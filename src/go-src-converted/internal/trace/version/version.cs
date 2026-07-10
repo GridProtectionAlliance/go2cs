@@ -5,9 +5,10 @@ namespace go.@internal.trace;
 
 using fmt = fmt_package;
 using io = io_package;
-using @event = @internal.trace.event_package;
-using go122 = @internal.trace.@event.go122_package;
-using @internal.trace.@event;
+using Δevent = go.@internal.trace.event_package;
+using go122 = go.@internal.trace.@event.go122_package;
+using go.@internal.trace;
+using go.@internal.trace.@event;
 
 partial class version_package {
 
@@ -25,7 +26,7 @@ public static readonly Version Current = /* Go123 */ 23;
 // Go 1.23 adds backwards-incompatible events, but
 // traces produced by Go 1.22 are also always valid
 // Go 1.23 traces.
-internal static @event.Spec versions = new map<Version, slice<@event.Spec>>{
+internal static map<Version, slice<Δevent.Spec>> versions = new map<Version, slice<Δevent.Spec>>{
     [Go111] = default!,
     [Go119] = default!,
     [Go121] = default!,
@@ -34,13 +35,12 @@ internal static @event.Spec versions = new map<Version, slice<@event.Spec>>{
 };
 
 // Specs returns the set of event.Specs for this version.
-public static slice<@event.Spec> Specs(this Version v) {
+public static slice<Δevent.Spec> Specs(this Version v) {
     return versions[v];
 }
 
 public static bool Valid(this Version v) {
-    var _ = versions[v];
-    var ok = versions[v];
+    var (_, ok) = versions[v, ꟷ];
     return ok;
 }
 

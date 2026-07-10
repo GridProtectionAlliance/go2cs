@@ -6,12 +6,14 @@ namespace go;
 using filepathlite = @internal.filepathlite_package;
 using godebug = @internal.godebug_package;
 using windows = @internal.syscall.windows_package;
-using sync = sync_package;
+using Δsync = sync_package;
 using syscall = syscall_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.syscall;
+using fs = go.io.fs_package;
+using go.io;
 
 partial class os_package {
 
@@ -20,9 +22,9 @@ partial class os_package {
     internal @string name;
     // from ByHandleFileInformation, Win32FileAttributeData, Win32finddata, and GetFileInformationByHandleEx
     public uint32 FileAttributes;
-    public syscall_package.Filetime CreationTime;
-    public syscall_package.Filetime LastAccessTime;
-    public syscall_package.Filetime LastWriteTime;
+    public syscall.Filetime CreationTime;
+    public syscall.Filetime LastAccessTime;
+    public syscall.Filetime LastWriteTime;
     public uint32 FileSizeHigh;
     public uint32 FileSizeLow;
     // from Win32finddata and GetFileInformationByHandleEx
@@ -44,17 +46,17 @@ internal static (ж<fileStat> fs, error err) newFileStatFromGetFileInformationBy
     ж<fileStat> fs = default!;
     error err = default!;
 
-    ref var d = ref heap(new syscall_package.ByHandleFileInformation(), out var Ꮡd);
+    ref var d = ref heap(new syscall.ByHandleFileInformation(), out var Ꮡd);
     err = syscall.GetFileInformationByHandle(h, Ꮡd);
     if (err != default!) {
-        return (default!, new PathError{Op: "GetFileInformationByHandle"u8, Path: path, Err: err});
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "GetFileInformationByHandle"u8, Path: path, Err: err))));
     }
     ref var reparseTag = ref heap(new uint32(), out var ᏑreparseTag);
-    if ((uint32)(d.FileAttributes & syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
-        ref var ti = ref heap(new @internal.syscall.windows_package.FILE_ATTRIBUTE_TAG_INFO(), out var Ꮡti);
-        err = windows.GetFileInformationByHandleEx(h, windows.FileAttributeTagInfo, (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡti)), ((uint32)@unsafe.Sizeof(ti)));
+    if ((uint32)(d.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
+        ref var ti = ref heap(new windows.FILE_ATTRIBUTE_TAG_INFO(), out var Ꮡti);
+        err = windows.GetFileInformationByHandleEx(h, windows.FileAttributeTagInfo, (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡti)), (uint32)@unsafe.Sizeof(ti));
         if (err != default!) {
-            return (default!, new PathError{Op: "GetFileInformationByHandleEx"u8, Path: path, Err: err});
+            return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "GetFileInformationByHandleEx"u8, Path: path, Err: err))));
         }
         reparseTag = ti.ReparseTag;
     }
@@ -80,7 +82,7 @@ internal static (ж<fileStat> fs, error err) newFileStatFromGetFileInformationBy
 // newFileStatFromWin32FileAttributeData copies all required information
 // from syscall.Win32FileAttributeData d into the newly created fileStat.
 internal static ж<fileStat> newFileStatFromWin32FileAttributeData(ж<syscall.Win32FileAttributeData> Ꮡd) {
-    ref var d = ref Ꮡd.val;
+    ref var d = ref Ꮡd.Value;
 
     return Ꮡ(new fileStat(
         FileAttributes: d.FileAttributes,
@@ -95,7 +97,7 @@ internal static ж<fileStat> newFileStatFromWin32FileAttributeData(ж<syscall.Wi
 // newFileStatFromFileIDBothDirInfo copies all required information
 // from windows.FILE_ID_BOTH_DIR_INFO d into the newly created fileStat.
 internal static ж<fileStat> newFileStatFromFileIDBothDirInfo(ж<windows.FILE_ID_BOTH_DIR_INFO> Ꮡd) {
-    ref var d = ref Ꮡd.val;
+    ref var d = ref Ꮡd.Value;
 
     // The FILE_ID_BOTH_DIR_INFO MSDN documentations isn't completely correct.
     // FileAttributes can contain any file attributes that is currently set on the file,
@@ -106,26 +108,26 @@ internal static ж<fileStat> newFileStatFromFileIDBothDirInfo(ж<windows.FILE_ID
         CreationTime: d.CreationTime,
         LastAccessTime: d.LastAccessTime,
         LastWriteTime: d.LastWriteTime,
-        FileSizeHigh: ((uint32)(d.EndOfFile >> (int)(32))),
-        FileSizeLow: ((uint32)d.EndOfFile),
+        FileSizeHigh: (uint32)((d.EndOfFile >> (int)(32))),
+        FileSizeLow: (uint32)d.EndOfFile,
         ReparseTag: d.EaSize,
-        idxhi: ((uint32)(d.FileID >> (int)(32))),
-        idxlo: ((uint32)d.FileID)
+        idxhi: (uint32)((d.FileID >> (int)(32))),
+        idxlo: (uint32)d.FileID
     ));
 }
 
 // newFileStatFromFileFullDirInfo copies all required information
 // from windows.FILE_FULL_DIR_INFO d into the newly created fileStat.
 internal static ж<fileStat> newFileStatFromFileFullDirInfo(ж<windows.FILE_FULL_DIR_INFO> Ꮡd) {
-    ref var d = ref Ꮡd.val;
+    ref var d = ref Ꮡd.Value;
 
     return Ꮡ(new fileStat(
         FileAttributes: d.FileAttributes,
         CreationTime: d.CreationTime,
         LastAccessTime: d.LastAccessTime,
         LastWriteTime: d.LastWriteTime,
-        FileSizeHigh: ((uint32)(d.EndOfFile >> (int)(32))),
-        FileSizeLow: ((uint32)d.EndOfFile),
+        FileSizeHigh: (uint32)((d.EndOfFile >> (int)(32))),
+        FileSizeLow: (uint32)d.EndOfFile,
         ReparseTag: d.EaSize
     ));
 }
@@ -133,7 +135,7 @@ internal static ж<fileStat> newFileStatFromFileFullDirInfo(ж<windows.FILE_FULL
 // newFileStatFromWin32finddata copies all required information
 // from syscall.Win32finddata d into the newly created fileStat.
 internal static ж<fileStat> newFileStatFromWin32finddata(ж<syscall.Win32finddata> Ꮡd) {
-    ref var d = ref Ꮡd.val;
+    ref var d = ref Ꮡd.Value;
 
     var fs = Ꮡ(new fileStat(
         FileAttributes: d.FileAttributes,
@@ -143,12 +145,12 @@ internal static ж<fileStat> newFileStatFromWin32finddata(ж<syscall.Win32findda
         FileSizeHigh: d.FileSizeHigh,
         FileSizeLow: d.FileSizeLow
     ));
-    if ((uint32)(d.FileAttributes & syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
+    if ((uint32)(d.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
         // Per https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-win32_find_dataw:
         // “If the dwFileAttributes member includes the FILE_ATTRIBUTE_REPARSE_POINT
         // attribute, this member specifies the reparse point tag. Otherwise, this
         // value is undefined and should not be used.”
-        fs.val.ReparseTag = d.Reserved0;
+        fs.Value.ReparseTag = d.Reserved0;
     }
     return fs;
 }
@@ -160,11 +162,11 @@ internal static ж<fileStat> newFileStatFromWin32finddata(ж<syscall.Win32findda
 // and https://learn.microsoft.com/en-us/windows/win32/fileio/reparse-point-tags.
 [GoRecv] internal static bool isReparseTagNameSurrogate(this ref fileStat fs) {
     // True for IO_REPARSE_TAG_SYMLINK and IO_REPARSE_TAG_MOUNT_POINT.
-    return (uint32)(fs.FileAttributes & syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0 && (uint32)(fs.ReparseTag & 536870912) != 0;
+    return (uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0 && (uint32)(fs.ReparseTag & 0x20000000) != 0;
 }
 
 [GoRecv] internal static int64 Size(this ref fileStat fs) {
-    return ((int64)fs.FileSizeHigh) << (int)(32) + ((int64)fs.FileSizeLow);
+    return ((int64)fs.FileSizeHigh << (int)(32)) + (int64)fs.FileSizeLow;
 }
 
 internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
@@ -184,7 +186,7 @@ internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
 [GoRecv] internal static FileMode /*m*/ mode(this ref fileStat fs) {
     FileMode m = default!;
 
-    if ((uint32)(fs.FileAttributes & syscall.FILE_ATTRIBUTE_READONLY) != 0){
+    if ((uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0){
         m |= (FileMode)(292);
     } else {
         m |= (FileMode)(438);
@@ -199,37 +201,31 @@ internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
     // the same way for consistency. Also, mount points can contain infinite
     // loops, so it is not safe to walk them without special handling.
     if (!fs.isReparseTagNameSurrogate()) {
-        if ((uint32)(fs.FileAttributes & syscall.FILE_ATTRIBUTE_DIRECTORY) != 0) {
+        if ((uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0) {
             m |= (fs.FileMode)((fs.FileMode)(ModeDir | 73));
         }
-        switch (fs.filetype) {
-        case syscall.FILE_TYPE_PIPE: {
+        var exprᴛ1 = fs.filetype;
+        if (exprᴛ1 == syscall.FILE_TYPE_PIPE) {
             m |= (fs.FileMode)(ModeNamedPipe);
-            break;
         }
-        case syscall.FILE_TYPE_CHAR: {
+        else if (exprᴛ1 == syscall.FILE_TYPE_CHAR) {
             m |= (fs.FileMode)((fs.FileMode)(ModeDevice | ModeCharDevice));
-            break;
-        }}
+        }
 
     }
-    if ((uint32)(fs.FileAttributes & syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
-        switch (fs.ReparseTag) {
-        case syscall.IO_REPARSE_TAG_SYMLINK: {
+    if ((uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
+        var exprᴛ2 = fs.ReparseTag;
+        if (exprᴛ2 == syscall.IO_REPARSE_TAG_SYMLINK) {
             m |= (fs.FileMode)(ModeSymlink);
-            break;
         }
-        case windows.IO_REPARSE_TAG_AF_UNIX: {
+        else if (exprᴛ2 == windows.IO_REPARSE_TAG_AF_UNIX) {
             m |= (fs.FileMode)(ModeSocket);
-            break;
         }
-        case windows.IO_REPARSE_TAG_DEDUP: {
-            break;
+        else if (exprᴛ2 == windows.IO_REPARSE_TAG_DEDUP) {
         }
-        default: {
+        else { /* default: */
             m |= (fs.FileMode)(ModeIrregular);
-            break;
-        }}
+        }
 
     }
     // If the Data Deduplication service is enabled on Windows Server, its
@@ -255,7 +251,7 @@ internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
 [GoRecv] internal static FileMode /*m*/ modePreGo1_23(this ref fileStat fs) {
     FileMode m = default!;
 
-    if ((uint32)(fs.FileAttributes & syscall.FILE_ATTRIBUTE_READONLY) != 0){
+    if ((uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0){
         m |= (FileMode)(292);
     } else {
         m |= (FileMode)(438);
@@ -263,20 +259,18 @@ internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
     if (fs.ReparseTag == syscall.IO_REPARSE_TAG_SYMLINK || fs.ReparseTag == windows.IO_REPARSE_TAG_MOUNT_POINT) {
         return (FileMode)(m | ModeSymlink);
     }
-    if ((uint32)(fs.FileAttributes & syscall.FILE_ATTRIBUTE_DIRECTORY) != 0) {
+    if ((uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0) {
         m |= (fs.FileMode)((fs.FileMode)(ModeDir | 73));
     }
-    switch (fs.filetype) {
-    case syscall.FILE_TYPE_PIPE: {
+    var exprᴛ1 = fs.filetype;
+    if (exprᴛ1 == syscall.FILE_TYPE_PIPE) {
         m |= (fs.FileMode)(ModeNamedPipe);
-        break;
     }
-    case syscall.FILE_TYPE_CHAR: {
+    else if (exprᴛ1 == syscall.FILE_TYPE_CHAR) {
         m |= (fs.FileMode)((fs.FileMode)(ModeDevice | ModeCharDevice));
-        break;
-    }}
+    }
 
-    if ((uint32)(fs.FileAttributes & syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
+    if ((uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
         if (fs.ReparseTag == windows.IO_REPARSE_TAG_AF_UNIX) {
             m |= (fs.FileMode)(ModeSocket);
         }
@@ -307,9 +301,11 @@ internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
     ));
 }
 
-[GoRecv] internal static error loadFileId(this ref fileStat fs) => func((defer, _) => {
-    fs.Lock();
-    defer(fs.Unlock);
+internal static error loadFileId(this ж<fileStat> Ꮡfs) => func<error>((defer, recover) => {
+    ref var fs = ref Ꮡfs.Value;
+
+    Ꮡfs.of(fileStat.ᏑMutex).Lock();
+    defer(Ꮡfs.of(fileStat.ᏑMutex).Unlock);
     if (fs.path == ""u8) {
         // already done
         return default!;
@@ -320,7 +316,7 @@ internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
     } else {
         path = fs.path;
     }
-    (pathp, err) = syscall.UTF16PtrFromString(path);
+    var (pathp, err) = syscall.UTF16PtrFromString(path);
     if (err != default!) {
         return err;
     }
@@ -338,13 +334,13 @@ internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
     // If the file is a symlink, the symlink target should have already been
     // resolved when the fileStat was created, so we don't need to worry about
     // resolving symlink reparse points again here.
-    var attrs = ((uint32)((uint32)(syscall.FILE_FLAG_BACKUP_SEMANTICS | syscall.FILE_FLAG_OPEN_REPARSE_POINT)));
-    var (h, err) = syscall.CreateFile(pathp, 0, 0, nil, syscall.OPEN_EXISTING, attrs, 0);
+    var attrs = (uint32)((uint32)((uint32)syscall.FILE_FLAG_BACKUP_SEMANTICS | (uint32)syscall.FILE_FLAG_OPEN_REPARSE_POINT));
+    (var h, err) = syscall.CreateFile(pathp, 0, 0, nil, syscall.OPEN_EXISTING, attrs, 0);
     if (err != default!) {
         return err;
     }
     deferǃ(syscall.CloseHandle, h, defer);
-    ref var i = ref heap(new syscall_package.ByHandleFileInformation(), out var Ꮡi);
+    ref var i = ref heap(new syscall.ByHandleFileInformation(), out var Ꮡi);
     err = syscall.GetFileInformationByHandle(h, Ꮡi);
     if (err != default!) {
         return err;
@@ -364,7 +360,7 @@ internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
         error err = default!;
         (fs.path, err) = syscall.FullPath(fs.path);
         if (err != default!) {
-            return new PathError{Op: "FullPath"u8, Path: path, Err: err};
+            return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "FullPath"u8, Path: path, Err: err)));
         }
     }
     fs.name = filepathlite.Base(path);
@@ -372,14 +368,14 @@ internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
 }
 
 internal static bool sameFile(ж<fileStat> Ꮡfs1, ж<fileStat> Ꮡfs2) {
-    ref var fs1 = ref Ꮡfs1.val;
-    ref var fs2 = ref Ꮡfs2.val;
+    ref var fs1 = ref Ꮡfs1.Value;
+    ref var fs2 = ref Ꮡfs2.Value;
 
-    var e = fs1.loadFileId();
+    var e = Ꮡfs1.loadFileId();
     if (e != default!) {
         return false;
     }
-    e = fs2.loadFileId();
+    e = Ꮡfs2.loadFileId();
     if (e != default!) {
         return false;
     }
@@ -388,7 +384,7 @@ internal static bool sameFile(ж<fileStat> Ꮡfs1, ж<fileStat> Ꮡfs2) {
 
 // For testing.
 internal static time.Time atime(FileInfo fi) {
-    return time.Unix(0, fi.Sys()._<ж<syscall.Win32FileAttributeData>>().LastAccessTime.Nanoseconds());
+    return time.Unix(0, Ꮡ((~fi.Sys()._<ж<syscall.Win32FileAttributeData>>()).LastAccessTime).Nanoseconds());
 }
 
 } // end os_package

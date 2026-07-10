@@ -9,7 +9,7 @@
     <Version>0.1.4</Version>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>
-    <Copyright>Copyright © 2025</Copyright>
+    <Copyright>Copyright © 2026</Copyright>
     <Authors>$(Product) Authors</Authors>
     <Company>Grid Protection Alliance</Company>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
@@ -86,7 +86,6 @@
     <Using Include="System.Double" Alias="float64" />
     <Using Include="System.Numerics.Complex" Alias="complex128" />
     <Using Include="System.Int32" Alias="rune" />
-    <Using Include="System.UIntPtr" Alias="uintptr" />
     <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
     <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTagAttribute" />
     <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
@@ -107,7 +106,10 @@
     <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\bufio\bufio.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\bytes\bytes.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\compress\gzip\compress.gzip.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\container\list\container.list.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\context\context.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\crypto\rand\crypto.rand.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\crypto\tls\crypto.tls.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\encoding\base64\encoding.base64.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\encoding\binary\encoding.binary.csproj" />
@@ -118,6 +120,8 @@
     <ProjectReference Include="$(go2csPath)go-src-converted\io\io.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\log\log.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\maps\maps.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\math\bits\math.bits.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\math\math.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\math\rand\math.rand.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\mime\mime.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\mime\multipart\mime.multipart.csproj" />
@@ -142,6 +146,10 @@
     <ProjectReference Include="$(go2csPath)go-src-converted\unicode\unicode.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\unicode\utf8\unicode.utf8.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\unsafe\unsafe.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\vendor\golang.org\x\net\http2\hpack\vendor.golang.org.x.net.http2.hpack.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\vendor\golang.org\x\net\http\httpguts\vendor.golang.org.x.net.http.httpguts.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\vendor\golang.org\x\net\http\httpproxy\vendor.golang.org.x.net.http.httpproxy.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\vendor\golang.org\x\net\idna\vendor.golang.org.x.net.idna.csproj" />
   </ItemGroup>
 
 </Project>

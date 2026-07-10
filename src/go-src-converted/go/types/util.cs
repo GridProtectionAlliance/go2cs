@@ -7,9 +7,10 @@
 // to be shared.
 namespace go.go;
 
-using ast = go.ast_package;
-using constant = go.constant_package;
-using token = go.token_package;
+using ast = global::go.go.ast_package;
+using constant = global::go.go.constant_package;
+using token = global::go.go.token_package;
+using global::go.go;
 
 partial class types_package {
 
@@ -24,28 +25,28 @@ internal const bool isTypes2 = false;
 // If p and q are in different files, p is before q if the filename
 // of p sorts lexicographically before the filename of q.
 internal static nint cmpPos(tokenꓸPos p, tokenꓸPos q) {
-    return ((nint)(p - q));
+    return (nint)(p - q);
 }
 
 // hasDots reports whether the last argument in the call is followed by ...
 internal static bool hasDots(ж<ast.CallExpr> Ꮡcall) {
-    ref var call = ref Ꮡcall.val;
+    ref var call = ref Ꮡcall.Value;
 
     return call.Ellipsis.IsValid();
 }
 
 // dddErrPos returns the positioner for reporting an invalid ... use in a call.
 internal static positioner dddErrPos(ж<ast.CallExpr> Ꮡcall) {
-    ref var call = ref Ꮡcall.val;
+    ref var call = ref Ꮡcall.Value;
 
     return ((atPos)call.Ellipsis);
 }
 
 // argErrPos returns positioner for reporting an invalid argument count.
 internal static positioner argErrPos(ж<ast.CallExpr> Ꮡcall) {
-    ref var call = ref Ꮡcall.val;
+    ref var call = ref Ꮡcall.Value;
 
-    return inNode(~call, call.Rparen);
+    return inNode(new ast.CallExprжNode(Ꮡcall), call.Rparen);
 }
 
 // startPos returns the start position of node n.

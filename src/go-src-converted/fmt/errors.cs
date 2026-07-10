@@ -23,9 +23,10 @@ public static error Errorf(@string format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
 
     var p = newPrinter();
-    p.val.wrapErrs = true;
+    p.Value.wrapErrs = true;
     p.doPrintf(format, a);
-    @string s = ((@string)(~p).buf);
+    ref var s = ref heap<@string>(out var Ꮡs);
+    s = ((@string)(slice<byte>)(~p).buf);
     error err = default!;
     switch (len((~p).wrappedErrs)) {
     case 0: {
@@ -34,13 +35,13 @@ public static error Errorf(@string format, params ꓸꓸꓸany aʗp) {
     }
     case 1: {
         var w = Ꮡ(new wrapError(msg: s));
-        (w.val.err, _) = a[(~p).wrappedErrs[0]]._<error>(ᐧ);
-        err = ~w;
+        (w.Value.err, _) = a[(~p).wrappedErrs[0]]._<error>(ᐧ);
+        err = new wrapErrorжerror(w);
         break;
     }
     default: {
         if ((~p).reordered) {
-            slices.Sort((~p).wrappedErrs);
+            slices.Sort<slice<nint>, nint>((~p).wrappedErrs);
         }
         slice<error> errs = default!;
         foreach (var (i, argNum) in (~p).wrappedErrs) {
@@ -53,7 +54,7 @@ public static error Errorf(@string format, params ꓸꓸꓸany aʗp) {
                 }
             }
         }
-        Ꮡerr = new wrapErrors(s, errs); err = ref Ꮡerr.val;
+        err = new wrapErrorsжerror(Ꮡ(new wrapErrors(s, errs)));
         break;
     }}
 

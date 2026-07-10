@@ -44,7 +44,6 @@ using static go.text.scanner_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<os_package.File, io_package.Writer>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

@@ -22,7 +22,7 @@ partial class runtime_package {
 //go:linkname add
 //go:nosplit
 internal static @unsafe.Pointer add(@unsafe.Pointer Δp, uintptr x) {
-    return ((@unsafe.Pointer)(((uintptr)Δp) + x));
+    return (@unsafe.Pointer)((uintptr)Δp + x);
 }
 
 // getg returns the pointer to the current g.
@@ -110,7 +110,7 @@ internal static partial void memclrNoHeapPointers(@unsafe.Pointer ptr, uintptr n
 
 //go:linkname reflect_memclrNoHeapPointers reflect.memclrNoHeapPointers
 internal static void reflect_memclrNoHeapPointers(@unsafe.Pointer ptr, uintptr n) {
-    memclrNoHeapPointers(ptr.val, n);
+    memclrNoHeapPointers(ptr, n);
 }
 
 // memmove copies n bytes from "from" to "to".
@@ -148,11 +148,11 @@ internal static partial void memmove(@unsafe.Pointer to, @unsafe.Pointer from, u
 
 //go:linkname reflect_memmove reflect.memmove
 internal static void reflect_memmove(@unsafe.Pointer to, @unsafe.Pointer from, uintptr n) {
-    memmove(to.val, from.val, n);
+    memmove(to, from, n);
 }
 
 // exported value for testing
-internal const float32 hashLoad = /* float32(loadFactorNum) / float32(loadFactorDen) */ 6.5;
+internal const float32 hashLoad = /* float32(loadFactorNum) / float32(loadFactorDen) */ 6.5f;
 
 // in internal/bytealg/equal_*.s
 //
@@ -189,21 +189,19 @@ internal static partial bool memequal(@unsafe.Pointer a, @unsafe.Pointer b, uint
 //go:linkname noescape
 //go:nosplit
 internal static @unsafe.Pointer noescape(@unsafe.Pointer Δp) {
-    var x = ((uintptr)Δp);
-    return ((@unsafe.Pointer)((uintptr)(x ^ 0)));
+    var x = (uintptr)Δp;
+    return (@unsafe.Pointer)((uintptr)(x ^ 0));
 }
 
 // noEscapePtr hides a pointer from escape analysis. See noescape.
 // USE CAREFULLY!
 //
 //go:nosplit
-internal static ж<T> noEscapePtr<T>(ж<T> Ꮡp)
-    where T : new()
-{
-    ref var Δp = ref Ꮡp.val;
+internal static ж<T> noEscapePtr<T>(ж<T> Ꮡp) {
+    ref var Δp = ref Ꮡp.Value;
 
-    var x = ((uintptr)new @unsafe.Pointer(Ꮡp));
-    return (ж<T>)(uintptr)(((@unsafe.Pointer)((uintptr)(x ^ 0))));
+    var x = (uintptr)new @unsafe.Pointer(Ꮡp);
+    return (ж<T>)(uintptr)((@unsafe.Pointer)((uintptr)(x ^ 0)));
 }
 
 // Not all cgocallback frames are actually cgocallback,
@@ -483,7 +481,7 @@ internal static partial bool memequal_varlen(@unsafe.Pointer a, @unsafe.Pointer 
 internal static nint bool2int(bool x) {
     // Avoid branches. In the SSA compiler, this compiles to
     // exactly what you would want it to.
-    return ((nint)(~(ж<uint8>)(uintptr)(new @unsafe.Pointer(Ꮡ(x)))));
+    return (nint)(~(ж<uint8>)(uintptr)(new @unsafe.Pointer(Ꮡ(x))));
 }
 
 // abort crashes the runtime in situations where even throw might not

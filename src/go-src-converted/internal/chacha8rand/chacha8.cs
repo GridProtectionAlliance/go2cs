@@ -7,7 +7,8 @@
 // and must have minimal dependencies.
 namespace go.@internal;
 
-using byteorder = @internal.byteorder_package;
+using byteorder = go.@internal.byteorder_package;
+using go.@internal;
 
 partial class chacha8rand_package {
 
@@ -47,16 +48,17 @@ internal static partial void block(ж<array<uint64>> seed, ж<array<uint64>> blo
         return (0, false);
     }
     s.i = i + 1;
-    return (s.buf[(uint32)(i & 31)], true);
+    return (s.buf[(nint)((uint32)(i & 31))], true);
 }
 
 // i&31 eliminates bounds check
 
 // Init seeds the State with the given seed value.
-[GoRecv] public static void Init(this ref State s, array<byte> seed) {
+public static void Init(this ж<State> Ꮡs, array<byte> seed) {
     seed = seed.Clone();
 
-    s.Init64(new uint64[]{
+    ref var s = ref Ꮡs.Value;
+    Ꮡs.Init64(new uint64[]{
         byteorder.LeUint64(seed[(int)(0 * 8)..]),
         byteorder.LeUint64(seed[(int)(1 * 8)..]),
         byteorder.LeUint64(seed[(int)(2 * 8)..]),
@@ -65,11 +67,12 @@ internal static partial void block(ж<array<uint64>> seed, ж<array<uint64>> blo
 }
 
 // Init64 seeds the state with the given seed value.
-[GoRecv] public static void Init64(this ref State s, array<uint64> seed) {
+public static void Init64(this ж<State> Ꮡs, array<uint64> seed) {
     seed = seed.Clone();
 
+    ref var s = ref Ꮡs.Value;
     s.seed = seed;
-    block(Ꮡ(s.seed), Ꮡ(s.buf), 0);
+    block(Ꮡs.of(State.Ꮡseed), Ꮡs.of(State.Ꮡbuf), 0);
     s.c = 0;
     s.i = 0;
     s.n = chunk;
@@ -78,7 +81,9 @@ internal static partial void block(ж<array<uint64>> seed, ж<array<uint64>> blo
 // Refill refills the state with more random values.
 // After a call to Refill, an immediate call to Next will succeed
 // (unless multiple goroutines are incorrectly sharing a state).
-[GoRecv] public static void Refill(this ref State s) {
+public static void Refill(this ж<State> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
     s.c += ctrInc;
     if (s.c == ctrMax) {
         // Reseed with generated uint64s for forward secrecy.
@@ -88,17 +93,17 @@ internal static partial void block(ж<array<uint64>> seed, ж<array<uint64>> blo
         // This gives a delayed benefit for the forward secrecy
         // (you can reconstruct the recent past given a memory dump),
         // which we deem acceptable in exchange for the reduced size.
-        s.seed[0] = s.buf[len(s.buf) - reseed + 0];
-        s.seed[1] = s.buf[len(s.buf) - reseed + 1];
-        s.seed[2] = s.buf[len(s.buf) - reseed + 2];
-        s.seed[3] = s.buf[len(s.buf) - reseed + 3];
+        s.seed[0] = s.buf[(nint)(len(s.buf) - (nint)reseed) + 0];
+        s.seed[1] = s.buf[(nint)(len(s.buf) - (nint)reseed) + 1];
+        s.seed[2] = s.buf[(nint)(len(s.buf) - (nint)reseed) + 2];
+        s.seed[3] = s.buf[(nint)(len(s.buf) - (nint)reseed) + 3];
         s.c = 0;
     }
-    block(Ꮡ(s.seed), Ꮡ(s.buf), s.c);
+    block(Ꮡs.of(State.Ꮡseed), Ꮡs.of(State.Ꮡbuf), s.c);
     s.i = 0;
-    s.n = ((uint32)len(s.buf));
+    s.n = (uint32)len(s.buf);
     if (s.c == ctrMax - ctrInc) {
-        s.n = ((uint32)len(s.buf)) - reseed;
+        s.n = (uint32)len(s.buf) - (uint32)reseed;
     }
 }
 
@@ -106,7 +111,9 @@ internal static partial void block(ж<array<uint64>> seed, ж<array<uint64>> blo
 // After a call to Reseed, any previously returned random values
 // have been erased from the memory of the state and cannot be
 // recovered.
-[GoRecv] public static void Reseed(this ref State s) {
+public static void Reseed(this ж<State> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
     array<uint64> seed = new(4);
     foreach (var (i, _) in seed) {
         while (ᐧ) {
@@ -115,10 +122,10 @@ internal static partial void block(ж<array<uint64>> seed, ж<array<uint64>> blo
                 seed[i] = x;
                 break;
             }
-            s.Refill();
+            Ꮡs.Refill();
         }
     }
-    s.Init64(seed);
+    Ꮡs.Init64(seed);
 }
 
 // Marshal marshals the state into a byte slice.
@@ -127,12 +134,12 @@ internal static partial void block(ж<array<uint64>> seed, ж<array<uint64>> blo
 // when it uses the State struct, since the runtime
 // does not need these.
 public static slice<byte> Marshal(ж<State> Ꮡs) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     var data = new slice<byte>(6 * 8);
     copy(data, "chacha8:"u8);
-    var used = (s.c / ctrInc) * chunk + s.i;
-    byteorder.BePutUint64(data[(int)(1 * 8)..], ((uint64)used));
+    var used = (s.c / (uint32)ctrInc) * (uint32)chunk + s.i;
+    byteorder.BePutUint64(data[(int)(1 * 8)..], (uint64)used);
     foreach (var (i, seed) in s.seed) {
         byteorder.LePutUint64(data[(int)((2 + i) * 8)..], seed);
     }
@@ -148,21 +155,21 @@ public static slice<byte> Marshal(ж<State> Ꮡs) {
 
 // Unmarshal unmarshals the state from a byte slice.
 public static error Unmarshal(ж<State> Ꮡs, slice<byte> data) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (len(data) != 6 * 8 || ((@string)(data[..8])) != "chacha8:"u8) {
-        return new errUnmarshalChaCha8();
+        return new errUnmarshalChaCha8жerror(@new<errUnmarshalChaCha8>());
     }
     var used = byteorder.BeUint64(data[(int)(1 * 8)..]);
     if (used > (ctrMax / ctrInc) * chunk - reseed) {
-        return new errUnmarshalChaCha8();
+        return new errUnmarshalChaCha8жerror(@new<errUnmarshalChaCha8>());
     }
     foreach (var (i, _) in s.seed) {
         s.seed[i] = byteorder.LeUint64(data[(int)((2 + i) * 8)..]);
     }
-    s.c = ctrInc * (((uint32)used) / chunk);
-    block(Ꮡ(s.seed), Ꮡ(s.buf), s.c);
-    s.i = ((uint32)used) % chunk;
+    s.c = (uint32)ctrInc * ((uint32)used / (uint32)chunk);
+    block(Ꮡs.of(State.Ꮡseed), Ꮡs.of(State.Ꮡbuf), s.c);
+    s.i = (uint32)used % (uint32)chunk;
     s.n = chunk;
     if (s.c == ctrMax - ctrInc) {
         s.n = chunk - reseed;

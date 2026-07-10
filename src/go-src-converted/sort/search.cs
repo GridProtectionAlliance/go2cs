@@ -61,7 +61,7 @@ public static nint Search(nint n, Func<nint, bool> f) {
     nint i = 0;
     nint j = n;
     while (i < j) {
-        nint h = ((nint)(((nuint)(i + j)) >> (int)(1)));
+        nint h = (nint)(((nuint)(i + j) >> (int)(1)));
         // avoid overflow when computing h
         // i ≤ h < j
         if (!f(h)){
@@ -110,7 +110,7 @@ public static (nint i, bool found) Find(nint n, Func<nint, nint> cmp) {
     i = 0;
     nint j = n;
     while (i < j) {
-        nint h = ((nint)(((nuint)(i + j)) >> (int)(1)));
+        nint h = (nint)(((nuint)(i + j) >> (int)(1)));
         // avoid overflow when computing h
         // i ≤ h < j
         if (cmp(h) > 0){
@@ -132,9 +132,8 @@ public static (nint i, bool found) Find(nint n, Func<nint, nint> cmp) {
 // not present (it could be len(a)).
 // The slice must be sorted in ascending order.
 public static nint SearchInts(slice<nint> a, nint x) {
-    return Search(len(a), 
     var aʗ1 = a;
-    (nint i) => aʗ1[i] >= x);
+    return Search(len(a), (nint i) => aʗ1[i] >= x);
 }
 
 // SearchFloat64s searches for x in a sorted slice of float64s and returns the index
@@ -142,9 +141,8 @@ public static nint SearchInts(slice<nint> a, nint x) {
 // present (it could be len(a)).
 // The slice must be sorted in ascending order.
 public static nint SearchFloat64s(slice<float64> a, float64 x) {
-    return Search(len(a), 
     var aʗ1 = a;
-    (nint i) => aʗ1[i] >= x);
+    return Search(len(a), (nint i) => aʗ1[i] >= x);
 }
 
 // SearchStrings searches for x in a sorted slice of strings and returns the index
@@ -152,9 +150,8 @@ public static nint SearchFloat64s(slice<float64> a, float64 x) {
 // present (it could be len(a)).
 // The slice must be sorted in ascending order.
 public static nint SearchStrings(slice<@string> a, @string x) {
-    return Search(len(a), 
     var aʗ1 = a;
-    (nint i) => aʗ1[i] >= x);
+    return Search(len(a), (nint i) => aʗ1[i] >= x);
 }
 
 // Search returns the result of applying [SearchInts] to the receiver and x.

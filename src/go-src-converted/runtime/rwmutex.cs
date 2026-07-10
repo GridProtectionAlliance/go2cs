@@ -21,8 +21,8 @@ partial class runtime_package {
     internal uint32 readerPass;   // number of pending readers to skip readers list
     internal mutex wLock;    // serializes writers
     internal muintptr writer; // pending writer waiting for completing readers
-    internal @internal.runtime.atomic_package.Int32 readerCount; // number of pending readers
-    internal @internal.runtime.atomic_package.Int32 readerWait; // number of departing readers
+    internal atomic.Int32 readerCount; // number of pending readers
+    internal atomic.Int32 readerWait; // number of departing readers
     internal lockRank readRank; // semantic lock rank for read locking
 }
 
@@ -54,57 +54,66 @@ partial class runtime_package {
 //     belongs.
 //   - writeRank is placed in the lock order wherever a write lock of this
 //     rwmutex belongs.
-[GoRecv] internal static void init(this ref rwmutex rw, lockRank readRank, lockRank readRankInternal, lockRank writeRank) {
+internal static void init(this ж<rwmutex> Ꮡrw, lockRank readRank, lockRank readRankInternal, lockRank writeRank) {
+    ref var rw = ref Ꮡrw.Value;
+
     rw.readRank = readRank;
-    lockInit(Ꮡ(rw.rLock), readRankInternal);
-    lockInit(Ꮡ(rw.wLock), writeRank);
+    lockInit(Ꮡrw.of(rwmutex.ᏑrLock), readRankInternal);
+    lockInit(Ꮡrw.of(rwmutex.ᏑwLock), writeRank);
 }
 
 internal static readonly UntypedInt rwmutexMaxReaders = /* 1 << 30 */ 1073741824;
 
 // rlock locks rw for reading.
-[GoRecv] internal static void rlock(this ref rwmutex rw) {
+internal static void rlock(this ж<rwmutex> Ꮡrw) {
+    ref var rw = ref Ꮡrw.Value;
+
     // The reader must not be allowed to lose its P or else other
     // things blocking on the lock may consume all of the Ps and
     // deadlock (issue #20903). Alternatively, we could drop the P
     // while sleeping.
     acquireLockRankAndM(rw.readRank);
-    lockWithRankMayAcquire(Ꮡ(rw.rLock), getLockRank(Ꮡ(rw.rLock)));
-    if (rw.readerCount.Add(1) < 0) {
+    lockWithRankMayAcquire(Ꮡrw.of(rwmutex.ᏑrLock), getLockRank(Ꮡrw.of(rwmutex.ᏑrLock)));
+    if (Ꮡrw.of(rwmutex.ᏑreaderCount).Add(1) < 0) {
         // A writer is pending. Park on the reader queue.
         systemstack(() => {
-            @lock(Ꮡ(rw.rLock));
-            if (rw.readerPass > 0){
-                rw.readerPass -= 1;
-                unlock(Ꮡ(rw.rLock));
+            @lock(Ꮡrw.of(rwmutex.ᏑrLock));
+            if (Ꮡrw.Value.readerPass > 0){
+                // Writer finished.
+                Ꮡrw.Value.readerPass -= 1;
+                unlock(Ꮡrw.of(rwmutex.ᏑrLock));
             } else {
-                var m = getg().val.m;
-                m.val.schedlink = rw.readers;
-                rw.readers.set(m);
-                unlock(Ꮡ(rw.rLock));
-                notesleep(Ꮡ((~m).park));
-                noteclear(Ꮡ((~m).park));
+                // Queue this reader to be woken by
+                // the writer.
+                var m = getg().Value.m;
+                m.Value.schedlink = Ꮡrw.Value.readers;
+                Ꮡrw.Value.readers.set(m);
+                unlock(Ꮡrw.of(rwmutex.ᏑrLock));
+                notesleep(m.of(runtime_package.m.Ꮡpark));
+                noteclear(m.of(runtime_package.m.Ꮡpark));
             }
         });
     }
 }
 
 // runlock undoes a single rlock call on rw.
-[GoRecv] internal static void runlock(this ref rwmutex rw) {
+internal static void runlock(this ж<rwmutex> Ꮡrw) {
+    ref var rw = ref Ꮡrw.Value;
+
     {
-        var r = rw.readerCount.Add(-1); if (r < 0) {
+        var r = Ꮡrw.of(rwmutex.ᏑreaderCount).Add(-1); if (r < 0) {
             if (r + 1 == 0 || r + 1 == -rwmutexMaxReaders) {
                 @throw("runlock of unlocked rwmutex"u8);
             }
             // A writer is pending.
-            if (rw.readerWait.Add(-1) == 0) {
+            if (Ꮡrw.of(rwmutex.ᏑreaderWait).Add(-1) == 0) {
                 // The last reader unblocks the writer.
-                @lock(Ꮡ(rw.rLock));
+                @lock(Ꮡrw.of(rwmutex.ᏑrLock));
                 var w = rw.writer.ptr();
                 if (w != nil) {
-                    notewakeup(Ꮡ((~w).park));
+                    notewakeup(w.of(m.Ꮡpark));
                 }
-                unlock(Ꮡ(rw.rLock));
+                unlock(Ꮡrw.of(rwmutex.ᏑrLock));
             }
         }
     }
@@ -112,51 +121,54 @@ internal static readonly UntypedInt rwmutexMaxReaders = /* 1 << 30 */ 1073741824
 }
 
 // lock locks rw for writing.
-[GoRecv] internal static void @lock(this ref rwmutex rw) {
+internal static void @lock(this ж<rwmutex> Ꮡrw) {
+    ref var rw = ref Ꮡrw.Value;
+
     // Resolve competition with other writers and stick to our P.
-    @lock(Ꮡ(rw.wLock));
-    var m = getg().val.m;
+    @lock(Ꮡrw.of(rwmutex.ᏑwLock));
+    var m = getg().Value.m;
     // Announce that there is a pending writer.
-    var r = rw.readerCount.Add(-rwmutexMaxReaders) + rwmutexMaxReaders;
+    var r = Ꮡrw.of(rwmutex.ᏑreaderCount).Add(-rwmutexMaxReaders) + (int32)rwmutexMaxReaders;
     // Wait for any active readers to complete.
-    @lock(Ꮡ(rw.rLock));
-    if (r != 0 && rw.readerWait.Add(r) != 0){
+    @lock(Ꮡrw.of(rwmutex.ᏑrLock));
+    if (r != 0 && Ꮡrw.of(rwmutex.ᏑreaderWait).Add(r) != 0){
         // Wait for reader to wake us up.
-        systemstack(
-        var mʗ2 = m;
-        () => {
-            rw.writer.set(mʗ2);
-            unlock(Ꮡ(rw.rLock));
-            notesleep(Ꮡ((~mʗ2).park));
-            noteclear(Ꮡ((~mʗ2).park));
+        var mʗ1 = m;
+        systemstack(() => {
+            Ꮡrw.Value.writer.set(mʗ1);
+            unlock(Ꮡrw.of(rwmutex.ᏑrLock));
+            notesleep(mʗ1.of(runtime_package.m.Ꮡpark));
+            noteclear(mʗ1.of(runtime_package.m.Ꮡpark));
         });
     } else {
-        unlock(Ꮡ(rw.rLock));
+        unlock(Ꮡrw.of(rwmutex.ᏑrLock));
     }
 }
 
 // unlock unlocks rw for writing.
-[GoRecv] internal static void unlock(this ref rwmutex rw) {
+internal static void unlock(this ж<rwmutex> Ꮡrw) {
+    ref var rw = ref Ꮡrw.Value;
+
     // Announce to readers that there is no active writer.
-    var r = rw.readerCount.Add(rwmutexMaxReaders);
+    var r = Ꮡrw.of(rwmutex.ᏑreaderCount).Add(rwmutexMaxReaders);
     if (r >= rwmutexMaxReaders) {
         @throw("unlock of unlocked rwmutex"u8);
     }
     // Unblock blocked readers.
-    @lock(Ꮡ(rw.rLock));
+    @lock(Ꮡrw.of(rwmutex.ᏑrLock));
     while (rw.readers.ptr() != nil) {
         var reader = rw.readers.ptr();
-        rw.readers = reader.val.schedlink;
-        (~reader).schedlink.set(nil);
-        notewakeup(Ꮡ((~reader).park));
+        rw.readers = reader.Value.schedlink;
+        reader.of(m.Ꮡschedlink).set(nil);
+        notewakeup(reader.of(m.Ꮡpark));
         r -= 1;
     }
     // If r > 0, there are pending readers that aren't on the
     // queue. Tell them to skip waiting.
-    rw.readerPass += ((uint32)r);
-    unlock(Ꮡ(rw.rLock));
+    rw.readerPass += (uint32)r;
+    unlock(Ꮡrw.of(rwmutex.ᏑrLock));
     // Allow other writers to proceed.
-    unlock(Ꮡ(rw.wLock));
+    unlock(Ꮡrw.of(rwmutex.ᏑwLock));
 }
 
 } // end runtime_package

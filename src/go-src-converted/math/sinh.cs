@@ -33,19 +33,19 @@ public static float64 Sinh(float64 x) {
 
 internal static float64 sinh(float64 x) {
     // The coefficients are #2029 from Hart & Cheney. (20.36D)
-    static readonly UntypedFloat P0 = -630767.3640497717;
+    UntypedFloat P0 = -630767.3640497717;
     
-    static readonly UntypedFloat P1 = /* -0.8991272022039509355398013511e+5 */ -89912.7;
+    UntypedFloat P1 = /* -0.8991272022039509355398013511e+5 */ -89912.7;
     
-    static readonly UntypedFloat P2 = /* -0.2894211355989563807284660366e+4 */ -2894.21;
+    UntypedFloat P2 = /* -0.2894211355989563807284660366e+4 */ -2894.21;
     
-    static readonly UntypedFloat P3 = /* -0.2630563213397497062819489e+2 */ -26.3056;
+    UntypedFloat P3 = /* -0.2630563213397497062819489e+2 */ -26.3056;
     
-    static readonly UntypedFloat Q0 = -630767.3640497717;
+    UntypedFloat Q0 = -630767.3640497717;
     
-    static readonly UntypedFloat Q1 = /* 0.1521517378790019070696485176e+5 */ 15215.2;
+    UntypedFloat Q1 = /* 0.1521517378790019070696485176e+5 */ 15215.2;
     
-    static readonly UntypedFloat Q2 = /* -0.173678953558233699533450911e+3 */ -173.679;
+    UntypedFloat Q2 = /* -0.173678953558233699533450911e+3 */ -173.679;
     var sign = false;
     if (x < 0) {
         x = -x;
@@ -54,18 +54,18 @@ internal static float64 sinh(float64 x) {
     float64 temp = default!;
     switch (ᐧ) {
     case {} when x is > 21: {
-        temp = Exp(x) * 0.5F;
+        temp = Exp(x) * 0.5D;
         break;
     }
-    case {} when x is > 0.5F: {
+    case {} when x is > 0.5D: {
         var ex = Exp(x);
-        temp = (ex - 1 / ex) * 0.5F;
+        temp = (ex - 1 / ex) * 0.5D;
         break;
     }
     default: {
         var sq = x * x;
-        temp = (((P3 * sq + P2) * sq + P1) * sq + P0) * x;
-        temp = temp / (((sq + Q2) * sq + Q1) * sq + Q0);
+        temp = ((((float64)P3 * sq + (float64)P2) * sq + (float64)P1) * sq + (float64)P0) * x;
+        temp = temp / (((sq + (float64)Q2) * sq + (float64)Q1) * sq + (float64)Q0);
         break;
     }}
 
@@ -92,10 +92,10 @@ public static float64 Cosh(float64 x) {
 internal static float64 cosh(float64 x) {
     x = Abs(x);
     if (x > 21) {
-        return Exp(x) * 0.5F;
+        return Exp(x) * 0.5D;
     }
     var ex = Exp(x);
-    return (ex + 1 / ex) * 0.5F;
+    return (ex + 1 / ex) * 0.5D;
 }
 
 } // end math_package

@@ -5,18 +5,21 @@
 namespace go.encoding;
 
 using encoding = encoding_package;
-using binary = encoding.binary_package;
+using binary = go.encoding.binary_package;
 using math = math_package;
-using bits = math.bits_package;
+using bits = go.math.bits_package;
 using reflect = reflect_package;
 using sync = sync_package;
-using math;
+using go.encoding;
+using go.math;
+using go.sync;
+using io = io_package;
 
 partial class gob_package {
 
 internal static readonly UntypedInt uint64Size = 8;
 
-internal delegate bool encHelper(ж<encoderState> state, reflectꓸValue v);
+// type encHelper is a methodless func type — rendered inline as its base delegate
 
 // encoderState is the global execution state of an instance of the encoder.
 // Field numbers are delta encoded and always increase. The field
@@ -38,13 +41,14 @@ internal delegate bool encHelper(ж<encoderState> state, reflectꓸValue v);
     internal array<byte> scratch = new(64);
 }
 
-internal static sync.Pool encBufferPool = new sync.Pool(
+internal static ж<sync.Pool> ᏑencBufferPool = new(new sync.Pool(
     New: () => {
         var e = @new<encBuffer>();
-        var e.val.data = (~e).scratch[0..0];
+        e.Value.data = (~e).scratch[0..0];
         return e;
     }
-);
+));
+internal static ref sync.Pool encBufferPool => ref ᏑencBufferPool.Value;
 
 [GoRecv] internal static void writeByte(this ref encBuffer e, byte c) {
     e.data = append(e.data, c);
@@ -75,30 +79,31 @@ internal static sync.Pool encBufferPool = new sync.Pool(
     }
 }
 
-[GoRecv] public static ж<encoderState> newEncoderState(this ref Encoder enc, ж<encBuffer> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+internal static ж<encoderState> newEncoderState(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb) {
+    ref var enc = ref Ꮡenc.Value;
+    ref var b = ref Ꮡb.Value;
 
     var e = enc.freeList;
     if (e == nil){
         e = @new<encoderState>();
-        e.val.enc = enc;
+        e.Value.enc = Ꮡenc;
     } else {
-        enc.freeList = e.val.next;
+        enc.freeList = e.Value.next;
     }
-    e.val.sendZero = false;
-    e.val.fieldnum = 0;
-    e.val.b = b;
+    e.Value.sendZero = false;
+    e.Value.fieldnum = 0;
+    e.Value.b = Ꮡb;
     if (len(b.data) == 0) {
         b.data = b.scratch[0..0];
     }
     return e;
 }
 
-[GoRecv] public static void freeEncoderState(this ref Encoder enc, ж<encoderState> Ꮡe) {
-    ref var e = ref Ꮡe.val;
+[GoRecv] internal static void freeEncoderState(this ref Encoder enc, ж<encoderState> Ꮡe) {
+    ref var e = ref Ꮡe.Value;
 
     e.next = enc.freeList;
-    enc.freeList = e;
+    enc.freeList = Ꮡe;
 }
 
 // Unsigned integers have a two-state encoding. If the number is less
@@ -108,14 +113,14 @@ internal static sync.Pool encBufferPool = new sync.Pool(
 
 // encodeUint writes an encoded unsigned integer to state.b.
 [GoRecv] internal static void encodeUint(this ref encoderState state, uint64 x) {
-    if (x <= 127) {
-        state.b.writeByte(((uint8)x));
+    if (x <= 0x7F) {
+        state.b.writeByte((uint8)x);
         return;
     }
     binary.BigEndian.PutUint64(state.buf[1..], x);
-    nint bc = bits.LeadingZeros64(x) >> (int)(3);
+    nint bc = (bits.LeadingZeros64(x) >> (int)(3));
     // 8 - bytelen(x)
-    state.buf[bc] = ((uint8)(bc - uint64Size));
+    state.buf[bc] = (uint8)(bc - (nint)uint64Size);
     // and then we subtract 8 to get -bytelen(x)
     state.b.Write(state.buf[(int)(bc)..(int)(uint64Size + 1)]);
 }
@@ -126,18 +131,18 @@ internal static sync.Pool encBufferPool = new sync.Pool(
 [GoRecv] internal static void encodeInt(this ref encoderState state, int64 i) {
     uint64 x = default!;
     if (i < 0){
-        x = (uint64)(((uint64)(~i << (int)(1))) | 1);
+        x = (uint64)((uint64)((~i << (int)(1))) | 1);
     } else {
-        x = ((uint64)(i << (int)(1)));
+        x = (uint64)((i << (int)(1)));
     }
     state.encodeUint(x);
 }
 
-internal delegate void encOp(ж<encInstr> i, ж<encoderState> state, reflectꓸValue v);
+// type encOp is a methodless func type — rendered inline as its base delegate
 
 // The 'instructions' of the encoding machine
 [GoType] partial struct encInstr {
-    internal encOp op;
+    internal Action<ж<encInstr>, ж<encoderState>, reflectꓸValue> op;
     internal nint field;  // field number in input
     internal slice<nint> index; // struct index
     internal nint indir;  // how many pointer indirections to reach the value in the struct
@@ -146,10 +151,10 @@ internal delegate void encOp(ж<encInstr> i, ж<encoderState> state, reflectꓸV
 // update emits a field number and updates the state to record its value for delta encoding.
 // If the instruction pointer is nil, it does nothing
 [GoRecv] internal static void update(this ref encoderState state, ж<encInstr> Ꮡinstr) {
-    ref var instr = ref Ꮡinstr.val;
+    ref var instr = ref Ꮡinstr.DerefOrNil();
 
-    if (instr != nil) {
-        state.encodeUint(((uint64)(instr.field - state.fieldnum)));
+    if (Ꮡinstr != nil) {
+        state.encodeUint((uint64)(instr.field - state.fieldnum));
         state.fieldnum = instr.field;
     }
 }
@@ -176,8 +181,8 @@ internal static reflectꓸValue encIndirect(reflectꓸValue pv, nint indir) {
 
 // encBool encodes the bool referenced by v as an unsigned 0 or 1.
 internal static void encBool(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var i = ref Ꮡi.val;
-    ref var state = ref Ꮡstate.val;
+    ref var i = ref Ꮡi.Value;
+    ref var state = ref Ꮡstate.Value;
 
     var b = v.Bool();
     if (b || state.sendZero) {
@@ -192,8 +197,8 @@ internal static void encBool(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, refle
 
 // encInt encodes the signed integer (int int8 int16 int32 int64) referenced by v.
 internal static void encInt(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var i = ref Ꮡi.val;
-    ref var state = ref Ꮡstate.val;
+    ref var i = ref Ꮡi.Value;
+    ref var state = ref Ꮡstate.Value;
 
     var value = v.Int();
     if (value != 0 || state.sendZero) {
@@ -204,8 +209,8 @@ internal static void encInt(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflec
 
 // encUint encodes the unsigned integer (uint uint8 uint16 uint32 uint64 uintptr) referenced by v.
 internal static void encUint(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var i = ref Ꮡi.val;
-    ref var state = ref Ꮡstate.val;
+    ref var i = ref Ꮡi.Value;
+    ref var state = ref Ꮡstate.Value;
 
     var value = v.Uint();
     if (value != 0 || state.sendZero) {
@@ -227,8 +232,8 @@ internal static uint64 floatBits(float64 f) {
 
 // encFloat encodes the floating point value (float32 float64) referenced by v.
 internal static void encFloat(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var i = ref Ꮡi.val;
-    ref var state = ref Ꮡstate.val;
+    ref var i = ref Ꮡi.Value;
+    ref var state = ref Ꮡstate.Value;
 
     var f = v.Float();
     if (f != 0 || state.sendZero) {
@@ -241,11 +246,11 @@ internal static void encFloat(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, refl
 // encComplex encodes the complex value (complex64 complex128) referenced by v.
 // Complex numbers are just a pair of floating-point numbers, real part first.
 internal static void encComplex(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var i = ref Ꮡi.val;
-    ref var state = ref Ꮡstate.val;
+    ref var i = ref Ꮡi.Value;
+    ref var state = ref Ꮡstate.Value;
 
     var c = v.Complex();
-    if (c != 0 + i(0F) || state.sendZero) {
+    if (c != 0 + builtin.i(0F) || state.sendZero) {
         var rpart = floatBits(real(c));
         var ipart = floatBits(imag(c));
         state.update(Ꮡi);
@@ -257,13 +262,13 @@ internal static void encComplex(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, re
 // encUint8Array encodes the byte array referenced by v.
 // Byte arrays are encoded as an unsigned count followed by the raw bytes.
 internal static void encUint8Array(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var i = ref Ꮡi.val;
-    ref var state = ref Ꮡstate.val;
+    ref var i = ref Ꮡi.Value;
+    ref var state = ref Ꮡstate.Value;
 
     var b = v.Bytes();
     if (len(b) > 0 || state.sendZero) {
         state.update(Ꮡi);
-        state.encodeUint(((uint64)len(b)));
+        state.encodeUint((uint64)len(b));
         state.b.Write(b);
     }
 }
@@ -271,13 +276,13 @@ internal static void encUint8Array(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate,
 // encString encodes the string referenced by v.
 // Strings are encoded as an unsigned count followed by the raw bytes.
 internal static void encString(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var i = ref Ꮡi.val;
-    ref var state = ref Ꮡstate.val;
+    ref var i = ref Ꮡi.Value;
+    ref var state = ref Ꮡstate.Value;
 
     @string s = v.String();
     if (len(s) > 0 || state.sendZero) {
         state.update(Ꮡi);
-        state.encodeUint(((uint64)len(s)));
+        state.encodeUint((uint64)len(s));
         state.b.WriteString(s);
     }
 }
@@ -285,8 +290,8 @@ internal static void encString(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, ref
 // encStructTerminator encodes the end of an encoded struct
 // as delta field number of 0.
 internal static void encStructTerminator(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var i = ref Ꮡi.val;
-    ref var state = ref Ꮡstate.val;
+    ref var i = ref Ꮡi.Value;
+    ref var state = ref Ꮡstate.Value;
 
     state.encodeUint(0);
 }
@@ -316,16 +321,17 @@ internal static bool valid(reflectꓸValue v) {
 }
 
 // encodeSingle encodes a single top-level non-struct value.
-[GoRecv] public static void encodeSingle(this ref Encoder enc, ж<encBuffer> Ꮡb, ж<encEngine> Ꮡengine, reflectꓸValue value) => func((defer, _) => {
-    ref var b = ref Ꮡb.val;
-    ref var engine = ref Ꮡengine.val;
+internal static void encodeSingle(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, ж<encEngine> Ꮡengine, reflectꓸValue value) => func((defer, recover) => {
+    ref var enc = ref Ꮡenc.Value;
+    ref var b = ref Ꮡb.Value;
+    ref var engine = ref Ꮡengine.Value;
 
-    var state = enc.newEncoderState(Ꮡb);
-    deferǃ(enc.freeEncoderState, state, defer);
-    state.val.fieldnum = singletonField;
+    var state = Ꮡenc.newEncoderState(Ꮡb);
+    deferǃ(Ꮡenc.freeEncoderState, state, defer);
+    state.Value.fieldnum = singletonField;
     // There is no surrounding struct to frame the transmission, so we must
     // generate data even if the item is zero. To do this, set sendZero.
-    state.val.sendZero = true;
+    state.Value.sendZero = true;
     var instr = Ꮡ(engine.instr, singletonField);
     if ((~instr).indir > 0) {
         value = encIndirect(value, (~instr).indir);
@@ -336,16 +342,17 @@ internal static bool valid(reflectꓸValue v) {
 });
 
 // encodeStruct encodes a single struct value.
-[GoRecv] public static void encodeStruct(this ref Encoder enc, ж<encBuffer> Ꮡb, ж<encEngine> Ꮡengine, reflectꓸValue value) => func((defer, _) => {
-    ref var b = ref Ꮡb.val;
-    ref var engine = ref Ꮡengine.val;
+internal static void encodeStruct(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, ж<encEngine> Ꮡengine, reflectꓸValue value) => func((defer, recover) => {
+    ref var enc = ref Ꮡenc.Value;
+    ref var b = ref Ꮡb.Value;
+    ref var engine = ref Ꮡengine.Value;
 
     if (!valid(value)) {
         return;
     }
-    var state = enc.newEncoderState(Ꮡb);
-    deferǃ(enc.freeEncoderState, state, defer);
-    state.val.fieldnum = -1;
+    var state = Ꮡenc.newEncoderState(Ꮡb);
+    deferǃ(Ꮡenc.freeEncoderState, state, defer);
+    state.Value.fieldnum = -1;
     for (nint i = 0; i < len(engine.instr); i++) {
         var instr = Ꮡ(engine.instr, i);
         if (i >= value.NumField()) {
@@ -366,14 +373,15 @@ internal static bool valid(reflectꓸValue v) {
 });
 
 // encodeArray encodes an array.
-[GoRecv] public static void encodeArray(this ref Encoder enc, ж<encBuffer> Ꮡb, reflectꓸValue value, encOp op, nint elemIndir, nint length, encHelper helper) => func((defer, _) => {
-    ref var b = ref Ꮡb.val;
+internal static void encodeArray(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflectꓸValue value, Action<ж<encInstr>, ж<encoderState>, reflectꓸValue> op, nint elemIndir, nint length, Func<ж<encoderState>, reflectꓸValue, bool> helper) => func((defer, recover) => {
+    ref var enc = ref Ꮡenc.Value;
+    ref var b = ref Ꮡb.Value;
 
-    var state = enc.newEncoderState(Ꮡb);
-    deferǃ(enc.freeEncoderState, state, defer);
-    state.val.fieldnum = -1;
-    state.val.sendZero = true;
-    state.encodeUint(((uint64)length));
+    var state = Ꮡenc.newEncoderState(Ꮡb);
+    deferǃ(Ꮡenc.freeEncoderState, state, defer);
+    state.Value.fieldnum = -1;
+    state.Value.sendZero = true;
+    state.encodeUint((uint64)length);
     if (helper != default! && helper(state, value)) {
         return;
     }
@@ -391,8 +399,8 @@ internal static bool valid(reflectꓸValue v) {
 });
 
 // encodeReflectValue is a helper for maps. It encodes the value v.
-internal static void encodeReflectValue(ж<encoderState> Ꮡstate, reflectꓸValue v, encOp op, nint indir) {
-    ref var state = ref Ꮡstate.val;
+internal static void encodeReflectValue(ж<encoderState> Ꮡstate, reflectꓸValue v, Action<ж<encInstr>, ж<encoderState>, reflectꓸValue> op, nint indir) {
+    ref var state = ref Ꮡstate.Value;
 
     for (nint i = 0; i < indir && v.IsValid(); i++) {
         v = reflect.Indirect(v);
@@ -404,13 +412,14 @@ internal static void encodeReflectValue(ж<encoderState> Ꮡstate, reflectꓸVal
 }
 
 // encodeMap encodes a map as unsigned count followed by key:value pairs.
-[GoRecv] public static void encodeMap(this ref Encoder enc, ж<encBuffer> Ꮡb, reflectꓸValue mv, encOp keyOp, encOp elemOp, nint keyIndir, nint elemIndir) {
-    ref var b = ref Ꮡb.val;
+internal static void encodeMap(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflectꓸValue mv, Action<ж<encInstr>, ж<encoderState>, reflectꓸValue> keyOp, Action<ж<encInstr>, ж<encoderState>, reflectꓸValue> elemOp, nint keyIndir, nint elemIndir) {
+    ref var enc = ref Ꮡenc.Value;
+    ref var b = ref Ꮡb.Value;
 
-    var state = enc.newEncoderState(Ꮡb);
-    state.val.fieldnum = -1;
-    state.val.sendZero = true;
-    state.encodeUint(((uint64)mv.Len()));
+    var state = Ꮡenc.newEncoderState(Ꮡb);
+    state.Value.fieldnum = -1;
+    state.Value.sendZero = true;
+    state.encodeUint((uint64)mv.Len());
     var mi = mv.MapRange();
     while (mi.Next()) {
         encodeReflectValue(state, mi.Key(), keyOp, keyIndir);
@@ -424,8 +433,9 @@ internal static void encodeReflectValue(ж<encoderState> Ꮡstate, reflectꓸVal
 // by the type identifier (which might require defining that type right now), followed
 // by the concrete value. A nil value gets sent as the empty string for the name,
 // followed by no value.
-[GoRecv] public static void encodeInterface(this ref Encoder enc, ж<encBuffer> Ꮡb, reflectꓸValue iv) {
-    ref var b = ref Ꮡb.val;
+internal static void encodeInterface(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflectꓸValue iv) {
+    ref var enc = ref Ꮡenc.Value;
+    ref var b = ref Ꮡb.Value;
 
     // Gobs can encode nil interface values but not typed interface
     // values holding nil pointers, since nil pointers point to no value.
@@ -433,39 +443,39 @@ internal static void encodeReflectValue(ж<encoderState> Ꮡstate, reflectꓸVal
     if (elem.Kind() == reflect.ΔPointer && elem.IsNil()) {
         errorf("gob: cannot encode nil pointer of type %s inside interface"u8, iv.Elem().Type());
     }
-    var state = enc.newEncoderState(Ꮡb);
-    state.val.fieldnum = -1;
-    state.val.sendZero = true;
+    var state = Ꮡenc.newEncoderState(Ꮡb);
+    state.Value.fieldnum = -1;
+    state.Value.sendZero = true;
     if (iv.IsNil()) {
         state.encodeUint(0);
         return;
     }
     var ut = userType(iv.Elem().Type());
-    var (namei, ok) = concreteTypeToName.Load((~ut).@base);
+    var (namei, ok) = ᏑconcreteTypeToName.Load((~ut).@base);
     if (!ok) {
         errorf("type not registered for interface: %s"u8, (~ut).@base);
     }
     @string name = namei._<@string>();
     // Send the name.
-    state.encodeUint(((uint64)len(name)));
+    state.encodeUint((uint64)len(name));
     (~state).b.WriteString(name);
     // Define the type id if necessary.
-    enc.sendTypeDescriptor(enc.writer(), state, ut);
+    Ꮡenc.sendTypeDescriptor(enc.writer(), state, ut);
     // Send the type id.
     enc.sendTypeId(state, ut);
     // Encode the value into a new buffer. Any nested type definitions
     // should be written to b, before the encoded value.
-    enc.pushWriter(~b);
-    var data = encBufferPool.Get()._<encBuffer.val>();
+    enc.pushWriter(new encBufferжWriter(Ꮡb));
+    var data = ᏑencBufferPool.Get()._<ж<encBuffer>>();
     data.Write(spaceForLength);
-    enc.encode(data, elem, ut);
+    Ꮡenc.encode(data, elem, ut);
     if (enc.err != default!) {
         error_(enc.err);
     }
     enc.popWriter();
-    enc.writeMessage(~b, data);
+    enc.writeMessage(new encBufferжWriter(Ꮡb), data);
     data.Reset();
-    encBufferPool.Put(data);
+    ᏑencBufferPool.Put(data);
     if (enc.err != default!) {
         error_(enc.err);
     }
@@ -474,9 +484,10 @@ internal static void encodeReflectValue(ж<encoderState> Ꮡstate, reflectꓸVal
 
 // encodeGobEncoder encodes a value that implements the GobEncoder interface.
 // The data is sent as a byte array.
-[GoRecv] public static void encodeGobEncoder(this ref Encoder enc, ж<encBuffer> Ꮡb, ж<userTypeInfo> Ꮡut, reflectꓸValue v) {
-    ref var b = ref Ꮡb.val;
-    ref var ut = ref Ꮡut.val;
+internal static void encodeGobEncoder(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, ж<userTypeInfo> Ꮡut, reflectꓸValue v) {
+    ref var enc = ref Ꮡenc.Value;
+    ref var b = ref Ꮡb.Value;
+    ref var ut = ref Ꮡut.Value;
 
     // TODO: should we catch panics from the called method?
     slice<byte> data = default!;
@@ -496,36 +507,36 @@ internal static void encodeReflectValue(ж<encoderState> Ꮡstate, reflectꓸVal
     if (err != default!) {
         error_(err);
     }
-    var state = enc.newEncoderState(Ꮡb);
-    state.val.fieldnum = -1;
-    state.encodeUint(((uint64)len(data)));
+    var state = Ꮡenc.newEncoderState(Ꮡb);
+    state.Value.fieldnum = -1;
+    state.encodeUint((uint64)len(data));
     (~state).b.Write(data);
     enc.freeEncoderState(state);
 }
 
-internal static array<encOp> encOpTable = new runtime.SparseArray<encOp>{
-    [reflect.ΔBool] = encBool,
-    [reflect.ΔInt] = encInt,
-    [reflect.Int8] = encInt,
-    [reflect.Int16] = encInt,
-    [reflect.Int32] = encInt,
-    [reflect.Int64] = encInt,
-    [reflect.ΔUint] = encUint,
-    [reflect.Uint8] = encUint,
-    [reflect.Uint16] = encUint,
-    [reflect.Uint32] = encUint,
-    [reflect.Uint64] = encUint,
-    [reflect.Uintptr] = encUint,
-    [reflect.Float32] = encFloat,
-    [reflect.Float64] = encFloat,
-    [reflect.Complex64] = encComplex,
-    [reflect.Complex128] = encComplex,
-    [reflect.ΔString] = encString
+internal static array<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>> encOpTable = new golib.SparseArray<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>>{
+    [1] = encBool,
+    [2] = encInt,
+    [3] = encInt,
+    [4] = encInt,
+    [5] = encInt,
+    [6] = encInt,
+    [7] = encUint,
+    [8] = encUint,
+    [9] = encUint,
+    [10] = encUint,
+    [11] = encUint,
+    [12] = encUint,
+    [13] = encFloat,
+    [14] = encFloat,
+    [15] = encComplex,
+    [16] = encComplex,
+    [24] = encString
 }.array();
 
 // encOpFor returns (a pointer to) the encoding op for the base type under rt and
 // the indirection count to reach it.
-internal static (ж<encOp>, nint) encOpFor(reflectꓸType rt, map<reflectꓸType, ж<encOp>> inProgress, map<ж<typeInfo>, bool> building) {
+internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>>, nint) encOpFor(reflectꓸType rt, map<reflectꓸType, ж<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>>> inProgress, map<ж<typeInfo>, bool> building) {
     var ut = userType(rt);
     // If the type implements GobEncoder, we handle it without further processing.
     if ((~ut).externalEnc != 0) {
@@ -538,82 +549,79 @@ internal static (ж<encOp>, nint) encOpFor(reflectꓸType rt, map<reflectꓸType
             return (opPtr, (~ut).indir);
         }
     }
-    var typ = ut.val.@base;
-    nint indir = ut.val.indir;
+    var typ = ut.Value.@base;
+    nint indir = ut.Value.indir;
     reflectꓸKind k = typ.Kind();
-    encOp op = default!;
-    if (((nint)k) < len(encOpTable)) {
+    ref var op = ref heap<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>>(out var Ꮡop);
+    if ((nint)(nuint)k < len(encOpTable)) {
         op = encOpTable[k];
     }
     if (op == default!) {
-        inProgress[rt] = Ꮡ(op);
+        inProgress[rt] = Ꮡop;
         // Special cases
         {
             var t = typ;
             var exprᴛ1 = t.Kind();
             if (exprᴛ1 == reflect.ΔSlice) {
-                if (t.Elem().Kind() == reflect.Uint8) {
-                    op = encUint8Array;
-                    break;
-                }
-                var (elemOp, elemIndir) = encOpFor(t.Elem(), // Slices have a header; we decode it to find the underlying array.
- inProgress, building);
-                var helper = encSliceHelper[t.Elem().Kind()];
-                op = 
-                var elemOpʗ1 = elemOp;
-                var helperʗ1 = helper;
-                (ж<encInstr> i, ж<encoderState> state, reflectꓸValue Δslice) => {
-                    if (!(~state).sendZero && Δslice.Len() == 0) {
-                        return;
+                do {
+                    if (t.Elem().Kind() == reflect.Uint8) {
+                        op = encUint8Array;
+                        break;
                     }
-                    state.update(i);
-                    (~state).enc.encodeArray((~state).b, Δslice, elemOpʗ1.val, elemIndir, Δslice.Len(), helperʗ1);
-                };
+                    var (elemOp, elemIndir) = encOpFor(t.Elem(), // Slices have a header; we decode it to find the underlying array.
+ inProgress, building);
+                    var helper = encSliceHelper[t.Elem().Kind()];
+                    var elemOpʗ1 = elemOp;
+                    var helperʗ1 = helper;
+                    op = (ж<encInstr> i, ж<encoderState> state, reflectꓸValue Δslice) => {
+                        if (!(~state).sendZero && Δslice.Len() == 0) {
+                            return;
+                        }
+                        state.update(i);
+                        (~state).enc.encodeArray((~state).b, Δslice, elemOpʗ1.ValueSlot, elemIndir, Δslice.Len(), helperʗ1);
+                    };
+                } while (false);
             }
             else if (exprᴛ1 == reflect.Array) {
                 var (elemOp, elemIndir) = encOpFor(t.Elem(), // True arrays have size in the type.
  inProgress, building);
                 var helper = encArrayHelper[t.Elem().Kind()];
-                op = 
                 var elemOpʗ2 = elemOp;
                 var helperʗ2 = helper;
-                (ж<encInstr> i, ж<encoderState> state, reflectꓸValue Δarray) => {
+                op = (ж<encInstr> i, ж<encoderState> state, reflectꓸValue Δarray) => {
                     state.update(i);
-                    (~state).enc.encodeArray((~state).b, Δarray, elemOpʗ2.val, elemIndir, Δarray.Len(), helperʗ2);
+                    (~state).enc.encodeArray((~state).b, Δarray, elemOpʗ2.ValueSlot, elemIndir, Δarray.Len(), helperʗ2);
                 };
             }
             else if (exprᴛ1 == reflect.Map) {
                 var (keyOp, keyIndir) = encOpFor(t.Key(), inProgress, building);
                 var (elemOp, elemIndir) = encOpFor(t.Elem(), inProgress, building);
-                op = 
                 var elemOpʗ3 = elemOp;
                 var keyOpʗ1 = keyOp;
-                (ж<encInstr> i, ж<encoderState> state, reflectꓸValue mv) => {
+                op = (ж<encInstr> i, ж<encoderState> state, reflectꓸValue mv) => {
                     // We send zero-length (but non-nil) maps because the
                     // receiver might want to use the map.  (Maps don't use append.)
                     if (!(~state).sendZero && mv.IsNil()) {
                         return;
                     }
                     state.update(i);
-                    (~state).enc.encodeMap((~state).b, mv, keyOpʗ1.val, elemOpʗ3.val, keyIndir, elemIndir);
+                    (~state).enc.encodeMap((~state).b, mv, keyOpʗ1.ValueSlot, elemOpʗ3.ValueSlot, keyIndir, elemIndir);
                 };
             }
             else if (exprᴛ1 == reflect.Struct) {
                 getEncEngine(userType(typ), // Generate a closure that calls out to the engine for the nested type.
  building);
                 var info = mustGetTypeInfo(typ);
-                op = 
                 var infoʗ1 = info;
-                (ж<encInstr> i, ж<encoderState> state, reflectꓸValue sv) => {
+                op = (ж<encInstr> i, ж<encoderState> state, reflectꓸValue sv) => {
                     state.update(i);
                     // indirect through info to delay evaluation for recursive structs
-                    var enc = (~infoʗ1).encoder.Load();
+                    var enc = infoʗ1.of(typeInfo.Ꮡencoder).Load();
                     (~state).enc.encodeStruct((~state).b, enc, sv);
                 };
             }
             else if (exprᴛ1 == reflect.ΔInterface) {
-                op = 
-                (ж<encInstr> i, ж<encoderState> state, reflectꓸValue iv) => {
+                op = (ж<encInstr> i, ж<encoderState> state, reflectꓸValue iv) => {
                     if (!(~state).sendZero && (!iv.IsValid() || iv.IsNil())) {
                         return;
                     }
@@ -627,27 +635,26 @@ internal static (ж<encOp>, nint) encOpFor(reflectꓸType rt, map<reflectꓸType
     if (op == default!) {
         errorf("can't happen: encode type %s"u8, rt);
     }
-    return (Ꮡ(op), indir);
+    return (Ꮡop, indir);
 }
 
 // gobEncodeOpFor returns the op for a type that is known to implement GobEncoder.
-internal static (ж<encOp>, nint) gobEncodeOpFor(ж<userTypeInfo> Ꮡut) {
-    ref var ut = ref Ꮡut.val;
+internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>>, nint) gobEncodeOpFor(ж<userTypeInfo> Ꮡut) {
+    ref var ut = ref Ꮡut.Value;
 
     var rt = ut.user;
     if (ut.encIndir == -1){
         rt = reflect.PointerTo(rt);
     } else 
     if (ut.encIndir > 0) {
-        for (var i = ((int8)0); i < ut.encIndir; i++) {
+        for (var i = (int8)0; i < ut.encIndir; i++) {
             rt = rt.Elem();
         }
     }
-    encOp op = default!;
-    op = 
+    ref var op = ref heap<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>>(out var Ꮡop);
     var rtʗ1 = rt;
-    (ж<encInstr> i, ж<encoderState> state, reflectꓸValue v) => {
-        if (ut.encIndir == -1) {
+    op = (ж<encInstr> i, ж<encoderState> state, reflectꓸValue v) => {
+        if (Ꮡut.Value.encIndir == -1) {
             // Need to climb up one level to turn value into pointer.
             if (!v.CanAddr()) {
                 errorf("unaddressable value of type %s"u8, rtʗ1);
@@ -660,99 +667,100 @@ internal static (ж<encOp>, nint) gobEncodeOpFor(ж<userTypeInfo> Ꮡut) {
         state.update(i);
         (~state).enc.encodeGobEncoder((~state).b, Ꮡut, v);
     };
-    return (Ꮡ(op), ((nint)ut.encIndir));
+    return (Ꮡop, (nint)ut.encIndir);
 }
 
 // encIndir: op will get called with p == address of receiver.
 
 // compileEnc returns the engine to compile the type.
 internal static ж<encEngine> compileEnc(ж<userTypeInfo> Ꮡut, map<ж<typeInfo>, bool> building) {
-    ref var ut = ref Ꮡut.val;
+    ref var ut = ref Ꮡut.Value;
 
     var srt = ut.@base;
     var engine = @new<encEngine>();
-    var seen = new map<reflectꓸType, ж<encOp>>();
+    var seen = new map<reflectꓸType, ж<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>>>();
     var rt = ut.@base;
     if (ut.externalEnc != 0) {
         rt = ut.user;
     }
     if (ut.externalEnc == 0 && srt.Kind() == reflect.Struct){
-        for (nint fieldNum = 0;nint wireFieldNum = 0; fieldNum < srt.NumField(); fieldNum++) {
-            ref var f = ref heap<reflect_package.StructField>(out var Ꮡf);
+        for ((nint fieldNum, nint wireFieldNum) = (0, 0); fieldNum < srt.NumField(); fieldNum++) {
+            ref var f = ref heap<reflect.StructField>(out var Ꮡf);
             f = srt.Field(fieldNum);
             if (!isSent(Ꮡf)) {
                 continue;
             }
             var (op, indir) = encOpFor(f.Type, seen, building);
-            engine.val.instr = append((~engine).instr, new encInstr(op.val, wireFieldNum, f.Index, indir));
+            engine.Value.instr = append((~engine).instr, new encInstr(op.ValueSlot, wireFieldNum, f.Index, indir));
             wireFieldNum++;
         }
         if (srt.NumField() > 0 && len((~engine).instr) == 0) {
             errorf("type %s has no exported fields"u8, rt);
         }
-        engine.val.instr = append((~engine).instr, new encInstr(encStructTerminator, 0, default!, 0));
+        engine.Value.instr = append((~engine).instr, new encInstr(new Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>(encStructTerminator), 0, default!, 0));
     } else {
-        engine.val.instr = new slice<encInstr>(1);
+        engine.Value.instr = new slice<encInstr>(1);
         var (op, indir) = encOpFor(rt, seen, building);
-        (~engine).instr[0] = new encInstr(op.val, singletonField, default!, indir);
+        engine.Value.instr[0] = new encInstr(op.ValueSlot, singletonField, default!, indir);
     }
     return engine;
 }
 
 // getEncEngine returns the engine to compile the type.
 internal static ж<encEngine> getEncEngine(ж<userTypeInfo> Ꮡut, map<ж<typeInfo>, bool> building) {
-    ref var ut = ref Ꮡut.val;
+    ref var ut = ref Ꮡut.Value;
 
-    (info, err) = getTypeInfo(Ꮡut);
+    var (info, err) = getTypeInfo(Ꮡut);
     if (err != default!) {
         error_(err);
     }
-    var enc = (~info).encoder.Load();
+    var enc = info.of(typeInfo.Ꮡencoder).Load();
     if (enc == nil) {
         enc = buildEncEngine(info, Ꮡut, building);
     }
     return enc;
 }
 
-internal static ж<encEngine> buildEncEngine(ж<typeInfo> Ꮡinfo, ж<userTypeInfo> Ꮡut, map<ж<typeInfo>, bool> building) => func((defer, _) => {
-    ref var info = ref Ꮡinfo.val;
-    ref var ut = ref Ꮡut.val;
+internal static ж<encEngine> buildEncEngine(ж<typeInfo> Ꮡinfo, ж<userTypeInfo> Ꮡut, map<ж<typeInfo>, bool> building) => func<ж<encEngine>>((defer, recover) => {
+    ref var info = ref Ꮡinfo.Value;
+    ref var ut = ref Ꮡut.Value;
 
     // Check for recursive types.
-    if (building != default! && building[info]) {
+    if (building != default! && building[Ꮡinfo]) {
         return default!;
     }
-    info.encInit.Lock();
-    defer(info.encInit.Unlock);
-    var enc = info.encoder.Load();
+    Ꮡinfo.of(typeInfo.ᏑencInit).Lock();
+    defer(Ꮡinfo.of(typeInfo.ᏑencInit).Unlock);
+    var enc = Ꮡinfo.of(typeInfo.Ꮡencoder).Load();
     if (enc == nil) {
         if (building == default!) {
             building = new map<ж<typeInfo>, bool>();
         }
-        building[info] = true;
+        building[Ꮡinfo] = true;
         enc = compileEnc(Ꮡut, building);
-        info.encoder.Store(enc);
+        Ꮡinfo.of(typeInfo.Ꮡencoder).Store(enc);
     }
     return enc;
 });
 
-[GoRecv] public static void encode(this ref Encoder enc, ж<encBuffer> Ꮡb, reflectꓸValue value, ж<userTypeInfo> Ꮡut) => func((defer, _) => {
-    ref var b = ref Ꮡb.val;
-    ref var ut = ref Ꮡut.val;
+internal static void encode(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflectꓸValue value, ж<userTypeInfo> Ꮡut) => func((defer, recover) => {
+    ref var enc = ref Ꮡenc.Value;
+    ref var b = ref Ꮡb.Value;
+    ref var ut = ref Ꮡut.Value;
 
-    deferǃ(catchError, Ꮡ(enc.err), defer);
+    deferǃ(catchError, Ꮡenc.of(Encoder.Ꮡerr), defer);
     var engine = getEncEngine(Ꮡut, default!);
     nint indir = ut.indir;
     if (ut.externalEnc != 0) {
-        indir = ((nint)ut.encIndir);
+        indir = (nint)ut.encIndir;
     }
     for (nint i = 0; i < indir; i++) {
         value = reflect.Indirect(value);
     }
     if (ut.externalEnc == 0 && value.Type().Kind() == reflect.Struct){
-        enc.encodeStruct(Ꮡb, engine, value);
+        Ꮡenc.encodeStruct(Ꮡb, engine, value);
     } else {
-        enc.encodeSingle(Ꮡb, engine, value);
+        Ꮡenc.encodeSingle(Ꮡb, engine, value);
     }
 });
 

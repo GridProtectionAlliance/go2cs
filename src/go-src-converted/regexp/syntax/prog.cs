@@ -6,9 +6,9 @@ namespace go.regexp;
 using strconv = strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
-using unicode;
-using ꓸꓸꓸ@string = Span<@string>;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class syntax_package {
 
@@ -51,7 +51,7 @@ internal static slice<@string> instOpNames = new @string[]{
 }.slice();
 
 public static @string String(this InstOp i) {
-    if (((nuint)i) >= ((nuint)len(instOpNames))) {
+    if ((nuint)(uint8)i >= (nuint)len(instOpNames)) {
         return ""u8;
     }
     return instOpNames[i];
@@ -127,9 +127,11 @@ public static bool IsWordChar(rune r) {
     public slice<rune> Rune;
 }
 
-[GoRecv] public static @string String(this ref Prog p) {
-    ref var b = ref heap(new strings_package.Builder(), out var Ꮡb);
-    dumpProg(Ꮡb, p);
+public static @string String(this ж<Prog> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    ref var b = ref heap(new strings.Builder(), out var Ꮡb);
+    dumpProg(Ꮡb, Ꮡp);
     return b.String();
 }
 
@@ -160,15 +162,15 @@ public static bool IsWordChar(rune r) {
     @string prefix = default!;
     bool complete = default!;
 
-    var i = p.skipNop(((uint32)p.Start));
+    var i = p.skipNop((uint32)p.Start);
     // Avoid allocation of buffer if prefix is empty.
     if (i.op() != InstRune || len((~i).Rune) != 1) {
         return ("", (~i).Op == InstMatch);
     }
     // Have prefix; gather characters.
-    strings.Builder buf = default!;
-    while (i.op() == InstRune && len((~i).Rune) == 1 && (Flags)(((Flags)(~i).Arg) & FoldCase) == 0 && (~i).Rune[0] != utf8.RuneError) {
-        buf.WriteRune((~i).Rune[0]);
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
+    while (i.op() == InstRune && len((~i).Rune) == 1 && (Flags)(((Flags)(uint16)(~i).Arg) & FoldCase) == 0 && (~i).Rune[0] != utf8.RuneError) {
+        Ꮡbuf.WriteRune((~i).Rune[0]);
         i = p.skipNop((~i).Out);
     }
     return (buf.String(), (~i).Op == InstMatch);
@@ -178,16 +180,16 @@ public static bool IsWordChar(rune r) {
 // be true in any match. It returns ^EmptyOp(0) if no matches are possible.
 [GoRecv] public static EmptyOp StartCond(this ref Prog p) {
     EmptyOp flag = default!;
-    var pc = ((uint32)p.Start);
+    var pc = (uint32)p.Start;
     var i = Ꮡ(p.Inst[pc]);
 Loop:
     while (ᐧ) {
         var exprᴛ1 = (~i).Op;
         if (exprᴛ1 == InstEmptyWidth) {
-            flag |= (EmptyOp)(((EmptyOp)(~i).Arg));
+            flag |= (EmptyOp)(((EmptyOp)(uint8)(~i).Arg));
         }
         else if (exprᴛ1 == InstFail) {
-            return ~((EmptyOp)0);
+            return (EmptyOp)(~((EmptyOp)((EmptyOp)0)));
         }
         if (exprᴛ1 == InstCapture || exprᴛ1 == InstNop) {
         }
@@ -196,7 +198,7 @@ Loop:
         }
 
         // skip
-        pc = i.val.Out;
+        pc = i.Value.Out;
         i = Ꮡ(p.Inst[pc]);
 continue_Loop:;
     }
@@ -204,8 +206,7 @@ break_Loop:;
     return flag;
 }
 
-internal static readonly GoUntyped noMatch = /* -1 */
-    GoUntyped.Parse("-1");
+internal static readonly UntypedInt noMatch = -1;
 
 // MatchRune reports whether the instruction matches (and consumes) r.
 // It should only be called when i.Op == [InstRune].
@@ -230,7 +231,7 @@ internal static readonly GoUntyped noMatch = /* -1 */
             // Special case: single-rune slice is from literal string, not char class.
             return 0;
         }
-        if ((Flags)(((Flags)i.Arg) & FoldCase) != 0) {
+        if ((Flags)(((Flags)(uint16)i.Arg) & FoldCase) != 0) {
             for (var r1 = unicode.SimpleFold(r0); r1 != r0; r1 = unicode.SimpleFold(r1)) {
                 if (r == r1) {
                     return 0;
@@ -263,7 +264,7 @@ internal static readonly GoUntyped noMatch = /* -1 */
     nint lo = 0;
     nint hi = len(rune) / 2;
     while (lo < hi) {
-        nint m = ((nint)(((nuint)(lo + hi)) >> (int)(1)));
+        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
         {
             var c = rune[2 * m]; if (c <= r){
                 if (r <= rune[2 * m + 1]) {
@@ -282,7 +283,7 @@ internal static readonly GoUntyped noMatch = /* -1 */
 // an empty string between the runes before and after.
 // It should only be called when i.Op == [InstEmptyWidth].
 [GoRecv] public static bool MatchEmptyWidth(this ref Inst i, rune before, rune after) {
-    var exprᴛ1 = ((EmptyOp)i.Arg);
+    var exprᴛ1 = ((EmptyOp)(uint8)i.Arg);
     if (exprᴛ1 == EmptyBeginLine) {
         return before == (rune)'\n' || before == -1;
     }
@@ -305,30 +306,32 @@ internal static readonly GoUntyped noMatch = /* -1 */
     throw panic("unknown empty width arg");
 }
 
-[GoRecv] public static @string String(this ref Inst i) {
-    ref var b = ref heap(new strings_package.Builder(), out var Ꮡb);
-    dumpInst(Ꮡb, i);
+public static @string String(this ж<Inst> Ꮡi) {
+    ref var i = ref Ꮡi.Value;
+
+    ref var b = ref heap(new strings.Builder(), out var Ꮡb);
+    dumpInst(Ꮡb, Ꮡi);
     return b.String();
 }
 
-internal static void bw(ж<strings.Builder> Ꮡb, params ꓸꓸꓸ@string argsʗp) {
+internal static void bw(ж<strings.Builder> Ꮡb, params ꓸꓸꓸstring argsʗp) {
     var args = argsʗp.slice();
 
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
     foreach (var (_, s) in args) {
-        b.WriteString(s);
+        Ꮡb.WriteString(s);
     }
 }
 
 internal static void dumpProg(ж<strings.Builder> Ꮡb, ж<Prog> Ꮡp) {
-    ref var b = ref Ꮡb.val;
-    ref var p = ref Ꮡp.val;
+    ref var b = ref Ꮡb.Value;
+    ref var p = ref Ꮡp.Value;
 
     foreach (var (j, _) in p.Inst) {
         var i = Ꮡ(p.Inst, j);
         @string pc = strconv.Itoa(j);
         if (len(pc) < 3) {
-            b.WriteString("   "u8[(int)(len(pc))..]);
+            Ꮡb.WriteString("   "u8[(int)(len(pc))..]);
         }
         if (j == p.Start) {
             pc += "*"u8;
@@ -340,12 +343,12 @@ internal static void dumpProg(ж<strings.Builder> Ꮡb, ж<Prog> Ꮡp) {
 }
 
 internal static @string u32(uint32 i) {
-    return strconv.FormatUint(((uint64)i), 10);
+    return strconv.FormatUint((uint64)i, 10);
 }
 
 internal static void dumpInst(ж<strings.Builder> Ꮡb, ж<Inst> Ꮡi) {
-    ref var b = ref Ꮡb.val;
-    ref var i = ref Ꮡi.val;
+    ref var b = ref Ꮡb.Value;
+    ref var i = ref Ꮡi.Value;
 
     var exprᴛ1 = i.Op;
     if (exprᴛ1 == InstAlt) {
@@ -375,7 +378,7 @@ internal static void dumpInst(ж<strings.Builder> Ꮡb, ж<Inst> Ꮡi) {
             bw(Ꮡb, "rune <nil>"u8);
         }
         bw(Ꮡb, "rune "u8, strconv.QuoteToASCII(((@string)i.Rune)));
-        if ((Flags)(((Flags)i.Arg) & FoldCase) != 0) {
+        if ((Flags)(((Flags)(uint16)i.Arg) & FoldCase) != 0) {
             bw(Ꮡb, "/i"u8);
         }
         bw(Ꮡb, " -> "u8, u32(i.Out));

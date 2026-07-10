@@ -43,10 +43,9 @@ using static go.@internal.coverage.encodecounter_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<@internal.coverage.slicewriter_package.WriteSeeker, io_package.Writer>]
-[assembly: GoImplement<bufio_package.Writer, io_package.Writer>]
-[assembly: GoImplement<encoding.binary_package.littleEndian, encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
+[assembly: GoImplement<bufio_package.Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<go.@internal.coverage.slicewriter_package.WriteSeeker, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<go.encoding.binary_package.littleEndian, go.encoding.binary_package.ByteOrder>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

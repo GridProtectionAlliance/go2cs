@@ -5,13 +5,13 @@ namespace go;
 
 using errors = errors_package;
 using testlog = @internal.testlog_package;
-using runtime = runtime_package;
-using sync = sync_package;
-using atomic = sync.atomic_package;
+using Δruntime = runtime_package;
+using Δsync = sync_package;
+using atomic = go.sync.atomic_package;
 using syscall = syscall_package;
 using time = time_package;
 using @internal;
-using sync;
+using go.sync;
 
 partial class os_package {
 
@@ -26,8 +26,8 @@ internal static readonly processMode modeHandle = 1;
 [GoType("num:uint64")] partial struct processStatus;
 
 internal static readonly processStatus statusOK = 0;
-internal static readonly processStatus statusDone = /* 1 << 62 */ 4611686018427387904;
-internal static readonly processStatus statusReleased = /* 1 << 63 */ 9223372036854775808;
+internal static readonly processStatus statusDone = /* 1 << 62 */ unchecked((processStatus)4611686018427387904);
+internal static readonly processStatus statusReleased = /* 1 << 63 */ unchecked((processStatus)9223372036854775808);
 internal static readonly UntypedInt processStatusMask = /* 0x3 << 62 */ 13835058055282163712;
 
 // Process stores the information about a process created by [StartProcess].
@@ -59,9 +59,9 @@ internal static readonly UntypedInt processStatusMask = /* 0x3 << 62 */ 13835058
     // Process' persistent reference is dropped. The only difference in the
     // flags is the reason the handle is unavailable, which affects the
     // errors returned by concurrent calls.
-    internal sync.atomic_package.Uint64 state;
+    internal atomic.Uint64 state;
     // Used only in modePID.
-    internal sync_package.RWMutex sigMu; // avoid race between wait and signal
+    internal Δsync.RWMutex sigMu; // avoid race between wait and signal
     // handle is the OS handle for process actions, used only in
     // modeHandle.
     //
@@ -79,7 +79,7 @@ internal static ж<Process> newPIDProcess(nint pid) {
         Pid: pid,
         mode: modePID
     ));
-    runtime.SetFinalizer(p, (ж<Process>).Release);
+    Δruntime.SetFinalizer(p, (Func<ж<Process>, error>)(Release));
     return p;
 }
 
@@ -89,9 +89,9 @@ internal static ж<Process> newHandleProcess(nint pid, uintptr handle) {
         mode: modeHandle,
         handle: handle
     ));
-    (~p).state.Store(1);
+    p.of(Process.Ꮡstate).Store(1);
     // 1 persistent reference
-    runtime.SetFinalizer(p, (ж<Process>).Release);
+    Δruntime.SetFinalizer(p, (Func<ж<Process>, error>)(Release));
     return p;
 }
 
@@ -102,37 +102,41 @@ internal static ж<Process> newDoneProcess(nint pid) {
     ));
     // N.B Since we set statusDone, handle will never actually be
     // used, so its value doesn't matter.
-    (~p).state.Store(((uint64)statusDone));
+    p.of(Process.Ꮡstate).Store((uint64)statusDone);
     // No persistent reference, as there is no handle.
-    runtime.SetFinalizer(p, (ж<Process>).Release);
+    Δruntime.SetFinalizer(p, (Func<ж<Process>, error>)(Release));
     return p;
 }
 
-[GoRecv] internal static (uintptr, processStatus) handleTransientAcquire(this ref Process p) {
+internal static (uintptr, processStatus) handleTransientAcquire(this ж<Process> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     if (p.mode != modeHandle) {
         throw panic("handleTransientAcquire called in invalid mode");
     }
     while (ᐧ) {
-        var refs = p.state.Load();
-        if ((uint64)(refs & processStatusMask) != 0) {
-            return (0, ((processStatus)((uint64)(refs & processStatusMask))));
+        var refs = Ꮡp.of(Process.Ꮡstate).Load();
+        if ((uint64)(refs & (uint64)processStatusMask) != 0) {
+            return (0, ((processStatus)((uint64)(refs & (uint64)processStatusMask))));
         }
         var @new = refs + 1;
-        if (!p.state.CompareAndSwap(refs, @new)) {
+        if (!Ꮡp.of(Process.Ꮡstate).CompareAndSwap(refs, @new)) {
             continue;
         }
         return (p.handle, statusOK);
     }
 }
 
-[GoRecv] internal static void handleTransientRelease(this ref Process p) {
+internal static void handleTransientRelease(this ж<Process> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     if (p.mode != modeHandle) {
         throw panic("handleTransientRelease called in invalid mode");
     }
     while (ᐧ) {
-        var state = p.state.Load();
-        var refs = (uint64)(state & ~processStatusMask);
-        var status = ((processStatus)((uint64)(state & processStatusMask)));
+        var state = Ꮡp.of(Process.Ꮡstate).Load();
+        var refs = (uint64)(state & ~(uint64)processStatusMask);
+        var status = ((processStatus)((uint64)(state & (uint64)processStatusMask)));
         if (refs == 0) {
             // This should never happen because
             // handleTransientRelease is always paired with
@@ -148,10 +152,10 @@ internal static ж<Process> newDoneProcess(nint pid) {
             throw panic("final release of handle without processStatus");
         }
         var @new = state - 1;
-        if (!p.state.CompareAndSwap(state, @new)) {
+        if (!Ꮡp.of(Process.Ꮡstate).CompareAndSwap(state, @new)) {
             continue;
         }
-        if ((uint64)(@new & ~processStatusMask) == 0) {
+        if ((uint64)(@new & ~(uint64)processStatusMask) == 0) {
             p.closeHandle();
         }
         return;
@@ -163,13 +167,15 @@ internal static ж<Process> newDoneProcess(nint pid) {
 //
 // Returns the status prior to this call. If this is not statusOK, then the
 // reference was not dropped or status changed.
-[GoRecv] internal static processStatus handlePersistentRelease(this ref Process p, processStatus reason) {
+internal static processStatus handlePersistentRelease(this ж<Process> Ꮡp, processStatus reason) {
+    ref var p = ref Ꮡp.Value;
+
     if (p.mode != modeHandle) {
         throw panic("handlePersistentRelease called in invalid mode");
     }
     while (ᐧ) {
-        var refs = p.state.Load();
-        var status = ((processStatus)((uint64)(refs & processStatusMask)));
+        var refs = Ꮡp.of(Process.Ꮡstate).Load();
+        var status = ((processStatus)((uint64)(refs & (uint64)processStatusMask)));
         if (status != statusOK) {
             // Both Release and successful Wait will drop the
             // Process' persistent reference on the handle. We
@@ -183,25 +189,29 @@ internal static ж<Process> newDoneProcess(nint pid) {
             // persistent reference always sets a status.
             throw panic("release of handle with refcount 0");
         }
-        var @new = (uint64)((refs - 1) | ((uint64)reason));
-        if (!p.state.CompareAndSwap(refs, @new)) {
+        var @new = (uint64)((refs - 1) | (uint64)reason);
+        if (!Ꮡp.of(Process.Ꮡstate).CompareAndSwap(refs, @new)) {
             continue;
         }
-        if ((uint64)(@new & ~processStatusMask) == 0) {
+        if ((uint64)(@new & ~(uint64)processStatusMask) == 0) {
             p.closeHandle();
         }
         return status;
     }
 }
 
-[GoRecv] internal static processStatus pidStatus(this ref Process p) {
+internal static processStatus pidStatus(this ж<Process> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     if (p.mode != modePID) {
         throw panic("pidStatus called in invalid mode");
     }
-    return ((processStatus)p.state.Load());
+    return ((processStatus)Ꮡp.of(Process.Ꮡstate).Load());
 }
 
-[GoRecv] internal static void pidDeactivate(this ref Process p, processStatus reason) {
+internal static void pidDeactivate(this ж<Process> Ꮡp, processStatus reason) {
+    ref var p = ref Ꮡp.Value;
+
     if (p.mode != modePID) {
         throw panic("pidDeactivate called in invalid mode");
     }
@@ -213,7 +223,7 @@ internal static ж<Process> newDoneProcess(nint pid) {
     // racing Release and Wait, Wait may successfully wait on the process,
     // returning the wait status, while future calls error with "process
     // released" rather than "process done".
-    p.state.CompareAndSwap(0, ((uint64)reason));
+    Ꮡp.of(Process.Ꮡstate).CompareAndSwap(0, (uint64)reason);
 }
 
 // ProcAttr holds the attributes that will be applied to a new process
@@ -239,7 +249,7 @@ internal static ж<Process> newDoneProcess(nint pid) {
     // Note that setting this field means that your program
     // may not execute properly or even compile on some
     // operating systems.
-    public ж<syscall_package.SysProcAttr> Sys;
+    public ж<syscall.SysProcAttr> Sys;
 }
 
 // A Signal represents an operating system signal.
@@ -287,7 +297,7 @@ public static (ж<Process>, error) FindProcess(nint pid) {
 //
 // If there is an error, it will be of type [*PathError].
 public static (ж<Process>, error) StartProcess(@string name, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
-    ref var attr = ref Ꮡattr.val;
+    ref var attr = ref Ꮡattr.Value;
 
     testlog.Open(name);
     return startProcess(name, argv, Ꮡattr);
@@ -296,7 +306,9 @@ public static (ж<Process>, error) StartProcess(@string name, slice<@string> arg
 // Release releases any resources associated with the [Process] p,
 // rendering it unusable in the future.
 // Release only needs to be called if [Process.Wait] is not.
-[GoRecv] public static error Release(this ref Process p) {
+public static error Release(this ж<Process> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     // Note to future authors: the Release API is cursed.
     //
     // On Unix and Plan 9, Release sets p.Pid = -1. This is the only part of the
@@ -313,14 +325,16 @@ public static (ж<Process>, error) StartProcess(@string name, slice<@string> arg
     // On Unix and Plan 9, calling Release a second time has no effect.
     //
     // On Windows, calling Release a second time returns EINVAL.
-    return p.release();
+    return Ꮡp.release();
 }
 
 // Kill causes the [Process] to exit immediately. Kill does not wait until
 // the Process has actually exited. This only kills the Process itself,
 // not any other processes it may have started.
-[GoRecv] public static error Kill(this ref Process p) {
-    return p.kill();
+public static error Kill(this ж<Process> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    return Ꮡp.kill();
 }
 
 // Wait waits for the [Process] to exit, and then returns a
@@ -328,14 +342,18 @@ public static (ж<Process>, error) StartProcess(@string name, slice<@string> arg
 // Wait releases any resources associated with the Process.
 // On most operating systems, the Process must be a child
 // of the current process or an error will be returned.
-[GoRecv] public static (ж<ProcessState>, error) Wait(this ref Process p) {
-    return p.wait();
+public static (ж<ProcessState>, error) Wait(this ж<Process> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    return Ꮡp.wait();
 }
 
 // Signal sends a signal to the [Process].
 // Sending [Interrupt] on Windows is not implemented.
-[GoRecv] public static error Signal(this ref Process p, ΔSignal sig) {
-    return p.signal(sig);
+public static error Signal(this ж<Process> Ꮡp, ΔSignal sig) {
+    ref var p = ref Ꮡp.Value;
+
+    return Ꮡp.signal(sig);
 }
 
 // UserTime returns the user CPU time of the exited process and its children.

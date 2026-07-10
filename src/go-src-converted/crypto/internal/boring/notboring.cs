@@ -5,11 +5,11 @@
 namespace go.crypto.@internal;
 
 using crypto = crypto_package;
-using cipher = crypto.cipher_package;
-using sig = crypto.@internal.boring.sig_package;
+using cipher = go.crypto.cipher_package;
+using sig = go.crypto.@internal.boring.sig_package;
 using hash = hash_package;
-using crypto;
-using crypto.@internal.boring;
+using go.crypto;
+using go.crypto.@internal.boring;
 
 partial class boring_package {
 
@@ -29,9 +29,9 @@ public static void Unreachable() {
 public static void UnreachableExceptTests() {
 }
 
-[GoType("num:nint")] partial struct randReader;
+[GoType("num:nint")] public partial struct randReader;
 
-internal static (nint, error) Read(this randReader _, slice<byte> b) {
+public static (nint, error) Read(this randReader _, slice<byte> b) {
     throw panic("boringcrypto: not available");
 }
 
@@ -115,13 +115,13 @@ public static (ж<PublicKeyECDSA>, error) NewPublicKeyECDSA(@string curve, BigIn
 }
 
 public static (slice<byte>, error) SignMarshalECDSA(ж<PrivateKeyECDSA> Ꮡpriv, slice<byte> hash) {
-    ref var priv = ref Ꮡpriv.val;
+    ref var priv = ref Ꮡpriv.Value;
 
     throw panic("boringcrypto: not available");
 }
 
 public static bool VerifyECDSA(ж<PublicKeyECDSA> Ꮡpub, slice<byte> hash, slice<byte> sig) {
-    ref var pub = ref Ꮡpub.val;
+    ref var pub = ref Ꮡpub.Value;
 
     throw panic("boringcrypto: not available");
 }
@@ -135,37 +135,37 @@ public static bool VerifyECDSA(ж<PublicKeyECDSA> Ꮡpub, slice<byte> hash, slic
 }
 
 public static (slice<byte>, error) DecryptRSAOAEP(hash.Hash h, hash.Hash mgfHash, ж<PrivateKeyRSA> Ꮡpriv, slice<byte> ciphertext, slice<byte> label) {
-    ref var priv = ref Ꮡpriv.val;
+    ref var priv = ref Ꮡpriv.Value;
 
     throw panic("boringcrypto: not available");
 }
 
 public static (slice<byte>, error) DecryptRSAPKCS1(ж<PrivateKeyRSA> Ꮡpriv, slice<byte> ciphertext) {
-    ref var priv = ref Ꮡpriv.val;
+    ref var priv = ref Ꮡpriv.Value;
 
     throw panic("boringcrypto: not available");
 }
 
 public static (slice<byte>, error) DecryptRSANoPadding(ж<PrivateKeyRSA> Ꮡpriv, slice<byte> ciphertext) {
-    ref var priv = ref Ꮡpriv.val;
+    ref var priv = ref Ꮡpriv.Value;
 
     throw panic("boringcrypto: not available");
 }
 
 public static (slice<byte>, error) EncryptRSAOAEP(hash.Hash h, hash.Hash mgfHash, ж<PublicKeyRSA> Ꮡpub, slice<byte> msg, slice<byte> label) {
-    ref var pub = ref Ꮡpub.val;
+    ref var pub = ref Ꮡpub.Value;
 
     throw panic("boringcrypto: not available");
 }
 
 public static (slice<byte>, error) EncryptRSAPKCS1(ж<PublicKeyRSA> Ꮡpub, slice<byte> msg) {
-    ref var pub = ref Ꮡpub.val;
+    ref var pub = ref Ꮡpub.Value;
 
     throw panic("boringcrypto: not available");
 }
 
 public static (slice<byte>, error) EncryptRSANoPadding(ж<PublicKeyRSA> Ꮡpub, slice<byte> msg) {
-    ref var pub = ref Ꮡpub.val;
+    ref var pub = ref Ꮡpub.Value;
 
     throw panic("boringcrypto: not available");
 }
@@ -193,25 +193,25 @@ public static (ж<PublicKeyRSA>, error) NewPublicKeyRSA(BigInt N, BigInt E) {
 }
 
 public static (slice<byte>, error) SignRSAPKCS1v15(ж<PrivateKeyRSA> Ꮡpriv, crypto.Hash h, slice<byte> hashed) {
-    ref var priv = ref Ꮡpriv.val;
+    ref var priv = ref Ꮡpriv.Value;
 
     throw panic("boringcrypto: not available");
 }
 
 public static (slice<byte>, error) SignRSAPSS(ж<PrivateKeyRSA> Ꮡpriv, crypto.Hash h, slice<byte> hashed, nint saltLen) {
-    ref var priv = ref Ꮡpriv.val;
+    ref var priv = ref Ꮡpriv.Value;
 
     throw panic("boringcrypto: not available");
 }
 
 public static error VerifyRSAPKCS1v15(ж<PublicKeyRSA> Ꮡpub, crypto.Hash h, slice<byte> hashed, slice<byte> sig) {
-    ref var pub = ref Ꮡpub.val;
+    ref var pub = ref Ꮡpub.Value;
 
     throw panic("boringcrypto: not available");
 }
 
 public static error VerifyRSAPSS(ж<PublicKeyRSA> Ꮡpub, crypto.Hash h, slice<byte> hashed, slice<byte> sig, nint saltLen) {
-    ref var pub = ref Ꮡpub.val;
+    ref var pub = ref Ꮡpub.Value;
 
     throw panic("boringcrypto: not available");
 }
@@ -222,10 +222,7 @@ public static error VerifyRSAPSS(ж<PublicKeyRSA> Ꮡpub, crypto.Hash h, slice<b
 [GoType] partial struct PrivateKeyECDH {
 }
 
-public static (slice<byte>, error) ECDH(ж<PrivateKeyECDH> Ꮡ, ж<PublicKeyECDH> Ꮡ) {
-    ref var  = ref Ꮡ.val;
-    ref var  = ref Ꮡ.val;
-
+public static (slice<byte>, error) ECDH(ж<PrivateKeyECDH> _Δp0, ж<PublicKeyECDH> _Δp1) {
     throw panic("boringcrypto: not available");
 }
 
@@ -233,11 +230,11 @@ public static (ж<PrivateKeyECDH>, slice<byte>, error) GenerateKeyECDH(@string _
     throw panic("boringcrypto: not available");
 }
 
-public static (ж<PrivateKeyECDH>, error) NewPrivateKeyECDH(@string _, slice<byte> _) {
+public static (ж<PrivateKeyECDH>, error) NewPrivateKeyECDH(@string _Δp0, slice<byte> _Δp1) {
     throw panic("boringcrypto: not available");
 }
 
-public static (ж<PublicKeyECDH>, error) NewPublicKeyECDH(@string _, slice<byte> _) {
+public static (ж<PublicKeyECDH>, error) NewPublicKeyECDH(@string _Δp0, slice<byte> _Δp1) {
     throw panic("boringcrypto: not available");
 }
 

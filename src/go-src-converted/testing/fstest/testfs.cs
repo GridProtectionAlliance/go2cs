@@ -8,15 +8,17 @@ namespace go.testing;
 using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
-using fs = io.fs_package;
+using fs = go.io.fs_package;
 using path = path_package;
 using reflect = reflect_package;
 using slices = slices_package;
 using strings = strings_package;
-using iotest = testing.iotest_package;
-using io;
-using ꓸꓸꓸ@string = Span<@string>;
+using iotest = go.testing.iotest_package;
+using go.io;
+using go.testing;
+using time = time_package;
 using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class fstest_package {
 
@@ -36,7 +38,7 @@ partial class fstest_package {
 //	if err := fstest.TestFS(myFS, "file/that/should/be/present"); err != nil {
 //		t.Fatal(err)
 //	}
-public static error TestFS(fs.FS fsys, params ꓸꓸꓸ@string expectedʗp) {
+public static error TestFS(fs.FS fsys, params ꓸꓸꓸstring expectedʗp) {
     var expected = expectedʗp.slice();
 
     {
@@ -55,7 +57,7 @@ public static error TestFS(fs.FS fsys, params ꓸꓸꓸ@string expectedʗp) {
                         subExpected = append(subExpected, nameΔ1[(int)(len(dirSlash))..]);
                     }
                 }
-                (sub, err) = fs.Sub(fsys, dir);
+                var (sub, err) = fs.Sub(fsys, dir);
                 if (err != default!) {
                     return err;
                 }
@@ -72,18 +74,19 @@ public static error TestFS(fs.FS fsys, params ꓸꓸꓸ@string expectedʗp) {
     return default!;
 }
 
-internal static error testFS(fs.FS fsys, params ꓸꓸꓸ@string expectedʗp) {
+internal static error testFS(fs.FS fsys, params ꓸꓸꓸstring expectedʗp) {
     var expected = expectedʗp.slice();
 
-    var t = new fsTester(fsys: fsys);
-    t.checkDir("."u8);
-    t.checkOpen("."u8);
+    ref var t = ref heap<fsTester>(out var Ꮡt);
+    t = new fsTester(fsys: fsys);
+    Ꮡt.checkDir("."u8);
+    Ꮡt.checkOpen("."u8);
     var found = new map<@string, bool>();
     foreach (var (_, dir) in t.dirs) {
         found[dir] = true;
     }
-    foreach (var (_, file) in t.files) {
-        found[file] = true;
+    foreach (var (_, @file) in t.files) {
+        found[@file] = true;
     }
     delete(found, "."u8);
     if (len(expected) == 0 && len(found) > 0) {
@@ -93,7 +96,7 @@ internal static error testFS(fs.FS fsys, params ꓸꓸꓸ@string expectedʗp) {
                 list = append(list, k);
             }
         }
-        slices.Sort(list);
+        slices.Sort<slice<@string>, @string>(list);
         if (len(list) > 15) {
             list = append(list[..10], "..."u8);
         }
@@ -112,7 +115,7 @@ internal static error testFS(fs.FS fsys, params ꓸꓸꓸ@string expectedʗp) {
 
 // An fsTester holds state for running the test.
 [GoType] partial struct fsTester {
-    internal io.fs_package.FS fsys;
+    internal fs.FS fsys;
     internal slice<error> errors;
     internal slice<@string> dirs;
     internal slice<@string> files;
@@ -126,7 +129,7 @@ internal static error testFS(fs.FS fsys, params ꓸꓸꓸ@string expectedʗp) {
 }
 
 [GoRecv] internal static fs.ReadDirFile openDir(this ref fsTester t, @string dir) {
-    (f, err) = t.fsys.Open(dir);
+    var (f, err) = t.fsys.Open(dir);
     if (err != default!) {
         t.errorf("%s: Open: %w"u8, dir, err);
         return default!;
@@ -142,14 +145,16 @@ internal static error testFS(fs.FS fsys, params ꓸꓸꓸ@string expectedʗp) {
 
 // checkDir checks the directory dir, which is expected to exist
 // (it is either the root or was found in a directory listing with IsDir true).
-[GoRecv] internal static void checkDir(this ref fsTester t, @string dir) => func((defer, _) => {
+internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) => func((defer, recover) => {
+    ref var t = ref Ꮡt.Value;
+
     // Read entire directory.
     t.dirs = append(t.dirs, dir);
     var d = t.openDir(dir);
     if (d == default!) {
         return;
     }
-    (list, err) = d.ReadDir(-1);
+    var (list, err) = d.ReadDir(-1);
     if (err != default!) {
         d.Close();
         t.errorf("%s: ReadDir(-1): %w"u8, dir, err);
@@ -183,15 +188,15 @@ internal static error testFS(fs.FS fsys, params ꓸꓸꓸ@string expectedʗp) {
 
         @string path = prefix + name;
         t.checkStat(path, info);
-        t.checkOpen(path);
+        Ꮡt.checkOpen(path);
         if (info.IsDir()){
-            t.checkDir(path);
+            Ꮡt.checkDir(path);
         } else {
-            t.checkFile(path);
+            Ꮡt.checkFile(path);
         }
     }
     // Check ReadDir(-1) at EOF.
-    (list2, err) = d.ReadDir(-1);
+    (var list2, err) = d.ReadDir(-1);
     if (len(list2) > 0 || err != default!) {
         d.Close();
         t.errorf("%s: ReadDir(-1) at EOF = %d entries, %w, wanted 0 entries, nil"u8, dir, len(list2), err);
@@ -220,13 +225,13 @@ internal static error testFS(fs.FS fsys, params ꓸꓸꓸ@string expectedʗp) {
         }
     }
     var dʗ1 = d;
-    defer(dʗ1.Close);
+    defer(() => dʗ1.Close());
     (list2, err) = d.ReadDir(-1);
     if (err != default!) {
         t.errorf("%s: second Open+ReadDir(-1): %w"u8, dir, err);
         return;
     }
-    t.checkDirList(dir, "first Open+ReadDir(-1) vs second Open+ReadDir(-1)"u8, list, list2);
+    Ꮡt.checkDirList(dir, "first Open+ReadDir(-1) vs second Open+ReadDir(-1)"u8, list, list2);
     // Reopen directory, read a third time in pieces, make sure contents match.
     {
         d = t.openDir(dir); if (d == default!) {
@@ -234,24 +239,24 @@ internal static error testFS(fs.FS fsys, params ꓸꓸꓸ@string expectedʗp) {
         }
     }
     var dʗ2 = d;
-    defer(dʗ2.Close);
+    defer(() => dʗ2.Close());
     list2 = default!;
     while (ᐧ) {
         nint n = 1;
         if (len(list2) > 0) {
             n = 2;
         }
-        (frag, err) = d.ReadDir(n);
+        var (frag, errΔ2) = d.ReadDir(n);
         if (len(frag) > n) {
             t.errorf("%s: third Open: ReadDir(%d) after %d: %d entries (too many)"u8, dir, n, len(list2), len(frag));
             return;
         }
         list2 = append(list2, frag.ꓸꓸꓸ);
-        if (AreEqual(err, io.EOF)) {
+        if (AreEqual(errΔ2, io.EOF)) {
             break;
         }
-        if (err != default!) {
-            t.errorf("%s: third Open: ReadDir(%d) after %d: %w"u8, dir, n, len(list2), err);
+        if (errΔ2 != default!) {
+            t.errorf("%s: third Open: ReadDir(%d) after %d: %w"u8, dir, n, len(list2), errΔ2);
             return;
         }
         if (n == 0) {
@@ -259,19 +264,19 @@ internal static error testFS(fs.FS fsys, params ꓸꓸꓸ@string expectedʗp) {
             return;
         }
     }
-    t.checkDirList(dir, "first Open+ReadDir(-1) vs third Open+ReadDir(1,2) loop"u8, list, list2);
+    Ꮡt.checkDirList(dir, "first Open+ReadDir(-1) vs third Open+ReadDir(1,2) loop"u8, list, list2);
     // If fsys has ReadDir, check that it matches and is sorted.
     {
         var (fsys, ok) = t.fsys._<fs.ReadDirFS>(ᐧ); if (ok) {
-            (list2Δ1, errΔ2) = fsys.ReadDir(dir);
-            if (errΔ2 != default!) {
-                t.errorf("%s: fsys.ReadDir: %w"u8, dir, errΔ2);
+            var (list2Δ1, errΔ3) = fsys.ReadDir(dir);
+            if (errΔ3 != default!) {
+                t.errorf("%s: fsys.ReadDir: %w"u8, dir, errΔ3);
                 return;
             }
-            t.checkDirList(dir, "first Open+ReadDir(-1) vs fsys.ReadDir"u8, list, list2Δ1);
-            for (nint iΔ1 = 0; iΔ1 + 1 < len(list2Δ1); iΔ1++) {
-                if (list2Δ1[iΔ1].Name() >= list2Δ1[iΔ1 + 1].Name()) {
-                    t.errorf("%s: fsys.ReadDir: list not sorted: %s before %s"u8, dir, list2Δ1[iΔ1].Name(), list2Δ1[iΔ1 + 1].Name());
+            Ꮡt.checkDirList(dir, "first Open+ReadDir(-1) vs fsys.ReadDir"u8, list, list2Δ1);
+            for (nint i = 0; i + 1 < len(list2Δ1); i++) {
+                if (list2Δ1[i].Name() >= list2Δ1[i + 1].Name()) {
+                    t.errorf("%s: fsys.ReadDir: list not sorted: %s before %s"u8, dir, list2Δ1[i].Name(), list2Δ1[i + 1].Name());
                 }
             }
         }
@@ -282,7 +287,7 @@ internal static error testFS(fs.FS fsys, params ꓸꓸꓸ@string expectedʗp) {
         t.errorf("%s: fs.ReadDir: %w"u8, dir, err);
         return;
     }
-    t.checkDirList(dir, "first Open+ReadDir(-1) vs fs.ReadDir"u8, list, list2);
+    Ꮡt.checkDirList(dir, "first Open+ReadDir(-1) vs fs.ReadDir"u8, list, list2);
     for (nint i = 0; i + 1 < len(list2); i++) {
         if (list2[i].Name() >= list2[i + 1].Name()) {
             t.errorf("%s: fs.ReadDir: list not sorted: %s before %s"u8, dir, list2[i].Name(), list2[i + 1].Name());
@@ -321,7 +326,7 @@ internal static @string formatInfo(fs.FileInfo info) {
             slice<rune> pattern = default!;
             foreach (var (j, r) in e) {
                 if (r == (rune)'*' || r == (rune)'?' || r == (rune)'\\' || r == (rune)'[' || r == (rune)'-') {
-                    pattern = append(pattern, (rune)'\\', r);
+                    pattern = append(pattern, (rune)((rune)'\\'), r);
                     continue;
                 }
                 switch ((i + j) % 5) {
@@ -330,19 +335,19 @@ internal static @string formatInfo(fs.FileInfo info) {
                     break;
                 }
                 case 1: {
-                    pattern = append(pattern, (rune)'[', r, (rune)']');
+                    pattern = append(pattern, (rune)((rune)'['), r, (rune)((rune)']'));
                     break;
                 }
                 case 2: {
-                    pattern = append(pattern, (rune)'[', r, (rune)'-', r, (rune)']');
+                    pattern = append(pattern, (rune)((rune)'['), r, (rune)((rune)'-'), r, (rune)((rune)']'));
                     break;
                 }
                 case 3: {
-                    pattern = append(pattern, (rune)'[', (rune)'\\', r, (rune)']');
+                    pattern = append(pattern, (rune)((rune)'['), (rune)((rune)'\\'), r, (rune)((rune)']'));
                     break;
                 }
                 case 4: {
-                    pattern = append(pattern, (rune)'[', (rune)'\\', r, (rune)'-', (rune)'\\', r, (rune)']');
+                    pattern = append(pattern, (rune)((rune)'['), (rune)((rune)'\\'), r, (rune)((rune)'-'), (rune)((rune)'\\'), r, (rune)((rune)']'));
                     break;
                 }}
 
@@ -354,12 +359,12 @@ internal static @string formatInfo(fs.FileInfo info) {
     // Test that malformed patterns are detected.
     // The error is likely path.ErrBadPattern but need not be.
     {
-        (_, errΔ1) = t.fsys._<fs.GlobFS>().Glob(glob + "nonexist/[]"u8); if (errΔ1 == default!) {
-            t.errorf("%s: Glob(%#q): bad pattern not detected"u8, dir, glob + "nonexist/[]"u8);
+        var (_, errΔ1) = t.fsys._<fs.GlobFS>().Glob(glob + "nonexist/[]"u8); if (errΔ1 == default!) {
+            t.errorf("%s: Glob(%#q): bad pattern not detected"u8, dir, glob + "nonexist/[]");
         }
     }
     // Try to find a letter that appears in only some of the final names.
-    var c = ((rune)(rune)'a');
+    var c = (rune)(rune)'a';
     for (; c <= (rune)'z'; c++) {
         var (have, haveNot) = (false, false);
         foreach (var (_, d) in list) {
@@ -383,7 +388,7 @@ internal static @string formatInfo(fs.FileInfo info) {
             want = append(want, path.Join(dir, d.Name()));
         }
     }
-    (names, err) = t.fsys._<fs.GlobFS>().Glob(glob);
+    var (names, err) = t.fsys._<fs.GlobFS>().Glob(glob);
     if (err != default!) {
         t.errorf("%s: Glob(%#q): %w"u8, dir, glob, err);
         return;
@@ -391,9 +396,9 @@ internal static @string formatInfo(fs.FileInfo info) {
     if (reflect.DeepEqual(want, names)) {
         return;
     }
-    if (!slices.IsSorted(names)) {
+    if (!slices.IsSorted<slice<@string>, @string>(names)) {
         t.errorf("%s: Glob(%#q): unsorted output:\n%s"u8, dir, glob, strings.Join(names, "\n"u8));
-        slices.Sort(names);
+        slices.Sort<slice<@string>, @string>(names);
     }
     slice<@string> problems = default!;
     while (len(want) > 0 || len(names) > 0) {
@@ -420,13 +425,13 @@ internal static @string formatInfo(fs.FileInfo info) {
 // checkStat checks that a direct stat of path matches entry,
 // which was found in the parent's directory listing.
 [GoRecv] internal static void checkStat(this ref fsTester t, @string path, fs.DirEntry entry) {
-    (file, err) = t.fsys.Open(path);
+    var (@file, err) = t.fsys.Open(path);
     if (err != default!) {
         t.errorf("%s: Open: %w"u8, path, err);
         return;
     }
-    (info, err) = file.Stat();
-    file.Close();
+    (var info, err) = @file.Stat();
+    @file.Close();
     if (err != default!) {
         t.errorf("%s: Stat: %w"u8, path, err);
         return;
@@ -437,7 +442,7 @@ internal static @string formatInfo(fs.FileInfo info) {
     if (fentry != fientry && (fs.FileMode)(entry.Type() & fs.ModeSymlink) == 0) {
         t.errorf("%s: mismatch:\n\tentry = %s\n\tfile.Stat() = %s"u8, path, fentry, fientry);
     }
-    (einfo, err) = entry.Info();
+    (var einfo, err) = entry.Info();
     if (err != default!) {
         t.errorf("%s: entry.Info: %w"u8, path, err);
         return;
@@ -457,7 +462,7 @@ internal static @string formatInfo(fs.FileInfo info) {
         }
     }
     // Stat should be the same as Open+Stat, even for symlinks.
-    (info2, err) = fs.Stat(t.fsys, path);
+    (var info2, err) = fs.Stat(t.fsys, path);
     if (err != default!) {
         t.errorf("%s: fs.Stat: %w"u8, path, err);
         return;
@@ -468,14 +473,14 @@ internal static @string formatInfo(fs.FileInfo info) {
     }
     {
         var (fsys, ok) = t.fsys._<fs.StatFS>(ᐧ); if (ok) {
-            (info2Δ1, errΔ1) = fsys.Stat(path);
+            var (info2Δ1, errΔ1) = fsys.Stat(path);
             if (errΔ1 != default!) {
                 t.errorf("%s: fsys.Stat: %w"u8, path, errΔ1);
                 return;
             }
-            @string finfo2 = formatInfo(info2Δ1);
-            if (finfo2 != finfo) {
-                t.errorf("%s: fsys.Stat(...) = %s\n\twant %s"u8, path, finfo2, finfo);
+            @string finfo2Δ1 = formatInfo(info2Δ1);
+            if (finfo2Δ1 != finfo) {
+                t.errorf("%s: fsys.Stat(...) = %s\n\twant %s"u8, path, finfo2Δ1, finfo);
             }
         }
     }
@@ -483,14 +488,16 @@ internal static @string formatInfo(fs.FileInfo info) {
 
 // checkDirList checks that two directory lists contain the same files and file info.
 // The order of the lists need not match.
-[GoRecv] internal static void checkDirList(this ref fsTester t, @string dir, @string desc, slice<fs.DirEntry> list1, slice<fs.DirEntry> list2) {
-    var old = new fs.DirEntry();
+internal static void checkDirList(this ж<fsTester> Ꮡt, @string dir, @string desc, slice<fs.DirEntry> list1, slice<fs.DirEntry> list2) {
+    ref var t = ref Ꮡt.Value;
+
+    var old = new map<@string, fs.DirEntry>();
     var checkMode = (fs.DirEntry entry) => {
         if (entry.IsDir() != ((fs.FileMode)(entry.Type() & fs.ModeDir) != 0)) {
             if (entry.IsDir()){
-                t.errorf("%s: ReadDir returned %s with IsDir() = true, Type() & ModeDir = 0"u8, dir, entry.Name());
+                Ꮡt.Value.errorf("%s: ReadDir returned %s with IsDir() = true, Type() & ModeDir = 0"u8, dir, entry.Name());
             } else {
-                t.errorf("%s: ReadDir returned %s with IsDir() = false, Type() & ModeDir = ModeDir"u8, dir, entry.Name());
+                Ꮡt.Value.errorf("%s: ReadDir returned %s with IsDir() = false, Type() & ModeDir = ModeDir"u8, dir, entry.Name());
             }
         }
     };
@@ -507,7 +514,7 @@ internal static @string formatInfo(fs.FileInfo info) {
             continue;
         }
         if (formatEntry(entry1) != formatEntry(entry2)) {
-            diffs = append(diffs, "- "u8 + formatEntry(entry1), "+ "u8 + formatEntry(entry2));
+            diffs = append(diffs, "- "u8 + formatEntry(entry1), "+ " + formatEntry(entry2));
         }
         delete(old, entry2.Name());
     }
@@ -527,23 +534,25 @@ internal static @string formatInfo(fs.FileInfo info) {
 }
 
 // checkFile checks that basic file reading works correctly.
-[GoRecv] internal static void checkFile(this ref fsTester t, @string file) => func((defer, _) => {
-    t.files = append(t.files, file);
+internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) => func((defer, recover) => {
+    ref var t = ref Ꮡt.Value;
+
+    t.files = append(t.files, @file);
     // Read entire file.
-    (f, err) = t.fsys.Open(file);
+    var (f, err) = t.fsys.Open(@file);
     if (err != default!) {
-        t.errorf("%s: Open: %w"u8, file, err);
+        t.errorf("%s: Open: %w"u8, @file, err);
         return;
     }
-    (data, err) = io.ReadAll(f);
+    (var data, err) = io.ReadAll(new fs_FileᴠReader(f));
     if (err != default!) {
         f.Close();
-        t.errorf("%s: Open+ReadAll: %w"u8, file, err);
+        t.errorf("%s: Open+ReadAll: %w"u8, @file, err);
         return;
     }
     {
         var errΔ1 = f.Close(); if (errΔ1 != default!) {
-            t.errorf("%s: Close: %w"u8, file, errΔ1);
+            t.errorf("%s: Close: %w"u8, @file, errΔ1);
         }
     }
     // Check that closing twice doesn't crash.
@@ -552,65 +561,66 @@ internal static @string formatInfo(fs.FileInfo info) {
     // Check that ReadFile works if present.
     {
         var (fsys, ok) = t.fsys._<fs.ReadFileFS>(ᐧ); if (ok) {
-            (data2Δ1, errΔ2) = fsys.ReadFile(file);
+            var (data2Δ1, errΔ2) = fsys.ReadFile(@file);
             if (errΔ2 != default!) {
-                t.errorf("%s: fsys.ReadFile: %w"u8, file, errΔ2);
+                t.errorf("%s: fsys.ReadFile: %w"u8, @file, errΔ2);
                 return;
             }
-            t.checkFileRead(file, "ReadAll vs fsys.ReadFile"u8, data, data2Δ1);
+            t.checkFileRead(@file, "ReadAll vs fsys.ReadFile"u8, data, data2Δ1);
             // Modify the data and check it again. Modifying the
             // returned byte slice should not affect the next call.
             foreach (var (i, _) in data2Δ1) {
                 data2Δ1[i]++;
             }
-            (, err) = fsys.ReadFile(file);
+            (data2Δ1, errΔ2) = fsys.ReadFile(@file);
             if (errΔ2 != default!) {
-                t.errorf("%s: second call to fsys.ReadFile: %w"u8, file, errΔ2);
+                t.errorf("%s: second call to fsys.ReadFile: %w"u8, @file, errΔ2);
                 return;
             }
-            t.checkFileRead(file, "Readall vs second fsys.ReadFile"u8, data, data2Δ1);
-            t.checkBadPath(file, "ReadFile"u8,
-                
+            t.checkFileRead(@file, "Readall vs second fsys.ReadFile"u8, data, data2Δ1);
                 var fsysʗ1 = fsys;
+            t.checkBadPath(@file, "ReadFile"u8,
                 (@string name) => {
-                    (_, errΔ3) = fsysʗ1.ReadFile(name);
+                    var (_, errΔ3) = fsysʗ1.ReadFile(name);
                     return errΔ3;
                 });
         }
     }
     // Check that fs.ReadFile works with t.fsys.
-    (data2, err) = fs.ReadFile(t.fsys, file);
+    (var data2, err) = fs.ReadFile(t.fsys, @file);
     if (err != default!) {
-        t.errorf("%s: fs.ReadFile: %w"u8, file, err);
+        t.errorf("%s: fs.ReadFile: %w"u8, @file, err);
         return;
     }
-    t.checkFileRead(file, "ReadAll vs fs.ReadFile"u8, data, data2);
+    t.checkFileRead(@file, "ReadAll vs fs.ReadFile"u8, data, data2);
     // Use iotest.TestReader to check small reads, Seek, ReadAt.
-    (f, err) = t.fsys.Open(file);
+    (f, err) = t.fsys.Open(@file);
     if (err != default!) {
-        t.errorf("%s: second Open: %w"u8, file, err);
+        t.errorf("%s: second Open: %w"u8, @file, err);
         return;
     }
     var fʗ1 = f;
-    defer(fʗ1.Close);
+    defer(() => fʗ1.Close());
     {
-        var errΔ4 = iotest.TestReader(f, data); if (errΔ4 != default!) {
-            t.errorf("%s: failed TestReader:\n\t%s"u8, file, strings.ReplaceAll(errΔ4.Error(), "\n"u8, "\n\t"u8));
+        var errΔ4 = iotest.TestReader(new fs_FileᴠReader(f), data); if (errΔ4 != default!) {
+            t.errorf("%s: failed TestReader:\n\t%s"u8, @file, strings.ReplaceAll(errΔ4.Error(), "\n"u8, "\n\t"u8));
         }
     }
 });
 
-[GoRecv] internal static void checkFileRead(this ref fsTester t, @string file, @string desc, slice<byte> data1, slice<byte> data2) {
+[GoRecv] internal static void checkFileRead(this ref fsTester t, @string @file, @string desc, slice<byte> data1, slice<byte> data2) {
     if (((@string)data1) != ((@string)data2)) {
-        t.errorf("%s: %s: different data returned\n\t%q\n\t%q"u8, file, desc, data1, data2);
+        t.errorf("%s: %s: different data returned\n\t%q\n\t%q"u8, @file, desc, data1, data2);
         return;
     }
 }
 
 // checkBadPath checks that various invalid forms of file's name cannot be opened using t.fsys.Open.
-[GoRecv] internal static void checkOpen(this ref fsTester t, @string file) {
-    t.checkBadPath(file, "Open"u8, (@string file) => {
-        (f, err) = t.fsys.Open(fileΔ1);
+internal static void checkOpen(this ж<fsTester> Ꮡt, @string @file) {
+    ref var t = ref Ꮡt.Value;
+
+    t.checkBadPath(@file, "Open"u8, (@string fileΔ1) => {
+        var (f, err) = Ꮡt.Value.fsys.Open(fileΔ1);
         if (err == default!) {
             f.Close();
         }
@@ -619,36 +629,36 @@ internal static @string formatInfo(fs.FileInfo info) {
 }
 
 // checkBadPath checks that various invalid forms of file's name cannot be opened using open.
-[GoRecv] internal static void checkBadPath(this ref fsTester t, @string file, @string desc, Func<@string, error> open) {
+[GoRecv] internal static void checkBadPath(this ref fsTester t, @string @file, @string desc, Func<@string, error> open) {
     var bad = new @string[]{
-        "/"u8 + file,
-        file + "/."u8
+        "/" + @file,
+        @file + "/."
     }.slice();
-    if (file == "."u8) {
+    if (@file == "."u8) {
         bad = append(bad, "/"u8);
     }
     {
-        nint i = strings.Index(file, "/"u8); if (i >= 0) {
+        nint i = strings.Index(@file, "/"u8); if (i >= 0) {
             bad = append(bad,
-                file[..(int)(i)] + "//" + file[(int)(i + 1)..],
-                file[..(int)(i)] + "/./" + file[(int)(i + 1)..],
-                file[..(int)(i)] + @"\" + file[(int)(i + 1)..],
-                file[..(int)(i)] + "/../" + file);
+                @file[..(int)(i)] + "//" + @file[(int)(i + 1)..],
+                @file[..(int)(i)] + "/./" + @file[(int)(i + 1)..],
+                @file[..(int)(i)] + @"\" + @file[(int)(i + 1)..],
+                @file[..(int)(i)] + "/../" + @file);
         }
     }
     {
-        nint i = strings.LastIndex(file, "/"u8); if (i >= 0) {
+        nint i = strings.LastIndex(@file, "/"u8); if (i >= 0) {
             bad = append(bad,
-                file[..(int)(i)] + "//" + file[(int)(i + 1)..],
-                file[..(int)(i)] + "/./" + file[(int)(i + 1)..],
-                file[..(int)(i)] + @"\" + file[(int)(i + 1)..],
-                file + "/../"u8 + file[(int)(i + 1)..]);
+                @file[..(int)(i)] + "//" + @file[(int)(i + 1)..],
+                @file[..(int)(i)] + "/./" + @file[(int)(i + 1)..],
+                @file[..(int)(i)] + @"\" + @file[(int)(i + 1)..],
+                @file + "/../" + @file[(int)(i + 1)..]);
         }
     }
     foreach (var (_, b) in bad) {
         {
             var err = open(b); if (err == default!) {
-                t.errorf("%s: %s(%s) succeeded, want error"u8, file, desc, b);
+                t.errorf("%s: %s(%s) succeeded, want error"u8, @file, desc, b);
             }
         }
     }

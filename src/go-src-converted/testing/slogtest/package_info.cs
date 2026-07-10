@@ -51,12 +51,11 @@ using static go.testing.slogtest_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<slice<error>, error>]
-[assembly: GoImplement<wrapper, log.slog_package.ΔHandler>]
+[assembly: GoImplement<wrapper, go.log.slog_package.ΔHandler>(Pointer = true)]
+[assembly: GoImplement<wrapper, go.log.slog_package.ΔHandler>(Promoted = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<slog.Attr}, slog.Attr}>(Inverted = true)]
 // </ImplicitConversions>
 
 namespace go.testing;

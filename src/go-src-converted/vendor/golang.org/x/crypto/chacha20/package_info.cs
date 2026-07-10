@@ -39,6 +39,7 @@ using static go.vendor.golang.org.x.crypto.chacha20_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Cipher, go.crypto.cipher_package.Stream>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

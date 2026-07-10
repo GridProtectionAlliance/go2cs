@@ -19,7 +19,7 @@ using os = os_package;
 using slices = slices_package;
 using @internal;
 using io;
-using ꓸꓸꓸ@string = Span<@string>;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class filepath_package {
 
@@ -117,9 +117,9 @@ public static slice<@string> SplitList(@string path) {
 // If there is no Separator in path, Split returns an empty dir
 // and file set to path.
 // The returned values have the property that path = dir+file.
-public static (@string dir, @string file) Split(@string path) {
+public static (@string dir, @string @file) Split(@string path) {
     @string dir = default!;
-    @string file = default!;
+    @string @file = default!;
 
     return filepathlite.Split(path);
 }
@@ -131,7 +131,7 @@ public static (@string dir, @string file) Split(@string path) {
 // an empty string.
 // On Windows, the result will only be a UNC path if the first
 // non-empty element is a UNC path.
-public static @string Join(params ꓸꓸꓸ@string elemʗp) {
+public static @string Join(params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.slice();
 
     return join(elem);
@@ -203,7 +203,7 @@ public static (@string, error) Rel(@string basepath, @string targpath) {
     if (@base == ""u8 && filepathlite.VolumeNameLen(baseVol) > 2) {
         /* isUNC */
         // Treat any targetpath matching `\\host\share` basepath as absolute path.
-        @base = ((@string)Separator);
+        @base = ((@string)(rune)Separator);
     }
     // Can't use IsAbs - `\a` and `a` are both relative in Windows.
     var baseSlashed = len(@base) > 0 && @base[0] == Separator;
@@ -273,22 +273,22 @@ public static error SkipDir = fs.SkipDir;
 // as an error by any function.
 public static error SkipAll = fs.SkipAll;
 
-public delegate error WalkFunc(@string path, fs.FileInfo info, error err);
+// type WalkFunc is a methodless func type — rendered inline as its base delegate
 
-internal static Func<@string, (os.FileInfo, error)> lstat = os.Lstat;                   // for testing
+internal static Func<@string, (fs.FileInfo, error)> lstat = os.Lstat;                   // for testing
 
 // walkDir recursively descends path, calling walkDirFn.
-internal static error walkDir(@string path, fs.DirEntry d, fs.WalkDirFunc walkDirFn) {
+internal static error walkDir(@string path, fs.DirEntry d, Func<@string, fs.DirEntry, error, error> walkDirFn) {
     {
         var errΔ1 = walkDirFn(path, d, default!); if (errΔ1 != default! || !d.IsDir()) {
             if (AreEqual(errΔ1, SkipDir) && d.IsDir()) {
                 // Successfully skipped directory.
-                 = default!;
+                errΔ1 = default!;
             }
             return errΔ1;
         }
     }
-    (dirs, err) = os.ReadDir(path);
+    var (dirs, err) = os.ReadDir(path);
     if (err != default!) {
         // Second call, to report ReadDir error.
         err = walkDirFn(path, d, err);
@@ -314,11 +314,11 @@ internal static error walkDir(@string path, fs.DirEntry d, fs.WalkDirFunc walkDi
 }
 
 // walk recursively descends path, calling walkFn.
-internal static error walk(@string path, fs.FileInfo info, WalkFunc walkFn) {
+internal static error walk(@string path, fs.FileInfo info, Func<@string, fs.FileInfo, error, error> walkFn) {
     if (!info.IsDir()) {
         return walkFn(path, info, default!);
     }
-    (names, err) = readDirNames(path);
+    var (names, err) = readDirNames(path);
     var err1 = walkFn(path, info, err);
     // If err != nil, walk can't walk into this directory.
     // err1 != nil means walkFn want walk to skip this directory or stop walking.
@@ -332,7 +332,7 @@ internal static error walk(@string path, fs.FileInfo info, WalkFunc walkFn) {
     }
     foreach (var (_, name) in names) {
         @string filename = Join(path, name);
-        (fileInfo, errΔ1) = lstat(filename);
+        var (fileInfo, errΔ1) = lstat(filename);
         if (errΔ1 != default!){
             {
                 var errΔ2 = walkFn(filename, fileInfo, errΔ1); if (errΔ2 != default! && !AreEqual(errΔ2, SkipDir)) {
@@ -340,7 +340,7 @@ internal static error walk(@string path, fs.FileInfo info, WalkFunc walkFn) {
                 }
             }
         } else {
-            err = walk(filename, fileInfo, walkFn);
+            errΔ1 = walk(filename, fileInfo, walkFn);
             if (errΔ1 != default!) {
                 if (!fileInfo.IsDir() || !AreEqual(errΔ1, SkipDir)) {
                     return errΔ1;
@@ -366,8 +366,8 @@ internal static error walk(@string path, fs.FileInfo info, WalkFunc walkFn) {
 // WalkDir calls fn with paths that use the separator character appropriate
 // for the operating system. This is unlike [io/fs.WalkDir], which always
 // uses slash separated paths.
-public static error WalkDir(@string root, fs.WalkDirFunc fn) {
-    (info, err) = os.Lstat(root);
+public static error WalkDir(@string root, Func<@string, fs.DirEntry, error, error> fn) {
+    var (info, err) = os.Lstat(root);
     if (err != default!){
         err = fn(root, default!, err);
     } else {
@@ -393,8 +393,8 @@ public static error WalkDir(@string root, fs.WalkDirFunc fn) {
 //
 // Walk is less efficient than [WalkDir], introduced in Go 1.16,
 // which avoids calling os.Lstat on every visited file or directory.
-public static error Walk(@string root, WalkFunc fn) {
-    (info, err) = os.Lstat(root);
+public static error Walk(@string root, Func<@string, fs.FileInfo, error, error> fn) {
+    var (info, err) = os.Lstat(root);
     if (err != default!){
         err = fn(root, default!, err);
     } else {
@@ -409,16 +409,16 @@ public static error Walk(@string root, WalkFunc fn) {
 // readDirNames reads the directory named by dirname and returns
 // a sorted list of directory entry names.
 internal static (slice<@string>, error) readDirNames(@string dirname) {
-    (f, err) = os.Open(dirname);
+    var (f, err) = os.Open(dirname);
     if (err != default!) {
         return (default!, err);
     }
-    (names, err) = f.Readdirnames(-1);
+    (var names, err) = f.Readdirnames(-1);
     f.Close();
     if (err != default!) {
         return (default!, err);
     }
-    slices.Sort(names);
+    slices.Sort<slice<@string>, @string>(names);
     return (names, default!);
 }
 

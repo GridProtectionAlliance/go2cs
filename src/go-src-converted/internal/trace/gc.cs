@@ -58,11 +58,11 @@ public static readonly UtilFlags UtilPerProc = 16;
 public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> events, UtilFlags flags) {
     var @out = new slice<MutatorUtil>[]{}.slice();
     nint stw = 0;
-    var ps = new perP[]{}.slice();
+    var ps = new MutatorUtilizationV2_perP[]{}.slice();
     var inGC = new map<GoID, bool>();
-    var states = new trace.GoState();
+    var states = new map<GoID, GoState>();
     var bgMark = new map<GoID, bool>();
-    var procs = new procsCount[]{}.slice();
+    var procs = new MutatorUtilizationV2_procsCount[]{}.slice();
     var seenSync = false;
     // Helpers.
     var handleSTW = (ΔRange r) => (UtilFlags)(flags & UtilSTW) != 0 && isGCSTW(r);
@@ -74,37 +74,39 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
         var ev = Ꮡ(events, i);
         lastEv = ev;
         // Process the event.
-        var exprᴛ1 = ev.Kind();
+        var exprᴛ1 = (~ev).Kind();
         if (exprᴛ1 == EventSync) {
             seenSync = true;
         }
         else if (exprᴛ1 == EventMetric) {
-            var m = ev.Metric();
-            if (m.Name != "/sched/gomaxprocs:threads"u8) {
-                break;
-            }
-            nint gomaxprocs = ((nint)m.Value.Uint64());
-            if (len(ps) > gomaxprocs) {
-                if ((UtilFlags)(flags & UtilPerProc) != 0) {
-                    // End each P's series.
-                    foreach (var (_, p) in ps[(int)(gomaxprocs)..]) {
-                        @out[p.series] = addUtil(@out[p.series], new MutatorUtil(((int64)ev.Time()), 0));
+            do {
+                var m = (~ev).Metric();
+                if (m.Name != "/sched/gomaxprocs:threads"u8) {
+                    break;
+                }
+                nint gomaxprocs = (nint)m.Value.Uint64();
+                if (len(ps) > gomaxprocs) {
+                    if ((UtilFlags)(flags & UtilPerProc) != 0) {
+                        // End each P's series.
+                        foreach (var (_, p) in ps[(int)(gomaxprocs)..]) {
+                            @out[p.series] = addUtil(@out[p.series], new MutatorUtil((int64)(~ev).Time(), 0));
+                        }
                     }
+                    ps = ps[..(int)(gomaxprocs)];
                 }
-                ps = ps[..(int)(gomaxprocs)];
-            }
-            while (len(ps) < gomaxprocs) {
-                // Start new P's series.
-                nint series = 0;
-                if ((UtilFlags)(flags & UtilPerProc) != 0 || len(@out) == 0) {
-                    series = len(@out);
-                    @out = append(@out, new MutatorUtil[]{new(((int64)ev.Time()), 1)}.slice());
+                while (len(ps) < gomaxprocs) {
+                    // Start new P's series.
+                    nint series = 0;
+                    if ((UtilFlags)(flags & UtilPerProc) != 0 || len(@out) == 0) {
+                        series = len(@out);
+                        @out = append(@out, new MutatorUtil[]{new((int64)(~ev).Time(), 1)}.slice());
+                    }
+                    ps = append(ps, new MutatorUtilizationV2_perP(series: series));
                 }
-                ps = append(ps, new perP(series: series));
-            }
-            if (len(procs) == 0 || gomaxprocs != procs[len(procs) - 1].n) {
-                procs = append(procs, new procsCount(time: ((int64)ev.Time()), n: gomaxprocs));
-            }
+                if (len(procs) == 0 || gomaxprocs != procs[len(procs) - 1].n) {
+                    procs = append(procs, new MutatorUtilizationV2_procsCount(time: (int64)(~ev).Time(), n: gomaxprocs));
+                }
+            } while (false);
         }
 
         if (len(ps) == 0) {
@@ -113,74 +115,80 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             // something else being emitted beforehand.
             continue;
         }
-        var exprᴛ2 = ev.Kind();
+        var exprᴛ2 = (~ev).Kind();
         var matchᴛ1 = false;
         if (exprᴛ2 == EventRangeActive) { matchᴛ1 = true;
-            if (seenSync) {
-                // If we've seen a sync, then we can be sure we're not finding out about
-                // something late; we have complete information after that point, and these
-                // active events will just be redundant.
-                break;
-            }
-            var r = ev.Range();
-            var matchᴛ2 = false;
-            if (handleMarkAssist(r)) {
-                if (!states[ev.Goroutine()].Executing()) {
-                    // This range is active back to the start of the trace. We're failing to account
-                    // for this since we just found out about it now. Fix up the mutator utilization.
-                    //
-                    // N.B. A trace can't start during a STW, so we don't handle it here.
-                    // If the goroutine isn't executing, then the fact that it was in mark
-                    // assist doesn't actually count.
+            do {
+                if (seenSync) {
+                    // If we've seen a sync, then we can be sure we're not finding out about
+                    // something late; we have complete information after that point, and these
+                    // active events will just be redundant.
                     break;
                 }
-                fallthrough = true;
-            }
-            if (fallthrough || !matchᴛ2 && (handleSweep(r))) { matchᴛ2 = true;
-                if ((UtilFlags)(flags & UtilPerProc) != 0) {
-                    // This G has been in a mark assist *and running on its P* since the start
-                    // of the trace.
-                    // This P has been in sweep (or mark assist, from above) in the start of the trace.
-                    //
-                    // We don't need to do anything if UtilPerProc is set. If we get an event like
-                    // this for a running P, it must show up the first time a P is mentioned. Therefore,
-                    // this P won't actually have any MutatorUtils on its list yet.
-                    //
-                    // However, if UtilPerProc isn't set, then we probably have data from other procs
-                    // and from previous events. We need to fix that up.
-                    break;
+                var r = (~ev).Range();
+                var matchᴛ2 = false;
+                if (handleMarkAssist(r)) {
+                    do {
+                        if (!states[(~ev).Goroutine()].Executing()) {
+                            // This range is active back to the start of the trace. We're failing to account
+                            // for this since we just found out about it now. Fix up the mutator utilization.
+                            //
+                            // N.B. A trace can't start during a STW, so we don't handle it here.
+                            // If the goroutine isn't executing, then the fact that it was in mark
+                            // assist doesn't actually count.
+                            break;
+                        }
+                    } while (false);
+                    fallthrough = true;
                 }
-                nint mi = 0;
-                nint pi = 0;
-                while (mi < len(@out[0])) {
-                    // Subtract out 1/gomaxprocs mutator utilization for all time periods
-                    // from the beginning of the trace until now.
-                    if (pi < len(procs) - 1 && procs[pi + 1].time < @out[0][mi].Time) {
-                        pi++;
-                        continue;
-                    }
-                    @out[0][mi].Util -= ((float64)1) / ((float64)procs[pi].n);
-                    if (@out[0][mi].Util < 0) {
-                        @out[0][mi].Util = 0;
-                    }
-                    mi++;
+                if (fallthrough || !matchᴛ2 && (handleSweep(r))) { matchᴛ2 = true;
+                    do {
+                        if ((UtilFlags)(flags & UtilPerProc) != 0) {
+                            // This G has been in a mark assist *and running on its P* since the start
+                            // of the trace.
+                            // This P has been in sweep (or mark assist, from above) in the start of the trace.
+                            //
+                            // We don't need to do anything if UtilPerProc is set. If we get an event like
+                            // this for a running P, it must show up the first time a P is mentioned. Therefore,
+                            // this P won't actually have any MutatorUtils on its list yet.
+                            //
+                            // However, if UtilPerProc isn't set, then we probably have data from other procs
+                            // and from previous events. We need to fix that up.
+                            break;
+                        }
+                        nint mi = 0;
+                        nint pi = 0;
+                        while (mi < len(@out[0])) {
+                            // Subtract out 1/gomaxprocs mutator utilization for all time periods
+                            // from the beginning of the trace until now.
+                            if (pi < len(procs) - 1 && procs[pi + 1].time < @out[0][mi].Time) {
+                                pi++;
+                                continue;
+                            }
+                            @out[0][mi].Util -= (float64)1 / (float64)procs[pi].n;
+                            if (@out[0][mi].Util < 0) {
+                                @out[0][mi].Util = 0;
+                            }
+                            mi++;
+                        }
+                    } while (false);
                 }
-            }
 
+            } while (false);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ2 == EventRangeBegin)) { matchᴛ1 = true;
-            var r = ev.Range();
+        if (fallthrough || !matchᴛ1 && exprᴛ2 == EventRangeBegin) { matchᴛ1 = true;
+            var r = (~ev).Range();
             if (handleSTW(r)){
                 // After accounting for the portion we missed, this just acts like the
                 // beginning of a new range.
                 stw++;
             } else 
             if (handleSweep(r)){
-                ps[ev.Proc()].gc++;
+                ps[(nint)((~ev).Proc())].gc++;
             } else 
             if (handleMarkAssist(r)) {
-                ps[ev.Proc()].gc++;
+                ps[(nint)((~ev).Proc())].gc++;
                 {
                     var g = r.Scope.Goroutine(); if (g != NoGoroutine) {
                         inGC[g] = true;
@@ -189,15 +197,15 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             }
         }
         else if (exprᴛ2 == EventRangeEnd) { matchᴛ1 = true;
-            var r = ev.Range();
+            var r = (~ev).Range();
             if (handleSTW(r)){
                 stw--;
             } else 
             if (handleSweep(r)){
-                ps[ev.Proc()].gc--;
+                ps[(nint)((~ev).Proc())].gc--;
             } else 
             if (handleMarkAssist(r)) {
-                ps[ev.Proc()].gc--;
+                ps[(nint)((~ev).Proc())].gc--;
                 {
                     var g = r.Scope.Goroutine(); if (g != NoGoroutine) {
                         delete(inGC, g);
@@ -206,27 +214,29 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             }
         }
         else if (exprᴛ2 == EventStateTransition) {
-            var st = ev.StateTransition();
-            if (st.Resource.Kind != ResourceGoroutine) {
-                break;
-            }
-            var (old, @new) = st.Goroutine();
-            var g = st.Resource.Goroutine();
-            if (inGC[g] || bgMark[g]) {
-                if (!old.Executing() && @new.Executing()){
-                    // Started running while doing GC things.
-                    ps[ev.Proc()].gc++;
-                } else 
-                if (old.Executing() && !@new.Executing()) {
-                    // Stopped running while doing GC things.
-                    ps[ev.Proc()].gc--;
+            do {
+                var st = (~ev).StateTransition();
+                if (st.Resource.Kind != ResourceGoroutine) {
+                    break;
                 }
-            }
-            states[g] = @new;
+                var (old, @new) = st.Goroutine();
+                var g = st.Resource.Goroutine();
+                if (inGC[g] || bgMark[g]) {
+                    if (!old.Executing() && @new.Executing()){
+                        // Started running while doing GC things.
+                        ps[(nint)((~ev).Proc())].gc++;
+                    } else 
+                    if (old.Executing() && !@new.Executing()) {
+                        // Stopped running while doing GC things.
+                        ps[(nint)((~ev).Proc())].gc--;
+                    }
+                }
+                states[g] = @new;
+            } while (false);
         }
         else if (exprᴛ2 == EventLabel) { matchᴛ1 = true;
-            var l = ev.Label();
-            if ((UtilFlags)(flags & UtilBackground) != 0 && strings.HasPrefix(l.Label, "GC "u8) && l.Label != "GC (idle)"u8) {
+            var l = (~ev).Label();
+            if ((UtilFlags)(flags & UtilBackground) != 0 && strings.HasPrefix(l.ΔΔLabel, "GC "u8) && l.ΔΔLabel != "GC (idle)"u8) {
                 // Background mark worker.
                 //
                 // If we're in per-proc mode, we don't
@@ -234,9 +244,9 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                 // they kick all of the goroutines off
                 // that P, so don't directly
                 // contribute to goroutine latency.
-                if (!((UtilFlags)(flags & UtilPerProc) != 0 && l.Label == "GC (dedicated)"u8)) {
-                    bgMark[ev.Goroutine()] = true;
-                    ps[ev.Proc()].gc++;
+                if (!((UtilFlags)(flags & UtilPerProc) != 0 && l.ΔΔLabel == "GC (dedicated)"u8)) {
+                    bgMark[(~ev).Goroutine()] = true;
+                    ps[(nint)((~ev).Proc())].gc++;
                 }
             }
         }
@@ -256,7 +266,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                     }
                 }
             }
-            var muΔ1 = new MutatorUtil(((int64)ev.Time()), 1 - ((float64)gcPs) / ((float64)len(ps)));
+            var muΔ1 = new MutatorUtil((int64)(~ev).Time(), 1 - (float64)gcPs / (float64)len(ps));
             // Record the utilization change. (Since
             // len(ps) == len(out), we know len(out) > 0.)
             @out[0] = addUtil(@out[0], muΔ1);
@@ -264,11 +274,11 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             // Check for per-P utilization changes.
             foreach (var (iΔ2, _) in ps) {
                 var p = Ꮡ(ps, iΔ2);
-                var util = 1.0F;
+                var util = 1.0D;
                 if (stw > 0 || (~p).gc > 0) {
-                    util = 0.0F;
+                    util = 0.0D;
                 }
-                @out[(~p).series] = addUtil(@out[(~p).series], new MutatorUtil(((int64)ev.Time()), util));
+                @out[(~p).series] = addUtil(@out[(~p).series], new MutatorUtil((int64)(~ev).Time(), util));
             }
         }
     }
@@ -280,7 +290,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
     // is important to mark the end of the trace. The exact value
     // shouldn't matter since no window should extend beyond this,
     // but using 0 is symmetric with the start of the trace.
-    var mu = new MutatorUtil(((int64)lastEv.Time()), 0);
+    var mu = new MutatorUtil((int64)(~lastEv).Time(), 0);
     foreach (var (i, _) in ps) {
         @out[ps[i].series] = addUtil(@out[ps[i].series], mu);
     }
@@ -307,12 +317,12 @@ internal static slice<MutatorUtil> addUtil(slice<MutatorUtil> util, MutatorUtil 
 [GoType("num:float64")] partial struct totalUtil;
 
 internal static totalUtil totalUtilOf(float64 meanUtil, int64 dur) {
-    return ((totalUtil)(meanUtil * ((float64)dur)));
+    return ((totalUtil)(meanUtil * (float64)dur));
 }
 
 // mean returns the mean utilization over dur.
 internal static float64 mean(this totalUtil u, time.Duration dur) {
-    return ((float64)u) / ((float64)dur);
+    return (float64)u / (float64)(int64)dur;
 }
 
 // An MMUCurve is the minimum mutator utilization curve across
@@ -380,7 +390,7 @@ internal static mmuSeries newMMUSeries(slice<MutatorUtil> util) {
         numBands = len(util);
     }
     var dur = util[len(util) - 1].Time - util[0].Time;
-    var bandDur = (dur + ((int64)numBands) - 1) / ((int64)numBands);
+    var bandDur = (dur + (int64)numBands - 1) / (int64)numBands;
     if (bandDur < 1) {
         bandDur = 1;
     }
@@ -394,7 +404,7 @@ internal static mmuSeries newMMUSeries(slice<MutatorUtil> util) {
         var (startTime, endTime) = s.bandTime(i);
         var cumUtil = leftSum.advance(startTime);
         nint predIdx = leftSum.pos;
-        var minUtil = 1.0F;
+        var minUtil = 1.0D;
         for (nint iΔ1 = predIdx; iΔ1 < len(util) && util[iΔ1].Time < endTime; iΔ1++) {
             minUtil = math.Min(minUtil, util[iΔ1].Util);
         }
@@ -407,7 +417,7 @@ internal static mmuSeries newMMUSeries(slice<MutatorUtil> util) {
     int64 start = default!;
     int64 end = default!;
 
-    start = ((int64)i) * s.bandDur + s.util[0].Time;
+    start = (int64)i * s.bandDur + s.util[0].Time;
     end = start + s.bandDur;
     return (start, end);
 }
@@ -440,9 +450,9 @@ internal static void Swap(this bandUtilHeap h, nint i, nint j) {
     h = append(h, x._<bandUtil>());
 }
 
-[GoRecv] internal static unsafe any Pop(this ref bandUtilHeap h) {
-    var x = (ж<ж<bandUtilHeap>>)[len(h) - 1];
-    h = new Span<ж<bandUtilHeap>>((bandUtilHeap**), len(h) - 1);
+[GoRecv] internal static any Pop(this ref bandUtilHeap h) {
+    var x = (h)[len(h) - 1];
+    h = (h)[..(int)(len(h) - 1)];
     return x;
 }
 
@@ -474,9 +484,9 @@ internal static void Swap(this utilHeap h, nint i, nint j) {
     h = append(h, x._<UtilWindow>());
 }
 
-[GoRecv] internal static unsafe any Pop(this ref utilHeap h) {
-    var x = (ж<ж<utilHeap>>)[len(h) - 1];
-    h = new Span<ж<utilHeap>>((utilHeap**), len(h) - 1);
+[GoRecv] internal static any Pop(this ref utilHeap h) {
+    var x = (h)[len(h) - 1];
+    h = (h)[..(int)(len(h) - 1)];
     return x;
 }
 
@@ -516,7 +526,9 @@ internal static void Swap(this utilHeap h, nint i, nint j) {
 // of time.
 //
 // It returns true if further calls to addMU would be pointless.
-[GoRecv] internal static bool addMU(this ref accumulator acc, int64 time, float64 mu, time.Duration window) {
+internal static bool addMU(this ж<accumulator> Ꮡacc, int64 timeΔ1, float64 mu, time.Duration window) {
+    ref var acc = ref Ꮡacc.Value;
+
     if (mu < acc.mmu) {
         acc.mmu = mu;
     }
@@ -534,26 +546,26 @@ internal static void Swap(this utilHeap h, nint i, nint j) {
         // already in the heap and keep whichever is
         // worse.
         foreach (var (i, ui) in acc.wHeap) {
-            if (time + ((int64)window) > ui.Time && ui.Time + ((int64)window) > time) {
+            if (timeΔ1 + (int64)window > ui.Time && ui.Time + (int64)window > timeΔ1) {
                 if (ui.MutatorUtil <= mu){
                     // Keep the first window.
                     goto keep;
                 } else {
                     // Replace it with this window.
-                    heap.Remove(acc.wHeap, i);
+                    heap.Remove(new utilHeapжInterface(Ꮡacc.of(accumulator.ᏑwHeap)), i);
                     break;
                 }
             }
         }
-        heap.Push(acc.wHeap, new UtilWindow(time, mu));
+        heap.Push(new utilHeapжInterface(Ꮡacc.of(accumulator.ᏑwHeap)), new UtilWindow(timeΔ1, mu));
         if (len(acc.wHeap) > acc.nWorst) {
-            heap.Pop(acc.wHeap);
+            heap.Pop(new utilHeapжInterface(Ꮡacc.of(accumulator.ᏑwHeap)));
         }
-keep:
+keep:;
     }
     if (len(acc.wHeap) < acc.nWorst){
         // We don't have N windows yet, so keep accumulating.
-        acc.bound = 1.0F;
+        acc.bound = 1.0D;
     } else {
         // Anything above the least worst window has no effect.
         acc.bound = math.Max(acc.bound, acc.wHeap[0].MutatorUtil);
@@ -561,9 +573,10 @@ keep:
     if (acc.mud != nil) {
         if (acc.lastTime != math.MaxInt64) {
             // Update distribution.
-            acc.mud.add(acc.lastMU, mu, ((float64)(time - acc.lastTime)));
+            acc.mud.add(acc.lastMU, mu, (float64)(timeΔ1 - acc.lastTime));
         }
-        (acc.lastTime, acc.lastMU) = (time, mu);
+        acc.lastTime = timeΔ1;
+        acc.lastMU = mu;
         {
             var (_, mudBound, ok) = acc.mud.approxInvCumulativeSum(); if (ok){
                 acc.bound = math.Max(acc.bound, mudBound);
@@ -590,7 +603,7 @@ keep:
     float64 mmu = default!;
 
     ref var acc = ref heap<accumulator>(out var Ꮡacc);
-    acc = new accumulator(mmu: 1.0F, bound: 1.0F);
+    acc = new accumulator(mmu: 1.0D, bound: 1.0D);
     c.mmu(window, Ꮡacc);
     return acc.mmu;
 }
@@ -604,10 +617,10 @@ keep:
     slice<UtilWindow> worst = default!;
 
     ref var acc = ref heap<accumulator>(out var Ꮡacc);
-    acc = new accumulator(mmu: 1.0F, bound: 1.0F, nWorst: n);
+    acc = new accumulator(mmu: 1.0D, bound: 1.0D, nWorst: n);
     c.mmu(window, Ꮡacc);
     sort.Sort(sort.Reverse(acc.wHeap));
-    return (slice<UtilWindow>)(acc.wHeap);
+    return ((slice<UtilWindow>)acc.wHeap);
 }
 
 // MUD returns mutator utilization distribution quantiles for the
@@ -651,21 +664,21 @@ keep:
     int64 duration = default!;
     foreach (var (_, s) in c.series) {
         var duration1 = s.util[len(s.util) - 1].Time - s.util[0].Time;
-        if (duration1 >= ((int64)window)) {
-            duration += duration1 - ((int64)window);
+        if (duration1 >= (int64)window) {
+            duration += duration1 - (int64)window;
         }
     }
-    var qMass = ((float64)duration) * maxQ;
+    var qMass = (float64)duration * maxQ;
     // Accumulate the MUD until we have precise information for
     // everything to the left of qMass.
     ref var acc = ref heap<accumulator>(out var Ꮡacc);
-    acc = new accumulator(mmu: 1.0F, bound: 1.0F, preciseMass: qMass, mud: @new<mud>());
+    acc = new accumulator(mmu: 1.0D, bound: 1.0D, preciseMass: qMass, mud: @new<mud>());
     acc.mud.setTrackMass(qMass);
     c.mmu(window, Ꮡacc);
     // Evaluate the quantiles on the accumulated MUD.
     var @out = new slice<float64>(len(quantiles));
     foreach (var (i, _) in @out) {
-        var (mu, _) = acc.mud.invCumulativeSum(((float64)duration) * quantiles[i]);
+        var (mu, _) = acc.mud.invCumulativeSum((float64)duration * quantiles[i]);
         if (math.IsNaN(mu)) {
             // There are a few legitimate ways this can
             // happen:
@@ -687,16 +700,18 @@ keep:
     return @out;
 }
 
-[GoRecv] public static void mmu(this ref MMUCurve c, time.Duration window, ж<accumulator> Ꮡacc) {
-    ref var acc = ref Ꮡacc.val;
+[GoRecv] internal static void mmu(this ref MMUCurve c, time.Duration window, ж<accumulator> Ꮡacc) {
+    ref var acc = ref Ꮡacc.Value;
 
     if (window <= 0) {
         acc.mmu = 0;
         return;
     }
-    bandUtilHeap bandU = default!;
+    ref var bandU = ref heap<bandUtilHeap>(out var ᏑbandU);
     var windows = new slice<time.Duration>(len(c.series));
-    foreach (var (i, s) in c.series) {
+    foreach (var (i, vᴛ1) in c.series) {
+        var s = vᴛ1;
+
         windows[i] = window;
         {
             var max = ((time.Duration)(s.util[len(s.util) - 1].Time - s.util[0].Time)); if (window > max) {
@@ -711,14 +726,14 @@ keep:
         }
     }
     // Process bands from lowest utilization bound to highest.
-    heap.Init(bandU);
+    heap.Init(new bandUtilHeapжInterface(ᏑbandU));
     // Refine each band into a precise window and MMU until
     // refining the next lowest band can no longer affect the MMU
     // or windows.
     while (len(bandU) > 0 && bandU[0].utilBound < acc.bound) {
         nint i = bandU[0].series;
         c.series[i].bandMMU(bandU[0].i, windows[i], Ꮡacc);
-        heap.Pop(bandU);
+        heap.Pop(new bandUtilHeapжInterface(ᏑbandU));
     }
 }
 
@@ -728,12 +743,12 @@ keep:
     // minBands is the minimum number of bands a window can span
     // and maxBands is the maximum number of bands a window can
     // span in any alignment.
-    nint minBands = ((nint)((((int64)window) + c.bandDur - 1) / c.bandDur));
-    nint maxBands = ((nint)((((int64)window) + 2 * (c.bandDur - 1)) / c.bandDur));
+    nint minBands = (nint)(((int64)window + c.bandDur - 1) / c.bandDur);
+    nint maxBands = (nint)(((int64)window + 2 * (c.bandDur - 1)) / c.bandDur);
     if (window > 1 && maxBands < 2) {
         throw panic("maxBands < 2");
     }
-    var tailDur = ((int64)window) % c.bandDur;
+    var tailDur = (int64)window % c.bandDur;
     nint nUtil = len(c.bands) - maxBands + 1;
     if (nUtil < 0) {
         nUtil = 0;
@@ -755,20 +770,20 @@ keep:
         // worst minimum and then the rest overlaps the second
         // worst minimum.
         if (minBands == 1){
-            util += totalUtilOf(minBand, ((int64)window));
+            util += totalUtilOf(minBand, (int64)window);
         } else {
             util += totalUtilOf(minBand, c.bandDur);
-            var midBand = 0.0F;
+            var midBand = 0.0D;
             switch (ᐧ) {
-            case {} when minBand is l: {
+            case {} when minBand == l: {
                 midBand = math.Min(r1, r2);
                 break;
             }
-            case {} when minBand is r1: {
+            case {} when minBand == r1: {
                 midBand = math.Min(l, r2);
                 break;
             }
-            case {} when minBand is r2: {
+            case {} when minBand == r2: {
                 midBand = math.Min(l, r1);
                 break;
             }}
@@ -788,7 +803,7 @@ keep:
 // bandMMU computes the precise minimum mutator utilization for
 // windows with a left edge in band bandIdx.
 [GoRecv] internal static void bandMMU(this ref mmuSeries c, nint bandIdx, time.Duration window, ж<accumulator> Ꮡacc) {
-    ref var acc = ref Ꮡacc.val;
+    ref var acc = ref Ꮡacc.Value;
 
     var util = c.util;
     // We think of the mutator utilization over time as the
@@ -808,45 +823,45 @@ keep:
     // window and to the right edge of the window.
     var left = c.bands[bandIdx].integrator;
     var right = left;
-    var (time, endTime) = c.bandTime(bandIdx);
+    var (timeΔ1, endTime) = c.bandTime(bandIdx);
     {
-        var utilEnd = util[len(util) - 1].Time - ((int64)window); if (utilEnd < endTime) {
+        var utilEnd = util[len(util) - 1].Time - (int64)window; if (utilEnd < endTime) {
             endTime = utilEnd;
         }
     }
     acc.resetTime();
     while (ᐧ) {
         // Advance edges to time and time+window.
-        var mu = (right.advance(time + ((int64)window)) - left.advance(time)).mean(window);
-        if (acc.addMU(time, mu, window)) {
+        var mu = (right.advance(timeΔ1 + (int64)window) - left.advance(timeΔ1)).mean(window);
+        if (Ꮡacc.addMU(timeΔ1, mu, window)) {
             break;
         }
-        if (time == endTime) {
+        if (timeΔ1 == endTime) {
             break;
         }
         // The maximum slope of the windowed mutator
         // utilization function is 1/window, so we can always
         // advance the time by at least (mu - mmu) * window
         // without dropping below mmu.
-        var minTime = time + ((int64)((mu - acc.bound) * ((float64)window)));
+        var minTime = timeΔ1 + (int64)((mu - acc.bound) * (float64)(int64)window);
         // Advance the window to the next time where either
         // the left or right edge of the window encounters a
         // change in the utilization curve.
         {
-            var (t1, t2) = (left.next(time), right.next(time + ((int64)window)) - ((int64)window)); if (t1 < t2){
-                time = t1;
+            var (t1, t2) = (left.next(timeΔ1), right.next(timeΔ1 + (int64)window) - (int64)window); if (t1 < t2){
+                timeΔ1 = t1;
             } else {
-                time = t2;
+                timeΔ1 = t2;
             }
         }
-        if (time < minTime) {
-            time = minTime;
+        if (timeΔ1 < minTime) {
+            timeΔ1 = minTime;
         }
-        if (time >= endTime) {
+        if (timeΔ1 >= endTime) {
             // For MMUs we could stop here, but for MUDs
             // it's important that we span the entire
             // band.
-            time = endTime;
+            timeΔ1 = endTime;
         }
     }
 }
@@ -864,7 +879,7 @@ keep:
 // time. advance must be called on monotonically increasing values of
 // times.
 [GoRecv] internal static totalUtil advance(this ref integrator @in, int64 time) {
-    var util = @in.u.util;
+    var util = @in.u.Value.util;
     nint pos = @in.pos;
     // Advance pos until pos+1 is time's strict successor (making
     // pos time's non-strict predecessor).
@@ -872,8 +887,8 @@ keep:
     // Very often, this will be nearby, so we optimize that case,
     // but it may be arbitrarily far away, so we handled that
     // efficiently, too.
-    static readonly UntypedInt maxSeq = 8;
-    if (pos + maxSeq < len(util) && util[pos + maxSeq].Time > time){
+    UntypedInt maxSeq = 8;
+    if (pos + (nint)maxSeq < len(util) && util[pos + (nint)maxSeq].Time > time){
         // Nearby. Use a linear scan.
         while (pos + 1 < len(util) && util[pos + 1].Time <= time) {
             pos++;
@@ -883,7 +898,7 @@ keep:
         nint l = pos;
         nint r = len(util);
         while (l < r) {
-            nint h = ((nint)(((nuint)(l + r)) >> (int)(1)));
+            nint h = (nint)(((nuint)(l + r) >> (int)(1)));
             if (util[h].Time <= time){
                 l = h + 1;
             } else {
@@ -898,18 +913,18 @@ keep:
     if (time != util[pos].Time) {
         partial = totalUtilOf(util[pos].Util, time - util[pos].Time);
     }
-    return @in.u.sums[pos] + partial;
+    return (~@in.u).sums[pos] + partial;
 }
 
 // next returns the smallest time t' > time of a change in the
 // utilization function.
 [GoRecv] internal static int64 next(this ref integrator @in, int64 time) {
-    foreach (var (_, u) in @in.u.util[(int)(@in.pos)..]) {
+    foreach (var (_, u) in (~@in.u).util[(int)(@in.pos)..]) {
         if (u.Time > time) {
             return u.Time;
         }
     }
-    return 1 << (int)(63) - 1;
+    return 9223372036854775807L;
 }
 
 internal static bool isGCSTW(ΔRange r) {

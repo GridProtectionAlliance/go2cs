@@ -17,7 +17,7 @@ public static (bool, error) ParseBool(@string str) {
         return (false, default!);
     }
 
-    return (false, ~syntaxError("ParseBool"u8, str));
+    return (false, new NumErrorжerror(syntaxError("ParseBool"u8, str)));
 }
 
 // FormatBool returns "true" or "false" according to the value of b.
@@ -32,9 +32,9 @@ public static @string FormatBool(bool b) {
 // to dst and returns the extended buffer.
 public static slice<byte> AppendBool(slice<byte> dst, bool b) {
     if (b) {
-        return append(dst, "true"u8.ꓸꓸꓸ);
+        return append(dst, ((@string)"true"u8).ꓸꓸꓸ);
     }
-    return append(dst, "false"u8.ꓸꓸꓸ);
+    return append(dst, ((@string)"false"u8).ꓸꓸꓸ);
 }
 
 } // end strconv_package

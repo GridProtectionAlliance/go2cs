@@ -5,8 +5,10 @@
 namespace go.go;
 
 using fmt = fmt_package;
-using token = go.token_package;
+using token = global::go.go.token_package;
 using strings = strings_package;
+using global::go.go;
+using io = io_package;
 
 partial class ast_package {
 
@@ -22,9 +24,9 @@ partial class ast_package {
 
 // NewScope creates a new scope nested in the outer scope.
 public static ж<Scope> NewScope(ж<Scope> Ꮡouter) {
-    ref var outer = ref Ꮡouter.val;
+    ref var outer = ref Ꮡouter.Value;
 
-    static readonly UntypedInt n = 4; // initial scope capacity
+    UntypedInt n = 4; // initial scope capacity
     return Ꮡ(new Scope(Ꮡouter, new map<@string, ж<Object>>(n)));
 }
 
@@ -42,26 +44,28 @@ public static ж<Scope> NewScope(ж<Scope> Ꮡouter) {
 [GoRecv] public static ж<Object> /*alt*/ Insert(this ref Scope s, ж<Object> Ꮡobj) {
     ж<Object> alt = default!;
 
-    ref var obj = ref Ꮡobj.val;
+    ref var obj = ref Ꮡobj.Value;
     {
         alt = s.Objects[obj.Name]; if (alt == nil) {
-            s.Objects[obj.Name] = obj;
+            s.Objects[obj.Name] = Ꮡobj;
         }
     }
     return alt;
 }
 
 // Debugging support
-[GoRecv] public static @string String(this ref Scope s) {
-    ref var buf = ref heap(new strings_package.Builder(), out var Ꮡbuf);
-    fmt.Fprintf(~Ꮡbuf, "scope %p {"u8, s);
+public static @string String(this ж<Scope> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
+    fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "scope %p {"u8, s);
     if (s != nil && len(s.Objects) > 0) {
-        fmt.Fprintln(~Ꮡbuf);
+        fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf));
         foreach (var (_, obj) in s.Objects) {
-            fmt.Fprintf(~Ꮡbuf, "\t%s %s\n"u8, (~obj).Kind, (~obj).Name);
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "\t%s %s\n"u8, (~obj).Kind, (~obj).Name);
         }
     }
-    fmt.Fprintf(~Ꮡbuf, "}\n"u8);
+    fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "}\n"u8);
     return buf.String();
 }
 
@@ -108,7 +112,7 @@ public static ж<Object> NewObj(ObjKind kind, @string name) {
 [GoRecv] public static tokenꓸPos Pos(this ref Object obj) {
     @string name = obj.Name;
     switch (obj.Decl.type()) {
-    case Field.val d: {
+    case ж<Field> d: {
         foreach (var (_, n) in (~d).Names) {
             if ((~n).Name == name) {
                 return n.Pos();
@@ -116,13 +120,13 @@ public static ж<Object> NewObj(ObjKind kind, @string name) {
         }
         break;
     }
-    case ImportSpec.val d: {
+    case ж<ImportSpec> d: {
         if ((~d).Name != nil && (~(~d).Name).Name == name) {
             return (~d).Name.Pos();
         }
         return (~d).Path.Pos();
     }
-    case ValueSpec.val d: {
+    case ж<ValueSpec> d: {
         foreach (var (_, n) in (~d).Names) {
             if ((~n).Name == name) {
                 return n.Pos();
@@ -130,35 +134,35 @@ public static ж<Object> NewObj(ObjKind kind, @string name) {
         }
         break;
     }
-    case TypeSpec.val d: {
+    case ж<TypeSpec> d: {
         if ((~(~d).Name).Name == name) {
             return (~d).Name.Pos();
         }
         break;
     }
-    case FuncDecl.val d: {
+    case ж<FuncDecl> d: {
         if ((~(~d).Name).Name == name) {
             return (~d).Name.Pos();
         }
         break;
     }
-    case LabeledStmt.val d: {
+    case ж<LabeledStmt> d: {
         if ((~(~d).Label).Name == name) {
             return (~d).Label.Pos();
         }
         break;
     }
-    case AssignStmt.val d: {
+    case ж<AssignStmt> d: {
         foreach (var (_, x) in (~d).Lhs) {
             {
-                var (ident, isIdent) = x._<Ident.val>(ᐧ); if (isIdent && (~ident).Name == name) {
+                var (ident, isIdent) = x._<ж<Ident>>(ᐧ); if (isIdent && (~ident).Name == name) {
                     return ident.Pos();
                 }
             }
         }
         break;
     }
-    case Scope.val d: {
+    case ж<Scope> d: {
         break;
     }}
     // predeclared object - nothing to do for now
@@ -182,14 +186,14 @@ public static readonly ObjKind Fun = 5;  // function or method
 
 public static readonly ObjKind Lbl = 6;  // label
 
-internal static array<@string> objKindStrings = new runtime.SparseArray<@string>{
-    [Bad] = "bad"u8,
-    [Pkg] = "package"u8,
-    [Con] = "const"u8,
-    [Typ] = "type"u8,
-    [Var] = "var"u8,
-    [Fun] = "func"u8,
-    [Lbl] = "label"u8
+internal static array<@string> objKindStrings = new golib.SparseArray<@string>{
+    [(int)Bad] = "bad"u8,
+    [(int)Pkg] = "package"u8,
+    [(int)Con] = "const"u8,
+    [(int)Typ] = "type"u8,
+    [(int)Var] = "var"u8,
+    [(int)Fun] = "func"u8,
+    [(int)Lbl] = "label"u8
 }.array();
 
 public static @string String(this ObjKind kind) {

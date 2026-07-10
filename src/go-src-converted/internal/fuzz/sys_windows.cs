@@ -5,70 +5,75 @@ namespace go.@internal;
 
 using fmt = fmt_package;
 using os = os_package;
-using exec = os.exec_package;
-using syscall = syscall_package;
+using exec = global::go.os.exec_package;
+using Δsyscall = syscall_package;
 using @unsafe = unsafe_package;
-using os;
+using fs = global::go.io.fs_package;
+using global::go.io;
+using global::go.os;
 
 partial class fuzz_package {
 
 [GoType] partial struct sharedMemSys {
-    internal syscall_package.ΔHandle mapObj;
+    internal syscallꓸHandle mapObj;
 }
 
-internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> Ꮡf, nint size, bool removeOnClose) => func((defer, _) => {
+internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> Ꮡf, nint size, bool removeOnClose) {
     ж<sharedMem> mem = default!;
-    error err = default!;
+    heap<error>(out var Ꮡerr);
+    func((defer, recover) => {
+    ref var f = ref Ꮡf.Value;
 
-    ref var f = ref Ꮡf.val;
-    var errʗ1 = err;
-    defer(() => {
-        if (errʗ1 != default!) {
-            errʗ1 = fmt.Errorf("mapping temporary file %s: %w"u8, f.Name(), errʗ1);
+    ref var err = ref Ꮡerr.ValueSlot;
+        defer(() => {
+            if (Ꮡerr.ValueSlot != default!) {
+                Ꮡerr.ValueSlot = fmt.Errorf("mapping temporary file %s: %w"u8, Ꮡf.Value.Name(), Ꮡerr.ValueSlot);
+            }
+        });
+        // Create a file mapping object. The object itself is not shared.
+        (var mapObj, err) = Δsyscall.CreateFileMapping(
+            ((syscallꓸHandle)Ꮡf.Fd()), // fhandle
+
+            nil, // sa
+
+            Δsyscall.PAGE_READWRITE, // prot
+
+            0, // maxSizeHigh
+
+            0, // maxSizeLow
+
+            nil);
+        // name
+        if (err != default!) {
+            (mem, err) = (default!, err); return;
         }
+        // Create a view from the file mapping object.
+        var access = (uint32)((uint32)((uint32)Δsyscall.FILE_MAP_READ | (uint32)Δsyscall.FILE_MAP_WRITE));
+        (var addr, err) = Δsyscall.MapViewOfFile(
+            mapObj, // handle
+
+            access, // access
+
+            0, // offsetHigh
+
+            0, // offsetLow
+
+            (uintptr)size);
+        // length
+        if (err != default!) {
+            Δsyscall.CloseHandle(mapObj);
+            (mem, err) = (default!, err); return;
+        }
+        var region = @unsafe.Slice((ж<byte>)(uintptr)((@unsafe.Pointer)addr), size);
+        (mem, err) = (Ꮡ(new sharedMem(
+            f: Ꮡf,
+            region: region,
+            removeOnClose: removeOnClose,
+            sys: new sharedMemSys(mapObj: mapObj)
+        )), default!);
     });
-    // Create a file mapping object. The object itself is not shared.
-    var (mapObj, err) = syscall.CreateFileMapping(
-        ((syscallꓸHandle)f.Fd()), // fhandle
-
-        nil, // sa
-
-        syscall.PAGE_READWRITE, // prot
-
-        0, // maxSizeHigh
-
-        0, // maxSizeLow
-
-        nil);
-    // name
-    if (err != default!) {
-        return (default!, err);
-    }
-    // Create a view from the file mapping object.
-    var access = ((uint32)((uint32)(syscall.FILE_MAP_READ | syscall.FILE_MAP_WRITE)));
-    var (addr, err) = syscall.MapViewOfFile(
-        mapObj, // handle
-
-        access, // access
-
-        0, // offsetHigh
-
-        0, // offsetLow
-
-        ((uintptr)size));
-    // length
-    if (err != default!) {
-        syscall.CloseHandle(mapObj);
-        return (default!, err);
-    }
-    var region = @unsafe.Slice((ж<byte>)(uintptr)(((@unsafe.Pointer)addr)), size);
-    return (Ꮡ(new sharedMem(
-        f: f,
-        region: region,
-        removeOnClose: removeOnClose,
-        sys: new sharedMemSys(mapObj: mapObj)
-    )), default!);
-});
+    return (mem, Ꮡerr.ValueSlot);
+}
 
 // Close unmaps the shared memory and closes the temporary file. If this
 // sharedMem was created with sharedMemTempFile, Close also removes the file.
@@ -78,8 +83,8 @@ internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> Ꮡf
     // the temporary file.
     slice<error> errs = default!;
     errs = append(errs,
-        syscall.UnmapViewOfFile(((uintptr)new @unsafe.Pointer(Ꮡ(m.region[0])))),
-        syscall.CloseHandle(m.sys.mapObj),
+        Δsyscall.UnmapViewOfFile((uintptr)new @unsafe.Pointer(Ꮡ(m.region[0]))),
+        Δsyscall.CloseHandle(m.sys.mapObj),
         m.f.Close());
     if (m.removeOnClose) {
         errs = append(errs, os.Remove(m.f.Name()));
@@ -95,16 +100,16 @@ internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> Ꮡf
 // setWorkerComm configures communication channels on the cmd that will
 // run a worker process.
 internal static void setWorkerComm(ж<exec.Cmd> Ꮡcmd, workerComm comm) {
-    ref var cmd = ref Ꮡcmd.val;
+    ref var cmd = ref Ꮡcmd.Value;
 
     var mem = ᐸꟷ(comm.memMu);
     var memFD = (~mem).f.Fd();
     comm.memMu.ᐸꟷ(mem);
-    syscall.SetHandleInformation(((syscallꓸHandle)comm.fuzzIn.Fd()), syscall.HANDLE_FLAG_INHERIT, 1);
-    syscall.SetHandleInformation(((syscallꓸHandle)comm.fuzzOut.Fd()), syscall.HANDLE_FLAG_INHERIT, 1);
-    syscall.SetHandleInformation(((syscallꓸHandle)memFD), syscall.HANDLE_FLAG_INHERIT, 1);
+    Δsyscall.SetHandleInformation(((syscallꓸHandle)comm.fuzzIn.Fd()), Δsyscall.HANDLE_FLAG_INHERIT, 1);
+    Δsyscall.SetHandleInformation(((syscallꓸHandle)comm.fuzzOut.Fd()), Δsyscall.HANDLE_FLAG_INHERIT, 1);
+    Δsyscall.SetHandleInformation(((syscallꓸHandle)memFD), Δsyscall.HANDLE_FLAG_INHERIT, 1);
     cmd.Env = append(cmd.Env, fmt.Sprintf("GO_TEST_FUZZ_WORKER_HANDLES=%x,%x,%x"u8, comm.fuzzIn.Fd(), comm.fuzzOut.Fd(), memFD));
-    cmd.SysProcAttr = Ꮡ(new syscall.SysProcAttr(AdditionalInheritedHandles: new syscallꓸHandle[]{((syscallꓸHandle)comm.fuzzIn.Fd()), ((syscallꓸHandle)comm.fuzzOut.Fd()), ((syscallꓸHandle)memFD)}.slice()));
+    cmd.SysProcAttr = Ꮡ(new Δsyscall.SysProcAttr(AdditionalInheritedHandles: new syscallꓸHandle[]{((syscallꓸHandle)comm.fuzzIn.Fd()), ((syscallꓸHandle)comm.fuzzOut.Fd()), ((syscallꓸHandle)memFD)}.slice()));
 }
 
 // getWorkerComm returns communication channels in the worker process.
@@ -127,16 +132,16 @@ internal static (workerComm comm, error err) getWorkerComm() {
     var fuzzIn = os.NewFile(fuzzInFD, "fuzz_in"u8);
     var fuzzOut = os.NewFile(fuzzOutFD, "fuzz_out"u8);
     var memFile = os.NewFile(memFileFD, "fuzz_mem"u8);
-    (fi, err) = memFile.Stat();
+    (var fi, err) = memFile.Stat();
     if (err != default!) {
         return (new workerComm(nil), fmt.Errorf("worker checking temp file size: %w"u8, err));
     }
-    nint size = ((nint)fi.Size());
-    if (((int64)size) != fi.Size()) {
+    nint size = (nint)fi.Size();
+    if ((int64)size != fi.Size()) {
         return (new workerComm(nil), fmt.Errorf("fuzz temp file exceeds maximum size"u8));
     }
     var removeOnClose = false;
-    (mem, err) = sharedMemMapFile(memFile, size, removeOnClose);
+    (var mem, err) = sharedMemMapFile(memFile, size, removeOnClose);
     if (err != default!) {
         return (new workerComm(nil), err);
     }
@@ -153,7 +158,7 @@ internal static bool isInterruptError(error err) {
 
 // terminationSignal returns -1 and false because Windows doesn't have signals.
 internal static (osꓸSignal, bool) terminationSignal(error err) {
-    return (((syscallꓸSignal)(-1)), false);
+    return (new syscall_ΔSignalᴠΔSignal(((syscallꓸSignal)(-1))), false);
 }
 
 // isCrashSignal is not implemented because Windows doesn't have signals.

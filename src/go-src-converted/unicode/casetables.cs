@@ -11,12 +11,12 @@ partial class unicode_package {
 
 public static SpecialCase TurkishCase = _TurkishCase;
 
-internal static SpecialCase _TurkishCase = new SpecialCase{
-    new CaseRange(73, 73, new d{0, 305 - 73, 0}),
-    new CaseRange(105, 105, new d{304 - 105, 0, 304 - 105}),
-    new CaseRange(304, 304, new d{0, 105 - 304, 0}),
-    new CaseRange(305, 305, new d{73 - 305, 0, 73 - 305})
-};
+internal static SpecialCase _TurkishCase = new SpecialCase(new CaseRange[]{
+    new CaseRange(0x0049, 0x0049, new d(new rune[]{0, 0x131 - 0x49, 0}.array())),
+    new CaseRange(0x0069, 0x0069, new d(new rune[]{0x130 - 0x69, 0, 0x130 - 0x69}.array())),
+    new CaseRange(0x0130, 0x0130, new d(new rune[]{0, 0x69 - 0x130, 0}.array())),
+    new CaseRange(0x0131, 0x0131, new d(new rune[]{0x49 - 0x131, 0, 0x49 - 0x131}.array()))
+}.slice());
 
 public static SpecialCase AzeriCase = _TurkishCase;
 

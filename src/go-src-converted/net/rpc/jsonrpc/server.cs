@@ -6,19 +6,19 @@ namespace go.net.rpc;
 using json = encoding.json_package;
 using errors = errors_package;
 using io = io_package;
-using rpc = net.rpc_package;
+using rpc = global::go.net.rpc_package;
 using sync = sync_package;
 using encoding;
-using net;
+using global::go.net;
 
 partial class jsonrpc_package {
 
 internal static error errMissingParams = errors.New("jsonrpc: request body missing params"u8);
 
 [GoType] partial struct serverCodec {
-    internal ж<encoding.json_package.Decoder> dec; // for reading JSON values
-    internal ж<encoding.json_package.Encoder> enc; // for writing JSON values
-    internal io_package.Closer c;
+    internal ж<json.Decoder> dec; // for reading JSON values
+    internal ж<json.Encoder> enc; // for writing JSON values
+    internal io.Closer c;
     // temporary work space
     internal serverRequest req;
     // JSON-RPC clients can use arbitrary json values as request IDs.
@@ -27,28 +27,28 @@ internal static error errMissingParams = errors.New("jsonrpc: request body missi
     // but save the original request ID in the pending map.
     // When rpc responds, we use the sequence number in
     // the response to find the original request ID.
-    internal sync_package.Mutex mutex; // protects seq, pending
+    internal sync.Mutex mutex; // protects seq, pending
     internal uint64 seq;
-    internal json.RawMessage pending;
+    internal map<uint64, ж<json.RawMessage>> pending;
 }
 
 // NewServerCodec returns a new [rpc.ServerCodec] using JSON-RPC on conn.
 public static rpc.ServerCodec NewServerCodec(io.ReadWriteCloser conn) {
-    return new serverCodec(
+    return new serverCodecжServerCodec(Ꮡ(new serverCodec(
         dec: json.NewDecoder(conn),
         enc: json.NewEncoder(conn),
         c: conn,
-        pending: new json.RawMessage()
-    );
+        pending: new map<uint64, ж<json.RawMessage>>()
+    )));
 }
 
 [GoType] partial struct serverRequest {
     [GoTag(@"json:""method""")]
     public @string Method;
     [GoTag(@"json:""params""")]
-    public ж<encoding.json_package.RawMessage> Params;
+    public ж<json.RawMessage> Params;
     [GoTag(@"json:""id""")]
-    public ж<encoding.json_package.RawMessage> Id;
+    public ж<json.RawMessage> Id;
 }
 
 [GoRecv] internal static void reset(this ref serverRequest r) {
@@ -59,19 +59,20 @@ public static rpc.ServerCodec NewServerCodec(io.ReadWriteCloser conn) {
 
 [GoType] partial struct serverResponse {
     [GoTag(@"json:""id""")]
-    public ж<encoding.json_package.RawMessage> Id;
+    public ж<json.RawMessage> Id;
     [GoTag(@"json:""result""")]
     public any Result;
     [GoTag(@"json:""error""")]
     public any Error;
 }
 
-[GoRecv] internal static error ReadRequestHeader(this ref serverCodec c, ж<rpc.Request> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+internal static error ReadRequestHeader(this ж<serverCodec> Ꮡc, ж<rpc.Request> Ꮡr) {
+    ref var c = ref Ꮡc.Value;
+    ref var r = ref Ꮡr.Value;
 
     c.req.reset();
     {
-        var err = c.dec.Decode(Ꮡ(c.req)); if (err != default!) {
+        var err = c.dec.Decode(Ꮡc.of(serverCodec.Ꮡreq)); if (err != default!) {
             return err;
         }
     }
@@ -79,12 +80,12 @@ public static rpc.ServerCodec NewServerCodec(io.ReadWriteCloser conn) {
     // JSON request id can be any JSON value;
     // RPC package expects uint64.  Translate to
     // internal uint64 and save JSON on the side.
-    c.mutex.Lock();
+    Ꮡc.of(serverCodec.Ꮡmutex).Lock();
     c.seq++;
     c.pending[c.seq] = c.req.Id;
     c.req.Id = default!;
     r.Seq = c.seq;
-    c.mutex.Unlock();
+    Ꮡc.of(serverCodec.Ꮡmutex).Unlock();
     return default!;
 }
 
@@ -99,28 +100,29 @@ public static rpc.ServerCodec NewServerCodec(io.ReadWriteCloser conn) {
     // RPC params is struct.
     // Unmarshal into array containing struct for now.
     // Should think about making RPC more general.
-    ref var params = ref heap(new array<any>(1), out var Ꮡparams);
+    ref var @params = ref heap(new array<any>(1), out var Ꮡparams);
     @params[0] = x;
-    return json.Unmarshal(c.req.Params.val, Ꮡ@params);
+    return json.Unmarshal(c.req.Params.ValueSlot, Ꮡparams);
 }
 
-public static json.RawMessage @null = ((json.RawMessage)slice<byte>("null"));
+internal static ж<json.RawMessage> Ꮡnull = new(((json.RawMessage)slice<byte>((@string)"null")));
+internal static ref json.RawMessage @null => ref Ꮡnull.ValueSlot;
 
-[GoRecv] internal static error WriteResponse(this ref serverCodec c, ж<rpc.Response> Ꮡr, any x) {
-    ref var r = ref Ꮡr.val;
+internal static error WriteResponse(this ж<serverCodec> Ꮡc, ж<rpc.Response> Ꮡr, any x) {
+    ref var c = ref Ꮡc.Value;
+    ref var r = ref Ꮡr.Value;
 
-    c.mutex.Lock();
-    var b = c.pending[r.Seq];
-    var ok = c.pending[r.Seq];
+    Ꮡc.of(serverCodec.Ꮡmutex).Lock();
+    var (b, ok) = c.pending[r.Seq, ꟷ];
     if (!ok) {
-        c.mutex.Unlock();
+        Ꮡc.of(serverCodec.Ꮡmutex).Unlock();
         return errors.New("invalid sequence number in response"u8);
     }
     delete(c.pending, r.Seq);
-    c.mutex.Unlock();
+    Ꮡc.of(serverCodec.Ꮡmutex).Unlock();
     if (b == nil) {
         // Invalid request so no id. Use JSON null.
-        b = Ꮡ(@null);
+        b = Ꮡnull;
     }
     var resp = new serverResponse(Id: b);
     if (r.Error == ""u8){

@@ -186,10 +186,8 @@ public static readonly UntypedInt CovMetaHeaderSize = /* 16 + 4 + 4 + 4 + 4 + 4 
 // Note: in the initial version of the coverage revamp, only simple
 // units will be in use.
 [GoType] partial struct CoverableUnit {
-    public uint32 StLine;
-    public uint32 StCol;
-    public uint32 EnLine;
-    public uint32 EnCol;
+    public uint32 StLine, StCol;
+    public uint32 EnLine, EnCol;
     public uint32 NxStmts;
     public uint32 Parent;
 }
@@ -353,7 +351,7 @@ public static readonly CounterFlavor CtrRaw = /* iota + 1 */ 1;
 public static readonly CounterFlavor CtrULeb128 = 2;
 
 public static nint Round4(nint x) {
-    return (nint)((x + 3) & ~3);
+    return (nint)((x + 3) & ~(nint)3);
 }
 
 //.....................................................................

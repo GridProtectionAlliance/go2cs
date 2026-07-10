@@ -124,7 +124,7 @@ public static complex128 Asinh(complex128 x) {
                 return x;
             }
             default: {
-                return complex(re, math.Copysign(0.0F, im));
+                return complex(re, math.Copysign(0.0D, im));
             }}
 
             break;
@@ -171,7 +171,7 @@ public static complex128 Asinh(complex128 x) {
 // Acos returns the inverse cosine of x.
 public static complex128 Acos(complex128 x) {
     var w = Asin(x);
-    return complex(math.Pi / 2 - real(w), -imag(w));
+    return complex((float64)(math.Pi / 2) - real(w), -imag(w));
 }
 
 // Acosh returns the inverse hyperbolic cosine of x.
@@ -248,7 +248,7 @@ public static complex128 Atan(complex128 x) {
     if (a == 0) {
         return NaN();
     }
-    var t = 0.5F * math.Atan2(2 * real(x), a);
+    var t = 0.5D * math.Atan2(2 * real(x), a);
     var w = reducePi(t);
     t = imag(x) - 1;
     var b = x2 + t * t;
@@ -257,7 +257,7 @@ public static complex128 Atan(complex128 x) {
     }
     t = imag(x) + 1;
     var c = (x2 + t * t) / b;
-    return complex(w, 0.25F * math.Log(c));
+    return complex(w, 0.25D * math.Log(c));
 }
 
 // Atanh returns the inverse hyperbolic tangent of x.

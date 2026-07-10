@@ -21,10 +21,10 @@ fields must be used instead.
 */
 namespace go.archive;
 
-using fs = io.fs_package;
+using fs = go.io.fs_package;
 using path = path_package;
 using time = time_package;
-using io;
+using go.io;
 
 partial class zip_package {
 
@@ -33,12 +33,12 @@ public const uint16 Store = 0; // no compression
 
 public const uint16 Deflate = 8; // DEFLATE compressed
 
-internal static readonly UntypedInt fileHeaderSignature = /* 0x04034b50 */ 67324752;
-internal static readonly UntypedInt directoryHeaderSignature = /* 0x02014b50 */ 33639248;
-internal static readonly UntypedInt directoryEndSignature = /* 0x06054b50 */ 101010256;
-internal static readonly UntypedInt directory64LocSignature = /* 0x07064b50 */ 117853008;
-internal static readonly UntypedInt directory64EndSignature = /* 0x06064b50 */ 101075792;
-internal static readonly UntypedInt dataDescriptorSignature = /* 0x08074b50 */ 134695760; // de-facto standard; required by OS X Finder
+internal static readonly UntypedInt fileHeaderSignature = 0x04034b50;
+internal static readonly UntypedInt directoryHeaderSignature = 0x02014b50;
+internal static readonly UntypedInt directoryEndSignature = 0x06054b50;
+internal static readonly UntypedInt directory64LocSignature = 0x07064b50;
+internal static readonly UntypedInt directory64EndSignature = 0x06064b50;
+internal static readonly UntypedInt dataDescriptorSignature = 0x08074b50; // de-facto standard; required by OS X Finder
 internal static readonly UntypedInt fileHeaderLen = 30; // + filename + extra
 internal static readonly UntypedInt directoryHeaderLen = 46; // + filename + extra + comment
 internal static readonly UntypedInt directoryEndLen = 22; // + comment
@@ -55,11 +55,11 @@ internal static readonly UntypedInt zipVersion20 = 20; // 2.0
 internal static readonly UntypedInt zipVersion45 = 45; // 4.5 (reads and writes zip64 archives)
 internal static readonly UntypedInt uint16max = /* (1 << 16) - 1 */ 65535;
 internal static readonly UntypedInt uint32max = /* (1 << 32) - 1 */ 4294967295;
-internal static readonly UntypedInt zip64ExtraID = /* 0x0001 */ 1; // Zip64 extended information
-internal static readonly UntypedInt ntfsExtraID = /* 0x000a */ 10; // NTFS
-internal static readonly UntypedInt unixExtraID = /* 0x000d */ 13; // UNIX
-internal static readonly UntypedInt extTimeExtraID = /* 0x5455 */ 21589; // Extended timestamp
-internal static readonly UntypedInt infoZipUnixExtraID = /* 0x5855 */ 22613; // Info-ZIP Unix extension
+internal static readonly UntypedInt zip64ExtraID = 0x0001; // Zip64 extended information
+internal static readonly UntypedInt ntfsExtraID = 0x000a; // NTFS
+internal static readonly UntypedInt unixExtraID = 0x000d; // UNIX
+internal static readonly UntypedInt extTimeExtraID = 0x5455; // Extended timestamp
+internal static readonly UntypedInt infoZipUnixExtraID = 0x5855; // Info-ZIP Unix extension
 
 // FileHeader describes a file within a ZIP file.
 // See the [ZIP specification] for details.
@@ -98,7 +98,7 @@ internal static readonly UntypedInt infoZipUnixExtraID = /* 0x5855 */ 22613; // 
     // When writing, an extended timestamp (which is timezone-agnostic) is
     // always emitted. The legacy MS-DOS date field is encoded according to the
     // location of the Modified time.
-    public time_package.Time Modified;
+    public time.Time Modified;
     // ModifiedTime is an MS-DOS-encoded time.
     //
     // Deprecated: Use Modified instead.
@@ -130,8 +130,10 @@ internal static readonly UntypedInt infoZipUnixExtraID = /* 0x5855 */ 22613; // 
 }
 
 // FileInfo returns an fs.FileInfo for the [FileHeader].
-[GoRecv] public static fs.FileInfo FileInfo(this ref FileHeader h) {
-    return new headerFileInfo(h);
+public static fs.FileInfo FileInfo(this ж<FileHeader> Ꮡh) {
+    ref var h = ref Ꮡh.Value;
+
+    return new headerFileInfo(Ꮡh);
 }
 
 // headerFileInfo implements [fs.FileInfo].
@@ -140,14 +142,14 @@ internal static readonly UntypedInt infoZipUnixExtraID = /* 0x5855 */ 22613; // 
 }
 
 internal static @string Name(this headerFileInfo fi) {
-    return path.Base(fi.fh.Name);
+    return path.Base((~fi.fh).Name);
 }
 
 internal static int64 Size(this headerFileInfo fi) {
-    if (fi.fh.UncompressedSize64 > 0) {
-        return ((int64)fi.fh.UncompressedSize64);
+    if ((~fi.fh).UncompressedSize64 > 0) {
+        return (int64)(~fi.fh).UncompressedSize64;
     }
-    return ((int64)fi.fh.UncompressedSize);
+    return (int64)(~fi.fh).UncompressedSize;
 }
 
 internal static bool IsDir(this headerFileInfo fi) {
@@ -155,10 +157,10 @@ internal static bool IsDir(this headerFileInfo fi) {
 }
 
 internal static time.Time ModTime(this headerFileInfo fi) {
-    if (fi.fh.Modified.IsZero()) {
+    if ((~fi.fh).Modified.IsZero()) {
         return fi.fh.ModTime();
     }
-    return fi.fh.Modified.UTC();
+    return (~fi.fh).Modified.UTC();
 }
 
 internal static fs.FileMode Mode(this headerFileInfo fi) {
@@ -192,14 +194,14 @@ public static (ж<FileHeader>, error) FileInfoHeader(fs.FileInfo fi) {
     var size = fi.Size();
     var fh = Ꮡ(new FileHeader(
         Name: fi.Name(),
-        UncompressedSize64: ((uint64)size)
+        UncompressedSize64: (uint64)size
     ));
     fh.SetModTime(fi.ModTime());
     fh.SetMode(fi.Mode());
     if ((~fh).UncompressedSize64 > uint32max){
-        fh.val.UncompressedSize = uint32max;
+        fh.Value.UncompressedSize = uint32max;
     } else {
-        fh.val.UncompressedSize = ((uint32)(~fh).UncompressedSize64);
+        fh.Value.UncompressedSize = (uint32)(~fh).UncompressedSize64;
     }
     return (fh, default!);
 }
@@ -218,15 +220,14 @@ public static (ж<FileHeader>, error) FileInfoHeader(fs.FileInfo fi) {
 // timeZone returns a *time.Location based on the provided offset.
 // If the offset is non-sensible, then this uses an offset of zero.
 internal static ж<timeꓸLocation> timeZone(time.Duration offset) {
-    GoUntyped minOffset = /* -12 * time.Hour */ // E.g., Baker island at -12:00
-            GoUntyped.Parse("-43200000000000");
-    static readonly time.Duration maxOffset = /* +14 * time.Hour */ 50400000000000; // E.g., Line island at +14:00
-    static readonly time.Duration offsetAlias = /* 15 * time.Minute */ 900000000000; // E.g., Nepal at +5:45
+    time.Duration minOffset = /* -12 * time.Hour */ -43200000000000; // E.g., Baker island at -12:00
+    time.Duration maxOffset = /* +14 * time.Hour */ 50400000000000; // E.g., Line island at +14:00
+    time.Duration offsetAlias = /* 15 * time.Minute */ 900000000000; // E.g., Nepal at +5:45
     offset = offset.Round(offsetAlias);
     if (offset < minOffset || maxOffset < offset) {
         offset = 0;
     }
-    return time.FixedZone(""u8, ((nint)(offset / time.ΔSecond)));
+    return time.FixedZone(""u8, (nint)(int64)(offset / time.ΔSecond));
 }
 
 // msDosTimeToTime converts an MS-DOS date and time into a time.Time.
@@ -234,14 +235,14 @@ internal static ж<timeꓸLocation> timeZone(time.Duration offset) {
 // See: https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-dosdatetimetofiletime
 internal static time.Time msDosTimeToTime(uint16 dosDate, uint16 dosTime) {
     return time.Date(
-        ((nint)(dosDate >> (int)(9) + 1980)), // date bits 0-4: day of month; 5-8: month; 9-15: years since 1980
+        (nint)((dosDate >> (int)(9)) + 1980), // date bits 0-4: day of month; 5-8: month; 9-15: years since 1980
 
-        ((timeꓸMonth)((uint16)(dosDate >> (int)(5) & 15))),
-        ((nint)((uint16)(dosDate & 31))), // time bits 0-4: second/2; 5-10: minute; 11-15: hour
+        ((timeꓸMonth)(nint)((uint16)((dosDate >> (int)(5)) & 0xf))),
+        (nint)((uint16)(dosDate & 0x1f)), // time bits 0-4: second/2; 5-10: minute; 11-15: hour
 
-        ((nint)(dosTime >> (int)(11))),
-        ((nint)((uint16)(dosTime >> (int)(5) & 63))),
-        ((nint)((uint16)(dosTime & 31) * 2)),
+        (nint)((dosTime >> (int)(11))),
+        (nint)((uint16)((dosTime >> (int)(5)) & 0x3f)),
+        (nint)((uint16)(dosTime & 0x1f) * 2),
         0, // nanoseconds
 
         time.ΔUTC);
@@ -254,8 +255,8 @@ internal static (uint16 fDate, uint16 fTime) timeToMsDosTime(time.Time t) {
     uint16 fDate = default!;
     uint16 fTime = default!;
 
-    fDate = ((uint16)(t.Day() + ((nint)t.Month()) << (int)(5) + (t.Year() - 1980) << (int)(9)));
-    fTime = ((uint16)(t.Second() / 2 + t.Minute() << (int)(5) + t.Hour() << (int)(11)));
+    fDate = (uint16)(t.Day() + ((nint)t.Month() << (int)(5)) + ((t.Year() - 1980) << (int)(9)));
+    fTime = (uint16)(t.Second() / 2 + (t.Minute() << (int)(5)) + (t.Hour() << (int)(11)));
     return (fDate, fTime);
 }
 
@@ -278,27 +279,27 @@ internal static (uint16 fDate, uint16 fTime) timeToMsDosTime(time.Time t) {
     (h.ModifiedDate, h.ModifiedTime) = timeToMsDosTime(t);
 }
 
-internal static readonly UntypedInt s_IFMT = /* 0xf000 */ 61440;
-internal static readonly UntypedInt s_IFSOCK = /* 0xc000 */ 49152;
-internal static readonly UntypedInt s_IFLNK = /* 0xa000 */ 40960;
-internal static readonly UntypedInt s_IFREG = /* 0x8000 */ 32768;
-internal static readonly UntypedInt s_IFBLK = /* 0x6000 */ 24576;
-internal static readonly UntypedInt s_IFDIR = /* 0x4000 */ 16384;
-internal static readonly UntypedInt s_IFCHR = /* 0x2000 */ 8192;
-internal static readonly UntypedInt s_IFIFO = /* 0x1000 */ 4096;
-internal static readonly UntypedInt s_ISUID = /* 0x800 */ 2048;
-internal static readonly UntypedInt s_ISGID = /* 0x400 */ 1024;
-internal static readonly UntypedInt s_ISVTX = /* 0x200 */ 512;
-internal static readonly UntypedInt msdosDir = /* 0x10 */ 16;
-internal static readonly UntypedInt msdosReadOnly = /* 0x01 */ 1;
+internal static readonly UntypedInt s_IFMT = 0xf000;
+internal static readonly UntypedInt s_IFSOCK = 0xc000;
+internal static readonly UntypedInt s_IFLNK = 0xa000;
+internal static readonly UntypedInt s_IFREG = 0x8000;
+internal static readonly UntypedInt s_IFBLK = 0x6000;
+internal static readonly UntypedInt s_IFDIR = 0x4000;
+internal static readonly UntypedInt s_IFCHR = 0x2000;
+internal static readonly UntypedInt s_IFIFO = 0x1000;
+internal static readonly UntypedInt s_ISUID = 0x800;
+internal static readonly UntypedInt s_ISGID = 0x400;
+internal static readonly UntypedInt s_ISVTX = 0x200;
+internal static readonly UntypedInt msdosDir = 0x10;
+internal static readonly UntypedInt msdosReadOnly = 0x01;
 
 // Mode returns the permission and mode bits for the [FileHeader].
 [GoRecv] public static fs.FileMode /*mode*/ Mode(this ref FileHeader h) {
     fs.FileMode mode = default!;
 
-    var exprᴛ1 = h.CreatorVersion >> (int)(8);
+    var exprᴛ1 = (h.CreatorVersion >> (int)(8));
     if (exprᴛ1 == creatorUnix || exprᴛ1 == creatorMacOSX) {
-        mode = unixModeToFileMode(h.ExternalAttrs >> (int)(16));
+        mode = unixModeToFileMode((h.ExternalAttrs >> (int)(16)));
     }
     else if (exprᴛ1 == creatorNTFS || exprᴛ1 == creatorVFAT || exprᴛ1 == creatorFAT) {
         mode = msdosModeToFileMode(h.ExternalAttrs);
@@ -312,14 +313,14 @@ internal static readonly UntypedInt msdosReadOnly = /* 0x01 */ 1;
 
 // SetMode changes the permission and mode bits for the [FileHeader].
 [GoRecv] public static void SetMode(this ref FileHeader h, fs.FileMode mode) {
-    h.CreatorVersion = (uint16)((uint16)(h.CreatorVersion & 255) | creatorUnix << (int)(8));
-    h.ExternalAttrs = fileModeToUnixMode(mode) << (int)(16);
+    h.CreatorVersion = (uint16)((uint16)(h.CreatorVersion & 0xff) | (uint16)(creatorUnix << (int)(8)));
+    h.ExternalAttrs = (fileModeToUnixMode(mode) << (int)(16));
     // set MSDOS attributes too, as the original zip does.
     if ((fs.FileMode)(mode & fs.ModeDir) != 0) {
-        h.ExternalAttrs |= (uint32)(msdosDir);
+        h.ExternalAttrs |= msdosDir;
     }
     if ((fs.FileMode)(mode & 128) == 0) {
-        h.ExternalAttrs |= (uint32)(msdosReadOnly);
+        h.ExternalAttrs |= msdosReadOnly;
     }
 }
 
@@ -329,19 +330,19 @@ internal static readonly UntypedInt msdosReadOnly = /* 0x01 */ 1;
 }
 
 [GoRecv] internal static bool hasDataDescriptor(this ref FileHeader h) {
-    return (uint16)(h.Flags & 8) != 0;
+    return (uint16)(h.Flags & 0x8) != 0;
 }
 
 internal static fs.FileMode /*mode*/ msdosModeToFileMode(uint32 m) {
     fs.FileMode mode = default!;
 
-    if ((uint32)(m & msdosDir) != 0){
+    if ((uint32)(m & (uint32)msdosDir) != 0){
         mode = (fs.FileMode)(fs.ModeDir | 511);
     } else {
         mode = 438;
     }
-    if ((uint32)(m & msdosReadOnly) != 0) {
-        mode &= ~(fs.FileMode)(146);
+    if ((uint32)(m & (uint32)msdosReadOnly) != 0) {
+        mode &= unchecked((fs.FileMode)~(fs.FileMode)(146));
     }
     return mode;
 }
@@ -349,10 +350,7 @@ internal static fs.FileMode /*mode*/ msdosModeToFileMode(uint32 m) {
 internal static uint32 fileModeToUnixMode(fs.FileMode mode) {
     uint32 m = default!;
     var exprᴛ1 = (fs.FileMode)(mode & fs.ModeType);
-    { /* default: */
-        m = s_IFREG;
-    }
-    else if (exprᴛ1 == fs.ModeDir) {
+    if (exprᴛ1 == fs.ModeDir) {
         m = s_IFDIR;
     }
     else if (exprᴛ1 == fs.ModeSymlink) {
@@ -367,8 +365,11 @@ internal static uint32 fileModeToUnixMode(fs.FileMode mode) {
     else if (exprᴛ1 == fs.ModeDevice) {
         m = s_IFBLK;
     }
-    else if (exprᴛ1 == (fs.FileMode)(fs.ModeDevice | fs.ModeCharDevice)) {
+    else if (exprᴛ1 == (fs.FileMode)((fs.FileMode)(fs.ModeDevice | fs.ModeCharDevice))) {
         m = s_IFCHR;
+    }
+    else { /* default: */
+        m = s_IFREG;
     }
 
     if ((fs.FileMode)(mode & fs.ModeSetuid) != 0) {
@@ -380,12 +381,12 @@ internal static uint32 fileModeToUnixMode(fs.FileMode mode) {
     if ((fs.FileMode)(mode & fs.ModeSticky) != 0) {
         m |= (uint32)(s_ISVTX);
     }
-    return (uint32)(m | ((uint32)((fs.FileMode)(mode & 511))));
+    return (uint32)(m | (uint32)((fs.FileMode)(mode & 511)));
 }
 
 internal static fs.FileMode unixModeToFileMode(uint32 m) {
     var mode = ((fs.FileMode)((uint32)(m & 511)));
-    var exprᴛ1 = (uint32)(m & s_IFMT);
+    var exprᴛ1 = (uint32)(m & (uint32)s_IFMT);
     if (exprᴛ1 == s_IFBLK) {
         mode |= (fs.FileMode)(fs.ModeDevice);
     }
@@ -408,13 +409,13 @@ internal static fs.FileMode unixModeToFileMode(uint32 m) {
     }
 
     // nothing to do
-    if ((uint32)(m & s_ISGID) != 0) {
+    if ((uint32)(m & (uint32)s_ISGID) != 0) {
         mode |= (fs.FileMode)(fs.ModeSetgid);
     }
-    if ((uint32)(m & s_ISUID) != 0) {
+    if ((uint32)(m & (uint32)s_ISUID) != 0) {
         mode |= (fs.FileMode)(fs.ModeSetuid);
     }
-    if ((uint32)(m & s_ISVTX) != 0) {
+    if ((uint32)(m & (uint32)s_ISVTX) != 0) {
         mode |= (fs.FileMode)(fs.ModeSticky);
     }
     return mode;

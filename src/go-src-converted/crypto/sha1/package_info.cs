@@ -10,6 +10,9 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using cryptoꓸDecrypterOpts = object;
+global using cryptoꓸPrivateKey = object;
+global using cryptoꓸPublicKey = object;
 // </ImportedTypeAliases>
 
 using go;
@@ -40,7 +43,7 @@ using static go.crypto.sha1_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<digest, hash_package.Hash>]
+[assembly: GoImplement<digest, hash_package.Hash>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

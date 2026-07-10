@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using astꓸFilter = go.go.ast_package.ΔFilter;
-global using docꓸFilter = go.go.doc_package.ΔFilter;
 global using execꓸError = go.os.exec_package.ΔError;
 global using osꓸDirEntry = go.io.fs_package.DirEntry;
 global using osꓸFileInfo = go.io.fs_package.FileInfo;
@@ -51,13 +49,11 @@ using static go.go.build_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(io.ReadCloser, error), io_package.ReadCloser>]
-[assembly: GoImplement<(os.FileInfo, error), osꓸFileInfo>]
-[assembly: GoImplement<MultiplePackageError, error>]
-[assembly: GoImplement<NoGoError, error>]
-[assembly: GoImplement<constraint.Expr, error), go.build.constraint_package.Expr>]
-[assembly: GoImplement<io_package.ReadCloser, io_package.Reader>]
-[assembly: GoImplement<os_package.File, io_package.ReadCloser>]
+[assembly: GoImplement<MultiplePackageError, error>(Pointer = true)]
+[assembly: GoImplement<NoGoError, error>(Pointer = true)]
+[assembly: GoImplement<go.go.scanner_package.ΔError, error>]
+[assembly: GoImplement<os_package.File, io_package.ReadCloser>(Pointer = true)]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

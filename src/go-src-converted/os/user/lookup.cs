@@ -18,16 +18,14 @@ internal static slice<byte> colon = new byte[]{(rune)':'}.slice();
 // Subsequent calls will return the cached value and will not reflect
 // changes to the current user.
 public static (ж<User>, error) Current() {
-    cache.Do(
-    var cacheʗ2 = cache;
-    () => {
-        (cacheʗ2.u, cacheʗ2.err) = current();
+    Ꮡcache.of(cacheᴛ1.ᏑOnce).Do(() => {
+        (cache.u, cache.err) = current();
     });
     if (cache.err != default!) {
         return (default!, cache.err);
     }
     ref var u = ref heap<User>(out var Ꮡu);
-    u = cache.u.val;
+    u = cache.u.Value;
     // copy
     return (Ꮡu, default!);
 }
@@ -39,13 +37,14 @@ public static (ж<User>, error) Current() {
     internal ж<User> u;
     internal error err;
 }
-internal static cacheᴛ1 cache;
+internal static ж<cacheᴛ1> Ꮡcache = new(new cacheᴛ1(nil));
+internal static ref cacheᴛ1 cache => ref Ꮡcache.Value;
 
 // Lookup looks up a user by username. If the user cannot be found, the
 // returned error is of type [UnknownUserError].
 public static (ж<User>, error) Lookup(@string username) {
     {
-        (u, err) = Current(); if (err == default! && (~u).Username == username) {
+        var (u, err) = Current(); if (err == default! && (~u).Username == username) {
             return (u, err);
         }
     }
@@ -56,7 +55,7 @@ public static (ж<User>, error) Lookup(@string username) {
 // returned error is of type [UnknownUserIdError].
 public static (ж<User>, error) LookupId(@string uid) {
     {
-        (u, err) = Current(); if (err == default! && (~u).Uid == uid) {
+        var (u, err) = Current(); if (err == default! && (~u).Uid == uid) {
             return (u, err);
         }
     }
@@ -76,8 +75,10 @@ public static (ж<Group>, error) LookupGroupId(@string gid) {
 }
 
 // GroupIds returns the list of group IDs that the user is a member of.
-[GoRecv] public static (slice<@string>, error) GroupIds(this ref User u) {
-    return listGroups(u);
+public static (slice<@string>, error) GroupIds(this ж<User> Ꮡu) {
+    ref var u = ref Ꮡu.Value;
+
+    return listGroups(Ꮡu);
 }
 
 } // end user_package

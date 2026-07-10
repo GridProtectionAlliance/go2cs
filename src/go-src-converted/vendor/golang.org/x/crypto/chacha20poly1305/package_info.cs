@@ -40,8 +40,8 @@ using static go.vendor.golang.org.x.crypto.chacha20poly1305_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<chacha20poly1305, crypto.cipher_package.AEAD>]
-[assembly: GoImplement<xchacha20poly1305, crypto.cipher_package.AEAD>]
+[assembly: GoImplement<chacha20poly1305, go.crypto.cipher_package.AEAD>(Pointer = true)]
+[assembly: GoImplement<xchacha20poly1305, go.crypto.cipher_package.AEAD>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

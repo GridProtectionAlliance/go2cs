@@ -5,10 +5,11 @@ namespace go;
 
 using windows = @internal.syscall.windows_package;
 using os = os_package;
-using runtime = runtime_package;
+using Δruntime = runtime_package;
 using syscall = syscall_package;
 using time = time_package;
 using @unsafe = unsafe_package;
+using @internal;
 using @internal.syscall;
 
 partial class net_package {
@@ -20,7 +21,7 @@ internal static readonly time.Duration defaultKeepAliveIdle = /* 2 * time.Hour *
 internal static readonly time.Duration defaultKeepAliveInterval = /* time.Second */ 1000000000;
 
 internal static error setKeepAliveIdle(ж<netFD> Ꮡfd, time.Duration d) {
-    ref var fd = ref Ꮡfd.val;
+    ref var fd = ref Ꮡfd.Value;
 
     if (!windows.SupportTCPKeepAliveIdle()) {
         return setKeepAliveIdleAndInterval(Ꮡfd, d, -1);
@@ -32,14 +33,14 @@ internal static error setKeepAliveIdle(ж<netFD> Ꮡfd, time.Duration d) {
         return default!;
     }
     // The kernel expects seconds so round to next highest second.
-    nint secs = ((nint)roundDurationUp(d, time.ΔSecond));
-    var err = fd.pfd.SetsockoptInt(syscall.IPPROTO_TCP, windows.TCP_KEEPIDLE, secs);
-    runtime.KeepAlive(fd);
+    nint secs = (nint)(int64)roundDurationUp(d, time.ΔSecond);
+    var err = Ꮡfd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.IPPROTO_TCP, windows.TCP_KEEPIDLE, secs);
+    Δruntime.KeepAlive(fd);
     return os.NewSyscallError("setsockopt"u8, err);
 }
 
 internal static error setKeepAliveInterval(ж<netFD> Ꮡfd, time.Duration d) {
-    ref var fd = ref Ꮡfd.val;
+    ref var fd = ref Ꮡfd.Value;
 
     if (!windows.SupportTCPKeepAliveInterval()) {
         return setKeepAliveIdleAndInterval(Ꮡfd, -1, d);
@@ -51,14 +52,14 @@ internal static error setKeepAliveInterval(ж<netFD> Ꮡfd, time.Duration d) {
         return default!;
     }
     // The kernel expects seconds so round to next highest second.
-    nint secs = ((nint)roundDurationUp(d, time.ΔSecond));
-    var err = fd.pfd.SetsockoptInt(syscall.IPPROTO_TCP, windows.TCP_KEEPINTVL, secs);
-    runtime.KeepAlive(fd);
+    nint secs = (nint)(int64)roundDurationUp(d, time.ΔSecond);
+    var err = Ꮡfd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.IPPROTO_TCP, windows.TCP_KEEPINTVL, secs);
+    Δruntime.KeepAlive(fd);
     return os.NewSyscallError("setsockopt"u8, err);
 }
 
 internal static error setKeepAliveCount(ж<netFD> Ꮡfd, nint n) {
-    ref var fd = ref Ꮡfd.val;
+    ref var fd = ref Ꮡfd.Value;
 
     if (n == 0){
         n = defaultTCPKeepAliveCount;
@@ -66,14 +67,14 @@ internal static error setKeepAliveCount(ж<netFD> Ꮡfd, nint n) {
     if (n < 0) {
         return default!;
     }
-    var err = fd.pfd.SetsockoptInt(syscall.IPPROTO_TCP, windows.TCP_KEEPCNT, n);
-    runtime.KeepAlive(fd);
+    var err = Ꮡfd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.IPPROTO_TCP, windows.TCP_KEEPCNT, n);
+    Δruntime.KeepAlive(fd);
     return os.NewSyscallError("setsockopt"u8, err);
 }
 
 // setKeepAliveIdleAndInterval serves for kernels prior to Windows 10, version 1709.
 internal static error setKeepAliveIdleAndInterval(ж<netFD> Ꮡfd, time.Duration idle, time.Duration interval) {
-    ref var fd = ref Ꮡfd.val;
+    ref var fd = ref Ꮡfd.Value;
 
     // WSAIoctl with SIO_KEEPALIVE_VALS control code requires all fields in
     // `tcp_keepalive` struct to be provided.
@@ -94,6 +95,7 @@ internal static error setKeepAliveIdleAndInterval(ж<netFD> Ꮡfd, time.Duration
         return default!;
     }
     case {} when idle >= 0 && interval >= 0: {
+        break;
     }}
 
     // Given that we can't set KeepAliveInterval alone, and this code path
@@ -113,19 +115,19 @@ internal static error setKeepAliveIdleAndInterval(ж<netFD> Ꮡfd, time.Duration
     }
     // The kernel expects milliseconds so round to next highest
     // millisecond.
-    var tcpKeepAliveIdle = ((uint32)roundDurationUp(idle, time.Millisecond));
-    var tcpKeepAliveInterval = ((uint32)roundDurationUp(interval, time.Millisecond));
-    ref var ka = ref heap<syscall_package.TCPKeepalive>(out var Ꮡka);
+    var tcpKeepAliveIdle = (uint32)(int64)roundDurationUp(idle, time.Millisecond);
+    var tcpKeepAliveInterval = (uint32)(int64)roundDurationUp(interval, time.Millisecond);
+    ref var ka = ref heap<syscall.TCPKeepalive>(out var Ꮡka);
     ka = new syscall.TCPKeepalive(
         OnOff: 1,
         Time: tcpKeepAliveIdle,
         Interval: tcpKeepAliveInterval
     );
     ref var ret = ref heap<uint32>(out var Ꮡret);
-    ret = ((uint32)0);
-    var size = ((uint32)@unsafe.Sizeof(ka));
-    var err = fd.pfd.WSAIoctl(syscall.SIO_KEEPALIVE_VALS, (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡka)), size, nil, 0, Ꮡret, nil, 0);
-    runtime.KeepAlive(fd);
+    ret = (uint32)0;
+    var size = (uint32)@unsafe.Sizeof(ka);
+    var err = Ꮡfd.of(netFD.Ꮡpfd).WSAIoctl(syscall.SIO_KEEPALIVE_VALS, (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡka)), size, nil, 0, Ꮡret, nil, 0);
+    Δruntime.KeepAlive(fd);
     return os.NewSyscallError("wsaioctl"u8, err);
 }
 

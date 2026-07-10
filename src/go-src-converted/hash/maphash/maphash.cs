@@ -262,14 +262,14 @@ public static ΔSeed MakeSeed() {
 [GoRecv] public static slice<byte> Sum(this ref Hash h, slice<byte> b) {
     var x = h.Sum64();
     return append(b,
-        ((byte)(x >> (int)(0))),
-        ((byte)(x >> (int)(8))),
-        ((byte)(x >> (int)(16))),
-        ((byte)(x >> (int)(24))),
-        ((byte)(x >> (int)(32))),
-        ((byte)(x >> (int)(40))),
-        ((byte)(x >> (int)(48))),
-        ((byte)(x >> (int)(56))));
+        (byte)((x >> (int)(0))),
+        (byte)((x >> (int)(8))),
+        (byte)((x >> (int)(16))),
+        (byte)((x >> (int)(24))),
+        (byte)((x >> (int)(32))),
+        (byte)((x >> (int)(40))),
+        (byte)((x >> (int)(48))),
+        (byte)((x >> (int)(56))));
 }
 
 // Size returns h's hash value size, 8 bytes.

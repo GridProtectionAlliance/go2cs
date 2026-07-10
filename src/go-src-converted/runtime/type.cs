@@ -39,7 +39,7 @@ internal static @string @string(this Δrtype t) {
 }
 
 internal static ж<uncommontype> uncommon(this Δrtype t) {
-    return t.Uncommon();
+    return t.Type.Uncommon();
 }
 
 internal static @string name(this Δrtype t) {
@@ -108,7 +108,8 @@ internal static @string pkgpath(this Δrtype t) {
     internal map<int32, @unsafe.Pointer> m;
     internal map<@unsafe.Pointer, int32> minv;
 }
-internal static reflectOffsᴛ1 reflectOffs;
+internal static ж<reflectOffsᴛ1> ᏑreflectOffs = new(default(reflectOffsᴛ1));
+internal static ref reflectOffsᴛ1 reflectOffs => ref ᏑreflectOffs.Value;
 
 internal static void reflectOffsLock() {
     @lock(ᏑreflectOffs.of(reflectOffsᴛ1.Ꮡlock));
@@ -133,37 +134,36 @@ internal static void reflectOffsUnlock() {
 // See go.dev/issue/67401.
 //
 //go:linkname resolveNameOff
-internal static name resolveNameOff(@unsafe.Pointer ptrInModule, nameOff off) {
+internal static abiꓸName resolveNameOff(@unsafe.Pointer ptrInModule, nameOff off) {
     if (off == 0) {
-        return new name{};
+        return new name();
     }
-    var @base = ((uintptr)ptrInModule);
-    for (var md = Ꮡ(firstmoduledata); md != nil; md = md.val.next) {
+    var @base = (uintptr)ptrInModule;
+    for (var md = Ꮡfirstmoduledata; md != nil; md = md.Value.next) {
         if (@base >= (~md).types && @base < (~md).etypes) {
-            var resΔ1 = (~md).types + ((uintptr)off);
+            var resΔ1 = (~md).types + (uintptr)(int32)off;
             if (resΔ1 > (~md).etypes) {
-                println("runtime: nameOff", ((Δhex)off), "out of range", ((Δhex)(~md).types), "-", ((Δhex)(~md).etypes));
+                println("runtime: nameOff", ((Δhex)(uint64)(int32)off), "out of range", ((Δhex)(uint64)(~md).types), "-", ((Δhex)(uint64)(~md).etypes));
                 @throw("runtime: name offset out of range"u8);
             }
-            return new name{Bytes: (ж<byte>)(uintptr)(((@unsafe.Pointer)resΔ1))};
+            return new name(Bytes: (ж<byte>)(uintptr)((@unsafe.Pointer)resΔ1));
         }
     }
     // No module found. see if it is a run time name.
     reflectOffsLock();
-    @unsafe.Pointer res = reflectOffs.m[((int32)off)];
-    var found = reflectOffs.m[((int32)off)];
+    var (res, found) = reflectOffs.m[(int32)off, ꟷ];
     reflectOffsUnlock();
     if (!found) {
-        println("runtime: nameOff", ((Δhex)off), "base", ((Δhex)@base), "not in ranges:");
-        for (var next = Ꮡ(firstmoduledata); next != nil; next = next.val.next) {
-            println("\ttypes", ((Δhex)(~next).types), "etypes", ((Δhex)(~next).etypes));
+        println("runtime: nameOff", ((Δhex)(uint64)(int32)off), "base", ((Δhex)(uint64)@base), "not in ranges:");
+        for (var next = Ꮡfirstmoduledata; next != nil; next = next.Value.next) {
+            println("\ttypes", ((Δhex)(uint64)(~next).types), "etypes", ((Δhex)(uint64)(~next).etypes));
         }
         @throw("runtime: name offset base pointer out of range"u8);
     }
-    return new name{Bytes: (ж<byte>)(uintptr)(res)};
+    return new name(Bytes: (ж<byte>)(uintptr)(res));
 }
 
-internal static name nameOff(this Δrtype t, nameOff off) {
+internal static abiꓸName nameOff(this Δrtype t, nameOff off) {
     return resolveNameOff(new @unsafe.Pointer(t.Type), off);
 }
 
@@ -182,9 +182,9 @@ internal static ж<_type> resolveTypeOff(@unsafe.Pointer ptrInModule, typeOff of
         // See cmd/link/internal/ld/data.go:relocsym.
         return default!;
     }
-    var @base = ((uintptr)ptrInModule);
+    var @base = (uintptr)ptrInModule;
     ж<moduledata> md = default!;
-    for (var next = Ꮡ(firstmoduledata); next != nil; next = next.val.next) {
+    for (var next = Ꮡfirstmoduledata; next != nil; next = next.Value.next) {
         if (@base >= (~next).types && @base < (~next).etypes) {
             md = next;
             break;
@@ -192,12 +192,12 @@ internal static ж<_type> resolveTypeOff(@unsafe.Pointer ptrInModule, typeOff of
     }
     if (md == nil) {
         reflectOffsLock();
-        @unsafe.Pointer resΔ1 = reflectOffs.m[((int32)off)];
+        @unsafe.Pointer resΔ1 = reflectOffs.m[(int32)off];
         reflectOffsUnlock();
         if (resΔ1 == nil) {
-            println("runtime: typeOff", ((Δhex)off), "base", ((Δhex)@base), "not in ranges:");
-            for (var next = Ꮡ(firstmoduledata); next != nil; next = next.val.next) {
-                println("\ttypes", ((Δhex)(~next).types), "etypes", ((Δhex)(~next).etypes));
+            println("runtime: typeOff", ((Δhex)(uint64)(int32)off), "base", ((Δhex)(uint64)@base), "not in ranges:");
+            for (var next = Ꮡfirstmoduledata; next != nil; next = next.Value.next) {
+                println("\ttypes", ((Δhex)(uint64)(~next).types), "etypes", ((Δhex)(uint64)(~next).etypes));
             }
             @throw("runtime: type offset base pointer out of range"u8);
         }
@@ -208,12 +208,12 @@ internal static ж<_type> resolveTypeOff(@unsafe.Pointer ptrInModule, typeOff of
             return t;
         }
     }
-    var res = (~md).types + ((uintptr)off);
+    var res = (~md).types + (uintptr)(int32)off;
     if (res > (~md).etypes) {
-        println("runtime: typeOff", ((Δhex)off), "out of range", ((Δhex)(~md).types), "-", ((Δhex)(~md).etypes));
+        println("runtime: typeOff", ((Δhex)(uint64)(int32)off), "out of range", ((Δhex)(uint64)(~md).types), "-", ((Δhex)(uint64)(~md).etypes));
         @throw("runtime: type offset out of range"u8);
     }
-    return (ж<_type>)(uintptr)(((@unsafe.Pointer)res));
+    return (ж<_type>)(uintptr)((@unsafe.Pointer)res);
 }
 
 internal static ж<_type> typeOff(this Δrtype t, typeOff off) {
@@ -224,11 +224,11 @@ internal static @unsafe.Pointer textOff(this Δrtype t, textOff off) {
     if (off == -1) {
         // -1 is the sentinel value for unreachable code.
         // See cmd/link/internal/ld/data.go:relocsym.
-        return ((@unsafe.Pointer)abi.FuncPCABIInternal(unreachableMethod));
+        return (@unsafe.Pointer)abi.FuncPCABIInternal(unreachableMethod);
     }
-    var @base = ((uintptr)new @unsafe.Pointer(t.Type));
+    var @base = (uintptr)new @unsafe.Pointer(t.Type);
     ж<moduledata> md = default!;
-    for (var next = Ꮡ(firstmoduledata); next != nil; next = next.val.next) {
+    for (var next = Ꮡfirstmoduledata; next != nil; next = next.Value.next) {
         if (@base >= (~next).types && @base < (~next).etypes) {
             md = next;
             break;
@@ -236,33 +236,33 @@ internal static @unsafe.Pointer textOff(this Δrtype t, textOff off) {
     }
     if (md == nil) {
         reflectOffsLock();
-        @unsafe.Pointer resΔ1 = reflectOffs.m[((int32)off)];
+        @unsafe.Pointer resΔ1 = reflectOffs.m[(int32)off];
         reflectOffsUnlock();
         if (resΔ1 == nil) {
-            println("runtime: textOff", ((Δhex)off), "base", ((Δhex)@base), "not in ranges:");
-            for (var next = Ꮡ(firstmoduledata); next != nil; next = next.val.next) {
-                println("\ttypes", ((Δhex)(~next).types), "etypes", ((Δhex)(~next).etypes));
+            println("runtime: textOff", ((Δhex)(uint64)(int32)off), "base", ((Δhex)(uint64)@base), "not in ranges:");
+            for (var next = Ꮡfirstmoduledata; next != nil; next = next.Value.next) {
+                println("\ttypes", ((Δhex)(uint64)(~next).types), "etypes", ((Δhex)(uint64)(~next).etypes));
             }
             @throw("runtime: text offset base pointer out of range"u8);
         }
         return resΔ1;
     }
-    var res = md.textAddr(((uint32)off));
-    return ((@unsafe.Pointer)res);
+    var res = md.textAddr((uint32)(int32)off);
+    return (@unsafe.Pointer)res;
 }
 
-internal static @string pkgPath(name n) {
-    if (n.Bytes == nil || (byte)(n.Data(0).val & (1 << (int)(2))) == 0) {
+internal static @string pkgPath(abiꓸName n) {
+    if (n.Bytes == nil || (byte)(n.Data(0).Value & ((byte)(1 << (int)(2)))) == 0) {
         return ""u8;
     }
     var (i, l) = n.ReadVarint(1);
     nint off = 1 + i + l;
-    if ((byte)(n.Data(0).val & (1 << (int)(1))) != 0) {
+    if ((byte)(n.Data(0).Value & ((byte)(1 << (int)(1)))) != 0) {
         var (i2, l2) = n.ReadVarint(off);
         off += i2 + l2;
     }
     ref var nameOff = ref heap(new nameOff(), out var ᏑnameOff);
-    copy((ж<array<byte>>)(uintptr)(new @unsafe.Pointer(ᏑnameOff))[..], (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(n.Data(off)))[..]);
+    copy((~(ж<array<byte>>)(uintptr)(new @unsafe.Pointer(ᏑnameOff)))[..], (~(ж<array<byte>>)(uintptr)(new @unsafe.Pointer(n.Data(off))))[..]);
     var pkgPathName = resolveNameOff(new @unsafe.Pointer(n.Bytes), nameOff);
     return pkgPathName.Name();
 }
@@ -276,13 +276,15 @@ internal static void typelinksinit() {
     var typehash = new map<uint32, slice<ж<_type>>>(len(firstmoduledata.typelinks));
     var modules = activeModules();
     var prev = modules[0];
-    foreach (var (_, md) in modules[1..]) {
+    foreach (var (_, vᴛ1) in modules[1..]) {
+        var md = vᴛ1;
+
         // Collect types from the previous module into typehash.
 collect:
         foreach (var (_, tl) in (~prev).typelinks) {
             ж<_type> t = default!;
             if ((~prev).typemap == default!){
-                t = (ж<_type>)(uintptr)(((@unsafe.Pointer)((~prev).types + ((uintptr)tl))));
+                t = (ж<_type>)(uintptr)((@unsafe.Pointer)((~prev).types + (uintptr)tl));
             } else {
                 t = (~prev).typemap[((typeOff)tl)];
             }
@@ -294,16 +296,18 @@ collect:
                 }
             }
             typehash[(~t).Hash] = append(tlist, t);
+continue_collect:;
         }
+break_collect:;
         if ((~md).typemap == default!) {
             // If any of this module's typelinks match a type from a
             // prior module, prefer that prior type by adding the offset
             // to this module's typemap.
-            var tm = new map<typeOff, ж<runtime._type>>(len((~md).typelinks));
+            var tm = new map<typeOff, ж<_type>>(len((~md).typelinks));
             pinnedTypemaps = append(pinnedTypemaps, tm);
-            md.val.typemap = tm;
+            md.Value.typemap = tm;
             foreach (var (_, tl) in (~md).typelinks) {
-                var t = (ж<_type>)(uintptr)(((@unsafe.Pointer)((~md).types + ((uintptr)tl))));
+                var t = (ж<_type>)(uintptr)((@unsafe.Pointer)((~md).types + (uintptr)tl));
                 foreach (var (_, candidate) in typehash[(~t).Hash]) {
                     var seen = new map<_typePair, EmptyStruct>{};
                     if (typesEqual(t, candidate, seen)) {
@@ -311,7 +315,7 @@ collect:
                         break;
                     }
                 }
-                (~md).typemap[((typeOff)tl)] = t;
+                md.Value.typemap[((typeOff)tl)] = t;
             }
         }
         prev = md;
@@ -324,12 +328,9 @@ collect:
 }
 
 internal static Δrtype toRType(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     return new Δrtype(Ꮡt);
-}
-
-[GoType("dyn")] partial struct typesEqual_seen {
 }
 
 // typesEqual reports whether two types are equal.
@@ -344,20 +345,20 @@ internal static Δrtype toRType(ж<abi.Type> Ꮡt) {
 // back into earlier ones.
 //
 // Only typelinksinit needs this function.
-internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, typesEqual_seen seen) {
-    ref var t = ref Ꮡt.val;
-    ref var v = ref Ꮡv.val;
+internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, EmptyStruct> seen) {
+    ref var t = ref Ꮡt.DerefOrNil();
+    ref var v = ref Ꮡv.DerefOrNil();
 
     var tp = new _typePair(Ꮡt, Ꮡv);
     {
-        var (_, ok) = seen[tp]; if (ok) {
+        var (_, ok) = seen[tp, ꟷ]; if (ok) {
             return true;
         }
     }
     // mark these types as seen, and thus equivalent which prevents an infinite loop if
     // the two types are identical, but recursively defined and loaded from
     // different modules
-    seen[tp] = new typesEqual_seen();
+    seen[tp] = new EmptyStruct();
     if (Ꮡt == Ꮡv) {
         return true;
     }
@@ -369,8 +370,8 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, typesEqual_seen 
     if (rt.@string() != rv.@string()) {
         return false;
     }
-    var ut = t.Uncommon();
-    var uv = v.Uncommon();
+    var ut = Ꮡt.Uncommon();
+    var uv = Ꮡv.Uncommon();
     if (ut != nil || uv != nil) {
         if (ut == nil || uv == nil) {
             return false;
@@ -404,18 +405,14 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, typesEqual_seen 
         if ((~ft).OutCount != (~fv).OutCount || (~ft).InCount != (~fv).InCount) {
             return false;
         }
-        var tin = ft.InSlice();
-        var vin = fv.InSlice();
-        ref var i = ref heap<nint>(out var Ꮡi);
-        for (i = 0; i < len(tin); i++) {
+        var (tin, vin) = (ft.InSlice(), fv.InSlice());
+        for (nint i = 0; i < len(tin); i++) {
             if (!typesEqual(tin[i], vin[i], seen)) {
                 return false;
             }
         }
-        var tout = ft.OutSlice();
-        var vout = fv.OutSlice();
-        ref var i = ref heap<nint>(out var Ꮡi);
-        for (i = 0; i < len(tout); i++) {
+        var (tout, vout) = (ft.OutSlice(), fv.OutSlice());
+        for (nint i = 0; i < len(tout); i++) {
             if (!typesEqual(tout[i], vout[i], seen)) {
                 return false;
             }

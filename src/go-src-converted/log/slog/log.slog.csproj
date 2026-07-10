@@ -9,7 +9,7 @@
     <Version>0.1.4</Version>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>
-    <Copyright>Copyright © 2025</Copyright>
+    <Copyright>Copyright © 2026</Copyright>
     <Authors>$(Product) Authors</Authors>
     <Company>Grid Protection Alliance</Company>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
@@ -86,7 +86,6 @@
     <Using Include="System.Double" Alias="float64" />
     <Using Include="System.Numerics.Complex" Alias="complex128" />
     <Using Include="System.Int32" Alias="rune" />
-    <Using Include="System.UIntPtr" Alias="uintptr" />
     <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
     <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTagAttribute" />
     <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
@@ -105,7 +104,10 @@
 
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\bytes\bytes.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\context\context.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\encoding\encoding.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\encoding\json\encoding.json.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\errors\errors.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\fmt\fmt.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\io\io.csproj" />
@@ -122,6 +124,8 @@
     <ProjectReference Include="$(go2csPath)go-src-converted\sync\atomic\sync.atomic.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\sync\sync.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\time\time.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\unicode\unicode.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\unicode\utf8\unicode.utf8.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\unsafe\unsafe.csproj" />
   </ItemGroup>
 

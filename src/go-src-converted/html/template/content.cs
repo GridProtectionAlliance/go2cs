@@ -55,7 +55,7 @@ internal static any indirect(any a) {
 }
 
 internal static reflectꓸType errorType = reflect.TypeFor<error>();
-internal static reflectꓸType fmtStringerType = reflect.TypeFor[fmt.Stringer]();
+internal static reflectꓸType fmtStringerType = reflect.TypeFor<fmt.Stringer>();
 
 // indirectToStringerOrError returns the value, after dereferencing as many times
 // as necessary to reach the base type (or nil) or an implementation of fmt.Stringer

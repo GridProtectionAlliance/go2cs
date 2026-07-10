@@ -4,6 +4,7 @@
 namespace go;
 
 using @unsafe = unsafe_package;
+using @internal.runtime;
 
 partial class runtime_package {
 
@@ -38,35 +39,37 @@ partial class runtime_package {
 // and returns that coro.
 internal static ж<coro> newcoro(Action<ж<coro>> f) {
     var c = @new<coro>();
-    c.val.f = f;
+    c.Value.f = f;
     var pc = getcallerpc();
-    var gp = getg();
-    systemstack(
-    var cʗ2 = c;
-    var gpʗ2 = gp;
-    () => {
-        var mp = gpʗ2.val.m;
-        var start = corostart;
-        var startfv = ~(ж<ж<funcval>>)(uintptr)(new @unsafe.Pointer(Ꮡ(start)));
-        gpʗ2 = newproc1(startfv, gpʗ2, pc, true, waitReasonCoroutine);
+    ref var gp = ref heap<ж<g>>(out var Ꮡgp);
+    gp = getg();
+    var cʗ1 = c;
+    systemstack(() => {
+        var mp = Ꮡgp.ValueSlot.Value.m;
+        ref var start = ref heap<Action>(out var Ꮡstart);
+        start = corostart;
+        var startfv = ~(ж<ж<funcval>>)(uintptr)(new @unsafe.Pointer(Ꮡstart));
+        Ꮡgp.ValueSlot = newproc1(startfv, Ꮡgp.ValueSlot, pc, true, waitReasonCoroutine);
+        // Scribble down locked thread state if needed and/or donate
+        // thread-lock state to the new goroutine.
         if ((~mp).lockedExt + (~mp).lockedInt != 0) {
-            cʗ2.val.mp = mp;
-            cʗ2.val.lockedExt = mp.val.lockedExt;
-            cʗ2.val.lockedInt = mp.val.lockedInt;
+            cʗ1.Value.mp = mp;
+            cʗ1.Value.lockedExt = mp.Value.lockedExt;
+            cʗ1.Value.lockedInt = mp.Value.lockedInt;
         }
     });
-    gp.val.coroarg = c;
-    (~c).gp.set(gp);
+    gp.Value.coroarg = c;
+    c.of(coro.Ꮡgp).set(gp);
     return c;
 }
 
 // corostart is the entry func for a new coroutine.
 // It runs the coroutine user function f passed to corostart
 // and then calls coroexit to remove the extra concurrency.
-internal static void corostart() => func((defer, _) => {
+internal static void corostart() => func((defer, recover) => {
     var gp = getg();
-    var c = gp.val.coroarg;
-    gp.val.coroarg = default!;
+    var c = gp.Value.coroarg;
+    gp.Value.coroarg = default!;
     deferǃ(coroexit, c, defer);
     (~c).f(c);
 });
@@ -74,11 +77,11 @@ internal static void corostart() => func((defer, _) => {
 // coroexit is like coroswitch but closes the coro
 // and exits the current goroutine
 internal static void coroexit(ж<coro> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     var gp = getg();
-    gp.val.coroarg = c;
-    gp.val.coroexit = true;
+    gp.Value.coroarg = Ꮡc;
+    gp.Value.coroexit = true;
     mcall(coroswitch_m);
 }
 
@@ -87,10 +90,10 @@ internal static void coroexit(ж<coro> Ꮡc) {
 // coroswitch switches to the goroutine blocked on c
 // and then blocks the current goroutine on c.
 internal static void coroswitch(ж<coro> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     var gp = getg();
-    gp.val.coroarg = c;
+    gp.Value.coroarg = Ꮡc;
     mcall(coroswitch_m);
 }
 
@@ -107,7 +110,7 @@ internal static void coroswitch(ж<coro> Ꮡc) {
 // It is important not to add more atomic operations or other
 // expensive operations to the fast path.
 internal static void coroswitch_m(ж<g> Ꮡgp) {
-    ref var gp = ref Ꮡgp.val;
+    ref var gp = ref Ꮡgp.DerefOrNil();
 
     var c = gp.coroarg;
     gp.coroarg = default!;
@@ -153,13 +156,13 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
         // If we can CAS ourselves directly from running to waiting, so do,
         // keeping the control transfer as lightweight as possible.
         gp.waitreason = waitReasonCoroutine;
-        if (!gp.atomicstatus.CompareAndSwap(_Grunning, _Gwaiting)) {
+        if (!Ꮡgp.of(g.Ꮡatomicstatus).CompareAndSwap(_Grunning, _Gwaiting)) {
             // The CAS failed: use casgstatus, which will take care of
             // coordinating with the garbage collector about the state change.
             casgstatus(Ꮡgp, _Grunning, _Gwaiting);
         }
         // Clear gp.m.
-        setMNoWB(Ꮡ(gp.m), nil);
+        setMNoWB(Ꮡgp.of(g.Ꮡm), nil);
     }
     // The goroutine stored in c is the one to run next.
     // Swap it with ourselves.
@@ -175,13 +178,13 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
         // We are avoiding the atomic load to keep this path
         // as lightweight as absolutely possible.
         // (The atomic load is free on x86 but not free elsewhere.)
-        var next = c.val.gp;
+        var next = c.Value.gp;
         if (next.ptr() == nil) {
             @throw("coroswitch on exited coro"u8);
         }
         Δguintptr self = default!;
         self.set(Ꮡgp);
-        if ((~c).gp.cas(next, self)) {
+        if (c.of(coro.Ꮡgp).cas(next, self)) {
             gnext = next.ptr();
             break;
         }
@@ -202,9 +205,9 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
     // Start running next, without heavy scheduling machinery.
     // Set mp.curg and gnext.m and then update scheduling state
     // directly if possible.
-    setGNoWB(Ꮡ((~mp).curg), gnext);
-    setMNoWB(Ꮡ((~gnext).m), mp);
-    if (!(~gnext).atomicstatus.CompareAndSwap(_Gwaiting, _Grunning)) {
+    setGNoWB(mp.of(m.Ꮡcurg), gnext);
+    setMNoWB(gnext.of(g.Ꮡm), mp);
+    if (!gnext.of(g.Ꮡatomicstatus).CompareAndSwap(_Gwaiting, _Grunning)) {
         // The CAS failed: use casgstatus, which will take care of
         // coordinating with the garbage collector about the state change.
         casgstatus(gnext, _Gwaiting, _Grunnable);
@@ -212,15 +215,15 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
     }
     // Donate locked state.
     if (locked) {
-        (~mp).lockedg.set(gnext);
-        (~gnext).lockedm.set(mp);
+        mp.of(m.Ꮡlockedg).set(gnext);
+        gnext.of(g.Ꮡlockedm).set(mp);
     }
     // Release the trace locker. We've completed all the necessary transitions..
     if (Δtrace.ok()) {
         traceRelease(Δtrace);
     }
     // Switch to gnext. Does not return.
-    gogo(Ꮡ((~gnext).sched));
+    gogo(gnext.of(g.Ꮡsched));
 }
 
 } // end runtime_package

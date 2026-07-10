@@ -6,12 +6,12 @@ namespace go.@internal;
 
 partial class profile_package {
 
-public delegate bool TagMatch(@string key, @string val, int64 nval);
+// type TagMatch is a methodless func type — rendered inline as its base delegate
 
 // FilterSamplesByTag removes all samples from the profile, except
 // those that match focus and do not match the ignore regular
 // expression.
-[GoRecv] public static (bool fm, bool im) FilterSamplesByTag(this ref Profile p, TagMatch focus, TagMatch ignore) {
+[GoRecv] public static (bool fm, bool im) FilterSamplesByTag(this ref Profile p, Func<@string, @string, int64, bool> focus, Func<@string, @string, int64, bool> ignore) {
     bool fm = default!;
     bool im = default!;
 
@@ -30,11 +30,11 @@ public delegate bool TagMatch(@string key, @string val, int64 nval);
 
 // focusedSample checks a sample against focus and ignore regexps.
 // Returns whether the focus/ignore regexps match any tags.
-internal static (bool fm, bool im) focusedSample(ж<Sample> Ꮡs, TagMatch focus, TagMatch ignore) {
+internal static (bool fm, bool im) focusedSample(ж<Sample> Ꮡs, Func<@string, @string, int64, bool> focus, Func<@string, @string, int64, bool> ignore) {
     bool fm = default!;
     bool im = default!;
 
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
     fm = focus == default!;
     foreach (var (key, vals) in s.Label) {
         foreach (var (_, val) in vals) {

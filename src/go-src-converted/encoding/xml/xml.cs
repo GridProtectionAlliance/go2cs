@@ -4,6 +4,8 @@
 
 // Package xml implements a simple XML 1.0 parser that
 // understands XML name spaces.
+global using ΔToken = object;
+
 namespace go.encoding;
 
 // References:
@@ -17,8 +19,8 @@ using io = io_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
 
 partial class xml_package {
 
@@ -38,8 +40,7 @@ partial class xml_package {
 // is given as a canonical URL, not the short prefix used
 // in the document being parsed.
 [GoType] partial struct Name {
-    public @string Space;
-    public @string Local;
+    public @string Space, Local;
 }
 
 // An Attr represents an attribute in an XML element (Name=Value).
@@ -47,8 +48,6 @@ partial class xml_package {
     public Name Name;
     public @string Value;
 }
-
-[GoType("any")] partial struct ΔToken;
 
 // A StartElement represents an XML start element.
 [GoType] partial struct StartElement {
@@ -194,10 +193,10 @@ public static ΔToken CopyToken(ΔToken t) {
     // as if the entire XML stream were wrapped in an element containing
     // the attribute xmlns="DefaultSpace".
     public @string DefaultSpace;
-    internal io_package.ByteReader r;
+    internal io.ByteReader r;
     internal TokenReader t;
-    internal bytes_package.Buffer buf;
-    internal ж<bytes_package.Buffer> saved;
+    internal bytes.Buffer buf;
+    internal ж<bytes.Buffer> saved;
     internal ж<stack> stk;
     internal ж<stack> free;
     internal bool needClose;
@@ -230,7 +229,7 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
 public static ж<Decoder> NewTokenDecoder(TokenReader t) {
     // Is it already a Decoder?
     {
-        var (dΔ1, ok) = t._<Decoder.val>(ᐧ); if (ok) {
+        var (dΔ1, ok) = t._<ж<Decoder>>(ᐧ); if (ok) {
             return dΔ1;
         }
     }
@@ -273,7 +272,7 @@ public static ж<Decoder> NewTokenDecoder(TokenReader t) {
 [GoRecv] public static (ΔToken, error) Token(this ref Decoder d) {
     ΔToken t = default!;
     error err = default!;
-    if (d.stk != nil && d.stk.kind == stkEOF) {
+    if (d.stk != nil && (~d.stk).kind == stkEOF) {
         return (default!, io.EOF);
     }
     if (d.nextToken != default!){
@@ -282,7 +281,7 @@ public static ж<Decoder> NewTokenDecoder(TokenReader t) {
     } else {
         {
             (t, err) = d.rawToken(); if (t == default! && err != default!) {
-                if (AreEqual(err, io.EOF) && d.stk != nil && d.stk.kind != stkEOF) {
+                if (AreEqual(err, io.EOF) && d.stk != nil && (~d.stk).kind != stkEOF) {
                     err = d.syntaxError("unexpected EOF"u8);
                 }
                 return (default!, err);
@@ -308,25 +307,21 @@ public static ж<Decoder> NewTokenDecoder(TokenReader t) {
             // to the other attribute names, so process
             // the translations first.
             if (a.Name.Space == xmlnsPrefix) {
-                @string v = d.ns[a.Name.Local];
-                var ok = d.ns[a.Name.Local];
+                var (v, ok) = d.ns[a.Name.Local, ꟷ];
                 d.pushNs(a.Name.Local, v, ok);
                 d.ns[a.Name.Local] = a.Value;
             }
             if (a.Name.Space == ""u8 && a.Name.Local == xmlnsPrefix) {
                 // Default space for untagged names
-                @string v = d.ns[""u8];
-                var ok = d.ns[""u8];
+                var (v, ok) = d.ns[""u8, ꟷ];
                 d.pushNs(""u8, v, ok);
                 d.ns[""u8] = a.Value;
             }
         }
         d.pushElement(t1.Name);
-        d.translate(Ꮡt1.of(StartElement.ᏑName), true);
-        ref var i = ref heap(new nint(), out var Ꮡi);
-
+        d.translate(Ꮡ(t1).of(StartElement.ᏑName), true);
         foreach (var (i, _) in t1.Attr) {
-            d.translate(Ꮡt1.Attr[i].of(Attr.ᏑName), false);
+            d.translate(Ꮡ(t1.Attr[i]).of(Attr.ᏑName), false);
         }
         t = t1;
         break;
@@ -348,8 +343,8 @@ internal static readonly @string xmlPrefix = "xml"u8;
 // Apply name space translation to name n.
 // The default name space (for Space=="")
 // applies only to element names, not to attribute names.
-[GoRecv] public static void translate(this ref Decoder d, ж<Name> Ꮡn, bool isElementName) {
-    ref var n = ref Ꮡn.val;
+[GoRecv] internal static void translate(this ref Decoder d, ж<Name> Ꮡn, bool isElementName) {
+    ref var n = ref Ꮡn.Value;
 
     switch (ᐧ) {
     case {} when n.Space == xmlnsPrefix: {
@@ -367,8 +362,7 @@ internal static readonly @string xmlPrefix = "xml"u8;
     }}
 
     {
-        @string v = d.ns[n.Space];
-        var ok = d.ns[n.Space]; if (ok){
+        var (v, ok) = d.ns[n.Space, ꟷ]; if (ok){
             n.Space = v;
         } else 
         if (n.Space == ""u8) {
@@ -386,7 +380,7 @@ internal static readonly @string xmlPrefix = "xml"u8;
         var (rb, ok) = r._<io.ByteReader>(ᐧ); if (ok){
             d.r = rb;
         } else {
-            d.r = bufio.NewReader(r);
+            d.r = new bufio_ReaderжByteReader(bufio.NewReader(r));
         }
     }
 }
@@ -409,12 +403,12 @@ internal static readonly UntypedInt stkEOF = 2;
 [GoRecv] internal static ж<stack> push(this ref Decoder d, nint kind) {
     var s = d.free;
     if (s != nil){
-        d.free = s.val.next;
+        d.free = s.Value.next;
     } else {
         s = @new<stack>();
     }
-    s.val.next = d.stk;
-    s.val.kind = kind;
+    s.Value.next = d.stk;
+    s.Value.kind = kind;
     d.stk = s;
     return s;
 }
@@ -422,8 +416,8 @@ internal static readonly UntypedInt stkEOF = 2;
 [GoRecv] internal static ж<stack> pop(this ref Decoder d) {
     var s = d.stk;
     if (s != nil) {
-        d.stk = s.val.next;
-        s.val.next = d.free;
+        d.stk = s.Value.next;
+        s.Value.next = d.free;
         d.free = s;
     }
     return s;
@@ -438,28 +432,28 @@ internal static readonly UntypedInt stkEOF = 2;
     // entries above it.
     var start = d.stk;
     while ((~start).kind != stkStart) {
-        start = start.val.next;
+        start = start.Value.next;
     }
     // The stkNs entries below a start are associated with that
     // element too; skip over them.
     while ((~start).next != nil && (~(~start).next).kind == stkNs) {
-        start = start.val.next;
+        start = start.Value.next;
     }
     var s = d.free;
     if (s != nil){
-        d.free = s.val.next;
+        d.free = s.Value.next;
     } else {
         s = @new<stack>();
     }
-    s.val.kind = stkEOF;
-    s.val.next = start.val.next;
-    start.val.next = s;
+    s.Value.kind = stkEOF;
+    s.Value.next = start.Value.next;
+    start.Value.next = s;
 }
 
 // Undo a pushEOF.
 // The element must have been finished, so the EOF should be at the top of the stack.
 [GoRecv] internal static bool popEOF(this ref Decoder d) {
-    if (d.stk == nil || d.stk.kind != stkEOF) {
+    if (d.stk == nil || (~d.stk).kind != stkEOF) {
         return false;
     }
     d.pop();
@@ -469,21 +463,21 @@ internal static readonly UntypedInt stkEOF = 2;
 // Record that we are starting an element with the given name.
 [GoRecv] internal static void pushElement(this ref Decoder d, Name name) {
     var s = d.push(stkStart);
-    s.val.name = name;
+    s.Value.name = name;
 }
 
 // Record that we are changing the value of ns[local].
 // The old value is url, ok.
 [GoRecv] internal static void pushNs(this ref Decoder d, @string local, @string url, bool ok) {
     var s = d.push(stkNs);
-    (~s).name.Local = local;
-    (~s).name.Space = url;
-    s.val.ok = ok;
+    s.Value.name.Local = local;
+    s.Value.name.Space = url;
+    s.Value.ok = ok;
 }
 
 // Creates a SyntaxError with the current line number.
 [GoRecv] internal static error syntaxError(this ref Decoder d, @string msg) {
-    return new SyntaxError(Msg: msg, Line: d.line);
+    return new SyntaxErrorжerror(Ꮡ(new SyntaxError(Msg: msg, Line: d.line)));
 }
 
 // Record that we are ending an element with the given name.
@@ -492,8 +486,8 @@ internal static readonly UntypedInt stkEOF = 2;
 // After popping the element, apply any undo records from
 // the stack to restore the name translations that existed
 // before we saw this element.
-[GoRecv] public static bool popElement(this ref Decoder d, ж<EndElement> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+[GoRecv] internal static bool popElement(this ref Decoder d, ж<EndElement> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
 
     var s = d.pop();
     var name = t.Name;
@@ -502,17 +496,17 @@ internal static readonly UntypedInt stkEOF = 2;
         d.err = d.syntaxError("unexpected end element </"u8 + name.Local + ">"u8);
         return false;
     }
-    case {} when (~s).name.Local is != name.Local: {
+    case {} when (~s).name.Local != name.Local: {
         if (!d.Strict) {
             d.needClose = true;
             d.toClose = t.Name;
-            t.Name = s.val.name;
+            t.Name = s.Value.name;
             return true;
         }
         d.err = d.syntaxError("element <"u8 + (~s).name.Local + "> closed by </"u8 + name.Local + ">"u8);
         return false;
     }
-    case {} when (~s).name.Space is != name.Space: {
+    case {} when (~s).name.Space != name.Space: {
         @string ns = name.Space;
         if (name.Space == ""u8) {
             ns = @""""""u8;
@@ -521,13 +515,13 @@ internal static readonly UntypedInt stkEOF = 2;
         return false;
     }}
 
-    d.translate(Ꮡ(t.Name), true);
+    d.translate(Ꮡt.of(EndElement.ᏑName), true);
     // Pop stack until a Start or EOF is on the top, undoing the
     // translations that were associated with the element we just closed.
-    while (d.stk != nil && d.stk.kind != stkStart && d.stk.kind != stkEOF) {
+    while (d.stk != nil && (~d.stk).kind != stkStart && (~d.stk).kind != stkEOF) {
         var sΔ1 = d.pop();
         if ((~sΔ1).ok){
-            d.ns[(~s).name.Local] = (~sΔ1).name.Space;
+            d.ns[(~sΔ1).name.Local] = sΔ1.Value.name.Space;
         } else {
             delete(d.ns, (~sΔ1).name.Local);
         }
@@ -538,15 +532,15 @@ internal static readonly UntypedInt stkEOF = 2;
 // If the top element on the stack is autoclosing and
 // t is not the end tag, invent the end tag.
 [GoRecv] internal static (ΔToken, bool) autoClose(this ref Decoder d, ΔToken t) {
-    if (d.stk == nil || d.stk.kind != stkStart) {
+    if (d.stk == nil || (~d.stk).kind != stkStart) {
         return (default!, false);
     }
     foreach (var (_, s) in d.AutoClose) {
-        if (strings.EqualFold(s, d.stk.name.Local)) {
+        if (strings.EqualFold(s, (~d.stk).name.Local)) {
             // This one should be auto closed if t doesn't close it.
             var (et, ok) = t._<EndElement>(ᐧ);
-            if (!ok || !strings.EqualFold(et.Name.Local, d.stk.name.Local)) {
-                return (new EndElement(d.stk.name), true);
+            if (!ok || !strings.EqualFold(et.Name.Local, (~d.stk).name.Local)) {
+                return (new EndElement((~d.stk).name), true);
             }
             break;
         }
@@ -635,7 +629,7 @@ internal static error errRawToken = errors.New("xml: cannot use RawToken from Un
         }
         d.space();
         d.buf.Reset();
-        byte b0Δ4 = default!;
+        byte b0 = default!;
         while (ᐧ) {
             {
                 (b, ok) = d.mustgetc(); if (!ok) {
@@ -643,7 +637,7 @@ internal static error errRawToken = errors.New("xml: cannot use RawToken from Un
                 }
             }
             d.buf.WriteByte(b);
-            if (b0Δ4 == (rune)'?' && b == (rune)'>') {
+            if (b0 == (rune)'?' && b == (rune)'>') {
                 break;
             }
             b0 = b;
@@ -664,13 +658,13 @@ internal static error errRawToken = errors.New("xml: cannot use RawToken from Un
                     d.err = fmt.Errorf("xml: encoding %q declared but Decoder.CharsetReader is nil"u8, enc);
                     return (default!, d.err);
                 }
-                (newr, err) = d.CharsetReader(enc, d.r._<io.Reader>());
+                var (newr, err) = d.CharsetReader(enc, d.r._<io.Reader>());
                 if (err != default!) {
                     d.err = fmt.Errorf("xml: opening charset %q: %w"u8, enc, err);
                     return (default!, d.err);
                 }
                 if (newr == default!) {
-                    throw panic("CharsetReader returned a nil Reader for charset "u8 + enc);
+                    throw panic("CharsetReader returned a nil Reader for charset " + enc);
                 }
                 d.switchToReader(newr);
             }
@@ -699,8 +693,8 @@ internal static error errRawToken = errors.New("xml: cannot use RawToken from Un
             }
             d.buf.Reset();
 // Look for terminator.
-            byte b0Δ6 = default!;
-            byte b1Δ4 = default!;
+            byte b0 = default!;
+            byte b1 = default!;
             while (ᐧ) {
                 {
                     (b, ok) = d.mustgetc(); if (!ok) {
@@ -708,7 +702,7 @@ internal static error errRawToken = errors.New("xml: cannot use RawToken from Un
                     }
                 }
                 d.buf.WriteByte(b);
-                if (b0Δ6 == (rune)'-' && b1Δ4 == (rune)'-') {
+                if (b0 == (rune)'-' && b1 == (rune)'-') {
                     if (b != (rune)'>') {
                         d.err = d.syntaxError(
                             @"invalid sequence ""--"" not allowed in comments"u8);
@@ -716,7 +710,7 @@ internal static error errRawToken = errors.New("xml: cannot use RawToken from Un
                     }
                     break;
                 }
-                (b0, b1) = (b1Δ4, b);
+                (b0, b1) = (b1, b);
             }
             var data = d.buf.Bytes();
             data = data[0..(int)(len(data) - 3)];
@@ -732,7 +726,7 @@ internal static error errRawToken = errors.New("xml: cannot use RawToken from Un
                         return (default!, d.err);
                     }
                 }
-                if (b != "CDATA["u8[i]) {
+                if (b != "CDATA["u8[(int)(i)]) {
                     d.err = d.syntaxError("invalid <![ sequence"u8);
                     return (default!, d.err);
                 }
@@ -747,7 +741,7 @@ internal static error errRawToken = errors.New("xml: cannot use RawToken from Un
 
         d.buf.Reset();
         d.buf.WriteByte(b);
-        var inquote = ((uint8)0);
+        var inquote = (uint8)0;
         nint depth = 0;
         while (ᐧ) {
             // Probably a directive: <!DOCTYPE ...>, <!ENTITY ...>, etc.
@@ -764,11 +758,11 @@ internal static error errRawToken = errors.New("xml: cannot use RawToken from Un
 HandleB:
             d.buf.WriteByte(b);
             switch (ᐧ) {
-            case {} when b is inquote: {
+            case {} when b == inquote: {
                 inquote = 0;
                 break;
             }
-            case {} when inquote is != 0: {
+            case {} when inquote is not 0: {
                 break;
             }
             case {} when b == (rune)'\'' || b == (rune)'"': {
@@ -866,7 +860,7 @@ HandleB:
         d.ungetc(b);
         var a = new Attr(nil);
         {
-            var (a.Name, ok) = d.nsname(); if (!ok) {
+            (a.Name, ok) = d.nsname(); if (!ok) {
                 if (d.err == default!) {
                     d.err = d.syntaxError("expected attribute name in element"u8);
                 }
@@ -910,7 +904,7 @@ HandleB:
     }
     // Handle quoted attribute values
     if (b == (rune)'"' || b == (rune)'\'') {
-        return d.text(((nint)b), false);
+        return d.text((nint)b, false);
     }
     // Handle unquoted attribute values for strict parsers
     if (d.Strict) {
@@ -967,7 +961,7 @@ HandleB:
         return (0, false);
     }
     if (d.nextByte >= 0){
-        b = ((byte)d.nextByte);
+        b = (byte)d.nextByte;
         d.nextByte = -1;
     } else {
         (b, d.err) = d.r.ReadByte();
@@ -1000,7 +994,7 @@ HandleB:
     nint line = default!;
     nint column = default!;
 
-    return (d.line, ((nint)(d.offset - d.linestart)) + 1);
+    return (d.line, (nint)(d.offset - d.linestart) + 1);
 }
 
 // Return saved offset.
@@ -1036,7 +1030,7 @@ HandleB:
     if (b == (rune)'\n') {
         d.line--;
     }
-    d.nextByte = ((nint)b);
+    d.nextByte = (nint)b;
     d.offset--;
 }
 
@@ -1059,8 +1053,8 @@ internal static map<@string, rune> entity = new map<@string, rune>{
     d.buf.Reset();
 Input:
     while (ᐧ) {
-        var (b, okΔ1) = d.getc();
-        if (!okΔ1) {
+        var (b, ok) = d.getc();
+        if (!ok) {
             if (cdata) {
                 if (AreEqual(d.err, io.EOF)) {
                     d.err = d.syntaxError("unexpected EOF in CDATA section"u8);
@@ -1088,7 +1082,7 @@ Input:
             d.ungetc((rune)'<');
             goto break_Input;
         }
-        if (quote >= 0 && b == ((byte)quote)) {
+        if (quote >= 0 && b == (byte)quote) {
             goto break_Input;
         }
         if (b == (rune)'&' && !cdata) {
@@ -1099,18 +1093,18 @@ Input:
             // even if they have not been declared.
             nint before = d.buf.Len();
             d.buf.WriteByte((rune)'&');
-            bool okΔ2 = default!;
+            bool okΔ1 = default!;
             @string text = default!;
             bool haveText = default!;
             {
-                (b, okΔ2) = d.mustgetc(); if (!okΔ2) {
+                (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
                     return default!;
                 }
             }
             if (b == (rune)'#'){
                 d.buf.WriteByte(b);
                 {
-                    (b, okΔ2) = d.mustgetc(); if (!okΔ2) {
+                    (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
                         return default!;
                     }
                 }
@@ -1119,7 +1113,7 @@ Input:
                     @base = 16;
                     d.buf.WriteByte(b);
                     {
-                        (b, okΔ2) = d.mustgetc(); if (!okΔ2) {
+                        (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
                             return default!;
                         }
                     }
@@ -1128,7 +1122,7 @@ Input:
                 while ((rune)'0' <= b && b <= (rune)'9' || @base == 16 && (rune)'a' <= b && b <= (rune)'f' || @base == 16 && (rune)'A' <= b && b <= (rune)'F') {
                     d.buf.WriteByte(b);
                     {
-                        (b, okΔ2) = d.mustgetc(); if (!okΔ2) {
+                        (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
                             return default!;
                         }
                     }
@@ -1140,7 +1134,7 @@ Input:
                     d.buf.WriteByte((rune)';');
                     var (n, err) = strconv.ParseUint(s, @base, 64);
                     if (err == default! && n <= unicode.MaxRune) {
-                        text = ((@string)((rune)n));
+                        text = ((@string)(rune)n);
                         haveText = true;
                     }
                 }
@@ -1152,7 +1146,7 @@ Input:
                     }
                 }
                 {
-                    (b, okΔ2) = d.mustgetc(); if (!okΔ2) {
+                    (b, okΔ1) = d.mustgetc(); if (!okΔ1) {
                         return default!;
                     }
                 }
@@ -1164,12 +1158,12 @@ Input:
                     if (isName(name)) {
                         @string s = ((@string)name);
                         {
-                            var (r, okΔ3) = entity[s]; if (okΔ3){
+                            var (r, okΔ2) = entity[s, ꟷ]; if (okΔ2){
                                 text = ((@string)r);
                                 haveText = true;
                             } else 
                             if (d.Entity != default!) {
-                                (text, haveText) = d.Entity[s];
+                                (text, haveText) = d.Entity[s, ꟷ];
                             }
                         }
                     }
@@ -1230,7 +1224,7 @@ break_Input:;
 internal static bool /*inrange*/ isInCharacterRange(rune r) {
     bool inrange = default!;
 
-    return r == 9 || r == 10 || r == 13 || r >= 32 && r <= 55295 || r >= 57344 && r <= 65533 || r >= 65536 && r <= 1114111;
+    return r == 0x09 || r == 0x0A || r == 0x0D || r >= 0x20 && r <= 0xD7FF || r >= 0xE000 && r <= 0xFFFD || r >= 0x10000 && r <= 0x10FFFF;
 }
 
 // Get name space name: name with a : stuck in the middle.
@@ -1239,7 +1233,7 @@ internal static bool /*inrange*/ isInCharacterRange(rune r) {
     Name name = default!;
     bool ok = default!;
 
-    var (s, ok) = d.name();
+    (var s, ok) = d.name();
     if (!ok) {
         return (name, ok);
     }
@@ -1367,313 +1361,313 @@ internal static bool isNameString(@string s) {
 // and second corresponds to NameChar.
 internal static ж<unicode.RangeTable> first = Ꮡ(new unicode.RangeTable(
     R16: new unicode.Range16[]{
-        new(58, 58, 1),
-        new(65, 90, 1),
-        new(95, 95, 1),
-        new(97, 122, 1),
-        new(192, 214, 1),
-        new(216, 246, 1),
-        new(248, 255, 1),
-        new(256, 305, 1),
-        new(308, 318, 1),
-        new(321, 328, 1),
-        new(330, 382, 1),
-        new(384, 451, 1),
-        new(461, 496, 1),
-        new(500, 501, 1),
-        new(506, 535, 1),
-        new(592, 680, 1),
-        new(699, 705, 1),
-        new(902, 902, 1),
-        new(904, 906, 1),
-        new(908, 908, 1),
-        new(910, 929, 1),
-        new(931, 974, 1),
-        new(976, 982, 1),
-        new(986, 992, 2),
-        new(994, 1011, 1),
-        new(1025, 1036, 1),
-        new(1038, 1103, 1),
-        new(1105, 1116, 1),
-        new(1118, 1153, 1),
-        new(1168, 1220, 1),
-        new(1223, 1224, 1),
-        new(1227, 1228, 1),
-        new(1232, 1259, 1),
-        new(1262, 1269, 1),
-        new(1272, 1273, 1),
-        new(1329, 1366, 1),
-        new(1369, 1369, 1),
-        new(1377, 1414, 1),
-        new(1488, 1514, 1),
-        new(1520, 1522, 1),
-        new(1569, 1594, 1),
-        new(1601, 1610, 1),
-        new(1649, 1719, 1),
-        new(1722, 1726, 1),
-        new(1728, 1742, 1),
-        new(1744, 1747, 1),
-        new(1749, 1749, 1),
-        new(1765, 1766, 1),
-        new(2309, 2361, 1),
-        new(2365, 2365, 1),
-        new(2392, 2401, 1),
-        new(2437, 2444, 1),
-        new(2447, 2448, 1),
-        new(2451, 2472, 1),
-        new(2474, 2480, 1),
-        new(2482, 2482, 1),
-        new(2486, 2489, 1),
-        new(2524, 2525, 1),
-        new(2527, 2529, 1),
-        new(2544, 2545, 1),
-        new(2565, 2570, 1),
-        new(2575, 2576, 1),
-        new(2579, 2600, 1),
-        new(2602, 2608, 1),
-        new(2610, 2611, 1),
-        new(2613, 2614, 1),
-        new(2616, 2617, 1),
-        new(2649, 2652, 1),
-        new(2654, 2654, 1),
-        new(2674, 2676, 1),
-        new(2693, 2699, 1),
-        new(2701, 2701, 1),
-        new(2703, 2705, 1),
-        new(2707, 2728, 1),
-        new(2730, 2736, 1),
-        new(2738, 2739, 1),
-        new(2741, 2745, 1),
-        new(2749, 2784, 35),
-        new(2821, 2828, 1),
-        new(2831, 2832, 1),
-        new(2835, 2856, 1),
-        new(2858, 2864, 1),
-        new(2866, 2867, 1),
-        new(2870, 2873, 1),
-        new(2877, 2877, 1),
-        new(2908, 2909, 1),
-        new(2911, 2913, 1),
-        new(2949, 2954, 1),
-        new(2958, 2960, 1),
-        new(2962, 2965, 1),
-        new(2969, 2970, 1),
-        new(2972, 2972, 1),
-        new(2974, 2975, 1),
-        new(2979, 2980, 1),
-        new(2984, 2986, 1),
-        new(2990, 2997, 1),
-        new(2999, 3001, 1),
-        new(3077, 3084, 1),
-        new(3086, 3088, 1),
-        new(3090, 3112, 1),
-        new(3114, 3123, 1),
-        new(3125, 3129, 1),
-        new(3168, 3169, 1),
-        new(3205, 3212, 1),
-        new(3214, 3216, 1),
-        new(3218, 3240, 1),
-        new(3242, 3251, 1),
-        new(3253, 3257, 1),
-        new(3294, 3294, 1),
-        new(3296, 3297, 1),
-        new(3333, 3340, 1),
-        new(3342, 3344, 1),
-        new(3346, 3368, 1),
-        new(3370, 3385, 1),
-        new(3424, 3425, 1),
-        new(3585, 3630, 1),
-        new(3632, 3632, 1),
-        new(3634, 3635, 1),
-        new(3648, 3653, 1),
-        new(3713, 3714, 1),
-        new(3716, 3716, 1),
-        new(3719, 3720, 1),
-        new(3722, 3725, 3),
-        new(3732, 3735, 1),
-        new(3737, 3743, 1),
-        new(3745, 3747, 1),
-        new(3749, 3751, 2),
-        new(3754, 3755, 1),
-        new(3757, 3758, 1),
-        new(3760, 3760, 1),
-        new(3762, 3763, 1),
-        new(3773, 3773, 1),
-        new(3776, 3780, 1),
-        new(3904, 3911, 1),
-        new(3913, 3945, 1),
-        new(4256, 4293, 1),
-        new(4304, 4342, 1),
-        new(4352, 4352, 1),
-        new(4354, 4355, 1),
-        new(4357, 4359, 1),
-        new(4361, 4361, 1),
-        new(4363, 4364, 1),
-        new(4366, 4370, 1),
-        new(4412, 4416, 2),
-        new(4428, 4432, 2),
-        new(4436, 4437, 1),
-        new(4441, 4441, 1),
-        new(4447, 4449, 1),
-        new(4451, 4457, 2),
-        new(4461, 4462, 1),
-        new(4466, 4467, 1),
-        new(4469, 4510, 4510 - 4469),
-        new(4520, 4523, 4523 - 4520),
-        new(4526, 4527, 1),
-        new(4535, 4536, 1),
-        new(4538, 4538, 1),
-        new(4540, 4546, 1),
-        new(4587, 4592, 4592 - 4587),
-        new(4601, 4601, 1),
-        new(7680, 7835, 1),
-        new(7840, 7929, 1),
-        new(7936, 7957, 1),
-        new(7960, 7965, 1),
-        new(7968, 8005, 1),
-        new(8008, 8013, 1),
-        new(8016, 8023, 1),
-        new(8025, 8027, 8027 - 8025),
-        new(8029, 8029, 1),
-        new(8031, 8061, 1),
-        new(8064, 8116, 1),
-        new(8118, 8124, 1),
-        new(8126, 8126, 1),
-        new(8130, 8132, 1),
-        new(8134, 8140, 1),
-        new(8144, 8147, 1),
-        new(8150, 8155, 1),
-        new(8160, 8172, 1),
-        new(8178, 8180, 1),
-        new(8182, 8188, 1),
-        new(8486, 8486, 1),
-        new(8490, 8491, 1),
-        new(8494, 8494, 1),
-        new(8576, 8578, 1),
-        new(12295, 12295, 1),
-        new(12321, 12329, 1),
-        new(12353, 12436, 1),
-        new(12449, 12538, 1),
-        new(12549, 12588, 1),
-        new(19968, 40869, 1),
-        new(44032, 55203, 1)
+        new(0x003A, 0x003A, 1),
+        new(0x0041, 0x005A, 1),
+        new(0x005F, 0x005F, 1),
+        new(0x0061, 0x007A, 1),
+        new(0x00C0, 0x00D6, 1),
+        new(0x00D8, 0x00F6, 1),
+        new(0x00F8, 0x00FF, 1),
+        new(0x0100, 0x0131, 1),
+        new(0x0134, 0x013E, 1),
+        new(0x0141, 0x0148, 1),
+        new(0x014A, 0x017E, 1),
+        new(0x0180, 0x01C3, 1),
+        new(0x01CD, 0x01F0, 1),
+        new(0x01F4, 0x01F5, 1),
+        new(0x01FA, 0x0217, 1),
+        new(0x0250, 0x02A8, 1),
+        new(0x02BB, 0x02C1, 1),
+        new(0x0386, 0x0386, 1),
+        new(0x0388, 0x038A, 1),
+        new(0x038C, 0x038C, 1),
+        new(0x038E, 0x03A1, 1),
+        new(0x03A3, 0x03CE, 1),
+        new(0x03D0, 0x03D6, 1),
+        new(0x03DA, 0x03E0, 2),
+        new(0x03E2, 0x03F3, 1),
+        new(0x0401, 0x040C, 1),
+        new(0x040E, 0x044F, 1),
+        new(0x0451, 0x045C, 1),
+        new(0x045E, 0x0481, 1),
+        new(0x0490, 0x04C4, 1),
+        new(0x04C7, 0x04C8, 1),
+        new(0x04CB, 0x04CC, 1),
+        new(0x04D0, 0x04EB, 1),
+        new(0x04EE, 0x04F5, 1),
+        new(0x04F8, 0x04F9, 1),
+        new(0x0531, 0x0556, 1),
+        new(0x0559, 0x0559, 1),
+        new(0x0561, 0x0586, 1),
+        new(0x05D0, 0x05EA, 1),
+        new(0x05F0, 0x05F2, 1),
+        new(0x0621, 0x063A, 1),
+        new(0x0641, 0x064A, 1),
+        new(0x0671, 0x06B7, 1),
+        new(0x06BA, 0x06BE, 1),
+        new(0x06C0, 0x06CE, 1),
+        new(0x06D0, 0x06D3, 1),
+        new(0x06D5, 0x06D5, 1),
+        new(0x06E5, 0x06E6, 1),
+        new(0x0905, 0x0939, 1),
+        new(0x093D, 0x093D, 1),
+        new(0x0958, 0x0961, 1),
+        new(0x0985, 0x098C, 1),
+        new(0x098F, 0x0990, 1),
+        new(0x0993, 0x09A8, 1),
+        new(0x09AA, 0x09B0, 1),
+        new(0x09B2, 0x09B2, 1),
+        new(0x09B6, 0x09B9, 1),
+        new(0x09DC, 0x09DD, 1),
+        new(0x09DF, 0x09E1, 1),
+        new(0x09F0, 0x09F1, 1),
+        new(0x0A05, 0x0A0A, 1),
+        new(0x0A0F, 0x0A10, 1),
+        new(0x0A13, 0x0A28, 1),
+        new(0x0A2A, 0x0A30, 1),
+        new(0x0A32, 0x0A33, 1),
+        new(0x0A35, 0x0A36, 1),
+        new(0x0A38, 0x0A39, 1),
+        new(0x0A59, 0x0A5C, 1),
+        new(0x0A5E, 0x0A5E, 1),
+        new(0x0A72, 0x0A74, 1),
+        new(0x0A85, 0x0A8B, 1),
+        new(0x0A8D, 0x0A8D, 1),
+        new(0x0A8F, 0x0A91, 1),
+        new(0x0A93, 0x0AA8, 1),
+        new(0x0AAA, 0x0AB0, 1),
+        new(0x0AB2, 0x0AB3, 1),
+        new(0x0AB5, 0x0AB9, 1),
+        new(0x0ABD, 0x0AE0, 0x23),
+        new(0x0B05, 0x0B0C, 1),
+        new(0x0B0F, 0x0B10, 1),
+        new(0x0B13, 0x0B28, 1),
+        new(0x0B2A, 0x0B30, 1),
+        new(0x0B32, 0x0B33, 1),
+        new(0x0B36, 0x0B39, 1),
+        new(0x0B3D, 0x0B3D, 1),
+        new(0x0B5C, 0x0B5D, 1),
+        new(0x0B5F, 0x0B61, 1),
+        new(0x0B85, 0x0B8A, 1),
+        new(0x0B8E, 0x0B90, 1),
+        new(0x0B92, 0x0B95, 1),
+        new(0x0B99, 0x0B9A, 1),
+        new(0x0B9C, 0x0B9C, 1),
+        new(0x0B9E, 0x0B9F, 1),
+        new(0x0BA3, 0x0BA4, 1),
+        new(0x0BA8, 0x0BAA, 1),
+        new(0x0BAE, 0x0BB5, 1),
+        new(0x0BB7, 0x0BB9, 1),
+        new(0x0C05, 0x0C0C, 1),
+        new(0x0C0E, 0x0C10, 1),
+        new(0x0C12, 0x0C28, 1),
+        new(0x0C2A, 0x0C33, 1),
+        new(0x0C35, 0x0C39, 1),
+        new(0x0C60, 0x0C61, 1),
+        new(0x0C85, 0x0C8C, 1),
+        new(0x0C8E, 0x0C90, 1),
+        new(0x0C92, 0x0CA8, 1),
+        new(0x0CAA, 0x0CB3, 1),
+        new(0x0CB5, 0x0CB9, 1),
+        new(0x0CDE, 0x0CDE, 1),
+        new(0x0CE0, 0x0CE1, 1),
+        new(0x0D05, 0x0D0C, 1),
+        new(0x0D0E, 0x0D10, 1),
+        new(0x0D12, 0x0D28, 1),
+        new(0x0D2A, 0x0D39, 1),
+        new(0x0D60, 0x0D61, 1),
+        new(0x0E01, 0x0E2E, 1),
+        new(0x0E30, 0x0E30, 1),
+        new(0x0E32, 0x0E33, 1),
+        new(0x0E40, 0x0E45, 1),
+        new(0x0E81, 0x0E82, 1),
+        new(0x0E84, 0x0E84, 1),
+        new(0x0E87, 0x0E88, 1),
+        new(0x0E8A, 0x0E8D, 3),
+        new(0x0E94, 0x0E97, 1),
+        new(0x0E99, 0x0E9F, 1),
+        new(0x0EA1, 0x0EA3, 1),
+        new(0x0EA5, 0x0EA7, 2),
+        new(0x0EAA, 0x0EAB, 1),
+        new(0x0EAD, 0x0EAE, 1),
+        new(0x0EB0, 0x0EB0, 1),
+        new(0x0EB2, 0x0EB3, 1),
+        new(0x0EBD, 0x0EBD, 1),
+        new(0x0EC0, 0x0EC4, 1),
+        new(0x0F40, 0x0F47, 1),
+        new(0x0F49, 0x0F69, 1),
+        new(0x10A0, 0x10C5, 1),
+        new(0x10D0, 0x10F6, 1),
+        new(0x1100, 0x1100, 1),
+        new(0x1102, 0x1103, 1),
+        new(0x1105, 0x1107, 1),
+        new(0x1109, 0x1109, 1),
+        new(0x110B, 0x110C, 1),
+        new(0x110E, 0x1112, 1),
+        new(0x113C, 0x1140, 2),
+        new(0x114C, 0x1150, 2),
+        new(0x1154, 0x1155, 1),
+        new(0x1159, 0x1159, 1),
+        new(0x115F, 0x1161, 1),
+        new(0x1163, 0x1169, 2),
+        new(0x116D, 0x116E, 1),
+        new(0x1172, 0x1173, 1),
+        new(0x1175, 0x119E, 0x119E - 0x1175),
+        new(0x11A8, 0x11AB, 0x11AB - 0x11A8),
+        new(0x11AE, 0x11AF, 1),
+        new(0x11B7, 0x11B8, 1),
+        new(0x11BA, 0x11BA, 1),
+        new(0x11BC, 0x11C2, 1),
+        new(0x11EB, 0x11F0, 0x11F0 - 0x11EB),
+        new(0x11F9, 0x11F9, 1),
+        new(0x1E00, 0x1E9B, 1),
+        new(0x1EA0, 0x1EF9, 1),
+        new(0x1F00, 0x1F15, 1),
+        new(0x1F18, 0x1F1D, 1),
+        new(0x1F20, 0x1F45, 1),
+        new(0x1F48, 0x1F4D, 1),
+        new(0x1F50, 0x1F57, 1),
+        new(0x1F59, 0x1F5B, 0x1F5B - 0x1F59),
+        new(0x1F5D, 0x1F5D, 1),
+        new(0x1F5F, 0x1F7D, 1),
+        new(0x1F80, 0x1FB4, 1),
+        new(0x1FB6, 0x1FBC, 1),
+        new(0x1FBE, 0x1FBE, 1),
+        new(0x1FC2, 0x1FC4, 1),
+        new(0x1FC6, 0x1FCC, 1),
+        new(0x1FD0, 0x1FD3, 1),
+        new(0x1FD6, 0x1FDB, 1),
+        new(0x1FE0, 0x1FEC, 1),
+        new(0x1FF2, 0x1FF4, 1),
+        new(0x1FF6, 0x1FFC, 1),
+        new(0x2126, 0x2126, 1),
+        new(0x212A, 0x212B, 1),
+        new(0x212E, 0x212E, 1),
+        new(0x2180, 0x2182, 1),
+        new(0x3007, 0x3007, 1),
+        new(0x3021, 0x3029, 1),
+        new(0x3041, 0x3094, 1),
+        new(0x30A1, 0x30FA, 1),
+        new(0x3105, 0x312C, 1),
+        new(0x4E00, 0x9FA5, 1),
+        new(0xAC00, 0xD7A3, 1)
     }.slice()
 ));
 
 internal static ж<unicode.RangeTable> second = Ꮡ(new unicode.RangeTable(
     R16: new unicode.Range16[]{
-        new(45, 46, 1),
-        new(48, 57, 1),
-        new(183, 183, 1),
-        new(720, 721, 1),
-        new(768, 837, 1),
-        new(864, 865, 1),
-        new(903, 903, 1),
-        new(1155, 1158, 1),
-        new(1425, 1441, 1),
-        new(1443, 1465, 1),
-        new(1467, 1469, 1),
-        new(1471, 1471, 1),
-        new(1473, 1474, 1),
-        new(1476, 1600, 1600 - 1476),
-        new(1611, 1618, 1),
-        new(1632, 1641, 1),
-        new(1648, 1648, 1),
-        new(1750, 1756, 1),
-        new(1757, 1759, 1),
-        new(1760, 1764, 1),
-        new(1767, 1768, 1),
-        new(1770, 1773, 1),
-        new(1776, 1785, 1),
-        new(2305, 2307, 1),
-        new(2364, 2364, 1),
-        new(2366, 2380, 1),
-        new(2381, 2381, 1),
-        new(2385, 2388, 1),
-        new(2402, 2403, 1),
-        new(2406, 2415, 1),
-        new(2433, 2435, 1),
-        new(2492, 2492, 1),
-        new(2494, 2495, 1),
-        new(2496, 2500, 1),
-        new(2503, 2504, 1),
-        new(2507, 2509, 1),
-        new(2519, 2519, 1),
-        new(2530, 2531, 1),
-        new(2534, 2543, 1),
-        new(2562, 2620, 58),
-        new(2622, 2623, 1),
-        new(2624, 2626, 1),
-        new(2631, 2632, 1),
-        new(2635, 2637, 1),
-        new(2662, 2671, 1),
-        new(2672, 2673, 1),
-        new(2689, 2691, 1),
-        new(2748, 2748, 1),
-        new(2750, 2757, 1),
-        new(2759, 2761, 1),
-        new(2763, 2765, 1),
-        new(2790, 2799, 1),
-        new(2817, 2819, 1),
-        new(2876, 2876, 1),
-        new(2878, 2883, 1),
-        new(2887, 2888, 1),
-        new(2891, 2893, 1),
-        new(2902, 2903, 1),
-        new(2918, 2927, 1),
-        new(2946, 2947, 1),
-        new(3006, 3010, 1),
-        new(3014, 3016, 1),
-        new(3018, 3021, 1),
-        new(3031, 3031, 1),
-        new(3047, 3055, 1),
-        new(3073, 3075, 1),
-        new(3134, 3140, 1),
-        new(3142, 3144, 1),
-        new(3146, 3149, 1),
-        new(3157, 3158, 1),
-        new(3174, 3183, 1),
-        new(3202, 3203, 1),
-        new(3262, 3268, 1),
-        new(3270, 3272, 1),
-        new(3274, 3277, 1),
-        new(3285, 3286, 1),
-        new(3302, 3311, 1),
-        new(3330, 3331, 1),
-        new(3390, 3395, 1),
-        new(3398, 3400, 1),
-        new(3402, 3405, 1),
-        new(3415, 3415, 1),
-        new(3430, 3439, 1),
-        new(3633, 3633, 1),
-        new(3636, 3642, 1),
-        new(3654, 3654, 1),
-        new(3655, 3662, 1),
-        new(3664, 3673, 1),
-        new(3761, 3761, 1),
-        new(3764, 3769, 1),
-        new(3771, 3772, 1),
-        new(3782, 3782, 1),
-        new(3784, 3789, 1),
-        new(3792, 3801, 1),
-        new(3864, 3865, 1),
-        new(3872, 3881, 1),
-        new(3893, 3897, 2),
-        new(3902, 3903, 1),
-        new(3953, 3972, 1),
-        new(3974, 3979, 1),
-        new(3984, 3989, 1),
-        new(3991, 3991, 1),
-        new(3993, 4013, 1),
-        new(4017, 4023, 1),
-        new(4025, 4025, 1),
-        new(8400, 8412, 1),
-        new(8417, 12293, 12293 - 8417),
-        new(12330, 12335, 1),
-        new(12337, 12341, 1),
-        new(12441, 12442, 1),
-        new(12445, 12446, 1),
-        new(12540, 12542, 1)
+        new(0x002D, 0x002E, 1),
+        new(0x0030, 0x0039, 1),
+        new(0x00B7, 0x00B7, 1),
+        new(0x02D0, 0x02D1, 1),
+        new(0x0300, 0x0345, 1),
+        new(0x0360, 0x0361, 1),
+        new(0x0387, 0x0387, 1),
+        new(0x0483, 0x0486, 1),
+        new(0x0591, 0x05A1, 1),
+        new(0x05A3, 0x05B9, 1),
+        new(0x05BB, 0x05BD, 1),
+        new(0x05BF, 0x05BF, 1),
+        new(0x05C1, 0x05C2, 1),
+        new(0x05C4, 0x0640, 0x0640 - 0x05C4),
+        new(0x064B, 0x0652, 1),
+        new(0x0660, 0x0669, 1),
+        new(0x0670, 0x0670, 1),
+        new(0x06D6, 0x06DC, 1),
+        new(0x06DD, 0x06DF, 1),
+        new(0x06E0, 0x06E4, 1),
+        new(0x06E7, 0x06E8, 1),
+        new(0x06EA, 0x06ED, 1),
+        new(0x06F0, 0x06F9, 1),
+        new(0x0901, 0x0903, 1),
+        new(0x093C, 0x093C, 1),
+        new(0x093E, 0x094C, 1),
+        new(0x094D, 0x094D, 1),
+        new(0x0951, 0x0954, 1),
+        new(0x0962, 0x0963, 1),
+        new(0x0966, 0x096F, 1),
+        new(0x0981, 0x0983, 1),
+        new(0x09BC, 0x09BC, 1),
+        new(0x09BE, 0x09BF, 1),
+        new(0x09C0, 0x09C4, 1),
+        new(0x09C7, 0x09C8, 1),
+        new(0x09CB, 0x09CD, 1),
+        new(0x09D7, 0x09D7, 1),
+        new(0x09E2, 0x09E3, 1),
+        new(0x09E6, 0x09EF, 1),
+        new(0x0A02, 0x0A3C, 0x3A),
+        new(0x0A3E, 0x0A3F, 1),
+        new(0x0A40, 0x0A42, 1),
+        new(0x0A47, 0x0A48, 1),
+        new(0x0A4B, 0x0A4D, 1),
+        new(0x0A66, 0x0A6F, 1),
+        new(0x0A70, 0x0A71, 1),
+        new(0x0A81, 0x0A83, 1),
+        new(0x0ABC, 0x0ABC, 1),
+        new(0x0ABE, 0x0AC5, 1),
+        new(0x0AC7, 0x0AC9, 1),
+        new(0x0ACB, 0x0ACD, 1),
+        new(0x0AE6, 0x0AEF, 1),
+        new(0x0B01, 0x0B03, 1),
+        new(0x0B3C, 0x0B3C, 1),
+        new(0x0B3E, 0x0B43, 1),
+        new(0x0B47, 0x0B48, 1),
+        new(0x0B4B, 0x0B4D, 1),
+        new(0x0B56, 0x0B57, 1),
+        new(0x0B66, 0x0B6F, 1),
+        new(0x0B82, 0x0B83, 1),
+        new(0x0BBE, 0x0BC2, 1),
+        new(0x0BC6, 0x0BC8, 1),
+        new(0x0BCA, 0x0BCD, 1),
+        new(0x0BD7, 0x0BD7, 1),
+        new(0x0BE7, 0x0BEF, 1),
+        new(0x0C01, 0x0C03, 1),
+        new(0x0C3E, 0x0C44, 1),
+        new(0x0C46, 0x0C48, 1),
+        new(0x0C4A, 0x0C4D, 1),
+        new(0x0C55, 0x0C56, 1),
+        new(0x0C66, 0x0C6F, 1),
+        new(0x0C82, 0x0C83, 1),
+        new(0x0CBE, 0x0CC4, 1),
+        new(0x0CC6, 0x0CC8, 1),
+        new(0x0CCA, 0x0CCD, 1),
+        new(0x0CD5, 0x0CD6, 1),
+        new(0x0CE6, 0x0CEF, 1),
+        new(0x0D02, 0x0D03, 1),
+        new(0x0D3E, 0x0D43, 1),
+        new(0x0D46, 0x0D48, 1),
+        new(0x0D4A, 0x0D4D, 1),
+        new(0x0D57, 0x0D57, 1),
+        new(0x0D66, 0x0D6F, 1),
+        new(0x0E31, 0x0E31, 1),
+        new(0x0E34, 0x0E3A, 1),
+        new(0x0E46, 0x0E46, 1),
+        new(0x0E47, 0x0E4E, 1),
+        new(0x0E50, 0x0E59, 1),
+        new(0x0EB1, 0x0EB1, 1),
+        new(0x0EB4, 0x0EB9, 1),
+        new(0x0EBB, 0x0EBC, 1),
+        new(0x0EC6, 0x0EC6, 1),
+        new(0x0EC8, 0x0ECD, 1),
+        new(0x0ED0, 0x0ED9, 1),
+        new(0x0F18, 0x0F19, 1),
+        new(0x0F20, 0x0F29, 1),
+        new(0x0F35, 0x0F39, 2),
+        new(0x0F3E, 0x0F3F, 1),
+        new(0x0F71, 0x0F84, 1),
+        new(0x0F86, 0x0F8B, 1),
+        new(0x0F90, 0x0F95, 1),
+        new(0x0F97, 0x0F97, 1),
+        new(0x0F99, 0x0FAD, 1),
+        new(0x0FB1, 0x0FB7, 1),
+        new(0x0FB9, 0x0FB9, 1),
+        new(0x20D0, 0x20DC, 1),
+        new(0x20E1, 0x3005, 0x3005 - 0x20E1),
+        new(0x302A, 0x302F, 1),
+        new(0x3031, 0x3035, 1),
+        new(0x3099, 0x309A, 1),
+        new(0x309D, 0x309E, 1),
+        new(0x30FC, 0x30FE, 1)
     }.slice()
 ));
 
@@ -1972,15 +1966,15 @@ internal static slice<@string> htmlAutoClose = new @string[]{
     "meta"
 }.slice();
 
-internal static slice<byte> escQuot = slice<byte>("&#34;"); // shorter than "&quot;"
-internal static slice<byte> escApos = slice<byte>("&#39;"); // shorter than "&apos;"
-internal static slice<byte> escAmp = slice<byte>("&amp;");
-internal static slice<byte> escLT = slice<byte>("&lt;");
-internal static slice<byte> escGT = slice<byte>("&gt;");
-internal static slice<byte> escTab = slice<byte>("&#x9;");
-internal static slice<byte> escNL = slice<byte>("&#xA;");
-internal static slice<byte> escCR = slice<byte>("&#xD;");
-internal static slice<byte> escFFFD = slice<byte>("\uFFFD"); // Unicode replacement character
+internal static slice<byte> escQuot = slice<byte>((@string)"&#34;"); // shorter than "&quot;"
+internal static slice<byte> escApos = slice<byte>((@string)"&#39;"); // shorter than "&apos;"
+internal static slice<byte> escAmp = slice<byte>((@string)"&amp;");
+internal static slice<byte> escLT = slice<byte>((@string)"&lt;");
+internal static slice<byte> escGT = slice<byte>((@string)"&gt;");
+internal static slice<byte> escTab = slice<byte>((@string)"&#x9;");
+internal static slice<byte> escNL = slice<byte>((@string)"&#xA;");
+internal static slice<byte> escCR = slice<byte>((@string)"&#xD;");
+internal static slice<byte> escFFFD = slice<byte>((@string)"\uFFFD"); // Unicode replacement character
 
 // EscapeText writes to w the properly escaped XML equivalent
 // of the plain text data s.
@@ -2034,7 +2028,7 @@ internal static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline)
             break;
         }
         default: {
-            if (!isInCharacterRange(r) || (r == 65533 && width == 1)) {
+            if (!isInCharacterRange(r) || (r == 0xFFFD && width == 1)) {
                 esc = escFFFD;
                 break;
             }
@@ -2100,7 +2094,7 @@ internal static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline)
             break;
         }
         default: {
-            if (!isInCharacterRange(r) || (r == 65533 && width == 1)) {
+            if (!isInCharacterRange(r) || (r == 0xFFFD && width == 1)) {
                 esc = escFFFD;
                 break;
             }
@@ -2122,9 +2116,9 @@ public static void Escape(io.Writer w, slice<byte> s) {
     EscapeText(w, s);
 }
 
-internal static slice<byte> cdataStart = slice<byte>("<![CDATA[");
-internal static slice<byte> cdataEnd = slice<byte>("]]>");
-internal static slice<byte> cdataEscape = slice<byte>("]]]]><![CDATA[>");
+internal static slice<byte> cdataStart = slice<byte>((@string)"<![CDATA[");
+internal static slice<byte> cdataEnd = slice<byte>((@string)"]]>");
+internal static slice<byte> cdataEscape = slice<byte>((@string)"]]]]><![CDATA[>");
 
 // emitCDATA writes to w the CDATA-wrapped plain text data s.
 // It escapes CDATA directives nested in s.

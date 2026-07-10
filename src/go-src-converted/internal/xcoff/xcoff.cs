@@ -33,25 +33,25 @@ public static readonly UntypedInt U802TOCMAGIC = /* 0737 */ 479; // AIX 32-bit X
 public static readonly UntypedInt U64_TOCMAGIC = /* 0767 */ 503; // AIX 64-bit XCOFF
 
 // Flags that describe the type of the object file.
-public static readonly UntypedInt F_RELFLG = /* 0x0001 */ 1;
+public static readonly UntypedInt F_RELFLG = 0x0001;
 
-public static readonly UntypedInt F_EXEC = /* 0x0002 */ 2;
+public static readonly UntypedInt F_EXEC = 0x0002;
 
-public static readonly UntypedInt F_LNNO = /* 0x0004 */ 4;
+public static readonly UntypedInt F_LNNO = 0x0004;
 
-public static readonly UntypedInt F_FDPR_PROF = /* 0x0010 */ 16;
+public static readonly UntypedInt F_FDPR_PROF = 0x0010;
 
-public static readonly UntypedInt F_FDPR_OPTI = /* 0x0020 */ 32;
+public static readonly UntypedInt F_FDPR_OPTI = 0x0020;
 
-public static readonly UntypedInt F_DSA = /* 0x0040 */ 64;
+public static readonly UntypedInt F_DSA = 0x0040;
 
-public static readonly UntypedInt F_VARPG = /* 0x0100 */ 256;
+public static readonly UntypedInt F_VARPG = 0x0100;
 
-public static readonly UntypedInt F_DYNLOAD = /* 0x1000 */ 4096;
+public static readonly UntypedInt F_DYNLOAD = 0x1000;
 
-public static readonly UntypedInt F_SHROBJ = /* 0x2000 */ 8192;
+public static readonly UntypedInt F_SHROBJ = 0x2000;
 
-public static readonly UntypedInt F_LOADONLY = /* 0x4000 */ 16384;
+public static readonly UntypedInt F_LOADONLY = 0x4000;
 
 // Section Header.
 [GoType] partial struct SectionHeader32 {
@@ -82,41 +82,41 @@ public static readonly UntypedInt F_LOADONLY = /* 0x4000 */ 16384;
 }
 
 // Flags defining the section type.
-public static readonly UntypedInt STYP_DWARF = /* 0x0010 */ 16;
+public static readonly UntypedInt STYP_DWARF = 0x0010;
 
-public static readonly UntypedInt STYP_TEXT = /* 0x0020 */ 32;
+public static readonly UntypedInt STYP_TEXT = 0x0020;
 
-public static readonly UntypedInt STYP_DATA = /* 0x0040 */ 64;
+public static readonly UntypedInt STYP_DATA = 0x0040;
 
-public static readonly UntypedInt STYP_BSS = /* 0x0080 */ 128;
+public static readonly UntypedInt STYP_BSS = 0x0080;
 
-public static readonly UntypedInt STYP_EXCEPT = /* 0x0100 */ 256;
+public static readonly UntypedInt STYP_EXCEPT = 0x0100;
 
-public static readonly UntypedInt STYP_INFO = /* 0x0200 */ 512;
+public static readonly UntypedInt STYP_INFO = 0x0200;
 
-public static readonly UntypedInt STYP_TDATA = /* 0x0400 */ 1024;
+public static readonly UntypedInt STYP_TDATA = 0x0400;
 
-public static readonly UntypedInt STYP_TBSS = /* 0x0800 */ 2048;
+public static readonly UntypedInt STYP_TBSS = 0x0800;
 
-public static readonly UntypedInt STYP_LOADER = /* 0x1000 */ 4096;
+public static readonly UntypedInt STYP_LOADER = 0x1000;
 
-public static readonly UntypedInt STYP_DEBUG = /* 0x2000 */ 8192;
+public static readonly UntypedInt STYP_DEBUG = 0x2000;
 
-public static readonly UntypedInt STYP_TYPCHK = /* 0x4000 */ 16384;
+public static readonly UntypedInt STYP_TYPCHK = 0x4000;
 
-public static readonly UntypedInt STYP_OVRFLO = /* 0x8000 */ 32768;
+public static readonly UntypedInt STYP_OVRFLO = 0x8000;
 
-public static readonly UntypedInt SSUBTYP_DWINFO = /* 0x10000 */ 65536; // DWARF info section
-public static readonly UntypedInt SSUBTYP_DWLINE = /* 0x20000 */ 131072; // DWARF line-number section
-public static readonly UntypedInt SSUBTYP_DWPBNMS = /* 0x30000 */ 196608; // DWARF public names section
-public static readonly UntypedInt SSUBTYP_DWPBTYP = /* 0x40000 */ 262144; // DWARF public types section
-public static readonly UntypedInt SSUBTYP_DWARNGE = /* 0x50000 */ 327680; // DWARF aranges section
-public static readonly UntypedInt SSUBTYP_DWABREV = /* 0x60000 */ 393216; // DWARF abbreviation section
-public static readonly UntypedInt SSUBTYP_DWSTR = /* 0x70000 */ 458752; // DWARF strings section
-public static readonly UntypedInt SSUBTYP_DWRNGES = /* 0x80000 */ 524288; // DWARF ranges section
-public static readonly UntypedInt SSUBTYP_DWLOC = /* 0x90000 */ 589824; // DWARF location lists section
-public static readonly UntypedInt SSUBTYP_DWFRAME = /* 0xA0000 */ 655360; // DWARF frames section
-public static readonly UntypedInt SSUBTYP_DWMAC = /* 0xB0000 */ 720896; // DWARF macros section
+public static readonly UntypedInt SSUBTYP_DWINFO = 0x10000; // DWARF info section
+public static readonly UntypedInt SSUBTYP_DWLINE = 0x20000; // DWARF line-number section
+public static readonly UntypedInt SSUBTYP_DWPBNMS = 0x30000; // DWARF public names section
+public static readonly UntypedInt SSUBTYP_DWPBTYP = 0x40000; // DWARF public types section
+public static readonly UntypedInt SSUBTYP_DWARNGE = 0x50000; // DWARF aranges section
+public static readonly UntypedInt SSUBTYP_DWABREV = 0x60000; // DWARF abbreviation section
+public static readonly UntypedInt SSUBTYP_DWSTR = 0x70000; // DWARF strings section
+public static readonly UntypedInt SSUBTYP_DWRNGES = 0x80000; // DWARF ranges section
+public static readonly UntypedInt SSUBTYP_DWLOC = 0x90000; // DWARF location lists section
+public static readonly UntypedInt SSUBTYP_DWFRAME = 0xA0000; // DWARF frames section
+public static readonly UntypedInt SSUBTYP_DWMAC = 0xB0000; // DWARF macros section
 
 // Symbol Table Entry.
 [GoType] partial struct SymEnt32 {
@@ -139,16 +139,14 @@ public static readonly UntypedInt SSUBTYP_DWMAC = /* 0xB0000 */ 720896; // DWARF
 
 public static readonly UntypedInt SYMESZ = 18;
 
-public static readonly GoUntyped N_DEBUG = /* -2 */
-    GoUntyped.Parse("-2");
-public static readonly GoUntyped N_ABS = /* -1 */
-    GoUntyped.Parse("-1");
+public static readonly UntypedInt N_DEBUG = -2;
+public static readonly UntypedInt N_ABS = -1;
 public static readonly UntypedInt N_UNDEF = 0;
-public static readonly UntypedInt SYM_V_INTERNAL = /* 0x1000 */ 4096;
-public static readonly UntypedInt SYM_V_HIDDEN = /* 0x2000 */ 8192;
-public static readonly UntypedInt SYM_V_PROTECTED = /* 0x3000 */ 12288;
-public static readonly UntypedInt SYM_V_EXPORTED = /* 0x4000 */ 16384;
-public static readonly UntypedInt SYM_TYPE_FUNC = /* 0x0020 */ 32; // is function
+public static readonly UntypedInt SYM_V_INTERNAL = 0x1000;
+public static readonly UntypedInt SYM_V_HIDDEN = 0x2000;
+public static readonly UntypedInt SYM_V_PROTECTED = 0x3000;
+public static readonly UntypedInt SYM_V_EXPORTED = 0x4000;
+public static readonly UntypedInt SYM_TYPE_FUNC = 0x0020; // is function
 
 // Storage Class.
 public static readonly UntypedInt C_NULL = 0; // Symbol table entry marked for deletion
@@ -391,28 +389,28 @@ public static readonly UntypedInt LDHDRSZ_64 = 56;
     public uint8 Rtype;  // Toc relocation type
 }
 
-public static readonly UntypedInt R_POS = /* 0x00 */ 0; // A(sym) Positive Relocation
-public static readonly UntypedInt R_NEG = /* 0x01 */ 1; // -A(sym) Negative Relocation
-public static readonly UntypedInt R_REL = /* 0x02 */ 2; // A(sym-*) Relative to self
-public static readonly UntypedInt R_TOC = /* 0x03 */ 3; // A(sym-TOC) Relative to TOC
-public static readonly UntypedInt R_TRL = /* 0x12 */ 18; // A(sym-TOC) TOC Relative indirect load.
-public static readonly UntypedInt R_TRLA = /* 0x13 */ 19; // A(sym-TOC) TOC Rel load address. modifiable inst
-public static readonly UntypedInt R_GL = /* 0x05 */ 5; // A(external TOC of sym) Global Linkage
-public static readonly UntypedInt R_TCL = /* 0x06 */ 6; // A(local TOC of sym) Local object TOC address
-public static readonly UntypedInt R_RL = /* 0x0C */ 12; // A(sym) Pos indirect load. modifiable instruction
-public static readonly UntypedInt R_RLA = /* 0x0D */ 13; // A(sym) Pos Load Address. modifiable instruction
-public static readonly UntypedInt R_REF = /* 0x0F */ 15; // AL0(sym) Non relocating ref. No garbage collect
-public static readonly UntypedInt R_BA = /* 0x08 */ 8; // A(sym) Branch absolute. Cannot modify instruction
-public static readonly UntypedInt R_RBA = /* 0x18 */ 24; // A(sym) Branch absolute. modifiable instruction
-public static readonly UntypedInt R_BR = /* 0x0A */ 10; // A(sym-*) Branch rel to self. non modifiable
-public static readonly UntypedInt R_RBR = /* 0x1A */ 26; // A(sym-*) Branch rel to self. modifiable instr
-public static readonly UntypedInt R_TLS = /* 0x20 */ 32; // General-dynamic reference to TLS symbol
-public static readonly UntypedInt R_TLS_IE = /* 0x21 */ 33; // Initial-exec reference to TLS symbol
-public static readonly UntypedInt R_TLS_LD = /* 0x22 */ 34; // Local-dynamic reference to TLS symbol
-public static readonly UntypedInt R_TLS_LE = /* 0x23 */ 35; // Local-exec reference to TLS symbol
-public static readonly UntypedInt R_TLSM = /* 0x24 */ 36; // Module reference to TLS symbol
-public static readonly UntypedInt R_TLSML = /* 0x25 */ 37; // Module reference to local (own) module
-public static readonly UntypedInt R_TOCU = /* 0x30 */ 48; // Relative to TOC - high order bits
-public static readonly UntypedInt R_TOCL = /* 0x31 */ 49; // Relative to TOC - low order bits
+public static readonly UntypedInt R_POS = 0x00; // A(sym) Positive Relocation
+public static readonly UntypedInt R_NEG = 0x01; // -A(sym) Negative Relocation
+public static readonly UntypedInt R_REL = 0x02; // A(sym-*) Relative to self
+public static readonly UntypedInt R_TOC = 0x03; // A(sym-TOC) Relative to TOC
+public static readonly UntypedInt R_TRL = 0x12; // A(sym-TOC) TOC Relative indirect load.
+public static readonly UntypedInt R_TRLA = 0x13; // A(sym-TOC) TOC Rel load address. modifiable inst
+public static readonly UntypedInt R_GL = 0x05; // A(external TOC of sym) Global Linkage
+public static readonly UntypedInt R_TCL = 0x06; // A(local TOC of sym) Local object TOC address
+public static readonly UntypedInt R_RL = 0x0C; // A(sym) Pos indirect load. modifiable instruction
+public static readonly UntypedInt R_RLA = 0x0D; // A(sym) Pos Load Address. modifiable instruction
+public static readonly UntypedInt R_REF = 0x0F; // AL0(sym) Non relocating ref. No garbage collect
+public static readonly UntypedInt R_BA = 0x08; // A(sym) Branch absolute. Cannot modify instruction
+public static readonly UntypedInt R_RBA = 0x18; // A(sym) Branch absolute. modifiable instruction
+public static readonly UntypedInt R_BR = 0x0A; // A(sym-*) Branch rel to self. non modifiable
+public static readonly UntypedInt R_RBR = 0x1A; // A(sym-*) Branch rel to self. modifiable instr
+public static readonly UntypedInt R_TLS = 0x20; // General-dynamic reference to TLS symbol
+public static readonly UntypedInt R_TLS_IE = 0x21; // Initial-exec reference to TLS symbol
+public static readonly UntypedInt R_TLS_LD = 0x22; // Local-dynamic reference to TLS symbol
+public static readonly UntypedInt R_TLS_LE = 0x23; // Local-exec reference to TLS symbol
+public static readonly UntypedInt R_TLSM = 0x24; // Module reference to TLS symbol
+public static readonly UntypedInt R_TLSML = 0x25; // Module reference to local (own) module
+public static readonly UntypedInt R_TOCU = 0x30; // Relative to TOC - high order bits
+public static readonly UntypedInt R_TOCL = 0x31; // Relative to TOC - low order bits
 
 } // end xcoff_package

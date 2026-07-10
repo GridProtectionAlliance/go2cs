@@ -24,20 +24,20 @@ namespace go;
 
 using json = encoding.json_package;
 using godebug = @internal.godebug_package;
-using log = log_package;
-using math = math_package;
+using Δlog = log_package;
+using Δmath = math_package;
 using http = net.http_package;
 using os = os_package;
-using runtime = runtime_package;
+using Δruntime = runtime_package;
 using slices = slices_package;
 using strconv = strconv_package;
-using sync = sync_package;
-using atomic = sync.atomic_package;
+using Δsync = sync_package;
+using atomic = go.sync.atomic_package;
 using utf8 = unicode.utf8_package;
 using @internal;
 using encoding;
+using go.sync;
 using net;
-using sync;
 using unicode;
 
 partial class expvar_package {
@@ -57,68 +57,88 @@ partial class expvar_package {
 
 // Int is a 64-bit integer variable that satisfies the [Var] interface.
 [GoType] partial struct Int {
-    internal sync.atomic_package.Int64 i;
+    internal atomic.Int64 i;
 }
 
-[GoRecv] public static int64 Value(this ref Int v) {
-    return v.i.Load();
+public static int64 Value(this ж<Int> Ꮡv) {
+    ref var v = ref Ꮡv.Value;
+
+    return Ꮡv.of(Int.Ꮡi).Load();
 }
 
-[GoRecv] public static @string String(this ref Int v) {
-    return ((@string)v.appendJSON(default!));
+public static @string String(this ж<Int> Ꮡv) {
+    ref var v = ref Ꮡv.Value;
+
+    return ((@string)Ꮡv.appendJSON(default!));
 }
 
-[GoRecv] internal static slice<byte> appendJSON(this ref Int v, slice<byte> b) {
-    return strconv.AppendInt(b, v.i.Load(), 10);
+internal static slice<byte> appendJSON(this ж<Int> Ꮡv, slice<byte> b) {
+    ref var v = ref Ꮡv.Value;
+
+    return strconv.AppendInt(b, Ꮡv.of(Int.Ꮡi).Load(), 10);
 }
 
-[GoRecv] public static void Add(this ref Int v, int64 delta) {
-    v.i.Add(delta);
+public static void Add(this ж<Int> Ꮡv, int64 delta) {
+    ref var v = ref Ꮡv.Value;
+
+    Ꮡv.of(Int.Ꮡi).Add(delta);
 }
 
-[GoRecv] public static void Set(this ref Int v, int64 value) {
-    v.i.Store(value);
+public static void Set(this ж<Int> Ꮡv, int64 value) {
+    ref var v = ref Ꮡv.Value;
+
+    Ꮡv.of(Int.Ꮡi).Store(value);
 }
 
 // Float is a 64-bit float variable that satisfies the [Var] interface.
 [GoType] partial struct Float {
-    internal sync.atomic_package.Uint64 f;
+    internal atomic.Uint64 f;
 }
 
-[GoRecv] public static float64 Value(this ref Float v) {
-    return math.Float64frombits(v.f.Load());
+public static float64 Value(this ж<Float> Ꮡv) {
+    ref var v = ref Ꮡv.Value;
+
+    return Δmath.Float64frombits(Ꮡv.of(Float.Ꮡf).Load());
 }
 
-[GoRecv] public static @string String(this ref Float v) {
-    return ((@string)v.appendJSON(default!));
+public static @string String(this ж<Float> Ꮡv) {
+    ref var v = ref Ꮡv.Value;
+
+    return ((@string)Ꮡv.appendJSON(default!));
 }
 
-[GoRecv] internal static slice<byte> appendJSON(this ref Float v, slice<byte> b) {
-    return strconv.AppendFloat(b, math.Float64frombits(v.f.Load()), (rune)'g', -1, 64);
+internal static slice<byte> appendJSON(this ж<Float> Ꮡv, slice<byte> b) {
+    ref var v = ref Ꮡv.Value;
+
+    return strconv.AppendFloat(b, Δmath.Float64frombits(Ꮡv.of(Float.Ꮡf).Load()), (rune)'g', -1, 64);
 }
 
 // Add adds delta to v.
-[GoRecv] public static void Add(this ref Float v, float64 delta) {
+public static void Add(this ж<Float> Ꮡv, float64 delta) {
+    ref var v = ref Ꮡv.Value;
+
     while (ᐧ) {
-        var cur = v.f.Load();
-        var curVal = math.Float64frombits(cur);
+        var cur = Ꮡv.of(Float.Ꮡf).Load();
+        var curVal = Δmath.Float64frombits(cur);
         var nxtVal = curVal + delta;
-        var nxt = math.Float64bits(nxtVal);
-        if (v.f.CompareAndSwap(cur, nxt)) {
+        var nxt = Δmath.Float64bits(nxtVal);
+        if (Ꮡv.of(Float.Ꮡf).CompareAndSwap(cur, nxt)) {
             return;
         }
     }
 }
 
 // Set sets v to value.
-[GoRecv] public static void Set(this ref Float v, float64 value) {
-    v.f.Store(math.Float64bits(value));
+public static void Set(this ж<Float> Ꮡv, float64 value) {
+    ref var v = ref Ꮡv.Value;
+
+    Ꮡv.of(Float.Ꮡf).Store(Δmath.Float64bits(value));
 }
 
 // Map is a string-to-Var map variable that satisfies the [Var] interface.
 [GoType] partial struct Map {
-    internal sync_package.Map m; // map[string]Var
-    internal sync_package.RWMutex keysMu;
+    internal Δsync.Map m; // map[string]Var
+    internal Δsync.RWMutex keysMu;
     internal slice<@string> keys; // sorted
 }
 
@@ -128,67 +148,75 @@ partial class expvar_package {
     public Var Value;
 }
 
-[GoRecv] public static @string String(this ref Map v) {
-    return ((@string)v.appendJSON(default!));
+public static @string String(this ж<Map> Ꮡv) {
+    ref var v = ref Ꮡv.Value;
+
+    return ((@string)Ꮡv.appendJSON(default!));
 }
 
-[GoRecv] internal static slice<byte> appendJSON(this ref Map v, slice<byte> b) {
-    return v.appendJSONMayExpand(b, false);
+internal static slice<byte> appendJSON(this ж<Map> Ꮡv, slice<byte> b) {
+    ref var v = ref Ꮡv.Value;
+
+    return Ꮡv.appendJSONMayExpand(b, false);
 }
 
-[GoRecv] internal static slice<byte> appendJSONMayExpand(this ref Map v, slice<byte> b, bool expand) {
-    var afterCommaDelim = ((byte)(rune)' ');
-    var mayAppendNewline = (slice<byte> b) => bΔ1;
+internal static slice<byte> appendJSONMayExpand(this ж<Map> Ꮡv, slice<byte> b, bool expand) {
+    ref var v = ref Ꮡv.Value;
+
+    var afterCommaDelim = (byte)(rune)' ';
+    var mayAppendNewline = (slice<byte> bΔ1) => bΔ1;
     if (expand) {
         afterCommaDelim = (rune)'\n';
-        mayAppendNewline = (slice<byte> b) => append(bΔ2, (rune)'\n');
+        mayAppendNewline = (slice<byte> bΔ2) => append(bΔ2, (byte)((rune)'\n'));
     }
-    b = append(b, (rune)'{');
+    b = append(b, (byte)((rune)'{'));
     b = mayAppendNewline(b);
     var first = true;
-    v.Do(
-    var bʗ2 = b;
-    (KeyValue kv) => {
+    Ꮡv.Do((KeyValue kv) => {
         if (!first) {
-            bʗ2 = append(bʗ2, (rune)',', afterCommaDelim);
+            b = append(b, (byte)((rune)','), afterCommaDelim);
         }
         first = false;
-        bʗ2 = appendJSONQuote(bʗ2, kv.Key);
-        bʗ2 = append(bʗ2, (rune)':', (rune)' ');
+        b = appendJSONQuote(b, kv.Key);
+        b = append(b, (byte)((rune)':'), (byte)((rune)' '));
         switch (kv.Value.type()) {
-        case default! v: {
-            bʗ2 = append(bʗ2, "null"u8.ꓸꓸꓸ);
+        case null: {
+            b = append(b, ((@string)"null"u8).ꓸꓸꓸ);
             break;
         }
-        case jsonVar v: {
-            bʗ2 = v.appendJSON(bʗ2);
+        case {} ΔvΔ1 when ΔvΔ1._<jsonVar>(out var vΔ1): {
+            b = vΔ1.appendJSON(b);
             break;
         }
         default: {
-            var v = kv.Value.type();
-            bʗ2 = append(bʗ2, v.String().ꓸꓸꓸ);
+            var vΔ1 = kv.Value;
+            b = append(b, vΔ1.String().ꓸꓸꓸ);
             break;
         }}
     });
     b = mayAppendNewline(b);
-    b = append(b, (rune)'}');
+    b = append(b, (byte)((rune)'}'));
     b = mayAppendNewline(b);
     return b;
 }
 
 // Init removes all keys from the map.
-[GoRecv("capture")] public static ж<Map> Init(this ref Map v) => func((defer, _) => {
-    v.keysMu.Lock();
-    defer(v.keysMu.Unlock);
+public static ж<Map> Init(this ж<Map> Ꮡv) => func((defer, recover) => {
+    ref var v = ref Ꮡv.Value;
+
+    Ꮡv.of(Map.ᏑkeysMu).Lock();
+    defer(Ꮡv.of(Map.ᏑkeysMu).Unlock);
     v.keys = v.keys[..0];
-    v.m.Clear();
-    return InitꓸᏑv;
+    Ꮡv.of(Map.Ꮡm).Clear();
+    return Ꮡv;
 });
 
 // addKey updates the sorted list of keys in v.keys.
-[GoRecv] internal static void addKey(this ref Map v, @string key) => func((defer, _) => {
-    v.keysMu.Lock();
-    defer(v.keysMu.Unlock);
+internal static void addKey(this ж<Map> Ꮡv, @string key) => func((defer, recover) => {
+    ref var v = ref Ꮡv.Value;
+
+    Ꮡv.of(Map.ᏑkeysMu).Lock();
+    defer(Ꮡv.of(Map.ᏑkeysMu).Unlock);
     // Using insertion sort to place key into the already-sorted v.keys.
     var (i, found) = slices.BinarySearch(v.keys, key);
     if (found) {
@@ -197,84 +225,96 @@ partial class expvar_package {
     v.keys = slices.Insert(v.keys, i, key);
 });
 
-[GoRecv] public static Var Get(this ref Map v, @string key) {
-    var (i, _) = v.m.Load(key);
+public static Var Get(this ж<Map> Ꮡv, @string key) {
+    ref var v = ref Ꮡv.Value;
+
+    var (i, _) = Ꮡv.of(Map.Ꮡm).Load(key);
     var (av, _) = i._<Var>(ᐧ);
     return av;
 }
 
-[GoRecv] public static void Set(this ref Map v, @string key, Var av) {
+public static void Set(this ж<Map> Ꮡv, @string key, Var av) {
+    ref var v = ref Ꮡv.Value;
+
     // Before we store the value, check to see whether the key is new. Try a Load
     // before LoadOrStore: LoadOrStore causes the key interface to escape even on
     // the Load path.
     {
-        var (_, ok) = v.m.Load(key); if (!ok) {
+        var (_, ok) = Ꮡv.of(Map.Ꮡm).Load(key); if (!ok) {
             {
-                var (_, dup) = v.m.LoadOrStore(key, av); if (!dup) {
-                    v.addKey(key);
+                var (_, dup) = Ꮡv.of(Map.Ꮡm).LoadOrStore(key, av); if (!dup) {
+                    Ꮡv.addKey(key);
                     return;
                 }
             }
         }
     }
-    v.m.Store(key, av);
+    Ꮡv.of(Map.Ꮡm).Store(key, av);
 }
 
 // Add adds delta to the *[Int] value stored under the given map key.
-[GoRecv] public static void Add(this ref Map v, @string key, int64 delta) {
-    var (i, ok) = v.m.Load(key);
+public static void Add(this ж<Map> Ꮡv, @string key, int64 delta) {
+    ref var v = ref Ꮡv.Value;
+
+    var (i, ok) = Ꮡv.of(Map.Ꮡm).Load(key);
     if (!ok) {
         bool dup = default!;
-        (i, dup) = v.m.LoadOrStore(key, @new<Int>());
+        (i, dup) = Ꮡv.of(Map.Ꮡm).LoadOrStore(key, @new<Int>());
         if (!dup) {
-            v.addKey(key);
+            Ꮡv.addKey(key);
         }
     }
     // Add to Int; ignore otherwise.
     {
-        var (iv, okΔ1) = i._<Int.val>(ᐧ); if (okΔ1) {
+        var (iv, okΔ1) = i._<ж<Int>>(ᐧ); if (okΔ1) {
             iv.Add(delta);
         }
     }
 }
 
 // AddFloat adds delta to the *[Float] value stored under the given map key.
-[GoRecv] public static void AddFloat(this ref Map v, @string key, float64 delta) {
-    var (i, ok) = v.m.Load(key);
+public static void AddFloat(this ж<Map> Ꮡv, @string key, float64 delta) {
+    ref var v = ref Ꮡv.Value;
+
+    var (i, ok) = Ꮡv.of(Map.Ꮡm).Load(key);
     if (!ok) {
         bool dup = default!;
-        (i, dup) = v.m.LoadOrStore(key, @new<Float>());
+        (i, dup) = Ꮡv.of(Map.Ꮡm).LoadOrStore(key, @new<Float>());
         if (!dup) {
-            v.addKey(key);
+            Ꮡv.addKey(key);
         }
     }
     // Add to Float; ignore otherwise.
     {
-        var (iv, okΔ1) = i._<Float.val>(ᐧ); if (okΔ1) {
+        var (iv, okΔ1) = i._<ж<Float>>(ᐧ); if (okΔ1) {
             iv.Add(delta);
         }
     }
 }
 
 // Delete deletes the given key from the map.
-[GoRecv] public static void Delete(this ref Map v, @string key) => func((defer, _) => {
-    v.keysMu.Lock();
-    defer(v.keysMu.Unlock);
+public static void Delete(this ж<Map> Ꮡv, @string key) => func((defer, recover) => {
+    ref var v = ref Ꮡv.Value;
+
+    Ꮡv.of(Map.ᏑkeysMu).Lock();
+    defer(Ꮡv.of(Map.ᏑkeysMu).Unlock);
     var (i, found) = slices.BinarySearch(v.keys, key);
     if (found) {
-        v.keys = slices.Delete(v.keys, i, i + 1);
-        v.m.Delete(key);
+        v.keys = slices.Delete<slice<@string>, @string>(v.keys, i, i + 1);
+        Ꮡv.of(Map.Ꮡm).Delete(key);
     }
 });
 
 // Do calls f for each entry in the map.
 // The map is locked during the iteration,
 // but existing entries may be concurrently updated.
-[GoRecv] public static void Do(this ref Map v, Action<KeyValue> f) => func((defer, _) => {
-    v.keysMu.RLock();
-    defer(v.keysMu.RUnlock);
+public static void Do(this ж<Map> Ꮡv, Action<KeyValue> f) => func((defer, recover) => {
+    ref var v = ref Ꮡv.Value;
+
+    Ꮡv.of(Map.ᏑkeysMu).RLock();
+    defer(Ꮡv.of(Map.ᏑkeysMu).RUnlock);
     foreach (var (_, k) in v.keys) {
-        var (i, _) = v.m.Load(k);
+        var (i, _) = Ꮡv.of(Map.Ꮡm).Load(k);
         var (val, _) = i._<Var>(ᐧ);
         f(new KeyValue(k, val));
     }
@@ -282,26 +322,34 @@ partial class expvar_package {
 
 // String is a string variable, and satisfies the [Var] interface.
 [GoType] partial struct ΔString {
-    internal sync.atomic_package.Value s; // string
+    internal atomic.Value s; // string
 }
 
-[GoRecv] public static @string Value(this ref ΔString v) {
-    var (p, _) = v.s.Load()._<@string>(ᐧ);
+public static @string Value(this ж<ΔString> Ꮡv) {
+    ref var v = ref Ꮡv.Value;
+
+    var (p, _) = Ꮡv.of(expvar_package.ΔString.Ꮡs).Load()._<@string>(ᐧ);
     return p;
 }
 
 // String implements the [Var] interface. To get the unquoted string
 // use [String.Value].
-[GoRecv] public static @string String(this ref ΔString v) {
-    return ((@string)v.appendJSON(default!));
+public static @string String(this ж<ΔString> Ꮡv) {
+    ref var v = ref Ꮡv.Value;
+
+    return ((@string)Ꮡv.appendJSON(default!));
 }
 
-[GoRecv] internal static slice<byte> appendJSON(this ref ΔString v, slice<byte> b) {
-    return appendJSONQuote(b, v.Value());
+internal static slice<byte> appendJSON(this ж<ΔString> Ꮡv, slice<byte> b) {
+    ref var v = ref Ꮡv.Value;
+
+    return appendJSONQuote(b, Ꮡv.Value());
 }
 
-[GoRecv] public static void Set(this ref ΔString v, @string value) {
-    v.s.Store(value);
+public static void Set(this ж<ΔString> Ꮡv, @string value) {
+    ref var v = ref Ꮡv.Value;
+
+    Ꮡv.of(expvar_package.ΔString.Ꮡs).Store(value);
 }
 
 public delegate any Func();
@@ -311,57 +359,57 @@ public static any Value(this Func f) {
 }
 
 public static @string String(this Func f) {
-    (v, _) = json.Marshal(f());
+    var (v, _) = json.Marshal(f());
     return ((@string)v);
 }
 
 // All published variables.
-internal static Map vars;
+internal static ж<Map> Ꮡvars = new(default(Map));
+internal static ref Map vars => ref Ꮡvars.Value;
 
 // Publish declares a named exported variable. This should be called from a
 // package's init function when it creates its Vars. If the name is already
 // registered then this will log.Panic.
-public static void Publish(@string name, Var v) => func((defer, _) => {
+public static void Publish(@string name, Var v) => func((defer, recover) => {
     {
-        var (_, dup) = vars.m.LoadOrStore(name, v); if (dup) {
-            log.Panicln("Reuse of exported var name:", name);
+        var (_, dup) = Ꮡvars.of(Map.Ꮡm).LoadOrStore(name, v); if (dup) {
+            Δlog.Panicln("Reuse of exported var name:", name);
         }
     }
-    vars.keysMu.Lock();
-    var varsʗ1 = vars;
-    defer(varsʗ1.keysMu.Unlock);
+    Ꮡvars.of(Map.ᏑkeysMu).Lock();
+    defer(Ꮡvars.of(Map.ᏑkeysMu).Unlock);
     vars.keys = append(vars.keys, name);
-    slices.Sort(vars.keys);
+    slices.Sort<slice<@string>, @string>(vars.keys);
 });
 
 // Get retrieves a named exported variable. It returns nil if the name has
 // not been registered.
 public static Var Get(@string name) {
-    return vars.Get(name);
+    return Ꮡvars.Get(name);
 }
 
 // Convenience functions for creating new exported variables.
 public static ж<Int> NewInt(@string name) {
     var v = @new<Int>();
-    Publish(name, ~v);
+    Publish(name, new IntжVar(v));
     return v;
 }
 
 public static ж<Float> NewFloat(@string name) {
     var v = @new<Float>();
-    Publish(name, ~v);
+    Publish(name, new FloatжVar(v));
     return v;
 }
 
 public static ж<Map> NewMap(@string name) {
     var v = @new<Map>().Init();
-    Publish(name, ~v);
+    Publish(name, new MapжVar(v));
     return v;
 }
 
 public static ж<ΔString> NewString(@string name) {
     var v = @new<ΔString>();
-    Publish(name, ~v);
+    Publish(name, new ΔStringжVar(v));
     return v;
 }
 
@@ -369,21 +417,21 @@ public static ж<ΔString> NewString(@string name) {
 // The global variable map is locked during the iteration,
 // but existing entries may be concurrently updated.
 public static void Do(Action<KeyValue> f) {
-    vars.Do(f);
+    Ꮡvars.Do(f);
 }
 
 internal static void expvarHandler(http.ResponseWriter w, ж<http.Request> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     w.Header().Set("Content-Type"u8, "application/json; charset=utf-8"u8);
-    w.Write(vars.appendJSONMayExpand(default!, true));
+    w.Write(Ꮡvars.appendJSONMayExpand(default!, true));
 }
 
 // Handler returns the expvar HTTP Handler.
 //
 // This is only needed to install the handler in a non-standard location.
 public static httpꓸHandler Handler() {
-    return ((http.HandlerFunc)expvarHandler);
+    return new http_HandlerFuncᴠΔHandler(new http.HandlerFunc(expvarHandler));
 }
 
 internal static any cmdline() {
@@ -391,9 +439,9 @@ internal static any cmdline() {
 }
 
 internal static any memstats() {
-    var stats = @new<runtime.MemStats>();
-    runtime.ReadMemStats(stats);
-    return stats.val;
+    var stats = @new<Δruntime.MemStats>();
+    Δruntime.ReadMemStats(stats);
+    return stats.Value;
 }
 
 [GoInit] internal static void init() {
@@ -402,43 +450,43 @@ internal static any memstats() {
     } else {
         http.HandleFunc("GET /debug/vars"u8, expvarHandler);
     }
-    Publish("cmdline"u8, ((Func)cmdline));
-    Publish("memstats"u8, ((Func)memstats));
+    Publish("cmdline"u8, new FuncᴠVar(new Func(cmdline)));
+    Publish("memstats"u8, new FuncᴠVar(new Func(memstats)));
 }
 
 // TODO: Use json.appendString instead.
 internal static slice<byte> appendJSONQuote(slice<byte> b, @string s) {
     @string hex = "0123456789abcdef"u8;
-    b = append(b, (rune)'"');
+    b = append(b, (byte)((rune)'"'));
     foreach (var (_, r) in s) {
         switch (ᐧ) {
         case {} when r < (rune)' ' || r == (rune)'\\' || r == (rune)'"' || r == (rune)'<' || r == (rune)'>' || r == (rune)'&' || r == (rune)'\u2028' || r == (rune)'\u2029': {
             switch (r) {
             case (rune)'\\' or (rune)'"': {
-                b = append(b, (rune)'\\', ((byte)r));
+                b = append(b, (byte)((rune)'\\'), (byte)r);
                 break;
             }
             case (rune)'\n': {
-                b = append(b, (rune)'\\', (rune)'n');
+                b = append(b, (byte)((rune)'\\'), (byte)((rune)'n'));
                 break;
             }
             case (rune)'\r': {
-                b = append(b, (rune)'\\', (rune)'r');
+                b = append(b, (byte)((rune)'\\'), (byte)((rune)'r'));
                 break;
             }
             case (rune)'\t': {
-                b = append(b, (rune)'\\', (rune)'t');
+                b = append(b, (byte)((rune)'\\'), (byte)((rune)'t'));
                 break;
             }
             default: {
-                b = append(b, (rune)'\\', (rune)'u', hex[(rune)((r >> (int)(12)) & 15)], hex[(rune)((r >> (int)(8)) & 15)], hex[(rune)((r >> (int)(4)) & 15)], hex[(rune)((r >> (int)(0)) & 15)]);
+                b = append(b, (byte)((rune)'\\'), (byte)((rune)'u'), hex[(rune)(((r >> (int)(12))) & 0xf)], hex[(rune)(((r >> (int)(8))) & 0xf)], hex[(rune)(((r >> (int)(4))) & 0xf)], hex[(rune)(((r >> (int)(0))) & 0xf)]);
                 break;
             }}
 
             break;
         }
-        case {} when r is < utf8.RuneSelf: {
-            b = append(b, ((byte)r));
+        case {} when r < utf8.RuneSelf: {
+            b = append(b, (byte)r);
             break;
         }
         default: {
@@ -447,7 +495,7 @@ internal static slice<byte> appendJSONQuote(slice<byte> b, @string s) {
         }}
 
     }
-    b = append(b, (rune)'"');
+    b = append(b, (byte)((rune)'"'));
     return b;
 }
 

@@ -43,11 +43,10 @@ using static go.@internal.coverage.decodemeta_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<@internal.coverage.slicereader_package.Reader, io_package.Reader>]
-[assembly: GoImplement<bufio_package.Reader, io_package.Reader>]
-[assembly: GoImplement<encoding.binary_package.littleEndian, encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<os_package.File, io_package.Reader>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
+[assembly: GoImplement<bufio_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<go.@internal.coverage.slicereader_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<go.encoding.binary_package.littleEndian, go.encoding.binary_package.ByteOrder>]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

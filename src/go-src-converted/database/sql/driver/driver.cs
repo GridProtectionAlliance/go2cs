@@ -36,6 +36,8 @@
 // is called before reusing the connection for another query. If a connection is
 // never returned to the connection pool but is immediately reused, then
 // ResetSession is called prior to reuse but IsValid is not called.
+global using Value = object;
+
 namespace go.database.sql;
 
 using context = context_package;
@@ -43,8 +45,6 @@ using errors = errors_package;
 using reflect = reflect_package;
 
 partial class driver_package {
-
-[GoType("any")] partial struct Value;
 
 // NamedValue holds both the value name and value.
 [GoType] partial struct NamedValue {
@@ -497,14 +497,14 @@ public static error ErrRemoveArgument = errors.New("driver: remove argument from
 
 [GoType("num:int64")] partial struct ΔRowsAffected;
 
-internal static ΔRowsAffected _ᴛ3ʗ = ((ΔRowsAffected)0);
+internal static Result _ᴛ1ʗ = ((ΔRowsAffected)0);
 
 public static (int64, error) LastInsertId(this ΔRowsAffected _) {
     return (0, errors.New("LastInsertId is not supported by this driver"u8));
 }
 
 public static (int64, error) RowsAffected(this ΔRowsAffected v) {
-    return (((int64)v), default!);
+    return ((int64)v, default!);
 }
 
 // ResultNoRows is a pre-defined [Result] for drivers to return when a DDL
@@ -512,16 +512,16 @@ public static (int64, error) RowsAffected(this ΔRowsAffected v) {
 // LastInsertId and [RowsAffected].
 public static noRows ResultNoRows;
 
-[GoType] partial struct noRows {
+[GoType] public partial struct noRows {
 }
 
-internal static Result _ᴛ4ʗ = new noRows(nil);
+internal static Result _ᴛ2ʗ = new noRows(nil);
 
-internal static (int64, error) LastInsertId(this noRows _) {
+public static (int64, error) LastInsertId(this noRows _) {
     return (0, errors.New("no LastInsertId available after DDL statement"u8));
 }
 
-internal static (int64, error) RowsAffected(this noRows _) {
+public static (int64, error) RowsAffected(this noRows _) {
     return (0, errors.New("no RowsAffected available after DDL statement"u8));
 }
 

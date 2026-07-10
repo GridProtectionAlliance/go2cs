@@ -54,18 +54,13 @@ using static go.net.http.httptest_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(closeIdleTransport, bool), closeIdleTransport>]
-[assembly: GoImplement<(io.ReadCloser, bool), io_package.ReadCloser>]
-[assembly: GoImplement<(net.Listener, error), net_package.Listener>]
-[assembly: GoImplement<bytes_package.Reader, io_package.Reader>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
-[assembly: GoImplement<strings_package.Builder, io_package.Writer>]
-[assembly: GoImplement<strings_package.Reader, io_package.Reader>]
+[assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<go.net.http_package.Transport, go.net.http_package.RoundTripper>(Pointer = true)]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<strings_package.Reader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<http.pattern; matches <>string; otherValues map<string>string}, http.pattern; matches <>string; otherValues map<string>string}>(Inverted = true)]
-[assembly: GoImplicitConv<struct{wall uint64; ext int64; loc *time.Location}, struct{wall uint64; ext int64; loc *time.Location}>(Inverted = true)]
 // </ImplicitConversions>
 
 namespace go.net.http;

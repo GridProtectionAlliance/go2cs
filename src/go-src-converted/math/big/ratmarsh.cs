@@ -16,22 +16,24 @@ partial class big_package {
 internal const byte ratGobVersion = 1;
 
 // GobEncode implements the [encoding/gob.GobEncoder] interface.
-[GoRecv] public static (slice<byte>, error) GobEncode(this ref ΔRat x) {
+public static (slice<byte>, error) GobEncode(this ж<ΔRat> Ꮡx) {
+    ref var x = ref Ꮡx.Value;
+
     if (x == nil) {
         return (default!, default!);
     }
-    var buf = new slice<byte>(1 + 4 + (len(x.a.abs) + len(x.b.abs)) * _S);
+    var buf = new slice<byte>(1 + 4 + (len(x.a.abs) + len(x.b.abs)) * (nint)_S);
     // extra bytes for version and sign bit (1), and numerator length (4)
     nint i = x.b.abs.bytes(buf);
     nint j = x.a.abs.bytes(buf[..(int)(i)]);
     nint n = i - j;
-    if (((nint)((uint32)n)) != n) {
+    if ((nint)(uint32)n != n) {
         // this should never happen
         return (default!, errors.New("Rat.GobEncode: numerator too large"u8));
     }
-    byteorder.BePutUint32(buf[(int)(j - 4)..(int)(j)], ((uint32)n));
+    byteorder.BePutUint32(buf[(int)(j - 4)..(int)(j)], (uint32)n);
     j -= 1 + 4;
-    var b = ratGobVersion << (int)(1);
+    var b = (byte)((ratGobVersion << (int)(1)));
     // make space for sign bit
     if (x.a.neg) {
         b |= (byte)(1);
@@ -51,15 +53,15 @@ internal const byte ratGobVersion = 1;
         return errors.New("Rat.GobDecode: buffer too small"u8);
     }
     var b = buf[0];
-    if (b >> (int)(1) != ratGobVersion) {
-        return fmt.Errorf("Rat.GobDecode: encoding version %d not supported"u8, b >> (int)(1));
+    if ((b >> (int)(1)) != ratGobVersion) {
+        return fmt.Errorf("Rat.GobDecode: encoding version %d not supported"u8, (b >> (int)(1)));
     }
-    static readonly UntypedInt j = /* 1 + 4 */ 5;
+    UntypedInt j = /* 1 + 4 */ 5;
     var ln = byteorder.BeUint32(buf[(int)(j - 4)..(int)(j)]);
-    if (((uint64)ln) > math.MaxInt - j) {
+    if ((uint64)ln > math.MaxInt - j) {
         return errors.New("Rat.GobDecode: invalid length"u8);
     }
-    nint i = j + ((nint)ln);
+    nint i = (nint)j + (nint)ln;
     if (len(buf) < i) {
         return errors.New("Rat.GobDecode: buffer too small"u8);
     }
@@ -70,21 +72,24 @@ internal const byte ratGobVersion = 1;
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-[GoRecv] public static (slice<byte> text, error err) MarshalText(this ref ΔRat x) {
+public static (slice<byte> text, error err) MarshalText(this ж<ΔRat> Ꮡx) {
     slice<byte> text = default!;
     error err = default!;
 
+    ref var x = ref Ꮡx.Value;
     if (x.IsInt()) {
-        return x.a.MarshalText();
+        return Ꮡx.of(big_package.ΔRat.Ꮡa).MarshalText();
     }
-    return (x.marshal(), default!);
+    return (Ꮡx.marshal(), default!);
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-[GoRecv] public static error UnmarshalText(this ref ΔRat z, slice<byte> text) {
+public static error UnmarshalText(this ж<ΔRat> Ꮡz, slice<byte> text) {
+    ref var z = ref Ꮡz.Value;
+
     // TODO(gri): get rid of the []byte/string conversion
     {
-        var (Δ_, ok) = z.SetString(((@string)text)); if (!ok) {
+        var (_, ok) = Ꮡz.SetString(((@string)text)); if (!ok) {
             return fmt.Errorf("math/big: cannot unmarshal %q into a *big.Rat"u8, text);
         }
     }

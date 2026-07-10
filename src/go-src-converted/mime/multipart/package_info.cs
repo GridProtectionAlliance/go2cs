@@ -44,19 +44,21 @@ using static go.mime.multipart_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(*os.File, error), File>]
-[assembly: GoImplement<(io.Writer, error), io_package.Writer>]
-[assembly: GoImplement<Part, io_package.Reader>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Reader>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>]
-[assembly: GoImplement<bytes_package.Reader, io_package.ReaderAt>]
-[assembly: GoImplement<os_package.File, io_package.Closer>]
-[assembly: GoImplement<os_package.File, io_package.ReaderAt>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
-[assembly: GoImplement<part, io_package.Writer>]
+[assembly: GoImplement<Part, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Reader, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<go.mime.quotedprintable_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<os_package.File, File>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<part, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<partReader, io_package.Reader>]
+[assembly: GoImplement<readForm_writerOnly, io_package.Writer>(Promoted = true)]
 [assembly: GoImplement<readForm_writerOnly, io_package.Writer>]
 [assembly: GoImplement<sectionReadCloser, File>]
-[assembly: GoImplement<stickyErrorReader, io_package.Reader>]
+[assembly: GoImplement<sectionReadCloser, io_package.Closer>(Promoted = true)]
+[assembly: GoImplement<stickyErrorReader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

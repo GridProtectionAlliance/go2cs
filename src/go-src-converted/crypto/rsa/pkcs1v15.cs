@@ -5,12 +5,13 @@ namespace go.crypto;
 
 using bytes = bytes_package;
 using crypto = crypto_package;
-using boring = crypto.@internal.boring_package;
-using randutil = crypto.@internal.randutil_package;
-using subtle = crypto.subtle_package;
+using boring = go.crypto.@internal.boring_package;
+using randutil = go.crypto.@internal.randutil_package;
+using subtle = go.crypto.subtle_package;
 using errors = errors_package;
 using io = io_package;
-using crypto.@internal;
+using go.crypto;
+using go.crypto.@internal;
 
 partial class rsa_package {
 
@@ -40,7 +41,7 @@ partial class rsa_package {
 // WARNING: use of this function to encrypt plaintexts other than
 // session keys is dangerous. Use RSA OAEP in new protocols.
 public static (slice<byte>, error) EncryptPKCS1v15(io.Reader random, ж<PublicKey> Ꮡpub, slice<byte> msg) {
-    ref var pub = ref Ꮡpub.val;
+    ref var pub = ref Ꮡpub.Value;
 
     randutil.MaybeReadByte(random);
     {
@@ -52,19 +53,18 @@ public static (slice<byte>, error) EncryptPKCS1v15(io.Reader random, ж<PublicKe
     if (len(msg) > k - 11) {
         return (default!, ErrMessageTooLong);
     }
-    if (boring.Enabled && random == boring.RandReader) {
-        (bkeyΔ1, errΔ2) = boringPublicKey(Ꮡpub);
+    if (boring.Enabled && AreEqual(random, boring.RandReader)) {
+        var (bkey, errΔ2) = boringPublicKey(Ꮡpub);
         if (errΔ2 != default!) {
             return (default!, errΔ2);
         }
-        return boring.EncryptRSAPKCS1(bkeyΔ1, msg);
+        return boring.EncryptRSAPKCS1(bkey, msg);
     }
     boring.UnreachableExceptTests();
     // EM = 0x00 || 0x02 || PS || 0x00 || M
     var em = new slice<byte>(k);
     em[1] = 2;
-    var ps = em[2..(int)(len(em) - len(msg) - 1)];
-    var mm = em[(int)(len(em) - len(msg))..];
+    var (ps, mm) = (em[2..(int)(len(em) - len(msg) - 1)], em[(int)(len(em) - len(msg))..]);
     var err = nonZeroRandomBytes(ps, random);
     if (err != default!) {
         return (default!, err);
@@ -91,19 +91,19 @@ public static (slice<byte>, error) EncryptPKCS1v15(io.Reader random, ж<PublicKe
 // forge signatures as if they had the private key. See
 // DecryptPKCS1v15SessionKey for a way of solving this problem.
 public static (slice<byte>, error) DecryptPKCS1v15(io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext) {
-    ref var priv = ref Ꮡpriv.val;
+    ref var priv = ref Ꮡpriv.Value;
 
     {
-        var errΔ1 = checkPub(Ꮡ(priv.PublicKey)); if (errΔ1 != default!) {
+        var errΔ1 = checkPub(Ꮡpriv.of(PrivateKey.ᏑPublicKey)); if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
     }
     if (boring.Enabled) {
-        (bkey, errΔ2) = boringPrivateKey(Ꮡpriv);
+        var (bkey, errΔ2) = boringPrivateKey(Ꮡpriv);
         if (errΔ2 != default!) {
             return (default!, errΔ2);
         }
-        (outΔ1, ) = boring.DecryptRSAPKCS1(bkey, ciphertext);
+        (var outΔ1, errΔ2) = boring.DecryptRSAPKCS1(bkey, ciphertext);
         if (errΔ2 != default!) {
             return (default!, ErrDecryption);
         }
@@ -154,14 +154,14 @@ public static (slice<byte>, error) DecryptPKCS1v15(io.Reader random, ж<PrivateK
 //   - [1] RFC 3218, Preventing the Million Message Attack on CMS,
 //     https://www.rfc-editor.org/rfc/rfc3218.html
 public static error DecryptPKCS1v15SessionKey(io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext, slice<byte> key) {
-    ref var priv = ref Ꮡpriv.val;
+    ref var priv = ref Ꮡpriv.Value;
 
     {
-        var errΔ1 = checkPub(Ꮡ(priv.PublicKey)); if (errΔ1 != default!) {
+        var errΔ1 = checkPub(Ꮡpriv.of(PrivateKey.ᏑPublicKey)); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
-    nint k = priv.Size();
+    nint k = Ꮡpriv.of(PrivateKey.ᏑPublicKey).Size();
     if (k - (len(key) + 3 + 8) < 0) {
         return ErrDecryption;
     }
@@ -174,7 +174,7 @@ public static error DecryptPKCS1v15SessionKey(io.Reader random, ж<PrivateKey> �
         // returns the full slice.
         return ErrDecryption;
     }
-    valid &= (nint)(subtle.ConstantTimeEq(((int32)(len(em) - index)), ((int32)len(key))));
+    valid &= (nint)(subtle.ConstantTimeEq((int32)(len(em) - index), (int32)len(key)));
     subtle.ConstantTimeCopy(valid, key, em[(int)(len(em) - len(key))..]);
     return default!;
 }
@@ -191,8 +191,8 @@ internal static (nint valid, slice<byte> em, nint index, error err) decryptPKCS1
     nint index = default!;
     error err = default!;
 
-    ref var priv = ref Ꮡpriv.val;
-    nint k = priv.Size();
+    ref var priv = ref Ꮡpriv.Value;
+    nint k = Ꮡpriv.of(PrivateKey.ᏑPublicKey).Size();
     if (k < 11) {
         err = ErrDecryption;
         return (valid, em, index, err);
@@ -249,7 +249,7 @@ internal static error /*err*/ nonZeroRandomBytes(slice<byte> s, io.Reader random
             }
             // In tests, the PRNG may return all zeros so we do
             // this to break the loop.
-            s[i] ^= (byte)(66);
+            s[i] ^= (byte)(0x42);
         }
     }
     return err;
@@ -267,14 +267,14 @@ internal static error /*err*/ nonZeroRandomBytes(slice<byte> s, io.Reader random
 // precompute a prefix of the digest value that makes a valid ASN1 DER string
 // with the correct contents.
 internal static map<crypto.Hash, slice<byte>> hashPrefixes = new map<crypto.Hash, slice<byte>>{
-    [crypto.MD5] = new(48, 32, 48, 12, 6, 8, 42, 134, 72, 134, 247, 13, 2, 5, 5, 0, 4, 16),
-    [crypto.SHA1] = new(48, 33, 48, 9, 6, 5, 43, 14, 3, 2, 26, 5, 0, 4, 20),
-    [crypto.SHA224] = new(48, 45, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 4, 5, 0, 4, 28),
-    [crypto.SHA256] = new(48, 49, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 1, 5, 0, 4, 32),
-    [crypto.SHA384] = new(48, 65, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 2, 5, 0, 4, 48),
-    [crypto.SHA512] = new(48, 81, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 3, 5, 0, 4, 64),
-    [crypto.MD5SHA1] = new(),
-    [crypto.RIPEMD160] = new(48, 32, 48, 8, 6, 6, 40, 207, 6, 3, 0, 49, 4, 20)
+    [crypto.MD5] = new byte[]{0x30, 0x20, 0x30, 0x0c, 0x06, 0x08, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x02, 0x05, 0x05, 0x00, 0x04, 0x10}.slice(),
+    [crypto.SHA1] = new byte[]{0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2b, 0x0e, 0x03, 0x02, 0x1a, 0x05, 0x00, 0x04, 0x14}.slice(),
+    [crypto.SHA224] = new byte[]{0x30, 0x2d, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x04, 0x05, 0x00, 0x04, 0x1c}.slice(),
+    [crypto.SHA256] = new byte[]{0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20}.slice(),
+    [crypto.SHA384] = new byte[]{0x30, 0x41, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x05, 0x00, 0x04, 0x30}.slice(),
+    [crypto.SHA512] = new byte[]{0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05, 0x00, 0x04, 0x40}.slice(),
+    [crypto.MD5SHA1] = new byte[]{}.slice(),
+    [crypto.RIPEMD160] = new byte[]{0x30, 0x20, 0x30, 0x08, 0x06, 0x06, 0x28, 0xcf, 0x06, 0x03, 0x00, 0x31, 0x04, 0x14}.slice()
 };
 
 // SignPKCS1v15 calculates the signature of hashed using
@@ -290,16 +290,16 @@ internal static map<crypto.Hash, slice<byte>> hashPrefixes = new map<crypto.Hash
 // messages to signatures and identify the signed messages. As ever,
 // signatures provide authenticity, not confidentiality.
 public static (slice<byte>, error) SignPKCS1v15(io.Reader random, ж<PrivateKey> Ꮡpriv, crypto.Hash hash, slice<byte> hashed) {
-    ref var priv = ref Ꮡpriv.val;
+    ref var priv = ref Ꮡpriv.Value;
 
     // pkcs1v15ConstructEM is called before boring.SignRSAPKCS1v15 to return
     // consistent errors, including ErrMessageTooLong.
-    (em, err) = pkcs1v15ConstructEM(Ꮡ(priv.PublicKey), hash, hashed);
+    var (em, err) = pkcs1v15ConstructEM(Ꮡpriv.of(PrivateKey.ᏑPublicKey), hash, hashed);
     if (err != default!) {
         return (default!, err);
     }
     if (boring.Enabled) {
-        (bkey, errΔ1) = boringPrivateKey(Ꮡpriv);
+        var (bkey, errΔ1) = boringPrivateKey(Ꮡpriv);
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
@@ -309,7 +309,7 @@ public static (slice<byte>, error) SignPKCS1v15(io.Reader random, ж<PrivateKey>
 }
 
 internal static (slice<byte>, error) pkcs1v15ConstructEM(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice<byte> hashed) {
-    ref var pub = ref Ꮡpub.val;
+    ref var pub = ref Ꮡpub.Value;
 
     // Special case: crypto.Hash(0) is used to indicate that the data is
     // signed directly.
@@ -319,7 +319,7 @@ internal static (slice<byte>, error) pkcs1v15ConstructEM(ж<PublicKey> Ꮡpub, c
             return (default!, errors.New("crypto/rsa: input must be hashed message"u8));
         }
         bool ok = default!;
-        (prefix, ok) = hashPrefixes[hash];
+        (prefix, ok) = hashPrefixes[hash, ꟷ];
         if (!ok) {
             return (default!, errors.New("crypto/rsa: unsupported hash function"u8));
         }
@@ -332,7 +332,7 @@ internal static (slice<byte>, error) pkcs1v15ConstructEM(ж<PublicKey> Ꮡpub, c
     var em = new slice<byte>(k);
     em[1] = 1;
     for (nint i = 2; i < k - len(prefix) - len(hashed) - 1; i++) {
-        em[i] = 255;
+        em[i] = 0xff;
     }
     copy(em[(int)(k - len(prefix) - len(hashed))..], prefix);
     copy(em[(int)(k - len(hashed))..], hashed);
@@ -348,10 +348,10 @@ internal static (slice<byte>, error) pkcs1v15ConstructEM(ж<PublicKey> Ꮡpub, c
 // The inputs are not considered confidential, and may leak through timing side
 // channels, or if an attacker has control of part of the inputs.
 public static error VerifyPKCS1v15(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice<byte> hashed, slice<byte> sig) {
-    ref var pub = ref Ꮡpub.val;
+    ref var pub = ref Ꮡpub.Value;
 
     if (boring.Enabled) {
-        (bkey, errΔ1) = boringPublicKey(Ꮡpub);
+        var (bkey, errΔ1) = boringPublicKey(Ꮡpub);
         if (errΔ1 != default!) {
             return errΔ1;
         }
@@ -368,11 +368,11 @@ public static error VerifyPKCS1v15(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice
     if (pub.Size() != len(sig)) {
         return ErrVerification;
     }
-    (em, err) = encrypt(Ꮡpub, sig);
+    var (em, err) = encrypt(Ꮡpub, sig);
     if (err != default!) {
         return ErrVerification;
     }
-    (expected, err) = pkcs1v15ConstructEM(Ꮡpub, hash, hashed);
+    (var expected, err) = pkcs1v15ConstructEM(Ꮡpub, hash, hashed);
     if (err != default!) {
         return ErrVerification;
     }

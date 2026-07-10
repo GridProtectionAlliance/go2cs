@@ -18,7 +18,9 @@ internal static partial void update(ж<macState> state, slice<byte> msg);
     internal partial ref macGeneric macGeneric { get; }
 }
 
-[GoRecv] internal static (nint, error) Write(this ref mac h, slice<byte> p) {
+internal static (nint, error) Write(this ж<mac> Ꮡh, slice<byte> p) {
+    ref var h = ref Ꮡh.Value;
+
     nint nn = len(p);
     if (h.offset > 0) {
         nint n = copy(h.buffer[(int)(h.offset)..], p);
@@ -28,11 +30,11 @@ internal static partial void update(ж<macState> state, slice<byte> msg);
         }
         p = p[(int)(n)..];
         h.offset = 0;
-        update(Ꮡ(h.macState), h.buffer[..]);
+        update(Ꮡh.of(mac.ᏑmacState), h.buffer[..]);
     }
     {
-        nint n = len(p) - (len(p) % TagSize); if (n > 0) {
-            update(Ꮡ(h.macState), p[..(int)(n)]);
+        nint n = len(p) - (len(p) % (nint)TagSize); if (n > 0) {
+            update(Ꮡh.of(mac.ᏑmacState), p[..(int)(n)]);
             p = p[(int)(n)..];
         }
     }
@@ -43,7 +45,7 @@ internal static partial void update(ж<macState> state, slice<byte> msg);
 }
 
 [GoRecv] internal static void Sum(this ref mac h, ж<array<byte>> Ꮡout) {
-    ref var @out = ref Ꮡout.val;
+    ref var @out = ref Ꮡout.Value;
 
     ref var state = ref heap<macState>(out var Ꮡstate);
     state = h.macState;

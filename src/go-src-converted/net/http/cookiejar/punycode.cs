@@ -5,10 +5,10 @@ namespace go.net.http;
 
 // This file implements the Punycode algorithm from RFC 3492.
 using fmt = fmt_package;
-using ascii = net.http.@internal.ascii_package;
+using ascii = go.net.http.@internal.ascii_package;
 using strings = strings_package;
 using utf8 = unicode.utf8_package;
-using net.http.@internal;
+using go.net.http.@internal;
 using unicode;
 
 partial class cookiejar_package {
@@ -39,22 +39,22 @@ internal const int32 tmin = 1;
 internal static (@string, error) encode(@string prefix, @string s) {
     var output = new slice<byte>(len(prefix), len(prefix) + 1 + 2 * len(s));
     copy(output, prefix);
-    var (delta, n, bias) = (((int32)0), initialN, initialBias);
-    var (b, remaining) = (((int32)0), ((int32)0));
+    var (delta, n, bias) = ((int32)0, initialN, initialBias);
+    var (b, remaining) = ((int32)0, (int32)0);
     foreach (var (_, r) in s) {
         if (r < utf8.RuneSelf){
             b++;
-            output = append(output, ((byte)r));
+            output = append(output, (byte)r);
         } else {
             remaining++;
         }
     }
     var h = b;
     if (b > 0) {
-        output = append(output, (rune)'-');
+        output = append(output, (byte)((rune)'-'));
     }
     while (remaining != 0) {
-        var m = ((int32)2147483647);
+        var m = (int32)0x7fffffff;
         foreach (var (_, r) in s) {
             if (m > r && r >= n) {
                 m = r;
@@ -106,10 +106,10 @@ internal static (@string, error) encode(@string prefix, @string s) {
 internal static byte encodeDigit(int32 digit) {
     switch (ᐧ) {
     case {} when 0 <= digit && digit < 26: {
-        return ((byte)(digit + (rune)'a'));
+        return (byte)(digit + (rune)'a');
     }
     case {} when 26 <= digit && digit < 36: {
-        return ((byte)(digit + ((rune)'0' - 26)));
+        return (byte)(digit + ((rune)'0' - 26));
     }}
 
     throw panic("cookiejar: internal error in punycode encoding");
@@ -123,7 +123,7 @@ internal static int32 adapt(int32 delta, int32 numPoints, bool firstTime) {
         delta /= 2;
     }
     delta += delta / numPoints;
-    var k = ((int32)0);
+    var k = (int32)0;
     while (delta > ((@base - tmin) * tmax) / 2) {
         delta /= @base - tmin;
         k += @base;

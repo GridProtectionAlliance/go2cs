@@ -80,11 +80,11 @@ internal static slice<intName> versionStrings = new intName[]{
 }.slice();
 
 public static @string String(this Version i) {
-    return stringName(((uint32)i), versionStrings, false);
+    return stringName((uint32)(byte)i, versionStrings, false);
 }
 
 public static @string GoString(this Version i) {
-    return stringName(((uint32)i), versionStrings, true);
+    return stringName((uint32)(byte)i, versionStrings, true);
 }
 
 [GoType("num:byte")] partial struct Class;
@@ -100,11 +100,11 @@ internal static slice<intName> classStrings = new intName[]{
 }.slice();
 
 public static @string String(this Class i) {
-    return stringName(((uint32)i), classStrings, false);
+    return stringName((uint32)(byte)i, classStrings, false);
 }
 
 public static @string GoString(this Class i) {
-    return stringName(((uint32)i), classStrings, true);
+    return stringName((uint32)(byte)i, classStrings, true);
 }
 
 [GoType("num:byte")] partial struct ΔData;
@@ -120,11 +120,11 @@ internal static slice<intName> dataStrings = new intName[]{
 }.slice();
 
 public static @string String(this ΔData i) {
-    return stringName(((uint32)i), dataStrings, false);
+    return stringName((uint32)(byte)i, dataStrings, false);
 }
 
 public static @string GoString(this ΔData i) {
-    return stringName(((uint32)i), dataStrings, true);
+    return stringName((uint32)(byte)i, dataStrings, true);
 }
 
 [GoType("num:byte")] partial struct OSABI;
@@ -174,11 +174,11 @@ internal static slice<intName> osabiStrings = new intName[]{
 }.slice();
 
 public static @string String(this OSABI i) {
-    return stringName(((uint32)i), osabiStrings, false);
+    return stringName((uint32)(byte)i, osabiStrings, false);
 }
 
 public static @string GoString(this OSABI i) {
-    return stringName(((uint32)i), osabiStrings, true);
+    return stringName((uint32)(byte)i, osabiStrings, true);
 }
 
 [GoType("num:uint16")] partial struct Type;
@@ -188,10 +188,10 @@ public static readonly Type ET_REL = 1;       /* Relocatable. */
 public static readonly Type ET_EXEC = 2;      /* Executable. */
 public static readonly Type ET_DYN = 3;       /* Shared object. */
 public static readonly Type ET_CORE = 4;      /* Core file. */
-public static readonly Type ET_LOOS = /* 0xfe00 */ 65024;      /* First operating system specific. */
-public static readonly Type ET_HIOS = /* 0xfeff */ 65279;      /* Last operating system-specific. */
-public static readonly Type ET_LOPROC = /* 0xff00 */ 65280;    /* First processor-specific. */
-public static readonly Type ET_HIPROC = /* 0xffff */ 65535;    /* Last processor-specific. */
+public static readonly Type ET_LOOS = 0xfe00;      /* First operating system specific. */
+public static readonly Type ET_HIOS = 0xfeff;      /* Last operating system-specific. */
+public static readonly Type ET_LOPROC = 0xff00;    /* First processor-specific. */
+public static readonly Type ET_HIPROC = 0xffff;    /* Last processor-specific. */
 
 internal static slice<intName> typeStrings = new intName[]{
     new(0, "ET_NONE"u8),
@@ -199,18 +199,18 @@ internal static slice<intName> typeStrings = new intName[]{
     new(2, "ET_EXEC"u8),
     new(3, "ET_DYN"u8),
     new(4, "ET_CORE"u8),
-    new(65024, "ET_LOOS"u8),
-    new(65279, "ET_HIOS"u8),
-    new(65280, "ET_LOPROC"u8),
-    new(65535, "ET_HIPROC"u8)
+    new(0xfe00, "ET_LOOS"u8),
+    new(0xfeff, "ET_HIOS"u8),
+    new(0xff00, "ET_LOPROC"u8),
+    new(0xffff, "ET_HIPROC"u8)
 }.slice();
 
 public static @string String(this Type i) {
-    return stringName(((uint32)i), typeStrings, false);
+    return stringName((uint32)(uint16)i, typeStrings, false);
 }
 
 public static @string GoString(this Type i) {
-    return stringName(((uint32)i), typeStrings, true);
+    return stringName((uint32)(uint16)i, typeStrings, true);
 }
 
 [GoType("num:uint16")] partial struct Machine;
@@ -401,7 +401,7 @@ public static readonly Machine EM_LOONGARCH = 258;     /* LoongArch */
 public static readonly Machine EM_486 = 6;            /* Intel i486. */
 public static readonly Machine EM_MIPS_RS4_BE = 10;    /* MIPS R4000 Big-Endian */
 public static readonly Machine EM_ALPHA_STD = 41;      /* Digital Alpha (standard value). */
-public static readonly Machine EM_ALPHA = /* 0x9026 */ 36902;          /* Alpha (written in the absence of an ABI) */
+public static readonly Machine EM_ALPHA = 0x9026;          /* Alpha (written in the absence of an ABI) */
 
 /* Non-standard or deprecated. */
 internal static slice<intName> machineStrings = new intName[]{
@@ -591,45 +591,45 @@ internal static slice<intName> machineStrings = new intName[]{
     new(6, "EM_486"u8),
     new(10, "EM_MIPS_RS4_BE"u8),
     new(41, "EM_ALPHA_STD"u8),
-    new(36902, "EM_ALPHA"u8)
+    new(0x9026, "EM_ALPHA"u8)
 }.slice();
 
 public static @string String(this Machine i) {
-    return stringName(((uint32)i), machineStrings, false);
+    return stringName((uint32)(uint16)i, machineStrings, false);
 }
 
 public static @string GoString(this Machine i) {
-    return stringName(((uint32)i), machineStrings, true);
+    return stringName((uint32)(uint16)i, machineStrings, true);
 }
 
 [GoType("num:nint")] partial struct SectionIndex;
 
 public static readonly SectionIndex SHN_UNDEF = 0;        /* Undefined, missing, irrelevant. */
-public static readonly SectionIndex SHN_LORESERVE = /* 0xff00 */ 65280;    /* First of reserved range. */
-public static readonly SectionIndex SHN_LOPROC = /* 0xff00 */ 65280;       /* First processor-specific. */
-public static readonly SectionIndex SHN_HIPROC = /* 0xff1f */ 65311;       /* Last processor-specific. */
-public static readonly SectionIndex SHN_LOOS = /* 0xff20 */ 65312;         /* First operating system-specific. */
-public static readonly SectionIndex SHN_HIOS = /* 0xff3f */ 65343;         /* Last operating system-specific. */
-public static readonly SectionIndex SHN_ABS = /* 0xfff1 */ 65521;          /* Absolute values. */
-public static readonly SectionIndex SHN_COMMON = /* 0xfff2 */ 65522;       /* Common data. */
-public static readonly SectionIndex SHN_XINDEX = /* 0xffff */ 65535;       /* Escape; index stored elsewhere. */
-public static readonly SectionIndex SHN_HIRESERVE = /* 0xffff */ 65535;    /* Last of reserved range. */
+public static readonly SectionIndex SHN_LORESERVE = 0xff00;    /* First of reserved range. */
+public static readonly SectionIndex SHN_LOPROC = 0xff00;       /* First processor-specific. */
+public static readonly SectionIndex SHN_HIPROC = 0xff1f;       /* Last processor-specific. */
+public static readonly SectionIndex SHN_LOOS = 0xff20;         /* First operating system-specific. */
+public static readonly SectionIndex SHN_HIOS = 0xff3f;         /* Last operating system-specific. */
+public static readonly SectionIndex SHN_ABS = 0xfff1;          /* Absolute values. */
+public static readonly SectionIndex SHN_COMMON = 0xfff2;       /* Common data. */
+public static readonly SectionIndex SHN_XINDEX = 0xffff;       /* Escape; index stored elsewhere. */
+public static readonly SectionIndex SHN_HIRESERVE = 0xffff;    /* Last of reserved range. */
 
 internal static slice<intName> shnStrings = new intName[]{
     new(0, "SHN_UNDEF"u8),
-    new(65280, "SHN_LOPROC"u8),
-    new(65312, "SHN_LOOS"u8),
-    new(65521, "SHN_ABS"u8),
-    new(65522, "SHN_COMMON"u8),
-    new(65535, "SHN_XINDEX"u8)
+    new(0xff00, "SHN_LOPROC"u8),
+    new(0xff20, "SHN_LOOS"u8),
+    new(0xfff1, "SHN_ABS"u8),
+    new(0xfff2, "SHN_COMMON"u8),
+    new(0xffff, "SHN_XINDEX"u8)
 }.slice();
 
 public static @string String(this SectionIndex i) {
-    return stringName(((uint32)i), shnStrings, false);
+    return stringName((uint32)(nint)i, shnStrings, false);
 }
 
 public static @string GoString(this SectionIndex i) {
-    return stringName(((uint32)i), shnStrings, true);
+    return stringName((uint32)(nint)i, shnStrings, true);
 }
 
 [GoType("num:uint32")] partial struct SectionType;
@@ -651,19 +651,19 @@ public static readonly SectionType SHT_FINI_ARRAY = 15;            /* Terminatio
 public static readonly SectionType SHT_PREINIT_ARRAY = 16;         /* Pre-initialization function ptrs. */
 public static readonly SectionType SHT_GROUP = 17;                 /* Section group. */
 public static readonly SectionType SHT_SYMTAB_SHNDX = 18;          /* Section indexes (see SHN_XINDEX). */
-public static readonly SectionType SHT_LOOS = /* 0x60000000 */ 1610612736;                  /* First of OS specific semantics */
-public static readonly SectionType SHT_GNU_ATTRIBUTES = /* 0x6ffffff5 */ 1879048181;        /* GNU object attributes */
-public static readonly SectionType SHT_GNU_HASH = /* 0x6ffffff6 */ 1879048182;              /* GNU hash table */
-public static readonly SectionType SHT_GNU_LIBLIST = /* 0x6ffffff7 */ 1879048183;           /* GNU prelink library list */
-public static readonly SectionType SHT_GNU_VERDEF = /* 0x6ffffffd */ 1879048189;            /* GNU version definition section */
-public static readonly SectionType SHT_GNU_VERNEED = /* 0x6ffffffe */ 1879048190;           /* GNU version needs section */
-public static readonly SectionType SHT_GNU_VERSYM = /* 0x6fffffff */ 1879048191;            /* GNU version symbol table */
-public static readonly SectionType SHT_HIOS = /* 0x6fffffff */ 1879048191;                  /* Last of OS specific semantics */
-public static readonly SectionType SHT_LOPROC = /* 0x70000000 */ 1879048192;                /* reserved range for processor */
-public static readonly SectionType SHT_MIPS_ABIFLAGS = /* 0x7000002a */ 1879048234;         /* .MIPS.abiflags */
-public static readonly SectionType SHT_HIPROC = /* 0x7fffffff */ 2147483647;                /* specific section header types */
-public static readonly SectionType SHT_LOUSER = /* 0x80000000 */ 2147483648;                /* reserved range for application */
-public static readonly SectionType SHT_HIUSER = /* 0xffffffff */ 4294967295;                /* specific indexes */
+public static readonly SectionType SHT_LOOS = 0x60000000;                  /* First of OS specific semantics */
+public static readonly SectionType SHT_GNU_ATTRIBUTES = 0x6ffffff5;        /* GNU object attributes */
+public static readonly SectionType SHT_GNU_HASH = 0x6ffffff6;              /* GNU hash table */
+public static readonly SectionType SHT_GNU_LIBLIST = 0x6ffffff7;           /* GNU prelink library list */
+public static readonly SectionType SHT_GNU_VERDEF = 0x6ffffffd;            /* GNU version definition section */
+public static readonly SectionType SHT_GNU_VERNEED = 0x6ffffffe;           /* GNU version needs section */
+public static readonly SectionType SHT_GNU_VERSYM = 0x6fffffff;            /* GNU version symbol table */
+public static readonly SectionType SHT_HIOS = 0x6fffffff;                  /* Last of OS specific semantics */
+public static readonly SectionType SHT_LOPROC = 0x70000000;                /* reserved range for processor */
+public static readonly SectionType SHT_MIPS_ABIFLAGS = 0x7000002a;         /* .MIPS.abiflags */
+public static readonly SectionType SHT_HIPROC = 0x7fffffff;                /* specific section header types */
+public static readonly SectionType SHT_LOUSER = 0x80000000;                /* reserved range for application */
+public static readonly SectionType SHT_HIUSER = 0xffffffff;                /* specific indexes */
 
 internal static slice<intName> shtStrings = new intName[]{
     new(0, "SHT_NULL"u8),
@@ -683,90 +683,90 @@ internal static slice<intName> shtStrings = new intName[]{
     new(16, "SHT_PREINIT_ARRAY"u8),
     new(17, "SHT_GROUP"u8),
     new(18, "SHT_SYMTAB_SHNDX"u8),
-    new(1610612736, "SHT_LOOS"u8),
-    new(1879048181, "SHT_GNU_ATTRIBUTES"u8),
-    new(1879048182, "SHT_GNU_HASH"u8),
-    new(1879048183, "SHT_GNU_LIBLIST"u8),
-    new(1879048189, "SHT_GNU_VERDEF"u8),
-    new(1879048190, "SHT_GNU_VERNEED"u8),
-    new(1879048191, "SHT_GNU_VERSYM"u8),
-    new(1879048192, "SHT_LOPROC"u8),
-    new(1879048234, "SHT_MIPS_ABIFLAGS"u8),
-    new(2147483647, "SHT_HIPROC"u8),
-    new((nint)2147483648L, "SHT_LOUSER"u8),
-    new((nint)4294967295L, "SHT_HIUSER"u8)
+    new(0x60000000, "SHT_LOOS"u8),
+    new(0x6ffffff5, "SHT_GNU_ATTRIBUTES"u8),
+    new(0x6ffffff6, "SHT_GNU_HASH"u8),
+    new(0x6ffffff7, "SHT_GNU_LIBLIST"u8),
+    new(0x6ffffffd, "SHT_GNU_VERDEF"u8),
+    new(0x6ffffffe, "SHT_GNU_VERNEED"u8),
+    new(0x6fffffff, "SHT_GNU_VERSYM"u8),
+    new(0x70000000, "SHT_LOPROC"u8),
+    new(0x7000002a, "SHT_MIPS_ABIFLAGS"u8),
+    new(0x7fffffff, "SHT_HIPROC"u8),
+    new(0x80000000U, "SHT_LOUSER"u8),
+    new(0xffffffffU, "SHT_HIUSER"u8)
 }.slice();
 
 public static @string String(this SectionType i) {
-    return stringName(((uint32)i), shtStrings, false);
+    return stringName((uint32)i, shtStrings, false);
 }
 
 public static @string GoString(this SectionType i) {
-    return stringName(((uint32)i), shtStrings, true);
+    return stringName((uint32)i, shtStrings, true);
 }
 
 [GoType("num:uint32")] partial struct SectionFlag;
 
-public static readonly SectionFlag SHF_WRITE = /* 0x1 */ 1;                   /* Section contains writable data. */
-public static readonly SectionFlag SHF_ALLOC = /* 0x2 */ 2;                   /* Section occupies memory. */
-public static readonly SectionFlag SHF_EXECINSTR = /* 0x4 */ 4;               /* Section contains instructions. */
-public static readonly SectionFlag SHF_MERGE = /* 0x10 */ 16;                   /* Section may be merged. */
-public static readonly SectionFlag SHF_STRINGS = /* 0x20 */ 32;                 /* Section contains strings. */
-public static readonly SectionFlag SHF_INFO_LINK = /* 0x40 */ 64;               /* sh_info holds section index. */
-public static readonly SectionFlag SHF_LINK_ORDER = /* 0x80 */ 128;              /* Special ordering requirements. */
-public static readonly SectionFlag SHF_OS_NONCONFORMING = /* 0x100 */ 256;        /* OS-specific processing required. */
-public static readonly SectionFlag SHF_GROUP = /* 0x200 */ 512;                   /* Member of section group. */
-public static readonly SectionFlag SHF_TLS = /* 0x400 */ 1024;                     /* Section contains TLS data. */
-public static readonly SectionFlag SHF_COMPRESSED = /* 0x800 */ 2048;              /* Section is compressed. */
-public static readonly SectionFlag SHF_MASKOS = /* 0x0ff00000 */ 267386880;                  /* OS-specific semantics. */
-public static readonly SectionFlag SHF_MASKPROC = /* 0xf0000000 */ 4026531840;                /* Processor-specific semantics. */
+public static readonly SectionFlag SHF_WRITE = 0x1;                   /* Section contains writable data. */
+public static readonly SectionFlag SHF_ALLOC = 0x2;                   /* Section occupies memory. */
+public static readonly SectionFlag SHF_EXECINSTR = 0x4;               /* Section contains instructions. */
+public static readonly SectionFlag SHF_MERGE = 0x10;                   /* Section may be merged. */
+public static readonly SectionFlag SHF_STRINGS = 0x20;                 /* Section contains strings. */
+public static readonly SectionFlag SHF_INFO_LINK = 0x40;               /* sh_info holds section index. */
+public static readonly SectionFlag SHF_LINK_ORDER = 0x80;              /* Special ordering requirements. */
+public static readonly SectionFlag SHF_OS_NONCONFORMING = 0x100;        /* OS-specific processing required. */
+public static readonly SectionFlag SHF_GROUP = 0x200;                   /* Member of section group. */
+public static readonly SectionFlag SHF_TLS = 0x400;                     /* Section contains TLS data. */
+public static readonly SectionFlag SHF_COMPRESSED = 0x800;              /* Section is compressed. */
+public static readonly SectionFlag SHF_MASKOS = 0x0ff00000;                  /* OS-specific semantics. */
+public static readonly SectionFlag SHF_MASKPROC = 0xf0000000;                /* Processor-specific semantics. */
 
 internal static slice<intName> shfStrings = new intName[]{
-    new(1, "SHF_WRITE"u8),
-    new(2, "SHF_ALLOC"u8),
-    new(4, "SHF_EXECINSTR"u8),
-    new(16, "SHF_MERGE"u8),
-    new(32, "SHF_STRINGS"u8),
-    new(64, "SHF_INFO_LINK"u8),
-    new(128, "SHF_LINK_ORDER"u8),
-    new(256, "SHF_OS_NONCONFORMING"u8),
-    new(512, "SHF_GROUP"u8),
-    new(1024, "SHF_TLS"u8),
-    new(2048, "SHF_COMPRESSED"u8)
+    new(0x1, "SHF_WRITE"u8),
+    new(0x2, "SHF_ALLOC"u8),
+    new(0x4, "SHF_EXECINSTR"u8),
+    new(0x10, "SHF_MERGE"u8),
+    new(0x20, "SHF_STRINGS"u8),
+    new(0x40, "SHF_INFO_LINK"u8),
+    new(0x80, "SHF_LINK_ORDER"u8),
+    new(0x100, "SHF_OS_NONCONFORMING"u8),
+    new(0x200, "SHF_GROUP"u8),
+    new(0x400, "SHF_TLS"u8),
+    new(0x800, "SHF_COMPRESSED"u8)
 }.slice();
 
 public static @string String(this SectionFlag i) {
-    return flagName(((uint32)i), shfStrings, false);
+    return flagName((uint32)i, shfStrings, false);
 }
 
 public static @string GoString(this SectionFlag i) {
-    return flagName(((uint32)i), shfStrings, true);
+    return flagName((uint32)i, shfStrings, true);
 }
 
 [GoType("num:nint")] partial struct CompressionType;
 
 public static readonly CompressionType COMPRESS_ZLIB = 1;          /* ZLIB compression. */
 public static readonly CompressionType COMPRESS_ZSTD = 2;          /* ZSTD compression. */
-public static readonly CompressionType COMPRESS_LOOS = /* 0x60000000 */ 1610612736;          /* First OS-specific. */
-public static readonly CompressionType COMPRESS_HIOS = /* 0x6fffffff */ 1879048191;          /* Last OS-specific. */
-public static readonly CompressionType COMPRESS_LOPROC = /* 0x70000000 */ 1879048192;        /* First processor-specific type. */
-public static readonly CompressionType COMPRESS_HIPROC = /* 0x7fffffff */ 2147483647;        /* Last processor-specific type. */
+public static readonly CompressionType COMPRESS_LOOS = 0x60000000;          /* First OS-specific. */
+public static readonly CompressionType COMPRESS_HIOS = 0x6fffffff;          /* Last OS-specific. */
+public static readonly CompressionType COMPRESS_LOPROC = 0x70000000;        /* First processor-specific type. */
+public static readonly CompressionType COMPRESS_HIPROC = 0x7fffffff;        /* Last processor-specific type. */
 
 internal static slice<intName> compressionStrings = new intName[]{
     new(1, "COMPRESS_ZLIB"u8),
     new(2, "COMPRESS_ZSTD"u8),
-    new(1610612736, "COMPRESS_LOOS"u8),
-    new(1879048191, "COMPRESS_HIOS"u8),
-    new(1879048192, "COMPRESS_LOPROC"u8),
-    new(2147483647, "COMPRESS_HIPROC"u8)
+    new(0x60000000, "COMPRESS_LOOS"u8),
+    new(0x6fffffff, "COMPRESS_HIOS"u8),
+    new(0x70000000, "COMPRESS_LOPROC"u8),
+    new(0x7fffffff, "COMPRESS_HIPROC"u8)
 }.slice();
 
 public static @string String(this CompressionType i) {
-    return stringName(((uint32)i), compressionStrings, false);
+    return stringName((uint32)(nint)i, compressionStrings, false);
 }
 
 public static @string GoString(this CompressionType i) {
-    return stringName(((uint32)i), compressionStrings, true);
+    return stringName((uint32)(nint)i, compressionStrings, true);
 }
 
 [GoType("num:nint")] partial struct ProgType;
@@ -779,32 +779,32 @@ public static readonly ProgType PT_NOTE = 4;  /* Auxiliary information. */
 public static readonly ProgType PT_SHLIB = 5; /* Reserved (not used). */
 public static readonly ProgType PT_PHDR = 6;  /* Location of program header itself. */
 public static readonly ProgType PT_TLS = 7;   /* Thread local storage segment */
-public static readonly ProgType PT_LOOS = /* 0x60000000 */ 1610612736;        /* First OS-specific. */
-public static readonly ProgType PT_GNU_EH_FRAME = /* 0x6474e550 */ 1685382480;        /* Frame unwind information */
-public static readonly ProgType PT_GNU_STACK = /* 0x6474e551 */ 1685382481;           /* Stack flags */
-public static readonly ProgType PT_GNU_RELRO = /* 0x6474e552 */ 1685382482;           /* Read only after relocs */
-public static readonly ProgType PT_GNU_PROPERTY = /* 0x6474e553 */ 1685382483;        /* GNU property */
-public static readonly ProgType PT_GNU_MBIND_LO = /* 0x6474e555 */ 1685382485;        /* Mbind segments start */
-public static readonly ProgType PT_GNU_MBIND_HI = /* 0x6474f554 */ 1685386580;        /* Mbind segments finish */
-public static readonly ProgType PT_PAX_FLAGS = /* 0x65041580 */ 1694766464;        /* PAX flags */
-public static readonly ProgType PT_OPENBSD_RANDOMIZE = /* 0x65a3dbe6 */ 1705237478;        /* Random data */
-public static readonly ProgType PT_OPENBSD_WXNEEDED = /* 0x65a3dbe7 */ 1705237479;         /* W^X violations */
-public static readonly ProgType PT_OPENBSD_NOBTCFI = /* 0x65a3dbe8 */ 1705237480;          /* No branch target CFI */
-public static readonly ProgType PT_OPENBSD_BOOTDATA = /* 0x65a41be6 */ 1705253862;         /* Boot arguments */
-public static readonly ProgType PT_SUNW_EH_FRAME = /* 0x6474e550 */ 1685382480;        /* Frame unwind information */
-public static readonly ProgType PT_SUNWSTACK = /* 0x6ffffffb */ 1879048187;            /* Stack segment */
-public static readonly ProgType PT_HIOS = /* 0x6fffffff */ 1879048191;        /* Last OS-specific. */
-public static readonly ProgType PT_LOPROC = /* 0x70000000 */ 1879048192;        /* First processor-specific type. */
-public static readonly ProgType PT_ARM_ARCHEXT = /* 0x70000000 */ 1879048192;        /* Architecture compatibility */
-public static readonly ProgType PT_ARM_EXIDX = /* 0x70000001 */ 1879048193;          /* Exception unwind tables */
-public static readonly ProgType PT_AARCH64_ARCHEXT = /* 0x70000000 */ 1879048192;        /* Architecture compatibility */
-public static readonly ProgType PT_AARCH64_UNWIND = /* 0x70000001 */ 1879048193;         /* Exception unwind tables */
-public static readonly ProgType PT_MIPS_REGINFO = /* 0x70000000 */ 1879048192;         /* Register usage */
-public static readonly ProgType PT_MIPS_RTPROC = /* 0x70000001 */ 1879048193;          /* Runtime procedures */
-public static readonly ProgType PT_MIPS_OPTIONS = /* 0x70000002 */ 1879048194;         /* Options */
-public static readonly ProgType PT_MIPS_ABIFLAGS = /* 0x70000003 */ 1879048195;        /* ABI flags */
-public static readonly ProgType PT_S390_PGSTE = /* 0x70000000 */ 1879048192;        /* 4k page table size */
-public static readonly ProgType PT_HIPROC = /* 0x7fffffff */ 2147483647;        /* Last processor-specific type. */
+public static readonly ProgType PT_LOOS = 0x60000000;        /* First OS-specific. */
+public static readonly ProgType PT_GNU_EH_FRAME = 0x6474e550;        /* Frame unwind information */
+public static readonly ProgType PT_GNU_STACK = 0x6474e551;           /* Stack flags */
+public static readonly ProgType PT_GNU_RELRO = 0x6474e552;           /* Read only after relocs */
+public static readonly ProgType PT_GNU_PROPERTY = 0x6474e553;        /* GNU property */
+public static readonly ProgType PT_GNU_MBIND_LO = 0x6474e555;        /* Mbind segments start */
+public static readonly ProgType PT_GNU_MBIND_HI = 0x6474f554;        /* Mbind segments finish */
+public static readonly ProgType PT_PAX_FLAGS = 0x65041580;        /* PAX flags */
+public static readonly ProgType PT_OPENBSD_RANDOMIZE = 0x65a3dbe6;        /* Random data */
+public static readonly ProgType PT_OPENBSD_WXNEEDED = 0x65a3dbe7;         /* W^X violations */
+public static readonly ProgType PT_OPENBSD_NOBTCFI = 0x65a3dbe8;          /* No branch target CFI */
+public static readonly ProgType PT_OPENBSD_BOOTDATA = 0x65a41be6;         /* Boot arguments */
+public static readonly ProgType PT_SUNW_EH_FRAME = 0x6474e550;        /* Frame unwind information */
+public static readonly ProgType PT_SUNWSTACK = 0x6ffffffb;            /* Stack segment */
+public static readonly ProgType PT_HIOS = 0x6fffffff;        /* Last OS-specific. */
+public static readonly ProgType PT_LOPROC = 0x70000000;        /* First processor-specific type. */
+public static readonly ProgType PT_ARM_ARCHEXT = 0x70000000;        /* Architecture compatibility */
+public static readonly ProgType PT_ARM_EXIDX = 0x70000001;          /* Exception unwind tables */
+public static readonly ProgType PT_AARCH64_ARCHEXT = 0x70000000;        /* Architecture compatibility */
+public static readonly ProgType PT_AARCH64_UNWIND = 0x70000001;         /* Exception unwind tables */
+public static readonly ProgType PT_MIPS_REGINFO = 0x70000000;         /* Register usage */
+public static readonly ProgType PT_MIPS_RTPROC = 0x70000001;          /* Runtime procedures */
+public static readonly ProgType PT_MIPS_OPTIONS = 0x70000002;         /* Options */
+public static readonly ProgType PT_MIPS_ABIFLAGS = 0x70000003;        /* ABI flags */
+public static readonly ProgType PT_S390_PGSTE = 0x70000000;        /* 4k page table size */
+public static readonly ProgType PT_HIPROC = 0x7fffffff;        /* Last processor-specific type. */
 
 // We don't list the processor-dependent ProgTypes,
 // as the values overlap.
@@ -817,49 +817,49 @@ internal static slice<intName> ptStrings = new intName[]{
     new(5, "PT_SHLIB"u8),
     new(6, "PT_PHDR"u8),
     new(7, "PT_TLS"u8),
-    new(1610612736, "PT_LOOS"u8),
-    new(1685382480, "PT_GNU_EH_FRAME"u8),
-    new(1685382481, "PT_GNU_STACK"u8),
-    new(1685382482, "PT_GNU_RELRO"u8),
-    new(1685382483, "PT_GNU_PROPERTY"u8),
-    new(1694766464, "PT_PAX_FLAGS"u8),
-    new(1705237478, "PT_OPENBSD_RANDOMIZE"u8),
-    new(1705237479, "PT_OPENBSD_WXNEEDED"u8),
-    new(1705253862, "PT_OPENBSD_BOOTDATA"u8),
-    new(1879048187, "PT_SUNWSTACK"u8),
-    new(1879048191, "PT_HIOS"u8),
-    new(1879048192, "PT_LOPROC"u8),
-    new(2147483647, "PT_HIPROC"u8)
+    new(0x60000000, "PT_LOOS"u8),
+    new(0x6474e550, "PT_GNU_EH_FRAME"u8),
+    new(0x6474e551, "PT_GNU_STACK"u8),
+    new(0x6474e552, "PT_GNU_RELRO"u8),
+    new(0x6474e553, "PT_GNU_PROPERTY"u8),
+    new(0x65041580, "PT_PAX_FLAGS"u8),
+    new(0x65a3dbe6, "PT_OPENBSD_RANDOMIZE"u8),
+    new(0x65a3dbe7, "PT_OPENBSD_WXNEEDED"u8),
+    new(0x65a41be6, "PT_OPENBSD_BOOTDATA"u8),
+    new(0x6ffffffb, "PT_SUNWSTACK"u8),
+    new(0x6fffffff, "PT_HIOS"u8),
+    new(0x70000000, "PT_LOPROC"u8),
+    new(0x7fffffff, "PT_HIPROC"u8)
 }.slice();
 
 public static @string String(this ProgType i) {
-    return stringName(((uint32)i), ptStrings, false);
+    return stringName((uint32)(nint)i, ptStrings, false);
 }
 
 public static @string GoString(this ProgType i) {
-    return stringName(((uint32)i), ptStrings, true);
+    return stringName((uint32)(nint)i, ptStrings, true);
 }
 
 [GoType("num:uint32")] partial struct ProgFlag;
 
-public static readonly ProgFlag PF_X = /* 0x1 */ 1;               /* Executable. */
-public static readonly ProgFlag PF_W = /* 0x2 */ 2;               /* Writable. */
-public static readonly ProgFlag PF_R = /* 0x4 */ 4;               /* Readable. */
-public static readonly ProgFlag PF_MASKOS = /* 0x0ff00000 */ 267386880;          /* Operating system-specific. */
-public static readonly ProgFlag PF_MASKPROC = /* 0xf0000000 */ 4026531840;        /* Processor-specific. */
+public static readonly ProgFlag PF_X = 0x1;               /* Executable. */
+public static readonly ProgFlag PF_W = 0x2;               /* Writable. */
+public static readonly ProgFlag PF_R = 0x4;               /* Readable. */
+public static readonly ProgFlag PF_MASKOS = 0x0ff00000;          /* Operating system-specific. */
+public static readonly ProgFlag PF_MASKPROC = 0xf0000000;        /* Processor-specific. */
 
 internal static slice<intName> pfStrings = new intName[]{
-    new(1, "PF_X"u8),
-    new(2, "PF_W"u8),
-    new(4, "PF_R"u8)
+    new(0x1, "PF_X"u8),
+    new(0x2, "PF_W"u8),
+    new(0x4, "PF_R"u8)
 }.slice();
 
 public static @string String(this ProgFlag i) {
-    return flagName(((uint32)i), pfStrings, false);
+    return flagName((uint32)i, pfStrings, false);
 }
 
 public static @string GoString(this ProgFlag i) {
-    return flagName(((uint32)i), pfStrings, true);
+    return flagName((uint32)i, pfStrings, true);
 }
 
 [GoType("num:nint")] partial struct DynTag;
@@ -903,100 +903,100 @@ public static readonly DynTag DT_ENCODING = 32;    /* Values greater than or equ
 public static readonly DynTag DT_PREINIT_ARRAY = 32;  /* Address of the array of pointers to pre-initialization functions. */
 public static readonly DynTag DT_PREINIT_ARRAYSZ = 33; /* Size in bytes of the array of pre-initialization functions. */
 public static readonly DynTag DT_SYMTAB_SHNDX = 34;   /* Address of SHT_SYMTAB_SHNDX section. */
-public static readonly DynTag DT_LOOS = /* 0x6000000d */ 1610612749;        /* First OS-specific */
-public static readonly DynTag DT_HIOS = /* 0x6ffff000 */ 1879044096;        /* Last OS-specific */
-public static readonly DynTag DT_VALRNGLO = /* 0x6ffffd00 */ 1879047424;
-public static readonly DynTag DT_GNU_PRELINKED = /* 0x6ffffdf5 */ 1879047669;
-public static readonly DynTag DT_GNU_CONFLICTSZ = /* 0x6ffffdf6 */ 1879047670;
-public static readonly DynTag DT_GNU_LIBLISTSZ = /* 0x6ffffdf7 */ 1879047671;
-public static readonly DynTag DT_CHECKSUM = /* 0x6ffffdf8 */ 1879047672;
-public static readonly DynTag DT_PLTPADSZ = /* 0x6ffffdf9 */ 1879047673;
-public static readonly DynTag DT_MOVEENT = /* 0x6ffffdfa */ 1879047674;
-public static readonly DynTag DT_MOVESZ = /* 0x6ffffdfb */ 1879047675;
-public static readonly DynTag DT_FEATURE = /* 0x6ffffdfc */ 1879047676;
-public static readonly DynTag DT_POSFLAG_1 = /* 0x6ffffdfd */ 1879047677;
-public static readonly DynTag DT_SYMINSZ = /* 0x6ffffdfe */ 1879047678;
-public static readonly DynTag DT_SYMINENT = /* 0x6ffffdff */ 1879047679;
-public static readonly DynTag DT_VALRNGHI = /* 0x6ffffdff */ 1879047679;
-public static readonly DynTag DT_ADDRRNGLO = /* 0x6ffffe00 */ 1879047680;
-public static readonly DynTag DT_GNU_HASH = /* 0x6ffffef5 */ 1879047925;
-public static readonly DynTag DT_TLSDESC_PLT = /* 0x6ffffef6 */ 1879047926;
-public static readonly DynTag DT_TLSDESC_GOT = /* 0x6ffffef7 */ 1879047927;
-public static readonly DynTag DT_GNU_CONFLICT = /* 0x6ffffef8 */ 1879047928;
-public static readonly DynTag DT_GNU_LIBLIST = /* 0x6ffffef9 */ 1879047929;
-public static readonly DynTag DT_CONFIG = /* 0x6ffffefa */ 1879047930;
-public static readonly DynTag DT_DEPAUDIT = /* 0x6ffffefb */ 1879047931;
-public static readonly DynTag DT_AUDIT = /* 0x6ffffefc */ 1879047932;
-public static readonly DynTag DT_PLTPAD = /* 0x6ffffefd */ 1879047933;
-public static readonly DynTag DT_MOVETAB = /* 0x6ffffefe */ 1879047934;
-public static readonly DynTag DT_SYMINFO = /* 0x6ffffeff */ 1879047935;
-public static readonly DynTag DT_ADDRRNGHI = /* 0x6ffffeff */ 1879047935;
-public static readonly DynTag DT_VERSYM = /* 0x6ffffff0 */ 1879048176;
-public static readonly DynTag DT_RELACOUNT = /* 0x6ffffff9 */ 1879048185;
-public static readonly DynTag DT_RELCOUNT = /* 0x6ffffffa */ 1879048186;
-public static readonly DynTag DT_FLAGS_1 = /* 0x6ffffffb */ 1879048187;
-public static readonly DynTag DT_VERDEF = /* 0x6ffffffc */ 1879048188;
-public static readonly DynTag DT_VERDEFNUM = /* 0x6ffffffd */ 1879048189;
-public static readonly DynTag DT_VERNEED = /* 0x6ffffffe */ 1879048190;
-public static readonly DynTag DT_VERNEEDNUM = /* 0x6fffffff */ 1879048191;
-public static readonly DynTag DT_LOPROC = /* 0x70000000 */ 1879048192;        /* First processor-specific type. */
-public static readonly DynTag DT_MIPS_RLD_VERSION = /* 0x70000001 */ 1879048193;
-public static readonly DynTag DT_MIPS_TIME_STAMP = /* 0x70000002 */ 1879048194;
-public static readonly DynTag DT_MIPS_ICHECKSUM = /* 0x70000003 */ 1879048195;
-public static readonly DynTag DT_MIPS_IVERSION = /* 0x70000004 */ 1879048196;
-public static readonly DynTag DT_MIPS_FLAGS = /* 0x70000005 */ 1879048197;
-public static readonly DynTag DT_MIPS_BASE_ADDRESS = /* 0x70000006 */ 1879048198;
-public static readonly DynTag DT_MIPS_MSYM = /* 0x70000007 */ 1879048199;
-public static readonly DynTag DT_MIPS_CONFLICT = /* 0x70000008 */ 1879048200;
-public static readonly DynTag DT_MIPS_LIBLIST = /* 0x70000009 */ 1879048201;
-public static readonly DynTag DT_MIPS_LOCAL_GOTNO = /* 0x7000000a */ 1879048202;
-public static readonly DynTag DT_MIPS_CONFLICTNO = /* 0x7000000b */ 1879048203;
-public static readonly DynTag DT_MIPS_LIBLISTNO = /* 0x70000010 */ 1879048208;
-public static readonly DynTag DT_MIPS_SYMTABNO = /* 0x70000011 */ 1879048209;
-public static readonly DynTag DT_MIPS_UNREFEXTNO = /* 0x70000012 */ 1879048210;
-public static readonly DynTag DT_MIPS_GOTSYM = /* 0x70000013 */ 1879048211;
-public static readonly DynTag DT_MIPS_HIPAGENO = /* 0x70000014 */ 1879048212;
-public static readonly DynTag DT_MIPS_RLD_MAP = /* 0x70000016 */ 1879048214;
-public static readonly DynTag DT_MIPS_DELTA_CLASS = /* 0x70000017 */ 1879048215;
-public static readonly DynTag DT_MIPS_DELTA_CLASS_NO = /* 0x70000018 */ 1879048216;
-public static readonly DynTag DT_MIPS_DELTA_INSTANCE = /* 0x70000019 */ 1879048217;
-public static readonly DynTag DT_MIPS_DELTA_INSTANCE_NO = /* 0x7000001a */ 1879048218;
-public static readonly DynTag DT_MIPS_DELTA_RELOC = /* 0x7000001b */ 1879048219;
-public static readonly DynTag DT_MIPS_DELTA_RELOC_NO = /* 0x7000001c */ 1879048220;
-public static readonly DynTag DT_MIPS_DELTA_SYM = /* 0x7000001d */ 1879048221;
-public static readonly DynTag DT_MIPS_DELTA_SYM_NO = /* 0x7000001e */ 1879048222;
-public static readonly DynTag DT_MIPS_DELTA_CLASSSYM = /* 0x70000020 */ 1879048224;
-public static readonly DynTag DT_MIPS_DELTA_CLASSSYM_NO = /* 0x70000021 */ 1879048225;
-public static readonly DynTag DT_MIPS_CXX_FLAGS = /* 0x70000022 */ 1879048226;
-public static readonly DynTag DT_MIPS_PIXIE_INIT = /* 0x70000023 */ 1879048227;
-public static readonly DynTag DT_MIPS_SYMBOL_LIB = /* 0x70000024 */ 1879048228;
-public static readonly DynTag DT_MIPS_LOCALPAGE_GOTIDX = /* 0x70000025 */ 1879048229;
-public static readonly DynTag DT_MIPS_LOCAL_GOTIDX = /* 0x70000026 */ 1879048230;
-public static readonly DynTag DT_MIPS_HIDDEN_GOTIDX = /* 0x70000027 */ 1879048231;
-public static readonly DynTag DT_MIPS_PROTECTED_GOTIDX = /* 0x70000028 */ 1879048232;
-public static readonly DynTag DT_MIPS_OPTIONS = /* 0x70000029 */ 1879048233;
-public static readonly DynTag DT_MIPS_INTERFACE = /* 0x7000002a */ 1879048234;
-public static readonly DynTag DT_MIPS_DYNSTR_ALIGN = /* 0x7000002b */ 1879048235;
-public static readonly DynTag DT_MIPS_INTERFACE_SIZE = /* 0x7000002c */ 1879048236;
-public static readonly DynTag DT_MIPS_RLD_TEXT_RESOLVE_ADDR = /* 0x7000002d */ 1879048237;
-public static readonly DynTag DT_MIPS_PERF_SUFFIX = /* 0x7000002e */ 1879048238;
-public static readonly DynTag DT_MIPS_COMPACT_SIZE = /* 0x7000002f */ 1879048239;
-public static readonly DynTag DT_MIPS_GP_VALUE = /* 0x70000030 */ 1879048240;
-public static readonly DynTag DT_MIPS_AUX_DYNAMIC = /* 0x70000031 */ 1879048241;
-public static readonly DynTag DT_MIPS_PLTGOT = /* 0x70000032 */ 1879048242;
-public static readonly DynTag DT_MIPS_RWPLT = /* 0x70000034 */ 1879048244;
-public static readonly DynTag DT_MIPS_RLD_MAP_REL = /* 0x70000035 */ 1879048245;
-public static readonly DynTag DT_PPC_GOT = /* 0x70000000 */ 1879048192;
-public static readonly DynTag DT_PPC_OPT = /* 0x70000001 */ 1879048193;
-public static readonly DynTag DT_PPC64_GLINK = /* 0x70000000 */ 1879048192;
-public static readonly DynTag DT_PPC64_OPD = /* 0x70000001 */ 1879048193;
-public static readonly DynTag DT_PPC64_OPDSZ = /* 0x70000002 */ 1879048194;
-public static readonly DynTag DT_PPC64_OPT = /* 0x70000003 */ 1879048195;
-public static readonly DynTag DT_SPARC_REGISTER = /* 0x70000001 */ 1879048193;
-public static readonly DynTag DT_AUXILIARY = /* 0x7ffffffd */ 2147483645;
-public static readonly DynTag DT_USED = /* 0x7ffffffe */ 2147483646;
-public static readonly DynTag DT_FILTER = /* 0x7fffffff */ 2147483647;
-public static readonly DynTag DT_HIPROC = /* 0x7fffffff */ 2147483647;        /* Last processor-specific type. */
+public static readonly DynTag DT_LOOS = 0x6000000d;        /* First OS-specific */
+public static readonly DynTag DT_HIOS = 0x6ffff000;        /* Last OS-specific */
+public static readonly DynTag DT_VALRNGLO = 0x6ffffd00;
+public static readonly DynTag DT_GNU_PRELINKED = 0x6ffffdf5;
+public static readonly DynTag DT_GNU_CONFLICTSZ = 0x6ffffdf6;
+public static readonly DynTag DT_GNU_LIBLISTSZ = 0x6ffffdf7;
+public static readonly DynTag DT_CHECKSUM = 0x6ffffdf8;
+public static readonly DynTag DT_PLTPADSZ = 0x6ffffdf9;
+public static readonly DynTag DT_MOVEENT = 0x6ffffdfa;
+public static readonly DynTag DT_MOVESZ = 0x6ffffdfb;
+public static readonly DynTag DT_FEATURE = 0x6ffffdfc;
+public static readonly DynTag DT_POSFLAG_1 = 0x6ffffdfd;
+public static readonly DynTag DT_SYMINSZ = 0x6ffffdfe;
+public static readonly DynTag DT_SYMINENT = 0x6ffffdff;
+public static readonly DynTag DT_VALRNGHI = 0x6ffffdff;
+public static readonly DynTag DT_ADDRRNGLO = 0x6ffffe00;
+public static readonly DynTag DT_GNU_HASH = 0x6ffffef5;
+public static readonly DynTag DT_TLSDESC_PLT = 0x6ffffef6;
+public static readonly DynTag DT_TLSDESC_GOT = 0x6ffffef7;
+public static readonly DynTag DT_GNU_CONFLICT = 0x6ffffef8;
+public static readonly DynTag DT_GNU_LIBLIST = 0x6ffffef9;
+public static readonly DynTag DT_CONFIG = 0x6ffffefa;
+public static readonly DynTag DT_DEPAUDIT = 0x6ffffefb;
+public static readonly DynTag DT_AUDIT = 0x6ffffefc;
+public static readonly DynTag DT_PLTPAD = 0x6ffffefd;
+public static readonly DynTag DT_MOVETAB = 0x6ffffefe;
+public static readonly DynTag DT_SYMINFO = 0x6ffffeff;
+public static readonly DynTag DT_ADDRRNGHI = 0x6ffffeff;
+public static readonly DynTag DT_VERSYM = 0x6ffffff0;
+public static readonly DynTag DT_RELACOUNT = 0x6ffffff9;
+public static readonly DynTag DT_RELCOUNT = 0x6ffffffa;
+public static readonly DynTag DT_FLAGS_1 = 0x6ffffffb;
+public static readonly DynTag DT_VERDEF = 0x6ffffffc;
+public static readonly DynTag DT_VERDEFNUM = 0x6ffffffd;
+public static readonly DynTag DT_VERNEED = 0x6ffffffe;
+public static readonly DynTag DT_VERNEEDNUM = 0x6fffffff;
+public static readonly DynTag DT_LOPROC = 0x70000000;        /* First processor-specific type. */
+public static readonly DynTag DT_MIPS_RLD_VERSION = 0x70000001;
+public static readonly DynTag DT_MIPS_TIME_STAMP = 0x70000002;
+public static readonly DynTag DT_MIPS_ICHECKSUM = 0x70000003;
+public static readonly DynTag DT_MIPS_IVERSION = 0x70000004;
+public static readonly DynTag DT_MIPS_FLAGS = 0x70000005;
+public static readonly DynTag DT_MIPS_BASE_ADDRESS = 0x70000006;
+public static readonly DynTag DT_MIPS_MSYM = 0x70000007;
+public static readonly DynTag DT_MIPS_CONFLICT = 0x70000008;
+public static readonly DynTag DT_MIPS_LIBLIST = 0x70000009;
+public static readonly DynTag DT_MIPS_LOCAL_GOTNO = 0x7000000a;
+public static readonly DynTag DT_MIPS_CONFLICTNO = 0x7000000b;
+public static readonly DynTag DT_MIPS_LIBLISTNO = 0x70000010;
+public static readonly DynTag DT_MIPS_SYMTABNO = 0x70000011;
+public static readonly DynTag DT_MIPS_UNREFEXTNO = 0x70000012;
+public static readonly DynTag DT_MIPS_GOTSYM = 0x70000013;
+public static readonly DynTag DT_MIPS_HIPAGENO = 0x70000014;
+public static readonly DynTag DT_MIPS_RLD_MAP = 0x70000016;
+public static readonly DynTag DT_MIPS_DELTA_CLASS = 0x70000017;
+public static readonly DynTag DT_MIPS_DELTA_CLASS_NO = 0x70000018;
+public static readonly DynTag DT_MIPS_DELTA_INSTANCE = 0x70000019;
+public static readonly DynTag DT_MIPS_DELTA_INSTANCE_NO = 0x7000001a;
+public static readonly DynTag DT_MIPS_DELTA_RELOC = 0x7000001b;
+public static readonly DynTag DT_MIPS_DELTA_RELOC_NO = 0x7000001c;
+public static readonly DynTag DT_MIPS_DELTA_SYM = 0x7000001d;
+public static readonly DynTag DT_MIPS_DELTA_SYM_NO = 0x7000001e;
+public static readonly DynTag DT_MIPS_DELTA_CLASSSYM = 0x70000020;
+public static readonly DynTag DT_MIPS_DELTA_CLASSSYM_NO = 0x70000021;
+public static readonly DynTag DT_MIPS_CXX_FLAGS = 0x70000022;
+public static readonly DynTag DT_MIPS_PIXIE_INIT = 0x70000023;
+public static readonly DynTag DT_MIPS_SYMBOL_LIB = 0x70000024;
+public static readonly DynTag DT_MIPS_LOCALPAGE_GOTIDX = 0x70000025;
+public static readonly DynTag DT_MIPS_LOCAL_GOTIDX = 0x70000026;
+public static readonly DynTag DT_MIPS_HIDDEN_GOTIDX = 0x70000027;
+public static readonly DynTag DT_MIPS_PROTECTED_GOTIDX = 0x70000028;
+public static readonly DynTag DT_MIPS_OPTIONS = 0x70000029;
+public static readonly DynTag DT_MIPS_INTERFACE = 0x7000002a;
+public static readonly DynTag DT_MIPS_DYNSTR_ALIGN = 0x7000002b;
+public static readonly DynTag DT_MIPS_INTERFACE_SIZE = 0x7000002c;
+public static readonly DynTag DT_MIPS_RLD_TEXT_RESOLVE_ADDR = 0x7000002d;
+public static readonly DynTag DT_MIPS_PERF_SUFFIX = 0x7000002e;
+public static readonly DynTag DT_MIPS_COMPACT_SIZE = 0x7000002f;
+public static readonly DynTag DT_MIPS_GP_VALUE = 0x70000030;
+public static readonly DynTag DT_MIPS_AUX_DYNAMIC = 0x70000031;
+public static readonly DynTag DT_MIPS_PLTGOT = 0x70000032;
+public static readonly DynTag DT_MIPS_RWPLT = 0x70000034;
+public static readonly DynTag DT_MIPS_RLD_MAP_REL = 0x70000035;
+public static readonly DynTag DT_PPC_GOT = 0x70000000;
+public static readonly DynTag DT_PPC_OPT = 0x70000001;
+public static readonly DynTag DT_PPC64_GLINK = 0x70000000;
+public static readonly DynTag DT_PPC64_OPD = 0x70000001;
+public static readonly DynTag DT_PPC64_OPDSZ = 0x70000002;
+public static readonly DynTag DT_PPC64_OPT = 0x70000003;
+public static readonly DynTag DT_SPARC_REGISTER = 0x70000001;
+public static readonly DynTag DT_AUXILIARY = 0x7ffffffd;
+public static readonly DynTag DT_USED = 0x7ffffffe;
+public static readonly DynTag DT_FILTER = 0x7fffffff;
+public static readonly DynTag DT_HIPROC = 0x7fffffff;        /* Last processor-specific type. */
 
 // We don't list the processor-dependent DynTags,
 // as the values overlap.
@@ -1036,161 +1036,161 @@ internal static slice<intName> dtStrings = new intName[]{
     new(32, "DT_PREINIT_ARRAY"u8),
     new(33, "DT_PREINIT_ARRAYSZ"u8),
     new(34, "DT_SYMTAB_SHNDX"u8),
-    new(1610612749, "DT_LOOS"u8),
-    new(1879044096, "DT_HIOS"u8),
-    new(1879047424, "DT_VALRNGLO"u8),
-    new(1879047669, "DT_GNU_PRELINKED"u8),
-    new(1879047670, "DT_GNU_CONFLICTSZ"u8),
-    new(1879047671, "DT_GNU_LIBLISTSZ"u8),
-    new(1879047672, "DT_CHECKSUM"u8),
-    new(1879047673, "DT_PLTPADSZ"u8),
-    new(1879047674, "DT_MOVEENT"u8),
-    new(1879047675, "DT_MOVESZ"u8),
-    new(1879047676, "DT_FEATURE"u8),
-    new(1879047677, "DT_POSFLAG_1"u8),
-    new(1879047678, "DT_SYMINSZ"u8),
-    new(1879047679, "DT_SYMINENT"u8),
-    new(1879047679, "DT_VALRNGHI"u8),
-    new(1879047680, "DT_ADDRRNGLO"u8),
-    new(1879047925, "DT_GNU_HASH"u8),
-    new(1879047926, "DT_TLSDESC_PLT"u8),
-    new(1879047927, "DT_TLSDESC_GOT"u8),
-    new(1879047928, "DT_GNU_CONFLICT"u8),
-    new(1879047929, "DT_GNU_LIBLIST"u8),
-    new(1879047930, "DT_CONFIG"u8),
-    new(1879047931, "DT_DEPAUDIT"u8),
-    new(1879047932, "DT_AUDIT"u8),
-    new(1879047933, "DT_PLTPAD"u8),
-    new(1879047934, "DT_MOVETAB"u8),
-    new(1879047935, "DT_SYMINFO"u8),
-    new(1879047935, "DT_ADDRRNGHI"u8),
-    new(1879048176, "DT_VERSYM"u8),
-    new(1879048185, "DT_RELACOUNT"u8),
-    new(1879048186, "DT_RELCOUNT"u8),
-    new(1879048187, "DT_FLAGS_1"u8),
-    new(1879048188, "DT_VERDEF"u8),
-    new(1879048189, "DT_VERDEFNUM"u8),
-    new(1879048190, "DT_VERNEED"u8),
-    new(1879048191, "DT_VERNEEDNUM"u8),
-    new(1879048192, "DT_LOPROC"u8),
-    new(2147483645, "DT_AUXILIARY"u8),
-    new(2147483646, "DT_USED"u8),
-    new(2147483647, "DT_FILTER"u8)
+    new(0x6000000d, "DT_LOOS"u8),
+    new(0x6ffff000, "DT_HIOS"u8),
+    new(0x6ffffd00, "DT_VALRNGLO"u8),
+    new(0x6ffffdf5, "DT_GNU_PRELINKED"u8),
+    new(0x6ffffdf6, "DT_GNU_CONFLICTSZ"u8),
+    new(0x6ffffdf7, "DT_GNU_LIBLISTSZ"u8),
+    new(0x6ffffdf8, "DT_CHECKSUM"u8),
+    new(0x6ffffdf9, "DT_PLTPADSZ"u8),
+    new(0x6ffffdfa, "DT_MOVEENT"u8),
+    new(0x6ffffdfb, "DT_MOVESZ"u8),
+    new(0x6ffffdfc, "DT_FEATURE"u8),
+    new(0x6ffffdfd, "DT_POSFLAG_1"u8),
+    new(0x6ffffdfe, "DT_SYMINSZ"u8),
+    new(0x6ffffdff, "DT_SYMINENT"u8),
+    new(0x6ffffdff, "DT_VALRNGHI"u8),
+    new(0x6ffffe00, "DT_ADDRRNGLO"u8),
+    new(0x6ffffef5, "DT_GNU_HASH"u8),
+    new(0x6ffffef6, "DT_TLSDESC_PLT"u8),
+    new(0x6ffffef7, "DT_TLSDESC_GOT"u8),
+    new(0x6ffffef8, "DT_GNU_CONFLICT"u8),
+    new(0x6ffffef9, "DT_GNU_LIBLIST"u8),
+    new(0x6ffffefa, "DT_CONFIG"u8),
+    new(0x6ffffefb, "DT_DEPAUDIT"u8),
+    new(0x6ffffefc, "DT_AUDIT"u8),
+    new(0x6ffffefd, "DT_PLTPAD"u8),
+    new(0x6ffffefe, "DT_MOVETAB"u8),
+    new(0x6ffffeff, "DT_SYMINFO"u8),
+    new(0x6ffffeff, "DT_ADDRRNGHI"u8),
+    new(0x6ffffff0, "DT_VERSYM"u8),
+    new(0x6ffffff9, "DT_RELACOUNT"u8),
+    new(0x6ffffffa, "DT_RELCOUNT"u8),
+    new(0x6ffffffb, "DT_FLAGS_1"u8),
+    new(0x6ffffffc, "DT_VERDEF"u8),
+    new(0x6ffffffd, "DT_VERDEFNUM"u8),
+    new(0x6ffffffe, "DT_VERNEED"u8),
+    new(0x6fffffff, "DT_VERNEEDNUM"u8),
+    new(0x70000000, "DT_LOPROC"u8),
+    new(0x7ffffffd, "DT_AUXILIARY"u8),
+    new(0x7ffffffe, "DT_USED"u8),
+    new(0x7fffffff, "DT_FILTER"u8)
 }.slice();
 
 public static @string String(this DynTag i) {
-    return stringName(((uint32)i), dtStrings, false);
+    return stringName((uint32)(nint)i, dtStrings, false);
 }
 
 public static @string GoString(this DynTag i) {
-    return stringName(((uint32)i), dtStrings, true);
+    return stringName((uint32)(nint)i, dtStrings, true);
 }
 
 [GoType("num:nint")] partial struct DynFlag;
 
-public static readonly DynFlag DF_ORIGIN = /* 0x0001 */ 1;    /* Indicates that the object being loaded may
+public static readonly DynFlag DF_ORIGIN = 0x0001;    /* Indicates that the object being loaded may
 	   make reference to the
 	   $ORIGIN substitution string */
-public static readonly DynFlag DF_SYMBOLIC = /* 0x0002 */ 2;    /* Indicates "symbolic" linking. */
-public static readonly DynFlag DF_TEXTREL = /* 0x0004 */ 4;     /* Indicates there may be relocations in non-writable segments. */
-public static readonly DynFlag DF_BIND_NOW = /* 0x0008 */ 8;    /* Indicates that the dynamic linker should
+public static readonly DynFlag DF_SYMBOLIC = 0x0002;    /* Indicates "symbolic" linking. */
+public static readonly DynFlag DF_TEXTREL = 0x0004;     /* Indicates there may be relocations in non-writable segments. */
+public static readonly DynFlag DF_BIND_NOW = 0x0008;    /* Indicates that the dynamic linker should
 	   process all relocations for the object
 	   containing this entry before transferring
 	   control to the program. */
-public static readonly DynFlag DF_STATIC_TLS = /* 0x0010 */ 16;    /* Indicates that the shared object or
+public static readonly DynFlag DF_STATIC_TLS = 0x0010;    /* Indicates that the shared object or
 	   executable contains code using a static
 	   thread-local storage scheme. */
 
 internal static slice<intName> dflagStrings = new intName[]{
-    new(1, "DF_ORIGIN"u8),
-    new(2, "DF_SYMBOLIC"u8),
-    new(4, "DF_TEXTREL"u8),
-    new(8, "DF_BIND_NOW"u8),
-    new(16, "DF_STATIC_TLS"u8)
+    new(0x0001, "DF_ORIGIN"u8),
+    new(0x0002, "DF_SYMBOLIC"u8),
+    new(0x0004, "DF_TEXTREL"u8),
+    new(0x0008, "DF_BIND_NOW"u8),
+    new(0x0010, "DF_STATIC_TLS"u8)
 }.slice();
 
 public static @string String(this DynFlag i) {
-    return flagName(((uint32)i), dflagStrings, false);
+    return flagName((uint32)(nint)i, dflagStrings, false);
 }
 
 public static @string GoString(this DynFlag i) {
-    return flagName(((uint32)i), dflagStrings, true);
+    return flagName((uint32)(nint)i, dflagStrings, true);
 }
 
 [GoType("num:uint32")] partial struct DynFlag1;
 
-public static readonly DynFlag1 DF_1_NOW = /* 0x00000001 */ 1;
-public static readonly DynFlag1 DF_1_GLOBAL = /* 0x00000002 */ 2;
-public static readonly DynFlag1 DF_1_GROUP = /* 0x00000004 */ 4;
-public static readonly DynFlag1 DF_1_NODELETE = /* 0x00000008 */ 8;
-public static readonly DynFlag1 DF_1_LOADFLTR = /* 0x00000010 */ 16;
-public static readonly DynFlag1 DF_1_INITFIRST = /* 0x00000020 */ 32;
-public static readonly DynFlag1 DF_1_NOOPEN = /* 0x00000040 */ 64;
-public static readonly DynFlag1 DF_1_ORIGIN = /* 0x00000080 */ 128;
-public static readonly DynFlag1 DF_1_DIRECT = /* 0x00000100 */ 256;
-public static readonly DynFlag1 DF_1_TRANS = /* 0x00000200 */ 512;
-public static readonly DynFlag1 DF_1_INTERPOSE = /* 0x00000400 */ 1024;
-public static readonly DynFlag1 DF_1_NODEFLIB = /* 0x00000800 */ 2048;
-public static readonly DynFlag1 DF_1_NODUMP = /* 0x00001000 */ 4096;
-public static readonly DynFlag1 DF_1_CONFALT = /* 0x00002000 */ 8192;
-public static readonly DynFlag1 DF_1_ENDFILTEE = /* 0x00004000 */ 16384;
-public static readonly DynFlag1 DF_1_DISPRELDNE = /* 0x00008000 */ 32768;
-public static readonly DynFlag1 DF_1_DISPRELPND = /* 0x00010000 */ 65536;
-public static readonly DynFlag1 DF_1_NODIRECT = /* 0x00020000 */ 131072;
-public static readonly DynFlag1 DF_1_IGNMULDEF = /* 0x00040000 */ 262144;
-public static readonly DynFlag1 DF_1_NOKSYMS = /* 0x00080000 */ 524288;
-public static readonly DynFlag1 DF_1_NOHDR = /* 0x00100000 */ 1048576;
-public static readonly DynFlag1 DF_1_EDITED = /* 0x00200000 */ 2097152;
-public static readonly DynFlag1 DF_1_NORELOC = /* 0x00400000 */ 4194304;
-public static readonly DynFlag1 DF_1_SYMINTPOSE = /* 0x00800000 */ 8388608;
-public static readonly DynFlag1 DF_1_GLOBAUDIT = /* 0x01000000 */ 16777216;
-public static readonly DynFlag1 DF_1_SINGLETON = /* 0x02000000 */ 33554432;
-public static readonly DynFlag1 DF_1_STUB = /* 0x04000000 */ 67108864;
-public static readonly DynFlag1 DF_1_PIE = /* 0x08000000 */ 134217728;
-public static readonly DynFlag1 DF_1_KMOD = /* 0x10000000 */ 268435456;
-public static readonly DynFlag1 DF_1_WEAKFILTER = /* 0x20000000 */ 536870912;
-public static readonly DynFlag1 DF_1_NOCOMMON = /* 0x40000000 */ 1073741824;
+public static readonly DynFlag1 DF_1_NOW = 0x00000001;
+public static readonly DynFlag1 DF_1_GLOBAL = 0x00000002;
+public static readonly DynFlag1 DF_1_GROUP = 0x00000004;
+public static readonly DynFlag1 DF_1_NODELETE = 0x00000008;
+public static readonly DynFlag1 DF_1_LOADFLTR = 0x00000010;
+public static readonly DynFlag1 DF_1_INITFIRST = 0x00000020;
+public static readonly DynFlag1 DF_1_NOOPEN = 0x00000040;
+public static readonly DynFlag1 DF_1_ORIGIN = 0x00000080;
+public static readonly DynFlag1 DF_1_DIRECT = 0x00000100;
+public static readonly DynFlag1 DF_1_TRANS = 0x00000200;
+public static readonly DynFlag1 DF_1_INTERPOSE = 0x00000400;
+public static readonly DynFlag1 DF_1_NODEFLIB = 0x00000800;
+public static readonly DynFlag1 DF_1_NODUMP = 0x00001000;
+public static readonly DynFlag1 DF_1_CONFALT = 0x00002000;
+public static readonly DynFlag1 DF_1_ENDFILTEE = 0x00004000;
+public static readonly DynFlag1 DF_1_DISPRELDNE = 0x00008000;
+public static readonly DynFlag1 DF_1_DISPRELPND = 0x00010000;
+public static readonly DynFlag1 DF_1_NODIRECT = 0x00020000;
+public static readonly DynFlag1 DF_1_IGNMULDEF = 0x00040000;
+public static readonly DynFlag1 DF_1_NOKSYMS = 0x00080000;
+public static readonly DynFlag1 DF_1_NOHDR = 0x00100000;
+public static readonly DynFlag1 DF_1_EDITED = 0x00200000;
+public static readonly DynFlag1 DF_1_NORELOC = 0x00400000;
+public static readonly DynFlag1 DF_1_SYMINTPOSE = 0x00800000;
+public static readonly DynFlag1 DF_1_GLOBAUDIT = 0x01000000;
+public static readonly DynFlag1 DF_1_SINGLETON = 0x02000000;
+public static readonly DynFlag1 DF_1_STUB = 0x04000000;
+public static readonly DynFlag1 DF_1_PIE = 0x08000000;
+public static readonly DynFlag1 DF_1_KMOD = 0x10000000;
+public static readonly DynFlag1 DF_1_WEAKFILTER = 0x20000000;
+public static readonly DynFlag1 DF_1_NOCOMMON = 0x40000000;
 
 internal static slice<intName> dflag1Strings = new intName[]{
-    new(1, "DF_1_NOW"u8),
-    new(2, "DF_1_GLOBAL"u8),
-    new(4, "DF_1_GROUP"u8),
-    new(8, "DF_1_NODELETE"u8),
-    new(16, "DF_1_LOADFLTR"u8),
-    new(32, "DF_1_INITFIRST"u8),
-    new(64, "DF_1_NOOPEN"u8),
-    new(128, "DF_1_ORIGIN"u8),
-    new(256, "DF_1_DIRECT"u8),
-    new(512, "DF_1_TRANS"u8),
-    new(1024, "DF_1_INTERPOSE"u8),
-    new(2048, "DF_1_NODEFLIB"u8),
-    new(4096, "DF_1_NODUMP"u8),
-    new(8192, "DF_1_CONFALT"u8),
-    new(16384, "DF_1_ENDFILTEE"u8),
-    new(32768, "DF_1_DISPRELDNE"u8),
-    new(65536, "DF_1_DISPRELPND"u8),
-    new(131072, "DF_1_NODIRECT"u8),
-    new(262144, "DF_1_IGNMULDEF"u8),
-    new(524288, "DF_1_NOKSYMS"u8),
-    new(1048576, "DF_1_NOHDR"u8),
-    new(2097152, "DF_1_EDITED"u8),
-    new(4194304, "DF_1_NORELOC"u8),
-    new(8388608, "DF_1_SYMINTPOSE"u8),
-    new(16777216, "DF_1_GLOBAUDIT"u8),
-    new(33554432, "DF_1_SINGLETON"u8),
-    new(67108864, "DF_1_STUB"u8),
-    new(134217728, "DF_1_PIE"u8),
-    new(268435456, "DF_1_KMOD"u8),
-    new(536870912, "DF_1_WEAKFILTER"u8),
-    new(1073741824, "DF_1_NOCOMMON"u8)
+    new(0x00000001, "DF_1_NOW"u8),
+    new(0x00000002, "DF_1_GLOBAL"u8),
+    new(0x00000004, "DF_1_GROUP"u8),
+    new(0x00000008, "DF_1_NODELETE"u8),
+    new(0x00000010, "DF_1_LOADFLTR"u8),
+    new(0x00000020, "DF_1_INITFIRST"u8),
+    new(0x00000040, "DF_1_NOOPEN"u8),
+    new(0x00000080, "DF_1_ORIGIN"u8),
+    new(0x00000100, "DF_1_DIRECT"u8),
+    new(0x00000200, "DF_1_TRANS"u8),
+    new(0x00000400, "DF_1_INTERPOSE"u8),
+    new(0x00000800, "DF_1_NODEFLIB"u8),
+    new(0x00001000, "DF_1_NODUMP"u8),
+    new(0x00002000, "DF_1_CONFALT"u8),
+    new(0x00004000, "DF_1_ENDFILTEE"u8),
+    new(0x00008000, "DF_1_DISPRELDNE"u8),
+    new(0x00010000, "DF_1_DISPRELPND"u8),
+    new(0x00020000, "DF_1_NODIRECT"u8),
+    new(0x00040000, "DF_1_IGNMULDEF"u8),
+    new(0x00080000, "DF_1_NOKSYMS"u8),
+    new(0x00100000, "DF_1_NOHDR"u8),
+    new(0x00200000, "DF_1_EDITED"u8),
+    new(0x00400000, "DF_1_NORELOC"u8),
+    new(0x00800000, "DF_1_SYMINTPOSE"u8),
+    new(0x01000000, "DF_1_GLOBAUDIT"u8),
+    new(0x02000000, "DF_1_SINGLETON"u8),
+    new(0x04000000, "DF_1_STUB"u8),
+    new(0x08000000, "DF_1_PIE"u8),
+    new(0x10000000, "DF_1_KMOD"u8),
+    new(0x20000000, "DF_1_WEAKFILTER"u8),
+    new(0x40000000, "DF_1_NOCOMMON"u8)
 }.slice();
 
 public static @string String(this DynFlag1 i) {
-    return flagName(((uint32)i), dflag1Strings, false);
+    return flagName((uint32)i, dflag1Strings, false);
 }
 
 public static @string GoString(this DynFlag1 i) {
-    return flagName(((uint32)i), dflag1Strings, true);
+    return flagName((uint32)i, dflag1Strings, true);
 }
 
 [GoType("num:nint")] partial struct NType;
@@ -1206,11 +1206,11 @@ internal static slice<intName> ntypeStrings = new intName[]{
 }.slice();
 
 public static @string String(this NType i) {
-    return stringName(((uint32)i), ntypeStrings, false);
+    return stringName((uint32)(nint)i, ntypeStrings, false);
 }
 
 public static @string GoString(this NType i) {
-    return stringName(((uint32)i), ntypeStrings, true);
+    return stringName((uint32)(nint)i, ntypeStrings, true);
 }
 
 [GoType("num:nint")] partial struct SymBind;
@@ -1234,11 +1234,11 @@ internal static slice<intName> stbStrings = new intName[]{
 }.slice();
 
 public static @string String(this SymBind i) {
-    return stringName(((uint32)i), stbStrings, false);
+    return stringName((uint32)(nint)i, stbStrings, false);
 }
 
 public static @string GoString(this SymBind i) {
-    return stringName(((uint32)i), stbStrings, true);
+    return stringName((uint32)(nint)i, stbStrings, true);
 }
 
 [GoType("num:nint")] partial struct SymType;
@@ -1275,33 +1275,33 @@ internal static slice<intName> sttStrings = new intName[]{
 }.slice();
 
 public static @string String(this SymType i) {
-    return stringName(((uint32)i), sttStrings, false);
+    return stringName((uint32)(nint)i, sttStrings, false);
 }
 
 public static @string GoString(this SymType i) {
-    return stringName(((uint32)i), sttStrings, true);
+    return stringName((uint32)(nint)i, sttStrings, true);
 }
 
 [GoType("num:nint")] partial struct SymVis;
 
-public static readonly SymVis STV_DEFAULT = /* 0x0 */ 0;   /* Default visibility (see binding). */
-public static readonly SymVis STV_INTERNAL = /* 0x1 */ 1;  /* Special meaning in relocatable objects. */
-public static readonly SymVis STV_HIDDEN = /* 0x2 */ 2;    /* Not visible. */
-public static readonly SymVis STV_PROTECTED = /* 0x3 */ 3; /* Visible but not preemptible. */
+public static readonly SymVis STV_DEFAULT = 0x0;   /* Default visibility (see binding). */
+public static readonly SymVis STV_INTERNAL = 0x1;  /* Special meaning in relocatable objects. */
+public static readonly SymVis STV_HIDDEN = 0x2;    /* Not visible. */
+public static readonly SymVis STV_PROTECTED = 0x3; /* Visible but not preemptible. */
 
 internal static slice<intName> stvStrings = new intName[]{
-    new(0, "STV_DEFAULT"u8),
-    new(1, "STV_INTERNAL"u8),
-    new(2, "STV_HIDDEN"u8),
-    new(3, "STV_PROTECTED"u8)
+    new(0x0, "STV_DEFAULT"u8),
+    new(0x1, "STV_INTERNAL"u8),
+    new(0x2, "STV_HIDDEN"u8),
+    new(0x3, "STV_PROTECTED"u8)
 }.slice();
 
 public static @string String(this SymVis i) {
-    return stringName(((uint32)i), stvStrings, false);
+    return stringName((uint32)(nint)i, stvStrings, false);
 }
 
 public static @string GoString(this SymVis i) {
-    return stringName(((uint32)i), stvStrings, true);
+    return stringName((uint32)(nint)i, stvStrings, true);
 }
 
 [GoType("num:nint")] partial struct R_X86_64;
@@ -1400,11 +1400,11 @@ internal static slice<intName> rx86_64Strings = new intName[]{
 }.slice();
 
 public static @string String(this R_X86_64 i) {
-    return stringName(((uint32)i), rx86_64Strings, false);
+    return stringName((uint32)(nint)i, rx86_64Strings, false);
 }
 
 public static @string GoString(this R_X86_64 i) {
-    return stringName(((uint32)i), rx86_64Strings, true);
+    return stringName((uint32)(nint)i, rx86_64Strings, true);
 }
 
 [GoType("num:nint")] partial struct R_AARCH64;
@@ -1674,11 +1674,11 @@ internal static slice<intName> raarch64Strings = new intName[]{
 }.slice();
 
 public static @string String(this R_AARCH64 i) {
-    return stringName(((uint32)i), raarch64Strings, false);
+    return stringName((uint32)(nint)i, raarch64Strings, false);
 }
 
 public static @string GoString(this R_AARCH64 i) {
-    return stringName(((uint32)i), raarch64Strings, true);
+    return stringName((uint32)(nint)i, raarch64Strings, true);
 }
 
 [GoType("num:nint")] partial struct R_ALPHA;
@@ -1744,11 +1744,11 @@ internal static slice<intName> ralphaStrings = new intName[]{
 }.slice();
 
 public static @string String(this R_ALPHA i) {
-    return stringName(((uint32)i), ralphaStrings, false);
+    return stringName((uint32)(nint)i, ralphaStrings, false);
 }
 
 public static @string GoString(this R_ALPHA i) {
-    return stringName(((uint32)i), ralphaStrings, true);
+    return stringName((uint32)(nint)i, ralphaStrings, true);
 }
 
 [GoType("num:nint")] partial struct R_ARM;
@@ -2046,11 +2046,11 @@ internal static slice<intName> rarmStrings = new intName[]{
 }.slice();
 
 public static @string String(this R_ARM i) {
-    return stringName(((uint32)i), rarmStrings, false);
+    return stringName((uint32)(nint)i, rarmStrings, false);
 }
 
 public static @string GoString(this R_ARM i) {
-    return stringName(((uint32)i), rarmStrings, true);
+    return stringName((uint32)(nint)i, rarmStrings, true);
 }
 
 [GoType("num:nint")] partial struct R_386;
@@ -2144,11 +2144,11 @@ internal static slice<intName> r386Strings = new intName[]{
 }.slice();
 
 public static @string String(this R_386 i) {
-    return stringName(((uint32)i), r386Strings, false);
+    return stringName((uint32)(nint)i, r386Strings, false);
 }
 
 public static @string GoString(this R_386 i) {
-    return stringName(((uint32)i), r386Strings, true);
+    return stringName((uint32)(nint)i, r386Strings, true);
 }
 
 [GoType("num:nint")] partial struct R_MIPS;
@@ -2256,11 +2256,11 @@ internal static slice<intName> rmipsStrings = new intName[]{
 }.slice();
 
 public static @string String(this R_MIPS i) {
-    return stringName(((uint32)i), rmipsStrings, false);
+    return stringName((uint32)(nint)i, rmipsStrings, false);
 }
 
 public static @string GoString(this R_MIPS i) {
-    return stringName(((uint32)i), rmipsStrings, true);
+    return stringName((uint32)(nint)i, rmipsStrings, true);
 }
 
 [GoType("num:nint")] partial struct R_LARCH;
@@ -2466,11 +2466,11 @@ internal static slice<intName> rlarchStrings = new intName[]{
 }.slice();
 
 public static @string String(this R_LARCH i) {
-    return stringName(((uint32)i), rlarchStrings, false);
+    return stringName((uint32)(nint)i, rlarchStrings, false);
 }
 
 public static @string GoString(this R_LARCH i) {
-    return stringName(((uint32)i), rlarchStrings, true);
+    return stringName((uint32)(nint)i, rlarchStrings, true);
 }
 
 [GoType("num:nint")] partial struct R_PPC;
@@ -2634,11 +2634,11 @@ internal static slice<intName> rppcStrings = new intName[]{
 }.slice();
 
 public static @string String(this R_PPC i) {
-    return stringName(((uint32)i), rppcStrings, false);
+    return stringName((uint32)(nint)i, rppcStrings, false);
 }
 
 public static @string GoString(this R_PPC i) {
-    return stringName(((uint32)i), rppcStrings, true);
+    return stringName((uint32)(nint)i, rppcStrings, true);
 }
 
 [GoType("num:nint")] partial struct R_PPC64;
@@ -2970,11 +2970,11 @@ internal static slice<intName> rppc64Strings = new intName[]{
 }.slice();
 
 public static @string String(this R_PPC64 i) {
-    return stringName(((uint32)i), rppc64Strings, false);
+    return stringName((uint32)(nint)i, rppc64Strings, false);
 }
 
 public static @string GoString(this R_PPC64 i) {
-    return stringName(((uint32)i), rppc64Strings, true);
+    return stringName((uint32)(nint)i, rppc64Strings, true);
 }
 
 [GoType("num:nint")] partial struct R_RISCV;
@@ -3092,11 +3092,11 @@ internal static slice<intName> rriscvStrings = new intName[]{
 }.slice();
 
 public static @string String(this R_RISCV i) {
-    return stringName(((uint32)i), rriscvStrings, false);
+    return stringName((uint32)(nint)i, rriscvStrings, false);
 }
 
 public static @string GoString(this R_RISCV i) {
-    return stringName(((uint32)i), rriscvStrings, true);
+    return stringName((uint32)(nint)i, rriscvStrings, true);
 }
 
 [GoType("num:nint")] partial struct R_390;
@@ -3228,11 +3228,11 @@ internal static slice<intName> r390Strings = new intName[]{
 }.slice();
 
 public static @string String(this R_390 i) {
-    return stringName(((uint32)i), r390Strings, false);
+    return stringName((uint32)(nint)i, r390Strings, false);
 }
 
 public static @string GoString(this R_390 i) {
-    return stringName(((uint32)i), r390Strings, true);
+    return stringName((uint32)(nint)i, r390Strings, true);
 }
 
 [GoType("num:nint")] partial struct R_SPARC;
@@ -3354,15 +3354,15 @@ internal static slice<intName> rsparcStrings = new intName[]{
 }.slice();
 
 public static @string String(this R_SPARC i) {
-    return stringName(((uint32)i), rsparcStrings, false);
+    return stringName((uint32)(nint)i, rsparcStrings, false);
 }
 
 public static @string GoString(this R_SPARC i) {
-    return stringName(((uint32)i), rsparcStrings, true);
+    return stringName((uint32)(nint)i, rsparcStrings, true);
 }
 
 // Magic number for the elf trampoline, chosen wisely to be an immediate value.
-public static readonly UntypedInt ARM_MAGIC_TRAMP_NUMBER = /* 0x5c000003 */ 1543503875;
+public static readonly UntypedInt ARM_MAGIC_TRAMP_NUMBER = 0x5c000003;
 
 // ELF32 File header.
 [GoType] partial struct Header32 {
@@ -3439,15 +3439,15 @@ public static readonly UntypedInt ARM_MAGIC_TRAMP_NUMBER = /* 0x5c000003 */ 1543
 }
 
 public static uint32 R_SYM32(uint32 info) {
-    return info >> (int)(8);
+    return (info >> (int)(8));
 }
 
 public static uint32 R_TYPE32(uint32 info) {
-    return (uint32)(info & 255);
+    return (uint32)(info & 0xff);
 }
 
 public static uint32 R_INFO32(uint32 sym, uint32 typ) {
-    return (uint32)(sym << (int)(8) | typ);
+    return (uint32)((sym << (int)(8)) | typ);
 }
 
 // ELF32 Symbol.
@@ -3463,19 +3463,19 @@ public static uint32 R_INFO32(uint32 sym, uint32 typ) {
 public static readonly UntypedInt Sym32Size = 16;
 
 public static SymBind ST_BIND(uint8 info) {
-    return ((SymBind)(info >> (int)(4)));
+    return ((SymBind)(nint)((info >> (int)(4))));
 }
 
 public static SymType ST_TYPE(uint8 info) {
-    return ((SymType)((uint8)(info & 15)));
+    return ((SymType)(nint)((uint8)(info & 0xF)));
 }
 
 public static uint8 ST_INFO(SymBind bind, SymType typ) {
-    return (uint8)(((uint8)bind) << (int)(4) | (uint8)(((uint8)typ) & 15));
+    return (uint8)(((uint8)(nint)bind << (int)(4)) | (uint8)((uint8)(nint)typ & 0xf));
 }
 
 public static SymVis ST_VISIBILITY(uint8 other) {
-    return ((SymVis)((uint8)(other & 3)));
+    return ((SymVis)(nint)((uint8)(other & 3)));
 }
 
 /*
@@ -3558,15 +3558,15 @@ public static SymVis ST_VISIBILITY(uint8 other) {
 }
 
 public static uint32 R_SYM64(uint64 info) {
-    return ((uint32)(info >> (int)(32)));
+    return (uint32)((info >> (int)(32)));
 }
 
 public static uint32 R_TYPE64(uint64 info) {
-    return ((uint32)info);
+    return (uint32)info;
 }
 
 public static uint64 R_INFO(uint32 sym, uint32 typ) {
-    return (uint64)(((uint64)sym) << (int)(32) | ((uint64)typ));
+    return (uint64)(((uint64)sym << (int)(32)) | (uint64)typ);
 }
 
 // ELF64 symbol table entries.
@@ -3604,10 +3604,10 @@ internal static @string stringName(uint32 i, slice<intName> names, bool goSyntax
             if (goSyntax) {
                 s = "elf."u8 + s;
             }
-            return s + "+"u8 + strconv.FormatUint(((uint64)(i - n.i)), 10);
+            return s + "+"u8 + strconv.FormatUint((uint64)(i - n.i), 10);
         }
     }
-    return strconv.FormatUint(((uint64)i), 10);
+    return strconv.FormatUint((uint64)i, 10);
 }
 
 internal static @string flagName(uint32 i, slice<intName> names, bool goSyntax) {
@@ -3625,10 +3625,10 @@ internal static @string flagName(uint32 i, slice<intName> names, bool goSyntax) 
         }
     }
     if (len(s) == 0) {
-        return "0x"u8 + strconv.FormatUint(((uint64)i), 16);
+        return "0x"u8 + strconv.FormatUint((uint64)i, 16);
     }
     if (i != 0) {
-        s += "+0x"u8 + strconv.FormatUint(((uint64)i), 16);
+        s += "+0x"u8 + strconv.FormatUint((uint64)i, 16);
     }
     return s;
 }

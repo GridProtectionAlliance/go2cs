@@ -176,10 +176,10 @@
 // in most runs.
 namespace go.@internal;
 
-using runtime = runtime_package;
+using Δruntime = runtime_package;
 using sync = sync_package;
-using atomic = sync.atomic_package;
-using sync;
+using atomic = go.sync.atomic_package;
+using go.sync;
 using ꓸꓸꓸany = Span<any>;
 
 partial class bisect_package {
@@ -201,45 +201,45 @@ public static (ж<Matcher>, error) New(@string pattern) {
     // Special case for leading 'q' so that 'qn' quietly disables, e.g. fmahash=qn to disable fma
     // Any instance of 'v' disables 'q'.
     if (len(p) > 0 && p[0] == (rune)'q') {
-        m.val.quiet = true;
+        m.Value.quiet = true;
         p = p[1..];
         if (p == ""u8) {
-            return (default!, new parseError("invalid pattern syntax: "u8 + pattern));
+            return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: " + pattern))));
         }
     }
     // Allow multiple v, so that “bisect cmd vPATTERN” can force verbose all the time.
     while (len(p) > 0 && p[0] == (rune)'v') {
-        m.val.verbose = true;
-        m.val.quiet = false;
+        m.Value.verbose = true;
+        m.Value.quiet = false;
         p = p[1..];
         if (p == ""u8) {
-            return (default!, new parseError("invalid pattern syntax: "u8 + pattern));
+            return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: " + pattern))));
         }
     }
     // Allow multiple !, each negating the last, so that “bisect cmd !PATTERN” works
     // even when bisect chooses to add its own !.
-    m.val.enable = true;
+    m.Value.enable = true;
     while (len(p) > 0 && p[0] == (rune)'!') {
-        m.val.enable = !(~m).enable;
+        m.Value.enable = !(~m).enable;
         p = p[1..];
         if (p == ""u8) {
-            return (default!, new parseError("invalid pattern syntax: "u8 + pattern));
+            return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: " + pattern))));
         }
     }
     if (p == "n"u8) {
         // n is an alias for !y.
-        m.val.enable = !(~m).enable;
+        m.Value.enable = !(~m).enable;
         p = "y"u8;
     }
     // Parse actual pattern syntax.
     var result = true;
-    var bits = ((uint64)0);
+    var bits = (uint64)0;
     nint start = 0;
     nint wid = 1;
     // 1-bit (binary); sometimes 4-bit (hex)
     for (nint i = 0; i <= len(p); i++) {
         // Imagine a trailing - at the end of the pattern to flush final suffix
-        var c = ((byte)(rune)'-');
+        var c = (byte)(rune)'-';
         if (i < len(p)) {
             c = p[i];
         }
@@ -252,53 +252,53 @@ public static (ж<Matcher>, error) New(@string pattern) {
         var exprᴛ1 = c;
         var matchᴛ1 = false;
         { /* default: */
-            return (default!, new parseError("invalid pattern syntax: "u8 + pattern));
+            return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: " + pattern))));
         }
         if (exprᴛ1 is (rune)'2' or (rune)'3' or (rune)'4' or (rune)'5' or (rune)'6' or (rune)'7' or (rune)'8' or (rune)'9') { matchᴛ1 = true;
             if (wid != 4) {
-                return (default!, new parseError("invalid pattern syntax: "u8 + pattern));
+                return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: " + pattern))));
             }
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && (exprᴛ1 is (rune)'0' or (rune)'1')) { matchᴛ1 = true;
-            bits <<= (nint)(wid);
-            bits |= (uint64)(((uint64)(c - (rune)'0')));
+            bits <<= (int)(wid);
+            bits |= (uint64)((uint64)(c - (rune)'0'));
         }
         else if (exprᴛ1 is (rune)'a' or (rune)'b' or (rune)'c' or (rune)'d' or (rune)'e' or (rune)'f' or (rune)'A' or (rune)'B' or (rune)'C' or (rune)'D' or (rune)'E' or (rune)'F') { matchᴛ1 = true;
             if (wid != 4) {
-                return (default!, new parseError("invalid pattern syntax: "u8 + pattern));
+                return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: " + pattern))));
             }
-            bits <<= (UntypedInt)(4);
-            bits |= (uint64)(((uint64)((byte)(c & ~32) - (rune)'A' + 10)));
+            bits <<= (int)(4);
+            bits |= (uint64)((uint64)((byte)(c & ~0x20) - (rune)'A' + 10));
         }
         else if (exprᴛ1 is (rune)'y') {
             if (i + 1 < len(p) && (p[i + 1] == (rune)'0' || p[i + 1] == (rune)'1')) {
-                return (default!, new parseError("invalid pattern syntax: "u8 + pattern));
+                return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: " + pattern))));
             }
             bits = 0;
         }
         else if (exprᴛ1 is (rune)'+' or (rune)'-') { matchᴛ1 = true;
             if (c == (rune)'+' && result == false) {
                 // Have already seen a -. Should be - from here on.
-                return (default!, new parseError("invalid pattern syntax (+ after -): "u8 + pattern));
+                return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax (+ after -): " + pattern))));
             }
             if (i > 0){
                 nint n = (i - start) * wid;
                 if (n > 64) {
-                    return (default!, new parseError("pattern bits too long: "u8 + pattern));
+                    return (default!, new parseErrorжerror(Ꮡ(new parseError("pattern bits too long: " + pattern))));
                 }
                 if (n <= 0) {
-                    return (default!, new parseError("invalid pattern syntax: "u8 + pattern));
+                    return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: " + pattern))));
                 }
                 if (p[start] == (rune)'y') {
                     n = 0;
                 }
-                var mask = ((uint64)1) << (int)(n) - 1;
-                m.val.list = append((~m).list, new cond(mask, bits, result));
+                var mask = ((uint64)1 << (int)(n)) - 1;
+                m.Value.list = append((~m).list, new cond(mask, bits, result));
             } else 
             if (c == (rune)'-') {
                 // leading - subtracts from complete set
-                m.val.list = append((~m).list, new cond(0, 0, true));
+                m.Value.list = append((~m).list, new cond(0, 0, true));
             }
             bits = 0;
             result = c == (rune)'+';
@@ -317,7 +317,7 @@ public static (ж<Matcher>, error) New(@string pattern) {
     internal bool quiet;   // disables all reporting.  reset if verbose is true. use case is -d=fmahash=qn
     internal bool enable;   // when true, list is for “enable and report” (when false, “disable and report”)
     internal slice<cond> list; // conditions; later ones win over earlier ones
-    internal sync.atomic_package.Pointer dedup;
+    internal atomic.Pointer<dedup> dedup;
 }
 
 // A cond is a single condition in the matcher.
@@ -337,7 +337,9 @@ public static (ж<Matcher>, error) New(@string pattern) {
 }
 
 // ShouldEnable reports whether the change with the given id should be enabled.
-[GoRecv] public static bool ShouldEnable(this ref Matcher m, uint64 id) {
+public static bool ShouldEnable(this ж<Matcher> Ꮡm, uint64 id) {
+    ref var m = ref Ꮡm.Value;
+
     if (m == nil) {
         return true;
     }
@@ -345,7 +347,9 @@ public static (ж<Matcher>, error) New(@string pattern) {
 }
 
 // ShouldPrint reports whether to print identifying information about the change with the given id.
-[GoRecv] public static bool ShouldPrint(this ref Matcher m, uint64 id) {
+public static bool ShouldPrint(this ж<Matcher> Ꮡm, uint64 id) {
+    ref var m = ref Ꮡm.Value;
+
     if (m == nil || m.quiet) {
         return false;
     }
@@ -365,52 +369,56 @@ public static (ж<Matcher>, error) New(@string pattern) {
 
 // FileLine reports whether the change identified by file and line should be enabled.
 // If the change should be printed, FileLine prints a one-line report to w.
-[GoRecv] public static bool FileLine(this ref Matcher m, Writer w, @string file, nint line) {
+public static bool FileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint line) {
+    ref var m = ref Ꮡm.Value;
+
     if (m == nil) {
         return true;
     }
-    return m.fileLine(w, file, line);
+    return Ꮡm.fileLine(w, @file, line);
 }
 
 // fileLine does the real work for FileLine.
 // This lets FileLine's body handle m == nil and potentially be inlined.
-[GoRecv] internal static bool fileLine(this ref Matcher m, Writer w, @string file, nint line) {
-    var h = Hash(file, line);
-    if (m.ShouldPrint(h)) {
+internal static bool fileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint line) {
+    ref var m = ref Ꮡm.Value;
+
+    var h = Hash(@file, line);
+    if (Ꮡm.ShouldPrint(h)) {
         if (m.MarkerOnly()){
             PrintMarker(w, h);
         } else {
-            printFileLine(w, h, file, line);
+            printFileLine(w, h, @file, line);
         }
     }
-    return m.ShouldEnable(h);
+    return Ꮡm.ShouldEnable(h);
 }
 
 // printFileLine prints a non-marker-only report for file:line to w.
-internal static error printFileLine(Writer w, uint64 h, @string file, nint line) {
-    static readonly UntypedInt markerLen = 40; // overestimate
-    var b = new slice<byte>(0, markerLen + len(file) + 24);
+internal static error printFileLine(Writer w, uint64 h, @string @file, nint line) {
+    UntypedInt markerLen = 40; // overestimate
+    var b = new slice<byte>(0, (nint)markerLen + len(@file) + 24);
     b = AppendMarker(b, h);
-    b = appendFileLine(b, file, line);
-    b = append(b, (rune)'\n');
+    b = appendFileLine(b, @file, line);
+    b = append(b, (byte)((rune)'\n'));
     var (_, err) = w.Write(b);
     return err;
 }
 
 // appendFileLine appends file:line to dst, returning the extended slice.
-internal static slice<byte> appendFileLine(slice<byte> dst, @string file, nint line) {
-    dst = append(dst, file.ꓸꓸꓸ);
-    dst = append(dst, (rune)':');
-    nuint u = ((nuint)line);
+internal static slice<byte> appendFileLine(slice<byte> dst, @string @file, nint line) {
+    dst = append(dst, @file.ꓸꓸꓸ);
+    dst = append(dst, (byte)((rune)':'));
+    nuint u = (nuint)line;
     if (line < 0) {
-        dst = append(dst, (rune)'-');
-        u = -u;
+        dst = append(dst, (byte)((rune)'-'));
+        u = ((nuint)0 - u);
     }
     array<byte> buf = new(24);
     nint i = len(buf);
     while (i == len(buf) || u > 0) {
         i--;
-        buf[i] = (rune)'0' + ((byte)(u % 10));
+        buf[i] = (byte)((rune)'0' + (byte)(u % 10));
         u /= 10;
     }
     dst = append(dst, buf[(int)(i)..].ꓸꓸꓸ);
@@ -420,19 +428,23 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string file, nint l
 // MatchStack assigns the current call stack a change ID.
 // If the stack should be printed, MatchStack prints it.
 // Then MatchStack reports whether a change at the current call stack should be enabled.
-[GoRecv] public static bool Stack(this ref Matcher m, Writer w) {
+public static bool Stack(this ж<Matcher> Ꮡm, Writer w) {
+    ref var m = ref Ꮡm.Value;
+
     if (m == nil) {
         return true;
     }
-    return m.stack(w);
+    return Ꮡm.stack(w);
 }
 
 // stack does the real work for Stack.
 // This lets stack's body handle m == nil and potentially be inlined.
-[GoRecv] internal static bool stack(this ref Matcher m, Writer w) {
-    static readonly UntypedInt maxStack = 16;
+internal static bool stack(this ж<Matcher> Ꮡm, Writer w) {
+    ref var m = ref Ꮡm.Value;
+
+    UntypedInt maxStack = 16;
     array<uintptr> stk = new(16); /* maxStack */
-    nint n = runtime.Callers(2, stk[..]);
+    nint n = Δruntime.Callers(2, stk[..]);
     // caller #2 is not for printing; need it to normalize PCs if ASLR.
     if (n <= 1) {
         return false;
@@ -443,15 +455,15 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string file, nint l
         stk[i] -= @base;
     }
     var h = Hash(stk[..(int)(n)]);
-    if (m.ShouldPrint(h)) {
+    if (Ꮡm.ShouldPrint(h)) {
         ж<dedup> d = default!;
         while (ᐧ) {
-            d = m.dedup.Load();
+            d = Ꮡm.of(Matcher.Ꮡdedup).Load();
             if (d != nil) {
                 break;
             }
             d = @new<dedup>();
-            if (m.dedup.CompareAndSwap(nil, d)) {
+            if (Ꮡm.of(Matcher.Ꮡdedup).CompareAndSwap(nil, d)) {
                 break;
             }
         }
@@ -469,7 +481,7 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string file, nint l
             }
         }
     }
-    return m.ShouldEnable(h);
+    return Ꮡm.ShouldEnable(h);
 }
 
 // Writer is the same interface as io.Writer.
@@ -483,7 +495,7 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string file, nint l
 public static error PrintMarker(Writer w, uint64 h) {
     array<byte> buf = new(50);
     var b = AppendMarker(buf[..0], h);
-    b = append(b, (rune)'\n');
+    b = append(b, (byte)((rune)'\n'));
     var (_, err) = w.Write(b);
     return err;
 }
@@ -494,22 +506,22 @@ internal static error printStack(Writer w, uint64 h, slice<uintptr> stk) {
     var buf = new slice<byte>(0, 2048);
     array<byte> prefixBuf = new(100);
     var prefix = AppendMarker(prefixBuf[..0], h);
-    var frames = runtime.CallersFrames(stk);
+    var frames = Δruntime.CallersFrames(stk);
     while (ᐧ) {
         var (f, more) = frames.Next();
         buf = append(buf, prefix.ꓸꓸꓸ);
         buf = append(buf, f.Function.ꓸꓸꓸ);
-        buf = append(buf, "()\n"u8.ꓸꓸꓸ);
+        buf = append(buf, ((@string)"()\n"u8).ꓸꓸꓸ);
         buf = append(buf, prefix.ꓸꓸꓸ);
-        buf = append(buf, (rune)'\t');
+        buf = append(buf, (byte)((rune)'\t'));
         buf = appendFileLine(buf, f.File, f.Line);
-        buf = append(buf, (rune)'\n');
+        buf = append(buf, (byte)((rune)'\n'));
         if (!more) {
             break;
         }
     }
     buf = append(buf, prefix.ꓸꓸꓸ);
-    buf = append(buf, (rune)'\n');
+    buf = append(buf, (byte)((rune)'\n'));
     var (_, err) = w.Write(buf);
     return err;
 }
@@ -527,8 +539,8 @@ public static slice<byte> AppendMarker(slice<byte> dst, uint64 id) {
     array<byte> buf = new(33); /* len(prefix) + 16 + 1 */
     copy(buf[..], prefix);
     for (nint i = 0; i < 16; i++) {
-        buf[len(prefix) + i] = "0123456789abcdef"u8[id >> (int)(60)];
-        id <<= (UntypedInt)(4);
+        buf[len(prefix) + i] = "0123456789abcdef"u8[(int)((id >> (int)(60)))];
+        id <<= (int)(4);
     }
     buf[len(prefix) + 16] = (rune)']';
     return append(dst, buf[..].ꓸꓸꓸ);
@@ -572,20 +584,20 @@ public static (@string @short, uint64 id, bool ok) CutMarker(@string line) {
             return (line, 0, false);
         }
         for (nint iΔ1 = 2; iΔ1 < len(idstr); iΔ1++) {
-            id <<= (UntypedInt)(4);
+            id <<= (int)(4);
             {
-                var c = idstr[i];
+                var c = idstr[iΔ1];
                 switch (ᐧ) {
                 case {} when (rune)'0' <= c && c <= (rune)'9': {
-                    id |= (uint64)(((uint64)(c - (rune)'0')));
+                    id |= (uint64)((uint64)(c - (rune)'0'));
                     break;
                 }
                 case {} when (rune)'a' <= c && c <= (rune)'f': {
-                    id |= (uint64)(((uint64)(c - (rune)'a' + 10)));
+                    id |= (uint64)((uint64)(c - (rune)'a' + 10));
                     break;
                 }
                 case {} when (rune)'A' <= c && c <= (rune)'F': {
-                    id |= (uint64)(((uint64)(c - (rune)'A' + 10)));
+                    id |= (uint64)((uint64)(c - (rune)'A' + 10));
                     break;
                 }}
             }
@@ -598,15 +610,15 @@ public static (@string @short, uint64 id, bool ok) CutMarker(@string line) {
         }
         // parse binary
         for (nint iΔ2 = 0; iΔ2 < len(idstr); iΔ2++) {
-            id <<= (UntypedInt)(1);
+            id <<= (int)(1);
             {
-                var c = idstr[i];
+                var c = idstr[iΔ2];
                 switch (c) {
                 default: {
                     return (line, 0, false);
                 }
                 case (rune)'0' or (rune)'1': {
-                    id |= (uint64)(((uint64)(c - (rune)'0')));
+                    id |= (uint64)((uint64)(c - (rune)'0'));
                     break;
                 }}
             }
@@ -637,110 +649,102 @@ public static uint64 Hash(params ꓸꓸꓸany dataʗp) {
     foreach (var (_, v) in data) {
         switch (v.type()) {
         default: {
-            var v = v.type();
+            var vΔ1 = v;
             throw panic("bisect.Hash: unexpected argument type");
             break;
         }
-        case @string v: {
+        case @string vΔ1: {
             h = fnvString(h, // Note: Not printing the type, because reflect.ValueOf(v)
  // would make the interfaces prepared by the caller escape
  // and therefore allocate. This way, Hash(file, line) runs
  // without any allocation. It should be clear from the
  // source code calling Hash what the bad argument was.
- v);
+ vΔ1);
             break;
         }
-        case byte v: {
-            h = fnv(h, v);
+        case byte vΔ1: {
+            h = fnv(h, vΔ1);
             break;
         }
-        case nint v: {
-            h = fnvUint64(h, ((uint64)v));
+        case nint vΔ1: {
+            h = fnvUint64(h, (uint64)vΔ1);
             break;
         }
-        case int32 v: {
-            h = fnvUint64(h, ((uint64)v));
+        case nuint vΔ1: {
+            h = fnvUint64(h, (uint64)vΔ1);
             break;
         }
-        case nuint v: {
-            h = fnvUint64(h, ((uint64)v));
+        case int32 vΔ1: {
+            h = fnvUint32(h, (uint32)vΔ1);
             break;
         }
-        case uint32 v: {
-            h = fnvUint64(h, ((uint64)v));
+        case uint32 vΔ1: {
+            h = fnvUint32(h, vΔ1);
             break;
         }
-        case int32 v: {
-            h = fnvUint32(h, ((uint32)v));
+        case int64 vΔ1: {
+            h = fnvUint64(h, (uint64)vΔ1);
             break;
         }
-        case uint32 v: {
-            h = fnvUint32(h, v);
+        case uint64 vΔ1: {
+            h = fnvUint64(h, vΔ1);
             break;
         }
-        case int64 v: {
-            h = fnvUint64(h, ((uint64)v));
+        case uintptr vΔ1: {
+            h = fnvUint64(h, (uint64)vΔ1);
             break;
         }
-        case uint64 v: {
-            h = fnvUint64(h, v);
-            break;
-        }
-        case uintptr v: {
-            h = fnvUint64(h, ((uint64)v));
-            break;
-        }
-        case slice<@string> v: {
-            foreach (var (_, x) in v) {
+        case slice<@string> vΔ1: {
+            foreach (var (_, x) in vΔ1) {
                 h = fnvString(h, x);
             }
             break;
         }
-        case slice<byte> v: {
-            foreach (var (_, x) in v) {
+        case slice<byte> vΔ1: {
+            foreach (var (_, x) in vΔ1) {
                 h = fnv(h, x);
             }
             break;
         }
-        case slice<nint> v: {
-            foreach (var (_, x) in v) {
-                h = fnvUint64(h, ((uint64)x));
+        case slice<nint> vΔ1: {
+            foreach (var (_, x) in vΔ1) {
+                h = fnvUint64(h, (uint64)x);
             }
             break;
         }
-        case slice<nuint> v: {
-            foreach (var (_, x) in v) {
-                h = fnvUint64(h, ((uint64)x));
+        case slice<nuint> vΔ1: {
+            foreach (var (_, x) in vΔ1) {
+                h = fnvUint64(h, (uint64)x);
             }
             break;
         }
-        case slice<int32> v: {
-            foreach (var (_, x) in v) {
-                h = fnvUint32(h, ((uint32)x));
+        case slice<int32> vΔ1: {
+            foreach (var (_, x) in vΔ1) {
+                h = fnvUint32(h, (uint32)x);
             }
             break;
         }
-        case slice<uint32> v: {
-            foreach (var (_, x) in v) {
+        case slice<uint32> vΔ1: {
+            foreach (var (_, x) in vΔ1) {
                 h = fnvUint32(h, x);
             }
             break;
         }
-        case slice<int64> v: {
-            foreach (var (_, x) in v) {
-                h = fnvUint64(h, ((uint64)x));
+        case slice<int64> vΔ1: {
+            foreach (var (_, x) in vΔ1) {
+                h = fnvUint64(h, (uint64)x);
             }
             break;
         }
-        case slice<uint64> v: {
-            foreach (var (_, x) in v) {
+        case slice<uint64> vΔ1: {
+            foreach (var (_, x) in vΔ1) {
                 h = fnvUint64(h, x);
             }
             break;
         }
-        case slice<uintptr> v: {
-            foreach (var (_, x) in v) {
-                h = fnvUint64(h, ((uint64)x));
+        case slice<uintptr> vΔ1: {
+            foreach (var (_, x) in vΔ1) {
+                h = fnvUint64(h, (uint64)x);
             }
             break;
         }}
@@ -767,14 +771,14 @@ internal const uint64 offset64 = 14695981039346656037;
 internal const uint64 prime64 = 1099511628211;
 
 internal static uint64 fnv(uint64 h, byte x) {
-    h ^= (uint64)(((uint64)x));
+    h ^= (uint64)((uint64)x);
     h *= prime64;
     return h;
 }
 
 internal static uint64 fnvString(uint64 h, @string x) {
     for (nint i = 0; i < len(x); i++) {
-        h ^= (uint64)(((uint64)x[i]));
+        h ^= (uint64)((uint64)x[i]);
         h *= prime64;
     }
     return h;
@@ -782,8 +786,8 @@ internal static uint64 fnvString(uint64 h, @string x) {
 
 internal static uint64 fnvUint64(uint64 h, uint64 x) {
     for (nint i = 0; i < 8; i++) {
-        h ^= (uint64)((uint64)(x & 255));
-        x >>= (UntypedInt)(8);
+        h ^= (uint64)((uint64)(x & 0xFF));
+        x >>= (int)(8);
         h *= prime64;
     }
     return h;
@@ -791,8 +795,8 @@ internal static uint64 fnvUint64(uint64 h, uint64 x) {
 
 internal static uint64 fnvUint32(uint64 h, uint32 x) {
     for (nint i = 0; i < 4; i++) {
-        h ^= (uint64)(((uint64)((uint32)(x & 255))));
-        x >>= (UntypedInt)(8);
+        h ^= (uint64)((uint64)((uint32)(x & 0xFF)));
+        x >>= (int)(8);
         h *= prime64;
     }
     return h;
@@ -809,20 +813,22 @@ internal static uint64 fnvUint32(uint64 h, uint32 x) {
     // 128-entry 4-way, lossy cache for seenLossy
     internal array<array<uint64>> recent = new(128);
     // complete history for seen
-    internal sync_package.Mutex mu;
+    internal sync.Mutex mu;
     internal map<uint64, bool> m;
 }
 
 // seen records that h has now been seen and reports whether it was seen before.
 // When seen returns false, the caller is expected to print a report for h.
-[GoRecv] internal static bool seen(this ref dedup d, uint64 h) {
-    d.mu.Lock();
+internal static bool seen(this ж<dedup> Ꮡd, uint64 h) {
+    ref var d = ref Ꮡd.Value;
+
+    Ꮡd.of(dedup.Ꮡmu).Lock();
     if (d.m == default!) {
         d.m = new map<uint64, bool>();
     }
     var seen = d.m[h];
     d.m[h] = true;
-    d.mu.Unlock();
+    Ꮡd.of(dedup.Ꮡmu).Unlock();
     return seen;
 }
 
@@ -831,20 +837,18 @@ internal static uint64 fnvUint32(uint64 h, uint32 x) {
 // If h does not appear in any of them, then it is inserted into a random slot,
 // overwriting whatever was there before.
 [GoRecv] internal static bool seenLossy(this ref dedup d, uint64 h) {
-    var cache = Ꮡ(d.recent[((nuint)h) % ((nuint)len(d.recent))]);
-    ref var i = ref heap<nint>(out var Ꮡi);
-    for (i = 0; i < len(cache); i++) {
-        if (atomic.LoadUint64(Ꮡ(cache.val[i])) == h) {
+    var cache = Ꮡ(d.recent[(nuint)h % (nuint)len(d.recent)]);
+    for (nint i = 0; i < len(cache); i++) {
+        if (atomic.LoadUint64(Ꮡ(cache.Value[i])) == h) {
             return true;
         }
     }
     // Compute index in set to evict as hash of current set.
-    ref var ch = ref heap<uint64>(out var Ꮡch);
-    ch = offset64;
-    foreach (var (_, x) in cache.val) {
+    var ch = offset64;
+    foreach (var (_, x) in cache.Value) {
         ch = fnvUint64(ch, x);
     }
-    atomic.StoreUint64(Ꮡ(cache.val[((nuint)ch) % ((nuint)len(cache))]), h);
+    atomic.StoreUint64(Ꮡ(cache.Value[(nuint)ch % (nuint)len(cache)]), h);
     return false;
 }
 

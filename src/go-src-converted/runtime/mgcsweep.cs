@@ -29,7 +29,8 @@ using @internal.runtime;
 
 partial class runtime_package {
 
-public static sweepdata Δsweep;
+internal static ж<sweepdata> ᏑΔsweep = new(default(sweepdata));
+internal static ref sweepdata Δsweep => ref ᏑΔsweep.Value;
 
 // State of background sweep.
 [GoType] partial struct sweepdata {
@@ -54,16 +55,20 @@ public static sweepdata Δsweep;
 internal static readonly UntypedInt numSweepClasses = /* numSpanClasses * 2 */ 272;
 internal static readonly sweepClass sweepClassDone = /* sweepClass(^uint32(0)) */ 4294967295;
 
-[GoRecv] internal static sweepClass load(this ref sweepClass s) {
-    return ((sweepClass)atomic.Load(((ж<uint32>)s)));
+internal static sweepClass load(this ж<sweepClass> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    return ((sweepClass)atomic.Load(Ꮡ((uint32)(s))));
 }
 
-[GoRecv] internal static void update(this ref sweepClass s, sweepClass sNew) {
+internal static void update(this ж<sweepClass> Ꮡs, sweepClass sNew) {
+    ref var s = ref Ꮡs.Value;
+
     // Only update *s if its current value is less than sNew,
     // since *s increases monotonically.
-    var sOld = s.load();
-    while (sOld < sNew && !atomic.Cas(((ж<uint32>)s), ((uint32)sOld), ((uint32)sNew))) {
-        sOld = s.load();
+    var sOld = Ꮡs.load();
+    while (sOld < sNew && !atomic.Cas(Ꮡ((uint32)(s)), (uint32)sOld, (uint32)sNew)) {
+        sOld = Ꮡs.load();
     }
 }
 
@@ -72,8 +77,10 @@ internal static readonly sweepClass sweepClassDone = /* sweepClass(^uint32(0)) *
 // be nice to have an "atomic max" which is just implemented
 // as the above on most architectures. Some architectures
 // like RISC-V however have native support for an atomic max.
-[GoRecv] internal static void clear(this ref sweepClass s) {
-    atomic.Store(((ж<uint32>)s), 0);
+internal static void clear(this ж<sweepClass> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    atomic.Store(Ꮡ((uint32)(s)), 0);
 }
 
 // split returns the underlying span class as well as
@@ -84,7 +91,7 @@ internal static (spanClass spc, bool full) split(this sweepClass s) {
     spanClass spc = default!;
     bool full = default!;
 
-    return (((spanClass)(s >> (int)(1))), (sweepClass)(s & 1) == 0);
+    return (((spanClass)(uint8)((uint32)((s >> (int)(1))))), (sweepClass)(s & 1) == 0);
 }
 
 // nextSpanForSweep finds and pops the next span for sweeping from the
@@ -92,9 +99,9 @@ internal static (spanClass spc, bool full) split(this sweepClass s) {
 // Returns nil if no such span exists.
 [GoRecv] internal static ж<mspan> nextSpanForSweep(this ref mheap h) {
     var sg = h.sweepgen;
-    for (var sc = Δsweep.centralIndex.load(); sc < numSweepClasses; sc++) {
+    for (var sc = ᏑΔsweep.of(sweepdata.ᏑcentralIndex).load(); sc < numSweepClasses; sc++) {
         var (spc, full) = sc.split();
-        var c = Ꮡh.central[spc].of(struct{mcentral mcentral; pad [24]byte}.Ꮡmcentral);
+        var c = Ꮡ(h.central[spc]).of(mheap_central.Ꮡmcentral);
         ж<mspan> s = default!;
         if (full){
             s = c.fullUnswept(sg).pop();
@@ -104,12 +111,12 @@ internal static (spanClass spc, bool full) split(this sweepClass s) {
         if (s != nil) {
             // Write down that we found something so future sweepers
             // can start from here.
-            Δsweep.centralIndex.update(sc);
+            ᏑΔsweep.of(sweepdata.ᏑcentralIndex).update(sc);
             return s;
         }
     }
     // Write down that we found nothing.
-    Δsweep.centralIndex.update(sweepClassDone);
+    ᏑΔsweep.of(sweepdata.ᏑcentralIndex).update(sweepClassDone);
     return default!;
 }
 
@@ -129,7 +136,7 @@ internal static readonly UntypedInt sweepDrainedMask = /* 1 << 31 */ 2147483648;
     //
     // The rest of the bits are a counter, indicating the
     // number of outstanding concurrent sweepers.
-    internal @internal.runtime.atomic_package.Uint32 state;
+    internal atomic.Uint32 state;
 }
 
 // begin registers a new sweeper. Returns a sweepLocker
@@ -142,13 +149,15 @@ internal static readonly UntypedInt sweepDrainedMask = /* 1 << 31 */ 2147483648;
 // this does not indicate that all sweeping has completed.
 //
 // Even if the sweepLocker is invalid, its sweepGen is always valid.
-[GoRecv] internal static sweepLocker begin(this ref activeSweep a) {
+internal static sweepLocker begin(this ж<activeSweep> Ꮡa) {
+    ref var a = ref Ꮡa.Value;
+
     while (ᐧ) {
-        var state = a.state.Load();
-        if ((uint32)(state & sweepDrainedMask) != 0) {
+        var state = Ꮡa.of(activeSweep.Ꮡstate).Load();
+        if ((uint32)(state & (uint32)sweepDrainedMask) != 0) {
             return new sweepLocker(mheap_.sweepgen, false);
         }
-        if (a.state.CompareAndSwap(state, state + 1)) {
+        if (Ꮡa.of(activeSweep.Ꮡstate).CompareAndSwap(state, state + 1)) {
             return new sweepLocker(mheap_.sweepgen, true);
         }
     }
@@ -156,22 +165,24 @@ internal static readonly UntypedInt sweepDrainedMask = /* 1 << 31 */ 2147483648;
 
 // end deregisters a sweeper. Must be called once for each time
 // begin is called if the sweepLocker is valid.
-[GoRecv] internal static void end(this ref activeSweep a, sweepLocker sl) {
+internal static void end(this ж<activeSweep> Ꮡa, sweepLocker sl) {
+    ref var a = ref Ꮡa.Value;
+
     if (sl.sweepGen != mheap_.sweepgen) {
         @throw("sweeper left outstanding across sweep generations"u8);
     }
     while (ᐧ) {
-        var state = a.state.Load();
-        if (((uint32)(state & ~sweepDrainedMask)) - 1 >= sweepDrainedMask) {
+        var state = Ꮡa.of(activeSweep.Ꮡstate).Load();
+        if (((uint32)(state & ~(uint32)sweepDrainedMask)) - 1 >= sweepDrainedMask) {
             @throw("mismatched begin/end of activeSweep"u8);
         }
-        if (a.state.CompareAndSwap(state, state - 1)) {
+        if (Ꮡa.of(activeSweep.Ꮡstate).CompareAndSwap(state, state - 1)) {
             if (state != sweepDrainedMask) {
                 return;
             }
             if (debug.gcpacertrace > 0) {
-                var live = gcController.heapLive.Load();
-                print("pacer: sweep done at heap size ", live >> (int)(20), "MB; allocated ", (live - mheap_.sweepHeapLiveBasis) >> (int)(20), "MB during sweep; swept ", mheap_.pagesSwept.Load(), " pages at ", mheap_.sweepPagesPerByte, " pages/byte\n");
+                var live = ᏑgcController.of(gcControllerState.ᏑheapLive).Load();
+                print("pacer: sweep done at heap size ", (live >> (int)(20)), "MB; allocated ", ((live - mheap_.sweepHeapLiveBasis) >> (int)(20)), "MB during sweep; swept ", Ꮡmheap_.of(mheap.ᏑpagesSwept).Load(), " pages at ", mheap_.sweepPagesPerByte, " pages/byte\n");
             }
             return;
         }
@@ -184,36 +195,44 @@ internal static readonly UntypedInt sweepDrainedMask = /* 1 << 31 */ 2147483648;
 //
 // Returns true if this call was the one that actually performed
 // the mark.
-[GoRecv] internal static bool markDrained(this ref activeSweep a) {
+internal static bool markDrained(this ж<activeSweep> Ꮡa) {
+    ref var a = ref Ꮡa.Value;
+
     while (ᐧ) {
-        var state = a.state.Load();
-        if ((uint32)(state & sweepDrainedMask) != 0) {
+        var state = Ꮡa.of(activeSweep.Ꮡstate).Load();
+        if ((uint32)(state & (uint32)sweepDrainedMask) != 0) {
             return false;
         }
-        if (a.state.CompareAndSwap(state, (uint32)(state | sweepDrainedMask))) {
+        if (Ꮡa.of(activeSweep.Ꮡstate).CompareAndSwap(state, (uint32)(state | (uint32)sweepDrainedMask))) {
             return true;
         }
     }
 }
 
 // sweepers returns the current number of active sweepers.
-[GoRecv] internal static uint32 sweepers(this ref activeSweep a) {
-    return (uint32)(a.state.Load() & ~sweepDrainedMask);
+internal static uint32 sweepers(this ж<activeSweep> Ꮡa) {
+    ref var a = ref Ꮡa.Value;
+
+    return (uint32)(Ꮡa.of(activeSweep.Ꮡstate).Load() & ~(uint32)sweepDrainedMask);
 }
 
 // isDone returns true if all sweep work has been drained and no more
 // outstanding sweepers exist. That is, when the sweep phase is
 // completely done.
-[GoRecv] internal static bool isDone(this ref activeSweep a) {
-    return a.state.Load() == sweepDrainedMask;
+internal static bool isDone(this ж<activeSweep> Ꮡa) {
+    ref var a = ref Ꮡa.Value;
+
+    return Ꮡa.of(activeSweep.Ꮡstate).Load() == sweepDrainedMask;
 }
 
 // reset sets up the activeSweep for the next sweep cycle.
 //
 // The world must be stopped.
-[GoRecv] internal static void reset(this ref activeSweep a) {
+internal static void reset(this ж<activeSweep> Ꮡa) {
+    ref var a = ref Ꮡa.Value;
+
     assertWorldStopped();
-    a.state.Store(0);
+    Ꮡa.of(activeSweep.Ꮡstate).Store(0);
 }
 
 // finishsweep_m ensures that all spans are swept.
@@ -229,14 +248,14 @@ internal static void finishsweep_m() {
     // shouldn't be any spans left to sweep, so this should finish
     // instantly. If GC was forced before the concurrent sweep
     // finished, there may be spans to sweep.
-    while (sweepone() != ~((uintptr)0)) {
+    while (sweepone() != ~(uintptr)0) {
     }
     // Make sure there aren't any outstanding sweepers left.
     // At this point, with the world stopped, it means one of two
     // things. Either we were able to preempt a sweeper, or that
     // a sweeper didn't call sweep.active.end when it should have.
     // Both cases indicate a bug, so throw.
-    if (Δsweep.active.sweepers() != 0) {
+    if (ᏑΔsweep.of(sweepdata.Ꮡactive).sweepers() != 0) {
         @throw("active sweepers found at start of mark phase"u8);
     }
     // Reset all the unswept buffers, which should be empty.
@@ -245,7 +264,7 @@ internal static void finishsweep_m() {
     // soon as possible.
     var sg = mheap_.sweepgen;
     foreach (var (i, _) in mheap_.central) {
-        var c = Ꮡmheap_.central[i].of(struct{mcentral mcentral; pad [24]byte}.Ꮡmcentral);
+        var c = Ꮡmheap_.at(mheap.Ꮡcentral, i).of(mheap_central.Ꮡmcentral);
         c.partialUnswept(sg).reset();
         c.fullUnswept(sg).reset();
     }
@@ -254,7 +273,7 @@ internal static void finishsweep_m() {
     //
     // If the scavenger isn't already awake, wake it up. There's
     // definitely work for it to do at this point.
-    scavenger.wake();
+    Ꮡscavenger.wake();
     nextMarkBitArenaEpoch();
 }
 
@@ -282,11 +301,11 @@ internal static void bgsweep(channel<nint> c) {
         // isn't spare idle time available on other cores. If there's available idle
         // time, helping to sweep can reduce allocation latencies by getting ahead of
         // the proportional sweeper and having spans ready to go for allocation.
-        static readonly UntypedInt sweepBatchSize = 10;
+        UntypedInt sweepBatchSize = 10;
         nint nSwept = 0;
-        while (sweepone() != ~((uintptr)0)) {
+        while (sweepone() != ~(uintptr)0) {
             nSwept++;
-            if (nSwept % sweepBatchSize == 0) {
+            if (nSwept % (nint)sweepBatchSize == 0) {
                 goschedIfBusy();
             }
         }
@@ -316,23 +335,23 @@ internal static void bgsweep(channel<nint> c) {
 
 // sweepLocked represents sweep ownership of a span.
 [GoType] partial struct sweepLocked {
-    public partial ref ж<mspan> mspan { get; }
+    internal partial ref ж<mspan> mspan { get; }
 }
 
 // tryAcquire attempts to acquire sweep ownership of span s. If it
 // successfully acquires ownership, it blocks sweep completion.
 [GoRecv] internal static (sweepLocked, bool) tryAcquire(this ref sweepLocker l, ж<mspan> Ꮡs) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (!l.valid) {
         @throw("use of invalid sweepLocker"u8);
     }
     // Check before attempting to CAS.
-    if (atomic.Load(Ꮡ(s.sweepgen)) != l.sweepGen - 2) {
+    if (atomic.Load(Ꮡs.of(mspan.Ꮡsweepgen)) != l.sweepGen - 2) {
         return (new sweepLocked(nil), false);
     }
     // Attempt to acquire sweep ownership of s.
-    if (!atomic.Cas(Ꮡ(s.sweepgen), l.sweepGen - 2, l.sweepGen - 1)) {
+    if (!atomic.Cas(Ꮡs.of(mspan.Ꮡsweepgen), l.sweepGen - 2, l.sweepGen - 1)) {
         return (new sweepLocked(nil), false);
     }
     return (new sweepLocked(Ꮡs), true);
@@ -344,25 +363,25 @@ internal static uintptr sweepone() {
     var gp = getg();
     // Increment locks to ensure that the goroutine is not preempted
     // in the middle of sweep thus leaving the span in an inconsistent state for next GC
-    (~(~gp).m).locks++;
+    gp.Value.m.Value.locks++;
     // TODO(austin): sweepone is almost always called in a loop;
     // lift the sweepLocker into its callers.
-    var sl = Δsweep.active.begin();
+    var sl = ᏑΔsweep.of(sweepdata.Ꮡactive).begin();
     if (!sl.valid) {
-        (~(~gp).m).locks--;
-        return ~((uintptr)0);
+        gp.Value.m.Value.locks--;
+        return ~(uintptr)0;
     }
     // Find a span to sweep.
-    var npages = ~((uintptr)0);
+    var npages = ~(uintptr)0;
     bool noMoreWork = default!;
     while (ᐧ) {
         var s = mheap_.nextSpanForSweep();
         if (s == nil) {
-            noMoreWork = Δsweep.active.markDrained();
+            noMoreWork = ᏑΔsweep.of(sweepdata.Ꮡactive).markDrained();
             break;
         }
         {
-            var state = (~s).state.get(); if (state != mSpanInUse) {
+            var state = s.of(mspan.Ꮡstate).get(); if (state != mSpanInUse) {
                 // This can happen if direct sweeping already
                 // swept this span, but in that case the sweep
                 // generation should always be up-to-date.
@@ -381,7 +400,7 @@ internal static uintptr sweepone() {
                     // Whole span was freed. Count it toward the
                     // page reclaimer credit since these pages can
                     // now be used for span allocation.
-                    mheap_.reclaimCredit.Add(npages);
+                    Ꮡmheap_.of(mheap.ᏑreclaimCredit).Add(npages);
                 } else {
                     // Span is still in-use, so this returned no
                     // pages to the heap and the span needs to
@@ -392,7 +411,7 @@ internal static uintptr sweepone() {
             }
         }
     }
-    Δsweep.active.end(sl);
+    ᏑΔsweep.of(sweepdata.Ꮡactive).end(sl);
     if (noMoreWork) {
         // The sweep list is empty. There may still be
         // concurrent sweeps running, but we're at least very
@@ -409,21 +428,22 @@ internal static uintptr sweepone() {
         // allocations to trigger a GC) which would be nice to fill in
         // with scavenging work.
         if (debug.scavtrace > 0) {
-            systemstack(
-            var mheap_ʗ2 = mheap_;
-            () => {
-                @lock(Ꮡmheap_ʗ2.of(mheap.Ꮡlock));
-                var releasedBg = mheap_ʗ2.pages.scav.releasedBg.Load();
-                var releasedEager = mheap_ʗ2.pages.scav.releasedEager.Load();
+            systemstack(() => {
+                @lock(Ꮡmheap_.of(mheap.Ꮡlock));
+                // Get released stats.
+                var releasedBg = Ꮡmheap_.of(mheap.Ꮡpages).of(pageAlloc.Ꮡscav).of(pageAlloc_scav.ᏑreleasedBg).Load();
+                var releasedEager = Ꮡmheap_.of(mheap.Ꮡpages).of(pageAlloc.Ꮡscav).of(pageAlloc_scav.ᏑreleasedEager).Load();
+                // Print the line.
                 printScavTrace(releasedBg, releasedEager, false);
-                mheap_ʗ2.pages.scav.releasedBg.Add(-releasedBg);
-                mheap_ʗ2.pages.scav.releasedEager.Add(-releasedEager);
-                unlock(Ꮡmheap_ʗ2.of(mheap.Ꮡlock));
+                // Update the stats.
+                Ꮡmheap_.of(mheap.Ꮡpages).of(pageAlloc.Ꮡscav).of(pageAlloc_scav.ᏑreleasedBg).Add(((uintptr)0 - releasedBg));
+                Ꮡmheap_.of(mheap.Ꮡpages).of(pageAlloc.Ꮡscav).of(pageAlloc_scav.ᏑreleasedEager).Add(((uintptr)0 - releasedEager));
+                unlock(Ꮡmheap_.of(mheap.Ꮡlock));
             });
         }
-        scavenger.ready();
+        Ꮡscavenger.ready();
     }
-    (~(~gp).m).locks--;
+    gp.Value.m.Value.locks--;
     return npages;
 }
 
@@ -434,13 +454,15 @@ internal static uintptr sweepone() {
 // GC runs; to prevent that the caller must be non-preemptible or must
 // somehow block GC progress.
 internal static bool isSweepDone() {
-    return Δsweep.active.isDone();
+    return ᏑΔsweep.of(sweepdata.Ꮡactive).isDone();
 }
 
 // Returns only when span s has been swept.
 //
 //go:nowritebarrier
-[GoRecv] internal static void ensureSwept(this ref mspan s) {
+internal static void ensureSwept(this ж<mspan> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
     // Caller must disable preemption.
     // Otherwise when this function returns the span can become unswept again
     // (if GC is triggered on another goroutine).
@@ -451,23 +473,23 @@ internal static bool isSweepDone() {
     // If this operation fails, then that means that there are
     // no more spans to be swept. In this case, either s has already
     // been swept, or is about to be acquired for sweeping and swept.
-    var sl = Δsweep.active.begin();
+    var sl = ᏑΔsweep.of(sweepdata.Ꮡactive).begin();
     if (sl.valid) {
         // The caller must be sure that the span is a mSpanInUse span.
         {
-            var (sΔ1, ok) = sl.tryAcquire(s); if (ok) {
+            var (sΔ1, ok) = sl.tryAcquire(Ꮡs); if (ok) {
                 sΔ1.sweep(false);
-                Δsweep.active.end(sl);
+                ᏑΔsweep.of(sweepdata.Ꮡactive).end(sl);
                 return;
             }
         }
-        Δsweep.active.end(sl);
+        ᏑΔsweep.of(sweepdata.Ꮡactive).end(sl);
     }
     // Unfortunately we can't sweep the span ourselves. Somebody else
     // got to it first. We don't have efficient means to wait, but that's
     // OK, it will be swept fairly soon.
     while (ᐧ) {
-        var spangen = atomic.Load(Ꮡ(s.sweepgen));
+        var spangen = atomic.Load(Ꮡs.of(mspan.Ꮡsweepgen));
         if (spangen == sl.sweepGen || spangen == sl.sweepGen + 3) {
             break;
         }
@@ -495,20 +517,19 @@ internal static bool isSweepDone() {
     }
     var sweepgen = mheap_.sweepgen;
     {
-        var state = (~s).state.get(); if (state != mSpanInUse || (~s).sweepgen != sweepgen - 1) {
+        var state = s.of(mspan.Ꮡstate).get(); if (state != mSpanInUse || (~s).sweepgen != sweepgen - 1) {
             print("mspan.sweep: state=", state, " sweepgen=", (~s).sweepgen, " mheap.sweepgen=", sweepgen, "\n");
             @throw("mspan.sweep: bad span state"u8);
         }
     }
     var Δtrace = traceAcquire();
     if (Δtrace.ok()) {
-        Δtrace.GCSweepSpan((~s).npages * _PageSize);
+        Δtrace.GCSweepSpan((~s).npages * (uintptr)_PageSize);
         traceRelease(Δtrace);
     }
-    mheap_.pagesSwept.Add(((int64)(~s).npages));
-    ref var spc = ref heap<spanClass>(out var Ꮡspc);
-    spc = s.val.spanclass;
-    var size = s.val.elemsize;
+    Ꮡmheap_.of(mheap.ᏑpagesSwept).Add((int64)(~s).npages);
+    var spc = s.Value.spanclass;
+    var size = s.Value.elemsize;
     // The allocBits indicate which unmarked objects don't need to be
     // processed since they were free at the end of the last GC cycle
     // and were not allocated since then.
@@ -528,7 +549,7 @@ internal static bool isSweepDone() {
     var siter = newSpecialsIter(s);
     while (siter.valid()) {
         // A finalizer can be set for an inner byte of an object, find object beginning.
-        var objIndex = ((uintptr)(~siter.s).offset) / size;
+        var objIndex = (uintptr)(~siter.s).offset / size;
         var Δp = s.@base() + objIndex * size;
         var mbits = s.markBitsForIndex(objIndex);
         if (!mbits.isMarked()){
@@ -536,7 +557,7 @@ internal static bool isSweepDone() {
             // Pass 1: see if it has a finalizer.
             var hasFinAndRevived = false;
             var endOffset = Δp - s.@base() + size;
-            for (var tmp = siter.s; tmp != nil && ((uintptr)(~tmp).offset) < endOffset; tmp = tmp.val.next) {
+            for (var tmp = siter.s; tmp != nil && (uintptr)(~tmp).offset < endOffset; tmp = tmp.Value.next) {
                 if ((~tmp).kind == _KindSpecialFinalizer) {
                     // Stop freeing of object if it has a finalizer.
                     mbits.setMarkedNonAtomic();
@@ -548,14 +569,14 @@ internal static bool isSweepDone() {
                 // Pass 2: queue all finalizers and clear any weak handles. Weak handles are cleared
                 // before finalization as specified by the internal/weak package. See the documentation
                 // for that package for more details.
-                while (siter.valid() && ((uintptr)(~siter.s).offset) < endOffset) {
+                while (siter.valid() && (uintptr)(~siter.s).offset < endOffset) {
                     // Find the exact byte for which the special was setup
                     // (as opposed to object beginning).
                     var special = siter.s;
-                    var pΔ1 = s.@base() + ((uintptr)(~special).offset);
+                    var pΔ1 = s.@base() + (uintptr)(~special).offset;
                     if ((~special).kind == _KindSpecialFinalizer || (~special).kind == _KindSpecialWeakHandle){
                         siter.unlinkAndNext();
-                        freeSpecial(special, ((@unsafe.Pointer)pΔ1), size);
+                        freeSpecial(special, (@unsafe.Pointer)pΔ1, size);
                     } else {
                         // All other specials only apply when an object is freed,
                         // so just keep the special record.
@@ -564,21 +585,21 @@ internal static bool isSweepDone() {
                 }
             } else {
                 // Pass 2: the object is truly dead, free (and handle) all specials.
-                while (siter.valid() && ((uintptr)(~siter.s).offset) < endOffset) {
+                while (siter.valid() && (uintptr)(~siter.s).offset < endOffset) {
                     // Find the exact byte for which the special was setup
                     // (as opposed to object beginning).
                     var special = siter.s;
-                    var pΔ2 = s.@base() + ((uintptr)(~special).offset);
+                    var pΔ2 = s.@base() + (uintptr)(~special).offset;
                     siter.unlinkAndNext();
-                    freeSpecial(special, ((@unsafe.Pointer)pΔ2), size);
+                    freeSpecial(special, (@unsafe.Pointer)pΔ2, size);
                 }
             }
         } else {
             // object is still live
             if ((~siter.s).kind == _KindSpecialReachable){
                 var special = siter.unlinkAndNext();
-                ((ж<specialReachable>)(uintptr)(new @unsafe.Pointer(special))).val.reachable = true;
-                freeSpecial(special, ((@unsafe.Pointer)Δp), size);
+                ((ж<specialReachable>)(uintptr)(new @unsafe.Pointer(special))).Value.reachable = true;
+                freeSpecial(special, (@unsafe.Pointer)Δp, size);
             } else {
                 // keep special record
                 siter.next();
@@ -592,8 +613,8 @@ internal static bool isSweepDone() {
         // Find all newly freed objects.
         var mbits = s.markBitsForBase();
         var abits = s.allocBitsForIndex(0);
-        for (var i = ((uintptr)0); i < ((uintptr)(~s).nelems); i++) {
-            if (!mbits.isMarked() && (abits.index < ((uintptr)(~s).freeindex) || abits.isMarked())) {
+        for (var i = (uintptr)0; i < (uintptr)(~s).nelems; i++) {
+            if (!mbits.isMarked() && (abits.index < (uintptr)(~s).freeindex || abits.isMarked())) {
                 var x = s.@base() + i * (~s).elemsize;
                 if (traceAllocFreeEnabled()) {
                     var traceΔ1 = traceAcquire();
@@ -603,17 +624,17 @@ internal static bool isSweepDone() {
                     }
                 }
                 if (debug.clobberfree != 0) {
-                    clobberfree(((@unsafe.Pointer)x), size);
+                    clobberfree((@unsafe.Pointer)x, size);
                 }
                 // User arenas are handled on explicit free.
                 if (raceenabled && !(~s).isUserArenaChunk) {
-                    racefree(((@unsafe.Pointer)x), size);
+                    racefree((@unsafe.Pointer)x, size);
                 }
                 if (msanenabled && !(~s).isUserArenaChunk) {
-                    msanfree(((@unsafe.Pointer)x), size);
+                    msanfree((@unsafe.Pointer)x, size);
                 }
                 if (asanenabled && !(~s).isUserArenaChunk) {
-                    asanpoison(((@unsafe.Pointer)x), size);
+                    asanpoison((@unsafe.Pointer)x, size);
                 }
             }
             mbits.advance();
@@ -627,37 +648,37 @@ internal static bool isSweepDone() {
         //
         // Check the first bitmap byte, where we have to be
         // careful with freeindex.
-        var obj = ((uintptr)(~s).freeindex);
-        if (((uint8)((~s).gcmarkBits.bytep(obj / 8).val & ~(~s).allocBits.bytep(obj / 8).val)) >> (int)((obj % 8)) != 0) {
+        var obj = (uintptr)(~s).freeindex;
+        if ((((uint8)((~s).gcmarkBits.bytep(obj / 8).Value & ~(~s).allocBits.bytep(obj / 8).Value)) >> (int)((obj % 8))) != 0) {
             s.reportZombies();
         }
         // Check remaining bytes.
-        for (var i = obj / 8 + 1; i < divRoundUp(((uintptr)(~s).nelems), 8); i++) {
-            if ((uint8)((~s).gcmarkBits.bytep(i).val & ~(~s).allocBits.bytep(i).val) != 0) {
+        for (var i = obj / 8 + 1; i < divRoundUp((uintptr)(~s).nelems, 8); i++) {
+            if ((uint8)((~s).gcmarkBits.bytep(i).Value & ~(~s).allocBits.bytep(i).Value) != 0) {
                 s.reportZombies();
             }
         }
     }
     // Count the number of free objects in this span.
-    var nalloc = ((uint16)s.countAlloc());
-    var nfreed = (~s).allocCount - nalloc;
+    var nalloc = (uint16)s.countAlloc();
+    var nfreed = (uint16)((~s).allocCount - nalloc);
     if (nalloc > (~s).allocCount) {
         // The zombie check above should have caught this in
         // more detail.
         print("runtime: nelems=", (~s).nelems, " nalloc=", nalloc, " previous allocCount=", (~s).allocCount, " nfreed=", nfreed, "\n");
         @throw("sweep increased allocation count"u8);
     }
-    s.val.allocCount = nalloc;
-    s.val.freeindex = 0;
+    s.Value.allocCount = nalloc;
+    s.Value.freeindex = 0;
     // reset allocation index to start of span.
-    s.val.freeIndexForScan = 0;
+    s.Value.freeIndexForScan = 0;
     if (traceEnabled()) {
-        (~(~(~getg()).m).p.ptr()).trace.reclaimed += ((uintptr)nfreed) * (~s).elemsize;
+        (~(~getg()).m).p.ptr().Value.trace.reclaimed += (uintptr)nfreed * (~s).elemsize;
     }
     // gcmarkBits becomes the allocBits.
     // get a fresh cleared gcmarkBits in preparation for next GC
-    s.val.allocBits = s.val.gcmarkBits;
-    s.val.gcmarkBits = newMarkBits(((uintptr)(~s).nelems));
+    s.Value.allocBits = s.Value.gcmarkBits;
+    s.Value.gcmarkBits = newMarkBits((uintptr)(~s).nelems);
     // refresh pinnerBits if they exists
     if ((~s).pinnerBits != nil) {
         s.refreshPinnerBits();
@@ -667,7 +688,7 @@ internal static bool isSweepDone() {
     // The span must be in our exclusive ownership until we update sweepgen,
     // check for potential races.
     {
-        var state = (~s).state.get(); if (state != mSpanInUse || (~s).sweepgen != sweepgen - 1) {
+        var state = s.of(mspan.Ꮡstate).get(); if (state != mSpanInUse || (~s).sweepgen != sweepgen - 1) {
             print("mspan.sweep: state=", state, " sweepgen=", (~s).sweepgen, " mheap.sweepgen=", sweepgen, "\n");
             @throw("mspan.sweep: bad span state after sweep"u8);
         }
@@ -685,7 +706,7 @@ internal static bool isSweepDone() {
     // Serialization point.
     // At this point the mark bits are cleared and allocation ready
     // to go so release the span.
-    atomic.Store(Ꮡ((~s).sweepgen), sweepgen);
+    atomic.Store(s.of(mspan.Ꮡsweepgen), sweepgen);
     if ((~s).isUserArenaChunk) {
         if (preserve) {
             // This is a case that should never be handled by a sweeper that
@@ -701,21 +722,21 @@ internal static bool isSweepDone() {
         }
         // It's only at this point that the sweeper doesn't actually need to look
         // at this arena anymore, so subtract from pagesInUse now.
-        mheap_.pagesInUse.Add(-(~s).npages);
-        (~s).state.set(mSpanDead);
+        Ꮡmheap_.of(mheap.ᏑpagesInUse).Add(((uintptr)0 - (~s).npages));
+        s.of(mspan.Ꮡstate).set(mSpanDead);
         // The arena is ready to be recycled. Remove it from the quarantine list
         // and place it on the ready list. Don't add it back to any sweep lists.
-        systemstack(
-        var mheap_ʗ2 = mheap_;
-        var sʗ2 = s;
-        () => {
-            if ((~sʗ2).list != Ꮡmheap_ʗ2.userArena.of(struct{arenaHints *arenaHint; quarantineList runtime.mSpanList; readyList runtime.mSpanList}.ᏑquarantineList)) {
+        var sʗ1 = s;
+        systemstack(() => {
+            // It's the arena code's responsibility to get the chunk on the quarantine
+            // list by the time all references to the chunk are gone.
+            if ((~sʗ1).list != Ꮡmheap_.of(mheap.ᏑuserArena).of(mheap_userArena.ᏑquarantineList)) {
                 @throw("user arena span is on the wrong list"u8);
             }
-            @lock(Ꮡmheap_ʗ2.of(mheap.Ꮡlock));
-            mheap_ʗ2.userArena.quarantineList.remove(sʗ2);
-            mheap_ʗ2.userArena.readyList.insert(sʗ2);
-            unlock(Ꮡmheap_ʗ2.of(mheap.Ꮡlock));
+            @lock(Ꮡmheap_.of(mheap.Ꮡlock));
+            Ꮡmheap_.of(mheap.ᏑuserArena).of(mheap_userArena.ᏑquarantineList).remove(sʗ1);
+            Ꮡmheap_.of(mheap.ᏑuserArena).of(mheap_userArena.ᏑreadyList).insert(sʗ1);
+            unlock(Ꮡmheap_.of(mheap.Ꮡlock));
         });
         return false;
     }
@@ -726,12 +747,12 @@ internal static bool isSweepDone() {
             // objects, because a fresh span that had been allocated into,
             // wasn't totally filled, but then swept, still has all of its
             // free slots zeroed.
-            s.val.needzero = 1;
-            var stats = memstats.heapStats.acquire();
-            atomic.Xadd64(Ꮡ(~stats).smallFreeCount.at<uint64>(spc.sizeclass()), ((int64)nfreed));
-            memstats.heapStats.release();
+            s.Value.needzero = 1;
+            var stats = Ꮡmemstats.of(mstats.ᏑheapStats).acquire();
+            atomic.Xadd64(stats.at(heapStatsDelta.ᏑsmallFreeCount, (nint)(spc.sizeclass())), (int64)nfreed);
+            Ꮡmemstats.of(mstats.ᏑheapStats).release();
             // Count the frees in the inconsistent, internal stats.
-            gcController.totalFree.Add(((int64)nfreed) * ((int64)(~s).elemsize));
+            ᏑgcController.of(gcControllerState.ᏑtotalFree).Add((int64)nfreed * (int64)(~s).elemsize);
         }
         if (!preserve) {
             // The caller may not have removed this span from whatever
@@ -741,7 +762,7 @@ internal static bool isSweepDone() {
             // set, check its sweepgen, and ignore it.
             if (nalloc == 0) {
                 // Free totally free span directly back to the heap.
-                mheap_.freeSpan(s);
+                Ꮡmheap_.freeSpan(s);
                 return true;
             }
             // Return span back to the right mcentral list.
@@ -761,12 +782,12 @@ internal static bool isSweepDone() {
             // Do this before freeSpan, which might update heapStats' inHeap
             // value. If it does so, then metrics that subtract object footprint
             // from inHeap might overflow. See #67019.
-            var stats = memstats.heapStats.acquire();
-            atomic.Xadd64(Ꮡ((~stats).largeFreeCount), 1);
-            atomic.Xadd64(Ꮡ((~stats).largeFree), ((int64)size));
-            memstats.heapStats.release();
+            var stats = Ꮡmemstats.of(mstats.ᏑheapStats).acquire();
+            atomic.Xadd64(stats.of(heapStatsDelta.ᏑlargeFreeCount), 1);
+            atomic.Xadd64(stats.of(heapStatsDelta.ᏑlargeFree), (int64)size);
+            Ꮡmemstats.of(mstats.ᏑheapStats).release();
             // Count the free in the inconsistent, internal stats.
-            gcController.totalFree.Add(((int64)size));
+            ᏑgcController.of(gcControllerState.ᏑtotalFree).Add((int64)size);
             // NOTE(rsc,dvyukov): The original implementation of efence
             // in CL 22060046 used sysFree instead of sysFault, so that
             // the operating system would eventually give the memory
@@ -782,26 +803,24 @@ internal static bool isSweepDone() {
             // It should be possible to switch back to sysFree if we also
             // implement and then call some kind of mheap.deleteSpan.
             if (debug.efence > 0){
-                s.val.limit = 0;
+                s.Value.limit = 0;
                 // prevent mlookup from finding this span
-                sysFault(((@unsafe.Pointer)s.@base()), size);
+                sysFault((@unsafe.Pointer)s.@base(), size);
             } else {
-                mheap_.freeSpan(s);
+                Ꮡmheap_.freeSpan(s);
             }
             if ((~s).largeType != nil && (abi.TFlag)((~(~s).largeType).TFlag & abi.TFlagUnrolledBitmap) != 0) {
                 // The unrolled GCProg bitmap is allocated separately.
                 // Free the space for the unrolled bitmap.
-                systemstack(
-                var mheap_ʗ5 = mheap_;
-                var sʗ5 = s;
-                () => {
-                    var sʗ5 = spanOf(((uintptr)new @unsafe.Pointer((~sʗ5).largeType)));
-                    mheap_ʗ5.freeManual(sʗ5, spanAllocPtrScalarBits);
+                var sʗ3 = s;
+                systemstack(() => {
+                    var sΔ1 = spanOf((uintptr)new @unsafe.Pointer((~sʗ3).largeType));
+                    Ꮡmheap_.freeManual(sΔ1, spanAllocPtrScalarBits);
                 });
                 // Make sure to zero this pointer without putting the old
                 // value in a write buffer, as the old value might be an
                 // invalid pointer. See arena.go:(*mheap).allocUserArenaChunk.
-                ((ж<uintptr>)(uintptr)(((@unsafe.Pointer)(Ꮡ((~s).largeType))))).val = 0;
+                ((ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref (s.of(mspan.ᏑlargeType)).Value))).Value = 0;
             }
             return true;
         }
@@ -825,15 +844,17 @@ internal static bool isSweepDone() {
 // 3. The GC two cycles ago missed a pointer and freed a live object,
 // but it was still live in the last cycle, so this GC cycle found a
 // pointer to that object and marked it.
-[GoRecv] internal static void reportZombies(this ref mspan s) {
+internal static void reportZombies(this ж<mspan> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
     printlock();
     print("runtime: marked free object in span ", s, ", elemsize=", s.elemsize, " freeindex=", s.freeindex, " (bad use of unsafe.Pointer? try -d=checkptr)\n");
     var mbits = s.markBitsForBase();
     var abits = s.allocBitsForIndex(0);
-    for (var i = ((uintptr)0); i < ((uintptr)s.nelems); i++) {
+    for (var i = (uintptr)0; i < (uintptr)s.nelems; i++) {
         var addr = s.@base() + i * s.elemsize;
-        print(((Δhex)addr));
-        var alloc = i < ((uintptr)s.freeindex) || abits.isMarked();
+        print(((Δhex)(uint64)addr));
+        var alloc = i < (uintptr)s.freeindex || abits.isMarked();
         if (alloc){
             print(" alloc");
         } else {
@@ -891,8 +912,8 @@ internal static void deductSweepCredit(uintptr spanBytes, uintptr callerSweepPag
     }
     // Fix debt if necessary.
 retry:
-    var sweptBasis = mheap_.pagesSweptBasis.Load();
-    var live = gcController.heapLive.Load();
+    var sweptBasis = Ꮡmheap_.of(mheap.ᏑpagesSweptBasis).Load();
+    var live = ᏑgcController.of(gcControllerState.ᏑheapLive).Load();
     var liveBasis = mheap_.sweepHeapLiveBasis;
     var newHeapLive = spanBytes;
     if (liveBasis < live) {
@@ -911,15 +932,15 @@ retry:
         // sweep.
         //
         // See issue #57523.
-        newHeapLive += ((uintptr)(live - liveBasis));
+        newHeapLive += (uintptr)(live - liveBasis);
     }
-    var pagesTarget = ((int64)(mheap_.sweepPagesPerByte * ((float64)newHeapLive))) - ((int64)callerSweepPages);
-    while (pagesTarget > ((int64)(mheap_.pagesSwept.Load() - sweptBasis))) {
-        if (sweepone() == ~((uintptr)0)) {
+    var pagesTarget = (int64)(mheap_.sweepPagesPerByte * (float64)newHeapLive) - (int64)callerSweepPages;
+    while (pagesTarget > (int64)(Ꮡmheap_.of(mheap.ᏑpagesSwept).Load() - sweptBasis)) {
+        if (sweepone() == ~(uintptr)0) {
             mheap_.sweepPagesPerByte = 0;
             break;
         }
-        if (mheap_.pagesSweptBasis.Load() != sweptBasis) {
+        if (Ꮡmheap_.of(mheap.ᏑpagesSweptBasis).Load() != sweptBasis) {
             // Sweep pacing changed. Recompute debt.
             goto retry;
         }
@@ -935,8 +956,8 @@ retry:
 // purposes.
 internal static void clobberfree(@unsafe.Pointer x, uintptr size) {
     // size (span.elemsize) is always a multiple of 4.
-    for (var i = ((uintptr)0); i < size; i += 4) {
-        ((ж<uint32>)(uintptr)(add(x.val, i))).val = (nint)3735928559L;
+    for (var i = (uintptr)0; i < size; i += 4) {
+        ((ж<uint32>)(uintptr)(add(x, i))).Value = 0xdeadbeefU;
     }
 }
 
@@ -956,8 +977,8 @@ internal static void gcPaceSweeper(uint64 trigger) {
         // trigger. Compute the ratio of in-use pages to sweep
         // per byte allocated, accounting for the fact that
         // some might already be swept.
-        var heapLiveBasis = gcController.heapLive.Load();
-        var heapDistance = ((int64)trigger) - ((int64)heapLiveBasis);
+        var heapLiveBasis = ᏑgcController.of(gcControllerState.ᏑheapLive).Load();
+        var heapDistance = (int64)trigger - (int64)heapLiveBasis;
         // Add a little margin so rounding errors and
         // concurrent sweep are less likely to leave pages
         // unswept when GC starts.
@@ -966,18 +987,18 @@ internal static void gcPaceSweeper(uint64 trigger) {
             // Avoid setting the sweep ratio extremely high
             heapDistance = _PageSize;
         }
-        var pagesSwept = mheap_.pagesSwept.Load();
-        var pagesInUse = mheap_.pagesInUse.Load();
-        var sweepDistancePages = ((int64)pagesInUse) - ((int64)pagesSwept);
+        var pagesSwept = Ꮡmheap_.of(mheap.ᏑpagesSwept).Load();
+        var pagesInUse = Ꮡmheap_.of(mheap.ᏑpagesInUse).Load();
+        var sweepDistancePages = (int64)pagesInUse - (int64)pagesSwept;
         if (sweepDistancePages <= 0){
             mheap_.sweepPagesPerByte = 0;
         } else {
-            mheap_.sweepPagesPerByte = ((float64)sweepDistancePages) / ((float64)heapDistance);
+            mheap_.sweepPagesPerByte = (float64)sweepDistancePages / (float64)heapDistance;
             mheap_.sweepHeapLiveBasis = heapLiveBasis;
             // Write pagesSweptBasis last, since this
             // signals concurrent sweeps to recompute
             // their debt.
-            mheap_.pagesSweptBasis.Store(pagesSwept);
+            Ꮡmheap_.of(mheap.ᏑpagesSweptBasis).Store(pagesSwept);
         }
     }
 }

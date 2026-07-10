@@ -9,28 +9,29 @@ namespace go.go;
 
 using bytes = bytes_package;
 using fmt = fmt_package;
-using token = go.token_package;
+using token = global::go.go.token_package;
 using filepath = path.filepath_package;
 using strconv = strconv_package;
 using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
+using utf8 = global::go.unicode.utf8_package;
+using global::go.go;
+using global::go.unicode;
 using path;
-using unicode;
 using ꓸꓸꓸany = Span<any>;
 
 partial class scanner_package {
 
-public delegate void ErrorHandler(tokenꓸPosition pos, @string msg);
+// type ErrorHandler is a methodless func type — rendered inline as its base delegate
 
 // A Scanner holds the scanner's internal state while processing
 // a given text. It can be allocated as part of another data
 // structure but must be initialized via [Scanner.Init] before use.
 [GoType] partial struct Scanner {
     // immutable state
-    internal ж<go.token_package.ΔFile> file; // source file handle
+    internal ж<tokenꓸFile> @file; // source file handle
     internal @string dir;      // directory portion of file.Name()
     internal slice<byte> src;  // source
-    internal ErrorHandler err; // error reporting; or nil
+    internal Action<tokenꓸPosition, @string> err;    // error reporting; or nil
     internal Mode mode;         // scanning mode
     // scanning state
     internal rune ch;      // current character
@@ -38,14 +39,13 @@ public delegate void ErrorHandler(tokenꓸPosition pos, @string msg);
     internal nint rdOffset;      // reading offset (position after current character)
     internal nint lineOffset;      // current line offset
     internal bool insertSemi;      // insert a semicolon before next newline
-    internal go.token_package.ΔPos nlPos; // position of newline in preceding comment
+    internal tokenꓸPos nlPos; // position of newline in preceding comment
     // public state - ok to modify
     public nint ErrorCount; // number of errors encountered
 }
 
-internal static readonly UntypedInt bom = /* 0xFEFF */ 65279; // byte order mark, only permitted as very first character
-internal static readonly GoUntyped eof = /* -1 */  // end of file
-    GoUntyped.Parse("-1");
+internal static readonly UntypedInt bom = 0xFEFF; // byte order mark, only permitted as very first character
+internal static readonly UntypedInt eof = -1; // end of file
 
 // Read the next Unicode char into s.ch.
 // s.ch < 0 means end-of-file.
@@ -57,16 +57,16 @@ internal static readonly GoUntyped eof = /* -1 */  // end of file
         s.offset = s.rdOffset;
         if (s.ch == (rune)'\n') {
             s.lineOffset = s.offset;
-            s.file.AddLine(s.offset);
+            s.@file.AddLine(s.offset);
         }
-        var r = ((rune)s.src[s.rdOffset]);
+        var r = (rune)s.src[s.rdOffset];
         nint w = 1;
         switch (ᐧ) {
         case {} when r is 0: {
             s.error(s.offset, "illegal character NUL"u8);
             break;
         }
-        case {} when r is >= utf8.RuneSelf: {
+        case {} when r >= utf8.RuneSelf: {
             (r, w) = utf8.DecodeRune(s.src[(int)(s.rdOffset)..]);
             if (r == utf8.RuneError && w == 1){
                 // not ASCII
@@ -84,7 +84,7 @@ internal static readonly GoUntyped eof = /* -1 */  // end of file
         s.offset = len(s.src);
         if (s.ch == (rune)'\n') {
             s.lineOffset = s.offset;
-            s.file.AddLine(s.offset);
+            s.@file.AddLine(s.offset);
         }
         s.ch = eof;
     }
@@ -118,15 +118,15 @@ internal static readonly Mode dontInsertSemis = 2;     // do not automatically i
 //
 // Note that Init may call err if there is an error in the first character
 // of the file.
-[GoRecv] public static void Init(this ref Scanner s, ж<tokenꓸFile> Ꮡfile, slice<byte> src, ErrorHandler err, Mode mode) {
-    ref var file = ref Ꮡfile.val;
+[GoRecv] public static void Init(this ref Scanner s, ж<tokenꓸFile> Ꮡfile, slice<byte> src, Action<tokenꓸPosition, @string> err, Mode mode) {
+    ref var @file = ref Ꮡfile.Value;
 
     // Explicitly initialize all fields since a scanner may be reused.
-    if (file.Size() != len(src)) {
-        throw panic(fmt.Sprintf("file size (%d) does not match src len (%d)"u8, file.Size(), len(src)));
+    if (@file.Size() != len(src)) {
+        throw panic(fmt.Sprintf("file size (%d) does not match src len (%d)"u8, @file.Size(), len(src)));
     }
-    s.file = file;
-    (s.dir, _) = filepath.Split(file.Name());
+    s.@file = Ꮡfile;
+    (s.dir, _) = filepath.Split(@file.Name());
     s.src = src;
     s.err = err;
     s.mode = mode;
@@ -145,7 +145,7 @@ internal static readonly Mode dontInsertSemis = 2;     // do not automatically i
 // ignore BOM at file beginning
 [GoRecv] internal static void error(this ref Scanner s, nint offs, @string msg) {
     if (s.err != default!) {
-        s.err(s.file.Position(s.file.Pos(offs)), msg);
+        s.err(s.@file.Position(s.@file.Pos(offs)), msg);
     }
     s.ErrorCount++;
 }
@@ -226,7 +226,7 @@ exit:
     return (((@string)lit), nlOffset);
 }
 
-internal static slice<byte> prefix = slice<byte>("line ");
+internal static slice<byte> prefix = slice<byte>((@string)"line ");
 
 // updateLineInfo parses the incoming comment text at offset offs
 // as a line directive. If successful, it updates the line info table
@@ -254,7 +254,7 @@ internal static slice<byte> prefix = slice<byte>("line ");
     // Put a cap on the maximum size of line and column numbers.
     // 30 bits allows for some additional space before wrapping an int32.
     // Keep this consistent with cmd/compile/internal/syntax.PosMax.
-    static readonly UntypedInt maxLineCol = /* 1 << 30 */ 1073741824;
+    UntypedInt maxLineCol = /* 1 << 30 */ 1073741824;
     nint line = default!;
     nint col = default!;
     var (i2, n2, ok2) = trailingDigits(text[..(int)(i - 1)]);
@@ -281,7 +281,7 @@ internal static slice<byte> prefix = slice<byte>("line ");
     @string filename = ((@string)(text[..(int)(i - 1)]));
     // lop off ":line", and trim white space
     if (filename == ""u8 && ok2){
-        filename = s.file.Position(s.file.Pos(offs)).Filename;
+        filename = s.@file.Position(s.@file.Pos(offs)).Filename;
     } else 
     if (filename != ""u8) {
         // Put a relative filename in the current directory.
@@ -292,7 +292,7 @@ internal static slice<byte> prefix = slice<byte>("line ");
             filename = filepath.Join(s.dir, filename);
         }
     }
-    s.file.AddLineColumnInfo(next, filename, line, col);
+    s.@file.AddLineColumnInfo(next, filename, line, col);
 }
 
 internal static (nint, nint, bool) trailingDigits(slice<byte> text) {
@@ -304,7 +304,7 @@ internal static (nint, nint, bool) trailingDigits(slice<byte> text) {
     // no ":"
     // i >= 0
     var (n, err) = strconv.ParseUint(((@string)(text[(int)(i + 1)..])), 10, 0);
-    return (i + 1, ((nint)n), err == default!);
+    return (i + 1, (nint)n, err == default!);
 }
 
 internal static bool isLetter(rune ch) {
@@ -342,7 +342,7 @@ internal static bool isDigit(rune ch) {
             // Note that s.next() does some line accounting if s.ch is '\n', so this
             // shortcut is only possible because we know that the preceding character
             // is not '\n'.
-            s.ch = ((rune)b);
+            s.ch = (rune)b;
             s.offset = s.rdOffset;
             s.rdOffset++;
             goto exit;
@@ -366,10 +366,10 @@ exit:
 internal static nint digitVal(rune ch) {
     switch (ᐧ) {
     case {} when (rune)'0' <= ch && ch <= (rune)'9': {
-        return ((nint)(ch - (rune)'0'));
+        return (nint)(ch - (rune)'0');
     }
     case {} when (rune)'a' <= lower(ch) && lower(ch) <= (rune)'f': {
-        return ((nint)(lower(ch) - (rune)'a' + 10));
+        return (nint)(lower(ch) - (rune)'a' + 10);
     }}
 
     return 16;
@@ -395,12 +395,12 @@ internal static bool isHex(rune ch) {
 // in *invalid, if *invalid < 0.
 // digits returns a bitset describing whether the sequence contained
 // digits (bit 0 is set), or separators '_' (bit 1 is set).
-[GoRecv] public static nint /*digsep*/ digits(this ref Scanner s, nint @base, ж<nint> Ꮡinvalid) {
+[GoRecv] internal static nint /*digsep*/ digits(this ref Scanner s, nint @base, ж<nint> Ꮡinvalid) {
     nint digsep = default!;
 
-    ref var invalid = ref Ꮡinvalid.val;
+    ref var invalid = ref Ꮡinvalid.Value;
     if (@base <= 10){
-        var max = ((rune)((rune)'0' + @base));
+        var max = (rune)((rune)'0' + @base);
         while (isDecimal(s.ch) || s.ch == (rune)'_') {
             nint ds = 1;
             if (s.ch == (rune)'_'){
@@ -431,7 +431,7 @@ internal static bool isHex(rune ch) {
     token.Token tok = token.ILLEGAL;
     nint @base = 10;
     // number base
-    var prefix = ((rune)0);
+    var prefix = (rune)0;
     // one of 0 (decimal), '0' (0-octal), 'x', 'o', or 'b'
     nint digsep = 0;
     // bit 0: digit present, bit 1: '_' present
@@ -552,7 +552,7 @@ internal static nint invalidSep(@string x) {
     nint i = 0;
     // a prefix counts as a digit
     if (len(x) >= 2 && x[0] == (rune)'0') {
-        x1 = lower(((rune)x[1]));
+        x1 = lower((rune)x[1]);
         if (x1 == (rune)'x' || x1 == (rune)'o' || x1 == (rune)'b') {
             d = (rune)'0';
             i = 2;
@@ -562,7 +562,7 @@ internal static nint invalidSep(@string x) {
     for (; i < len(x); i++) {
         var p = d;
         // previous digit
-        d = ((rune)x[i]);
+        d = (rune)x[i];
         switch (ᐧ) {
         case {} when d is (rune)'_': {
             if (p != (rune)'0') {
@@ -598,42 +598,38 @@ internal static nint invalidSep(@string x) {
     nint n = default!;
     uint32 @base = default!;
     uint32 max = default!;
-    switch (s.ch) {
-    case (rune)'a' or (rune)'b' or (rune)'f' or (rune)'n' or (rune)'r' or (rune)'t' or (rune)'v' or (rune)'\\' or quote: {
+    var exprᴛ1 = s.ch;
+    if (exprᴛ1 == (rune)'a' || exprᴛ1 == (rune)'b' || exprᴛ1 == (rune)'f' || exprᴛ1 == (rune)'n' || exprᴛ1 == (rune)'r' || exprᴛ1 == (rune)'t' || exprᴛ1 == (rune)'v' || exprᴛ1 == (rune)'\\' || exprᴛ1 == quote) {
         s.next();
         return true;
     }
-    case (rune)'0' or (rune)'1' or (rune)'2' or (rune)'3' or (rune)'4' or (rune)'5' or (rune)'6' or (rune)'7': {
+    if (exprᴛ1 is (rune)'0' or (rune)'1' or (rune)'2' or (rune)'3' or (rune)'4' or (rune)'5' or (rune)'6' or (rune)'7') {
         (n, @base, max) = (3, 8, 255);
-        break;
     }
-    case (rune)'x': {
+    else if (exprᴛ1 is (rune)'x') {
         s.next();
         (n, @base, max) = (2, 16, 255);
-        break;
     }
-    case (rune)'u': {
+    else if (exprᴛ1 is (rune)'u') {
         s.next();
         (n, @base, max) = (4, 16, unicode.MaxRune);
-        break;
     }
-    case (rune)'U': {
+    else if (exprᴛ1 is (rune)'U') {
         s.next();
         (n, @base, max) = (8, 16, unicode.MaxRune);
-        break;
     }
-    default: {
+    else { /* default: */
         @string msg = "unknown escape sequence"u8;
         if (s.ch < 0) {
             msg = "escape sequence not terminated"u8;
         }
         s.error(offs, msg);
         return false;
-    }}
+    }
 
     uint32 x = default!;
     while (n > 0) {
-        var d = ((uint32)digitVal(s.ch));
+        var d = (uint32)digitVal(s.ch);
         if (d >= @base) {
             @string msg = fmt.Sprintf("illegal character %#U in escape sequence"u8, s.ch);
             if (s.ch < 0) {
@@ -646,7 +642,7 @@ internal static nint invalidSep(@string x) {
         s.next();
         n--;
     }
-    if (x > max || 55296 <= x && x < 57344) {
+    if (x > max || 0xD800 <= x && x < 0xE000) {
         s.error(offs, "escape sequence is invalid Unicode code point"u8);
         return false;
     }
@@ -834,13 +830,13 @@ scanAgain:
     if (s.nlPos.IsValid()) {
         // Return artificial ';' token after /*...*/ comment
         // containing newline, at position of first newline.
-        (pos, tok, lit) = (s.nlPos, token.SEMICOLON, "\n"u8);
+        (pos, tok, lit) = (s.nlPos, token.SEMICOLON, "\n");
         s.nlPos = token.NoPos;
         return (pos, tok, lit);
     }
     s.skipWhitespace();
     // current token start
-    pos = s.file.Pos(s.offset);
+    pos = s.@file.Pos(s.offset);
     // determine token value
     var insertSemi = false;
     {
@@ -862,7 +858,7 @@ scanAgain:
             }
             break;
         }
-        case {} when isDecimal(ch) || ch == (rune)'.' && isDecimal(((rune)s.peek())): {
+        case {} when isDecimal(ch) || ch == (rune)'.' && isDecimal((rune)s.peek()): {
             insertSemi = true;
             (tok, lit) = s.scanNumber();
             break;
@@ -965,7 +961,7 @@ scanAgain:
                     if (s.insertSemi && nlOffset != 0){
                         // For /*...*/ containing \n, return
                         // COMMENT then artificial SEMICOLON.
-                        s.nlPos = s.file.Pos(nlOffset);
+                        s.nlPos = s.@file.Pos(nlOffset);
                         s.insertSemi = false;
                     } else {
                         insertSemi = s.insertSemi;
@@ -1025,9 +1021,9 @@ scanAgain:
                     // Report an informative error for U+201[CD] quotation
                     // marks, which are easily introduced via copy and paste.
                     if (ch == (rune)'“' || ch == (rune)'”'){
-                        s.errorf(s.file.Offset(pos), "curly quotation mark %q (use neutral %q)"u8, ch, (rune)'"');
+                        s.errorf(s.@file.Offset(pos), "curly quotation mark %q (use neutral %q)"u8, ch, (rune)'"');
                     } else {
-                        s.errorf(s.file.Offset(pos), "illegal character %#U"u8, ch);
+                        s.errorf(s.@file.Offset(pos), "illegal character %#U"u8, ch);
                     }
                 }
                 insertSemi = s.insertSemi;

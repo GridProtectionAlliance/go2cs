@@ -39,10 +39,13 @@ using static go.@internal.trace.@internal.oldtrace_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(io.Seeker, bool), io_package.Seeker>]
+[assembly: GoImplement<Events, sort_package.Interface>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
+[assembly: GoImplicitConv<Event, ж<Event>>(Indirect = true)]
+[assembly: GoImplicitConv<Event, ж<Event>>]
 // </ImplicitConversions>
 
 namespace go.@internal.trace.@internal;

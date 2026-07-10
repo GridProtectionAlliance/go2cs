@@ -8,7 +8,8 @@
 // sufficiently efficiently in Go.
 namespace go.math;
 
-using bits = math.bits_package;
+using bits = go.math.bits_package;
+using go.math;
 
 partial class big_package {
 
@@ -41,7 +42,7 @@ internal static (Word z1, Word z0) mulWW(Word x, Word y) {
     Word z1 = default!;
     Word z0 = default!;
 
-    var (hi, lo) = bits.Mul(((nuint)x), ((nuint)y));
+    var (hi, lo) = bits.Mul((nuint)x, (nuint)y);
     return (((Word)hi), ((Word)lo));
 }
 
@@ -50,16 +51,16 @@ internal static (Word z1, Word z0) mulAddWWW_g(Word x, Word y, Word c) {
     Word z1 = default!;
     Word z0 = default!;
 
-    var (hi, lo) = bits.Mul(((nuint)x), ((nuint)y));
+    var (hi, lo) = bits.Mul((nuint)x, (nuint)y);
     nuint cc = default!;
-    (lo, cc) = bits.Add(lo, ((nuint)c), 0);
+    (lo, cc) = bits.Add(lo, (nuint)c, 0);
     return (((Word)(hi + cc)), ((Word)lo));
 }
 
 // nlz returns the number of leading zeros in x.
 // Wraps bits.LeadingZeros call for convenience.
 internal static nuint nlz(Word x) {
-    return ((nuint)bits.LeadingZeros(((nuint)x)));
+    return (nuint)bits.LeadingZeros((nuint)x);
 }
 
 // The resulting carry c is either 0 or 1.
@@ -68,7 +69,7 @@ internal static Word /*c*/ addVV_g(slice<Word> z, slice<Word> x, slice<Word> y) 
 
     // The comment near the top of this file discusses this for loop condition.
     for (nint i = 0; i < len(z) && i < len(x) && i < len(y); i++) {
-        var (zi, cc) = bits.Add(((nuint)x[i]), ((nuint)y[i]), ((nuint)c));
+        var (zi, cc) = bits.Add((nuint)x[i], (nuint)y[i], (nuint)c);
         z[i] = ((Word)zi);
         c = ((Word)cc);
     }
@@ -81,7 +82,7 @@ internal static Word /*c*/ subVV_g(slice<Word> z, slice<Word> x, slice<Word> y) 
 
     // The comment near the top of this file discusses this for loop condition.
     for (nint i = 0; i < len(z) && i < len(x) && i < len(y); i++) {
-        var (zi, cc) = bits.Sub(((nuint)x[i]), ((nuint)y[i]), ((nuint)c));
+        var (zi, cc) = bits.Sub((nuint)x[i], (nuint)y[i], (nuint)c);
         z[i] = ((Word)zi);
         c = ((Word)cc);
     }
@@ -95,7 +96,7 @@ internal static Word /*c*/ addVW_g(slice<Word> z, slice<Word> x, Word y) {
     c = y;
     // The comment near the top of this file discusses this for loop condition.
     for (nint i = 0; i < len(z) && i < len(x); i++) {
-        var (zi, cc) = bits.Add(((nuint)x[i]), ((nuint)c), 0);
+        var (zi, cc) = bits.Add((nuint)x[i], (nuint)c, 0);
         z[i] = ((Word)zi);
         c = ((Word)cc);
     }
@@ -119,7 +120,7 @@ internal static Word /*c*/ addVWlarge(slice<Word> z, slice<Word> x, Word y) {
             copy(z[(int)(i)..], x[(int)(i)..]);
             return c;
         }
-        var (zi, cc) = bits.Add(((nuint)x[i]), ((nuint)c), 0);
+        var (zi, cc) = bits.Add((nuint)x[i], (nuint)c, 0);
         z[i] = ((Word)zi);
         c = ((Word)cc);
     }
@@ -132,7 +133,7 @@ internal static Word /*c*/ subVW_g(slice<Word> z, slice<Word> x, Word y) {
     c = y;
     // The comment near the top of this file discusses this for loop condition.
     for (nint i = 0; i < len(z) && i < len(x); i++) {
-        var (zi, cc) = bits.Sub(((nuint)x[i]), ((nuint)c), 0);
+        var (zi, cc) = bits.Sub((nuint)x[i], (nuint)c, 0);
         z[i] = ((Word)zi);
         c = ((Word)cc);
     }
@@ -150,7 +151,7 @@ internal static Word /*c*/ subVWlarge(slice<Word> z, slice<Word> x, Word y) {
             copy(z[(int)(i)..], x[(int)(i)..]);
             return c;
         }
-        var (zi, cc) = bits.Sub(((nuint)x[i]), ((nuint)c), 0);
+        var (zi, cc) = bits.Sub((nuint)x[i], (nuint)c, 0);
         z[i] = ((Word)zi);
         c = ((Word)cc);
     }
@@ -169,14 +170,14 @@ internal static Word /*c*/ shlVU_g(slice<Word> z, slice<Word> x, nuint s) {
     }
     s &= (nuint)(_W - 1);
     // hint to the compiler that shifts by s don't need guard code
-    nuint ŝ = _W - s;
+    nuint ŝ = (nuint)_W - s;
     ŝ &= (nuint)(_W - 1);
     // ditto
-    c = x[len(z) - 1] >> (int)(ŝ);
+    c = (x[len(z) - 1] >> (int)(ŝ));
     for (nint i = len(z) - 1; i > 0; i--) {
-        z[i] = (Word)(x[i] << (int)(s) | x[i - 1] >> (int)(ŝ));
+        z[i] = (Word)((x[i] << (int)(s)) | (x[i - 1] >> (int)(ŝ)));
     }
-    z[0] = x[0] << (int)(s);
+    z[0] = (x[0] << (int)(s));
     return c;
 }
 
@@ -196,14 +197,14 @@ internal static Word /*c*/ shrVU_g(slice<Word> z, slice<Word> x, nuint s) {
     }
     s &= (nuint)(_W - 1);
     // hint to the compiler that shifts by s don't need guard code
-    nuint ŝ = _W - s;
+    nuint ŝ = (nuint)_W - s;
     ŝ &= (nuint)(_W - 1);
     // ditto
-    c = x[0] << (int)(ŝ);
+    c = (x[0] << (int)(ŝ));
     for (nint i = 1; i < len(z); i++) {
-        z[i - 1] = (Word)(x[i - 1] >> (int)(s) | x[i] << (int)(ŝ));
+        z[i - 1] = (Word)((x[i - 1] >> (int)(s)) | (x[i] << (int)(ŝ)));
     }
-    z[len(z) - 1] = x[len(z) - 1] >> (int)(s);
+    z[len(z) - 1] = (x[len(z) - 1] >> (int)(s));
     return c;
 }
 
@@ -224,7 +225,7 @@ internal static Word /*c*/ addMulVVW_g(slice<Word> z, slice<Word> x, Word y) {
     // The comment near the top of this file discusses this for loop condition.
     for (nint i = 0; i < len(z) && i < len(x); i++) {
         var (z1, z0) = mulAddWWW_g(x[i], y, z[i]);
-        var (lo, cc) = bits.Add(((nuint)z0), ((nuint)c), 0);
+        var (lo, cc) = bits.Add((nuint)z0, (nuint)c, 0);
         (c, z[i]) = (((Word)cc), ((Word)lo));
         c += z1;
     }
@@ -240,11 +241,11 @@ internal static (Word q, Word r) divWW(Word x1, Word x0, Word y, Word m) {
 
     nuint s = nlz(y);
     if (s != 0) {
-        x1 = (Word)(x1 << (int)(s) | x0 >> (int)((_W - s)));
-        x0 <<= (nuint)(s);
-        y <<= (nuint)(s);
+        x1 = (Word)((x1 << (int)(s)) | (x0 >> (int)(((nuint)_W - s))));
+        x0 <<= (int)(s);
+        y <<= (int)(s);
     }
-    nuint d = ((nuint)y);
+    nuint d = (nuint)y;
     // We know that
     //   m = ⎣(B^2-1)/d⎦-B
     //   ⎣(B^2-1)/d⎦ = m+B
@@ -257,16 +258,16 @@ internal static (Word q, Word r) divWW(Word x1, Word x0, Word y, Word m) {
     //            = ⎣(x1*m+x1*B+x0)/B + x0*m/B^2 + delta2*(x1*B+x0)/B^2⎦
     // The latter two terms of this three-term sum are between 0 and 1.
     // So we can compute just the first term, and we will be low by at most 2.
-    var (t1, t0) = bits.Mul(((nuint)m), ((nuint)x1));
-    var (Δ_, c) = bits.Add(t0, ((nuint)x0), 0);
-    (t1, Δ_) = bits.Add(t1, ((nuint)x1), c);
+    var (t1, t0) = bits.Mul((nuint)m, (nuint)x1);
+    var (_, c) = bits.Add(t0, (nuint)x0, 0);
+    (t1, _) = bits.Add(t1, (nuint)x1, c);
     // The quotient is either t1, t1+1, or t1+2.
     // We'll try t1 and adjust if needed.
     nuint qq = t1;
     // compute remainder r=x-d*q.
     var (dq1, dq0) = bits.Mul(d, qq);
-    var (r0, b) = bits.Sub(((nuint)x0), dq0, 0);
-    var (r1, Δ_) = bits.Sub(((nuint)x1), dq1, b);
+    var (r0, b) = bits.Sub((nuint)x0, dq0, 0);
+    var (r1, _) = bits.Sub((nuint)x1, dq1, b);
     // The remainder we just computed is bounded above by B+d:
     // r = x1*B + x0 - d*q.
     //   = x1*B + x0 - d*⎣(x1*m+x1*B+x0)/B⎦
@@ -293,15 +294,15 @@ internal static (Word q, Word r) divWW(Word x1, Word x0, Word y, Word m) {
         qq++;
         r0 -= d;
     }
-    return (((Word)qq), ((Word)(r0 >> (int)(s))));
+    return (((Word)qq), ((Word)((r0 >> (int)(s)))));
 }
 
 // reciprocalWord return the reciprocal of the divisor. rec = floor(( _B^2 - 1 ) / u - _B). u = d1 << nlz(d1).
 internal static Word reciprocalWord(Word d1) {
-    nuint u = ((nuint)(d1 << (int)(nlz(d1))));
+    nuint u = (nuint)((d1 << (int)(nlz(d1))));
     nuint x1 = ~u;
-    nuint x0 = ((nuint)_M);
-    var (rec, Δ_) = bits.Div(x1, x0, u);
+    nuint x0 = (nuint)_M;
+    var (rec, _) = bits.Div(x1, x0, u);
     // (_B^2-1)/U-_B = (_B*(_M-C)+_M)/U
     return ((Word)rec);
 }

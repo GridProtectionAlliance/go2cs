@@ -11,47 +11,48 @@ using reflect = reflect_package;
 using strings = strings_package;
 using sync = sync_package;
 using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
 using net;
-using unicode;
 using ꓸꓸꓸany = Span<any>;
 using ꓸꓸꓸreflectꓸValue = Span<reflectꓸValue>;
 
 partial class template_package {
-/* visitMapType: map[string]any */
+
+[GoType("map[@string, any]")] partial struct FuncMap;
 
 // builtins returns the FuncMap.
 // It is not a global variable so the linker can dead code eliminate
 // more when this isn't called. See golang.org/issue/36021.
 // TODO: revert this back to a global map once golang.org/issue/2559 is fixed.
 internal static FuncMap builtins() {
-    return new FuncMap{
-        "and"u8: and,
-        "call"u8: emptyCall,
-        "html"u8: HTMLEscaper,
-        "index"u8: index,
-        "slice"u8: Δslice,
-        "js"u8: JSEscaper,
-        "len"u8: length,
-        "not"u8: not,
-        "or"u8: or,
-        "print"u8: fmt.Sprint,
-        "printf"u8: fmt.Sprintf,
-        "println"u8: fmt.Sprintln,
-        "urlquery"u8: URLQueryEscaper, // Comparisons
+    return new FuncMap(new map<@string, any>{
+        ["and"u8] = and,
+        ["call"u8] = emptyCall,
+        ["html"u8] = HTMLEscaper,
+        ["index"u8] = index,
+        ["slice"u8] = Δslice,
+        ["js"u8] = JSEscaper,
+        ["len"u8] = length,
+        ["not"u8] = not,
+        ["or"u8] = or,
+        ["print"u8] = fmt.Sprint,
+        ["printf"u8] = fmt.Sprintf,
+        ["println"u8] = fmt.Sprintln,
+        ["urlquery"u8] = URLQueryEscaper, // Comparisons
 
-        "eq"u8: eq, // ==
+        ["eq"u8] = eq, // ==
 
-        "ge"u8: ge, // >=
+        ["ge"u8] = ge, // >=
 
-        "gt"u8: gt, // >
+        ["gt"u8] = gt, // >
 
-        "le"u8: le, // <=
+        ["le"u8] = le, // <=
 
-        "lt"u8: lt, // <
+        ["lt"u8] = lt, // <
 
-        "ne"u8: ne
-    };
+        ["ne"u8] = ne
+    });
 }
 
 // !=
@@ -60,15 +61,14 @@ internal static FuncMap builtins() {
     public partial ref sync_package.Once Once { get; }
     internal map<@string, reflectꓸValue> v;
 }
-internal static builtinFuncsOnceᴛ1 builtinFuncsOnce;
+internal static ж<builtinFuncsOnceᴛ1> ᏑbuiltinFuncsOnce = new(new builtinFuncsOnceᴛ1(nil));
+internal static ref builtinFuncsOnceᴛ1 builtinFuncsOnce => ref ᏑbuiltinFuncsOnce.Value;
 
 // builtinFuncsOnce lazily computes & caches the builtinFuncs map.
 // TODO: revert this back to a global map once golang.org/issue/2559 is fixed.
 internal static map<@string, reflectꓸValue> builtinFuncs() {
-    builtinFuncsOnce.Do(
-    var builtinFuncsOnceʗ2 = builtinFuncsOnce;
-    () => {
-        builtinFuncsOnceʗ2.v = createValueFuncs(builtins());
+    ᏑbuiltinFuncsOnce.of(builtinFuncsOnceᴛ1.ᏑOnce).Do(() => {
+        builtinFuncsOnce.v = createValueFuncs(builtins());
     });
     return builtinFuncsOnce.v;
 }
@@ -88,7 +88,7 @@ internal static void addValueFuncs(map<@string, reflectꓸValue> @out, FuncMap @
         }
         var v = reflect.ValueOf(fn);
         if (v.Kind() != reflect.Func) {
-            throw panic("value for "u8 + name + " not a function"u8);
+            throw panic("value for " + name + " not a function");
         }
         {
             var err = goodFunc(name, v.Type()); if (err != default!) {
@@ -151,28 +151,31 @@ internal static bool goodName(@string name) {
 }
 
 // findFunction looks for a function in the template, and global map.
-internal static (reflectꓸValue v, bool isBuiltin, bool ok) findFunction(@string name, ж<Template> Ꮡtmpl) => func((defer, _) => {
-    reflectꓸValue v = default!;
+internal static (reflectꓸValue v, bool isBuiltin, bool ok) findFunction(@string name, ж<Template> Ꮡtmpl) {
+    reflectꓸValue v = new(nil);
     bool isBuiltin = default!;
     bool ok = default!;
+    func((defer, recover) => {
+    ref var tmpl = ref Ꮡtmpl.DerefOrNil();
 
-    ref var tmpl = ref Ꮡtmpl.val;
-    if (tmpl != nil && tmpl.common != nil) {
-        tmpl.muFuncs.RLock();
-        defer(tmpl.muFuncs.RUnlock);
-        {
-            var fn = tmpl.execFuncs[name]; if (fn.IsValid()) {
-                return (fn, false, true);
+        if (Ꮡtmpl != nil && tmpl.common != nil) {
+            Ꮡtmpl.of(Template.ᏑmuFuncs).RLock();
+            defer(Ꮡtmpl.of(Template.ᏑmuFuncs).RUnlock);
+            {
+                var fn = tmpl.execFuncs[name]; if (fn.IsValid()) {
+                    (v, isBuiltin, ok) = (fn, false, true); return;
+                }
             }
         }
-    }
-    {
-        var fn = builtinFuncs()[name]; if (fn.IsValid()) {
-            return (fn, true, true);
+        {
+            var fn = builtinFuncs()[name]; if (fn.IsValid()) {
+                (v, isBuiltin, ok) = (fn, true, true); return;
+            }
         }
-    }
-    return (new reflectꓸValue(nil), false, false);
-});
+        (v, isBuiltin, ok) = (new reflectꓸValue(nil), false, false);
+    });
+    return (v, isBuiltin, ok);
+}
 
 // prepareArg checks if value can be used as an argument of type argType, and
 // converts an invalid value to appropriate zero if possible.
@@ -213,7 +216,7 @@ internal static (nint, error) indexArg(reflectꓸValue index, nint cap) {
         x = index.Int();
     }
     else if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) {
-        x = ((int64)index.Uint());
+        x = (int64)index.Uint();
     }
     else if (exprᴛ1 == reflect.Invalid) {
         return (0, fmt.Errorf("cannot index slice/array with nil"u8));
@@ -222,10 +225,10 @@ internal static (nint, error) indexArg(reflectꓸValue index, nint cap) {
         return (0, fmt.Errorf("cannot index slice/array with type %s"u8, index.Type()));
     }
 
-    if (x < 0 || ((nint)x) < 0 || ((nint)x) > cap) {
+    if (x < 0 || (nint)x < 0 || (nint)x > cap) {
         return (0, fmt.Errorf("index out of range: %d"u8, x));
     }
-    return (((nint)x), default!);
+    return ((nint)x, default!);
 }
 
 // Indexing.
@@ -240,7 +243,9 @@ internal static (reflectꓸValue, error) index(reflectꓸValue item, params ꓸ�
     if (!item.IsValid()) {
         return (new reflectꓸValue(nil), fmt.Errorf("index of untyped nil"u8));
     }
-    foreach (var (_, index) in indexes) {
+    foreach (var (_, vᴛ1) in indexes) {
+        var index = vᴛ1;
+
         index = indirectInterface(index);
         bool isNil = default!;
         {
@@ -339,7 +344,7 @@ internal static (reflectꓸValue, error) Δslice(reflectꓸValue item, params �
 
 // length returns the length of the item, with an error if it has no defined length.
 internal static (nint, error) length(reflectꓸValue item) {
-    var (item, isNil) = indirect(item);
+    (item, var isNil) = indirect(item);
     if (isNil) {
         return (0, fmt.Errorf("len of nil pointer"u8));
     }
@@ -374,8 +379,8 @@ internal static (reflectꓸValue, error) call(@string name, reflectꓸValue fn, 
         return (new reflectꓸValue(nil), fmt.Errorf("non-function %s of type %s"u8, name, typ));
     }
     {
-        var errΔ1 = goodFunc(name, typ); if (errΔ1 != default!) {
-            return (new reflectꓸValue(nil), errΔ1);
+        var err = goodFunc(name, typ); if (err != default!) {
+            return (new reflectꓸValue(nil), err);
         }
     }
     nint numIn = typ.NumIn();
@@ -391,7 +396,9 @@ internal static (reflectꓸValue, error) call(@string name, reflectꓸValue fn, 
         }
     }
     var argv = new slice<reflectꓸValue>(len(args));
-    foreach (var (i, arg) in args) {
+    foreach (var (i, vᴛ1) in args) {
+        var arg = vᴛ1;
+
         arg = indirectInterface(arg);
         // Compute the expected type. Clumsy because of variadics.
         var argType = dddType;
@@ -410,29 +417,31 @@ internal static (reflectꓸValue, error) call(@string name, reflectꓸValue fn, 
 
 // safeCall runs fun.Call(args), and returns the resulting value and error, if
 // any. If the call panics, the panic value is returned as an error.
-internal static (reflectꓸValue val, error err) safeCall(reflectꓸValue fun, slice<reflectꓸValue> args) => func((defer, recover) => {
-    reflectꓸValue val = default!;
+internal static (reflectꓸValue val, error err) safeCall(reflectꓸValue fun, slice<reflectꓸValue> args) {
+    reflectꓸValue val = new(nil);
     error err = default!;
-
-    defer(() => {
-        {
-            var r = recover(); if (r != default!) {
-                {
-                    var (e, ok) = r._<error>(ᐧ); if (ok){
-                        err = e;
-                    } else {
-                        err = fmt.Errorf("%v"u8, r);
+    func((defer, recover) => {
+        defer(() => {
+            {
+                var r = recover(); if (r != default!) {
+                    {
+                        var (e, ok) = r._<error>(ᐧ); if (ok){
+                            err = e;
+                        } else {
+                            err = fmt.Errorf("%v"u8, r);
+                        }
                     }
                 }
             }
+        });
+        var ret = fun.Call(args);
+        if (len(ret) == 2 && !ret[1].IsNil()) {
+            (val, err) = (ret[0], ret[1].Interface()._<error>()); return;
         }
+        (val, err) = (ret[0], default!);
     });
-    var ret = fun.Call(args);
-    if (len(ret) == 2 && !ret[1].IsNil()) {
-        return (ret[0], ret[1].Interface()._<error>());
-    }
-    return (ret[0], default!);
-});
+    return (val, err);
+}
 
 // Boolean logic.
 internal static bool truth(reflectꓸValue arg) {
@@ -539,7 +548,9 @@ internal static (bool, error) eq(reflectꓸValue arg1, params ꓸꓸꓸreflect�
         return (false, errNoComparison);
     }
     var (k1, _) = basicKind(arg1);
-    foreach (var (_, arg) in arg2) {
+    foreach (var (_, vᴛ1) in arg2) {
+        var arg = vᴛ1;
+
         arg = indirectInterface(arg);
         var (k2, _) = basicKind(arg);
         var truth = false;
@@ -547,11 +558,11 @@ internal static (bool, error) eq(reflectꓸValue arg1, params ꓸꓸꓸreflect�
             // Special case: Can compare integer values regardless of type's sign.
             switch (ᐧ) {
             case {} when k1 == intKind && k2 == uintKind: {
-                truth = arg1.Int() >= 0 && ((uint64)arg1.Int()) == arg.Uint();
+                truth = arg1.Int() >= 0 && (uint64)arg1.Int() == arg.Uint();
                 break;
             }
             case {} when k1 == uintKind && k2 == intKind: {
-                truth = arg.Int() >= 0 && arg1.Uint() == ((uint64)arg.Int());
+                truth = arg.Int() >= 0 && arg1.Uint() == (uint64)arg.Int();
                 break;
             }
             default: {
@@ -618,7 +629,7 @@ internal static (bool, error) lt(reflectꓸValue arg1, reflectꓸValue arg2) {
         return (false, err);
     }
     arg2 = indirectInterface(arg2);
-    var (k2, err) = basicKind(arg2);
+    (var k2, err) = basicKind(arg2);
     if (err != default!) {
         return (false, err);
     }
@@ -627,11 +638,11 @@ internal static (bool, error) lt(reflectꓸValue arg1, reflectꓸValue arg2) {
         // Special case: Can compare integer values regardless of type's sign.
         switch (ᐧ) {
         case {} when k1 == intKind && k2 == uintKind: {
-            truth = arg1.Int() < 0 || ((uint64)arg1.Int()) < arg2.Uint();
+            truth = arg1.Int() < 0 || (uint64)arg1.Int() < arg2.Uint();
             break;
         }
         case {} when k1 == uintKind && k2 == intKind: {
-            truth = arg2.Int() >= 0 && arg1.Uint() < ((uint64)arg2.Int());
+            truth = arg2.Int() >= 0 && arg1.Uint() < (uint64)arg2.Int();
             break;
         }
         default: {
@@ -694,12 +705,12 @@ internal static (bool, error) ge(reflectꓸValue arg1, reflectꓸValue arg2) {
 }
 
 // HTML escaping.
-internal static slice<byte> htmlQuot = slice<byte>("&#34;"); // shorter than "&quot;"
-internal static slice<byte> htmlApos = slice<byte>("&#39;"); // shorter than "&apos;" and apos was not in HTML until HTML5
-internal static slice<byte> htmlAmp = slice<byte>("&amp;");
-internal static slice<byte> htmlLt = slice<byte>("&lt;");
-internal static slice<byte> htmlGt = slice<byte>("&gt;");
-internal static slice<byte> htmlNull = slice<byte>("\uFFFD");
+internal static slice<byte> htmlQuot = slice<byte>((@string)"&#34;"); // shorter than "&quot;"
+internal static slice<byte> htmlApos = slice<byte>((@string)"&#39;"); // shorter than "&apos;" and apos was not in HTML until HTML5
+internal static slice<byte> htmlAmp = slice<byte>((@string)"&amp;");
+internal static slice<byte> htmlLt = slice<byte>((@string)"&lt;");
+internal static slice<byte> htmlGt = slice<byte>((@string)"&gt;");
+internal static slice<byte> htmlNull = slice<byte>((@string)"\uFFFD");
 
 // HTMLEscape writes to w the escaped HTML equivalent of the plain text data b.
 public static void HTMLEscape(io.Writer w, slice<byte> b) {
@@ -749,8 +760,8 @@ public static @string HTMLEscapeString(@string s) {
     if (!strings.ContainsAny(s, "'\"&<>\u0000"u8)) {
         return s;
     }
-    ref var b = ref heap(new strings_package.Builder(), out var Ꮡb);
-    HTMLEscape(~Ꮡb, slice<byte>(s));
+    ref var b = ref heap(new strings.Builder(), out var Ꮡb);
+    HTMLEscape(new strings_BuilderжWriter(Ꮡb), slice<byte>(s));
     return b.String();
 }
 
@@ -763,22 +774,22 @@ public static @string HTMLEscaper(params ꓸꓸꓸany argsʗp) {
 }
 
 // JavaScript escaping.
-internal static slice<byte> jsLowUni = slice<byte>(@"\u00");
-internal static slice<byte> hex = slice<byte>("0123456789ABCDEF");
-internal static slice<byte> jsBackslash = slice<byte>(@"\\");
-internal static slice<byte> jsApos = slice<byte>(@"\'");
-internal static slice<byte> jsQuot = slice<byte>(@"\""");
-internal static slice<byte> jsLt = slice<byte>(@"\u003C");
-internal static slice<byte> jsGt = slice<byte>(@"\u003E");
-internal static slice<byte> jsAmp = slice<byte>(@"\u0026");
-internal static slice<byte> jsEq = slice<byte>(@"\u003D");
+internal static slice<byte> jsLowUni = slice<byte>((@string)@"\u00");
+internal static slice<byte> hex = slice<byte>((@string)"0123456789ABCDEF");
+internal static slice<byte> jsBackslash = slice<byte>((@string)@"\\");
+internal static slice<byte> jsApos = slice<byte>((@string)@"\'");
+internal static slice<byte> jsQuot = slice<byte>((@string)@"\""");
+internal static slice<byte> jsLt = slice<byte>((@string)@"\u003C");
+internal static slice<byte> jsGt = slice<byte>((@string)@"\u003E");
+internal static slice<byte> jsAmp = slice<byte>((@string)@"\u0026");
+internal static slice<byte> jsEq = slice<byte>((@string)@"\u003D");
 
 // JSEscape writes to w the escaped JavaScript equivalent of the plain text data b.
 public static void JSEscape(io.Writer w, slice<byte> b) {
     nint last = 0;
     for (nint i = 0; i < len(b); i++) {
         var c = b[i];
-        if (!jsIsSpecial(((rune)c))) {
+        if (!jsIsSpecial((rune)c)) {
             // fast path: nothing to do
             continue;
         }
@@ -817,7 +828,7 @@ public static void JSEscape(io.Writer w, slice<byte> b) {
             }
             default: {
                 w.Write(jsLowUni);
-                var (t, bΔ2) = (c >> (int)(4), (byte)(c & 15));
+                var (t, bΔ2) = ((byte)((c >> (int)(4))), (byte)(c & 0x0f));
                 w.Write(hex[(int)(t)..(int)(t + 1)]);
                 w.Write(hex[(int)(bΔ2)..(int)(bΔ2 + 1)]);
                 break;
@@ -844,8 +855,8 @@ public static @string JSEscapeString(@string s) {
     if (strings.IndexFunc(s, jsIsSpecial) < 0) {
         return s;
     }
-    ref var b = ref heap(new strings_package.Builder(), out var Ꮡb);
-    JSEscape(~Ꮡb, slice<byte>(s));
+    ref var b = ref heap(new strings.Builder(), out var Ꮡb);
+    JSEscape(new strings_BuilderжWriter(Ꮡb), slice<byte>(s));
     return b.String();
 }
 

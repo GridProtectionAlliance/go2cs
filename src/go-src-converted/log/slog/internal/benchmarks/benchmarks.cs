@@ -24,9 +24,9 @@
 namespace go.log.slog.@internal;
 
 using errors = errors_package;
-using slog = log.slog_package;
+using slog = go.log.slog_package;
 using time = time_package;
-using log;
+using go.log;
 
 partial class benchmarks_package {
 
@@ -35,7 +35,7 @@ internal static readonly @string testMessage = "Test logging, but use a somewhat
 internal static time.Time testTime = time.Date(2022, time.May, 1, 0, 0, 0, 0, time.ΔUTC);
 internal static @string testString = "7e3b3b2aaeff56a7108fe11e154200dd/7819479873059528190"u8;
 internal static nint testInt = 32768;
-internal static time.Duration testDuration = 23 * time.ΔSecond;
+internal static time.Duration testDuration = 23000000000L;
 internal static error testError = errors.New("fail"u8);
 
 internal static slice<slog.Attr> testAttrs = new slog.Attr[]{

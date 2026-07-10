@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using runtime = runtime_package;
+using Δruntime = runtime_package;
 
 partial class testing_package {
 
@@ -16,28 +16,30 @@ partial class testing_package {
 //
 // AllocsPerRun sets GOMAXPROCS to 1 during its measurement and will restore
 // it before returning.
-public static float64 /*avg*/ AllocsPerRun(nint runs, Action f) => func((defer, _) => {
+public static float64 /*avg*/ AllocsPerRun(nint runs, Action f) {
     float64 avg = default!;
-
-    deferǃ(runtime.GOMAXPROCS, runtime.GOMAXPROCS(1), defer);
-    // Warm up the function
-    f();
-    // Measure the starting statistics
-    ref var memstats = ref heap(new runtime_package.MemStats(), out var Ꮡmemstats);
-    runtime.ReadMemStats(Ꮡmemstats);
-    var mallocs = 0 - memstats.Mallocs;
-    // Run the function the specified number of times
-    for (nint i = 0; i < runs; i++) {
+    func((defer, recover) => {
+        deferǃ(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(1), defer);
+        // Warm up the function
         f();
-    }
-    // Read the final statistics
-    runtime.ReadMemStats(Ꮡmemstats);
-    mallocs += memstats.Mallocs;
-    // Average the mallocs over the runs (not counting the warm-up).
-    // We are forced to return a float64 because the API is silly, but do
-    // the division as integers so we can ask if AllocsPerRun()==1
-    // instead of AllocsPerRun()<2.
-    return ((float64)(mallocs / ((uint64)runs)));
-});
+        // Measure the starting statistics
+        ref var memstats = ref heap(new Δruntime.MemStats(), out var Ꮡmemstats);
+        Δruntime.ReadMemStats(Ꮡmemstats);
+        var mallocs = 0 - memstats.Mallocs;
+        // Run the function the specified number of times
+        for (nint i = 0; i < runs; i++) {
+            f();
+        }
+        // Read the final statistics
+        Δruntime.ReadMemStats(Ꮡmemstats);
+        mallocs += memstats.Mallocs;
+        // Average the mallocs over the runs (not counting the warm-up).
+        // We are forced to return a float64 because the API is silly, but do
+        // the division as integers so we can ask if AllocsPerRun()==1
+        // instead of AllocsPerRun()<2.
+        avg = (float64)(mallocs / (uint64)runs);
+    });
+    return avg;
+}
 
 } // end testing_package

@@ -3,6 +3,10 @@
 // license that can be found in the LICENSE file.
 
 // Package crypto collects common cryptographic constants.
+global using PublicKey = object;
+global using PrivateKey = object;
+global using DecrypterOpts = object;
+
 namespace go;
 
 using hash = hash_package;
@@ -78,7 +82,7 @@ public static @string String(this Hash h) {
         return "BLAKE2b-512"u8;
     }
     { /* default: */
-        return "unknown hash value "u8 + strconv.Itoa(((nint)h));
+        return "unknown hash value "u8 + strconv.Itoa((nint)(nuint)h);
     }
 
 }
@@ -104,26 +108,26 @@ public static readonly Hash BLAKE2b_384 = 18;      // import golang.org/x/crypto
 public static readonly Hash BLAKE2b_512 = 19;      // import golang.org/x/crypto/blake2b
 internal static readonly Hash maxHash = 20;
 
-internal static slice<uint8> digestSizes = new runtime.SparseArray<uint8>{
-    [MD4] = 16,
-    [MD5] = 16,
-    [SHA1] = 20,
-    [SHA224] = 28,
-    [SHA256] = 32,
-    [SHA384] = 48,
-    [SHA512] = 64,
-    [SHA512_224] = 28,
-    [SHA512_256] = 32,
-    [SHA3_224] = 28,
-    [SHA3_256] = 32,
-    [SHA3_384] = 48,
-    [SHA3_512] = 64,
-    [MD5SHA1] = 36,
-    [RIPEMD160] = 20,
-    [BLAKE2s_256] = 32,
-    [BLAKE2b_256] = 32,
-    [BLAKE2b_384] = 48,
-    [BLAKE2b_512] = 64
+internal static slice<uint8> digestSizes = new golib.SparseArray<uint8>{
+    [(int)((nuint)MD4)] = 16,
+    [(int)((nuint)MD5)] = 16,
+    [(int)((nuint)SHA1)] = 20,
+    [(int)((nuint)SHA224)] = 28,
+    [(int)((nuint)SHA256)] = 32,
+    [(int)((nuint)SHA384)] = 48,
+    [(int)((nuint)SHA512)] = 64,
+    [(int)((nuint)SHA512_224)] = 28,
+    [(int)((nuint)SHA512_256)] = 32,
+    [(int)((nuint)SHA3_224)] = 28,
+    [(int)((nuint)SHA3_256)] = 32,
+    [(int)((nuint)SHA3_384)] = 48,
+    [(int)((nuint)SHA3_512)] = 64,
+    [(int)((nuint)MD5SHA1)] = 36,
+    [(int)((nuint)RIPEMD160)] = 20,
+    [(int)((nuint)BLAKE2s_256)] = 32,
+    [(int)((nuint)BLAKE2b_256)] = 32,
+    [(int)((nuint)BLAKE2b_384)] = 48,
+    [(int)((nuint)BLAKE2b_512)] = 64
 }.slice();
 
 // Size returns the length, in bytes, of a digest resulting from the given hash
@@ -131,12 +135,12 @@ internal static slice<uint8> digestSizes = new runtime.SparseArray<uint8>{
 // into the program.
 public static nint Size(this Hash h) {
     if (h > 0 && h < maxHash) {
-        return ((nint)digestSizes[h]);
+        return (nint)digestSizes[h];
     }
     throw panic("crypto: Size of unknown hash function");
 }
 
-internal static slice<Func<hash.Hash>> hashes = new slice<Func<hash.Hash>>(maxHash);
+internal static slice<Func<hash.Hash>> hashes = new slice<Func<hash.Hash>>((nint)(nuint)(maxHash));
 
 // New returns a new hash.Hash calculating the given hash function. New panics
 // if the hash function is not linked into the binary.
@@ -147,7 +151,7 @@ public static hash.Hash New(this Hash h) {
             return f();
         }
     }
-    throw panic("crypto: requested hash function #"u8 + strconv.Itoa(((nint)h)) + " is unavailable"u8);
+    throw panic("crypto: requested hash function #" + strconv.Itoa((nint)(nuint)h) + " is unavailable");
 }
 
 // Available reports whether the given hash function is linked into the binary.
@@ -164,10 +168,6 @@ public static void RegisterHash(Hash h, Func<hash.Hash> f) {
     }
     hashes[h] = f;
 }
-
-[GoType("any")] partial struct PublicKey;
-
-[GoType("any")] partial struct PrivateKey;
 
 // Signer is an interface for an opaque private key that can be used for
 // signing operations. For example, an RSA key kept in a hardware module.
@@ -211,7 +211,5 @@ public static void RegisterHash(Hash h, Func<hash.Hash> f) {
     // details.
     (slice<byte> plaintext, error err) Decrypt(io.Reader rand, slice<byte> msg, DecrypterOpts opts);
 }
-
-[GoType("any")] partial struct DecrypterOpts;
 
 } // end crypto_package

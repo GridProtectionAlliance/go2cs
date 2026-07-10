@@ -96,12 +96,12 @@ partial class math_package {
 // 0xbfc5555555555548
 // sin coefficients
 internal static array<float64> _sin = new float64[]{
-    1.58962301576546568060e-10F,
-    -2.50507477628578072866e-8F,
-    2.75573136213857245213e-6F,
-    -1.98412698295895385996e-4F,
-    8.33333333332211858878e-3F,
-    -1.66666666666666307295e-1F
+    1.58962301576546568060e-10D,
+    -2.50507477628578072866e-8D,
+    2.75573136213857245213e-6D,
+    -1.98412698295895385996e-4D,
+    8.33333333332211858878e-3D,
+    -1.66666666666666307295e-1D
 }.array();
 
 // 0xbda8fa49a0861a9b
@@ -112,12 +112,12 @@ internal static array<float64> _sin = new float64[]{
 // 0x3fa555555555554b
 // cos coefficients
 internal static array<float64> _cos = new float64[]{
-    -1.13585365213876817300e-11F,
-    2.08757008419747316778e-9F,
-    -2.75573141792967388112e-7F,
-    2.48015872888517045348e-5F,
-    -1.38888888888730564116e-3F,
-    4.16666666666665929218e-2F
+    -1.13585365213876817300e-11D,
+    2.08757008419747316778e-9D,
+    -2.75573141792967388112e-7D,
+    2.48015872888517045348e-5D,
+    -1.38888888888730564116e-3D,
+    4.16666666666665929218e-2D
 }.array();
 
 // Cos returns the cosine of the radian argument x.
@@ -134,9 +134,9 @@ public static float64 Cos(float64 x) {
 }
 
 internal static float64 cos(float64 x) {
-    static readonly UntypedFloat PI4A = /* 7.85398125648498535156e-1 */ 0.785398;    // 0x3fe921fb40000000, Pi/4 split into three parts
-    static readonly UntypedFloat PI4B = /* 3.77489470793079817668e-8 */ 3.77489e-08; // 0x3e64442d00000000,
-    static readonly UntypedFloat PI4C = /* 2.69515142907905952645e-15 */ 2.69515e-15; // 0x3ce8469898cc5170,
+    UntypedFloat PI4A = /* 7.85398125648498535156e-1 */ 0.785398;    // 0x3fe921fb40000000, Pi/4 split into three parts
+    UntypedFloat PI4B = /* 3.77489470793079817668e-8 */ 3.77489e-08; // 0x3e64442d00000000,
+    UntypedFloat PI4C = /* 2.69515142907905952645e-15 */ 2.69515e-15; // 0x3ce8469898cc5170,
     // special cases
     switch (ᐧ) {
     case {} when IsNaN(x) || IsInf(x, 0): {
@@ -152,9 +152,9 @@ internal static float64 cos(float64 x) {
     if (x >= reduceThreshold){
         (j, z) = trigReduce(x);
     } else {
-        j = ((uint64)(x * (4 / Pi)));
+        j = (uint64)(x * (float64)(4 / Pi));
         // integer part of x/(Pi/4), as integer for tests on the phase angle
-        y = ((float64)j);
+        y = (float64)j;
         // integer part of x/(Pi/4), as float
         // map zeros to origin
         if ((uint64)(j & 1) == 1) {
@@ -163,7 +163,7 @@ internal static float64 cos(float64 x) {
         }
         j &= (uint64)(7);
         // octant modulo 2Pi radians (360 degrees)
-        z = ((x - y * PI4A) - y * PI4B) - y * PI4C;
+        z = ((x - y * (float64)PI4A) - y * (float64)PI4B) - y * (float64)PI4C;
     }
     // Extended precision modular arithmetic
     if (j > 3) {
@@ -177,7 +177,7 @@ internal static float64 cos(float64 x) {
     if (j == 1 || j == 2){
         y = z + z * zz * ((((((_sin[0] * zz) + _sin[1]) * zz + _sin[2]) * zz + _sin[3]) * zz + _sin[4]) * zz + _sin[5]);
     } else {
-        y = 1.0F - 0.5F * zz + zz * zz * ((((((_cos[0] * zz) + _cos[1]) * zz + _cos[2]) * zz + _cos[3]) * zz + _cos[4]) * zz + _cos[5]);
+        y = 1.0D - 0.5D * zz + zz * zz * ((((((_cos[0] * zz) + _cos[1]) * zz + _cos[2]) * zz + _cos[3]) * zz + _cos[4]) * zz + _cos[5]);
     }
     if (sign) {
         y = -y;
@@ -200,9 +200,9 @@ public static float64 Sin(float64 x) {
 }
 
 internal static float64 sin(float64 x) {
-    static readonly UntypedFloat PI4A = /* 7.85398125648498535156e-1 */ 0.785398;    // 0x3fe921fb40000000, Pi/4 split into three parts
-    static readonly UntypedFloat PI4B = /* 3.77489470793079817668e-8 */ 3.77489e-08; // 0x3e64442d00000000,
-    static readonly UntypedFloat PI4C = /* 2.69515142907905952645e-15 */ 2.69515e-15; // 0x3ce8469898cc5170,
+    UntypedFloat PI4A = /* 7.85398125648498535156e-1 */ 0.785398;    // 0x3fe921fb40000000, Pi/4 split into three parts
+    UntypedFloat PI4B = /* 3.77489470793079817668e-8 */ 3.77489e-08; // 0x3e64442d00000000,
+    UntypedFloat PI4C = /* 2.69515142907905952645e-15 */ 2.69515e-15; // 0x3ce8469898cc5170,
     // special cases
     switch (ᐧ) {
     case {} when x == 0 || IsNaN(x): {
@@ -225,9 +225,9 @@ internal static float64 sin(float64 x) {
     if (x >= reduceThreshold){
         (j, z) = trigReduce(x);
     } else {
-        j = ((uint64)(x * (4 / Pi)));
+        j = (uint64)(x * (float64)(4 / Pi));
         // integer part of x/(Pi/4), as integer for tests on the phase angle
-        y = ((float64)j);
+        y = (float64)j;
         // integer part of x/(Pi/4), as float
         // map zeros to origin
         if ((uint64)(j & 1) == 1) {
@@ -236,7 +236,7 @@ internal static float64 sin(float64 x) {
         }
         j &= (uint64)(7);
         // octant modulo 2Pi radians (360 degrees)
-        z = ((x - y * PI4A) - y * PI4B) - y * PI4C;
+        z = ((x - y * (float64)PI4A) - y * (float64)PI4B) - y * (float64)PI4C;
     }
     // Extended precision modular arithmetic
     // reflect in x axis
@@ -246,7 +246,7 @@ internal static float64 sin(float64 x) {
     }
     var zz = z * z;
     if (j == 1 || j == 2){
-        y = 1.0F - 0.5F * zz + zz * zz * ((((((_cos[0] * zz) + _cos[1]) * zz + _cos[2]) * zz + _cos[3]) * zz + _cos[4]) * zz + _cos[5]);
+        y = 1.0D - 0.5D * zz + zz * zz * ((((((_cos[0] * zz) + _cos[1]) * zz + _cos[2]) * zz + _cos[3]) * zz + _cos[4]) * zz + _cos[5]);
     } else {
         y = z + z * zz * ((((((_sin[0] * zz) + _sin[1]) * zz + _sin[2]) * zz + _sin[3]) * zz + _sin[4]) * zz + _sin[5]);
     }

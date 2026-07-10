@@ -3,9 +3,9 @@
 // license that can be found in the LICENSE file.
 namespace go.runtime.@internal;
 
-using goarch = @internal.goarch_package;
-using goos = @internal.goos_package;
-using @internal;
+using goarch = go.@internal.goarch_package;
+using goos = go.@internal.goos_package;
+using go.@internal;
 
 partial class sys_package {
 

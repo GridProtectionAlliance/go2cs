@@ -39,8 +39,8 @@ using static go.encoding.ascii85_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<CorruptInputError, error>]
-[assembly: GoImplement<decoder, io_package.Reader>]
-[assembly: GoImplement<encoder, io_package.WriteCloser>]
+[assembly: GoImplement<decoder, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<encoder, io_package.WriteCloser>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

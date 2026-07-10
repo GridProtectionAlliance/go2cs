@@ -21,7 +21,7 @@ internal static bool fuzzing = false;
 // Reader implements [io.Reader] to read a zstd compressed stream.
 [GoType] partial struct Reader {
     // The underlying Reader.
-    internal io_package.Reader r;
+    internal io.Reader r;
     // Whether we have read the frame header.
     // This is of interest when buffer is empty.
     // If true we expect to see a new block.
@@ -106,9 +106,11 @@ public static ж<Reader> NewReader(io.Reader input) {
 // fseScratch
 
 // Read implements [io.Reader].
-[GoRecv] public static (nint, error) Read(this ref Reader r, slice<byte> p) {
+public static (nint, error) Read(this ж<Reader> Ꮡr, slice<byte> p) {
+    ref var r = ref Ꮡr.Value;
+
     {
-        var err = r.refillIfNeeded(); if (err != default!) {
+        var err = Ꮡr.refillIfNeeded(); if (err != default!) {
             return (0, err);
         }
     }
@@ -118,9 +120,11 @@ public static ж<Reader> NewReader(io.Reader input) {
 }
 
 // ReadByte implements [io.ByteReader].
-[GoRecv] public static (byte, error) ReadByte(this ref Reader r) {
+public static (byte, error) ReadByte(this ж<Reader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
     {
-        var err = r.refillIfNeeded(); if (err != default!) {
+        var err = Ꮡr.refillIfNeeded(); if (err != default!) {
             return (0, err);
         }
     }
@@ -130,10 +134,12 @@ public static ж<Reader> NewReader(io.Reader input) {
 }
 
 // refillIfNeeded reads the next block if necessary.
-[GoRecv] internal static error refillIfNeeded(this ref Reader r) {
-    while (r.off >= len(r.buffer)) {
+internal static error refillIfNeeded(this ж<Reader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    while (r.off >= builtin.len(r.buffer)) {
         {
-            var err = r.refill(); if (err != default!) {
+            var err = Ꮡr.refill(); if (err != default!) {
                 return err;
             }
         }
@@ -143,7 +149,9 @@ public static ж<Reader> NewReader(io.Reader input) {
 }
 
 // refill reads and decompresses the next block.
-[GoRecv] internal static error refill(this ref Reader r) {
+internal static error refill(this ж<Reader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
     if (!r.sawFrameHeader) {
         {
             var err = r.readFrameHeader(); if (err != default!) {
@@ -151,7 +159,7 @@ public static ж<Reader> NewReader(io.Reader input) {
             }
         }
     }
-    return r.readBlock();
+    return Ꮡr.readBlock();
 }
 
 // readFrameHeader reads the frame header and prepares to read a block.
@@ -169,10 +177,10 @@ retry:
         }
     }
     {
-        var magic = binary.LittleEndian.Uint32(r.scratch[..4]); if (magic != (nint)4247762216L) {
-            if (magic >= 407710288 && magic <= 407710303) {
+        var magic = binary.LittleEndian.Uint32(r.scratch[..4]); if (magic != 0xfd2fb528U) {
+            if (magic >= 0x184d2a50 && magic <= 0x184d2a5f) {
                 // This is a skippable frame.
-                r.blockOffset += ((int64)relativeOffset) + 4;
+                r.blockOffset += (int64)relativeOffset + 4;
                 {
                     var err = r.skipFrame(); if (err != default!) {
                         return err;
@@ -192,8 +200,8 @@ retry:
         }
     }
     var descriptor = r.scratch[0];
-    var singleSegment = (byte)(descriptor & (1 << (int)(5))) != 0;
-    nint fcsFieldSize = 1 << (int)((descriptor >> (int)(6)));
+    var singleSegment = (byte)(descriptor & ((byte)(1 << (int)(5)))) != 0;
+    nint fcsFieldSize = (1 << (int)(((descriptor >> (int)(6)))));
     if (fcsFieldSize == 1 && !singleSegment) {
         fcsFieldSize = 0;
     }
@@ -203,10 +211,10 @@ retry:
     } else {
         windowDescriptorSize = 1;
     }
-    if ((byte)(descriptor & (1 << (int)(3))) != 0) {
+    if ((byte)(descriptor & ((byte)(1 << (int)(3)))) != 0) {
         return r.makeError(relativeOffset, "reserved bit set in frame header descriptor"u8);
     }
-    r.hasChecksum = (byte)(descriptor & (1 << (int)(2))) != 0;
+    r.hasChecksum = (byte)(descriptor & ((byte)(1 << (int)(2)))) != 0;
     if (r.hasChecksum) {
         r.checksum.reset();
     }
@@ -214,7 +222,7 @@ retry:
     nint dictionaryIdSize = 0;
     {
         var dictIdFlag = (byte)(descriptor & 3); if (dictIdFlag != 0) {
-            dictionaryIdSize = 1 << (int)((dictIdFlag - 1));
+            dictionaryIdSize = (1 << (int)((dictIdFlag - 1)));
         }
     }
     relativeOffset++;
@@ -230,14 +238,14 @@ retry:
     if (!singleSegment) {
         // Window descriptor. RFC 3.1.1.1.2.
         var windowDescriptor = r.scratch[0];
-        var exponent = ((uint64)(windowDescriptor >> (int)(3)));
-        var mantissa = ((uint64)((byte)(windowDescriptor & 7)));
+        var exponent = (uint64)((windowDescriptor >> (int)(3)));
+        var mantissa = (uint64)((byte)(windowDescriptor & 7));
         var windowLog = exponent + 10;
-        var windowBase = ((uint64)1) << (int)(windowLog);
+        var windowBase = ((uint64)1 << (int)(windowLog));
         var windowAdd = (windowBase / 8) * mantissa;
         windowSize = windowBase + windowAdd;
         // Default zstd sets limits on the window size.
-        if (fuzzing && (windowLog > 31 || windowSize > 1 << (int)(27))) {
+        if (fuzzing && (windowLog > 31 || windowSize > ((uint64)1 << (int)(27)))) {
             return r.makeError(relativeOffset, "windowSize too large"u8);
         }
     }
@@ -261,15 +269,15 @@ retry:
         break;
     }
     case 1: {
-        r.remainingFrameSize = ((uint64)fb[0]);
+        r.remainingFrameSize = (uint64)fb[0];
         break;
     }
     case 2: {
-        r.remainingFrameSize = 256 + ((uint64)binary.LittleEndian.Uint16(fb));
+        r.remainingFrameSize = 256 + (uint64)binary.LittleEndian.Uint16(fb);
         break;
     }
     case 4: {
-        r.remainingFrameSize = ((uint64)binary.LittleEndian.Uint32(fb));
+        r.remainingFrameSize = (uint64)binary.LittleEndian.Uint32(fb);
         break;
     }
     case 8: {
@@ -288,20 +296,20 @@ retry:
         windowSize = r.remainingFrameSize;
     }
     // RFC 8878 3.1.1.1.1.2. permits us to set an 8M max on window size.
-    static readonly UntypedInt maxWindowSize = /* 8 << 20 */ 8388608;
+    UntypedInt maxWindowSize = /* 8 << 20 */ 8388608;
     if (windowSize > maxWindowSize) {
         windowSize = maxWindowSize;
     }
     relativeOffset += headerSize;
     r.sawFrameHeader = true;
     r.readOneFrame = true;
-    r.blockOffset += ((int64)relativeOffset);
+    r.blockOffset += (int64)relativeOffset;
     // Prepare to read blocks from the frame.
     r.repeatedOffset1 = 1;
     r.repeatedOffset2 = 4;
     r.repeatedOffset3 = 8;
     r.huffmanTableBits = 0;
-    r.window.reset(((nint)windowSize));
+    r.window.reset((nint)windowSize);
     r.seqTables[0] = default!;
     r.seqTables[1] = default!;
     r.seqTables[2] = default!;
@@ -319,39 +327,39 @@ retry:
     relativeOffset += 4;
     var size = binary.LittleEndian.Uint32(r.scratch[..4]);
     if (size == 0) {
-        r.blockOffset += ((int64)relativeOffset);
+        r.blockOffset += (int64)relativeOffset;
         return default!;
     }
     {
         var (seeker, ok) = r.r._<io.Seeker>(ᐧ); if (ok) {
-            r.blockOffset += ((int64)relativeOffset);
+            r.blockOffset += (int64)relativeOffset;
             // Implementations of Seeker do not always detect invalid offsets,
             // so check that the new offset is valid by comparing to the end.
             var (prev, err) = seeker.Seek(0, io.SeekCurrent);
             if (err != default!) {
                 return r.wrapError(0, err);
             }
-            var (end, err) = seeker.Seek(0, io.SeekEnd);
+            (var end, err) = seeker.Seek(0, io.SeekEnd);
             if (err != default!) {
                 return r.wrapError(0, err);
             }
-            if (prev > end - ((int64)size)) {
+            if (prev > end - (int64)size) {
                 r.blockOffset += end - prev;
                 return r.makeEOFError(0);
             }
             // The new offset is valid, so seek to it.
-            (_, err) = seeker.Seek(prev + ((int64)size), io.SeekStart);
+            (_, err) = seeker.Seek(prev + (int64)size, io.SeekStart);
             if (err != default!) {
                 return r.wrapError(0, err);
             }
-            r.blockOffset += ((int64)size);
+            r.blockOffset += (int64)size;
             return default!;
         }
     }
     slice<byte> skip = default!;
-    static readonly UntypedInt chunk = /* 1 << 20 */ 1048576; // 1M
+    UntypedInt chunk = /* 1 << 20 */ 1048576; // 1M
     while (size >= chunk) {
-        if (len(skip) == 0) {
+        if (builtin.len(skip) == 0) {
             skip = new slice<byte>(chunk);
         }
         {
@@ -363,22 +371,24 @@ retry:
         size -= chunk;
     }
     if (size > 0) {
-        if (len(skip) == 0) {
-            skip = new slice<byte>(size);
+        if (builtin.len(skip) == 0) {
+            skip = new slice<byte>((nint)(size));
         }
         {
             var (_, err) = io.ReadFull(r.r, skip); if (err != default!) {
                 return r.wrapNonEOFError(relativeOffset, err);
             }
         }
-        relativeOffset += ((nint)size);
+        relativeOffset += (nint)size;
     }
-    r.blockOffset += ((int64)relativeOffset);
+    r.blockOffset += (int64)relativeOffset;
     return default!;
 }
 
 // readBlock reads the next block from a frame.
-[GoRecv] internal static error readBlock(this ref Reader r) {
+internal static error readBlock(this ж<Reader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
     nint relativeOffset = 0;
     // Read Block_Header. RFC 3.1.1.2.
     {
@@ -387,14 +397,14 @@ retry:
         }
     }
     relativeOffset += 3;
-    var header = (uint32)((uint32)(((uint32)r.scratch[0]) | (((uint32)r.scratch[1]) << (int)(8))) | (((uint32)r.scratch[2]) << (int)(16)));
+    var header = (uint32)((uint32)((uint32)r.scratch[0] | (((uint32)r.scratch[1] << (int)(8)))) | (((uint32)r.scratch[2] << (int)(16))));
     var lastBlock = (uint32)(header & 1) != 0;
-    var blockType = (uint32)((header >> (int)(1)) & 3);
-    nint blockSize = ((nint)(header >> (int)(3)));
+    var blockType = (uint32)(((header >> (int)(1))) & 3);
+    nint blockSize = (nint)((header >> (int)(3)));
     // Maximum block size is smaller of window size and 128K.
     // We don't record the window size for a single segment frame,
     // so just use 128K. RFC 3.1.1.2.3, 3.1.1.2.4.
-    if (blockSize > 128 << (int)(10) || (r.window.size > 0 && blockSize > r.window.size)) {
+    if (blockSize > (128 << (int)(10)) || (r.window.size > 0 && blockSize > r.window.size)) {
         return r.makeError(relativeOffset, "block size too large"u8);
     }
     // Handle different block types. RFC 3.1.1.2.2.
@@ -407,7 +417,7 @@ retry:
             }
         }
         relativeOffset += blockSize;
-        r.blockOffset += ((int64)relativeOffset);
+        r.blockOffset += (int64)relativeOffset;
         break;
     }
     case 1: {
@@ -422,17 +432,17 @@ retry:
         foreach (var (i, _) in r.buffer) {
             r.buffer[i] = v;
         }
-        r.blockOffset += ((int64)relativeOffset);
+        r.blockOffset += (int64)relativeOffset;
         break;
     }
     case 2: {
-        r.blockOffset += ((int64)relativeOffset);
+        r.blockOffset += (int64)relativeOffset;
         {
-            var err = r.compressedBlock(blockSize); if (err != default!) {
+            var err = Ꮡr.compressedBlock(blockSize); if (err != default!) {
                 return err;
             }
         }
-        r.blockOffset += ((int64)blockSize);
+        r.blockOffset += (int64)blockSize;
         break;
     }
     case 3: {
@@ -440,10 +450,10 @@ retry:
     }}
 
     if (!r.frameSizeUnknown) {
-        if (((uint64)len(r.buffer)) > r.remainingFrameSize) {
+        if ((uint64)builtin.len(r.buffer) > r.remainingFrameSize) {
             return r.makeError(relativeOffset, "too many uncompressed bytes in frame"u8);
         }
-        r.remainingFrameSize -= ((uint64)len(r.buffer));
+        r.remainingFrameSize -= (uint64)builtin.len(r.buffer);
     }
     if (r.hasChecksum) {
         r.checksum.update(r.buffer);
@@ -462,7 +472,7 @@ retry:
                 }
             }
             var inputChecksum = binary.LittleEndian.Uint32(r.scratch[..4]);
-            var dataChecksum = ((uint32)r.checksum.digest());
+            var dataChecksum = (uint32)r.checksum.digest();
             if (inputChecksum != dataChecksum) {
                 return r.wrapError(0, fmt.Errorf("invalid checksum: got %#x want %#x"u8, dataChecksum, inputChecksum));
             }
@@ -516,7 +526,7 @@ retry:
     if (AreEqual(err, io.EOF)) {
         return err;
     }
-    return new zstdError(r.blockOffset + ((int64)off), err);
+    return new zstdErrorжerror(Ꮡ(new zstdError(r.blockOffset + (int64)off, err)));
 }
 
 } // end zstd_package

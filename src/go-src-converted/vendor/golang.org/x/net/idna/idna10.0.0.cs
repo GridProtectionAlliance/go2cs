@@ -19,13 +19,12 @@ namespace go.vendor.golang.org.x.net;
 using fmt = fmt_package;
 using strings = strings_package;
 using utf8 = unicode.utf8_package;
-using bidirule = golang.org.x.text.secure.bidirule_package;
-using bidi = golang.org.x.text.unicode.bidi_package;
-using norm = golang.org.x.text.unicode.norm_package;
-using golang.org.x.text.secure;
-using golang.org.x.text.unicode;
+using bidirule = go.vendor.golang.org.x.text.secure.bidirule_package;
+using bidi = go.vendor.golang.org.x.text.unicode.bidi_package;
+using norm = go.vendor.golang.org.x.text.unicode.norm_package;
+using go.vendor.golang.org.x.text.secure;
+using go.vendor.golang.org.x.text.unicode;
 using unicode;
-using ꓸꓸꓸOption = Span<Option>;
 
 partial class idna_package {
 
@@ -54,16 +53,16 @@ public static (@string, error) ToUnicode(@string s) {
     return Punycode.process(s, false);
 }
 
-public delegate void Option(ж<options> _);
+// type Option is a methodless func type — rendered inline as its base delegate
 
 // Transitional sets a Profile to use the Transitional mapping as defined in UTS
 // #46. This will cause, for example, "ß" to be mapped to "ss". Using the
 // transitional mapping provides a compromise between IDNA2003 and IDNA2008
 // compatibility. It is used by some browsers when resolving domain names. This
 // option is only meaningful if combined with MapForLookup.
-public static Option Transitional(bool transitional) {
+public static Action<ж<options>> Transitional(bool transitional) {
     return (ж<options> o) => {
-        o.val.transitional = transitional;
+        o.Value.transitional = transitional;
     };
 }
 
@@ -71,17 +70,17 @@ public static Option Transitional(bool transitional) {
 // are longer than allowed by the RFC.
 //
 // This option corresponds to the VerifyDnsLength flag in UTS #46.
-public static Option VerifyDNSLength(bool verify) {
+public static Action<ж<options>> VerifyDNSLength(bool verify) {
     return (ж<options> o) => {
-        o.val.verifyDNSLength = verify;
+        o.Value.verifyDNSLength = verify;
     };
 }
 
 // RemoveLeadingDots removes leading label separators. Leading runes that map to
 // dots, such as U+3002 IDEOGRAPHIC FULL STOP, are removed as well.
-public static Option RemoveLeadingDots(bool remove) {
+public static Action<ж<options>> RemoveLeadingDots(bool remove) {
     return (ж<options> o) => {
-        o.val.removeLeadingDots = remove;
+        o.Value.removeLeadingDots = remove;
     };
 }
 
@@ -90,20 +89,20 @@ public static Option RemoveLeadingDots(bool remove) {
 // of hyphens ('-'), normalization, validity of runes, and the context rules.
 // In particular, ValidateLabels also sets the CheckHyphens and CheckJoiners flags
 // in UTS #46.
-public static Option ValidateLabels(bool enable) {
+public static Action<ж<options>> ValidateLabels(bool enable) {
     return (ж<options> o) => {
         // Don't override existing mappings, but set one that at least checks
         // normalization if it is not set.
         if ((~o).mapping == default! && enable) {
-            o.val.mapping = normalize;
+            o.Value.mapping = normalize;
         }
-        o.val.trie = trie;
-        o.val.checkJoiners = enable;
-        o.val.checkHyphens = enable;
+        o.Value.trie = trie;
+        o.Value.checkJoiners = enable;
+        o.Value.checkHyphens = enable;
         if (enable){
-            o.val.fromPuny = validateFromPunycode;
+            o.Value.fromPuny = validateFromPunycode;
         } else {
-            o.val.fromPuny = default!;
+            o.Value.fromPuny = default!;
         }
     };
 }
@@ -113,9 +112,9 @@ public static Option ValidateLabels(bool enable) {
 // "r3---sn-apo3qvuoxuxbt-j5pe" are in common use.
 //
 // This option corresponds to the CheckHyphens flag in UTS #46.
-public static Option CheckHyphens(bool enable) {
+public static Action<ж<options>> CheckHyphens(bool enable) {
     return (ж<options> o) => {
-        o.val.checkHyphens = enable;
+        o.Value.checkHyphens = enable;
     };
 }
 
@@ -123,10 +122,10 @@ public static Option CheckHyphens(bool enable) {
 // A of RFC 5892, concerning the use of joiner runes.
 //
 // This option corresponds to the CheckJoiners flag in UTS #46.
-public static Option CheckJoiners(bool enable) {
+public static Action<ж<options>> CheckJoiners(bool enable) {
     return (ж<options> o) => {
-        o.val.trie = trie;
-        o.val.checkJoiners = enable;
+        o.Value.trie = trie;
+        o.Value.checkJoiners = enable;
     };
 }
 
@@ -140,9 +139,9 @@ public static Option CheckJoiners(bool enable) {
 // http://www.rfc-editor.org/std/std3.txt for more details.
 //
 // This option corresponds to the UseSTD3ASCIIRules flag in UTS #46.
-public static Option StrictDomainName(bool use) {
+public static Action<ж<options>> StrictDomainName(bool use) {
     return (ж<options> o) => {
-        o.val.useSTD3Rules = use;
+        o.Value.useSTD3Rules = use;
     };
 }
 
@@ -153,17 +152,17 @@ public static Option StrictDomainName(bool use) {
 // that relies on proper validation of labels should include this rule.
 //
 // This option corresponds to the CheckBidi flag in UTS #46.
-public static Option BidiRule() {
+public static Action<ж<options>> BidiRule() {
     return (ж<options> o) => {
-        o.val.bidirule = bidirule.ValidString;
+        o.Value.bidirule = bidirule.ValidString;
     };
 }
 
 // ValidateForRegistration sets validation options to verify that a given IDN is
 // properly formatted for registration as defined by Section 4 of RFC 5891.
-public static Option ValidateForRegistration() {
+public static Action<ж<options>> ValidateForRegistration() {
     return (ж<options> o) => {
-        o.val.mapping = validateRegistration;
+        o.Value.mapping = validateRegistration;
         StrictDomainName(true)(o);
         ValidateLabels(true)(o);
         VerifyDNSLength(true)(o);
@@ -179,15 +178,15 @@ public static Option ValidateForRegistration() {
 //
 // The mappings include normalization and mapping case, width and other
 // compatibility mappings.
-public static Option MapForLookup() {
+public static Action<ж<options>> MapForLookup() {
     return (ж<options> o) => {
-        o.val.mapping = validateAndMap;
+        o.Value.mapping = validateAndMap;
         StrictDomainName(true)(o);
         ValidateLabels(true)(o);
     };
 }
 
-[GoType] partial struct options {
+[GoType] public partial struct options {
     internal bool transitional;
     internal bool useSTD3Rules;
     internal bool checkHyphens;
@@ -199,7 +198,7 @@ public static Option MapForLookup() {
     internal Func<ж<Profile>, @string, error> fromPuny;
     // mapping implements a validation and mapping step as defined in RFC 5895
     // or UTS 46, tailored to, for example, domain registration or lookup.
-    internal Func<ж<Profile>, @string, (mapped string, isBidi bool, err error)> mapping;
+    internal Func<ж<Profile>, @string, (@string mapped, bool isBidi, error err)> mapping;
     // bidirule, if specified, checks whether s conforms to the Bidi Rule
     // defined in RFC 5893.
     internal Func<@string, bool> bidirule;
@@ -210,8 +209,8 @@ public static Option MapForLookup() {
     internal partial ref options options { get; }
 }
 
-internal static void apply(ж<options> Ꮡo, slice<Option> opts) {
-    ref var o = ref Ꮡo.val;
+internal static void apply(ж<options> Ꮡo, slice<Action<ж<options>>> opts) {
+    ref var o = ref Ꮡo.Value;
 
     foreach (var (_, f) in opts) {
         f(Ꮡo);
@@ -226,11 +225,11 @@ internal static void apply(ж<options> Ꮡo, slice<Option> opts) {
 // for lookup and registration purposes respectively, which can be tailored by
 // adding more fine-grained options, where later options override earlier
 // options.
-public static ж<Profile> New(params ꓸꓸꓸOption oʗp) {
+public static ж<Profile> New(params Span<Action<ж<options>>> oʗp) {
     var o = oʗp.slice();
 
     var p = Ꮡ(new Profile(nil));
-    apply(Ꮡ((~p).options), o);
+    apply(p.of(Profile.Ꮡoptions), o);
     return p;
 }
 
@@ -238,8 +237,10 @@ public static ж<Profile> New(params ꓸꓸꓸOption oʗp) {
 // ToASCII("bücher.example.com") is "xn--bcher-kva.example.com", and
 // ToASCII("golang") is "golang". If an error is encountered it will return
 // an error and a (partially) processed result.
-[GoRecv] public static (@string, error) ToASCII(this ref Profile p, @string s) {
-    return p.process(s, true);
+public static (@string, error) ToASCII(this ж<Profile> Ꮡp, @string s) {
+    ref var p = ref Ꮡp.Value;
+
+    return Ꮡp.process(s, true);
 }
 
 // ToUnicode converts a domain or domain label to its Unicode form. For example,
@@ -247,9 +248,10 @@ public static ж<Profile> New(params ꓸꓸꓸOption oʗp) {
 // ToUnicode("golang") is "golang". If an error is encountered it will return
 // an error and a (partially) processed result.
 [GoRecv] public static (@string, error) ToUnicode(this ref Profile p, @string s) {
-    var pp = p;
+    ref var pp = ref heap<Profile>(out var Ꮡpp);
+    pp = p;
     pp.transitional = false;
-    return pp.process(s, false);
+    return Ꮡpp.process(s, false);
 }
 
 // String reports a string with a description of the profile for debugging
@@ -281,7 +283,7 @@ public static ж<Profile> Lookup = Δlookup;
 public static ж<Profile> Display = display;
 public static ж<Profile> Registration = registration;
 internal static ж<Profile> punycode = Ꮡ(new Profile(nil));
-public static ж<Profile> Δlookup = Ꮡ(new Profile(new options(
+internal static ж<Profile> Δlookup = Ꮡ(new Profile(new options(
     transitional: transitionalLookup,
     useSTD3Rules: true,
     checkHyphens: true,
@@ -318,8 +320,7 @@ internal static ж<Profile> registration = Ꮡ(new Profile(new options(
 // Register: recommended for approving domain names: don't do any mappings
 // but rather reject on invalid input. Bundle or block deviation characters.
 [GoType] partial struct labelError {
-    internal @string label;
-    internal @string code_;
+    internal @string label, code_;
 }
 
 internal static @string code(this labelError e) {
@@ -342,11 +343,13 @@ internal static @string Error(this runeError e) {
 
 // process implements the algorithm described in section 4 of UTS #46,
 // see https://www.unicode.org/reports/tr46.
-[GoRecv] internal static (@string, error) process(this ref Profile p, @string s, bool toASCII) {
+internal static (@string, error) process(this ж<Profile> Ꮡp, @string s, bool toASCII) {
+    ref var p = ref Ꮡp.Value;
+
     error err = default!;
     bool isBidi = default!;
     if (p.mapping != default!) {
-        (s, isBidi, err) = p.mapping(p, s);
+        (s, isBidi, err) = p.mapping(Ꮡp, s);
     }
     // Remove leading empty labels.
     if (p.removeLeadingDots) {
@@ -357,17 +360,16 @@ internal static @string Error(this runeError e) {
     // It seems like we should only create this error on ToASCII, but the
     // UTS 46 conformance tests suggests we should always check this.
     if (err == default! && p.verifyDNSLength && s == ""u8) {
-        Ꮡerr = new labelError(s, "A4"); err = ref Ꮡerr.val;
+        err = new labelErrorжerror(Ꮡ(new labelError(s, "A4")));
     }
     var labels = new labelIter(orig: s);
-    for (; !labels.done(); 
-    labels.next();) {
+    for (; !labels.done(); labels.next()) {
         @string label = labels.label();
         if (label == ""u8) {
             // Empty labels are not okay. The label iterator skips the last
             // label if it is empty.
             if (err == default! && p.verifyDNSLength) {
-                Ꮡerr = new labelError(s, "A4"); err = ref Ꮡerr.val;
+                err = new labelErrorжerror(Ꮡ(new labelError(s, "A4")));
             }
             continue;
         }
@@ -383,7 +385,7 @@ internal static @string Error(this runeError e) {
             isBidi = isBidi || bidirule.DirectionString(u) != bidi.LeftToRight;
             labels.set(u);
             if (err == default! && p.fromPuny != default!) {
-                err = p.fromPuny(p, u);
+                err = p.fromPuny(Ꮡp, u);
             }
             if (err == default!) {
                 // This should be called on NonTransitional, according to the
@@ -397,20 +399,17 @@ internal static @string Error(this runeError e) {
         }
     }
     if (isBidi && p.bidirule != default! && err == default!) {
-        for (
-        labels.reset();; !labels.done(); 
-        labels.next();) {
+        for (labels.reset(); !labels.done(); labels.next()) {
             if (!p.bidirule(labels.label())) {
-                Ꮡerr = new labelError(s, "B"); err = ref Ꮡerr.val;
+                err = new labelErrorжerror(Ꮡ(new labelError(s, "B")));
                 break;
             }
         }
     }
     if (toASCII) {
-        for (
-        labels.reset();; !labels.done(); 
-        labels.next();) {
-            @string label = labels.label();
+        for (labels.reset(); !labels.done(); labels.next()) {
+            ref var label = ref heap<@string>(out var Ꮡlabel);
+            label = labels.label();
             if (!ascii(label)) {
                 var (a, err2) = encode(acePrefix, label);
                 if (err == default!) {
@@ -421,7 +420,7 @@ internal static @string Error(this runeError e) {
             }
             nint n = len(label);
             if (p.verifyDNSLength && err == default! && (n == 0 || n > 63)) {
-                Ꮡerr = new labelError(label, "A4"); err = ref Ꮡerr.val;
+                err = new labelErrorжerror(Ꮡ(new labelError(label, "A4")));
             }
         }
     }
@@ -433,7 +432,7 @@ internal static @string Error(this runeError e) {
             n--;
         }
         if (len(s) < 1 || n > 253) {
-            Ꮡerr = new labelError(s, "A4"); err = ref Ꮡerr.val;
+            err = new labelErrorжerror(Ꮡ(new labelError(s, "A4")));
         }
     }
     return (s, err);
@@ -444,7 +443,7 @@ internal static (@string mapped, bool isBidi, error err) normalize(ж<Profile> �
     bool isBidi = default!;
     error err = default!;
 
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
     // TODO: consider first doing a quick check to see if any of these checks
     // need to be done. This will make it slower in the general case, but
     // faster in the common case.
@@ -458,10 +457,10 @@ internal static (@string idem, bool bidi, error err) validateRegistration(ж<Pro
     bool bidi = default!;
     error err = default!;
 
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
     // TODO: filter need for normalization in loop below.
     if (!norm.NFC.IsNormalString(s)) {
-        return (s, false, new labelError(s, "V1"));
+        return (s, false, new labelErrorжerror(Ꮡ(new labelError(s, "V1"))));
     }
     for (nint i = 0; i < len(s); ) {
         var (v, sz) = trie.lookupString(s[(int)(i)..]);
@@ -487,7 +486,7 @@ internal static (@string idem, bool bidi, error err) validateRegistration(ж<Pro
 
 internal static bool isBidi(this info c, @string s) {
     if (!c.isMapped()) {
-        return (info)(c & attributesMask) == rtl;
+        return (info)(c & (uint16)attributesMask) == rtl;
     }
     // TODO: also store bidi info for mapped data. This is possible, but a bit
     // cumbersome and not for the common case.
@@ -505,7 +504,7 @@ internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> �
     bool bidi = default!;
     error err = default!;
 
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
     slice<byte> b = default!;
     nint k = default!;
     // combinedInfoBits contains the or-ed bits of all runes. We use this
@@ -517,7 +516,7 @@ internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> �
         var (v, sz) = trie.lookupString(s[(int)(i)..]);
         if (sz == 0) {
             b = append(b, s[(int)(k)..(int)(i)].ꓸꓸꓸ);
-            b = append(b, "\ufffd"u8.ꓸꓸꓸ);
+            b = append(b, ((@string)"\ufffd"u8).ꓸꓸꓸ);
             k = len(s);
             if (err == default!) {
                 err = ((runeError)utf8.RuneError);
@@ -550,14 +549,14 @@ internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> �
         else if (exprᴛ1 == unknown) {
             b = append(b, // drop the rune
  s[(int)(k)..(int)(start)].ꓸꓸꓸ);
-            b = append(b, "\ufffd"u8.ꓸꓸꓸ);
+            b = append(b, ((@string)"\ufffd"u8).ꓸꓸꓸ);
         }
 
         k = i;
     }
     if (k == 0){
         // No changes so far.
-        if ((info)(combinedInfoBits & mayNeedNorm) != 0) {
+        if ((info)(combinedInfoBits & (uint16)mayNeedNorm) != 0) {
             s = norm.NFC.String(s);
         }
     } else {
@@ -664,10 +663,10 @@ internal static readonly @string acePrefix = "xn--"u8;
 }
 
 internal static error validateFromPunycode(ж<Profile> Ꮡp, @string s) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     if (!norm.NFC.IsNormalString(s)) {
-        return new labelError(s, "V1");
+        return new labelErrorжerror(Ꮡ(new labelError(s, "V1")));
     }
     // TODO: detect whether string may have to be normalized in the following
     // loop.
@@ -678,7 +677,7 @@ internal static error validateFromPunycode(ж<Profile> Ꮡp, @string s) {
         }
         {
             var c = p.simplify(((info)v).category()); if (c != valid && c != deviation) {
-                return new labelError(s, "V6");
+                return new labelErrorжerror(Ꮡ(new labelError(s, "V6")));
             }
         }
         i += sz;
@@ -699,50 +698,44 @@ internal static readonly joinState stateAfter = 4;
 internal static readonly joinState stateFAIL = 5;
 
 // no-op as we can't accept joiners here
-internal static slice<array<joinState>> joinStates = new runtime.SparseArray<array<joinState>>{
-    [stateStart] = new(
-        joiningL: stateBefore,
-        joiningD: stateBefore,
-        joinZWNJ: stateFAIL,
-        joinZWJ: stateFAIL,
-        joinVirama: stateVirama
-    ),
-    [stateVirama] = new(
-        joiningL: stateBefore,
-        joiningD: stateBefore
-    ),
-    [stateBefore] = new(
-        joiningL: stateBefore,
-        joiningD: stateBefore,
-        joiningT: stateBefore,
-        joinZWNJ: stateAfter,
-        joinZWJ: stateFAIL,
-        joinVirama: stateBeforeVirama
-    ),
-    [stateBeforeVirama] = new(
-        joiningL: stateBefore,
-        joiningD: stateBefore,
-        joiningT: stateBefore
-    ),
-    [stateAfter] = new(
-        joiningL: stateFAIL,
-        joiningD: stateBefore,
-        joiningT: stateAfter,
-        joiningR: stateStart,
-        joinZWNJ: stateFAIL,
-        joinZWJ: stateFAIL,
-        joinVirama: stateAfter
-    ),
-    [stateFAIL] = new(
-        0: stateFAIL,
-        joiningL: stateFAIL,
-        joiningD: stateFAIL,
-        joiningT: stateFAIL,
-        joiningR: stateFAIL,
-        joinZWNJ: stateFAIL,
-        joinZWJ: stateFAIL,
-        joinVirama: stateFAIL
-    )
+internal static slice<array<joinState>> joinStates = new golib.SparseArray<array<joinState>>{
+    [stateStart] = new golib.SparseArray<joinState>{
+        [joiningL] = stateBefore,
+        [joiningD] = stateBefore,
+        [joinZWNJ] = stateFAIL,
+        [joinZWJ] = stateFAIL,
+        [joinVirama] = stateVirama}.array(),
+    [stateVirama] = new golib.SparseArray<joinState>{
+        [joiningL] = stateBefore,
+        [joiningD] = stateBefore}.array(),
+    [stateBefore] = new golib.SparseArray<joinState>{
+        [joiningL] = stateBefore,
+        [joiningD] = stateBefore,
+        [joiningT] = stateBefore,
+        [joinZWNJ] = stateAfter,
+        [joinZWJ] = stateFAIL,
+        [joinVirama] = stateBeforeVirama}.array(),
+    [stateBeforeVirama] = new golib.SparseArray<joinState>{
+        [joiningL] = stateBefore,
+        [joiningD] = stateBefore,
+        [joiningT] = stateBefore}.array(),
+    [stateAfter] = new golib.SparseArray<joinState>{
+        [joiningL] = stateFAIL,
+        [joiningD] = stateBefore,
+        [joiningT] = stateAfter,
+        [joiningR] = stateStart,
+        [joinZWNJ] = stateFAIL,
+        [joinZWJ] = stateFAIL,
+        [joinVirama] = stateAfter}.array(),
+    [stateFAIL] = new golib.SparseArray<joinState>{
+        [0] = stateFAIL,
+        [joiningL] = stateFAIL,
+        [joiningD] = stateFAIL,
+        [joiningT] = stateFAIL,
+        [joiningR] = stateFAIL,
+        [joinZWNJ] = stateFAIL,
+        [joinZWJ] = stateFAIL,
+        [joinVirama] = stateFAIL}.array()
 }.slice();
 
 // validateLabel validates the criteria from Section 4.1. Item 1, 4, and 6 are
@@ -752,16 +745,16 @@ internal static slice<array<joinState>> joinStates = new runtime.SparseArray<arr
 
     if (s == ""u8) {
         if (p.verifyDNSLength) {
-            return new labelError(s, "A4");
+            return new labelErrorжerror(Ꮡ(new labelError(s, "A4")));
         }
         return default!;
     }
     if (p.checkHyphens) {
         if (len(s) > 4 && s[2] == (rune)'-' && s[3] == (rune)'-') {
-            return new labelError(s, "V2");
+            return new labelErrorжerror(Ꮡ(new labelError(s, "V2")));
         }
         if (s[0] == (rune)'-' || s[len(s) - 1] == (rune)'-') {
-            return new labelError(s, "V3");
+            return new labelErrorжerror(Ꮡ(new labelError(s, "V3")));
         }
     }
     if (!p.checkJoiners) {
@@ -773,7 +766,7 @@ internal static slice<array<joinState>> joinStates = new runtime.SparseArray<arr
     var (v, sz) = trie.lookupString(s);
     var x = ((info)v);
     if (x.isModifier()) {
-        return new labelError(s, "V5");
+        return new labelErrorжerror(Ꮡ(new labelError(s, "V5")));
     }
     // Quickly return in the absence of zero-width (non) joiners.
     if (strings.Index(s, zwj) == -1 && strings.Index(s, zwnj) == -1) {
@@ -801,7 +794,7 @@ internal static slice<array<joinState>> joinStates = new runtime.SparseArray<arr
         x = ((info)v);
     }
     if (st == stateFAIL || st == stateAfter) {
-        return new labelError(s, "C");
+        return new labelErrorжerror(Ꮡ(new labelError(s, "C")));
     }
     return default!;
 }

@@ -18,20 +18,20 @@ public static error SkipDir = errors.New("skip this directory"u8);
 // as an error by any function.
 public static error SkipAll = errors.New("skip everything and stop the walk"u8);
 
-public delegate error WalkDirFunc(@string path, DirEntry d, error err);
+// type WalkDirFunc is a methodless func type — rendered inline as its base delegate
 
 // walkDir recursively descends path, calling walkDirFn.
-internal static error walkDir(FS fsys, @string name, DirEntry d, WalkDirFunc walkDirFn) {
+internal static error walkDir(FS fsys, @string name, DirEntry d, Func<@string, DirEntry, error, error> walkDirFn) {
     {
         var errΔ1 = walkDirFn(name, d, default!); if (errΔ1 != default! || !d.IsDir()) {
             if (AreEqual(errΔ1, SkipDir) && d.IsDir()) {
                 // Successfully skipped directory.
-                 = default!;
+                errΔ1 = default!;
             }
             return errΔ1;
         }
     }
-    (dirs, err) = ReadDir(fsys, name);
+    var (dirs, err) = ReadDir(fsys, name);
     if (err != default!) {
         // Second call, to report ReadDir error.
         err = walkDirFn(name, d, err);
@@ -68,8 +68,8 @@ internal static error walkDir(FS fsys, @string name, DirEntry d, WalkDirFunc wal
 //
 // WalkDir does not follow symbolic links found in directories,
 // but if root itself is a symbolic link, its target will be walked.
-public static error WalkDir(FS fsys, @string root, WalkDirFunc fn) {
-    (info, err) = Stat(fsys, root);
+public static error WalkDir(FS fsys, @string root, Func<@string, DirEntry, error, error> fn) {
+    var (info, err) = Stat(fsys, root);
     if (err != default!){
         err = fn(root, default!, err);
     } else {

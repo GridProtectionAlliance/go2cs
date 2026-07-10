@@ -1,6 +1,8 @@
 // Copyright 2010 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+global using ΔToken = object;
+
 namespace go.encoding;
 
 using bytes = bytes_package;
@@ -11,7 +13,7 @@ partial class json_package {
 
 // A Decoder reads and decodes JSON values from an input stream.
 [GoType] partial struct Decoder {
-    internal io_package.Reader r;
+    internal io.Reader r;
     internal slice<byte> buf;
     internal decodeState d;
     internal nint scanp;  // start of unread data in buf
@@ -48,7 +50,9 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
 //
 // See the documentation for [Unmarshal] for details about
 // the conversion of JSON into a Go value.
-[GoRecv] public static error Decode(this ref Decoder dec, any v) {
+public static error Decode(this ж<Decoder> Ꮡdec, any v) {
+    ref var dec = ref Ꮡdec.Value;
+
     if (dec.err != default!) {
         return dec.err;
     }
@@ -58,19 +62,19 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
         }
     }
     if (!dec.tokenValueAllowed()) {
-        return new SyntaxError(msg: "not at beginning of value"u8, Offset: dec.InputOffset());
+        return new SyntaxErrorжerror(Ꮡ(new SyntaxError(msg: "not at beginning of value"u8, Offset: dec.InputOffset())));
     }
     // Read whole value into buffer.
-    var (n, err) = dec.readValue();
+    var (n, err) = Ꮡdec.readValue();
     if (err != default!) {
         return err;
     }
-    dec.d.init(dec.buf[(int)(dec.scanp)..(int)(dec.scanp + n)]);
+    Ꮡdec.of(Decoder.Ꮡd).init(dec.buf[(int)(dec.scanp)..(int)(dec.scanp + n)]);
     dec.scanp += n;
     // Don't save err from unmarshal into dec.err:
     // the connection is still usable since we read a complete JSON
     // object from it before the error happened.
-    err = dec.d.unmarshal(v);
+    err = Ꮡdec.of(Decoder.Ꮡd).unmarshal(v);
     // fixup token streaming state
     dec.tokenValueEnd();
     return err;
@@ -79,12 +83,14 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
 // Buffered returns a reader of the data remaining in the Decoder's
 // buffer. The reader is valid until the next call to [Decoder.Decode].
 [GoRecv] public static io.Reader Buffered(this ref Decoder dec) {
-    return ~bytes.NewReader(dec.buf[(int)(dec.scanp)..]);
+    return new bytes_ReaderжReader(bytes.NewReader(dec.buf[(int)(dec.scanp)..]));
 }
 
 // readValue reads a JSON value into dec.buf.
 // It returns the length of the encoding.
-[GoRecv] internal static (nint, error) readValue(this ref Decoder dec) {
+internal static (nint, error) readValue(this ж<Decoder> Ꮡdec) {
+    ref var dec = ref Ꮡdec.Value;
+
     dec.scan.reset();
     nint scanp = dec.scanp;
     error err = default!;
@@ -96,13 +102,13 @@ Input:
         for (; scanp < len(dec.buf); scanp++) {
             var c = dec.buf[scanp];
             dec.scan.bytes++;
-            var exprᴛ1 = dec.scan.step(Ꮡ(dec.scan), c);
+            var exprᴛ1 = dec.scan.step(Ꮡdec.of(Decoder.Ꮡscan), c);
             if (exprᴛ1 == scanEnd) {
                 dec.scan.bytes--;
                 goto break_Input;
             }
             else if (exprᴛ1 == scanEndObject || exprᴛ1 == scanEndArray) {
-                if (stateEndValue(Ꮡ(dec.scan), // scanEnd is delayed one byte so we decrement
+                if (stateEndValue(Ꮡdec.of(Decoder.Ꮡscan), // scanEnd is delayed one byte so we decrement
  // the scanner bytes count by 1 to ensure that
  // this value is correct in the next call of Decode.
  // scanEnd is delayed one byte.
@@ -123,7 +129,7 @@ Input:
         // Delayed until now to allow buffer scan.
         if (err != default!) {
             if (AreEqual(err, io.EOF)) {
-                if (dec.scan.step(Ꮡ(dec.scan), (rune)' ') == scanEnd) {
+                if (dec.scan.step(Ꮡdec.of(Decoder.Ꮡscan), (rune)' ') == scanEnd) {
                     goto break_Input;
                 }
                 if (nonSpace(dec.buf)) {
@@ -146,15 +152,15 @@ break_Input:;
     // Make room to read more into the buffer.
     // First slide down data already consumed.
     if (dec.scanp > 0) {
-        dec.scanned += ((int64)dec.scanp);
+        dec.scanned += (int64)dec.scanp;
         nint nΔ1 = copy(dec.buf, dec.buf[(int)(dec.scanp)..]);
         dec.buf = dec.buf[..(int)(nΔ1)];
         dec.scanp = 0;
     }
     // Grow buffer if not large enough.
-    static readonly UntypedInt minRead = 512;
+    UntypedInt minRead = 512;
     if (cap(dec.buf) - len(dec.buf) < minRead) {
-        var newBuf = new slice<byte>(len(dec.buf), 2 * cap(dec.buf) + minRead);
+        var newBuf = new slice<byte>(len(dec.buf), 2 * cap(dec.buf) + (nint)minRead);
         copy(newBuf, dec.buf);
         dec.buf = newBuf;
     }
@@ -175,7 +181,7 @@ internal static bool nonSpace(slice<byte> b) {
 
 // An Encoder writes JSON values to an output stream.
 [GoType] partial struct Encoder {
-    internal io_package.Writer w;
+    internal io.Writer w;
     internal error err;
     internal bool escapeHTML;
     internal slice<byte> indentBuf;
@@ -194,13 +200,14 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
 //
 // See the documentation for [Marshal] for details about the
 // conversion of Go values to JSON.
-[GoRecv] public static error Encode(this ref Encoder enc, any v) => func((defer, _) => {
+public static error Encode(this ж<Encoder> Ꮡenc, any v) => func((defer, recover) => {
+    ref var enc = ref Ꮡenc.Value;
+
     if (enc.err != default!) {
         return enc.err;
     }
     var e = newEncodeState();
-    var encodeStatePoolʗ1 = encodeStatePool;
-    deferǃ(encodeStatePoolʗ1.Put, e, defer);
+    deferǃ(ᏑencodeStatePool.Put, e, defer);
     var err = e.marshal(v, new encOpts(escapeHTML: enc.escapeHTML));
     if (err != default!) {
         return err;
@@ -211,8 +218,8 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
     // is required if the encoded value was a number,
     // so that the reader knows there aren't more
     // digits coming.
-    e.WriteByte((rune)'\n');
-    var b = e.Bytes();
+    e.of(encodeState.ᏑBuffer).WriteByte((rune)'\n');
+    var b = e.of(encodeState.ᏑBuffer).Bytes();
     if (enc.indentPrefix != ""u8 || enc.indentValue != ""u8) {
         (enc.indentBuf, err) = appendIndent(enc.indentBuf[..0], b, enc.indentPrefix, enc.indentValue);
         if (err != default!) {
@@ -252,25 +259,25 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
 // MarshalJSON returns m as the JSON encoding of m.
 public static (slice<byte>, error) MarshalJSON(this RawMessage m) {
     if (m == default!) {
-        return (slice<byte>("null"), default!);
+        return (slice<byte>((@string)"null"), default!);
     }
     return (m, default!);
 }
 
 // UnmarshalJSON sets *m to a copy of data.
-[GoRecv] public static unsafe error UnmarshalJSON(this ref RawMessage m, slice<byte> data) {
+public static error UnmarshalJSON(this ж<RawMessage> Ꮡm, slice<byte> data) {
+    ref var m = ref Ꮡm.Value;
+
     if (m == nil) {
         return errors.New("json.RawMessage: UnmarshalJSON on nil pointer"u8);
     }
-    m = append(new Span<ж<RawMessage>>((RawMessage**), 0), data.ꓸꓸꓸ);
+    m = append((m)[0..0], data.ꓸꓸꓸ);
     return default!;
 }
 
-internal static Marshaler _ᴛ1ʗ = ((ж<RawMessage>)default!);
+internal static Marshaler _ᴛ1ʗ = new RawMessageжMarshaler(((ж<RawMessage>)default!));
 
-internal static Unmarshaler _ᴛ2ʗ = ((ж<RawMessage>)default!);
-
-[GoType("any")] partial struct ΔToken;
+internal static Unmarshaler _ᴛ2ʗ = new RawMessageжUnmarshaler(((ж<RawMessage>)default!));
 
 internal static readonly UntypedInt tokenTopValue = iota;
 internal static readonly UntypedInt tokenArrayStart = 1;
@@ -294,7 +301,7 @@ internal static readonly UntypedInt tokenObjectComma = 8;
             return err;
         }
         if (c != (rune)',') {
-            return new SyntaxError("expected comma after array element", dec.InputOffset());
+            return new SyntaxErrorжerror(Ꮡ(new SyntaxError("expected comma after array element", dec.InputOffset())));
         }
         dec.scanp++;
         dec.tokenState = tokenArrayValue;
@@ -305,7 +312,7 @@ internal static readonly UntypedInt tokenObjectComma = 8;
             return err;
         }
         if (c != (rune)':') {
-            return new SyntaxError("expected colon after object key", dec.InputOffset());
+            return new SyntaxErrorжerror(Ꮡ(new SyntaxError("expected colon after object key", dec.InputOffset())));
         }
         dec.scanp++;
         dec.tokenState = tokenObjectValue;
@@ -337,7 +344,7 @@ internal static readonly UntypedInt tokenObjectComma = 8;
 [GoType("num:rune")] partial struct Delim;
 
 public static @string String(this Delim d) {
-    return ((@string)d);
+    return ((@string)(rune)d);
 }
 
 // Token returns the next JSON token in the input stream.
@@ -351,7 +358,9 @@ public static @string String(this Delim d) {
 // number, and null—along with delimiters [ ] { } of type [Delim]
 // to mark the start and end of arrays and objects.
 // Commas and colons are elided.
-[GoRecv] public static (ΔToken, error) Token(this ref Decoder dec) {
+public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
+    ref var dec = ref Ꮡdec.Value;
+
     while (ᐧ) {
         var (c, err) = dec.peek();
         if (err != default!) {
@@ -420,16 +429,16 @@ public static @string String(this Delim d) {
         }
         if (exprᴛ1 is (rune)'"') { matchᴛ1 = true;
             if (dec.tokenState == tokenObjectStart || dec.tokenState == tokenObjectKey) {
-                ref var xΔ2 = ref heap(new @string(), out var ᏑxΔ2);
+                ref var x = ref heap(new @string(), out var Ꮡx);
                 nint old = dec.tokenState;
                 dec.tokenState = tokenTopValue;
-                var errΔ3 = dec.Decode(ᏑxΔ2);
+                var errΔ3 = Ꮡdec.Decode(Ꮡx);
                 dec.tokenState = old;
                 if (errΔ3 != default!) {
                     return (default!, errΔ3);
                 }
                 dec.tokenState = tokenObjectColon;
-                return (xΔ2, default!);
+                return (x, default!);
             }
             fallthrough = true;
         }
@@ -437,9 +446,9 @@ public static @string String(this Delim d) {
             if (!dec.tokenValueAllowed()) {
                 return dec.tokenError(c);
             }
-            any x = default!;
+            ref var x = ref heap<any>(out var Ꮡx);
             {
-                var errΔ4 = dec.Decode(Ꮡ(x)); if (errΔ4 != default!) {
+                var errΔ4 = Ꮡdec.Decode(Ꮡx); if (errΔ4 != default!) {
                     return (default!, errΔ4);
                 }
             }
@@ -471,7 +480,7 @@ public static @string String(this Delim d) {
         context = " after object key:value pair"u8;
     }
 
-    return (default!, new SyntaxError("invalid character "u8 + quoteChar(c) + context, dec.InputOffset()));
+    return (default!, new SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character " + quoteChar(c) + context, dec.InputOffset()))));
 }
 
 // More reports whether there is another element in the
@@ -504,7 +513,7 @@ public static @string String(this Delim d) {
 // The offset gives the location of the end of the most recently returned token
 // and the beginning of the next token.
 [GoRecv] public static int64 InputOffset(this ref Decoder dec) {
-    return dec.scanned + ((int64)dec.scanp);
+    return dec.scanned + (int64)dec.scanp;
 }
 
 } // end json_package

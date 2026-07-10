@@ -8,6 +8,7 @@ using md5 = crypto.md5_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using crypto;
+using hash = hash_package;
 
 partial class smtp_package {
 
@@ -37,9 +38,7 @@ partial class smtp_package {
 }
 
 [GoType] partial struct plainAuth {
-    internal @string identity;
-    internal @string username;
-    internal @string password;
+    internal @string identity, username, password;
     internal @string host;
 }
 
@@ -52,7 +51,7 @@ partial class smtp_package {
 // or is connected to localhost. Otherwise authentication will fail with an
 // error, without sending the credentials.
 public static ΔAuth PlainAuth(@string identity, @string username, @string password, @string host) {
-    return new plainAuth(identity, username, password, host);
+    return new plainAuthжΔAuth(Ꮡ(new plainAuth(identity, username, password, host)));
 }
 
 internal static bool isLocalhost(@string name) {
@@ -60,7 +59,7 @@ internal static bool isLocalhost(@string name) {
 }
 
 [GoRecv] internal static (@string, slice<byte>, error) Start(this ref plainAuth a, ж<ServerInfo> Ꮡserver) {
-    ref var server = ref Ꮡserver.val;
+    ref var server = ref Ꮡserver.Value;
 
     // Must have TLS, or else localhost server.
     // Note: If TLS is not true, then we can't trust ANYTHING in ServerInfo.
@@ -73,7 +72,7 @@ internal static bool isLocalhost(@string name) {
     if (server.Name != a.host) {
         return ("", default!, errors.New("wrong host name"u8));
     }
-    var resp = slice<byte>(a.identity + "\x00"u8 + a.username + "\x00"u8 + a.password);
+    var resp = slice<byte>(a.identity + "\x00" + a.username + "\x00" + a.password);
     return ("PLAIN", resp, default!);
 }
 
@@ -86,8 +85,7 @@ internal static bool isLocalhost(@string name) {
 }
 
 [GoType] partial struct cramMD5Auth {
-    internal @string username;
-    internal @string secret;
+    internal @string username, secret;
 }
 
 // CRAMMD5Auth returns an [Auth] that implements the CRAM-MD5 authentication
@@ -95,11 +93,11 @@ internal static bool isLocalhost(@string name) {
 // The returned Auth uses the given username and secret to authenticate
 // to the server using the challenge-response mechanism.
 public static ΔAuth CRAMMD5Auth(@string username, @string secret) {
-    return new cramMD5Auth(username, secret);
+    return new cramMD5AuthжΔAuth(Ꮡ(new cramMD5Auth(username, secret)));
 }
 
 [GoRecv] internal static (@string, slice<byte>, error) Start(this ref cramMD5Auth a, ж<ServerInfo> Ꮡserver) {
-    ref var server = ref Ꮡserver.val;
+    ref var server = ref Ꮡserver.Value;
 
     return ("CRAM-MD5", default!, default!);
 }

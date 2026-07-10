@@ -4,21 +4,23 @@
 namespace go.@internal;
 
 using errors = errors_package;
-using race = @internal.race_package;
-using windows = @internal.syscall.windows_package;
+using race = go.@internal.race_package;
+using windows = go.@internal.syscall.windows_package;
 using io = io_package;
 using sync = sync_package;
-using syscall = syscall_package;
+using Δsyscall = syscall_package;
 using utf16 = unicode.utf16_package;
 using utf8 = unicode.utf8_package;
 using @unsafe = unsafe_package;
-using @internal.syscall;
+using go.@internal;
+using go.@internal.syscall;
 using unicode;
 
 partial class poll_package {
 
 internal static error initErr;
-internal static uint64 ioSync;
+internal static ж<uint64> ᏑioSync = new(default(uint64));
+internal static ref uint64 ioSync => ref ᏑioSync.Value;
 
 // This package uses the SetFileCompletionNotificationModes Windows
 // API to skip calling GetQueuedCompletionStatus if an IO operation
@@ -32,21 +34,21 @@ internal static bool useSetFileCompletionNotificationModes; // determines is Set
 // on the system and is safe to use.
 // See https://support.microsoft.com/kb/2568167 for details.
 internal static void checkSetFileCompletionNotificationModes() {
-    var err = syscall.LoadSetFileCompletionNotificationModes();
+    var err = Δsyscall.LoadSetFileCompletionNotificationModes();
     if (err != default!) {
         return;
     }
     ref var protos = ref heap<array<int32>>(out var Ꮡprotos);
-    protos = new int32[]{syscall.IPPROTO_TCP, 0}.array();
-    ref var buf = ref heap(new array<syscall.WSAProtocolInfo>(32), out var Ꮡbuf);
+    protos = new int32[]{Δsyscall.IPPROTO_TCP, 0}.array();
+    ref var buf = ref heap(new array<Δsyscall.WSAProtocolInfo>(32), out var Ꮡbuf);
     ref var len = ref heap<uint32>(out var Ꮡlen);
-    len = ((uint32)@unsafe.Sizeof(buf));
-    var (n, err) = syscall.WSAEnumProtocols(Ꮡprotos.at<int32>(0), Ꮡbuf.at<syscall.WSAProtocolInfo>(0), Ꮡlen);
+    len = (uint32)@unsafe.Sizeof(buf);
+    (var n, err) = Δsyscall.WSAEnumProtocols(Ꮡprotos.at<int32>(0), Ꮡbuf.at<Δsyscall.WSAProtocolInfo>(0), Ꮡlen);
     if (err != default!) {
         return;
     }
-    for (var i = ((int32)0); i < n; i++) {
-        if ((uint32)(buf[i].ServiceFlags1 & syscall.XP1_IFS_HANDLES) == 0) {
+    for (var i = (int32)0; i < n; i++) {
+        if ((uint32)(buf[i].ServiceFlags1 & (uint32)Δsyscall.XP1_IFS_HANDLES) == 0) {
             return;
         }
     }
@@ -57,11 +59,10 @@ internal static void checkSetFileCompletionNotificationModes() {
 // It is called from the net package at init time to avoid
 // loading ws2_32.dll when net is not used.
 public static Action InitWSA = sync.OnceFunc(() => {
-    internal static syscall.WSAData d;
-
-    var e = syscall.WSAStartup(((uint32)514), Ꮡ(d));
+    Δsyscall.WSAData d = default!;
+    var e = Δsyscall.WSAStartup((uint32)0x202, Ꮡ(d));
     if (e != default!) {
-        var initErr = e;
+        initErr = e;
     }
     checkSetFileCompletionNotificationModes();
 });
@@ -70,25 +71,25 @@ public static Action InitWSA = sync.OnceFunc(() => {
 [GoType] partial struct operation {
     // Used by IOCP interface, it must be first field
     // of the struct, as our code rely on it.
-    internal syscall_package.Overlapped o;
+    internal Δsyscall.Overlapped o;
     // fields used by runtime.netpoll
     internal uintptr runtimeCtx;
     internal int32 mode;
     // fields used only by net package
     internal ж<FD> fd;
-    internal syscall_package.WSABuf buf;
-    internal @internal.syscall.windows_package.WSAMsg msg;
-    internal syscall_package.ΔSockaddr sa;
-    internal ж<syscall_package.RawSockaddrAny> rsa;
+    internal Δsyscall.WSABuf buf;
+    internal windows.WSAMsg msg;
+    internal syscallꓸSockaddr sa;
+    internal ж<Δsyscall.RawSockaddrAny> rsa;
     internal int32 rsan;
-    internal syscall_package.ΔHandle handle;
+    internal syscallꓸHandle handle;
     internal uint32 flags;
     internal uint32 qty;
-    internal slice<syscall.WSABuf> bufs;
+    internal slice<Δsyscall.WSABuf> bufs;
 }
 
 [GoRecv] internal static void InitBuf(this ref operation o, slice<byte> buf) {
-    o.buf.Len = ((uint32)len(buf));
+    o.buf.Len = (uint32)len(buf);
     o.buf.Buf = default!;
     if (len(buf) != 0) {
         o.buf.Buf = Ꮡ(buf, 0);
@@ -96,24 +97,26 @@ public static Action InitWSA = sync.OnceFunc(() => {
 }
 
 [GoRecv] internal static void InitBufs(this ref operation o, ж<slice<slice<byte>>> Ꮡbuf) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.Value;
 
     if (o.bufs == default!){
-        o.bufs = new slice<syscall.WSABuf>(0, len(buf));
+        o.bufs = new slice<Δsyscall.WSABuf>(0, len(buf));
     } else {
         o.bufs = o.bufs[..0];
     }
-    foreach (var (_, b) in buf) {
+    foreach (var (_, vᴛ1) in buf) {
+        var b = vᴛ1;
+
         if (len(b) == 0) {
-            o.bufs = append(o.bufs, new syscall.WSABuf(nil));
+            o.bufs = append(o.bufs, new Δsyscall.WSABuf(nil));
             continue;
         }
         while (len(b) > maxRW) {
-            o.bufs = append(o.bufs, new syscall.WSABuf(Len: maxRW, Buf: Ꮡ(b, 0)));
+            o.bufs = append(o.bufs, new Δsyscall.WSABuf(Len: maxRW, Buf: Ꮡ(b, 0)));
             b = b[(int)(maxRW)..];
         }
         if (len(b) > 0) {
-            o.bufs = append(o.bufs, new syscall.WSABuf(Len: ((uint32)len(b)), Buf: Ꮡ(b, 0)));
+            o.bufs = append(o.bufs, new Δsyscall.WSABuf(Len: (uint32)len(b), Buf: Ꮡ(b, 0)));
         }
     }
 }
@@ -127,14 +130,16 @@ public static Action InitWSA = sync.OnceFunc(() => {
     o.bufs = o.bufs[..0];
 }
 
-[GoRecv] internal static void InitMsg(this ref operation o, slice<byte> p, slice<byte> oob) {
+internal static void InitMsg(this ж<operation> Ꮡo, slice<byte> p, slice<byte> oob) {
+    ref var o = ref Ꮡo.Value;
+
     o.InitBuf(p);
-    o.msg.Buffers = Ꮡ(o.buf);
+    o.msg.Buffers = Ꮡo.of(operation.Ꮡbuf);
     o.msg.BufferCount = 1;
     o.msg.Name = default!;
     o.msg.Namelen = 0;
     o.msg.Flags = 0;
-    o.msg.Control.Len = ((uint32)len(oob));
+    o.msg.Control.Len = (uint32)len(oob);
     o.msg.Control.Buf = default!;
     if (len(oob) != 0) {
         o.msg.Control.Buf = Ꮡ(oob, 0);
@@ -146,28 +151,28 @@ public static Action InitWSA = sync.OnceFunc(() => {
 // is available. Alternatively, it passes the request onto
 // runtime netpoll and waits for completion or cancels request.
 internal static (nint, error) execIO(ж<operation> Ꮡo, Func<ж<operation>, error> submit) {
-    ref var o = ref Ꮡo.val;
+    ref var o = ref Ꮡo.Value;
 
-    if (o.fd.pd.runtimeCtx == 0) {
+    if ((~o.fd).pd.runtimeCtx == 0) {
         return (0, errors.New("internal error: polling on unsupported descriptor type"u8));
     }
     var fd = o.fd;
     // Notify runtime netpoll about starting IO.
-    var err = (~fd).pd.prepare(((nint)o.mode), (~fd).isFile);
+    var err = fd.of(FD.Ꮡpd).prepare((nint)o.mode, (~fd).isFile);
     if (err != default!) {
         return (0, err);
     }
     // Start IO.
     err = submit(Ꮡo);
     var exprᴛ1 = err;
-    if (exprᴛ1 == default!) {
-        if (o.fd.skipSyncNotif) {
+    if (AreEqual(exprᴛ1, default!)) {
+        if ((~o.fd).skipSyncNotif) {
             // IO completed immediately
             // No completion message will follow, so return immediately.
-            return (((nint)o.qty), default!);
+            return ((nint)o.qty, default!);
         }
     }
-    if (exprᴛ1 == syscall.ERROR_IO_PENDING) {
+    if (AreEqual(exprᴛ1, Δsyscall.ERROR_IO_PENDING)) {
         err = default!;
     }
     else { /* default: */
@@ -177,41 +182,41 @@ internal static (nint, error) execIO(ж<operation> Ꮡo, Func<ж<operation>, err
     // Need to get our completion message anyway.
     // IO started, and we have to wait for its completion.
     // Wait for our request to complete.
-    err = (~fd).pd.wait(((nint)o.mode), (~fd).isFile);
+    err = fd.of(FD.Ꮡpd).wait((nint)o.mode, (~fd).isFile);
     if (err == default!) {
-        err = windows.WSAGetOverlappedResult((~fd).Sysfd, Ꮡ(o.o), Ꮡ(o.qty), false, Ꮡ(o.flags));
+        err = windows.WSAGetOverlappedResult((~fd).Sysfd, Ꮡo.of(operation.Ꮡo), Ꮡo.of(operation.Ꮡqty), false, Ꮡo.of(operation.Ꮡflags));
         // All is good. Extract our IO results and return.
         if (err != default!) {
             // More data available. Return back the size of received data.
-            if (err == syscall.ERROR_MORE_DATA || err == windows.WSAEMSGSIZE) {
-                return (((nint)o.qty), err);
+            if (AreEqual(err, Δsyscall.ERROR_MORE_DATA) || AreEqual(err, windows.WSAEMSGSIZE)) {
+                return ((nint)o.qty, err);
             }
             return (0, err);
         }
-        return (((nint)o.qty), default!);
+        return ((nint)o.qty, default!);
     }
     // IO is interrupted by "close" or "timeout"
     var netpollErr = err;
     var exprᴛ2 = netpollErr;
-    if (exprᴛ2 == ErrNetClosing || exprᴛ2 == ErrFileClosing || exprᴛ2 == ErrDeadlineExceeded) {
+    if (AreEqual(exprᴛ2, ErrNetClosing) || AreEqual(exprᴛ2, ErrFileClosing) || AreEqual(exprᴛ2, ErrDeadlineExceeded)) {
     }
     else { /* default: */
-        throw panic("unexpected runtime.netpoll error: "u8 + netpollErr.Error());
+        throw panic("unexpected runtime.netpoll error: " + netpollErr.Error());
     }
 
     // will deal with those.
     // Cancel our request.
-    err = syscall.CancelIoEx((~fd).Sysfd, Ꮡ(o.o));
+    err = Δsyscall.CancelIoEx((~fd).Sysfd, Ꮡo.of(operation.Ꮡo));
     // Assuming ERROR_NOT_FOUND is returned, if IO is completed.
-    if (err != default! && err != syscall.ERROR_NOT_FOUND) {
+    if (err != default! && !AreEqual(err, Δsyscall.ERROR_NOT_FOUND)) {
         // TODO(brainman): maybe do something else, but panic.
         throw panic(err);
     }
     // Wait for cancellation to complete.
-    (~fd).pd.waitCanceled(((nint)o.mode));
-    err = windows.WSAGetOverlappedResult((~fd).Sysfd, Ꮡ(o.o), Ꮡ(o.qty), false, Ꮡ(o.flags));
+    fd.of(FD.Ꮡpd).waitCanceled((nint)o.mode);
+    err = windows.WSAGetOverlappedResult((~fd).Sysfd, Ꮡo.of(operation.Ꮡo), Ꮡo.of(operation.Ꮡqty), false, Ꮡo.of(operation.Ꮡflags));
     if (err != default!) {
-        if (err == syscall.ERROR_OPERATION_ABORTED) {
+        if (AreEqual(err, Δsyscall.ERROR_OPERATION_ABORTED)) {
             // IO Canceled
             err = netpollErr;
         }
@@ -220,7 +225,7 @@ internal static (nint, error) execIO(ж<operation> Ꮡo, Func<ж<operation>, err
     // We issued a cancellation request. But, it seems, IO operation succeeded
     // before the cancellation request run. We need to treat the IO operation as
     // succeeded (the bytes are actually sent/recv from network).
-    return (((nint)o.qty), default!);
+    return ((nint)o.qty, default!);
 }
 
 // FD is a file descriptor. The net and os packages embed this type in
@@ -229,7 +234,7 @@ internal static (nint, error) execIO(ж<operation> Ꮡo, Func<ж<operation>, err
     // Lock sysfd and serialize access to Read and Write methods.
     internal fdMutex fdmu;
     // System file descriptor. Immutable until Close.
-    public syscall_package.ΔHandle Sysfd;
+    public syscallꓸHandle Sysfd;
     // Read operation.
     internal operation rop;
     // Write operation.
@@ -237,7 +242,7 @@ internal static (nint, error) execIO(ж<operation> Ꮡo, Func<ж<operation>, err
     // I/O poller.
     internal pollDesc pd;
     // Used to implement pread/pwrite.
-    internal sync_package.Mutex l;
+    internal sync.Mutex l;
     // For console I/O.
     internal slice<byte> lastbits; // first few bytes of the last incomplete rune in last write
     internal slice<uint16> readuint16; // buffer to hold uint16s obtained with ReadConsole
@@ -273,7 +278,9 @@ internal static Action<@string, ж<FD>, error> logInitFD;
 // The net argument is a network name from the net package (e.g., "tcp"),
 // or "file" or "console" or "dir".
 // Set pollable to true if fd should be managed by runtime netpoll.
-[GoRecv] public static (@string, error) Init(this ref FD fd, @string net, bool pollable) {
+public static (@string, error) Init(this ж<FD> Ꮡfd, @string net, bool pollable) {
+    ref var fd = ref Ꮡfd.Value;
+
     if (initErr != default!) {
         return ("", initErr);
     }
@@ -308,24 +315,24 @@ internal static Action<@string, ж<FD>, error> logInitFD;
         // somehow call execIO, then execIO, and therefore the
         // calling method, will return an error, because
         // fd.pd.runtimeCtx will be 0.
-        err = fd.pd.init(fd);
+        err = fd.pd.init(Ꮡfd);
     }
     if (logInitFD != default!) {
-        logInitFD(net, fd, err);
+        logInitFD(net, Ꮡfd, err);
     }
     if (err != default!) {
         return ("", err);
     }
     if (pollable && useSetFileCompletionNotificationModes) {
         // We do not use events, so we can skip them always.
-        var flags = ((uint8)syscall.FILE_SKIP_SET_EVENT_ON_HANDLE);
+        var flags = (uint8)Δsyscall.FILE_SKIP_SET_EVENT_ON_HANDLE;
         var exprᴛ2 = net;
         if (exprᴛ2 == "tcp"u8 || exprᴛ2 == "tcp4"u8 || exprᴛ2 == "tcp6"u8 || exprᴛ2 == "udp"u8 || exprᴛ2 == "udp4"u8 || exprᴛ2 == "udp6"u8) {
-            flags |= (uint8)(syscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS);
+            flags |= (uint8)(Δsyscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS);
         }
 
-        var err = syscall.SetFileCompletionNotificationModes(fd.Sysfd, flags);
-        if (err == default! && (uint8)(flags & syscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS) != 0) {
+        var errΔ1 = Δsyscall.SetFileCompletionNotificationModes(fd.Sysfd, flags);
+        if (errΔ1 == default! && (uint8)(flags & (uint8)Δsyscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS) != 0) {
             fd.skipSyncNotif = true;
         }
     }
@@ -334,28 +341,30 @@ internal static Action<@string, ж<FD>, error> logInitFD;
     var exprᴛ3 = net;
     if (exprᴛ3 == "udp"u8 || exprᴛ3 == "udp4"u8 || exprᴛ3 == "udp6"u8) {
         ref var ret = ref heap<uint32>(out var Ꮡret);
-        ret = ((uint32)0);
+        ret = (uint32)0;
         ref var flag = ref heap<uint32>(out var Ꮡflag);
-        flag = ((uint32)0);
-        var size = ((uint32)@unsafe.Sizeof(flag));
-        var errΔ2 = syscall.WSAIoctl(fd.Sysfd, syscall.SIO_UDP_CONNRESET, (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡflag)), size, nil, 0, Ꮡret, nil, 0);
-        if (errΔ2 != default!) {
-            return ("wsaioctl", errΔ2);
+        flag = (uint32)0;
+        var size = (uint32)@unsafe.Sizeof(flag);
+        var errΔ3 = Δsyscall.WSAIoctl(fd.Sysfd, Δsyscall.SIO_UDP_CONNRESET, (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡflag)), size, nil, 0, Ꮡret, nil, 0);
+        if (errΔ3 != default!) {
+            return ("wsaioctl", errΔ3);
         }
     }
 
     fd.rop.mode = (rune)'r';
     fd.wop.mode = (rune)'w';
-    fd.rop.fd = fd;
-    fd.wop.fd = fd;
+    fd.rop.fd = Ꮡfd;
+    fd.wop.fd = Ꮡfd;
     fd.rop.runtimeCtx = fd.pd.runtimeCtx;
     fd.wop.runtimeCtx = fd.pd.runtimeCtx;
     return ("", default!);
 }
 
-[GoRecv] internal static error destroy(this ref FD fd) {
-    if (fd.Sysfd == syscall.InvalidHandle) {
-        return syscall.EINVAL;
+internal static error destroy(this ж<FD> Ꮡfd) {
+    ref var fd = ref Ꮡfd.Value;
+
+    if (fd.Sysfd == Δsyscall.InvalidHandle) {
+        return Δsyscall.EINVAL;
     }
     // Poller may want to unregister fd in readiness notification mechanism,
     // so this must be executed before fd.CloseFunc.
@@ -366,30 +375,32 @@ internal static Action<@string, ж<FD>, error> logInitFD;
         err = CloseFunc(fd.Sysfd);
     }
     else { /* default: */
-        err = syscall.CloseHandle(fd.Sysfd);
+        err = Δsyscall.CloseHandle(fd.Sysfd);
     }
 
     // The net package uses the CloseFunc variable for testing.
-    fd.Sysfd = syscall.InvalidHandle;
-    runtime_Semrelease(Ꮡ(fd.csema));
+    fd.Sysfd = Δsyscall.InvalidHandle;
+    runtime_Semrelease(Ꮡfd.of(FD.Ꮡcsema));
     return err;
 }
 
 // Close closes the FD. The underlying file descriptor is closed by
 // the destroy method when there are no remaining references.
-[GoRecv] public static error Close(this ref FD fd) {
-    if (!fd.fdmu.increfAndClose()) {
+public static error Close(this ж<FD> Ꮡfd) {
+    ref var fd = ref Ꮡfd.Value;
+
+    if (!Ꮡfd.of(FD.Ꮡfdmu).increfAndClose()) {
         return errClosing(fd.isFile);
     }
     if (fd.kind == kindPipe) {
-        syscall.CancelIoEx(fd.Sysfd, nil);
+        Δsyscall.CancelIoEx(fd.Sysfd, nil);
     }
     // unblock pending reader and writer
     fd.pd.evict();
-    var err = fd.decref();
+    var err = Ꮡfd.decref();
     // Wait until the descriptor is closed. If this was the only
     // reference, it is already closed.
-    runtime_Semacquire(Ꮡ(fd.csema));
+    runtime_Semacquire(Ꮡfd.of(FD.Ꮡcsema));
     return err;
 }
 
@@ -399,28 +410,30 @@ internal static Action<@string, ж<FD>, error> logInitFD;
 internal static readonly UntypedInt maxRW = /* 1 << 30 */ 1073741824; // 1GB is large enough and keeps subsequent reads aligned
 
 // Read implements io.Reader.
-[GoRecv] public static (nint, error) Read(this ref FD fd, slice<byte> buf) => func((defer, _) => {
+public static (nint, error) Read(this ж<FD> Ꮡfd, slice<byte> buf) => func<(nint, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+
     {
-        var errΔ1 = fd.readLock(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != default!) {
             return (0, errΔ1);
         }
     }
-    defer(fd.readUnlock);
+    defer(Ꮡfd.readUnlock);
     if (len(buf) > maxRW) {
         buf = buf[..(int)(maxRW)];
     }
     nint n = default!;
     error err = default!;
     if (fd.isFile){
-        fd.l.Lock();
-        defer(fd.l.Unlock);
+        Ꮡfd.of(FD.Ꮡl).Lock();
+        defer(Ꮡfd.of(FD.Ꮡl).Unlock);
         var exprᴛ1 = fd.kind;
         if (exprᴛ1 == kindConsole) {
             (n, err) = fd.readConsole(buf);
         }
         else { /* default: */
-            (n, err) = syscall.Read(fd.Sysfd, buf);
-            if (fd.kind == kindPipe && err == syscall.ERROR_OPERATION_ABORTED) {
+            (n, err) = Δsyscall.Read(fd.Sysfd, buf);
+            if (fd.kind == kindPipe && AreEqual(err, Δsyscall.ERROR_OPERATION_ABORTED)) {
                 // Close uses CancelIoEx to interrupt concurrent I/O for pipes.
                 // If the fd is a pipe and the Read was interrupted by CancelIoEx,
                 // we assume it is interrupted by Close.
@@ -432,11 +445,11 @@ internal static readonly UntypedInt maxRW = /* 1 << 30 */ 1073741824; // 1GB is 
             n = 0;
         }
     } else {
-        var o = Ꮡ(fd.rop);
+        var o = Ꮡfd.of(FD.Ꮡrop);
         o.InitBuf(buf);
-        (n, err) = execIO(o, (ж<operation> o) => syscall.WSARecv((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).buf), 1, Ꮡ((~oΔ1).qty), Ꮡ((~oΔ1).flags), Ꮡ((~oΔ1).o), nil));
+        (n, err) = execIO(o, (ж<operation> oΔ1) => Δsyscall.WSARecv((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡbuf), 1, oΔ1.of(operation.Ꮡqty), oΔ1.of(operation.Ꮡflags), oΔ1.of(operation.Ꮡo), nil));
         if (race.Enabled) {
-            race.Acquire(new @unsafe.Pointer(Ꮡ(ioSync)));
+            race.Acquire(new @unsafe.Pointer(ᏑioSync));
         }
     }
     if (len(buf) != 0) {
@@ -445,7 +458,7 @@ internal static readonly UntypedInt maxRW = /* 1 << 30 */ 1073741824; // 1GB is 
     return (n, err);
 });
 
-public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (err error)> ReadConsole = syscall.ReadConsole;                                                               // changed for testing
+public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, error> ReadConsole = Δsyscall.ReadConsole;                                                         // changed for testing
 
 // readConsole reads utf16 characters from console File,
 // encodes them into utf8 and stores them in buffer b.
@@ -467,26 +480,26 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
             n = len(b);
         }
         ref var nw = ref heap(new uint32(), out var Ꮡnw);
-        var err = ReadConsole(fd.Sysfd, Ꮡfd.readuint16[..(int)(len(fd.readuint16) + 1)].at<uint16>(len(fd.readuint16)), ((uint32)n), Ꮡnw, nil);
+        var err = ReadConsole(fd.Sysfd, Ꮡ(fd.readuint16[..(int)(len(fd.readuint16) + 1)], len(fd.readuint16)), (uint32)n, Ꮡnw, nil);
         if (err != default!) {
             return (0, err);
         }
-        var uint16s = fd.readuint16[..(int)(len(fd.readuint16) + ((nint)nw))];
+        var uint16s = fd.readuint16[..(int)(len(fd.readuint16) + (nint)nw)];
         fd.readuint16 = fd.readuint16[..0];
         var buf = fd.readbyte[..0];
         for (nint iΔ1 = 0; iΔ1 < len(uint16s); iΔ1++) {
-            var r = ((rune)uint16s[iΔ1]);
+            var r = (rune)uint16s[iΔ1];
             if (utf16.IsSurrogate(r)) {
                 if (iΔ1 + 1 == len(uint16s)){
                     if (nw > 0) {
                         // Save half surrogate pair for next time.
                         fd.readuint16 = fd.readuint16[..1];
-                        fd.readuint16[0] = ((uint16)r);
+                        fd.readuint16[0] = (uint16)r;
                         break;
                     }
                     r = utf8.RuneError;
                 } else {
-                    r = utf16.DecodeRune(r, ((rune)uint16s[iΔ1 + 1]));
+                    r = utf16.DecodeRune(r, (rune)uint16s[iΔ1 + 1]);
                     if (r != utf8.RuneError) {
                         iΔ1++;
                     }
@@ -504,7 +517,7 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
     nint i = default!;
     for (i = 0; i < len(src) && i < len(b); i++) {
         var x = src[i];
-        if (x == 26) {
+        if (x == 0x1A) {
             // Ctrl-Z
             if (i == 0) {
                 fd.readbyteOffset++;
@@ -518,50 +531,54 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
 }
 
 // Pread emulates the Unix pread system call.
-[GoRecv] public static (nint, error) Pread(this ref FD fd, slice<byte> b, int64 off) => func((defer, _) => {
+public static (nint, error) Pread(this ж<FD> Ꮡfd, slice<byte> b, int64 off) => func<(nint, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+
     if (fd.kind == kindPipe) {
         // Pread does not work with pipes
-        return (0, syscall.ESPIPE);
+        return (0, Δsyscall.ESPIPE);
     }
     // Call incref, not readLock, because since pread specifies the
     // offset it is independent from other reads.
     {
-        var err = fd.incref(); if (err != default!) {
+        var err = Ꮡfd.incref(); if (err != default!) {
             return (0, err);
         }
     }
-    defer(fd.decref);
+    defer(() => Ꮡfd.decref());
     if (len(b) > maxRW) {
         b = b[..(int)(maxRW)];
     }
-    fd.l.Lock();
-    defer(fd.l.Unlock);
-    var (curoffset, e) = syscall.Seek(fd.Sysfd, 0, io.SeekCurrent);
+    Ꮡfd.of(FD.Ꮡl).Lock();
+    defer(Ꮡfd.of(FD.Ꮡl).Unlock);
+    var (curoffset, e) = Δsyscall.Seek(fd.Sysfd, 0, io.SeekCurrent);
     if (e != default!) {
         return (0, e);
     }
-    deferǃ(syscall.Seek, fd.Sysfd, curoffset, io.SeekStart, defer);
-    ref var o = ref heap<syscall_package.Overlapped>(out var Ꮡo);
-    o = new syscall.Overlapped(
-        OffsetHigh: ((uint32)(off >> (int)(32))),
-        Offset: ((uint32)off)
+    deferǃ(Δsyscall.Seek, Ꮡfd.Value.Sysfd, curoffset, (nint)(io.SeekStart), defer);
+    ref var o = ref heap<Δsyscall.Overlapped>(out var Ꮡo);
+    o = new Δsyscall.Overlapped(
+        OffsetHigh: (uint32)((off >> (int)(32))),
+        Offset: (uint32)off
     );
     ref var done = ref heap(new uint32(), out var Ꮡdone);
-    e = syscall.ReadFile(fd.Sysfd, b, Ꮡdone, Ꮡo);
+    e = Δsyscall.ReadFile(fd.Sysfd, b, Ꮡdone, Ꮡo);
     if (e != default!) {
         done = 0;
-        if (e == syscall.ERROR_HANDLE_EOF) {
+        if (AreEqual(e, Δsyscall.ERROR_HANDLE_EOF)) {
             e = io.EOF;
         }
     }
     if (len(b) != 0) {
-        e = fd.eofError(((nint)done), e);
+        e = fd.eofError((nint)done, e);
     }
-    return (((nint)done), e);
+    return ((nint)done, e);
 });
 
 // ReadFrom wraps the recvfrom network call.
-[GoRecv] public static (nint, syscallꓸSockaddr, error) ReadFrom(this ref FD fd, slice<byte> buf) => func((defer, _) => {
+public static (nint, syscallꓸSockaddr, error) ReadFrom(this ж<FD> Ꮡfd, slice<byte> buf) => func<(nint, syscallꓸSockaddr, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+
     if (len(buf) == 0) {
         return (0, default!, default!);
     }
@@ -569,31 +586,32 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
         buf = buf[..(int)(maxRW)];
     }
     {
-        var errΔ1 = fd.readLock(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != default!) {
             return (0, default!, errΔ1);
         }
     }
-    defer(fd.readUnlock);
-    var o = Ꮡ(fd.rop);
+    defer(Ꮡfd.readUnlock);
+    var o = Ꮡfd.of(FD.Ꮡrop);
     o.InitBuf(buf);
-    var (n, err) = execIO(o, (ж<operation> o) => {
+    var (n, err) = execIO(o, (ж<operation> oΔ1) => {
         if ((~oΔ1).rsa == nil) {
-            o.val.rsa = @new<syscall.RawSockaddrAny>();
+            oΔ1.Value.rsa = @new<Δsyscall.RawSockaddrAny>();
         }
-        o.val.rsan = ((int32)@unsafe.Sizeof((~oΔ1).rsa.val));
-        return syscall.WSARecvFrom((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).buf), 1, Ꮡ((~oΔ1).qty), Ꮡ((~oΔ1).flags), (~oΔ1).rsa, Ꮡ((~oΔ1).rsan), Ꮡ((~oΔ1).o), nil);
+        oΔ1.Value.rsan = (int32)@unsafe.Sizeof((~oΔ1).rsa.Value);
+        return Δsyscall.WSARecvFrom((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡbuf), 1, oΔ1.of(operation.Ꮡqty), oΔ1.of(operation.Ꮡflags), (~oΔ1).rsa, oΔ1.of(operation.Ꮡrsan), oΔ1.of(operation.Ꮡo), nil);
     });
     err = fd.eofError(n, err);
     if (err != default!) {
         return (n, default!, err);
     }
-    (sa, _) = (~o).rsa.Sockaddr();
+    var (sa, _) = (~o).rsa.Sockaddr();
     return (n, sa, default!);
 });
 
 // ReadFromInet4 wraps the recvfrom network call for IPv4.
-[GoRecv] public static (nint, error) ReadFromInet4(this ref FD fd, slice<byte> buf, ж<syscall.SockaddrInet4> Ꮡsa4) => func((defer, _) => {
-    ref var sa4 = ref Ꮡsa4.val;
+public static (nint, error) ReadFromInet4(this ж<FD> Ꮡfd, slice<byte> buf, ж<Δsyscall.SockaddrInet4> Ꮡsa4) => func<(nint, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+    ref var sa4 = ref Ꮡsa4.Value;
 
     if (len(buf) == 0) {
         return (0, default!);
@@ -602,19 +620,19 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
         buf = buf[..(int)(maxRW)];
     }
     {
-        var errΔ1 = fd.readLock(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != default!) {
             return (0, errΔ1);
         }
     }
-    defer(fd.readUnlock);
-    var o = Ꮡ(fd.rop);
+    defer(Ꮡfd.readUnlock);
+    var o = Ꮡfd.of(FD.Ꮡrop);
     o.InitBuf(buf);
-    var (n, err) = execIO(o, (ж<operation> o) => {
+    var (n, err) = execIO(o, (ж<operation> oΔ1) => {
         if ((~oΔ1).rsa == nil) {
-            o.val.rsa = @new<syscall.RawSockaddrAny>();
+            oΔ1.Value.rsa = @new<Δsyscall.RawSockaddrAny>();
         }
-        o.val.rsan = ((int32)@unsafe.Sizeof((~oΔ1).rsa.val));
-        return syscall.WSARecvFrom((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).buf), 1, Ꮡ((~oΔ1).qty), Ꮡ((~oΔ1).flags), (~oΔ1).rsa, Ꮡ((~oΔ1).rsan), Ꮡ((~oΔ1).o), nil);
+        oΔ1.Value.rsan = (int32)@unsafe.Sizeof((~oΔ1).rsa.Value);
+        return Δsyscall.WSARecvFrom((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡbuf), 1, oΔ1.of(operation.Ꮡqty), oΔ1.of(operation.Ꮡflags), (~oΔ1).rsa, oΔ1.of(operation.Ꮡrsan), oΔ1.of(operation.Ꮡo), nil);
     });
     err = fd.eofError(n, err);
     if (err != default!) {
@@ -625,8 +643,9 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
 });
 
 // ReadFromInet6 wraps the recvfrom network call for IPv6.
-[GoRecv] public static (nint, error) ReadFromInet6(this ref FD fd, slice<byte> buf, ж<syscall.SockaddrInet6> Ꮡsa6) => func((defer, _) => {
-    ref var sa6 = ref Ꮡsa6.val;
+public static (nint, error) ReadFromInet6(this ж<FD> Ꮡfd, slice<byte> buf, ж<Δsyscall.SockaddrInet6> Ꮡsa6) => func<(nint, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+    ref var sa6 = ref Ꮡsa6.Value;
 
     if (len(buf) == 0) {
         return (0, default!);
@@ -635,19 +654,19 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
         buf = buf[..(int)(maxRW)];
     }
     {
-        var errΔ1 = fd.readLock(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != default!) {
             return (0, errΔ1);
         }
     }
-    defer(fd.readUnlock);
-    var o = Ꮡ(fd.rop);
+    defer(Ꮡfd.readUnlock);
+    var o = Ꮡfd.of(FD.Ꮡrop);
     o.InitBuf(buf);
-    var (n, err) = execIO(o, (ж<operation> o) => {
+    var (n, err) = execIO(o, (ж<operation> oΔ1) => {
         if ((~oΔ1).rsa == nil) {
-            o.val.rsa = @new<syscall.RawSockaddrAny>();
+            oΔ1.Value.rsa = @new<Δsyscall.RawSockaddrAny>();
         }
-        o.val.rsan = ((int32)@unsafe.Sizeof((~oΔ1).rsa.val));
-        return syscall.WSARecvFrom((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).buf), 1, Ꮡ((~oΔ1).qty), Ꮡ((~oΔ1).flags), (~oΔ1).rsa, Ꮡ((~oΔ1).rsan), Ꮡ((~oΔ1).o), nil);
+        oΔ1.Value.rsan = (int32)@unsafe.Sizeof((~oΔ1).rsa.Value);
+        return Δsyscall.WSARecvFrom((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡbuf), 1, oΔ1.of(operation.Ꮡqty), oΔ1.of(operation.Ꮡflags), (~oΔ1).rsa, oΔ1.of(operation.Ꮡrsan), oΔ1.of(operation.Ꮡo), nil);
     });
     err = fd.eofError(n, err);
     if (err != default!) {
@@ -658,16 +677,18 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
 });
 
 // Write implements io.Writer.
-[GoRecv] public static (nint, error) Write(this ref FD fd, slice<byte> buf) => func((defer, _) => {
+public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> buf) => func<(nint, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+
     {
-        var errΔ1 = fd.writeLock(); if (errΔ1 != default!) {
-            return (0, errΔ1);
+        var err = Ꮡfd.writeLock(); if (err != default!) {
+            return (0, err);
         }
     }
-    defer(fd.writeUnlock);
+    defer(Ꮡfd.writeUnlock);
     if (fd.isFile) {
-        fd.l.Lock();
-        defer(fd.l.Unlock);
+        Ꮡfd.of(FD.Ꮡl).Lock();
+        defer(Ꮡfd.of(FD.Ꮡl).Unlock);
     }
     nint ntotal = 0;
     while (len(buf) > 0) {
@@ -683,8 +704,8 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
                 (n, err) = fd.writeConsole(b);
             }
             else { /* default: */
-                (n, err) = syscall.Write(fd.Sysfd, b);
-                if (fd.kind == kindPipe && err == syscall.ERROR_OPERATION_ABORTED) {
+                (n, err) = Δsyscall.Write(fd.Sysfd, b);
+                if (fd.kind == kindPipe && AreEqual(err, Δsyscall.ERROR_OPERATION_ABORTED)) {
                     // Close uses CancelIoEx to interrupt concurrent I/O for pipes.
                     // If the fd is a pipe and the Write was interrupted by CancelIoEx,
                     // we assume it is interrupted by Close.
@@ -697,11 +718,11 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
             }
         } else {
             if (race.Enabled) {
-                race.ReleaseMerge(new @unsafe.Pointer(Ꮡ(ioSync)));
+                race.ReleaseMerge(new @unsafe.Pointer(ᏑioSync));
             }
-            var o = Ꮡ(fd.wop);
+            var o = Ꮡfd.of(FD.Ꮡwop);
             o.InitBuf(b);
-            (n, err) = execIO(o, (ж<operation> o) => syscall.WSASend((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).buf), 1, Ꮡ((~oΔ1).qty), 0, Ꮡ((~oΔ1).o), nil));
+            (n, err) = execIO(o, (ж<operation> oΔ1) => Δsyscall.WSASend((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡbuf), 1, oΔ1.of(operation.Ꮡqty), 0, oΔ1.of(operation.Ꮡo), nil));
         }
         ntotal += n;
         if (err != default!) {
@@ -733,7 +754,7 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
     // syscall.WriteConsole seems to fail, if given large buffer.
     // So limit the buffer to 16000 characters. This number was
     // discovered by experimenting with syscall.WriteConsole.
-    static readonly UntypedInt maxWrite = 16000;
+    UntypedInt maxWrite = 16000;
     while (len(runes) > 0) {
         nint m = len(runes);
         if (m > maxWrite) {
@@ -744,7 +765,7 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
         var uint16s = utf16.Encode(chunk);
         while (len(uint16s) > 0) {
             ref var written = ref heap(new uint32(), out var Ꮡwritten);
-            var err = syscall.WriteConsole(fd.Sysfd, Ꮡ(uint16s, 0), ((uint32)len(uint16s)), Ꮡwritten, nil);
+            var err = Δsyscall.WriteConsole(fd.Sysfd, Ꮡ(uint16s, 0), (uint32)len(uint16s), Ꮡwritten, nil);
             if (err != default!) {
                 return (0, err);
             }
@@ -755,26 +776,28 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
 }
 
 // Pwrite emulates the Unix pwrite system call.
-[GoRecv] public static (nint, error) Pwrite(this ref FD fd, slice<byte> buf, int64 off) => func((defer, _) => {
+public static (nint, error) Pwrite(this ж<FD> Ꮡfd, slice<byte> buf, int64 off) => func<(nint, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+
     if (fd.kind == kindPipe) {
         // Pwrite does not work with pipes
-        return (0, syscall.ESPIPE);
+        return (0, Δsyscall.ESPIPE);
     }
     // Call incref, not writeLock, because since pwrite specifies the
     // offset it is independent from other writes.
     {
-        var err = fd.incref(); if (err != default!) {
+        var err = Ꮡfd.incref(); if (err != default!) {
             return (0, err);
         }
     }
-    defer(fd.decref);
-    fd.l.Lock();
-    defer(fd.l.Unlock);
-    var (curoffset, e) = syscall.Seek(fd.Sysfd, 0, io.SeekCurrent);
+    defer(() => Ꮡfd.decref());
+    Ꮡfd.of(FD.Ꮡl).Lock();
+    defer(Ꮡfd.of(FD.Ꮡl).Unlock);
+    var (curoffset, e) = Δsyscall.Seek(fd.Sysfd, 0, io.SeekCurrent);
     if (e != default!) {
         return (0, e);
     }
-    deferǃ(syscall.Seek, fd.Sysfd, curoffset, io.SeekStart, defer);
+    deferǃ(Δsyscall.Seek, Ꮡfd.Value.Sysfd, curoffset, (nint)(io.SeekStart), defer);
     nint ntotal = 0;
     while (len(buf) > 0) {
         var b = buf;
@@ -782,61 +805,64 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
             b = b[..(int)(maxRW)];
         }
         ref var n = ref heap(new uint32(), out var Ꮡn);
-        ref var o = ref heap<syscall_package.Overlapped>(out var Ꮡo);
-        o = new syscall.Overlapped(
-            OffsetHigh: ((uint32)(off >> (int)(32))),
-            Offset: ((uint32)off)
+        ref var o = ref heap<Δsyscall.Overlapped>(out var Ꮡo);
+        o = new Δsyscall.Overlapped(
+            OffsetHigh: (uint32)((off >> (int)(32))),
+            Offset: (uint32)off
         );
-        e = syscall.WriteFile(fd.Sysfd, b, Ꮡn, Ꮡo);
-        ntotal += ((nint)n);
+        e = Δsyscall.WriteFile(fd.Sysfd, b, Ꮡn, Ꮡo);
+        ntotal += (nint)n;
         if (e != default!) {
             return (ntotal, e);
         }
         buf = buf[(int)(n)..];
-        off += ((int64)n);
+        off += (int64)n;
     }
     return (ntotal, default!);
 });
 
 // Writev emulates the Unix writev system call.
-[GoRecv] public static (int64, error) Writev(this ref FD fd, ж<slice<slice<byte>>> Ꮡbuf) => func((defer, _) => {
-    ref var buf = ref Ꮡbuf.val;
+public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> Ꮡbuf) => func<(int64, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+    ref var buf = ref Ꮡbuf.Value;
 
     if (len(buf) == 0) {
         return (0, default!);
     }
     {
-        var errΔ1 = fd.writeLock(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != default!) {
             return (0, errΔ1);
         }
     }
-    defer(fd.writeUnlock);
+    defer(Ꮡfd.writeUnlock);
     if (race.Enabled) {
-        race.ReleaseMerge(new @unsafe.Pointer(Ꮡ(ioSync)));
+        race.ReleaseMerge(new @unsafe.Pointer(ᏑioSync));
     }
-    var o = Ꮡ(fd.wop);
+    var o = Ꮡfd.of(FD.Ꮡwop);
     o.InitBufs(Ꮡbuf);
-    var (n, err) = execIO(o, (ж<operation> o) => syscall.WSASend((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).bufs, 0), ((uint32)len((~oΔ1).bufs)), Ꮡ((~oΔ1).qty), 0, Ꮡ((~oΔ1).o), nil));
+    var (n, err) = execIO(o, (ж<operation> oΔ1) => Δsyscall.WSASend((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).bufs, 0), (uint32)len((~oΔ1).bufs), oΔ1.of(operation.Ꮡqty), 0, oΔ1.of(operation.Ꮡo), nil));
     o.ClearBufs();
     TestHookDidWritev(n);
-    consume(Ꮡbuf, ((int64)n));
-    return (((int64)n), err);
+    consume(Ꮡbuf, (int64)n);
+    return ((int64)n, err);
 });
 
 // WriteTo wraps the sendto network call.
-[GoRecv] public static (nint, error) WriteTo(this ref FD fd, slice<byte> buf, syscallꓸSockaddr sa) => func((defer, _) => {
+public static (nint, error) WriteTo(this ж<FD> Ꮡfd, slice<byte> buf, syscallꓸSockaddr sa) => func<(nint, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+
     {
-        var err = fd.writeLock(); if (err != default!) {
+        var err = Ꮡfd.writeLock(); if (err != default!) {
             return (0, err);
         }
     }
-    defer(fd.writeUnlock);
+    defer(Ꮡfd.writeUnlock);
     if (len(buf) == 0) {
         // handle zero-byte payload
-        var o = Ꮡ(fd.wop);
+        var o = Ꮡfd.of(FD.Ꮡwop);
         o.InitBuf(buf);
-        o.val.sa = sa;
-        var (n, err) = execIO(o, (ж<operation> o) => syscall.WSASendto((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).buf), 1, Ꮡ((~oΔ1).qty), 0, (~oΔ1).sa, Ꮡ((~oΔ1).o), nil));
+        o.Value.sa = sa;
+        var (n, err) = execIO(o, (ж<operation> oΔ1) => Δsyscall.WSASendto((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡbuf), 1, oΔ1.of(operation.Ꮡqty), 0, (~oΔ1).sa, oΔ1.of(operation.Ꮡo), nil));
         return (n, err);
     }
     nint ntotal = 0;
@@ -845,11 +871,11 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
         if (len(b) > maxRW) {
             b = b[..(int)(maxRW)];
         }
-        var o = Ꮡ(fd.wop);
+        var o = Ꮡfd.of(FD.Ꮡwop);
         o.InitBuf(b);
-        o.val.sa = sa;
-        var (n, err) = execIO(o, (ж<operation> o) => syscall.WSASendto((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).buf), 1, Ꮡ((~oΔ1).qty), 0, (~oΔ1).sa, Ꮡ((~oΔ1).o), nil));
-        ntotal += ((nint)n);
+        o.Value.sa = sa;
+        var (n, err) = execIO(o, (ж<operation> oΔ1) => Δsyscall.WSASendto((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡbuf), 1, oΔ1.of(operation.Ꮡqty), 0, (~oΔ1).sa, oΔ1.of(operation.Ꮡo), nil));
+        ntotal += (nint)n;
         if (err != default!) {
             return (ntotal, err);
         }
@@ -859,20 +885,21 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
 });
 
 // WriteToInet4 is WriteTo, specialized for syscall.SockaddrInet4.
-[GoRecv] public static (nint, error) WriteToInet4(this ref FD fd, slice<byte> buf, ж<syscall.SockaddrInet4> Ꮡsa4) => func((defer, _) => {
-    ref var sa4 = ref Ꮡsa4.val;
+public static (nint, error) WriteToInet4(this ж<FD> Ꮡfd, slice<byte> buf, ж<Δsyscall.SockaddrInet4> Ꮡsa4) => func<(nint, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+    ref var sa4 = ref Ꮡsa4.Value;
 
     {
-        var err = fd.writeLock(); if (err != default!) {
+        var err = Ꮡfd.writeLock(); if (err != default!) {
             return (0, err);
         }
     }
-    defer(fd.writeUnlock);
+    defer(Ꮡfd.writeUnlock);
     if (len(buf) == 0) {
         // handle zero-byte payload
-        var o = Ꮡ(fd.wop);
+        var o = Ꮡfd.of(FD.Ꮡwop);
         o.InitBuf(buf);
-        var (n, err) = execIO(o, (ж<operation> o) => windows.WSASendtoInet4((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).buf), 1, Ꮡ((~oΔ1).qty), 0, Ꮡsa4, Ꮡ((~oΔ1).o), nil));
+        var (n, err) = execIO(o, (ж<operation> oΔ1) => windows.WSASendtoInet4((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡbuf), 1, oΔ1.of(operation.Ꮡqty), 0, Ꮡsa4, oΔ1.of(operation.Ꮡo), nil));
         return (n, err);
     }
     nint ntotal = 0;
@@ -881,10 +908,10 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
         if (len(b) > maxRW) {
             b = b[..(int)(maxRW)];
         }
-        var o = Ꮡ(fd.wop);
+        var o = Ꮡfd.of(FD.Ꮡwop);
         o.InitBuf(b);
-        var (n, err) = execIO(o, (ж<operation> o) => windows.WSASendtoInet4((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).buf), 1, Ꮡ((~oΔ1).qty), 0, Ꮡsa4, Ꮡ((~oΔ1).o), nil));
-        ntotal += ((nint)n);
+        var (n, err) = execIO(o, (ж<operation> oΔ1) => windows.WSASendtoInet4((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡbuf), 1, oΔ1.of(operation.Ꮡqty), 0, Ꮡsa4, oΔ1.of(operation.Ꮡo), nil));
+        ntotal += (nint)n;
         if (err != default!) {
             return (ntotal, err);
         }
@@ -894,20 +921,21 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
 });
 
 // WriteToInet6 is WriteTo, specialized for syscall.SockaddrInet6.
-[GoRecv] public static (nint, error) WriteToInet6(this ref FD fd, slice<byte> buf, ж<syscall.SockaddrInet6> Ꮡsa6) => func((defer, _) => {
-    ref var sa6 = ref Ꮡsa6.val;
+public static (nint, error) WriteToInet6(this ж<FD> Ꮡfd, slice<byte> buf, ж<Δsyscall.SockaddrInet6> Ꮡsa6) => func<(nint, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+    ref var sa6 = ref Ꮡsa6.Value;
 
     {
-        var err = fd.writeLock(); if (err != default!) {
+        var err = Ꮡfd.writeLock(); if (err != default!) {
             return (0, err);
         }
     }
-    defer(fd.writeUnlock);
+    defer(Ꮡfd.writeUnlock);
     if (len(buf) == 0) {
         // handle zero-byte payload
-        var o = Ꮡ(fd.wop);
+        var o = Ꮡfd.of(FD.Ꮡwop);
         o.InitBuf(buf);
-        var (n, err) = execIO(o, (ж<operation> o) => windows.WSASendtoInet6((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).buf), 1, Ꮡ((~oΔ1).qty), 0, Ꮡsa6, Ꮡ((~oΔ1).o), nil));
+        var (n, err) = execIO(o, (ж<operation> oΔ1) => windows.WSASendtoInet6((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡbuf), 1, oΔ1.of(operation.Ꮡqty), 0, Ꮡsa6, oΔ1.of(operation.Ꮡo), nil));
         return (n, err);
     }
     nint ntotal = 0;
@@ -916,10 +944,10 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
         if (len(b) > maxRW) {
             b = b[..(int)(maxRW)];
         }
-        var o = Ꮡ(fd.wop);
+        var o = Ꮡfd.of(FD.Ꮡwop);
         o.InitBuf(b);
-        var (n, err) = execIO(o, (ж<operation> o) => windows.WSASendtoInet6((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).buf), 1, Ꮡ((~oΔ1).qty), 0, Ꮡsa6, Ꮡ((~oΔ1).o), nil));
-        ntotal += ((nint)n);
+        var (n, err) = execIO(o, (ж<operation> oΔ1) => windows.WSASendtoInet6((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡbuf), 1, oΔ1.of(operation.Ꮡqty), 0, Ꮡsa6, oΔ1.of(operation.Ꮡo), nil));
+        ntotal += (nint)n;
         if (err != default!) {
             return (ntotal, err);
         }
@@ -931,28 +959,30 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
 // Call ConnectEx. This doesn't need any locking, since it is only
 // called when the descriptor is first created. This is here rather
 // than in the net package so that it can use fd.wop.
-[GoRecv] public static error ConnectEx(this ref FD fd, syscallꓸSockaddr ra) {
-    var o = Ꮡ(fd.wop);
-    o.val.sa = ra;
-    var (_, err) = execIO(o, (ж<operation> o) => ConnectExFunc((~(~oΔ1).fd).Sysfd, (~oΔ1).sa, nil, 0, nil, Ꮡ((~oΔ1).o)));
+public static error ConnectEx(this ж<FD> Ꮡfd, syscallꓸSockaddr ra) {
+    ref var fd = ref Ꮡfd.Value;
+
+    var o = Ꮡfd.of(FD.Ꮡwop);
+    o.Value.sa = ra;
+    var (_, err) = execIO(o, (ж<operation> oΔ1) => ConnectExFunc((~(~oΔ1).fd).Sysfd, (~oΔ1).sa, nil, 0, nil, oΔ1.of(operation.Ꮡo)));
     return err;
 }
 
-[GoRecv] public static (@string, error) acceptOne(this ref FD fd, syscallꓸHandle s, slice<syscall.RawSockaddrAny> rawsa, ж<operation> Ꮡo) {
-    ref var o = ref Ꮡo.val;
+internal static (@string, error) acceptOne(this ж<FD> Ꮡfd, syscallꓸHandle s, slice<Δsyscall.RawSockaddrAny> rawsa, ж<operation> Ꮡo) {
+    ref var fd = ref Ꮡfd.Value;
+    ref var o = ref Ꮡo.Value;
 
     // Submit accept request.
     o.handle = s;
-    o.rsan = ((int32)@unsafe.Sizeof(rawsa[0]));
-    var (_, err) = execIO(Ꮡo, 
+    o.rsan = (int32)@unsafe.Sizeof(rawsa[0]);
     var rawsaʗ1 = rawsa;
-    (ж<operation> o) => AcceptFunc((~(~oΔ1).fd).Sysfd, (~oΔ1).handle, (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡ(rawsaʗ1, 0))), 0, ((uint32)(~oΔ1).rsan), ((uint32)(~oΔ1).rsan), Ꮡ((~oΔ1).qty), Ꮡ((~oΔ1).o)));
+    var (_, err) = execIO(Ꮡo, (ж<operation> oΔ1) => AcceptFunc((~(~oΔ1).fd).Sysfd, (~oΔ1).handle, (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡ(rawsaʗ1, 0))), 0, (uint32)(~oΔ1).rsan, (uint32)(~oΔ1).rsan, oΔ1.of(operation.Ꮡqty), oΔ1.of(operation.Ꮡo)));
     if (err != default!) {
         CloseFunc(s);
         return ("acceptex", err);
     }
     // Inherit properties of the listening socket.
-    err = syscall.Setsockopt(s, syscall.SOL_SOCKET, syscall.SO_UPDATE_ACCEPT_CONTEXT, (ж<byte>)(uintptr)(((@unsafe.Pointer)(Ꮡ(fd.Sysfd)))), ((int32)@unsafe.Sizeof(fd.Sysfd)));
+    err = Δsyscall.Setsockopt(s, Δsyscall.SOL_SOCKET, Δsyscall.SO_UPDATE_ACCEPT_CONTEXT, (ж<byte>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡfd.of(FD.ᏑSysfd)).Value)), (int32)@unsafe.Sizeof(fd.Sysfd));
     if (err != default!) {
         CloseFunc(s);
         return ("setsockopt", err);
@@ -962,38 +992,40 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
 
 // Accept handles accepting a socket. The sysSocket parameter is used
 // to allocate the net socket.
-[GoRecv] public static (syscallꓸHandle, slice<syscall.RawSockaddrAny>, uint32, @string, error) Accept(this ref FD fd, Func<(syscall.Handle, error)> sysSocket) => func((defer, _) => {
+public static (syscallꓸHandle, slice<Δsyscall.RawSockaddrAny>, uint32, @string, error) Accept(this ж<FD> Ꮡfd, Func<(syscallꓸHandle, error)> sysSocket) => func<(syscallꓸHandle, slice<Δsyscall.RawSockaddrAny>, uint32, @string, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+
     {
-        var err = fd.readLock(); if (err != default!) {
-            return (syscall.InvalidHandle, default!, 0, "", err);
+        var err = Ꮡfd.readLock(); if (err != default!) {
+            return (Δsyscall.InvalidHandle, default!, 0, "", err);
         }
     }
-    defer(fd.readUnlock);
-    var o = Ꮡ(fd.rop);
-    array<syscall.RawSockaddrAny> rawsa = new(2);
+    defer(Ꮡfd.readUnlock);
+    var o = Ꮡfd.of(FD.Ꮡrop);
+    array<Δsyscall.RawSockaddrAny> rawsa = new(2);
     while (ᐧ) {
         var (s, err) = sysSocket();
         if (err != default!) {
-            return (syscall.InvalidHandle, default!, 0, "", err);
+            return (Δsyscall.InvalidHandle, default!, 0, "", err);
         }
-        var (errcall, err) = fd.acceptOne(s, rawsa[..], o);
+        (var errcall, err) = Ꮡfd.acceptOne(s, rawsa[..], o);
         if (err == default!) {
-            return (s, rawsa[..], ((uint32)(~o).rsan), "", default!);
+            return (s, rawsa[..], (uint32)(~o).rsan, "", default!);
         }
         // Sometimes we see WSAECONNRESET and ERROR_NETNAME_DELETED is
         // returned here. These happen if connection reset is received
         // before AcceptEx could complete. These errors relate to new
         // connection, not to AcceptEx, so ignore broken connection and
         // try AcceptEx again for more connections.
-        var (errno, ok) = err._<syscall.Errno>(ᐧ);
+        var (errno, ok) = err._<Δsyscall.Errno>(ᐧ);
         if (!ok) {
-            return (syscall.InvalidHandle, default!, 0, errcall, err);
+            return (Δsyscall.InvalidHandle, default!, 0, errcall, err);
         }
         var exprᴛ1 = errno;
-        if (exprᴛ1 == syscall.ERROR_NETNAME_DELETED || exprᴛ1 == syscall.WSAECONNRESET) {
+        if (exprᴛ1 == Δsyscall.ERROR_NETNAME_DELETED || exprᴛ1 == Δsyscall.WSAECONNRESET) {
         }
         else { /* default: */
-            return (syscall.InvalidHandle, default!, 0, errcall, err);
+            return (Δsyscall.InvalidHandle, default!, 0, errcall, err);
         }
 
     }
@@ -1002,105 +1034,116 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
 // ignore these and try again
 
 // Seek wraps syscall.Seek.
-[GoRecv] public static (int64, error) Seek(this ref FD fd, int64 offset, nint whence) => func((defer, _) => {
+public static (int64, error) Seek(this ж<FD> Ꮡfd, int64 offset, nint whence) => func<(int64, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+
     if (fd.kind == kindPipe) {
-        return (0, syscall.ESPIPE);
+        return (0, Δsyscall.ESPIPE);
     }
     {
-        var err = fd.incref(); if (err != default!) {
+        var err = Ꮡfd.incref(); if (err != default!) {
             return (0, err);
         }
     }
-    defer(fd.decref);
-    fd.l.Lock();
-    defer(fd.l.Unlock);
-    return syscall.Seek(fd.Sysfd, offset, whence);
+    defer(() => Ꮡfd.decref());
+    Ꮡfd.of(FD.Ꮡl).Lock();
+    defer(Ꮡfd.of(FD.Ꮡl).Unlock);
+    return Δsyscall.Seek(fd.Sysfd, offset, whence);
 });
 
 // Fchmod updates syscall.ByHandleFileInformation.Fileattributes when needed.
-[GoRecv] public static error Fchmod(this ref FD fd, uint32 mode) => func((defer, _) => {
+public static error Fchmod(this ж<FD> Ꮡfd, uint32 mode) => func<error>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+
     {
-        var err = fd.incref(); if (err != default!) {
+        var err = Ꮡfd.incref(); if (err != default!) {
             return err;
         }
     }
-    defer(fd.decref);
-    ref var d = ref heap(new syscall_package.ByHandleFileInformation(), out var Ꮡd);
+    defer(() => Ꮡfd.decref());
+    ref var d = ref heap(new Δsyscall.ByHandleFileInformation(), out var Ꮡd);
     {
-        var err = syscall.GetFileInformationByHandle(fd.Sysfd, Ꮡd); if (err != default!) {
+        var err = Δsyscall.GetFileInformationByHandle(fd.Sysfd, Ꮡd); if (err != default!) {
             return err;
         }
     }
     var attrs = d.FileAttributes;
-    if ((uint32)(mode & syscall.S_IWRITE) != 0){
-        attrs &= ~(uint32)(syscall.FILE_ATTRIBUTE_READONLY);
+    if ((uint32)(mode & (uint32)Δsyscall.S_IWRITE) != 0){
+        attrs &= unchecked((uint32)~(uint32)(Δsyscall.FILE_ATTRIBUTE_READONLY));
     } else {
-        attrs |= (uint32)(syscall.FILE_ATTRIBUTE_READONLY);
+        attrs |= (uint32)(Δsyscall.FILE_ATTRIBUTE_READONLY);
     }
     if (attrs == d.FileAttributes) {
         return default!;
     }
-    ref var du = ref heap(new @internal.syscall.windows_package.FILE_BASIC_INFO(), out var Ꮡdu);
+    ref var du = ref heap(new windows.FILE_BASIC_INFO(), out var Ꮡdu);
     du.FileAttributes = attrs;
-    return windows.SetFileInformationByHandle(fd.Sysfd, windows.FileBasicInfo, new @unsafe.Pointer(Ꮡdu), ((uint32)@unsafe.Sizeof(du)));
+    return windows.SetFileInformationByHandle(fd.Sysfd, windows.FileBasicInfo, new @unsafe.Pointer(Ꮡdu), (uint32)@unsafe.Sizeof(du));
 });
 
 // Fchdir wraps syscall.Fchdir.
-[GoRecv] public static error Fchdir(this ref FD fd) => func((defer, _) => {
+public static error Fchdir(this ж<FD> Ꮡfd) => func((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+
     {
-        var err = fd.incref(); if (err != default!) {
+        var err = Ꮡfd.incref(); if (err != default!) {
             return err;
         }
     }
-    defer(fd.decref);
-    return syscall.Fchdir(fd.Sysfd);
+    defer(() => Ꮡfd.decref());
+    return Δsyscall.Fchdir(fd.Sysfd);
 });
 
 // GetFileType wraps syscall.GetFileType.
-[GoRecv] public static (uint32, error) GetFileType(this ref FD fd) => func((defer, _) => {
+public static (uint32, error) GetFileType(this ж<FD> Ꮡfd) => func<(uint32, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+
     {
-        var err = fd.incref(); if (err != default!) {
+        var err = Ꮡfd.incref(); if (err != default!) {
             return (0, err);
         }
     }
-    defer(fd.decref);
-    return syscall.GetFileType(fd.Sysfd);
+    defer(() => Ꮡfd.decref());
+    return Δsyscall.GetFileType(fd.Sysfd);
 });
 
 // GetFileInformationByHandle wraps GetFileInformationByHandle.
-[GoRecv] public static error GetFileInformationByHandle(this ref FD fd, ж<syscall.ByHandleFileInformation> Ꮡdata) => func((defer, _) => {
-    ref var data = ref Ꮡdata.val;
+public static error GetFileInformationByHandle(this ж<FD> Ꮡfd, ж<Δsyscall.ByHandleFileInformation> Ꮡdata) => func((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+    ref var data = ref Ꮡdata.Value;
 
     {
-        var err = fd.incref(); if (err != default!) {
+        var err = Ꮡfd.incref(); if (err != default!) {
             return err;
         }
     }
-    defer(fd.decref);
-    return syscall.GetFileInformationByHandle(fd.Sysfd, Ꮡdata);
+    defer(() => Ꮡfd.decref());
+    return Δsyscall.GetFileInformationByHandle(fd.Sysfd, Ꮡdata);
 });
 
 // RawRead invokes the user-defined function f for a read operation.
-[GoRecv] public static error RawRead(this ref FD fd, Func<uintptr, bool> f) => func((defer, _) => {
+public static error RawRead(this ж<FD> Ꮡfd, Func<uintptr, bool> f) => func<error>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+
     {
-        var err = fd.readLock(); if (err != default!) {
+        var err = Ꮡfd.readLock(); if (err != default!) {
             return err;
         }
     }
-    defer(fd.readUnlock);
+    defer(Ꮡfd.readUnlock);
     while (ᐧ) {
-        if (f(((uintptr)fd.Sysfd))) {
+        if (f((uintptr)fd.Sysfd)) {
             return default!;
         }
         // Use a zero-byte read as a way to get notified when this
         // socket is readable. h/t https://stackoverflow.com/a/42019668/332798
-        var o = Ꮡ(fd.rop);
+        var o = Ꮡfd.of(FD.Ꮡrop);
         o.InitBuf(default!);
         if (!fd.IsStream) {
-            o.val.flags |= (uint32)(windows.MSG_PEEK);
+            o.Value.flags |= windows.MSG_PEEK;
         }
-        var (_, err) = execIO(o, (ж<operation> o) => syscall.WSARecv((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).buf), 1, Ꮡ((~oΔ1).qty), Ꮡ((~oΔ1).flags), Ꮡ((~oΔ1).o), nil));
-        if (err == windows.WSAEMSGSIZE){
+        var (_, err) = execIO(o, (ж<operation> oΔ1) => Δsyscall.WSARecv((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡbuf), 1, oΔ1.of(operation.Ꮡqty), oΔ1.of(operation.Ꮡflags), oΔ1.of(operation.Ꮡo), nil));
+        if (AreEqual(err, windows.WSAEMSGSIZE)){
         } else 
         if (err != default!) {
             // expected with a 0-byte peek, ignore.
@@ -1110,265 +1153,275 @@ public static Func<syscallꓸHandle, ж<uint16>, uint32, ж<uint32>, ж<byte>, (
 });
 
 // RawWrite invokes the user-defined function f for a write operation.
-[GoRecv] public static error RawWrite(this ref FD fd, Func<uintptr, bool> f) => func((defer, _) => {
+public static error RawWrite(this ж<FD> Ꮡfd, Func<uintptr, bool> f) => func<error>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+
     {
-        var err = fd.writeLock(); if (err != default!) {
+        var err = Ꮡfd.writeLock(); if (err != default!) {
             return err;
         }
     }
-    defer(fd.writeUnlock);
-    if (f(((uintptr)fd.Sysfd))) {
+    defer(Ꮡfd.writeUnlock);
+    if (f((uintptr)fd.Sysfd)) {
         return default!;
     }
     // TODO(tmm1): find a way to detect socket writability
-    return syscall.EWINDOWS;
+    return Δsyscall.EWINDOWS;
 });
 
-internal static int32 sockaddrInet4ToRaw(ж<syscall.RawSockaddrAny> Ꮡrsa, ж<syscall.SockaddrInet4> Ꮡsa) {
-    ref var rsa = ref Ꮡrsa.val;
-    ref var sa = ref Ꮡsa.val;
+internal static int32 sockaddrInet4ToRaw(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ж<Δsyscall.SockaddrInet4> Ꮡsa) {
+    ref var rsa = ref Ꮡrsa.Value;
+    ref var sa = ref Ꮡsa.Value;
 
-    rsa = new syscall.RawSockaddrAny(nil);
-    var raw = (ж<syscall.RawSockaddrInet4>)(uintptr)(new @unsafe.Pointer(Ꮡrsa));
-    raw.val.Family = syscall.AF_INET;
-    var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡ((~raw).Port)));
-    p.val[0] = ((byte)(sa.Port >> (int)(8)));
-    p.val[1] = ((byte)sa.Port);
-    raw.val.Addr = sa.Addr;
-    return ((int32)@unsafe.Sizeof(raw.val));
+    rsa = new Δsyscall.RawSockaddrAny(nil);
+    var raw = (ж<Δsyscall.RawSockaddrInet4>)(uintptr)(new @unsafe.Pointer(Ꮡrsa));
+    raw.Value.Family = Δsyscall.AF_INET;
+    var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(raw.of(Δsyscall.RawSockaddrInet4.ᏑPort)));
+    p.Value[0] = (byte)((sa.Port >> (int)(8)));
+    p.Value[1] = (byte)sa.Port;
+    raw.Value.Addr = sa.Addr;
+    return (int32)@unsafe.Sizeof(raw.Value);
 }
 
-internal static int32 sockaddrInet6ToRaw(ж<syscall.RawSockaddrAny> Ꮡrsa, ж<syscall.SockaddrInet6> Ꮡsa) {
-    ref var rsa = ref Ꮡrsa.val;
-    ref var sa = ref Ꮡsa.val;
+internal static int32 sockaddrInet6ToRaw(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ж<Δsyscall.SockaddrInet6> Ꮡsa) {
+    ref var rsa = ref Ꮡrsa.Value;
+    ref var sa = ref Ꮡsa.Value;
 
-    rsa = new syscall.RawSockaddrAny(nil);
-    var raw = (ж<syscall.RawSockaddrInet6>)(uintptr)(new @unsafe.Pointer(Ꮡrsa));
-    raw.val.Family = syscall.AF_INET6;
-    var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡ((~raw).Port)));
-    p.val[0] = ((byte)(sa.Port >> (int)(8)));
-    p.val[1] = ((byte)sa.Port);
-    raw.val.Scope_id = sa.ZoneId;
-    raw.val.Addr = sa.Addr;
-    return ((int32)@unsafe.Sizeof(raw.val));
+    rsa = new Δsyscall.RawSockaddrAny(nil);
+    var raw = (ж<Δsyscall.RawSockaddrInet6>)(uintptr)(new @unsafe.Pointer(Ꮡrsa));
+    raw.Value.Family = Δsyscall.AF_INET6;
+    var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(raw.of(Δsyscall.RawSockaddrInet6.ᏑPort)));
+    p.Value[0] = (byte)((sa.Port >> (int)(8)));
+    p.Value[1] = (byte)sa.Port;
+    raw.Value.Scope_id = sa.ZoneId;
+    raw.Value.Addr = sa.Addr;
+    return (int32)@unsafe.Sizeof(raw.Value);
 }
 
-internal static void rawToSockaddrInet4(ж<syscall.RawSockaddrAny> Ꮡrsa, ж<syscall.SockaddrInet4> Ꮡsa) {
-    ref var rsa = ref Ꮡrsa.val;
-    ref var sa = ref Ꮡsa.val;
+internal static void rawToSockaddrInet4(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ж<Δsyscall.SockaddrInet4> Ꮡsa) {
+    ref var rsa = ref Ꮡrsa.Value;
+    ref var sa = ref Ꮡsa.Value;
 
-    var pp = (ж<syscall.RawSockaddrInet4>)(uintptr)(new @unsafe.Pointer(Ꮡrsa));
-    var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡ((~pp).Port)));
-    sa.Port = ((nint)p.val[0]) << (int)(8) + ((nint)p.val[1]);
-    sa.Addr = pp.val.Addr;
+    var pp = (ж<Δsyscall.RawSockaddrInet4>)(uintptr)(new @unsafe.Pointer(Ꮡrsa));
+    var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(pp.of(Δsyscall.RawSockaddrInet4.ᏑPort)));
+    sa.Port = ((nint)p.Value[0] << (int)(8)) + (nint)p.Value[1];
+    sa.Addr = pp.Value.Addr;
 }
 
-internal static void rawToSockaddrInet6(ж<syscall.RawSockaddrAny> Ꮡrsa, ж<syscall.SockaddrInet6> Ꮡsa) {
-    ref var rsa = ref Ꮡrsa.val;
-    ref var sa = ref Ꮡsa.val;
+internal static void rawToSockaddrInet6(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ж<Δsyscall.SockaddrInet6> Ꮡsa) {
+    ref var rsa = ref Ꮡrsa.Value;
+    ref var sa = ref Ꮡsa.Value;
 
-    var pp = (ж<syscall.RawSockaddrInet6>)(uintptr)(new @unsafe.Pointer(Ꮡrsa));
-    var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡ((~pp).Port)));
-    sa.Port = ((nint)p.val[0]) << (int)(8) + ((nint)p.val[1]);
-    sa.ZoneId = pp.val.Scope_id;
-    sa.Addr = pp.val.Addr;
+    var pp = (ж<Δsyscall.RawSockaddrInet6>)(uintptr)(new @unsafe.Pointer(Ꮡrsa));
+    var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(pp.of(Δsyscall.RawSockaddrInet6.ᏑPort)));
+    sa.Port = ((nint)p.Value[0] << (int)(8)) + (nint)p.Value[1];
+    sa.ZoneId = pp.Value.Scope_id;
+    sa.Addr = pp.Value.Addr;
 }
 
-internal static (int32, error) sockaddrToRaw(ж<syscall.RawSockaddrAny> Ꮡrsa, syscallꓸSockaddr sa) {
-    ref var rsa = ref Ꮡrsa.val;
+internal static (int32, error) sockaddrToRaw(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, syscallꓸSockaddr sa) {
+    ref var rsa = ref Ꮡrsa.Value;
 
     switch (sa.type()) {
-    case ж<syscall.SockaddrInet4> sa: {
-        var sz = sockaddrInet4ToRaw(Ꮡrsa, Ꮡsa);
+    case ж<Δsyscall.SockaddrInet4> saΔ1: {
+        var sz = sockaddrInet4ToRaw(Ꮡrsa, saΔ1);
         return (sz, default!);
     }
-    case ж<syscall.SockaddrInet6> sa: {
-        sz = sockaddrInet6ToRaw(Ꮡrsa, Ꮡsa);
+    case ж<Δsyscall.SockaddrInet6> saΔ1: {
+        var sz = sockaddrInet6ToRaw(Ꮡrsa, saΔ1);
         return (sz, default!);
     }
     default: {
-        var sa = sa.type();
-        return (0, syscall.EWINDOWS);
+        var saΔ1 = sa;
+        return (0, Δsyscall.EWINDOWS);
     }}
 }
 
 // ReadMsg wraps the WSARecvMsg network call.
-[GoRecv] public static (nint, nint, nint, syscallꓸSockaddr, error) ReadMsg(this ref FD fd, slice<byte> p, slice<byte> oob, nint flags) => func((defer, _) => {
+public static (nint, nint, nint, syscallꓸSockaddr, error) ReadMsg(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags) => func<(nint, nint, nint, syscallꓸSockaddr, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+
     {
-        var errΔ1 = fd.readLock(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != default!) {
             return (0, 0, 0, default!, errΔ1);
         }
     }
-    defer(fd.readUnlock);
+    defer(Ꮡfd.readUnlock);
     if (len(p) > maxRW) {
         p = p[..(int)(maxRW)];
     }
-    var o = Ꮡ(fd.rop);
+    var o = Ꮡfd.of(FD.Ꮡrop);
     o.InitMsg(p, oob);
     if ((~o).rsa == nil) {
-        o.val.rsa = @new<syscall.RawSockaddrAny>();
+        o.Value.rsa = @new<Δsyscall.RawSockaddrAny>();
     }
-    (~o).msg.Name = ((syscall.Pointer)new @unsafe.Pointer((~o).rsa));
-    (~o).msg.Namelen = ((int32)@unsafe.Sizeof((~o).rsa.val));
-    (~o).msg.Flags = ((uint32)flags);
-    var (n, err) = execIO(o, (ж<operation> o) => windows.WSARecvMsg((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).msg), Ꮡ((~oΔ1).qty), Ꮡ((~oΔ1).o), nil));
+    o.Value.msg.Name = ((Δsyscall.Pointer)(ж<EmptyStruct>)(uintptr)(new @unsafe.Pointer((~o).rsa)));
+    o.Value.msg.Namelen = (int32)@unsafe.Sizeof((~o).rsa.Value);
+    o.Value.msg.Flags = (uint32)flags;
+    var (n, err) = execIO(o, (ж<operation> oΔ1) => windows.WSARecvMsg((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡmsg), oΔ1.of(operation.Ꮡqty), oΔ1.of(operation.Ꮡo), nil));
     err = fd.eofError(n, err);
     syscallꓸSockaddr sa = default!;
     if (err == default!) {
         (sa, err) = (~o).rsa.Sockaddr();
     }
-    return (n, ((nint)(~o).msg.Control.Len), ((nint)(~o).msg.Flags), sa, err);
+    return (n, (nint)(~o).msg.Control.Len, (nint)(~o).msg.Flags, sa, err);
 });
 
 // ReadMsgInet4 is ReadMsg, but specialized to return a syscall.SockaddrInet4.
-[GoRecv] public static (nint, nint, nint, error) ReadMsgInet4(this ref FD fd, slice<byte> p, slice<byte> oob, nint flags, ж<syscall.SockaddrInet4> Ꮡsa4) => func((defer, _) => {
-    ref var sa4 = ref Ꮡsa4.val;
+public static (nint, nint, nint, error) ReadMsgInet4(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet4> Ꮡsa4) => func<(nint, nint, nint, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+    ref var sa4 = ref Ꮡsa4.Value;
 
     {
-        var errΔ1 = fd.readLock(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != default!) {
             return (0, 0, 0, errΔ1);
         }
     }
-    defer(fd.readUnlock);
+    defer(Ꮡfd.readUnlock);
     if (len(p) > maxRW) {
         p = p[..(int)(maxRW)];
     }
-    var o = Ꮡ(fd.rop);
+    var o = Ꮡfd.of(FD.Ꮡrop);
     o.InitMsg(p, oob);
     if ((~o).rsa == nil) {
-        o.val.rsa = @new<syscall.RawSockaddrAny>();
+        o.Value.rsa = @new<Δsyscall.RawSockaddrAny>();
     }
-    (~o).msg.Name = ((syscall.Pointer)new @unsafe.Pointer((~o).rsa));
-    (~o).msg.Namelen = ((int32)@unsafe.Sizeof((~o).rsa.val));
-    (~o).msg.Flags = ((uint32)flags);
-    var (n, err) = execIO(o, (ж<operation> o) => windows.WSARecvMsg((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).msg), Ꮡ((~oΔ1).qty), Ꮡ((~oΔ1).o), nil));
+    o.Value.msg.Name = ((Δsyscall.Pointer)(ж<EmptyStruct>)(uintptr)(new @unsafe.Pointer((~o).rsa)));
+    o.Value.msg.Namelen = (int32)@unsafe.Sizeof((~o).rsa.Value);
+    o.Value.msg.Flags = (uint32)flags;
+    var (n, err) = execIO(o, (ж<operation> oΔ1) => windows.WSARecvMsg((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡmsg), oΔ1.of(operation.Ꮡqty), oΔ1.of(operation.Ꮡo), nil));
     err = fd.eofError(n, err);
     if (err == default!) {
         rawToSockaddrInet4((~o).rsa, Ꮡsa4);
     }
-    return (n, ((nint)(~o).msg.Control.Len), ((nint)(~o).msg.Flags), err);
+    return (n, (nint)(~o).msg.Control.Len, (nint)(~o).msg.Flags, err);
 });
 
 // ReadMsgInet6 is ReadMsg, but specialized to return a syscall.SockaddrInet6.
-[GoRecv] public static (nint, nint, nint, error) ReadMsgInet6(this ref FD fd, slice<byte> p, slice<byte> oob, nint flags, ж<syscall.SockaddrInet6> Ꮡsa6) => func((defer, _) => {
-    ref var sa6 = ref Ꮡsa6.val;
+public static (nint, nint, nint, error) ReadMsgInet6(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet6> Ꮡsa6) => func<(nint, nint, nint, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+    ref var sa6 = ref Ꮡsa6.Value;
 
     {
-        var errΔ1 = fd.readLock(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != default!) {
             return (0, 0, 0, errΔ1);
         }
     }
-    defer(fd.readUnlock);
+    defer(Ꮡfd.readUnlock);
     if (len(p) > maxRW) {
         p = p[..(int)(maxRW)];
     }
-    var o = Ꮡ(fd.rop);
+    var o = Ꮡfd.of(FD.Ꮡrop);
     o.InitMsg(p, oob);
     if ((~o).rsa == nil) {
-        o.val.rsa = @new<syscall.RawSockaddrAny>();
+        o.Value.rsa = @new<Δsyscall.RawSockaddrAny>();
     }
-    (~o).msg.Name = ((syscall.Pointer)new @unsafe.Pointer((~o).rsa));
-    (~o).msg.Namelen = ((int32)@unsafe.Sizeof((~o).rsa.val));
-    (~o).msg.Flags = ((uint32)flags);
-    var (n, err) = execIO(o, (ж<operation> o) => windows.WSARecvMsg((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).msg), Ꮡ((~oΔ1).qty), Ꮡ((~oΔ1).o), nil));
+    o.Value.msg.Name = ((Δsyscall.Pointer)(ж<EmptyStruct>)(uintptr)(new @unsafe.Pointer((~o).rsa)));
+    o.Value.msg.Namelen = (int32)@unsafe.Sizeof((~o).rsa.Value);
+    o.Value.msg.Flags = (uint32)flags;
+    var (n, err) = execIO(o, (ж<operation> oΔ1) => windows.WSARecvMsg((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡmsg), oΔ1.of(operation.Ꮡqty), oΔ1.of(operation.Ꮡo), nil));
     err = fd.eofError(n, err);
     if (err == default!) {
         rawToSockaddrInet6((~o).rsa, Ꮡsa6);
     }
-    return (n, ((nint)(~o).msg.Control.Len), ((nint)(~o).msg.Flags), err);
+    return (n, (nint)(~o).msg.Control.Len, (nint)(~o).msg.Flags, err);
 });
 
 // WriteMsg wraps the WSASendMsg network call.
-[GoRecv] public static (nint, nint, error) WriteMsg(this ref FD fd, slice<byte> p, slice<byte> oob, syscallꓸSockaddr sa) => func((defer, _) => {
+public static (nint, nint, error) WriteMsg(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, syscallꓸSockaddr sa) => func<(nint, nint, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+
     if (len(p) > maxRW) {
         return (0, 0, errors.New("packet is too large (only 1GB is allowed)"u8));
     }
     {
-        var errΔ1 = fd.writeLock(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != default!) {
             return (0, 0, errΔ1);
         }
     }
-    defer(fd.writeUnlock);
-    var o = Ꮡ(fd.wop);
+    defer(Ꮡfd.writeUnlock);
+    var o = Ꮡfd.of(FD.Ꮡwop);
     o.InitMsg(p, oob);
     if (sa != default!) {
         if ((~o).rsa == nil) {
-            o.val.rsa = @new<syscall.RawSockaddrAny>();
+            o.Value.rsa = @new<Δsyscall.RawSockaddrAny>();
         }
-        var (len, errΔ2) = sockaddrToRaw((~o).rsa, sa);
+        var (lenΔ1, errΔ2) = sockaddrToRaw((~o).rsa, sa);
         if (errΔ2 != default!) {
             return (0, 0, errΔ2);
         }
-        (~o).msg.Name = ((syscall.Pointer)new @unsafe.Pointer((~o).rsa));
-        (~o).msg.Namelen = len;
+        o.Value.msg.Name = ((Δsyscall.Pointer)(ж<EmptyStruct>)(uintptr)(new @unsafe.Pointer((~o).rsa)));
+        o.Value.msg.Namelen = lenΔ1;
     }
-    var (n, err) = execIO(o, (ж<operation> o) => windows.WSASendMsg((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).msg), 0, Ꮡ((~oΔ1).qty), Ꮡ((~oΔ1).o), nil));
-    return (n, ((nint)(~o).msg.Control.Len), err);
+    var (n, err) = execIO(o, (ж<operation> oΔ1) => windows.WSASendMsg((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡmsg), 0, oΔ1.of(operation.Ꮡqty), oΔ1.of(operation.Ꮡo), nil));
+    return (n, (nint)(~o).msg.Control.Len, err);
 });
 
 // WriteMsgInet4 is WriteMsg specialized for syscall.SockaddrInet4.
-[GoRecv] public static (nint, nint, error) WriteMsgInet4(this ref FD fd, slice<byte> p, slice<byte> oob, ж<syscall.SockaddrInet4> Ꮡsa) => func((defer, _) => {
-    ref var sa = ref Ꮡsa.val;
+public static (nint, nint, error) WriteMsgInet4(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet4> Ꮡsa) => func<(nint, nint, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+    ref var sa = ref Ꮡsa.Value;
 
     if (len(p) > maxRW) {
         return (0, 0, errors.New("packet is too large (only 1GB is allowed)"u8));
     }
     {
-        var errΔ1 = fd.writeLock(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != default!) {
             return (0, 0, errΔ1);
         }
     }
-    defer(fd.writeUnlock);
-    var o = Ꮡ(fd.wop);
+    defer(Ꮡfd.writeUnlock);
+    var o = Ꮡfd.of(FD.Ꮡwop);
     o.InitMsg(p, oob);
     if ((~o).rsa == nil) {
-        o.val.rsa = @new<syscall.RawSockaddrAny>();
+        o.Value.rsa = @new<Δsyscall.RawSockaddrAny>();
     }
-    var len = sockaddrInet4ToRaw((~o).rsa, Ꮡsa);
-    (~o).msg.Name = ((syscall.Pointer)new @unsafe.Pointer((~o).rsa));
-    (~o).msg.Namelen = len;
-    var (n, err) = execIO(o, (ж<operation> o) => windows.WSASendMsg((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).msg), 0, Ꮡ((~oΔ1).qty), Ꮡ((~oΔ1).o), nil));
-    return (n, ((nint)(~o).msg.Control.Len), err);
+    var lenΔ1 = sockaddrInet4ToRaw((~o).rsa, Ꮡsa);
+    o.Value.msg.Name = ((Δsyscall.Pointer)(ж<EmptyStruct>)(uintptr)(new @unsafe.Pointer((~o).rsa)));
+    o.Value.msg.Namelen = lenΔ1;
+    var (n, err) = execIO(o, (ж<operation> oΔ1) => windows.WSASendMsg((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡmsg), 0, oΔ1.of(operation.Ꮡqty), oΔ1.of(operation.Ꮡo), nil));
+    return (n, (nint)(~o).msg.Control.Len, err);
 });
 
 // WriteMsgInet6 is WriteMsg specialized for syscall.SockaddrInet6.
-[GoRecv] public static (nint, nint, error) WriteMsgInet6(this ref FD fd, slice<byte> p, slice<byte> oob, ж<syscall.SockaddrInet6> Ꮡsa) => func((defer, _) => {
-    ref var sa = ref Ꮡsa.val;
+public static (nint, nint, error) WriteMsgInet6(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet6> Ꮡsa) => func<(nint, nint, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+    ref var sa = ref Ꮡsa.Value;
 
     if (len(p) > maxRW) {
         return (0, 0, errors.New("packet is too large (only 1GB is allowed)"u8));
     }
     {
-        var errΔ1 = fd.writeLock(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != default!) {
             return (0, 0, errΔ1);
         }
     }
-    defer(fd.writeUnlock);
-    var o = Ꮡ(fd.wop);
+    defer(Ꮡfd.writeUnlock);
+    var o = Ꮡfd.of(FD.Ꮡwop);
     o.InitMsg(p, oob);
     if ((~o).rsa == nil) {
-        o.val.rsa = @new<syscall.RawSockaddrAny>();
+        o.Value.rsa = @new<Δsyscall.RawSockaddrAny>();
     }
-    var len = sockaddrInet6ToRaw((~o).rsa, Ꮡsa);
-    (~o).msg.Name = ((syscall.Pointer)new @unsafe.Pointer((~o).rsa));
-    (~o).msg.Namelen = len;
-    var (n, err) = execIO(o, (ж<operation> o) => windows.WSASendMsg((~(~oΔ1).fd).Sysfd, Ꮡ((~oΔ1).msg), 0, Ꮡ((~oΔ1).qty), Ꮡ((~oΔ1).o), nil));
-    return (n, ((nint)(~o).msg.Control.Len), err);
+    var lenΔ1 = sockaddrInet6ToRaw((~o).rsa, Ꮡsa);
+    o.Value.msg.Name = ((Δsyscall.Pointer)(ж<EmptyStruct>)(uintptr)(new @unsafe.Pointer((~o).rsa)));
+    o.Value.msg.Namelen = lenΔ1;
+    var (n, err) = execIO(o, (ж<operation> oΔ1) => windows.WSASendMsg((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡmsg), 0, oΔ1.of(operation.Ꮡqty), oΔ1.of(operation.Ꮡo), nil));
+    return (n, (nint)(~o).msg.Control.Len, err);
 });
 
 public static (nint, @string, error) DupCloseOnExec(nint fd) {
-    var (proc, err) = syscall.GetCurrentProcess();
+    var (proc, err) = Δsyscall.GetCurrentProcess();
     if (err != default!) {
         return (0, "GetCurrentProcess", err);
     }
-    ref var nfd = ref heap(new syscall_package.ΔHandle(), out var Ꮡnfd);
+    ref var nfd = ref heap(new syscallꓸHandle(), out var Ꮡnfd);
     const bool inherit = false; // analogous to CLOEXEC
     {
-        var errΔ1 = syscall.DuplicateHandle(proc, ((syscallꓸHandle)fd), proc, Ꮡnfd, 0, inherit, syscall.DUPLICATE_SAME_ACCESS); if (errΔ1 != default!) {
+        var errΔ1 = Δsyscall.DuplicateHandle(proc, ((syscallꓸHandle)(uintptr)fd), proc, Ꮡnfd, 0, inherit, Δsyscall.DUPLICATE_SAME_ACCESS); if (errΔ1 != default!) {
             return (0, "DuplicateHandle", errΔ1);
         }
     }
-    return (((nint)nfd), "", default!);
+    return ((nint)(uintptr)nfd, "", default!);
 }
 
 } // end poll_package

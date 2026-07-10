@@ -24,16 +24,16 @@ internal static uintptr /*reqSize*/ roundupsize(uintptr size, bool noscan) {
         // (reqSize - size) is either mallocHeaderSize or 0. We need to subtract mallocHeaderSize
         // from the result if we have one, since mallocgc will add it back in.
         if (reqSize <= smallSizeMax - 8) {
-            return ((uintptr)class_to_size[size_to_class8[divRoundUp(reqSize, smallSizeDiv)]]) - (reqSize - size);
+            return (uintptr)class_to_size[size_to_class8[(nint)(divRoundUp(reqSize, smallSizeDiv))]] - (reqSize - size);
         }
-        return ((uintptr)class_to_size[size_to_class128[divRoundUp(reqSize - smallSizeMax, largeSizeDiv)]]) - (reqSize - size);
+        return (uintptr)class_to_size[size_to_class128[(nint)(divRoundUp(reqSize - (uintptr)smallSizeMax, largeSizeDiv))]] - (reqSize - size);
     }
     // Large object. Align reqSize up to the next page. Check for overflow.
     reqSize += pageSize - 1;
     if (reqSize < size) {
         return size;
     }
-    return (uintptr)(reqSize & ~(pageSize - 1));
+    return (uintptr)(reqSize & ~(uintptr)(pageSize - 1));
 }
 
 } // end runtime_package

@@ -16,6 +16,7 @@ global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 global using runtimeꓸError = go.runtime_package.ΔError;
+using reflect = go.reflect_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -34,6 +35,7 @@ using static go.encoding.xml_package;
 
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("Token", "ΔToken")]
+[assembly: GoTypeAlias("ΔToken", "object")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -45,24 +47,20 @@ using static go.encoding.xml_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(io.ByteReader, bool), io_package.ByteReader>]
-[assembly: GoImplement<(io.Reader, error), io_package.Reader>]
-[assembly: GoImplement<SyntaxError, error>]
-[assembly: GoImplement<TagPathError, error>]
+[assembly: GoImplement<SyntaxError, error>(Pointer = true)]
+[assembly: GoImplement<TagPathError, error>(Pointer = true)]
 [assembly: GoImplement<UnmarshalError, error>]
-[assembly: GoImplement<UnsupportedTypeError, error>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>]
-[assembly: GoImplement<bytes_package.Reader, io_package.Reader>]
-[assembly: GoImplement<printer, io_package.Writer>]
+[assembly: GoImplement<UnsupportedTypeError, error>(Pointer = true)]
+[assembly: GoImplement<bufio_package.Reader, io_package.ByteReader>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<printer, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 [assembly: GoImplicitConv<StartElement, ж<StartElement>>(Indirect = true)]
 [assembly: GoImplicitConv<StartElement, ж<StartElement>>]
 [assembly: GoImplicitConv<fieldInfo, ж<fieldInfo>>]
-[assembly: GoImplicitConv<struct{p printer}, struct{p printer}>(Inverted = true)]
-[assembly: GoImplicitConv<xml.Attr}, xml.Attr}>(Inverted = true)]
-[assembly: GoImplicitConv<xml.Token; nextByte int; ns map<@string>string; err error; line int; linestart int64; offset int64; unmarshalDepth int}, xml.Token; nextByte int; ns map<@string>string; err error; line int; linestart int64; offset int64; unmarshalDepth int}>(Inverted = true)]
 // </ImplicitConversions>
 
 namespace go.encoding;

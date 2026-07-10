@@ -6,8 +6,9 @@ namespace go;
 using errors = errors_package;
 using bytealg = @internal.bytealg_package;
 using itoa = @internal.itoa_package;
-using _ = unsafe_package; // for go:linkname
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
 using @internal;
+using fs = go.io.fs_package;
 
 partial class os_package {
 
@@ -20,7 +21,7 @@ partial class os_package {
 internal static partial uint64 runtime_rand();
 
 internal static @string nextRandom() {
-    return itoa.Uitoa(((nuint)((uint32)runtime_rand())));
+    return itoa.Uitoa((nuint)(uint32)runtime_rand());
 }
 
 // CreateTemp creates a new temporary file in the directory dir,
@@ -38,20 +39,20 @@ public static (ж<File>, error) CreateTemp(@string dir, @string pattern) {
     }
     var (prefix, suffix, err) = prefixAndSuffix(pattern);
     if (err != default!) {
-        return (default!, new PathError{Op: "createtemp"u8, Path: pattern, Err: err});
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "createtemp"u8, Path: pattern, Err: err))));
     }
     prefix = joinPath(dir, prefix);
     nint @try = 0;
     while (ᐧ) {
         @string name = prefix + nextRandom() + suffix;
-        (f, errΔ1) = OpenFile(name, (nint)((nint)(O_RDWR | O_CREATE) | O_EXCL), 384);
+        var (f, errΔ1) = OpenFile(name, (nint)((nint)(nint)(O_RDWR | O_CREATE) | O_EXCL), 384);
         if (IsExist(errΔ1)) {
             {
                 @try++; if (@try < 10000) {
                     continue;
                 }
             }
-            return (default!, new PathError{Op: "createtemp"u8, Path: prefix + "*"u8 + suffix, Err: ErrExist});
+            return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "createtemp"u8, Path: prefix + "*"u8 + suffix, Err: ErrExist))));
         }
         return (f, errΔ1);
     }
@@ -95,7 +96,7 @@ public static (@string, error) MkdirTemp(@string dir, @string pattern) {
     }
     var (prefix, suffix, err) = prefixAndSuffix(pattern);
     if (err != default!) {
-        return ("", new PathError{Op: "mkdirtemp"u8, Path: pattern, Err: err});
+        return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirtemp"u8, Path: pattern, Err: err))));
     }
     prefix = joinPath(dir, prefix);
     nint @try = 0;
@@ -111,11 +112,11 @@ public static (@string, error) MkdirTemp(@string dir, @string pattern) {
                     continue;
                 }
             }
-            return ("", new PathError{Op: "mkdirtemp"u8, Path: dir + ((@string)PathSeparator) + prefix + "*"u8 + suffix, Err: ErrExist});
+            return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirtemp"u8, Path: dir + ((@string)(rune)PathSeparator) + prefix + "*"u8 + suffix, Err: ErrExist))));
         }
         if (IsNotExist(errΔ1)) {
             {
-                (_, errΔ2) = Stat(dir); if (IsNotExist(errΔ2)) {
+                var (_, errΔ2) = Stat(dir); if (IsNotExist(errΔ2)) {
                     return ("", errΔ2);
                 }
             }
@@ -128,7 +129,7 @@ internal static @string joinPath(@string dir, @string name) {
     if (len(dir) > 0 && IsPathSeparator(dir[len(dir) - 1])) {
         return dir + name;
     }
-    return dir + ((@string)PathSeparator) + name;
+    return dir + ((@string)(rune)PathSeparator) + name;
 }
 
 } // end os_package

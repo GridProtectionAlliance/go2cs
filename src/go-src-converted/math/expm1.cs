@@ -132,19 +132,19 @@ public static float64 Expm1(float64 x) {
 }
 
 internal static float64 expm1(float64 x) {
-    static readonly UntypedFloat Othreshold = /* 7.09782712893383973096e+02 */ 709.783;     // 0x40862E42FEFA39EF
-    static readonly UntypedFloat Ln2X56 = /* 3.88162421113569373274e+01 */ 38.8162;     // 0x4043687a9f1af2b1
-    static readonly UntypedFloat Ln2HalfX3 = /* 1.03972077083991796413e+00 */ 1.03972;     // 0x3ff0a2b23f3bab73
-    static readonly UntypedFloat Ln2Half = /* 3.46573590279972654709e-01 */ 0.346574;    // 0x3fd62e42fefa39ef
-    static readonly UntypedFloat Ln2Hi = /* 6.93147180369123816490e-01 */ 0.693147;    // 0x3fe62e42fee00000
-    static readonly UntypedFloat Ln2Lo = /* 1.90821492927058770002e-10 */ 1.90821e-10; // 0x3dea39ef35793c76
-    static readonly UntypedFloat InvLn2 = /* 1.44269504088896338700e+00 */ 1.4427;      // 0x3ff71547652b82fe
-    static readonly UntypedFloat Tiny = /* 1.0 / (1 << 54) */ 5.55112e-17; // 2**-54 = 0x3c90000000000000
-    static readonly UntypedFloat Q1 = /* -3.33333333333331316428e-02 */ -0.0333333; // 0xBFA11111111110F4
-    static readonly UntypedFloat Q2 = /* 1.58730158725481460165e-03 */ 0.0015873;    // 0x3F5A01A019FE5585
-    static readonly UntypedFloat Q3 = /* -7.93650757867487942473e-05 */ -7.93651e-05; // 0xBF14CE199EAADBB7
-    static readonly UntypedFloat Q4 = /* 4.00821782732936239552e-06 */ 4.00822e-06;  // 0x3ED0CFCA86E65239
-    static readonly UntypedFloat Q5 = /* -2.01099218183624371326e-07 */ -2.01099e-07; // 0xBE8AFDB76E09C32D
+    UntypedFloat Othreshold = /* 7.09782712893383973096e+02 */ 709.783;     // 0x40862E42FEFA39EF
+    UntypedFloat Ln2X56 = /* 3.88162421113569373274e+01 */ 38.8162;     // 0x4043687a9f1af2b1
+    UntypedFloat Ln2HalfX3 = /* 1.03972077083991796413e+00 */ 1.03972;     // 0x3ff0a2b23f3bab73
+    UntypedFloat Ln2Half = /* 3.46573590279972654709e-01 */ 0.346574;    // 0x3fd62e42fefa39ef
+    UntypedFloat Ln2Hi = /* 6.93147180369123816490e-01 */ 0.693147;    // 0x3fe62e42fee00000
+    UntypedFloat Ln2Lo = /* 1.90821492927058770002e-10 */ 1.90821e-10; // 0x3dea39ef35793c76
+    UntypedFloat InvLn2 = /* 1.44269504088896338700e+00 */ 1.4427;      // 0x3ff71547652b82fe
+    UntypedFloat Tiny = /* 1.0 / (1 << 54) */ 5.55112e-17; // 2**-54 = 0x3c90000000000000
+    UntypedFloat Q1 = /* -3.33333333333331316428e-02 */ -0.0333333; // 0xBFA11111111110F4
+    UntypedFloat Q2 = /* 1.58730158725481460165e-03 */ 0.0015873;    // 0x3F5A01A019FE5585
+    UntypedFloat Q3 = /* -7.93650757867487942473e-05 */ -7.93651e-05; // 0xBF14CE199EAADBB7
+    UntypedFloat Q4 = /* 4.00821782732936239552e-06 */ 4.00822e-06;  // 0x3ED0CFCA86E65239
+    UntypedFloat Q5 = /* -2.01099218183624371326e-07 */ -2.01099e-07; // 0xBE8AFDB76E09C32D
     // special cases
     switch (ᐧ) {
     case {} when IsInf(x, 1) || IsNaN(x): {
@@ -182,24 +182,24 @@ internal static float64 expm1(float64 x) {
         if (absx < Ln2HalfX3){
             // and |x| < 1.5 * ln2
             if (!sign){
-                hi = x - Ln2Hi;
+                hi = x - (float64)Ln2Hi;
                 lo = Ln2Lo;
                 k = 1;
             } else {
-                hi = x + Ln2Hi;
+                hi = x + (float64)Ln2Hi;
                 lo = -Ln2Lo;
                 k = -1;
             }
         } else {
             if (!sign){
-                k = ((nint)(InvLn2 * x + 0.5F));
+                k = (nint)((float64)InvLn2 * x + 0.5D);
             } else {
-                k = ((nint)(InvLn2 * x - 0.5F));
+                k = (nint)((float64)InvLn2 * x - 0.5D);
             }
-            var tΔ1 = ((float64)k);
-            hi = x - tΔ1 * Ln2Hi;
+            var tΔ1 = (float64)k;
+            hi = x - tΔ1 * (float64)Ln2Hi;
             // t * Ln2Hi is exact here
-            lo = tΔ1 * Ln2Lo;
+            lo = tΔ1 * (float64)Ln2Lo;
         }
         x = hi - lo;
         c = (hi - x) - lo;
@@ -211,11 +211,11 @@ internal static float64 expm1(float64 x) {
         k = 0;
     }
     // x is now in primary range
-    var hfx = 0.5F * x;
+    var hfx = 0.5D * x;
     var hxs = x * hfx;
-    var r1 = 1 + hxs * (Q1 + hxs * (Q2 + hxs * (Q3 + hxs * (Q4 + hxs * Q5))));
+    var r1 = 1 + hxs * ((float64)Q1 + hxs * ((float64)Q2 + hxs * ((float64)Q3 + hxs * ((float64)Q4 + hxs * (float64)Q5))));
     var t = 3 - r1 * hfx;
-    var e = hxs * ((r1 - t) / (6.0F - x * t));
+    var e = hxs * ((r1 - t) / (6.0D - x * t));
     if (k == 0) {
         return x - (x * e - hxs);
     }
@@ -224,35 +224,35 @@ internal static float64 expm1(float64 x) {
     e -= hxs;
     switch (ᐧ) {
     case {} when k == -1: {
-        return 0.5F * (x - e) - 0.5F;
+        return 0.5D * (x - e) - 0.5D;
     }
     case {} when k is 1: {
-        if (x < -0.25F) {
-            return -2 * (e - (x + 0.5F));
+        if (x < -0.25D) {
+            return -2 * (e - (x + 0.5D));
         }
         return 1 + 2 * (x - e);
     }
     case {} when k <= -2 || k > 56: {
         var yΔ2 = 1 - (e - x);
-         = Float64frombits(Float64bits(yΔ2) + ((uint64)k) << (int)(52));
+        yΔ2 = Float64frombits(Float64bits(yΔ2) + ((uint64)k << (int)(52)));
         return yΔ2 - 1;
     }}
 
     // suffice to return exp(x)-1
     // add k to y's exponent
     if (k < 20) {
-        var tΔ2 = Float64frombits((nint)4607182418800017408L - ((nint)9007199254740992L >> (int)(((nuint)k))));
+        var tΔ2 = Float64frombits(0x3ff0000000000000UL - (((uint64)0x20000000000000UL >> (int)((nuint)k))));
         // t=1-2**-k
         var yΔ3 = tΔ2 - (e - x);
-         = Float64frombits(Float64bits(yΔ3) + ((uint64)k) << (int)(52));
+        yΔ3 = Float64frombits(Float64bits(yΔ3) + ((uint64)k << (int)(52)));
         // add k to y's exponent
         return yΔ3;
     }
-    t = Float64frombits(((uint64)(1023 - k)) << (int)(52));
+    t = Float64frombits(((uint64)(0x3ff - k) << (int)(52)));
     // 2**-k
     var y = x - (e + t);
     y++;
-    y = Float64frombits(Float64bits(y) + ((uint64)k) << (int)(52));
+    y = Float64frombits(Float64bits(y) + ((uint64)k << (int)(52)));
     // add k to y's exponent
     return y;
 }

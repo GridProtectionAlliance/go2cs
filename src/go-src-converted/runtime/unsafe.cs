@@ -13,7 +13,7 @@ internal static void unsafestring(@unsafe.Pointer ptr, nint len) {
     if (len < 0) {
         panicunsafestringlen();
     }
-    if (((uintptr)len) > -((uintptr)ptr)) {
+    if ((uintptr)len > ((uintptr)0 - (uintptr)ptr)) {
         if (ptr == nil) {
             panicunsafestringnilptr();
         }
@@ -23,33 +23,33 @@ internal static void unsafestring(@unsafe.Pointer ptr, nint len) {
 
 // Keep this code in sync with cmd/compile/internal/walk/builtin.go:walkUnsafeString
 internal static void unsafestring64(@unsafe.Pointer ptr, int64 len64) {
-    nint len = ((nint)len64);
-    if (((int64)len) != len64) {
+    nint len = (nint)len64;
+    if ((int64)len != len64) {
         panicunsafestringlen();
     }
-    unsafestring(ptr.val, len);
+    unsafestring(ptr, len);
 }
 
 internal static void unsafestringcheckptr(@unsafe.Pointer ptr, int64 len64) {
-    unsafestring64(ptr.val, len64);
+    unsafestring64(ptr, len64);
     // Check that underlying array doesn't straddle multiple heap objects.
     // unsafestring64 has already checked for overflow.
-    if (checkptrStraddles(ptr.val, ((uintptr)len64))) {
+    if (checkptrStraddles(ptr, (uintptr)len64)) {
         @throw("checkptr: unsafe.String result straddles multiple allocations"u8);
     }
 }
 
 internal static void panicunsafestringlen() {
-    throw panic(((errorString)"unsafe.String: len out of range"u8));
+    throw panic(((errorString)(@string)"unsafe.String: len out of range"u8));
 }
 
 internal static void panicunsafestringnilptr() {
-    throw panic(((errorString)"unsafe.String: ptr is nil and len is not zero"u8));
+    throw panic(((errorString)(@string)"unsafe.String: ptr is nil and len is not zero"u8));
 }
 
 // Keep this code in sync with cmd/compile/internal/walk/builtin.go:walkUnsafeSlice
 internal static void unsafeslice(ж<_type> Ꮡet, @unsafe.Pointer ptr, nint len) {
-    ref var et = ref Ꮡet.val;
+    ref var et = ref Ꮡet.Value;
 
     if (len < 0) {
         panicunsafeslicelen1(getcallerpc());
@@ -59,8 +59,8 @@ internal static void unsafeslice(ж<_type> Ꮡet, @unsafe.Pointer ptr, nint len)
             panicunsafeslicenilptr1(getcallerpc());
         }
     }
-    var (mem, overflow) = math.MulUintptr(et.Size_, ((uintptr)len));
-    if (overflow || mem > -((uintptr)ptr)) {
+    var (mem, overflow) = math.MulUintptr(et.Size_, (uintptr)len);
+    if (overflow || mem > ((uintptr)0 - (uintptr)ptr)) {
         if (ptr == nil) {
             panicunsafeslicenilptr1(getcallerpc());
         }
@@ -70,22 +70,22 @@ internal static void unsafeslice(ж<_type> Ꮡet, @unsafe.Pointer ptr, nint len)
 
 // Keep this code in sync with cmd/compile/internal/walk/builtin.go:walkUnsafeSlice
 internal static void unsafeslice64(ж<_type> Ꮡet, @unsafe.Pointer ptr, int64 len64) {
-    ref var et = ref Ꮡet.val;
+    ref var et = ref Ꮡet.Value;
 
-    nint len = ((nint)len64);
-    if (((int64)len) != len64) {
+    nint len = (nint)len64;
+    if ((int64)len != len64) {
         panicunsafeslicelen1(getcallerpc());
     }
-    unsafeslice(Ꮡet, ptr.val, len);
+    unsafeslice(Ꮡet, ptr, len);
 }
 
 internal static void unsafeslicecheckptr(ж<_type> Ꮡet, @unsafe.Pointer ptr, int64 len64) {
-    ref var et = ref Ꮡet.val;
+    ref var et = ref Ꮡet.Value;
 
-    unsafeslice64(Ꮡet, ptr.val, len64);
+    unsafeslice64(Ꮡet, ptr, len64);
     // Check that underlying array doesn't straddle multiple heap objects.
     // unsafeslice64 has already checked for overflow.
-    if (checkptrStraddles(ptr.val, ((uintptr)len64) * et.Size_)) {
+    if (checkptrStraddles(ptr, (uintptr)len64 * et.Size_)) {
         @throw("checkptr: unsafe.Slice result straddles multiple allocations"u8);
     }
 }
@@ -99,7 +99,7 @@ internal static void panicunsafeslicelen() {
 //go:yeswritebarrierrec
 internal static void panicunsafeslicelen1(uintptr pc) {
     panicCheck1(pc, "unsafe.Slice: len out of range"u8);
-    throw panic(((errorString)"unsafe.Slice: len out of range"u8));
+    throw panic(((errorString)(@string)"unsafe.Slice: len out of range"u8));
 }
 
 internal static void panicunsafeslicenilptr() {
@@ -111,14 +111,14 @@ internal static void panicunsafeslicenilptr() {
 //go:yeswritebarrierrec
 internal static void panicunsafeslicenilptr1(uintptr pc) {
     panicCheck1(pc, "unsafe.Slice: ptr is nil and len is not zero"u8);
-    throw panic(((errorString)"unsafe.Slice: ptr is nil and len is not zero"u8));
+    throw panic(((errorString)(@string)"unsafe.Slice: ptr is nil and len is not zero"u8));
 }
 
 //go:linkname reflect_unsafeslice reflect.unsafeslice
 internal static void reflect_unsafeslice(ж<_type> Ꮡet, @unsafe.Pointer ptr, nint len) {
-    ref var et = ref Ꮡet.val;
+    ref var et = ref Ꮡet.Value;
 
-    unsafeslice(Ꮡet, ptr.val, len);
+    unsafeslice(Ꮡet, ptr, len);
 }
 
 } // end runtime_package

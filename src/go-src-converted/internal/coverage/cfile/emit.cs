@@ -10,10 +10,10 @@ namespace go.@internal.coverage;
 
 using md5 = crypto.md5_package;
 using fmt = fmt_package;
-using coverage = @internal.coverage_package;
-using encodecounter = @internal.coverage.encodecounter_package;
-using encodemeta = @internal.coverage.encodemeta_package;
-using rtcov = @internal.coverage.rtcov_package;
+using coverage = go.@internal.coverage_package;
+using encodecounter = go.@internal.coverage.encodecounter_package;
+using encodemeta = go.@internal.coverage.encodemeta_package;
+using rtcov = go.@internal.coverage.rtcov_package;
 using io = io_package;
 using os = os_package;
 using filepath = path.filepath_package;
@@ -22,8 +22,12 @@ using strconv = strconv_package;
 using atomic = sync.atomic_package;
 using time = time_package;
 using @unsafe = unsafe_package;
-using @internal;
 using crypto;
+using fs = go.io.fs_package;
+using go.@internal;
+using go.@internal.coverage;
+using go.io;
+using hash = hash_package;
 using path;
 using sync;
 
@@ -63,22 +67,22 @@ internal static partial slice<rtcov.CovCounterBlob> getCovCounterList();
 [GoType] partial struct emitState {
     internal @string mfname;  // path of final meta-data output file
     internal @string mftmp;  // path to meta-data temp file (if needed)
-    internal ж<os_package.File> mf; // open os.File for meta-data temp file
+    internal ж<os.File> mf; // open os.File for meta-data temp file
     internal @string cfname;  // path of final counter data file
     internal @string cftmp;  // path to counter data temp file
-    internal ж<os_package.File> cf; // open os.File for counter data file
+    internal ж<os.File> cf; // open os.File for counter data file
     internal @string outdir;  // output directory
     // List of meta-data symbols obtained from the runtime
-    internal rtcov.CovMetaBlob metalist;
+    internal slice<rtcov.CovMetaBlob> metalist;
     // List of counter-data symbols obtained from the runtime
-    internal rtcov.CovCounterBlob counterlist;
+    internal slice<rtcov.CovCounterBlob> counterlist;
     // Table to use for remapping hard-coded pkg ids.
     internal map<nint, nint> pkgmap;
     // emit debug trace output
     internal bool debug;
 }
 
-internal static array<byte> finalHash;
+internal static array<byte> finalHash = new(16);
 internal static bool finalHashComputed;
 internal static uint64 finalMetaLen;
 internal static bool metaDataEmitAttempted;
@@ -101,25 +105,25 @@ internal static void emitMetaData() {
     if (covProfileAlreadyEmitted) {
         return;
     }
-    (ml, err) = prepareForMetaEmit();
+    var (ml, err) = prepareForMetaEmit();
     if (err != default!) {
-        fmt.Fprintf(~os.Stderr, "error: coverage meta-data prep failed: %v\n"u8, err);
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "error: coverage meta-data prep failed: %v\n"u8, err);
         if (os.Getenv("GOCOVERDEBUG"u8) != ""u8) {
             throw panic("meta-data write failure");
         }
     }
     if (len(ml) == 0) {
-        fmt.Fprintf(~os.Stderr, "program not built with -cover\n"u8);
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "program not built with -cover\n"u8);
         return;
     }
     goCoverDir = os.Getenv("GOCOVERDIR"u8);
     if (goCoverDir == ""u8) {
-        fmt.Fprintf(~os.Stderr, "warning: GOCOVERDIR not set, no coverage data emitted\n"u8);
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "warning: GOCOVERDIR not set, no coverage data emitted\n"u8);
         return;
     }
     {
         var errΔ1 = emitMetaDataToDirectory(goCoverDir, ml); if (errΔ1 != default!) {
-            fmt.Fprintf(~os.Stderr, "error: coverage meta-data emit failed: %v\n"u8, errΔ1);
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "error: coverage meta-data emit failed: %v\n"u8, errΔ1);
             if (os.Getenv("GOCOVERDEBUG"u8) != ""u8) {
                 throw panic("meta-data write failure");
             }
@@ -168,31 +172,31 @@ internal static (slice<rtcov.CovMetaBlob>, error) prepareForMetaEmit() {
     // are rewritten during program execution.
     capturedOsArgs = captureOsArgs();
     if ((~s).debug) {
-        fmt.Fprintf(~os.Stderr, "=+= GOCOVERDIR is %s\n"u8, os.Getenv("GOCOVERDIR"u8));
-        fmt.Fprintf(~os.Stderr, "=+= contents of covmetalist:\n"u8);
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= GOCOVERDIR is %s\n"u8, os.Getenv("GOCOVERDIR"u8));
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= contents of covmetalist:\n"u8);
         foreach (var (k, b) in ml) {
-            fmt.Fprintf(~os.Stderr, "=+= slot: %d path: %s "u8, k, b.PkgPath);
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= slot: %d path: %s "u8, k, b.PkgPath);
             if (b.PkgID != -1) {
-                fmt.Fprintf(~os.Stderr, " hcid: %d"u8, b.PkgID);
+                fmt.Fprintf(new os.FileжWriter(os.Stderr), " hcid: %d"u8, b.PkgID);
             }
-            fmt.Fprintf(~os.Stderr, "\n"u8);
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "\n"u8);
         }
         var pm = rtcov.Meta.PkgMap;
-        fmt.Fprintf(~os.Stderr, "=+= remap table:\n"u8);
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= remap table:\n"u8);
         foreach (var (from, to) in pm) {
-            fmt.Fprintf(~os.Stderr, "=+= from %d to %d\n"u8,
-                ((uint32)from), ((uint32)to));
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= from %d to %d\n"u8,
+                (uint32)from, (uint32)to);
         }
     }
     var h = md5.New();
-    var tlen = ((uint64)@unsafe.Sizeof(new coverage.MetaFileHeader(nil)));
+    var tlen = (uint64)@unsafe.Sizeof(new coverage.MetaFileHeader(nil));
     foreach (var (_, entry) in ml) {
         {
             var (_, err) = h.Write(entry.Hash[..]); if (err != default!) {
                 return (default!, err);
             }
         }
-        tlen += ((uint64)entry.Len);
+        tlen += (uint64)entry.Len;
         var ecm = ((coverage.CounterMode)entry.CounterMode);
         if (modeClash(ecm)) {
             return (default!, fmt.Errorf("coverage counter mode clash: package %s uses mode=%d, but package %s uses mode=%s\n"u8, ml[0].PkgPath, cmode, entry.PkgPath, ecm));
@@ -216,7 +220,7 @@ internal static (slice<rtcov.CovMetaBlob>, error) prepareForMetaEmit() {
 // emitMetaDataToDirectory emits the meta-data output file to the specified
 // directory, returning an error if something went wrong.
 internal static error emitMetaDataToDirectory(@string outdir, slice<rtcov.CovMetaBlob> ml) {
-    (ml, err) = prepareForMetaEmit();
+    (ml, var err) = prepareForMetaEmit();
     if (err != default!) {
         return err;
     }
@@ -255,7 +259,7 @@ internal static void emitCounterData() {
     }
     {
         var err = emitCounterDataToDirectory(goCoverDir); if (err != default!) {
-            fmt.Fprintf(~os.Stderr, "error: coverage counter data emit failed: %v\n"u8, err);
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "error: coverage counter data emit failed: %v\n"u8, err);
             if (os.Getenv("GOCOVERDEBUG"u8) != ""u8) {
                 throw panic("counter-data write failure");
             }
@@ -293,7 +297,7 @@ internal static error emitCounterDataToDirectory(@string outdir) {
     }
     // Emit counter data file.
     {
-        var err = s.emitCounterDataFile(finalHash, ~(~s).cf); if (err != default!) {
+        var err = s.emitCounterDataFile(finalHash, new os.FileжWriter((~s).cf)); if (err != default!) {
             return err;
         }
     }
@@ -313,9 +317,11 @@ internal static error emitCounterDataToDirectory(@string outdir) {
 }
 
 // emitCounterDataToWriter emits counter data for this coverage run to an io.Writer.
-[GoRecv] internal static error emitCounterDataToWriter(this ref emitState s, io.Writer w) {
+internal static error emitCounterDataToWriter(this ж<emitState> Ꮡs, io.Writer w) {
+    ref var s = ref Ꮡs.Value;
+
     {
-        var err = s.emitCounterDataFile(finalHash, w); if (err != default!) {
+        var err = Ꮡs.emitCounterDataFile(finalHash, w); if (err != default!) {
             return err;
         }
     }
@@ -333,8 +339,8 @@ internal static error emitCounterDataToDirectory(@string outdir) {
     // Open meta-outfile for reading to see if it exists.
     @string fn = fmt.Sprintf("%s.%x"u8, coverage.MetaFilePref, metaHash);
     s.mfname = filepath.Join(s.outdir, fn);
-    (fi, err) = os.Stat(s.mfname);
-    if (err != default! || fi.Size() != ((int64)metaLen)) {
+    var (fi, err) = os.Stat(s.mfname);
+    if (err != default! || fi.Size() != (int64)metaLen) {
         // We need a new meta-file.
         @string tname = "tmp."u8 + fn + strconv.FormatInt(time.Now().UnixNano(), 10);
         s.mftmp = filepath.Join(s.outdir, tname);
@@ -355,7 +361,7 @@ internal static error emitCounterDataToDirectory(@string outdir) {
     nint processID = os.Getpid();
     @string fn = fmt.Sprintf(coverage.CounterFileTempl, coverage.CounterFilePref, metaHash, processID, time.Now().UnixNano());
     s.cfname = filepath.Join(s.outdir, fn);
-    s.cftmp = filepath.Join(s.outdir, "tmp."u8 + fn);
+    s.cftmp = filepath.Join(s.outdir, "tmp." + fn);
     error err = default!;
     (s.cf, err) = os.Create(s.cftmp);
     if (err != default!) {
@@ -378,21 +384,21 @@ internal static error emitCounterDataToDirectory(@string outdir) {
 [GoRecv] internal static error openOutputFiles(this ref emitState s, array<byte> metaHash, uint64 metaLen, fileType which) {
     metaHash = metaHash.Clone();
 
-    (fi, err) = os.Stat(s.outdir);
+    var (fi, err) = os.Stat(s.outdir);
     if (err != default!) {
         return fmt.Errorf("output directory %q inaccessible (err: %v); no coverage data written"u8, s.outdir, err);
     }
     if (!fi.IsDir()) {
         return fmt.Errorf("output directory %q not a directory; no coverage data written"u8, s.outdir);
     }
-    if (((fileType)(which & metaDataFile)) != 0) {
+    if (((fileType)(which & (nint)metaDataFile)) != 0) {
         {
             var errΔ1 = s.openMetaFile(metaHash, metaLen); if (errΔ1 != default!) {
                 return errΔ1;
             }
         }
     }
-    if (((fileType)(which & counterDataFile)) != 0) {
+    if (((fileType)(which & (nint)counterDataFile)) != 0) {
         {
             var errΔ2 = s.openCounterFile(metaHash); if (errΔ2 != default!) {
                 return errΔ2;
@@ -409,7 +415,7 @@ internal static error emitCounterDataToDirectory(@string outdir) {
     finalHash = finalHash.Clone();
 
     {
-        var err = writeMetaData(~s.mf, s.metalist, cmode, cgran, finalHash); if (err != default!) {
+        var err = writeMetaData(new os.FileжWriter(s.mf), s.metalist, cmode, cgran, finalHash); if (err != default!) {
             return fmt.Errorf("writing %s: %v\n"u8, s.mftmp, err);
         }
     }
@@ -440,61 +446,59 @@ internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metali
 
     var mfw = encodemeta.NewCoverageMetaFileWriter("<io.Writer>"u8, w);
     slice<slice<byte>> blobs = default!;
-    ref var e = ref heap(new @internal.coverage.rtcov_package.CovMetaBlob(), out var Ꮡe);
-
     foreach (var (_, e) in metalist) {
-        var sd = @unsafe.Slice(e.P, ((nint)e.Len));
+        var sd = @unsafe.Slice(e.P, (nint)e.Len);
         blobs = append(blobs, sd);
     }
     return mfw.Write(finalHash, blobs, cmode, gran);
 }
 
-[GoRecv] internal static error VisitFuncs(this ref emitState s, encodecounter.CounterVisitorFn f) {
+[GoRecv] internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slice<uint32>, error> f) {
     slice<uint32> tcounters = default!;
     var rdCounters = (slice<atomic.Uint32> actrs, slice<uint32> ctrs) => {
         ctrs = ctrs[..0];
         foreach (var (i, _) in actrs) {
-            ctrs = append(ctrs, actrs[i].Load());
+            ctrs = append(ctrs, Ꮡ(actrs, i).Load());
         }
         return ctrs;
     };
-    var dpkg = ((uint32)0);
+    var dpkg = (uint32)0;
     foreach (var (_, c) in s.counterlist) {
-        var sd = @unsafe.Slice((ж<atomic.Uint32>)(uintptr)(new @unsafe.Pointer(c.Counters)), ((nint)c.Len));
+        var sd = @unsafe.Slice((ж<atomic.Uint32>)(uintptr)(new @unsafe.Pointer(c.Counters)), (nint)c.Len);
         for (nint i = 0; i < len(sd); i++) {
             // Skip ahead until the next non-zero value.
-            var sdi = sd[i].Load();
+            var sdi = Ꮡ(sd, i).Load();
             if (sdi == 0) {
                 continue;
             }
             // We found a function that was executed.
-            var nCtrs = sd[i + coverage.NumCtrsOffset].Load();
-            var pkgId = sd[i + coverage.PkgIdOffset].Load();
-            var funcId = sd[i + coverage.FuncIdOffset].Load();
-            nint cst = i + coverage.FirstCtrOffset;
-            var counters = sd[(int)(cst)..(int)(cst + ((nint)nCtrs))];
+            var nCtrs = Ꮡ(sd, i + (nint)coverage.NumCtrsOffset).Load();
+            var pkgId = Ꮡ(sd, i + (nint)coverage.PkgIdOffset).Load();
+            var funcId = Ꮡ(sd, i + (nint)coverage.FuncIdOffset).Load();
+            nint cst = i + (nint)coverage.FirstCtrOffset;
+            var counters = sd[(int)(cst)..(int)(cst + (nint)nCtrs)];
             // Check to make sure that we have at least one live
             // counter. See the implementation note in ClearCoverageCounters
             // for a description of why this is needed.
             var isLive = false;
             for (nint iΔ1 = 0; iΔ1 < len(counters); iΔ1++) {
-                if (counters[iΔ1].Load() != 0) {
+                if (Ꮡ(counters, iΔ1).Load() != 0) {
                     isLive = true;
                     break;
                 }
             }
             if (!isLive) {
                 // Skip this function.
-                i += coverage.FirstCtrOffset + ((nint)nCtrs) - 1;
+                i += (nint)coverage.FirstCtrOffset + (nint)nCtrs - 1;
                 continue;
             }
             if (s.debug) {
                 if (pkgId != dpkg) {
                     dpkg = pkgId;
-                    fmt.Fprintf(~os.Stderr, "\n=+= %d: pk=%d visit live fcn"u8,
+                    fmt.Fprintf(new os.FileжWriter(os.Stderr), "\n=+= %d: pk=%d visit live fcn"u8,
                         i, pkgId);
                 }
-                fmt.Fprintf(~os.Stderr, " {i=%d F%d NC%d}"u8, i, funcId, nCtrs);
+                fmt.Fprintf(new os.FileжWriter(os.Stderr), " {i=%d F%d NC%d}"u8, i, funcId, nCtrs);
             }
             // Vet and/or fix up package ID. A package ID of zero
             // indicates that there is some new package X that is a
@@ -502,19 +506,18 @@ internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metali
             // executes before its corresponding init package runs.
             // This is a fatal error that we should only see during
             // Go development (e.g. tip).
-            var ipk = ((int32)pkgId);
+            var ipk = (int32)pkgId;
             if (ipk == 0){
-                fmt.Fprintf(~os.Stderr, "\n"u8);
-                reportErrorInHardcodedList(((int32)i), ipk, funcId, nCtrs);
+                fmt.Fprintf(new os.FileжWriter(os.Stderr), "\n"u8);
+                reportErrorInHardcodedList((int32)i, ipk, funcId, nCtrs);
             } else 
             if (ipk < 0){
                 {
-                    nint newId = s.pkgmap[((nint)ipk)];
-                    var ok = s.pkgmap[((nint)ipk)]; if (ok){
-                        pkgId = ((uint32)newId);
+                    var (newId, ok) = s.pkgmap[(nint)ipk, ꟷ]; if (ok){
+                        pkgId = (uint32)newId;
                     } else {
-                        fmt.Fprintf(~os.Stderr, "\n"u8);
-                        reportErrorInHardcodedList(((int32)i), ipk, funcId, nCtrs);
+                        fmt.Fprintf(new os.FileжWriter(os.Stderr), "\n"u8);
+                        reportErrorInHardcodedList((int32)i, ipk, funcId, nCtrs);
                     }
                 }
             } else {
@@ -532,10 +535,10 @@ internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metali
                 }
             }
             // Skip over this function.
-            i += coverage.FirstCtrOffset + ((nint)nCtrs) - 1;
+            i += (nint)coverage.FirstCtrOffset + (nint)nCtrs - 1;
         }
         if (s.debug) {
-            fmt.Fprintf(~os.Stderr, "\n"u8);
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "\n"u8);
         }
     }
     return default!;
@@ -559,12 +562,13 @@ internal static map<@string, @string> captureOsArgs() {
 
 // emitCounterDataFile emits the counter data portion of a
 // coverage output file (to the file 's.cf').
-[GoRecv] internal static error emitCounterDataFile(this ref emitState s, array<byte> finalHash, io.Writer w) {
+internal static error emitCounterDataFile(this ж<emitState> Ꮡs, array<byte> finalHash, io.Writer w) {
     finalHash = finalHash.Clone();
 
+    ref var s = ref Ꮡs.Value;
     var cfw = encodecounter.NewCoverageDataWriter(w, coverage.CtrULeb128);
     {
-        var err = cfw.Write(finalHash, capturedOsArgs, ~s); if (err != default!) {
+        var err = cfw.Write(finalHash, capturedOsArgs, new emitStateжCounterVisitor(Ꮡs)); if (err != default!) {
             return err;
         }
     }

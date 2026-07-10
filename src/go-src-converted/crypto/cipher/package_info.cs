@@ -38,23 +38,15 @@ using static go.crypto.cipher_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(AEAD, error), AEAD>]
-[assembly: GoImplement<(cbcDecAble, bool), cbcDecAble>]
-[assembly: GoImplement<(cbcEncAble, bool), cbcEncAble>]
-[assembly: GoImplement<(ctrAble, bool), ctrAble>]
-[assembly: GoImplement<(gcmAble, bool), gcmAble>]
-[assembly: GoImplement<(io.Closer, bool), io_package.Closer>]
-[assembly: GoImplement<cbcDecrypter, BlockMode>]
-[assembly: GoImplement<cbcEncrypter, BlockMode>]
-[assembly: GoImplement<cfb, Stream>]
-[assembly: GoImplement<ctr, Stream>]
-[assembly: GoImplement<gcm, AEAD>]
-[assembly: GoImplement<ofb, Stream>]
+[assembly: GoImplement<cbcDecrypter, BlockMode>(Pointer = true)]
+[assembly: GoImplement<cbcEncrypter, BlockMode>(Pointer = true)]
+[assembly: GoImplement<cfb, Stream>(Pointer = true)]
+[assembly: GoImplement<ctr, Stream>(Pointer = true)]
+[assembly: GoImplement<gcm, AEAD>(Pointer = true)]
+[assembly: GoImplement<ofb, Stream>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<cbc, ж<cbcDecrypter>>(Indirect = true)]
-[assembly: GoImplicitConv<cbc, ж<cbcEncrypter>>(Indirect = true)]
 // </ImplicitConversions>
 
 namespace go.crypto;

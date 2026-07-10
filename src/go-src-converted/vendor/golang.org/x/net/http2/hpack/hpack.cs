@@ -26,14 +26,13 @@ public static @string Error(this DecodingError de) {
 [GoType("num:nint")] partial struct InvalidIndexError;
 
 public static @string Error(this InvalidIndexError e) {
-    return fmt.Sprintf("invalid indexed representation index %d"u8, ((nint)e));
+    return fmt.Sprintf("invalid indexed representation index %d"u8, (nint)e);
 }
 
 // A HeaderField is a name-value pair. Both the name and value are
 // treated as opaque sequences of octets.
 [GoType] partial struct HeaderField {
-    public @string Name;
-    public @string Value;
+    public @string Name, Value;
     // Sensitive means that this header field should never be
     // indexed.
     public bool Sensitive;
@@ -44,7 +43,7 @@ public static @string Error(this InvalidIndexError e) {
 // It is not otherwise guaranteed to be a valid pseudo header field,
 // though.
 public static bool IsPseudo(this HeaderField hf) {
-    return len(hf.Name) != 0 && hf.Name[0] == (rune)':';
+    return builtin.len(hf.Name) != 0 && hf.Name[0] == (rune)':';
 }
 
 public static @string String(this HeaderField hf) {
@@ -68,7 +67,7 @@ public static uint32 Size(this HeaderField hf) {
     // Name and/or Value by hand, but we don't care, because that
     // won't happen on the wire because the encoding doesn't allow
     // it.
-    return ((uint32)(len(hf.Name) + len(hf.Value) + 32));
+    return (uint32)(builtin.len(hf.Name) + builtin.len(hf.Value) + 32);
 }
 
 // A Decoder is the decoding context for incremental processing of
@@ -85,7 +84,7 @@ public static uint32 Size(this HeaderField hf) {
     internal slice<byte> buf; // not owned; only valid during Write
     // saveBuf is previous data passed to Write which we weren't able
     // to fully parse before. Unlike buf, we own this data.
-    internal bytes_package.Buffer saveBuf;
+    internal bytes.Buffer saveBuf;
     internal bool firstField; // processing the first field of the header block
 }
 
@@ -98,9 +97,9 @@ public static ж<Decoder> NewDecoder(uint32 maxDynamicTableSize, Action<HeaderFi
         emitEnabled: true,
         firstField: true
     ));
-    (~d).dynTab.table.init();
-    (~d).dynTab.allowedMaxSize = maxDynamicTableSize;
-    (~d).dynTab.setMaxSize(maxDynamicTableSize);
+    d.of(Decoder.ᏑdynTab).of(dynamicTable.Ꮡtable).init();
+    d.Value.dynTab.allowedMaxSize = maxDynamicTableSize;
+    d.of(Decoder.ᏑdynTab).setMaxSize(maxDynamicTableSize);
     return d;
 }
 
@@ -197,34 +196,34 @@ public static error ErrStringLength = errors.New("hpack: string too long"u8);
     if (i == 0) {
         return (hf, ok);
     }
-    if (i <= ((uint64)staticTable.len())) {
-        return ((~staticTable).ents[i - 1], true);
+    if (i <= (uint64)staticTable.len()) {
+        return ((~staticTable).ents[(nint)(i - 1)], true);
     }
-    if (i > ((uint64)d.maxTableIndex())) {
+    if (i > (uint64)d.maxTableIndex()) {
         return (hf, ok);
     }
     // In the dynamic table, newer entries have lower indices.
     // However, dt.ents[0] is the oldest entry. Hence, dt.ents is
     // the reversed dynamic table.
     var dt = d.dynTab.table;
-    return (dt.ents[dt.len() - (((nint)i) - staticTable.len())], true);
+    return (dt.ents[dt.len() - ((nint)i - staticTable.len())], true);
 }
 
 // DecodeFull decodes an entire block.
 //
 // TODO: remove this method and make it incremental later? This is
 // easier for debugging now.
-[GoRecv] public static (slice<HeaderField>, error) DecodeFull(this ref Decoder d, slice<byte> p) => func((defer, _) => {
-    slice<HeaderField> hf = default!;
+public static (slice<HeaderField>, error) DecodeFull(this ж<Decoder> Ꮡd, slice<byte> p) => func<(slice<HeaderField>, error)>((defer, recover) => {
+    ref var d = ref Ꮡd.Value;
+
+    ref var hf = ref heap<slice<HeaderField>>(out var Ꮡhf);
     var saveFunc = d.emit;
     var saveFuncʗ1 = saveFunc;
     defer(() => {
-        d.emit = saveFuncʗ1;
+        Ꮡd.Value.emit = saveFuncʗ1;
     });
-    d.emit = 
-    var hfʗ1 = hf;
-    (HeaderField f) => {
-        hfʗ1 = append(hfʗ1, f);
+    d.emit = (HeaderField f) => {
+        Ꮡhf.ValueSlot = append(Ꮡhf.ValueSlot, f);
     };
     {
         var (_, err) = d.Write(p); if (err != default!) {
@@ -255,7 +254,7 @@ public static error ErrStringLength = errors.New("hpack: string too long"u8);
     nint n = default!;
     error err = default!;
 
-    if (len(p) == 0) {
+    if (builtin.len(p) == 0) {
         // Prevent state machine CPU attacks (making us redo
         // work up to the point of finding out we don't have
         // enough data)
@@ -270,7 +269,7 @@ public static error ErrStringLength = errors.New("hpack: string too long"u8);
         d.buf = d.saveBuf.Bytes();
         d.saveBuf.Reset();
     }
-    while (len(d.buf) > 0) {
+    while (builtin.len(d.buf) > 0) {
         err = d.parseHeaderFieldRepr();
         if (AreEqual(err, errNeedMore)) {
             // Extra paranoia, making sure saveBuf won't
@@ -278,19 +277,19 @@ public static error ErrStringLength = errors.New("hpack: string too long"u8);
             // reading code earlier should already catch
             // overlong things and return ErrStringLength,
             // but keep this as a last resort.
-            static readonly UntypedInt varIntOverhead = 8; // conservative
-            if (d.maxStrLen != 0 && ((int64)len(d.buf)) > 2 * (((int64)d.maxStrLen) + varIntOverhead)) {
+            UntypedInt varIntOverhead = 8; // conservative
+            if (d.maxStrLen != 0 && (int64)builtin.len(d.buf) > 2 * ((int64)d.maxStrLen + (int64)varIntOverhead)) {
                 return (0, ErrStringLength);
             }
             d.saveBuf.Write(d.buf);
-            return (len(p), default!);
+            return (builtin.len(p), default!);
         }
         d.firstField = false;
         if (err != default!) {
             break;
         }
     }
-    return (len(p), err);
+    return (builtin.len(p), err);
 }
 
 // errNeedMore is an internal sentinel error value that means the
@@ -356,13 +355,13 @@ internal static bool sensitive(this indexType v) {
 // (same invariants and behavior as parseHeaderFieldRepr)
 [GoRecv] internal static error parseFieldIndexed(this ref Decoder d) {
     var buf = d.buf;
-    var (idx, buf, err) = readVarInt(7, buf);
+    (var idx, buf, var err) = readVarInt(7, buf);
     if (err != default!) {
         return err;
     }
     var (hf, ok) = d.at(idx);
     if (!ok) {
-        return new DecodingError(((InvalidIndexError)idx));
+        return new DecodingError(((InvalidIndexError)(nint)idx));
     }
     d.buf = buf;
     return d.callEmit(new HeaderField(Name: hf.Name, Value: hf.Value));
@@ -371,7 +370,7 @@ internal static bool sensitive(this indexType v) {
 // (same invariants and behavior as parseHeaderFieldRepr)
 [GoRecv] internal static error parseFieldLiteral(this ref Decoder d, uint8 n, indexType it) {
     var buf = d.buf;
-    var (nameIdx, buf, err) = readVarInt(n, buf);
+    (var nameIdx, buf, var err) = readVarInt(n, buf);
     if (err != default!) {
         return err;
     }
@@ -381,7 +380,7 @@ internal static bool sensitive(this indexType v) {
     if (nameIdx > 0){
         var (ihf, ok) = d.at(nameIdx);
         if (!ok) {
-            return new DecodingError(((InvalidIndexError)nameIdx));
+            return new DecodingError(((InvalidIndexError)(nint)nameIdx));
         }
         hf.Name = ihf.Name;
     } else {
@@ -390,7 +389,7 @@ internal static bool sensitive(this indexType v) {
             return err;
         }
     }
-    var (undecodedValue, buf, err) = d.readString(buf);
+    (var undecodedValue, buf, err) = d.readString(buf);
     if (err != default!) {
         return err;
     }
@@ -416,7 +415,7 @@ internal static bool sensitive(this indexType v) {
 
 [GoRecv] internal static error callEmit(this ref Decoder d, HeaderField hf) {
     if (d.maxStrLen != 0) {
-        if (len(hf.Name) > d.maxStrLen || len(hf.Value) > d.maxStrLen) {
+        if (builtin.len(hf.Name) > d.maxStrLen || builtin.len(hf.Value) > d.maxStrLen) {
             return ErrStringLength;
         }
     }
@@ -434,14 +433,14 @@ internal static bool sensitive(this indexType v) {
         return new DecodingError(errors.New("dynamic table size update MUST occur at the beginning of a header block"u8));
     }
     var buf = d.buf;
-    var (size, buf, err) = readVarInt(5, buf);
+    (var size, buf, var err) = readVarInt(5, buf);
     if (err != default!) {
         return err;
     }
-    if (size > ((uint64)d.dynTab.allowedMaxSize)) {
+    if (size > (uint64)d.dynTab.allowedMaxSize) {
         return new DecodingError(errors.New("dynamic table size update too large"u8));
     }
-    d.dynTab.setMaxSize(((uint32)size));
+    d.dynTab.setMaxSize((uint32)size);
     d.buf = buf;
     return default!;
 }
@@ -464,23 +463,23 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
     if (n < 1 || n > 8) {
         throw panic("bad n");
     }
-    if (len(p) == 0) {
+    if (builtin.len(p) == 0) {
         return (0, p, errNeedMore);
     }
-    i = ((uint64)p[0]);
+    i = (uint64)p[0];
     if (n < 8) {
-        i &= (uint64)((1 << (int)(((uint64)n))) - 1);
+        i &= (uint64)((((uint64)1 << (int)((uint64)n))) - 1);
     }
-    if (i < (1 << (int)(((uint64)n))) - 1) {
+    if (i < (((uint64)1 << (int)((uint64)n))) - 1) {
         return (i, p[1..], default!);
     }
     var origP = p;
     p = p[1..];
     uint64 m = default!;
-    while (len(p) > 0) {
+    while (builtin.len(p) > 0) {
         var b = p[0];
         p = p[1..];
-        i += ((uint64)((byte)(b & 127))) << (int)(m);
+        i += ((uint64)((byte)(b & 127)) << (int)(m));
         if ((byte)(b & 128) == 0) {
             return (i, p, default!);
         }
@@ -502,15 +501,15 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
     slice<byte> remain = default!;
     error err = default!;
 
-    if (len(p) == 0) {
+    if (builtin.len(p) == 0) {
         return (u, p, errNeedMore);
     }
     var isHuff = (byte)(p[0] & 128) != 0;
-    var (strLen, p, err) = readVarInt(7, p);
+    (var strLen, p, err) = readVarInt(7, p);
     if (err != default!) {
         return (u, p, err);
     }
-    if (d.maxStrLen != 0 && strLen > ((uint64)d.maxStrLen)) {
+    if (d.maxStrLen != 0 && strLen > (uint64)d.maxStrLen) {
         // Returning an error here means Huffman decoding errors
         // for non-indexed strings past the maximum string length
         // are ignored, but the server is returning an error anyway
@@ -518,7 +517,7 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
         // affect the decoding state.
         return (u, default!, ErrStringLength);
     }
-    if (((uint64)len(p)) < strLen) {
+    if ((uint64)builtin.len(p) < strLen) {
         return (u, p, errNeedMore);
     }
     u.isHuff = isHuff;
@@ -535,7 +534,7 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
     if (!u.isHuff) {
         return (((@string)u.b), default!);
     }
-    var buf = bufPool.Get()._<ж<bytes.Buffer>>();
+    var buf = ᏑbufPool.Get()._<ж<bytes.Buffer>>();
     buf.Reset();
     // don't trust others
     @string s = default!;
@@ -545,7 +544,7 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
     }
     buf.Reset();
     // be nice to GC
-    bufPool.Put(buf);
+    ᏑbufPool.Put(buf);
     return (s, err);
 }
 

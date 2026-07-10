@@ -40,8 +40,8 @@ using static go.crypto.des_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<KeySizeError, error>]
-[assembly: GoImplement<desCipher, crypto.cipher_package.Block>]
-[assembly: GoImplement<tripleDESCipher, crypto.cipher_package.Block>]
+[assembly: GoImplement<desCipher, go.crypto.cipher_package.Block>(Pointer = true)]
+[assembly: GoImplement<tripleDESCipher, go.crypto.cipher_package.Block>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

@@ -8,10 +8,11 @@
 namespace go.image;
 
 using image = image_package;
-using color = image.color_package;
-using imageutil = image.@internal.imageutil_package;
+using color = go.image.color_package;
+using imageutil = go.image.@internal.imageutil_package;
 using io = io_package;
-using image.@internal;
+using go.image;
+using go.image.@internal;
 
 partial class jpeg_package {
 
@@ -27,7 +28,7 @@ public static @string Error(this UnsupportedError e) {
     return "unsupported JPEG feature: "u8 + ((@string)e);
 }
 
-internal static UnsupportedError errUnsupportedSubsamplingRatio = ((UnsupportedError)"luma/chroma subsampling ratio"u8);
+internal static UnsupportedError errUnsupportedSubsamplingRatio = ((UnsupportedError)(@string)"luma/chroma subsampling ratio"u8);
 
 // Component specification, specified in section B.2.2.
 [GoType] partial struct component {
@@ -44,21 +45,21 @@ internal static readonly UntypedInt maxTh = 3;
 internal static readonly UntypedInt maxTq = 3;
 internal static readonly UntypedInt maxComponents = 4;
 
-internal static readonly UntypedInt sof0Marker = /* 0xc0 */ 192; // Start Of Frame (Baseline Sequential).
-internal static readonly UntypedInt sof1Marker = /* 0xc1 */ 193; // Start Of Frame (Extended Sequential).
-internal static readonly UntypedInt sof2Marker = /* 0xc2 */ 194; // Start Of Frame (Progressive).
-internal static readonly UntypedInt dhtMarker = /* 0xc4 */ 196; // Define Huffman Table.
-internal static readonly UntypedInt rst0Marker = /* 0xd0 */ 208; // ReSTart (0).
-internal static readonly UntypedInt rst7Marker = /* 0xd7 */ 215; // ReSTart (7).
-internal static readonly UntypedInt soiMarker = /* 0xd8 */ 216; // Start Of Image.
-internal static readonly UntypedInt eoiMarker = /* 0xd9 */ 217; // End Of Image.
-internal static readonly UntypedInt sosMarker = /* 0xda */ 218; // Start Of Scan.
-internal static readonly UntypedInt dqtMarker = /* 0xdb */ 219; // Define Quantization Table.
-internal static readonly UntypedInt driMarker = /* 0xdd */ 221; // Define Restart Interval.
-internal static readonly UntypedInt comMarker = /* 0xfe */ 254; // COMment.
-internal static readonly UntypedInt app0Marker = /* 0xe0 */ 224;
-internal static readonly UntypedInt app14Marker = /* 0xee */ 238;
-internal static readonly UntypedInt app15Marker = /* 0xef */ 239;
+internal static readonly UntypedInt sof0Marker = 0xc0; // Start Of Frame (Baseline Sequential).
+internal static readonly UntypedInt sof1Marker = 0xc1; // Start Of Frame (Extended Sequential).
+internal static readonly UntypedInt sof2Marker = 0xc2; // Start Of Frame (Progressive).
+internal static readonly UntypedInt dhtMarker = 0xc4; // Define Huffman Table.
+internal static readonly UntypedInt rst0Marker = 0xd0; // ReSTart (0).
+internal static readonly UntypedInt rst7Marker = 0xd7; // ReSTart (7).
+internal static readonly UntypedInt soiMarker = 0xd8; // Start Of Image.
+internal static readonly UntypedInt eoiMarker = 0xd9; // End Of Image.
+internal static readonly UntypedInt sosMarker = 0xda; // Start Of Scan.
+internal static readonly UntypedInt dqtMarker = 0xdb; // Define Quantization Table.
+internal static readonly UntypedInt driMarker = 0xdd; // Define Restart Interval.
+internal static readonly UntypedInt comMarker = 0xfe; // COMment.
+internal static readonly UntypedInt app0Marker = 0xe0;
+internal static readonly UntypedInt app14Marker = 0xee;
+internal static readonly UntypedInt app15Marker = 0xef;
 
 // See https://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
 internal static readonly UntypedInt adobeTransformUnknown = 0;
@@ -102,24 +103,22 @@ internal static array<nint> unzig = new nint[]{
     // buf[i:j] are the buffered bytes read from the underlying
     // io.Reader that haven't yet been passed further on.
     internal array<byte> buf = new(4096);
-    internal nint i;
-    internal nint j;
+    internal nint i, j;
     // nUnreadable is the number of bytes to back up i after
     // overshooting. It can be 0, 1 or 2.
     internal nint nUnreadable;
 }
 
 [GoType] partial struct decoder {
-    internal io_package.Reader r;
+    internal io.Reader r;
     internal bits bits;
     // bytes is a byte buffer, similar to a bufio.Reader, except that it
     // has to be able to unread more than 1 byte, due to byte stuffing.
     // Byte stuffing is specified in section F.1.2.3.
     internal decoder_bytes bytes;
-    internal nint width;
-    internal nint height;
-    internal ж<image_package.Gray> img1;
-    internal ж<image_package.YCbCr> img3;
+    internal nint width, height;
+    internal ж<image.Gray> img1;
+    internal ж<image.YCbCr> img3;
     internal slice<byte> blackPix;
     internal nint blackStride;
     internal nint ri; // Restart Interval.
@@ -153,7 +152,8 @@ internal static array<nint> unzig = new nint[]{
     if (d.bytes.j > 2) {
         d.bytes.buf[0] = d.bytes.buf[d.bytes.j - 2];
         d.bytes.buf[1] = d.bytes.buf[d.bytes.j - 1];
-        (d.bytes.i, d.bytes.j) = (2, 2);
+        d.bytes.i = 2;
+        d.bytes.j = 2;
     }
     // Fill in the rest of the buffer.
     var (n, err) = d.r.Read(d.bytes.buf[(int)(d.bytes.j)..]);
@@ -176,9 +176,9 @@ internal static array<nint> unzig = new nint[]{
     d.bytes.i -= d.bytes.nUnreadable;
     d.bytes.nUnreadable = 0;
     if (d.bits.n >= 8) {
-        d.bits.a >>= (UntypedInt)(8);
+        d.bits.a >>= (int)(8);
         d.bits.n -= 8;
-        d.bits.m >>= (UntypedInt)(8);
+        d.bits.m >>= (int)(8);
     }
 }
 
@@ -203,7 +203,7 @@ internal static array<nint> unzig = new nint[]{
 
 // errMissingFF00 means that readByteStuffedByte encountered an 0xff byte (a
 // marker byte) that wasn't the expected byte-stuffed sequence 0xff, 0x00.
-internal static FormatError errMissingFF00 = ((FormatError)"missing 0xff00 sequence"u8);
+internal static FormatError errMissingFF00 = ((FormatError)(@string)"missing 0xff00 sequence"u8);
 
 // readByteStuffedByte is like readByte but is for byte-stuffed Huffman data.
 [GoRecv] internal static (byte x, error err) readByteStuffedByte(this ref decoder d) {
@@ -215,15 +215,15 @@ internal static FormatError errMissingFF00 = ((FormatError)"missing 0xff00 seque
         x = d.bytes.buf[d.bytes.i];
         d.bytes.i++;
         d.bytes.nUnreadable = 1;
-        if (x != 255) {
+        if (x != 0xff) {
             return (x, err);
         }
-        if (d.bytes.buf[d.bytes.i] != 0) {
+        if (d.bytes.buf[d.bytes.i] != 0x00) {
             return (0, errMissingFF00);
         }
         d.bytes.i++;
         d.bytes.nUnreadable = 2;
-        return (255, default!);
+        return (0xff, default!);
     }
     d.bytes.nUnreadable = 0;
     (x, err) = d.readByte();
@@ -231,7 +231,7 @@ internal static FormatError errMissingFF00 = ((FormatError)"missing 0xff00 seque
         return (0, err);
     }
     d.bytes.nUnreadable = 1;
-    if (x != 255) {
+    if (x != 0xff) {
         return (x, default!);
     }
     (x, err) = d.readByte();
@@ -239,10 +239,10 @@ internal static FormatError errMissingFF00 = ((FormatError)"missing 0xff00 seque
         return (0, err);
     }
     d.bytes.nUnreadable = 2;
-    if (x != 0) {
+    if (x != 0x00) {
         return (0, errMissingFF00);
     }
-    return (255, default!);
+    return (0xff, default!);
 }
 
 // readFull reads exactly len(p) bytes into p. It does not care about byte
@@ -302,7 +302,7 @@ internal static FormatError errMissingFF00 = ((FormatError)"missing 0xff00 seque
 // Specified in section B.2.2.
 [GoRecv] internal static error processSOF(this ref decoder d, nint n) {
     if (d.nComp != 0) {
-        return ((FormatError)"multiple SOF markers"u8);
+        return ((FormatError)(@string)"multiple SOF markers"u8);
     }
     var exprᴛ1 = n;
     if (exprᴛ1 == 6 + 3 * 1) {
@@ -315,7 +315,7 @@ internal static FormatError errMissingFF00 = ((FormatError)"missing 0xff00 seque
         d.nComp = 4;
     }
     else { /* default: */
-        return ((UnsupportedError)"number of components"u8);
+        return ((UnsupportedError)(@string)"number of components"u8);
     }
 
     // Grayscale image.
@@ -328,12 +328,12 @@ internal static FormatError errMissingFF00 = ((FormatError)"missing 0xff00 seque
     }
     // We only support 8-bit precision.
     if (d.tmp[0] != 8) {
-        return ((UnsupportedError)"precision"u8);
+        return ((UnsupportedError)(@string)"precision"u8);
     }
-    d.height = ((nint)d.tmp[1]) << (int)(8) + ((nint)d.tmp[2]);
-    d.width = ((nint)d.tmp[3]) << (int)(8) + ((nint)d.tmp[4]);
-    if (((nint)d.tmp[5]) != d.nComp) {
-        return ((FormatError)"SOF has wrong length"u8);
+    d.height = ((nint)d.tmp[1] << (int)(8)) + (nint)d.tmp[2];
+    d.width = ((nint)d.tmp[3] << (int)(8)) + (nint)d.tmp[4];
+    if ((nint)d.tmp[5] != d.nComp) {
+        return ((FormatError)(@string)"SOF has wrong length"u8);
     }
     for (nint i = 0; i < d.nComp; i++) {
         d.comp[i].c = d.tmp[6 + 3 * i];
@@ -341,18 +341,18 @@ internal static FormatError errMissingFF00 = ((FormatError)"missing 0xff00 seque
         // the values of C_1 through C_(i-1)".
         for (nint j = 0; j < i; j++) {
             if (d.comp[i].c == d.comp[j].c) {
-                return ((FormatError)"repeated component identifier"u8);
+                return ((FormatError)(@string)"repeated component identifier"u8);
             }
         }
         d.comp[i].tq = d.tmp[8 + 3 * i];
         if (d.comp[i].tq > maxTq) {
-            return ((FormatError)"bad Tq value"u8);
+            return ((FormatError)(@string)"bad Tq value"u8);
         }
         var hv = d.tmp[7 + 3 * i];
-        nint h = ((nint)(hv >> (int)(4)));
-        nint v = ((nint)((byte)(hv & 15)));
+        nint h = (nint)((hv >> (int)(4)));
+        nint v = (nint)((byte)(hv & 0x0f));
         if (h < 1 || 4 < h || v < 1 || 4 < v) {
-            return ((FormatError)"luma/chroma subsampling ratio"u8);
+            return ((FormatError)(@string)"luma/chroma subsampling ratio"u8);
         }
         if (h == 3 || v == 3) {
             return errUnsupportedSubsamplingRatio;
@@ -412,7 +412,7 @@ internal static FormatError errMissingFF00 = ((FormatError)"missing 0xff00 seque
         case 4: {
             switch (i) {
             case 0: {
-                if (hv != 17 && hv != 34) {
+                if (hv != 0x11 && hv != 0x22) {
                     // For 4-component images (either CMYK or YCbCrK), we only support two
                     // hv vectors: [0x11 0x11 0x11 0x11] and [0x22 0x11 0x11 0x22].
                     // Theoretically, 4-component JPEG images could mix and match hv values
@@ -427,7 +427,7 @@ internal static FormatError errMissingFF00 = ((FormatError)"missing 0xff00 seque
                 break;
             }
             case 1 or 2: {
-                if (hv != 17) {
+                if (hv != 0x11) {
                     return errUnsupportedSubsamplingRatio;
                 }
                 break;
@@ -457,13 +457,13 @@ loop:
         if (err != default!) {
             return err;
         }
-        var tq = (byte)(x & 15);
+        var tq = (byte)(x & 0x0f);
         if (tq > maxTq) {
-            return ((FormatError)"bad Tq value"u8);
+            return ((FormatError)(@string)"bad Tq value"u8);
         }
-        switch (x >> (int)(4)) {
+        switch ((x >> (int)(4))) {
         default: {
-            return ((FormatError)"bad Pq value"u8);
+            return ((FormatError)(@string)"bad Pq value"u8);
         }
         case 0: {
             if (n < blockSize) {
@@ -476,7 +476,7 @@ loop:
                 }
             }
             foreach (var (i, _) in d.quant[tq]) {
-                d.quant[tq][i] = ((int32)d.tmp[i]);
+                d.quant[tq][i] = (int32)d.tmp[i];
             }
             break;
         }
@@ -491,7 +491,7 @@ loop:
                 }
             }
             foreach (var (i, _) in d.quant[tq]) {
-                d.quant[tq][i] = (int32)(((int32)d.tmp[2 * i]) << (int)(8) | ((int32)d.tmp[2 * i + 1]));
+                d.quant[tq][i] = (int32)(((int32)d.tmp[2 * i] << (int)(8)) | (int32)d.tmp[2 * i + 1]);
             }
             break;
         }}
@@ -500,7 +500,7 @@ continue_loop:;
     }
 break_loop:;
     if (n != 0) {
-        return ((FormatError)"DQT has wrong length"u8);
+        return ((FormatError)(@string)"DQT has wrong length"u8);
     }
     return default!;
 }
@@ -508,14 +508,14 @@ break_loop:;
 // Specified in section B.2.4.4.
 [GoRecv] internal static error processDRI(this ref decoder d, nint n) {
     if (n != 2) {
-        return ((FormatError)"DRI has wrong length"u8);
+        return ((FormatError)(@string)"DRI has wrong length"u8);
     }
     {
         var err = d.readFull(d.tmp[..2]); if (err != default!) {
             return err;
         }
     }
-    d.ri = ((nint)d.tmp[0]) << (int)(8) + ((nint)d.tmp[1]);
+    d.ri = ((nint)d.tmp[0] << (int)(8)) + (nint)d.tmp[1];
     return default!;
 }
 
@@ -565,8 +565,8 @@ break_loop:;
             return (default!, err);
         }
     }
-    if (d.tmp[0] != 255 || d.tmp[1] != soiMarker) {
-        return (default!, ((FormatError)"missing SOI marker"u8));
+    if (d.tmp[0] != 0xff || d.tmp[1] != soiMarker) {
+        return (default!, ((FormatError)(@string)"missing SOI marker"u8));
     }
     // Process the remaining segments until the End Of Image marker.
     while (ᐧ) {
@@ -574,7 +574,7 @@ break_loop:;
         if (err != default!) {
             return (default!, err);
         }
-        while (d.tmp[0] != 255) {
+        while (d.tmp[0] != 0xff) {
             // Strictly speaking, this is a format error. However, libjpeg is
             // liberal in what it accepts. As of version 9, next_marker in
             // jdmarker.c treats this as a warning (JWRN_EXTRANEOUS_DATA) and
@@ -606,7 +606,7 @@ break_loop:;
             // Treat "\xff\x00" as extraneous data.
             continue;
         }
-        while (marker == 255) {
+        while (marker == 0xff) {
             // Section B.1.1.2 says, "Any marker may optionally be preceded by any
             // number of fill bytes, which are bytes assigned code X'FF'".
             (marker, err) = d.readByte();
@@ -634,9 +634,9 @@ break_loop:;
                 return (default!, err);
             }
         }
-        nint n = ((nint)d.tmp[0]) << (int)(8) + ((nint)d.tmp[1]) - 2;
+        nint n = ((nint)d.tmp[0] << (int)(8)) + (nint)d.tmp[1] - 2;
         if (n < 0) {
-            return (default!, ((FormatError)"short segment length"u8));
+            return (default!, ((FormatError)(@string)"short segment length"u8));
         }
         var exprᴛ1 = marker;
         if (exprᴛ1 == sof0Marker || exprᴛ1 == sof1Marker || exprᴛ1 == sof2Marker) {
@@ -684,11 +684,11 @@ break_loop:;
             if (app0Marker <= marker && marker <= app15Marker || marker == comMarker){
                 err = d.ignore(n);
             } else 
-            if (marker < 192){
+            if (marker < 0xc0){
                 // See Table B.1 "Marker code assignments".
-                err = ((FormatError)"unknown marker"u8);
+                err = ((FormatError)(@string)"unknown marker"u8);
             } else {
-                err = ((UnsupportedError)"unknown marker"u8);
+                err = ((UnsupportedError)(@string)"unknown marker"u8);
             }
         }
 
@@ -704,7 +704,7 @@ break_loop:;
         }
     }
     if (d.img1 != nil) {
-        return (~d.img1, default!);
+        return (new image.GrayжImage(d.img1), default!);
     }
     if (d.img3 != nil) {
         if (d.blackPix != default!){
@@ -713,9 +713,9 @@ break_loop:;
         if (d.isRGB()) {
             return d.convertToRGB();
         }
-        return (~d.img3, default!);
+        return (new image.YCbCrжImage(d.img3), default!);
     }
-    return (default!, ((FormatError)"missing SOS marker"u8));
+    return (default!, ((FormatError)(@string)"missing SOS marker"u8));
 }
 
 [GoType("dyn")] partial struct applyBlack_translations {
@@ -732,7 +732,7 @@ break_loop:;
 // inversion is a no-op, so inversions might be implicit in the code below.
 [GoRecv] internal static (image.Image, error) applyBlack(this ref decoder d) {
     if (!d.adobeTransformValid) {
-        return (default!, ((UnsupportedError)"unknown color model: 4-component JPEG doesn't have Adobe APP14 metadata"u8));
+        return (default!, ((UnsupportedError)(@string)"unknown color model: 4-component JPEG doesn't have Adobe APP14 metadata"u8));
     }
     // If the 4-component JPEG image isn't explicitly marked as "Unknown (RGB
     // or CMYK)" as per
@@ -746,16 +746,16 @@ break_loop:;
         var boundsΔ1 = d.img3.Bounds();
         var imgΔ1 = image.NewRGBA(boundsΔ1);
         imageutil.DrawYCbCr(imgΔ1, boundsΔ1, d.img3, boundsΔ1.Min);
-        for (nint iBase = 0;nint y = bounds.Min.Y; y < boundsΔ1.Max.Y; (iBase, y) = (iBase + (~imgΔ1).Stride, y + 1)) {
-            for (nint i = iBase + 3;nint x = bounds.Min.X; x < boundsΔ1.Max.X; (i, x) = (i + 4, x + 1)) {
-                (~).Pix[i] = 255 - d.blackPix[(y - boundsΔ1.Min.Y) * d.blackStride + (x - boundsΔ1.Min.X)];
+        for ((nint iBase, nint y) = (0, boundsΔ1.Min.Y); y < boundsΔ1.Max.Y; (iBase, y) = (iBase + (~imgΔ1).Stride, y + 1)) {
+            for ((nint i, nint x) = (iBase + 3, boundsΔ1.Min.X); x < boundsΔ1.Max.X; (i, x) = (i + 4, x + 1)) {
+                imgΔ1.Value.Pix[i] = (uint8)(255 - d.blackPix[(y - boundsΔ1.Min.Y) * d.blackStride + (x - boundsΔ1.Min.X)]);
             }
         }
-        return (new image.CMYK(
+        return (new image.CMYKжImage(Ꮡ(new image.CMYK(
             Pix: (~imgΔ1).Pix,
             Stride: (~imgΔ1).Stride,
             Rect: (~imgΔ1).Rect
-        ), default!);
+        ))), default!);
     }
     // The first three channels (cyan, magenta, yellow) of the CMYK
     // were decoded into d.img3, but each channel was decoded into a separate
@@ -764,29 +764,29 @@ break_loop:;
     // contiguous bytes per pixel.
     var bounds = d.img3.Bounds();
     var img = image.NewCMYK(bounds);
-    var translations = new struct{src <>byte; stride int}[]{
-        new(d.img3.Y, d.img3.YStride),
-        new(d.img3.Cb, d.img3.CStride),
-        new(d.img3.Cr, d.img3.CStride),
+    var translations = new applyBlack_translations[]{
+        new((~d.img3).Y, (~d.img3).YStride),
+        new((~d.img3).Cb, (~d.img3).CStride),
+        new((~d.img3).Cr, (~d.img3).CStride),
         new(d.blackPix, d.blackStride)
     }.array();
     foreach (var (t, translation) in translations) {
         var subsample = d.comp[t].h != d.comp[0].h || d.comp[t].v != d.comp[0].v;
-        for (nint iBase = 0;nint y = bounds.Min.Y; y < bounds.Max.Y; (iBase, y) = (iBase + (~img).Stride, y + 1)) {
+        for ((nint iBase, nint y) = (0, bounds.Min.Y); y < bounds.Max.Y; (iBase, y) = (iBase + (~img).Stride, y + 1)) {
             nint sy = y - bounds.Min.Y;
             if (subsample) {
                 sy /= 2;
             }
-            for (nint i = iBase + t;nint x = bounds.Min.X; x < bounds.Max.X; (i, x) = (i + 4, x + 1)) {
+            for ((nint i, nint x) = (iBase + t, bounds.Min.X); x < bounds.Max.X; (i, x) = (i + 4, x + 1)) {
                 nint sx = x - bounds.Min.X;
                 if (subsample) {
                     sx /= 2;
                 }
-                (~img).Pix[i] = 255 - translation.src[sy * translation.stride + sx];
+                img.Value.Pix[i] = (uint8)(255 - translation.src[sy * translation.stride + sx]);
             }
         }
     }
-    return (~img, default!);
+    return (new image.CMYKжImage(img), default!);
 }
 
 [GoRecv] internal static bool isRGB(this ref decoder d) {
@@ -809,14 +809,14 @@ break_loop:;
         nint po = img.PixOffset(bounds.Min.X, y);
         nint yo = d.img3.YOffset(bounds.Min.X, y);
         nint co = d.img3.COffset(bounds.Min.X, y);
-        for (nint i = 0;nint iMax = bounds.Max.X - bounds.Min.X; i < iMax; i++) {
-            (~img).Pix[po + 4 * i + 0] = d.img3.Y[yo + i];
-            (~img).Pix[po + 4 * i + 1] = d.img3.Cb[co + i / cScale];
-            (~img).Pix[po + 4 * i + 2] = d.img3.Cr[co + i / cScale];
-            (~img).Pix[po + 4 * i + 3] = 255;
+        for ((nint i, nint iMax) = (0, bounds.Max.X - bounds.Min.X); i < iMax; i++) {
+            img.Value.Pix[po + 4 * i + 0] = (~d.img3).Y[yo + i];
+            img.Value.Pix[po + 4 * i + 1] = (~d.img3).Cb[co + i / cScale];
+            img.Value.Pix[po + 4 * i + 2] = (~d.img3).Cr[co + i / cScale];
+            img.Value.Pix[po + 4 * i + 3] = 255;
         }
     }
-    return (~img, default!);
+    return (new image_ΔRGBAжImage(img), default!);
 }
 
 // Decode reads a JPEG image from r and returns it as an [image.Image].
@@ -830,7 +830,7 @@ public static (image.Image, error) Decode(io.Reader r) {
 public static (image.Config, error) DecodeConfig(io.Reader r) {
     decoder d = default!;
     {
-        (_, err) = d.decode(r, true); if (err != default!) {
+        var (_, err) = d.decode(r, true); if (err != default!) {
             return (new image.Config(nil), err);
         }
     }
@@ -861,11 +861,11 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
         ), default!);
     }}
 
-    return (new image.Config(nil), ((FormatError)"missing SOF marker"u8));
+    return (new image.Config(nil), ((FormatError)(@string)"missing SOF marker"u8));
 }
 
-[GoInit] internal static void initΔ1() {
-    image.RegisterFormat("jpeg"u8, "\xff\xd8"u8, Decode, DecodeConfig);
+[GoInit] internal static void init() {
+    image.RegisterFormat("jpeg"u8, ((@string)(new byte[]{0xff, 0xd8})), Decode, DecodeConfig);
 }
 
 } // end jpeg_package

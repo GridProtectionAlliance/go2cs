@@ -63,9 +63,9 @@ partial class math_package {
 // 0xc1711fead3299176
 // tan coefficients
 internal static array<float64> _tanP = new float64[]{
-    -1.30936939181383777646e4F,
-    1.15351664838587416140e6F,
-    -1.79565251976484877988e7F
+    -1.30936939181383777646e4D,
+    1.15351664838587416140e6D,
+    -1.79565251976484877988e7D
 }.array();
 
 // 0x40cab8a5eeb36572
@@ -73,11 +73,11 @@ internal static array<float64> _tanP = new float64[]{
 // 0x4177d98fc2ead8ef
 // 0xc189afe03cbe5a31
 internal static array<float64> _tanQ = new float64[]{
-    1.00000000000000000000e0F,
-    1.36812963470692954678e4F,
-    -1.32089234440210967447e6F,
-    2.50083801823357915839e7F,
-    -5.38695755929454629881e7F
+    1.00000000000000000000e0D,
+    1.36812963470692954678e4D,
+    -1.32089234440210967447e6D,
+    2.50083801823357915839e7D,
+    -5.38695755929454629881e7D
 }.array();
 
 // Tan returns the tangent of the radian argument x.
@@ -95,9 +95,9 @@ public static float64 Tan(float64 x) {
 }
 
 internal static float64 tan(float64 x) {
-    static readonly UntypedFloat PI4A = /* 7.85398125648498535156e-1 */ 0.785398;    // 0x3fe921fb40000000, Pi/4 split into three parts
-    static readonly UntypedFloat PI4B = /* 3.77489470793079817668e-8 */ 3.77489e-08; // 0x3e64442d00000000,
-    static readonly UntypedFloat PI4C = /* 2.69515142907905952645e-15 */ 2.69515e-15; // 0x3ce8469898cc5170,
+    UntypedFloat PI4A = /* 7.85398125648498535156e-1 */ 0.785398;    // 0x3fe921fb40000000, Pi/4 split into three parts
+    UntypedFloat PI4B = /* 3.77489470793079817668e-8 */ 3.77489e-08; // 0x3e64442d00000000,
+    UntypedFloat PI4C = /* 2.69515142907905952645e-15 */ 2.69515e-15; // 0x3ce8469898cc5170,
     // special cases
     switch (ᐧ) {
     case {} when x == 0 || IsNaN(x): {
@@ -120,19 +120,19 @@ internal static float64 tan(float64 x) {
     if (x >= reduceThreshold){
         (j, z) = trigReduce(x);
     } else {
-        j = ((uint64)(x * (4 / Pi)));
+        j = (uint64)(x * (float64)(4 / Pi));
         // integer part of x/(Pi/4), as integer for tests on the phase angle
-        y = ((float64)j);
+        y = (float64)j;
         // integer part of x/(Pi/4), as float
         /* map zeros and singularities to origin */
         if ((uint64)(j & 1) == 1) {
             j++;
             y++;
         }
-        z = ((x - y * PI4A) - y * PI4B) - y * PI4C;
+        z = ((x - y * (float64)PI4A) - y * (float64)PI4B) - y * (float64)PI4C;
     }
     var zz = z * z;
-    if (zz > 1e-14F){
+    if (zz > 1e-14D){
         y = z + z * (zz * (((_tanP[0] * zz) + _tanP[1]) * zz + _tanP[2]) / ((((zz + _tanQ[1]) * zz + _tanQ[2]) * zz + _tanQ[3]) * zz + _tanQ[4]));
     } else {
         y = z;

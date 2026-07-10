@@ -10,6 +10,7 @@ using stringslite = @internal.stringslite_package;
 using sys = runtime.@internal.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime;
 using runtime.@internal;
 
 partial class runtime_package {
@@ -65,7 +66,7 @@ internal static readonly unwindFlags unwindJumpStack = 8;
     internal nint cgoCtxt;
     // calleeFuncID is the function ID of the caller of the current
     // frame.
-    internal @internal.abi_package.FuncID calleeFuncID;
+    internal abi.FuncID calleeFuncID;
     // flags are the flags to this unwind. Some of these are updated as we
     // unwind (see the flags documentation).
     internal unwindFlags flags;
@@ -75,8 +76,9 @@ internal static readonly unwindFlags unwindJumpStack = 8;
 // iterator on gp's innermost frame. gp must not be the current G.
 //
 // A single unwinder can be reused for multiple unwinds.
-[GoRecv] internal static void init(this ref unwinder u, ж<g> Ꮡgp, unwindFlags flags) {
-    ref var gp = ref Ꮡgp.val;
+internal static void init(this ж<unwinder> Ꮡu, ж<g> Ꮡgp, unwindFlags flags) {
+    ref var u = ref Ꮡu.Value;
+    ref var gp = ref Ꮡgp.Value;
 
     // Implementation note: This starts the iterator on the first frame and we
     // provide a "valid" method. Alternatively, this could start in a "before
@@ -84,11 +86,12 @@ internal static readonly unwindFlags unwindJumpStack = 8;
     // move to the next frame, but that's both more awkward to use in a "for"
     // loop and is harder to implement because we have to do things differently
     // for the first frame.
-    u.initAt(~((uintptr)0), ~((uintptr)0), ~((uintptr)0), Ꮡgp, flags);
+    Ꮡu.initAt(~(uintptr)0, ~(uintptr)0, ~(uintptr)0, Ꮡgp, flags);
 }
 
-[GoRecv] internal static void initAt(this ref unwinder u, uintptr pc0, uintptr sp0, uintptr lr0, ж<g> Ꮡgp, unwindFlags flags) {
-    ref var gp = ref Ꮡgp.val;
+internal static void initAt(this ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, uintptr lr0, ж<g> Ꮡgp, unwindFlags flags) {
+    ref var u = ref Ꮡu.Value;
+    ref var gp = ref Ꮡgp.DerefOrNil();
 
     // Don't call this "g"; it's too easy get "g" and "gp" confused.
     {
@@ -109,7 +112,7 @@ internal static readonly unwindFlags unwindJumpStack = 8;
             @throw("cannot trace user goroutine on its own stack"u8);
         }
     }
-    if (pc0 == ~((uintptr)0) && sp0 == ~((uintptr)0)) {
+    if (pc0 == ~(uintptr)0 && sp0 == ~(uintptr)0) {
         // Signal to fetch saved values from gp.
         if (gp.syscallsp != 0){
             pc0 = gp.syscallpc;
@@ -135,10 +138,10 @@ internal static readonly unwindFlags unwindJumpStack = 8;
     // Start in the caller's frame.
     if (frame.pc == 0) {
         if (usesLR){
-            frame.pc = ~(ж<uintptr>)(uintptr)(((@unsafe.Pointer)frame.sp));
+            frame.pc = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)frame.sp);
             frame.lr = 0;
         } else {
-            frame.pc = ~(ж<uintptr>)(uintptr)(((@unsafe.Pointer)frame.sp));
+            frame.pc = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)frame.sp);
             frame.sp += goarch.PtrSize;
         }
     }
@@ -146,7 +149,7 @@ internal static readonly unwindFlags unwindJumpStack = 8;
     // arm < 7. See internal/runtime/atomic/sys_linux_arm.s.
     //
     // Start in the caller's frame.
-    if (GOARCH == "arm"u8 && goarm < 7 && GOOS == "linux"u8 && (uintptr)(frame.pc & (nint)4294901760L) == (nint)4294901760L) {
+    if (GOARCH == "arm"u8 && goarm < 7 && GOOS == "linux"u8 && (uintptr)(frame.pc & (uintptr)0xffff0000U) == 0xffff0000U) {
         // Note that the calls are simple BL without pushing the return
         // address, so we use LR directly.
         //
@@ -158,7 +161,7 @@ internal static readonly unwindFlags unwindJumpStack = 8;
     var f = findfunc(frame.pc);
     if (!f.valid()) {
         if ((unwindFlags)(flags & unwindSilentErrors) == 0) {
-            print("runtime: g ", gp.goid, " gp=", gp, ": unknown pc ", ((Δhex)frame.pc), "\n");
+            print("runtime: g ", gp.goid, " gp=", gp, ": unknown pc ", ((Δhex)(uint64)frame.pc), "\n");
             tracebackHexdump(gp.stack, Ꮡframe, 0);
         }
         if ((unwindFlags)(flags & ((unwindFlags)(unwindPrintErrors | unwindSilentErrors))) == 0) {
@@ -171,13 +174,13 @@ internal static readonly unwindFlags unwindJumpStack = 8;
     // Populate the unwinder.
     u = new unwinder(
         frame: frame,
-        g: gp.guintptr(),
+        g: Ꮡgp.guintptr(),
         cgoCtxt: len(gp.cgoCtxt) - 1,
         calleeFuncID: abi.FuncIDNormal,
         flags: flags
     );
     var isSyscall = frame.pc == pc0 && frame.sp == sp0 && pc0 == gp.syscallpc && sp0 == gp.syscallsp;
-    u.resolveInternal(true, isSyscall);
+    Ꮡu.resolveInternal(true, isSyscall);
 }
 
 [GoRecv] internal static bool valid(this ref unwinder u) {
@@ -205,10 +208,12 @@ internal static readonly unwindFlags unwindJumpStack = 8;
 // frame state to follow that stack jump.
 //
 // This is internal to unwinder.
-[GoRecv] internal static void resolveInternal(this ref unwinder u, bool innermost, bool isSyscall) {
-    var frame = Ꮡ(u.frame);
+internal static void resolveInternal(this ж<unwinder> Ꮡu, bool innermost, bool isSyscall) {
+    ref var u = ref Ꮡu.Value;
+
+    var frame = Ꮡu.of(unwinder.Ꮡframe);
     var gp = u.g.ptr();
-    var f = frame.val.fn;
+    var f = frame.Value.fn;
     if (f.pcsp == 0) {
         // No frame information, must be external function, like race support.
         // See golang.org/issue/13568.
@@ -222,13 +227,13 @@ internal static readonly unwindFlags unwindJumpStack = 8;
         // but it carefully arranges that during the transition BOTH stacks
         // have cgocallback frame valid for unwinding through.
         // So we don't need to exclude it with the other SP-writing functions.
-        flag &= ~(abi.FuncFlag)(abi.FuncFlagSPWrite);
+        flag &= unchecked((abi.FuncFlag)~(abi.FuncFlag)(abi.FuncFlagSPWrite));
     }
     if (isSyscall) {
         // Some Syscall functions write to SP, but they do so only after
         // saving the entry PC/SP using entersyscall.
         // Since we are using the entry PC/SP, the later SP write doesn't matter.
-        flag &= ~(abi.FuncFlag)(abi.FuncFlagSPWrite);
+        flag &= unchecked((abi.FuncFlag)~(abi.FuncFlag)(abi.FuncFlagSPWrite));
     }
     // Found an actual function.
     // Derive frame pointer.
@@ -241,18 +246,19 @@ internal static readonly unwindFlags unwindJumpStack = 8;
         if ((unwindFlags)(u.flags & unwindJumpStack) != 0 && gp == (~(~gp).m).g0 && (~(~gp).m).curg != nil && (~(~(~gp).m).curg).m == (~gp).m) {
             var exprᴛ1 = f.funcID;
             if (exprᴛ1 == abi.FuncID_morestack) {
-                gp = (~gp).m.val.curg;
+                gp = gp.Value.m.Value.curg;
                 u.g.set(gp);
-                frame.val.pc = (~gp).sched.pc;
-                frame.val.fn = findfunc((~frame).pc);
-                f = frame.val.fn;
+                frame.Value.pc = gp.Value.sched.pc;
+                frame.Value.fn = findfunc((~frame).pc);
+                f = frame.Value.fn;
                 flag = f.flag;
-                frame.val.lr = (~gp).sched.lr;
-                frame.val.sp = (~gp).sched.sp;
+                frame.Value.lr = gp.Value.sched.lr;
+                frame.Value.sp = gp.Value.sched.sp;
                 u.cgoCtxt = len((~gp).cgoCtxt) - 1;
             }
             else if (exprᴛ1 == abi.FuncID_systemstack) {
-                if (usesLR && funcspdelta(f, // morestack does not return normally -- newstack()
+                do {
+                    if (usesLR && funcspdelta(f, // morestack does not return normally -- newstack()
  // gogo's to curg.sched. Match that.
  // This keeps morestack() from showing up in the backtrace,
  // but that makes some sense since it'll never be returned
@@ -260,34 +266,35 @@ internal static readonly unwindFlags unwindJumpStack = 8;
  // systemstack returns normally, so just follow the
  // stack transition.
  (~frame).pc) == 0) {
-                    // We're at the function prologue and the stack
-                    // switch hasn't happened, or epilogue where we're
-                    // about to return. Just unwind normally.
-                    // Do this only on LR machines because on x86
-                    // systemstack doesn't have an SP delta (the CALL
-                    // instruction opens the frame), therefore no way
-                    // to check.
-                    flag &= ~(abi.FuncFlag)(abi.FuncFlagSPWrite);
-                    break;
-                }
-                gp = (~gp).m.val.curg;
-                u.g.set(gp);
-                frame.val.sp = (~gp).sched.sp;
-                u.cgoCtxt = len((~gp).cgoCtxt) - 1;
-                flag &= ~(abi.FuncFlag)(abi.FuncFlagSPWrite);
+                        // We're at the function prologue and the stack
+                        // switch hasn't happened, or epilogue where we're
+                        // about to return. Just unwind normally.
+                        // Do this only on LR machines because on x86
+                        // systemstack doesn't have an SP delta (the CALL
+                        // instruction opens the frame), therefore no way
+                        // to check.
+                        flag &= unchecked((abi.FuncFlag)~(abi.FuncFlag)(abi.FuncFlagSPWrite));
+                        break;
+                    }
+                    gp = gp.Value.m.Value.curg;
+                    u.g.set(gp);
+                    frame.Value.sp = gp.Value.sched.sp;
+                    u.cgoCtxt = len((~gp).cgoCtxt) - 1;
+                    flag &= unchecked((abi.FuncFlag)~(abi.FuncFlag)(abi.FuncFlagSPWrite));
+                } while (false);
             }
 
         }
-        frame.val.fp = (~frame).sp + ((uintptr)funcspdelta(f, (~frame).pc));
+        frame.Value.fp = (~frame).sp + (uintptr)funcspdelta(f, (~frame).pc);
         if (!usesLR) {
             // On x86, call instruction pushes return PC before entering new function.
-            frame.val.fp += goarch.PtrSize;
+            frame.Value.fp += goarch.PtrSize;
         }
     }
     // Derive link register.
     if ((abi.FuncFlag)(flag & abi.FuncFlagTopFrame) != 0){
         // This function marks the top of the stack. Stop the traceback.
-        frame.val.lr = 0;
+        frame.Value.lr = 0;
     } else 
     if ((abi.FuncFlag)(flag & abi.FuncFlagSPWrite) != 0 && (!innermost || (unwindFlags)(u.flags & ((unwindFlags)(unwindPrintErrors | unwindSilentErrors))) != 0)){
         // The function we are in does a write to SP that we don't know
@@ -319,25 +326,25 @@ internal static readonly unwindFlags unwindJumpStack = 8;
             println("traceback: unexpected SPWRITE function", funcname(f));
             @throw("traceback"u8);
         }
-        frame.val.lr = 0;
+        frame.Value.lr = 0;
     } else {
         uintptr lrPtr = default!;
         if (usesLR){
             if (innermost && (~frame).sp < (~frame).fp || (~frame).lr == 0) {
-                lrPtr = frame.val.sp;
-                frame.val.lr = ~(ж<uintptr>)(uintptr)(((@unsafe.Pointer)lrPtr));
+                lrPtr = frame.Value.sp;
+                frame.Value.lr = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)lrPtr);
             }
         } else {
             if ((~frame).lr == 0) {
-                lrPtr = (~frame).fp - goarch.PtrSize;
-                frame.val.lr = ~(ж<uintptr>)(uintptr)(((@unsafe.Pointer)lrPtr));
+                lrPtr = (~frame).fp - (uintptr)goarch.PtrSize;
+                frame.Value.lr = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)lrPtr);
             }
         }
     }
-    frame.val.varp = frame.val.fp;
+    frame.Value.varp = frame.Value.fp;
     if (!usesLR) {
         // On x86, call instruction pushes return PC before entering new function.
-        frame.val.varp -= goarch.PtrSize;
+        frame.Value.varp -= goarch.PtrSize;
     }
     // For architectures with frame pointers, if there's
     // a frame, then there's a saved frame pointer here.
@@ -357,9 +364,9 @@ internal static readonly unwindFlags unwindJumpStack = 8;
     // And it happens to end up mimicking the x86 layout.
     // Other architectures may make different decisions.
     if ((~frame).varp > (~frame).sp && framepointer_enabled) {
-        frame.val.varp -= goarch.PtrSize;
+        frame.Value.varp -= goarch.PtrSize;
     }
-    frame.val.argp = (~frame).fp + sys.MinFrameSize;
+    frame.Value.argp = (~frame).fp + (uintptr)sys.MinFrameSize;
     // Determine frame's 'continuation PC', where it can continue.
     // Normally this is the return address on the stack, but if sigpanic
     // is immediately below this function on the stack, then the frame
@@ -369,10 +376,10 @@ internal static readonly unwindFlags unwindJumpStack = 8;
     // defers do not recover) or it returns from one of the calls to
     // deferproc a second time (if the corresponding deferred func recovers).
     // In the latter case, use a deferreturn call site as the continuation pc.
-    frame.val.continpc = frame.val.pc;
+    frame.Value.continpc = frame.Value.pc;
     if (u.calleeFuncID == abi.FuncID_sigpanic) {
         if ((~frame).fn.deferreturn != 0){
-            frame.val.continpc = (~frame).fn.entry() + ((uintptr)(~frame).fn.deferreturn) + 1;
+            frame.Value.continpc = (~frame).fn.entry() + (uintptr)(~frame).fn.deferreturn + 1;
         } else {
             // Note: this may perhaps keep return variables alive longer than
             // strictly necessary, as we are using "function has a defer statement"
@@ -383,14 +390,16 @@ internal static readonly unwindFlags unwindJumpStack = 8;
             // Note: the +1 is to offset the -1 that
             // stack.go:getStackMap does to back up a return
             // address make sure the pc is in the CALL instruction.
-            frame.val.continpc = 0;
+            frame.Value.continpc = 0;
         }
     }
 }
 
-[GoRecv] internal static void next(this ref unwinder u) {
-    var frame = Ꮡ(u.frame);
-    var f = frame.val.fn;
+internal static void next(this ж<unwinder> Ꮡu) {
+    ref var u = ref Ꮡu.Value;
+
+    var frame = Ꮡu.of(unwinder.Ꮡframe);
+    var f = frame.Value.fn;
     var gp = u.g.ptr();
     // Do not unwind past the bottom of the stack.
     if ((~frame).lr == 0) {
@@ -413,50 +422,50 @@ internal static readonly unwindFlags unwindJumpStack = 8;
             doPrint = false;
         }
         if (fail || doPrint) {
-            print("runtime: g ", (~gp).goid, ": unexpected return pc for ", funcname(f), " called from ", ((Δhex)(~frame).lr), "\n");
+            print("runtime: g ", (~gp).goid, ": unexpected return pc for ", funcname(f), " called from ", ((Δhex)(uint64)(~frame).lr), "\n");
             tracebackHexdump((~gp).stack, frame, 0);
         }
         if (fail) {
             @throw("unknown caller pc"u8);
         }
-        frame.val.lr = 0;
+        frame.Value.lr = 0;
         u.finishInternal();
         return;
     }
     if ((~frame).pc == (~frame).lr && (~frame).sp == (~frame).fp) {
         // If the next frame is identical to the current frame, we cannot make progress.
-        print("runtime: traceback stuck. pc=", ((Δhex)(~frame).pc), " sp=", ((Δhex)(~frame).sp), "\n");
+        print("runtime: traceback stuck. pc=", ((Δhex)(uint64)(~frame).pc), " sp=", ((Δhex)(uint64)(~frame).sp), "\n");
         tracebackHexdump((~gp).stack, frame, (~frame).sp);
         @throw("traceback stuck"u8);
     }
     var injectedCall = f.funcID == abi.FuncID_sigpanic || f.funcID == abi.FuncID_asyncPreempt || f.funcID == abi.FuncID_debugCallV2;
     if (injectedCall){
-        u.flags |= (unwindFlags)(unwindTrap);
+        u.flags |= unwindTrap;
     } else {
-        u.flags &= ~(unwindFlags)(unwindTrap);
+        u.flags &= unchecked((unwindFlags)~unwindTrap);
     }
     // Unwind to next frame.
     u.calleeFuncID = f.funcID;
-    frame.val.fn = flr;
-    frame.val.pc = frame.val.lr;
-    frame.val.lr = 0;
-    frame.val.sp = frame.val.fp;
-    frame.val.fp = 0;
+    frame.Value.fn = flr;
+    frame.Value.pc = frame.Value.lr;
+    frame.Value.lr = 0;
+    frame.Value.sp = frame.Value.fp;
+    frame.Value.fp = 0;
     // On link register architectures, sighandler saves the LR on stack
     // before faking a call.
     if (usesLR && injectedCall) {
-        var x = ~(ж<uintptr>)(uintptr)(((@unsafe.Pointer)(~frame).sp));
-        frame.val.sp += alignUp(sys.MinFrameSize, sys.StackAlign);
+        var x = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)(~frame).sp);
+        frame.Value.sp += alignUp(sys.MinFrameSize, sys.StackAlign);
         f = findfunc((~frame).pc);
-        frame.val.fn = f;
+        frame.Value.fn = f;
         if (!f.valid()){
-            frame.val.pc = x;
+            frame.Value.pc = x;
         } else 
         if (funcspdelta(f, (~frame).pc) == 0) {
-            frame.val.lr = x;
+            frame.Value.lr = x;
         }
     }
-    u.resolveInternal(false, false);
+    Ꮡu.resolveInternal(false, false);
 }
 
 // finishInternal is an unwinder-internal helper called after the stack has been
@@ -506,8 +515,8 @@ internal static readonly unwindFlags unwindJumpStack = 8;
     // stopped nicely, and the stack walk may not be able to complete.
     var gp = u.g.ptr();
     if ((unwindFlags)(u.flags & ((unwindFlags)(unwindPrintErrors | unwindSilentErrors))) == 0 && u.frame.sp != (~gp).stktopsp) {
-        print("runtime: g", (~gp).goid, ": frame.sp=", ((Δhex)u.frame.sp), " top=", ((Δhex)(~gp).stktopsp), "\n");
-        print("\tstack=[", ((Δhex)(~gp).stack.lo), "-", ((Δhex)(~gp).stack.hi), "\n");
+        print("runtime: g", (~gp).goid, ": frame.sp=", ((Δhex)(uint64)u.frame.sp), " top=", ((Δhex)(uint64)(~gp).stktopsp), "\n");
+        print("\tstack=[", ((Δhex)(uint64)(~gp).stack.lo), "-", ((Δhex)(uint64)(~gp).stack.hi), "\n");
         @throw("traceback did not unwind completely"u8);
     }
 }
@@ -562,12 +571,11 @@ internal static readonly unwindFlags unwindJumpStack = 8;
 //
 // Callers should set the unwindSilentErrors flag on u.
 internal static nint tracebackPCs(ж<unwinder> Ꮡu, nint skip, slice<uintptr> pcBuf) {
-    ref var u = ref Ꮡu.val;
+    ref var u = ref Ꮡu.Value;
 
     array<uintptr> cgoBuf = new(32);
     nint n = 0;
-    for (; n < len(pcBuf) && u.valid(); 
-    u.next();) {
+    for (; n < len(pcBuf) && u.valid(); Ꮡu.next()) {
         var f = u.frame.fn;
         nint cgoN = u.cgoCallers(cgoBuf[..]);
         // TODO: Why does &u.cache cause u to escape? (Same in traceback2)
@@ -607,12 +615,12 @@ internal static void printArgs(ΔfuncInfo f, @unsafe.Pointer argp, uintptr pc) {
     }
     @unsafe.Pointer liveInfo = (uintptr)funcdata(f, abi.FUNCDATA_ArgLiveInfo);
     var liveIdx = pcdatavalue(f, abi.PCDATA_ArgLiveIndex, pc);
-    var startOffset = ((uint8)255);
+    var startOffset = (uint8)0xff;
     // smallest offset that needs liveness info (slots with a lower offset is always live)
     if (liveInfo != nil) {
         startOffset = ~(ж<uint8>)(uintptr)(liveInfo);
     }
-    var isLive = (uint8 off, uint8 slotIdx) => {
+    var isLive = (uint8 off, uint8 slotIdxΔ1) => {
         if (liveInfo == nil || liveIdx <= 0) {
             return true;
         }
@@ -620,20 +628,19 @@ internal static void printArgs(ΔfuncInfo f, @unsafe.Pointer argp, uintptr pc) {
         if (off < startOffset) {
             return true;
         }
-        var bits = ~(ж<uint8>)(uintptr)(add(liveInfo, ((uintptr)liveIdx) + ((uintptr)(slotIdxΔ1 / 8))));
-        return (uint8)(bits & (1 << (int)((slotIdxΔ1 % 8)))) != 0;
+        var bits = ~(ж<uint8>)(uintptr)(add(liveInfo, (uintptr)liveIdx + (uintptr)(slotIdxΔ1 / 8)));
+        return (uint8)(bits & ((uint8)(1 << (int)((slotIdxΔ1 % 8))))) != 0;
     };
-    var print1 = 
     var isLiveʗ1 = isLive;
-    (uint8 off, uint8 sz, uint8 slotIdx) => {
-        var x = readUnaligned64((uintptr)add(argp.val, ((uintptr)off)));
+    var print1 = (uint8 off, uint8 sz, uint8 slotIdxΔ2) => {
+        var x = readUnaligned64((uintptr)add(argp, (uintptr)off));
         // mask out irrelevant bits
         if (sz < 8) {
-            var shift = 64 - sz * 8;
+            var shift = (uint8)(64 - sz * 8);
             if (goarch.BigEndian){
-                x = x >> (int)(shift);
+                x = (x >> (int)(shift));
             } else {
-                x = x << (int)(shift) >> (int)(shift);
+                x = ((x << (int)(shift)) >> (int)(shift));
             }
         }
         print(((Δhex)x));
@@ -642,55 +649,48 @@ internal static void printArgs(ΔfuncInfo f, @unsafe.Pointer argp, uintptr pc) {
         }
     };
     var start = true;
-    var printcomma = 
-    () => {
+    var printcomma = () => {
         if (!start) {
             print(", ");
         }
     };
     nint pi = 0;
-    var slotIdx = ((uint8)0);
+    var slotIdx = (uint8)0;
     // register arg spill slot index
 printloop:
     while (ᐧ) {
-        var o = Δp.val[pi];
+        var o = Δp.Value[pi];
         pi++;
-        switch (o) {
-        case abi.TraceArgsEndSeq: {
+        var exprᴛ1 = o;
+        if (exprᴛ1 == abi.TraceArgsEndSeq) {
             goto break_printloop;
-            break;
         }
-        case abi.TraceArgsStartAgg: {
+        else if (exprᴛ1 == abi.TraceArgsStartAgg) {
             printcomma();
             print("{");
             start = true;
             continue;
-            break;
         }
-        case abi.TraceArgsEndAgg: {
+        else if (exprᴛ1 == abi.TraceArgsEndAgg) {
             print("}");
-            break;
         }
-        case abi.TraceArgsDotdotdot: {
+        else if (exprᴛ1 == abi.TraceArgsDotdotdot) {
             printcomma();
             print("...");
-            break;
         }
-        case abi.TraceArgsOffsetTooLarge: {
+        else if (exprᴛ1 == abi.TraceArgsOffsetTooLarge) {
             printcomma();
             print("_");
-            break;
         }
-        default: {
+        else { /* default: */
             printcomma();
-            var sz = Δp.val[pi];
+            var sz = Δp.Value[pi];
             pi++;
             print1(o, sz, slotIdx);
             if (o >= startOffset) {
                 slotIdx++;
             }
-            break;
-        }}
+        }
 
         start = false;
 continue_printloop:;
@@ -735,7 +735,7 @@ internal static void printFuncName(@string name) {
 }
 
 internal static void printcreatedby(ж<g> Ꮡgp) {
-    ref var gp = ref Ꮡgp.val;
+    ref var gp = ref Ꮡgp.Value;
 
     // Show what created goroutine, except main goroutine (goid 1).
     var pc = gp.gopc;
@@ -757,16 +757,16 @@ internal static void printcreatedby1(ΔfuncInfo f, uintptr pc, uint64 goid) {
     if (pc > f.entry()) {
         tracepc -= sys.PCQuantum;
     }
-    var (file, line) = funcline(f, tracepc);
-    print("\t", file, ":", line);
+    var (@file, line) = funcline(f, tracepc);
+    print("\t", @file, ":", line);
     if (pc > f.entry()) {
-        print(" +", ((Δhex)(pc - f.entry())));
+        print(" +", ((Δhex)(uint64)(pc - f.entry())));
     }
     print("\n");
 }
 
 internal static void traceback(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp) {
-    ref var gp = ref Ꮡgp.val;
+    ref var gp = ref Ꮡgp.Value;
 
     traceback1(pc, sp, lr, Ꮡgp, 0);
 }
@@ -780,46 +780,46 @@ internal static void traceback(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp) 
 // If gp.m.libcall{g,pc,sp} information is available, it uses that information in preference to
 // the pc/sp/lr passed in.
 internal static void tracebacktrap(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp) {
-    ref var gp = ref Ꮡgp.val;
+    ref var gp = ref Ꮡgp.Value;
 
-    if (gp.m.libcallsp != 0) {
+    if ((~gp.m).libcallsp != 0) {
         // We're in C code somewhere, traceback from the saved position.
-        traceback1(gp.m.libcallpc, gp.m.libcallsp, 0, gp.m.libcallg.ptr(), 0);
+        traceback1((~gp.m).libcallpc, (~gp.m).libcallsp, 0, (~gp.m).libcallg.ptr(), 0);
         return;
     }
     traceback1(pc, sp, lr, Ꮡgp, unwindTrap);
 }
 
 internal static void traceback1(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp, unwindFlags flags) {
-    ref var gp = ref Ꮡgp.val;
+    ref var gp = ref Ꮡgp.Value;
 
     // If the goroutine is in cgo, and we have a cgo traceback, print that.
-    if (iscgo && gp.m != nil && gp.m.ncgo > 0 && gp.syscallsp != 0 && gp.m.cgoCallers != nil && gp.m.cgoCallers[0] != 0) {
+    if (iscgo && gp.m != nil && (~gp.m).ncgo > 0 && gp.syscallsp != 0 && (~gp.m).cgoCallers != nil && (~gp.m).cgoCallers.Value[0] != 0) {
         // Lock cgoCallers so that a signal handler won't
         // change it, copy the array, reset it, unlock it.
         // We are locked to the thread and are not running
         // concurrently with a signal handler.
         // We just have to stop a signal handler from interrupting
         // in the middle of our copy.
-        gp.m.cgoCallersUse.Store(1);
-        ref var cgoCallers = ref heap<ΔcgoCallers>(out var ᏑcgoCallers);
-        ΔcgoCallers = gp.m.cgoCallers;
-        gp.m.cgoCallers[0] = 0;
-        gp.m.cgoCallersUse.Store(0);
-        printCgoTraceback(ᏑΔcgoCallers);
+        gp.m.of(m.ᏑcgoCallersUse).Store(1);
+        ref var ΔcgoCallers = ref heap<ΔcgoCallers>(out var ᏑcgoCallers);
+        ΔcgoCallers = (~gp.m).cgoCallers.Value;
+        gp.m.Value.cgoCallers.Value[0] = 0;
+        gp.m.of(m.ᏑcgoCallersUse).Store(0);
+        printCgoTraceback(ᏑcgoCallers);
     }
-    if ((uint32)(readgstatus(Ꮡgp) & ~_Gscan) == _Gsyscall) {
+    if ((uint32)(readgstatus(Ꮡgp) & ~(uint32)_Gscan) == _Gsyscall) {
         // Override registers if blocked in system call.
         pc = gp.syscallpc;
         sp = gp.syscallsp;
-        flags &= ~(unwindFlags)(unwindTrap);
+        flags &= unchecked((unwindFlags)~(unwindFlags)(unwindTrap));
     }
-    if (gp.m != nil && gp.m.vdsoSP != 0) {
+    if (gp.m != nil && (~gp.m).vdsoSP != 0) {
         // Override registers if running in VDSO. This comes after the
         // _Gsyscall check to cover VDSO calls after entersyscall.
-        pc = gp.m.vdsoPC;
-        sp = gp.m.vdsoSP;
-        flags &= ~(unwindFlags)(unwindTrap);
+        pc = gp.m.Value.vdsoPC;
+        sp = gp.m.Value.vdsoSP;
+        flags &= unchecked((unwindFlags)~(unwindFlags)(unwindTrap));
     }
     // Print traceback.
     //
@@ -867,12 +867,10 @@ internal static void traceback1(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp,
     // cgo expansion boundaries. It's not clear that's much simpler.
     flags |= (unwindFlags)(unwindPrintErrors);
     ref var u = ref heap(new unwinder(), out var Ꮡu);
-    var tracebackWithRuntime = 
-    var uʗ1 = u;
-    (bool showRuntime) => {
-        const nint maxInt = /* 0x7fffffff */ 2147483647;
-        uʗ1.initAt(pc, sp, lr, Ꮡgp, flags);
-        var (n, lastN) = traceback2(Ꮡuʗ1, showRuntime, 0, tracebackInnerFrames);
+    var tracebackWithRuntime = (bool showRuntime) => {
+        const nint maxInt = 0x7fffffff;
+        Ꮡu.initAt(pc, sp, lr, Ꮡgp, flags);
+        var (n, lastN) = traceback2(Ꮡu, showRuntime, 0, tracebackInnerFrames);
         if (n < tracebackInnerFrames) {
             // We printed the whole stack.
             return n;
@@ -881,9 +879,9 @@ internal static void traceback1(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp,
         // count will include any logical frames already printed for u's current
         // physical frame.
         ref var u2 = ref heap<unwinder>(out var Ꮡu2);
-        u2 = uʗ1;
-        var (remaining, _) = traceback2(Ꮡuʗ1, showRuntime, maxInt, 0);
-        nint elide = remaining - lastN - tracebackOuterFrames;
+        u2 = Ꮡu.Value;
+        var (remaining, _) = traceback2(Ꮡu, showRuntime, maxInt, 0);
+        nint elide = remaining - lastN - (nint)tracebackOuterFrames;
         if (elide > 0){
             print("...", elide, " frames elided...\n");
             traceback2(Ꮡu2, showRuntime, lastN + elide, tracebackOuterFrames);
@@ -904,7 +902,7 @@ internal static void traceback1(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp,
     if (gp.ancestors == nil) {
         return;
     }
-    foreach (var (_, ancestor) in gp.ancestors) {
+    foreach (var (_, ancestor) in gp.ancestors.ValueSlot) {
         printAncestorTraceback(ancestor);
     }
 }
@@ -918,10 +916,12 @@ internal static (nint n, nint lastN) traceback2(ж<unwinder> Ꮡu, bool showRunt
     nint n = default!;
     nint lastN = default!;
 
-    ref var u = ref Ꮡu.val;
+    ref var u = ref Ꮡu.Value;
     // commitFrame commits to a logical frame and returns whether this frame
     // should be printed and whether iteration should stop.
     var commitFrame = () => {
+        bool pr = default!;
+        bool stop = default!;
         if (skip == 0 && max == 0) {
             // Stop
             return (false, true);
@@ -940,8 +940,7 @@ internal static (nint n, nint lastN) traceback2(ж<unwinder> Ꮡu, bool showRunt
     var gp = u.g.ptr();
     var (level, _, _) = gotraceback();
     array<uintptr> cgoBuf = new(32);
-    for (; u.valid(); 
-    u.next();) {
+    for (; u.valid(); Ꮡu.next()) {
         lastN = 0;
         var f = u.frame.fn;
         for (var (iu, uf) = newInlineUnwinder(f, u.symPC()); uf.valid(); uf = iu.next(uf)) {
@@ -960,7 +959,7 @@ internal static (nint n, nint lastN) traceback2(ж<unwinder> Ꮡu, bool showRunt
                 }
             }
             @string name = sf.name();
-            var (file, line) = iu.fileLine(uf);
+            var (@file, line) = iu.fileLine(uf);
             // Print during crash.
             //	main(0x1, 0x2, 0x3)
             //		/home/rsc/go/src/runtime/x.go:23 +0xf
@@ -970,17 +969,17 @@ internal static (nint n, nint lastN) traceback2(ж<unwinder> Ꮡu, bool showRunt
             if (iu.isInlined(uf)){
                 print("...");
             } else {
-                @unsafe.Pointer argp = ((@unsafe.Pointer)u.frame.argp);
+                @unsafe.Pointer argp = (@unsafe.Pointer)u.frame.argp;
                 printArgs(f, argp, u.symPC());
             }
             print(")\n");
-            print("\t", file, ":", line);
+            print("\t", @file, ":", line);
             if (!iu.isInlined(uf)) {
                 if (u.frame.pc > f.entry()) {
-                    print(" +", ((Δhex)(u.frame.pc - f.entry())));
+                    print(" +", ((Δhex)(uint64)(u.frame.pc - f.entry())));
                 }
                 if ((~gp).m != nil && (~(~gp).m).throwing >= throwTypeRuntime && gp == (~(~gp).m).curg || level >= 2) {
-                    print(" fp=", ((Δhex)u.frame.fp), " sp=", ((Δhex)u.frame.sp), " pc=", ((Δhex)u.frame.pc));
+                    print(" fp=", ((Δhex)(uint64)u.frame.fp), " sp=", ((Δhex)(uint64)u.frame.sp), " pc=", ((Δhex)(uint64)u.frame.pc));
                 }
             }
             print("\n");
@@ -998,7 +997,7 @@ internal static (nint n, nint lastN) traceback2(ж<unwinder> Ꮡu, bool showRunt
                                 break;
                             } else 
                             if (pr) {
-                                print("non-Go function at pc=", ((Δhex)pc), "\n");
+                                print("non-Go function at pc=", ((Δhex)(uint64)pc), "\n");
                             }
                         }
                     } else {
@@ -1052,12 +1051,12 @@ internal static void printAncestorTraceback(ancestorInfo ancestor) {
 // goroutine being created.
 internal static void printAncestorTracebackFuncInfo(ΔfuncInfo f, uintptr pc) {
     var (u, uf) = newInlineUnwinder(f, pc);
-    var (file, line) = u.fileLine(uf);
+    var (@file, line) = u.fileLine(uf);
     printFuncName(u.srcFunc(uf).name());
     print("(...)\n");
-    print("\t", file, ":", line);
+    print("\t", @file, ":", line);
     if (pc > f.entry()) {
-        print(" +", ((Δhex)(pc - f.entry())));
+        print(" +", ((Δhex)(uint64)(pc - f.entry())));
     }
     print("\n");
 }
@@ -1077,32 +1076,31 @@ internal static nint callers(nint skip, slice<uintptr> pcbuf) {
     var pc = getcallerpc();
     var gp = getg();
     nint n = default!;
-    systemstack(
-    var gpʗ2 = gp;
-    var pcbufʗ2 = pcbuf;
-    () => {
+    var gpʗ1 = gp;
+    var pcbufʗ1 = pcbuf;
+    systemstack(() => {
         ref var u = ref heap(new unwinder(), out var Ꮡu);
-        u.initAt(pc, sp, 0, gpʗ2, unwindSilentErrors);
-        n = tracebackPCs(Ꮡu, skip, pcbufʗ2);
+        Ꮡu.initAt(pc, sp, 0, gpʗ1, unwindSilentErrors);
+        n = tracebackPCs(Ꮡu, skip, pcbufʗ1);
     });
     return n;
 }
 
 internal static nint gcallers(ж<g> Ꮡgp, nint skip, slice<uintptr> pcbuf) {
-    ref var gp = ref Ꮡgp.val;
+    ref var gp = ref Ꮡgp.Value;
 
     ref var u = ref heap(new unwinder(), out var Ꮡu);
-    u.init(Ꮡgp, unwindSilentErrors);
+    Ꮡu.init(Ꮡgp, unwindSilentErrors);
     return tracebackPCs(Ꮡu, skip, pcbuf);
 }
 
 // showframe reports whether the frame with the given characteristics should
 // be printed during a traceback.
 internal static bool showframe(ΔsrcFunc sf, ж<g> Ꮡgp, bool firstFrame, abi.FuncID calleeID) {
-    ref var gp = ref Ꮡgp.val;
+    ref var gp = ref Ꮡgp.DerefOrNil();
 
-    var mp = getg().val.m;
-    if ((~mp).throwing >= throwTypeRuntime && gp != nil && (Ꮡgp == (~mp).curg || Ꮡgp == (~mp).caughtsig.ptr())) {
+    var mp = getg().Value.m;
+    if ((~mp).throwing >= throwTypeRuntime && Ꮡgp != nil && (Ꮡgp == (~mp).curg || Ꮡgp == (~mp).caughtsig.ptr())) {
         return true;
     }
     return showfuncinfo(sf, firstFrame, calleeID);
@@ -1167,7 +1165,7 @@ internal static bool elideWrapperCalling(abi.FuncID id) {
     return !(id == abi.FuncID_gopanic || id == abi.FuncID_sigpanic || id == abi.FuncID_panicwrap);
 }
 
-internal static array<@string> gStatusStrings = new runtime.SparseArray<@string>{
+internal static array<@string> gStatusStrings = new golib.SparseArray<@string>{
     [_Gidle] = "idle"u8,
     [_Grunnable] = "runnable"u8,
     [_Grunning] = "running"u8,
@@ -1179,17 +1177,17 @@ internal static array<@string> gStatusStrings = new runtime.SparseArray<@string>
 }.array();
 
 internal static void goroutineheader(ж<g> Ꮡgp) {
-    ref var gp = ref Ꮡgp.val;
+    ref var gp = ref Ꮡgp.DerefOrNil();
 
     var (level, _, _) = gotraceback();
     var gpstatus = readgstatus(Ꮡgp);
-    var isScan = (uint32)(gpstatus & _Gscan) != 0;
-    gpstatus &= ~(uint32)(_Gscan);
+    var isScan = (uint32)(gpstatus & (uint32)_Gscan) != 0;
+    gpstatus &= unchecked((uint32)~(uint32)(_Gscan));
     // drop the scan bit
     // Basic string status
     @string status = default!;
-    if (0 <= gpstatus && gpstatus < ((uint32)len(gStatusStrings))){
-        status = gStatusStrings[gpstatus];
+    if (0 <= gpstatus && gpstatus < (uint32)len(gStatusStrings)){
+        status = gStatusStrings[(nint)(gpstatus)];
     } else {
         status = "???"u8;
     }
@@ -1200,13 +1198,13 @@ internal static void goroutineheader(ж<g> Ꮡgp) {
     // approx time the G is blocked, in minutes
     int64 waitfor = default!;
     if ((gpstatus == _Gwaiting || gpstatus == _Gsyscall) && gp.waitsince != 0) {
-        waitfor = (nanotime() - gp.waitsince) / 60e9F;
+        waitfor = (nanotime() - gp.waitsince) / 60000000000;
     }
     print("goroutine ", gp.goid);
-    if (gp.m != nil && gp.m.throwing >= throwTypeRuntime && Ꮡgp == gp.m.curg || level >= 2) {
+    if (gp.m != nil && (~gp.m).throwing >= throwTypeRuntime && Ꮡgp == (~gp.m).curg || level >= 2) {
         print(" gp=", gp);
         if (gp.m != nil){
-            print(" m=", gp.m.id, " mp=", gp.m);
+            print(" m=", (~gp.m).id, " mp=", gp.m);
         } else {
             print(" m=nil");
         }
@@ -1225,15 +1223,15 @@ internal static void goroutineheader(ж<g> Ꮡgp) {
 }
 
 internal static void tracebackothers(ж<g> Ꮡme) {
-    ref var me = ref Ꮡme.val;
+    ref var me = ref Ꮡme.DerefOrNil();
 
     var (level, _, _) = gotraceback();
     // Show the current goroutine first, if we haven't already.
-    var curgp = (~getg()).m.val.curg;
+    var curgp = getg().Value.m.Value.curg;
     if (curgp != nil && curgp != Ꮡme) {
         print("\n");
         goroutineheader(curgp);
-        traceback(~((uintptr)0), ~((uintptr)0), 0, curgp);
+        traceback(~(uintptr)0, ~(uintptr)0, 0, curgp);
     }
     // We can't call locking forEachG here because this may be during fatal
     // throw/panic, where locking could be out-of-order or a direct
@@ -1242,19 +1240,22 @@ internal static void tracebackothers(ж<g> Ꮡme) {
     // Instead, use forEachGRace, which requires no locking. We don't lock
     // against concurrent creation of new Gs, but even with allglock we may
     // miss Gs created after this loop.
-    forEachGRace(
-    var curgpʗ2 = curgp;
-    (ж<g> gp) => {
-        if (gp == Ꮡme || gp == curgpʗ2 || readgstatus(gp) == _Gdead || isSystemGoroutine(gp, false) && level < 2) {
+    var curgpʗ1 = curgp;
+    forEachGRace((ж<g> gp) => {
+        if (gp == Ꮡme || gp == curgpʗ1 || readgstatus(gp) == _Gdead || isSystemGoroutine(gp, false) && level < 2) {
             return;
         }
         print("\n");
         goroutineheader(gp);
-        if ((~gp).m != (~getg()).m && (uint32)(readgstatus(gp) & ~_Gscan) == _Grunning){
+        // Note: gp.m == getg().m occurs when tracebackothers is called
+        // from a signal handler initiated during a systemstack call.
+        // The original G is still in the running state, and we want to
+        // print its stack.
+        if ((~gp).m != (~getg()).m && (uint32)(readgstatus(gp) & ~(uint32)_Gscan) == _Grunning){
             print("\tgoroutine running on other thread; stack unavailable\n");
             printcreatedby(gp);
         } else {
-            traceback(~((uintptr)0), ~((uintptr)0), 0, gp);
+            traceback(~(uintptr)0, ~(uintptr)0, 0, gp);
         }
     });
 }
@@ -1263,10 +1264,10 @@ internal static void tracebackothers(ж<g> Ꮡme) {
 // for debugging purposes. If the address bad is included in the
 // hexdumped range, it will mark it as well.
 internal static void tracebackHexdump(Δstack stk, ж<stkframe> Ꮡframe, uintptr bad) {
-    ref var frame = ref Ꮡframe.val;
+    ref var frame = ref Ꮡframe.Value;
 
-    static readonly UntypedInt expand = /* 32 * goarch.PtrSize */ 256;
-    static readonly UntypedInt maxExpand = /* 256 * goarch.PtrSize */ 2048;
+    UntypedInt expand = /* 32 * goarch.PtrSize */ 256;
+    UntypedInt maxExpand = /* 256 * goarch.PtrSize */ 2048;
     // Start around frame.sp.
     var (lo, hi) = (frame.sp, frame.sp);
     // Expand to include frame.fp.
@@ -1277,13 +1278,13 @@ internal static void tracebackHexdump(Δstack stk, ж<stkframe> Ꮡframe, uintpt
         hi = frame.fp;
     }
     // Expand a bit more.
-    (lo, hi) = (lo - expand, hi + expand);
+    (lo, hi) = (lo - (uintptr)expand, hi + (uintptr)expand);
     // But don't go too far from frame.sp.
-    if (lo < frame.sp - maxExpand) {
-        lo = frame.sp - maxExpand;
+    if (lo < frame.sp - (uintptr)maxExpand) {
+        lo = frame.sp - (uintptr)maxExpand;
     }
-    if (hi > frame.sp + maxExpand) {
-        hi = frame.sp + maxExpand;
+    if (hi > frame.sp + (uintptr)maxExpand) {
+        hi = frame.sp + (uintptr)maxExpand;
     }
     // And don't go outside the stack bounds.
     if (lo < stk.lo) {
@@ -1293,18 +1294,18 @@ internal static void tracebackHexdump(Δstack stk, ж<stkframe> Ꮡframe, uintpt
         hi = stk.hi;
     }
     // Print the hex dump.
-    print("stack: frame={sp:", ((Δhex)frame.sp), ", fp:", ((Δhex)frame.fp), "} stack=[", ((Δhex)stk.lo), ",", ((Δhex)stk.hi), ")\n");
+    print("stack: frame={sp:", ((Δhex)(uint64)frame.sp), ", fp:", ((Δhex)(uint64)frame.fp), "} stack=[", ((Δhex)(uint64)stk.lo), ",", ((Δhex)(uint64)stk.hi), ")\n");
     hexdumpWords(lo, hi, (uintptr Δp) => {
-        switch (Δp) {
-        case frame.fp: {
+        var exprᴛ1 = Δp;
+        if (exprᴛ1 == Ꮡframe.Value.fp) {
             return (rune)'>';
         }
-        case frame.sp: {
+        if (exprᴛ1 == Ꮡframe.Value.sp) {
             return (rune)'<';
         }
-        case bad: {
+        if (exprᴛ1 == bad) {
             return (rune)'!';
-        }}
+        }
 
         return 0;
     });
@@ -1319,7 +1320,7 @@ internal static void tracebackHexdump(Δstack stk, ж<stkframe> Ꮡframe, uintpt
 // system (that is, the finalizer goroutine) is considered a user
 // goroutine.
 internal static bool isSystemGoroutine(ж<g> Ꮡgp, bool @fixed) {
-    ref var gp = ref Ꮡgp.val;
+    ref var gp = ref Ꮡgp.Value;
 
     // Keep this in sync with internal/trace.IsSystemGoroutine.
     var f = findfunc(gp.startpc);
@@ -1337,7 +1338,7 @@ internal static bool isSystemGoroutine(ж<g> Ꮡgp, bool @fixed) {
             // always consider it a user goroutine.
             return false;
         }
-        return (uint32)(fingStatus.Load() & fingRunningFinalizer) == 0;
+        return (uint32)(ᏑfingStatus.Load() & fingRunningFinalizer) == 0;
     }
     return stringslite.HasPrefix(funcname(f), "runtime."u8);
 }
@@ -1507,7 +1508,7 @@ public static void SetCgoTraceback(nint version, @unsafe.Pointer traceback, @uns
     if (version != 0) {
         throw panic("unsupported version");
     }
-    if (cgoTraceback != nil && cgoTraceback.val != traceback.val || cgoContext != nil && cgoContext.val != context.val || cgoSymbolizer != nil && cgoSymbolizer.val != symbolizer.val) {
+    if (cgoTraceback != nil && cgoTraceback.Value != traceback.Value || cgoContext != nil && cgoContext.Value != context.Value || cgoSymbolizer != nil && cgoSymbolizer.Value != symbolizer.Value) {
         throw panic("call SetCgoTraceback only once");
     }
     cgoTraceback = traceback;
@@ -1516,7 +1517,7 @@ public static void SetCgoTraceback(nint version, @unsafe.Pointer traceback, @uns
     // The context function is called when a C function calls a Go
     // function. As such it is only called by C code in runtime/cgo.
     if (_cgo_set_context_function != nil) {
-        cgocall(_cgo_set_context_function, context.val);
+        cgocall(_cgo_set_context_function, context);
     }
 }
 
@@ -1542,7 +1543,7 @@ internal static @unsafe.Pointer cgoSymbolizer;
 // cgoSymbolizerArg is the type passed to cgoSymbolizer.
 [GoType] partial struct cgoSymbolizerArg {
     internal uintptr pc;
-    internal ж<byte> file;
+    internal ж<byte> @file;
     internal uintptr lineno;
     internal ж<byte> funcName;
     internal uintptr entry;
@@ -1552,20 +1553,24 @@ internal static @unsafe.Pointer cgoSymbolizer;
 
 // printCgoTraceback prints a traceback of callers.
 internal static void printCgoTraceback(ж<ΔcgoCallers> Ꮡcallers) {
-    ref var callers = ref Ꮡcallers.val;
+    ref var callers = ref Ꮡcallers.Value;
 
     if (cgoSymbolizer == nil) {
-        foreach (var (_, c) in callers.val) {
+        foreach (var (_, c) in callers) {
             if (c == 0) {
                 break;
             }
-            print("non-Go function at pc=", ((Δhex)c), "\n");
+            print("non-Go function at pc=", ((Δhex)(uint64)c), "\n");
         }
         return;
     }
-    var commitFrame = () => (true, false);
+    var commitFrame = () => {
+        bool pr = default!;
+        bool stop = default!;
+        return (true, false);
+    };
     ref var arg = ref heap(new cgoSymbolizerArg(), out var Ꮡarg);
-    foreach (var (_, c) in callers.val) {
+    foreach (var (_, c) in callers) {
         if (c == 0) {
             break;
         }
@@ -1578,8 +1583,8 @@ internal static void printCgoTraceback(ж<ΔcgoCallers> Ꮡcallers) {
 // printOneCgoTraceback prints the traceback of a single cgo caller.
 // This can print more than one line because of inlining.
 // It returns the "stop" result of commitFrame.
-internal static bool printOneCgoTraceback(uintptr pc, Func<(pr bool, stop bool)> commitFrame, ж<cgoSymbolizerArg> Ꮡarg) {
-    ref var arg = ref Ꮡarg.val;
+internal static bool printOneCgoTraceback(uintptr pc, Func<(bool, bool)> commitFrame, ж<cgoSymbolizerArg> Ꮡarg) {
+    ref var arg = ref Ꮡarg.Value;
 
     arg.pc = pc;
     while (ᐧ) {
@@ -1601,10 +1606,10 @@ internal static bool printOneCgoTraceback(uintptr pc, Func<(pr bool, stop bool)>
             println("non-Go function");
         }
         print("\t");
-        if (arg.file != nil) {
-            print(gostringnocopy(arg.file), ":", arg.lineno, " ");
+        if (arg.@file != nil) {
+            print(gostringnocopy(arg.@file), ":", arg.lineno, " ");
         }
-        print("pc=", ((Δhex)pc), "\n");
+        print("pc=", ((Δhex)(uint64)pc), "\n");
         if (arg.more == 0) {
             return false;
         }
@@ -1613,10 +1618,10 @@ internal static bool printOneCgoTraceback(uintptr pc, Func<(pr bool, stop bool)>
 
 // callCgoSymbolizer calls the cgoSymbolizer function.
 internal static void callCgoSymbolizer(ж<cgoSymbolizerArg> Ꮡarg) {
-    ref var arg = ref Ꮡarg.val;
+    ref var arg = ref Ꮡarg.Value;
 
     var call = cgocall;
-    if (panicking.Load() > 0 || (~(~getg()).m).curg != getg()) {
+    if (Ꮡpanicking.Load() > 0 || (~(~getg()).m).curg != getg()) {
         // We do not want to call into the scheduler when panicking
         // or when on the system stack.
         call = asmcgocall;
@@ -1636,7 +1641,7 @@ internal static void cgoContextPCs(uintptr ctxt, slice<uintptr> buf) {
         return;
     }
     var call = cgocall;
-    if (panicking.Load() > 0 || (~(~getg()).m).curg != getg()) {
+    if (Ꮡpanicking.Load() > 0 || (~(~getg()).m).curg != getg()) {
         // We do not want to call into the scheduler when panicking
         // or when on the system stack.
         call = asmcgocall;
@@ -1644,8 +1649,8 @@ internal static void cgoContextPCs(uintptr ctxt, slice<uintptr> buf) {
     ref var arg = ref heap<cgoTracebackArg>(out var Ꮡarg);
     arg = new cgoTracebackArg(
         context: ctxt,
-        buf: ((ж<uintptr>)(uintptr)noescape(((@unsafe.Pointer)(Ꮡ(buf, 0))))),
-        max: ((uintptr)len(buf))
+        buf: (ж<uintptr>)(uintptr)((uintptr)noescape(@unsafe.Pointer.FromRef(ref (Ꮡ(buf, 0)).Value))),
+        max: (uintptr)len(buf)
     );
     if (msanenabled) {
         msanwrite(new @unsafe.Pointer(Ꮡarg), @unsafe.Sizeof(arg));

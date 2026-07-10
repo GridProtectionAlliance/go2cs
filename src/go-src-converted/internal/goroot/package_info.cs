@@ -44,7 +44,6 @@ using static go.@internal.goroot_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(os.FileInfo, error), osꓸFileInfo>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

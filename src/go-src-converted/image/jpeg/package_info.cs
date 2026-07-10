@@ -12,6 +12,7 @@
 // <ImportedTypeAliases>
 global using colorꓸRGBA = go.image.color_package.ΔRGBA;
 global using imageꓸRGBA = go.image_package.ΔRGBA;
+using image = go.image_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -40,14 +41,10 @@ using static go.image.jpeg_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(image.Image, error), image_package.Image>]
-[assembly: GoImplement<(writer, bool), writer>]
 [assembly: GoImplement<FormatError, error>]
 [assembly: GoImplement<UnsupportedError, error>]
-[assembly: GoImplement<image_package.CMYK, image_package.Image>]
-[assembly: GoImplement<image_package.Gray, image_package.Image>]
-[assembly: GoImplement<image_package.YCbCr, image_package.Image>]
-[assembly: GoImplement<image_package.ΔRGBA, image_package.Image>]
+[assembly: GoImplement<bufio_package.Writer, writer>(Pointer = true)]
+[assembly: GoImplement<image_package.ΔRGBA, image_package.Image>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

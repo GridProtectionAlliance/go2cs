@@ -3,9 +3,11 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
+using global::go.sync;
+
 partial class token_package {
 
-[GoType] partial struct serializedFile {
+[GoType] public partial struct serializedFile {
     // fields correspond 1:1 to fields with same (lower-case) name in File
     public @string Name;
     public nint Base;
@@ -20,14 +22,16 @@ partial class token_package {
 }
 
 // Read calls decode to deserialize a file set into s; s must not be nil.
-[GoRecv] public static error Read(this ref FileSet s, Func<any, error> decode) {
+public static error Read(this ж<FileSet> Ꮡs, Func<any, error> decode) {
+    ref var s = ref Ꮡs.Value;
+
     ref var ss = ref heap(new serializedFileSet(), out var Ꮡss);
     {
         var err = decode(Ꮡss); if (err != default!) {
             return err;
         }
     }
-    s.mutex.Lock();
+    Ꮡs.of(FileSet.Ꮡmutex).Lock();
     s.@base = ss.Base;
     var files = new slice<ж<ΔFile>>(len(ss.Files));
     for (nint i = 0; i < len(ss.Files); i++) {
@@ -41,19 +45,21 @@ partial class token_package {
         ));
     }
     s.files = files;
-    s.last.Store(nil);
-    s.mutex.Unlock();
+    Ꮡs.of(FileSet.Ꮡlast).Store(nil);
+    Ꮡs.of(FileSet.Ꮡmutex).Unlock();
     return default!;
 }
 
 // Write calls encode to serialize the file set s.
-[GoRecv] public static error Write(this ref FileSet s, Func<any, error> encode) {
+public static error Write(this ж<FileSet> Ꮡs, Func<any, error> encode) {
+    ref var s = ref Ꮡs.Value;
+
     serializedFileSet ss = default!;
-    s.mutex.Lock();
+    Ꮡs.of(FileSet.Ꮡmutex).Lock();
     ss.Base = s.@base;
     var files = new slice<serializedFile>(len(s.files));
     foreach (var (i, f) in s.files) {
-        (~f).mutex.Lock();
+        f.of(token_package.ΔFile.Ꮡmutex).Lock();
         files[i] = new serializedFile(
             Name: (~f).name,
             Base: (~f).@base,
@@ -61,10 +67,10 @@ partial class token_package {
             Lines: append(slice<nint>(default!), (~f).lines.ꓸꓸꓸ),
             Infos: append(slice<lineInfo>(default!), (~f).infos.ꓸꓸꓸ)
         );
-        (~f).mutex.Unlock();
+        f.of(token_package.ΔFile.Ꮡmutex).Unlock();
     }
     ss.Files = files;
-    s.mutex.Unlock();
+    Ꮡs.of(FileSet.Ꮡmutex).Unlock();
     return encode(ss);
 }
 

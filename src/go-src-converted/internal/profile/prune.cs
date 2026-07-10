@@ -13,23 +13,25 @@ partial class profile_package {
 // matching keepRx. If the root node of a Sample matches, the sample
 // will have an empty stack.
 [GoRecv] public static void Prune(this ref Profile p, ж<regexp.Regexp> ᏑdropRx, ж<regexp.Regexp> ᏑkeepRx) {
-    ref var dropRx = ref ᏑdropRx.val;
-    ref var keepRx = ref ᏑkeepRx.val;
+    ref var dropRx = ref ᏑdropRx.Value;
+    ref var keepRx = ref ᏑkeepRx.DerefOrNil();
 
     var prune = new map<uint64, bool>();
     var pruneBeneath = new map<uint64, bool>();
-    foreach (var (_, loc) in p.Location) {
+    foreach (var (_, vᴛ1) in p.Location) {
+        var loc = vᴛ1;
+
         nint i = default!;
         for (i = len((~loc).Line) - 1; i >= 0; i--) {
             {
                 var fn = (~loc).Line[i].Function; if (fn != nil && (~fn).Name != ""u8) {
-                    @string funcName = fn.val.Name;
+                    @string funcName = fn.Value.Name;
                     // Account for leading '.' on the PPC ELF v1 ABI.
                     if (funcName[0] == (rune)'.') {
                         funcName = funcName[1..];
                     }
-                    if (dropRx.MatchString(funcName)) {
-                        if (keepRx == nil || !keepRx.MatchString(funcName)) {
+                    if (ᏑdropRx.MatchString(funcName)) {
+                        if (ᏑkeepRx == nil || !ᏑkeepRx.MatchString(funcName)) {
                             break;
                         }
                     }
@@ -44,18 +46,20 @@ partial class profile_package {
                 // Matched the top entry: prune the whole location.
                 prune[(~loc).ID] = true;
             } else {
-                loc.val.Line = (~loc).Line[(int)(i + 1)..];
+                loc.Value.Line = (~loc).Line[(int)(i + 1)..];
             }
         }
     }
     // Prune locs from each Sample
-    foreach (var (_, sample) in p.Sample) {
+    foreach (var (_, vᴛ2) in p.Sample) {
+        var sample = vᴛ2;
+
         // Scan from the root to the leaves to find the prune location.
         // Do not prune frames before the first user frame, to avoid
         // pruning everything.
         var foundUser = false;
         for (nint i = len((~sample).Location) - 1; i >= 0; i--) {
-            var id = (~sample).Location[i].val.ID;
+            var id = (~sample).Location[i].Value.ID;
             if (!prune[id] && !pruneBeneath[id]) {
                 foundUser = true;
                 continue;
@@ -64,11 +68,11 @@ partial class profile_package {
                 continue;
             }
             if (prune[id]) {
-                sample.val.Location = (~sample).Location[(int)(i + 1)..];
+                sample.Value.Location = (~sample).Location[(int)(i + 1)..];
                 break;
             }
             if (pruneBeneath[id]) {
-                sample.val.Location = (~sample).Location[(int)(i)..];
+                sample.Value.Location = (~sample).Location[(int)(i)..];
                 break;
             }
         }

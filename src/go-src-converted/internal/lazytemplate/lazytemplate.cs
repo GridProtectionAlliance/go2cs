@@ -18,24 +18,29 @@ partial class lazytemplate_package {
 // Template is a wrapper around text/template.Template, where the underlying
 // template will be parsed the first time it is needed.
 [GoType] partial struct Template {
-    internal @string name;
-    internal @string text;
-    internal sync_package.Once once;
-    internal ж<text.template_package.Template> tmpl;
+    internal @string name, text;
+    internal sync.Once once;
+    internal ж<template.Template> tmpl;
 }
 
-[GoRecv] internal static ж<template.Template> tp(this ref Template r) {
-    r.once.Do(r.build);
+internal static ж<template.Template> tp(this ж<Template> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    Ꮡr.of(Template.Ꮡonce).Do(Ꮡr.build);
     return r.tmpl;
 }
 
 [GoRecv] internal static void build(this ref Template r) {
-    r.tmpl = template.Must(template.New(r.name).Parse(r.text));
-    (r.name, r.text) = (""u8, ""u8);
+    var (ᴛ1, ᴛ2) = template.New(r.name).Parse(r.text);
+    r.tmpl = template.Must(ᴛ1, ᴛ2);
+    r.name = ""u8;
+    r.text = ""u8;
 }
 
-[GoRecv] public static error Execute(this ref Template r, io.Writer w, any data) {
-    return r.tp().Execute(w, data);
+public static error Execute(this ж<Template> Ꮡr, io.Writer w, any data) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.tp().Execute(w, data);
 }
 
 internal static bool inTest = len(os.Args) > 0 && strings.HasSuffix(strings.TrimSuffix(os.Args[0], ".exe"u8), ".test"u8);

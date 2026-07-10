@@ -12,14 +12,14 @@ partial class runtime_package {
 //go:linkname coverage_getCovCounterList internal/coverage/cfile.getCovCounterList
 internal static slice<rtcov.CovCounterBlob> coverage_getCovCounterList() {
     var res = new rtcov.CovCounterBlob[]{}.slice();
-    var u32sz = @unsafe.Sizeof(((uint32)0));
-    for (var datap = Ꮡ(firstmoduledata); datap != nil; datap = datap.val.next) {
+    var u32sz = @unsafe.Sizeof((uint32)0);
+    for (var datap = Ꮡfirstmoduledata; datap != nil; datap = datap.Value.next) {
         if ((~datap).covctrs == (~datap).ecovctrs) {
             continue;
         }
         res = append(res, new rtcov.CovCounterBlob(
-            Counters: (ж<uint32>)(uintptr)(((@unsafe.Pointer)(~datap).covctrs)),
-            Len: ((uint64)(((~datap).ecovctrs - (~datap).covctrs) / u32sz))
+            Counters: (ж<uint32>)(uintptr)((@unsafe.Pointer)(~datap).covctrs),
+            Len: (uint64)(((~datap).ecovctrs - (~datap).covctrs) / u32sz)
         ));
     }
     return res;

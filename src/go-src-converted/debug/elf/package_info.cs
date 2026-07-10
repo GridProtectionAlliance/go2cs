@@ -48,23 +48,23 @@ using static go.debug.elf_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(io.ReadCloser, error), io_package.ReadSeeker>]
-[assembly: GoImplement<(io.Reader, error), io_package.Reader>]
-[assembly: GoImplement<@internal.zstd_package.Reader, io_package.Reader>]
-[assembly: GoImplement<FormatError, error>]
-[assembly: GoImplement<bytes_package.Reader, io_package.Reader>]
-[assembly: GoImplement<encoding.binary_package.bigEndian, encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<encoding.binary_package.littleEndian, encoding.binary_package.ByteOrder>]
+[assembly: GoImplement<FormatError, error>(Pointer = true)]
+[assembly: GoImplement<Prog, io_package.ReaderAt>(Promoted = true)]
+[assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<errorReader, error>(Promoted = true)]
 [assembly: GoImplement<errorReader, io_package.ReadSeeker>]
-[assembly: GoImplement<io_package.ReadCloser, io_package.ReadSeeker>]
+[assembly: GoImplement<go.@internal.zstd_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<go.encoding.binary_package.bigEndian, go.encoding.binary_package.ByteOrder>]
+[assembly: GoImplement<go.encoding.binary_package.littleEndian, go.encoding.binary_package.ByteOrder>]
 [assembly: GoImplement<io_package.ReadSeeker, io_package.Reader>]
-[assembly: GoImplement<io_package.SectionReader, io_package.ReadSeeker>]
-[assembly: GoImplement<io_package.SectionReader, io_package.Reader>]
-[assembly: GoImplement<io_package.SectionReader, io_package.ReaderAt>]
-[assembly: GoImplement<nobitsSectionReader, io_package.ReaderAt>]
-[assembly: GoImplement<os_package.File, io_package.ReaderAt>]
-[assembly: GoImplement<readSeekerFromReader, io_package.ReadSeeker>]
+[assembly: GoImplement<io_package.SectionReader, io_package.ReadSeeker>(Pointer = true)]
+[assembly: GoImplement<io_package.SectionReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<io_package.SectionReader, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<nobitsSectionReader, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<readSeekerFromReader, io_package.ReadSeeker>(Pointer = true)]
+[assembly: GoImplement<ΔSection, io_package.ReaderAt>(Promoted = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

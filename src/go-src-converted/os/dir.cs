@@ -7,11 +7,11 @@ namespace go;
 
 using bytealg = @internal.bytealg_package;
 using filepathlite = @internal.filepathlite_package;
-using io = io_package;
-using fs = io.fs_package;
+using Δio = io_package;
+using fs = go.io.fs_package;
 using slices = slices_package;
 using @internal;
-using io;
+using go.io;
 
 partial class os_package {
 
@@ -38,11 +38,13 @@ internal static readonly readdirMode readdirFileInfo = 2;
 // and a non-nil error.
 //
 // Most clients are better served by the more efficient ReadDir method.
-[GoRecv] public static (slice<FileInfo>, error) Readdir(this ref File f, nint n) {
+public static (slice<FileInfo>, error) Readdir(this ж<File> Ꮡf, nint n) {
+    ref var f = ref Ꮡf.Value;
+
     if (f == nil) {
         return (default!, ErrInvalid);
     }
-    (_, _, infos, err) = f.readdir(n, readdirFileInfo);
+    var (_, _, infos, err) = Ꮡf.readdir(n, readdirFileInfo);
     if (infos == default!) {
         // Readdir has historically always returned a non-nil empty slice, never nil,
         // even on error (except misuse with nil receiver above).
@@ -67,14 +69,15 @@ internal static readonly readdirMode readdirFileInfo = 2;
 // nil error. If it encounters an error before the end of the
 // directory, Readdirnames returns the names read until that point and
 // a non-nil error.
-[GoRecv] public static (slice<@string> names, error err) Readdirnames(this ref File f, nint n) {
+public static (slice<@string> names, error err) Readdirnames(this ж<File> Ꮡf, nint n) {
     slice<@string> names = default!;
     error err = default!;
 
+    ref var f = ref Ꮡf.Value;
     if (f == nil) {
         return (default!, ErrInvalid);
     }
-    (names, _, _, err) = f.readdir(n, readdirName);
+    (names, _, _, err) = Ꮡf.readdir(n, readdirName);
     if (names == default!) {
         // Readdirnames has historically always returned a non-nil empty slice, never nil,
         // even on error (except misuse with nil receiver above).
@@ -94,11 +97,13 @@ internal static readonly readdirMode readdirFileInfo = 2;
 //
 // If n <= 0, ReadDir returns all the DirEntry records remaining in the directory.
 // When it succeeds, it returns a nil error (not io.EOF).
-[GoRecv] public static (slice<DirEntry>, error) ReadDir(this ref File f, nint n) {
+public static (slice<DirEntry>, error) ReadDir(this ж<File> Ꮡf, nint n) {
+    ref var f = ref Ꮡf.Value;
+
     if (f == nil) {
         return (default!, ErrInvalid);
     }
-    (_, dirents, _, err) = f.readdir(n, readdirDirEntry);
+    var (_, dirents, _, err) = Ꮡf.readdir(n, readdirDirEntry);
     if (dirents == default!) {
         // Match Readdir and Readdirnames: don't return nil slices.
         dirents = new DirEntry[]{}.slice();
@@ -115,16 +120,15 @@ internal static bool testingForceReadDirLstat;
 // If an error occurs reading the directory,
 // ReadDir returns the entries it was able to read before the error,
 // along with the error.
-public static (slice<DirEntry>, error) ReadDir(@string name) => func((defer, _) => {
-    (f, err) = openDir(name);
+public static (slice<DirEntry>, error) ReadDir(@string name) => func<(slice<DirEntry>, error)>((defer, recover) => {
+    var (f, err) = openDir(name);
     if (err != default!) {
         return (default!, err);
     }
     var fʗ1 = f;
-    defer(fʗ1.Close);
-    (dirs, err) = f.ReadDir(-1);
-    slices.SortFunc(dirs, 
-    (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
+    defer(() => fʗ1.Close());
+    (var dirs, err) = f.ReadDir(-1);
+    slices.SortFunc(dirs, (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
     return (dirs, err);
 });
 
@@ -145,16 +149,17 @@ public static (slice<DirEntry>, error) ReadDir(@string name) => func((defer, _) 
 // Symbolic links in dir are followed.
 //
 // Copying stops at and returns the first error encountered.
-public static error CopyFS(@string dir, fs.FS fsys) => func((defer, _) => {
-    return fs.WalkDir(fsys, "."u8, (@string path, fs.DirEntry d, error err) => {
+public static error CopyFS(@string dir, fs.FS fsys) {
+    return fs.WalkDir(fsys, "."u8, error (@string path, fs.DirEntry d, error err) => func<error>((defer, recover) => {
         if (err != default!) {
             return err;
         }
-        var (fpath, err) = filepathlite.Localize(path);
+        (var fpath, err) = filepathlite.Localize(path);
         if (err != default!) {
             return err;
         }
-        @string newPath = joinPath(dir, fpath);
+        ref var newPath = ref heap<@string>(out var ᏑnewPath);
+        newPath = joinPath(dir, fpath);
         if (d.IsDir()) {
             return MkdirAll(newPath, 511);
         }
@@ -162,30 +167,30 @@ public static error CopyFS(@string dir, fs.FS fsys) => func((defer, _) => {
         // 		once https://go.dev/issue/49580 is done.
         //		we also need filepathlite.IsLocal from https://go.dev/cl/564295.
         if (!d.Type().IsRegular()) {
-            return new PathError{Op: "CopyFS"u8, Path: path, Err: ErrInvalid};
+            return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "CopyFS"u8, Path: path, Err: ErrInvalid)));
         }
-        (r, err) = fsys.Open(path);
+        (var r, err) = fsys.Open(path);
         if (err != default!) {
             return err;
         }
         var rʗ1 = r;
-        defer(rʗ1.Close);
-        (info, err) = r.Stat();
+        defer(() => rʗ1.Close());
+        (var info, err) = r.Stat();
         if (err != default!) {
             return err;
         }
-        (w, err) = OpenFile(newPath, (nint)((nint)(O_CREATE | O_EXCL) | O_WRONLY), (fs.FileMode)(438 | (fs.FileMode)(info.Mode() & 511)));
+        (var w, err) = OpenFile(newPath, (nint)((nint)(nint)(O_CREATE | O_EXCL) | O_WRONLY), (fs.FileMode)(438 | (fs.FileMode)(info.Mode() & 511)));
         if (err != default!) {
             return err;
         }
         {
-            var (_, errΔ1) = io.Copy(~w, r); if (errΔ1 != default!) {
+            var (_, errΔ1) = Δio.Copy(new FileжWriter(w), new fs_FileᴠReader(r)); if (errΔ1 != default!) {
                 w.Close();
-                return new PathError{Op: "Copy"u8, Path: newPath, Err: errΔ1};
+                return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "Copy"u8, Path: newPath, Err: errΔ1)));
             }
         }
         return w.Close();
-    });
-});
+    }));
+}
 
 } // end os_package

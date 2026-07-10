@@ -32,7 +32,7 @@ partial class fs_package {
 // chroot-style security mechanism, and Sub does not change that fact.
 public static (FS, error) Sub(FS fsys, @string dir) {
     if (!ValidPath(dir)) {
-        return (default!, new PathError(Op: "sub"u8, Path: dir, Err: ErrInvalid));
+        return (default!, new PathErrorжerror(Ꮡ(new PathError(Op: "sub"u8, Path: dir, Err: ErrInvalid))));
     }
     if (dir == "."u8) {
         return (fsys, default!);
@@ -42,7 +42,7 @@ public static (FS, error) Sub(FS fsys, @string dir) {
             return fsysΔ1.Sub(dir);
         }
     }
-    return (new subFS(fsys, dir), default!);
+    return (new subFSжFS(Ꮡ(new subFS(fsys, dir))), default!);
 }
 
 [GoType] partial struct subFS {
@@ -53,7 +53,7 @@ public static (FS, error) Sub(FS fsys, @string dir) {
 // fullName maps name to the fully-qualified name dir/name.
 [GoRecv] internal static (@string, error) fullName(this ref subFS f, @string op, @string name) {
     if (!ValidPath(name)) {
-        return ("", new PathError(Op: op, Path: name, Err: ErrInvalid));
+        return ("", new PathErrorжerror(Ꮡ(new PathError(Op: op, Path: name, Err: ErrInvalid))));
     }
     return (path.Join(f.dir, name), default!);
 }
@@ -75,10 +75,10 @@ public static (FS, error) Sub(FS fsys, @string dir) {
 // fixErr shortens any reported names in PathErrors by stripping f.dir.
 [GoRecv] internal static error fixErr(this ref subFS f, error err) {
     {
-        var (e, ok) = err._<PathError.val>(ᐧ); if (ok) {
+        var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
             {
                 var (@short, okΔ1) = f.shorten((~e).Path); if (okΔ1) {
-                    e.val.Path = @short;
+                    e.Value.Path = @short;
                 }
             }
         }
@@ -91,8 +91,8 @@ public static (FS, error) Sub(FS fsys, @string dir) {
     if (err != default!) {
         return (default!, err);
     }
-    (file, err) = f.fsys.Open(full);
-    return (file, f.fixErr(err));
+    (var @file, err) = f.fsys.Open(full);
+    return (@file, f.fixErr(err));
 }
 
 [GoRecv] internal static (slice<DirEntry>, error) ReadDir(this ref subFS f, @string name) {
@@ -100,7 +100,7 @@ public static (FS, error) Sub(FS fsys, @string dir) {
     if (err != default!) {
         return (default!, err);
     }
-    (dir, err) = ReadDir(f.fsys, full);
+    (var dir, err) = ReadDir(f.fsys, full);
     return (dir, f.fixErr(err));
 }
 
@@ -109,7 +109,7 @@ public static (FS, error) Sub(FS fsys, @string dir) {
     if (err != default!) {
         return (default!, err);
     }
-    (data, err) = ReadFile(f.fsys, full);
+    (var data, err) = ReadFile(f.fsys, full);
     return (data, f.fixErr(err));
 }
 
@@ -124,7 +124,7 @@ public static (FS, error) Sub(FS fsys, @string dir) {
         return (new @string[]{"."}.slice(), default!);
     }
     @string full = f.dir + "/"u8 + pattern;
-    (list, err) = Glob(f.fsys, full);
+    var (list, err) = Glob(f.fsys, full);
     foreach (var (i, name) in list) {
         var (nameΔ1, ok) = f.shorten(name);
         if (!ok) {
@@ -136,15 +136,18 @@ public static (FS, error) Sub(FS fsys, @string dir) {
     return (list, f.fixErr(err));
 }
 
-[GoRecv("capture")] internal static (FS, error) Sub(this ref subFS f, @string dir) {
+internal static (FS, error) Sub(this ж<subFS> Ꮡf, @string dir) {
+    ref var f = ref Ꮡf.Value;
+
     if (dir == "."u8) {
-        return (~f, default!);
+        return (new subFSжFS(Ꮡf), default!);
     }
-    (full, err) = f.fullName("sub"u8, dir);
+    ref var full = ref heap<@string>(out var Ꮡfull);
+    (full, var err) = f.fullName("sub"u8, dir);
     if (err != default!) {
         return (default!, err);
     }
-    return (new subFS(f.fsys, full), default!);
+    return (new subFSжFS(Ꮡ(new subFS(f.fsys, full))), default!);
 }
 
 } // end fs_package

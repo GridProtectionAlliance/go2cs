@@ -30,13 +30,13 @@ public static readonly Order LSB = /* iota */ 0;
 public static readonly Order MSB = 1;
 
 internal static readonly UntypedInt maxWidth = 12;
-internal static readonly UntypedInt decoderInvalidCode = /* 0xffff */ 65535;
+internal static readonly UntypedInt decoderInvalidCode = 0xffff;
 internal static readonly UntypedInt flushBuffer = /* 1 << maxWidth */ 4096;
 
 // Reader is an io.Reader which can be used to read compressed data in the
 // LZW format.
 [GoType] partial struct Reader {
-    internal io_package.ByteReader r;
+    internal io.ByteReader r;
     internal uint32 bits;
     internal nuint nBits;
     internal nuint width;
@@ -54,18 +54,14 @@ internal static readonly UntypedInt flushBuffer = /* 1 << maxWidth */ 4096;
     // last is the most recently seen code, or decoderInvalidCode.
     //
     // An invariant is that hi < overflow.
-    internal uint16 clear;
-    internal uint16 eof;
-    internal uint16 hi;
-    internal uint16 overflow;
-    internal uint16 last;
+    internal uint16 clear, eof, hi, overflow, last;
     // Each code c in [lo, hi] expands to two or more bytes. For c != hi:
     //   suffix[c] is the last of these bytes.
     //   prefix[c] is the code for all but the last byte.
     //   This code can either be a literal code or another code in [lo, c).
     // The c == hi case is a special case.
-    internal array<uint8> suffix = new(1 << (int)(maxWidth));
-    internal array<uint16> prefix = new(1 << (int)(maxWidth));
+    internal array<uint8> suffix = new((1 << (int)(maxWidth)));
+    internal array<uint16> prefix = new((1 << (int)(maxWidth)));
     // output is the temporary output buffer.
     // Literal codes are accumulated from the start of the buffer.
     // Non-literal codes decode to a sequence of suffixes that are first
@@ -73,7 +69,7 @@ internal static readonly UntypedInt flushBuffer = /* 1 << maxWidth */ 4096;
     // to the start of the buffer.
     // It is flushed when it contains >= 1<<maxWidth bytes,
     // so that there is always room to decode an entire code.
-    internal array<byte> output = new(2 * 1 << (int)(maxWidth));
+    internal array<byte> output = new((2 * 1 << (int)(maxWidth)));
     internal nint o;   // write index into output
     internal slice<byte> toRead; // bytes to return from Read
 }
@@ -85,11 +81,11 @@ internal static readonly UntypedInt flushBuffer = /* 1 << maxWidth */ 4096;
         if (err != default!) {
             return (0, err);
         }
-        r.bits |= (uint32)(((uint32)x) << (int)(r.nBits));
+        r.bits |= ((uint32)x << (int)(r.nBits));
         r.nBits += 8;
     }
-    var code = ((uint16)((uint32)(r.bits & (1 << (int)(r.width) - 1))));
-    r.bits >>= (nuint)(r.width);
+    var code = (uint16)((uint32)(r.bits & (((uint32)1 << (int)(r.width)) - 1)));
+    r.bits >>= (int)(r.width);
     r.nBits -= r.width;
     return (code, default!);
 }
@@ -101,17 +97,19 @@ internal static readonly UntypedInt flushBuffer = /* 1 << maxWidth */ 4096;
         if (err != default!) {
             return (0, err);
         }
-        r.bits |= (uint32)(((uint32)x) << (int)((24 - r.nBits)));
+        r.bits |= ((uint32)x << (int)((24 - r.nBits)));
         r.nBits += 8;
     }
-    var code = ((uint16)(r.bits >> (int)((32 - r.width))));
-    r.bits <<= (nuint)(r.width);
+    var code = (uint16)((r.bits >> (int)((32 - r.width))));
+    r.bits <<= (int)(r.width);
     r.nBits -= r.width;
     return (code, default!);
 }
 
 // Read implements io.Reader, reading uncompressed bytes from its underlying [Reader].
-[GoRecv] public static (nint, error) Read(this ref Reader r, slice<byte> b) {
+public static (nint, error) Read(this ж<Reader> Ꮡr, slice<byte> b) {
+    ref var r = ref Ꮡr.Value;
+
     while (ᐧ) {
         if (len(r.toRead) > 0) {
             nint n = copy(b, r.toRead);
@@ -121,18 +119,20 @@ internal static readonly UntypedInt flushBuffer = /* 1 << maxWidth */ 4096;
         if (r.err != default!) {
             return (0, r.err);
         }
-        r.decode();
+        Ꮡr.decode();
     }
 }
 
 // decode decompresses bytes from r and leaves them in d.toRead.
 // read specifies how to decode bytes into codes.
 // litWidth is the width in bits of literal codes.
-[GoRecv] internal static void decode(this ref Reader r) {
+internal static void decode(this ж<Reader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
     // Loop over the code stream, converting codes into decompressed bytes.
 loop:
     while (ᐧ) {
-        var (code, err) = r.read(r);
+        var (code, err) = r.read(Ꮡr);
         if (err != default!) {
             if (AreEqual(err, io.EOF)) {
                 err = io.ErrUnexpectedEOF;
@@ -141,31 +141,31 @@ loop:
             break;
         }
         switch (ᐧ) {
-        case {} when code is < r.clear: {
-            r.output[r.o] = ((uint8)code);
+        case {} when code < r.clear: {
+            r.output[r.o] = (uint8)code;
             r.o++;
             if (r.last != decoderInvalidCode) {
                 // We have a literal code.
                 // Save what the hi code expands to.
-                r.suffix[r.hi] = ((uint8)code);
+                r.suffix[r.hi] = (uint8)code;
                 r.prefix[r.hi] = r.last;
             }
             break;
         }
-        case {} when code is r.clear: {
-            r.width = 1 + ((nuint)r.litWidth);
+        case {} when code == r.clear: {
+            r.width = 1 + (nuint)r.litWidth;
             r.hi = r.eof;
-            r.overflow = 1 << (int)(r.width);
+            r.overflow = (uint16)(1 << (int)(r.width));
             r.last = decoderInvalidCode;
             continue;
             break;
         }
-        case {} when code is r.eof: {
+        case {} when code == r.eof: {
             r.err = io.EOF;
             goto break_loop;
             break;
         }
-        case {} when code is <= r.hi: {
+        case {} when code <= r.hi: {
             var c = code;
             nint i = len(r.output) - 1;
             if (code == r.hi && r.last != decoderInvalidCode) {
@@ -176,7 +176,7 @@ loop:
                 while (c >= r.clear) {
                     c = r.prefix[c];
                 }
-                r.output[i] = ((uint8)c);
+                r.output[i] = (uint8)c;
                 i--;
                 c = r.last;
             }
@@ -186,11 +186,11 @@ loop:
                 i--;
                 c = r.prefix[c];
             }
-            r.output[i] = ((uint8)c);
+            r.output[i] = (uint8)c;
             r.o += copy(r.output[(int)(r.o)..], r.output[(int)(i)..]);
             if (r.last != decoderInvalidCode) {
                 // Save what the hi code expands to.
-                r.suffix[r.hi] = ((uint8)c);
+                r.suffix[r.hi] = (uint8)c;
                 r.prefix[r.hi] = r.last;
             }
             break;
@@ -201,7 +201,8 @@ loop:
             break;
         }}
 
-        (r.last, r.hi) = (code, r.hi + 1);
+        r.last = code;
+        r.hi = (uint16)(r.hi + 1);
         if (r.hi >= r.overflow) {
             if (r.hi > r.overflow) {
                 throw panic("unreachable");
@@ -214,7 +215,7 @@ loop:
                 r.hi--;
             } else {
                 r.width++;
-                r.overflow = 1 << (int)(r.width);
+                r.overflow = (uint16)(1 << (int)(r.width));
             }
         }
         if (r.o >= flushBuffer) {
@@ -258,7 +259,7 @@ internal static error errClosed = errors.New("lzw: reader/writer is closed"u8);
 // It is guaranteed that the underlying type of the returned [io.ReadCloser]
 // is a *[Reader].
 public static io.ReadCloser NewReader(io.Reader r, Order order, nint litWidth) {
-    return ~newReader(r, order, litWidth);
+    return new ReaderжReadCloser(newReader(r, order, litWidth));
 }
 
 internal static ж<Reader> newReader(io.Reader src, Order order, nint litWidth) {
@@ -270,10 +271,10 @@ internal static ж<Reader> newReader(io.Reader src, Order order, nint litWidth) 
 [GoRecv] internal static void init(this ref Reader r, io.Reader src, Order order, nint litWidth) {
     var exprᴛ1 = order;
     if (exprᴛ1 == LSB) {
-        r.read = () => (ж<Reader>).readLSB();
+        r.read = (Func<ж<Reader>, (uint16, error)>)(readLSB);
     }
     else if (exprᴛ1 == MSB) {
-        r.read = () => (ж<Reader>).readMSB();
+        r.read = (Func<ж<Reader>, (uint16, error)>)(readMSB);
     }
     else { /* default: */
         r.err = errors.New("lzw: unknown order"u8);
@@ -286,14 +287,15 @@ internal static ж<Reader> newReader(io.Reader src, Order order, nint litWidth) 
     }
     var (br, ok) = src._<io.ByteReader>(ᐧ);
     if (!ok && src != default!) {
-        br = ~bufio.NewReader(src);
+        br = new bufio_ReaderжByteReader(bufio.NewReader(src));
     }
     r.r = br;
     r.litWidth = litWidth;
-    r.width = 1 + ((nuint)litWidth);
-    r.clear = ((uint16)1) << (int)(((nuint)litWidth));
-    (r.eof, r.hi) = (r.clear + 1, r.clear + 1);
-    r.overflow = ((uint16)1) << (int)(r.width);
+    r.width = 1 + (nuint)litWidth;
+    r.clear = (uint16)(((uint16)1 << (int)((nuint)litWidth)));
+    r.eof = (uint16)(r.clear + 1);
+    r.hi = (uint16)(r.clear + 1);
+    r.overflow = (uint16)(((uint16)1 << (int)(r.width)));
     r.last = decoderInvalidCode;
 }
 

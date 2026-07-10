@@ -6,8 +6,9 @@ namespace go.math;
 
 using fmt = fmt_package;
 using io = io_package;
-using rand = math.rand_package;
+using rand = go.math.rand_package;
 using strings = strings_package;
+using go.math;
 
 partial class big_package {
 
@@ -53,52 +54,57 @@ internal static ж<ΔInt> intOne = Ꮡ(new ΔInt(false, natOne));
 }
 
 // SetInt64 sets z to x and returns z.
-[GoRecv("capture")] public static ж<ΔInt> SetInt64(this ref ΔInt z, int64 x) {
+public static ж<ΔInt> SetInt64(this ж<ΔInt> Ꮡz, int64 x) {
+    ref var z = ref Ꮡz.Value;
+
     var neg = false;
     if (x < 0) {
         neg = true;
         x = -x;
     }
-    z.abs = z.abs.setUint64(((uint64)x));
+    z.abs = z.abs.setUint64((uint64)x);
     z.neg = neg;
-    return SetInt64ꓸᏑz;
+    return Ꮡz;
 }
 
 // SetUint64 sets z to x and returns z.
-[GoRecv("capture")] public static ж<ΔInt> SetUint64(this ref ΔInt z, uint64 x) {
+public static ж<ΔInt> SetUint64(this ж<ΔInt> Ꮡz, uint64 x) {
+    ref var z = ref Ꮡz.Value;
+
     z.abs = z.abs.setUint64(x);
     z.neg = false;
-    return SetUint64ꓸᏑz;
+    return Ꮡz;
 }
 
 // NewInt allocates and returns a new [Int] set to x.
 public static ж<ΔInt> NewInt(int64 x) {
     // This code is arranged to be inlineable and produce
     // zero allocations when inlined. See issue 29951.
-    var u = ((uint64)x);
+    var u = (uint64)x;
     if (x < 0) {
-        u = -u;
+        u = ((uint64)0 - u);
     }
     slice<Word> abs = default!;
     if (x == 0){
     } else 
-    if (_W == 32 && u >> (int)(32) != 0){
-        abs = new Word[]{((Word)u), ((Word)(u >> (int)(32)))}.slice();
+    if (_W == 32 && (u >> (int)(32)) != 0){
+        abs = new Word[]{((Word)(nuint)u), ((Word)(nuint)((u >> (int)(32))))}.slice();
     } else {
-        abs = new Word[]{((Word)u)}.slice();
+        abs = new Word[]{((Word)(nuint)u)}.slice();
     }
     return Ꮡ(new ΔInt(neg: x < 0, abs: abs));
 }
 
 // Set sets z to x and returns z.
-[GoRecv("capture")] public static ж<ΔInt> Set(this ref ΔInt z, ж<ΔInt> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+public static ж<ΔInt> Set(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
 
-    if (z != Ꮡx) {
+    if (Ꮡz != Ꮡx) {
         z.abs = z.abs.set(x.abs);
         z.neg = x.neg;
     }
-    return SetꓸᏑz;
+    return Ꮡz;
 }
 
 // Bits provides raw (unchecked but fast) access to x by returning its
@@ -118,35 +124,40 @@ public static ж<ΔInt> NewInt(int64 x) {
 // z. The result and abs share the same underlying array.
 // SetBits is intended to support implementation of missing low-level [Int]
 // functionality outside this package; it should be avoided otherwise.
-[GoRecv("capture")] public static ж<ΔInt> SetBits(this ref ΔInt z, slice<Word> abs) {
+public static ж<ΔInt> SetBits(this ж<ΔInt> Ꮡz, slice<Word> abs) {
+    ref var z = ref Ꮡz.Value;
+
     z.abs = ((nat)abs).norm();
     z.neg = false;
-    return SetBitsꓸᏑz;
+    return Ꮡz;
 }
 
 // Abs sets z to |x| (the absolute value of x) and returns z.
-[GoRecv("capture")] public static ж<ΔInt> Abs(this ref ΔInt z, ж<ΔInt> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+public static ж<ΔInt> Abs(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
 
-    z.Set(Ꮡx);
+    Ꮡz.Set(Ꮡx);
     z.neg = false;
-    return AbsꓸᏑz;
+    return Ꮡz;
 }
 
 // Neg sets z to -x and returns z.
-[GoRecv("capture")] public static ж<ΔInt> Neg(this ref ΔInt z, ж<ΔInt> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+public static ж<ΔInt> Neg(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
 
-    z.Set(Ꮡx);
+    Ꮡz.Set(Ꮡx);
     z.neg = len(z.abs) > 0 && !z.neg;
     // 0 has no sign
-    return NegꓸᏑz;
+    return Ꮡz;
 }
 
 // Add sets z to the sum x+y and returns z.
-[GoRecv("capture")] public static ж<ΔInt> Add(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<ΔInt> Add(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     var neg = x.neg;
     if (x.neg == y.neg){
@@ -165,13 +176,14 @@ public static ж<ΔInt> NewInt(int64 x) {
     }
     z.neg = len(z.abs) > 0 && neg;
     // 0 has no sign
-    return AddꓸᏑz;
+    return Ꮡz;
 }
 
 // Sub sets z to the difference x-y and returns z.
-[GoRecv("capture")] public static ж<ΔInt> Sub(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<ΔInt> Sub(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     var neg = x.neg;
     if (x.neg != y.neg){
@@ -190,13 +202,14 @@ public static ж<ΔInt> NewInt(int64 x) {
     }
     z.neg = len(z.abs) > 0 && neg;
     // 0 has no sign
-    return SubꓸᏑz;
+    return Ꮡz;
 }
 
 // Mul sets z to the product x*y and returns z.
-[GoRecv("capture")] public static ж<ΔInt> Mul(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<ΔInt> Mul(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
+    ref var y = ref Ꮡy.DerefOrNil();
 
     // x * y == x * y
     // x * (-y) == -(x * y)
@@ -205,24 +218,26 @@ public static ж<ΔInt> NewInt(int64 x) {
     if (Ꮡx == Ꮡy) {
         z.abs = z.abs.sqr(x.abs);
         z.neg = false;
-        return MulꓸᏑz;
+        return Ꮡz;
     }
     z.abs = z.abs.mul(x.abs, y.abs);
     z.neg = len(z.abs) > 0 && x.neg != y.neg;
     // 0 has no sign
-    return MulꓸᏑz;
+    return Ꮡz;
 }
 
 // MulRange sets z to the product of all integers
 // in the range [a, b] inclusively and returns z.
 // If a > b (empty range), the result is 1.
-[GoRecv("capture")] public static ж<ΔInt> MulRange(this ref ΔInt z, int64 a, int64 b) {
+public static ж<ΔInt> MulRange(this ж<ΔInt> Ꮡz, int64 a, int64 b) {
+    ref var z = ref Ꮡz.Value;
+
     switch (ᐧ) {
-    case {} when a is > b: {
-        return z.SetInt64(1);
+    case {} when a > b: {
+        return Ꮡz.SetInt64(1);
     }
     case {} when a <= 0 && b >= 0: {
-        return z.SetInt64(0);
+        return Ꮡz.SetInt64(0);
     }}
 
     // empty range
@@ -233,15 +248,17 @@ public static ж<ΔInt> NewInt(int64 x) {
         neg = (int64)((b - a) & 1) == 0;
         (a, b) = (-b, -a);
     }
-    z.abs = z.abs.mulRange(((uint64)a), ((uint64)b));
+    z.abs = z.abs.mulRange((uint64)a, (uint64)b);
     z.neg = neg;
-    return MulRangeꓸᏑz;
+    return Ꮡz;
 }
 
 // Binomial sets z to the binomial coefficient C(n, k) and returns z.
-[GoRecv("capture")] public static ж<ΔInt> Binomial(this ref ΔInt z, int64 n, int64 k) {
+public static ж<ΔInt> Binomial(this ж<ΔInt> Ꮡz, int64 n, int64 k) {
+    ref var z = ref Ꮡz.Value;
+
     if (k > n) {
-        return z.SetInt64(0);
+        return Ꮡz.SetInt64(0);
     }
     // reduce the number of multiplications by reducing k
     if (k > n - k) {
@@ -272,42 +289,44 @@ public static ж<ΔInt> NewInt(int64 x) {
     ref var N = ref heap(new ΔInt(), out var ᏑN);
     ref var K = ref heap(new ΔInt(), out var ᏑK);
     ref var i = ref heap(new ΔInt(), out var Ꮡi);
-    ΔInt t = default!;
-    N.SetInt64(n);
-    K.SetInt64(k);
-    z.Set(intOne);
-    while (i.Cmp(ᏑK) < 0) {
-        z.Mul(z, t.Sub(ᏑN, Ꮡi));
-        i.Add(Ꮡi, intOne);
-        z.Quo(z, Ꮡi);
+    ref var t = ref heap(new ΔInt(), out var Ꮡt);
+    ᏑN.SetInt64(n);
+    ᏑK.SetInt64(k);
+    Ꮡz.Set(intOne);
+    while (Ꮡi.Cmp(ᏑK) < 0) {
+        Ꮡz.Mul(Ꮡz, Ꮡt.Sub(ᏑN, Ꮡi));
+        Ꮡi.Add(Ꮡi, intOne);
+        Ꮡz.Quo(Ꮡz, Ꮡi);
     }
-    return BinomialꓸᏑz;
+    return Ꮡz;
 }
 
 // Quo sets z to the quotient x/y for y != 0 and returns z.
 // If y == 0, a division-by-zero run-time panic occurs.
 // Quo implements truncated division (like Go); see [Int.QuoRem] for more details.
-[GoRecv("capture")] public static ж<ΔInt> Quo(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<ΔInt> Quo(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
-    (z.abs, Δ_) = z.abs.div(default!, x.abs, y.abs);
+    (z.abs, _) = z.abs.div(default!, x.abs, y.abs);
     z.neg = len(z.abs) > 0 && x.neg != y.neg;
     // 0 has no sign
-    return QuoꓸᏑz;
+    return Ꮡz;
 }
 
 // Rem sets z to the remainder x%y for y != 0 and returns z.
 // If y == 0, a division-by-zero run-time panic occurs.
 // Rem implements truncated modulus (like Go); see [Int.QuoRem] for more details.
-[GoRecv("capture")] public static ж<ΔInt> Rem(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<ΔInt> Rem(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
-    (Δ_, z.abs) = ((nat)default!).div(z.abs, x.abs, y.abs);
+    (_, z.abs) = ((nat)default!).div(z.abs, x.abs, y.abs);
     z.neg = len(z.abs) > 0 && x.neg;
     // 0 has no sign
-    return RemꓸᏑz;
+    return Ꮡz;
 }
 
 // QuoRem sets z to the quotient x/y and r to the remainder x%y
@@ -321,60 +340,64 @@ public static ж<ΔInt> NewInt(int64 x) {
 //
 // (See Daan Leijen, “Division and Modulus for Computer Scientists”.)
 // See [DivMod] for Euclidean division and modulus (unlike Go).
-[GoRecv("capture")] public static (ж<ΔInt>, ж<ΔInt>) QuoRem(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡr) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
-    ref var r = ref Ꮡr.val;
+public static (ж<ΔInt>, ж<ΔInt>) QuoRem(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡr) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
+    ref var r = ref Ꮡr.Value;
 
     (z.abs, r.abs) = z.abs.div(r.abs, x.abs, y.abs);
-    (z.neg, r.neg) = (len(z.abs) > 0 && x.neg != y.neg, len(r.abs) > 0 && x.neg);
+    z.neg = len(z.abs) > 0 && x.neg != y.neg;
+    r.neg = len(r.abs) > 0 && x.neg;
     // 0 has no sign
-    return (QuoRemꓸᏑz, Ꮡr);
+    return (Ꮡz, Ꮡr);
 }
 
 // Div sets z to the quotient x/y for y != 0 and returns z.
 // If y == 0, a division-by-zero run-time panic occurs.
 // Div implements Euclidean division (unlike Go); see [Int.DivMod] for more details.
-[GoRecv("capture")] public static ж<ΔInt> Div(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<ΔInt> Div(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     var y_neg = y.neg;
     // z may be an alias for y
     ref var r = ref heap(new ΔInt(), out var Ꮡr);
-    z.QuoRem(Ꮡx, Ꮡy, Ꮡr);
+    Ꮡz.QuoRem(Ꮡx, Ꮡy, Ꮡr);
     if (r.neg) {
         if (y_neg){
-            z.Add(z, intOne);
+            Ꮡz.Add(Ꮡz, intOne);
         } else {
-            z.Sub(z, intOne);
+            Ꮡz.Sub(Ꮡz, intOne);
         }
     }
-    return DivꓸᏑz;
+    return Ꮡz;
 }
 
 // Mod sets z to the modulus x%y for y != 0 and returns z.
 // If y == 0, a division-by-zero run-time panic occurs.
 // Mod implements Euclidean modulus (unlike Go); see [Int.DivMod] for more details.
-[GoRecv("capture")] public static ж<ΔInt> Mod(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<ΔInt> Mod(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.DerefOrNil();
 
-    var y0 = y;
+    var y0 = Ꮡy;
     // save y
-    if (z == Ꮡy || alias(z.abs, y.abs)) {
+    if (Ꮡz == Ꮡy || alias(z.abs, y.abs)) {
         y0 = @new<ΔInt>().Set(Ꮡy);
     }
-    ΔInt q = default!;
-    q.QuoRem(Ꮡx, Ꮡy, z);
+    ref var q = ref heap(new ΔInt(), out var Ꮡq);
+    Ꮡq.QuoRem(Ꮡx, Ꮡy, Ꮡz);
     if (z.neg) {
         if ((~y0).neg){
-            z.Sub(z, y0);
+            Ꮡz.Sub(Ꮡz, y0);
         } else {
-            z.Add(z, y0);
+            Ꮡz.Add(Ꮡz, y0);
         }
     }
-    return ModꓸᏑz;
+    return Ꮡz;
 }
 
 // DivMod sets z to the quotient x div y and m to the modulus x mod y
@@ -391,46 +414,48 @@ public static ж<ΔInt> NewInt(int64 x) {
 // Systems (TOPLAS), 14(2):127-144, New York, NY, USA, 4/1992.
 // ACM press.)
 // See [Int.QuoRem] for T-division and modulus (like Go).
-[GoRecv("capture")] public static (ж<ΔInt>, ж<ΔInt>) DivMod(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡm) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
-    ref var m = ref Ꮡm.val;
+public static (ж<ΔInt>, ж<ΔInt>) DivMod(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡm) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.DerefOrNil();
+    ref var m = ref Ꮡm.Value;
 
-    var y0 = y;
+    var y0 = Ꮡy;
     // save y
-    if (z == Ꮡy || alias(z.abs, y.abs)) {
+    if (Ꮡz == Ꮡy || alias(z.abs, y.abs)) {
         y0 = @new<ΔInt>().Set(Ꮡy);
     }
-    z.QuoRem(Ꮡx, Ꮡy, Ꮡm);
+    Ꮡz.QuoRem(Ꮡx, Ꮡy, Ꮡm);
     if (m.neg) {
         if ((~y0).neg){
-            z.Add(z, intOne);
-            m.Sub(Ꮡm, y0);
+            Ꮡz.Add(Ꮡz, intOne);
+            Ꮡm.Sub(Ꮡm, y0);
         } else {
-            z.Sub(z, intOne);
-            m.Add(Ꮡm, y0);
+            Ꮡz.Sub(Ꮡz, intOne);
+            Ꮡm.Add(Ꮡm, y0);
         }
     }
-    return (DivModꓸᏑz, Ꮡm);
+    return (Ꮡz, Ꮡm);
 }
 
 // Cmp compares x and y and returns:
 //   - -1 if x < y;
 //   - 0 if x == y;
 //   - +1 if x > y.
-[GoRecv] public static nint /*r*/ Cmp(this ref ΔInt x, ж<ΔInt> Ꮡy) {
+public static nint /*r*/ Cmp(this ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
     nint r = default!;
 
-    ref var y = ref Ꮡy.val;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.DerefOrNil();
     // x cmp y == x cmp y
     // x cmp (-y) == x
     // (-x) cmp y == y
     // (-x) cmp (-y) == -(x cmp y)
     switch (ᐧ) {
-    case {} when x is Ꮡy: {
+    case {} when Ꮡx == Ꮡy: {
         break;
     }
-    case {} when x.neg is y.neg: {
+    case {} when x.neg == y.neg: {
         r = x.abs.cmp(y.abs);
         if (x.neg) {
             // nothing to do
@@ -455,7 +480,7 @@ public static ж<ΔInt> NewInt(int64 x) {
 //   - 0 if |x| == |y|;
 //   - +1 if |x| > |y|.
 [GoRecv] public static nint CmpAbs(this ref ΔInt x, ж<ΔInt> Ꮡy) {
-    ref var y = ref Ꮡy.val;
+    ref var y = ref Ꮡy.Value;
 
     return x.abs.cmp(y.abs);
 }
@@ -465,7 +490,7 @@ internal static uint32 low32(nat x) {
     if (len(x) == 0) {
         return 0;
     }
-    return ((uint32)x[0]);
+    return (uint32)(nuint)x[0];
 }
 
 // low64 returns the least significant 64 bits of x.
@@ -473,9 +498,9 @@ internal static uint64 low64(nat x) {
     if (len(x) == 0) {
         return 0;
     }
-    var v = ((uint64)x[0]);
+    var v = (uint64)(nuint)x[0];
     if (_W == 32 && len(x) > 1) {
-        return (uint64)(((uint64)x[1]) << (int)(32) | v);
+        return (uint64)(((uint64)(nuint)x[1] << (int)(32)) | v);
     }
     return v;
 }
@@ -483,7 +508,7 @@ internal static uint64 low64(nat x) {
 // Int64 returns the int64 representation of x.
 // If x cannot be represented in an int64, the result is undefined.
 [GoRecv] public static int64 Int64(this ref ΔInt x) {
-    var v = ((int64)low64(x.abs));
+    var v = (int64)low64(x.abs);
     if (x.neg) {
         v = -v;
     }
@@ -499,7 +524,7 @@ internal static uint64 low64(nat x) {
 // IsInt64 reports whether x can be represented as an int64.
 [GoRecv] public static bool IsInt64(this ref ΔInt x) {
     if (len(x.abs) <= 64 / _W) {
-        var w = ((int64)low64(x.abs));
+        var w = (int64)low64(x.abs);
         return w >= 0 || x.neg && w == -w;
     }
     return false;
@@ -512,21 +537,23 @@ internal static uint64 low64(nat x) {
 
 // Float64 returns the float64 value nearest x,
 // and an indication of any rounding that occurred.
-[GoRecv] public static (float64, Accuracy) Float64(this ref ΔInt x) {
+public static (float64, Accuracy) Float64(this ж<ΔInt> Ꮡx) {
+    ref var x = ref Ꮡx.Value;
+
     nint n = x.abs.bitLen();
     // NB: still uses slow crypto impl!
     if (n == 0) {
-        return (0.0F, Exact);
+        return (0.0D, Exact);
     }
     // Fast path: no more than 53 significant bits.
-    if (n <= 53 || n < 64 && n - ((nint)x.abs.trailingZeroBits()) <= 53) {
-        var f = ((float64)low64(x.abs));
+    if (n <= 53 || n < 64 && n - (nint)x.abs.trailingZeroBits() <= 53) {
+        var f = (float64)low64(x.abs);
         if (x.neg) {
             f = -f;
         }
         return (f, Exact);
     }
-    return @new<Float>().SetInt(x).Float64();
+    return @new<Float>().SetInt(Ꮡx).Float64();
 }
 
 // SetString sets z to the value of s, interpreted in the given base,
@@ -551,35 +578,41 @@ internal static uint64 low64(nat x) {
 // Incorrect placement of underscores is reported as an error if there
 // are no other errors. If base != 0, underscores are not recognized
 // and act like any other character that is not a valid digit.
-[GoRecv] public static (ж<ΔInt>, bool) SetString(this ref ΔInt z, @string s, nint @base) {
-    return z.setFromScanner(~strings.NewReader(s), @base);
+public static (ж<ΔInt>, bool) SetString(this ж<ΔInt> Ꮡz, @string s, nint @base) {
+    ref var z = ref Ꮡz.Value;
+
+    return Ꮡz.setFromScanner(new strings_ReaderжByteScanner(strings.NewReader(s)), @base);
 }
 
 // setFromScanner implements SetString given an io.ByteScanner.
 // For documentation see comments of SetString.
-[GoRecv("capture")] internal static (ж<ΔInt>, bool) setFromScanner(this ref ΔInt z, io.ByteScanner r, nint @base) {
+internal static (ж<ΔInt>, bool) setFromScanner(this ж<ΔInt> Ꮡz, io.ByteScanner r, nint @base) {
+    ref var z = ref Ꮡz.Value;
+
     {
-        var (Δ_, Δ_, err) = z.scan(r, @base); if (err != default!) {
+        var (_, _, err) = Ꮡz.scan(r, @base); if (err != default!) {
             return (default!, false);
         }
     }
     // entire content must have been consumed
     {
-        var (Δ_, err) = r.ReadByte(); if (!AreEqual(err, io.EOF)) {
+        var (_, err) = r.ReadByte(); if (!AreEqual(err, io.EOF)) {
             return (default!, false);
         }
     }
-    return (setFromScannerꓸᏑz, true);
+    return (Ꮡz, true);
 }
 
 // err == io.EOF => scan consumed all content of r
 
 // SetBytes interprets buf as the bytes of a big-endian unsigned
 // integer, sets z to that value, and returns z.
-[GoRecv("capture")] public static ж<ΔInt> SetBytes(this ref ΔInt z, slice<byte> buf) {
+public static ж<ΔInt> SetBytes(this ж<ΔInt> Ꮡz, slice<byte> buf) {
+    ref var z = ref Ꮡz.Value;
+
     z.abs = z.abs.setBytes(buf);
     z.neg = false;
-    return SetBytesꓸᏑz;
+    return Ꮡz;
 }
 
 // Bytes returns the absolute value of x as a big-endian byte slice.
@@ -589,7 +622,7 @@ internal static uint64 low64(nat x) {
     // This function is used in cryptographic operations. It must not leak
     // anything but the Int's sign and bit size through side-channels. Any
     // changes must be reviewed by a security expert.
-    var buf = new slice<byte>(len(x.abs) * _S);
+    var buf = new slice<byte>(len(x.abs) * (nint)_S);
     return buf[(int)(x.abs.bytes(buf))..];
 }
 
@@ -625,45 +658,48 @@ internal static uint64 low64(nat x) {
 //
 // Modular exponentiation of inputs of a particular size is not a
 // cryptographically constant-time operation.
-[GoRecv] public static ж<ΔInt> Exp(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡm) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
-    ref var m = ref Ꮡm.val;
+public static ж<ΔInt> Exp(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡm) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
+    ref var m = ref Ꮡm.Value;
 
-    return z.exp(Ꮡx, Ꮡy, Ꮡm, false);
+    return Ꮡz.exp(Ꮡx, Ꮡy, Ꮡm, false);
 }
 
-[GoRecv] public static ж<ΔInt> expSlow(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡm) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
-    ref var m = ref Ꮡm.val;
+internal static ж<ΔInt> expSlow(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡm) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
+    ref var m = ref Ꮡm.Value;
 
-    return z.exp(Ꮡx, Ꮡy, Ꮡm, true);
+    return Ꮡz.exp(Ꮡx, Ꮡy, Ꮡm, true);
 }
 
-[GoRecv("capture")] public static ж<ΔInt> exp(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡm, bool slow) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
-    ref var m = ref Ꮡm.val;
+internal static ж<ΔInt> exp(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡm, bool slow) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
+    ref var m = ref Ꮡm.DerefOrNil();
 
     // See Knuth, volume 2, section 4.6.3.
     var xWords = x.abs;
     if (y.neg) {
-        if (m == nil || len(m.abs) == 0) {
-            return z.SetInt64(1);
+        if (Ꮡm == nil || len(m.abs) == 0) {
+            return Ꮡz.SetInt64(1);
         }
         // for y < 0: x**y mod m == (x**(-1))**|y| mod m
         var inverse = @new<ΔInt>().ModInverse(Ꮡx, Ꮡm);
         if (inverse == nil) {
             return default!;
         }
-        xWords = inverse.val.abs;
+        xWords = inverse.Value.abs;
     }
     var yWords = y.abs;
     nat mWords = default!;
-    if (m != nil) {
-        if (z == Ꮡm || alias(z.abs, m.abs)) {
-            m = @new<ΔInt>().Set(Ꮡm);
+    if (Ꮡm != nil) {
+        if (Ꮡz == Ꮡm || alias(z.abs, m.abs)) {
+            Ꮡm = @new<ΔInt>().Set(Ꮡm); m = ref Ꮡm.DerefOrNil();
         }
         mWords = m.abs;
     }
@@ -677,7 +713,7 @@ internal static uint64 low64(nat x) {
         // z == x**y mod |m| && 0 <= z < |m|
         z.neg = false;
     }
-    return expꓸᏑz;
+    return Ꮡz;
 }
 
 // GCD sets z to the greatest common divisor of a and b and returns z.
@@ -691,11 +727,12 @@ internal static uint64 low64(nat x) {
 // If a == 0 and b != 0, GCD sets z = |b|, x = 0, y = sign(b) * 1.
 //
 // If a != 0 and b == 0, GCD sets z = |a|, x = sign(a) * 1, y = 0.
-[GoRecv("capture")] public static ж<ΔInt> GCD(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡa, ж<ΔInt> Ꮡb) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
-    ref var a = ref Ꮡa.val;
-    ref var b = ref Ꮡb.val;
+public static ж<ΔInt> GCD(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡa, ж<ΔInt> Ꮡb) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
+    ref var y = ref Ꮡy.DerefOrNil();
+    ref var a = ref Ꮡa.Value;
+    ref var b = ref Ꮡb.Value;
 
     if (len(a.abs) == 0 || len(b.abs) == 0) {
         nint lenA = len(a.abs);
@@ -703,30 +740,30 @@ internal static uint64 low64(nat x) {
         var negA = a.neg;
         var negB = b.neg;
         if (lenA == 0){
-            z.Set(Ꮡb);
+            Ꮡz.Set(Ꮡb);
         } else {
-            z.Set(Ꮡa);
+            Ꮡz.Set(Ꮡa);
         }
         z.neg = false;
-        if (x != nil) {
+        if (Ꮡx != nil) {
             if (lenA == 0){
-                x.SetUint64(0);
+                Ꮡx.SetUint64(0);
             } else {
-                x.SetUint64(1);
+                Ꮡx.SetUint64(1);
                 x.neg = negA;
             }
         }
-        if (y != nil) {
+        if (Ꮡy != nil) {
             if (lenB == 0){
-                y.SetUint64(0);
+                Ꮡy.SetUint64(0);
             } else {
-                y.SetUint64(1);
+                Ꮡy.SetUint64(1);
                 y.neg = negB;
             }
         }
-        return GCDꓸᏑz;
+        return Ꮡz;
     }
-    return z.lehmerGCD(Ꮡx, Ꮡy, Ꮡa, Ꮡb);
+    return Ꮡz.lehmerGCD(Ꮡx, Ꮡy, Ꮡa, Ꮡb);
 }
 
 // lehmerSimulate attempts to simulate several Euclidean update steps
@@ -748,8 +785,8 @@ internal static (Word u0, Word u1, Word v0, Word v1, bool even) lehmerSimulate(�
     Word v1 = default!;
     bool even = default!;
 
-    ref var A = ref ᏑA.val;
-    ref var B = ref ᏑB.val;
+    ref var A = ref ᏑA.Value;
+    ref var B = ref ᏑB.Value;
     // initialize the digits
     Word a1 = default!;
     Word a2 = default!;
@@ -761,15 +798,15 @@ internal static (Word u0, Word u1, Word v0, Word v1, bool even) lehmerSimulate(�
     // n >= m >= 2
     // extract the top Word of bits from A and B
     nuint h = nlz(A.abs[n - 1]);
-    a1 = (Word)(A.abs[n - 1] << (int)(h) | A.abs[n - 2] >> (int)((_W - h)));
+    a1 = (Word)((A.abs[n - 1] << (int)(h)) | (A.abs[n - 2] >> (int)(((nuint)_W - h))));
     // B may have implicit zero words in the high bits if the lengths differ
     switch (ᐧ) {
-    case {} when n is m: {
-        a2 = (Word)(B.abs[n - 1] << (int)(h) | B.abs[n - 2] >> (int)((_W - h)));
+    case {} when n == m: {
+        a2 = (Word)((B.abs[n - 1] << (int)(h)) | (B.abs[n - 2] >> (int)(((nuint)_W - h))));
         break;
     }
-    case {} when n is m + 1: {
-        a2 = B.abs[n - 2] >> (int)((_W - h));
+    case {} when n == m + 1: {
+        a2 = (B.abs[n - 2] >> (int)(((nuint)_W - h)));
         break;
     }
     default: {
@@ -811,49 +848,49 @@ internal static (Word u0, Word u1, Word v0, Word v1, bool even) lehmerSimulate(�
 // For even == false: u0, v1 <= 0 && u1, v0 >= 0
 // q, r, s, t are temporary variables to avoid allocations in the multiplication.
 internal static void lehmerUpdate(ж<ΔInt> ᏑA, ж<ΔInt> ᏑB, ж<ΔInt> Ꮡq, ж<ΔInt> Ꮡr, ж<ΔInt> Ꮡs, ж<ΔInt> Ꮡt, Word u0, Word u1, Word v0, Word v1, bool even) {
-    ref var A = ref ᏑA.val;
-    ref var B = ref ᏑB.val;
-    ref var q = ref Ꮡq.val;
-    ref var r = ref Ꮡr.val;
-    ref var s = ref Ꮡs.val;
-    ref var t = ref Ꮡt.val;
+    ref var A = ref ᏑA.Value;
+    ref var B = ref ᏑB.Value;
+    ref var q = ref Ꮡq.Value;
+    ref var r = ref Ꮡr.Value;
+    ref var s = ref Ꮡs.Value;
+    ref var t = ref Ꮡt.Value;
 
     t.abs = t.abs.setWord(u0);
     s.abs = s.abs.setWord(v0);
     t.neg = !even;
     s.neg = even;
-    t.Mul(ᏑA, Ꮡt);
-    s.Mul(ᏑB, Ꮡs);
+    Ꮡt.Mul(ᏑA, Ꮡt);
+    Ꮡs.Mul(ᏑB, Ꮡs);
     r.abs = r.abs.setWord(u1);
     q.abs = q.abs.setWord(v1);
     r.neg = even;
     q.neg = !even;
-    r.Mul(ᏑA, Ꮡr);
-    q.Mul(ᏑB, Ꮡq);
-    A.Add(Ꮡt, Ꮡs);
-    B.Add(Ꮡr, Ꮡq);
+    Ꮡr.Mul(ᏑA, Ꮡr);
+    Ꮡq.Mul(ᏑB, Ꮡq);
+    ᏑA.Add(Ꮡt, Ꮡs);
+    ᏑB.Add(Ꮡr, Ꮡq);
 }
 
 // euclidUpdate performs a single step of the Euclidean GCD algorithm
 // if extended is true, it also updates the cosequence Ua, Ub.
 internal static void euclidUpdate(ж<ΔInt> ᏑA, ж<ΔInt> ᏑB, ж<ΔInt> ᏑUa, ж<ΔInt> ᏑUb, ж<ΔInt> Ꮡq, ж<ΔInt> Ꮡr, ж<ΔInt> Ꮡs, ж<ΔInt> Ꮡt, bool extended) {
-    ref var A = ref ᏑA.val;
-    ref var B = ref ᏑB.val;
-    ref var Ua = ref ᏑUa.val;
-    ref var Ub = ref ᏑUb.val;
-    ref var q = ref Ꮡq.val;
-    ref var r = ref Ꮡr.val;
-    ref var s = ref Ꮡs.val;
-    ref var t = ref Ꮡt.val;
+    ref var A = ref ᏑA.Value;
+    ref var B = ref ᏑB.Value;
+    ref var Ua = ref ᏑUa.Value;
+    ref var Ub = ref ᏑUb.Value;
+    ref var q = ref Ꮡq.Value;
+    ref var r = ref Ꮡr.Value;
+    ref var s = ref Ꮡs.Value;
+    ref var t = ref Ꮡt.Value;
 
-    (q, r) = q.QuoRem(ᏑA, ᏑB, Ꮡr);
+    (Ꮡq, Ꮡr) = Ꮡq.QuoRem(ᏑA, ᏑB, Ꮡr); q = ref Ꮡq.Value; r = ref Ꮡr.Value;
     (A, B, r) = (B, r, A);
     if (extended) {
         // Ua, Ub = Ub, Ua - q*Ub
-        t.Set(ᏑUb);
-        s.Mul(ᏑUb, Ꮡq);
-        Ub.Sub(ᏑUa, Ꮡs);
-        Ua.Set(Ꮡt);
+        Ꮡt.Set(ᏑUb);
+        Ꮡs.Mul(ᏑUb, Ꮡq);
+        ᏑUb.Sub(ᏑUa, Ꮡs);
+        ᏑUa.Set(Ꮡt);
     }
 }
 
@@ -867,11 +904,12 @@ internal static void euclidUpdate(ж<ΔInt> ᏑA, ж<ΔInt> ᏑB, ж<ΔInt> ᏑU
 // Design and Implementation of Symbolic Computation Systems, pp 45-58.
 // The cosequences are updated according to Algorithm 10.45 from
 // Cohen et al. "Handbook of Elliptic and Hyperelliptic Curve Cryptography" pp 192.
-[GoRecv("capture")] public static ж<ΔInt> lehmerGCD(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡa, ж<ΔInt> Ꮡb) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
-    ref var a = ref Ꮡa.val;
-    ref var b = ref Ꮡb.val;
+internal static ж<ΔInt> lehmerGCD(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡa, ж<ΔInt> Ꮡb) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
+    ref var y = ref Ꮡy.DerefOrNil();
+    ref var a = ref Ꮡa.Value;
+    ref var b = ref Ꮡb.DerefOrNil();
 
     ж<ΔInt> A = default!;
     ж<ΔInt> B = default!;
@@ -879,7 +917,7 @@ internal static void euclidUpdate(ж<ΔInt> ᏑA, ж<ΔInt> ᏑB, ж<ΔInt> ᏑU
     ж<ΔInt> Ub = default!;
     A = @new<ΔInt>().Abs(Ꮡa);
     B = @new<ΔInt>().Abs(Ꮡb);
-    var extended = x != nil || y != nil;
+    var extended = Ꮡx != nil || Ꮡy != nil;
     if (extended) {
         // Ua (Ub) tracks how many times input a has been accumulated into A (B).
         Ua = @new<ΔInt>().SetInt64(1);
@@ -942,10 +980,10 @@ internal static void euclidUpdate(ж<ΔInt> ᏑA, ж<ΔInt> ᏑB, ж<ΔInt> ᏑU
                     (va, vb) = (vb, va + qΔ1 * vb);
                     even = !even;
                 }
-                t.val.abs = (~t).abs.setWord(ua);
-                s.val.abs = (~s).abs.setWord(va);
-                t.val.neg = !even;
-                s.val.neg = even;
+                t.Value.abs = (~t).abs.setWord(ua);
+                s.Value.abs = (~s).abs.setWord(va);
+                t.Value.neg = !even;
+                s.Value.neg = even;
                 t.Mul(Ua, t);
                 s.Mul(Ub, s);
                 Ua.Add(t, s);
@@ -954,87 +992,89 @@ internal static void euclidUpdate(ж<ΔInt> ᏑA, ж<ΔInt> ᏑB, ж<ΔInt> ᏑU
                     (aWord, bWord) = (bWord, aWord % bWord);
                 }
             }
-            (~A).abs[0] = aWord;
+            A.Value.abs[0] = aWord;
         }
     }
     var negA = a.neg;
-    if (y != nil) {
+    if (Ꮡy != nil) {
         // avoid aliasing b needed in the division below
         if (Ꮡy == Ꮡb){
             B.Set(Ꮡb);
         } else {
-            B = b;
+            B = Ꮡb;
         }
         // y = (z - a*x)/b
-        y.Mul(Ꮡa, Ua);
+        Ꮡy.Mul(Ꮡa, Ua);
         // y can safely alias a
         if (negA) {
             y.neg = !y.neg;
         }
-        y.Sub(A, Ꮡy);
-        y.Div(Ꮡy, B);
+        Ꮡy.Sub(A, Ꮡy);
+        Ꮡy.Div(Ꮡy, B);
     }
-    if (x != nil) {
-        x = Ua.val;
+    if (Ꮡx != nil) {
+        x = Ua.Value;
         if (negA) {
             x.neg = !x.neg;
         }
     }
-    z = A.val;
-    return lehmerGCDꓸᏑz;
+    z = A.Value;
+    return Ꮡz;
 }
 
 // Rand sets z to a pseudo-random number in [0, n) and returns z.
 //
 // As this uses the [math/rand] package, it must not be used for
 // security-sensitive work. Use [crypto/rand.Int] instead.
-[GoRecv("capture")] public static ж<ΔInt> Rand(this ref ΔInt z, ж<rand.Rand> Ꮡrnd, ж<ΔInt> Ꮡn) {
-    ref var rnd = ref Ꮡrnd.val;
-    ref var n = ref Ꮡn.val;
+public static ж<ΔInt> Rand(this ж<ΔInt> Ꮡz, ж<rand.Rand> Ꮡrnd, ж<ΔInt> Ꮡn) {
+    ref var z = ref Ꮡz.Value;
+    ref var rnd = ref Ꮡrnd.Value;
+    ref var n = ref Ꮡn.Value;
 
     // z.neg is not modified before the if check, because z and n might alias.
     if (n.neg || len(n.abs) == 0) {
         z.neg = false;
         z.abs = default!;
-        return RandꓸᏑz;
+        return Ꮡz;
     }
     z.neg = false;
     z.abs = z.abs.random(Ꮡrnd, n.abs, n.abs.bitLen());
-    return RandꓸᏑz;
+    return Ꮡz;
 }
 
 // ModInverse sets z to the multiplicative inverse of g in the ring ℤ/nℤ
 // and returns z. If g and n are not relatively prime, g has no multiplicative
 // inverse in the ring ℤ/nℤ.  In this case, z is unchanged and the return value
 // is nil. If n == 0, a division-by-zero run-time panic occurs.
-[GoRecv("capture")] public static ж<ΔInt> ModInverse(this ref ΔInt z, ж<ΔInt> Ꮡg, ж<ΔInt> Ꮡn) {
-    ref var g = ref Ꮡg.val;
-    ref var n = ref Ꮡn.val;
+public static ж<ΔInt> ModInverse(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡg, ж<ΔInt> Ꮡn) {
+    ref var z = ref Ꮡz.Value;
+    ref var g = ref Ꮡg.Value;
+    ref var n = ref Ꮡn.Value;
 
     // GCD expects parameters a and b to be > 0.
     if (n.neg) {
-        ΔInt n2 = default!;
-        n = n2.Neg(Ꮡn);
+        ref var n2 = ref heap(new ΔInt(), out var Ꮡn2);
+        Ꮡn = Ꮡn2.Neg(Ꮡn); n = ref Ꮡn.Value;
     }
     if (g.neg) {
-        ΔInt g2 = default!;
-        g = g2.Mod(Ꮡg, Ꮡn);
+        ref var g2 = ref heap(new ΔInt(), out var Ꮡg2);
+        Ꮡg = Ꮡg2.Mod(Ꮡg, Ꮡn); g = ref Ꮡg.Value;
     }
-    ΔInt d = default!;
+    ref var d = ref heap(new ΔInt(), out var Ꮡd);
     ref var x = ref heap(new ΔInt(), out var Ꮡx);
-    d.GCD(Ꮡx, nil, Ꮡg, Ꮡn);
+    Ꮡd.GCD(Ꮡx, nil, Ꮡg, Ꮡn);
     // if and only if d==1, g and n are relatively prime
-    if (d.Cmp(intOne) != 0) {
+    if (Ꮡd.Cmp(intOne) != 0) {
         return default!;
     }
     // x and y are such that g*x + n*y = 1, therefore x is the inverse element,
     // but it may be negative, so convert to the range 0 <= z < |n|
     if (x.neg){
-        z.Add(Ꮡx, Ꮡn);
+        Ꮡz.Add(Ꮡx, Ꮡn);
     } else {
-        z.Set(Ꮡx);
+        Ꮡz.Set(Ꮡx);
     }
-    return ModInverseꓸᏑz;
+    return Ꮡz;
 }
 
 internal static nat modInverse(this nat z, nat g, nat n) {
@@ -1045,11 +1085,11 @@ internal static nat modInverse(this nat z, nat g, nat n) {
 // Jacobi returns the Jacobi symbol (x/y), either +1, -1, or 0.
 // The y argument must be an odd integer.
 public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     if (len(y.abs) == 0 || (Word)(y.abs[0] & 1) == 0) {
-        throw panic(fmt.Sprintf("big: invalid 2nd argument to Int.Jacobi: need odd integer but got %s"u8, y.String()));
+        throw panic(fmt.Sprintf("big: invalid 2nd argument to Int.Jacobi: need odd integer but got %s"u8, Ꮡy.String()));
     }
     // We use the formulation described in chapter 2, section 2.4,
     // "The Yacas Book of Algorithms":
@@ -1057,8 +1097,8 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
     ref var a = ref heap(new ΔInt(), out var Ꮡa);
     ref var b = ref heap(new ΔInt(), out var Ꮡb);
     ref var c = ref heap(new ΔInt(), out var Ꮡc);
-    a.Set(Ꮡx);
-    b.Set(Ꮡy);
+    Ꮡa.Set(Ꮡx);
+    Ꮡb.Set(Ꮡy);
     nint j = 1;
     if (b.neg) {
         if (a.neg) {
@@ -1067,13 +1107,13 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
         b.neg = false;
     }
     while (ᐧ) {
-        if (b.Cmp(intOne) == 0) {
+        if (Ꮡb.Cmp(intOne) == 0) {
             return j;
         }
         if (len(a.abs) == 0) {
             return 0;
         }
-        a.Mod(Ꮡa, Ꮡb);
+        Ꮡa.Mod(Ꮡa, Ꮡb);
         if (len(a.abs) == 0) {
             return 0;
         }
@@ -1086,14 +1126,14 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
                 j = -j;
             }
         }
-        c.Rsh(Ꮡa, s);
+        Ꮡc.Rsh(Ꮡa, s);
         // a = 2^s*c
         // swap numerator and denominator
         if ((Word)(b.abs[0] & 3) == 3 && (Word)(c.abs[0] & 3) == 3) {
             j = -j;
         }
-        a.Set(Ꮡb);
-        b.Set(Ꮡc);
+        Ꮡa.Set(Ꮡb);
+        Ꮡb.Set(Ꮡc);
     }
 }
 
@@ -1105,17 +1145,18 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
 //
 // to calculate the square root of any quadratic residue mod p quickly for 3
 // mod 4 primes.
-[GoRecv("capture")] public static ж<ΔInt> modSqrt3Mod4Prime(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡp) {
-    ref var x = ref Ꮡx.val;
-    ref var p = ref Ꮡp.val;
+internal static ж<ΔInt> modSqrt3Mod4Prime(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡp) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var p = ref Ꮡp.Value;
 
     var e = @new<ΔInt>().Add(Ꮡp, intOne);
     // e = p + 1
     e.Rsh(e, 2);
     // e = (p + 1) / 4
-    z.Exp(Ꮡx, e, Ꮡp);
+    Ꮡz.Exp(Ꮡx, e, Ꮡp);
     // z = x^e mod p
-    return modSqrt3Mod4PrimeꓸᏑz;
+    return Ꮡz;
 }
 
 // modSqrt5Mod8Prime uses Atkin's observation that 2 is not a square mod p
@@ -1126,9 +1167,10 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
 //
 // to calculate the square root of any quadratic residue mod p quickly for 5
 // mod 8 primes.
-[GoRecv("capture")] public static ж<ΔInt> modSqrt5Mod8Prime(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡp) {
-    ref var x = ref Ꮡx.val;
-    ref var p = ref Ꮡp.val;
+internal static ж<ΔInt> modSqrt5Mod8Prime(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡp) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var p = ref Ꮡp.Value;
 
     // p == 5 mod 8 implies p = e*8 + 5
     // e is the quotient and 5 the remainder on division by 8
@@ -1145,26 +1187,27 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
     beta.Mul(beta, Ꮡx);
     beta.Mod(beta, Ꮡp);
     beta.Mul(beta, alpha);
-    z.Mod(beta, Ꮡp);
-    return modSqrt5Mod8PrimeꓸᏑz;
+    Ꮡz.Mod(beta, Ꮡp);
+    return Ꮡz;
 }
 
 // modSqrtTonelliShanks uses the Tonelli-Shanks algorithm to find the square
 // root of a quadratic residue modulo any prime.
-[GoRecv] public static ж<ΔInt> modSqrtTonelliShanks(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡp) {
-    ref var x = ref Ꮡx.val;
-    ref var p = ref Ꮡp.val;
+internal static ж<ΔInt> modSqrtTonelliShanks(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡp) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var p = ref Ꮡp.Value;
 
     // Break p-1 into s*2^e such that s is odd.
     ref var s = ref heap(new ΔInt(), out var Ꮡs);
-    s.Sub(Ꮡp, intOne);
+    Ꮡs.Sub(Ꮡp, intOne);
     nuint e = s.abs.trailingZeroBits();
-    s.Rsh(Ꮡs, e);
+    Ꮡs.Rsh(Ꮡs, e);
     // find some non-square n
     ref var n = ref heap(new ΔInt(), out var Ꮡn);
-    n.SetInt64(2);
+    Ꮡn.SetInt64(2);
     while (Jacobi(Ꮡn, Ꮡp) != -1) {
-        n.Add(Ꮡn, intOne);
+        Ꮡn.Add(Ꮡn, intOne);
     }
     // Core of the Tonelli-Shanks algorithm. Follows the description in
     // section 6 of "Square roots from 1; 24, 51, 10 to Dan Shanks" by Ezra
@@ -1174,32 +1217,32 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
     ref var b = ref heap(new ΔInt(), out var Ꮡb);
     ref var g = ref heap(new ΔInt(), out var Ꮡg);
     ref var t = ref heap(new ΔInt(), out var Ꮡt);
-    y.Add(Ꮡs, intOne);
-    y.Rsh(Ꮡy, 1);
-    y.Exp(Ꮡx, Ꮡy, Ꮡp);
+    Ꮡy.Add(Ꮡs, intOne);
+    Ꮡy.Rsh(Ꮡy, 1);
+    Ꮡy.Exp(Ꮡx, Ꮡy, Ꮡp);
     // y = x^((s+1)/2)
-    b.Exp(Ꮡx, Ꮡs, Ꮡp);
+    Ꮡb.Exp(Ꮡx, Ꮡs, Ꮡp);
     // b = x^s
-    g.Exp(Ꮡn, Ꮡs, Ꮡp);
+    Ꮡg.Exp(Ꮡn, Ꮡs, Ꮡp);
     // g = n^s
     nuint r = e;
     while (ᐧ) {
         // find the least m such that ord_p(b) = 2^m
         nuint m = default!;
-        t.Set(Ꮡb);
-        while (t.Cmp(intOne) != 0) {
-            t.Mul(Ꮡt, Ꮡt).Mod(Ꮡt, Ꮡp);
+        Ꮡt.Set(Ꮡb);
+        while (Ꮡt.Cmp(intOne) != 0) {
+            Ꮡt.Mul(Ꮡt, Ꮡt).Mod(Ꮡt, Ꮡp);
             m++;
         }
         if (m == 0) {
-            return z.Set(Ꮡy);
+            return Ꮡz.Set(Ꮡy);
         }
-        t.SetInt64(0).SetBit(Ꮡt, ((nint)(r - m - 1)), 1).Exp(Ꮡg, Ꮡt, Ꮡp);
+        Ꮡt.SetInt64(0).SetBit(Ꮡt, (nint)(r - m - 1), 1).Exp(Ꮡg, Ꮡt, Ꮡp);
         // t = g^(2^(r-m-1)) mod p
-        g.Mul(Ꮡt, Ꮡt).Mod(Ꮡg, Ꮡp);
+        Ꮡg.Mul(Ꮡt, Ꮡt).Mod(Ꮡg, Ꮡp);
         // g = g^(2^(r-m)) mod p
-        y.Mul(Ꮡy, Ꮡt).Mod(Ꮡy, Ꮡp);
-        b.Mul(Ꮡb, Ꮡg).Mod(Ꮡb, Ꮡp);
+        Ꮡy.Mul(Ꮡy, Ꮡt).Mod(Ꮡy, Ꮡp);
+        Ꮡb.Mul(Ꮡb, Ꮡg).Mod(Ꮡb, Ꮡp);
         r = m;
     }
 }
@@ -1208,55 +1251,60 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
 // returns z. The modulus p must be an odd prime. If x is not a square mod p,
 // ModSqrt leaves z unchanged and returns nil. This function panics if p is
 // not an odd integer, its behavior is undefined if p is odd but not prime.
-[GoRecv] public static ж<ΔInt> ModSqrt(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡp) {
-    ref var x = ref Ꮡx.val;
-    ref var p = ref Ꮡp.val;
+public static ж<ΔInt> ModSqrt(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡp) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var p = ref Ꮡp.Value;
 
     var exprᴛ1 = Jacobi(Ꮡx, Ꮡp);
     if (exprᴛ1 == -1) {
         return default!;
     }
     if (exprᴛ1 is 0) {
-        return z.SetInt64(0);
+        return Ꮡz.SetInt64(0);
     }
     if (exprᴛ1 is 1) {
-        break;
+        do {
+            break;
+        } while (false);
     }
 
     // x is not a square mod p
     // sqrt(0) mod p = 0
-    if (x.neg || x.Cmp(Ꮡp) >= 0) {
+    if (x.neg || Ꮡx.Cmp(Ꮡp) >= 0) {
         // ensure 0 <= x < p
-        x = @new<ΔInt>().Mod(Ꮡx, Ꮡp);
+        Ꮡx = @new<ΔInt>().Mod(Ꮡx, Ꮡp); x = ref Ꮡx.Value;
     }
     switch (ᐧ) {
-    case {} when p.abs[0] % 4 is 3: {
-        return z.modSqrt3Mod4Prime(Ꮡx, // Check whether p is 3 mod 4, and if so, use the faster algorithm.
+    case {} when p.abs[0] % 4 == 3: {
+        return Ꮡz.modSqrt3Mod4Prime(Ꮡx, // Check whether p is 3 mod 4, and if so, use the faster algorithm.
  Ꮡp);
     }
-    case {} when p.abs[0] % 8 is 5: {
-        return z.modSqrt5Mod8Prime(Ꮡx, // Check whether p is 5 mod 8, use Atkin's algorithm.
+    case {} when p.abs[0] % 8 == 5: {
+        return Ꮡz.modSqrt5Mod8Prime(Ꮡx, // Check whether p is 5 mod 8, use Atkin's algorithm.
  Ꮡp);
     }
     default: {
-        return z.modSqrtTonelliShanks(Ꮡx, // Otherwise, use Tonelli-Shanks.
+        return Ꮡz.modSqrtTonelliShanks(Ꮡx, // Otherwise, use Tonelli-Shanks.
  Ꮡp);
     }}
 
 }
 
 // Lsh sets z = x << n and returns z.
-[GoRecv("capture")] public static ж<ΔInt> Lsh(this ref ΔInt z, ж<ΔInt> Ꮡx, nuint n) {
-    ref var x = ref Ꮡx.val;
+public static ж<ΔInt> Lsh(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, nuint n) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
 
     z.abs = z.abs.shl(x.abs, n);
     z.neg = x.neg;
-    return LshꓸᏑz;
+    return Ꮡz;
 }
 
 // Rsh sets z = x >> n and returns z.
-[GoRecv("capture")] public static ж<ΔInt> Rsh(this ref ΔInt z, ж<ΔInt> Ꮡx, nuint n) {
-    ref var x = ref Ꮡx.val;
+public static ж<ΔInt> Rsh(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, nuint n) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
 
     if (x.neg) {
         // (-x) >> s == ^(x-1) >> s == ^((x-1) >> s) == -(((x-1) >> s) + 1)
@@ -1266,11 +1314,11 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
         z.abs = t.add(t, natOne);
         z.neg = true;
         // z cannot be zero if x is negative
-        return RshꓸᏑz;
+        return Ꮡz;
     }
     z.abs = z.abs.shr(x.abs, n);
     z.neg = false;
-    return RshꓸᏑz;
+    return Ꮡz;
 }
 
 // Bit returns the value of the i'th bit of x. That is, it
@@ -1279,7 +1327,7 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
     if (i == 0) {
         // optimization for common case: odd/even test of x
         if (len(x.abs) > 0) {
-            return ((nuint)((Word)(x.abs[0] & 1)));
+            return (nuint)((Word)(x.abs[0] & 1));
         }
         // bit 0 is same for -x
         return 0;
@@ -1289,9 +1337,9 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
     }
     if (x.neg) {
         var t = ((nat)default!).sub(x.abs, natOne);
-        return (nuint)(t.bit(((nuint)i)) ^ 1);
+        return (nuint)(t.bit((nuint)i) ^ 1);
     }
-    return x.abs.bit(((nuint)i));
+    return x.abs.bit((nuint)i);
 }
 
 // SetBit sets z to x, with x's i'th bit set to b (0 or 1).
@@ -1299,28 +1347,30 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
 //   - if b is 1, SetBit sets z = x | (1 << i);
 //   - if b is 0, SetBit sets z = x &^ (1 << i);
 //   - if b is not 0 or 1, SetBit will panic.
-[GoRecv("capture")] public static ж<ΔInt> SetBit(this ref ΔInt z, ж<ΔInt> Ꮡx, nint i, nuint b) {
-    ref var x = ref Ꮡx.val;
+public static ж<ΔInt> SetBit(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, nint i, nuint b) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
 
     if (i < 0) {
         throw panic("negative bit index");
     }
     if (x.neg) {
         var t = z.abs.sub(x.abs, natOne);
-        t = t.setBit(t, ((nuint)i), (nuint)(b ^ 1));
+        t = t.setBit(t, (nuint)i, (nuint)(b ^ 1));
         z.abs = t.add(t, natOne);
         z.neg = len(z.abs) > 0;
-        return SetBitꓸᏑz;
+        return Ꮡz;
     }
-    z.abs = z.abs.setBit(x.abs, ((nuint)i), b);
+    z.abs = z.abs.setBit(x.abs, (nuint)i, b);
     z.neg = false;
-    return SetBitꓸᏑz;
+    return Ꮡz;
 }
 
 // And sets z = x & y and returns z.
-[GoRecv("capture")] public static ж<ΔInt> And(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<ΔInt> And(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     if (x.neg == y.neg) {
         if (x.neg) {
@@ -1330,29 +1380,30 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
             z.abs = z.abs.add(z.abs.or(x1, y1Δ1), natOne);
             z.neg = true;
             // z cannot be zero if x and y are negative
-            return AndꓸᏑz;
+            return Ꮡz;
         }
         // x & y == x & y
         z.abs = z.abs.and(x.abs, y.abs);
         z.neg = false;
-        return AndꓸᏑz;
+        return Ꮡz;
     }
     // x.neg != y.neg
     if (x.neg) {
-        (x, y) = (y, x);
+        (Ꮡx, Ꮡy) = (Ꮡy, Ꮡx); x = ref Ꮡx.Value; y = ref Ꮡy.Value;
     }
     // & is symmetric
     // x & (-y) == x & ^(y-1) == x &^ (y-1)
     var y1 = ((nat)default!).sub(y.abs, natOne);
     z.abs = z.abs.andNot(x.abs, y1);
     z.neg = false;
-    return AndꓸᏑz;
+    return Ꮡz;
 }
 
 // AndNot sets z = x &^ y and returns z.
-[GoRecv("capture")] public static ж<ΔInt> AndNot(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<ΔInt> AndNot(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     if (x.neg == y.neg) {
         if (x.neg) {
@@ -1361,12 +1412,12 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
             var y1Δ1 = ((nat)default!).sub(y.abs, natOne);
             z.abs = z.abs.andNot(y1Δ1, x1);
             z.neg = false;
-            return AndNotꓸᏑz;
+            return Ꮡz;
         }
         // x &^ y == x &^ y
         z.abs = z.abs.andNot(x.abs, y.abs);
         z.neg = false;
-        return AndNotꓸᏑz;
+        return Ꮡz;
     }
     if (x.neg) {
         // (-x) &^ y == ^(x-1) &^ y == ^(x-1) & ^y == ^((x-1) | y) == -(((x-1) | y) + 1)
@@ -1374,19 +1425,20 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
         z.abs = z.abs.add(z.abs.or(x1, y.abs), natOne);
         z.neg = true;
         // z cannot be zero if x is negative and y is positive
-        return AndNotꓸᏑz;
+        return Ꮡz;
     }
     // x &^ (-y) == x &^ ^(y-1) == x & (y-1)
     var y1 = ((nat)default!).sub(y.abs, natOne);
     z.abs = z.abs.and(x.abs, y1);
     z.neg = false;
-    return AndNotꓸᏑz;
+    return Ꮡz;
 }
 
 // Or sets z = x | y and returns z.
-[GoRecv("capture")] public static ж<ΔInt> Or(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<ΔInt> Or(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     if (x.neg == y.neg) {
         if (x.neg) {
@@ -1396,16 +1448,16 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
             z.abs = z.abs.add(z.abs.and(x1, y1Δ1), natOne);
             z.neg = true;
             // z cannot be zero if x and y are negative
-            return OrꓸᏑz;
+            return Ꮡz;
         }
         // x | y == x | y
         z.abs = z.abs.or(x.abs, y.abs);
         z.neg = false;
-        return OrꓸᏑz;
+        return Ꮡz;
     }
     // x.neg != y.neg
     if (x.neg) {
-        (x, y) = (y, x);
+        (Ꮡx, Ꮡy) = (Ꮡy, Ꮡx); x = ref Ꮡx.Value; y = ref Ꮡy.Value;
     }
     // | is symmetric
     // x | (-y) == x | ^(y-1) == ^((y-1) &^ x) == -(^((y-1) &^ x) + 1)
@@ -1413,13 +1465,14 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
     z.abs = z.abs.add(z.abs.andNot(y1, x.abs), natOne);
     z.neg = true;
     // z cannot be zero if one of x or y is negative
-    return OrꓸᏑz;
+    return Ꮡz;
 }
 
 // Xor sets z = x ^ y and returns z.
-[GoRecv("capture")] public static ж<ΔInt> Xor(this ref ΔInt z, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<ΔInt> Xor(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     if (x.neg == y.neg) {
         if (x.neg) {
@@ -1428,16 +1481,16 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
             var y1Δ1 = ((nat)default!).sub(y.abs, natOne);
             z.abs = z.abs.xor(x1, y1Δ1);
             z.neg = false;
-            return XorꓸᏑz;
+            return Ꮡz;
         }
         // x ^ y == x ^ y
         z.abs = z.abs.xor(x.abs, y.abs);
         z.neg = false;
-        return XorꓸᏑz;
+        return Ꮡz;
     }
     // x.neg != y.neg
     if (x.neg) {
-        (x, y) = (y, x);
+        (Ꮡx, Ꮡy) = (Ꮡy, Ꮡx); x = ref Ꮡx.Value; y = ref Ꮡy.Value;
     }
     // ^ is symmetric
     // x ^ (-y) == x ^ ^(y-1) == ^(x ^ (y-1)) == -((x ^ (y-1)) + 1)
@@ -1445,37 +1498,39 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
     z.abs = z.abs.add(z.abs.xor(x.abs, y1), natOne);
     z.neg = true;
     // z cannot be zero if only one of x or y is negative
-    return XorꓸᏑz;
+    return Ꮡz;
 }
 
 // Not sets z = ^x and returns z.
-[GoRecv("capture")] public static ж<ΔInt> Not(this ref ΔInt z, ж<ΔInt> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+public static ж<ΔInt> Not(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
 
     if (x.neg) {
         // ^(-x) == ^(^(x-1)) == x-1
         z.abs = z.abs.sub(x.abs, natOne);
         z.neg = false;
-        return NotꓸᏑz;
+        return Ꮡz;
     }
     // ^x == -x-1 == -(x+1)
     z.abs = z.abs.add(x.abs, natOne);
     z.neg = true;
     // z cannot be zero if x is positive
-    return NotꓸᏑz;
+    return Ꮡz;
 }
 
 // Sqrt sets z to ⌊√x⌋, the largest integer such that z² ≤ x, and returns z.
 // It panics if x is negative.
-[GoRecv("capture")] public static ж<ΔInt> Sqrt(this ref ΔInt z, ж<ΔInt> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+public static ж<ΔInt> Sqrt(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
 
     if (x.neg) {
         throw panic("square root of negative number");
     }
     z.neg = false;
     z.abs = z.abs.sqrt(x.abs);
-    return SqrtꓸᏑz;
+    return Ꮡz;
 }
 
 } // end big_package

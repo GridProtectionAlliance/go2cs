@@ -20,8 +20,7 @@ partial class list_package {
     // as a ring, such that &l.root is both the next element of the last
     // list element (l.Back()) and the previous element of the first list
     // element (l.Front()).
-    internal ж<Element> next;
-    internal ж<Element> prev;
+    internal ж<Element> next, prev;
     // The list to which this element belongs.
     internal ж<List> list;
     // The value stored with this element.
@@ -31,7 +30,7 @@ partial class list_package {
 // Next returns the next list element or nil.
 [GoRecv] public static ж<Element> Next(this ref Element e) {
     {
-        var p = e.next; if (e.list != nil && p != Ꮡ(e.list.root)) {
+        var p = e.next; if (e.list != nil && p != e.list.of(List.Ꮡroot)) {
             return p;
         }
     }
@@ -41,7 +40,7 @@ partial class list_package {
 // Prev returns the previous list element or nil.
 [GoRecv] public static ж<Element> Prev(this ref Element e) {
     {
-        var p = e.prev; if (e.list != nil && p != Ꮡ(e.list.root)) {
+        var p = e.prev; if (e.list != nil && p != e.list.of(List.Ꮡroot)) {
             return p;
         }
     }
@@ -56,11 +55,13 @@ partial class list_package {
 }
 
 // Init initializes or clears list l.
-[GoRecv("capture")] public static ж<List> Init(this ref List l) {
-    l.root.next = Ꮡ(l.root);
-    l.root.prev = Ꮡ(l.root);
+public static ж<List> Init(this ж<List> Ꮡl) {
+    ref var l = ref Ꮡl.Value;
+
+    l.root.next = Ꮡl.of(List.Ꮡroot);
+    l.root.prev = Ꮡl.of(List.Ꮡroot);
     l.len = 0;
-    return InitꓸᏑl;
+    return Ꮡl;
 }
 
 // New returns an initialized list.
@@ -91,39 +92,43 @@ public static ж<List> New() {
 }
 
 // lazyInit lazily initializes a zero List value.
-[GoRecv] internal static void lazyInit(this ref List l) {
+internal static void lazyInit(this ж<List> Ꮡl) {
+    ref var l = ref Ꮡl.Value;
+
     if (l.root.next == nil) {
-        l.Init();
+        Ꮡl.Init();
     }
 }
 
 // insert inserts e after at, increments l.len, and returns e.
-[GoRecv] public static ж<Element> insert(this ref List l, ж<Element> Ꮡe, ж<Element> Ꮡat) {
-    ref var e = ref Ꮡe.val;
-    ref var at = ref Ꮡat.val;
+internal static ж<Element> insert(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡat) {
+    ref var l = ref Ꮡl.Value;
+    ref var e = ref Ꮡe.Value;
+    ref var at = ref Ꮡat.Value;
 
-    e.prev = at;
+    e.prev = Ꮡat;
     e.next = at.next;
-    e.prev.next = e;
-    e.next.prev = e;
-    e.list = l;
+    e.prev.Value.next = Ꮡe;
+    e.next.Value.prev = Ꮡe;
+    e.list = Ꮡl;
     l.len++;
     return Ꮡe;
 }
 
 // insertValue is a convenience wrapper for insert(&Element{Value: v}, at).
-[GoRecv] public static ж<Element> insertValue(this ref List l, any v, ж<Element> Ꮡat) {
-    ref var at = ref Ꮡat.val;
+internal static ж<Element> insertValue(this ж<List> Ꮡl, any v, ж<Element> Ꮡat) {
+    ref var l = ref Ꮡl.Value;
+    ref var at = ref Ꮡat.Value;
 
-    return l.insert(Ꮡ(new Element(Value: v)), Ꮡat);
+    return Ꮡl.insert(Ꮡ(new Element(Value: v)), Ꮡat);
 }
 
 // remove removes e from its list, decrements l.len
-[GoRecv] public static void remove(this ref List l, ж<Element> Ꮡe) {
-    ref var e = ref Ꮡe.val;
+[GoRecv] internal static void remove(this ref List l, ж<Element> Ꮡe) {
+    ref var e = ref Ꮡe.Value;
 
-    e.prev.next = e.next;
-    e.next.prev = e.prev;
+    e.prev.Value.next = e.next;
+    e.next.Value.prev = e.prev;
     e.next = default!;
     // avoid memory leaks
     e.prev = default!;
@@ -133,28 +138,29 @@ public static ж<List> New() {
 }
 
 // move moves e to next to at.
-[GoRecv] public static void move(this ref List l, ж<Element> Ꮡe, ж<Element> Ꮡat) {
-    ref var e = ref Ꮡe.val;
-    ref var at = ref Ꮡat.val;
+[GoRecv] internal static void move(this ref List l, ж<Element> Ꮡe, ж<Element> Ꮡat) {
+    ref var e = ref Ꮡe.DerefOrNil();
+    ref var at = ref Ꮡat.DerefOrNil();
 
     if (Ꮡe == Ꮡat) {
         return;
     }
-    e.prev.next = e.next;
-    e.next.prev = e.prev;
-    e.prev = at;
+    e.prev.Value.next = e.next;
+    e.next.Value.prev = e.prev;
+    e.prev = Ꮡat;
     e.next = at.next;
-    e.prev.next = e;
-    e.next.prev = e;
+    e.prev.Value.next = Ꮡe;
+    e.next.Value.prev = Ꮡe;
 }
 
 // Remove removes e from l if e is an element of list l.
 // It returns the element value e.Value.
 // The element must not be nil.
-[GoRecv] public static any Remove(this ref List l, ж<Element> Ꮡe) {
-    ref var e = ref Ꮡe.val;
+public static any Remove(this ж<List> Ꮡl, ж<Element> Ꮡe) {
+    ref var l = ref Ꮡl.Value;
+    ref var e = ref Ꮡe.Value;
 
-    if (e.list == l) {
+    if (e.list == Ꮡl) {
         // if e.list == l, l must have been initialized when e was inserted
         // in l or l == nil (e is a zero Element) and l.remove will crash
         l.remove(Ꮡe);
@@ -163,63 +169,71 @@ public static ж<List> New() {
 }
 
 // PushFront inserts a new element e with value v at the front of list l and returns e.
-[GoRecv] public static ж<Element> PushFront(this ref List l, any v) {
-    l.lazyInit();
-    return l.insertValue(v, Ꮡ(l.root));
+public static ж<Element> PushFront(this ж<List> Ꮡl, any v) {
+    ref var l = ref Ꮡl.Value;
+
+    Ꮡl.lazyInit();
+    return Ꮡl.insertValue(v, Ꮡl.of(List.Ꮡroot));
 }
 
 // PushBack inserts a new element e with value v at the back of list l and returns e.
-[GoRecv] public static ж<Element> PushBack(this ref List l, any v) {
-    l.lazyInit();
-    return l.insertValue(v, l.root.prev);
+public static ж<Element> PushBack(this ж<List> Ꮡl, any v) {
+    ref var l = ref Ꮡl.Value;
+
+    Ꮡl.lazyInit();
+    return Ꮡl.insertValue(v, l.root.prev);
 }
 
 // InsertBefore inserts a new element e with value v immediately before mark and returns e.
 // If mark is not an element of l, the list is not modified.
 // The mark must not be nil.
-[GoRecv] public static ж<Element> InsertBefore(this ref List l, any v, ж<Element> Ꮡmark) {
-    ref var mark = ref Ꮡmark.val;
+public static ж<Element> InsertBefore(this ж<List> Ꮡl, any v, ж<Element> Ꮡmark) {
+    ref var l = ref Ꮡl.Value;
+    ref var mark = ref Ꮡmark.Value;
 
-    if (mark.list != l) {
+    if (mark.list != Ꮡl) {
         return default!;
     }
     // see comment in List.Remove about initialization of l
-    return l.insertValue(v, mark.prev);
+    return Ꮡl.insertValue(v, mark.prev);
 }
 
 // InsertAfter inserts a new element e with value v immediately after mark and returns e.
 // If mark is not an element of l, the list is not modified.
 // The mark must not be nil.
-[GoRecv] public static ж<Element> InsertAfter(this ref List l, any v, ж<Element> Ꮡmark) {
-    ref var mark = ref Ꮡmark.val;
+public static ж<Element> InsertAfter(this ж<List> Ꮡl, any v, ж<Element> Ꮡmark) {
+    ref var l = ref Ꮡl.Value;
+    ref var mark = ref Ꮡmark.Value;
 
-    if (mark.list != l) {
+    if (mark.list != Ꮡl) {
         return default!;
     }
     // see comment in List.Remove about initialization of l
-    return l.insertValue(v, Ꮡmark);
+    return Ꮡl.insertValue(v, Ꮡmark);
 }
 
 // MoveToFront moves element e to the front of list l.
 // If e is not an element of l, the list is not modified.
 // The element must not be nil.
-[GoRecv] public static void MoveToFront(this ref List l, ж<Element> Ꮡe) {
-    ref var e = ref Ꮡe.val;
+public static void MoveToFront(this ж<List> Ꮡl, ж<Element> Ꮡe) {
+    ref var l = ref Ꮡl.Value;
+    ref var e = ref Ꮡe.DerefOrNil();
 
-    if (e.list != l || l.root.next == Ꮡe) {
+    if (e.list != Ꮡl || l.root.next == Ꮡe) {
         return;
     }
     // see comment in List.Remove about initialization of l
-    l.move(Ꮡe, Ꮡ(l.root));
+    l.move(Ꮡe, Ꮡl.of(List.Ꮡroot));
 }
 
 // MoveToBack moves element e to the back of list l.
 // If e is not an element of l, the list is not modified.
 // The element must not be nil.
-[GoRecv] public static void MoveToBack(this ref List l, ж<Element> Ꮡe) {
-    ref var e = ref Ꮡe.val;
+public static void MoveToBack(this ж<List> Ꮡl, ж<Element> Ꮡe) {
+    ref var l = ref Ꮡl.Value;
+    ref var e = ref Ꮡe.DerefOrNil();
 
-    if (e.list != l || l.root.prev == Ꮡe) {
+    if (e.list != Ꮡl || l.root.prev == Ꮡe) {
         return;
     }
     // see comment in List.Remove about initialization of l
@@ -229,11 +243,12 @@ public static ж<List> New() {
 // MoveBefore moves element e to its new position before mark.
 // If e or mark is not an element of l, or e == mark, the list is not modified.
 // The element and mark must not be nil.
-[GoRecv] public static void MoveBefore(this ref List l, ж<Element> Ꮡe, ж<Element> Ꮡmark) {
-    ref var e = ref Ꮡe.val;
-    ref var mark = ref Ꮡmark.val;
+public static void MoveBefore(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) {
+    ref var l = ref Ꮡl.Value;
+    ref var e = ref Ꮡe.DerefOrNil();
+    ref var mark = ref Ꮡmark.DerefOrNil();
 
-    if (e.list != l || Ꮡe == Ꮡmark || mark.list != l) {
+    if (e.list != Ꮡl || Ꮡe == Ꮡmark || mark.list != Ꮡl) {
         return;
     }
     l.move(Ꮡe, mark.prev);
@@ -242,11 +257,12 @@ public static ж<List> New() {
 // MoveAfter moves element e to its new position after mark.
 // If e or mark is not an element of l, or e == mark, the list is not modified.
 // The element and mark must not be nil.
-[GoRecv] public static void MoveAfter(this ref List l, ж<Element> Ꮡe, ж<Element> Ꮡmark) {
-    ref var e = ref Ꮡe.val;
-    ref var mark = ref Ꮡmark.val;
+public static void MoveAfter(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) {
+    ref var l = ref Ꮡl.Value;
+    ref var e = ref Ꮡe.DerefOrNil();
+    ref var mark = ref Ꮡmark.DerefOrNil();
 
-    if (e.list != l || Ꮡe == Ꮡmark || mark.list != l) {
+    if (e.list != Ꮡl || Ꮡe == Ꮡmark || mark.list != Ꮡl) {
         return;
     }
     l.move(Ꮡe, Ꮡmark);
@@ -254,23 +270,25 @@ public static ж<List> New() {
 
 // PushBackList inserts a copy of another list at the back of list l.
 // The lists l and other may be the same. They must not be nil.
-[GoRecv] public static void PushBackList(this ref List l, ж<List> Ꮡother) {
-    ref var other = ref Ꮡother.val;
+public static void PushBackList(this ж<List> Ꮡl, ж<List> Ꮡother) {
+    ref var l = ref Ꮡl.Value;
+    ref var other = ref Ꮡother.Value;
 
-    l.lazyInit();
-    for (nint i = other.Len();var e = other.Front(); i > 0; (i, e) = (i - 1, e.Next())) {
-        l.insertValue((~e).Value, l.root.prev);
+    Ꮡl.lazyInit();
+    for ((nint i, var e) = (other.Len(), other.Front()); i > 0; (i, e) = (i - 1, e.Next())) {
+        Ꮡl.insertValue((~e).Value, l.root.prev);
     }
 }
 
 // PushFrontList inserts a copy of another list at the front of list l.
 // The lists l and other may be the same. They must not be nil.
-[GoRecv] public static void PushFrontList(this ref List l, ж<List> Ꮡother) {
-    ref var other = ref Ꮡother.val;
+public static void PushFrontList(this ж<List> Ꮡl, ж<List> Ꮡother) {
+    ref var l = ref Ꮡl.Value;
+    ref var other = ref Ꮡother.Value;
 
-    l.lazyInit();
-    for (nint i = other.Len();var e = other.Back(); i > 0; (i, e) = (i - 1, e.Prev())) {
-        l.insertValue((~e).Value, Ꮡ(l.root));
+    Ꮡl.lazyInit();
+    for ((nint i, var e) = (other.Len(), other.Back()); i > 0; (i, e) = (i - 1, e.Prev())) {
+        Ꮡl.insertValue((~e).Value, Ꮡl.of(List.Ꮡroot));
     }
 }
 

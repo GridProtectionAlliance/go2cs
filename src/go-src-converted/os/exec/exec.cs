@@ -105,8 +105,9 @@ using syscall = syscall_package;
 using time = time_package;
 using @internal;
 using @internal.syscall;
+using fs = go.io.fs_package;
 using path;
-using ꓸꓸꓸ@string = Span<@string>;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class exec_package {
 
@@ -147,8 +148,7 @@ internal static error Unwrap(this wrappedError w) {
 }
 
 [GoType("dyn")] partial struct Cmd_cachedLookExtensions {
-    internal @string @in;
-    internal @string @out;
+    internal @string @in, @out;
 }
 
 // Cmd represents an external command being prepared or run.
@@ -193,7 +193,7 @@ internal static error Unwrap(this wrappedError w) {
     // stops copying, either because it has reached the end of Stdin
     // (EOF or a read error), or because writing to the pipe returned an error,
     // or because a nonzero WaitDelay was set and expired.
-    public io_package.Reader Stdin;
+    public io.Reader Stdin;
     // Stdout and Stderr specify the process's standard output and error.
     //
     // If either is nil, Run connects the corresponding file descriptor
@@ -210,8 +210,8 @@ internal static error Unwrap(this wrappedError w) {
     //
     // If Stdout and Stderr are the same writer, and have a type that can
     // be compared with ==, at most one goroutine at a time will call Write.
-    public io_package.Writer Stdout;
-    public io_package.Writer Stderr;
+    public io.Writer Stdout;
+    public io.Writer Stderr;
     // ExtraFiles specifies additional open files to be inherited by the
     // new process. It does not include standard input, standard output, or
     // standard error. If non-nil, entry i becomes file descriptor 3+i.
@@ -220,15 +220,15 @@ internal static error Unwrap(this wrappedError w) {
     public slice<ж<os.File>> ExtraFiles;
     // SysProcAttr holds optional, operating system-specific attributes.
     // Run passes it to os.StartProcess as the os.ProcAttr's Sys field.
-    public ж<syscall_package.SysProcAttr> SysProcAttr;
+    public ж<syscall.SysProcAttr> SysProcAttr;
     // Process is the underlying process, once started.
-    public ж<os_package.Process> Process;
+    public ж<os.Process> Process;
     // ProcessState contains information about an exited process.
     // If the process was started successfully, Wait or Run will
     // populate its ProcessState when the command completes.
-    public ж<os_package.ProcessState> ProcessState;
+    public ж<os.ProcessState> ProcessState;
     // ctx is the context passed to CommandContext, if any.
-    internal context_package.Context ctx;
+    internal context.Context ctx;
     public error Err; // LookPath error, if any.
     // If Cancel is non-nil, the command must have been created with
     // CommandContext and Cancel will be called when the command's
@@ -281,7 +281,7 @@ internal static error Unwrap(this wrappedError w) {
     // If WaitDelay is zero (the default), I/O pipes will be read until EOF,
     // which might not occur until orphaned subprocesses of the command have
     // also closed their descriptors for the pipes.
-    public time_package.Duration WaitDelay;
+    public time.Duration WaitDelay;
     // childIOFiles holds closers for any of the child process's
     // stdin, stdout, and/or stderr files that were opened by the Cmd itself
     // (not supplied by the caller). These should be closed as soon as they
@@ -340,7 +340,7 @@ internal static error Unwrap(this wrappedError w) {
     // (If timer is nil, that means that the Context was not done before the
     // command completed, or no WaitDelay was set, or the WaitDelay already
     // expired and its effect was already applied.)
-    internal ж<time_package.Timer> timer;
+    internal ж<time.Timer> timer;
 }
 
 internal static ж<godebug.Setting> execwait = godebug.New("#execwait"u8);
@@ -369,7 +369,7 @@ internal static ж<godebug.Setting> execerrdot = godebug.New("execerrdot"u8);
 // unquoting algorithm. In these or other similar cases, you can do the
 // quoting yourself and provide the full command line in SysProcAttr.CmdLine,
 // leaving Args empty.
-public static ж<Cmd> Command(@string name, params ꓸꓸꓸ@string argʗp) {
+public static ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗp) {
     var arg = argʗp.slice();
 
     var cmd = Ꮡ(new Cmd(
@@ -391,11 +391,11 @@ public static ж<Cmd> Command(@string name, params ꓸꓸꓸ@string argʗp) {
                     stack = new slice<byte>(2 * len(stack));
                 }
                 {
-                    nint i = bytes.Index(stack, slice<byte>("\nos/exec.Command(")); if (i >= 0) {
+                    nint i = bytes.Index(stack, slice<byte>((@string)"\nos/exec.Command(")); if (i >= 0) {
                         stack = stack[(int)(i + 1)..];
                     }
                 }
-                cmd.val.createdByStack = stack;
+                cmd.Value.createdByStack = stack;
             }
             runtime.SetFinalizer(cmd, (ж<Cmd> c) => {
                 if ((~c).Process != nil && (~c).ProcessState == nil) {
@@ -408,7 +408,7 @@ public static ж<Cmd> Command(@string name, params ꓸꓸꓸ@string argʗp) {
                         os.Stderr.WriteString("\n"u8);
                         debugHint = ""u8;
                     }
-                    throw panic("exec: Cmd started a Process but leaked without a call to Wait"u8 + debugHint);
+                    throw panic("exec: Cmd started a Process but leaked without a call to Wait" + debugHint);
                 }
             });
         }
@@ -419,10 +419,10 @@ public static ж<Cmd> Command(@string name, params ꓸꓸꓸ@string argʗp) {
             // Update cmd.Path even if err is non-nil.
             // If err is ErrDot (especially on Windows), lp may include a resolved
             // extension (like .exe or .bat) that should be preserved.
-            cmd.val.Path = lp;
+            cmd.Value.Path = lp;
         }
         if (err != default!) {
-            cmd.val.Err = err;
+            cmd.Value.Err = err;
         }
     } else 
     if (runtime.GOOS == "windows"u8 && filepath.IsAbs(name)) {
@@ -436,9 +436,10 @@ public static ж<Cmd> Command(@string name, params ꓸꓸꓸ@string argʗp) {
         // cause the command to resolve to a different extension.
         {
             var (lp, err) = lookExtensions(name, ""u8); if (err == default!){
-                ((~cmd).cachedLookExtensions.@in, (~cmd).cachedLookExtensions.@out) = (name, lp);
+                cmd.Value.cachedLookExtensions.@in = name;
+                cmd.Value.cachedLookExtensions.@out = lp;
             } else {
-                cmd.val.Err = err;
+                cmd.Value.Err = err;
             }
         }
     }
@@ -454,17 +455,16 @@ public static ж<Cmd> Command(@string name, params ꓸꓸꓸ@string argʗp) {
 // CommandContext sets the command's Cancel function to invoke the Kill method
 // on its Process, and leaves its WaitDelay unset. The caller may change the
 // cancellation behavior by modifying those fields before starting the command.
-public static ж<Cmd> CommandContext(context.Context ctx, @string name, params ꓸꓸꓸ@string argʗp) {
+public static ж<Cmd> CommandContext(context.Context ctx, @string name, params ꓸꓸꓸstring argʗp) {
     var arg = argʗp.slice();
 
     if (ctx == default!) {
         throw panic("nil Context");
     }
     var cmd = Command(name, arg.ꓸꓸꓸ);
-    cmd.val.ctx = ctx;
-    cmd.val.Cancel = 
+    cmd.Value.ctx = ctx;
     var cmdʗ1 = cmd;
-    () => (~cmdʗ1).Process.Kill();
+    cmd.Value.Cancel = () => (~cmdʗ1).Process.Kill();
     return cmd;
 }
 
@@ -503,13 +503,15 @@ internal static bool interfaceEqual(any a, any b) => func((defer, recover) => {
     return new @string[]{c.Path}.slice();
 }
 
-[GoRecv] internal static (ж<os.File>, error) childStdin(this ref Cmd c) {
+internal static (ж<os.File>, error) childStdin(this ж<Cmd> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     if (c.Stdin == default!) {
-        (f, errΔ1) = os.Open(os.DevNull);
+        var (f, errΔ1) = os.Open(os.DevNull);
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
-        c.childIOFiles = append(c.childIOFiles, ~f);
+        c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(f)));
         return (f, default!);
     }
     {
@@ -517,22 +519,21 @@ internal static bool interfaceEqual(any a, any b) => func((defer, recover) => {
             return (f, default!);
         }
     }
-    (pr, pw, err) = os.Pipe();
+    var (pr, pw, err) = os.Pipe();
     if (err != default!) {
         return (default!, err);
     }
-    c.childIOFiles = append(c.childIOFiles, ~pr);
-    c.parentIOPipes = append(c.parentIOPipes, ~pw);
-    c.goroutine = append(c.goroutine, 
+    c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(pr)));
+    c.parentIOPipes = append(c.parentIOPipes, (io.Closer)(new os_FileжCloser(pw)));
     var pwʗ1 = pw;
-    () => {
-        var (_, errΔ2) = io.Copy(~pwʗ1, c.Stdin);
+    c.goroutine = append(c.goroutine, () => {
+        var (_, errΔ2) = io.Copy(new os.FileжWriter(pwʗ1), Ꮡc.Value.Stdin);
         if (skipStdinCopyError(errΔ2)) {
-            err = default!;
+            errΔ2 = default!;
         }
         {
             var err1 = pwʗ1.Close(); if (errΔ2 == default!) {
-                err = err1;
+                errΔ2 = err1;
             }
         }
         return errΔ2;
@@ -544,8 +545,8 @@ internal static bool interfaceEqual(any a, any b) => func((defer, recover) => {
     return c.writerDescriptor(c.Stdout);
 }
 
-[GoRecv] public static (ж<os.File>, error) childStderr(this ref Cmd c, ж<os.File> ᏑchildStdout) {
-    ref var childStdout = ref ᏑchildStdout.val;
+[GoRecv] internal static (ж<os.File>, error) childStderr(this ref Cmd c, ж<os.File> ᏑchildStdout) {
+    ref var childStdout = ref ᏑchildStdout.Value;
 
     if (c.Stderr != default! && interfaceEqual(c.Stderr, c.Stdout)) {
         return (ᏑchildStdout, default!);
@@ -559,11 +560,11 @@ internal static bool interfaceEqual(any a, any b) => func((defer, recover) => {
 // If w is nil, writerDescriptor returns a File that writes to os.DevNull.
 [GoRecv] internal static (ж<os.File>, error) writerDescriptor(this ref Cmd c, io.Writer w) {
     if (w == default!) {
-        (f, errΔ1) = os.OpenFile(os.DevNull, os.O_WRONLY, 0);
+        var (f, errΔ1) = os.OpenFile(os.DevNull, os.O_WRONLY, 0);
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
-        c.childIOFiles = append(c.childIOFiles, ~f);
+        c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(f)));
         return (f, default!);
     }
     {
@@ -571,16 +572,15 @@ internal static bool interfaceEqual(any a, any b) => func((defer, recover) => {
             return (f, default!);
         }
     }
-    (pr, pw, err) = os.Pipe();
+    var (pr, pw, err) = os.Pipe();
     if (err != default!) {
         return (default!, err);
     }
-    c.childIOFiles = append(c.childIOFiles, ~pw);
-    c.parentIOPipes = append(c.parentIOPipes, ~pr);
-    c.goroutine = append(c.goroutine, 
+    c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(pw)));
+    c.parentIOPipes = append(c.parentIOPipes, (io.Closer)(new os_FileжCloser(pr)));
     var prʗ1 = pr;
-    () => {
-        var (_, errΔ2) = io.Copy(w, ~prʗ1);
+    c.goroutine = append(c.goroutine, () => {
+        var (_, errΔ2) = io.Copy(w, new os_FileжReader(prʗ1));
         prʗ1.Close();
         // in case io.Copy stopped due to write error
         return errΔ2;
@@ -607,13 +607,15 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
 // with [runtime.LockOSThread] and modified any inheritable OS-level
 // thread state (for example, Linux or Plan 9 name spaces), the new
 // process will inherit the caller's thread state.
-[GoRecv] public static error Run(this ref Cmd c) {
+public static error Run(this ж<Cmd> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     {
-        var err = c.Start(); if (err != default!) {
+        var err = Ꮡc.Start(); if (err != default!) {
             return err;
         }
     }
-    return c.Wait();
+    return Ꮡc.Wait();
 }
 
 [GoType("dyn")] partial struct Start_goroutineStatus {
@@ -627,7 +629,9 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
 //
 // After a successful call to Start the [Cmd.Wait] method must be called in
 // order to release associated system resources.
-[GoRecv] public static error Start(this ref Cmd c) => func((defer, _) => {
+public static error Start(this ж<Cmd> Ꮡc) => func<error>((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+
     // Check for doubled Start calls before we defer failure cleanup. If the prior
     // call to Start succeeded, we don't want to spuriously close its pipes.
     if (c.Process != nil) {
@@ -635,11 +639,11 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
     }
     var started = false;
     defer(() => {
-        closeDescriptors(c.childIOFiles);
-        c.childIOFiles = default!;
+        closeDescriptors(Ꮡc.Value.childIOFiles);
+        Ꮡc.Value.childIOFiles = default!;
         if (!started) {
-            closeDescriptors(c.parentIOPipes);
-            c.parentIOPipes = default!;
+            closeDescriptors(Ꮡc.Value.parentIOPipes);
+            Ꮡc.Value.parentIOPipes = default!;
         }
     });
     if (c.Path == ""u8 && c.Err == default! && c.lookPathErr == default!) {
@@ -673,10 +677,10 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
             // c.Path as is: missing a bit of logging information seems less harmful
             // than triggering a surprising data race, and if the user really cares
             // about that bit of logging they can always use LookPath to resolve it.
-            error err = default!;
-            (lp, err) = lookExtensions(c.Path, c.Dir);
-            if (err != default!) {
-                return err;
+            error errΔ1 = default!;
+            (lp, errΔ1) = lookExtensions(c.Path, c.Dir);
+            if (errΔ1 != default!) {
+                return errΔ1;
             }
         }
     }
@@ -689,26 +693,27 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
             return c.ctx.Err();
         }
         default: {
+            break;
         }}
     }
     var childFiles = new slice<ж<os.File>>(0, 3 + len(c.ExtraFiles));
-    (stdin, err) = c.childStdin();
+    var (stdin, err) = Ꮡc.childStdin();
     if (err != default!) {
         return err;
     }
     childFiles = append(childFiles, stdin);
-    (stdout, err) = c.childStdout();
+    (var stdout, err) = c.childStdout();
     if (err != default!) {
         return err;
     }
     childFiles = append(childFiles, stdout);
-    (stderr, err) = c.childStderr(stdout);
+    (var stderr, err) = c.childStderr(stdout);
     if (err != default!) {
         return err;
     }
     childFiles = append(childFiles, stderr);
     childFiles = append(childFiles, c.ExtraFiles.ꓸꓸꓸ);
-    (env, err) = c.environ();
+    (var env, err) = c.environ();
     if (err != default!) {
         return err;
     }
@@ -726,17 +731,17 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
     if (len(c.goroutine) > 0) {
         var goroutineErr = new channel<error>(1);
         c.goroutineErr = goroutineErr;
-        var statusc = new channel<goroutineStatus>(1);
-        statusc.ᐸꟷ(new goroutineStatus(running: len(c.goroutine)));
+        var statusc = new channel<Start_goroutineStatus>(1);
+        statusc.ᐸꟷ(new Start_goroutineStatus(running: len(c.goroutine)));
         foreach (var (_, fn) in c.goroutine) {
             var goroutineErrʗ2 = goroutineErr;
             var statuscʗ2 = statusc;
-            goǃ((Func<error> fn) => {
-                var errΔ1 = fnΔ1();
+            goǃ((Func<error> fnΔ1) => {
+                var errΔ2 = fnΔ1();
                 ref var status = ref heap<Start_goroutineStatus>(out var Ꮡstatus);
                 status = ᐸꟷ(statuscʗ2);
                 if (status.firstErr == default!) {
-                    status.firstErr = errΔ1;
+                    status.firstErr = errΔ2;
                 }
                 status.running--;
                 if (status.running == 0){
@@ -758,7 +763,7 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
     if ((c.Cancel != default! || c.WaitDelay != 0) && c.ctx != default! && c.ctx.Done() != default!) {
         var resultc = new channel<ctxResult>(1);
         c.ctxResult = resultc;
-        goǃ(c.watchCtx, resultc);
+        goǃ(Ꮡc.watchCtx, resultc);
     }
     return default!;
 });
@@ -776,6 +781,7 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
         return;
     }
     case 1 when c.ctx.Done().ꟷᐳ(out _): {
+        break;
     }}
     error err = default!;
     if (c.Cancel != default!) {
@@ -808,6 +814,7 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
         return;
     }
     case 1 when (~timer).C.ꟷᐳ(out _): {
+        break;
     }}
     // c.Process.Wait returned and we've handed the timer off to c.Wait.
     // It will take care of goroutine shutdown from here.
@@ -900,16 +907,18 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
 // for the respective I/O loop copying to or from the process to complete.
 //
 // Wait releases any resources associated with the [Cmd].
-[GoRecv] public static error Wait(this ref Cmd c) {
+public static error Wait(this ж<Cmd> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     if (c.Process == nil) {
         return errors.New("exec: not started"u8);
     }
     if (c.ProcessState != nil) {
         return errors.New("exec: Wait was already called"u8);
     }
-    (state, err) = c.Process.Wait();
+    var (state, err) = c.Process.Wait();
     if (err == default! && !state.Success()) {
-        Ꮡerr = new ExitError(ProcessState: state); err = ref Ꮡerr.val;
+        err = new ExitErrorжerror(Ꮡ(new ExitError(ProcessState: state)));
     }
     c.ProcessState = state;
     ж<time.Timer> timer = default!;
@@ -924,7 +933,7 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
         }
     }
     {
-        var goroutineErr = c.awaitGoroutines(timer); if (err == default!) {
+        var goroutineErr = Ꮡc.awaitGoroutines(timer); if (err == default!) {
             // Report an error from the copying goroutines only if the program otherwise
             // exited normally on its own. Otherwise, the copying error may be due to the
             // abnormal termination.
@@ -943,20 +952,21 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
 // forcibly closes their pipes and returns ErrWaitDelay.
 //
 // If timer is non-nil, it must send to timer.C at the end of c.WaitDelay.
-[GoRecv] public static error awaitGoroutines(this ref Cmd c, ж<time.Timer> Ꮡtimer) => func((defer, _) => {
-    ref var timer = ref Ꮡtimer.val;
+internal static error awaitGoroutines(this ж<Cmd> Ꮡc, ж<time.Timer> Ꮡtimer) => func<error>((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+    ref var timer = ref Ꮡtimer.DerefOrNil();
 
     defer(() => {
-        if (timer != nil) {
-            timer.Stop();
+        if (Ꮡtimer != nil) {
+            Ꮡtimer.Stop();
         }
-        c.goroutineErr = default!;
+        Ꮡc.Value.goroutineErr = default!;
     });
     if (c.goroutineErr == default!) {
         return default!;
     }
     // No running goroutines to await.
-    if (timer == nil) {
+    if (Ꮡtimer == nil) {
         if (c.WaitDelay == 0) {
             return ᐸꟷ(c.goroutineErr);
         }
@@ -965,11 +975,12 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
             return err;
         }
         default: {
+            break;
         }}
         // Avoid the overhead of starting a timer.
         // No existing timer was started: either there is no Context associated with
         // the command, or c.Process.Wait completed before the Context was done.
-        timer = time.NewTimer(c.WaitDelay);
+        Ꮡtimer = time.NewTimer(c.WaitDelay); timer = ref Ꮡtimer.DerefOrNil();
     }
     switch (select(ᐸꟷ(timer.C, ꓸꓸꓸ), ᐸꟷ(c.goroutineErr, ꓸꓸꓸ))) {
     case 0 when timer.C.ꟷᐳ(out _): {
@@ -980,6 +991,7 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
     case 1 when c.goroutineErr.ꟷᐳ(out var err): {
         return err;
     }}
+    return default!;
 });
 
 // Wait for the copying goroutines to finish, but ignore any error
@@ -988,21 +1000,23 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
 // Output runs the command and returns its standard output.
 // Any returned error will usually be of type [*ExitError].
 // If c.Stderr was nil, Output populates [ExitError.Stderr].
-[GoRecv] public static (slice<byte>, error) Output(this ref Cmd c) {
+public static (slice<byte>, error) Output(this ж<Cmd> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     if (c.Stdout != default!) {
         return (default!, errors.New("exec: Stdout already set"u8));
     }
-    ref var stdout = ref heap(new bytes_package.Buffer(), out var Ꮡstdout);
-    c.Stdout = Ꮡstdout;
+    ref var stdout = ref heap(new bytes.Buffer(), out var Ꮡstdout);
+    c.Stdout = new bytes_BufferжWriter(Ꮡstdout);
     var captureErr = c.Stderr == default!;
     if (captureErr) {
-        c.Stderr = Ꮡ(new prefixSuffixSaver(N: 32 << (int)(10)));
+        c.Stderr = new prefixSuffixSaverжWriter(Ꮡ(new prefixSuffixSaver(N: (32 << (int)(10)))));
     }
-    var err = c.Run();
+    var err = Ꮡc.Run();
     if (err != default! && captureErr) {
         {
-            var (ee, ok) = err._<ExitError.val>(ᐧ); if (ok) {
-                ee.val.Stderr = c.Stderr._<prefixSuffixSaver.val>().Bytes();
+            var (ee, ok) = err._<ж<ExitError>>(ᐧ); if (ok) {
+                ee.Value.Stderr = c.Stderr._<ж<prefixSuffixSaver>>().Bytes();
             }
         }
     }
@@ -1011,17 +1025,19 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
 
 // CombinedOutput runs the command and returns its combined standard
 // output and standard error.
-[GoRecv] public static (slice<byte>, error) CombinedOutput(this ref Cmd c) {
+public static (slice<byte>, error) CombinedOutput(this ж<Cmd> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     if (c.Stdout != default!) {
         return (default!, errors.New("exec: Stdout already set"u8));
     }
     if (c.Stderr != default!) {
         return (default!, errors.New("exec: Stderr already set"u8));
     }
-    ref var b = ref heap(new bytes_package.Buffer(), out var Ꮡb);
-    c.Stdout = Ꮡb;
-    c.Stderr = Ꮡb;
-    var err = c.Run();
+    ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
+    c.Stdout = new bytes_BufferжWriter(Ꮡb);
+    c.Stderr = new bytes_BufferжWriter(Ꮡb);
+    var err = Ꮡc.Run();
     return (b.Bytes(), err);
 }
 
@@ -1038,14 +1054,14 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
     if (c.Process != nil) {
         return (default!, errors.New("exec: StdinPipe after process started"u8));
     }
-    (pr, pw, err) = os.Pipe();
+    var (pr, pw, err) = os.Pipe();
     if (err != default!) {
         return (default!, err);
     }
-    c.Stdin = pr;
-    c.childIOFiles = append(c.childIOFiles, ~pr);
-    c.parentIOPipes = append(c.parentIOPipes, ~pw);
-    return (~pw, default!);
+    c.Stdin = new os_FileжReader(pr);
+    c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(pr)));
+    c.parentIOPipes = append(c.parentIOPipes, (io.Closer)(new os_FileжCloser(pw)));
+    return (new os_FileжWriteCloser(pw), default!);
 }
 
 // StdoutPipe returns a pipe that will be connected to the command's
@@ -1063,14 +1079,14 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
     if (c.Process != nil) {
         return (default!, errors.New("exec: StdoutPipe after process started"u8));
     }
-    (pr, pw, err) = os.Pipe();
+    var (pr, pw, err) = os.Pipe();
     if (err != default!) {
         return (default!, err);
     }
-    c.Stdout = pw;
-    c.childIOFiles = append(c.childIOFiles, ~pw);
-    c.parentIOPipes = append(c.parentIOPipes, ~pr);
-    return (~pr, default!);
+    c.Stdout = new os.FileжWriter(pw);
+    c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(pw)));
+    c.parentIOPipes = append(c.parentIOPipes, (io.Closer)(new os_FileжCloser(pr)));
+    return (new os_FileжReadCloser(pr), default!);
 }
 
 // StderrPipe returns a pipe that will be connected to the command's
@@ -1088,14 +1104,14 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
     if (c.Process != nil) {
         return (default!, errors.New("exec: StderrPipe after process started"u8));
     }
-    (pr, pw, err) = os.Pipe();
+    var (pr, pw, err) = os.Pipe();
     if (err != default!) {
         return (default!, err);
     }
-    c.Stderr = pw;
-    c.childIOFiles = append(c.childIOFiles, ~pw);
-    c.parentIOPipes = append(c.parentIOPipes, ~pr);
-    return (~pr, default!);
+    c.Stderr = new os.FileжWriter(pw);
+    c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(pw)));
+    c.parentIOPipes = append(c.parentIOPipes, (io.Closer)(new os_FileжCloser(pr)));
+    return (new os_FileжReadCloser(pr), default!);
 }
 
 // prefixSuffixSaver is an io.Writer which retains the first N bytes
@@ -1114,26 +1130,27 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
 // then the ring buffer suffix, and just rearrange the ring buffer
 // suffix when Bytes() is called, but it doesn't seem worth it for
 // now just for error messages. It's only ~64KB anyway.
-[GoRecv] internal static (nint n, error err) Write(this ref prefixSuffixSaver w, slice<byte> p) {
+internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
+    ref var w = ref Ꮡw.Value;
     nint lenp = len(p);
-    p = w.fill(Ꮡ(w.prefix), p);
+    p = w.fill(Ꮡw.of(prefixSuffixSaver.Ꮡprefix), p);
     // Only keep the last w.N bytes of suffix data.
     {
         nint overage = len(p) - w.N; if (overage > 0) {
             p = p[(int)(overage)..];
-            w.skipped += ((int64)overage);
+            w.skipped += (int64)overage;
         }
     }
-    p = w.fill(Ꮡ(w.suffix), p);
+    p = w.fill(Ꮡw.of(prefixSuffixSaver.Ꮡsuffix), p);
     // w.suffix is full now if p is non-empty. Overwrite it in a circle.
     while (len(p) > 0) {
         // 0, 1, or 2 iterations.
         nint nΔ1 = copy(w.suffix[(int)(w.suffixOff)..], p);
         p = p[(int)(nΔ1)..];
-        w.skipped += ((int64)nΔ1);
+        w.skipped += (int64)nΔ1;
         w.suffixOff += nΔ1;
         if (w.suffixOff == w.N) {
             w.suffixOff = 0;
@@ -1147,7 +1164,7 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
 [GoRecv] internal static slice<byte> /*pRemain*/ fill(this ref prefixSuffixSaver w, ж<slice<byte>> Ꮡdst, slice<byte> p) {
     slice<byte> pRemain = default!;
 
-    ref var dst = ref Ꮡdst.val;
+    ref var dst = ref Ꮡdst.Value;
     {
         nint remain = w.N - len(dst); if (remain > 0) {
             nint add = min(len(p), remain);
@@ -1215,7 +1232,7 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
 
         }
     }
-    (env, dedupErr) = dedupEnv(env);
+    (env, var dedupErr) = dedupEnv(env);
     if (err == default!) {
         err = dedupErr;
     }
@@ -1226,7 +1243,7 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
 // as it is currently configured.
 [GoRecv] public static slice<@string> Environ(this ref Cmd c) {
     //  Intentionally ignore errors: environ returns a best-effort environment no matter what.
-    (env, _) = c.environ();
+    var (env, _) = c.environ();
     return env;
 }
 
@@ -1256,14 +1273,14 @@ internal static (slice<@string>, error) dedupEnvCase(bool caseInsensitive, bool 
             err = errors.New("exec: environment variable contains NUL"u8);
             continue;
         }
-        nint iΔ1 = strings.Index(kv, "="u8);
-        if (iΔ1 == 0) {
+        nint i = strings.Index(kv, "="u8);
+        if (i == 0) {
             // We observe in practice keys with a single leading "=" on Windows.
             // TODO(#49886): Should we consume only the first leading "=" as part
             // of the key, or parse through arbitrarily many of them until a non-"="?
-             = strings.Index(kv[1..], "="u8) + 1;
+            i = strings.Index(kv[1..], "="u8) + 1;
         }
-        if (iΔ1 < 0) {
+        if (i < 0) {
             if (kv != ""u8) {
                 // The entry is not of the form "key=value" (as it is required to be).
                 // Leave it as-is for now.
@@ -1272,7 +1289,7 @@ internal static (slice<@string>, error) dedupEnvCase(bool caseInsensitive, bool 
             }
             continue;
         }
-        @string k = kv[..(int)(iΔ1)];
+        @string k = kv[..(int)(i)];
         if (caseInsensitive) {
             k = strings.ToLower(k);
         }

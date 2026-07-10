@@ -24,7 +24,7 @@ partial struct tmpBuf;
 // escape the calling function, so the string data can be stored in buf
 // if small enough.
 internal static @string concatstrings(ж<tmpBuf> Ꮡbuf, slice<@string> a) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.DerefOrNil();
 
     nint idx = 0;
     nint l = 0;
@@ -47,7 +47,7 @@ internal static @string concatstrings(ж<tmpBuf> Ꮡbuf, slice<@string> a) {
     // If there is just one string and either it is not on the stack
     // or our result does not escape the calling frame (buf != nil),
     // then we can return that string directly.
-    if (count == 1 && (buf != nil || !stringDataOnStack(a[idx]))) {
+    if (count == 1 && (Ꮡbuf != nil || !stringDataOnStack(a[idx]))) {
         return a[idx];
     }
     var (s, b) = rawstringtmp(Ꮡbuf, l);
@@ -59,25 +59,25 @@ internal static @string concatstrings(ж<tmpBuf> Ꮡbuf, slice<@string> a) {
 }
 
 internal static @string concatstring2(ж<tmpBuf> Ꮡbuf, @string a0, @string a1) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.Value;
 
     return concatstrings(Ꮡbuf, new @string[]{a0, a1}.slice());
 }
 
 internal static @string concatstring3(ж<tmpBuf> Ꮡbuf, @string a0, @string a1, @string a2) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.Value;
 
     return concatstrings(Ꮡbuf, new @string[]{a0, a1, a2}.slice());
 }
 
 internal static @string concatstring4(ж<tmpBuf> Ꮡbuf, @string a0, @string a1, @string a2, @string a3) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.Value;
 
     return concatstrings(Ꮡbuf, new @string[]{a0, a1, a2, a3}.slice());
 }
 
 internal static @string concatstring5(ж<tmpBuf> Ꮡbuf, @string a0, @string a1, @string a2, @string a3, @string a4) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.Value;
 
     return concatstrings(Ꮡbuf, new @string[]{a0, a1, a2, a3, a4}.slice());
 }
@@ -99,8 +99,8 @@ internal static @string concatstring5(ж<tmpBuf> Ꮡbuf, @string a0, @string a1,
 //
 //go:linkname slicebytetostring
 internal static @string slicebytetostring(ж<tmpBuf> Ꮡbuf, ж<byte> Ꮡptr, nint n) {
-    ref var buf = ref Ꮡbuf.val;
-    ref var ptr = ref Ꮡptr.val;
+    ref var buf = ref Ꮡbuf.DerefOrNil();
+    ref var ptr = ref Ꮡptr.Value;
 
     if (n == 0) {
         // Turns out to be a relatively common case.
@@ -110,38 +110,38 @@ internal static @string slicebytetostring(ж<tmpBuf> Ꮡbuf, ж<byte> Ꮡptr, ni
     }
     if (raceenabled) {
         racereadrangepc(new @unsafe.Pointer(Ꮡptr),
-            ((uintptr)n),
+            (uintptr)n,
             getcallerpc(),
             abi.FuncPCABIInternal(slicebytetostring));
     }
     if (msanenabled) {
-        msanread(new @unsafe.Pointer(Ꮡptr), ((uintptr)n));
+        msanread(new @unsafe.Pointer(Ꮡptr), (uintptr)n);
     }
     if (asanenabled) {
-        asanread(new @unsafe.Pointer(Ꮡptr), ((uintptr)n));
+        asanread(new @unsafe.Pointer(Ꮡptr), (uintptr)n);
     }
     if (n == 1) {
-        @unsafe.Pointer pΔ1 = new @unsafe.Pointer(Ꮡstaticuint64s.at<uint64>(ptr));
+        @unsafe.Pointer pΔ1 = new @unsafe.Pointer(Ꮡstaticuint64s.at<uint64>((nint)(ptr)));
         if (goarch.BigEndian) {
-             = (uintptr)add(pΔ1, 7);
+            pΔ1 = (uintptr)add(pΔ1, 7);
         }
         return @unsafe.String((ж<byte>)(uintptr)(pΔ1), 1);
     }
     @unsafe.Pointer Δp = default!;
-    if (buf != nil && n <= len(buf)){
+    if (Ꮡbuf != nil && n <= len(buf.Value)){
         Δp = new @unsafe.Pointer(Ꮡbuf);
     } else {
-        Δp = (uintptr)mallocgc(((uintptr)n), nil, false);
+        Δp = (uintptr)mallocgc((uintptr)n, nil, false);
     }
-    memmove(Δp, new @unsafe.Pointer(Ꮡptr), ((uintptr)n));
+    memmove(Δp, new @unsafe.Pointer(Ꮡptr), (uintptr)n);
     return @unsafe.String((ж<byte>)(uintptr)(Δp), n);
 }
 
 // stringDataOnStack reports whether the string's data is
 // stored on the current goroutine's stack.
 internal static bool stringDataOnStack(@string s) {
-    var ptr = ((uintptr)new @unsafe.Pointer(@unsafe.StringData(s)));
-    var stk = getg().val.stack;
+    var ptr = (uintptr)new @unsafe.Pointer(@unsafe.StringData(s));
+    var stk = getg().Value.stack;
     return stk.lo <= ptr && ptr < stk.hi;
 }
 
@@ -149,9 +149,9 @@ internal static (@string s, slice<byte> b) rawstringtmp(ж<tmpBuf> Ꮡbuf, nint 
     @string s = default!;
     slice<byte> b = default!;
 
-    ref var buf = ref Ꮡbuf.val;
-    if (buf != nil && l <= len(buf)){
-        b = buf[..(int)(l)];
+    ref var buf = ref Ꮡbuf.DerefOrNil();
+    if (Ꮡbuf != nil && l <= len(buf.Value)){
+        b = buf.Value[..(int)(l)];
         s = slicebytetostringtmp(Ꮡ(b, 0), len(b));
     } else {
         (s, b) = rawstring(l);
@@ -174,30 +174,30 @@ internal static (@string s, slice<byte> b) rawstringtmp(ж<tmpBuf> Ꮡbuf, nint 
 //   - Used for "<"+string(b)+">" concatenation where b is []byte.
 //   - Used for string(b)=="foo" comparison where b is []byte.
 internal static @string slicebytetostringtmp(ж<byte> Ꮡptr, nint n) {
-    ref var ptr = ref Ꮡptr.val;
+    ref var ptr = ref Ꮡptr.Value;
 
     if (raceenabled && n > 0) {
         racereadrangepc(new @unsafe.Pointer(Ꮡptr),
-            ((uintptr)n),
+            (uintptr)n,
             getcallerpc(),
             abi.FuncPCABIInternal(slicebytetostringtmp));
     }
     if (msanenabled && n > 0) {
-        msanread(new @unsafe.Pointer(Ꮡptr), ((uintptr)n));
+        msanread(new @unsafe.Pointer(Ꮡptr), (uintptr)n);
     }
     if (asanenabled && n > 0) {
-        asanread(new @unsafe.Pointer(Ꮡptr), ((uintptr)n));
+        asanread(new @unsafe.Pointer(Ꮡptr), (uintptr)n);
     }
     return @unsafe.String(Ꮡptr, n);
 }
 
 internal static slice<byte> stringtoslicebyte(ж<tmpBuf> Ꮡbuf, @string s) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.DerefOrNil();
 
     slice<byte> b = default!;
-    if (buf != nil && len(s) <= len(buf)){
-        buf = new tmpBuf{nil};
-        b = buf[..(int)(len(s))];
+    if (Ꮡbuf != nil && len(s) <= len(buf.Value)){
+        buf = new tmpBuf(new byte[32].array());
+        b = buf.Value[..(int)(len(s))];
     } else {
         b = rawbyteslice(len(s));
     }
@@ -206,7 +206,7 @@ internal static slice<byte> stringtoslicebyte(ж<tmpBuf> Ꮡbuf, @string s) {
 }
 
 internal static slice<rune> stringtoslicerune(ж<array<rune>> Ꮡbuf, @string s) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.DerefOrNil();
 
     // two passes.
     // unlike slicerunetostring, no race because strings are immutable.
@@ -215,7 +215,7 @@ internal static slice<rune> stringtoslicerune(ж<array<rune>> Ꮡbuf, @string s)
         n++;
     }
     slice<rune> a = default!;
-    if (buf != nil && n <= len(buf)){
+    if (Ꮡbuf != nil && n <= len(buf)){
         buf = new rune[]{}.array();
         a = buf[..(int)(n)];
     } else {
@@ -230,19 +230,19 @@ internal static slice<rune> stringtoslicerune(ж<array<rune>> Ꮡbuf, @string s)
 }
 
 internal static @string slicerunetostring(ж<tmpBuf> Ꮡbuf, slice<rune> a) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.Value;
 
     if (raceenabled && len(a) > 0) {
         racereadrangepc(new @unsafe.Pointer(Ꮡ(a, 0)),
-            ((uintptr)len(a)) * @unsafe.Sizeof(a[0]),
+            (uintptr)len(a) * @unsafe.Sizeof(a[0]),
             getcallerpc(),
             abi.FuncPCABIInternal(slicerunetostring));
     }
     if (msanenabled && len(a) > 0) {
-        msanread(new @unsafe.Pointer(Ꮡ(a, 0)), ((uintptr)len(a)) * @unsafe.Sizeof(a[0]));
+        msanread(new @unsafe.Pointer(Ꮡ(a, 0)), (uintptr)len(a) * @unsafe.Sizeof(a[0]));
     }
     if (asanenabled && len(a) > 0) {
-        asanread(new @unsafe.Pointer(Ꮡ(a, 0)), ((uintptr)len(a)) * @unsafe.Sizeof(a[0]));
+        asanread(new @unsafe.Pointer(Ꮡ(a, 0)), (uintptr)len(a) * @unsafe.Sizeof(a[0]));
     }
     array<byte> dum = new(4);
     nint size1 = 0;
@@ -273,7 +273,7 @@ internal static @string slicerunetostring(ж<tmpBuf> Ꮡbuf, slice<rune> a) {
 }
 
 internal static ж<stringStruct> stringStructOf(ж<@string> Ꮡsp) {
-    ref var sp = ref Ꮡsp.val;
+    ref var sp = ref Ꮡsp.Value;
 
     return (ж<stringStruct>)(uintptr)(new @unsafe.Pointer(Ꮡsp));
 }
@@ -281,18 +281,18 @@ internal static ж<stringStruct> stringStructOf(ж<@string> Ꮡsp) {
 internal static @string /*s*/ intstring(ж<array<byte>> Ꮡbuf, int64 v) {
     @string s = default!;
 
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.DerefOrNil();
     slice<byte> b = default!;
-    if (buf != nil){
+    if (Ꮡbuf != nil){
         b = buf[..];
         s = slicebytetostringtmp(Ꮡ(b, 0), len(b));
     } else {
         (s, b) = rawstring(4);
     }
-    if (((int64)((rune)v)) != v) {
+    if ((int64)(rune)v != v) {
         v = runeError;
     }
-    nint n = encoderune(b, ((rune)v));
+    nint n = encoderune(b, (rune)v);
     return s[..(int)(n)];
 }
 
@@ -304,7 +304,7 @@ internal static (@string s, slice<byte> b) rawstring(nint size) {
     @string s = default!;
     slice<byte> b = default!;
 
-    @unsafe.Pointer Δp = (uintptr)mallocgc(((uintptr)size), nil, false);
+    @unsafe.Pointer Δp = (uintptr)mallocgc((uintptr)size, nil, false);
     return (@unsafe.String((ж<byte>)(uintptr)(Δp), size), @unsafe.Slice((ж<byte>)(uintptr)(Δp), size));
 }
 
@@ -312,12 +312,12 @@ internal static (@string s, slice<byte> b) rawstring(nint size) {
 internal static slice<byte> /*b*/ rawbyteslice(nint size) {
     slice<byte> b = default!;
 
-    var cap = roundupsize(((uintptr)size), true);
+    var cap = roundupsize((uintptr)size, true);
     @unsafe.Pointer Δp = (uintptr)mallocgc(cap, nil, false);
-    if (cap != ((uintptr)size)) {
-        memclrNoHeapPointers((uintptr)add(Δp, ((uintptr)size)), cap - ((uintptr)size));
+    if (cap != (uintptr)size) {
+        memclrNoHeapPointers((uintptr)add(Δp, (uintptr)size), cap - (uintptr)size);
     }
-    ((ж<Δslice>)(uintptr)(new @unsafe.Pointer(Ꮡ(b)))).val = new Δslice(p.val, size, ((nint)cap));
+    ((ж<Δsliceᴛ>)(uintptr)(new @unsafe.Pointer(Ꮡ(b)))).Value = new Δsliceᴛ(Δp.Value, size, (nint)cap);
     return b;
 }
 
@@ -325,15 +325,15 @@ internal static slice<byte> /*b*/ rawbyteslice(nint size) {
 internal static slice<rune> /*b*/ rawruneslice(nint size) {
     slice<rune> b = default!;
 
-    if (((uintptr)size) > maxAlloc / 4) {
+    if ((uintptr)size > maxAlloc / 4) {
         @throw("out of memory"u8);
     }
-    var mem = roundupsize(((uintptr)size) * 4, true);
+    var mem = roundupsize((uintptr)size * 4, true);
     @unsafe.Pointer Δp = (uintptr)mallocgc(mem, nil, false);
-    if (mem != ((uintptr)size) * 4) {
-        memclrNoHeapPointers((uintptr)add(Δp, ((uintptr)size) * 4), mem - ((uintptr)size) * 4);
+    if (mem != (uintptr)size * 4) {
+        memclrNoHeapPointers((uintptr)add(Δp, (uintptr)size * 4), mem - (uintptr)size * 4);
     }
-    ((ж<Δslice>)(uintptr)(new @unsafe.Pointer(Ꮡ(b)))).val = new Δslice(p.val, size, ((nint)(mem / 4)));
+    ((ж<Δsliceᴛ>)(uintptr)(new @unsafe.Pointer(Ꮡ(b)))).Value = new Δsliceᴛ(Δp.Value, size, (nint)(mem / 4));
     return b;
 }
 
@@ -341,16 +341,16 @@ internal static slice<rune> /*b*/ rawruneslice(nint size) {
 internal static slice<byte> /*b*/ gobytes(ж<byte> Ꮡp, nint n) {
     slice<byte> b = default!;
 
-    ref var Δp = ref Ꮡp.val;
+    ref var Δp = ref Ꮡp.Value;
     if (n == 0) {
         return new slice<byte>(0);
     }
-    if (n < 0 || ((uintptr)n) > maxAlloc) {
-        throw panic(((errorString)"gobytes: length out of range"u8));
+    if (n < 0 || (uintptr)n > maxAlloc) {
+        throw panic(((errorString)(@string)"gobytes: length out of range"u8));
     }
-    @unsafe.Pointer bp = (uintptr)mallocgc(((uintptr)n), nil, false);
-    memmove(bp, new @unsafe.Pointer(Ꮡp), ((uintptr)n));
-    ((ж<Δslice>)(uintptr)(new @unsafe.Pointer(Ꮡ(b)))).val = new Δslice(bp.val, n, n);
+    @unsafe.Pointer bp = (uintptr)mallocgc((uintptr)n, nil, false);
+    memmove(bp, new @unsafe.Pointer(Ꮡp), (uintptr)n);
+    ((ж<Δsliceᴛ>)(uintptr)(new @unsafe.Pointer(Ꮡ(b)))).Value = new Δsliceᴛ(bp.Value, n, n);
     return b;
 }
 
@@ -358,14 +358,14 @@ internal static slice<byte> /*b*/ gobytes(ж<byte> Ꮡp, nint n) {
 //
 //go:linkname gostring
 internal static @string gostring(ж<byte> Ꮡp) {
-    ref var Δp = ref Ꮡp.val;
+    ref var Δp = ref Ꮡp.Value;
 
     nint l = findnull(Ꮡp);
     if (l == 0) {
         return ""u8;
     }
     var (s, b) = rawstring(l);
-    memmove(new @unsafe.Pointer(Ꮡ(b, 0)), new @unsafe.Pointer(Ꮡp), ((uintptr)l));
+    memmove(new @unsafe.Pointer(Ꮡ(b, 0)), new @unsafe.Pointer(Ꮡp), (uintptr)l);
     return s;
 }
 
@@ -373,19 +373,19 @@ internal static @string gostring(ж<byte> Ꮡp) {
 //
 //go:linkname internal_syscall_gostring internal/syscall/unix.gostring
 internal static @string internal_syscall_gostring(ж<byte> Ꮡp) {
-    ref var Δp = ref Ꮡp.val;
+    ref var Δp = ref Ꮡp.Value;
 
     return gostring(Ꮡp);
 }
 
 internal static @string gostringn(ж<byte> Ꮡp, nint l) {
-    ref var Δp = ref Ꮡp.val;
+    ref var Δp = ref Ꮡp.Value;
 
     if (l == 0) {
         return ""u8;
     }
     var (s, b) = rawstring(l);
-    memmove(new @unsafe.Pointer(Ꮡ(b, 0)), new @unsafe.Pointer(Ꮡp), ((uintptr)l));
+    memmove(new @unsafe.Pointer(Ꮡ(b, 0)), new @unsafe.Pointer(Ꮡp), (uintptr)l);
     return s;
 }
 
@@ -404,7 +404,7 @@ internal static (int64, bool) atoi64(@string s) {
         neg = true;
         s = s[1..];
     }
-    var un = ((uint64)0);
+    var un = (uint64)0;
     for (nint i = 0; i < len(s); i++) {
         var c = s[i];
         if (c < (rune)'0' || c > (rune)'9') {
@@ -415,20 +415,20 @@ internal static (int64, bool) atoi64(@string s) {
             return (0, false);
         }
         un *= 10;
-        var un1 = un + ((uint64)c) - (rune)'0';
+        var un1 = un + (uint64)c - (rune)'0';
         if (un1 < un) {
             // overflow
             return (0, false);
         }
         un = un1;
     }
-    if (!neg && un > ((uint64)maxInt64)) {
+    if (!neg && un > (uint64)maxInt64) {
         return (0, false);
     }
-    if (neg && un > ((uint64)maxInt64) + 1) {
+    if (neg && un > (uint64)maxInt64 + 1) {
         return (0, false);
     }
-    var n = ((int64)un);
+    var n = (int64)un;
     if (neg) {
         n = -n;
     }
@@ -439,8 +439,8 @@ internal static (int64, bool) atoi64(@string s) {
 // that fit into an int.
 internal static (nint, bool) atoi(@string s) {
     {
-        var (n, ok) = atoi64(s); if (n == ((int64)((nint)n))) {
-            return (((nint)n), ok);
+        var (n, ok) = atoi64(s); if (n == (int64)(nint)n) {
+            return ((nint)n, ok);
         }
     }
     return (0, false);
@@ -450,8 +450,8 @@ internal static (nint, bool) atoi(@string s) {
 // that fit into an int32.
 internal static (int32, bool) atoi32(@string s) {
     {
-        var (n, ok) = atoi64(s); if (n == ((int64)((int32)n))) {
-            return (((int32)n), ok);
+        var (n, ok) = atoi64(s); if (n == (int64)(int32)n) {
+            return ((int32)n, ok);
         }
     }
     return (0, false);
@@ -532,7 +532,7 @@ internal static (int64, bool) parseByteCount(@string s) {
     }}
 
     // Invalid suffix.
-    var m = ((uint64)1);
+    var m = (uint64)1;
     for (nint i = 0; i < power; i++) {
         m *= 1024;
     }
@@ -540,24 +540,24 @@ internal static (int64, bool) parseByteCount(@string s) {
     if (!ok || n < 0) {
         return (0, false);
     }
-    var un = ((uint64)n);
+    var un = (uint64)n;
     if (un > maxUint64 / m) {
         // Overflow.
         return (0, false);
     }
     un *= m;
-    if (un > ((uint64)maxInt64)) {
+    if (un > (uint64)maxInt64) {
         // Overflow.
         return (0, false);
     }
-    return (((int64)un), true);
+    return ((int64)un, true);
 }
 
 //go:nosplit
 internal static nint findnull(ж<byte> Ꮡs) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.DerefOrNil();
 
-    if (s == nil) {
+    if (Ꮡs == nil) {
         return 0;
     }
     // Avoid IndexByteString on Plan 9 because it uses SSE instructions
@@ -566,7 +566,7 @@ internal static nint findnull(ж<byte> Ꮡs) {
     if (GOOS == "plan9"u8) {
         var Δp = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡs));
         nint l = 0;
-        while (Δp.val[l] != 0) {
+        while (Δp.Value[l] != 0) {
             l++;
         }
         return l;
@@ -575,7 +575,7 @@ internal static nint findnull(ж<byte> Ꮡs) {
     // It must be the minimum page size for any architecture Go
     // runs on. It's okay (just a minor performance loss) if the
     // actual system page size is larger than this value.
-    static readonly UntypedInt pageSize = 4096;
+    UntypedInt pageSize = 4096;
     nint offset = 0;
     ref var ptr = ref heap<@unsafe.Pointer>(out var Ꮡptr);
     ptr = new @unsafe.Pointer(Ꮡs);
@@ -583,9 +583,9 @@ internal static nint findnull(ж<byte> Ꮡs) {
     // with page boundaries. Call IndexByteString on
     // [ptr, endOfPage) interval.
     ref var safeLen = ref heap<nint>(out var ᏑsafeLen);
-    safeLen = ((nint)(pageSize - ((uintptr)ptr) % pageSize));
+    safeLen = (nint)((uintptr)pageSize - (uintptr)ptr % (uintptr)pageSize);
     while (ᐧ) {
-        @string t = ~(ж<@string>)(uintptr)(new @unsafe.Pointer(Ꮡ(new stringStruct(ptr.val, safeLen))));
+        @string t = ~(ж<@string>)(uintptr)(new @unsafe.Pointer(Ꮡ(new stringStruct(ptr.Value, safeLen))));
         // Check one page at a time.
         {
             nint i = bytealg.IndexByteString(t, 0); if (i != -1) {
@@ -593,21 +593,21 @@ internal static nint findnull(ж<byte> Ꮡs) {
             }
         }
         // Move to next page
-        ptr = ((@unsafe.Pointer)(((uintptr)ptr) + ((uintptr)safeLen)));
+        ptr = (@unsafe.Pointer)((uintptr)ptr + (uintptr)safeLen);
         offset += safeLen;
         safeLen = pageSize;
     }
 }
 
 internal static nint findnullw(ж<uint16> Ꮡs) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.DerefOrNil();
 
-    if (s == nil) {
+    if (Ꮡs == nil) {
         return 0;
     }
     var Δp = (ж<array<uint16>>)(uintptr)(new @unsafe.Pointer(Ꮡs));
     nint l = 0;
-    while (Δp.val[l] != 0) {
+    while (Δp.Value[l] != 0) {
         l++;
     }
     return l;
@@ -615,7 +615,7 @@ internal static nint findnullw(ж<uint16> Ꮡs) {
 
 //go:nosplit
 internal static @string gostringnocopy(ж<byte> Ꮡstr) {
-    ref var str = ref Ꮡstr.val;
+    ref var str = ref Ꮡstr.Value;
 
     ref var ss = ref heap<stringStruct>(out var Ꮡss);
     ss = new stringStruct(str: new @unsafe.Pointer(Ꮡstr), len: findnull(Ꮡstr));
@@ -624,22 +624,22 @@ internal static @string gostringnocopy(ж<byte> Ꮡstr) {
 }
 
 internal static @string gostringw(ж<uint16> Ꮡstrw) {
-    ref var strw = ref Ꮡstrw.val;
+    ref var strw = ref Ꮡstrw.Value;
 
     array<byte> buf = new(8);
     var str = (ж<array<uint16>>)(uintptr)(new @unsafe.Pointer(Ꮡstrw));
     nint n1 = 0;
-    for (nint i = 0; str.val[i] != 0; i++) {
-        n1 += encoderune(buf[..], ((rune)str.val[i]));
+    for (nint i = 0; str.Value[i] != 0; i++) {
+        n1 += encoderune(buf[..], (rune)str.Value[i]);
     }
     var (s, b) = rawstring(n1 + 4);
     nint n2 = 0;
-    for (nint i = 0; str.val[i] != 0; i++) {
+    for (nint i = 0; str.Value[i] != 0; i++) {
         // check for race
         if (n2 >= n1) {
             break;
         }
-        n2 += encoderune(b[(int)(n2)..], ((rune)str.val[i]));
+        n2 += encoderune(b[(int)(n2)..], (rune)str.Value[i]);
     }
     b[n2] = 0;
     // for luck

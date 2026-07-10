@@ -6,39 +6,42 @@ namespace go;
 using windows = @internal.syscall.windows_package;
 using syscall = syscall_package;
 using @internal.syscall;
+using time = time_package;
 
 partial class net_package {
 
 // SetKeepAliveConfig configures keep-alive messages sent by the operating system.
-[GoRecv] public static error SetKeepAliveConfig(this ref TCPConn c, KeepAliveConfig config) {
-    if (!c.ok()) {
+public static error SetKeepAliveConfig(this ж<TCPConn> Ꮡc, KeepAliveConfig config) {
+    ref var c = ref Ꮡc.Value;
+
+    if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
         return syscall.EINVAL;
     }
     {
         var err = setKeepAlive(c.fd, config.Enable); if (err != default!) {
-            return new OpError(Op: "set"u8, Net: c.fd.net, Source: c.fd.laddr, ΔAddr: c.fd.raddr, Err: err);
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
         }
     }
     if (windows.SupportTCPKeepAliveIdle() && windows.SupportTCPKeepAliveInterval()){
         {
             var err = setKeepAliveIdle(c.fd, config.Idle); if (err != default!) {
-                return new OpError(Op: "set"u8, Net: c.fd.net, Source: c.fd.laddr, ΔAddr: c.fd.raddr, Err: err);
+                return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
             }
         }
         {
             var err = setKeepAliveInterval(c.fd, config.Interval); if (err != default!) {
-                return new OpError(Op: "set"u8, Net: c.fd.net, Source: c.fd.laddr, ΔAddr: c.fd.raddr, Err: err);
+                return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
             }
         }
     } else 
     {
         var err = setKeepAliveIdleAndInterval(c.fd, config.Idle, config.Interval); if (err != default!) {
-            return new OpError(Op: "set"u8, Net: c.fd.net, Source: c.fd.laddr, ΔAddr: c.fd.raddr, Err: err);
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
         }
     }
     {
         var err = setKeepAliveCount(c.fd, config.Count); if (err != default!) {
-            return new OpError(Op: "set"u8, Net: c.fd.net, Source: c.fd.laddr, ΔAddr: c.fd.raddr, Err: err);
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
         }
     }
     return default!;

@@ -22,12 +22,16 @@ public static ж<Slice> NewSlice(ΔType elem) {
     return s.elem;
 }
 
-[GoRecv("capture")] public static ΔType Underlying(this ref Slice s) {
-    return ~s;
+public static ΔType Underlying(this ж<Slice> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    return new SliceжΔType(Ꮡs);
 }
 
-[GoRecv] public static @string String(this ref Slice s) {
-    return TypeString(~s, default!);
+public static @string String(this ж<Slice> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    return TypeString(new SliceжΔType(Ꮡs), default!);
 }
 
 } // end types_package

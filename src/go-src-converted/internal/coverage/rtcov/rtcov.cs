@@ -79,8 +79,7 @@ public static uint32 AddMeta(@unsafe.Pointer p, uint32 dlen, array<byte> hash, @
             Meta.PkgMap = new map<nint, nint>();
         }
         {
-            nint _ = Meta.PkgMap[pkgid];
-            var ok = Meta.PkgMap[pkgid]; if (ok) {
+            var (_, ok) = Meta.PkgMap[pkgid, ꟷ]; if (ok) {
                 return 0;
             }
         }
@@ -89,7 +88,7 @@ public static uint32 AddMeta(@unsafe.Pointer p, uint32 dlen, array<byte> hash, @
         Meta.PkgMap[pkgid] = slot;
     }
     // ID zero is reserved as invalid.
-    return ((uint32)(slot + 1));
+    return (uint32)(slot + 1);
 }
 
 } // end rtcov_package

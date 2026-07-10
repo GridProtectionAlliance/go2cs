@@ -12,6 +12,9 @@
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
 global using bigꓸRat = go.math.big_package.ΔRat;
+global using cryptoꓸDecrypterOpts = object;
+global using cryptoꓸPrivateKey = object;
+global using cryptoꓸPublicKey = object;
 global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
 global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
 global using netꓸAddr = go.net_package.ΔAddr;
@@ -29,6 +32,8 @@ global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using urlꓸError = go.net.url_package.ΔError;
+using rsa = go.crypto.rsa_package;
+using syscall = go.syscall_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -57,9 +62,6 @@ using static go.crypto.x509_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(bool, error), error>]
-[assembly: GoImplement<(crypto.Signer, bool), crypto_package.Signer>]
-[assembly: GoImplement<(privateKey, bool), CreateCertificate_privateKey>]
 [assembly: GoImplement<CertificateInvalidError, error>]
 [assembly: GoImplement<ConstraintViolationError, error>]
 [assembly: GoImplement<HostnameError, error>]
@@ -67,18 +69,12 @@ using static go.crypto.x509_package;
 [assembly: GoImplement<SystemRootsError, error>]
 [assembly: GoImplement<UnhandledCriticalExtension, error>]
 [assembly: GoImplement<UnknownAuthorityError, error>]
-[assembly: GoImplement<crypto.rsa_package.PSSOptions, crypto_package.SignerOpts>]
 [assembly: GoImplement<crypto_package.Hash, crypto_package.SignerOpts>]
-[assembly: GoImplement<crypto_package.PublicKey, CreateCertificate_privateKey>]
-[assembly: GoImplement<encoding.asn1_package.SyntaxError, error>]
-[assembly: GoImplement<slice<ж<net.IPNet>>, error>]
+[assembly: GoImplement<go.crypto.rsa_package.PSSOptions, crypto_package.SignerOpts>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<InsecureAlgorithmError, SignatureAlgorithm>(Inverted = true, ValueType = "InsecureAlgorithmError")]
-[assembly: GoImplicitConv<SignatureAlgorithm, InsecureAlgorithmError>(Inverted = true, ValueType = "SignatureAlgorithm")]
 [assembly: GoImplicitConv<VerifyOptions, ж<VerifyOptions>>(Indirect = true)]
-[assembly: GoImplicitConv<big.nat}, big.nat}>(Inverted = true)]
 [assembly: GoImplicitConv<rsa.PSSOptions, ж<rsa.PSSOptions>>(Indirect = true)]
 [assembly: GoImplicitConv<syscall.CertChainContext, ж<syscall.CertChainContext>>(Indirect = true)]
 // </ImplicitConversions>

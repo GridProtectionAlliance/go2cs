@@ -26,25 +26,24 @@ partial class fs_package {
 // If fs implements [ReadDirFS], ReadDir calls fs.ReadDir.
 // Otherwise ReadDir calls fs.Open and uses ReadDir and Close
 // on the returned file.
-public static (slice<DirEntry>, error) ReadDir(FS fsys, @string name) => func((defer, _) => {
+public static (slice<DirEntry>, error) ReadDir(FS fsys, @string name) => func<(slice<DirEntry>, error)>((defer, recover) => {
     {
         var (fsysΔ1, okΔ1) = fsys._<ReadDirFS>(ᐧ); if (okΔ1) {
             return fsysΔ1.ReadDir(name);
         }
     }
-    (file, err) = fsys.Open(name);
+    var (@file, err) = fsys.Open(name);
     if (err != default!) {
         return (default!, err);
     }
-    var fileʗ1 = file;
-    defer(fileʗ1.Close);
-    var (dir, ok) = file._<ReadDirFile>(ᐧ);
+    var fileʗ1 = @file;
+    defer(() => fileʗ1.Close());
+    var (dir, ok) = @file._<ReadDirFile>(ᐧ);
     if (!ok) {
-        return (default!, new PathError(Op: "readdir"u8, Path: name, Err: errors.New("not implemented"u8)));
+        return (default!, new PathErrorжerror(Ꮡ(new PathError(Op: "readdir"u8, Path: name, Err: errors.New("not implemented"u8)))));
     }
-    (list, err) = dir.ReadDir(-1);
-    slices.SortFunc(list, 
-    (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
+    (var list, err) = dir.ReadDir(-1);
+    slices.SortFunc(list, (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
     return (list, err);
 });
 

@@ -13,54 +13,61 @@ partial class ring_package {
 // as nil Ring pointers. The zero value for a Ring is a one-element
 // ring with a nil Value.
 [GoType] partial struct Ring {
-    internal ж<Ring> next;
-    internal ж<Ring> prev;
+    internal ж<Ring> next, prev;
     public any Value; // for use by client; untouched by this library
 }
 
-[GoRecv("capture")] internal static ж<Ring> init(this ref Ring r) {
-    r.next = r;
-    r.prev = r;
-    return initꓸᏑr;
+internal static ж<Ring> init(this ж<Ring> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    r.next = Ꮡr;
+    r.prev = Ꮡr;
+    return Ꮡr;
 }
 
 // Next returns the next ring element. r must not be empty.
-[GoRecv] public static ж<Ring> Next(this ref Ring r) {
+public static ж<Ring> Next(this ж<Ring> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
     if (r.next == nil) {
-        return r.init();
+        return Ꮡr.init();
     }
     return r.next;
 }
 
 // Prev returns the previous ring element. r must not be empty.
-[GoRecv] public static ж<Ring> Prev(this ref Ring r) {
+public static ж<Ring> Prev(this ж<Ring> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
     if (r.next == nil) {
-        return r.init();
+        return Ꮡr.init();
     }
     return r.prev;
 }
 
 // Move moves n % r.Len() elements backward (n < 0) or forward (n >= 0)
 // in the ring and returns that ring element. r must not be empty.
-[GoRecv("capture")] public static ж<Ring> Move(this ref Ring r, nint n) {
+public static ж<Ring> Move(this ж<Ring> Ꮡr, nint n) {
+    ref var r = ref Ꮡr.Value;
+
     if (r.next == nil) {
-        return r.init();
+        return Ꮡr.init();
     }
     switch (ᐧ) {
     case {} when n is < 0: {
         for (; n < 0; n++) {
-            r = r.prev;
+            Ꮡr = r.prev; r = ref Ꮡr.Value;
         }
         break;
     }
     case {} when n is > 0: {
         for (; n > 0; n--) {
-            r = r.next;
+            Ꮡr = r.next; r = ref Ꮡr.Value;
         }
         break;
     }}
 
-    return MoveꓸᏑr;
+    return Ꮡr;
 }
 
 // New creates a ring of n elements.
@@ -71,11 +78,11 @@ public static ж<Ring> New(nint n) {
     var r = @new<Ring>();
     var p = r;
     for (nint i = 1; i < n; i++) {
-        p.val.next = Ꮡ(new Ring(prev: p));
-        p = p.val.next;
+        p.Value.next = Ꮡ(new Ring(prev: p));
+        p = p.Value.next;
     }
-    p.val.next = r;
-    r.val.prev = p;
+    p.Value.next = r;
+    r.Value.prev = p;
     return r;
 }
 
@@ -94,18 +101,19 @@ public static ж<Ring> New(nint n) {
 // them creates a single ring with the elements of s inserted
 // after r. The result points to the element following the
 // last element of s after insertion.
-[GoRecv] public static ж<Ring> Link(this ref Ring r, ж<Ring> Ꮡs) {
-    ref var s = ref Ꮡs.val;
+public static ж<Ring> Link(this ж<Ring> Ꮡr, ж<Ring> Ꮡs) {
+    ref var r = ref Ꮡr.Value;
+    ref var s = ref Ꮡs.DerefOrNil();
 
-    var n = r.Next();
-    if (s != nil) {
-        var p = s.Prev();
+    var n = Ꮡr.Next();
+    if (Ꮡs != nil) {
+        var p = Ꮡs.Prev();
         // Note: Cannot use multiple assignment because
         // evaluation order of LHS is not specified.
-        r.next = s;
-        s.prev = r;
-        n.val.prev = p;
-        p.val.next = n;
+        r.next = Ꮡs;
+        s.prev = Ꮡr;
+        n.Value.prev = p;
+        p.Value.next = n;
     }
     return n;
 }
@@ -113,20 +121,24 @@ public static ж<Ring> New(nint n) {
 // Unlink removes n % r.Len() elements from the ring r, starting
 // at r.Next(). If n % r.Len() == 0, r remains unchanged.
 // The result is the removed subring. r must not be empty.
-[GoRecv] public static ж<Ring> Unlink(this ref Ring r, nint n) {
+public static ж<Ring> Unlink(this ж<Ring> Ꮡr, nint n) {
+    ref var r = ref Ꮡr.Value;
+
     if (n <= 0) {
         return default!;
     }
-    return r.Link(r.Move(n + 1));
+    return Ꮡr.Link(Ꮡr.Move(n + 1));
 }
 
 // Len computes the number of elements in ring r.
 // It executes in time proportional to the number of elements.
-[GoRecv] public static nint Len(this ref Ring r) {
+public static nint Len(this ж<Ring> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
     nint n = 0;
     if (r != nil) {
         n = 1;
-        for (var p = r.Next(); p != r; p = p.val.next) {
+        for (var p = Ꮡr.Next(); p != Ꮡr; p = p.Value.next) {
             n++;
         }
     }
@@ -135,10 +147,12 @@ public static ж<Ring> New(nint n) {
 
 // Do calls function f on each element of the ring, in forward order.
 // The behavior of Do is undefined if f changes *r.
-[GoRecv] public static void Do(this ref Ring r, Action<any> f) {
+public static void Do(this ж<Ring> Ꮡr, Action<any> f) {
+    ref var r = ref Ꮡr.Value;
+
     if (r != nil) {
         f(r.Value);
-        for (var p = r.Next(); p != r; p = p.val.next) {
+        for (var p = Ꮡr.Next(); p != Ꮡr; p = p.Value.next) {
             f((~p).Value);
         }
     }

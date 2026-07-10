@@ -5,23 +5,25 @@ namespace go.@internal.coverage;
 
 using json = encoding.json_package;
 using fmt = fmt_package;
-using coverage = @internal.coverage_package;
-using calloc = @internal.coverage.calloc_package;
-using cformat = @internal.coverage.cformat_package;
-using cmerge = @internal.coverage.cmerge_package;
-using decodecounter = @internal.coverage.decodecounter_package;
-using decodemeta = @internal.coverage.decodemeta_package;
-using pods = @internal.coverage.pods_package;
-using rtcov = @internal.coverage.rtcov_package;
-using atomic = @internal.runtime.atomic_package;
+using coverage = go.@internal.coverage_package;
+using calloc = go.@internal.coverage.calloc_package;
+using cformat = go.@internal.coverage.cformat_package;
+using cmerge = go.@internal.coverage.cmerge_package;
+using decodecounter = go.@internal.coverage.decodecounter_package;
+using decodemeta = go.@internal.coverage.decodemeta_package;
+using pods = go.@internal.coverage.pods_package;
+using rtcov = go.@internal.coverage.rtcov_package;
+using atomic = go.@internal.runtime.atomic_package;
 using io = io_package;
 using os = os_package;
 using filepath = path.filepath_package;
 using strings = strings_package;
 using @unsafe = unsafe_package;
-using @internal;
-using @internal.runtime;
 using encoding;
+using fs = go.io.fs_package;
+using go.@internal;
+using go.@internal.coverage;
+using go.@internal.runtime;
 using path;
 
 partial class cfile_package {
@@ -30,8 +32,8 @@ partial class cfile_package {
 // testmain code when "go test -cover" is in effect. It is not
 // intended to be used other than internally by the Go command's
 // generated code.
-public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, @string cpkg, io.Writer w, slice<@string> selpkgs) => func((defer, _) => {
-    ref var cmode = ref heap<@internal.coverage_package.CounterMode>(out var Ꮡcmode);
+public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, @string cpkg, io.Writer w, slice<@string> selpkgs) => func<error>((defer, recover) => {
+    ref var cmode = ref heap<coverage.CounterMode>(out var Ꮡcmode);
     cmode = coverage.ParseCounterMode(cm);
     if (cmode == coverage.CtrModeInvalid) {
         return fmt.Errorf("invalid counter mode %q"u8, cm);
@@ -58,18 +60,18 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
     // expect to see a single pod here, but allow for multiple pods in
     // case the test harness is doing extra work to collect data files
     // from builds that it kicks off as part of the testing.
-    (podlist, errΔ3) = pods.CollectPods(new @string[]{dir}.slice(), false);
-    if (errΔ3 != default!) {
-        return fmt.Errorf("reading from %s: %v"u8, dir, errΔ3);
+    var (podlist, err) = pods.CollectPods(new @string[]{dir}.slice(), false);
+    if (err != default!) {
+        return fmt.Errorf("reading from %s: %v"u8, dir, err);
     }
     // Open text output file if appropriate.
     ж<os.File> tf = default!;
     bool tfClosed = default!;
     if (cfile != ""u8) {
-        error errΔ4 = default!;
-        (tf, errΔ4) = os.Create(cfile);
-        if (errΔ4 != default!) {
-            return fmt.Errorf("internal error: opening coverage data output file %q: %v"u8, cfile, errΔ4);
+        error errΔ3 = default!;
+        (tf, errΔ3) = os.Create(cfile);
+        if (errΔ3 != default!) {
+            return fmt.Errorf("internal error: opening coverage data output file %q: %v"u8, cfile, errΔ3);
         }
         var tfʗ1 = tf;
         defer(() => {
@@ -96,38 +98,38 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
             continue;
         }
         {
-            var errΔ5 = ts.processPod(p, importpaths); if (errΔ5 != default!) {
-                return errΔ5;
+            var errΔ4 = ts.processPod(p, importpaths); if (errΔ4 != default!) {
+                return errΔ4;
             }
         }
     }
     @string metafilespath = filepath.Join(dir, coverage.MetaFilesFileName);
     {
-        (_, errΔ6) = os.Stat(metafilespath); if (errΔ6 == default!) {
+        var (_, errΔ5) = os.Stat(metafilespath); if (errΔ5 == default!) {
             {
-                var errΔ7 = ts.readAuxMetaFiles(metafilespath, importpaths); if (errΔ7 != default!) {
-                    return errΔ7;
+                var errΔ6 = ts.readAuxMetaFiles(metafilespath, importpaths); if (errΔ6 != default!) {
+                    return errΔ6;
                 }
             }
         }
     }
     // Emit percent.
     {
-        var errΔ8 = (~ts).cf.EmitPercent(w, selpkgs, cpkg, true, true); if (errΔ8 != default!) {
-            return errΔ8;
+        var errΔ7 = (~ts).cf.EmitPercent(w, selpkgs, cpkg, true, true); if (errΔ7 != default!) {
+            return errΔ7;
         }
     }
     // Emit text output.
     if (tf != nil) {
         {
-            var errΔ9 = (~ts).cf.EmitTextual(~tf); if (errΔ9 != default!) {
-                return errΔ9;
+            var errΔ8 = (~ts).cf.EmitTextual(new os.FileжWriter(tf)); if (errΔ8 != default!) {
+                return errΔ8;
             }
         }
         tfClosed = true;
         {
-            var errΔ10 = tf.Close(); if (errΔ10 != default!) {
-                return fmt.Errorf("closing %s: %v"u8, cfile, errΔ10);
+            var errΔ9 = tf.Close(); if (errΔ9 != default!) {
+                return fmt.Errorf("closing %s: %v"u8, cfile, errΔ9);
             }
         }
     }
@@ -135,19 +137,18 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
 });
 
 [GoType] partial struct tstate {
-    public partial ref @internal.coverage.calloc_package.BatchCounterAlloc BatchCounterAlloc { get; }
-    internal ж<@internal.coverage.cmerge_package.Merger> cm;
-    internal ж<@internal.coverage.cformat_package.Formatter> cf;
-    internal @internal.coverage_package.CounterMode cmode;
-}
-
-[GoType("dyn")] partial struct processPod_importpaths {
+    public partial ref go.@internal.coverage.calloc_package.BatchCounterAlloc BatchCounterAlloc { get; }
+    internal ж<cmerge.Merger> cm;
+    internal ж<cformat.Formatter> cf;
+    internal coverage.CounterMode cmode;
 }
 
 // processPod reads coverage counter data for a specific pod.
-[GoRecv] internal static error processPod(this ref tstate ts, pods.Pod p, processPod_importpaths importpaths) => func((defer, _) => {
+internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string, EmptyStruct> importpaths) => func<error>((defer, recover) => {
+    ref var ts = ref Ꮡts.Value;
+
     // Open meta-data file
-    (f, err) = os.Open(p.MetaFile);
+    var (f, err) = os.Open(p.MetaFile);
     if (err != default!) {
         return fmt.Errorf("unable to open meta-data file %s: %v"u8, p.MetaFile, err);
     }
@@ -173,21 +174,20 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
     // A map to store counter data, indexed by pkgid/fnid tuple.
     var pmm = new map<pkfunc, slice<uint32>>();
     // Helper to read a single counter data file.
-    var readcdf = 
     var pmmʗ1 = pmm;
-    (@string cdf) => {
-        (cf, errΔ2) = os.Open(cdf);
+    var readcdf = error (@string cdf) => func<error>((defer, recover) => {
+        var (cf, errΔ2) = os.Open(cdf);
         if (errΔ2 != default!) {
             return fmt.Errorf("opening counter data file %s: %s"u8, cdf, errΔ2);
         }
         var cfʗ1 = cf;
-        defer(cfʗ1.Close);
+        defer(() => cfʗ1.Close());
         ж<decodecounter.CounterDataReader> cdr = default!;
-        (cdr, err) = decodecounter.NewCounterDataReader(cdf, ~cf);
+        (cdr, errΔ2) = decodecounter.NewCounterDataReader(cdf, new os_FileжReadSeeker(cf));
         if (errΔ2 != default!) {
             return fmt.Errorf("reading counter data file %s: %s"u8, cdf, errΔ2);
         }
-        ref var data = ref heap(new @internal.coverage.decodecounter_package.FuncPayload(), out var Ꮡdata);
+        ref var data = ref heap(new decodecounter.FuncPayload(), out var Ꮡdata);
         while (ᐧ) {
             var (ok, errΔ3) = cdr.NextFunc(Ꮡdata);
             if (errΔ3 != default!) {
@@ -200,22 +200,21 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
             ref var key = ref heap<pkfunc>(out var Ꮡkey);
             key = new pkfunc(pk: data.PkgIdx, fcn: data.FuncIdx);
             {
-                var prev = pmm[key];
-                var found = pmm[key]; if (found) {
+                var (prev, found) = pmmʗ1[key, ꟷ]; if (found) {
                     // Note: no overflow reporting here.
                     {
-                        var (errΔ4, _) = ts.cm.MergeCounters(data.Counters, prev); if (errΔ4 != default!) {
+                        var (errΔ4, _) = Ꮡts.Value.cm.MergeCounters(data.Counters, prev); if (errΔ4 != default!) {
                             return fmt.Errorf("processing counter data file %s: %v"u8, cdf, errΔ4);
                         }
                     }
                 }
             }
-            var c = ts.AllocateCounters(len(data.Counters));
+            var c = Ꮡts.of(tstate.ᏑBatchCounterAlloc).AllocateCounters(len(data.Counters));
             copy(c, data.Counters);
-            pmm[key] = c;
+            pmmʗ1[key] = c;
         }
         return default!;
-    };
+    });
     // Read counter data files.
     foreach (var (_, cdf) in p.CounterDataFiles) {
         {
@@ -225,19 +224,19 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
         }
     }
     // Visit meta-data file.
-    var np = ((uint32)mfr.NumPackages());
+    var np = (uint32)mfr.NumPackages();
     var payload = new byte[]{}.slice();
-    for (var pkIdx = ((uint32)0); pkIdx < np; pkIdx++) {
+    for (var pkIdx = (uint32)0; pkIdx < np; pkIdx++) {
         ж<decodemeta.CoverageMetaDataDecoder> pd = default!;
         (pd, payload, err) = mfr.GetPackageDecoder(pkIdx, payload);
         if (err != default!) {
             return fmt.Errorf("reading pkg %d from meta-file %s: %s"u8, pkIdx, p.MetaFile, err);
         }
         ts.cf.SetPackage(pd.PackagePath());
-        importpaths[pd.PackagePath()] = new processPod_importpaths();
-        ref var fd = ref heap(new @internal.coverage_package.FuncDesc(), out var Ꮡfd);
+        importpaths[pd.PackagePath()] = new EmptyStruct();
+        ref var fd = ref heap(new coverage.FuncDesc(), out var Ꮡfd);
         var nf = pd.NumFuncs();
-        for (var fnIdx = ((uint32)0); fnIdx < nf; fnIdx++) {
+        for (var fnIdx = (uint32)0; fnIdx < nf; fnIdx++) {
             {
                 var errΔ6 = pd.ReadFunc(fnIdx, Ꮡfd); if (errΔ6 != default!) {
                     return fmt.Errorf("reading meta-data file %s: %v"u8,
@@ -245,8 +244,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
                 }
             }
             var key = new pkfunc(pk: pkIdx, fcn: fnIdx);
-            var counters = pmm[key];
-            var haveCounters = pmm[key];
+            var (counters, haveCounters) = pmm[key, ꟷ];
             for (nint i = 0; i < len(fd.Units); i++) {
                 var u = fd.Units[i];
                 // Skip units with non-zero parent (no way to represent
@@ -254,7 +252,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
                 if (u.Parent != 0) {
                     continue;
                 }
-                var count = ((uint32)0);
+                var count = (uint32)0;
                 if (haveCounters) {
                     count = counters[i];
                 }
@@ -266,15 +264,16 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
 });
 
 [GoType] partial struct pkfunc {
-    internal uint32 pk;
-    internal uint32 fcn;
+    internal uint32 pk, fcn;
 }
 
-[GoRecv] internal static error readAuxMetaFiles(this ref tstate ts, @string metafiles, map<@string, EmptyStruct> importpaths) {
+internal static error readAuxMetaFiles(this ж<tstate> Ꮡts, @string metafiles, map<@string, EmptyStruct> importpaths) {
+    ref var ts = ref Ꮡts.Value;
+
     // Unmarshal the information on available aux metafiles into
     // a MetaFileCollection struct.
-    ref var mfc = ref heap(new @internal.coverage_package.MetaFileCollection(), out var Ꮡmfc);
-    (data, err) = os.ReadFile(metafiles);
+    ref var mfc = ref heap(new coverage.MetaFileCollection(), out var Ꮡmfc);
+    var (data, err) = os.ReadFile(metafiles);
     if (err != default!) {
         return fmt.Errorf("error reading auxmetafiles file %q: %v"u8, metafiles, err);
     }
@@ -291,14 +290,14 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
     foreach (var (i, _) in mfc.ImportPaths) {
         @string p = mfc.ImportPaths[i];
         {
-            var (_, ok) = importpaths[p]; if (ok) {
+            var (_, ok) = importpaths[p, ꟷ]; if (ok) {
                 continue;
             }
         }
         pods.Pod pod = default!;
         pod.MetaFile = mfc.MetaFileFragments[i];
         {
-            var errΔ2 = ts.processPod(pod, importpaths); if (errΔ2 != default!) {
+            var errΔ2 = Ꮡts.processPod(pod, importpaths); if (errΔ2 != default!) {
                 return errΔ2;
             }
         }
@@ -316,37 +315,37 @@ public static float64 Snapshot() {
     var cl = getCovCounterList();
     if (len(cl) == 0) {
         // no work to do here.
-        return 0.0F;
+        return 0.0D;
     }
-    var tot = ((uint64)0);
-    var totExec = ((uint64)0);
+    var tot = (uint64)0;
+    var totExec = (uint64)0;
     foreach (var (_, c) in cl) {
         var sd = @unsafe.Slice((ж<atomic.Uint32>)(uintptr)(new @unsafe.Pointer(c.Counters)), c.Len);
-        tot += ((uint64)len(sd));
+        tot += (uint64)len(sd);
         for (nint i = 0; i < len(sd); i++) {
             // Skip ahead until the next non-zero value.
-            if (sd[i].Load() == 0) {
+            if (Ꮡ(sd, i).Load() == 0) {
                 continue;
             }
             // We found a function that was executed.
-            var nCtrs = sd[i + coverage.NumCtrsOffset].Load();
-            nint cst = i + coverage.FirstCtrOffset;
-            if (cst + ((nint)nCtrs) > len(sd)) {
+            var nCtrs = Ꮡ(sd, i + (nint)coverage.NumCtrsOffset).Load();
+            nint cst = i + (nint)coverage.FirstCtrOffset;
+            if (cst + (nint)nCtrs > len(sd)) {
                 break;
             }
-            var counters = sd[(int)(cst)..(int)(cst + ((nint)nCtrs))];
+            var counters = sd[(int)(cst)..(int)(cst + (nint)nCtrs)];
             foreach (var (iΔ1, _) in counters) {
-                if (counters[iΔ1].Load() != 0) {
+                if (Ꮡ(counters, iΔ1).Load() != 0) {
                     totExec++;
                 }
             }
-            i += coverage.FirstCtrOffset + ((nint)nCtrs) - 1;
+            i += (nint)coverage.FirstCtrOffset + (nint)nCtrs - 1;
         }
     }
     if (tot == 0) {
-        return 0.0F;
+        return 0.0D;
     }
-    return ((float64)totExec) / ((float64)tot);
+    return (float64)totExec / (float64)tot;
 }
 
 } // end cfile_package

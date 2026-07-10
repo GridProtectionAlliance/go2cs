@@ -10,7 +10,7 @@ internal static readonly UntypedInt intSize = /* 32 << (^uint(0) >> 63) */ 64;
 
 internal static nint abs(nint x) {
     // m := -1 if x < 0. m := 0 otherwise.
-    nint m = x >> (int)((intSize - 1));
+    nint m = (x >> (int)((intSize - 1)));
     // In two's complement representation, the negative number
     // of any number (except the smallest one) can be computed
     // by flipping all the bits and add 1. This is faster than
@@ -28,9 +28,9 @@ internal static uint8 paeth(uint8 a, uint8 b, uint8 c) {
     // but the optimized form uses fewer arithmetic operations:
     //	pa := int(b) - int(c)
     //	pa = abs(pa)
-    nint pc = ((nint)c);
-    nint pa = ((nint)b) - pc;
-    nint pb = ((nint)a) - pc;
+    nint pc = (nint)c;
+    nint pa = (nint)b - pc;
+    nint pb = (nint)a - pc;
     pc = abs(pa + pb);
     pa = abs(pa);
     pb = abs(pb);
@@ -55,7 +55,7 @@ internal static void filterPaeth(slice<byte> cdat, slice<byte> pdat, nint bytesP
     for (nint i = 0; i < bytesPerPixel; i++) {
         (a, c) = (0, 0);
         for (nint j = i; j < len(cdat); j += bytesPerPixel) {
-            b = ((nint)pdat[j]);
+            b = (nint)pdat[j];
             pa = b - c;
             pb = a - c;
             pc = abs(pa + pb);
@@ -69,9 +69,9 @@ internal static void filterPaeth(slice<byte> cdat, slice<byte> pdat, nint bytesP
             } else {
                 a = c;
             }
-            a += ((nint)cdat[j]);
-            a &= (nint)(255);
-            cdat[j] = ((uint8)a);
+            a += (nint)cdat[j];
+            a &= (nint)(0xff);
+            cdat[j] = (uint8)a;
             c = b;
         }
     }

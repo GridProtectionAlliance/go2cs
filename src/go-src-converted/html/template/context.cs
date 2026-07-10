@@ -28,14 +28,14 @@ partial class template_package {
     internal slice<nint> jsBraceDepth;
     internal attr attr;
     internal element element;
-    internal text.template.parse_package.Node n; // for range break/continue
+    internal parse.Node n; // for range break/continue
     internal ж<ΔError> err;
 }
 
 internal static @string String(this context c) {
     error err = default!;
     if (c.err != nil) {
-        err = ~c.err;
+        err = new ΔErrorжerror(c.err);
     }
     return fmt.Sprintf("{%v %v %v %v %v %v %v}"u8, c.state, c.delim, c.urlPart, c.jsCtx, c.attr, c.element, err);
 }

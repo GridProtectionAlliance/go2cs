@@ -8,8 +8,8 @@ using fmt = fmt_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using sync = sync_package;
-using atomic = sync.atomic_package;
-using sync;
+using atomic = global::go.sync.atomic_package;
+using global::go.sync;
 
 partial class token_package {
 
@@ -83,7 +83,7 @@ public static bool IsValid(this ΔPos p) {
     internal nint @base;   // Pos value range for this file is [base...base+size]
     internal nint size;   // file size as provided to AddFile
     // lines and infos are protected by mutex
-    internal sync_package.Mutex mutex;
+    internal sync.Mutex mutex;
     internal slice<nint> lines; // lines contains the offset of the first character for each line (the first entry is always 0)
     internal slice<lineInfo> infos;
 }
@@ -104,36 +104,42 @@ public static bool IsValid(this ΔPos p) {
 }
 
 // LineCount returns the number of lines in file f.
-[GoRecv] public static nint LineCount(this ref ΔFile f) {
-    f.mutex.Lock();
+public static nint LineCount(this ж<ΔFile> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
+    Ꮡf.of(token_package.ΔFile.Ꮡmutex).Lock();
     nint n = len(f.lines);
-    f.mutex.Unlock();
+    Ꮡf.of(token_package.ΔFile.Ꮡmutex).Unlock();
     return n;
 }
 
 // AddLine adds the line offset for a new line.
 // The line offset must be larger than the offset for the previous line
 // and smaller than the file size; otherwise the line offset is ignored.
-[GoRecv] public static void AddLine(this ref ΔFile f, nint offset) {
-    f.mutex.Lock();
+public static void AddLine(this ж<ΔFile> Ꮡf, nint offset) {
+    ref var f = ref Ꮡf.Value;
+
+    Ꮡf.of(token_package.ΔFile.Ꮡmutex).Lock();
     {
         nint i = len(f.lines); if ((i == 0 || f.lines[i - 1] < offset) && offset < f.size) {
             f.lines = append(f.lines, offset);
         }
     }
-    f.mutex.Unlock();
+    Ꮡf.of(token_package.ΔFile.Ꮡmutex).Unlock();
 }
 
 // MergeLine merges a line with the following line. It is akin to replacing
 // the newline character at the end of the line with a space (to not change the
 // remaining offsets). To obtain the line number, consult e.g. [Position.Line].
 // MergeLine will panic if given an invalid line number.
-[GoRecv] public static void MergeLine(this ref ΔFile f, nint line) => func((defer, _) => {
+public static void MergeLine(this ж<ΔFile> Ꮡf, nint line) => func((defer, recover) => {
+    ref var f = ref Ꮡf.Value;
+
     if (line < 1) {
         throw panic(fmt.Sprintf("invalid line number %d (should be >= 1)"u8, line));
     }
-    f.mutex.Lock();
-    defer(f.mutex.Unlock);
+    Ꮡf.of(token_package.ΔFile.Ꮡmutex).Lock();
+    defer(Ꮡf.of(token_package.ΔFile.Ꮡmutex).Unlock);
     if (line >= len(f.lines)) {
         throw panic(fmt.Sprintf("invalid line number %d (should be < %d)"u8, line, len(f.lines)));
     }
@@ -148,10 +154,12 @@ public static bool IsValid(this ΔPos p) {
 
 // Lines returns the effective line offset table of the form described by [File.SetLines].
 // Callers must not mutate the result.
-[GoRecv] public static slice<nint> Lines(this ref ΔFile f) {
-    f.mutex.Lock();
+public static slice<nint> Lines(this ж<ΔFile> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
+    Ꮡf.of(token_package.ΔFile.Ꮡmutex).Lock();
     var lines = f.lines;
-    f.mutex.Unlock();
+    Ꮡf.of(token_package.ΔFile.Ꮡmutex).Unlock();
     return lines;
 }
 
@@ -163,7 +171,9 @@ public static bool IsValid(this ΔPos p) {
 // and smaller than the file size; otherwise SetLines fails and returns
 // false.
 // Callers must not mutate the provided slice after SetLines returns.
-[GoRecv] public static bool SetLines(this ref ΔFile f, slice<nint> lines) {
+public static bool SetLines(this ж<ΔFile> Ꮡf, slice<nint> lines) {
+    ref var f = ref Ꮡf.Value;
+
     // verify validity of lines table
     nint size = f.size;
     foreach (var (i, offset) in lines) {
@@ -172,15 +182,17 @@ public static bool IsValid(this ΔPos p) {
         }
     }
     // set lines table
-    f.mutex.Lock();
+    Ꮡf.of(token_package.ΔFile.Ꮡmutex).Lock();
     f.lines = lines;
-    f.mutex.Unlock();
+    Ꮡf.of(token_package.ΔFile.Ꮡmutex).Unlock();
     return true;
 }
 
 // SetLinesForContent sets the line offsets for the given file content.
 // It ignores position-altering //line comments.
-[GoRecv] public static void SetLinesForContent(this ref ΔFile f, slice<byte> content) {
+public static void SetLinesForContent(this ж<ΔFile> Ꮡf, slice<byte> content) {
+    ref var f = ref Ꮡf.Value;
+
     slice<nint> lines = default!;
     nint line = 0;
     foreach (var (offset, b) in content) {
@@ -193,20 +205,22 @@ public static bool IsValid(this ΔPos p) {
         }
     }
     // set lines table
-    f.mutex.Lock();
+    Ꮡf.of(token_package.ΔFile.Ꮡmutex).Lock();
     f.lines = lines;
-    f.mutex.Unlock();
+    Ꮡf.of(token_package.ΔFile.Ꮡmutex).Unlock();
 }
 
 // LineStart returns the [Pos] value of the start of the specified line.
 // It ignores any alternative positions set using [File.AddLineColumnInfo].
 // LineStart panics if the 1-based line number is invalid.
-[GoRecv] public static ΔPos LineStart(this ref ΔFile f, nint line) => func((defer, _) => {
+public static ΔPos LineStart(this ж<ΔFile> Ꮡf, nint line) => func((defer, recover) => {
+    ref var f = ref Ꮡf.Value;
+
     if (line < 1) {
         throw panic(fmt.Sprintf("invalid line number %d (should be >= 1)"u8, line));
     }
-    f.mutex.Lock();
-    defer(f.mutex.Unlock);
+    Ꮡf.of(token_package.ΔFile.Ꮡmutex).Lock();
+    defer(Ꮡf.of(token_package.ΔFile.Ꮡmutex).Unlock);
     if (line > len(f.lines)) {
         throw panic(fmt.Sprintf("invalid line number %d (should be < %d)"u8, line, len(f.lines)));
     }
@@ -216,18 +230,19 @@ public static bool IsValid(this ΔPos p) {
 // A lineInfo object describes alternative file, line, and column
 // number information (such as provided via a //line directive)
 // for a given file offset.
-[GoType] partial struct lineInfo {
+[GoType] public partial struct lineInfo {
     // fields are exported to make them accessible to gob
     public nint Offset;
     public @string Filename;
-    public nint Line;
-    public nint Column;
+    public nint Line, Column;
 }
 
 // AddLineInfo is like [File.AddLineColumnInfo] with a column = 1 argument.
 // It is here for backward-compatibility for code prior to Go 1.11.
-[GoRecv] public static void AddLineInfo(this ref ΔFile f, nint offset, @string filename, nint line) {
-    f.AddLineColumnInfo(offset, filename, line, 1);
+public static void AddLineInfo(this ж<ΔFile> Ꮡf, nint offset, @string filename, nint line) {
+    ref var f = ref Ꮡf.Value;
+
+    Ꮡf.AddLineColumnInfo(offset, filename, line, 1);
 }
 
 // AddLineColumnInfo adds alternative file, line, and column number
@@ -238,14 +253,16 @@ public static bool IsValid(this ΔPos p) {
 //
 // AddLineColumnInfo is typically used to register alternative position
 // information for line directives such as //line filename:line:column.
-[GoRecv] public static void AddLineColumnInfo(this ref ΔFile f, nint offset, @string filename, nint line, nint column) {
-    f.mutex.Lock();
+public static void AddLineColumnInfo(this ж<ΔFile> Ꮡf, nint offset, @string filename, nint line, nint column) {
+    ref var f = ref Ꮡf.Value;
+
+    Ꮡf.of(token_package.ΔFile.Ꮡmutex).Lock();
     {
         nint i = len(f.infos); if ((i == 0 || f.infos[i - 1].Offset < offset) && offset < f.size) {
             f.infos = append(f.infos, new lineInfo(offset, filename, line, column));
         }
     }
-    f.mutex.Unlock();
+    Ꮡf.of(token_package.ΔFile.Ꮡmutex).Unlock();
 }
 
 // fixOffset fixes an out-of-bounds offset such that 0 <= offset <= f.size.
@@ -257,7 +274,7 @@ public static bool IsValid(this ΔPos p) {
         }
         break;
     }
-    case {} when offset is > f.size: {
+    case {} when offset > f.size: {
         if (!debug) {
             return f.size;
         }
@@ -300,17 +317,19 @@ public static bool IsValid(this ΔPos p) {
 // in general, holds for the result offset:
 // f.Offset(f.Pos(offset)) == offset
 [GoRecv] public static nint Offset(this ref ΔFile f, ΔPos p) {
-    return f.fixOffset(((nint)p) - f.@base);
+    return f.fixOffset((nint)p - f.@base);
 }
 
 // Line returns the line number for the given file position p;
 // p must be a [Pos] value in that file or [NoPos].
-[GoRecv] public static nint Line(this ref ΔFile f, ΔPos p) {
-    return f.Position(p).Line;
+public static nint Line(this ж<ΔFile> Ꮡf, ΔPos p) {
+    ref var f = ref Ꮡf.Value;
+
+    return Ꮡf.Position(p).Line;
 }
 
 internal static nint searchLineInfos(slice<lineInfo> a, nint x) {
-    var (i, found) = slices.BinarySearchFunc(a, x, (lineInfo a, nint x) => cmp.Compare(aΔ1.Offset, xΔ1));
+    var (i, found) = slices.BinarySearchFunc(a, x, (lineInfo aΔ1, nint xΔ1) => cmp.Compare(aΔ1.Offset, xΔ1));
     if (!found) {
         // We want the lineInfo containing x, but if we didn't
         // find x then i is the next one.
@@ -322,12 +341,13 @@ internal static nint searchLineInfos(slice<lineInfo> a, nint x) {
 // unpack returns the filename and line and column number for a file offset.
 // If adjusted is set, unpack will return the filename and line information
 // possibly adjusted by //line comments; otherwise those comments are ignored.
-[GoRecv] internal static (@string filename, nint line, nint column) unpack(this ref ΔFile f, nint offset, bool adjusted) {
+internal static (@string filename, nint line, nint column) unpack(this ж<ΔFile> Ꮡf, nint offset, bool adjusted) {
     @string filename = default!;
     nint line = default!;
     nint column = default!;
 
-    f.mutex.Lock();
+    ref var f = ref Ꮡf.Value;
+    Ꮡf.of(token_package.ΔFile.Ꮡmutex).Lock();
     filename = f.name;
     {
         nint i = searchInts(f.lines, offset); if (i >= 0) {
@@ -339,7 +359,7 @@ internal static nint searchLineInfos(slice<lineInfo> a, nint x) {
         {
             nint i = searchLineInfos(f.infos, offset); if (i >= 0) {
                 var alt = Ꮡ(f.infos[i]);
-                filename = alt.val.Filename;
+                filename = alt.Value.Filename;
                 {
                     nint iΔ1 = searchInts(f.lines, (~alt).Offset); if (iΔ1 >= 0) {
                         // i+1 is the line at which the alternative position was recorded
@@ -365,16 +385,17 @@ internal static nint searchLineInfos(slice<lineInfo> a, nint x) {
     }
     // TODO(mvdan): move Unlock back under Lock with a defer statement once
     // https://go.dev/issue/38471 is fixed to remove the performance penalty.
-    f.mutex.Unlock();
+    Ꮡf.of(token_package.ΔFile.Ꮡmutex).Unlock();
     return (filename, line, column);
 }
 
-[GoRecv] internal static ΔPosition /*pos*/ position(this ref ΔFile f, ΔPos p, bool adjusted) {
+internal static ΔPosition /*pos*/ position(this ж<ΔFile> Ꮡf, ΔPos p, bool adjusted) {
     ΔPosition pos = default!;
 
-    nint offset = f.fixOffset(((nint)p) - f.@base);
+    ref var f = ref Ꮡf.Value;
+    nint offset = f.fixOffset((nint)p - f.@base);
     pos.Offset = offset;
-    (pos.Filename, pos.Line, pos.Column) = f.unpack(offset, adjusted);
+    (pos.Filename, pos.Line, pos.Column) = Ꮡf.unpack(offset, adjusted);
     return pos;
 }
 
@@ -383,11 +404,12 @@ internal static nint searchLineInfos(slice<lineInfo> a, nint x) {
 // If adjusted is set, the position may be adjusted by position-altering
 // //line comments; otherwise those comments are ignored.
 // p must be a Pos value in f or NoPos.
-[GoRecv] public static ΔPosition /*pos*/ PositionFor(this ref ΔFile f, ΔPos p, bool adjusted) {
+public static ΔPosition /*pos*/ PositionFor(this ж<ΔFile> Ꮡf, ΔPos p, bool adjusted) {
     ΔPosition pos = default!;
 
+    ref var f = ref Ꮡf.Value;
     if (p != NoPos) {
-        pos = f.position(p, adjusted);
+        pos = Ꮡf.position(p, adjusted);
     }
     return pos;
 }
@@ -395,10 +417,11 @@ internal static nint searchLineInfos(slice<lineInfo> a, nint x) {
 // Position returns the Position value for the given file position p.
 // If p is out of bounds, it is adjusted to match the File.Offset behavior.
 // Calling f.Position(p) is equivalent to calling f.PositionFor(p, true).
-[GoRecv] public static ΔPosition /*pos*/ Position(this ref ΔFile f, ΔPos p) {
+public static ΔPosition /*pos*/ Position(this ж<ΔFile> Ꮡf, ΔPos p) {
     ΔPosition pos = default!;
 
-    return f.PositionFor(p, true);
+    ref var f = ref Ꮡf.Value;
+    return Ꮡf.PositionFor(p, true);
 }
 
 // -----------------------------------------------------------------------------
@@ -427,10 +450,10 @@ internal static nint searchLineInfos(slice<lineInfo> a, nint x) {
 // A [File] may be removed from a FileSet when it is no longer needed.
 // This may reduce memory usage in a long-running application.
 [GoType] partial struct FileSet {
-    internal sync_package.RWMutex mutex;         // protects the file set
+    internal sync.RWMutex mutex;         // protects the file set
     internal nint @base;                 // base offset for the next file
     internal slice<ж<ΔFile>> files;    // list of files in the order added to the set
-    internal sync.atomic_package.Pointer last; // cache of last file looked up
+    internal atomic.Pointer<ΔFile> last; // cache of last file looked up
 }
 
 // NewFileSet creates a new file set.
@@ -444,10 +467,12 @@ public static ж<FileSet> NewFileSet() {
 
 // Base returns the minimum base offset that must be provided to
 // [FileSet.AddFile] when adding the next file.
-[GoRecv] public static nint Base(this ref FileSet s) {
-    s.mutex.RLock();
+public static nint Base(this ж<FileSet> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    Ꮡs.of(FileSet.Ꮡmutex).RLock();
     nint b = s.@base;
-    s.mutex.RUnlock();
+    Ꮡs.of(FileSet.Ꮡmutex).RUnlock();
     return b;
 }
 
@@ -466,18 +491,20 @@ public static ж<FileSet> NewFileSet() {
 // with offs in the range [0, size] and thus p in the range [base, base+size].
 // For convenience, [File.Pos] may be used to create file-specific position
 // values from a file offset.
-[GoRecv] public static ж<ΔFile> AddFile(this ref FileSet s, @string filename, nint @base, nint size) => func((defer, _) => {
+public static ж<ΔFile> AddFile(this ж<FileSet> Ꮡs, @string filename, nint @base, nint size) => func((defer, recover) => {
+    ref var s = ref Ꮡs.Value;
+
     // Allocate f outside the critical section.
     var f = Ꮡ(new ΔFile(name: filename, size: size, lines: new nint[]{0}.slice()));
-    s.mutex.Lock();
-    defer(s.mutex.Unlock);
+    Ꮡs.of(FileSet.Ꮡmutex).Lock();
+    defer(Ꮡs.of(FileSet.Ꮡmutex).Unlock);
     if (@base < 0) {
         @base = s.@base;
     }
     if (@base < s.@base) {
         throw panic(fmt.Sprintf("invalid base %d (should be >= %d)"u8, @base, s.@base));
     }
-    f.val.@base = @base;
+    f.Value.@base = @base;
     if (size < 0) {
         throw panic(fmt.Sprintf("invalid size %d (should be >= 0)"u8, size));
     }
@@ -490,7 +517,7 @@ public static ж<FileSet> NewFileSet() {
     // add the file to the file set
     s.@base = @base;
     s.files = append(s.files, f);
-    s.last.Store(f);
+    Ꮡs.of(FileSet.Ꮡlast).Store(f);
     return f;
 });
 
@@ -500,19 +527,19 @@ public static ж<FileSet> NewFileSet() {
 // encounters an unbounded stream of files.
 //
 // Removing a file that does not belong to the set has no effect.
-[GoRecv] public static void RemoveFile(this ref FileSet s, ж<ΔFile> Ꮡfile) => func((defer, _) => {
-    ref var file = ref Ꮡfile.val;
+public static void RemoveFile(this ж<FileSet> Ꮡs, ж<ΔFile> Ꮡfile) => func((defer, recover) => {
+    ref var s = ref Ꮡs.Value;
+    ref var @file = ref Ꮡfile.DerefOrNil();
 
-    s.last.CompareAndSwap(Ꮡfile, nil);
+    Ꮡs.of(FileSet.Ꮡlast).CompareAndSwap(Ꮡfile, nil);
     // clear last file cache
-    s.mutex.Lock();
-    defer(s.mutex.Unlock);
+    Ꮡs.of(FileSet.Ꮡmutex).Lock();
+    defer(Ꮡs.of(FileSet.Ꮡmutex).Unlock);
     {
-        ref var i = ref heap<nint>(out var Ꮡi);
-        i = searchFiles(s.files, file.@base); if (i >= 0 && s.files[i] == Ꮡfile) {
+        nint i = searchFiles(s.files, @file.@base); if (i >= 0 && s.files[i] == Ꮡfile) {
             var last = Ꮡ(s.files[len(s.files) - 1]);
             s.files = append(s.files[..(int)(i)], s.files[(int)(i + 1)..].ꓸꓸꓸ);
-            last.val = default!;
+            last.ValueSlot = default!;
         }
     }
 });
@@ -521,22 +548,24 @@ public static ж<FileSet> NewFileSet() {
 
 // Iterate calls f for the files in the file set in the order they were added
 // until f returns false.
-[GoRecv] public static void Iterate(this ref FileSet s, Func<ж<ΔFile>, bool> f) {
+public static void Iterate(this ж<FileSet> Ꮡs, Func<ж<ΔFile>, bool> f) {
+    ref var s = ref Ꮡs.Value;
+
     for (nint i = 0; ᐧ ; i++) {
-        ж<ΔFile> file = default!;
-        s.mutex.RLock();
+        ж<ΔFile> @file = default!;
+        Ꮡs.of(FileSet.Ꮡmutex).RLock();
         if (i < len(s.files)) {
-            file = s.files[i];
+            @file = s.files[i];
         }
-        s.mutex.RUnlock();
-        if (file == nil || !f(file)) {
+        Ꮡs.of(FileSet.Ꮡmutex).RUnlock();
+        if (@file == nil || !f(@file)) {
             break;
         }
     }
 }
 
 internal static nint searchFiles(slice<ж<ΔFile>> a, nint x) {
-    var (i, found) = slices.BinarySearchFunc(a, x, (ж<ΔFile> a, nint x) => cmp.Compare((~aΔ1).@base, xΔ1));
+    var (i, found) = slices.BinarySearchFunc(a, x, (ж<ΔFile> aΔ1, nint xΔ1) => cmp.Compare((~aΔ1).@base, xΔ1));
     if (!found) {
         // We want the File containing x, but if we didn't
         // find x then i is the next one.
@@ -545,24 +574,26 @@ internal static nint searchFiles(slice<ж<ΔFile>> a, nint x) {
     return i;
 }
 
-[GoRecv] internal static ж<ΔFile> file(this ref FileSet s, ΔPos p) => func((defer, _) => {
+internal static ж<ΔFile> @file(this ж<FileSet> Ꮡs, ΔPos p) => func<ж<ΔFile>>((defer, recover) => {
+    ref var s = ref Ꮡs.Value;
+
     // common case: p is in last file.
     {
-        var f = s.last.Load(); if (f != nil && (~f).@base <= ((nint)p) && ((nint)p) <= (~f).@base + (~f).size) {
+        var f = Ꮡs.of(FileSet.Ꮡlast).Load(); if (f != nil && (~f).@base <= (nint)p && (nint)p <= (~f).@base + (~f).size) {
             return f;
         }
     }
-    s.mutex.RLock();
-    defer(s.mutex.RUnlock);
+    Ꮡs.of(FileSet.Ꮡmutex).RLock();
+    defer(Ꮡs.of(FileSet.Ꮡmutex).RUnlock);
     // p is not in last file - search all files
     {
-        nint i = searchFiles(s.files, ((nint)p)); if (i >= 0) {
+        nint i = searchFiles(s.files, (nint)p); if (i >= 0) {
             var f = s.files[i];
             // f.base <= int(p) by definition of searchFiles
-            if (((nint)p) <= (~f).@base + (~f).size) {
+            if ((nint)p <= (~f).@base + (~f).size) {
                 // Update cache of last file. A race is ok,
                 // but an exclusive lock causes heavy contention.
-                s.last.Store(f);
+                Ꮡs.of(FileSet.Ꮡlast).Store(f);
                 return f;
             }
         }
@@ -573,11 +604,12 @@ internal static nint searchFiles(slice<ж<ΔFile>> a, nint x) {
 // File returns the file that contains the position p.
 // If no such file is found (for instance for p == [NoPos]),
 // the result is nil.
-[GoRecv] public static ж<ΔFile> /*f*/ File(this ref FileSet s, ΔPos p) {
+public static ж<ΔFile> /*f*/ File(this ж<FileSet> Ꮡs, ΔPos p) {
     ж<ΔFile> f = default!;
 
+    ref var s = ref Ꮡs.Value;
     if (p != NoPos) {
-        f = s.file(p);
+        f = Ꮡs.@file(p);
     }
     return f;
 }
@@ -586,12 +618,13 @@ internal static nint searchFiles(slice<ж<ΔFile>> a, nint x) {
 // If adjusted is set, the position may be adjusted by position-altering
 // //line comments; otherwise those comments are ignored.
 // p must be a [Pos] value in s or [NoPos].
-[GoRecv] public static ΔPosition /*pos*/ PositionFor(this ref FileSet s, ΔPos p, bool adjusted) {
+public static ΔPosition /*pos*/ PositionFor(this ж<FileSet> Ꮡs, ΔPos p, bool adjusted) {
     ΔPosition pos = default!;
 
+    ref var s = ref Ꮡs.Value;
     if (p != NoPos) {
         {
-            var f = s.file(p); if (f != nil) {
+            var f = Ꮡs.@file(p); if (f != nil) {
                 return f.position(p, adjusted);
             }
         }
@@ -601,10 +634,11 @@ internal static nint searchFiles(slice<ж<ΔFile>> a, nint x) {
 
 // Position converts a [Pos] p in the fileset into a Position value.
 // Calling s.Position(p) is equivalent to calling s.PositionFor(p, true).
-[GoRecv] public static ΔPosition /*pos*/ Position(this ref FileSet s, ΔPos p) {
+public static ΔPosition /*pos*/ Position(this ж<FileSet> Ꮡs, ΔPos p) {
     ΔPosition pos = default!;
 
-    return s.PositionFor(p, true);
+    ref var s = ref Ꮡs.Value;
+    return Ꮡs.PositionFor(p, true);
 }
 
 // -----------------------------------------------------------------------------
@@ -622,7 +656,7 @@ internal static nint searchInts(slice<nint> a, nint x) {
     nint i = 0;
     nint j = len(a);
     while (i < j) {
-        nint h = ((nint)(((nuint)(i + j)) >> (int)(1)));
+        nint h = (nint)(((nuint)(i + j) >> (int)(1)));
         // avoid overflow when computing h
         // i ≤ h < j
         if (a[h] <= x){

@@ -43,22 +43,19 @@ using static go.context_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(Context, context.CancelFunc), Context>]
-[assembly: GoImplement<(afterFuncer, bool), afterFuncer>]
-[assembly: GoImplement<(ctx Context, cancel context.CancelFunc), Context>]
-[assembly: GoImplement<(stringer, bool), stringer>]
-[assembly: GoImplement<afterFuncCtx, canceler>]
+[assembly: GoImplement<afterFuncCtx, canceler>(Pointer = true)]
 [assembly: GoImplement<backgroundCtx, Context>]
+[assembly: GoImplement<cancelCtx, Context>(Pointer = true)]
 [assembly: GoImplement<cancelCtx, Context>(Promoted = true)]
-[assembly: GoImplement<cancelCtx, Context>]
-[assembly: GoImplement<cancelCtx, canceler>]
+[assembly: GoImplement<cancelCtx, canceler>(Pointer = true)]
 [assembly: GoImplement<deadlineExceededError, error>]
 [assembly: GoImplement<stopCtx, Context>(Promoted = true)]
-[assembly: GoImplement<timerCtx, Context>]
-[assembly: GoImplement<timerCtx, canceler>]
+[assembly: GoImplement<stopCtx, Context>]
+[assembly: GoImplement<timerCtx, Context>(Pointer = true)]
+[assembly: GoImplement<timerCtx, canceler>(Pointer = true)]
 [assembly: GoImplement<todoCtx, Context>]
+[assembly: GoImplement<valueCtx, Context>(Pointer = true)]
 [assembly: GoImplement<valueCtx, Context>(Promoted = true)]
-[assembly: GoImplement<valueCtx, Context>]
 [assembly: GoImplement<withoutCancelCtx, Context>]
 // </InterfaceImplementations>
 

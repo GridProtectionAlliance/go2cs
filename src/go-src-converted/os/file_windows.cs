@@ -8,29 +8,30 @@ using filepathlite = @internal.filepathlite_package;
 using godebug = @internal.godebug_package;
 using poll = @internal.poll_package;
 using windows = @internal.syscall.windows_package;
-using runtime = runtime_package;
-using sync = sync_package;
-using atomic = sync.atomic_package;
+using Δruntime = runtime_package;
+using Δsync = sync_package;
+using atomic = go.sync.atomic_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.syscall;
-using sync;
+using fs = go.io.fs_package;
+using go.io;
+using go.sync;
 
 partial class os_package {
 
 // This matches the value in syscall/syscall_windows.go.
-internal static readonly GoUntyped _UTIME_OMIT = /* -1 */
-    GoUntyped.Parse("-1");
+internal static readonly UntypedInt _UTIME_OMIT = -1;
 
 // file is the real representation of *File.
 // The extra level of indirection ensures that no clients of os
 // can overwrite this data, which could cause the finalizer
 // to close the wrong file descriptor.
-[GoType] partial struct file {
-    internal @internal.poll_package.FD pfd;
+[GoType] partial struct @file {
+    internal poll.FD pfd;
     internal @string name;
-    internal sync.atomic_package.Pointer dirinfo; // nil unless directory being read
+    internal atomic.Pointer<dirInfo> dirinfo; // nil unless directory being read
     internal bool appendMode;                    // whether file is opened for appending
 }
 
@@ -40,11 +41,13 @@ internal static readonly GoUntyped _UTIME_OMIT = /* -1 */
 // making it invalid; see [runtime.SetFinalizer] for more information on when
 // a finalizer might be run. On Unix systems this will cause the [File.SetDeadline]
 // methods to stop working.
-[GoRecv] public static uintptr Fd(this ref File file) {
-    if (file == nil) {
-        return ((uintptr)syscall.InvalidHandle);
+public static uintptr Fd(this ж<File> Ꮡfile) {
+    ref var @file = ref Ꮡfile.Value;
+
+    if (@file == nil) {
+        return (uintptr)syscall.InvalidHandle;
     }
-    return ((uintptr)file.pfd.Sysfd);
+    return (uintptr)@file.pfd.Sysfd;
 }
 
 // newFile returns a new File with the given file handle and name.
@@ -61,7 +64,7 @@ internal static ж<File> newFile(syscallꓸHandle h, @string name, @string kind)
             }
         }
     }
-    var f = Ꮡ(new File(Ꮡ(new file(
+    var f = Ꮡ(new File(Ꮡ(new @file(
         pfd: new poll.FD(
             Sysfd: h,
             IsStream: true,
@@ -70,10 +73,10 @@ internal static ж<File> newFile(syscallꓸHandle h, @string name, @string kind)
         name: name
     ))
     ));
-    runtime.SetFinalizer((~f).file, (ж<file>).close);
+    Δruntime.SetFinalizer((~f).@file, (Func<ж<@file>, error>)(close));
     // Ignore initialization errors.
     // Assume any problems will show up in later I/O.
-    f.pfd.Init(kind, false);
+    f.of(File.Ꮡpfd).Init(kind, false);
     return f;
 }
 
@@ -94,7 +97,7 @@ public static ж<File> NewFile(uintptr fd, @string name) {
 }
 
 internal static void epipecheck(ж<File> Ꮡfile, error e) {
-    ref var file = ref Ꮡfile.val;
+    ref var @file = ref Ꮡfile.Value;
 
 }
 
@@ -105,23 +108,23 @@ public static readonly @string DevNull = "NUL"u8;
 // openFileNolog is the Windows implementation of OpenFile.
 internal static (ж<File>, error) openFileNolog(@string name, nint flag, FileMode perm) {
     if (name == ""u8) {
-        return (default!, new PathError{Op: "open"u8, Path: name, Err: syscall.ENOENT});
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: syscall.ENOENT))));
     }
     @string path = fixLongPath(name);
-    var (r, e) = syscall.Open(path, (nint)(flag | syscall.O_CLOEXEC), syscallMode(perm));
+    var (r, e) = syscall.Open(path, (nint)(flag | (nint)syscall.O_CLOEXEC), syscallMode(perm));
     if (e != default!) {
         // We should return EISDIR when we are trying to open a directory with write access.
-        if (e == syscall.ERROR_ACCESS_DENIED && ((nint)(flag & O_WRONLY) != 0 || (nint)(flag & O_RDWR) != 0)) {
-            (pathp, e1) = syscall.UTF16PtrFromString(path);
+        if (AreEqual(e, syscall.ERROR_ACCESS_DENIED) && ((nint)(flag & O_WRONLY) != 0 || (nint)(flag & O_RDWR) != 0)) {
+            var (pathp, e1) = syscall.UTF16PtrFromString(path);
             if (e1 == default!) {
-                ref var fa = ref heap(new syscall_package.Win32FileAttributeData(), out var Ꮡfa);
+                ref var fa = ref heap(new syscall.Win32FileAttributeData(), out var Ꮡfa);
                 e1 = syscall.GetFileAttributesEx(pathp, syscall.GetFileExInfoStandard, (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡfa)));
-                if (e1 == default! && (uint32)(fa.FileAttributes & syscall.FILE_ATTRIBUTE_DIRECTORY) != 0) {
+                if (e1 == default! && (uint32)(fa.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0) {
                     e = syscall.EISDIR;
                 }
             }
         }
-        return (default!, new PathError{Op: "open"u8, Path: name, Err: e});
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: e))));
     }
     return (newFile(r, name, "file"u8), default!);
 }
@@ -130,26 +133,28 @@ internal static (ж<File>, error) openDirNolog(@string name) {
     return openFileNolog(name, O_RDONLY, 0);
 }
 
-[GoRecv] internal static error close(this ref file file) {
-    if (file == nil) {
+internal static error close(this ж<@file> Ꮡfile) {
+    ref var @file = ref Ꮡfile.Value;
+
+    if (@file == nil) {
         return syscall.EINVAL;
     }
     {
-        var info = file.dirinfo.Swap(nil); if (info != nil) {
+        var info = Ꮡfile.of(@file.Ꮡdirinfo).Swap(nil); if (info != nil) {
             info.close();
         }
     }
     error err = default!;
     {
-        var e = file.pfd.Close(); if (e != default!) {
+        var e = Ꮡfile.of(@file.Ꮡpfd).Close(); if (e != default!) {
             if (AreEqual(e, poll.ErrFileClosing)) {
                 e = ErrClosed;
             }
-            Ꮡerr = new PathError{Op: "close"u8, Path: file.name, Err: e}; err = ref Ꮡerr.val;
+            err = new fs.PathErrorжerror(Ꮡ(new PathError(Op: "close"u8, Path: @file.name, Err: e)));
         }
     }
     // no need for a finalizer anymore
-    runtime.SetFinalizer(file, default!);
+    Δruntime.SetFinalizer(@file, default!);
     return err;
 }
 
@@ -157,31 +162,32 @@ internal static (ж<File>, error) openDirNolog(@string name) {
 // according to whence: 0 means relative to the origin of the file, 1 means
 // relative to the current offset, and 2 means relative to the end.
 // It returns the new offset and an error, if any.
-[GoRecv] internal static (int64 ret, error err) seek(this ref File f, int64 offset, nint whence) {
+internal static (int64 ret, error err) seek(this ж<File> Ꮡf, int64 offset, nint whence) {
     int64 ret = default!;
     error err = default!;
 
+    ref var f = ref Ꮡf.Value;
     {
-        var info = f.dirinfo.Swap(nil); if (info != nil) {
+        var info = Ꮡf.of(File.Ꮡdirinfo).Swap(nil); if (info != nil) {
             // Free cached dirinfo, so we allocate a new one if we
             // access this file as a directory again. See #35767 and #37161.
             info.close();
         }
     }
-    (ret, err) = f.pfd.Seek(offset, whence);
-    runtime.KeepAlive(f);
+    (ret, err) = Ꮡf.of(File.Ꮡpfd).Seek(offset, whence);
+    Δruntime.KeepAlive(f);
     return (ret, err);
 }
 
 // Truncate changes the size of the named file.
 // If the file is a symbolic link, it changes the size of the link's target.
-public static error Truncate(@string name, int64 size) => func((defer, _) => {
-    (f, e) = OpenFile(name, O_WRONLY, 438);
+public static error Truncate(@string name, int64 size) => func<error>((defer, recover) => {
+    var (f, e) = OpenFile(name, O_WRONLY, 438);
     if (e != default!) {
         return e;
     }
     var fʗ1 = f;
-    defer(fʗ1.Close);
+    defer(() => fʗ1.Close());
     var e1 = f.Truncate(size);
     if (e1 != default!) {
         return e1;
@@ -192,9 +198,9 @@ public static error Truncate(@string name, int64 size) => func((defer, _) => {
 // Remove removes the named file or directory.
 // If there is an error, it will be of type *PathError.
 public static error Remove(@string name) {
-    (p, e) = syscall.UTF16PtrFromString(fixLongPath(name));
+    var (p, e) = syscall.UTF16PtrFromString(fixLongPath(name));
     if (e != default!) {
-        return new PathError{Op: "remove"u8, Path: name, Err: e};
+        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "remove"u8, Path: name, Err: e)));
     }
     // Go file interface forces us to know whether
     // name is a file or directory. Try both.
@@ -212,12 +218,12 @@ public static error Remove(@string name) {
         if (e2 != default!){
             e = e2;
         } else {
-            if ((uint32)(a & syscall.FILE_ATTRIBUTE_DIRECTORY) != 0){
+            if ((uint32)(a & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0){
                 e = e1;
             } else 
-            if ((uint32)(a & syscall.FILE_ATTRIBUTE_READONLY) != 0) {
+            if ((uint32)(a & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0) {
                 {
-                    e1 = syscall.SetFileAttributes(p, (uint32)(a & ~syscall.FILE_ATTRIBUTE_READONLY)); if (e1 == default!) {
+                    e1 = syscall.SetFileAttributes(p, (uint32)(a & ~(uint32)syscall.FILE_ATTRIBUTE_READONLY)); if (e1 == default!) {
                         {
                             e = syscall.DeleteFile(p); if (e == default!) {
                                 return default!;
@@ -228,13 +234,13 @@ public static error Remove(@string name) {
             }
         }
     }
-    return new PathError{Op: "remove"u8, Path: name, Err: e};
+    return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "remove"u8, Path: name, Err: e)));
 }
 
 internal static error rename(@string oldname, @string newname) {
     var e = windows.Rename(fixLongPath(oldname), fixLongPath(newname));
     if (e != default!) {
-        return new LinkError("rename", oldname, newname, e);
+        return new LinkErrorжerror(Ꮡ(new LinkError("rename", oldname, newname, e)));
     }
     return default!;
 }
@@ -255,27 +261,28 @@ public static (ж<File> r, ж<File> w, error err) Pipe() {
     return (newFile(p[0], "|0"u8, "pipe"u8), newFile(p[1], "|1"u8, "pipe"u8), default!);
 }
 
-internal static sync.Once useGetTempPath2Once;
+internal static ж<Δsync.Once> ᏑuseGetTempPath2Once = new(default(Δsync.Once));
+internal static ref Δsync.Once useGetTempPath2Once => ref ᏑuseGetTempPath2Once.Value;
 internal static bool useGetTempPath2;
 
 internal static @string tempDir() {
-    useGetTempPath2Once.Do(() => {
+    ᏑuseGetTempPath2Once.Do(() => {
         useGetTempPath2 = (windows.ErrorLoadingGetTempPath2() == default!);
     });
     var getTempPath = syscall.GetTempPath;
     if (useGetTempPath2) {
         getTempPath = windows.GetTempPath2;
     }
-    var n = ((uint32)syscall.MAX_PATH);
+    var n = (uint32)syscall.MAX_PATH;
     while (ᐧ) {
-        var b = new slice<uint16>(n);
-        (n, _) = getTempPath(((uint32)len(b)), Ꮡ(b, 0));
-        if (n > ((uint32)len(b))) {
+        var b = new slice<uint16>((nint)(n));
+        (n, _) = getTempPath((uint32)len(b), Ꮡ(b, 0));
+        if (n > (uint32)len(b)) {
             continue;
         }
         if (n == 3 && b[1] == (rune)':' && b[2] == (rune)'\\'){
         } else 
-        if (n > 0 && b[n - 1] == (rune)'\\') {
+        if (n > 0 && b[(nint)(n - 1)] == (rune)'\\') {
             // Do nothing for path, like C:\.
             // Otherwise remove terminating \.
             n--;
@@ -287,17 +294,17 @@ internal static @string tempDir() {
 // Link creates newname as a hard link to the oldname file.
 // If there is an error, it will be of type *LinkError.
 public static error Link(@string oldname, @string newname) {
-    (n, err) = syscall.UTF16PtrFromString(fixLongPath(newname));
+    var (n, err) = syscall.UTF16PtrFromString(fixLongPath(newname));
     if (err != default!) {
-        return new LinkError("link", oldname, newname, err);
+        return new LinkErrorжerror(Ꮡ(new LinkError("link", oldname, newname, err)));
     }
-    (o, err) = syscall.UTF16PtrFromString(fixLongPath(oldname));
+    (var o, err) = syscall.UTF16PtrFromString(fixLongPath(oldname));
     if (err != default!) {
-        return new LinkError("link", oldname, newname, err);
+        return new LinkErrorжerror(Ꮡ(new LinkError("link", oldname, newname, err)));
     }
     err = syscall.CreateHardLink(n, o, 0);
     if (err != default!) {
-        return new LinkError("link", oldname, newname, err);
+        return new LinkErrorжerror(Ꮡ(new LinkError("link", oldname, newname, err)));
     }
     return default!;
 }
@@ -328,11 +335,11 @@ public static error Symlink(@string oldname, @string newname) {
             }
         }
     }
-    (fi, err) = Stat(destpath);
+    var (fi, err) = Stat(destpath);
     var isdir = err == default! && fi.IsDir();
-    (n, err) = syscall.UTF16PtrFromString(fixLongPath(newname));
+    (var n, err) = syscall.UTF16PtrFromString(fixLongPath(newname));
     if (err != default!) {
-        return new LinkError("symlink", oldname, newname, err);
+        return new LinkErrorжerror(Ꮡ(new LinkError("symlink", oldname, newname, err)));
     }
     ж<uint16> o = default!;
     if (filepathlite.IsAbs(oldname)){
@@ -347,7 +354,7 @@ public static error Symlink(@string oldname, @string newname) {
         (o, err) = syscall.UTF16PtrFromString(oldname);
     }
     if (err != default!) {
-        return new LinkError("symlink", oldname, newname, err);
+        return new LinkErrorжerror(Ꮡ(new LinkError("symlink", oldname, newname, err)));
     }
     uint32 flags = windows.SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE;
     if (isdir) {
@@ -357,10 +364,10 @@ public static error Symlink(@string oldname, @string newname) {
     if (err != default!) {
         // the unprivileged create flag is unsupported
         // below Windows 10 (1703, v10.0.14972). retry without it.
-        flags &= ~(uint32)(windows.SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE);
+        flags &= unchecked((uint32)~(uint32)(windows.SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE));
         err = syscall.CreateSymbolicLink(n, o, flags);
         if (err != default!) {
-            return new LinkError("symlink", oldname, newname, err);
+            return new LinkErrorжerror(Ꮡ(new LinkError("symlink", oldname, newname, err)));
         }
     }
     return default!;
@@ -370,15 +377,15 @@ public static error Symlink(@string oldname, @string newname) {
 // parameter, so that Windows does not follow symlink, if path is a symlink.
 // openSymlink returns opened file handle.
 internal static (syscallꓸHandle, error) openSymlink(@string path) {
-    (p, err) = syscall.UTF16PtrFromString(path);
+    var (p, err) = syscall.UTF16PtrFromString(path);
     if (err != default!) {
         return (0, err);
     }
-    var attrs = ((uint32)syscall.FILE_FLAG_BACKUP_SEMANTICS);
+    var attrs = (uint32)syscall.FILE_FLAG_BACKUP_SEMANTICS;
     // Use FILE_FLAG_OPEN_REPARSE_POINT, otherwise CreateFile will follow symlink.
     // See https://docs.microsoft.com/en-us/windows/desktop/FileIO/symbolic-link-effects-on-file-systems-functions#createfile-and-createfiletransacted
     attrs |= (uint32)(syscall.FILE_FLAG_OPEN_REPARSE_POINT);
-    var (h, err) = syscall.CreateFile(p, 0, 0, nil, syscall.OPEN_EXISTING, attrs, 0);
+    (var h, err) = syscall.CreateFile(p, 0, 0, nil, syscall.OPEN_EXISTING, attrs, 0);
     if (err != default!) {
         return (0, err);
     }
@@ -395,7 +402,7 @@ internal static ж<godebug.Setting> winreadlinkvolume = godebug.New("winreadlink
 //	\??\C:\foo\bar into C:\foo\bar
 //	\??\UNC\foo\bar into \\foo\bar
 //	\??\Volume{abc}\ into \\?\Volume{abc}\
-internal static (@string, error) normaliseLinkPath(@string path) => func((defer, _) => {
+internal static (@string, error) normaliseLinkPath(@string path) => func<(@string, error)>((defer, recover) => {
     if (len(path) < 4 || path[..4] != @"\??\") {
         // unexpected path, return it as is
         return (path, default!);
@@ -424,14 +431,14 @@ internal static (@string, error) normaliseLinkPath(@string path) => func((defer,
     deferǃ(syscall.CloseHandle, h, defer);
     var buf = new slice<uint16>(100);
     while (ᐧ) {
-        var (n, errΔ1) = windows.GetFinalPathNameByHandle(h, Ꮡ(buf, 0), ((uint32)len(buf)), windows.VOLUME_NAME_DOS);
+        var (n, errΔ1) = windows.GetFinalPathNameByHandle(h, Ꮡ(buf, 0), (uint32)len(buf), windows.VOLUME_NAME_DOS);
         if (errΔ1 != default!) {
             return ("", errΔ1);
         }
-        if (n < ((uint32)len(buf))) {
+        if (n < (uint32)len(buf)) {
             break;
         }
-        buf = new slice<uint16>(n);
+        buf = new slice<uint16>((nint)(n));
     }
     s = syscall.UTF16ToString(buf);
     if (len(s) > 4 && s[..4] == @"\\?\") {
@@ -445,7 +452,7 @@ internal static (@string, error) normaliseLinkPath(@string path) => func((defer,
     return ("", errors.New("GetFinalPathNameByHandle returned unexpected path: "u8 + s));
 });
 
-internal static (@string, error) readReparseLink(@string path) => func((defer, _) => {
+internal static (@string, error) readReparseLink(@string path) => func<(@string, error)>((defer, recover) => {
     var (h, err) = openSymlink(path);
     if (err != default!) {
         return ("", err);
@@ -453,26 +460,26 @@ internal static (@string, error) readReparseLink(@string path) => func((defer, _
     deferǃ(syscall.CloseHandle, h, defer);
     var rdbbuf = new slice<byte>(syscall.MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
     ref var bytesReturned = ref heap(new uint32(), out var ᏑbytesReturned);
-    err = syscall.DeviceIoControl(h, syscall.FSCTL_GET_REPARSE_POINT, nil, 0, Ꮡ(rdbbuf, 0), ((uint32)len(rdbbuf)), ᏑbytesReturned, nil);
+    err = syscall.DeviceIoControl(h, syscall.FSCTL_GET_REPARSE_POINT, nil, 0, Ꮡ(rdbbuf, 0), (uint32)len(rdbbuf), ᏑbytesReturned, nil);
     if (err != default!) {
         return ("", err);
     }
     var rdb = (ж<windows.REPARSE_DATA_BUFFER>)(uintptr)(new @unsafe.Pointer(Ꮡ(rdbbuf, 0)));
-    switch ((~rdb).ReparseTag) {
-    case syscall.IO_REPARSE_TAG_SYMLINK: {
-        var rb = (ж<windows.SymbolicLinkReparseBuffer>)(uintptr)(new @unsafe.Pointer(Ꮡ((~rdb).DUMMYUNIONNAME)));
+    var exprᴛ1 = (~rdb).ReparseTag;
+    if (exprᴛ1 == syscall.IO_REPARSE_TAG_SYMLINK) {
+        var rb = (ж<windows.SymbolicLinkReparseBuffer>)(uintptr)(new @unsafe.Pointer(rdb.of(windows.REPARSE_DATA_BUFFER.ᏑDUMMYUNIONNAME)));
         @string s = rb.Path();
-        if ((uint32)((~rb).Flags & windows.SYMLINK_FLAG_RELATIVE) != 0) {
+        if ((uint32)((~rb).Flags & (uint32)windows.SYMLINK_FLAG_RELATIVE) != 0) {
             return (s, default!);
         }
         return normaliseLinkPath(s);
     }
-    case windows.IO_REPARSE_TAG_MOUNT_POINT: {
-        return normaliseLinkPath(((ж<windows.MountPointReparseBuffer>)(uintptr)(new @unsafe.Pointer(Ꮡ((~rdb).DUMMYUNIONNAME)))).val.Path());
+    if (exprᴛ1 == windows.IO_REPARSE_TAG_MOUNT_POINT) {
+        return normaliseLinkPath(((ж<windows.MountPointReparseBuffer>)(uintptr)(new @unsafe.Pointer(rdb.of(windows.REPARSE_DATA_BUFFER.ᏑDUMMYUNIONNAME)))).Path());
     }
-    default: {
+    { /* default: */
         return ("", syscall.ENOENT);
-    }}
+    }
 
 });
 
@@ -481,7 +488,7 @@ internal static (@string, error) readReparseLink(@string path) => func((defer, _
 internal static (@string, error) readlink(@string name) {
     var (s, err) = readReparseLink(fixLongPath(name));
     if (err != default!) {
-        return ("", new PathError{Op: "readlink"u8, Path: name, Err: err});
+        return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readlink"u8, Path: name, Err: err))));
     }
     return (s, default!);
 }

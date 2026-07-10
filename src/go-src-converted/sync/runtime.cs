@@ -52,7 +52,7 @@ internal static partial void runtime_notifyListNotifyOne(ж<notifyList> l);
 // Ensure that sync and runtime agree on size of notifyList.
 internal static partial void runtime_notifyListCheck(uintptr size);
 
-[GoInit] internal static void init() {
+[GoInit] internal static void initΔ1() {
     notifyList n = default!;
     runtime_notifyListCheck(@unsafe.Sizeof(n));
 }

@@ -40,7 +40,7 @@ public static readonly UntypedInt ΔSize = 4;
 public static hash.Hash32 New() {
     var d = @new<digest>();
     d.Reset();
-    return ~d;
+    return new digestжHash32(d);
 }
 
 [GoRecv] internal static nint Size(this ref digest d) {
@@ -57,7 +57,7 @@ internal const nint marshaledSize = /* len(magic) + 4 */ 8;
 [GoRecv] internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
     var b = new slice<byte>(0, marshaledSize);
     b = append(b, magic.ꓸꓸꓸ);
-    b = byteorder.BeAppendUint32(b, ((uint32)(d)));
+    b = byteorder.BeAppendUint32(b, (uint32)(d));
     return (b, default!);
 }
 
@@ -74,32 +74,32 @@ internal const nint marshaledSize = /* len(magic) + 4 */ 8;
 
 // Add p to the running checksum d.
 internal static digest update(digest d, slice<byte> p) {
-    var (s1, s2) = (((uint32)((digest)(d & 65535))), ((uint32)(d >> (int)(16))));
+    var (s1, s2) = ((uint32)((digest)(d & 0xffff)), (uint32)((d >> (int)(16))));
     while (len(p) > 0) {
         slice<byte> q = default!;
         if (len(p) > nmax) {
             (p, q) = (p[..(int)(nmax)], p[(int)(nmax)..]);
         }
         while (len(p) >= 4) {
-            s1 += ((uint32)p[0]);
+            s1 += (uint32)p[0];
             s2 += s1;
-            s1 += ((uint32)p[1]);
+            s1 += (uint32)p[1];
             s2 += s1;
-            s1 += ((uint32)p[2]);
+            s1 += (uint32)p[2];
             s2 += s1;
-            s1 += ((uint32)p[3]);
+            s1 += (uint32)p[3];
             s2 += s1;
             p = p[4..];
         }
         foreach (var (_, x) in p) {
-            s1 += ((uint32)x);
+            s1 += (uint32)x;
             s2 += s1;
         }
         s1 %= mod;
         s2 %= mod;
         p = q;
     }
-    return ((digest)((uint32)(s2 << (int)(16) | s1)));
+    return ((digest)((uint32)((s2 << (int)(16)) | s1)));
 }
 
 [GoRecv] internal static (nint nn, error err) Write(this ref digest d, slice<byte> p) {
@@ -111,17 +111,17 @@ internal static digest update(digest d, slice<byte> p) {
 }
 
 [GoRecv] internal static uint32 Sum32(this ref digest d) {
-    return ((uint32)(d));
+    return (uint32)(d);
 }
 
 [GoRecv] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
-    var s = ((uint32)(d));
-    return append(@in, ((byte)(s >> (int)(24))), ((byte)(s >> (int)(16))), ((byte)(s >> (int)(8))), ((byte)s));
+    var s = (uint32)(d);
+    return append(@in, (byte)((s >> (int)(24))), (byte)((s >> (int)(16))), (byte)((s >> (int)(8))), (byte)s);
 }
 
 // Checksum returns the Adler-32 checksum of data.
 public static uint32 Checksum(slice<byte> data) {
-    return ((uint32)update(1, data));
+    return (uint32)update(1, data);
 }
 
 } // end adler32_package

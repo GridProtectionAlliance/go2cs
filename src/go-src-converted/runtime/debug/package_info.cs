@@ -47,7 +47,7 @@ using static go.runtime.debug_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<strings_package.Builder, io_package.Writer>]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

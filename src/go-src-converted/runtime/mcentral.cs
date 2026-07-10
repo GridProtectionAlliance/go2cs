@@ -19,7 +19,7 @@ partial class runtime_package {
 
 // Central list of free objects of a given size.
 [GoType] partial struct mcentral {
-    internal runtime.@internal.sys_package.NotInHeap _;
+    internal sys.NotInHeap _;
     internal spanClass spanclass;
     // partial and full contain two mspan sets: one of swept in-use
     // spans, and one of unswept in-use spans. These two trade
@@ -46,10 +46,10 @@ partial class runtime_package {
 // Initialize a single central free list.
 [GoRecv] internal static void init(this ref mcentral c, spanClass spc) {
     c.spanclass = spc;
-    lockInit(Ꮡc.partial[0].of(spanSet.ᏑspineLock), lockRankSpanSetSpine);
-    lockInit(Ꮡc.partial[1].of(spanSet.ᏑspineLock), lockRankSpanSetSpine);
-    lockInit(Ꮡc.full[0].of(spanSet.ᏑspineLock), lockRankSpanSetSpine);
-    lockInit(Ꮡc.full[1].of(spanSet.ᏑspineLock), lockRankSpanSetSpine);
+    lockInit(Ꮡ(c.partial[0]).of(spanSet.ᏑspineLock), lockRankSpanSetSpine);
+    lockInit(Ꮡ(c.partial[1]).of(spanSet.ᏑspineLock), lockRankSpanSetSpine);
+    lockInit(Ꮡ(c.full[0]).of(spanSet.ᏑspineLock), lockRankSpanSetSpine);
+    lockInit(Ꮡ(c.full[1]).of(spanSet.ᏑspineLock), lockRankSpanSetSpine);
 }
 
 // partialUnswept returns the spanSet which holds partially-filled
@@ -79,7 +79,7 @@ partial class runtime_package {
 // Allocate a span to use in an mcache.
 [GoRecv] internal static ж<mspan> cacheSpan(this ref mcentral c) {
     // Deduct credit for this span allocation and sweep if necessary.
-    var spanBytes = ((uintptr)class_to_allocnpages[c.spanclass.sizeclass()]) * _PageSize;
+    var spanBytes = (uintptr)class_to_allocnpages[c.spanclass.sizeclass()] * (uintptr)_PageSize;
     deductSweepCredit(spanBytes, 0);
     var traceDone = false;
     var Δtrace = traceAcquire();
@@ -110,7 +110,7 @@ partial class runtime_package {
             goto havespan;
         }
     }
-    sl = Δsweep.active.begin();
+    sl = ᏑΔsweep.of(sweepdata.Ꮡactive).begin();
     if (sl.valid) {
         // Now try partial unswept spans.
         for (; spanBudget >= 0; spanBudget--) {
@@ -122,7 +122,7 @@ partial class runtime_package {
                 var (sΔ1, ok) = sl.tryAcquire(s); if (ok) {
                     // We got ownership of the span, so let's sweep it and use it.
                     sΔ1.sweep(true);
-                    Δsweep.active.end(sl);
+                    ᏑΔsweep.of(sweepdata.Ꮡactive).end(sl);
                     goto havespan;
                 }
             }
@@ -147,8 +147,8 @@ partial class runtime_package {
                     // Check if there's any free space.
                     var freeIndex = sΔ2.nextFreeIndex();
                     if (freeIndex != sΔ2.nelems) {
-                        s.freeindex = freeIndex;
-                        Δsweep.active.end(sl);
+                        sΔ2.freeindex = freeIndex;
+                        ᏑΔsweep.of(sweepdata.Ꮡactive).end(sl);
                         goto havespan;
                     }
                     // Add it to the swept list, because sweeping didn't give us any free space.
@@ -157,7 +157,7 @@ partial class runtime_package {
             }
         }
         // See comment for partial unswept spans.
-        Δsweep.active.end(sl);
+        ᏑΔsweep.of(sweepdata.Ꮡactive).end(sl);
     }
     Δtrace = traceAcquire();
     if (Δtrace.ok()) {
@@ -179,17 +179,17 @@ havespan:
             traceRelease(traceΔ1);
         }
     }
-    nint n = ((nint)(~s).nelems) - ((nint)(~s).allocCount);
+    nint n = (nint)(~s).nelems - (nint)(~s).allocCount;
     if (n == 0 || (~s).freeindex == (~s).nelems || (~s).allocCount == (~s).nelems) {
         @throw("span has no free objects"u8);
     }
     var freeByteBase = (uint16)((~s).freeindex & ~(64 - 1));
-    var whichByte = freeByteBase / 8;
+    var whichByte = (uint16)(freeByteBase / 8);
     // Init alloc bits cache.
     s.refillAllocCache(whichByte);
     // Adjust the allocCache so that s.freeindex corresponds to the low bit in
     // s.allocCache.
-    s.val.allocCache >>= (uint16)((~s).freeindex % 64);
+    s.Value.allocCache >>= (int)((~s).freeindex % 64);
     return s;
 }
 
@@ -198,7 +198,7 @@ havespan:
 // s must have a span class corresponding to this
 // mcentral and it must not be empty.
 [GoRecv] internal static void uncacheSpan(this ref mcentral c, ж<mspan> Ꮡs) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (s.allocCount == 0) {
         @throw("uncaching span but s.allocCount == 0"u8);
@@ -213,10 +213,10 @@ havespan:
         // Set sweepgen to indicate it's not cached but needs
         // sweeping and can't be allocated from. sweep will
         // set s.sweepgen to indicate s is swept.
-        atomic.Store(Ꮡ(s.sweepgen), sg - 1);
+        atomic.Store(Ꮡs.of(mspan.Ꮡsweepgen), sg - 1);
     } else {
         // Indicate that s is no longer cached.
-        atomic.Store(Ꮡ(s.sweepgen), sg);
+        atomic.Store(Ꮡs.of(mspan.Ꮡsweepgen), sg);
     }
     // Put the span in the appropriate place.
     if (stale){
@@ -230,7 +230,7 @@ havespan:
         var ss = new sweepLocked(Ꮡs);
         ss.sweep(false);
     } else {
-        if (((nint)s.nelems) - ((nint)s.allocCount) > 0){
+        if ((nint)s.nelems - (nint)s.allocCount > 0){
             // Put it back on the partial swept list.
             c.partialSwept(sg).push(Ꮡs);
         } else {
@@ -243,16 +243,16 @@ havespan:
 
 // grow allocates a new empty span from the heap and initializes it for c's size class.
 [GoRecv] internal static ж<mspan> grow(this ref mcentral c) {
-    var npages = ((uintptr)class_to_allocnpages[c.spanclass.sizeclass()]);
-    var size = ((uintptr)class_to_size[c.spanclass.sizeclass()]);
-    var s = mheap_.alloc(npages, c.spanclass);
+    var npages = (uintptr)class_to_allocnpages[c.spanclass.sizeclass()];
+    var size = (uintptr)class_to_size[c.spanclass.sizeclass()];
+    var s = Ꮡmheap_.alloc(npages, c.spanclass);
     if (s == nil) {
         return default!;
     }
     // Use division by multiplication and shifts to quickly compute:
     // n := (npages << _PageShift) / size
-    var n = s.divideByElemSize(npages << (int)(_PageShift));
-    s.val.limit = s.@base() + size * n;
+    var n = s.divideByElemSize((npages << (int)(_PageShift)));
+    s.Value.limit = s.@base() + size * n;
     s.initHeapBits(false);
     return s;
 }

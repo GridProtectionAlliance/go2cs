@@ -25,10 +25,10 @@ using runtime.@internal;
 partial class runtime_package {
 
 [GoType] partial struct traceMap {
-    internal @internal.runtime.atomic_package.UnsafePointer root; // *traceMapNode (can't use generics because it's notinheap)
-    internal @internal.cpu_package.CacheLinePad _;
-    internal @internal.runtime.atomic_package.Uint64 seq;
-    internal @internal.cpu_package.CacheLinePad __;
+    internal atomic.UnsafePointer root; // *traceMapNode (can't use generics because it's notinheap)
+    internal cpu.CacheLinePad _;
+    internal atomic.Uint64 seq;
+    internal cpu.CacheLinePad __;
     internal traceRegionAlloc mem;
 }
 
@@ -45,8 +45,8 @@ partial class runtime_package {
 //   - Intentionally devolves into a linked list on hash collisions (the hash bits will all
 //     get shifted out during iteration, and new nodes will just be appended to the 0th child).
 [GoType] partial struct traceMapNode {
-    internal runtime.@internal.sys_package.NotInHeap _;
-    internal atomic.UnsafePointer children = new(4); // *traceMapNode (can't use generics because it's notinheap)
+    internal sys.NotInHeap _;
+    internal array<atomic.UnsafePointer> children = new(4); // *traceMapNode (can't use generics because it's notinheap)
     internal uintptr hash;
     internal uint64 id;
     internal slice<byte> data;
@@ -54,8 +54,10 @@ partial class runtime_package {
 
 // stealID steals an ID from the table, ensuring that it will not
 // appear in the table anymore.
-[GoRecv] internal static uint64 stealID(this ref traceMap tab) {
-    return tab.seq.Add(1);
+internal static uint64 stealID(this ж<traceMap> Ꮡtab) {
+    ref var tab = ref Ꮡtab.Value;
+
+    return Ꮡtab.of(traceMap.Ꮡseq).Add(1);
 }
 
 // put inserts the data into the table.
@@ -64,13 +66,15 @@ partial class runtime_package {
 //
 // Returns a unique ID for the data and whether this is the first time
 // the data has been added to the map.
-[GoRecv] internal static (uint64, bool) put(this ref traceMap tab, @unsafe.Pointer data, uintptr size) {
+internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer data, uintptr size) {
+    ref var tab = ref Ꮡtab.Value;
+
     if (size == 0) {
         return (0, false);
     }
-    var hash = memhash(data.val, 0, size);
+    var hash = memhash(data, 0, size);
     ж<traceMapNode> newNode = default!;
-    var m = Ꮡ(tab.root);
+    var m = Ꮡtab.of(traceMap.Ꮡroot);
     var hashIter = hash;
     while (ᐧ) {
         var n = (ж<traceMapNode>)(uintptr)(m.Load());
@@ -91,7 +95,7 @@ partial class runtime_package {
             // much activity, or the map gets big and races to insert on
             // the same node are much less likely.
             if (newNode == nil) {
-                newNode = tab.newTraceMapNode(data.val, size, hash, tab.seq.Add(1));
+                newNode = Ꮡtab.newTraceMapNode(data, size, hash, Ꮡtab.of(traceMap.Ꮡseq).Add(1));
             }
             if (m.CompareAndSwapNoWB(nil, new @unsafe.Pointer(newNode))) {
                 return ((~newNode).id, true);
@@ -101,29 +105,31 @@ partial class runtime_package {
             // anymore.
             n = (ж<traceMapNode>)(uintptr)(m.Load());
         }
-        if ((~n).hash == hash && ((uintptr)len((~n).data)) == size) {
-            if (memequal(new @unsafe.Pointer(Ꮡ((~n).data, 0)), data.val, size)) {
+        if ((~n).hash == hash && (uintptr)len((~n).data) == size) {
+            if (memequal(new @unsafe.Pointer(Ꮡ((~n).data, 0)), data, size)) {
                 return ((~n).id, false);
             }
         }
-        m = Ꮡ(~n).children.at<atomic.UnsafePointer>(hashIter >> (int)((8 * goarch.PtrSize - 2)));
-        hashIter <<= (UntypedInt)(2);
+        m = n.at(traceMapNode.Ꮡchildren, (nint)((hashIter >> (int)((8 * goarch.PtrSize - 2)))));
+        hashIter <<= (int)(2);
     }
 }
 
-[GoRecv] internal static ж<traceMapNode> newTraceMapNode(this ref traceMap tab, @unsafe.Pointer data, uintptr size, uintptr hash, uint64 id) {
+internal static ж<traceMapNode> newTraceMapNode(this ж<traceMap> Ꮡtab, @unsafe.Pointer data, uintptr size, uintptr hash, uint64 id) {
+    ref var tab = ref Ꮡtab.Value;
+
     // Create data array.
     var sl = new notInHeapSlice(
-        Δarray: tab.mem.alloc(size),
-        len: ((nint)size),
-        cap: ((nint)size)
+        Δarray: Ꮡtab.of(traceMap.Ꮡmem).alloc(size),
+        len: (nint)size,
+        cap: (nint)size
     );
-    memmove(new @unsafe.Pointer(sl.Δarray), data.val, size);
+    memmove(new @unsafe.Pointer(sl.Δarray), data, size);
     // Create metadata structure.
-    var meta = (ж<traceMapNode>)(uintptr)(new @unsafe.Pointer(tab.mem.alloc(@unsafe.Sizeof(new traceMapNode(nil)))));
-    ((ж<notInHeapSlice>)(uintptr)(new @unsafe.Pointer(Ꮡ((~meta).data)))).val = sl;
-    meta.val.id = id;
-    meta.val.hash = hash;
+    var meta = (ж<traceMapNode>)(uintptr)(new @unsafe.Pointer(Ꮡtab.of(traceMap.Ꮡmem).alloc(@unsafe.Sizeof(new traceMapNode(nil)))));
+    ((ж<notInHeapSlice>)(uintptr)(new @unsafe.Pointer(meta.of(traceMapNode.Ꮡdata)))).Value = sl;
+    meta.Value.id = id;
+    meta.Value.hash = hash;
     return meta;
 }
 
@@ -131,10 +137,12 @@ partial class runtime_package {
 //
 // The caller must ensure that there are no put operations executing concurrently
 // with this function.
-[GoRecv] internal static void reset(this ref traceMap tab) {
-    tab.root.Store(nil);
-    tab.seq.Store(0);
-    tab.mem.drop();
+internal static void reset(this ж<traceMap> Ꮡtab) {
+    ref var tab = ref Ꮡtab.Value;
+
+    Ꮡtab.of(traceMap.Ꮡroot).Store(nil);
+    Ꮡtab.of(traceMap.Ꮡseq).Store(0);
+    Ꮡtab.of(traceMap.Ꮡmem).drop();
 }
 
 } // end runtime_package

@@ -9,7 +9,7 @@
     <Version>0.1.4</Version>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>
-    <Copyright>Copyright © 2025</Copyright>
+    <Copyright>Copyright © 2026</Copyright>
     <Authors>$(Product) Authors</Authors>
     <Company>Grid Protection Alliance</Company>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
@@ -38,7 +38,7 @@
     <PublishTrimmed>True</PublishTrimmed>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <!-- Setup packaging options for library projects -->
@@ -86,7 +86,6 @@
     <Using Include="System.Double" Alias="float64" />
     <Using Include="System.Numerics.Complex" Alias="complex128" />
     <Using Include="System.Int32" Alias="rune" />
-    <Using Include="System.UIntPtr" Alias="uintptr" />
     <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
     <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTagAttribute" />
     <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
@@ -114,6 +113,10 @@
     <ProjectReference Include="$(go2csPath)go-src-converted\iter\iter.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\math\math.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\runtime\runtime.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\strconv\strconv.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\sync\sync.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\unicode\unicode.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\unicode\utf8\unicode.utf8.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\unsafe\unsafe.csproj" />
   </ItemGroup>
 

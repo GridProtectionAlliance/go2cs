@@ -16,21 +16,21 @@ internal static error errNoBuildID = errors.New("no NT_GNU_BUILD_ID found in ELF
 
 // elfBuildID returns the GNU build ID of the named ELF binary,
 // without introducing a dependency on debug/elf and its dependencies.
-internal static (@string, error) elfBuildID(@string file) => func((defer, _) => {
+internal static (@string, error) elfBuildID(@string @file) => func<(@string, error)>((defer, recover) => {
     var buf = new slice<byte>(256);
-    (f, err) = os.Open(file);
+    var (f, err) = os.Open(@file);
     if (err != default!) {
         return ("", err);
     }
     var fʗ1 = f;
-    defer(fʗ1.Close);
+    defer(() => fʗ1.Close());
     {
         var (_, errΔ1) = f.ReadAt(buf[..64], 0); if (errΔ1 != default!) {
             return ("", errΔ1);
         }
     }
     // ELF file begins with \x7F E L F.
-    if (buf[0] != 127 || buf[1] != (rune)'E' || buf[2] != (rune)'L' || buf[3] != (rune)'F') {
+    if (buf[0] != 0x7F || buf[1] != (rune)'E' || buf[2] != (rune)'L' || buf[3] != (rune)'F') {
         return ("", errBadELF);
     }
     binary.ByteOrder byteOrder = default!;
@@ -39,11 +39,11 @@ internal static (@string, error) elfBuildID(@string file) => func((defer, _) => 
         return ("", errBadELF);
     }
     case 1: {
-        byteOrder = binary.LittleEndian;
+        byteOrder = new binary_littleEndianᴠByteOrder(binary.LittleEndian);
         break;
     }
     case 2: {
-        byteOrder = binary.BigEndian;
+        byteOrder = new binary_bigEndianᴠByteOrder(binary.BigEndian);
         break;
     }}
 
@@ -57,29 +57,29 @@ internal static (@string, error) elfBuildID(@string file) => func((defer, _) => 
         return ("", errBadELF);
     }
     case 1: {
-        shoff = ((int64)byteOrder.Uint32(buf[32..]));
-        shentsize = ((int64)byteOrder.Uint16(buf[46..]));
+        shoff = (int64)byteOrder.Uint32(buf[32..]);
+        shentsize = (int64)byteOrder.Uint16(buf[46..]);
         if (shentsize != 40) {
             // 32-bit file header
             return ("", errBadELF);
         }
-        shnum = ((nint)byteOrder.Uint16(buf[48..]));
+        shnum = (nint)byteOrder.Uint16(buf[48..]);
         break;
     }
     case 2: {
-        shoff = ((int64)byteOrder.Uint64(buf[40..]));
-        shentsize = ((int64)byteOrder.Uint16(buf[58..]));
+        shoff = (int64)byteOrder.Uint64(buf[40..]);
+        shentsize = (int64)byteOrder.Uint16(buf[58..]);
         if (shentsize != 64) {
             // 64-bit file header
             return ("", errBadELF);
         }
-        shnum = ((nint)byteOrder.Uint16(buf[60..]));
+        shnum = (nint)byteOrder.Uint16(buf[60..]);
         break;
     }}
 
     for (nint i = 0; i < shnum; i++) {
         {
-            var (_, errΔ2) = f.ReadAt(buf[..(int)(shentsize)], shoff + ((int64)i) * shentsize); if (errΔ2 != default!) {
+            var (_, errΔ2) = f.ReadAt(buf[..(int)(shentsize)], shoff + (int64)i * shentsize); if (errΔ2 != default!) {
                 return ("", errΔ2);
             }
         }
@@ -93,12 +93,12 @@ internal static (@string, error) elfBuildID(@string file) => func((defer, _) => 
         int64 size = default!;
         if (shentsize == 40){
             // 32-bit section header
-            off = ((int64)byteOrder.Uint32(buf[16..]));
-            size = ((int64)byteOrder.Uint32(buf[20..]));
+            off = (int64)byteOrder.Uint32(buf[16..]);
+            size = (int64)byteOrder.Uint32(buf[20..]);
         } else {
             // 64-bit section header
-            off = ((int64)byteOrder.Uint64(buf[24..]));
-            size = ((int64)byteOrder.Uint64(buf[32..]));
+            off = (int64)byteOrder.Uint64(buf[24..]);
+            size = (int64)byteOrder.Uint64(buf[32..]);
         }
         size += off;
         while (off < size) {
@@ -108,11 +108,11 @@ internal static (@string, error) elfBuildID(@string file) => func((defer, _) => 
                     return ("", errΔ3);
                 }
             }
-            nint nameSize = ((nint)byteOrder.Uint32(buf[0..]));
-            nint descSize = ((nint)byteOrder.Uint32(buf[4..]));
-            nint noteType = ((nint)byteOrder.Uint32(buf[8..]));
-            var descOff = off + ((int64)(12 + (nint)((nameSize + 3) & ~3)));
-            off = descOff + ((int64)((nint)((descSize + 3) & ~3)));
+            nint nameSize = (nint)byteOrder.Uint32(buf[0..]);
+            nint descSize = (nint)byteOrder.Uint32(buf[4..]);
+            nint noteType = (nint)byteOrder.Uint32(buf[8..]);
+            var descOff = off + (int64)(12 + (nint)((nameSize + 3) & ~(nint)3));
+            off = descOff + (int64)((nint)((descSize + 3) & ~(nint)3));
             if (nameSize != 4 || noteType != 3 || buf[12] != (rune)'G' || buf[13] != (rune)'N' || buf[14] != (rune)'U' || buf[15] != (rune)'\x00') {
                 // want name GNU\x00 type 3 (NT_GNU_BUILD_ID)
                 continue;

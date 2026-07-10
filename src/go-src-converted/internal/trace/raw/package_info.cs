@@ -38,8 +38,8 @@ using static go.@internal.trace.raw_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<bufio_package.Reader, io_package.ByteReader>]
-[assembly: GoImplement<bufio_package.Reader, io_package.Reader>]
+[assembly: GoImplement<bufio_package.Reader, io_package.ByteReader>(Pointer = true)]
+[assembly: GoImplement<bufio_package.Reader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

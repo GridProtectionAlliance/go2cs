@@ -21,6 +21,8 @@ global using typesꓸScope = go.go.types_package.ΔScope;
 global using typesꓸSignature = go.go.types_package.ΔSignature;
 global using typesꓸTerm = go.go.types_package.ΔTerm;
 global using typesꓸType = go.go.types_package.ΔType;
+using token = go.go.token_package;
+using Δbuild = go.go.build_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,9 +51,9 @@ using static go.go.importer_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<gccgoimports, go.types_package.Importer>]
-[assembly: GoImplement<gcimports, go.types_package.Importer>]
-[assembly: GoImplement<go.@internal.srcimporter_package.Importer, go.types_package.Importer>]
+[assembly: GoImplement<gccgoimports, go.go.types_package.Importer>(Pointer = true)]
+[assembly: GoImplement<gcimports, go.go.types_package.Importer>(Pointer = true)]
+[assembly: GoImplement<go.go.@internal.srcimporter_package.Importer, go.go.types_package.Importer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

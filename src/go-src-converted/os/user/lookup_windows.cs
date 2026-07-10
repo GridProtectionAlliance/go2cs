@@ -14,9 +14,9 @@ using @internal.syscall.windows;
 partial class user_package {
 
 internal static (bool, error) isDomainJoined() {
-    ж<uint16> domain = default!;
+    ref var domain = ref heap<ж<uint16>>(out var Ꮡdomain);
     ref var status = ref heap(new uint32(), out var Ꮡstatus);
-    var err = syscall.NetGetJoinInformation(nil, Ꮡ(domain), Ꮡstatus);
+    var err = syscall.NetGetJoinInformation(nil, Ꮡdomain, Ꮡstatus);
     if (err != default!) {
         return (false, err);
     }
@@ -29,17 +29,17 @@ internal static (@string, error) lookupFullNameDomain(@string domainAndUser) {
         syscall.NameSamCompatible, syscall.NameDisplay, 50);
 }
 
-internal static (@string, error) lookupFullNameServer(@string servername, @string username) => func((defer, _) => {
-    (s, e) = syscall.UTF16PtrFromString(servername);
+internal static (@string, error) lookupFullNameServer(@string servername, @string username) => func<(@string, error)>((defer, recover) => {
+    var (s, e) = syscall.UTF16PtrFromString(servername);
     if (e != default!) {
         return ("", e);
     }
-    (u, e) = syscall.UTF16PtrFromString(username);
+    (var u, e) = syscall.UTF16PtrFromString(username);
     if (e != default!) {
         return ("", e);
     }
-    ж<byte> p = default!;
-    e = syscall.NetUserGetInfo(s, u, 10, Ꮡ(p));
+    ref var p = ref heap<ж<byte>>(out var Ꮡp);
+    e = syscall.NetUserGetInfo(s, u, 10, Ꮡp);
     if (e != default!) {
         return ("", e);
     }
@@ -56,7 +56,7 @@ internal static (@string, error) lookupFullName(@string domain, @string username
             return (nameΔ1, default!);
         }
     }
-    var (name, err) = lookupFullNameServer(domain, username);
+    (var name, err) = lookupFullNameServer(domain, username);
     if (err == default!) {
         return (name, default!);
     }
@@ -70,17 +70,17 @@ internal static (@string, error) lookupFullName(@string domain, @string username
 // where user profiles are stored.
 internal static (@string, error) getProfilesDirectory() {
     ref var n = ref heap<uint32>(out var Ꮡn);
-    n = ((uint32)100);
+    n = (uint32)100;
     while (ᐧ) {
-        var b = new slice<uint16>(n);
+        var b = new slice<uint16>((nint)(n));
         var e = windows.GetProfilesDirectory(Ꮡ(b, 0), Ꮡn);
         if (e == default!) {
             return (syscall.UTF16ToString(b), default!);
         }
-        if (e != syscall.ERROR_INSUFFICIENT_BUFFER) {
+        if (!AreEqual(e, syscall.ERROR_INSUFFICIENT_BUFFER)) {
             return ("", e);
         }
-        if (n <= ((uint32)len(b))) {
+        if (n <= (uint32)len(b)) {
             return ("", e);
         }
     }
@@ -92,8 +92,8 @@ internal static (@string username, @string domain, error e) lookupUsernameAndDom
     @string domain = default!;
     error e = default!;
 
-    ref var usid = ref Ꮡusid.val;
-    var (username, domain, t, e) = usid.LookupAccount(""u8);
+    ref var usid = ref Ꮡusid.Value;
+    (username, domain, var t, e) = Ꮡusid.LookupAccount(""u8);
     if (e != default!) {
         return ("", "", e);
     }
@@ -104,21 +104,23 @@ internal static (@string username, @string domain, error e) lookupUsernameAndDom
 }
 
 // findHomeDirInRegistry finds the user home path based on the uid.
-internal static (@string dir, error e) findHomeDirInRegistry(@string uid) => func((defer, _) => {
+internal static (@string dir, error e) findHomeDirInRegistry(@string uid) {
     @string dir = default!;
     error e = default!;
-
-    var (k, e) = registry.OpenKey(registry.LOCAL_MACHINE, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\"u8 + uid, registry.QUERY_VALUE);
-    if (e != default!) {
-        return ("", e);
-    }
-    defer(k.Close);
-    (dir, _, e) = k.GetStringValue("ProfileImagePath"u8);
-    if (e != default!) {
-        return ("", e);
-    }
-    return (dir, default!);
-});
+    func((defer, recover) => {
+        (var k, e) = registry.OpenKey(registry.LOCAL_MACHINE, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\"u8 + uid, registry.QUERY_VALUE);
+        if (e != default!) {
+            (dir, e) = ("", e); return;
+        }
+        defer(() => k.Close());
+        (dir, _, e) = k.GetStringValue("ProfileImagePath"u8);
+        if (e != default!) {
+            (dir, e) = ("", e); return;
+        }
+        (dir, e) = (dir, default!);
+    });
+    return (dir, e);
+}
 
 // lookupGroupName accepts the name of a group and retrieves the group SID.
 internal static (@string, error) lookupGroupName(@string groupname) {
@@ -140,7 +142,7 @@ internal static (@string, error) lookupGroupName(@string groupname) {
 
 // listGroupsForUsernameAndDomain accepts username and domain and retrieves
 // a SID list of the local groups where this user is a member.
-internal static unsafe (slice<@string>, error) listGroupsForUsernameAndDomain(@string username, @string domain) => func((defer, _) => {
+internal static unsafe (slice<@string>, error) listGroupsForUsernameAndDomain(@string username, @string domain) => func<(slice<@string>, error)>((defer, recover) => {
     // Check if both the domain name and user should be used.
     @string query = default!;
     var (joined, err) = isDomainJoined();
@@ -149,11 +151,11 @@ internal static unsafe (slice<@string>, error) listGroupsForUsernameAndDomain(@s
     } else {
         query = username;
     }
-    (q, err) = syscall.UTF16PtrFromString(query);
+    (var q, err) = syscall.UTF16PtrFromString(query);
     if (err != default!) {
         return (default!, err);
     }
-    ж<byte> p0 = default!;
+    ref var p0 = ref heap<ж<byte>>(out var Ꮡp0);
     ref var entriesRead = ref heap(new uint32(), out var ᏑentriesRead);
     ref var totalEntries = ref heap(new uint32(), out var ᏑtotalEntries);
     // https://learn.microsoft.com/en-us/windows/win32/api/lmaccess/nf-lmaccess-netusergetlocalgroups
@@ -164,7 +166,7 @@ internal static unsafe (slice<@string>, error) listGroupsForUsernameAndDomain(@s
     // If no groups can be found for this user, NetUserGetLocalGroups() should
     // always return the SID of a single group called "None", which
     // also happens to be the primary group for the local user.
-    err = windows.NetUserGetLocalGroups(nil, q, 0, windows.LG_INCLUDE_INDIRECT, Ꮡ(p0), windows.MAX_PREFERRED_LENGTH, ᏑentriesRead, ᏑtotalEntries);
+    err = windows.NetUserGetLocalGroups(nil, q, 0, windows.LG_INCLUDE_INDIRECT, Ꮡp0, windows.MAX_PREFERRED_LENGTH, ᏑentriesRead, ᏑtotalEntries);
     if (err != default!) {
         return (default!, err);
     }
@@ -172,17 +174,15 @@ internal static unsafe (slice<@string>, error) listGroupsForUsernameAndDomain(@s
     if (entriesRead == 0) {
         return (default!, fmt.Errorf("listGroupsForUsernameAndDomain: NetUserGetLocalGroups() returned an empty list for domain: %s, username: %s"u8, domain, username));
     }
-    var entries = new Span<windows.LocalGroupUserInfo0>((windows.LocalGroupUserInfo0*)(uintptr)(new @unsafe.Pointer(p0)), entriesRead);
+    var entries = new slice<windows.LocalGroupUserInfo0>(new ReadOnlySpan<windows.LocalGroupUserInfo0>((windows.LocalGroupUserInfo0*)(uintptr)(new @unsafe.Pointer(p0)), (int)(entriesRead)));
     slice<@string> sids = default!;
-    ref var entry = ref heap(new @internal.syscall.windows_package.LocalGroupUserInfo0(), out var Ꮡentry);
-
     foreach (var (_, entry) in entries) {
         if (entry.Name == nil) {
             continue;
         }
-        var (sid, err) = lookupGroupName(windows.UTF16PtrToString(entry.Name));
-        if (err != default!) {
-            return (default!, err);
+        var (sid, errΔ1) = lookupGroupName(windows.UTF16PtrToString(entry.Name));
+        if (errΔ1 != default!) {
+            return (default!, errΔ1);
         }
         sids = append(sids, sid);
     }
@@ -190,8 +190,10 @@ internal static unsafe (slice<@string>, error) listGroupsForUsernameAndDomain(@s
 });
 
 internal static (ж<User>, error) newUser(@string uid, @string gid, @string dir, @string username, @string domain) {
-    @string domainAndUser = domain + @"\"u8 + username;
-    (name, e) = lookupFullName(domain, username, domainAndUser);
+    ref var domainAndUser = ref heap<@string>(out var ᏑdomainAndUser);
+    domainAndUser = domain + @"\"u8 + username;
+    ref var name = ref heap<@string>(out var Ꮡname);
+    (name, var e) = lookupFullName(domain, username, domainAndUser);
     if (e != default!) {
         return (default!, e);
     }
@@ -208,33 +210,33 @@ internal static (ж<User>, error) newUser(@string uid, @string gid, @string dir,
 internal static nint userBuffer = 0;
 internal static nint groupBuffer = 0;
 
-internal static (ж<User>, error) current() => func((defer, _) => {
+internal static (ж<User>, error) current() => func<(ж<User>, error)>((defer, recover) => {
     var (t, e) = syscall.OpenCurrentProcessToken();
     if (e != default!) {
         return (default!, e);
     }
-    defer(t.Close);
-    (u, e) = t.GetTokenUser();
+    defer(() => t.Close());
+    (var u, e) = t.GetTokenUser();
     if (e != default!) {
         return (default!, e);
     }
-    (pg, e) = t.GetTokenPrimaryGroup();
+    (var pg, e) = t.GetTokenPrimaryGroup();
     if (e != default!) {
         return (default!, e);
     }
-    var (uid, e) = (~u).User.Sid.String();
+    (var uid, e) = (~u).User.Sid.String();
     if (e != default!) {
         return (default!, e);
     }
-    var (gid, e) = (~pg).PrimaryGroup.String();
+    (var gid, e) = (~pg).PrimaryGroup.String();
     if (e != default!) {
         return (default!, e);
     }
-    var (dir, e) = t.GetUserProfileDirectory();
+    (var dir, e) = t.GetUserProfileDirectory();
     if (e != default!) {
         return (default!, e);
     }
-    var (username, domain, e) = lookupUsernameAndDomain((~u).User.Sid);
+    (var username, var domain, e) = lookupUsernameAndDomain((~u).User.Sid);
     if (e != default!) {
         return (default!, e);
     }
@@ -244,7 +246,7 @@ internal static (ж<User>, error) current() => func((defer, _) => {
 // lookupUserPrimaryGroup obtains the primary group SID for a user using this method:
 // https://support.microsoft.com/en-us/help/297951/how-to-use-the-primarygroupid-attribute-to-find-the-primary-group-for
 // The method follows this formula: domainRID + "-" + primaryGroupRID
-internal static (@string, error) lookupUserPrimaryGroup(@string username, @string domain) => func((defer, _) => {
+internal static (@string, error) lookupUserPrimaryGroup(@string username, @string domain) => func<(@string, error)>((defer, recover) => {
     // get the domain RID
     var (sid, _, t, e) = syscall.LookupSID(""u8, domain);
     if (e != default!) {
@@ -253,7 +255,7 @@ internal static (@string, error) lookupUserPrimaryGroup(@string username, @strin
     if (t != syscall.SidTypeDomain) {
         return ("", fmt.Errorf("lookupUserPrimaryGroup: should be domain account type, not %d"u8, t));
     }
-    var (domainRID, e) = sid.String();
+    (var domainRID, e) = sid.String();
     if (e != default!) {
         return ("", e);
     }
@@ -272,7 +274,7 @@ internal static (@string, error) lookupUserPrimaryGroup(@string username, @strin
     // https://books.google.bg/books?id=kGApqjobEfsC&lpg=PA410&ots=p7oo-eOQL7&dq=primary%20group%20RID&hl=bg&pg=PA409#v=onepage&q&f=false
     var (joined, err) = isDomainJoined();
     if (err == default! && joined) {
-        return (domainRID + "-513"u8, default!);
+        return (domainRID + "-513", default!);
     }
     // For non-domain users call NetUserGetInfo() with level 4, which
     // in this case would not have any network overhead.
@@ -280,16 +282,16 @@ internal static (@string, error) lookupUserPrimaryGroup(@string username, @strin
     // but the group will be called "None" instead:
     // https://www.adampalmer.me/iodigitalsec/2013/08/10/windows-null-session-enumeration/
     // "Group 'None' (RID: 513)"
-    (u, e) = syscall.UTF16PtrFromString(username);
+    (var u, e) = syscall.UTF16PtrFromString(username);
     if (e != default!) {
         return ("", e);
     }
-    (d, e) = syscall.UTF16PtrFromString(domain);
+    (var d, e) = syscall.UTF16PtrFromString(domain);
     if (e != default!) {
         return ("", e);
     }
-    ж<byte> p = default!;
-    e = syscall.NetUserGetInfo(d, u, 4, Ꮡ(p));
+    ref var p = ref heap<ж<byte>>(out var Ꮡp);
+    e = syscall.NetUserGetInfo(d, u, 4, Ꮡp);
     if (e != default!) {
         return ("", e);
     }
@@ -299,17 +301,17 @@ internal static (@string, error) lookupUserPrimaryGroup(@string username, @strin
 });
 
 internal static (ж<User>, error) newUserFromSid(ж<syscall.SID> Ꮡusid) {
-    ref var usid = ref Ꮡusid.val;
+    ref var usid = ref Ꮡusid.Value;
 
     var (username, domain, e) = lookupUsernameAndDomain(Ꮡusid);
     if (e != default!) {
         return (default!, e);
     }
-    var (gid, e) = lookupUserPrimaryGroup(username, domain);
+    (var gid, e) = lookupUserPrimaryGroup(username, domain);
     if (e != default!) {
         return (default!, e);
     }
-    var (uid, e) = usid.String();
+    (var uid, e) = Ꮡusid.String();
     if (e != default!) {
         return (default!, e);
     }
@@ -322,7 +324,7 @@ internal static (ж<User>, error) newUserFromSid(ж<syscall.SID> Ꮡusid) {
     // might have decided to move it outside of the default location,
     // (e.g. C:\users). Reference:
     // https://answers.microsoft.com/en-us/windows/forum/windows_7-security/how-do-i-set-a-home-directory-outside-cusers-for-a/aed68262-1bf4-4a4d-93dc-7495193a440f
-    var (dir, e) = findHomeDirInRegistry(uid);
+    (var dir, e) = findHomeDirInRegistry(uid);
     if (e != default!) {
         // If the home path does not exist in the registry, the user might
         // have not logged in yet; fall back to using getProfilesDirectory().
@@ -349,7 +351,7 @@ internal static (ж<User>, error) lookupUser(@string username) {
 }
 
 internal static (ж<User>, error) lookupUserId(@string uid) {
-    (sid, e) = syscall.StringToSid(uid);
+    var (sid, e) = syscall.StringToSid(uid);
     if (e != default!) {
         return (default!, e);
     }
@@ -357,7 +359,8 @@ internal static (ж<User>, error) lookupUserId(@string uid) {
 }
 
 internal static (ж<Group>, error) lookupGroup(@string groupname) {
-    (sid, err) = lookupGroupName(groupname);
+    ref var sid = ref heap<@string>(out var Ꮡsid);
+    (sid, var err) = lookupGroupName(groupname);
     if (err != default!) {
         return (default!, err);
     }
@@ -365,11 +368,12 @@ internal static (ж<Group>, error) lookupGroup(@string groupname) {
 }
 
 internal static (ж<Group>, error) lookupGroupId(@string gid) {
-    (sid, err) = syscall.StringToSid(gid);
+    var (sid, err) = syscall.StringToSid(gid);
     if (err != default!) {
         return (default!, err);
     }
-    var (groupname, _, t, err) = sid.LookupAccount(""u8);
+    ref var groupname = ref heap<@string>(out var Ꮡgroupname);
+    (groupname, _, var t, err) = sid.LookupAccount(""u8);
     if (err != default!) {
         return (default!, err);
     }
@@ -380,17 +384,17 @@ internal static (ж<Group>, error) lookupGroupId(@string gid) {
 }
 
 internal static (slice<@string>, error) listGroups(ж<User> Ꮡuser) {
-    ref var user = ref Ꮡuser.val;
+    ref var user = ref Ꮡuser.Value;
 
-    (sid, err) = syscall.StringToSid(user.Uid);
+    var (sid, err) = syscall.StringToSid(user.Uid);
     if (err != default!) {
         return (default!, err);
     }
-    var (username, domain, err) = lookupUsernameAndDomain(sid);
+    (var username, var domain, err) = lookupUsernameAndDomain(sid);
     if (err != default!) {
         return (default!, err);
     }
-    (sids, err) = listGroupsForUsernameAndDomain(username, domain);
+    (var sids, err) = listGroupsForUsernameAndDomain(username, domain);
     if (err != default!) {
         return (default!, err);
     }

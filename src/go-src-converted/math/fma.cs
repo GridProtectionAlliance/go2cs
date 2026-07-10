@@ -30,8 +30,8 @@ internal static (uint64 r1, uint64 r2) shl(uint64 u1, uint64 u2, nuint n) {
     uint64 r1 = default!;
     uint64 r2 = default!;
 
-    r1 = (uint64)((uint64)(u1 << (int)(n) | u2 >> (int)((64 - n))) | u2 << (int)((n - 64)));
-    r2 = u2 << (int)(n);
+    r1 = (uint64)((uint64)((u1 << (int)(n)) | (u2 >> (int)((64 - n)))) | (u2 << (int)((n - 64))));
+    r2 = (u2 << (int)(n));
     return (r1, r2);
 }
 
@@ -39,8 +39,8 @@ internal static (uint64 r1, uint64 r2) shr(uint64 u1, uint64 u2, nuint n) {
     uint64 r1 = default!;
     uint64 r2 = default!;
 
-    r2 = (uint64)((uint64)(u2 >> (int)(n) | u1 << (int)((64 - n))) | u1 >> (int)((n - 64)));
-    r1 = u1 >> (int)(n);
+    r2 = (uint64)((uint64)((u2 >> (int)(n)) | (u1 << (int)((64 - n)))) | (u1 >> (int)((n - 64))));
+    r1 = (u1 >> (int)(n));
     return (r1, r2);
 }
 
@@ -68,12 +68,12 @@ internal static (uint64 r1, uint64 r2) shrcompress(uint64 u1, uint64 u2, nuint n
     }
     case {} when n is < 64: {
         (r1, r2) = shr(u1, u2, n);
-        r2 |= (uint64)(nonzero((uint64)(u2 & (1 << (int)(n) - 1))));
+        r2 |= (uint64)(nonzero((uint64)(u2 & (((uint64)1 << (int)(n)) - 1))));
         break;
     }
     case {} when n is < 128: {
         (r1, r2) = shr(u1, u2, n);
-        r2 |= (uint64)(nonzero((uint64)((uint64)(u1 & (1 << (int)((n - 64)) - 1)) | u2)));
+        r2 |= (uint64)(nonzero((uint64)((uint64)(u1 & (((uint64)1 << (int)((n - 64))) - 1)) | u2)));
         break;
     }}
 
@@ -83,9 +83,9 @@ internal static (uint64 r1, uint64 r2) shrcompress(uint64 u1, uint64 u2, nuint n
 internal static int32 /*l*/ lz(uint64 u1, uint64 u2) {
     int32 l = default!;
 
-    l = ((int32)bits.LeadingZeros64(u1));
+    l = (int32)bits.LeadingZeros64(u1);
     if (l == 64) {
-        l += ((int32)bits.LeadingZeros64(u2));
+        l += (int32)bits.LeadingZeros64(u2);
     }
     return l;
 }
@@ -98,17 +98,17 @@ internal static (uint32 sign, int32 exp, uint64 mantissa) split(uint64 b) {
     int32 exp = default!;
     uint64 mantissa = default!;
 
-    sign = ((uint32)(b >> (int)(63)));
-    exp = (int32)(((int32)(b >> (int)(52))) & mask);
-    mantissa = (uint64)(b & fracMask);
+    sign = (uint32)((b >> (int)(63)));
+    exp = (int32)((int32)((b >> (int)(52))) & (int32)mask);
+    mantissa = (uint64)(b & (uint64)fracMask);
     if (exp == 0){
         // Normalize value if subnormal.
-        nuint shift = ((nuint)(bits.LeadingZeros64(mantissa) - 11));
-        mantissa <<= (nuint)(shift);
-        exp = 1 - ((int32)shift);
+        nuint shift = (nuint)(bits.LeadingZeros64(mantissa) - 11);
+        mantissa <<= (int)(shift);
+        exp = 1 - (int32)shift;
     } else {
         // Add implicit 1 bit
-        mantissa |= (uint64)(1 << (int)(52));
+        mantissa |= (uint64)(((uint64)1 << (int)(52)));
     }
     return (sign, exp, mantissa);
 }
@@ -118,12 +118,12 @@ internal static (uint32 sign, int32 exp, uint64 mantissa) split(uint64 b) {
 public static float64 FMA(float64 x, float64 y, float64 z) {
     var (bx, by, bz) = (Float64bits(x), Float64bits(y), Float64bits(z));
     // Inf or NaN or zero involved. At most one rounding will occur.
-    if (x == 0.0F || y == 0.0F || z == 0.0F || (uint64)(bx & uvinf) == uvinf || (uint64)(by & uvinf) == uvinf) {
+    if (x == 0.0D || y == 0.0D || z == 0.0D || (uint64)(bx & (uint64)uvinf) == uvinf || (uint64)(by & (uint64)uvinf) == uvinf) {
         return x * y + z;
     }
     // Handle non-finite z separately. Evaluating x*y+z where
     // x and y are finite, but z is infinite, should always result in z.
-    if ((uint64)(bz & uvinf) == uvinf) {
+    if ((uint64)(bz & (uint64)uvinf) == uvinf) {
         return z;
     }
     // Inputs are (sub)normal.
@@ -133,18 +133,18 @@ public static float64 FMA(float64 x, float64 y, float64 z) {
     var (zs, ze, zm) = split(bz);
     // Compute product p = x*y as sign, exponent, two-word mantissa.
     // Start with exponent. "is normal" bit isn't subtracted yet.
-    var pe = xe + ye - bias + 1;
+    var pe = xe + ye - (int32)bias + 1;
     // pm1:pm2 is the double-word mantissa for the product p.
     // Shift left to leave top bit in product. Effectively
     // shifts the 106-bit product to the left by 21.
-    var (pm1, pm2) = bits.Mul64(xm << (int)(10), ym << (int)(11));
-    var (zm1, zm2) = (zm << (int)(10), ((uint64)0));
+    var (pm1, pm2) = bits.Mul64((xm << (int)(10)), (ym << (int)(11)));
+    var (zm1, zm2) = ((zm << (int)(10)), (uint64)0);
     var ps = (uint32)(xs ^ ys);
     // product sign
     // normalize to 62nd bit
-    nuint is62zero = ((nuint)((uint64)((~pm1 >> (int)(62)) & 1)));
+    nuint is62zero = (nuint)((uint64)(((~pm1 >> (int)(62))) & 1));
     (pm1, pm2) = shl(pm1, pm2, is62zero);
-    pe -= ((int32)is62zero);
+    pe -= (int32)is62zero;
     // Swap addition operands so |p| >= |z|
     if (pe < ze || pe == ze && pm1 < zm1) {
         (ps, pe, pm1, pm2, zs, ze, zm1, zm2) = (zs, ze, zm1, zm2, ps, pe, pm1, pm2);
@@ -154,7 +154,7 @@ public static float64 FMA(float64 x, float64 y, float64 z) {
         return 0;
     }
     // Align significands
-    (zm1, zm2) = shrcompress(zm1, zm2, ((nuint)(pe - ze)));
+    (zm1, zm2) = shrcompress(zm1, zm2, (nuint)(pe - ze));
     // Compute resulting significands, normalizing if necessary.
     uint64 m = default!;
     uint64 c = default!;
@@ -162,8 +162,8 @@ public static float64 FMA(float64 x, float64 y, float64 z) {
         // Adding (pm1:pm2) + (zm1:zm2)
         (pm2, c) = bits.Add64(pm2, zm2, 0);
         (pm1, _) = bits.Add64(pm1, zm1, c);
-        pe -= ((int32)(~pm1 >> (int)(63)));
-        (pm1, m) = shrcompress(pm1, pm2, ((nuint)(64 + pm1 >> (int)(63))));
+        pe -= (int32)((~pm1 >> (int)(63)));
+        (pm1, m) = shrcompress(pm1, pm2, (nuint)(64 + (pm1 >> (int)(63))));
     } else {
         // Subtracting (pm1:pm2) - (zm1:zm2)
         // TODO: should we special-case cancellation?
@@ -171,22 +171,22 @@ public static float64 FMA(float64 x, float64 y, float64 z) {
         (pm1, _) = bits.Sub64(pm1, zm1, c);
         var nz = lz(pm1, pm2);
         pe -= nz;
-        (m, pm2) = shl(pm1, pm2, ((nuint)(nz - 1)));
+        (m, pm2) = shl(pm1, pm2, (nuint)(nz - 1));
         m |= (uint64)(nonzero(pm2));
     }
     // Round and break ties to even
-    if (pe > 1022 + bias || pe == 1022 + bias && (m + 1 << (int)(9)) >> (int)(63) == 1) {
+    if (pe > 1022 + bias || pe == 1022 + bias && ((m + ((uint64)1 << (int)(9))) >> (int)(63)) == 1) {
         // rounded value overflows exponent range
-        return Float64frombits((uint64)(((uint64)ps) << (int)(63) | uvinf));
+        return Float64frombits((uint64)(((uint64)ps << (int)(63)) | (uint64)uvinf));
     }
     if (pe < 0) {
-        nuint n = ((nuint)(-pe));
-        m = (uint64)(m >> (int)(n) | nonzero((uint64)(m & (1 << (int)(n) - 1))));
+        nuint n = (nuint)(-pe);
+        m = (uint64)((m >> (int)(n)) | nonzero((uint64)(m & (((uint64)1 << (int)(n)) - 1))));
         pe = 0;
     }
-    m = (uint64)(((m + 1 << (int)(9)) >> (int)(10)) & ~zero((uint64)(((uint64)(m & (1 << (int)(10) - 1))) ^ 1 << (int)(9))));
-    pe &= (int32)(-((int32)nonzero(m)));
-    return Float64frombits(((uint64)ps) << (int)(63) + ((uint64)pe) << (int)(52) + m);
+    m = (uint64)((((m + ((uint64)1 << (int)(9))) >> (int)(10))) & ~zero((uint64)(((uint64)(m & ((1 << (int)(10)) - 1))) ^ ((uint64)1 << (int)(9)))));
+    pe &= (int32)(-(int32)nonzero(m));
+    return Float64frombits(((uint64)ps << (int)(63)) + ((uint64)pe << (int)(52)) + m);
 }
 
 } // end math_package

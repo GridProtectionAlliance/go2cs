@@ -21,11 +21,11 @@ public static slice<byte> Rot13(slice<byte> data) {
     foreach (var (i, c) in @out) {
         switch (ᐧ) {
         case {} when (rune)'A' <= c && c <= (rune)'M' || (rune)'a' <= c && c <= (rune)'m': {
-            @out[i] = c + 13;
+            @out[i] = (byte)(c + 13);
             break;
         }
         case {} when (rune)'N' <= c && c <= (rune)'Z' || (rune)'n' <= c && c <= (rune)'z': {
-            @out[i] = c - 13;
+            @out[i] = (byte)(c - 13);
             break;
         }}
 
@@ -36,45 +36,47 @@ public static slice<byte> Rot13(slice<byte> data) {
 // DecodeToTempFile decodes the named file to a temporary location.
 // If successful, it returns the path of the decoded file.
 // The caller is responsible for ensuring that the temporary file is removed.
-public static (@string path, error err) DecodeToTempFile(@string name) => func((defer, _) => {
+public static (@string path, error err) DecodeToTempFile(@string name) {
     @string path = default!;
     error err = default!;
-
-    (f, err) = os.Open(name);
-    if (err != default!) {
-        return ("", err);
-    }
-    var fʗ1 = f;
-    defer(fʗ1.Close);
-    (tmp, err) = os.CreateTemp(""u8, "obscuretestdata-decoded-"u8);
-    if (err != default!) {
-        return ("", err);
-    }
-    {
-        var (_, errΔ1) = io.Copy(~tmp, base64.NewDecoder(base64.StdEncoding, ~f)); if (errΔ1 != default!) {
-            tmp.Close();
-            os.Remove(tmp.Name());
-            return ("", errΔ1);
+    func((defer, recover) => {
+        (var f, err) = os.Open(name);
+        if (err != default!) {
+            (path, err) = ("", err); return;
         }
-    }
-    {
-        var errΔ2 = tmp.Close(); if (errΔ2 != default!) {
-            os.Remove(tmp.Name());
-            return ("", errΔ2);
+        var fʗ1 = f;
+        defer(() => fʗ1.Close());
+        (var tmp, err) = os.CreateTemp(""u8, "obscuretestdata-decoded-"u8);
+        if (err != default!) {
+            (path, err) = ("", err); return;
         }
-    }
-    return (tmp.Name(), default!);
-});
+        {
+            var (_, errΔ1) = io.Copy(new os.FileжWriter(tmp), base64.NewDecoder(base64.StdEncoding, new os_FileжReader(f))); if (errΔ1 != default!) {
+                tmp.Close();
+                os.Remove(tmp.Name());
+                (path, err) = ("", errΔ1); return;
+            }
+        }
+        {
+            var errΔ2 = tmp.Close(); if (errΔ2 != default!) {
+                os.Remove(tmp.Name());
+                (path, err) = ("", errΔ2); return;
+            }
+        }
+        (path, err) = (tmp.Name(), default!);
+    });
+    return (path, err);
+}
 
 // ReadFile reads the named file and returns its decoded contents.
-public static (slice<byte>, error) ReadFile(@string name) => func((defer, _) => {
-    (f, err) = os.Open(name);
+public static (slice<byte>, error) ReadFile(@string name) => func<(slice<byte>, error)>((defer, recover) => {
+    var (f, err) = os.Open(name);
     if (err != default!) {
         return (default!, err);
     }
     var fʗ1 = f;
-    defer(fʗ1.Close);
-    return io.ReadAll(base64.NewDecoder(base64.StdEncoding, ~f));
+    defer(() => fʗ1.Close());
+    return io.ReadAll(base64.NewDecoder(base64.StdEncoding, new os_FileжReader(f)));
 });
 
 } // end obscuretestdata_package

@@ -8,13 +8,14 @@ namespace go;
 using errors = errors_package;
 using flag = flag_package;
 using fmt = fmt_package;
-using io = io_package;
+using Δio = io_package;
 using os = os_package;
 using filepath = path.filepath_package;
 using reflect = reflect_package;
-using runtime = runtime_package;
+using Δruntime = runtime_package;
 using strings = strings_package;
 using time = time_package;
+using go.sync;
 using path;
 using ꓸꓸꓸany = Span<any>;
 
@@ -22,15 +23,17 @@ partial class testing_package {
 
 internal static void initFuzzFlags() {
     matchFuzz = flag.String("test.fuzz"u8, ""u8, "run the fuzz test matching `regexp`"u8);
-    flag.Var(fuzzDuration, "test.fuzztime"u8, "time to spend fuzzing; default is to run indefinitely"u8);
-    flag.Var(minimizeDuration, "test.fuzzminimizetime"u8, "time to spend minimizing a value after finding a failing input"u8);
+    flag.Var(new durationOrCountFlagжValue(ᏑfuzzDuration), "test.fuzztime"u8, "time to spend fuzzing; default is to run indefinitely"u8);
+    flag.Var(new durationOrCountFlagжValue(ᏑminimizeDuration), "test.fuzzminimizetime"u8, "time to spend minimizing a value after finding a failing input"u8);
     fuzzCacheDir = flag.String("test.fuzzcachedir"u8, ""u8, "directory where interesting fuzzing inputs are stored (for use only by cmd/go)"u8);
     isFuzzWorker = flag.Bool("test.fuzzworker"u8, false, "coordinate with the parent process to fuzz random values (for use only by cmd/go)"u8);
 }
 
 internal static ж<@string> matchFuzz;
-internal static durationOrCountFlag fuzzDuration;
-internal static durationOrCountFlag minimizeDuration = new durationOrCountFlag(d: 60 * time.ΔSecond, allowZero: true);
+internal static ж<durationOrCountFlag> ᏑfuzzDuration = new(default(durationOrCountFlag));
+internal static ref durationOrCountFlag fuzzDuration => ref ᏑfuzzDuration.Value;
+internal static ж<durationOrCountFlag> ᏑminimizeDuration = new(new durationOrCountFlag(d: 60000000000L, allowZero: true));
+internal static ref durationOrCountFlag minimizeDuration => ref ᏑminimizeDuration.Value;
 internal static ж<@string> fuzzCacheDir;
 internal static ж<bool> isFuzzWorker;
 internal static @string corpusDir = "testdata/fuzz"u8;
@@ -76,12 +79,12 @@ internal static readonly UntypedInt fuzzWorkerExitCode = 70;
     internal bool fuzzCalled;
 }
 
-internal static TB _ᴛ1ʗ = (ж<F>)(default!);
+internal static TB _ᴛ1ʗ = new FжTB((ж<F>)(default!));
 
 // corpusEntry is an alias to the same type as internal/fuzz.CorpusEntry.
 // We use a type alias because we don't want to export this type, and we can't
 // import internal/fuzz from testing.
-[GoType("dyn")] partial struct corpusEntryᴛ1 {
+[GoType("dyn")] public partial struct corpusEntryᴛ1 {
     public @string Parent;
     public @string Path;
     public slice<byte> Data;
@@ -90,34 +93,33 @@ internal static TB _ᴛ1ʗ = (ж<F>)(default!);
     public bool IsSeed;
 }
 
-[GoType("dyn")] partial struct Helper_f {
-}
-
 // Helper marks the calling function as a test helper function.
 // When printing file and line information, that function will be skipped.
 // Helper may be called simultaneously from multiple goroutines.
-[GoRecv] public static void Helper(this ref F f) => func((defer, _) => {
+public static void Helper(this ж<F> Ꮡf) => func((defer, recover) => {
+    ref var f = ref Ꮡf.Value;
+
     if (f.inFuzzFn) {
         throw panic("testing: f.Helper was called inside the fuzz target, use t.Helper instead");
     }
     // common.Helper is inlined here.
     // If we called it, it would mark F.Helper as the helper
     // instead of the caller.
-    f.mu.Lock();
-    defer(f.mu.Unlock);
+    Ꮡf.of(F.Ꮡmu).Lock();
+    defer(Ꮡf.of(F.Ꮡmu).Unlock);
     if (f.helperPCs == default!) {
         f.helperPCs = new map<uintptr, EmptyStruct>();
     }
     // repeating code from callerName here to save walking a stack frame
     array<uintptr> pc = new(1);
-    nint n = runtime.Callers(2, pc[..]);
+    nint n = Δruntime.Callers(2, pc[..]);
     // skip runtime.Callers + Helper
     if (n == 0) {
         throw panic("testing: zero callers found");
     }
     {
-        var (_, found) = f.helperPCs[pc[0]]; if (!found) {
-            f.helperPCs[pc[0]] = new Helper_f();
+        var (_, found) = f.helperPCs[pc[0], ꟷ]; if (!found) {
+            f.helperPCs[pc[0]] = new EmptyStruct();
             f.helperNames = default!;
         }
     }
@@ -126,25 +128,29 @@ internal static TB _ᴛ1ʗ = (ж<F>)(default!);
 // map will be recreated next time it is needed
 
 // Fail marks the function as having failed but continues execution.
-[GoRecv] public static void Fail(this ref F f) {
+public static void Fail(this ж<F> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
     // (*F).Fail may be called by (*T).Fail, which we should allow. However, we
     // shouldn't allow direct (*F).Fail calls from inside the (*F).Fuzz function.
     if (f.inFuzzFn) {
         throw panic("testing: f.Fail was called inside the fuzz target, use t.Fail instead");
     }
-    f.common.Helper();
-    f.common.Fail();
+    Ꮡf.of(F.Ꮡcommon).Helper();
+    Ꮡf.of(F.Ꮡcommon).Fail();
 }
 
 // Skipped reports whether the test was skipped.
-[GoRecv] public static bool Skipped(this ref F f) {
+public static bool Skipped(this ж<F> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
     // (*F).Skipped may be called by tRunner, which we should allow. However, we
     // shouldn't allow direct (*F).Skipped calls from inside the (*F).Fuzz function.
     if (f.inFuzzFn) {
         throw panic("testing: f.Skipped was called inside the fuzz target, use t.Skipped instead");
     }
-    f.common.Helper();
-    return f.common.Skipped();
+    Ꮡf.of(F.Ꮡcommon).Helper();
+    return Ꮡf.of(F.Ꮡcommon).Skipped();
 }
 
 // Add will add the arguments to the seed corpus for the fuzz test. This will be
@@ -162,28 +168,28 @@ internal static TB _ᴛ1ʗ = (ж<F>)(default!);
         }
         values = append(values, args[i]);
     }
-    f.corpus = append(f.corpus, new corpusEntry{Values: values, IsSeed: true, Path: fmt.Sprintf("seed#%d"u8, len(f.corpus))});
+    f.corpus = append(f.corpus, new corpusEntry(Values: values, IsSeed: true, Path: fmt.Sprintf("seed#%d"u8, len(f.corpus))));
 }
 
 // supportedTypes represents all of the supported types which can be fuzzed.
 internal static map<reflectꓸType, bool> supportedTypes = new map<reflectꓸType, bool>{
-    [reflect.TypeOf((slice<byte>)(""))] = true,
+    [reflect.TypeOf((slice<byte>)((@string)""))] = true,
     [reflect.TypeOf(((@string)""u8))] = true,
-    [reflect.TypeOf(((bool)false))] = true,
-    [reflect.TypeOf(((byte)0))] = true,
-    [reflect.TypeOf(((rune)0))] = true,
-    [reflect.TypeOf(((float32)0))] = true,
-    [reflect.TypeOf(((float64)0))] = true,
-    [reflect.TypeOf(((nint)0))] = true,
-    [reflect.TypeOf(((int8)0))] = true,
-    [reflect.TypeOf(((int16)0))] = true,
-    [reflect.TypeOf(((int32)0))] = true,
-    [reflect.TypeOf(((int64)0))] = true,
-    [reflect.TypeOf(((nuint)0))] = true,
-    [reflect.TypeOf(((uint8)0))] = true,
-    [reflect.TypeOf(((uint16)0))] = true,
-    [reflect.TypeOf(((uint32)0))] = true,
-    [reflect.TypeOf(((uint64)0))] = true
+    [reflect.TypeOf((bool)false)] = true,
+    [reflect.TypeOf((byte)0)] = true,
+    [reflect.TypeOf((rune)0)] = true,
+    [reflect.TypeOf((float32)0)] = true,
+    [reflect.TypeOf((float64)0)] = true,
+    [reflect.TypeOf((nint)0)] = true,
+    [reflect.TypeOf((int8)0)] = true,
+    [reflect.TypeOf((int16)0)] = true,
+    [reflect.TypeOf((int32)0)] = true,
+    [reflect.TypeOf((int64)0)] = true,
+    [reflect.TypeOf((nuint)0)] = true,
+    [reflect.TypeOf((uint8)0)] = true,
+    [reflect.TypeOf((uint16)0)] = true,
+    [reflect.TypeOf((uint32)0)] = true,
+    [reflect.TypeOf((uint64)0)] = true
 };
 
 // Fuzz runs the fuzz function, ff, for fuzz testing. If ff fails for a set of
@@ -212,7 +218,9 @@ internal static map<reflectꓸType, bool> supportedTypes = new map<reflectꓸTyp
 // When fuzzing, F.Fuzz does not return until a problem is found, time runs out
 // (set with -fuzztime), or the test process is interrupted by a signal. F.Fuzz
 // should be called exactly once, unless F.Skip or [F.Fail] is called beforehand.
-[GoRecv] public static void Fuzz(this ref F f, any ff) => func((defer, _) => {
+public static void Fuzz(this ж<F> Ꮡf, any ff) {
+    ref var f = ref Ꮡf.Value;
+
     if (f.fuzzCalled) {
         throw panic("testing: F.Fuzz called more than once");
     }
@@ -220,9 +228,9 @@ internal static map<reflectꓸType, bool> supportedTypes = new map<reflectꓸTyp
     if (f.failed) {
         return;
     }
-    f.Helper();
+    Ꮡf.Helper();
     // ff should be in the form func(*testing.T, ...interface{})
-    ref var fn = ref heap<reflect_package.ΔValue>(out var Ꮡfn);
+    ref var fn = ref heap<reflectꓸValue>(out var Ꮡfn);
     fn = reflect.ValueOf(ff);
     var fnType = fn.Type();
     if (fnType.Kind() != reflect.Func) {
@@ -247,24 +255,24 @@ internal static map<reflectꓸType, bool> supportedTypes = new map<reflectꓸTyp
     // corpus and entries declared with F.Add.
     //
     // Don't load the seed corpus if this is a worker process; we won't use it.
-    if (f.fuzzContext.mode != fuzzWorker) {
-        foreach (var (_, c) in f.corpus) {
+    if ((~f.fuzzContext).mode != fuzzWorker) {
+        foreach (var (_, cΔ1) in f.corpus) {
             {
-                var err = f.fuzzContext.deps.CheckCorpus(c.Values, types); if (err != default!) {
+                var errΔ1 = (~f.fuzzContext).deps.CheckCorpus(cΔ1.Values, types); if (errΔ1 != default!) {
                     // TODO(#48302): Report the source location of the F.Add call.
-                    f.Fatal(err);
+                    Ꮡf.of(F.Ꮡcommon).Fatal(errΔ1);
                 }
             }
         }
         // Load seed corpus
-        (c, err) = f.fuzzContext.deps.ReadCorpus(filepath.Join(corpusDir, f.name), types);
+        var (c, err) = (~f.fuzzContext).deps.ReadCorpus(filepath.Join(corpusDir, f.name), types);
         if (err != default!) {
-            f.Fatal(err);
+            Ꮡf.of(F.Ꮡcommon).Fatal(err);
         }
         foreach (var (i, _) in c) {
             c[i].IsSeed = true;
             // these are all seed corpus values
-            if (f.fuzzContext.mode == fuzzCoordinator) {
+            if ((~f.fuzzContext).mode == fuzzCoordinator) {
                 // If this is the coordinator process, zero the values, since we don't need
                 // to hold onto them.
                 c[i].Values = default!;
@@ -275,9 +283,9 @@ internal static map<reflectꓸType, bool> supportedTypes = new map<reflectꓸTyp
     // run calls fn on a given input, as a subtest with its own T.
     // run is analogous to T.Run. The test filtering and cleanup works similarly.
     // fn is called in its own goroutine.
-    var run = 
     var fnʗ1 = fn;
-    (io.Writer captureOut, corpusEntry e) => {
+    var run = (Δio.Writer captureOut, corpusEntry e) => {
+        bool ok = default!;
         if (e.Values == default!) {
             // The corpusEntry must have non-nil Values in order to run the
             // test. If Values is nil, it is a bug in our code.
@@ -286,47 +294,47 @@ internal static map<reflectꓸType, bool> supportedTypes = new map<reflectꓸTyp
         if (shouldFailFast()) {
             return true;
         }
-        @string testName = f.name;
+        @string testName = Ꮡf.Value.name;
         if (e.Path != ""u8) {
             testName = fmt.Sprintf("%s/%s"u8, testName, filepath.Base(e.Path));
         }
-        if (f.testContext.isFuzzing) {
+        if ((~Ꮡf.Value.testContext).isFuzzing) {
             // Don't preserve subtest names while fuzzing. If fn calls T.Run,
             // there will be a very large number of subtests with duplicate names,
             // which will use a large amount of memory. The subtest names aren't
             // useful since there's no way to re-run them deterministically.
-            f.testContext.match.clearSubNames();
+            (~Ꮡf.Value.testContext).match.clearSubNames();
         }
         // Record the stack trace at the point of this call so that if the subtest
         // function - which runs in a separate stack - is marked as a helper, we can
         // continue walking the stack into the parent test.
         ref var pc = ref heap(new array<uintptr>(50), out var Ꮡpc);
-        nint n = runtime.Callers(2, pc[..]);
+        nint n = Δruntime.Callers(2, pc[..]);
         var t = Ꮡ(new T(
             common: new common(
                 barrier: new channel<bool>(1),
                 signal: new channel<bool>(1),
                 name: testName,
-                parent: Ꮡ(f.common),
-                level: f.level + 1,
+                parent: Ꮡf.of(F.Ꮡcommon),
+                level: Ꮡf.Value.level + 1,
                 creator: pc[..(int)(n)],
-                chatty: f.chatty
+                chatty: Ꮡf.Value.chatty
             ),
-            context: f.testContext
+            context: Ꮡf.Value.testContext
         ));
         if (captureOut != default!) {
             // t.parent aliases f.common.
-            t.parent.val.w = captureOut;
+            t.Value.parent.Value.w = captureOut;
         }
-        t.w = new indenter(Ꮡ((~t).common));
-        if (t.chatty != nil) {
-            t.chatty.Updatef(t.name, "=== RUN   %s\n"u8, t.name);
+        t.Value.w = new indenter(t.of(T.Ꮡcommon));
+        if ((~t).chatty != nil) {
+            (~t).chatty.Updatef((~t).name, "=== RUN   %s\n"u8, (~t).name);
         }
-        (f.common.inFuzzFn, f.inFuzzFn) = (true, true);
-        goǃ(tRunner, t, 
+        Ꮡf.Value.common.inFuzzFn = true;
+        Ꮡf.Value.inFuzzFn = true;
         var eʗ1 = e;
-        var fnʗ2 = fn;
-        (ж<T> t) => {
+        var fnʗ2 = fnʗ1;
+        goǃ(tRunner, t, (ж<T> tΔ1) => func((defer, recover) => {
             var args = new reflectꓸValue[]{reflect.ValueOf(tΔ1)}.slice();
             foreach (var (_, v) in eʗ1.Values) {
                 args = append(args, reflect.ValueOf(v));
@@ -335,39 +343,40 @@ internal static map<reflectꓸType, bool> supportedTypes = new map<reflectꓸTyp
             // we make sure it is called right before the tRunner function
             // exits, regardless of whether it was executed cleanly, panicked,
             // or if the fuzzFn called t.Fatal.
-            if (f.testContext.isFuzzing) {
-                defer(f.fuzzContext.deps.SnapshotCoverage);
-                f.fuzzContext.deps.ResetCoverage();
+            if ((~Ꮡf.Value.testContext).isFuzzing) {
+                defer((~Ꮡf.Value.fuzzContext).deps.SnapshotCoverage);
+                (~Ꮡf.Value.fuzzContext).deps.ResetCoverage();
             }
-            fn.Call(args);
-        });
-        ᐸꟷ(t.signal);
-        if (t.chatty != nil && (~t.chatty).json) {
-            t.chatty.Updatef((~t.parent).name, "=== NAME  %s\n"u8, (~t.parent).name);
+            fnʗ2.Call(args);
+        }));
+        ᐸꟷ((~t).signal);
+        if ((~t).chatty != nil && (~(~t).chatty).json) {
+            (~t).chatty.Updatef((~(~t).parent).name, "=== NAME  %s\n"u8, (~(~t).parent).name);
         }
-        (f.common.inFuzzFn, f.inFuzzFn) = (false, false);
-        return !t.Failed();
+        Ꮡf.Value.common.inFuzzFn = false;
+        Ꮡf.Value.inFuzzFn = false;
+        return !t.of(T.Ꮡcommon).Failed();
     };
-    var exprᴛ1 = f.fuzzContext.mode;
+    var exprᴛ1 = (~f.fuzzContext).mode;
     if (exprᴛ1 == fuzzCoordinator) {
         @string corpusTargetDir = filepath.Join(corpusDir, // Fuzzing is enabled, and this is the test process started by 'go test'.
  // Act as the coordinator process, and coordinate workers to perform the
  // actual fuzzing.
  f.name);
-        @string cacheTargetDir = filepath.Join(fuzzCacheDir.val, f.name);
-        var err = f.fuzzContext.deps.CoordinateFuzzing(
+        @string cacheTargetDir = filepath.Join(fuzzCacheDir.Value, f.name);
+        var err = (~f.fuzzContext).deps.CoordinateFuzzing(
             fuzzDuration.d,
-            ((int64)fuzzDuration.n),
+            (int64)fuzzDuration.n,
             minimizeDuration.d,
-            ((int64)minimizeDuration.n),
-            parallel.val,
+            (int64)minimizeDuration.n,
+            parallel.Value,
             f.corpus,
             types,
             corpusTargetDir,
             cacheTargetDir);
         if (err != default!) {
             f.result = new fuzzResult(Error: err);
-            f.Fail();
+            Ꮡf.Fail();
             fmt.Fprintf(f.w, "%v\n"u8, err);
             {
                 var (crashErr, ok) = err._<fuzzCrashError>(ᐧ); if (ok) {
@@ -381,13 +390,19 @@ internal static map<reflectꓸType, bool> supportedTypes = new map<reflectꓸTyp
     }
     else if (exprᴛ1 == fuzzWorker) {
         {
-            var err = f.fuzzContext.deps.RunFuzzWorker(
-            var runʗ2 = run;
-            (corpusEntry e) => {
-                
-                ref var buf = ref heap(new strings_package.Builder(), out var Ꮡbuf);
+            var runʗ1 = run;
+            var err = (~f.fuzzContext).deps.RunFuzzWorker(error (corpusEntry e) => {
+                // TODO(jayconrod,katiehockman): Aggregate statistics across workers
+                // and add to FuzzResult (ie. time taken, num iterations)
+                // Fuzzing is enabled, and this is a worker process. Follow instructions
+                // from the coordinator.
+                // Don't write to f.w (which points to Stdout) if running from a
+                // fuzz worker. This would become very verbose, particularly during
+                // minimization. Return the error instead, and let the caller deal
+                // with the output.
+                ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
                 {
-                    var ok = runʗ2(~Ꮡbuf, e); if (!ok) {
+                    var ok = runʗ1(new strings_BuilderжWriter(Ꮡbuf), e); if (!ok) {
                         return errors.New(buf.String());
                     }
                 }
@@ -396,7 +411,7 @@ internal static map<reflectꓸType, bool> supportedTypes = new map<reflectꓸTyp
                 // Internal errors are marked with f.Fail; user code may call this too, before F.Fuzz.
                 // The worker will exit with fuzzWorkerExitCode, indicating this is a failure
                 // (and 'go test' should exit non-zero) but a failing input should not be recorded.
-                f.Errorf("communicating with fuzzing coordinator: %v"u8, err);
+                Ꮡf.of(F.Ꮡcommon).Errorf("communicating with fuzzing coordinator: %v"u8, err);
             }
         }
     }
@@ -406,29 +421,31 @@ internal static map<reflectꓸType, bool> supportedTypes = new map<reflectꓸTyp
             // corpus now.
             @string name = fmt.Sprintf("%s/%s"u8, f.name, filepath.Base(e.Path));
             {
-                var (_, ok, _) = f.testContext.match.fullName(nil, name); if (ok) {
+                var (_, ok, _) = (~f.testContext).match.fullName(nil, name); if (ok) {
                     run(f.w, e);
                 }
             }
         }
     }
 
-});
+}
 
-[GoRecv] internal static void report(this ref F f) {
-    if (isFuzzWorker.val || f.parent == nil) {
+internal static void report(this ж<F> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
+    if (isFuzzWorker.Value || f.parent == nil) {
         return;
     }
     @string dstr = fmtDuration(f.duration);
     @string format = "--- %s: %s (%s)\n"u8;
-    if (f.Failed()){
-        f.flushToParent(f.name, format, "FAIL", f.name, dstr);
+    if (Ꮡf.of(F.Ꮡcommon).Failed()){
+        Ꮡf.of(F.Ꮡcommon).flushToParent(f.name, format, "FAIL", f.name, dstr);
     } else 
     if (f.chatty != nil) {
-        if (f.Skipped()){
-            f.flushToParent(f.name, format, "SKIP", f.name, dstr);
+        if (Ꮡf.Skipped()){
+            Ꮡf.of(F.Ꮡcommon).flushToParent(f.name, format, "SKIP", f.name, dstr);
         } else {
-            f.flushToParent(f.name, format, "PASS", f.name, dstr);
+            Ꮡf.of(F.Ꮡcommon).flushToParent(f.name, format, "PASS", f.name, dstr);
         }
     }
 }
@@ -436,7 +453,7 @@ internal static map<reflectꓸType, bool> supportedTypes = new map<reflectꓸTyp
 // fuzzResult contains the results of a fuzz run.
 [GoType] partial struct fuzzResult {
     public nint N;          // The number of iterations.
-    public time_package.Duration T; // The total time taken.
+    public time.Duration T; // The total time taken.
     public error Error;         // Error is the error from the failing input
 }
 
@@ -482,32 +499,33 @@ internal static (bool ran, bool ok) runFuzzTests(testDeps deps, slice<InternalFu
     bool ok = default!;
 
     ok = true;
-    if (len(fuzzTests) == 0 || isFuzzWorker.val) {
+    if (len(fuzzTests) == 0 || isFuzzWorker.Value) {
         return (ran, ok);
     }
-    var m = newMatcher(deps.MatchString, match.val, "-test.run"u8, skip.val);
+    var m = newMatcher(deps.MatchString, match.Value, "-test.run"u8, skip.Value);
     ж<matcher> mFuzz = default!;
-    if (matchFuzz.val != ""u8) {
-        mFuzz = newMatcher(deps.MatchString, matchFuzz.val, "-test.fuzz"u8, skip.val);
+    if (matchFuzz.Value != ""u8) {
+        mFuzz = newMatcher(deps.MatchString, matchFuzz.Value, "-test.fuzz"u8, skip.Value);
     }
     foreach (var (_, procs) in cpuList) {
-        runtime.GOMAXPROCS(procs);
-        for (nuint i = ((nuint)0); i < count.val; i++) {
+        Δruntime.GOMAXPROCS(procs);
+        for (nuint i = (nuint)0; i < count.Value; i++) {
             if (shouldFailFast()) {
                 break;
             }
-            var tctx = newTestContext(parallel.val, m);
-            tctx.val.deadline = deadline;
+            var tctx = newTestContext(parallel.Value, m);
+            tctx.Value.deadline = deadline;
             var fctx = Ꮡ(new fuzzContext(deps: deps, mode: seedCorpusOnly));
             ref var root = ref heap<common>(out var Ꮡroot);
-            root = new common(w: os.Stdout);
+            root = new common(w: new os.FileжWriter(os.Stdout));
             // gather output in one place
             if (Verbose()) {
                 root.chatty = newChattyPrinter(root.w);
             }
-            ref var ft = ref heap(new InternalFuzzTarget(), out var Ꮡft);
+            foreach (var (_, vᴛ1) in fuzzTests) {
+                ref var ft = ref heap(new InternalFuzzTarget(), out var Ꮡft);
+                ft = vᴛ1;
 
-            foreach (var (_, ft) in fuzzTests) {
                 if (shouldFailFast()) {
                     break;
                 }
@@ -536,17 +554,17 @@ internal static (bool ran, bool ok) runFuzzTests(testDeps deps, slice<InternalFu
                     testContext: tctx,
                     fuzzContext: fctx
                 ));
-                f.w = new indenter(Ꮡ((~f).common));
-                if (f.chatty != nil) {
-                    f.chatty.Updatef(f.name, "=== RUN   %s\n"u8, f.name);
+                f.Value.w = new indenter(f.of(F.Ꮡcommon));
+                if ((~f).chatty != nil) {
+                    (~f).chatty.Updatef((~f).name, "=== RUN   %s\n"u8, (~f).name);
                 }
                 goǃ(fRunner, f, ft.Fn);
-                ᐸꟷ(f.signal);
-                if (f.chatty != nil && (~f.chatty).json) {
-                    f.chatty.Updatef((~f.parent).name, "=== NAME  %s\n"u8, (~f.parent).name);
+                ᐸꟷ((~f).signal);
+                if ((~f).chatty != nil && (~(~f).chatty).json) {
+                    (~f).chatty.Updatef((~(~f).parent).name, "=== NAME  %s\n"u8, (~(~f).parent).name);
                 }
-                ok = ok && !f.Failed();
-                ran = ran || f.ran;
+                ok = ok && !f.of(F.Ꮡcommon).Failed();
+                ran = ran || (~f).ran;
             }
             if (!ran) {
                 // There were no tests to run on this iteration.
@@ -567,24 +585,24 @@ internal static (bool ran, bool ok) runFuzzTests(testDeps deps, slice<InternalFu
 internal static bool /*ok*/ runFuzzing(testDeps deps, slice<InternalFuzzTarget> fuzzTests) {
     bool ok = default!;
 
-    if (len(fuzzTests) == 0 || matchFuzz.val == ""u8) {
+    if (len(fuzzTests) == 0 || matchFuzz.Value == ""u8) {
         return true;
     }
-    var m = newMatcher(deps.MatchString, matchFuzz.val, "-test.fuzz"u8, skip.val);
+    var m = newMatcher(deps.MatchString, matchFuzz.Value, "-test.fuzz"u8, skip.Value);
     var tctx = newTestContext(1, m);
-    tctx.val.isFuzzing = true;
+    tctx.Value.isFuzzing = true;
     var fctx = Ꮡ(new fuzzContext(
         deps: deps
     ));
     ref var root = ref heap<common>(out var Ꮡroot);
-    root = new common(w: os.Stdout);
-    if (isFuzzWorker.val){
-        root.w = io.Discard;
-        fctx.val.mode = fuzzWorker;
+    root = new common(w: new os.FileжWriter(os.Stdout));
+    if (isFuzzWorker.Value){
+        root.w = Δio.Discard;
+        fctx.Value.mode = fuzzWorker;
     } else {
-        fctx.val.mode = fuzzCoordinator;
+        fctx.Value.mode = fuzzCoordinator;
     }
-    if (Verbose() && !isFuzzWorker.val) {
+    if (Verbose() && !isFuzzWorker.Value) {
         root.chatty = newChattyPrinter(root.w);
     }
     ж<InternalFuzzTarget> fuzzTest = default!;
@@ -600,11 +618,11 @@ internal static bool /*ok*/ runFuzzing(testDeps deps, slice<InternalFuzzTarget> 
         testName = name;
     }
     if (len(matched) == 0) {
-        fmt.Fprintln(~os.Stderr, "testing: warning: no fuzz tests to fuzz");
+        fmt.Fprintln(new os.FileжWriter(os.Stderr), "testing: warning: no fuzz tests to fuzz");
         return true;
     }
     if (len(matched) > 1) {
-        fmt.Fprintf(~os.Stderr, "testing: will not fuzz, -fuzz matches more than one fuzz test: %v\n"u8, matched);
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: will not fuzz, -fuzz matches more than one fuzz test: %v\n"u8, matched);
         return false;
     }
     var f = Ꮡ(new F(
@@ -620,16 +638,16 @@ internal static bool /*ok*/ runFuzzing(testDeps deps, slice<InternalFuzzTarget> 
         fuzzContext: fctx,
         testContext: tctx
     ));
-    f.w = new indenter(Ꮡ((~f).common));
-    if (f.chatty != nil) {
-        f.chatty.Updatef(f.name, "=== RUN   %s\n"u8, f.name);
+    f.Value.w = new indenter(f.of(F.Ꮡcommon));
+    if ((~f).chatty != nil) {
+        (~f).chatty.Updatef((~f).name, "=== RUN   %s\n"u8, (~f).name);
     }
     goǃ(fRunner, f, (~fuzzTest).Fn);
-    ᐸꟷ(f.signal);
-    if (f.chatty != nil) {
-        f.chatty.Updatef((~f.parent).name, "=== NAME  %s\n"u8, (~f.parent).name);
+    ᐸꟷ((~f).signal);
+    if ((~f).chatty != nil) {
+        (~f).chatty.Updatef((~(~f).parent).name, "=== NAME  %s\n"u8, (~(~f).parent).name);
     }
-    return !f.failed;
+    return !(~f).failed;
 }
 
 // fRunner wraps a call to a fuzz test and ensures that cleanup functions are
@@ -643,12 +661,11 @@ internal static bool /*ok*/ runFuzzing(testDeps deps, slice<InternalFuzzTarget> 
 // simplifications are made. We also require that F.Fuzz, F.Skip, or F.Fail is
 // called.
 internal static void fRunner(ж<F> Ꮡf, Action<ж<F>> fn) => func((defer, recover) => {
-    ref var f = ref Ꮡf.val;
+    ref var f = ref Ꮡf.Value;
 
     // When this goroutine is done, either because runtime.Goexit was called, a
     // panic started, or fn returned normally, record the duration and send
     // t.signal, indicating the fuzz test is done.
-    var numFailedʗ1 = numFailed;
     defer(() => {
         // Detect whether the fuzz test panicked or called runtime.Goexit
         // without calling F.Fuzz, F.Fail, or F.Skip. If it did, panic (possibly
@@ -657,20 +674,20 @@ internal static void fRunner(ж<F> Ꮡf, Action<ж<F>> fn) => func((defer, recov
         // Unfortunately, recovering here adds stack frames, but the location of
         // the original panic should still be
         // clear.
-        f.checkRaces();
-        if (f.Failed()) {
-            numFailedʗ1.Add(1);
+        Ꮡf.of(F.Ꮡcommon).checkRaces();
+        if (Ꮡf.of(F.Ꮡcommon).Failed()) {
+            ᏑnumFailed.Add(1);
         }
         var err = recover();
         if (err == default!) {
-            f.mu.RLock();
-            var fuzzNotCalled = !f.fuzzCalled && !f.skipped && !f.failed;
-            if (!f.finished && !f.skipped && !f.failed) {
+            Ꮡf.of(F.Ꮡmu).RLock();
+            var fuzzNotCalled = !Ꮡf.Value.fuzzCalled && !Ꮡf.Value.skipped && !Ꮡf.Value.failed;
+            if (!Ꮡf.Value.finished && !Ꮡf.Value.skipped && !Ꮡf.Value.failed) {
                 err = errNilPanicOrGoexit;
             }
-            f.mu.RUnlock();
+            Ꮡf.of(F.Ꮡmu).RUnlock();
             if (fuzzNotCalled && err == default!) {
-                f.Error("returned without calling F.Fuzz, F.Fail, or F.Skip");
+                Ꮡf.of(F.Ꮡcommon).Error("returned without calling F.Fuzz, F.Fail, or F.Skip");
             }
         }
         // Use a deferred call to ensure that we report that the test is
@@ -681,24 +698,23 @@ internal static void fRunner(ж<F> Ꮡf, Action<ж<F>> fn) => func((defer, recov
                 // Only report that the test is complete if it doesn't panic,
                 // as otherwise the test binary can exit before the panic is
                 // reported to the user. See issue 41479.
-                f.signal.ᐸꟷ(true);
+                Ꮡf.Value.signal.ᐸꟷ(true);
             }
         });
         // If we recovered a panic or inappropriate runtime.Goexit, fail the test,
         // flush the output log up to the root, then panic.
-        var doPanic = 
-        (any err) => {
-            f.Fail();
+        var doPanic = (any errΔ1) => {
+            Ꮡf.Fail();
             {
-                var r = f.runCleanup(recoverAndReturnPanic); if (r != default!) {
-                    f.Logf("cleanup panicked with %v"u8, r);
+                var r = Ꮡf.of(F.Ꮡcommon).runCleanup(recoverAndReturnPanic); if (r != default!) {
+                    Ꮡf.of(F.Ꮡcommon).Logf("cleanup panicked with %v"u8, r);
                 }
             }
-            for (var root = Ꮡ(f.common); (~root).parent != nil; root = root.val.parent) {
-                (~root).mu.Lock();
-                root.val.duration += highPrecisionTimeSince((~root).start);
-                var d = root.val.duration;
-                (~root).mu.Unlock();
+            for (var root = Ꮡf.of(F.Ꮡcommon); (~root).parent != nil; root = root.Value.parent) {
+                root.of(common.Ꮡmu).Lock();
+                root.Value.duration += highPrecisionTimeSince((~root).start);
+                var d = root.Value.duration;
+                root.of(common.Ꮡmu).Unlock();
                 root.flushToParent((~root).name, "--- FAIL: %s (%s)\n"u8, (~root).name, fmtDuration(d));
             }
             didPanic = true;
@@ -708,44 +724,44 @@ internal static void fRunner(ж<F> Ꮡf, Action<ж<F>> fn) => func((defer, recov
             doPanic(err);
         }
         // No panic or inappropriate Goexit.
-        f.duration += highPrecisionTimeSince(f.start);
-        if (len(f.sub) > 0) {
+        Ꮡf.Value.duration += highPrecisionTimeSince(Ꮡf.Value.start);
+        if (len(Ꮡf.Value.sub) > 0) {
             // Unblock inputs that called T.Parallel while running the seed corpus.
             // This only affects fuzz tests run as normal tests.
             // While fuzzing, T.Parallel has no effect, so f.sub is empty, and this
             // branch is not taken. f.barrier is nil in that case.
-            f.testContext.release();
-            close(f.barrier);
+            Ꮡf.Value.testContext.release();
+            close(Ꮡf.Value.barrier);
             // Wait for the subtests to complete.
-            foreach (var (_, sub) in f.sub) {
-                ᐸꟷ(sub.signal);
+            foreach (var (_, sub) in Ꮡf.Value.sub) {
+                ᐸꟷ((~sub).signal);
             }
             ref var cleanupStart = ref heap<highPrecisionTime>(out var ᏑcleanupStart);
             cleanupStart = highPrecisionTimeNow();
-            var errΔ2 = f.runCleanup(recoverAndReturnPanic);
-            f.duration += highPrecisionTimeSince(cleanupStart);
+            var errΔ2 = Ꮡf.of(F.Ꮡcommon).runCleanup(recoverAndReturnPanic);
+            Ꮡf.Value.duration += highPrecisionTimeSince(cleanupStart);
             if (errΔ2 != default!) {
                 doPanic(errΔ2);
             }
         }
         // Report after all subtests have finished.
-        f.report();
-        f.done = true;
-        f.setRan();
+        Ꮡf.report();
+        Ꮡf.Value.done = true;
+        Ꮡf.of(F.Ꮡcommon).setRan();
     });
     defer(() => {
-        if (len(f.sub) == 0) {
-            f.runCleanup(normalPanic);
+        if (len(Ꮡf.Value.sub) == 0) {
+            Ꮡf.of(F.Ꮡcommon).runCleanup(normalPanic);
         }
     });
     f.start = highPrecisionTimeNow();
-    f.resetRaces();
+    Ꮡf.of(F.Ꮡcommon).resetRaces();
     fn(Ꮡf);
     // Code beyond this point will not be executed when FailNow or SkipNow
     // is invoked.
-    f.mu.Lock();
+    Ꮡf.of(F.Ꮡmu).Lock();
     f.finished = true;
-    f.mu.Unlock();
+    Ꮡf.of(F.Ꮡmu).Unlock();
 });
 
 } // end testing_package

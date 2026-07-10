@@ -6,8 +6,8 @@ namespace go;
 // Simple byte buffer for marshaling data.
 using errors = errors_package;
 using io = io_package;
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
 
 partial class bytes_package {
 
@@ -26,8 +26,7 @@ internal static readonly UntypedInt smallBufferSize = 64;
 
 // Don't use iota for these, as the values need to correspond with the
 // names and comments, which is easier to see when being explicit.
-internal static readonly GoUntyped opRead = /* -1 */               // Any other read operation.
-    GoUntyped.Parse("-1");
+internal static readonly readOp opRead = -1;   // Any other read operation.
 
 internal static readonly readOp opInvalid = 0; // Non-read operation.
 
@@ -44,7 +43,7 @@ public static error ErrTooLarge = errors.New("bytes.Buffer: too large"u8);
 
 internal static error errNegativeRead = errors.New("bytes.Buffer: reader returned negative count from Read"u8);
 
-internal const nint maxInt = /* int(^uint(0) >> 1) */ 9223372036854775807;
+internal static readonly nint maxInt = /* int(^uint(0) >> 1) */ unchecked((nint)9223372036854775807);
 
 // Bytes returns a slice of length b.Len() holding the unread portion of the buffer.
 // The slice is valid for use only until the next buffer modification (that is,
@@ -67,7 +66,9 @@ internal const nint maxInt = /* int(^uint(0) >> 1) */ 9223372036854775807;
 // as a string. If the [Buffer] is a nil pointer, it returns "<nil>".
 //
 // To build strings more efficiently, see the [strings.Builder] type.
-[GoRecv] public static @string String(this ref Buffer b) {
+public static @string String(this ж<Buffer> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
+
     if (b == nil) {
         // Special case, useful in debugging.
         return "<nil>"u8;
@@ -239,7 +240,7 @@ public static readonly UntypedInt MinRead = 512;
             throw panic(errNegativeRead);
         }
         b.buf = b.buf[..(int)(i + m)];
-        n += ((int64)m);
+        n += (int64)m;
         if (AreEqual(e, io.EOF)) {
             return (n, default!);
         }
@@ -294,7 +295,7 @@ internal static slice<byte> growSlice(slice<byte> b, nint n) => func((defer, rec
                 throw panic("bytes.Buffer.WriteTo: invalid Write count");
             }
             b.off += m;
-            n = ((int64)m);
+            n = (int64)m;
             if (e != default!) {
                 return (n, e);
             }
@@ -333,8 +334,8 @@ internal static slice<byte> growSlice(slice<byte> b, nint n) => func((defer, rec
     error err = default!;
 
     // Compare as uint32 to correctly handle negative runes.
-    if (((uint32)r) < utf8.RuneSelf) {
-        b.WriteByte(((byte)r));
+    if ((uint32)r < utf8.RuneSelf) {
+        b.WriteByte((byte)r);
         return (1, default!);
     }
     b.lastRead = opInvalid;
@@ -422,11 +423,11 @@ internal static slice<byte> growSlice(slice<byte> b, nint n) => func((defer, rec
     if (c < utf8.RuneSelf) {
         b.off++;
         b.lastRead = opReadRune1;
-        return (((rune)c), 1, default!);
+        return ((rune)c, 1, default!);
     }
-    var (r, n) = utf8.DecodeRune(b.buf[(int)(b.off)..]);
+    (r, var n) = utf8.DecodeRune(b.buf[(int)(b.off)..]);
     b.off += n;
-    b.lastRead = ((readOp)n);
+    b.lastRead = ((readOp)(int8)n);
     return (r, n, default!);
 }
 
@@ -439,8 +440,8 @@ internal static slice<byte> growSlice(slice<byte> b, nint n) => func((defer, rec
     if (b.lastRead <= opInvalid) {
         return errors.New("bytes.Buffer: UnreadRune: previous operation was not a successful ReadRune"u8);
     }
-    if (b.off >= ((nint)b.lastRead)) {
-        b.off -= ((nint)b.lastRead);
+    if (b.off >= (nint)(int8)b.lastRead) {
+        b.off -= (nint)(int8)b.lastRead;
     }
     b.lastRead = opInvalid;
     return default!;
@@ -473,7 +474,7 @@ internal static error errUnreadByte = errors.New("bytes.Buffer: UnreadByte: prev
     slice<byte> line = default!;
     error err = default!;
 
-    (Δslice, err) = b.readSlice(delim);
+    (var Δslice, err) = b.readSlice(delim);
     // return a copy of slice. The buffer's backing array may
     // be overwritten by later calls.
     line = append(line, Δslice.ꓸꓸꓸ);
@@ -507,7 +508,7 @@ internal static error errUnreadByte = errors.New("bytes.Buffer: UnreadByte: prev
     @string line = default!;
     error err = default!;
 
-    (Δslice, err) = b.readSlice(delim);
+    (var Δslice, err) = b.readSlice(delim);
     return (((@string)Δslice), err);
 }
 

@@ -24,8 +24,7 @@ partial class runtime_package {
     // These are address over an offset view of the address space on
     // platforms with a segmented address space, that is, on platforms
     // where arenaBaseOffset != 0.
-    internal offAddr @base;
-    internal offAddr limit;
+    internal offAddr @base, limit;
 }
 
 // makeAddrRange creates a new address range from two virtual addresses.
@@ -33,7 +32,7 @@ partial class runtime_package {
 // Throws if the base and limit are not in the same memory segment.
 internal static addrRange makeAddrRange(uintptr @base, uintptr limit) {
     var r = new addrRange(new offAddr(@base), new offAddr(limit));
-    if ((@base - arenaBaseOffset >= @base) != (limit - arenaBaseOffset >= limit)) {
+    if ((@base - (uintptr)arenaBaseOffset >= @base) != (limit - (uintptr)arenaBaseOffset >= limit)) {
         @throw("addr range base and limit are not in the same memory segment"u8);
     }
     return r;
@@ -78,7 +77,7 @@ internal static addrRange subtract(this addrRange a, addrRange b) {
 // the base to align first. On success, returns the aligned start of the region
 // taken and true.
 [GoRecv] internal static (uintptr, bool) takeFromFront(this ref addrRange a, uintptr len, uint8 align) {
-    var @base = alignUp(a.@base.addr(), ((uintptr)align)) + len;
+    var @base = alignUp(a.@base.addr(), (uintptr)align) + len;
     if (@base > a.limit.addr()) {
         return (0, false);
     }
@@ -90,7 +89,7 @@ internal static addrRange subtract(this addrRange a, addrRange b) {
 // the limit to align after subtracting len. On success, returns the aligned
 // start of the region taken and true.
 [GoRecv] internal static (uintptr, bool) takeFromBack(this ref addrRange a, uintptr len, uint8 align) {
-    var limit = alignDown(a.limit.addr() - len, ((uintptr)align));
+    var limit = alignDown(a.limit.addr() - len, (uintptr)align);
     if (a.@base.addr() > limit) {
         return (0, false);
     }
@@ -111,7 +110,7 @@ internal static addrRange removeGreaterEqual(this addrRange a, uintptr addr) {
 }
 
 internal static offAddr minOffAddr = new offAddr(arenaBaseOffset);
-internal static offAddr maxOffAddr = new offAddr((uintptr)((((1 << (int)(heapAddrBits)) - 1) + arenaBaseOffset) & uintptrMask));
+internal static offAddr maxOffAddr = new offAddr((uintptr)((uintptr)((281474976710655L) + arenaBaseOffset) & (uintptr)uintptrMask));
 
 // offAddr represents an address in a contiguous view
 // of the address space on systems where the address space is
@@ -141,13 +140,13 @@ internal static uintptr diff(this offAddr l1, offAddr l2) {
 // lessThan returns true if l1 is less than l2 in the offset
 // address space.
 internal static bool lessThan(this offAddr l1, offAddr l2) {
-    return (l1.a - arenaBaseOffset) < (l2.a - arenaBaseOffset);
+    return (l1.a - (uintptr)arenaBaseOffset) < (l2.a - (uintptr)arenaBaseOffset);
 }
 
 // lessEqual returns true if l1 is less than or equal to l2 in
 // the offset address space.
 internal static bool lessEqual(this offAddr l1, offAddr l2) {
-    return (l1.a - arenaBaseOffset) <= (l2.a - arenaBaseOffset);
+    return (l1.a - (uintptr)arenaBaseOffset) <= (l2.a - (uintptr)arenaBaseOffset);
 }
 
 // equal returns true if the two offAddr values are equal.
@@ -167,18 +166,20 @@ internal static uintptr addr(this offAddr l) {
 // to ensure that they're not overridden until they've been seen.
 [GoType] partial struct atomicOffAddr {
     // a contains the offset address, unlike offAddr.
-    internal @internal.runtime.atomic_package.Int64 a;
+    internal atomic.Int64 a;
 }
 
 // Clear attempts to store minOffAddr in atomicOffAddr. It may fail
 // if a marked value is placed in the box in the meanwhile.
-[GoRecv] internal static void Clear(this ref atomicOffAddr b) {
+internal static void Clear(this ж<atomicOffAddr> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
+
     while (ᐧ) {
-        var old = b.a.Load();
+        var old = Ꮡb.of(atomicOffAddr.Ꮡa).Load();
         if (old < 0) {
             return;
         }
-        if (b.a.CompareAndSwap(old, ((int64)(minOffAddr.addr() - arenaBaseOffset)))) {
+        if (Ꮡb.of(atomicOffAddr.Ꮡa).CompareAndSwap(old, (int64)(minOffAddr.addr() - (uintptr)arenaBaseOffset))) {
             return;
         }
     }
@@ -186,14 +187,16 @@ internal static uintptr addr(this offAddr l) {
 
 // StoreMin stores addr if it's less than the current value in the
 // offset address space if the current value is not marked.
-[GoRecv] internal static void StoreMin(this ref atomicOffAddr b, uintptr addr) {
-    var @new = ((int64)(addr - arenaBaseOffset));
+internal static void StoreMin(this ж<atomicOffAddr> Ꮡb, uintptr addr) {
+    ref var b = ref Ꮡb.Value;
+
+    var @new = (int64)(addr - (uintptr)arenaBaseOffset);
     while (ᐧ) {
-        var old = b.a.Load();
+        var old = Ꮡb.of(atomicOffAddr.Ꮡa).Load();
         if (old < @new) {
             return;
         }
-        if (b.a.CompareAndSwap(old, @new)) {
+        if (Ꮡb.of(atomicOffAddr.Ꮡa).CompareAndSwap(old, @new)) {
             return;
         }
     }
@@ -203,26 +206,32 @@ internal static uintptr addr(this offAddr l) {
 // replace it with newAddr. markedAddr must be a marked address
 // returned by Load. This function will not store newAddr if the
 // box no longer contains markedAddr.
-[GoRecv] internal static void StoreUnmark(this ref atomicOffAddr b, uintptr markedAddr, uintptr newAddr) {
-    b.a.CompareAndSwap(-((int64)(markedAddr - arenaBaseOffset)), ((int64)(newAddr - arenaBaseOffset)));
+internal static void StoreUnmark(this ж<atomicOffAddr> Ꮡb, uintptr markedAddr, uintptr newAddr) {
+    ref var b = ref Ꮡb.Value;
+
+    Ꮡb.of(atomicOffAddr.Ꮡa).CompareAndSwap(-(int64)(markedAddr - (uintptr)arenaBaseOffset), (int64)(newAddr - (uintptr)arenaBaseOffset));
 }
 
 // StoreMarked stores addr but first converted to the offset address
 // space and then negated.
-[GoRecv] internal static void StoreMarked(this ref atomicOffAddr b, uintptr addr) {
-    b.a.Store(-((int64)(addr - arenaBaseOffset)));
+internal static void StoreMarked(this ж<atomicOffAddr> Ꮡb, uintptr addr) {
+    ref var b = ref Ꮡb.Value;
+
+    Ꮡb.of(atomicOffAddr.Ꮡa).Store(-(int64)(addr - (uintptr)arenaBaseOffset));
 }
 
 // Load returns the address in the box as a virtual address. It also
 // returns if the value was marked or not.
-[GoRecv] internal static (uintptr, bool) Load(this ref atomicOffAddr b) {
-    var v = b.a.Load();
+internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
+
+    var v = Ꮡb.of(atomicOffAddr.Ꮡa).Load();
     var wasMarked = false;
     if (v < 0) {
         wasMarked = true;
         v = -v;
     }
-    return (((uintptr)v) + arenaBaseOffset, wasMarked);
+    return ((uintptr)v + (uintptr)arenaBaseOffset, wasMarked);
 }
 
 // addrRanges is a data structure holding a collection of ranges of
@@ -245,14 +254,15 @@ internal static uintptr addr(this offAddr l) {
     internal ж<sysMemStat> sysStat;
 }
 
-[GoRecv] internal static void init(this ref addrRanges a, ж<sysMemStat> ᏑsysStat) {
-    ref var sysStat = ref ᏑsysStat.val;
+internal static void init(this ж<addrRanges> Ꮡa, ж<sysMemStat> ᏑsysStat) {
+    ref var a = ref Ꮡa.Value;
+    ref var sysStat = ref ᏑsysStat.Value;
 
-    var ranges = (ж<notInHeapSlice>)(uintptr)(new @unsafe.Pointer(Ꮡ(a.ranges)));
-    ranges.val.len = 0;
-    ranges.val.cap = 16;
-    ranges.val.Δarray = (ж<notInHeap>)(uintptr)(persistentalloc(@unsafe.Sizeof(new addrRange(nil)) * ((uintptr)(~ranges).cap), goarch.PtrSize, ᏑsysStat));
-    a.sysStat = sysStat;
+    var ranges = (ж<notInHeapSlice>)(uintptr)(new @unsafe.Pointer(Ꮡa.of(addrRanges.Ꮡranges)));
+    ranges.Value.len = 0;
+    ranges.Value.cap = 16;
+    ranges.Value.Δarray = (ж<notInHeap>)(uintptr)(persistentalloc(@unsafe.Sizeof(new addrRange(nil)) * (uintptr)(~ranges).cap, goarch.PtrSize, ᏑsysStat));
+    a.sysStat = ᏑsysStat;
     a.totalBytes = 0;
 }
 
@@ -263,28 +273,28 @@ internal static uintptr addr(this offAddr l) {
     // Narrow down the search space via a binary search
     // for large addrRanges until we have at most iterMax
     // candidates left.
-    static readonly UntypedInt iterMax = 8;
+    UntypedInt iterMax = 8;
     nint bot = 0;
     nint top = len(a.ranges);
     while (top - bot > iterMax) {
-        nint iΔ1 = ((nint)(((nuint)(bot + top)) >> (int)(1)));
-        if (a.ranges[iΔ1].contains(@base.addr())) {
+        nint i = (nint)(((nuint)(bot + top) >> (int)(1)));
+        if (a.ranges[i].contains(@base.addr())) {
             // a.ranges[i] contains base, so
             // its successor is the next index.
-            return iΔ1 + 1;
+            return i + 1;
         }
-        if (@base.lessThan(a.ranges[iΔ1].@base)){
+        if (@base.lessThan(a.ranges[i].@base)){
             // In this case i might actually be
             // the successor, but we can't be sure
             // until we check the ones before it.
-            top = iΔ1;
+            top = i;
         } else {
             // In this case we know base is
             // greater than or equal to a.ranges[i].limit-1,
             // so i is definitely not the successor.
             // We already checked i, so pick the next
             // one.
-            bot = iΔ1 + 1;
+            bot = i + 1;
         }
     }
     // There are top-bot candidates left, so
@@ -329,7 +339,9 @@ internal static uintptr addr(this offAddr l) {
 // add inserts a new address range to a.
 //
 // r must not overlap with any address range in a and r.size() must be > 0.
-[GoRecv] internal static void add(this ref addrRanges a, addrRange r) {
+internal static void add(this ж<addrRanges> Ꮡa, addrRange r) {
+    ref var a = ref Ꮡa.Value;
+
     // The copies in this function are potentially expensive, but this data
     // structure is meant to represent the Go heap. At worst, copying this
     // would take ~160µs assuming a conservative copying rate of 25 GiB/s (the
@@ -341,7 +353,7 @@ internal static uintptr addr(this offAddr l) {
     // An empty range has no effect on the set of addresses represented
     // by a, but passing a zero-sized range is almost always a bug.
     if (r.size() == 0) {
-        print("runtime: range = {", ((Δhex)r.@base.addr()), ", ", ((Δhex)r.limit.addr()), "}\n");
+        print("runtime: range = {", ((Δhex)(uint64)r.@base.addr()), ", ", ((Δhex)(uint64)r.limit.addr()), "}\n");
         @throw("attempted to add zero-sized address range"u8);
     }
     // Because we assume r is not currently represented in a,
@@ -375,10 +387,10 @@ internal static uintptr addr(this offAddr l) {
             // 4 MiB arenas which are all discontiguous (both very conservative
             // assumptions), this would waste at most 4 MiB of memory.
             var oldRanges = a.ranges;
-            var ranges = (ж<notInHeapSlice>)(uintptr)(new @unsafe.Pointer(Ꮡ(a.ranges)));
-            ranges.val.len = len(oldRanges) + 1;
-            ranges.val.cap = cap(oldRanges) * 2;
-            ranges.val.Δarray = (ж<notInHeap>)(uintptr)(persistentalloc(@unsafe.Sizeof(new addrRange(nil)) * ((uintptr)(~ranges).cap), goarch.PtrSize, a.sysStat));
+            var ranges = (ж<notInHeapSlice>)(uintptr)(new @unsafe.Pointer(Ꮡa.of(addrRanges.Ꮡranges)));
+            ranges.Value.len = len(oldRanges) + 1;
+            ranges.Value.cap = cap(oldRanges) * 2;
+            ranges.Value.Δarray = (ж<notInHeap>)(uintptr)(persistentalloc(@unsafe.Sizeof(new addrRange(nil)) * (uintptr)(~ranges).cap, goarch.PtrSize, a.sysStat));
             // Copy in the old array, but make space for the new range.
             copy(a.ranges[..(int)(i)], oldRanges[..(int)(i)]);
             copy(a.ranges[(int)(i + 1)..], oldRanges[(int)(i)..]);
@@ -421,7 +433,7 @@ internal static uintptr addr(this offAddr l) {
         a.ranges = a.ranges[..0];
         return;
     }
-    var removed = ((uintptr)0);
+    var removed = (uintptr)0;
     foreach (var (_, r) in a.ranges[(int)(pivot)..]) {
         removed += r.size();
     }
@@ -444,14 +456,14 @@ internal static uintptr addr(this offAddr l) {
 // cloneInto makes a deep clone of a's state into b, re-using
 // b's ranges if able.
 [GoRecv] internal static void cloneInto(this ref addrRanges a, ж<addrRanges> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     if (len(a.ranges) > cap(b.ranges)) {
         // Grow the array.
-        var ranges = (ж<notInHeapSlice>)(uintptr)(new @unsafe.Pointer(Ꮡ(b.ranges)));
-        ranges.val.len = 0;
-        ranges.val.cap = cap(a.ranges);
-        ranges.val.Δarray = (ж<notInHeap>)(uintptr)(persistentalloc(@unsafe.Sizeof(new addrRange(nil)) * ((uintptr)(~ranges).cap), goarch.PtrSize, b.sysStat));
+        var ranges = (ж<notInHeapSlice>)(uintptr)(new @unsafe.Pointer(Ꮡb.of(addrRanges.Ꮡranges)));
+        ranges.Value.len = 0;
+        ranges.Value.cap = cap(a.ranges);
+        ranges.Value.Δarray = (ж<notInHeap>)(uintptr)(persistentalloc(@unsafe.Sizeof(new addrRange(nil)) * (uintptr)(~ranges).cap, goarch.PtrSize, b.sysStat));
     }
     b.ranges = b.ranges[..(int)(len(a.ranges))];
     b.totalBytes = a.totalBytes;

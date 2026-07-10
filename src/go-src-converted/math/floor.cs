@@ -25,8 +25,8 @@ internal static float64 floor(float64 x) {
     }
     if (x < 0) {
         var (dΔ1, fract) = Modf(-x);
-        if (fract != 0.0F) {
-             = dΔ1 + 1;
+        if (fract != 0.0D) {
+            dΔ1 = dΔ1 + 1;
         }
         return -dΔ1;
     }
@@ -92,7 +92,7 @@ public static float64 Round(float64 x) {
     //   return t
     // }
     var bits = Float64bits(x);
-    nuint e = (nuint)(((nuint)(bits >> (int)(shift))) & mask);
+    nuint e = (nuint)((nuint)((bits >> (int)(shift))) & (nuint)mask);
     if (e < bias){
         // Round abs(x) < 1 including denormals.
         bits &= (uint64)(signMask);
@@ -107,10 +107,10 @@ public static float64 Round(float64 x) {
         //
         // Numbers with larger exponents are returned unchanged since they
         // must be either an integer, infinity, or NaN.
-        static readonly UntypedInt half = /* 1 << (shift - 1) */ 2251799813685248;
+        UntypedInt half = /* 1 << (shift - 1) */ 2251799813685248;
         e -= bias;
-        bits += half >> (int)(e);
-        bits &= ~(uint64)(fracMask >> (int)(e));
+        bits += ((uint64)half >> (int)(e));
+        bits &= unchecked((uint64)~(uint64)(((uint64)fracMask >> (int)(e))));
     }
     return Float64frombits(bits);
 }
@@ -134,20 +134,20 @@ public static float64 RoundToEven(float64 x) {
     //   return t
     // }
     var bits = Float64bits(x);
-    nuint e = (nuint)(((nuint)(bits >> (int)(shift))) & mask);
+    nuint e = (nuint)((nuint)((bits >> (int)(shift))) & (nuint)mask);
     if (e >= bias){
         // Round abs(x) >= 1.
         // - Large numbers without fractional components, infinity, and NaN are unchanged.
         // - Add 0.499.. or 0.5 before truncating depending on whether the truncated
         //   number is even or odd (respectively).
-        static readonly UntypedInt halfMinusULP = /* (1 << (shift - 1)) - 1 */ 2251799813685247;
+        UntypedInt halfMinusULP = /* (1 << (shift - 1)) - 1 */ 2251799813685247;
         e -= bias;
-        bits += (halfMinusULP + (uint64)((bits >> (int)((shift - e))) & 1)) >> (int)(e);
-        bits &= ~(uint64)(fracMask >> (int)(e));
+        bits += (((uint64)halfMinusULP + (uint64)(((bits >> (int)(((nuint)shift - e)))) & 1)) >> (int)(e));
+        bits &= unchecked((uint64)~(uint64)(((uint64)fracMask >> (int)(e))));
     } else 
-    if (e == bias - 1 && (uint64)(bits & fracMask) != 0){
+    if (e == bias - 1 && (uint64)(bits & (uint64)fracMask) != 0){
         // Round 0.5 < abs(x) < 1.
-        bits = (uint64)((uint64)(bits & signMask) | uvone);
+        bits = (uint64)((uint64)(bits & (uint64)signMask) | (uint64)uvone);
     } else {
         // +-1
         // Round abs(x) <= 0.5 including denormals.

@@ -37,12 +37,16 @@ public static ж<Chan> NewChan(ChanDir dir, ΔType elem) {
     return c.elem;
 }
 
-[GoRecv("capture")] public static ΔType Underlying(this ref Chan c) {
-    return ~c;
+public static ΔType Underlying(this ж<Chan> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    return new ChanжΔType(Ꮡc);
 }
 
-[GoRecv] public static @string String(this ref Chan c) {
-    return TypeString(~c, default!);
+public static @string String(this ж<Chan> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    return TypeString(new ChanжΔType(Ꮡc), default!);
 }
 
 } // end types_package

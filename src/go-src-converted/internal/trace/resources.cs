@@ -11,22 +11,19 @@ partial class trace_package {
 
 // NoThread indicates that the relevant events don't correspond to any
 // thread in particular.
-public static readonly GoUntyped NoThread = /* ThreadID(-1) */
-    GoUntyped.Parse("-1");
+public static readonly ThreadID NoThread = /* ThreadID(-1) */ -1;
 
 [GoType("num:int64")] partial struct ProcID;
 
 // NoProc indicates that the relevant events don't correspond to any
 // P in particular.
-public static readonly GoUntyped NoProc = /* ProcID(-1) */
-    GoUntyped.Parse("-1");
+public static readonly ProcID NoProc = /* ProcID(-1) */ -1;
 
 [GoType("num:int64")] partial struct GoID;
 
 // NoGoroutine indicates that the relevant events don't correspond to any
 // goroutine in particular.
-public static readonly GoUntyped NoGoroutine = /* GoID(-1) */
-    GoUntyped.Parse("-1");
+public static readonly GoID NoGoroutine = /* GoID(-1) */ -1;
 
 [GoType("num:uint8")] partial struct GoState;
 
@@ -141,25 +138,25 @@ public static @string String(this ResourceKind r) {
 
 // MakeResourceID creates a general resource ID from a specific resource's ID.
 public static ResourceID MakeResourceID<T>(T id)
-    where T : /* interface{internal/trace.GoID | internal/trace.ProcID | internal/trace.ThreadID} */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
+    where T : /* interface{internal/trace.GoID | internal/trace.ProcID | internal/trace.ThreadID} */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
     ResourceID rd = default!;
     any a = id;
     switch (a.type()) {
-    case GoID : {
+    case GoID: {
         rd.Kind = ResourceGoroutine;
         break;
     }
-    case ProcID : {
+    case ProcID: {
         rd.Kind = ResourceProc;
         break;
     }
-    case ThreadID : {
+    case ThreadID: {
         rd.Kind = ResourceThread;
         break;
     }}
 
-    rd.id = ((int64)id);
+    rd.id = (int64)ConvertToUInt64<T>(id);
     return rd;
 }
 
@@ -230,17 +227,17 @@ public static @string String(this ResourceID r) {
 
 internal static ΔStateTransition goStateTransition(GoID id, GoState from, GoState to) {
     return new ΔStateTransition(
-        Resource: new ResourceID(Kind: ResourceGoroutine, id: ((int64)id)),
-        oldState: ((uint8)from),
-        newState: ((uint8)to)
+        Resource: new ResourceID(Kind: ResourceGoroutine, id: (int64)id),
+        oldState: (uint8)from,
+        newState: (uint8)to
     );
 }
 
 internal static ΔStateTransition procStateTransition(ProcID id, ProcState from, ProcState to) {
     return new ΔStateTransition(
-        Resource: new ResourceID(Kind: ResourceProc, id: ((int64)id)),
-        oldState: ((uint8)from),
-        newState: ((uint8)to)
+        Resource: new ResourceID(Kind: ResourceProc, id: (int64)id),
+        oldState: (uint8)from,
+        newState: (uint8)to
     );
 }
 

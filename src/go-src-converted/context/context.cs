@@ -55,11 +55,11 @@ namespace go;
 
 using errors = errors_package;
 using reflectlite = @internal.reflectlite_package;
-using sync = sync_package;
-using atomic = sync.atomic_package;
+using Δsync = sync_package;
+using atomic = go.sync.atomic_package;
 using time = time_package;
 using @internal;
-using sync;
+using go.sync;
 
 partial class context_package {
 
@@ -236,7 +236,7 @@ public static Context TODO() {
     return new todoCtx(nil);
 }
 
-public delegate void CancelFunc();
+// type CancelFunc is a methodless func type — rendered inline as its base delegate
 
 // WithCancel returns a copy of parent with a new Done channel. The returned
 // context's Done channel is closed when the returned cancel function is called
@@ -244,18 +244,18 @@ public delegate void CancelFunc();
 //
 // Canceling this context releases resources associated with it, so code should
 // call cancel as soon as the operations running in this [Context] complete.
-public static (Context ctx, CancelFunc cancel) WithCancel(Context parent) {
+public static (Context ctx, Action cancel) WithCancel(Context parent) {
     Context ctx = default!;
-    CancelFunc cancel = default!;
+    Action cancel = default!;
 
     var c = withCancel(parent);
     var cʗ1 = c;
-    return (~c, () => {
+    return (new cancelCtxжContext(c), () => {
         cʗ1.cancel(true, Canceled, default!);
     });
 }
 
-public delegate void CancelCauseFunc(error cause);
+// type CancelCauseFunc is a methodless func type — rendered inline as its base delegate
 
 // WithCancelCause behaves like [WithCancel] but returns a [CancelCauseFunc] instead of a [CancelFunc].
 // Calling cancel with a non-nil error (the "cause") records that error in ctx;
@@ -268,13 +268,13 @@ public delegate void CancelCauseFunc(error cause);
 //	cancel(myError)
 //	ctx.Err() // returns context.Canceled
 //	context.Cause(ctx) // returns myError
-public static (Context ctx, CancelCauseFunc cancel) WithCancelCause(Context parent) {
+public static (Context ctx, Action<error> cancel) WithCancelCause(Context parent) {
     Context ctx = default!;
-    CancelCauseFunc cancel = default!;
+    Action<error> cancel = default!;
 
     var c = withCancel(parent);
     var cʗ1 = c;
-    return (~c, (error cause) => {
+    return (new cancelCtxжContext(c), (error cause) => {
         cʗ1.cancel(true, Canceled, cause);
     });
 }
@@ -284,7 +284,7 @@ internal static ж<cancelCtx> withCancel(Context parent) {
         throw panic("cannot create context from nil parent");
     }
     var c = Ꮡ(new cancelCtx(nil));
-    c.propagateCancel(parent, ~c);
+    c.propagateCancel(parent, new cancelCtxжcanceler(c));
     return c;
 }
 
@@ -294,12 +294,12 @@ internal static ж<cancelCtx> withCancel(Context parent) {
 // then [Cause] returns err.
 // Otherwise Cause(c) returns the same value as c.Err().
 // Cause returns nil if c has not been canceled yet.
-public static error Cause(Context c) => func((defer, _) => {
+public static error Cause(Context c) => func((defer, recover) => {
     {
-        var (cc, ok) = c.Value(Ꮡ(cancelCtxKey))._<cancelCtx.val>(ᐧ); if (ok) {
-            (~cc).mu.Lock();
+        var (cc, ok) = c.Value(ᏑcancelCtxKey)._<ж<cancelCtx>>(ᐧ); if (ok) {
+            cc.of(cancelCtx.Ꮡmu).Lock();
             var ccʗ1 = cc;
-            defer((~ccʗ1).mu.Unlock);
+            defer(ccʗ1.of(cancelCtx.Ꮡmu).Unlock);
             return (~cc).cause;
         }
     }
@@ -335,16 +335,15 @@ public static Func<bool> /*stop*/ AfterFunc(Context ctx, Action f) {
     var a = Ꮡ(new afterFuncCtx(
         f: f
     ));
-    (~a).cancelCtx.propagateCancel(ctx, ~a);
+    a.of(afterFuncCtx.ᏑcancelCtx).propagateCancel(ctx, new afterFuncCtxжcanceler(a));
     var aʗ1 = a;
     return () => {
         var stopped = false;
-        (~aʗ1).once.Do(
-        () => {
+        aʗ1.of(afterFuncCtx.Ꮡonce).Do(() => {
             stopped = true;
         });
         if (stopped) {
-            a.cancel(true, Canceled, default!);
+            aʗ1.cancel(true, Canceled, default!);
         }
         return stopped;
     };
@@ -356,17 +355,19 @@ public static Func<bool> /*stop*/ AfterFunc(Context ctx, Action f) {
 
 [GoType] partial struct afterFuncCtx {
     internal partial ref cancelCtx cancelCtx { get; }
-    internal sync_package.Once once; // either starts running f or stops f from running
+    internal Δsync.Once once; // either starts running f or stops f from running
     internal Action f;
 }
 
-[GoRecv] internal static void cancel(this ref afterFuncCtx a, bool removeFromParent, error err, error cause) {
-    a.cancelCtx.cancel(false, err, cause);
+internal static void cancel(this ж<afterFuncCtx> Ꮡa, bool removeFromParent, error err, error cause) {
+    ref var a = ref Ꮡa.Value;
+
+    Ꮡa.of(afterFuncCtx.ᏑcancelCtx).cancel(false, err, cause);
     if (removeFromParent) {
-        removeChild(a.Context, ~a);
+        removeChild(a.Context, new afterFuncCtxжcanceler(Ꮡa));
     }
-    a.once.Do(() => {
-        goǃ(a.f);
+    Ꮡa.of(afterFuncCtx.Ꮡonce).Do(() => {
+        goǃ(Ꮡa.Value.f);
     });
 }
 
@@ -379,10 +380,12 @@ public static Func<bool> /*stop*/ AfterFunc(Context ctx, Action f) {
 }
 
 // goroutines counts the number of goroutines ever created; for testing.
-internal static atomic.Int32 goroutines;
+internal static ж<atomic.Int32> Ꮡgoroutines = new(default(atomic.Int32));
+internal static ref atomic.Int32 goroutines => ref Ꮡgoroutines.Value;
 
 // &cancelCtxKey is the key that a cancelCtx returns itself for.
-internal static nint cancelCtxKey;
+internal static ж<nint> ᏑcancelCtxKey = new(default(nint));
+internal static ref nint cancelCtxKey => ref ᏑcancelCtxKey.Value;
 
 // parentCancelCtx returns the underlying *cancelCtx for parent.
 // It does this by looking up parent.Value(&cancelCtxKey) to find
@@ -395,11 +398,11 @@ internal static (ж<cancelCtx>, bool) parentCancelCtx(Context parent) {
     if (done == closedchan || done == default!) {
         return (default!, false);
     }
-    var (p, ok) = parent.Value(Ꮡ(cancelCtxKey))._<cancelCtx.val>(ᐧ);
+    var (p, ok) = parent.Value(ᏑcancelCtxKey)._<ж<cancelCtx>>(ᐧ);
     if (!ok) {
         return (default!, false);
     }
-    var (pdone, _) = (~p).done.Load()._<channel<ΔEmptyStruct>>(ᐧ);
+    var (pdone, _) = p.of(cancelCtx.Ꮡdone).Load()._<channel<EmptyStruct>>(ᐧ);
     if (pdone != done) {
         return (default!, false);
     }
@@ -418,11 +421,11 @@ internal static void removeChild(Context parent, canceler child) {
     if (!ok) {
         return;
     }
-    (~p).mu.Lock();
+    p.of(cancelCtx.Ꮡmu).Lock();
     if ((~p).children != default!) {
         delete((~p).children, child);
     }
-    (~p).mu.Unlock();
+    p.of(cancelCtx.Ꮡmu).Unlock();
 }
 
 // A canceler is a context type that can be canceled directly. The
@@ -443,48 +446,53 @@ internal static channel<EmptyStruct> closedchan = new channel<EmptyStruct>(1);
 // that implement canceler.
 [GoType] partial struct cancelCtx {
     public Context Context;
-    internal sync_package.Mutex mu;            // protects following fields
-    internal sync.atomic_package.Value done;          // of chan struct{}, created lazily, closed by first cancel call
+    internal Δsync.Mutex mu;            // protects following fields
+    internal atomic.Value done;          // of chan struct{}, created lazily, closed by first cancel call
     internal map<canceler, EmptyStruct> children; // set to nil by the first cancel call
     internal error err;                 // set to non-nil by the first cancel call
     internal error cause;                 // set to non-nil by the first cancel call
 }
 
-[GoRecv("capture")] internal static any Value(this ref cancelCtx c, any key) {
-    if (Ꮡkey == Ꮡ(cancelCtxKey)) {
-        return ValueꓸᏑc;
+internal static any Value(this ж<cancelCtx> Ꮡc, any key) {
+    ref var c = ref Ꮡc.Value;
+
+    if (key == ᏑcancelCtxKey) {
+        return Ꮡc;
     }
     return value(c.Context, key);
 }
 
-[GoRecv] internal static /*<-*/channel<EmptyStruct> Done(this ref cancelCtx c) => func((defer, _) => {
-    var d = c.done.Load();
+internal static /*<-*/channel<EmptyStruct> Done(this ж<cancelCtx> Ꮡc) => func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+
+    var d = Ꮡc.of(cancelCtx.Ꮡdone).Load();
     if (d != default!) {
-        return d._<channel<ΔEmptyStruct>>();
+        return d._<channel<EmptyStruct>>();
     }
-    c.mu.Lock();
-    defer(c.mu.Unlock);
-    d = c.done.Load();
+    Ꮡc.of(cancelCtx.Ꮡmu).Lock();
+    defer(Ꮡc.of(cancelCtx.Ꮡmu).Unlock);
+    d = Ꮡc.of(cancelCtx.Ꮡdone).Load();
     if (d == default!) {
         d = new channel<EmptyStruct>(1);
-        c.done.Store(d);
+        Ꮡc.of(cancelCtx.Ꮡdone).Store(d);
     }
-    return d._<channel<ΔEmptyStruct>>();
+    return d._<channel<EmptyStruct>>();
 });
 
-[GoRecv] internal static error Err(this ref cancelCtx c) {
-    c.mu.Lock();
-    var err = c.err;
-    c.mu.Unlock();
-    return err;
-}
+internal static error Err(this ж<cancelCtx> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
 
-[GoType("dyn")] partial struct propagateCancel_p {
+    Ꮡc.of(cancelCtx.Ꮡmu).Lock();
+    var err = c.err;
+    Ꮡc.of(cancelCtx.Ꮡmu).Unlock();
+    return err;
 }
 
 // propagateCancel arranges for child to be canceled when parent is.
 // It sets the parent context of cancelCtx.
-[GoRecv] internal static void propagateCancel(this ref cancelCtx c, Context parent, canceler child) {
+internal static void propagateCancel(this ж<cancelCtx> Ꮡc, Context parent, canceler child) {
+    ref var c = ref Ꮡc.Value;
+
     c.Context = parent;
     var done = parent.Done();
     if (done == default!) {
@@ -498,28 +506,29 @@ internal static channel<EmptyStruct> closedchan = new channel<EmptyStruct>(1);
         return;
     }
     default: {
+        break;
     }}
     {
         var (p, ok) = parentCancelCtx(parent); if (ok) {
             // parent is a *cancelCtx, or derives from one.
-            (~p).mu.Lock();
+            p.of(cancelCtx.Ꮡmu).Lock();
             if ((~p).err != default!){
                 // parent has already been canceled
                 child.cancel(false, (~p).err, (~p).cause);
             } else {
                 if ((~p).children == default!) {
-                    p.val.children = new map<canceler, EmptyStruct>();
+                    p.Value.children = new map<canceler, EmptyStruct>();
                 }
-                (~p).children[child] = new propagateCancel_p();
+                p.Value.children[child] = new EmptyStruct();
             }
-            (~p).mu.Unlock();
+            p.of(cancelCtx.Ꮡmu).Unlock();
             return;
         }
     }
     {
         var (a, ok) = parent._<afterFuncer>(ᐧ); if (ok) {
             // parent implements an AfterFunc method.
-            c.mu.Lock();
+            Ꮡc.of(cancelCtx.Ꮡmu).Lock();
             var stop = a.AfterFunc(() => {
                 child.cancel(false, parent.Err(), Cause(parent));
             });
@@ -527,11 +536,11 @@ internal static channel<EmptyStruct> closedchan = new channel<EmptyStruct>(1);
                 Context: parent,
                 stop: stop
             );
-            c.mu.Unlock();
+            Ꮡc.of(cancelCtx.Ꮡmu).Unlock();
             return;
         }
     }
-    goroutines.Add(1);
+    Ꮡgoroutines.Add(1);
     goǃ(() => {
         switch (select(ᐸꟷ(parent.Done(), ꓸꓸꓸ), ᐸꟷ(child.Done(), ꓸꓸꓸ))) {
         case 0 when parent.Done().ꟷᐳ(out _): {
@@ -564,24 +573,26 @@ internal static @string contextName(Context c) {
 // cancel closes c.done, cancels each of c's children, and, if
 // removeFromParent is true, removes c from its parent's children.
 // cancel sets c.cause to cause if this is the first time c is canceled.
-[GoRecv] internal static void cancel(this ref cancelCtx c, bool removeFromParent, error err, error cause) {
+internal static void cancel(this ж<cancelCtx> Ꮡc, bool removeFromParent, error err, error cause) {
+    ref var c = ref Ꮡc.Value;
+
     if (err == default!) {
         throw panic("context: internal error: missing cancel error");
     }
     if (cause == default!) {
         cause = err;
     }
-    c.mu.Lock();
+    Ꮡc.of(cancelCtx.Ꮡmu).Lock();
     if (c.err != default!) {
-        c.mu.Unlock();
+        Ꮡc.of(cancelCtx.Ꮡmu).Unlock();
         return;
     }
     // already canceled
     c.err = err;
     c.cause = cause;
-    var (d, _) = c.done.Load()._<channel<ΔEmptyStruct>>(ᐧ);
+    var (d, _) = Ꮡc.of(cancelCtx.Ꮡdone).Load()._<channel<EmptyStruct>>(ᐧ);
     if (d == default!){
-        c.done.Store(closedchan);
+        Ꮡc.of(cancelCtx.Ꮡdone).Store(closedchan);
     } else {
         close(d);
     }
@@ -590,9 +601,9 @@ internal static @string contextName(Context c) {
         child.cancel(false, err, cause);
     }
     c.children = default!;
-    c.mu.Unlock();
+    Ꮡc.of(cancelCtx.Ꮡmu).Unlock();
     if (removeFromParent) {
-        removeChild(c.Context, ~c);
+        removeChild(c.Context, new cancelCtxжcanceler(Ꮡc));
     }
 }
 
@@ -642,14 +653,14 @@ internal static @string String(this withoutCancelCtx c) {
 //
 // Canceling this context releases resources associated with it, so code should
 // call cancel as soon as the operations running in this [Context] complete.
-public static (Context, CancelFunc) WithDeadline(Context parent, time.Time d) {
+public static (Context, Action) WithDeadline(Context parent, time.Time d) {
     return WithDeadlineCause(parent, d, default!);
 }
 
 // WithDeadlineCause behaves like [WithDeadline] but also sets the cause of the
 // returned Context when the deadline is exceeded. The returned [CancelFunc] does
 // not set the cause.
-public static (Context, CancelFunc) WithDeadlineCause(Context parent, time.Time d, error cause) => func((defer, _) => {
+public static (Context, Action) WithDeadlineCause(Context parent, time.Time d, error cause) => func<(Context, Action)>((defer, recover) => {
     if (parent == default!) {
         throw panic("cannot create context from nil parent");
     }
@@ -662,28 +673,27 @@ public static (Context, CancelFunc) WithDeadlineCause(Context parent, time.Time 
     var c = Ꮡ(new timerCtx(
         deadline: d
     ));
-    (~c).cancelCtx.propagateCancel(parent, ~c);
+    c.of(timerCtx.ᏑcancelCtx).propagateCancel(parent, new timerCtxжcanceler(c));
     var dur = time.Until(d);
     if (dur <= 0) {
         c.cancel(true, DeadlineExceeded, cause);
         // deadline has already passed
         var cʗ1 = c;
-        return (~c, () => {
+        return (new timerCtxжContext(c), () => {
             cʗ1.cancel(false, Canceled, default!);
         });
     }
-    c.mu.Lock();
+    c.of(timerCtx.Ꮡmu).Lock();
     var cʗ2 = c;
-    defer(cʗ2.mu.Unlock);
-    if (c.err == default!) {
-        c.val.timer = time.AfterFunc(dur, 
+    defer(cʗ2.of(timerCtx.Ꮡmu).Unlock);
+    if ((~c).err == default!) {
         var cʗ3 = c;
-        () => {
+        c.Value.timer = time.AfterFunc(dur, () => {
             cʗ3.cancel(true, DeadlineExceeded, cause);
         });
     }
     var cʗ5 = c;
-    return (~c, () => {
+    return (new timerCtxжContext(c), () => {
         cʗ5.cancel(true, Canceled, default!);
     });
 });
@@ -693,8 +703,8 @@ public static (Context, CancelFunc) WithDeadlineCause(Context parent, time.Time 
 // delegating to cancelCtx.cancel.
 [GoType] partial struct timerCtx {
     internal partial ref cancelCtx cancelCtx { get; }
-    internal ж<time_package.Timer> timer; // Under cancelCtx.mu.
-    internal time_package.Time deadline;
+    internal ж<time.Timer> timer; // Under cancelCtx.mu.
+    internal time.Time deadline;
 }
 
 [GoRecv] internal static (time.Time deadline, bool ok) Deadline(this ref timerCtx c) {
@@ -708,18 +718,20 @@ public static (Context, CancelFunc) WithDeadlineCause(Context parent, time.Time 
     return contextName(c.cancelCtx.Context) + ".WithDeadline("u8 + c.deadline.String() + " ["u8 + time.Until(c.deadline).String() + "])"u8;
 }
 
-[GoRecv] internal static void cancel(this ref timerCtx c, bool removeFromParent, error err, error cause) {
-    c.cancelCtx.cancel(false, err, cause);
+internal static void cancel(this ж<timerCtx> Ꮡc, bool removeFromParent, error err, error cause) {
+    ref var c = ref Ꮡc.Value;
+
+    Ꮡc.of(timerCtx.ᏑcancelCtx).cancel(false, err, cause);
     if (removeFromParent) {
         // Remove this timerCtx from its parent cancelCtx's children.
-        removeChild(c.cancelCtx.Context, ~c);
+        removeChild(c.cancelCtx.Context, new timerCtxжcanceler(Ꮡc));
     }
-    c.mu.Lock();
+    Ꮡc.of(timerCtx.Ꮡmu).Lock();
     if (c.timer != nil) {
         c.timer.Stop();
         c.timer = default!;
     }
-    c.mu.Unlock();
+    Ꮡc.of(timerCtx.Ꮡmu).Unlock();
 }
 
 // WithTimeout returns WithDeadline(parent, time.Now().Add(timeout)).
@@ -732,14 +744,14 @@ public static (Context, CancelFunc) WithDeadlineCause(Context parent, time.Time 
 //		defer cancel()  // releases resources if slowOperation completes before timeout elapses
 //		return slowOperation(ctx)
 //	}
-public static (Context, CancelFunc) WithTimeout(Context parent, time.Duration timeout) {
+public static (Context, Action) WithTimeout(Context parent, time.Duration timeout) {
     return WithDeadline(parent, time.Now().Add(timeout));
 }
 
 // WithTimeoutCause behaves like [WithTimeout] but also sets the cause of the
 // returned Context when the timeout expires. The returned [CancelFunc] does
 // not set the cause.
-public static (Context, CancelFunc) WithTimeoutCause(Context parent, time.Duration timeout, error cause) {
+public static (Context, Action) WithTimeoutCause(Context parent, time.Duration timeout, error cause) {
     return WithDeadlineCause(parent, time.Now().Add(timeout), cause);
 }
 
@@ -766,15 +778,14 @@ public static Context WithValue(Context parent, any key, any val) {
     if (!reflectlite.TypeOf(key).Comparable()) {
         throw panic("key is not comparable");
     }
-    return new valueCtx(parent, key, val);
+    return new valueCtxжContext(Ꮡ(new valueCtx(parent, key, val)));
 }
 
 // A valueCtx carries a key-value pair. It implements Value for that key and
 // delegates all other calls to the embedded Context.
 [GoType] partial struct valueCtx {
     public Context Context;
-    internal any key;
-    internal any val;
+    internal any key, val;
 }
 
 // stringify tries a bit to stringify v, without using fmt, since we don't
@@ -782,13 +793,13 @@ public static Context WithValue(Context parent, any key, any val) {
 // *valueCtx.String().
 internal static @string stringify(any v) {
     switch (v.type()) {
-    case stringer s: {
+    case {} Δs when Δs._<stringer>(out var s): {
         return s.String();
     }
     case @string s: {
         return s;
     }
-    case default! s: {
+    case null: {
         return "<nil>"u8;
     }}
     return reflectlite.TypeOf(v).String();
@@ -808,22 +819,22 @@ internal static @string stringify(any v) {
 internal static any value(Context c, any key) {
     while (ᐧ) {
         switch (c.type()) {
-        case valueCtx.val ctx: {
+        case ж<valueCtx> ctx: {
             if (AreEqual(key, (~ctx).key)) {
                 return (~ctx).val;
             }
-            c = ctx.val.Context;
+            c = ctx.Value.Context;
             break;
         }
-        case cancelCtx.val ctx: {
-            if (Ꮡkey == Ꮡ(cancelCtxKey)) {
+        case ж<cancelCtx> ctx: {
+            if (key == ᏑcancelCtxKey) {
                 return c;
             }
-            c = ctx.val.Context;
+            c = ctx.Value.Context;
             break;
         }
         case withoutCancelCtx ctx: {
-            if (Ꮡkey == Ꮡ(cancelCtxKey)) {
+            if (key == ᏑcancelCtxKey) {
                 // This implements Cause(ctx) == nil
                 // when ctx is created using WithoutCancel.
                 return default!;
@@ -831,21 +842,20 @@ internal static any value(Context c, any key) {
             c = ctx.c;
             break;
         }
-        case timerCtx.val ctx: {
-            if (Ꮡkey == Ꮡ(cancelCtxKey)) {
-                return Ꮡ((~ctx).cancelCtx);
+        case ж<timerCtx> ctx: {
+            if (key == ᏑcancelCtxKey) {
+                return ctx.of(timerCtx.ᏑcancelCtx);
             }
-            c = ctx.Context;
+            c = ctx.Value.Context;
             break;
         }
-        case backgroundCtx ctx: {
-            return default!;
-        }
-        case todoCtx ctx: {
+        case backgroundCtx _:
+        case todoCtx _: {
+            var ctx = c;
             return default!;
         }
         default: {
-            var ctx = c.type();
+            var ctx = c;
             return c.Value(key);
         }}
     }

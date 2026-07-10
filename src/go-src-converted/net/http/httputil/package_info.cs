@@ -20,6 +20,9 @@ global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using urlꓸError = go.net.url_package.ΔError;
+using bufio = go.bufio_package;
+using http = go.net.http_package;
+using url = go.net.url_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -48,37 +51,30 @@ using static go.net.http.httputil_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(c net.Conn, r *bufio.Reader), net_package.Conn>]
-[assembly: GoImplement<(ctx context.Context, cancel context.CancelFunc), context_package.Context>]
-[assembly: GoImplement<(io.ReadWriteCloser, bool), io_package.ReadWriteCloser>]
-[assembly: GoImplement<(net.Conn, *bufio.ReadWriter, error), net_package.Conn>]
-[assembly: GoImplement<(net.Conn, *bufio.Reader), net_package.Conn>]
-[assembly: GoImplement<(r1 io.ReadCloser, r2 io.ReadCloser, err error), io_package.ReadCloser>]
-[assembly: GoImplement<bufio_package.ReadWriter, io_package.Writer>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Reader>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>]
-[assembly: GoImplement<bytes_package.Reader, io_package.Reader>]
-[assembly: GoImplement<delegateReader, io_package.Reader>]
-[assembly: GoImplement<http.CloseNotifier, bool), net.http_package.CloseNotifier>]
-[assembly: GoImplement<io_package.PipeReader, io_package.Reader>]
-[assembly: GoImplement<io_package.ReadCloser, io_package.Reader>]
-[assembly: GoImplement<io_package.ReadWriter, io_package.Reader>]
-[assembly: GoImplement<io_package.ReadWriter, io_package.Writer>]
+[assembly: GoImplement<bufio_package.ReadWriter, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<delegateReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<dumpConn, io_package.Reader>(Promoted = true)]
+[assembly: GoImplement<dumpConn, io_package.Writer>(Promoted = true)]
+[assembly: GoImplement<dumpConn, net_package.Conn>(Pointer = true)]
+[assembly: GoImplement<failureToReadBody, io_package.ReadCloser>]
+[assembly: GoImplement<go.net.http_package.ResponseWriter, io_package.Writer>]
+[assembly: GoImplement<io_package.PipeReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<io_package.PipeWriter, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<io_package.ReadWriteCloser, io_package.ReadWriter>]
 [assembly: GoImplement<io_package.WriteCloser, io_package.Writer>]
-[assembly: GoImplement<maxLatencyWriter, io_package.Writer>]
-[assembly: GoImplement<net.http_package.ProtocolError, error>]
-[assembly: GoImplement<net.http_package.ResponseWriter, io_package.Writer>]
-[assembly: GoImplement<net.http_package.noBody, io_package.ReadCloser>]
+[assembly: GoImplement<maxLatencyWriter, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<net_package.Conn, io_package.ReadWriter>]
 [assembly: GoImplement<net_package.Conn, io_package.Reader>]
 [assembly: GoImplement<net_package.Conn, io_package.Writer>]
 [assembly: GoImplement<neverEnding, io_package.Reader>]
-[assembly: GoImplement<strings_package.Reader, io_package.Reader>]
+[assembly: GoImplement<strings_package.Reader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 [assembly: GoImplicitConv<http.Request, ж<http.Request>>(Indirect = true)]
-[assembly: GoImplicitConv<http.pattern; matches <>string; otherValues map<string>string}, http.pattern; matches <>string; otherValues map<string>string}>(Inverted = true)]
-[assembly: GoImplicitConv<struct{wall uint64; ext int64; loc *time.Location}, struct{wall uint64; ext int64; loc *time.Location}>(Inverted = true)]
 [assembly: GoImplicitConv<url.URL, ж<url.URL>>(Indirect = true)]
 // </ImplicitConversions>
 

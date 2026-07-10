@@ -6,8 +6,9 @@ namespace go.html;
 using bytes = bytes_package;
 using fmt = fmt_package;
 using strings = strings_package;
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
+using io = io_package;
 using ꓸꓸꓸany = Span<any>;
 
 partial class template_package {
@@ -67,11 +68,11 @@ internal static @string htmlEscaper(params ꓸꓸꓸany argsʗp) {
 // https://www.w3.org/TR/html5/syntax.html#before-attribute-value-state
 // htmlReplacementTable contains the runes that need to be escaped
 // inside a quoted attribute value or in a text node.
-internal static slice<@string> htmlReplacementTable = new slice<@string>(93){
+internal static slice<@string> htmlReplacementTable = new slice<@string>(63){
     [0] = "\uFFFD"u8,
     [(rune)'"'] = "&#34;"u8,
     [(rune)'&'] = "&amp;"u8,
-    [(rune)'\'] = "&#39;"u8,
+    [(rune)'\''] = "&#39;"u8,
     [(rune)'+'] = "&#43;"u8,
     [(rune)'<'] = "&lt;"u8,
     [(rune)'>'] = "&gt;"u8
@@ -79,10 +80,10 @@ internal static slice<@string> htmlReplacementTable = new slice<@string>(93){
 
 // htmlNormReplacementTable is like htmlReplacementTable but without '&' to
 // avoid over-encoding existing entities.
-internal static slice<@string> htmlNormReplacementTable = new slice<@string>(93){
+internal static slice<@string> htmlNormReplacementTable = new slice<@string>(63){
     [0] = "\uFFFD"u8,
     [(rune)'"'] = "&#34;"u8,
-    [(rune)'\'] = "&#39;"u8,
+    [(rune)'\''] = "&#39;"u8,
     [(rune)'+'] = "&#43;"u8,
     [(rune)'<'] = "&lt;"u8,
     [(rune)'>'] = "&gt;"u8
@@ -110,15 +111,15 @@ internal static slice<@string> htmlNormReplacementTable = new slice<@string>(93)
 // })()</script>
 internal static slice<@string> htmlNospaceReplacementTable = new slice<@string>(97){
     [0] = "&#xfffd;"u8,
-    [(rune)'\'] = "&#9;"u8,
-    [(rune)'\'] = "&#10;"u8,
-    [(rune)'\'] = "&#11;"u8,
-    [(rune)'\'] = "&#12;"u8,
-    [(rune)'\'] = "&#13;"u8,
+    [(rune)'\t'] = "&#9;"u8,
+    [(rune)'\n'] = "&#10;"u8,
+    [(rune)'\v'] = "&#11;"u8,
+    [(rune)'\f'] = "&#12;"u8,
+    [(rune)'\r'] = "&#13;"u8,
     [(rune)' '] = "&#32;"u8,
     [(rune)'"'] = "&#34;"u8,
     [(rune)'&'] = "&amp;"u8,
-    [(rune)'\'] = "&#39;"u8,
+    [(rune)'\''] = "&#39;"u8,
     [(rune)'+'] = "&#43;"u8,
     [(rune)'<'] = "&lt;"u8,
     [(rune)'='] = "&#61;"u8,
@@ -133,14 +134,14 @@ internal static slice<@string> htmlNospaceReplacementTable = new slice<@string>(
 // without '&' to avoid over-encoding existing entities.
 internal static slice<@string> htmlNospaceNormReplacementTable = new slice<@string>(97){
     [0] = "&#xfffd;"u8,
-    [(rune)'\'] = "&#9;"u8,
-    [(rune)'\'] = "&#10;"u8,
-    [(rune)'\'] = "&#11;"u8,
-    [(rune)'\'] = "&#12;"u8,
-    [(rune)'\'] = "&#13;"u8,
+    [(rune)'\t'] = "&#9;"u8,
+    [(rune)'\n'] = "&#10;"u8,
+    [(rune)'\v'] = "&#11;"u8,
+    [(rune)'\f'] = "&#12;"u8,
+    [(rune)'\r'] = "&#13;"u8,
     [(rune)' '] = "&#32;"u8,
     [(rune)'"'] = "&#34;"u8,
-    [(rune)'\'] = "&#39;"u8,
+    [(rune)'\''] = "&#39;"u8,
     [(rune)'+'] = "&#43;"u8,
     [(rune)'<'] = "&lt;"u8,
     [(rune)'='] = "&#61;"u8,
@@ -153,14 +154,14 @@ internal static slice<@string> htmlNospaceNormReplacementTable = new slice<@stri
 internal static @string htmlReplacer(@string s, slice<@string> replacementTable, bool badRunes) {
     nint written = 0;
     var b = @new<strings.Builder>();
-    var r = ((rune)0);
+    var r = (rune)0;
     nint w = 0;
     for (nint i = 0; i < len(s); i += w) {
         // Cannot use 'for range s' because we need to preserve the width
         // of the runes in the input. If we see a decoding error, the input
         // width will not be utf8.Runelen(r) and we will overrun the buffer.
         (r, w) = utf8.DecodeRuneInString(s[(int)(i)..]);
-        if (((nint)r) < len(replacementTable)){
+        if ((nint)r < len(replacementTable)){
             {
                 @string repl = replacementTable[r]; if (len(repl) != 0) {
                     if (written == 0) {
@@ -174,13 +175,13 @@ internal static @string htmlReplacer(@string s, slice<@string> replacementTable,
         } else 
         if (badRunes){
         } else 
-        if (64976 <= r && r <= 65007 || 65520 <= r && r <= 65535) {
+        if (0xfdd0 <= r && r <= 0xfdef || 0xfff0 <= r && r <= 0xffff) {
             // No-op.
             // IE does not allow these ranges in unquoted attrs.
             if (written == 0) {
                 b.Grow(len(s));
             }
-            fmt.Fprintf(~b, "%s&#x%x;"u8, s[(int)(written)..(int)(i)], r);
+            fmt.Fprintf(new strings_BuilderжWriter(b), "%s&#x%x;"u8, s[(int)(written)..(int)(i)], r);
             written = i + w;
         }
     }
@@ -194,7 +195,7 @@ internal static @string htmlReplacer(@string s, slice<@string> replacementTable,
 // stripTags takes a snippet of HTML and returns only the text content.
 // For example, `<b>&iexcl;Hi!</b> <script>...</script>` -> `&iexcl;Hi! `.
 internal static @string stripTags(@string html) {
-    strings.Builder b = default!;
+    ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     var s = slice<byte>(html);
     var c = new context(nil);
     nint i = 0;
@@ -209,10 +210,10 @@ internal static @string stripTags(@string html) {
                 st = stateRCDATA;
             }
             var (d, nread) = transitionFunc[st](c, s[(int)(i)..]);
-            nint i1 = i + nread;
+            nint i1Δ1 = i + nread;
             if (c.state == stateText || c.state == stateRCDATA){
                 // Emit text up to the start of the tag or comment.
-                nint j = i1;
+                nint j = i1Δ1;
                 if (d.state != c.state) {
                     for (nint j1 = j - 1; j1 >= i; j1--) {
                         if (s[j1] == (rune)'<') {
@@ -221,11 +222,11 @@ internal static @string stripTags(@string html) {
                         }
                     }
                 }
-                b.Write(s[(int)(i)..(int)(j)]);
+                Ꮡb.Write(s[(int)(i)..(int)(j)]);
             } else {
                 allText = false;
             }
-            (c, i) = (d, i1);
+            (c, i) = (d, i1Δ1);
             continue;
         }
         nint i1 = i + bytes.IndexAny(s[(int)(i)..], delimEnds[c.delim]);
@@ -242,7 +243,7 @@ internal static @string stripTags(@string html) {
         return html;
     } else 
     if (c.state == stateText || c.state == stateRCDATA) {
-        b.Write(s[(int)(i)..]);
+        Ꮡb.Write(s[(int)(i)..]);
     }
     return b.String();
 }

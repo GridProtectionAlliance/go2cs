@@ -91,12 +91,12 @@ internal static readonly UntypedInt centerJSample = 128;
 // fdct performs a forward DCT on an 8x8 block of coefficients, including a
 // level shift.
 internal static void fdct(ж<block> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     // Pass 1: process rows.
     for (nint y = 0; y < 8; y++) {
         nint y8 = y * 8;
-        var s = b.slice(y8, y8 + 8, y8 + 8);
+        var s = b.Value.slice(y8, y8 + 8, y8 + 8);
         // Small cap improves performance, see https://golang.org/issue/27857
         var x0 = s[0];
         var x1 = s[1];
@@ -118,18 +118,18 @@ internal static void fdct(ж<block> Ꮡb) {
         tmp1 = x1 - x6;
         tmp2 = x2 - x5;
         tmp3 = x3 - x4;
-        s[0] = (tmp10 + tmp11 - 8 * centerJSample) << (int)(pass1Bits);
-        s[4] = (tmp10 - tmp11) << (int)(pass1Bits);
-        var z1 = (tmp12 + tmp13) * fix_0_541196100;
-        z1 += 1 << (int)((constBits - pass1Bits - 1));
-        s[2] = (z1 + tmp12 * fix_0_765366865) >> (int)((constBits - pass1Bits));
-        s[6] = (z1 - tmp13 * fix_1_847759065) >> (int)((constBits - pass1Bits));
+        s[0] = ((tmp10 + tmp11 - (int32)(8 * centerJSample)) << (int)(pass1Bits));
+        s[4] = ((tmp10 - tmp11) << (int)(pass1Bits));
+        var z1 = (tmp12 + tmp13) * (int32)fix_0_541196100;
+        z1 += (int32)(1 << (int)((constBits - pass1Bits - 1)));
+        s[2] = ((z1 + tmp12 * (int32)fix_0_765366865) >> (int)((constBits - pass1Bits)));
+        s[6] = ((z1 - tmp13 * (int32)fix_1_847759065) >> (int)((constBits - pass1Bits)));
         tmp10 = tmp0 + tmp3;
         tmp11 = tmp1 + tmp2;
         tmp12 = tmp0 + tmp2;
         tmp13 = tmp1 + tmp3;
-        z1 = (tmp12 + tmp13) * fix_1_175875602;
-        z1 += 1 << (int)((constBits - pass1Bits - 1));
+        z1 = (tmp12 + tmp13) * (int32)fix_1_175875602;
+        z1 += (int32)(1 << (int)((constBits - pass1Bits - 1)));
         tmp0 *= fix_1_501321110;
         tmp1 *= fix_3_072711026;
         tmp2 *= fix_2_053119869;
@@ -140,10 +140,10 @@ internal static void fdct(ж<block> Ꮡb) {
         tmp13 *= -fix_1_961570560;
         tmp12 += z1;
         tmp13 += z1;
-        s[1] = (tmp0 + tmp10 + tmp12) >> (int)((constBits - pass1Bits));
-        s[3] = (tmp1 + tmp11 + tmp13) >> (int)((constBits - pass1Bits));
-        s[5] = (tmp2 + tmp11 + tmp12) >> (int)((constBits - pass1Bits));
-        s[7] = (tmp3 + tmp10 + tmp13) >> (int)((constBits - pass1Bits));
+        s[1] = ((tmp0 + tmp10 + tmp12) >> (int)((constBits - pass1Bits)));
+        s[3] = ((tmp1 + tmp11 + tmp13) >> (int)((constBits - pass1Bits)));
+        s[5] = ((tmp2 + tmp11 + tmp12) >> (int)((constBits - pass1Bits)));
+        s[7] = ((tmp3 + tmp10 + tmp13) >> (int)((constBits - pass1Bits)));
     }
     // Pass 2: process columns.
     // We remove pass1Bits scaling, but leave results scaled up by an overall factor of 8.
@@ -152,7 +152,7 @@ internal static void fdct(ж<block> Ꮡb) {
         var tmp1 = b[1 * 8 + x] + b[6 * 8 + x];
         var tmp2 = b[2 * 8 + x] + b[5 * 8 + x];
         var tmp3 = b[3 * 8 + x] + b[4 * 8 + x];
-        var tmp10 = tmp0 + tmp3 + 1 << (int)((pass1Bits - 1));
+        var tmp10 = tmp0 + tmp3 + (int32)((int32)(1 << (int)((pass1Bits - 1))));
         var tmp12 = tmp0 - tmp3;
         var tmp11 = tmp1 + tmp2;
         var tmp13 = tmp1 - tmp2;
@@ -160,18 +160,18 @@ internal static void fdct(ж<block> Ꮡb) {
         tmp1 = b[1 * 8 + x] - b[6 * 8 + x];
         tmp2 = b[2 * 8 + x] - b[5 * 8 + x];
         tmp3 = b[3 * 8 + x] - b[4 * 8 + x];
-        b[0 * 8 + x] = (tmp10 + tmp11) >> (int)(pass1Bits);
-        b[4 * 8 + x] = (tmp10 - tmp11) >> (int)(pass1Bits);
-        var z1 = (tmp12 + tmp13) * fix_0_541196100;
-        z1 += 1 << (int)((constBits + pass1Bits - 1));
-        b[2 * 8 + x] = (z1 + tmp12 * fix_0_765366865) >> (int)((constBits + pass1Bits));
-        b[6 * 8 + x] = (z1 - tmp13 * fix_1_847759065) >> (int)((constBits + pass1Bits));
+        b[0 * 8 + x] = ((tmp10 + tmp11) >> (int)(pass1Bits));
+        b[4 * 8 + x] = ((tmp10 - tmp11) >> (int)(pass1Bits));
+        var z1 = (tmp12 + tmp13) * (int32)fix_0_541196100;
+        z1 += (int32)(1 << (int)((constBits + pass1Bits - 1)));
+        b[2 * 8 + x] = ((z1 + tmp12 * (int32)fix_0_765366865) >> (int)((constBits + pass1Bits)));
+        b[6 * 8 + x] = ((z1 - tmp13 * (int32)fix_1_847759065) >> (int)((constBits + pass1Bits)));
         tmp10 = tmp0 + tmp3;
         tmp11 = tmp1 + tmp2;
         tmp12 = tmp0 + tmp2;
         tmp13 = tmp1 + tmp3;
-        z1 = (tmp12 + tmp13) * fix_1_175875602;
-        z1 += 1 << (int)((constBits + pass1Bits - 1));
+        z1 = (tmp12 + tmp13) * (int32)fix_1_175875602;
+        z1 += (int32)(1 << (int)((constBits + pass1Bits - 1)));
         tmp0 *= fix_1_501321110;
         tmp1 *= fix_3_072711026;
         tmp2 *= fix_2_053119869;
@@ -182,10 +182,10 @@ internal static void fdct(ж<block> Ꮡb) {
         tmp13 *= -fix_1_961570560;
         tmp12 += z1;
         tmp13 += z1;
-        b[1 * 8 + x] = (tmp0 + tmp10 + tmp12) >> (int)((constBits + pass1Bits));
-        b[3 * 8 + x] = (tmp1 + tmp11 + tmp13) >> (int)((constBits + pass1Bits));
-        b[5 * 8 + x] = (tmp2 + tmp11 + tmp12) >> (int)((constBits + pass1Bits));
-        b[7 * 8 + x] = (tmp3 + tmp10 + tmp13) >> (int)((constBits + pass1Bits));
+        b[1 * 8 + x] = ((tmp0 + tmp10 + tmp12) >> (int)((constBits + pass1Bits)));
+        b[3 * 8 + x] = ((tmp1 + tmp11 + tmp13) >> (int)((constBits + pass1Bits)));
+        b[5 * 8 + x] = ((tmp2 + tmp11 + tmp12) >> (int)((constBits + pass1Bits)));
+        b[7 * 8 + x] = ((tmp3 + tmp10 + tmp13) >> (int)((constBits + pass1Bits)));
     }
 }
 

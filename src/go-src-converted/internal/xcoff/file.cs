@@ -9,12 +9,13 @@ using dwarf = debug.dwarf_package;
 using binary = encoding.binary_package;
 using errors = errors_package;
 using fmt = fmt_package;
-using saferio = @internal.saferio_package;
+using saferio = go.@internal.saferio_package;
 using io = io_package;
 using os = os_package;
 using strings = strings_package;
 using debug;
 using encoding;
+using go.@internal;
 
 partial class xcoff_package {
 
@@ -31,8 +32,8 @@ partial class xcoff_package {
 [GoType] partial struct ΔSection {
     public partial ref SectionHeader SectionHeader { get; }
     public slice<Reloc> Relocs;
-    public partial ref io_package.ReaderAt ReaderAt { get; }
-    internal ж<io_package.SectionReader> sr;
+    public io_package.ReaderAt ReaderAt;
+    internal ж<io.SectionReader> sr;
 }
 
 // AuxiliaryCSect holds information about an XCOFF symbol in an AUX_CSECT entry.
@@ -83,21 +84,21 @@ partial class xcoff_package {
     public slice<ж<Symbol>> Symbols;
     public slice<byte> StringTable;
     public slice<@string> LibraryPaths;
-    internal io_package.Closer closer;
+    internal io.Closer closer;
 }
 
 // Open opens the named file using os.Open and prepares it for use as an XCOFF binary.
 public static (ж<File>, error) Open(@string name) {
-    (f, err) = os.Open(name);
+    var (f, err) = os.Open(name);
     if (err != default!) {
         return (default!, err);
     }
-    (ff, err) = NewFile(~f);
+    (var ff, err) = NewFile(new os_FileжReaderAt(f));
     if (err != default!) {
         f.Close();
         return (default!, err);
     }
-    ff.val.closer = f;
+    ff.Value.closer = new os_FileжCloser(f);
     return (ff, default!);
 }
 
@@ -119,7 +120,7 @@ public static (ж<File>, error) Open(@string name) {
 // can be trunked but this method will still find them.
 [GoRecv] public static ж<ΔSection> Section(this ref File f, @string name) {
     foreach (var (_, s) in f.Sections) {
-        if (s.Name == name || (len(name) > 8 && s.Name == name[..8])) {
+        if ((~s).Name == name || (len(name) > 8 && (~s).Name == name[..8])) {
             return s;
         }
     }
@@ -130,7 +131,7 @@ public static (ж<File>, error) Open(@string name) {
 // given type, or nil if there is no such section.
 [GoRecv] public static ж<ΔSection> SectionByType(this ref File f, uint32 typ) {
     foreach (var (_, s) in f.Sections) {
-        if (s.Type == typ) {
+        if ((~s).Type == typ) {
             return s;
         }
     }
@@ -148,7 +149,7 @@ internal static @string cstring(slice<byte> b) {
 
 // getString extracts a string from an XCOFF string table.
 internal static (@string, bool) getString(slice<byte> st, uint32 offset) {
-    if (offset < 4 || ((nint)offset) >= len(st)) {
+    if (offset < 4 || (nint)offset >= len(st)) {
         return ("", false);
     }
     return (cstring(st[(int)(offset)..]), true);
@@ -156,11 +157,11 @@ internal static (@string, bool) getString(slice<byte> st, uint32 offset) {
 
 // NewFile creates a new File for accessing an XCOFF binary in an underlying reader.
 public static (ж<File>, error) NewFile(io.ReaderAt r) {
-    var sr = io.NewSectionReader(r, 0, 1 << (int)(63) - 1);
+    var sr = io.NewSectionReader(r, 0, 9223372036854775807L);
     // Read XCOFF target machine
     ref var magic = ref heap(new uint16(), out var Ꮡmagic);
     {
-        var err = binary.Read(~sr, binary.BigEndian, Ꮡmagic); if (err != default!) {
+        var err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), Ꮡmagic); if (err != default!) {
             return (default!, err);
         }
     }
@@ -168,7 +169,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         return (default!, fmt.Errorf("unrecognised XCOFF magic: 0x%x"u8, magic));
     }
     var f = @new<File>();
-    f.TargetMachine = magic;
+    f.Value.TargetMachine = magic;
     // Read XCOFF file header
     {
         var (_, err) = sr.Seek(0, io.SeekStart); if (err != default!) {
@@ -180,31 +181,31 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     uint32 nsyms = default!;
     uint16 opthdr = default!;
     nint hdrsz = default!;
-    var exprᴛ1 = f.TargetMachine;
+    var exprᴛ1 = (~f).TargetMachine;
     if (exprᴛ1 == U802TOCMAGIC) {
         var fhdr = @new<FileHeader32>();
         {
-            var err = binary.Read(~sr, binary.BigEndian, fhdr); if (err != default!) {
+            var err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), fhdr); if (err != default!) {
                 return (default!, err);
             }
         }
-        nscns = fhdr.val.Fnscns;
-        symptr = ((uint64)(~fhdr).Fsymptr);
-        nsyms = fhdr.val.Fnsyms;
-        opthdr = fhdr.val.Fopthdr;
+        nscns = fhdr.Value.Fnscns;
+        symptr = (uint64)(~fhdr).Fsymptr;
+        nsyms = fhdr.Value.Fnsyms;
+        opthdr = fhdr.Value.Fopthdr;
         hdrsz = FILHSZ_32;
     }
     else if (exprᴛ1 == U64_TOCMAGIC) {
         var fhdr = @new<FileHeader64>();
         {
-            var err = binary.Read(~sr, binary.BigEndian, fhdr); if (err != default!) {
+            var err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), fhdr); if (err != default!) {
                 return (default!, err);
             }
         }
-        nscns = fhdr.val.Fnscns;
-        symptr = fhdr.val.Fsymptr;
-        nsyms = fhdr.val.Fnsyms;
-        opthdr = fhdr.val.Fopthdr;
+        nscns = fhdr.Value.Fnscns;
+        symptr = fhdr.Value.Fsymptr;
+        nsyms = fhdr.Value.Fnsyms;
+        opthdr = fhdr.Value.Fopthdr;
         hdrsz = FILHSZ_64;
     }
 
@@ -212,114 +213,114 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         return (default!, fmt.Errorf("no symbol table"u8));
     }
     // Read string table (located right after symbol table).
-    var offset = symptr + ((uint64)nsyms) * SYMESZ;
+    var offset = symptr + (uint64)nsyms * (uint64)SYMESZ;
     {
-        var (_, err) = sr.Seek(((int64)offset), io.SeekStart); if (err != default!) {
+        var (_, err) = sr.Seek((int64)offset, io.SeekStart); if (err != default!) {
             return (default!, err);
         }
     }
     // The first 4 bytes contain the length (in bytes).
     ref var l = ref heap(new uint32(), out var Ꮡl);
     {
-        var err = binary.Read(~sr, binary.BigEndian, Ꮡl); if (err != default!) {
+        var err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), Ꮡl); if (err != default!) {
             return (default!, err);
         }
     }
     if (l > 4) {
-        (st, err) = saferio.ReadDataAt(~sr, ((uint64)l), ((int64)offset));
+        var (st, err) = saferio.ReadDataAt(new io_SectionReaderжReaderAt(sr), (uint64)l, (int64)offset);
         if (err != default!) {
             return (default!, err);
         }
-        f.val.StringTable = st;
+        f.Value.StringTable = st;
     }
     // Read section headers
     {
-        var (_, err) = sr.Seek(((int64)hdrsz) + ((int64)opthdr), io.SeekStart); if (err != default!) {
+        var (_, err) = sr.Seek((int64)hdrsz + (int64)opthdr, io.SeekStart); if (err != default!) {
             return (default!, err);
         }
     }
-    nint c = saferio.SliceCap[ΔSection.val](((uint64)nscns));
+    nint c = saferio.SliceCap<ж<ΔSection>>((uint64)nscns);
     if (c < 0) {
         return (default!, fmt.Errorf("too many XCOFF sections (%d)"u8, nscns));
     }
-    f.val.Sections = new slice<ж<ΔSection>>(0, c);
-    for (nint i = 0; i < ((nint)nscns); i++) {
+    f.Value.Sections = new slice<ж<ΔSection>>(0, c);
+    for (nint i = 0; i < (nint)nscns; i++) {
         uint64 scnptr = default!;
         var s = @new<ΔSection>();
-        var exprᴛ2 = f.TargetMachine;
+        var exprᴛ2 = (~f).TargetMachine;
         if (exprᴛ2 == U802TOCMAGIC) {
             var shdr = @new<SectionHeader32>();
             {
-                var err = binary.Read(~sr, binary.BigEndian, shdr); if (err != default!) {
+                var err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), shdr); if (err != default!) {
                     return (default!, err);
                 }
             }
-            s.Name = cstring((~shdr).Sname[..]);
-            s.VirtualAddress = ((uint64)(~shdr).Svaddr);
-            s.Size = ((uint64)(~shdr).Ssize);
-            scnptr = ((uint64)(~shdr).Sscnptr);
-            s.Type = shdr.val.Sflags;
-            s.Relptr = ((uint64)(~shdr).Srelptr);
-            s.Nreloc = ((uint32)(~shdr).Snreloc);
+            s.Value.Name = cstring((~shdr).Sname[..]);
+            s.Value.VirtualAddress = (uint64)(~shdr).Svaddr;
+            s.Value.Size = (uint64)(~shdr).Ssize;
+            scnptr = (uint64)(~shdr).Sscnptr;
+            s.Value.Type = shdr.Value.Sflags;
+            s.Value.Relptr = (uint64)(~shdr).Srelptr;
+            s.Value.Nreloc = (uint32)(~shdr).Snreloc;
         }
         else if (exprᴛ2 == U64_TOCMAGIC) {
             var shdr = @new<SectionHeader64>();
             {
-                var err = binary.Read(~sr, binary.BigEndian, shdr); if (err != default!) {
+                var err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), shdr); if (err != default!) {
                     return (default!, err);
                 }
             }
-            s.Name = cstring((~shdr).Sname[..]);
-            s.VirtualAddress = shdr.val.Svaddr;
-            s.Size = shdr.val.Ssize;
-            scnptr = shdr.val.Sscnptr;
-            s.Type = shdr.val.Sflags;
-            s.Relptr = shdr.val.Srelptr;
-            s.Nreloc = shdr.val.Snreloc;
+            s.Value.Name = cstring((~shdr).Sname[..]);
+            s.Value.VirtualAddress = shdr.Value.Svaddr;
+            s.Value.Size = shdr.Value.Ssize;
+            scnptr = shdr.Value.Sscnptr;
+            s.Value.Type = shdr.Value.Sflags;
+            s.Value.Relptr = shdr.Value.Srelptr;
+            s.Value.Nreloc = shdr.Value.Snreloc;
         }
 
         var r2 = r;
         if (scnptr == 0) {
             // .bss must have all 0s
-            Ꮡr2 = new nobitsSectionReader(nil); r2 = ref Ꮡr2.val;
+            r2 = new nobitsSectionReaderжReaderAt(Ꮡ(new nobitsSectionReader(nil)));
         }
-        s.val.sr = io.NewSectionReader(r2, ((int64)scnptr), ((int64)s.Size));
-        s.val.ReaderAt = s.val.sr;
-        f.val.Sections = append((~f).Sections, s);
+        s.Value.sr = io.NewSectionReader(r2, (int64)scnptr, (int64)(~s).Size);
+        s.Value.ReaderAt = new io_SectionReaderжReaderAt(s.Value.sr);
+        f.Value.Sections = append((~f).Sections, s);
     }
     // Symbol map needed by relocation
     map<nint, ж<Symbol>> idxToSym = new map<nint, ж<Symbol>>();
     // Read symbol table
     {
-        var (_, err) = sr.Seek(((int64)symptr), io.SeekStart); if (err != default!) {
+        var (_, err) = sr.Seek((int64)symptr, io.SeekStart); if (err != default!) {
             return (default!, err);
         }
     }
-    f.val.Symbols = new slice<ж<Symbol>>(0);
-    for (nint i = 0; i < ((nint)nsyms); i++) {
+    f.Value.Symbols = new slice<ж<Symbol>>(0);
+    for (nint i = 0; i < (nint)nsyms; i++) {
         nint numaux = default!;
         bool ok = default!;
         bool needAuxFcn = default!;
         var sym = @new<Symbol>();
-        var exprᴛ3 = f.TargetMachine;
+        var exprᴛ3 = (~f).TargetMachine;
         if (exprᴛ3 == U802TOCMAGIC) {
             var se = @new<SymEnt32>();
             {
-                var err = binary.Read(~sr, binary.BigEndian, se); if (err != default!) {
+                var err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), se); if (err != default!) {
                     return (default!, err);
                 }
             }
-            numaux = ((nint)(~se).Nnumaux);
-            sym.val.SectionNumber = ((nint)(~se).Nscnum);
-            sym.val.StorageClass = ((nint)(~se).Nsclass);
-            sym.val.Value = ((uint64)(~se).Nvalue);
-            needAuxFcn = (uint16)((~se).Ntype & SYM_TYPE_FUNC) != 0 && numaux > 1;
+            numaux = (nint)(~se).Nnumaux;
+            sym.Value.SectionNumber = (nint)(~se).Nscnum;
+            sym.Value.StorageClass = (nint)(~se).Nsclass;
+            sym.Value.Value = (uint64)(~se).Nvalue;
+            needAuxFcn = (uint16)((~se).Ntype & (uint16)SYM_TYPE_FUNC) != 0 && numaux > 1;
             var zeroes = binary.BigEndian.Uint32((~se).Nname[..4]);
             if (zeroes != 0){
-                sym.val.Name = cstring((~se).Nname[..]);
+                sym.Value.Name = cstring((~se).Nname[..]);
             } else {
                 var offsetΔ2 = binary.BigEndian.Uint32((~se).Nname[4..]);
-                (sym.val.Name, ok) = getString((~f).StringTable, offsetΔ2);
+                (sym.Value.Name, ok) = getString((~f).StringTable, offsetΔ2);
                 if (!ok) {
                     goto skip;
                 }
@@ -328,16 +329,16 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         else if (exprᴛ3 == U64_TOCMAGIC) {
             var se = @new<SymEnt64>();
             {
-                var err = binary.Read(~sr, binary.BigEndian, se); if (err != default!) {
+                var err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), se); if (err != default!) {
                     return (default!, err);
                 }
             }
-            numaux = ((nint)(~se).Nnumaux);
-            sym.val.SectionNumber = ((nint)(~se).Nscnum);
-            sym.val.StorageClass = ((nint)(~se).Nsclass);
-            sym.val.Value = se.val.Nvalue;
-            needAuxFcn = (uint16)((~se).Ntype & SYM_TYPE_FUNC) != 0 && numaux > 1;
-            (sym.val.Name, ok) = getString((~f).StringTable, (~se).Noffset);
+            numaux = (nint)(~se).Nnumaux;
+            sym.Value.SectionNumber = (nint)(~se).Nscnum;
+            sym.Value.StorageClass = (nint)(~se).Nsclass;
+            sym.Value.Value = se.Value.Nvalue;
+            needAuxFcn = (uint16)((~se).Ntype & (uint16)SYM_TYPE_FUNC) != 0 && numaux > 1;
+            (sym.Value.Name, ok) = getString((~f).StringTable, (~se).Noffset);
             if (!ok) {
                 goto skip;
             }
@@ -347,16 +348,16 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             goto skip;
         }
         // Must have at least one csect auxiliary entry.
-        if (numaux < 1 || i + numaux >= ((nint)nsyms)) {
+        if (numaux < 1 || i + numaux >= (nint)nsyms) {
             goto skip;
         }
-        if ((~sym).SectionNumber > ((nint)nscns)) {
+        if ((~sym).SectionNumber > (nint)nscns) {
             goto skip;
         }
         if ((~sym).SectionNumber == 0){
-            sym.val.Value = 0;
+            sym.Value.Value = 0;
         } else {
-            sym.val.Value -= (~f).Sections[(~sym).SectionNumber - 1].VirtualAddress;
+            sym.Value.Value -= (~f).Sections[(~sym).SectionNumber - 1].Value.VirtualAddress;
         }
         idxToSym[i] = sym;
         // If this symbol is a function, it must retrieve its size from
@@ -364,131 +365,133 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         // It can happen that a function symbol doesn't have any AUX_FCN.
         // In this case, needAuxFcn is false and their size will be set to 0.
         if (needAuxFcn) {
-            var exprᴛ4 = f.TargetMachine;
+            var exprᴛ4 = (~f).TargetMachine;
             if (exprᴛ4 == U802TOCMAGIC) {
                 var aux = @new<AuxFcn32>();
                 {
-                    var err = binary.Read(~sr, binary.BigEndian, aux); if (err != default!) {
+                    var err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), aux); if (err != default!) {
                         return (default!, err);
                     }
                 }
-                (~sym).AuxFcn.Size = ((int64)(~aux).Xfsize);
+                sym.Value.AuxFcn.Size = (int64)(~aux).Xfsize;
             }
             else if (exprᴛ4 == U64_TOCMAGIC) {
                 var aux = @new<AuxFcn64>();
                 {
-                    var err = binary.Read(~sr, binary.BigEndian, aux); if (err != default!) {
+                    var err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), aux); if (err != default!) {
                         return (default!, err);
                     }
                 }
-                (~sym).AuxFcn.Size = ((int64)(~aux).Xfsize);
+                sym.Value.AuxFcn.Size = (int64)(~aux).Xfsize;
             }
 
         }
         // Read csect auxiliary entry (by convention, it is the last).
         if (!needAuxFcn) {
             {
-                var (_, err) = sr.Seek(((int64)(numaux - 1)) * SYMESZ, io.SeekCurrent); if (err != default!) {
+                var (_, err) = sr.Seek((int64)(numaux - 1) * (int64)SYMESZ, io.SeekCurrent); if (err != default!) {
                     return (default!, err);
                 }
             }
         }
         i += numaux;
         numaux = 0;
-        var exprᴛ5 = f.TargetMachine;
+        var exprᴛ5 = (~f).TargetMachine;
         if (exprᴛ5 == U802TOCMAGIC) {
             var aux = @new<AuxCSect32>();
             {
-                var err = binary.Read(~sr, binary.BigEndian, aux); if (err != default!) {
+                var err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), aux); if (err != default!) {
                     return (default!, err);
                 }
             }
-            (~sym).AuxCSect.SymbolType = ((nint)((uint8)((~aux).Xsmtyp & 7)));
-            (~sym).AuxCSect.StorageMappingClass = ((nint)(~aux).Xsmclas);
-            (~sym).AuxCSect.Length = ((int64)(~aux).Xscnlen);
+            sym.Value.AuxCSect.SymbolType = (nint)((uint8)((~aux).Xsmtyp & 0x7));
+            sym.Value.AuxCSect.StorageMappingClass = (nint)(~aux).Xsmclas;
+            sym.Value.AuxCSect.Length = (int64)(~aux).Xscnlen;
         }
         else if (exprᴛ5 == U64_TOCMAGIC) {
             var aux = @new<AuxCSect64>();
             {
-                var err = binary.Read(~sr, binary.BigEndian, aux); if (err != default!) {
+                var err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), aux); if (err != default!) {
                     return (default!, err);
                 }
             }
-            (~sym).AuxCSect.SymbolType = ((nint)((uint8)((~aux).Xsmtyp & 7)));
-            (~sym).AuxCSect.StorageMappingClass = ((nint)(~aux).Xsmclas);
-            (~sym).AuxCSect.Length = (int64)(((int64)(~aux).Xscnlenhi) << (int)(32) | ((int64)(~aux).Xscnlenlo));
+            sym.Value.AuxCSect.SymbolType = (nint)((uint8)((~aux).Xsmtyp & 0x7));
+            sym.Value.AuxCSect.StorageMappingClass = (nint)(~aux).Xsmclas;
+            sym.Value.AuxCSect.Length = (int64)(((int64)(~aux).Xscnlenhi << (int)(32)) | (int64)(~aux).Xscnlenlo);
         }
 
-        f.val.Symbols = append((~f).Symbols, sym);
+        f.Value.Symbols = append((~f).Symbols, sym);
 skip:
         i += numaux;
         // Skip auxiliary entries
         {
-            var (_, err) = sr.Seek(((int64)numaux) * SYMESZ, io.SeekCurrent); if (err != default!) {
+            var (_, err) = sr.Seek((int64)numaux * (int64)SYMESZ, io.SeekCurrent); if (err != default!) {
                 return (default!, err);
             }
         }
     }
     // Read relocations
     // Only for .data or .text section
-    foreach (var (sectNum, sect) in (~f).Sections) {
-        if (sect.Type != STYP_TEXT && sect.Type != STYP_DATA) {
+    foreach (var (sectNum, vᴛ1) in (~f).Sections) {
+        var sect = vᴛ1;
+
+        if ((~sect).Type != STYP_TEXT && (~sect).Type != STYP_DATA) {
             continue;
         }
-        if (sect.Relptr == 0) {
+        if ((~sect).Relptr == 0) {
             continue;
         }
-        nint c = saferio.SliceCap<Reloc>(((uint64)sect.Nreloc));
-        if (c < 0) {
-            return (default!, fmt.Errorf("too many relocs (%d) for section %d"u8, sect.Nreloc, sectNum));
+        nint cΔ1 = saferio.SliceCap<Reloc>((uint64)(~sect).Nreloc);
+        if (cΔ1 < 0) {
+            return (default!, fmt.Errorf("too many relocs (%d) for section %d"u8, (~sect).Nreloc, sectNum));
         }
-        sect.val.Relocs = new slice<Reloc>(0, c);
+        sect.Value.Relocs = new slice<Reloc>(0, cΔ1);
         {
-            var (_, err) = sr.Seek(((int64)sect.Relptr), io.SeekStart); if (err != default!) {
+            var (_, err) = sr.Seek((int64)(~sect).Relptr, io.SeekStart); if (err != default!) {
                 return (default!, err);
             }
         }
-        for (var i = ((uint32)0); i < sect.Nreloc; i++) {
+        for (var i = (uint32)0; i < (~sect).Nreloc; i++) {
             Reloc reloc = default!;
-            var exprᴛ6 = f.TargetMachine;
+            var exprᴛ6 = (~f).TargetMachine;
             if (exprᴛ6 == U802TOCMAGIC) {
                 var rel = @new<Reloc32>();
                 {
-                    var err = binary.Read(~sr, binary.BigEndian, rel); if (err != default!) {
+                    var err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), rel); if (err != default!) {
                         return (default!, err);
                     }
                 }
-                reloc.VirtualAddress = ((uint64)(~rel).Rvaddr);
-                reloc.Symbol = idxToSym[((nint)(~rel).Rsymndx)];
-                reloc.Type = rel.val.Rtype;
-                reloc.Length = (uint8)((~rel).Rsize & 63) + 1;
-                if ((uint8)((~rel).Rsize & 128) != 0) {
+                reloc.VirtualAddress = (uint64)(~rel).Rvaddr;
+                reloc.Symbol = idxToSym[(nint)(~rel).Rsymndx];
+                reloc.Type = rel.Value.Rtype;
+                reloc.Length = (uint8)((uint8)((~rel).Rsize & 0x3F) + 1);
+                if ((uint8)((~rel).Rsize & 0x80) != 0) {
                     reloc.Signed = true;
                 }
-                if ((uint8)((~rel).Rsize & 64) != 0) {
+                if ((uint8)((~rel).Rsize & 0x40) != 0) {
                     reloc.InstructionFixed = true;
                 }
             }
             else if (exprᴛ6 == U64_TOCMAGIC) {
                 var rel = @new<Reloc64>();
                 {
-                    var err = binary.Read(~sr, binary.BigEndian, rel); if (err != default!) {
+                    var err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), rel); if (err != default!) {
                         return (default!, err);
                     }
                 }
-                reloc.VirtualAddress = rel.val.Rvaddr;
-                reloc.Symbol = idxToSym[((nint)(~rel).Rsymndx)];
-                reloc.Type = rel.val.Rtype;
-                reloc.Length = (uint8)((~rel).Rsize & 63) + 1;
-                if ((uint8)((~rel).Rsize & 128) != 0) {
+                reloc.VirtualAddress = rel.Value.Rvaddr;
+                reloc.Symbol = idxToSym[(nint)(~rel).Rsymndx];
+                reloc.Type = rel.Value.Rtype;
+                reloc.Length = (uint8)((uint8)((~rel).Rsize & 0x3F) + 1);
+                if ((uint8)((~rel).Rsize & 0x80) != 0) {
                     reloc.Signed = true;
                 }
-                if ((uint8)((~rel).Rsize & 64) != 0) {
+                if ((uint8)((~rel).Rsize & 0x40) != 0) {
                     reloc.InstructionFixed = true;
                 }
             }
 
-            sect.val.Relocs = append((~sect).Relocs, reloc);
+            sect.Value.Relocs = append((~sect).Relocs, reloc);
         }
     }
     return (f, default!);
@@ -506,7 +509,7 @@ skip:
 
 // Data reads and returns the contents of the XCOFF section s.
 [GoRecv] public static (slice<byte>, error) Data(this ref ΔSection s) {
-    var dat = new slice<byte>(s.sr.Size());
+    var dat = new slice<byte>((nint)(s.sr.Size()));
     var (n, err) = s.sr.ReadAt(dat, 0);
     if (n == len(dat)) {
         err = default!;
@@ -521,9 +524,9 @@ skip:
             {
                 nint i = (~sym).SectionNumber - 1; if (0 <= i && i < len(f.Sections)) {
                     var s = f.Sections[i];
-                    if ((~sym).Value + ((uint64)(~sym).AuxCSect.Length) <= s.Size) {
-                        var dat = new slice<byte>((~sym).AuxCSect.Length);
-                        var (_, err) = (~s).sr.ReadAt(dat, ((int64)(~sym).Value));
+                    if ((~sym).Value + (uint64)(~sym).AuxCSect.Length <= (~s).Size) {
+                        var dat = new slice<byte>((nint)((~sym).AuxCSect.Length));
+                        var (_, err) = (~s).sr.ReadAt(dat, (int64)(~sym).Value);
                         if (err != default!) {
                             return default!;
                         }
@@ -544,27 +547,23 @@ skip:
     array<uint32> subtypes = new uint32[]{SSUBTYP_DWABREV, SSUBTYP_DWINFO, SSUBTYP_DWLINE, SSUBTYP_DWRNGES, SSUBTYP_DWSTR}.array();
     array<slice<byte>> dat = new(5); /* len(subtypes) */
     foreach (var (i, subtype) in subtypes) {
-        var s = f.SectionByType((uint32)(STYP_DWARF | subtype));
+        var s = f.SectionByType((uint32)((uint32)STYP_DWARF | subtype));
         if (s != nil) {
-            (b, err) = s.Data();
-            if (err != default! && ((uint64)len(b)) < s.Size) {
+            var (b, err) = s.Data();
+            if (err != default! && (uint64)len(b) < (~s).Size) {
                 return (default!, err);
             }
             dat[i] = b;
         }
     }
-    var abbrev = dat[0];
-    var info = dat[1];
-    var line = dat[2];
-    var ranges = dat[3];
-    var str = dat[4];
+    var (abbrev, info, line, ranges, str) = (dat[0], dat[1], dat[2], dat[3], dat[4]);
     return dwarf.New(abbrev, default!, default!, info, line, default!, ranges, str);
 }
 
 // readImportID returns the import file IDs stored inside the .loader section.
 // Library name pattern is either path/base/member or base/member
-[GoRecv] public static (slice<@string>, error) readImportIDs(this ref File f, ж<ΔSection> Ꮡs) {
-    ref var s = ref Ꮡs.val;
+[GoRecv] internal static (slice<@string>, error) readImportIDs(this ref File f, ж<ΔSection> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
 
     // Read loader header
     {
@@ -579,35 +578,35 @@ skip:
     if (exprᴛ1 == U802TOCMAGIC) {
         var lhdr = @new<LoaderHeader32>();
         {
-            var err = binary.Read(~s.sr, binary.BigEndian, lhdr); if (err != default!) {
+            var err = binary.Read(new io_SectionReaderжReader(s.sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), lhdr); if (err != default!) {
                 return (default!, err);
             }
         }
-        istlen = lhdr.val.Listlen;
-        nimpid = lhdr.val.Lnimpid;
-        impoff = ((uint64)(~lhdr).Limpoff);
+        istlen = lhdr.Value.Listlen;
+        nimpid = lhdr.Value.Lnimpid;
+        impoff = (uint64)(~lhdr).Limpoff;
     }
     else if (exprᴛ1 == U64_TOCMAGIC) {
         var lhdr = @new<LoaderHeader64>();
         {
-            var err = binary.Read(~s.sr, binary.BigEndian, lhdr); if (err != default!) {
+            var err = binary.Read(new io_SectionReaderжReader(s.sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), lhdr); if (err != default!) {
                 return (default!, err);
             }
         }
-        istlen = lhdr.val.Listlen;
-        nimpid = lhdr.val.Lnimpid;
-        impoff = lhdr.val.Limpoff;
+        istlen = lhdr.Value.Listlen;
+        nimpid = lhdr.Value.Lnimpid;
+        impoff = lhdr.Value.Limpoff;
     }
 
     // Read loader import file ID table
     {
-        var (_, err) = s.sr.Seek(((int64)impoff), io.SeekStart); if (err != default!) {
+        var (_, err) = s.sr.Seek((int64)impoff, io.SeekStart); if (err != default!) {
             return (default!, err);
         }
     }
-    var table = new slice<byte>(istlen);
+    var table = new slice<byte>((nint)(istlen));
     {
-        var (_, err) = io.ReadFull(~s.sr, table); if (err != default!) {
+        var (_, err) = io.ReadFull(new io_SectionReaderжReader(s.sr), table); if (err != default!) {
             return (default!, err);
         }
     }
@@ -618,7 +617,7 @@ skip:
     offset += len(libpath) + 3;
     // 3 null bytes
     var all = new slice<@string>(0);
-    for (nint i = 1; i < ((nint)nimpid); i++) {
+    for (nint i = 1; i < (nint)nimpid; i++) {
         @string impidpath = cstring(table[(int)(offset)..]);
         offset += len(impidpath) + 1;
         @string impidbase = cstring(table[(int)(offset)..]);
@@ -659,53 +658,53 @@ skip:
     if (exprᴛ1 == U802TOCMAGIC) {
         var lhdr = @new<LoaderHeader32>();
         {
-            var errΔ4 = binary.Read(~(~s).sr, binary.BigEndian, lhdr); if (errΔ4 != default!) {
+            var errΔ4 = binary.Read(new io_SectionReaderжReader((~s).sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), lhdr); if (errΔ4 != default!) {
                 return (default!, errΔ4);
             }
         }
-        stlen = lhdr.val.Lstlen;
-        stoff = ((uint64)(~lhdr).Lstoff);
-        nsyms = lhdr.val.Lnsyms;
+        stlen = lhdr.Value.Lstlen;
+        stoff = (uint64)(~lhdr).Lstoff;
+        nsyms = lhdr.Value.Lnsyms;
         symoff = LDHDRSZ_32;
     }
     else if (exprᴛ1 == U64_TOCMAGIC) {
         var lhdr = @new<LoaderHeader64>();
         {
-            var errΔ5 = binary.Read(~(~s).sr, binary.BigEndian, lhdr); if (errΔ5 != default!) {
+            var errΔ5 = binary.Read(new io_SectionReaderжReader((~s).sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), lhdr); if (errΔ5 != default!) {
                 return (default!, errΔ5);
             }
         }
-        stlen = lhdr.val.Lstlen;
-        stoff = lhdr.val.Lstoff;
-        nsyms = lhdr.val.Lnsyms;
-        symoff = lhdr.val.Lsymoff;
+        stlen = lhdr.Value.Lstlen;
+        stoff = lhdr.Value.Lstoff;
+        nsyms = lhdr.Value.Lnsyms;
+        symoff = lhdr.Value.Lsymoff;
     }
 
     // Read loader section string table
     {
-        var (_, errΔ6) = (~s).sr.Seek(((int64)stoff), io.SeekStart); if (errΔ6 != default!) {
+        var (_, errΔ6) = (~s).sr.Seek((int64)stoff, io.SeekStart); if (errΔ6 != default!) {
             return (default!, errΔ6);
         }
     }
-    var st = new slice<byte>(stlen);
+    var st = new slice<byte>((nint)(stlen));
     {
-        var (_, errΔ7) = io.ReadFull(~(~s).sr, st); if (errΔ7 != default!) {
+        var (_, errΔ7) = io.ReadFull(new io_SectionReaderжReader((~s).sr), st); if (errΔ7 != default!) {
             return (default!, errΔ7);
         }
     }
     // Read imported libraries
-    (libs, err) = f.readImportIDs(s);
+    var (libs, err) = f.readImportIDs(s);
     if (err != default!) {
         return (default!, err);
     }
     // Read loader symbol table
     {
-        var (_, errΔ8) = (~s).sr.Seek(((int64)symoff), io.SeekStart); if (errΔ8 != default!) {
+        var (_, errΔ8) = (~s).sr.Seek((int64)symoff, io.SeekStart); if (errΔ8 != default!) {
             return (default!, errΔ8);
         }
     }
     var all = new slice<ImportedSymbol>(0);
-    for (nint i = 0; i < ((nint)nsyms); i++) {
+    for (nint i = 0; i < (nint)nsyms; i++) {
         @string name = default!;
         uint32 ifile = default!;
         bool ok = default!;
@@ -713,11 +712,11 @@ skip:
         if (exprᴛ2 == U802TOCMAGIC) {
             var ldsym = @new<LoaderSymbol32>();
             {
-                var errΔ11 = binary.Read(~(~s).sr, binary.BigEndian, ldsym); if (errΔ11 != default!) {
+                var errΔ11 = binary.Read(new io_SectionReaderжReader((~s).sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), ldsym); if (errΔ11 != default!) {
                     return (default!, errΔ11);
                 }
             }
-            if ((uint8)((~ldsym).Lsmtype & 64) == 0) {
+            if ((uint8)((~ldsym).Lsmtype & 0x40) == 0) {
                 continue;
             }
             var zeroes = binary.BigEndian.Uint32((~ldsym).Lname[..4]);
@@ -731,16 +730,16 @@ skip:
                     continue;
                 }
             }
-            ifile = ldsym.val.Lifile;
+            ifile = ldsym.Value.Lifile;
         }
         else if (exprᴛ2 == U64_TOCMAGIC) {
             var ldsym = @new<LoaderSymbol64>();
             {
-                var errΔ12 = binary.Read(~(~s).sr, binary.BigEndian, ldsym); if (errΔ12 != default!) {
+                var errΔ12 = binary.Read(new io_SectionReaderжReader((~s).sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), ldsym); if (errΔ12 != default!) {
                     return (default!, errΔ12);
                 }
             }
-            if ((uint8)((~ldsym).Lsmtype & 64) == 0) {
+            if ((uint8)((~ldsym).Lsmtype & 0x40) == 0) {
                 continue;
             }
             (name, ok) = getString(st, // Imported symbols only
@@ -748,13 +747,13 @@ skip:
             if (!ok) {
                 continue;
             }
-            ifile = ldsym.val.Lifile;
+            ifile = ldsym.Value.Lifile;
         }
 
         ImportedSymbol sym = default!;
         sym.Name = name;
-        if (ifile >= 1 && ((nint)ifile) <= len(libs)) {
-            sym.Library = libs[ifile - 1];
+        if (ifile >= 1 && (nint)ifile <= len(libs)) {
+            sym.Library = libs[(nint)(ifile - 1)];
         }
         all = append(all, sym);
     }
@@ -769,7 +768,7 @@ skip:
     if (s == nil) {
         return (default!, default!);
     }
-    (all, err) = f.readImportIDs(s);
+    var (all, err) = f.readImportIDs(s);
     return (all, err);
 }
 

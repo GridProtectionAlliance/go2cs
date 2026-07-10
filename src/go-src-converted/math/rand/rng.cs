@@ -180,12 +180,12 @@ internal static array<int64> rngCooked = new int64[]{
 
 // seed rng x[n+1] = 48271 * x[n] mod (2**31 - 1)
 internal static int32 seedrand(int32 x) {
-    static readonly UntypedInt A = 48271;
-    static readonly UntypedInt Q = 44488;
-    static readonly UntypedInt R = 3399;
-    var hi = x / Q;
-    var lo = x % Q;
-    x = A * lo - R * hi;
+    UntypedInt A = 48271;
+    UntypedInt Q = 44488;
+    UntypedInt R = 3399;
+    var hi = x / (int32)Q;
+    var lo = x % (int32)Q;
+    x = (int32)A * lo - (int32)R * hi;
     if (x < 0) {
         x += int32max;
     }
@@ -196,23 +196,23 @@ internal static int32 seedrand(int32 x) {
 [GoRecv] internal static void Seed(this ref rngSource rng, int64 seed) {
     rng.tap = 0;
     rng.feed = rngLen - rngTap;
-    seed = seed % int32max;
+    seed = seed % (int64)int32max;
     if (seed < 0) {
         seed += int32max;
     }
     if (seed == 0) {
         seed = 89482311;
     }
-    var x = ((int32)seed);
+    var x = (int32)seed;
     for (nint i = -20; i < rngLen; i++) {
         x = seedrand(x);
         if (i >= 0) {
             int64 u = default!;
-            u = ((int64)x) << (int)(40);
+            u = ((int64)x << (int)(40));
             x = seedrand(x);
-            u ^= (int64)(((int64)x) << (int)(20));
+            u ^= (int64)(((int64)x << (int)(20)));
             x = seedrand(x);
-            u ^= (int64)(((int64)x));
+            u ^= (int64)((int64)x);
             u ^= (int64)(rngCooked[i]);
             rng.vec[i] = u;
         }
@@ -221,7 +221,7 @@ internal static int32 seedrand(int32 x) {
 
 // Int63 returns a non-negative pseudo-random 63-bit integer as an int64.
 [GoRecv] internal static int64 Int63(this ref rngSource rng) {
-    return ((int64)((uint64)(rng.Uint64() & rngMask)));
+    return (int64)((uint64)(rng.Uint64() & (uint64)rngMask));
 }
 
 // Uint64 returns a non-negative pseudo-random 64-bit integer as a uint64.
@@ -236,7 +236,7 @@ internal static int32 seedrand(int32 x) {
     }
     var x = rng.vec[rng.feed] + rng.vec[rng.tap];
     rng.vec[rng.feed] = x;
-    return ((uint64)x);
+    return (uint64)x;
 }
 
 } // end rand_package

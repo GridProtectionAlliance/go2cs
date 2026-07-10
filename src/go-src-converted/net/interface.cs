@@ -5,9 +5,9 @@ namespace go;
 
 using errors = errors_package;
 using itoa = @internal.itoa_package;
-using sync = sync_package;
+using Δsync = sync_package;
 using time = time_package;
-using _ = unsafe_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using @internal;
 
 partial class net_package {
@@ -63,7 +63,7 @@ internal static slice<@string> flagNames = new @string[]{
 public static @string String(this Flags f) {
     @string s = ""u8;
     foreach (var (i, name) in flagNames) {
-        if ((Flags)(f & (1 << (int)(((nuint)i)))) != 0) {
+        if ((Flags)(f & ((Flags)((nuint)1 << (int)((nuint)i)))) != 0) {
             if (s != ""u8) {
                 s += "|"u8;
             }
@@ -78,38 +78,42 @@ public static @string String(this Flags f) {
 
 // Addrs returns a list of unicast interface addresses for a specific
 // interface.
-[GoRecv] public static (slice<ΔAddr>, error) Addrs(this ref Interface ifi) {
+public static (slice<ΔAddr>, error) Addrs(this ж<Interface> Ꮡifi) {
+    ref var ifi = ref Ꮡifi.Value;
+
     if (ifi == nil) {
-        return (default!, new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, ΔAddr: default!, Err: errInvalidInterface));
+        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: errInvalidInterface))));
     }
-    (ifat, err) = interfaceAddrTable(ifi);
+    var (ifat, err) = interfaceAddrTable(Ꮡifi);
     if (err != default!) {
-        Ꮡerr = new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, ΔAddr: default!, Err: err); err = ref Ꮡerr.val;
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: err)));
     }
     return (ifat, err);
 }
 
 // MulticastAddrs returns a list of multicast, joined group addresses
 // for a specific interface.
-[GoRecv] public static (slice<ΔAddr>, error) MulticastAddrs(this ref Interface ifi) {
+public static (slice<ΔAddr>, error) MulticastAddrs(this ж<Interface> Ꮡifi) {
+    ref var ifi = ref Ꮡifi.Value;
+
     if (ifi == nil) {
-        return (default!, new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, ΔAddr: default!, Err: errInvalidInterface));
+        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: errInvalidInterface))));
     }
-    (ifat, err) = interfaceMulticastAddrTable(ifi);
+    var (ifat, err) = interfaceMulticastAddrTable(Ꮡifi);
     if (err != default!) {
-        Ꮡerr = new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, ΔAddr: default!, Err: err); err = ref Ꮡerr.val;
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: err)));
     }
     return (ifat, err);
 }
 
 // Interfaces returns a list of the system's network interfaces.
 public static (slice<Interface>, error) Interfaces() {
-    (ift, err) = interfaceTable(0);
+    var (ift, err) = interfaceTable(0);
     if (err != default!) {
-        return (default!, new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, ΔAddr: default!, Err: err));
+        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: err))));
     }
     if (len(ift) != 0) {
-        zoneCache.update(ift, false);
+        ᏑzoneCache.update(ift, false);
     }
     return (ift, default!);
 }
@@ -120,9 +124,9 @@ public static (slice<Interface>, error) Interfaces() {
 // The returned list does not identify the associated interface; use
 // Interfaces and [Interface.Addrs] for more detail.
 public static (slice<ΔAddr>, error) InterfaceAddrs() {
-    (ifat, err) = interfaceAddrTable(nil);
+    var (ifat, err) = interfaceAddrTable(nil);
     if (err != default!) {
-        Ꮡerr = new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, ΔAddr: default!, Err: err); err = ref Ꮡerr.val;
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: err)));
     }
     return (ifat, err);
 }
@@ -134,23 +138,24 @@ public static (slice<ΔAddr>, error) InterfaceAddrs() {
 // [InterfaceByName].
 public static (ж<Interface>, error) InterfaceByIndex(nint index) {
     if (index <= 0) {
-        return (default!, new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, ΔAddr: default!, Err: errInvalidInterfaceIndex));
+        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: errInvalidInterfaceIndex))));
     }
-    (ift, err) = interfaceTable(index);
+    var (ift, err) = interfaceTable(index);
     if (err != default!) {
-        return (default!, new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, ΔAddr: default!, Err: err));
+        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: err))));
     }
-    (ifi, err) = interfaceByIndex(ift, index);
+    (var ifi, err) = interfaceByIndex(ift, index);
     if (err != default!) {
-        Ꮡerr = new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, ΔAddr: default!, Err: err); err = ref Ꮡerr.val;
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: err)));
     }
     return (ifi, err);
 }
 
 internal static (ж<Interface>, error) interfaceByIndex(slice<Interface> ift, nint index) {
-    ref var ifi = ref heap(new Interface(), out var Ꮡifi);
+    foreach (var (_, vᴛ1) in ift) {
+        ref var ifi = ref heap(new Interface(), out var Ꮡifi);
+        ifi = vᴛ1;
 
-    foreach (var (_, ifi) in ift) {
         if (index == ifi.Index) {
             return (Ꮡifi, default!);
         }
@@ -161,23 +166,24 @@ internal static (ж<Interface>, error) interfaceByIndex(slice<Interface> ift, ni
 // InterfaceByName returns the interface specified by name.
 public static (ж<Interface>, error) InterfaceByName(@string name) {
     if (name == ""u8) {
-        return (default!, new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, ΔAddr: default!, Err: errInvalidInterfaceName));
+        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: errInvalidInterfaceName))));
     }
-    (ift, err) = interfaceTable(0);
+    var (ift, err) = interfaceTable(0);
     if (err != default!) {
-        return (default!, new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, ΔAddr: default!, Err: err));
+        return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: err))));
     }
     if (len(ift) != 0) {
-        zoneCache.update(ift, false);
+        ᏑzoneCache.update(ift, false);
     }
-    ref var ifi = ref heap(new Interface(), out var Ꮡifi);
+    foreach (var (_, vᴛ1) in ift) {
+        ref var ifi = ref heap(new Interface(), out var Ꮡifi);
+        ifi = vᴛ1;
 
-    foreach (var (_, ifi) in ift) {
         if (name == ifi.Name) {
             return (Ꮡifi, default!);
         }
     }
-    return (default!, new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, ΔAddr: default!, Err: errNoSuchInterface));
+    return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: errNoSuchInterface))));
 }
 
 // An ipv6ZoneCache represents a cache holding partial network
@@ -188,69 +194,72 @@ public static (ж<Interface>, error) InterfaceByName(@string name) {
 // first-served basis for consistency.
 [GoType] partial struct ipv6ZoneCache {
     public partial ref sync_package.RWMutex RWMutex { get; }                // guard the following
-    internal time_package.Time lastFetched;      // last time routing information was fetched
+    internal time.Time lastFetched;      // last time routing information was fetched
     internal map<@string, nint> toIndex; // interface name to its index
     internal map<nint, @string> toName; // interface index to its name
 }
 
-internal static ipv6ZoneCache zoneCache = new ipv6ZoneCache(
+internal static ж<ipv6ZoneCache> ᏑzoneCache = new(new ipv6ZoneCache(
     toIndex: new map<@string, nint>(),
     toName: new map<nint, @string>()
-);
+));
+internal static ref ipv6ZoneCache zoneCache => ref ᏑzoneCache.Value;
 
 // update refreshes the network interface information if the cache was last
 // updated more than 1 minute ago, or if force is set. It reports whether the
 // cache was updated.
-[GoRecv] internal static bool /*updated*/ update(this ref ipv6ZoneCache zc, slice<Interface> ift, bool force) => func((defer, _) => {
+internal static bool /*updated*/ update(this ж<ipv6ZoneCache> Ꮡzc, slice<Interface> ift, bool force) {
     bool updated = default!;
+    func((defer, recover) => {
+    ref var zc = ref Ꮡzc.Value;
 
-    zc.Lock();
-    defer(zc.Unlock);
-    var now = time.Now();
-    if (!force && zc.lastFetched.After(now.Add(-60 * time.ΔSecond))) {
-        return false;
-    }
-    zc.lastFetched = now;
-    if (len(ift) == 0) {
-        error err = default!;
-        {
-            (ift, err) = interfaceTable(0); if (err != default!) {
-                return false;
+        Ꮡzc.of(ipv6ZoneCache.ᏑRWMutex).Lock();
+        defer(Ꮡzc.of(ipv6ZoneCache.ᏑRWMutex).Unlock);
+        var now = time.Now();
+        if (!force && zc.lastFetched.After(now.Add(-60000000000L))) {
+            updated = false; return;
+        }
+        zc.lastFetched = now;
+        if (len(ift) == 0) {
+            error err = default!;
+            {
+                (ift, err) = interfaceTable(0); if (err != default!) {
+                    updated = false; return;
+                }
             }
         }
-    }
-    zc.toIndex = new map<@string, nint>(len(ift));
-    zc.toName = new map<nint, @string>(len(ift));
-    foreach (var (_, ifi) in ift) {
-        zc.toIndex[ifi.Name] = ifi.Index;
-        {
-            @string _ = zc.toName[ifi.Index];
-            var ok = zc.toName[ifi.Index]; if (!ok) {
-                zc.toName[ifi.Index] = ifi.Name;
+        zc.toIndex = new map<@string, nint>(len(ift));
+        zc.toName = new map<nint, @string>(len(ift));
+        foreach (var (_, ifi) in ift) {
+            zc.toIndex[ifi.Name] = ifi.Index;
+            {
+                var (_, ok) = zc.toName[ifi.Index, ꟷ]; if (!ok) {
+                    zc.toName[ifi.Index] = ifi.Name;
+                }
             }
         }
-    }
-    return true;
-});
+        updated = true;
+    });
+    return updated;
+}
 
 [GoRecv] internal static @string name(this ref ipv6ZoneCache zc, nint index) {
     if (index == 0) {
         return ""u8;
     }
-    var updated = zoneCache.update(default!, false);
-    zoneCache.RLock();
-    @string name = zoneCache.toName[index];
-    var ok = zoneCache.toName[index];
-    zoneCache.RUnlock();
+    var updated = ᏑzoneCache.update(default!, false);
+    ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RLock();
+    var (name, ok) = zoneCache.toName[index, ꟷ];
+    ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RUnlock();
     if (!ok && !updated) {
-        zoneCache.update(default!, true);
-        zoneCache.RLock();
-        (name, ok) = zoneCache.toName[index];
-        zoneCache.RUnlock();
+        ᏑzoneCache.update(default!, true);
+        ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RLock();
+        (name, ok) = zoneCache.toName[index, ꟷ];
+        ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RUnlock();
     }
     if (!ok) {
         // last resort
-        name = itoa.Uitoa(((nuint)index));
+        name = itoa.Uitoa((nuint)index);
     }
     return name;
 }
@@ -259,16 +268,15 @@ internal static ipv6ZoneCache zoneCache = new ipv6ZoneCache(
     if (name == ""u8) {
         return 0;
     }
-    var updated = zoneCache.update(default!, false);
-    zoneCache.RLock();
-    nint index = zoneCache.toIndex[name];
-    var ok = zoneCache.toIndex[name];
-    zoneCache.RUnlock();
+    var updated = ᏑzoneCache.update(default!, false);
+    ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RLock();
+    var (index, ok) = zoneCache.toIndex[name, ꟷ];
+    ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RUnlock();
     if (!ok && !updated) {
-        zoneCache.update(default!, true);
-        zoneCache.RLock();
-        (index, ok) = zoneCache.toIndex[name];
-        zoneCache.RUnlock();
+        ᏑzoneCache.update(default!, true);
+        ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RLock();
+        (index, ok) = zoneCache.toIndex[name, ꟷ];
+        ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RUnlock();
     }
     if (!ok) {
         // last resort

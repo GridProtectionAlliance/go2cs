@@ -7,14 +7,15 @@ using bufio = bufio_package;
 using binary = encoding.binary_package;
 using errors = errors_package;
 using hash = hash_package;
-using crc32 = hash.crc32_package;
+using crc32 = go.hash.crc32_package;
 using io = io_package;
-using fs = io.fs_package;
+using fs = go.io.fs_package;
 using strings = strings_package;
 using utf8 = unicode.utf8_package;
 using encoding;
-using hash;
-using io;
+using go.hash;
+using go.io;
+using time = time_package;
 using unicode;
 
 partial class zip_package {
@@ -28,7 +29,7 @@ internal static error errLongExtra = errors.New("zip: FileHeader.Extra too long"
     internal slice<ж<header>> dir;
     internal ж<fileWriter> last;
     internal bool closed;
-    internal map<uint16, Compressor> compressors;
+    internal map<uint16, Func<io.Writer, (io.WriteCloser, error)>> compressors;
     internal @string comment;
     // testHookCloseSizeOffset if non-nil is called with the size
     // of offset of the central directory at Close.
@@ -43,7 +44,7 @@ internal static error errLongExtra = errors.New("zip: FileHeader.Extra too long"
 
 // NewWriter returns a new [Writer] writing a zip file to w.
 public static ж<Writer> NewWriter(io.Writer w) {
-    return Ꮡ(new Writer(cw: Ꮡ(new countWriter(w: bufio.NewWriter(w)))));
+    return Ꮡ(new Writer(cw: Ꮡ(new countWriter(w: new bufio_WriterжWriter(bufio.NewWriter(w))))));
 }
 
 // SetOffset sets the offset of the beginning of the zip data within the
@@ -51,16 +52,16 @@ public static ж<Writer> NewWriter(io.Writer w) {
 // existing file, such as a binary executable.
 // It must be called before any data is written.
 [GoRecv] public static void SetOffset(this ref Writer w, int64 n) {
-    if (w.cw.count != 0) {
+    if ((~w.cw).count != 0) {
         throw panic("zip: SetOffset called after data was written");
     }
-    w.cw.count = n;
+    w.cw.Value.count = n;
 }
 
 // Flush flushes any buffered data to the underlying writer.
 // Calling Flush is not normally necessary; calling Close is sufficient.
 [GoRecv] public static error Flush(this ref Writer w) {
-    return w.cw.w._<ж<bufio.Writer>>().Flush();
+    return (~w.cw).w._<ж<bufio.Writer>>().Flush();
 }
 
 // SetComment sets the end-of-central-directory comment field.
@@ -76,7 +77,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
 // Close finishes writing the zip file by writing the central directory.
 // It does not close the underlying writer.
 [GoRecv] public static error Close(this ref Writer w) {
-    if (w.last != nil && !w.last.closed) {
+    if (w.last != nil && !(~w.last).closed) {
         {
             var err = w.last.close(); if (err != default!) {
                 return err;
@@ -89,18 +90,20 @@ public static ж<Writer> NewWriter(io.Writer w) {
     }
     w.closed = true;
     // write central directory
-    var start = w.cw.count;
-    foreach (var (_, h) in w.dir) {
+    var start = w.cw.Value.count;
+    foreach (var (_, vᴛ1) in w.dir) {
+        var h = vᴛ1;
+
         array<byte> bufΔ1 = new(46); /* directoryHeaderLen */
         var bΔ1 = ((writeBuf)(bufΔ1[..]));
-        bΔ1.uint32(((uint32)directoryHeaderSignature));
-        bΔ1.uint16(h.CreatorVersion);
-        bΔ1.uint16(h.ReaderVersion);
-        bΔ1.uint16(h.Flags);
-        bΔ1.uint16(h.Method);
-        bΔ1.uint16(h.ModifiedTime);
-        bΔ1.uint16(h.ModifiedDate);
-        bΔ1.uint32(h.CRC32);
+        bΔ1.uint32((uint32)directoryHeaderSignature);
+        bΔ1.uint16((~h).CreatorVersion);
+        bΔ1.uint16((~h).ReaderVersion);
+        bΔ1.uint16((~h).Flags);
+        bΔ1.uint16((~h).Method);
+        bΔ1.uint16((~h).ModifiedTime);
+        bΔ1.uint16((~h).ModifiedDate);
+        bΔ1.uint32((~h).CRC32);
         if (h.isZip64() || (~h).offset >= uint32max){
             // the file needs a zip64 header. store maxint in both
             // 32 bit size fields (and offset later) to signal that the
@@ -115,24 +118,24 @@ public static ж<Writer> NewWriter(io.Writer w) {
             eb.uint16(zip64ExtraID);
             eb.uint16(24);
             // size = 3x uint64
-            eb.uint64(h.UncompressedSize64);
-            eb.uint64(h.CompressedSize64);
+            eb.uint64((~h).UncompressedSize64);
+            eb.uint64((~h).CompressedSize64);
             eb.uint64((~h).offset);
-            h.Extra = append(h.Extra, bufΔ2[..].ꓸꓸꓸ);
+            h.Value.Extra = append((~h).Extra, bufΔ2[..].ꓸꓸꓸ);
         } else {
-            bΔ1.uint32(h.CompressedSize);
-            bΔ1.uint32(h.UncompressedSize);
+            bΔ1.uint32((~h).CompressedSize);
+            bΔ1.uint32((~h).UncompressedSize);
         }
-        bΔ1.uint16(((uint16)len(h.Name)));
-        bΔ1.uint16(((uint16)len(h.Extra)));
-        bΔ1.uint16(((uint16)len(h.Comment)));
-         = bΔ1[4..];
+        bΔ1.uint16((uint16)len((~h).Name));
+        bΔ1.uint16((uint16)len((~h).Extra));
+        bΔ1.uint16((uint16)len((~h).Comment));
+        bΔ1 = bΔ1[4..];
         // skip disk number start and internal file attr (2x uint16)
-        bΔ1.uint32(h.ExternalAttrs);
+        bΔ1.uint32((~h).ExternalAttrs);
         if ((~h).offset > uint32max){
             bΔ1.uint32(uint32max);
         } else {
-            bΔ1.uint32(((uint32)(~h).offset));
+            bΔ1.uint32((uint32)(~h).offset);
         }
         {
             var (_, err) = w.cw.Write(bufΔ1[..]); if (err != default!) {
@@ -140,25 +143,25 @@ public static ж<Writer> NewWriter(io.Writer w) {
             }
         }
         {
-            var (_, err) = io.WriteString(~w.cw, h.Name); if (err != default!) {
+            var (_, err) = io.WriteString(new countWriterжWriter(w.cw), (~h).Name); if (err != default!) {
                 return err;
             }
         }
         {
-            var (_, err) = w.cw.Write(h.Extra); if (err != default!) {
+            var (_, err) = w.cw.Write((~h).Extra); if (err != default!) {
                 return err;
             }
         }
         {
-            var (_, err) = io.WriteString(~w.cw, h.Comment); if (err != default!) {
+            var (_, err) = io.WriteString(new countWriterжWriter(w.cw), (~h).Comment); if (err != default!) {
                 return err;
             }
         }
     }
-    var end = w.cw.count;
-    var records = ((uint64)len(w.dir));
-    var size = ((uint64)(end - start));
-    var offset = ((uint64)start);
+    var end = w.cw.Value.count;
+    var records = (uint64)len(w.dir);
+    var size = (uint64)(end - start);
+    var offset = (uint64)start;
     {
         var f = w.testHookCloseSizeOffset; if (f != default!) {
             f(size, offset);
@@ -191,7 +194,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
         bΔ2.uint32(directory64LocSignature);
         bΔ2.uint32(0);
         // number of the disk with the start of the zip64 end of central directory
-        bΔ2.uint64(((uint64)end));
+        bΔ2.uint64((uint64)end);
         // relative offset of the zip64 end of central directory record
         bΔ2.uint32(1);
         // total number of disks
@@ -209,18 +212,18 @@ public static ж<Writer> NewWriter(io.Writer w) {
     // write end record
     array<byte> buf = new(22); /* directoryEndLen */
     var b = ((writeBuf)(buf[..]));
-    b.uint32(((uint32)directoryEndSignature));
+    b.uint32((uint32)directoryEndSignature);
     b = b[4..];
     // skip over disk number and first disk number (2x uint16)
-    b.uint16(((uint16)records));
+    b.uint16((uint16)records);
     // number of entries this disk
-    b.uint16(((uint16)records));
+    b.uint16((uint16)records);
     // number of entries total
-    b.uint32(((uint32)size));
+    b.uint32((uint32)size);
     // size of directory
-    b.uint32(((uint32)offset));
+    b.uint32((uint32)offset);
     // start of directory
-    b.uint16(((uint16)len(w.comment)));
+    b.uint16((uint16)len(w.comment));
     // byte size of EOCD comment
     {
         var (_, err) = w.cw.Write(buf[..]); if (err != default!) {
@@ -228,11 +231,11 @@ public static ж<Writer> NewWriter(io.Writer w) {
         }
     }
     {
-        var (_, err) = io.WriteString(~w.cw, w.comment); if (err != default!) {
+        var (_, err) = io.WriteString(new countWriterжWriter(w.cw), w.comment); if (err != default!) {
             return err;
         }
     }
-    return w.cw.w._<ж<bufio.Writer>>().Flush();
+    return (~w.cw).w._<ж<bufio.Writer>>().Flush();
 }
 
 // Create adds a file to the zip file using the provided name.
@@ -269,7 +272,7 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
         //
         // Forbid 0x7e and 0x5c since EUC-KR and Shift-JIS replace those
         // characters with localized currency and overline characters.
-        if (r < 32 || r > 125 || r == 92) {
+        if (r < 0x20 || r > 0x7d || r == 0x5c) {
             if (!utf8.ValidRune(r) || (r == utf8.RuneError && size == 1)) {
                 return (false, false);
             }
@@ -281,17 +284,17 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
 
 // prepare performs the bookkeeping operations required at the start of
 // CreateHeader and CreateRaw.
-[GoRecv] public static error prepare(this ref Writer w, ж<FileHeader> Ꮡfh) {
-    ref var fh = ref Ꮡfh.val;
+[GoRecv] internal static error prepare(this ref Writer w, ж<FileHeader> Ꮡfh) {
+    ref var fh = ref Ꮡfh.DerefOrNil();
 
-    if (w.last != nil && !w.last.closed) {
+    if (w.last != nil && !(~w.last).closed) {
         {
             var err = w.last.close(); if (err != default!) {
                 return err;
             }
         }
     }
-    if (len(w.dir) > 0 && w.dir[len(w.dir) - 1].FileHeader == Ꮡfh) {
+    if (len(w.dir) > 0 && (~w.dir[len(w.dir) - 1]).FileHeader == Ꮡfh) {
         // See https://golang.org/issue/11144 confusion.
         return errors.New("archive/zip: invalid duplicate FileHeader"u8);
     }
@@ -306,11 +309,11 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
 // The file's contents must be written to the io.Writer before the next
 // call to [Writer.Create], [Writer.CreateHeader], [Writer.CreateRaw], or [Writer.Close].
 [GoRecv] public static (io.Writer, error) CreateHeader(this ref Writer w, ж<FileHeader> Ꮡfh) {
-    ref var fh = ref Ꮡfh.val;
+    ref var fh = ref Ꮡfh.Value;
 
     {
-        var errΔ1 = w.prepare(Ꮡfh); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var err = w.prepare(Ꮡfh); if (err != default!) {
+            return (default!, err);
         }
     }
     // The ZIP format has a sad state of affairs regarding character encoding.
@@ -333,15 +336,15 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
     var (utf8Valid2, utf8Require2) = detectUTF8(fh.Comment);
     switch (ᐧ) {
     case {} when fh.NonUTF8: {
-        fh.Flags &= ~(uint16)(2048);
+        fh.Flags &= unchecked((uint16)~0x800);
         break;
     }
     case {} when (utf8Require1 || utf8Require2) && (utf8Valid1 && utf8Valid2): {
-        fh.Flags |= (uint16)(2048);
+        fh.Flags |= 0x800;
         break;
     }}
 
-    fh.CreatorVersion = (uint16)((uint16)(fh.CreatorVersion & 65280) | zipVersion20);
+    fh.CreatorVersion = (uint16)((uint16)(fh.CreatorVersion & 0xff00) | (uint16)zipVersion20);
     // preserve compatibility byte
     fh.ReaderVersion = zipVersion20;
     // If Modified is set, this takes precedence over MS-DOS timestamp fields.
@@ -362,7 +365,7 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
         // This format happens to be identical for both local and central header
         // if modification time is the only timestamp being encoded.
         array<byte> mbuf = new(9);            // 2*SizeOf(uint16) + SizeOf(uint8) + SizeOf(uint32)
-        var mt = ((uint32)fh.Modified.Unix());
+        var mt = (uint32)fh.Modified.Unix();
         var eb = ((writeBuf)(mbuf[..]));
         eb.uint16(extTimeExtraID);
         eb.uint16(5);
@@ -376,8 +379,8 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
     io.Writer ow = default!;
     ж<fileWriter> fw = default!;
     var h = Ꮡ(new header(
-        FileHeader: fh,
-        offset: ((uint64)w.cw.count)
+        FileHeader: Ꮡfh,
+        offset: (uint64)(~w.cw).count
     ));
     if (strings.HasSuffix(fh.Name, "/"u8)){
         // Set the compression method to Store to ensure data length is truly zero,
@@ -385,7 +388,7 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
         // This is necessary as most compression formats have non-zero lengths
         // even when compressing an empty string.
         fh.Method = Store;
-        fh.Flags &= ~(uint16)(8);
+        fh.Flags &= unchecked((uint16)~0x8);
         // we will not write a data descriptor
         // Explicitly clear sizes as they have no meaning for directories.
         fh.CompressedSize = 0;
@@ -394,11 +397,11 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
         fh.UncompressedSize64 = 0;
         ow = new dirWriter(nil);
     } else {
-        fh.Flags |= (uint16)(8);
+        fh.Flags |= 0x8;
         // we will write a data descriptor
         fw = Ꮡ(new fileWriter(
-            zipw: w.cw,
-            compCount: Ꮡ(new countWriter(w: w.cw)),
+            zipw: new countWriterжWriter(w.cw),
+            compCount: Ꮡ(new countWriter(w: new countWriterжWriter(w.cw))),
             crc32: crc32.NewIEEE()
         ));
         var comp = w.compressor(fh.Method);
@@ -406,17 +409,17 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
             return (default!, ErrAlgorithm);
         }
         error err = default!;
-        (fw.val.comp, err) = comp(~(~fw).compCount);
+        (fw.Value.comp, err) = comp(new countWriterжWriter((~fw).compCount));
         if (err != default!) {
             return (default!, err);
         }
-        fw.val.rawCount = Ꮡ(new countWriter(w: (~fw).comp));
-        fw.val.header = h;
-        ow = ~fw;
+        fw.Value.rawCount = Ꮡ(new countWriter(w: (~fw).comp));
+        fw.Value.header = h;
+        ow = new fileWriterжWriter(fw);
     }
     w.dir = append(w.dir, h);
     {
-        var err = writeHeader(~w.cw, h); if (err != default!) {
+        var err = writeHeader(new countWriterжWriter(w.cw), h); if (err != default!) {
             return (default!, err);
         }
     }
@@ -426,9 +429,9 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
 }
 
 internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
-    ref var h = ref Ꮡh.val;
+    ref var h = ref Ꮡh.Value;
 
-    static readonly UntypedInt maxUint16 = /* 1<<16 - 1 */ 65535;
+    UntypedInt maxUint16 = /* 1<<16 - 1 */ 65535;
     if (len(h.Name) > maxUint16) {
         return errLongName;
     }
@@ -437,7 +440,7 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
     }
     array<byte> buf = new(30); /* fileHeaderLen */
     var b = ((writeBuf)(buf[..]));
-    b.uint32(((uint32)fileHeaderSignature));
+    b.uint32((uint32)fileHeaderSignature);
     b.uint16(h.ReaderVersion);
     b.uint16(h.Flags);
     b.uint16(h.Method);
@@ -448,8 +451,8 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
     // flags.
     if (h.raw && !h.hasDataDescriptor()){
         b.uint32(h.CRC32);
-        b.uint32(((uint32)min(h.CompressedSize64, uint32max)));
-        b.uint32(((uint32)min(h.UncompressedSize64, uint32max)));
+        b.uint32((uint32)min(h.CompressedSize64, (uint64)(uint32max)));
+        b.uint32((uint32)min(h.UncompressedSize64, (uint64)(uint32max)));
     } else {
         // When this package handle the compression, these values are
         // always written to the trailing data descriptor.
@@ -460,8 +463,8 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
         b.uint32(0);
     }
     // uncompressed size
-    b.uint16(((uint16)len(h.Name)));
-    b.uint16(((uint16)len(h.Extra)));
+    b.uint16((uint16)len(h.Name));
+    b.uint16((uint16)len(h.Extra));
     {
         var (_, errΔ1) = w.Write(buf[..]); if (errΔ1 != default!) {
             return errΔ1;
@@ -487,23 +490,23 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
 // [FileHeader] in a [File] obtained from a [Reader] created from in-memory data,
 // then w will refer to all of that memory.
 [GoRecv] public static (io.Writer, error) CreateRaw(this ref Writer w, ж<FileHeader> Ꮡfh) {
-    ref var fh = ref Ꮡfh.val;
+    ref var fh = ref Ꮡfh.Value;
 
     {
         var err = w.prepare(Ꮡfh); if (err != default!) {
             return (default!, err);
         }
     }
-    fh.CompressedSize = ((uint32)min(fh.CompressedSize64, uint32max));
-    fh.UncompressedSize = ((uint32)min(fh.UncompressedSize64, uint32max));
+    fh.CompressedSize = (uint32)min(fh.CompressedSize64, (uint64)(uint32max));
+    fh.UncompressedSize = (uint32)min(fh.UncompressedSize64, (uint64)(uint32max));
     var h = Ꮡ(new header(
-        FileHeader: fh,
-        offset: ((uint64)w.cw.count),
+        FileHeader: Ꮡfh,
+        offset: (uint64)(~w.cw).count,
         raw: true
     ));
     w.dir = append(w.dir, h);
     {
-        var err = writeHeader(~w.cw, h); if (err != default!) {
+        var err = writeHeader(new countWriterжWriter(w.cw), h); if (err != default!) {
             return (default!, err);
         }
     }
@@ -513,18 +516,18 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
     }
     var fw = Ꮡ(new fileWriter(
         header: h,
-        zipw: w.cw
+        zipw: new countWriterжWriter(w.cw)
     ));
     w.last = fw;
-    return (~fw, default!);
+    return (new fileWriterжWriter(fw), default!);
 }
 
 // Copy copies the file f (obtained from a [Reader]) into w. It copies the raw
 // form directly bypassing decompression, compression, and validation.
 [GoRecv] public static error Copy(this ref Writer w, ж<File> Ꮡf) {
-    ref var f = ref Ꮡf.val;
+    ref var f = ref Ꮡf.Value;
 
-    (r, err) = f.OpenRaw();
+    var (r, err) = f.OpenRaw();
     if (err != default!) {
         return err;
     }
@@ -532,7 +535,7 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
     // of f's entire archive. See #65499.
     ref var fh = ref heap<FileHeader>(out var Ꮡfh);
     fh = f.FileHeader;
-    (fw, err) = w.CreateRaw(Ꮡfh);
+    (var fw, err) = w.CreateRaw(Ꮡfh);
     if (err != default!) {
         return err;
     }
@@ -543,9 +546,9 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
 // RegisterCompressor registers or overrides a custom compressor for a specific
 // method ID. If a compressor for a given method is not found, [Writer] will
 // default to looking up the compressor at the package level.
-[GoRecv] public static void RegisterCompressor(this ref Writer w, uint16 method, Compressor comp) {
+[GoRecv] public static void RegisterCompressor(this ref Writer w, uint16 method, Func<io.Writer, (io.WriteCloser, error)> comp) {
     if (w.compressors == default!) {
-        w.compressors = new map<uint16, Compressor>();
+        w.compressors = new map<uint16, Func<io.Writer, (io.WriteCloser, error)>>();
     }
     w.compressors[method] = comp;
 }
@@ -553,43 +556,45 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
 // AddFS adds the files from fs.FS to the archive.
 // It walks the directory tree starting at the root of the filesystem
 // adding each file to the zip using deflate while maintaining the directory structure.
-[GoRecv] public static error AddFS(this ref Writer w, fs.FS fsys) => func((defer, _) => {
-    return fs.WalkDir(fsys, "."u8, (@string name, fs.DirEntry d, error err) => {
+public static error AddFS(this ж<Writer> Ꮡw, fs.FS fsys) {
+    ref var w = ref Ꮡw.Value;
+
+    return fs.WalkDir(fsys, "."u8, error (@string name, fs.DirEntry d, error err) => func<error>((defer, recover) => {
         if (err != default!) {
             return err;
         }
         if (d.IsDir()) {
             return default!;
         }
-        (info, err) = d.Info();
+        (var info, err) = d.Info();
         if (err != default!) {
             return err;
         }
         if (!info.Mode().IsRegular()) {
             return errors.New("zip: cannot add non-regular file"u8);
         }
-        (h, err) = FileInfoHeader(info);
+        (var h, err) = FileInfoHeader(info);
         if (err != default!) {
             return err;
         }
-        h.val.Name = name;
-        h.val.Method = Deflate;
-        (fw, err) = w.CreateHeader(h);
+        h.Value.Name = name;
+        h.Value.Method = Deflate;
+        (var fw, err) = Ꮡw.Value.CreateHeader(h);
         if (err != default!) {
             return err;
         }
-        (f, err) = fsys.Open(name);
+        (var f, err) = fsys.Open(name);
         if (err != default!) {
             return err;
         }
         var fʗ1 = f;
-        defer(fʗ1.Close);
-        (_, err) = io.Copy(fw, f);
+        defer(() => fʗ1.Close());
+        (_, err) = io.Copy(fw, new fs_FileᴠReader(f));
         return err;
-    });
-});
+    }));
+}
 
-[GoRecv] internal static Compressor compressor(this ref Writer w, uint16 method) {
+[GoRecv] internal static Func<io.Writer, (io.WriteCloser, error)> compressor(this ref Writer w, uint16 method) {
     var comp = w.compressors[method];
     if (comp == default!) {
         comp = compressor(method);
@@ -608,12 +613,12 @@ internal static (nint, error) Write(this dirWriter _, slice<byte> b) {
 }
 
 [GoType] partial struct fileWriter {
-    public partial ref ж<header> header { get; }
-    internal io_package.Writer zipw;
+    internal partial ref ж<header> header { get; }
+    internal io.Writer zipw;
     internal ж<countWriter> rawCount;
-    internal io_package.WriteCloser comp;
+    internal io.WriteCloser comp;
     internal ж<countWriter> compCount;
-    internal hash_package.Hash32 crc32;
+    internal hash.Hash32 crc32;
     internal bool closed;
 }
 
@@ -642,18 +647,18 @@ internal static (nint, error) Write(this dirWriter _, slice<byte> b) {
         }
     }
     // update FileHeader
-    var fh = w.header.FileHeader;
-    fh.val.CRC32 = w.crc32.Sum32();
-    fh.val.CompressedSize64 = ((uint64)w.compCount.count);
-    fh.val.UncompressedSize64 = ((uint64)w.rawCount.count);
+    var fh = w.header.Value.FileHeader;
+    fh.Value.CRC32 = w.crc32.Sum32();
+    fh.Value.CompressedSize64 = (uint64)(~w.compCount).count;
+    fh.Value.UncompressedSize64 = (uint64)(~w.rawCount).count;
     if (fh.isZip64()){
-        fh.val.CompressedSize = uint32max;
-        fh.val.UncompressedSize = uint32max;
-        fh.val.ReaderVersion = zipVersion45;
+        fh.Value.CompressedSize = uint32max;
+        fh.Value.UncompressedSize = uint32max;
+        fh.Value.ReaderVersion = zipVersion45;
     } else {
         // requires 4.5 - File uses ZIP64 format extensions
-        fh.val.CompressedSize = ((uint32)(~fh).CompressedSize64);
-        fh.val.UncompressedSize = ((uint32)(~fh).UncompressedSize64);
+        fh.Value.CompressedSize = (uint32)(~fh).CompressedSize64;
+        fh.Value.UncompressedSize = (uint32)(~fh).UncompressedSize64;
     }
     return w.writeDataDescriptor();
 }
@@ -689,18 +694,18 @@ internal static (nint, error) Write(this dirWriter _, slice<byte> b) {
 }
 
 [GoType] partial struct countWriter {
-    internal io_package.Writer w;
+    internal io.Writer w;
     internal int64 count;
 }
 
 [GoRecv] internal static (nint, error) Write(this ref countWriter w, slice<byte> p) {
     var (n, err) = w.w.Write(p);
-    w.count += ((int64)n);
+    w.count += (int64)n;
     return (n, err);
 }
 
 [GoType] partial struct nopCloser {
-    public partial ref io_package.Writer Writer { get; }
+    public io_package.Writer Writer;
 }
 
 internal static error Close(this nopCloser w) {
@@ -710,23 +715,23 @@ internal static error Close(this nopCloser w) {
 [GoType("[]byte")] partial struct writeBuf;
 
 [GoRecv] internal static void uint8(this ref writeBuf b, uint8 v) {
-    (ж<ж<writeBuf>>)[0] = v;
-    b = (ж<ж<writeBuf>>)[1..];
+    (b)[0] = v;
+    b = (b)[1..];
 }
 
 [GoRecv] internal static void uint16(this ref writeBuf b, uint16 v) {
     binary.LittleEndian.PutUint16(b, v);
-    b = (ж<ж<writeBuf>>)[2..];
+    b = (b)[2..];
 }
 
 [GoRecv] internal static void uint32(this ref writeBuf b, uint32 v) {
     binary.LittleEndian.PutUint32(b, v);
-    b = (ж<ж<writeBuf>>)[4..];
+    b = (b)[4..];
 }
 
 [GoRecv] internal static void uint64(this ref writeBuf b, uint64 v) {
     binary.LittleEndian.PutUint64(b, v);
-    b = (ж<ж<writeBuf>>)[8..];
+    b = (b)[8..];
 }
 
 } // end zip_package

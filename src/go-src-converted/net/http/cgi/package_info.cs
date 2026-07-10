@@ -23,6 +23,9 @@ global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
 global using runtimeꓸError = go.runtime_package.ΔError;
 global using textprotoꓸError = go.net.textproto_package.ΔError;
+global using timeꓸLocation = go.time_package.ΔLocation;
+global using timeꓸMonth = go.time_package.ΔMonth;
+global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
 global using urlꓸError = go.net.url_package.ΔError;
 // </ImportedTypeAliases>
@@ -53,15 +56,14 @@ using static go.net.http.cgi_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(io.ReadCloser, error), io_package.ReadCloser>]
-[assembly: GoImplement<bufio_package.Reader, io_package.Reader>]
-[assembly: GoImplement<bufio_package.Writer, io_package.Writer>]
-[assembly: GoImplement<io_package.ReadCloser, io_package.Reader>]
-[assembly: GoImplement<net.http_package.ResponseWriter, io_package.Writer>]
-[assembly: GoImplement<net.http_package.ServeMux, net.http_package.ΔHandler>]
-[assembly: GoImplement<os_package.File, io_package.Reader>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
-[assembly: GoImplement<response, net.http_package.ResponseWriter>]
+[assembly: GoImplement<bufio_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<bufio_package.Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.ΔHandler>]
+[assembly: GoImplement<go.net.http_package.ResponseWriter, io_package.Writer>]
+[assembly: GoImplement<go.net.http_package.ServeMux, go.net.http_package.ΔHandler>(Pointer = true)]
+[assembly: GoImplement<neverEnding, io_package.Reader>]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<response, go.net.http_package.ResponseWriter>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

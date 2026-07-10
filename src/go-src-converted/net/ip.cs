@@ -46,7 +46,7 @@ public static IP IPv4(byte a, byte b, byte c, byte d) {
     return p;
 }
 
-internal static slice<byte> v4InV6Prefix = new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255}.slice();
+internal static slice<byte> v4InV6Prefix = new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff}.slice();
 
 // IPv4Mask returns the IP mask (in 4-byte form) of the
 // IPv4 mask a.b.c.d.
@@ -71,14 +71,14 @@ public static IPMask CIDRMask(nint ones, nint bits) {
     }
     nint l = bits / 8;
     var m = new IPMask(l);
-    nuint n = ((nuint)ones);
+    nuint n = (nuint)ones;
     for (nint i = 0; i < l; i++) {
         if (n >= 8) {
-            m[i] = 255;
+            m[i] = 0xff;
             n -= 8;
             continue;
         }
-        m[i] = ~((byte)(255 >> (int)(n)));
+        m[i] = (byte)(~(byte)((byte)(0xff >> (int)(n))));
         n = 0;
     }
     return m;
@@ -94,17 +94,17 @@ public static IP IPv4allrouter = IPv4(224, 0, 0, 2); // all routers
 public static IP IPv4zero = IPv4(0, 0, 0, 0); // all zeros
 
 // Well-known IPv6 addresses
-public static IP IPv6zero = new IP{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+public static IP IPv6zero = new IP(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}.slice());
 
-public static IP IPv6unspecified = new IP{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+public static IP IPv6unspecified = new IP(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}.slice());
 
-public static IP IPv6loopback = new IP{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+public static IP IPv6loopback = new IP(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}.slice());
 
-public static IP IPv6interfacelocalallnodes = new IP{255, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+public static IP IPv6interfacelocalallnodes = new IP(new byte[]{0xff, 0x01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x01}.slice());
 
-public static IP IPv6linklocalallnodes = new IP{255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+public static IP IPv6linklocalallnodes = new IP(new byte[]{0xff, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x01}.slice());
 
-public static IP IPv6linklocalallrouters = new IP{255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2};
+public static IP IPv6linklocalallrouters = new IP(new byte[]{0xff, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x02}.slice());
 
 // IsUnspecified reports whether ip is an unspecified address, either
 // the IPv4 address "0.0.0.0" or the IPv6 address "::".
@@ -133,28 +133,28 @@ public static bool IsPrivate(this IP ip) {
             //     10.0.0.0        -   10.255.255.255  (10/8 prefix)
             //     172.16.0.0      -   172.31.255.255  (172.16/12 prefix)
             //     192.168.0.0     -   192.168.255.255 (192.168/16 prefix)
-            return ip4[0] == 10 || (ip4[0] == 172 && (byte)(ip4[1] & 240) == 16) || (ip4[0] == 192 && ip4[1] == 168);
+            return ip4[0] == 10 || (ip4[0] == 172 && (byte)(ip4[1] & 0xf0) == 16) || (ip4[0] == 192 && ip4[1] == 168);
         }
     }
     // Following RFC 4193, Section 8. IANA Considerations which says:
     //   The IANA has assigned the FC00::/7 prefix to "Unique Local Unicast".
-    return len(ip) == IPv6len && (byte)(ip[0] & 254) == 252;
+    return len(ip) == IPv6len && (byte)(ip[0] & 0xfe) == 0xfc;
 }
 
 // IsMulticast reports whether ip is a multicast address.
 public static bool IsMulticast(this IP ip) {
     {
         var ip4 = ip.To4(); if (ip4 != default!) {
-            return (byte)(ip4[0] & 240) == 224;
+            return (byte)(ip4[0] & 0xf0) == 0xe0;
         }
     }
-    return len(ip) == IPv6len && ip[0] == 255;
+    return len(ip) == IPv6len && ip[0] == 0xff;
 }
 
 // IsInterfaceLocalMulticast reports whether ip is
 // an interface-local multicast address.
 public static bool IsInterfaceLocalMulticast(this IP ip) {
-    return len(ip) == IPv6len && ip[0] == 255 && (byte)(ip[1] & 15) == 1;
+    return len(ip) == IPv6len && ip[0] == 0xff && (byte)(ip[1] & 0x0f) == 0x01;
 }
 
 // IsLinkLocalMulticast reports whether ip is a link-local
@@ -165,7 +165,7 @@ public static bool IsLinkLocalMulticast(this IP ip) {
             return ip4[0] == 224 && ip4[1] == 0 && ip4[2] == 0;
         }
     }
-    return len(ip) == IPv6len && ip[0] == 255 && (byte)(ip[1] & 15) == 2;
+    return len(ip) == IPv6len && ip[0] == 0xff && (byte)(ip[1] & 0x0f) == 0x02;
 }
 
 // IsLinkLocalUnicast reports whether ip is a link-local
@@ -176,7 +176,7 @@ public static bool IsLinkLocalUnicast(this IP ip) {
             return ip4[0] == 169 && ip4[1] == 254;
         }
     }
-    return len(ip) == IPv6len && ip[0] == 254 && (byte)(ip[1] & 192) == 128;
+    return len(ip) == IPv6len && ip[0] == 0xfe && (byte)(ip[1] & 0xc0) == 0x80;
 }
 
 // IsGlobalUnicast reports whether ip is a global unicast
@@ -207,7 +207,7 @@ public static IP To4(this IP ip) {
     if (len(ip) == IPv4len) {
         return ip;
     }
-    if (len(ip) == IPv6len && isZeros(ip[0..10]) && ip[10] == 255 && ip[11] == 255) {
+    if (len(ip) == IPv6len && isZeros(ip[0..10]) && ip[10] == 0xff && ip[11] == 0xff) {
         return ip[12..16];
     }
     return default!;
@@ -226,11 +226,11 @@ public static IP To16(this IP ip) {
 }
 
 // Default route masks for IPv4.
-internal static IPMask classAMask = IPv4Mask(255, 0, 0, 0);
+internal static IPMask classAMask = IPv4Mask(0xff, 0, 0, 0);
 
-internal static IPMask classBMask = IPv4Mask(255, 255, 0, 0);
+internal static IPMask classBMask = IPv4Mask(0xff, 0xff, 0, 0);
 
-internal static IPMask classCMask = IPv4Mask(255, 255, 255, 0);
+internal static IPMask classCMask = IPv4Mask(0xff, 0xff, 0xff, 0);
 
 // DefaultMask returns the default IP mask for the IP address ip.
 // Only IPv4 addresses have default masks; DefaultMask returns
@@ -242,10 +242,10 @@ public static IPMask DefaultMask(this IP ip) {
         }
     }
     switch (ᐧ) {
-    case {} when ip[0] is < 128: {
+    case {} when ip[0] is < 0x80: {
         return classAMask;
     }
-    case {} when ip[0] is < 192: {
+    case {} when ip[0] is < 0xC0: {
         return classBMask;
     }
     default: {
@@ -256,7 +256,7 @@ public static IPMask DefaultMask(this IP ip) {
 
 internal static bool allFF(slice<byte> b) {
     foreach (var (_, c) in b) {
-        if (c != 255) {
+        if (c != 0xff) {
             return false;
         }
     }
@@ -298,16 +298,16 @@ public static @string String(this IP ip) {
     // If IPv4, use dotted notation.
     {
         var p4 = ip.To4(); if (len(p4) == IPv4len) {
-            return netip.AddrFrom4(array<byte>(p4)).String();
+            return netip.AddrFrom4(new array<byte>(p4, 4)).String();
         }
     }
-    return netip.AddrFrom16(array<byte>(ip)).String();
+    return netip.AddrFrom16(new array<byte>(ip, 16)).String();
 }
 
 internal static @string hexString(slice<byte> b) {
     var s = new slice<byte>(len(b) * 2);
     foreach (var (i, tn) in b) {
-        (s[i * 2], s[i * 2 + 1]) = (hexDigit[tn >> (int)(4)], hexDigit[(byte)(tn & 15)]);
+        (s[i * 2], s[i * 2 + 1]) = (hexDigit[(tn >> (int)(4))], hexDigit[(byte)(tn & 0xf)]);
     }
     return ((@string)s);
 }
@@ -326,10 +326,10 @@ internal static @string ipEmptyString(IP ip) {
 // When len(ip) is zero, it returns an empty slice.
 public static (slice<byte>, error) MarshalText(this IP ip) {
     if (len(ip) == 0) {
-        return (slice<byte>(""), default!);
+        return (slice<byte>((@string)""), default!);
     }
     if (len(ip) != IPv4len && len(ip) != IPv6len) {
-        return (default!, new AddrError(Err: "invalid IP address"u8, ΔAddr: hexString(ip)));
+        return (default!, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid IP address"u8, Addr: hexString(ip)))));
     }
     return (slice<byte>(ip.String()), default!);
 }
@@ -341,10 +341,11 @@ public static (slice<byte>, error) MarshalText(this IP ip) {
         ip = default!;
         return default!;
     }
-    @string s = ((@string)text);
+    ref var s = ref heap<@string>(out var Ꮡs);
+    s = ((@string)text);
     var x = ParseIP(s);
     if (x == default!) {
-        return new ParseError(Type: "IP address"u8, Text: s);
+        return new ParseErrorжerror(Ꮡ(new ParseError(Type: "IP address"u8, Text: s)));
     }
     ip = x;
     return default!;
@@ -374,16 +375,19 @@ internal static bool matchAddrFamily(this IP ip, IP x) {
 // return the number of 1 bits.
 internal static nint simpleMaskLength(IPMask mask) {
     nint n = default!;
-    foreach (var (i, v) in mask) {
-        if (v == 255) {
+    foreach (var (iᴛ1, vᴛ1) in mask) {
+        var i = iᴛ1;
+        var v = vᴛ1;
+
+        if (v == 0xff) {
             n += 8;
             continue;
         }
         // found non-ff byte
         // count 1 bits
-        while ((byte)(v & 128) != 0) {
+        while ((byte)(v & 0x80) != 0) {
             n++;
-            v <<= (UntypedInt)(1);
+            v <<= (int)(1);
         }
         // rest must be 0 bits
         if (v != 0) {
@@ -425,7 +429,7 @@ internal static (IP ip, IPMask m) networkNumberAndMask(ж<IPNet> Ꮡn) {
     IP ip = default!;
     IPMask m = default!;
 
-    ref var n = ref Ꮡn.val;
+    ref var n = ref Ꮡn.Value;
     {
         ip = n.IP.To4(); if (ip == default!) {
             ip = n.IP;
@@ -454,8 +458,10 @@ internal static (IP ip, IPMask m) networkNumberAndMask(ж<IPNet> Ꮡn) {
 }
 
 // Contains reports whether the network includes ip.
-[GoRecv] public static bool Contains(this ref IPNet n, IP ip) {
-    (nn, m) = networkNumberAndMask(n);
+public static bool Contains(this ж<IPNet> Ꮡn, IP ip) {
+    ref var n = ref Ꮡn.Value;
+
+    var (nn, m) = networkNumberAndMask(Ꮡn);
     {
         var x = ip.To4(); if (x != default!) {
             ip = x;
@@ -484,11 +490,13 @@ internal static (IP ip, IPMask m) networkNumberAndMask(ж<IPNet> Ꮡn) {
 // string which consists of an IP address, followed by a slash
 // character and a mask expressed as hexadecimal form with no
 // punctuation like "198.51.100.0/c000ff00".
-[GoRecv] public static @string String(this ref IPNet n) {
+public static @string String(this ж<IPNet> Ꮡn) {
+    ref var n = ref Ꮡn.Value;
+
     if (n == nil) {
         return "<nil>"u8;
     }
-    (nn, m) = networkNumberAndMask(n);
+    var (nn, m) = networkNumberAndMask(Ꮡn);
     if (nn == default! || m == default!) {
         return "<nil>"u8;
     }
@@ -496,7 +504,7 @@ internal static (IP ip, IPMask m) networkNumberAndMask(ж<IPNet> Ꮡn) {
     if (l == -1) {
         return nn.String() + "/"u8 + m.String();
     }
-    return nn.String() + "/"u8 + itoa.Uitoa(((nuint)l));
+    return nn.String() + "/"u8 + itoa.Uitoa((nuint)l);
 }
 
 // ParseIP parses s as an IP address, returning the result.
@@ -533,15 +541,15 @@ internal static (array<byte>, bool) parseIP(@string s) {
 public static (IP, ж<IPNet>, error) ParseCIDR(@string s) {
     var (addr, mask, found) = stringslite.Cut(s, "/"u8);
     if (!found) {
-        return (default!, default!, new ParseError(Type: "CIDR address"u8, Text: s));
+        return (default!, default!, new ParseErrorжerror(Ꮡ(new ParseError(Type: "CIDR address"u8, Text: s))));
     }
     var (ipAddr, err) = netip.ParseAddr(addr);
     if (err != default! || ipAddr.Zone() != ""u8) {
-        return (default!, default!, new ParseError(Type: "CIDR address"u8, Text: s));
+        return (default!, default!, new ParseErrorжerror(Ꮡ(new ParseError(Type: "CIDR address"u8, Text: s))));
     }
     var (n, i, ok) = dtoi(mask);
     if (!ok || i != len(mask) || n < 0 || n > ipAddr.BitLen()) {
-        return (default!, default!, new ParseError(Type: "CIDR address"u8, Text: s));
+        return (default!, default!, new ParseErrorжerror(Ꮡ(new ParseError(Type: "CIDR address"u8, Text: s))));
     }
     var m = CIDRMask(n, ipAddr.BitLen());
     var addr16 = ipAddr.As16();

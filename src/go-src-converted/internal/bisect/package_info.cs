@@ -39,7 +39,7 @@ using static go.@internal.bisect_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<parseError, error>]
+[assembly: GoImplement<parseError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

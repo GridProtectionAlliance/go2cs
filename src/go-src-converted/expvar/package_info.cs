@@ -13,7 +13,8 @@
 global using httpꓸCookie = go.net.http_package.ΔCookie;
 global using httpꓸHandler = go.net.http_package.ΔHandler;
 global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using jsonꓸToken = go.encoding.json_package.ΔToken;
+global using jsonꓸToken = object;
+global using jsonꓸΔToken = object;
 global using osꓸDirEntry = go.io.fs_package.DirEntry;
 global using osꓸFileInfo = go.io.fs_package.FileInfo;
 global using osꓸFileMode = go.io.fs_package.FileMode;
@@ -49,17 +50,15 @@ using static go.expvar_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(Var, bool), Var>]
-[assembly: GoImplement<Float, Var>]
-[assembly: GoImplement<Func, Var>]
-[assembly: GoImplement<Int, Var>]
-[assembly: GoImplement<Map, Var>]
-[assembly: GoImplement<net.http_package.HandlerFunc, net.http_package.ΔHandler>]
-[assembly: GoImplement<ΔString, Var>]
+[assembly: GoImplement<Float, Var>(Pointer = true)]
+[assembly: GoImplement<Int, Var>(Pointer = true)]
+[assembly: GoImplement<Map, Var>(Pointer = true)]
+[assembly: GoImplement<go.expvar_package.Func, Var>]
+[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.ΔHandler>]
+[assembly: GoImplement<ΔString, Var>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<http.pattern; matches <>string; otherValues map<string>string}, http.pattern; matches <>string; otherValues map<string>string}>(Inverted = true)]
 // </ImplicitConversions>
 
 namespace go;

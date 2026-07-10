@@ -3,11 +3,11 @@
 // license that can be found in the LICENSE file.
 namespace go.vendor.golang.org.x.crypto;
 
-using cipher = crypto.cipher_package;
+using cipher = go.crypto.cipher_package;
 using errors = errors_package;
-using chacha20 = golang.org.x.crypto.chacha20_package;
-using crypto;
-using golang.org.x.crypto;
+using chacha20 = go.vendor.golang.org.x.crypto.chacha20_package;
+using go.crypto;
+using go.vendor.golang.org.x.crypto;
 
 partial class chacha20poly1305_package {
 
@@ -27,7 +27,7 @@ public static (cipher.AEAD, error) NewX(slice<byte> key) {
     }
     var ret = @new<xchacha20poly1305>();
     copy((~ret).key[..], key);
-    return (~ret, default!);
+    return (new xchacha20poly1305жAEAD(ret), default!);
 }
 
 [GoRecv] internal static nint NonceSize(this ref xchacha20poly1305 _) {
@@ -47,11 +47,11 @@ public static (cipher.AEAD, error) NewX(slice<byte> key) {
     // the second half of the counter is not available. This is unlikely to be
     // an issue because the cipher.AEAD API requires the entire message to be in
     // memory, and the counter overflows at 256 GB.
-    if (((uint64)len(plaintext)) > (1 << (int)(38)) - 64) {
+    if ((uint64)len(plaintext) > (274877906944L) - 64) {
         throw panic("chacha20poly1305: plaintext too large");
     }
     var c = @new<chacha20poly1305>();
-    (hKey, _) = chacha20.HChaCha20(x.key[..], nonce[0..16]);
+    var (hKey, _) = chacha20.HChaCha20(x.key[..], nonce[0..16]);
     copy((~c).key[..], hKey);
     // The first 4 bytes of the final nonce are unused counter space.
     var cNonce = new slice<byte>(ΔNonceSize);
@@ -66,11 +66,11 @@ public static (cipher.AEAD, error) NewX(slice<byte> key) {
     if (len(ciphertext) < 16) {
         return (default!, errOpen);
     }
-    if (((uint64)len(ciphertext)) > (1 << (int)(38)) - 48) {
+    if ((uint64)len(ciphertext) > (274877906944L) - 48) {
         throw panic("chacha20poly1305: ciphertext too large");
     }
     var c = @new<chacha20poly1305>();
-    (hKey, _) = chacha20.HChaCha20(x.key[..], nonce[0..16]);
+    var (hKey, _) = chacha20.HChaCha20(x.key[..], nonce[0..16]);
     copy((~c).key[..], hKey);
     // The first 4 bytes of the final nonce are unused counter space.
     var cNonce = new slice<byte>(ΔNonceSize);

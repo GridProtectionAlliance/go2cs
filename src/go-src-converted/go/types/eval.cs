@@ -4,9 +4,10 @@
 namespace go.go;
 
 using fmt = fmt_package;
-using ast = go.ast_package;
-using parser = go.parser_package;
-using token = go.token_package;
+using ast = global::go.go.ast_package;
+using parser = global::go.go.parser_package;
+using token = global::go.go.token_package;
+using global::go.go;
 
 partial class types_package {
 
@@ -20,18 +21,18 @@ partial class types_package {
 // same as in [CheckExpr]. An error is returned if expr cannot
 // be parsed successfully, or the resulting expr AST cannot be
 // type-checked.
-public static (TypeAndValue _, error err) Eval(ж<token.FileSet> Ꮡfset, ж<Package> Ꮡpkg, tokenꓸPos pos, @string expr) {
+public static (TypeAndValue, error err) Eval(ж<token.FileSet> Ꮡfset, ж<Package> Ꮡpkg, tokenꓸPos pos, @string expr) {
     error err = default!;
 
-    ref var fset = ref Ꮡfset.val;
-    ref var pkg = ref Ꮡpkg.val;
+    ref var fset = ref Ꮡfset.Value;
+    ref var pkg = ref Ꮡpkg.Value;
     // parse expressions
-    (node, err) = parser.ParseExprFrom(Ꮡfset, "eval"u8, expr, 0);
+    (var node, err) = parser.ParseExprFrom(Ꮡfset, "eval"u8, expr, 0);
     if (err != default!) {
         return (new TypeAndValue(nil), err);
     }
     var info = Ꮡ(new ΔInfo(
-        Types: new ast.Expr>TypeAndValue()
+        Types: new map<ast.Expr, TypeAndValue>()
     ));
     err = CheckExpr(Ꮡfset, Ꮡpkg, pos, node, info);
     return ((~info).Types[node], err);
@@ -55,57 +56,60 @@ public static (TypeAndValue _, error err) Eval(ж<token.FileSet> Ꮡfset, ж<Pac
 // functions ignore the context in which an expression is used (e.g., an
 // assignment). Thus, top-level untyped constants will return an
 // untyped type rather than the respective context-specific type.
-public static error /*err*/ CheckExpr(ж<token.FileSet> Ꮡfset, ж<Package> Ꮡpkg, tokenꓸPos pos, ast.Expr expr, ж<ΔInfo> Ꮡinfo) => func((defer, _) => {
+public static error /*err*/ CheckExpr(ж<token.FileSet> Ꮡfset, ж<Package> Ꮡpkg, tokenꓸPos pos, ast.Expr expr, ж<ΔInfo> Ꮡinfo) {
     error err = default!;
+    func((defer, recover) => {
+    ref var fset = ref Ꮡfset.Value;
+    ref var pkg = ref Ꮡpkg.DerefOrNil();
+    ref var info = ref Ꮡinfo.Value;
 
-    ref var fset = ref Ꮡfset.val;
-    ref var pkg = ref Ꮡpkg.val;
-    ref var info = ref Ꮡinfo.val;
-    // determine scope
-    ж<ΔScope> scope = default!;
-    if (pkg == nil){
-        scope = Universe;
-        pos = nopos;
-    } else 
-    if (!pos.IsValid()){
-        scope = pkg.scope;
-    } else {
-        // The package scope extent (position information) may be
-        // incorrect (files spread across a wide range of fset
-        // positions) - ignore it and just consider its children
-        // (file scopes).
-        foreach (var (_, fscope) in pkg.scope.children) {
-            {
-                scope = fscope.Innermost(pos); if (scope != nil) {
-                    break;
+        // determine scope
+        ж<ΔScope> scope = default!;
+        if (Ꮡpkg == nil){
+            scope = Universe;
+            pos = nopos;
+        } else 
+        if (!pos.IsValid()){
+            scope = pkg.scope;
+        } else {
+            // The package scope extent (position information) may be
+            // incorrect (files spread across a wide range of fset
+            // positions) - ignore it and just consider its children
+            // (file scopes).
+            foreach (var (_, fscope) in (~pkg.scope).children) {
+                {
+                    scope = fscope.Innermost(pos); if (scope != nil) {
+                        break;
+                    }
+                }
+            }
+            if (scope == nil || debug) {
+                var s = scope;
+                while (s != nil && s != pkg.scope) {
+                    s = s.Value.parent;
+                }
+                // s == nil || s == pkg.scope
+                if (s == nil) {
+                    err = fmt.Errorf("no position %s found in package %s"u8, Ꮡfset.Position(pos), pkg.name); return;
                 }
             }
         }
-        if (scope == nil || debug) {
-            var s = scope;
-            while (s != nil && s != pkg.scope) {
-                s = s.val.parent;
-            }
-            // s == nil || s == pkg.scope
-            if (s == nil) {
-                return fmt.Errorf("no position %s found in package %s"u8, fset.Position(pos), pkg.name);
-            }
-        }
-    }
-    // initialize checker
-    var check = NewChecker(nil, Ꮡfset, Ꮡpkg, Ꮡinfo);
-    check.scope = scope;
-    check.pos = pos;
-    var checkʗ1 = check;
-    deferǃ(checkʗ1.handleBailout, Ꮡ(err), defer);
-    // evaluate node
-    ref var x = ref heap(new operand(), out var Ꮡx);
-    check.rawExpr(nil, Ꮡx, expr, default!, true);
-    // allow generic expressions
-    check.processDelayed(0);
-    // incl. all functions
-    check.recordUntyped();
-    return default!;
-});
+        // initialize checker
+        var check = NewChecker(nil, Ꮡfset, Ꮡpkg, Ꮡinfo);
+        check.Value.scope = scope;
+        check.Value.pos = pos;
+        var checkʗ1 = check;
+        deferǃ(checkʗ1.handleBailout, Ꮡ(err), defer);
+        // evaluate node
+        ref var x = ref heap(new operand(), out var Ꮡx);
+        check.rawExpr(nil, Ꮡx, expr, default!, true);
+        // allow generic expressions
+        check.processDelayed(0);
+        // incl. all functions
+        check.recordUntyped();
+        err = default!;
+    });
+    return err;
+}
 
 } // end types_package

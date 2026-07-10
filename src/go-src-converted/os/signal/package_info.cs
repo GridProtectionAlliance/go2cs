@@ -15,6 +15,9 @@ global using osꓸFileInfo = go.io.fs_package.FileInfo;
 global using osꓸFileMode = go.io.fs_package.FileMode;
 global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
+global using syscallꓸHandle = go.syscall_package.ΔHandle;
+global using syscallꓸSignal = go.syscall_package.ΔSignal;
+global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
 // </ImportedTypeAliases>
 
 using go;
@@ -43,9 +46,9 @@ using static go.os.signal_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(ctx context.Context, cancel context.CancelFunc), context_package.Context>]
-[assembly: GoImplement<signalCtx, context_package.Context>]
-[assembly: GoImplement<slice<osꓸSignal>, os_package.ΔSignal>]
+[assembly: GoImplement<signalCtx, context_package.Context>(Pointer = true)]
+[assembly: GoImplement<signalCtx, context_package.Context>(Promoted = true)]
+[assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

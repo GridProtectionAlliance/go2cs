@@ -39,7 +39,7 @@ using static go.hash.crc64_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<digest, hash_package.Hash64>]
+[assembly: GoImplement<digest, hash_package.Hash64>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

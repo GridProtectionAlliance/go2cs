@@ -9,15 +9,15 @@ using cmp = cmp_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using net = net_package;
-using http = net.http_package;
-using ascii = net.http.@internal.ascii_package;
-using url = net.url_package;
+using http = go.net.http_package;
+using ascii = go.net.http.@internal.ascii_package;
+using url = go.net.url_package;
 using slices = slices_package;
 using strings = strings_package;
 using sync = sync_package;
 using time = time_package;
-using net;
-using net.http.@internal;
+using go.net;
+using go.net.http.@internal;
 
 partial class cookiejar_package {
 
@@ -35,17 +35,15 @@ partial class cookiejar_package {
 //
 // A public suffix list implementation is in the package
 // golang.org/x/net/publicsuffix.
-[GoType] partial interface PublicSuffixList {
+[GoType] partial interface PublicSuffixList :
+    fmt.Stringer
+{
     // PublicSuffix returns the public suffix of domain.
     //
     // TODO: specify which of the caller and callee is responsible for IP
     // addresses, for leading and trailing dots, for case sensitivity, and
     // for IDN/Punycode.
     @string PublicSuffix(@string domain);
-    // String returns a description of the source of this public suffix
-    // list. The description will typically contain something like a time
-    // stamp or version number.
-    @string String();
 }
 
 // Options are the options for creating a new Jar.
@@ -63,7 +61,7 @@ partial class cookiejar_package {
 [GoType] partial struct Jar {
     internal PublicSuffixList psList;
     // mu locks the remaining fields.
-    internal sync_package.Mutex mu;
+    internal sync.Mutex mu;
     // entries is a set of entries, keyed by their eTLD+1 and subkeyed by
     // their name/domain/path.
     internal map<@string, map<@string, entry>> entries;
@@ -75,13 +73,13 @@ partial class cookiejar_package {
 // New returns a new cookie jar. A nil [*Options] is equivalent to a zero
 // Options.
 public static (ж<Jar>, error) New(ж<Options> Ꮡo) {
-    ref var o = ref Ꮡo.val;
+    ref var o = ref Ꮡo.DerefOrNil();
 
     var jar = Ꮡ(new Jar(
         entries: new map<@string, map<@string, entry>>()
     ));
-    if (o != nil) {
-        jar.val.psList = o.PublicSuffixList;
+    if (Ꮡo != nil) {
+        jar.Value.psList = o.PublicSuffixList;
     }
     return (jar, default!);
 }
@@ -101,9 +99,9 @@ public static (ж<Jar>, error) New(ж<Options> Ꮡo) {
     public bool HttpOnly;
     public bool Persistent;
     public bool HostOnly;
-    public time_package.Time Expires;
-    public time_package.Time Creation;
-    public time_package.Time LastAccess;
+    public time.Time Expires;
+    public time.Time Creation;
+    public time.Time LastAccess;
     // seqNum is a sequence number so that Cookies returns cookies in a
     // deterministic order, even for cookies that have equal Path length and
     // equal Creation time. This simplifies testing.
@@ -158,95 +156,101 @@ internal static bool hasDotSuffix(@string s, @string suffix) {
 // Cookies implements the Cookies method of the [http.CookieJar] interface.
 //
 // It returns an empty slice if the URL's scheme is not HTTP or HTTPS.
-[GoRecv] public static slice<httpꓸCookie> /*cookies*/ Cookies(this ref Jar j, ж<url.URL> Ꮡu) {
-    slice<httpꓸCookie> cookies = default!;
+public static slice<ж<httpꓸCookie>> /*cookies*/ Cookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu) {
+    slice<ж<httpꓸCookie>> cookies = default!;
 
-    ref var u = ref Ꮡu.val;
-    return j.cookies(Ꮡu, time.Now());
+    ref var j = ref Ꮡj.Value;
+    ref var u = ref Ꮡu.Value;
+    return Ꮡj.cookies(Ꮡu, time.Now());
 }
 
 // cookies is like Cookies but takes the current time as a parameter.
-[GoRecv] public static slice<httpꓸCookie> /*cookies*/ cookies(this ref Jar j, ж<url.URL> Ꮡu, time.Time now) => func((defer, _) => {
-    slice<httpꓸCookie> cookies = default!;
+internal static slice<ж<httpꓸCookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, time.Time now) {
+    slice<ж<httpꓸCookie>> cookies = default!;
+    func((defer, recover) => {
+    ref var j = ref Ꮡj.Value;
+    ref var u = ref Ꮡu.Value;
 
-    ref var u = ref Ꮡu.val;
-    if (u.Scheme != "http"u8 && u.Scheme != "https"u8) {
-        return cookies;
-    }
-    var (host, err) = canonicalHost(u.Host);
-    if (err != default!) {
-        return cookies;
-    }
-    @string key = jarKey(host, j.psList);
-    j.mu.Lock();
-    defer(j.mu.Unlock);
-    var submap = j.entries[key];
-    if (submap == default!) {
-        return cookies;
-    }
-    var https = u.Scheme == "https"u8;
-    @string path = u.Path;
-    if (path == ""u8) {
-        path = "/"u8;
-    }
-    var modified = false;
-    slice<entry> selected = default!;
-    foreach (var (id, e) in submap) {
-        if (e.Persistent && !e.Expires.After(now)) {
-            delete(submap, id);
+        if (u.Scheme != "http"u8 && u.Scheme != "https"u8) {
+            return;
+        }
+        var (host, err) = canonicalHost(u.Host);
+        if (err != default!) {
+            return;
+        }
+        @string key = jarKey(host, j.psList);
+        Ꮡj.of(Jar.Ꮡmu).Lock();
+        defer(Ꮡj.of(Jar.Ꮡmu).Unlock);
+        var submap = j.entries[key];
+        if (submap == default!) {
+            return;
+        }
+        var https = u.Scheme == "https"u8;
+        @string path = u.Path;
+        if (path == ""u8) {
+            path = "/"u8;
+        }
+        var modified = false;
+        slice<entry> selected = default!;
+        foreach (var (id, vᴛ1) in submap) {
+            var e = vᴛ1;
+
+            if (e.Persistent && !e.Expires.After(now)) {
+                delete(submap, id);
+                modified = true;
+                continue;
+            }
+            if (!e.shouldSend(https, host, path)) {
+                continue;
+            }
+            e.LastAccess = now;
+            submap[id] = e;
+            selected = append(selected, e);
             modified = true;
-            continue;
         }
-        if (!e.shouldSend(https, host, path)) {
-            continue;
-        }
-        e.LastAccess = now;
-        submap[id] = e;
-        selected = append(selected, e);
-        modified = true;
-    }
-    if (modified) {
-        if (len(submap) == 0){
-            delete(j.entries, key);
-        } else {
-            j.entries[key] = submap;
-        }
-    }
-    // sort according to RFC 6265 section 5.4 point 2: by longest
-    // path and then by earliest creation time.
-    slices.SortFunc(selected, (entry a, entry b) => {
-        {
-            nint r = cmp.Compare(b.Path, a.Path); if (r != 0) {
-                return r;
+        if (modified) {
+            if (len(submap) == 0){
+                delete(j.entries, key);
+            } else {
+                j.entries[key] = submap;
             }
         }
-        {
-            nint r = a.Creation.Compare(b.Creation); if (r != 0) {
-                return r;
+        // sort according to RFC 6265 section 5.4 point 2: by longest
+        // path and then by earliest creation time.
+        slices.SortFunc(selected, (entry a, entry b) => {
+            {
+                nint r = cmp.Compare(b.Path, a.Path); if (r != 0) {
+                    return r;
+                }
             }
+            {
+                nint r = a.Creation.Compare(b.Creation); if (r != 0) {
+                    return r;
+                }
+            }
+            return cmp.Compare(a.seqNum, b.seqNum);
+        });
+        foreach (var (_, e) in selected) {
+            cookies = append(cookies, Ꮡ(new httpꓸCookie(Name: e.Name, Value: e.Value, Quoted: e.Quoted)));
         }
-        return cmp.Compare(a.seqNum, b.seqNum);
     });
-    ref var e = ref heap(new entry(), out var Ꮡe);
-
-    foreach (var (_, e) in selected) {
-        cookies = append(cookies, Ꮡ(new httpꓸCookie(Name: e.Name, Value: e.Value, Quoted: e.Quoted)));
-    }
     return cookies;
-});
+}
 
 // SetCookies implements the SetCookies method of the [http.CookieJar] interface.
 //
 // It does nothing if the URL's scheme is not HTTP or HTTPS.
-[GoRecv] public static void SetCookies(this ref Jar j, ж<url.URL> Ꮡu, slice<httpꓸCookie> cookies) {
-    ref var u = ref Ꮡu.val;
+public static void SetCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<httpꓸCookie>> cookies) {
+    ref var j = ref Ꮡj.Value;
+    ref var u = ref Ꮡu.Value;
 
-    j.setCookies(Ꮡu, cookies, time.Now());
+    Ꮡj.setCookies(Ꮡu, cookies, time.Now());
 }
 
 // setCookies is like SetCookies but takes the current time as parameter.
-[GoRecv] public static void setCookies(this ref Jar j, ж<url.URL> Ꮡu, slice<httpꓸCookie> cookies, time.Time now) => func((defer, _) => {
-    ref var u = ref Ꮡu.val;
+internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<httpꓸCookie>> cookies, time.Time now) => func((defer, recover) => {
+    ref var j = ref Ꮡj.Value;
+    ref var u = ref Ꮡu.Value;
 
     if (len(cookies) == 0) {
         return;
@@ -260,8 +264,8 @@ internal static bool hasDotSuffix(@string s, @string suffix) {
     }
     @string key = jarKey(host, j.psList);
     @string defPath = defaultPath(u.Path);
-    j.mu.Lock();
-    defer(j.mu.Unlock);
+    Ꮡj.of(Jar.Ꮡmu).Lock();
+    defer(Ꮡj.of(Jar.Ꮡmu).Unlock);
     var submap = j.entries[key];
     var modified = false;
     foreach (var (_, cookie) in cookies) {
@@ -273,7 +277,7 @@ internal static bool hasDotSuffix(@string s, @string suffix) {
         if (remove) {
             if (submap != default!) {
                 {
-                    var (_, ok) = submap[id]; if (ok) {
+                    var (_, ok) = submap[id, ꟷ]; if (ok) {
                         delete(submap, id);
                         modified = true;
                     }
@@ -285,7 +289,7 @@ internal static bool hasDotSuffix(@string s, @string suffix) {
             submap = new map<@string, entry>();
         }
         {
-            var (old, ok) = submap[id]; if (ok){
+            var (old, ok) = submap[id, ꟷ]; if (ok){
                 e.Creation = old.Creation;
                 e.seqNum = old.seqNum;
             } else {
@@ -319,7 +323,7 @@ internal static (@string, error) canonicalHost(@string host) {
     }
     // Strip trailing dot from fully qualified domain names.
     host = strings.TrimSuffix(host, "."u8);
-    var (encoded, err) = toASCII(host);
+    (var encoded, err) = toASCII(host);
     if (err != default!) {
         return ("", err);
     }
@@ -410,12 +414,12 @@ internal static @string defaultPath(@string path) {
 // be valid to call e.id (which depends on e's Name, Domain and Path).
 //
 // A malformed c.Domain will result in an error.
-[GoRecv] public static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<httpꓸCookie> Ꮡc, time.Time now, @string defPath, @string host) {
+[GoRecv] internal static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<httpꓸCookie> Ꮡc, time.Time now, @string defPath, @string host) {
     entry e = default!;
     bool remove = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
     e.Name = c.Name;
     if (c.Path == ""u8 || c.Path[0] != (rune)'/'){
         e.Path = defPath;
@@ -431,7 +435,7 @@ internal static @string defaultPath(@string path) {
         return (e, true, default!);
     } else 
     if (c.MaxAge > 0){
-        e.Expires = now.Add(((time.Duration)c.MaxAge) * time.ΔSecond);
+        e.Expires = now.Add(((time.Duration)(int64)c.MaxAge) * time.ΔSecond);
         e.Persistent = true;
     } else {
         if (c.Expires.IsZero()){
@@ -519,7 +523,7 @@ internal static time.Time endOfTime = time.Date(9999, 12, 31, 23, 59, 59, 0, tim
         // both are illegal.
         return ("", false, errMalformedDomain);
     }
-    var (domain, isASCII) = ascii.ToLower(domain);
+    (domain, var isASCII) = ascii.ToLower(domain);
     if (!isASCII) {
         // Received non-ASCII domain, e.g. "perché.com" instead of "xn--perch-fsa.com"
         return ("", false, errMalformedDomain);

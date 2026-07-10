@@ -17,9 +17,9 @@
 // [crypto/rand] package.
 namespace go.math.rand;
 
-using bits = math.bits_package;
-using _ = unsafe_package; // for go:linkname
-using math;
+using bits = go.math.bits_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+using go.math;
 
 partial class rand_package {
 
@@ -44,12 +44,12 @@ public static ж<Rand> New(Source src) {
 
 // Int64 returns a non-negative pseudo-random 63-bit integer as an int64.
 [GoRecv] public static int64 Int64(this ref Rand r) {
-    return ((int64)((uint64)(r.src.Uint64() & ~(1 << (int)(63)))));
+    return (int64)((uint64)(r.src.Uint64() & ~(((uint64)1 << (int)(63)))));
 }
 
 // Uint32 returns a pseudo-random 32-bit value as a uint32.
 [GoRecv] public static uint32 Uint32(this ref Rand r) {
-    return ((uint32)(r.src.Uint64() >> (int)(32)));
+    return (uint32)((r.src.Uint64() >> (int)(32)));
 }
 
 // Uint64 returns a pseudo-random 64-bit value as a uint64.
@@ -59,17 +59,17 @@ public static ж<Rand> New(Source src) {
 
 // Int32 returns a non-negative pseudo-random 31-bit integer as an int32.
 [GoRecv] public static int32 Int32(this ref Rand r) {
-    return ((int32)(r.src.Uint64() >> (int)(33)));
+    return (int32)((r.src.Uint64() >> (int)(33)));
 }
 
 // Int returns a non-negative pseudo-random int.
 [GoRecv] public static nint Int(this ref Rand r) {
-    return ((nint)(((nuint)r.src.Uint64()) << (int)(1) >> (int)(1)));
+    return (nint)((((nuint)r.src.Uint64() << (int)(1)) >> (int)(1)));
 }
 
 // Uint returns a pseudo-random uint.
 [GoRecv] public static nuint Uint(this ref Rand r) {
-    return ((nuint)r.src.Uint64());
+    return (nuint)r.src.Uint64();
 }
 
 // Int64N returns, as an int64, a non-negative pseudo-random number in the half-open interval [0,n).
@@ -78,7 +78,7 @@ public static ж<Rand> New(Source src) {
     if (n <= 0) {
         throw panic("invalid argument to Int64N");
     }
-    return ((int64)r.uint64n(((uint64)n)));
+    return (int64)r.uint64n((uint64)n);
 }
 
 // Uint64N returns, as a uint64, a non-negative pseudo-random number in the half-open interval [0,n).
@@ -92,8 +92,8 @@ public static ж<Rand> New(Source src) {
 
 // uint64n is the no-bounds-checks version of Uint64N.
 [GoRecv] internal static uint64 uint64n(this ref Rand r, uint64 n) {
-    if (is32bit && ((uint64)((uint32)n)) == n) {
-        return ((uint64)r.uint32n(((uint32)n)));
+    if (is32bit && (uint64)(uint32)n == n) {
+        return (uint64)r.uint32n((uint32)n);
     }
     if ((uint64)(n & (n - 1)) == 0) {
         // n is power of two, can mask
@@ -131,7 +131,7 @@ public static ж<Rand> New(Source src) {
     // https://lemire.me/blog/2016/06/30/fast-random-shuffling
     var (hi, lo) = bits.Mul64(r.Uint64(), n);
     if (lo < n) {
-        var thresh = -n % n;
+        var thresh = ((uint64)0 - n) % n;
         while (lo < thresh) {
             (hi, lo) = bits.Mul64(r.Uint64(), n);
         }
@@ -144,7 +144,7 @@ public static ж<Rand> New(Source src) {
 [GoRecv] internal static uint32 uint32n(this ref Rand r, uint32 n) {
     if ((uint32)(n & (n - 1)) == 0) {
         // n is power of two, can mask
-        return (uint32)(((uint32)r.Uint64()) & (n - 1));
+        return (uint32)((uint32)r.Uint64() & (n - 1));
     }
     // On 64-bit systems we still use the uint64 code below because
     // the probability of a random uint64 lo being < a uint32 n is near zero,
@@ -162,17 +162,17 @@ public static ж<Rand> New(Source src) {
     // using direct hardware instructions and avoiding
     // the computations involving these zeros.
     var x = r.Uint64();
-    var (lo1a, lo0) = bits.Mul32(((uint32)x), n);
-    var (hi, lo1b) = bits.Mul32(((uint32)(x >> (int)(32))), n);
+    var (lo1a, lo0) = bits.Mul32((uint32)x, n);
+    var (hi, lo1b) = bits.Mul32((uint32)((x >> (int)(32))), n);
     var (lo1, c) = bits.Add32(lo1a, lo1b, 0);
     hi += c;
-    if (lo1 == 0 && lo0 < ((uint32)n)) {
-        var n64 = ((uint64)n);
-        var thresh = ((uint32)(-n64 % n64));
+    if (lo1 == 0 && lo0 < (uint32)n) {
+        var n64 = (uint64)n;
+        var thresh = (uint32)(((uint64)0 - n64) % n64);
         while (lo1 == 0 && lo0 < thresh) {
             var xΔ1 = r.Uint64();
-            (lo1a, lo0) = bits.Mul32(((uint32)xΔ1), n);
-            (hi, lo1b) = bits.Mul32(((uint32)(xΔ1 >> (int)(32))), n);
+            (lo1a, lo0) = bits.Mul32((uint32)xΔ1, n);
+            (hi, lo1b) = bits.Mul32((uint32)((xΔ1 >> (int)(32))), n);
             (lo1, c) = bits.Add32(lo1a, lo1b, 0);
             hi += c;
         }
@@ -186,7 +186,7 @@ public static ж<Rand> New(Source src) {
     if (n <= 0) {
         throw panic("invalid argument to Int32N");
     }
-    return ((int32)r.uint64n(((uint64)n)));
+    return (int32)r.uint64n((uint64)n);
 }
 
 // Uint32N returns, as a uint32, a non-negative pseudo-random number in the half-open interval [0,n).
@@ -195,7 +195,7 @@ public static ж<Rand> New(Source src) {
     if (n == 0) {
         throw panic("invalid argument to Uint32N");
     }
-    return ((uint32)r.uint64n(((uint64)n)));
+    return (uint32)r.uint64n((uint64)n);
 }
 
 internal const bool is32bit = /* ^uint(0)>>32 == 0 */ false;
@@ -206,7 +206,7 @@ internal const bool is32bit = /* ^uint(0)>>32 == 0 */ false;
     if (n <= 0) {
         throw panic("invalid argument to IntN");
     }
-    return ((nint)r.uint64n(((uint64)n)));
+    return (nint)r.uint64n((uint64)n);
 }
 
 // UintN returns, as a uint, a non-negative pseudo-random number in the half-open interval [0,n).
@@ -215,19 +215,19 @@ internal const bool is32bit = /* ^uint(0)>>32 == 0 */ false;
     if (n == 0) {
         throw panic("invalid argument to UintN");
     }
-    return ((nuint)r.uint64n(((uint64)n)));
+    return (nuint)r.uint64n((uint64)n);
 }
 
 // Float64 returns, as a float64, a pseudo-random number in the half-open interval [0.0,1.0).
 [GoRecv] public static float64 Float64(this ref Rand r) {
     // There are exactly 1<<53 float64s in [0,1). Use Intn(1<<53) / (1<<53).
-    return ((float64)(r.Uint64() << (int)(11) >> (int)(11))) / (1 << (int)(53));
+    return (float64)(((r.Uint64() << (int)(11)) >> (int)(11))) / ((1 << (int)(53)));
 }
 
 // Float32 returns, as a float32, a pseudo-random number in the half-open interval [0.0,1.0).
 [GoRecv] public static float32 Float32(this ref Rand r) {
     // There are exactly 1<<24 float32s in [0,1). Use Intn(1<<24) / (1<<24).
-    return ((float32)(r.Uint32() << (int)(8) >> (int)(8))) / (1 << (int)(24));
+    return (float32)(((r.Uint32() << (int)(8)) >> (int)(8))) / ((1 << (int)(24)));
 }
 
 // Perm returns, as a slice of n ints, a pseudo-random permutation of the integers
@@ -237,9 +237,8 @@ internal const bool is32bit = /* ^uint(0)>>32 == 0 */ false;
     foreach (var (i, _) in p) {
         p[i] = i;
     }
-    r.Shuffle(len(p), 
     var pʗ1 = p;
-    (nint i, nint j) => {
+    r.Shuffle(len(p), (nint i, nint j) => {
         (pʗ1[i], pʗ1[j]) = (pʗ1[j], pʗ1[i]);
     });
     return p;
@@ -259,7 +258,7 @@ internal const bool is32bit = /* ^uint(0)>>32 == 0 */ false;
     // generate even a minuscule percentage of the possible permutations.
     // Nevertheless, the right API signature accepts an int n, so handle it as best we can.
     for (nint i = n - 1; i > 0; i--) {
-        nint j = ((nint)r.uint64n(((uint64)(i + 1))));
+        nint j = (nint)r.uint64n((uint64)(i + 1));
         swap(i, j);
     }
 }
@@ -363,18 +362,17 @@ public static nuint UintN(nuint n) {
 // The type parameter Int can be any integer type.
 // It panics if n <= 0.
 public static Int N<Int>(Int n)
-    where Int : /* intType */ IAdditionOperators<Int, Int, Int>, ISubtractionOperators<Int, Int, Int>, IMultiplyOperators<Int, Int, Int>, IDivisionOperators<Int, Int, Int>, IModulusOperators<Int, Int, Int>, IBitwiseOperators<Int, Int, Int>, IShiftOperators<Int, Int, Int>, IEqualityOperators<Int, Int, bool>, IComparisonOperators<Int, Int, bool>, new()
+    where Int : /* intType */ IAdditionOperators<Int, Int, Int>, ISubtractionOperators<Int, Int, Int>, IMultiplyOperators<Int, Int, Int>, IDivisionOperators<Int, Int, Int>, IIncrementOperators<Int>, IDecrementOperators<Int>, IModulusOperators<Int, Int, Int>, IBitwiseOperators<Int, Int, Int>, IShiftOperators<Int, int, Int>, IEqualityOperators<Int, Int, bool>, IComparisonOperators<Int, Int, bool>, new()
 {
-    if (n <= 0) {
+    if (n <= ConvertToType<Int>(0)) {
         throw panic("invalid argument to N");
     }
-    return ((Int)globalRand.uint64n(((uint64)n)));
+    return ConvertToType<Int>(globalRand.uint64n(ConvertToUInt64<Int>(n)));
 }
 
 [GoType("operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
 partial interface intType<ΔT> {
-    //  Type constraints: ~int | ~int8 | ~int16 | ~int32 | ~int64 |
-	~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
+    //  Type constraints: ~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 

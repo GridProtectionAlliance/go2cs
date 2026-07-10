@@ -15,15 +15,15 @@
 namespace go;
 
 using fmt = fmt_package;
-using io = io_package;
-using @internal = log.internal_package;
+using Δio = io_package;
+using Δinternal = log.internal_package;
 using os = os_package;
-using runtime = runtime_package;
-using sync = sync_package;
-using atomic = sync.atomic_package;
+using Δruntime = runtime_package;
+using Δsync = sync_package;
+using atomic = go.sync.atomic_package;
 using time = time_package;
+using go.sync;
 using log;
-using sync;
 using ꓸꓸꓸany = Span<any>;
 
 partial class log_package {
@@ -63,11 +63,11 @@ public static readonly UntypedInt LstdFlags = /* Ldate | Ltime */ 3; // initial 
 // the Writer's Write method. A Logger can be used simultaneously from
 // multiple goroutines; it guarantees to serialize access to the Writer.
 [GoType] partial struct Logger {
-    internal sync_package.Mutex outMu;
-    internal io_package.Writer @out; // destination for output
-    internal sync.atomic_package.Pointer prefix; // prefix on each line to identify the logger (but see Lmsgprefix)
-    internal sync.atomic_package.Int32 flag;           // properties
-    internal sync.atomic_package.Bool isDiscard;
+    internal Δsync.Mutex outMu;
+    internal Δio.Writer @out; // destination for output
+    internal atomic.Pointer<@string> prefix; // prefix on each line to identify the logger (but see Lmsgprefix)
+    internal atomic.Int32 flag;           // properties
+    internal atomic.Bool isDiscard;
 }
 
 // New creates a new [Logger]. The out variable sets the
@@ -75,7 +75,7 @@ public static readonly UntypedInt LstdFlags = /* Ldate | Ltime */ 3; // initial 
 // The prefix appears at the beginning of each generated log line, or
 // after the log header if the [Lmsgprefix] flag is provided.
 // The flag argument defines the logging properties.
-public static ж<Logger> New(io.Writer @out, @string prefix, nint flag) {
+public static ж<Logger> New(Δio.Writer @out, @string prefix, nint flag) {
     var l = @new<Logger>();
     l.SetOutput(@out);
     l.SetPrefix(prefix);
@@ -84,14 +84,16 @@ public static ж<Logger> New(io.Writer @out, @string prefix, nint flag) {
 }
 
 // SetOutput sets the output destination for the logger.
-[GoRecv] public static void SetOutput(this ref Logger l, io.Writer w) => func((defer, _) => {
-    l.outMu.Lock();
-    defer(l.outMu.Unlock);
+public static void SetOutput(this ж<Logger> Ꮡl, Δio.Writer w) => func((defer, recover) => {
+    ref var l = ref Ꮡl.Value;
+
+    Ꮡl.of(Logger.ᏑoutMu).Lock();
+    defer(Ꮡl.of(Logger.ᏑoutMu).Unlock);
     l.@out = w;
-    l.isDiscard.Store(AreEqual(w, io.Discard));
+    Ꮡl.of(Logger.ᏑisDiscard).Store(AreEqual(w, Δio.Discard));
 });
 
-internal static ж<Logger> std = New(~os.Stderr, ""u8, LstdFlags);
+internal static ж<Logger> std = New(new os.FileжWriter(os.Stderr), ""u8, LstdFlags);
 
 // Default returns the standard logger used by the package-level output functions.
 public static ж<Logger> Default() {
@@ -100,7 +102,7 @@ public static ж<Logger> Default() {
 
 // Cheap integer to fixed-width decimal ASCII. Give a negative width to avoid zero-padding.
 internal static void itoa(ж<slice<byte>> Ꮡbuf, nint i, nint wid) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.Value;
 
     // Assemble decimal in reverse order.
     array<byte> b = new(20);
@@ -108,12 +110,12 @@ internal static void itoa(ж<slice<byte>> Ꮡbuf, nint i, nint wid) {
     while (i >= 10 || wid > 1) {
         wid--;
         nint q = i / 10;
-        b[bp] = ((byte)((rune)'0' + i - q * 10));
+        b[bp] = (byte)((rune)'0' + i - q * 10);
         bp--;
         i = q;
     }
     // i < 10
-    b[bp] = ((byte)((rune)'0' + i));
+    b[bp] = (byte)((rune)'0' + i);
     buf = append(buf, b[(int)(bp)..].ꓸꓸꓸ);
 }
 
@@ -122,70 +124,71 @@ internal static void itoa(ж<slice<byte>> Ꮡbuf, nint i, nint wid) {
 //   - date and/or time (if corresponding flags are provided),
 //   - file and line number (if corresponding flags are provided),
 //   - l.prefix (if it's not blank and Lmsgprefix is set).
-internal static void formatHeader(ж<slice<byte>> Ꮡbuf, time.Time t, @string prefix, nint flag, @string file, nint line) {
-    ref var buf = ref Ꮡbuf.val;
+internal static void formatHeader(ж<slice<byte>> Ꮡbuf, time.Time t, @string prefix, nint flag, @string @file, nint line) {
+    ref var buf = ref Ꮡbuf.Value;
 
-    if ((nint)(flag & Lmsgprefix) == 0) {
+    if ((nint)(flag & (nint)Lmsgprefix) == 0) {
         buf = append(buf, prefix.ꓸꓸꓸ);
     }
-    if ((nint)(flag & ((nint)((UntypedInt)(Ldate | Ltime) | Lmicroseconds))) != 0) {
-        if ((nint)(flag & LUTC) != 0) {
+    if ((nint)(flag & (nint)((nint)((nint)(UntypedInt)(Ldate | Ltime) | (nint)Lmicroseconds))) != 0) {
+        if ((nint)(flag & (nint)LUTC) != 0) {
             t = t.UTC();
         }
-        if ((nint)(flag & Ldate) != 0) {
+        if ((nint)(flag & (nint)Ldate) != 0) {
             var (year, month, day) = t.Date();
             itoa(Ꮡbuf, year, 4);
-            buf = append(buf, (rune)'/');
-            itoa(Ꮡbuf, ((nint)month), 2);
-            buf = append(buf, (rune)'/');
+            buf = append(buf, (byte)((rune)'/'));
+            itoa(Ꮡbuf, (nint)month, 2);
+            buf = append(buf, (byte)((rune)'/'));
             itoa(Ꮡbuf, day, 2);
-            buf = append(buf, (rune)' ');
+            buf = append(buf, (byte)((rune)' '));
         }
-        if ((nint)(flag & ((nint)(Ltime | Lmicroseconds))) != 0) {
+        if ((nint)(flag & (nint)((nint)((nint)Ltime | (nint)Lmicroseconds))) != 0) {
             var (hour, min, sec) = t.Clock();
             itoa(Ꮡbuf, hour, 2);
-            buf = append(buf, (rune)':');
+            buf = append(buf, (byte)((rune)':'));
             itoa(Ꮡbuf, min, 2);
-            buf = append(buf, (rune)':');
+            buf = append(buf, (byte)((rune)':'));
             itoa(Ꮡbuf, sec, 2);
-            if ((nint)(flag & Lmicroseconds) != 0) {
-                buf = append(buf, (rune)'.');
-                itoa(Ꮡbuf, t.Nanosecond() / 1e3F, 6);
+            if ((nint)(flag & (nint)Lmicroseconds) != 0) {
+                buf = append(buf, (byte)((rune)'.'));
+                itoa(Ꮡbuf, t.Nanosecond() / 1000, 6);
             }
-            buf = append(buf, (rune)' ');
+            buf = append(buf, (byte)((rune)' '));
         }
     }
-    if ((nint)(flag & ((nint)(Lshortfile | Llongfile))) != 0) {
-        if ((nint)(flag & Lshortfile) != 0) {
-            @string @short = file;
-            for (nint i = len(file) - 1; i > 0; i--) {
-                if (file[i] == (rune)'/') {
-                    @short = file[(int)(i + 1)..];
+    if ((nint)(flag & (nint)((nint)((nint)Lshortfile | (nint)Llongfile))) != 0) {
+        if ((nint)(flag & (nint)Lshortfile) != 0) {
+            @string @short = @file;
+            for (nint i = len(@file) - 1; i > 0; i--) {
+                if (@file[i] == (rune)'/') {
+                    @short = @file[(int)(i + 1)..];
                     break;
                 }
             }
-            file = @short;
+            @file = @short;
         }
-        buf = append(buf, file.ꓸꓸꓸ);
-        buf = append(buf, (rune)':');
+        buf = append(buf, @file.ꓸꓸꓸ);
+        buf = append(buf, (byte)((rune)':'));
         itoa(Ꮡbuf, line, -1);
-        buf = append(buf, ": "u8.ꓸꓸꓸ);
+        buf = append(buf, ((@string)": "u8).ꓸꓸꓸ);
     }
-    if ((nint)(flag & Lmsgprefix) != 0) {
+    if ((nint)(flag & (nint)Lmsgprefix) != 0) {
         buf = append(buf, prefix.ꓸꓸꓸ);
     }
 }
 
-internal static sync.Pool bufferPool = new sync.Pool(New: () => @new<slice<byte>>());
+internal static ж<Δsync.Pool> ᏑbufferPool = new(new Δsync.Pool(New: () => @new<slice<byte>>()));
+internal static ref Δsync.Pool bufferPool => ref ᏑbufferPool.Value;
 
-internal static unsafe ж<slice<byte>> getBuffer() {
-    var p = bufferPool.Get()._<slice<byte>.val>();
-    p.val = new Span<ж<slice<byte>>>((slice<byte>**), 0);
+internal static ж<slice<byte>> getBuffer() {
+    var p = ᏑbufferPool.Get()._<ж<slice<byte>>>();
+    p.ValueSlot = (p.ValueSlot)[..0];
     return p;
 }
 
 internal static void putBuffer(ж<slice<byte>> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     // Proper usage of a sync.Pool requires each entry to have approximately
     // the same memory cost. To obtain this property when the stored type
@@ -193,10 +196,10 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
     // to place back in the pool.
     //
     // See https://go.dev/issue/23199
-    if (cap(p) > 64 << (int)(10)) {
+    if (cap(p) > (64 << (int)(10))) {
         p = default!;
     }
-    bufferPool.Put(p);
+    ᏑbufferPool.Put(p);
 }
 
 // Output writes the output for a logging event. The string s contains
@@ -205,180 +208,201 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 // already a newline. Calldepth is used to recover the PC and is
 // provided for generality, although at the moment on all pre-defined
 // paths it will be 2.
-[GoRecv] public static error Output(this ref Logger l, nint calldepth, @string s) {
+public static error Output(this ж<Logger> Ꮡl, nint calldepth, @string s) {
+    ref var l = ref Ꮡl.Value;
+
     calldepth++;
     // +1 for this frame.
-    return l.output(0, calldepth, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
+    return Ꮡl.output(0, calldepth, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
 }
 
 // output can take either a calldepth or a pc to get source line information.
 // It uses the pc if it is non-zero.
-[GoRecv] internal static error output(this ref Logger l, uintptr pc, nint calldepth, Func<slice<byte>, slice<byte>> appendOutput) => func((defer, _) => {
-    if (l.isDiscard.Load()) {
+internal static error output(this ж<Logger> Ꮡl, uintptr pc, nint calldepth, Func<slice<byte>, slice<byte>> appendOutput) => func<error>((defer, recover) => {
+    ref var l = ref Ꮡl.Value;
+
+    if (Ꮡl.of(Logger.ᏑisDiscard).Load()) {
         return default!;
     }
     var now = time.Now();
     // get this early.
     // Load prefix and flag once so that their value is consistent within
     // this call regardless of any concurrent changes to their value.
-    @string prefix = l.Prefix();
-    nint flag = l.Flags();
-    @string file = default!;
+    @string prefix = Ꮡl.Prefix();
+    nint flag = Ꮡl.Flags();
+    @string @file = default!;
     nint line = default!;
-    if ((nint)(flag & ((nint)(Lshortfile | Llongfile))) != 0) {
+    if ((nint)(flag & (nint)((nint)((nint)Lshortfile | (nint)Llongfile))) != 0) {
         if (pc == 0){
             bool ok = default!;
-            (_, file, line, ok) = runtime.Caller(calldepth);
+            (_, @file, line, ok) = Δruntime.Caller(calldepth);
             if (!ok) {
-                file = "???"u8;
+                @file = "???"u8;
                 line = 0;
             }
         } else {
-            var fs = runtime.CallersFrames(new uintptr[]{pc}.slice());
+            var fs = Δruntime.CallersFrames(new uintptr[]{pc}.slice());
             var (f, _) = fs.Next();
-            file = f.File;
-            if (file == ""u8) {
-                file = "???"u8;
+            @file = f.File;
+            if (@file == ""u8) {
+                @file = "???"u8;
             }
             line = f.Line;
         }
     }
     var buf = getBuffer();
     deferǃ(putBuffer, buf, defer);
-    formatHeader(buf, now, prefix, flag, file, line);
-    buf.val = appendOutput(buf.val);
-    if (len(buf.val) == 0 || (ж<ж<slice<byte>>>)[len(buf.val) - 1] != (rune)'\n') {
-        buf.val = append(buf.val, (rune)'\n');
+    formatHeader(buf, now, prefix, flag, @file, line);
+    buf.ValueSlot = appendOutput(buf.ValueSlot);
+    if (len(buf.ValueSlot) == 0 || (buf.ValueSlot)[len(buf.ValueSlot) - 1] != (rune)'\n') {
+        buf.ValueSlot = append(buf.ValueSlot, (byte)((rune)'\n'));
     }
-    l.outMu.Lock();
-    defer(l.outMu.Unlock);
-    var (_, err) = l.@out.Write(buf.val);
+    Ꮡl.of(Logger.ᏑoutMu).Lock();
+    defer(Ꮡl.of(Logger.ᏑoutMu).Unlock);
+    var (_, err) = l.@out.Write(buf.ValueSlot);
     return err;
 });
 
 [GoInit] internal static void init() {
-    var @internal.DefaultOutput = (uintptr pc, slice<byte> data) => std.output(pc, 0, 
+    Δinternal.DefaultOutput = (uintptr pc, slice<byte> data) => {
         var dataʗ1 = data;
-        (slice<byte> buf) => append(buf, dataʗ1.ꓸꓸꓸ));
+        return std.output(pc, 0, (slice<byte> buf) => append(buf, dataʗ1.ꓸꓸꓸ));
+    };
 }
 
 // Print calls l.Output to print to the logger.
 // Arguments are handled in the manner of [fmt.Print].
-[GoRecv] public static void Print(this ref Logger l, params ꓸꓸꓸany vʗp) {
+public static void Print(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    l.output(0, 2, 
+    ref var l = ref Ꮡl.Value;
     var vʗ1 = v;
-    (slice<byte> b) => fmt.Append(b, vʗ1.ꓸꓸꓸ));
+    Ꮡl.output(0, 2, (slice<byte> b) => fmt.Append(b, vʗ1.ꓸꓸꓸ));
 }
 
 // Printf calls l.Output to print to the logger.
 // Arguments are handled in the manner of [fmt.Printf].
-[GoRecv] public static void Printf(this ref Logger l, @string format, params ꓸꓸꓸany vʗp) {
+public static void Printf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    l.output(0, 2, 
+    ref var l = ref Ꮡl.Value;
     var vʗ1 = v;
-    (slice<byte> b) => fmt.Appendf(b, format, vʗ1.ꓸꓸꓸ));
+    Ꮡl.output(0, 2, (slice<byte> b) => fmt.Appendf(b, format, vʗ1.ꓸꓸꓸ));
 }
 
 // Println calls l.Output to print to the logger.
 // Arguments are handled in the manner of [fmt.Println].
-[GoRecv] public static void Println(this ref Logger l, params ꓸꓸꓸany vʗp) {
+public static void Println(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    l.output(0, 2, 
+    ref var l = ref Ꮡl.Value;
     var vʗ1 = v;
-    (slice<byte> b) => fmt.Appendln(b, vʗ1.ꓸꓸꓸ));
+    Ꮡl.output(0, 2, (slice<byte> b) => fmt.Appendln(b, vʗ1.ꓸꓸꓸ));
 }
 
 // Fatal is equivalent to l.Print() followed by a call to [os.Exit](1).
-[GoRecv] public static void Fatal(this ref Logger l, params ꓸꓸꓸany vʗp) {
+public static void Fatal(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    l.Output(2, fmt.Sprint(v.ꓸꓸꓸ));
+    ref var l = ref Ꮡl.Value;
+    Ꮡl.Output(2, fmt.Sprint(v.ꓸꓸꓸ));
     os.Exit(1);
 }
 
 // Fatalf is equivalent to l.Printf() followed by a call to [os.Exit](1).
-[GoRecv] public static void Fatalf(this ref Logger l, @string format, params ꓸꓸꓸany vʗp) {
+public static void Fatalf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    l.Output(2, fmt.Sprintf(format, v.ꓸꓸꓸ));
+    ref var l = ref Ꮡl.Value;
+    Ꮡl.Output(2, fmt.Sprintf(format, v.ꓸꓸꓸ));
     os.Exit(1);
 }
 
 // Fatalln is equivalent to l.Println() followed by a call to [os.Exit](1).
-[GoRecv] public static void Fatalln(this ref Logger l, params ꓸꓸꓸany vʗp) {
+public static void Fatalln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    l.Output(2, fmt.Sprintln(v.ꓸꓸꓸ));
+    ref var l = ref Ꮡl.Value;
+    Ꮡl.Output(2, fmt.Sprintln(v.ꓸꓸꓸ));
     os.Exit(1);
 }
 
 // Panic is equivalent to l.Print() followed by a call to panic().
-[GoRecv] public static void Panic(this ref Logger l, params ꓸꓸꓸany vʗp) {
+public static void Panic(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
+    ref var l = ref Ꮡl.Value;
     @string s = fmt.Sprint(v.ꓸꓸꓸ);
-    l.Output(2, s);
+    Ꮡl.Output(2, s);
     throw panic(s);
 }
 
 // Panicf is equivalent to l.Printf() followed by a call to panic().
-[GoRecv] public static void Panicf(this ref Logger l, @string format, params ꓸꓸꓸany vʗp) {
+public static void Panicf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
+    ref var l = ref Ꮡl.Value;
     @string s = fmt.Sprintf(format, v.ꓸꓸꓸ);
-    l.Output(2, s);
+    Ꮡl.Output(2, s);
     throw panic(s);
 }
 
 // Panicln is equivalent to l.Println() followed by a call to panic().
-[GoRecv] public static void Panicln(this ref Logger l, params ꓸꓸꓸany vʗp) {
+public static void Panicln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
+    ref var l = ref Ꮡl.Value;
     @string s = fmt.Sprintln(v.ꓸꓸꓸ);
-    l.Output(2, s);
+    Ꮡl.Output(2, s);
     throw panic(s);
 }
 
 // Flags returns the output flags for the logger.
 // The flag bits are [Ldate], [Ltime], and so on.
-[GoRecv] public static nint Flags(this ref Logger l) {
-    return ((nint)l.flag.Load());
+public static nint Flags(this ж<Logger> Ꮡl) {
+    ref var l = ref Ꮡl.Value;
+
+    return (nint)Ꮡl.of(Logger.Ꮡflag).Load();
 }
 
 // SetFlags sets the output flags for the logger.
 // The flag bits are [Ldate], [Ltime], and so on.
-[GoRecv] public static void SetFlags(this ref Logger l, nint flag) {
-    l.flag.Store(((int32)flag));
+public static void SetFlags(this ж<Logger> Ꮡl, nint flag) {
+    ref var l = ref Ꮡl.Value;
+
+    Ꮡl.of(Logger.Ꮡflag).Store((int32)flag);
 }
 
 // Prefix returns the output prefix for the logger.
-[GoRecv] public static @string Prefix(this ref Logger l) {
+public static @string Prefix(this ж<Logger> Ꮡl) {
+    ref var l = ref Ꮡl.Value;
+
     {
-        var p = l.prefix.Load(); if (p != nil) {
-            return p.val;
+        var p = Ꮡl.of(Logger.Ꮡprefix).Load(); if (p != nil) {
+            return p.Value;
         }
     }
     return ""u8;
 }
 
 // SetPrefix sets the output prefix for the logger.
-[GoRecv] public static void SetPrefix(this ref Logger l, @string prefix) {
-    l.prefix.Store(Ꮡ(prefix));
+public static void SetPrefix(this ж<Logger> Ꮡl, @string prefix) {
+    ref var l = ref Ꮡl.Value;
+
+    Ꮡl.of(Logger.Ꮡprefix).Store(Ꮡ(prefix));
 }
 
 // Writer returns the output destination for the logger.
-[GoRecv] public static io.Writer Writer(this ref Logger l) => func((defer, _) => {
-    l.outMu.Lock();
-    defer(l.outMu.Unlock);
+public static Δio.Writer Writer(this ж<Logger> Ꮡl) => func((defer, recover) => {
+    ref var l = ref Ꮡl.Value;
+
+    Ꮡl.of(Logger.ᏑoutMu).Lock();
+    defer(Ꮡl.of(Logger.ᏑoutMu).Unlock);
     return l.@out;
 });
 
 // SetOutput sets the output destination for the standard logger.
-public static void SetOutput(io.Writer w) {
+public static void SetOutput(Δio.Writer w) {
     std.SetOutput(w);
 }
 
@@ -405,7 +429,7 @@ public static void SetPrefix(@string prefix) {
 }
 
 // Writer returns the output destination for the standard logger.
-public static io.Writer Writer() {
+public static Δio.Writer Writer() {
     return std.Writer();
 }
 
@@ -416,9 +440,8 @@ public static io.Writer Writer() {
 public static void Print(params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    std.output(0, 2, 
     var vʗ1 = v;
-    (slice<byte> b) => fmt.Append(b, vʗ1.ꓸꓸꓸ));
+    std.output(0, 2, (slice<byte> b) => fmt.Append(b, vʗ1.ꓸꓸꓸ));
 }
 
 // Printf calls Output to print to the standard logger.
@@ -426,9 +449,8 @@ public static void Print(params ꓸꓸꓸany vʗp) {
 public static void Printf(@string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    std.output(0, 2, 
     var vʗ1 = v;
-    (slice<byte> b) => fmt.Appendf(b, format, vʗ1.ꓸꓸꓸ));
+    std.output(0, 2, (slice<byte> b) => fmt.Appendf(b, format, vʗ1.ꓸꓸꓸ));
 }
 
 // Println calls Output to print to the standard logger.
@@ -436,9 +458,8 @@ public static void Printf(@string format, params ꓸꓸꓸany vʗp) {
 public static void Println(params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    std.output(0, 2, 
     var vʗ1 = v;
-    (slice<byte> b) => fmt.Appendln(b, vʗ1.ꓸꓸꓸ));
+    std.output(0, 2, (slice<byte> b) => fmt.Appendln(b, vʗ1.ꓸꓸꓸ));
 }
 
 // Fatal is equivalent to [Print] followed by a call to [os.Exit](1).

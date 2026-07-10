@@ -38,12 +38,12 @@ using static go.hash.fnv_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<sum128, hash_package.Hash>]
-[assembly: GoImplement<sum128a, hash_package.Hash>]
-[assembly: GoImplement<sum32, hash_package.Hash32>]
-[assembly: GoImplement<sum32a, hash_package.Hash32>]
-[assembly: GoImplement<sum64, hash_package.Hash64>]
-[assembly: GoImplement<sum64a, hash_package.Hash64>]
+[assembly: GoImplement<sum128, hash_package.Hash>(Pointer = true)]
+[assembly: GoImplement<sum128a, hash_package.Hash>(Pointer = true)]
+[assembly: GoImplement<sum32, hash_package.Hash32>(Pointer = true)]
+[assembly: GoImplement<sum32a, hash_package.Hash32>(Pointer = true)]
+[assembly: GoImplement<sum64, hash_package.Hash64>(Pointer = true)]
+[assembly: GoImplement<sum64a, hash_package.Hash64>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

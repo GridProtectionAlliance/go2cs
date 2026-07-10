@@ -5,14 +5,17 @@ namespace go.@internal.coverage;
 
 using cmp = cmp_package;
 using fmt = fmt_package;
-using coverage = @internal.coverage_package;
+using coverage = go.@internal.coverage_package;
 using os = os_package;
 using filepath = path.filepath_package;
 using regexp = regexp_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
-using @internal;
+using fs = io.fs_package;
+using go.@internal;
+using io;
+using io = io_package;
 using path;
 using ꓸꓸꓸany = Span<any>;
 
@@ -55,7 +58,7 @@ public static (slice<Pod>, error) CollectPods(slice<@string> dirs, bool warn) {
     var files = new @string[]{}.slice();
     var dirIndices = new nint[]{}.slice();
     foreach (var (k, dir) in dirs) {
-        (dents, err) = os.ReadDir(dir);
+        var (dents, err) = os.ReadDir(dir);
         if (err != default!) {
             return (default!, err);
         }
@@ -77,7 +80,7 @@ public static slice<Pod> CollectPodsFromFiles(slice<@string> files, bool warn) {
 }
 
 [GoType] partial struct fileWithAnnotations {
-    internal @string file;
+    internal @string @file;
     internal nint origin;
     internal nint pid;
 }
@@ -132,7 +135,7 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
                 // meta-data files. If we hit this case, use the
                 // first encountered as the canonical version.
                 {
-                    var (_, ok) = mm[tag]; if (!ok) {
+                    var (_, ok) = mm[tag, ꟷ]; if (!ok) {
                         mm[tag] = new protoPod(mf: f);
                     }
                 }
@@ -153,12 +156,12 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
                     continue;
                 }
                 {
-                    var (v, ok) = mm[tag]; if (ok){
+                    var (v, ok) = mm[tag, ꟷ]; if (ok){
                         nint idx = -1;
                         if (dirIndices != default!) {
                             idx = dirIndices[k];
                         }
-                        var fo = new fileWithAnnotations(file: f, origin: idx, pid: pid);
+                        var fo = new fileWithAnnotations(@file: f, origin: idx, pid: pid);
                         v.elements = append(v.elements, fo);
                         mm[tag] = v;
                     } else {
@@ -184,7 +187,7 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
                     return r;
                 }
             }
-            return strings.Compare(a.file, b.file);
+            return strings.Compare(a.@file, b.@file);
         });
         var pod = new Pod(
             MetaFile: p.mf,
@@ -193,7 +196,7 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
             ProcessIDs: new slice<nint>(0, len(p.elements))
         );
         foreach (var (_, e) in p.elements) {
-            pod.CounterDataFiles = append(pod.CounterDataFiles, e.file);
+            pod.CounterDataFiles = append(pod.CounterDataFiles, e.@file);
             pod.Origins = append(pod.Origins, e.origin);
             pod.ProcessIDs = append(pod.ProcessIDs, e.pid);
         }
@@ -206,9 +209,9 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
 internal static void warning(@string s, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
 
-    fmt.Fprintf(~os.Stderr, "warning: "u8);
-    fmt.Fprintf(~os.Stderr, s, a.ꓸꓸꓸ);
-    fmt.Fprintf(~os.Stderr, "\n"u8);
+    fmt.Fprintf(new os.FileжWriter(os.Stderr), "warning: "u8);
+    fmt.Fprintf(new os.FileжWriter(os.Stderr), s, a.ꓸꓸꓸ);
+    fmt.Fprintf(new os.FileжWriter(os.Stderr), "\n"u8);
 }
 
 } // end pods_package

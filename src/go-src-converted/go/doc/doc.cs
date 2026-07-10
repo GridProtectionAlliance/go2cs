@@ -6,11 +6,12 @@
 namespace go.go;
 
 using fmt = fmt_package;
-using ast = go.ast_package;
-using comment = go.doc.comment_package;
-using token = go.token_package;
+using ast = global::go.go.ast_package;
+using comment = global::go.go.doc.comment_package;
+using token = global::go.go.token_package;
 using strings = strings_package;
-using go.doc;
+using global::go.go;
+using global::go.go.doc;
 using ꓸꓸꓸany = Span<any>;
 
 partial class doc_package {
@@ -43,7 +44,7 @@ partial class doc_package {
 [GoType] partial struct Value {
     public @string Doc;
     public slice<@string> Names; // var or const names in declaration order
-    public ж<go.ast_package.GenDecl> Decl;
+    public ж<ast.GenDecl> Decl;
     internal nint order;
 }
 
@@ -51,7 +52,7 @@ partial class doc_package {
 [GoType] partial struct Type {
     public @string Doc;
     public @string Name;
-    public ж<go.ast_package.GenDecl> Decl;
+    public ж<ast.GenDecl> Decl;
     // associated declarations
     public slice<ж<Value>> Consts; // sorted list of constants of (mostly) this type
     public slice<ж<Value>> Vars; // sorted list of variables of (mostly) this type
@@ -67,7 +68,7 @@ partial class doc_package {
 [GoType] partial struct Func {
     public @string Doc;
     public @string Name;
-    public ж<go.ast_package.FuncDecl> Decl;
+    public ж<ast.FuncDecl> Decl;
     // methods
     // (for functions, these fields have the respective zero value)
     public @string Recv; // actual   receiver "T" or "*T" possibly followed by type parameters [P1, ..., Pn]
@@ -84,8 +85,7 @@ partial class doc_package {
 // at least one character is recognized. The ":" following the uid is optional.
 // Notes are collected in the Package.Notes map indexed by the notes marker.
 [GoType] partial struct Note {
-    public go.token_package.ΔPos Pos; // position range of the comment containing the marker
-    public go.token_package.ΔPos End;
+    public tokenꓸPos Pos, End; // position range of the comment containing the marker
     public @string UID;   // uid found with the marker
     public @string Body;   // note body text
 }
@@ -101,10 +101,10 @@ public static readonly Mode PreserveAST = 4;
 // To have the [Examples] fields populated, use [NewFromFiles] and include
 // the package's _test.go files.
 public static ж<Package> New(ж<ast.Package> Ꮡpkg, @string importPath, Mode mode) {
-    ref var pkg = ref Ꮡpkg.val;
+    ref var pkg = ref Ꮡpkg.Value;
 
-    reader r = default!;
-    r.readPackage(Ꮡpkg, mode);
+    ref var r = ref heap(new reader(), out var Ꮡr);
+    Ꮡr.readPackage(Ꮡpkg, mode);
     r.computeMethodSets();
     r.cleanupTypes();
     var p = Ꮡ(new Package(
@@ -189,12 +189,12 @@ public static ж<Package> New(ж<ast.Package> Ꮡpkg, @string importPath, Mode m
 //
 // NewFromFiles takes ownership of the AST files and may edit them,
 // unless the PreserveAST Mode bit is on.
-public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice<ast.File> files, @string importPath, params ꓸꓸꓸany optsʗp) {
+public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice<ж<ast.File>> files, @string importPath, params ꓸꓸꓸany optsʗp) {
     var opts = optsʗp.slice();
 
-    ref var fset = ref Ꮡfset.val;
+    ref var fset = ref Ꮡfset.DerefOrNil();
     // Check for invalid API usage.
-    if (fset == nil) {
+    if (Ꮡfset == nil) {
         throw panic(fmt.Errorf("doc.NewFromFiles: no token.FileSet provided (fset == nil)"u8));
     }
     Mode mode = default!;
@@ -218,13 +218,11 @@ public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice
     }}
 
     // Collect .go and _test.go files.
-    ast.File goFiles = new ast.File();
+    map<@string, ж<ast.File>> goFiles = new map<@string, ж<ast.File>>();
     
-    slice<ast.File> testGoFiles = default!;
-    ref var i = ref heap(new nint(), out var Ꮡi);
-
+    slice<ж<ast.File>> testGoFiles = default!;
     foreach (var (i, _) in files) {
-        var f = fset.File(files[i].Pos());
+        var f = Ꮡfset.File(files[i].Pos());
         if (f == nil) {
             return (default!, fmt.Errorf("file files[%d] is not found in the provided file set"u8, i));
         }
@@ -248,10 +246,10 @@ public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice
     // TODO(dmitshur,gri): A relatively high level call to ast.NewPackage with a simpleImporter
     // ast.Importer implementation is made below. It might be possible to short-circuit and simplify.
     // Compute package documentation.
-    (pkg, _) = ast.NewPackage(Ꮡfset, goFiles, simpleImporter, nil);
+    var (pkg, _) = ast.NewPackage(Ꮡfset, goFiles, new Func<map<@string, ж<ast.Object>>, @string, (ж<ast.Object>, error)>(simpleImporter), nil);
     // Ignore errors that can happen due to unresolved identifiers.
     var p = New(pkg, importPath, mode);
-    classifyExamples(p, Examples(ᏑtestGoFiles.ꓸꓸꓸ));
+    classifyExamples(p, Examples(testGoFiles.ꓸꓸꓸ));
     return (p, default!);
 }
 
@@ -259,12 +257,12 @@ public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice
 // component of the provided package path (as is the convention for packages).
 // This is sufficient to resolve package identifiers without doing an actual
 // import. It never returns an error.
-internal static (ж<ast.Object>, error) simpleImporter(ast.Object imports, @string path) {
+internal static (ж<ast.Object>, error) simpleImporter(map<@string, ж<ast.Object>> imports, @string path) {
     var pkg = imports[path];
     if (pkg == nil) {
         // note that strings.LastIndex returns -1 if there is no "/"
         pkg = ast.NewObj(ast.Pkg, path[(int)(strings.LastIndex(path, "/"u8) + 1)..]);
-        pkg.val.Data = ast.NewScope(nil);
+        pkg.Value.Data = ast.NewScope(nil);
         // required by ast.NewPackage for dot-import
         imports[path] = pkg;
     }
@@ -297,8 +295,7 @@ internal static (ж<ast.Object>, error) simpleImporter(ast.Object imports, @stri
     bool ok = default!;
 
     {
-        @string path = p.importByName[name];
-        var okΔ1 = p.importByName[name]; if (okΔ1) {
+        var (path, okΔ1) = p.importByName[name, ꟷ]; if (okΔ1) {
             if (path == ""u8) {
                 return ("", false);
             }
@@ -320,10 +317,12 @@ internal static (ж<ast.Object>, error) simpleImporter(ast.Object imports, @stri
 // for parsing doc comments from package p.
 // Each call returns a new parser, so that the caller may
 // customize it before use.
-[GoRecv] public static ж<comment.Parser> Parser(this ref Package p) {
+public static ж<comment.Parser> Parser(this ж<Package> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     return Ꮡ(new comment.Parser(
-        LookupPackage: p.lookupPackage,
-        LookupSym: p.lookupSym
+        LookupPackage: Ꮡp.lookupPackage,
+        LookupSym: Ꮡp.lookupSym
     ));
 }
 
@@ -342,8 +341,10 @@ internal static (ж<ast.Object>, error) simpleImporter(ast.Object imports, @stri
 // To customize details of the HTML, use [Package.Printer]
 // to obtain a [comment.Printer], and configure it
 // before calling its HTML method.
-[GoRecv] public static slice<byte> HTML(this ref Package p, @string text) {
-    return p.Printer().HTML(p.Parser().Parse(text));
+public static slice<byte> HTML(this ж<Package> Ꮡp, @string text) {
+    ref var p = ref Ꮡp.Value;
+
+    return p.Printer().HTML(Ꮡp.Parser().Parse(text));
 }
 
 // Markdown returns formatted Markdown for the doc comment text.
@@ -351,8 +352,10 @@ internal static (ж<ast.Object>, error) simpleImporter(ast.Object imports, @stri
 // To customize details of the Markdown, use [Package.Printer]
 // to obtain a [comment.Printer], and configure it
 // before calling its Markdown method.
-[GoRecv] public static slice<byte> Markdown(this ref Package p, @string text) {
-    return p.Printer().Markdown(p.Parser().Parse(text));
+public static slice<byte> Markdown(this ж<Package> Ꮡp, @string text) {
+    ref var p = ref Ꮡp.Value;
+
+    return p.Printer().Markdown(Ꮡp.Parser().Parse(text));
 }
 
 // Text returns formatted text for the doc comment text,
@@ -362,8 +365,10 @@ internal static (ж<ast.Object>, error) simpleImporter(ast.Object imports, @stri
 // To customize details of the formatting, use [Package.Printer]
 // to obtain a [comment.Printer], and configure it
 // before calling its Text method.
-[GoRecv] public static slice<byte> Text(this ref Package p, @string text) {
-    return p.Printer().Text(p.Parser().Parse(text));
+public static slice<byte> Text(this ж<Package> Ꮡp, @string text) {
+    ref var p = ref Ꮡp.Value;
+
+    return p.Printer().Text(Ꮡp.Parser().Parse(text));
 }
 
 } // end doc_package

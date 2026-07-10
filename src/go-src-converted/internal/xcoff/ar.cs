@@ -13,12 +13,12 @@ using encoding;
 
 partial class xcoff_package {
 
-public static readonly UntypedInt SAIAMAG = /* 0x8 */ 8;
+public static readonly UntypedInt SAIAMAG = 0x8;
 public static readonly @string AIAFMAG = "`\n"u8;
 public static readonly @string AIAMAG = "<aiaff>\n"u8;
 public static readonly @string AIAMAGBIG = "<bigaf>\n"u8;
-public static readonly UntypedInt FL_HSZ_BIG = /* 0x80 */ 128;
-public static readonly UntypedInt AR_HSZ_BIG = /* 0x70 */ 112;
+public static readonly UntypedInt FL_HSZ_BIG = 0x80;
+public static readonly UntypedInt AR_HSZ_BIG = 0x70;
 
 [GoType] partial struct bigarFileHeader {
     public array<byte> Flmagic = new(SAIAMAG); // Archive magic string
@@ -47,7 +47,7 @@ public static readonly UntypedInt AR_HSZ_BIG = /* 0x70 */ 112;
 [GoType] partial struct Archive {
     public partial ref ArchiveHeader ArchiveHeader { get; }
     public slice<ж<Member>> Members;
-    internal io_package.Closer closer;
+    internal io.Closer closer;
 }
 
 // ArchiveHeader holds information about a big archive file header
@@ -58,7 +58,7 @@ public static readonly UntypedInt AR_HSZ_BIG = /* 0x70 */ 112;
 // Member represents a member of an AIX big archive.
 [GoType] partial struct Member {
     public partial ref MemberHeader MemberHeader { get; }
-    internal ж<io_package.SectionReader> sr;
+    internal ж<io.SectionReader> sr;
 }
 
 // MemberHeader holds information about a big archive member
@@ -70,16 +70,16 @@ public static readonly UntypedInt AR_HSZ_BIG = /* 0x70 */ 112;
 // OpenArchive opens the named archive using os.Open and prepares it for use
 // as an AIX big archive.
 public static (ж<Archive>, error) OpenArchive(@string name) {
-    (f, err) = os.Open(name);
+    var (f, err) = os.Open(name);
     if (err != default!) {
         return (default!, err);
     }
-    (arch, err) = NewArchive(~f);
+    (var arch, err) = NewArchive(new os_FileжReaderAt(f));
     if (err != default!) {
         f.Close();
         return (default!, err);
     }
-    arch.val.closer = f;
+    arch.Value.closer = new os_FileжCloser(f);
     return (arch, default!);
 }
 
@@ -98,7 +98,7 @@ public static (ж<Archive>, error) OpenArchive(@string name) {
 // NewArchive creates a new Archive for accessing an AIX big archive in an underlying reader.
 public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
     var parseDecimalBytes = (slice<byte> b) => strconv.ParseInt(strings.TrimSpace(((@string)b)), 10, 64);
-    var sr = io.NewSectionReader(r, 0, 1 << (int)(63) - 1);
+    var sr = io.NewSectionReader(r, 0, 9223372036854775807L);
     // Read File Header
     array<byte> magic = new(8); /* SAIAMAG */
     {
@@ -109,7 +109,7 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
     var arch = @new<Archive>();
     var exprᴛ1 = ((@string)(magic[..]));
     if (exprᴛ1 == AIAMAGBIG) {
-        arch.magic = ((@string)(magic[..]));
+        arch.Value.magic = ((@string)(magic[..]));
     }
     else if (exprᴛ1 == AIAMAG) {
         return (default!, fmt.Errorf("small AIX archive not supported"u8));
@@ -125,7 +125,7 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
         }
     }
     {
-        var errΔ3 = binary.Read(~sr, binary.BigEndian, Ꮡfhdr); if (errΔ3 != default!) {
+        var errΔ3 = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), Ꮡfhdr); if (errΔ3 != default!) {
             return (default!, errΔ3);
         }
     }
@@ -137,7 +137,7 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
         // Occurs if the archive is empty.
         return (arch, default!);
     }
-    var (lastoff, err) = parseDecimalBytes(fhdr.Fllstmoff[..]);
+    (var lastoff, err) = parseDecimalBytes(fhdr.Fllstmoff[..]);
     if (err != default!) {
         return (default!, fmt.Errorf("error parsing offset of first member in archive header(%q); %v"u8, fhdr, err));
     }
@@ -154,43 +154,43 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
         }
         ref var mhdr = ref heap(new bigarMemberHeader(), out var Ꮡmhdr);
         {
-            var errΔ5 = binary.Read(~sr, binary.BigEndian, Ꮡmhdr); if (errΔ5 != default!) {
+            var errΔ5 = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), Ꮡmhdr); if (errΔ5 != default!) {
                 return (default!, errΔ5);
             }
         }
         var member = @new<Member>();
-        arch.val.Members = append((~arch).Members, member);
-        var (size, err) = parseDecimalBytes(mhdr.Arsize[..]);
-        if (err != default!) {
-            return (default!, fmt.Errorf("error parsing size in member header(%q); %v"u8, mhdr, err));
+        arch.Value.Members = append((~arch).Members, member);
+        var (size, errΔ6) = parseDecimalBytes(mhdr.Arsize[..]);
+        if (errΔ6 != default!) {
+            return (default!, fmt.Errorf("error parsing size in member header(%q); %v"u8, mhdr, errΔ6));
         }
-        member.Size = ((uint64)size);
+        member.Value.Size = (uint64)size;
         // Read name
-        var (namlen, err) = parseDecimalBytes(mhdr.Arnamlen[..]);
-        if (err != default!) {
-            return (default!, fmt.Errorf("error parsing name length in member header(%q); %v"u8, mhdr, err));
+        (var namlen, errΔ6) = parseDecimalBytes(mhdr.Arnamlen[..]);
+        if (errΔ6 != default!) {
+            return (default!, fmt.Errorf("error parsing name length in member header(%q); %v"u8, mhdr, errΔ6));
         }
-        var name = new slice<byte>(namlen);
+        var name = new slice<byte>((nint)(namlen));
         {
-            var errΔ6 = binary.Read(~sr, binary.BigEndian, name); if (errΔ6 != default!) {
-                return (default!, errΔ6);
+            var errΔ7 = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), name); if (errΔ7 != default!) {
+                return (default!, errΔ7);
             }
         }
-        member.Name = ((@string)name);
-        var fileoff = off + AR_HSZ_BIG + namlen;
+        member.Value.Name = ((@string)name);
+        var fileoff = off + (int64)AR_HSZ_BIG + namlen;
         if ((int64)(fileoff & 1) != 0) {
             fileoff++;
             {
-                var (_, errΔ7) = sr.Seek(1, io.SeekCurrent); if (errΔ7 != default!) {
-                    return (default!, errΔ7);
+                var (_, errΔ8) = sr.Seek(1, io.SeekCurrent); if (errΔ8 != default!) {
+                    return (default!, errΔ8);
                 }
             }
         }
         // Read AIAFMAG string
         ref var fmag = ref heap(new array<byte>(2), out var Ꮡfmag);
         {
-            var errΔ8 = binary.Read(~sr, binary.BigEndian, Ꮡfmag); if (errΔ8 != default!) {
-                return (default!, errΔ8);
+            var errΔ9 = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), Ꮡfmag); if (errΔ9 != default!) {
+                return (default!, errΔ9);
             }
         }
         if (((@string)(fmag[..])) != AIAFMAG) {
@@ -198,13 +198,13 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
         }
         fileoff += 2;
         // Add the two bytes of AIAFMAG
-        member.val.sr = io.NewSectionReader(~sr, fileoff, size);
+        member.Value.sr = io.NewSectionReader(new io_SectionReaderжReaderAt(sr), fileoff, size);
         if (off == lastoff) {
             break;
         }
-        (off, err) = parseDecimalBytes(mhdr.Arnxtmem[..]);
-        if (err != default!) {
-            return (default!, fmt.Errorf("error parsing offset of first member in archive header(%q); %v"u8, fhdr, err));
+        (off, errΔ6) = parseDecimalBytes(mhdr.Arnxtmem[..]);
+        if (errΔ6 != default!) {
+            return (default!, fmt.Errorf("error parsing offset of first member in archive header(%q); %v"u8, fhdr, errΔ6));
         }
     }
     return (arch, default!);
@@ -215,8 +215,8 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
 // name which can occur if an archive has both 32-bits and 64-bits files.
 [GoRecv] public static (ж<File>, error) GetFile(this ref Archive arch, @string name) {
     foreach (var (_, mem) in arch.Members) {
-        if (mem.Name == name) {
-            return NewFile(~(~mem).sr);
+        if ((~mem).Name == name) {
+            return NewFile(new io_SectionReaderжReaderAt((~mem).sr));
         }
     }
     return (default!, fmt.Errorf("unknown member %s in archive"u8, name));

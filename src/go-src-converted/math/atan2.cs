@@ -79,9 +79,9 @@ internal static float64 atan2(float64 y, float64 x) {
     var q = Atan(y / x);
     if (x < 0) {
         if (q <= 0) {
-            return q + Pi;
+            return q + (float64)Pi;
         }
-        return q - Pi;
+        return q - (float64)Pi;
     }
     return q;
 }

@@ -1,4 +1,4 @@
-// Copyright 2009 The Go Authors. All rights reserved.
+﻿// Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -12,7 +12,7 @@ Go 1 compatibility guidelines.
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using go.runtime;
+using go.golib;
 using go;
 
 [module: GoManualConversion]
@@ -212,9 +212,9 @@ public class Pointer : ж<uintptr> {
     {
     }
 
-    public Pointer this[int index] => val + (uintptr)index;
+    public Pointer this[int index] => Value + (uintptr)index;
 
-    public Pointer this[nint index] => val + (uintptr)index;
+    public Pointer this[nint index] => Value + (uintptr)index;
 
     public Pointer this[Range range]
     {
@@ -223,7 +223,7 @@ public class Pointer : ж<uintptr> {
             if (range.End.Value >= 0)
                 throw new IndexOutOfRangeException($"End of range not supported for '{nameof(Pointer)}' indexing -- length is not known");
 
-            return val + (uintptr)range.Start.Value;
+            return Value + (uintptr)range.Start.Value;
         }
     }
 
@@ -258,7 +258,7 @@ public class Pointer : ж<uintptr> {
     }
 
     public static implicit operator uintptr(Pointer value) {
-        return value.val;
+        return value.Value;
     }
 
     public static implicit operator Pointer(void* value) {
@@ -266,7 +266,7 @@ public class Pointer : ж<uintptr> {
     }
 
     public static implicit operator void*(Pointer value) {
-        return (void*)value.val;
+        return (void*)value.Value;
     }
 
     public static Pointer FromRef<T>(ref T type)
@@ -479,6 +479,12 @@ private static uintptr AlignofType([DynamicallyAccessedMembers(DynamicallyAccess
 // A constant len argument must be representable by a value of type int;
 // if it is an untyped constant it is given type int.
 // The rules for valid uses of Pointer still apply.
+// uintptr forwards through its inner value (the golib struct does not implement the
+// IBinaryInteger generic-math surface the TLen constraint requires — CS0315)
+public static ж<T> Add<T>(ж<T> ptr, uintptr len) {
+    return Add(ptr, len.Value);
+}
+
 public static ж<T> Add<T, TLen>(ж<T> ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
     // Go's len is of any integer type (the `IntegerType` constraint); reduce it to the pointer
     // offset type. A signed/unsigned/native-width argument (e.g. a `uintptr`) thus all bind here.
@@ -511,6 +517,13 @@ public static ж<T> Add<T, TLen>(ж<T> ptr, TLen len) where TLen : System.Numeri
 // if it is an untyped constant it is given type int.
 // At run time, if len is negative, or if ptr is nil and len is not zero,
 // a run-time panic occurs.
+// A uintptr length forwards through its inner value: golib's uintptr STRUCT does not (and
+// deliberately will not) implement the IBinaryInteger generic-math surface the TLen
+// constraint requires (CS0315); the non-generic-length overload is preferred by resolution.
+public static slice<T> Slice<T>(ж<T> ptr, uintptr len) {
+    return Slice(ptr, len.Value);
+}
+
 public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
     // Go's len is of any integer type (the `IntegerType` constraint); reduce it to int.
     int n = int.CreateTruncating(len);
@@ -526,7 +539,7 @@ public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.N
         throw panic("ptr is nil and len is not zero");
     }
 
-    fixed (T* pointer = &ptr.val)
+    fixed (T* pointer = &ptr.Value)
         return new slice<T>(new ReadOnlySpan<T>(pointer, n));
 }
 
@@ -555,6 +568,11 @@ public static ж<T> SliceData<T>(slice<T> slice) {
 //
 // Since Go strings are immutable, the bytes passed to String
 // must not be modified as long as the returned string value exists.
+// uintptr forwards through its inner value (see Add overload note)
+public static @string String(ж<byte> ptr, uintptr len) {
+    return String(ptr, len.Value);
+}
+
 public static @string String<TLen>(ж<byte> ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
     // Go's len is of any integer type (the `IntegerType` constraint); reduce it to int.
     int n = int.CreateTruncating(len);
@@ -570,7 +588,7 @@ public static @string String<TLen>(ж<byte> ptr, TLen len) where TLen : System.N
         throw panic("ptr is nil and len is not zero");
     }
 
-    fixed (byte* pointer = &ptr.val)
+    fixed (byte* pointer = &ptr.Value)
         return new @string(new ReadOnlySpan<byte>(pointer, n));
 }
 

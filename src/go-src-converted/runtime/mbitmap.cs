@@ -149,7 +149,7 @@ internal static bool heapBitsInSpan(uintptr userSize) {
     ж<_type> typ = default!;
     if (spc.sizeclass() != 0){
         // Pull the allocation header from the first word of the object.
-        typ = ~(ж<ж<_type>>)(uintptr)(((@unsafe.Pointer)addr));
+        typ = ~(ж<ж<_type>>)(uintptr)((@unsafe.Pointer)addr);
         addr += mallocHeaderSize;
     } else {
         typ = span.largeType;
@@ -158,7 +158,7 @@ internal static bool heapBitsInSpan(uintptr userSize) {
             return new typePointers(nil);
         }
     }
-    var gcdata = typ.val.GCData;
+    var gcdata = typ.Value.GCData;
     return new typePointers(elem: addr, addr: addr, mask: readUintptr(gcdata), typ: typ);
 }
 
@@ -173,10 +173,10 @@ internal static bool heapBitsInSpan(uintptr userSize) {
 //
 //go:nosplit
 [GoRecv] internal static typePointers typePointersOfType(this ref mspan span, ж<abi.Type> Ꮡtyp, uintptr addr) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.DerefOrNil();
 
     const bool doubleCheck = false;
-    if (doubleCheck && (typ == nil || (abiꓸKind)(typ.Kind_ & abi.KindGCProg) != 0)) {
+    if (doubleCheck && (Ꮡtyp == nil || (abiꓸKind)(typ.Kind_ & abi.KindGCProg) != 0)) {
         @throw("bad type passed to typePointersOfType"u8);
     }
     if (span.spanclass.noscan()) {
@@ -184,7 +184,7 @@ internal static bool heapBitsInSpan(uintptr userSize) {
     }
     // Since we have the type, pretend we have a header.
     var gcdata = typ.GCData;
-    return new typePointers(elem: addr, addr: addr, mask: readUintptr(gcdata), typ: typ);
+    return new typePointers(elem: addr, addr: addr, mask: readUintptr(gcdata), typ: Ꮡtyp);
 }
 
 // nextFast is the fast path of next. nextFast is written to be inlineable and,
@@ -215,14 +215,14 @@ internal static (typePointers, uintptr) nextFast(this typePointers tp) {
     // BSFQ
     nint i = default!;
     if (goarch.PtrSize == 8){
-        i = sys.TrailingZeros64(((uint64)tp.mask));
+        i = sys.TrailingZeros64((uint64)tp.mask);
     } else {
-        i = sys.TrailingZeros32(((uint32)tp.mask));
+        i = sys.TrailingZeros32((uint32)tp.mask);
     }
     // BTCQ
-    tp.mask ^= (uintptr)(((uintptr)1) << (int)(((nint)(i & (ptrBits - 1)))));
+    tp.mask ^= ((uintptr)1 << (int)(((nint)(i & (nint)(ptrBits - 1)))));
     // LEAQ (XX)(XX*8)
-    return (tp, tp.addr + ((uintptr)i) * goarch.PtrSize);
+    return (tp, tp.addr + (uintptr)i * (uintptr)goarch.PtrSize);
 }
 
 // next advances the pointers iterator, returning the updated iterator and
@@ -243,8 +243,8 @@ internal static (typePointers, uintptr) next(this typePointers tp, uintptr limit
             return (new typePointers(nil), 0);
         }
         // Advance to the next element if necessary.
-        if (tp.addr + goarch.PtrSize * ptrBits >= tp.elem + tp.typ.PtrBytes){
-            tp.elem += tp.typ.Size_;
+        if (tp.addr + (uintptr)(goarch.PtrSize * ptrBits) >= tp.elem + (~tp.typ).PtrBytes){
+            tp.elem += tp.typ.Value.Size_;
             tp.addr = tp.elem;
         } else {
             tp.addr += ptrBits * goarch.PtrSize;
@@ -254,10 +254,10 @@ internal static (typePointers, uintptr) next(this typePointers tp, uintptr limit
             return (new typePointers(nil), 0);
         }
         // Grab more bits and try again.
-        tp.mask = readUintptr(addb(tp.typ.GCData, (tp.addr - tp.elem) / goarch.PtrSize / 8));
-        if (tp.addr + goarch.PtrSize * ptrBits > limit) {
-            var bits = (tp.addr + goarch.PtrSize * ptrBits - limit) / goarch.PtrSize;
-            tp.mask &= ~(uintptr)(((1 << (int)((bits))) - 1) << (int)((ptrBits - bits)));
+        tp.mask = readUintptr(addb((~tp.typ).GCData, (tp.addr - tp.elem) / (uintptr)goarch.PtrSize / 8));
+        if (tp.addr + (uintptr)(goarch.PtrSize * ptrBits) > limit) {
+            var bits = (tp.addr + (uintptr)(goarch.PtrSize * ptrBits) - limit) / (uintptr)goarch.PtrSize;
+            tp.mask &= unchecked((uintptr)~((((uintptr)(1 << (int)((bits)))) - 1) << (int)(((uintptr)ptrBits - bits))));
         }
     }
 }
@@ -278,31 +278,31 @@ internal static typePointers fastForward(this typePointers tp, uintptr n, uintpt
     if (tp.typ == nil) {
         // Handle small objects.
         // Clear any bits before the target address.
-        tp.mask &= ~(uintptr)((1 << (int)(((target - tp.addr) / goarch.PtrSize))) - 1);
+        tp.mask &= unchecked((uintptr)~((uintptr)(1 << (int)(((target - tp.addr) / (uintptr)goarch.PtrSize)))) - 1);
         // Clear any bits past the limit.
-        if (tp.addr + goarch.PtrSize * ptrBits > limit) {
-            var bits = (tp.addr + goarch.PtrSize * ptrBits - limit) / goarch.PtrSize;
-            tp.mask &= ~(uintptr)(((1 << (int)((bits))) - 1) << (int)((ptrBits - bits)));
+        if (tp.addr + (uintptr)(goarch.PtrSize * ptrBits) > limit) {
+            var bits = (tp.addr + (uintptr)(goarch.PtrSize * ptrBits) - limit) / (uintptr)goarch.PtrSize;
+            tp.mask &= unchecked((uintptr)~((((uintptr)(1 << (int)((bits)))) - 1) << (int)(((uintptr)ptrBits - bits))));
         }
         return tp;
     }
     // Move up elem and addr.
     // Offsets within an element are always at a ptrBits*goarch.PtrSize boundary.
-    if (n >= tp.typ.Size_){
+    if (n >= (~tp.typ).Size_){
         // elem needs to be moved to the element containing
         // tp.addr + n.
         var oldelem = tp.elem;
-        tp.elem += (tp.addr - tp.elem + n) / tp.typ.Size_ * tp.typ.Size_;
+        tp.elem += (tp.addr - tp.elem + n) / (~tp.typ).Size_ * (~tp.typ).Size_;
         tp.addr = tp.elem + alignDown(n - (tp.elem - oldelem), ptrBits * goarch.PtrSize);
     } else {
         tp.addr += alignDown(n, ptrBits * goarch.PtrSize);
     }
-    if (tp.addr - tp.elem >= tp.typ.PtrBytes){
+    if (tp.addr - tp.elem >= (~tp.typ).PtrBytes){
         // We're starting in the non-pointer area of an array.
         // Move up to the next element.
-        tp.elem += tp.typ.Size_;
+        tp.elem += tp.typ.Value.Size_;
         tp.addr = tp.elem;
-        tp.mask = readUintptr(tp.typ.GCData);
+        tp.mask = readUintptr((~tp.typ).GCData);
         // We may have exceeded the limit after this. Bail just like next does.
         if (tp.addr >= limit) {
             return new typePointers(nil);
@@ -310,12 +310,12 @@ internal static typePointers fastForward(this typePointers tp, uintptr n, uintpt
     } else {
         // Grab the mask, but then clear any bits before the target address and any
         // bits over the limit.
-        tp.mask = readUintptr(addb(tp.typ.GCData, (tp.addr - tp.elem) / goarch.PtrSize / 8));
-        tp.mask &= ~(uintptr)((1 << (int)(((target - tp.addr) / goarch.PtrSize))) - 1);
+        tp.mask = readUintptr(addb((~tp.typ).GCData, (tp.addr - tp.elem) / (uintptr)goarch.PtrSize / 8));
+        tp.mask &= unchecked((uintptr)~((uintptr)(1 << (int)(((target - tp.addr) / (uintptr)goarch.PtrSize)))) - 1);
     }
-    if (tp.addr + goarch.PtrSize * ptrBits > limit) {
-        var bits = (tp.addr + goarch.PtrSize * ptrBits - limit) / goarch.PtrSize;
-        tp.mask &= ~(uintptr)(((1 << (int)((bits))) - 1) << (int)((ptrBits - bits)));
+    if (tp.addr + (uintptr)(goarch.PtrSize * ptrBits) > limit) {
+        var bits = (tp.addr + (uintptr)(goarch.PtrSize * ptrBits) - limit) / (uintptr)goarch.PtrSize;
+        tp.mask &= unchecked((uintptr)~((((uintptr)(1 << (int)((bits)))) - 1) << (int)(((uintptr)ptrBits - bits))));
     }
     return tp;
 }
@@ -372,9 +372,9 @@ internal static typePointers fastForward(this typePointers tp, uintptr n, uintpt
 //
 //go:nosplit
 internal static void bulkBarrierPreWrite(uintptr dst, uintptr src, uintptr size, ж<abi.Type> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.DerefOrNil();
 
-    if ((uintptr)(((uintptr)((uintptr)(dst | src) | size)) & (goarch.PtrSize - 1)) != 0) {
+    if ((uintptr)(((uintptr)((uintptr)(dst | src) | size)) & (uintptr)(goarch.PtrSize - 1)) != 0) {
         @throw("bulkBarrierPreWrite: unaligned arguments"u8);
     }
     if (!writeBarrier.enabled) {
@@ -398,7 +398,7 @@ internal static void bulkBarrierPreWrite(uintptr dst, uintptr src, uintptr size,
         }
         return;
     } else 
-    if ((~s).state.get() != mSpanInUse || dst < s.@base() || (~s).limit <= dst) {
+    if (s.of(mspan.Ꮡstate).get() != mSpanInUse || dst < s.@base() || (~s).limit <= dst) {
         // dst was heap memory at some point, but isn't now.
         // It can't be a global. It must be either our stack,
         // or in the case of direct channel sends, it could be
@@ -407,29 +407,29 @@ internal static void bulkBarrierPreWrite(uintptr dst, uintptr src, uintptr size,
         // though that should never have.
         return;
     }
-    var buf = Ꮡ((~(~(~getg()).m).p.ptr()).wbBuf);
+    var buf = (~(~getg()).m).p.ptr().of(runtime_package.Δp.ᏑwbBuf);
     // Double-check that the bitmaps generated in the two possible paths match.
     const bool doubleCheck = false;
     if (doubleCheck) {
         doubleCheckTypePointersOfType(s, Ꮡtyp, dst, size);
     }
     typePointers tp = default!;
-    if (typ != nil && (abiꓸKind)(typ.Kind_ & abi.KindGCProg) == 0){
+    if (Ꮡtyp != nil && (abiꓸKind)(typ.Kind_ & abi.KindGCProg) == 0){
         tp = s.typePointersOfType(Ꮡtyp, dst);
     } else {
         tp = s.typePointersOf(dst, size);
     }
     if (src == 0){
         while (ᐧ) {
-            uintptr addrΔ1 = default!;
+            uintptr addr = default!;
             {
-                (tp, addrΔ1) = tp.next(dst + size); if (addrΔ1 == 0) {
+                (tp, addr) = tp.next(dst + size); if (addr == 0) {
                     break;
                 }
             }
-            var dstx = ((ж<uintptr>)((@unsafe.Pointer)addrΔ1));
+            var dstx = (ж<uintptr>)(uintptr)((@unsafe.Pointer)addr);
             var Δp = buf.get1();
-            Δp.val[0] = dstx.val;
+            Δp.Value[0] = dstx.Value;
         }
     } else {
         while (ᐧ) {
@@ -439,11 +439,11 @@ internal static void bulkBarrierPreWrite(uintptr dst, uintptr src, uintptr size,
                     break;
                 }
             }
-            var dstx = ((ж<uintptr>)((@unsafe.Pointer)addr));
-            var srcx = ((ж<uintptr>)((@unsafe.Pointer)(src + (addr - dst))));
+            var dstx = (ж<uintptr>)(uintptr)((@unsafe.Pointer)addr);
+            var srcx = (ж<uintptr>)(uintptr)((@unsafe.Pointer)(src + (addr - dst)));
             var Δp = buf.get2();
-            Δp.val[0] = dstx.val;
-            Δp.val[1] = srcx.val;
+            Δp.Value[0] = dstx.Value;
+            Δp.Value[1] = srcx.Value;
         }
     }
 }
@@ -463,15 +463,15 @@ internal static void bulkBarrierPreWrite(uintptr dst, uintptr src, uintptr size,
 //
 //go:nosplit
 internal static void bulkBarrierPreWriteSrcOnly(uintptr dst, uintptr src, uintptr size, ж<abi.Type> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.DerefOrNil();
 
-    if ((uintptr)(((uintptr)((uintptr)(dst | src) | size)) & (goarch.PtrSize - 1)) != 0) {
+    if ((uintptr)(((uintptr)((uintptr)(dst | src) | size)) & (uintptr)(goarch.PtrSize - 1)) != 0) {
         @throw("bulkBarrierPreWrite: unaligned arguments"u8);
     }
     if (!writeBarrier.enabled) {
         return;
     }
-    var buf = Ꮡ((~(~(~getg()).m).p.ptr()).wbBuf);
+    var buf = (~(~getg()).m).p.ptr().of(runtime_package.Δp.ᏑwbBuf);
     var s = spanOf(dst);
     // Double-check that the bitmaps generated in the two possible paths match.
     const bool doubleCheck = false;
@@ -479,7 +479,7 @@ internal static void bulkBarrierPreWriteSrcOnly(uintptr dst, uintptr src, uintpt
         doubleCheckTypePointersOfType(s, Ꮡtyp, dst, size);
     }
     typePointers tp = default!;
-    if (typ != nil && (abiꓸKind)(typ.Kind_ & abi.KindGCProg) == 0){
+    if (Ꮡtyp != nil && (abiꓸKind)(typ.Kind_ & abi.KindGCProg) == 0){
         tp = s.typePointersOfType(Ꮡtyp, dst);
     } else {
         tp = s.typePointersOf(dst, size);
@@ -491,9 +491,9 @@ internal static void bulkBarrierPreWriteSrcOnly(uintptr dst, uintptr src, uintpt
                 break;
             }
         }
-        var srcx = ((ж<uintptr>)((@unsafe.Pointer)(addr - dst + src)));
+        var srcx = (ж<uintptr>)(uintptr)((@unsafe.Pointer)(addr - dst + src));
         var Δp = buf.get1();
-        Δp.val[0] = srcx.val;
+        Δp.Value[0] = srcx.Value;
     }
 }
 
@@ -505,7 +505,7 @@ internal static void bulkBarrierPreWriteSrcOnly(uintptr dst, uintptr src, uintpt
 [GoRecv] internal static void initHeapBits(this ref mspan s, bool forceClear) {
     if ((!s.spanclass.noscan() && heapBitsInSpan(s.elemsize)) || s.isUserArenaChunk) {
         var b = s.heapBits();
-        clear(b);
+        builtin.clear(b);
     }
 }
 
@@ -540,17 +540,17 @@ internal static void bulkBarrierPreWriteSrcOnly(uintptr dst, uintptr src, uintpt
         // This will be inlined and constant-folded down.
         return heapBitsSlice(span.@base(), pageSize);
     }
-    return heapBitsSlice(span.@base(), span.npages * pageSize);
+    return heapBitsSlice(span.@base(), span.npages * (uintptr)pageSize);
 }
 
 // Helper for constructing a slice for the span's heap bits.
 //
 //go:nosplit
 internal static slice<uintptr> heapBitsSlice(uintptr spanBase, uintptr spanSize) {
-    var bitmapSize = spanSize / goarch.PtrSize / 8;
-    nint elems = ((nint)(bitmapSize / goarch.PtrSize));
+    var bitmapSize = spanSize / (uintptr)goarch.PtrSize / 8;
+    nint elems = (nint)(bitmapSize / (uintptr)goarch.PtrSize);
     ref var sl = ref heap(new notInHeapSlice(), out var Ꮡsl);
-    sl = new notInHeapSlice((ж<notInHeap>)(uintptr)(((@unsafe.Pointer)(spanBase + spanSize - bitmapSize))), elems, elems);
+    sl = new notInHeapSlice((ж<notInHeap>)(uintptr)((@unsafe.Pointer)(spanBase + spanSize - bitmapSize)), elems, elems);
     return ~(ж<slice<uintptr>>)(uintptr)(new @unsafe.Pointer(Ꮡsl));
 }
 
@@ -561,9 +561,9 @@ internal static slice<uintptr> heapBitsSlice(uintptr spanBase, uintptr spanSize)
 //
 //go:nosplit
 [GoRecv] internal static uintptr heapBitsSmallForAddr(this ref mspan span, uintptr addr) {
-    var spanSize = span.npages * pageSize;
-    var bitmapSize = spanSize / goarch.PtrSize / 8;
-    var hbits = (ж<byte>)(uintptr)(((@unsafe.Pointer)(span.@base() + spanSize - bitmapSize)));
+    var spanSize = span.npages * (uintptr)pageSize;
+    var bitmapSize = spanSize / (uintptr)goarch.PtrSize / 8;
+    var hbits = (ж<byte>)(uintptr)((@unsafe.Pointer)(span.@base() + spanSize - bitmapSize));
     // These objects are always small enough that their bitmaps
     // fit in a single word, so just load the word or two we need.
     //
@@ -572,21 +572,21 @@ internal static slice<uintptr> heapBitsSlice(uintptr spanBase, uintptr spanSize)
     // We should be using heapBits(), but unfortunately it introduces
     // both bounds checks panics and throw which causes us to exceed
     // the nosplit limit in quite a few cases.
-    var i = (addr - span.@base()) / goarch.PtrSize / ptrBits;
-    var j = (addr - span.@base()) / goarch.PtrSize % ptrBits;
-    var bits = span.elemsize / goarch.PtrSize;
-    var word0 = ((ж<uintptr>)new @unsafe.Pointer(addb(hbits, goarch.PtrSize * (i + 0))));
-    var word1 = ((ж<uintptr>)new @unsafe.Pointer(addb(hbits, goarch.PtrSize * (i + 1))));
+    var i = (addr - span.@base()) / (uintptr)goarch.PtrSize / (uintptr)ptrBits;
+    var j = (addr - span.@base()) / (uintptr)goarch.PtrSize % (uintptr)ptrBits;
+    var bits = span.elemsize / (uintptr)goarch.PtrSize;
+    var word0 = (ж<uintptr>)(uintptr)(new @unsafe.Pointer(addb(hbits, (uintptr)goarch.PtrSize * (i + 0))));
+    var word1 = (ж<uintptr>)(uintptr)(new @unsafe.Pointer(addb(hbits, (uintptr)goarch.PtrSize * (i + 1))));
     uintptr read = default!;
     if (j + bits > ptrBits){
         // Two reads.
-        var bits0 = ptrBits - j;
+        var bits0 = (uintptr)ptrBits - j;
         var bits1 = bits - bits0;
-        read = word0.val >> (int)(j);
-        read |= (uintptr)(((uintptr)(word1.val & ((1 << (int)(bits1)) - 1))) << (int)(bits0));
+        read = (word0.Value >> (int)(j));
+        read |= (uintptr)((((uintptr)(word1.Value & (((uintptr)(1 << (int)(bits1))) - 1))) << (int)(bits0)));
     } else {
         // One read.
-        read = (uintptr)((word0.val >> (int)(j)) & ((1 << (int)(bits)) - 1));
+        read = (uintptr)(((word0.Value >> (int)(j))) & (((uintptr)(1 << (int)(bits))) - 1));
     }
     return read;
 }
@@ -601,49 +601,47 @@ internal static slice<uintptr> heapBitsSlice(uintptr spanBase, uintptr spanSize)
 [GoRecv] internal static uintptr /*scanSize*/ writeHeapBitsSmall(this ref mspan span, uintptr x, uintptr dataSize, ж<_type> Ꮡtyp) {
     uintptr scanSize = default!;
 
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.Value;
     // The objects here are always really small, so a single load is sufficient.
     var src0 = readUintptr(typ.GCData);
     // Create repetitions of the bitmap if we have a small array.
-    var bits = span.elemsize / goarch.PtrSize;
+    var bits = span.elemsize / (uintptr)goarch.PtrSize;
     scanSize = typ.PtrBytes;
     var src = src0;
-    switch (typ.Size_) {
-    case goarch.PtrSize: {
-        src = (1 << (int)((dataSize / goarch.PtrSize))) - 1;
-        break;
+    var exprᴛ1 = typ.Size_;
+    if (exprᴛ1 == goarch.PtrSize) {
+        src = ((uintptr)(1 << (int)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
     }
-    default: {
-        for (var iΔ2 = typ.Size_; iΔ2 < dataSize;  += typ.Size_) {
-            src |= (uintptr)(src0 << (int)((iΔ2 / goarch.PtrSize)));
+    else { /* default: */
+        for (var iΔ2 = typ.Size_; iΔ2 < dataSize; iΔ2 += typ.Size_) {
+            src |= (uintptr)((src0 << (int)((iΔ2 / (uintptr)goarch.PtrSize))));
             scanSize += typ.Size_;
         }
-        break;
-    }}
+    }
 
     // Since we're never writing more than one uintptr's worth of bits, we're either going
     // to do one or two writes.
     var dst = span.heapBits();
-    var o = (x - span.@base()) / goarch.PtrSize;
-    var i = o / ptrBits;
-    var j = o % ptrBits;
+    var o = (x - span.@base()) / (uintptr)goarch.PtrSize;
+    var i = o / (uintptr)ptrBits;
+    var j = o % (uintptr)ptrBits;
     if (j + bits > ptrBits){
         // Two writes.
-        var bits0 = ptrBits - j;
+        var bits0 = (uintptr)ptrBits - j;
         var bits1 = bits - bits0;
-        dst[i + 0] = (uintptr)((uintptr)(dst[i + 0] & (~((uintptr)0) >> (int)(bits0))) | (src << (int)(j)));
-        dst[i + 1] = (uintptr)((uintptr)(dst[i + 1] & ~((1 << (int)(bits1)) - 1)) | (src >> (int)(bits0)));
+        dst[(nint)(i + 0)] = (uintptr)((uintptr)(dst[(nint)(i + 0)] & ((~(uintptr)0 >> (int)(bits0)))) | ((src << (int)(j))));
+        dst[(nint)(i + 1)] = (uintptr)((uintptr)(dst[(nint)(i + 1)] & ~(((uintptr)(1 << (int)(bits1))) - 1)) | ((src >> (int)(bits0))));
     } else {
         // One write.
-        dst[i] = (uintptr)(((uintptr)(dst[i] & ~(((1 << (int)(bits)) - 1) << (int)(j)))) | (src << (int)(j)));
+        dst[(nint)(i)] = (uintptr)(((uintptr)(dst[(nint)(i)] & ~(((((uintptr)(1 << (int)(bits))) - 1) << (int)(j))))) | ((src << (int)(j))));
     }
     const bool doubleCheck = false;
     if (doubleCheck) {
         var srcRead = span.heapBitsSmallForAddr(x);
         if (srcRead != src) {
-            print("runtime: x=", ((Δhex)x), " i=", i, " j=", j, " bits=", bits, "\n");
+            print("runtime: x=", ((Δhex)(uint64)x), " i=", i, " j=", j, " bits=", bits, "\n");
             print("runtime: dataSize=", dataSize, " typ.Size_=", typ.Size_, " typ.PtrBytes=", typ.PtrBytes, "\n");
-            print("runtime: src0=", ((Δhex)src0), " src=", ((Δhex)src), " srcRead=", ((Δhex)srcRead), "\n");
+            print("runtime: src0=", ((Δhex)(uint64)src0), " src=", ((Δhex)(uint64)src), " srcRead=", ((Δhex)(uint64)srcRead), "\n");
             @throw("bad pointer bits written for small object"u8);
         }
     }
@@ -669,12 +667,12 @@ internal static slice<uintptr> heapBitsSlice(uintptr spanBase, uintptr spanSize)
 internal static uintptr /*scanSize*/ heapSetType(uintptr x, uintptr dataSize, ж<_type> Ꮡtyp, ж<ж<_type>> Ꮡheader, ж<mspan> Ꮡspan) {
     uintptr scanSize = default!;
 
-    ref var typ = ref Ꮡtyp.val;
-    ref var header = ref Ꮡheader.val;
-    ref var span = ref Ꮡspan.val;
+    ref var typ = ref Ꮡtyp.Value;
+    ref var header = ref Ꮡheader.DerefOrNil();
+    ref var span = ref Ꮡspan.Value;
     const bool doubleCheck = false;
-    var gctyp = typ;
-    if (header == nil){
+    var gctyp = Ꮡtyp;
+    if (Ꮡheader == nil){
         if (doubleCheck && (!heapBitsInSpan(dataSize) || !heapBitsInSpan(span.elemsize))) {
             @throw("tried to write heap bits, but no heap bits in span"u8);
         }
@@ -688,27 +686,24 @@ internal static uintptr /*scanSize*/ heapSetType(uintptr x, uintptr dataSize, ж
             if (span.spanclass.sizeclass() != 0) {
                 @throw("GCProg for type that isn't large"u8);
             }
-            var spaceNeeded = alignUp(@unsafe.Sizeof(new _type{}), goarch.PtrSize);
+            var spaceNeeded = alignUp(@unsafe.Sizeof(new _type()), goarch.PtrSize);
             var heapBitsOff = spaceNeeded;
-            spaceNeeded += alignUp(typ.PtrBytes / goarch.PtrSize / 8, goarch.PtrSize);
-            var npages = alignUp(spaceNeeded, pageSize) / pageSize;
-            ж<mspan> progSpan = default!;
-            systemstack(
-            var mheap_ʗ2 = mheap_;
-            var progSpanʗ2 = progSpan;
-            () => {
-                progSpanʗ2 = mheap_ʗ2.allocManual(npages, spanAllocPtrScalarBits);
-                memclrNoHeapPointers(((@unsafe.Pointer)progSpanʗ2.@base()), (~progSpanʗ2).npages * pageSize);
+            spaceNeeded += alignUp(typ.PtrBytes / (uintptr)goarch.PtrSize / 8, goarch.PtrSize);
+            var npages = alignUp(spaceNeeded, pageSize) / (uintptr)pageSize;
+            ref var progSpan = ref heap<ж<mspan>>(out var ᏑprogSpan);
+            systemstack(() => {
+                ᏑprogSpan.ValueSlot = Ꮡmheap_.allocManual(npages, spanAllocPtrScalarBits);
+                memclrNoHeapPointers((@unsafe.Pointer)ᏑprogSpan.ValueSlot.@base(), (~ᏑprogSpan.ValueSlot).npages * (uintptr)pageSize);
             });
             // Write a dummy _type in the new space.
             //
             // We only need to write size, PtrBytes, and GCData, since that's all
             // the GC cares about.
-            gctyp = (ж<_type>)(uintptr)(((@unsafe.Pointer)progSpan.@base()));
-            gctyp.val.Size_ = typ.Size_;
-            gctyp.val.PtrBytes = typ.PtrBytes;
-            gctyp.val.GCData = (ж<byte>)(uintptr)(add(((@unsafe.Pointer)progSpan.@base()), heapBitsOff));
-            gctyp.val.TFlag = abi.TFlagUnrolledBitmap;
+            gctyp = (ж<_type>)(uintptr)((@unsafe.Pointer)progSpan.@base());
+            gctyp.Value.Size_ = typ.Size_;
+            gctyp.Value.PtrBytes = typ.PtrBytes;
+            gctyp.Value.GCData = (ж<byte>)(uintptr)(add((@unsafe.Pointer)progSpan.@base(), heapBitsOff));
+            gctyp.Value.TFlag = abi.TFlagUnrolledBitmap;
             // Expand the GC program into space reserved at the end of the new span.
             runGCProg(addb(typ.GCData, 4), (~gctyp).GCData);
         }
@@ -722,17 +717,17 @@ internal static uintptr /*scanSize*/ heapSetType(uintptr x, uintptr dataSize, ж
         // a random interior pointer and make sure iterating from
         // that point works correctly too.
         var maxIterBytes = span.elemsize;
-        if (header == nil) {
+        if (Ꮡheader == nil) {
             maxIterBytes = dataSize;
         }
-        var off = alignUp(((uintptr)cheaprand()) % dataSize, goarch.PtrSize);
+        var off = alignUp((uintptr)cheaprand() % dataSize, goarch.PtrSize);
         var size = dataSize - off;
         if (size == 0) {
             off -= goarch.PtrSize;
             size += goarch.PtrSize;
         }
         var interior = x + off;
-        size -= alignDown(((uintptr)cheaprand()) % size, goarch.PtrSize);
+        size -= alignDown((uintptr)cheaprand() % size, goarch.PtrSize);
         if (size == 0) {
             size = goarch.PtrSize;
         }
@@ -747,51 +742,51 @@ internal static uintptr /*scanSize*/ heapSetType(uintptr x, uintptr dataSize, ж
 }
 
 internal static void doubleCheckHeapPointers(uintptr x, uintptr dataSize, ж<_type> Ꮡtyp, ж<ж<_type>> Ꮡheader, ж<mspan> Ꮡspan) {
-    ref var typ = ref Ꮡtyp.val;
-    ref var header = ref Ꮡheader.val;
-    ref var span = ref Ꮡspan.val;
+    ref var typ = ref Ꮡtyp.Value;
+    ref var header = ref Ꮡheader.DerefOrNil();
+    ref var span = ref Ꮡspan.Value;
 
     // Check that scanning the full object works.
     var tp = span.typePointersOfUnchecked(span.objBase(x));
     var maxIterBytes = span.elemsize;
-    if (header == nil) {
+    if (Ꮡheader == nil) {
         maxIterBytes = dataSize;
     }
     var bad = false;
-    for (var i = ((uintptr)0); i < maxIterBytes; i += goarch.PtrSize) {
+    for (var i = (uintptr)0; i < maxIterBytes; i += goarch.PtrSize) {
         // Compute the pointer bit we want at offset i.
         var want = false;
         if (i < span.elemsize) {
             var off = i % typ.Size_;
             if (off < typ.PtrBytes) {
-                var j = off / goarch.PtrSize;
-                want = (byte)(addb(typ.GCData, j / 8).val >> (int)((j % 8)) & 1) != 0;
+                var j = off / (uintptr)goarch.PtrSize;
+                want = (byte)((addb(typ.GCData, j / 8).Value >> (int)((j % 8))) & 1) != 0;
             }
         }
         if (want) {
-            uintptr addrΔ1 = default!;
-            (tp, ) = tp.next(x + span.elemsize);
-            if (addrΔ1 == 0) {
+            uintptr addr = default!;
+            (tp, addr) = tp.next(x + span.elemsize);
+            if (addr == 0) {
                 println("runtime: found bad iterator");
             }
-            if (addrΔ1 != x + i) {
-                print("runtime: addr=", ((Δhex)addrΔ1), " x+i=", ((Δhex)(x + i)), "\n");
+            if (addr != x + i) {
+                print("runtime: addr=", ((Δhex)(uint64)addr), " x+i=", ((Δhex)(uint64)(x + i)), "\n");
                 bad = true;
             }
         }
     }
     if (!bad) {
-        uintptr addrΔ2 = default!;
-        (tp, ) = tp.next(x + span.elemsize);
-        if (addrΔ2 == 0) {
+        uintptr addr = default!;
+        (tp, addr) = tp.next(x + span.elemsize);
+        if (addr == 0) {
             return;
         }
-        println("runtime: extra pointer:", ((Δhex)addrΔ2));
+        println("runtime: extra pointer:", ((Δhex)(uint64)addr));
     }
-    print("runtime: hasHeader=", header != nil, " typ.Size_=", typ.Size_, " hasGCProg=", (abiꓸKind)(typ.Kind_ & abi.KindGCProg) != 0, "\n");
-    print("runtime: x=", ((Δhex)x), " dataSize=", dataSize, " elemsize=", span.elemsize, "\n");
+    print("runtime: hasHeader=", Ꮡheader != nil, " typ.Size_=", typ.Size_, " hasGCProg=", (abiꓸKind)(typ.Kind_ & abi.KindGCProg) != 0, "\n");
+    print("runtime: x=", ((Δhex)(uint64)x), " dataSize=", dataSize, " elemsize=", span.elemsize, "\n");
     print("runtime: typ=", new @unsafe.Pointer(Ꮡtyp), " typ.PtrBytes=", typ.PtrBytes, "\n");
-    print("runtime: limit=", ((Δhex)(x + span.elemsize)), "\n");
+    print("runtime: limit=", ((Δhex)(uint64)(x + span.elemsize)), "\n");
     tp = span.typePointersOfUnchecked(x);
     dumpTypePointers(tp);
     while (ᐧ) {
@@ -803,20 +798,20 @@ internal static void doubleCheckHeapPointers(uintptr x, uintptr dataSize, ж<_ty
                 break;
             }
         }
-        print("runtime: addr=", ((Δhex)addr), "\n");
+        print("runtime: addr=", ((Δhex)(uint64)addr), "\n");
         dumpTypePointers(tp);
     }
     @throw("heapSetType: pointer entry not correct"u8);
 }
 
 internal static void doubleCheckHeapPointersInterior(uintptr x, uintptr interior, uintptr size, uintptr dataSize, ж<_type> Ꮡtyp, ж<ж<_type>> Ꮡheader, ж<mspan> Ꮡspan) {
-    ref var typ = ref Ꮡtyp.val;
-    ref var header = ref Ꮡheader.val;
-    ref var span = ref Ꮡspan.val;
+    ref var typ = ref Ꮡtyp.Value;
+    ref var header = ref Ꮡheader.DerefOrNil();
+    ref var span = ref Ꮡspan.Value;
 
     var bad = false;
     if (interior < x) {
-        print("runtime: interior=", ((Δhex)interior), " x=", ((Δhex)x), "\n");
+        print("runtime: interior=", ((Δhex)(uint64)interior), " x=", ((Δhex)(uint64)x), "\n");
         @throw("found bad interior pointer"u8);
     }
     var off = interior - x;
@@ -827,34 +822,34 @@ internal static void doubleCheckHeapPointersInterior(uintptr x, uintptr interior
         if (i < span.elemsize) {
             var offΔ1 = i % typ.Size_;
             if (offΔ1 < typ.PtrBytes) {
-                var j = offΔ1 / goarch.PtrSize;
-                want = (byte)(addb(typ.GCData, j / 8).val >> (int)((j % 8)) & 1) != 0;
+                var j = offΔ1 / (uintptr)goarch.PtrSize;
+                want = (byte)((addb(typ.GCData, j / 8).Value >> (int)((j % 8))) & 1) != 0;
             }
         }
         if (want) {
-            uintptr addrΔ1 = default!;
-            (tp, ) = tp.next(interior + size);
-            if (addrΔ1 == 0) {
+            uintptr addr = default!;
+            (tp, addr) = tp.next(interior + size);
+            if (addr == 0) {
                 println("runtime: found bad iterator");
                 bad = true;
             }
-            if (addrΔ1 != x + i) {
-                print("runtime: addr=", ((Δhex)addrΔ1), " x+i=", ((Δhex)(x + i)), "\n");
+            if (addr != x + i) {
+                print("runtime: addr=", ((Δhex)(uint64)addr), " x+i=", ((Δhex)(uint64)(x + i)), "\n");
                 bad = true;
             }
         }
     }
     if (!bad) {
-        uintptr addrΔ2 = default!;
-        (tp, ) = tp.next(interior + size);
-        if (addrΔ2 == 0) {
+        uintptr addr = default!;
+        (tp, addr) = tp.next(interior + size);
+        if (addr == 0) {
             return;
         }
-        println("runtime: extra pointer:", ((Δhex)addrΔ2));
+        println("runtime: extra pointer:", ((Δhex)(uint64)addr));
     }
-    print("runtime: hasHeader=", header != nil, " typ.Size_=", typ.Size_, "\n");
-    print("runtime: x=", ((Δhex)x), " dataSize=", dataSize, " elemsize=", span.elemsize, " interior=", ((Δhex)interior), " size=", size, "\n");
-    print("runtime: limit=", ((Δhex)(interior + size)), "\n");
+    print("runtime: hasHeader=", Ꮡheader != nil, " typ.Size_=", typ.Size_, "\n");
+    print("runtime: x=", ((Δhex)(uint64)x), " dataSize=", dataSize, " elemsize=", span.elemsize, " interior=", ((Δhex)(uint64)interior), " size=", size, "\n");
+    print("runtime: limit=", ((Δhex)(uint64)(interior + size)), "\n");
     tp = span.typePointersOf(interior, size);
     dumpTypePointers(tp);
     while (ᐧ) {
@@ -866,7 +861,7 @@ internal static void doubleCheckHeapPointersInterior(uintptr x, uintptr interior
                 break;
             }
         }
-        print("runtime: addr=", ((Δhex)addr), "\n");
+        print("runtime: addr=", ((Δhex)(uint64)addr), "\n");
         dumpTypePointers(tp);
     }
     print("runtime: want: ");
@@ -876,8 +871,8 @@ internal static void doubleCheckHeapPointersInterior(uintptr x, uintptr interior
         if (i < dataSize) {
             var offΔ2 = i % typ.Size_;
             if (offΔ2 < typ.PtrBytes) {
-                var j = offΔ2 / goarch.PtrSize;
-                want = (byte)(addb(typ.GCData, j / 8).val >> (int)((j % 8)) & 1) != 0;
+                var j = offΔ2 / (uintptr)goarch.PtrSize;
+                want = (byte)((addb(typ.GCData, j / 8).Value >> (int)((j % 8))) & 1) != 0;
             }
         }
         if (want){
@@ -892,10 +887,10 @@ internal static void doubleCheckHeapPointersInterior(uintptr x, uintptr interior
 
 //go:nosplit
 internal static void doubleCheckTypePointersOfType(ж<mspan> Ꮡs, ж<_type> Ꮡtyp, uintptr addr, uintptr size) {
-    ref var s = ref Ꮡs.val;
-    ref var typ = ref Ꮡtyp.val;
+    ref var s = ref Ꮡs.Value;
+    ref var typ = ref Ꮡtyp.DerefOrNil();
 
-    if (typ == nil || (abiꓸKind)(typ.Kind_ & abi.KindGCProg) != 0) {
+    if (Ꮡtyp == nil || (abiꓸKind)(typ.Kind_ & abi.KindGCProg) != 0) {
         return;
     }
     if ((abiꓸKind)(typ.Kind_ & abi.KindMask) == abi.Interface) {
@@ -908,31 +903,31 @@ internal static void doubleCheckTypePointersOfType(ж<mspan> Ꮡs, ж<_type> Ꮡ
     var tp1 = s.typePointersOf(addr, size);
     var failed = false;
     while (ᐧ) {
-        uintptr addr0Δ1 = default!;
-        uintptr addr1Δ1 = default!;
-        (tp0, ) = tp0.next(addr + size);
-        (tp1, ) = tp1.next(addr + size);
-        if (addr0Δ1 != addr1Δ1) {
+        uintptr addr0 = default!;
+        uintptr addr1 = default!;
+        (tp0, addr0) = tp0.next(addr + size);
+        (tp1, addr1) = tp1.next(addr + size);
+        if (addr0 != addr1) {
             failed = true;
             break;
         }
-        if (addr0Δ1 == 0) {
+        if (addr0 == 0) {
             break;
         }
     }
     if (failed) {
         var tp0Δ1 = s.typePointersOfType(Ꮡtyp, addr);
         var tp1Δ1 = s.typePointersOf(addr, size);
-        print("runtime: addr=", ((Δhex)addr), " size=", size, "\n");
+        print("runtime: addr=", ((Δhex)(uint64)addr), " size=", size, "\n");
         print("runtime: type=", toRType(Ꮡtyp).@string(), "\n");
         dumpTypePointers(tp0Δ1);
         dumpTypePointers(tp1Δ1);
         while (ᐧ) {
             uintptr addr0 = default!;
             uintptr addr1 = default!;
-            (tp0, addr0) = tp0Δ1.next(addr + size);
-            (tp1, addr1) = tp1Δ1.next(addr + size);
-            print("runtime: ", ((Δhex)addr0), " ", ((Δhex)addr1), "\n");
+            (tp0Δ1, addr0) = tp0Δ1.next(addr + size);
+            (tp1Δ1, addr1) = tp1Δ1.next(addr + size);
+            print("runtime: ", ((Δhex)(uint64)addr0), " ", ((Δhex)(uint64)addr1), "\n");
             if (addr0 == 0 && addr1 == 0) {
                 break;
             }
@@ -942,10 +937,10 @@ internal static void doubleCheckTypePointersOfType(ж<mspan> Ꮡs, ж<_type> Ꮡ
 }
 
 internal static void dumpTypePointers(typePointers tp) {
-    print("runtime: tp.elem=", ((Δhex)tp.elem), " tp.typ=", new @unsafe.Pointer(tp.typ), "\n");
-    print("runtime: tp.addr=", ((Δhex)tp.addr), " tp.mask=");
-    for (var i = ((uintptr)0); i < ptrBits; i++) {
-        if ((uintptr)(tp.mask & (((uintptr)1) << (int)(i))) != 0){
+    print("runtime: tp.elem=", ((Δhex)(uint64)tp.elem), " tp.typ=", new @unsafe.Pointer(tp.typ), "\n");
+    print("runtime: tp.addr=", ((Δhex)(uint64)tp.addr), " tp.mask=");
+    for (var i = (uintptr)0; i < ptrBits; i++) {
+        if ((uintptr)(tp.mask & (((uintptr)1 << (int)(i)))) != 0){
             print("1");
         } else {
             print("0");
@@ -959,12 +954,12 @@ internal static void dumpTypePointers(typePointers tp) {
 //go:nowritebarrier
 //go:nosplit
 internal static ж<byte> addb(ж<byte> Ꮡp, uintptr n) {
-    ref var Δp = ref Ꮡp.val;
+    ref var Δp = ref Ꮡp.Value;
 
     // Note: wrote out full expression instead of calling add(p, n)
     // to reduce the number of temporaries generated by the
     // compiler for this trivial expression during inlining.
-    return (ж<byte>)(uintptr)(((@unsafe.Pointer)(((uintptr)new @unsafe.Pointer(Ꮡp)) + n)));
+    return (ж<byte>)(uintptr)((@unsafe.Pointer)((uintptr)new @unsafe.Pointer(Ꮡp) + n));
 }
 
 // subtractb returns the byte pointer p-n.
@@ -972,12 +967,12 @@ internal static ж<byte> addb(ж<byte> Ꮡp, uintptr n) {
 //go:nowritebarrier
 //go:nosplit
 internal static ж<byte> subtractb(ж<byte> Ꮡp, uintptr n) {
-    ref var Δp = ref Ꮡp.val;
+    ref var Δp = ref Ꮡp.Value;
 
     // Note: wrote out full expression instead of calling add(p, -n)
     // to reduce the number of temporaries generated by the
     // compiler for this trivial expression during inlining.
-    return (ж<byte>)(uintptr)(((@unsafe.Pointer)(((uintptr)new @unsafe.Pointer(Ꮡp)) - n)));
+    return (ж<byte>)(uintptr)((@unsafe.Pointer)((uintptr)new @unsafe.Pointer(Ꮡp) - n));
 }
 
 // add1 returns the byte pointer p+1.
@@ -985,12 +980,12 @@ internal static ж<byte> subtractb(ж<byte> Ꮡp, uintptr n) {
 //go:nowritebarrier
 //go:nosplit
 internal static ж<byte> add1(ж<byte> Ꮡp) {
-    ref var Δp = ref Ꮡp.val;
+    ref var Δp = ref Ꮡp.Value;
 
     // Note: wrote out full expression instead of calling addb(p, 1)
     // to reduce the number of temporaries generated by the
     // compiler for this trivial expression during inlining.
-    return (ж<byte>)(uintptr)(((@unsafe.Pointer)(((uintptr)new @unsafe.Pointer(Ꮡp)) + 1)));
+    return (ж<byte>)(uintptr)((@unsafe.Pointer)((uintptr)new @unsafe.Pointer(Ꮡp) + 1));
 }
 
 // subtract1 returns the byte pointer p-1.
@@ -1000,12 +995,12 @@ internal static ж<byte> add1(ж<byte> Ꮡp) {
 //go:nowritebarrier
 //go:nosplit
 internal static ж<byte> subtract1(ж<byte> Ꮡp) {
-    ref var Δp = ref Ꮡp.val;
+    ref var Δp = ref Ꮡp.Value;
 
     // Note: wrote out full expression instead of calling subtractb(p, 1)
     // to reduce the number of temporaries generated by the
     // compiler for this trivial expression during inlining.
-    return (ж<byte>)(uintptr)(((@unsafe.Pointer)(((uintptr)new @unsafe.Pointer(Ꮡp)) - 1)));
+    return (ж<byte>)(uintptr)((@unsafe.Pointer)((uintptr)new @unsafe.Pointer(Ꮡp) - 1));
 }
 
 // markBits provides access to the mark bit for an object in the heap.
@@ -1034,16 +1029,16 @@ internal static ж<byte> subtract1(ж<byte> Ꮡp) {
 // can be used. It then places these 8 bytes into the cached 64 bit
 // s.allocCache.
 [GoRecv] internal static void refillAllocCache(this ref mspan s, uint16 whichByte) {
-    var bytes = (ж<array<uint8>>)(uintptr)(new @unsafe.Pointer(s.allocBits.bytep(((uintptr)whichByte))));
-    var aCache = ((uint64)0);
-    aCache |= (uint64)(((uint64)bytes.val[0]));
-    aCache |= (uint64)(((uint64)bytes.val[1]) << (int)((1 * 8)));
-    aCache |= (uint64)(((uint64)bytes.val[2]) << (int)((2 * 8)));
-    aCache |= (uint64)(((uint64)bytes.val[3]) << (int)((3 * 8)));
-    aCache |= (uint64)(((uint64)bytes.val[4]) << (int)((4 * 8)));
-    aCache |= (uint64)(((uint64)bytes.val[5]) << (int)((5 * 8)));
-    aCache |= (uint64)(((uint64)bytes.val[6]) << (int)((6 * 8)));
-    aCache |= (uint64)(((uint64)bytes.val[7]) << (int)((7 * 8)));
+    var bytes = (ж<array<uint8>>)(uintptr)(new @unsafe.Pointer(s.allocBits.bytep((uintptr)whichByte)));
+    var aCache = (uint64)0;
+    aCache |= (uint64)((uint64)bytes.Value[0]);
+    aCache |= (uint64)(((uint64)bytes.Value[1] << (int)((1 * 8))));
+    aCache |= (uint64)(((uint64)bytes.Value[2] << (int)((2 * 8))));
+    aCache |= (uint64)(((uint64)bytes.Value[3] << (int)((3 * 8))));
+    aCache |= (uint64)(((uint64)bytes.Value[4] << (int)((4 * 8))));
+    aCache |= (uint64)(((uint64)bytes.Value[5] << (int)((5 * 8))));
+    aCache |= (uint64)(((uint64)bytes.Value[6] << (int)((6 * 8))));
+    aCache |= (uint64)(((uint64)bytes.Value[7] << (int)((7 * 8))));
     s.allocCache = ~aCache;
 }
 
@@ -1069,7 +1064,7 @@ internal static ж<byte> subtract1(ж<byte> Ꮡp) {
             s.freeindex = snelems;
             return snelems;
         }
-        var whichByte = sfreeindex / 8;
+        var whichByte = (uint16)(sfreeindex / 8);
         // Refill s.allocCache with the next 64 alloc bits.
         s.refillAllocCache(whichByte);
         aCache = s.allocCache;
@@ -1077,20 +1072,20 @@ internal static ж<byte> subtract1(ж<byte> Ꮡp) {
     }
     // nothing available in cached bits
     // grab the next 8 bytes and try again.
-    var result = sfreeindex + ((uint16)bitIndex);
+    var result = (uint16)(sfreeindex + (uint16)bitIndex);
     if (result >= snelems) {
         s.freeindex = snelems;
         return snelems;
     }
-    s.allocCache >>= (nuint)(((nuint)(bitIndex + 1)));
-    sfreeindex = result + 1;
+    s.allocCache >>= (int)((nuint)(bitIndex + 1));
+    sfreeindex = (uint16)(result + 1);
     if (sfreeindex % 64 == 0 && sfreeindex != snelems) {
         // We just incremented s.freeindex so it isn't 0.
         // As each 1 in s.allocCache was encountered and used for allocation
         // it was shifted away. At this point s.allocCache contains all 0s.
         // Refill s.allocCache so that it corresponds
         // to the bits at s.allocBits starting at s.freeindex.
-        var whichByte = sfreeindex / 8;
+        var whichByte = (uint16)(sfreeindex / 8);
         s.refillAllocCache(whichByte);
     }
     s.freeindex = sfreeindex;
@@ -1103,11 +1098,11 @@ internal static ж<byte> subtract1(ж<byte> Ꮡp) {
 // been no preemption points since ensuring this (which could allow a
 // GC transition, which would allow the state to change).
 [GoRecv] internal static bool isFree(this ref mspan s, uintptr index) {
-    if (index < ((uintptr)s.freeIndexForScan)) {
+    if (index < (uintptr)s.freeIndexForScan) {
         return false;
     }
     var (bytep, mask) = s.allocBits.bitp(index);
-    return (uint8)(bytep.val & mask) == 0;
+    return (uint8)(bytep.Value & mask) == 0;
 }
 
 // divideByElemSize returns n/s.elemsize.
@@ -1121,7 +1116,7 @@ internal static ж<byte> subtract1(ж<byte> Ꮡp) {
 [GoRecv] internal static uintptr divideByElemSize(this ref mspan s, uintptr n) {
     const bool doubleCheck = false;
     // See explanation in mksizeclasses.go's computeDivMagic.
-    var q = ((uintptr)((((uint64)n) * ((uint64)s.divMul)) >> (int)(32)));
+    var q = (uintptr)((((uint64)n * (uint64)s.divMul) >> (int)(32)));
     if (doubleCheck && q != n / s.elemsize) {
         println(n, "/", s.elemsize, "should be", n / s.elemsize, "but got", q);
         @throw("bad magic division"u8);
@@ -1148,12 +1143,12 @@ internal static markBits markBitsForAddr(uintptr Δp) {
 }
 
 [GoRecv] internal static markBits markBitsForBase(this ref mspan s) {
-    return new markBits(Ꮡ(s.gcmarkBits.x), ((uint8)1), 0);
+    return new markBits(s.gcmarkBits.of(gcBits.Ꮡx), (uint8)1, 0);
 }
 
 // isMarked reports whether mark bit m is set.
 internal static bool isMarked(this markBits m) {
-    return (uint8)(m.bytep.val & m.mask) != 0;
+    return (uint8)(m.bytep.Value & m.mask) != 0;
 }
 
 // setMarked sets the marked bit in the markbits, atomically.
@@ -1166,7 +1161,7 @@ internal static void setMarked(this markBits m) {
 
 // setMarkedNonAtomic sets the marked bit in the markbits, non-atomically.
 internal static void setMarkedNonAtomic(this markBits m) {
-    m.bytep.val |= (uint8)(m.mask);
+    m.bytep.Value |= (uint8)(m.mask);
 }
 
 // clearMarked clears the marked bit in the markbits, atomically.
@@ -1174,7 +1169,7 @@ internal static void clearMarked(this markBits m) {
     // Might be racing with other updates, so use atomic update always.
     // We used to be clever here and use a non-atomic update in certain
     // cases, but it's not worth the risk.
-    atomic.And8(m.bytep, ~m.mask);
+    atomic.And8(m.bytep, (uint8)(~m.mask));
 }
 
 // markBitsForSpan returns the markBits for the span base address base.
@@ -1190,22 +1185,22 @@ internal static markBits /*mbits*/ markBitsForSpan(uintptr @base) {
 
 // advance advances the markBits to the next object in the span.
 [GoRecv] internal static void advance(this ref markBits m) {
-    if (m.mask == 1 << (int)(7)){
-        m.bytep = (ж<uint8>)(uintptr)(((@unsafe.Pointer)(((uintptr)new @unsafe.Pointer(m.bytep)) + 1)));
+    if (m.mask == (uint8)(1 << (int)(7))){
+        m.bytep = (ж<uint8>)(uintptr)((@unsafe.Pointer)((uintptr)new @unsafe.Pointer(m.bytep) + 1));
         m.mask = 1;
     } else {
-        m.mask = m.mask << (int)(1);
+        m.mask = (uint8)((m.mask << (int)(1)));
     }
     m.index++;
 }
 
 // clobberdeadPtr is a special value that is used by the compiler to
 // clobber dead stack slots, when -clobberdead flag is set.
-internal const uintptr clobberdeadPtr = /* uintptr(0xdeaddead | 0xdeaddead<<((^uintptr(0)>>63)*32)) */ 16045725885737590445;
+internal static readonly uintptr clobberdeadPtr = /* uintptr(0xdeaddead | 0xdeaddead<<((^uintptr(0)>>63)*32)) */ unchecked((uintptr)16045725885737590445);
 
 // badPointer throws bad pointer in heap panic.
 internal static void badPointer(ж<mspan> Ꮡs, uintptr Δp, uintptr refBase, uintptr refOff) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.DerefOrNil();
 
     // Typically this indicates an incorrect use
     // of unsafe or cgo to store a bad pointer in
@@ -1216,22 +1211,22 @@ internal static void badPointer(ж<mspan> Ꮡs, uintptr Δp, uintptr refBase, ui
     // and detect pointers to unallocated objects
     // in allocated spans.
     printlock();
-    print("runtime: pointer ", ((Δhex)Δp));
-    if (s != nil) {
-        var state = s.state.get();
+    print("runtime: pointer ", ((Δhex)(uint64)Δp));
+    if (Ꮡs != nil) {
+        var state = Ꮡs.of(mspan.Ꮡstate).get();
         if (state != mSpanInUse){
             print(" to unallocated span");
         } else {
             print(" to unused region of span");
         }
-        print(" span.base()=", ((Δhex)s.@base()), " span.limit=", ((Δhex)s.limit), " span.state=", state);
+        print(" span.base()=", ((Δhex)(uint64)s.@base()), " span.limit=", ((Δhex)(uint64)s.limit), " span.state=", state);
     }
     print("\n");
     if (refBase != 0) {
-        print("runtime: found in object at *(", ((Δhex)refBase), "+", ((Δhex)refOff), ")\n");
+        print("runtime: found in object at *(", ((Δhex)(uint64)refBase), "+", ((Δhex)(uint64)refOff), ")\n");
         gcDumpObject("object"u8, refBase, refOff);
     }
-    (~getg()).m.val.traceback = 2;
+    getg().Value.m.Value.traceback = 2;
     @throw("found bad pointer in Go heap (incorrect use of unsafe or cgo?)"u8);
 }
 
@@ -1281,7 +1276,7 @@ internal static (uintptr @base, ж<mspan> s, uintptr objIndex) findObject(uintpt
     // Check s.state to synchronize with span initialization
     // before checking other fields. See also spanOfHeap.
     {
-        var state = (~s).state.get(); if (state != mSpanInUse || Δp < s.@base() || Δp >= (~s).limit) {
+        var state = s.of(mspan.Ꮡstate).get(); if (state != mSpanInUse || Δp < s.@base() || Δp >= (~s).limit) {
             // Pointers into stacks are also ok, the runtime manages these explicitly.
             if (state == mSpanManual) {
                 return (@base, s, objIndex);
@@ -1320,15 +1315,15 @@ internal static readonly UntypedInt ptrBits = /* 8 * goarch.PtrSize */ 64;
 //
 //go:nosplit
 internal static void bulkBarrierBitmap(uintptr dst, uintptr src, uintptr size, uintptr maskOffset, ж<uint8> Ꮡbits) {
-    ref var bits = ref Ꮡbits.val;
+    ref var bits = ref Ꮡbits.Value;
 
-    var word = maskOffset / goarch.PtrSize;
-    bits = addb(Ꮡbits, word / 8);
-    var mask = ((uint8)1) << (int)((word % 8));
-    var buf = Ꮡ((~(~(~getg()).m).p.ptr()).wbBuf);
-    for (var i = ((uintptr)0); i < size; i += goarch.PtrSize) {
+    var word = maskOffset / (uintptr)goarch.PtrSize;
+    Ꮡbits = addb(Ꮡbits, word / 8); bits = ref Ꮡbits.Value;
+    var mask = (uint8)(((uint8)1 << (int)((word % 8))));
+    var buf = (~(~getg()).m).p.ptr().of(runtime_package.Δp.ᏑwbBuf);
+    for (var i = (uintptr)0; i < size; i += goarch.PtrSize) {
         if (mask == 0) {
-            bits = addb(Ꮡbits, 1);
+            Ꮡbits = addb(Ꮡbits, 1); bits = ref Ꮡbits.Value;
             if (bits == 0) {
                 // Skip 8 words.
                 i += 7 * goarch.PtrSize;
@@ -1337,18 +1332,18 @@ internal static void bulkBarrierBitmap(uintptr dst, uintptr src, uintptr size, u
             mask = 1;
         }
         if ((uint8)(bits & mask) != 0) {
-            var dstx = ((ж<uintptr>)((@unsafe.Pointer)(dst + i)));
+            var dstx = (ж<uintptr>)(uintptr)((@unsafe.Pointer)(dst + i));
             if (src == 0){
                 var Δp = buf.get1();
-                Δp.val[0] = dstx.val;
+                Δp.Value[0] = dstx.Value;
             } else {
-                var srcx = ((ж<uintptr>)((@unsafe.Pointer)(src + i)));
+                var srcx = (ж<uintptr>)(uintptr)((@unsafe.Pointer)(src + i));
                 var Δp = buf.get2();
-                Δp.val[0] = dstx.val;
-                Δp.val[1] = srcx.val;
+                Δp.Value[0] = dstx.Value;
+                Δp.Value[1] = srcx.Value;
             }
         }
-        mask <<= (UntypedInt)(1);
+        mask <<= (int)(1);
     }
 }
 
@@ -1370,9 +1365,9 @@ internal static void bulkBarrierBitmap(uintptr dst, uintptr src, uintptr size, u
 //
 //go:nosplit
 internal static void typeBitsBulkBarrier(ж<_type> Ꮡtyp, uintptr dst, uintptr src, uintptr size) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.DerefOrNil();
 
-    if (typ == nil) {
+    if (Ꮡtyp == nil) {
         @throw("runtime: typeBitsBulkBarrier without type"u8);
     }
     if (typ.Size_ != size) {
@@ -1387,21 +1382,21 @@ internal static void typeBitsBulkBarrier(ж<_type> Ꮡtyp, uintptr dst, uintptr 
         return;
     }
     var ptrmask = typ.GCData;
-    var buf = Ꮡ((~(~(~getg()).m).p.ptr()).wbBuf);
+    var buf = (~(~getg()).m).p.ptr().of(runtime_package.Δp.ᏑwbBuf);
     uint32 bits = default!;
-    for (var i = ((uintptr)0); i < typ.PtrBytes; i += goarch.PtrSize) {
-        if ((uintptr)(i & (goarch.PtrSize * 8 - 1)) == 0){
-            bits = ((uint32)(ptrmask.val));
+    for (var i = (uintptr)0; i < typ.PtrBytes; i += goarch.PtrSize) {
+        if ((uintptr)(i & (uintptr)(goarch.PtrSize * 8 - 1)) == 0){
+            bits = (uint32)(ptrmask.Value);
             ptrmask = addb(ptrmask, 1);
         } else {
-            bits = bits >> (int)(1);
+            bits = (bits >> (int)(1));
         }
         if ((uint32)(bits & 1) != 0) {
-            var dstx = ((ж<uintptr>)((@unsafe.Pointer)(dst + i)));
-            var srcx = ((ж<uintptr>)((@unsafe.Pointer)(src + i)));
+            var dstx = (ж<uintptr>)(uintptr)((@unsafe.Pointer)(dst + i));
+            var srcx = (ж<uintptr>)(uintptr)((@unsafe.Pointer)(src + i));
             var Δp = buf.get2();
-            Δp.val[0] = dstx.val;
-            Δp.val[1] = srcx.val;
+            Δp.Value[0] = dstx.Value;
+            Δp.Value[1] = srcx.Value;
         }
     }
 }
@@ -1410,12 +1405,12 @@ internal static void typeBitsBulkBarrier(ж<_type> Ꮡtyp, uintptr dst, uintptr 
 // scanning the mark bitmap.
 [GoRecv] internal static nint countAlloc(this ref mspan s) {
     nint count = 0;
-    var bytes = divRoundUp(((uintptr)s.nelems), 8);
+    var bytes = divRoundUp((uintptr)s.nelems, 8);
     // Iterate over each 8-byte chunk and count allocations
     // with an intrinsic. Note that newMarkBits guarantees that
     // gcmarkBits will be 8-byte aligned, so we don't have to
     // worry about edge cases, irrelevant bits will simply be zero.
-    for (var i = ((uintptr)0); i < bytes; i += 8) {
+    for (var i = (uintptr)0; i < bytes; i += 8) {
         // Extract 64 bits from the byte pointer and get a OnesCount.
         // Note that the unsafe cast here doesn't preserve endianness,
         // but that's OK. We only care about how many bits are 1, not
@@ -1429,14 +1424,14 @@ internal static void typeBitsBulkBarrier(ж<_type> Ꮡtyp, uintptr dst, uintptr 
 // Read the bytes starting at the aligned pointer p into a uintptr.
 // Read is little-endian.
 internal static uintptr readUintptr(ж<byte> Ꮡp) {
-    ref var Δp = ref Ꮡp.val;
+    ref var Δp = ref Ꮡp.Value;
 
     var x = ~(ж<uintptr>)(uintptr)(new @unsafe.Pointer(Ꮡp));
     if (goarch.BigEndian) {
         if (goarch.PtrSize == 8) {
-            return ((uintptr)sys.Bswap64(((uint64)x)));
+            return (uintptr)sys.Bswap64((uint64)x);
         }
-        return ((uintptr)sys.Bswap32(((uint32)x)));
+        return (uintptr)sys.Bswap32((uint32)x);
     }
     return x;
 }
@@ -1452,17 +1447,17 @@ internal static debugPtrmaskᴛ1 debugPtrmask;
 // size the size of the region described by prog, in bytes.
 // The resulting bitvector will have no more than size/goarch.PtrSize bits.
 internal static unsafe bitvector progToPointerMask(ж<byte> Ꮡprog, uintptr size) {
-    ref var prog = ref Ꮡprog.val;
+    ref var prog = ref Ꮡprog.Value;
 
-    var n = (size / goarch.PtrSize + 7) / 8;
-    var x = new Span<byte>((byte*)(uintptr)(persistentalloc(n + 1, 1, Ꮡmemstats.of(mstats.Ꮡbuckhash_sys))), n + 1);
-    x[len(x) - 1] = 161;
+    var n = (size / (uintptr)goarch.PtrSize + 7) / 8;
+    var x = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(persistentalloc(n + 1, 1, Ꮡmemstats.of(mstats.Ꮡbuckhash_sys))), (int)(n + 1)));
+    x[len(x) - 1] = 0xa1;
     // overflow check sentinel
     n = runGCProg(Ꮡprog, Ꮡ(x, 0));
-    if (x[len(x) - 1] != 161) {
+    if (x[len(x) - 1] != 0xa1) {
         @throw("progToPointerMask: overflow"u8);
     }
-    return new bitvector(((int32)n), Ꮡ(x, 0));
+    return new bitvector((int32)n, Ꮡ(x, 0));
 }
 
 // Packed GC pointer bitmaps, aka GC programs.
@@ -1481,44 +1476,44 @@ internal static unsafe bitvector progToPointerMask(ж<byte> Ꮡprog, uintptr siz
 
 // runGCProg returns the number of 1-bit entries written to memory.
 internal static uintptr runGCProg(ж<byte> Ꮡprog, ж<byte> Ꮡdst) {
-    ref var prog = ref Ꮡprog.val;
-    ref var dst = ref Ꮡdst.val;
+    ref var prog = ref Ꮡprog.Value;
+    ref var dst = ref Ꮡdst.Value;
 
-    var dstStart = dst;
+    var dstStart = Ꮡdst;
     // Bits waiting to be written to memory.
     uintptr bits = default!;
     uintptr nbits = default!;
-    var Δp = prog;
+    var Δp = Ꮡprog;
 Run:
     while (ᐧ) {
         // Flush accumulated full bytes.
         // The rest of the loop assumes that nbits <= 7.
         for (; nbits >= 8; nbits -= 8) {
-            dst = ((uint8)bits);
-            dst = add1(Ꮡdst);
-            bits >>= (UntypedInt)(8);
+            dst = (uint8)bits;
+            Ꮡdst = add1(Ꮡdst); dst = ref Ꮡdst.Value;
+            bits >>= (int)(8);
         }
         // Process one instruction.
-        var inst = ((uintptr)(Δp.val));
+        var inst = (uintptr)(Δp.Value);
         Δp = add1(Δp);
-        var n = (uintptr)(inst & 127);
-        if ((uintptr)(inst & 128) == 0) {
+        var n = (uintptr)(inst & 0x7F);
+        if ((uintptr)(inst & 0x80) == 0) {
             // Literal bits; n == 0 means end of program.
             if (n == 0) {
                 // Program is over.
                 goto break_Run;
             }
             var nbyte = n / 8;
-            for (var i = ((uintptr)0); i < nbyte; i++) {
-                bits |= (uintptr)(((uintptr)(Δp.val)) << (int)(nbits));
+            for (var i = (uintptr)0; i < nbyte; i++) {
+                bits |= (uintptr)(((uintptr)(Δp.Value) << (int)(nbits)));
                 Δp = add1(Δp);
-                dst = ((uint8)bits);
-                dst = add1(Ꮡdst);
-                bits >>= (UntypedInt)(8);
+                dst = (uint8)bits;
+                Ꮡdst = add1(Ꮡdst); dst = ref Ꮡdst.Value;
+                bits >>= (int)(8);
             }
             {
                 n %= 8; if (n > 0) {
-                    bits |= (uintptr)(((uintptr)(Δp.val)) << (int)(nbits));
+                    bits |= (uintptr)(((uintptr)(Δp.Value) << (int)(nbits)));
                     Δp = add1(Δp);
                     nbits += n;
                 }
@@ -1527,22 +1522,22 @@ Run:
         }
         // Repeat. If n == 0, it is encoded in a varint in the next bytes.
         if (n == 0) {
-            for (nuint off = ((nuint)0); ᐧ ; off += 7) {
-                var x = ((uintptr)(Δp.val));
+            for (nuint offΔ1 = (nuint)0; ᐧ ; offΔ1 += 7) {
+                var x = (uintptr)(Δp.Value);
                 Δp = add1(Δp);
-                n |= (uintptr)(((uintptr)(x & 127)) << (int)(off));
-                if ((uintptr)(x & 128) == 0) {
+                n |= (uintptr)((((uintptr)(x & 0x7F)) << (int)(offΔ1)));
+                if ((uintptr)(x & 0x80) == 0) {
                     break;
                 }
             }
         }
         // Count is encoded in a varint in the next bytes.
-        var c = ((uintptr)0);
-        for (nuint off = ((nuint)0); ᐧ ; off += 7) {
-            var x = ((uintptr)(Δp.val));
+        var c = (uintptr)0;
+        for (nuint offΔ2 = (nuint)0; ᐧ ; offΔ2 += 7) {
+            var x = (uintptr)(Δp.Value);
             Δp = add1(Δp);
-            c |= (uintptr)(((uintptr)(x & 127)) << (int)(off));
-            if ((uintptr)(x & 128) == 0) {
+            c |= (uintptr)((((uintptr)(x & 0x7F)) << (int)(offΔ2)));
+            if ((uintptr)(x & 0x80) == 0) {
                 break;
             }
         }
@@ -1555,8 +1550,8 @@ Run:
         // The cutoff is goarch.PtrSize*8 - 7 to guarantee that when we add
         // the pattern to a bit buffer holding at most 7 bits (a partial byte)
         // it will not overflow.
-        var src = dst;
-        static readonly UntypedInt maxBits = /* goarch.PtrSize*8 - 7 */ 57;
+        var src = Ꮡdst;
+        UntypedInt maxBits = /* goarch.PtrSize*8 - 7 */ 57;
         if (n <= maxBits) {
             // Start with bits in output buffer.
             var pattern = bits;
@@ -1564,8 +1559,8 @@ Run:
             // If we need more bits, fetch them from memory.
             src = subtract1(src);
             while (npattern < n) {
-                pattern <<= (UntypedInt)(8);
-                pattern |= (uintptr)(((uintptr)(src.val)));
+                pattern <<= (int)(8);
+                pattern |= (uintptr)((uintptr)(src.Value));
                 src = subtract1(src);
                 npattern += 8;
             }
@@ -1574,7 +1569,7 @@ Run:
             // Either way, we might now have too many instead of too few.
             // Discard the extra.
             if (npattern > n) {
-                pattern >>= (uintptr)(npattern - n);
+                pattern >>= (int)(npattern - n);
                 npattern = n;
             }
             // Replicate pattern to at most maxBits.
@@ -1586,7 +1581,7 @@ Run:
                 // in the word is equal to the number we need (c),
                 // because right shift of bits will zero fill.
                 if (pattern == 1){
-                    pattern = 1 << (int)(maxBits) - 1;
+                    pattern = (uintptr)(144115188075855872L - 1);
                     npattern = maxBits;
                 } else {
                     npattern = c;
@@ -1597,13 +1592,13 @@ Run:
                 if (nb + nb <= maxBits) {
                     // Double pattern until the whole uintptr is filled.
                     while (nb <= goarch.PtrSize * 8) {
-                        b |= (uintptr)(b << (int)(nb));
+                        b |= (uintptr)((b << (int)(nb)));
                         nb += nb;
                     }
                     // Trim away incomplete copy of original pattern in high bits.
                     // TODO(rsc): Replace with table lookup or loop on systems without divide?
-                    nb = maxBits / npattern * npattern;
-                    b &= (uintptr)(1 << (int)(nb) - 1);
+                    nb = (uintptr)maxBits / npattern * npattern;
+                    b &= (uintptr)((uintptr)(1 << (int)(nb)) - 1);
                     pattern = b;
                     npattern = nb;
                 }
@@ -1612,19 +1607,19 @@ Run:
             // Since pattern contains >8 bits, there will be full bytes to flush
             // on each iteration.
             for (; c >= npattern; c -= npattern) {
-                bits |= (uintptr)(pattern << (int)(nbits));
+                bits |= (uintptr)((pattern << (int)(nbits)));
                 nbits += npattern;
                 while (nbits >= 8) {
-                    dst = ((uint8)bits);
-                    dst = add1(Ꮡdst);
-                    bits >>= (UntypedInt)(8);
+                    dst = (uint8)bits;
+                    Ꮡdst = add1(Ꮡdst); dst = ref Ꮡdst.Value;
+                    bits >>= (int)(8);
                     nbits -= 8;
                 }
             }
             // Add final fragment to bit buffer.
             if (c > 0) {
-                pattern &= (uintptr)(1 << (int)(c) - 1);
-                bits |= (uintptr)(pattern << (int)(nbits));
+                pattern &= (uintptr)((uintptr)(1 << (int)(c)) - 1);
+                bits |= (uintptr)((pattern << (int)(nbits)));
                 nbits += c;
             }
             goto continue_Run;
@@ -1638,7 +1633,7 @@ Run:
         src = subtractb(src, (off + 7) / 8);
         {
             var frag = (uintptr)(off & 7); if (frag != 0) {
-                bits |= (uintptr)(((uintptr)(src.val)) >> (int)((8 - frag)) << (int)(nbits));
+                bits |= (uintptr)((((uintptr)(src.Value) >> (int)((8 - frag))) << (int)(nbits)));
                 src = add1(src);
                 nbits += frag;
                 c -= frag;
@@ -1647,16 +1642,16 @@ Run:
         // Main loop: load one byte, write another.
         // The bits are rotating through the bit buffer.
         for (var i = c / 8; i > 0; i--) {
-            bits |= (uintptr)(((uintptr)(src.val)) << (int)(nbits));
+            bits |= (uintptr)(((uintptr)(src.Value) << (int)(nbits)));
             src = add1(src);
-            dst = ((uint8)bits);
-            dst = add1(Ꮡdst);
-            bits >>= (UntypedInt)(8);
+            dst = (uint8)bits;
+            Ꮡdst = add1(Ꮡdst); dst = ref Ꮡdst.Value;
+            bits >>= (int)(8);
         }
         // Final src fragment.
         {
             c %= 8; if (c > 0) {
-                bits |= (uintptr)(((uintptr)(((uintptr)(src.val)) & (1 << (int)(c) - 1))) << (int)(nbits));
+                bits |= (uintptr)((((uintptr)((uintptr)(src.Value) & ((uintptr)(1 << (int)(c)) - 1))) << (int)(nbits)));
                 nbits += c;
             }
         }
@@ -1664,12 +1659,12 @@ continue_Run:;
     }
 break_Run:;
     // Write any final bits out, using full-byte writes, even for the final byte.
-    var totalBits = (((uintptr)new @unsafe.Pointer(Ꮡdst)) - ((uintptr)new @unsafe.Pointer(dstStart))) * 8 + nbits;
-    nbits += (uintptr)(-nbits & 7);
+    var totalBits = ((uintptr)new @unsafe.Pointer(Ꮡdst) - (uintptr)new @unsafe.Pointer(dstStart)) * 8 + nbits;
+    nbits += (uintptr)(((uintptr)0 - nbits) & 7);
     for (; nbits > 0; nbits -= 8) {
-        dst = ((uint8)bits);
-        dst = add1(Ꮡdst);
-        bits >>= (UntypedInt)(8);
+        dst = (uint8)bits;
+        Ꮡdst = add1(Ꮡdst); dst = ref Ꮡdst.Value;
+        bits >>= (int)(8);
     }
     return totalBits;
 }
@@ -1680,61 +1675,61 @@ break_Run:;
 // The bitmask starts at s.startAddr.
 // The result must be deallocated with dematerializeGCProg.
 internal static ж<mspan> materializeGCProg(uintptr ptrdata, ж<byte> Ꮡprog) {
-    ref var prog = ref Ꮡprog.val;
+    ref var prog = ref Ꮡprog.Value;
 
     // Each word of ptrdata needs one bit in the bitmap.
     var bitmapBytes = divRoundUp(ptrdata, 8 * goarch.PtrSize);
     // Compute the number of pages needed for bitmapBytes.
     var pages = divRoundUp(bitmapBytes, pageSize);
-    var s = mheap_.allocManual(pages, spanAllocPtrScalarBits);
-    runGCProg(addb(Ꮡprog, 4), (ж<byte>)(uintptr)(((@unsafe.Pointer)(~s).startAddr)));
+    var s = Ꮡmheap_.allocManual(pages, spanAllocPtrScalarBits);
+    runGCProg(addb(Ꮡprog, 4), (ж<byte>)(uintptr)((@unsafe.Pointer)(~s).startAddr));
     return s;
 }
 
 internal static void dematerializeGCProg(ж<mspan> Ꮡs) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
-    mheap_.freeManual(Ꮡs, spanAllocPtrScalarBits);
+    Ꮡmheap_.freeManual(Ꮡs, spanAllocPtrScalarBits);
 }
 
 internal static void dumpGCProg(ж<byte> Ꮡp) {
-    ref var Δp = ref Ꮡp.val;
+    ref var Δp = ref Ꮡp.Value;
 
     nint nptr = 0;
     while (ᐧ) {
         var x = Δp;
-        Δp = add1(Ꮡp);
+        Ꮡp = add1(Ꮡp); Δp = ref Ꮡp.Value;
         if (x == 0) {
             print("\t", nptr, " end\n");
             break;
         }
-        if ((byte)(x & 128) == 0){
+        if ((byte)(x & 0x80) == 0){
             print("\t", nptr, " lit ", x, ":");
-            nint n = ((nint)(x + 7)) / 8;
+            nint n = (nint)(x + 7) / 8;
             for (nint i = 0; i < n; i++) {
-                print(" ", ((Δhex)(Δp)));
-                Δp = add1(Ꮡp);
+                print(" ", ((Δhex)(uint64)(Δp)));
+                Ꮡp = add1(Ꮡp); Δp = ref Ꮡp.Value;
             }
             print("\n");
-            nptr += ((nint)x);
+            nptr += (nint)x;
         } else {
-            nint nbit = ((nint)((byte)(x & ~128)));
+            nint nbit = (nint)((byte)(x & ~0x80));
             if (nbit == 0) {
-                for (nuint nb = ((nuint)0); ᐧ ; nb += 7) {
+                for (nuint nb = (nuint)0; ᐧ ; nb += 7) {
                     var xΔ1 = Δp;
-                    Δp = add1(Ꮡp);
-                    nbit |= (nint)(((nint)((byte)(xΔ1 & 127))) << (int)(nb));
-                    if ((byte)(xΔ1 & 128) == 0) {
+                    Ꮡp = add1(Ꮡp); Δp = ref Ꮡp.Value;
+                    nbit |= (nint)(((nint)((byte)(xΔ1 & 0x7f)) << (int)(nb)));
+                    if ((byte)(xΔ1 & 0x80) == 0) {
                         break;
                     }
                 }
             }
             nint count = 0;
-            for (nuint nb = ((nuint)0); ᐧ ; nb += 7) {
+            for (nuint nb = (nuint)0; ᐧ ; nb += 7) {
                 var xΔ2 = Δp;
-                Δp = add1(Ꮡp);
-                count |= (nint)(((nint)((byte)(xΔ2 & 127))) << (int)(nb));
-                if ((byte)(xΔ2 & 128) == 0) {
+                Ꮡp = add1(Ꮡp); Δp = ref Ꮡp.Value;
+                count |= (nint)(((nint)((byte)(xΔ2 & 0x7f)) << (int)(nb)));
+                if ((byte)(xΔ2 & 0x80) == 0) {
                     break;
                 }
             }
@@ -1760,42 +1755,42 @@ internal static slice<byte> reflect_gcbits(any x) {
 internal static slice<byte> /*mask*/ getgcmask(any ep) {
     slice<byte> mask = default!;
 
-    var e = efaceOf(Ꮡ(ep)).val;
+    var e = efaceOf(Ꮡ(ep)).Value;
     @unsafe.Pointer Δp = e.data;
     var t = e._type;
     ж<_type> et = default!;
     if ((abiꓸKind)((~t).Kind_ & abi.KindMask) != abi.Pointer) {
         @throw("bad argument to getgcmask: expected type to be a pointer to the value type whose mask is being queried"u8);
     }
-    et = ((ж<ptrtype>)(uintptr)(new @unsafe.Pointer(t))).val.Elem;
+    et = ((ж<ptrtype>)(uintptr)(new @unsafe.Pointer(t))).Value.Elem;
     // data or bss
     foreach (var (_, datap) in activeModules()) {
         // data
-        if ((~datap).data <= ((uintptr)Δp) && ((uintptr)Δp) < (~datap).edata) {
-            var bitmap = (~datap).gcdatamask.bytedata;
-            var n = et.val.Size_;
-            mask = new slice<byte>(n / goarch.PtrSize);
-            for (var i = ((uintptr)0); i < n; i += goarch.PtrSize) {
-                var off = (((uintptr)Δp) + i - (~datap).data) / goarch.PtrSize;
-                mask[i / goarch.PtrSize] = (byte)((addb(bitmap, off / 8).val >> (int)((off % 8))) & 1);
+        if ((~datap).data <= (uintptr)Δp && (uintptr)Δp < (~datap).edata) {
+            var bitmap = datap.Value.gcdatamask.bytedata;
+            var n = et.Value.Size_;
+            mask = new slice<byte>((nint)(n / (uintptr)goarch.PtrSize));
+            for (var i = (uintptr)0; i < n; i += goarch.PtrSize) {
+                var off = ((uintptr)Δp + i - (~datap).data) / (uintptr)goarch.PtrSize;
+                mask[(nint)(i / (uintptr)goarch.PtrSize)] = (byte)(((addb(bitmap, off / 8).Value >> (int)((off % 8)))) & 1);
             }
             return mask;
         }
         // bss
-        if ((~datap).bss <= ((uintptr)Δp) && ((uintptr)Δp) < (~datap).ebss) {
-            var bitmap = (~datap).gcbssmask.bytedata;
-            var n = et.val.Size_;
-            mask = new slice<byte>(n / goarch.PtrSize);
-            for (var i = ((uintptr)0); i < n; i += goarch.PtrSize) {
-                var off = (((uintptr)Δp) + i - (~datap).bss) / goarch.PtrSize;
-                mask[i / goarch.PtrSize] = (byte)((addb(bitmap, off / 8).val >> (int)((off % 8))) & 1);
+        if ((~datap).bss <= (uintptr)Δp && (uintptr)Δp < (~datap).ebss) {
+            var bitmap = datap.Value.gcbssmask.bytedata;
+            var n = et.Value.Size_;
+            mask = new slice<byte>((nint)(n / (uintptr)goarch.PtrSize));
+            for (var i = (uintptr)0; i < n; i += goarch.PtrSize) {
+                var off = ((uintptr)Δp + i - (~datap).bss) / (uintptr)goarch.PtrSize;
+                mask[(nint)(i / (uintptr)goarch.PtrSize)] = (byte)(((addb(bitmap, off / 8).Value >> (int)((off % 8)))) & 1);
             }
             return mask;
         }
     }
     // heap
     {
-        var (@base, s, _) = findObject(((uintptr)Δp), 0, 0); if (@base != 0) {
+        var (@base, s, _) = findObject((uintptr)Δp, 0, 0); if (@base != 0) {
             if ((~s).spanclass.noscan()) {
                 return default!;
             }
@@ -1806,21 +1801,21 @@ internal static slice<byte> /*mask*/ getgcmask(any ep) {
             var tp = s.typePointersOfUnchecked(@base);
             @base = tp.addr;
             // Unroll the full bitmap the GC would actually observe.
-            var maskFromHeap = new slice<byte>((limit - @base) / goarch.PtrSize);
+            var maskFromHeap = new slice<byte>((nint)((limit - @base) / (uintptr)goarch.PtrSize));
             while (ᐧ) {
-                uintptr addrΔ1 = default!;
+                uintptr addr = default!;
                 {
-                    (tp, addrΔ1) = tp.next(limit); if (addrΔ1 == 0) {
+                    (tp, addr) = tp.next(limit); if (addr == 0) {
                         break;
                     }
                 }
-                maskFromHeap[(addr - @base) / goarch.PtrSize] = 1;
+                maskFromHeap[(nint)((addr - @base) / (uintptr)goarch.PtrSize)] = 1;
             }
             // Double-check that every part of the ptr/scalar we're not
             // showing the caller is zeroed. This keeps us honest that
             // that information is actually irrelevant.
             for (var i = limit; i < (~s).elemsize; i++) {
-                if (~(ж<byte>)(uintptr)(((@unsafe.Pointer)i)) != 0) {
+                if (~(ж<byte>)(uintptr)((@unsafe.Pointer)i) != 0) {
                     @throw("found non-zeroed tail of allocation"u8);
                 }
             }
@@ -1831,7 +1826,7 @@ internal static slice<byte> /*mask*/ getgcmask(any ep) {
             }
             if ((abiꓸKind)((~et).Kind_ & abi.KindGCProg) == 0) {
                 // Unroll again, but this time from the type information.
-                var maskFromType = new slice<byte>((limit - @base) / goarch.PtrSize);
+                var maskFromType = new slice<byte>((nint)((limit - @base) / (uintptr)goarch.PtrSize));
                 tp = s.typePointersOfType(et, @base);
                 while (ᐧ) {
                     uintptr addr = default!;
@@ -1840,7 +1835,7 @@ internal static slice<byte> /*mask*/ getgcmask(any ep) {
                             break;
                         }
                     }
-                    maskFromType[(addr - @base) / goarch.PtrSize] = 1;
+                    maskFromType[(nint)((addr - @base) / (uintptr)goarch.PtrSize)] = 1;
                 }
                 // Validate that the prefix of maskFromType is equal to
                 // maskFromHeap. maskFromType may contain more pointers than
@@ -1885,13 +1880,11 @@ internal static slice<byte> /*mask*/ getgcmask(any ep) {
     }
     // stack
     {
-        var gp = getg(); if ((~(~(~gp).m).curg).stack.lo <= ((uintptr)Δp) && ((uintptr)Δp) < (~(~(~gp).m).curg).stack.hi) {
+        var gp = getg(); if ((~(~(~gp).m).curg).stack.lo <= (uintptr)Δp && (uintptr)Δp < (~(~(~gp).m).curg).stack.hi) {
             var found = false;
-            unwinder u = default!;
-            for (
-            u.initAt((~(~(~gp).m).curg).sched.pc, (~(~(~gp).m).curg).sched.sp, 0, (~(~gp).m).curg, 0);; u.valid(); 
-            u.next();) {
-                if (u.frame.sp <= ((uintptr)Δp) && ((uintptr)Δp) < u.frame.varp) {
+            ref var u = ref heap(new unwinder(), out var Ꮡu);
+            for (Ꮡu.initAt((~(~(~gp).m).curg).sched.pc, (~(~(~gp).m).curg).sched.sp, 0, (~(~gp).m).curg, 0); u.valid(); Ꮡu.next()) {
+                if (u.frame.sp <= (uintptr)Δp && (uintptr)Δp < u.frame.varp) {
                     found = true;
                     break;
                 }
@@ -1901,12 +1894,12 @@ internal static slice<byte> /*mask*/ getgcmask(any ep) {
                 if (locals.n == 0) {
                     return mask;
                 }
-                var size = ((uintptr)locals.n) * goarch.PtrSize;
-                var n = ((ж<ptrtype>)(uintptr)(new @unsafe.Pointer(t))).val.Elem.Size_;
-                mask = new slice<byte>(n / goarch.PtrSize);
-                for (var i = ((uintptr)0); i < n; i += goarch.PtrSize) {
-                    var off = (((uintptr)Δp) + i - u.frame.varp + size) / goarch.PtrSize;
-                    mask[i / goarch.PtrSize] = locals.ptrbit(off);
+                var size = (uintptr)locals.n * (uintptr)goarch.PtrSize;
+                var n = ((ж<ptrtype>)(uintptr)(new @unsafe.Pointer(t))).Value.Elem.Value.Size_;
+                mask = new slice<byte>((nint)(n / (uintptr)goarch.PtrSize));
+                for (var i = (uintptr)0; i < n; i += goarch.PtrSize) {
+                    var off = ((uintptr)Δp + i - u.frame.varp + size) / (uintptr)goarch.PtrSize;
+                    mask[(nint)(i / (uintptr)goarch.PtrSize)] = locals.ptrbit(off);
                 }
             }
             return mask;

@@ -11,107 +11,123 @@ using compress;
 
 partial class zip_package {
 
-public delegate (io.WriteCloser, error) Compressor(io.Writer w);
+// type Compressor is a methodless func type — rendered inline as its base delegate
 
-public delegate io.ReadCloser Decompressor(io.Reader r);
+// type Decompressor is a methodless func type — rendered inline as its base delegate
 
-internal static sync.Pool flateWriterPool;
+internal static ж<sync.Pool> ᏑflateWriterPool = new(default(sync.Pool));
+internal static ref sync.Pool flateWriterPool => ref ᏑflateWriterPool.Value;
 
 internal static io.WriteCloser newFlateWriter(io.Writer w) {
-    var (fw, ok) = flateWriterPool.Get()._<ж<flate.Writer>>(ᐧ);
+    var (fw, ok) = ᏑflateWriterPool.Get()._<ж<flate.Writer>>(ᐧ);
     if (ok){
         fw.Reset(w);
     } else {
         (fw, _) = flate.NewWriter(w, 5);
     }
-    return new pooledFlateWriter(fw: fw);
+    return new pooledFlateWriterжWriteCloser(Ꮡ(new pooledFlateWriter(fw: fw)));
 }
 
 [GoType] partial struct pooledFlateWriter {
-    internal sync_package.Mutex mu; // guards Close and Write
-    internal ж<compress.flate_package.Writer> fw;
+    internal sync.Mutex mu; // guards Close and Write
+    internal ж<flate.Writer> fw;
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref pooledFlateWriter w, slice<byte> p) => func((defer, _) => {
+internal static (nint n, error err) Write(this ж<pooledFlateWriter> Ꮡw, slice<byte> p) {
     nint n = default!;
     error err = default!;
+    func((defer, recover) => {
+    ref var w = ref Ꮡw.Value;
 
-    w.mu.Lock();
-    defer(w.mu.Unlock);
-    if (w.fw == nil) {
-        return (0, errors.New("Write after Close"u8));
-    }
-    return w.fw.Write(p);
-});
+        Ꮡw.of(pooledFlateWriter.Ꮡmu).Lock();
+        defer(Ꮡw.of(pooledFlateWriter.Ꮡmu).Unlock);
+        if (w.fw == nil) {
+            (n, err) = (0, errors.New("Write after Close"u8)); return;
+        }
+        (n, err) = w.fw.Write(p);
+    });
+    return (n, err);
+}
 
-[GoRecv] internal static error Close(this ref pooledFlateWriter w) => func((defer, _) => {
-    w.mu.Lock();
-    defer(w.mu.Unlock);
+internal static error Close(this ж<pooledFlateWriter> Ꮡw) => func((defer, recover) => {
+    ref var w = ref Ꮡw.Value;
+
+    Ꮡw.of(pooledFlateWriter.Ꮡmu).Lock();
+    defer(Ꮡw.of(pooledFlateWriter.Ꮡmu).Unlock);
     error err = default!;
     if (w.fw != nil) {
         err = w.fw.Close();
-        flateWriterPool.Put(w.fw);
+        ᏑflateWriterPool.Put(w.fw);
         w.fw = default!;
     }
     return err;
 });
 
-internal static sync.Pool flateReaderPool;
+internal static ж<sync.Pool> ᏑflateReaderPool = new(default(sync.Pool));
+internal static ref sync.Pool flateReaderPool => ref ᏑflateReaderPool.Value;
 
 internal static io.ReadCloser newFlateReader(io.Reader r) {
-    var (fr, ok) = flateReaderPool.Get()._<io.ReadCloser>(ᐧ);
+    var (fr, ok) = ᏑflateReaderPool.Get()._<io.ReadCloser>(ᐧ);
     if (ok){
         fr._<flate.Resetter>().Reset(r, default!);
     } else {
         fr = flate.NewReader(r);
     }
-    return new pooledFlateReader(fr: fr);
+    return new pooledFlateReaderжReadCloser(Ꮡ(new pooledFlateReader(fr: fr)));
 }
 
 [GoType] partial struct pooledFlateReader {
-    internal sync_package.Mutex mu; // guards Close and Read
-    internal io_package.ReadCloser fr;
+    internal sync.Mutex mu; // guards Close and Read
+    internal io.ReadCloser fr;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref pooledFlateReader r, slice<byte> p) => func((defer, _) => {
+internal static (nint n, error err) Read(this ж<pooledFlateReader> Ꮡr, slice<byte> p) {
     nint n = default!;
     error err = default!;
+    func((defer, recover) => {
+    ref var r = ref Ꮡr.Value;
 
-    r.mu.Lock();
-    defer(r.mu.Unlock);
-    if (r.fr == default!) {
-        return (0, errors.New("Read after Close"u8));
-    }
-    return r.fr.Read(p);
-});
+        Ꮡr.of(pooledFlateReader.Ꮡmu).Lock();
+        defer(Ꮡr.of(pooledFlateReader.Ꮡmu).Unlock);
+        if (r.fr == default!) {
+            (n, err) = (0, errors.New("Read after Close"u8)); return;
+        }
+        (n, err) = r.fr.Read(p);
+    });
+    return (n, err);
+}
 
-[GoRecv] internal static error Close(this ref pooledFlateReader r) => func((defer, _) => {
-    r.mu.Lock();
-    defer(r.mu.Unlock);
+internal static error Close(this ж<pooledFlateReader> Ꮡr) => func((defer, recover) => {
+    ref var r = ref Ꮡr.Value;
+
+    Ꮡr.of(pooledFlateReader.Ꮡmu).Lock();
+    defer(Ꮡr.of(pooledFlateReader.Ꮡmu).Unlock);
     error err = default!;
     if (r.fr != default!) {
         err = r.fr.Close();
-        flateReaderPool.Put(r.fr);
+        ᏑflateReaderPool.Put(r.fr);
         r.fr = default!;
     }
     return err;
 });
 
-internal static sync.Map compressors; // map[uint16]Compressor
-internal static sync.Map decompressors; // map[uint16]Decompressor
+internal static ж<sync.Map> Ꮡcompressors = new(default(sync.Map));
+internal static ref sync.Map compressors => ref Ꮡcompressors.Value; // map[uint16]Compressor
+internal static ж<sync.Map> Ꮡdecompressors = new(default(sync.Map));
+internal static ref sync.Map decompressors => ref Ꮡdecompressors.Value; // map[uint16]Decompressor
 
 [GoInit] internal static void init() {
-    compressors.Store(Store, ((Compressor)((io.Writer w) => (Ꮡ(new nopCloser(w)), default!))));
-    compressors.Store(Deflate, ((Compressor)((io.Writer w) => (newFlateWriter(w), default!))));
-    decompressors.Store(Store, ((Decompressor)io.NopCloser));
-    decompressors.Store(Deflate, ((Decompressor)newFlateReader));
+    Ꮡcompressors.Store(Store, new Func<io.Writer, (io.WriteCloser, error)>((io.Writer w) => (new nopCloserжWriteCloser(Ꮡ(new nopCloser(w))), default!)));
+    Ꮡcompressors.Store(Deflate, new Func<io.Writer, (io.WriteCloser, error)>((io.Writer w) => (newFlateWriter(w), default!)));
+    Ꮡdecompressors.Store(Store, new Func<io.Reader, io.ReadCloser>(io.NopCloser));
+    Ꮡdecompressors.Store(Deflate, new Func<io.Reader, io.ReadCloser>(newFlateReader));
 }
 
 // RegisterDecompressor allows custom decompressors for a specified method ID.
 // The common methods [Store] and [Deflate] are built in.
-public static void RegisterDecompressor(uint16 method, Decompressor dcomp) {
+public static void RegisterDecompressor(uint16 method, Func<io.Reader, io.ReadCloser> dcomp) {
     {
-        var (_, dup) = decompressors.LoadOrStore(method, dcomp); if (dup) {
+        var (_, dup) = Ꮡdecompressors.LoadOrStore(method, dcomp); if (dup) {
             throw panic("decompressor already registered");
         }
     }
@@ -119,28 +135,28 @@ public static void RegisterDecompressor(uint16 method, Decompressor dcomp) {
 
 // RegisterCompressor registers custom compressors for a specified method ID.
 // The common methods [Store] and [Deflate] are built in.
-public static void RegisterCompressor(uint16 method, Compressor comp) {
+public static void RegisterCompressor(uint16 method, Func<io.Writer, (io.WriteCloser, error)> comp) {
     {
-        var (_, dup) = compressors.LoadOrStore(method, comp); if (dup) {
+        var (_, dup) = Ꮡcompressors.LoadOrStore(method, comp); if (dup) {
             throw panic("compressor already registered");
         }
     }
 }
 
-internal static Compressor compressor(uint16 method) {
-    var (ci, ok) = compressors.Load(method);
+internal static Func<io.Writer, (io.WriteCloser, error)> compressor(uint16 method) {
+    var (ci, ok) = Ꮡcompressors.Load(method);
     if (!ok) {
         return default!;
     }
-    return ci._<Compressor>();
+    return ci._<Func<io.Writer, (io.WriteCloser, error)>>();
 }
 
-internal static Decompressor decompressor(uint16 method) {
-    var (di, ok) = decompressors.Load(method);
+internal static Func<io.Reader, io.ReadCloser> decompressor(uint16 method) {
+    var (di, ok) = Ꮡdecompressors.Load(method);
     if (!ok) {
         return default!;
     }
-    return di._<Decompressor>();
+    return di._<Func<io.Reader, io.ReadCloser>>();
 }
 
 } // end zip_package

@@ -32,10 +32,10 @@ partial class profile_package {
     internal array<byte> tmp = new(16);
 }
 
-internal delegate error decoder(ж<buffer> _, message _);
+// type Δdecoder is a methodless func type — rendered inline as its base delegate
 
 [GoType] partial interface message {
-    slice<Δdecoder> decoder();
+    slice<Func<ж<buffer>, message, error>> decoder();
     void encode(ж<buffer> _);
 }
 
@@ -46,32 +46,32 @@ internal static slice<byte> marshal(message m) {
 }
 
 internal static void encodeVarint(ж<buffer> Ꮡb, uint64 x) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     while (x >= 128) {
-        b.data = append(b.data, (byte)(((byte)x) | 128));
-        x >>= (UntypedInt)(7);
+        b.data = append(b.data, (byte)((byte)x | 0x80));
+        x >>= (int)(7);
     }
-    b.data = append(b.data, ((byte)x));
+    b.data = append(b.data, (byte)x);
 }
 
 internal static void encodeLength(ж<buffer> Ꮡb, nint tag, nint len) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
-    encodeVarint(Ꮡb, (uint64)(((uint64)tag) << (int)(3) | 2));
-    encodeVarint(Ꮡb, ((uint64)len));
+    encodeVarint(Ꮡb, (uint64)(((uint64)tag << (int)(3)) | 2));
+    encodeVarint(Ꮡb, (uint64)len);
 }
 
 internal static void encodeUint64(ж<buffer> Ꮡb, nint tag, uint64 x) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     // append varint to b.data
-    encodeVarint(Ꮡb, (uint64)(((uint64)tag) << (int)(3) | 0));
+    encodeVarint(Ꮡb, (uint64)(((uint64)tag << (int)(3)) | 0));
     encodeVarint(Ꮡb, x);
 }
 
 internal static void encodeUint64s(ж<buffer> Ꮡb, nint tag, slice<uint64> x) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     if (len(x) > 2) {
         // Use packed encoding
@@ -93,7 +93,7 @@ internal static void encodeUint64s(ж<buffer> Ꮡb, nint tag, slice<uint64> x) {
 }
 
 internal static void encodeUint64Opt(ж<buffer> Ꮡb, nint tag, uint64 x) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     if (x == 0) {
         return;
@@ -102,14 +102,14 @@ internal static void encodeUint64Opt(ж<buffer> Ꮡb, nint tag, uint64 x) {
 }
 
 internal static void encodeInt64(ж<buffer> Ꮡb, nint tag, int64 x) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
-    var u = ((uint64)x);
+    var u = (uint64)x;
     encodeUint64(Ꮡb, tag, u);
 }
 
 internal static void encodeInt64Opt(ж<buffer> Ꮡb, nint tag, int64 x) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     if (x == 0) {
         return;
@@ -118,13 +118,13 @@ internal static void encodeInt64Opt(ж<buffer> Ꮡb, nint tag, int64 x) {
 }
 
 internal static void encodeInt64s(ж<buffer> Ꮡb, nint tag, slice<int64> x) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     if (len(x) > 2) {
         // Use packed encoding
         nint n1 = len(b.data);
         foreach (var (_, u) in x) {
-            encodeVarint(Ꮡb, ((uint64)u));
+            encodeVarint(Ꮡb, (uint64)u);
         }
         nint n2 = len(b.data);
         encodeLength(Ꮡb, tag, n2 - n1);
@@ -140,14 +140,14 @@ internal static void encodeInt64s(ж<buffer> Ꮡb, nint tag, slice<int64> x) {
 }
 
 internal static void encodeString(ж<buffer> Ꮡb, nint tag, @string x) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     encodeLength(Ꮡb, tag, len(x));
     b.data = append(b.data, x.ꓸꓸꓸ);
 }
 
 internal static void encodeStrings(ж<buffer> Ꮡb, nint tag, slice<@string> x) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     foreach (var (_, s) in x) {
         encodeString(Ꮡb, tag, s);
@@ -155,7 +155,7 @@ internal static void encodeStrings(ж<buffer> Ꮡb, nint tag, slice<@string> x) 
 }
 
 internal static void encodeBool(ж<buffer> Ꮡb, nint tag, bool x) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     if (x){
         encodeUint64(Ꮡb, tag, 1);
@@ -165,7 +165,7 @@ internal static void encodeBool(ж<buffer> Ꮡb, nint tag, bool x) {
 }
 
 internal static void encodeBoolOpt(ж<buffer> Ꮡb, nint tag, bool x) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     if (!x) {
         return;
@@ -174,7 +174,7 @@ internal static void encodeBoolOpt(ж<buffer> Ꮡb, nint tag, bool x) {
 }
 
 internal static void encodeMessage(ж<buffer> Ꮡb, nint tag, message m) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     nint n1 = len(b.data);
     m.encode(Ꮡb);
@@ -195,11 +195,11 @@ internal static error /*err*/ unmarshal(slice<byte> data, message m) {
 }
 
 internal static uint64 le64(slice<byte> p) {
-    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)(((uint64)p[0]) | ((uint64)p[1]) << (int)(8)) | ((uint64)p[2]) << (int)(16)) | ((uint64)p[3]) << (int)(24)) | ((uint64)p[4]) << (int)(32)) | ((uint64)p[5]) << (int)(40)) | ((uint64)p[6]) << (int)(48)) | ((uint64)p[7]) << (int)(56));
+    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)p[0] | ((uint64)p[1] << (int)(8))) | ((uint64)p[2] << (int)(16))) | ((uint64)p[3] << (int)(24))) | ((uint64)p[4] << (int)(32))) | ((uint64)p[5] << (int)(40))) | ((uint64)p[6] << (int)(48))) | ((uint64)p[7] << (int)(56)));
 }
 
 internal static uint32 le32(slice<byte> p) {
-    return (uint32)((uint32)((uint32)(((uint32)p[0]) | ((uint32)p[1]) << (int)(8)) | ((uint32)p[2]) << (int)(16)) | ((uint32)p[3]) << (int)(24));
+    return (uint32)((uint32)((uint32)((uint32)p[0] | ((uint32)p[1] << (int)(8))) | ((uint32)p[2] << (int)(16))) | ((uint32)p[3] << (int)(24)));
 }
 
 internal static (uint64, slice<byte>, error) decodeVarint(slice<byte> data) {
@@ -209,22 +209,22 @@ internal static (uint64, slice<byte>, error) decodeVarint(slice<byte> data) {
         if (i >= 10 || i >= len(data)) {
             return (0, default!, errors.New("bad varint"u8));
         }
-        u |= (uint64)(((uint64)((byte)(data[i] & 127))) << (int)(((nuint)(7 * i))));
-        if ((byte)(data[i] & 128) == 0) {
+        u |= (uint64)(((uint64)((byte)(data[i] & 0x7F)) << (int)((nuint)(7 * i))));
+        if ((byte)(data[i] & 0x80) == 0) {
             return (u, data[(int)(i + 1)..], default!);
         }
     }
 }
 
 internal static (slice<byte>, error) decodeField(ж<buffer> Ꮡb, slice<byte> data) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
-    var (x, data, err) = decodeVarint(data);
+    (var x, data, var err) = decodeVarint(data);
     if (err != default!) {
         return (default!, err);
     }
-    b.field = ((nint)(x >> (int)(3)));
-    b.typ = ((nint)((uint64)(x & 7)));
+    b.field = (nint)((x >> (int)(3)));
+    b.typ = (nint)((uint64)(x & 7));
     b.data = default!;
     b.u64 = 0;
     switch (b.typ) {
@@ -249,7 +249,7 @@ internal static (slice<byte>, error) decodeField(ж<buffer> Ꮡb, slice<byte> da
         if (err != default!) {
             return (default!, err);
         }
-        if (n > ((uint64)len(data))) {
+        if (n > (uint64)len(data)) {
             return (default!, errors.New("too much data"u8));
         }
         b.data = data[..(int)(n)];
@@ -260,7 +260,7 @@ internal static (slice<byte>, error) decodeField(ж<buffer> Ꮡb, slice<byte> da
         if (len(data) < 4) {
             return (default!, errors.New("not enough data"u8));
         }
-        b.u64 = ((uint64)le32(data[..4]));
+        b.u64 = (uint64)le32(data[..4]);
         data = data[4..];
         break;
     }
@@ -272,7 +272,7 @@ internal static (slice<byte>, error) decodeField(ж<buffer> Ꮡb, slice<byte> da
 }
 
 internal static error checkType(ж<buffer> Ꮡb, nint typ) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     if (b.typ != typ) {
         return errors.New("type mismatch"u8);
@@ -281,11 +281,11 @@ internal static error checkType(ж<buffer> Ꮡb, nint typ) {
 }
 
 internal static error decodeMessage(ж<buffer> Ꮡb, message m) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     {
-        var errΔ1 = checkType(Ꮡb, 2); if (errΔ1 != default!) {
-            return errΔ1;
+        var err = checkType(Ꮡb, 2); if (err != default!) {
+            return err;
         }
     }
     var dec = m.decoder();
@@ -301,8 +301,8 @@ internal static error decodeMessage(ж<buffer> Ꮡb, message m) {
             continue;
         }
         {
-            var errΔ2 = dec[b.field](Ꮡb, m); if (errΔ2 != default!) {
-                return errΔ2;
+            var errΔ1 = dec[b.field](Ꮡb, m); if (errΔ1 != default!) {
+                return errΔ1;
             }
         }
     }
@@ -310,21 +310,21 @@ internal static error decodeMessage(ж<buffer> Ꮡb, message m) {
 }
 
 internal static error decodeInt64(ж<buffer> Ꮡb, ж<int64> Ꮡx) {
-    ref var b = ref Ꮡb.val;
-    ref var x = ref Ꮡx.val;
+    ref var b = ref Ꮡb.Value;
+    ref var x = ref Ꮡx.Value;
 
     {
         var err = checkType(Ꮡb, 0); if (err != default!) {
             return err;
         }
     }
-    x = ((int64)b.u64);
+    x = (int64)b.u64;
     return default!;
 }
 
 internal static error decodeInt64s(ж<buffer> Ꮡb, ж<slice<int64>> Ꮡx) {
-    ref var b = ref Ꮡb.val;
-    ref var x = ref Ꮡx.val;
+    ref var b = ref Ꮡb.Value;
+    ref var x = ref Ꮡx.Value;
 
     if (b.typ == 2) {
         // Packed encoding
@@ -337,7 +337,7 @@ internal static error decodeInt64s(ж<buffer> Ꮡb, ж<slice<int64>> Ꮡx) {
                     return err;
                 }
             }
-            x = append(x, ((int64)u));
+            x = append(x, (int64)u);
         }
         return default!;
     }
@@ -352,8 +352,8 @@ internal static error decodeInt64s(ж<buffer> Ꮡb, ж<slice<int64>> Ꮡx) {
 }
 
 internal static error decodeUint64(ж<buffer> Ꮡb, ж<uint64> Ꮡx) {
-    ref var b = ref Ꮡb.val;
-    ref var x = ref Ꮡx.val;
+    ref var b = ref Ꮡb.Value;
+    ref var x = ref Ꮡx.Value;
 
     {
         var err = checkType(Ꮡb, 0); if (err != default!) {
@@ -365,8 +365,8 @@ internal static error decodeUint64(ж<buffer> Ꮡb, ж<uint64> Ꮡx) {
 }
 
 internal static error decodeUint64s(ж<buffer> Ꮡb, ж<slice<uint64>> Ꮡx) {
-    ref var b = ref Ꮡb.val;
-    ref var x = ref Ꮡx.val;
+    ref var b = ref Ꮡb.Value;
+    ref var x = ref Ꮡx.Value;
 
     if (b.typ == 2) {
         var data = b.data;
@@ -394,8 +394,8 @@ internal static error decodeUint64s(ж<buffer> Ꮡb, ж<slice<uint64>> Ꮡx) {
 }
 
 internal static error decodeString(ж<buffer> Ꮡb, ж<@string> Ꮡx) {
-    ref var b = ref Ꮡb.val;
-    ref var x = ref Ꮡx.val;
+    ref var b = ref Ꮡb.Value;
+    ref var x = ref Ꮡx.Value;
 
     {
         var err = checkType(Ꮡb, 2); if (err != default!) {
@@ -407,8 +407,8 @@ internal static error decodeString(ж<buffer> Ꮡb, ж<@string> Ꮡx) {
 }
 
 internal static error decodeStrings(ж<buffer> Ꮡb, ж<slice<@string>> Ꮡx) {
-    ref var b = ref Ꮡb.val;
-    ref var x = ref Ꮡx.val;
+    ref var b = ref Ꮡb.Value;
+    ref var x = ref Ꮡx.Value;
 
     ref var s = ref heap(new @string(), out var Ꮡs);
     {
@@ -421,15 +421,15 @@ internal static error decodeStrings(ж<buffer> Ꮡb, ж<slice<@string>> Ꮡx) {
 }
 
 internal static error decodeBool(ж<buffer> Ꮡb, ж<bool> Ꮡx) {
-    ref var b = ref Ꮡb.val;
-    ref var x = ref Ꮡx.val;
+    ref var b = ref Ꮡb.Value;
+    ref var x = ref Ꮡx.Value;
 
     {
         var err = checkType(Ꮡb, 0); if (err != default!) {
             return err;
         }
     }
-    if (((int64)b.u64) == 0){
+    if ((int64)b.u64 == 0){
         x = false;
     } else {
         x = true;

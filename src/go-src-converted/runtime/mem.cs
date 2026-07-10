@@ -4,6 +4,7 @@
 namespace go;
 
 using @unsafe = unsafe_package;
+using @internal.runtime;
 
 partial class runtime_package {
 
@@ -48,10 +49,10 @@ partial class runtime_package {
 //
 //go:nosplit
 internal static @unsafe.Pointer sysAlloc(uintptr n, ж<sysMemStat> ᏑsysStat) {
-    ref var sysStat = ref ᏑsysStat.val;
+    ref var sysStat = ref ᏑsysStat.Value;
 
-    sysStat.add(((int64)n));
-    gcController.mappedReady.Add(((int64)n));
+    ᏑsysStat.add((int64)n);
+    ᏑgcController.of(gcControllerState.ᏑmappedReady).Add((int64)n);
     return (uintptr)sysAllocOS(n);
 }
 
@@ -61,8 +62,8 @@ internal static @unsafe.Pointer sysAlloc(uintptr n, ж<sysMemStat> ᏑsysStat) {
 // sysUnused memory region are considered forfeit and the region must not be
 // accessed again until sysUsed is called.
 internal static void sysUnused(@unsafe.Pointer v, uintptr n) {
-    gcController.mappedReady.Add(-((int64)n));
-    sysUnusedOS(v.val, n);
+    ᏑgcController.of(gcControllerState.ᏑmappedReady).Add(-(int64)n);
+    sysUnusedOS(v, n);
 }
 
 // sysUsed transitions a memory region from Prepared to Ready. It notifies the
@@ -76,28 +77,28 @@ internal static void sysUnused(@unsafe.Pointer v, uintptr n) {
 // Prepared and Ready memory. However, the caller must provide the exact amount
 // of Prepared memory for accounting purposes.
 internal static void sysUsed(@unsafe.Pointer v, uintptr n, uintptr prepared) {
-    gcController.mappedReady.Add(((int64)prepared));
-    sysUsedOS(v.val, n);
+    ᏑgcController.of(gcControllerState.ᏑmappedReady).Add((int64)prepared);
+    sysUsedOS(v, n);
 }
 
 // sysHugePage does not transition memory regions, but instead provides a
 // hint to the OS that it would be more efficient to back this memory region
 // with pages of a larger size transparently.
 internal static void sysHugePage(@unsafe.Pointer v, uintptr n) {
-    sysHugePageOS(v.val, n);
+    sysHugePageOS(v, n);
 }
 
 // sysNoHugePage does not transition memory regions, but instead provides a
 // hint to the OS that it would be less efficient to back this memory region
 // with pages of a larger size transparently.
 internal static void sysNoHugePage(@unsafe.Pointer v, uintptr n) {
-    sysNoHugePageOS(v.val, n);
+    sysNoHugePageOS(v, n);
 }
 
 // sysHugePageCollapse attempts to immediately back the provided memory region
 // with huge pages. It is best-effort and may fail silently.
 internal static void sysHugePageCollapse(@unsafe.Pointer v, uintptr n) {
-    sysHugePageCollapseOS(v.val, n);
+    sysHugePageCollapseOS(v, n);
 }
 
 // sysFree transitions a memory region from any state to None. Therefore, it
@@ -114,11 +115,11 @@ internal static void sysHugePageCollapse(@unsafe.Pointer v, uintptr n) {
 //
 //go:nosplit
 internal static void sysFree(@unsafe.Pointer v, uintptr n, ж<sysMemStat> ᏑsysStat) {
-    ref var sysStat = ref ᏑsysStat.val;
+    ref var sysStat = ref ᏑsysStat.Value;
 
-    sysStat.add(-((int64)n));
-    gcController.mappedReady.Add(-((int64)n));
-    sysFreeOS(v.val, n);
+    ᏑsysStat.add(-(int64)n);
+    ᏑgcController.of(gcControllerState.ᏑmappedReady).Add(-(int64)n);
+    sysFreeOS(v, n);
 }
 
 // sysFault transitions a memory region from Ready to Reserved. It
@@ -131,8 +132,8 @@ internal static void sysFree(@unsafe.Pointer v, uintptr n, ж<sysMemStat> Ꮡsys
 // If a transition from Prepared is ever introduced, create a new function
 // that elides the Ready state accounting.
 internal static void sysFault(@unsafe.Pointer v, uintptr n) {
-    gcController.mappedReady.Add(-((int64)n));
-    sysFaultOS(v.val, n);
+    ᏑgcController.of(gcControllerState.ᏑmappedReady).Add(-(int64)n);
+    sysFaultOS(v, n);
 }
 
 // sysReserve transitions a memory region from None to Reserved. It reserves
@@ -148,7 +149,7 @@ internal static void sysFault(@unsafe.Pointer v, uintptr n) {
 // may use larger alignment, so the caller must be careful to realign the
 // memory obtained by sysReserve.
 internal static @unsafe.Pointer sysReserve(@unsafe.Pointer v, uintptr n) {
-    return (uintptr)sysReserveOS(v.val, n);
+    return (uintptr)sysReserveOS(v, n);
 }
 
 // sysMap transitions a memory region from Reserved to Prepared. It ensures the
@@ -156,10 +157,10 @@ internal static @unsafe.Pointer sysReserve(@unsafe.Pointer v, uintptr n) {
 //
 // sysStat must be non-nil.
 internal static void sysMap(@unsafe.Pointer v, uintptr n, ж<sysMemStat> ᏑsysStat) {
-    ref var sysStat = ref ᏑsysStat.val;
+    ref var sysStat = ref ᏑsysStat.Value;
 
-    sysStat.add(((int64)n));
-    sysMapOS(v.val, n);
+    ᏑsysStat.add((int64)n);
+    sysMapOS(v, n);
 }
 
 } // end runtime_package

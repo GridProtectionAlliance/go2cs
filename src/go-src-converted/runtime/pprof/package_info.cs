@@ -58,18 +58,14 @@ using static go.runtime.pprof_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(n int, ok bool), error>]
-[assembly: GoImplement<(os.FileInfo, error), osꓸFileInfo>]
-[assembly: GoImplement<@string, error>]
-[assembly: GoImplement<bufio_package.Writer, io_package.Writer>]
-[assembly: GoImplement<encoding.binary_package.bigEndian, encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<encoding.binary_package.littleEndian, encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<keysByCount, sort_package.Interface>]
-[assembly: GoImplement<nint, error>]
-[assembly: GoImplement<runtimeProfile, countProfile>]
+[assembly: GoImplement<bufio_package.Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<go.encoding.binary_package.bigEndian, go.encoding.binary_package.ByteOrder>]
+[assembly: GoImplement<go.encoding.binary_package.littleEndian, go.encoding.binary_package.ByteOrder>]
+[assembly: GoImplement<go.text.tabwriter_package.Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<keysByCount, sort_package.Interface>(Pointer = true)]
+[assembly: GoImplement<runtimeProfile, countProfile>(Pointer = true)]
 [assembly: GoImplement<stackProfile, countProfile>]
-[assembly: GoImplement<strings_package.Builder, io_package.Writer>]
-[assembly: GoImplement<text.tabwriter_package.Writer, io_package.Writer>]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

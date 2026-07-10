@@ -77,7 +77,8 @@ public static bool Initialized;
     public bool HasSSE42; // Streaming SIMD extension 4 and 4.2
     internal CacheLinePad __;
 }
-public static X86ᴛ1 X86;
+public static ж<X86ᴛ1> ᏑX86 = new(default(X86ᴛ1));
+public static ref X86ᴛ1 X86 => ref ᏑX86.Value;
 
 // ARM64 contains the supported CPU features of the
 // current ARMv8(aarch64) platform. If the current platform
@@ -241,7 +242,7 @@ field:
         @string field = ""u8;
         nint i = strings.IndexByte(env, (rune)',');
         if (i < 0){
-            (field, env) = (env, ""u8);
+            (field, env) = (env, "");
         } else {
             (field, env) = (env[..(int)(i)], env[(int)(i + 1)..]);
         }
@@ -291,7 +292,7 @@ break_field:;
         if (!o.Specified) {
             continue;
         }
-        if (o.Enable && !o.Feature.val) {
+        if (o.Enable && !o.Feature.Value) {
             print("GODEBUG sys/cpu: can not enable \"", o.Name, "\", missing CPU support\n");
             continue;
         }
@@ -299,7 +300,7 @@ break_field:;
             print("GODEBUG sys/cpu: can not disable \"", o.Name, "\", required CPU feature\n");
             continue;
         }
-        o.Feature.val = o.Enable;
+        o.Feature.Value = o.Enable;
     }
 }
 

@@ -43,8 +43,8 @@ using static go.sort_package;
 [assembly: GoImplement<Float64Slice, Interface>]
 [assembly: GoImplement<IntSlice, Interface>]
 [assembly: GoImplement<StringSlice, Interface>]
+[assembly: GoImplement<reverse, Interface>(Pointer = true)]
 [assembly: GoImplement<reverse, Interface>(Promoted = true)]
-[assembly: GoImplement<reverse, Interface>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

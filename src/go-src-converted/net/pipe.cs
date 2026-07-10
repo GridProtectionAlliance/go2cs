@@ -3,17 +3,17 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using io = io_package;
+using Δio = io_package;
 using os = os_package;
-using sync = sync_package;
+using Δsync = sync_package;
 using time = time_package;
 
 partial class net_package {
 
 // pipeDeadline is an abstraction for handling timeouts.
 [GoType] partial struct pipeDeadline {
-    internal sync_package.Mutex mu; // Guards timer and cancel
-    internal ж<time_package.Timer> timer;
+    internal Δsync.Mutex mu; // Guards timer and cancel
+    internal ж<time.Timer> timer;
     internal channel<EmptyStruct> cancel; // Must be non-nil
 }
 
@@ -27,9 +27,11 @@ internal static pipeDeadline makePipeDeadline() {
 // t value in the future.
 //
 // A zero value for t prevents timeout.
-[GoRecv] internal static void set(this ref pipeDeadline d, time.Time t) => func((defer, _) => {
-    d.mu.Lock();
-    defer(d.mu.Unlock);
+internal static void set(this ж<pipeDeadline> Ꮡd, time.Time t) => func((defer, recover) => {
+    ref var d = ref Ꮡd.Value;
+
+    Ꮡd.of(pipeDeadline.Ꮡmu).Lock();
+    defer(Ꮡd.of(pipeDeadline.Ꮡmu).Unlock);
     if (d.timer != nil && !d.timer.Stop()) {
         ᐸꟷ(d.cancel);
     }
@@ -50,21 +52,23 @@ internal static pipeDeadline makePipeDeadline() {
                 d.cancel = new channel<EmptyStruct>(1);
             }
             d.timer = time.AfterFunc(dur, () => {
-                close(d.cancel);
+                builtin.close(Ꮡd.Value.cancel);
             });
             return;
         }
     }
     // Time in the past, so close immediately.
     if (!closed) {
-        close(d.cancel);
+        builtin.close(d.cancel);
     }
 });
 
 // wait returns a channel that is closed when the deadline is exceeded.
-[GoRecv] internal static channel<EmptyStruct> wait(this ref pipeDeadline d) => func((defer, _) => {
-    d.mu.Lock();
-    defer(d.mu.Unlock);
+internal static channel<EmptyStruct> wait(this ж<pipeDeadline> Ꮡd) => func((defer, recover) => {
+    ref var d = ref Ꮡd.Value;
+
+    Ꮡd.of(pipeDeadline.Ꮡmu).Lock();
+    defer(Ꮡd.of(pipeDeadline.Ꮡmu).Unlock);
     return d.cancel;
 });
 
@@ -90,7 +94,7 @@ internal static @string String(this pipeAddr _) {
 }
 
 [GoType] partial struct pipe {
-    internal sync_package.Mutex wrMu; // Serialize Write operations
+    internal Δsync.Mutex wrMu; // Serialize Write operations
     // Used by local Read to interact with remote Write.
     // Successful receive on rdRx is always followed by send on rdTx.
     internal /*<-*/channel<slice<byte>> rdRx;
@@ -99,7 +103,7 @@ internal static @string String(this pipeAddr _) {
     // Successful send on wrTx is always followed by receive on wrRx.
     internal channel/*<-*/<slice<byte>> wrTx;
     internal /*<-*/channel<nint> wrRx;
-    internal sync_package.Once once; // Protects closing localDone
+    internal Δsync.Once once; // Protects closing localDone
     internal channel<EmptyStruct> localDone;
     internal /*<-*/channel<EmptyStruct> remoteDone;
     internal pipeDeadline readDeadline;
@@ -132,7 +136,7 @@ public static (Conn, Conn) Pipe() {
         readDeadline: makePipeDeadline(),
         writeDeadline: makePipeDeadline()
     ));
-    return (~p1, ~p2);
+    return (new pipeжConn(p1), new pipeжConn(p2));
 }
 
 [GoRecv] internal static ΔAddr LocalAddr(this ref pipe _) {
@@ -143,121 +147,139 @@ public static (Conn, Conn) Pipe() {
     return new pipeAddr(nil);
 }
 
-[GoRecv] internal static (nint, error) Read(this ref pipe p, slice<byte> b) {
-    var (n, err) = p.read(b);
-    if (err != default! && !AreEqual(err, io.EOF) && !AreEqual(err, io.ErrClosedPipe)) {
-        Ꮡerr = new OpError(Op: "read"u8, Net: "pipe"u8, Err: err); err = ref Ꮡerr.val;
+internal static (nint, error) Read(this ж<pipe> Ꮡp, slice<byte> b) {
+    ref var p = ref Ꮡp.Value;
+
+    var (n, err) = Ꮡp.read(b);
+    if (err != default! && !AreEqual(err, Δio.EOF) && !AreEqual(err, Δio.ErrClosedPipe)) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "read"u8, Net: "pipe"u8, Err: err)));
     }
     return (n, err);
 }
 
-[GoRecv] internal static (nint n, error err) read(this ref pipe p, slice<byte> b) {
+internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
     nint n = default!;
     error err = default!;
 
+    ref var p = ref Ꮡp.Value;
     switch (ᐧ) {
     case {} when isClosedChan(p.localDone): {
-        return (0, io.ErrClosedPipe);
+        return (0, Δio.ErrClosedPipe);
     }
     case {} when isClosedChan(p.remoteDone): {
-        return (0, io.EOF);
+        return (0, Δio.EOF);
     }
-    case {} when isClosedChan(p.readDeadline.wait()): {
+    case {} when isClosedChan(Ꮡp.of(pipe.ᏑreadDeadline).wait()): {
         return (0, os.ErrDeadlineExceeded);
     }}
 
-    switch (select(ᐸꟷ(p.rdRx, ꓸꓸꓸ), ᐸꟷ(p.localDone, ꓸꓸꓸ), ᐸꟷ(p.remoteDone, ꓸꓸꓸ), ᐸꟷ(p.readDeadline.wait(), ꓸꓸꓸ))) {
+    switch (select(ᐸꟷ(p.rdRx, ꓸꓸꓸ), ᐸꟷ(p.localDone, ꓸꓸꓸ), ᐸꟷ(p.remoteDone, ꓸꓸꓸ), ᐸꟷ(Ꮡp.of(pipe.ᏑreadDeadline).wait(), ꓸꓸꓸ))) {
     case 0 when p.rdRx.ꟷᐳ(out var bw): {
         nint nr = copy(b, bw);
         p.rdTx.ᐸꟷ(nr);
         return (nr, default!);
     }
     case 1 when p.localDone.ꟷᐳ(out _): {
-        return (0, io.ErrClosedPipe);
+        return (0, Δio.ErrClosedPipe);
     }
     case 2 when p.remoteDone.ꟷᐳ(out _): {
-        return (0, io.EOF);
+        return (0, Δio.EOF);
     }
-    case 3 when p.readDeadline.wait().ꟷᐳ(out _): {
+    case 3 when Ꮡp.of(pipe.ᏑreadDeadline).wait().ꟷᐳ(out _): {
         return (0, os.ErrDeadlineExceeded);
     }}
+    return default!;
 }
 
-[GoRecv] internal static (nint, error) Write(this ref pipe p, slice<byte> b) {
-    var (n, err) = p.write(b);
-    if (err != default! && !AreEqual(err, io.ErrClosedPipe)) {
-        Ꮡerr = new OpError(Op: "write"u8, Net: "pipe"u8, Err: err); err = ref Ꮡerr.val;
+internal static (nint, error) Write(this ж<pipe> Ꮡp, slice<byte> b) {
+    ref var p = ref Ꮡp.Value;
+
+    var (n, err) = Ꮡp.write(b);
+    if (err != default! && !AreEqual(err, Δio.ErrClosedPipe)) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "write"u8, Net: "pipe"u8, Err: err)));
     }
     return (n, err);
 }
 
-[GoRecv] internal static (nint n, error err) write(this ref pipe p, slice<byte> b) => func((defer, _) => {
+internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
     nint n = default!;
     error err = default!;
+    func((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
 
-    switch (ᐧ) {
-    case {} when isClosedChan(p.localDone): {
-        return (0, io.ErrClosedPipe);
-    }
-    case {} when isClosedChan(p.remoteDone): {
-        return (0, io.ErrClosedPipe);
-    }
-    case {} when isClosedChan(p.writeDeadline.wait()): {
-        return (0, os.ErrDeadlineExceeded);
-    }}
-
-    p.wrMu.Lock();
-    // Ensure entirety of b is written together
-    defer(p.wrMu.Unlock);
-    for (var once = true; once || len(b) > 0; once = false) {
-        switch (select(p.wrTx.ᐸꟷ(b, ꓸꓸꓸ), ᐸꟷ(p.localDone, ꓸꓸꓸ), ᐸꟷ(p.remoteDone, ꓸꓸꓸ), ᐸꟷ(p.writeDeadline.wait(), ꓸꓸꓸ))) {
-        case 0: {
-            nint nw = ᐸꟷ(p.wrRx);
-            b = b[(int)(nw)..];
-            n += nw;
-            break;
+        switch (ᐧ) {
+        case {} when isClosedChan(p.localDone): {
+            (n, err) = (0, Δio.ErrClosedPipe); return;
         }
-        case 1 when p.localDone.ꟷᐳ(out _): {
-            return (n, io.ErrClosedPipe);
+        case {} when isClosedChan(p.remoteDone): {
+            (n, err) = (0, Δio.ErrClosedPipe); return;
         }
-        case 2 when p.remoteDone.ꟷᐳ(out _): {
-            return (n, io.ErrClosedPipe);
-        }
-        case 3 when p.writeDeadline.wait().ꟷᐳ(out _): {
-            return (n, os.ErrDeadlineExceeded);
+        case {} when isClosedChan(Ꮡp.of(pipe.ᏑwriteDeadline).wait()): {
+            (n, err) = (0, os.ErrDeadlineExceeded); return;
         }}
-    }
-    return (n, default!);
-});
 
-[GoRecv] internal static error SetDeadline(this ref pipe p, time.Time t) {
+        Ꮡp.of(pipe.ᏑwrMu).Lock();
+        // Ensure entirety of b is written together
+        defer(Ꮡp.of(pipe.ᏑwrMu).Unlock);
+        for (var once = true; once || len(b) > 0; once = false) {
+            switch (select(p.wrTx.ᐸꟷ(b, ꓸꓸꓸ), ᐸꟷ(p.localDone, ꓸꓸꓸ), ᐸꟷ(p.remoteDone, ꓸꓸꓸ), ᐸꟷ(Ꮡp.of(pipe.ᏑwriteDeadline).wait(), ꓸꓸꓸ))) {
+            case 0: {
+                nint nw = ᐸꟷ(p.wrRx);
+                b = b[(int)(nw)..];
+                n += nw;
+                break;
+            }
+            case 1 when p.localDone.ꟷᐳ(out _): {
+                (n, err) = (n, Δio.ErrClosedPipe); return;
+            }
+            case 2 when p.remoteDone.ꟷᐳ(out _): {
+                (n, err) = (n, Δio.ErrClosedPipe); return;
+            }
+            case 3 when Ꮡp.of(pipe.ᏑwriteDeadline).wait().ꟷᐳ(out _): {
+                (n, err) = (n, os.ErrDeadlineExceeded); return;
+            }}
+        }
+        (n, err) = (n, default!);
+    });
+    return (n, err);
+}
+
+internal static error SetDeadline(this ж<pipe> Ꮡp, time.Time t) {
+    ref var p = ref Ꮡp.Value;
+
     if (isClosedChan(p.localDone) || isClosedChan(p.remoteDone)) {
-        return io.ErrClosedPipe;
+        return Δio.ErrClosedPipe;
     }
-    p.readDeadline.set(t);
-    p.writeDeadline.set(t);
+    Ꮡp.of(pipe.ᏑreadDeadline).set(t);
+    Ꮡp.of(pipe.ᏑwriteDeadline).set(t);
     return default!;
 }
 
-[GoRecv] internal static error SetReadDeadline(this ref pipe p, time.Time t) {
+internal static error SetReadDeadline(this ж<pipe> Ꮡp, time.Time t) {
+    ref var p = ref Ꮡp.Value;
+
     if (isClosedChan(p.localDone) || isClosedChan(p.remoteDone)) {
-        return io.ErrClosedPipe;
+        return Δio.ErrClosedPipe;
     }
-    p.readDeadline.set(t);
+    Ꮡp.of(pipe.ᏑreadDeadline).set(t);
     return default!;
 }
 
-[GoRecv] internal static error SetWriteDeadline(this ref pipe p, time.Time t) {
+internal static error SetWriteDeadline(this ж<pipe> Ꮡp, time.Time t) {
+    ref var p = ref Ꮡp.Value;
+
     if (isClosedChan(p.localDone) || isClosedChan(p.remoteDone)) {
-        return io.ErrClosedPipe;
+        return Δio.ErrClosedPipe;
     }
-    p.writeDeadline.set(t);
+    Ꮡp.of(pipe.ᏑwriteDeadline).set(t);
     return default!;
 }
 
-[GoRecv] internal static error Close(this ref pipe p) {
-    p.once.Do(() => {
-        close(p.localDone);
+internal static error Close(this ж<pipe> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    Ꮡp.of(pipe.Ꮡonce).Do(() => {
+        builtin.close(Ꮡp.Value.localDone);
     });
     return default!;
 }

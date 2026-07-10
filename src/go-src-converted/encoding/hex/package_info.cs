@@ -39,10 +39,10 @@ using static go.encoding.hex_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<InvalidByteError, error>]
-[assembly: GoImplement<decoder, io_package.Reader>]
-[assembly: GoImplement<dumper, io_package.WriteCloser>]
-[assembly: GoImplement<encoder, io_package.Writer>]
-[assembly: GoImplement<strings_package.Builder, io_package.Writer>]
+[assembly: GoImplement<decoder, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<dumper, io_package.WriteCloser>(Pointer = true)]
+[assembly: GoImplement<encoder, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

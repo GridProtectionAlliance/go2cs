@@ -100,18 +100,18 @@ partial class math_package {
 // 0x3EFA7074428CFA52
 // 0x3F07858E90A45837
 internal static array<float64> _lgamA = new float64[]{
-    7.72156649015328655494e-02F,
-    3.22467033424113591611e-01F,
-    6.73523010531292681824e-02F,
-    2.05808084325167332806e-02F,
-    7.38555086081402883957e-03F,
-    2.89051383673415629091e-03F,
-    1.19270763183362067845e-03F,
-    5.10069792153511336608e-04F,
-    2.20862790713908385557e-04F,
-    1.08011567247583939954e-04F,
-    2.52144565451257326939e-05F,
-    4.48640949618915160150e-05F
+    7.72156649015328655494e-02D,
+    3.22467033424113591611e-01D,
+    6.73523010531292681824e-02D,
+    2.05808084325167332806e-02D,
+    7.38555086081402883957e-03D,
+    2.89051383673415629091e-03D,
+    1.19270763183362067845e-03D,
+    5.10069792153511336608e-04D,
+    2.20862790713908385557e-04D,
+    1.08011567247583939954e-04D,
+    2.52144565451257326939e-05D,
+    4.48640949618915160150e-05D
 }.array();
 
 // placeholder
@@ -122,13 +122,13 @@ internal static array<float64> _lgamA = new float64[]{
 // 0x3F497DDACA41A95B
 // 0x3EDEBAF7A5B38140
 internal static array<float64> _lgamR = new float64[]{
-    1.0F,
-    1.39200533467621045958e+00F,
-    7.21935547567138069525e-01F,
-    1.71933865632803078993e-01F,
-    1.86459191715652901344e-02F,
-    7.77942496381893596434e-04F,
-    7.32668430744625636189e-06F
+    1.0D,
+    1.39200533467621045958e+00D,
+    7.21935547567138069525e-01D,
+    1.71933865632803078993e-01D,
+    1.86459191715652901344e-02D,
+    7.77942496381893596434e-04D,
+    7.32668430744625636189e-06D
 }.array();
 
 // 0xBFB3C467E37DB0C8
@@ -139,13 +139,13 @@ internal static array<float64> _lgamR = new float64[]{
 // 0x3F5E26B67368F239
 // 0x3F00BFECDD17E945
 internal static array<float64> _lgamS = new float64[]{
-    -7.72156649015328655494e-02F,
-    2.14982415960608852501e-01F,
-    3.25778796408930981787e-01F,
-    1.46350472652464452805e-01F,
-    2.66422703033638609560e-02F,
-    1.84028451407337715652e-03F,
-    3.19475326584100867617e-05F
+    -7.72156649015328655494e-02D,
+    2.14982415960608852501e-01D,
+    3.25778796408930981787e-01D,
+    1.46350472652464452805e-01D,
+    2.66422703033638609560e-02D,
+    1.84028451407337715652e-03D,
+    3.19475326584100867617e-05D
 }.array();
 
 // 0x3FDEF72BC8EE38A2
@@ -164,21 +164,21 @@ internal static array<float64> _lgamS = new float64[]{
 // 0xBF347F24ECC38C38
 // 0x3F35FD3EE8C2D3F4
 internal static array<float64> _lgamT = new float64[]{
-    4.83836122723810047042e-01F,
-    -1.47587722994593911752e-01F,
-    6.46249402391333854778e-02F,
-    -3.27885410759859649565e-02F,
-    1.79706750811820387126e-02F,
-    -1.03142241298341437450e-02F,
-    6.10053870246291332635e-03F,
-    -3.68452016781138256760e-03F,
-    2.25964780900612472250e-03F,
-    -1.40346469989232843813e-03F,
-    8.81081882437654011382e-04F,
-    -5.38595305356740546715e-04F,
-    3.15632070903625950361e-04F,
-    -3.12754168375120860518e-04F,
-    3.35529192635519073543e-04F
+    4.83836122723810047042e-01D,
+    -1.47587722994593911752e-01D,
+    6.46249402391333854778e-02D,
+    -3.27885410759859649565e-02D,
+    1.79706750811820387126e-02D,
+    -1.03142241298341437450e-02D,
+    6.10053870246291332635e-03D,
+    -3.68452016781138256760e-03D,
+    2.25964780900612472250e-03D,
+    -1.40346469989232843813e-03D,
+    8.81081882437654011382e-04D,
+    -5.38595305356740546715e-04D,
+    3.15632070903625950361e-04D,
+    -3.12754168375120860518e-04D,
+    3.35529192635519073543e-04D
 }.array();
 
 // 0xBFB3C467E37DB0C8
@@ -188,12 +188,12 @@ internal static array<float64> _lgamT = new float64[]{
 // 0x3FCD4EAEF6010924
 // 0x3F8B678BBF2BAB09
 internal static array<float64> _lgamU = new float64[]{
-    -7.72156649015328655494e-02F,
-    6.32827064025093366517e-01F,
-    1.45492250137234768737e+00F,
-    9.77717527963372745603e-01F,
-    2.28963728064692451092e-01F,
-    1.33810918536787660377e-02F
+    -7.72156649015328655494e-02D,
+    6.32827064025093366517e-01D,
+    1.45492250137234768737e+00D,
+    9.77717527963372745603e-01D,
+    2.28963728064692451092e-01D,
+    1.33810918536787660377e-02D
 }.array();
 
 // 0x4003A5D7C2BD619C
@@ -202,12 +202,12 @@ internal static array<float64> _lgamU = new float64[]{
 // 0x3FBAAE55D6537C88
 // 0x3F6A5ABB57D0CF61
 internal static array<float64> _lgamV = new float64[]{
-    1.0F,
-    2.45597793713041134822e+00F,
-    2.12848976379893395361e+00F,
-    7.69285150456672783825e-01F,
-    1.04222645593369134254e-01F,
-    3.21709242282423911810e-03F
+    1.0D,
+    2.45597793713041134822e+00D,
+    2.12848976379893395361e+00D,
+    7.69285150456672783825e-01D,
+    1.04222645593369134254e-01D,
+    3.21709242282423911810e-03D
 }.array();
 
 // 0x3FDACFE390C97D69
@@ -218,13 +218,13 @@ internal static array<float64> _lgamV = new float64[]{
 // 0x3F4B67BA4CDAD5D1
 // 0xBF5AB89D0B9E43E4
 internal static array<float64> _lgamW = new float64[]{
-    4.18938533204672725052e-01F,
-    8.33333333333329678849e-02F,
-    -2.77777777728775536470e-03F,
-    7.93650558643019558500e-04F,
-    -5.95187557450339963135e-04F,
-    8.36339918996282139126e-04F,
-    -1.63092934096575273989e-03F
+    4.18938533204672725052e-01D,
+    8.33333333333329678849e-02D,
+    -2.77777777728775536470e-03D,
+    7.93650558643019558500e-04D,
+    -5.95187557450339963135e-04D,
+    8.36339918996282139126e-04D,
+    -1.63092934096575273989e-03D
 }.array();
 
 // Lgamma returns the natural logarithm and sign (-1 or +1) of [Gamma](x).
@@ -240,14 +240,14 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
     float64 lgamma = default!;
     nint sign = default!;
 
-    static readonly UntypedFloat Ymin = /* 1.461632144968362245 */ 1.46163;
-    static readonly UntypedInt Two52 = /* 1 << 52 */ 4503599627370496; // 0x4330000000000000 ~4.5036e+15
-    static readonly UntypedInt Two53 = /* 1 << 53 */ 9007199254740992; // 0x4340000000000000 ~9.0072e+15
-    static readonly UntypedInt Two58 = /* 1 << 58 */ 288230376151711744; // 0x4390000000000000 ~2.8823e+17
-    static readonly UntypedFloat Tiny = /* 1.0 / (1 << 70) */ 8.47033e-22; // 0x3b90000000000000 ~8.47033e-22
-    static readonly UntypedFloat Tc = /* 1.46163214496836224576e+00 */ 1.46163;      // 0x3FF762D86356BE3F
-    static readonly UntypedFloat Tf = /* -1.21486290535849611461e-01 */ -0.121486; // 0xBFBF19B9BCC38A42
-    static readonly UntypedFloat Tt = /* -3.63867699703950536541e-18 */ -3.63868e-18; // 0xBC50C7CAA48A971F
+    UntypedFloat Ymin = /* 1.461632144968362245 */ 1.46163;
+    UntypedInt Two52 = /* 1 << 52 */ 4503599627370496; // 0x4330000000000000 ~4.5036e+15
+    UntypedInt Two53 = /* 1 << 53 */ 9007199254740992; // 0x4340000000000000 ~9.0072e+15
+    UntypedInt Two58 = /* 1 << 58 */ 288230376151711744; // 0x4390000000000000 ~2.8823e+17
+    UntypedFloat Tiny = /* 1.0 / (1 << 70) */ 8.47033e-22; // 0x3b90000000000000 ~8.47033e-22
+    UntypedFloat Tc = /* 1.46163214496836224576e+00 */ 1.46163;      // 0x3FF762D86356BE3F
+    UntypedFloat Tf = /* -1.21486290535849611461e-01 */ -0.121486; // 0xBFBF19B9BCC38A42
+    UntypedFloat Tt = /* -3.63867699703950536541e-18 */ -3.63868e-18; // 0xBC50C7CAA48A971F
     // special cases
     sign = 1;
     switch (ᐧ) {
@@ -290,7 +290,7 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
             // -integer
             return (lgamma, sign);
         }
-        nadj = Log(Pi / Abs(t * x));
+        nadj = Log((float64)Pi / Abs(t * x));
         if (t < 0) {
             sign = -1;
         }
@@ -305,16 +305,16 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
 // use lgamma(x) = lgamma(x+1) - log(x)
         float64 y = default!;
         nint i = default!;
-        if (x <= 0.9F){
+        if (x <= 0.9D){
             lgamma = -Log(x);
             switch (ᐧ) {
-            case {} when x >= (Ymin - 1 + 0.27F): {
+            case {} when x >= (Ymin - 1 + 0.27D): {
                 y = 1 - x;
                 i = 0;
                 break;
             }
-            case {} when x >= (Ymin - 1 - 0.27F): {
-                y = x - (Tc - 1);
+            case {} when x >= (Ymin - 1 - 0.27D): {
+                y = x - (float64)(Tc - 1);
                 i = 1;
                 break;
             }
@@ -330,13 +330,13 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
             // 0 < x < 0.2316
             lgamma = 0;
             switch (ᐧ) {
-            case {} when x >= (Ymin + 0.27F): {
+            case {} when x >= (Ymin + 0.27D): {
                 y = 2 - x;
                 i = 0;
                 break;
             }
-            case {} when x >= (Ymin - 0.27F): {
-                y = x - Tc;
+            case {} when x >= (Ymin - 0.27D): {
+                y = x - (float64)Tc;
                 i = 1;
                 break;
             }
@@ -353,7 +353,7 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
             var p1 = _lgamA[0] + z * (_lgamA[2] + z * (_lgamA[4] + z * (_lgamA[6] + z * (_lgamA[8] + z * _lgamA[10]))));
             var p2 = z * (_lgamA[1] + z * (+_lgamA[3] + z * (_lgamA[5] + z * (_lgamA[7] + z * (_lgamA[9] + z * _lgamA[11])))));
             var p = y * p1 + p2;
-            lgamma += (p - 0.5F * y);
+            lgamma += (p - 0.5D * y);
             break;
         }
         case 1: {
@@ -362,45 +362,45 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
             var p1 = _lgamT[0] + w * (_lgamT[3] + w * (_lgamT[6] + w * (_lgamT[9] + w * _lgamT[12])));
             var p2 = _lgamT[1] + w * (_lgamT[4] + w * (_lgamT[7] + w * (_lgamT[10] + w * _lgamT[13])));
             var p3 = _lgamT[2] + w * (_lgamT[5] + w * (_lgamT[8] + w * (_lgamT[11] + w * _lgamT[14])));
-            var p = z * p1 - (Tt - w * (p2 + y * p3));
-            lgamma += (Tf + p);
+            var p = z * p1 - ((float64)Tt - w * (p2 + y * p3));
+            lgamma += ((float64)Tf + p);
             break;
         }
         case 2: {
             var p1 = y * (_lgamU[0] + y * (_lgamU[1] + y * (_lgamU[2] + y * (_lgamU[3] + y * (_lgamU[4] + y * _lgamU[5])))));
             var p2 = 1 + y * (_lgamV[1] + y * (_lgamV[2] + y * (_lgamV[3] + y * (_lgamV[4] + y * _lgamV[5]))));
-            lgamma += (-0.5F * y + p1 / p2);
+            lgamma += (-0.5D * y + p1 / p2);
             break;
         }}
 
         break;
     }
     case {} when x is < 8: {
-        nint i = ((nint)x);
-        var y = x - ((float64)i);
+        nint i = (nint)x;
+        var y = x - (float64)i;
         var p = y * (_lgamS[0] + y * (_lgamS[1] + y * (_lgamS[2] + y * (_lgamS[3] + y * (_lgamS[4] + y * (_lgamS[5] + y * _lgamS[6]))))));
         var q = 1 + y * (_lgamR[1] + y * (_lgamR[2] + y * (_lgamR[3] + y * (_lgamR[4] + y * (_lgamR[5] + y * _lgamR[6])))));
-        lgamma = 0.5F * y + p / q;
-        var z = 1.0F;
+        lgamma = 0.5D * y + p / q;
+        var z = 1.0D;
         var exprᴛ1 = i;
         var matchᴛ1 = false;
         if (exprᴛ1 is 7) { matchᴛ1 = true;
             z *= (y + 6);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 6)) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 6) { matchᴛ1 = true;
             z *= (y + 5);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 5)) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 5) { matchᴛ1 = true;
             z *= (y + 4);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 4)) {
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 4) {
             z *= (y + 3);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 3)) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) { matchᴛ1 = true;
             z *= (y + 2);
             lgamma += Log(z);
         }
@@ -412,7 +412,7 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
         var z = 1 / x;
         var y = z * z;
         var w = _lgamW[0] + z * (_lgamW[1] + y * (_lgamW[2] + y * (_lgamW[3] + y * (_lgamW[4] + y * (_lgamW[5] + y * _lgamW[6])))));
-        lgamma = (x - 0.5F) * (t - 1) + w;
+        lgamma = (x - 0.5D) * (t - 1) + w;
         break;
     }
     default: {
@@ -436,10 +436,10 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
 
 // sinPi(x) is a helper function for negative x
 internal static float64 sinPi(float64 x) {
-    static readonly UntypedInt Two52 = /* 1 << 52 */ 4503599627370496; // 0x4330000000000000 ~4.5036e+15
-    static readonly UntypedInt Two53 = /* 1 << 53 */ 9007199254740992; // 0x4340000000000000 ~9.0072e+15
-    if (x < 0.25F) {
-        return -Sin(Pi * x);
+    UntypedInt Two52 = /* 1 << 52 */ 4503599627370496; // 0x4330000000000000 ~4.5036e+15
+    UntypedInt Two53 = /* 1 << 53 */ 9007199254740992; // 0x4340000000000000 ~9.0072e+15
+    if (x < 0.25D) {
+        return -Sin((float64)Pi * x);
     }
     // argument reduction
     var z = Floor(x);
@@ -447,7 +447,7 @@ internal static float64 sinPi(float64 x) {
     if (z != x){
         // inexact
         x = Mod(x, 2);
-        n = ((nint)(x * 4));
+        n = (nint)(x * 4);
     } else {
         if (x >= Two53){
             // x must be even
@@ -455,33 +455,33 @@ internal static float64 sinPi(float64 x) {
             n = 0;
         } else {
             if (x < Two52) {
-                z = x + Two52;
+                z = x + (float64)Two52;
             }
             // exact
-            n = ((nint)((uint64)(1 & Float64bits(z))));
-            x = ((float64)n);
-            n <<= (UntypedInt)(2);
+            n = (nint)((uint64)(1 & Float64bits(z)));
+            x = (float64)n;
+            n <<= (int)(2);
         }
     }
     switch (n) {
     case 0: {
-        x = Sin(Pi * x);
+        x = Sin((float64)Pi * x);
         break;
     }
     case 1 or 2: {
-        x = Cos(Pi * (0.5F - x));
+        x = Cos((float64)Pi * (0.5D - x));
         break;
     }
     case 3 or 4: {
-        x = Sin(Pi * (1 - x));
+        x = Sin((float64)Pi * (1 - x));
         break;
     }
     case 5 or 6: {
-        x = -Cos(Pi * (x - 1.5F));
+        x = -Cos((float64)Pi * (x - 1.5D));
         break;
     }
     default: {
-        x = Sin(Pi * (x - 2));
+        x = Sin((float64)Pi * (x - 2));
         break;
     }}
 

@@ -17,7 +17,7 @@ partial class fuzz_package {
 }
 
 internal static ж<mutator> newMutator() {
-    return Ꮡ(new mutator(r: newPcgRand()));
+    return Ꮡ(new mutator(r: new pcgRandжmutatorRand(newPcgRand())));
 }
 
 [GoRecv] internal static nint rand(this ref mutator m, nint n) {
@@ -26,9 +26,9 @@ internal static ж<mutator> newMutator() {
 
 [GoRecv] internal static binary.ByteOrder randByteOrder(this ref mutator m) {
     if (m.r.@bool()) {
-        return binary.LittleEndian;
+        return new binary_littleEndianᴠByteOrder(binary.LittleEndian);
     }
-    return binary.BigEndian;
+    return new binary_bigEndianᴠByteOrder(binary.BigEndian);
 }
 
 // chooseLen chooses length of range mutation in range [1,n]. It gives
@@ -51,7 +51,9 @@ internal static ж<mutator> newMutator() {
 }
 
 // mutate performs several mutations on the provided values.
-[GoRecv] internal static void mutate(this ref mutator m, slice<any> vals, nint maxBytes) {
+internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxBytes) {
+    ref var m = ref Ꮡm.Value;
+
     // TODO(katiehockman): pull some of these functions into helper methods and
     // test that each case is working as expected.
     // TODO(katiehockman): perform more types of mutations for []byte.
@@ -64,19 +66,15 @@ internal static ж<mutator> newMutator() {
     nint i = m.rand(len(vals));
     switch (vals[i].type()) {
     case nint v: {
-        vals[i] = ((nint)m.mutateInt(((int64)v), maxInt));
-        break;
-    }
-    case int32 v: {
-        vals[i] = ((nint)m.mutateInt(((int64)v), maxInt));
+        vals[i] = (nint)m.mutateInt((int64)v, maxInt);
         break;
     }
     case int8 v: {
-        vals[i] = ((int8)m.mutateInt(((int64)v), math.MaxInt8));
+        vals[i] = (int8)m.mutateInt((int64)v, math.MaxInt8);
         break;
     }
     case int16 v: {
-        vals[i] = ((int16)m.mutateInt(((int64)v), math.MaxInt16));
+        vals[i] = (int16)m.mutateInt((int64)v, math.MaxInt16);
         break;
     }
     case int64 v: {
@@ -84,19 +82,15 @@ internal static ж<mutator> newMutator() {
         break;
     }
     case nuint v: {
-        vals[i] = ((nuint)m.mutateUInt(((uint64)v), maxUint));
-        break;
-    }
-    case uint32 v: {
-        vals[i] = ((nuint)m.mutateUInt(((uint64)v), maxUint));
+        vals[i] = (nuint)m.mutateUInt((uint64)v, maxUint);
         break;
     }
     case uint16 v: {
-        vals[i] = ((uint16)m.mutateUInt(((uint64)v), math.MaxUint16));
+        vals[i] = (uint16)m.mutateUInt((uint64)v, math.MaxUint16);
         break;
     }
     case uint32 v: {
-        vals[i] = ((uint32)m.mutateUInt(((uint64)v), math.MaxUint32));
+        vals[i] = (uint32)m.mutateUInt((uint64)v, math.MaxUint32);
         break;
     }
     case uint64 v: {
@@ -104,7 +98,7 @@ internal static ж<mutator> newMutator() {
         break;
     }
     case float32 v: {
-        vals[i] = ((float32)m.mutateFloat(((float64)v), math.MaxFloat32));
+        vals[i] = (float32)m.mutateFloat((float64)v, math.MaxFloat32);
         break;
     }
     case float64 v: {
@@ -118,27 +112,27 @@ internal static ж<mutator> newMutator() {
         break;
     }
     case rune v: {
-        vals[i] = ((rune)m.mutateInt(((int64)v), // 50% chance of flipping the bool
+        vals[i] = (rune)m.mutateInt((int64)v, // 50% chance of flipping the bool
  // int32
- math.MaxInt32));
+ math.MaxInt32);
         break;
     }
     case byte v: {
-        vals[i] = ((byte)m.mutateUInt(((uint64)v), // uint8
- math.MaxUint8));
+        vals[i] = (byte)m.mutateUInt((uint64)v, // uint8
+ math.MaxUint8);
         break;
     }
     case @string v: {
         if (len(v) > maxPerVal) {
             throw panic(fmt.Sprintf("cannot mutate bytes of length %d"u8, len(v)));
         }
-        if (cap(m.scratch) < maxPerVal){
+        if (builtin.cap(m.scratch) < maxPerVal){
             m.scratch = append(new slice<byte>(0, maxPerVal), v.ꓸꓸꓸ);
         } else {
             m.scratch = m.scratch[..(int)(len(v))];
             copy(m.scratch, v);
         }
-        m.mutateBytes(Ꮡ(m.scratch));
+        Ꮡm.mutateBytes(Ꮡm.of(mutator.Ꮡscratch));
         vals[i] = ((@string)m.scratch);
         break;
     }
@@ -146,18 +140,18 @@ internal static ж<mutator> newMutator() {
         if (len(v) > maxPerVal) {
             throw panic(fmt.Sprintf("cannot mutate bytes of length %d"u8, len(v)));
         }
-        if (cap(m.scratch) < maxPerVal){
+        if (builtin.cap(m.scratch) < maxPerVal){
             m.scratch = append(new slice<byte>(0, maxPerVal), v.ꓸꓸꓸ);
         } else {
             m.scratch = m.scratch[..(int)(len(v))];
             copy(m.scratch, v);
         }
-        m.mutateBytes(Ꮡ(m.scratch));
+        Ꮡm.mutateBytes(Ꮡm.of(mutator.Ꮡscratch));
         vals[i] = m.scratch;
         break;
     }
     default: {
-        var v = vals[i].type();
+        var v = vals[i];
         throw panic(fmt.Sprintf("type not supported for mutating: %T"u8, vals[i]));
         break;
     }}
@@ -177,7 +171,7 @@ internal static ж<mutator> newMutator() {
                 // Don't let v exceed maxValue
                 max = maxValue - v;
             }
-            v += ((int64)(1 + m.rand(((nint)max))));
+            v += (int64)(1 + m.rand((nint)max));
             return v;
         }
         case 1: {
@@ -189,7 +183,7 @@ internal static ж<mutator> newMutator() {
                 // Don't let v drop below -maxValue
                 max = maxValue + v;
             }
-            v -= ((int64)(1 + m.rand(((nint)max))));
+            v -= (int64)(1 + m.rand((nint)max));
             return v;
         }}
 
@@ -210,7 +204,7 @@ internal static ж<mutator> newMutator() {
                 // Don't let v exceed maxValue
                 max = maxValue - v;
             }
-            v += ((uint64)(1 + m.rand(((nint)max))));
+            v += (uint64)(1 + m.rand((nint)max));
             return v;
         }
         case 1: {
@@ -222,7 +216,7 @@ internal static ж<mutator> newMutator() {
                 // Don't let v drop below 0
                 max = v;
             }
-            v -= ((uint64)(1 + m.rand(((nint)max))));
+            v -= (uint64)(1 + m.rand((nint)max));
             return v;
         }}
 
@@ -243,7 +237,7 @@ internal static ж<mutator> newMutator() {
                 // Don't let v exceed maxValue
                 max = maxValue - v;
             }
-            v += ((float64)(1 + m.rand(((nint)max))));
+            v += (float64)(1 + m.rand((nint)max));
             return v;
         }
         case 1: {
@@ -256,7 +250,7 @@ internal static ж<mutator> newMutator() {
                 // Don't let v drop below -maxValue
                 max = maxValue + v;
             }
-            v -= ((float64)(1 + m.rand(((nint)max))));
+            v -= (float64)(1 + m.rand((nint)max));
             return v;
         }
         case 2: {
@@ -270,7 +264,7 @@ internal static ж<mutator> newMutator() {
                 // Don't let v go beyond the minimum or maximum value
                 max = maxValue / absV;
             }
-            v *= ((float64)(1 + m.rand(((nint)max))));
+            v *= (float64)(1 + m.rand((nint)max));
             return v;
         }
         case 3: {
@@ -278,16 +272,16 @@ internal static ж<mutator> newMutator() {
                 // Divide by a random number
                 continue;
             }
-            v /= ((float64)(1 + m.rand(10)));
+            v /= (float64)(1 + m.rand(10));
             return v;
         }}
 
     }
 }
 
-internal delegate slice<byte> byteSliceMutator(ж<mutator> _, slice<byte> _);
+// type byteSliceMutator is a methodless func type — rendered inline as its base delegate
 
-internal static slice<byteSliceMutator> byteSliceMutators = new byteSliceMutator[]{
+internal static slice<Func<ж<mutator>, slice<byte>, slice<byte>>> byteSliceMutators = new Func<ж<mutator>, slice<byte>, slice<byte>>[]{
     byteSliceRemoveBytes,
     byteSliceInsertRandomBytes,
     byteSliceDuplicateBytes,
@@ -308,21 +302,22 @@ internal static slice<byteSliceMutator> byteSliceMutators = new byteSliceMutator
     byteSliceSwapBytes
 }.slice();
 
-[GoRecv] internal static void mutateBytes(this ref mutator m, ж<slice<byte>> ᏑptrB) => func((defer, _) => {
-    ref var ptrB = ref ᏑptrB.val;
+internal static void mutateBytes(this ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB) => func((defer, recover) => {
+    ref var m = ref Ꮡm.Value;
+    ref var ptrB = ref ᏑptrB.Value;
 
-    var b = ptrB;
-    var bʗ1 = b;
+    ref var b = ref heap<slice<byte>>(out var Ꮡb);
+    b = ptrB;
     defer(() => {
-        if (@unsafe.SliceData(ptrB) != @unsafe.SliceData(bʗ1)) {
+        if (@unsafe.SliceData(ᏑptrB.ValueSlot) != @unsafe.SliceData(Ꮡb.ValueSlot)) {
             throw panic("data moved to new address");
         }
-        ptrB = bʗ1;
+        ᏑptrB.ValueSlot = Ꮡb.ValueSlot;
     });
     while (ᐧ) {
         var mut = byteSliceMutators[m.rand(len(byteSliceMutators))];
         {
-            var mutated = mut(m, b); if (mutated != default!) {
+            var mutated = mut(Ꮡm, b); if (mutated != default!) {
                 b = mutated;
                 return;
             }
@@ -330,19 +325,19 @@ internal static slice<byteSliceMutator> byteSliceMutators = new byteSliceMutator
     }
 });
 
-internal static slice<int8> interesting8 = new int8[]{-128, -1, 0, 1, 16, 32, 64, 100, 127}.slice();
-internal static slice<int16> interesting16 = new int16[]{-32768, -129, 128, 255, 256, 512, 1000, 1024, 4096, 32767}.slice();
-internal static slice<int32> interesting32 = new int32[]{-(nint)2147483648L, -100663046, -32769, 32768, 65535, 65536, 100663045, 2147483647}.slice();
+internal static slice<int8> interesting8 = new int8[]{(int8)(-128), (int8)(-1), 0, 1, 16, 32, 64, 100, 127}.slice();
+internal static slice<int16> interesting16 = new int16[]{(int16)(-32768), (int16)(-129), 128, 255, 256, 512, 1000, 1024, 4096, 32767}.slice();
+internal static slice<int32> interesting32 = new int32[]{-2147483648, -100663046, -32769, 32768, 65535, 65536, 100663045, 2147483647}.slice();
 
 internal const uint64 maxUint = /* uint64(^uint(0)) */ 18446744073709551615;
 internal const int64 maxInt = /* int64(maxUint >> 1) */ 9223372036854775807;
 
 [GoInit] internal static void init() {
     foreach (var (_, v) in interesting8) {
-        interesting16 = append(interesting16, ((int16)v));
+        interesting16 = append(interesting16, (int16)v);
     }
     foreach (var (_, v) in interesting16) {
-        interesting32 = append(interesting32, ((int32)v));
+        interesting32 = append(interesting32, (int32)v);
     }
 }
 

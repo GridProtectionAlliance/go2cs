@@ -5,7 +5,7 @@ namespace go;
 
 using errors = errors_package;
 using windows = @internal.syscall.windows_package;
-using runtime = runtime_package;
+using Δruntime = runtime_package;
 using syscall = syscall_package;
 using time = time_package;
 using @internal.syscall;
@@ -14,49 +14,56 @@ partial class os_package {
 
 // Note that Process.mode is always modeHandle because Windows always requires
 // a handle. A manually-created Process literal is not valid.
-[GoRecv] internal static (ж<ProcessState> ps, error err) wait(this ref Process p) => func((defer, _) => {
+internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
     ж<ProcessState> ps = default!;
     error err = default!;
+    func((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
 
-    var (handle, status) = p.handleTransientAcquire();
-    var exprᴛ1 = status;
-    if (exprᴛ1 == statusDone) {
-        return (default!, ErrProcessDone);
-    }
-    if (exprᴛ1 == statusReleased) {
-        return (default!, syscall.EINVAL);
-    }
+        var (handle, status) = Ꮡp.handleTransientAcquire();
+        var exprᴛ1 = status;
+        if (exprᴛ1 == statusDone) {
+            (ps, err) = (default!, ErrProcessDone); return;
+        }
+        if (exprᴛ1 == statusReleased) {
+            (ps, err) = (default!, syscall.EINVAL); return;
+        }
 
-    defer(p.handleTransientRelease);
-    var (s, e) = syscall.WaitForSingleObject(((syscallꓸHandle)handle), syscall.INFINITE);
-    switch (s) {
-    case syscall.WAIT_OBJECT_0: {
-        break;
-        break;
-    }
-    case syscall.WAIT_FAILED: {
-        return (default!, NewSyscallError("WaitForSingleObject"u8, e));
-    }
-    default: {
-        return (default!, errors.New("os: unexpected result from WaitForSingleObject"u8));
-    }}
+        defer(Ꮡp.handleTransientRelease);
+        var (s, e) = syscall.WaitForSingleObject(((syscallꓸHandle)handle), syscall.INFINITE);
+        var exprᴛ2 = s;
+        if (exprᴛ2 == syscall.WAIT_OBJECT_0) {
+            do {
+                break;
+            } while (false);
+        }
+        else if (exprᴛ2 == syscall.WAIT_FAILED) {
+            (ps, err) = (default!, NewSyscallError("WaitForSingleObject"u8, e)); return;
+        }
+        { /* default: */
+            (ps, err) = (default!, errors.New("os: unexpected result from WaitForSingleObject"u8)); return;
+        }
 
-    ref var ec = ref heap(new uint32(), out var Ꮡec);
-    e = syscall.GetExitCodeProcess(((syscallꓸHandle)handle), Ꮡec);
-    if (e != default!) {
-        return (default!, NewSyscallError("GetExitCodeProcess"u8, e));
-    }
-    ref var u = ref heap(new syscall_package.Rusage(), out var Ꮡu);
-    e = syscall.GetProcessTimes(((syscallꓸHandle)handle), Ꮡu.of(syscall.Rusage.ᏑCreationTime), Ꮡu.of(syscall.Rusage.ᏑExitTime), Ꮡu.of(syscall.Rusage.ᏑKernelTime), Ꮡu.of(syscall.Rusage.ᏑUserTime));
-    if (e != default!) {
-        return (default!, NewSyscallError("GetProcessTimes"u8, e));
-    }
-    defer(p.Release);
-    return (Ꮡ(new ProcessState(p.Pid, new syscall.WaitStatus(ExitCode: ec), Ꮡu)), default!);
-});
+        ref var ec = ref heap(new uint32(), out var Ꮡec);
+        e = syscall.GetExitCodeProcess(((syscallꓸHandle)handle), Ꮡec);
+        if (e != default!) {
+            (ps, err) = (default!, NewSyscallError("GetExitCodeProcess"u8, e)); return;
+        }
+        ref var u = ref heap(new syscall.Rusage(), out var Ꮡu);
+        e = syscall.GetProcessTimes(((syscallꓸHandle)handle), Ꮡu.of(syscall.Rusage.ᏑCreationTime), Ꮡu.of(syscall.Rusage.ᏑExitTime), Ꮡu.of(syscall.Rusage.ᏑKernelTime), Ꮡu.of(syscall.Rusage.ᏑUserTime));
+        if (e != default!) {
+            (ps, err) = (default!, NewSyscallError("GetProcessTimes"u8, e)); return;
+        }
+        defer(() => Ꮡp.Release());
+        (ps, err) = (Ꮡ(new ProcessState(p.Pid, new syscall.WaitStatus(ExitCode: ec), Ꮡu)), default!);
+    });
+    return (ps, err);
+}
 
-[GoRecv] internal static error signal(this ref Process p, ΔSignal sig) => func((defer, _) => {
-    var (handle, status) = p.handleTransientAcquire();
+internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) => func<error>((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
+
+    var (handle, status) = Ꮡp.handleTransientAcquire();
     var exprᴛ1 = status;
     if (exprᴛ1 == statusDone) {
         return ErrProcessDone;
@@ -65,35 +72,37 @@ partial class os_package {
         return syscall.EINVAL;
     }
 
-    defer(p.handleTransientRelease);
+    defer(Ꮡp.handleTransientRelease);
     if (AreEqual(sig, ΔKill)) {
-        ref var terminationHandle = ref heap(new syscall_package.ΔHandle(), out var ᏑterminationHandle);
-        var e = syscall.DuplicateHandle(~((syscallꓸHandle)0), ((syscallꓸHandle)handle), ~((syscallꓸHandle)0), ᏑterminationHandle, syscall.PROCESS_TERMINATE, false, 0);
+        ref var terminationHandle = ref heap(new syscallꓸHandle(), out var ᏑterminationHandle);
+        var e = syscall.DuplicateHandle(~((syscallꓸHandle)((syscallꓸHandle)0)), ((syscallꓸHandle)handle), ~((syscallꓸHandle)((syscallꓸHandle)0)), ᏑterminationHandle, syscall.PROCESS_TERMINATE, false, 0);
         if (e != default!) {
             return NewSyscallError("DuplicateHandle"u8, e);
         }
-        runtime.KeepAlive(p);
+        Δruntime.KeepAlive(p);
         deferǃ(syscall.CloseHandle, terminationHandle, defer);
-        e = syscall.TerminateProcess(((syscallꓸHandle)terminationHandle), 1);
+        e = syscall.TerminateProcess(terminationHandle, 1);
         return NewSyscallError("TerminateProcess"u8, e);
     }
     // TODO(rsc): Handle Interrupt too?
     return ((syscall.Errno)syscall.EWINDOWS);
 });
 
-[GoRecv] internal static error release(this ref Process p) {
+internal static error release(this ж<Process> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     // Drop the Process' reference and mark handle unusable for
     // future calls.
     //
     // The API on Windows expects EINVAL if Release is called multiple
     // times.
     {
-        var old = p.handlePersistentRelease(statusReleased); if (old == statusReleased) {
+        var old = Ꮡp.handlePersistentRelease(statusReleased); if (old == statusReleased) {
             return syscall.EINVAL;
         }
     }
     // no need for a finalizer anymore
-    runtime.SetFinalizer(p, default!);
+    Δruntime.SetFinalizer(p, default!);
     return default!;
 }
 
@@ -105,16 +114,16 @@ internal static (ж<Process> p, error err) findProcess(nint pid) {
     ж<Process> p = default!;
     error err = default!;
 
-    static readonly UntypedInt da = /* syscall.STANDARD_RIGHTS_READ |
+    UntypedInt da = /* syscall.STANDARD_RIGHTS_READ |
 	syscall.PROCESS_QUERY_INFORMATION | syscall.SYNCHRONIZE */ 1180672;
-    var (h, e) = syscall.OpenProcess(da, false, ((uint32)pid));
+    var (h, e) = syscall.OpenProcess(da, false, (uint32)pid);
     if (e != default!) {
         return (default!, NewSyscallError("OpenProcess"u8, e));
     }
-    return (newHandleProcess(pid, ((uintptr)h)), default!);
+    return (newHandleProcess(pid, (uintptr)h), default!);
 }
 
-[GoInit] internal static void initΔ1() {
+[GoInit] internal static void init() {
     @string cmd = windows.UTF16PtrToString(syscall.GetCommandLine());
     if (len(cmd) == 0){
         var (arg0, _) = Executable();
@@ -127,7 +136,7 @@ internal static (ж<Process> p, error err) findProcess(nint pid) {
 // appendBSBytes appends n '\\' bytes to b and returns the resulting slice.
 internal static slice<byte> appendBSBytes(slice<byte> b, nint n) {
     for (; n > 0; n--) {
-        b = append(b, (rune)'\\');
+        b = append(b, (byte)((rune)'\\'));
     }
     return b;
 }
@@ -199,19 +208,19 @@ internal static slice<@string> commandLineToArgv(@string cmd) {
 }
 
 internal static time.Duration ftToDuration(ж<syscall.Filetime> Ꮡft) {
-    ref var ft = ref Ꮡft.val;
+    ref var ft = ref Ꮡft.Value;
 
-    var n = ((int64)ft.HighDateTime) << (int)(32) + ((int64)ft.LowDateTime);
+    var n = ((int64)ft.HighDateTime << (int)(32)) + (int64)ft.LowDateTime;
     // in 100-nanosecond intervals
     return ((time.Duration)(n * 100)) * time.ΔNanosecond;
 }
 
 [GoRecv] internal static time.Duration userTime(this ref ProcessState p) {
-    return ftToDuration(Ꮡ(p.rusage.UserTime));
+    return ftToDuration(p.rusage.of(syscall.Rusage.ᏑUserTime));
 }
 
 [GoRecv] internal static time.Duration systemTime(this ref ProcessState p) {
-    return ftToDuration(Ꮡ(p.rusage.KernelTime));
+    return ftToDuration(p.rusage.of(syscall.Rusage.ᏑKernelTime));
 }
 
 } // end os_package

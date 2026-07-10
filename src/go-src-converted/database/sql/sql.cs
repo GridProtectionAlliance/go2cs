@@ -16,27 +16,28 @@
 namespace go.database;
 
 using context = context_package;
-using driver = database.sql.driver_package;
+using driver = go.database.sql.driver_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
-using v2 = math.rand.v2_package;
+using rand = math.rand.rand_package;
 using reflect = reflect_package;
 using runtime = runtime_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using sync = sync_package;
-using atomic = sync.atomic_package;
+using atomic = go.sync.atomic_package;
 using time = time_package;
-using _ = unsafe_package;
-using database.sql;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+using go.database.sql;
+using go.sync;
 using math.rand;
-using sync;
 using ꓸꓸꓸany = Span<any>;
 
 partial class sql_package {
 
-internal static sync.RWMutex driversMu;
+internal static ж<sync.RWMutex> ᏑdriversMu = new(default(sync.RWMutex));
+internal static ref sync.RWMutex driversMu => ref ᏑdriversMu.Value;
 
 // drivers should be an internal detail,
 // but widely used packages access it using linkname.
@@ -48,7 +49,7 @@ internal static sync.RWMutex driversMu;
 // See go.dev/issue/67401.
 //
 //go:linkname drivers
-internal static driver.Driver drivers = new driver.Driver();
+internal static map<@string, driver.Driver> drivers = new map<@string, driver.Driver>();
 
 // nowFunc returns the current time; it's overridden in tests.
 internal static Func<time.Time> nowFunc = time.Now;
@@ -56,40 +57,36 @@ internal static Func<time.Time> nowFunc = time.Now;
 // Register makes a database driver available by the provided name.
 // If Register is called twice with the same name or if driver is nil,
 // it panics.
-public static void Register(@string name, driver.Driver driver) => func((defer, _) => {
-    driversMu.Lock();
-    var driversMuʗ1 = driversMu;
-    defer(driversMuʗ1.Unlock);
-    if (driver == default!) {
+public static void Register(@string name, driver.Driver driverΔ1) => func((defer, recover) => {
+    ᏑdriversMu.Lock();
+    defer(ᏑdriversMu.Unlock);
+    if (driverΔ1 == default!) {
         throw panic("sql: Register driver is nil");
     }
     {
-        var _ = drivers[name];
-        var dup = drivers[name]; if (dup) {
-            throw panic("sql: Register called twice for driver "u8 + name);
+        var (_, dup) = drivers[name, ꟷ]; if (dup) {
+            throw panic("sql: Register called twice for driver " + name);
         }
     }
-    drivers[name] = driver;
+    drivers[name] = driverΔ1;
 });
 
-internal static void unregisterAllDrivers() => func((defer, _) => {
-    driversMu.Lock();
-    var driversMuʗ1 = driversMu;
-    defer(driversMuʗ1.Unlock);
+internal static void unregisterAllDrivers() => func((defer, recover) => {
+    ᏑdriversMu.Lock();
+    defer(ᏑdriversMu.Unlock);
     // For tests.
-    drivers = new driver.Driver();
+    drivers = new map<@string, driver.Driver>();
 });
 
 // Drivers returns a sorted list of the names of the registered drivers.
-public static slice<@string> Drivers() => func((defer, _) => {
-    driversMu.RLock();
-    var driversMuʗ1 = driversMu;
-    defer(driversMuʗ1.RUnlock);
+public static slice<@string> Drivers() => func((defer, recover) => {
+    ᏑdriversMu.RLock();
+    defer(ᏑdriversMu.RUnlock);
     var list = new slice<@string>(0, len(drivers));
     foreach (var (name, _) in drivers) {
         list = append(list, name);
     }
-    slices.Sort(list);
+    slices.Sort<slice<@string>, @string>(list);
     return list;
 });
 
@@ -187,12 +184,12 @@ public static @string String(this IsolationLevel i) {
         return "Linearizable"u8;
     }
     { /* default: */
-        return "IsolationLevel("u8 + strconv.Itoa(((nint)i)) + ")"u8;
+        return "IsolationLevel("u8 + strconv.Itoa((nint)i) + ")"u8;
     }
 
 }
 
-internal static IsolationLevel _ᴛ1ʗ = LevelDefault;
+internal static fmt.Stringer _ᴛ1ʗ = ((IsolationLevel)LevelDefault);
 
 // TxOptions holds the transaction options to be used in [DB.BeginTx].
 [GoType] partial struct TxOptions {
@@ -222,17 +219,20 @@ internal static IsolationLevel _ᴛ1ʗ = LevelDefault;
 }
 
 // Scan implements the [Scanner] interface.
-[GoRecv] public static error Scan(this ref NullString ns, any value) {
+public static error Scan(this ж<NullString> Ꮡns, any value) {
+    ref var ns = ref Ꮡns.Value;
+
     if (value == default!) {
-        (ns.String, ns.Valid) = (""u8, false);
+        ns.String = ""u8;
+        ns.Valid = false;
         return default!;
     }
     ns.Valid = true;
-    return convertAssign(Ꮡ(ns.String), value);
+    return convertAssign(Ꮡns.of(NullString.ᏑString), value);
 }
 
 // Value implements the [driver.Valuer] interface.
-public static (driver.Value, error) Value(this NullString ns) {
+public static (driverꓸValue, error) Value(this NullString ns) {
     if (!ns.Valid) {
         return (default!, default!);
     }
@@ -248,17 +248,20 @@ public static (driver.Value, error) Value(this NullString ns) {
 }
 
 // Scan implements the [Scanner] interface.
-[GoRecv] public static error Scan(this ref NullInt64 n, any value) {
+public static error Scan(this ж<NullInt64> Ꮡn, any value) {
+    ref var n = ref Ꮡn.Value;
+
     if (value == default!) {
-        (n.Int64, n.Valid) = (0, false);
+        n.Int64 = 0;
+        n.Valid = false;
         return default!;
     }
     n.Valid = true;
-    return convertAssign(Ꮡ(n.Int64), value);
+    return convertAssign(Ꮡn.of(NullInt64.ᏑInt64), value);
 }
 
 // Value implements the [driver.Valuer] interface.
-public static (driver.Value, error) Value(this NullInt64 n) {
+public static (driverꓸValue, error) Value(this NullInt64 n) {
     if (!n.Valid) {
         return (default!, default!);
     }
@@ -274,21 +277,24 @@ public static (driver.Value, error) Value(this NullInt64 n) {
 }
 
 // Scan implements the [Scanner] interface.
-[GoRecv] public static error Scan(this ref NullInt32 n, any value) {
+public static error Scan(this ж<NullInt32> Ꮡn, any value) {
+    ref var n = ref Ꮡn.Value;
+
     if (value == default!) {
-        (n.Int32, n.Valid) = (0, false);
+        n.Int32 = 0;
+        n.Valid = false;
         return default!;
     }
     n.Valid = true;
-    return convertAssign(Ꮡ(n.Int32), value);
+    return convertAssign(Ꮡn.of(NullInt32.ᏑInt32), value);
 }
 
 // Value implements the [driver.Valuer] interface.
-public static (driver.Value, error) Value(this NullInt32 n) {
+public static (driverꓸValue, error) Value(this NullInt32 n) {
     if (!n.Valid) {
         return (default!, default!);
     }
-    return (((int64)n.Int32), default!);
+    return ((int64)n.Int32, default!);
 }
 
 // NullInt16 represents an int16 that may be null.
@@ -300,22 +306,25 @@ public static (driver.Value, error) Value(this NullInt32 n) {
 }
 
 // Scan implements the [Scanner] interface.
-[GoRecv] public static error Scan(this ref NullInt16 n, any value) {
+public static error Scan(this ж<NullInt16> Ꮡn, any value) {
+    ref var n = ref Ꮡn.Value;
+
     if (value == default!) {
-        (n.Int16, n.Valid) = (0, false);
+        n.Int16 = 0;
+        n.Valid = false;
         return default!;
     }
-    var err = convertAssign(Ꮡ(n.Int16), value);
+    var err = convertAssign(Ꮡn.of(NullInt16.ᏑInt16), value);
     n.Valid = err == default!;
     return err;
 }
 
 // Value implements the [driver.Valuer] interface.
-public static (driver.Value, error) Value(this NullInt16 n) {
+public static (driverꓸValue, error) Value(this NullInt16 n) {
     if (!n.Valid) {
         return (default!, default!);
     }
-    return (((int64)n.Int16), default!);
+    return ((int64)n.Int16, default!);
 }
 
 // NullByte represents a byte that may be null.
@@ -327,22 +336,25 @@ public static (driver.Value, error) Value(this NullInt16 n) {
 }
 
 // Scan implements the [Scanner] interface.
-[GoRecv] public static error Scan(this ref NullByte n, any value) {
+public static error Scan(this ж<NullByte> Ꮡn, any value) {
+    ref var n = ref Ꮡn.Value;
+
     if (value == default!) {
-        (n.Byte, n.Valid) = (0, false);
+        n.Byte = 0;
+        n.Valid = false;
         return default!;
     }
-    var err = convertAssign(Ꮡ(n.Byte), value);
+    var err = convertAssign(Ꮡn.of(NullByte.ᏑByte), value);
     n.Valid = err == default!;
     return err;
 }
 
 // Value implements the [driver.Valuer] interface.
-public static (driver.Value, error) Value(this NullByte n) {
+public static (driverꓸValue, error) Value(this NullByte n) {
     if (!n.Valid) {
         return (default!, default!);
     }
-    return (((int64)n.Byte), default!);
+    return ((int64)n.Byte, default!);
 }
 
 // NullFloat64 represents a float64 that may be null.
@@ -354,17 +366,20 @@ public static (driver.Value, error) Value(this NullByte n) {
 }
 
 // Scan implements the [Scanner] interface.
-[GoRecv] public static error Scan(this ref NullFloat64 n, any value) {
+public static error Scan(this ж<NullFloat64> Ꮡn, any value) {
+    ref var n = ref Ꮡn.Value;
+
     if (value == default!) {
-        (n.Float64, n.Valid) = (0, false);
+        n.Float64 = 0;
+        n.Valid = false;
         return default!;
     }
     n.Valid = true;
-    return convertAssign(Ꮡ(n.Float64), value);
+    return convertAssign(Ꮡn.of(NullFloat64.ᏑFloat64), value);
 }
 
 // Value implements the [driver.Valuer] interface.
-public static (driver.Value, error) Value(this NullFloat64 n) {
+public static (driverꓸValue, error) Value(this NullFloat64 n) {
     if (!n.Valid) {
         return (default!, default!);
     }
@@ -380,17 +395,20 @@ public static (driver.Value, error) Value(this NullFloat64 n) {
 }
 
 // Scan implements the [Scanner] interface.
-[GoRecv] public static error Scan(this ref NullBool n, any value) {
+public static error Scan(this ж<NullBool> Ꮡn, any value) {
+    ref var n = ref Ꮡn.Value;
+
     if (value == default!) {
-        (n.Bool, n.Valid) = (false, false);
+        n.Bool = false;
+        n.Valid = false;
         return default!;
     }
     n.Valid = true;
-    return convertAssign(Ꮡ(n.Bool), value);
+    return convertAssign(Ꮡn.of(NullBool.ᏑBool), value);
 }
 
 // Value implements the [driver.Valuer] interface.
-public static (driver.Value, error) Value(this NullBool n) {
+public static (driverꓸValue, error) Value(this NullBool n) {
     if (!n.Valid) {
         return (default!, default!);
     }
@@ -401,22 +419,25 @@ public static (driver.Value, error) Value(this NullBool n) {
 // NullTime implements the [Scanner] interface so
 // it can be used as a scan destination, similar to [NullString].
 [GoType] partial struct NullTime {
-    public time_package.Time Time;
+    public time.Time Time;
     public bool Valid; // Valid is true if Time is not NULL
 }
 
 // Scan implements the [Scanner] interface.
-[GoRecv] public static error Scan(this ref NullTime n, any value) {
+public static error Scan(this ж<NullTime> Ꮡn, any value) {
+    ref var n = ref Ꮡn.Value;
+
     if (value == default!) {
-        (n.Time, n.Valid) = (new time.Time(nil), false);
+        n.Time = new time.Time(nil);
+        n.Valid = false;
         return default!;
     }
     n.Valid = true;
-    return convertAssign(Ꮡ(n.Time), value);
+    return convertAssign(Ꮡn.of(NullTime.ᏑTime), value);
 }
 
 // Value implements the [driver.Valuer] interface.
-public static (driver.Value, error) Value(this NullTime n) {
+public static (driverꓸValue, error) Value(this NullTime n) {
     if (!n.Valid) {
         return (default!, default!);
     }
@@ -435,27 +456,24 @@ public static (driver.Value, error) Value(this NullTime n) {
 //	} else {
 //	   // NULL value
 //	}
-[GoType] partial struct Null<T>
-    where T : new()
-{
+[GoType] partial struct Null<T> {
     public T V;
     public bool Valid;
 }
 
-[GoRecv] public static error Scan<T>(this ref Null<T> n, any value)
-    where T : new()
-{
+public static error Scan<T>(this ж<Null<T>> Ꮡn, any value) {
+    ref var n = ref Ꮡn.Value;
+
     if (value == default!) {
-        (n.V, n.Valid) = (@new<T>().val, false);
+        n.V = @new<T>().ValueSlot;
+        n.Valid = false;
         return default!;
     }
     n.Valid = true;
-    return convertAssign(Ꮡ(n.V), value);
+    return convertAssign(Ꮡn.of(Null<T>.ᏑV), value);
 }
 
-public static (driver.Value, error) Value<T>(this Null<T> n)
-    where T : new()
-{
+public static (driverꓸValue, error) Value<T>(this Null<T> n) {
     if (!n.Valid) {
         return (default!, default!);
     }
@@ -526,13 +544,13 @@ public static error ErrNoRows = errors.New("sql: no rows in result set"u8);
 // can be controlled with [DB.SetMaxIdleConns].
 [GoType] partial struct DB {
     // Total time waited for new connections.
-    internal sync.atomic_package.Int64 waitDuration;
-    internal database.sql.driver_package.Connector connector;
+    internal atomic.Int64 waitDuration;
+    internal driver.Connector connector;
     // numClosed is an atomic counter which represents a total number of
     // closed connections. Stmt.openStmt checks it before cleaning closed
     // connections in Stmt.css.
-    internal sync.atomic_package.Uint64 numClosed;
-    internal sync_package.Mutex mu;    // protects following fields
+    internal atomic.Uint64 numClosed;
+    internal sync.Mutex mu;    // protects following fields
     internal slice<ж<driverConn>> freeConn; // free connections ordered by returnedAt oldest to newest
     internal connRequestSet connRequests;
     internal nint numOpen; // number of opened and pending open connections
@@ -543,12 +561,12 @@ public static error ErrNoRows = errors.New("sql: no rows in result set"u8);
     // goroutine to exit.
     internal channel<EmptyStruct> openerCh;
     internal bool closed;
-    internal sql.depSet dep;
+    internal map<finalCloser, depSet> dep;
     internal map<ж<driverConn>, @string> lastPut; // stacktrace of last conn's put; debug only
     internal nint maxIdleCount;                   // zero means defaultMaxIdleConns; negative means 0
     internal nint maxOpen;                   // <= 0 means unlimited
-    internal time_package.Duration maxLifetime;          // maximum amount of time a connection may be reused
-    internal time_package.Duration maxIdleTime;          // maximum amount of time a connection may be idle before being closed
+    internal time.Duration maxLifetime;          // maximum amount of time a connection may be reused
+    internal time.Duration maxIdleTime;          // maximum amount of time a connection may be idle before being closed
     internal channel<EmptyStruct> cleanerCh;
     internal int64 waitCount; // Total number of connections waited for.
     internal int64 maxIdleClosed; // Total number of connections closed due to idle count.
@@ -568,9 +586,9 @@ internal static readonly connReuseStrategy cachedOrNewConn = 1;
 // Result, Rows)
 [GoType] partial struct driverConn {
     internal ж<DB> db;
-    internal time_package.Time createdAt;
+    internal time.Time createdAt;
     public partial ref sync_package.Mutex Mutex { get; }  // guards following
-    internal database.sql.driver_package.Conn ci;
+    internal driver.Conn ci;
     internal bool needReset; // The connection session should be reset before use if true.
     internal bool closed;
     internal bool finalClosed; // ci.Close has been called
@@ -578,19 +596,22 @@ internal static readonly connReuseStrategy cachedOrNewConn = 1;
     // guarded by db.mu
     internal bool inUse;
     internal bool dbmuClosed;      // same as closed, but guarded by db.mu, for removeClosedStmtLocked
-    internal time_package.Time returnedAt; // Time the connection was created or returned.
+    internal time.Time returnedAt; // Time the connection was created or returned.
     internal slice<Action> onPut; // code (with db.mu held) run when conn is next returned
 }
 
-[GoRecv] internal static void releaseConn(this ref driverConn dc, error err) {
-    dc.db.putConn(dc, err, true);
+internal static void releaseConn(this ж<driverConn> Ꮡdc, error err) {
+    ref var dc = ref Ꮡdc.Value;
+
+    dc.db.putConn(Ꮡdc, err, true);
 }
 
-[GoRecv] internal static void removeOpenStmt(this ref driverConn dc, ж<driverStmt> Ꮡds) => func((defer, _) => {
-    ref var ds = ref Ꮡds.val;
+internal static void removeOpenStmt(this ж<driverConn> Ꮡdc, ж<driverStmt> Ꮡds) => func((defer, recover) => {
+    ref var dc = ref Ꮡdc.Value;
+    ref var ds = ref Ꮡds.Value;
 
-    dc.Lock();
-    defer(dc.Unlock);
+    Ꮡdc.of(driverConn.ᏑMutex).Lock();
+    defer(Ꮡdc.of(driverConn.ᏑMutex).Unlock);
     delete(dc.openStmt, Ꮡds);
 });
 
@@ -603,9 +624,11 @@ internal static readonly connReuseStrategy cachedOrNewConn = 1;
 
 // resetSession checks if the driver connection needs the
 // session to be reset and if required, resets it.
-[GoRecv] internal static error resetSession(this ref driverConn dc, context.Context ctx) => func((defer, _) => {
-    dc.Lock();
-    defer(dc.Unlock);
+internal static error resetSession(this ж<driverConn> Ꮡdc, context.Context ctx) => func<error>((defer, recover) => {
+    ref var dc = ref Ꮡdc.Value;
+
+    Ꮡdc.of(driverConn.ᏑMutex).Lock();
+    defer(Ꮡdc.of(driverConn.ᏑMutex).Unlock);
     if (!dc.needReset) {
         return default!;
     }
@@ -619,9 +642,11 @@ internal static readonly connReuseStrategy cachedOrNewConn = 1;
 
 // validateConnection checks if the connection is valid and can
 // still be used. It also marks the session for reset if required.
-[GoRecv] internal static bool validateConnection(this ref driverConn dc, bool needsReset) => func((defer, _) => {
-    dc.Lock();
-    defer(dc.Unlock);
+internal static bool validateConnection(this ж<driverConn> Ꮡdc, bool needsReset) => func<bool>((defer, recover) => {
+    ref var dc = ref Ꮡdc.Value;
+
+    Ꮡdc.of(driverConn.ᏑMutex).Lock();
+    defer(Ꮡdc.of(driverConn.ᏑMutex).Unlock);
     if (needsReset) {
         dc.needReset = true;
     }
@@ -635,12 +660,14 @@ internal static readonly connReuseStrategy cachedOrNewConn = 1;
 
 // prepareLocked prepares the query on dc. When cg == nil the dc must keep track of
 // the prepared statements in a pool.
-[GoRecv] internal static (ж<driverStmt>, error) prepareLocked(this ref driverConn dc, context.Context ctx, stmtConnGrabber cg, @string query) {
-    (si, err) = ctxDriverPrepare(ctx, dc.ci, query);
+internal static (ж<driverStmt>, error) prepareLocked(this ж<driverConn> Ꮡdc, context.Context ctx, stmtConnGrabber cg, @string query) {
+    ref var dc = ref Ꮡdc.Value;
+
+    var (si, err) = ctxDriverPrepare(ctx, dc.ci, query);
     if (err != default!) {
         return (default!, err);
     }
-    var ds = Ꮡ(new driverStmt(Locker: dc, si: si));
+    var ds = Ꮡ(new driverStmt(Locker: new driverConnжLocker(Ꮡdc), si: si));
     // No need to manage open statements if there is a single connection grabber.
     if (cg != default!) {
         return (ds, default!);
@@ -657,62 +684,64 @@ internal static readonly connReuseStrategy cachedOrNewConn = 1;
 }
 
 // the dc.db's Mutex is held.
-[GoRecv] internal static Func<error> closeDBLocked(this ref driverConn dc) => func((defer, _) => {
-    dc.Lock();
-    defer(dc.Unlock);
+internal static Func<error> closeDBLocked(this ж<driverConn> Ꮡdc) => func((defer, recover) => {
+    ref var dc = ref Ꮡdc.Value;
+
+    Ꮡdc.of(driverConn.ᏑMutex).Lock();
+    defer(Ꮡdc.of(driverConn.ᏑMutex).Unlock);
     if (dc.closed) {
         return () => errors.New("sql: duplicate driverConn close"u8);
     }
     dc.closed = true;
-    return dc.db.removeDepLocked(~dc, dc);
+    return dc.db.removeDepLocked(new driverConnжfinalCloser(Ꮡdc), dc);
 });
 
-[GoRecv] internal static error Close(this ref driverConn dc) {
-    dc.Lock();
+internal static error Close(this ж<driverConn> Ꮡdc) {
+    ref var dc = ref Ꮡdc.Value;
+
+    Ꮡdc.of(driverConn.ᏑMutex).Lock();
     if (dc.closed) {
-        dc.Unlock();
+        Ꮡdc.of(driverConn.ᏑMutex).Unlock();
         return errors.New("sql: duplicate driverConn close"u8);
     }
     dc.closed = true;
-    dc.Unlock();
+    Ꮡdc.of(driverConn.ᏑMutex).Unlock();
     // not defer; removeDep finalClose calls may need to lock
     // And now updates that require holding dc.mu.Lock.
-    dc.db.mu.Lock();
+    dc.db.of(DB.Ꮡmu).Lock();
     dc.dbmuClosed = true;
-    var fn = dc.db.removeDepLocked(~dc, dc);
-    dc.db.mu.Unlock();
+    var fn = dc.db.removeDepLocked(new driverConnжfinalCloser(Ꮡdc), dc);
+    dc.db.of(DB.Ꮡmu).Unlock();
     return fn();
 }
 
-[GoRecv] internal static error finalClose(this ref driverConn dc) {
-    error err = default!;
+internal static error finalClose(this ж<driverConn> Ꮡdc) {
+    ref var dc = ref Ꮡdc.Value;
+
+    ref var err = ref heap<error>(out var Ꮡerr);
     // Each *driverStmt has a lock to the dc. Copy the list out of the dc
     // before calling close on each stmt.
-    slice<ж<driverStmt>> openStmt = default!;
-    withLock(~dc, 
-    var openStmtʗ1 = openStmt;
-    () => {
-        openStmtʗ1 = new slice<ж<driverStmt>>(0, len(dc.openStmtʗ1));
-        foreach (var (ds, _) in dc.openStmtʗ1) {
-            openStmtʗ1 = append(openStmtʗ1, ds);
+    ref var openStmt = ref heap<slice<ж<driverStmt>>>(out var ᏑopenStmt);
+    withLock(new driverConnжLocker(Ꮡdc), () => {
+        ᏑopenStmt.ValueSlot = new slice<ж<driverStmt>>(0, len(Ꮡdc.Value.openStmt));
+        foreach (var (ds, _) in Ꮡdc.Value.openStmt) {
+            ᏑopenStmt.ValueSlot = append(ᏑopenStmt.ValueSlot, ds);
         }
-        dc.openStmtʗ1 = default!;
+        Ꮡdc.Value.openStmt = default!;
     });
     foreach (var (_, ds) in openStmt) {
         ds.Close();
     }
-    withLock(~dc, 
-    var errʗ1 = err;
-    () => {
-        dc.finalClosed = true;
-        errʗ1 = dc.ci.Close();
-        dc.ci = default!;
+    withLock(new driverConnжLocker(Ꮡdc), () => {
+        Ꮡdc.Value.finalClosed = true;
+        Ꮡerr.ValueSlot = Ꮡdc.Value.ci.Close();
+        Ꮡdc.Value.ci = default!;
     });
-    dc.db.mu.Lock();
-    dc.db.numOpen--;
+    dc.db.of(DB.Ꮡmu).Lock();
+    dc.db.Value.numOpen--;
     dc.db.maybeOpenNewConnections();
-    dc.db.mu.Unlock();
-    dc.db.numClosed.Add(1);
+    dc.db.of(DB.Ꮡmu).Unlock();
+    dc.db.of(DB.ᏑnumClosed).Add(1);
     return err;
 }
 
@@ -720,17 +749,19 @@ internal static readonly connReuseStrategy cachedOrNewConn = 1;
 // *driverConn from which it came, so the driverConn's lock can be
 // held during calls.
 [GoType] partial struct driverStmt {
-    public partial ref sync_package.Locker Locker { get; } // the *driverConn
-    internal database.sql.driver_package.Stmt si;
+    public sync_package.Locker Locker; // the *driverConn
+    internal driver.Stmt si;
     internal bool closed;
     internal error closeErr; // return value of previous Close call
 }
 
 // Close ensures driver.Stmt is only closed once and always returns the same
 // result.
-[GoRecv] internal static error Close(this ref driverStmt ds) => func((defer, _) => {
-    ds.Lock();
-    defer(ds.Unlock);
+internal static error Close(this ж<driverStmt> Ꮡds) => func((defer, recover) => {
+    ref var ds = ref Ꮡds.Value;
+
+    ds.Locker.Lock();
+    defer(Ꮡds.Value.Locker.Unlock);
     if (ds.closed) {
         return ds.closeErr;
     }
@@ -738,7 +769,8 @@ internal static readonly connReuseStrategy cachedOrNewConn = 1;
     ds.closeErr = ds.si.Close();
     return ds.closeErr;
 });
-/* visitMapType: map[any]bool */
+
+[GoType("map[any, bool]")] partial struct depSet;
 
 // The finalCloser interface is used by (*DB).addDep and related
 // dependency reference counting.
@@ -750,15 +782,17 @@ internal static readonly connReuseStrategy cachedOrNewConn = 1;
 
 // addDep notes that x now depends on dep, and x's finalClose won't be
 // called until all of x's dependencies are removed with removeDep.
-[GoRecv] internal static void addDep(this ref DB db, finalCloser x, any dep) => func((defer, _) => {
-    db.mu.Lock();
-    defer(db.mu.Unlock);
+internal static void addDep(this ж<DB> Ꮡdb, finalCloser x, any dep) => func((defer, recover) => {
+    ref var db = ref Ꮡdb.Value;
+
+    Ꮡdb.of(DB.Ꮡmu).Lock();
+    defer(Ꮡdb.of(DB.Ꮡmu).Unlock);
     db.addDepLocked(x, dep);
 });
 
 [GoRecv] internal static void addDepLocked(this ref DB db, finalCloser x, any dep) {
     if (db.dep == default!) {
-        db.dep = new sql.depSet();
+        db.dep = new map<finalCloser, depSet>();
     }
     var xdep = db.dep[x];
     if (xdep == default!) {
@@ -772,35 +806,38 @@ internal static readonly connReuseStrategy cachedOrNewConn = 1;
 // If x still has dependencies, nil is returned.
 // If x no longer has any dependencies, its finalClose method will be
 // called and its error value will be returned.
-[GoRecv] internal static error removeDep(this ref DB db, finalCloser x, any dep) {
-    db.mu.Lock();
+internal static error removeDep(this ж<DB> Ꮡdb, finalCloser x, any dep) {
+    ref var db = ref Ꮡdb.Value;
+
+    Ꮡdb.of(DB.Ꮡmu).Lock();
     var fn = db.removeDepLocked(x, dep);
-    db.mu.Unlock();
+    Ꮡdb.of(DB.Ꮡmu).Unlock();
     return fn();
 }
 
 [GoRecv] internal static Func<error> removeDepLocked(this ref DB db, finalCloser x, any dep) {
-    var xdep = db.dep[x];
-    var ok = db.dep[x];
+    var (xdep, ok) = db.dep[x, ꟷ];
     if (!ok) {
         throw panic(fmt.Sprintf("unpaired removeDep: no deps for %T"u8, x));
     }
     nint l0 = len(xdep);
     delete(xdep, dep);
-    switch (len(xdep)) {
-    case l0: {
+    var exprᴛ1 = len(xdep);
+    if (exprᴛ1 == l0) {
         throw panic(fmt.Sprintf("unpaired removeDep: no %T dep on %T"u8, // Nothing removed. Shouldn't happen.
  dep, x));
-        break;
     }
-    case 0: {
+    else if (exprᴛ1 is 0) {
         delete(db.dep, // No more dependencies.
  x);
         return x.finalClose;
     }
-    default: {
-        return () => default!;
-    }}
+    { /* default: */
+        return () => {
+            // Dependencies remain.
+            return default!;
+        };
+    }
 
 }
 
@@ -813,7 +850,7 @@ internal static nint connectionRequestQueueSize = 1000000;
 
 [GoType] partial struct dsnConnector {
     internal @string dsn;
-    internal database.sql.driver_package.Driver driver;
+    internal driver.Driver driver;
 }
 
 internal static (driver.Conn, error) Connect(this dsnConnector t, context.Context _) {
@@ -841,7 +878,7 @@ internal static driver.Driver Driver(this dsnConnector t) {
 // function should be called just once. It is rarely necessary to
 // close a [DB].
 public static ж<DB> OpenDB(driver.Connector c) {
-    (ctx, cancel) = context.WithCancel(context.Background());
+    var (ctx, cancel) = context.WithCancel(context.Background());
     var db = Ꮡ(new DB(
         connector: c,
         openerCh: new channel<EmptyStruct>(connectionRequestQueueSize),
@@ -871,16 +908,15 @@ public static ж<DB> OpenDB(driver.Connector c) {
 // function should be called just once. It is rarely necessary to
 // close a [DB].
 public static (ж<DB>, error) Open(@string driverName, @string dataSourceName) {
-    driversMu.RLock();
-    var driveri = drivers[driverName];
-    var ok = drivers[driverName];
-    driversMu.RUnlock();
+    ᏑdriversMu.RLock();
+    var (driveri, ok) = drivers[driverName, ꟷ];
+    ᏑdriversMu.RUnlock();
     if (!ok) {
         return (default!, fmt.Errorf("sql: unknown driver %q (forgotten import?)"u8, driverName));
     }
     {
         var (driverCtx, okΔ1) = driveri._<driver.DriverContext>(ᐧ); if (okΔ1) {
-            (connector, err) = driverCtx.OpenConnector(dataSourceName);
+            var (connector, err) = driverCtx.OpenConnector(dataSourceName);
             if (err != default!) {
                 return (default!, err);
             }
@@ -890,17 +926,15 @@ public static (ж<DB>, error) Open(@string driverName, @string dataSourceName) {
     return (OpenDB(new dsnConnector(dsn: dataSourceName, driver: driveri)), default!);
 }
 
-[GoRecv] public static error pingDC(this ref DB db, context.Context ctx, ж<driverConn> Ꮡdc, Action<error> release) {
-    ref var dc = ref Ꮡdc.val;
+[GoRecv] internal static error pingDC(this ref DB db, context.Context ctx, ж<driverConn> Ꮡdc, Action<error> release) {
+    ref var dc = ref Ꮡdc.Value;
 
-    error err = default!;
+    ref var err = ref heap<error>(out var Ꮡerr);
     {
         var (pinger, ok) = dc.ci._<driver.Pinger>(ᐧ); if (ok) {
-            withLock(~dc, 
-            var errʗ1 = err;
             var pingerʗ1 = pinger;
-            () => {
-                errʗ1 = pingerʗ1.Ping(ctx);
+            withLock(new driverConnжLocker(Ꮡdc), () => {
+                Ꮡerr.ValueSlot = pingerʗ1.Ping(ctx);
             });
         }
     }
@@ -910,15 +944,14 @@ public static (ж<DB>, error) Open(@string driverName, @string dataSourceName) {
 
 // PingContext verifies a connection to the database is still alive,
 // establishing a connection if necessary.
-[GoRecv] public static error PingContext(this ref DB db, context.Context ctx) {
-    ж<driverConn> dc = default!;
-    error err = default!;
-    err = db.retry(
-    var dcʗ2 = dc;
-    var errʗ2 = err;
-    (connReuseStrategy strategy) => {
-        (dcʗ2, errʗ2) = db.conn(ctx, strategy);
-        return errʗ2;
+public static error PingContext(this ж<DB> Ꮡdb, context.Context ctx) {
+    ref var db = ref Ꮡdb.Value;
+
+    ref var dc = ref heap<ж<driverConn>>(out var Ꮡdc);
+    ref var err = ref heap<error>(out var Ꮡerr);
+    err = db.retry((connReuseStrategy strategy) => {
+        (Ꮡdc.ValueSlot, Ꮡerr.ValueSlot) = Ꮡdb.conn(ctx, strategy);
+        return Ꮡerr.ValueSlot;
     });
     if (err != default!) {
         return err;
@@ -931,8 +964,10 @@ public static (ж<DB>, error) Open(@string driverName, @string dataSourceName) {
 //
 // Ping uses [context.Background] internally; to specify the context, use
 // [DB.PingContext].
-[GoRecv] public static error Ping(this ref DB db) {
-    return db.PingContext(context.Background());
+public static error Ping(this ж<DB> Ꮡdb) {
+    ref var db = ref Ꮡdb.Value;
+
+    return Ꮡdb.PingContext(context.Background());
 }
 
 // Close closes the database and prevents new queries from starting.
@@ -941,15 +976,17 @@ public static (ж<DB>, error) Open(@string driverName, @string dataSourceName) {
 //
 // It is rare to Close a [DB], as the [DB] handle is meant to be
 // long-lived and shared between many goroutines.
-[GoRecv] public static error Close(this ref DB db) {
-    db.mu.Lock();
+public static error Close(this ж<DB> Ꮡdb) {
+    ref var db = ref Ꮡdb.Value;
+
+    Ꮡdb.of(DB.Ꮡmu).Lock();
     if (db.closed) {
         // Make DB.Close idempotent
-        db.mu.Unlock();
+        Ꮡdb.of(DB.Ꮡmu).Unlock();
         return default!;
     }
     if (db.cleanerCh != default!) {
-        close(db.cleanerCh);
+        builtin.close(db.cleanerCh);
     }
     error err = default!;
     var fns = new slice<Func<error>>(0, len(db.freeConn));
@@ -959,7 +996,7 @@ public static (ж<DB>, error) Open(@string driverName, @string dataSourceName) {
     db.freeConn = default!;
     db.closed = true;
     db.connRequests.CloseAndRemoveAll();
-    db.mu.Unlock();
+    Ꮡdb.of(DB.Ꮡmu).Unlock();
     foreach (var (_, fn) in fns) {
         var err1 = fn();
         if (err1 != default!) {
@@ -1016,8 +1053,10 @@ internal static readonly UntypedInt defaultMaxIdleConns = 2;
 //
 // The default max idle connections is currently 2. This may change in
 // a future release.
-[GoRecv] public static void SetMaxIdleConns(this ref DB db, nint n) {
-    db.mu.Lock();
+public static void SetMaxIdleConns(this ж<DB> Ꮡdb, nint n) {
+    ref var db = ref Ꮡdb.Value;
+
+    Ꮡdb.of(DB.Ꮡmu).Lock();
     if (n > 0){
         db.maxIdleCount = n;
     } else {
@@ -1035,8 +1074,8 @@ internal static readonly UntypedInt defaultMaxIdleConns = 2;
         closing = db.freeConn[(int)(maxIdle)..];
         db.freeConn = db.freeConn[..(int)(maxIdle)];
     }
-    db.maxIdleClosed += ((int64)len(closing));
-    db.mu.Unlock();
+    db.maxIdleClosed += (int64)len(closing);
+    Ꮡdb.of(DB.Ꮡmu).Unlock();
     foreach (var (_, c) in closing) {
         c.Close();
     }
@@ -1050,16 +1089,18 @@ internal static readonly UntypedInt defaultMaxIdleConns = 2;
 //
 // If n <= 0, then there is no limit on the number of open connections.
 // The default is 0 (unlimited).
-[GoRecv] public static void SetMaxOpenConns(this ref DB db, nint n) {
-    db.mu.Lock();
+public static void SetMaxOpenConns(this ж<DB> Ꮡdb, nint n) {
+    ref var db = ref Ꮡdb.Value;
+
+    Ꮡdb.of(DB.Ꮡmu).Lock();
     db.maxOpen = n;
     if (n < 0) {
         db.maxOpen = 0;
     }
     var syncMaxIdle = db.maxOpen > 0 && db.maxIdleConnsLocked() > db.maxOpen;
-    db.mu.Unlock();
+    Ꮡdb.of(DB.Ꮡmu).Unlock();
     if (syncMaxIdle) {
-        db.SetMaxIdleConns(n);
+        Ꮡdb.SetMaxIdleConns(n);
     }
 }
 
@@ -1068,11 +1109,13 @@ internal static readonly UntypedInt defaultMaxIdleConns = 2;
 // Expired connections may be closed lazily before reuse.
 //
 // If d <= 0, connections are not closed due to a connection's age.
-[GoRecv] public static void SetConnMaxLifetime(this ref DB db, time.Duration d) {
+public static void SetConnMaxLifetime(this ж<DB> Ꮡdb, time.Duration d) {
+    ref var db = ref Ꮡdb.Value;
+
     if (d < 0) {
         d = 0;
     }
-    db.mu.Lock();
+    Ꮡdb.of(DB.Ꮡmu).Lock();
     // Wake cleaner up when lifetime is shortened.
     if (d > 0 && d < db.maxLifetime && db.cleanerCh != default!) {
         switch (ᐧ) {
@@ -1084,8 +1127,8 @@ internal static readonly UntypedInt defaultMaxIdleConns = 2;
         }}
     }
     db.maxLifetime = d;
-    db.startCleanerLocked();
-    db.mu.Unlock();
+    Ꮡdb.startCleanerLocked();
+    Ꮡdb.of(DB.Ꮡmu).Unlock();
 }
 
 // SetConnMaxIdleTime sets the maximum amount of time a connection may be idle.
@@ -1093,12 +1136,14 @@ internal static readonly UntypedInt defaultMaxIdleConns = 2;
 // Expired connections may be closed lazily before reuse.
 //
 // If d <= 0, connections are not closed due to a connection's idle time.
-[GoRecv] public static void SetConnMaxIdleTime(this ref DB db, time.Duration d) => func((defer, _) => {
+public static void SetConnMaxIdleTime(this ж<DB> Ꮡdb, time.Duration d) => func((defer, recover) => {
+    ref var db = ref Ꮡdb.Value;
+
     if (d < 0) {
         d = 0;
     }
-    db.mu.Lock();
-    defer(db.mu.Unlock);
+    Ꮡdb.of(DB.Ꮡmu).Lock();
+    defer(Ꮡdb.of(DB.Ꮡmu).Unlock);
     // Wake cleaner up when idle time is shortened.
     if (d > 0 && d < db.maxIdleTime && db.cleanerCh != default!) {
         switch (ᐧ) {
@@ -1110,19 +1155,23 @@ internal static readonly UntypedInt defaultMaxIdleConns = 2;
         }}
     }
     db.maxIdleTime = d;
-    db.startCleanerLocked();
+    Ꮡdb.startCleanerLocked();
 });
 
 // startCleanerLocked starts connectionCleaner if needed.
-[GoRecv] internal static void startCleanerLocked(this ref DB db) {
+internal static void startCleanerLocked(this ж<DB> Ꮡdb) {
+    ref var db = ref Ꮡdb.Value;
+
     if ((db.maxLifetime > 0 || db.maxIdleTime > 0) && db.numOpen > 0 && db.cleanerCh == default!) {
         db.cleanerCh = new channel<EmptyStruct>(1);
-        goǃ(db.connectionCleaner, db.shortestIdleTimeLocked());
+        goǃ(Ꮡdb.connectionCleaner, Ꮡdb.Value.shortestIdleTimeLocked());
     }
 }
 
-[GoRecv] internal static void connectionCleaner(this ref DB db, time.Duration d) {
-    static readonly time.Duration minInterval = /* time.Second */ 1000000000;
+internal static void connectionCleaner(this ж<DB> Ꮡdb, time.Duration d) {
+    ref var db = ref Ꮡdb.Value;
+
+    time.Duration minInterval = /* time.Second */ 1000000000;
     if (d < minInterval) {
         d = minInterval;
     }
@@ -1136,15 +1185,15 @@ internal static readonly UntypedInt defaultMaxIdleConns = 2;
             break;
         }}
         // maxLifetime was changed or db was closed.
-        db.mu.Lock();
+        Ꮡdb.of(DB.Ꮡmu).Lock();
         d = db.shortestIdleTimeLocked();
         if (db.closed || db.numOpen == 0 || d <= 0) {
             db.cleanerCh = default!;
-            db.mu.Unlock();
+            Ꮡdb.of(DB.Ꮡmu).Unlock();
             return;
         }
         var (dΔ1, closing) = db.connectionCleanerRunLocked(d);
-        db.mu.Unlock();
+        Ꮡdb.of(DB.Ꮡmu).Unlock();
         foreach (var (_, c) in closing) {
             c.Close();
         }
@@ -1181,7 +1230,7 @@ internal static readonly UntypedInt defaultMaxIdleConns = 2;
                 i++;
                 closing = db.freeConn.slice(-1, i, i);
                 db.freeConn = db.freeConn[(int)(i)..];
-                idleClosing = ((int64)len(closing));
+                idleClosing = (int64)len(closing);
                 db.maxIdleTimeClosed += idleClosing;
                 break;
             }
@@ -1219,7 +1268,7 @@ internal static readonly UntypedInt defaultMaxIdleConns = 2;
                 }
             }
         }
-        db.maxLifetimeClosed += ((int64)len(closing)) - idleClosing;
+        db.maxLifetimeClosed += (int64)len(closing) - idleClosing;
     }
     return (d, closing);
 }
@@ -1233,17 +1282,19 @@ internal static readonly UntypedInt defaultMaxIdleConns = 2;
     public nint Idle; // The number of idle connections.
     // Counters
     public int64 WaitCount;         // The total number of connections waited for.
-    public time_package.Duration WaitDuration; // The total time blocked waiting for a new connection.
+    public time.Duration WaitDuration; // The total time blocked waiting for a new connection.
     public int64 MaxIdleClosed;         // The total number of connections closed due to SetMaxIdleConns.
     public int64 MaxIdleTimeClosed;         // The total number of connections closed due to SetConnMaxIdleTime.
     public int64 MaxLifetimeClosed;         // The total number of connections closed due to SetConnMaxLifetime.
 }
 
 // Stats returns database statistics.
-[GoRecv] public static DBStats Stats(this ref DB db) => func((defer, _) => {
-    var wait = db.waitDuration.Load();
-    db.mu.Lock();
-    defer(db.mu.Unlock);
+public static DBStats Stats(this ж<DB> Ꮡdb) => func((defer, recover) => {
+    ref var db = ref Ꮡdb.Value;
+
+    var wait = Ꮡdb.of(DB.ᏑwaitDuration).Load();
+    Ꮡdb.of(DB.Ꮡmu).Lock();
+    defer(Ꮡdb.of(DB.Ꮡmu).Unlock);
     var stats = new DBStats(
         MaxOpenConnections: db.maxOpen,
         Idle: len(db.freeConn),
@@ -1257,9 +1308,6 @@ internal static readonly UntypedInt defaultMaxIdleConns = 2;
     );
     return stats;
 });
-
-[GoType("dyn")] partial struct maybeOpenNewConnections_type {
-}
 
 // Assumes db.mu is locked.
 // If there are connRequests and the connection limit hasn't been reached,
@@ -1279,32 +1327,36 @@ internal static readonly UntypedInt defaultMaxIdleConns = 2;
         if (db.closed) {
             return;
         }
-        db.openerCh.ᐸꟷ(new maybeOpenNewConnections_type());
+        db.openerCh.ᐸꟷ(new EmptyStruct());
     }
 }
 
 // Runs in a separate goroutine, opens new connections when requested.
-[GoRecv] internal static void connectionOpener(this ref DB db, context.Context ctx) {
+internal static void connectionOpener(this ж<DB> Ꮡdb, context.Context ctx) {
+    ref var db = ref Ꮡdb.Value;
+
     while (ᐧ) {
         switch (select(ᐸꟷ(ctx.Done(), ꓸꓸꓸ), ᐸꟷ(db.openerCh, ꓸꓸꓸ))) {
         case 0 when ctx.Done().ꟷᐳ(out _): {
             return;
         }
         case 1 when db.openerCh.ꟷᐳ(out _): {
-            db.openNewConnection(ctx);
+            Ꮡdb.openNewConnection(ctx);
             break;
         }}
     }
 }
 
 // Open one new connection
-[GoRecv] internal static void openNewConnection(this ref DB db, context.Context ctx) => func((defer, _) => {
+internal static void openNewConnection(this ж<DB> Ꮡdb, context.Context ctx) => func((defer, recover) => {
+    ref var db = ref Ꮡdb.Value;
+
     // maybeOpenNewConnections has already executed db.numOpen++ before it sent
     // on db.openerCh. This function must execute db.numOpen-- if the
     // connection fails or is closed before returning.
-    (ci, err) = db.connector.Connect(ctx);
-    db.mu.Lock();
-    defer(db.mu.Unlock);
+    var (ci, err) = db.connector.Connect(ctx);
+    Ꮡdb.of(DB.Ꮡmu).Lock();
+    defer(Ꮡdb.of(DB.Ꮡmu).Unlock);
     if (db.closed) {
         if (err == default!) {
             ci.Close();
@@ -1314,18 +1366,18 @@ internal static readonly UntypedInt defaultMaxIdleConns = 2;
     }
     if (err != default!) {
         db.numOpen--;
-        db.putConnDBLocked(nil, err);
+        Ꮡdb.putConnDBLocked(nil, err);
         db.maybeOpenNewConnections();
         return;
     }
     var dc = Ꮡ(new driverConn(
-        db: db,
+        db: Ꮡdb,
         createdAt: nowFunc(),
         returnedAt: nowFunc(),
         ci: ci
     ));
-    if (db.putConnDBLocked(dc, err)){
-        db.addDepLocked(~dc, dc);
+    if (Ꮡdb.putConnDBLocked(dc, err)){
+        db.addDepLocked(new driverConnжfinalCloser(dc), dc);
     } else {
         db.numOpen--;
         ci.Close();
@@ -1343,19 +1395,22 @@ internal static readonly UntypedInt defaultMaxIdleConns = 2;
 internal static error errDBClosed = errors.New("sql: database is closed"u8);
 
 // conn returns a newly-opened or cached *driverConn.
-[GoRecv] internal static (ж<driverConn>, error) conn(this ref DB db, context.Context ctx, connReuseStrategy strategy) {
-    db.mu.Lock();
+internal static (ж<driverConn>, error) conn(this ж<DB> Ꮡdb, context.Context ctx, connReuseStrategy strategy) {
+    ref var db = ref Ꮡdb.Value;
+
+    Ꮡdb.of(DB.Ꮡmu).Lock();
     if (db.closed) {
-        db.mu.Unlock();
+        Ꮡdb.of(DB.Ꮡmu).Unlock();
         return (default!, errDBClosed);
     }
     // Check if the context is expired.
     switch (ᐧ) {
     case ᐧ when ctx.Done().ꟷᐳ(out _): {
-        db.mu.Unlock();
+        Ꮡdb.of(DB.Ꮡmu).Unlock();
         return (default!, ctx.Err());
     }
     default: {
+        break;
     }}
     var lifetime = db.maxLifetime;
     // Prefer a free connection, if possible.
@@ -1365,14 +1420,14 @@ internal static error errDBClosed = errors.New("sql: database is closed"u8);
         // connections which remain idle as soon as possible.
         var conn = db.freeConn[last];
         db.freeConn = db.freeConn[..(int)(last)];
-        conn.val.inUse = true;
+        conn.Value.inUse = true;
         if (conn.expired(lifetime)) {
             db.maxLifetimeClosed++;
-            db.mu.Unlock();
+            Ꮡdb.of(DB.Ꮡmu).Unlock();
             conn.Close();
             return (default!, driver.ErrBadConn);
         }
-        db.mu.Unlock();
+        Ꮡdb.of(DB.Ꮡmu).Unlock();
         // Reset the session if required.
         {
             var errΔ1 = conn.resetSession(ctx); if (errors.Is(errΔ1, driver.ErrBadConn)) {
@@ -1390,15 +1445,15 @@ internal static error errDBClosed = errors.New("sql: database is closed"u8);
         var req = new channel<connRequest>(1);
         var delHandle = db.connRequests.Add(req);
         db.waitCount++;
-        db.mu.Unlock();
+        Ꮡdb.of(DB.Ꮡmu).Unlock();
         var waitStart = nowFunc();
         // Timeout the connection request with the context.
         switch (select(ᐸꟷ(ctx.Done(), ꓸꓸꓸ), ᐸꟷ(req, ꓸꓸꓸ))) {
         case 0 when ctx.Done().ꟷᐳ(out _): {
-            db.mu.Lock();
+            Ꮡdb.of(DB.Ꮡmu).Lock();
             var deleted = db.connRequests.Delete(delHandle);
-            db.mu.Unlock();
-            db.waitDuration.Add(((int64)time.Since(waitStart)));
+            Ꮡdb.of(DB.Ꮡmu).Unlock();
+            Ꮡdb.of(DB.ᏑwaitDuration).Add((int64)time.Since(waitStart));
             if (!deleted) {
                 // Remove the connection request and ensure no value has been sent
                 // on it after removing.
@@ -1413,7 +1468,7 @@ internal static error errDBClosed = errors.New("sql: database is closed"u8);
                 switch (ᐧ) {
                 case ᐧ when req.ꟷᐳ(out var ret, out var ok): {
                     if (ok && ret.conn != nil) {
-                        db.putConn(ret.conn, ret.err, false);
+                        Ꮡdb.putConn(ret.conn, ret.err, false);
                     }
                     break;
                 }
@@ -1424,7 +1479,7 @@ internal static error errDBClosed = errors.New("sql: database is closed"u8);
             return (default!, ctx.Err());
         }
         case 1 when req.ꟷᐳ(out var ret, out var ok): {
-            db.waitDuration.Add(((int64)time.Since(waitStart)));
+            Ꮡdb.of(DB.ᏑwaitDuration).Add((int64)time.Since(waitStart));
             if (!ok) {
                 return (default!, errDBClosed);
             }
@@ -1435,9 +1490,9 @@ internal static error errDBClosed = errors.New("sql: database is closed"u8);
                 // back into the connection pool.
                 // This prioritizes giving a valid connection to a client over the exact connection
                 // lifetime, which could expire exactly after this point anyway.
-                db.mu.Lock();
+                Ꮡdb.of(DB.Ꮡmu).Lock();
                 db.maxLifetimeClosed++;
-                db.mu.Unlock();
+                Ꮡdb.of(DB.Ꮡmu).Unlock();
                 ret.conn.Close();
                 return (default!, driver.ErrBadConn);
             }
@@ -1453,54 +1508,56 @@ internal static error errDBClosed = errors.New("sql: database is closed"u8);
             }
             return (ret.conn, ret.err);
         }}
+        return default!;
     }
     db.numOpen++;
     // optimistically
-    db.mu.Unlock();
-    (ci, err) = db.connector.Connect(ctx);
+    Ꮡdb.of(DB.Ꮡmu).Unlock();
+    var (ci, err) = db.connector.Connect(ctx);
     if (err != default!) {
-        db.mu.Lock();
+        Ꮡdb.of(DB.Ꮡmu).Lock();
         db.numOpen--;
         // correct for earlier optimism
         db.maybeOpenNewConnections();
-        db.mu.Unlock();
+        Ꮡdb.of(DB.Ꮡmu).Unlock();
         return (default!, err);
     }
-    db.mu.Lock();
+    Ꮡdb.of(DB.Ꮡmu).Lock();
     var dc = Ꮡ(new driverConn(
-        db: db,
+        db: Ꮡdb,
         createdAt: nowFunc(),
         returnedAt: nowFunc(),
         ci: ci,
         inUse: true
     ));
-    db.addDepLocked(~dc, dc);
-    db.mu.Unlock();
+    db.addDepLocked(new driverConnжfinalCloser(dc), dc);
+    Ꮡdb.of(DB.Ꮡmu).Unlock();
     return (dc, default!);
 }
 
 // putConnHook is a hook for testing.
-internal static sql.driverConn) putConnHook;
+internal static Action<ж<DB>, ж<driverConn>> putConnHook;
 
 // noteUnusedDriverStatement notes that ds is no longer used and should
 // be closed whenever possible (when c is next not in use), unless c is
 // already closed.
-[GoRecv] public static void noteUnusedDriverStatement(this ref DB db, ж<driverConn> Ꮡc, ж<driverStmt> Ꮡds) => func((defer, _) => {
-    ref var c = ref Ꮡc.val;
-    ref var ds = ref Ꮡds.val;
+internal static void noteUnusedDriverStatement(this ж<DB> Ꮡdb, ж<driverConn> Ꮡc, ж<driverStmt> Ꮡds) => func((defer, recover) => {
+    ref var db = ref Ꮡdb.Value;
+    ref var c = ref Ꮡc.Value;
+    ref var ds = ref Ꮡds.Value;
 
-    db.mu.Lock();
-    defer(db.mu.Unlock);
+    Ꮡdb.of(DB.Ꮡmu).Lock();
+    defer(Ꮡdb.of(DB.Ꮡmu).Unlock);
     if (c.inUse){
         c.onPut = append(c.onPut, () => {
-            ds.Close();
+            Ꮡds.Close();
         });
     } else {
-        c.Lock();
+        Ꮡc.of(driverConn.ᏑMutex).Lock();
         var fc = c.finalClosed;
-        c.Unlock();
+        Ꮡc.of(driverConn.ᏑMutex).Unlock();
         if (!fc) {
-            ds.Close();
+            Ꮡds.Close();
         }
     }
 });
@@ -1511,19 +1568,20 @@ internal const bool debugGetPut = false;
 
 // putConn adds a connection to the db's free pool.
 // err is optionally the last error that occurred on this connection.
-[GoRecv] public static void putConn(this ref DB db, ж<driverConn> Ꮡdc, error err, bool resetSession) {
-    ref var dc = ref Ꮡdc.val;
+internal static void putConn(this ж<DB> Ꮡdb, ж<driverConn> Ꮡdc, error err, bool resetSession) {
+    ref var db = ref Ꮡdb.Value;
+    ref var dc = ref Ꮡdc.Value;
 
     if (!errors.Is(err, driver.ErrBadConn)) {
-        if (!dc.validateConnection(resetSession)) {
+        if (!Ꮡdc.validateConnection(resetSession)) {
             err = driver.ErrBadConn;
         }
     }
-    db.mu.Lock();
+    Ꮡdb.of(DB.Ꮡmu).Lock();
     if (!dc.inUse) {
-        db.mu.Unlock();
+        Ꮡdb.of(DB.Ꮡmu).Unlock();
         if (debugGetPut) {
-            fmt.Printf("putConn(%v) DUPLICATE was: %s\n\nPREVIOUS was: %s"u8, dc, stack(), db.lastPut[dc]);
+            fmt.Printf("putConn(%v) DUPLICATE was: %s\n\nPREVIOUS was: %s"u8, dc, stack(), db.lastPut[Ꮡdc]);
         }
         throw panic("sql: connection returned that was never out");
     }
@@ -1532,7 +1590,7 @@ internal const bool debugGetPut = false;
         err = driver.ErrBadConn;
     }
     if (debugGetPut) {
-        db.lastPut[dc] = stack();
+        db.lastPut[Ꮡdc] = stack();
     }
     dc.inUse = false;
     dc.returnedAt = nowFunc();
@@ -1546,17 +1604,17 @@ internal const bool debugGetPut = false;
         // as closed. Don't decrement the open count here, finalClose will
         // take care of that.
         db.maybeOpenNewConnections();
-        db.mu.Unlock();
-        dc.Close();
+        Ꮡdb.of(DB.Ꮡmu).Unlock();
+        Ꮡdc.Close();
         return;
     }
     if (putConnHook != default!) {
-        putConnHook(db, Ꮡdc);
+        putConnHook(Ꮡdb, Ꮡdc);
     }
-    var added = db.putConnDBLocked(Ꮡdc, default!);
-    db.mu.Unlock();
+    var added = Ꮡdb.putConnDBLocked(Ꮡdc, default!);
+    Ꮡdb.of(DB.Ꮡmu).Unlock();
     if (!added) {
-        dc.Close();
+        Ꮡdc.Close();
         return;
     }
 }
@@ -1570,8 +1628,9 @@ internal const bool debugGetPut = false;
 // If err == nil, then dc must not equal nil.
 // If a connRequest was fulfilled or the *driverConn was placed in the
 // freeConn list, then true is returned, otherwise false is returned.
-[GoRecv] public static bool putConnDBLocked(this ref DB db, ж<driverConn> Ꮡdc, error err) {
-    ref var dc = ref Ꮡdc.val;
+internal static bool putConnDBLocked(this ж<DB> Ꮡdb, ж<driverConn> Ꮡdc, error err) {
+    ref var db = ref Ꮡdb.Value;
+    ref var dc = ref Ꮡdc.Value;
 
     if (db.closed) {
         return false;
@@ -1585,7 +1644,7 @@ internal const bool debugGetPut = false;
                 dc.inUse = true;
             }
             req.ᐸꟷ(new connRequest(
-                conn: dc,
+                conn: Ꮡdc,
                 err: err
             ));
             return true;
@@ -1593,7 +1652,7 @@ internal const bool debugGetPut = false;
         if (err == default! && !db.closed) {
             if (db.maxIdleConnsLocked() > len(db.freeConn)) {
                 db.freeConn = append(db.freeConn, Ꮡdc);
-                db.startCleanerLocked();
+                Ꮡdb.startCleanerLocked();
                 return true;
             }
             db.maxIdleClosed++;
@@ -1608,7 +1667,7 @@ internal const bool debugGetPut = false;
 internal static readonly UntypedInt maxBadConnRetries = 2;
 
 [GoRecv] internal static error retry(this ref DB db, Func<connReuseStrategy, error> fn) {
-    for (var i = ((int64)0); i < maxBadConnRetries; i++) {
+    for (var i = (int64)0; i < maxBadConnRetries; i++) {
         var err = fn(cachedOrNewConn);
         // retry if err is driver.ErrBadConn
         if (err == default! || !errors.Is(err, driver.ErrBadConn)) {
@@ -1626,15 +1685,14 @@ internal static readonly UntypedInt maxBadConnRetries = 2;
 //
 // The provided context is used for the preparation of the statement, not for the
 // execution of the statement.
-[GoRecv] public static (ж<ΔStmt>, error) PrepareContext(this ref DB db, context.Context ctx, @string query) {
-    ж<ΔStmt> stmt = default!;
-    error err = default!;
-    err = db.retry(
-    var errʗ2 = err;
-    var stmtʗ2 = stmt;
-    (connReuseStrategy strategy) => {
-        (stmtʗ2, errʗ2) = db.prepare(ctx, query, strategy);
-        return errʗ2;
+public static (ж<ΔStmt>, error) PrepareContext(this ж<DB> Ꮡdb, context.Context ctx, @string query) {
+    ref var db = ref Ꮡdb.Value;
+
+    ref var stmt = ref heap<ж<ΔStmt>>(out var Ꮡstmt);
+    ref var err = ref heap<error>(out var Ꮡerr);
+    err = db.retry((connReuseStrategy strategy) => {
+        (Ꮡstmt.ValueSlot, Ꮡerr.ValueSlot) = Ꮡdb.prepare(ctx, query, strategy);
+        return Ꮡerr.ValueSlot;
     });
     return (stmt, err);
 }
@@ -1647,47 +1705,48 @@ internal static readonly UntypedInt maxBadConnRetries = 2;
 //
 // Prepare uses [context.Background] internally; to specify the context, use
 // [DB.PrepareContext].
-[GoRecv] public static (ж<ΔStmt>, error) Prepare(this ref DB db, @string query) {
-    return db.PrepareContext(context.Background(), query);
+public static (ж<ΔStmt>, error) Prepare(this ж<DB> Ꮡdb, @string query) {
+    ref var db = ref Ꮡdb.Value;
+
+    return Ꮡdb.PrepareContext(context.Background(), query);
 }
 
-[GoRecv] internal static (ж<ΔStmt>, error) prepare(this ref DB db, context.Context ctx, @string query, connReuseStrategy strategy) {
+internal static (ж<ΔStmt>, error) prepare(this ж<DB> Ꮡdb, context.Context ctx, @string query, connReuseStrategy strategy) {
+    ref var db = ref Ꮡdb.Value;
+
     // TODO: check if db.driver supports an optional
     // driver.Preparer interface and call that instead, if so,
     // otherwise we make a prepared statement that's bound
     // to a connection, and to execute this prepared statement
     // we either need to use this connection (if it's free), else
     // get a new connection + re-prepare + execute on that one.
-    (dc, err) = db.conn(ctx, strategy);
+    var (dc, err) = Ꮡdb.conn(ctx, strategy);
     if (err != default!) {
         return (default!, err);
     }
-    return db.prepareDC(ctx, dc, dc.releaseConn, default!, query);
+    return Ꮡdb.prepareDC(ctx, dc, dc.releaseConn, default!, query);
 }
 
 // prepareDC prepares a query on the driverConn and calls release before
 // returning. When cg == nil it implies that a connection pool is used, and
 // when cg != nil only a single driver connection is used.
-[GoRecv] public static (ж<ΔStmt>, error) prepareDC(this ref DB db, context.Context ctx, ж<driverConn> Ꮡdc, Action<error> release, stmtConnGrabber cg, @string query) => func((defer, _) => {
-    ref var dc = ref Ꮡdc.val;
+internal static (ж<ΔStmt>, error) prepareDC(this ж<DB> Ꮡdb, context.Context ctx, ж<driverConn> Ꮡdc, Action<error> release, stmtConnGrabber cg, @string query) => func<(ж<ΔStmt>, error)>((defer, recover) => {
+    ref var db = ref Ꮡdb.Value;
+    ref var dc = ref Ꮡdc.Value;
 
-    ж<driverStmt> ds = default!;
-    error err = default!;
-    var errʗ1 = err;
+    ref var ds = ref heap<ж<driverStmt>>(out var Ꮡds);
+    ref var err = ref heap<error>(out var Ꮡerr);
     defer(() => {
-        release(errʗ1);
+        release(Ꮡerr.ValueSlot);
     });
-    withLock(~dc, 
-    var dsʗ1 = ds;
-    var errʗ2 = err;
-    () => {
-        (dsʗ1, errʗ2) = dc.prepareLocked(ctx, cg, query);
+    withLock(new driverConnжLocker(Ꮡdc), () => {
+        (Ꮡds.ValueSlot, Ꮡerr.ValueSlot) = Ꮡdc.prepareLocked(ctx, cg, query);
     });
     if (err != default!) {
         return (default!, err);
     }
     var stmt = Ꮡ(new ΔStmt(
-        db: db,
+        db: Ꮡdb,
         query: query,
         cg: cg,
         cgds: ds
@@ -1696,27 +1755,25 @@ internal static readonly UntypedInt maxBadConnRetries = 2;
     // connections they are prepared on and record the stmt dependency on
     // the DB.
     if (cg == default!) {
-        stmt.val.css = new ΔconnStmt[]{new(dc, ds)}.slice();
-        stmt.val.lastNumClosed = db.numClosed.Load();
-        db.addDep(~stmt, stmt);
+        stmt.Value.css = new ΔconnStmt[]{new(dc, ds)}.slice();
+        stmt.Value.lastNumClosed = Ꮡdb.of(DB.ᏑnumClosed).Load();
+        Ꮡdb.addDep(new ΔStmtжfinalCloser(stmt), stmt);
     }
     return (stmt, default!);
 });
 
 // ExecContext executes a query without returning any rows.
 // The args are for any placeholder parameters in the query.
-[GoRecv] public static (Result, error) ExecContext(this ref DB db, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+public static (Result, error) ExecContext(this ж<DB> Ꮡdb, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    Result res = default!;
-    error err = default!;
-    err = db.retry(
-    var argsʗ2 = args;
-    var errʗ2 = err;
-    var resʗ2 = res;
-    (connReuseStrategy strategy) => {
-        (resʗ2, errʗ2) = db.exec(ctx, query, argsʗ2, strategy);
-        return errʗ2;
+    ref var db = ref Ꮡdb.Value;
+    ref var res = ref heap<Result>(out var Ꮡres);
+    ref var err = ref heap<error>(out var Ꮡerr);
+    var argsʗ1 = args;
+    err = db.retry((connReuseStrategy strategy) => {
+        (Ꮡres.ValueSlot, Ꮡerr.ValueSlot) = Ꮡdb.exec(ctx, query, argsʗ1, strategy);
+        return Ꮡerr.ValueSlot;
     });
     return (res, err);
 }
@@ -1726,85 +1783,84 @@ internal static readonly UntypedInt maxBadConnRetries = 2;
 //
 // Exec uses [context.Background] internally; to specify the context, use
 // [DB.ExecContext].
-[GoRecv] public static (Result, error) Exec(this ref DB db, @string query, params ꓸꓸꓸany argsʗp) {
+public static (Result, error) Exec(this ж<DB> Ꮡdb, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    return db.ExecContext(context.Background(), query, args.ꓸꓸꓸ);
+    ref var db = ref Ꮡdb.Value;
+    return Ꮡdb.ExecContext(context.Background(), query, args.ꓸꓸꓸ);
 }
 
-[GoRecv] internal static (Result, error) exec(this ref DB db, context.Context ctx, @string query, slice<any> args, connReuseStrategy strategy) {
-    (dc, err) = db.conn(ctx, strategy);
+internal static (Result, error) exec(this ж<DB> Ꮡdb, context.Context ctx, @string query, slice<any> args, connReuseStrategy strategy) {
+    ref var db = ref Ꮡdb.Value;
+
+    var (dc, err) = Ꮡdb.conn(ctx, strategy);
     if (err != default!) {
         return (default!, err);
     }
     return db.execDC(ctx, dc, dc.releaseConn, query, args);
 }
 
-[GoRecv] public static (Result res, error err) execDC(this ref DB db, context.Context ctx, ж<driverConn> Ꮡdc, Action<error> release, @string query, slice<any> args) => func((defer, _) => {
+[GoRecv] internal static (Result res, error err) execDC(this ref DB db, context.Context ctx, ж<driverConn> Ꮡdc, Action<error> release, @string query, slice<any> args) {
     Result res = default!;
     error err = default!;
+    func((defer, recover) => {
+    ref var dc = ref Ꮡdc.Value;
 
-    ref var dc = ref Ꮡdc.val;
-    defer(() => {
-        release(err);
-    });
-    var (execerCtx, ok) = dc.ci._<driver.ExecerContext>(ᐧ);
-    driver.Execer execer = default!;
-    if (!ok) {
-        (execer, ok) = dc.ci._<driver.Execer>(ᐧ);
-    }
-    if (ok) {
-        slice<driver.NamedValue> nvdargs = default!;
-        driver.Result resi = default!;
-        withLock(~dc, 
-        var argsʗ1 = args;
-        var execerʗ1 = execer;
-        var execerCtxʗ1 = execerCtx;
-        var nvdargsʗ1 = nvdargs;
-        var resiʗ1 = resi;
-        () => {
-            (nvdargsʗ1, err) = driverArgsConnLocked(dc.ci, nil, argsʗ1);
-            if (err != default!) {
-                return (res, err);
-            }
-            (resiʗ1, err) = ctxDriverExec(ctx, execerCtxʗ1, execerʗ1, query, nvdargsʗ1);
+        defer(() => {
+            release(err);
         });
-        if (!AreEqual(err, driver.ErrSkip)) {
-            if (err != default!) {
-                return (default!, err);
-            }
-            return (new driverResult(dc, resi), default!);
+        var (execerCtx, ok) = dc.ci._<driver.ExecerContext>(ᐧ);
+        driver.Execer execer = default!;
+        if (!ok) {
+            (execer, ok) = dc.ci._<driver.Execer>(ᐧ);
         }
-    }
-    driver.Stmt si = default!;
-    withLock(~dc, 
-    var siʗ1 = si;
-    () => {
-        (siʗ1, err) = ctxDriverPrepare(ctx, dc.ci, query);
+        if (ok) {
+            ref var nvdargs = ref heap<slice<driver.NamedValue>>(out var Ꮡnvdargs);
+            ref var resi = ref heap<driver.Result>(out var Ꮡresi);
+            var argsʗ1 = args;
+            var execerʗ1 = execer;
+            var execerCtxʗ1 = execerCtx;
+            withLock(new driverConnжLocker(Ꮡdc), () => {
+                (Ꮡnvdargs.ValueSlot, err) = driverArgsConnLocked(Ꮡdc.Value.ci, nil, argsʗ1);
+                if (err != default!) {
+                    return;
+                }
+                (Ꮡresi.ValueSlot, err) = ctxDriverExec(ctx, execerCtxʗ1, execerʗ1, query, Ꮡnvdargs.ValueSlot);
+            });
+            if (!AreEqual(err, driver.ErrSkip)) {
+                if (err != default!) {
+                    (res, err) = (default!, err); return;
+                }
+                (res, err) = (new driverResult(new driverConnжLocker(Ꮡdc), resi), default!); return;
+            }
+        }
+        ref var si = ref heap<driver.Stmt>(out var Ꮡsi);
+        withLock(new driverConnжLocker(Ꮡdc), () => {
+            (Ꮡsi.ValueSlot, err) = ctxDriverPrepare(ctx, Ꮡdc.Value.ci, query);
+        });
+        if (err != default!) {
+            (res, err) = (default!, err); return;
+        }
+        var ds = Ꮡ(new driverStmt(Locker: new driverConnжLocker(Ꮡdc), si: si));
+        var dsʗ1 = ds;
+        defer(() => dsʗ1.Close());
+        (res, err) = resultFromStatement(ctx, dc.ci, ds, args.ꓸꓸꓸ);
     });
-    if (err != default!) {
-        return (default!, err);
-    }
-    var ds = Ꮡ(new driverStmt(Locker: dc, si: si));
-    var dsʗ1 = ds;
-    defer(dsʗ1.Close);
-    return resultFromStatement(ctx, dc.ci, ds, args.ꓸꓸꓸ);
-});
+    return (res, err);
+}
 
 // QueryContext executes a query that returns rows, typically a SELECT.
 // The args are for any placeholder parameters in the query.
-[GoRecv] public static (ж<Rows>, error) QueryContext(this ref DB db, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+public static (ж<Rows>, error) QueryContext(this ж<DB> Ꮡdb, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ж<Rows> rows = default!;
-    error err = default!;
-    err = db.retry(
-    var argsʗ2 = args;
-    var errʗ2 = err;
-    var rowsʗ2 = rows;
-    (connReuseStrategy strategy) => {
-        (rowsʗ2, errʗ2) = db.query(ctx, query, argsʗ2, strategy);
-        return errʗ2;
+    ref var db = ref Ꮡdb.Value;
+    ref var rows = ref heap<ж<Rows>>(out var Ꮡrows);
+    ref var err = ref heap<error>(out var Ꮡerr);
+    var argsʗ1 = args;
+    err = db.retry((connReuseStrategy strategy) => {
+        (Ꮡrows.ValueSlot, Ꮡerr.ValueSlot) = Ꮡdb.query(ctx, query, argsʗ1, strategy);
+        return Ꮡerr.ValueSlot;
     });
     return (rows, err);
 }
@@ -1814,14 +1870,17 @@ internal static readonly UntypedInt maxBadConnRetries = 2;
 //
 // Query uses [context.Background] internally; to specify the context, use
 // [DB.QueryContext].
-[GoRecv] public static (ж<Rows>, error) Query(this ref DB db, @string query, params ꓸꓸꓸany argsʗp) {
+public static (ж<Rows>, error) Query(this ж<DB> Ꮡdb, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    return db.QueryContext(context.Background(), query, args.ꓸꓸꓸ);
+    ref var db = ref Ꮡdb.Value;
+    return Ꮡdb.QueryContext(context.Background(), query, args.ꓸꓸꓸ);
 }
 
-[GoRecv] internal static (ж<Rows>, error) query(this ref DB db, context.Context ctx, @string query, slice<any> args, connReuseStrategy strategy) {
-    (dc, err) = db.conn(ctx, strategy);
+internal static (ж<Rows>, error) query(this ж<DB> Ꮡdb, context.Context ctx, @string query, slice<any> args, connReuseStrategy strategy) {
+    ref var db = ref Ꮡdb.Value;
+
+    var (dc, err) = Ꮡdb.conn(ctx, strategy);
     if (err != default!) {
         return (default!, err);
     }
@@ -1832,8 +1891,8 @@ internal static readonly UntypedInt maxBadConnRetries = 2;
 // The connection gets released by the releaseConn function.
 // The ctx context is from a query method and the txctx context is from an
 // optional transaction context.
-[GoRecv] public static (ж<Rows>, error) queryDC(this ref DB db, context.Context ctx, context.Context txctx, ж<driverConn> Ꮡdc, Action<error> ΔreleaseConn, @string query, slice<any> args) {
-    ref var dc = ref Ꮡdc.val;
+[GoRecv] internal static (ж<Rows>, error) queryDC(this ref DB db, context.Context ctx, context.Context txctx, ж<driverConn> Ꮡdc, Action<error> ΔreleaseConn, @string query, slice<any> args) {
+    ref var dc = ref Ꮡdc.Value;
 
     var (queryerCtx, ok) = dc.ci._<driver.QueryerContext>(ᐧ);
     driver.Queryer queryer = default!;
@@ -1841,22 +1900,18 @@ internal static readonly UntypedInt maxBadConnRetries = 2;
         (queryer, ok) = dc.ci._<driver.Queryer>(ᐧ);
     }
     if (ok) {
-        slice<driver.NamedValue> nvdargs = default!;
-        driver.Rows rowsi = default!;
-        error errΔ1 = default!;
-        withLock(~dc, 
+        ref var nvdargs = ref heap<slice<driver.NamedValue>>(out var Ꮡnvdargs);
+        ref var rowsiΔ1 = ref heap<driver.Rows>(out var ᏑrowsiΔ1);
+        ref var errΔ1 = ref heap<error>(out var ᏑerrΔ1);
         var argsʗ1 = args;
-        var errʗ1 = errΔ1;
-        var nvdargsʗ1 = nvdargs;
         var queryerʗ1 = queryer;
         var queryerCtxʗ1 = queryerCtx;
-        var rowsiʗ1 = rowsi;
-        () => {
-            (nvdargsʗ1, errʗ1) = driverArgsConnLocked(dc.ci, nil, argsʗ1);
-            if (errʗ1 != default!) {
+        withLock(new driverConnжLocker(Ꮡdc), () => {
+            (Ꮡnvdargs.ValueSlot, ᏑerrΔ1.ValueSlot) = driverArgsConnLocked(Ꮡdc.Value.ci, nil, argsʗ1);
+            if (ᏑerrΔ1.ValueSlot != default!) {
                 return;
             }
-            (rowsiʗ1, errʗ1) = ctxDriverQuery(ctx, queryerCtxʗ1, queryerʗ1, query, nvdargsʗ1);
+            (ᏑrowsiΔ1.ValueSlot, ᏑerrΔ1.ValueSlot) = ctxDriverQuery(ctx, queryerCtxʗ1, queryerʗ1, query, Ꮡnvdargs.ValueSlot);
         });
         if (!AreEqual(errΔ1, driver.ErrSkip)) {
             if (errΔ1 != default!) {
@@ -1866,28 +1921,25 @@ internal static readonly UntypedInt maxBadConnRetries = 2;
             // Note: ownership of dc passes to the *Rows, to be freed
             // with releaseConn.
             var rowsΔ1 = Ꮡ(new Rows(
-                dc: dc,
-                ΔreleaseConn: ΔreleaseConn,
-                rowsi: rowsi
+                dc: Ꮡdc,
+                releaseConn: ΔreleaseConn,
+                rowsi: rowsiΔ1
             ));
             rowsΔ1.initContextClose(ctx, txctx);
             return (rowsΔ1, default!);
         }
     }
-    driver.Stmt si = default!;
-    error err = default!;
-    withLock(~dc, 
-    var errʗ3 = err;
-    var siʗ1 = si;
-    () => {
-        (siʗ1, errʗ3) = ctxDriverPrepare(ctx, dc.ci, query);
+    ref var si = ref heap<driver.Stmt>(out var Ꮡsi);
+    ref var err = ref heap<error>(out var Ꮡerr);
+    withLock(new driverConnжLocker(Ꮡdc), () => {
+        (Ꮡsi.ValueSlot, Ꮡerr.ValueSlot) = ctxDriverPrepare(ctx, Ꮡdc.Value.ci, query);
     });
     if (err != default!) {
         ΔreleaseConn(err);
         return (default!, err);
     }
-    var ds = Ꮡ(new driverStmt(Locker: dc, si: si));
-    (rowsi, err) = rowsiFromStatement(ctx, dc.ci, ds, args.ꓸꓸꓸ);
+    var ds = Ꮡ(new driverStmt(Locker: new driverConnжLocker(Ꮡdc), si: si));
+    (var rowsi, err) = rowsiFromStatement(ctx, dc.ci, ds, args.ꓸꓸꓸ);
     if (err != default!) {
         ds.Close();
         ΔreleaseConn(err);
@@ -1896,8 +1948,8 @@ internal static readonly UntypedInt maxBadConnRetries = 2;
     // Note: ownership of ci passes to the *Rows, to be freed
     // with releaseConn.
     var rows = Ꮡ(new Rows(
-        dc: dc,
-        ΔreleaseConn: ΔreleaseConn,
+        dc: Ꮡdc,
+        releaseConn: ΔreleaseConn,
         rowsi: rowsi,
         closeStmt: ds
     ));
@@ -1911,10 +1963,11 @@ internal static readonly UntypedInt maxBadConnRetries = 2;
 // If the query selects no rows, the [*Row.Scan] will return [ErrNoRows].
 // Otherwise, [*Row.Scan] scans the first selected row and discards
 // the rest.
-[GoRecv] public static ж<Row> QueryRowContext(this ref DB db, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+public static ж<Row> QueryRowContext(this ж<DB> Ꮡdb, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    (rows, err) = db.QueryContext(ctx, query, args.ꓸꓸꓸ);
+    ref var db = ref Ꮡdb.Value;
+    var (rows, err) = Ꮡdb.QueryContext(ctx, query, args.ꓸꓸꓸ);
     return Ꮡ(new Row(rows: rows, err: err));
 }
 
@@ -1927,10 +1980,11 @@ internal static readonly UntypedInt maxBadConnRetries = 2;
 //
 // QueryRow uses [context.Background] internally; to specify the context, use
 // [DB.QueryRowContext].
-[GoRecv] public static ж<Row> QueryRow(this ref DB db, @string query, params ꓸꓸꓸany argsʗp) {
+public static ж<Row> QueryRow(this ж<DB> Ꮡdb, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    return db.QueryRowContext(context.Background(), query, args.ꓸꓸꓸ);
+    ref var db = ref Ꮡdb.Value;
+    return Ꮡdb.QueryRowContext(context.Background(), query, args.ꓸꓸꓸ);
 }
 
 // BeginTx starts a transaction.
@@ -1943,17 +1997,15 @@ internal static readonly UntypedInt maxBadConnRetries = 2;
 // The provided [TxOptions] is optional and may be nil if defaults should be used.
 // If a non-default isolation level is used that the driver doesn't support,
 // an error will be returned.
-[GoRecv] public static (ж<Tx>, error) BeginTx(this ref DB db, context.Context ctx, ж<TxOptions> Ꮡopts) {
-    ref var opts = ref Ꮡopts.val;
+public static (ж<Tx>, error) BeginTx(this ж<DB> Ꮡdb, context.Context ctx, ж<TxOptions> Ꮡopts) {
+    ref var db = ref Ꮡdb.Value;
+    ref var opts = ref Ꮡopts.Value;
 
-    ж<Tx> tx = default!;
-    error err = default!;
-    err = db.retry(
-    var errʗ2 = err;
-    var txʗ2 = tx;
-    (connReuseStrategy strategy) => {
-        (txʗ2, errʗ2) = db.begin(ctx, Ꮡopts, strategy);
-        return errʗ2;
+    ref var tx = ref heap<ж<Tx>>(out var Ꮡtx);
+    ref var err = ref heap<error>(out var Ꮡerr);
+    err = db.retry((connReuseStrategy strategy) => {
+        (Ꮡtx.ValueSlot, Ꮡerr.ValueSlot) = Ꮡdb.begin(ctx, Ꮡopts, strategy);
+        return Ꮡerr.ValueSlot;
     });
     return (tx, err);
 }
@@ -1963,41 +2015,42 @@ internal static readonly UntypedInt maxBadConnRetries = 2;
 //
 // Begin uses [context.Background] internally; to specify the context, use
 // [DB.BeginTx].
-[GoRecv] public static (ж<Tx>, error) Begin(this ref DB db) {
-    return db.BeginTx(context.Background(), nil);
+public static (ж<Tx>, error) Begin(this ж<DB> Ꮡdb) {
+    ref var db = ref Ꮡdb.Value;
+
+    return Ꮡdb.BeginTx(context.Background(), nil);
 }
 
-[GoRecv] public static (ж<Tx> tx, error err) begin(this ref DB db, context.Context ctx, ж<TxOptions> Ꮡopts, connReuseStrategy strategy) {
+internal static (ж<Tx> tx, error err) begin(this ж<DB> Ꮡdb, context.Context ctx, ж<TxOptions> Ꮡopts, connReuseStrategy strategy) {
     ж<Tx> tx = default!;
     error err = default!;
 
-    ref var opts = ref Ꮡopts.val;
-    (dc, err) = db.conn(ctx, strategy);
+    ref var db = ref Ꮡdb.Value;
+    ref var opts = ref Ꮡopts.Value;
+    (var dc, err) = Ꮡdb.conn(ctx, strategy);
     if (err != default!) {
         return (default!, err);
     }
-    return db.beginDC(ctx, dc, dc.releaseConn, Ꮡopts);
+    return Ꮡdb.beginDC(ctx, dc, dc.releaseConn, Ꮡopts);
 }
 
 // beginDC starts a transaction. The provided dc must be valid and ready to use.
-[GoRecv] public static (ж<Tx> tx, error err) beginDC(this ref DB db, context.Context ctx, ж<driverConn> Ꮡdc, Action<error> release, ж<TxOptions> Ꮡopts) {
+internal static (ж<Tx> tx, error err) beginDC(this ж<DB> Ꮡdb, context.Context ctxʗp, ж<driverConn> Ꮡdc, Action<error> release, ж<TxOptions> Ꮡopts) {
     ж<Tx> tx = default!;
     error err = default!;
 
-    ref var dc = ref Ꮡdc.val;
-    ref var opts = ref Ꮡopts.val;
-    driver.Tx txi = default!;
+    ref var db = ref Ꮡdb.Value;
+    ref var dc = ref Ꮡdc.Value;
+    ref var opts = ref Ꮡopts.Value;
+    ref var ctx = ref heap(ctxʗp, out var Ꮡctx);
+    ref var txi = ref heap<driver.Tx>(out var Ꮡtxi);
     ref var keepConnOnRollback = ref heap<bool>(out var ᏑkeepConnOnRollback);
     keepConnOnRollback = false;
-    withLock(~dc, 
-    var ctxʗ1 = ctx;
-    var keepConnOnRollbackʗ1 = keepConnOnRollback;
-    var txiʗ1 = txi;
-    () => {
-        var (_, hasSessionResetter) = dc.ci._<driver.SessionResetter>(ᐧ);
-        var (_, hasConnectionValidator) = dc.ci._<driver.Validator>(ᐧ);
-        keepConnOnRollbackʗ1 = hasSessionResetter && hasConnectionValidator;
-        (txiʗ1, err) = ctxDriverBegin(ctxʗ1, Ꮡopts, dc.ci);
+    withLock(new driverConnжLocker(Ꮡdc), () => {
+        var (_, hasSessionResetter) = Ꮡdc.Value.ci._<driver.SessionResetter>(ᐧ);
+        var (_, hasConnectionValidator) = Ꮡdc.Value.ci._<driver.Validator>(ᐧ);
+        ᏑkeepConnOnRollback.Value = hasSessionResetter && hasConnectionValidator;
+        (Ꮡtxi.ValueSlot, err) = ctxDriverBegin(Ꮡctx.ValueSlot, Ꮡopts, Ꮡdc.Value.ci);
     });
     if (err != default!) {
         release(err);
@@ -2005,11 +2058,11 @@ internal static readonly UntypedInt maxBadConnRetries = 2;
     }
     // Schedule the transaction to rollback when the context is canceled.
     // The cancel function in Tx will be called after done is set to true.
-    (ctx, cancel) = context.WithCancel(ctx);
+    (ctx, var cancel) = context.WithCancel(ctx);
     tx = Ꮡ(new Tx(
-        db: db,
-        dc: dc,
-        ΔreleaseConn: release,
+        db: Ꮡdb,
+        dc: Ꮡdc,
+        releaseConn: release,
         txi: txi,
         cancel: cancel,
         keepConnOnRollback: keepConnOnRollback,
@@ -2035,27 +2088,26 @@ public static error ErrConnDone = errors.New("sql: connection is already closed"
 //
 // Every Conn must be returned to the database pool after use by
 // calling [Conn.Close].
-[GoRecv] public static (ж<ΔConn>, error) Conn(this ref DB db, context.Context ctx) {
-    ж<driverConn> dc = default!;
-    error err = default!;
-    err = db.retry(
-    var dcʗ2 = dc;
-    var errʗ2 = err;
-    (connReuseStrategy strategy) => {
-        (dcʗ2, errʗ2) = db.conn(ctx, strategy);
-        return errʗ2;
+public static (ж<ΔConn>, error) Conn(this ж<DB> Ꮡdb, context.Context ctx) {
+    ref var db = ref Ꮡdb.Value;
+
+    ref var dc = ref heap<ж<driverConn>>(out var Ꮡdc);
+    ref var err = ref heap<error>(out var Ꮡerr);
+    err = db.retry((connReuseStrategy strategy) => {
+        (Ꮡdc.ValueSlot, Ꮡerr.ValueSlot) = Ꮡdb.conn(ctx, strategy);
+        return Ꮡerr.ValueSlot;
     });
     if (err != default!) {
         return (default!, err);
     }
     var conn = Ꮡ(new ΔConn(
-        db: db,
+        db: Ꮡdb,
         dc: dc
     ));
     return (conn, default!);
 }
 
-internal delegate void releaseConn(error _);
+// type ΔreleaseConn is a methodless func type — rendered inline as its base delegate
 
 // Conn represents a single database connection rather than a pool of database
 // connections. Prefer running queries from [DB] unless there is a specific
@@ -2071,35 +2123,39 @@ internal delegate void releaseConn(error _);
     // closemu prevents the connection from closing while there
     // is an active query. It is held for read during queries
     // and exclusively during close.
-    internal sync_package.RWMutex closemu;
+    internal sync.RWMutex closemu;
     // dc is owned until close, at which point
     // it's returned to the connection pool.
     internal ж<driverConn> dc;
     // done transitions from false to true exactly once, on close.
     // Once done, all operations fail with ErrConnDone.
-    internal sync.atomic_package.Bool done;
-    internal sync_package.Once releaseConnOnce;
+    internal atomic.Bool done;
+    internal sync.Once releaseConnOnce;
     // releaseConnCache is a cache of c.closemuRUnlockCondReleaseConn
     // to save allocations in a call to grabConn.
-    internal ΔreleaseConn releaseConnCache;
+    internal Action<error> releaseConnCache;
 }
 
 // grabConn takes a context to implement stmtConnGrabber
 // but the context is not used.
-[GoRecv] internal static (ж<driverConn>, ΔreleaseConn, error) grabConn(this ref ΔConn c, context.Context _) {
-    if (c.done.Load()) {
+internal static (ж<driverConn>, Action<error>, error) grabConn(this ж<ΔConn> Ꮡc, context.Context _) {
+    ref var c = ref Ꮡc.Value;
+
+    if (Ꮡc.of(sql_package.ΔConn.Ꮡdone).Load()) {
         return (default!, default!, ErrConnDone);
     }
-    c.releaseConnOnce.Do(() => {
-        c.releaseConnCache = () => c.closemuRUnlockCondReleaseConn();
+    Ꮡc.of(sql_package.ΔConn.ᏑreleaseConnOnce).Do(() => {
+        Ꮡc.Value.releaseConnCache = (error p1) => Ꮡc.closemuRUnlockCondReleaseConn(p1);
     });
-    c.closemu.RLock();
+    Ꮡc.of(sql_package.ΔConn.Ꮡclosemu).RLock();
     return (c.dc, c.releaseConnCache, default!);
 }
 
 // PingContext verifies the connection to the database is still alive.
-[GoRecv] public static error PingContext(this ref ΔConn c, context.Context ctx) {
-    (dc, release, err) = c.grabConn(ctx);
+public static error PingContext(this ж<ΔConn> Ꮡc, context.Context ctx) {
+    ref var c = ref Ꮡc.Value;
+
+    var (dc, release, err) = Ꮡc.grabConn(ctx);
     if (err != default!) {
         return err;
     }
@@ -2108,10 +2164,11 @@ internal delegate void releaseConn(error _);
 
 // ExecContext executes a query without returning any rows.
 // The args are for any placeholder parameters in the query.
-[GoRecv] public static (Result, error) ExecContext(this ref ΔConn c, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+public static (Result, error) ExecContext(this ж<ΔConn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    (dc, release, err) = c.grabConn(ctx);
+    ref var c = ref Ꮡc.Value;
+    var (dc, release, err) = Ꮡc.grabConn(ctx);
     if (err != default!) {
         return (default!, err);
     }
@@ -2120,10 +2177,11 @@ internal delegate void releaseConn(error _);
 
 // QueryContext executes a query that returns rows, typically a SELECT.
 // The args are for any placeholder parameters in the query.
-[GoRecv] public static (ж<Rows>, error) QueryContext(this ref ΔConn c, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+public static (ж<Rows>, error) QueryContext(this ж<ΔConn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    (dc, release, err) = c.grabConn(ctx);
+    ref var c = ref Ꮡc.Value;
+    var (dc, release, err) = Ꮡc.grabConn(ctx);
     if (err != default!) {
         return (default!, err);
     }
@@ -2136,10 +2194,11 @@ internal delegate void releaseConn(error _);
 // If the query selects no rows, the [*Row.Scan] will return [ErrNoRows].
 // Otherwise, the [*Row.Scan] scans the first selected row and discards
 // the rest.
-[GoRecv] public static ж<Row> QueryRowContext(this ref ΔConn c, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+public static ж<Row> QueryRowContext(this ж<ΔConn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    (rows, err) = c.QueryContext(ctx, query, args.ꓸꓸꓸ);
+    ref var c = ref Ꮡc.Value;
+    var (rows, err) = Ꮡc.QueryContext(ctx, query, args.ꓸꓸꓸ);
     return Ꮡ(new Row(rows: rows, err: err));
 }
 
@@ -2151,12 +2210,14 @@ internal delegate void releaseConn(error _);
 //
 // The provided context is used for the preparation of the statement, not for the
 // execution of the statement.
-[GoRecv] public static (ж<ΔStmt>, error) PrepareContext(this ref ΔConn c, context.Context ctx, @string query) {
-    (dc, release, err) = c.grabConn(ctx);
+public static (ж<ΔStmt>, error) PrepareContext(this ж<ΔConn> Ꮡc, context.Context ctx, @string query) {
+    ref var c = ref Ꮡc.Value;
+
+    var (dc, release, err) = Ꮡc.grabConn(ctx);
     if (err != default!) {
         return (default!, err);
     }
-    return c.db.prepareDC(ctx, dc, release, ~c, query);
+    return c.db.prepareDC(ctx, dc, release, new ΔConnжstmtConnGrabber(Ꮡc), query);
 }
 
 // Raw executes f exposing the underlying driver connection for the
@@ -2164,34 +2225,37 @@ internal delegate void releaseConn(error _);
 //
 // Once f returns and err is not [driver.ErrBadConn], the [Conn] will continue to be usable
 // until [Conn.Close] is called.
-[GoRecv] public static error /*err*/ Raw(this ref ΔConn c, Func<any, error> f) => func((defer, _) => {
+public static error /*err*/ Raw(this ж<ΔConn> Ꮡc, Func<any, error> f) {
     error err = default!;
+    func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
 
-    ж<driverConn> dc = default!;
-    ΔreleaseConn release = default!;
-    // grabConn takes a context to implement stmtConnGrabber, but the context is not used.
-    (dc, release, err) = c.grabConn(default!);
-    if (err != default!) {
-        return err;
-    }
-    var fPanic = true;
-    (~dc).Mutex.Lock();
-    var dcʗ1 = dc;
-    var releaseʗ1 = release;
-    defer(() => {
-        (~dcʗ1).Mutex.Unlock();
-        // If f panics fPanic will remain true.
-        // Ensure an error is passed to release so the connection
-        // may be discarded.
-        if (fPanic) {
-            err = driver.ErrBadConn;
+        ж<driverConn> dc = default!;
+        Action<error> release = default!;
+        // grabConn takes a context to implement stmtConnGrabber, but the context is not used.
+        (dc, release, err) = Ꮡc.grabConn(default!);
+        if (err != default!) {
+            return;
         }
-        releaseʗ1(err);
+        var fPanic = true;
+        dc.of(driverConn.ᏑMutex).Lock();
+        var dcʗ1 = dc;
+        var releaseʗ1 = release;
+        defer(() => {
+            dcʗ1.of(driverConn.ᏑMutex).Unlock();
+            // If f panics fPanic will remain true.
+            // Ensure an error is passed to release so the connection
+            // may be discarded.
+            if (fPanic) {
+                err = driver.ErrBadConn;
+            }
+            releaseʗ1(err);
+        });
+        err = f((~dc).ci);
+        fPanic = false;
     });
-    err = f((~dc).ci);
-    fPanic = false;
     return err;
-});
+}
 
 // BeginTx starts a transaction.
 //
@@ -2203,10 +2267,11 @@ internal delegate void releaseConn(error _);
 // The provided [TxOptions] is optional and may be nil if defaults should be used.
 // If a non-default isolation level is used that the driver doesn't support,
 // an error will be returned.
-[GoRecv] public static (ж<Tx>, error) BeginTx(this ref ΔConn c, context.Context ctx, ж<TxOptions> Ꮡopts) {
-    ref var opts = ref Ꮡopts.val;
+public static (ж<Tx>, error) BeginTx(this ж<ΔConn> Ꮡc, context.Context ctx, ж<TxOptions> Ꮡopts) {
+    ref var c = ref Ꮡc.Value;
+    ref var opts = ref Ꮡopts.Value;
 
-    (dc, release, err) = c.grabConn(ctx);
+    var (dc, release, err) = Ꮡc.grabConn(ctx);
     if (err != default!) {
         return (default!, err);
     }
@@ -2215,10 +2280,12 @@ internal delegate void releaseConn(error _);
 
 // closemuRUnlockCondReleaseConn read unlocks closemu
 // as the sql operation is done with the dc.
-[GoRecv] internal static void closemuRUnlockCondReleaseConn(this ref ΔConn c, error err) {
-    c.closemu.RUnlock();
+internal static void closemuRUnlockCondReleaseConn(this ж<ΔConn> Ꮡc, error err) {
+    ref var c = ref Ꮡc.Value;
+
+    Ꮡc.of(sql_package.ΔConn.Ꮡclosemu).RUnlock();
     if (errors.Is(err, driver.ErrBadConn)) {
-        c.close(err);
+        Ꮡc.close(err);
     }
 }
 
@@ -2226,14 +2293,16 @@ internal delegate void releaseConn(error _);
     return default!;
 }
 
-[GoRecv] internal static error close(this ref ΔConn c, error err) => func((defer, _) => {
-    if (!c.done.CompareAndSwap(false, true)) {
+internal static error close(this ж<ΔConn> Ꮡc, error err) => func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+
+    if (!Ꮡc.of(sql_package.ΔConn.Ꮡdone).CompareAndSwap(false, true)) {
         return ErrConnDone;
     }
     // Lock around releasing the driver connection
     // to ensure all queries have been stopped before doing so.
-    c.closemu.Lock();
-    defer(c.closemu.Unlock);
+    Ꮡc.of(sql_package.ΔConn.Ꮡclosemu).Lock();
+    defer(Ꮡc.of(sql_package.ΔConn.Ꮡclosemu).Unlock);
     c.dc.releaseConn(err);
     c.dc = default!;
     c.db = default!;
@@ -2245,8 +2314,10 @@ internal delegate void releaseConn(error _);
 // Close is safe to call concurrently with other operations and will
 // block until all other operations finish. It may be useful to first
 // cancel any used context and then call close directly after.
-[GoRecv] public static error Close(this ref ΔConn c) {
-    return c.close(default!);
+public static error Close(this ж<ΔConn> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    return Ꮡc.close(default!);
 }
 
 [GoType("dyn")] partial struct Tx_stmts {
@@ -2269,18 +2340,18 @@ internal delegate void releaseConn(error _);
     // closemu prevents the transaction from closing while there
     // is an active query. It is held for read during queries
     // and exclusively during close.
-    internal sync_package.RWMutex closemu;
+    internal sync.RWMutex closemu;
     // dc is owned exclusively until Commit or Rollback, at which point
     // it's returned with putConn.
     internal ж<driverConn> dc;
-    internal database.sql.driver_package.Tx txi;
+    internal driver.Tx txi;
     // releaseConn is called once the Tx is closed to release
     // any held driverConn back to the pool.
     internal Action<error> releaseConn;
     // done transitions from false to true exactly once, on Commit
     // or Rollback. once done, all operations fail with
     // ErrTxDone.
-    internal sync.atomic_package.Bool done;
+    internal atomic.Bool done;
     // keepConnOnRollback is true if the driver knows
     // how to reset the connection's session and if need be discard
     // the connection.
@@ -2291,12 +2362,14 @@ internal delegate void releaseConn(error _);
     // cancel is called after done transitions from 0 to 1.
     internal Action cancel;
     // ctx lives for the life of the transaction.
-    internal context_package.Context ctx;
+    internal context.Context ctx;
 }
 
 // awaitDone blocks until the context in Tx is canceled and rolls back
 // the transaction if it's not already done.
-[GoRecv] internal static void awaitDone(this ref Tx tx) {
+internal static void awaitDone(this ж<Tx> Ꮡtx) {
+    ref var tx = ref Ꮡtx.Value;
+
     // Wait for either the transaction to be committed or rolled
     // back, or for the associated context to be closed.
     ᐸꟷ(tx.ctx.Done());
@@ -2307,11 +2380,13 @@ internal delegate void releaseConn(error _);
     // Do not discard the connection if the connection knows
     // how to reset the session.
     var discardConnection = !tx.keepConnOnRollback;
-    tx.rollback(discardConnection);
+    Ꮡtx.rollback(discardConnection);
 }
 
-[GoRecv] internal static bool isDone(this ref Tx tx) {
-    return tx.done.Load();
+internal static bool isDone(this ж<Tx> Ꮡtx) {
+    ref var tx = ref Ꮡtx.Value;
+
+    return Ꮡtx.of(Tx.Ꮡdone).Load();
 }
 
 // ErrTxDone is returned by any operation that is performed on a transaction
@@ -2331,25 +2406,28 @@ public static error ErrTxDone = errors.New("sql: transaction has already been co
 // a successful call to (*Tx).grabConn. For tests.
 internal static Action hookTxGrabConn;
 
-[GoRecv] internal static (ж<driverConn>, ΔreleaseConn, error) grabConn(this ref Tx tx, context.Context ctx) {
+internal static (ж<driverConn>, Action<error>, error) grabConn(this ж<Tx> Ꮡtx, context.Context ctx) {
+    ref var tx = ref Ꮡtx.Value;
+
     switch (ᐧ) {
     case ᐧ when ctx.Done().ꟷᐳ(out _): {
         return (default!, default!, ctx.Err());
     }
     default: {
+        break;
     }}
     // closemu.RLock must come before the check for isDone to prevent the Tx from
     // closing while a query is executing.
-    tx.closemu.RLock();
-    if (tx.isDone()) {
-        tx.closemu.RUnlock();
+    Ꮡtx.of(Tx.Ꮡclosemu).RLock();
+    if (Ꮡtx.isDone()) {
+        Ꮡtx.of(Tx.Ꮡclosemu).RUnlock();
         return (default!, default!, ErrTxDone);
     }
     if (hookTxGrabConn != default!) {
         // test hook
         hookTxGrabConn();
     }
-    return (tx.dc, tx.closemuRUnlockRelease, default!);
+    return (tx.dc, Ꮡtx.closemuRUnlockRelease, default!);
 }
 
 [GoRecv] internal static context.Context txCtx(this ref Tx tx) {
@@ -2360,34 +2438,41 @@ internal static Action hookTxGrabConn;
 // [DB.ExecContext] and [DB.QueryContext]. Unlocking in the releaseConn keeps
 // the driver conn from being returned to the connection pool until
 // the Rows has been closed.
-[GoRecv] internal static void closemuRUnlockRelease(this ref Tx tx, error _) {
-    tx.closemu.RUnlock();
+internal static void closemuRUnlockRelease(this ж<Tx> Ꮡtx, error _) {
+    ref var tx = ref Ꮡtx.Value;
+
+    Ꮡtx.of(Tx.Ꮡclosemu).RUnlock();
 }
 
 // Closes all Stmts prepared for this transaction.
-[GoRecv] internal static void closePrepared(this ref Tx tx) => func((defer, _) => {
-    tx.stmts.Lock();
-    defer(tx.stmts.Unlock);
+internal static void closePrepared(this ж<Tx> Ꮡtx) => func((defer, recover) => {
+    ref var tx = ref Ꮡtx.Value;
+
+    Ꮡtx.of(Tx.Ꮡstmts).of(Tx_stmts.ᏑMutex).Lock();
+    defer(Ꮡtx.of(Tx.Ꮡstmts).of(Tx_stmts.ᏑMutex).Unlock);
     foreach (var (_, stmt) in tx.stmts.v) {
         stmt.Close();
     }
 });
 
 // Commit commits the transaction.
-[GoRecv] public static error Commit(this ref Tx tx) {
+public static error Commit(this ж<Tx> Ꮡtx) {
+    ref var tx = ref Ꮡtx.Value;
+
     // Check context first to avoid transaction leak.
     // If put it behind tx.done CompareAndSwap statement, we can't ensure
     // the consistency between tx.done and the real COMMIT operation.
     switch (ᐧ) {
     case ᐧ when tx.ctx.Done().ꟷᐳ(out _): {
-        if (tx.done.Load()) {
+        if (Ꮡtx.of(Tx.Ꮡdone).Load()) {
             return ErrTxDone;
         }
         return tx.ctx.Err();
     }
     default: {
+        break;
     }}
-    if (!tx.done.CompareAndSwap(false, true)) {
+    if (!Ꮡtx.of(Tx.Ꮡdone).CompareAndSwap(false, true)) {
         return ErrTxDone;
     }
     // Cancel the Tx to release any active R-closemu locks.
@@ -2395,16 +2480,14 @@ internal static Action hookTxGrabConn;
     // from 0 to 1. Hold the W-closemu lock prior to rollback
     // to ensure no other connection has an active query.
     tx.cancel();
-    tx.closemu.Lock();
-    tx.closemu.Unlock();
-    error err = default!;
-    withLock(~tx.dc, 
-    var errʗ1 = err;
-    () => {
-        errʗ1 = tx.txi.Commit();
+    Ꮡtx.of(Tx.Ꮡclosemu).Lock();
+    Ꮡtx.of(Tx.Ꮡclosemu).Unlock();
+    ref var err = ref heap<error>(out var Ꮡerr);
+    withLock(new driverConnжLocker(tx.dc), () => {
+        Ꮡerr.ValueSlot = Ꮡtx.Value.txi.Commit();
     });
     if (!errors.Is(err, driver.ErrBadConn)) {
-        tx.closePrepared();
+        Ꮡtx.closePrepared();
     }
     tx.close(err);
     return err;
@@ -2414,8 +2497,10 @@ internal static Action rollbackHook;
 
 // rollback aborts the transaction and optionally forces the pool to discard
 // the connection.
-[GoRecv] internal static error rollback(this ref Tx tx, bool discardConn) {
-    if (!tx.done.CompareAndSwap(false, true)) {
+internal static error rollback(this ж<Tx> Ꮡtx, bool discardConn) {
+    ref var tx = ref Ꮡtx.Value;
+
+    if (!Ꮡtx.of(Tx.Ꮡdone).CompareAndSwap(false, true)) {
         return ErrTxDone;
     }
     if (rollbackHook != default!) {
@@ -2426,16 +2511,14 @@ internal static Action rollbackHook;
     // from 0 to 1. Hold the W-closemu lock prior to rollback
     // to ensure no other connection has an active query.
     tx.cancel();
-    tx.closemu.Lock();
-    tx.closemu.Unlock();
-    error err = default!;
-    withLock(~tx.dc, 
-    var errʗ1 = err;
-    () => {
-        errʗ1 = tx.txi.Rollback();
+    Ꮡtx.of(Tx.Ꮡclosemu).Lock();
+    Ꮡtx.of(Tx.Ꮡclosemu).Unlock();
+    ref var err = ref heap<error>(out var Ꮡerr);
+    withLock(new driverConnжLocker(tx.dc), () => {
+        Ꮡerr.ValueSlot = Ꮡtx.Value.txi.Rollback();
     });
     if (!errors.Is(err, driver.ErrBadConn)) {
-        tx.closePrepared();
+        Ꮡtx.closePrepared();
     }
     if (discardConn) {
         err = driver.ErrBadConn;
@@ -2445,8 +2528,10 @@ internal static Action rollbackHook;
 }
 
 // Rollback aborts the transaction.
-[GoRecv] public static error Rollback(this ref Tx tx) {
-    return tx.rollback(false);
+public static error Rollback(this ж<Tx> Ꮡtx) {
+    ref var tx = ref Ꮡtx.Value;
+
+    return Ꮡtx.rollback(false);
 }
 
 // PrepareContext creates a prepared statement for use within a transaction.
@@ -2459,18 +2544,20 @@ internal static Action rollbackHook;
 // The provided context will be used for the preparation of the context, not
 // for the execution of the returned statement. The returned statement
 // will run in the transaction context.
-[GoRecv] public static (ж<ΔStmt>, error) PrepareContext(this ref Tx tx, context.Context ctx, @string query) {
-    (dc, release, err) = tx.grabConn(ctx);
+public static (ж<ΔStmt>, error) PrepareContext(this ж<Tx> Ꮡtx, context.Context ctx, @string query) {
+    ref var tx = ref Ꮡtx.Value;
+
+    var (dc, release, err) = Ꮡtx.grabConn(ctx);
     if (err != default!) {
         return (default!, err);
     }
-    (stmt, err) = tx.db.prepareDC(ctx, dc, release, ~tx, query);
+    (var stmt, err) = tx.db.prepareDC(ctx, dc, release, new TxжstmtConnGrabber(Ꮡtx), query);
     if (err != default!) {
         return (default!, err);
     }
-    tx.stmts.Lock();
+    Ꮡtx.of(Tx.Ꮡstmts).of(Tx_stmts.ᏑMutex).Lock();
     tx.stmts.v = append(tx.stmts.v, stmt);
-    tx.stmts.Unlock();
+    Ꮡtx.of(Tx.Ꮡstmts).of(Tx_stmts.ᏑMutex).Unlock();
     return (stmt, default!);
 }
 
@@ -2483,8 +2570,10 @@ internal static Action rollbackHook;
 //
 // Prepare uses [context.Background] internally; to specify the context, use
 // [Tx.PrepareContext].
-[GoRecv] public static (ж<ΔStmt>, error) Prepare(this ref Tx tx, @string query) {
-    return tx.PrepareContext(context.Background(), query);
+public static (ж<ΔStmt>, error) Prepare(this ж<Tx> Ꮡtx, @string query) {
+    ref var tx = ref Ꮡtx.Value;
+
+    return Ꮡtx.PrepareContext(context.Background(), query);
 }
 
 // StmtContext returns a transaction-specific prepared statement from
@@ -2503,21 +2592,23 @@ internal static Action rollbackHook;
 //
 // The returned statement operates within the transaction and will be closed
 // when the transaction has been committed or rolled back.
-[GoRecv] public static ж<ΔStmt> StmtContext(this ref Tx tx, context.Context ctx, ж<ΔStmt> Ꮡstmt) => func((defer, _) => {
-    ref var stmt = ref Ꮡstmt.val;
+public static ж<ΔStmt> StmtContext(this ж<Tx> Ꮡtx, context.Context ctx, ж<ΔStmt> Ꮡstmt) => func((defer, recover) => {
+    ref var tx = ref Ꮡtx.Value;
+    ref var stmt = ref Ꮡstmt.Value;
 
-    (dc, release, err) = tx.grabConn(ctx);
+    ref var err = ref heap<error>(out var Ꮡerr);
+    (var dc, var release, err) = Ꮡtx.grabConn(ctx);
     if (err != default!) {
         return Ꮡ(new ΔStmt(stickyErr: err));
     }
     var releaseʗ1 = release;
-    deferǃ(releaseʗ1, default!, defer);
+    deferǃ(releaseʗ1, (error)(default!), defer);
     if (tx.db != stmt.db) {
         return Ꮡ(new ΔStmt(stickyErr: errors.New("sql: Tx.Stmt: statement from different database used"u8)));
     }
-    driver.Stmt si = default!;
+    ref var si = ref heap<driver.Stmt>(out var Ꮡsi);
     ж<ΔStmt> parentStmt = default!;
-    stmt.mu.Lock();
+    Ꮡstmt.of(sql_package.ΔStmt.Ꮡmu).Lock();
     if (stmt.closed || stmt.cg != default!){
         // If the statement has been closed or already belongs to a
         // transaction, we can't reuse it in this connection.
@@ -2525,13 +2616,10 @@ internal static Action rollbackHook;
         // Stmt already belonging to tx, we ignore this edge case and
         // re-prepare the statement in this case. No need to add
         // code-complexity for this.
-        stmt.mu.Unlock();
-        withLock(~dc, 
+        Ꮡstmt.of(sql_package.ΔStmt.Ꮡmu).Unlock();
         var dcʗ1 = dc;
-        var errʗ1 = err;
-        var siʗ1 = si;
-        () => {
-            (siʗ1, errʗ1) = ctxDriverPrepare(ctx, (~dcʗ1).ci, stmt.query);
+        withLock(new driverConnжLocker(dc), () => {
+            (Ꮡsi.ValueSlot, Ꮡerr.ValueSlot) = ctxDriverPrepare(ctx, (~dcʗ1).ci, Ꮡstmt.Value.query);
         });
         if (err != default!) {
             return Ꮡ(new ΔStmt(stickyErr: err));
@@ -2542,43 +2630,40 @@ internal static Action rollbackHook;
         // and reuse it if possible.
         foreach (var (_, v) in stmt.css) {
             if (v.dc == dc) {
-                si = v.ds.val.si;
+                si = v.ds.Value.si;
                 break;
             }
         }
-        stmt.mu.Unlock();
+        Ꮡstmt.of(sql_package.ΔStmt.Ꮡmu).Unlock();
         if (si == default!) {
-            ж<driverStmt> ds = default!;
-            withLock(~dc, 
+            ref var ds = ref heap<ж<driverStmt>>(out var Ꮡds);
             var dcʗ3 = dc;
-            var dsʗ1 = ds;
-            var errʗ3 = err;
-            () => {
-                (dsʗ1, errʗ3) = stmt.prepareOnConnLocked(ctx, dcʗ3);
+            withLock(new driverConnжLocker(dc), () => {
+                (Ꮡds.ValueSlot, Ꮡerr.ValueSlot) = Ꮡstmt.prepareOnConnLocked(ctx, dcʗ3);
             });
             if (err != default!) {
                 return Ꮡ(new ΔStmt(stickyErr: err));
             }
-            si = ds.val.si;
+            si = ds.Value.si;
         }
-        parentStmt = stmt;
+        parentStmt = Ꮡstmt;
     }
     var txs = Ꮡ(new ΔStmt(
         db: tx.db,
-        cg: tx,
+        cg: new TxжstmtConnGrabber(Ꮡtx),
         cgds: Ꮡ(new driverStmt(
-            Locker: dc,
+            Locker: new driverConnжLocker(dc),
             si: si
         )),
         parentStmt: parentStmt,
         query: stmt.query
     ));
     if (parentStmt != nil) {
-        tx.db.addDep(~parentStmt, txs);
+        tx.db.addDep(new ΔStmtжfinalCloser(parentStmt), txs);
     }
-    tx.stmts.Lock();
+    Ꮡtx.of(Tx.Ꮡstmts).of(Tx_stmts.ᏑMutex).Lock();
     tx.stmts.v = append(tx.stmts.v, txs);
-    tx.stmts.Unlock();
+    Ꮡtx.of(Tx.Ꮡstmts).of(Tx_stmts.ᏑMutex).Unlock();
     return txs;
 });
 
@@ -2598,18 +2683,20 @@ internal static Action rollbackHook;
 //
 // Stmt uses [context.Background] internally; to specify the context, use
 // [Tx.StmtContext].
-[GoRecv] public static ж<ΔStmt> Stmt(this ref Tx tx, ж<ΔStmt> Ꮡstmt) {
-    ref var stmt = ref Ꮡstmt.val;
+public static ж<ΔStmt> Stmt(this ж<Tx> Ꮡtx, ж<ΔStmt> Ꮡstmt) {
+    ref var tx = ref Ꮡtx.Value;
+    ref var stmt = ref Ꮡstmt.Value;
 
-    return tx.StmtContext(context.Background(), Ꮡstmt);
+    return Ꮡtx.StmtContext(context.Background(), Ꮡstmt);
 }
 
 // ExecContext executes a query that doesn't return rows.
 // For example: an INSERT and UPDATE.
-[GoRecv] public static (Result, error) ExecContext(this ref Tx tx, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+public static (Result, error) ExecContext(this ж<Tx> Ꮡtx, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    (dc, release, err) = tx.grabConn(ctx);
+    ref var tx = ref Ꮡtx.Value;
+    var (dc, release, err) = Ꮡtx.grabConn(ctx);
     if (err != default!) {
         return (default!, err);
     }
@@ -2621,17 +2708,19 @@ internal static Action rollbackHook;
 //
 // Exec uses [context.Background] internally; to specify the context, use
 // [Tx.ExecContext].
-[GoRecv] public static (Result, error) Exec(this ref Tx tx, @string query, params ꓸꓸꓸany argsʗp) {
+public static (Result, error) Exec(this ж<Tx> Ꮡtx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    return tx.ExecContext(context.Background(), query, args.ꓸꓸꓸ);
+    ref var tx = ref Ꮡtx.Value;
+    return Ꮡtx.ExecContext(context.Background(), query, args.ꓸꓸꓸ);
 }
 
 // QueryContext executes a query that returns rows, typically a SELECT.
-[GoRecv] public static (ж<Rows>, error) QueryContext(this ref Tx tx, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+public static (ж<Rows>, error) QueryContext(this ж<Tx> Ꮡtx, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    (dc, release, err) = tx.grabConn(ctx);
+    ref var tx = ref Ꮡtx.Value;
+    var (dc, release, err) = Ꮡtx.grabConn(ctx);
     if (err != default!) {
         return (default!, err);
     }
@@ -2642,10 +2731,11 @@ internal static Action rollbackHook;
 //
 // Query uses [context.Background] internally; to specify the context, use
 // [Tx.QueryContext].
-[GoRecv] public static (ж<Rows>, error) Query(this ref Tx tx, @string query, params ꓸꓸꓸany argsʗp) {
+public static (ж<Rows>, error) Query(this ж<Tx> Ꮡtx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    return tx.QueryContext(context.Background(), query, args.ꓸꓸꓸ);
+    ref var tx = ref Ꮡtx.Value;
+    return Ꮡtx.QueryContext(context.Background(), query, args.ꓸꓸꓸ);
 }
 
 // QueryRowContext executes a query that is expected to return at most one row.
@@ -2654,10 +2744,11 @@ internal static Action rollbackHook;
 // If the query selects no rows, the [*Row.Scan] will return [ErrNoRows].
 // Otherwise, the [*Row.Scan] scans the first selected row and discards
 // the rest.
-[GoRecv] public static ж<Row> QueryRowContext(this ref Tx tx, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+public static ж<Row> QueryRowContext(this ж<Tx> Ꮡtx, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    (rows, err) = tx.QueryContext(ctx, query, args.ꓸꓸꓸ);
+    ref var tx = ref Ꮡtx.Value;
+    var (rows, err) = Ꮡtx.QueryContext(ctx, query, args.ꓸꓸꓸ);
     return Ꮡ(new Row(rows: rows, err: err));
 }
 
@@ -2670,10 +2761,11 @@ internal static Action rollbackHook;
 //
 // QueryRow uses [context.Background] internally; to specify the context, use
 // [Tx.QueryRowContext].
-[GoRecv] public static ж<Row> QueryRow(this ref Tx tx, @string query, params ꓸꓸꓸany argsʗp) {
+public static ж<Row> QueryRow(this ж<Tx> Ꮡtx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    return tx.QueryRowContext(context.Background(), query, args.ꓸꓸꓸ);
+    ref var tx = ref Ꮡtx.Value;
+    return Ꮡtx.QueryRowContext(context.Background(), query, args.ꓸꓸꓸ);
 }
 
 // connStmt is a prepared statement on a particular connection.
@@ -2687,15 +2779,15 @@ internal static Action rollbackHook;
 [GoType] partial interface stmtConnGrabber {
     // grabConn returns the driverConn and the associated release function
     // that must be called when the operation completes.
-    (ж<driverConn>, ΔreleaseConn, error) grabConn(context.Context _);
+    (ж<driverConn>, Action<error>, error) grabConn(context.Context _);
     // txCtx returns the transaction context if available.
     // The returned context should be selected on along with
     // any query context when awaiting a cancel.
     context.Context txCtx();
 }
 
-internal static stmtConnGrabber _ᴛ2ʗ = Ꮡ(new Tx(nil));
-internal static stmtConnGrabber _ᴛ3ʗ = Ꮡ(new ΔConn(nil));
+internal static stmtConnGrabber _ᴛ2ʗ = new TxжstmtConnGrabber(Ꮡ(new Tx(nil)));
+internal static stmtConnGrabber _ᴛ3ʗ = new ΔConnжstmtConnGrabber(Ꮡ(new ΔConn(nil)));
 
 // Stmt is a prepared statement.
 // A Stmt is safe for concurrent use by multiple goroutines.
@@ -2711,7 +2803,7 @@ internal static stmtConnGrabber _ᴛ3ʗ = Ꮡ(new ΔConn(nil));
     internal ж<DB> db; // where we came from
     internal @string query; // that created the Stmt
     internal error stickyErr;  // if non-nil, this error is returned for all operations
-    internal sync_package.RWMutex closemu; // held exclusively during close, for read otherwise.
+    internal sync.RWMutex closemu; // held exclusively during close, for read otherwise.
     // If Stmt is prepared on a Tx or Conn then cg is present and will
     // only ever grab a connection from cg.
     // If cg is nil then the Stmt must grab an arbitrary connection
@@ -2726,7 +2818,7 @@ internal static stmtConnGrabber _ᴛ3ʗ = Ꮡ(new ΔConn(nil));
     // be closed by the user without them having to know whether or not
     // any transactions are still using it.
     internal ж<ΔStmt> parentStmt;
-    internal sync_package.Mutex mu; // protects the rest of the fields
+    internal sync.Mutex mu; // protects the rest of the fields
     internal bool closed;
     // css is a list of underlying driver statement interfaces
     // that are valid on particular connections. This is only
@@ -2740,54 +2832,58 @@ internal static stmtConnGrabber _ᴛ3ʗ = Ꮡ(new ΔConn(nil));
 
 // ExecContext executes a prepared statement with the given arguments and
 // returns a [Result] summarizing the effect of the statement.
-[GoRecv] public static (Result, error) ExecContext(this ref ΔStmt s, context.Context ctx, params ꓸꓸꓸany argsʗp) => func((defer, _) => {
+public static (Result, error) ExecContext(this ж<ΔStmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
+    return func((defer, recover) => {
+    ref var s = ref Ꮡs.Value;
 
-    s.closemu.RLock();
-    defer(s.closemu.RUnlock);
-    Result res = default!;
-    var err = s.db.retry(
-    var argsʗ2 = args;
-    var resʗ2 = res;
-    (connReuseStrategy strategy) => {
-        (dc, ΔreleaseConn, ds, errΔ1) = s.connStmt(ctx, strategy);
-        if (errΔ1 != default!) {
+        Ꮡs.of(sql_package.ΔStmt.Ꮡclosemu).RLock();
+        defer(Ꮡs.of(sql_package.ΔStmt.Ꮡclosemu).RUnlock);
+        ref var res = ref heap<Result>(out var Ꮡres);
+        var argsʗ1 = args;
+        var err = s.db.retry((connReuseStrategy strategy) => {
+            var (dc, ΔreleaseConn, ds, errΔ1) = Ꮡs.connStmt(ctx, strategy);
+            if (errΔ1 != default!) {
+                return errΔ1;
+            }
+            (Ꮡres.ValueSlot, errΔ1) = resultFromStatement(ctx, (~dc).ci, ds, argsʗ1.ꓸꓸꓸ);
+            ΔreleaseConn(errΔ1);
             return errΔ1;
-        }
-        (resʗ2, err) = resultFromStatement(ctx, (~dc).ci, ds, argsʗ2.ꓸꓸꓸ);
-        ΔreleaseConn(errΔ1);
-        return errΔ1;
+        });
+        return (res, err);
     });
-    return (res, err);
-});
+}
 
 // Exec executes a prepared statement with the given arguments and
 // returns a [Result] summarizing the effect of the statement.
 //
 // Exec uses [context.Background] internally; to specify the context, use
 // [Stmt.ExecContext].
-[GoRecv] public static (Result, error) Exec(this ref ΔStmt s, params ꓸꓸꓸany argsʗp) {
+public static (Result, error) Exec(this ж<ΔStmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    return s.ExecContext(context.Background(), args.ꓸꓸꓸ);
+    ref var s = ref Ꮡs.Value;
+    return Ꮡs.ExecContext(context.Background(), args.ꓸꓸꓸ);
 }
 
-internal static (Result, error) resultFromStatement(context.Context ctx, driver.Conn ci, ж<driverStmt> Ꮡds, params ꓸꓸꓸany argsʗp) => func((defer, _) => {
+internal static (Result, error) resultFromStatement(context.Context ctx, driver.Conn ci, ж<driverStmt> Ꮡds, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
+    return func<(Result, error)>((defer, recover) => {
+    ref var ds = ref Ꮡds.Value;
 
-    ref var ds = ref Ꮡds.val;
-    ds.Lock();
-    defer(ds.Unlock);
-    (dargs, err) = driverArgsConnLocked(ci, Ꮡds, args);
-    if (err != default!) {
-        return (default!, err);
-    }
-    (resi, err) = ctxDriverStmtExec(ctx, ds.si, dargs);
-    if (err != default!) {
-        return (default!, err);
-    }
-    return (new driverResult(ds.Locker, resi), default!);
-});
+        ds.Locker.Lock();
+        defer(Ꮡds.Value.Locker.Unlock);
+        var (dargs, err) = driverArgsConnLocked(ci, Ꮡds, args);
+        if (err != default!) {
+            return (default!, err);
+        }
+        (var resi, err) = ctxDriverStmtExec(ctx, ds.si, dargs);
+        if (err != default!) {
+            return (default!, err);
+        }
+        return (new driverResult(ds.Locker, resi), default!);
+    });
+}
 
 // removeClosedStmtLocked removes closed conns in s.css.
 //
@@ -2798,13 +2894,13 @@ internal static (Result, error) resultFromStatement(context.Context ctx, driver.
     if (t > 10) {
         t = 10;
     }
-    var dbClosed = s.db.numClosed.Load();
-    if (dbClosed - s.lastNumClosed < ((uint64)t)) {
+    var dbClosed = s.db.of(DB.ᏑnumClosed).Load();
+    if (dbClosed - s.lastNumClosed < (uint64)t) {
         return;
     }
-    s.db.mu.Lock();
+    s.db.of(DB.Ꮡmu).Lock();
     for (nint i = 0; i < len(s.css); i++) {
-        if (s.css[i].dc.dbmuClosed) {
+        if ((~s.css[i].dc).dbmuClosed) {
             s.css[i] = s.css[len(s.css) - 1];
             // Zero out the last element (for GC) before shrinking the slice.
             s.css[len(s.css) - 1] = new ΔconnStmt(nil);
@@ -2812,34 +2908,35 @@ internal static (Result, error) resultFromStatement(context.Context ctx, driver.
             i--;
         }
     }
-    s.db.mu.Unlock();
+    s.db.of(DB.Ꮡmu).Unlock();
     s.lastNumClosed = dbClosed;
 }
 
 // connStmt returns a free driver connection on which to execute the
 // statement, a function to call to release the connection, and a
 // statement bound to that connection.
-[GoRecv] internal static (ж<driverConn> dc, Action<error> ΔreleaseConn, ж<driverStmt> ds, error err) connStmt(this ref ΔStmt s, context.Context ctx, connReuseStrategy strategy) {
+internal static (ж<driverConn> dc, Action<error> ΔreleaseConn, ж<driverStmt> ds, error err) connStmt(this ж<ΔStmt> Ꮡs, context.Context ctx, connReuseStrategy strategy) {
     ж<driverConn> dc = default!;
     Action<error> ΔreleaseConn = default!;
     ж<driverStmt> ds = default!;
     error err = default!;
 
+    ref var s = ref Ꮡs.Value;
     {
         err = s.stickyErr; if (err != default!) {
             return (dc, ΔreleaseConn, ds, err);
         }
     }
-    s.mu.Lock();
+    Ꮡs.of(sql_package.ΔStmt.Ꮡmu).Lock();
     if (s.closed) {
-        s.mu.Unlock();
+        Ꮡs.of(sql_package.ΔStmt.Ꮡmu).Unlock();
         err = errors.New("sql: statement is closed"u8);
         return (dc, ΔreleaseConn, ds, err);
     }
     // In a transaction or connection, we always use the connection that the
     // stmt was created on.
     if (s.cg != default!) {
-        s.mu.Unlock();
+        Ꮡs.of(sql_package.ΔStmt.Ꮡmu).Unlock();
         (dc, ΔreleaseConn, err) = s.cg.grabConn(ctx);
         // blocks, waiting for the connection.
         if (err != default!) {
@@ -2848,22 +2945,22 @@ internal static (Result, error) resultFromStatement(context.Context ctx, driver.
         return (dc, ΔreleaseConn, s.cgds, default!);
     }
     s.removeClosedStmtLocked();
-    s.mu.Unlock();
+    Ꮡs.of(sql_package.ΔStmt.Ꮡmu).Unlock();
     (dc, err) = s.db.conn(ctx, strategy);
     if (err != default!) {
         return (default!, default!, default!, err);
     }
-    s.mu.Lock();
+    Ꮡs.of(sql_package.ΔStmt.Ꮡmu).Lock();
     foreach (var (_, v) in s.css) {
         if (v.dc == dc) {
-            s.mu.Unlock();
+            Ꮡs.of(sql_package.ΔStmt.Ꮡmu).Unlock();
             return (dc, dc.releaseConn, v.ds, default!);
         }
     }
-    s.mu.Unlock();
+    Ꮡs.of(sql_package.ΔStmt.Ꮡmu).Unlock();
     // No luck; we need to prepare the statement on this connection
-    withLock(~dc, () => {
-        (ds, err) = s.prepareOnConnLocked(ctx, dc);
+    withLock(new driverConnжLocker(dc), () => {
+        (ds, err) = Ꮡs.prepareOnConnLocked(ctx, dc);
     });
     if (err != default!) {
         dc.releaseConn(err);
@@ -2874,88 +2971,97 @@ internal static (Result, error) resultFromStatement(context.Context ctx, driver.
 
 // prepareOnConnLocked prepares the query in Stmt s on dc and adds it to the list of
 // open connStmt on the statement. It assumes the caller is holding the lock on dc.
-[GoRecv] public static (ж<driverStmt>, error) prepareOnConnLocked(this ref ΔStmt s, context.Context ctx, ж<driverConn> Ꮡdc) {
-    ref var dc = ref Ꮡdc.val;
+internal static (ж<driverStmt>, error) prepareOnConnLocked(this ж<ΔStmt> Ꮡs, context.Context ctx, ж<driverConn> Ꮡdc) {
+    ref var s = ref Ꮡs.Value;
+    ref var dc = ref Ꮡdc.Value;
 
-    (si, err) = dc.prepareLocked(ctx, s.cg, s.query);
+    var (si, err) = Ꮡdc.prepareLocked(ctx, s.cg, s.query);
     if (err != default!) {
         return (default!, err);
     }
     var cs = new ΔconnStmt(Ꮡdc, si);
-    s.mu.Lock();
+    Ꮡs.of(sql_package.ΔStmt.Ꮡmu).Lock();
     s.css = append(s.css, cs);
-    s.mu.Unlock();
+    Ꮡs.of(sql_package.ΔStmt.Ꮡmu).Unlock();
     return (cs.ds, default!);
 }
 
 // QueryContext executes a prepared query statement with the given arguments
 // and returns the query results as a [*Rows].
-[GoRecv] public static (ж<Rows>, error) QueryContext(this ref ΔStmt s, context.Context ctx, params ꓸꓸꓸany argsʗp) => func((defer, _) => {
+public static (ж<Rows>, error) QueryContext(this ж<ΔStmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
+    return func((defer, recover) => {
+    ref var s = ref Ꮡs.Value;
 
-    s.closemu.RLock();
-    defer(s.closemu.RUnlock);
-    driver.Rows rowsi = default!;
-    ж<Rows> rows = default!;
-    var err = s.db.retry(
-    var argsʗ2 = args;
-    var rowsʗ3 = rows;
-    var rowsiʗ2 = rowsi;
-    (connReuseStrategy strategy) => {
-        (dc, ΔreleaseConn, ds, errΔ1) = s.connStmt(ctx, strategy);
-        if (errΔ1 != default!) {
-            return errΔ1;
-        }
-        (rowsiʗ2, err) = rowsiFromStatement(ctx, (~dc).ci, ds, argsʗ2.ꓸꓸꓸ);
-        if (errΔ1 == default!) {
-            rowsʗ3 = Ꮡ(new Rows(
-                dc: dc,
-                rowsiʗ2: rowsiʗ2
-            ));
-            s.db.addDep(~s, rowsʗ3);
-            rowsʗ3.val.releaseConn = 
-            var releaseConnʗ2 = ΔreleaseConn;
-            var rowsʗ4 = rows;
-            (error err) => {
-                releaseConnʗ2(errΔ2);
-                s.db.removeDep(~s, rowsʗ4);
-            };
-            context.Context txctx = default!;
-            if (s.cg != default!) {
-                txctx = s.cg.txCtx();
+        Ꮡs.of(sql_package.ΔStmt.Ꮡclosemu).RLock();
+        defer(Ꮡs.of(sql_package.ΔStmt.Ꮡclosemu).RUnlock);
+        ref var rowsi = ref heap<driver.Rows>(out var Ꮡrowsi);
+        ref var rows = ref heap<ж<Rows>>(out var Ꮡrows);
+        var argsʗ1 = args;
+        var err = s.db.retry(error (connReuseStrategy strategy) => {
+            var (dc, ΔreleaseConn, ds, errΔ1) = Ꮡs.connStmt(ctx, strategy);
+            if (errΔ1 != default!) {
+                return errΔ1;
             }
-            rows.initContextClose(ctx, txctx);
-            return default!;
-        }
-        ΔreleaseConn(errΔ1);
-        return errΔ1;
+            (Ꮡrowsi.ValueSlot, errΔ1) = rowsiFromStatement(ctx, (~dc).ci, ds, argsʗ1.ꓸꓸꓸ);
+            if (errΔ1 == default!) {
+                // Note: ownership of ci passes to the *Rows, to be freed
+                // with releaseConn.
+                Ꮡrows.ValueSlot = Ꮡ(new Rows(
+                    dc: dc,
+                    rowsi: Ꮡrowsi.ValueSlot
+                ));
+                // releaseConn set below
+                // addDep must be added before initContextClose or it could attempt
+                // to removeDep before it has been added.
+                Ꮡs.Value.db.addDep(new ΔStmtжfinalCloser(Ꮡs), Ꮡrows.ValueSlot);
+                // releaseConn must be set before initContextClose or it could
+                // release the connection before it is set.
+                var releaseConnʗ1 = ΔreleaseConn;
+                Ꮡrows.ValueSlot.Value.releaseConn = (error errΔ2) => {
+                    releaseConnʗ1(errΔ2);
+                    Ꮡs.Value.db.removeDep(new ΔStmtжfinalCloser(Ꮡs), Ꮡrows.ValueSlot);
+                };
+                context.Context txctx = default!;
+                if (Ꮡs.Value.cg != default!) {
+                    txctx = Ꮡs.Value.cg.txCtx();
+                }
+                Ꮡrows.ValueSlot.initContextClose(ctx, txctx);
+                return default!;
+            }
+            ΔreleaseConn(errΔ1);
+            return errΔ1;
+        });
+        return (rows, err);
     });
-    return (rows, err);
-});
+}
 
 // Query executes a prepared query statement with the given arguments
 // and returns the query results as a *Rows.
 //
 // Query uses [context.Background] internally; to specify the context, use
 // [Stmt.QueryContext].
-[GoRecv] public static (ж<Rows>, error) Query(this ref ΔStmt s, params ꓸꓸꓸany argsʗp) {
+public static (ж<Rows>, error) Query(this ж<ΔStmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    return s.QueryContext(context.Background(), args.ꓸꓸꓸ);
+    ref var s = ref Ꮡs.Value;
+    return Ꮡs.QueryContext(context.Background(), args.ꓸꓸꓸ);
 }
 
-internal static (driver.Rows, error) rowsiFromStatement(context.Context ctx, driver.Conn ci, ж<driverStmt> Ꮡds, params ꓸꓸꓸany argsʗp) => func((defer, _) => {
+internal static (driver.Rows, error) rowsiFromStatement(context.Context ctx, driver.Conn ci, ж<driverStmt> Ꮡds, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
+    return func<(driver.Rows, error)>((defer, recover) => {
+    ref var ds = ref Ꮡds.Value;
 
-    ref var ds = ref Ꮡds.val;
-    ds.Lock();
-    defer(ds.Unlock);
-    (dargs, err) = driverArgsConnLocked(ci, Ꮡds, args);
-    if (err != default!) {
-        return (default!, err);
-    }
-    return ctxDriverStmtQuery(ctx, ds.si, dargs);
-});
+        ds.Locker.Lock();
+        defer(Ꮡds.Value.Locker.Unlock);
+        var (dargs, err) = driverArgsConnLocked(ci, Ꮡds, args);
+        if (err != default!) {
+            return (default!, err);
+        }
+        return ctxDriverStmtQuery(ctx, ds.si, dargs);
+    });
+}
 
 // QueryRowContext executes a prepared query statement with the given arguments.
 // If an error occurs during the execution of the statement, that error will
@@ -2963,10 +3069,11 @@ internal static (driver.Rows, error) rowsiFromStatement(context.Context ctx, dri
 // If the query selects no rows, the [*Row.Scan] will return [ErrNoRows].
 // Otherwise, the [*Row.Scan] scans the first selected row and discards
 // the rest.
-[GoRecv] public static ж<Row> QueryRowContext(this ref ΔStmt s, context.Context ctx, params ꓸꓸꓸany argsʗp) {
+public static ж<Row> QueryRowContext(this ж<ΔStmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    (rows, err) = s.QueryContext(ctx, args.ꓸꓸꓸ);
+    ref var s = ref Ꮡs.Value;
+    var (rows, err) = Ꮡs.QueryContext(ctx, args.ꓸꓸꓸ);
     if (err != default!) {
         return Ꮡ(new Row(err: err));
     }
@@ -2987,45 +3094,48 @@ internal static (driver.Rows, error) rowsiFromStatement(context.Context ctx, dri
 //
 // QueryRow uses [context.Background] internally; to specify the context, use
 // [Stmt.QueryRowContext].
-[GoRecv] public static ж<Row> QueryRow(this ref ΔStmt s, params ꓸꓸꓸany argsʗp) {
+public static ж<Row> QueryRow(this ж<ΔStmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    return s.QueryRowContext(context.Background(), args.ꓸꓸꓸ);
+    ref var s = ref Ꮡs.Value;
+    return Ꮡs.QueryRowContext(context.Background(), args.ꓸꓸꓸ);
 }
 
 // Close closes the statement.
-[GoRecv] public static error Close(this ref ΔStmt s) => func((defer, _) => {
-    s.closemu.Lock();
-    defer(s.closemu.Unlock);
+public static error Close(this ж<ΔStmt> Ꮡs) => func<error>((defer, recover) => {
+    ref var s = ref Ꮡs.Value;
+
+    Ꮡs.of(sql_package.ΔStmt.Ꮡclosemu).Lock();
+    defer(Ꮡs.of(sql_package.ΔStmt.Ꮡclosemu).Unlock);
     if (s.stickyErr != default!) {
         return s.stickyErr;
     }
-    s.mu.Lock();
+    Ꮡs.of(sql_package.ΔStmt.Ꮡmu).Lock();
     if (s.closed) {
-        s.mu.Unlock();
+        Ꮡs.of(sql_package.ΔStmt.Ꮡmu).Unlock();
         return default!;
     }
     s.closed = true;
     var txds = s.cgds;
     s.cgds = default!;
-    s.mu.Unlock();
+    Ꮡs.of(sql_package.ΔStmt.Ꮡmu).Unlock();
     if (s.cg == default!) {
-        return s.db.removeDep(~s, s);
+        return s.db.removeDep(new ΔStmtжfinalCloser(Ꮡs), s);
     }
     if (s.parentStmt != nil) {
         // If parentStmt is set, we must not close s.txds since it's stored
         // in the css array of the parentStmt.
-        return s.db.removeDep(~s.parentStmt, s);
+        return s.db.removeDep(new ΔStmtжfinalCloser(s.parentStmt), s);
     }
     return txds.Close();
 });
 
-[GoRecv] internal static error finalClose(this ref ΔStmt s) => func((defer, _) => {
-    s.mu.Lock();
-    defer(s.mu.Unlock);
-    if (s.css != default!) {
-        ref var v = ref heap(new ΔconnStmt(), out var Ꮡv);
+internal static error finalClose(this ж<ΔStmt> Ꮡs) => func<error>((defer, recover) => {
+    ref var s = ref Ꮡs.Value;
 
+    Ꮡs.of(sql_package.ΔStmt.Ꮡmu).Lock();
+    defer(Ꮡs.of(sql_package.ΔStmt.Ꮡmu).Unlock);
+    if (s.css != default!) {
         foreach (var (_, v) in s.css) {
             s.db.noteUnusedDriverStatement(v.dc, v.ds);
             v.dc.removeOpenStmt(v.ds);
@@ -3040,16 +3150,16 @@ internal static (driver.Rows, error) rowsiFromStatement(context.Context ctx, dri
 [GoType] partial struct Rows {
     internal ж<driverConn> dc; // owned; must call releaseConn when closed to release
     internal Action<error> releaseConn;
-    internal database.sql.driver_package.Rows rowsi;
+    internal driver.Rows rowsi;
     internal Action cancel;      // called when Rows is closed, may be nil.
     internal ж<driverStmt> closeStmt; // if non-nil, statement to Close on close
-    internal sync.atomic_package.Pointer contextDone; // error that awaitDone saw; set before close attempt
+    internal atomic.Pointer<error> contextDone; // error that awaitDone saw; set before close attempt
     // closemu prevents Rows from closing while there
     // is an active streaming result. It is held for read during non-close operations
     // and exclusively during close.
     //
     // closemu guards lasterr and closed.
-    internal sync_package.RWMutex closemu;
+    internal sync.RWMutex closemu;
     internal error lasterr; // non-nil only if closed is true
     internal bool closed;
     // closemuScanHold is whether the previous call to Scan kept closemu RLock'ed
@@ -3067,7 +3177,7 @@ internal static (driver.Rows, error) rowsiFromStatement(context.Context ctx, dri
     internal bool hitEOF;
     // lastcols is only used in Scan, Next, and NextResultSet which are expected
     // not to be called concurrently.
-    internal driver.Value lastcols;
+    internal slice<driverꓸValue> lastcols;
     // raw is a buffer for RawBytes that persists between Scan calls.
     // This is used when the driver returns a mismatched type that requires
     // a cloning allocation. For example, if the driver returns a *string and
@@ -3089,16 +3199,18 @@ internal static (driver.Rows, error) rowsiFromStatement(context.Context ctx, dri
 // If true, it will not close the Rows automatically from the context.
 internal static bool bypassRowsAwaitDone = false;
 
-[GoRecv] internal static void initContextClose(this ref Rows rs, context.Context ctx, context.Context txctx) {
+internal static void initContextClose(this ж<Rows> Ꮡrs, context.Context ctx, context.Context txctx) {
+    ref var rs = ref Ꮡrs.Value;
+
     if (ctx.Done() == default! && (txctx == default! || txctx.Done() == default!)) {
         return;
     }
     if (bypassRowsAwaitDone) {
         return;
     }
-    (closectx, cancel) = context.WithCancel(ctx);
+    var (closectx, cancel) = context.WithCancel(ctx);
     rs.cancel = cancel;
-    goǃ(rs.awaitDone, ctx, txctx, closectx);
+    goǃ(Ꮡrs.awaitDone, ctx, txctx, closectx);
 }
 
 // awaitDone blocks until ctx, txctx, or closectx is canceled.
@@ -3106,20 +3218,24 @@ internal static bool bypassRowsAwaitDone = false;
 // If the query was issued in a transaction, the transaction's context
 // is also provided in txctx, to ensure Rows is closed if the Tx is closed.
 // The closectx is closed by an explicit call to rs.Close.
-[GoRecv] internal static void awaitDone(this ref Rows rs, context.Context ctx, context.Context txctx, context.Context closectx) {
+internal static void awaitDone(this ж<Rows> Ꮡrs, context.Context ctx, context.Context txctx, context.Context closectx) {
+    ref var rs = ref Ꮡrs.Value;
+
     /*<-*/channel<EmptyStruct> txctxDone = default!;
     if (txctx != default!) {
         txctxDone = txctx.Done();
     }
     switch (select(ᐸꟷ(ctx.Done(), ꓸꓸꓸ), ᐸꟷ(txctxDone, ꓸꓸꓸ), ᐸꟷ(closectx.Done(), ꓸꓸꓸ))) {
     case 0 when ctx.Done().ꟷᐳ(out _): {
-        var err = ctx.Err();
-        rs.contextDone.Store(Ꮡ(err));
+        ref var err = ref heap<error>(out var Ꮡerr);
+        err = ctx.Err();
+        Ꮡrs.of(Rows.ᏑcontextDone).Store(Ꮡerr);
         break;
     }
     case 1 when txctxDone.ꟷᐳ(out _): {
-        var err = txctx.Err();
-        rs.contextDone.Store(Ꮡ(err));
+        ref var err = ref heap<error>(out var Ꮡerr);
+        err = txctx.Err();
+        Ꮡrs.of(Rows.ᏑcontextDone).Store(Ꮡerr);
         break;
     }
     case 2 when closectx.Done().ꟷᐳ(out _): {
@@ -3127,7 +3243,7 @@ internal static bool bypassRowsAwaitDone = false;
     }}
     // rs.cancel was called via Close(); don't store this into contextDone
     // to ensure Err() is unaffected.
-    rs.close(ctx.Err());
+    Ꮡrs.close(ctx.Err());
 }
 
 // Next prepares the next result row for reading with the [Rows.Scan] method. It
@@ -3136,21 +3252,23 @@ internal static bool bypassRowsAwaitDone = false;
 // the two cases.
 //
 // Every call to [Rows.Scan], even the first one, must be preceded by a call to [Rows.Next].
-[GoRecv] public static bool Next(this ref Rows rs) {
+public static bool Next(this ж<Rows> Ꮡrs) {
+    ref var rs = ref Ꮡrs.Value;
+
     // If the user's calling Next, they're done with their previous row's Scan
     // results (any RawBytes memory), so we can release the read lock that would
     // be preventing awaitDone from calling close.
-    rs.closemuRUnlockIfHeldByScan();
-    if (rs.contextDone.Load() != nil) {
+    Ꮡrs.closemuRUnlockIfHeldByScan();
+    if (Ꮡrs.of(Rows.ᏑcontextDone).Load() != nil) {
         return false;
     }
     bool doClose = default!;
     bool ok = default!;
-    withLock(rs.closemu.RLocker(), () => {
-        (doClose, ok) = rs.nextLocked();
+    withLock(Ꮡrs.of(Rows.Ꮡclosemu).RLocker(), () => {
+        (doClose, ok) = Ꮡrs.nextLocked();
     });
     if (doClose) {
-        rs.Close();
+        Ꮡrs.Close();
     }
     if (doClose && !ok) {
         rs.hitEOF = true;
@@ -3158,40 +3276,44 @@ internal static bool bypassRowsAwaitDone = false;
     return ok;
 }
 
-[GoRecv] internal static (bool doClose, bool ok) nextLocked(this ref Rows rs) => func((defer, _) => {
+internal static (bool doClose, bool ok) nextLocked(this ж<Rows> Ꮡrs) {
     bool doClose = default!;
     bool ok = default!;
+    func((defer, recover) => {
+    ref var rs = ref Ꮡrs.Value;
 
-    if (rs.closed) {
-        return (false, false);
-    }
-    // Lock the driver connection before calling the driver interface
-    // rowsi to prevent a Tx from rolling back the connection at the same time.
-    rs.dc.Lock();
-    defer(rs.dc.Unlock);
-    if (rs.lastcols == default!) {
-        rs.lastcols = new slice<driver.Value>(len(rs.rowsi.Columns()));
-    }
-    rs.lasterr = rs.rowsi.Next(rs.lastcols);
-    if (rs.lasterr != default!) {
-        // Close the connection if there is a driver error.
-        if (!AreEqual(rs.lasterr, io.EOF)) {
-            return (true, false);
+        if (rs.closed) {
+            (doClose, ok) = (false, false); return;
         }
-        var (nextResultSet, okΔ1) = rs.rowsi._<driver.RowsNextResultSet>(ᐧ);
-        if (!okΔ1) {
-            return (true, false);
+        // Lock the driver connection before calling the driver interface
+        // rowsi to prevent a Tx from rolling back the connection at the same time.
+        rs.dc.of(driverConn.ᏑMutex).Lock();
+        defer(Ꮡrs.Value.dc.of(driverConn.ᏑMutex).Unlock);
+        if (rs.lastcols == default!) {
+            rs.lastcols = new slice<driverꓸValue>(len(rs.rowsi.Columns()));
         }
-        // The driver is at the end of the current result set.
-        // Test to see if there is another result set after the current one.
-        // Only close Rows if there is no further result sets to read.
-        if (!nextResultSet.HasNextResultSet()) {
-            doClose = true;
+        rs.lasterr = rs.rowsi.Next(rs.lastcols);
+        if (rs.lasterr != default!) {
+            // Close the connection if there is a driver error.
+            if (!AreEqual(rs.lasterr, io.EOF)) {
+                (doClose, ok) = (true, false); return;
+            }
+            var (nextResultSet, okΔ1) = rs.rowsi._<driver.RowsNextResultSet>(ᐧ);
+            if (!okΔ1) {
+                (doClose, ok) = (true, false); return;
+            }
+            // The driver is at the end of the current result set.
+            // Test to see if there is another result set after the current one.
+            // Only close Rows if there is no further result sets to read.
+            if (!nextResultSet.HasNextResultSet()) {
+                doClose = true;
+            }
+            (doClose, ok) = (doClose, false); return;
         }
-        return (doClose, false);
-    }
-    return (false, true);
-});
+        (doClose, ok) = (false, true);
+    });
+    return (doClose, ok);
+}
 
 // NextResultSet prepares the next result set for reading. It reports whether
 // there is further result sets, or false if there is no further result set
@@ -3201,19 +3323,21 @@ internal static bool bypassRowsAwaitDone = false;
 // After calling NextResultSet, the [Rows.Next] method should always be called before
 // scanning. If there are further result sets they may not have rows in the result
 // set.
-[GoRecv] public static bool NextResultSet(this ref Rows rs) => func((defer, _) => {
+public static bool NextResultSet(this ж<Rows> Ꮡrs) => func<bool>((defer, recover) => {
+    ref var rs = ref Ꮡrs.Value;
+
     // If the user's calling NextResultSet, they're done with their previous
     // row's Scan results (any RawBytes memory), so we can release the read lock
     // that would be preventing awaitDone from calling close.
-    rs.closemuRUnlockIfHeldByScan();
+    Ꮡrs.closemuRUnlockIfHeldByScan();
     bool doClose = default!;
     defer(() => {
         if (doClose) {
-            rs.Close();
+            Ꮡrs.Close();
         }
     });
-    rs.closemu.RLock();
-    defer(rs.closemu.RUnlock);
+    Ꮡrs.of(Rows.Ꮡclosemu).RLock();
+    defer(Ꮡrs.of(Rows.Ꮡclosemu).RUnlock);
     if (rs.closed) {
         return false;
     }
@@ -3225,8 +3349,8 @@ internal static bool bypassRowsAwaitDone = false;
     }
     // Lock the driver connection before calling the driver interface
     // rowsi to prevent a Tx from rolling back the connection at the same time.
-    rs.dc.Lock();
-    defer(rs.dc.Unlock);
+    rs.dc.of(driverConn.ᏑMutex).Lock();
+    defer(Ꮡrs.Value.dc.of(driverConn.ᏑMutex).Unlock);
     rs.lasterr = nextResultSet.NextResultSet();
     if (rs.lasterr != default!) {
         doClose = true;
@@ -3237,20 +3361,22 @@ internal static bool bypassRowsAwaitDone = false;
 
 // Err returns the error, if any, that was encountered during iteration.
 // Err may be called after an explicit or implicit [Rows.Close].
-[GoRecv] public static error Err(this ref Rows rs) => func((defer, _) => {
+public static error Err(this ж<Rows> Ꮡrs) => func((defer, recover) => {
+    ref var rs = ref Ꮡrs.Value;
+
     // Return any context error that might've happened during row iteration,
     // but only if we haven't reported the final Next() = false after rows
     // are done, in which case the user might've canceled their own context
     // before calling Rows.Err.
     if (!rs.hitEOF) {
         {
-            var errp = rs.contextDone.Load(); if (errp != nil) {
-                return errp.val;
+            var errp = Ꮡrs.of(Rows.ᏑcontextDone).Load(); if (errp != nil) {
+                return errp.ValueSlot;
             }
         }
     }
-    rs.closemu.RLock();
-    defer(rs.closemu.RUnlock);
+    Ꮡrs.of(Rows.Ꮡclosemu).RLock();
+    defer(Ꮡrs.of(Rows.Ꮡclosemu).RUnlock);
     return rs.lasterrOrErrLocked(default!);
 });
 
@@ -3260,7 +3386,9 @@ internal static bool bypassRowsAwaitDone = false;
 // Usage:
 //
 //	rawBytes = rows.setrawbuf(append(rows.rawbuf(), value...))
-[GoRecv] internal static slice<byte> rawbuf(this ref Rows rs) {
+internal static slice<byte> rawbuf(this ж<Rows> Ꮡrs) {
+    ref var rs = ref Ꮡrs.Value;
+
     if (rs == nil) {
         // convertAssignRows can take a nil *Rows; for simplicity handle it here
         return default!;
@@ -3270,7 +3398,9 @@ internal static bool bypassRowsAwaitDone = false;
 
 // setrawbuf updates the RawBytes buffer with the result of appending a new value to it.
 // It returns the new value.
-[GoRecv] internal static RawBytes setrawbuf(this ref Rows rs, slice<byte> b) {
+internal static RawBytes setrawbuf(this ж<Rows> Ꮡrs, slice<byte> b) {
+    ref var rs = ref Ꮡrs.Value;
+
     if (rs == nil) {
         // convertAssignRows can take a nil *Rows; for simplicity handle it here
         return ((RawBytes)b);
@@ -3286,33 +3416,37 @@ internal static error errNoRows = errors.New("sql: no Rows available"u8);
 
 // Columns returns the column names.
 // Columns returns an error if the rows are closed.
-[GoRecv] public static (slice<@string>, error) Columns(this ref Rows rs) => func((defer, _) => {
-    rs.closemu.RLock();
-    defer(rs.closemu.RUnlock);
+public static (slice<@string>, error) Columns(this ж<Rows> Ꮡrs) => func<(slice<@string>, error)>((defer, recover) => {
+    ref var rs = ref Ꮡrs.Value;
+
+    Ꮡrs.of(Rows.Ꮡclosemu).RLock();
+    defer(Ꮡrs.of(Rows.Ꮡclosemu).RUnlock);
     if (rs.closed) {
         return (default!, rs.lasterrOrErrLocked(errRowsClosed));
     }
     if (rs.rowsi == default!) {
         return (default!, rs.lasterrOrErrLocked(errNoRows));
     }
-    rs.dc.Lock();
-    defer(rs.dc.Unlock);
+    rs.dc.of(driverConn.ᏑMutex).Lock();
+    defer(Ꮡrs.Value.dc.of(driverConn.ᏑMutex).Unlock);
     return (rs.rowsi.Columns(), default!);
 });
 
 // ColumnTypes returns column information such as column type, length,
 // and nullable. Some information may not be available from some drivers.
-[GoRecv] public static (slice<ж<ColumnType>>, error) ColumnTypes(this ref Rows rs) => func((defer, _) => {
-    rs.closemu.RLock();
-    defer(rs.closemu.RUnlock);
+public static (slice<ж<ColumnType>>, error) ColumnTypes(this ж<Rows> Ꮡrs) => func<(slice<ж<ColumnType>>, error)>((defer, recover) => {
+    ref var rs = ref Ꮡrs.Value;
+
+    Ꮡrs.of(Rows.Ꮡclosemu).RLock();
+    defer(Ꮡrs.of(Rows.Ꮡclosemu).RUnlock);
     if (rs.closed) {
         return (default!, rs.lasterrOrErrLocked(errRowsClosed));
     }
     if (rs.rowsi == default!) {
         return (default!, rs.lasterrOrErrLocked(errNoRows));
     }
-    rs.dc.Lock();
-    defer(rs.dc.Unlock);
+    rs.dc.of(driverConn.ᏑMutex).Lock();
+    defer(Ꮡrs.Value.dc.of(driverConn.ᏑMutex).Unlock);
     return (rowsColumnInfoSetupConnLocked(rs.rowsi), default!);
 });
 
@@ -3327,7 +3461,7 @@ internal static error errNoRows = errors.New("sql: no Rows available"u8);
     internal @string databaseType;
     internal int64 precision;
     internal int64 scale;
-    internal reflect_package.ΔType scanType;
+    internal reflectꓸType scanType;
 }
 
 // Name returns the name or alias of the column.
@@ -3393,29 +3527,29 @@ internal static slice<ж<ColumnType>> rowsColumnInfoSetupConnLocked(driver.Rows 
         list[i] = ci;
         {
             var (prop, ok) = rowsi._<driver.RowsColumnTypeScanType>(ᐧ); if (ok){
-                ci.val.scanType = prop.ColumnTypeScanType(i);
+                ci.Value.scanType = prop.ColumnTypeScanType(i);
             } else {
-                ci.val.scanType = reflect.TypeFor<any>();
+                ci.Value.scanType = reflect.TypeFor<any>();
             }
         }
         {
             var (prop, ok) = rowsi._<driver.RowsColumnTypeDatabaseTypeName>(ᐧ); if (ok) {
-                ci.val.databaseType = prop.ColumnTypeDatabaseTypeName(i);
+                ci.Value.databaseType = prop.ColumnTypeDatabaseTypeName(i);
             }
         }
         {
             var (prop, ok) = rowsi._<driver.RowsColumnTypeLength>(ᐧ); if (ok) {
-                (ci.val.length, ci.val.hasLength) = prop.ColumnTypeLength(i);
+                (ci.Value.length, ci.Value.hasLength) = prop.ColumnTypeLength(i);
             }
         }
         {
             var (prop, ok) = rowsi._<driver.RowsColumnTypeNullable>(ᐧ); if (ok) {
-                (ci.val.nullable, ci.val.hasNullable) = prop.ColumnTypeNullable(i);
+                (ci.Value.nullable, ci.Value.hasNullable) = prop.ColumnTypeNullable(i);
             }
         }
         {
             var (prop, ok) = rowsi._<driver.RowsColumnTypePrecisionScale>(ᐧ); if (ok) {
-                (ci.val.precision, ci.val.scale, ci.val.hasPrecisionScale) = prop.ColumnTypePrecisionScale(i);
+                (ci.Value.precision, ci.Value.scale, ci.Value.hasPrecisionScale) = prop.ColumnTypePrecisionScale(i);
             }
         }
     }
@@ -3482,42 +3616,43 @@ internal static slice<ж<ColumnType>> rowsColumnInfoSetupConnLocked(driver.Rows 
 //
 // If any of the first arguments implementing [Scanner] returns an error,
 // that error will be wrapped in the returned error.
-[GoRecv] public static error Scan(this ref Rows rs, params ꓸꓸꓸany destʗp) {
+public static error Scan(this ж<Rows> Ꮡrs, params ꓸꓸꓸany destʗp) {
     var dest = destʗp.slice();
 
+    ref var rs = ref Ꮡrs.Value;
     if (rs.closemuScanHold) {
         // This should only be possible if the user calls Scan twice in a row
         // without calling Next.
         return fmt.Errorf("sql: Scan called without calling Next (closemuScanHold)"u8);
     }
-    rs.closemu.RLock();
+    Ꮡrs.of(Rows.Ꮡclosemu).RLock();
     if (rs.lasterr != default! && !AreEqual(rs.lasterr, io.EOF)) {
-        rs.closemu.RUnlock();
+        Ꮡrs.of(Rows.Ꮡclosemu).RUnlock();
         return rs.lasterr;
     }
     if (rs.closed) {
         var err = rs.lasterrOrErrLocked(errRowsClosed);
-        rs.closemu.RUnlock();
+        Ꮡrs.of(Rows.Ꮡclosemu).RUnlock();
         return err;
     }
     if (scanArgsContainRawBytes(dest)){
         rs.closemuScanHold = true;
         rs.raw = rs.raw[..0];
     } else {
-        rs.closemu.RUnlock();
+        Ꮡrs.of(Rows.Ꮡclosemu).RUnlock();
     }
     if (rs.lastcols == default!) {
-        rs.closemuRUnlockIfHeldByScan();
+        Ꮡrs.closemuRUnlockIfHeldByScan();
         return errors.New("sql: Scan called without calling Next"u8);
     }
     if (len(dest) != len(rs.lastcols)) {
-        rs.closemuRUnlockIfHeldByScan();
+        Ꮡrs.closemuRUnlockIfHeldByScan();
         return fmt.Errorf("sql: expected %d destination arguments in Scan, not %d"u8, len(rs.lastcols), len(dest));
     }
     foreach (var (i, sv) in rs.lastcols) {
-        var err = convertAssignRows(dest[i], sv, rs);
+        var err = convertAssignRows(dest[i], sv, Ꮡrs);
         if (err != default!) {
-            rs.closemuRUnlockIfHeldByScan();
+            Ꮡrs.closemuRUnlockIfHeldByScan();
             return fmt.Errorf(@"sql: Scan error on column index %d, name %q: %w"u8, i, rs.rowsi.Columns()[i], err);
         }
     }
@@ -3526,17 +3661,19 @@ internal static slice<ж<ColumnType>> rowsColumnInfoSetupConnLocked(driver.Rows 
 
 // closemuRUnlockIfHeldByScan releases any closemu.RLock held open by a previous
 // call to Scan with *RawBytes.
-[GoRecv] internal static void closemuRUnlockIfHeldByScan(this ref Rows rs) {
+internal static void closemuRUnlockIfHeldByScan(this ж<Rows> Ꮡrs) {
+    ref var rs = ref Ꮡrs.Value;
+
     if (rs.closemuScanHold) {
         rs.closemuScanHold = false;
-        rs.closemu.RUnlock();
+        Ꮡrs.of(Rows.Ꮡclosemu).RUnlock();
     }
 }
 
 internal static bool scanArgsContainRawBytes(slice<any> args) {
     foreach (var (_, a) in args) {
         {
-            var (_, ok) = a._<RawBytes.val>(ᐧ); if (ok) {
+            var (_, ok) = a._<ж<RawBytes>>(ᐧ); if (ok) {
                 return true;
             }
         }
@@ -3552,17 +3689,21 @@ internal static Func<Action<ж<Rows>, ж<error>>> rowsCloseHook = () => default!
 // and returns false and there are no further result sets,
 // the [Rows] are closed automatically and it will suffice to check the
 // result of [Rows.Err]. Close is idempotent and does not affect the result of [Rows.Err].
-[GoRecv] public static error Close(this ref Rows rs) {
+public static error Close(this ж<Rows> Ꮡrs) {
+    ref var rs = ref Ꮡrs.Value;
+
     // If the user's calling Close, they're done with their previous row's Scan
     // results (any RawBytes memory), so we can release the read lock that would
     // be preventing awaitDone from calling the unexported close before we do so.
-    rs.closemuRUnlockIfHeldByScan();
-    return rs.close(default!);
+    Ꮡrs.closemuRUnlockIfHeldByScan();
+    return Ꮡrs.close(default!);
 }
 
-[GoRecv] internal static error close(this ref Rows rs, error err) => func((defer, _) => {
-    rs.closemu.Lock();
-    defer(rs.closemu.Unlock);
+internal static error close(this ж<Rows> Ꮡrs, error err) => func<error>((defer, recover) => {
+    ref var rs = ref Ꮡrs.Value;
+
+    Ꮡrs.of(Rows.Ꮡclosemu).Lock();
+    defer(Ꮡrs.of(Rows.Ꮡclosemu).Unlock);
     if (rs.closed) {
         return default!;
     }
@@ -3570,12 +3711,12 @@ internal static Func<Action<ж<Rows>, ж<error>>> rowsCloseHook = () => default!
     if (rs.lasterr == default!) {
         rs.lasterr = err;
     }
-    withLock(~rs.dc, () => {
-        err = rs.rowsi.Close();
+    withLock(new driverConnжLocker(rs.dc), () => {
+        err = Ꮡrs.Value.rowsi.Close();
     });
     {
         var fn = rowsCloseHook(); if (fn != default!) {
-            fn(rs, Ꮡ(err));
+            fn(Ꮡrs, Ꮡ(err));
         }
     }
     if (rs.cancel != default!) {
@@ -3601,44 +3742,47 @@ internal static Func<Action<ж<Rows>, ж<error>>> rowsCloseHook = () => default!
 // If more than one row matches the query,
 // Scan uses the first row and discards the rest. If no row matches
 // the query, Scan returns [ErrNoRows].
-[GoRecv] public static error Scan(this ref Row r, params ꓸꓸꓸany destʗp) => func((defer, _) => {
+public static error Scan(this ж<Row> Ꮡr, params ꓸꓸꓸany destʗp) {
     var dest = destʗp.slice();
+    return func((defer, recover) => {
+    ref var r = ref Ꮡr.Value;
 
-    if (r.err != default!) {
-        return r.err;
-    }
-    // TODO(bradfitz): for now we need to defensively clone all
-    // []byte that the driver returned (not permitting
-    // *RawBytes in Rows.Scan), since we're about to close
-    // the Rows in our defer, when we return from this function.
-    // the contract with the driver.Next(...) interface is that it
-    // can return slices into read-only temporary memory that's
-    // only valid until the next Scan/Close. But the TODO is that
-    // for a lot of drivers, this copy will be unnecessary. We
-    // should provide an optional interface for drivers to
-    // implement to say, "don't worry, the []bytes that I return
-    // from Next will not be modified again." (for instance, if
-    // they were obtained from the network anyway) But for now we
-    // don't care.
-    defer(r.rows.Close);
-    if (scanArgsContainRawBytes(dest)) {
-        return errors.New("sql: RawBytes isn't allowed on Row.Scan"u8);
-    }
-    if (!r.rows.Next()) {
-        {
-            var errΔ1 = r.rows.Err(); if (errΔ1 != default!) {
-                return errΔ1;
-            }
+        if (r.err != default!) {
+            return r.err;
         }
-        return ErrNoRows;
-    }
-    var err = r.rows.Scan(dest.ꓸꓸꓸ);
-    if (err != default!) {
-        return err;
-    }
-    // Make sure the query can be processed to completion with no errors.
-    return r.rows.Close();
-});
+        // TODO(bradfitz): for now we need to defensively clone all
+        // []byte that the driver returned (not permitting
+        // *RawBytes in Rows.Scan), since we're about to close
+        // the Rows in our defer, when we return from this function.
+        // the contract with the driver.Next(...) interface is that it
+        // can return slices into read-only temporary memory that's
+        // only valid until the next Scan/Close. But the TODO is that
+        // for a lot of drivers, this copy will be unnecessary. We
+        // should provide an optional interface for drivers to
+        // implement to say, "don't worry, the []bytes that I return
+        // from Next will not be modified again." (for instance, if
+        // they were obtained from the network anyway) But for now we
+        // don't care.
+        defer(() => Ꮡr.Value.rows.Close());
+        if (scanArgsContainRawBytes(dest)) {
+            return errors.New("sql: RawBytes isn't allowed on Row.Scan"u8);
+        }
+        if (!r.rows.Next()) {
+            {
+                var errΔ1 = r.rows.Err(); if (errΔ1 != default!) {
+                    return errΔ1;
+                }
+            }
+            return ErrNoRows;
+        }
+        var err = r.rows.Scan(dest.ꓸꓸꓸ);
+        if (err != default!) {
+            return err;
+        }
+        // Make sure the query can be processed to completion with no errors.
+        return r.rows.Close();
+    });
+}
 
 // Err provides a way for wrapping packages to check for
 // query errors without calling [Row.Scan].
@@ -3663,31 +3807,31 @@ internal static Func<Action<ж<Rows>, ж<error>>> rowsCloseHook = () => default!
 }
 
 [GoType] partial struct driverResult {
-    public partial ref sync_package.Locker Locker { get; } // the *driverConn
-    internal database.sql.driver_package.Result resi;
+    public sync_package.Locker Locker; // the *driverConn
+    internal driver.Result resi;
 }
 
-internal static (int64, error) LastInsertId(this driverResult dr) => func((defer, _) => {
-    dr.Lock();
+internal static (int64, error) LastInsertId(this driverResult dr) => func((defer, recover) => {
+    dr.Locker.Lock();
     var drʗ1 = dr;
-    defer(drʗ1.Unlock);
+    defer(drʗ1.Locker.Unlock);
     return dr.resi.LastInsertId();
 });
 
-internal static (int64, error) RowsAffected(this driverResult dr) => func((defer, _) => {
-    dr.Lock();
+internal static (int64, error) RowsAffected(this driverResult dr) => func((defer, recover) => {
+    dr.Locker.Lock();
     var drʗ1 = dr;
-    defer(drʗ1.Unlock);
+    defer(drʗ1.Locker.Unlock);
     return dr.resi.RowsAffected();
 });
 
 internal static @string stack() {
-    array<byte> buf = new(2048); /* 2 << (int)(10) */
+    array<byte> buf = new(2048); /* (2 << (int)(10)) */
     return ((@string)(buf[..(int)(runtime.Stack(buf[..], false))]));
 }
 
 // withLock runs while holding lk.
-internal static void withLock(sync.Locker lk, Action fn) => func((defer, _) => {
+internal static void withLock(sync.Locker lk, Action fn) => func((defer, recover) => {
     lk.Lock();
     defer(lk.Unlock);
     // in case fn panics
@@ -3721,8 +3865,8 @@ internal static void withLock(sync.Locker lk, Action fn) => func((defer, _) => {
 // and clears the set.
 [GoRecv] internal static void CloseAndRemoveAll(this ref connRequestSet s) {
     foreach (var (_, v) in s.s) {
-        v.curIdx.val = -1;
-        close(v.req);
+        v.curIdx.Value = -1;
+        builtin.close(v.req);
     }
     s.s = default!;
 }
@@ -3762,7 +3906,7 @@ internal static void withLock(sync.Locker lk, Action fn) => func((defer, _) => {
 // It reports whether the element was deleted. (It can return false if a caller
 // of TakeRandom took it meanwhile, or upon the second call to Delete)
 [GoRecv] internal static bool Delete(this ref connRequestSet s, connRequestDelHandle h) {
-    nint idx = h.idx;
+    nint idx = h.idx.Value;
     if (idx < 0) {
         return false;
     }
@@ -3772,12 +3916,12 @@ internal static void withLock(sync.Locker lk, Action fn) => func((defer, _) => {
 
 [GoRecv] internal static void deleteIndex(this ref connRequestSet s, nint idx) {
     // Mark item as deleted.
-    (s.s[idx].curIdx).val = -1;
+    (s.s[idx].curIdx).Value = -1;
     // Copy last element, updating its position
     // to its new home.
     if (idx < len(s.s) - 1) {
         var last = s.s[len(s.s) - 1];
-        last.curIdx.val = idx;
+        last.curIdx.Value = idx;
         s.s[idx] = last;
     }
     // Zero out last element (for GC) before shrinking the slice.

@@ -75,23 +75,23 @@ using bytes = bytes_package;
 using context = context_package;
 using fmt = fmt_package;
 using html = html_package;
-using godebug = @internal.godebug_package;
-using profile = @internal.profile_package;
+using godebug = go.@internal.godebug_package;
+using profile = go.@internal.profile_package;
 using io = io_package;
 using log = log_package;
-using http = net.http_package;
-using url = net.url_package;
+using http = go.net.http_package;
+using url = go.net.url_package;
 using os = os_package;
 using runtime = runtime_package;
-using pprof = runtime.pprof_package;
-using trace = runtime.trace_package;
+using pprof = go.runtime.pprof_package;
+using trace = go.runtime.trace_package;
 using sort = sort_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using time = time_package;
-using @internal;
-using net;
-using runtime;
+using go.@internal;
+using go.net;
+using go.runtime;
 
 partial class pprof_package {
 
@@ -111,15 +111,15 @@ partial class pprof_package {
 // command line, with arguments separated by NUL bytes.
 // The package initialization registers it as /debug/pprof/cmdline.
 public static void Cmdline(http.ResponseWriter w, ж<http.Request> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     w.Header().Set("X-Content-Type-Options"u8, "nosniff"u8);
     w.Header().Set("Content-Type"u8, "text/plain; charset=utf-8"u8);
-    fmt.Fprint(w, strings.Join(os.Args, "\x00"u8));
+    fmt.Fprint(new http_ResponseWriterᴠWriter(w), strings.Join(os.Args, "\x00"u8));
 }
 
 internal static void sleep(ж<http.Request> Ꮡr, time.Duration d) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     switch (select(ᐸꟷ(time.After(d), ꓸꓸꓸ), ᐸꟷ(r.Context().Done(), ꓸꓸꓸ))) {
     case 0 when time.After(d).ꟷᐳ(out _): {
@@ -131,11 +131,11 @@ internal static void sleep(ж<http.Request> Ꮡr, time.Duration d) {
 }
 
 internal static void configureWriteDeadline(http.ResponseWriter w, ж<http.Request> Ꮡr, float64 seconds) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     var (srv, ok) = r.Context().Value(http.ServerContextKey)._<ж<http.Server>>(ᐧ);
     if (ok && (~srv).WriteTimeout > 0) {
-        var timeout = (~srv).WriteTimeout + ((time.Duration)(seconds * ((float64)time.ΔSecond)));
+        var timeout = (~srv).WriteTimeout + ((time.Duration)(int64)(seconds * (float64)(int64)time.ΔSecond));
         var rc = http.NewResponseController(w);
         rc.SetWriteDeadline(time.Now().Add(timeout));
     }
@@ -146,27 +146,27 @@ internal static void serveError(http.ResponseWriter w, nint status, @string txt)
     w.Header().Set("X-Go-Pprof"u8, "1"u8);
     w.Header().Del("Content-Disposition"u8);
     w.WriteHeader(status);
-    fmt.Fprintln(w, txt);
+    fmt.Fprintln(new http_ResponseWriterᴠWriter(w), txt);
 }
 
 // Profile responds with the pprof-formatted cpu profile.
 // Profiling lasts for duration specified in seconds GET parameter, or for 30 seconds if not specified.
 // The package initialization registers it as /debug/pprof/profile.
 public static void Profile(http.ResponseWriter w, ж<http.Request> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     w.Header().Set("X-Content-Type-Options"u8, "nosniff"u8);
-    var (sec, err) = strconv.ParseInt(r.FormValue("seconds"u8), 10, 64);
+    var (sec, err) = strconv.ParseInt(Ꮡr.FormValue("seconds"u8), 10, 64);
     if (sec <= 0 || err != default!) {
         sec = 30;
     }
-    configureWriteDeadline(w, Ꮡr, ((float64)sec));
+    configureWriteDeadline(w, Ꮡr, (float64)sec);
     // Set Content Type assuming StartCPUProfile will work,
     // because if it does it starts writing.
     w.Header().Set("Content-Type"u8, "application/octet-stream"u8);
     w.Header().Set("Content-Disposition"u8, @"attachment; filename=""profile"""u8);
     {
-        var errΔ1 = pprof.StartCPUProfile(w); if (errΔ1 != default!) {
+        var errΔ1 = pprof.StartCPUProfile(new http_ResponseWriterᴠWriter(w)); if (errΔ1 != default!) {
             // StartCPUProfile failed, so no writes yet.
             serveError(w, http.StatusInternalServerError,
                 fmt.Sprintf("Could not enable CPU profiling: %s"u8, errΔ1));
@@ -181,10 +181,10 @@ public static void Profile(http.ResponseWriter w, ж<http.Request> Ꮡr) {
 // Tracing lasts for duration specified in seconds GET parameter, or for 1 second if not specified.
 // The package initialization registers it as /debug/pprof/trace.
 public static void Trace(http.ResponseWriter w, ж<http.Request> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     w.Header().Set("X-Content-Type-Options"u8, "nosniff"u8);
-    var (sec, err) = strconv.ParseFloat(r.FormValue("seconds"u8), 64);
+    var (sec, err) = strconv.ParseFloat(Ꮡr.FormValue("seconds"u8), 64);
     if (sec <= 0 || err != default!) {
         sec = 1;
     }
@@ -194,14 +194,14 @@ public static void Trace(http.ResponseWriter w, ж<http.Request> Ꮡr) {
     w.Header().Set("Content-Type"u8, "application/octet-stream"u8);
     w.Header().Set("Content-Disposition"u8, @"attachment; filename=""trace"""u8);
     {
-        var errΔ1 = trace.Start(w); if (errΔ1 != default!) {
+        var errΔ1 = trace.Start(new http_ResponseWriterᴠWriter(w)); if (errΔ1 != default!) {
             // trace.Start failed, so no writes yet.
             serveError(w, http.StatusInternalServerError,
                 fmt.Sprintf("Could not enable tracing: %s"u8, errΔ1));
             return;
         }
     }
-    sleep(Ꮡr, ((time.Duration)(sec * ((float64)time.ΔSecond))));
+    sleep(Ꮡr, ((time.Duration)(int64)(sec * (float64)(int64)time.ΔSecond)));
     trace.Stop();
 }
 
@@ -209,41 +209,41 @@ public static void Trace(http.ResponseWriter w, ж<http.Request> Ꮡr) {
 // responding with a table mapping program counters to function names.
 // The package initialization registers it as /debug/pprof/symbol.
 public static void Symbol(http.ResponseWriter w, ж<http.Request> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     w.Header().Set("X-Content-Type-Options"u8, "nosniff"u8);
     w.Header().Set("Content-Type"u8, "text/plain; charset=utf-8"u8);
     // We have to read the whole POST body before
     // writing any output. Buffer the output here.
-    ref var buf = ref heap(new bytes_package.Buffer(), out var Ꮡbuf);
+    ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     // We don't know how many symbols we have, but we
     // do have symbol information. Pprof only cares whether
     // this number is 0 (no symbols available) or > 0.
-    fmt.Fprintf(~Ꮡbuf, "num_symbols: 1\n"u8);
+    fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), "num_symbols: 1\n"u8);
     ж<bufio.Reader> b = default!;
     if (r.Method == "POST"u8){
-        b = bufio.NewReader(r.Body);
+        b = bufio.NewReader(new io_ReadCloserᴠReader(r.Body));
     } else {
-        b = bufio.NewReader(~strings.NewReader(r.URL.RawQuery));
+        b = bufio.NewReader(new strings_ReaderжReader(strings.NewReader((~r.URL).RawQuery)));
     }
     while (ᐧ) {
-        (word, err) = b.ReadSlice((rune)'+');
+        var (word, err) = b.ReadSlice((rune)'+');
         if (err == default!) {
             word = word[0..(int)(len(word) - 1)];
         }
         // trim +
         var (pc, _) = strconv.ParseUint(((@string)word), 0, 64);
         if (pc != 0) {
-            var f = runtime.FuncForPC(((uintptr)pc));
+            var f = runtime.FuncForPC((uintptr)pc);
             if (f != nil) {
-                fmt.Fprintf(~Ꮡbuf, "%#x %s\n"u8, pc, f.Name());
+                fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), "%#x %s\n"u8, pc, f.Name());
             }
         }
         // Wait until here to check for err; the last
         // symbol will have an err because it doesn't end in +.
         if (err != default!) {
             if (!AreEqual(err, io.EOF)) {
-                fmt.Fprintf(~Ꮡbuf, "reading request: %v\n"u8, err);
+                fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), "reading request: %v\n"u8, err);
             }
             break;
         }
@@ -260,7 +260,7 @@ public static httpꓸHandler Handler(@string name) {
 [GoType("@string")] partial struct handler;
 
 internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http.Request> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     w.Header().Set("X-Content-Type-Options"u8, "nosniff"u8);
     var p = pprof.Lookup(((@string)name));
@@ -269,28 +269,28 @@ internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http
         return;
     }
     {
-        @string sec = r.FormValue("seconds"u8); if (sec != ""u8) {
+        @string sec = Ꮡr.FormValue("seconds"u8); if (sec != ""u8) {
             name.serveDeltaProfile(w, Ꮡr, p, sec);
             return;
         }
     }
-    var (gc, _) = strconv.Atoi(r.FormValue("gc"u8));
+    var (gc, _) = strconv.Atoi(Ꮡr.FormValue("gc"u8));
     if (name == "heap"u8 && gc > 0) {
         runtime.GC();
     }
-    var (debug, _) = strconv.Atoi(r.FormValue("debug"u8));
+    var (debug, _) = strconv.Atoi(Ꮡr.FormValue("debug"u8));
     if (debug != 0){
         w.Header().Set("Content-Type"u8, "text/plain; charset=utf-8"u8);
     } else {
         w.Header().Set("Content-Type"u8, "application/octet-stream"u8);
         w.Header().Set("Content-Disposition"u8, fmt.Sprintf(@"attachment; filename=""%s"""u8, name));
     }
-    p.WriteTo(w, debug);
+    p.WriteTo(new http_ResponseWriterᴠWriter(w), debug);
 }
 
-internal static void serveDeltaProfile(this handler name, http.ResponseWriter w, ж<http.Request> Ꮡr, ж<pprof.Profile> Ꮡp, @string secStr) => func((defer, _) => {
-    ref var r = ref Ꮡr.val;
-    ref var p = ref Ꮡp.val;
+internal static void serveDeltaProfile(this handler name, http.ResponseWriter w, ж<http.Request> Ꮡr, ж<pprof.Profile> Ꮡp, @string secStr) => func((defer, recover) => {
+    ref var r = ref Ꮡr.Value;
+    ref var p = ref Ꮡp.Value;
 
     var (sec, err) = strconv.ParseInt(secStr, 10, 64);
     if (err != default! || sec <= 0) {
@@ -302,20 +302,20 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
         serveError(w, http.StatusBadRequest, @"""seconds"" parameter is not supported for this profile type"u8);
         return;
     }
-    configureWriteDeadline(w, Ꮡr, ((float64)sec));
-    var (debug, _) = strconv.Atoi(r.FormValue("debug"u8));
+    configureWriteDeadline(w, Ꮡr, (float64)sec);
+    var (debug, _) = strconv.Atoi(Ꮡr.FormValue("debug"u8));
     if (debug != 0) {
         serveError(w, http.StatusBadRequest, "seconds and debug params are incompatible"u8);
         return;
     }
-    (p0, err) = collectProfile(Ꮡp);
+    (var p0, err) = collectProfile(Ꮡp);
     if (err != default!) {
         serveError(w, http.StatusInternalServerError, "failed to collect profile"u8);
         return;
     }
     var t = time.NewTimer(((time.Duration)sec) * time.ΔSecond);
     var tʗ1 = t;
-    defer(tʗ1.Stop);
+    defer(() => tʗ1.Stop());
     switch (select(ᐸꟷ(r.Context().Done(), ꓸꓸꓸ), ᐸꟷ((~t).C, ꓸꓸꓸ))) {
     case 0 when r.Context().Done().ꟷᐳ(out _): {
         var errΔ1 = r.Context().Err();
@@ -328,43 +328,44 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
         return;
     }
     case 1 when (~t).C.ꟷᐳ(out _): {
+        break;
     }}
-    (p1, err) = collectProfile(Ꮡp);
+    (var p1, err) = collectProfile(Ꮡp);
     if (err != default!) {
         serveError(w, http.StatusInternalServerError, "failed to collect profile"u8);
         return;
     }
-    var ts = p1.val.TimeNanos;
+    var ts = p1.Value.TimeNanos;
     var dur = (~p1).TimeNanos - (~p0).TimeNanos;
     p0.Scale(-1);
-    (p1, err) = profile.Merge(new profile.Profile[]{p0, p1}.slice());
+    (p1, err) = profile.Merge(new ж<profile.Profile>[]{p0, p1}.slice());
     if (err != default!) {
         serveError(w, http.StatusInternalServerError, "failed to compute delta"u8);
         return;
     }
-    p1.val.TimeNanos = ts;
+    p1.Value.TimeNanos = ts;
     // set since we don't know what profile.Merge set for TimeNanos.
-    p1.val.DurationNanos = dur;
+    p1.Value.DurationNanos = dur;
     w.Header().Set("Content-Type"u8, "application/octet-stream"u8);
     w.Header().Set("Content-Disposition"u8, fmt.Sprintf(@"attachment; filename=""%s-delta"""u8, name));
-    p1.Write(w);
+    p1.Write(new http_ResponseWriterᴠWriter(w));
 });
 
 internal static (ж<profile.Profile>, error) collectProfile(ж<pprof.Profile> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    ref var buf = ref heap(new bytes_package.Buffer(), out var Ꮡbuf);
+    ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
-        var errΔ1 = p.WriteTo(~Ꮡbuf, 0); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡp.WriteTo(new bytes_BufferжWriter(Ꮡbuf), 0); if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
     }
     var ts = time.Now().UnixNano();
-    (p0, err) = profile.Parse(~Ꮡbuf);
+    var (p0, err) = profile.Parse(new bytes_BufferжReader(Ꮡbuf));
     if (err != default!) {
         return (default!, err);
     }
-    p0.val.TimeNanos = ts;
+    p0.Value.TimeNanos = ts;
     return (p0, default!);
 }
 
@@ -401,10 +402,10 @@ internal static map<@string, @string> profileDescriptions = new map<@string, @st
 // Index responds to a request for "/debug/pprof/" with an HTML page
 // listing the available profiles.
 public static void Index(http.ResponseWriter w, ж<http.Request> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     {
-        var (name, found) = strings.CutPrefix(r.URL.Path, "/debug/pprof/"u8); if (found) {
+        var (name, found) = strings.CutPrefix((~r.URL).Path, "/debug/pprof/"u8); if (found) {
             if (name != ""u8) {
                 ((handler)name).ServeHTTP(w, Ꮡr);
                 return;
@@ -430,18 +431,17 @@ public static void Index(http.ResponseWriter w, ж<http.Request> Ꮡr) {
             Desc: profileDescriptions[p]
         ));
     }
-    sort.Slice(profiles, 
     var profilesʗ1 = profiles;
-    (nint i, nint j) => profilesʗ1[i].Name < profilesʗ1[j].Name);
+    sort.Slice(profiles, (nint i, nint j) => profilesʗ1[i].Name < profilesʗ1[j].Name);
     {
-        var err = indexTmplExecute(w, profiles); if (err != default!) {
+        var err = indexTmplExecute(new http_ResponseWriterᴠWriter(w), profiles); if (err != default!) {
             log.Print(err);
         }
     }
 }
 
 internal static error indexTmplExecute(io.Writer w, slice<profileEntry> profiles) {
-    ref var b = ref heap(new bytes_package.Buffer(), out var Ꮡb);
+    ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     b.WriteString("""
 <html>
 <head>
@@ -465,7 +465,7 @@ Types of profiles available:
 """u8);
     foreach (var (_, profile) in profiles) {
         var link = Ꮡ(new url.URL(Path: profile.Href, RawQuery: "debug=1"u8));
-        fmt.Fprintf(~Ꮡb, "<tr><td>%d</td><td><a href='%s'>%s</a></td></tr>\n"u8, profile.Count, link, html.EscapeString(profile.Name));
+        fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "<tr><td>%d</td><td><a href='%s'>%s</a></td></tr>\n"u8, profile.Count, link, html.EscapeString(profile.Name));
     }
     b.WriteString("""
 </table>
@@ -477,7 +477,7 @@ Profile Descriptions:
 
 """u8);
     foreach (var (_, profile) in profiles) {
-        fmt.Fprintf(~Ꮡb, "<li><div class=profile-name>%s: </div> %s</li>\n"u8, html.EscapeString(profile.Name), html.EscapeString(profile.Desc));
+        fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "<li><div class=profile-name>%s: </div> %s</li>\n"u8, html.EscapeString(profile.Name), html.EscapeString(profile.Desc));
     }
     b.WriteString("""
 </ul>

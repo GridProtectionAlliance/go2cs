@@ -47,19 +47,19 @@ internal static readonly UntypedInt realMaxData32 = /* math.MaxInt32 */ 21474836
 }
 
 [GoRecv] internal static nint len(this ref ints a) {
-    return len(a.int32) + len(a.int64);
+    return builtin.len(a.int32) + builtin.len(a.int64);
 }
 
 [GoRecv] internal static int64 get(this ref ints a, nint i) {
     if (a.int32 != default!) {
-        return ((int64)a.int32[i]);
+        return (int64)a.int32[i];
     }
     return a.int64[i];
 }
 
 [GoRecv] internal static void set(this ref ints a, nint i, int64 v) {
     if (a.int32 != default!){
-        a.int32[i] = ((int32)v);
+        a.int32[i] = (int32)v;
     } else {
         a.int64[i] = v;
     }
@@ -76,11 +76,11 @@ internal static readonly UntypedInt realMaxData32 = /* math.MaxInt32 */ 21474836
 // [Index] creation time is O(N) for N = len(data).
 public static ж<Index> New(slice<byte> data) {
     var ix = Ꮡ(new Index(data: data));
-    if (len(data) <= maxData32){
-        (~ix).sa.int32 = new slice<int32>(len(data));
+    if (builtin.len(data) <= maxData32){
+        ix.Value.sa.int32 = new slice<int32>(builtin.len(data));
         text_32(data, (~ix).sa.int32);
     } else {
-        (~ix).sa.int64 = new slice<int64>(len(data));
+        ix.Value.sa.int64 = new slice<int64>(builtin.len(data));
         text_64(data, (~ix).sa.int64);
     }
     return ix;
@@ -88,7 +88,7 @@ public static ж<Index> New(slice<byte> data) {
 
 // writeInt writes an int x to w using buf to buffer the write.
 internal static error writeInt(io.Writer w, slice<byte> buf, nint x) {
-    binary.PutVarint(buf, ((int64)x));
+    binary.PutVarint(buf, (int64)x);
     var (_, err) = w.Write(buf[0..(int)(binary.MaxVarintLen64)]);
     return err;
 }
@@ -110,11 +110,11 @@ internal static (nint n, error err) writeSlice(io.Writer w, slice<byte> buf, int
     // encode as many elements as fit into buf
     nint p = binary.MaxVarintLen64;
     nint m = data.len();
-    for (; n < m && p + binary.MaxVarintLen64 <= len(buf); n++) {
-        p += binary.PutUvarint(buf[(int)(p)..], ((uint64)data.get(n)));
+    for (; n < m && p + (nint)binary.MaxVarintLen64 <= builtin.len(buf); n++) {
+        p += binary.PutUvarint(buf[(int)(p)..], (uint64)data.get(n));
     }
     // update buffer size
-    binary.PutVarint(buf, ((int64)p));
+    binary.PutVarint(buf, (int64)p);
     // write buffer
     (_, err) = w.Write(buf[0..(int)(p)]);
     return (n, err);
@@ -134,11 +134,11 @@ internal static (nint n, error err) readSlice(io.Reader r, slice<byte> buf, ints
     if (err != default!) {
         return (n, err);
     }
-    if (((int64)((nint)size64)) != size64 || ((nint)size64) < 0) {
+    if ((int64)(nint)size64 != size64 || (nint)size64 < 0) {
         // We never write chunks this big anyway.
         return (0, errTooBig);
     }
-    nint size = ((nint)size64);
+    nint size = (nint)size64;
     // read buffer w/o the size
     {
         (_, err) = io.ReadFull(r, buf[(int)(binary.MaxVarintLen64)..(int)(size)]); if (err != default!) {
@@ -148,7 +148,7 @@ internal static (nint n, error err) readSlice(io.Reader r, slice<byte> buf, ints
     // decode as many elements as present in buf
     for (nint p = binary.MaxVarintLen64; p < size; n++) {
         var (x, w) = binary.Uvarint(buf[(int)(p)..]);
-        data.set(n, ((int64)x));
+        data.set(n, (int64)x);
         p += w;
     }
     return (n, err);
@@ -165,10 +165,10 @@ internal static readonly UntypedInt bufSize = /* 16 << 10 */ 16384; // reasonabl
     if (err != default!) {
         return err;
     }
-    if (((int64)((nint)n64)) != n64 || ((nint)n64) < 0) {
+    if ((int64)(nint)n64 != n64 || (nint)n64 < 0) {
         return errTooBig;
     }
-    nint n = ((nint)n64);
+    nint n = (nint)n64;
     // allocate space
     if (2 * n < cap(x.data) || cap(x.data) < n || x.sa.int32 != default! && n > maxData32 || x.sa.int64 != default! && n <= maxData32){
         // new data is significantly smaller or larger than
@@ -210,7 +210,7 @@ internal static readonly UntypedInt bufSize = /* 16 << 10 */ 16384; // reasonabl
     var buf = new slice<byte>(bufSize);
     // write length
     {
-        var err = writeInt(w, buf, len(x.data)); if (err != default!) {
+        var err = writeInt(w, buf, builtin.len(x.data)); if (err != default!) {
             return err;
         }
     }
@@ -244,16 +244,16 @@ internal static readonly UntypedInt bufSize = /* 16 << 10 */ 16384; // reasonabl
 
 // lookupAll returns a slice into the matching region of the index.
 // The runtime is O(log(N)*len(s)).
-[GoRecv] internal static ints lookupAll(this ref Index x, slice<byte> s) {
+internal static ints lookupAll(this ж<Index> Ꮡx, slice<byte> s) {
+    ref var x = ref Ꮡx.Value;
+
     // find matching suffix index range [i:j]
     // find the first index where s would be the prefix
-    nint i = sort.Search(x.sa.len(), 
     var sʗ1 = s;
-    (nint i) => bytes.Compare(x.at(iΔ1), sʗ1) >= 0);
+    nint i = sort.Search(x.sa.len(), (nint iΔ1) => bytes.Compare(Ꮡx.Value.at(iΔ1), sʗ1) >= 0);
     // starting at i, find the first index at which s is not a prefix
-    nint j = i + sort.Search(x.sa.len() - i, 
     var sʗ3 = s;
-    (nint j) => !bytes.HasPrefix(x.at(jΔ1 + i), sʗ3));
+    nint j = i + sort.Search(x.sa.len() - i, (nint jΔ1) => !bytes.HasPrefix(Ꮡx.Value.at(jΔ1 + i), sʗ3));
     return x.sa.Δslice(i, j);
 }
 
@@ -262,11 +262,12 @@ internal static readonly UntypedInt bufSize = /* 16 << 10 */ 16384; // reasonabl
 // The result is nil if s is empty, s is not found, or n == 0.
 // Lookup time is O(log(N)*len(s) + len(result)) where N is the
 // size of the indexed data.
-[GoRecv] public static slice<nint> /*result*/ Lookup(this ref Index x, slice<byte> s, nint n) {
+public static slice<nint> /*result*/ Lookup(this ж<Index> Ꮡx, slice<byte> s, nint n) {
     slice<nint> result = default!;
 
-    if (len(s) > 0 && n != 0) {
-        var matches = x.lookupAll(s);
+    ref var x = ref Ꮡx.Value;
+    if (builtin.len(s) > 0 && n != 0) {
+        var matches = Ꮡx.lookupAll(s);
         nint count = matches.len();
         if (n < 0 || count < n) {
             n = count;
@@ -276,11 +277,11 @@ internal static readonly UntypedInt bufSize = /* 16 << 10 */ 16384; // reasonabl
             result = new slice<nint>(n);
             if (matches.int32 != default!){
                 foreach (var (i, _) in result) {
-                    result[i] = ((nint)matches.int32[i]);
+                    result[i] = (nint)matches.int32[i];
                 }
             } else {
                 foreach (var (i, _) in result) {
-                    result[i] = ((nint)matches.int64[i]);
+                    result[i] = (nint)matches.int64[i];
                 }
             }
         }
@@ -294,17 +295,18 @@ internal static readonly UntypedInt bufSize = /* 16 << 10 */ 16384; // reasonabl
 // in successive order. Otherwise, at most n matches are returned and
 // they may not be successive. The result is nil if there are no matches,
 // or if n == 0.
-[GoRecv] public static slice<slice<nint>> /*result*/ FindAllIndex(this ref Index x, ж<regexp.Regexp> Ꮡr, nint n) {
+public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж<regexp.Regexp> Ꮡr, nint n) {
     slice<slice<nint>> result = default!;
 
-    ref var r = ref Ꮡr.val;
+    ref var x = ref Ꮡx.Value;
+    ref var r = ref Ꮡr.Value;
     // a non-empty literal prefix is used to determine possible
     // match start indices with Lookup
     var (prefix, complete) = r.LiteralPrefix();
     var lit = slice<byte>(prefix);
     // worst-case scenario: no literal prefix
     if (prefix == ""u8) {
-        return r.FindAllIndex(x.data, n);
+        return Ꮡr.FindAllIndex(x.data, n);
     }
     // if regexp is a literal just use Lookup and convert its
     // result into match pairs
@@ -315,15 +317,15 @@ internal static readonly UntypedInt bufSize = /* 16 << 10 */ 16384; // reasonabl
         // increased value n1, but only if Lookup returned all the requested
         // indices in the first place (if it returned fewer than that then
         // there cannot be more).
-        for (nint n1Δ1 = n; ᐧ ;  += 2 * (n - len(result))) {
+        for (nint n1 = n; ᐧ ; n1 += 2 * (n - builtin.len(result))) {
             /* overflow ok */
-            var indices = x.Lookup(lit, n1Δ1);
-            if (len(indices) == 0) {
+            var indices = Ꮡx.Lookup(lit, n1);
+            if (builtin.len(indices) == 0) {
                 return result;
             }
-            slices.Sort(indices);
-            var pairs = new slice<nint>(2 * len(indices));
-            result = new slice<slice<nint>>(len(indices));
+            slices.Sort<slice<nint>, nint>(indices);
+            var pairs = new slice<nint>(2 * builtin.len(indices));
+            result = new slice<slice<nint>>(builtin.len(indices));
             nint count = 0;
             nint prev = 0;
             foreach (var (_, i) in indices) {
@@ -334,20 +336,20 @@ internal static readonly UntypedInt bufSize = /* 16 << 10 */ 16384; // reasonabl
                 if (prev <= i) {
                     nint j = 2 * count;
                     pairs[j + 0] = i;
-                    pairs[j + 1] = i + len(lit);
+                    pairs[j + 1] = i + builtin.len(lit);
                     result[count] = pairs[(int)(j)..(int)(j + 2)];
                     count++;
-                    prev = i + len(lit);
+                    prev = i + builtin.len(lit);
                 }
             }
             result = result[0..(int)(count)];
-            if (len(result) >= n || len(indices) != n1Δ1) {
+            if (builtin.len(result) >= n || builtin.len(indices) != n1) {
                 // found all matches or there's no chance to find more
                 // (n and n1 can be negative)
                 break;
             }
         }
-        if (len(result) == 0) {
+        if (builtin.len(result) == 0) {
             result = default!;
         }
         return result;
@@ -356,23 +358,23 @@ internal static readonly UntypedInt bufSize = /* 16 << 10 */ 16384; // reasonabl
     // the indices of possible complete matches; use these as starting
     // points for anchored searches
     // (regexp "^" matches beginning of input, not beginning of line)
-    r = regexp.MustCompile("^"u8 + r.String());
+    Ꮡr = regexp.MustCompile("^"u8 + r.String()); r = ref Ꮡr.Value;
     // compiles because r compiled
     // same comment about Lookup applies here as in the loop above
-    for (nint n1 = n; ᐧ ; n1 += 2 * (n - len(result))) {
+    for (nint n1 = n; ᐧ ; n1 += 2 * (n - builtin.len(result))) {
         /* overflow ok */
-        var indices = x.Lookup(lit, n1);
-        if (len(indices) == 0) {
+        var indices = Ꮡx.Lookup(lit, n1);
+        if (builtin.len(indices) == 0) {
             return result;
         }
-        slices.Sort(indices);
+        slices.Sort<slice<nint>, nint>(indices);
         result = result[0..0];
         nint prev = 0;
         foreach (var (_, i) in indices) {
-            if (len(result) == n) {
+            if (builtin.len(result) == n) {
                 break;
             }
-            var m = r.FindIndex(x.data[(int)(i)..]);
+            var m = Ꮡr.FindIndex(x.data[(int)(i)..]);
             // anchored search - will not run off
             // ignore indices leading to overlapping matches
             if (m != default! && prev <= i) {
@@ -383,13 +385,13 @@ internal static readonly UntypedInt bufSize = /* 16 << 10 */ 16384; // reasonabl
                 prev = m[1];
             }
         }
-        if (len(result) >= n || len(indices) != n1) {
+        if (builtin.len(result) >= n || builtin.len(indices) != n1) {
             // found all matches or there's no chance to find more
             // (n and n1 can be negative)
             break;
         }
     }
-    if (len(result) == 0) {
+    if (builtin.len(result) == 0) {
         result = default!;
     }
     return result;

@@ -6,7 +6,7 @@
 namespace go;
 
 using errors = errors_package;
-using sync = sync_package;
+using Δsync = sync_package;
 
 partial class io_package {
 
@@ -16,18 +16,22 @@ partial class io_package {
     internal error err;
 }
 
-[GoRecv] internal static void Store(this ref onceError a, error err) => func((defer, _) => {
-    a.Lock();
-    defer(a.Unlock);
+internal static void Store(this ж<onceError> Ꮡa, error err) => func((defer, recover) => {
+    ref var a = ref Ꮡa.Value;
+
+    Ꮡa.of(onceError.ᏑMutex).Lock();
+    defer(Ꮡa.of(onceError.ᏑMutex).Unlock);
     if (a.err != default!) {
         return;
     }
     a.err = err;
 });
 
-[GoRecv] internal static error Load(this ref onceError a) => func((defer, _) => {
-    a.Lock();
-    defer(a.Unlock);
+internal static error Load(this ж<onceError> Ꮡa) => func((defer, recover) => {
+    ref var a = ref Ꮡa.Value;
+
+    Ꮡa.of(onceError.ᏑMutex).Lock();
+    defer(Ꮡa.of(onceError.ᏑMutex).Unlock);
     return a.err;
 });
 
@@ -36,24 +40,26 @@ public static error ErrClosedPipe = errors.New("io: read/write on closed pipe"u8
 
 // A pipe is the shared pipe structure underlying PipeReader and PipeWriter.
 [GoType] partial struct pipe {
-    internal sync_package.Mutex wrMu; // Serializes Write operations
+    internal Δsync.Mutex wrMu; // Serializes Write operations
     internal channel<slice<byte>> wrCh;
     internal channel<nint> rdCh;
-    internal sync_package.Once once; // Protects closing done
+    internal Δsync.Once once; // Protects closing done
     internal channel<EmptyStruct> done;
     internal onceError rerr;
     internal onceError werr;
 }
 
-[GoRecv] internal static (nint n, error err) read(this ref pipe p, slice<byte> b) {
+internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
     nint n = default!;
     error err = default!;
 
+    ref var p = ref Ꮡp.Value;
     switch (ᐧ) {
     case ᐧ when p.done.ꟷᐳ(out _): {
-        return (0, p.readCloseError());
+        return (0, Ꮡp.readCloseError());
     }
     default: {
+        break;
     }}
     switch (select(ᐸꟷ(p.wrCh, ꓸꓸꓸ), ᐸꟷ(p.done, ꓸꓸꓸ))) {
     case 0 when p.wrCh.ꟷᐳ(out var bw): {
@@ -62,65 +68,76 @@ public static error ErrClosedPipe = errors.New("io: read/write on closed pipe"u8
         return (nr, default!);
     }
     case 1 when p.done.ꟷᐳ(out _): {
-        return (0, p.readCloseError());
+        return (0, Ꮡp.readCloseError());
     }}
+    return default!;
 }
 
-[GoRecv] internal static error closeRead(this ref pipe p, error err) {
+internal static error closeRead(this ж<pipe> Ꮡp, error err) {
+    ref var p = ref Ꮡp.Value;
+
     if (err == default!) {
         err = ErrClosedPipe;
     }
-    p.rerr.Store(err);
-    p.once.Do(() => {
-        close(p.done);
+    Ꮡp.of(pipe.Ꮡrerr).Store(err);
+    Ꮡp.of(pipe.Ꮡonce).Do(() => {
+        close(Ꮡp.Value.done);
     });
     return default!;
 }
 
-[GoRecv] internal static (nint n, error err) write(this ref pipe p, slice<byte> b) => func((defer, _) => {
+internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
     nint n = default!;
     error err = default!;
+    func((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
 
-    switch (ᐧ) {
-    case ᐧ when p.done.ꟷᐳ(out _): {
-        return (0, p.writeCloseError());
-    }
-    default: {
-        p.wrMu.Lock();
-        defer(p.wrMu.Unlock);
-        break;
-    }}
-    for (var once = true; once || len(b) > 0; once = false) {
-        switch (select(p.wrCh.ᐸꟷ(b, ꓸꓸꓸ), ᐸꟷ(p.done, ꓸꓸꓸ))) {
-        case 0: {
-            nint nw = ᐸꟷ(p.rdCh);
-            b = b[(int)(nw)..];
-            n += nw;
-            break;
+        switch (ᐧ) {
+        case ᐧ when p.done.ꟷᐳ(out _): {
+            (n, err) = (0, Ꮡp.writeCloseError()); return;
         }
-        case 1 when p.done.ꟷᐳ(out _): {
-            return (n, p.writeCloseError());
+        default: {
+            Ꮡp.of(pipe.ᏑwrMu).Lock();
+            defer(Ꮡp.of(pipe.ᏑwrMu).Unlock);
+            break;
         }}
-    }
-    return (n, default!);
-});
+        for (var once = true; once || len(b) > 0; once = false) {
+            switch (select(p.wrCh.ᐸꟷ(b, ꓸꓸꓸ), ᐸꟷ(p.done, ꓸꓸꓸ))) {
+            case 0: {
+                nint nw = ᐸꟷ(p.rdCh);
+                b = b[(int)(nw)..];
+                n += nw;
+                break;
+            }
+            case 1 when p.done.ꟷᐳ(out _): {
+                (n, err) = (n, Ꮡp.writeCloseError()); return;
+            }}
+        }
+        (n, err) = (n, default!);
+    });
+    return (n, err);
+}
 
-[GoRecv] internal static error closeWrite(this ref pipe p, error err) {
+internal static error closeWrite(this ж<pipe> Ꮡp, error err) {
+    ref var p = ref Ꮡp.Value;
+
     if (err == default!) {
         err = EOF;
     }
-    p.werr.Store(err);
-    p.once.Do(() => {
-        close(p.done);
+    Ꮡp.of(pipe.Ꮡwerr).Store(err);
+    Ꮡp.of(pipe.Ꮡonce).Do(() => {
+        close(Ꮡp.Value.done);
     });
     return default!;
 }
 
 // readCloseError is considered internal to the pipe type.
-[GoRecv] internal static error readCloseError(this ref pipe p) {
-    var rerr = p.rerr.Load();
+internal static error readCloseError(this ж<pipe> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    var rerr = Ꮡp.of(pipe.Ꮡrerr).Load();
     {
-        var werr = p.werr.Load(); if (rerr == default! && werr != default!) {
+        var werr = Ꮡp.of(pipe.Ꮡwerr).Load(); if (rerr == default! && werr != default!) {
             return werr;
         }
     }
@@ -128,10 +145,12 @@ public static error ErrClosedPipe = errors.New("io: read/write on closed pipe"u8
 }
 
 // writeCloseError is considered internal to the pipe type.
-[GoRecv] internal static error writeCloseError(this ref pipe p) {
-    var werr = p.werr.Load();
+internal static error writeCloseError(this ж<pipe> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    var werr = Ꮡp.of(pipe.Ꮡwerr).Load();
     {
-        var rerr = p.rerr.Load(); if (werr == default! && rerr != default!) {
+        var rerr = Ꮡp.of(pipe.Ꮡrerr).Load(); if (werr == default! && rerr != default!) {
             return rerr;
         }
     }
@@ -148,17 +167,20 @@ public static error ErrClosedPipe = errors.New("io: read/write on closed pipe"u8
 // arrives or the write end is closed.
 // If the write end is closed with an error, that error is
 // returned as err; otherwise err is EOF.
-[GoRecv] public static (nint n, error err) Read(this ref PipeReader r, slice<byte> data) {
+public static (nint n, error err) Read(this ж<PipeReader> Ꮡr, slice<byte> data) {
     nint n = default!;
     error err = default!;
 
-    return r.pipe.read(data);
+    ref var r = ref Ꮡr.Value;
+    return Ꮡr.of(PipeReader.Ꮡpipe).read(data);
 }
 
 // Close closes the reader; subsequent writes to the
 // write half of the pipe will return the error [ErrClosedPipe].
-[GoRecv] public static error Close(this ref PipeReader r) {
-    return r.CloseWithError(default!);
+public static error Close(this ж<PipeReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.CloseWithError(default!);
 }
 
 // CloseWithError closes the reader; subsequent writes
@@ -166,8 +188,10 @@ public static error ErrClosedPipe = errors.New("io: read/write on closed pipe"u8
 //
 // CloseWithError never overwrites the previous error if it exists
 // and always returns nil.
-[GoRecv] public static error CloseWithError(this ref PipeReader r, error err) {
-    return r.pipe.closeRead(err);
+public static error CloseWithError(this ж<PipeReader> Ꮡr, error err) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.of(PipeReader.Ꮡpipe).closeRead(err);
 }
 
 // A PipeWriter is the write half of a pipe.
@@ -180,17 +204,20 @@ public static error ErrClosedPipe = errors.New("io: read/write on closed pipe"u8
 // have consumed all the data or the read end is closed.
 // If the read end is closed with an error, that err is
 // returned as err; otherwise err is [ErrClosedPipe].
-[GoRecv] public static (nint n, error err) Write(this ref PipeWriter w, slice<byte> data) {
+public static (nint n, error err) Write(this ж<PipeWriter> Ꮡw, slice<byte> data) {
     nint n = default!;
     error err = default!;
 
-    return w.r.pipe.write(data);
+    ref var w = ref Ꮡw.Value;
+    return Ꮡw.of(PipeWriter.Ꮡr).of(PipeReader.Ꮡpipe).write(data);
 }
 
 // Close closes the writer; subsequent reads from the
 // read half of the pipe will return no bytes and EOF.
-[GoRecv] public static error Close(this ref PipeWriter w) {
-    return w.CloseWithError(default!);
+public static error Close(this ж<PipeWriter> Ꮡw) {
+    ref var w = ref Ꮡw.Value;
+
+    return Ꮡw.CloseWithError(default!);
 }
 
 // CloseWithError closes the writer; subsequent reads from the
@@ -199,8 +226,10 @@ public static error ErrClosedPipe = errors.New("io: read/write on closed pipe"u8
 //
 // CloseWithError never overwrites the previous error if it exists
 // and always returns nil.
-[GoRecv] public static error CloseWithError(this ref PipeWriter w, error err) {
-    return w.r.pipe.closeWrite(err);
+public static error CloseWithError(this ж<PipeWriter> Ꮡw, error err) {
+    ref var w = ref Ꮡw.Value;
+
+    return Ꮡw.of(PipeWriter.Ꮡr).of(PipeReader.Ꮡpipe).closeWrite(err);
 }
 
 // Pipe creates a synchronous in-memory pipe.
@@ -226,7 +255,7 @@ public static (ж<PipeReader>, ж<PipeWriter>) Pipe() {
     )
     )
     ));
-    return (Ꮡ((~pw).r), pw);
+    return (pw.of(PipeWriter.Ꮡr), pw);
 }
 
 } // end io_package

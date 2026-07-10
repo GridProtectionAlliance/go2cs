@@ -102,20 +102,20 @@ public static float64 Log1p(float64 x) {
 }
 
 internal static float64 log1p(float64 x) {
-    static readonly UntypedFloat Sqrt2M1 = /* 4.142135623730950488017e-01 */ 0.414214;      // Sqrt(2)-1 = 0x3fda827999fcef34
-    static readonly UntypedFloat Sqrt2HalfM1 = /* -2.928932188134524755992e-01 */ -0.292893; // Sqrt(2)/2-1 = 0xbfd2bec333018866
-    static readonly UntypedFloat Small = /* 1.0 / (1 << 29) */ 1.86265e-09; // 2**-29 = 0x3e20000000000000
-    static readonly UntypedFloat Tiny = /* 1.0 / (1 << 54) */ 5.55112e-17; // 2**-54
-    static readonly UntypedInt Two53 = /* 1 << 53 */ 9007199254740992; // 2**53
-    static readonly UntypedFloat Ln2Hi = /* 6.93147180369123816490e-01 */ 0.693147;      // 3fe62e42fee00000
-    static readonly UntypedFloat Ln2Lo = /* 1.90821492927058770002e-10 */ 1.90821e-10;   // 3dea39ef35793c76
-    static readonly UntypedFloat Lp1 = /* 6.666666666666735130e-01 */ 0.666667;      // 3FE5555555555593
-    static readonly UntypedFloat Lp2 = /* 3.999999999940941908e-01 */ 0.4;           // 3FD999999997FA04
-    static readonly UntypedFloat Lp3 = /* 2.857142874366239149e-01 */ 0.285714;      // 3FD2492494229359
-    static readonly UntypedFloat Lp4 = /* 2.222219843214978396e-01 */ 0.222222;      // 3FCC71C51D8E78AF
-    static readonly UntypedFloat Lp5 = /* 1.818357216161805012e-01 */ 0.181836;      // 3FC7466496CB03DE
-    static readonly UntypedFloat Lp6 = /* 1.531383769920937332e-01 */ 0.153138;      // 3FC39A09D078C69F
-    static readonly UntypedFloat Lp7 = /* 1.479819860511658591e-01 */ 0.147982;      // 3FC2F112DF3E5244
+    UntypedFloat Sqrt2M1 = /* 4.142135623730950488017e-01 */ 0.414214;      // Sqrt(2)-1 = 0x3fda827999fcef34
+    UntypedFloat Sqrt2HalfM1 = /* -2.928932188134524755992e-01 */ -0.292893; // Sqrt(2)/2-1 = 0xbfd2bec333018866
+    UntypedFloat Small = /* 1.0 / (1 << 29) */ 1.86265e-09; // 2**-29 = 0x3e20000000000000
+    UntypedFloat Tiny = /* 1.0 / (1 << 54) */ 5.55112e-17; // 2**-54
+    UntypedInt Two53 = /* 1 << 53 */ 9007199254740992; // 2**53
+    UntypedFloat Ln2Hi = /* 6.93147180369123816490e-01 */ 0.693147;      // 3fe62e42fee00000
+    UntypedFloat Ln2Lo = /* 1.90821492927058770002e-10 */ 1.90821e-10;   // 3dea39ef35793c76
+    UntypedFloat Lp1 = /* 6.666666666666735130e-01 */ 0.666667;      // 3FE5555555555593
+    UntypedFloat Lp2 = /* 3.999999999940941908e-01 */ 0.4;           // 3FD999999997FA04
+    UntypedFloat Lp3 = /* 2.857142874366239149e-01 */ 0.285714;      // 3FD2492494229359
+    UntypedFloat Lp4 = /* 2.222219843214978396e-01 */ 0.222222;      // 3FCC71C51D8E78AF
+    UntypedFloat Lp5 = /* 1.818357216161805012e-01 */ 0.181836;      // 3FC7466496CB03DE
+    UntypedFloat Lp6 = /* 1.531383769920937332e-01 */ 0.153138;      // 3FC39A09D078C69F
+    UntypedFloat Lp7 = /* 1.479819860511658591e-01 */ 0.147982;      // 3FC2F112DF3E5244
     // special cases
     switch (ᐧ) {
     case {} when x < -1 || IsNaN(x): {
@@ -141,7 +141,7 @@ internal static float64 log1p(float64 x) {
                 // |x| < 2**-54
                 return x;
             }
-            return x - x * x * 0.5F;
+            return x - x * x * 0.5D;
         }
         if (x > Sqrt2HalfM1) {
             // Sqrt(2)/2-1 < x
@@ -156,37 +156,37 @@ internal static float64 log1p(float64 x) {
         float64 u = default!;
         if (absx < Two53){
             // 1<<53
-            u = 1.0F + x;
+            u = 1.0D + x;
             iu = Float64bits(u);
-            k = ((nint)((iu >> (int)(52)) - 1023));
+            k = (nint)(((iu >> (int)(52))) - 1023);
             // correction term
             if (k > 0){
-                c = 1.0F - (u - x);
+                c = 1.0D - (u - x);
             } else {
-                c = x - (u - 1.0F);
+                c = x - (u - 1.0D);
             }
             c /= u;
         } else {
             u = x;
             iu = Float64bits(u);
-            k = ((nint)((iu >> (int)(52)) - 1023));
+            k = (nint)(((iu >> (int)(52))) - 1023);
             c = 0;
         }
-        iu &= (uint64)((nint)4503599627370495L);
-        if (iu < (nint)1865452045155277L){
+        iu &= (uint64)(0x000fffffffffffffUL);
+        if (iu < 0x0006a09e667f3bcdUL){
             // mantissa of Sqrt(2)
-            u = Float64frombits((uint64)(iu | (nint)4607182418800017408L));
+            u = Float64frombits((uint64)(iu | 0x3ff0000000000000UL));
         } else {
             // normalize u
             k++;
-            u = Float64frombits((uint64)(iu | (nint)4602678819172646912L));
+            u = Float64frombits((uint64)(iu | 0x3fe0000000000000UL));
             // normalize u/2
-            iu = ((nint)4503599627370496L - iu) >> (int)(2);
+            iu = ((0x0010000000000000UL - iu) >> (int)(2));
         }
-        f = u - 1.0F;
+        f = u - 1.0D;
     }
     // Sqrt(2)/2 < u < Sqrt(2)
-    var hfsq = 0.5F * f * f;
+    var hfsq = 0.5D * f * f;
     float64 s = default!;
     float64 R = default!;
     float64 z = default!;
@@ -196,23 +196,23 @@ internal static float64 log1p(float64 x) {
             if (k == 0) {
                 return 0;
             }
-            c += ((float64)k) * Ln2Lo;
-            return ((float64)k) * Ln2Hi + c;
+            c += (float64)k * (float64)Ln2Lo;
+            return (float64)k * (float64)Ln2Hi + c;
         }
-        R = hfsq * (1.0F - 0.66666666666666666F * f);
+        R = hfsq * (1.0D - 0.66666666666666666D * f);
         // avoid division
         if (k == 0) {
             return f - R;
         }
-        return ((float64)k) * Ln2Hi - ((R - (((float64)k) * Ln2Lo + c)) - f);
+        return (float64)k * (float64)Ln2Hi - ((R - ((float64)k * (float64)Ln2Lo + c)) - f);
     }
-    s = f / (2.0F + f);
+    s = f / (2.0D + f);
     z = s * s;
-    R = z * (Lp1 + z * (Lp2 + z * (Lp3 + z * (Lp4 + z * (Lp5 + z * (Lp6 + z * Lp7))))));
+    R = z * ((float64)Lp1 + z * ((float64)Lp2 + z * ((float64)Lp3 + z * ((float64)Lp4 + z * ((float64)Lp5 + z * ((float64)Lp6 + z * (float64)Lp7))))));
     if (k == 0) {
         return f - (hfsq - s * (hfsq + R));
     }
-    return ((float64)k) * Ln2Hi - ((hfsq - (s * (hfsq + R) + (((float64)k) * Ln2Lo + c))) - f);
+    return (float64)k * (float64)Ln2Hi - ((hfsq - (s * (hfsq + R) + ((float64)k * (float64)Ln2Lo + c))) - f);
 }
 
 } // end math_package

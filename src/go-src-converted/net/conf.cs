@@ -7,13 +7,13 @@ using errors = errors_package;
 using bytealg = @internal.bytealg_package;
 using godebug = @internal.godebug_package;
 using stringslite = @internal.stringslite_package;
-using fs = io.fs_package;
+using fs = go.io.fs_package;
 using os = os_package;
-using runtime = runtime_package;
-using sync = sync_package;
+using Δruntime = runtime_package;
+using Δsync = sync_package;
 using syscall = syscall_package;
 using @internal;
-using io;
+using go.io;
 
 partial class net_package {
 
@@ -65,22 +65,23 @@ internal static readonly mdnsTest mdnsFromSystem = /* iota */ 0;
 internal static readonly mdnsTest mdnsAssumeExists = 1;
 internal static readonly mdnsTest mdnsAssumeDoesNotExist = 2;
 
-internal static sync.Once confOnce; // guards init of confVal via initConfVal
-internal static ж<conf> confVal = Ꮡ(new conf(goos: runtime.GOOS));
+internal static ж<Δsync.Once> ᏑconfOnce = new(default(Δsync.Once));
+internal static ref Δsync.Once confOnce => ref ᏑconfOnce.Value; // guards init of confVal via initConfVal
+internal static ж<conf> confVal = Ꮡ(new conf(goos: Δruntime.GOOS));
 
 // systemConf returns the machine's network configuration.
 internal static ж<conf> systemConf() {
-    confOnce.Do(initConfVal);
+    ᏑconfOnce.Do(initConfVal);
     return confVal;
 }
 
 // initConfVal initializes confVal based on the environment
 // that will not change during program execution.
-internal static void initConfVal() => func((defer, _) => {
+internal static void initConfVal() => func((defer, recover) => {
     var (dnsMode, debugLevel) = goDebugNetDNS();
-    confVal.val.netGo = netGoBuildTag || dnsMode == "go"u8;
-    confVal.val.netCgo = netCgoBuildTag || dnsMode == "cgo"u8;
-    confVal.val.dnsDebugLevel = debugLevel;
+    confVal.Value.netGo = netGoBuildTag || dnsMode == "go"u8;
+    confVal.Value.netCgo = netCgoBuildTag || dnsMode == "cgo"u8;
+    confVal.Value.dnsDebugLevel = debugLevel;
     if ((~confVal).dnsDebugLevel > 0) {
         defer(() => {
             if ((~confVal).dnsDebugLevel > 1) {
@@ -113,18 +114,18 @@ internal static void initConfVal() => func((defer, _) => {
     // The remainder of this function sets preferCgo based on
     // conditions that will not change during program execution.
     // By default, prefer the go resolver.
-    confVal.val.preferCgo = false;
+    confVal.Value.preferCgo = false;
     // If the cgo resolver is not available, we can't prefer it.
     if (!cgoAvailable) {
         return;
     }
     // Some operating systems always prefer the cgo resolver.
     if (goosPrefersCgo()) {
-        confVal.val.preferCgo = true;
+        confVal.Value.preferCgo = true;
         return;
     }
     // The remaining checks are specific to Unix systems.
-    var exprᴛ1 = runtime.GOOS;
+    var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "plan9"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
         return;
     }
@@ -135,13 +136,13 @@ internal static void initConfVal() => func((defer, _) => {
     // specified with the empty string.
     var (_, localDomainDefined) = syscall.Getenv("LOCALDOMAIN"u8);
     if (localDomainDefined || os.Getenv("RES_OPTIONS"u8) != ""u8 || os.Getenv("HOSTALIASES"u8) != ""u8) {
-        confVal.val.preferCgo = true;
+        confVal.Value.preferCgo = true;
         return;
     }
     // OpenBSD apparently lets you override the location of resolv.conf
     // with ASR_CONFIG. If we notice that, defer to libc.
-    if (runtime.GOOS == "openbsd"u8 && os.Getenv("ASR_CONFIG"u8) != ""u8) {
-        confVal.val.preferCgo = true;
+    if (Δruntime.GOOS == "openbsd"u8 && os.Getenv("ASR_CONFIG"u8) != ""u8) {
+        confVal.Value.preferCgo = true;
         return;
     }
 });
@@ -149,7 +150,7 @@ internal static void initConfVal() => func((defer, _) => {
 // goosPrefersCgo reports whether the GOOS value passed in prefers
 // the cgo resolver.
 internal static bool goosPrefersCgo() {
-    var exprᴛ1 = runtime.GOOS;
+    var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "windows"u8 || exprᴛ1 == "plan9"u8) {
         return true;
     }
@@ -180,12 +181,12 @@ internal static bool goosPrefersCgo() {
 // required to use the go resolver. The provided Resolver is optional.
 // This will report true if the cgo resolver is not available.
 [GoRecv] internal static bool mustUseGoResolver(this ref conf c, ж<Resolver> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.DerefOrNil();
 
     if (!cgoAvailable) {
         return true;
     }
-    if (runtime.GOOS == "plan9"u8) {
+    if (Δruntime.GOOS == "plan9"u8) {
         // TODO(bradfitz): for now we only permit use of the PreferGo
         // implementation when there's a non-nil Resolver with a
         // non-nil Dialer. This is a sign that the code is trying
@@ -193,50 +194,58 @@ internal static bool goosPrefersCgo() {
         // DNS cache) and they don't want to actually hit the network.
         // Once we add support for looking the default DNS servers
         // from plan9, though, then we can relax this.
-        if (r == nil || r.Dial == default!) {
+        if (Ꮡr == nil || r.Dial == default!) {
             return false;
         }
     }
-    return c.netGo || r.preferGo();
+    return c.netGo || Ꮡr.preferGo();
 }
 
 // addrLookupOrder determines which strategy to use to resolve addresses.
 // The provided Resolver is optional. nil means to not consider its options.
 // It also returns dnsConfig when it was used to determine the lookup order.
-[GoRecv] internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder(this ref conf c, ж<Resolver> Ꮡr, @string addr) => func((defer, _) => {
+internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder(this ж<conf> Ꮡc, ж<Resolver> Ꮡr, @string addr) {
     ΔhostLookupOrder ret = default!;
     ж<dnsConfig> dnsConf = default!;
+    func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+    ref var r = ref Ꮡr.Value;
 
-    ref var r = ref Ꮡr.val;
-    if (c.dnsDebugLevel > 1) {
-        defer(() => {
-            print("go package net: addrLookupOrder(", addr, ") = ", ret.String(), "\n");
-        });
-    }
-    return c.lookupOrder(Ꮡr, ""u8);
-});
+        if (c.dnsDebugLevel > 1) {
+            defer(() => {
+                print("go package net: addrLookupOrder(", addr, ") = ", ret.String(), "\n");
+            });
+        }
+        (ret, dnsConf) = c.lookupOrder(Ꮡr, ""u8);
+    });
+    return (ret, dnsConf);
+}
 
 // hostLookupOrder determines which strategy to use to resolve hostname.
 // The provided Resolver is optional. nil means to not consider its options.
 // It also returns dnsConfig when it was used to determine the lookup order.
-[GoRecv] internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder(this ref conf c, ж<Resolver> Ꮡr, @string hostname) => func((defer, _) => {
+internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder(this ж<conf> Ꮡc, ж<Resolver> Ꮡr, @string hostname) {
     ΔhostLookupOrder ret = default!;
     ж<dnsConfig> dnsConf = default!;
+    func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+    ref var r = ref Ꮡr.Value;
 
-    ref var r = ref Ꮡr.val;
-    if (c.dnsDebugLevel > 1) {
-        defer(() => {
-            print("go package net: hostLookupOrder(", hostname, ") = ", ret.String(), "\n");
-        });
-    }
-    return c.lookupOrder(Ꮡr, hostname);
-});
+        if (c.dnsDebugLevel > 1) {
+            defer(() => {
+                print("go package net: hostLookupOrder(", hostname, ") = ", ret.String(), "\n");
+            });
+        }
+        (ret, dnsConf) = c.lookupOrder(Ꮡr, hostname);
+    });
+    return (ret, dnsConf);
+}
 
 [GoRecv] internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this ref conf c, ж<Resolver> Ꮡr, @string hostname) {
     ΔhostLookupOrder ret = default!;
     ж<dnsConfig> dnsConf = default!;
 
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
     // fallbackOrder is the order we return if we can't figure it out.
     ΔhostLookupOrder fallbackOrder = default!;
     bool canUseCgo = default!;
@@ -296,7 +305,7 @@ internal static bool goosPrefersCgo() {
         if (errors.Is((~dnsConf).err, fs.ErrNotExist)) {
             return (hostLookupFiles, dnsConf);
         }
-        var lookup = dnsConf.val.lookup;
+        var lookup = dnsConf.Value.lookup;
         if (len(lookup) == 0) {
             // https://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man5/resolv.conf.5
             // "If the lookup keyword is not used in the
@@ -409,7 +418,7 @@ internal static bool goosPrefersCgo() {
                 bool haveMDNSAllow = default!;
                 var exprᴛ3 = c.mdnsTest;
                 if (exprᴛ3 == mdnsFromSystem) {
-                    (_, err) = os.Stat("/etc/mdns.allow"u8);
+                    var (_, err) = os.Stat("/etc/mdns.allow"u8);
                     if (err != default! && !errors.Is(err, fs.ErrNotExist)) {
                         // Let libc figure out what is going on.
                         return (hostLookupCgo, dnsConf);
@@ -497,7 +506,7 @@ internal static (@string dnsMode, nint debugLevel) goDebugNetDNS() {
     @string goDebug = netdns.Value();
     var parsePart = (@string s) => {
         if (s == ""u8) {
-            return (dnsMode, debugLevel);
+            return;
         }
         if ((rune)'0' <= s[0] && s[0] <= (rune)'9'){
             (debugLevel, _, _) = dtoi(s);

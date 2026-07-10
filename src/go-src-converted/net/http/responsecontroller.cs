@@ -54,16 +54,16 @@ public static ж<ResponseController> NewResponseController(ResponseWriter rw) {
         case {} Δt when Δt._<Flush_type>(out var t): {
             return t.FlushError();
         }
-        case Flusher t: {
+        case {} Δt when Δt._<Flusher>(out var t): {
             t.Flush();
             return default!;
         }
-        case rwUnwrapper t: {
+        case {} Δt when Δt._<rwUnwrapper>(out var t): {
             rw = t.Unwrap();
             break;
         }
         default: {
-            var t = rw.type();
+            var t = rw;
             return errNotSupported();
         }}
     }
@@ -75,15 +75,15 @@ public static ж<ResponseController> NewResponseController(ResponseWriter rw) {
     var rw = c.rw;
     while (ᐧ) {
         switch (rw.type()) {
-        case Hijacker t: {
+        case {} Δt when Δt._<Hijacker>(out var t): {
             return t.Hijack();
         }
-        case rwUnwrapper t: {
+        case {} Δt when Δt._<rwUnwrapper>(out var t): {
             rw = t.Unwrap();
             break;
         }
         default: {
-            var t = rw.type();
+            var t = rw;
             return (default!, default!, errNotSupported());
         }}
     }
@@ -105,12 +105,12 @@ public static ж<ResponseController> NewResponseController(ResponseWriter rw) {
         case {} Δt when Δt._<SetReadDeadline_type>(out var t): {
             return t.SetReadDeadline(deadline);
         }
-        case rwUnwrapper t: {
+        case {} Δt when Δt._<rwUnwrapper>(out var t): {
             rw = t.Unwrap();
             break;
         }
         default: {
-            var t = rw.type();
+            var t = rw;
             return errNotSupported();
         }}
     }
@@ -133,12 +133,12 @@ public static ж<ResponseController> NewResponseController(ResponseWriter rw) {
         case {} Δt when Δt._<SetWriteDeadline_type>(out var t): {
             return t.SetWriteDeadline(deadline);
         }
-        case rwUnwrapper t: {
+        case {} Δt when Δt._<rwUnwrapper>(out var t): {
             rw = t.Unwrap();
             break;
         }
         default: {
-            var t = rw.type();
+            var t = rw;
             return errNotSupported();
         }}
     }
@@ -165,12 +165,12 @@ public static ж<ResponseController> NewResponseController(ResponseWriter rw) {
         case {} Δt when Δt._<EnableFullDuplex_type>(out var t): {
             return t.EnableFullDuplex();
         }
-        case rwUnwrapper t: {
+        case {} Δt when Δt._<rwUnwrapper>(out var t): {
             rw = t.Unwrap();
             break;
         }
         default: {
-            var t = rw.type();
+            var t = rw;
             return errNotSupported();
         }}
     }

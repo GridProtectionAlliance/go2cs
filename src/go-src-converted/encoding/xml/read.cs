@@ -11,6 +11,7 @@ using reflect = reflect_package;
 using runtime = runtime_package;
 using strconv = strconv_package;
 using strings = strings_package;
+using io = io_package;
 
 partial class xml_package {
 
@@ -130,21 +131,24 @@ partial class xml_package {
 // If the field is a slice, a zero value will be appended to the field. Otherwise, the
 // field will be set to its zero value.
 public static error Unmarshal(slice<byte> data, any v) {
-    return NewDecoder(~bytes.NewReader(data)).Decode(v);
+    return NewDecoder(new bytes_ReaderжReader(bytes.NewReader(data))).Decode(v);
 }
 
 // Decode works like [Unmarshal], except it reads the decoder
 // stream to find the start element.
-[GoRecv] public static error Decode(this ref Decoder d, any v) {
-    return d.DecodeElement(v, nil);
+public static error Decode(this ж<Decoder> Ꮡd, any v) {
+    ref var d = ref Ꮡd.Value;
+
+    return Ꮡd.DecodeElement(v, nil);
 }
 
 // DecodeElement works like [Unmarshal] except that it takes
 // a pointer to the start XML element to decode into v.
 // It is useful when a client reads some raw XML tokens itself
 // but also wants to defer to [Unmarshal] for some elements.
-[GoRecv] public static error DecodeElement(this ref Decoder d, any v, ж<StartElement> Ꮡstart) {
-    ref var start = ref Ꮡstart.val;
+public static error DecodeElement(this ж<Decoder> Ꮡd, any v, ж<StartElement> Ꮡstart) {
+    ref var d = ref Ꮡd.Value;
+    ref var start = ref Ꮡstart.Value;
 
     var val = reflect.ValueOf(v);
     if (val.Kind() != reflect.ΔPointer) {
@@ -153,7 +157,7 @@ public static error Unmarshal(slice<byte> data, any v) {
     if (val.IsNil()) {
         return errors.New("nil pointer passed to Unmarshal"u8);
     }
-    return d.unmarshal(val.Elem(), Ꮡstart, 0);
+    return Ꮡd.unmarshal(val.Elem(), Ꮡstart, 0);
 }
 
 [GoType("@string")] partial struct UnmarshalError;
@@ -204,13 +208,14 @@ internal static @string receiverType(any val) {
 
 // unmarshalInterface unmarshals a single XML element into val.
 // start is the opening tag of the element.
-[GoRecv] public static error unmarshalInterface(this ref Decoder d, Unmarshaler val, ж<StartElement> Ꮡstart) {
-    ref var start = ref Ꮡstart.val;
+internal static error unmarshalInterface(this ж<Decoder> Ꮡd, Unmarshaler val, ж<StartElement> Ꮡstart) {
+    ref var d = ref Ꮡd.Value;
+    ref var start = ref Ꮡstart.Value;
 
     // Record that decoder must stop at end tag corresponding to start.
     d.pushEOF();
     d.unmarshalDepth++;
-    var err = val.UnmarshalXML(d, start);
+    var err = val.UnmarshalXML(Ꮡd, start);
     d.unmarshalDepth--;
     if (err != default!) {
         d.popEOF();
@@ -229,22 +234,22 @@ internal static @string receiverType(any val) {
     slice<byte> buf = default!;
     nint depth = 1;
     while (depth > 0) {
-        (t, err) = d.Token();
+        var (t, err) = d.Token();
         if (err != default!) {
             return err;
         }
         switch (t.type()) {
-        case CharData t: {
+        case CharData tΔ1: {
             if (depth == 1) {
-                buf = append(buf, t.ꓸꓸꓸ);
+                buf = append(buf, tΔ1.ꓸꓸꓸ);
             }
             break;
         }
-        case StartElement t: {
+        case StartElement tΔ1: {
             depth++;
             break;
         }
-        case EndElement t: {
+        case EndElement tΔ1: {
             depth--;
             break;
         }}
@@ -308,7 +313,7 @@ internal static @string receiverType(any val) {
 internal static reflectꓸType attrType = reflect.TypeFor<Attr>();
 internal static reflectꓸType unmarshalerType = reflect.TypeFor<Unmarshaler>();
 internal static reflectꓸType unmarshalerAttrType = reflect.TypeFor<UnmarshalerAttr>();
-internal static reflectꓸType textUnmarshalerType = reflect.TypeFor[encoding.TextUnmarshaler]();
+internal static reflectꓸType textUnmarshalerType = reflect.TypeFor<encoding.TextUnmarshaler>();
 
 internal static readonly UntypedInt maxUnmarshalDepth = 10000;
 internal static readonly UntypedInt maxUnmarshalDepthWasm = 5000; // go.dev/issue/56498
@@ -316,22 +321,24 @@ internal static readonly UntypedInt maxUnmarshalDepthWasm = 5000; // go.dev/issu
 internal static error errUnmarshalDepth = errors.New("exceeded max depth"u8);
 
 // Unmarshal a single XML element into val.
-[GoRecv] public static error unmarshal(this ref Decoder d, reflectꓸValue val, ж<StartElement> Ꮡstart, nint depth) {
-    ref var start = ref Ꮡstart.val;
+internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<StartElement> Ꮡstart, nint depth) {
+    ref var d = ref Ꮡd.Value;
+    ref var start = ref Ꮡstart.DerefOrNil();
 
     if (depth >= maxUnmarshalDepth || runtime.GOARCH == "wasm"u8 && depth >= maxUnmarshalDepthWasm) {
         return errUnmarshalDepth;
     }
     // Find start element if we need it.
-    if (start == nil) {
+    if (Ꮡstart == nil) {
         while (ᐧ) {
-            (tok, errΔ1) = d.Token();
+            var (tok, errΔ1) = d.Token();
             if (errΔ1 != default!) {
                 return errΔ1;
             }
             {
-                var (t, ok) = tok._<StartElement>(ᐧ); if (ok) {
-                    Ꮡstart = Ꮡt; start = ref Ꮡstart.val;
+                ref var t = ref heap<StartElement>(out var Ꮡt);
+                (t, var ok) = tok._<StartElement>(ᐧ); if (ok) {
+                    Ꮡstart = Ꮡt; start = ref Ꮡstart.DerefOrNil();
                     break;
                 }
             }
@@ -354,12 +361,12 @@ internal static error errUnmarshalDepth = errors.New("exceeded max depth"u8);
     if (val.CanInterface() && val.Type().Implements(unmarshalerType)) {
         // This is an unmarshaler with a non-pointer receiver,
         // so it's likely to be incorrect, but we do what we're told.
-        return d.unmarshalInterface(val.Interface()._<Unmarshaler>(), Ꮡstart);
+        return Ꮡd.unmarshalInterface(val.Interface()._<Unmarshaler>(), Ꮡstart);
     }
     if (val.CanAddr()) {
         var pv = val.Addr();
         if (pv.CanInterface() && pv.Type().Implements(unmarshalerType)) {
-            return d.unmarshalInterface(pv.Interface()._<Unmarshaler>(), Ꮡstart);
+            return Ꮡd.unmarshalInterface(pv.Interface()._<Unmarshaler>(), Ꮡstart);
         }
     }
     if (val.CanInterface() && val.Type().Implements(textUnmarshalerType)) {
@@ -372,152 +379,156 @@ internal static error errUnmarshalDepth = errors.New("exceeded max depth"u8);
         }
     }
     slice<byte> data = default!;
-    reflectꓸValue saveData = default!;
+    reflectꓸValue saveData = new(nil);
     slice<byte> comment = default!;
-    reflectꓸValue saveComment = default!;
-    reflectꓸValue saveXML = default!;
+    reflectꓸValue saveComment = new(nil);
+    reflectꓸValue saveXML = new(nil);
     nint saveXMLIndex = default!;
     slice<byte> saveXMLData = default!;
-    reflectꓸValue saveAny = default!;
-    reflectꓸValue sv = default!;
+    reflectꓸValue saveAny = new(nil);
+    reflectꓸValue sv = new(nil);
     ж<typeInfo> tinfo = default!;
     error err = default!;
     {
         var v = val;
         var exprᴛ1 = v.Kind();
-        { /* default: */
-            return errors.New("unknown type "u8 + v.Type().String());
-        }
         if (exprᴛ1 == reflect.ΔInterface) {
             return d.Skip();
         }
         if (exprᴛ1 == reflect.ΔSlice) {
-            var typ = v.Type();
-            if (typ.Elem().Kind() == reflect.Uint8) {
-                // TODO: For now, simply ignore the field. In the near
-                //       future we may choose to unmarshal the start
-                //       element on it, if not nil.
-                // []byte
-                saveData = v;
-                break;
-            }
-            nint n = v.Len();
-            v.Grow(1);
-            v.SetLen(n + 1);
-            {
-                var errΔ6 = d.unmarshal(v.Index(n), // Slice of element values.
+            do {
+                var typ = v.Type();
+                if (typ.Elem().Kind() == reflect.Uint8) {
+                    // TODO: For now, simply ignore the field. In the near
+                    //       future we may choose to unmarshal the start
+                    //       element on it, if not nil.
+                    // []byte
+                    saveData = v;
+                    break;
+                }
+                nint n = v.Len();
+                v.Grow(1);
+                v.SetLen(n + 1);
+                {
+                    var errΔ6 = Ꮡd.unmarshal(v.Index(n), // Slice of element values.
  // Grow slice.
  // Recur to read element into slice.
  Ꮡstart, depth + 1); if (errΔ6 != default!) {
-                    v.SetLen(n);
-                    return errΔ6;
+                        v.SetLen(n);
+                        return errΔ6;
+                    }
                 }
-            }
-            return default!;
+                return default!;
+            } while (false);
         }
         if (exprᴛ1 == reflect.ΔBool || exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64 || exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64 || exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr || exprᴛ1 == reflect.ΔString) {
             saveData = v;
         }
         else if (exprᴛ1 == reflect.Struct) {
-            var typ = v.Type();
-            if (AreEqual(typ, nameType)) {
-                v.Set(reflect.ValueOf(start.Name));
-                break;
-            }
-            sv = v;
-            (tinfo, err) = getTypeInfo(typ);
-            if (err != default!) {
-                return err;
-            }
-            if ((~tinfo).xmlname != nil) {
-                // Validate and assign element name.
-                var finfo = tinfo.val.xmlname;
-                if ((~finfo).name != ""u8 && (~finfo).name != start.Name.Local) {
-                    return ((UnmarshalError)("expected element type <"u8 + (~finfo).name + "> but have <"u8 + start.Name.Local + ">"u8));
+            do {
+                var typ = v.Type();
+                if (AreEqual(typ, nameType)) {
+                    v.Set(reflect.ValueOf(start.Name));
+                    break;
                 }
-                if ((~finfo).xmlns != ""u8 && (~finfo).xmlns != start.Name.Space) {
-                    @string e = "expected element <"u8 + (~finfo).name + "> in name space "u8 + (~finfo).xmlns + " but have "u8;
-                    if (start.Name.Space == ""u8){
-                        e += "no name space"u8;
-                    } else {
-                        e += start.Name.Space;
-                    }
-                    return ((UnmarshalError)e);
+                sv = v;
+                (tinfo, err) = getTypeInfo(typ);
+                if (err != default!) {
+                    return err;
                 }
-                var fv = finfo.value(sv, initNilPointers);
-                {
-                    var (_, ok) = fv.Interface()._<Name>(ᐧ); if (ok) {
-                        fv.Set(reflect.ValueOf(start.Name));
+                if ((~tinfo).xmlname != nil) {
+                    // Validate and assign element name.
+                    var finfo = tinfo.Value.xmlname;
+                    if ((~finfo).name != ""u8 && (~finfo).name != start.Name.Local) {
+                        return ((UnmarshalError)("expected element type <"u8 + (~finfo).name + "> but have <"u8 + start.Name.Local + ">"u8));
                     }
-                }
-            }
-            foreach (var (_, a) in start.Attr) {
-                // Assign attributes.
-                var handled = false;
-                nint any = -1;
-                foreach (var (i, _) in (~tinfo).fields) {
-                    var finfo = Ꮡ((~tinfo).fields, i);
-                    var exprᴛ2 = (fieldFlags)((~finfo).flags & fMode);
-                    if (exprᴛ2 == fAttr) {
-                        var strv = finfo.value(sv, initNilPointers);
-                        if (a.Name.Local == (~finfo).name && ((~finfo).xmlns == ""u8 || (~finfo).xmlns == a.Name.Space)) {
-                            {
-                                var errΔ8 = d.unmarshalAttr(strv, a); if (errΔ8 != default!) {
-                                    return errΔ8;
-                                }
-                            }
-                            handled = true;
-                        }
-                    }
-                    else if (exprᴛ2 == (fieldFlags)(fAny | fAttr)) {
-                        if (any == -1) {
-                            any = i;
-                        }
-                    }
-
-                }
-                if (!handled && any >= 0) {
-                    var finfo = Ꮡ((~tinfo).fields, any);
-                    var strv = finfo.value(sv, initNilPointers);
-                    {
-                        var errΔ9 = d.unmarshalAttr(strv, a); if (errΔ9 != default!) {
-                            return errΔ9;
-                        }
-                    }
-                }
-            }
-            foreach (var (i, _) in (~tinfo).fields) {
-                // Determine whether we need to save character data or comments.
-                var finfo = Ꮡ((~tinfo).fields, i);
-                var exprᴛ3 = (fieldFlags)((~finfo).flags & fMode);
-                if (exprᴛ3 == fCDATA || exprᴛ3 == fCharData) {
-                    if (!saveData.IsValid()) {
-                        saveData = finfo.value(sv, initNilPointers);
-                    }
-                }
-                else if (exprᴛ3 == fComment) {
-                    if (!saveComment.IsValid()) {
-                        saveComment = finfo.value(sv, initNilPointers);
-                    }
-                }
-                else if (exprᴛ3 == fAny || exprᴛ3 == (fieldFlags)(fAny | fElement)) {
-                    if (!saveAny.IsValid()) {
-                        saveAny = finfo.value(sv, initNilPointers);
-                    }
-                }
-                else if (exprᴛ3 == fInnerXML) {
-                    if (!saveXML.IsValid()) {
-                        saveXML = finfo.value(sv, initNilPointers);
-                        if (d.saved == nil){
-                            saveXMLIndex = 0;
-                            d.saved = @new<bytes.Buffer>();
+                    if ((~finfo).xmlns != ""u8 && (~finfo).xmlns != start.Name.Space) {
+                        @string e = "expected element <"u8 + (~finfo).name + "> in name space "u8 + (~finfo).xmlns + " but have "u8;
+                        if (start.Name.Space == ""u8){
+                            e += "no name space"u8;
                         } else {
-                            saveXMLIndex = d.savedOffset();
+                            e += start.Name.Space;
+                        }
+                        return ((UnmarshalError)e);
+                    }
+                    var fv = finfo.value(sv, initNilPointers);
+                    {
+                        var (_, ok) = fv.Interface()._<Name>(ᐧ); if (ok) {
+                            fv.Set(reflect.ValueOf(start.Name));
                         }
                     }
                 }
+                foreach (var (_, a) in start.Attr) {
+                    // Assign attributes.
+                    var handled = false;
+                    nint any = -1;
+                    foreach (var (i, _) in (~tinfo).fields) {
+                        var finfo = Ꮡ((~tinfo).fields, i);
+                        var exprᴛ2 = (fieldFlags)((~finfo).flags & fMode);
+                        if (exprᴛ2 == fAttr) {
+                            var strv = finfo.value(sv, initNilPointers);
+                            if (a.Name.Local == (~finfo).name && ((~finfo).xmlns == ""u8 || (~finfo).xmlns == a.Name.Space)) {
+                                {
+                                    var errΔ8 = d.unmarshalAttr(strv, a); if (errΔ8 != default!) {
+                                        return errΔ8;
+                                    }
+                                }
+                                handled = true;
+                            }
+                        }
+                        else if (exprᴛ2 == (fieldFlags)((fieldFlags)(fAny | fAttr))) {
+                            if (any == -1) {
+                                any = i;
+                            }
+                        }
 
-            }
+                    }
+                    if (!handled && any >= 0) {
+                        var finfo = Ꮡ((~tinfo).fields, any);
+                        var strv = finfo.value(sv, initNilPointers);
+                        {
+                            var errΔ9 = d.unmarshalAttr(strv, a); if (errΔ9 != default!) {
+                                return errΔ9;
+                            }
+                        }
+                    }
+                }
+                foreach (var (i, _) in (~tinfo).fields) {
+                    // Determine whether we need to save character data or comments.
+                    var finfo = Ꮡ((~tinfo).fields, i);
+                    var exprᴛ3 = (fieldFlags)((~finfo).flags & fMode);
+                    if (exprᴛ3 == fCDATA || exprᴛ3 == fCharData) {
+                        if (!saveData.IsValid()) {
+                            saveData = finfo.value(sv, initNilPointers);
+                        }
+                    }
+                    else if (exprᴛ3 == fComment) {
+                        if (!saveComment.IsValid()) {
+                            saveComment = finfo.value(sv, initNilPointers);
+                        }
+                    }
+                    else if (exprᴛ3 == fAny || exprᴛ3 == (fieldFlags)((fieldFlags)(fAny | fElement))) {
+                        if (!saveAny.IsValid()) {
+                            saveAny = finfo.value(sv, initNilPointers);
+                        }
+                    }
+                    else if (exprᴛ3 == fInnerXML) {
+                        if (!saveXML.IsValid()) {
+                            saveXML = finfo.value(sv, initNilPointers);
+                            if (d.saved == nil){
+                                saveXMLIndex = 0;
+                                d.saved = @new<bytes.Buffer>();
+                            } else {
+                                saveXMLIndex = d.savedOffset();
+                            }
+                        }
+                    }
+
+                }
+            } while (false);
+        }
+        else { /* default: */
+            return errors.New("unknown type "u8 + v.Type().String());
         }
     }
 
@@ -529,9 +540,9 @@ Loop:
         if (saveXML.IsValid()) {
             savedOffset = d.savedOffset();
         }
-        (tok, err) = d.Token();
-        if (err != default!) {
-            return err;
+        var (tok, errΔ10) = d.Token();
+        if (errΔ10 != default!) {
+            return errΔ10;
         }
         switch (tok.type()) {
         case StartElement t: {
@@ -539,23 +550,23 @@ Loop:
             if (sv.IsValid()) {
                 // unmarshalPath can call unmarshal, so we need to pass the depth through so that
                 // we can continue to enforce the maximum recursion limit.
-                (consumed, err) = d.unmarshalPath(tinfo, sv, default!, Ꮡ(t), depth);
-                if (err != default!) {
-                    return err;
+                (consumed, errΔ10) = Ꮡd.unmarshalPath(tinfo, sv, default!, Ꮡ(t), depth);
+                if (errΔ10 != default!) {
+                    return errΔ10;
                 }
                 if (!consumed && saveAny.IsValid()) {
                     consumed = true;
                     {
-                        var errΔ10 = d.unmarshal(saveAny, Ꮡ(t), depth + 1); if (errΔ10 != default!) {
-                            return errΔ10;
+                        var errΔ11 = Ꮡd.unmarshal(saveAny, Ꮡ(t), depth + 1); if (errΔ11 != default!) {
+                            return errΔ11;
                         }
                     }
                 }
             }
             if (!consumed) {
                 {
-                    var errΔ11 = d.Skip(); if (errΔ11 != default!) {
-                        return errΔ11;
+                    var errΔ12 = d.Skip(); if (errΔ12 != default!) {
+                        return errΔ12;
                     }
                 }
             }
@@ -588,8 +599,8 @@ continue_Loop:;
 break_Loop:;
     if (saveData.IsValid() && saveData.CanInterface() && saveData.Type().Implements(textUnmarshalerType)) {
         {
-            var errΔ12 = saveData.Interface()._<encoding.TextUnmarshaler>().UnmarshalText(data); if (errΔ12 != default!) {
-                return errΔ12;
+            var errΔ13 = saveData.Interface()._<encoding.TextUnmarshaler>().UnmarshalText(data); if (errΔ13 != default!) {
+                return errΔ13;
             }
         }
         saveData = new reflectꓸValue(nil);
@@ -598,16 +609,16 @@ break_Loop:;
         var pv = saveData.Addr();
         if (pv.CanInterface() && pv.Type().Implements(textUnmarshalerType)) {
             {
-                var errΔ13 = pv.Interface()._<encoding.TextUnmarshaler>().UnmarshalText(data); if (errΔ13 != default!) {
-                    return errΔ13;
+                var errΔ14 = pv.Interface()._<encoding.TextUnmarshaler>().UnmarshalText(data); if (errΔ14 != default!) {
+                    return errΔ14;
                 }
             }
             saveData = new reflectꓸValue(nil);
         }
     }
     {
-        var errΔ14 = copyValue(saveData, data); if (errΔ14 != default!) {
-            return errΔ14;
+        var errΔ15 = copyValue(saveData, data); if (errΔ15 != default!) {
+            return errΔ15;
         }
     }
     {
@@ -651,10 +662,7 @@ internal static error /*err*/ copyValue(reflectꓸValue dst, slice<byte> src) {
     var exprᴛ1 = dst.Kind();
     if (exprᴛ1 == reflect.Invalid) {
     }
-    else { /* default: */
-        return errors.New("cannot unmarshal into "u8 + dst0.Type().String());
-    }
-    if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
+    else if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
         if (len(src) == 0) {
             // Probably a comment.
             dst.SetInt(0);
@@ -709,6 +717,9 @@ internal static error /*err*/ copyValue(reflectꓸValue dst, slice<byte> src) {
         }
         dst.SetBytes(src);
     }
+    else { /* default: */
+        return errors.New("cannot unmarshal into "u8 + dst0.Type().String());
+    }
 
     return default!;
 }
@@ -718,12 +729,13 @@ internal static error /*err*/ copyValue(reflectꓸValue dst, slice<byte> src) {
 // The consumed result tells whether XML elements have been consumed
 // from the Decoder until start's matching end element, or if it's
 // still untouched because start is uninteresting for sv's fields.
-[GoRecv] public static (bool consumed, error err) unmarshalPath(this ref Decoder d, ж<typeInfo> Ꮡtinfo, reflectꓸValue sv, slice<@string> parents, ж<StartElement> Ꮡstart, nint depth) {
+internal static (bool consumed, error err) unmarshalPath(this ж<Decoder> Ꮡd, ж<typeInfo> Ꮡtinfo, reflectꓸValue sv, slice<@string> parents, ж<StartElement> Ꮡstart, nint depth) {
     bool consumed = default!;
     error err = default!;
 
-    ref var tinfo = ref Ꮡtinfo.val;
-    ref var start = ref Ꮡstart.val;
+    ref var d = ref Ꮡd.Value;
+    ref var tinfo = ref Ꮡtinfo.Value;
+    ref var start = ref Ꮡstart.Value;
     var recurse = false;
 Loop:
     foreach (var (i, _) in tinfo.fields) {
@@ -738,7 +750,7 @@ Loop:
         }
         if (len((~finfo).parents) == len(parents) && (~finfo).name == start.Name.Local) {
             // It's a perfect match, unmarshal the field.
-            return (true, d.unmarshal(finfo.value(sv, initNilPointers), Ꮡstart, depth + 1));
+            return (true, Ꮡd.unmarshal(finfo.value(sv, initNilPointers), Ꮡstart, depth + 1));
         }
         if (len((~finfo).parents) > len(parents) && (~finfo).parents[len(parents)] == start.Name.Local) {
             // It's a prefix for the field. Break and recurse
@@ -750,7 +762,9 @@ Loop:
             parents = (~finfo).parents[..(int)(len(parents) + 1)];
             break;
         }
+continue_Loop:;
     }
+break_Loop:;
     if (!recurse) {
         // We have no business with this element.
         return (false, default!);
@@ -766,7 +780,7 @@ Loop:
         }
         switch (tok.type()) {
         case StartElement t: {
-            var (consumed2, errΔ1) = d.unmarshalPath(Ꮡtinfo, // the recursion depth of unmarshalPath is limited to the path length specified
+            var (consumed2, errΔ1) = Ꮡd.unmarshalPath(Ꮡtinfo, // the recursion depth of unmarshalPath is limited to the path length specified
  // by the struct field tag, so we don't increment the depth here.
  sv, parents, Ꮡ(t), depth);
             if (errΔ1 != default!) {
@@ -795,16 +809,16 @@ Loop:
 [GoRecv] public static error Skip(this ref Decoder d) {
     int64 depth = default!;
     while (ᐧ) {
-        (tok, err) = d.Token();
+        var (tok, err) = d.Token();
         if (err != default!) {
             return err;
         }
         switch (tok.type()) {
-        case StartElement : {
+        case StartElement: {
             depth++;
             break;
         }
-        case EndElement : {
+        case EndElement: {
             if (depth == 0) {
                 return default!;
             }

@@ -14,20 +14,23 @@ using bytes = bytes_package;
 using errors = errors_package;
 using flag = flag_package;
 using fmt = fmt_package;
-using cfg = @internal.cfg_package;
-using goarch = @internal.goarch_package;
-using platform = @internal.platform_package;
+using cfg = go.@internal.cfg_package;
+using goarch = go.@internal.goarch_package;
+using platform = go.@internal.platform_package;
 using os = os_package;
-using exec = os.exec_package;
+using exec = go.os.exec_package;
 using filepath = path.filepath_package;
-using runtime = runtime_package;
+using Δruntime = runtime_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
-using os;
+using fs = io.fs_package;
+using go.@internal;
+using go.os;
+using io = io_package;
 using path;
-using ꓸꓸꓸ@string = Span<@string>;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class testenv_package {
 
@@ -55,12 +58,15 @@ public static bool HasGoBuild() {
         // run go build.
         return false;
     }
-    goBuildOnce.Do(
-    var origEnvʗ2 = origEnv;
-    () => {
+    ᏑgoBuildOnce.Do(() => {
+        // To run 'go build', we need to be able to exec a 'go' command.
+        // We somewhat arbitrarily choose to exec 'go tool -n compile' because that
+        // also confirms that cmd/go can find the compiler. (Before CL 472096,
+        // we sometimes ended up with cmd/go installed in the test environment
+        // without a cmd/compile it could use to actually build things.)
         var cmd = exec.Command("go"u8, "tool"u8, "-n", "compile");
-        cmd.val.Env = origEnvʗ2;
-        (@out, err) = cmd.Output();
+        cmd.Value.Env = origEnv;
+        var (@out, err) = cmd.Output();
         if (err != default!) {
             goBuildErr = fmt.Errorf("%v: %w"u8, cmd, err);
             return;
@@ -76,11 +82,19 @@ public static bool HasGoBuild() {
                 return;
             }
         }
-        if (platform.MustLinkExternal(runtime.GOOS, runtime.GOARCH, false)) {
+        if (platform.MustLinkExternal(Δruntime.GOOS, Δruntime.GOARCH, false)) {
+            // We can assume that we always have a complete Go toolchain available.
+            // However, this platform requires a C linker to build even pure Go
+            // programs, including tests. Do we have one in the test environment?
+            // (On Android, for example, the device running the test might not have a
+            // C toolchain installed.)
+            //
+            // If CC is set explicitly, assume that we do. Otherwise, use 'go env CC'
+            // to determine which toolchain it would use by default.
             if (os.Getenv("CC"u8) == ""u8) {
                 var cmdΔ1 = exec.Command("go"u8, "env"u8, "CC");
-                cmdΔ1.val.Env = origEnvʗ2;
-                (outΔ1, errΔ2) = cmdΔ1.Output();
+                cmdΔ1.Value.Env = origEnv;
+                var (outΔ1, errΔ2) = cmdΔ1.Output();
                 if (errΔ2 != default!) {
                     goBuildErr = fmt.Errorf("%v: %w"u8, cmdΔ1, errΔ2);
                     return;
@@ -97,7 +111,8 @@ public static bool HasGoBuild() {
     return goBuildErr == default!;
 }
 
-internal static sync.Once goBuildOnce;
+internal static ж<sync.Once> ᏑgoBuildOnce = new(default(sync.Once));
+internal static ref sync.Once goBuildOnce => ref ᏑgoBuildOnce.Value;
 internal static error goBuildErr;
 
 // MustHaveGoBuild checks that the current system can build programs with “go build”
@@ -124,7 +139,7 @@ public static bool HasGoRun() {
 // If not, MustHaveGoRun calls t.Skip with an explanation.
 public static void MustHaveGoRun(testing.TB t) {
     if (!HasGoRun()) {
-        t.Skipf("skipping test: 'go run' not available on %s/%s"u8, runtime.GOOS, runtime.GOARCH);
+        t.Skipf("skipping test: 'go run' not available on %s/%s"u8, Δruntime.GOOS, Δruntime.GOARCH);
     }
 }
 
@@ -132,7 +147,7 @@ public static void MustHaveGoRun(testing.TB t) {
 // threads in parallel.
 // There is a copy of this function in cmd/dist/test.go.
 public static bool HasParallelism() {
-    var exprᴛ1 = runtime.GOOS;
+    var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
         return false;
     }
@@ -144,7 +159,7 @@ public static bool HasParallelism() {
 // threads in parallel. If not, MustHaveParallelism calls t.Skip with an explanation.
 public static void MustHaveParallelism(testing.TB t) {
     if (!HasParallelism()) {
-        t.Skipf("skipping test: no parallelism available on %s/%s"u8, runtime.GOOS, runtime.GOARCH);
+        t.Skipf("skipping test: no parallelism available on %s/%s"u8, Δruntime.GOOS, Δruntime.GOARCH);
     }
 }
 
@@ -167,16 +182,33 @@ public static @string GoToolPath(testing.TB t) {
     return path;
 }
 
-internal static sync.Once gorootOnce;
+internal static ж<sync.Once> ᏑgorootOnce = new(default(sync.Once));
+internal static ref sync.Once gorootOnce => ref ᏑgorootOnce.Value;
 internal static @string gorootPath;
 internal static error gorootErr;
 
 internal static (@string, error) findGOROOT() {
-    gorootOnce.Do(() => {
-        gorootPath = runtime.GOROOT();
+    ᏑgorootOnce.Do(() => {
+        gorootPath = Δruntime.GOROOT();
         if (gorootPath != ""u8) {
+            // If runtime.GOROOT() is non-empty, assume that it is valid.
+            //
+            // (It might not be: for example, the user may have explicitly set GOROOT
+            // to the wrong directory. But this case is
+            // rare, and if that happens the user can fix what they broke.)
             return;
         }
+        // runtime.GOROOT doesn't know where GOROOT is (perhaps because the test
+        // binary was built with -trimpath).
+        //
+        // Since this is internal/testenv, we can cheat and assume that the caller
+        // is a test of some package in a subdirectory of GOROOT/src. ('go test'
+        // runs the test in the directory containing the packaged under test.) That
+        // means that if we start walking up the tree, we should eventually find
+        // GOROOT/src/go.mod, and we can report the parent directory of that.
+        //
+        // Notably, this works even if we can't run 'go env GOROOT' as a
+        // subprocess.
         var (cwd, err) = os.Getwd();
         if (err != default!) {
             gorootErr = fmt.Errorf("finding GOROOT: %w"u8, err);
@@ -186,6 +218,7 @@ internal static (@string, error) findGOROOT() {
         while (ᐧ) {
             @string parent = filepath.Dir(dir);
             if (parent == dir) {
+                // dir is either "." or only a volume name.
                 gorootErr = fmt.Errorf("failed to locate GOROOT/src in any parent directory"u8);
                 return;
             }
@@ -195,7 +228,8 @@ internal static (@string, error) findGOROOT() {
                     continue;
                 }
             }
-            (b, errΔ1) = os.ReadFile(filepath.Join(dir, "go.mod"));
+            // dir cannot be GOROOT/src if it doesn't end in "src".
+            var (b, errΔ1) = os.ReadFile(filepath.Join(dir, "go.mod"));
             if (errΔ1 != default!) {
                 if (os.IsNotExist(errΔ1)) {
                     dir = parent;
@@ -210,6 +244,7 @@ internal static (@string, error) findGOROOT() {
                 (line, goMod, _) = strings.Cut(goMod, "\n"u8);
                 var fields = strings.Fields(line);
                 if (len(fields) >= 2 && fields[0] == "module" && fields[1] == "std") {
+                    // Found "module std", which is the module declaration in GOROOT/src!
                     gorootPath = parent;
                     return;
                 }
@@ -243,19 +278,20 @@ public static (@string, error) GoTool() {
     if (!HasGoBuild()) {
         return ("", errors.New("platform cannot run go tool"u8));
     }
-    goToolOnce.Do(() => {
+    ᏑgoToolOnce.Do(() => {
         (goToolPath, goToolErr) = exec.LookPath("go"u8);
     });
     return (goToolPath, goToolErr);
 }
 
-internal static sync.Once goToolOnce;
+internal static ж<sync.Once> ᏑgoToolOnce = new(default(sync.Once));
+internal static ref sync.Once goToolOnce => ref ᏑgoToolOnce.Value;
 internal static @string goToolPath;
 internal static error goToolErr;
 
 // HasSrc reports whether the entire source tree is available under GOROOT.
 public static bool HasSrc() {
-    var exprᴛ1 = runtime.GOOS;
+    var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "ios"u8) {
         return false;
     }
@@ -266,16 +302,16 @@ public static bool HasSrc() {
 // HasExternalNetwork reports whether the current system can use
 // external (non-localhost) networks.
 public static bool HasExternalNetwork() {
-    return !testing.Short() && runtime.GOOS != "js"u8 && runtime.GOOS != "wasip1"u8;
+    return !testing.Short() && Δruntime.GOOS != "js"u8 && Δruntime.GOOS != "wasip1"u8;
 }
 
 // MustHaveExternalNetwork checks that the current system can use
 // external (non-localhost) networks.
 // If not, MustHaveExternalNetwork calls t.Skip with an explanation.
 public static void MustHaveExternalNetwork(testing.TB t) {
-    if (runtime.GOOS == "js"u8 || runtime.GOOS == "wasip1"u8) {
+    if (Δruntime.GOOS == "js"u8 || Δruntime.GOOS == "wasip1"u8) {
         t.Helper();
-        t.Skipf("skipping test: no external network on %s"u8, runtime.GOOS);
+        t.Skipf("skipping test: no external network on %s"u8, Δruntime.GOOS);
     }
     if (testing.Short()) {
         t.Helper();
@@ -285,16 +321,14 @@ public static void MustHaveExternalNetwork(testing.TB t) {
 
 // HasCGO reports whether the current system can use cgo.
 public static bool HasCGO() {
-    hasCgoOnce.Do(
-    var origEnvʗ2 = origEnv;
-    () => {
+    ᏑhasCgoOnce.Do(() => {
         var (goTool, err) = GoTool();
         if (err != default!) {
             return;
         }
         var cmd = exec.Command(goTool, "env"u8, "CGO_ENABLED");
-        cmd.val.Env = origEnvʗ2;
-        (@out, err) = cmd.Output();
+        cmd.Value.Env = origEnv;
+        (var @out, err) = cmd.Output();
         if (err != default!) {
             throw panic(fmt.Sprintf("%v: %v"u8, cmd, @out));
         }
@@ -306,7 +340,8 @@ public static bool HasCGO() {
     return hasCgo;
 }
 
-internal static sync.Once hasCgoOnce;
+internal static ж<sync.Once> ᏑhasCgoOnce = new(default(sync.Once));
+internal static ref sync.Once hasCgoOnce => ref ᏑhasCgoOnce.Value;
 internal static bool hasCgo;
 
 // MustHaveCGO calls t.Skip if cgo is not available.
@@ -319,7 +354,7 @@ public static void MustHaveCGO(testing.TB t) {
 // CanInternalLink reports whether the current system can link programs with
 // internal linking.
 public static bool CanInternalLink(bool withCgo) {
-    return !platform.MustLinkExternal(runtime.GOOS, runtime.GOARCH, withCgo);
+    return !platform.MustLinkExternal(Δruntime.GOOS, Δruntime.GOARCH, withCgo);
 }
 
 // MustInternalLink checks that the current system can link programs with internal
@@ -328,9 +363,9 @@ public static bool CanInternalLink(bool withCgo) {
 public static void MustInternalLink(testing.TB t, bool withCgo) {
     if (!CanInternalLink(withCgo)) {
         if (withCgo && CanInternalLink(false)) {
-            t.Skipf("skipping test: internal linking on %s/%s is not supported with cgo"u8, runtime.GOOS, runtime.GOARCH);
+            t.Skipf("skipping test: internal linking on %s/%s is not supported with cgo"u8, Δruntime.GOOS, Δruntime.GOARCH);
         }
-        t.Skipf("skipping test: internal linking on %s/%s is not supported"u8, runtime.GOOS, runtime.GOARCH);
+        t.Skipf("skipping test: internal linking on %s/%s is not supported"u8, Δruntime.GOOS, Δruntime.GOARCH);
     }
 }
 
@@ -338,8 +373,8 @@ public static void MustInternalLink(testing.TB t, bool withCgo) {
 // internal linking.
 // If not, MustInternalLinkPIE calls t.Skip with an explanation.
 public static void MustInternalLinkPIE(testing.TB t) {
-    if (!platform.InternalLinkPIESupported(runtime.GOOS, runtime.GOARCH)) {
-        t.Skipf("skipping test: internal linking for buildmode=pie on %s/%s is not supported"u8, runtime.GOOS, runtime.GOARCH);
+    if (!platform.InternalLinkPIESupported(Δruntime.GOOS, Δruntime.GOARCH)) {
+        t.Skipf("skipping test: internal linking for buildmode=pie on %s/%s is not supported"u8, Δruntime.GOOS, Δruntime.GOARCH);
     }
 }
 
@@ -347,8 +382,8 @@ public static void MustInternalLinkPIE(testing.TB t) {
 // the given build mode.
 // If not, MustHaveBuildMode calls t.Skip with an explanation.
 public static void MustHaveBuildMode(testing.TB t, @string buildmode) {
-    if (!platform.BuildModeSupported(runtime.Compiler, buildmode, runtime.GOOS, runtime.GOARCH)) {
-        t.Skipf("skipping test: build mode %s on %s/%s is not supported by the %s compiler"u8, buildmode, runtime.GOOS, runtime.GOARCH, runtime.Compiler);
+    if (!platform.BuildModeSupported(Δruntime.Compiler, buildmode, Δruntime.GOOS, Δruntime.GOARCH)) {
+        t.Skipf("skipping test: build mode %s on %s/%s is not supported by the %s compiler"u8, buildmode, Δruntime.GOOS, Δruntime.GOARCH, Δruntime.Compiler);
     }
 }
 
@@ -363,7 +398,7 @@ public static bool HasSymlink() {
 public static void MustHaveSymlink(testing.TB t) {
     var (ok, reason) = hasSymlink();
     if (!ok) {
-        t.Skipf("skipping test: cannot make symlinks on %s/%s: %s"u8, runtime.GOOS, runtime.GOARCH, reason);
+        t.Skipf("skipping test: cannot make symlinks on %s/%s: %s"u8, Δruntime.GOOS, Δruntime.GOARCH, reason);
     }
 }
 
@@ -372,14 +407,14 @@ public static bool HasLink() {
     // From Android release M (Marshmallow), hard linking files is blocked
     // and an attempt to call link() on a file will return EACCES.
     // - https://code.google.com/p/android-developer-preview/issues/detail?id=3150
-    return runtime.GOOS != "plan9"u8 && runtime.GOOS != "android"u8;
+    return Δruntime.GOOS != "plan9"u8 && Δruntime.GOOS != "android"u8;
 }
 
 // MustHaveLink reports whether the current system can use os.Link.
 // If not, MustHaveLink calls t.Skip with an explanation.
 public static void MustHaveLink(testing.TB t) {
     if (!HasLink()) {
-        t.Skipf("skipping test: hardlinks are not supported on %s/%s"u8, runtime.GOOS, runtime.GOARCH);
+        t.Skipf("skipping test: hardlinks are not supported on %s/%s"u8, Δruntime.GOOS, Δruntime.GOARCH);
     }
 }
 
@@ -387,7 +422,7 @@ internal static ж<bool> flaky = flag.Bool("flaky"u8, false, "run known-flaky te
 
 public static void SkipFlaky(testing.TB t, nint issue) {
     t.Helper();
-    if (!flaky.val) {
+    if (!flaky.Value) {
         t.Skipf("skipping known flaky test without the -flaky flag; see golang.org/issue/%d"u8, issue);
     }
 }
@@ -403,7 +438,7 @@ public static void SkipFlakyNet(testing.TB t) {
 
 // CPUIsSlow reports whether the CPU running the test is suspected to be slow.
 public static bool CPUIsSlow() {
-    var exprᴛ1 = runtime.GOARCH;
+    var exprᴛ1 = Δruntime.GOARCH;
     if (exprᴛ1 == "arm"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8 || exprᴛ1 == "wasm"u8) {
         return true;
     }
@@ -418,7 +453,7 @@ public static bool CPUIsSlow() {
 public static void SkipIfShortAndSlow(testing.TB t) {
     if (testing.Short() && CPUIsSlow()) {
         t.Helper();
-        t.Skipf("skipping test in -short mode on %s"u8, runtime.GOARCH);
+        t.Skipf("skipping test in -short mode on %s"u8, Δruntime.GOARCH);
     }
 }
 
@@ -436,21 +471,21 @@ public static void SkipIfOptimizationOff(testing.TB t) {
 //
 // pkgs may include any package pattern that is valid to pass to 'go list',
 // so it may also be a list of Go source files all in the same directory.
-public static void WriteImportcfg(testing.TB t, @string dstPath, map<@string, @string> packageFiles, params ꓸꓸꓸ@string pkgsʗp) {
+public static void WriteImportcfg(testing.TB t, @string dstPath, map<@string, @string> packageFiles, params ꓸꓸꓸstring pkgsʗp) {
     var pkgs = pkgsʗp.slice();
 
     t.Helper();
     var icfg = @new<bytes.Buffer>();
     icfg.WriteString("# import config\n"u8);
     foreach (var (k, v) in packageFiles) {
-        fmt.Fprintf(~icfg, "packagefile %s=%s\n"u8, k, v);
+        fmt.Fprintf(new bytes_BufferжWriter(icfg), "packagefile %s=%s\n"u8, k, v);
     }
     if (len(pkgs) > 0) {
         // Use 'go list' to resolve any missing packages and rewrite the import map.
         var cmd = Command(t, GoToolPath(t), "list"u8, "-export", "-deps", "-f", @"{{if ne .ImportPath ""command-line-arguments""}}{{if .Export}}{{.ImportPath}}={{.Export}}{{end}}{{end}}");
-        cmd.val.Args = append((~cmd).Args, pkgs.ꓸꓸꓸ);
-        cmd.val.Stderr = @new<strings.Builder>();
-        (@out, err) = cmd.Output();
+        cmd.Value.Args = append((~cmd).Args, pkgs.ꓸꓸꓸ);
+        cmd.Value.Stderr = new strings_BuilderжWriter(@new<strings.Builder>());
+        var (@out, err) = cmd.Output();
         if (err != default!) {
             t.Fatalf("%v: %v\n%s"u8, cmd, err, (~cmd).Stderr);
         }
@@ -463,7 +498,7 @@ public static void WriteImportcfg(testing.TB t, @string dstPath, map<@string, @s
                 t.Fatalf("invalid line in output from %v:\n%s"u8, cmd, line);
             }
             if (packageFiles[importPath] == "") {
-                fmt.Fprintf(~icfg, "packagefile %s=%s\n"u8, importPath, export);
+                fmt.Fprintf(new bytes_BufferжWriter(icfg), "packagefile %s=%s\n"u8, importPath, export);
             }
         }
     }
@@ -484,12 +519,12 @@ public static bool SyscallIsNotSupported(error err) {
 // This function should be used when it is necessary to avoid t.Parallel on
 // 32-bit machines, typically because the test uses lots of memory.
 public static void ParallelOn64Bit(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     if (goarch.PtrSize == 4) {
         return;
     }
-    t.Parallel();
+    Ꮡt.Parallel();
 }
 
 } // end testenv_package

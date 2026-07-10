@@ -63,9 +63,7 @@ public static readonly UntypedInt ClassContextSpecific = 2;
 public static readonly UntypedInt ClassPrivate = 3;
 
 [GoType] partial struct tagAndLength {
-    internal nint @class;
-    internal nint tag;
-    internal nint length;
+    internal nint @class, tag, length;
     internal bool isCompound;
 }
 
@@ -153,7 +151,7 @@ internal static fieldParameters /*ret*/ parseFieldParameters(@string str) {
             var (i, err) = strconv.ParseInt(part[8..], 10, 64);
             if (err == default!) {
                 ret.defaultValue = @new<int64>();
-                ret.defaultValue.val = i;
+                ret.defaultValue.Value = i;
             }
             break;
         }
@@ -161,7 +159,7 @@ internal static fieldParameters /*ret*/ parseFieldParameters(@string str) {
             var (i, err) = strconv.Atoi(part[4..]);
             if (err == default!) {
                 ret.tag = @new<nint>();
-                ret.tag.val = i;
+                ret.tag.Value = i;
             }
             break;
         }
@@ -201,22 +199,22 @@ internal static (bool matchAny, nint tagNumber, bool isCompound, bool ok) getUni
     bool ok = default!;
 
     var exprᴛ1 = t;
-    if (exprᴛ1 == rawValueType) {
+    if (AreEqual(exprᴛ1, rawValueType)) {
         return (true, -1, false, true);
     }
-    if (exprᴛ1 == objectIdentifierType) {
+    if (AreEqual(exprᴛ1, objectIdentifierType)) {
         return (false, TagOID, false, true);
     }
-    if (exprᴛ1 == bitStringType) {
+    if (AreEqual(exprᴛ1, bitStringType)) {
         return (false, TagBitString, false, true);
     }
-    if (exprᴛ1 == timeType) {
+    if (AreEqual(exprᴛ1, timeType)) {
         return (false, TagUTCTime, false, true);
     }
-    if (exprᴛ1 == enumeratedType) {
+    if (AreEqual(exprᴛ1, enumeratedType)) {
         return (false, TagEnum, false, true);
     }
-    if (exprᴛ1 == bigIntType) {
+    if (AreEqual(exprᴛ1, bigIntType)) {
         return (false, TagInteger, false, true);
     }
 

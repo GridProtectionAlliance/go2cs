@@ -5,7 +5,8 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using token = go.token_package;
+using token = global::go.go.token_package;
+using global::go.go;
 
 partial class types_package {
 
@@ -13,10 +14,11 @@ partial class types_package {
 // producing a cycle in the type graph.
 // (Cycles involving alias types, as in "type A = [10]A" are detected
 // earlier, via the objDecl cycle detection mechanism.)
-[GoRecv] public static void validType(this ref Checker check, ж<Named> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.val;
+internal static void validType(this ж<Checker> Ꮡcheck, ж<Named> Ꮡtyp) {
+    ref var check = ref Ꮡcheck.Value;
+    ref var typ = ref Ꮡtyp.Value;
 
-    check.validType0(nopos, ~typ, default!, default!);
+    Ꮡcheck.validType0(nopos, new NamedжΔType(Ꮡtyp), default!, default!);
 }
 
 // validType0 checks if the given type is valid. If typ is a type parameter
@@ -29,23 +31,25 @@ partial class types_package {
 // of) F in S, leading to the nest S->F. If a type appears in its own nest
 // (say S->F->S) we have an invalid recursive type. The path list is the full
 // path of named types in a cycle, it is only needed for error reporting.
-[GoRecv] internal static bool validType0(this ref Checker check, tokenꓸPos pos, ΔType typ, slice<ж<Named>> nest, slice<ж<Named>> path) => func((defer, _) => {
+internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔType typ, slice<ж<Named>> nest, slice<ж<Named>> path) => func<bool>((defer, recover) => {
+    ref var check = ref Ꮡcheck.Value;
+
     typ = Unalias(typ);
-    if (check.conf._Trace) {
+    if ((~check.conf)._Trace) {
         {
-            var (t, _) = typ._<Named.val>(ᐧ); if (t != nil && (~t).obj != nil) {
+            var (t, _) = typ._<ж<Named>>(ᐧ); if (t != nil && (~t).obj != nil) {
                 /* obj should always exist but be conservative */
-                pos = (~t).obj.pos;
+                pos = t.Value.obj.Value.pos;
             }
         }
         check.indent++;
-        check.trace(pos, "validType(%s) nest %v, path %v"u8, typ, pathString(makeObjList(nest)), pathString(makeObjList(path)));
+        Ꮡcheck.trace(pos, "validType(%s) nest %v, path %v"u8, typ, pathString(makeObjList(nest)), pathString(makeObjList(path)));
         defer(() => {
-            check.indent--;
+            Ꮡcheck.Value.indent--;
         });
     }
     switch (typ.type()) {
-    case default! t: {
+    case null: {
         if (debug) {
             // We should never see a nil type but be conservative and panic
             // only in debug mode.
@@ -53,34 +57,34 @@ partial class types_package {
         }
         break;
     }
-    case Array.val t: {
-        return check.validType0(pos, (~t).elem, nest, path);
+    case ж<Array> t: {
+        return Ꮡcheck.validType0(pos, (~t).elem, nest, path);
     }
-    case Struct.val t: {
+    case ж<Struct> t: {
         foreach (var (_, f) in (~t).fields) {
-            if (!check.validType0(pos, f.typ, nest, path)) {
+            if (!Ꮡcheck.validType0(pos, (~f).typ, nest, path)) {
                 return false;
             }
         }
         break;
     }
-    case Union.val t: {
-        foreach (var (_, t) in (~t).terms) {
-            if (!check.validType0(pos, (~t).typ, nest, path)) {
+    case ж<Union> t: {
+        foreach (var (_, tΔ1) in (~t).terms) {
+            if (!Ꮡcheck.validType0(pos, (~tΔ1).typ, nest, path)) {
                 return false;
             }
         }
         break;
     }
-    case Interface.val t: {
+    case ж<Interface> t: {
         foreach (var (_, etyp) in (~t).embeddeds) {
-            if (!check.validType0(pos, etyp, nest, path)) {
+            if (!Ꮡcheck.validType0(pos, etyp, nest, path)) {
                 return false;
             }
         }
         break;
     }
-    case Named.val t: {
+    case ж<Named> t: {
         if (!isValid(t.Underlying())) {
             // TODO(gri) The optimization below is incorrect (see go.dev/issue/65711):
             //           in that issue `type A[P any] [1]P` is a valid type on its own
@@ -109,7 +113,7 @@ partial class types_package {
         foreach (var (_, e) in nest) {
             // If the current type t is also found in nest, (the memory of) t is
             // embedded in itself, indicating an invalid recursive type.
-            if (Identical(~e, ~t)) {
+            if (Identical(new NamedжΔType(e), new NamedжΔType(t))) {
                 // We have a cycle. If t != t.Origin() then t is an instance of
                 // the generic type t.Origin(). Because t is in the nest, t must
                 // occur within the definition (RHS) of the generic type t.Origin(),
@@ -131,25 +135,25 @@ partial class types_package {
                 // Therefore it is safe to change their underlying types; there is
                 // no chance for a race condition (the types of the current package
                 // are not yet available to other goroutines).
-                assert((~t).obj.pkg == check.pkg);
-                assert((~t.Origin()).obj.pkg == check.pkg);
-                var t.val.underlying = Typ[Invalid];
-                t.Origin().val.underlying = ~Typ[Invalid];
+                assert((~(~t).obj).pkg == check.pkg);
+                assert((~(~t.Origin()).obj).pkg == check.pkg);
+                t.Value.underlying = new BasicжΔType(Typ[Invalid]);
+                t.Origin().Value.underlying = new BasicжΔType(Typ[Invalid]);
                 // Find the starting point of the cycle and report it.
                 // Because each type in nest must also appear in path (see invariant below),
                 // type t must be in path since it was found in nest. But not every type in path
                 // is in nest. Specifically t may appear in path with an earlier index than the
                 // index of t in nest. Search again.
                 foreach (var (start, p) in path) {
-                    if (Identical(~p, ~t)) {
-                        check.cycleError(makeObjList(path[(int)(start)..]), 0);
+                    if (Identical(new NamedжΔType(p), new NamedжΔType(t))) {
+                        Ꮡcheck.cycleError(makeObjList(path[(int)(start)..]), 0);
                         return false;
                     }
                 }
                 throw panic("cycle start not found");
             }
         }
-        if (!check.validType0(pos, // No cycle was found. Check the RHS of t.
+        if (!Ꮡcheck.validType0(pos, // No cycle was found. Check the RHS of t.
  // Every type added to nest is also added to path; thus every type that is in nest
  // must also be in path (invariant). But not every type in path is in nest, since
  // nest may be pruned (see below, *TypeParam case).
@@ -158,7 +162,7 @@ partial class types_package {
         }
         break;
     }
-    case TypeParam.val t: {
+    case ж<TypeParam> t: {
         {
             nint d = len(nest) - 1; if (d >= 0) {
                 // see TODO above
@@ -181,7 +185,7 @@ partial class types_package {
                         // the current (instantiated) type (see the example
                         // at the end of this file).
                         // For error reporting we keep the full path.
-                        var res = check.validType0(pos, targ, nest[..(int)(d)], path);
+                        var res = Ꮡcheck.validType0(pos, targ, nest[..(int)(d)], path);
                         // The check.validType0 call with nest[:d] may have
                         // overwritten the entry at the current depth d.
                         // Restore the entry (was issue go.dev/issue/66323).
@@ -201,7 +205,7 @@ partial class types_package {
 internal static slice<Object> makeObjList(slice<ж<Named>> tlist) {
     var olist = new slice<Object>(len(tlist));
     foreach (var (i, t) in tlist) {
-        olist[i] = t.val.obj;
+        olist[i] = new TypeNameжObject(t.Value.obj);
     }
     return olist;
 }

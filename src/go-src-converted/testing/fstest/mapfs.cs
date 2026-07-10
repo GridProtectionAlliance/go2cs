@@ -4,37 +4,38 @@
 namespace go.testing;
 
 using io = io_package;
-using fs = io.fs_package;
+using fs = go.io.fs_package;
 using path = path_package;
 using slices = slices_package;
 using strings = strings_package;
 using time = time_package;
-using io;
+using go.io;
 
 partial class fstest_package {
-/* visitMapType: map[string]*MapFile */
+
+[GoType("map[@string, ж<MapFile>]")] partial struct MapFS;
 
 // A MapFile describes a single file in a [MapFS].
 [GoType] partial struct MapFile {
     public slice<byte> Data; // file content
-    public io.fs_package.FileMode Mode; // fs.FileInfo.Mode
-    public time_package.Time ModTime;   // fs.FileInfo.ModTime
+    public fs.FileMode Mode; // fs.FileInfo.Mode
+    public time.Time ModTime;   // fs.FileInfo.ModTime
     public any Sys;         // fs.FileInfo.Sys
 }
 
 internal static fs.FS _ᴛ1ʗ = ((MapFS)default!);
 
-internal static fs.File _ᴛ2ʗ = (ж<openMapFile>)(default!);
+internal static fs.File _ᴛ2ʗ = new openMapFileжFile((ж<openMapFile>)(default!));
 
 // Open opens the named file.
 public static (fs.File, error) Open(this MapFS fsys, @string name) {
     if (!fs.ValidPath(name)) {
-        return (default!, new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrNotExist));
+        return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrNotExist))));
     }
-    var file = fsys[name];
-    if (file != nil && (fs.FileMode)((~file).Mode & fs.ModeDir) == 0) {
+    var @file = fsys[name];
+    if (@file != nil && (fs.FileMode)((~@file).Mode & fs.ModeDir) == 0) {
         // Ordinary file
-        return (new openMapFile(name, new mapFileInfo(path.Base(name), file), 0), default!);
+        return (new openMapFileжFile(Ꮡ(new openMapFile(name, new mapFileInfo(path.Base(name), @file), 0))), default!);
     }
     // Directory, possibly synthesized.
     // Note that file can be nil here: the map need not contain explicit parent directories for all its files.
@@ -72,8 +73,8 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
         // If the directory name is not in the map,
         // and there are no children of the name in the map,
         // then the directory is treated as not existing.
-        if (file == nil && list == default! && len(need) == 0) {
-            return (default!, new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrNotExist));
+        if (@file == nil && list == default! && len(need) == 0) {
+            return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrNotExist))));
         }
     }
     foreach (var (_, fi) in list) {
@@ -83,10 +84,10 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
         list = append(list, new mapFileInfo(nameΔ1, Ꮡ(new MapFile(Mode: (fs.FileMode)(fs.ModeDir | 365)))));
     }
     slices.SortFunc(list, (mapFileInfo a, mapFileInfo b) => strings.Compare(a.name, b.name));
-    if (file == nil) {
-        file = Ꮡ(new MapFile(Mode: (fs.FileMode)(fs.ModeDir | 365)));
+    if (@file == nil) {
+        @file = Ꮡ(new MapFile(Mode: (fs.FileMode)(fs.ModeDir | 365)));
     }
-    return (new mapDir(name, new mapFileInfo(elem, file), list, 0), default!);
+    return (new mapDirжFile(Ꮡ(new mapDir(name, new mapFileInfo(elem, @file), list, 0))), default!);
 }
 
 // fsOnly is a wrapper that hides all but the fs.FS methods,
@@ -96,7 +97,7 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
 // is redundant and unnecessary, but having the methods may make
 // MapFS exercise more code paths when used in tests.)
 [GoType] partial struct fsOnly {
-    public partial ref io.fs_package.FS FS { get; }
+    public go.io.fs_package.FS FS;
 }
 
 public static (slice<byte>, error) ReadFile(this MapFS fsys, @string name) {
@@ -138,35 +139,39 @@ public static (fs.FS, error) Sub(this MapFS fsys, @string dir) {
 }
 
 [GoRecv] internal static int64 Size(this ref mapFileInfo i) {
-    return ((int64)len(i.f.Data));
+    return (int64)len((~i.f).Data);
 }
 
 [GoRecv] internal static fs.FileMode Mode(this ref mapFileInfo i) {
-    return i.f.Mode;
+    return (~i.f).Mode;
 }
 
 [GoRecv] internal static fs.FileMode Type(this ref mapFileInfo i) {
-    return i.f.Mode.Type();
+    return (~i.f).Mode.Type();
 }
 
 [GoRecv] internal static time.Time ModTime(this ref mapFileInfo i) {
-    return i.f.ModTime;
+    return (~i.f).ModTime;
 }
 
 [GoRecv] internal static bool IsDir(this ref mapFileInfo i) {
-    return (fs.FileMode)(i.f.Mode & fs.ModeDir) != 0;
+    return (fs.FileMode)((~i.f).Mode & fs.ModeDir) != 0;
 }
 
 [GoRecv] internal static any Sys(this ref mapFileInfo i) {
-    return i.f.Sys;
+    return (~i.f).Sys;
 }
 
-[GoRecv("capture")] internal static (fs.FileInfo, error) Info(this ref mapFileInfo i) {
-    return (~i, default!);
+internal static (fs.FileInfo, error) Info(this ж<mapFileInfo> Ꮡi) {
+    ref var i = ref Ꮡi.Value;
+
+    return (new mapFileInfoжFileInfo(Ꮡi), default!);
 }
 
-[GoRecv] internal static @string String(this ref mapFileInfo i) {
-    return fs.FormatFileInfo(~i);
+internal static @string String(this ж<mapFileInfo> Ꮡi) {
+    ref var i = ref Ꮡi.Value;
+
+    return fs.FormatFileInfo(new mapFileInfoжFileInfo(Ꮡi));
 }
 
 // An openMapFile is a regular (non-directory) fs.File open for reading.
@@ -176,8 +181,10 @@ public static (fs.FS, error) Sub(this MapFS fsys, @string dir) {
     internal int64 offset;
 }
 
-[GoRecv] internal static (fs.FileInfo, error) Stat(this ref openMapFile f) {
-    return (f.mapFileInfo, default!);
+internal static (fs.FileInfo, error) Stat(this ж<openMapFile> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
+    return (new mapFileInfoжFileInfo(Ꮡf.of(openMapFile.ᏑmapFileInfo)), default!);
 }
 
 [GoRecv] internal static error Close(this ref openMapFile f) {
@@ -185,14 +192,14 @@ public static (fs.FS, error) Sub(this MapFS fsys, @string dir) {
 }
 
 [GoRecv] internal static (nint, error) Read(this ref openMapFile f, slice<byte> b) {
-    if (f.offset >= ((int64)len(f.f.Data))) {
+    if (f.offset >= (int64)len((~f.f).Data)) {
         return (0, io.EOF);
     }
     if (f.offset < 0) {
-        return (0, new fs.PathError(Op: "read"u8, Path: f.path, Err: fs.ErrInvalid));
+        return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: f.path, Err: fs.ErrInvalid))));
     }
-    nint n = copy(b, f.f.Data[(int)(f.offset)..]);
-    f.offset += ((int64)n);
+    nint n = copy(b, (~f.f).Data[(int)(f.offset)..]);
+    f.offset += (int64)n;
     return (n, default!);
 }
 
@@ -206,23 +213,23 @@ public static (fs.FS, error) Sub(this MapFS fsys, @string dir) {
         break;
     }
     case 2: {
-        offset += ((int64)len(f.f.Data));
+        offset += (int64)len((~f.f).Data);
         break;
     }}
 
     // offset += 0
-    if (offset < 0 || offset > ((int64)len(f.f.Data))) {
-        return (0, new fs.PathError(Op: "seek"u8, Path: f.path, Err: fs.ErrInvalid));
+    if (offset < 0 || offset > (int64)len((~f.f).Data)) {
+        return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "seek"u8, Path: f.path, Err: fs.ErrInvalid))));
     }
     f.offset = offset;
     return (offset, default!);
 }
 
 [GoRecv] internal static (nint, error) ReadAt(this ref openMapFile f, slice<byte> b, int64 offset) {
-    if (offset < 0 || offset > ((int64)len(f.f.Data))) {
-        return (0, new fs.PathError(Op: "read"u8, Path: f.path, Err: fs.ErrInvalid));
+    if (offset < 0 || offset > (int64)len((~f.f).Data)) {
+        return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: f.path, Err: fs.ErrInvalid))));
     }
-    nint n = copy(b, f.f.Data[(int)(offset)..]);
+    nint n = copy(b, (~f.f).Data[(int)(offset)..]);
     if (n < len(b)) {
         return (n, io.EOF);
     }
@@ -237,8 +244,10 @@ public static (fs.FS, error) Sub(this MapFS fsys, @string dir) {
     internal nint offset;
 }
 
-[GoRecv] internal static (fs.FileInfo, error) Stat(this ref mapDir d) {
-    return (d.mapFileInfo, default!);
+internal static (fs.FileInfo, error) Stat(this ж<mapDir> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
+    return (new mapFileInfoжFileInfo(Ꮡd.of(mapDir.ᏑmapFileInfo)), default!);
 }
 
 [GoRecv] internal static error Close(this ref mapDir d) {
@@ -246,7 +255,7 @@ public static (fs.FS, error) Sub(this MapFS fsys, @string dir) {
 }
 
 [GoRecv] internal static (nint, error) Read(this ref mapDir d, slice<byte> b) {
-    return (0, new fs.PathError(Op: "read"u8, Path: d.path, Err: fs.ErrInvalid));
+    return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: d.path, Err: fs.ErrInvalid))));
 }
 
 [GoRecv] internal static (slice<fs.DirEntry>, error) ReadDir(this ref mapDir d, nint count) {
@@ -259,7 +268,7 @@ public static (fs.FS, error) Sub(this MapFS fsys, @string dir) {
     }
     var list = new slice<fs.DirEntry>(n);
     foreach (var (i, _) in list) {
-        list[i] = Ꮡ(d.entry[d.offset + i]);
+        list[i] = new mapFileInfoжDirEntry(Ꮡ(d.entry[d.offset + i]));
     }
     d.offset += n;
     return (list, default!);

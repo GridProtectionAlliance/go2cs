@@ -61,8 +61,7 @@ internal static ж<Graph> newGraph() {
 
 [GoRecv] internal static bool addNode(this ref Graph g, @string label) {
     {
-        nint _ = g.byLabel[label];
-        var ok = g.byLabel[label]; if (ok) {
+        var (_, ok) = g.byLabel[label, ꟷ]; if (ok) {
             return false;
         }
     }
@@ -73,7 +72,7 @@ internal static ж<Graph> newGraph() {
 }
 
 [GoRecv] public static void AddEdge(this ref Graph g, @string from, @string to) {
-    g.edges[from][to] = true;
+    g.edges[from].Set(to, true);
 }
 
 [GoRecv] public static void DelEdge(this ref Graph g, @string from, @string to) {
@@ -84,12 +83,14 @@ internal static ж<Graph> newGraph() {
     return g.edges[from] != default! && g.edges[from][to];
 }
 
-[GoRecv] public static slice<@string> Edges(this ref Graph g, @string from) {
+public static slice<@string> Edges(this ж<Graph> Ꮡg, @string from) {
+    ref var g = ref Ꮡg.Value;
+
     var edges = new slice<@string>(0, 16);
     foreach (var (k, _) in g.edges[from]) {
         edges = append(edges, k);
     }
-    slices.SortFunc(edges, (@string a, @string b) => cmp.Compare(g.byLabel[a], g.byLabel[b]));
+    slices.SortFunc(edges, (@string a, @string b) => cmp.Compare(Ꮡg.Value.byLabel[a], Ꮡg.Value.byLabel[b]));
     return edges;
 }
 
@@ -99,16 +100,15 @@ internal static ж<Graph> newGraph() {
 public static (ж<Graph>, error) Parse(@string dag) {
     var g = newGraph();
     var disallowed = new rule[]{}.slice();
-    (rules, err) = parseRules(dag);
+    var (rules, err) = parseRules(dag);
     if (err != default!) {
         return (default!, err);
     }
     // TODO: Add line numbers to errors.
-    slice<@string> errors = default!;
-    var errorf = 
-    var errorsʗ1 = errors;
-    (@string format, params ꓸꓸꓸany aʗp) => {
-        errorsʗ1 = append(errorsʗ1, fmt.Sprintf(format, a.ꓸꓸꓸ));
+    ref var errors = ref heap<slice<@string>>(out var Ꮡerrors);
+    var errorf = (@string format, params ꓸꓸꓸany aʗp) => {
+        var a = aʗp.slice();
+        Ꮡerrors.ValueSlot = append(Ꮡerrors.ValueSlot, fmt.Sprintf(format, a.ꓸꓸꓸ));
     };
     foreach (var (_, r) in rules) {
         if (r.op == "!<"u8) {
@@ -128,8 +128,7 @@ public static (ж<Graph>, error) Parse(@string dag) {
                     continue;
                 }
                 {
-                    nint _ = (~g).byLabel[less];
-                    var ok = (~g).byLabel[less]; if (!ok){
+                    var (_, ok) = (~g).byLabel[less, ꟷ]; if (!ok){
                         errorf("use of %s before its definition"u8, less);
                     } else {
                         g.AddEdge(def, less);
@@ -187,58 +186,59 @@ public static (ж<Graph>, error) Parse(@string dag) {
 
 [GoType("@string")] partial struct ΔsyntaxError;
 
-public static @string Error(this ΔsyntaxError e) {
+internal static @string Error(this ΔsyntaxError e) {
     return ((@string)e);
 }
 
 // parseRules parses the rules of a DAG.
-internal static (slice<rule> @out, error err) parseRules(@string rules) => func((defer, recover) => {
+internal static (slice<rule> @out, error err) parseRules(@string rules) {
     slice<rule> @out = default!;
     error err = default!;
-
-    defer(() => {
-        var e = recover();
-        switch (e.type()) {
-        case default! e: {
-            return (@out, err);
-        }
-        case ΔsyntaxError e: {
-            err = e;
-            break;
-        }
-        default: {
-            var e = e.type();
-            throw panic(e);
-            break;
-        }}
-    });
-    var p = Ꮡ(new rulesParser(lineno: 1, text: rules));
-    slice<@string> prev = default!;
-    @string op = default!;
-    while (ᐧ) {
-        var (list, tok) = p.nextList();
-        if (tok == ""u8) {
-            if (prev == default!) {
+    func((defer, recover) => {
+        defer(() => {
+            var e = recover();
+            switch (e.type()) {
+            case null: {
+                return;
+            }
+            case ΔsyntaxError eΔ1: {
+                err = eΔ1;
                 break;
             }
-            p.syntaxError("unexpected EOF"u8);
+            default: {
+                var eΔ1 = e;
+                throw panic(eΔ1);
+                break;
+            }}
+        });
+        var p = Ꮡ(new rulesParser(lineno: 1, text: rules));
+        slice<@string> prev = default!;
+        @string op = default!;
+        while (ᐧ) {
+            var (list, tok) = p.nextList();
+            if (tok == ""u8) {
+                if (prev == default!) {
+                    break;
+                }
+                p.syntaxError("unexpected EOF"u8);
+            }
+            if (prev != default!) {
+                @out = append(@out, new rule(prev, op, list));
+            }
+            prev = list;
+            if (tok == ";"u8) {
+                prev = default!;
+                op = ""u8;
+                continue;
+            }
+            if (tok != "<"u8 && tok != "!<"u8) {
+                p.syntaxError("missing <"u8);
+            }
+            op = tok;
         }
-        if (prev != default!) {
-            @out = append(@out, new rule(prev, op, list));
-        }
-        prev = list;
-        if (tok == ";"u8) {
-            prev = default!;
-            op = ""u8;
-            continue;
-        }
-        if (tok != "<"u8 && tok != "!<"u8) {
-            p.syntaxError("missing <"u8);
-        }
-        op = tok;
-    }
+    });
     return (@out, err);
-});
+}
 
 // A rulesParser parses the depsRules syntax described above.
 [GoType] partial struct rulesParser {

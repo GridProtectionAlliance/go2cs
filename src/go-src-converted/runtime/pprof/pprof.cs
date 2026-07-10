@@ -75,8 +75,8 @@ namespace go.runtime;
 using bufio = bufio_package;
 using cmp = cmp_package;
 using fmt = fmt_package;
-using abi = @internal.abi_package;
-using profilerecord = @internal.profilerecord_package;
+using abi = go.@internal.abi_package;
+using profilerecord = go.@internal.profilerecord_package;
 using io = io_package;
 using runtime = runtime_package;
 using slices = slices_package;
@@ -86,7 +86,7 @@ using sync = sync_package;
 using tabwriter = text.tabwriter_package;
 using time = time_package;
 using @unsafe = unsafe_package;
-using @internal;
+using go.@internal;
 using text;
 
 partial class pprof_package {
@@ -176,7 +176,7 @@ partial class pprof_package {
 // caveats).
 [GoType] partial struct Profile {
     internal @string name;
-    internal sync_package.Mutex mu;
+    internal sync.Mutex mu;
     internal map<any, slice<uintptr>> m;
     internal Func<nint> count;
     internal Func<io.Writer, nint, error> write;
@@ -185,10 +185,11 @@ partial class pprof_package {
 // profiles records all registered profiles.
 
 [GoType("dyn")] partial struct profilesᴛ1 {
-    internal sync_package.Mutex mu;
+    internal sync.Mutex mu;
     internal map<@string, ж<Profile>> m;
 }
-internal static profilesᴛ1 profiles;
+internal static ж<profilesᴛ1> Ꮡprofiles = new(default(profilesᴛ1));
+internal static ref profilesᴛ1 profiles => ref Ꮡprofiles.Value;
 
 internal static ж<Profile> goroutineProfile = Ꮡ(new Profile(
     name: "goroutine"u8,
@@ -228,7 +229,7 @@ internal static ж<Profile> mutexProfile = Ꮡ(new Profile(
 ));
 
 internal static void lockProfiles() {
-    profiles.mu.Lock();
+    Ꮡprofiles.of(profilesᴛ1.Ꮡmu).Lock();
     if (profiles.m == default!) {
         // Initial built-in profiles.
         profiles.m = new map<@string, ж<Profile>>{
@@ -243,7 +244,7 @@ internal static void lockProfiles() {
 }
 
 internal static void unlockProfiles() {
-    profiles.mu.Unlock();
+    Ꮡprofiles.of(profilesᴛ1.Ꮡmu).Unlock();
 }
 
 // NewProfile creates a new profile with the given name.
@@ -252,14 +253,14 @@ internal static void unlockProfiles() {
 // separate name spaces for each package.
 // For compatibility with various tools that read pprof data,
 // profile names should not contain spaces.
-public static ж<Profile> NewProfile(@string name) => func((defer, _) => {
+public static ж<Profile> NewProfile(@string name) => func((defer, recover) => {
     lockProfiles();
     defer(unlockProfiles);
     if (name == ""u8) {
         throw panic("pprof: NewProfile with empty name");
     }
     if (profiles.m[name] != nil) {
-        throw panic("pprof: NewProfile name already in use: "u8 + name);
+        throw panic("pprof: NewProfile name already in use: " + name);
     }
     var p = Ꮡ(new Profile(
         name: name,
@@ -270,21 +271,21 @@ public static ж<Profile> NewProfile(@string name) => func((defer, _) => {
 });
 
 // Lookup returns the profile with the given name, or nil if no such profile exists.
-public static ж<Profile> Lookup(@string name) => func((defer, _) => {
+public static ж<Profile> Lookup(@string name) => func((defer, recover) => {
     lockProfiles();
     defer(unlockProfiles);
     return profiles.m[name];
 });
 
 // Profiles returns a slice of all the known profiles, sorted by name.
-public static slice<ж<Profile>> Profiles() => func((defer, _) => {
+public static slice<ж<Profile>> Profiles() => func((defer, recover) => {
     lockProfiles();
     defer(unlockProfiles);
     var all = new slice<ж<Profile>>(0, len(profiles.m));
     foreach (var (_, p) in profiles.m) {
         all = append(all, p);
     }
-    slices.SortFunc(all, (ж<Profile> a, ж<Profile> b) => strings.Compare((~a).name, (~b).name));
+    slices.SortFunc(all, (ж<Profile> a, ж<Profile> b) => strings_package.Compare((~a).name, (~b).name));
     return all;
 });
 
@@ -294,9 +295,11 @@ public static slice<ж<Profile>> Profiles() => func((defer, _) => {
 }
 
 // Count returns the number of execution stacks currently in the profile.
-[GoRecv] public static nint Count(this ref Profile p) => func((defer, _) => {
-    p.mu.Lock();
-    defer(p.mu.Unlock);
+public static nint Count(this ж<Profile> Ꮡp) => func((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
+
+    Ꮡp.of(Profile.Ꮡmu).Lock();
+    defer(Ꮡp.of(Profile.Ꮡmu).Unlock);
     if (p.count != default!) {
         return p.count();
     }
@@ -320,12 +323,14 @@ public static slice<ж<Profile>> Profiles() => func((defer, _) => {
 //
 // Passing skip=0 begins the stack trace at the call to Add inside rpc.NewClient.
 // Passing skip=1 begins the stack trace at the call to NewClient inside mypkg.Run.
-[GoRecv] public static void Add(this ref Profile p, any value, nint skip) => func((defer, _) => {
+public static void Add(this ж<Profile> Ꮡp, any value, nint skip) => func((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
+
     if (p.name == ""u8) {
         throw panic("pprof: use of uninitialized Profile");
     }
     if (p.write != default!) {
-        throw panic("pprof: Add called on built-in Profile "u8 + p.name);
+        throw panic("pprof: Add called on built-in Profile " + p.name);
     }
     var stk = new slice<uintptr>(32);
     nint n = runtime.Callers(skip + 1, stk[..]);
@@ -334,8 +339,8 @@ public static slice<ж<Profile>> Profiles() => func((defer, _) => {
         // The value for skip is too large, and there's no stack trace to record.
         stk = new uintptr[]{abi.FuncPCABIInternal(lostProfileEvent)}.slice();
     }
-    p.mu.Lock();
-    defer(p.mu.Unlock);
+    Ꮡp.of(Profile.Ꮡmu).Lock();
+    defer(Ꮡp.of(Profile.Ꮡmu).Unlock);
     if (p.m[value] != default!) {
         throw panic("pprof: Profile.Add of duplicate value");
     }
@@ -344,9 +349,11 @@ public static slice<ж<Profile>> Profiles() => func((defer, _) => {
 
 // Remove removes the execution stack associated with value from the profile.
 // It is a no-op if the value is not in the profile.
-[GoRecv] public static void Remove(this ref Profile p, any value) => func((defer, _) => {
-    p.mu.Lock();
-    defer(p.mu.Unlock);
+public static void Remove(this ж<Profile> Ꮡp, any value) => func((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
+
+    Ꮡp.of(Profile.Ꮡmu).Lock();
+    defer(Ꮡp.of(Profile.Ꮡmu).Unlock);
     delete(p.m, value);
 });
 
@@ -365,7 +372,9 @@ public static slice<ж<Profile>> Profiles() => func((defer, _) => {
 // for example, when printing the "goroutine" profile, debug=2 means to
 // print the goroutine stacks in the same form that a Go program uses
 // when dying due to an unrecovered panic.
-[GoRecv] public static error WriteTo(this ref Profile p, io.Writer w, nint debug) {
+public static error WriteTo(this ж<Profile> Ꮡp, io.Writer w, nint debug) {
+    ref var p = ref Ꮡp.Value;
+
     if (p.name == ""u8) {
         throw panic("pprof: use of zero Profile");
     }
@@ -373,18 +382,18 @@ public static slice<ж<Profile>> Profiles() => func((defer, _) => {
         return p.write(w, debug);
     }
     // Obtain consistent snapshot under lock; then process without lock.
-    p.mu.Lock();
+    Ꮡp.of(Profile.Ꮡmu).Lock();
     var all = new slice<slice<uintptr>>(0, len(p.m));
     foreach (var (_, stk) in p.m) {
         all = append(all, stk);
     }
-    p.mu.Unlock();
+    Ꮡp.of(Profile.Ꮡmu).Unlock();
     // Map order is non-deterministic; make output deterministic.
-    slices.SortFunc(all, slices.Compare);
+    slices.SortFunc<slice<slice<uintptr>>, slice<uintptr>>(all, slices.Compare<slice<uintptr>, uintptr>);
     return printCountProfile(w, debug, p.name, ((stackProfile)all));
 }
 
-[GoType("[]uintptr")] partial struct stackProfile;
+[GoType("[]slice<uintptr>")] partial struct stackProfile;
 
 internal static nint Len(this stackProfile x) {
     return len(x);
@@ -435,16 +444,16 @@ internal static error printCountCycleProfile(io.Writer w, @string countName, @st
     // Output profile in protobuf form.
     var b = newProfileBuilder(w);
     b.pbValueType(tagProfile_PeriodType, countName, "count"u8);
-    (~b).pb.int64Opt(tagProfile_Period, 1);
+    b.of(profileBuilder.Ꮡpb).int64Opt(tagProfile_Period, 1);
     b.pbValueType(tagProfile_SampleType, countName, "count"u8);
     b.pbValueType(tagProfile_SampleType, cycleName, "nanoseconds"u8);
-    var cpuGHz = ((float64)pprof_cyclesPerSecond()) / 1e9F;
+    var cpuGHz = (float64)pprof_cyclesPerSecond() / 1e9D;
     var values = new int64[]{0, 0}.slice();
     slice<uint64> locs = default!;
     var expandedStack = pprof_makeProfStack();
     foreach (var (_, r) in records) {
         values[0] = r.Count;
-        values[1] = ((int64)(((float64)r.Cycles) / cpuGHz));
+        values[1] = (int64)((float64)r.Cycles / cpuGHz);
         // For count profiles, all stack addresses are
         // return PCs, which is what appendLocsForStack expects.
         nint n = expandInlinedFrames(expandedStack, r.Stack);
@@ -459,20 +468,18 @@ internal static error printCountCycleProfile(io.Writer w, @string countName, @st
 // The profile will be in compressed proto format unless debug is nonzero.
 internal static error printCountProfile(io.Writer w, nint debug, @string name, countProfile p) {
     // Build count of each stack.
-    ref var buf = ref heap(new strings_package.Builder(), out var Ꮡbuf);
-    var key = 
-    var bufʗ1 = buf;
-    (slice<uintptr> stk, ж<labelMap> lbls) => {
-        bufʗ1.Reset();
-        fmt.Fprintf(~Ꮡbufʗ1, "@"u8);
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
+    var key = @string (slice<uintptr> stk, ж<labelMap> lbls) => {
+        Ꮡbuf.Value.Reset();
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "@"u8);
         foreach (var (_, pc) in stk) {
-            fmt.Fprintf(~Ꮡbufʗ1, " %#x"u8, pc);
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), " %#x"u8, pc);
         }
         if (lbls != nil) {
-            bufʗ1.WriteString("\n# labels: "u8);
-            bufʗ1.WriteString(lbls.String());
+            Ꮡbuf.WriteString("\n# labels: "u8);
+            Ꮡbuf.WriteString(lbls.String());
         }
-        return bufʗ1.String();
+        return Ꮡbuf.Value.String();
     };
     var count = new map<@string, nint>{};
     var index = new map<@string, nint>{};
@@ -486,36 +493,35 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
         }
         count[k]++;
     }
-    sort.Sort(new keysByCount(keys, count));
+    sort.Sort(new keysByCountжInterface(Ꮡ(new keysByCount(keys, count))));
     if (debug > 0) {
         // Print debug profile in legacy format
         var tw = tabwriter.NewWriter(w, 1, 8, 1, (rune)'\t', 0);
-        fmt.Fprintf(~tw, "%s profile: total %d\n"u8, name, p.Len());
+        fmt.Fprintf(new tabwriter_WriterжWriter(tw), "%s profile: total %d\n"u8, name, p.Len());
         foreach (var (_, k) in keys) {
-            fmt.Fprintf(~tw, "%d %s\n"u8, count[k], k);
-            printStackRecord(~tw, p.Stack(index[k]), false);
+            fmt.Fprintf(new tabwriter_WriterжWriter(tw), "%d %s\n"u8, count[k], k);
+            printStackRecord(new tabwriter_WriterжWriter(tw), p.Stack(index[k]), false);
         }
         return tw.Flush();
     }
     // Output profile in protobuf form.
     var b = newProfileBuilder(w);
     b.pbValueType(tagProfile_PeriodType, name, "count"u8);
-    (~b).pb.int64Opt(tagProfile_Period, 1);
+    b.of(profileBuilder.Ꮡpb).int64Opt(tagProfile_Period, 1);
     b.pbValueType(tagProfile_SampleType, name, "count"u8);
     var values = new int64[]{0}.slice();
     slice<uint64> locs = default!;
     foreach (var (_, k) in keys) {
-        values[0] = ((int64)count[k]);
+        values[0] = (int64)count[k];
         // For count profiles, all stack addresses are
         // return PCs, which is what appendLocsForStack expects.
         locs = b.appendLocsForStack(locs[..0], p.Stack(index[k]));
         nint idx = index[k];
         Action labels = default!;
         if (p.Label(idx) != nil) {
-            labels = 
             var bʗ1 = b;
-            () => {
-                foreach (var (kΔ1, v) in p.Label(idx).val) {
+            labels = () => {
+                foreach (var (kΔ1, v) in p.Label(idx).ValueSlot) {
                     bʗ1.pbLabel(tagSample_Label, kΔ1, v, 0);
                 }
             };
@@ -563,7 +569,7 @@ internal static void printStackRecord(io.Writer w, slice<uintptr> stk, bool allF
             show = true;
             fmt.Fprintf(w, "#\t%#x\n"u8, frame.PC);
         } else 
-        if (name != "runtime.goexit"u8 && (show || !strings.HasPrefix(name, "runtime."u8))) {
+        if (name != "runtime.goexit"u8 && (show || !strings_package.HasPrefix(name, "runtime."u8))) {
             // Hide runtime.goexit and any runtime functions at the beginning.
             // This is useful mainly for allocation traces.
             show = true;
@@ -637,19 +643,19 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
     }
     // Profile grew; try again.
     if (debug == 0) {
-        return writeHeapProto(w, p, ((int64)runtime.MemProfileRate), defaultSampleType);
+        return writeHeapProto(w, p, (int64)runtime.MemProfileRate, defaultSampleType);
     }
-    slices.SortFunc(p, (profilerecord.MemProfileRecord a, profilerecord.MemProfileRecord b) => cmp.Compare(a.InUseBytes(), bΔ1.InUseBytes()));
+    slices.SortFunc(p, (profilerecord.MemProfileRecord a, profilerecord.MemProfileRecord bΔ1) => cmp.Compare(a.InUseBytes(), bΔ1.InUseBytes()));
     var b = bufio.NewWriter(w);
-    var tw = tabwriter.NewWriter(~b, 1, 8, 1, (rune)'\t', 0);
-    w = ~tw;
+    var tw = tabwriter.NewWriter(new bufio_WriterжWriter(b), 1, 8, 1, (rune)'\t', 0);
+    w = new tabwriter_WriterжWriter(tw);
     runtime.MemProfileRecord total = default!;
     foreach (var (i, _) in p) {
         var r = Ꮡ(p, i);
-        total.AllocBytes += r.val.AllocBytes;
-        total.AllocObjects += r.val.AllocObjects;
-        total.FreeBytes += r.val.FreeBytes;
-        total.FreeObjects += r.val.FreeObjects;
+        total.AllocBytes += r.Value.AllocBytes;
+        total.AllocObjects += r.Value.AllocObjects;
+        total.FreeBytes += r.Value.FreeBytes;
+        total.FreeObjects += r.Value.FreeObjects;
     }
     // Technically the rate is MemProfileRate not 2*MemProfileRate,
     // but early versions of the C++ heap profiler reported 2*MemProfileRate,
@@ -728,7 +734,11 @@ internal static error writeThreadCreate(io.Writer w, nint debug) {
     // Until https://golang.org/issues/6104 is addressed, wrap
     // ThreadCreateProfile because there's no point in tracking labels when we
     // don't get any stack-traces.
-    return writeRuntimeProfile(w, debug, "threadcreate"u8, (slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> _) => pprof_threadCreateInternal(p));
+    return writeRuntimeProfile(w, debug, "threadcreate"u8, (slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> _) => {
+        nint n = default!;
+        bool ok = default!;
+        return pprof_threadCreateInternal(p);
+    });
 }
 
 // countGoroutine returns the number of goroutines.
@@ -748,14 +758,14 @@ internal static error writeGoroutineStacks(io.Writer w) {
     // We don't know how big the buffer needs to be to collect
     // all the goroutines. Start with 1 MB and try a few times, doubling each time.
     // Give up and use a truncated trace if 64 MB is not enough.
-    var buf = new slice<byte>(1 << (int)(20));
+    var buf = new slice<byte>((1 << (int)(20)));
     for (nint i = 0; ᐧ ; i++) {
         nint n = runtime.Stack(buf, true);
         if (n < len(buf)) {
             buf = buf[..(int)(n)];
             break;
         }
-        if (len(buf) >= 64 << (int)(20)) {
+        if (len(buf) >= (64 << (int)(20))) {
             // Filled 64 MB - stop there.
             break;
         }
@@ -765,7 +775,7 @@ internal static error writeGoroutineStacks(io.Writer w) {
     return err;
 }
 
-internal static error writeRuntimeProfile(io.Writer w, nint debug, @string name, profilerecord.StackRecord, <>unsafe.Pointer) (int, bool) fetch) {
+internal static error writeRuntimeProfile(io.Writer w, nint debug, @string name, Func<slice<profilerecord.StackRecord>, slice<@unsafe.Pointer>, (nint, bool)> fetch) {
     // Find out how many records there are (fetch(nil)),
     // allocate that many records, and get the data.
     // There's a race—more records might be added between
@@ -788,11 +798,11 @@ internal static error writeRuntimeProfile(io.Writer w, nint debug, @string name,
         }
     }
     // Profile grew; try again.
-    return printCountProfile(w, debug, name, new runtimeProfile(p, labels));
+    return printCountProfile(w, debug, name, new runtimeProfileжcountProfile(Ꮡ(new runtimeProfile(p, labels))));
 }
 
 [GoType] partial struct runtimeProfile {
-    internal profilerecord.StackRecord stk;
+    internal slice<profilerecord.StackRecord> stk;
     internal slice<@unsafe.Pointer> labels;
 }
 
@@ -814,7 +824,8 @@ internal static error writeRuntimeProfile(io.Writer w, nint debug, @string name,
     internal bool profiling;
     internal channel<bool> done;
 }
-internal static cpuᴛ1 cpu;
+internal static ж<cpuᴛ1> Ꮡcpu = new(new cpuᴛ1(nil));
+internal static ref cpuᴛ1 cpu => ref Ꮡcpu.Value;
 
 // StartCPUProfile enables CPU profiling for the current process.
 // While profiling, the profile will be buffered and written to w.
@@ -827,7 +838,7 @@ internal static cpuᴛ1 cpu;
 // not to the one used by Go. To make it work, call [os/signal.Notify]
 // for [syscall.SIGPROF], but note that doing so may break any profiling
 // being done by the main program.
-public static error StartCPUProfile(io.Writer w) => func((defer, _) => {
+public static error StartCPUProfile(io.Writer w) => func<error>((defer, recover) => {
     // The runtime routines allow a variable profiling rate,
     // but in practice operating systems cannot trigger signals
     // at more than about 500 Hz, and our processing of the
@@ -837,10 +848,9 @@ public static error StartCPUProfile(io.Writer w) => func((defer, _) => {
     // system, and a nice round number to make it easy to
     // convert sample counts to seconds. Instead of requiring
     // each client to specify the frequency, we hard code it.
-    static readonly UntypedInt hz = 100;
-    cpu.Lock();
-    var cpuʗ1 = cpu;
-    defer(cpuʗ1.Unlock);
+    UntypedInt hz = 100;
+    Ꮡcpu.of(cpuᴛ1.ᏑMutex).Lock();
+    defer(Ꮡcpu.of(cpuᴛ1.ᏑMutex).Unlock);
     if (cpu.done == default!) {
         cpu.done = new channel<bool>(1);
     }
@@ -879,7 +889,7 @@ internal static void profileWriter(io.Writer w) {
     if (err != default!) {
         // The runtime should never produce an invalid or truncated profile.
         // It drops records that can't fit into its log buffers.
-        throw panic("runtime/pprof: converting profile: "u8 + err.Error());
+        throw panic("runtime/pprof: converting profile: " + err.Error());
     }
     b.build();
     cpu.done.ᐸꟷ(true);
@@ -888,10 +898,9 @@ internal static void profileWriter(io.Writer w) {
 // StopCPUProfile stops the current CPU profile, if any.
 // StopCPUProfile only returns after all the writes for the
 // profile have completed.
-public static void StopCPUProfile() => func((defer, _) => {
-    cpu.Lock();
-    var cpuʗ1 = cpu;
-    defer(cpuʗ1.Unlock);
+public static void StopCPUProfile() => func((defer, recover) => {
+    Ꮡcpu.of(cpuᴛ1.ᏑMutex).Lock();
+    defer(Ꮡcpu.of(cpuᴛ1.ᏑMutex).Unlock);
     if (!cpu.profiling) {
         return;
     }
@@ -923,7 +932,7 @@ internal static error writeMutex(io.Writer w, nint debug) {
 }
 
 // writeProfileInternal writes the current blocking or mutex profile depending on the passed parameters.
-internal static error writeProfileInternal(io.Writer w, nint debug, @string name, profilerecord.BlockProfileRecord) (int, bool) runtimeProfile) {
+internal static error writeProfileInternal(io.Writer w, nint debug, @string name, Func<slice<profilerecord.BlockProfileRecord>, (nint, bool)> runtimeProfile) {
     slice<profilerecord.BlockProfileRecord> p = default!;
     var (n, ok) = runtimeProfile(default!);
     while (ᐧ) {
@@ -934,13 +943,13 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
             break;
         }
     }
-    slices.SortFunc(p, (profilerecord.BlockProfileRecord a, profilerecord.BlockProfileRecord b) => cmp.Compare(bΔ1.Cycles, a.Cycles));
+    slices.SortFunc(p, (profilerecord.BlockProfileRecord a, profilerecord.BlockProfileRecord bΔ1) => cmp.Compare(bΔ1.Cycles, a.Cycles));
     if (debug <= 0) {
         return printCountCycleProfile(w, "contentions"u8, "delay"u8, p);
     }
     var b = bufio.NewWriter(w);
     var tw = tabwriter.NewWriter(w, 1, 8, 1, (rune)'\t', 0);
-    w = ~tw;
+    w = new tabwriter_WriterжWriter(tw);
     fmt.Fprintf(w, "--- %v:\n"u8, name);
     fmt.Fprintf(w, "cycles/second=%v\n"u8, pprof_cyclesPerSecond());
     if (name == "mutex"u8) {

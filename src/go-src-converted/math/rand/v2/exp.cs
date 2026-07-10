@@ -26,74 +26,74 @@ internal static readonly UntypedFloat re = /* 7.69711747013104972 */ 7.69712;
 [GoRecv] public static float64 ExpFloat64(this ref Rand r) {
     while (ᐧ) {
         var u = r.Uint64();
-        var j = ((uint32)u);
-        var i = ((uint8)(u >> (int)(32)));
-        var x = ((float64)j) * ((float64)we[i]);
+        var j = (uint32)u;
+        var i = (uint8)((u >> (int)(32)));
+        var x = (float64)j * (float64)we[i];
         if (j < ke[i]) {
             return x;
         }
         if (i == 0) {
-            return re - math.Log(r.Float64());
+            return (float64)re - math.Log(r.Float64());
         }
-        if (fe[i] + ((float32)r.Float64()) * (fe[i - 1] - fe[i]) < ((float32)math.Exp(-x))) {
+        if (fe[i] + (float32)r.Float64() * (fe[i - 1] - fe[i]) < (float32)math.Exp(-x)) {
             return x;
         }
     }
 }
 
 internal static array<uint32> ke = new uint32[]{
-    (nint)3801129273L, 0, (nint)2615860924L, (nint)3279400049L, (nint)3571300752L,
-    (nint)3733536696L, (nint)3836274812L, (nint)3906990442L, (nint)3958562475L, (nint)3997804264L,
-    (nint)4028649213L, (nint)4053523342L, (nint)4074002619L, (nint)4091154507L, (nint)4105727352L,
-    (nint)4118261130L, (nint)4129155133L, (nint)4138710916L, (nint)4147160435L, (nint)4154685009L,
-    (nint)4161428406L, (nint)4167506077L, (nint)4173011791L, (nint)4178022498L, (nint)4182601930L,
-    (nint)4186803325L, (nint)4190671498L, (nint)4194244443L, (nint)4197554582L, (nint)4200629752L,
-    (nint)4203493986L, (nint)4206168142L, (nint)4208670408L, (nint)4211016720L, (nint)4213221098L,
-    (nint)4215295924L, (nint)4217252177L, (nint)4219099625L, (nint)4220846988L, (nint)4222502074L,
-    (nint)4224071896L, (nint)4225562770L, (nint)4226980400L, (nint)4228329951L, (nint)4229616109L,
-    (nint)4230843138L, (nint)4232014925L, (nint)4233135020L, (nint)4234206673L, (nint)4235232866L,
-    (nint)4236216336L, (nint)4237159604L, (nint)4238064994L, (nint)4238934652L, (nint)4239770563L,
-    (nint)4240574564L, (nint)4241348362L, (nint)4242093539L, (nint)4242811568L, (nint)4243503822L,
-    (nint)4244171579L, (nint)4244816032L, (nint)4245438297L, (nint)4246039419L, (nint)4246620374L,
-    (nint)4247182079L, (nint)4247725394L, (nint)4248251127L, (nint)4248760037L, (nint)4249252839L,
-    (nint)4249730206L, (nint)4250192773L, (nint)4250641138L, (nint)4251075867L, (nint)4251497493L,
-    (nint)4251906522L, (nint)4252303431L, (nint)4252688672L, (nint)4253062674L, (nint)4253425844L,
-    (nint)4253778565L, (nint)4254121205L, (nint)4254454110L, (nint)4254777611L, (nint)4255092022L,
-    (nint)4255397640L, (nint)4255694750L, (nint)4255983622L, (nint)4256264513L, (nint)4256537670L,
-    (nint)4256803325L, (nint)4257061702L, (nint)4257313014L, (nint)4257557464L, (nint)4257795244L,
-    (nint)4258026541L, (nint)4258251531L, (nint)4258470383L, (nint)4258683258L, (nint)4258890309L,
-    (nint)4259091685L, (nint)4259287526L, (nint)4259477966L, (nint)4259663135L, (nint)4259843154L,
-    (nint)4260018142L, (nint)4260188212L, (nint)4260353470L, (nint)4260514019L, (nint)4260669958L,
-    (nint)4260821380L, (nint)4260968374L, (nint)4261111028L, (nint)4261249421L, (nint)4261383632L,
-    (nint)4261513736L, (nint)4261639802L, (nint)4261761900L, (nint)4261880092L, (nint)4261994441L,
-    (nint)4262105003L, (nint)4262211835L, (nint)4262314988L, (nint)4262414513L, (nint)4262510454L,
-    (nint)4262602857L, (nint)4262691764L, (nint)4262777212L, (nint)4262859239L, (nint)4262937878L,
-    (nint)4263013162L, (nint)4263085118L, (nint)4263153776L, (nint)4263219158L, (nint)4263281289L,
-    (nint)4263340187L, (nint)4263395872L, (nint)4263448358L, (nint)4263497660L, (nint)4263543789L,
-    (nint)4263586755L, (nint)4263626565L, (nint)4263663224L, (nint)4263696735L, (nint)4263727099L,
-    (nint)4263754314L, (nint)4263778377L, (nint)4263799282L, (nint)4263817020L, (nint)4263831582L,
-    (nint)4263842955L, (nint)4263851124L, (nint)4263856071L, (nint)4263857776L, (nint)4263856218L,
-    (nint)4263851370L, (nint)4263843206L, (nint)4263831695L, (nint)4263816804L, (nint)4263798497L,
-    (nint)4263776735L, (nint)4263751476L, (nint)4263722676L, (nint)4263690284L, (nint)4263654251L,
-    (nint)4263614520L, (nint)4263571032L, (nint)4263523724L, (nint)4263472530L, (nint)4263417377L,
-    (nint)4263358192L, (nint)4263294892L, (nint)4263227394L, (nint)4263155608L, (nint)4263079437L,
-    (nint)4262998781L, (nint)4262913534L, (nint)4262823581L, (nint)4262728804L, (nint)4262629075L,
-    (nint)4262524261L, (nint)4262414220L, (nint)4262298801L, (nint)4262177846L, (nint)4262051187L,
-    (nint)4261918645L, (nint)4261780032L, (nint)4261635148L, (nint)4261483780L, (nint)4261325704L,
-    (nint)4261160681L, (nint)4260988457L, (nint)4260808763L, (nint)4260621313L, (nint)4260425802L,
-    (nint)4260221905L, (nint)4260009277L, (nint)4259787550L, (nint)4259556329L, (nint)4259315195L,
-    (nint)4259063697L, (nint)4258801357L, (nint)4258527656L, (nint)4258242044L, (nint)4257943926L,
-    (nint)4257632664L, (nint)4257307571L, (nint)4256967906L, (nint)4256612870L, (nint)4256241598L,
-    (nint)4255853155L, (nint)4255446525L, (nint)4255020608L, (nint)4254574202L, (nint)4254106002L,
-    (nint)4253614578L, (nint)4253098370L, (nint)4252555662L, (nint)4251984571L, (nint)4251383021L,
-    (nint)4250748722L, (nint)4250079132L, (nint)4249371435L, (nint)4248622490L, (nint)4247828790L,
-    (nint)4246986404L, (nint)4246090910L, (nint)4245137315L, (nint)4244119963L, (nint)4243032411L,
-    (nint)4241867296L, (nint)4240616155L, (nint)4239269214L, (nint)4237815118L, (nint)4236240596L,
-    (nint)4234530035L, (nint)4232664930L, (nint)4230623176L, (nint)4228378137L, (nint)4225897409L,
-    (nint)4223141146L, (nint)4220059768L, (nint)4216590757L, (nint)4212654085L, (nint)4208145538L,
-    (nint)4202926710L, (nint)4196809522L, (nint)4189531420L, (nint)4180713890L, (nint)4169789475L,
-    (nint)4155865042L, (nint)4137444620L, (nint)4111806704L, (nint)4073393724L, (nint)4008685917L,
-    (nint)3873074895L
+    0xe290a139U, 0x0, 0x9beadebcU, 0xc377ac71U, 0xd4ddb990U,
+    0xde893fb8U, 0xe4a8e87cU, 0xe8dff16aU, 0xebf2deabU, 0xee49a6e8U,
+    0xf0204efdU, 0xf19bdb8eU, 0xf2d458bbU, 0xf3da104bU, 0xf4b86d78U,
+    0xf577ad8aU, 0xf61de83dU, 0xf6afb784U, 0xf730a573U, 0xf7a37651U,
+    0xf80a5bb6U, 0xf867189dU, 0xf8bb1b4fU, 0xf9079062U, 0xf94d70caU,
+    0xf98d8c7dU, 0xf9c8928aU, 0xf9ff175bU, 0xfa319996U, 0xfa6085f8U,
+    0xfa8c3a62U, 0xfab5084eU, 0xfadb36c8U, 0xfaff0410U, 0xfb20a6eaU,
+    0xfb404fb4U, 0xfb5e2951U, 0xfb7a59e9U, 0xfb95038cU, 0xfbae44baU,
+    0xfbc638d8U, 0xfbdcf892U, 0xfbf29a30U, 0xfc0731dfU, 0xfc1ad1edU,
+    0xfc2d8b02U, 0xfc3f6c4dU, 0xfc5083acU, 0xfc60ddd1U, 0xfc708662U,
+    0xfc7f8810U, 0xfc8decb4U, 0xfc9bbd62U, 0xfca9027cU, 0xfcb5c3c3U,
+    0xfcc20864U, 0xfccdd70aU, 0xfcd935e3U, 0xfce42ab0U, 0xfceebaceU,
+    0xfcf8eb3bU, 0xfd02c0a0U, 0xfd0c3f59U, 0xfd156b7bU, 0xfd1e48d6U,
+    0xfd26daffU, 0xfd2f2552U, 0xfd372af7U, 0xfd3eeee5U, 0xfd4673e7U,
+    0xfd4dbc9eU, 0xfd54cb85U, 0xfd5ba2f2U, 0xfd62451bU, 0xfd68b415U,
+    0xfd6ef1daU, 0xfd750047U, 0xfd7ae120U, 0xfd809612U, 0xfd8620b4U,
+    0xfd8b8285U, 0xfd90bcf5U, 0xfd95d15eU, 0xfd9ac10bU, 0xfd9f8d36U,
+    0xfda43708U, 0xfda8bf9eU, 0xfdad2806U, 0xfdb17141U, 0xfdb59c46U,
+    0xfdb9a9fdU, 0xfdbd9b46U, 0xfdc170f6U, 0xfdc52bd8U, 0xfdc8ccacU,
+    0xfdcc542dU, 0xfdcfc30bU, 0xfdd319efU, 0xfdd6597aU, 0xfdd98245U,
+    0xfddc94e5U, 0xfddf91e6U, 0xfde279ceU, 0xfde54d1fU, 0xfde80c52U,
+    0xfdeab7deU, 0xfded5034U, 0xfdefd5beU, 0xfdf248e3U, 0xfdf4aa06U,
+    0xfdf6f984U, 0xfdf937b6U, 0xfdfb64f4U, 0xfdfd818dU, 0xfdff8dd0U,
+    0xfe018a08U, 0xfe03767aU, 0xfe05536cU, 0xfe07211cU, 0xfe08dfc9U,
+    0xfe0a8fabU, 0xfe0c30fbU, 0xfe0dc3ecU, 0xfe0f48b1U, 0xfe10bf76U,
+    0xfe122869U, 0xfe1383b4U, 0xfe14d17cU, 0xfe1611e7U, 0xfe174516U,
+    0xfe186b2aU, 0xfe19843eU, 0xfe1a9070U, 0xfe1b8fd6U, 0xfe1c8289U,
+    0xfe1d689bU, 0xfe1e4220U, 0xfe1f0f26U, 0xfe1fcfbcU, 0xfe2083edU,
+    0xfe212bc3U, 0xfe21c745U, 0xfe225678U, 0xfe22d95fU, 0xfe234ffbU,
+    0xfe23ba4aU, 0xfe241849U, 0xfe2469f2U, 0xfe24af3cU, 0xfe24e81eU,
+    0xfe25148bU, 0xfe253474U, 0xfe2547c7U, 0xfe254e70U, 0xfe25485aU,
+    0xfe25356aU, 0xfe251586U, 0xfe24e88fU, 0xfe24ae64U, 0xfe2466e1U,
+    0xfe2411dfU, 0xfe23af34U, 0xfe233eb4U, 0xfe22c02cU, 0xfe22336bU,
+    0xfe219838U, 0xfe20ee58U, 0xfe20358cU, 0xfe1f6d92U, 0xfe1e9621U,
+    0xfe1daef0U, 0xfe1cb7acU, 0xfe1bb002U, 0xfe1a9798U, 0xfe196e0dU,
+    0xfe1832fdU, 0xfe16e5feU, 0xfe15869dU, 0xfe141464U, 0xfe128ed3U,
+    0xfe10f565U, 0xfe0f478cU, 0xfe0d84b1U, 0xfe0bac36U, 0xfe09bd73U,
+    0xfe07b7b5U, 0xfe059a40U, 0xfe03644cU, 0xfe011504U, 0xfdfeab88U,
+    0xfdfc26e9U, 0xfdf98629U, 0xfdf6c83bU, 0xfdf3ec01U, 0xfdf0f04aU,
+    0xfdedd3d1U, 0xfdea953dU, 0xfde7331eU, 0xfde3abe9U, 0xfddffdfbU,
+    0xfddc2791U, 0xfdd826cdU, 0xfdd3f9a8U, 0xfdcf9dfcU, 0xfdcb1176U,
+    0xfdc65198U, 0xfdc15bb3U, 0xfdbc2ce2U, 0xfdb6c206U, 0xfdb117beU,
+    0xfdab2a63U, 0xfda4f5fdU, 0xfd9e7640U, 0xfd97a67aU, 0xfd908192U,
+    0xfd8901f2U, 0xfd812182U, 0xfd78d98eU, 0xfd7022bbU, 0xfd66f4edU,
+    0xfd5d4732U, 0xfd530f9cU, 0xfd48432bU, 0xfd3cd59aU, 0xfd30b936U,
+    0xfd23dea4U, 0xfd16349eU, 0xfd07a7a3U, 0xfcf8219bU, 0xfce7895bU,
+    0xfcd5c220U, 0xfcc2aadbU, 0xfcae1d5eU, 0xfc97ed4eU, 0xfc7fe6d4U,
+    0xfc65ccf3U, 0xfc495762U, 0xfc2a2fc8U, 0xfc07ee19U, 0xfbe213c1U,
+    0xfbb8051aU, 0xfb890078U, 0xfb5411a5U, 0xfb180005U, 0xfad33482U,
+    0xfa839276U, 0xfa263b32U, 0xf9b72d1cU, 0xf930a1a2U, 0xf889f023U,
+    0xf7b577d2U, 0xf69c650cU, 0xf51530f0U, 0xf2cb0e3cU, 0xeeefb15dU,
+    0xe6da6ecfU
 }.array();
 
 internal static array<float32> we = new float32[]{

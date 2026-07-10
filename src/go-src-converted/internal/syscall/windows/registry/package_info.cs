@@ -42,11 +42,9 @@ using static go.@internal.syscall.windows.registry_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<syscall_package.Errno, error>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Key, syscallꓸHandle>(Inverted = true, ValueType = "Key")]
 // </ImplicitConversions>
 
 namespace go.@internal.syscall.windows;

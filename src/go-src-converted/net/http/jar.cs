@@ -3,7 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.net;
 
-using url = net.url_package;
+using url = go.net.url_package;
+using go.net;
 
 partial class http_package {
 

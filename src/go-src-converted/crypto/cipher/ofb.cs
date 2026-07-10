@@ -4,9 +4,10 @@
 // OFB (Output Feedback) Mode.
 namespace go.crypto;
 
-using alias = crypto.@internal.alias_package;
-using subtle = crypto.subtle_package;
-using crypto.@internal;
+using alias = go.crypto.@internal.alias_package;
+using subtle = go.crypto.subtle_package;
+using go.crypto;
+using go.crypto.@internal;
 
 partial class cipher_package {
 
@@ -36,7 +37,7 @@ public static Stream NewOFB(Block b, slice<byte> iv) {
         outUsed: 0
     ));
     copy((~x).cipher, iv);
-    return ~x;
+    return new ofbжStream(x);
 }
 
 [GoRecv] internal static void refill(this ref ofb x) {

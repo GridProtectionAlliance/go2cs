@@ -28,12 +28,12 @@ internal static void sortByRFC6724withSrcs(slice<IPAddr> addrs, slice<netipꓸAd
         addrAttr[i] = ipAttrOf(addrAttrIP);
         srcAttr[i] = ipAttrOf(srcs[i]);
     }
-    sort.Stable(new byRFC6724(
+    sort_package.Stable(new byRFC6724жInterface(Ꮡ(new byRFC6724(
         addrs: addrs,
         addrAttr: addrAttr,
         srcs: srcs,
         srcAttr: srcAttr
-    ));
+    ))));
 }
 
 // srcAddrs tries to UDP-connect to each address to see if it has a
@@ -46,14 +46,14 @@ internal static slice<netipꓸAddr> srcAddrs(slice<IPAddr> addrs) {
     foreach (var (i, _) in addrs) {
         dst.IP = addrs[i].IP;
         dst.Zone = addrs[i].Zone;
-        (c, err) = DialUDP("udp"u8, nil, Ꮡdst);
+        var (c, err) = DialUDP("udp"u8, nil, Ꮡdst);
         if (err == default!) {
             {
-                var (src, ok) = c.LocalAddr()._<UDPAddr.val>(ᐧ); if (ok) {
+                var (src, ok) = c.of(UDPConn.Ꮡconn).LocalAddr()._<ж<UDPAddr>>(ᐧ); if (ok) {
                     (srcs[i], _) = netip.AddrFromSlice((~src).IP);
                 }
             }
-            c.Close();
+            c.of(UDPConn.Ꮡconn).Close();
         }
     }
     return srcs;
@@ -80,7 +80,7 @@ internal static ipAttr ipAttrOf(netipꓸAddr ip) {
 [GoType] partial struct byRFC6724 {
     internal slice<IPAddr> addrs; // addrs to sort
     internal slice<ipAttr> addrAttr;
-    internal netipꓸAddr srcs; // or not valid addr if unreachable
+    internal slice<netipꓸAddr> srcs; // or not valid addr if unreachable
     internal slice<ipAttr> srcAttr;
 }
 
@@ -205,7 +205,7 @@ internal static ipAttr ipAttrOf(netipꓸAddr ip) {
 
 // "equal"
 [GoType] partial struct policyTableEntry {
-    public net.netip_package.ΔPrefix Prefix;
+    public netipꓸPrefix Prefix;
     public uint8 Precedence;
     public uint8 Label;
 }
@@ -226,14 +226,14 @@ internal static ipAttr ipAttrOf(netipꓸAddr ip) {
 // "::/0"
 // RFC 6724 section 2.1.
 // Items are sorted by the size of their Prefix.Mask.Size,
-internal static policyTable rfc6724policyTable = new policyTable{
+internal static policyTable rfc6724policyTable = new policyTable(new policyTableEntry[]{
     new(
-        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}.array()), 128),
+        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x01}.array()), 128),
         Precedence: 50,
         Label: 0
     ),
     new(
-        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255}.array()), 96),
+        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff}.array()), 96),
         Precedence: 35,
         Label: 4
     ),
@@ -243,27 +243,27 @@ internal static policyTable rfc6724policyTable = new policyTable{
         Label: 3
     ),
     new(
-        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{32, 1}.array()), 32),
+        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0x20, 0x01}.array()), 32),
         Precedence: 5,
         Label: 5
     ),
     new(
-        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{32, 2}.array()), 16),
+        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0x20, 0x02}.array()), 16),
         Precedence: 30,
         Label: 2
     ),
     new(
-        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{63, 254}.array()), 16),
+        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0x3f, 0xfe}.array()), 16),
         Precedence: 1,
         Label: 12
     ),
     new(
-        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{254, 192}.array()), 10),
+        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0xfe, 0xc0}.array()), 10),
         Precedence: 1,
         Label: 11
     ),
     new(
-        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{252}.array()), 7),
+        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0xfc}.array()), 7),
         Precedence: 3,
         Label: 13
     ),
@@ -272,7 +272,7 @@ internal static policyTable rfc6724policyTable = new policyTable{
         Precedence: 40,
         Label: 1
     )
-};
+}.slice());
 
 // Classify returns the policyTableEntry of the entry with the longest
 // matching prefix that contains ip.
@@ -290,14 +290,14 @@ internal static policyTableEntry Classify(this policyTable t, netipꓸAddr ip) {
     return new policyTableEntry(nil);
 }
 
-[GoType("num:uint8")] partial struct scope;
+[GoType("num:uint8")] public partial struct scope;
 
-internal static readonly scope scopeInterfaceLocal = /* 0x1 */ 1;
-internal static readonly scope scopeLinkLocal = /* 0x2 */ 2;
-internal static readonly scope scopeAdminLocal = /* 0x4 */ 4;
-internal static readonly scope scopeSiteLocal = /* 0x5 */ 5;
-internal static readonly scope scopeOrgLocal = /* 0x8 */ 8;
-internal static readonly scope scopeGlobal = /* 0xe */ 14;
+internal static readonly scope scopeInterfaceLocal = 0x1;
+internal static readonly scope scopeLinkLocal = 0x2;
+internal static readonly scope scopeAdminLocal = 0x4;
+internal static readonly scope scopeSiteLocal = 0x5;
+internal static readonly scope scopeOrgLocal = 0x8;
+internal static readonly scope scopeGlobal = 0xe;
 
 internal static scope classifyScope(netipꓸAddr ip) {
     if (ip.IsLoopback() || ip.IsLinkLocalUnicast()) {
@@ -306,11 +306,11 @@ internal static scope classifyScope(netipꓸAddr ip) {
     var ipv6 = ip.Is6() && !ip.Is4In6();
     var ipv6AsBytes = ip.As16();
     if (ipv6 && ip.IsMulticast()) {
-        return ((scope)((byte)(ipv6AsBytes[1] & 15)));
+        return ((scope)((byte)(ipv6AsBytes[1] & 0xf)));
     }
     // Site-local addresses are defined in RFC 3513 section 2.5.6
     // (and deprecated in RFC 3879).
-    if (ipv6 && ipv6AsBytes[0] == 254 && (byte)(ipv6AsBytes[1] & 192) == 192) {
+    if (ipv6 && ipv6AsBytes[0] == 0xfe && (byte)(ipv6AsBytes[1] & 0xc0) == 0xc0) {
         return scopeSiteLocal;
     }
     return scopeGlobal;
@@ -353,8 +353,8 @@ internal static nint /*cpl*/ commonPrefixLen(netipꓸAddr a, IP b) {
         nint bits = 8;
         var (ab, bb) = (aAsSlice[0], b[0]);
         while (ᐧ) {
-            ab >>= (UntypedInt)(1);
-            bb >>= (UntypedInt)(1);
+            ab >>= (int)(1);
+            bb >>= (int)(1);
             bits--;
             if (ab == bb) {
                 cpl += bits;

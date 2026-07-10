@@ -8,7 +8,7 @@ namespace go;
 //   1) Store input in multiprecision decimal.
 //   2) Multiply/divide decimal by powers of two until in range [0.5, 1)
 //   3) Multiply by 2^precision and round to get mantissa.
-using math = math_package;
+using Δmath = math_package;
 
 partial class strconv_package {
 
@@ -25,7 +25,7 @@ internal static nint commonPrefixLenIgnoreCase(@string s, @string prefix) {
     for (nint i = 0; i < n; i++) {
         var c = s[i];
         if ((rune)'A' <= c && c <= (rune)'Z') {
-            c += (rune)'a' - (rune)'A';
+            c += (byte)((rune)'a' - (rune)'A');
         }
         if (c != prefix[i]) {
             return i;
@@ -67,12 +67,12 @@ internal static (float64 f, nint n, bool ok) special(@string s) {
             nΔ2 = 3;
         }
         if (nΔ2 == 3 || nΔ2 == 8) {
-            return (math.Inf(sign), nsign + nΔ2, true);
+            return (Δmath.Inf(sign), nsign + nΔ2, true);
         }
     }
     if (exprᴛ1 is (rune)'n' or (rune)'N') { matchᴛ1 = true;
         if (commonPrefixLenIgnoreCase(s, "nan"u8) == 3) {
-            return (math.NaN(), 3, true);
+            return (Δmath.NaN(), 3, true);
         }
     }
 
@@ -173,7 +173,7 @@ internal static (float64 f, nint n, bool ok) special(@string s) {
                 continue;
             }
             if (e < 10000) {
-                e = e * 10 + ((nint)s[i]) - (rune)'0';
+                e = e * 10 + (nint)s[i] - (rune)'0';
             }
         }
         b.dp += e * esign;
@@ -215,10 +215,10 @@ internal static (uint64 mantissa, nint exp, bool neg, bool trunc, bool hex, nint
     }}
 
     // digits
-    var @base = ((uint64)10);
+    var @base = (uint64)10;
     nint maxMantDigits = 19;
     // 10^19 fits in uint64
-    var expChar = ((byte)(rune)'e');
+    var expChar = (byte)(rune)'e';
     if (i + 2 < len(s) && s[i] == (rune)'0' && lower(s[i + 1]) == (rune)'x') {
         @base = 16;
         maxMantDigits = 16;
@@ -236,13 +236,13 @@ loop:
     for (; i < len(s); i++) {
         {
             var c = s[i];
-            switch (true) {
-            case c == (rune)'_': {
+            switch (ᐧ) {
+            case {} when c is (rune)'_': {
                 underscores = true;
                 continue;
                 break;
             }
-            case c == (rune)'.': {
+            case {} when c is (rune)'.': {
                 if (sawdot) {
                     goto break_loop;
                 }
@@ -251,7 +251,7 @@ loop:
                 continue;
                 break;
             }
-            case (rune)'0' <= c && c <= (rune)'9': {
+            case {} when (rune)'0' <= c && c <= (rune)'9': {
                 sawdigits = true;
                 if (c == (rune)'0' && nd == 0) {
                     // ignore leading zeros
@@ -261,7 +261,7 @@ loop:
                 nd++;
                 if (ndMant < maxMantDigits){
                     mantissa *= @base;
-                    mantissa += ((uint64)(c - (rune)'0'));
+                    mantissa += (uint64)(c - (rune)'0');
                     ndMant++;
                 } else 
                 if (c != (rune)'0') {
@@ -270,12 +270,12 @@ loop:
                 continue;
                 break;
             }
-            case @base == 16 && (rune)'a' <= lower(c) && lower(c) <= (rune)'f': {
+            case {} when @base == 16 && (rune)'a' <= lower(c) && lower(c) <= (rune)'f': {
                 sawdigits = true;
                 nd++;
                 if (ndMant < maxMantDigits){
                     mantissa *= 16;
-                    mantissa += ((uint64)(lower(c) - (rune)'a' + 10));
+                    mantissa += (uint64)(lower(c) - (rune)'a' + 10);
                     ndMant++;
                 } else {
                     trunc = true;
@@ -327,7 +327,7 @@ break_loop:;
                 continue;
             }
             if (e < 10000) {
-                e = e * 10 + ((nint)s[i]) - (rune)'0';
+                e = e * 10 + (nint)s[i] - (rune)'0';
             }
         }
         dp += e * esign;
@@ -349,11 +349,12 @@ break_loop:;
 // decimal power of ten to binary power of two.
 internal static slice<nint> powtab = new nint[]{1, 3, 6, 9, 13, 16, 19, 23, 26}.slice();
 
-[GoRecv] public static (uint64 b, bool overflow) floatBits(this ref @decimal d, ж<floatInfo> Ꮡflt) {
+internal static (uint64 b, bool overflow) floatBits(this ж<@decimal> Ꮡd, ж<floatInfo> Ꮡflt) {
     uint64 b = default!;
     bool overflow = default!;
 
-    ref var flt = ref Ꮡflt.val;
+    ref var d = ref Ꮡd.Value;
+    ref var flt = ref Ꮡflt.Value;
     nint exp = default!;
     uint64 mant = default!;
     // Zero is always a special case.
@@ -377,14 +378,14 @@ internal static slice<nint> powtab = new nint[]{1, 3, 6, 9, 13, 16, 19, 23, 26}.
     // Scale by powers of two until in range [0.5, 1.0)
     exp = 0;
     while (d.dp > 0) {
-        nint nΔ1 = default!;
+        nint n = default!;
         if (d.dp >= len(powtab)){
-             = 27;
+            n = 27;
         } else {
-             = powtab[d.dp];
+            n = powtab[d.dp];
         }
-        d.Shift(-nΔ1);
-        exp += nΔ1;
+        Ꮡd.Shift(-n);
+        exp += n;
     }
     while (d.dp < 0 || d.dp == 0 && d.d[0] < (rune)'5') {
         nint n = default!;
@@ -393,7 +394,7 @@ internal static slice<nint> powtab = new nint[]{1, 3, 6, 9, 13, 16, 19, 23, 26}.
         } else {
             n = powtab[-d.dp];
         }
-        d.Shift(n);
+        Ꮡd.Shift(n);
         exp -= n;
     }
     // Our range is [0.5,1) but floating point range is [1,2).
@@ -403,48 +404,48 @@ internal static slice<nint> powtab = new nint[]{1, 3, 6, 9, 13, 16, 19, 23, 26}.
     // adjust d accordingly.
     if (exp < flt.bias + 1) {
         nint n = flt.bias + 1 - exp;
-        d.Shift(-n);
+        Ꮡd.Shift(-n);
         exp += n;
     }
-    if (exp - flt.bias >= 1 << (int)(flt.expbits) - 1) {
+    if (exp - flt.bias >= (1 << (int)(flt.expbits)) - 1) {
         goto overflow;
     }
     // Extract 1+flt.mantbits bits.
-    d.Shift(((nint)(1 + flt.mantbits)));
-    mant = d.RoundedInteger();
+    Ꮡd.Shift((nint)(1 + flt.mantbits));
+    mant = Ꮡd.RoundedInteger();
     // Rounding might have added a bit; shift down.
-    if (mant == 2 << (int)(flt.mantbits)) {
-        mant >>= (UntypedInt)(1);
+    if (mant == ((uint64)2 << (int)(flt.mantbits))) {
+        mant >>= (int)(1);
         exp++;
-        if (exp - flt.bias >= 1 << (int)(flt.expbits) - 1) {
+        if (exp - flt.bias >= (1 << (int)(flt.expbits)) - 1) {
             goto overflow;
         }
     }
     // Denormalized?
-    if ((uint64)(mant & (1 << (int)(flt.mantbits))) == 0) {
+    if ((uint64)(mant & (((uint64)1 << (int)(flt.mantbits)))) == 0) {
         exp = flt.bias;
     }
     goto @out;
 overflow:
     mant = 0;
     // ±Inf
-    exp = 1 << (int)(flt.expbits) - 1 + flt.bias;
+    exp = (1 << (int)(flt.expbits)) - 1 + flt.bias;
     overflow = true;
 @out:
-    var bits = (uint64)(mant & (((uint64)1) << (int)(flt.mantbits) - 1));
+    var bits = (uint64)(mant & (((uint64)1 << (int)(flt.mantbits)) - 1));
     // Assemble bits.
-    bits |= (uint64)(((uint64)((nint)((exp - flt.bias) & (1 << (int)(flt.expbits) - 1)))) << (int)(flt.mantbits));
+    bits |= (uint64)(((uint64)((nint)((exp - flt.bias) & ((1 << (int)(flt.expbits)) - 1))) << (int)(flt.mantbits)));
     if (d.neg) {
-        bits |= (uint64)(1 << (int)(flt.mantbits) << (int)(flt.expbits));
+        bits |= (uint64)((((uint64)1 << (int)(flt.mantbits)) << (int)(flt.expbits)));
     }
     return (bits, overflow);
 }
 
 // Exact powers of 10.
 internal static slice<float64> float64pow10 = new float64[]{
-    1e0F, 1e1F, 1e2F, 1e3F, 1e4F, 1e5F, 1e6F, 1e7F, 1e8F, 1e9F,
-    1e10F, 1e11F, 1e12F, 1e13F, 1e14F, 1e15F, 1e16F, 1e17F, 1e18F, 1e19F,
-    1e20F, 1e21F, 1e22F
+    1e0D, 1e1D, 1e2D, 1e3D, 1e4D, 1e5D, 1e6D, 1e7D, 1e8D, 1e9D,
+    1e10D, 1e11D, 1e12D, 1e13D, 1e14D, 1e15D, 1e16D, 1e17D, 1e18D, 1e19D,
+    1e20D, 1e21D, 1e22D
 }.slice();
 
 internal static slice<float32> float32pow10 = new float32[]{1e0F, 1e1F, 1e2F, 1e3F, 1e4F, 1e5F, 1e6F, 1e7F, 1e8F, 1e9F, 1e10F}.slice();
@@ -462,10 +463,10 @@ internal static (float64 f, bool ok) atof64exact(uint64 mantissa, nint exp, bool
     float64 f = default!;
     bool ok = default!;
 
-    if (mantissa >> (int)(float64info.mantbits) != 0) {
+    if ((mantissa >> (int)(float64info.mantbits)) != 0) {
         return (f, ok);
     }
-    f = ((float64)mantissa);
+    f = (float64)mantissa;
     if (neg) {
         f = -f;
     }
@@ -484,7 +485,7 @@ internal static (float64 f, bool ok) atof64exact(uint64 mantissa, nint exp, bool
             f *= float64pow10[exp - 22];
             exp = 22;
         }
-        if (f > 1e15F || f < -1e15F) {
+        if (f > 1e15D || f < -1e15D) {
             // the exponent was really too large.
             return (f, ok);
         }
@@ -504,10 +505,10 @@ internal static (float32 f, bool ok) atof32exact(uint64 mantissa, nint exp, bool
     float32 f = default!;
     bool ok = default!;
 
-    if (mantissa >> (int)(float32info.mantbits) != 0) {
+    if ((mantissa >> (int)(float32info.mantbits)) != 0) {
         return (f, ok);
     }
-    f = ((float32)mantissa);
+    f = (float32)mantissa;
     if (neg) {
         f = -f;
     }
@@ -525,7 +526,7 @@ internal static (float32 f, bool ok) atof32exact(uint64 mantissa, nint exp, bool
             f *= float32pow10[exp - 10];
             exp = 10;
         }
-        if (f > 1e7F || f < -1e7F) {
+        if (f > 1e7F || f < -1e7D) {
             // the exponent was really too large.
             return (f, ok);
         }
@@ -545,11 +546,11 @@ internal static (float32 f, bool ok) atof32exact(uint64 mantissa, nint exp, bool
 // The string s has already been parsed into a mantissa, exponent, and sign (neg==true for negative).
 // If trunc is true, trailing non-zero bits have been omitted from the mantissa.
 internal static (float64, error) atofHex(@string s, ж<floatInfo> Ꮡflt, uint64 mantissa, nint exp, bool neg, bool trunc) {
-    ref var flt = ref Ꮡflt.val;
+    ref var flt = ref Ꮡflt.DerefOrNil();
 
-    nint maxExp = 1 << (int)(flt.expbits) + flt.bias - 2;
+    nint maxExp = (1 << (int)(flt.expbits)) + flt.bias - 2;
     nint minExp = flt.bias + 1;
-    exp += ((nint)flt.mantbits);
+    exp += (nint)flt.mantbits;
     // mantissa now implicitly divided by 2^mantbits.
     // Shift mantissa and exponent to bring representation into float range.
     // Eventually we want a mantissa with a leading 1-bit followed by mantbits other bits.
@@ -557,57 +558,57 @@ internal static (float64, error) atofHex(@string s, ж<floatInfo> Ꮡflt, uint64
     // whether that bit or any later bit was non-zero.
     // (If the mantissa has already lost non-zero bits, trunc is true,
     // and we OR in a 1 below after shifting left appropriately.)
-    while (mantissa != 0 && mantissa >> (int)((flt.mantbits + 2)) == 0) {
-        mantissa <<= (UntypedInt)(1);
+    while (mantissa != 0 && (mantissa >> (int)((flt.mantbits + 2))) == 0) {
+        mantissa <<= (int)(1);
         exp--;
     }
     if (trunc) {
         mantissa |= (uint64)(1);
     }
-    while (mantissa >> (int)((1 + flt.mantbits + 2)) != 0) {
-        mantissa = (uint64)(mantissa >> (int)(1) | (uint64)(mantissa & 1));
+    while ((mantissa >> (int)((1 + flt.mantbits + 2))) != 0) {
+        mantissa = (uint64)((mantissa >> (int)(1)) | (uint64)(mantissa & 1));
         exp++;
     }
     // If exponent is too negative,
     // denormalize in hopes of making it representable.
     // (The -2 is for the rounding bits.)
     while (mantissa > 1 && exp < minExp - 2) {
-        mantissa = (uint64)(mantissa >> (int)(1) | (uint64)(mantissa & 1));
+        mantissa = (uint64)((mantissa >> (int)(1)) | (uint64)(mantissa & 1));
         exp++;
     }
     // Round using two bottom bits.
     var round = (uint64)(mantissa & 3);
-    mantissa >>= (UntypedInt)(2);
+    mantissa >>= (int)(2);
     round |= (uint64)((uint64)(mantissa & 1));
     // round to even (round up if mantissa is odd)
     exp += 2;
     if (round == 3) {
         mantissa++;
-        if (mantissa == 1 << (int)((1 + flt.mantbits))) {
-            mantissa >>= (UntypedInt)(1);
+        if (mantissa == ((uint64)1 << (int)((1 + flt.mantbits)))) {
+            mantissa >>= (int)(1);
             exp++;
         }
     }
-    if (mantissa >> (int)(flt.mantbits) == 0) {
+    if ((mantissa >> (int)(flt.mantbits)) == 0) {
         // Denormal or zero.
         exp = flt.bias;
     }
     error err = default!;
     if (exp > maxExp) {
         // infinity and range error
-        mantissa = 1 << (int)(flt.mantbits);
+        mantissa = ((uint64)1 << (int)(flt.mantbits));
         exp = maxExp + 1;
-        err = ~rangeError(fnParseFloat, s);
+        err = new NumErrorжerror(rangeError(fnParseFloat, s));
     }
-    var bits = (uint64)(mantissa & (1 << (int)(flt.mantbits) - 1));
-    bits |= (uint64)(((uint64)((nint)((exp - flt.bias) & (1 << (int)(flt.expbits) - 1)))) << (int)(flt.mantbits));
+    var bits = (uint64)(mantissa & (((uint64)1 << (int)(flt.mantbits)) - 1));
+    bits |= (uint64)(((uint64)((nint)((exp - flt.bias) & ((1 << (int)(flt.expbits)) - 1))) << (int)(flt.mantbits)));
     if (neg) {
-        bits |= (uint64)(1 << (int)(flt.mantbits) << (int)(flt.expbits));
+        bits |= (uint64)((((uint64)1 << (int)(flt.mantbits)) << (int)(flt.expbits)));
     }
-    if (Ꮡflt == Ꮡ(float32info)) {
-        return (((float64)math.Float32frombits(((uint32)bits))), err);
+    if (Ꮡflt == Ꮡfloat32info) {
+        return ((float64)Δmath.Float32frombits((uint32)bits), err);
     }
-    return (math.Float64frombits(bits), err);
+    return (Δmath.Float64frombits(bits), err);
 }
 
 internal static readonly @string fnParseFloat = "ParseFloat"u8;
@@ -619,16 +620,16 @@ internal static (float32 f, nint n, error err) atof32(@string s) {
 
     {
         var (val, nΔ1, okΔ1) = special(s); if (okΔ1) {
-            return (((float32)val), nΔ1, default!);
+            return ((float32)val, nΔ1, default!);
         }
     }
-    var (mantissa, exp, neg, trunc, hex, n, ok) = readFloat(s);
+    (var mantissa, var exp, var neg, var trunc, var hex, n, var ok) = readFloat(s);
     if (!ok) {
-        return (0, n, ~syntaxError(fnParseFloat, s));
+        return (0, n, new NumErrorжerror(syntaxError(fnParseFloat, s)));
     }
     if (hex) {
-        var (fΔ1, errΔ1) = atofHex(s[..(int)(n)], Ꮡ(float32info), mantissa, exp, neg, trunc);
-        return (((float32)fΔ1), n, errΔ1);
+        var (fΔ1, errΔ1) = atofHex(s[..(int)(n)], Ꮡfloat32info, mantissa, exp, neg, trunc);
+        return ((float32)fΔ1, n, errΔ1);
     }
     if (optimize) {
         // Try pure floating-point arithmetic conversion, and if that fails,
@@ -640,29 +641,29 @@ internal static (float32 f, nint n, error err) atof32(@string s) {
                 }
             }
         }
-        var (fΔ3, ok) = eiselLemire32(mantissa, exp, neg);
-        if (ok) {
+        var (fΔ3, okΔ3) = eiselLemire32(mantissa, exp, neg);
+        if (okΔ3) {
             if (!trunc) {
                 return (fΔ3, n, default!);
             }
             // Even if the mantissa was truncated, we may
             // have found the correct result. Confirm by
             // converting the upper mantissa bound.
-            var (fUp, ok) = eiselLemire32(mantissa + 1, exp, neg);
-            if (ok && fΔ3 == fUp) {
+            var (fUp, okΔ4) = eiselLemire32(mantissa + 1, exp, neg);
+            if (okΔ4 && fΔ3 == fUp) {
                 return (fΔ3, n, default!);
             }
         }
     }
     // Slow fallback.
-    @decimal d = default!;
+    ref var d = ref heap(new @decimal(), out var Ꮡd);
     if (!d.set(s[..(int)(n)])) {
-        return (0, n, ~syntaxError(fnParseFloat, s));
+        return (0, n, new NumErrorжerror(syntaxError(fnParseFloat, s)));
     }
-    var (b, ovf) = d.floatBits(Ꮡ(float32info));
-    f = math.Float32frombits(((uint32)b));
+    var (b, ovf) = Ꮡd.floatBits(Ꮡfloat32info);
+    f = Δmath.Float32frombits((uint32)b);
     if (ovf) {
-        err = ~rangeError(fnParseFloat, s);
+        err = new NumErrorжerror(rangeError(fnParseFloat, s));
     }
     return (f, n, err);
 }
@@ -677,12 +678,12 @@ internal static (float64 f, nint n, error err) atof64(@string s) {
             return (val, nΔ1, default!);
         }
     }
-    var (mantissa, exp, neg, trunc, hex, n, ok) = readFloat(s);
+    (var mantissa, var exp, var neg, var trunc, var hex, n, var ok) = readFloat(s);
     if (!ok) {
-        return (0, n, ~syntaxError(fnParseFloat, s));
+        return (0, n, new NumErrorжerror(syntaxError(fnParseFloat, s)));
     }
     if (hex) {
-        var (fΔ1, errΔ1) = atofHex(s[..(int)(n)], Ꮡ(float64info), mantissa, exp, neg, trunc);
+        var (fΔ1, errΔ1) = atofHex(s[..(int)(n)], Ꮡfloat64info, mantissa, exp, neg, trunc);
         return (fΔ1, n, errΔ1);
     }
     if (optimize) {
@@ -695,29 +696,29 @@ internal static (float64 f, nint n, error err) atof64(@string s) {
                 }
             }
         }
-        var (fΔ3, ok) = eiselLemire64(mantissa, exp, neg);
-        if (ok) {
+        var (fΔ3, okΔ3) = eiselLemire64(mantissa, exp, neg);
+        if (okΔ3) {
             if (!trunc) {
                 return (fΔ3, n, default!);
             }
             // Even if the mantissa was truncated, we may
             // have found the correct result. Confirm by
             // converting the upper mantissa bound.
-            var (fUp, ok) = eiselLemire64(mantissa + 1, exp, neg);
-            if (ok && fΔ3 == fUp) {
+            var (fUp, okΔ4) = eiselLemire64(mantissa + 1, exp, neg);
+            if (okΔ4 && fΔ3 == fUp) {
                 return (fΔ3, n, default!);
             }
         }
     }
     // Slow fallback.
-    @decimal d = default!;
+    ref var d = ref heap(new @decimal(), out var Ꮡd);
     if (!d.set(s[..(int)(n)])) {
-        return (0, n, ~syntaxError(fnParseFloat, s));
+        return (0, n, new NumErrorжerror(syntaxError(fnParseFloat, s)));
     }
-    var (b, ovf) = d.floatBits(Ꮡ(float64info));
-    f = math.Float64frombits(b);
+    var (b, ovf) = Ꮡd.floatBits(Ꮡfloat64info);
+    f = Δmath.Float64frombits(b);
     if (ovf) {
-        err = ~rangeError(fnParseFloat, s);
+        err = new NumErrorжerror(rangeError(fnParseFloat, s));
     }
     return (f, n, err);
 }
@@ -751,8 +752,8 @@ internal static (float64 f, nint n, error err) atof64(@string s) {
 // [floating-point literals]: https://go.dev/ref/spec#Floating-point_literals
 public static (float64, error) ParseFloat(@string s, nint bitSize) {
     var (f, n, err) = parseFloatPrefix(s, bitSize);
-    if (n != len(s) && (err == default! || !AreEqual(err._<NumError.val>().Err, ErrSyntax))) {
-        return (0, ~syntaxError(fnParseFloat, s));
+    if (n != len(s) && (err == default! || !AreEqual((~err._<ж<NumError>>()).Err, ErrSyntax))) {
+        return (0, new NumErrorжerror(syntaxError(fnParseFloat, s)));
     }
     return (f, err);
 }
@@ -760,7 +761,7 @@ public static (float64, error) ParseFloat(@string s, nint bitSize) {
 internal static (float64, nint, error) parseFloatPrefix(@string s, nint bitSize) {
     if (bitSize == 32) {
         var (f, n, err) = atof32(s);
-        return (((float64)f), n, err);
+        return ((float64)f, n, err);
     }
     return atof64(s);
 }

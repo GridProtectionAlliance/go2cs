@@ -6,6 +6,7 @@ namespace go;
 using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime;
 
 partial class runtime_package {
 
@@ -14,15 +15,15 @@ partial class runtime_package {
 internal static slice<byte> /*ret*/ bytes(@string s) {
     slice<byte> ret = default!;
 
-    var rp = (ж<Δslice>)(uintptr)(new @unsafe.Pointer(Ꮡ(ret)));
+    var rp = (ж<Δsliceᴛ>)(uintptr)(new @unsafe.Pointer(Ꮡ(ret)));
     var sp = stringStructOf(Ꮡ(s));
-    rp.val.Δarray = sp.val.str;
-    rp.val.len = sp.val.len;
-    rp.val.cap = sp.val.len;
+    rp.Value.Δarray = sp.Value.str;
+    rp.Value.len = sp.Value.len;
+    rp.Value.cap = sp.Value.len;
     return ret;
 }
 
-internal static array<byte> printBacklog;
+internal static array<byte> printBacklog = new(512);
 internal static nint printBacklogIndex;
 
 // recordForPanic maintains a circular buffer of messages written by the
@@ -34,7 +35,7 @@ internal static nint printBacklogIndex;
 // from the runtime data structures in the core file.
 internal static void recordForPanic(slice<byte> b) {
     printlock();
-    if (panicking.Load() == 0) {
+    if (Ꮡpanicking.Load() == 0) {
         // Not actively crashing: maintain circular buffer of print output.
         for (nint i = 0; i < len(b); ) {
             nint n = copy(printBacklog[(int)(printBacklogIndex)..], b[(int)(i)..]);
@@ -46,7 +47,8 @@ internal static void recordForPanic(slice<byte> b) {
     printunlock();
 }
 
-internal static mutex debuglock;
+internal static ж<mutex> Ꮡdebuglock = new(new mutex(nil));
+internal static ref mutex debuglock => ref Ꮡdebuglock.Value;
 
 // The compiler emits calls to printlock and printunlock around
 // the multiple calls that implement a single Go print or println
@@ -56,22 +58,22 @@ internal static mutex debuglock;
 // the print lock to print information about the crash.
 // For both these reasons, let a thread acquire the printlock 'recursively'.
 internal static void printlock() {
-    var mp = getg().val.m;
-    (~mp).locks++;
+    var mp = getg().Value.m;
+    mp.Value.locks++;
     // do not reschedule between printlock++ and lock(&debuglock).
-    (~mp).printlock++;
+    mp.Value.printlock++;
     if ((~mp).printlock == 1) {
-        @lock(Ꮡ(debuglock));
+        @lock(Ꮡdebuglock);
     }
-    (~mp).locks--;
+    mp.Value.locks--;
 }
 
 // now we know debuglock is held and holding up mp.locks for us.
 internal static void printunlock() {
-    var mp = getg().val.m;
-    (~mp).printlock--;
+    var mp = getg().Value.m;
+    mp.Value.printlock--;
     if ((~mp).printlock == 0) {
-        unlock(Ꮡ(debuglock));
+        unlock(Ꮡdebuglock);
     }
 }
 
@@ -93,7 +95,7 @@ internal static void gwrite(slice<byte> b) {
         return;
     }
     nint n = copy((~gp).writebuf[(int)(len((~gp).writebuf))..(int)(cap((~gp).writebuf))], b);
-    gp.val.writebuf = (~gp).writebuf[..(int)(len((~gp).writebuf) + n)];
+    gp.Value.writebuf = (~gp).writebuf[..(int)(len((~gp).writebuf) + n)];
 }
 
 internal static void printsp() {
@@ -114,7 +116,7 @@ internal static void printbool(bool v) {
 
 internal static void printfloat(float64 v) {
     switch (ᐧ) {
-    case {} when v is != v: {
+    case {} when v != v: {
         printstring("NaN"u8);
         return;
     }
@@ -127,7 +129,7 @@ internal static void printfloat(float64 v) {
         return;
     }}
 
-    static readonly UntypedInt n = 7; // digits printed
+    UntypedInt n = 7; // digits printed
     array<byte> buf = new(14); /* n + 7 */
     buf[0] = (rune)'+';
     nint e = 0;
@@ -151,8 +153,8 @@ internal static void printfloat(float64 v) {
             v *= 10;
         }
         // round
-        var h = 5.0F;
-        for (nint iΔ1 = 0; iΔ1 < n; iΔ1++) {
+        var h = 5.0D;
+        for (nint i = 0; i < n; i++) {
             h /= 10;
         }
         v += h;
@@ -163,9 +165,9 @@ internal static void printfloat(float64 v) {
     }
     // format +d.dddd+edd
     for (nint i = 0; i < n; i++) {
-        nint s = ((nint)v);
-        buf[i + 2] = ((byte)(s + (rune)'0'));
-        v -= ((float64)s);
+        nint s = (nint)v;
+        buf[i + 2] = (byte)(s + (rune)'0');
+        v -= (float64)s;
         v *= 10;
     }
     buf[1] = buf[2];
@@ -176,9 +178,9 @@ internal static void printfloat(float64 v) {
         e = -e;
         buf[n + 3] = (rune)'-';
     }
-    buf[n + 4] = ((byte)(e / 100)) + (rune)'0';
-    buf[n + 5] = ((byte)(e / 10)) % 10 + (rune)'0';
-    buf[n + 6] = ((byte)(e % 10)) + (rune)'0';
+    buf[n + 4] = (byte)((byte)(e / 100) + (rune)'0');
+    buf[n + 5] = (byte)((byte)(e / 10) % 10 + (rune)'0');
+    buf[n + 6] = (byte)((byte)(e % 10) + (rune)'0');
     gwrite(buf[..]);
 }
 
@@ -190,7 +192,7 @@ internal static void printuint(uint64 v) {
     array<byte> buf = new(100);
     nint i = len(buf);
     for (i--; i > 0; i--) {
-        buf[i] = ((byte)(v % 10 + (rune)'0'));
+        buf[i] = (byte)(v % 10 + (rune)'0');
         if (v < 10) {
             break;
         }
@@ -204,7 +206,7 @@ internal static void printint(int64 v) {
         printstring("-"u8);
         v = -v;
     }
-    printuint(((uint64)v));
+    printuint((uint64)v);
 }
 
 internal static nint minhexdigits = 0; // protected by printlock
@@ -214,7 +216,7 @@ internal static void printhex(uint64 v) {
     array<byte> buf = new(100);
     nint i = len(buf);
     for (i--; i > 0; i--) {
-        buf[i] = dig[v % 16];
+        buf[i] = dig[(int)(v % 16)];
         if (v < 16 && len(buf) - i >= minhexdigits) {
             break;
         }
@@ -228,11 +230,11 @@ internal static void printhex(uint64 v) {
 }
 
 internal static void printpointer(@unsafe.Pointer Δp) {
-    printhex(((uint64)((uintptr)Δp)));
+    printhex((uint64)(uintptr)Δp);
 }
 
 internal static void printuintptr(uintptr Δp) {
-    printhex(((uint64)Δp));
+    printhex((uint64)Δp);
 }
 
 internal static void printstring(@string s) {
@@ -240,7 +242,7 @@ internal static void printstring(@string s) {
 }
 
 internal static void printslice(slice<byte> s) {
-    var sp = (ж<Δslice>)(uintptr)(new @unsafe.Pointer(Ꮡ(s)));
+    var sp = (ж<Δsliceᴛ>)(uintptr)(new @unsafe.Pointer(Ꮡ(s)));
     print("[", len(s), "/", cap(s), "]");
     printpointer((~sp).Δarray);
 }
@@ -262,13 +264,13 @@ internal static void hexdumpWords(uintptr Δp, uintptr end, Func<uintptr, byte> 
     printlock();
     array<byte> markbuf = new(1);
     markbuf[0] = (rune)' ';
-    minhexdigits = ((nint)(@unsafe.Sizeof(((uintptr)0)) * 2));
-    for (var i = ((uintptr)0); Δp + i < end; i += goarch.PtrSize) {
+    minhexdigits = (nint)(@unsafe.Sizeof((uintptr)0) * 2);
+    for (var i = (uintptr)0; Δp + i < end; i += goarch.PtrSize) {
         if (i % 16 == 0) {
             if (i != 0) {
                 println();
             }
-            print(((Δhex)(Δp + i)), ": ");
+            print(((Δhex)(uint64)(Δp + i)), ": ");
         }
         if (mark != default!) {
             markbuf[0] = mark(Δp + i);
@@ -277,13 +279,13 @@ internal static void hexdumpWords(uintptr Δp, uintptr end, Func<uintptr, byte> 
             }
         }
         gwrite(markbuf[..]);
-        var val = ~(ж<uintptr>)(uintptr)(((@unsafe.Pointer)(Δp + i)));
-        print(((Δhex)val));
+        var val = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)(Δp + i));
+        print(((Δhex)(uint64)val));
         print(" ");
         // Can we symbolize val?
         var fn = findfunc(val);
         if (fn.valid()) {
-            print("<", funcname(fn), "+", ((Δhex)(val - fn.entry())), "> ");
+            print("<", funcname(fn), "+", ((Δhex)(uint64)(val - fn.entry())), "> ");
         }
     }
     minhexdigits = 0;

@@ -8,9 +8,9 @@ using json = encoding.json_package;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using strings = strings_package;
-using utf8 = unicode.utf8_package;
+using utf8 = go.unicode.utf8_package;
 using encoding;
-using unicode;
+using go.unicode;
 using ꓸꓸꓸany = Span<any>;
 
 partial class template_package {
@@ -82,7 +82,7 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
         }
         default: {
             nint j = n;
-            while (j > 0 && isJSIdentPart(((rune)s[j - 1]))) {
+            while (j > 0 && isJSIdentPart((rune)s[j - 1])) {
                 // Suffixes for all punctuators from section 7.7 of the language spec
                 // that only end binary operators not handled above.
                 // Suffixes for all punctuators from section 7.7 of the language spec
@@ -138,7 +138,7 @@ internal static map<@string, bool> regexpPrecederKeywords = new map<@string, boo
     ["void"u8] = true
 };
 
-internal static reflectꓸType jsonMarshalType = reflect.TypeFor[json.Marshaler]();
+internal static reflectꓸType jsonMarshalType = reflect.TypeFor<json.Marshaler>();
 
 // indirectToJSONMarshaler returns the value, after dereferencing as many times
 // as necessary to reach the base type (or nil) or an implementation of json.Marshal.
@@ -172,23 +172,24 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
         case JSStr t: {
             return @""""u8 + ((@string)t) + @""""u8;
         }
-        case json.Marshaler t: {
+        case {} Δt when Δt._<json.Marshaler>(out var t): {
+            break;
         }
-        case fmt.Stringer t: {
+        case {} Δt when Δt._<fmt.Stringer>(out var t): {
             a = t.String();
             break;
         }}
     } else {
         // TODO: normalize quotes.
         // Do not treat as a Stringer.
-        foreach (var (iΔ1, arg) in args) {
-            args[iΔ1] = indirectToJSONMarshaler(arg);
+        foreach (var (i, arg) in args) {
+            args[i] = indirectToJSONMarshaler(arg);
         }
         a = fmt.Sprint(args.ꓸꓸꓸ);
     }
     // TODO: detect cycles before calling Marshal which loops infinitely on
     // cyclic data. This may be an unacceptable DoS risk.
-    (b, err) = json.Marshal(a);
+    var (b, err) = json.Marshal(a);
     if (err != default!) {
         // While the standard JSON marshaler does not include user controlled
         // information in the error message, if a type has a MarshalJSON method,
@@ -228,12 +229,12 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
     }
     var (first, _) = utf8.DecodeRune(b);
     var (last, _) = utf8.DecodeLastRune(b);
-    strings.Builder buf = default!;
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     // Prevent IdentifierNames and NumericLiterals from running into
     // keywords: in, instanceof, typeof, void
     var pad = isJSIdentPart(first) || isJSIdentPart(last);
     if (pad) {
-        buf.WriteByte((rune)' ');
+        Ꮡbuf.WriteByte((rune)' ');
     }
     nint written = 0;
     // Make sure that json.Marshal escapes codepoints U+2028 & U+2029
@@ -241,23 +242,23 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
     for (nint i = 0; i < len(b); ) {
         var (rune, n) = utf8.DecodeRune(b[(int)(i)..]);
         @string repl = ""u8;
-        if (rune == 8232){
+        if (rune == 0x2028){
             repl = @"\u2028"u8;
         } else 
-        if (rune == 8233) {
+        if (rune == 0x2029) {
             repl = @"\u2029"u8;
         }
         if (repl != ""u8) {
-            buf.Write(b[(int)(written)..(int)(i)]);
-            buf.WriteString(repl);
+            Ꮡbuf.Write(b[(int)(written)..(int)(i)]);
+            Ꮡbuf.WriteString(repl);
             written = i + n;
         }
         i += n;
     }
     if (buf.Len() != 0) {
-        buf.Write(b[(int)(written)..]);
+        Ꮡbuf.Write(b[(int)(written)..]);
         if (pad) {
-            buf.WriteByte((rune)' ');
+            Ꮡbuf.WriteByte((rune)' ');
         }
         return buf.String();
     }
@@ -306,8 +307,8 @@ internal static @string jsRegexpEscaper(params ꓸꓸꓸany argsʗp) {
 // It also replaces runes U+2028 and U+2029 with the raw strings `\u2028` and
 // `\u2029`.
 internal static @string replace(@string s, slice<@string> replacementTable) {
-    strings.Builder b = default!;
-    var r = ((rune)0);
+    ref var b = ref heap(new strings.Builder(), out var Ꮡb);
+    var r = (rune)0;
     nint w = 0;
     nint written = 0;
     for (nint i = 0; i < len(s); i += w) {
@@ -315,11 +316,11 @@ internal static @string replace(@string s, slice<@string> replacementTable) {
         (r, w) = utf8.DecodeRuneInString(s[(int)(i)..]);
         @string repl = default!;
         switch (ᐧ) {
-        case {} when ((nint)r) < len(lowUnicodeReplacementTable): {
+        case {} when (nint)r < len(lowUnicodeReplacementTable): {
             repl = lowUnicodeReplacementTable[r];
             break;
         }
-        case {} when ((nint)r) < len(replacementTable) && replacementTable[r] != "": {
+        case {} when (nint)r < len(replacementTable) && replacementTable[r] != "": {
             repl = replacementTable[r];
             break;
         }
@@ -337,32 +338,32 @@ internal static @string replace(@string s, slice<@string> replacementTable) {
         }}
 
         if (written == 0) {
-            b.Grow(len(s));
+            Ꮡb.Grow(len(s));
         }
-        b.WriteString(s[(int)(written)..(int)(i)]);
-        b.WriteString(repl);
+        Ꮡb.WriteString(s[(int)(written)..(int)(i)]);
+        Ꮡb.WriteString(repl);
         written = i + w;
     }
     if (written == 0) {
         return s;
     }
-    b.WriteString(s[(int)(written)..]);
+    Ꮡb.WriteString(s[(int)(written)..]);
     return b.String();
 }
 
 // "\v" == "v" on IE 6.
-internal static slice<@string> lowUnicodeReplacementTable = new slice<@string>(93){
+internal static slice<@string> lowUnicodeReplacementTable = new slice<@string>(32){
     [0] = @"\u0000"u8, [1] = @"\u0001"u8, [2] = @"\u0002"u8, [3] = @"\u0003"u8, [4] = @"\u0004"u8, [5] = @"\u0005"u8, [6] = @"\u0006"u8,
-    [(rune)'\'] = @"\u0007"u8,
-    [(rune)'\'] = @"\u0008"u8,
-    [(rune)'\'] = @"\t"u8,
-    [(rune)'\'] = @"\n"u8,
-    [(rune)'\'] = @"\u000b"u8,
-    [(rune)'\'] = @"\f"u8,
-    [(rune)'\'] = @"\r"u8,
-    [14] = @"\u000e"u8, [15] = @"\u000f"u8, [16] = @"\u0010"u8, [17] = @"\u0011"u8, [18] = @"\u0012"u8, [19] = @"\u0013"u8,
-    [20] = @"\u0014"u8, [21] = @"\u0015"u8, [22] = @"\u0016"u8, [23] = @"\u0017"u8, [24] = @"\u0018"u8, [25] = @"\u0019"u8,
-    [26] = @"\u001a"u8, [27] = @"\u001b"u8, [28] = @"\u001c"u8, [29] = @"\u001d"u8, [30] = @"\u001e"u8, [31] = @"\u001f"u8
+    [(rune)'\a'] = @"\u0007"u8,
+    [(rune)'\b'] = @"\u0008"u8,
+    [(rune)'\t'] = @"\t"u8,
+    [(rune)'\n'] = @"\n"u8,
+    [(rune)'\v'] = @"\u000b"u8,
+    [(rune)'\f'] = @"\f"u8,
+    [(rune)'\r'] = @"\r"u8,
+    [0xe] = @"\u000e"u8, [0xf] = @"\u000f"u8, [0x10] = @"\u0010"u8, [0x11] = @"\u0011"u8, [0x12] = @"\u0012"u8, [0x13] = @"\u0013"u8,
+    [0x14] = @"\u0014"u8, [0x15] = @"\u0015"u8, [0x16] = @"\u0016"u8, [0x17] = @"\u0017"u8, [0x18] = @"\u0018"u8, [0x19] = @"\u0019"u8,
+    [0x1a] = @"\u001a"u8, [0x1b] = @"\u001b"u8, [0x1c] = @"\u001c"u8, [0x1d] = @"\u001d"u8, [0x1e] = @"\u001e"u8, [0x1f] = @"\u001f"u8
 };
 
 // "\v" == "v" on IE 6.
@@ -370,20 +371,20 @@ internal static slice<@string> lowUnicodeReplacementTable = new slice<@string>(9
 // in HTML attributes without further encoding.
 internal static slice<@string> jsStrReplacementTable = new slice<@string>(97){
     [0] = @"\u0000"u8,
-    [(rune)'\'] = @"\t"u8,
-    [(rune)'\'] = @"\n"u8,
-    [(rune)'\'] = @"\u000b"u8,
-    [(rune)'\'] = @"\f"u8,
-    [(rune)'\'] = @"\r"u8,
+    [(rune)'\t'] = @"\t"u8,
+    [(rune)'\n'] = @"\n"u8,
+    [(rune)'\v'] = @"\u000b"u8,
+    [(rune)'\f'] = @"\f"u8,
+    [(rune)'\r'] = @"\r"u8,
     [(rune)'"'] = @"\u0022"u8,
     [(rune)'`'] = @"\u0060"u8,
     [(rune)'&'] = @"\u0026"u8,
-    [(rune)'\'] = @"\u0027"u8,
+    [(rune)'\''] = @"\u0027"u8,
     [(rune)'+'] = @"\u002b"u8,
     [(rune)'/'] = @"\/"u8,
     [(rune)'<'] = @"\u003c"u8,
     [(rune)'>'] = @"\u003e"u8,
-    [(rune)'\'] = @"\\"u8
+    [(rune)'\\'] = @"\\"u8
 };
 
 // "\v" == "v" on IE 6.
@@ -393,20 +394,20 @@ internal static slice<@string> jsStrReplacementTable = new slice<@string>(97){
 // the special characters for JS template literals: $, {, and }.
 internal static slice<@string> jsBqStrReplacementTable = new slice<@string>(126){
     [0] = @"\u0000"u8,
-    [(rune)'\'] = @"\t"u8,
-    [(rune)'\'] = @"\n"u8,
-    [(rune)'\'] = @"\u000b"u8,
-    [(rune)'\'] = @"\f"u8,
-    [(rune)'\'] = @"\r"u8,
+    [(rune)'\t'] = @"\t"u8,
+    [(rune)'\n'] = @"\n"u8,
+    [(rune)'\v'] = @"\u000b"u8,
+    [(rune)'\f'] = @"\f"u8,
+    [(rune)'\r'] = @"\r"u8,
     [(rune)'"'] = @"\u0022"u8,
     [(rune)'`'] = @"\u0060"u8,
     [(rune)'&'] = @"\u0026"u8,
-    [(rune)'\'] = @"\u0027"u8,
+    [(rune)'\''] = @"\u0027"u8,
     [(rune)'+'] = @"\u002b"u8,
     [(rune)'/'] = @"\/"u8,
     [(rune)'<'] = @"\u003c"u8,
     [(rune)'>'] = @"\u003e"u8,
-    [(rune)'\'] = @"\\"u8,
+    [(rune)'\\'] = @"\\"u8,
     [(rune)'$'] = @"\u0024"u8,
     [(rune)'{'] = @"\u007b"u8,
     [(rune)'}'] = @"\u007d"u8
@@ -419,14 +420,14 @@ internal static slice<@string> jsBqStrReplacementTable = new slice<@string>(126)
 // overencode existing escapes since this table has no entry for `\`.
 internal static slice<@string> jsStrNormReplacementTable = new slice<@string>(97){
     [0] = @"\u0000"u8,
-    [(rune)'\'] = @"\t"u8,
-    [(rune)'\'] = @"\n"u8,
-    [(rune)'\'] = @"\u000b"u8,
-    [(rune)'\'] = @"\f"u8,
-    [(rune)'\'] = @"\r"u8,
+    [(rune)'\t'] = @"\t"u8,
+    [(rune)'\n'] = @"\n"u8,
+    [(rune)'\v'] = @"\u000b"u8,
+    [(rune)'\f'] = @"\f"u8,
+    [(rune)'\r'] = @"\r"u8,
     [(rune)'"'] = @"\u0022"u8,
     [(rune)'&'] = @"\u0026"u8,
-    [(rune)'\'] = @"\u0027"u8,
+    [(rune)'\''] = @"\u0027"u8,
     [(rune)'`'] = @"\u0060"u8,
     [(rune)'+'] = @"\u002b"u8,
     [(rune)'/'] = @"\/"u8,
@@ -439,15 +440,15 @@ internal static slice<@string> jsStrNormReplacementTable = new slice<@string>(97
 // in HTML attributes without further encoding.
 internal static slice<@string> jsRegexpReplacementTable = new slice<@string>(126){
     [0] = @"\u0000"u8,
-    [(rune)'\'] = @"\t"u8,
-    [(rune)'\'] = @"\n"u8,
-    [(rune)'\'] = @"\u000b"u8,
-    [(rune)'\'] = @"\f"u8,
-    [(rune)'\'] = @"\r"u8,
+    [(rune)'\t'] = @"\t"u8,
+    [(rune)'\n'] = @"\n"u8,
+    [(rune)'\v'] = @"\u000b"u8,
+    [(rune)'\f'] = @"\f"u8,
+    [(rune)'\r'] = @"\r"u8,
     [(rune)'"'] = @"\u0022"u8,
     [(rune)'$'] = @"\$"u8,
     [(rune)'&'] = @"\u0026"u8,
-    [(rune)'\'] = @"\u0027"u8,
+    [(rune)'\''] = @"\u0027"u8,
     [(rune)'('] = @"\("u8,
     [(rune)')'] = @"\)"u8,
     [(rune)'*'] = @"\*"u8,
@@ -459,7 +460,7 @@ internal static slice<@string> jsRegexpReplacementTable = new slice<@string>(126
     [(rune)'>'] = @"\u003e"u8,
     [(rune)'?'] = @"\?"u8,
     [(rune)'['] = @"\["u8,
-    [(rune)'\'] = @"\\"u8,
+    [(rune)'\\'] = @"\\"u8,
     [(rune)']'] = @"\]"u8,
     [(rune)'^'] = @"\^"u8,
     [(rune)'{'] = @"\{"u8,

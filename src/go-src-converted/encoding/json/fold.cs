@@ -4,8 +4,8 @@
 namespace go.encoding;
 
 using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
 
 partial class json_package {
 
@@ -23,7 +23,7 @@ internal static slice<byte> appendFoldedName(slice<byte> @out, slice<byte> @in) 
         {
             var c = @in[i]; if (c < utf8.RuneSelf) {
                 if ((rune)'a' <= c && c <= (rune)'z') {
-                    c -= (rune)'a' - (rune)'A';
+                    c -= (byte)((rune)'a' - (rune)'A');
                 }
                 @out = append(@out, c);
                 i++;

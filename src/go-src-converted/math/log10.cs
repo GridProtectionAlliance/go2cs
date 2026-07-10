@@ -15,7 +15,7 @@ public static float64 Log10(float64 x) {
 }
 
 internal static float64 log10(float64 x) {
-    return Log(x) * (1 / Ln10);
+    return Log(x) * (float64)(1 / Ln10);
 }
 
 // Log2 returns the binary logarithm of x.
@@ -31,10 +31,10 @@ internal static float64 log2(float64 x) {
     var (frac, exp) = Frexp(x);
     // Make sure exact powers of two give an exact answer.
     // Don't depend on Log(0.5)*(1/Ln2)+exp being exactly exp-1.
-    if (frac == 0.5F) {
-        return ((float64)(exp - 1));
+    if (frac == 0.5D) {
+        return (float64)(exp - 1);
     }
-    return Log(frac) * (1 / Ln2) + ((float64)exp);
+    return Log(frac) * (float64)(1 / Ln2) + (float64)exp;
 }
 
 } // end math_package

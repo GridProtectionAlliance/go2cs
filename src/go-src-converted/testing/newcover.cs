@@ -7,8 +7,9 @@ namespace go;
 using fmt = fmt_package;
 using goexperiment = @internal.goexperiment_package;
 using os = os_package;
-using _ = unsafe_package; // for linkname
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
 using @internal;
+using io = io_package;
 
 partial class testing_package {
 
@@ -17,7 +18,7 @@ partial class testing_package {
 
 [GoType("dyn")] partial struct cover2ᴛ1 {
     internal @string mode;
-    internal Func<@string, @string, (string, error)> tearDown;
+    internal Func<@string, @string, (@string, error)> tearDown;
     internal Func<float64> snapshotcov;
 }
 internal static cover2ᴛ1 cover2;
@@ -25,7 +26,7 @@ internal static cover2ᴛ1 cover2;
 // registerCover2 is invoked during "go test -cover" runs.
 // It is used to record a 'tear down' function
 // (to be called when the test is complete) and the coverage mode.
-internal static void registerCover2(@string mode, Func<@string, @string, (string, error)> tearDown, Func<float64> snapcov) {
+internal static void registerCover2(@string mode, Func<@string, @string, (@string, error)> tearDown, Func<float64> snapcov) {
     if (mode == ""u8) {
         return;
     }
@@ -42,8 +43,8 @@ internal static void coverReport2() {
         throw panic("unexpected");
     }
     {
-        var (errmsg, err) = cover2.tearDown(coverProfile.val, gocoverdir.val); if (err != default!) {
-            fmt.Fprintf(~os.Stderr, "%s: %v\n"u8, errmsg, err);
+        var (errmsg, err) = cover2.tearDown(coverProfile.Value, gocoverdir.Value); if (err != default!) {
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "%s: %v\n"u8, errmsg, err);
             os.Exit(2);
         }
     }
@@ -53,7 +54,7 @@ internal static void coverReport2() {
 // number to support the testing.Coverage() function.
 internal static float64 coverage2() {
     if (cover2.mode == ""u8) {
-        return 0.0F;
+        return 0.0D;
     }
     return cover2.snapshotcov();
 }

@@ -14,20 +14,20 @@ partial class pprof_package {
 
 [GoRecv] internal static void varint(this ref protobuf b, uint64 x) {
     while (x >= 128) {
-        b.data = append(b.data, (byte)(((byte)x) | 128));
-        x >>= (UntypedInt)(7);
+        b.data = append(b.data, (byte)((byte)x | 0x80));
+        x >>= (int)(7);
     }
-    b.data = append(b.data, ((byte)x));
+    b.data = append(b.data, (byte)x);
 }
 
 [GoRecv] internal static void length(this ref protobuf b, nint tag, nint len) {
-    b.varint((uint64)(((uint64)tag) << (int)(3) | 2));
-    b.varint(((uint64)len));
+    b.varint((uint64)(((uint64)tag << (int)(3)) | 2));
+    b.varint((uint64)len);
 }
 
 [GoRecv] internal static void uint64(this ref protobuf b, nint tag, uint64 x) {
     // append varint to b.data
-    b.varint((uint64)(((uint64)tag) << (int)(3) | 0));
+    b.varint((uint64)(((uint64)tag << (int)(3)) | 0));
     b.varint(x);
 }
 
@@ -59,7 +59,7 @@ partial class pprof_package {
 }
 
 [GoRecv] internal static void int64(this ref protobuf b, nint tag, int64 x) {
-    var u = ((uint64)x);
+    var u = (uint64)x;
     b.uint64(tag, u);
 }
 
@@ -75,7 +75,7 @@ partial class pprof_package {
         // Use packed encoding
         nint n1 = len(b.data);
         foreach (var (_, u) in x) {
-            b.varint(((uint64)u));
+            b.varint((uint64)u);
         }
         nint n2 = len(b.data);
         b.length(tag, n2 - n1);
@@ -131,7 +131,7 @@ partial class pprof_package {
 }
 
 [GoRecv] internal static void endMessage(this ref protobuf b, nint tag, msgOffset start) {
-    nint n1 = ((nint)start);
+    nint n1 = (nint)start;
     nint n2 = len(b.data);
     b.length(tag, n2 - n1);
     nint n3 = len(b.data);

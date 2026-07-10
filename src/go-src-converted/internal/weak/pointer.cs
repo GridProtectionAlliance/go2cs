@@ -29,9 +29,10 @@ https://github.com/golang/go/issues instead of relying on this package.
 */
 namespace go.@internal;
 
-using abi = @internal.abi_package;
-using runtime = runtime_package;
+using abi = go.@internal.abi_package;
+using Δruntime = runtime_package;
 using @unsafe = unsafe_package;
+using go.@internal;
 
 partial class weak_package {
 
@@ -48,26 +49,22 @@ partial class weak_package {
 // If a weak pointer is created from an object that becomes reachable again due
 // to a finalizer, that weak pointer will not compare equal with weak pointers
 // created before it became unreachable.
-[GoType] partial struct Pointer<T>
-    where T : new()
-{
+[GoType] partial struct Pointer<T> {
     internal @unsafe.Pointer u;
 }
 
 // Make creates a weak pointer from a strong pointer to some value of type T.
-public static Pointer<T> Make<T>(ж<T> Ꮡptr)
-    where T : new()
-{
-    ref var ptr = ref Ꮡptr.val;
+public static Pointer<T> Make<T>(ж<T> Ꮡptr) {
+    ref var ptr = ref Ꮡptr.DerefOrNil();
 
     // Explicitly force ptr to escape to the heap.
-    ptr = abi.Escape(ptr);
+    Ꮡptr = abi.Escape(Ꮡptr); ptr = ref Ꮡptr.DerefOrNil();
     @unsafe.Pointer u = default!;
-    if (ptr != nil) {
+    if (Ꮡptr != nil) {
         u = (uintptr)runtime_registerWeakPointer(new @unsafe.Pointer(Ꮡptr));
     }
-    runtime.KeepAlive(ptr);
-    return new Pointer<T>(u.val);
+    Δruntime.KeepAlive(ptr);
+    return new Pointer<T>(u.Value);
 }
 
 // Strong creates a strong pointer from the weak pointer.
@@ -75,9 +72,7 @@ public static Pointer<T> Make<T>(ж<T> Ꮡptr)
 // the garbage collector.
 // If a weak pointer points to an object with a finalizer, then Strong will
 // return nil as soon as the object's finalizer is queued for execution.
-public static ж<T> Strong<T>(this Pointer<T> p)
-    where T : new()
-{
+public static ж<T> Strong<T>(this Pointer<T> p) {
     return (ж<T>)(uintptr)(runtime_makeStrongFromWeak(p.u));
 }
 

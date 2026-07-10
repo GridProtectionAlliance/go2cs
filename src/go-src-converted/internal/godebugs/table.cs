@@ -28,7 +28,7 @@ partial class godebugs_package {
 //
 // Note: After adding entries to this table, update the list in doc/godebug.md as well.
 // (Otherwise the test in this package will fail.)
-public static slice<Info> All = new Info[]{
+public static ж<slice<Info>> ᏑAll = new(new Info[]{
     new(Name: "asynctimerchan"u8, Package: "time"u8, Changed: 23, Old: "1"u8),
     new(Name: "execerrdot"u8, Package: "os/exec"u8),
     new(Name: "gocachehash"u8, Package: "cmd/go"u8),
@@ -65,7 +65,8 @@ public static slice<Info> All = new Info[]{
     new(Name: "x509usefallbackroots"u8, Package: "crypto/x509"u8),
     new(Name: "x509usepolicies"u8, Package: "crypto/x509"u8),
     new(Name: "zipinsecurepath"u8, Package: "archive/zip"u8)
-}.slice();
+}.slice());
+public static ref slice<Info> All => ref ᏑAll.ValueSlot;
 
 // Lookup returns the Info with the given name.
 public static ж<Info> Lookup(@string name) {
@@ -73,7 +74,7 @@ public static ж<Info> Lookup(@string name) {
     nint lo = 0;
     nint hi = len(All);
     while (lo < hi) {
-        nint m = ((nint)(((nuint)(lo + hi)) >> (int)(1)));
+        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
         @string mid = All[m].Name;
         if (name == mid) {
             return Ꮡ(All, m);

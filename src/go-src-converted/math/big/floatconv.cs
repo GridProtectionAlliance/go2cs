@@ -10,16 +10,19 @@ using strings = strings_package;
 
 partial class big_package {
 
-internal static Float floatZero;
+internal static ж<Float> ᏑfloatZero = new(default(Float));
+internal static ref Float floatZero => ref ᏑfloatZero.Value;
 
 // SetString sets z to the value of s and returns z and a boolean indicating
 // success. s must be a floating-point number of the same format as accepted
 // by [Float.Parse], with base argument 0. The entire string (not just a prefix) must
 // be valid for success. If the operation failed, the value of z is undefined
 // but the returned value is nil.
-[GoRecv] public static (ж<Float>, bool) SetString(this ref Float z, @string s) {
+public static (ж<Float>, bool) SetString(this ж<Float> Ꮡz, @string s) {
+    ref var z = ref Ꮡz.Value;
+
     {
-        var (f, Δ_, err) = z.Parse(s, 0); if (err == default!) {
+        var (f, _, err) = Ꮡz.Parse(s, 0); if (err == default!) {
             return (f, true);
         }
     }
@@ -30,11 +33,12 @@ internal static Float floatZero;
 // floating point number from an io.ByteScanner rather than a string. It serves
 // as the implementation of Parse. It does not recognize ±Inf and does not expect
 // EOF at the end.
-[GoRecv] internal static (ж<Float> f, nint b, error err) scan(this ref Float z, io.ByteScanner r, nint @base) {
+internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.ByteScanner r, nint @base) {
     ж<Float> f = default!;
     nint b = default!;
     error err = default!;
 
+    ref var z = ref Ꮡz.Value;
     var prec = z.prec;
     if (prec == 0) {
         prec = 64;
@@ -64,7 +68,7 @@ internal static Float floatZero;
         z.prec = prec;
         z.acc = Exact;
         z.form = zero;
-        f = z;
+        f = Ꮡz;
         return (f, b, err);
     }
     // len(z.mant) > 0
@@ -79,21 +83,21 @@ internal static Float floatZero;
     // 2 and 5. This reduces the size of the multiplication factor
     // needed for base-10 exponents.
     // normalize mantissa and determine initial exponent contributions
-    var exp2 = ((int64)len(z.mant)) * _W - fnorm(z.mant);
-    var exp5 = ((int64)0);
+    var exp2 = (int64)len(z.mant) * (int64)_W - fnorm(z.mant);
+    var exp5 = (int64)0;
     // determine binary or decimal exponent contribution of radix point
     if (fcount < 0) {
         // The mantissa has a radix point ddd.dddd; and
         // -fcount is the number of digits to the right
         // of '.'. Adjust relevant exponent accordingly.
-        var d = ((int64)fcount);
+        var d = (int64)fcount;
         var exprᴛ1 = b;
         var matchᴛ1 = false;
         if (exprᴛ1 is 10) { matchᴛ1 = true;
             exp5 = d;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 2)) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) { matchᴛ1 = true;
             exp2 += d;
         }
         else if (exprᴛ1 is 8) { matchᴛ1 = true;
@@ -118,7 +122,7 @@ internal static Float floatZero;
         exp5 += exp;
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ2 && exprᴛ2 is 2)) {
+    if (fallthrough || !matchᴛ2 && exprᴛ2 is 2) {
         exp2 += exp;
     }
     else { /* default: */
@@ -131,15 +135,15 @@ internal static Float floatZero;
     if (MinExp <= exp2 && exp2 <= MaxExp){
         z.prec = prec;
         z.form = finite;
-        z.exp = ((int32)exp2);
-        f = z;
+        z.exp = (int32)exp2;
+        f = Ꮡz;
     } else {
         err = fmt.Errorf("exponent overflow"u8);
         return (f, b, err);
     }
     if (exp5 == 0) {
         // no decimal exponent contribution
-        z.round(0);
+        Ꮡz.round(0);
         return (f, b, err);
     }
     // exp5 != 0
@@ -147,9 +151,9 @@ internal static Float floatZero;
     var p = @new<Float>().SetPrec(z.Prec() + 64);
     // use more bits for p -- TODO(gri) what is the right number?
     if (exp5 < 0){
-        z.Quo(z, p.pow5(((uint64)(-exp5))));
+        Ꮡz.Quo(Ꮡz, p.pow5((uint64)(-exp5)));
     } else {
-        z.Mul(z, p.pow5(((uint64)exp5)));
+        Ꮡz.Mul(Ꮡz, p.pow5((uint64)exp5));
     }
     return (f, b, err);
 }
@@ -174,43 +178,45 @@ internal static array<uint64> pow5tab = new uint64[]{
     48828125,
     244140625,
     1220703125,
-    (nint)6103515625L,
-    (nint)30517578125L,
-    (nint)152587890625L,
-    (nint)762939453125L,
-    (nint)3814697265625L,
-    (nint)19073486328125L,
-    (nint)95367431640625L,
-    (nint)476837158203125L,
-    (nint)2384185791015625L,
-    (nint)11920928955078125L,
-    (nint)59604644775390625L,
-    (nint)298023223876953125L,
-    (nint)1490116119384765625L,
-    (nint)7450580596923828125L
+    6103515625UL,
+    30517578125UL,
+    152587890625UL,
+    762939453125UL,
+    3814697265625UL,
+    19073486328125UL,
+    95367431640625UL,
+    476837158203125UL,
+    2384185791015625UL,
+    11920928955078125UL,
+    59604644775390625UL,
+    298023223876953125UL,
+    1490116119384765625UL,
+    7450580596923828125UL
 }.array();
 
 // pow5 sets z to 5**n and returns z.
 // n must not be negative.
-[GoRecv("capture")] internal static ж<Float> pow5(this ref Float z, uint64 n) {
+internal static ж<Float> pow5(this ж<Float> Ꮡz, uint64 n) {
+    ref var z = ref Ꮡz.Value;
+
     const uint64 m = /* uint64(len(pow5tab) - 1) */ 27;
     if (n <= m) {
-        return z.SetUint64(pow5tab[n]);
+        return Ꮡz.SetUint64(pow5tab[(nint)(n)]);
     }
     // n > m
-    z.SetUint64(pow5tab[m]);
+    Ꮡz.SetUint64(pow5tab[(nint)(m)]);
     n -= m;
     // use more bits for f than for z
     // TODO(gri) what is the right number?
     var f = @new<Float>().SetPrec(z.Prec() + 64).SetUint64(5);
     while (n > 0) {
         if ((uint64)(n & 1) != 0) {
-            z.Mul(z, f);
+            Ꮡz.Mul(Ꮡz, f);
         }
         f.Mul(f, f);
-        n >>= (UntypedInt)(1);
+        n >>= (int)(1);
     }
-    return pow5ꓸᏑz;
+    return Ꮡz;
 }
 
 // Parse parses s which must contain a text representation of a floating-
@@ -258,23 +264,24 @@ internal static array<uint64> pow5tab = new uint64[]{
 //
 // The returned *Float f is nil and the value of z is valid but not
 // defined if an error is reported.
-[GoRecv] public static (ж<Float> f, nint b, error err) Parse(this ref Float z, @string s, nint @base) {
+public static (ж<Float> f, nint b, error err) Parse(this ж<Float> Ꮡz, @string s, nint @base) {
     ж<Float> f = default!;
     nint b = default!;
     error err = default!;
 
+    ref var z = ref Ꮡz.Value;
     // scan doesn't handle ±Inf
     if (len(s) == 3 && (s == "Inf"u8 || s == "inf"u8)) {
-        f = z.SetInf(false);
+        f = Ꮡz.SetInf(false);
         return (f, b, err);
     }
     if (len(s) == 4 && (s[0] == (rune)'+' || s[0] == (rune)'-') && (s[1..] == "Inf" || s[1..] == "inf")) {
-        f = z.SetInf(s[0] == (rune)'-');
+        f = Ꮡz.SetInf(s[0] == (rune)'-');
         return (f, b, err);
     }
     var r = strings.NewReader(s);
     {
-        (f, b, err) = z.scan(~r, @base); if (err != default!) {
+        (f, b, err) = Ꮡz.scan(new strings_ReaderжByteScanner(r), @base); if (err != default!) {
             return (f, b, err);
         }
     }
@@ -300,16 +307,18 @@ public static (ж<Float> f, nint b, error err) ParseFloat(@string s, nint @base,
     return @new<Float>().SetPrec(prec).SetMode(mode).Parse(s, @base);
 }
 
-internal static fmt.Scanner Δ_ = (ж<Float>)(default!); // *Float must implement fmt.Scanner
+internal static fmt.Scanner _ᴛ2ʗ = new FloatжScanner((ж<Float>)(default!)); // *Float must implement fmt.Scanner
 
 // Scan is a support routine for [fmt.Scanner]; it sets z to the value of
 // the scanned number. It accepts formats whose verbs are supported by
 // [fmt.Scan] for floating point values, which are:
 // 'b' (binary), 'e', 'E', 'f', 'F', 'g' and 'G'.
 // Scan doesn't handle ±Inf.
-[GoRecv] public static error Scan(this ref Float z, fmt.ScanState s, rune ch) {
+public static error Scan(this ж<Float> Ꮡz, fmt.ScanState s, rune ch) {
+    ref var z = ref Ꮡz.Value;
+
     s.SkipSpace();
-    var (Δ_, Δ_, err) = z.scan(new byteReader(s), 0);
+    var (_, _, err) = Ꮡz.scan(new byteReader(s), 0);
     return err;
 }
 

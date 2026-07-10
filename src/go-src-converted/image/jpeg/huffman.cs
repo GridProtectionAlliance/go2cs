@@ -24,7 +24,7 @@ internal static readonly UntypedInt lutSize = 8;
     // The high 8 bits of the uint16 are the encoded value. The low 8 bits
     // are 1 plus the code length, or 0 if the value is too large to fit in
     // lutSize bits.
-    internal array<uint16> lut = new(1 << (int)(lutSize));
+    internal array<uint16> lut = new((1 << (int)(lutSize)));
     // vals are the decoded values, sorted by their encoding.
     internal array<uint8> vals = new(maxNCodes);
     // minCodes[i] is the minimum code of length i, or -1 if there are no
@@ -39,7 +39,7 @@ internal static readonly UntypedInt lutSize = 8;
 
 // errShortHuffmanData means that an unexpected EOF occurred while decoding
 // Huffman data.
-internal static FormatError errShortHuffmanData = ((FormatError)"short Huffman data"u8);
+internal static FormatError errShortHuffmanData = ((FormatError)(@string)"short Huffman data"u8);
 
 // ensureNBits reads bytes from the byte buffer to ensure that d.bits.n is at
 // least n. For best performance (avoiding function calls inside hot loops),
@@ -53,12 +53,12 @@ internal static FormatError errShortHuffmanData = ((FormatError)"short Huffman d
             }
             return err;
         }
-        d.bits.a = (uint32)(d.bits.a << (int)(8) | ((uint32)c));
+        d.bits.a = (uint32)((d.bits.a << (int)(8)) | (uint32)c);
         d.bits.n += 8;
         if (d.bits.m == 0){
-            d.bits.m = 1 << (int)(7);
+            d.bits.m = ((uint32)1 << (int)(7));
         } else {
-            d.bits.m <<= (UntypedInt)(8);
+            d.bits.m <<= (int)(8);
         }
         if (d.bits.n >= n) {
             break;
@@ -70,19 +70,19 @@ internal static FormatError errShortHuffmanData = ((FormatError)"short Huffman d
 // receiveExtend is the composition of RECEIVE and EXTEND, specified in section
 // F.2.2.1.
 [GoRecv] internal static (int32, error) receiveExtend(this ref decoder d, uint8 t) {
-    if (d.bits.n < ((int32)t)) {
+    if (d.bits.n < (int32)t) {
         {
-            var err = d.ensureNBits(((int32)t)); if (err != default!) {
+            var err = d.ensureNBits((int32)t); if (err != default!) {
                 return (0, err);
             }
         }
     }
-    d.bits.n -= ((int32)t);
-    d.bits.m >>= (uint8)(t);
-    var s = ((int32)1) << (int)(t);
-    var x = (int32)(((int32)(d.bits.a >> (int)(((uint8)d.bits.n)))) & (s - 1));
-    if (x < s >> (int)(1)) {
-        x += ((-1) << (int)(t)) + 1;
+    d.bits.n -= (int32)t;
+    d.bits.m >>= (int)(t);
+    var s = ((int32)1 << (int)(t));
+    var x = (int32)((int32)((d.bits.a >> (int)((uint8)d.bits.n))) & (s - 1));
+    if (x < (s >> (int)(1))) {
+        x += (((-1) << (int)(t))) + 1;
     }
     return (x, default!);
 }
@@ -92,41 +92,41 @@ internal static FormatError errShortHuffmanData = ((FormatError)"short Huffman d
 [GoRecv] internal static error processDHT(this ref decoder d, nint n) {
     while (n > 0) {
         if (n < 17) {
-            return ((FormatError)"DHT has wrong length"u8);
+            return ((FormatError)(@string)"DHT has wrong length"u8);
         }
         {
             var err = d.readFull(d.tmp[..17]); if (err != default!) {
                 return err;
             }
         }
-        var tc = d.tmp[0] >> (int)(4);
+        var tc = (byte)((d.tmp[0] >> (int)(4)));
         if (tc > maxTc) {
-            return ((FormatError)"bad Tc value"u8);
+            return ((FormatError)(@string)"bad Tc value"u8);
         }
-        var th = (byte)(d.tmp[0] & 15);
+        var th = (byte)(d.tmp[0] & 0x0f);
         // The baseline th <= 1 restriction is specified in table B.5.
         if (th > maxTh || (d.baseline && th > 1)) {
-            return ((FormatError)"bad Th value"u8);
+            return ((FormatError)(@string)"bad Th value"u8);
         }
         var h = Ꮡ(d.huff[tc][th]);
         // Read nCodes and h.vals (and derive h.nCodes).
         // nCodes[i] is the number of codes with code length i.
         // h.nCodes is the total number of codes.
-        h.val.nCodes = 0;
+        h.Value.nCodes = 0;
         array<int32> nCodes = new(16); /* maxCodeLength */
         foreach (var (i, _) in nCodes) {
-            nCodes[i] = ((int32)d.tmp[i + 1]);
-            h.val.nCodes += nCodes[i];
+            nCodes[i] = (int32)d.tmp[i + 1];
+            h.Value.nCodes += nCodes[i];
         }
         if ((~h).nCodes == 0) {
-            return ((FormatError)"Huffman table has zero length"u8);
+            return ((FormatError)(@string)"Huffman table has zero length"u8);
         }
         if ((~h).nCodes > maxNCodes) {
-            return ((FormatError)"Huffman table has excessive length"u8);
+            return ((FormatError)(@string)"Huffman table has excessive length"u8);
         }
-        n -= ((nint)(~h).nCodes) + 17;
+        n -= (nint)(~h).nCodes + 17;
         if (n < 0) {
-            return ((FormatError)"DHT has wrong length"u8);
+            return ((FormatError)(@string)"DHT has wrong length"u8);
         }
         {
             var err = d.readFull((~h).vals[..(int)((~h).nCodes)]); if (err != default!) {
@@ -137,18 +137,18 @@ internal static FormatError errShortHuffmanData = ((FormatError)"short Huffman d
         clear((~h).lut[..]);
         uint32 x = default!;
         uint32 code = default!;
-        for (var i = ((uint32)0); i < lutSize; i++) {
-            code <<= (UntypedInt)(1);
-            for (var j = ((int32)0); j < nCodes[i]; j++) {
+        for (var i = (uint32)0; i < lutSize; i++) {
+            code <<= (int)(1);
+            for (var j = (int32)0; j < nCodes[(nint)(i)]; j++) {
                 // The codeLength is 1+i, so shift code by 8-(1+i) to
                 // calculate the high bits for every 8-bit sequence
                 // whose codeLength's high bits matches code.
                 // The high 8 bits of lutValue are the encoded value.
                 // The low 8 bits are 1 plus the codeLength.
-                var @base = ((uint8)(code << (int)((7 - i))));
-                var lutValue = (uint16)(((uint16)(~h).vals[x]) << (int)(8) | ((uint16)(2 + i)));
-                for (var k = ((uint8)0); k < 1 << (int)((7 - i)); k++) {
-                    (~h).lut[(uint8)(@base | k)] = lutValue;
+                var @base = (uint8)((code << (int)((7 - i))));
+                var lutValue = (uint16)(((uint16)(~h).vals[(nint)(x)] << (int)(8)) | (uint16)(2 + i));
+                for (var k = (uint8)0; k < (uint8)(1 << (int)((7 - i))); k++) {
+                    h.Value.lut[(uint8)(@base | k)] = lutValue;
                 }
                 code++;
                 x++;
@@ -159,17 +159,17 @@ internal static FormatError errShortHuffmanData = ((FormatError)"short Huffman d
         int32 index = default!;
         foreach (var (i, nΔ1) in nCodes) {
             if (nΔ1 == 0){
-                (~h).minCodes[i] = -1;
-                (~h).maxCodes[i] = -1;
-                (~h).valsIndices[i] = -1;
+                h.Value.minCodes[i] = -1;
+                h.Value.maxCodes[i] = -1;
+                h.Value.valsIndices[i] = -1;
             } else {
-                (~h).minCodes[i] = c;
-                (~h).maxCodes[i] = c + nΔ1 - 1;
-                (~h).valsIndices[i] = index;
+                h.Value.minCodes[i] = c;
+                h.Value.maxCodes[i] = c + nΔ1 - 1;
+                h.Value.valsIndices[i] = index;
                 c += nΔ1;
                 index += nΔ1;
             }
-            c <<= (UntypedInt)(1);
+            c <<= (int)(1);
         }
     }
     return default!;
@@ -178,15 +178,15 @@ internal static FormatError errShortHuffmanData = ((FormatError)"short Huffman d
 // decodeHuffman returns the next Huffman-coded value from the bit-stream,
 // decoded according to h.
 [GoRecv] internal static (uint8, error) decodeHuffman(this ref decoder d, ж<huffman> Ꮡh) {
-    ref var h = ref Ꮡh.val;
+    ref var h = ref Ꮡh.Value;
 
     if (h.nCodes == 0) {
-        return (0, ((FormatError)"uninitialized Huffman table"u8));
+        return (0, ((FormatError)(@string)"uninitialized Huffman table"u8));
     }
     if (d.bits.n < 8) {
         {
             var err = d.ensureNBits(8); if (err != default!) {
-                if (err != errMissingFF00 && err != errShortHuffmanData) {
+                if (!AreEqual(err, errMissingFF00) && !AreEqual(err, errShortHuffmanData)) {
                     return (0, err);
                 }
                 // There are no more bytes of data in this segment, but we may still
@@ -200,15 +200,15 @@ internal static FormatError errShortHuffmanData = ((FormatError)"short Huffman d
         }
     }
     {
-        var v = h.lut[(uint32)((d.bits.a >> (int)(((uint32)(d.bits.n - lutSize)))) & 255)]; if (v != 0) {
-            var n = ((uint16)(v & 255)) - 1;
-            d.bits.n -= ((int32)n);
-            d.bits.m >>= (uint16)(n);
-            return (((uint8)(v >> (int)(8))), default!);
+        var v = h.lut[(nint)((uint32)(((d.bits.a >> (int)((uint32)(d.bits.n - (int32)lutSize)))) & 0xff))]; if (v != 0) {
+            var n = (uint16)(((uint16)(v & 0xff)) - 1);
+            d.bits.n -= (int32)n;
+            d.bits.m >>= (int)(n);
+            return ((uint8)((v >> (int)(8))), default!);
         }
     }
 slowPath:
-    for (nint i = 0;var code = ((int32)0); i < maxCodeLength; i++) {
+    for ((nint i, var code) = (0, (int32)0); i < maxCodeLength; i++) {
         if (d.bits.n == 0) {
             {
                 var err = d.ensureNBits(1); if (err != default!) {
@@ -220,15 +220,15 @@ slowPath:
             code |= (int32)(1);
         }
         d.bits.n--;
-        d.bits.m >>= (UntypedInt)(1);
+        d.bits.m >>= (int)(1);
         if (code <= h.maxCodes[i]) {
             return (h.vals[h.valsIndices[i] + code - h.minCodes[i]], default!);
         }
-        code <<= (UntypedInt)(1);
+        code <<= (int)(1);
 continue_slowPath:;
     }
 break_slowPath:;
-    return (0, ((FormatError)"bad Huffman code"u8));
+    return (0, ((FormatError)(@string)"bad Huffman code"u8));
 }
 
 [GoRecv] internal static (bool, error) decodeBit(this ref decoder d) {
@@ -241,7 +241,7 @@ break_slowPath:;
     }
     var ret = (uint32)(d.bits.a & d.bits.m) != 0;
     d.bits.n--;
-    d.bits.m >>= (UntypedInt)(1);
+    d.bits.m >>= (int)(1);
     return (ret, default!);
 }
 
@@ -253,10 +253,10 @@ break_slowPath:;
             }
         }
     }
-    var ret = d.bits.a >> (int)(((uint32)(d.bits.n - n)));
-    ret &= (uint32)((1 << (int)(((uint32)n))) - 1);
+    var ret = (d.bits.a >> (int)((uint32)(d.bits.n - n)));
+    ret &= (uint32)((((uint32)1 << (int)((uint32)n))) - 1);
     d.bits.n -= n;
-    d.bits.m >>= (uint32)(((uint32)n));
+    d.bits.m >>= (int)((uint32)n);
     return (ret, default!);
 }
 

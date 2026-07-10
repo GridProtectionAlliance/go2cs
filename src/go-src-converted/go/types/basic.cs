@@ -83,12 +83,16 @@ public static readonly BasicInfo IsConstType = /* IsBoolean | IsNumeric | IsStri
     return b.name;
 }
 
-[GoRecv("capture")] public static ΔType Underlying(this ref Basic b) {
-    return ~b;
+public static ΔType Underlying(this ж<Basic> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
+
+    return new BasicжΔType(Ꮡb);
 }
 
-[GoRecv] public static @string String(this ref Basic b) {
-    return TypeString(~b, default!);
+public static @string String(this ж<Basic> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
+
+    return TypeString(new BasicжΔType(Ꮡb), default!);
 }
 
 } // end types_package

@@ -6,6 +6,8 @@ namespace go.crypto;
 using context = context_package;
 using errors = errors_package;
 using fmt = fmt_package;
+using go.sync;
+using net = net_package;
 
 partial class tls_package {
 
@@ -31,7 +33,7 @@ public static @string String(this QUICEncryptionLevel l) {
         return "Application"u8;
     }
     { /* default: */
-        return fmt.Sprintf("QUICEncryptionLevel(%v)"u8, ((nint)l));
+        return fmt.Sprintf("QUICEncryptionLevel(%v)"u8, (nint)l);
     }
 
 }
@@ -98,7 +100,7 @@ public static readonly QUICEventKind QUICStoreSession = 9;
     internal channel<EmptyStruct> signalc; // handshake data is available to be read
     internal channel<EmptyStruct> blockedc; // handshake is waiting for data, closed when done
     internal /*<-*/channel<EmptyStruct> cancelc; // handshake has been canceled
-    internal context_package.CancelFunc cancel;
+    internal Action cancel;
     internal bool waitingForDrain;
     // readbuf is shared between HandleData and the handshake goroutine.
     // HandshakeCryptoData passes ownership to the handshake goroutine by
@@ -113,7 +115,7 @@ public static readonly QUICEventKind QUICStoreSession = 9;
 //
 // The config's MinVersion must be at least TLS 1.3.
 public static ж<QUICConn> QUICClient(ж<QUICConfig> Ꮡconfig) {
-    ref var config = ref Ꮡconfig.val;
+    ref var config = ref Ꮡconfig.Value;
 
     return newQUICConn(Client(default!, config.TLSConfig), Ꮡconfig);
 }
@@ -123,23 +125,23 @@ public static ж<QUICConn> QUICClient(ж<QUICConfig> Ꮡconfig) {
 //
 // The config's MinVersion must be at least TLS 1.3.
 public static ж<QUICConn> QUICServer(ж<QUICConfig> Ꮡconfig) {
-    ref var config = ref Ꮡconfig.val;
+    ref var config = ref Ꮡconfig.Value;
 
     return newQUICConn(Server(default!, config.TLSConfig), Ꮡconfig);
 }
 
 internal static ж<QUICConn> newQUICConn(ж<Conn> Ꮡconn, ж<QUICConfig> Ꮡconfig) {
-    ref var conn = ref Ꮡconn.val;
-    ref var config = ref Ꮡconfig.val;
+    ref var conn = ref Ꮡconn.Value;
+    ref var config = ref Ꮡconfig.Value;
 
     conn.quic = Ꮡ(new quicState(
         signalc: new channel<EmptyStruct>(1),
         blockedc: new channel<EmptyStruct>(1),
         enableSessionEvents: config.EnableSessionEvents
     ));
-    conn.quic.events = conn.quic.eventArr[..0];
+    conn.quic.Value.events = (~conn.quic).eventArr[..0];
     return Ꮡ(new QUICConn(
-        conn: conn
+        conn: Ꮡconn
     ));
 }
 
@@ -147,18 +149,20 @@ internal static ж<QUICConn> newQUICConn(ж<Conn> Ꮡconn, ж<QUICConfig> Ꮡcon
 // It may produce connection events, which may be read with [QUICConn.NextEvent].
 //
 // Start must be called at most once.
-[GoRecv] public static error Start(this ref QUICConn q, context.Context ctx) {
-    if (q.conn.quic.started) {
+public static error Start(this ж<QUICConn> Ꮡq, context.Context ctx) {
+    ref var q = ref Ꮡq.Value;
+
+    if ((~(~q.conn).quic).started) {
         return quicError(errors.New("tls: Start called more than once"u8));
     }
-    q.conn.quic.started = true;
-    if (q.conn.config.MinVersion < VersionTLS13) {
+    q.conn.Value.quic.Value.started = true;
+    if ((~(~q.conn).config).MinVersion < VersionTLS13) {
         return quicError(errors.New("tls: Config MinVersion must be at least TLS 1.13"u8));
     }
-    goǃ(q.conn.HandshakeContext, ctx);
+    goǃ(ᴛ1 => Ꮡq.Value.conn.HandshakeContext(ᴛ1), ctx);
     {
-        var (_, ok) = ᐸꟷ(q.conn.quic.blockedc, ꟷ); if (!ok) {
-            return q.conn.handshakeErr;
+        var (_, ok) = ᐸꟷ((~(~q.conn).quic).blockedc, ꟷ); if (!ok) {
+            return (~q.conn).handshakeErr;
         }
     }
     return default!;
@@ -167,7 +171,7 @@ internal static ж<QUICConn> newQUICConn(ж<Conn> Ꮡconn, ж<QUICConfig> Ꮡcon
 // NextEvent returns the next event occurring on the connection.
 // It returns an event with a Kind of [QUICNoEvent] when no events are available.
 [GoRecv] public static QUICEvent NextEvent(this ref QUICConn q) {
-    var qs = q.conn.quic;
+    var qs = q.conn.Value.quic;
     {
         nint last = (~qs).nextEvent - 1; if (last >= 0 && len((~qs).events[last].Data) > 0) {
             // Write over some of the previous event's data,
@@ -176,43 +180,45 @@ internal static ж<QUICConn> newQUICConn(ж<Conn> Ꮡconn, ж<QUICConfig> Ꮡcon
         }
     }
     if ((~qs).nextEvent >= len((~qs).events) && (~qs).waitingForDrain) {
-        qs.val.waitingForDrain = false;
+        qs.Value.waitingForDrain = false;
         ᐸꟷ((~qs).signalc);
         ᐸꟷ((~qs).blockedc);
     }
     if ((~qs).nextEvent >= len((~qs).events)) {
-        qs.val.events = (~qs).events[..0];
-        qs.val.nextEvent = 0;
+        qs.Value.events = (~qs).events[..0];
+        qs.Value.nextEvent = 0;
         return new QUICEvent(Kind: QUICNoEvent);
     }
     var e = (~qs).events[(~qs).nextEvent];
-    (~qs).events[(~qs).nextEvent] = new QUICEvent(nil);
+    qs.Value.events[(~qs).nextEvent] = new QUICEvent(nil);
     // zero out references to data
-    (~qs).nextEvent++;
+    qs.Value.nextEvent++;
     return e;
 }
 
 // Close closes the connection and stops any in-progress handshake.
 [GoRecv] public static error Close(this ref QUICConn q) {
-    if (q.conn.quic.cancel == default!) {
+    if ((~(~q.conn).quic).cancel == default!) {
         return default!;
     }
     // never started
-    q.conn.quic.cancel();
-    foreach (var _ in q.conn.quic.blockedc) {
+    (~(~q.conn).quic).cancel();
+    foreach (var _ in (~(~q.conn).quic).blockedc) {
     }
     // Wait for the handshake goroutine to return.
-    return q.conn.handshakeErr;
+    return (~q.conn).handshakeErr;
 }
 
 // HandleData handles handshake bytes received from the peer.
 // It may produce connection events, which may be read with [QUICConn.NextEvent].
-[GoRecv] public static error HandleData(this ref QUICConn q, QUICEncryptionLevel level, slice<byte> data) => func((defer, _) => {
+public static error HandleData(this ж<QUICConn> Ꮡq, QUICEncryptionLevel level, slice<byte> data) => func<error>((defer, recover) => {
+    ref var q = ref Ꮡq.Value;
+
     var c = q.conn;
     if ((~c).@in.level != level) {
-        return quicError((~c).@in.setErrorLocked(errors.New("tls: handshake data received at wrong level"u8)));
+        return quicError(c.of(Conn.Ꮡin).setErrorLocked(errors.New("tls: handshake data received at wrong level"u8)));
     }
-    (~c).quic.val.readbuf = data;
+    c.Value.quic.Value.readbuf = data;
     ᐸꟷ((~(~c).quic).signalc);
     var (_, ok) = ᐸꟷ((~(~c).quic).blockedc, ꟷ);
     if (ok) {
@@ -220,16 +226,16 @@ internal static ж<QUICConn> newQUICConn(ж<Conn> Ꮡconn, ж<QUICConfig> Ꮡcon
         return default!;
     }
     // The handshake goroutine has exited.
-    (~c).handshakeMutex.Lock();
+    c.of(Conn.ᏑhandshakeMutex).Lock();
     var cʗ1 = c;
-    defer((~cʗ1).handshakeMutex.Unlock);
-    (~c).hand.Write((~(~c).quic).readbuf);
-    (~c).quic.val.readbuf = default!;
-    while (q.conn.hand.Len() >= 4 && q.conn.handshakeErr == default!) {
-        var b = q.conn.hand.Bytes();
-        nint n = (nint)((nint)(((nint)b[1]) << (int)(16) | ((nint)b[2]) << (int)(8)) | ((nint)b[3]));
+    defer(cʗ1.of(Conn.ᏑhandshakeMutex).Unlock);
+    c.of(Conn.Ꮡhand).Write((~(~c).quic).readbuf);
+    c.Value.quic.Value.readbuf = default!;
+    while (q.conn.of(Conn.Ꮡhand).Len() >= 4 && (~q.conn).handshakeErr == default!) {
+        var b = q.conn.of(Conn.Ꮡhand).Bytes();
+        nint n = (nint)((nint)(((nint)b[1] << (int)(16)) | ((nint)b[2] << (int)(8))) | (nint)b[3]);
         if (n > maxHandshake) {
-            q.conn.handshakeErr = fmt.Errorf("tls: handshake message of length %d bytes exceeds maximum of %d bytes"u8, n, maxHandshake);
+            q.conn.Value.handshakeErr = fmt.Errorf("tls: handshake message of length %d bytes exceeds maximum of %d bytes"u8, n, maxHandshake);
             break;
         }
         if (len(b) < 4 + n) {
@@ -237,12 +243,12 @@ internal static ж<QUICConn> newQUICConn(ж<Conn> Ꮡconn, ж<QUICConfig> Ꮡcon
         }
         {
             var err = q.conn.handlePostHandshakeMessage(); if (err != default!) {
-                q.conn.handshakeErr = err;
+                q.conn.Value.handshakeErr = err;
             }
         }
     }
-    if (q.conn.handshakeErr != default!) {
-        return quicError(q.conn.handshakeErr);
+    if ((~q.conn).handshakeErr != default!) {
+        return quicError((~q.conn).handshakeErr);
     }
     return default!;
 });
@@ -258,7 +264,7 @@ internal static ж<QUICConn> newQUICConn(ж<Conn> Ꮡconn, ж<QUICConfig> Ꮡcon
 // Currently, it can only be called once.
 [GoRecv] public static error SendSessionTicket(this ref QUICConn q, QUICSessionTicketOptions opts) {
     var c = q.conn;
-    if (!(~c).isHandshakeComplete.Load()) {
+    if (!c.of(Conn.ᏑisHandshakeComplete).Load()) {
         return quicError(errors.New("tls: SendSessionTicket called before handshake completed"u8));
     }
     if ((~c).isClient) {
@@ -276,7 +282,7 @@ internal static ж<QUICConn> newQUICConn(ж<Conn> Ꮡconn, ж<QUICConfig> Ꮡcon
 // The application may process additional events or modify the SessionState
 // before storing the session.
 [GoRecv] public static error StoreSession(this ref QUICConn q, ж<SessionState> Ꮡsession) {
-    ref var session = ref Ꮡsession.val;
+    ref var session = ref Ꮡsession.Value;
 
     var c = q.conn;
     if (!(~c).isClient) {
@@ -286,7 +292,7 @@ internal static ж<QUICConn> newQUICConn(ж<Conn> Ꮡconn, ж<QUICConfig> Ꮡcon
     if (cacheKey == ""u8) {
         return default!;
     }
-    var cs = Ꮡ(new ClientSessionState(session: session));
+    var cs = Ꮡ(new ClientSessionState(session: Ꮡsession));
     (~(~c).config).ClientSessionCache.Put(cacheKey, cs);
     return default!;
 }
@@ -304,10 +310,10 @@ internal static ж<QUICConn> newQUICConn(ж<Conn> Ꮡconn, ж<QUICConfig> Ꮡcon
     if (@params == default!) {
         @params = new byte[]{}.slice();
     }
-    q.conn.quic.transportParams = @params;
-    if (q.conn.quic.started) {
-        ᐸꟷ(q.conn.quic.signalc);
-        ᐸꟷ(q.conn.quic.blockedc);
+    q.conn.Value.quic.Value.transportParams = @params;
+    if ((~(~q.conn).quic).started) {
+        ᐸꟷ((~(~q.conn).quic).signalc);
+        ᐸꟷ((~(~q.conn).quic).blockedc);
     }
 }
 
@@ -327,13 +333,15 @@ internal static error quicError(error err) {
     }
     // Return an error wrapping the original error and an AlertError.
     // Truncate the text of the alert to 0 characters.
-    return fmt.Errorf("%w%.0w"u8, err, ((AlertError)a));
+    return fmt.Errorf("%w%.0w"u8, err, ((AlertError)(uint8)a));
 }
 
-[GoRecv] internal static error quicReadHandshakeBytes(this ref Conn c, nint n) {
+internal static error quicReadHandshakeBytes(this ж<Conn> Ꮡc, nint n) {
+    ref var c = ref Ꮡc.Value;
+
     while (c.hand.Len() < n) {
         {
-            var err = c.quicWaitForSignal(); if (err != default!) {
+            var err = Ꮡc.quicWaitForSignal(); if (err != default!) {
                 return err;
             }
         }
@@ -342,7 +350,7 @@ internal static error quicError(error err) {
 }
 
 [GoRecv] internal static void quicSetReadSecret(this ref Conn c, QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
-    c.quic.events = append(c.quic.events, new QUICEvent(
+    c.quic.Value.events = append((~c.quic).events, new QUICEvent(
         Kind: QUICSetReadSecret,
         Level: level,
         Suite: suite,
@@ -351,7 +359,7 @@ internal static error quicError(error err) {
 }
 
 [GoRecv] internal static void quicSetWriteSecret(this ref Conn c, QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
-    c.quic.events = append(c.quic.events, new QUICEvent(
+    c.quic.Value.events = append((~c.quic).events, new QUICEvent(
         Kind: QUICSetWriteSecret,
         Level: level,
         Suite: suite,
@@ -361,30 +369,31 @@ internal static error quicError(error err) {
 
 [GoRecv] internal static void quicWriteCryptoData(this ref Conn c, QUICEncryptionLevel level, slice<byte> data) {
     ж<QUICEvent> last = default!;
-    if (len(c.quic.events) > 0) {
-        last = Ꮡ(c.quic.events[len(c.quic.events) - 1]);
+    if (len((~c.quic).events) > 0) {
+        last = Ꮡ((~c.quic).events[len((~c.quic).events) - 1]);
     }
     if (last == nil || (~last).Kind != QUICWriteData || (~last).Level != level) {
-        c.quic.events = append(c.quic.events, new QUICEvent(
+        c.quic.Value.events = append((~c.quic).events, new QUICEvent(
             Kind: QUICWriteData,
             Level: level
         ));
-        last = Ꮡ(c.quic.events[len(c.quic.events) - 1]);
+        last = Ꮡ((~c.quic).events[len((~c.quic).events) - 1]);
     }
-    last.val.Data = append((~last).Data, data.ꓸꓸꓸ);
+    last.Value.Data = append((~last).Data, data.ꓸꓸꓸ);
 }
 
-[GoRecv] public static error quicResumeSession(this ref Conn c, ж<SessionState> Ꮡsession) {
-    ref var session = ref Ꮡsession.val;
+internal static error quicResumeSession(this ж<Conn> Ꮡc, ж<SessionState> Ꮡsession) {
+    ref var c = ref Ꮡc.Value;
+    ref var session = ref Ꮡsession.Value;
 
-    c.quic.events = append(c.quic.events, new QUICEvent(
+    c.quic.Value.events = append((~c.quic).events, new QUICEvent(
         Kind: QUICResumeSession,
-        SessionState: session
+        SessionState: Ꮡsession
     ));
-    c.quic.waitingForDrain = true;
-    while (c.quic.waitingForDrain) {
+    c.quic.Value.waitingForDrain = true;
+    while ((~c.quic).waitingForDrain) {
         {
-            var err = c.quicWaitForSignal(); if (err != default!) {
+            var err = Ꮡc.quicWaitForSignal(); if (err != default!) {
                 return err;
             }
         }
@@ -392,54 +401,50 @@ internal static error quicError(error err) {
     return default!;
 }
 
-[GoRecv] public static void quicStoreSession(this ref Conn c, ж<SessionState> Ꮡsession) {
-    ref var session = ref Ꮡsession.val;
+[GoRecv] internal static void quicStoreSession(this ref Conn c, ж<SessionState> Ꮡsession) {
+    ref var session = ref Ꮡsession.Value;
 
-    c.quic.events = append(c.quic.events, new QUICEvent(
+    c.quic.Value.events = append((~c.quic).events, new QUICEvent(
         Kind: QUICStoreSession,
-        SessionState: session
+        SessionState: Ꮡsession
     ));
 }
 
 [GoRecv] internal static void quicSetTransportParameters(this ref Conn c, slice<byte> @params) {
-    c.quic.events = append(c.quic.events, new QUICEvent(
+    c.quic.Value.events = append((~c.quic).events, new QUICEvent(
         Kind: QUICTransportParameters,
         Data: @params
     ));
 }
 
-[GoRecv] internal static (slice<byte>, error) quicGetTransportParameters(this ref Conn c) {
-    if (c.quic.transportParams == default!) {
-        c.quic.events = append(c.quic.events, new QUICEvent(
+internal static (slice<byte>, error) quicGetTransportParameters(this ж<Conn> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    if ((~c.quic).transportParams == default!) {
+        c.quic.Value.events = append((~c.quic).events, new QUICEvent(
             Kind: QUICTransportParametersRequired
         ));
     }
-    while (c.quic.transportParams == default!) {
+    while ((~c.quic).transportParams == default!) {
         {
-            var err = c.quicWaitForSignal(); if (err != default!) {
+            var err = Ꮡc.quicWaitForSignal(); if (err != default!) {
                 return (default!, err);
             }
         }
     }
-    return (c.quic.transportParams, default!);
+    return ((~c.quic).transportParams, default!);
 }
 
 [GoRecv] internal static void quicHandshakeComplete(this ref Conn c) {
-    c.quic.events = append(c.quic.events, new QUICEvent(
+    c.quic.Value.events = append((~c.quic).events, new QUICEvent(
         Kind: QUICHandshakeDone
     ));
 }
 
 [GoRecv] internal static void quicRejectedEarlyData(this ref Conn c) {
-    c.quic.events = append(c.quic.events, new QUICEvent(
+    c.quic.Value.events = append((~c.quic).events, new QUICEvent(
         Kind: QUICRejectedEarlyData
     ));
-}
-
-[GoType("dyn")] partial struct quicWaitForSignal_type {
-}
-
-[GoType("dyn")] partial struct quicWaitForSignal_typeᴛ1 {
 }
 
 // quicWaitForSignal notifies the QUICConn that handshake progress is blocked,
@@ -447,32 +452,34 @@ internal static error quicError(error err) {
 //
 // The handshake may become blocked waiting for handshake bytes
 // or for the user to provide transport parameters.
-[GoRecv] internal static error quicWaitForSignal(this ref Conn c) => func((defer, _) => {
+internal static error quicWaitForSignal(this ж<Conn> Ꮡc) => func<error>((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+
     // Drop the handshake mutex while blocked to allow the user
     // to call ConnectionState before the handshake completes.
-    c.handshakeMutex.Unlock();
-    defer(c.handshakeMutex.Lock);
+    Ꮡc.of(Conn.ᏑhandshakeMutex).Unlock();
+    defer(Ꮡc.of(Conn.ᏑhandshakeMutex).Lock);
     // Send on blockedc to notify the QUICConn that the handshake is blocked.
     // Exported methods of QUICConn wait for the handshake to become blocked
     // before returning to the user.
-    switch (select(c.quic.blockedc.ᐸꟷ(new quicWaitForSignal_type(), ꓸꓸꓸ), ᐸꟷ(c.quic.cancelc, ꓸꓸꓸ))) {
+    switch (select((~c.quic).blockedc.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ), ᐸꟷ((~c.quic).cancelc, ꓸꓸꓸ))) {
     case 0: {
         break;
     }
-    case 1 when c.quic.cancelc.ꟷᐳ(out _): {
-        return c.sendAlertLocked(alertCloseNotify);
+    case 1 when (~c.quic).cancelc.ꟷᐳ(out _): {
+        return Ꮡc.sendAlertLocked(alertCloseNotify);
     }}
     // The QUICConn reads from signalc to notify us that the handshake may
     // be able to proceed. (The QUICConn reads, because we close signalc to
     // indicate that the handshake has completed.)
-    switch (select(c.quic.signalc.ᐸꟷ(new quicWaitForSignal_typeᴛ1(), ꓸꓸꓸ), ᐸꟷ(c.quic.cancelc, ꓸꓸꓸ))) {
+    switch (select((~c.quic).signalc.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ), ᐸꟷ((~c.quic).cancelc, ꓸꓸꓸ))) {
     case 0: {
-        c.hand.Write(c.quic.readbuf);
-        c.quic.readbuf = default!;
+        c.hand.Write((~c.quic).readbuf);
+        c.quic.Value.readbuf = default!;
         break;
     }
-    case 1 when c.quic.cancelc.ꟷᐳ(out _): {
-        return c.sendAlertLocked(alertCloseNotify);
+    case 1 when (~c.quic).cancelc.ꟷᐳ(out _): {
+        return Ꮡc.sendAlertLocked(alertCloseNotify);
     }}
     return default!;
 });

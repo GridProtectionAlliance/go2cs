@@ -4,8 +4,9 @@
 // This file implements isTerminating.
 namespace go.go;
 
-using ast = go.ast_package;
-using token = go.token_package;
+using ast = global::go.go.ast_package;
+using token = global::go.go.token_package;
+using global::go.go;
 
 partial class types_package {
 
@@ -15,85 +16,70 @@ partial class types_package {
 [GoRecv] internal static bool isTerminating(this ref Checker check, ast.Stmt s, @string label) {
     switch (s.type()) {
     default: {
-        var s = s.type();
+        var sΔ1 = s;
         throw panic("unreachable");
         break;
     }
-    case ж<ast.BadStmt> s: {
+    case ж<ast.BadStmt> _:
+    case ж<ast.DeclStmt> _:
+    case ж<ast.EmptyStmt> _:
+    case ж<ast.SendStmt> _:
+    case ж<ast.IncDecStmt> _:
+    case ж<ast.AssignStmt> _:
+    case ж<ast.GoStmt> _:
+    case ж<ast.DeferStmt> _:
+    case ж<ast.RangeStmt> _: {
+        var sΔ1 = s;
         break;
     }
-    case ж<ast.DeclStmt> s: {
-        break;
+    case ж<ast.LabeledStmt> sΔ1: {
+        return check.isTerminating((~sΔ1).Stmt, // no chance
+ (~(~sΔ1).Label).Name);
     }
-    case ж<ast.EmptyStmt> s: {
-        break;
-    }
-    case ж<ast.SendStmt> s: {
-        break;
-    }
-    case ж<ast.IncDecStmt> s: {
-        break;
-    }
-    case ж<ast.AssignStmt> s: {
-        break;
-    }
-    case ж<ast.GoStmt> s: {
-        break;
-    }
-    case ж<ast.DeferStmt> s: {
-        break;
-    }
-    case ж<ast.RangeStmt> s: {
-        break;
-    }
-    case ж<ast.LabeledStmt> s: {
-        return check.isTerminating((~s).Stmt, // no chance
- (~(~s).Label).Name);
-    }
-    case ж<ast.ExprStmt> s: {
+    case ж<ast.ExprStmt> sΔ1: {
         {
-            var (call, ok) = ast.Unparen((~s).X)._<ж<ast.CallExpr>>(ᐧ); if (ok && check.isPanic[call]) {
+            var (call, ok) = ast.Unparen((~sΔ1).X)._<ж<ast.CallExpr>>(ᐧ); if (ok && check.isPanic[call]) {
                 // calling the predeclared (possibly parenthesized) panic() function is terminating
                 return true;
             }
         }
         break;
     }
-    case ж<ast.ReturnStmt> s: {
+    case ж<ast.ReturnStmt> sΔ1: {
         return true;
     }
-    case ж<ast.BranchStmt> s: {
-        if ((~s).Tok == token.GOTO || (~s).Tok == token.FALLTHROUGH) {
+    case ж<ast.BranchStmt> sΔ1: {
+        if ((~sΔ1).Tok == token.GOTO || (~sΔ1).Tok == token.FALLTHROUGH) {
             return true;
         }
         break;
     }
-    case ж<ast.BlockStmt> s: {
-        return check.isTerminatingList((~s).List, ""u8);
+    case ж<ast.BlockStmt> sΔ1: {
+        return check.isTerminatingList((~sΔ1).List, ""u8);
     }
-    case ж<ast.IfStmt> s: {
-        if ((~s).Else != default! && check.isTerminating(~(~s).Body, ""u8) && check.isTerminating((~s).Else, ""u8)) {
+    case ж<ast.IfStmt> sΔ1: {
+        if ((~sΔ1).Else != default! && check.isTerminating(new ast_BlockStmtжStmt((~sΔ1).Body), ""u8) && check.isTerminating((~sΔ1).Else, ""u8)) {
             return true;
         }
         break;
     }
-    case ж<ast.SwitchStmt> s: {
-        return check.isTerminatingSwitch((~s).Body, label);
+    case ж<ast.SwitchStmt> sΔ1: {
+        return check.isTerminatingSwitch((~sΔ1).Body, label);
     }
-    case ж<ast.TypeSwitchStmt> s: {
-        return check.isTerminatingSwitch((~s).Body, label);
+    case ж<ast.TypeSwitchStmt> sΔ1: {
+        return check.isTerminatingSwitch((~sΔ1).Body, label);
     }
-    case ж<ast.SelectStmt> s: {
-        foreach (var (_, sΔ1) in (~(~s).Body).List) {
-            var cc = sΔ1._<ж<ast.CommClause>>();
+    case ж<ast.SelectStmt> sΔ1: {
+        foreach (var (_, sΔ2) in (~(~sΔ1).Body).List) {
+            var cc = sΔ2._<ж<ast.CommClause>>();
             if (!check.isTerminatingList((~cc).Body, ""u8) || hasBreakList((~cc).Body, label, true)) {
                 return false;
             }
         }
         return true;
     }
-    case ж<ast.ForStmt> s: {
-        if ((~s).Cond == default! && !hasBreak(~(~s).Body, label, true)) {
+    case ж<ast.ForStmt> sΔ1: {
+        if ((~sΔ1).Cond == default! && !hasBreak(new ast_BlockStmtжStmt((~sΔ1).Body), label, true)) {
             return true;
         }
         break;
@@ -114,8 +100,8 @@ partial class types_package {
 }
 
 // all statements are empty
-[GoRecv] public static bool isTerminatingSwitch(this ref Checker check, ж<ast.BlockStmt> Ꮡbody, @string label) {
-    ref var body = ref Ꮡbody.val;
+[GoRecv] internal static bool isTerminatingSwitch(this ref Checker check, ж<ast.BlockStmt> Ꮡbody, @string label) {
+    ref var body = ref Ꮡbody.Value;
 
     var hasDefault = false;
     foreach (var (_, s) in body.List) {
@@ -140,96 +126,79 @@ partial class types_package {
 internal static bool hasBreak(ast.Stmt s, @string label, bool @implicit) {
     switch (s.type()) {
     default: {
-        var s = s.type();
+        var sΔ1 = s;
         throw panic("unreachable");
         break;
     }
-    case ж<ast.BadStmt> s: {
+    case ж<ast.BadStmt> _:
+    case ж<ast.DeclStmt> _:
+    case ж<ast.EmptyStmt> _:
+    case ж<ast.ExprStmt> _:
+    case ж<ast.SendStmt> _:
+    case ж<ast.IncDecStmt> _:
+    case ж<ast.AssignStmt> _:
+    case ж<ast.GoStmt> _:
+    case ж<ast.DeferStmt> _:
+    case ж<ast.ReturnStmt> _: {
+        var sΔ1 = s;
         break;
     }
-    case ж<ast.DeclStmt> s: {
-        break;
-    }
-    case ж<ast.EmptyStmt> s: {
-        break;
-    }
-    case ж<ast.ExprStmt> s: {
-        break;
-    }
-    case ж<ast.SendStmt> s: {
-        break;
-    }
-    case ж<ast.IncDecStmt> s: {
-        break;
-    }
-    case ж<ast.AssignStmt> s: {
-        break;
-    }
-    case ж<ast.GoStmt> s: {
-        break;
-    }
-    case ж<ast.DeferStmt> s: {
-        break;
-    }
-    case ж<ast.ReturnStmt> s: {
-        break;
-    }
-    case ж<ast.LabeledStmt> s: {
-        return hasBreak((~s).Stmt, // no chance
+    case ж<ast.LabeledStmt> sΔ1: {
+        return hasBreak((~sΔ1).Stmt, // no chance
  label, @implicit);
     }
-    case ж<ast.BranchStmt> s: {
-        if ((~s).Tok == token.BREAK) {
-            if ((~s).Label == nil) {
+    case ж<ast.BranchStmt> sΔ1: {
+        if ((~sΔ1).Tok == token.BREAK) {
+            if ((~sΔ1).Label == nil) {
                 return @implicit;
             }
-            if ((~(~s).Label).Name == label) {
+            if ((~(~sΔ1).Label).Name == label) {
                 return true;
             }
         }
         break;
     }
-    case ж<ast.BlockStmt> s: {
-        return hasBreakList((~s).List, label, @implicit);
+    case ж<ast.BlockStmt> sΔ1: {
+        return hasBreakList((~sΔ1).List, label, @implicit);
     }
-    case ж<ast.IfStmt> s: {
-        if (hasBreak(~(~s).Body, label, @implicit) || (~s).Else != default! && hasBreak((~s).Else, label, @implicit)) {
+    case ж<ast.IfStmt> sΔ1: {
+        if (hasBreak(new ast_BlockStmtжStmt((~sΔ1).Body), label, @implicit) || (~sΔ1).Else != default! && hasBreak((~sΔ1).Else, label, @implicit)) {
             return true;
         }
         break;
     }
-    case ж<ast.CaseClause> s: {
-        return hasBreakList((~s).Body, label, @implicit);
+    case ж<ast.CaseClause> sΔ1: {
+        return hasBreakList((~sΔ1).Body, label, @implicit);
     }
-    case ж<ast.SwitchStmt> s: {
-        if (label != ""u8 && hasBreak(~(~s).Body, label, false)) {
+    case ж<ast.SwitchStmt> sΔ1: {
+        if (label != ""u8 && hasBreak(new ast_BlockStmtжStmt((~sΔ1).Body), label, false)) {
             return true;
         }
         break;
     }
-    case ж<ast.TypeSwitchStmt> s: {
-        if (label != ""u8 && hasBreak(~(~s).Body, label, false)) {
+    case ж<ast.TypeSwitchStmt> sΔ1: {
+        if (label != ""u8 && hasBreak(new ast_BlockStmtжStmt((~sΔ1).Body), label, false)) {
             return true;
         }
         break;
     }
-    case ж<ast.CommClause> s: {
-        return hasBreakList((~s).Body, label, @implicit);
+    case ж<ast.CommClause> sΔ1: {
+        return hasBreakList((~sΔ1).Body, label, @implicit);
     }
-    case ж<ast.SelectStmt> s: {
-        if (label != ""u8 && hasBreak(~(~s).Body, label, false)) {
+    case ж<ast.SelectStmt> sΔ1: {
+        if (label != ""u8 && hasBreak(new ast_BlockStmtжStmt((~sΔ1).Body), label, false)) {
             return true;
         }
         break;
     }
-    case ж<ast.ForStmt> s: {
-        if (label != ""u8 && hasBreak(~(~s).Body, label, false)) {
+    case ж<ast.ForStmt> sΔ1: {
+        if (label != ""u8 && hasBreak(new ast_BlockStmtжStmt((~sΔ1).Body), label, false)) {
             return true;
         }
         break;
     }
-    case ж<ast.RangeStmt> s: {
-        if (label != ""u8 && hasBreak(~(~s).Body, label, false)) {
+    case ж<ast.RangeStmt> sΔ1: {
+        if (label != ""u8 && hasBreak(new ast_BlockStmtжStmt((~sΔ1).Body), label, false)) {
             return true;
         }
         break;

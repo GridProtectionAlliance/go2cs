@@ -10,6 +10,9 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using cryptoꓸDecrypterOpts = object;
+global using cryptoꓸPrivateKey = object;
+global using cryptoꓸPublicKey = object;
 // </ImportedTypeAliases>
 
 using go;
@@ -38,9 +41,9 @@ using static go.vendor.golang.org.x.crypto.sha3_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<cshakeState, ShakeHash>]
-[assembly: GoImplement<state, ShakeHash>]
-[assembly: GoImplement<state, hash_package.Hash>]
+[assembly: GoImplement<cshakeState, ShakeHash>(Pointer = true)]
+[assembly: GoImplement<state, ShakeHash>(Pointer = true)]
+[assembly: GoImplement<state, hash_package.Hash>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

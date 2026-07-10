@@ -6,11 +6,11 @@
 // they are running.
 namespace go.runtime;
 
-using poll = @internal.poll_package;
+using poll = go.@internal.poll_package;
 using os = os_package;
 using runtime = runtime_package;
-using _ = unsafe_package; // for linkname
-using @internal;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+using go.@internal;
 
 partial class debug_package {
 
@@ -49,10 +49,10 @@ public static slice<byte> Stack() {
 // If called concurrently with a crash, some in-progress output may be written
 // to the old file even after an overriding SetCrashOutput returns.
 public static error SetCrashOutput(ж<os.File> Ꮡf, CrashOptions opts) {
-    ref var f = ref Ꮡf.val;
+    ref var f = ref Ꮡf.DerefOrNil();
 
-    var fd = ~((uintptr)0);
-    if (f != nil) {
+    var fd = ~(uintptr)0;
+    if (Ꮡf != nil) {
         // The runtime will write to this file descriptor from
         // low-level routines during a panic, possibly without
         // a G, so we must call f.Fd() eagerly. This creates a
@@ -78,16 +78,16 @@ public static error SetCrashOutput(ж<os.File> Ꮡf, CrashOptions opts) {
         // A side effect of Fd() is that it calls SetBlocking,
         // which is important so that writes of a crash report
         // to a full pipe buffer don't get lost.
-        var (fd2, _, err) = poll.DupCloseOnExec(((nint)f.Fd()));
+        var (fd2, _, err) = poll.DupCloseOnExec((nint)Ꮡf.Fd());
         if (err != default!) {
             return err;
         }
         runtime.KeepAlive(f);
         // prevent finalization before dup
-        fd = ((uintptr)fd2);
+        fd = (uintptr)fd2;
     }
     {
-        var prev = runtime_setCrashFD(fd); if (prev != ~((uintptr)0)) {
+        var prev = runtime_setCrashFD(fd); if (prev != ~(uintptr)0) {
             // We use NewFile+Close because it is portable
             // unlike syscall.Close, whose parameter type varies.
             os.NewFile(prev, ""u8).Close();

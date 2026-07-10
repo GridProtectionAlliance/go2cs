@@ -6,39 +6,43 @@
 // This file implements typechecking of conversions.
 namespace go.go;
 
-using constant = go.constant_package;
-using static @internal.types.errors_package;
+using constant = global::go.go.constant_package;
+using static global::go.@internal.types.errors_package;
 using unicode = unicode_package;
+using ast = global::go.go.ast_package;
+using errors = global::go.@internal.types.errors_package;
+using global::go.go;
 using ꓸꓸꓸany = Span<any>;
 
 partial class types_package {
 
 // conversion type-checks the conversion T(x).
 // The result is in x.
-[GoRecv] public static void conversion(this ref Checker check, ж<operand> Ꮡx, ΔType T) {
-    ref var x = ref Ꮡx.val;
+internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔType T) {
+    ref var check = ref Ꮡcheck.Value;
+    ref var x = ref Ꮡx.Value;
 
     var constArg = x.mode == constant_;
-    var constConvertibleTo = (ΔType T, ж<constant.Value> val) => {
+    var constConvertibleTo = (ΔType TΔ1, ж<constant.Value> val) => {
         {
-            var (t, _) = under(T)._<Basic.val>(ᐧ);
+            var (t, _) = under(TΔ1)._<ж<Basic>>(ᐧ);
             switch (ᐧ) {
             case {} when t == nil: {
                 break;
             }
-            case {} when representableConst(x.val, // nothing to do
- check, t, val): {
+            case {} when representableConst(Ꮡx.Value.val, // nothing to do
+ Ꮡcheck, t, val): {
                 return true;
             }
-            case {} when isInteger(x.typ) && isString(~t): {
-                var codepoint = unicode.ReplacementChar;
+            case {} when isInteger(Ꮡx.Value.typ) && isString(new BasicжΔType(t)): {
+                rune codepoint = unicode.ReplacementChar;
                 {
-                    var (i, okΔ2) = constant.Uint64Val(x.val); if (okΔ2 && i <= unicode.MaxRune) {
-                        codepoint = ((rune)i);
+                    var (i, okΔ2) = constant.Uint64Val(Ꮡx.Value.val); if (okΔ2 && i <= unicode.MaxRune) {
+                        codepoint = (rune)i;
                     }
                 }
                 if (val != nil) {
-                    val.val = constant.MakeString(((@string)codepoint));
+                    val.ValueSlot = constant.MakeString(((@string)codepoint));
                 }
                 return true;
             }}
@@ -51,34 +55,39 @@ partial class types_package {
     switch (ᐧ) {
     case {} when constArg && isConstType(T): {
         ok = constConvertibleTo(T, // constant conversion
- Ꮡ(x.val));
+ Ꮡx.of(operand.Ꮡval));
         if (!ok && isInteger(x.typ) && isInteger(T)) {
             // A conversion from an integer constant to an integer type
             // can only fail if there's overflow. Give a concise error.
             // (go.dev/issue/63563)
-            check.errorf(~x, InvalidConversion, "constant %s overflows %s"u8, x.val, T);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConversion, "constant %s overflows %s"u8, x.val, T);
             x.mode = invalid;
             return;
         }
         break;
     }
     case {} when constArg && isTypeParam(T): {
-        ok = Unalias(T)._<TypeParam.val>().underIs(
-        var causeʗ2 = cause;
-        var constConvertibleToʗ2 = constConvertibleTo;
-        (ΔType u) => {
+        var constConvertibleToʗ1 = constConvertibleTo;
+        ok = Unalias(T)._<ж<TypeParam>>().underIs((ΔType u) => {
+            // x is convertible to T if it is convertible
+            // to each specific type in the type set of T.
+            // If T's type set is empty, or if it doesn't
+            // have specific types, constant x cannot be
+            // converted.
+            // u is nil if there are no specific type terms
             if (u == default!) {
-                causeʗ2 = check.sprintf("%s does not contain specific types"u8, T);
+                Ꮡcause.Value = Ꮡcheck.sprintf("%s does not contain specific types"u8, T);
                 return false;
             }
-            if (isString(x.typ) && isBytesOrRunes(u)) {
+            if (isString(Ꮡx.Value.typ) && isBytesOrRunes(u)) {
                 return true;
             }
-            if (!constConvertibleToʗ2(u, nil)) {
-                if (isInteger(x.typ) && isInteger(u)){
-                    causeʗ2 = check.sprintf("constant %s overflows %s (in %s)"u8, x.val, u, T);
+            if (!constConvertibleToʗ1(u, nil)) {
+                if (isInteger(Ꮡx.Value.typ) && isInteger(u)){
+                    // see comment above on constant conversion
+                    Ꮡcause.Value = Ꮡcheck.sprintf("constant %s overflows %s (in %s)"u8, Ꮡx.Value.val, u, T);
                 } else {
-                    causeʗ2 = check.sprintf("cannot convert %s to type %s (in %s)"u8, x, u, T);
+                    Ꮡcause.Value = Ꮡcheck.sprintf("cannot convert %s to type %s (in %s)"u8, Ꮡx.Value, u, T);
                 }
                 return false;
             }
@@ -87,7 +96,7 @@ partial class types_package {
         x.mode = value;
         break;
     }
-    case {} when x.convertibleTo(check, // type parameters are not constants
+    case {} when Ꮡx.convertibleTo(Ꮡcheck, // type parameters are not constants
  T, Ꮡcause): {
         ok = true;
         x.mode = value;
@@ -97,9 +106,9 @@ partial class types_package {
     // non-constant conversion
     if (!ok) {
         if (cause != ""u8){
-            check.errorf(~x, InvalidConversion, "cannot convert %s to type %s: %s"u8, x, T, cause);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConversion, "cannot convert %s to type %s: %s"u8, x, T, cause);
         } else {
-            check.errorf(~x, InvalidConversion, "cannot convert %s to type %s"u8, x, T);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConversion, "cannot convert %s to type %s"u8, x, T);
         }
         x.mode = invalid;
         return;
@@ -117,7 +126,7 @@ partial class types_package {
         // - If !isTypes2, keep untyped nil for untyped nil arguments.
         // - For constant integer to string conversions, keep the argument type.
         //   (See also the TODO below.)
-        if (isTypes2 && x.typ == ~Typ[UntypedNil]){
+        if (isTypes2 && AreEqual(x.typ, Typ[UntypedNil])){
         } else 
         if (isNonTypeParamInterface(T) || constArg && !isConstType(T) || !isTypes2 && x.isNil()){
             // ok
@@ -127,7 +136,7 @@ partial class types_package {
             // default type of untyped nil is untyped nil
             final = x.typ;
         }
-        check.updateExprType(x.expr, final, true);
+        Ꮡcheck.updateExprType(x.expr, final, true);
     }
     x.typ = T;
 }
@@ -146,13 +155,14 @@ partial class types_package {
 // may be set to the cause for the failure.
 // The check parameter may be nil if convertibleTo is invoked through an
 // exported API call, i.e., when all methods have been type-checked.
-[GoRecv] internal static bool convertibleTo(this ref operand x, ж<Checker> Ꮡcheck, ΔType T, ж<@string> Ꮡcause) {
-    ref var check = ref Ꮡcheck.val;
-    ref var cause = ref Ꮡcause.val;
+internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, ΔType T, ж<@string> Ꮡcause) {
+    ref var x = ref Ꮡx.Value;
+    ref var check = ref Ꮡcheck.DerefOrNil();
+    ref var cause = ref Ꮡcause.DerefOrNil();
 
     // "x is assignable to T"
     {
-        var (ok, _) = x.assignableTo(Ꮡcheck, T, Ꮡcause); if (ok) {
+        var (ok, _) = Ꮡx.assignableTo(Ꮡcheck, T, Ꮡcause); if (ok) {
             return true;
         }
     }
@@ -161,8 +171,8 @@ partial class types_package {
     T = Unalias(T);
     var Vu = under(V);
     var Tu = under(T);
-    var (Vp, _) = V._<TypeParam.val>(ᐧ);
-    var (Tp, _) = T._<TypeParam.val>(ᐧ);
+    var (Vp, _) = V._<ж<TypeParam>>(ᐧ);
+    var (Tp, _) = T._<ж<TypeParam>>(ᐧ);
     // "V and T have identical underlying types if tags are ignored
     // and V and T are not type parameters"
     if (IdenticalIgnoreTags(Vu, Tu) && Vp == nil && Tp == nil) {
@@ -172,9 +182,9 @@ partial class types_package {
     // have identical underlying types if tags are ignored
     // and their pointer base types are not type parameters"
     {
-        var (VΔ1, ok) = V._<Pointer.val>(ᐧ); if (ok) {
+        var (VΔ1, ok) = V._<ж<Pointer>>(ᐧ); if (ok) {
             {
-                var (TΔ1, okΔ1) = T._<Pointer.val>(ᐧ); if (okΔ1) {
+                var (TΔ1, okΔ1) = T._<ж<Pointer>>(ᐧ); if (okΔ1) {
                     if (IdenticalIgnoreTags(under((~VΔ1).@base), under((~TΔ1).@base)) && !isTypeParam((~VΔ1).@base) && !isTypeParam((~TΔ1).@base)) {
                         return true;
                     }
@@ -210,15 +220,15 @@ partial class types_package {
     // "V is a slice, T is an array or pointer-to-array type,
     // and the slice and array types have identical element types."
     {
-        var (s, _) = Vu._<Slice.val>(ᐧ); if (s != nil) {
+        var (s, _) = Vu._<ж<Slice>>(ᐧ); if (s != nil) {
             switch (Tu.type()) {
-            case Array.val a: {
+            case ж<Array> a: {
                 if (Identical(s.Elem(), a.Elem())) {
-                    if (check == nil || check.allowVersion(~x, go1_20)) {
+                    if (Ꮡcheck == nil || Ꮡcheck.allowVersion(new operandжpositioner(Ꮡx), go1_20)) {
                         return true;
                     }
                     // check != nil
-                    if (cause != nil) {
+                    if (Ꮡcause != nil) {
                         // TODO(gri) consider restructuring versionErrorf so we can use it here and below
                         cause = "conversion of slice to array requires go1.20 or later"u8;
                     }
@@ -226,15 +236,15 @@ partial class types_package {
                 }
                 break;
             }
-            case Pointer.val a: {
+            case ж<Pointer> a: {
                 {
-                    var (a, _) = under(a.Elem())._<Array.val>(ᐧ); if (a != nil) {
-                        if (Identical(s.Elem(), a.Elem())) {
-                            if (check == nil || check.allowVersion(~x, go1_17)) {
+                    var (aΔ1, _) = under(a.Elem())._<ж<Array>>(ᐧ); if (aΔ1 != nil) {
+                        if (Identical(s.Elem(), aΔ1.Elem())) {
+                            if (Ꮡcheck == nil || Ꮡcheck.allowVersion(new operandжpositioner(Ꮡx), go1_17)) {
                                 return true;
                             }
                             // check != nil
-                            if (cause != nil) {
+                            if (Ꮡcause != nil) {
                                 cause = "conversion of slice to array pointer requires go1.17 or later"u8;
                             }
                             return false;
@@ -250,12 +260,13 @@ partial class types_package {
         return false;
     }
     var errorf = (@string format, params ꓸꓸꓸany argsʗp) => {
-        if (check != nil && cause != nil) {
-            @string msg = check.sprintf(format, args.ꓸꓸꓸ);
-            if (cause != ""u8) {
-                msg += "\n\t"u8 + cause;
+        var args = argsʗp.slice();
+        if (Ꮡcheck != nil && Ꮡcause != nil) {
+            @string msg = Ꮡcheck.sprintf(format, args.ꓸꓸꓸ);
+            if (Ꮡcause.Value != ""u8) {
+                msg += "\n\t"u8 + Ꮡcause.Value;
             }
-            cause = msg;
+            Ꮡcause.Value = msg;
         }
     };
     // generic cases with specific type terms
@@ -264,27 +275,26 @@ partial class types_package {
     case {} when Vp != nil && Tp != nil: {
         ref var xΔ2 = ref heap<operand>(out var ᏑxΔ2);
         xΔ2 = x;
-        return Vp.@is(
-        var Tpʗ5 = Tp;
-        var Vpʗ5 = Vp;
-        var errorfʗ5 = errorf;
-        var xʗ5 = xΔ2;
-        (ж<term> V) => {
+        var Tpʗ1 = Tp;
+        var Vpʗ1 = Vp;
+        var errorfʗ1 = errorf;
+        return Vp.@is((ж<term> VΔ4) => {
+            // don't clobber outer x
             if (VΔ4 == nil) {
                 return false;
             }
-            xʗ5.typ = VΔ4.val.typ;
-            return Tpʗ5.@is(
-            var Tpʗ7 = Tp;
-            var Vpʗ7 = Vp;
-            var errorfʗ7 = errorf;
-            var xʗ7 = xΔ2;
-            (ж<term> T) => {
+            // no specific types
+            ᏑxΔ2.Value.typ = VΔ4.Value.typ;
+            var Tpʗ2 = Tpʗ1;
+            var Vpʗ2 = Vpʗ1;
+            var errorfʗ2 = errorfʗ1;
+            return Tpʗ1.@is((ж<term> TΔ4) => {
                 if (TΔ4 == nil) {
                     return false;
                 }
-                if (!xʗ7.convertibleTo(Ꮡcheck, (~TΔ4).typ, Ꮡcause)) {
-                    errorfʗ7("cannot convert %s (in %s) to type %s (in %s)"u8, (~VΔ4).typ, Vpʗ7, (~TΔ4).typ, Tpʗ7);
+                // no specific types
+                if (!ᏑxΔ2.convertibleTo(Ꮡcheck, (~TΔ4).typ, Ꮡcause)) {
+                    errorfʗ2("cannot convert %s (in %s) to type %s (in %s)"u8, (~VΔ4).typ, Vpʗ2, (~TΔ4).typ, Tpʗ2);
                     return false;
                 }
                 return true;
@@ -294,33 +304,33 @@ partial class types_package {
     case {} when Vp != nil: {
         ref var xΔ3 = ref heap<operand>(out var ᏑxΔ3);
         xΔ3 = x;
-        return Vp.@is(
-        var Vpʗ14 = Vp;
-        var errorfʗ14 = errorf;
-        var origTʗ2 = origT;
-        var xʗ14 = xΔ3;
-        (ж<term> V) => {
+        var Vpʗ7 = Vp;
+        var errorfʗ7 = errorf;
+        var origTʗ1 = origT;
+        return Vp.@is((ж<term> VΔ5) => {
+            // don't clobber outer x
             if (VΔ5 == nil) {
                 return false;
             }
-            xʗ14.typ = VΔ5.val.typ;
-            if (!xʗ14.convertibleTo(Ꮡcheck, T, Ꮡcause)) {
-                errorfʗ14("cannot convert %s (in %s) to type %s"u8, (~VΔ5).typ, Vpʗ14, origTʗ2);
+            // no specific types
+            ᏑxΔ3.Value.typ = VΔ5.Value.typ;
+            if (!ᏑxΔ3.convertibleTo(Ꮡcheck, T, Ꮡcause)) {
+                errorfʗ7("cannot convert %s (in %s) to type %s"u8, (~VΔ5).typ, Vpʗ7, origTʗ1);
                 return false;
             }
             return true;
         });
     }
     case {} when Tp != nil: {
-        return Tp.@is(
-        var Tpʗ14 = Tp;
-        var errorfʗ17 = errorf;
-        (ж<term> T) => {
+        var Tpʗ7 = Tp;
+        var errorfʗ9 = errorf;
+        return Tp.@is((ж<term> TΔ5) => {
             if (TΔ5 == nil) {
                 return false;
             }
-            if (!x.convertibleTo(Ꮡcheck, (~TΔ5).typ, Ꮡcause)) {
-                errorfʗ17("cannot convert %s to type %s (in %s)"u8, x.typ, (~TΔ5).typ, Tpʗ14);
+            // no specific types
+            if (!Ꮡx.convertibleTo(Ꮡcheck, (~TΔ5).typ, Ꮡcause)) {
+                errorfʗ9("cannot convert %s to type %s (in %s)"u8, Ꮡx.Value.typ, (~TΔ5).typ, Tpʗ7);
                 return false;
             }
             return true;
@@ -331,24 +341,24 @@ partial class types_package {
 }
 
 internal static bool isUintptr(ΔType typ) {
-    var (t, _) = under(typ)._<Basic.val>(ᐧ);
+    var (t, _) = under(typ)._<ж<Basic>>(ᐧ);
     return t != nil && (~t).kind == Uintptr;
 }
 
 internal static bool isUnsafePointer(ΔType typ) {
-    var (t, _) = under(typ)._<Basic.val>(ᐧ);
+    var (t, _) = under(typ)._<ж<Basic>>(ᐧ);
     return t != nil && (~t).kind == UnsafePointer;
 }
 
 internal static bool isPointer(ΔType typ) {
-    var (_, ok) = under(typ)._<Pointer.val>(ᐧ);
+    var (_, ok) = under(typ)._<ж<Pointer>>(ᐧ);
     return ok;
 }
 
 internal static bool isBytesOrRunes(ΔType typ) {
     {
-        var (s, _) = under(typ)._<Slice.val>(ᐧ); if (s != nil) {
-            var (t, _) = under((~s).elem)._<Basic.val>(ᐧ);
+        var (s, _) = under(typ)._<ж<Slice>>(ᐧ); if (s != nil) {
+            var (t, _) = under((~s).elem)._<ж<Basic>>(ᐧ);
             return t != nil && ((~t).kind == Byte || (~t).kind == Rune);
         }
     }

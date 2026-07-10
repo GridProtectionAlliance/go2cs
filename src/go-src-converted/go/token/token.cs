@@ -8,8 +8,8 @@ namespace go.go;
 
 using strconv = strconv_package;
 using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = global::go.unicode.utf8_package;
+using global::go.unicode;
 
 partial class token_package {
 
@@ -196,89 +196,89 @@ public static readonly Token TILDE = 88;
 
 internal static readonly Token additional_end = 89;
 
-internal static array<@string> tokens = new runtime.SparseArray<@string>{
-    [ILLEGAL] = "ILLEGAL"u8,
-    [EOF] = "EOF"u8,
-    [COMMENT] = "COMMENT"u8,
-    [IDENT] = "IDENT"u8,
-    [INT] = "INT"u8,
-    [FLOAT] = "FLOAT"u8,
-    [IMAG] = "IMAG"u8,
-    [CHAR] = "CHAR"u8,
-    [STRING] = "STRING"u8,
-    [ADD] = "+"u8,
-    [SUB] = "-"u8,
-    [MUL] = "*"u8,
-    [QUO] = "/"u8,
-    [REM] = "%"u8,
-    [AND] = "&"u8,
-    [OR] = "|"u8,
-    [XOR] = "^"u8,
-    [SHL] = "<<"u8,
-    [SHR] = ">>"u8,
-    [AND_NOT] = "&^"u8,
-    [ADD_ASSIGN] = "+="u8,
-    [SUB_ASSIGN] = "-="u8,
-    [MUL_ASSIGN] = "*="u8,
-    [QUO_ASSIGN] = "/="u8,
-    [REM_ASSIGN] = "%="u8,
-    [AND_ASSIGN] = "&="u8,
-    [OR_ASSIGN] = "|="u8,
-    [XOR_ASSIGN] = "^="u8,
-    [SHL_ASSIGN] = "<<="u8,
-    [SHR_ASSIGN] = ">>="u8,
-    [AND_NOT_ASSIGN] = "&^="u8,
-    [LAND] = "&&"u8,
-    [LOR] = "||"u8,
-    [ARROW] = "<-"u8,
-    [INC] = "++"u8,
-    [DEC] = "--"u8,
-    [EQL] = "=="u8,
-    [LSS] = "<"u8,
-    [GTR] = ">"u8,
-    [ASSIGN] = "="u8,
-    [NOT] = "!"u8,
-    [NEQ] = "!="u8,
-    [LEQ] = "<="u8,
-    [GEQ] = ">="u8,
-    [DEFINE] = ":="u8,
-    [ELLIPSIS] = "..."u8,
-    [LPAREN] = "("u8,
-    [LBRACK] = "["u8,
-    [LBRACE] = "{"u8,
-    [COMMA] = ","u8,
-    [PERIOD] = "."u8,
-    [RPAREN] = ")"u8,
-    [RBRACK] = "]"u8,
-    [RBRACE] = "}"u8,
-    [SEMICOLON] = ";"u8,
-    [COLON] = ":"u8,
-    [BREAK] = "break"u8,
-    [CASE] = "case"u8,
-    [CHAN] = "chan"u8,
-    [CONST] = "const"u8,
-    [CONTINUE] = "continue"u8,
-    [DEFAULT] = "default"u8,
-    [DEFER] = "defer"u8,
-    [ELSE] = "else"u8,
-    [FALLTHROUGH] = "fallthrough"u8,
-    [FOR] = "for"u8,
-    [FUNC] = "func"u8,
-    [GO] = "go"u8,
-    [GOTO] = "goto"u8,
-    [IF] = "if"u8,
-    [IMPORT] = "import"u8,
-    [INTERFACE] = "interface"u8,
-    [MAP] = "map"u8,
-    [PACKAGE] = "package"u8,
-    [RANGE] = "range"u8,
-    [RETURN] = "return"u8,
-    [SELECT] = "select"u8,
-    [STRUCT] = "struct"u8,
-    [SWITCH] = "switch"u8,
-    [TYPE] = "type"u8,
-    [VAR] = "var"u8,
-    [TILDE] = "~"u8
+internal static array<@string> tokens = new golib.SparseArray<@string>{
+    [(int)ILLEGAL] = "ILLEGAL"u8,
+    [(int)EOF] = "EOF"u8,
+    [(int)COMMENT] = "COMMENT"u8,
+    [(int)IDENT] = "IDENT"u8,
+    [(int)INT] = "INT"u8,
+    [(int)FLOAT] = "FLOAT"u8,
+    [(int)IMAG] = "IMAG"u8,
+    [(int)CHAR] = "CHAR"u8,
+    [(int)STRING] = "STRING"u8,
+    [(int)ADD] = "+"u8,
+    [(int)SUB] = "-"u8,
+    [(int)MUL] = "*"u8,
+    [(int)QUO] = "/"u8,
+    [(int)REM] = "%"u8,
+    [(int)AND] = "&"u8,
+    [(int)OR] = "|"u8,
+    [(int)XOR] = "^"u8,
+    [(int)SHL] = "<<"u8,
+    [(int)SHR] = ">>"u8,
+    [(int)AND_NOT] = "&^"u8,
+    [(int)ADD_ASSIGN] = "+="u8,
+    [(int)SUB_ASSIGN] = "-="u8,
+    [(int)MUL_ASSIGN] = "*="u8,
+    [(int)QUO_ASSIGN] = "/="u8,
+    [(int)REM_ASSIGN] = "%="u8,
+    [(int)AND_ASSIGN] = "&="u8,
+    [(int)OR_ASSIGN] = "|="u8,
+    [(int)XOR_ASSIGN] = "^="u8,
+    [(int)SHL_ASSIGN] = "<<="u8,
+    [(int)SHR_ASSIGN] = ">>="u8,
+    [(int)AND_NOT_ASSIGN] = "&^="u8,
+    [(int)LAND] = "&&"u8,
+    [(int)LOR] = "||"u8,
+    [(int)ARROW] = "<-"u8,
+    [(int)INC] = "++"u8,
+    [(int)DEC] = "--"u8,
+    [(int)EQL] = "=="u8,
+    [(int)LSS] = "<"u8,
+    [(int)GTR] = ">"u8,
+    [(int)ASSIGN] = "="u8,
+    [(int)NOT] = "!"u8,
+    [(int)NEQ] = "!="u8,
+    [(int)LEQ] = "<="u8,
+    [(int)GEQ] = ">="u8,
+    [(int)DEFINE] = ":="u8,
+    [(int)ELLIPSIS] = "..."u8,
+    [(int)LPAREN] = "("u8,
+    [(int)LBRACK] = "["u8,
+    [(int)LBRACE] = "{"u8,
+    [(int)COMMA] = ","u8,
+    [(int)PERIOD] = "."u8,
+    [(int)RPAREN] = ")"u8,
+    [(int)RBRACK] = "]"u8,
+    [(int)RBRACE] = "}"u8,
+    [(int)SEMICOLON] = ";"u8,
+    [(int)COLON] = ":"u8,
+    [(int)BREAK] = "break"u8,
+    [(int)CASE] = "case"u8,
+    [(int)CHAN] = "chan"u8,
+    [(int)CONST] = "const"u8,
+    [(int)CONTINUE] = "continue"u8,
+    [(int)DEFAULT] = "default"u8,
+    [(int)DEFER] = "defer"u8,
+    [(int)ELSE] = "else"u8,
+    [(int)FALLTHROUGH] = "fallthrough"u8,
+    [(int)FOR] = "for"u8,
+    [(int)FUNC] = "func"u8,
+    [(int)GO] = "go"u8,
+    [(int)GOTO] = "goto"u8,
+    [(int)IF] = "if"u8,
+    [(int)IMPORT] = "import"u8,
+    [(int)INTERFACE] = "interface"u8,
+    [(int)MAP] = "map"u8,
+    [(int)PACKAGE] = "package"u8,
+    [(int)RANGE] = "range"u8,
+    [(int)RETURN] = "return"u8,
+    [(int)SELECT] = "select"u8,
+    [(int)STRUCT] = "struct"u8,
+    [(int)SWITCH] = "switch"u8,
+    [(int)TYPE] = "type"u8,
+    [(int)VAR] = "var"u8,
+    [(int)TILDE] = "~"u8
 }.array();
 
 // String returns the string corresponding to the token tok.
@@ -292,7 +292,7 @@ public static @string String(this Token tok) {
         s = tokens[tok];
     }
     if (s == ""u8) {
-        s = "token("u8 + strconv.Itoa(((nint)tok)) + ")"u8;
+        s = "token("u8 + strconv.Itoa((nint)tok) + ")"u8;
     }
     return s;
 }
@@ -344,8 +344,7 @@ internal static map<@string, Token> keywords;
 // Lookup maps an identifier to its keyword token or [IDENT] (if not a keyword).
 public static Token Lookup(@string ident) {
     {
-        Token tok = keywords[ident];
-        var is_keyword = keywords[ident]; if (is_keyword) {
+        var (tok, is_keyword) = keywords[ident, ꟷ]; if (is_keyword) {
             return tok;
         }
     }
@@ -381,8 +380,7 @@ public static bool IsExported(@string name) {
 // IsKeyword reports whether name is a Go keyword, such as "func" or "return".
 public static bool IsKeyword(@string name) {
     // TODO: opt: use a perfect hash function instead of a global map.
-    Token _ = keywords[name];
-    var ok = keywords[name];
+    var (_, ok) = keywords[name, ꟷ];
     return ok;
 }
 

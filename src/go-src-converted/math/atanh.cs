@@ -54,7 +54,7 @@ public static float64 Atanh(float64 x) {
 }
 
 internal static float64 atanh(float64 x) {
-    static readonly UntypedFloat NearZero = /* 1.0 / (1 << 28) */ 3.72529e-09; // 2**-28
+    UntypedFloat NearZero = /* 1.0 / (1 << 28) */ 3.72529e-09; // 2**-28
     // special cases
     switch (ᐧ) {
     case {} when x < -1 || x > 1 || IsNaN(x): {
@@ -78,13 +78,13 @@ internal static float64 atanh(float64 x) {
         temp = x;
         break;
     }
-    case {} when x is < 0.5F: {
+    case {} when x is < 0.5D: {
         temp = x + x;
-        temp = 0.5F * Log1p(temp + temp * x / (1 - x));
+        temp = 0.5D * Log1p(temp + temp * x / (1 - x));
         break;
     }
     default: {
-        temp = 0.5F * Log1p((x + x) / (1 - x));
+        temp = 0.5D * Log1p((x + x) / (1 - x));
         break;
     }}
 

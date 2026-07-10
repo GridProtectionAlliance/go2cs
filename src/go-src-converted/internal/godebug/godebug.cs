@@ -48,38 +48,39 @@ namespace go.@internal;
 // that internal/godebug imports cannot itself import internal/godebug,
 // meaning it cannot introduce a GODEBUG setting of its own.
 // We keep imports to the absolute bare minimum.
-using bisect = @internal.bisect_package;
+using bisect = go.@internal.bisect_package;
 
-using godebugs = @internal.godebugs_package;
+using godebugs = go.@internal.godebugs_package;
 
 using sync = sync_package;
 
-using atomic = sync.atomic_package;
+using atomic = go.sync.atomic_package;
 
 using @unsafe = unsafe_package;
 
-using _ = unsafe_package; // go:linkname
-using sync;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // go:linkname
+using go.@internal;
+using go.sync;
 
 partial class godebug_package {
 
 // A Setting is a single setting in the $GODEBUG environment variable.
 [GoType] partial struct Setting {
     internal @string name;
-    internal sync_package.Once once;
-    public partial ref ж<setting> setting { get; }
+    internal sync.Once once;
+    internal partial ref ж<setting> setting { get; }
 }
 
 [GoType] partial struct setting {
-    internal sync.atomic_package.Pointer value;
-    internal sync_package.Once nonDefaultOnce;
-    internal sync.atomic_package.Uint64 nonDefault;
-    internal ж<@internal.godebugs_package.Info> info;
+    internal atomic.Pointer<value> value;
+    internal sync.Once nonDefaultOnce;
+    internal atomic.Uint64 nonDefault;
+    internal ж<godebugs.Info> info;
 }
 
 [GoType] partial struct value {
     internal @string text;
-    internal ж<@internal.bisect_package.Matcher> bisect;
+    internal ж<bisect.Matcher> bisect;
 }
 
 // New returns a new Setting for the $GODEBUG setting with the given name.
@@ -114,8 +115,10 @@ public static ж<Setting> New(@string name) {
 }
 
 // String returns a printable form for the setting: name=value.
-[GoRecv] public static @string String(this ref Setting s) {
-    return s.Name() + "="u8 + s.Value();
+public static @string String(this ж<Setting> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    return s.Name() + "="u8 + Ꮡs.Value();
 }
 
 // IncNonDefault increments the non-default behavior counter
@@ -124,16 +127,20 @@ public static ж<Setting> New(@string name) {
 // /godebug/non-default-behavior/<name>:events.
 //
 // Note that Value must be called at least once before IncNonDefault.
-[GoRecv] public static void IncNonDefault(this ref Setting s) {
-    s.nonDefaultOnce.Do(s.register);
-    s.nonDefault.Add(1);
+public static void IncNonDefault(this ж<Setting> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    Ꮡs.of(Setting.ᏑnonDefaultOnce).Do(Ꮡs.register);
+    Ꮡs.of(Setting.ᏑnonDefault).Add(1);
 }
 
-[GoRecv] internal static void register(this ref Setting s) {
-    if (s.info == nil || s.info.Opaque) {
-        throw panic("godebug: unexpected IncNonDefault of "u8 + s.name);
+internal static void register(this ж<Setting> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    if (s.info == nil || (~s.info).Opaque) {
+        throw panic("godebug: unexpected IncNonDefault of " + s.name);
     }
-    registerMetric("/godebug/non-default-behavior/"u8 + s.Name() + ":events"u8, s.nonDefault.Load);
+    registerMetric("/godebug/non-default-behavior/"u8 + s.Name() + ":events"u8, Ꮡs.of(Setting.ᏑnonDefault).Load);
 }
 
 // cache is a cache of all the GODEBUG settings,
@@ -149,9 +156,11 @@ public static ж<Setting> New(@string name) {
 // at least once, or if the name has ever appeared in
 // a name=value pair in the $GODEBUG environment variable.
 // Once entered into the map, the name is never removed.
-internal static sync.Map cache; // name string -> value *atomic.Pointer[string]
+internal static ж<sync.Map> Ꮡcache = new(default(sync.Map));
+internal static ref sync.Map cache => ref Ꮡcache.Value; // name string -> value *atomic.Pointer[string]
 
-internal static value empty;
+internal static ж<value> Ꮡempty = new(default(value));
+internal static ref value empty => ref Ꮡempty.Value;
 
 // Value returns the current value for the GODEBUG setting s.
 //
@@ -160,15 +169,17 @@ internal static value empty;
 // making Value efficient to call as frequently as needed.
 // Clients should therefore typically not attempt their own
 // caching of Value's result.
-[GoRecv] public static @string Value(this ref Setting s) {
-    s.once.Do(() => {
-        s.setting = lookup(s.Name());
-        if (s.info == nil && !s.Undocumented()) {
-            throw panic("godebug: Value of name not listed in godebugs.All: "u8 + s.name);
+public static @string Value(this ж<Setting> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    Ꮡs.of(Setting.Ꮡonce).Do(() => {
+        Ꮡs.Value.setting = lookup(Ꮡs.Value.Name());
+        if (Ꮡs.Value.info == nil && !Ꮡs.Value.Undocumented()) {
+            throw panic("godebug: Value of name not listed in godebugs.All: " + Ꮡs.Value.name);
         }
     });
-    var v = s.value.Load().val;
-    if (v.bisect != nil && !v.bisect.Stack(stderr)) {
+    var v = Ꮡs.of(Setting.Ꮡvalue).Load().Value;
+    if (v.bisect != nil && !v.bisect.Stack(new runtimeStderrжWriter(Ꮡstderr))) {
         return ""u8;
     }
     return v.text;
@@ -177,17 +188,17 @@ internal static value empty;
 // lookup returns the unique *setting value for the given name.
 internal static ж<setting> lookup(@string name) {
     {
-        var (v, ok) = cache.Load(name); if (ok) {
-            return v._<setting.val>();
+        var (v, ok) = Ꮡcache.Load(name); if (ok) {
+            return v._<ж<setting>>();
         }
     }
     var s = @new<setting>();
-    s.val.info = godebugs.Lookup(name);
-    (~s).value.Store(Ꮡ(empty));
+    s.Value.info = godebugs.Lookup(name);
+    s.of(setting.Ꮡvalue).Store(Ꮡempty);
     {
-        var (v, loaded) = cache.LoadOrStore(name, s); if (loaded) {
+        var (v, loaded) = Ꮡcache.LoadOrStore(name, s); if (loaded) {
             // Lost race: someone else created it. Use theirs.
-            return v._<setting.val>();
+            return v._<ж<setting>>();
         }
     }
     return s;
@@ -234,15 +245,15 @@ internal static Action newIncNonDefault(@string name) {
     return s.IncNonDefault;
 }
 
-internal static sync.Mutex updateMu;
+internal static ж<sync.Mutex> ᏑupdateMu = new(default(sync.Mutex));
+internal static ref sync.Mutex updateMu => ref ᏑupdateMu.Value;
 
 // update records an updated GODEBUG setting.
 // def is the default GODEBUG setting for the running binary,
 // and env is the current value of the $GODEBUG environment variable.
-internal static void update(@string def, @string env) => func((defer, _) => {
-    updateMu.Lock();
-    var updateMuʗ1 = updateMu;
-    defer(updateMuʗ1.Unlock);
+internal static void update(@string def, @string env) => func((defer, recover) => {
+    ᏑupdateMu.Lock();
+    defer(ᏑupdateMu.Unlock);
     // Update all the cached values, creating new ones as needed.
     // We parse the environment variable first, so that any settings it has
     // are already locked in place (did[name] = true) before we consider
@@ -251,12 +262,10 @@ internal static void update(@string def, @string env) => func((defer, _) => {
     parse(did, env);
     parse(did, def);
     // Clear any cached values that are no longer present.
-    cache.Range(
-    var didʗ2 = did;
-    var emptyʗ2 = empty;
-    (any name, any s) => {
-        if (!didʗ2[name._<@string>()]) {
-            s._<setting.val>().value.Store(Ꮡ(emptyʗ2));
+    var didʗ1 = did;
+    Ꮡcache.Range((any name, any s) => {
+        if (!didʗ1[name._<@string>()]) {
+            Ꮡ((~s._<ж<setting>>()).value).Store(Ꮡempty);
         }
         return true;
     });
@@ -282,18 +291,19 @@ internal static void parse(map<@string, bool> did, @string s) {
         if (i == -1 || s[i] == (rune)','){
             if (eq >= 0) {
                 @string name = s[(int)(i + 1)..(int)(eq)];
-                @string arg = s[(int)(eq + 1)..(int)(end)];
+                ref var arg = ref heap<@string>(out var Ꮡarg);
+                arg = s[(int)(eq + 1)..(int)(end)];
                 if (!did[name]) {
                     did[name] = true;
                     var v = Ꮡ(new value(text: arg));
                     for (nint j = 0; j < len(arg); j++) {
                         if (arg[j] == (rune)'#') {
-                            v.val.text = arg[..(int)(j)];
-                            (v.val.bisect, _) = bisect.New(arg[(int)(j + 1)..]);
+                            v.Value.text = arg[..(int)(j)];
+                            (v.Value.bisect, _) = bisect.New(arg[(int)(j + 1)..]);
                             break;
                         }
                     }
-                    (~lookup(name)).value.Store(v);
+                    lookup(name).of(setting.Ꮡvalue).Store(v);
                 }
             }
             eq = -1;
@@ -308,11 +318,12 @@ internal static void parse(map<@string, bool> did, @string s) {
 [GoType] partial struct runtimeStderr {
 }
 
-internal static runtimeStderr stderr;
+internal static ж<runtimeStderr> Ꮡstderr = new(default(runtimeStderr));
+internal static ref runtimeStderr stderr => ref Ꮡstderr.Value;
 
 [GoRecv] internal static (nint, error) Write(this ref runtimeStderr _, slice<byte> b) {
     if (len(b) > 0) {
-        write(2, new @unsafe.Pointer(Ꮡ(b, 0)), ((int32)len(b)));
+        write(2, new @unsafe.Pointer(Ꮡ(b, 0)), (int32)len(b));
     }
     return (len(b), default!);
 }

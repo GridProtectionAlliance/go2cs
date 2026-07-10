@@ -3,8 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.net;
 
-using bits = math.bits_package;
-using math;
+using bits = go.math.bits_package;
+using go.math;
 
 partial class netip_package {
 
@@ -20,7 +20,7 @@ partial class netip_package {
 // mask6 returns a uint128 bitmask with the topmost n bits of a
 // 128-bit number.
 internal static uint128 mask6(nint n) {
-    return new uint128(~(~((uint64)0) >> (int)(n)), ~((uint64)0) << (int)((128 - n)));
+    return new uint128(~((~(uint64)0 >> (int)(n))), (~(uint64)0 << (int)((128 - n))));
 }
 
 // isZero reports whether u == 0.
@@ -68,20 +68,22 @@ internal static uint128 addOne(this uint128 u) {
 //
 // Logically, think of it as returning two uint64s.
 // It only returns pointers for inlining reasons on 32-bit platforms.
-[GoRecv] internal static array<ж<uint64>> halves(this ref uint128 u) {
-    return new ж<uint64>[]{Ꮡ(u.hi), Ꮡ(u.lo)}.array();
+internal static array<ж<uint64>> halves(this ж<uint128> Ꮡu) {
+    ref var u = ref Ꮡu.Value;
+
+    return new ж<uint64>[]{Ꮡu.of(uint128.Ꮡhi), Ꮡu.of(uint128.Ꮡlo)}.array();
 }
 
 // bitsSetFrom returns a copy of u with the given bit
 // and all subsequent ones set.
 internal static uint128 bitsSetFrom(this uint128 u, uint8 bit) {
-    return u.or(mask6(((nint)bit)).not());
+    return u.or(mask6((nint)bit).not());
 }
 
 // bitsClearedFrom returns a copy of u with the given bit
 // and all subsequent ones cleared.
 internal static uint128 bitsClearedFrom(this uint128 u, uint8 bit) {
-    return u.and(mask6(((nint)bit)));
+    return u.and(mask6((nint)bit));
 }
 
 } // end netip_package

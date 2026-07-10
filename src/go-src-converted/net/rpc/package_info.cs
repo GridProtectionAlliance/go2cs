@@ -21,10 +21,13 @@ global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 global using templateꓸError = go.html.template_package.ΔError;
-global using templateꓸFuncMap = go.template.FuncMap;
+global using templateꓸFuncMap = go.text.template_package.FuncMap;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;
+using bufio = go.bufio_package;
+using sync = go.sync_package;
+using Δhttp = go.net.http_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -54,32 +57,26 @@ using static go.net.rpc_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(net.Conn, *bufio.ReadWriter, error), net_package.Conn>]
-[assembly: GoImplement<(net.Conn, error), net_package.Conn>]
-[assembly: GoImplement<Server, net.http_package.ΔHandler>]
-[assembly: GoImplement<bufio_package.Writer, io_package.Writer>]
-[assembly: GoImplement<debugHTTP, net.http_package.ΔHandler>]
-[assembly: GoImplement<gobClientCodec, ClientCodec>]
-[assembly: GoImplement<gobServerCodec, ServerCodec>]
+[assembly: GoImplement<Server, go.net.http_package.ΔHandler>(Pointer = true)]
+[assembly: GoImplement<ServerError, error>]
+[assembly: GoImplement<bufio_package.Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<debugHTTP, go.net.http_package.ΔHandler>]
+[assembly: GoImplement<go.net.http_package.ResponseWriter, io_package.Writer>]
+[assembly: GoImplement<gobClientCodec, ClientCodec>(Pointer = true)]
+[assembly: GoImplement<gobServerCodec, ServerCodec>(Pointer = true)]
 [assembly: GoImplement<io_package.ReadWriteCloser, io_package.Reader>]
 [assembly: GoImplement<io_package.ReadWriteCloser, io_package.Writer>]
-[assembly: GoImplement<net.http_package.ResponseWriter, io_package.Writer>]
 [assembly: GoImplement<net_package.Conn, io_package.ReadWriteCloser>]
 [assembly: GoImplement<net_package.Conn, io_package.Reader>]
 [assembly: GoImplement<net_package.Conn, io_package.Writer>]
-[assembly: GoImplement<net_package.OpError, error>]
-[assembly: GoImplement<reflect_package.ΔMethod, reflect_package.ΔType>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 [assembly: GoImplicitConv<Request, ж<Request>>(Indirect = true)]
-[assembly: GoImplicitConv<http.Request, ж<http.Request>>(Indirect = true)]
-[assembly: GoImplicitConv<http.pattern; matches <>string; otherValues map<string>string}, http.pattern; matches <>string; otherValues map<string>string}>(Inverted = true)]
 [assembly: GoImplicitConv<methodType, ж<methodType>>(Indirect = true)]
-[assembly: GoImplicitConv<struct{ServiceMethod string; Seq uint64; Error string; next *Response}, struct{ServiceMethod string; Seq uint64; Error string; next *Response}>(Inverted = true)]
-[assembly: GoImplicitConv<struct{ServiceMethod string; Seq uint64; next *Request}, struct{ServiceMethod string; Seq uint64; next *Request}>(Inverted = true)]
 [assembly: GoImplicitConv<sync.Mutex, ж<sync.Mutex>>(Indirect = true)]
 [assembly: GoImplicitConv<sync.WaitGroup, ж<sync.WaitGroup>>(Indirect = true)]
+[assembly: GoImplicitConv<Δhttp.Request, ж<Δhttp.Request>>(Indirect = true)]
 // </ImplicitConversions>
 
 namespace go.net;

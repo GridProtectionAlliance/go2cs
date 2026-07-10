@@ -41,9 +41,7 @@ using static go.compress.gzip_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<Header, io_package.Writer>]
-[assembly: GoImplement<compress.flate_package.Reader, io_package.Reader>]
-[assembly: GoImplement<flate.Reader, bool), compress.flate_package.Reader>]
+[assembly: GoImplement<bufio_package.Reader, go.compress.flate_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

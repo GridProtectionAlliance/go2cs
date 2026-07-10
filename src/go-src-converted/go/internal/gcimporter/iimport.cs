@@ -9,19 +9,19 @@ using bufio = bufio_package;
 using bytes = bytes_package;
 using binary = encoding.binary_package;
 using fmt = fmt_package;
-using constant = go.constant_package;
-using token = go.token_package;
-using types = go.types_package;
-using saferio = @internal.saferio_package;
+using constant = global::go.go.constant_package;
+using token = global::go.go.token_package;
+using types = global::go.go.types_package;
+using saferio = global::go.@internal.saferio_package;
 using io = io_package;
 using math = math_package;
-using big = math.big_package;
+using big = global::go.math.big_package;
 using slices = slices_package;
 using strings = strings_package;
-using @internal;
 using encoding;
-using go;
-using math;
+using global::go.@internal;
+using global::go.go;
+using global::go.math;
 
 partial class gcimporter_package {
 
@@ -31,7 +31,7 @@ partial class gcimporter_package {
 }
 
 [GoRecv] internal static int64 int64(this ref intReader r) {
-    var (i, err) = binary.ReadVarint(~r.Reader);
+    var (i, err) = binary.ReadVarint(new bufio_ReaderжByteReader(r.Reader));
     if (err != default!) {
         errorf("import %q: read varint error: %v"u8, r.path, err);
     }
@@ -39,7 +39,7 @@ partial class gcimporter_package {
 }
 
 [GoRecv] internal static uint64 uint64(this ref intReader r) {
-    var (i, err) = binary.ReadUvarint(~r.Reader);
+    var (i, err) = binary.ReadUvarint(new bufio_ReaderжByteReader(r.Reader));
     if (err != default!) {
         errorf("import %q: read varint error: %v"u8, r.path, err);
     }
@@ -58,7 +58,7 @@ internal static readonly UntypedInt iexportVersionGo1_18 = 2;
 internal static readonly UntypedInt iexportVersionCurrent = 2;
 
 [GoType] partial struct Δident {
-    internal ж<go.types_package.Package> pkg;
+    internal ж<types.Package> pkg;
     internal @string name;
 }
 
@@ -83,134 +83,135 @@ internal static readonly itag ΔunionType = 11;
 // and returns the number of bytes consumed and a reference to the package.
 // If the export data version is not recognized or the format is otherwise
 // compromised, an error is returned.
-internal static (ж<types.Package> pkg, error err) iImportData(ж<token.FileSet> Ꮡfset, types.Package imports, ж<bufio.Reader> ᏑdataReader, @string path) => func((defer, recover) => {
+internal static (ж<types.Package> pkg, error err) iImportData(ж<token.FileSet> Ꮡfset, map<@string, ж<types.Package>> imports, ж<bufio.Reader> ᏑdataReader, @string path) {
     ж<types.Package> pkg = default!;
-    error err = default!;
+    heap<error>(out var Ꮡerr);
+    func((defer, recover) => {
+    ref var fset = ref Ꮡfset.Value;
+    ref var dataReader = ref ᏑdataReader.Value;
 
-    ref var fset = ref Ꮡfset.val;
-    ref var dataReader = ref ᏑdataReader.val;
-    static readonly UntypedInt currentVersion = /* iexportVersionCurrent */ 2;
-    var version = ((int64)(-1));
-    var errʗ1 = err;
-    defer(() => {
-        {
-            var e = recover(); if (e != default!) {
-                if (version > currentVersion){
-                    errʗ1 = fmt.Errorf("cannot import %q (%v), export data is newer version - update tool"u8, path, e);
-                } else {
-                    errʗ1 = fmt.Errorf("cannot import %q (%v), possibly version skew - reinstall package"u8, path, e);
+    ref var err = ref Ꮡerr.ValueSlot;
+        UntypedInt currentVersion = /* iexportVersionCurrent */ 2;
+        var version = (int64)(-1);
+        defer(() => {
+            {
+                var e = recover(); if (e != default!) {
+                    if (version > currentVersion){
+                        Ꮡerr.ValueSlot = fmt.Errorf("cannot import %q (%v), export data is newer version - update tool"u8, path, e);
+                    } else {
+                        Ꮡerr.ValueSlot = fmt.Errorf("cannot import %q (%v), possibly version skew - reinstall package"u8, path, e);
+                    }
                 }
             }
+        });
+        var r = Ꮡ(new intReader(ᏑdataReader, path));
+        version = (int64)r.uint64();
+        var exprᴛ1 = version;
+        if (exprᴛ1 == iexportVersionGo1_18 || exprᴛ1 == iexportVersionPosCol || exprᴛ1 == iexportVersionGo1_11) {
         }
-    });
-    var r = Ꮡ(new intReader(ᏑdataReader, path));
-    version = ((int64)r.uint64());
-    var exprᴛ1 = version;
-    if (exprᴛ1 == iexportVersionGo1_18 || exprᴛ1 == iexportVersionPosCol || exprᴛ1 == iexportVersionGo1_11) {
-    }
-    else { /* default: */
-        errorf("unknown iexport format version %d"u8, version);
-    }
+        else { /* default: */
+            errorf("unknown iexport format version %d"u8, version);
+        }
 
-    var sLen = r.uint64();
-    var dLen = r.uint64();
-    if (sLen > math.MaxUint64 - dLen) {
-        errorf("lengths out of range (%d, %d)"u8, sLen, dLen);
-    }
-    (data, err) = saferio.ReadData(~r, sLen + dLen);
-    if (err != default!) {
-        errorf("cannot read %d bytes of stringData and declData: %s"u8, sLen + dLen, err);
-    }
-    var stringData = data[..(int)(sLen)];
-    var declData = data[(int)(sLen)..];
-    ref var p = ref heap<iimporter>(out var Ꮡp);
-    p = new iimporter(
-        exportVersion: version,
-        ipath: path,
-        version: ((nint)version),
-        stringData: stringData,
-        stringCache: new map<uint64, @string>(),
-        pkgCache: new types.Package(),
-        declData: declData,
-        pkgIndex: new types.Package>map<@string>uint64(),
-        typCache: new typesꓸType(), // Separate map for typeparams, keyed by their package and unique
+        var sLen = r.uint64();
+        var dLen = r.uint64();
+        if (sLen > (uint64)math.MaxUint64 - dLen) {
+            errorf("lengths out of range (%d, %d)"u8, sLen, dLen);
+        }
+        (var data, err) = saferio.ReadData(new intReaderжReader(r), sLen + dLen);
+        if (err != default!) {
+            errorf("cannot read %d bytes of stringData and declData: %s"u8, sLen + dLen, err);
+        }
+        var stringData = data[..(int)(sLen)];
+        var declData = data[(int)(sLen)..];
+        ref var p = ref heap<iimporter>(out var Ꮡp);
+        p = new iimporter(
+            exportVersion: version,
+            ipath: path,
+            version: (nint)version,
+            stringData: stringData,
+            stringCache: new map<uint64, @string>(),
+            pkgCache: new map<uint64, ж<types.Package>>(),
+            declData: declData,
+            pkgIndex: new map<ж<types.Package>, map<@string, uint64>>(),
+            typCache: new map<uint64, typesꓸType>(), // Separate map for typeparams, keyed by their package and unique
  // name (name with subscript).
 
-        tparamIndex: new types.TypeParam(),
-        fake: new fakeFileSet(
-            fset: fset,
-            files: new map<@string, ж<fileInfo>>()
-        )
-    );
-    var pʗ1 = p;
-    defer(pʗ1.fake.setLines);
-    // set lines for files in fset
-    foreach (var (i, pt) in predeclared) {
-        p.typCache[((uint64)i)] = pt;
-    }
-    // Special handling for "any", whose representation may be changed by the
-    // gotypesalias GODEBUG variable.
-    p.typCache[((uint64)len(predeclared))] = types.Universe.Lookup("any"u8).Type();
-    var pkgList = new slice<types.Package>(r.uint64());
-    foreach (var (i, _) in pkgList) {
-        var pkgPathOff = r.uint64();
-        @string pkgPath = p.stringAt(pkgPathOff);
-        @string pkgName = p.stringAt(r.uint64());
-        _ = r.uint64();
-        // package height; unused by go/types
-        if (pkgPath == ""u8) {
-            pkgPath = path;
+            tparamIndex: new map<Δident, ж<types.TypeParam>>(),
+            fake: new fakeFileSet(
+                fset: Ꮡfset,
+                files: new map<@string, ж<fileInfo>>()
+            )
+        );
+        defer(Ꮡp.of(iimporter.Ꮡfake).setLines);
+        // set lines for files in fset
+        foreach (var (i, pt) in predeclared) {
+            p.typCache[(uint64)i] = pt;
         }
-        var pkgΔ1 = imports[pkgPath];
-        if (pkgΔ1 == nil){
-            pkgΔ1 = types.NewPackage(pkgPath, pkgName);
-            imports[pkgPath] = pkgΔ1;
-        } else 
-        if (pkgΔ1.Name() != pkgName) {
-            errorf("conflicting names %s and %s for package %q"u8, pkgΔ1.Name(), pkgName, path);
+        // Special handling for "any", whose representation may be changed by the
+        // gotypesalias GODEBUG variable.
+        p.typCache[(uint64)len(predeclared)] = types.Universe.Lookup("any"u8).Type();
+        var pkgList = new slice<ж<types.Package>>((nint)(r.uint64()));
+        foreach (var (i, _) in pkgList) {
+            var pkgPathOff = r.uint64();
+            @string pkgPath = p.stringAt(pkgPathOff);
+            @string pkgName = p.stringAt(r.uint64());
+            _ = r.uint64();
+            // package height; unused by go/types
+            if (pkgPath == ""u8) {
+                pkgPath = path;
+            }
+            var pkgΔ1 = imports[pkgPath];
+            if (pkgΔ1 == nil){
+                pkgΔ1 = types.NewPackage(pkgPath, pkgName);
+                imports[pkgPath] = pkgΔ1;
+            } else 
+            if (pkgΔ1.Name() != pkgName) {
+                errorf("conflicting names %s and %s for package %q"u8, pkgΔ1.Name(), pkgName, path);
+            }
+            p.pkgCache[pkgPathOff] = pkgΔ1;
+            var nameIndex = new map<@string, uint64>();
+            for (var nSyms = r.uint64(); nSyms > 0; nSyms--) {
+                @string name = p.stringAt(r.uint64());
+                nameIndex[name] = r.uint64();
+            }
+            p.pkgIndex[pkgΔ1] = nameIndex;
+            pkgList[i] = pkgΔ1;
         }
-        p.pkgCache[pkgPathOff] = pkgΔ1;
-        var nameIndex = new map<@string, uint64>();
-        for (var nSyms = r.uint64(); nSyms > 0; nSyms--) {
-            @string name = p.stringAt(r.uint64());
-            nameIndex[name] = r.uint64();
+        var localpkg = pkgList[0];
+        var names = new slice<@string>(0, len(p.pkgIndex[localpkg]));
+        foreach (var (name, _) in p.pkgIndex[localpkg]) {
+            names = append(names, name);
         }
-        p.pkgIndex[pkg] = nameIndex;
-        pkgList[i] = pkgΔ1;
-    }
-    var localpkg = pkgList[0];
-    var names = new slice<@string>(0, len(p.pkgIndex[localpkg]));
-    foreach (var (name, _) in p.pkgIndex[localpkg]) {
-        names = append(names, name);
-    }
-    slices.Sort(names);
-    foreach (var (_, name) in names) {
-        p.doDecl(localpkg, name);
-    }
-    // SetConstraint can't be called if the constraint type is not yet complete.
-    // When type params are created in the 'P' case of (*importReader).obj(),
-    // the associated constraint type may not be complete due to recursion.
-    // Therefore, we defer calling SetConstraint there, and call it here instead
-    // after all types are complete.
-    foreach (var (_, d) in p.later) {
-        d.t.SetConstraint(d.constraint);
-    }
-    foreach (var (_, typ) in p.interfaceList) {
-        typ.Complete();
-    }
-    // record all referenced packages as imports
-    var list = append((slice<types.Package>)(default!), pkgList[1..].ꓸꓸꓸ);
-    slices.SortFunc(list, 
-    (ж<types.Package> a, ж<types.Package> b) => strings.Compare(a.Path(), b.Path()));
-    localpkg.SetImports(list);
-    // package was imported completely and without errors
-    localpkg.MarkComplete();
-    return (localpkg, default!);
-});
+        slices.Sort<slice<@string>, @string>(names);
+        foreach (var (_, name) in names) {
+            Ꮡp.doDecl(localpkg, name);
+        }
+        // SetConstraint can't be called if the constraint type is not yet complete.
+        // When type params are created in the 'P' case of (*importReader).obj(),
+        // the associated constraint type may not be complete due to recursion.
+        // Therefore, we defer calling SetConstraint there, and call it here instead
+        // after all types are complete.
+        foreach (var (_, d) in p.later) {
+            d.t.SetConstraint(d.constraint);
+        }
+        foreach (var (_, typ) in p.interfaceList) {
+            typ.Complete();
+        }
+        // record all referenced packages as imports
+        var list = append((slice<ж<types.Package>>)(default!), pkgList[1..].ꓸꓸꓸ);
+        slices.SortFunc(list, (ж<types.Package> a, ж<types.Package> b) => strings.Compare(a.Path(), b.Path()));
+        localpkg.SetImports(list);
+        // package was imported completely and without errors
+        localpkg.MarkComplete();
+        (pkg, err) = (localpkg, default!);
+    });
+    return (pkg, Ꮡerr.ValueSlot);
+}
 
 [GoType] partial struct setConstraintArgs {
-    internal ж<go.types_package.TypeParam> t;
-    internal go.types_package.ΔType constraint;
+    internal ж<types.TypeParam> t;
+    internal typesꓸType constraint;
 }
 
 [GoType] partial struct iimporter {
@@ -219,39 +220,39 @@ internal static (ж<types.Package> pkg, error err) iImportData(ж<token.FileSet>
     internal nint version;
     internal slice<byte> stringData;
     internal map<uint64, @string> stringCache;
-    internal types.Package pkgCache;
+    internal map<uint64, ж<types.Package>> pkgCache;
     internal slice<byte> declData;
-    internal types.Package>map<@string>uint64 pkgIndex;
-    internal typesꓸType typCache;
-    internal types.TypeParam tparamIndex;
+    internal map<ж<types.Package>, map<@string, uint64>> pkgIndex;
+    internal map<uint64, typesꓸType> typCache;
+    internal map<Δident, ж<types.TypeParam>> tparamIndex;
     internal fakeFileSet fake;
-    internal types.Interface interfaceList;
+    internal slice<ж<types.Interface>> interfaceList;
     // Arguments for calls to SetConstraint that are deferred due to recursive types
     internal slice<setConstraintArgs> later;
 }
 
-[GoRecv] internal static void doDecl(this ref iimporter p, ж<types.Package> Ꮡpkg, @string name) {
-    ref var pkg = ref Ꮡpkg.val;
+internal static void doDecl(this ж<iimporter> Ꮡp, ж<types.Package> Ꮡpkg, @string name) {
+    ref var p = ref Ꮡp.Value;
+    ref var pkg = ref Ꮡpkg.Value;
 
     // See if we've already imported this declaration.
     {
-        var obj = pkg.Scope().Lookup(name); if (obj != default!) {
+        var obj = Ꮡpkg.Scope().Lookup(name); if (obj != default!) {
             return;
         }
     }
-    var (off, ok) = p.pkgIndex[pkg][name];
+    var (off, ok) = p.pkgIndex[Ꮡpkg][name, ꟷ];
     if (!ok) {
         errorf("%v.%v not in index"u8, pkg, name);
     }
-    var r = Ꮡ(new importReader(p: p, currPkg: pkg));
-    (~r).declReader.Reset(p.declData[(int)(off)..]);
+    var r = Ꮡ(new importReader(p: Ꮡp, currPkg: Ꮡpkg));
+    r.of(importReader.ᏑdeclReader).Reset(p.declData[(int)(off)..]);
     r.obj(name);
 }
 
 [GoRecv] internal static @string stringAt(this ref iimporter p, uint64 off) {
     {
-        @string sΔ1 = p.stringCache[off];
-        var ok = p.stringCache[off]; if (ok) {
+        var (sΔ1, ok) = p.stringCache[off, ꟷ]; if (ok) {
             return sΔ1;
         }
     }
@@ -259,7 +260,7 @@ internal static (ж<types.Package> pkg, error err) iImportData(ж<token.FileSet>
     if (n <= 0) {
         errorf("varint failed"u8);
     }
-    var spos = off + ((uint64)n);
+    var spos = off + (uint64)n;
     @string s = ((@string)(p.stringData[(int)(spos)..(int)(spos + slen)]));
     p.stringCache[off] = s;
     return s;
@@ -267,8 +268,7 @@ internal static (ж<types.Package> pkg, error err) iImportData(ж<token.FileSet>
 
 [GoRecv] internal static ж<types.Package> pkgAt(this ref iimporter p, uint64 off) {
     {
-        var pkg = p.pkgCache[off];
-        var ok = p.pkgCache[off]; if (ok) {
+        var (pkg, ok) = p.pkgCache[off, ꟷ]; if (ok) {
             return pkg;
         }
     }
@@ -277,20 +277,20 @@ internal static (ж<types.Package> pkg, error err) iImportData(ж<token.FileSet>
     return default!;
 }
 
-[GoRecv] internal static typesꓸType typAt(this ref iimporter p, uint64 off, ж<types.Named> Ꮡbase) {
-    ref var @base = ref Ꮡbase.val;
+internal static typesꓸType typAt(this ж<iimporter> Ꮡp, uint64 off, ж<types.Named> Ꮡbase) {
+    ref var p = ref Ꮡp.Value;
+    ref var @base = ref Ꮡbase.Value;
 
     {
-        var tΔ1 = p.typCache[off];
-        var ok = p.typCache[off]; if (ok && canReuse(Ꮡbase, tΔ1)) {
+        var (tΔ1, ok) = p.typCache[off, ꟷ]; if (ok && canReuse(Ꮡbase, tΔ1)) {
             return tΔ1;
         }
     }
     if (off < predeclReserved) {
         errorf("predeclared type missing from cache: %v"u8, off);
     }
-    var r = Ꮡ(new importReader(p: p));
-    (~r).declReader.Reset(p.declData[(int)(off - predeclReserved)..]);
+    var r = Ꮡ(new importReader(p: Ꮡp));
+    r.of(importReader.ᏑdeclReader).Reset(p.declData[(int)(off - (uint64)predeclReserved)..]);
     var t = r.doType(Ꮡbase);
     if (canReuse(Ꮡbase, t)) {
         p.typCache[off] = t;
@@ -305,9 +305,9 @@ internal static (ж<types.Package> pkg, error err) iImportData(ж<token.FileSet>
 // may not be re-used because we have a convention of setting the receiver type
 // for interface methods to def.
 internal static bool canReuse(ж<types.Named> Ꮡdef, typesꓸType rhs) {
-    ref var def = ref Ꮡdef.val;
+    ref var def = ref Ꮡdef.DerefOrNil();
 
-    if (def == nil) {
+    if (Ꮡdef == nil) {
         return true;
     }
     var (iface, _) = rhs._<ж<types.Interface>>(ᐧ);
@@ -320,34 +320,36 @@ internal static bool canReuse(ж<types.Named> Ꮡdef, typesꓸType rhs) {
 
 [GoType] partial struct importReader {
     internal ж<iimporter> p;
-    internal bytes_package.Reader declReader;
-    internal ж<go.types_package.Package> currPkg;
+    internal bytes.Reader declReader;
+    internal ж<types.Package> currPkg;
     internal @string prevFile;
     internal int64 prevLine;
     internal int64 prevColumn;
 }
 
-[GoRecv] internal static void obj(this ref importReader r, @string name) {
+internal static void obj(this ж<importReader> Ꮡr, @string name) {
+    ref var r = ref Ꮡr.Value;
+
     var tag = r.@byte();
-    tokenꓸPos pos = r.pos();
+    tokenꓸPos pos = Ꮡr.pos();
     switch (tag) {
     case (rune)'A': {
-        var typ = r.typ();
-        r.declare(~types.NewTypeName(pos, r.currPkg, name, typ));
+        var typ = Ꮡr.typ();
+        r.declare(new types_TypeNameжObject(types.NewTypeName(pos, r.currPkg, name, typ)));
         break;
     }
     case (rune)'C': {
-        (typ, val) = r.value();
-        r.declare(~types.NewConst(pos, r.currPkg, name, typ, val));
+        var (typ, val) = Ꮡr.value();
+        r.declare(new types_ConstжObject(types.NewConst(pos, r.currPkg, name, typ, val)));
         break;
     }
     case (rune)'F' or (rune)'G': {
-        slice<types.TypeParam> tparams = default!;
+        slice<ж<types.TypeParam>> tparams = default!;
         if (tag == (rune)'G') {
-            tparams = r.tparamList();
+            tparams = Ꮡr.tparamList();
         }
-        var sig = r.signature(nil, default!, tparams);
-        r.declare(~types.NewFunc(pos, r.currPkg, name, sig));
+        var sig = Ꮡr.signature(nil, default!, tparams);
+        r.declare(new types_FuncжObject(types.NewFunc(pos, r.currPkg, name, sig)));
         break;
     }
     case (rune)'T' or (rune)'U': {
@@ -355,39 +357,39 @@ internal static bool canReuse(ж<types.Named> Ꮡdef, typesꓸType rhs) {
  // declaration before recurring.
  r.currPkg, name, default!);
         var named = types.NewNamed(obj, default!, default!);
-        r.declare(~obj);
+        r.declare(new types_TypeNameжObject(obj));
         if (tag == (rune)'U') {
             // Declare obj before calling r.tparamList, so the new type name is recognized
             // if used in the constraint of one of its own typeparams (see #48280).
-            var tparams = r.tparamList();
+            var tparams = Ꮡr.tparamList();
             named.SetTypeParams(tparams);
         }
-        var underlying = r.p.typAt(r.uint64(), named).Underlying();
+        var underlying = r.p.typAt(Ꮡr.uint64(), named).Underlying();
         named.SetUnderlying(underlying);
         if (!isInterface(underlying)) {
-            for (var n = r.uint64(); n > 0; n--) {
-                tokenꓸPos mpos = r.pos();
-                @string mname = r.ident();
-                var recv = r.param();
+            for (var n = Ꮡr.uint64(); n > 0; n--) {
+                tokenꓸPos mpos = Ꮡr.pos();
+                @string mname = Ꮡr.ident();
+                var recv = Ꮡr.param();
                 // If the receiver has any targs, set those as the
                 // rparams of the method (since those are the
                 // typeparams being used in the method sig/body).
                 var targs = baseType(recv.Type()).TypeArgs();
-                slice<types.TypeParam> rparams = default!;
+                slice<ж<types.TypeParam>> rparams = default!;
                 if (targs.Len() > 0) {
-                    rparams = new slice<types.TypeParam>(targs.Len());
+                    rparams = new slice<ж<types.TypeParam>>(targs.Len());
                     foreach (var (i, _) in rparams) {
                         (rparams[i], _) = targs.At(i)._<ж<types.TypeParam>>(ᐧ);
                     }
                 }
-                var msig = r.signature(recv, rparams, default!);
+                var msig = Ꮡr.signature(recv, rparams, default!);
                 named.AddMethod(types.NewFunc(mpos, r.currPkg, mname, msig));
             }
         }
         break;
     }
     case (rune)'P': {
-        if (r.p.exportVersion < iexportVersionGenerics) {
+        if ((~r.p).exportVersion < iexportVersionGenerics) {
             // We need to "declare" a typeparam in order to have a name that
             // can be referenced recursively (if needed) in the type param's
             // bound.
@@ -401,12 +403,12 @@ internal static bool canReuse(ж<types.Named> Ꮡdef, typesꓸType rhs) {
         var id = new Δident( // To handle recursive references to the typeparam within its
  // bound, save the partial type in tparamIndex before reading the bounds.
 r.currPkg, name);
-        r.p.tparamIndex[id] = t;
+        r.p.Value.tparamIndex[id] = t;
         bool @implicit = default!;
-        if (r.p.exportVersion >= iexportVersionGo1_18) {
-            @implicit = r.@bool();
+        if ((~r.p).exportVersion >= iexportVersionGo1_18) {
+            @implicit = Ꮡr.@bool();
         }
-        var constraint = r.typ();
+        var constraint = Ꮡr.typ();
         if (@implicit) {
             var (iface, _) = constraint._<ж<types.Interface>>(ᐧ);
             if (iface == nil) {
@@ -414,7 +416,7 @@ r.currPkg, name);
             }
             iface.MarkImplicit();
         }
-        r.p.later = append(r.p.later, // The constraint type may not be complete, if we
+        r.p.Value.later = append((~r.p).later, // The constraint type may not be complete, if we
  // are in the middle of a type recursion involving type
  // constraints. So, we defer SetConstraint until we have
  // completely set up all types in ImportData.
@@ -422,8 +424,8 @@ r.currPkg, name);
         break;
     }
     case (rune)'V': {
-        var typ = r.typ();
-        r.declare(~types.NewVar(pos, r.currPkg, name, typ));
+        var typ = Ꮡr.typ();
+        r.declare(new types_VarжObject(types.NewVar(pos, r.currPkg, name, typ)));
         break;
     }
     default: {
@@ -437,35 +439,36 @@ r.currPkg, name);
     obj.Pkg().Scope().Insert(obj);
 }
 
-[GoRecv] internal static (typesꓸType typ, constant.Value val) value(this ref importReader r) {
+internal static (typesꓸType typ, constant.Value val) value(this ж<importReader> Ꮡr) {
     typesꓸType typ = default!;
     constant.Value val = default!;
 
-    typ = r.typ();
-    if (r.p.exportVersion >= iexportVersionGo1_18) {
+    ref var r = ref Ꮡr.Value;
+    typ = Ꮡr.typ();
+    if ((~r.p).exportVersion >= iexportVersionGo1_18) {
         // TODO: add support for using the kind
-        _ = ((constantꓸKind)r.int64());
+        _ = ((constantꓸKind)(nint)Ꮡr.int64());
     }
     {
         var b = typ.Underlying()._<ж<types.Basic>>();
         var exprᴛ1 = (types.BasicInfo)(b.Info() & types.IsConstType);
         if (exprᴛ1 == types.IsBoolean) {
-            val = constant.MakeBool(r.@bool());
+            val = constant.MakeBool(Ꮡr.@bool());
         }
         else if (exprᴛ1 == types.IsString) {
-            val = constant.MakeString(r.@string());
+            val = constant.MakeString(Ꮡr.@string());
         }
         else if (exprᴛ1 == types.IsInteger) {
-            ref var x = ref heap(new math.big_package.ΔInt(), out var Ꮡx);
-            r.mpint(Ꮡx, b);
+            ref var x = ref heap(new bigꓸInt(), out var Ꮡx);
+            Ꮡr.mpint(Ꮡx, b);
             val = constant.Make(Ꮡx);
         }
         else if (exprᴛ1 == types.IsFloat) {
-            val = r.mpfloat(b);
+            val = Ꮡr.mpfloat(b);
         }
         else if (exprᴛ1 == types.IsComplex) {
-            var re = r.mpfloat(b);
-            var im = r.mpfloat(b);
+            var re = Ꮡr.mpfloat(b);
+            var im = Ꮡr.mpfloat(b);
             val = constant.BinaryOp(re, token.ADD, constant.MakeImag(im));
         }
         else { /* default: */
@@ -482,7 +485,7 @@ internal static (bool signed, nuint maxBytes) intSize(ж<types.Basic> Ꮡb) {
     bool signed = default!;
     nuint maxBytes = default!;
 
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
     if (((types.BasicInfo)(b.Info() & types.IsUntyped)) != 0) {
         return (true, 64);
     }
@@ -512,9 +515,10 @@ internal static (bool signed, nuint maxBytes) intSize(ж<types.Basic> Ꮡb) {
     return (signed, maxBytes);
 }
 
-[GoRecv] internal static void mpint(this ref importReader r, ж<bigꓸInt> Ꮡx, ж<types.Basic> Ꮡtyp) {
-    ref var x = ref Ꮡx.val;
-    ref var typ = ref Ꮡtyp.val;
+internal static void mpint(this ж<importReader> Ꮡr, ж<bigꓸInt> Ꮡx, ж<types.Basic> Ꮡtyp) {
+    ref var r = ref Ꮡr.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var typ = ref Ꮡtyp.Value;
 
     var (signed, maxBytes) = intSize(Ꮡtyp);
     nuint maxSmall = 256 - maxBytes;
@@ -525,96 +529,109 @@ internal static (bool signed, nuint maxBytes) intSize(ж<types.Basic> Ꮡb) {
         maxSmall = 256;
     }
     var (n, _) = r.declReader.ReadByte();
-    if (((nuint)n) < maxSmall) {
-        var vΔ1 = ((int64)n);
+    if ((nuint)n < maxSmall) {
+        var vΔ1 = (int64)n;
         if (signed) {
-             >>= (UntypedInt)(1);
+            vΔ1 >>= (int)(1);
             if ((byte)(n & 1) != 0) {
-                 = ~vΔ1;
+                vΔ1 = ~vΔ1;
             }
         }
-        x.SetInt64(vΔ1);
+        Ꮡx.SetInt64(vΔ1);
         return;
     }
-    var v = -n;
+    var v = (byte)(((byte)0 - n));
     if (signed) {
-        v = -((byte)(n & ~1)) >> (int)(1);
+        v = (byte)((((byte)0 - ((byte)(n & ~1))) >> (int)(1)));
     }
-    if (v < 1 || ((nuint)v) > maxBytes) {
+    if (v < 1 || (nuint)v > maxBytes) {
         errorf("weird decoding: %v, %v => %v"u8, n, signed, v);
     }
     var b = new slice<byte>(v);
-    io.ReadFull(r.declReader, b);
-    x.SetBytes(b);
+    io.ReadFull(new bytes_ReaderжReader(Ꮡr.of(importReader.ᏑdeclReader)), b);
+    Ꮡx.SetBytes(b);
     if (signed && (byte)(n & 1) != 0) {
-        x.Neg(Ꮡx);
+        Ꮡx.Neg(Ꮡx);
     }
 }
 
-[GoRecv] internal static constant.Value mpfloat(this ref importReader r, ж<types.Basic> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.val;
+internal static constant.Value mpfloat(this ж<importReader> Ꮡr, ж<types.Basic> Ꮡtyp) {
+    ref var r = ref Ꮡr.Value;
+    ref var typ = ref Ꮡtyp.Value;
 
-    ref var mant = ref heap(new math.big_package.ΔInt(), out var Ꮡmant);
-    r.mpint(Ꮡmant, Ꮡtyp);
-    ref var f = ref heap(new math.big_package.Float(), out var Ꮡf);
-    f.SetInt(Ꮡmant);
-    if (f.Sign() != 0) {
-        f.SetMantExp(Ꮡf, ((nint)r.int64()));
+    ref var mant = ref heap(new bigꓸInt(), out var Ꮡmant);
+    Ꮡr.mpint(Ꮡmant, Ꮡtyp);
+    ref var f = ref heap(new big.Float(), out var Ꮡf);
+    Ꮡf.SetInt(Ꮡmant);
+    if (Ꮡf.Sign() != 0) {
+        Ꮡf.SetMantExp(Ꮡf, (nint)Ꮡr.int64());
     }
     return constant.Make(Ꮡf);
 }
 
-[GoRecv] internal static @string ident(this ref importReader r) {
-    return r.@string();
+internal static @string ident(this ж<importReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.@string();
 }
 
-[GoRecv] internal static (ж<types.Package>, @string) qualifiedIdent(this ref importReader r) {
-    @string name = r.@string();
-    var pkg = r.pkg();
+internal static (ж<types.Package>, @string) qualifiedIdent(this ж<importReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    @string name = Ꮡr.@string();
+    var pkg = Ꮡr.pkg();
     return (pkg, name);
 }
 
-[GoRecv] internal static tokenꓸPos pos(this ref importReader r) {
-    if (r.p.version >= 1){
-        r.posv1();
+internal static tokenꓸPos pos(this ж<importReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    if ((~r.p).version >= 1){
+        Ꮡr.posv1();
     } else {
-        r.posv0();
+        Ꮡr.posv0();
     }
     if (r.prevFile == ""u8 && r.prevLine == 0 && r.prevColumn == 0) {
         return token.NoPos;
     }
-    return r.p.fake.pos(r.prevFile, ((nint)r.prevLine), ((nint)r.prevColumn));
+    return r.p.of(iimporter.Ꮡfake).pos(r.prevFile, (nint)r.prevLine, (nint)r.prevColumn);
 }
 
-[GoRecv] internal static void posv0(this ref importReader r) {
-    var delta = r.int64();
+internal static void posv0(this ж<importReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    var delta = Ꮡr.int64();
     if (delta != deltaNewFile){
         r.prevLine += delta;
     } else 
     {
-        var l = r.int64(); if (l == -1){
+        var l = Ꮡr.int64(); if (l == -1){
             r.prevLine += deltaNewFile;
         } else {
-            r.prevFile = r.@string();
+            r.prevFile = Ꮡr.@string();
             r.prevLine = l;
         }
     }
 }
 
-[GoRecv] internal static void posv1(this ref importReader r) {
-    var delta = r.int64();
-    r.prevColumn += delta >> (int)(1);
+internal static void posv1(this ж<importReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    var delta = Ꮡr.int64();
+    r.prevColumn += (delta >> (int)(1));
     if ((int64)(delta & 1) != 0) {
-        delta = r.int64();
-        r.prevLine += delta >> (int)(1);
+        delta = Ꮡr.int64();
+        r.prevLine += (delta >> (int)(1));
         if ((int64)(delta & 1) != 0) {
-            r.prevFile = r.@string();
+            r.prevFile = Ꮡr.@string();
         }
     }
 }
 
-[GoRecv] internal static typesꓸType typ(this ref importReader r) {
-    return r.p.typAt(r.uint64(), nil);
+internal static typesꓸType typ(this ж<importReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    return r.p.typAt(Ꮡr.uint64(), nil);
 }
 
 internal static bool isInterface(typesꓸType t) {
@@ -622,193 +639,212 @@ internal static bool isInterface(typesꓸType t) {
     return ok;
 }
 
-[GoRecv] internal static ж<types.Package> pkg(this ref importReader r) {
-    return r.p.pkgAt(r.uint64());
+internal static ж<types.Package> pkg(this ж<importReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    return r.p.pkgAt(Ꮡr.uint64());
 }
 
-[GoRecv] internal static @string @string(this ref importReader r) {
-    return r.p.stringAt(r.uint64());
+internal static @string @string(this ж<importReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    return r.p.stringAt(Ꮡr.uint64());
 }
 
-[GoRecv] internal static typesꓸType doType(this ref importReader r, ж<types.Named> Ꮡbase) {
-    ref var @base = ref Ꮡbase.val;
+internal static typesꓸType doType(this ж<importReader> Ꮡr, ж<types.Named> Ꮡbase) {
+    ref var r = ref Ꮡr.Value;
+    ref var @base = ref Ꮡbase.DerefOrNil();
 
     {
-        var k = r.kind();
+        var k = Ꮡr.kind();
         var exprᴛ1 = k;
-        { /* default: */
-            errorf("unexpected kind tag in %q: %v"u8, r.p.ipath, k);
-            return default!;
-        }
         if (exprᴛ1 == definedType) {
-            var (pkg, name) = r.qualifiedIdent();
+            var (pkg, name) = Ꮡr.qualifiedIdent();
             r.p.doDecl(pkg, name);
             return pkg.Scope().Lookup(name)._<ж<types.TypeName>>().Type();
         }
         if (exprᴛ1 == pointerType) {
-            return ~types.NewPointer(r.typ());
+            return new types.PointerжΔType(types.NewPointer(Ꮡr.typ()));
         }
         if (exprᴛ1 == sliceType) {
-            return ~types.NewSlice(r.typ());
+            return new types.SliceжΔType(types.NewSlice(Ꮡr.typ()));
         }
         if (exprᴛ1 == arrayType) {
-            var n = r.uint64();
-            return ~types.NewArray(r.typ(), ((int64)n));
+            var n = Ꮡr.uint64();
+            return new types.ArrayжΔType(types.NewArray(Ꮡr.typ(), (int64)n));
         }
         if (exprᴛ1 == chanType) {
-            types.ChanDir dir = chanDir(((nint)r.uint64()));
-            return ~types.NewChan(dir, r.typ());
+            types.ChanDir dir = chanDir((nint)Ꮡr.uint64());
+            return new types.ChanжΔType(types.NewChan(dir, Ꮡr.typ()));
         }
         if (exprᴛ1 == mapType) {
-            return ~types.NewMap(r.typ(), r.typ());
+            return new types.MapжΔType(types.NewMap(Ꮡr.typ(), Ꮡr.typ()));
         }
         if (exprᴛ1 == signatureType) {
-            r.currPkg = r.pkg();
-            return ~r.signature(nil, default!, default!);
+            r.currPkg = Ꮡr.pkg();
+            return new types_ΔSignatureжΔType(Ꮡr.signature(nil, default!, default!));
         }
         if (exprᴛ1 == ΔstructType) {
-            r.currPkg = r.pkg();
-            var fields = new slice<types.Var>(r.uint64());
+            r.currPkg = Ꮡr.pkg();
+            var fields = new slice<ж<types.Var>>((nint)(Ꮡr.uint64()));
             var tags = new slice<@string>(len(fields));
             foreach (var (i, _) in fields) {
-                tokenꓸPos fpos = r.pos();
-                @string fname = r.ident();
-                var ftyp = r.typ();
-                var emb = r.@bool();
-                @string tag = r.@string();
+                tokenꓸPos fpos = Ꮡr.pos();
+                @string fname = Ꮡr.ident();
+                var ftyp = Ꮡr.typ();
+                var emb = Ꮡr.@bool();
+                @string tag = Ꮡr.@string();
                 fields[i] = types.NewField(fpos, r.currPkg, fname, ftyp, emb);
                 tags[i] = tag;
             }
-            return ~types.NewStruct(fields, tags);
+            return new types.StructжΔType(types.NewStruct(fields, tags));
         }
         if (exprᴛ1 == ΔinterfaceType) {
-            r.currPkg = r.pkg();
-            var embeddeds = new slice<typesꓸType>(r.uint64());
+            r.currPkg = Ꮡr.pkg();
+            var embeddeds = new slice<typesꓸType>((nint)(Ꮡr.uint64()));
             foreach (var (i, _) in embeddeds) {
-                _ = r.pos();
-                embeddeds[i] = r.typ();
+                _ = Ꮡr.pos();
+                embeddeds[i] = Ꮡr.typ();
             }
-            var methods = new slice<types.Func>(r.uint64());
+            var methods = new slice<ж<types.Func>>((nint)(Ꮡr.uint64()));
             foreach (var (i, _) in methods) {
-                tokenꓸPos mpos = r.pos();
-                @string mname = r.ident();
+                tokenꓸPos mpos = Ꮡr.pos();
+                @string mname = Ꮡr.ident();
                 // TODO(mdempsky): Matches bimport.go, but I
                 // don't agree with this.
                 ж<types.Var> recv = default!;
-                if (@base != nil) {
-                    recv = types.NewVar(token.NoPos, r.currPkg, ""u8, ~@base);
+                if (Ꮡbase != nil) {
+                    recv = types.NewVar(token.NoPos, r.currPkg, ""u8, new types.NamedжΔType(Ꮡbase));
                 }
-                var msig = r.signature(recv, default!, default!);
+                var msig = Ꮡr.signature(recv, default!, default!);
                 methods[i] = types.NewFunc(mpos, r.currPkg, mname, msig);
             }
             var typ = types.NewInterfaceType(methods, embeddeds);
-            r.p.interfaceList = append(r.p.interfaceList, typ);
-            return ~typ;
+            r.p.Value.interfaceList = append((~r.p).interfaceList, typ);
+            return new types.InterfaceжΔType(typ);
         }
         if (exprᴛ1 == typeParamType) {
-            if (r.p.exportVersion < iexportVersionGenerics) {
+            if ((~r.p).exportVersion < iexportVersionGenerics) {
                 errorf("unexpected type param type"u8);
             }
-            var (pkg, name) = r.qualifiedIdent();
+            var (pkg, name) = Ꮡr.qualifiedIdent();
             var id = new Δident(pkg, name);
             {
-                var t = r.p.tparamIndex[id];
-                var ok = r.p.tparamIndex[id]; if (ok) {
+                var (t, ok) = (~r.p).tparamIndex[id, ꟷ]; if (ok) {
                     // We're already in the process of importing this typeparam.
-                    return ~t;
+                    return new types.TypeParamжΔType(t);
                 }
             }
             r.p.doDecl(pkg, // Otherwise, import the definition of the typeparam now.
  name);
-            return ~r.p.tparamIndex[id];
+            return new types.TypeParamжΔType((~r.p).tparamIndex[id]);
         }
         if (exprᴛ1 == instanceType) {
-            if (r.p.exportVersion < iexportVersionGenerics) {
+            if ((~r.p).exportVersion < iexportVersionGenerics) {
                 errorf("unexpected instantiation type"u8);
             }
-            _ = r.pos();
-            var len = r.uint64();
-            var targs = new slice<typesꓸType>(len);
+            _ = Ꮡr.pos();
+            var lenΔ2 = Ꮡr.uint64();
+            var targs = new slice<typesꓸType>((nint)(lenΔ2));
             foreach (var (i, _) in targs) {
                 // pos does not matter for instances: they are positioned on the original
                 // type.
-                targs[i] = r.typ();
+                targs[i] = Ꮡr.typ();
             }
-            var baseType = r.typ();
-            (t, _) = types.Instantiate(nil, // The imported instantiated type doesn't include any methods, so
+            var baseType = Ꮡr.typ();
+            var (t, _) = types.Instantiate(nil, // The imported instantiated type doesn't include any methods, so
  // we must always use the methods of the base (orig) type.
  // TODO provide a non-nil *Context
  baseType, targs, false);
             return t;
         }
         if (exprᴛ1 == ΔunionType) {
-            if (r.p.exportVersion < iexportVersionGenerics) {
+            if ((~r.p).exportVersion < iexportVersionGenerics) {
                 errorf("unexpected instantiation type"u8);
             }
-            var terms = new slice<typesꓸTerm>(r.uint64());
+            var terms = new slice<ж<typesꓸTerm>>((nint)(Ꮡr.uint64()));
             foreach (var (i, _) in terms) {
-                terms[i] = types.NewTerm(r.@bool(), r.typ());
+                terms[i] = types.NewTerm(Ꮡr.@bool(), Ꮡr.typ());
             }
-            return ~types.NewUnion(terms);
+            return new types.UnionжΔType(types.NewUnion(terms));
+        }
+        { /* default: */
+            errorf("unexpected kind tag in %q: %v"u8, (~r.p).ipath, k);
+            return default!;
         }
     }
 
 }
 
-[GoRecv] internal static itag kind(this ref importReader r) {
-    return ((itag)r.uint64());
+internal static itag kind(this ж<importReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    return ((itag)Ꮡr.uint64());
 }
 
-[GoRecv] internal static ж<typesꓸSignature> signature(this ref importReader r, ж<types.Var> Ꮡrecv, slice<types.TypeParam> rparams, slice<types.TypeParam> tparams) {
-    ref var recv = ref Ꮡrecv.val;
+internal static ж<typesꓸSignature> signature(this ж<importReader> Ꮡr, ж<types.Var> Ꮡrecv, slice<ж<types.TypeParam>> rparams, slice<ж<types.TypeParam>> tparams) {
+    ref var r = ref Ꮡr.Value;
+    ref var recv = ref Ꮡrecv.Value;
 
-    var @params = r.paramList();
-    var results = r.paramList();
-    var variadic = @params.Len() > 0 && r.@bool();
+    var @params = Ꮡr.paramList();
+    var results = Ꮡr.paramList();
+    var variadic = @params.Len() > 0 && Ꮡr.@bool();
     return types.NewSignatureType(Ꮡrecv, rparams, tparams, @params, results, variadic);
 }
 
-[GoRecv] internal static slice<types.TypeParam> tparamList(this ref importReader r) {
-    var n = r.uint64();
+internal static slice<ж<types.TypeParam>> tparamList(this ж<importReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    var n = Ꮡr.uint64();
     if (n == 0) {
         return default!;
     }
-    var xs = new slice<types.TypeParam>(n);
+    var xs = new slice<ж<types.TypeParam>>((nint)(n));
     foreach (var (i, _) in xs) {
-        (xs[i], _) = r.typ()._<ж<types.TypeParam>>(ᐧ);
+        (xs[i], _) = Ꮡr.typ()._<ж<types.TypeParam>>(ᐧ);
     }
     return xs;
 }
 
-[GoRecv] internal static ж<types.Tuple> paramList(this ref importReader r) {
-    var xs = new slice<types.Var>(r.uint64());
+internal static ж<types.Tuple> paramList(this ж<importReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    var xs = new slice<ж<types.Var>>((nint)(Ꮡr.uint64()));
     foreach (var (i, _) in xs) {
-        xs[i] = r.param();
+        xs[i] = Ꮡr.param();
     }
-    return types.NewTuple(Ꮡxs.ꓸꓸꓸ);
+    return types.NewTuple(xs.ꓸꓸꓸ);
 }
 
-[GoRecv] internal static ж<types.Var> param(this ref importReader r) {
-    tokenꓸPos pos = r.pos();
-    @string name = r.ident();
-    var typ = r.typ();
+internal static ж<types.Var> param(this ж<importReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    tokenꓸPos pos = Ꮡr.pos();
+    @string name = Ꮡr.ident();
+    var typ = Ꮡr.typ();
     return types.NewParam(pos, r.currPkg, name, typ);
 }
 
-[GoRecv] internal static bool @bool(this ref importReader r) {
-    return r.uint64() != 0;
+internal static bool @bool(this ж<importReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.uint64() != 0;
 }
 
-[GoRecv] internal static int64 int64(this ref importReader r) {
-    var (n, err) = binary.ReadVarint(r.declReader);
+internal static int64 int64(this ж<importReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    var (n, err) = binary.ReadVarint(new bytes_ReaderжByteReader(Ꮡr.of(importReader.ᏑdeclReader)));
     if (err != default!) {
         errorf("readVarint: %v"u8, err);
     }
     return n;
 }
 
-[GoRecv] internal static uint64 uint64(this ref importReader r) {
-    var (n, err) = binary.ReadUvarint(r.declReader);
+internal static uint64 uint64(this ж<importReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    var (n, err) = binary.ReadUvarint(new bytes_ReaderжByteReader(Ꮡr.of(importReader.ᏑdeclReader)));
     if (err != default!) {
         errorf("readUvarint: %v"u8, err);
     }

@@ -3,7 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.math;
 
-using rand = math.rand_package;
+using rand = go.math.rand_package;
+using go.math;
 
 partial class big_package {
 
@@ -45,32 +46,29 @@ partial class big_package {
 	1<<37 | 1<<41 | 1<<43 | 1<<47 | 1<<53 | 1<<59 | 1<<61 */ 2891462833508853932;
     Word w = x.abs[0];
     if (len(x.abs) == 1 && w < 64) {
-        return (uint64)(primeBitMask & (1 << (int)(w))) != 0;
+        return (uint64)(primeBitMask & (((uint64)1 << (int)(nuint)(w)))) != 0;
     }
     if ((Word)(w & 1) == 0) {
         return false;
     }
     // x is even
-    static readonly UntypedInt primesA = /* 3 * 5 * 7 * 11 * 13 * 17 * 19 * 23 * 37 */ 4127218095;
-    static readonly UntypedInt primesB = /* 29 * 31 * 41 * 43 * 47 * 53 */ 3948078067;
+    UntypedInt primesA = /* 3 * 5 * 7 * 11 * 13 * 17 * 19 * 23 * 37 */ 4127218095;
+    UntypedInt primesB = /* 29 * 31 * 41 * 43 * 47 * 53 */ 3948078067;
     uint32 rA = default!;
     uint32 rB = default!;
-    switch (_W) {
-    case 32: {
-        rA = ((uint32)x.abs.modW(primesA));
-        rB = ((uint32)x.abs.modW(primesB));
-        break;
+    var exprᴛ1 = _W;
+    if (exprᴛ1 == 32) {
+        rA = (uint32)(nuint)x.abs.modW(primesA);
+        rB = (uint32)(nuint)x.abs.modW(primesB);
     }
-    case 64: {
-        Word r = x.abs.modW((Word)((primesA * primesB) & _M));
-        rA = ((uint32)(r % primesA));
-        rB = ((uint32)(r % primesB));
-        break;
+    else if (exprᴛ1 == 64) {
+        Word r = x.abs.modW((Word)((nuint)((primesA * primesB)) & (nuint)_M));
+        rA = (uint32)(nuint)(r % (nuint)primesA);
+        rB = (uint32)(nuint)(r % (nuint)primesB);
     }
-    default: {
+    else { /* default: */
         throw panic("math/big: invalid word size");
-        break;
-    }}
+    }
 
     if (rA % 3 == 0 || rA % 5 == 0 || rA % 7 == 0 || rA % 11 == 0 || rA % 13 == 0 || rA % 17 == 0 || rA % 19 == 0 || rA % 23 == 0 || rA % 37 == 0 || rB % 29 == 0 || rB % 31 == 0 || rB % 41 == 0 || rB % 43 == 0 || rB % 47 == 0 || rB % 53 == 0) {
         return false;
@@ -89,7 +87,7 @@ internal static bool probablyPrimeMillerRabin(this nat n, nint reps, bool force2
     nuint k = nm1.trailingZeroBits();
     var q = ((nat)default!).shr(nm1, k);
     var nm3 = ((nat)default!).sub(nm1, natTwo);
-    var rand = rand.New(rand.NewSource(((int64)n[0])));
+    var randΔ1 = rand.New(rand.NewSource((int64)(nuint)n[0]));
     nat x = default!;
     nat y = default!;
     nat quotient = default!;
@@ -99,14 +97,14 @@ NextRandom:
         if (i == reps - 1 && force2){
             x = x.set(natTwo);
         } else {
-            x = x.random(rand, nm3, nm3Len);
+            x = x.random(randΔ1, nm3, nm3Len);
             x = x.add(x, natTwo);
         }
         y = y.expNN(x, q, n, false);
         if (y.cmp(natOne) == 0 || y.cmp(nm1) == 0) {
             continue;
         }
-        for (nuint j = ((nuint)1); j < k; j++) {
+        for (nuint j = (nuint)1; j < k; j++) {
             y = y.sqr(y);
             (quotient, y) = quotient.div(y, y, n);
             if (y.cmp(nm1) == 0) {
@@ -165,7 +163,7 @@ internal static bool probablyPrimeLucas(this nat n) {
     // After more than expected failures, check whether n is square
     // (which would cause Jacobi(D, n) = 1 for all D not dividing n).
     Word p = ((Word)3);
-    var d = new nat{1};
+    var d = new nat(new Word[]{1}.slice());
     var t1 = ((nat)default!);
     // temp
     var intD = Ꮡ(new ΔInt(abs: d));
@@ -174,7 +172,7 @@ internal static bool probablyPrimeLucas(this nat n) {
         if (p > 10000) {
             // This is widely believed to be impossible.
             // If we get a report, we'll want the exact number n.
-            throw panic("math/big: internal error: cannot find (D/n) = -1 for "u8 + intN.String());
+            throw panic("math/big: internal error: cannot find (D/n) = -1 for " + intN.String());
         }
         d[0] = p * p - 4;
         nint j = Jacobi(intD, intN);
@@ -213,8 +211,8 @@ internal static bool probablyPrimeLucas(this nat n) {
     //
     // Arrange s = (n - Jacobi(Δ, n)) / 2^r = (n+1) / 2^r.
     var s = ((nat)default!).add(n, natOne);
-    nint r = ((nint)s.trailingZeroBits());
-    s = s.shr(s, ((nuint)r));
+    nint r = (nint)s.trailingZeroBits();
+    s = s.shr(s, (nuint)r);
     var nm2 = ((nat)default!).sub(n, natTwo);
     // n-2
     // We apply the "almost extra strong" test, which checks the above conditions
@@ -249,8 +247,8 @@ internal static bool probablyPrimeLucas(this nat n) {
     var vk1 = ((nat)default!).setWord(p);
     var t2 = ((nat)default!);
     // temp
-    for (nint i = ((nint)s.bitLen()); i >= 0; i--) {
-        if (s.bit(((nuint)i)) != 0){
+    for (nint i = (nint)s.bitLen(); i >= 0; i--) {
+        if (s.bit((nuint)i) != 0){
             // k' = 2k+1
             // V(k') = V(2k+1) = V(k) V(k+1) - P.
             t1 = t1.mul(vk, vk1);
@@ -286,14 +284,14 @@ internal static bool probablyPrimeLucas(this nat n) {
         var t1Δ1 = t1.mul(vk, natP);
         var t2Δ1 = t2.shl(vk1, 1);
         if (t1Δ1.cmp(t2Δ1) < 0) {
-            (t1, t2) = (t2Δ1, t1Δ1);
+            (t1Δ1, t2Δ1) = (t2Δ1, t1Δ1);
         }
-        t1 = t1Δ1.sub(t1Δ1, t2Δ1);
+        t1Δ1 = t1Δ1.sub(t1Δ1, t2Δ1);
         var t3 = vk1;
         // steal vk1, no longer needed below
         vk1 = default!;
-        Δ_ = vk1;
-        (t2, t3) = t2Δ1.div(t3, t1Δ1, n);
+        _ = vk1;
+        (t2Δ1, t3) = t2Δ1.div(t3, t1Δ1, n);
         if (len(t3) == 0) {
             return true;
         }

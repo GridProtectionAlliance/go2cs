@@ -7,14 +7,14 @@ using bytes = bytes_package;
 using fmt = fmt_package;
 using sort = sort_package;
 using strings = strings_package;
+using io = io_package;
 
 partial class diff_package {
 
 // A pair is a pair of values tracked for both the x and y side of a diff.
 // It is typically a pair of line indexes.
 [GoType] partial struct pair {
-    internal nint x;
-    internal nint y;
+    internal nint x, y;
 }
 
 // Diff returns an anchored diff of the two texts old and new
@@ -52,10 +52,10 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
     var x = lines(old);
     var y = lines(@new);
     // Print diff header.
-    ref var out = ref heap(new bytes_package.Buffer(), out var Ꮡout);
-    fmt.Fprintf(~Ꮡ@out, "diff %s %s\n"u8, oldName, newName);
-    fmt.Fprintf(~Ꮡ@out, "--- %s\n"u8, oldName);
-    fmt.Fprintf(~Ꮡ@out, "+++ %s\n"u8, newName);
+    ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
+    fmt.Fprintf(new bytes_BufferжWriter(Ꮡout), "diff %s %s\n"u8, oldName, newName);
+    fmt.Fprintf(new bytes_BufferжWriter(Ꮡout), "--- %s\n"u8, oldName);
+    fmt.Fprintf(new bytes_BufferжWriter(Ꮡout), "+++ %s\n"u8, newName);
     // Loop over matches to consider,
     // expanding each match to include surrounding lines,
     // and then printing diff chunks.
@@ -100,7 +100,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
         }
         // If we're not at EOF and have too few common lines,
         // the chunk includes all the common lines and continues.
-        static readonly UntypedInt C = 3; // number of context lines
+        UntypedInt C = 3; // number of context lines
         if ((end.x < len(x) || end.y < len(y)) && (end.x - start.x < C || (len(ctext) > 0 && end.x - start.x < 2 * C))) {
             foreach (var (_, s) in x[(int)(start.x)..(int)(end.x)]) {
                 ctext = append(ctext, " "u8 + s);
@@ -131,7 +131,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
             if (count.y > 0) {
                 chunk.y++;
             }
-            fmt.Fprintf(~Ꮡ@out, "@@ -%d,%d +%d,%d @@\n"u8, chunk.x, count.x, chunk.y, count.y);
+            fmt.Fprintf(new bytes_BufferжWriter(Ꮡout), "@@ -%d,%d +%d,%d @@\n"u8, chunk.x, count.x, chunk.y, count.y);
             foreach (var (_, s) in ctext) {
                 @out.WriteString(s);
             }
@@ -144,7 +144,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
             break;
         }
         // Otherwise start a new chunk.
-        chunk = new pair(end.x - C, end.y - C);
+        chunk = new pair(end.x - (nint)C, end.y - (nint)C);
         foreach (var (_, s) in x[(int)(chunk.x)..(int)(end.x)]) {
             ctext = append(ctext, " "u8 + s);
             count.x++;
@@ -207,17 +207,16 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
     slice<nint> xi = default!;
     slice<nint> yi = default!;
     slice<nint> inv = default!;
-    foreach (var (iΔ1, s) in y) {
+    foreach (var (i, s) in y) {
         if (m[s] == -1 + -4) {
             m[s] = len(yi);
-            yi = append(yi, iΔ1);
+            yi = append(yi, i);
         }
     }
-    foreach (var (iΔ2, s) in x) {
+    foreach (var (i, s) in x) {
         {
-            nint j = m[s];
-            var ok = m[s]; if (ok && j >= 0) {
-                xi = append(xi, iΔ2);
+            var (j, ok) = m[s, ꟷ]; if (ok && j >= 0) {
+                xi = append(xi, i);
                 inv = append(inv, j);
             }
         }
@@ -230,15 +229,15 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
     nint n = len(xi);
     var T = new slice<nint>(n);
     var L = new slice<nint>(n);
-    foreach (var (iΔ3, _) in T) {
-        T[iΔ3] = n + 1;
+    foreach (var (i, _) in T) {
+        T[i] = n + 1;
     }
-    for (nint i = 0; i < n; i++) {
-        nint kΔ1 = sort.Search(n, 
+    for (nint iᴛ1 = 0; iᴛ1 < n; iᴛ1++) {
+        var i = iᴛ1;
         var Jʗ1 = J;
         var Tʗ1 = T;
-        (nint k) => Tʗ1[kΔ2] >= Jʗ1[i]);
-        T[k] = J[i];
+        nint kΔ1 = sort.Search(n, (nint kΔ2) => Tʗ1[kΔ2] >= Jʗ1[i]);
+        T[kΔ1] = J[i];
         L[i] = kΔ1 + 1;
     }
     nint k = 0;

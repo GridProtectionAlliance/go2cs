@@ -9,9 +9,10 @@
 namespace go.@internal;
 
 using errors = errors_package;
-using stringslite = @internal.stringslite_package;
+using stringslite = go.@internal.stringslite_package;
 using fs = io.fs_package;
 using slices = slices_package;
+using go.@internal;
 using io;
 using ꓸꓸꓸbyte = Span<byte>;
 
@@ -84,7 +85,7 @@ public static @string Clean(@string path) {
     //	dotdot is index in buf where .. must stop, either because
     //		it is the leading slash or it is a leading ../../.. prefix.
     nint n = len(path);
-    ref var out = ref heap<lazybuf>(out var Ꮡout);
+    ref var @out = ref heap<lazybuf>(out var Ꮡout);
     @out = new lazybuf(path: path, volAndPath: originalPath, volLen: volLen);
     nint r = 0;
     nint dotdot = 0;
@@ -105,7 +106,7 @@ public static @string Clean(@string path) {
         case {} when path[r] == (rune)'.' && path[r + 1] == (rune)'.' && (r + 2 == n || IsPathSeparator(path[r + 2])): {
             r += 2;
             switch (ᐧ) {
-            case {} when @out.w is > dotdot: {
+            case {} when @out.w > dotdot: {
                 @out.w--;
                 while (@out.w > dotdot && !IsPathSeparator(@out.index(@out.w))) {
                     // empty path element
@@ -147,7 +148,7 @@ public static @string Clean(@string path) {
     if (@out.w == 0) {
         @out.append((rune)'.');
     }
-    postClean(Ꮡ@out);
+    postClean(Ꮡout);
     // avoid creating absolute paths on Windows
     return FromSlash(@out.@string());
 }
@@ -162,7 +163,7 @@ internal static bool unixIsLocal(@string path) {
         return false;
     }
     var hasDots = false;
-    for (@string p = path;; p != ""u8; ) {
+    for (@string p = path; p != ""u8; ) {
         @string part = default!;
         (part, p, _) = stringslite.Cut(p, "/"u8);
         if (part == "."u8 || part == ".."u8) {
@@ -217,9 +218,9 @@ internal static @string replaceStringByte(@string s, byte old, byte @new) {
 }
 
 // Split is filepath.Split.
-public static (@string dir, @string file) Split(@string path) {
+public static (@string dir, @string @file) Split(@string path) {
     @string dir = default!;
-    @string file = default!;
+    @string @file = default!;
 
     @string vol = VolumeName(path);
     nint i = len(path) - 1;
@@ -260,7 +261,7 @@ public static @string Base(@string path) {
     }
     // If empty now, it had only slashes.
     if (path == ""u8) {
-        return ((@string)Separator);
+        return ((@string)(rune)Separator);
     }
     return path;
 }

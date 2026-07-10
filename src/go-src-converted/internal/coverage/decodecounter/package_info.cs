@@ -43,10 +43,7 @@ using static go.@internal.coverage.decodecounter_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<@string, error>]
-[assembly: GoImplement<encoding.binary_package.littleEndian, encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<io_package.ReadSeeker, io_package.Reader>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
+[assembly: GoImplement<go.encoding.binary_package.littleEndian, go.encoding.binary_package.ByteOrder>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

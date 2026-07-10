@@ -57,7 +57,7 @@ internal static void heapSort_func(lessSwap data, nint a, nint b) {
 // Rust implementation: https://docs.rs/pdqsort/latest/pdqsort/
 // limit is the number of allowed bad (very unbalanced) pivots before falling back to heapsort.
 internal static void pdqsort_func(lessSwap data, nint a, nint b, nint limit) {
-    static readonly UntypedInt maxInsertion = 12;
+    UntypedInt maxInsertion = 12;
     bool wasBalanced = true;   // whether the last partitioning was reasonably balanced
     bool wasPartitioned = true; // whether the slice was already partitioned
     while (ᐧ) {
@@ -94,8 +94,8 @@ internal static void pdqsort_func(lessSwap data, nint a, nint b, nint limit) {
         // Probably the slice contains many duplicate elements, partition the slice into
         // elements equal to and elements greater than the pivot.
         if (a > 0 && !data.Less(a - 1, pivot)) {
-            nint mid = partitionEqual_func(data, a, b, pivot);
-            a = mid;
+            nint midΔ1 = partitionEqual_func(data, a, b, pivot);
+            a = midΔ1;
             continue;
         }
         var (mid, alreadyPartitioned) = partition_func(data, a, b, pivot);
@@ -186,8 +186,8 @@ internal static nint /*newpivot*/ partitionEqual_func(lessSwap data, nint a, nin
 
 // partialInsertionSort_func partially sorts a slice, returns true if the slice is sorted at the end.
 internal static bool partialInsertionSort_func(lessSwap data, nint a, nint b) {
-    static readonly UntypedInt maxSteps = 5; // maximum number of adjacent out-of-order pairs that will get shifted
-    static readonly UntypedInt shortestShifting = 50; // don't shift any elements on short arrays
+    UntypedInt maxSteps = 5; // maximum number of adjacent out-of-order pairs that will get shifted
+    UntypedInt shortestShifting = 50; // don't shift any elements on short arrays
     nint i = a + 1;
     for (nint j = 0; j < maxSteps; j++) {
         while (i < b && !data.Less(i, i - 1)) {
@@ -227,10 +227,10 @@ internal static bool partialInsertionSort_func(lessSwap data, nint a, nint b) {
 internal static void breakPatterns_func(lessSwap data, nint a, nint b) {
     nint length = b - a;
     if (length >= 8) {
-        var random = ((xorshift)length);
+        var random = ((xorshift)(uint64)length);
         nuint modulus = nextPowerOfTwo(length);
         for (nint idx = a + (length / 4) * 2 - 1; idx <= a + (length / 4) * 2 + 1; idx++) {
-            nint other = ((nint)((nuint)(((nuint)random.Next()) & (modulus - 1))));
+            nint other = (nint)((nuint)((nuint)random.Next() & (modulus - 1)));
             if (other >= length) {
                 other -= length;
             }
@@ -248,8 +248,8 @@ internal static (nint pivot, sortedHint hint) choosePivot_func(lessSwap data, ni
     nint pivot = default!;
     sortedHint hint = default!;
 
-    static readonly UntypedInt shortestNinther = 50;
-    static readonly UntypedInt maxSwaps = /* 4 * 3 */ 12;
+    UntypedInt shortestNinther = 50;
+    UntypedInt maxSwaps = /* 4 * 3 */ 12;
     nint l = b - a;
     ref var swaps = ref heap(new nint(), out var Ꮡswaps);
     nint i = a + l / 4 * 1;
@@ -280,7 +280,7 @@ internal static (nint pivot, sortedHint hint) choosePivot_func(lessSwap data, ni
 
 // order2_func returns x,y where data[x] <= data[y], where x,y=a,b or x,y=b,a.
 internal static (nint, nint) order2_func(lessSwap data, nint a, nint b, ж<nint> Ꮡswaps) {
-    ref var swaps = ref Ꮡswaps.val;
+    ref var swaps = ref Ꮡswaps.Value;
 
     if (data.Less(b, a)) {
         swaps++;
@@ -291,7 +291,7 @@ internal static (nint, nint) order2_func(lessSwap data, nint a, nint b, ж<nint>
 
 // median_func returns x where data[x] is the median of data[a],data[b],data[c], where x is a, b, or c.
 internal static nint median_func(lessSwap data, nint a, nint b, nint c, ж<nint> Ꮡswaps) {
-    ref var swaps = ref Ꮡswaps.val;
+    ref var swaps = ref Ꮡswaps.Value;
 
     (a, b) = order2_func(data, a, b, Ꮡswaps);
     (b, c) = order2_func(data, b, c, Ꮡswaps);
@@ -301,7 +301,7 @@ internal static nint median_func(lessSwap data, nint a, nint b, nint c, ж<nint>
 
 // medianAdjacent_func finds the median of data[a - 1], data[a], data[a + 1] and stores the index into a.
 internal static nint medianAdjacent_func(lessSwap data, nint a, ж<nint> Ꮡswaps) {
-    ref var swaps = ref Ꮡswaps.val;
+    ref var swaps = ref Ꮡswaps.Value;
 
     return median_func(data, a - 1, a, a + 1, Ꮡswaps);
 }
@@ -379,7 +379,7 @@ internal static void symMerge_func(lessSwap data, nint a, nint m, nint b) {
         nint i = m;
         nint j = b;
         while (i < j) {
-            nint h = ((nint)(((nuint)(i + j)) >> (int)(1)));
+            nint h = (nint)(((nuint)(i + j) >> (int)(1)));
             if (data.Less(h, a)){
                 i = h + 1;
             } else {
@@ -402,7 +402,7 @@ internal static void symMerge_func(lessSwap data, nint a, nint m, nint b) {
         nint i = a;
         nint j = m;
         while (i < j) {
-            nint h = ((nint)(((nuint)(i + j)) >> (int)(1)));
+            nint h = (nint)(((nuint)(i + j) >> (int)(1)));
             if (!data.Less(m, h)){
                 i = h + 1;
             } else {
@@ -415,7 +415,7 @@ internal static void symMerge_func(lessSwap data, nint a, nint m, nint b) {
         }
         return;
     }
-    nint mid = ((nint)(((nuint)(a + b)) >> (int)(1)));
+    nint mid = (nint)(((nuint)(a + b) >> (int)(1)));
     nint n = mid + m;
     nint start = default!;
     nint r = default!;
@@ -428,7 +428,7 @@ internal static void symMerge_func(lessSwap data, nint a, nint m, nint b) {
     }
     nint p = n - 1;
     while (start < r) {
-        nint c = ((nint)(((nuint)(start + r)) >> (int)(1)));
+        nint c = (nint)(((nuint)(start + r) >> (int)(1)));
         if (!data.Less(p - c, c)){
             start = c + 1;
         } else {

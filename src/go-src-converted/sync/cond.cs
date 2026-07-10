@@ -62,11 +62,13 @@ public static ж<Cond> NewCond(Locker l) {
 //	}
 //	... make use of condition ...
 //	c.L.Unlock()
-[GoRecv] public static void Wait(this ref Cond c) {
-    c.checker.check();
-    var t = runtime_notifyListAdd(Ꮡ(c.notify));
+public static void Wait(this ж<Cond> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    Ꮡc.of(Cond.Ꮡchecker).check();
+    var t = runtime_notifyListAdd(Ꮡc.of(Cond.Ꮡnotify));
     c.L.Unlock();
-    runtime_notifyListWait(Ꮡ(c.notify), t);
+    runtime_notifyListWait(Ꮡc.of(Cond.Ꮡnotify), t);
     c.L.Lock();
 }
 
@@ -77,28 +79,34 @@ public static ж<Cond> NewCond(Locker l) {
 //
 // Signal() does not affect goroutine scheduling priority; if other goroutines
 // are attempting to lock c.L, they may be awoken before a "waiting" goroutine.
-[GoRecv] public static void Signal(this ref Cond c) {
-    c.checker.check();
-    runtime_notifyListNotifyOne(Ꮡ(c.notify));
+public static void Signal(this ж<Cond> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    Ꮡc.of(Cond.Ꮡchecker).check();
+    runtime_notifyListNotifyOne(Ꮡc.of(Cond.Ꮡnotify));
 }
 
 // Broadcast wakes all goroutines waiting on c.
 //
 // It is allowed but not required for the caller to hold c.L
 // during the call.
-[GoRecv] public static void Broadcast(this ref Cond c) {
-    c.checker.check();
-    runtime_notifyListNotifyAll(Ꮡ(c.notify));
+public static void Broadcast(this ж<Cond> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    Ꮡc.of(Cond.Ꮡchecker).check();
+    runtime_notifyListNotifyAll(Ꮡc.of(Cond.Ꮡnotify));
 }
 
 [GoType("num:uintptr")] partial struct copyChecker;
 
-[GoRecv] internal static void check(this ref copyChecker c) {
+internal static void check(this ж<copyChecker> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     // Check if c has been copied in three steps:
     // 1. The first comparison is the fast-path. If c has been initialized and not copied, this will return immediately. Otherwise, c is either not initialized, or has been copied.
     // 2. Ensure c is initialized. If the CAS succeeds, we're done. If it fails, c was either initialized concurrently and we simply lost the race, or c has been copied.
     // 3. Do step 1 again. Now that c is definitely initialized, if this fails, c was copied.
-    if (((uintptr)(c)) != ((uintptr)((@unsafe.Pointer)c)) && !atomic.CompareAndSwapUintptr(((ж<uintptr>)c), 0, ((uintptr)((@unsafe.Pointer)c))) && ((uintptr)(c)) != ((uintptr)((@unsafe.Pointer)c))) {
+    if ((uintptr)(c) != (uintptr)@unsafe.Pointer.FromRef(ref c) && !atomic.CompareAndSwapUintptr(Ꮡ((uintptr)(c)), 0, (uintptr)@unsafe.Pointer.FromRef(ref c)) && (uintptr)(c) != (uintptr)@unsafe.Pointer.FromRef(ref c)) {
         throw panic("sync.Cond is copied");
     }
 }

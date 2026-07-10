@@ -46,12 +46,11 @@ using static go.strings_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(io.StringWriter, bool), io_package.StringWriter>]
-[assembly: GoImplement<appendSliceWriter, io_package.Writer>]
-[assembly: GoImplement<byteReplacer, replacer>]
-[assembly: GoImplement<byteStringReplacer, replacer>]
-[assembly: GoImplement<genericReplacer, replacer>]
-[assembly: GoImplement<singleStringReplacer, replacer>]
+[assembly: GoImplement<appendSliceWriter, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<byteReplacer, replacer>(Pointer = true)]
+[assembly: GoImplement<byteStringReplacer, replacer>(Pointer = true)]
+[assembly: GoImplement<genericReplacer, replacer>(Pointer = true)]
+[assembly: GoImplement<singleStringReplacer, replacer>(Pointer = true)]
 [assembly: GoImplement<stringWriter, io_package.StringWriter>]
 // </InterfaceImplementations>
 

@@ -28,24 +28,26 @@ using syscall = syscall_package;
 
 partial class registry_package {
 
-public static readonly UntypedInt ALL_ACCESS = /* 0xf003f */ 983103;
-public static readonly UntypedInt CREATE_LINK = /* 0x00020 */ 32;
-public static readonly UntypedInt CREATE_SUB_KEY = /* 0x00004 */ 4;
-public static readonly UntypedInt ENUMERATE_SUB_KEYS = /* 0x00008 */ 8;
-public static readonly UntypedInt EXECUTE = /* 0x20019 */ 131097;
-public static readonly UntypedInt NOTIFY = /* 0x00010 */ 16;
-public static readonly UntypedInt QUERY_VALUE = /* 0x00001 */ 1;
-public static readonly UntypedInt READ = /* 0x20019 */ 131097;
-public static readonly UntypedInt SET_VALUE = /* 0x00002 */ 2;
-public static readonly UntypedInt WOW64_32KEY = /* 0x00200 */ 512;
-public static readonly UntypedInt WOW64_64KEY = /* 0x00100 */ 256;
-public static readonly UntypedInt WRITE = /* 0x20006 */ 131078;
-syscallꓸHandle
-public static readonly Key CLASSES_ROOT = /* Key(syscall.HKEY_CLASSES_ROOT) */ 2147483648;
-public static readonly Key CURRENT_USER = /* Key(syscall.HKEY_CURRENT_USER) */ 2147483649;
-public static readonly Key LOCAL_MACHINE = /* Key(syscall.HKEY_LOCAL_MACHINE) */ 2147483650;
-public static readonly Key USERS = /* Key(syscall.HKEY_USERS) */ 2147483651;
-public static readonly Key CURRENT_CONFIG = /* Key(syscall.HKEY_CURRENT_CONFIG) */ 2147483653;
+public static readonly UntypedInt ALL_ACCESS = 0xf003f;
+public static readonly UntypedInt CREATE_LINK = 0x00020;
+public static readonly UntypedInt CREATE_SUB_KEY = 0x00004;
+public static readonly UntypedInt ENUMERATE_SUB_KEYS = 0x00008;
+public static readonly UntypedInt EXECUTE = 0x20019;
+public static readonly UntypedInt NOTIFY = 0x00010;
+public static readonly UntypedInt QUERY_VALUE = 0x00001;
+public static readonly UntypedInt READ = 0x20019;
+public static readonly UntypedInt SET_VALUE = 0x00002;
+public static readonly UntypedInt WOW64_32KEY = 0x00200;
+public static readonly UntypedInt WOW64_64KEY = 0x00100;
+public static readonly UntypedInt WRITE = 0x20006;
+
+[GoType("syscall_package.ΔHandle")] partial struct Key;
+
+public static readonly Key CLASSES_ROOT = /* Key(syscall.HKEY_CLASSES_ROOT) */ unchecked((Key)(syscallꓸHandle)2147483648);
+public static readonly Key CURRENT_USER = /* Key(syscall.HKEY_CURRENT_USER) */ unchecked((Key)(syscallꓸHandle)2147483649);
+public static readonly Key LOCAL_MACHINE = /* Key(syscall.HKEY_LOCAL_MACHINE) */ unchecked((Key)(syscallꓸHandle)2147483650);
+public static readonly Key USERS = /* Key(syscall.HKEY_USERS) */ unchecked((Key)(syscallꓸHandle)2147483651);
+public static readonly Key CURRENT_CONFIG = /* Key(syscall.HKEY_CURRENT_CONFIG) */ unchecked((Key)(syscallꓸHandle)2147483653);
 
 // Close closes open key k.
 public static error Close(this Key k) {
@@ -58,20 +60,20 @@ public static error Close(this Key k) {
 // The access parameter specifies desired access rights to the
 // key to be opened.
 public static (Key, error) OpenKey(Key k, @string path, uint32 access) {
-    (p, err) = syscall.UTF16PtrFromString(path);
+    var (p, err) = syscall.UTF16PtrFromString(path);
     if (err != default!) {
-        return (0, err);
+        return ((Key)(syscallꓸHandle)(0), err);
     }
-    ref var subkey = ref heap(new syscall_package.ΔHandle(), out var Ꮡsubkey);
+    ref var subkey = ref heap(new syscallꓸHandle(), out var Ꮡsubkey);
     err = syscall.RegOpenKeyEx(((syscallꓸHandle)k), p, 0, access, Ꮡsubkey);
     if (err != default!) {
-        return (0, err);
+        return ((Key)(syscallꓸHandle)(0), err);
     }
     return (((Key)subkey), default!);
 }
 
 // ReadSubKeyNames returns the names of subkeys of key k.
-public static (slice<@string>, error) ReadSubKeyNames(this Key k) => func((defer, _) => {
+public static (slice<@string>, error) ReadSubKeyNames(this Key k) => func<(slice<@string>, error)>((defer, recover) => {
     // RegEnumKeyEx must be called repeatedly and to completion.
     // During this time, this goroutine cannot migrate away from
     // its current thread. See #49320.
@@ -83,21 +85,21 @@ public static (slice<@string>, error) ReadSubKeyNames(this Key k) => func((defer
     var buf = new slice<uint16>(256);
     //plus extra room for terminating zero byte
 loopItems:
-    for (var i = ((uint32)0); ᐧ ; i++) {
+    for (var i = (uint32)0; ᐧ ; i++) {
         ref var l = ref heap<uint32>(out var Ꮡl);
-        l = ((uint32)len(buf));
+        l = (uint32)len(buf);
         while (ᐧ) {
             var err = syscall.RegEnumKeyEx(((syscallꓸHandle)k), i, Ꮡ(buf, 0), Ꮡl, nil, nil, nil, nil);
             if (err == default!) {
                 break;
             }
-            if (err == syscall.ERROR_MORE_DATA) {
+            if (AreEqual(err, syscall.ERROR_MORE_DATA)) {
                 // Double buffer size and try again.
-                l = ((uint32)(2 * len(buf)));
-                buf = new slice<uint16>(l);
+                l = (uint32)(2 * len(buf));
+                buf = new slice<uint16>((nint)(l));
                 continue;
             }
-            if (err == _ERROR_NO_MORE_ITEMS) {
+            if (AreEqual(err, _ERROR_NO_MORE_ITEMS)) {
                 goto break_loopItems;
             }
             return (names, err);
@@ -119,12 +121,12 @@ public static (Key newk, bool openedExisting, error err) CreateKey(Key k, @strin
     bool openedExisting = default!;
     error err = default!;
 
-    ref var h = ref heap(new syscall_package.ΔHandle(), out var Ꮡh);
+    ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
     ref var d = ref heap(new uint32(), out var Ꮡd);
     err = regCreateKeyEx(((syscallꓸHandle)k), syscall.StringToUTF16Ptr(path),
         0, nil, _REG_OPTION_NON_VOLATILE, access, nil, Ꮡh, Ꮡd);
     if (err != default!) {
-        return (0, false, err);
+        return ((Key)(syscallꓸHandle)(0), false, err);
     }
     return (((Key)h), d == _REG_OPENED_EXISTING_KEY, default!);
 }
@@ -141,7 +143,7 @@ public static error DeleteKey(Key k, @string path) {
     public uint32 ValueCount;
     public uint32 MaxValueNameLen; // size of the key's longest value name, in Unicode characters, not including the terminating zero byte
     public uint32 MaxValueLen; // longest data component among the key's values, in bytes
-    internal syscall_package.Filetime lastWriteTime;
+    internal syscall.Filetime lastWriteTime;
 }
 
 // Stat retrieves information about the open key k.

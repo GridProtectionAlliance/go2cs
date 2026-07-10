@@ -6,6 +6,7 @@ namespace go;
 using abi = @internal.abi_package;
 using bytealg = @internal.bytealg_package;
 using @internal;
+using @unsafe = unsafe_package;
 
 partial class runtime_package {
 
@@ -64,11 +65,11 @@ partial class runtime_package {
 internal static slice<byte> itoa(slice<byte> buf, uint64 val) {
     nint i = len(buf) - 1;
     while (val >= 10) {
-        buf[i] = ((byte)(val % 10 + (rune)'0'));
+        buf[i] = (byte)(val % 10 + (rune)'0');
         i--;
         val /= 10;
     }
-    buf[i] = ((byte)(val + (rune)'0'));
+    buf[i] = (byte)(val + (rune)'0');
     return buf[(int)(i)..];
 }
 
@@ -140,7 +141,7 @@ internal static readonly boundsErrorCode boundsConvert = 8; // (*[x]T)(s), 0 <= 
 // boundsErrorFmts provide error text for various out-of-bounds panics.
 // Note: if you change these strings, you should adjust the size of the buffer
 // in boundsError.Error below as well.
-internal static array<@string> boundsErrorFmts = new runtime.SparseArray<@string>{
+internal static array<@string> boundsErrorFmts = new golib.SparseArray<@string>{
     [boundsIndex] = "index out of range [%x] with length %y"u8,
     [boundsSliceAlen] = "slice bounds out of range [:%x] with length %y"u8,
     [boundsSliceAcap] = "slice bounds out of range [:%x] with capacity %y"u8,
@@ -153,7 +154,7 @@ internal static array<@string> boundsErrorFmts = new runtime.SparseArray<@string
 }.array();
 
 // boundsNegErrorFmts are overriding formats if x is negative. In this case there's no need to report y.
-internal static array<@string> boundsNegErrorFmts = new runtime.SparseArray<@string>{
+internal static array<@string> boundsNegErrorFmts = new golib.SparseArray<@string>{
     [boundsIndex] = "index out of range [%x]"u8,
     [boundsSliceAlen] = "slice bounds out of range [:%x]"u8,
     [boundsSliceAcap] = "slice bounds out of range [:%x]"u8,
@@ -169,11 +170,11 @@ internal static void RuntimeError(this boundsError e) {
 
 internal static slice<byte> appendIntStr(slice<byte> b, int64 v, bool signed) {
     if (signed && v < 0) {
-        b = append(b, (rune)'-');
+        b = append(b, (byte)((rune)'-'));
         v = -v;
     }
     array<byte> buf = new(20);
-    b = append(b, itoa(buf[..], ((uint64)v)).ꓸꓸꓸ);
+    b = append(b, itoa(buf[..], (uint64)v).ꓸꓸꓸ);
     return b;
 }
 
@@ -185,7 +186,7 @@ internal static @string Error(this boundsError e) {
     // max message length is 99: "runtime error: slice bounds out of range [::%x] with capacity %y"
     // x can be at most 20 characters. y can be at most 19.
     var b = new slice<byte>(0, 100);
-    b = append(b, "runtime error: "u8.ꓸꓸꓸ);
+    b = append(b, ((@string)"runtime error: "u8).ꓸꓸꓸ);
     for (nint i = 0; i < len(fmt); i++) {
         var c = fmt[i];
         if (c != (rune)'%') {
@@ -199,7 +200,7 @@ internal static @string Error(this boundsError e) {
             break;
         }
         case (rune)'y': {
-            b = appendIntStr(b, ((int64)e.y), true);
+            b = appendIntStr(b, (int64)e.y, true);
             break;
         }}
 
@@ -221,89 +222,81 @@ internal static @string Error(this boundsError e) {
 // "\n\t".
 internal static void printpanicval(any v) {
     switch (v.type()) {
-    case default! v: {
+    case null: {
         print("nil");
         break;
     }
-    case bool v: {
-        print(v);
+    case bool vΔ1: {
+        print(vΔ1);
         break;
     }
-    case nint v: {
-        print(v);
+    case nint vΔ1: {
+        print(vΔ1);
         break;
     }
-    case int32 v: {
-        print(v);
+    case int8 vΔ1: {
+        print(vΔ1);
         break;
     }
-    case int8 v: {
-        print(v);
+    case int16 vΔ1: {
+        print(vΔ1);
         break;
     }
-    case int16 v: {
-        print(v);
+    case int32 vΔ1: {
+        print(vΔ1);
         break;
     }
-    case int32 v: {
-        print(v);
+    case int64 vΔ1: {
+        print(vΔ1);
         break;
     }
-    case int64 v: {
-        print(v);
+    case nuint vΔ1: {
+        print(vΔ1);
         break;
     }
-    case nuint v: {
-        print(v);
+    case uint8 vΔ1: {
+        print(vΔ1);
         break;
     }
-    case uint32 v: {
-        print(v);
+    case uint16 vΔ1: {
+        print(vΔ1);
         break;
     }
-    case uint8 v: {
-        print(v);
+    case uint32 vΔ1: {
+        print(vΔ1);
         break;
     }
-    case uint16 v: {
-        print(v);
+    case uint64 vΔ1: {
+        print(vΔ1);
         break;
     }
-    case uint32 v: {
-        print(v);
+    case uintptr vΔ1: {
+        print(vΔ1);
         break;
     }
-    case uint64 v: {
-        print(v);
+    case float32 vΔ1: {
+        print(vΔ1);
         break;
     }
-    case uintptr v: {
-        print(v);
+    case float64 vΔ1: {
+        print(vΔ1);
         break;
     }
-    case float32 v: {
-        print(v);
+    case complex64 vΔ1: {
+        print(vΔ1);
         break;
     }
-    case float64 v: {
-        print(v);
+    case complex128 vΔ1: {
+        print(vΔ1);
         break;
     }
-    case complex64 v: {
-        print(v);
-        break;
-    }
-    case complex128 v: {
-        print(v);
-        break;
-    }
-    case @string v: {
-        printindented(v);
+    case @string vΔ1: {
+        printindented(vΔ1);
         break;
     }
     default: {
-        var v = v.type();
-        printanycustomtype(v);
+        var vΔ1 = v;
+        printanycustomtype(vΔ1);
         break;
     }}
 }

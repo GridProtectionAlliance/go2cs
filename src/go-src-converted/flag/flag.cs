@@ -85,10 +85,10 @@ namespace go;
 using encoding = encoding_package;
 using errors = errors_package;
 using fmt = fmt_package;
-using io = io_package;
+using Δio = io_package;
 using os = os_package;
 using reflect = reflect_package;
-using runtime = runtime_package;
+using Δruntime = runtime_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
@@ -126,10 +126,10 @@ internal static error numError(error err) {
 [GoType("bool")] partial struct boolValue;
 
 internal static ж<boolValue> newBoolValue(bool val, ж<bool> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     p = val;
-    return ((ж<boolValue>)p);
+    return Ꮡ((boolValue)(p));
 }
 
 [GoRecv] internal static error Set(this ref boolValue b, @string s) {
@@ -142,11 +142,11 @@ internal static ж<boolValue> newBoolValue(bool val, ж<bool> Ꮡp) {
 }
 
 [GoRecv] internal static any Get(this ref boolValue b) {
-    return ((bool)(b));
+    return (bool)(b);
 }
 
 [GoRecv] internal static @string String(this ref boolValue b) {
-    return strconv.FormatBool(((bool)(b)));
+    return strconv.FormatBool((bool)(b));
 }
 
 [GoRecv] internal static bool IsBoolFlag(this ref boolValue b) {
@@ -164,10 +164,10 @@ internal static ж<boolValue> newBoolValue(bool val, ж<bool> Ꮡp) {
 [GoType("num:nint")] partial struct intValue;
 
 internal static ж<intValue> newIntValue(nint val, ж<nint> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     p = val;
-    return ((ж<intValue>)p);
+    return Ꮡ((intValue)(p));
 }
 
 [GoRecv] internal static error Set(this ref intValue i, @string s) {
@@ -175,25 +175,25 @@ internal static ж<intValue> newIntValue(nint val, ж<nint> Ꮡp) {
     if (err != default!) {
         err = numError(err);
     }
-    i = ((intValue)v);
+    i = ((intValue)(nint)v);
     return err;
 }
 
 [GoRecv] internal static any Get(this ref intValue i) {
-    return ((nint)(i));
+    return (nint)(i);
 }
 
 [GoRecv] internal static @string String(this ref intValue i) {
-    return strconv.Itoa(((nint)(i)));
+    return strconv.Itoa((nint)(i));
 }
 
 [GoType("num:int64")] partial struct int64Value;
 
 internal static ж<int64Value> newInt64Value(int64 val, ж<int64> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     p = val;
-    return ((ж<int64Value>)p);
+    return Ꮡ((int64Value)(p));
 }
 
 [GoRecv] internal static error Set(this ref int64Value i, @string s) {
@@ -206,20 +206,20 @@ internal static ж<int64Value> newInt64Value(int64 val, ж<int64> Ꮡp) {
 }
 
 [GoRecv] internal static any Get(this ref int64Value i) {
-    return ((int64)(i));
+    return (int64)(i);
 }
 
 [GoRecv] internal static @string String(this ref int64Value i) {
-    return strconv.FormatInt(((int64)(i)), 10);
+    return strconv.FormatInt((int64)(i), 10);
 }
 
 [GoType("num:nuint")] partial struct uintValue;
 
 internal static ж<uintValue> newUintValue(nuint val, ж<nuint> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     p = val;
-    return ((ж<uintValue>)p);
+    return Ꮡ((uintValue)(p));
 }
 
 [GoRecv] internal static error Set(this ref uintValue i, @string s) {
@@ -227,25 +227,25 @@ internal static ж<uintValue> newUintValue(nuint val, ж<nuint> Ꮡp) {
     if (err != default!) {
         err = numError(err);
     }
-    i = ((uintValue)v);
+    i = ((uintValue)(nuint)v);
     return err;
 }
 
 [GoRecv] internal static any Get(this ref uintValue i) {
-    return ((nuint)(i));
+    return (nuint)(i);
 }
 
 [GoRecv] internal static @string String(this ref uintValue i) {
-    return strconv.FormatUint(((uint64)(i)), 10);
+    return strconv.FormatUint((uint64)(nuint)(i), 10);
 }
 
 [GoType("num:uint64")] partial struct uint64Value;
 
 internal static ж<uint64Value> newUint64Value(uint64 val, ж<uint64> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     p = val;
-    return ((ж<uint64Value>)p);
+    return Ꮡ((uint64Value)(p));
 }
 
 [GoRecv] internal static error Set(this ref uint64Value i, @string s) {
@@ -258,20 +258,20 @@ internal static ж<uint64Value> newUint64Value(uint64 val, ж<uint64> Ꮡp) {
 }
 
 [GoRecv] internal static any Get(this ref uint64Value i) {
-    return ((uint64)(i));
+    return (uint64)(i);
 }
 
 [GoRecv] internal static @string String(this ref uint64Value i) {
-    return strconv.FormatUint(((uint64)(i)), 10);
+    return strconv.FormatUint((uint64)(i), 10);
 }
 
 [GoType("@string")] partial struct stringValue;
 
 internal static ж<stringValue> newStringValue(@string val, ж<@string> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     p = val;
-    return ((ж<stringValue>)p);
+    return Ꮡ((stringValue)(p));
 }
 
 [GoRecv] internal static error Set(this ref stringValue s, @string val) {
@@ -290,10 +290,10 @@ internal static ж<stringValue> newStringValue(@string val, ж<@string> Ꮡp) {
 [GoType("num:float64")] partial struct float64Value;
 
 internal static ж<float64Value> newFloat64Value(float64 val, ж<float64> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     p = val;
-    return ((ж<float64Value>)p);
+    return Ꮡ((float64Value)(p));
 }
 
 [GoRecv] internal static error Set(this ref float64Value f, @string s) {
@@ -306,18 +306,20 @@ internal static ж<float64Value> newFloat64Value(float64 val, ж<float64> Ꮡp) 
 }
 
 [GoRecv] internal static any Get(this ref float64Value f) {
-    return ((float64)(f));
+    return (float64)(f);
 }
 
 [GoRecv] internal static @string String(this ref float64Value f) {
-    return strconv.FormatFloat(((float64)(f)), (rune)'g', -1, 64);
+    return strconv.FormatFloat((float64)(f), (rune)'g', -1, 64);
 }
-time.Duration
+
+[GoType("time_package.Duration")] partial struct durationValue;
+
 internal static ж<durationValue> newDurationValue(time.Duration val, ж<time.Duration> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     p = val;
-    return ((ж<durationValue>)(p?.val ?? default!));
+    return Ꮡ((durationValue)(p));
 }
 
 [GoRecv] internal static error Set(this ref durationValue d, @string s) {
@@ -330,16 +332,18 @@ internal static ж<durationValue> newDurationValue(time.Duration val, ж<time.Du
 }
 
 [GoRecv] internal static any Get(this ref durationValue d) {
-    return ((time.Duration)(d));
+    return ((time.Duration)d);
 }
 
-[GoRecv] internal static @string String(this ref durationValue d) {
-    return ((ж<time.Duration>)(d)).val.String();
+internal static @string String(this ж<durationValue> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
+    return (Ꮡ((time.Duration)(d))).Value.String();
 }
 
 // -- encoding.TextUnmarshaler Value
 [GoType] partial struct textValue {
-    internal encoding_package.TextUnmarshaler p;
+    internal encoding.TextUnmarshaler p;
 }
 
 internal static textValue newTextValue(encoding.TextMarshaler val, encoding.TextUnmarshaler p) {
@@ -370,7 +374,7 @@ internal static @string String(this textValue v) {
     {
         var (m, ok) = v.p._<encoding.TextMarshaler>(ᐧ); if (ok) {
             {
-                (b, err) = m.MarshalText(); if (err == default!) {
+                var (b, err) = m.MarshalText(); if (err == default!) {
                     return ((@string)b);
                 }
             }
@@ -413,8 +417,9 @@ internal static bool IsBoolFlag(this boolFuncValue f) {
 // Set is called once, in command line order, for each flag present.
 // The flag package may call the [String] method with a zero-valued receiver,
 // such as a nil pointer.
-[GoType] partial interface Value {
-    @string String();
+[GoType] partial interface Value :
+    fmt.Stringer
+{
     error Set(@string _);
 }
 
@@ -455,7 +460,7 @@ public static readonly ΔErrorHandling PanicOnError = 2;   // Call panic with a 
     internal map<@string, ж<Flag>> formal;
     internal slice<@string> args; // arguments after flags
     internal ΔErrorHandling errorHandling;
-    internal io_package.Writer output;         // nil means stderr; use Output() accessor
+    internal Δio.Writer output;         // nil means stderr; use Output() accessor
     internal map<@string, @string> undef; // flags which didn't exist at the time of Set
 }
 
@@ -481,9 +486,9 @@ internal static slice<ж<Flag>> sortFlags(map<@string, ж<Flag>> flags) {
 
 // Output returns the destination for usage and error messages. [os.Stderr] is returned if
 // output was not set or was set to nil.
-[GoRecv] public static io.Writer Output(this ref FlagSet f) {
+[GoRecv] public static Δio.Writer Output(this ref FlagSet f) {
     if (f.output == default!) {
-        return ~os.Stderr;
+        return new os.FileжWriter(os.Stderr);
     }
     return f.output;
 }
@@ -500,7 +505,7 @@ internal static slice<ж<Flag>> sortFlags(map<@string, ж<Flag>> flags) {
 
 // SetOutput sets the destination for usage and error messages.
 // If output is nil, [os.Stderr] is used.
-[GoRecv] public static void SetOutput(this ref FlagSet f, io.Writer output) {
+[GoRecv] public static void SetOutput(this ref FlagSet f, Δio.Writer output) {
     f.output = output;
 }
 
@@ -549,8 +554,7 @@ public static ж<Flag> Lookup(@string name) {
 }
 
 [GoRecv] internal static error set(this ref FlagSet f, @string name, @string value) {
-    var flag = f.formal[name];
-    var ok = f.formal[name];
+    var (flag, ok) = f.formal[name, ꟷ];
     if (!ok) {
         // Remember that a flag that isn't defined is being set.
         // We return an error in this case, but in addition if
@@ -560,15 +564,15 @@ public static ж<Flag> Lookup(@string name) {
         // and the Set call are in init code and for whatever
         // reason the init code changes evaluation order.
         // See issue 57411.
-        var (_, file, line, okΔ1) = runtime.Caller(2);
+        var (_, @file, line, okΔ1) = Δruntime.Caller(2);
         if (!okΔ1) {
-            file = "?"u8;
+            @file = "?"u8;
             line = 0;
         }
         if (f.undef == default!) {
             f.undef = new map<@string, @string>{};
         }
-        f.undef[name] = fmt.Sprintf("%s:%d"u8, file, line);
+        f.undef[name] = fmt.Sprintf("%s:%d"u8, @file, line);
         return fmt.Errorf("no such flag -%v"u8, name);
     }
     var err = (~flag).Value.Set(value);
@@ -589,37 +593,40 @@ public static error Set(@string name, @string value) {
 
 // isZeroValue determines whether the string represents the zero
 // value for a flag.
-internal static (bool ok, error err) isZeroValue(ж<Flag> Ꮡflag, @string value) => func((defer, recover) => {
+internal static (bool ok, error err) isZeroValue(ж<Flag> Ꮡflag, @string value) {
     bool ok = default!;
     error err = default!;
+    func((defer, recover) => {
+    ref var flag = ref Ꮡflag.Value;
 
-    ref var flag = ref Ꮡflag.val;
-    // Build a zero value of the flag's Value type, and see if the
-    // result of calling its String method equals the value passed in.
-    // This works unless the Value type is itself an interface type.
-    var typ = reflect.TypeOf(flag.Value);
-    reflectꓸValue z = default!;
-    if (typ.Kind() == reflect.ΔPointer){
-        z = reflect.New(typ.Elem());
-    } else {
-        z = reflect.Zero(typ);
-    }
-    // Catch panics calling the String method, which shouldn't prevent the
-    // usage message from being printed, but that we should report to the
-    // user so that they know to fix their code.
-    var typʗ1 = typ;
-    defer(() => {
-        {
-            var e = recover(); if (e != default!) {
-                if (typʗ1.Kind() == reflect.ΔPointer) {
-                    typʗ1 = typʗ1.Elem();
-                }
-                err = fmt.Errorf("panic calling String method on zero %v for flag %s: %v"u8, typʗ1, flag.Name, e);
-            }
+        // Build a zero value of the flag's Value type, and see if the
+        // result of calling its String method equals the value passed in.
+        // This works unless the Value type is itself an interface type.
+        ref var typ = ref heap<reflectꓸType>(out var Ꮡtyp);
+        typ = reflect.TypeOf(flag.Value);
+        reflectꓸValue z = new(nil);
+        if (typ.Kind() == reflect.ΔPointer){
+            z = reflect.New(typ.Elem());
+        } else {
+            z = reflect.Zero(typ);
         }
+        // Catch panics calling the String method, which shouldn't prevent the
+        // usage message from being printed, but that we should report to the
+        // user so that they know to fix their code.
+        defer(() => {
+            {
+                var e = recover(); if (e != default!) {
+                    if (Ꮡtyp.ValueSlot.Kind() == reflect.ΔPointer) {
+                        Ꮡtyp.ValueSlot = Ꮡtyp.ValueSlot.Elem();
+                    }
+                    err = fmt.Errorf("panic calling String method on zero %v for flag %s: %v"u8, Ꮡtyp.ValueSlot, Ꮡflag.Value.Name, e);
+                }
+            }
+        });
+        (ok, err) = (value == z.Interface()._<Value>().String(), default!);
     });
-    return (value == z.Interface()._<Value>().String(), default!);
-});
+    return (ok, err);
+}
 
 // UnquoteUsage extracts a back-quoted name from the usage
 // string for a flag and returns it and the un-quoted usage.
@@ -630,7 +637,7 @@ public static (@string name, @string usage) UnquoteUsage(ж<Flag> Ꮡflag) {
     @string name = default!;
     @string usage = default!;
 
-    ref var flag = ref Ꮡflag.val;
+    ref var flag = ref Ꮡflag.Value;
     // Look for a back-quoted name, but avoid the strings package.
     usage = flag.Usage;
     for (nint i = 0; i < len(usage); i++) {
@@ -649,37 +656,33 @@ public static (@string name, @string usage) UnquoteUsage(ж<Flag> Ꮡflag) {
     // No explicit name, so use type if we can find one.
     name = "value"u8;
     switch (flag.Value.type()) {
-    case boolFlag fv: {
+    case {} Δfv when Δfv._<boolFlag>(out var fv): {
         if (fv.IsBoolFlag()) {
             name = ""u8;
         }
         break;
     }
-    case durationValue.val fv: {
+    case ж<durationValue> fv: {
         name = "duration"u8;
         break;
     }
-    case float64Value.val fv: {
+    case ж<float64Value> fv: {
         name = "float"u8;
         break;
     }
-    case intValue.val fv: {
+    case ж<intValue> _:
+    case ж<int64Value> _: {
+        var fv = flag.Value;
         name = "int"u8;
         break;
     }
-    case int64Value.val fv: {
-        name = "int"u8;
-        break;
-    }
-    case stringValue.val fv: {
+    case ж<stringValue> fv: {
         name = "string"u8;
         break;
     }
-    case uintValue.val fv: {
-        name = "uint"u8;
-        break;
-    }
-    case uint64Value.val fv: {
+    case ж<uintValue> _:
+    case ж<uint64Value> _: {
+        var fv = flag.Value;
         name = "uint"u8;
         break;
     }}
@@ -689,39 +692,48 @@ public static (@string name, @string usage) UnquoteUsage(ж<Flag> Ꮡflag) {
 // PrintDefaults prints, to standard error unless configured otherwise, the
 // default values of all defined command-line flags in the set. See the
 // documentation for the global function PrintDefaults for more information.
-[GoRecv] public static void PrintDefaults(this ref FlagSet f) {
-    slice<error> isZeroValueErrs = default!;
-    f.VisitAll(
-    var isZeroValueErrsʗ2 = isZeroValueErrs;
-    (ж<Flag> flag) => {
-        ref var b = ref heap(new strings_package.Builder(), out var Ꮡb);
-        fmt.Fprintf(~Ꮡb, "  -%s"u8, (~flag).Name);
+public static void PrintDefaults(this ж<FlagSet> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
+    ref var isZeroValueErrs = ref heap<slice<error>>(out var ᏑisZeroValueErrs);
+    f.VisitAll((ж<Flag> flag) => {
+        ref var b = ref heap(new strings.Builder(), out var Ꮡb);
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "  -%s"u8, (~flag).Name);
+        // Two spaces before -; see next two comments.
         var (name, usage) = UnquoteUsage(flag);
         if (len(name) > 0) {
-            b.WriteString(" "u8);
-            b.WriteString(name);
+            Ꮡb.WriteString(" "u8);
+            Ꮡb.WriteString(name);
         }
+        // Boolean flags of one ASCII letter are so common we
+        // treat them specially, putting their usage on the same line.
         if (b.Len() <= 4){
-            b.WriteString("\t"u8);
+            // space, space, '-', 'x'.
+            Ꮡb.WriteString("\t"u8);
         } else {
-            b.WriteString("\n    \t"u8);
+            // Four spaces before the tab triggers good alignment
+            // for both 4- and 8-space tab stops.
+            Ꮡb.WriteString("\n    \t"u8);
         }
-        b.WriteString(strings.ReplaceAll(usage, "\n"u8, "\n    \t"u8));
+        Ꮡb.WriteString(strings.ReplaceAll(usage, "\n"u8, "\n    \t"u8));
+        // Print the default value only if it differs to the zero value
+        // for this flag type.
         {
             var (isZero, err) = isZeroValue(flag, (~flag).DefValue); if (err != default!){
-                isZeroValueErrsʗ2 = append(isZeroValueErrsʗ2, err);
+                ᏑisZeroValueErrs.ValueSlot = append(ᏑisZeroValueErrs.ValueSlot, err);
             } else 
             if (!isZero) {
                 {
-                    var (_, ok) = (~flag).Value._<stringValue.val>(ᐧ); if (ok){
-                        fmt.Fprintf(~Ꮡb, " (default %q)"u8, (~flag).DefValue);
+                    var (_, ok) = (~flag).Value._<ж<stringValue>>(ᐧ); if (ok){
+                        // put quotes on the value
+                        fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), " (default %q)"u8, (~flag).DefValue);
                     } else {
-                        fmt.Fprintf(~Ꮡb, " (default %v)"u8, (~flag).DefValue);
+                        fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), " (default %v)"u8, (~flag).DefValue);
                     }
                 }
             }
         }
-        fmt.Fprint(f.Output(), b.String(), "\n");
+        fmt.Fprint(Ꮡf.Value.Output(), b.String(), "\n");
     });
     // If calling String on any zero flag.Values triggered a panic, print
     // the messages after the full set of defaults so that the programmer
@@ -767,13 +779,15 @@ public static void PrintDefaults() {
 }
 
 // defaultUsage is the default function to print a usage message.
-[GoRecv] internal static void defaultUsage(this ref FlagSet f) {
+internal static void defaultUsage(this ж<FlagSet> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
     if (f.name == ""u8){
         fmt.Fprintf(f.Output(), "Usage:\n"u8);
     } else {
         fmt.Fprintf(f.Output(), "Usage of %s:\n"u8, f.name);
     }
-    f.PrintDefaults();
+    Ꮡf.PrintDefaults();
 }
 
 // NOTE: Usage is not just defaultUsage(CommandLine)
@@ -844,17 +858,17 @@ public static slice<@string> Args() {
 // BoolVar defines a bool flag with specified name, default value, and usage string.
 // The argument p points to a bool variable in which to store the value of the flag.
 [GoRecv] public static void BoolVar(this ref FlagSet f, ж<bool> Ꮡp, @string name, bool value, @string usage) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    f.Var(~newBoolValue(value, Ꮡp), name, usage);
+    f.Var(new boolValueжValue(newBoolValue(value, Ꮡp)), name, usage);
 }
 
 // BoolVar defines a bool flag with specified name, default value, and usage string.
 // The argument p points to a bool variable in which to store the value of the flag.
 public static void BoolVar(ж<bool> Ꮡp, @string name, bool value, @string usage) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    CommandLine.Var(~newBoolValue(value, Ꮡp), name, usage);
+    CommandLine.Var(new boolValueжValue(newBoolValue(value, Ꮡp)), name, usage);
 }
 
 // Bool defines a bool flag with specified name, default value, and usage string.
@@ -874,17 +888,17 @@ public static ж<bool> Bool(@string name, bool value, @string usage) {
 // IntVar defines an int flag with specified name, default value, and usage string.
 // The argument p points to an int variable in which to store the value of the flag.
 [GoRecv] public static void IntVar(this ref FlagSet f, ж<nint> Ꮡp, @string name, nint value, @string usage) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    f.Var(~newIntValue(value, Ꮡp), name, usage);
+    f.Var(new intValueжValue(newIntValue(value, Ꮡp)), name, usage);
 }
 
 // IntVar defines an int flag with specified name, default value, and usage string.
 // The argument p points to an int variable in which to store the value of the flag.
 public static void IntVar(ж<nint> Ꮡp, @string name, nint value, @string usage) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    CommandLine.Var(~newIntValue(value, Ꮡp), name, usage);
+    CommandLine.Var(new intValueжValue(newIntValue(value, Ꮡp)), name, usage);
 }
 
 // Int defines an int flag with specified name, default value, and usage string.
@@ -904,17 +918,17 @@ public static ж<nint> Int(@string name, nint value, @string usage) {
 // Int64Var defines an int64 flag with specified name, default value, and usage string.
 // The argument p points to an int64 variable in which to store the value of the flag.
 [GoRecv] public static void Int64Var(this ref FlagSet f, ж<int64> Ꮡp, @string name, int64 value, @string usage) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    f.Var(~newInt64Value(value, Ꮡp), name, usage);
+    f.Var(new int64ValueжValue(newInt64Value(value, Ꮡp)), name, usage);
 }
 
 // Int64Var defines an int64 flag with specified name, default value, and usage string.
 // The argument p points to an int64 variable in which to store the value of the flag.
 public static void Int64Var(ж<int64> Ꮡp, @string name, int64 value, @string usage) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    CommandLine.Var(~newInt64Value(value, Ꮡp), name, usage);
+    CommandLine.Var(new int64ValueжValue(newInt64Value(value, Ꮡp)), name, usage);
 }
 
 // Int64 defines an int64 flag with specified name, default value, and usage string.
@@ -934,17 +948,17 @@ public static ж<int64> Int64(@string name, int64 value, @string usage) {
 // UintVar defines a uint flag with specified name, default value, and usage string.
 // The argument p points to a uint variable in which to store the value of the flag.
 [GoRecv] public static void UintVar(this ref FlagSet f, ж<nuint> Ꮡp, @string name, nuint value, @string usage) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    f.Var(~newUintValue(value, Ꮡp), name, usage);
+    f.Var(new uintValueжValue(newUintValue(value, Ꮡp)), name, usage);
 }
 
 // UintVar defines a uint flag with specified name, default value, and usage string.
 // The argument p points to a uint variable in which to store the value of the flag.
 public static void UintVar(ж<nuint> Ꮡp, @string name, nuint value, @string usage) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    CommandLine.Var(~newUintValue(value, Ꮡp), name, usage);
+    CommandLine.Var(new uintValueжValue(newUintValue(value, Ꮡp)), name, usage);
 }
 
 // Uint defines a uint flag with specified name, default value, and usage string.
@@ -964,17 +978,17 @@ public static ж<nuint> Uint(@string name, nuint value, @string usage) {
 // Uint64Var defines a uint64 flag with specified name, default value, and usage string.
 // The argument p points to a uint64 variable in which to store the value of the flag.
 [GoRecv] public static void Uint64Var(this ref FlagSet f, ж<uint64> Ꮡp, @string name, uint64 value, @string usage) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    f.Var(~newUint64Value(value, Ꮡp), name, usage);
+    f.Var(new uint64ValueжValue(newUint64Value(value, Ꮡp)), name, usage);
 }
 
 // Uint64Var defines a uint64 flag with specified name, default value, and usage string.
 // The argument p points to a uint64 variable in which to store the value of the flag.
 public static void Uint64Var(ж<uint64> Ꮡp, @string name, uint64 value, @string usage) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    CommandLine.Var(~newUint64Value(value, Ꮡp), name, usage);
+    CommandLine.Var(new uint64ValueжValue(newUint64Value(value, Ꮡp)), name, usage);
 }
 
 // Uint64 defines a uint64 flag with specified name, default value, and usage string.
@@ -994,17 +1008,17 @@ public static ж<uint64> Uint64(@string name, uint64 value, @string usage) {
 // StringVar defines a string flag with specified name, default value, and usage string.
 // The argument p points to a string variable in which to store the value of the flag.
 [GoRecv] public static void StringVar(this ref FlagSet f, ж<@string> Ꮡp, @string name, @string value, @string usage) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    f.Var(~newStringValue(value, Ꮡp), name, usage);
+    f.Var(new stringValueжValue(newStringValue(value, Ꮡp)), name, usage);
 }
 
 // StringVar defines a string flag with specified name, default value, and usage string.
 // The argument p points to a string variable in which to store the value of the flag.
 public static void StringVar(ж<@string> Ꮡp, @string name, @string value, @string usage) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    CommandLine.Var(~newStringValue(value, Ꮡp), name, usage);
+    CommandLine.Var(new stringValueжValue(newStringValue(value, Ꮡp)), name, usage);
 }
 
 // String defines a string flag with specified name, default value, and usage string.
@@ -1024,17 +1038,17 @@ public static ж<@string> String(@string name, @string value, @string usage) {
 // Float64Var defines a float64 flag with specified name, default value, and usage string.
 // The argument p points to a float64 variable in which to store the value of the flag.
 [GoRecv] public static void Float64Var(this ref FlagSet f, ж<float64> Ꮡp, @string name, float64 value, @string usage) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    f.Var(~newFloat64Value(value, Ꮡp), name, usage);
+    f.Var(new float64ValueжValue(newFloat64Value(value, Ꮡp)), name, usage);
 }
 
 // Float64Var defines a float64 flag with specified name, default value, and usage string.
 // The argument p points to a float64 variable in which to store the value of the flag.
 public static void Float64Var(ж<float64> Ꮡp, @string name, float64 value, @string usage) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    CommandLine.Var(~newFloat64Value(value, Ꮡp), name, usage);
+    CommandLine.Var(new float64ValueжValue(newFloat64Value(value, Ꮡp)), name, usage);
 }
 
 // Float64 defines a float64 flag with specified name, default value, and usage string.
@@ -1055,18 +1069,18 @@ public static ж<float64> Float64(@string name, float64 value, @string usage) {
 // The argument p points to a time.Duration variable in which to store the value of the flag.
 // The flag accepts a value acceptable to time.ParseDuration.
 [GoRecv] public static void DurationVar(this ref FlagSet f, ж<time.Duration> Ꮡp, @string name, time.Duration value, @string usage) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    f.Var(~newDurationValue(value, Ꮡp), name, usage);
+    f.Var(new durationValueжValue(newDurationValue(value, Ꮡp)), name, usage);
 }
 
 // DurationVar defines a time.Duration flag with specified name, default value, and usage string.
 // The argument p points to a time.Duration variable in which to store the value of the flag.
 // The flag accepts a value acceptable to time.ParseDuration.
 public static void DurationVar(ж<time.Duration> Ꮡp, @string name, time.Duration value, @string usage) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
-    CommandLine.Var(~newDurationValue(value, Ꮡp), name, usage);
+    CommandLine.Var(new durationValueжValue(newDurationValue(value, Ꮡp)), name, usage);
 }
 
 // Duration defines a time.Duration flag with specified name, default value, and usage string.
@@ -1107,7 +1121,7 @@ public static void TextVar(encoding.TextUnmarshaler p, @string name, encoding.Te
 // Each time the flag is seen, fn is called with the value of the flag.
 // If fn returns a non-nil error, it will be treated as a flag value parsing error.
 [GoRecv] public static void Func(this ref FlagSet f, @string name, @string usage, Func<@string, error> fn) {
-    f.Var(((funcValue)fn), name, usage);
+    f.Var(new funcValueᴠValue(new funcValue(fn)), name, usage);
 }
 
 // Func defines a flag with the specified name and usage string.
@@ -1121,7 +1135,7 @@ public static void Func(@string name, @string usage, Func<@string, error> fn) {
 // Each time the flag is seen, fn is called with the value of the flag.
 // If fn returns a non-nil error, it will be treated as a flag value parsing error.
 [GoRecv] public static void BoolFunc(this ref FlagSet f, @string name, @string usage, Func<@string, error> fn) {
-    f.Var(((boolFuncValue)fn), name, usage);
+    f.Var(new boolFuncValueᴠValue(new boolFuncValue(fn)), name, usage);
 }
 
 // BoolFunc defines a flag with the specified name and usage string without requiring values.
@@ -1147,8 +1161,7 @@ public static void BoolFunc(@string name, @string usage, Func<@string, error> fn
     }
     // Remember the default value as a string; it won't change.
     var flag = Ꮡ(new Flag(name, usage, value, value.String()));
-    var _ = f.formal[name];
-    var alreadythere = f.formal[name];
+    var (_, alreadythere) = f.formal[name, ꟷ];
     if (alreadythere) {
         @string msg = default!;
         if (f.name == ""u8){
@@ -1191,26 +1204,31 @@ public static void Var(Value value, @string name, @string usage) {
 
 // failf prints to standard error a formatted error and usage message and
 // returns the error.
-[GoRecv] internal static error failf(this ref FlagSet f, @string format, params ꓸꓸꓸany aʗp) {
+internal static error failf(this ж<FlagSet> Ꮡf, @string format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
 
+    ref var f = ref Ꮡf.Value;
     @string msg = f.sprintf(format, a.ꓸꓸꓸ);
-    f.usage();
+    Ꮡf.usage();
     return errors.New(msg);
 }
 
 // usage calls the Usage method for the flag set if one is specified,
 // or the appropriate default usage function otherwise.
-[GoRecv] internal static void usage(this ref FlagSet f) {
+internal static void usage(this ж<FlagSet> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
     if (f.Usage == default!){
-        f.defaultUsage();
+        Ꮡf.defaultUsage();
     } else {
         f.Usage();
     }
 }
 
 // parseOne parses one flag. It reports whether a flag was seen.
-[GoRecv] internal static (bool, error) parseOne(this ref FlagSet f) {
+internal static (bool, error) parseOne(this ж<FlagSet> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
     if (len(f.args) == 0) {
         return (false, default!);
     }
@@ -1229,7 +1247,7 @@ public static void Var(Value value, @string name, @string usage) {
     }
     @string name = s[(int)(numMinuses)..];
     if (len(name) == 0 || name[0] == (rune)'-' || name[0] == (rune)'=') {
-        return (false, f.failf("bad flag syntax: %s"u8, s));
+        return (false, Ꮡf.failf("bad flag syntax: %s"u8, s));
     }
     // it's a flag. does it have an argument?
     f.args = f.args[1..];
@@ -1244,15 +1262,14 @@ public static void Var(Value value, @string name, @string usage) {
             break;
         }
     }
-    var flag = f.formal[name];
-    var ok = f.formal[name];
+    var (flag, ok) = f.formal[name, ꟷ];
     if (!ok) {
         if (name == "help"u8 || name == "h"u8) {
             // special case for nice help message.
-            f.usage();
+            Ꮡf.usage();
             return (false, ErrHelp);
         }
-        return (false, f.failf("flag provided but not defined: -%s"u8, name));
+        return (false, Ꮡf.failf("flag provided but not defined: -%s"u8, name));
     }
     {
         var (fv, okΔ1) = (~flag).Value._<boolFlag>(ᐧ); if (okΔ1 && fv.IsBoolFlag()){
@@ -1260,13 +1277,13 @@ public static void Var(Value value, @string name, @string usage) {
             if (hasValue){
                 {
                     var err = fv.Set(value); if (err != default!) {
-                        return (false, f.failf("invalid boolean value %q for -%s: %v"u8, value, name, err));
+                        return (false, Ꮡf.failf("invalid boolean value %q for -%s: %v"u8, value, name, err));
                     }
                 }
             } else {
                 {
                     var err = fv.Set("true"u8); if (err != default!) {
-                        return (false, f.failf("invalid boolean flag %s: %v"u8, name, err));
+                        return (false, Ꮡf.failf("invalid boolean flag %s: %v"u8, name, err));
                     }
                 }
             }
@@ -1275,14 +1292,15 @@ public static void Var(Value value, @string name, @string usage) {
             if (!hasValue && len(f.args) > 0) {
                 // value is the next arg
                 hasValue = true;
-                (value, f.args) = (f.args[0], f.args[1..]);
+                value = f.args[0];
+                f.args = f.args[1..];
             }
             if (!hasValue) {
-                return (false, f.failf("flag needs an argument: -%s"u8, name));
+                return (false, Ꮡf.failf("flag needs an argument: -%s"u8, name));
             }
             {
                 var err = (~flag).Value.Set(value); if (err != default!) {
-                    return (false, f.failf("invalid value %q for flag -%s: %v"u8, value, name, err));
+                    return (false, Ꮡf.failf("invalid value %q for flag -%s: %v"u8, value, name, err));
                 }
             }
         }
@@ -1298,11 +1316,13 @@ public static void Var(Value value, @string name, @string usage) {
 // include the command name. Must be called after all flags in the [FlagSet]
 // are defined and before flags are accessed by the program.
 // The return value will be [ErrHelp] if -help or -h were set but not defined.
-[GoRecv] public static error Parse(this ref FlagSet f, slice<@string> arguments) {
+public static error Parse(this ж<FlagSet> Ꮡf, slice<@string> arguments) {
+    ref var f = ref Ꮡf.Value;
+
     f.parsed = true;
     f.args = arguments;
     while (ᐧ) {
-        var (seen, err) = f.parseOne();
+        var (seen, err) = Ꮡf.parseOne();
         if (seen) {
             continue;
         }
@@ -1354,7 +1374,7 @@ public static ж<FlagSet> CommandLine = NewFlagSet(os.Args[0], ExitOnError);
     // Note: This is not CommandLine.Usage = Usage,
     // because we want any eventual call to use any updated value of Usage,
     // not the value it has when this line is run.
-    CommandLine.val.Usage = commandLineUsage;
+    CommandLine.Value.Usage = commandLineUsage;
 }
 
 internal static void commandLineUsage() {
@@ -1369,9 +1389,9 @@ public static ж<FlagSet> NewFlagSet(@string name, ΔErrorHandling errorHandling
         name: name,
         errorHandling: errorHandling
     ));
-    f.val.Usage = 
+    
     var fʗ1 = f;
-    () => fʗ1.defaultUsage();
+    fʗ1.Value.Usage = () => fʗ1.defaultUsage();
     return f;
 }
 

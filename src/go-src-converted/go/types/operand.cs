@@ -8,10 +8,12 @@ namespace go.go;
 
 using bytes = bytes_package;
 using fmt = fmt_package;
-using ast = go.ast_package;
-using constant = go.constant_package;
-using token = go.token_package;
-using static @internal.types.errors_package;
+using ast = global::go.go.ast_package;
+using constant = global::go.go.constant_package;
+using token = global::go.go.token_package;
+using static global::go.@internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
+using global::go.go;
 using ꓸꓸꓸany = Span<any>;
 
 partial class types_package {
@@ -32,7 +34,7 @@ internal static readonly operandMode commaerr = 10; // like commaok, but second 
 internal static readonly operandMode cgofunc = 11;  // operand is a cgo function
 
 // only used by types2
-internal static array<@string> operandModeString = new runtime.SparseArray<@string>{
+internal static array<@string> operandModeString = new golib.SparseArray<@string>{
     [invalid] = "invalid operand"u8,
     [novalue] = "no value"u8,
     [Δbuiltin] = "built-in"u8,
@@ -54,9 +56,9 @@ internal static array<@string> operandModeString = new runtime.SparseArray<@stri
 // The zero value of operand is a ready to use invalid operand.
 [GoType] partial struct operand {
     internal operandMode mode;
-    internal go.ast_package.Expr expr;
+    internal ast.Expr expr;
     internal ΔType typ;
-    internal go.constant_package.Value val;
+    internal constant.Value val;
     internal builtinId id;
 }
 
@@ -106,17 +108,17 @@ internal static array<@string> operandModeString = new runtime.SparseArray<@stri
 //
 // cgofunc    <expr> (<untyped kind> <mode>                    )
 // cgofunc    <expr> (               <mode>       of type <typ>)
-internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
-    ref var x = ref Ꮡx.val;
+internal static @string operandString(ж<operand> Ꮡx, Func<ж<Package>, @string> qf) {
+    ref var x = ref Ꮡx.Value;
 
     // special-case nil
     if (isTypes2){
         if (x.mode == nilvalue) {
             var exprᴛ1 = x.typ;
-            if (exprᴛ1 == default! || exprᴛ1 == Typ[Invalid]) {
+            if (AreEqual(exprᴛ1, default!) || AreEqual(exprᴛ1, Typ[Invalid])) {
                 return "nil (with invalid type)"u8;
             }
-            if (exprᴛ1 is Typ[UntypedNil]) {
+            if (AreEqual(exprᴛ1, Typ[UntypedNil])) {
                 return "nil"u8;
             }
             { /* default: */
@@ -126,11 +128,11 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
         }
     } else {
         // go/types
-        if (x.mode == value && x.typ == ~Typ[UntypedNil]) {
+        if (x.mode == value && AreEqual(x.typ, Typ[UntypedNil])) {
             return "nil"u8;
         }
     }
-    ref var buf = ref heap(new bytes_package.Buffer(), out var Ꮡbuf);
+    ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     @string expr = default!;
     if (x.expr != default!){
         expr = ExprString(x.expr);
@@ -158,16 +160,18 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
     if (exprᴛ3 == invalid || exprᴛ3 == novalue || exprᴛ3 == Δbuiltin || exprᴛ3 == typexpr) {
     }
     else { /* default: */
-        if (x.typ != default!) {
-            // no type
-            // should have a type, but be cautious (don't crash during printing)
-            if (isUntyped(x.typ)) {
-                buf.WriteString(x.typ._<Basic.val>().name);
-                buf.WriteByte((rune)' ');
-                break;
+        do {
+            if (x.typ != default!) {
+                // no type
+                // should have a type, but be cautious (don't crash during printing)
+                if (isUntyped(x.typ)) {
+                    buf.WriteString((~x.typ._<ж<Basic>>()).name);
+                    buf.WriteByte((rune)' ');
+                    break;
+                }
+                hasType = true;
             }
-            hasType = true;
-        }
+        } while (false);
     }
 
     // <mode>
@@ -193,12 +197,12 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
             buf.WriteString(intro);
             WriteType(Ꮡbuf, x.typ, qf);
             {
-                var (tpar, _) = Unalias(x.typ)._<TypeParam.val>(ᐧ); if (tpar != nil) {
+                var (tpar, _) = Unalias(x.typ)._<ж<TypeParam>>(ᐧ); if (tpar != nil) {
                     buf.WriteString(" constrained by "u8);
                     WriteType(Ꮡbuf, (~tpar).bound, qf);
                     // do not compute interface type sets here
                     // If we have the type set and it's empty, say so for better error messages.
-                    if (hasEmptyTypeset(~tpar)) {
+                    if (hasEmptyTypeset(new TypeParamжΔType(tpar))) {
                         buf.WriteString(" with empty type set"u8);
                     }
                 }
@@ -211,11 +215,13 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
     if (expr != ""u8) {
         buf.WriteByte((rune)')');
     }
-    return buf.String();
+    return Ꮡbuf.String();
 }
 
-[GoRecv] internal static @string String(this ref operand x) {
-    return operandString(x, default!);
+internal static @string String(this ж<operand> Ꮡx) {
+    ref var x = ref Ꮡx.Value;
+
+    return operandString(Ꮡx, default!);
 }
 
 // setConst sets x to the untyped constant for literal lit.
@@ -244,11 +250,11 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
     var val = makeFromLiteral(lit, k);
     if (val.Kind() == constant.Unknown) {
         x.mode = invalid;
-        x.typ = Typ[Invalid];
+        x.typ = new BasicжΔType(Typ[Invalid]);
         return;
     }
     x.mode = constant_;
-    x.typ = Typ[kind];
+    x.typ = new BasicжΔType(Typ[kind]);
     x.val = val;
 }
 
@@ -258,7 +264,7 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
         return x.mode == nilvalue;
     } else {
         // go/types
-        return x.mode == value && x.typ == ~Typ[UntypedNil];
+        return x.mode == value && AreEqual(x.typ, Typ[UntypedNil]);
     }
 }
 
@@ -268,9 +274,10 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
 // is only valid if the (first) result is false. The check parameter may be nil
 // if assignableTo is invoked through an exported API call, i.e., when all
 // methods have been type-checked.
-[GoRecv] internal static (bool, errors.Code) assignableTo(this ref operand x, ж<Checker> Ꮡcheck, ΔType T, ж<@string> Ꮡcause) {
-    ref var check = ref Ꮡcheck.val;
-    ref var cause = ref Ꮡcause.val;
+internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, ΔType T, ж<@string> Ꮡcause) {
+    ref var x = ref Ꮡx.Value;
+    ref var check = ref Ꮡcheck.DerefOrNil();
+    ref var cause = ref Ꮡcause.DerefOrNil();
 
     if (x.mode == invalid || !isValid(T)) {
         return (true, 0);
@@ -285,8 +292,8 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
     }
     var Vu = under(V);
     var Tu = under(T);
-    var (Vp, _) = V._<TypeParam.val>(ᐧ);
-    var (Tp, _) = T._<TypeParam.val>(ᐧ);
+    var (Vp, _) = V._<ж<TypeParam>>(ᐧ);
+    var (Tp, _) = T._<ж<TypeParam>>(ᐧ);
     // x is an untyped value representable by a value of type T.
     if (isUntyped(Vu)) {
         assert(Vp == nil);
@@ -297,11 +304,14 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
                 if (t == nil) {
                     return false;
                 }
-                var (newType, _, _) = check.implicitTypeAndValue(x, (~t).typ);
-                return newType != default!;
+                // A term may be a tilde term but the underlying
+                // type of an untyped value doesn't change so we
+                // don't need to do anything special.
+                var (newTypeΔ1, _, _) = Ꮡcheck.implicitTypeAndValue(Ꮡx, (~t).typ);
+                return newTypeΔ1 != default!;
             }), IncompatibleAssign);
         }
-        var (newType, _, _) = check.implicitTypeAndValue(x, T);
+        var (newType, _, _) = Ꮡcheck.implicitTypeAndValue(Ꮡx, T);
         return (newType != default!, IncompatibleAssign);
     }
     // Vu is typed
@@ -315,8 +325,8 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
     // Also handle the case where T is a pointer to an interface so that we get
     // the Checker.implements error cause.
     {
-        var (_, ok) = Tu._<Interface.val>(ᐧ); if (ok && Tp == nil || isInterfacePtr(Tu)) {
-            if (check.implements(x.Pos(), V, T, false, Ꮡcause)) {
+        var (_, ok) = Tu._<ж<Interface>>(ᐧ); if (ok && Tp == nil || isInterfacePtr(Tu)) {
+            if (Ꮡcheck.implements(x.Pos(), V, T, false, Ꮡcause)) {
                 return (true, 0);
             }
             // V doesn't implement T but V may still be assignable to T if V
@@ -324,17 +334,17 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
             if (Vp == nil) {
                 return (false, InvalidIfaceAssign);
             }
-            if (cause != nil) {
+            if (Ꮡcause != nil) {
                 cause = ""u8;
             }
         }
     }
     // If V is an interface, check if a missing type assertion is the problem.
     {
-        var (Vi, _) = Vu._<Interface.val>(ᐧ); if (Vi != nil && Vp == nil) {
-            if (check.implements(x.Pos(), T, V, false, nil)) {
+        var (Vi, _) = Vu._<ж<Interface>>(ᐧ); if (Vi != nil && Vp == nil) {
+            if (Ꮡcheck.implements(x.Pos(), T, V, false, nil)) {
                 // T implements V, so give hint about type assertion.
-                if (cause != nil) {
+                if (Ꮡcause != nil) {
                     cause = "need type assertion"u8;
                 }
                 return (false, IncompatibleAssign);
@@ -345,9 +355,9 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
     // type, x's type V and T have identical element types,
     // and at least one of V or T is not a named type.
     {
-        var (Vc, ok) = Vu._<Chan.val>(ᐧ); if (ok && (~Vc).dir == SendRecv) {
+        var (Vc, ok) = Vu._<ж<Chan>>(ᐧ); if (ok && (~Vc).dir == SendRecv) {
             {
-                var (Tc, okΔ1) = Tu._<Chan.val>(ᐧ); if (okΔ1 && Identical((~Vc).elem, (~Tc).elem)) {
+                var (Tc, okΔ1) = Tu._<ж<Chan>>(ᐧ); if (okΔ1 && Identical((~Vc).elem, (~Tc).elem)) {
                     return (!hasName(V) || !hasName(T), InvalidChanAssign);
                 }
             }
@@ -358,12 +368,13 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
         return (false, IncompatibleAssign);
     }
     var errorf = (@string format, params ꓸꓸꓸany argsʗp) => {
-        if (check != nil && cause != nil) {
-            @string msg = check.sprintf(format, args.ꓸꓸꓸ);
-            if (cause != ""u8) {
-                msg += "\n\t"u8 + cause;
+        var args = argsʗp.slice();
+        if (Ꮡcheck != nil && Ꮡcause != nil) {
+            @string msg = Ꮡcheck.sprintf(format, args.ꓸꓸꓸ);
+            if (Ꮡcause.Value != ""u8) {
+                msg += "\n\t"u8 + Ꮡcause.Value;
             }
-            cause = msg;
+            Ꮡcause.Value = msg;
         }
     };
     // x's type V is not a named type and T is a type parameter, and
@@ -371,16 +382,16 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
     if (!hasName(V) && Tp != nil) {
         var ok = false;
         errors.Code code = IncompatibleAssign;
-        Tp.@is(
-        var Tpʗ2 = Tp;
-        var errorfʗ2 = errorf;
-        (ж<term> T) => {
+        var Tpʗ1 = Tp;
+        var errorfʗ1 = errorf;
+        Tp.@is((ж<term> TΔ1) => {
             if (TΔ1 == nil) {
                 return false;
             }
-            (ok, code) = x.assignableTo(Ꮡcheck, (~TΔ1).typ, Ꮡcause);
+            // no specific types
+            (ok, code) = Ꮡx.assignableTo(Ꮡcheck, (~TΔ1).typ, Ꮡcause);
             if (!ok) {
-                errorfʗ2("cannot assign %s to %s (in %s)"u8, x.typ, (~TΔ1).typ, Tpʗ2);
+                errorfʗ1("cannot assign %s to %s (in %s)"u8, Ꮡx.Value.typ, (~TΔ1).typ, Tpʗ1);
                 return false;
             }
             return true;
@@ -396,19 +407,18 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
         // don't clobber outer x
         var ok = false;
         errors.Code code = IncompatibleAssign;
-        Vp.@is(
-        var Vpʗ2 = Vp;
-        var errorfʗ5 = errorf;
-        var origTʗ2 = origT;
-        var xʗ2 = xΔ1;
-        (ж<term> V) => {
+        var Vpʗ1 = Vp;
+        var errorfʗ3 = errorf;
+        var origTʗ1 = origT;
+        Vp.@is((ж<term> VΔ1) => {
             if (VΔ1 == nil) {
                 return false;
             }
-            xʗ2.typ = VΔ1.val.typ;
-            (ok, code) = xʗ2.assignableTo(Ꮡcheck, T, Ꮡcause);
+            // no specific types
+            ᏑxΔ1.Value.typ = VΔ1.Value.typ;
+            (ok, code) = ᏑxΔ1.assignableTo(Ꮡcheck, T, Ꮡcause);
             if (!ok) {
-                errorfʗ5("cannot assign %s (in %s) to %s"u8, (~VΔ1).typ, Vpʗ2, origTʗ2);
+                errorfʗ3("cannot assign %s (in %s) to %s"u8, (~VΔ1).typ, Vpʗ1, origTʗ1);
                 return false;
             }
             return true;

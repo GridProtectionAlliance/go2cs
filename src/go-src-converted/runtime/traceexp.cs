@@ -21,9 +21,9 @@ partial class runtime_package {
 //
 // buf may be nil.
 internal static traceExpWriter unsafeTraceExpWriter(uintptr gen, ж<traceBuf> Ꮡbuf, traceExperiment exp) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.Value;
 
-    return new traceExpWriter(new traceWriter(traceLocker: new traceLocker(gen: gen), traceBuf: buf), exp);
+    return new traceExpWriter(new traceWriter(traceLocker: new traceLocker(gen: gen), traceBuf: Ꮡbuf), exp);
 }
 
 // ensure makes sure that at least maxSize bytes are available to write.
@@ -43,7 +43,7 @@ internal static readonly traceExperiment traceNoExperiment = /* iota */ 0;
 internal static readonly traceExperiment traceExperimentAllocFree = 1;
 
 // Experimental events.
-internal static readonly traceEv _ᴛ2ʗ = /* 127 + iota */ 127;
+internal static readonly traceEv _ᴛ4ʗ = /* 127 + iota */ 127;
 // Experimental events for ExperimentAllocFree.
 
 internal static readonly traceEv traceEvSpan = 128; // heap span exists [timestamp, id, npages, type/class]

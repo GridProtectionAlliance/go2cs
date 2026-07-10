@@ -57,16 +57,16 @@ partial class driver_package {
 //   - all other types are an error
 public static boolType Bool;
 
-[GoType] partial struct boolType {
+[GoType] public partial struct boolType {
 }
 
-internal static ValueConverter _ᴛ1ʗ = new boolType(nil);
+internal static ValueConverter _ᴛ3ʗ = new boolType(nil);
 
-internal static @string String(this boolType _) {
+public static @string String(this boolType _) {
     return "Bool"u8;
 }
 
-internal static (Value, error) ConvertValue(this boolType _, any src) {
+public static (Value, error) ConvertValue(this boolType _, any src) {
     switch (src.type()) {
     case bool s: {
         return (s, default!);
@@ -79,7 +79,7 @@ internal static (Value, error) ConvertValue(this boolType _, any src) {
         return (b, default!);
     }
     case slice<byte> s: {
-        (b, err) = strconv.ParseBool(((@string)s));
+        var (b, err) = strconv.ParseBool(((@string)s));
         if (err != default!) {
             return (default!, fmt.Errorf("sql/driver: couldn't convert %q into type bool"u8, s));
         }
@@ -109,34 +109,34 @@ internal static (Value, error) ConvertValue(this boolType _, any src) {
 // respecting the limits of an int32 value.
 public static int32Type Int32;
 
-[GoType] partial struct int32Type {
+[GoType] public partial struct int32Type {
 }
 
-internal static ValueConverter _ᴛ2ʗ = new int32Type(nil);
+internal static ValueConverter _ᴛ4ʗ = new int32Type(nil);
 
-internal static (Value, error) ConvertValue(this int32Type _, any v) {
+public static (Value, error) ConvertValue(this int32Type _, any v) {
     var rv = reflect.ValueOf(v);
     var exprᴛ1 = rv.Kind();
     if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
         var i64 = rv.Int();
-        if (i64 > (1 << (int)(31)) - 1 || i64 < -(1 << (int)(31))) {
+        if (i64 > (2147483648L) - 1 || i64 < -(2147483648L)) {
             return (default!, fmt.Errorf("sql/driver: value %d overflows int32"u8, v));
         }
         return (i64, default!);
     }
     if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64) {
         var u64 = rv.Uint();
-        if (u64 > (1 << (int)(31)) - 1) {
+        if (u64 > (2147483648L) - 1) {
             return (default!, fmt.Errorf("sql/driver: value %d overflows int32"u8, v));
         }
-        return (((int64)u64), default!);
+        return ((int64)u64, default!);
     }
     if (exprᴛ1 == reflect.ΔString) {
         var (i, err) = strconv.Atoi(rv.String());
         if (err != default!) {
             return (default!, fmt.Errorf("sql/driver: value %q can't be converted to int32"u8, v));
         }
-        return (((int64)i), default!);
+        return ((int64)i, default!);
     }
 
     return (default!, fmt.Errorf("sql/driver: unsupported value %v (type %T) converting to int32"u8, v, v));
@@ -148,15 +148,13 @@ internal static (Value, error) ConvertValue(this int32Type _, any v) {
 // with fmt.Sprintf("%v", v).
 public static stringType ΔString;
 
-[GoType] partial struct stringType {
+[GoType] public partial struct stringType {
 }
 
-internal static (Value, error) ConvertValue(this stringType _, any v) {
+public static (Value, error) ConvertValue(this stringType _, any v) {
     switch (v.type()) {
-    case @string : {
-        return (v, default!);
-    }
-    case slice<byte> : {
+    case @string _:
+    case slice<byte> _: {
         return (v, default!);
     }}
 
@@ -195,25 +193,15 @@ public static bool IsValue(any v) {
         return true;
     }
     switch (v.type()) {
-    case slice<byte> : {
+    case slice<byte> _:
+    case bool _:
+    case float64 _:
+    case int64 _:
+    case @string _:
+    case time.Time _: {
         return true;
     }
-    case bool : {
-        return true;
-    }
-    case float64 : {
-        return true;
-    }
-    case int64 : {
-        return true;
-    }
-    case @string : {
-        return true;
-    }
-    case time.Time : {
-        return true;
-    }
-    case decimalDecompose : {
+    case {} ᴛ0 when ᴛ0._<decimalDecompose>(out var _): {
         return true;
     }}
 
@@ -242,7 +230,7 @@ public static bool IsScanValue(any v) {
 // are an error.
 public static defaultConverter DefaultParameterConverter;
 
-[GoType] partial struct defaultConverter {
+[GoType] public partial struct defaultConverter {
 }
 
 internal static ValueConverter _ᴛ5ʗ = new defaultConverter(nil);
@@ -272,13 +260,13 @@ internal static (Value v, error err) callValuerValue(Valuer vr) {
     return vr.Value();
 }
 
-internal static (Value, error) ConvertValue(this defaultConverter _, any v) {
+public static (Value, error) ConvertValue(this defaultConverter _, any v) {
     if (IsValue(v)) {
         return (v, default!);
     }
     switch (v.type()) {
-    case Valuer vr: {
-        (sv, err) = callValuerValue(vr);
+    case {} Δvr when Δvr._<Valuer>(out var vr): {
+        var (sv, err) = callValuerValue(vr);
         if (err != default!) {
             return (default!, err);
         }
@@ -287,7 +275,7 @@ internal static (Value, error) ConvertValue(this defaultConverter _, any v) {
         }
         return (sv, default!);
     }
-    case decimalDecompose vr: {
+    case {} Δvr when Δvr._<decimalDecompose>(out var vr): {
         return (vr, default!);
     }}
     // For now, continue to prefer the Valuer interface over the decimal decompose interface.
@@ -305,14 +293,14 @@ internal static (Value, error) ConvertValue(this defaultConverter _, any v) {
         return (rv.Int(), default!);
     }
     if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32) {
-        return (((int64)rv.Uint()), default!);
+        return ((int64)rv.Uint(), default!);
     }
     if (exprᴛ1 == reflect.Uint64) {
         var u64 = rv.Uint();
-        if (u64 >= 1 << (int)(63)) {
+        if (u64 >= ((uint64)1 << (int)(63))) {
             return (default!, fmt.Errorf("uint64 values with high bit set are not supported"u8));
         }
-        return (((int64)u64), default!);
+        return ((int64)u64, default!);
     }
     if (exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64) {
         return (rv.Float(), default!);

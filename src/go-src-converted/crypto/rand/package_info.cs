@@ -40,7 +40,7 @@ using static go.crypto.rand_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<rngReader, io_package.Reader>]
+[assembly: GoImplement<rngReader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

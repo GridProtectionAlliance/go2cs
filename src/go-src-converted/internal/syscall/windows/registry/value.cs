@@ -44,7 +44,7 @@ public static (nint n, uint32 valtype, error err) GetValue(this Key k, @string n
     uint32 valtype = default!;
     error err = default!;
 
-    (pname, err) = syscall.UTF16PtrFromString(name);
+    (var pname, err) = syscall.UTF16PtrFromString(name);
     if (err != default!) {
         return (0, 0, err);
     }
@@ -53,12 +53,12 @@ public static (nint n, uint32 valtype, error err) GetValue(this Key k, @string n
         pbuf = (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡ(buf, 0)));
     }
     ref var l = ref heap<uint32>(out var Ꮡl);
-    l = ((uint32)len(buf));
+    l = (uint32)len(buf);
     err = syscall.RegQueryValueEx(((syscallꓸHandle)k), pname, nil, Ꮡ(valtype), pbuf, Ꮡl);
     if (err != default!) {
-        return (((nint)l), valtype, err);
+        return ((nint)l, valtype, err);
     }
-    return (((nint)l), valtype, default!);
+    return ((nint)l, valtype, default!);
 }
 
 internal static (slice<byte> date, uint32 valtype, error err) getValue(this Key k, @string name, slice<byte> buf) {
@@ -66,25 +66,25 @@ internal static (slice<byte> date, uint32 valtype, error err) getValue(this Key 
     uint32 valtype = default!;
     error err = default!;
 
-    (p, err) = syscall.UTF16PtrFromString(name);
+    (var p, err) = syscall.UTF16PtrFromString(name);
     if (err != default!) {
         return (default!, 0, err);
     }
     ref var t = ref heap(new uint32(), out var Ꮡt);
     ref var n = ref heap<uint32>(out var Ꮡn);
-    n = ((uint32)len(buf));
+    n = (uint32)len(buf);
     while (ᐧ) {
         err = syscall.RegQueryValueEx(((syscallꓸHandle)k), p, nil, Ꮡt, (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡ(buf, 0))), Ꮡn);
         if (err == default!) {
             return (buf[..(int)(n)], t, default!);
         }
-        if (err != syscall.ERROR_MORE_DATA) {
+        if (!AreEqual(err, syscall.ERROR_MORE_DATA)) {
             return (default!, 0, err);
         }
-        if (n <= ((uint32)len(buf))) {
+        if (n <= (uint32)len(buf)) {
             return (default!, 0, err);
         }
-        buf = new slice<byte>(n);
+        buf = new slice<byte>((nint)(n));
     }
 }
 
@@ -112,7 +112,7 @@ public static unsafe (@string val, uint32 valtype, error err) GetStringValue(thi
     if (len(data) == 0) {
         return ("", typ, default!);
     }
-    var u = new Span<uint16>((uint16*)(uintptr)(new @unsafe.Pointer(Ꮡ(data, 0))), len(data) / 2);
+    var u = new slice<uint16>(new ReadOnlySpan<uint16>((uint16*)(uintptr)(new @unsafe.Pointer(Ꮡ(data, 0))), (int)(len(data) / 2)));
     return (syscall.UTF16ToString(u), typ, default!);
 }
 
@@ -121,15 +121,15 @@ public static unsafe (@string val, uint32 valtype, error err) GetStringValue(thi
 // If the value name doesn't exist or the localized string value
 // can't be resolved, GetMUIStringValue returns ErrNotExist.
 public static (@string, error) GetMUIStringValue(this Key k, @string name) {
-    (pname, err) = syscall.UTF16PtrFromString(name);
+    var (pname, err) = syscall.UTF16PtrFromString(name);
     if (err != default!) {
         return ("", err);
     }
     var buf = new slice<uint16>(1024);
     ref var buflen = ref heap(new uint32(), out var Ꮡbuflen);
     ж<uint16> pdir = default!;
-    err = regLoadMUIString(((syscallꓸHandle)k), pname, Ꮡ(buf, 0), ((uint32)len(buf)), Ꮡbuflen, 0, pdir);
-    if (err == syscall.ERROR_FILE_NOT_FOUND) {
+    err = regLoadMUIString(((syscallꓸHandle)k), pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
+    if (AreEqual(err, syscall.ERROR_FILE_NOT_FOUND)) {
         // Try fallback path
         // Try to resolve the string value using the system directory as
         // a DLL search path; this assumes the string value is of the form
@@ -145,16 +145,16 @@ public static (@string, error) GetMUIStringValue(this Key k, @string name) {
         if (err != default!) {
             return ("", err);
         }
-        err = regLoadMUIString(((syscallꓸHandle)k), pname, Ꮡ(buf, 0), ((uint32)len(buf)), Ꮡbuflen, 0, pdir);
+        err = regLoadMUIString(((syscallꓸHandle)k), pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
     }
-    while (err == syscall.ERROR_MORE_DATA) {
+    while (AreEqual(err, syscall.ERROR_MORE_DATA)) {
         // Grow buffer if needed
-        if (buflen <= ((uint32)len(buf))) {
+        if (buflen <= (uint32)len(buf)) {
             break;
         }
         // Buffer not growing, assume race; break
-        buf = new slice<uint16>(buflen);
-        err = regLoadMUIString(((syscallꓸHandle)k), pname, Ꮡ(buf, 0), ((uint32)len(buf)), Ꮡbuflen, 0, pdir);
+        buf = new slice<uint16>((nint)(buflen));
+        err = regLoadMUIString(((syscallꓸHandle)k), pname, Ꮡ(buf, 0), (uint32)len(buf), Ꮡbuflen, 0, pdir);
     }
     if (err != default!) {
         return ("", err);
@@ -169,20 +169,20 @@ public static (@string, error) ExpandString(@string value) {
     if (value == ""u8) {
         return ("", default!);
     }
-    (p, err) = syscall.UTF16PtrFromString(value);
+    var (p, err) = syscall.UTF16PtrFromString(value);
     if (err != default!) {
         return ("", err);
     }
     var r = new slice<uint16>(100);
     while (ᐧ) {
-        var (n, errΔ1) = expandEnvironmentStrings(p, Ꮡ(r, 0), ((uint32)len(r)));
+        var (n, errΔ1) = expandEnvironmentStrings(p, Ꮡ(r, 0), (uint32)len(r));
         if (errΔ1 != default!) {
             return ("", errΔ1);
         }
-        if (n <= ((uint32)len(r))) {
+        if (n <= (uint32)len(r)) {
             return (syscall.UTF16ToString(r[..(int)(n)]), default!);
         }
-        r = new slice<uint16>(n);
+        r = new slice<uint16>((nint)(n));
     }
 }
 
@@ -206,7 +206,7 @@ public static unsafe (slice<@string> val, uint32 valtype, error err) GetStringsV
     if (len(data) == 0) {
         return (default!, typ, default!);
     }
-    var p = new Span<uint16>((uint16*)(uintptr)(new @unsafe.Pointer(Ꮡ(data, 0))), len(data) / 2);
+    var p = new slice<uint16>(new ReadOnlySpan<uint16>((uint16*)(uintptr)(new @unsafe.Pointer(Ꮡ(data, 0))), (int)(len(data) / 2)));
     if (len(p) == 0) {
         return (default!, typ, default!);
     }
@@ -244,7 +244,7 @@ public static (uint64 val, uint32 valtype, error err) GetIntegerValue(this Key k
         if (len(data) != 4) {
             return (0, typ, errors.New("DWORD value is not 4 bytes long"u8));
         }
-        return (((uint64)(~(ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡ(data, 0))))), DWORD, default!);
+        return ((uint64)(~(ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡ(data, 0)))), DWORD, default!);
     }
     if (exprᴛ1 == QWORD) {
         if (len(data) != 8) {
@@ -279,34 +279,34 @@ public static (slice<byte> val, uint32 valtype, error err) GetBinaryValue(this K
 }
 
 internal static error setValue(this Key k, @string name, uint32 valtype, slice<byte> data) {
-    (p, err) = syscall.UTF16PtrFromString(name);
+    var (p, err) = syscall.UTF16PtrFromString(name);
     if (err != default!) {
         return err;
     }
     if (len(data) == 0) {
         return regSetValueEx(((syscallꓸHandle)k), p, 0, valtype, nil, 0);
     }
-    return regSetValueEx(((syscallꓸHandle)k), p, 0, valtype, Ꮡ(data, 0), ((uint32)len(data)));
+    return regSetValueEx(((syscallꓸHandle)k), p, 0, valtype, Ꮡ(data, 0), (uint32)len(data));
 }
 
 // SetDWordValue sets the data and type of a name value
 // under key k to value and DWORD.
 public static error SetDWordValue(this Key k, @string name, uint32 value) {
-    return k.setValue(name, DWORD, (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡ(value)))[..]);
+    return k.setValue(name, DWORD, (~(ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡ(value))))[..]);
 }
 
 // SetQWordValue sets the data and type of a name value
 // under key k to value and QWORD.
 public static error SetQWordValue(this Key k, @string name, uint64 value) {
-    return k.setValue(name, QWORD, (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡ(value)))[..]);
+    return k.setValue(name, QWORD, (~(ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡ(value))))[..]);
 }
 
 internal static unsafe error setStringValue(this Key k, @string name, uint32 valtype, @string value) {
-    (v, err) = syscall.UTF16FromString(value);
+    var (v, err) = syscall.UTF16FromString(value);
     if (err != default!) {
         return err;
     }
-    var buf = new Span<byte>((byte*)(uintptr)(new @unsafe.Pointer(Ꮡ(v, 0))), len(v) * 2);
+    var buf = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(new @unsafe.Pointer(Ꮡ(v, 0))), (int)(len(v) * 2)));
     return k.setValue(name, valtype, buf);
 }
 
@@ -335,8 +335,8 @@ public static unsafe error SetStringsValue(this Key k, @string name, slice<@stri
         }
         ss += s + "\x00"u8;
     }
-    var v = utf16.Encode(slice<rune>(ss + "\x00"u8));
-    var buf = new Span<byte>((byte*)(uintptr)(new @unsafe.Pointer(Ꮡ(v, 0))), len(v) * 2);
+    var v = utf16.Encode(slice<rune>(ss + "\x00"));
+    var buf = new slice<byte>(new ReadOnlySpan<byte>((byte*)(uintptr)(new @unsafe.Pointer(Ꮡ(v, 0))), (int)(len(v) * 2)));
     return k.setValue(name, MULTI_SZ, buf);
 }
 
@@ -353,29 +353,29 @@ public static error DeleteValue(this Key k, @string name) {
 
 // ReadValueNames returns the value names of key k.
 public static (slice<@string>, error) ReadValueNames(this Key k) {
-    (ki, err) = k.Stat();
+    var (ki, err) = k.Stat();
     if (err != default!) {
         return (default!, err);
     }
-    var names = new slice<@string>(0, (~ki).ValueCount);
-    var buf = new slice<uint16>((~ki).MaxValueNameLen + 1);
+    var names = new slice<@string>(0, (nint)((~ki).ValueCount));
+    var buf = new slice<uint16>((nint)((~ki).MaxValueNameLen + 1));
     // extra room for terminating null character
 loopItems:
-    for (var i = ((uint32)0); ᐧ ; i++) {
+    for (var i = (uint32)0; ᐧ ; i++) {
         ref var l = ref heap<uint32>(out var Ꮡl);
-        l = ((uint32)len(buf));
+        l = (uint32)len(buf);
         while (ᐧ) {
             var errΔ1 = regEnumValue(((syscallꓸHandle)k), i, Ꮡ(buf, 0), Ꮡl, nil, nil, nil, nil);
             if (errΔ1 == default!) {
                 break;
             }
-            if (errΔ1 == syscall.ERROR_MORE_DATA) {
+            if (AreEqual(errΔ1, syscall.ERROR_MORE_DATA)) {
                 // Double buffer size and try again.
-                l = ((uint32)(2 * len(buf)));
-                buf = new slice<uint16>(l);
+                l = (uint32)(2 * len(buf));
+                buf = new slice<uint16>((nint)(l));
                 continue;
             }
-            if (errΔ1 == _ERROR_NO_MORE_ITEMS) {
+            if (AreEqual(errΔ1, _ERROR_NO_MORE_ITEMS)) {
                 goto break_loopItems;
             }
             return (names, errΔ1);

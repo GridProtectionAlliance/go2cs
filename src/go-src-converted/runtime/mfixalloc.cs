@@ -46,29 +46,29 @@ partial class runtime_package {
 // the sweeper is placing an unmarked object on the free list it does not want the
 // write barrier to be called since that could result in the object being reachable.
 [GoType] partial struct mlink {
-    internal runtime.@internal.sys_package.NotInHeap _;
+    internal sys.NotInHeap _;
     internal ж<mlink> next;
 }
 
 // Initialize f to allocate objects of the given size,
 // using the allocator to obtain chunks of memory.
 [GoRecv] internal static void init(this ref fixalloc f, uintptr size, Action<@unsafe.Pointer, @unsafe.Pointer> first, @unsafe.Pointer arg, ж<sysMemStat> Ꮡstat) {
-    ref var stat = ref Ꮡstat.val;
+    ref var stat = ref Ꮡstat.Value;
 
     if (size > _FixAllocChunk) {
         @throw("runtime: fixalloc size too large"u8);
     }
-    size = max(size, @unsafe.Sizeof(new mlink(nil)));
+    size = builtin.max(size, @unsafe.Sizeof(new mlink(nil)));
     f.size = size;
     f.first = first;
     f.arg = arg;
     f.list = default!;
     f.chunk = 0;
     f.nchunk = 0;
-    f.nalloc = ((uint32)(_FixAllocChunk / size * size));
+    f.nalloc = (uint32)((uintptr)_FixAllocChunk / size * size);
     // Round _FixAllocChunk down to an exact multiple of size to eliminate tail waste
     f.inuse = 0;
-    f.stat = stat;
+    f.stat = Ꮡstat;
     f.zero = true;
 }
 
@@ -79,23 +79,23 @@ partial class runtime_package {
     }
     if (f.list != nil) {
         @unsafe.Pointer vΔ1 = new @unsafe.Pointer(f.list);
-        f.list = f.list.next;
+        f.list = f.list.Value.next;
         f.inuse += f.size;
         if (f.zero) {
             memclrNoHeapPointers(vΔ1, f.size);
         }
         return vΔ1;
     }
-    if (((uintptr)f.nchunk) < f.size) {
-        f.chunk = ((uintptr)(uintptr)persistentalloc(((uintptr)f.nalloc), 0, f.stat));
+    if ((uintptr)f.nchunk < f.size) {
+        f.chunk = (uintptr)(uintptr)persistentalloc((uintptr)f.nalloc, 0, f.stat);
         f.nchunk = f.nalloc;
     }
-    @unsafe.Pointer v = ((@unsafe.Pointer)f.chunk);
+    @unsafe.Pointer v = (@unsafe.Pointer)f.chunk;
     if (f.first != default!) {
         f.first(f.arg, v);
     }
     f.chunk = f.chunk + f.size;
-    f.nchunk -= ((uint32)f.size);
+    f.nchunk -= (uint32)f.size;
     f.inuse += f.size;
     return v;
 }
@@ -103,7 +103,7 @@ partial class runtime_package {
 [GoRecv] internal static void free(this ref fixalloc f, @unsafe.Pointer Δp) {
     f.inuse -= f.size;
     var v = (ж<mlink>)(uintptr)(Δp);
-    v.val.next = f.list;
+    v.Value.next = f.list;
     f.list = v;
 }
 

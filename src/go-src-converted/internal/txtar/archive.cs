@@ -35,6 +35,7 @@ using bytes = bytes_package;
 using fmt = fmt_package;
 using os = os_package;
 using strings = strings_package;
+using io = io_package;
 
 partial class txtar_package {
 
@@ -55,20 +56,20 @@ partial class txtar_package {
 // a.Comment and all a.File[i].Data contain no file marker lines,
 // and all a.File[i].Name is non-empty.
 public static slice<byte> Format(ж<Archive> Ꮡa) {
-    ref var a = ref Ꮡa.val;
+    ref var a = ref Ꮡa.Value;
 
-    ref var buf = ref heap(new bytes_package.Buffer(), out var Ꮡbuf);
+    ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     buf.Write(fixNL(a.Comment));
     foreach (var (_, f) in a.Files) {
-        fmt.Fprintf(~Ꮡbuf, "-- %s --\n"u8, f.Name);
+        fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), "-- %s --\n"u8, f.Name);
         buf.Write(fixNL(f.Data));
     }
     return buf.Bytes();
 }
 
 // ParseFile parses the named file as an archive.
-public static (ж<Archive>, error) ParseFile(@string file) {
-    (data, err) = os.ReadFile(file);
+public static (ж<Archive>, error) ParseFile(@string @file) {
+    var (data, err) = os.ReadFile(@file);
     if (err != default!) {
         return (default!, err);
     }
@@ -80,18 +81,18 @@ public static (ж<Archive>, error) ParseFile(@string file) {
 public static ж<Archive> Parse(slice<byte> data) {
     var a = @new<Archive>();
     @string name = default!;
-    (a.val.Comment, name, data) = findFileMarker(data);
+    (a.Value.Comment, name, data) = findFileMarker(data);
     while (name != ""u8) {
         var f = new File(name, default!);
         (f.Data, name, data) = findFileMarker(data);
-        a.val.Files = append((~a).Files, f);
+        a.Value.Files = append((~a).Files, f);
     }
     return a;
 }
 
-internal static slice<byte> newlineMarker = slice<byte>("\n-- ");
-internal static slice<byte> marker = slice<byte>("-- ");
-internal static slice<byte> markerEnd = slice<byte>(" --");
+internal static slice<byte> newlineMarker = slice<byte>((@string)"\n-- ");
+internal static slice<byte> marker = slice<byte>((@string)"-- ");
+internal static slice<byte> markerEnd = slice<byte>((@string)" --");
 
 // findFileMarker finds the next file marker in data,
 // extracts the file name, and returns the data before the marker,

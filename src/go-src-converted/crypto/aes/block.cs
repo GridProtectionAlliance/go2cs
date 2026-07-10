@@ -34,8 +34,8 @@
 //	https://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf
 namespace go.crypto;
 
-using byteorder = @internal.byteorder_package;
-using @internal;
+using byteorder = go.@internal.byteorder_package;
+using go.@internal;
 
 partial class aes_package {
 
@@ -62,18 +62,18 @@ internal static void encryptBlockGo(slice<uint32> xk, slice<byte> dst, slice<byt
     uint32 t2 = default!;
     uint32 t3 = default!;
     for (nint r = 0; r < nr; r++) {
-        t0 = (uint32)((uint32)((uint32)((uint32)(xk[k + 0] ^ te0[((uint8)(s0 >> (int)(24)))]) ^ te1[((uint8)(s1 >> (int)(16)))]) ^ te2[((uint8)(s2 >> (int)(8)))]) ^ te3[((uint8)s3)]);
-        t1 = (uint32)((uint32)((uint32)((uint32)(xk[k + 1] ^ te0[((uint8)(s1 >> (int)(24)))]) ^ te1[((uint8)(s2 >> (int)(16)))]) ^ te2[((uint8)(s3 >> (int)(8)))]) ^ te3[((uint8)s0)]);
-        t2 = (uint32)((uint32)((uint32)((uint32)(xk[k + 2] ^ te0[((uint8)(s2 >> (int)(24)))]) ^ te1[((uint8)(s3 >> (int)(16)))]) ^ te2[((uint8)(s0 >> (int)(8)))]) ^ te3[((uint8)s1)]);
-        t3 = (uint32)((uint32)((uint32)((uint32)(xk[k + 3] ^ te0[((uint8)(s3 >> (int)(24)))]) ^ te1[((uint8)(s0 >> (int)(16)))]) ^ te2[((uint8)(s1 >> (int)(8)))]) ^ te3[((uint8)s2)]);
+        t0 = (uint32)((uint32)((uint32)((uint32)(xk[k + 0] ^ te0[(uint8)((s0 >> (int)(24)))]) ^ te1[(uint8)((s1 >> (int)(16)))]) ^ te2[(uint8)((s2 >> (int)(8)))]) ^ te3[(uint8)s3]);
+        t1 = (uint32)((uint32)((uint32)((uint32)(xk[k + 1] ^ te0[(uint8)((s1 >> (int)(24)))]) ^ te1[(uint8)((s2 >> (int)(16)))]) ^ te2[(uint8)((s3 >> (int)(8)))]) ^ te3[(uint8)s0]);
+        t2 = (uint32)((uint32)((uint32)((uint32)(xk[k + 2] ^ te0[(uint8)((s2 >> (int)(24)))]) ^ te1[(uint8)((s3 >> (int)(16)))]) ^ te2[(uint8)((s0 >> (int)(8)))]) ^ te3[(uint8)s1]);
+        t3 = (uint32)((uint32)((uint32)((uint32)(xk[k + 3] ^ te0[(uint8)((s3 >> (int)(24)))]) ^ te1[(uint8)((s0 >> (int)(16)))]) ^ te2[(uint8)((s1 >> (int)(8)))]) ^ te3[(uint8)s2]);
         k += 4;
         (s0, s1, s2, s3) = (t0, t1, t2, t3);
     }
     // Last round uses s-box directly and XORs to produce output.
-    s0 = (uint32)((uint32)((uint32)(((uint32)sbox0[t0 >> (int)(24)]) << (int)(24) | ((uint32)sbox0[(uint32)(t1 >> (int)(16) & 255)]) << (int)(16)) | ((uint32)sbox0[(uint32)(t2 >> (int)(8) & 255)]) << (int)(8)) | ((uint32)sbox0[(uint32)(t3 & 255)]));
-    s1 = (uint32)((uint32)((uint32)(((uint32)sbox0[t1 >> (int)(24)]) << (int)(24) | ((uint32)sbox0[(uint32)(t2 >> (int)(16) & 255)]) << (int)(16)) | ((uint32)sbox0[(uint32)(t3 >> (int)(8) & 255)]) << (int)(8)) | ((uint32)sbox0[(uint32)(t0 & 255)]));
-    s2 = (uint32)((uint32)((uint32)(((uint32)sbox0[t2 >> (int)(24)]) << (int)(24) | ((uint32)sbox0[(uint32)(t3 >> (int)(16) & 255)]) << (int)(16)) | ((uint32)sbox0[(uint32)(t0 >> (int)(8) & 255)]) << (int)(8)) | ((uint32)sbox0[(uint32)(t1 & 255)]));
-    s3 = (uint32)((uint32)((uint32)(((uint32)sbox0[t3 >> (int)(24)]) << (int)(24) | ((uint32)sbox0[(uint32)(t0 >> (int)(16) & 255)]) << (int)(16)) | ((uint32)sbox0[(uint32)(t1 >> (int)(8) & 255)]) << (int)(8)) | ((uint32)sbox0[(uint32)(t2 & 255)]));
+    s0 = (uint32)((uint32)((uint32)(((uint32)sbox0[(nint)((t0 >> (int)(24)))] << (int)(24)) | ((uint32)sbox0[(nint)((uint32)((t1 >> (int)(16)) & 0xff))] << (int)(16))) | ((uint32)sbox0[(nint)((uint32)((t2 >> (int)(8)) & 0xff))] << (int)(8))) | (uint32)sbox0[(nint)((uint32)(t3 & 0xff))]);
+    s1 = (uint32)((uint32)((uint32)(((uint32)sbox0[(nint)((t1 >> (int)(24)))] << (int)(24)) | ((uint32)sbox0[(nint)((uint32)((t2 >> (int)(16)) & 0xff))] << (int)(16))) | ((uint32)sbox0[(nint)((uint32)((t3 >> (int)(8)) & 0xff))] << (int)(8))) | (uint32)sbox0[(nint)((uint32)(t0 & 0xff))]);
+    s2 = (uint32)((uint32)((uint32)(((uint32)sbox0[(nint)((t2 >> (int)(24)))] << (int)(24)) | ((uint32)sbox0[(nint)((uint32)((t3 >> (int)(16)) & 0xff))] << (int)(16))) | ((uint32)sbox0[(nint)((uint32)((t0 >> (int)(8)) & 0xff))] << (int)(8))) | (uint32)sbox0[(nint)((uint32)(t1 & 0xff))]);
+    s3 = (uint32)((uint32)((uint32)(((uint32)sbox0[(nint)((t3 >> (int)(24)))] << (int)(24)) | ((uint32)sbox0[(nint)((uint32)((t0 >> (int)(16)) & 0xff))] << (int)(16))) | ((uint32)sbox0[(nint)((uint32)((t1 >> (int)(8)) & 0xff))] << (int)(8))) | (uint32)sbox0[(nint)((uint32)(t2 & 0xff))]);
     s0 ^= (uint32)(xk[k + 0]);
     s1 ^= (uint32)(xk[k + 1]);
     s2 ^= (uint32)(xk[k + 2]);
@@ -109,18 +109,18 @@ internal static void decryptBlockGo(slice<uint32> xk, slice<byte> dst, slice<byt
     uint32 t2 = default!;
     uint32 t3 = default!;
     for (nint r = 0; r < nr; r++) {
-        t0 = (uint32)((uint32)((uint32)((uint32)(xk[k + 0] ^ td0[((uint8)(s0 >> (int)(24)))]) ^ td1[((uint8)(s3 >> (int)(16)))]) ^ td2[((uint8)(s2 >> (int)(8)))]) ^ td3[((uint8)s1)]);
-        t1 = (uint32)((uint32)((uint32)((uint32)(xk[k + 1] ^ td0[((uint8)(s1 >> (int)(24)))]) ^ td1[((uint8)(s0 >> (int)(16)))]) ^ td2[((uint8)(s3 >> (int)(8)))]) ^ td3[((uint8)s2)]);
-        t2 = (uint32)((uint32)((uint32)((uint32)(xk[k + 2] ^ td0[((uint8)(s2 >> (int)(24)))]) ^ td1[((uint8)(s1 >> (int)(16)))]) ^ td2[((uint8)(s0 >> (int)(8)))]) ^ td3[((uint8)s3)]);
-        t3 = (uint32)((uint32)((uint32)((uint32)(xk[k + 3] ^ td0[((uint8)(s3 >> (int)(24)))]) ^ td1[((uint8)(s2 >> (int)(16)))]) ^ td2[((uint8)(s1 >> (int)(8)))]) ^ td3[((uint8)s0)]);
+        t0 = (uint32)((uint32)((uint32)((uint32)(xk[k + 0] ^ td0[(uint8)((s0 >> (int)(24)))]) ^ td1[(uint8)((s3 >> (int)(16)))]) ^ td2[(uint8)((s2 >> (int)(8)))]) ^ td3[(uint8)s1]);
+        t1 = (uint32)((uint32)((uint32)((uint32)(xk[k + 1] ^ td0[(uint8)((s1 >> (int)(24)))]) ^ td1[(uint8)((s0 >> (int)(16)))]) ^ td2[(uint8)((s3 >> (int)(8)))]) ^ td3[(uint8)s2]);
+        t2 = (uint32)((uint32)((uint32)((uint32)(xk[k + 2] ^ td0[(uint8)((s2 >> (int)(24)))]) ^ td1[(uint8)((s1 >> (int)(16)))]) ^ td2[(uint8)((s0 >> (int)(8)))]) ^ td3[(uint8)s3]);
+        t3 = (uint32)((uint32)((uint32)((uint32)(xk[k + 3] ^ td0[(uint8)((s3 >> (int)(24)))]) ^ td1[(uint8)((s2 >> (int)(16)))]) ^ td2[(uint8)((s1 >> (int)(8)))]) ^ td3[(uint8)s0]);
         k += 4;
         (s0, s1, s2, s3) = (t0, t1, t2, t3);
     }
     // Last round uses s-box directly and XORs to produce output.
-    s0 = (uint32)((uint32)((uint32)(((uint32)sbox1[t0 >> (int)(24)]) << (int)(24) | ((uint32)sbox1[(uint32)(t3 >> (int)(16) & 255)]) << (int)(16)) | ((uint32)sbox1[(uint32)(t2 >> (int)(8) & 255)]) << (int)(8)) | ((uint32)sbox1[(uint32)(t1 & 255)]));
-    s1 = (uint32)((uint32)((uint32)(((uint32)sbox1[t1 >> (int)(24)]) << (int)(24) | ((uint32)sbox1[(uint32)(t0 >> (int)(16) & 255)]) << (int)(16)) | ((uint32)sbox1[(uint32)(t3 >> (int)(8) & 255)]) << (int)(8)) | ((uint32)sbox1[(uint32)(t2 & 255)]));
-    s2 = (uint32)((uint32)((uint32)(((uint32)sbox1[t2 >> (int)(24)]) << (int)(24) | ((uint32)sbox1[(uint32)(t1 >> (int)(16) & 255)]) << (int)(16)) | ((uint32)sbox1[(uint32)(t0 >> (int)(8) & 255)]) << (int)(8)) | ((uint32)sbox1[(uint32)(t3 & 255)]));
-    s3 = (uint32)((uint32)((uint32)(((uint32)sbox1[t3 >> (int)(24)]) << (int)(24) | ((uint32)sbox1[(uint32)(t2 >> (int)(16) & 255)]) << (int)(16)) | ((uint32)sbox1[(uint32)(t1 >> (int)(8) & 255)]) << (int)(8)) | ((uint32)sbox1[(uint32)(t0 & 255)]));
+    s0 = (uint32)((uint32)((uint32)(((uint32)sbox1[(nint)((t0 >> (int)(24)))] << (int)(24)) | ((uint32)sbox1[(nint)((uint32)((t3 >> (int)(16)) & 0xff))] << (int)(16))) | ((uint32)sbox1[(nint)((uint32)((t2 >> (int)(8)) & 0xff))] << (int)(8))) | (uint32)sbox1[(nint)((uint32)(t1 & 0xff))]);
+    s1 = (uint32)((uint32)((uint32)(((uint32)sbox1[(nint)((t1 >> (int)(24)))] << (int)(24)) | ((uint32)sbox1[(nint)((uint32)((t0 >> (int)(16)) & 0xff))] << (int)(16))) | ((uint32)sbox1[(nint)((uint32)((t3 >> (int)(8)) & 0xff))] << (int)(8))) | (uint32)sbox1[(nint)((uint32)(t2 & 0xff))]);
+    s2 = (uint32)((uint32)((uint32)(((uint32)sbox1[(nint)((t2 >> (int)(24)))] << (int)(24)) | ((uint32)sbox1[(nint)((uint32)((t1 >> (int)(16)) & 0xff))] << (int)(16))) | ((uint32)sbox1[(nint)((uint32)((t0 >> (int)(8)) & 0xff))] << (int)(8))) | (uint32)sbox1[(nint)((uint32)(t3 & 0xff))]);
+    s3 = (uint32)((uint32)((uint32)(((uint32)sbox1[(nint)((t3 >> (int)(24)))] << (int)(24)) | ((uint32)sbox1[(nint)((uint32)((t2 >> (int)(16)) & 0xff))] << (int)(16))) | ((uint32)sbox1[(nint)((uint32)((t1 >> (int)(8)) & 0xff))] << (int)(8))) | (uint32)sbox1[(nint)((uint32)(t0 & 0xff))]);
     s0 ^= (uint32)(xk[k + 0]);
     s1 ^= (uint32)(xk[k + 1]);
     s2 ^= (uint32)(xk[k + 2]);
@@ -135,12 +135,12 @@ internal static void decryptBlockGo(slice<uint32> xk, slice<byte> dst, slice<byt
 
 // Apply sbox0 to each byte in w.
 internal static uint32 subw(uint32 w) {
-    return (uint32)((uint32)((uint32)(((uint32)sbox0[w >> (int)(24)]) << (int)(24) | ((uint32)sbox0[(uint32)(w >> (int)(16) & 255)]) << (int)(16)) | ((uint32)sbox0[(uint32)(w >> (int)(8) & 255)]) << (int)(8)) | ((uint32)sbox0[(uint32)(w & 255)]));
+    return (uint32)((uint32)((uint32)(((uint32)sbox0[(nint)((w >> (int)(24)))] << (int)(24)) | ((uint32)sbox0[(nint)((uint32)((w >> (int)(16)) & 0xff))] << (int)(16))) | ((uint32)sbox0[(nint)((uint32)((w >> (int)(8)) & 0xff))] << (int)(8))) | (uint32)sbox0[(nint)((uint32)(w & 0xff))]);
 }
 
 // Rotate
 internal static uint32 rotw(uint32 w) {
-    return (uint32)(w << (int)(8) | w >> (int)(24));
+    return (uint32)((w << (int)(8)) | (w >> (int)(24)));
 }
 
 // Key expansion algorithm. See FIPS-197, Figure 11.
@@ -155,7 +155,7 @@ internal static void expandKeyGo(slice<byte> key, slice<uint32> enc, slice<uint3
     for (; i < len(enc); i++) {
         var t = enc[i - 1];
         if (i % nk == 0){
-            t = (uint32)(subw(rotw(t)) ^ (((uint32)powx[i / nk - 1]) << (int)(24)));
+            t = (uint32)(subw(rotw(t)) ^ (((uint32)powx[i / nk - 1] << (int)(24))));
         } else 
         if (nk > 6 && i % nk == 4) {
             t = subw(t);
@@ -169,14 +169,14 @@ internal static void expandKeyGo(slice<byte> key, slice<uint32> enc, slice<uint3
         return;
     }
     nint n = len(enc);
-    for (nint iΔ1 = 0; iΔ1 < n; i += 4) {
+    for (nint iΔ1 = 0; iΔ1 < n; iΔ1 += 4) {
         nint ei = n - iΔ1 - 4;
         for (nint j = 0; j < 4; j++) {
             var x = enc[ei + j];
             if (iΔ1 > 0 && iΔ1 + 4 < n) {
-                x = (uint32)((uint32)((uint32)(td0[sbox0[x >> (int)(24)]] ^ td1[sbox0[(uint32)(x >> (int)(16) & 255)]]) ^ td2[sbox0[(uint32)(x >> (int)(8) & 255)]]) ^ td3[sbox0[(uint32)(x & 255)]]);
+                x = (uint32)((uint32)((uint32)(td0[sbox0[(nint)((x >> (int)(24)))]] ^ td1[sbox0[(nint)((uint32)((x >> (int)(16)) & 0xff))]]) ^ td2[sbox0[(nint)((uint32)((x >> (int)(8)) & 0xff))]]) ^ td3[sbox0[(nint)((uint32)(x & 0xff))]]);
             }
-            dec[i + j] = x;
+            dec[iΔ1 + j] = x;
         }
     }
 }

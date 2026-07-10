@@ -52,7 +52,7 @@ partial class math_package {
 //	Jn(n, ±Inf) = 0
 //	Jn(n, NaN) = NaN
 public static float64 Jn(nint n, float64 x) {
-    static readonly UntypedFloat TwoM29 = /* 1.0 / (1 << 29) */ 1.86265e-09; // 2**-29 0x3e10000000000000
+    UntypedFloat TwoM29 = /* 1.0 / (1 << 29) */ 1.86265e-09; // 2**-29 0x3e10000000000000
     GoUntyped Two302 = /* 1 << 302 */       // 2**302 0x52D0000000000000
             GoUntyped.Parse("8148143905337944345073782753637512644205873574663745002544561797417525199053346824733589504");
     // special cases
@@ -87,9 +87,9 @@ public static float64 Jn(nint n, float64 x) {
     }
     // odd n and negative x
     float64 b = default!;
-    if (((float64)n) <= x){
+    if ((float64)n <= x){
         // Safe to use J(n+1,x)=2n/x *J(n,x)-J(n-1,x)
-        if (x >= Two302){
+        if (x >= (float64)Two302){
             // x > 2**302
             // (x >> n**2)
             //          Jn(x) = cos(x-(2n+1)*pi/4)*sqrt(2/x*pi)
@@ -125,11 +125,11 @@ public static float64 Jn(nint n, float64 x) {
                 }}
             }
 
-            b = (1 / SqrtPi) * temp / Sqrt(x);
+            b = (float64)(1 / SqrtPi) * temp / Sqrt(x);
         } else {
             b = J1(x);
-            for (nint i = 1;var a = J0(x); i < n; i++) {
-                (a, b) = (b, b * (((float64)(i + i)) / x) - a);
+            for ((nint i, var a) = (1, J0(x)); i < n; i++) {
+                (a, b) = (b, b * ((float64)(i + i) / x) - a);
             }
         }
     } else {
@@ -142,11 +142,11 @@ public static float64 Jn(nint n, float64 x) {
                 // underflow
                 b = 0;
             } else {
-                var temp = x * 0.5F;
+                var temp = x * 0.5D;
                 b = temp;
-                var a = 1.0F;
+                var a = 1.0D;
                 for (nint i = 2; i <= n; i++) {
-                    a *= ((float64)i);
+                    a *= (float64)i;
                     // a = n!
                     b *= temp;
                 }
@@ -182,21 +182,21 @@ public static float64 Jn(nint n, float64 x) {
             // When Q(k) > 1e9	good for double
             // When Q(k) > 1e17	good for quadruple
             // determine k
-            var w = ((float64)(n + n)) / x;
+            var w = (float64)(n + n) / x;
             var h = 2 / x;
             var q0 = w;
             var z = w + h;
             var q1 = w * z - 1;
             nint k = 1;
-            while (q1 < 1e9F) {
+            while (q1 < 1e9D) {
                 k++;
                 z += h;
                 (q0, q1) = (q1, z * q1 - q0);
             }
             nint m = n + n;
-            var t = 0.0F;
+            var t = 0.0D;
             for (nint i = 2 * (n + k); i >= m; i -= 2) {
-                t = 1 / (((float64)i) / x - t);
+                t = 1 / ((float64)i / x - t);
             }
             var a = t;
             b = 1;
@@ -207,17 +207,17 @@ public static float64 Jn(nint n, float64 x) {
             //  long double 1.1356523406294143949491931077970765006170e+04
             //  then recurrent value may overflow and the result is
             //  likely underflow to zero
-            var tmp = ((float64)n);
+            var tmp = (float64)n;
             var v = 2 / x;
             tmp = tmp * Log(Abs(v * tmp));
-            if (tmp < 7.09782712893383973096e+02F){
+            if (tmp < 7.09782712893383973096e+02D){
                 for (nint i = n - 1; i > 0; i--) {
-                    var di = ((float64)(i + i));
+                    var di = (float64)(i + i);
                     (a, b) = (b, b * di / x - a);
                 }
             } else {
                 for (nint i = n - 1; i > 0; i--) {
-                    var di = ((float64)(i + i));
+                    var di = (float64)(i + i);
                     (a, b) = (b, b * di / x - a);
                     // scale b to avoid spurious overflow
                     if (b > 1e100D) {
@@ -281,7 +281,7 @@ public static float64 Yn(nint n, float64 x) {
         return Y1(x);
     }
     float64 b = default!;
-    if (x >= Two302){
+    if (x >= (float64)Two302){
         // x > 2**302
         // (x >> n**2)
         //	    Jn(x) = cos(x-(2n+1)*pi/4)*sqrt(2/x*pi)
@@ -317,13 +317,13 @@ public static float64 Yn(nint n, float64 x) {
             }}
         }
 
-        b = (1 / SqrtPi) * temp / Sqrt(x);
+        b = (float64)(1 / SqrtPi) * temp / Sqrt(x);
     } else {
         var a = Y0(x);
         b = Y1(x);
         // quit if b is -inf
         for (nint i = 1; i < n && !IsInf(b, -1); i++) {
-            (a, b) = (b, (((float64)(i + i)) / x) * b - a);
+            (a, b) = (b, ((float64)(i + i) / x) * b - a);
         }
     }
     if (sign) {

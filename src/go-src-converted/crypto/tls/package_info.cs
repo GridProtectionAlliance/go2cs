@@ -10,6 +10,11 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using cryptoꓸDecrypterOpts = object;
+global using cryptoꓸPrivateKey = object;
+global using cryptoꓸPublicKey = object;
+global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
+global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
 global using netꓸAddr = go.net_package.ΔAddr;
 global using netꓸError = go.net_package.ΔError;
 global using osꓸDirEntry = go.io.fs_package.DirEntry;
@@ -21,6 +26,9 @@ global using runtimeꓸError = go.runtime_package.ΔError;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
+using net = go.net_package;
+using rsa = go.crypto.rsa_package;
+using Δx509 = go.crypto.x509_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -50,57 +58,63 @@ using static go.crypto.tls_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(cbcMode, bool), cbcMode>]
-[assembly: GoImplement<(context.Context, context.CancelFunc), context_package.Context>]
-[assembly: GoImplement<(crypto.Decrypter, bool), crypto_package.Decrypter>]
-[assembly: GoImplement<(crypto.Signer, bool), crypto_package.Signer>]
-[assembly: GoImplement<(ctx context.Context, cancel context.CancelFunc), context_package.Context>]
-[assembly: GoImplement<(net.Conn, error), net_package.Conn>]
-[assembly: GoImplement<(net.Error, bool), net_package.ΔError>]
-[assembly: GoImplement<(net.Listener, error), net_package.Listener>]
-[assembly: GoImplement<Conn, net_package.Conn>]
+[assembly: GoImplement<CertificateVerificationError, error>(Pointer = true)]
+[assembly: GoImplement<Conn, net_package.Conn>(Pointer = true)]
+[assembly: GoImplement<ECHRejectionError, error>(Pointer = true)]
 [assembly: GoImplement<RecordHeaderError, error>]
 [assembly: GoImplement<alert, error>]
-[assembly: GoImplement<atLeastReader, io_package.Reader>]
-[assembly: GoImplement<bool, error>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>]
-[assembly: GoImplement<certificateMsg, handshakeMessage>]
-[assembly: GoImplement<certificateMsgTLS13, handshakeMessage>]
-[assembly: GoImplement<certificateRequestMsg, handshakeMessage>]
-[assembly: GoImplement<certificateRequestMsgTLS13, handshakeMessage>]
-[assembly: GoImplement<certificateStatusMsg, handshakeMessage>]
-[assembly: GoImplement<certificateVerifyMsg, handshakeMessage>]
-[assembly: GoImplement<cipher.Block, error), crypto.cipher_package.Block>]
-[assembly: GoImplement<cipher.BlockMode, bool), crypto.cipher_package.BlockMode>]
-[assembly: GoImplement<clientHelloMsg, handshakeMessage>]
-[assembly: GoImplement<clientKeyExchangeMsg, handshakeMessage>]
-[assembly: GoImplement<crypto_package.PrivateKey, crypto_package.Decrypter>]
-[assembly: GoImplement<crypto_package.PrivateKey, crypto_package.Signer>]
-[assembly: GoImplement<encryptedExtensionsMsg, handshakeMessage>]
-[assembly: GoImplement<endOfEarlyDataMsg, handshakeMessage>]
-[assembly: GoImplement<finishedMsg, handshakeMessage>]
-[assembly: GoImplement<hash_package.Hash, io_package.Writer>]
-[assembly: GoImplement<helloRequestMsg, handshakeMessage>]
-[assembly: GoImplement<keyUpdateMsg, handshakeMessage>]
-[assembly: GoImplement<listener, net_package.Listener>]
-[assembly: GoImplement<lruSessionCache, ClientSessionCache>]
+[assembly: GoImplement<atLeastReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<certificateMsg, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<certificateMsgTLS13, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<certificateRequestMsg, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<certificateRequestMsgTLS13, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<certificateStatusMsg, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<certificateVerifyMsg, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<clientHelloMsg, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<clientKeyExchangeMsg, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<crypto_package.Hash, crypto_package.SignerOpts>]
+[assembly: GoImplement<cthWrapper, hash_package.Hash>(Pointer = true)]
+[assembly: GoImplement<ecdheKeyAgreement, keyAgreement>(Pointer = true)]
+[assembly: GoImplement<encryptedExtensionsMsg, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<endOfEarlyDataMsg, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<finishedMsg, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<go.crypto.rsa_package.PSSOptions, crypto_package.SignerOpts>(Pointer = true)]
+[assembly: GoImplement<hash_package.Hash, transcriptHash>]
+[assembly: GoImplement<helloRequestMsg, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<keyUpdateMsg, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<listener, net_package.Listener>(Pointer = true)]
+[assembly: GoImplement<listener, net_package.Listener>(Promoted = true)]
+[assembly: GoImplement<lruSessionCache, ClientSessionCache>(Pointer = true)]
+[assembly: GoImplement<marshalingFunction, go.vendor.golang.org.x.crypto.cryptobyte_package.MarshalingValue>]
 [assembly: GoImplement<net_package.Conn, io_package.Reader>]
-[assembly: GoImplement<net_package.OpError, error>]
 [assembly: GoImplement<net_package.ΔError, error>]
-[assembly: GoImplement<newSessionTicketMsg, handshakeMessage>]
-[assembly: GoImplement<newSessionTicketMsgTLS13, handshakeMessage>]
-[assembly: GoImplement<serverHelloDoneMsg, handshakeMessage>]
-[assembly: GoImplement<serverHelloMsg, handshakeMessage>]
-[assembly: GoImplement<serverKeyExchangeMsg, handshakeMessage>]
+[assembly: GoImplement<newSessionTicketMsg, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<newSessionTicketMsgTLS13, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<permanentError, error>(Pointer = true)]
+[assembly: GoImplement<prefixNonceAEAD, aead>(Pointer = true)]
+[assembly: GoImplement<rsaKeyAgreement, keyAgreement>]
+[assembly: GoImplement<serverHelloDoneMsg, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<serverHelloMsg, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<serverKeyExchangeMsg, handshakeMessage>(Pointer = true)]
+[assembly: GoImplement<xorNonceAEAD, aead>(Pointer = true)]
+[assembly: GoImplement<ΔfinishedHash, transcriptHash>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 [assembly: GoImplicitConv<AlertError, alert>(Inverted = true, ValueType = "AlertError")]
+[assembly: GoImplicitConv<Certificate, ж<Certificate>>(Indirect = true)]
 [assembly: GoImplicitConv<Config, ж<Config>>(Indirect = true)]
 [assembly: GoImplicitConv<QUICConfig, ж<QUICConfig>>(Indirect = true)]
+[assembly: GoImplicitConv<SessionState, ж<SessionState>>]
 [assembly: GoImplicitConv<alert, AlertError>(Inverted = true, ValueType = "alert")]
+[assembly: GoImplicitConv<clientHelloMsg, ж<clientHelloMsg>>(Indirect = true)]
+[assembly: GoImplicitConv<clientKeyExchangeMsg, ж<clientKeyExchangeMsg>>(Indirect = true)]
+[assembly: GoImplicitConv<echContext, ж<echContext>>(Indirect = true)]
 [assembly: GoImplicitConv<rsa.PSSOptions, ж<rsa.PSSOptions>>(Indirect = true)]
-[assembly: GoImplicitConv<struct{wall uint64; ext int64; loc *time.Location}, struct{wall uint64; ext int64; loc *time.Location}>(Inverted = true)]
+[assembly: GoImplicitConv<serverHelloMsg, ж<serverHelloMsg>>(Indirect = true)]
+[assembly: GoImplicitConv<serverKeyExchangeMsg, ж<serverKeyExchangeMsg>>(Indirect = true)]
+[assembly: GoImplicitConv<Δx509.Certificate, ж<Δx509.Certificate>>(Indirect = true)]
 // </ImplicitConversions>
 
 namespace go.crypto;

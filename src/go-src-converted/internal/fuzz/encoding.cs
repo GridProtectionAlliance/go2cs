@@ -5,14 +5,15 @@ namespace go.@internal;
 
 using bytes = bytes_package;
 using fmt = fmt_package;
-using ast = go.ast_package;
-using parser = go.parser_package;
-using token = go.token_package;
+using ast = global::go.go.ast_package;
+using parser = global::go.go.parser_package;
+using token = global::go.go.token_package;
 using math = math_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using utf8 = unicode.utf8_package;
-using go;
+using global::go.go;
+using io = io_package;
 using unicode;
 using ꓸꓸꓸany = Span<any>;
 
@@ -29,57 +30,26 @@ internal static slice<byte> marshalCorpusFile(params ꓸꓸꓸany valsʗp) {
     if (len(vals) == 0) {
         throw panic("must have at least one value to marshal");
     }
-    var b = bytes.NewBuffer(slice<byte>(encVersion1 + "\n"u8));
+    var b = bytes.NewBuffer(slice<byte>(encVersion1 + "\n"));
     // TODO(katiehockman): keep uint8 and int32 encoding where applicable,
     // instead of changing to byte and rune respectively.
     foreach (var (_, val) in vals) {
         switch (val.type()) {
-        case nint t: {
-            fmt.Fprintf(~b, "%T(%v)\n"u8, t, t);
-            break;
-        }
-        case int32 t: {
-            fmt.Fprintf(~b, "%T(%v)\n"u8, t, t);
-            break;
-        }
-        case int8 t: {
-            fmt.Fprintf(~b, "%T(%v)\n"u8, t, t);
-            break;
-        }
-        case int16 t: {
-            fmt.Fprintf(~b, "%T(%v)\n"u8, t, t);
-            break;
-        }
-        case int64 t: {
-            fmt.Fprintf(~b, "%T(%v)\n"u8, t, t);
-            break;
-        }
-        case nuint t: {
-            fmt.Fprintf(~b, "%T(%v)\n"u8, t, t);
-            break;
-        }
-        case uint32 t: {
-            fmt.Fprintf(~b, "%T(%v)\n"u8, t, t);
-            break;
-        }
-        case uint16 t: {
-            fmt.Fprintf(~b, "%T(%v)\n"u8, t, t);
-            break;
-        }
-        case uint32 t: {
-            fmt.Fprintf(~b, "%T(%v)\n"u8, t, t);
-            break;
-        }
-        case uint64 t: {
-            fmt.Fprintf(~b, "%T(%v)\n"u8, t, t);
-            break;
-        }
-        case bool t: {
-            fmt.Fprintf(~b, "%T(%v)\n"u8, t, t);
+        case nint _:
+        case int8 _:
+        case int16 _:
+        case int64 _:
+        case nuint _:
+        case uint16 _:
+        case uint32 _:
+        case uint64 _:
+        case bool _: {
+            var t = val;
+            fmt.Fprintf(new bytes_BufferжWriter(b), "%T(%v)\n"u8, t, t);
             break;
         }
         case float32 t: {
-            if (math.IsNaN(((float64)t)) && math.Float32bits(t) != math.Float32bits(((float32)math.NaN()))){
+            if (math.IsNaN((float64)t) && math.Float32bits(t) != math.Float32bits((float32)math.NaN())){
                 // We encode unusual NaNs as hex values, because that is how users are
                 // likely to encounter them in literature about floating-point encoding.
                 // This allows us to reproduce fuzz failures that depend on the specific
@@ -92,7 +62,7 @@ internal static slice<byte> marshalCorpusFile(params ꓸꓸꓸany valsʗp) {
                 // hardware before around 2012). We believe that the increase in clarity
                 // from identifying "NaN" with math.NaN() is worth the slight ambiguity
                 // from a platform-dependent value.
-                fmt.Fprintf(~b, "math.Float32frombits(0x%x)\n"u8, math.Float32bits(t));
+                fmt.Fprintf(new bytes_BufferжWriter(b), "math.Float32frombits(0x%x)\n"u8, math.Float32bits(t));
             } else {
                 // We encode all other values — including the NaN value that is
                 // bitwise-identical to float32(math.Nan()) — using the default
@@ -103,20 +73,20 @@ internal static slice<byte> marshalCorpusFile(params ꓸꓸꓸany valsʗp) {
                 // sufficiently many digits to reconstruct the exact value. For positive
                 // or negative infinity it is the string "+Inf" or "-Inf". For positive
                 // or negative zero it is "0" or "-0". For NaN, it is the string "NaN".
-                fmt.Fprintf(~b, "%T(%v)\n"u8, t, t);
+                fmt.Fprintf(new bytes_BufferжWriter(b), "%T(%v)\n"u8, t, t);
             }
             break;
         }
         case float64 t: {
             if (math.IsNaN(t) && math.Float64bits(t) != math.Float64bits(math.NaN())){
-                fmt.Fprintf(~b, "math.Float64frombits(0x%x)\n"u8, math.Float64bits(t));
+                fmt.Fprintf(new bytes_BufferжWriter(b), "math.Float64frombits(0x%x)\n"u8, math.Float64bits(t));
             } else {
-                fmt.Fprintf(~b, "%T(%v)\n"u8, t, t);
+                fmt.Fprintf(new bytes_BufferжWriter(b), "%T(%v)\n"u8, t, t);
             }
             break;
         }
         case @string t: {
-            fmt.Fprintf(~b, "string(%q)\n"u8, t);
+            fmt.Fprintf(new bytes_BufferжWriter(b), "string(%q)\n"u8, t);
             break;
         }
         case rune t: {
@@ -134,26 +104,26 @@ internal static slice<byte> marshalCorpusFile(params ꓸꓸꓸany valsʗp) {
                 //
                 // We arbitrarily draw the line at UTF-8 validity, which biases toward the
                 // "rune" interpretation. (However, we accept either format as input.)
-                fmt.Fprintf(~b, "rune(%q)\n"u8, t);
+                fmt.Fprintf(new bytes_BufferжWriter(b), "rune(%q)\n"u8, t);
             } else {
-                fmt.Fprintf(~b, "int32(%v)\n"u8, t);
+                fmt.Fprintf(new bytes_BufferжWriter(b), "int32(%v)\n"u8, t);
             }
             break;
         }
         case byte t: {
-            fmt.Fprintf(~b, // uint8
+            fmt.Fprintf(new bytes_BufferжWriter(b), // uint8
  // For bytes, we arbitrarily prefer the character interpretation.
  // (Every byte has a valid character encoding.)
  "byte(%q)\n"u8, t);
             break;
         }
         case slice<byte> t: {
-            fmt.Fprintf(~b, // []uint8
+            fmt.Fprintf(new bytes_BufferжWriter(b), // []uint8
  "[]byte(%q)\n"u8, t);
             break;
         }
         default: {
-            var t = val.type();
+            var t = val;
             throw panic(fmt.Sprintf("unsupported type: %T"u8, t));
             break;
         }}
@@ -166,7 +136,7 @@ internal static (slice<any>, error) unmarshalCorpusFile(slice<byte> b) {
     if (len(b) == 0) {
         return (default!, fmt.Errorf("cannot unmarshal empty string"u8));
     }
-    var lines = bytes.Split(b, slice<byte>("\n"));
+    var lines = bytes.Split(b, slice<byte>((@string)"\n"));
     if (len(lines) < 2) {
         return (default!, fmt.Errorf("must include version and at least one value"u8));
     }
@@ -175,12 +145,14 @@ internal static (slice<any>, error) unmarshalCorpusFile(slice<byte> b) {
         return (default!, fmt.Errorf("unknown encoding version: %s"u8, version));
     }
     slice<any> vals = default!;
-    foreach (var (_, line) in lines[1..]) {
+    foreach (var (_, vᴛ1) in lines[1..]) {
+        var line = vᴛ1;
+
         line = bytes.TrimSpace(line);
         if (len(line) == 0) {
             continue;
         }
-        (v, err) = parseCorpusValue(line);
+        var (v, err) = parseCorpusValue(line);
         if (err != default!) {
             return (default!, fmt.Errorf("malformed line %q: %v"u8, line, err));
         }
@@ -191,7 +163,7 @@ internal static (slice<any>, error) unmarshalCorpusFile(slice<byte> b) {
 
 internal static (any, error) parseCorpusValue(slice<byte> line) {
     var fs = token.NewFileSet();
-    (expr, err) = parser.ParseExprFrom(fs, "(test)"u8, line, 0);
+    var (expr, err) = parser.ParseExprFrom(fs, "(test)"u8, line, 0);
     if (err != default!) {
         return (default!, err);
     }
@@ -208,26 +180,26 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
             if ((~arrayType).Len != default!) {
                 return (default!, fmt.Errorf("expected []byte or primitive type"u8));
             }
-            var (elt, ok) = (~arrayType).Elt._<ж<ast.Ident>>(ᐧ);
-            if (!ok || (~elt).Name != "byte"u8) {
+            var (elt, okΔ2) = (~arrayType).Elt._<ж<ast.Ident>>(ᐧ);
+            if (!okΔ2 || (~elt).Name != "byte"u8) {
                 return (default!, fmt.Errorf("expected []byte"u8));
             }
-            (lit, ok) = arg._<ж<ast.BasicLit>>(ᐧ);
-            if (!ok || (~lit).Kind != token.STRING) {
+            (var lit, okΔ2) = arg._<ж<ast.BasicLit>>(ᐧ);
+            if (!okΔ2 || (~lit).Kind != token.STRING) {
                 return (default!, fmt.Errorf("string literal required for type []byte"u8));
             }
-            var (s, err) = strconv.Unquote((~lit).Value);
-            if (err != default!) {
-                return (default!, err);
+            var (s, errΔ1) = strconv.Unquote((~lit).Value);
+            if (errΔ1 != default!) {
+                return (default!, errΔ1);
             }
             return (slice<byte>(s), default!);
         }
     }
     ж<ast.Ident> idType = default!;
     {
-        var (selector, okΔ2) = (~call).Fun._<ж<ast.SelectorExpr>>(ᐧ); if (okΔ2){
-            var (xIdent, okΔ3) = (~selector).X._<ж<ast.Ident>>(ᐧ);
-            if (!okΔ3 || (~xIdent).Name != "math"u8) {
+        var (selector, okΔ3) = (~call).Fun._<ж<ast.SelectorExpr>>(ᐧ); if (okΔ3){
+            var (xIdent, okΔ4) = (~selector).X._<ж<ast.Ident>>(ᐧ);
+            if (!okΔ4 || (~xIdent).Name != "math"u8) {
                 return (default!, fmt.Errorf("invalid selector type"u8));
             }
             var exprᴛ1 = (~(~selector).Sel).Name;
@@ -242,13 +214,13 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
             }
 
         } else {
-            (idType, ok) = (~call).Fun._<ж<ast.Ident>>(ᐧ);
-            if (!okΔ2) {
+            (idType, okΔ3) = (~call).Fun._<ж<ast.Ident>>(ᐧ);
+            if (!okΔ3) {
                 return (default!, fmt.Errorf("expected []byte or primitive type"u8));
             }
             if ((~idType).Name == "bool"u8) {
-                var (id, okΔ4) = arg._<ж<ast.Ident>>(ᐧ);
-                if (!okΔ4) {
+                var (id, okΔ5) = arg._<ж<ast.Ident>>(ᐧ);
+                if (!okΔ5) {
                     return (default!, fmt.Errorf("malformed bool"u8));
                 }
                 if ((~id).Name == "true"u8){
@@ -265,14 +237,14 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
     @string val = default!;
     token.Token kind = default!;
     {
-        var (op, okΔ5) = arg._<ж<ast.UnaryExpr>>(ᐧ); if (okΔ5){
+        var (op, okΔ6) = arg._<ж<ast.UnaryExpr>>(ᐧ); if (okΔ6){
             switch ((~op).X.type()) {
             case ж<ast.BasicLit> lit: {
                 if ((~op).Op != token.SUB) {
                     return (default!, fmt.Errorf("unsupported operation on int/float: %v"u8, (~op).Op));
                 }
                 val = (~op).Op.String() + (~lit).Value;
-                kind = lit.val.Kind;
+                kind = lit.Value.Kind;
                 break;
             }
             case ж<ast.Ident> lit: {
@@ -290,36 +262,37 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
                 break;
             }
             default: {
-                var lit = (~op).X.type();
+                var lit = (~op).X;
                 return (default!, fmt.Errorf("expected operation on int or float type"u8));
             }}
         } else {
             switch (arg.type()) {
             case ж<ast.BasicLit> lit: {
-                (val, kind) = (lit.val.Value, lit.val.Kind);
+                (val, kind) = (lit.Value.Value, lit.Value.Kind);
                 break;
             }
             case ж<ast.Ident> lit: {
                 if ((~lit).Name != "NaN"u8) {
                     return (default!, fmt.Errorf("literal value required for primitive type"u8));
                 }
-                (val, kind) = ("NaN"u8, token.FLOAT);
+                (val, kind) = ("NaN", token.FLOAT);
                 break;
             }
             default: {
-                var lit = arg.type();
+                var lit = arg;
                 return (default!, fmt.Errorf("literal value required for primitive type"u8));
             }}
         }
     }
     {
-        @string typ = idType.val.Name;
+        @string typ = idType.Value.Name;
         var exprᴛ2 = typ;
         if (exprᴛ2 == "string"u8) {
             if (kind != token.STRING) {
                 return (default!, fmt.Errorf("string literal value required for type string"u8));
             }
-            return strconv.Unquote(val);
+            var (ᴛ1, ᴛ2) = strconv.Unquote(val);
+            return (ᴛ1, ᴛ2);
         }
         if (exprᴛ2 == "byte"u8 || exprᴛ2 == "rune"u8) {
             if (kind == token.INT) {
@@ -339,9 +312,9 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
             if (n < 2) {
                 return (default!, fmt.Errorf("malformed character literal, missing single quotes"u8));
             }
-            var (code, _, _, err) = strconv.UnquoteChar(val[1..(int)(n - 1)], (rune)'\'');
-            if (err != default!) {
-                return (default!, err);
+            var (code, _, _, errΔ3) = strconv.UnquoteChar(val[1..(int)(n - 1)], (rune)'\'');
+            if (errΔ3 != default!) {
+                return (default!, errΔ3);
             }
             if (typ == "rune"u8) {
                 return (code, default!);
@@ -349,7 +322,7 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
             if (code >= 256) {
                 return (default!, fmt.Errorf("can only encode single byte to a byte type"u8));
             }
-            return (((byte)code), default!);
+            return ((byte)code, default!);
         }
         if (exprᴛ2 == "int"u8 || exprᴛ2 == "int8"u8 || exprᴛ2 == "int16"u8 || exprᴛ2 == "int32"u8 || exprᴛ2 == "int64"u8) {
             if (kind != token.INT) {
@@ -367,22 +340,23 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
             if (kind != token.FLOAT && kind != token.INT) {
                 return (default!, fmt.Errorf("float or integer literal required for float32 type"u8));
             }
-            var (v, err) = strconv.ParseFloat(val, 32);
-            return (((float32)v), err);
+            var (v, errΔ4) = strconv.ParseFloat(val, 32);
+            return ((float32)v, errΔ4);
         }
         if (exprᴛ2 == "float64"u8) {
             if (kind != token.FLOAT && kind != token.INT) {
                 return (default!, fmt.Errorf("float or integer literal required for float64 type"u8));
             }
-            return strconv.ParseFloat(val, 64);
+            var (ᴛ1, ᴛ2) = strconv.ParseFloat(val, 64);
+            return (ᴛ1, ᴛ2);
         }
         if (exprᴛ2 == "float32-bits"u8) {
             if (kind != token.INT) {
                 return (default!, fmt.Errorf("integer literal required for math.Float32frombits type"u8));
             }
-            (bits, err) = parseUint(val, "uint32"u8);
-            if (err != default!) {
-                return (default!, err);
+            var (bits, errΔ5) = parseUint(val, "uint32"u8);
+            if (errΔ5 != default!) {
+                return (default!, errΔ5);
             }
             return (math.Float32frombits(bits._<uint32>()), default!);
         }
@@ -390,9 +364,9 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
             if (kind != token.FLOAT && kind != token.INT) {
                 return (default!, fmt.Errorf("integer literal required for math.Float64frombits type"u8));
             }
-            (bits, err) = parseUint(val, "uint64"u8);
-            if (err != default!) {
-                return (default!, err);
+            var (bits, errΔ6) = parseUint(val, "uint64"u8);
+            if (errΔ6 != default!) {
+                return (default!, errΔ6);
             }
             return (math.Float64frombits(bits._<uint64>()), default!);
         }
@@ -413,22 +387,23 @@ internal static (any, error) parseInt(@string val, @string typ) {
  // fit in a regular int. (The test case is still “interesting”, even if the
  // specific values of its inputs are platform-dependent.)
  0, 64);
-        return (((nint)i), err);
+        return ((nint)i, err);
     }
     if (exprᴛ1 == "int8"u8) {
         var (i, err) = strconv.ParseInt(val, 0, 8);
-        return (((int8)i), err);
+        return ((int8)i, err);
     }
     if (exprᴛ1 == "int16"u8) {
         var (i, err) = strconv.ParseInt(val, 0, 16);
-        return (((int16)i), err);
+        return ((int16)i, err);
     }
     if (exprᴛ1 == "int32"u8 || exprᴛ1 == "rune"u8) {
         var (i, err) = strconv.ParseInt(val, 0, 32);
-        return (((int32)i), err);
+        return ((int32)i, err);
     }
     if (exprᴛ1 == "int64"u8) {
-        return strconv.ParseInt(val, 0, 64);
+        var (ᴛ1, ᴛ2) = strconv.ParseInt(val, 0, 64);
+        return (ᴛ1, ᴛ2);
     }
     { /* default: */
         throw panic("unreachable");
@@ -441,22 +416,23 @@ internal static (any, error) parseUint(@string val, @string typ) {
     var exprᴛ1 = typ;
     if (exprᴛ1 == "uint"u8) {
         var (i, err) = strconv.ParseUint(val, 0, 64);
-        return (((nuint)i), err);
+        return ((nuint)i, err);
     }
     if (exprᴛ1 == "uint8"u8 || exprᴛ1 == "byte"u8) {
         var (i, err) = strconv.ParseUint(val, 0, 8);
-        return (((uint8)i), err);
+        return ((uint8)i, err);
     }
     if (exprᴛ1 == "uint16"u8) {
         var (i, err) = strconv.ParseUint(val, 0, 16);
-        return (((uint16)i), err);
+        return ((uint16)i, err);
     }
     if (exprᴛ1 == "uint32"u8) {
         var (i, err) = strconv.ParseUint(val, 0, 32);
-        return (((uint32)i), err);
+        return ((uint32)i, err);
     }
     if (exprᴛ1 == "uint64"u8) {
-        return strconv.ParseUint(val, 0, 64);
+        var (ᴛ1, ᴛ2) = strconv.ParseUint(val, 0, 64);
+        return (ᴛ1, ᴛ2);
     }
     { /* default: */
         throw panic("unreachable");

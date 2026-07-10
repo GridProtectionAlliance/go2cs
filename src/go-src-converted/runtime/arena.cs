@@ -115,27 +115,27 @@ internal static any arena_arena_New(@unsafe.Pointer arena, any typ) {
     if ((abiꓸKind)((~t).Kind_ & abi.KindMask) != abi.Pointer) {
         @throw("arena_New: non-pointer type"u8);
     }
-    var te = ((ж<ptrtype>)(uintptr)(new @unsafe.Pointer(t))).val.Elem;
-    @unsafe.Pointer x = (uintptr)((ж<userArena>)(uintptr)(arena)).@new(te);
-    any result = default!;
-    var e = efaceOf(Ꮡ(result));
-    e.val._type = t;
-    e.val.data = x;
+    var te = ((ж<ptrtype>)(uintptr)(new @unsafe.Pointer(t))).Value.Elem;
+    @unsafe.Pointer x = (uintptr)(((ж<userArena>)(uintptr)(arena))).@new(te);
+    ref var result = ref heap<any>(out var Ꮡresult);
+    var e = efaceOf(Ꮡresult);
+    e.Value._type = t;
+    e.Value.data = x;
     return result;
 }
 
 // arena_arena_Slice is a wrapper around (*userArena).slice.
 //
 //go:linkname arena_arena_Slice arena.runtime_arena_arena_Slice
-internal static void arena_arena_Slice(@unsafe.Pointer arena, any Δslice, nint cap) {
-    ((ж<userArena>)(uintptr)(arena)).Δslice(Δslice, cap);
+internal static void arena_arena_Slice(@unsafe.Pointer arena, any Δsliceᴛ, nint cap) {
+    (((ж<userArena>)(uintptr)(arena))).Δslice(Δsliceᴛ, cap);
 }
 
 // arena_arena_Free is a wrapper around (*userArena).free.
 //
 //go:linkname arena_arena_Free arena.runtime_arena_arena_Free
 internal static void arena_arena_Free(@unsafe.Pointer arena) {
-    ((ж<userArena>)(uintptr)(arena)).free();
+    (((ж<userArena>)(uintptr)(arena))).free();
 }
 
 // arena_heapify takes a value that lives in an arena and makes a copy
@@ -145,28 +145,28 @@ internal static void arena_arena_Free(@unsafe.Pointer arena) {
 internal static any arena_heapify(any s) {
     @unsafe.Pointer v = default!;
     var e = efaceOf(Ꮡ(s));
-    var t = e.val._type;
+    var t = e.Value._type;
     var exprᴛ1 = (abiꓸKind)((~t).Kind_ & abi.KindMask);
     if (exprᴛ1 == abi.ΔString) {
-        v = stringStructOf((ж<@string>)(uintptr)((~e).data)).str;
+        v = stringStructOf((ж<@string>)(uintptr)((~e).data)).Value.str;
     }
     else if (exprᴛ1 == abi.Slice) {
-        v = ((ж<Δslice>)(uintptr)((~e).data)).val.Δarray;
+        v = ((ж<Δsliceᴛ>)(uintptr)((~e).data)).Value.Δarray;
     }
     else if (exprᴛ1 == abi.Pointer) {
-        v = e.val.data;
+        v = e.Value.data;
     }
     else { /* default: */
         throw panic("arena: Clone only supports pointers, slices, and strings");
     }
 
-    var span = spanOf(((uintptr)v));
+    var span = spanOf((uintptr)v);
     if (span == nil || !(~span).isUserArenaChunk) {
         // Not stored in a user arena chunk.
         return s;
     }
     // Heap-allocate storage for a copy.
-    any x = default!;
+    ref var x = ref heap<any>(out var Ꮡx);
     var exprᴛ2 = (abiꓸKind)((~t).Kind_ & abi.KindMask);
     if (exprᴛ2 == abi.ΔString) {
         @string s1 = s._<@string>();
@@ -175,48 +175,48 @@ internal static any arena_heapify(any s) {
         x = s2;
     }
     else if (exprᴛ2 == abi.Slice) {
-        nint len = ((ж<Δslice>)(uintptr)((~e).data)).val.len;
-        var et = ((ж<slicetype>)(uintptr)(new @unsafe.Pointer(t))).val.Elem;
-        var sl = @new<Δslice>();
-        sl.val = new Δslice((uintptr)makeslicecopy(et, len, len, ((ж<Δslice>)(uintptr)((~e).data)).val.Δarray), len, len);
-        var xe = efaceOf(Ꮡ(x));
-        xe.val._type = t;
-        xe.val.data = new @unsafe.Pointer(sl);
+        nint lenΔ2 = ((ж<Δsliceᴛ>)(uintptr)((~e).data)).Value.len;
+        var et = ((ж<slicetype>)(uintptr)(new @unsafe.Pointer(t))).Value.Elem;
+        var sl = @new<Δsliceᴛ>();
+        sl.Value = new Δsliceᴛ((uintptr)makeslicecopy(et, lenΔ2, lenΔ2, ((ж<Δsliceᴛ>)(uintptr)((~e).data)).Value.Δarray), lenΔ2, lenΔ2);
+        var xe = efaceOf(Ꮡx);
+        xe.Value._type = t;
+        xe.Value.data = new @unsafe.Pointer(sl);
     }
     else if (exprᴛ2 == abi.Pointer) {
-        var et = ((ж<ptrtype>)(uintptr)(new @unsafe.Pointer(t))).val.Elem;
+        var et = ((ж<ptrtype>)(uintptr)(new @unsafe.Pointer(t))).Value.Elem;
         @unsafe.Pointer e2 = (uintptr)newobject(et);
         typedmemmove(et, e2, (~e).data);
-        var xe = efaceOf(Ꮡ(x));
-        xe.val._type = t;
-        xe.val.data = e2;
+        var xe = efaceOf(Ꮡx);
+        xe.Value._type = t;
+        xe.Value.data = e2;
     }
 
     return x;
 }
 
 internal static readonly UntypedInt userArenaChunkBytesMax = /* 8 << 20 */ 8388608;
-internal const uintptr userArenaChunkBytes = /* uintptr(int64(userArenaChunkBytesMax-heapArenaBytes)&(int64(userArenaChunkBytesMax-heapArenaBytes)>>63) + heapArenaBytes) */ 4194304; // min(userArenaChunkBytesMax, heapArenaBytes)
-internal const uintptr userArenaChunkPages = /* userArenaChunkBytes / pageSize */ 512;
-internal const uintptr userArenaChunkMaxAllocBytes = /* userArenaChunkBytes / 4 */ 1048576;
+internal static readonly uintptr userArenaChunkBytes = /* uintptr(int64(userArenaChunkBytesMax-heapArenaBytes)&(int64(userArenaChunkBytesMax-heapArenaBytes)>>63) + heapArenaBytes) */ 4194304; // min(userArenaChunkBytesMax, heapArenaBytes)
+internal static readonly uintptr userArenaChunkPages = /* userArenaChunkBytes / pageSize */ 512;
+internal static readonly uintptr userArenaChunkMaxAllocBytes = /* userArenaChunkBytes / 4 */ 1048576;
 
-[GoInit] internal static void initΔ1() {
-    if (userArenaChunkPages * pageSize != userArenaChunkBytes) {
+[GoInit] internal static void init() {
+    if (userArenaChunkPages * (uintptr)pageSize != userArenaChunkBytes) {
         @throw("user arena chunk size is not a multiple of the page size"u8);
     }
     if (userArenaChunkBytes % physPageSize != 0) {
         @throw("user arena chunk size is not a multiple of the physical page size"u8);
     }
     if (userArenaChunkBytes < heapArenaBytes){
-        if (heapArenaBytes % userArenaChunkBytes != 0) {
+        if ((uintptr)heapArenaBytes % userArenaChunkBytes != 0) {
             @throw("user arena chunk size is smaller than a heap arena, but doesn't divide it"u8);
         }
     } else {
-        if (userArenaChunkBytes % heapArenaBytes != 0) {
+        if (userArenaChunkBytes % (uintptr)heapArenaBytes != 0) {
             @throw("user arena chunks size is larger than a heap arena, but not a multiple"u8);
         }
     }
-    lockInit(ᏑuserArenaState.of(struct{lock mutex; reuse []runtime.liveUserArenaChunk; fault []runtime.liveUserArenaChunk}.Ꮡlock), lockRankUserArenaState);
+    lockInit(ᏑuserArenaState.of(userArenaStateᴛ1.Ꮡlock), lockRankUserArenaState);
 }
 
 // userArenaChunkReserveBytes returns the amount of additional bytes to reserve for
@@ -226,7 +226,7 @@ internal static uintptr userArenaChunkReserveBytes() {
     // a pointer/scalar bitmap. We also reserve space for a dummy _type that
     // refers to the bitmap. The PtrBytes field of the dummy _type indicates how
     // many of those bits are valid.
-    return userArenaChunkBytes / goarch.PtrSize / 8 + @unsafe.Sizeof(new _type{});
+    return (uintptr)((uintptr)(userArenaChunkBytes / (uintptr)goarch.PtrSize) / 8) + @unsafe.Sizeof(new _type());
 }
 
 [GoType] partial struct userArena {
@@ -250,13 +250,13 @@ internal static uintptr userArenaChunkReserveBytes() {
     //
     // This is just a best-effort way to discover a concurrent allocation
     // and free. Also used to detect a double-free.
-    internal @internal.runtime.atomic_package.Bool defunct;
+    internal atomic.Bool defunct;
 }
 
 // newUserArena creates a new userArena ready to be used.
 internal static ж<userArena> newUserArena() {
     var a = @new<userArena>();
-    SetFinalizer(a, (ж<userArena> a) => {
+    SetFinalizer(a, (ж<userArena> aΔ1) => {
         // If arena handle is dropped without being freed, then call
         // free on the arena, so the arena chunks are never reclaimed
         // by the garbage collector.
@@ -272,7 +272,7 @@ internal static ж<userArena> newUserArena() {
 // This operation is not safe to call concurrently with other operations on the
 // same arena.
 [GoRecv] internal static @unsafe.Pointer @new(this ref userArena a, ж<_type> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.Value;
 
     return (uintptr)a.alloc(Ꮡtyp, -1);
 }
@@ -289,17 +289,17 @@ internal static ж<userArena> newUserArena() {
         throw panic("userArena.slice: negative cap");
     }
     var i = efaceOf(Ꮡ(sl));
-    var typ = i.val._type;
+    var typ = i.Value._type;
     if ((abiꓸKind)((~typ).Kind_ & abi.KindMask) != abi.Pointer) {
         throw panic("slice result of non-ptr type");
     }
-    typ = ((ж<ptrtype>)(uintptr)(new @unsafe.Pointer(typ))).val.Elem;
+    typ = ((ж<ptrtype>)(uintptr)(new @unsafe.Pointer(typ))).Value.Elem;
     if ((abiꓸKind)((~typ).Kind_ & abi.KindMask) != abi.Slice) {
         throw panic("slice of non-ptr-to-slice type");
     }
-    typ = ((ж<slicetype>)(uintptr)(new @unsafe.Pointer(typ))).val.Elem;
+    typ = ((ж<slicetype>)(uintptr)(new @unsafe.Pointer(typ))).Value.Elem;
     // t is now the element type of the slice we want to allocate.
-    ((ж<Δslice>)(uintptr)((~i).data)).val = new Δslice((uintptr)a.alloc(typ, cap), cap, cap);
+    ((ж<Δsliceᴛ>)(uintptr)((~i).data)).Value = new Δsliceᴛ((uintptr)a.alloc(typ, cap), cap, cap);
 }
 
 // free returns the userArena's chunks back to mheap and marks it as defunct.
@@ -308,13 +308,15 @@ internal static ж<userArena> newUserArena() {
 //
 // This operation is not safe to call concurrently with other operations on the
 // same arena.
-[GoRecv] internal static void free(this ref userArena a) {
+internal static void free(this ж<userArena> Ꮡa) {
+    ref var a = ref Ꮡa.Value;
+
     // Check for a double-free.
-    if (a.defunct.Load()) {
+    if (Ꮡa.of(userArena.Ꮡdefunct).Load()) {
         throw panic("arena double free");
     }
     // Mark ourselves as defunct.
-    a.defunct.Store(true);
+    Ꮡa.of(userArena.Ꮡdefunct).Store(true);
     SetFinalizer(a, default!);
     // Free all the full arenas.
     //
@@ -322,8 +324,8 @@ internal static ж<userArena> newUserArena() {
     var s = a.fullList;
     nint i = len(a.refs) - 2;
     while (s != nil) {
-        a.fullList = s.val.next;
-        s.val.next = default!;
+        a.fullList = s.Value.next;
+        s.Value.next = default!;
         freeUserArenaChunk(s, a.refs[i]);
         s = a.fullList;
         i--;
@@ -343,9 +345,9 @@ internal static ж<userArena> newUserArena() {
             // any use-after-free errors aggressively.
             freeUserArenaChunk(s, a.refs[len(a.refs) - 1]);
         } else {
-            @lock(ᏑuserArenaState.of(struct{lock mutex; reuse []runtime.liveUserArenaChunk; fault []runtime.liveUserArenaChunk}.Ꮡlock));
+            @lock(ᏑuserArenaState.of(userArenaStateᴛ1.Ꮡlock));
             userArenaState.reuse = append(userArenaState.reuse, new liveUserArenaChunk(s, a.refs[len(a.refs) - 1]));
-            unlock(ᏑuserArenaState.of(struct{lock mutex; reuse []runtime.liveUserArenaChunk; fault []runtime.liveUserArenaChunk}.Ꮡlock));
+            unlock(ᏑuserArenaState.of(userArenaStateᴛ1.Ꮡlock));
         }
     }
     // nil out a.active so that a race with freeing will more likely cause a crash.
@@ -358,7 +360,7 @@ internal static ж<userArena> newUserArena() {
 // it will be considered as an element type for a slice backing store with capacity
 // cap.
 [GoRecv] internal static @unsafe.Pointer alloc(this ref userArena a, ж<_type> Ꮡtyp, nint cap) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.Value;
 
     var s = a.active;
     @unsafe.Pointer x = default!;
@@ -385,14 +387,14 @@ internal static ж<userArena> newUserArena() {
             // should never exceed the maximum allocation size.
             @throw("wasted too much memory in an arena chunk"u8);
         }
-        s.val.next = a.fullList;
+        s.Value.next = a.fullList;
         a.fullList = s;
         a.active = default!;
         s = default!;
     }
     @unsafe.Pointer x = default!;
     // Check the partially-used list.
-    @lock(ᏑuserArenaState.of(struct{lock mutex; reuse []runtime.liveUserArenaChunk; fault []runtime.liveUserArenaChunk}.Ꮡlock));
+    @lock(ᏑuserArenaState.of(userArenaStateᴛ1.Ꮡlock));
     if (len(userArenaState.reuse) > 0) {
         // Pick off the last arena chunk from the list.
         nint n = len(userArenaState.reuse) - 1;
@@ -402,7 +404,7 @@ internal static ж<userArena> newUserArena() {
         userArenaState.reuse[n].mspan = default!;
         userArenaState.reuse = userArenaState.reuse[..(int)(n)];
     }
-    unlock(ᏑuserArenaState.of(struct{lock mutex; reuse []runtime.liveUserArenaChunk; fault []runtime.liveUserArenaChunk}.Ꮡlock));
+    unlock(ᏑuserArenaState.of(userArenaStateᴛ1.Ꮡlock));
     if (s == nil) {
         // Allocate a new one.
         (x, s) = newUserArenaChunk();
@@ -416,7 +418,7 @@ internal static ж<userArena> newUserArena() {
 }
 
 [GoType] partial struct liveUserArenaChunk {
-    public partial ref ж<mspan> mspan { get; } // Must represent a user arena chunk.
+    internal partial ref ж<mspan> mspan { get; } // Must represent a user arena chunk.
     // Reference to mspan.base() to keep the chunk alive.
     internal @unsafe.Pointer x;
 }
@@ -435,23 +437,25 @@ internal static ж<userArena> newUserArena() {
     // Protected by lock.
     internal slice<liveUserArenaChunk> fault;
 }
-internal static userArenaStateᴛ1 userArenaState;
+internal static ж<userArenaStateᴛ1> ᏑuserArenaState = new(default(userArenaStateᴛ1));
+internal static ref userArenaStateᴛ1 userArenaState => ref ᏑuserArenaState.Value;
 
 // userArenaNextFree reserves space in the user arena for an item of the specified
 // type. If cap is not -1, this is for an array of cap elements of type t.
-[GoRecv] internal static @unsafe.Pointer userArenaNextFree(this ref mspan s, ж<_type> Ꮡtyp, nint cap) {
-    ref var typ = ref Ꮡtyp.val;
+internal static @unsafe.Pointer userArenaNextFree(this ж<mspan> Ꮡs, ж<_type> Ꮡtyp, nint cap) {
+    ref var s = ref Ꮡs.Value;
+    ref var typ = ref Ꮡtyp.Value;
 
     var size = typ.Size_;
     if (cap > 0) {
-        if (size > ~((uintptr)0) / ((uintptr)cap)) {
+        if (size > ~(uintptr)0 / (uintptr)cap) {
             // Overflow.
             @throw("out of memory"u8);
         }
-        size *= ((uintptr)cap);
+        size *= (uintptr)cap;
     }
     if (size == 0 || cap == 0) {
-        return ((@unsafe.Pointer)(Ꮡ(zerobase)));
+        return @unsafe.Pointer.FromRef(ref (Ꮡzerobase).Value);
     }
     if (size > userArenaChunkMaxAllocBytes) {
         // Redirect allocations that don't fit into a chunk well directly
@@ -471,23 +475,23 @@ internal static userArenaStateᴛ1 userArenaState;
     if ((~mp).gsignal == getg()) {
         @throw("malloc during signal"u8);
     }
-    mp.val.mallocing = 1;
+    mp.Value.mallocing = 1;
     @unsafe.Pointer ptr = default!;
     if (!typ.Pointers()){
         // Allocate pointer-less objects from the tail end of the chunk.
         var (v, ok) = s.userArenaChunkFree.takeFromBack(size, typ.Align_);
         if (ok) {
-            ptr = ((@unsafe.Pointer)v);
+            ptr = (@unsafe.Pointer)v;
         }
     } else {
         var (v, ok) = s.userArenaChunkFree.takeFromFront(size, typ.Align_);
         if (ok) {
-            ptr = ((@unsafe.Pointer)v);
+            ptr = (@unsafe.Pointer)v;
         }
     }
     if (ptr == nil) {
         // Failed to allocate.
-        mp.val.mallocing = 0;
+        mp.Value.mallocing = 0;
         releasem(mp);
         return default!;
     }
@@ -497,18 +501,18 @@ internal static userArenaStateᴛ1 userArenaState;
     // Set up heap bitmap and do extra accounting.
     if (typ.Pointers()) {
         if (cap >= 0){
-            userArenaHeapBitsSetSliceType(Ꮡtyp, cap, ptr, s);
+            userArenaHeapBitsSetSliceType(Ꮡtyp, cap, ptr, Ꮡs);
         } else {
-            userArenaHeapBitsSetType(Ꮡtyp, ptr, s);
+            userArenaHeapBitsSetType(Ꮡtyp, ptr, Ꮡs);
         }
         var c = getMCache(mp);
         if (c == nil) {
             @throw("mallocgc called without a P or outside bootstrapping"u8);
         }
         if (cap > 0){
-            c.val.scanAlloc += size - (typ.Size_ - typ.PtrBytes);
+            c.Value.scanAlloc += size - (typ.Size_ - typ.PtrBytes);
         } else {
-            c.val.scanAlloc += typ.PtrBytes;
+            c.Value.scanAlloc += typ.PtrBytes;
         }
     }
     // Ensure that the stores above that initialize x to
@@ -518,7 +522,7 @@ internal static userArenaStateᴛ1 userArenaState;
     // the garbage collector could follow a pointer to x,
     // but see uninitialized memory or stale heap bits.
     publicationBarrier();
-    mp.val.mallocing = 0;
+    mp.Value.mallocing = 0;
     releasem(mp);
     return ptr;
 }
@@ -527,15 +531,15 @@ internal static userArenaStateᴛ1 userArenaState;
 // Go slice backing store values allocated in a user arena chunk. It sets up the
 // heap bitmap for n consecutive values with type typ allocated at address ptr.
 internal static void userArenaHeapBitsSetSliceType(ж<_type> Ꮡtyp, nint n, @unsafe.Pointer ptr, ж<mspan> Ꮡs) {
-    ref var typ = ref Ꮡtyp.val;
-    ref var s = ref Ꮡs.val;
+    ref var typ = ref Ꮡtyp.Value;
+    ref var s = ref Ꮡs.Value;
 
-    var (mem, overflow) = math.MulUintptr(typ.Size_, ((uintptr)n));
+    var (mem, overflow) = math.MulUintptr(typ.Size_, (uintptr)n);
     if (overflow || n < 0 || mem > maxAlloc) {
-        throw panic(((plainError)"runtime: allocation size out of range"u8));
+        throw panic(((plainError)(@string)"runtime: allocation size out of range"u8));
     }
     for (nint i = 0; i < n; i++) {
-        userArenaHeapBitsSetType(Ꮡtyp, (uintptr)add(ptr.val, ((uintptr)i) * typ.Size_), Ꮡs);
+        userArenaHeapBitsSetType(Ꮡtyp, (uintptr)add(ptr, (uintptr)i * typ.Size_), Ꮡs);
     }
 }
 
@@ -544,11 +548,11 @@ internal static void userArenaHeapBitsSetSliceType(ж<_type> Ꮡtyp, nint n, @un
 // sets up the type metadata for the value with type typ allocated at address ptr.
 // base is the base address of the arena chunk.
 internal static void userArenaHeapBitsSetType(ж<_type> Ꮡtyp, @unsafe.Pointer ptr, ж<mspan> Ꮡs) {
-    ref var typ = ref Ꮡtyp.val;
-    ref var s = ref Ꮡs.val;
+    ref var typ = ref Ꮡtyp.Value;
+    ref var s = ref Ꮡs.Value;
 
     var @base = s.@base();
-    var h = s.writeUserArenaHeapBits(((uintptr)ptr));
+    var h = s.writeUserArenaHeapBits((uintptr)ptr);
     var Δp = typ.GCData;
     // start of 1-bit pointer mask (or GC program)
     uintptr gcProgBits = default!;
@@ -557,8 +561,8 @@ internal static void userArenaHeapBitsSetType(ж<_type> Ꮡtyp, @unsafe.Pointer 
         gcProgBits = runGCProg(addb(Δp, 4), (ж<byte>)(uintptr)(ptr));
         Δp = (ж<byte>)(uintptr)(ptr);
     }
-    var nb = typ.PtrBytes / goarch.PtrSize;
-    for (var i = ((uintptr)0); i < nb; i += ptrBits) {
+    var nb = typ.PtrBytes / (uintptr)goarch.PtrSize;
+    for (var i = (uintptr)0; i < nb; i += ptrBits) {
         var k = nb - i;
         if (k > ptrBits) {
             k = ptrBits;
@@ -578,18 +582,18 @@ internal static void userArenaHeapBitsSetType(ж<_type> Ꮡtyp, @unsafe.Pointer 
     // markers from previous uses because arena chunk pointer bitmaps
     // are always fully cleared when reused.
     h = h.pad(Ꮡs, typ.Size_ - typ.PtrBytes);
-    h.flush(Ꮡs, ((uintptr)ptr), typ.Size_);
+    h.flush(Ꮡs, (uintptr)ptr, typ.Size_);
     if ((abiꓸKind)(typ.Kind_ & abi.KindGCProg) != 0) {
         // Zero out temporary ptrmask buffer inside object.
-        memclrNoHeapPointers(ptr.val, (gcProgBits + 7) / 8);
+        memclrNoHeapPointers(ptr, (gcProgBits + 7) / 8);
     }
     // Update the PtrBytes value in the type information. After this
     // point, the GC will observe the new bitmap.
-    s.largeType.PtrBytes = ((uintptr)ptr) - @base + typ.PtrBytes;
+    s.largeType.Value.PtrBytes = (uintptr)ptr - @base + typ.PtrBytes;
     // Double-check that the bitmap was written out correctly.
     const bool doubleCheck = false;
     if (doubleCheck) {
-        doubleCheckHeapPointersInterior(((uintptr)ptr), ((uintptr)ptr), typ.Size_, typ.Size_, Ꮡtyp, Ꮡ(s.largeType), Ꮡs);
+        doubleCheckHeapPointersInterior((uintptr)ptr, (uintptr)ptr, typ.Size_, typ.Size_, Ꮡtyp, Ꮡs.of(mspan.ᏑlargeType), Ꮡs);
     }
 }
 
@@ -607,9 +611,9 @@ internal static void userArenaHeapBitsSetType(ж<_type> Ꮡtyp, @unsafe.Pointer 
     // We start writing bits maybe in the middle of a heap bitmap word.
     // Remember how many bits into the word we started, so we can be sure
     // not to overwrite the previous bits.
-    h.low = offset / goarch.PtrSize % ptrBits;
+    h.low = offset / (uintptr)goarch.PtrSize % (uintptr)ptrBits;
     // round down to heap word that starts the bitmap word.
-    h.offset = offset - h.low * goarch.PtrSize;
+    h.offset = offset - h.low * (uintptr)goarch.PtrSize;
     // We don't have any bits yet.
     h.mask = 0;
     h.valid = h.low;
@@ -618,28 +622,28 @@ internal static void userArenaHeapBitsSetType(ж<_type> Ꮡtyp, @unsafe.Pointer 
 
 // write appends the pointerness of the next valid pointer slots
 // using the low valid bits of bits. 1=pointer, 0=scalar.
-public static ΔwriteUserArenaHeapBits write(this ΔwriteUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr bits, uintptr valid) {
-    ref var s = ref Ꮡs.val;
+internal static ΔwriteUserArenaHeapBits write(this ΔwriteUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr bits, uintptr valid) {
+    ref var s = ref Ꮡs.Value;
 
     if (h.valid + valid <= ptrBits) {
         // Fast path - just accumulate the bits.
-        h.mask |= (uintptr)(bits << (int)(h.valid));
+        h.mask |= (bits << (int)(h.valid));
         h.valid += valid;
         return h;
     }
     // Too many bits to fit in this word. Write the current word
     // out and move on to the next word.
-    var data = (uintptr)(h.mask | bits << (int)(h.valid));
+    var data = (uintptr)(h.mask | (bits << (int)(h.valid)));
     // mask for this word
-    h.mask = bits >> (int)((ptrBits - h.valid));
+    h.mask = (bits >> (int)(((uintptr)ptrBits - h.valid)));
     // leftover for next word
-    h.valid += valid - ptrBits;
+    h.valid += valid - (uintptr)ptrBits;
     // have h.valid+valid bits, writing ptrBits of them
     // Flush mask to the memory bitmap.
-    var idx = h.offset / (ptrBits * goarch.PtrSize);
-    var m = ((uintptr)1) << (int)(h.low) - 1;
+    var idx = h.offset / (uintptr)(ptrBits * goarch.PtrSize);
+    var m = ((uintptr)1 << (int)(h.low)) - 1;
     var bitmap = s.heapBits();
-    bitmap[idx] = bswapIfBigEndian((uintptr)((uintptr)(bswapIfBigEndian(bitmap[idx]) & m) | data));
+    bitmap[(nint)(idx)] = bswapIfBigEndian((uintptr)((uintptr)(bswapIfBigEndian(bitmap[(nint)(idx)]) & m) | data));
     // Note: no synchronization required for this write because
     // the allocator has exclusive access to the page, and the bitmap
     // entries are all for a single page. Also, visibility of these
@@ -651,13 +655,13 @@ public static ΔwriteUserArenaHeapBits write(this ΔwriteUserArenaHeapBits h, ж
 }
 
 // Add padding of size bytes.
-public static ΔwriteUserArenaHeapBits pad(this ΔwriteUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr size) {
-    ref var s = ref Ꮡs.val;
+internal static ΔwriteUserArenaHeapBits pad(this ΔwriteUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr size) {
+    ref var s = ref Ꮡs.Value;
 
     if (size == 0) {
         return h;
     }
-    var words = size / goarch.PtrSize;
+    var words = size / (uintptr)goarch.PtrSize;
     while (words > ptrBits) {
         h = h.write(Ꮡs, 0, ptrBits);
         words -= ptrBits;
@@ -667,17 +671,17 @@ public static ΔwriteUserArenaHeapBits pad(this ΔwriteUserArenaHeapBits h, ж<m
 
 // Flush the bits that have been written, and add zeros as needed
 // to cover the full object [addr, addr+size).
-public static void flush(this ΔwriteUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr addr, uintptr size) {
-    ref var s = ref Ꮡs.val;
+internal static void flush(this ΔwriteUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr addr, uintptr size) {
+    ref var s = ref Ꮡs.Value;
 
     var offset = addr - s.@base();
     // zeros counts the number of bits needed to represent the object minus the
     // number of bits we've already written. This is the number of 0 bits
     // that need to be added.
-    var zeros = (offset + size - h.offset) / goarch.PtrSize - h.valid;
+    var zeros = (offset + size - h.offset) / (uintptr)goarch.PtrSize - h.valid;
     // Add zero bits up to the bitmap word boundary
     if (zeros > 0) {
-        var z = ptrBits - h.valid;
+        var z = (uintptr)ptrBits - h.valid;
         if (z > zeros) {
             z = zeros;
         }
@@ -686,14 +690,14 @@ public static void flush(this ΔwriteUserArenaHeapBits h, ж<mspan> Ꮡs, uintpt
     }
     // Find word in bitmap that we're going to write.
     var bitmap = s.heapBits();
-    var idx = h.offset / (ptrBits * goarch.PtrSize);
+    var idx = h.offset / (uintptr)(ptrBits * goarch.PtrSize);
     // Write remaining bits.
     if (h.valid != h.low) {
-        var m = ((uintptr)1) << (int)(h.low) - 1;
+        var m = ((uintptr)1 << (int)(h.low)) - 1;
         // don't clear existing bits below "low"
-        m |= (uintptr)(~(((uintptr)1) << (int)(h.valid) - 1));
+        m |= (uintptr)(~(((uintptr)1 << (int)(h.valid)) - 1));
         // don't clear existing bits above "valid"
-        bitmap[idx] = bswapIfBigEndian((uintptr)((uintptr)(bswapIfBigEndian(bitmap[idx]) & m) | h.mask));
+        bitmap[(nint)(idx)] = bswapIfBigEndian((uintptr)((uintptr)(bswapIfBigEndian(bitmap[(nint)(idx)]) & m) | h.mask));
     }
     if (zeros == 0) {
         return;
@@ -707,16 +711,16 @@ public static void flush(this ΔwriteUserArenaHeapBits h, ж<mspan> Ꮡs, uintpt
     // start mid-object, so these writes are still required.
     while (ᐧ) {
         // Write zero bits.
-        var idxΔ1 = h.offset / (ptrBits * goarch.PtrSize);
+        var idxΔ1 = h.offset / (uintptr)(ptrBits * goarch.PtrSize);
         if (zeros < ptrBits){
-            bitmap[idx] = bswapIfBigEndian((uintptr)(bswapIfBigEndian(bitmap[idxΔ1]) & ~(((uintptr)1) << (int)(zeros) - 1)));
+            bitmap[(nint)(idxΔ1)] = bswapIfBigEndian((uintptr)(bswapIfBigEndian(bitmap[(nint)(idxΔ1)]) & ~(((uintptr)1 << (int)(zeros)) - 1)));
             break;
         } else 
         if (zeros == ptrBits){
-            bitmap[idx] = 0;
+            bitmap[(nint)(idxΔ1)] = 0;
             break;
         } else {
-            bitmap[idx] = 0;
+            bitmap[(nint)(idxΔ1)] = 0;
             zeros -= ptrBits;
         }
         h.offset += ptrBits * goarch.PtrSize;
@@ -728,9 +732,9 @@ public static void flush(this ΔwriteUserArenaHeapBits h, ж<mspan> Ꮡs, uintpt
 internal static uintptr bswapIfBigEndian(uintptr x) {
     if (goarch.BigEndian) {
         if (goarch.PtrSize == 8) {
-            return ((uintptr)sys.Bswap64(((uint64)x)));
+            return (uintptr)sys.Bswap64((uint64)x);
         }
-        return ((uintptr)sys.Bswap32(((uint32)x)));
+        return (uintptr)sys.Bswap32((uint32)x);
     }
     return x;
 }
@@ -757,19 +761,16 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
     if ((~mp).gsignal == getg()) {
         @throw("malloc during signal"u8);
     }
-    mp.val.mallocing = 1;
+    mp.Value.mallocing = 1;
     // Allocate a new user arena.
-    ж<mspan> span = default!;
-    systemstack(
-    var mheap_ʗ2 = mheap_;
-    var spanʗ2 = span;
-    () => {
-        spanʗ2 = mheap_ʗ2.allocUserArenaChunk();
+    ref var span = ref heap<ж<mspan>>(out var Ꮡspan);
+    systemstack(() => {
+        Ꮡspan.ValueSlot = Ꮡmheap_.allocUserArenaChunk();
     });
     if (span == nil) {
         @throw("out of memory"u8);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)span.@base());
+    @unsafe.Pointer x = (@unsafe.Pointer)span.@base();
     // Allocate black during GC.
     // All slots hold nil so no scanning is needed.
     // This may be racing with GC so do it atomically if there can be
@@ -779,21 +780,21 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
     }
     if (raceenabled) {
         // TODO(mknyszek): Track individual objects.
-        racemalloc(((@unsafe.Pointer)span.@base()), (~span).elemsize);
+        racemalloc((@unsafe.Pointer)span.@base(), (~span).elemsize);
     }
     if (msanenabled) {
         // TODO(mknyszek): Track individual objects.
-        msanmalloc(((@unsafe.Pointer)span.@base()), (~span).elemsize);
+        msanmalloc((@unsafe.Pointer)span.@base(), (~span).elemsize);
     }
     if (asanenabled) {
         // TODO(mknyszek): Track individual objects.
         var rzSize = computeRZlog((~span).elemsize);
-        span.val.elemsize -= rzSize;
-        (~span).largeType.val.Size_ = span.val.elemsize;
+        span.Value.elemsize -= rzSize;
+        span.Value.largeType.Value.Size_ = span.Value.elemsize;
         var rzStart = span.@base() + (~span).elemsize;
-        span.val.userArenaChunkFree = makeAddrRange(span.@base(), rzStart);
-        asanpoison(((@unsafe.Pointer)rzStart), (~span).limit - rzStart);
-        asanunpoison(((@unsafe.Pointer)span.@base()), (~span).elemsize);
+        span.Value.userArenaChunkFree = makeAddrRange(span.@base(), rzStart);
+        asanpoison((@unsafe.Pointer)rzStart, (~span).limit - rzStart);
+        asanunpoison((@unsafe.Pointer)span.@base(), (~span).elemsize);
     }
     {
         nint rate = MemProfileRate; if (rate > 0) {
@@ -803,13 +804,13 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
             }
             // Note cache c only valid while m acquired; see #47302
             if (rate != 1 && userArenaChunkBytes < (~c).nextSample){
-                c.val.nextSample -= userArenaChunkBytes;
+                c.Value.nextSample -= userArenaChunkBytes;
             } else {
-                profilealloc(mp, ((@unsafe.Pointer)span.@base()), userArenaChunkBytes);
+                profilealloc(mp, (@unsafe.Pointer)span.@base(), userArenaChunkBytes);
             }
         }
     }
-    mp.val.mallocing = 0;
+    mp.Value.mallocing = 0;
     releasem(mp);
     // Again, because this chunk counts toward heapLive, potentially trigger a GC.
     {
@@ -820,14 +821,14 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
     if (debug.malloc) {
         if (inittrace.active && inittrace.id == (~getg()).goid) {
             // Init functions are executed sequentially in a single goroutine.
-            inittrace.bytes += ((uint64)userArenaChunkBytes);
+            inittrace.bytes += (uint64)userArenaChunkBytes;
         }
     }
     // Double-check it's aligned to the physical page size. Based on the current
     // implementation this is trivially true, but it need not be in the future.
     // However, if it's not aligned to the physical page size then we can't properly
     // set it to fault later.
-    if (((uintptr)x) % physPageSize != 0) {
+    if ((uintptr)x % physPageSize != 0) {
         @throw("user arena chunk is not aligned to the physical page size"u8);
     }
     return (x, span);
@@ -852,11 +853,13 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
 //
 // Must be in a non-preemptible state to ensure the consistency of statistics
 // exported to MemStats.
-[GoRecv] internal static void setUserArenaChunkToFault(this ref mspan s) {
+internal static void setUserArenaChunkToFault(this ж<mspan> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
     if (!s.isUserArenaChunk) {
         @throw("invalid span in heapArena for user arena"u8);
     }
-    if (s.npages * pageSize != userArenaChunkBytes) {
+    if (s.npages * (uintptr)pageSize != userArenaChunkBytes) {
         @throw("span on userArena.faultList has invalid size"u8);
     }
     // Update the span class to be noscan. What we want to happen is that
@@ -875,38 +878,37 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
     // Actually set the arena chunk to fault, so we'll get dangling pointer errors.
     // sysFault currently uses a method on each OS that forces it to evacuate all
     // memory backing the chunk.
-    sysFault(((@unsafe.Pointer)s.@base()), s.npages * pageSize);
+    sysFault((@unsafe.Pointer)s.@base(), s.npages * (uintptr)pageSize);
     // Everything on the list is counted as in-use, however sysFault transitions to
     // Reserved, not Prepared, so we skip updating heapFree or heapReleased and just
     // remove the memory from the total altogether; it's just address space now.
-    gcController.heapInUse.add(-((int64)(s.npages * pageSize)));
+    ᏑgcController.of(gcControllerState.ᏑheapInUse).add(-(int64)(s.npages * (uintptr)pageSize));
     // Count this as a free of an object right now as opposed to when
     // the span gets off the quarantine list. The main reason is so that the
     // amount of bytes allocated doesn't exceed how much is counted as
     // "mapped ready," which could cause a deadlock in the pacer.
-    gcController.totalFree.Add(((int64)s.elemsize));
+    ᏑgcController.of(gcControllerState.ᏑtotalFree).Add((int64)s.elemsize);
     // Update consistent stats to match.
     //
     // We're non-preemptible, so it's safe to update consistent stats (our P
     // won't change out from under us).
-    var stats = memstats.heapStats.acquire();
-    atomic.Xaddint64(Ꮡ((~stats).committed), -((int64)(s.npages * pageSize)));
-    atomic.Xaddint64(Ꮡ((~stats).inHeap), -((int64)(s.npages * pageSize)));
-    atomic.Xadd64(Ꮡ((~stats).largeFreeCount), 1);
-    atomic.Xadd64(Ꮡ((~stats).largeFree), ((int64)s.elemsize));
-    memstats.heapStats.release();
+    var stats = Ꮡmemstats.of(mstats.ᏑheapStats).acquire();
+    atomic.Xaddint64(stats.of(heapStatsDelta.Ꮡcommitted), -(int64)(s.npages * (uintptr)pageSize));
+    atomic.Xaddint64(stats.of(heapStatsDelta.ᏑinHeap), -(int64)(s.npages * (uintptr)pageSize));
+    atomic.Xadd64(stats.of(heapStatsDelta.ᏑlargeFreeCount), 1);
+    atomic.Xadd64(stats.of(heapStatsDelta.ᏑlargeFree), (int64)s.elemsize);
+    Ꮡmemstats.of(mstats.ᏑheapStats).release();
     // This counts as a free, so update heapLive.
-    gcController.update(-((int64)s.elemsize), 0);
+    ᏑgcController.update(-(int64)s.elemsize, 0);
     // Mark it as free for the race detector.
     if (raceenabled) {
-        racefree(((@unsafe.Pointer)s.@base()), s.elemsize);
+        racefree((@unsafe.Pointer)s.@base(), s.elemsize);
     }
-    systemstack(
-    var mheap_ʗ2 = mheap_;
-    () => {
-        @lock(Ꮡmheap_ʗ2.of(mheap.Ꮡlock));
-        mheap_ʗ2.userArena.quarantineList.insert(s);
-        unlock(Ꮡmheap_ʗ2.of(mheap.Ꮡlock));
+    systemstack(() => {
+        // Add the user arena to the quarantine list.
+        @lock(Ꮡmheap_.of(mheap.Ꮡlock));
+        Ꮡmheap_.of(mheap.ᏑuserArena).of(mheap_userArena.ᏑquarantineList).insert(Ꮡs);
+        unlock(Ꮡmheap_.of(mheap.Ꮡlock));
     });
 }
 
@@ -927,24 +929,24 @@ internal static bool inUserArenaChunk(uintptr Δp) {
 // and then once the user arena is no longer referenced by the application, will allow it to
 // be reused.
 internal static void freeUserArenaChunk(ж<mspan> Ꮡs, @unsafe.Pointer x) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (!s.isUserArenaChunk) {
         @throw("span is not for a user arena"u8);
     }
-    if (s.npages * pageSize != userArenaChunkBytes) {
+    if (s.npages * (uintptr)pageSize != userArenaChunkBytes) {
         @throw("invalid user arena span size"u8);
     }
     // Mark the region as free to various sanitizers immediately instead
     // of handling them at sweep time.
     if (raceenabled) {
-        racefree(((@unsafe.Pointer)s.@base()), s.elemsize);
+        racefree((@unsafe.Pointer)s.@base(), s.elemsize);
     }
     if (msanenabled) {
-        msanfree(((@unsafe.Pointer)s.@base()), s.elemsize);
+        msanfree((@unsafe.Pointer)s.@base(), s.elemsize);
     }
     if (asanenabled) {
-        asanpoison(((@unsafe.Pointer)s.@base()), s.elemsize);
+        asanpoison((@unsafe.Pointer)s.@base(), s.elemsize);
     }
     // Make ourselves non-preemptible as we manipulate state and statistics.
     //
@@ -956,7 +958,7 @@ internal static void freeUserArenaChunk(ж<mspan> Ꮡs, @unsafe.Pointer x) {
         var faultList = userArenaState.fault;
         userArenaState.fault = default!;
         unlock(ᏑuserArenaState.of(userArenaStateᴛ1.Ꮡlock));
-        s.setUserArenaChunkToFault();
+        Ꮡs.setUserArenaChunkToFault();
         foreach (var (_, lc) in faultList) {
             lc.mspan.setUserArenaChunkToFault();
         }
@@ -966,7 +968,7 @@ internal static void freeUserArenaChunk(ж<mspan> Ꮡs, @unsafe.Pointer x) {
     } else {
         // Put the user arena on the fault list.
         @lock(ᏑuserArenaState.of(userArenaStateᴛ1.Ꮡlock));
-        userArenaState.fault = append(userArenaState.fault, new liveUserArenaChunk(Ꮡs, x.val));
+        userArenaState.fault = append(userArenaState.fault, new liveUserArenaChunk(Ꮡs, x.Value));
         unlock(ᏑuserArenaState.of(userArenaStateᴛ1.Ꮡlock));
     }
     releasem(mp);
@@ -981,25 +983,27 @@ internal static void freeUserArenaChunk(ж<mspan> Ꮡs, @unsafe.Pointer x) {
 // Acquires the heap lock. Must run on the system stack for that reason.
 //
 //go:systemstack
-[GoRecv] internal static ж<mspan> allocUserArenaChunk(this ref mheap h) {
+internal static ж<mspan> allocUserArenaChunk(this ж<mheap> Ꮡh) {
+    ref var h = ref Ꮡh.Value;
+
     ж<mspan> s = default!;
     uintptr @base = default!;
     // First check the free list.
-    @lock(Ꮡ(h.@lock));
+    @lock(Ꮡh.of(mheap.Ꮡlock));
     if (!h.userArena.readyList.isEmpty()){
         s = h.userArena.readyList.first;
-        h.userArena.readyList.remove(s);
+        Ꮡh.of(mheap.ᏑuserArena).of(mheap_userArena.ᏑreadyList).remove(s);
         @base = s.@base();
     } else {
         // Free list was empty, so allocate a new arena.
-        var hintList = Ꮡh.userArena.of(struct{arenaHints *arenaHint; quarantineList runtime.mSpanList; readyList runtime.mSpanList}.ᏑarenaHints);
+        var hintList = Ꮡh.of(mheap.ᏑuserArena).of(mheap_userArena.ᏑarenaHints);
         if (raceenabled) {
             // In race mode just use the regular heap hints. We might fragment
             // the address space, but the race detector requires that the heap
             // is mapped contiguously.
-            hintList = Ꮡ(h.arenaHints);
+            hintList = Ꮡh.of(mheap.ᏑarenaHints);
         }
-        var (v, size) = h.sysAlloc(userArenaChunkBytes, hintList, false);
+        var (v, size) = Ꮡh.sysAlloc(userArenaChunkBytes, hintList, false);
         if (size % userArenaChunkBytes != 0) {
             @throw("sysAlloc size is not divisible by userArenaChunkBytes"u8);
         }
@@ -1010,51 +1014,51 @@ internal static void freeUserArenaChunk(ж<mspan> Ꮡs, @unsafe.Pointer x) {
             //
             // Divide it up and put it on the ready list.
             for (var i = userArenaChunkBytes; i < size; i += userArenaChunkBytes) {
-                var sΔ1 = h.allocMSpanLocked();
-                sΔ1.init(((uintptr)v) + i, userArenaChunkPages);
-                h.userArena.readyList.insertBack(sΔ1);
+                var sΔ1 = Ꮡh.allocMSpanLocked();
+                sΔ1.init((uintptr)v + i, userArenaChunkPages);
+                Ꮡh.of(mheap.ᏑuserArena).of(mheap_userArena.ᏑreadyList).insertBack(sΔ1);
             }
             size = userArenaChunkBytes;
         }
-        @base = ((uintptr)v);
+        @base = (uintptr)v;
         if (@base == 0) {
             // Out of memory.
-            unlock(Ꮡ(h.@lock));
+            unlock(Ꮡh.of(mheap.Ꮡlock));
             return default!;
         }
-        s = h.allocMSpanLocked();
+        s = Ꮡh.allocMSpanLocked();
     }
-    unlock(Ꮡ(h.@lock));
+    unlock(Ꮡh.of(mheap.Ꮡlock));
     // sysAlloc returns Reserved address space, and any span we're
     // reusing is set to fault (so, also Reserved), so transition
     // it to Prepared and then Ready.
     //
     // Unlike (*mheap).grow, just map in everything that we
     // asked for. We're likely going to use it all.
-    sysMap(((@unsafe.Pointer)@base), userArenaChunkBytes, ᏑgcController.of(gcControllerState.ᏑheapReleased));
-    sysUsed(((@unsafe.Pointer)@base), userArenaChunkBytes, userArenaChunkBytes);
+    sysMap((@unsafe.Pointer)@base, userArenaChunkBytes, ᏑgcController.of(gcControllerState.ᏑheapReleased));
+    sysUsed((@unsafe.Pointer)@base, userArenaChunkBytes, userArenaChunkBytes);
     // Model the user arena as a heap span for a large object.
     var spc = makeSpanClass(0, false);
-    h.initSpan(s, spanAllocHeap, spc, @base, userArenaChunkPages);
-    s.val.isUserArenaChunk = true;
-    s.val.elemsize -= userArenaChunkReserveBytes();
-    s.val.limit = s.@base() + (~s).elemsize;
-    s.val.freeindex = 1;
-    s.val.allocCount = 1;
+    Ꮡh.initSpan(s, spanAllocHeap, spc, @base, userArenaChunkPages);
+    s.Value.isUserArenaChunk = true;
+    s.Value.elemsize -= userArenaChunkReserveBytes();
+    s.Value.limit = s.@base() + (~s).elemsize;
+    s.Value.freeindex = 1;
+    s.Value.allocCount = 1;
     // Account for this new arena chunk memory.
-    gcController.heapInUse.add(((int64)userArenaChunkBytes));
-    gcController.heapReleased.add(-((int64)userArenaChunkBytes));
-    var stats = memstats.heapStats.acquire();
-    atomic.Xaddint64(Ꮡ((~stats).inHeap), ((int64)userArenaChunkBytes));
-    atomic.Xaddint64(Ꮡ((~stats).committed), ((int64)userArenaChunkBytes));
+    ᏑgcController.of(gcControllerState.ᏑheapInUse).add((int64)userArenaChunkBytes);
+    ᏑgcController.of(gcControllerState.ᏑheapReleased).add(-(int64)userArenaChunkBytes);
+    var stats = Ꮡmemstats.of(mstats.ᏑheapStats).acquire();
+    atomic.Xaddint64(stats.of(heapStatsDelta.ᏑinHeap), (int64)userArenaChunkBytes);
+    atomic.Xaddint64(stats.of(heapStatsDelta.Ꮡcommitted), (int64)userArenaChunkBytes);
     // Model the arena as a single large malloc.
-    atomic.Xadd64(Ꮡ((~stats).largeAlloc), ((int64)(~s).elemsize));
-    atomic.Xadd64(Ꮡ((~stats).largeAllocCount), 1);
-    memstats.heapStats.release();
+    atomic.Xadd64(stats.of(heapStatsDelta.ᏑlargeAlloc), (int64)(~s).elemsize);
+    atomic.Xadd64(stats.of(heapStatsDelta.ᏑlargeAllocCount), 1);
+    Ꮡmemstats.of(mstats.ᏑheapStats).release();
     // Count the alloc in inconsistent, internal stats.
-    gcController.totalAlloc.Add(((int64)(~s).elemsize));
+    ᏑgcController.of(gcControllerState.ᏑtotalAlloc).Add((int64)(~s).elemsize);
     // Update heapLive.
-    gcController.update(((int64)(~s).elemsize), 0);
+    ᏑgcController.update((int64)(~s).elemsize, 0);
     // This must clear the entire heap bitmap so that it's safe
     // to allocate noscan data without writing anything out.
     s.initHeapBits(true);
@@ -1067,20 +1071,20 @@ internal static void freeUserArenaChunk(ж<mspan> Ꮡs, @unsafe.Pointer x) {
     // gains are almost always worth it. Note: it's important that we
     // clear even if it's freshly mapped and we know there's no point
     // to zeroing as *that* is the critical signal to use huge pages.
-    memclrNoHeapPointers(((@unsafe.Pointer)s.@base()), (~s).elemsize);
-    s.val.needzero = 0;
-    s.val.freeIndexForScan = 1;
+    memclrNoHeapPointers((@unsafe.Pointer)s.@base(), (~s).elemsize);
+    s.Value.needzero = 0;
+    s.Value.freeIndexForScan = 1;
     // Set up the range for allocation.
-    s.val.userArenaChunkFree = makeAddrRange(@base, @base + (~s).elemsize);
+    s.Value.userArenaChunkFree = makeAddrRange(@base, @base + (~s).elemsize);
     // Put the large span in the mcentral swept list so that it's
     // visible to the background sweeper.
     h.central[spc].mcentral.fullSwept(h.sweepgen).push(s);
     // Set up an allocation header. Avoid write barriers here because this type
     // is not a real type, and it exists in an invalid location.
-    ((ж<uintptr>)(uintptr)(((@unsafe.Pointer)(Ꮡ((~s).largeType))))).val = ((uintptr)((@unsafe.Pointer)(~s).limit));
-    ((ж<uintptr>)(uintptr)(((@unsafe.Pointer)(Ꮡ((~(~s).largeType).GCData))))).val = (~s).limit + @unsafe.Sizeof(new _type{});
-    (~s).largeType.val.PtrBytes = 0;
-    (~s).largeType.val.Size_ = s.val.elemsize;
+    ((ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref (s.of(mspan.ᏑlargeType)).Value))).Value = (uintptr)(@unsafe.Pointer)(~s).limit;
+    ((ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref ((~s).largeType.of(_type.ᏑGCData)).Value))).Value = (~s).limit + @unsafe.Sizeof(new _type());
+    s.Value.largeType.Value.PtrBytes = 0;
+    s.Value.largeType.Value.Size_ = s.Value.elemsize;
     return s;
 }
 

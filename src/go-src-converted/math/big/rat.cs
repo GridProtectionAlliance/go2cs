@@ -24,8 +24,7 @@ partial class big_package {
     // the earliest opportunity (when an assignment to the Rat
     // is made), such uninitialized denominators are set to 1.
     // a.neg determines the sign of the Rat, b.neg is ignored.
-    internal ΔInt a;
-    internal ΔInt b;
+    internal ΔInt a, b;
 }
 
 // NewRat creates a new [Rat] with numerator a and denominator b.
@@ -35,11 +34,13 @@ public static ж<ΔRat> NewRat(int64 a, int64 b) {
 
 // SetFloat64 sets z to exactly f and returns z.
 // If f is not finite, SetFloat returns nil.
-[GoRecv] public static ж<ΔRat> SetFloat64(this ref ΔRat z, float64 f) {
-    static readonly UntypedInt expMask = /* 1<<11 - 1 */ 2047;
+public static ж<ΔRat> SetFloat64(this ж<ΔRat> Ꮡz, float64 f) {
+    ref var z = ref Ꮡz.Value;
+
+    UntypedInt expMask = /* 1<<11 - 1 */ 2047;
     var bits = math.Float64bits(f);
-    var mantissa = (uint64)(bits & (1 << (int)(52) - 1));
-    nint exp = ((nint)((uint64)((bits >> (int)(52)) & expMask)));
+    var mantissa = (uint64)(bits & (4503599627370496L - 1));
+    nint exp = (nint)((uint64)(((bits >> (int)(52))) & (uint64)expMask));
     var exprᴛ1 = exp;
     if (exprᴛ1 == expMask) {
         return default!;
@@ -48,7 +49,7 @@ public static ж<ΔRat> NewRat(int64 a, int64 b) {
         exp -= 1022;
     }
     else { /* default: */
-        mantissa |= (uint64)(1 << (int)(52));
+        mantissa |= (uint64)(((uint64)1 << (int)(52)));
         exp -= 1023;
     }
 
@@ -58,18 +59,18 @@ public static ж<ΔRat> NewRat(int64 a, int64 b) {
     nint shift = 52 - exp;
     // Optimization (?): partially pre-normalise.
     while ((uint64)(mantissa & 1) == 0 && shift > 0) {
-        mantissa >>= (UntypedInt)(1);
+        mantissa >>= (int)(1);
         shift--;
     }
-    z.a.SetUint64(mantissa);
+    Ꮡz.of(big_package.ΔRat.Ꮡa).SetUint64(mantissa);
     z.a.neg = f < 0;
-    z.b.Set(intOne);
+    Ꮡz.of(big_package.ΔRat.Ꮡb).Set(intOne);
     if (shift > 0){
-        z.b.Lsh(Ꮡ(z.b), ((nuint)shift));
+        Ꮡz.of(big_package.ΔRat.Ꮡb).Lsh(Ꮡz.of(big_package.ΔRat.Ꮡb), (nuint)shift);
     } else {
-        z.a.Lsh(Ꮡ(z.a), ((nuint)(-shift)));
+        Ꮡz.of(big_package.ΔRat.Ꮡa).Lsh(Ꮡz.of(big_package.ΔRat.Ꮡa), (nuint)(-shift));
     }
-    return z.norm();
+    return Ꮡz.norm();
 }
 
 // quotToFloat32 returns the non-negative float32 value
@@ -80,15 +81,14 @@ internal static (float32 f, bool exact) quotToFloat32(nat a, nat b) {
     float32 f = default!;
     bool exact = default!;
 
-    static readonly UntypedInt Fsize = 32;
-    static readonly UntypedInt Msize = 23;
-    static readonly UntypedInt Msize1 = /* Msize + 1 */ 24; // incl. implicit 1
-    static readonly UntypedInt Msize2 = /* Msize1 + 1 */ 25;
-    static readonly UntypedInt Esize = /* Fsize - Msize1 */ 8;
-    static readonly UntypedInt Ebias = /* 1<<(Esize-1) - 1 */ 127;
-    GoUntyped Emin = /* 1 - Ebias */
-            GoUntyped.Parse("-126");
-    static readonly UntypedInt Emax = /* Ebias */ 127;
+    UntypedInt Fsize = 32;
+    UntypedInt Msize = 23;
+    UntypedInt Msize1 = /* Msize + 1 */ 24; // incl. implicit 1
+    UntypedInt Msize2 = /* Msize1 + 1 */ 25;
+    UntypedInt Esize = /* Fsize - Msize1 */ 8;
+    UntypedInt Ebias = /* 1<<(Esize-1) - 1 */ 127;
+    UntypedInt Emin = /* 1 - Ebias */ -126;
+    UntypedInt Emax = /* Ebias */ 127;
     // TODO(adonovan): specialize common degenerate cases: 1.0, integers.
     nint alen = a.bitLen();
     if (alen == 0) {
@@ -110,42 +110,42 @@ internal static (float32 f, bool exact) quotToFloat32(nat a, nat b) {
     a2 = a2.set(a);
     b2 = b2.set(b);
     {
-        nint shift = Msize2 - exp; if (shift > 0){
-            a2 = a2.shl(a2, ((nuint)shift));
+        nint shift = (nint)Msize2 - exp; if (shift > 0){
+            a2 = a2.shl(a2, (nuint)shift);
         } else 
         if (shift < 0) {
-            b2 = b2.shl(b2, ((nuint)(-shift)));
+            b2 = b2.shl(b2, (nuint)(-shift));
         }
     }
     // 2. Compute quotient and remainder (q, r).  NB: due to the
     // extra shift, the low-order bit of q is logically the
     // high-order bit of r.
     nat q = default!;
-    (q, r) = q.div(a2, a2, b2);
+    (q, var r) = q.div(a2, a2, b2);
     // (recycle a2)
     var mantissa = low32(q);
     var haveRem = len(r) > 0;
     // mantissa&1 && !haveRem => remainder is exactly half
     // 3. If quotient didn't fit in Msize2 bits, redo division by b2<<1
     // (in effect---we accomplish this incrementally).
-    if (mantissa >> (int)(Msize2) == 1) {
+    if ((mantissa >> (int)(Msize2)) == 1) {
         if ((uint32)(mantissa & 1) == 1) {
             haveRem = true;
         }
-        mantissa >>= (UntypedInt)(1);
+        mantissa >>= (int)(1);
         exp++;
     }
-    if (mantissa >> (int)(Msize1) != 1) {
+    if ((mantissa >> (int)(Msize1)) != 1) {
         throw panic(fmt.Sprintf("expected exactly %d bits of result"u8, Msize2));
     }
     // 4. Rounding.
     if (Emin - Msize <= exp && exp <= Emin) {
         // Denormal case; lose 'shift' bits of precision.
-        nuint shift = ((nuint)(Emin - (exp - 1)));
+        nuint shift = (nuint)((nint)Emin - (exp - 1));
         // [1..Esize1)
-        var lostbits = (uint32)(mantissa & (1 << (int)(shift) - 1));
+        var lostbits = (uint32)(mantissa & (((uint32)1 << (int)(shift)) - 1));
         haveRem = haveRem || lostbits != 0;
-        mantissa >>= (nuint)(shift);
+        mantissa >>= (int)(shift);
         exp = 2 - Ebias;
     }
     // == exp + shift
@@ -155,18 +155,18 @@ internal static (float32 f, bool exact) quotToFloat32(nat a, nat b) {
         exact = false;
         if (haveRem || (uint32)(mantissa & 2) != 0) {
             {
-                mantissa++; if (mantissa >= 1 << (int)(Msize2)) {
+                mantissa++; if (mantissa >= ((uint32)1 << (int)(Msize2))) {
                     // Complete rollover 11...1 => 100...0, so shift is safe
-                    mantissa >>= (UntypedInt)(1);
+                    mantissa >>= (int)(1);
                     exp++;
                 }
             }
         }
     }
-    mantissa >>= (UntypedInt)(1);
+    mantissa >>= (int)(1);
     // discard rounding bit.  Mantissa now scaled by 1<<Msize1.
-    f = ((float32)math.Ldexp(((float64)mantissa), exp - Msize1));
-    if (math.IsInf(((float64)f), 0)) {
+    f = (float32)math.Ldexp((float64)mantissa, exp - (nint)Msize1);
+    if (math.IsInf((float64)f, 0)) {
         exact = false;
     }
     return (f, exact);
@@ -180,15 +180,14 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
     float64 f = default!;
     bool exact = default!;
 
-    static readonly UntypedInt Fsize = 64;
-    static readonly UntypedInt Msize = 52;
-    static readonly UntypedInt Msize1 = /* Msize + 1 */ 53; // incl. implicit 1
-    static readonly UntypedInt Msize2 = /* Msize1 + 1 */ 54;
-    static readonly UntypedInt Esize = /* Fsize - Msize1 */ 11;
-    static readonly UntypedInt Ebias = /* 1<<(Esize-1) - 1 */ 1023;
-    GoUntyped Emin = /* 1 - Ebias */
-            GoUntyped.Parse("-1022");
-    static readonly UntypedInt Emax = /* Ebias */ 1023;
+    UntypedInt Fsize = 64;
+    UntypedInt Msize = 52;
+    UntypedInt Msize1 = /* Msize + 1 */ 53; // incl. implicit 1
+    UntypedInt Msize2 = /* Msize1 + 1 */ 54;
+    UntypedInt Esize = /* Fsize - Msize1 */ 11;
+    UntypedInt Ebias = /* 1<<(Esize-1) - 1 */ 1023;
+    UntypedInt Emin = /* 1 - Ebias */ -1022;
+    UntypedInt Emax = /* Ebias */ 1023;
     // TODO(adonovan): specialize common degenerate cases: 1.0, integers.
     nint alen = a.bitLen();
     if (alen == 0) {
@@ -210,42 +209,42 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
     a2 = a2.set(a);
     b2 = b2.set(b);
     {
-        nint shift = Msize2 - exp; if (shift > 0){
-            a2 = a2.shl(a2, ((nuint)shift));
+        nint shift = (nint)Msize2 - exp; if (shift > 0){
+            a2 = a2.shl(a2, (nuint)shift);
         } else 
         if (shift < 0) {
-            b2 = b2.shl(b2, ((nuint)(-shift)));
+            b2 = b2.shl(b2, (nuint)(-shift));
         }
     }
     // 2. Compute quotient and remainder (q, r).  NB: due to the
     // extra shift, the low-order bit of q is logically the
     // high-order bit of r.
     nat q = default!;
-    (q, r) = q.div(a2, a2, b2);
+    (q, var r) = q.div(a2, a2, b2);
     // (recycle a2)
     var mantissa = low64(q);
     var haveRem = len(r) > 0;
     // mantissa&1 && !haveRem => remainder is exactly half
     // 3. If quotient didn't fit in Msize2 bits, redo division by b2<<1
     // (in effect---we accomplish this incrementally).
-    if (mantissa >> (int)(Msize2) == 1) {
+    if ((mantissa >> (int)(Msize2)) == 1) {
         if ((uint64)(mantissa & 1) == 1) {
             haveRem = true;
         }
-        mantissa >>= (UntypedInt)(1);
+        mantissa >>= (int)(1);
         exp++;
     }
-    if (mantissa >> (int)(Msize1) != 1) {
+    if ((mantissa >> (int)(Msize1)) != 1) {
         throw panic(fmt.Sprintf("expected exactly %d bits of result"u8, Msize2));
     }
     // 4. Rounding.
     if (Emin - Msize <= exp && exp <= Emin) {
         // Denormal case; lose 'shift' bits of precision.
-        nuint shift = ((nuint)(Emin - (exp - 1)));
+        nuint shift = (nuint)((nint)Emin - (exp - 1));
         // [1..Esize1)
-        var lostbits = (uint64)(mantissa & (1 << (int)(shift) - 1));
+        var lostbits = (uint64)(mantissa & (((uint64)1 << (int)(shift)) - 1));
         haveRem = haveRem || lostbits != 0;
-        mantissa >>= (nuint)(shift);
+        mantissa >>= (int)(shift);
         exp = 2 - Ebias;
     }
     // == exp + shift
@@ -255,17 +254,17 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
         exact = false;
         if (haveRem || (uint64)(mantissa & 2) != 0) {
             {
-                mantissa++; if (mantissa >= 1 << (int)(Msize2)) {
+                mantissa++; if (mantissa >= ((uint64)1 << (int)(Msize2))) {
                     // Complete rollover 11...1 => 100...0, so shift is safe
-                    mantissa >>= (UntypedInt)(1);
+                    mantissa >>= (int)(1);
                     exp++;
                 }
             }
         }
     }
-    mantissa >>= (UntypedInt)(1);
+    mantissa >>= (int)(1);
     // discard rounding bit.  Mantissa now scaled by 1<<Msize1.
-    f = math.Ldexp(((float64)mantissa), exp - Msize1);
+    f = math.Ldexp((float64)mantissa, exp - (nint)Msize1);
     if (math.IsInf(f, 0)) {
         exact = false;
     }
@@ -312,106 +311,119 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
 
 // SetFrac sets z to a/b and returns z.
 // If b == 0, SetFrac panics.
-[GoRecv] public static ж<ΔRat> SetFrac(this ref ΔRat z, ж<ΔInt> Ꮡa, ж<ΔInt> Ꮡb) {
-    ref var a = ref Ꮡa.val;
-    ref var b = ref Ꮡb.val;
+public static ж<ΔRat> SetFrac(this ж<ΔRat> Ꮡz, ж<ΔInt> Ꮡa, ж<ΔInt> Ꮡb) {
+    ref var z = ref Ꮡz.Value;
+    ref var a = ref Ꮡa.Value;
+    ref var b = ref Ꮡb.DerefOrNil();
 
     z.a.neg = a.neg != b.neg;
     var babs = b.abs;
     if (len(babs) == 0) {
         throw panic("division by zero");
     }
-    if (Ꮡ(z.a) == Ꮡb || alias(z.a.abs, babs)) {
+    if (Ꮡz.of(big_package.ΔRat.Ꮡa) == Ꮡb || alias(z.a.abs, babs)) {
         babs = ((nat)default!).set(babs);
     }
     // make a copy
     z.a.abs = z.a.abs.set(a.abs);
     z.b.abs = z.b.abs.set(babs);
-    return z.norm();
+    return Ꮡz.norm();
 }
 
 // SetFrac64 sets z to a/b and returns z.
 // If b == 0, SetFrac64 panics.
-[GoRecv] public static ж<ΔRat> SetFrac64(this ref ΔRat z, int64 a, int64 b) {
+public static ж<ΔRat> SetFrac64(this ж<ΔRat> Ꮡz, int64 a, int64 b) {
+    ref var z = ref Ꮡz.Value;
+
     if (b == 0) {
         throw panic("division by zero");
     }
-    z.a.SetInt64(a);
+    Ꮡz.of(big_package.ΔRat.Ꮡa).SetInt64(a);
     if (b < 0) {
         b = -b;
         z.a.neg = !z.a.neg;
     }
-    z.b.abs = z.b.abs.setUint64(((uint64)b));
-    return z.norm();
+    z.b.abs = z.b.abs.setUint64((uint64)b);
+    return Ꮡz.norm();
 }
 
 // SetInt sets z to x (by making a copy of x) and returns z.
-[GoRecv("capture")] public static ж<ΔRat> SetInt(this ref ΔRat z, ж<ΔInt> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+public static ж<ΔRat> SetInt(this ж<ΔRat> Ꮡz, ж<ΔInt> Ꮡx) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
 
-    z.a.Set(Ꮡx);
+    Ꮡz.of(big_package.ΔRat.Ꮡa).Set(Ꮡx);
     z.b.abs = z.b.abs.setWord(1);
-    return SetIntꓸᏑz;
+    return Ꮡz;
 }
 
 // SetInt64 sets z to x and returns z.
-[GoRecv("capture")] public static ж<ΔRat> SetInt64(this ref ΔRat z, int64 x) {
-    z.a.SetInt64(x);
+public static ж<ΔRat> SetInt64(this ж<ΔRat> Ꮡz, int64 x) {
+    ref var z = ref Ꮡz.Value;
+
+    Ꮡz.of(big_package.ΔRat.Ꮡa).SetInt64(x);
     z.b.abs = z.b.abs.setWord(1);
-    return SetInt64ꓸᏑz;
+    return Ꮡz;
 }
 
 // SetUint64 sets z to x and returns z.
-[GoRecv("capture")] public static ж<ΔRat> SetUint64(this ref ΔRat z, uint64 x) {
-    z.a.SetUint64(x);
+public static ж<ΔRat> SetUint64(this ж<ΔRat> Ꮡz, uint64 x) {
+    ref var z = ref Ꮡz.Value;
+
+    Ꮡz.of(big_package.ΔRat.Ꮡa).SetUint64(x);
     z.b.abs = z.b.abs.setWord(1);
-    return SetUint64ꓸᏑz;
+    return Ꮡz;
 }
 
 // Set sets z to x (by making a copy of x) and returns z.
-[GoRecv("capture")] public static ж<ΔRat> Set(this ref ΔRat z, ж<ΔRat> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+public static ж<ΔRat> Set(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
 
-    if (z != Ꮡx) {
-        z.a.Set(Ꮡ(x.a));
-        z.b.Set(Ꮡ(x.b));
+    if (Ꮡz != Ꮡx) {
+        Ꮡz.of(big_package.ΔRat.Ꮡa).Set(Ꮡx.of(big_package.ΔRat.Ꮡa));
+        Ꮡz.of(big_package.ΔRat.Ꮡb).Set(Ꮡx.of(big_package.ΔRat.Ꮡb));
     }
     if (len(z.b.abs) == 0) {
         z.b.abs = z.b.abs.setWord(1);
     }
-    return SetꓸᏑz;
+    return Ꮡz;
 }
 
 // Abs sets z to |x| (the absolute value of x) and returns z.
-[GoRecv("capture")] public static ж<ΔRat> Abs(this ref ΔRat z, ж<ΔRat> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+public static ж<ΔRat> Abs(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
 
-    z.Set(Ꮡx);
+    Ꮡz.Set(Ꮡx);
     z.a.neg = false;
-    return AbsꓸᏑz;
+    return Ꮡz;
 }
 
 // Neg sets z to -x and returns z.
-[GoRecv("capture")] public static ж<ΔRat> Neg(this ref ΔRat z, ж<ΔRat> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+public static ж<ΔRat> Neg(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
 
-    z.Set(Ꮡx);
+    Ꮡz.Set(Ꮡx);
     z.a.neg = len(z.a.abs) > 0 && !z.a.neg;
     // 0 has no sign
-    return NegꓸᏑz;
+    return Ꮡz;
 }
 
 // Inv sets z to 1/x and returns z.
 // If x == 0, Inv panics.
-[GoRecv("capture")] public static ж<ΔRat> Inv(this ref ΔRat z, ж<ΔRat> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+public static ж<ΔRat> Inv(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
 
     if (len(x.a.abs) == 0) {
         throw panic("division by zero");
     }
-    z.Set(Ꮡx);
-    (z.a.abs, z.b.abs) = (z.b.abs, z.a.abs);
-    return InvꓸᏑz;
+    Ꮡz.Set(Ꮡx);
+    z.a.abs = z.b.abs;
+    z.b.abs = z.a.abs;
+    return Ꮡz;
 }
 
 // Sign returns:
@@ -431,8 +443,10 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
 // The result is a reference to x's numerator; it
 // may change if a new value is assigned to x, and vice versa.
 // The sign of the numerator corresponds to the sign of x.
-[GoRecv] public static ж<ΔInt> Num(this ref ΔRat x) {
-    return Ꮡ(x.a);
+public static ж<ΔInt> Num(this ж<ΔRat> Ꮡx) {
+    ref var x = ref Ꮡx.Value;
+
+    return Ꮡx.of(big_package.ΔRat.Ꮡa);
 }
 
 // Denom returns the denominator of x; it is always > 0.
@@ -442,24 +456,28 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
 // any operation that sets x will do, including x.Set(x).)
 // If the result is a reference to x's denominator it
 // may change if a new value is assigned to x, and vice versa.
-[GoRecv] public static ж<ΔInt> Denom(this ref ΔRat x) {
+public static ж<ΔInt> Denom(this ж<ΔRat> Ꮡx) {
+    ref var x = ref Ꮡx.Value;
+
     // Note that x.b.neg is guaranteed false.
     if (len(x.b.abs) == 0) {
         // Note: If this proves problematic, we could
         //       panic instead and require the Rat to
         //       be explicitly initialized.
-        return Ꮡ(new ΔInt(abs: new nat{1}));
+        return Ꮡ(new ΔInt(abs: new nat(new Word[]{1}.slice())));
     }
-    return Ꮡ(x.b);
+    return Ꮡx.of(big_package.ΔRat.Ꮡb);
 }
 
-[GoRecv("capture")] internal static ж<ΔRat> norm(this ref ΔRat z) {
+internal static ж<ΔRat> norm(this ж<ΔRat> Ꮡz) {
+    ref var z = ref Ꮡz.Value;
+
     var matchᴛ1 = false;
     if (len(z.a.abs) is 0) { matchᴛ1 = true;
         z.a.neg = false;
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && len(z.b.abs) is 0)) {
+    if (fallthrough || !matchᴛ1 && len(z.b.abs) is 0) {
         z.b.abs = z.b.abs.setWord(1);
     }
     else { /* default: */
@@ -470,15 +488,15 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
             var f = NewInt(0).lehmerGCD(nil, // z == 0; normalize sign and denominator
  // z is integer; normalize denominator
  // z is fraction; normalize numerator and denominator
- nil, Ꮡ(z.a), Ꮡ(z.b)); if (f.Cmp(intOne) != 0) {
-                (z.a.abs, Δ_) = z.a.abs.div(default!, z.a.abs, (~f).abs);
-                (z.b.abs, Δ_) = z.b.abs.div(default!, z.b.abs, (~f).abs);
+ nil, Ꮡz.of(big_package.ΔRat.Ꮡa), Ꮡz.of(big_package.ΔRat.Ꮡb)); if (f.Cmp(intOne) != 0) {
+                (z.a.abs, _) = z.a.abs.div(default!, z.a.abs, (~f).abs);
+                (z.b.abs, _) = z.b.abs.div(default!, z.b.abs, (~f).abs);
             }
         }
         z.a.neg = neg;
     }
 
-    return normꓸᏑz;
+    return Ꮡz;
 }
 
 // mulDenom sets z to the denominator product x*y (by taking into
@@ -501,11 +519,12 @@ internal static nat mulDenom(nat z, nat x, nat y) {
 
 // scaleDenom sets z to the product x*f.
 // If f == 0 (zero value of denominator), z is set to (a copy of) x.
-[GoRecv] public static void scaleDenom(this ref ΔInt z, ж<ΔInt> Ꮡx, nat f) {
-    ref var x = ref Ꮡx.val;
+internal static void scaleDenom(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, nat f) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
 
     if (len(f) == 0) {
-        z.Set(Ꮡx);
+        Ꮡz.Set(Ꮡx);
         return;
     }
     z.abs = z.abs.mul(x.abs, f);
@@ -516,48 +535,52 @@ internal static nat mulDenom(nat z, nat x, nat y) {
 //   - -1 if x < y;
 //   - 0 if x == y;
 //   - +1 if x > y.
-[GoRecv] public static nint Cmp(this ref ΔRat x, ж<ΔRat> Ꮡy) {
-    ref var y = ref Ꮡy.val;
+public static nint Cmp(this ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy) {
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
-    ΔInt a = default!;
+    ref var a = ref heap(new ΔInt(), out var Ꮡa);
     ref var b = ref heap(new ΔInt(), out var Ꮡb);
-    a.scaleDenom(Ꮡ(x.a), y.b.abs);
-    b.scaleDenom(Ꮡ(y.a), x.b.abs);
-    return a.Cmp(Ꮡb);
+    Ꮡa.scaleDenom(Ꮡx.of(big_package.ΔRat.Ꮡa), y.b.abs);
+    Ꮡb.scaleDenom(Ꮡy.of(big_package.ΔRat.Ꮡa), x.b.abs);
+    return Ꮡa.Cmp(Ꮡb);
 }
 
 // Add sets z to the sum x+y and returns z.
-[GoRecv] public static ж<ΔRat> Add(this ref ΔRat z, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<ΔRat> Add(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     ref var a1 = ref heap(new ΔInt(), out var Ꮡa1);
     ref var a2 = ref heap(new ΔInt(), out var Ꮡa2);
-    a1.scaleDenom(Ꮡ(x.a), y.b.abs);
-    a2.scaleDenom(Ꮡ(y.a), x.b.abs);
-    z.a.Add(Ꮡa1, Ꮡa2);
+    Ꮡa1.scaleDenom(Ꮡx.of(big_package.ΔRat.Ꮡa), y.b.abs);
+    Ꮡa2.scaleDenom(Ꮡy.of(big_package.ΔRat.Ꮡa), x.b.abs);
+    Ꮡz.of(big_package.ΔRat.Ꮡa).Add(Ꮡa1, Ꮡa2);
     z.b.abs = mulDenom(z.b.abs, x.b.abs, y.b.abs);
-    return z.norm();
+    return Ꮡz.norm();
 }
 
 // Sub sets z to the difference x-y and returns z.
-[GoRecv] public static ж<ΔRat> Sub(this ref ΔRat z, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<ΔRat> Sub(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     ref var a1 = ref heap(new ΔInt(), out var Ꮡa1);
     ref var a2 = ref heap(new ΔInt(), out var Ꮡa2);
-    a1.scaleDenom(Ꮡ(x.a), y.b.abs);
-    a2.scaleDenom(Ꮡ(y.a), x.b.abs);
-    z.a.Sub(Ꮡa1, Ꮡa2);
+    Ꮡa1.scaleDenom(Ꮡx.of(big_package.ΔRat.Ꮡa), y.b.abs);
+    Ꮡa2.scaleDenom(Ꮡy.of(big_package.ΔRat.Ꮡa), x.b.abs);
+    Ꮡz.of(big_package.ΔRat.Ꮡa).Sub(Ꮡa1, Ꮡa2);
     z.b.abs = mulDenom(z.b.abs, x.b.abs, y.b.abs);
-    return z.norm();
+    return Ꮡz.norm();
 }
 
 // Mul sets z to the product x*y and returns z.
-[GoRecv("capture")] public static ж<ΔRat> Mul(this ref ΔRat z, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<ΔRat> Mul(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.DerefOrNil();
+    ref var y = ref Ꮡy.DerefOrNil();
 
     if (Ꮡx == Ꮡy) {
         // a squared Rat is positive and can't be reduced (no need to call norm())
@@ -568,30 +591,31 @@ internal static nat mulDenom(nat z, nat x, nat y) {
         } else {
             z.b.abs = z.b.abs.sqr(x.b.abs);
         }
-        return MulꓸᏑz;
+        return Ꮡz;
     }
-    z.a.Mul(Ꮡ(x.a), Ꮡ(y.a));
+    Ꮡz.of(big_package.ΔRat.Ꮡa).Mul(Ꮡx.of(big_package.ΔRat.Ꮡa), Ꮡy.of(big_package.ΔRat.Ꮡa));
     z.b.abs = mulDenom(z.b.abs, x.b.abs, y.b.abs);
-    return z.norm();
+    return Ꮡz.norm();
 }
 
 // Quo sets z to the quotient x/y and returns z.
 // If y == 0, Quo panics.
-[GoRecv] public static ж<ΔRat> Quo(this ref ΔRat z, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<ΔRat> Quo(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx, ж<ΔRat> Ꮡy) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     if (len(y.a.abs) == 0) {
         throw panic("division by zero");
     }
-    ΔInt a = default!;
-    ΔInt b = default!;
-    a.scaleDenom(Ꮡ(x.a), y.b.abs);
-    b.scaleDenom(Ꮡ(y.a), x.b.abs);
+    ref var a = ref heap(new ΔInt(), out var Ꮡa);
+    ref var b = ref heap(new ΔInt(), out var Ꮡb);
+    Ꮡa.scaleDenom(Ꮡx.of(big_package.ΔRat.Ꮡa), y.b.abs);
+    Ꮡb.scaleDenom(Ꮡy.of(big_package.ΔRat.Ꮡa), x.b.abs);
     z.a.abs = a.abs;
     z.b.abs = b.abs;
     z.a.neg = a.neg != b.neg;
-    return z.norm();
+    return Ꮡz.norm();
 }
 
 } // end big_package

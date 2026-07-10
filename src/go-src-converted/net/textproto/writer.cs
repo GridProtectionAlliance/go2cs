@@ -13,15 +13,15 @@ partial class textproto_package {
 // A Writer implements convenience methods for writing
 // requests or responses to a text protocol network connection.
 [GoType] partial struct Writer {
-    public ж<bufio_package.Writer> W;
+    public ж<bufio.Writer> W;
     internal ж<dotWriter> dot;
 }
 
 // NewWriter returns a new [Writer] writing to w.
 public static ж<Writer> NewWriter(ж<bufio.Writer> Ꮡw) {
-    ref var w = ref Ꮡw.val;
+    ref var w = ref Ꮡw.Value;
 
-    return Ꮡ(new Writer(W: w));
+    return Ꮡ(new Writer(W: Ꮡw));
 }
 
 internal static slice<byte> crnl = new byte[]{(rune)'\r', (rune)'\n'}.slice();
@@ -33,7 +33,7 @@ internal static slice<byte> dotcrnl = new byte[]{(rune)'.', (rune)'\r', (rune)'\
     var args = argsʗp.slice();
 
     w.closeDot();
-    fmt.Fprintf(~w.W, format, args.ꓸꓸꓸ);
+    fmt.Fprintf(new bufio_WriterжWriter(w.W), format, args.ꓸꓸꓸ);
     w.W.Write(crnl);
     return w.W.Flush();
 }
@@ -45,10 +45,12 @@ internal static slice<byte> dotcrnl = new byte[]{(rune)'.', (rune)'\r', (rune)'\
 // DotWriter before the next call to a method on w.
 //
 // See the documentation for the [Reader.DotReader] method for details about dot-encoding.
-[GoRecv] public static io.WriteCloser DotWriter(this ref Writer w) {
+public static io.WriteCloser DotWriter(this ж<Writer> Ꮡw) {
+    ref var w = ref Ꮡw.Value;
+
     w.closeDot();
-    w.dot = Ꮡ(new dotWriter(w: w));
-    return ~w.dot;
+    w.dot = Ꮡ(new dotWriter(w: Ꮡw));
+    return new dotWriterжWriteCloser(w.dot);
 }
 
 [GoRecv] internal static void closeDot(this ref Writer w) {
@@ -72,7 +74,7 @@ internal static readonly UntypedInt wstateData = 3; // writing data in middle of
     nint n = default!;
     error err = default!;
 
-    var bw = d.w.W;
+    var bw = d.w.Value.W;
     while (n < len(b)) {
         var c = b[n];
         var exprᴛ1 = d.state;
@@ -85,7 +87,7 @@ internal static readonly UntypedInt wstateData = 3; // writing data in middle of
             }
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 == wstateData)) {
+        if (fallthrough || !matchᴛ1 && exprᴛ1 == wstateData) {
             if (c == (rune)'\r') {
                 d.state = wstateCR;
             }
@@ -111,21 +113,25 @@ internal static readonly UntypedInt wstateData = 3; // writing data in middle of
     return (n, err);
 }
 
-[GoRecv] internal static error Close(this ref dotWriter d) {
-    if (d.w.dot == d) {
-        d.w.dot = default!;
+internal static error Close(this ж<dotWriter> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
+    if ((~d.w).dot == Ꮡd) {
+        d.w.Value.dot = default!;
     }
-    var bw = d.w.W;
+    var bw = d.w.Value.W;
     var exprᴛ1 = d.state;
     var matchᴛ1 = false;
-    { /* default: */
+    var matchᴛ2 = exprᴛ1 == wstateCR || exprᴛ1 == wstateBeginLine;
+    if (!matchᴛ2) { /* default: */
         bw.WriteByte((rune)'\r');
+        fallthrough = true;
     }
-    else if (exprᴛ1 == wstateCR) {
+    if (fallthrough || !matchᴛ1 && exprᴛ1 == wstateCR) {
         bw.WriteByte((rune)'\n');
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 == wstateBeginLine)) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && exprᴛ1 == wstateBeginLine) { matchᴛ1 = true;
         bw.Write(dotcrnl);
     }
 

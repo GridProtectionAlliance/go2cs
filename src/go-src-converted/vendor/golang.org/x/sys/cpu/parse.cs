@@ -28,9 +28,9 @@ internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@stri
     var next = () => {
         for (nint i = 0; i < len(rel); i++) {
             if (rel[i] == (rune)'.') {
-                var (ver, err) = strconv.Atoi(rel[..(int)(i)]);
+                var (verΔ1, errΔ1) = strconv.Atoi(rel[..(int)(i)]);
                 rel = rel[(int)(i + 1)..];
-                return (ver, err == default!);
+                return (verΔ1, errΔ1 == default!);
             }
         }
         var (ver, err) = strconv.Atoi(rel);

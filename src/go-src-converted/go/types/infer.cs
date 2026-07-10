@@ -7,8 +7,10 @@
 namespace go.go;
 
 using fmt = fmt_package;
-using token = go.token_package;
+using token = global::go.go.token_package;
 using strings = strings_package;
+using ast = global::go.go.ast_package;
+using global::go.go;
 
 partial class types_package {
 
@@ -28,216 +30,215 @@ internal const bool enableReverseTypeInference = true; // disable for debugging
 // If successful, infer returns the complete list of given and inferred type arguments, one for each
 // type parameter. Otherwise the result is nil. Errors are reported through the err parameter.
 // Note: infer may fail (return nil) due to invalid args operands without reporting additional errors.
-[GoRecv] public static slice<ΔType> /*inferred*/ infer(this ref Checker check, positioner posn, slice<ж<TypeParam>> tparams, slice<ΔType> targs, ж<Tuple> Ꮡparams, slice<ж<operand>> args, bool reverse, ж<error_> Ꮡerr) => func((defer, _) => {
+internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, positioner posn, slice<ж<TypeParam>> tparams, slice<ΔType> targs, ж<Tuple> Ꮡparams, slice<ж<operand>> args, bool reverse, ж<error_> Ꮡerr) {
     slice<ΔType> inferred = default!;
+    func((defer, recover) => {
+    ref var check = ref Ꮡcheck.Value;
+    ref var @params = ref Ꮡparams.Value;
+    ref var err = ref Ꮡerr.Value;
 
-    ref var @params = ref Ꮡparams.val;
-    ref var err = ref Ꮡerr.val;
-    // Don't verify result conditions if there's no error handler installed:
-    // in that case, an error leads to an exit panic and the result value may
-    // be incorrect. But in that case it doesn't matter because callers won't
-    // be able to use it either.
-    if (check.conf.Error != default!) {
-        var inferredʗ1 = inferred;
-        var tparamsʗ1 = tparams;
-        defer(() => {
-            assert(inferredʗ1 == default! || len(inferredʗ1) == len(tparamsʗ1) && !containsNil(inferredʗ1));
-        });
-    }
-    if (traceInference) {
-        check.dump("== infer : %s%s ➞ %s"u8, tparams, @params, targs);
-        // aligned with rename print below
-        var inferredʗ2 = inferred;
-        var tparamsʗ2 = tparams;
-        defer(() => {
-            check.dump("=> %s ➞ %s\n"u8, tparamsʗ2, inferredʗ2);
-        });
-    }
-    // There must be at least one type parameter, and no more type arguments than type parameters.
-    nint n = len(tparams);
-    assert(n > 0 && len(targs) <= n);
-    // Parameters and arguments must match in number.
-    assert(@params.Len() == len(args));
-    // If we already have all type arguments, we're done.
-    if (len(targs) == n && !containsNil(targs)) {
-        return targs;
-    }
-    // If we have invalid (ordinary) arguments, an error was reported before.
-    // Avoid additional inference errors and exit early (go.dev/issue/60434).
-    foreach (var (_, arg) in args) {
-        if ((~arg).mode == invalid) {
-            return default!;
+        // Don't verify result conditions if there's no error handler installed:
+        // in that case, an error leads to an exit panic and the result value may
+        // be incorrect. But in that case it doesn't matter because callers won't
+        // be able to use it either.
+        if ((~check.conf).Error != default!) {
+            var tparamsʗ1 = tparams;
+            defer(() => {
+                assert(inferred == default! || len(inferred) == len(tparamsʗ1) && !containsNil(inferred));
+            });
         }
-    }
-    // Make sure we have a "full" list of type arguments, some of which may
-    // be nil (unknown). Make a copy so as to not clobber the incoming slice.
-    if (len(targs) < n) {
-        var targs2 = new slice<ΔType>(n);
-        copy(targs2, targs);
-        targs = targs2;
-    }
-    // len(targs) == n
-    // Continue with the type arguments we have. Avoid matching generic
-    // parameters that already have type arguments against function arguments:
-    // It may fail because matching uses type identity while parameter passing
-    // uses assignment rules. Instantiate the parameter list with the type
-    // arguments we have, and continue with that parameter list.
-    // Substitute type arguments for their respective type parameters in params,
-    // if any. Note that nil targs entries are ignored by check.subst.
-    // We do this for better error messages; it's not needed for correctness.
-    // For instance, given:
-    //
-    //   func f[P, Q any](P, Q) {}
-    //
-    //   func _(s string) {
-    //           f[int](s, s) // ERROR
-    //   }
-    //
-    // With substitution, we get the error:
-    //   "cannot use s (variable of type string) as int value in argument to f[int]"
-    //
-    // Without substitution we get the (worse) error:
-    //   "type string of s does not match inferred type int for P"
-    // even though the type int was provided (not inferred) for P.
-    //
-    // TODO(gri) We might be able to finesse this in the error message reporting
-    //           (which only happens in case of an error) and then avoid doing
-    //           the substitution (which always happens).
-    if (@params.Len() > 0) {
-        var smap = makeSubstMap(tparams, targs);
-        @params = check.subst(nopos, ~@params, smap, nil, check.context())._<Tuple.val>();
-    }
-    // Unify parameter and argument types for generic parameters with typed arguments
-    // and collect the indices of generic parameters with untyped arguments.
-    // Terminology: generic parameter = function parameter with a type-parameterized type
-    var u = newUnifier(tparams, targs, check.allowVersion(posn, go1_21));
-    var errorf = 
-    var tparamsʗ3 = tparams;
-    var uʗ1 = u;
-    (ΔType tpar, ΔType targ, ж<operand> arg) => {
-        // provide a better error message if we can
-        var targsΔ1 = uʗ1.inferred(tparamsʗ3);
-        if (targsΔ1[0] == default!) {
-            // The first type parameter couldn't be inferred.
-            // If none of them could be inferred, don't try
-            // to provide the inferred type in the error msg.
-            var allFailed = true;
-            foreach (var (_, targΔ1) in targsΔ1) {
-                if (targΔ1 != default!) {
-                    allFailed = false;
-                    break;
-                }
-            }
-            if (allFailed) {
-                err.addf(~arg, "type %s of %s does not match %s (cannot infer %s)"u8, targ, (~arg).expr, tpar, typeParamsString(tparamsʗ3));
-                return inferred;
-            }
-        }
-        var smap = makeSubstMap(tparamsʗ3, targsΔ1);
-        // TODO(gri): pass a poser here, rather than arg.Pos().
-        var inferredΔ1 = check.subst(arg.Pos(), tpar, smap, nil, check.context());
-        // CannotInferTypeArgs indicates a failure of inference, though the actual
-        // error may be better attributed to a user-provided type argument (hence
-        // InvalidTypeArg). We can't differentiate these cases, so fall back on
-        // the more general CannotInferTypeArgs.
-        if (!AreEqual(inferredΔ1, tpar)){
-            if (reverse){
-                err.addf(~arg, "inferred type %s for %s does not match type %s of %s"u8, inferredΔ1, tpar, targ, (~arg).expr);
-            } else {
-                err.addf(~arg, "type %s of %s does not match inferred type %s for %s"u8, targ, (~arg).expr, inferredΔ1, tpar);
-            }
-        } else {
-            err.addf(~arg, "type %s of %s does not match %s"u8, targ, (~arg).expr, tpar);
-        }
-    };
-    // indices of generic parameters with untyped arguments, for later use
-    slice<nint> untyped = default!;
-    // --- 1 ---
-    // use information from function arguments
-    if (traceInference) {
-        u.tracef("== function parameters: %s"u8, @params);
-        u.tracef("-- function arguments : %s"u8, args);
-    }
-    foreach (var (iΔ1, arg) in args) {
-        if ((~arg).mode == invalid) {
-            // An error was reported earlier. Ignore this arg
-            // and continue, we may still be able to infer all
-            // targs resulting in fewer follow-on errors.
-            // TODO(gri) determine if we still need this check
-            continue;
-        }
-        var par = @params.At(iΔ1);
-        if (isParameterized(tparams, par.typ) || isParameterized(tparams, (~arg).typ)) {
-            // Function parameters are always typed. Arguments may be untyped.
-            // Collect the indices of untyped arguments and handle them later.
-            if (isTyped((~arg).typ)){
-                if (!u.unify(par.typ, (~arg).typ, Δassign)) {
-                    errorf(par.typ, (~arg).typ, arg);
-                    return default!;
-                }
-            } else 
-            {
-                var (_, ok) = par.typ._<TypeParam.val>(ᐧ); if (ok && !arg.isNil()) {
-                    // Since default types are all basic (i.e., non-composite) types, an
-                    // untyped argument will never match a composite parameter type; the
-                    // only parameter type it can possibly match against is a *TypeParam.
-                    // Thus, for untyped arguments we only need to look at parameter types
-                    // that are single type parameters.
-                    // Also, untyped nils don't have a default type and can be ignored.
-                    // Finally, it's not possible to have an alias type denoting a type
-                    // parameter declared by the current function and use it in the same
-                    // function signature; hence we don't need to Unalias before the
-                    // .(*TypeParam) type assertion above.
-                    untyped = append(untyped, iΔ1);
-                }
-            }
-        }
-    }
-    if (traceInference) {
-        var inferredΔ2 = u.inferred(tparams);
-        u.tracef("=> %s ➞ %s\n"u8, tparams, inferredΔ2);
-    }
-    // --- 2 ---
-    // use information from type parameter constraints
-    if (traceInference) {
-        u.tracef("== type parameters: %s"u8, tparams);
-    }
-    // Unify type parameters with their constraints as long
-    // as progress is being made.
-    //
-    // This is an O(n^2) algorithm where n is the number of
-    // type parameters: if there is progress, at least one
-    // type argument is inferred per iteration, and we have
-    // a doubly nested loop.
-    //
-    // In practice this is not a problem because the number
-    // of type parameters tends to be very small (< 5 or so).
-    // (It should be possible for unification to efficiently
-    // signal newly inferred type arguments; then the loops
-    // here could handle the respective type parameters only,
-    // but that will come at a cost of extra complexity which
-    // may not be worth it.)
-    for (nint i = 0; ᐧ ; i++) {
-        nint nn = u.unknowns();
         if (traceInference) {
-            if (i > 0) {
-                fmt.Println();
-            }
-            u.tracef("-- iteration %d"u8, i);
+            Ꮡcheck.dump("== infer : %s%s ➞ %s"u8, tparams, @params, targs);
+            // aligned with rename print below
+            var tparamsʗ2 = tparams;
+            defer(() => {
+                Ꮡcheck.dump("=> %s ➞ %s\n"u8, tparamsʗ2, inferred);
+            });
         }
-        foreach (var (_, tpar) in tparams) {
-            var tx = u.at(tpar);
-            var (core, single) = coreTerm(tpar);
-            if (traceInference) {
-                u.tracef("-- type parameter %s = %s: core(%s) = %s, single = %v"u8, tpar, tx, tpar, core, single);
+        // There must be at least one type parameter, and no more type arguments than type parameters.
+        nint n = len(tparams);
+        assert(n > 0 && len(targs) <= n);
+        // Parameters and arguments must match in number.
+        assert(Ꮡparams.Len() == len(args));
+        // If we already have all type arguments, we're done.
+        if (len(targs) == n && !containsNil(targs)) {
+            inferred = targs; return;
+        }
+        // If we have invalid (ordinary) arguments, an error was reported before.
+        // Avoid additional inference errors and exit early (go.dev/issue/60434).
+        foreach (var (_, arg) in args) {
+            if ((~arg).mode == invalid) {
+                inferred = default!; return;
             }
-            // If there is a core term (i.e., a core type with tilde information)
-            // unify the type parameter with the core type.
-            if (core != nil){
-                // A type parameter can be unified with its core type in two cases.
-                switch (ᐧ) {
-                case {} when tx != default!: {
-                    if (!u.unify(tx, // The corresponding type argument tx is known. There are 2 cases:
+        }
+        // Make sure we have a "full" list of type arguments, some of which may
+        // be nil (unknown). Make a copy so as to not clobber the incoming slice.
+        if (len(targs) < n) {
+            var targs2 = new slice<ΔType>(n);
+            copy(targs2, targs);
+            targs = targs2;
+        }
+        // len(targs) == n
+        // Continue with the type arguments we have. Avoid matching generic
+        // parameters that already have type arguments against function arguments:
+        // It may fail because matching uses type identity while parameter passing
+        // uses assignment rules. Instantiate the parameter list with the type
+        // arguments we have, and continue with that parameter list.
+        // Substitute type arguments for their respective type parameters in params,
+        // if any. Note that nil targs entries are ignored by check.subst.
+        // We do this for better error messages; it's not needed for correctness.
+        // For instance, given:
+        //
+        //   func f[P, Q any](P, Q) {}
+        //
+        //   func _(s string) {
+        //           f[int](s, s) // ERROR
+        //   }
+        //
+        // With substitution, we get the error:
+        //   "cannot use s (variable of type string) as int value in argument to f[int]"
+        //
+        // Without substitution we get the (worse) error:
+        //   "type string of s does not match inferred type int for P"
+        // even though the type int was provided (not inferred) for P.
+        //
+        // TODO(gri) We might be able to finesse this in the error message reporting
+        //           (which only happens in case of an error) and then avoid doing
+        //           the substitution (which always happens).
+        if (Ꮡparams.Len() > 0) {
+            var smap = makeSubstMap(tparams, targs);
+            Ꮡparams = Ꮡcheck.subst(nopos, new TupleжΔType(Ꮡparams), smap, nil, check.context())._<ж<Tuple>>(); @params = ref Ꮡparams.Value;
+        }
+        // Unify parameter and argument types for generic parameters with typed arguments
+        // and collect the indices of generic parameters with untyped arguments.
+        // Terminology: generic parameter = function parameter with a type-parameterized type
+        var u = newUnifier(tparams, targs, Ꮡcheck.allowVersion(posn, go1_21));
+        var tparamsʗ3 = tparams;
+        var uʗ1 = u;
+        var errorf = (ΔType tpar, ΔType targ, ж<operand> arg) => {
+            // provide a better error message if we can
+            var targsΔ1 = uʗ1.inferred(tparamsʗ3);
+            if (targsΔ1[0] == default!) {
+                // The first type parameter couldn't be inferred.
+                // If none of them could be inferred, don't try
+                // to provide the inferred type in the error msg.
+                var allFailed = true;
+                foreach (var (_, targΔ1) in targsΔ1) {
+                    if (targΔ1 != default!) {
+                        allFailed = false;
+                        break;
+                    }
+                }
+                if (allFailed) {
+                    Ꮡerr.Value.addf(new operandжpositioner(arg), "type %s of %s does not match %s (cannot infer %s)"u8, targ, (~arg).expr, tpar, typeParamsString(tparamsʗ3));
+                    return;
+                }
+            }
+            var smap = makeSubstMap(tparamsʗ3, targsΔ1);
+            // TODO(gri): pass a poser here, rather than arg.Pos().
+            var inferredΔ1 = Ꮡcheck.subst(arg.Pos(), tpar, smap, nil, Ꮡcheck.Value.context());
+            // CannotInferTypeArgs indicates a failure of inference, though the actual
+            // error may be better attributed to a user-provided type argument (hence
+            // InvalidTypeArg). We can't differentiate these cases, so fall back on
+            // the more general CannotInferTypeArgs.
+            if (!AreEqual(inferredΔ1, tpar)){
+                if (reverse){
+                    Ꮡerr.Value.addf(new operandжpositioner(arg), "inferred type %s for %s does not match type %s of %s"u8, inferredΔ1, tpar, targ, (~arg).expr);
+                } else {
+                    Ꮡerr.Value.addf(new operandжpositioner(arg), "type %s of %s does not match inferred type %s for %s"u8, targ, (~arg).expr, inferredΔ1, tpar);
+                }
+            } else {
+                Ꮡerr.Value.addf(new operandжpositioner(arg), "type %s of %s does not match %s"u8, targ, (~arg).expr, tpar);
+            }
+        };
+        // indices of generic parameters with untyped arguments, for later use
+        slice<nint> untyped = default!;
+        // --- 1 ---
+        // use information from function arguments
+        if (traceInference) {
+            u.tracef("== function parameters: %s"u8, @params);
+            u.tracef("-- function arguments : %s"u8, args);
+        }
+        foreach (var (i, arg) in args) {
+            if ((~arg).mode == invalid) {
+                // An error was reported earlier. Ignore this arg
+                // and continue, we may still be able to infer all
+                // targs resulting in fewer follow-on errors.
+                // TODO(gri) determine if we still need this check
+                continue;
+            }
+            var par = @params.At(i);
+            if (isParameterized(tparams, (~par).typ) || isParameterized(tparams, (~arg).typ)) {
+                // Function parameters are always typed. Arguments may be untyped.
+                // Collect the indices of untyped arguments and handle them later.
+                if (isTyped((~arg).typ)){
+                    if (!u.unify((~par).typ, (~arg).typ, Δassign)) {
+                        errorf((~par).typ, (~arg).typ, arg);
+                        inferred = default!; return;
+                    }
+                } else 
+                {
+                    var (_, ok) = (~par).typ._<ж<TypeParam>>(ᐧ); if (ok && !arg.isNil()) {
+                        // Since default types are all basic (i.e., non-composite) types, an
+                        // untyped argument will never match a composite parameter type; the
+                        // only parameter type it can possibly match against is a *TypeParam.
+                        // Thus, for untyped arguments we only need to look at parameter types
+                        // that are single type parameters.
+                        // Also, untyped nils don't have a default type and can be ignored.
+                        // Finally, it's not possible to have an alias type denoting a type
+                        // parameter declared by the current function and use it in the same
+                        // function signature; hence we don't need to Unalias before the
+                        // .(*TypeParam) type assertion above.
+                        untyped = append(untyped, i);
+                    }
+                }
+            }
+        }
+        if (traceInference) {
+            var inferredΔ2 = u.inferred(tparams);
+            u.tracef("=> %s ➞ %s\n"u8, tparams, inferredΔ2);
+        }
+        // --- 2 ---
+        // use information from type parameter constraints
+        if (traceInference) {
+            u.tracef("== type parameters: %s"u8, tparams);
+        }
+        // Unify type parameters with their constraints as long
+        // as progress is being made.
+        //
+        // This is an O(n^2) algorithm where n is the number of
+        // type parameters: if there is progress, at least one
+        // type argument is inferred per iteration, and we have
+        // a doubly nested loop.
+        //
+        // In practice this is not a problem because the number
+        // of type parameters tends to be very small (< 5 or so).
+        // (It should be possible for unification to efficiently
+        // signal newly inferred type arguments; then the loops
+        // here could handle the respective type parameters only,
+        // but that will come at a cost of extra complexity which
+        // may not be worth it.)
+        for (nint i = 0; ᐧ ; i++) {
+            nint nn = u.unknowns();
+            if (traceInference) {
+                if (i > 0) {
+                    fmt.Println();
+                }
+                u.tracef("-- iteration %d"u8, i);
+            }
+            foreach (var (_, tpar) in tparams) {
+                var tx = u.at(tpar);
+                var (core, single) = coreTerm(tpar);
+                if (traceInference) {
+                    u.tracef("-- type parameter %s = %s: core(%s) = %s, single = %v"u8, tpar, tx, tpar, core, single);
+                }
+                // If there is a core term (i.e., a core type with tilde information)
+                // unify the type parameter with the core type.
+                if (core != nil){
+                    // A type parameter can be unified with its core type in two cases.
+                    switch (ᐧ) {
+                    case {} when tx != default!: {
+                        if (!u.unify(tx, // The corresponding type argument tx is known. There are 2 cases:
  // 1) If the core type has a tilde, per spec requirement for tilde
  //    elements, the core type is an underlying (literal) type.
  //    And because of the tilde, the underlying type of tx must match
@@ -248,194 +249,194 @@ internal const bool enableReverseTypeInference = true; // disable for debugging
  // 2) If the core type doesn't have a tilde, we also must unify tx
  //    with the core type.
  (~core).typ, 0)) {
-                        // TODO(gri) Type parameters that appear in the constraint and
-                        //           for which we have type arguments inferred should
-                        //           use those type arguments for a better error message.
-                        err.addf(posn, "%s (type %s) does not satisfy %s"u8, tpar, tx, tpar.Constraint());
-                        return default!;
+                            // TODO(gri) Type parameters that appear in the constraint and
+                            //           for which we have type arguments inferred should
+                            //           use those type arguments for a better error message.
+                            err.addf(posn, "%s (type %s) does not satisfy %s"u8, tpar, tx, tpar.Constraint());
+                            inferred = default!; return;
+                        }
+                        break;
                     }
-                    break;
-                }
-                case {} when single && !(~core).tilde: {
-                    u.set(tpar, // The corresponding type argument tx is unknown and there's a single
+                    case {} when single && !(~core).tilde: {
+                        u.set(tpar, // The corresponding type argument tx is unknown and there's a single
  // specific type and no tilde.
  // In this case the type argument must be that single type; set it.
  (~core).typ);
-                    break;
-                }}
+                        break;
+                    }}
 
-            } else {
-                if (tx != default!) {
-                    // We don't have a core type, but the type argument tx is known.
-                    // It must have (at least) all the methods of the type constraint,
-                    // and the method signatures must unify; otherwise tx cannot satisfy
-                    // the constraint.
-                    // TODO(gri) Now that unification handles interfaces, this code can
-                    //           be reduced to calling u.unify(tx, tpar.iface(), assign)
-                    //           (which will compare signatures exactly as we do below).
-                    //           We leave it as is for now because missingMethod provides
-                    //           a failure cause which allows for a better error message.
-                    //           Eventually, unify should return an error with cause.
-                    ref var cause = ref heap(new @string(), out var Ꮡcause);
-                    var constraint = tpar.iface();
-                    {
-                        var (m, _) = check.missingMethod(tx, ~constraint, true, 
-                        var uʗ2 = u;
-                        (ΔType x, ΔType y) => uʗ2.unify(x, y, exact), Ꮡcause); if (m != nil) {
-                            // TODO(gri) better error message (see TODO above)
-                            err.addf(posn, "%s (type %s) does not satisfy %s %s"u8, tpar, tx, tpar.Constraint(), cause);
-                            return default!;
+                } else {
+                    if (tx != default!) {
+                        // We don't have a core type, but the type argument tx is known.
+                        // It must have (at least) all the methods of the type constraint,
+                        // and the method signatures must unify; otherwise tx cannot satisfy
+                        // the constraint.
+                        // TODO(gri) Now that unification handles interfaces, this code can
+                        //           be reduced to calling u.unify(tx, tpar.iface(), assign)
+                        //           (which will compare signatures exactly as we do below).
+                        //           We leave it as is for now because missingMethod provides
+                        //           a failure cause which allows for a better error message.
+                        //           Eventually, unify should return an error with cause.
+                        ref var cause = ref heap(new @string(), out var Ꮡcause);
+                        var constraint = tpar.iface();
+                        {
+                            var uʗ2 = u;
+                            var (m, _) = Ꮡcheck.missingMethod(tx, new InterfaceжΔType(constraint), true, (ΔType x, ΔType y) => uʗ2.unify(x, y, exact), Ꮡcause); if (m != nil) {
+                                // TODO(gri) better error message (see TODO above)
+                                err.addf(posn, "%s (type %s) does not satisfy %s %s"u8, tpar, tx, tpar.Constraint(), cause);
+                                inferred = default!; return;
+                            }
                         }
                     }
                 }
             }
-        }
-        if (u.unknowns() == nn) {
-            break;
-        }
-    }
-    // no progress
-    if (traceInference) {
-        var inferredΔ3 = u.inferred(tparams);
-        u.tracef("=> %s ➞ %s\n"u8, tparams, inferredΔ3);
-    }
-    // --- 3 ---
-    // use information from untyped constants
-    if (traceInference) {
-        u.tracef("== untyped arguments: %v"u8, untyped);
-    }
-    // Some generic parameters with untyped arguments may have been given a type by now.
-    // Collect all remaining parameters that don't have a type yet and determine the
-    // maximum untyped type for each of those parameters, if possible.
-    types.Type maxUntyped = default!;                     // lazily allocated (we may not need it)
-    foreach (var (_, index) in untyped) {
-        var tpar = @params.At(index).typ._<TypeParam.val>();
-        // is type parameter (no alias) by construction of untyped
-        if (u.at(tpar) == default!) {
-            var arg = args[index];
-            // arg corresponding to tpar
-            if (maxUntyped == default!) {
-                maxUntyped = new types.Type();
+            if (u.unknowns() == nn) {
+                break;
             }
-            var max = maxUntyped[tpar];
-            if (max == default!){
-                max = arg.val.typ;
-            } else {
-                var m = maxType(max, (~arg).typ);
-                if (m == default!) {
-                    err.addf(~arg, "mismatched types %s and %s (cannot infer %s)"u8, max, (~arg).typ, tpar);
-                    return default!;
-                }
-                max = m;
-            }
-            maxUntyped[tpar] = max;
         }
-    }
-    // maxUntyped contains the maximum untyped type for each type parameter
-    // which doesn't have a type yet. Set the respective default types.
-    foreach (var (tpar, typ) in maxUntyped) {
-        var d = Default(typ);
-        assert(isTyped(d));
-        u.set(tpar, d);
-    }
-    // --- simplify ---
-    // u.inferred(tparams) now contains the incoming type arguments plus any additional type
-    // arguments which were inferred. The inferred non-nil entries may still contain
-    // references to other type parameters found in constraints.
-    // For instance, for [A any, B interface{ []C }, C interface{ *A }], if A == int
-    // was given, unification produced the type list [int, []C, *A]. We eliminate the
-    // remaining type parameters by substituting the type parameters in this type list
-    // until nothing changes anymore.
-    inferred = u.inferred(tparams);
-    if (debug) {
-        foreach (var (i, targ) in targs) {
-            assert(targ == default! || AreEqual(inferred[i], targ));
-        }
-    }
-    // The data structure of each (provided or inferred) type represents a graph, where
-    // each node corresponds to a type and each (directed) vertex points to a component
-    // type. The substitution process described above repeatedly replaces type parameter
-    // nodes in these graphs with the graphs of the types the type parameters stand for,
-    // which creates a new (possibly bigger) graph for each type.
-    // The substitution process will not stop if the replacement graph for a type parameter
-    // also contains that type parameter.
-    // For instance, for [A interface{ *A }], without any type argument provided for A,
-    // unification produces the type list [*A]. Substituting A in *A with the value for
-    // A will lead to infinite expansion by producing [**A], [****A], [********A], etc.,
-    // because the graph A -> *A has a cycle through A.
-    // Generally, cycles may occur across multiple type parameters and inferred types
-    // (for instance, consider [P interface{ *Q }, Q interface{ func(P) }]).
-    // We eliminate cycles by walking the graphs for all type parameters. If a cycle
-    // through a type parameter is detected, killCycles nils out the respective type
-    // (in the inferred list) which kills the cycle, and marks the corresponding type
-    // parameter as not inferred.
-    //
-    // TODO(gri) If useful, we could report the respective cycle as an error. We don't
-    //           do this now because type inference will fail anyway, and furthermore,
-    //           constraints with cycles of this kind cannot currently be satisfied by
-    //           any user-supplied type. But should that change, reporting an error
-    //           would be wrong.
-    killCycles(tparams, inferred);
-    // dirty tracks the indices of all types that may still contain type parameters.
-    // We know that nil type entries and entries corresponding to provided (non-nil)
-    // type arguments are clean, so exclude them from the start.
-    slice<nint> dirty = default!;
-    foreach (var (i, typ) in inferred) {
-        if (typ != default! && (i >= len(targs) || targs[i] == default!)) {
-            dirty = append(dirty, i);
-        }
-    }
-    while (len(dirty) > 0) {
+        // no progress
         if (traceInference) {
-            u.tracef("-- simplify %s ➞ %s"u8, tparams, inferred);
+            var inferredΔ3 = u.inferred(tparams);
+            u.tracef("=> %s ➞ %s\n"u8, tparams, inferredΔ3);
         }
-        // TODO(gri) Instead of creating a new substMap for each iteration,
-        // provide an update operation for substMaps and only change when
-        // needed. Optimization.
-        var smap = makeSubstMap(tparams, inferred);
-        nint n = 0;
-        foreach (var (_, index) in dirty) {
-            var t0 = inferred[index];
-            {
-                var t1 = check.subst(nopos, t0, smap, nil, check.context()); if (!AreEqual(t1, t0)) {
-                    // t0 was simplified to t1.
-                    // If t0 was a generic function, but the simplified signature t1 does
-                    // not contain any type parameters anymore, the function is not generic
-                    // anymore. Remove it's type parameters. (go.dev/issue/59953)
-                    // Note that if t0 was a signature, t1 must be a signature, and t1
-                    // can only be a generic signature if it originated from a generic
-                    // function argument. Those signatures are never defined types and
-                    // thus there is no need to call under below.
-                    // TODO(gri) Consider doing this in Checker.subst.
-                    //           Then this would fall out automatically here and also
-                    //           in instantiation (where we also explicitly nil out
-                    //           type parameters). See the *Signature TODO in subst.
-                    {
-                        var (sig, _) = t1._<ΔSignature.val>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0 && !isParameterized(tparams, ~sig)) {
-                            sig.val.tparams = default!;
-                        }
-                    }
-                    inferred[index] = t1;
-                    dirty[n] = index;
-                    n++;
+        // --- 3 ---
+        // use information from untyped constants
+        if (traceInference) {
+            u.tracef("== untyped arguments: %v"u8, untyped);
+        }
+        // Some generic parameters with untyped arguments may have been given a type by now.
+        // Collect all remaining parameters that don't have a type yet and determine the
+        // maximum untyped type for each of those parameters, if possible.
+        map<ж<TypeParam>, ΔType> maxUntyped = default!;                              // lazily allocated (we may not need it)
+        foreach (var (_, index) in untyped) {
+            var tpar = (~@params.At(index)).typ._<ж<TypeParam>>();
+            // is type parameter (no alias) by construction of untyped
+            if (u.at(tpar) == default!) {
+                var arg = args[index];
+                // arg corresponding to tpar
+                if (maxUntyped == default!) {
+                    maxUntyped = new map<ж<TypeParam>, ΔType>();
                 }
+                var max = maxUntyped[tpar];
+                if (max == default!){
+                    max = arg.Value.typ;
+                } else {
+                    var m = maxType(max, (~arg).typ);
+                    if (m == default!) {
+                        err.addf(new operandжpositioner(arg), "mismatched types %s and %s (cannot infer %s)"u8, max, (~arg).typ, tpar);
+                        inferred = default!; return;
+                    }
+                    max = m;
+                }
+                maxUntyped[tpar] = max;
             }
         }
-        dirty = dirty[..(int)(n)];
-    }
-    // Once nothing changes anymore, we may still have type parameters left;
-    // e.g., a constraint with core type *P may match a type parameter Q but
-    // we don't have any type arguments to fill in for *P or Q (go.dev/issue/45548).
-    // Don't let such inferences escape; instead treat them as unresolved.
-    foreach (var (i, typ) in inferred) {
-        if (typ == default! || isParameterized(tparams, typ)) {
-            var obj = tparams[i].obj;
-            err.addf(posn, "cannot infer %s (%v)"u8, obj.name, obj.pos);
-            return default!;
+        // maxUntyped contains the maximum untyped type for each type parameter
+        // which doesn't have a type yet. Set the respective default types.
+        foreach (var (tpar, typ) in maxUntyped) {
+            var d = Default(typ);
+            assert(isTyped(d));
+            u.set(tpar, d);
         }
-    }
+        // --- simplify ---
+        // u.inferred(tparams) now contains the incoming type arguments plus any additional type
+        // arguments which were inferred. The inferred non-nil entries may still contain
+        // references to other type parameters found in constraints.
+        // For instance, for [A any, B interface{ []C }, C interface{ *A }], if A == int
+        // was given, unification produced the type list [int, []C, *A]. We eliminate the
+        // remaining type parameters by substituting the type parameters in this type list
+        // until nothing changes anymore.
+        inferred = u.inferred(tparams);
+        if (debug) {
+            foreach (var (i, targ) in targs) {
+                assert(targ == default! || AreEqual(inferred[i], targ));
+            }
+        }
+        // The data structure of each (provided or inferred) type represents a graph, where
+        // each node corresponds to a type and each (directed) vertex points to a component
+        // type. The substitution process described above repeatedly replaces type parameter
+        // nodes in these graphs with the graphs of the types the type parameters stand for,
+        // which creates a new (possibly bigger) graph for each type.
+        // The substitution process will not stop if the replacement graph for a type parameter
+        // also contains that type parameter.
+        // For instance, for [A interface{ *A }], without any type argument provided for A,
+        // unification produces the type list [*A]. Substituting A in *A with the value for
+        // A will lead to infinite expansion by producing [**A], [****A], [********A], etc.,
+        // because the graph A -> *A has a cycle through A.
+        // Generally, cycles may occur across multiple type parameters and inferred types
+        // (for instance, consider [P interface{ *Q }, Q interface{ func(P) }]).
+        // We eliminate cycles by walking the graphs for all type parameters. If a cycle
+        // through a type parameter is detected, killCycles nils out the respective type
+        // (in the inferred list) which kills the cycle, and marks the corresponding type
+        // parameter as not inferred.
+        //
+        // TODO(gri) If useful, we could report the respective cycle as an error. We don't
+        //           do this now because type inference will fail anyway, and furthermore,
+        //           constraints with cycles of this kind cannot currently be satisfied by
+        //           any user-supplied type. But should that change, reporting an error
+        //           would be wrong.
+        killCycles(tparams, inferred);
+        // dirty tracks the indices of all types that may still contain type parameters.
+        // We know that nil type entries and entries corresponding to provided (non-nil)
+        // type arguments are clean, so exclude them from the start.
+        slice<nint> dirty = default!;
+        foreach (var (i, typ) in inferred) {
+            if (typ != default! && (i >= len(targs) || targs[i] == default!)) {
+                dirty = append(dirty, i);
+            }
+        }
+        while (len(dirty) > 0) {
+            if (traceInference) {
+                u.tracef("-- simplify %s ➞ %s"u8, tparams, inferred);
+            }
+            // TODO(gri) Instead of creating a new substMap for each iteration,
+            // provide an update operation for substMaps and only change when
+            // needed. Optimization.
+            var smap = makeSubstMap(tparams, inferred);
+            nint nΔ1 = 0;
+            foreach (var (_, index) in dirty) {
+                var t0 = inferred[index];
+                {
+                    var t1 = Ꮡcheck.subst(nopos, t0, smap, nil, check.context()); if (!AreEqual(t1, t0)) {
+                        // t0 was simplified to t1.
+                        // If t0 was a generic function, but the simplified signature t1 does
+                        // not contain any type parameters anymore, the function is not generic
+                        // anymore. Remove it's type parameters. (go.dev/issue/59953)
+                        // Note that if t0 was a signature, t1 must be a signature, and t1
+                        // can only be a generic signature if it originated from a generic
+                        // function argument. Those signatures are never defined types and
+                        // thus there is no need to call under below.
+                        // TODO(gri) Consider doing this in Checker.subst.
+                        //           Then this would fall out automatically here and also
+                        //           in instantiation (where we also explicitly nil out
+                        //           type parameters). See the *Signature TODO in subst.
+                        {
+                            var (sig, _) = t1._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0 && !isParameterized(tparams, new ΔSignatureжΔType(sig))) {
+                                sig.Value.tparams = default!;
+                            }
+                        }
+                        inferred[index] = t1;
+                        dirty[nΔ1] = index;
+                        nΔ1++;
+                    }
+                }
+            }
+            dirty = dirty[..(int)(nΔ1)];
+        }
+        // Once nothing changes anymore, we may still have type parameters left;
+        // e.g., a constraint with core type *P may match a type parameter Q but
+        // we don't have any type arguments to fill in for *P or Q (go.dev/issue/45548).
+        // Don't let such inferences escape; instead treat them as unresolved.
+        foreach (var (i, typ) in inferred) {
+            if (typ == default! || isParameterized(tparams, typ)) {
+                var obj = tparams[i].Value.obj;
+                err.addf(posn, "cannot infer %s (%v)"u8, (~obj).name, (~obj).pos);
+                inferred = default!; return;
+            }
+        }
+    });
     return inferred;
-});
+}
 
 // containsNil reports whether list contains a nil entry.
 internal static bool containsNil(slice<ΔType> list) {
@@ -454,7 +455,9 @@ internal static bool containsNil(slice<ΔType> list) {
 // If typ is a generic function, type parameters held with typ are not changed and
 // must be updated separately if desired.
 // The positions is only used for debug traces.
-[GoRecv] internal static (slice<ж<TypeParam>>, ΔType) renameTParams(this ref Checker check, tokenꓸPos pos, slice<ж<TypeParam>> tparams, ΔType typ) {
+internal static (slice<ж<TypeParam>>, ΔType) renameTParams(this ж<Checker> Ꮡcheck, tokenꓸPos pos, slice<ж<TypeParam>> tparams, ΔType typ) {
+    ref var check = ref Ꮡcheck.Value;
+
     // For the purpose of type inference we must differentiate type parameters
     // occurring in explicit type or value function arguments from the type
     // parameters we are solving for via unification because they may be the
@@ -488,16 +491,16 @@ internal static bool containsNil(slice<ΔType> list) {
     // nothing to do
     var tparams2 = new slice<ж<TypeParam>>(len(tparams));
     foreach (var (i, tparam) in tparams) {
-        var tname = NewTypeName(tparam.Obj().Pos(), tparam.Obj().Pkg(), tparam.Obj().Name(), default!);
+        var tname = NewTypeName(tparam.Obj().of(TypeName.Ꮡobject).Pos(), tparam.Obj().of(TypeName.Ꮡobject).Pkg(), tparam.Obj().of(TypeName.Ꮡobject).Name(), default!);
         tparams2[i] = NewTypeParam(tname, default!);
-        tparams2[i].val.index = tparam.val.index;
+        tparams2[i].Value.index = tparam.Value.index;
     }
     // == i
     var renameMap = makeRenameMap(tparams, tparams2);
     foreach (var (i, tparam) in tparams) {
-        tparams2[i].val.bound = check.subst(pos, (~tparam).bound, renameMap, nil, check.context());
+        tparams2[i].Value.bound = Ꮡcheck.subst(pos, (~tparam).bound, renameMap, nil, check.context());
     }
-    return (tparams2, check.subst(pos, typ, renameMap, nil, check.context()));
+    return (tparams2, Ꮡcheck.subst(pos, typ, renameMap, nil, check.context()));
 }
 
 // typeParamsString produces a string containing all the type parameter names
@@ -510,22 +513,22 @@ internal static @string typeParamsString(slice<ж<TypeParam>> list) {
         return ""u8;
     }
     case 1: {
-        return list[0].obj.name;
+        return (~(~list[0]).obj).name;
     }
     case 2: {
-        return list[0].obj.name + " and "u8 + list[1].obj.name;
+        return (~(~list[0]).obj).name + " and "u8 + (~(~list[1]).obj).name;
     }}
 
     // general case (n > 2)
-    strings.Builder buf = default!;
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     foreach (var (i, tname) in list[..(int)(n - 1)]) {
         if (i > 0) {
-            buf.WriteString(", "u8);
+            Ꮡbuf.WriteString(", "u8);
         }
-        buf.WriteString((~tname).obj.name);
+        Ꮡbuf.WriteString((~(~tname).obj).name);
     }
-    buf.WriteString(", and "u8);
-    buf.WriteString(list[n - 1].obj.name);
+    Ꮡbuf.WriteString(", and "u8);
+    Ꮡbuf.WriteString((~(~list[n - 1]).obj).name);
     return buf.String();
 }
 
@@ -533,11 +536,12 @@ internal static @string typeParamsString(slice<ж<TypeParam>> list) {
 // If typ is a generic function, isParameterized ignores the type parameter declarations;
 // it only considers the signature proper (incoming and result parameters).
 internal static bool isParameterized(slice<ж<TypeParam>> tparams, ΔType typ) {
-    var w = new tpWalker(
+    ref var w = ref heap<tpWalker>(out var Ꮡw);
+    w = new tpWalker(
         tparams: tparams,
         seen: new map<ΔType, bool>()
     );
-    return w.isParameterized(typ);
+    return Ꮡw.isParameterized(typ);
 }
 
 [GoType] partial struct tpWalker {
@@ -545,94 +549,100 @@ internal static bool isParameterized(slice<ж<TypeParam>> tparams, ΔType typ) {
     internal map<ΔType, bool> seen;
 }
 
-[GoRecv] internal static bool /*res*/ isParameterized(this ref tpWalker w, ΔType typ) => func((defer, _) => {
+internal static bool /*res*/ isParameterized(this ж<tpWalker> Ꮡw, ΔType typ) {
     bool res = default!;
+    func((defer, recover) => {
+    ref var w = ref Ꮡw.Value;
 
-    // detect cycles
-    {
-        var (x, ok) = w.seen[typ]; if (ok) {
-            return x;
+        // detect cycles
+        {
+            var (x, ok) = w.seen[typ, ꟷ]; if (ok) {
+                res = x; return;
+            }
         }
-    }
-    w.seen[typ] = false;
-    defer(() => {
-        w.seen[typ] = res;
+        w.seen[typ] = false;
+        defer(() => {
+            Ꮡw.Value.seen[typ] = res;
+        });
+        switch (typ.type()) {
+        case ж<Basic> t: {
+            break;
+        }
+        case ж<Alias> t: {
+            res = Ꮡw.isParameterized(Unalias(new AliasжΔType(t))); return;
+        }
+        case ж<Array> t: {
+            res = Ꮡw.isParameterized((~t).elem); return;
+        }
+        case ж<Slice> t: {
+            res = Ꮡw.isParameterized((~t).elem); return;
+        }
+        case ж<Struct> t: {
+            res = Ꮡw.varList((~t).fields); return;
+        }
+        case ж<Pointer> t: {
+            res = Ꮡw.isParameterized((~t).@base); return;
+        }
+        case ж<Tuple> t: {
+            res = t != nil && Ꮡw.varList((~t).vars); return;
+        }
+        case ж<ΔSignature> t: {
+            res = (~t).@params != nil && Ꮡw.varList((~(~t).@params).vars) || (~t).results != nil && Ꮡw.varList((~(~t).results).vars); return;
+        }
+        case ж<Interface> t: {
+            var tset = t.typeSet();
+            foreach (var (_, m) in (~tset).methods) {
+                // nothing to do
+                // This case does not occur from within isParameterized
+                // because tuples only appear in signatures where they
+                // are handled explicitly. But isParameterized is also
+                // called by Checker.callExpr with a function result tuple
+                // if instantiation failed (go.dev/issue/59890).
+                // t.tparams may not be nil if we are looking at a signature
+                // of a generic function type (or an interface method) that is
+                // part of the type we're testing. We don't care about these type
+                // parameters.
+                // Similarly, the receiver of a method may declare (rather than
+                // use) type parameters, we don't care about those either.
+                // Thus, we only need to look at the input and result parameters.
+                if (Ꮡw.isParameterized((~m).typ)) {
+                    res = true; return;
+                }
+            }
+            res = tset.@is((ж<term> tΔ1) => tΔ1 != nil && Ꮡw.isParameterized((~tΔ1).typ)); return;
+        }
+        case ж<Map> t: {
+            res = Ꮡw.isParameterized((~t).key) || Ꮡw.isParameterized((~t).elem); return;
+        }
+        case ж<Chan> t: {
+            res = Ꮡw.isParameterized((~t).elem); return;
+        }
+        case ж<Named> t: {
+            foreach (var (_, tΔ2) in t.TypeArgs().list()) {
+                if (Ꮡw.isParameterized(tΔ2)) {
+                    res = true; return;
+                }
+            }
+            break;
+        }
+        case ж<TypeParam> t: {
+            res = tparamIndex(w.tparams, t) >= 0; return;
+        }
+        default: {
+            var t = typ;
+            throw panic(fmt.Sprintf("unexpected %T"u8, typ));
+            break;
+        }}
+        res = false;
     });
-    switch (typ.type()) {
-    case Basic.val t: {
-        break;
-    }
-    case Alias.val t: {
-        return w.isParameterized(Unalias(~t));
-    }
-    case Array.val t: {
-        return w.isParameterized((~t).elem);
-    }
-    case Slice.val t: {
-        return w.isParameterized((~t).elem);
-    }
-    case Struct.val t: {
-        return w.varList((~t).fields);
-    }
-    case Pointer.val t: {
-        return w.isParameterized((~t).@base);
-    }
-    case Tuple.val t: {
-        return t != nil && w.varList((~t).vars);
-    }
-    case ΔSignature.val t: {
-        return (~t).@params != nil && w.varList((~(~t).@params).vars) || (~t).results != nil && w.varList((~(~t).results).vars);
-    }
-    case Interface.val t: {
-        var tset = t.typeSet();
-        foreach (var (_, m) in (~tset).methods) {
-            // nothing to do
-            // This case does not occur from within isParameterized
-            // because tuples only appear in signatures where they
-            // are handled explicitly. But isParameterized is also
-            // called by Checker.callExpr with a function result tuple
-            // if instantiation failed (go.dev/issue/59890).
-            // t.tparams may not be nil if we are looking at a signature
-            // of a generic function type (or an interface method) that is
-            // part of the type we're testing. We don't care about these type
-            // parameters.
-            // Similarly, the receiver of a method may declare (rather than
-            // use) type parameters, we don't care about those either.
-            // Thus, we only need to look at the input and result parameters.
-            if (w.isParameterized(m.typ)) {
-                return true;
-            }
-        }
-        return tset.@is((ж<term> t) => t != nil && w.isParameterized((~t).typ));
-    }
-    case Map.val t: {
-        return w.isParameterized((~t).key) || w.isParameterized((~t).elem);
-    }
-    case Chan.val t: {
-        return w.isParameterized((~t).elem);
-    }
-    case Named.val t: {
-        foreach (var (_, t) in t.TypeArgs().list()) {
-            if (w.isParameterized(t)) {
-                return true;
-            }
-        }
-        break;
-    }
-    case TypeParam.val t: {
-        return tparamIndex(w.tparams, t) >= 0;
-    }
-    default: {
-        var t = typ.type();
-        throw panic(fmt.Sprintf("unexpected %T"u8, typ));
-        break;
-    }}
-    return false;
-});
+    return res;
+}
 
-[GoRecv] internal static bool varList(this ref tpWalker w, slice<ж<Var>> list) {
+internal static bool varList(this ж<tpWalker> Ꮡw, slice<ж<Var>> list) {
+    ref var w = ref Ꮡw.Value;
+
     foreach (var (_, v) in list) {
-        if (w.isParameterized(v.typ)) {
+        if (Ꮡw.isParameterized((~v).typ)) {
             return true;
         }
     }
@@ -644,34 +654,32 @@ internal static bool isParameterized(slice<ж<TypeParam>> tparams, ΔType typ) {
 // core type and false. In that case, if any term of tpar has a tilde, the core
 // term has a tilde. In all other cases coreTerm returns (nil, false).
 internal static (ж<term>, bool) coreTerm(ж<TypeParam> Ꮡtpar) {
-    ref var tpar = ref Ꮡtpar.val;
+    ref var tpar = ref Ꮡtpar.Value;
 
     nint n = 0;
-    ж<term> single = default!;      // valid if n == 1
+    ref var single = ref heap<ж<term>>(out var Ꮡsingle);      // valid if n == 1
     ref var tilde = ref heap(new bool(), out var Ꮡtilde);
-    tpar.@is(
-    var singleʗ2 = single;
-    var tildeʗ2 = tilde;
-    (ж<term> t) => {
+    tpar.@is((ж<term> t) => {
         if (t == nil) {
             assert(n == 0);
             return false;
         }
+        // no terms
         n++;
-        singleʗ2 = t;
-        if ((~t).tildeʗ2) {
-            tildeʗ2 = true;
+        Ꮡsingle.ValueSlot = t;
+        if ((~t).tilde) {
+            Ꮡtilde.Value = true;
         }
         return true;
     });
     if (n == 1) {
         if (debug) {
-            assert(debug && AreEqual(under((~single).typ), coreType(~tpar)));
+            assert(debug && AreEqual(under((~single).typ), coreType(new TypeParamжΔType(Ꮡtpar))));
         }
         return (single, true);
     }
     {
-        var typ = coreType(~tpar); if (typ != default!) {
+        var typ = coreType(new TypeParamжΔType(Ꮡtpar)); if (typ != default!) {
             // A core type is always an underlying type.
             // If any term of tpar has a tilde, we don't
             // have a precise core type and we must return
@@ -690,9 +698,10 @@ internal static (ж<term>, bool) coreTerm(ж<TypeParam> Ꮡtpar) {
 // TODO(gri) Determine if we can simply abort inference as soon as we have
 // found a single cycle.
 internal static void killCycles(slice<ж<TypeParam>> tparams, slice<ΔType> inferred) {
-    var w = new cycleFinder(tparams, inferred, new map<ΔType, bool>());
+    ref var w = ref heap<cycleFinder>(out var Ꮡw);
+    w = new cycleFinder(tparams, inferred, new map<ΔType, bool>());
     foreach (var (_, t) in tparams) {
-        w.typ(~t);
+        Ꮡw.typ(new TypeParamжΔType(t));
     }
 }
 
@@ -703,14 +712,16 @@ internal static void killCycles(slice<ж<TypeParam>> tparams, slice<ΔType> infe
     internal map<ΔType, bool> seen;
 }
 
-[GoRecv] internal static void typ(this ref cycleFinder w, ΔType typ) => func((defer, _) => {
+internal static void typ(this ж<cycleFinder> Ꮡw, ΔType typ) => func((defer, recover) => {
+    ref var w = ref Ꮡw.Value;
+
     typ = Unalias(typ);
     if (w.seen[typ]) {
         // We have seen typ before. If it is one of the type parameters
         // in w.tparams, iterative substitution will lead to infinite expansion.
         // Nil out the corresponding type which effectively kills the cycle.
         {
-            var (tpar, _) = typ._<TypeParam.val>(ᐧ); if (tpar != nil) {
+            var (tpar, _) = typ._<ж<TypeParam>>(ᐧ); if (tpar != nil) {
                 {
                     nint i = tparamIndex(w.tparams, tpar); if (i >= 0) {
                         // cycle through tpar
@@ -724,28 +735,28 @@ internal static void killCycles(slice<ж<TypeParam>> tparams, slice<ΔType> infe
         return;
     }
     w.seen[typ] = true;
-    deferǃ(delete, w.seen, typ, defer);
+    deferǃ((ᴛ1, ᴛ2) => delete(ᴛ1, ᴛ2), Ꮡw.Value.seen, typ, defer);
     switch (typ.type()) {
-    case Basic.val t: {
+    case ж<Basic> t: {
         break;
     }
-    case Array.val t: {
-        w.typ((~t).elem);
+    case ж<Array> t: {
+        Ꮡw.typ((~t).elem);
         break;
     }
-    case Slice.val t: {
-        w.typ((~t).elem);
+    case ж<Slice> t: {
+        Ꮡw.typ((~t).elem);
         break;
     }
-    case Struct.val t: {
-        w.varList((~t).fields);
+    case ж<Struct> t: {
+        Ꮡw.varList((~t).fields);
         break;
     }
-    case Pointer.val t: {
-        w.typ((~t).@base);
+    case ж<Pointer> t: {
+        Ꮡw.typ((~t).@base);
         break;
     }
-    case ΔSignature.val t: {
+    case ж<ΔSignature> t: {
         if ((~t).@params != nil) {
             // nothing to do
             // *Alias:
@@ -753,68 +764,70 @@ internal static void killCycles(slice<ж<TypeParam>> tparams, slice<ΔType> infe
             // case *Tuple:
             //      This case should not occur because tuples only appear
             //      in signatures where they are handled explicitly.
-            w.varList((~(~t).@params).vars);
+            Ꮡw.varList((~(~t).@params).vars);
         }
         if ((~t).results != nil) {
-            w.varList((~(~t).results).vars);
+            Ꮡw.varList((~(~t).results).vars);
         }
         break;
     }
-    case Union.val t: {
-        foreach (var (_, t) in (~t).terms) {
-            w.typ((~t).typ);
+    case ж<Union> t: {
+        foreach (var (_, tΔ1) in (~t).terms) {
+            Ꮡw.typ((~tΔ1).typ);
         }
         break;
     }
-    case Interface.val t: {
+    case ж<Interface> t: {
         foreach (var (_, m) in (~t).methods) {
-            w.typ(m.typ);
+            Ꮡw.typ((~m).typ);
         }
-        foreach (var (_, t) in (~t).embeddeds) {
-            w.typ(t);
+        foreach (var (_, tΔ2) in (~t).embeddeds) {
+            Ꮡw.typ(tΔ2);
         }
         break;
     }
-    case Map.val t: {
-        w.typ((~t).key);
-        w.typ((~t).elem);
+    case ж<Map> t: {
+        Ꮡw.typ((~t).key);
+        Ꮡw.typ((~t).elem);
         break;
     }
-    case Chan.val t: {
-        w.typ((~t).elem);
+    case ж<Chan> t: {
+        Ꮡw.typ((~t).elem);
         break;
     }
-    case Named.val t: {
+    case ж<Named> t: {
         foreach (var (_, tpar) in t.TypeArgs().list()) {
-            w.typ(tpar);
+            Ꮡw.typ(tpar);
         }
         break;
     }
-    case TypeParam.val t: {
+    case ж<TypeParam> t: {
         {
             nint i = tparamIndex(w.tparams, t); if (i >= 0 && w.inferred[i] != default!) {
-                w.typ(w.inferred[i]);
+                Ꮡw.typ(w.inferred[i]);
             }
         }
         break;
     }
     default: {
-        var t = typ.type();
+        var t = typ;
         throw panic(fmt.Sprintf("unexpected %T"u8, typ));
         break;
     }}
 });
 
-[GoRecv] internal static void varList(this ref cycleFinder w, slice<ж<Var>> list) {
+internal static void varList(this ж<cycleFinder> Ꮡw, slice<ж<Var>> list) {
+    ref var w = ref Ꮡw.Value;
+
     foreach (var (_, v) in list) {
-        w.typ(v.typ);
+        Ꮡw.typ((~v).typ);
     }
 }
 
 // If tpar is a type parameter in list, tparamIndex returns the index
 // of the type parameter in list. Otherwise the result is < 0.
 internal static nint tparamIndex(slice<ж<TypeParam>> list, ж<TypeParam> Ꮡtpar) {
-    ref var tpar = ref Ꮡtpar.val;
+    ref var tpar = ref Ꮡtpar.DerefOrNil();
 
     foreach (var (i, p) in list) {
         if (p == Ꮡtpar) {

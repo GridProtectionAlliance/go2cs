@@ -15,22 +15,22 @@ partial class poll_package {
 
 // errNetClosing is the type of the variable ErrNetClosing.
 // This is used to implement the net.Error interface.
-[GoType] partial struct errNetClosing {
+[GoType] public partial struct errNetClosing {
 }
 
 // Error returns the error message for ErrNetClosing.
 // Keep this string consistent because of issue #4373:
 // since historically programs have not been able to detect
 // this error, they look for the string.
-internal static @string Error(this errNetClosing e) {
+public static @string Error(this errNetClosing e) {
     return "use of closed network connection"u8;
 }
 
-internal static bool Timeout(this errNetClosing e) {
+public static bool Timeout(this errNetClosing e) {
     return false;
 }
 
-internal static bool Temporary(this errNetClosing e) {
+public static bool Temporary(this errNetClosing e) {
     return false;
 }
 
@@ -56,7 +56,7 @@ internal static error errClosing(bool isFile) {
 
 // ErrDeadlineExceeded is returned for an expired deadline.
 // This is exported by the os package as os.ErrDeadlineExceeded.
-public static error ErrDeadlineExceeded = Ꮡ(new DeadlineExceededError(nil));
+public static error ErrDeadlineExceeded = new DeadlineExceededErrorжerror(Ꮡ(new DeadlineExceededError(nil)));
 
 // DeadlineExceededError is returned for an expired deadline.
 [GoType] partial struct DeadlineExceededError {
@@ -84,10 +84,10 @@ public static error ErrNotPollable = errors.New("not pollable"u8);
 
 // consume removes data from a slice of byte slices, for writev.
 internal static void consume(ж<slice<slice<byte>>> Ꮡv, int64 n) {
-    ref var v = ref Ꮡv.val;
+    ref var v = ref Ꮡv.Value;
 
     while (len(v) > 0) {
-        var ln0 = ((int64)len((v)[0]));
+        var ln0 = (int64)len((v)[0]);
         if (ln0 > n) {
             (v)[0] = (v)[0][(int)(n)..];
             return;

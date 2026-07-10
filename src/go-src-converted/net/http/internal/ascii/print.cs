@@ -25,7 +25,7 @@ public static bool EqualFold(@string s, @string t) {
 // lower returns the ASCII lowercase version of b.
 internal static byte lower(byte b) {
     if ((rune)'A' <= b && b <= (rune)'Z') {
-        return b + ((rune)'a' - (rune)'A');
+        return (byte)(b + ((rune)'a' - (rune)'A'));
     }
     return b;
 }

@@ -9,13 +9,14 @@ using fmt = fmt_package;
 using regexp = regexp_package;
 using strconv = strconv_package;
 using strings = strings_package;
+using io = io_package;
 
 partial class testtrace_package {
 
 // Expectation represents the expected result of some operation.
 [GoType] partial struct Expectation {
     internal bool failure;
-    internal ж<regexp_package.Regexp> errorMatcher;
+    internal ж<regexp.Regexp> errorMatcher;
 }
 
 // ExpectSuccess returns an Expectation that trivially expects success.
@@ -44,22 +45,22 @@ public static ж<Expectation> ExpectSuccess() {
 // ParseExpectation parses the serialized form of an Expectation.
 public static (ж<Expectation>, error) ParseExpectation(slice<byte> data) {
     var exp = @new<Expectation>();
-    var s = bufio.NewScanner(~bytes.NewReader(data));
+    var s = bufio.NewScanner(new bytes_ReaderжReader(bytes.NewReader(data)));
     if (s.Scan()) {
         var c = strings.SplitN(s.Text(), " "u8, 2);
         var exprᴛ1 = c[0];
         if (exprᴛ1 == "SUCCESS"u8) {
         }
         else if (exprᴛ1 == "FAILURE"u8) {
-            exp.val.failure = true;
+            exp.Value.failure = true;
             if (len(c) != 2) {
                 return (exp, fmt.Errorf("bad header line for FAILURE: %q"u8, s.Text()));
             }
-            (matcher, err) = parseMatcher(c[1]);
+            var (matcher, err) = parseMatcher(c[1]);
             if (err != default!) {
                 return (exp, err);
             }
-            exp.val.errorMatcher = matcher;
+            exp.Value.errorMatcher = matcher;
         }
         else { /* default: */
             return (exp, fmt.Errorf("bad header line: %q"u8, s.Text()));
@@ -75,7 +76,7 @@ internal static (ж<regexp.Regexp>, error) parseMatcher(@string quoted) {
     if (err != default!) {
         return (default!, fmt.Errorf("malformed pattern: not correctly quoted: %s: %v"u8, quoted, err));
     }
-    (matcher, err) = regexp.Compile(pattern);
+    (var matcher, err) = regexp.Compile(pattern);
     if (err != default!) {
         return (default!, fmt.Errorf("malformed pattern: not a valid regexp: %s: %v"u8, pattern, err));
     }

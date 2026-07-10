@@ -15,8 +15,8 @@ using path = path_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
-using _ = unsafe_package; // for linkname
-using ꓸꓸꓸ@string = Span<@string>;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class url_package {
 
@@ -73,13 +73,13 @@ internal static bool ishex(byte c) {
 internal static byte unhex(byte c) {
     switch (ᐧ) {
     case {} when (rune)'0' <= c && c <= (rune)'9': {
-        return c - (rune)'0';
+        return (byte)(c - (rune)'0');
     }
     case {} when (rune)'a' <= c && c <= (rune)'f': {
-        return c - (rune)'a' + 10;
+        return (byte)(c - (rune)'a' + 10);
     }
     case {} when (rune)'A' <= c && c <= (rune)'F': {
-        return c - (rune)'A' + 10;
+        return (byte)(c - (rune)'A' + 10);
     }}
 
     return 0;
@@ -251,7 +251,7 @@ internal static (@string, error) unescape(@string s, encoding mode) {
                 // That is, you can use escaping in the zone identifier but not
                 // to introduce bytes you couldn't just write directly.
                 // But Windows puts spaces here! Yay.
-                var v = (byte)(unhex(s[i + 1]) << (int)(4) | unhex(s[i + 2]));
+                var v = (byte)((unhex(s[i + 1]) << (int)(4)) | unhex(s[i + 2]));
                 if (s[(int)(i)..(int)(i + 3)] != "%25" && v != (rune)' ' && shouldEscape(v, encodeHost)) {
                     return ("", ((EscapeError)(s[(int)(i)..(int)(i + 3)])));
                 }
@@ -265,7 +265,7 @@ internal static (@string, error) unescape(@string s, encoding mode) {
             break;
         }
         default: {
-            if ((mode == encodeHost || mode == encodeZone) && s[i] < 128 && shouldEscape(s[i], mode)) {
+            if ((mode == encodeHost || mode == encodeZone) && s[i] < 0x80 && shouldEscape(s[i], mode)) {
                 return ("", ((InvalidHostError)(s[(int)(i)..(int)(i + 1)])));
             }
             i++;
@@ -276,25 +276,25 @@ internal static (@string, error) unescape(@string s, encoding mode) {
     if (n == 0 && !hasPlus) {
         return (s, default!);
     }
-    strings.Builder t = default!;
-    t.Grow(len(s) - 2 * n);
+    ref var t = ref heap(new strings.Builder(), out var Ꮡt);
+    Ꮡt.Grow(len(s) - 2 * n);
     for (nint i = 0; i < len(s); i++) {
         switch (s[i]) {
         case (rune)'%': {
-            t.WriteByte((byte)(unhex(s[i + 1]) << (int)(4) | unhex(s[i + 2])));
+            Ꮡt.WriteByte((byte)((unhex(s[i + 1]) << (int)(4)) | unhex(s[i + 2])));
             i += 2;
             break;
         }
         case (rune)'+': {
             if (mode == encodeQueryComponent){
-                t.WriteByte((rune)' ');
+                Ꮡt.WriteByte((rune)' ');
             } else {
-                t.WriteByte((rune)'+');
+                Ꮡt.WriteByte((rune)'+');
             }
             break;
         }
         default: {
-            t.WriteByte(s[i]);
+            Ꮡt.WriteByte(s[i]);
             break;
         }}
 
@@ -359,7 +359,7 @@ internal static @string escape(@string s, encoding mode) {
             }
             case {} when shouldEscape(c, mode): {
                 t[j] = (rune)'%';
-                t[j + 1] = upperhex[c >> (int)(4)];
+                t[j + 1] = upperhex[(c >> (int)(4))];
                 t[j + 2] = upperhex[(byte)(c & 15)];
                 j += 3;
                 break;
@@ -446,7 +446,9 @@ public static ж<Userinfo> UserPassword(@string username, @string password) {
 }
 
 // Username returns the username.
-[GoRecv] public static @string Username(this ref Userinfo u) {
+public static @string Username(this ж<Userinfo> Ꮡu) {
+    ref var u = ref Ꮡu.Value;
+
     if (u == nil) {
         return ""u8;
     }
@@ -454,7 +456,9 @@ public static ж<Userinfo> UserPassword(@string username, @string password) {
 }
 
 // Password returns the password in case it is set, and whether it is set.
-[GoRecv] public static (@string, bool) Password(this ref Userinfo u) {
+public static (@string, bool) Password(this ж<Userinfo> Ꮡu) {
+    ref var u = ref Ꮡu.Value;
+
     if (u == nil) {
         return ("", false);
     }
@@ -463,7 +467,9 @@ public static ж<Userinfo> UserPassword(@string username, @string password) {
 
 // String returns the encoded userinfo information in the standard form
 // of "username[:password]".
-[GoRecv] public static @string String(this ref Userinfo u) {
+public static @string String(this ж<Userinfo> Ꮡu) {
+    ref var u = ref Ꮡu.Value;
+
     if (u == nil) {
         return ""u8;
     }
@@ -519,17 +525,18 @@ internal static (@string scheme, @string path, error err) getScheme(@string rawU
 // error, due to parsing ambiguities.
 public static (ж<URL>, error) Parse(@string rawURL) {
     // Cut off #frag
-    var (u, frag, _) = strings.Cut(rawURL, "#"u8);
-    (url, err) = parse(u, false);
+    ref var u = ref heap<@string>(out var Ꮡu);
+    (u, var frag, _) = strings.Cut(rawURL, "#"u8);
+    var (url, err) = parse(u, false);
     if (err != default!) {
-        return (default!, new ΔError("parse", u, err));
+        return (default!, new ΔErrorжerror(Ꮡ(new ΔError("parse", u, err))));
     }
     if (frag == ""u8) {
         return (url, default!);
     }
     {
         err = url.setFragment(frag); if (err != default!) {
-            return (default!, new ΔError("parse", rawURL, err));
+            return (default!, new ΔErrorжerror(Ꮡ(new ΔError("parse", rawURL, err))));
         }
     }
     return (url, default!);
@@ -541,9 +548,9 @@ public static (ж<URL>, error) Parse(@string rawURL) {
 // The string url is assumed not to have a #fragment suffix.
 // (Web browsers strip #fragment before sending the URL to a web server.)
 public static (ж<URL>, error) ParseRequestURI(@string rawURL) {
-    (url, err) = parse(rawURL, true);
+    var (url, err) = parse(rawURL, true);
     if (err != default!) {
-        return (default!, new ΔError("parse", rawURL, err));
+        return (default!, new ΔErrorжerror(Ꮡ(new ΔError("parse", rawURL, err))));
     }
     return (url, default!);
 }
@@ -563,27 +570,27 @@ internal static (ж<URL>, error) parse(@string rawURL, bool viaRequest) {
     }
     var url = @new<URL>();
     if (rawURL == "*"u8) {
-        url.val.Path = "*"u8;
+        url.Value.Path = "*"u8;
         return (url, default!);
     }
     // Split off possible leading "http:", "mailto:", etc.
     // Cannot contain escaped characters.
     {
-        (url.val.Scheme, rest, err) = getScheme(rawURL); if (err != default!) {
+        (url.Value.Scheme, rest, err) = getScheme(rawURL); if (err != default!) {
             return (default!, err);
         }
     }
-    url.val.Scheme = strings.ToLower((~url).Scheme);
+    url.Value.Scheme = strings.ToLower((~url).Scheme);
     if (strings.HasSuffix(rest, "?"u8) && strings.Count(rest, "?"u8) == 1){
-        url.val.ForceQuery = true;
+        url.Value.ForceQuery = true;
         rest = rest[..(int)(len(rest) - 1)];
     } else {
-        (rest, url.val.RawQuery, _) = strings.Cut(rest, "?"u8);
+        (rest, url.Value.RawQuery, _) = strings.Cut(rest, "?"u8);
     }
     if (!strings.HasPrefix(rest, "/"u8)) {
         if ((~url).Scheme != ""u8) {
             // We consider rootless paths per RFC 3986 as opaque.
-            url.val.Opaque = rest;
+            url.Value.Opaque = rest;
             return (url, default!);
         }
         if (viaRequest) {
@@ -604,13 +611,13 @@ internal static (ж<URL>, error) parse(@string rawURL, bool viaRequest) {
     }
     if (((~url).Scheme != ""u8 || !viaRequest && !strings.HasPrefix(rest, "///"u8)) && strings.HasPrefix(rest, "//"u8)){
         @string authority = default!;
-        (authority, rest) = (rest[2..], ""u8);
+        (authority, rest) = (rest[2..], "");
         {
             nint i = strings.Index(authority, "/"u8); if (i >= 0) {
                 (authority, rest) = (authority[..(int)(i)], authority[(int)(i)..]);
             }
         }
-        (url.val.User, url.val.Host, err) = parseAuthority(authority);
+        (url.Value.User, url.Value.Host, err) = parseAuthority(authority);
         if (err != default!) {
             return (default!, err);
         }
@@ -618,7 +625,7 @@ internal static (ж<URL>, error) parse(@string rawURL, bool viaRequest) {
     if ((~url).Scheme != ""u8 && strings.HasPrefix(rest, "/"u8)) {
         // OmitHost is set to true when rawURL has an empty host (authority).
         // See golang.org/issue/46059.
-        url.val.OmitHost = true;
+        url.Value.OmitHost = true;
     }
     // Set Path and, optionally, RawPath.
     // RawPath is a hint of the encoding of Path. We don't want to set it if
@@ -703,11 +710,11 @@ internal static (@string, error) parseHost(@string host) {
             if (errΔ1 != default!) {
                 return ("", errΔ1);
             }
-            var (host2, ) = unescape(host[(int)(zone)..(int)(i)], encodeZone);
+            (var host2, errΔ1) = unescape(host[(int)(zone)..(int)(i)], encodeZone);
             if (errΔ1 != default!) {
                 return ("", errΔ1);
             }
-            var (host3, ) = unescape(host[(int)(i)..], encodeHost);
+            (var host3, errΔ1) = unescape(host[(int)(i)..], encodeHost);
             if (errΔ1 != default!) {
                 return ("", errΔ1);
             }
@@ -767,7 +774,7 @@ internal static (@string, error) parseHost(@string host) {
 }
 
 // for linkname because we cannot linkname methods directly
-internal static partial error badSetPath(ж<URL> _, @string _);
+internal static partial error badSetPath(ж<URL> _Δp0, @string _Δp1);
 
 // EscapedPath returns the escaped form of u.Path.
 // In general there are multiple possible escaped forms of any path.
@@ -901,7 +908,7 @@ internal static bool validOptionalPort(@string port) {
 //   - if u.RawQuery is empty, ?query is omitted.
 //   - if u.Fragment is empty, #fragment is omitted.
 [GoRecv] public static @string String(this ref URL u) {
-    strings.Builder buf = default!;
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     nint n = len(u.Scheme);
     if (u.Opaque != ""u8){
         n += len(u.Opaque);
@@ -914,38 +921,38 @@ internal static bool validOptionalPort(@string port) {
         n += len(u.Path);
     }
     n += len(u.RawQuery) + len(u.RawFragment);
-    n += len(":"u8 + "//"u8 + "//"u8 + ":"u8 + "@"u8 + "/"u8 + "./"u8 + "?"u8 + "#"u8);
-    buf.Grow(n);
+    n += len(":" + "//" + "//" + ":" + "@" + "/" + "./" + "?" + "#");
+    Ꮡbuf.Grow(n);
     if (u.Scheme != ""u8) {
-        buf.WriteString(u.Scheme);
-        buf.WriteByte((rune)':');
+        Ꮡbuf.WriteString(u.Scheme);
+        Ꮡbuf.WriteByte((rune)':');
     }
     if (u.Opaque != ""u8){
-        buf.WriteString(u.Opaque);
+        Ꮡbuf.WriteString(u.Opaque);
     } else {
         if (u.Scheme != ""u8 || u.Host != ""u8 || u.User != nil) {
             if (u.OmitHost && u.Host == ""u8 && u.User == nil){
             } else {
                 // omit empty host
                 if (u.Host != ""u8 || u.Path != ""u8 || u.User != nil) {
-                    buf.WriteString("//"u8);
+                    Ꮡbuf.WriteString("//"u8);
                 }
                 {
                     var ui = u.User; if (ui != nil) {
-                        buf.WriteString(ui.String());
-                        buf.WriteByte((rune)'@');
+                        Ꮡbuf.WriteString(ui.String());
+                        Ꮡbuf.WriteByte((rune)'@');
                     }
                 }
                 {
                     @string h = u.Host; if (h != ""u8) {
-                        buf.WriteString(escape(h, encodeHost));
+                        Ꮡbuf.WriteString(escape(h, encodeHost));
                     }
                 }
             }
         }
         @string path = u.EscapedPath();
         if (path != ""u8 && path[0] != (rune)'/' && u.Host != ""u8) {
-            buf.WriteByte((rune)'/');
+            Ꮡbuf.WriteByte((rune)'/');
         }
         if (buf.Len() == 0) {
             // RFC 3986 §4.2
@@ -956,26 +963,28 @@ internal static bool validOptionalPort(@string port) {
             // path reference.
             {
                 var (segment, _, _) = strings.Cut(path, "/"u8); if (strings.Contains(segment, ":"u8)) {
-                    buf.WriteString("./"u8);
+                    Ꮡbuf.WriteString("./"u8);
                 }
             }
         }
-        buf.WriteString(path);
+        Ꮡbuf.WriteString(path);
     }
     if (u.ForceQuery || u.RawQuery != ""u8) {
-        buf.WriteByte((rune)'?');
-        buf.WriteString(u.RawQuery);
+        Ꮡbuf.WriteByte((rune)'?');
+        Ꮡbuf.WriteString(u.RawQuery);
     }
     if (u.Fragment != ""u8) {
-        buf.WriteByte((rune)'#');
-        buf.WriteString(u.EscapedFragment());
+        Ꮡbuf.WriteByte((rune)'#');
+        Ꮡbuf.WriteString(u.EscapedFragment());
     }
     return buf.String();
 }
 
 // Redacted is like [URL.String] but replaces any password with "xxxxx".
 // Only the password in u.User is redacted.
-[GoRecv] public static @string Redacted(this ref URL u) {
+public static @string Redacted(this ж<URL> Ꮡu) {
+    ref var u = ref Ꮡu.Value;
+
     if (u == nil) {
         return ""u8;
     }
@@ -987,7 +996,8 @@ internal static bool validOptionalPort(@string port) {
     }
     return ru.String();
 }
-/* visitMapType: map[string][]string */
+
+[GoType("map[@string, slice<@string>]")] partial struct Values;
 
 // Get gets the first value associated with the given key.
 // If there are no values associated with the key, Get returns
@@ -1020,8 +1030,7 @@ public static void Del(this Values v, @string key) {
 
 // Has checks whether a given key is set.
 public static bool Has(this Values v, @string key) {
-    var _ = v[key];
-    var ok = v[key];
+    var (_, ok) = v[key, ꟷ];
     return ok;
 }
 
@@ -1054,8 +1063,8 @@ internal static error /*err*/ parseQuery(Values m, @string query) {
         if (key == ""u8) {
             continue;
         }
-        var (key, value, _) = strings.Cut(key, "="u8);
-        (key, err1) = QueryUnescape(key);
+        (key, var value, _) = strings.Cut(key, "="u8);
+        (key, var err1) = QueryUnescape(key);
         if (err1 != default!) {
             if (err == default!) {
                 err = err1;
@@ -1080,22 +1089,22 @@ public static @string Encode(this Values v) {
     if (len(v) == 0) {
         return ""u8;
     }
-    strings.Builder buf = default!;
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var keys = new slice<@string>(0, len(v));
     foreach (var (k, _) in v) {
         keys = append(keys, k);
     }
-    slices.Sort(keys);
+    slices.Sort<slice<@string>, @string>(keys);
     foreach (var (_, k) in keys) {
         var vs = v[k];
         @string keyEscaped = QueryEscape(k);
         foreach (var (_, vΔ1) in vs) {
             if (buf.Len() > 0) {
-                buf.WriteByte((rune)'&');
+                Ꮡbuf.WriteByte((rune)'&');
             }
-            buf.WriteString(keyEscaped);
-            buf.WriteByte((rune)'=');
-            buf.WriteString(QueryEscape(vΔ1));
+            Ꮡbuf.WriteString(keyEscaped);
+            Ꮡbuf.WriteByte((rune)'=');
+            Ꮡbuf.WriteString(QueryEscape(vΔ1));
         }
     }
     return buf.String();
@@ -1118,11 +1127,11 @@ internal static @string resolvePath(@string @base, @string @ref) {
         return ""u8;
     }
     @string elem = default!;
-    strings.Builder dst = default!;
+    ref var dst = ref heap(new strings.Builder(), out var Ꮡdst);
     var first = true;
     @string remaining = full;
     // We want to return a leading '/', so write it now.
-    dst.WriteByte((rune)'/');
+    Ꮡdst.WriteByte((rune)'/');
     var found = true;
     while (found) {
         (elem, remaining, found) = strings.Cut(remaining, "/"u8);
@@ -1136,22 +1145,22 @@ internal static @string resolvePath(@string @base, @string @ref) {
             @string str = dst.String()[1..];
             nint index = strings.LastIndexByte(str, (rune)'/');
             dst.Reset();
-            dst.WriteByte((rune)'/');
+            Ꮡdst.WriteByte((rune)'/');
             if (index == -1){
                 first = true;
             } else {
-                dst.WriteString(str[..(int)(index)]);
+                Ꮡdst.WriteString(str[..(int)(index)]);
             }
         } else {
             if (!first) {
-                dst.WriteByte((rune)'/');
+                Ꮡdst.WriteByte((rune)'/');
             }
-            dst.WriteString(elem);
+            Ꮡdst.WriteString(elem);
             first = false;
         }
     }
     if (elem == "."u8 || elem == ".."u8) {
-        dst.WriteByte((rune)'/');
+        Ꮡdst.WriteByte((rune)'/');
     }
     // We wrote an initial '/', but we don't want two.
     @string r = dst.String();
@@ -1171,7 +1180,7 @@ internal static @string resolvePath(@string @base, @string @ref) {
 // may be relative or absolute. Parse returns nil, err on parse
 // failure, otherwise its return value is the same as [URL.ResolveReference].
 [GoRecv] public static (ж<URL>, error) Parse(this ref URL u, @string @ref) {
-    (refURL, err) = Parse(@ref);
+    var (refURL, err) = Parse(@ref);
     if (err != default!) {
         return (default!, err);
     }
@@ -1185,7 +1194,7 @@ internal static @string resolvePath(@string @base, @string @ref) {
 // base or reference. If ref is an absolute URL, then ResolveReference
 // ignores base and returns a copy of ref.
 [GoRecv] public static ж<URL> ResolveReference(this ref URL u, ж<URL> Ꮡref) {
-    ref var @ref = ref Ꮡref.val;
+    ref var @ref = ref Ꮡref.Value;
 
     ref var url = ref heap<URL>(out var Ꮡurl);
     url = @ref;
@@ -1230,7 +1239,7 @@ internal static @string resolvePath(@string @base, @string @ref) {
 // It silently discards malformed value pairs.
 // To check errors use [ParseQuery].
 [GoRecv] public static Values Query(this ref URL u) {
-    (v, _) = ParseQuery(u.RawQuery);
+    var (v, _) = ParseQuery(u.RawQuery);
     return v;
 }
 
@@ -1299,18 +1308,18 @@ internal static (@string host, @string port) splitHostPort(@string hostPort) {
 }
 
 [GoRecv] public static error UnmarshalBinary(this ref URL u, slice<byte> text) {
-    (u1, err) = Parse(((@string)text));
+    var (u1, err) = Parse(((@string)text));
     if (err != default!) {
         return err;
     }
-    u = u1.val;
+    u = u1.Value;
     return default!;
 }
 
 // JoinPath returns a new [URL] with the provided path elements joined to
 // any existing path and the resulting path cleaned of any ./ or ../ elements.
 // Any sequences of multiple / characters will be reduced to a single /.
-[GoRecv] public static ж<URL> JoinPath(this ref URL u, params ꓸꓸꓸ@string elemʗp) {
+[GoRecv] public static ж<URL> JoinPath(this ref URL u, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.slice();
 
     elem = append(new @string[]{u.EscapedPath()}.slice(), elem.ꓸꓸꓸ);
@@ -1371,7 +1380,7 @@ internal static bool validUserinfo(@string s) {
 internal static bool stringContainsCTLByte(@string s) {
     for (nint i = 0; i < len(s); i++) {
         var b = s[i];
-        if (b < (rune)' ' || b == 127) {
+        if (b < (rune)' ' || b == 0x7f) {
             return true;
         }
     }
@@ -1380,12 +1389,12 @@ internal static bool stringContainsCTLByte(@string s) {
 
 // JoinPath returns a [URL] string with the provided path elements joined to
 // the existing path of base and the resulting path cleaned of any ./ or ../ elements.
-public static (@string result, error err) JoinPath(@string @base, params ꓸꓸꓸ@string elemʗp) {
+public static (@string result, error err) JoinPath(@string @base, params ꓸꓸꓸstring elemʗp) {
     @string result = default!;
     error err = default!;
     var elem = elemʗp.slice();
 
-    (url, err) = Parse(@base);
+    (var url, err) = Parse(@base);
     if (err != default!) {
         return (result, err);
     }

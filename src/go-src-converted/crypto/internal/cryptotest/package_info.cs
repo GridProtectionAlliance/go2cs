@@ -41,7 +41,7 @@ using static go.crypto.@internal.cryptotest_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<math.rand_package.Rand, io_package.Reader>]
+[assembly: GoImplement<go.math.rand_package.Rand, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

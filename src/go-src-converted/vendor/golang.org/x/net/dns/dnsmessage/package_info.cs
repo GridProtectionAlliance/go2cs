@@ -50,18 +50,18 @@ using static go.vendor.golang.org.x.net.dns.dnsmessage_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<nestedError, error>]
-[assembly: GoImplement<ΔAAAAResource, ResourceBody>]
-[assembly: GoImplement<ΔAResource, ResourceBody>]
-[assembly: GoImplement<ΔCNAMEResource, ResourceBody>]
-[assembly: GoImplement<ΔMXResource, ResourceBody>]
-[assembly: GoImplement<ΔNSResource, ResourceBody>]
-[assembly: GoImplement<ΔOPTResource, ResourceBody>]
-[assembly: GoImplement<ΔPTRResource, ResourceBody>]
-[assembly: GoImplement<ΔSOAResource, ResourceBody>]
-[assembly: GoImplement<ΔSRVResource, ResourceBody>]
-[assembly: GoImplement<ΔTXTResource, ResourceBody>]
-[assembly: GoImplement<ΔUnknownResource, ResourceBody>]
+[assembly: GoImplement<nestedError, error>(Pointer = true)]
+[assembly: GoImplement<ΔAAAAResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<ΔAResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<ΔCNAMEResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<ΔMXResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<ΔNSResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<ΔOPTResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<ΔPTRResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<ΔSOAResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<ΔSRVResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<ΔTXTResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<ΔUnknownResource, ResourceBody>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

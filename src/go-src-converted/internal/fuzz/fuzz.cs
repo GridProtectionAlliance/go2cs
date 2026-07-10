@@ -5,7 +5,7 @@
 // Package fuzz provides common fuzzing functionality for tests built with
 // "go test" and for programs that use fuzzing functionality in the testing
 // package.
-global using CorpusEntry = go.fuzz_package.CorpusEntryᴛ1;
+global using CorpusEntry = go.@internal.fuzz_package.CorpusEntryᴛ1;
 
 namespace go.@internal;
 
@@ -14,17 +14,20 @@ using context = context_package;
 using sha256 = crypto.sha256_package;
 using errors = errors_package;
 using fmt = fmt_package;
-using godebug = @internal.godebug_package;
+using godebug = global::go.@internal.godebug_package;
 using io = io_package;
-using bits = math.bits_package;
+using bits = global::go.math.bits_package;
 using os = os_package;
 using filepath = path.filepath_package;
 using reflect = reflect_package;
-using runtime = runtime_package;
+using Δruntime = runtime_package;
 using strings = strings_package;
 using time = time_package;
 using crypto;
-using math;
+using fs = global::go.io.fs_package;
+using global::go.@internal;
+using global::go.io;
+using global::go.math;
 using path;
 using ꓸꓸꓸCorpusEntry = Span<CorpusEntry>;
 using ꓸꓸꓸany = Span<any>;
@@ -36,10 +39,10 @@ partial class fuzz_package {
 [GoType] partial struct CoordinateFuzzingOpts {
     // Log is a writer for logging progress messages and warnings.
     // If nil, io.Discard will be used instead.
-    public io_package.Writer Log;
+    public io.Writer Log;
     // Timeout is the amount of wall clock time to spend fuzzing after the corpus
     // has loaded. If zero, there will be no time limit.
-    public time_package.Duration Timeout;
+    public time.Duration Timeout;
     // Limit is the number of random values to generate and test. If zero,
     // there will be no limit on the number of generated values.
     public int64 Limit;
@@ -47,7 +50,7 @@ partial class fuzz_package {
     // after discovering a crasher. If zero, there will be no time limit. If
     // MinimizeTimeout and MinimizeLimit are both zero, then minimization will
     // be disabled.
-    public time_package.Duration MinimizeTimeout;
+    public time.Duration MinimizeTimeout;
     // MinimizeLimit is the maximum number of calls to the fuzz function to be
     // made while minimizing after finding a crash. If zero, there will be no
     // limit. Calls to the fuzz function made when minimizing also count toward
@@ -80,329 +83,331 @@ partial class fuzz_package {
 //
 // If a crash occurs, the function will return an error containing information
 // about the crash, which can be reported to the user.
-public static error /*err*/ CoordinateFuzzing(context.Context ctx, CoordinateFuzzingOpts opts) => func((defer, _) => {
-    error errΔ1 = default!;
+public static error /*err*/ CoordinateFuzzing(context.Context ctx, CoordinateFuzzingOpts opts) {
+    heap<error>(out var Ꮡerr);
+    func((defer, recover) => {
+    ref var err = ref Ꮡerr.ValueSlot;
 
-    {
-        var errΔ2 = ctx.Err(); if (errΔ2 != default!) {
-            return errΔ2;
-        }
-    }
-    if (opts.Log == default!) {
-        opts.Log = io.Discard;
-    }
-    if (opts.Parallel == 0) {
-        opts.Parallel = runtime.GOMAXPROCS(0);
-    }
-    if (opts.Limit > 0 && ((int64)opts.Parallel) > opts.Limit) {
-        // Don't start more workers than we need.
-        opts.Parallel = ((nint)opts.Limit);
-    }
-    (c, ) = newCoordinator(opts);
-    if (errΔ1 != default!) {
-        return errΔ1;
-    }
-    if (opts.Timeout > 0) {
-        Action cancel = default!;
-        (ctx, cancel) = context.WithTimeout(ctx, opts.Timeout);
-        var cancelʗ1 = cancel;
-        defer(cancelʗ1);
-    }
-    // fuzzCtx is used to stop workers, for example, after finding a crasher.
-    (fuzzCtx, cancelWorkers) = context.WithCancel(ctx);
-    var cancelWorkersʗ1 = cancelWorkers;
-    defer(cancelWorkersʗ1);
-    var doneC = ctx.Done();
-    // stop is called when a worker encounters a fatal error.
-    error fuzzErr = default!;
-    var stopping = false;
-    var stop = 
-    var cʗ1 = c;
-    var cancelWorkersʗ2 = cancelWorkers;
-    var doneCʗ1 = doneC;
-    var fuzzCtxʗ1 = fuzzCtx;
-    var fuzzErrʗ1 = fuzzErr;
-    (error err) => {
-        if (shouldPrintDebugInfo()) {
-            var (_, file, line, ok) = runtime.Caller(1);
-            if (ok){
-                cʗ1.debugLogf("stop called at %s:%d. stopping: %t"u8, file, line, stopping);
-            } else {
-                cʗ1.debugLogf("stop called at unknown. stopping: %t"u8, stopping);
+        {
+            var errΔ1 = ctx.Err(); if (errΔ1 != default!) {
+                err = errΔ1; return;
             }
         }
-        if (AreEqual(errΔ3, fuzzCtxʗ1.Err()) || isInterruptError(errΔ3)) {
-            // Suppress cancellation errors and terminations due to SIGINT.
-            // The messages are not helpful since either the user triggered the error
-            // (with ^C) or another more helpful message will be printed (a crasher).
-             = default!;
+        if (opts.Log == default!) {
+            opts.Log = io.Discard;
         }
-        if (errΔ3 != default! && (fuzzErrʗ1 == default! || AreEqual(fuzzErrʗ1, ctx.Err()))) {
-            fuzzErrʗ1 = errΔ3;
+        if (opts.Parallel == 0) {
+            opts.Parallel = Δruntime.GOMAXPROCS(0);
         }
-        if (stopping) {
-            return errΔ1;
+        if (opts.Limit > 0 && (int64)opts.Parallel > opts.Limit) {
+            // Don't start more workers than we need.
+            opts.Parallel = (nint)opts.Limit;
         }
-        stopping = true;
-        cancelWorkersʗ2();
-        doneCʗ1 = default!;
-    };
-    // Ensure that any crash we find is written to the corpus, even if an error
-    // or interruption occurs while minimizing it.
-    var crashWritten = false;
-    var cʗ2 = c;
-    var errʗ1 = errΔ1;
-    var optsʗ1 = opts;
-    defer(() => {
-        if ((~cʗ2).crashMinimizing == nil || crashWritten) {
-            return errʗ1;
+        (var c, err) = newCoordinator(opts);
+        if (err != default!) {
+            return;
         }
-        var werr = writeToCorpus(Ꮡ((~(~cʗ2).crashMinimizing).entry), optsʗ1.CorpusDir);
-        if (werr != default!) {
-            errʗ1 = fmt.Errorf("%w\n%v"u8, errʗ1, werr);
-            return errʗ1;
+        if (opts.Timeout > 0) {
+            Action cancel = default!;
+            (ctx, cancel) = context.WithTimeout(ctx, opts.Timeout);
+            var cancelʗ1 = cancel;
+            defer(cancelʗ1);
         }
-        if (errʗ1 == default!) {
-            Ꮡerrʗ1 = new crashError(
-                path: (~(~cʗ2).crashMinimizing).entry.Path,
-                errʗ1: errors.New((~(~cʗ2).crashMinimizing).crasherMsg)
-            ); errʗ1 = ref Ꮡerrʗ1.val;
-        }
-    });
-    // Start workers.
-    // TODO(jayconrod): do we want to support fuzzing different binaries?
-    @string dir = ""u8;
-    // same as self
-    @string binPath = os.Args[0];
-    var args = append(new @string[]{"-test.fuzzworker"}.slice(), os.Args[1..].ꓸꓸꓸ);
-    var env = os.Environ();
-    // same as self
-    var errC = new channel<error>(1);
-    var workers = new slice<ж<worker>>(opts.Parallel);
-    foreach (var (i, _) in workers) {
-        error errΔ4 = default!;
-        (workers[i], errΔ4) = newWorker(c, dir, binPath, args, env);
-        if (errΔ4 != default!) {
-            return errΔ4;
-        }
-    }
-    foreach (var (i, _) in workers) {
-        var w = workers[i];
-        var errCʗ1 = errC;
-        var fuzzCtxʗ2 = fuzzCtx;
-        var wʗ1 = w;
-        goǃ(() => {
-            var errΔ5 = wʗ1.coordinate(fuzzCtxʗ2);
-            if (fuzzCtxʗ2.Err() != default! || isInterruptError(errΔ5)) {
-                errΔ4 = default!;
+        // fuzzCtx is used to stop workers, for example, after finding a crasher.
+        var (fuzzCtx, cancelWorkers) = context.WithCancel(ctx);
+        var cancelWorkersʗ1 = cancelWorkers;
+        defer(() => cancelWorkersʗ1());
+        ref var doneC = ref heap</*<-*/channel<EmptyStruct>>(out var ᏑdoneC);
+        doneC = ctx.Done();
+        // stop is called when a worker encounters a fatal error.
+        ref var fuzzErr = ref heap<error>(out var ᏑfuzzErr);
+        var stopping = false;
+        var cʗ1 = c;
+        var cancelWorkersʗ2 = cancelWorkers;
+        var fuzzCtxʗ1 = fuzzCtx;
+        var stop = (error errΔ2) => {
+            if (shouldPrintDebugInfo()) {
+                var (_, @file, line, ok) = Δruntime.Caller(1);
+                if (ok){
+                    cʗ1.debugLogf("stop called at %s:%d. stopping: %t"u8, @file, line, stopping);
+                } else {
+                    cʗ1.debugLogf("stop called at unknown. stopping: %t"u8, stopping);
+                }
             }
-            var cleanErr = wʗ1.cleanup();
-            if (errΔ5 == default!) {
-                errΔ4 = cleanErr;
+            if (AreEqual(errΔ2, fuzzCtxʗ1.Err()) || isInterruptError(errΔ2)) {
+                // Suppress cancellation errors and terminations due to SIGINT.
+                // The messages are not helpful since either the user triggered the error
+                // (with ^C) or another more helpful message will be printed (a crasher).
+                errΔ2 = default!;
             }
-            errCʗ1.ᐸꟷ(errΔ5);
-        });
-    }
-    // Main event loop.
-    // Do not return until all workers have terminated. We avoid a deadlock by
-    // receiving messages from workers even after ctx is canceled.
-    nint activeWorkers = len(workers);
-    var statTicker = time.NewTicker(3 * time.ΔSecond);
-    var statTickerʗ1 = statTicker;
-    defer(statTickerʗ1.Stop);
-    var cʗ3 = c;
-    defer(cʗ3.logStats);
-    c.logStats();
-    while (ᐧ) {
-        // If there is an execution limit, and we've reached it, stop.
-        if ((~c).opts.Limit > 0 && (~c).count >= (~c).opts.Limit) {
-            stop(default!);
-        }
-        channel<fuzzInput> inputC = default!;
-        var (input, ok) = c.peekInput();
-        if (ok && (~c).crashMinimizing == nil && !stopping) {
-            inputC = c.val.inputC;
-        }
-        channel<fuzzMinimizeInput> minimizeC = default!;
-        var (minimizeInput, ok) = c.peekMinimizeInput();
-        if (ok && !stopping) {
-            minimizeC = c.val.minimizeC;
-        }
-        switch (select(ᐸꟷ(doneC, ꓸꓸꓸ), ᐸꟷ(errC, ꓸꓸꓸ), ᐸꟷ((~c).resultC, ꓸꓸꓸ), inputC.ᐸꟷ(input, ꓸꓸꓸ), minimizeC.ᐸꟷ(minimizeInput, ꓸꓸꓸ), ᐸꟷ((~statTicker).C, ꓸꓸꓸ))) {
-        case 0 when doneC.ꟷᐳ(out _): {
-            stop(ctx.Err());
-            break;
-        }
-        case 1 when errC.ꟷᐳ(out var errΔ6): {
-            stop(errΔ6);
-            activeWorkers--;
-            if (activeWorkers == 0) {
-                // Interrupted, canceled, or timed out.
-                // stop sets doneC to nil, so we don't busy wait here.
-                // A worker terminated, possibly after encountering a fatal error.
-                return fuzzErr;
+            if (errΔ2 != default! && (ᏑfuzzErr.ValueSlot == default! || AreEqual(ᏑfuzzErr.ValueSlot, ctx.Err()))) {
+                ᏑfuzzErr.ValueSlot = errΔ2;
             }
-            break;
-        }
-        case 2 when (~c).resultC.ꟷᐳ(out var result): {
             if (stopping) {
-                // Received response from worker.
+                return;
+            }
+            stopping = true;
+            cancelWorkersʗ2();
+            ᏑdoneC.ValueSlot = default!;
+        };
+        // Ensure that any crash we find is written to the corpus, even if an error
+        // or interruption occurs while minimizing it.
+        var crashWritten = false;
+        var cʗ2 = c;
+        var optsʗ1 = opts;
+        defer(() => {
+            if ((~cʗ2).crashMinimizing == nil || crashWritten) {
+                return;
+            }
+            var werr = writeToCorpus((~cʗ2).crashMinimizing.of(fuzzResult.Ꮡentry), optsʗ1.CorpusDir);
+            if (werr != default!) {
+                Ꮡerr.ValueSlot = fmt.Errorf("%w\n%v"u8, Ꮡerr.ValueSlot, werr);
+                return;
+            }
+            if (Ꮡerr.ValueSlot == default!) {
+                Ꮡerr.ValueSlot = new crashErrorжerror(Ꮡ(new crashError(
+                    path: (~(~cʗ2).crashMinimizing).entry.Path,
+                    err: errors.New((~(~cʗ2).crashMinimizing).crasherMsg)
+                )));
+            }
+        });
+        // Start workers.
+        // TODO(jayconrod): do we want to support fuzzing different binaries?
+        @string dir = ""u8;
+        // same as self
+        @string binPath = os.Args[0];
+        var args = append(new @string[]{"-test.fuzzworker"}.slice(), os.Args[1..].ꓸꓸꓸ);
+        var env = os.Environ();
+        // same as self
+        var errC = new channel<error>(1);
+        var workers = new slice<ж<worker>>(opts.Parallel);
+        foreach (var (i, _) in workers) {
+            error errΔ3 = default!;
+            (workers[i], errΔ3) = newWorker(c, dir, binPath, args, env);
+            if (errΔ3 != default!) {
+                err = errΔ3; return;
+            }
+        }
+        foreach (var (i, _) in workers) {
+            var w = workers[i];
+            var errCʗ1 = errC;
+            var fuzzCtxʗ2 = fuzzCtx;
+            var wʗ1 = w;
+            goǃ(() => {
+                var errΔ4 = wʗ1.coordinate(fuzzCtxʗ2);
+                if (fuzzCtxʗ2.Err() != default! || isInterruptError(errΔ4)) {
+                    errΔ4 = default!;
+                }
+                var cleanErr = wʗ1.cleanup();
+                if (errΔ4 == default!) {
+                    errΔ4 = cleanErr;
+                }
+                errCʗ1.ᐸꟷ(errΔ4);
+            });
+        }
+        // Main event loop.
+        // Do not return until all workers have terminated. We avoid a deadlock by
+        // receiving messages from workers even after ctx is canceled.
+        nint activeWorkers = len(workers);
+        var statTicker = time.NewTicker(3000000000L);
+        var statTickerʗ1 = statTicker;
+        defer(statTickerʗ1.Stop);
+        var cʗ3 = c;
+        defer(cʗ3.logStats);
+        c.logStats();
+        while (ᐧ) {
+            // If there is an execution limit, and we've reached it, stop.
+            if ((~c).opts.Limit > 0 && (~c).count >= (~c).opts.Limit) {
+                stop(default!);
+            }
+            channel<fuzzInput> inputC = default!;
+            var (input, ok) = c.peekInput();
+            if (ok && (~c).crashMinimizing == nil && !stopping) {
+                inputC = c.Value.inputC;
+            }
+            channel<fuzzMinimizeInput> minimizeC = default!;
+            (var minimizeInput, ok) = c.peekMinimizeInput();
+            if (ok && !stopping) {
+                minimizeC = c.Value.minimizeC;
+            }
+            switch (select(ᐸꟷ(doneC, ꓸꓸꓸ), ᐸꟷ(errC, ꓸꓸꓸ), ᐸꟷ((~c).resultC, ꓸꓸꓸ), inputC.ᐸꟷ(input, ꓸꓸꓸ), minimizeC.ᐸꟷ(minimizeInput, ꓸꓸꓸ), ᐸꟷ((~statTicker).C, ꓸꓸꓸ))) {
+            case 0 when doneC.ꟷᐳ(out _): {
+                stop(ctx.Err());
                 break;
             }
-            c.updateStats(result);
-            if (result.crasherMsg != ""u8){
-                if (c.warmupRun() && result.entry.IsSeed) {
-                    @string target = filepath.Base((~c).opts.CorpusDir);
-                    fmt.Fprintf((~c).opts.Log, "failure while testing seed corpus entry: %s/%s\n"u8, target, testName(result.entry.Parent));
-                    stop(errors.New(result.crasherMsg));
+            case 1 when errC.ꟷᐳ(out var errΔ5): {
+                stop(errΔ5);
+                activeWorkers--;
+                if (activeWorkers == 0) {
+                    // Interrupted, canceled, or timed out.
+                    // stop sets doneC to nil, so we don't busy wait here.
+                    // A worker terminated, possibly after encountering a fatal error.
+                    err = fuzzErr; return;
+                }
+                break;
+            }
+            case 2 when (~c).resultC.ꟷᐳ(out var resultᴛ1): {
+                ref var result = ref heap(resultᴛ1, out var Ꮡresult);
+                if (stopping) {
+                    // Received response from worker.
                     break;
                 }
-                if (c.canMinimize() && result.canMinimize){
-                    if ((~c).crashMinimizing != nil) {
-                        // This crash is not minimized, and another crash is being minimized.
-                        // Ignore this one and wait for the other one to finish.
-                        if (shouldPrintDebugInfo()) {
-                            c.debugLogf("found unminimized crasher, skipping in favor of minimizable crasher"u8);
-                        }
+                c.updateStats(result);
+                if (result.crasherMsg != ""u8){
+                    if (c.warmupRun() && result.entry.IsSeed) {
+                        @string target = filepath.Base((~c).opts.CorpusDir);
+                        fmt.Fprintf((~c).opts.Log, "failure while testing seed corpus entry: %s/%s\n"u8, target, testName(result.entry.Parent));
+                        stop(errors.New(result.crasherMsg));
                         break;
                     }
-                    // Found a crasher but haven't yet attempted to minimize it.
-                    // Send it back to a worker for minimization. Disable inputC so
-                    // other workers don't continue fuzzing.
-                    c.val.crashMinimizing = Ꮡresult;
-                    fmt.Fprintf((~c).opts.Log, "fuzz: minimizing %d-byte failing input file\n"u8, len(result.entry.Data));
-                    c.queueForMinimization(result, default!);
-                } else 
-                if (!crashWritten) {
-                    // Found a crasher that's either minimized or not minimizable.
-                    // Write to corpus and stop.
-                    var errΔ7 = writeToCorpus(Ꮡresult.of(fuzzResult.Ꮡentry), opts.CorpusDir);
-                    if (errΔ7 == default!) {
-                        crashWritten = true;
-                        ᏑerrΔ4 = new crashError(
-                            path: result.entry.Path,
-                            err: errors.New(result.crasherMsg)
-                        ); errΔ4 = ref ᏑerrΔ4.val;
-                    }
-                    if (shouldPrintDebugInfo()) {
-                        c.debugLogf(
-                            "found crasher, id: %s, parent: %s, gen: %d, size: %d, exec time: %s"u8,
-                            result.entry.Path,
-                            result.entry.Parent,
-                            result.entry.Generation,
-                            len(result.entry.Data),
-                            result.entryDuration);
-                    }
-                    stop(errΔ7);
-                }
-            } else 
-            if (result.coverageData != default!){
-                if (c.warmupRun()){
-                    if (shouldPrintDebugInfo()) {
-                        c.debugLogf(
-                            "processed an initial input, id: %s, new bits: %d, size: %d, exec time: %s"u8,
-                            result.entry.Parent,
-                            countBits(diffCoverage((~c).coverageMask, result.coverageData)),
-                            len(result.entry.Data),
-                            result.entryDuration);
-                    }
-                    c.updateCoverage(result.coverageData);
-                    (~c).warmupInputLeft--;
-                    if ((~c).warmupInputLeft == 0) {
-                        fmt.Fprintf((~c).opts.Log, "fuzz: elapsed: %s, gathering baseline coverage: %d/%d completed, now fuzzing with %d workers\n"u8, c.elapsed(), (~c).warmupInputCount, (~c).warmupInputCount, (~c).opts.Parallel);
-                        if (shouldPrintDebugInfo()) {
-                            c.debugLogf(
-                                "finished processing input corpus, entries: %d, initial coverage bits: %d"u8,
-                                len((~c).corpus.entries),
-                                countBits((~c).coverageMask));
-                        }
-                    }
-                } else 
-                {
-                    var keepCoverage = diffCoverage((~c).coverageMask, result.coverageData); if (keepCoverage != default!){
-                        // Found a value that expanded coverage.
-                        // It's not a crasher, but we may want to add it to the on-disk
-                        // corpus and prioritize it for future fuzzing.
-                        // TODO(jayconrod, katiehockman): Prioritize fuzzing these
-                        // values which expanded coverage, perhaps based on the
-                        // number of new edges that this result expanded.
-                        // TODO(jayconrod, katiehockman): Don't write a value that's already
-                        // in the corpus.
-                        if (c.canMinimize() && result.canMinimize && (~c).crashMinimizing == nil){
-                            // Send back to workers to find a smaller value that preserves
-                            // at least one new coverage bit.
-                            c.queueForMinimization(result, keepCoverage);
-                        } else {
-                            // Update the coordinator's coverage mask and save the value.
-                            nint inputSize = len(result.entry.Data);
-                            var (entryNew, errΔ8) = c.addCorpusEntries(true, result.entry);
-                            if (errΔ8 != default!) {
-                                stop(errΔ8);
-                                break;
-                            }
-                            if (!entryNew) {
-                                if (shouldPrintDebugInfo()) {
-                                    c.debugLogf(
-                                        "ignoring duplicate input which increased coverage, id: %s"u8,
-                                        result.entry.Path);
-                                }
-                                break;
-                            }
-                            c.updateCoverage(keepCoverage);
-                            (~c).inputQueue.enqueue(result.entry);
-                            (~c).interestingCount++;
+                    if (c.canMinimize() && result.canMinimize){
+                        if ((~c).crashMinimizing != nil) {
+                            // This crash is not minimized, and another crash is being minimized.
+                            // Ignore this one and wait for the other one to finish.
                             if (shouldPrintDebugInfo()) {
-                                c.debugLogf(
-                                    "new interesting input, id: %s, parent: %s, gen: %d, new bits: %d, total bits: %d, size: %d, exec time: %s"u8,
-                                    result.entry.Path,
-                                    result.entry.Parent,
-                                    result.entry.Generation,
-                                    countBits(keepCoverage),
-                                    countBits((~c).coverageMask),
-                                    inputSize,
-                                    result.entryDuration);
+                                c.debugLogf("found unminimized crasher, skipping in favor of minimizable crasher"u8);
                             }
+                            break;
                         }
-                    } else {
+                        // Found a crasher but haven't yet attempted to minimize it.
+                        // Send it back to a worker for minimization. Disable inputC so
+                        // other workers don't continue fuzzing.
+                        c.Value.crashMinimizing = Ꮡresult;
+                        fmt.Fprintf((~c).opts.Log, "fuzz: minimizing %d-byte failing input file\n"u8, len(result.entry.Data));
+                        c.queueForMinimization(result, default!);
+                    } else 
+                    if (!crashWritten) {
+                        // Found a crasher that's either minimized or not minimizable.
+                        // Write to corpus and stop.
+                        var errΔ6 = writeToCorpus(Ꮡresult.of(fuzzResult.Ꮡentry), opts.CorpusDir);
+                        if (errΔ6 == default!) {
+                            crashWritten = true;
+                            errΔ6 = new crashErrorжerror(Ꮡ(new crashError(
+                                path: result.entry.Path,
+                                err: errors.New(result.crasherMsg)
+                            )));
+                        }
                         if (shouldPrintDebugInfo()) {
                             c.debugLogf(
-                                "worker reported interesting input that doesn't expand coverage, id: %s, parent: %s, canMinimize: %t"u8,
+                                "found crasher, id: %s, parent: %s, gen: %d, size: %d, exec time: %s"u8,
                                 result.entry.Path,
                                 result.entry.Parent,
-                                result.canMinimize);
+                                result.entry.Generation,
+                                len(result.entry.Data),
+                                result.entryDuration);
+                        }
+                        stop(errΔ6);
+                    }
+                } else 
+                if (result.coverageData != default!){
+                    if (c.warmupRun()){
+                        if (shouldPrintDebugInfo()) {
+                            c.debugLogf(
+                                "processed an initial input, id: %s, new bits: %d, size: %d, exec time: %s"u8,
+                                result.entry.Parent,
+                                countBits(diffCoverage((~c).coverageMask, result.coverageData)),
+                                len(result.entry.Data),
+                                result.entryDuration);
+                        }
+                        c.updateCoverage(result.coverageData);
+                        c.Value.warmupInputLeft--;
+                        if ((~c).warmupInputLeft == 0) {
+                            fmt.Fprintf((~c).opts.Log, "fuzz: elapsed: %s, gathering baseline coverage: %d/%d completed, now fuzzing with %d workers\n"u8, c.elapsed(), (~c).warmupInputCount, (~c).warmupInputCount, (~c).opts.Parallel);
+                            if (shouldPrintDebugInfo()) {
+                                c.debugLogf(
+                                    "finished processing input corpus, entries: %d, initial coverage bits: %d"u8,
+                                    len((~c).corpus.entries),
+                                    countBits((~c).coverageMask));
+                            }
+                        }
+                    } else 
+                    {
+                        var keepCoverage = diffCoverage((~c).coverageMask, result.coverageData); if (keepCoverage != default!){
+                            // Found a value that expanded coverage.
+                            // It's not a crasher, but we may want to add it to the on-disk
+                            // corpus and prioritize it for future fuzzing.
+                            // TODO(jayconrod, katiehockman): Prioritize fuzzing these
+                            // values which expanded coverage, perhaps based on the
+                            // number of new edges that this result expanded.
+                            // TODO(jayconrod, katiehockman): Don't write a value that's already
+                            // in the corpus.
+                            if (c.canMinimize() && result.canMinimize && (~c).crashMinimizing == nil){
+                                // Send back to workers to find a smaller value that preserves
+                                // at least one new coverage bit.
+                                c.queueForMinimization(result, keepCoverage);
+                            } else {
+                                // Update the coordinator's coverage mask and save the value.
+                                nint inputSize = len(result.entry.Data);
+                                var (entryNew, errΔ7) = c.addCorpusEntries(true, result.entry);
+                                if (errΔ7 != default!) {
+                                    stop(errΔ7);
+                                    break;
+                                }
+                                if (!entryNew) {
+                                    if (shouldPrintDebugInfo()) {
+                                        c.debugLogf(
+                                            "ignoring duplicate input which increased coverage, id: %s"u8,
+                                            result.entry.Path);
+                                    }
+                                    break;
+                                }
+                                c.updateCoverage(keepCoverage);
+                                c.of(coordinator.ᏑinputQueue).enqueue(result.entry);
+                                c.Value.interestingCount++;
+                                if (shouldPrintDebugInfo()) {
+                                    c.debugLogf(
+                                        "new interesting input, id: %s, parent: %s, gen: %d, new bits: %d, total bits: %d, size: %d, exec time: %s"u8,
+                                        result.entry.Path,
+                                        result.entry.Parent,
+                                        result.entry.Generation,
+                                        countBits(keepCoverage),
+                                        countBits((~c).coverageMask),
+                                        inputSize,
+                                        result.entryDuration);
+                                }
+                            }
+                        } else {
+                            if (shouldPrintDebugInfo()) {
+                                c.debugLogf(
+                                    "worker reported interesting input that doesn't expand coverage, id: %s, parent: %s, canMinimize: %t"u8,
+                                    result.entry.Path,
+                                    result.entry.Parent,
+                                    result.canMinimize);
+                            }
+                        }
+                    }
+                } else 
+                if (c.warmupRun()) {
+                    // No error or coverage data was reported for this input during
+                    // warmup, so continue processing results.
+                    c.Value.warmupInputLeft--;
+                    if ((~c).warmupInputLeft == 0) {
+                        fmt.Fprintf((~c).opts.Log, "fuzz: elapsed: %s, testing seed corpus: %d/%d completed, now fuzzing with %d workers\n"u8, c.elapsed(), (~c).warmupInputCount, (~c).warmupInputCount, (~c).opts.Parallel);
+                        if (shouldPrintDebugInfo()) {
+                            c.debugLogf(
+                                "finished testing-only phase, entries: %d"u8,
+                                len((~c).corpus.entries));
                         }
                     }
                 }
-            } else 
-            if (c.warmupRun()) {
-                // No error or coverage data was reported for this input during
-                // warmup, so continue processing results.
-                (~c).warmupInputLeft--;
-                if ((~c).warmupInputLeft == 0) {
-                    fmt.Fprintf((~c).opts.Log, "fuzz: elapsed: %s, testing seed corpus: %d/%d completed, now fuzzing with %d workers\n"u8, c.elapsed(), (~c).warmupInputCount, (~c).warmupInputCount, (~c).opts.Parallel);
-                    if (shouldPrintDebugInfo()) {
-                        c.debugLogf(
-                            "finished testing-only phase, entries: %d"u8,
-                            len((~c).corpus.entries));
-                    }
-                }
+                break;
             }
-            break;
+            case 3: {
+                c.sentInput(input);
+                break;
+            }
+            case 4: {
+                c.sentMinimizeInput(minimizeInput);
+                break;
+            }
+            case 5 when (~statTicker).C.ꟷᐳ(out _): {
+                c.logStats();
+                break;
+            }}
         }
-        case 3: {
-            c.sentInput(input);
-            break;
-        }
-        case 4: {
-            c.sentMinimizeInput(minimizeInput);
-            break;
-        }
-        case 5 when (~statTicker).C.ꟷᐳ(out _): {
-            c.logStats();
-            break;
-        }}
-    }
-});
+    });
+    return Ꮡerr.ValueSlot;
+}
 
 // Sent the next input to a worker.
 // Sent the next input for minimization to a worker.
@@ -442,10 +447,11 @@ public static error /*err*/ CoordinateFuzzing(context.Context ctx, CoordinateFuz
     var entries = entriesʗp.slice();
 
     var noDupes = true;
-    ref var e = ref heap(new CorpusEntry(), out var Ꮡe);
+    foreach (var (_, vᴛ1) in entries) {
+        ref var e = ref heap(new CorpusEntry(), out var Ꮡe);
+        e = vᴛ1;
 
-    foreach (var (_, e) in entries) {
-        (data, err) = corpusEntryData(e);
+        var (data, err) = corpusEntryData(e);
         if (err != default!) {
             return (false, err);
         }
@@ -477,7 +483,7 @@ public static error /*err*/ CoordinateFuzzing(context.Context ctx, CoordinateFuz
 // packages, but testing can't import this package directly, and we don't want
 // to export this type from testing. Instead, we use the same struct type and
 // use a type alias (not a defined type) for convenience.
-[GoType("dyn")] partial struct CorpusEntryᴛ1 {
+[GoType("dyn")] public partial struct CorpusEntryᴛ1 {
     public @string Parent;
     // Path is the path of the corpus file, if the entry was loaded from disk.
     // For other entries, including seed values provided by f.Add, Path is the
@@ -509,7 +515,7 @@ internal static (slice<byte>, error) corpusEntryData(CorpusEntry ce) {
     internal CorpusEntry entry;
     // timeout is the time to spend fuzzing variations of this input,
     // not including starting or cleaning up.
-    internal time_package.Duration timeout;
+    internal time.Duration timeout;
     // limit is the maximum number of calls to the fuzz function the worker may
     // make. The worker may make fewer calls, for example, if it finds an
     // error early. If limit is zero, there is no limit on calls to the
@@ -538,9 +544,9 @@ internal static (slice<byte>, error) corpusEntryData(CorpusEntry ce) {
     // count is the number of values the worker actually tested.
     internal int64 count;
     // totalDuration is the time the worker spent testing inputs.
-    internal time_package.Duration totalDuration;
+    internal time.Duration totalDuration;
     // entryDuration is the time the worker spent execution an interesting result
-    internal time_package.Duration entryDuration;
+    internal time.Duration entryDuration;
 }
 
 [GoType] partial struct fuzzMinimizeInput {
@@ -556,7 +562,7 @@ internal static (slice<byte>, error) corpusEntryData(CorpusEntry ce) {
     internal int64 limit;
     // timeout is the time to spend minimizing this input.
     // A zero timeout means no limit.
-    internal time_package.Duration timeout;
+    internal time.Duration timeout;
     // keepCoverage is a set of coverage bits that entry found that were not in
     // the coordinator's combined set. When minimizing, the worker should find an
     // input that preserves at least one of these bits. keepCoverage is nil for
@@ -570,7 +576,7 @@ internal static (slice<byte>, error) corpusEntryData(CorpusEntry ce) {
     internal CoordinateFuzzingOpts opts;
     // startTime is the time we started the workers after loading the corpus.
     // Used for logging.
-    internal time_package.Time startTime;
+    internal time.Time startTime;
     // inputC is sent values to fuzz by the coordinator. Any worker may receive
     // values from this channel. Workers send results to resultC.
     internal channel<fuzzInput> inputC;
@@ -586,7 +592,7 @@ internal static (slice<byte>, error) corpusEntryData(CorpusEntry ce) {
     // logged.
     internal int64 countLastLog;
     // timeLastLog is the time at which the output was last logged.
-    internal time_package.Time timeLastLog;
+    internal time.Time timeLastLog;
     // interestingCount is the number of unique interesting values which have
     // been found this execution.
     internal nint interestingCount;
@@ -601,7 +607,7 @@ internal static (slice<byte>, error) corpusEntryData(CorpusEntry ce) {
     internal nint warmupInputLeft;
     // duration is the time spent fuzzing inside workers, not counting time
     // starting up or tearing down.
-    internal time_package.Duration duration;
+    internal time.Duration duration;
     // countWaiting is the number of fuzzing executions the coordinator is
     // waiting on workers to complete.
     internal int64 countWaiting;
@@ -654,7 +660,7 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
     if (opts.MinimizeLimit > 0 || opts.MinimizeTimeout > 0) {
         foreach (var (_, t) in opts.Types) {
             if (isMinimizable(t)) {
-                c.val.minimizationAllowed = true;
+                c.Value.minimizationAllowed = true;
                 break;
             }
         }
@@ -665,19 +671,19 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
         // Even though a coverage-only run won't occur, we should still run all
         // of the seed corpus to make sure there are no existing failures before
         // we start fuzzing.
-        c.val.warmupInputCount = len((~c).opts.Seed);
+        c.Value.warmupInputCount = len((~c).opts.Seed);
         foreach (var (_, e) in (~c).opts.Seed) {
-            (~c).inputQueue.enqueue(e);
+            c.of(coordinator.ᏑinputQueue).enqueue(e);
         }
     } else {
-        c.val.warmupInputCount = len((~c).corpus.entries);
+        c.Value.warmupInputCount = len((~c).corpus.entries);
         foreach (var (_, e) in (~c).corpus.entries) {
-            (~c).inputQueue.enqueue(e);
+            c.of(coordinator.ᏑinputQueue).enqueue(e);
         }
         // Set c.coverageMask to a clean []byte full of zeros.
-        c.val.coverageMask = new slice<byte>(covSize);
+        c.Value.coverageMask = new slice<byte>(covSize);
     }
-    c.val.warmupInputLeft = c.val.warmupInputCount;
+    c.Value.warmupInputLeft = c.Value.warmupInputCount;
     if (len((~c).corpus.entries) == 0) {
         fmt.Fprintf((~c).opts.Log, "warning: starting with empty corpus\n"u8);
         slice<any> vals = default!;
@@ -687,7 +693,7 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
         var data = marshalCorpusFile(vals.ꓸꓸꓸ);
         var h = sha256.Sum256(data);
         @string name = fmt.Sprintf("%x"u8, h[..4]);
-        c.addCorpusEntries(false, new CorpusEntry{Path: name, Data: data});
+        c.addCorpusEntries(false, new CorpusEntry(Path: name, Data: data));
     }
     return (c, default!);
 }
@@ -711,7 +717,7 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
     if (c.crashMinimizing != nil){
         fmt.Fprintf(c.opts.Log, "fuzz: elapsed: %s, minimizing\n"u8, c.elapsed());
     } else {
-        var rate = ((float64)(c.count - c.countLastLog)) / now.Sub(c.timeLastLog).Seconds();
+        var rate = (float64)(c.count - c.countLastLog) / now.Sub(c.timeLastLog).Seconds();
         if (coverageEnabled){
             nint total = c.warmupInputCount + c.interestingCount;
             fmt.Fprintf(c.opts.Log, "fuzz: elapsed: %s, execs: %d (%.0f/sec), new interesting: %d (total: %d)\n"u8, c.elapsed(), c.count, rate, c.interestingCount, total);
@@ -766,8 +772,8 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
         return (input, true);
     }
     if (c.opts.Limit > 0) {
-        input.limit = c.opts.Limit / ((int64)c.opts.Parallel);
-        if (c.opts.Limit % ((int64)c.opts.Parallel) > 0) {
+        input.limit = c.opts.Limit / (int64)c.opts.Parallel;
+        if (c.opts.Limit % (int64)c.opts.Parallel > 0) {
             input.limit++;
         }
         var remaining = c.opts.Limit - c.count - c.countWaiting;
@@ -837,8 +843,8 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
         if (input.crasherMsg != ""u8){
             input.limit = c.opts.Limit;
         } else {
-            input.limit = c.opts.Limit / ((int64)c.opts.Parallel);
-            if (c.opts.Limit % ((int64)c.opts.Parallel) > 0) {
+            input.limit = c.opts.Limit / (int64)c.opts.Parallel;
+            if (c.opts.Limit % (int64)c.opts.Parallel > 0) {
                 input.limit++;
             }
         }
@@ -913,10 +919,10 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
             return errΔ1;
         }
     }
-    (entries, err) = ReadCorpus(c.opts.CacheDir, c.opts.Types);
+    var (entries, err) = ReadCorpus(c.opts.CacheDir, c.opts.Types);
     if (err != default!) {
         {
-            var (_, ok) = err._<MalformedCorpusError.val>(ᐧ); if (!ok) {
+            var (_, ok) = err._<ж<MalformedCorpusError>>(ᐧ); if (!ok) {
                 // It's okay if some files in the cache directory are malformed and
                 // are not included in the corpus, but fail if it's an I/O error.
                 return err;
@@ -954,7 +960,7 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
 // be saved in a MalformedCorpusError and returned, along with the most recent
 // error.
 public static (slice<CorpusEntry>, error) ReadCorpus(@string dir, slice<reflectꓸType> types) {
-    (files, err) = os.ReadDir(dir);
+    var (files, err) = os.ReadDir(dir);
     if (os.IsNotExist(err)){
         return (default!, default!);
     } else 
@@ -964,36 +970,36 @@ public static (slice<CorpusEntry>, error) ReadCorpus(@string dir, slice<reflect�
     }
     slice<CorpusEntry> corpus = default!;
     slice<error> errs = default!;
-    foreach (var (_, file) in files) {
+    foreach (var (_, @file) in files) {
         // TODO(jayconrod,katiehockman): determine when a file is a fuzzing input
         // based on its name. We should only read files created by writeToCorpus.
         // If we read ALL files, we won't be able to change the file format by
         // changing the extension. We also won't be able to add files like
         // README.txt explaining why the directory exists.
-        if (file.IsDir()) {
+        if (@file.IsDir()) {
             continue;
         }
-        @string filename = filepath.Join(dir, file.Name());
-        (data, err) = os.ReadFile(filename);
-        if (err != default!) {
-            return (default!, fmt.Errorf("failed to read corpus file: %v"u8, err));
+        @string filename = filepath.Join(dir, @file.Name());
+        var (data, errΔ1) = os.ReadFile(filename);
+        if (errΔ1 != default!) {
+            return (default!, fmt.Errorf("failed to read corpus file: %v"u8, errΔ1));
         }
         slice<any> vals = default!;
-        (vals, err) = readCorpusData(data, types);
-        if (err != default!) {
-            errs = append(errs, fmt.Errorf("%q: %v"u8, filename, err));
+        (vals, errΔ1) = readCorpusData(data, types);
+        if (errΔ1 != default!) {
+            errs = append(errs, fmt.Errorf("%q: %v"u8, filename, errΔ1));
             continue;
         }
-        corpus = append(corpus, new CorpusEntry{Path: filename, Values: vals});
+        corpus = append(corpus, new CorpusEntry(Path: filename, Values: vals));
     }
     if (len(errs) > 0) {
-        return (corpus, new MalformedCorpusError(errs: errs));
+        return (corpus, new MalformedCorpusErrorжerror(Ꮡ(new MalformedCorpusError(errs: errs))));
     }
     return (corpus, default!);
 }
 
 internal static (slice<any>, error) readCorpusData(slice<byte> data, slice<reflectꓸType> types) {
-    (vals, err) = unmarshalCorpusFile(data);
+    var (vals, err) = unmarshalCorpusFile(data);
     if (err != default!) {
         return (default!, fmt.Errorf("unmarshal: %v"u8, err));
     }
@@ -1030,7 +1036,7 @@ public static error CheckCorpus(slice<any> vals, slice<reflectꓸType> types) {
 internal static error /*err*/ writeToCorpus(ж<CorpusEntry> Ꮡentry, @string dir) {
     error err = default!;
 
-    ref var entry = ref Ꮡentry.val;
+    ref var entry = ref Ꮡentry.Value;
     @string sum = fmt.Sprintf("%x"u8, sha256.Sum256(entry.Data))[..16];
     entry.Path = filepath.Join(dir, sum);
     {
@@ -1062,23 +1068,23 @@ internal static any zeroValue(reflectꓸType t) {
 }
 
 internal static slice<any> zeroVals = new any[]{
-    slice<byte>(""),
+    slice<byte>((@string)""),
     ((@string)""u8),
     false,
-    ((byte)0),
-    ((rune)0),
-    ((float32)0),
-    ((float64)0),
-    ((nint)0),
-    ((int8)0),
-    ((int16)0),
-    ((int32)0),
-    ((int64)0),
-    ((nuint)0),
-    ((uint8)0),
-    ((uint16)0),
-    ((uint32)0),
-    ((uint64)0)
+    (byte)0,
+    (rune)0,
+    (float32)0,
+    (float64)0,
+    (nint)0,
+    (int8)0,
+    (int16)0,
+    (int32)0,
+    (int64)0,
+    (nuint)0,
+    (uint8)0,
+    (uint16)0,
+    (uint32)0,
+    (uint64)0
 }.slice();
 
 internal static bool debugInfo = godebug.New("#fuzzdebug"u8).Value() == "1"u8;

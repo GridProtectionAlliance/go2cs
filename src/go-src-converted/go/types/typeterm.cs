@@ -13,12 +13,14 @@ partial class types_package {
 //	 𝓤:  &term{}          == 𝓤                      // set of all types (𝓤niverse)
 //	 T:  &term{false, T}  == {T}                    // set of type T
 //	~t:  &term{true, t}   == {t' | under(t') == t}  // set of types with underlying type t
-[GoType] partial struct term {
+[GoType] public partial struct term {
     internal bool tilde; // valid if typ != nil
     internal ΔType typ;
 }
 
-[GoRecv] internal static @string String(this ref term x) {
+public static @string String(this ж<term> Ꮡx) {
+    ref var x = ref Ꮡx.Value;
+
     switch (ᐧ) {
     case {} when x == nil: {
         return "∅"u8;
@@ -36,13 +38,14 @@ partial class types_package {
 }
 
 // equal reports whether x and y represent the same type set.
-[GoRecv] internal static bool equal(this ref term x, ж<term> Ꮡy) {
-    ref var y = ref Ꮡy.val;
+internal static bool equal(this ж<term> Ꮡx, ж<term> Ꮡy) {
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.DerefOrNil();
 
     // easy cases
     switch (ᐧ) {
-    case {} when x == nil || y == nil: {
-        return x == Ꮡy;
+    case {} when x == nil || Ꮡy == nil: {
+        return Ꮡx == Ꮡy;
     }
     case {} when x.typ == default! || y.typ == default!: {
         return AreEqual(x.typ, y.typ);
@@ -53,22 +56,23 @@ partial class types_package {
 }
 
 // union returns the union x ∪ y: zero, one, or two non-nil terms.
-[GoRecv("capture")] internal static (ж<term> _, ж<term> _) union(this ref term x, ж<term> Ꮡy) {
-    ref var y = ref Ꮡy.val;
+internal static (ж<term>, ж<term>) union(this ж<term> Ꮡx, ж<term> Ꮡy) {
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.DerefOrNil();
 
     // easy cases
     switch (ᐧ) {
-    case {} when x == nil && y == nil: {
+    case {} when x == nil && Ꮡy == nil: {
         return (default!, default!);
     }
     case {} when x == nil: {
         return (Ꮡy, default!);
     }
-    case {} when y == nil: {
-        return (unionꓸᏑx, default!);
+    case {} when Ꮡy == nil: {
+        return (Ꮡx, default!);
     }
     case {} when x.typ == default!: {
-        return (unionꓸᏑx, default!);
+        return (Ꮡx, default!);
     }
     case {} when y.typ == default!: {
         return (Ꮡy, default!);
@@ -81,7 +85,7 @@ partial class types_package {
     // x ∪ 𝓤 == 𝓤
     // ∅ ⊂ x, y ⊂ 𝓤
     if (x.disjoint(Ꮡy)) {
-        return (unionꓸᏑx, Ꮡy);
+        return (Ꮡx, Ꮡy);
     }
     // x ∪ y == (x, y) if x ∩ y == ∅
     // x.typ == y.typ
@@ -90,25 +94,26 @@ partial class types_package {
     //  T ∪ ~t == ~t
     //  T ∪  T ==  T
     if (x.tilde || !y.tilde) {
-        return (unionꓸᏑx, default!);
+        return (Ꮡx, default!);
     }
     return (Ꮡy, default!);
 }
 
 // intersect returns the intersection x ∩ y.
-[GoRecv("capture")] internal static ж<term> intersect(this ref term x, ж<term> Ꮡy) {
-    ref var y = ref Ꮡy.val;
+internal static ж<term> intersect(this ж<term> Ꮡx, ж<term> Ꮡy) {
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.DerefOrNil();
 
     // easy cases
     switch (ᐧ) {
-    case {} when x == nil || y == nil: {
+    case {} when x == nil || Ꮡy == nil: {
         return default!;
     }
     case {} when x.typ == default!: {
         return Ꮡy;
     }
     case {} when y.typ == default!: {
-        return intersectꓸᏑx;
+        return Ꮡx;
     }}
 
     // ∅ ∩ y == ∅ and ∩ ∅ == ∅
@@ -125,13 +130,15 @@ partial class types_package {
     //  T ∩ ~t ==  T
     //  T ∩  T ==  T
     if (!x.tilde || y.tilde) {
-        return intersectꓸᏑx;
+        return Ꮡx;
     }
     return Ꮡy;
 }
 
 // includes reports whether t ∈ x.
-[GoRecv] internal static bool includes(this ref term x, ΔType t) {
+internal static bool includes(this ж<term> Ꮡx, ΔType t) {
+    ref var x = ref Ꮡx.Value;
+
     // easy cases
     switch (ᐧ) {
     case {} when x == nil: {
@@ -152,15 +159,16 @@ partial class types_package {
 }
 
 // subsetOf reports whether x ⊆ y.
-[GoRecv] internal static bool subsetOf(this ref term x, ж<term> Ꮡy) {
-    ref var y = ref Ꮡy.val;
+internal static bool subsetOf(this ж<term> Ꮡx, ж<term> Ꮡy) {
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.DerefOrNil();
 
     // easy cases
     switch (ᐧ) {
     case {} when x == nil: {
         return true;
     }
-    case {} when y == nil: {
+    case {} when Ꮡy == nil: {
         return false;
     }
     case {} when y.typ == default!: {
@@ -190,7 +198,7 @@ partial class types_package {
 // disjoint reports whether x ∩ y == ∅.
 // x.typ and y.typ must not be nil.
 [GoRecv] internal static bool disjoint(this ref term x, ж<term> Ꮡy) {
-    ref var y = ref Ꮡy.val;
+    ref var y = ref Ꮡy.Value;
 
     if (debug && (x.typ == default! || y.typ == default!)) {
         throw panic("invalid argument(s)");

@@ -51,19 +51,19 @@ using static go.debug.buildinfo_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<@internal.xcoff_package.ΔSection, io_package.ReaderAt>]
-[assembly: GoImplement<debug.elf_package.Prog, io_package.ReaderAt>]
-[assembly: GoImplement<debug.macho_package.ΔSegment, io_package.ReaderAt>]
-[assembly: GoImplement<debug.pe_package.ΔSection, io_package.ReaderAt>]
-[assembly: GoImplement<debug.plan9obj_package.ΔSection, io_package.ReaderAt>]
-[assembly: GoImplement<elfExe, exe>]
-[assembly: GoImplement<encoding.binary_package.bigEndian, encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<encoding.binary_package.littleEndian, encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<machoExe, exe>]
-[assembly: GoImplement<os_package.File, io_package.ReaderAt>]
-[assembly: GoImplement<peExe, exe>]
-[assembly: GoImplement<plan9objExe, exe>]
-[assembly: GoImplement<xcoffExe, exe>]
+[assembly: GoImplement<elfExe, exe>(Pointer = true)]
+[assembly: GoImplement<go.@internal.xcoff_package.ΔSection, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<go.debug.elf_package.Prog, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<go.debug.macho_package.ΔSegment, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<go.debug.pe_package.ΔSection, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<go.debug.plan9obj_package.ΔSection, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<go.encoding.binary_package.bigEndian, go.encoding.binary_package.ByteOrder>]
+[assembly: GoImplement<go.encoding.binary_package.littleEndian, go.encoding.binary_package.ByteOrder>]
+[assembly: GoImplement<machoExe, exe>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<peExe, exe>(Pointer = true)]
+[assembly: GoImplement<plan9objExe, exe>(Pointer = true)]
+[assembly: GoImplement<xcoffExe, exe>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

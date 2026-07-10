@@ -9,7 +9,7 @@
     <Version>0.1.4</Version>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>
-    <Copyright>Copyright © 2025</Copyright>
+    <Copyright>Copyright © 2026</Copyright>
     <Authors>$(Product) Authors</Authors>
     <Company>Grid Protection Alliance</Company>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
@@ -86,7 +86,6 @@
     <Using Include="System.Double" Alias="float64" />
     <Using Include="System.Numerics.Complex" Alias="complex128" />
     <Using Include="System.Int32" Alias="rune" />
-    <Using Include="System.UIntPtr" Alias="uintptr" />
     <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
     <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTagAttribute" />
     <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
@@ -99,19 +98,16 @@
     <Compile Include="*.cs" />
     <!-- Remove test files from current folder -->
     <Compile Remove="*._test.cs" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Compile Remove="type_impl.cs" />
-    <Compile Remove="value_impl.cs" />
+    <!--Remove all sub-folders -->
+    <None Remove="*/**/*" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\internal\abi\internal.abi.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\internal\goarch\internal.goarch.csproj" />
-    <!-- ProjectReference Include="$(go2csPath)go-src-converted\internal\unsafeheader\internal.unsafeheader.csproj" / -->
-    <!-- ProjectReference Include="$(go2csPath)go-src-converted\runtime\runtime.csproj" / -->
+    <ProjectReference Include="$(go2csPath)go-src-converted\internal\unsafeheader\internal.unsafeheader.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\runtime\runtime.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\unsafe\unsafe.csproj" />
   </ItemGroup>
 

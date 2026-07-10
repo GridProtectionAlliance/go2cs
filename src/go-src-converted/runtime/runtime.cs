@@ -15,14 +15,15 @@ partial class runtime_package {
 //go:generate go run mkduff.go
 //go:generate go run mkfastlog2table.go
 //go:generate go run mklockrank.go -o lockrank.go
-internal static ticksType ticks;
+internal static ж<ticksType> Ꮡticks = new(default(ticksType));
+internal static ref ticksType ticks => ref Ꮡticks.Value;
 
 [GoType] partial struct ticksType {
     // lock protects access to start* and val.
     internal mutex @lock;
     internal int64 startTicks;
     internal int64 startTime;
-    internal @internal.runtime.atomic_package.Int64 val;
+    internal atomic.Int64 val;
 }
 
 // init initializes ticks to maximize the chance that we have a good ticksPerSecond reference.
@@ -76,14 +77,14 @@ internal static readonly UntypedInt minTimeForTicksPerSecond = /* 5_000_000*(1-o
 // a more sophisticated and general approach in the future.
 internal static int64 ticksPerSecond() {
     // Get the conversion rate if we've already computed it.
-    var r = ticks.val.Load();
+    var r = Ꮡticks.of(ticksType.Ꮡval).Load();
     if (r != 0) {
         return r;
     }
     // Compute the conversion rate.
     while (ᐧ) {
         @lock(Ꮡticks.of(ticksType.Ꮡlock));
-        r = ticks.val.Load();
+        r = Ꮡticks.of(ticksType.Ꮡval).Load();
         if (r != 0) {
             unlock(Ꮡticks.of(ticksType.Ꮡlock));
             return r;
@@ -94,19 +95,19 @@ internal static int64 ticksPerSecond() {
         // See if we can use these times.
         if (nowTicks > ticks.startTicks && nowTime - ticks.startTime > minTimeForTicksPerSecond) {
             // Perform the calculation with floats. We don't want to risk overflow.
-            r = ((int64)(((float64)(nowTicks - ticks.startTicks)) * 1e9F / ((float64)(nowTime - ticks.startTime))));
+            r = (int64)((float64)(nowTicks - ticks.startTicks) * 1e9D / (float64)(nowTime - ticks.startTime));
             if (r == 0) {
                 // Zero is both a sentinel value and it would be bad if callers used this as
                 // a divisor. We tried out best, so just make it 1.
                 r++;
             }
-            ticks.val.Store(r);
+            Ꮡticks.of(ticksType.Ꮡval).Store(r);
             unlock(Ꮡticks.of(ticksType.Ꮡlock));
             break;
         }
         unlock(Ꮡticks.of(ticksType.Ꮡlock));
         // Sleep in one millisecond increments until we have a reliable time.
-        timeSleep(1000000);
+        timeSleep(1_000_000);
     }
     return r;
 }
@@ -122,7 +123,7 @@ internal static slice<@string> syscall_runtime_envs() {
 
 //go:linkname syscall_Getpagesize syscall.Getpagesize
 internal static nint syscall_Getpagesize() {
-    return ((nint)physPageSize);
+    return (nint)physPageSize;
 }
 
 //go:linkname os_runtime_args os.runtime_args
@@ -133,30 +134,33 @@ internal static slice<@string> os_runtime_args() {
 //go:linkname syscall_Exit syscall.Exit
 //go:nosplit
 internal static void syscall_Exit(nint code) {
-    exit(((int32)code));
+    exit((int32)code);
 }
 
 internal static @string godebugDefault;
 
-internal static atomic.Pointer<Action, string)> godebugUpdate;
+internal static ж<atomic.Pointer<Action<@string, @string>>> ᏑgodebugUpdate = new(default(atomic.Pointer<Action<@string, @string>>));
+internal static ref atomic.Pointer<Action<@string, @string>> godebugUpdate => ref ᏑgodebugUpdate.Value;
 
-internal static atomic.Pointer<@string> godebugEnv;                      // set by parsedebugvars
+internal static ж<atomic.Pointer<@string>> ᏑgodebugEnv = new(default(atomic.Pointer<@string>));
+internal static ref atomic.Pointer<@string> godebugEnv => ref ᏑgodebugEnv.Value;                      // set by parsedebugvars
 
-internal static atomic.Pointer<Func<@string, Action>> godebugNewIncNonDefault;
+internal static ж<atomic.Pointer<Func<@string, Action>>> ᏑgodebugNewIncNonDefault = new(default(atomic.Pointer<Func<@string, Action>>));
+internal static ref atomic.Pointer<Func<@string, Action>> godebugNewIncNonDefault => ref ᏑgodebugNewIncNonDefault.Value;
 
 //go:linkname godebug_setUpdate internal/godebug.setUpdate
 internal static void godebug_setUpdate(Action<@string, @string> update) {
     var Δp = @new<Action<@string, @string>>();
-    Δp.val = update;
-    godebugUpdate.Store(Δp);
+    Δp.ValueSlot = update;
+    ᏑgodebugUpdate.Store(Δp);
     godebugNotify(false);
 }
 
 //go:linkname godebug_setNewIncNonDefault internal/godebug.setNewIncNonDefault
 internal static void godebug_setNewIncNonDefault(Func<@string, Action> newIncNonDefault) {
     var Δp = @new<Func<@string, Action>>();
-    Δp.val = newIncNonDefault;
-    godebugNewIncNonDefault.Store(Δp);
+    Δp.ValueSlot = newIncNonDefault;
+    ᏑgodebugNewIncNonDefault.Store(Δp);
 }
 
 // A godebugInc provides access to internal/godebug's IncNonDefault function
@@ -164,44 +168,46 @@ internal static void godebug_setNewIncNonDefault(Func<@string, Action> newIncNon
 // Calls before internal/godebug registers itself are dropped on the floor.
 [GoType] partial struct godebugInc {
     internal @string name;
-    internal @internal.runtime.atomic_package.Pointer inc;
+    internal atomic.Pointer<Action> inc;
 }
 
-[GoRecv] internal static void IncNonDefault(this ref godebugInc g) {
-    var inc = g.inc.Load();
+internal static void IncNonDefault(this ж<godebugInc> Ꮡg) {
+    ref var g = ref Ꮡg.Value;
+
+    var inc = Ꮡg.of(godebugInc.Ꮡinc).Load();
     if (inc == nil) {
-        var newInc = godebugNewIncNonDefault.Load();
+        var newInc = ᏑgodebugNewIncNonDefault.Load();
         if (newInc == nil) {
             return;
         }
         inc = @new<Action>();
-        inc.val = (ж<ж<Func<@string, Action>>>)(g.name);
+        inc.ValueSlot = newInc.ValueSlot(g.name);
         if (raceenabled) {
-            racereleasemerge(new @unsafe.Pointer(Ꮡ(g.inc)));
+            racereleasemerge(new @unsafe.Pointer(Ꮡg.of(godebugInc.Ꮡinc)));
         }
-        if (!g.inc.CompareAndSwap(nil, inc)) {
-            inc = g.inc.Load();
+        if (!Ꮡg.of(godebugInc.Ꮡinc).CompareAndSwap(nil, inc)) {
+            inc = Ꮡg.of(godebugInc.Ꮡinc).Load();
         }
     }
     if (raceenabled) {
-        raceacquire(new @unsafe.Pointer(Ꮡ(g.inc)));
+        raceacquire(new @unsafe.Pointer(Ꮡg.of(godebugInc.Ꮡinc)));
     }
-    (ж<ж<Action>>)();
+    inc.ValueSlot();
 }
 
 internal static void godebugNotify(bool envChanged) {
-    var update = godebugUpdate.Load();
+    var update = ᏑgodebugUpdate.Load();
     @string env = default!;
     {
-        var Δp = godebugEnv.Load(); if (Δp != nil) {
-            env = Δp.val;
+        var Δp = ᏑgodebugEnv.Load(); if (Δp != nil) {
+            env = Δp.Value;
         }
     }
     if (envChanged) {
         reparsedebugvars(env);
     }
     if (update != nil) {
-        (ж<ж<Action<@string, @string>>>)(godebugDefault, env);
+        update.ValueSlot(godebugDefault, env);
     }
 }
 
@@ -210,8 +216,8 @@ internal static void syscall_runtimeSetenv(@string key, @string value) {
     setenv_c(key, value);
     if (key == "GODEBUG"u8) {
         var Δp = @new<@string>();
-        Δp.val = value;
-        godebugEnv.Store(Δp);
+        Δp.Value = value;
+        ᏑgodebugEnv.Store(Δp);
         godebugNotify(true);
     }
 }
@@ -220,7 +226,7 @@ internal static void syscall_runtimeSetenv(@string key, @string value) {
 internal static void syscall_runtimeUnsetenv(@string key) {
     unsetenv_c(key);
     if (key == "GODEBUG"u8) {
-        godebugEnv.Store(nil);
+        ᏑgodebugEnv.Store(nil);
         godebugNotify(true);
     }
 }
@@ -230,21 +236,21 @@ internal static void syscall_runtimeUnsetenv(@string key) {
 //
 //go:nosplit
 internal static void writeErrStr(@string s) {
-    writeErrData(@unsafe.StringData(s), ((int32)len(s)));
+    writeErrData(@unsafe.StringData(s), (int32)len(s));
 }
 
 // writeErrData is the common parts of writeErr{,Str}.
 //
 //go:nosplit
 internal static void writeErrData(ж<byte> Ꮡdata, int32 n) {
-    ref var data = ref Ꮡdata.val;
+    ref var data = ref Ꮡdata.Value;
 
     write(2, new @unsafe.Pointer(Ꮡdata), n);
     // If crashing, print a copy to the SetCrashOutput fd.
     var gp = getg();
-    if (gp != nil && (~(~gp).m).dying > 0 || gp == nil && panicking.Load() > 0) {
+    if (gp != nil && (~(~gp).m).dying > 0 || gp == nil && Ꮡpanicking.Load() > 0) {
         {
-            var fd = crashFD.Load(); if (fd != ~((uintptr)0)) {
+            var fd = ᏑcrashFD.Load(); if (fd != ~(uintptr)0) {
                 write(fd, new @unsafe.Pointer(Ꮡdata), n);
             }
         }
@@ -257,7 +263,8 @@ internal static void writeErrData(ж<byte> Ꮡdata, int32 n) {
 // to standard error.
 //
 // Initialized to -1 in schedinit.
-internal static atomic.Uintptr crashFD;
+internal static ж<atomic.Uintptr> ᏑcrashFD = new(default(atomic.Uintptr));
+internal static ref atomic.Uintptr crashFD => ref ᏑcrashFD.Value;
 
 //go:linkname setCrashFD
 internal static uintptr setCrashFD(uintptr fd) {
@@ -266,10 +273,10 @@ internal static uintptr setCrashFD(uintptr fd) {
     // Unlike the case below, this is not required for correctness, but it
     // is generally nicer to have all of the crash output go to the same
     // place rather than getting split across two different FDs.
-    if (panicking.Load() > 0) {
-        return ~((uintptr)0);
+    if (Ꮡpanicking.Load() > 0) {
+        return ~(uintptr)0;
     }
-    var old = crashFD.Swap(fd);
+    var old = ᏑcrashFD.Swap(fd);
     // If we are panicking, don't return the old FD to runtime/debug for
     // closing. writeErrData may have already read the old FD from crashFD
     // before the swap and closing it would cause the write to be lost [1].
@@ -291,8 +298,8 @@ internal static uintptr setCrashFD(uintptr fd) {
     // [2] If gp != nil, it occurs when incrementing gp.m.dying in
     // startpanic_m. If gp == nil, we read panicking.Load() > 0, so an Add
     // must have happened-before.
-    if (panicking.Load() > 0) {
-        return ~((uintptr)0);
+    if (Ꮡpanicking.Load() > 0) {
+        return ~(uintptr)0;
     }
     return old;
 }
@@ -332,6 +339,7 @@ internal static slice<uintptr> getAuxv() {
 // See go.dev/issue/67401.
 //
 //go:linkname zeroVal
-internal static array<byte> zeroVal;
+internal static ж<array<byte>> ᏑzeroVal = new(new array<byte>(1024));
+internal static ref array<byte> zeroVal => ref ᏑzeroVal.Value;
 
 } // end runtime_package

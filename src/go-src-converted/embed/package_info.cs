@@ -41,16 +41,14 @@ using static go.embed_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<FS, io.fs_package.ReadDirFS>]
-[assembly: GoImplement<FS, io.fs_package.ReadFileFS>]
-[assembly: GoImplement<file, io.fs_package.DirEntry>]
-[assembly: GoImplement<file, io.fs_package.FileInfo>]
-[assembly: GoImplement<fs.File, error), io.fs_package.File>]
-[assembly: GoImplement<io.fs_package.PathError, error>]
-[assembly: GoImplement<openDir, io.fs_package.File>]
-[assembly: GoImplement<openFile, io.fs_package.File>]
-[assembly: GoImplement<openFile, io_package.ReaderAt>]
-[assembly: GoImplement<openFile, io_package.Seeker>]
+[assembly: GoImplement<@file, go.io.fs_package.DirEntry>(Pointer = true)]
+[assembly: GoImplement<@file, go.io.fs_package.FileInfo>(Pointer = true)]
+[assembly: GoImplement<FS, go.io.fs_package.ReadDirFS>]
+[assembly: GoImplement<FS, go.io.fs_package.ReadFileFS>]
+[assembly: GoImplement<openDir, go.io.fs_package.File>(Pointer = true)]
+[assembly: GoImplement<openFile, go.io.fs_package.File>(Pointer = true)]
+[assembly: GoImplement<openFile, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<openFile, io_package.Seeker>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

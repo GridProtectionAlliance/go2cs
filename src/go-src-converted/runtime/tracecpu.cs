@@ -4,6 +4,10 @@
 // CPU profile -> trace
 namespace go;
 
+using @internal.runtime;
+using @unsafe = unsafe_package;
+using atomic = @internal.runtime.atomic_package;
+
 partial class runtime_package {
 
 // traceInitReadCPU initializes CPU profile -> tracer state for tracing.
@@ -24,11 +28,8 @@ internal static void traceInitReadCPU() {
     // writes of the pointer must be atomic. (And although this field is never
     // the sole pointer to the profBuf value, it's best to allow a write barrier
     // here.)
-    Δtrace.cpuLogWrite[0].Store(Δtrace.cpuLogRead[0]);
-    Δtrace.cpuLogWrite[1].Store(Δtrace.cpuLogRead[1]);
-}
-
-[GoType("dyn")] partial struct traceStartReadCPU_type {
+    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑcpuLogWrite, 0).Store(Δtrace.cpuLogRead[0]);
+    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑcpuLogWrite, 1).Store(Δtrace.cpuLogRead[1]);
 }
 
 // traceStartReadCPU creates a goroutine to start reading CPU profile
@@ -43,7 +44,6 @@ internal static void traceStartReadCPU() {
     Δtrace.cpuSleep = newWakeableSleep();
     var done = new channel<EmptyStruct>(1);
     var doneʗ1 = done;
-    var traceʗ1 = Δtrace;
     goǃ(() => {
         while (traceEnabled()) {
             // Sleep here because traceReadCPU is non-blocking. This mirrors
@@ -56,7 +56,7 @@ internal static void traceStartReadCPU() {
             // Like the runtime/pprof package, even if that bug didn't exist
             // we would still want to do a goroutine-level sleep in between
             // reads to avoid frequent wakeups.
-            traceʗ1.cpuSleep.sleep(100000000);
+            Δtrace.cpuSleep.sleep(100_000_000);
             ref var tl = ref heap<traceLocker>(out var Ꮡtl);
             tl = traceAcquire();
             if (!tl.ok()) {
@@ -69,7 +69,7 @@ internal static void traceStartReadCPU() {
                 break;
             }
         }
-        doneʗ1.ᐸꟷ(new traceStartReadCPU_type());
+        doneʗ1.ᐸꟷ(new EmptyStruct());
     });
     Δtrace.cpuLogDone = done;
 }
@@ -88,8 +88,8 @@ internal static void traceStopReadCPU() {
     //
     // Wake the goroutine so it can observe that their the buffer is
     // closed an exit.
-    Δtrace.cpuLogWrite[0].Store(nil);
-    Δtrace.cpuLogWrite[1].Store(nil);
+    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑcpuLogWrite, 0).Store(nil);
+    ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑcpuLogWrite, 1).Store(nil);
     Δtrace.cpuLogRead[0].close();
     Δtrace.cpuLogRead[1].close();
     Δtrace.cpuSleep.wake();
@@ -117,9 +117,9 @@ internal static void traceStopReadCPU() {
 // operations.
 internal static bool traceReadCPU(uintptr gen) {
     array<uintptr> pcBuf = new(128); /* traceStackSize */
-    var (data, tags, eof) = Δtrace.cpuLogRead[gen % 2].read(profBufNonBlocking);
+    var (data, tags, eof) = Δtrace.cpuLogRead[(nint)(gen % 2)].read(profBufNonBlocking);
     while (len(data) > 0) {
-        if (len(data) < 4 || data[0] > ((uint64)len(data))) {
+        if (len(data) < 4 || data[0] > (uint64)len(data)) {
             break;
         }
         // truncated profile
@@ -134,10 +134,10 @@ internal static bool traceReadCPU(uintptr gen) {
         // Deserialize the data in the profile buffer.
         var recordLen = data[0];
         var timestamp = data[1];
-        var ppid = data[2] >> (int)(1);
+        var ppid = (data[2] >> (int)(1));
         {
-            var hasP = ((uint64)(data[2] & 1)) != 0; if (!hasP) {
-                ppid = ~((uint64)0);
+            var hasP = ((uint64)(data[2] & 0b1)) != 0; if (!hasP) {
+                ppid = ~(uint64)0;
             }
         }
         var goid = data[3];
@@ -162,28 +162,28 @@ internal static bool traceReadCPU(uintptr gen) {
         nint nstk = 1;
         pcBuf[0] = logicalStackSentinel;
         for (; nstk < len(pcBuf) && nstk - 1 < len(stk); nstk++) {
-            pcBuf[nstk] = ((uintptr)stk[nstk - 1]);
+            pcBuf[nstk] = (uintptr)stk[nstk - 1];
         }
         // Write out a trace event.
-        var w = unsafeTraceWriter(gen, Δtrace.cpuBuf[gen % 2]);
+        var w = unsafeTraceWriter(gen, Δtrace.cpuBuf[(nint)(gen % 2)]);
         // Ensure we have a place to write to.
         bool flushed = default!;
         (w, flushed) = w.ensure(2 + 5 * traceBytesPerNumber);
         /* traceEvCPUSamples + traceEvCPUSample + timestamp + g + m + p + stack ID */
         if (flushed) {
             // Annotate the batch as containing strings.
-            w.@byte(((byte)traceEvCPUSamples));
+            w.@byte((byte)traceEvCPUSamples);
         }
         // Add the stack to the table.
-        var stackID = Δtrace.stackTab[gen % 2].put(pcBuf[..(int)(nstk)]);
+        var stackID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (nint)(gen % 2)).put(pcBuf[..(int)(nstk)]);
         // Write out the CPU sample.
-        w.@byte(((byte)traceEvCPUSample));
+        w.@byte((byte)traceEvCPUSample);
         w.varint(timestamp);
         w.varint(mpid);
         w.varint(ppid);
         w.varint(goid);
         w.varint(stackID);
-        Δtrace.cpuBuf[gen % 2] = w.traceBuf;
+        Δtrace.cpuBuf[(nint)(gen % 2)] = w.traceBuf;
     }
     return !eof;
 }
@@ -193,15 +193,13 @@ internal static bool traceReadCPU(uintptr gen) {
 internal static void traceCPUFlush(uintptr gen) {
     // Flush any remaining trace buffers containing CPU samples.
     {
-        var buf = Δtrace.cpuBuf[gen % 2]; if (buf != nil) {
-            systemstack(
-            var bufʗ2 = buf;
-            var traceʗ2 = Δtrace;
-            () => {
-                @lock(Ꮡtraceʗ2.of(atomic.Int32; seqGC uint64; minPageHeapAddr uint64; debugMalloc bool}.Ꮡlock));
-                traceBufFlush(bufʗ2, gen);
-                unlock(Ꮡtraceʗ2.of(atomic.Int32; seqGC uint64; minPageHeapAddr uint64; debugMalloc bool}.Ꮡlock));
-                traceʗ2.cpuBuf[gen % 2] = default!;
+        var buf = Δtrace.cpuBuf[(nint)(gen % 2)]; if (buf != nil) {
+            var bufʗ1 = buf;
+            systemstack(() => {
+                @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+                traceBufFlush(bufʗ1, gen);
+                unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+                Δtrace.cpuBuf[(nint)(gen % 2)] = default!;
             });
         }
     }
@@ -211,16 +209,16 @@ internal static void traceCPUFlush(uintptr gen) {
 // profiling buffer. It is called from a signal handler, so is limited in what
 // it can do. mp must be the thread that is currently stopped in a signal.
 internal static void traceCPUSample(ж<g> Ꮡgp, ж<m> Ꮡmp, ж<Δp> Ꮡpp, slice<uintptr> stk) {
-    ref var gp = ref Ꮡgp.val;
-    ref var mp = ref Ꮡmp.val;
-    ref var pp = ref Ꮡpp.val;
+    ref var gp = ref Ꮡgp.DerefOrNil();
+    ref var mp = ref Ꮡmp.DerefOrNil();
+    ref var pp = ref Ꮡpp.DerefOrNil();
 
     if (!traceEnabled()) {
         // Tracing is usually turned off; don't spend time acquiring the signal
         // lock unless it's active.
         return;
     }
-    if (mp == nil) {
+    if (Ꮡmp == nil) {
         // Drop samples that don't have an identifiable thread. We can't render
         // this in any useful way anyway.
         return;
@@ -231,16 +229,16 @@ internal static void traceCPUSample(ж<g> Ꮡgp, ж<m> Ꮡmp, ж<Δp> Ꮡpp, sli
     // in the tracer and we can just take advantage of that. If it isn't, then
     // we need to acquire it and read the generation.
     var locked = false;
-    if (mp.trace.seqlock.Load() % 2 == 0) {
-        mp.trace.seqlock.Add(1);
+    if (Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡseqlock).Load() % 2 == 0) {
+        Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡseqlock).Add(1);
         locked = true;
     }
-    var gen = Δtrace.gen.Load();
+    var gen = ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡgen).Load();
     if (gen == 0) {
         // Tracing is disabled, as it turns out. Release the seqlock if necessary
         // and exit.
         if (locked) {
-            mp.trace.seqlock.Add(1);
+            Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡseqlock).Add(1);
         }
         return;
     }
@@ -250,34 +248,34 @@ internal static void traceCPUSample(ж<g> Ꮡgp, ж<m> Ꮡmp, ж<Δp> Ꮡpp, sli
     // usually the number of samples with the given stack.) Near syscalls, pp
     // may be nil. Reporting goid of 0 is fine for either g0 or a nil gp.
     array<uint64> hdr = new(3);
-    if (pp != nil){
+    if (Ꮡpp != nil){
         // Overflow records in profBuf have all header values set to zero. Make
         // sure that real headers have at least one bit set.
-        hdr[0] = (uint64)(((uint64)pp.id) << (int)(1) | 1);
+        hdr[0] = (uint64)(((uint64)pp.id << (int)(1)) | 0b1);
     } else {
-        hdr[0] = 2;
+        hdr[0] = 0b10;
     }
-    if (gp != nil) {
+    if (Ꮡgp != nil) {
         hdr[1] = gp.goid;
     }
-    hdr[2] = ((uint64)mp.procid);
+    hdr[2] = (uint64)mp.procid;
     // Allow only one writer at a time
-    while (!Δtrace.signalLock.CompareAndSwap(0, 1)) {
+    while (!ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑsignalLock).CompareAndSwap(0, 1)) {
         // TODO: Is it safe to osyield here? https://go.dev/issue/52672
         osyield();
     }
     {
-        var log = Δtrace.cpuLogWrite[gen % 2].Load(); if (log != nil) {
+        var log = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑcpuLogWrite, (nint)(gen % 2)).Load(); if (log != nil) {
             // Note: we don't pass a tag pointer here (how should profiling tags
             // interact with the execution tracer?), but if we did we'd need to be
             // careful about write barriers. See the long comment in profBuf.write.
-            log.write(nil, ((int64)now), hdr[..], stk);
+            log.write(nil, (int64)(uint64)now, hdr[..], stk);
         }
     }
-    Δtrace.signalLock.Store(0);
+    ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑsignalLock).Store(0);
     // Release the seqlock if we acquired it earlier.
     if (locked) {
-        mp.trace.seqlock.Add(1);
+        Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡseqlock).Add(1);
     }
 }
 

@@ -153,7 +153,7 @@ internal static contentType attrType(@string name) {
         }
     }
     {
-        var (t, ok) = attrTypeMap[name]; if (ok) {
+        var (t, ok) = attrTypeMap[name, ꟷ]; if (ok) {
             return t;
         }
     }

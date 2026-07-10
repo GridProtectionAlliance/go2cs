@@ -5,8 +5,8 @@ namespace go;
 
 using errors = errors_package;
 using io = io_package;
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
 
 partial class strings_package {
 
@@ -23,10 +23,10 @@ partial class strings_package {
 // Len returns the number of bytes of the unread portion of the
 // string.
 [GoRecv] public static nint Len(this ref Reader r) {
-    if (r.i >= ((int64)len(r.s))) {
+    if (r.i >= (int64)len(r.s)) {
         return 0;
     }
-    return ((nint)(((int64)len(r.s)) - r.i));
+    return (nint)((int64)len(r.s) - r.i);
 }
 
 // Size returns the original length of the underlying string.
@@ -34,7 +34,7 @@ partial class strings_package {
 // The returned value is always the same and is not affected by calls
 // to any other method.
 [GoRecv] public static int64 Size(this ref Reader r) {
-    return ((int64)len(r.s));
+    return (int64)len(r.s);
 }
 
 // Read implements the [io.Reader] interface.
@@ -42,12 +42,12 @@ partial class strings_package {
     nint n = default!;
     error err = default!;
 
-    if (r.i >= ((int64)len(r.s))) {
+    if (r.i >= (int64)len(r.s)) {
         return (0, io.EOF);
     }
     r.prevRune = -1;
     n = copy(b, r.s[(int)(r.i)..]);
-    r.i += ((int64)n);
+    r.i += (int64)n;
     return (n, err);
 }
 
@@ -60,7 +60,7 @@ partial class strings_package {
     if (off < 0) {
         return (0, errors.New("strings.Reader.ReadAt: negative offset"u8));
     }
-    if (off >= ((int64)len(r.s))) {
+    if (off >= (int64)len(r.s)) {
         return (0, io.EOF);
     }
     n = copy(b, r.s[(int)(off)..]);
@@ -73,10 +73,10 @@ partial class strings_package {
 // ReadByte implements the [io.ByteReader] interface.
 [GoRecv] public static (byte, error) ReadByte(this ref Reader r) {
     r.prevRune = -1;
-    if (r.i >= ((int64)len(r.s))) {
+    if (r.i >= (int64)len(r.s)) {
         return (0, io.EOF);
     }
-    var b = r.s[r.i];
+    var b = r.s[(int)(r.i)];
     r.i++;
     return (b, default!);
 }
@@ -97,19 +97,19 @@ partial class strings_package {
     nint size = default!;
     error err = default!;
 
-    if (r.i >= ((int64)len(r.s))) {
+    if (r.i >= (int64)len(r.s)) {
         r.prevRune = -1;
         return (0, 0, io.EOF);
     }
-    r.prevRune = ((nint)r.i);
+    r.prevRune = (nint)r.i;
     {
-        var c = r.s[r.i]; if (c < utf8.RuneSelf) {
+        var c = r.s[(int)(r.i)]; if (c < utf8.RuneSelf) {
             r.i++;
-            return (((rune)c), 1, default!);
+            return ((rune)c, 1, default!);
         }
     }
     (ch, size) = utf8.DecodeRuneInString(r.s[(int)(r.i)..]);
-    r.i += ((int64)size);
+    r.i += (int64)size;
     return (ch, size, err);
 }
 
@@ -121,7 +121,7 @@ partial class strings_package {
     if (r.prevRune < 0) {
         return errors.New("strings.Reader.UnreadRune: previous operation was not ReadRune"u8);
     }
-    r.i = ((int64)r.prevRune);
+    r.i = (int64)r.prevRune;
     r.prevRune = -1;
     return default!;
 }
@@ -130,22 +130,19 @@ partial class strings_package {
 [GoRecv] public static (int64, error) Seek(this ref Reader r, int64 offset, nint whence) {
     r.prevRune = -1;
     int64 abs = default!;
-    switch (whence) {
-    case io.SeekStart: {
+    var exprᴛ1 = whence;
+    if (exprᴛ1 == io.SeekStart) {
         abs = offset;
-        break;
     }
-    case io.SeekCurrent: {
+    else if (exprᴛ1 == io.SeekCurrent) {
         abs = r.i + offset;
-        break;
     }
-    case io.SeekEnd: {
-        abs = ((int64)len(r.s)) + offset;
-        break;
+    else if (exprᴛ1 == io.SeekEnd) {
+        abs = (int64)len(r.s) + offset;
     }
-    default: {
+    else { /* default: */
         return (0, errors.New("strings.Reader.Seek: invalid whence"u8));
-    }}
+    }
 
     if (abs < 0) {
         return (0, errors.New("strings.Reader.Seek: negative position"u8));
@@ -160,16 +157,16 @@ partial class strings_package {
     error err = default!;
 
     r.prevRune = -1;
-    if (r.i >= ((int64)len(r.s))) {
+    if (r.i >= (int64)len(r.s)) {
         return (0, default!);
     }
     @string s = r.s[(int)(r.i)..];
-    var (m, err) = io.WriteString(w, s);
+    (var m, err) = io.WriteString(w, s);
     if (m > len(s)) {
         throw panic("strings.Reader.WriteTo: invalid WriteString count");
     }
-    r.i += ((int64)m);
-    n = ((int64)m);
+    r.i += (int64)m;
+    n = (int64)m;
     if (m != len(s) && err == default!) {
         err = io.ErrShortWrite;
     }

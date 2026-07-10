@@ -5,24 +5,24 @@
 namespace go.database;
 
 using bytes = bytes_package;
-using driver = database.sql.driver_package;
+using driver = go.database.sql.driver_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using strconv = strconv_package;
 using time = time_package;
 using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
-using _ = unsafe_package; // for linkname
-using database.sql;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+using go.database.sql;
+using go.unicode;
 
 partial class sql_package {
 
 internal static error errNilPtr = errors.New("destination pointer is nil"u8); // embedded in descriptive error
 
 internal static @string describeNamedValue(ж<driver.NamedValue> Ꮡnv) {
-    ref var nv = ref Ꮡnv.val;
+    ref var nv = ref Ꮡnv.Value;
 
     if (len(nv.Name) == 0) {
         return fmt.Sprintf("$%d"u8, nv.Ordinal);
@@ -45,12 +45,12 @@ internal static error validateNamedValueName(@string name) {
 // as if it were a NamedValueChecker. If the driver ColumnConverter
 // is not present then the NamedValueChecker will return driver.ErrSkip.
 [GoType] partial struct ccChecker {
-    internal database.sql.driver_package.ColumnConverter cci;
+    internal driver.ColumnConverter cci;
     internal nint want;
 }
 
 internal static error CheckNamedValue(this ccChecker c, ж<driver.NamedValue> Ꮡnv) {
-    ref var nv = ref Ꮡnv.val;
+    ref var nv = ref Ꮡnv.Value;
 
     if (c.cci == default!) {
         return driver.ErrSkip;
@@ -67,7 +67,7 @@ internal static error CheckNamedValue(this ccChecker c, ж<driver.NamedValue> �
     // struct changing into a string or nil.
     {
         var (vr, ok) = nv.Value._<driver.Valuer>(ᐧ); if (ok) {
-            (sv, errΔ1) = callValuerValue(vr);
+            var (sv, errΔ1) = callValuerValue(vr);
             if (errΔ1 != default!) {
                 return errΔ1;
             }
@@ -102,7 +102,7 @@ internal static error CheckNamedValue(this ccChecker c, ж<driver.NamedValue> �
 internal static error /*err*/ defaultCheckNamedValue(ж<driver.NamedValue> Ꮡnv) {
     error err = default!;
 
-    ref var nv = ref Ꮡnv.val;
+    ref var nv = ref Ꮡnv.Value;
     (nv.Value, err) = driver.DefaultParameterConverter.ConvertValue(nv.Value);
     return err;
 }
@@ -114,7 +114,7 @@ internal static error /*err*/ defaultCheckNamedValue(ж<driver.NamedValue> Ꮡnv
 //
 // ci must be locked.
 internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Conn ci, ж<driverStmt> Ꮡds, slice<any> args) {
-    ref var ds = ref Ꮡds.val;
+    ref var ds = ref Ꮡds.DerefOrNil();
 
     var nvargs = new slice<driver.NamedValue>(len(args));
     // -1 means the driver doesn't know how to count the number of
@@ -123,7 +123,7 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
     nint want = -1;
     driver.Stmt si = default!;
     ccChecker cc = default!;
-    if (ds != nil) {
+    if (Ꮡds != nil) {
         si = ds.si;
         want = ds.si.NumInput();
         cc.want = want;
@@ -136,7 +136,7 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
     if (!ok) {
         (nvc, _) = ci._<driver.NamedValueChecker>(ᐧ);
     }
-    (cci, ok) = si._<driver.ColumnConverter>(ᐧ);
+    (var cci, ok) = si._<driver.ColumnConverter>(ᐧ);
     if (ok) {
         cc.cci = cci;
     }
@@ -147,7 +147,9 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
     // argument list.
     error err = default!;
     nint n = default!;
-    foreach (var (_, arg) in args) {
+    foreach (var (_, vᴛ1) in args) {
+        var arg = vᴛ1;
+
         var nv = Ꮡ(nvargs, n);
         {
             var (np, okΔ1) = arg._<NamedArg>(ᐧ); if (okΔ1) {
@@ -157,11 +159,11 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
                     }
                 }
                 arg = np.Value;
-                nv.val.Name = np.Name;
+                nv.Value.Name = np.Name;
             }
         }
-        nv.val.Ordinal = n + 1;
-        nv.val.Value = arg;
+        nv.Value.Ordinal = n + 1;
+        nv.Value.Value = arg;
         // Checking sequence has four routes:
         // A: 1. Default
         // B: 1. NamedValueChecker 2. Column Converter 3. Default
@@ -178,35 +180,32 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
         switch (ᐧ) {
         case {} when nvc != default!: {
             nextCC = cci != default!;
-            checker = 
             var nvcʗ1 = nvc;
-            () => nvcʗ1.CheckNamedValue();
+                        checker = nvcʗ1.CheckNamedValue;
             break;
         }
         case {} when cci != default!: {
-            checker = 
             var ccʗ1 = cc;
-            () => ccʗ1.CheckNamedValue();
+                        checker = (ж<driver.NamedValue> p1) => ccʗ1.CheckNamedValue(p1);
             break;
         }}
 
 nextCheck:
         err = checker(nv);
         var exprᴛ1 = err;
-        if (exprᴛ1 == default!) {
+        if (AreEqual(exprᴛ1, default!)) {
             n++;
             continue;
         }
-        else if (exprᴛ1 == driver.ErrRemoveArgument) {
+        else if (AreEqual(exprᴛ1, driver.ErrRemoveArgument)) {
             nvargs = nvargs[..(int)(len(nvargs) - 1)];
             continue;
         }
-        else if (exprᴛ1 == driver.ErrSkip) {
+        else if (AreEqual(exprᴛ1, driver.ErrSkip)) {
             if (nextCC){
                 nextCC = false;
-                checker = 
                 var ccʗ2 = cc;
-                () => ccʗ2.CheckNamedValue();
+                                checker = (ж<driver.NamedValue> p1) => ccʗ2.CheckNamedValue(p1);
             } else {
                 checker = defaultCheckNamedValue;
             }
@@ -247,63 +246,63 @@ internal static error convertAssign(any dest, any src) {
 // be used as the parent for any cursor values converted from a
 // driver.Rows to a *Rows.
 internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
-    ref var rows = ref Ꮡrows.val;
+    ref var rows = ref Ꮡrows.DerefOrNil();
 
     // Common cases, without reflect.
     switch (src.type()) {
     case @string s: {
         switch (dest.type()) {
-        case @string.val d: {
+        case ж<@string> d: {
             if (d == nil) {
                 return errNilPtr;
             }
-            var d.val = s;
+            d.Value = s;
             return default!;
         }
-        case slice<byte>.val d: {
+        case ж<slice<byte>> d: {
             if (d == nil) {
                 return errNilPtr;
             }
-            var d.val = slice<byte>(s);
+            d.ValueSlot = slice<byte>(s);
             return default!;
         }
-        case RawBytes.val d: {
+        case ж<RawBytes> d: {
             if (d == nil) {
                 return errNilPtr;
             }
-            var d.val = rows.setrawbuf(append(rows.rawbuf(), s.ꓸꓸꓸ));
+            d.ValueSlot = Ꮡrows.setrawbuf(append(Ꮡrows.rawbuf(), s.ꓸꓸꓸ));
             return default!;
         }}
         break;
     }
     case slice<byte> s: {
         switch (dest.type()) {
-        case @string.val d: {
+        case ж<@string> d: {
             if (d == nil) {
                 return errNilPtr;
             }
-            var d.val = ((@string)s);
+            d.Value = ((@string)s);
             return default!;
         }
-        case any.val d: {
+        case ж<any> d: {
             if (d == nil) {
                 return errNilPtr;
             }
-            var d.val = bytes.Clone(s);
+            d.ValueSlot = bytes.Clone(s);
             return default!;
         }
-        case slice<byte>.val d: {
+        case ж<slice<byte>> d: {
             if (d == nil) {
                 return errNilPtr;
             }
-            var d.val = bytes.Clone(s);
+            d.ValueSlot = bytes.Clone(s);
             return default!;
         }
-        case RawBytes.val d: {
+        case ж<RawBytes> d: {
             if (d == nil) {
                 return errNilPtr;
             }
-            var d.val = s;
+            d.ValueSlot = s;
             return default!;
         }}
         break;
@@ -311,136 +310,136 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
     case time.Time s: {
         switch (dest.type()) {
         case ж<time.Time> d: {
-            var d.val = s;
+            d.Value = s;
             return default!;
         }
-        case @string.val d: {
-            var d.val = s.Format(time.RFC3339Nano);
+        case ж<@string> d: {
+            d.Value = s.Format(time.RFC3339Nano);
             return default!;
         }
-        case slice<byte>.val d: {
+        case ж<slice<byte>> d: {
             if (d == nil) {
                 return errNilPtr;
             }
-            var d.val = slice<byte>(s.Format(time.RFC3339Nano));
+            d.ValueSlot = slice<byte>(s.Format(time.RFC3339Nano));
             return default!;
         }
-        case RawBytes.val d: {
+        case ж<RawBytes> d: {
             if (d == nil) {
                 return errNilPtr;
             }
-            var d.val = rows.setrawbuf(s.AppendFormat(rows.rawbuf(), time.RFC3339Nano));
+            d.ValueSlot = Ꮡrows.setrawbuf(s.AppendFormat(Ꮡrows.rawbuf(), time.RFC3339Nano));
             return default!;
         }}
         break;
     }
-    case decimalDecompose s: {
+    case {} Δs when Δs._<decimalDecompose>(out var s): {
         switch (dest.type()) {
-        case decimalCompose d: {
-            return d.Compose(s.Decompose(default!));
+        case {} Δd when Δd._<decimalCompose>(out var d): {
+            var (ᴛ1, ᴛ2, ᴛ3, ᴛ4) = s.Decompose(default!);
+            return d.Compose(ᴛ1, ᴛ2, ᴛ3, ᴛ4);
         }}
         break;
     }
-    case default! s: {
+    case null: {
         switch (dest.type()) {
-        case any.val d: {
+        case ж<any> d: {
             if (d == nil) {
                 return errNilPtr;
             }
-            var d.val = default!;
+            d.ValueSlot = default!;
             return default!;
         }
-        case slice<byte>.val d: {
+        case ж<slice<byte>> d: {
             if (d == nil) {
                 return errNilPtr;
             }
-            var d.val = default!;
+            d.ValueSlot = default!;
             return default!;
         }
-        case RawBytes.val d: {
+        case ж<RawBytes> d: {
             if (d == nil) {
                 return errNilPtr;
             }
-            var d.val = default!;
+            d.ValueSlot = default!;
             return default!;
         }}
         break;
     }
-    case driver.Rows s: {
+    case {} Δs when Δs._<driver.Rows>(out var s): {
         switch (dest.type()) {
-        case Rows.val d: {
+        case ж<Rows> d: {
             if (d == nil) {
                 // The driver is returning a cursor the client may iterate over.
                 return errNilPtr;
             }
-            if (rows == nil) {
+            if (Ꮡrows == nil) {
                 return errors.New("invalid context to convert cursor rows, missing parent *Rows"u8);
             }
-            rows.closemu.Lock();
-            var d.val = new Rows(
+            Ꮡrows.of(Rows.Ꮡclosemu).Lock();
+            d.Value = new Rows(
                 dc: rows.dc,
-                ΔreleaseConn: (error _) => {
+                releaseConn: (error _) => {
                 },
                 rowsi: s
             );
             var parentCancel = rows.cancel;
-            rows.cancel = 
             var parentCancelʗ1 = parentCancel;
-            () => {
+            rows.cancel = () => {
                 // Chain the cancel function.
                 // When Rows.cancel is called, the closemu will be locked as well.
                 // So we can access rs.lasterr.
-                d.close(rows.lasterr);
+                d.close(Ꮡrows.Value.lasterr);
                 if (parentCancelʗ1 != default!) {
                     parentCancelʗ1();
                 }
             };
-            rows.closemu.Unlock();
+            Ꮡrows.of(Rows.Ꮡclosemu).Unlock();
             return default!;
         }}
         break;
     }}
-    reflectꓸValue sv = default!;
+    reflectꓸValue sv = new(nil);
     switch (dest.type()) {
-    case @string.val d: {
+    case ж<@string> d: {
         sv = reflect.ValueOf(src);
         var exprᴛ1 = sv.Kind();
         if (exprᴛ1 == reflect.ΔBool || exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64 || exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64) {
-            var d.val = asString(src);
+            d.Value = asString(src);
             return default!;
         }
 
         break;
     }
-    case slice<byte>.val d: {
+    case ж<slice<byte>> d: {
         sv = reflect.ValueOf(src);
         {
             var (b, ok) = asBytes(default!, sv); if (ok) {
-                var d.val = b;
+                d.ValueSlot = b;
                 return default!;
             }
         }
         break;
     }
-    case RawBytes.val d: {
+    case ж<RawBytes> d: {
         sv = reflect.ValueOf(src);
         {
-            var (b, ok) = asBytes(rows.rawbuf(), sv); if (ok) {
-                var d.val = rows.setrawbuf(b);
+            var (b, ok) = asBytes(Ꮡrows.rawbuf(), sv); if (ok) {
+                d.ValueSlot = Ꮡrows.setrawbuf(b);
                 return default!;
             }
         }
         break;
     }
-    case @bool.val d: {
-        (bv, err) = driver.Bool.ConvertValue(src);
+    case ж<bool> d: {
+        var (bv, err) = driver.Bool.ConvertValue(src);
         if (err == default!) {
-            var d.val = bv._<bool>();
+            d.Value = bv._<bool>();
         }
         return err;
     }
-    case any.val d: {
-        var d.val = src;
+    case ж<any> d: {
+        d.ValueSlot = src;
         return default!;
     }}
     {
@@ -466,7 +465,7 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
             break;
         }
         default: {
-            var b = src.type();
+            var b = src;
             dv.Set(sv);
             break;
         }}
@@ -613,7 +612,7 @@ internal static (slice<byte> b, bool ok) asBytes(slice<byte> buf, reflectꓸValu
     return (b, ok);
 }
 
-internal static reflectꓸType valuerReflectType = reflect.TypeFor[driver.Valuer]();
+internal static reflectꓸType valuerReflectType = reflect.TypeFor<driver.Valuer>();
 
 // callValuerValue returns vr.Value(), with one exception:
 // If vr.Value is an auto-generated method on a pointer type and the
@@ -626,8 +625,8 @@ internal static reflectꓸType valuerReflectType = reflect.TypeFor[driver.Valuer
 // string/*string.
 //
 // This function is mirrored in the database/sql/driver package.
-internal static (driver.Value v, error err) callValuerValue(driver.Valuer vr) {
-    driver.Value v = default!;
+internal static (driverꓸValue v, error err) callValuerValue(driver.Valuer vr) {
+    driverꓸValue v = default!;
     error err = default!;
 
     {

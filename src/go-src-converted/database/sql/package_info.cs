@@ -11,6 +11,7 @@
 
 // <ImportedTypeAliases>
 global using driverꓸRowsAffected = go.database.sql.driver_package.ΔRowsAffected;
+global using driverꓸValue = object;
 global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
 global using reflectꓸKind = go.reflect_package.ΔKind;
 global using reflectꓸMethod = go.reflect_package.ΔMethod;
@@ -20,6 +21,7 @@ global using runtimeꓸError = go.runtime_package.ΔError;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
+using driver = go.database.sql.driver_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -50,49 +52,16 @@ using static go.database.sql_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(Result, error), Result>]
-[assembly: GoImplement<(Scanner, bool), Scanner>]
-[assembly: GoImplement<(ctx context.Context, cancel context.CancelFunc), context_package.Context>]
-[assembly: GoImplement<(io.Closer, bool), io_package.Closer>]
-[assembly: GoImplement<(res Result, err error), Result>]
 [assembly: GoImplement<IsolationLevel, fmt_package.Stringer>]
-[assembly: GoImplement<Tx, stmtConnGrabber>]
-[assembly: GoImplement<database.sql.driver_package.Value, database.sql.driver_package.Valuer>]
-[assembly: GoImplement<driver.ColumnConverter, bool), database.sql.driver_package.ColumnConverter>]
-[assembly: GoImplement<driver.Conn, error), database.sql.driver_package.Conn>]
-[assembly: GoImplement<driver.ConnBeginTx, bool), database.sql.driver_package.ConnBeginTx>]
-[assembly: GoImplement<driver.ConnPrepareContext, bool), database.sql.driver_package.ConnPrepareContext>]
-[assembly: GoImplement<driver.Connector, error), database.sql.driver_package.Connector>]
-[assembly: GoImplement<driver.Driver, bool), database.sql.driver_package.Driver>]
-[assembly: GoImplement<driver.DriverContext, bool), database.sql.driver_package.DriverContext>]
-[assembly: GoImplement<driver.Execer, bool), database.sql.driver_package.Execer>]
-[assembly: GoImplement<driver.ExecerContext, bool), database.sql.driver_package.ExecerContext>]
-[assembly: GoImplement<driver.NamedValueChecker, bool), database.sql.driver_package.NamedValueChecker>]
-[assembly: GoImplement<driver.Pinger, bool), database.sql.driver_package.Pinger>]
-[assembly: GoImplement<driver.Queryer, bool), database.sql.driver_package.Queryer>]
-[assembly: GoImplement<driver.QueryerContext, bool), database.sql.driver_package.QueryerContext>]
-[assembly: GoImplement<driver.Result, error), database.sql.driver_package.Result>]
-[assembly: GoImplement<driver.Rows, error), database.sql.driver_package.Rows>]
-[assembly: GoImplement<driver.RowsColumnTypeDatabaseTypeName, bool), database.sql.driver_package.RowsColumnTypeDatabaseTypeName>]
-[assembly: GoImplement<driver.RowsColumnTypeLength, bool), database.sql.driver_package.RowsColumnTypeLength>]
-[assembly: GoImplement<driver.RowsColumnTypeNullable, bool), database.sql.driver_package.RowsColumnTypeNullable>]
-[assembly: GoImplement<driver.RowsColumnTypePrecisionScale, bool), database.sql.driver_package.RowsColumnTypePrecisionScale>]
-[assembly: GoImplement<driver.RowsColumnTypeScanType, bool), database.sql.driver_package.RowsColumnTypeScanType>]
-[assembly: GoImplement<driver.RowsNextResultSet, bool), database.sql.driver_package.RowsNextResultSet>]
-[assembly: GoImplement<driver.SessionResetter, bool), database.sql.driver_package.SessionResetter>]
-[assembly: GoImplement<driver.Stmt, error), database.sql.driver_package.Stmt>]
-[assembly: GoImplement<driver.StmtExecContext, bool), database.sql.driver_package.StmtExecContext>]
-[assembly: GoImplement<driver.StmtQueryContext, bool), database.sql.driver_package.StmtQueryContext>]
-[assembly: GoImplement<driver.Tx, error), database.sql.driver_package.Tx>]
-[assembly: GoImplement<driver.Validator, bool), database.sql.driver_package.Validator>]
-[assembly: GoImplement<driver.Valuer, bool), database.sql.driver_package.Valuer>]
-[assembly: GoImplement<driverConn, finalCloser>]
-[assembly: GoImplement<driverConn, sync_package.Locker>]
+[assembly: GoImplement<Tx, stmtConnGrabber>(Pointer = true)]
+[assembly: GoImplement<driverConn, finalCloser>(Pointer = true)]
+[assembly: GoImplement<driverConn, sync_package.Locker>(Pointer = true)]
 [assembly: GoImplement<driverResult, Result>]
-[assembly: GoImplement<dsnConnector, database.sql.driver_package.Connector>]
-[assembly: GoImplement<error, Result>]
-[assembly: GoImplement<ΔConn, stmtConnGrabber>]
-[assembly: GoImplement<ΔStmt, finalCloser>]
+[assembly: GoImplement<driverResult, sync_package.Locker>(Promoted = true)]
+[assembly: GoImplement<driverStmt, sync_package.Locker>(Promoted = true)]
+[assembly: GoImplement<dsnConnector, go.database.sql.driver_package.Connector>]
+[assembly: GoImplement<ΔConn, stmtConnGrabber>(Pointer = true)]
+[assembly: GoImplement<ΔStmt, finalCloser>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

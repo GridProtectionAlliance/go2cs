@@ -10,6 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using base64 = go.encoding.base64_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -38,8 +39,8 @@ using static go.encoding.pem_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>]
-[assembly: GoImplement<lineBreaker, io_package.Writer>]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<lineBreaker, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

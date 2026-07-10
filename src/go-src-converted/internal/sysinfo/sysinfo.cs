@@ -6,8 +6,9 @@
 // that can be used for debugging or information purposes.
 namespace go.@internal;
 
-using cpu = @internal.cpu_package;
+using cpu = go.@internal.cpu_package;
 using sync = sync_package;
+using go.@internal;
 
 partial class sysinfo_package {
 

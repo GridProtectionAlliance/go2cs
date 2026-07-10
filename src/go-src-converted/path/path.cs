@@ -13,7 +13,7 @@ namespace go;
 
 using bytealg = @internal.bytealg_package;
 using @internal;
-using ꓸꓸꓸ@string = Span<@string>;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class path_package {
 
@@ -104,7 +104,7 @@ public static @string Clean(@string path) {
         case {} when path[r] == (rune)'.' && path[r + 1] == (rune)'.' && (r + 2 == n || path[r + 2] == (rune)'/'): {
             r += 2;
             switch (ᐧ) {
-            case {} when @out.w is > dotdot: {
+            case {} when @out.w > dotdot: {
                 @out.w--;
                 while (@out.w > dotdot && @out.index(@out.w) != (rune)'/') {
                     // empty path element
@@ -154,9 +154,9 @@ public static @string Clean(@string path) {
 // If there is no slash in path, Split returns an empty dir and
 // file set to path.
 // The returned values have the property that path = dir+file.
-public static (@string dir, @string file) Split(@string path) {
+public static (@string dir, @string @file) Split(@string path) {
     @string dir = default!;
-    @string file = default!;
+    @string @file = default!;
 
     nint i = bytealg.LastIndexByteString(path, (rune)'/');
     return (path[..(int)(i + 1)], path[(int)(i + 1)..]);
@@ -167,7 +167,7 @@ public static (@string dir, @string file) Split(@string path) {
 // The result is Cleaned. However, if the argument list is
 // empty or all its elements are empty, Join returns
 // an empty string.
-public static @string Join(params ꓸꓸꓸ@string elemʗp) {
+public static @string Join(params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.slice();
 
     nint size = 0;
@@ -181,9 +181,9 @@ public static @string Join(params ꓸꓸꓸ@string elemʗp) {
     foreach (var (_, e) in elem) {
         if (len(buf) > 0 || e != ""u8) {
             if (len(buf) > 0) {
-                buf = append(buf, (rune)'/');
+                buf = builtin.append(buf, (byte)((rune)'/'));
             }
-            buf = append(buf, e.ꓸꓸꓸ);
+            buf = builtin.append(buf, e.ꓸꓸꓸ);
         }
     }
     return Clean(((@string)buf));

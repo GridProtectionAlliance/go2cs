@@ -72,7 +72,7 @@ partial class runtime_package {
 // Do not change the slice until you are done with the [Frames].
 public static ж<Frames> CallersFrames(slice<uintptr> callers) {
     var f = Ꮡ(new Frames(callers: callers));
-    f.val.frames = (~f).frameStore[..0];
+    f.Value.frames = (~f).frameStore[..0];
     return f;
 }
 
@@ -98,9 +98,11 @@ public static ж<Frames> CallersFrames(slice<uintptr> callers) {
         }
         uintptr pc = default!;
         if (ci.nextPC != 0){
-            (pc, ci.nextPC) = (ci.nextPC, 0);
+            pc = ci.nextPC;
+            ci.nextPC = 0;
         } else {
-            (pc, ci.callers) = (ci.callers[0], ci.callers[1..]);
+            pc = ci.callers[0];
+            ci.callers = ci.callers[1..];
         }
         var ΔfuncInfo = findfunc(pc);
         if (!ΔfuncInfo.valid()) {
@@ -157,8 +159,8 @@ public static ж<Frames> CallersFrames(slice<uintptr> callers) {
             Func: f,
             Function: funcNameForPrint(sf.name()),
             Entry: entry,
-            startLine: ((nint)sf.startLine),
-            ΔfuncInfo: ΔfuncInfo
+            startLine: (nint)sf.startLine,
+            funcInfo: ΔfuncInfo
         ));
     }
     // Note: File,Line set below
@@ -191,8 +193,9 @@ public static ж<Frames> CallersFrames(slice<uintptr> callers) {
         // Compute file/line just before we need to return it,
         // as it can be expensive. This avoids computing file/line
         // for the Frame we find but don't return. See issue 32093.
-        var (file, line) = funcline1(frame.funcInfo, frame.PC, false);
-        (frame.File, frame.Line) = (file, ((nint)line));
+        var (@file, line) = funcline1(frame.funcInfo, frame.PC, false);
+        frame.File = @file;
+        frame.Line = (nint)line;
     }
     return (frame, more);
 }
@@ -209,7 +212,7 @@ public static ж<Frames> CallersFrames(slice<uintptr> callers) {
 //
 //go:linkname runtime_FrameStartLine runtime/pprof.runtime_FrameStartLine
 internal static nint runtime_FrameStartLine(ж<Frame> Ꮡf) {
-    ref var f = ref Ꮡf.val;
+    ref var f = ref Ꮡf.Value;
 
     return f.startLine;
 }
@@ -228,7 +231,7 @@ internal static nint runtime_FrameStartLine(ж<Frame> Ꮡf) {
 //
 //go:linkname runtime_FrameSymbolName runtime/pprof.runtime_FrameSymbolName
 internal static @string runtime_FrameSymbolName(ж<Frame> Ꮡf) {
-    ref var f = ref Ꮡf.val;
+    ref var f = ref Ꮡf.Value;
 
     if (!f.funcInfo.valid()) {
         return f.Function;
@@ -294,7 +297,7 @@ internal static slice<Frame> expandCgoFrames(uintptr pc) {
     ref var arg = ref heap<cgoSymbolizerArg>(out var Ꮡarg);
     arg = new cgoSymbolizerArg(pc: pc);
     callCgoSymbolizer(Ꮡarg);
-    if (arg.file == nil && arg.funcName == nil) {
+    if (arg.@file == nil && arg.funcName == nil) {
         // No useful information from symbolizer.
         return default!;
     }
@@ -302,10 +305,10 @@ internal static slice<Frame> expandCgoFrames(uintptr pc) {
     while (ᐧ) {
         frames = append(frames, new Frame(
             PC: pc,
-            Func: default!,
+            Func: nil,
             Function: gostring(arg.funcName),
-            File: gostring(arg.file),
-            Line: ((nint)arg.lineno),
+            File: gostring(arg.@file),
+            Line: (nint)arg.lineno,
             Entry: arg.entry
         ));
         // funcInfo is zero, which implies !funcInfo.valid().
@@ -339,38 +342,43 @@ internal static slice<Frame> expandCgoFrames(uintptr pc) {
     internal Func_opaque opaque;
 }
 
-[GoRecv] internal static ж<_func> raw(this ref Func f) {
+internal static ж<_func> raw(this ж<Func> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
     return (ж<_func>)(uintptr)(@unsafe.Pointer.FromRef(ref f));
 }
 
-[GoRecv] internal static ΔfuncInfo funcInfo(this ref Func f) {
-    return f.raw().funcInfo();
+internal static ΔfuncInfo funcInfo(this ж<Func> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
+    return Ꮡf.raw().funcInfo();
 }
 
-[GoRecv] internal static ΔfuncInfo funcInfo(this ref _func f) {
+internal static ΔfuncInfo funcInfo(this ж<_func> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
     // Find the module containing fn. fn is located in the pclntable.
     // The unsafe.Pointer to uintptr conversions and arithmetic
     // are safe because we are working with module addresses.
-    var ptr = ((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref f));
+    var ptr = (uintptr)(uintptr)@unsafe.Pointer.FromRef(ref f);
     ж<moduledata> mod = default!;
-    for (var datap = Ꮡ(firstmoduledata); datap != nil; datap = datap.val.next) {
+    for (var datap = Ꮡfirstmoduledata; datap != nil; datap = datap.Value.next) {
         if (len((~datap).pclntable) == 0) {
             continue;
         }
-        var @base = ((uintptr)new @unsafe.Pointer(Ꮡ((~datap).pclntable, 0)));
-        if (@base <= ptr && ptr < @base + ((uintptr)len((~datap).pclntable))) {
+        var @base = (uintptr)new @unsafe.Pointer(Ꮡ((~datap).pclntable, 0));
+        if (@base <= ptr && ptr < @base + (uintptr)len((~datap).pclntable)) {
             mod = datap;
             break;
         }
     }
-    return new ΔfuncInfo(f, mod);
+    return new ΔfuncInfo(Ꮡf, mod);
 }
 
 // pcHeader holds data used by the pclntab lookups.
 [GoType] partial struct pcHeader {
     internal uint32 magic;  // 0xFFFFFFF1
-    internal uint8 pad1;   // 0,0
-    internal uint8 pad2;
+    internal uint8 pad1, pad2;   // 0,0
     internal uint8 minLC;   // min instruction size
     internal uint8 ptrSize;   // size of a ptr in bytes
     internal nint nfunc;    // number of functions in the module
@@ -398,25 +406,15 @@ internal static slice<Frame> expandCgoFrames(uintptr pc) {
     internal slice<byte> pclntable;
     internal slice<functab> ftab;
     internal uintptr findfunctab;
-    internal uintptr minpc;
-    internal uintptr maxpc;
-    internal uintptr text;
-    internal uintptr etext;
-    internal uintptr noptrdata;
-    internal uintptr enoptrdata;
-    internal uintptr data;
-    internal uintptr edata;
-    internal uintptr bss;
-    internal uintptr ebss;
-    internal uintptr noptrbss;
-    internal uintptr enoptrbss;
-    internal uintptr covctrs;
-    internal uintptr ecovctrs;
-    internal uintptr end;
-    internal uintptr gcdata;
-    internal uintptr gcbss;
-    internal uintptr types;
-    internal uintptr etypes;
+    internal uintptr minpc, maxpc;
+    internal uintptr text, etext;
+    internal uintptr noptrdata, enoptrdata;
+    internal uintptr data, edata;
+    internal uintptr bss, ebss;
+    internal uintptr noptrbss, enoptrbss;
+    internal uintptr covctrs, ecovctrs;
+    internal uintptr end, gcdata, gcbss;
+    internal uintptr types, etypes;
     internal uintptr rodata;
     internal uintptr gofunc; // go.func.*
     internal slice<textsect> textsectmap;
@@ -432,9 +430,8 @@ internal static slice<Frame> expandCgoFrames(uintptr pc) {
     internal slice<modulehash> modulehashes;
     internal uint8 hasmain; // 1 if module contains the main function, 0 otherwise
     internal bool bad;  // module failed to load and should be ignored
-    internal bitvector gcdatamask;
-    internal bitvector gcbssmask;
-    internal map<typeOff, ж<runtime._type>> typemap; // offset to *_rtype in previous module
+    internal bitvector gcdatamask, gcbssmask;
+    internal map<typeOff, ж<_type>> typemap; // offset to *_rtype in previous module
     internal ж<moduledata> next;
 }
 
@@ -463,9 +460,10 @@ internal static slice<Frame> expandCgoFrames(uintptr pc) {
 // linker and marked SNOPTRDATA so it is ignored by the GC.
 //
 // To make sure the map isn't collected, we keep a second reference here.
-internal static slice<map<typeOff, ж<runtime._type>>> pinnedTypemaps;
+internal static slice<map<typeOff, ж<_type>>> pinnedTypemaps;
 
-internal static moduledata firstmoduledata; // linker symbol
+internal static ж<moduledata> Ꮡfirstmoduledata = new(new moduledata(nil));
+internal static ref moduledata firstmoduledata => ref Ꮡfirstmoduledata.Value; // linker symbol
 
 // lastmoduledatap should be an internal detail,
 // but widely used packages access it using linkname.
@@ -478,7 +476,8 @@ internal static moduledata firstmoduledata; // linker symbol
 //go:linkname lastmoduledatap
 internal static ж<moduledata> lastmoduledatap; // linker symbol
 
-internal static ж<slice<ж<moduledata>>> modulesSlice;    // see activeModules
+internal static ж<ж<slice<ж<moduledata>>>> ᏑmodulesSlice = new(default(ж<slice<ж<moduledata>>>));
+internal static ref ж<slice<ж<moduledata>>> modulesSlice => ref ᏑmodulesSlice.ValueSlot;    // see activeModules
 
 // activeModules returns a slice of active modules.
 //
@@ -491,11 +490,11 @@ internal static ж<slice<ж<moduledata>>> modulesSlice;    // see activeModules
 //go:nosplit
 //go:nowritebarrier
 internal static slice<ж<moduledata>> activeModules() {
-    var Δp = (ж<slice<ж<moduledata>>>)(uintptr)(atomic.Loadp(((@unsafe.Pointer)(Ꮡ(modulesSlice)))));
+    var Δp = (ж<slice<ж<moduledata>>>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromRef(ref (ᏑmodulesSlice).Value)));
     if (Δp == nil) {
         return default!;
     }
-    return Δp.val;
+    return Δp.ValueSlot;
 }
 
 // modulesinit creates the active modules slice out of all loaded modules.
@@ -518,17 +517,17 @@ internal static slice<ж<moduledata>> activeModules() {
 // Only one goroutine may call modulesinit at a time.
 internal static void modulesinit() {
     var modules = @new<slice<ж<moduledata>>>();
-    for (var md = Ꮡ(firstmoduledata); md != nil; md = md.val.next) {
+    for (var md = Ꮡfirstmoduledata; md != nil; md = md.Value.next) {
         if ((~md).bad) {
             continue;
         }
-        modules.val = append(modules.val, md);
+        modules.ValueSlot = append(modules.ValueSlot, md);
         if ((~md).gcdatamask == (new bitvector(nil))) {
             var scanDataSize = (~md).edata - (~md).data;
-            md.val.gcdatamask = progToPointerMask((ж<byte>)(uintptr)(((@unsafe.Pointer)(~md).gcdata)), scanDataSize);
+            md.Value.gcdatamask = progToPointerMask((ж<byte>)(uintptr)((@unsafe.Pointer)(~md).gcdata), scanDataSize);
             var scanBSSSize = (~md).ebss - (~md).bss;
-            md.val.gcbssmask = progToPointerMask((ж<byte>)(uintptr)(((@unsafe.Pointer)(~md).gcbss)), scanBSSSize);
-            gcController.addGlobals(((int64)(scanDataSize + scanBSSSize)));
+            md.Value.gcbssmask = progToPointerMask((ж<byte>)(uintptr)((@unsafe.Pointer)(~md).gcbss), scanBSSSize);
+            ᏑgcController.addGlobals((int64)(scanDataSize + scanBSSSize));
         }
     }
     // Modules appear in the moduledata linked list in the order they are
@@ -540,14 +539,14 @@ internal static void modulesinit() {
     // contains the main function.
     //
     // See Issue #18729.
-    foreach (var (i, md) in modules.val) {
+    foreach (var (i, md) in modules.ValueSlot) {
         if ((~md).hasmain != 0) {
-            (ж<ж<slice<ж<moduledata>>>>)[0] = md;
-            (ж<ж<slice<ж<moduledata>>>>)[i] = Ꮡ(firstmoduledata);
+            (modules.ValueSlot)[0] = md;
+            (modules.ValueSlot)[i] = Ꮡfirstmoduledata;
             break;
         }
     }
-    atomicstorep(((@unsafe.Pointer)(Ꮡ(modulesSlice))), new @unsafe.Pointer(modules));
+    atomicstorep(@unsafe.Pointer.FromRef(ref (ᏑmodulesSlice).Value), new @unsafe.Pointer(modules));
 }
 
 [GoType] partial struct functab {
@@ -576,7 +575,7 @@ internal static void modulesinit() {
 }
 
 internal static void moduledataverify() {
-    for (var datap = Ꮡ(firstmoduledata); datap != nil; datap = datap.val.next) {
+    for (var datap = Ꮡfirstmoduledata; datap != nil; datap = datap.Value.next) {
         moduledataverify1(datap);
     }
 }
@@ -593,14 +592,14 @@ internal const bool debugPcln = false;
 //
 //go:linkname moduledataverify1
 internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
-    ref var datap = ref Ꮡdatap.val;
+    ref var datap = ref Ꮡdatap.Value;
 
     // Check that the pclntab's format is valid.
     var hdr = datap.pcHeader;
-    if ((~hdr).magic != (nint)4294967281L || (~hdr).pad1 != 0 || (~hdr).pad2 != 0 || (~hdr).minLC != sys.PCQuantum || (~hdr).ptrSize != goarch.PtrSize || (~hdr).textStart != datap.text) {
-        println("runtime: pcHeader: magic=", ((Δhex)(~hdr).magic), "pad1=", (~hdr).pad1, "pad2=", (~hdr).pad2,
-            "minLC=", (~hdr).minLC, "ptrSize=", (~hdr).ptrSize, "pcHeader.textStart=", ((Δhex)(~hdr).textStart),
-            "text=", ((Δhex)datap.text), "pluginpath=", datap.pluginpath);
+    if ((~hdr).magic != 0xfffffff1U || (~hdr).pad1 != 0 || (~hdr).pad2 != 0 || (~hdr).minLC != sys.PCQuantum || (~hdr).ptrSize != goarch.PtrSize || (~hdr).textStart != datap.text) {
+        println("runtime: pcHeader: magic=", ((Δhex)(uint64)(~hdr).magic), "pad1=", (~hdr).pad1, "pad2=", (~hdr).pad2,
+            "minLC=", (~hdr).minLC, "ptrSize=", (~hdr).ptrSize, "pcHeader.textStart=", ((Δhex)(uint64)(~hdr).textStart),
+            "text=", ((Δhex)(uint64)datap.text), "pluginpath=", datap.pluginpath);
         @throw("invalid function symbol table"u8);
     }
     // ftab is lookup table for function by program counter.
@@ -608,15 +607,15 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
     for (nint i = 0; i < nftab; i++) {
         // NOTE: ftab[nftab].entry is legal; it is the address beyond the final function.
         if (datap.ftab[i].entryoff > datap.ftab[i + 1].entryoff) {
-            var f1 = new ΔfuncInfo((ж<_func>)(uintptr)(new @unsafe.Pointer(Ꮡ(datap.pclntable, datap.ftab[i].funcoff))), Ꮡdatap);
-            var f2 = new ΔfuncInfo((ж<_func>)(uintptr)(new @unsafe.Pointer(Ꮡ(datap.pclntable, datap.ftab[i + 1].funcoff))), Ꮡdatap);
+            var f1 = new ΔfuncInfo((ж<_func>)(uintptr)(new @unsafe.Pointer(Ꮡ(datap.pclntable, (int)(datap.ftab[i].funcoff)))), Ꮡdatap);
+            var f2 = new ΔfuncInfo((ж<_func>)(uintptr)(new @unsafe.Pointer(Ꮡ(datap.pclntable, (int)(datap.ftab[i + 1].funcoff)))), Ꮡdatap);
             @string f2name = "end"u8;
             if (i + 1 < nftab) {
                 f2name = funcname(f2);
             }
-            println("function symbol table not sorted by PC offset:", ((Δhex)datap.ftab[i].entryoff), funcname(f1), ">", ((Δhex)datap.ftab[i + 1].entryoff), f2name, ", plugin:", datap.pluginpath);
+            println("function symbol table not sorted by PC offset:", ((Δhex)(uint64)datap.ftab[i].entryoff), funcname(f1), ">", ((Δhex)(uint64)datap.ftab[i + 1].entryoff), f2name, ", plugin:", datap.pluginpath);
             for (nint j = 0; j <= i; j++) {
-                println("\t", ((Δhex)datap.ftab[j].entryoff), funcname(new ΔfuncInfo((ж<_func>)(uintptr)(new @unsafe.Pointer(Ꮡ(datap.pclntable, datap.ftab[j].funcoff))), Ꮡdatap)));
+                println("\t", ((Δhex)(uint64)datap.ftab[j].entryoff), funcname(new ΔfuncInfo((ж<_func>)(uintptr)(new @unsafe.Pointer(Ꮡ(datap.pclntable, (int)(datap.ftab[j].funcoff)))), Ꮡdatap)));
             }
             if (GOOS == "aix"u8 && isarchive) {
                 println("-Wl,-bnoobjreorder is mandatory on aix/ppc64 with c-archive");
@@ -627,11 +626,11 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
     var min = datap.textAddr(datap.ftab[0].entryoff);
     var max = datap.textAddr(datap.ftab[nftab].entryoff);
     if (datap.minpc != min || datap.maxpc != max) {
-        println("minpc=", ((Δhex)datap.minpc), "min=", ((Δhex)min), "maxpc=", ((Δhex)datap.maxpc), "max=", ((Δhex)max));
+        println("minpc=", ((Δhex)(uint64)datap.minpc), "min=", ((Δhex)(uint64)min), "maxpc=", ((Δhex)(uint64)datap.maxpc), "max=", ((Δhex)(uint64)max));
         @throw("minpc or maxpc invalid"u8);
     }
     foreach (var (_, modulehash) in datap.modulehashes) {
-        if (modulehash.linktimehash != modulehash.runtimehash.val) {
+        if (modulehash.linktimehash != modulehash.runtimehash.Value) {
             println("abi mismatch detected between", datap.modulename, "and", modulehash.modulename);
             @throw("abi mismatch"u8);
         }
@@ -657,7 +656,7 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
 //
 //go:nosplit
 [GoRecv] internal static uintptr textAddr(this ref moduledata md, uint32 off32) {
-    var off = ((uintptr)off32);
+    var off = (uintptr)off32;
     var res = md.text + off;
     if (len(md.textsectmap) > 1) {
         foreach (var (i, sect) in md.textsectmap) {
@@ -669,7 +668,7 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
         }
         if (res > md.etext && GOARCH != "wasm"u8) {
             // on wasm, functions do not live in the same address space as the linear memory
-            println("runtime: textAddr", ((Δhex)res), "out of range", ((Δhex)md.text), "-", ((Δhex)md.etext));
+            println("runtime: textAddr", ((Δhex)(uint64)res), "out of range", ((Δhex)(uint64)md.text), "-", ((Δhex)(uint64)md.etext));
             @throw("runtime: text offset out of range"u8);
         }
     }
@@ -683,7 +682,7 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
 //
 //go:nosplit
 [GoRecv] internal static (uint32, bool) textOff(this ref moduledata md, uintptr pc) {
-    var res = ((uint32)(pc - md.text));
+    var res = (uint32)(pc - md.text);
     if (len(md.textsectmap) > 1) {
         foreach (var (i, sect) in md.textsectmap) {
             if (sect.baseaddr > pc) {
@@ -696,7 +695,7 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
                 end++;
             }
             if (pc < end) {
-                res = ((uint32)(pc - sect.baseaddr + sect.vaddr));
+                res = (uint32)(pc - sect.baseaddr + sect.vaddr);
                 break;
             }
         }
@@ -742,36 +741,41 @@ public static ж<Func> FuncForPC(uintptr pc) {
         return f._Func();
     }
     var sf = u.srcFunc(uf);
-    var (file, line) = u.fileLine(uf);
+    ref var @file = ref heap<@string>(out var Ꮡfile);
+    (@file, var line) = u.fileLine(uf);
     var fi = Ꮡ(new funcinl(
-        ones: ~((uint32)0),
+        ones: ~(uint32)0,
         entry: f.entry(), // entry of the real (the outermost) function.
 
         name: sf.name(),
-        file: file,
-        line: ((int32)line),
+        @file: @file,
+        line: (int32)line,
         startLine: sf.startLine
     ));
     return (ж<Func>)(uintptr)(new @unsafe.Pointer(fi));
 }
 
 // Name returns the name of the function.
-[GoRecv] public static @string Name(this ref Func f) {
+public static @string Name(this ж<Func> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
     if (f == nil) {
         return ""u8;
     }
-    var fn = f.raw();
+    var fn = Ꮡf.raw();
     if (fn.isInlined()) {
         // inlined version
         var fi = (ж<funcinl>)(uintptr)(new @unsafe.Pointer(fn));
         return funcNameForPrint((~fi).name);
     }
-    return funcNameForPrint(funcname(f.funcInfo()));
+    return funcNameForPrint(funcname(Ꮡf.funcInfo()));
 }
 
 // Entry returns the entry address of the function.
-[GoRecv] public static uintptr Entry(this ref Func f) {
-    var fn = f.raw();
+public static uintptr Entry(this ж<Func> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
+    var fn = Ꮡf.raw();
     if (fn.isInlined()) {
         // inlined version
         var fi = (ж<funcinl>)(uintptr)(new @unsafe.Pointer(fn));
@@ -784,26 +788,29 @@ public static ж<Func> FuncForPC(uintptr pc) {
 // source code corresponding to the program counter pc.
 // The result will not be accurate if pc is not a program
 // counter within f.
-[GoRecv] public static (@string file, nint line) FileLine(this ref Func f, uintptr pc) {
-    @string file = default!;
+public static (@string @file, nint line) FileLine(this ж<Func> Ꮡf, uintptr pc) {
+    @string @file = default!;
     nint line = default!;
 
-    var fn = f.raw();
+    ref var f = ref Ꮡf.Value;
+    var fn = Ꮡf.raw();
     if (fn.isInlined()) {
         // inlined version
         var fi = (ж<funcinl>)(uintptr)(new @unsafe.Pointer(fn));
-        return ((~fi).file, ((nint)(~fi).line));
+        return ((~fi).@file, (nint)(~fi).line);
     }
     // Pass strict=false here, because anyone can call this function,
     // and they might just be wrong about targetpc belonging to f.
-    var (file, line32) = funcline1(f.funcInfo(), pc, false);
-    return (file, ((nint)line32));
+    (@file, var line32) = funcline1(Ꮡf.funcInfo(), pc, false);
+    return (@file, (nint)line32);
 }
 
 // startLine returns the starting line number of the function. i.e., the line
 // number of the func keyword.
-[GoRecv] internal static int32 startLine(this ref Func f) {
-    var fn = f.raw();
+internal static int32 startLine(this ж<Func> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
+    var fn = Ꮡf.raw();
     if (fn.isInlined()) {
         // inlined version
         var fi = (ж<funcinl>)(uintptr)(new @unsafe.Pointer(fn));
@@ -819,7 +826,7 @@ public static ж<Func> FuncForPC(uintptr pc) {
 //
 //go:nosplit
 internal static ж<moduledata> findmoduledatap(uintptr pc) {
-    for (var datap = Ꮡ(firstmoduledata); datap != nil; datap = datap.val.next) {
+    for (var datap = Ꮡfirstmoduledata; datap != nil; datap = datap.Value.next) {
         if ((~datap).minpc <= pc && pc < (~datap).maxpc) {
             return datap;
         }
@@ -828,7 +835,7 @@ internal static ж<moduledata> findmoduledatap(uintptr pc) {
 }
 
 [GoType] partial struct ΔfuncInfo {
-    public partial ref ж<_func> _func { get; }
+    internal partial ref ж<_func> _func { get; }
     internal ж<moduledata> datap;
 }
 
@@ -842,7 +849,7 @@ internal static ж<Func> _Func(this ΔfuncInfo f) {
 
 // isInlined reports whether f should be re-interpreted as a *funcinl.
 [GoRecv] internal static bool isInlined(this ref _func f) {
-    return f.entryOff == ~((uint32)0);
+    return f.entryOff == ~(uint32)0;
 }
 
 // see comment for funcinl.ones
@@ -884,23 +891,23 @@ internal static ΔfuncInfo findfunc(uintptr pc) {
     if (datap == nil) {
         return new ΔfuncInfo(nil);
     }
-    const uintptr nsub = /* uintptr(len(findfuncbucket{}.subbuckets)) */ 16;
+    uintptr nsub = /* uintptr(len(findfuncbucket{}.subbuckets)) */ 16;
     var (pcOff, ok) = datap.textOff(pc);
     if (!ok) {
         return new ΔfuncInfo(nil);
     }
-    var x = ((uintptr)pcOff) + (~datap).text - (~datap).minpc;
+    var x = (uintptr)pcOff + (~datap).text - (~datap).minpc;
     // TODO: are datap.text and datap.minpc always equal?
-    var b = x / abi.FuncTabBucketSize;
-    var i = x % abi.FuncTabBucketSize / (abi.FuncTabBucketSize / nsub);
-    var ffb = (ж<findfuncbucket>)(uintptr)(add(((@unsafe.Pointer)(~datap).findfunctab), b * @unsafe.Sizeof(new findfuncbucket(nil))));
-    var idx = (~ffb).idx + ((uint32)(~ffb).subbuckets[i]);
+    var b = x / (uintptr)abi.FuncTabBucketSize;
+    var i = x % (uintptr)abi.FuncTabBucketSize / (uintptr)((uintptr)abi.FuncTabBucketSize / nsub);
+    var ffb = (ж<findfuncbucket>)(uintptr)(add((@unsafe.Pointer)(~datap).findfunctab, b * @unsafe.Sizeof(new findfuncbucket(nil))));
+    var idx = (~ffb).idx + (uint32)(~ffb).subbuckets[(nint)(i)];
     // Find the ftab entry.
-    while ((~datap).ftab[idx + 1].entryoff <= pcOff) {
+    while ((~datap).ftab[(nint)(idx + 1)].entryoff <= pcOff) {
         idx++;
     }
-    var funcoff = (~datap).ftab[idx].funcoff;
-    return new ΔfuncInfo((ж<_func>)(uintptr)(new @unsafe.Pointer(Ꮡ((~datap).pclntable, funcoff))), datap);
+    var funcoff = (~datap).ftab[(nint)(idx)].funcoff;
+    return new ΔfuncInfo((ж<_func>)(uintptr)(new @unsafe.Pointer(Ꮡ((~datap).pclntable, (int)(funcoff)))), datap);
 }
 
 // A srcFunc represents a logical function in the source code. This may
@@ -910,7 +917,7 @@ internal static ΔfuncInfo findfunc(uintptr pc) {
     internal ж<moduledata> datap;
     internal int32 nameOff;
     internal int32 startLine;
-    internal @internal.abi_package.FuncID funcID;
+    internal abi.FuncID funcID;
 }
 
 internal static ΔsrcFunc srcFunc(this ΔfuncInfo f) {
@@ -955,7 +962,7 @@ internal static partial @string badSrcFuncName(ΔsrcFunc _);
 // For now, align to goarch.PtrSize and reduce mod the number of entries.
 // In practice, this appears to be fairly randomly and evenly distributed.
 internal static uintptr pcvalueCacheKey(uintptr targetpc) {
-    return (targetpc / goarch.PtrSize) % ((uintptr)len(new pcvalueCache(nil).entries));
+    return (targetpc / (uintptr)goarch.PtrSize) % (uintptr)len(new pcvalueCache(nil).entries);
 }
 
 // Returns the PCData value, and the PC where this value starts.
@@ -974,27 +981,27 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
     var ck = pcvalueCacheKey(targetpc);
     {
         var mp = acquirem();
-        var cache = Ꮡ((~mp).pcvalueCache);
+        var cache = mp.of(m.ᏑpcvalueCache);
         // The cache can be used by the signal handler on this M. Avoid
         // re-entrant use of the cache. The signal handler can also write inUse,
         // but will always restore its value, so we can use a regular increment
         // even if we get signaled in the middle of it.
-        (~cache).inUse++;
+        cache.Value.inUse++;
         if ((~cache).inUse == 1){
-            foreach (var (i, _) in (~cache).entries[ck]) {
+            foreach (var (i, _) in (~cache).entries[(nint)(ck)]) {
                 // We check off first because we're more
                 // likely to have multiple entries with
                 // different offsets for the same targetpc
                 // than the other way around, so we'll usually
                 // fail in the first clause.
-                var ent = Ꮡ(~cache).entries[ck].at<pcvalueCacheEnt>(i);
+                var ent = cache.at(pcvalueCache.Ꮡentries, (nint)(ck)).at<pcvalueCacheEnt>(i);
                 if ((~ent).off == off && (~ent).targetpc == targetpc) {
-                    var (valΔ1, pcΔ1) = (ent.val.val, ent.val.valPC);
+                    var (valΔ1, pcΔ1) = (ent.Value.val, ent.Value.valPC);
                     if (debugCheckCache){
-                        (checkVal, checkPC) = (ent.val.val, ent.val.valPC);
+                        (checkVal, checkPC) = (ent.Value.val, ent.Value.valPC);
                         break;
                     } else {
-                        (~cache).inUse--;
+                        cache.Value.inUse--;
                         releasem(mp);
                         return (valΔ1, pcΔ1);
                     }
@@ -1006,12 +1013,12 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
             // "inUse" should never exceed 2.
             @throw("cache.inUse out of range"u8);
         }
-        (~cache).inUse--;
+        cache.Value.inUse--;
         releasem(mp);
     }
     if (!f.valid()) {
-        if (strict && panicking.Load() == 0) {
-            println("runtime: no module data for", ((Δhex)f.entry()));
+        if (strict && Ꮡpanicking.Load() == 0) {
+            println("runtime: no module data for", ((Δhex)(uint64)f.entry()));
             @throw("no module data"u8);
         }
         return (-1, 0);
@@ -1022,11 +1029,11 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
     pc = f.entry();
     var prevpc = pc;
     ref var val = ref heap<int32>(out var Ꮡval);
-    val = ((int32)(-1));
+    val = (int32)(-1);
     while (ᐧ) {
-        bool okΔ1 = default!;
-        (Δp, ) = step(Δp, Ꮡpc, Ꮡval, pc == f.entry());
-        if (!okΔ1) {
+        bool ok = default!;
+        (Δp, ok) = step(Δp, Ꮡpc, Ꮡval, pc == f.entry());
+        if (!ok) {
             break;
         }
         if (targetpc < pc) {
@@ -1043,20 +1050,20 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
                 }
             } else {
                 var mp = acquirem();
-                var cache = Ꮡ((~mp).pcvalueCache);
-                (~cache).inUse++;
+                var cache = mp.of(m.ᏑpcvalueCache);
+                cache.Value.inUse++;
                 if ((~cache).inUse == 1) {
-                    var e = Ꮡ(~cache).entries.at<array<pcvalueCacheEnt>>(ck);
-                    var ci = cheaprandn(((uint32)len((~cache).entries[ck])));
-                    e.val[ci] = e.val[0];
-                    e.val[0] = new pcvalueCacheEnt(
+                    var e = cache.at(pcvalueCache.Ꮡentries, (nint)(ck));
+                    var ci = cheaprandn((uint32)len((~cache).entries[(nint)(ck)]));
+                    e.Value[ci] = e.Value[0];
+                    e.Value[0] = new pcvalueCacheEnt(
                         targetpc: targetpc,
                         off: off,
                         val: val,
                         valPC: prevpc
                     );
                 }
-                (~cache).inUse--;
+                cache.Value.inUse--;
                 releasem(mp);
             }
             return (val, prevpc);
@@ -1065,10 +1072,10 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
     }
     // If there was a table, it should have covered all program counters.
     // If not, something is wrong.
-    if (panicking.Load() != 0 || !strict) {
+    if (Ꮡpanicking.Load() != 0 || !strict) {
         return (-1, 0);
     }
-    print("runtime: invalid pc-encoded table f=", funcname(f), " pc=", ((Δhex)pc), " targetpc=", ((Δhex)targetpc), " tab=", Δp, "\n");
+    print("runtime: invalid pc-encoded table f=", funcname(f), " pc=", ((Δhex)(uint64)pc), " targetpc=", ((Δhex)(uint64)targetpc), " tab=", Δp, "\n");
     Δp = (~datap).pctab[(int)(off)..];
     pc = f.entry();
     val = -1;
@@ -1078,7 +1085,7 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
         if (!ok) {
             break;
         }
-        print("\tvalue=", val, " until pc=", ((Δhex)pc), "\n");
+        print("\tvalue=", val, " until pc=", ((Δhex)(uint64)pc), "\n");
     }
     @throw("invalid runtime symbol table"u8);
     return (-1, 0);
@@ -1114,9 +1121,8 @@ internal static @string funcfile(ΔfuncInfo f, int32 fileno) {
     }
     // Make sure the cu index and file offset are valid
     {
-        ref var fileoff = ref heap<uint32>(out var Ꮡfileoff);
-        fileoff = (~datap).cutab[f.cuOffset + ((uint32)fileno)]; if (fileoff != ~((uint32)0)) {
-            return gostringnocopy(Ꮡ((~datap).filetab, fileoff));
+        var fileoff = (~datap).cutab[(nint)(f.cuOffset + (uint32)fileno)]; if (fileoff != ~(uint32)0) {
+            return gostringnocopy(Ꮡ((~datap).filetab, (int)(fileoff)));
         }
     }
     // pcln section is corrupt.
@@ -1132,8 +1138,8 @@ internal static @string funcfile(ΔfuncInfo f, int32 fileno) {
 // See go.dev/issue/67401.
 //
 //go:linkname funcline1
-internal static (@string file, int32 line) funcline1(ΔfuncInfo f, uintptr targetpc, bool strict) {
-    @string file = default!;
+internal static (@string @file, int32 line) funcline1(ΔfuncInfo f, uintptr targetpc, bool strict) {
+    @string @file = default!;
     int32 line = default!;
 
     var datap = f.datap;
@@ -1142,16 +1148,16 @@ internal static (@string file, int32 line) funcline1(ΔfuncInfo f, uintptr targe
     }
     var (fileno, _) = pcvalue(f, f.pcfile, targetpc, strict);
     (line, _) = pcvalue(f, f.pcln, targetpc, strict);
-    if (fileno == -1 || line == -1 || ((nint)fileno) >= len((~datap).filetab)) {
+    if (fileno == -1 || line == -1 || (nint)fileno >= len((~datap).filetab)) {
         // print("looking for ", hex(targetpc), " in ", funcname(f), " got file=", fileno, " line=", lineno, "\n")
         return ("?", 0);
     }
-    file = funcfile(f, fileno);
-    return (file, line);
+    @file = funcfile(f, fileno);
+    return (@file, line);
 }
 
-internal static (@string file, int32 line) funcline(ΔfuncInfo f, uintptr targetpc) {
-    @string file = default!;
+internal static (@string @file, int32 line) funcline(ΔfuncInfo f, uintptr targetpc) {
+    @string @file = default!;
     int32 line = default!;
 
     return funcline1(f, targetpc, true);
@@ -1159,8 +1165,8 @@ internal static (@string file, int32 line) funcline(ΔfuncInfo f, uintptr target
 
 internal static int32 funcspdelta(ΔfuncInfo f, uintptr targetpc) {
     var (x, _) = pcvalue(f, f.pcsp, targetpc, true);
-    if (debugPcln && (int32)(x & (goarch.PtrSize - 1)) != 0) {
-        print("invalid spdelta ", funcname(f), " ", ((Δhex)f.entry()), " ", ((Δhex)targetpc), " ", ((Δhex)f.pcsp), " ", x, "\n");
+    if (debugPcln && (int32)(x & (int32)((goarch.PtrSize - 1))) != 0) {
+        print("invalid spdelta ", funcname(f), " ", ((Δhex)(uint64)f.entry()), " ", ((Δhex)(uint64)targetpc), " ", ((Δhex)(uint64)f.pcsp), " ", x, "\n");
         @throw("bad spdelta"u8);
     }
     return x;
@@ -1173,20 +1179,20 @@ internal static int32 funcMaxSPDelta(ΔfuncInfo f) {
     ref var pc = ref heap<uintptr>(out var Ꮡpc);
     pc = f.entry();
     ref var val = ref heap<int32>(out var Ꮡval);
-    val = ((int32)(-1));
-    var most = ((int32)0);
+    val = (int32)(-1);
+    var most = (int32)0;
     while (ᐧ) {
         bool ok = default!;
         (Δp, ok) = step(Δp, Ꮡpc, Ꮡval, pc == f.entry());
         if (!ok) {
             return most;
         }
-        most = max(most, val);
+        most = builtin.max(most, val);
     }
 }
 
 internal static uint32 pcdatastart(ΔfuncInfo f, uint32 table) {
-    return ~(ж<uint32>)(uintptr)(add(new @unsafe.Pointer(Ꮡf.of(funcInfo.Ꮡnfuncdata)), @unsafe.Sizeof(f.nfuncdata) + ((uintptr)table) * 4));
+    return ~(ж<uint32>)(uintptr)(add(new @unsafe.Pointer(Ꮡ(f).of(runtime_package.ΔfuncInfo.Ꮡnfuncdata)), @unsafe.Sizeof(f.nfuncdata) + (uintptr)table * 4));
 }
 
 internal static int32 pcdatavalue(ΔfuncInfo f, uint32 table, uintptr targetpc) {
@@ -1229,19 +1235,19 @@ internal static @unsafe.Pointer funcdata(ΔfuncInfo f, uint8 i) {
     if (i < 0 || i >= f.nfuncdata) {
         return default!;
     }
-    var @base = f.datap.gofunc;
+    var @base = f.datap.Value.gofunc;
     // load gofunc address early so that we calculate during cache misses
-    var Δp = ((uintptr)new @unsafe.Pointer(Ꮡf.of(funcInfo.Ꮡnfuncdata))) + @unsafe.Sizeof(f.nfuncdata) + ((uintptr)f.npcdata) * 4 + ((uintptr)i) * 4;
-    var off = ~(ж<uint32>)(uintptr)(((@unsafe.Pointer)Δp));
+    var Δp = (uintptr)new @unsafe.Pointer(Ꮡ(f).of(runtime_package.ΔfuncInfo.Ꮡnfuncdata)) + @unsafe.Sizeof(f.nfuncdata) + (uintptr)f.npcdata * 4 + (uintptr)i * 4;
+    var off = ~(ж<uint32>)(uintptr)((@unsafe.Pointer)Δp);
     // Return off == ^uint32(0) ? 0 : f.datap.gofunc + uintptr(off), but without branches.
     // The compiler calculates mask on most architectures using conditional assignment.
     uintptr mask = default!;
-    if (off == ~((uint32)0)) {
+    if (off == ~(uint32)0) {
         mask = 1;
     }
     mask--;
-    var raw = @base + ((uintptr)off);
-    return ((@unsafe.Pointer)((uintptr)(raw & mask)));
+    var raw = @base + (uintptr)off;
+    return (@unsafe.Pointer)((uintptr)(raw & mask));
 }
 
 // step advances to the next pc, value pair in the encoded table.
@@ -1259,27 +1265,27 @@ internal static (slice<byte> newp, bool ok) step(slice<byte> Δp, ж<uintptr> �
     slice<byte> newp = default!;
     bool ok = default!;
 
-    ref var pc = ref Ꮡpc.val;
-    ref var val = ref Ꮡval.val;
+    ref var pc = ref Ꮡpc.Value;
+    ref var val = ref Ꮡval.Value;
     // For both uvdelta and pcdelta, the common case (~70%)
     // is that they are a single byte. If so, avoid calling readvarint.
-    var uvdelta = ((uint32)Δp[0]);
+    var uvdelta = (uint32)Δp[0];
     if (uvdelta == 0 && !first) {
         return (default!, false);
     }
-    var n = ((uint32)1);
-    if ((uint32)(uvdelta & 128) != 0) {
+    var n = (uint32)1;
+    if ((uint32)(uvdelta & 0x80) != 0) {
         (n, uvdelta) = readvarint(Δp);
     }
-    val += ((int32)((uint32)(-((uint32)(uvdelta & 1)) ^ (uvdelta >> (int)(1)))));
+    val += (int32)((uint32)(((uint32)0 - ((uint32)(uvdelta & 1))) ^ ((uvdelta >> (int)(1)))));
     Δp = Δp[(int)(n)..];
-    var pcdelta = ((uint32)Δp[0]);
+    var pcdelta = (uint32)Δp[0];
     n = 1;
-    if ((uint32)(pcdelta & 128) != 0) {
+    if ((uint32)(pcdelta & 0x80) != 0) {
         (n, pcdelta) = readvarint(Δp);
     }
     Δp = Δp[(int)(n)..];
-    pc += ((uintptr)(pcdelta * sys.PCQuantum));
+    pc += (uintptr)(pcdelta * (uint32)sys.PCQuantum);
     return (Δp, true);
 }
 
@@ -1292,10 +1298,10 @@ internal static (uint32 read, uint32 val) readvarint(slice<byte> Δp) {
     uint32 shift = default!;
     uint32 n = default!;
     while (ᐧ) {
-        var b = Δp[n];
+        var b = Δp[(nint)(n)];
         n++;
-        v |= (uint32)(((uint32)((byte)(b & 127))) << (int)(((uint32)(shift & 31))));
-        if ((byte)(b & 128) == 0) {
+        v |= (uint32)(((uint32)((byte)(b & 0x7F)) << (int)(((uint32)(shift & 31)))));
+        if ((byte)(b & 0x80) == 0) {
             break;
         }
         shift += 7;
@@ -1320,7 +1326,7 @@ internal static (uint32 read, uint32 val) readvarint(slice<byte> Δp) {
 //go:linkname stackmapdata
 //go:nowritebarrier
 internal static bitvector stackmapdata(ж<stackmap> Ꮡstkmap, int32 n) {
-    ref var stkmap = ref Ꮡstkmap.val;
+    ref var stkmap = ref Ꮡstkmap.Value;
 
     // Check this invariant only when stackDebug is on at all.
     // The invariant is already checked by many of stackmapdata's callers,
@@ -1328,7 +1334,7 @@ internal static bitvector stackmapdata(ж<stackmap> Ꮡstkmap, int32 n) {
     if (stackDebug > 0 && (n < 0 || n >= stkmap.n)) {
         @throw("stackmapdata: index out of range"u8);
     }
-    return new bitvector(stkmap.nbit, addb(Ꮡstkmap.bytedata.at<byte>(0), ((uintptr)(n * ((stkmap.nbit + 7) >> (int)(3))))));
+    return new bitvector(stkmap.nbit, addb(Ꮡstkmap.at(stackmap.Ꮡbytedata, 0), (uintptr)(n * (((stkmap.nbit + 7) >> (int)(3))))));
 }
 
 } // end runtime_package

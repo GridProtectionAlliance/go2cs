@@ -7,7 +7,8 @@ using fmt = fmt_package;
 using os = os_package;
 using strconv = strconv_package;
 using strings = strings_package;
-using sync = sync_package;
+using Δsync = sync_package;
+using io = io_package;
 
 partial class testing_package {
 
@@ -16,7 +17,7 @@ partial class testing_package {
     internal filterMatch filter;
     internal filterMatch skip;
     internal Func<@string, @string, (bool, error)> matchFunc;
-    internal sync_package.Mutex mu;
+    internal Δsync.Mutex mu;
     // subNames is used to deduplicate subtest names.
     // Each key is the subtest name joined to the deduplicated name of the parent test.
     // Each value is the count of the number of occurrences of the given subtest name
@@ -39,7 +40,8 @@ partial class testing_package {
 
 // TODO: fix test_main to avoid race and improve caching, also allowing to
 // eliminate this Mutex.
-internal static sync.Mutex matchMutex;
+internal static ж<Δsync.Mutex> ᏑmatchMutex = new(default(Δsync.Mutex));
+internal static ref Δsync.Mutex matchMutex => ref ᏑmatchMutex.Value;
 
 internal static ж<matcher> allMatcher() {
     return newMatcher(default!, ""u8, ""u8, ""u8);
@@ -49,25 +51,25 @@ internal static ж<matcher> newMatcher(Func<@string, @string, (bool, error)> mat
     filterMatch filter = default!;
     filterMatch skip = default!;
     if (patterns == ""u8){
-        filter = new simpleMatch{nil};
+        filter = new simpleMatch(new @string[]{}.slice());
     } else {
         // always partial true
         filter = splitRegexp(patterns);
         {
             var err = filter.verify(name, matchString); if (err != default!) {
-                fmt.Fprintf(~os.Stderr, "testing: invalid regexp for %s\n"u8, err);
+                fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: invalid regexp for %s\n"u8, err);
                 os.Exit(1);
             }
         }
     }
     if (skips == ""u8){
-        skip = new alternationMatch{nil};
+        skip = new alternationMatch(new filterMatch[]{}.slice());
     } else {
         // always false
         skip = splitRegexp(skips);
         {
             var err = skip.verify("-test.skip"u8, matchString); if (err != default!) {
-                fmt.Fprintf(~os.Stderr, "testing: invalid regexp for %v\n"u8, err);
+                fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: invalid regexp for %v\n"u8, err);
                 os.Exit(1);
             }
         }
@@ -80,44 +82,48 @@ internal static ж<matcher> newMatcher(Func<@string, @string, (bool, error)> mat
     ));
 }
 
-[GoRecv] internal static (@string name, bool ok, bool partial) fullName(this ref matcher m, ж<common> Ꮡc, @string subname) => func((defer, _) => {
+internal static (@string name, bool ok, bool partial) fullName(this ж<matcher> Ꮡm, ж<common> Ꮡc, @string subname) {
     @string name = default!;
     bool ok = default!;
     bool partial = default!;
+    func((defer, recover) => {
+    ref var m = ref Ꮡm.Value;
+    ref var c = ref Ꮡc.DerefOrNil();
 
-    ref var c = ref Ꮡc.val;
-    name = subname;
-    m.mu.Lock();
-    defer(m.mu.Unlock);
-    if (c != nil && c.level > 0) {
-        name = m.unique(c.name, rewrite(subname));
-    }
-    matchMutex.Lock();
-    var matchMutexʗ1 = matchMutex;
-    defer(matchMutexʗ1.Unlock);
-    // We check the full array of paths each time to allow for the case that a pattern contains a '/'.
-    var elem = strings.Split(name, "/"u8);
-    // filter must match.
-    // accept partial match that may produce full match later.
-    (ok, partial) = m.filter.matches(elem, m.matchFunc);
-    if (!ok) {
-        return (name, false, false);
-    }
-    // skip must not match.
-    // ignore partial match so we can get to more precise match later.
-    var (skip, partialSkip) = m.skip.matches(elem, m.matchFunc);
-    if (skip && !partialSkip) {
-        return (name, false, false);
-    }
+        name = subname;
+        Ꮡm.of(matcher.Ꮡmu).Lock();
+        defer(Ꮡm.of(matcher.Ꮡmu).Unlock);
+        if (Ꮡc != nil && c.level > 0) {
+            name = m.unique(c.name, rewrite(subname));
+        }
+        ᏑmatchMutex.Lock();
+        defer(ᏑmatchMutex.Unlock);
+        // We check the full array of paths each time to allow for the case that a pattern contains a '/'.
+        var elem = strings.Split(name, "/"u8);
+        // filter must match.
+        // accept partial match that may produce full match later.
+        (ok, partial) = m.filter.matches(elem, m.matchFunc);
+        if (!ok) {
+            (name, ok, partial) = (name, false, false); return;
+        }
+        // skip must not match.
+        // ignore partial match so we can get to more precise match later.
+        var (skip, partialSkip) = m.skip.matches(elem, m.matchFunc);
+        if (skip && !partialSkip) {
+            (name, ok, partial) = (name, false, false); return;
+        }
+    });
     return (name, ok, partial);
-});
+}
 
 // clearSubNames clears the matcher's internal state, potentially freeing
 // memory. After this is called, T.Name may return the same strings as it did
 // for earlier subtests.
-[GoRecv] internal static void clearSubNames(this ref matcher m) => func((defer, _) => {
-    m.mu.Lock();
-    defer(m.mu.Unlock);
+internal static void clearSubNames(this ж<matcher> Ꮡm) => func((defer, recover) => {
+    ref var m = ref Ꮡm.Value;
+
+    Ꮡm.of(matcher.Ꮡmu).Lock();
+    defer(Ꮡm.of(matcher.Ꮡmu).Unlock);
     clear(m.subNames);
 });
 
@@ -228,7 +234,7 @@ internal static filterMatch splitRegexp(@string s) {
                 a = append(a, s[..(int)(i)]);
                 s = s[(int)(i + 1)..];
                 i = 0;
-                b = append(b, a);
+                b = append(b, (filterMatch)(a));
                 a = new simpleMatch(0, len(a));
                 continue;
             }
@@ -241,7 +247,7 @@ internal static filterMatch splitRegexp(@string s) {
     if (len(b) == 0) {
         return a;
     }
-    return append(b, a);
+    return append(b, (filterMatch)(a));
 }
 
 // unique creates a unique name for the given parent and subname by affixing it
@@ -303,7 +309,7 @@ internal static (@string prefix, int32 nn) parseSubtestNumber(@string s) {
     if (err != default! || n < 0) {
         return (s, 0);
     }
-    return (prefix, ((int32)n));
+    return (prefix, (int32)n);
 }
 
 // rewrite rewrites a subname to having only printable characters and no white
@@ -313,7 +319,7 @@ internal static @string rewrite(@string s) {
     foreach (var (_, r) in s) {
         switch (ᐧ) {
         case {} when isSpace(r): {
-            b = append(b, (rune)'_');
+            b = append(b, (byte)((rune)'_'));
             break;
         }
         case {} when !strconv.IsPrint(r): {
@@ -331,19 +337,19 @@ internal static @string rewrite(@string s) {
 }
 
 internal static bool isSpace(rune r) {
-    if (r < 8192){
+    if (r < 0x2000){
         switch (r) {
-        case (rune)'\t' or (rune)'\n' or (rune)'\v' or (rune)'\f' or (rune)'\r' or (rune)' ' or 133 or 160 or 5760: {
+        case (rune)'\t' or (rune)'\n' or (rune)'\v' or (rune)'\f' or (rune)'\r' or (rune)' ' or 0x85 or 0xA0 or 0x1680: {
             return true;
         }}
 
     } else {
         // Note: not the same as Unicode Z class.
-        if (r <= 8202) {
+        if (r <= 0x200a) {
             return true;
         }
         switch (r) {
-        case 8232 or 8233 or 8239 or 8287 or 12288: {
+        case 0x2028 or 0x2029 or 0x202f or 0x205f or 0x3000: {
             return true;
         }}
 

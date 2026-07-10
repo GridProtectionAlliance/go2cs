@@ -3,16 +3,19 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto;
 
-using aes = crypto.aes_package;
-using cipher = crypto.cipher_package;
-using hmac = crypto.hmac_package;
-using sha256 = crypto.sha256_package;
-using subtle = crypto.subtle_package;
-using x509 = crypto.x509_package;
+using aes = go.crypto.aes_package;
+using cipher = go.crypto.cipher_package;
+using hmac = go.crypto.hmac_package;
+using sha256 = go.crypto.sha256_package;
+using subtle = go.crypto.subtle_package;
+using Δx509 = go.crypto.x509_package;
 using errors = errors_package;
 using io = io_package;
-using cryptobyte = golang.org.x.crypto.cryptobyte_package;
-using golang.org.x.crypto;
+using cryptobyte = vendor.golang.org.x.crypto.cryptobyte_package;
+using go.crypto;
+using hash = hash_package;
+using time = time_package;
+using vendor.golang.org.x.crypto;
 
 partial class tls_package {
 
@@ -83,11 +86,11 @@ partial class tls_package {
     internal uint64 createdAt; // seconds since UNIX epoch
     internal slice<byte> secret; // master secret for TLS 1.2, or the PSK for TLS 1.3
     internal bool extMasterSecret;
-    internal x509.Certificate peerCertificates;
+    internal slice<ж<Δx509.Certificate>> peerCertificates;
     internal slice<ж<activeCert>> activeCertHandles;
     internal slice<byte> ocspResponse;
     internal slice<slice<byte>> scts;
-    internal x509.Certificate verifiedChains;
+    internal slice<slice<ж<Δx509.Certificate>>> verifiedChains;
     internal @string alpnProtocol; // only set if EarlyData is true
     // Client-side TLS 1.3-only fields.
     internal uint64 useBy; // seconds since UNIX epoch
@@ -101,8 +104,10 @@ partial class tls_package {
 //
 // The specific encoding should be considered opaque and may change incompatibly
 // between Go versions.
-[GoRecv] public static (slice<byte>, error) Bytes(this ref SessionState s) {
-    ref var b = ref heap(new vendor.golang.org.x.crypto.cryptobyte_package.Builder(), out var Ꮡb);
+public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint16(s.version);
     if (s.isClient){
         b.AddUint8(2);
@@ -113,16 +118,14 @@ partial class tls_package {
     // server
     b.AddUint16(s.cipherSuite);
     addUint64(Ꮡb, s.createdAt);
-    b.AddUint8LengthPrefixed((ж<cryptobyte.Builder> b) => {
-        bΔ1.AddBytes(s.secret);
+    Ꮡb.AddUint8LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+        bΔ1.AddBytes(Ꮡs.Value.secret);
     });
-    b.AddUint24LengthPrefixed(
-    (ж<cryptobyte.Builder> b) => {
-        foreach (var (_, extra) in s.Extra) {
-            bΔ2.AddUint24LengthPrefixed(
-            var extraʗ5 = extra;
-            (ж<cryptobyte.Builder> b) => {
-                bΔ3.AddBytes(extraʗ5);
+    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
+        foreach (var (_, extra) in Ꮡs.Value.Extra) {
+            var extraʗ1 = extra;
+            bΔ2.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ3) => {
+                bΔ3.AddBytes(extraʗ1);
             });
         }
     });
@@ -137,34 +140,31 @@ partial class tls_package {
         b.AddUint8(0);
     }
     marshalCertificate(Ꮡb, new Certificate(
-        Certificate: certificatesToBytesSlice(s.peerCertificates),
+        ΔCertificate: certificatesToBytesSlice(s.peerCertificates),
         OCSPStaple: s.ocspResponse,
         SignedCertificateTimestamps: s.scts
     ));
-    b.AddUint24LengthPrefixed(
-    (ж<cryptobyte.Builder> b) => {
-        foreach (var (_, chain) in s.verifiedChains) {
-            bΔ4.AddUint24LengthPrefixed(
-            var chainʗ5 = chain;
-            (ж<cryptobyte.Builder> b) => {
-                if (len(chainʗ5) == 0) {
+    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ4) => {
+        foreach (var (_, chain) in Ꮡs.Value.verifiedChains) {
+            var chainʗ1 = chain;
+            bΔ4.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ5) => {
+                // We elide the first certificate because it's always the leaf.
+                if (len(chainʗ1) == 0) {
                     bΔ5.SetError(errors.New("tls: internal error: empty verified chain"u8));
                     return;
                 }
-                foreach (var (_, cert) in chainʗ5[1..]) {
-                    bΔ5.AddUint24LengthPrefixed(
-                    var certʗ14 = cert;
-                    (ж<cryptobyte.Builder> b) => {
-                        bΔ6.AddBytes((~certʗ14).Raw);
+                foreach (var (_, cert) in chainʗ1[1..]) {
+                    var certʗ1 = cert;
+                    bΔ5.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ6) => {
+                        bΔ6.AddBytes((~certʗ1).Raw);
                     });
                 }
             });
         }
     });
     if (s.EarlyData) {
-        b.AddUint8LengthPrefixed(
-        (ж<cryptobyte.Builder> b) => {
-            bΔ7.AddBytes(slice<byte>(s.alpnProtocol));
+        Ꮡb.AddUint8LengthPrefixed((ж<cryptobyte.Builder> bΔ7) => {
+            bΔ7.AddBytes(slice<byte>(Ꮡs.Value.alpnProtocol));
         });
     }
     if (s.isClient) {
@@ -176,7 +176,7 @@ partial class tls_package {
     return b.Bytes();
 }
 
-internal static slice<slice<byte>> certificatesToBytesSlice(slice<x509.Certificate> certs) {
+internal static slice<slice<byte>> certificatesToBytesSlice(slice<ж<Δx509.Certificate>> certs) {
     var s = new slice<slice<byte>>(0, len(certs));
     foreach (var (_, c) in certs) {
         s = append(s, (~c).Raw);
@@ -187,29 +187,30 @@ internal static slice<slice<byte>> certificatesToBytesSlice(slice<x509.Certifica
 // ParseSessionState parses a [SessionState] encoded by [SessionState.Bytes].
 public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
     var ss = Ꮡ(new SessionState(nil));
-    var s = ((cryptobyte.String)data);
+    ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
+    s = ((cryptobyte.String)data);
     ref var typ = ref heap(new uint8(), out var Ꮡtyp);
     ref var extMasterSecret = ref heap(new uint8(), out var ᏑextMasterSecret);
     ref var earlyData = ref heap(new uint8(), out var ᏑearlyData);
-    ref var certΔ1 = ref heap(new Certificate(), out var ᏑcertΔ1);
-    cryptobyte.String extra = default!;
-    if (!s.ReadUint16(Ꮡ((~ss).version)) || !s.ReadUint8(Ꮡtyp) || (typ != 1 && typ != 2) || !s.ReadUint16(Ꮡ((~ss).cipherSuite)) || !readUint64(Ꮡ(s), Ꮡ((~ss).createdAt)) || !readUint8LengthPrefixed(Ꮡ(s), Ꮡ((~ss).secret)) || !s.ReadUint24LengthPrefixed(Ꮡ(extra)) || !s.ReadUint8(ᏑextMasterSecret) || !s.ReadUint8(ᏑearlyData) || len((~ss).secret) == 0 || !unmarshalCertificate(Ꮡ(s), ᏑcertΔ1)) {
+    ref var cert = ref heap(new Certificate(), out var Ꮡcert);
+    ref var extra = ref heap<cryptobyte.String>(out var Ꮡextra);
+    if (!s.ReadUint16(ss.of(SessionState.Ꮡversion)) || !s.ReadUint8(Ꮡtyp) || (typ != 1 && typ != 2) || !s.ReadUint16(ss.of(SessionState.ᏑcipherSuite)) || !readUint64(Ꮡs, ss.of(SessionState.ᏑcreatedAt)) || !readUint8LengthPrefixed(Ꮡs, ss.of(SessionState.Ꮡsecret)) || !s.ReadUint24LengthPrefixed(Ꮡextra) || !s.ReadUint8(ᏑextMasterSecret) || !s.ReadUint8(ᏑearlyData) || len((~ss).secret) == 0 || !unmarshalCertificate(Ꮡs, Ꮡcert)) {
         return (default!, errors.New("tls: invalid session encoding"u8));
     }
     while (!extra.Empty()) {
-        slice<byte> e = default!;
-        if (!readUint24LengthPrefixed(Ꮡ(extra), Ꮡ(e))) {
+        ref var e = ref heap<slice<byte>>(out var Ꮡe);
+        if (!readUint24LengthPrefixed(Ꮡextra, Ꮡe)) {
             return (default!, errors.New("tls: invalid session encoding"u8));
         }
-        ss.val.Extra = append((~ss).Extra, e);
+        ss.Value.Extra = append((~ss).Extra, e);
     }
     switch (extMasterSecret) {
     case 0: {
-        ss.val.extMasterSecret = false;
+        ss.Value.extMasterSecret = false;
         break;
     }
     case 1: {
-        ss.val.extMasterSecret = true;
+        ss.Value.extMasterSecret = true;
         break;
     }
     default: {
@@ -218,61 +219,61 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
 
     switch (earlyData) {
     case 0: {
-        ss.val.EarlyData = false;
+        ss.Value.EarlyData = false;
         break;
     }
     case 1: {
-        ss.val.EarlyData = true;
+        ss.Value.EarlyData = true;
         break;
     }
     default: {
         return (default!, errors.New("tls: invalid session encoding"u8));
     }}
 
-    foreach (var (_, certΔ2) in certΔ1.Certificate) {
-        (c, err) = globalCertCache.newCert(certΔ2);
+    foreach (var (_, certΔ1) in cert.ΔCertificate) {
+        var (c, err) = globalCertCache.newCert(certΔ1);
         if (err != default!) {
             return (default!, err);
         }
-        ss.val.activeCertHandles = append((~ss).activeCertHandles, c);
-        ss.val.peerCertificates = append((~ss).peerCertificates, (~c).certΔ2);
+        ss.Value.activeCertHandles = append((~ss).activeCertHandles, c);
+        ss.Value.peerCertificates = append((~ss).peerCertificates, (~c).cert);
     }
-    ss.val.ocspResponse = certΔ1.OCSPStaple;
-    ss.val.scts = certΔ1.SignedCertificateTimestamps;
-    cryptobyte.String chainList = default!;
-    if (!s.ReadUint24LengthPrefixed(Ꮡ(chainList))) {
+    ss.Value.ocspResponse = cert.OCSPStaple;
+    ss.Value.scts = cert.SignedCertificateTimestamps;
+    ref var chainList = ref heap<cryptobyte.String>(out var ᏑchainList);
+    if (!s.ReadUint24LengthPrefixed(ᏑchainList)) {
         return (default!, errors.New("tls: invalid session encoding"u8));
     }
     while (!chainList.Empty()) {
-        cryptobyte.String certList = default!;
-        if (!chainList.ReadUint24LengthPrefixed(Ꮡ(certList))) {
+        ref var certList = ref heap<cryptobyte.String>(out var ᏑcertList);
+        if (!chainList.ReadUint24LengthPrefixed(ᏑcertList)) {
             return (default!, errors.New("tls: invalid session encoding"u8));
         }
-        slice<x509.Certificate> chain = default!;
+        slice<ж<Δx509.Certificate>> chain = default!;
         if (len((~ss).peerCertificates) == 0) {
             return (default!, errors.New("tls: invalid session encoding"u8));
         }
         chain = append(chain, (~ss).peerCertificates[0]);
         while (!certList.Empty()) {
-            slice<byte> certΔ3 = default!;
-            if (!readUint24LengthPrefixed(Ꮡ(certList), Ꮡ(certΔ3))) {
+            ref var certΔ2 = ref heap<slice<byte>>(out var ᏑcertΔ2);
+            if (!readUint24LengthPrefixed(ᏑcertList, ᏑcertΔ2)) {
                 return (default!, errors.New("tls: invalid session encoding"u8));
             }
-            (c, err) = globalCertCache.newCert(certΔ3);
+            var (c, err) = globalCertCache.newCert(certΔ2);
             if (err != default!) {
                 return (default!, err);
             }
-            ss.val.activeCertHandles = append((~ss).activeCertHandles, c);
+            ss.Value.activeCertHandles = append((~ss).activeCertHandles, c);
             chain = append(chain, (~c).cert);
         }
-        ss.val.verifiedChains = append((~ss).verifiedChains, chain);
+        ss.Value.verifiedChains = append((~ss).verifiedChains, chain);
     }
     if ((~ss).EarlyData) {
-        slice<byte> alpn = default!;
-        if (!readUint8LengthPrefixed(Ꮡ(s), Ꮡ(alpn))) {
+        ref var alpn = ref heap<slice<byte>>(out var Ꮡalpn);
+        if (!readUint8LengthPrefixed(Ꮡs, Ꮡalpn)) {
             return (default!, errors.New("tls: invalid session encoding"u8));
         }
-        ss.val.alpnProtocol = ((@string)alpn);
+        ss.Value.alpnProtocol = ((@string)alpn);
     }
     {
         var isClient = typ == 2; if (!isClient) {
@@ -282,7 +283,7 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
             return (ss, default!);
         }
     }
-    ss.val.isClient = true;
+    ss.Value.isClient = true;
     if (len((~ss).peerCertificates) == 0) {
         return (default!, errors.New("tls: no server certificates in client session"u8));
     }
@@ -292,7 +293,7 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
         }
         return (ss, default!);
     }
-    if (!s.ReadUint64(Ꮡ((~ss).useBy)) || !s.ReadUint32(Ꮡ((~ss).ageAdd)) || !s.Empty()) {
+    if (!s.ReadUint64(ss.of(SessionState.ᏑuseBy)) || !s.ReadUint32(ss.of(SessionState.ᏑageAdd)) || !s.Empty()) {
         return (default!, errors.New("tls: invalid session encoding"u8));
     }
     return (ss, default!);
@@ -304,7 +305,7 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
     return Ꮡ(new SessionState(
         version: c.vers,
         cipherSuite: c.cipherSuite,
-        createdAt: ((uint64)c.config.time().Unix()),
+        createdAt: (uint64)c.config.time().Unix(),
         alpnProtocol: c.clientProtocol,
         peerCertificates: c.peerCertificates,
         activeCertHandles: c.activeCertHandles,
@@ -318,11 +319,12 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
 
 // EncryptTicket encrypts a ticket with the [Config]'s configured (or default)
 // session ticket keys. It can be used as a [Config.WrapSession] implementation.
-[GoRecv] public static (slice<byte>, error) EncryptTicket(this ref Config c, ΔConnectionState cs, ж<SessionState> Ꮡss) {
-    ref var ss = ref Ꮡss.val;
+public static (slice<byte>, error) EncryptTicket(this ж<Config> Ꮡc, ΔConnectionState cs, ж<SessionState> Ꮡss) {
+    ref var c = ref Ꮡc.Value;
+    ref var ss = ref Ꮡss.Value;
 
-    var ticketKeys = c.ticketKeys(nil);
-    (stateBytes, err) = ss.Bytes();
+    var ticketKeys = Ꮡc.ticketKeys(nil);
+    var (stateBytes, err) = Ꮡss.Bytes();
     if (err != default!) {
         return (default!, err);
     }
@@ -333,18 +335,18 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
     if (len(ticketKeys) == 0) {
         return (default!, errors.New("tls: internal error: session ticket keys unavailable"u8));
     }
-    var encrypted = new slice<byte>(aes.ΔBlockSize + len(state) + sha256.ΔSize);
+    var encrypted = new slice<byte>((nint)aes.ΔBlockSize + len(state) + (nint)sha256.ΔSize);
     var iv = encrypted[..(int)(aes.ΔBlockSize)];
-    var ciphertext = encrypted[(int)(aes.ΔBlockSize)..(int)(len(encrypted) - sha256.ΔSize)];
-    var authenticated = encrypted[..(int)(len(encrypted) - sha256.ΔSize)];
-    var macBytes = encrypted[(int)(len(encrypted) - sha256.ΔSize)..];
+    var ciphertext = encrypted[(int)(aes.ΔBlockSize)..(int)(len(encrypted) - (nint)sha256.ΔSize)];
+    var authenticated = encrypted[..(int)(len(encrypted) - (nint)sha256.ΔSize)];
+    var macBytes = encrypted[(int)(len(encrypted) - (nint)sha256.ΔSize)..];
     {
         var (_, errΔ1) = io.ReadFull(c.rand(), iv); if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
     }
     var key = ticketKeys[0];
-    (block, err) = aes.NewCipher(key.aesKey[..]);
+    var (block, err) = aes.NewCipher(key.aesKey[..]);
     if (err != default!) {
         return (default!, errors.New("tls: failed to create cipher while encrypting ticket: "u8 + err.Error()));
     }
@@ -359,13 +361,15 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
 // be used as a [Config.UnwrapSession] implementation.
 //
 // If the ticket can't be decrypted or parsed, DecryptTicket returns (nil, nil).
-[GoRecv] public static (ж<SessionState>, error) DecryptTicket(this ref Config c, slice<byte> identity, ΔConnectionState cs) {
-    var ticketKeys = c.ticketKeys(nil);
+public static (ж<SessionState>, error) DecryptTicket(this ж<Config> Ꮡc, slice<byte> identity, ΔConnectionState cs) {
+    ref var c = ref Ꮡc.Value;
+
+    var ticketKeys = Ꮡc.ticketKeys(nil);
     var stateBytes = c.decryptTicket(identity, ticketKeys);
     if (stateBytes == default!) {
         return (default!, default!);
     }
-    (s, err) = ParseSessionState(stateBytes);
+    var (s, err) = ParseSessionState(stateBytes);
     if (err != default!) {
         return (default!, default!);
     }
@@ -378,9 +382,9 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
         return default!;
     }
     var iv = encrypted[..(int)(aes.ΔBlockSize)];
-    var ciphertext = encrypted[(int)(aes.ΔBlockSize)..(int)(len(encrypted) - sha256.ΔSize)];
-    var authenticated = encrypted[..(int)(len(encrypted) - sha256.ΔSize)];
-    var macBytes = encrypted[(int)(len(encrypted) - sha256.ΔSize)..];
+    var ciphertext = encrypted[(int)(aes.ΔBlockSize)..(int)(len(encrypted) - (nint)sha256.ΔSize)];
+    var authenticated = encrypted[..(int)(len(encrypted) - (nint)sha256.ΔSize)];
+    var macBytes = encrypted[(int)(len(encrypted) - (nint)sha256.ΔSize)..];
     foreach (var (_, key) in ticketKeys) {
         var mac = hmac.New(sha256.New, key.hmacKey[..]);
         mac.Write(authenticated);
@@ -388,7 +392,7 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
         if (subtle.ConstantTimeCompare(macBytes, expected) != 1) {
             continue;
         }
-        (block, err) = aes.NewCipher(key.aesKey[..]);
+        var (block, err) = aes.NewCipher(key.aesKey[..]);
         if (err != default!) {
             return default!;
         }
@@ -410,15 +414,16 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
 //
 // It can be called by [ClientSessionCache.Put] to serialize (with
 // [SessionState.Bytes]) and store the session.
-[GoRecv] public static (slice<byte> ticket, ж<SessionState> state, error err) ResumptionState(this ref ClientSessionState cs) {
+public static (slice<byte> ticket, ж<SessionState> state, error err) ResumptionState(this ж<ClientSessionState> Ꮡcs) {
     slice<byte> ticket = default!;
     ж<SessionState> state = default!;
     error err = default!;
 
+    ref var cs = ref Ꮡcs.Value;
     if (cs == nil || cs.session == nil) {
         return (default!, default!, default!);
     }
-    return (cs.session.ticket, cs.session, default!);
+    return ((~cs.session).ticket, cs.session, default!);
 }
 
 // NewResumptionState returns a state value that can be returned by
@@ -427,11 +432,11 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
 // state needs to be returned by [ParseSessionState], and the ticket and session
 // state must have been returned by [ClientSessionState.ResumptionState].
 public static (ж<ClientSessionState>, error) NewResumptionState(slice<byte> ticket, ж<SessionState> Ꮡstate) {
-    ref var state = ref Ꮡstate.val;
+    ref var state = ref Ꮡstate.Value;
 
     state.ticket = ticket;
     return (Ꮡ(new ClientSessionState(
-        session: state
+        session: Ꮡstate
     )), default!);
 }
 

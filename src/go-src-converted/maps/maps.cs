@@ -8,7 +8,7 @@
 // (keys k where k != k), such as floating-point NaNs.
 namespace go;
 
-using _ = unsafe_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 
 partial class maps_package {
 
@@ -17,16 +17,15 @@ partial class maps_package {
 public static bool Equal<M1, M2, K, V>(M1 m1, M2 m2)
     where M1 : /* ~map[K]V */ IMap<K, V>, ISupportMake<M1>, new()
     where M2 : /* ~map[K]V */ IMap<K, V>, ISupportMake<M2>, new()
-    where K : /* comparable */ IAdditionOperators<K, K, K>, ISubtractionOperators<K, K, K>, IMultiplyOperators<K, K, K>, IDivisionOperators<K, K, K>, IModulusOperators<K, K, K>, IBitwiseOperators<K, K, K>, IShiftOperators<K, K, K>, IEqualityOperators<K, K, bool>, IComparisonOperators<K, K, bool>, new()
-    where V : /* comparable */ IAdditionOperators<V, V, V>, ISubtractionOperators<V, V, V>, IMultiplyOperators<V, V, V>, IDivisionOperators<V, V, V>, IModulusOperators<V, V, V>, IBitwiseOperators<V, V, V>, IShiftOperators<V, V, V>, IEqualityOperators<V, V, bool>, IComparisonOperators<V, V, bool>, new()
+    where K : /* comparable */ new()
+    where V : /* comparable */ new()
 {
     if (len(m1) != len(m2)) {
         return false;
     }
     foreach (var (k, v1) in m1) {
         {
-            var v2 = m2[k];
-            var ok = m2[k]; if (!ok || !AreEqual(v1, v2)) {
+            var (v2, ok) = m2[k, ꟷ]; if (!ok || !AreEqual(v1, v2)) {
                 return false;
             }
         }
@@ -39,17 +38,14 @@ public static bool Equal<M1, M2, K, V>(M1 m1, M2 m2)
 public static bool EqualFunc<M1, M2, K, V1, V2>(M1 m1, M2 m2, Func<V1, V2, bool> eq)
     where M1 : /* ~map[K]V1 */ IMap<K, V1>, ISupportMake<M1>, new()
     where M2 : /* ~map[K]V2 */ IMap<K, V2>, ISupportMake<M2>, new()
-    where K : /* comparable */ IAdditionOperators<K, K, K>, ISubtractionOperators<K, K, K>, IMultiplyOperators<K, K, K>, IDivisionOperators<K, K, K>, IModulusOperators<K, K, K>, IBitwiseOperators<K, K, K>, IShiftOperators<K, K, K>, IEqualityOperators<K, K, bool>, IComparisonOperators<K, K, bool>, new()
-    where V1 : new()
-    where V2 : new()
+    where K : /* comparable */ new()
 {
     if (len(m1) != len(m2)) {
         return false;
     }
     foreach (var (k, v1) in m1) {
         {
-            var v2 = m2[k];
-            var ok = m2[k]; if (!ok || !eq(v1, v2)) {
+            var (v2, ok) = m2[k, ꟷ]; if (!ok || !eq(v1, v2)) {
                 return false;
             }
         }
@@ -66,11 +62,10 @@ internal static partial any clone(any m);
 // the new keys and values are set using ordinary assignment.
 public static M Clone<M, K, V>(M m)
     where M : /* ~map[K]V */ IMap<K, V>, ISupportMake<M>, new()
-    where K : /* comparable */ IAdditionOperators<K, K, K>, ISubtractionOperators<K, K, K>, IMultiplyOperators<K, K, K>, IDivisionOperators<K, K, K>, IModulusOperators<K, K, K>, IBitwiseOperators<K, K, K>, IShiftOperators<K, K, K>, IEqualityOperators<K, K, bool>, IComparisonOperators<K, K, bool>, new()
-    where V : new()
+    where K : /* comparable */ new()
 {
     // Preserve nil in case it matters.
-    if (m == default!) {
+    if (m.IsNil) {
         return default!;
     }
     return clone(m)._<M>();
@@ -83,8 +78,7 @@ public static M Clone<M, K, V>(M m)
 public static void Copy<M1, M2, K, V>(M1 dst, M2 src)
     where M1 : /* ~map[K]V */ IMap<K, V>, ISupportMake<M1>, new()
     where M2 : /* ~map[K]V */ IMap<K, V>, ISupportMake<M2>, new()
-    where K : /* comparable */ IAdditionOperators<K, K, K>, ISubtractionOperators<K, K, K>, IMultiplyOperators<K, K, K>, IDivisionOperators<K, K, K>, IModulusOperators<K, K, K>, IBitwiseOperators<K, K, K>, IShiftOperators<K, K, K>, IEqualityOperators<K, K, bool>, IComparisonOperators<K, K, bool>, new()
-    where V : new()
+    where K : /* comparable */ new()
 {
     foreach (var (k, v) in src) {
         dst[k] = v;
@@ -94,8 +88,7 @@ public static void Copy<M1, M2, K, V>(M1 dst, M2 src)
 // DeleteFunc deletes any key/value pairs from m for which del returns true.
 public static void DeleteFunc<M, K, V>(M m, Func<K, V, bool> del)
     where M : /* ~map[K]V */ IMap<K, V>, ISupportMake<M>, new()
-    where K : /* comparable */ IAdditionOperators<K, K, K>, ISubtractionOperators<K, K, K>, IMultiplyOperators<K, K, K>, IDivisionOperators<K, K, K>, IModulusOperators<K, K, K>, IBitwiseOperators<K, K, K>, IShiftOperators<K, K, K>, IEqualityOperators<K, K, bool>, IComparisonOperators<K, K, bool>, new()
-    where V : new()
+    where K : /* comparable */ new()
 {
     foreach (var (k, v) in m) {
         if (del(k, v)) {

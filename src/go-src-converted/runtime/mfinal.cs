@@ -22,15 +22,16 @@ partial class runtime_package {
 // must be specially handled. GC currently assumes that the finalizer
 // queue does not grow during marking (but it can shrink).
 [GoType] partial struct finblock {
-    internal runtime.@internal.sys_package.NotInHeap _;
+    internal sys.NotInHeap _;
     internal ж<finblock> alllink;
     internal ж<finblock> next;
     internal uint32 cnt;
     internal int32 __;
-    internal array<finalizer> fin = new((_FinBlockSize - 2 * goarch.PtrSize - 2 * 4) / @unsafe.Sizeof(new finalizer(nil)));
+    internal array<finalizer> fin = new((uintptr)(_FinBlockSize - 2 * goarch.PtrSize - 2 * 4) / @unsafe.Sizeof(new finalizer(nil)));
 }
 
-internal static atomic.Uint32 fingStatus;
+internal static ж<atomic.Uint32> ᏑfingStatus = new(default(atomic.Uint32));
+internal static ref atomic.Uint32 fingStatus => ref ᏑfingStatus.Value;
 
 // finalizer goroutine status.
 internal const uint32 fingUninitialized = /* iota */ 0;
@@ -43,15 +44,18 @@ internal const uint32 fingWait = 4;
 
 internal const uint32 fingWake = 8;
 
-internal static mutex finlock; // protects the following variables
+internal static ж<mutex> Ꮡfinlock = new(new mutex(nil));
+internal static ref mutex finlock => ref Ꮡfinlock.Value; // protects the following variables
 
 internal static ж<g> fing; // goroutine that runs finalizers
 
-internal static ж<finblock> finq;  // list of finalizers that are to be executed
+internal static ж<ж<finblock>> Ꮡfinq = new(default(ж<finblock>));
+internal static ref ж<finblock> finq => ref Ꮡfinq.ValueSlot;  // list of finalizers that are to be executed
 
 internal static ж<finblock> finc;  // cache of free blocks
 
-internal static array<byte> finptrmask;
+internal static ж<array<byte>> Ꮡfinptrmask = new(new array<byte>(64));
+internal static ref array<byte> finptrmask => ref Ꮡfinptrmask.Value;
 
 internal static ж<finblock> allfin; // list of all blocks
 
@@ -85,23 +89,23 @@ internal static ж<finblock> allfin; // list of all blocks
 //
 // Assumptions about Finalizer layout checked below.
 internal static array<byte> finalizer1 = new byte[]{
-    (byte)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(0) | 1 << (int)(1)) | 0 << (int)(2)) | 1 << (int)(3)) | 1 << (int)(4)) | 1 << (int)(5)) | 1 << (int)(6)) | 0 << (int)(7)),
-    (byte)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(0) | 1 << (int)(1)) | 1 << (int)(2)) | 1 << (int)(3)) | 0 << (int)(4)) | 1 << (int)(5)) | 1 << (int)(6)) | 1 << (int)(7)),
-    (byte)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(0) | 0 << (int)(1)) | 1 << (int)(2)) | 1 << (int)(3)) | 1 << (int)(4)) | 1 << (int)(5)) | 0 << (int)(6)) | 1 << (int)(7)),
-    (byte)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(0) | 1 << (int)(1)) | 1 << (int)(2)) | 0 << (int)(3)) | 1 << (int)(4)) | 1 << (int)(5)) | 1 << (int)(6)) | 1 << (int)(7)),
-    (byte)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(0 << (int)(0) | 1 << (int)(1)) | 1 << (int)(2)) | 1 << (int)(3)) | 1 << (int)(4)) | 0 << (int)(5)) | 1 << (int)(6)) | 1 << (int)(7))
+    (byte)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(0)) | (1 << (int)(1))) | (0 << (int)(2))) | (1 << (int)(3))) | (1 << (int)(4))) | (1 << (int)(5))) | (1 << (int)(6))) | (0 << (int)(7))),
+    (byte)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(0)) | (1 << (int)(1))) | (1 << (int)(2))) | (1 << (int)(3))) | (0 << (int)(4))) | (1 << (int)(5))) | (1 << (int)(6))) | (1 << (int)(7))),
+    (byte)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(0)) | (0 << (int)(1))) | (1 << (int)(2))) | (1 << (int)(3))) | (1 << (int)(4))) | (1 << (int)(5))) | (0 << (int)(6))) | (1 << (int)(7))),
+    (byte)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(0)) | (1 << (int)(1))) | (1 << (int)(2))) | (0 << (int)(3))) | (1 << (int)(4))) | (1 << (int)(5))) | (1 << (int)(6))) | (1 << (int)(7))),
+    (byte)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((0 << (int)(0)) | (1 << (int)(1))) | (1 << (int)(2))) | (1 << (int)(3))) | (1 << (int)(4))) | (0 << (int)(5))) | (1 << (int)(6))) | (1 << (int)(7)))
 }.array();
 
 // lockRankMayQueueFinalizer records the lock ranking effects of a
 // function that may call queuefinalizer.
 internal static void lockRankMayQueueFinalizer() {
-    lockWithRankMayAcquire(Ꮡ(finlock), getLockRank(Ꮡ(finlock)));
+    lockWithRankMayAcquire(Ꮡfinlock, getLockRank(Ꮡfinlock));
 }
 
 internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uintptr nret, ж<_type> Ꮡfint, ж<ptrtype> Ꮡot) {
-    ref var fn = ref Ꮡfn.val;
-    ref var fint = ref Ꮡfint.val;
-    ref var ot = ref Ꮡot.val;
+    ref var fn = ref Ꮡfn.Value;
+    ref var fint = ref Ꮡfint.Value;
+    ref var ot = ref Ꮡot.Value;
 
     if (gcphase != _GCoff) {
         // Currently we assume that the finalizer queue won't
@@ -112,11 +116,11 @@ internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uint
         // have automatically).
         @throw("queuefinalizer during GC"u8);
     }
-    @lock(Ꮡ(finlock));
-    if (finq == nil || (~finq).cnt == ((uint32)len((~finq).fin))) {
+    @lock(Ꮡfinlock);
+    if (finq == nil || (~finq).cnt == (uint32)len((~finq).fin)) {
         if (finc == nil) {
             finc = (ж<finblock>)(uintptr)(persistentalloc(_FinBlockSize, 0, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
-            finc.val.alllink = allfin;
+            finc.Value.alllink = allfin;
             allfin = finc;
             if (finptrmask[0] == 0) {
                 // Build pointer mask for Finalizer array in block.
@@ -130,27 +134,27 @@ internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uint
             }
         }
         var block = finc;
-        finc = block.val.next;
-        block.val.next = finq;
+        finc = block.Value.next;
+        block.Value.next = finq;
         finq = block;
     }
-    var f = Ꮡ(~finq).fin.at<finalizer>((~finq).cnt);
-    atomic.Xadd(Ꮡ((~finq).cnt), +1);
+    var f = finq.at(finblock.Ꮡfin, (nint)((~finq).cnt));
+    atomic.Xadd(finq.of(finblock.Ꮡcnt), +1);
     // Sync with markroots
-    f.val.fn = fn;
-    f.val.nret = nret;
-    f.val.fint = fint;
-    f.val.ot = ot;
-    f.val.arg = Δp;
-    unlock(Ꮡ(finlock));
-    fingStatus.Or(fingWake);
+    f.Value.fn = Ꮡfn;
+    f.Value.nret = nret;
+    f.Value.fint = Ꮡfint;
+    f.Value.ot = Ꮡot;
+    f.Value.arg = Δp;
+    unlock(Ꮡfinlock);
+    ᏑfingStatus.Or(fingWake);
 }
 
 //go:nowritebarrier
-internal static void iterate_finq(Action<ж<funcval>, @unsafe.Pointer, uintptr, ж<runtime._type>, ж<runtime.ptrtype>> callback) {
-    for (var fb = allfin; fb != nil; fb = fb.val.alllink) {
-        for (var i = ((uint32)0); i < (~fb).cnt; i++) {
-            var f = Ꮡ(~fb).fin.at<finalizer>(i);
+internal static void iterate_finq(Action<ж<funcval>, @unsafe.Pointer, uintptr, ж<_type>, ж<ptrtype>> callback) {
+    for (var fb = allfin; fb != nil; fb = fb.Value.alllink) {
+        for (var i = (uint32)0; i < (~fb).cnt; i++) {
+            var f = fb.at(finblock.Ꮡfin, (nint)(i));
             callback((~f).fn, (~f).arg, (~f).nret, (~f).fint, (~f).ot);
         }
     }
@@ -158,7 +162,7 @@ internal static void iterate_finq(Action<ж<funcval>, @unsafe.Pointer, uintptr, 
 
 internal static ж<g> wakefing() {
     {
-        var ok = fingStatus.CompareAndSwap((uint32)((uint32)(fingCreated | fingWait) | fingWake), fingCreated); if (ok) {
+        var ok = ᏑfingStatus.CompareAndSwap((uint32)((uint32)(fingCreated | fingWait) | fingWake), fingCreated); if (ok) {
             return fing;
         }
     }
@@ -167,18 +171,18 @@ internal static ж<g> wakefing() {
 
 internal static void createfing() {
     // start the finalizer goroutine exactly once
-    if (fingStatus.Load() == fingUninitialized && fingStatus.CompareAndSwap(fingUninitialized, fingCreated)) {
+    if (ᏑfingStatus.Load() == fingUninitialized && ᏑfingStatus.CompareAndSwap(fingUninitialized, fingCreated)) {
         goǃ(runfinq);
     }
 }
 
 internal static bool finalizercommit(ж<g> Ꮡgp, @unsafe.Pointer @lock) {
-    ref var gp = ref Ꮡgp.val;
+    ref var gp = ref Ꮡgp.Value;
 
     unlock((ж<mutex>)(uintptr)(@lock));
     // fingStatus should be modified after fing is put into a waiting state
     // to avoid waking fing in running state, even if it is about to be parked.
-    fingStatus.Or(fingWait);
+    ᏑfingStatus.Or(fingWait);
     return true;
 }
 
@@ -188,26 +192,26 @@ internal static void runfinq() {
     uintptr framecap = default!;
     nint argRegs = default!;
     var gp = getg();
-    @lock(Ꮡ(finlock));
+    @lock(Ꮡfinlock);
     fing = gp;
-    unlock(Ꮡ(finlock));
+    unlock(Ꮡfinlock);
     while (ᐧ) {
-        @lock(Ꮡ(finlock));
+        @lock(Ꮡfinlock);
         var fb = finq;
         finq = default!;
         if (fb == nil) {
-            gopark(finalizercommit, new @unsafe.Pointer(Ꮡ(finlock)), waitReasonFinalizerWait, traceBlockSystemGoroutine, 1);
+            gopark(finalizercommit, new @unsafe.Pointer(Ꮡfinlock), waitReasonFinalizerWait, traceBlockSystemGoroutine, 1);
             continue;
         }
         argRegs = intArgRegs;
-        unlock(Ꮡ(finlock));
+        unlock(Ꮡfinlock);
         if (raceenabled) {
             racefingo();
         }
         while (fb != nil) {
-            for (var i = fb.val.cnt; i > 0; i--) {
-                var f = Ꮡ(~fb).fin.at<finalizer>(i - 1);
-                ref var regs = ref heap(new @internal.abi_package.RegArgs(), out var Ꮡregs);
+            for (var i = fb.Value.cnt; i > 0; i--) {
+                var f = fb.at(finblock.Ꮡfin, (nint)(i - 1));
+                ref var regs = ref heap(new abi.RegArgs(), out var Ꮡregs);
                 // The args may be passed in registers or on stack. Even for
                 // the register case, we still need the spill slots.
                 // TODO: revisit if we remove spill slots.
@@ -228,8 +232,7 @@ internal static void runfinq() {
                 if ((~f).fint == nil) {
                     @throw("missing type in runfinq"u8);
                 }
-                ref var r = ref heap<@unsafe.Pointer>(out var Ꮡr);
-                r = frame;
+                @unsafe.Pointer r = frame;
                 if (argRegs > 0){
                     r = new @unsafe.Pointer(Ꮡregs.of(abi.RegArgs.ᏑInts));
                 } else {
@@ -237,45 +240,45 @@ internal static void runfinq() {
                     // memory. That means we have to clear
                     // it before writing to it to avoid
                     // confusing the write barrier.
-                    ((ж<array<uintptr>>)(uintptr)(frame)).val = new uintptr[]{}.array();
+                    ((ж<array<uintptr>>)(uintptr)(frame)).Value = new uintptr[]{}.array();
                 }
                 var exprᴛ1 = (abiꓸKind)((~(~f).fint).Kind_ & abi.KindMask);
                 if (exprᴛ1 == abi.Pointer) {
-                    ((ж<@unsafe.Pointer>)(uintptr)(r)).val = f.val.arg;
+                    ((ж<@unsafe.Pointer>)(uintptr)(r)).Value = f.Value.arg;
                 }
                 else if (exprᴛ1 == abi.Interface) {
                     var ityp = (ж<interfacetype>)(uintptr)(new @unsafe.Pointer((~f).fint));
-                    ((ж<eface>)(uintptr)(r)).val._type = Ꮡ((~(~f).ot).Type);
-                    ((ж<eface>)(uintptr)(r)).val.data = f.val.arg;
+                    ((ж<eface>)(uintptr)(r)).Value._type = (~f).ot.of(ptrtype.ᏑType);
+                    ((ж<eface>)(uintptr)(r)).Value.data = f.Value.arg;
                     if (len((~ityp).Methods) != 0) {
                         // direct use of pointer
                         // set up with empty interface
                         // convert to interface with methods
                         // this conversion is guaranteed to succeed - we checked in SetFinalizer
-                        ((ж<iface>)(uintptr)(r)).val.tab = assertE2I(ityp, ((ж<eface>)(uintptr)(r)).val._type);
+                        ((ж<iface>)(uintptr)(r)).Value.tab = assertE2I(ityp, ((ж<eface>)(uintptr)(r)).Value._type);
                     }
                 }
                 else { /* default: */
                     @throw("bad kind in runfinq"u8);
                 }
 
-                fingStatus.Or(fingRunningFinalizer);
-                reflectcall(nil, new @unsafe.Pointer((~f).fn), frame, ((uint32)framesz), ((uint32)framesz), ((uint32)framesz), Ꮡregs);
-                fingStatus.And(~fingRunningFinalizer);
+                ᏑfingStatus.Or(fingRunningFinalizer);
+                reflectcall(nil, new @unsafe.Pointer((~f).fn), frame, (uint32)framesz, (uint32)framesz, (uint32)framesz, Ꮡregs);
+                ᏑfingStatus.And(~fingRunningFinalizer);
                 // Drop finalizer queue heap references
                 // before hiding them from markroot.
                 // This also ensures these will be
                 // clear if we reuse the finalizer.
-                f.val.fn = default!;
-                f.val.arg = default!;
-                f.val.ot = default!;
-                atomic.Store(Ꮡ((~fb).cnt), i - 1);
+                f.Value.fn = default!;
+                f.Value.arg = default!;
+                f.Value.ot = default!;
+                atomic.Store(fb.of(finblock.Ꮡcnt), i - 1);
             }
-            var next = fb.val.next;
-            @lock(Ꮡ(finlock));
-            fb.val.next = finc;
+            var next = fb.Value.next;
+            @lock(Ꮡfinlock);
+            fb.Value.next = finc;
             finc = fb;
-            unlock(Ꮡ(finlock));
+            unlock(Ꮡfinlock);
             fb = next;
         }
     }
@@ -283,7 +286,7 @@ internal static void runfinq() {
 
 internal static bool isGoPointerWithoutSpan(@unsafe.Pointer Δp) {
     // 0-length objects are okay.
-    if (p.val == ((@unsafe.Pointer)(Ꮡ(zerobase)))) {
+    if (Δp.Value == @unsafe.Pointer.FromRef(ref (Ꮡzerobase).Value)) {
         return true;
     }
     // Global initializers might be linker-allocated.
@@ -294,8 +297,8 @@ internal static bool isGoPointerWithoutSpan(@unsafe.Pointer Δp) {
     // The relevant segments are: noptrdata, data, bss, noptrbss.
     // We cannot assume they are in any order or even contiguous,
     // due to external linking.
-    for (var datap = Ꮡ(firstmoduledata); datap != nil; datap = datap.val.next) {
-        if ((~datap).noptrdata <= ((uintptr)Δp) && ((uintptr)Δp) < (~datap).enoptrdata || (~datap).data <= ((uintptr)Δp) && ((uintptr)Δp) < (~datap).edata || (~datap).bss <= ((uintptr)Δp) && ((uintptr)Δp) < (~datap).ebss || (~datap).noptrbss <= ((uintptr)Δp) && ((uintptr)Δp) < (~datap).enoptrbss) {
+    for (var datap = Ꮡfirstmoduledata; datap != nil; datap = datap.Value.next) {
+        if ((~datap).noptrdata <= (uintptr)Δp && (uintptr)Δp < (~datap).enoptrdata || (~datap).data <= (uintptr)Δp && (uintptr)Δp < (~datap).edata || (~datap).bss <= (uintptr)Δp && (uintptr)Δp < (~datap).ebss || (~datap).noptrbss <= (uintptr)Δp && (uintptr)Δp < (~datap).enoptrbss) {
             return true;
         }
     }
@@ -309,12 +312,12 @@ internal static bool isGoPointerWithoutSpan(@unsafe.Pointer Δp) {
 internal static bool blockUntilEmptyFinalizerQueue(int64 timeout) {
     var start = nanotime();
     while (nanotime() - start < timeout) {
-        @lock(Ꮡ(finlock));
+        @lock(Ꮡfinlock);
         // We know the queue has been drained when both finq is nil
         // and the finalizer g has stopped executing.
         var empty = finq == nil;
         empty = empty && readgstatus(fing) == _Gwaiting && (~fing).waitreason == waitReasonFinalizerWait;
-        unlock(Ꮡ(finlock));
+        unlock(Ꮡfinlock);
         if (empty) {
             return true;
         }
@@ -418,7 +421,7 @@ public static void SetFinalizer(any obj, any finalizer) {
         return;
     }
     var e = efaceOf(Ꮡ(obj));
-    var etyp = e.val._type;
+    var etyp = e.Value._type;
     if (etyp == nil) {
         @throw("runtime.SetFinalizer: first argument is nil"u8);
     }
@@ -429,12 +432,12 @@ public static void SetFinalizer(any obj, any finalizer) {
     if ((~ot).Elem == nil) {
         @throw("nil elem type!"u8);
     }
-    if (inUserArenaChunk(((uintptr)(~e).data))) {
+    if (inUserArenaChunk((uintptr)(~e).data)) {
         // Arena-allocated objects are not eligible for finalizers.
         @throw("runtime.SetFinalizer: first argument was allocated into an arena"u8);
     }
     // find the containing object
-    var (@base, span, _) = findObject(((uintptr)(~e).data), 0, 0);
+    var (@base, span, _) = findObject((uintptr)(~e).data, 0, 0);
     if (@base == 0) {
         if (isGoPointerWithoutSpan((~e).data)) {
             return;
@@ -445,7 +448,7 @@ public static void SetFinalizer(any obj, any finalizer) {
     if (!(~span).spanclass.noscan() && !heapBitsInSpan((~span).elemsize) && (~span).spanclass.sizeclass() != 0) {
         @base += mallocHeaderSize;
     }
-    if (((uintptr)(~e).data) != @base) {
+    if ((uintptr)(~e).data != @base) {
         // As an implementation detail we allow to set finalizers for an inner byte
         // of an object if it could come from tiny alloc (see mallocgc for details).
         if ((~ot).Elem == nil || (~ot).Elem.Pointers() || (~(~ot).Elem).Size_ >= maxTinySize) {
@@ -453,13 +456,12 @@ public static void SetFinalizer(any obj, any finalizer) {
         }
     }
     var f = efaceOf(Ꮡ(finalizer));
-    var ftyp = f.val._type;
+    var ftyp = f.Value._type;
     if (ftyp == nil) {
         // switch to system stack and remove finalizer
-        systemstack(
-        var eʗ2 = e;
-        () => {
-            removefinalizer((~eʗ2).data);
+        var eʗ1 = e;
+        systemstack(() => {
+            removefinalizer((~eʗ1).data);
         });
         return;
     }
@@ -475,12 +477,12 @@ public static void SetFinalizer(any obj, any finalizer) {
     }
     var fint = ft.InSlice()[0];
     switch (ᐧ) {
-    case {} when fint is etyp: {
+    case {} when fint == etyp: {
         goto okarg;
         break;
     }
     case {} when (abiꓸKind)((~fint).Kind_ & abi.KindMask) == abi.Pointer: {
-        if ((fint.Uncommon() == nil || etyp.Uncommon() == nil) && ((ж<ptrtype>)(uintptr)(new @unsafe.Pointer(fint))).val.Elem == (~ot).Elem) {
+        if ((fint.Uncommon() == nil || etyp.Uncommon() == nil) && ((ж<ptrtype>)(uintptr)(new @unsafe.Pointer(fint))).Value.Elem == (~ot).Elem) {
             // ok - same type
             // ok - not same type, but both pointers,
             // one or the other is unnamed, and same element type, so assignable.
@@ -504,21 +506,20 @@ public static void SetFinalizer(any obj, any finalizer) {
 
     @throw("runtime.SetFinalizer: cannot pass "u8 + toRType(etyp).@string() + " to finalizer "u8 + toRType(ftyp).@string());
 okarg:
-    var nret = ((uintptr)0);
+    var nret = (uintptr)0;
     // compute size needed for return parameters
     foreach (var (_, t) in ft.OutSlice()) {
-        nret = alignUp(nret, ((uintptr)(~t).Align_)) + (~t).Size_;
+        nret = alignUp(nret, (uintptr)(~t).Align_) + (~t).Size_;
     }
     nret = alignUp(nret, goarch.PtrSize);
     // make sure we have a finalizer goroutine
     createfing();
-    systemstack(
-    var eʗ5 = e;
-    var fʗ2 = f;
-    var fintʗ2 = fint;
-    var otʗ2 = ot;
-    () => {
-        if (!addfinalizer((~eʗ5).data, (ж<funcval>)(uintptr)((~fʗ2).data), nret, fintʗ2, otʗ2)) {
+    var eʗ3 = e;
+    var fʗ1 = f;
+    var fintʗ1 = fint;
+    var otʗ1 = ot;
+    systemstack(() => {
+        if (!addfinalizer((~eʗ3).data, (ж<funcval>)(uintptr)((~fʗ1).data), nret, fintʗ1, otʗ1)) {
             @throw("runtime.SetFinalizer: finalizer already set"u8);
         }
     });

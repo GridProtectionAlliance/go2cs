@@ -47,8 +47,6 @@ using static go.log_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<os_package.File, io_package.Writer>]
-[assembly: GoImplement<slice<byte>, error>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

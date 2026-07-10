@@ -13,7 +13,8 @@
 namespace go;
 
 using syntax = regexp.syntax_package;
-using sync = sync_package;
+using Δsync = sync_package;
+using io = io_package;
 using regexp;
 
 partial class regexp_package {
@@ -40,10 +41,11 @@ internal static readonly UntypedInt maxBacktrackVector = /* 256 * 1024 */ 262144
     internal inputs inputs;
 }
 
-internal static sync.Pool bitStatePool;
+internal static ж<Δsync.Pool> ᏑbitStatePool = new(default(Δsync.Pool));
+internal static ref Δsync.Pool bitStatePool => ref ᏑbitStatePool.Value;
 
 internal static ж<bitState> newBitState() {
-    var (b, ok) = bitStatePool.Get()._<bitState.val>(ᐧ);
+    var (b, ok) = ᏑbitStatePool.Get()._<ж<bitState>>(ᐧ);
     if (!ok) {
         b = @new<bitState>();
     }
@@ -51,27 +53,27 @@ internal static ж<bitState> newBitState() {
 }
 
 internal static void freeBitState(ж<bitState> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     b.inputs.clear();
-    bitStatePool.Put(b);
+    ᏑbitStatePool.Put(b);
 }
 
 // maxBitStateLen returns the maximum length of a string to search with
 // the backtracker using prog.
 internal static nint maxBitStateLen(ж<syntax.Prog> Ꮡprog) {
-    ref var prog = ref Ꮡprog.val;
+    ref var prog = ref Ꮡprog.Value;
 
     if (!shouldBacktrack(Ꮡprog)) {
         return 0;
     }
-    return maxBacktrackVector / len(prog.Inst);
+    return (nint)maxBacktrackVector / len(prog.Inst);
 }
 
 // shouldBacktrack reports whether the program is too
 // long for the backtracker to run.
 internal static bool shouldBacktrack(ж<syntax.Prog> Ꮡprog) {
-    ref var prog = ref Ꮡprog.val;
+    ref var prog = ref Ꮡprog.Value;
 
     return len(prog.Inst) <= maxBacktrackProg;
 }
@@ -80,7 +82,7 @@ internal static bool shouldBacktrack(ж<syntax.Prog> Ꮡprog) {
 // end is the end position in the input.
 // ncap is the number of captures.
 [GoRecv] internal static void reset(this ref bitState b, ж<syntax.Prog> Ꮡprog, nint end, nint ncap) {
-    ref var prog = ref Ꮡprog.val;
+    ref var prog = ref Ꮡprog.Value;
 
     b.end = end;
     if (cap(b.jobs) == 0){
@@ -88,12 +90,12 @@ internal static bool shouldBacktrack(ж<syntax.Prog> Ꮡprog) {
     } else {
         b.jobs = b.jobs[..0];
     }
-    nint visitedSize = (len(prog.Inst) * (end + 1) + visitedBits - 1) / visitedBits;
+    nint visitedSize = (len(prog.Inst) * (end + 1) + (nint)visitedBits - 1) / (nint)visitedBits;
     if (cap(b.visited) < visitedSize){
         b.visited = new slice<uint32>(visitedSize, maxBacktrackVector / visitedBits);
     } else {
         b.visited = b.visited[..(int)(visitedSize)];
-        clear(b.visited);
+        builtin.clear(b.visited);
     }
     // set to 0
     if (cap(b.cap) < ncap){
@@ -117,32 +119,33 @@ internal static bool shouldBacktrack(ж<syntax.Prog> Ꮡprog) {
 // shouldVisit reports whether the combination of (pc, pos) has not
 // been visited yet.
 [GoRecv] internal static bool shouldVisit(this ref bitState b, uint32 pc, nint pos) {
-    nuint n = ((nuint)(((nint)pc) * (b.end + 1) + pos));
-    if ((uint32)(b.visited[n / visitedBits] & (1 << (int)(((nuint)(n & (visitedBits - 1)))))) != 0) {
+    nuint n = (nuint)((nint)pc * (b.end + 1) + pos);
+    if ((uint32)(b.visited[(nint)(n / (nuint)visitedBits)] & (((uint32)1 << (int)(((nuint)(n & (nuint)(visitedBits - 1))))))) != 0) {
         return false;
     }
-    b.visited[n / visitedBits] |= (uint32)(1 << (int)(((nuint)(n & (visitedBits - 1)))));
+    b.visited[(nint)(n / (nuint)visitedBits)] |= (uint32)(((uint32)1 << (int)(((nuint)(n & (nuint)(visitedBits - 1))))));
     return true;
 }
 
 // push pushes (pc, pos, arg) onto the job stack if it should be
 // visited.
 [GoRecv] internal static void push(this ref bitState b, ж<Regexp> Ꮡre, uint32 pc, nint pos, bool arg) {
-    ref var re = ref Ꮡre.val;
+    ref var re = ref Ꮡre.Value;
 
     // Only check shouldVisit when arg is false.
     // When arg is true, we are continuing a previous visit.
-    if (re.prog.Inst[pc].Op != syntax.InstFail && (arg || b.shouldVisit(pc, pos))) {
+    if ((~re.prog).Inst[(nint)(pc)].Op != syntax.InstFail && (arg || b.shouldVisit(pc, pos))) {
         b.jobs = append(b.jobs, new job(pc: pc, arg: arg, pos: pos));
     }
 }
 
 // tryBacktrack runs a backtracking search starting at pos.
-[GoRecv] public static bool tryBacktrack(this ref Regexp re, ж<bitState> Ꮡb, input i, uint32 pc, nint pos) {
-    ref var b = ref Ꮡb.val;
+internal static bool tryBacktrack(this ж<Regexp> Ꮡre, ж<bitState> Ꮡb, input i, uint32 pc, nint pos) {
+    ref var re = ref Ꮡre.Value;
+    ref var b = ref Ꮡb.Value;
 
     var longest = re.longest;
-    b.push(re, pc, pos, false);
+    b.push(Ꮡre, pc, pos, false);
     while (len(b.jobs) > 0) {
         nint l = len(b.jobs) - 1;
         // Pop job off the stack.
@@ -163,12 +166,9 @@ CheckAndLoop:
             continue;
         }
 Skip:
-        var inst = Ꮡ(re.prog.Inst[pcΔ1]);
+        var inst = Ꮡ((~re.prog).Inst[pcΔ1]);
         var exprᴛ1 = (~inst).Op;
-        { /* default: */
-            throw panic("bad inst");
-        }
-        else if (exprᴛ1 == syntax.InstFail) {
+        if (exprᴛ1 == syntax.InstFail) {
             throw panic("unexpected InstFail");
         }
         else if (exprᴛ1 == syntax.InstAlt) {
@@ -183,28 +183,28 @@ Skip:
                 // later.
                 // Finished inst.Out; try inst.Arg.
                 arg = false;
-                pcΔ1 = inst.val.Arg;
+                pcΔ1 = inst.Value.Arg;
                 goto CheckAndLoop;
             } else {
-                b.push(re, pcΔ1, posΔ1, true);
-                pcΔ1 = inst.val.Out;
+                b.push(Ꮡre, pcΔ1, posΔ1, true);
+                pcΔ1 = inst.Value.Out;
                 goto CheckAndLoop;
             }
         }
         else if (exprᴛ1 == syntax.InstAltMatch) {
-            var exprᴛ2 = re.prog.Inst[(~inst).Out].Op;
+            var exprᴛ2 = (~re.prog).Inst[(nint)((~inst).Out)].Op;
             if (exprᴛ2 == syntax.InstRune || exprᴛ2 == syntax.InstRune1 || exprᴛ2 == syntax.InstRuneAny || exprᴛ2 == syntax.InstRuneAnyNotNL) {
-                b.push(re, // One opcode consumes runes; the other leads to match.
+                b.push(Ꮡre, // One opcode consumes runes; the other leads to match.
  // inst.Arg is the match.
  (~inst).Arg, posΔ1, false);
-                pcΔ1 = inst.val.Arg;
+                pcΔ1 = inst.Value.Arg;
                 posΔ1 = b.end;
                 goto CheckAndLoop;
             }
 
-            b.push(re, // inst.Out is the match - non-greedy
+            b.push(Ꮡre, // inst.Out is the match - non-greedy
  (~inst).Out, b.end, false);
-            pcΔ1 = inst.val.Out;
+            pcΔ1 = inst.Value.Out;
             goto CheckAndLoop;
         }
         else if (exprᴛ1 == syntax.InstRune) {
@@ -213,7 +213,7 @@ Skip:
                 continue;
             }
             posΔ1 += width;
-            pcΔ1 = inst.val.Out;
+            pcΔ1 = inst.Value.Out;
             goto CheckAndLoop;
         }
         else if (exprᴛ1 == syntax.InstRune1) {
@@ -222,7 +222,7 @@ Skip:
                 continue;
             }
             posΔ1 += width;
-            pcΔ1 = inst.val.Out;
+            pcΔ1 = inst.Value.Out;
             goto CheckAndLoop;
         }
         else if (exprᴛ1 == syntax.InstRuneAnyNotNL) {
@@ -231,7 +231,7 @@ Skip:
                 continue;
             }
             posΔ1 += width;
-            pcΔ1 = inst.val.Out;
+            pcΔ1 = inst.Value.Out;
             goto CheckAndLoop;
         }
         else if (exprᴛ1 == syntax.InstRuneAny) {
@@ -240,35 +240,35 @@ Skip:
                 continue;
             }
             posΔ1 += width;
-            pcΔ1 = inst.val.Out;
+            pcΔ1 = inst.Value.Out;
             goto CheckAndLoop;
         }
         else if (exprᴛ1 == syntax.InstCapture) {
             if (arg){
                 // Finished inst.Out; restore the old value.
-                b.cap[(~inst).Arg] = posΔ1;
+                b.cap[(nint)((~inst).Arg)] = posΔ1;
                 continue;
             } else {
-                if ((~inst).Arg < ((uint32)len(b.cap))) {
+                if ((~inst).Arg < (uint32)len(b.cap)) {
                     // Capture pos to register, but save old value.
-                    b.push(re, pcΔ1, b.cap[(~inst).Arg], true);
+                    b.push(Ꮡre, pcΔ1, b.cap[(nint)((~inst).Arg)], true);
                     // come back when we're done.
-                    b.cap[(~inst).Arg] = posΔ1;
+                    b.cap[(nint)((~inst).Arg)] = posΔ1;
                 }
-                pcΔ1 = inst.val.Out;
+                pcΔ1 = inst.Value.Out;
                 goto CheckAndLoop;
             }
         }
         else if (exprᴛ1 == syntax.InstEmptyWidth) {
             var flag = i.context(posΔ1);
-            if (!flag.match(((syntax.EmptyOp)(~inst).Arg))) {
+            if (!flag.match(((syntax.EmptyOp)(uint8)(~inst).Arg))) {
                 continue;
             }
-            pcΔ1 = inst.val.Out;
+            pcΔ1 = inst.Value.Out;
             goto CheckAndLoop;
         }
         else if (exprᴛ1 == syntax.InstNop) {
-            pcΔ1 = inst.val.Out;
+            pcΔ1 = inst.Value.Out;
             goto CheckAndLoop;
         }
         else if (exprᴛ1 == syntax.InstMatch) {
@@ -298,6 +298,9 @@ Skip:
             }
             continue;
         }
+        else { /* default: */
+            throw panic("bad inst");
+        }
 
     }
     // Otherwise, continue on in hope of a longer match.
@@ -305,9 +308,11 @@ Skip:
 }
 
 // backtrack runs a backtracking search of prog on the input starting at pos.
-[GoRecv] internal static slice<nint> backtrack(this ref Regexp re, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) {
+internal static slice<nint> backtrack(this ж<Regexp> Ꮡre, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) {
+    ref var re = ref Ꮡre.Value;
+
     var startCond = re.cond;
-    if (startCond == ~((syntax.EmptyOp)0)) {
+    if (startCond == ~((syntax.EmptyOp)((syntax.EmptyOp)0))) {
         // impossible
         return default!;
     }
@@ -316,14 +321,14 @@ Skip:
         return default!;
     }
     var b = newBitState();
-    var (i, end) = (~b).inputs.init(default!, ib, @is);
+    var (i, end) = b.of(bitState.Ꮡinputs).init(default!, ib, @is);
     b.reset(re.prog, end, ncap);
     // Anchored search must start at the beginning of the input
     if ((syntax.EmptyOp)(startCond & syntax.EmptyBeginText) != 0){
         if (len((~b).cap) > 0) {
-            (~b).cap[0] = pos;
+            b.Value.cap[0] = pos;
         }
-        if (!re.tryBacktrack(b, i, ((uint32)re.prog.Start), pos)) {
+        if (!Ꮡre.tryBacktrack(b, i, (uint32)(~re.prog).Start, pos)) {
             freeBitState(b);
             return default!;
         }
@@ -338,7 +343,7 @@ Skip:
         for (; pos <= end && width != 0; pos += width) {
             if (len(re.prefix) > 0) {
                 // Match requires literal prefix; fast search for it.
-                nint advance = i.index(re, pos);
+                nint advance = i.index(Ꮡre, pos);
                 if (advance < 0) {
                     freeBitState(b);
                     return default!;
@@ -346,9 +351,9 @@ Skip:
                 pos += advance;
             }
             if (len((~b).cap) > 0) {
-                (~b).cap[0] = pos;
+                b.Value.cap[0] = pos;
             }
-            if (re.tryBacktrack(b, i, ((uint32)re.prog.Start), pos)) {
+            if (Ꮡre.tryBacktrack(b, i, (uint32)(~re.prog).Start, pos)) {
                 // Match must be leftmost; done.
                 goto Match;
             }

@@ -5,19 +5,23 @@ namespace go.crypto;
 
 using bytes = bytes_package;
 using crypto = crypto_package;
-using pkix = crypto.x509.pkix_package;
+using pkix = go.crypto.x509.pkix_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using net = net_package;
-using url = net.url_package;
+using url = go.net.url_package;
 using reflect = reflect_package;
 using runtime = runtime_package;
 using strings = strings_package;
 using time = time_package;
-using utf8 = unicode.utf8_package;
-using crypto.x509;
-using net;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using asn1 = encoding.asn1_package;
+using cryptobyte = vendor.golang.org.x.crypto.cryptobyte_package;
+using encoding;
+using go.crypto.x509;
+using go.math;
+using go.net;
+using go.unicode;
 
 partial class x509_package {
 
@@ -91,11 +95,11 @@ public static @string Error(this HostnameError h) {
     {
         var ip = net.ParseIP(h.Host); if (ip != default!){
             // Trying to validate an IP
-            if (len((~c).IPAddresses) == 0) {
+            if (builtin.len((~c).IPAddresses) == 0) {
                 return "x509: cannot validate certificate for "u8 + h.Host + " because it doesn't contain any IP SANs"u8;
             }
             foreach (var (_, san) in (~c).IPAddresses) {
-                if (len(valid) > 0) {
+                if (builtin.len(valid) > 0) {
                     valid += ", "u8;
                 }
                 valid += san.String();
@@ -104,7 +108,7 @@ public static @string Error(this HostnameError h) {
             valid = strings.Join((~c).DNSNames, ", "u8);
         }
     }
-    if (len(valid) == 0) {
+    if (builtin.len(valid) == 0) {
         return "x509: certificate is not valid for any names, but wanted to match "u8 + h.Host;
     }
     return "x509: certificate is valid for "u8 + valid + ", not "u8 + h.Host;
@@ -124,12 +128,12 @@ public static @string Error(this HostnameError h) {
 public static @string Error(this UnknownAuthorityError e) {
     @string s = "x509: certificate signed by unknown authority"u8;
     if (e.hintErr != default!) {
-        @string certName = e.hintCert.Subject.CommonName;
-        if (len(certName) == 0) {
-            if (len(e.hintCert.Subject.Organization) > 0){
-                certName = e.hintCert.Subject.Organization[0];
+        @string certName = e.hintCert.Value.Subject.CommonName;
+        if (builtin.len(certName) == 0) {
+            if (builtin.len((~e.hintCert).Subject.Organization) > 0){
+                certName = (~e.hintCert).Subject.Organization[0];
             } else {
-                certName = "serial:"u8 + e.hintCert.SerialNumber.String();
+                certName = "serial:"u8 + (~e.hintCert).SerialNumber.String();
             }
         }
         s += fmt.Sprintf(" (possibly because of %q while trying to verify candidate authority certificate %q)"u8, e.hintErr, certName);
@@ -172,7 +176,7 @@ internal static error errNotParsed = errors.New("x509: missing ASN.1 contents; u
     public ж<CertPool> Roots;
     // CurrentTime is used to check the validity of all certificates in the
     // chain. If zero, the current time is used.
-    public time_package.Time CurrentTime;
+    public time.Time CurrentTime;
     // KeyUsages specifies which Extended Key Usage values are acceptable. A
     // chain is accepted if it allows any of the listed values. An empty list
     // means ExtKeyUsageServerAuth. To accept any key usage, include ExtKeyUsageAny.
@@ -193,8 +197,7 @@ internal static readonly UntypedInt rootCertificate = 2;
 // people) by breaking it into the “local” (i.e. before the '@') and “domain”
 // parts.
 [GoType] partial struct rfc2821Mailbox {
-    internal @string local;
-    internal @string domain;
+    internal @string local, domain;
 }
 
 // parseRFC2821Mailbox parses an email address into local and domain parts,
@@ -205,10 +208,10 @@ internal static (rfc2821Mailbox mailbox, bool ok) parseRFC2821Mailbox(@string @i
     rfc2821Mailbox mailbox = default!;
     bool ok = default!;
 
-    if (len(@in) == 0) {
+    if (builtin.len(@in) == 0) {
         return (mailbox, false);
     }
-    var localPartBytes = new slice<byte>(0, len(@in) / 2);
+    var localPartBytes = new slice<byte>(0, builtin.len(@in) / 2);
     if (@in[0] == (rune)'"'){
         // Quoted-string = DQUOTE *qcontent DQUOTE
         // non-whitespace-control = %d1-8 / %d11 / %d12 / %d14-31 / %d127
@@ -223,7 +226,7 @@ internal static (rfc2821Mailbox mailbox, bool ok) parseRFC2821Mailbox(@string @i
         @in = @in[1..];
 QuotedString:
         while (ᐧ) {
-            if (len(@in) == 0) {
+            if (builtin.len(@in) == 0) {
                 return (mailbox, false);
             }
             var c = @in[0];
@@ -234,7 +237,7 @@ QuotedString:
                 break;
             }
             case {} when c is (rune)'\\': {
-                if (len(@in) == 0) {
+                if (builtin.len(@in) == 0) {
                     // quoted-pair
                     return (mailbox, false);
                 }
@@ -266,13 +269,13 @@ break_QuotedString:;
     } else {
         // Atom ("." Atom)*
 NextChar:
-        while (len(@in) > 0) {
+        while (builtin.len(@in) > 0) {
             // atext from RFC 2822, Section 3.2.4
             var c = @in[0];
             var matchᴛ1 = false;
             if (c is (rune)'\\') { matchᴛ1 = true;
                 @in = @in[1..];
-                if (len(@in) == 0) {
+                if (builtin.len(@in) == 0) {
                     // Examples given in RFC 3696 suggest that
                     // escaped characters can appear outside of a
                     // quoted string. Several “verified” errata
@@ -293,7 +296,7 @@ NextChar:
 continue_NextChar:;
         }
 break_NextChar:;
-        if (len(localPartBytes) == 0) {
+        if (builtin.len(localPartBytes) == 0) {
             return (mailbox, false);
         }
         // From RFC 3696, Section 3:
@@ -301,11 +304,11 @@ break_NextChar:;
         // or end the local part, nor may two or more consecutive
         // periods appear.”
         var twoDots = new byte[]{(rune)'.', (rune)'.'}.slice();
-        if (localPartBytes[0] == (rune)'.' || localPartBytes[len(localPartBytes) - 1] == (rune)'.' || bytes.Contains(localPartBytes, twoDots)) {
+        if (localPartBytes[0] == (rune)'.' || localPartBytes[builtin.len(localPartBytes) - 1] == (rune)'.' || bytes.Contains(localPartBytes, twoDots)) {
             return (mailbox, false);
         }
     }
-    if (len(@in) == 0 || @in[0] != (rune)'@') {
+    if (builtin.len(@in) == 0 || @in[0] != (rune)'@') {
         return (mailbox, false);
     }
     @in = @in[1..];
@@ -328,7 +331,7 @@ internal static (slice<@string> reverseLabels, bool ok) domainToReverseLabels(@s
     slice<@string> reverseLabels = default!;
     bool ok = default!;
 
-    while (len(domain) > 0) {
+    while (builtin.len(domain) > 0) {
         {
             nint i = strings.LastIndexByte(domain, (rune)'.'); if (i == -1){
                 reverseLabels = append(reverseLabels, domain);
@@ -345,12 +348,12 @@ internal static (slice<@string> reverseLabels, bool ok) domainToReverseLabels(@s
             }
         }
     }
-    if (len(reverseLabels) > 0 && len(reverseLabels[0]) == 0) {
+    if (builtin.len(reverseLabels) > 0 && builtin.len(reverseLabels[0]) == 0) {
         // An empty label at the end indicates an absolute value.
         return (default!, false);
     }
     foreach (var (_, label) in reverseLabels) {
-        if (len(label) == 0) {
+        if (builtin.len(label) == 0) {
             // Empty labels are otherwise invalid.
             return (default!, false);
         }
@@ -380,7 +383,7 @@ internal static (bool, error) matchEmailConstraint(rfc2821Mailbox mailbox, @stri
 }
 
 internal static (bool, error) matchURIConstraint(ж<url.URL> Ꮡuri, @string constraint) {
-    ref var uri = ref Ꮡuri.val;
+    ref var uri = ref Ꮡuri.Value;
 
     // From RFC 5280, Section 4.2.1.10:
     // “a uniformResourceIdentifier that does not include an authority
@@ -390,7 +393,7 @@ internal static (bool, error) matchURIConstraint(ж<url.URL> Ꮡuri, @string con
     // is specified as an IP address), then the application MUST reject the
     // certificate.”
     @string host = uri.Host;
-    if (len(host) == 0) {
+    if (builtin.len(host) == 0) {
         return (false, fmt.Errorf("URI with empty host (%q) cannot be matched against constraints"u8, uri.String()));
     }
     if (strings.Contains(host, ":"u8) && !strings.HasSuffix(host, "]"u8)) {
@@ -407,9 +410,9 @@ internal static (bool, error) matchURIConstraint(ж<url.URL> Ꮡuri, @string con
 }
 
 internal static (bool, error) matchIPConstraint(net.IP ip, ж<net.IPNet> Ꮡconstraint) {
-    ref var constraint = ref Ꮡconstraint.val;
+    ref var constraint = ref Ꮡconstraint.Value;
 
-    if (len(ip) != len(constraint.IP)) {
+    if (builtin.len(ip) != builtin.len(constraint.IP)) {
         return (false, default!);
     }
     foreach (var (i, _) in ip) {
@@ -425,7 +428,7 @@ internal static (bool, error) matchIPConstraint(net.IP ip, ж<net.IPNet> Ꮡcons
 internal static (bool, error) matchDomainConstraint(@string domain, @string constraint) {
     // The meaning of zero length constraints is not specified, but this
     // code follows NSS and accepts them as matching everything.
-    if (len(constraint) == 0) {
+    if (builtin.len(constraint) == 0) {
         return (true, default!);
     }
     var (domainLabels, ok) = domainToReverseLabels(domain);
@@ -441,11 +444,11 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
         mustHaveSubdomains = true;
         constraint = constraint[1..];
     }
-    (constraintLabels, ok) = domainToReverseLabels(constraint);
+    (var constraintLabels, ok) = domainToReverseLabels(constraint);
     if (!ok) {
         return (false, fmt.Errorf("x509: internal error: cannot parse domain %q"u8, constraint));
     }
-    if (len(domainLabels) < len(constraintLabels) || (mustHaveSubdomains && len(domainLabels) == len(constraintLabels))) {
+    if (builtin.len(domainLabels) < builtin.len(constraintLabels) || (mustHaveSubdomains && builtin.len(domainLabels) == builtin.len(constraintLabels))) {
         return (false, default!);
     }
     foreach (var (i, constraintLabel) in constraintLabels) {
@@ -461,28 +464,29 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
 // form of name, suitable for passing to the match function. The total number
 // of comparisons is tracked in the given count and should not exceed the given
 // limit.
-[GoRecv] public static error checkNameConstraints(this ref Certificate c, ж<nint> Ꮡcount, nint maxConstraintComparisons, @string nameType, @string name, any parsedName, Func<any, any, (match bool, err error)> match, any permitted, any excluded) {
-    ref var count = ref Ꮡcount.val;
+internal static error checkNameConstraints(this ж<Certificate> Ꮡc, ж<nint> Ꮡcount, nint maxConstraintComparisons, @string nameType, @string name, any parsedName, Func<any, any, (bool, error)> match, any permitted, any excluded) {
+    ref var c = ref Ꮡc.Value;
+    ref var count = ref Ꮡcount.Value;
 
     var excludedValue = reflect.ValueOf(excluded);
     count += excludedValue.Len();
     if (count > maxConstraintComparisons) {
-        return new CertificateInvalidError(c, TooManyConstraints, "");
+        return new CertificateInvalidError(Ꮡc, TooManyConstraints, "");
     }
     for (nint i = 0; i < excludedValue.Len(); i++) {
         var constraint = excludedValue.Index(i).Interface();
-        var (matchΔ1, errΔ1) = match(parsedName, constraint);
-        if (errΔ1 != default!) {
-            return new CertificateInvalidError(c, CANotAuthorizedForThisName, errΔ1.Error());
+        var (matchΔ1, err) = match(parsedName, constraint);
+        if (err != default!) {
+            return new CertificateInvalidError(Ꮡc, CANotAuthorizedForThisName, err.Error());
         }
         if (matchΔ1) {
-            return new CertificateInvalidError(c, CANotAuthorizedForThisName, fmt.Sprintf("%s %q is excluded by constraint %q"u8, nameType, name, constraint));
+            return new CertificateInvalidError(Ꮡc, CANotAuthorizedForThisName, fmt.Sprintf("%s %q is excluded by constraint %q"u8, nameType, name, constraint));
         }
     }
     var permittedValue = reflect.ValueOf(permitted);
     count += permittedValue.Len();
     if (count > maxConstraintComparisons) {
-        return new CertificateInvalidError(c, TooManyConstraints, "");
+        return new CertificateInvalidError(Ꮡc, TooManyConstraints, "");
     }
     var ok = true;
     for (nint i = 0; i < permittedValue.Len(); i++) {
@@ -490,7 +494,7 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
         error err = default!;
         {
             (ok, err) = match(parsedName, constraint); if (err != default!) {
-                return new CertificateInvalidError(c, CANotAuthorizedForThisName, err.Error());
+                return new CertificateInvalidError(Ꮡc, CANotAuthorizedForThisName, err.Error());
             }
         }
         if (ok) {
@@ -498,23 +502,24 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
         }
     }
     if (!ok) {
-        return new CertificateInvalidError(c, CANotAuthorizedForThisName, fmt.Sprintf("%s %q is not permitted by any constraint"u8, nameType, name));
+        return new CertificateInvalidError(Ꮡc, CANotAuthorizedForThisName, fmt.Sprintf("%s %q is not permitted by any constraint"u8, nameType, name));
     }
     return default!;
 }
 
 // isValid performs validity checks on c given that it is a candidate to append
 // to the chain in currentChain.
-[GoRecv] public static error isValid(this ref Certificate c, nint certType, slice<ж<Certificate>> currentChain, ж<VerifyOptions> Ꮡopts) {
-    ref var opts = ref Ꮡopts.val;
+internal static error isValid(this ж<Certificate> Ꮡc, nint certType, slice<ж<Certificate>> currentChain, ж<VerifyOptions> Ꮡopts) {
+    ref var c = ref Ꮡc.Value;
+    ref var opts = ref Ꮡopts.Value;
 
-    if (len(c.UnhandledCriticalExtensions) > 0) {
+    if (builtin.len(c.UnhandledCriticalExtensions) > 0) {
         return new UnhandledCriticalExtension(nil);
     }
-    if (len(currentChain) > 0) {
-        var child = currentChain[len(currentChain) - 1];
+    if (builtin.len(currentChain) > 0) {
+        var child = currentChain[builtin.len(currentChain) - 1];
         if (!bytes.Equal((~child).RawIssuer, c.RawSubject)) {
-            return new CertificateInvalidError(c, NameMismatch, "");
+            return new CertificateInvalidError(Ꮡc, NameMismatch, "");
         }
     }
     var now = opts.CurrentTime;
@@ -523,14 +528,14 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
     }
     if (now.Before(c.NotBefore)){
         return new CertificateInvalidError(
-            Cert: c,
+            Cert: Ꮡc,
             Reason: Expired,
             Detail: fmt.Sprintf("current time %s is before %s"u8, now.Format(time.RFC3339), c.NotBefore.Format(time.RFC3339))
         );
     } else 
     if (now.After(c.NotAfter)) {
         return new CertificateInvalidError(
-            Cert: c,
+            Cert: Ꮡc,
             Reason: Expired,
             Detail: fmt.Sprintf("current time %s is after %s"u8, now.Format(time.RFC3339), c.NotAfter.Format(time.RFC3339))
         );
@@ -542,7 +547,7 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
     ref var comparisonCount = ref heap<nint>(out var ᏑcomparisonCount);
     comparisonCount = 0;
     if (certType == intermediateCertificate || certType == rootCertificate) {
-        if (len(currentChain) == 0) {
+        if (builtin.len(currentChain) == 0) {
             return errors.New("x509: internal error: empty chain when appending CA cert"u8);
         }
     }
@@ -554,20 +559,18 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
             }
         }
         foreach (var (_, sanCert) in toCheck) {
-            var err = forEachSAN(sanCert.getSANExtension(), 
-            var comparisonCountʗ1 = comparisonCount;
-            (nint tag, slice<byte> data) => {
+            var err = forEachSAN(sanCert.getSANExtension(), error (nint tag, slice<byte> data) => {
                 var exprᴛ1 = tag;
                 if (exprᴛ1 == nameTypeEmail) {
                     @string name = ((@string)data);
-                    var (mailbox, ok) = parseRFC2821Mailbox(name);
+                    ref var mailbox = ref heap<rfc2821Mailbox>(out var Ꮡmailbox);
+                    (mailbox, var ok) = parseRFC2821Mailbox(name);
                     if (!ok) {
                         return fmt.Errorf("x509: cannot parse rfc822Name %q"u8, mailbox);
                     }
                     {
-                        var errΔ6 = c.checkNameConstraints(ᏑcomparisonCountʗ1, maxConstraintComparisons, "email address"u8, name, mailbox,
-                            
-                            (any parsedName, any constraint) => matchEmailConstraint(parsedName._<rfc2821Mailbox>(), constraint._<@string>()), c.PermittedEmailAddresses, c.ExcludedEmailAddresses); if (errΔ6 != default!) {
+                        var errΔ6 = Ꮡc.checkNameConstraints(ᏑcomparisonCount, maxConstraintComparisons, "email address"u8, name, mailbox,
+                            (any parsedName, any constraint) => matchEmailConstraint(parsedName._<rfc2821Mailbox>(), constraint._<@string>()), Ꮡc.Value.PermittedEmailAddresses, Ꮡc.Value.ExcludedEmailAddresses); if (errΔ6 != default!) {
                             return errΔ6;
                         }
                     }
@@ -580,23 +583,21 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
                         }
                     }
                     {
-                        var errΔ7 = c.checkNameConstraints(ᏑcomparisonCount, maxConstraintComparisons, "DNS name"u8, name, name,
-                            
-                            (any parsedName, any constraint) => matchDomainConstraint(parsedName._<@string>(), constraint._<@string>()), c.PermittedDNSDomains, c.ExcludedDNSDomains); if (errΔ7 != default!) {
+                        var errΔ7 = Ꮡc.checkNameConstraints(ᏑcomparisonCount, maxConstraintComparisons, "DNS name"u8, name, name,
+                            (any parsedName, any constraint) => matchDomainConstraint(parsedName._<@string>(), constraint._<@string>()), Ꮡc.Value.PermittedDNSDomains, Ꮡc.Value.ExcludedDNSDomains); if (errΔ7 != default!) {
                             return errΔ7;
                         }
                     }
                 }
                 if (exprᴛ1 == nameTypeURI) {
                     @string name = ((@string)data);
-                    (uri, errΔ8) = url.Parse(name);
+                    var (uri, errΔ8) = url.Parse(name);
                     if (errΔ8 != default!) {
                         return fmt.Errorf("x509: internal error: URI SAN %q failed to parse"u8, name);
                     }
                     {
-                        var errΔ9 = c.checkNameConstraints(ᏑcomparisonCount, maxConstraintComparisons, "URI"u8, name, uri,
-                            
-                            (any parsedName, any constraint) => matchURIConstraint(parsedName._<ж<url.URL>>(), constraint._<@string>()), c.PermittedURIDomains, c.ExcludedURIDomains); if (errΔ9 != default!) {
+                        var errΔ9 = Ꮡc.checkNameConstraints(ᏑcomparisonCount, maxConstraintComparisons, "URI"u8, name, uri,
+                            (any parsedName, any constraint) => matchURIConstraint(parsedName._<ж<url.URL>>(), constraint._<@string>()), Ꮡc.Value.PermittedURIDomains, Ꮡc.Value.ExcludedURIDomains); if (errΔ9 != default!) {
                             return errΔ9;
                         }
                     }
@@ -604,14 +605,13 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
                 if (exprᴛ1 == nameTypeIP) {
                     var ip = ((net.IP)data);
                     {
-                        nint l = len(ip); if (l != net.IPv4len && l != net.IPv6len) {
+                        nint l = builtin.len(ip); if (l != net.IPv4len && l != net.IPv6len) {
                             return fmt.Errorf("x509: internal error: IP SAN %x failed to parse"u8, data);
                         }
                     }
                     {
-                        var errΔ10 = c.checkNameConstraints(ᏑcomparisonCount, maxConstraintComparisons, "IP address"u8, ip.String(), ip,
-                            
-                            (any parsedName, any constraint) => matchIPConstraint(parsedName._<net.IP>(), constraint._<ж<net.IPNet>>()), c.PermittedIPRanges, c.ExcludedIPRanges); if (errΔ10 != default!) {
+                        var errΔ10 = Ꮡc.checkNameConstraints(ᏑcomparisonCount, maxConstraintComparisons, "IP address"u8, ip.String(), ip,
+                            (any parsedName, any constraint) => matchIPConstraint(parsedName._<net.IP>(), constraint._<ж<net.IPNet>>()), Ꮡc.Value.PermittedIPRanges, Ꮡc.Value.ExcludedIPRanges); if (errΔ10 != default!) {
                             return errΔ10;
                         }
                     }
@@ -644,19 +644,19 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
     // keyUsage, and a keyUsage containing a flag indicating that the RSA
     // encryption key could only be used for Diffie-Hellman key agreement.
     if (certType == intermediateCertificate && (!c.BasicConstraintsValid || !c.IsCA)) {
-        return new CertificateInvalidError(c, NotAuthorizedToSign, "");
+        return new CertificateInvalidError(Ꮡc, NotAuthorizedToSign, "");
     }
     if (c.BasicConstraintsValid && c.MaxPathLen >= 0) {
-        nint numIntermediates = len(currentChain) - 1;
+        nint numIntermediates = builtin.len(currentChain) - 1;
         if (numIntermediates > c.MaxPathLen) {
-            return new CertificateInvalidError(c, TooManyIntermediates, "");
+            return new CertificateInvalidError(Ꮡc, TooManyIntermediates, "");
         }
     }
-    if (!boringAllowCert(c)) {
+    if (!boringAllowCert(Ꮡc)) {
         // IncompatibleUsage is not quite right here,
         // but it's also the "no chains found" error
         // and is close enough.
-        return new CertificateInvalidError(c, IncompatibleUsage, "");
+        return new CertificateInvalidError(Ꮡc, IncompatibleUsage, "");
     }
     return default!;
 }
@@ -693,21 +693,22 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
 // Certificates other than c in the returned chains should not be modified.
 //
 // WARNING: this function doesn't do any revocation checking.
-[GoRecv] public static (slice<slice<ж<Certificate>>> chains, error err) Verify(this ref Certificate c, VerifyOptions opts) {
+public static (slice<slice<ж<Certificate>>> chains, error err) Verify(this ж<Certificate> Ꮡc, VerifyOptions opts) {
     slice<slice<ж<Certificate>>> chains = default!;
     error err = default!;
 
+    ref var c = ref Ꮡc.Value;
     // Platform-specific verification needs the ASN.1 contents so
     // this makes the behavior consistent across platforms.
-    if (len(c.Raw) == 0) {
+    if (builtin.len(c.Raw) == 0) {
         return (default!, errNotParsed);
     }
     for (nint i = 0; i < opts.Intermediates.len(); i++) {
-        (cΔ1, _, errΔ1) = opts.Intermediates.cert(i);
+        var (cΔ1, _, errΔ1) = opts.Intermediates.cert(i);
         if (errΔ1 != default!) {
             return (default!, fmt.Errorf("crypto/x509: error fetching intermediate: %w"u8, errΔ1));
         }
-        if (len((~cΔ1).Raw) == 0) {
+        if (builtin.len((~cΔ1).Raw) == 0) {
             return (default!, errNotParsed);
         }
     }
@@ -717,10 +718,10 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
         // i.e. if SetFallbackRoots was called with x509usefallbackroots=1.
         var systemPool = systemRootsPool();
         if (opts.Roots == nil && (systemPool == nil || (~systemPool).systemPool)) {
-            return c.systemVerify(Ꮡ(opts));
+            return Ꮡc.systemVerify(Ꮡ(opts));
         }
-        if (opts.Roots != nil && opts.Roots.systemPool) {
-            (platformChains, errΔ2) = c.systemVerify(Ꮡ(opts));
+        if (opts.Roots != nil && (~opts.Roots).systemPool) {
+            var (platformChains, errΔ2) = Ꮡc.systemVerify(Ꮡ(opts));
             // If the platform verifier succeeded, or there are no additional
             // roots, return the platform verifier result. Otherwise, continue
             // with the Go verifier.
@@ -735,26 +736,26 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
             return (default!, new SystemRootsError(systemRootsErr));
         }
     }
-    err = c.isValid(leafCertificate, default!, Ꮡ(opts));
+    err = Ꮡc.isValid(leafCertificate, default!, Ꮡ(opts));
     if (err != default!) {
         return (chains, err);
     }
-    if (len(opts.DNSName) > 0) {
-        err = c.VerifyHostname(opts.DNSName);
+    if (builtin.len(opts.DNSName) > 0) {
+        err = Ꮡc.VerifyHostname(opts.DNSName);
         if (err != default!) {
             return (chains, err);
         }
     }
     slice<slice<ж<Certificate>>> candidateChains = default!;
-    if (opts.Roots.contains(c)){
-        candidateChains = new slice<ж<Certificate>>[]{new(c)}.slice();
+    if (opts.Roots.contains(Ꮡc)){
+        candidateChains = new slice<ж<Certificate>>[]{new ж<Certificate>[]{Ꮡc}.slice()}.slice();
     } else {
-        (candidateChains, err) = c.buildChains(new ж<Certificate>[]{c}.slice(), nil, Ꮡ(opts));
+        (candidateChains, err) = Ꮡc.buildChains(new ж<Certificate>[]{Ꮡc}.slice(), nil, Ꮡ(opts));
         if (err != default!) {
             return (default!, err);
         }
     }
-    if (len(opts.KeyUsages) == 0) {
+    if (builtin.len(opts.KeyUsages) == 0) {
         opts.KeyUsages = new ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice();
     }
     foreach (var (_, eku) in opts.KeyUsages) {
@@ -764,29 +765,29 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
             return (candidateChains, default!);
         }
     }
-    chains = new slice<slice<ж<Certificate>>>(0, len(candidateChains));
+    chains = new slice<slice<ж<Certificate>>>(0, builtin.len(candidateChains));
     foreach (var (_, candidate) in candidateChains) {
         if (checkChainForKeyUsage(candidate, opts.KeyUsages)) {
             chains = append(chains, candidate);
         }
     }
-    if (len(chains) == 0) {
-        return (default!, new CertificateInvalidError(c, IncompatibleUsage, ""));
+    if (builtin.len(chains) == 0) {
+        return (default!, new CertificateInvalidError(Ꮡc, IncompatibleUsage, ""));
     }
     return (chains, default!);
 }
 
 internal static slice<ж<Certificate>> appendToFreshChain(slice<ж<Certificate>> chain, ж<Certificate> Ꮡcert) {
-    ref var cert = ref Ꮡcert.val;
+    ref var cert = ref Ꮡcert.Value;
 
-    var n = new slice<ж<Certificate>>(len(chain) + 1);
+    var n = new slice<ж<Certificate>>(builtin.len(chain) + 1);
     copy(n, chain);
-    n[len(chain)] = cert;
+    n[builtin.len(chain)] = Ꮡcert;
     return n;
 }
 
 [GoType("dyn")] partial interface alreadyInChain_pubKeyEqual {
-    bool Equal(crypto.PublicKey _);
+    bool Equal(cryptoꓸPublicKey _);
 }
 
 // alreadyInChain checks whether a candidate certificate is present in a chain.
@@ -795,12 +796,13 @@ internal static slice<ж<Certificate>> appendToFreshChain(slice<ж<Certificate>>
 // are created by mutual cross-signatures, or other cross-signature bridge
 // oddities.
 internal static bool alreadyInChain(ж<Certificate> Ꮡcandidate, slice<ж<Certificate>> chain) {
-    ref var candidate = ref Ꮡcandidate.val;
+    ref var candidate = ref Ꮡcandidate.Value;
 
     ж<pkix.Extension> candidateSAN = default!;
-    ref var ext = ref heap(new crypto.x509.pkix_package.Extension(), out var Ꮡext);
+    foreach (var (_, vᴛ1) in candidate.Extensions) {
+        ref var ext = ref heap(new pkix.Extension(), out var Ꮡext);
+        ext = vᴛ1;
 
-    foreach (var (_, ext) in candidate.Extensions) {
         if (ext.Id.Equal(oidExtensionSubjectAltName)) {
             candidateSAN = Ꮡext;
             break;
@@ -810,13 +812,14 @@ internal static bool alreadyInChain(ж<Certificate> Ꮡcandidate, slice<ж<Certi
         if (!bytes.Equal(candidate.RawSubject, (~cert).RawSubject)) {
             continue;
         }
-        if (!candidate.PublicKey._<pubKeyEqual>().Equal((~cert).PublicKey)) {
+        if (!candidate.PublicKey._<alreadyInChain_pubKeyEqual>().Equal((~cert).PublicKey)) {
             continue;
         }
         ж<pkix.Extension> certSAN = default!;
-        ref var ext = ref heap(new crypto.x509.pkix_package.Extension(), out var Ꮡext);
+        foreach (var (_, vᴛ2) in (~cert).Extensions) {
+            ref var ext = ref heap(new pkix.Extension(), out var Ꮡext);
+            ext = vᴛ2;
 
-        foreach (var (_, ext) in (~cert).Extensions) {
             if (ext.Id.Equal(oidExtensionSubjectAltName)) {
                 certSAN = Ꮡext;
                 break;
@@ -841,81 +844,78 @@ internal static bool alreadyInChain(ж<Certificate> Ꮡcandidate, slice<ж<Certi
 // for failed checks due to different intermediates having the same Subject.
 internal static readonly UntypedInt maxChainSignatureChecks = 100;
 
-[GoRecv] public static (slice<slice<ж<Certificate>>> chains, error err) buildChains(this ref Certificate c, slice<ж<Certificate>> currentChain, ж<nint> ᏑsigChecks, ж<VerifyOptions> Ꮡopts) {
+internal static (slice<slice<ж<Certificate>>> chains, error err) buildChains(this ж<Certificate> Ꮡc, slice<ж<Certificate>> currentChain, ж<nint> ᏑsigChecks, ж<VerifyOptions> Ꮡopts) {
     slice<slice<ж<Certificate>>> chains = default!;
     error err = default!;
 
-    ref var sigChecks = ref ᏑsigChecks.val;
-    ref var opts = ref Ꮡopts.val;
-    error hintErr = default!;
-    ж<Certificate> hintCert = default!;
-    var considerCandidate = 
-    var chainsʗ1 = chains;
+    ref var c = ref Ꮡc.Value;
+    ref var sigChecks = ref ᏑsigChecks.DerefOrNil();
+    ref var opts = ref Ꮡopts.Value;
+    ref var hintErr = ref heap<error>(out var ᏑhintErr);
+    ref var hintCert = ref heap<ж<Certificate>>(out var ᏑhintCert);
     var currentChainʗ1 = currentChain;
-    var hintCertʗ1 = hintCert;
-    var hintErrʗ1 = hintErr;
-    (nint certType, potentialParent candidate) => {
+    var considerCandidate = (nint certType, potentialParent candidate) => {
         if ((~candidate.cert).PublicKey == default! || alreadyInChain(candidate.cert, currentChainʗ1)) {
-            return (chainsʗ1, err);
+            return;
         }
-        if (sigChecks == nil) {
-            sigChecks = @new<nint>();
+        if (ᏑsigChecks == nil) {
+            ᏑsigChecks = @new<nint>();
         }
-        sigChecks++;
-        if (sigChecks > maxChainSignatureChecks) {
+        ᏑsigChecks.Value++;
+        if (ᏑsigChecks.Value > maxChainSignatureChecks) {
             err = errors.New("x509: signature check attempts limit reached while verifying certificate chain"u8);
-            return (chainsʗ1, err);
+            return;
         }
         {
-            var errΔ1 = c.CheckSignatureFrom(candidate.cert); if (errΔ1 != default!) {
-                if (hintErrʗ1 == default!) {
-                    hintErrʗ1 = errΔ1;
-                    hintCertʗ1 = candidate.cert;
+            var errΔ1 = Ꮡc.Value.CheckSignatureFrom(candidate.cert); if (errΔ1 != default!) {
+                if (ᏑhintErr.ValueSlot == default!) {
+                    ᏑhintErr.ValueSlot = errΔ1;
+                    ᏑhintCert.ValueSlot = candidate.cert;
                 }
-                return (chainsʗ1, err);
+                return;
             }
         }
         err = candidate.cert.isValid(certType, currentChainʗ1, Ꮡopts);
         if (err != default!) {
-            if (hintErrʗ1 == default!) {
-                hintErrʗ1 = err;
-                hintCertʗ1 = candidate.cert;
+            if (ᏑhintErr.ValueSlot == default!) {
+                ᏑhintErr.ValueSlot = err;
+                ᏑhintCert.ValueSlot = candidate.cert;
             }
-            return (chainsʗ1, err);
+            return;
         }
         if (candidate.constraint != default!) {
             {
                 var errΔ2 = candidate.constraint(currentChainʗ1); if (errΔ2 != default!) {
-                    if (hintErrʗ1 == default!) {
-                        hintErrʗ1 = errΔ2;
-                        hintCertʗ1 = candidate.cert;
+                    if (ᏑhintErr.ValueSlot == default!) {
+                        ᏑhintErr.ValueSlot = errΔ2;
+                        ᏑhintCert.ValueSlot = candidate.cert;
                     }
-                    return (chainsʗ1, err);
+                    return;
                 }
             }
         }
         var exprᴛ1 = certType;
         if (exprᴛ1 == rootCertificate) {
-            chainsʗ1 = append(chainsʗ1, appendToFreshChain(currentChainʗ1, candidate.cert));
+            chains = append(chains, appendToFreshChain(currentChainʗ1, candidate.cert));
         }
         else if (exprᴛ1 == intermediateCertificate) {
             slice<slice<ж<Certificate>>> childChains = default!;
             (childChains, err) = candidate.cert.buildChains(appendToFreshChain(currentChainʗ1, candidate.cert), ᏑsigChecks, Ꮡopts);
-            chainsʗ1 = append(chainsʗ1, childChains.ꓸꓸꓸ);
+            chains = append(chains, childChains.ꓸꓸꓸ);
         }
 
     };
-    foreach (var (_, root) in opts.Roots.findPotentialParents(c)) {
+    foreach (var (_, root) in opts.Roots.findPotentialParents(Ꮡc)) {
         considerCandidate(rootCertificate, root);
     }
-    foreach (var (_, intermediate) in opts.Intermediates.findPotentialParents(c)) {
+    foreach (var (_, intermediate) in opts.Intermediates.findPotentialParents(Ꮡc)) {
         considerCandidate(intermediateCertificate, intermediate);
     }
-    if (len(chains) > 0) {
+    if (builtin.len(chains) > 0) {
         err = default!;
     }
-    if (len(chains) == 0 && err == default!) {
-        err = new UnknownAuthorityError(c, hintErr, hintCert);
+    if (builtin.len(chains) == 0 && err == default!) {
+        err = new UnknownAuthorityError(Ꮡc, hintErr, hintCert);
     }
     return (chains, err);
 }
@@ -935,7 +935,7 @@ internal static bool validHostname(@string host, bool isPattern) {
     if (!isPattern) {
         host = strings.TrimSuffix(host, "."u8);
     }
-    if (len(host) == 0) {
+    if (builtin.len(host) == 0) {
         return false;
     }
     if (host == "*"u8) {
@@ -988,12 +988,12 @@ internal static bool matchExactly(@string hostA, @string hostB) {
 internal static bool matchHostnames(@string pattern, @string host) {
     pattern = toLowerCaseASCII(pattern);
     host = toLowerCaseASCII(strings.TrimSuffix(host, "."u8));
-    if (len(pattern) == 0 || len(host) == 0) {
+    if (builtin.len(pattern) == 0 || builtin.len(host) == 0) {
         return false;
     }
     var patternParts = strings.Split(pattern, "."u8);
     var hostParts = strings.Split(host, "."u8);
-    if (len(patternParts) != len(hostParts)) {
+    if (builtin.len(patternParts) != builtin.len(hostParts)) {
         return false;
     }
     foreach (var (i, patternPart) in patternParts) {
@@ -1031,7 +1031,7 @@ internal static @string toLowerCaseASCII(@string @in) {
     var @out = slice<byte>(@in);
     foreach (var (i, c) in @out) {
         if ((rune)'A' <= c && c <= (rune)'Z') {
-            @out[i] += (rune)'a' - (rune)'A';
+            @out[i] += (byte)((rune)'a' - (rune)'A');
         }
     }
     return ((@string)@out);
@@ -1046,11 +1046,13 @@ internal static @string toLowerCaseASCII(@string @in) {
 // fields can have a wildcard as the complete left-most label (e.g. *.example.com).
 //
 // Note that the legacy Common Name field is ignored.
-[GoRecv] public static error VerifyHostname(this ref Certificate c, @string h) {
+public static error VerifyHostname(this ж<Certificate> Ꮡc, @string h) {
+    ref var c = ref Ꮡc.Value;
+
     // IP addresses may be written in [ ].
     @string candidateIP = h;
-    if (len(h) >= 3 && h[0] == (rune)'[' && h[len(h) - 1] == (rune)']') {
-        candidateIP = h[1..(int)(len(h) - 1)];
+    if (builtin.len(h) >= 3 && h[0] == (rune)'[' && h[builtin.len(h) - 1] == (rune)']') {
+        candidateIP = h[1..(int)(builtin.len(h) - 1)];
     }
     {
         var ip = net.ParseIP(candidateIP); if (ip != default!) {
@@ -1061,7 +1063,7 @@ internal static @string toLowerCaseASCII(@string @in) {
                     return default!;
                 }
             }
-            return new HostnameError(c, candidateIP);
+            return new HostnameError(Ꮡc, candidateIP);
         }
     }
     @string candidateName = toLowerCaseASCII(h);
@@ -1083,23 +1085,23 @@ internal static @string toLowerCaseASCII(@string @in) {
             }
         }
     }
-    return new HostnameError(c, h);
+    return new HostnameError(Ꮡc, h);
 }
 
 internal static bool checkChainForKeyUsage(slice<ж<Certificate>> chain, slice<ExtKeyUsage> keyUsages) {
-    var usages = new slice<ExtKeyUsage>(len(keyUsages));
+    var usages = new slice<ExtKeyUsage>(builtin.len(keyUsages));
     copy(usages, keyUsages);
-    if (len(chain) == 0) {
+    if (builtin.len(chain) == 0) {
         return false;
     }
-    nint usagesRemaining = len(usages);
+    nint usagesRemaining = builtin.len(usages);
     // We walk down the list and cross out any usages that aren't supported
     // by each certificate. If we cross out all the usages, then the chain
     // is unacceptable.
 NextCert:
-    for (nint i = len(chain) - 1; i >= 0; i--) {
+    for (nint i = builtin.len(chain) - 1; i >= 0; i--) {
         var cert = chain[i];
-        if (len((~cert).ExtKeyUsage) == 0 && len((~cert).UnknownExtKeyUsage) == 0) {
+        if (builtin.len((~cert).ExtKeyUsage) == 0 && builtin.len((~cert).UnknownExtKeyUsage) == 0) {
             // The certificate doesn't have any extended key usage specified.
             continue;
         }
@@ -1109,8 +1111,7 @@ NextCert:
                 goto continue_NextCert;
             }
         }
-        GoUntyped invalidUsage = /* -1 */
-                    GoUntyped.Parse("-1");
+        ExtKeyUsage invalidUsage = -1;
 NextRequestedUsage:
         foreach (var (iΔ1, requestedUsage) in usages) {
             if (requestedUsage == invalidUsage) {
@@ -1126,7 +1127,9 @@ NextRequestedUsage:
             if (usagesRemaining == 0) {
                 return false;
             }
+continue_NextRequestedUsage:;
         }
+break_NextRequestedUsage:;
 continue_NextCert:;
     }
 break_NextCert:;

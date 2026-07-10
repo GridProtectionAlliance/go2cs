@@ -17,7 +17,7 @@ partial class macho_package {
 [GoType] partial struct FatFile {
     public uint32 Magic;
     public slice<FatArch> Arches;
-    internal io_package.Closer closer;
+    internal io.Closer closer;
 }
 
 // A FatArchHeader represents a fat header for a specific image architecture.
@@ -46,12 +46,12 @@ public static ж<FormatError> ErrNotFat = Ꮡ(new FormatError(0, "not a fat Mach
 // the ReaderAt.
 public static (ж<FatFile>, error) NewFatFile(io.ReaderAt r) {
     ref var ff = ref heap(new FatFile(), out var Ꮡff);
-    var sr = io.NewSectionReader(r, 0, 1 << (int)(63) - 1);
+    var sr = io.NewSectionReader(r, 0, 9223372036854775807L);
     // Read the fat_header struct, which is always in big endian.
     // Start with the magic number.
-    var err = binary.Read(~sr, binary.BigEndian, Ꮡff.of(FatFile.ᏑMagic));
+    var err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), Ꮡff.of(FatFile.ᏑMagic));
     if (err != default!){
-        return (default!, new FormatError(0, "error reading magic number", default!));
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "error reading magic number", default!))));
     } else 
     if (ff.Magic != MagicFat) {
         // See if this is a Mach-O file via its magic number. The magic
@@ -60,22 +60,22 @@ public static (ж<FatFile>, error) NewFatFile(io.ReaderAt r) {
         binary.BigEndian.PutUint32(buf[..], ff.Magic);
         var leMagic = binary.LittleEndian.Uint32(buf[..]);
         if (leMagic == Magic32 || leMagic == Magic64){
-            return (default!, ~ErrNotFat);
+            return (default!, new FormatErrorжerror(ErrNotFat));
         } else {
-            return (default!, new FormatError(0, "invalid magic number", default!));
+            return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "invalid magic number", default!))));
         }
     }
     ref var offset = ref heap<int64>(out var Ꮡoffset);
-    offset = ((int64)4);
+    offset = (int64)4;
     // Read the number of FatArchHeaders that come after the fat_header.
     ref var narch = ref heap(new uint32(), out var Ꮡnarch);
-    err = binary.Read(~sr, binary.BigEndian, Ꮡnarch);
+    err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), Ꮡnarch);
     if (err != default!) {
-        return (default!, new FormatError(offset, "invalid fat_header", default!));
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "invalid fat_header", default!))));
     }
     offset += 4;
     if (narch < 1) {
-        return (default!, new FormatError(offset, "file contains no images", default!));
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "file contains no images", default!))));
     }
     // Combine the Cpu and SubCpu (both uint32) into a uint64 to make sure
     // there are not duplicate architectures.
@@ -84,28 +84,28 @@ public static (ж<FatFile>, error) NewFatFile(io.ReaderAt r) {
     Type machoType = default!;
     // Following the fat_header comes narch fat_arch structs that index
     // Mach-O images further in the file.
-    nint c = saferio.SliceCap<FatArch>(((uint64)narch));
+    nint c = saferio.SliceCap<FatArch>((uint64)narch);
     if (c < 0) {
-        return (default!, new FormatError(offset, "too many images", default!));
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "too many images", default!))));
     }
     ff.Arches = new slice<FatArch>(0, c);
-    for (var i = ((uint32)0); i < narch; i++) {
-        FatArch fa = default!;
-        err = binary.Read(~sr, binary.BigEndian, Ꮡfa.of(FatArch.ᏑFatArchHeader));
+    for (var i = (uint32)0; i < narch; i++) {
+        ref var fa = ref heap(new FatArch(), out var Ꮡfa);
+        err = binary.Read(new io_SectionReaderжReader(sr), new binary_bigEndianᴠByteOrder(binary.BigEndian), Ꮡfa.of(FatArch.ᏑFatArchHeader));
         if (err != default!) {
-            return (default!, new FormatError(offset, "invalid fat_arch header", default!));
+            return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "invalid fat_arch header", default!))));
         }
         offset += fatArchHeaderSize;
-        var fr = io.NewSectionReader(r, ((int64)fa.Offset), ((int64)fa.Size));
-        (fa.File, err) = NewFile(~fr);
+        var fr = io.NewSectionReader(r, (int64)fa.Offset, (int64)fa.Size);
+        (fa.File, err) = NewFile(new io_SectionReaderжReaderAt(fr));
         if (err != default!) {
             return (default!, err);
         }
         // Make sure the architecture for this image is not duplicate.
-        var seenArch = (uint64)((((uint64)fa.Cpu) << (int)(32)) | ((uint64)fa.SubCpu));
+        var seenArch = (uint64)((((uint64)(uint32)fa.Cpu << (int)(32))) | (uint64)fa.SubCpu);
         {
-            var (o, k) = seenArches[seenArch]; if (o || k) {
-                return (default!, new FormatError(offset, fmt.Sprintf("duplicate architecture cpu=%v, subcpu=%#x"u8, fa.Cpu, fa.SubCpu), default!));
+            var (o, k) = seenArches[seenArch, ꟷ]; if (o || k) {
+                return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, fmt.Sprintf("duplicate architecture cpu=%v, subcpu=%#x"u8, fa.Cpu, fa.SubCpu), default!))));
             }
         }
         seenArches[seenArch] = true;
@@ -114,7 +114,7 @@ public static (ж<FatFile>, error) NewFatFile(io.ReaderAt r) {
             machoType = fa.Type;
         } else {
             if (fa.Type != machoType) {
-                return (default!, new FormatError(offset, fmt.Sprintf("Mach-O type for architecture #%d (type=%#x) does not match first (type=%#x)"u8, i, fa.Type, machoType), default!));
+                return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, fmt.Sprintf("Mach-O type for architecture #%d (type=%#x) does not match first (type=%#x)"u8, i, fa.Type, machoType), default!))));
             }
         }
         ff.Arches = append(ff.Arches, fa);
@@ -125,16 +125,16 @@ public static (ж<FatFile>, error) NewFatFile(io.ReaderAt r) {
 // OpenFat opens the named file using [os.Open] and prepares it for use as a Mach-O
 // universal binary.
 public static (ж<FatFile>, error) OpenFat(@string name) {
-    (f, err) = os.Open(name);
+    var (f, err) = os.Open(name);
     if (err != default!) {
         return (default!, err);
     }
-    (ff, err) = NewFatFile(~f);
+    (var ff, err) = NewFatFile(new os_FileжReaderAt(f));
     if (err != default!) {
         f.Close();
         return (default!, err);
     }
-    ff.val.closer = f;
+    ff.Value.closer = new os_FileжCloser(f);
     return (ff, default!);
 }
 

@@ -35,11 +35,11 @@ partial class fnv_package {
 
 internal static readonly UntypedInt offset32 = 2166136261;
 internal static readonly UntypedInt offset64 = 14695981039346656037;
-internal static readonly UntypedInt offset128Lower = /* 0x62b821756295c58d */ 7113472399480571277;
-internal static readonly UntypedInt offset128Higher = /* 0x6c62272e07bb0142 */ 7809847782465536322;
+internal static readonly UntypedInt offset128Lower = 0x62b821756295c58d;
+internal static readonly UntypedInt offset128Higher = 0x6c62272e07bb0142;
 internal static readonly UntypedInt prime32 = 16777619;
 internal static readonly UntypedInt prime64 = 1099511628211;
-internal static readonly UntypedInt prime128Lower = /* 0x13b */ 315;
+internal static readonly UntypedInt prime128Lower = 0x13b;
 internal static readonly UntypedInt prime128Shift = 24;
 
 // New32 returns a new 32-bit FNV-1 [hash.Hash].
@@ -47,7 +47,7 @@ internal static readonly UntypedInt prime128Shift = 24;
 public static hash.Hash32 New32() {
     ref var s = ref heap(new sum32(), out var Ꮡs);
     s = offset32;
-    return ~Ꮡs;
+    return new sum32жHash32(Ꮡs);
 }
 
 // New32a returns a new 32-bit FNV-1a [hash.Hash].
@@ -55,7 +55,7 @@ public static hash.Hash32 New32() {
 public static hash.Hash32 New32a() {
     ref var s = ref heap(new sum32a(), out var Ꮡs);
     s = offset32;
-    return ~Ꮡs;
+    return new sum32aжHash32(Ꮡs);
 }
 
 // New64 returns a new 64-bit FNV-1 [hash.Hash].
@@ -63,7 +63,7 @@ public static hash.Hash32 New32a() {
 public static hash.Hash64 New64() {
     ref var s = ref heap(new sum64(), out var Ꮡs);
     s = offset64;
-    return ~Ꮡs;
+    return new sum64жHash64(Ꮡs);
 }
 
 // New64a returns a new 64-bit FNV-1a [hash.Hash].
@@ -71,7 +71,7 @@ public static hash.Hash64 New64() {
 public static hash.Hash64 New64a() {
     ref var s = ref heap(new sum64a(), out var Ꮡs);
     s = offset64;
-    return ~Ꮡs;
+    return new sum64aжHash64(Ꮡs);
 }
 
 // New128 returns a new 128-bit FNV-1 [hash.Hash].
@@ -80,7 +80,7 @@ public static hash.Hash New128() {
     ref var s = ref heap(new sum128(), out var Ꮡs);
     s[0] = offset128Higher;
     s[1] = offset128Lower;
-    return ~Ꮡs;
+    return new sum128жHash(Ꮡs);
 }
 
 // New128a returns a new 128-bit FNV-1a [hash.Hash].
@@ -89,7 +89,7 @@ public static hash.Hash New128a() {
     ref var s = ref heap(new sum128a(), out var Ꮡs);
     s[0] = offset128Higher;
     s[1] = offset128Lower;
-    return ~Ꮡs;
+    return new sum128aжHash(Ꮡs);
 }
 
 [GoRecv] internal static void Reset(this ref sum32 s) {
@@ -109,36 +109,36 @@ public static hash.Hash New128a() {
 }
 
 [GoRecv] internal static void Reset(this ref sum128 s) {
-    s.val[0] = offset128Higher;
-    s.val[1] = offset128Lower;
+    s.Value[0] = offset128Higher;
+    s.Value[1] = offset128Lower;
 }
 
 [GoRecv] internal static void Reset(this ref sum128a s) {
-    s.val[0] = offset128Higher;
-    s.val[1] = offset128Lower;
+    s.Value[0] = offset128Higher;
+    s.Value[1] = offset128Lower;
 }
 
 [GoRecv] internal static uint32 Sum32(this ref sum32 s) {
-    return ((uint32)(s));
+    return (uint32)(s);
 }
 
 [GoRecv] internal static uint32 Sum32(this ref sum32a s) {
-    return ((uint32)(s));
+    return (uint32)(s);
 }
 
 [GoRecv] internal static uint64 Sum64(this ref sum64 s) {
-    return ((uint64)(s));
+    return (uint64)(s);
 }
 
 [GoRecv] internal static uint64 Sum64(this ref sum64a s) {
-    return ((uint64)(s));
+    return (uint64)(s);
 }
 
 [GoRecv] internal static (nint, error) Write(this ref sum32 s, slice<byte> data) {
     var hash = s;
     foreach (var (_, c) in data) {
         hash *= prime32;
-        hash ^= (sum32)(((sum32)c));
+        hash ^= (sum32)(((sum32)(uint32)c));
     }
     s = hash;
     return (len(data), default!);
@@ -147,7 +147,7 @@ public static hash.Hash New128a() {
 [GoRecv] internal static (nint, error) Write(this ref sum32a s, slice<byte> data) {
     var hash = s;
     foreach (var (_, c) in data) {
-        hash ^= (sum32a)(((sum32a)c));
+        hash ^= (sum32a)(((sum32a)(uint32)c));
         hash *= prime32;
     }
     s = hash;
@@ -158,7 +158,7 @@ public static hash.Hash New128a() {
     var hash = s;
     foreach (var (_, c) in data) {
         hash *= prime64;
-        hash ^= (sum64)(((sum64)c));
+        hash ^= (sum64)(((sum64)(uint64)c));
     }
     s = hash;
     return (len(data), default!);
@@ -167,7 +167,7 @@ public static hash.Hash New128a() {
 [GoRecv] internal static (nint, error) Write(this ref sum64a s, slice<byte> data) {
     var hash = s;
     foreach (var (_, c) in data) {
-        hash ^= (sum64a)(((sum64a)c));
+        hash ^= (sum64a)(((sum64a)(uint64)c));
         hash *= prime64;
     }
     s = hash;
@@ -177,25 +177,25 @@ public static hash.Hash New128a() {
 [GoRecv] internal static (nint, error) Write(this ref sum128 s, slice<byte> data) {
     foreach (var (_, c) in data) {
         // Compute the multiplication
-        var (s0, s1) = bits.Mul64(prime128Lower, s.val[1]);
-        s0 += s.val[1] << (int)(prime128Shift) + prime128Lower * s.val[0];
+        var (s0, s1) = bits.Mul64(prime128Lower, s.Value[1]);
+        s0 += (s.Value[1] << (int)(prime128Shift)) + (uint64)prime128Lower * s.Value[0];
         // Update the values
-        s.val[1] = s1;
-        s.val[0] = s0;
-        s.val[1] ^= (uint64)(((uint64)c));
+        s.Value[1] = s1;
+        s.Value[0] = s0;
+        s.Value[1] ^= (uint64)((uint64)c);
     }
     return (len(data), default!);
 }
 
 [GoRecv] internal static (nint, error) Write(this ref sum128a s, slice<byte> data) {
     foreach (var (_, c) in data) {
-        s.val[1] ^= (uint64)(((uint64)c));
+        s.Value[1] ^= (uint64)((uint64)c);
         // Compute the multiplication
-        var (s0, s1) = bits.Mul64(prime128Lower, s.val[1]);
-        s0 += s.val[1] << (int)(prime128Shift) + prime128Lower * s.val[0];
+        var (s0, s1) = bits.Mul64(prime128Lower, s.Value[1]);
+        s0 += (s.Value[1] << (int)(prime128Shift)) + (uint64)prime128Lower * s.Value[0];
         // Update the values
-        s.val[1] = s1;
-        s.val[0] = s0;
+        s.Value[1] = s1;
+        s.Value[0] = s0;
     }
     return (len(data), default!);
 }
@@ -249,33 +249,33 @@ public static hash.Hash New128a() {
 }
 
 [GoRecv] internal static slice<byte> Sum(this ref sum32 s, slice<byte> @in) {
-    var v = ((uint32)(s));
+    var v = (uint32)(s);
     return byteorder.BeAppendUint32(@in, v);
 }
 
 [GoRecv] internal static slice<byte> Sum(this ref sum32a s, slice<byte> @in) {
-    var v = ((uint32)(s));
+    var v = (uint32)(s);
     return byteorder.BeAppendUint32(@in, v);
 }
 
 [GoRecv] internal static slice<byte> Sum(this ref sum64 s, slice<byte> @in) {
-    var v = ((uint64)(s));
+    var v = (uint64)(s);
     return byteorder.BeAppendUint64(@in, v);
 }
 
 [GoRecv] internal static slice<byte> Sum(this ref sum64a s, slice<byte> @in) {
-    var v = ((uint64)(s));
+    var v = (uint64)(s);
     return byteorder.BeAppendUint64(@in, v);
 }
 
 [GoRecv] internal static slice<byte> Sum(this ref sum128 s, slice<byte> @in) {
-    var ret = byteorder.BeAppendUint64(@in, s.val[0]);
-    return byteorder.BeAppendUint64(ret, s.val[1]);
+    var ret = byteorder.BeAppendUint64(@in, s.Value[0]);
+    return byteorder.BeAppendUint64(ret, s.Value[1]);
 }
 
 [GoRecv] internal static slice<byte> Sum(this ref sum128a s, slice<byte> @in) {
-    var ret = byteorder.BeAppendUint64(@in, s.val[0]);
-    return byteorder.BeAppendUint64(ret, s.val[1]);
+    var ret = byteorder.BeAppendUint64(@in, s.Value[0]);
+    return byteorder.BeAppendUint64(ret, s.Value[1]);
 }
 
 internal static readonly @string magic32 = "fnv\x01"u8;
@@ -291,44 +291,44 @@ internal const nint marshaledSize128 = /* len(magic128) + 8*2 */ 20;
 [GoRecv] internal static (slice<byte>, error) MarshalBinary(this ref sum32 s) {
     var b = new slice<byte>(0, marshaledSize32);
     b = append(b, magic32.ꓸꓸꓸ);
-    b = byteorder.BeAppendUint32(b, ((uint32)(s)));
+    b = byteorder.BeAppendUint32(b, (uint32)(s));
     return (b, default!);
 }
 
 [GoRecv] internal static (slice<byte>, error) MarshalBinary(this ref sum32a s) {
     var b = new slice<byte>(0, marshaledSize32);
     b = append(b, magic32a.ꓸꓸꓸ);
-    b = byteorder.BeAppendUint32(b, ((uint32)(s)));
+    b = byteorder.BeAppendUint32(b, (uint32)(s));
     return (b, default!);
 }
 
 [GoRecv] internal static (slice<byte>, error) MarshalBinary(this ref sum64 s) {
     var b = new slice<byte>(0, marshaledSize64);
     b = append(b, magic64.ꓸꓸꓸ);
-    b = byteorder.BeAppendUint64(b, ((uint64)(s)));
+    b = byteorder.BeAppendUint64(b, (uint64)(s));
     return (b, default!);
 }
 
 [GoRecv] internal static (slice<byte>, error) MarshalBinary(this ref sum64a s) {
     var b = new slice<byte>(0, marshaledSize64);
     b = append(b, magic64a.ꓸꓸꓸ);
-    b = byteorder.BeAppendUint64(b, ((uint64)(s)));
+    b = byteorder.BeAppendUint64(b, (uint64)(s));
     return (b, default!);
 }
 
 [GoRecv] internal static (slice<byte>, error) MarshalBinary(this ref sum128 s) {
     var b = new slice<byte>(0, marshaledSize128);
     b = append(b, magic128.ꓸꓸꓸ);
-    b = byteorder.BeAppendUint64(b, s.val[0]);
-    b = byteorder.BeAppendUint64(b, s.val[1]);
+    b = byteorder.BeAppendUint64(b, s.Value[0]);
+    b = byteorder.BeAppendUint64(b, s.Value[1]);
     return (b, default!);
 }
 
 [GoRecv] internal static (slice<byte>, error) MarshalBinary(this ref sum128a s) {
     var b = new slice<byte>(0, marshaledSize128);
     b = append(b, magic128a.ꓸꓸꓸ);
-    b = byteorder.BeAppendUint64(b, s.val[0]);
-    b = byteorder.BeAppendUint64(b, s.val[1]);
+    b = byteorder.BeAppendUint64(b, s.Value[0]);
+    b = byteorder.BeAppendUint64(b, s.Value[1]);
     return (b, default!);
 }
 
@@ -383,8 +383,8 @@ internal const nint marshaledSize128 = /* len(magic128) + 8*2 */ 20;
     if (len(b) != marshaledSize128) {
         return errors.New("hash/fnv: invalid hash state size"u8);
     }
-    s.val[0] = byteorder.BeUint64(b[4..]);
-    s.val[1] = byteorder.BeUint64(b[12..]);
+    s.Value[0] = byteorder.BeUint64(b[4..]);
+    s.Value[1] = byteorder.BeUint64(b[12..]);
     return default!;
 }
 
@@ -395,8 +395,8 @@ internal const nint marshaledSize128 = /* len(magic128) + 8*2 */ 20;
     if (len(b) != marshaledSize128) {
         return errors.New("hash/fnv: invalid hash state size"u8);
     }
-    s.val[0] = byteorder.BeUint64(b[4..]);
-    s.val[1] = byteorder.BeUint64(b[12..]);
+    s.Value[0] = byteorder.BeUint64(b[4..]);
+    s.Value[1] = byteorder.BeUint64(b[12..]);
     return default!;
 }
 

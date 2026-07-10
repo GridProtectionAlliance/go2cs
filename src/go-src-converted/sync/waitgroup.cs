@@ -25,7 +25,7 @@ partial class sync_package {
 // [the Go memory model]: https://go.dev/ref/mem
 [GoType] partial struct WaitGroup {
     internal noCopy noCopy;
-    internal sync.atomic_package.Uint64 state; // high 32 bits are counter, low 32 bits are waiter count.
+    internal atomic.Uint64 state; // high 32 bits are counter, low 32 bits are waiter count.
     internal uint32 sema;
 }
 
@@ -42,7 +42,9 @@ partial class sync_package {
 // If a WaitGroup is reused to wait for several independent sets of events,
 // new Add calls must happen after all previous Wait calls have returned.
 // See the WaitGroup example.
-[GoRecv] public static void Add(this ref WaitGroup wg, nint delta) => func((defer, _) => {
+public static void Add(this ж<WaitGroup> Ꮡwg, nint delta) => func((defer, recover) => {
+    ref var wg = ref Ꮡwg.Value;
+
     if (race.Enabled) {
         if (delta < 0) {
             // Synchronize decrements with Wait.
@@ -51,19 +53,19 @@ partial class sync_package {
         race.Disable();
         defer(race.Enable);
     }
-    var state = wg.state.Add(((uint64)delta) << (int)(32));
-    var v = ((int32)(state >> (int)(32)));
-    var w = ((uint32)state);
-    if (race.Enabled && delta > 0 && v == ((int32)delta)) {
+    var state = Ꮡwg.of(WaitGroup.Ꮡstate).Add(((uint64)delta << (int)(32)));
+    var v = (int32)((state >> (int)(32)));
+    var w = (uint32)state;
+    if (race.Enabled && delta > 0 && v == (int32)delta) {
         // The first increment must be synchronized with Wait.
         // Need to model this as a read, because there can be
         // several concurrent wg.counter transitions from 0.
-        race.Read(new @unsafe.Pointer(Ꮡ(wg.sema)));
+        race.Read(new @unsafe.Pointer(Ꮡwg.of(WaitGroup.Ꮡsema)));
     }
     if (v < 0) {
         throw panic("sync: negative WaitGroup counter");
     }
-    if (w != 0 && delta > 0 && v == ((int32)delta)) {
+    if (w != 0 && delta > 0 && v == (int32)delta) {
         throw panic("sync: WaitGroup misuse: Add called concurrently with Wait");
     }
     if (v > 0 || w == 0) {
@@ -74,30 +76,34 @@ partial class sync_package {
     // - Adds must not happen concurrently with Wait,
     // - Wait does not increment waiters if it sees counter == 0.
     // Still do a cheap sanity check to detect WaitGroup misuse.
-    if (wg.state.Load() != state) {
+    if (Ꮡwg.of(WaitGroup.Ꮡstate).Load() != state) {
         throw panic("sync: WaitGroup misuse: Add called concurrently with Wait");
     }
     // Reset waiters count to 0.
-    wg.state.Store(0);
+    Ꮡwg.of(WaitGroup.Ꮡstate).Store(0);
     for (; w != 0; w--) {
-        runtime_Semrelease(Ꮡ(wg.sema), false, 0);
+        runtime_Semrelease(Ꮡwg.of(WaitGroup.Ꮡsema), false, 0);
     }
 });
 
 // Done decrements the [WaitGroup] counter by one.
-[GoRecv] public static void Done(this ref WaitGroup wg) {
-    wg.Add(-1);
+public static void Done(this ж<WaitGroup> Ꮡwg) {
+    ref var wg = ref Ꮡwg.Value;
+
+    Ꮡwg.Add(-1);
 }
 
 // Wait blocks until the [WaitGroup] counter is zero.
-[GoRecv] public static void Wait(this ref WaitGroup wg) {
+public static void Wait(this ж<WaitGroup> Ꮡwg) {
+    ref var wg = ref Ꮡwg.Value;
+
     if (race.Enabled) {
         race.Disable();
     }
     while (ᐧ) {
-        var state = wg.state.Load();
-        var v = ((int32)(state >> (int)(32)));
-        var w = ((uint32)state);
+        var state = Ꮡwg.of(WaitGroup.Ꮡstate).Load();
+        var v = (int32)((state >> (int)(32)));
+        var w = (uint32)state;
         if (v == 0) {
             // Counter is 0, no need to wait.
             if (race.Enabled) {
@@ -107,16 +113,16 @@ partial class sync_package {
             return;
         }
         // Increment waiters count.
-        if (wg.state.CompareAndSwap(state, state + 1)) {
+        if (Ꮡwg.of(WaitGroup.Ꮡstate).CompareAndSwap(state, state + 1)) {
             if (race.Enabled && w == 0) {
                 // Wait must be synchronized with the first Add.
                 // Need to model this is as a write to race with the read in Add.
                 // As a consequence, can do the write only for the first waiter,
                 // otherwise concurrent Waits will race with each other.
-                race.Write(new @unsafe.Pointer(Ꮡ(wg.sema)));
+                race.Write(new @unsafe.Pointer(Ꮡwg.of(WaitGroup.Ꮡsema)));
             }
-            runtime_Semacquire(Ꮡ(wg.sema));
-            if (wg.state.Load() != 0) {
+            runtime_Semacquire(Ꮡwg.of(WaitGroup.Ꮡsema));
+            if (Ꮡwg.of(WaitGroup.Ꮡstate).Load() != 0) {
                 throw panic("sync: WaitGroup is reused before previous Wait has returned");
             }
             if (race.Enabled) {

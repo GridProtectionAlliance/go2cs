@@ -30,6 +30,10 @@ global using typesꓸScope = go.go.types_package.ΔScope;
 global using typesꓸSignature = go.go.types_package.ΔSignature;
 global using typesꓸTerm = go.go.types_package.ΔTerm;
 global using typesꓸType = go.go.types_package.ΔType;
+using big = go.math.big_package;
+using bufio = go.bufio_package;
+using token = go.go.token_package;
+using types = go.go.types_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -58,35 +62,22 @@ using static go.go.@internal.gcimporter_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<anyType, go.types_package.ΔType>]
-[assembly: GoImplement<bufio_package.Reader, io_package.ByteReader>]
-[assembly: GoImplement<bufio_package.Reader, io_package.Reader>]
-[assembly: GoImplement<bytes_package.Reader, io_package.ByteReader>]
-[assembly: GoImplement<bytes_package.Reader, io_package.Reader>]
-[assembly: GoImplement<constant.Value), go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Array, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Basic, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Chan, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Const, go.types_package.Object>]
-[assembly: GoImplement<go.types_package.Func, go.types_package.Object>]
-[assembly: GoImplement<go.types_package.Interface, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Map, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Named, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Pointer, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Slice, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Struct, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.TypeName, go.types_package.Object>]
-[assembly: GoImplement<go.types_package.TypeParam, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Union, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Var, go.types_package.Object>]
-[assembly: GoImplement<go.types_package.ΔSignature, go.types_package.ΔType>]
-[assembly: GoImplement<intReader, io_package.Reader>]
-[assembly: GoImplement<types.Type), go.types_package.Object>]
-[assembly: GoImplement<types.Type, bool), go.types_package.ΔType>]
-[assembly: GoImplement<types.Type, error), go.types_package.ΔType>]
+[assembly: GoImplement<anyType, go.go.types_package.ΔType>]
+[assembly: GoImplement<bufio_package.Reader, io_package.ByteReader>(Pointer = true)]
+[assembly: GoImplement<bufio_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Reader, io_package.ByteReader>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<go.go.types_package.Const, go.go.types_package.Object>(Pointer = true)]
+[assembly: GoImplement<go.go.types_package.Func, go.go.types_package.Object>(Pointer = true)]
+[assembly: GoImplement<go.go.types_package.TypeName, go.go.types_package.Object>(Pointer = true)]
+[assembly: GoImplement<go.go.types_package.Var, go.go.types_package.Object>(Pointer = true)]
+[assembly: GoImplement<go.go.types_package.ΔSignature, go.go.types_package.ΔType>(Pointer = true)]
+[assembly: GoImplement<intReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.ReadCloser>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
+[assembly: GoImplicitConv<bufio.Reader, ж<bufio.Reader>>(Indirect = true)]
 [assembly: GoImplicitConv<readerDict, ж<readerDict>>]
 [assembly: GoImplicitConv<types.Basic, ж<types.Basic>>(Indirect = true)]
 [assembly: GoImplicitConv<types.Tuple, ж<types.Tuple>>(Indirect = true)]

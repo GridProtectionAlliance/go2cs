@@ -34,18 +34,20 @@ partial class dwarf_package {
     return u.asize;
 }
 
-[GoRecv] internal static (slice<unit>, error) parseUnits(this ref Data d) {
+internal static (slice<unit>, error) parseUnits(this ж<Data> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
     // Count units.
     nint nunit = 0;
-    var b = makeBuf(d, new unknownFormat(nil), "info"u8, 0, d.info);
+    var b = makeBuf(Ꮡd, new unknownFormat(nil), "info"u8, 0, d.info);
     while (len(b.data) > 0) {
-        var (len, _) = b.unitLength();
-        if (len != ((Offset)((uint32)len))) {
+        var (lenΔ1, _) = b.unitLength();
+        if (lenΔ1 != ((Offset)(uint32)lenΔ1)) {
             b.error("unit length overflow"u8);
             break;
         }
-        b.skip(((nint)len));
-        if (len > 0) {
+        b.skip((nint)(uint32)lenΔ1);
+        if (lenΔ1 > 0) {
             nunit++;
         }
     }
@@ -53,45 +55,45 @@ partial class dwarf_package {
         return (default!, b.err);
     }
     // Again, this time writing them down.
-    b = makeBuf(d, new unknownFormat(nil), "info"u8, 0, d.info);
+    b = makeBuf(Ꮡd, new unknownFormat(nil), "info"u8, 0, d.info);
     var units = new slice<unit>(nunit);
     foreach (var (i, _) in units) {
         var u = Ꮡ(units, i);
-        u.val.@base = b.off;
+        u.Value.@base = b.off;
         Offset n = default!;
         if (b.err != default!) {
             return (default!, b.err);
         }
         while (n == 0) {
-            (n, u.val.is64) = b.unitLength();
+            (n, u.Value.is64) = b.unitLength();
         }
         var dataOff = b.off;
         var vers = b.uint16();
         if (vers < 2 || vers > 5) {
-            b.error("unsupported DWARF version "u8 + strconv.Itoa(((nint)vers)));
+            b.error("unsupported DWARF version "u8 + strconv.Itoa((nint)vers));
             break;
         }
-        u.val.vers = ((nint)vers);
+        u.Value.vers = (nint)vers;
         if (vers >= 5) {
-            u.val.utype = b.uint8();
-            u.val.asize = ((nint)b.uint8());
+            u.Value.utype = b.uint8();
+            u.Value.asize = (nint)b.uint8();
         }
         uint64 abbrevOff = default!;
         if ((~u).is64){
             abbrevOff = b.uint64();
         } else {
-            abbrevOff = ((uint64)b.uint32());
+            abbrevOff = (uint64)b.uint32();
         }
-        (atable, err) = d.parseAbbrev(abbrevOff, (~u).vers);
+        var (atable, err) = Ꮡd.parseAbbrev(abbrevOff, (~u).vers);
         if (err != default!) {
             if (b.err == default!) {
                 b.err = err;
             }
             break;
         }
-        u.val.atable = atable;
+        u.Value.atable = atable;
         if (vers < 5) {
-            u.val.asize = ((nint)b.uint8());
+            u.Value.asize = (nint)b.uint8();
         }
         var exprᴛ1 = (~u).utype;
         if (exprᴛ1 == utSkeleton || exprᴛ1 == utSplitCompile) {
@@ -109,8 +111,8 @@ partial class dwarf_package {
             }
         }
 
-        u.val.off = b.off;
-        u.val.data = b.bytes(((nint)(n - (b.off - dataOff))));
+        u.Value.off = b.off;
+        u.Value.data = b.bytes((nint)(uint32)(n - (b.off - dataOff)));
     }
     if (b.err != default!) {
         return (default!, b.err);
@@ -120,14 +122,16 @@ partial class dwarf_package {
 
 // offsetToUnit returns the index of the unit containing offset off.
 // It returns -1 if no unit contains this offset.
-[GoRecv] internal static nint offsetToUnit(this ref Data d, Offset off) {
+internal static nint offsetToUnit(this ж<Data> Ꮡd, Offset off) {
+    ref var d = ref Ꮡd.Value;
+
     // Find the unit after off
-    nint next = sort.Search(len(d.unit), (nint i) => d.unit[i].off > off);
+    nint next = sort.Search(len(d.unit), (nint i) => Ꮡd.Value.unit[i].off > off);
     if (next == 0) {
         return -1;
     }
     var u = Ꮡ(d.unit[next - 1]);
-    if ((~u).off <= off && off < (~u).off + ((Offset)len((~u).data))) {
+    if ((~u).off <= off && off < (~u).off + ((Offset)(uint32)len((~u).data))) {
         return next - 1;
     }
     return -1;

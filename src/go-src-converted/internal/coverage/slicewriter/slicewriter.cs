@@ -29,7 +29,7 @@ partial class slicewriter_package {
         towrite = sws.payload[(int)(sws.off)..];
     }
     copy(towrite, p);
-    sws.off += ((int64)amt);
+    sws.off += (int64)amt;
     return (amt, default!);
 }
 
@@ -38,30 +38,30 @@ partial class slicewriter_package {
 // expand the size of the slice using SEEK_SET; trying to seek outside
 // the slice will result in an error.
 [GoRecv] public static (int64, error) Seek(this ref WriteSeeker sws, int64 offset, nint whence) {
-    switch (whence) {
-    case io.SeekStart: {
-        if (sws.off != offset && (offset < 0 || offset > ((int64)len(sws.payload)))) {
+    var exprᴛ1 = whence;
+    if (exprᴛ1 == io.SeekStart) {
+        if (sws.off != offset && (offset < 0 || offset > (int64)len(sws.payload))) {
             return (0, fmt.Errorf("invalid seek: new offset %d (out of range [0 %d]"u8, offset, len(sws.payload)));
         }
         sws.off = offset;
         return (offset, default!);
     }
-    case io.SeekCurrent: {
+    if (exprᴛ1 == io.SeekCurrent) {
         var newoff = sws.off + offset;
-        if (newoff != sws.off && (newoff < 0 || newoff > ((int64)len(sws.payload)))) {
+        if (newoff != sws.off && (newoff < 0 || newoff > (int64)len(sws.payload))) {
             return (0, fmt.Errorf("invalid seek: new offset %d (out of range [0 %d]"u8, newoff, len(sws.payload)));
         }
         sws.off += offset;
         return (sws.off, default!);
     }
-    case io.SeekEnd: {
-        var newoff = ((int64)len(sws.payload)) + offset;
-        if (newoff != sws.off && (newoff < 0 || newoff > ((int64)len(sws.payload)))) {
+    if (exprᴛ1 == io.SeekEnd) {
+        var newoff = (int64)len(sws.payload) + offset;
+        if (newoff != sws.off && (newoff < 0 || newoff > (int64)len(sws.payload))) {
             return (0, fmt.Errorf("invalid seek: new offset %d (out of range [0 %d]"u8, newoff, len(sws.payload)));
         }
         sws.off = newoff;
         return (sws.off, default!);
-    }}
+    }
 
     // other modes not supported
     return (0, fmt.Errorf("unsupported seek mode %d"u8, whence));
@@ -83,7 +83,7 @@ partial class slicewriter_package {
         amt = len(toread);
     }
     copy(p, toread);
-    sws.off += ((int64)amt);
+    sws.off += (int64)amt;
     return (amt, default!);
 }
 

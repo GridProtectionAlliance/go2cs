@@ -9,9 +9,9 @@
 // and x/net/http2. It comes with no API stability promise.
 namespace go.vendor.golang.org.x.net.http;
 
-using textproto = net.textproto_package;
+using textproto = go.net.textproto_package;
 using strings = strings_package;
-using net;
+using go.net;
 
 partial class httpguts_package {
 

@@ -5,13 +5,13 @@
 namespace go.text;
 
 using fmt = fmt_package;
-using fs = io.fs_package;
+using fs = go.io.fs_package;
 using os = os_package;
 using path = path_package;
-using filepath = path.filepath_package;
-using io;
-using path;
-using ꓸꓸꓸ@string = Span<@string>;
+using filepath = go.path.filepath_package;
+using go.io;
+using go.path;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class template_package {
 
@@ -23,7 +23,7 @@ partial class template_package {
 //
 //	var t = template.Must(template.New("name").Parse("text"))
 public static ж<Template> Must(ж<Template> Ꮡt, error err) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     if (err != default!) {
         throw panic(err);
@@ -40,7 +40,7 @@ public static ж<Template> Must(ж<Template> Ꮡt, error err) {
 // the last one mentioned will be the one that results.
 // For instance, ParseFiles("a/foo", "b/foo") stores "b/foo" as the template
 // named "foo", while "a/foo" is unavailable.
-public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸ@string filenamesʗp) {
+public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸstring filenamesʗp) {
     var filenames = filenamesʗp.slice();
 
     return parseFiles(nil, readFileOS, filenames.ꓸꓸꓸ);
@@ -57,19 +57,20 @@ public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸ@string filenames
 //
 // When parsing multiple files with the same name in different directories,
 // the last one mentioned will be the one that results.
-[GoRecv] public static (ж<Template>, error) ParseFiles(this ref Template t, params ꓸꓸꓸ@string filenamesʗp) {
+public static (ж<Template>, error) ParseFiles(this ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) {
     var filenames = filenamesʗp.slice();
 
+    ref var t = ref Ꮡt.Value;
     t.init();
-    return parseFiles(t, readFileOS, filenames.ꓸꓸꓸ);
+    return parseFiles(Ꮡt, readFileOS, filenames.ꓸꓸꓸ);
 }
 
 // parseFiles is the helper for the method and function. If the argument
 // template is nil, it is created from the first file.
-internal static (ж<Template>, error) parseFiles(ж<Template> Ꮡt, Func<@string, (string, <>byte, error)> readFile, params ꓸꓸꓸ@string filenamesʗp) {
+internal static (ж<Template>, error) parseFiles(ж<Template> Ꮡt, Func<@string, (@string, slice<byte>, error)> readFile, params ꓸꓸꓸstring filenamesʗp) {
     var filenames = filenamesʗp.slice();
 
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.DerefOrNil();
     if (len(filenames) == 0) {
         // Not really a problem, but be consistent.
         return (default!, fmt.Errorf("template: no files named in call to ParseFiles"u8));
@@ -87,11 +88,11 @@ internal static (ж<Template>, error) parseFiles(ж<Template> Ꮡt, Func<@string
         //  t, err := New(name).Funcs(xxx).ParseFiles(name)
         // works. Otherwise we create a new template associated with t.
         ж<Template> tmpl = default!;
-        if (t == nil) {
-            t = New(name);
+        if (Ꮡt == nil) {
+            Ꮡt = New(name); t = ref Ꮡt.DerefOrNil();
         }
         if (name == t.Name()){
-            tmpl = t;
+            tmpl = Ꮡt;
         } else {
             tmpl = t.New(name);
         }
@@ -124,16 +125,18 @@ public static (ж<Template>, error) ParseGlob(@string pattern) {
 //
 // When parsing multiple files with the same name in different directories,
 // the last one mentioned will be the one that results.
-[GoRecv] public static (ж<Template>, error) ParseGlob(this ref Template t, @string pattern) {
+public static (ж<Template>, error) ParseGlob(this ж<Template> Ꮡt, @string pattern) {
+    ref var t = ref Ꮡt.Value;
+
     t.init();
-    return parseGlob(t, pattern);
+    return parseGlob(Ꮡt, pattern);
 }
 
 // parseGlob is the implementation of the function and method ParseGlob.
 internal static (ж<Template>, error) parseGlob(ж<Template> Ꮡt, @string pattern) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
-    (filenames, err) = filepath.Glob(pattern);
+    var (filenames, err) = filepath.Glob(pattern);
     if (err != default!) {
         return (default!, err);
     }
@@ -147,7 +150,7 @@ internal static (ж<Template>, error) parseGlob(ж<Template> Ꮡt, @string patte
 // instead of the host operating system's file system.
 // It accepts a list of glob patterns (see [path.Match]).
 // (Note that most file names serve as glob patterns matching only themselves.)
-public static (ж<Template>, error) ParseFS(fs.FS fsys, params ꓸꓸꓸ@string patternsʗp) {
+public static (ж<Template>, error) ParseFS(fs.FS fsys, params ꓸꓸꓸstring patternsʗp) {
     var patterns = patternsʗp.slice();
 
     return parseFS(nil, fsys, patterns);
@@ -157,19 +160,20 @@ public static (ж<Template>, error) ParseFS(fs.FS fsys, params ꓸꓸꓸ@string 
 // instead of the host operating system's file system.
 // It accepts a list of glob patterns (see [path.Match]).
 // (Note that most file names serve as glob patterns matching only themselves.)
-[GoRecv] public static (ж<Template>, error) ParseFS(this ref Template t, fs.FS fsys, params ꓸꓸꓸ@string patternsʗp) {
+public static (ж<Template>, error) ParseFS(this ж<Template> Ꮡt, fs.FS fsys, params ꓸꓸꓸstring patternsʗp) {
     var patterns = patternsʗp.slice();
 
+    ref var t = ref Ꮡt.Value;
     t.init();
-    return parseFS(t, fsys, patterns);
+    return parseFS(Ꮡt, fsys, patterns);
 }
 
 internal static (ж<Template>, error) parseFS(ж<Template> Ꮡt, fs.FS fsys, slice<@string> patterns) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     slice<@string> filenames = default!;
     foreach (var (_, pattern) in patterns) {
-        (list, err) = fs.Glob(fsys, pattern);
+        var (list, err) = fs.Glob(fsys, pattern);
         if (err != default!) {
             return (default!, err);
         }
@@ -181,22 +185,24 @@ internal static (ж<Template>, error) parseFS(ж<Template> Ꮡt, fs.FS fsys, sli
     return parseFiles(Ꮡt, readFileFS(fsys), filenames.ꓸꓸꓸ);
 }
 
-internal static (@string name, slice<byte> b, error err) readFileOS(@string file) {
+internal static (@string name, slice<byte> b, error err) readFileOS(@string @file) {
     @string name = default!;
     slice<byte> b = default!;
     error err = default!;
 
-    name = filepath.Base(file);
-    (b, err) = os.ReadFile(file);
+    name = filepath.Base(@file);
+    (b, err) = os.ReadFile(@file);
     return (name, b, err);
 }
 
-internal static Func<@string, (string, <>byte, error)> readFileFS(fs.FS fsys) {
-    var bʗ1 = b;
-    return (@string file) => {
-        name = path.Base(file);
-        (bʗ1, err) = fs.ReadFile(fsys, file);
-        return;
+internal static Func<@string, (@string, slice<byte>, error)> readFileFS(fs.FS fsys) {
+    return (@string @file) => {
+        @string name = default!;
+        slice<byte> b = default!;
+        error err = default!;
+        name = path.Base(@file);
+        (b, err) = fs.ReadFile(fsys, @file);
+        return (name, b, err);
     };
 }
 

@@ -4,8 +4,8 @@
 namespace go.@internal;
 
 using fmt = fmt_package;
-using bits = math.bits_package;
-using math;
+using bits = global::go.math.bits_package;
+using global::go.math;
 
 partial class fuzz_package {
 
@@ -13,7 +13,7 @@ partial class fuzz_package {
 // source code to 0.
 public static void ResetCoverage() {
     var cov = coverage();
-    clear(cov);
+    builtin.clear(cov);
 }
 
 // SnapshotCoverage copies the current counter values into coverageSnapshot,
@@ -22,11 +22,13 @@ public static void ResetCoverage() {
 // multiple values for each counter by OR'ing them together.
 public static void SnapshotCoverage() {
     var cov = coverage();
-    foreach (var (i, b) in cov) {
-        b |= (byte)(b >> (int)(1));
-        b |= (byte)(b >> (int)(2));
-        b |= (byte)(b >> (int)(4));
-        b -= b >> (int)(1);
+    foreach (var (i, vᴛ1) in cov) {
+        var b = vᴛ1;
+
+        b |= (byte)((b >> (int)(1)));
+        b |= (byte)((b >> (int)(2)));
+        b |= (byte)((b >> (int)(4)));
+        b -= (byte)((b >> (int)(1)));
         coverageSnapshot[i] = b;
     }
 }
@@ -59,7 +61,7 @@ internal static slice<byte> diffCoverage(slice<byte> @base, slice<byte> snapshot
 internal static nint countNewCoverageBits(slice<byte> @base, slice<byte> snapshot) {
     nint n = 0;
     foreach (var (i, _) in snapshot) {
-        n += bits.OnesCount8((byte)(snapshot[i] & ~@base[i]));
+        n += bits.OnesCount8((uint8)((byte)(snapshot[i] & ~@base[i])));
     }
     return n;
 }
@@ -96,7 +98,9 @@ internal static nint countBits(slice<byte> cov) {
 
 internal static bool coverageEnabled = len(coverage()) > 0;
 internal static slice<byte> coverageSnapshot = new slice<byte>(len(coverage()));
-internal static array<byte> _counters;
-internal static array<byte> _ecounters;
+internal static ж<array<byte>> Ꮡ_counters = new(new array<byte>(0));
+internal static ref array<byte> _counters => ref Ꮡ_counters.Value;
+internal static ж<array<byte>> Ꮡ_ecounters = new(new array<byte>(0));
+internal static ref array<byte> _ecounters => ref Ꮡ_ecounters.Value;
 
 } // end fuzz_package

@@ -6,16 +6,17 @@
 namespace go.encoding;
 
 using encoding = encoding_package;
-using base64 = encoding.base64_package;
+using base64 = go.encoding.base64_package;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
-using utf16 = unicode.utf16_package;
-using utf8 = unicode.utf8_package;
-using _ = unsafe_package; // for linkname
-using unicode;
+using utf16 = go.unicode.utf16_package;
+using utf8 = go.unicode.utf8_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+using go.encoding;
+using go.unicode;
 
 partial class json_package {
 
@@ -102,8 +103,8 @@ public static error Unmarshal(slice<byte> data, any v) {
     if (err != default!) {
         return err;
     }
-    d.init(data);
-    return d.unmarshal(v);
+    Ꮡd.init(data);
+    return Ꮡd.unmarshal(v);
 }
 
 // Unmarshaler is the interface implemented by types
@@ -122,7 +123,7 @@ public static error Unmarshal(slice<byte> data, any v) {
 // not appropriate for a value of a specific Go type.
 [GoType] partial struct UnmarshalTypeError {
     public @string Value;      // description of JSON value - "bool", "array", "number -5"
-    public reflect_package.ΔType Type; // type of Go value it could not be assigned to
+    public reflectꓸType Type; // type of Go value it could not be assigned to
     public int64 Offset;        // error occurred after reading Offset bytes
     public @string Struct;      // name of the struct type containing the field
     public @string Field;      // the full path from root node to the field
@@ -141,8 +142,8 @@ public static error Unmarshal(slice<byte> data, any v) {
 // Deprecated: No longer used; kept for compatibility.
 [GoType] partial struct UnmarshalFieldError {
     public @string Key;
-    public reflect_package.ΔType Type;
-    public reflect_package.StructField Field;
+    public reflectꓸType Type;
+    public reflect.StructField Field;
 }
 
 [GoRecv] public static @string Error(this ref UnmarshalFieldError e) {
@@ -152,7 +153,7 @@ public static error Unmarshal(slice<byte> data, any v) {
 // An InvalidUnmarshalError describes an invalid argument passed to [Unmarshal].
 // (The argument to [Unmarshal] must be a non-nil pointer.)
 [GoType] partial struct InvalidUnmarshalError {
-    public reflect_package.ΔType Type;
+    public reflectꓸType Type;
 }
 
 [GoRecv] public static @string Error(this ref InvalidUnmarshalError e) {
@@ -165,16 +166,18 @@ public static error Unmarshal(slice<byte> data, any v) {
     return "json: Unmarshal(nil "u8 + e.Type.String() + ")"u8;
 }
 
-[GoRecv] internal static error unmarshal(this ref decodeState d, any v) {
+internal static error unmarshal(this ж<decodeState> Ꮡd, any v) {
+    ref var d = ref Ꮡd.Value;
+
     var rv = reflect.ValueOf(v);
     if (rv.Kind() != reflect.ΔPointer || rv.IsNil()) {
-        return new InvalidUnmarshalError(reflect.TypeOf(v));
+        return new InvalidUnmarshalErrorжerror(Ꮡ(new InvalidUnmarshalError(reflect.TypeOf(v))));
     }
     d.scan.reset();
-    d.scanWhile(scanSkipSpace);
+    Ꮡd.scanWhile(scanSkipSpace);
     // We decode rv not rv.Elem because the Unmarshaler interface
     // test must be applied at the top level of the value.
-    var err = d.value(rv);
+    var err = Ꮡd.value(rv);
     if (err != default!) {
         return d.addErrorContext(err);
     }
@@ -200,7 +203,7 @@ public static (int64, error) Int64(this Number n) {
 
 // An errorContext provides context for type errors during decoding.
 [GoType] partial struct errorContext {
-    public reflect_package.ΔType Struct;
+    public reflectꓸType Struct;
     public slice<@string> FieldStack;
 }
 
@@ -226,16 +229,18 @@ public static (int64, error) Int64(this Number n) {
 // something is editing the data slice while the decoder executes.
 internal static readonly @string phasePanicMsg = "JSON decoder out of sync - data changing underfoot?"u8;
 
-[GoRecv("capture")] internal static ж<decodeState> init(this ref decodeState d, slice<byte> data) {
+internal static ж<decodeState> init(this ж<decodeState> Ꮡd, slice<byte> data) {
+    ref var d = ref Ꮡd.Value;
+
     d.data = data;
     d.off = 0;
     d.savedError = default!;
     if (d.errorContext != nil) {
-        d.errorContext.Struct = default!;
+        d.errorContext.Value.Struct = default!;
         // Reuse the allocated space for the FieldStack slice.
-        d.errorContext.FieldStack = d.errorContext.FieldStack[..0];
+        d.errorContext.Value.FieldStack = (~d.errorContext).FieldStack[..0];
     }
-    return initꓸᏑd;
+    return Ꮡd;
 }
 
 // saveError saves the first err it is called with,
@@ -248,11 +253,11 @@ internal static readonly @string phasePanicMsg = "JSON decoder out of sync - dat
 
 // addErrorContext returns a new error enhanced with information from d.errorContext
 [GoRecv] internal static error addErrorContext(this ref decodeState d, error err) {
-    if (d.errorContext != nil && (d.errorContext.Struct != default! || len(d.errorContext.FieldStack) > 0)) {
+    if (d.errorContext != nil && ((~d.errorContext).Struct != default! || len((~d.errorContext).FieldStack) > 0)) {
         switch (err.type()) {
-        case UnmarshalTypeError.val err: {
-            err.val.Struct = d.errorContext.Struct.Name();
-            err.val.Field = strings.Join(d.errorContext.FieldStack, "."u8);
+        case ж<UnmarshalTypeError> errΔ1: {
+            errΔ1.Value.Struct = (~d.errorContext).Struct.Name();
+            errΔ1.Value.Field = strings.Join((~d.errorContext).FieldStack, "."u8);
             break;
         }}
     }
@@ -260,8 +265,10 @@ internal static readonly @string phasePanicMsg = "JSON decoder out of sync - dat
 }
 
 // skip scans to the end of what was started.
-[GoRecv] internal static void skip(this ref decodeState d) {
-    var s = Ꮡ(d.scan);
+internal static void skip(this ж<decodeState> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
+    var s = Ꮡd.of(decodeState.Ꮡscan);
     var data = d.data;
     nint i = d.off;
     nint depth = len((~s).parseState);
@@ -277,12 +284,14 @@ internal static readonly @string phasePanicMsg = "JSON decoder out of sync - dat
 }
 
 // scanNext processes the byte at d.data[d.off].
-[GoRecv] internal static void scanNext(this ref decodeState d) {
+internal static void scanNext(this ж<decodeState> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
     if (d.off < len(d.data)){
-        d.opcode = d.scan.step(Ꮡ(d.scan), d.data[d.off]);
+        d.opcode = d.scan.step(Ꮡd.of(decodeState.Ꮡscan), d.data[d.off]);
         d.off++;
     } else {
-        d.opcode = d.scan.eof();
+        d.opcode = Ꮡd.of(decodeState.Ꮡscan).eof();
         d.off = len(d.data) + 1;
     }
 }
@@ -291,8 +300,10 @@ internal static readonly @string phasePanicMsg = "JSON decoder out of sync - dat
 
 // scanWhile processes bytes in d.data[d.off:] until it
 // receives a scan code not equal to op.
-[GoRecv] internal static void scanWhile(this ref decodeState d, nint op) {
-    var s = Ꮡ(d.scan);
+internal static void scanWhile(this ж<decodeState> Ꮡd, nint op) {
+    ref var d = ref Ꮡd.Value;
+
+    var s = Ꮡd.of(decodeState.Ꮡscan);
     var data = d.data;
     nint i = d.off;
     while (i < len(data)) {
@@ -306,7 +317,7 @@ internal static readonly @string phasePanicMsg = "JSON decoder out of sync - dat
     }
     d.off = len(data) + 1;
     // mark processed EOF with len+1
-    d.opcode = d.scan.eof();
+    d.opcode = Ꮡd.of(decodeState.Ꮡscan).eof();
 }
 
 // rescanLiteral is similar to scanWhile(scanContinue), but it specialises the
@@ -317,7 +328,9 @@ internal static readonly @string phasePanicMsg = "JSON decoder out of sync - dat
 // Only in the second step do we use decodeState to tokenize literals, so we
 // know there aren't any syntax errors. We can take advantage of that knowledge,
 // and scan a literal's bytes much more quickly.
-[GoRecv] internal static void rescanLiteral(this ref decodeState d) {
+internal static void rescanLiteral(this ж<decodeState> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
     var data = d.data;
     nint i = d.off;
 Switch:
@@ -369,11 +382,12 @@ Switch:
         break;
     }}
 
+    break_Switch:;
     // true
     // false
     // null
     if (i < len(data)){
-        d.opcode = stateEndValue(Ꮡ(d.scan), data[i]);
+        d.opcode = stateEndValue(Ꮡd.of(decodeState.Ꮡscan), data[i]);
     } else {
         d.opcode = scanEnd;
     }
@@ -383,38 +397,37 @@ Switch:
 // value consumes a JSON value from d.data[d.off-1:], decoding into v, and
 // reads the following byte ahead. If v is invalid, the value is discarded.
 // The first byte of the value has been read already.
-[GoRecv] internal static error value(this ref decodeState d, reflectꓸValue v) {
+internal static error value(this ж<decodeState> Ꮡd, reflectꓸValue v) {
+    ref var d = ref Ꮡd.Value;
+
     var exprᴛ1 = d.opcode;
-    { /* default: */
-        throw panic(phasePanicMsg);
-    }
-    else if (exprᴛ1 == scanBeginArray) {
+    if (exprᴛ1 == scanBeginArray) {
         if (v.IsValid()){
             {
-                var err = d.Δarray(v); if (err != default!) {
+                var err = Ꮡd.Δarray(v); if (err != default!) {
                     return err;
                 }
             }
         } else {
-            d.skip();
+            Ꮡd.skip();
         }
-        d.scanNext();
+        Ꮡd.scanNext();
     }
     else if (exprᴛ1 == scanBeginObject) {
         if (v.IsValid()){
             {
-                var err = d.@object(v); if (err != default!) {
+                var err = Ꮡd.@object(v); if (err != default!) {
                     return err;
                 }
             }
         } else {
-            d.skip();
+            Ꮡd.skip();
         }
-        d.scanNext();
+        Ꮡd.scanNext();
     }
     else if (exprᴛ1 == scanBeginLiteral) {
         nint start = d.readIndex();
-        d.rescanLiteral();
+        Ꮡd.rescanLiteral();
         if (v.IsValid()) {
             // All bytes inside literal return scanContinue op code.
             {
@@ -423,6 +436,9 @@ Switch:
                 }
             }
         }
+    }
+    { /* default: */
+        throw panic(phasePanicMsg);
     }
 
     return default!;
@@ -435,25 +451,25 @@ Switch:
 // quoted string literal or literal null into an interface value.
 // If it finds anything other than a quoted string literal or null,
 // valueQuoted returns unquotedValue{}.
-[GoRecv] internal static any valueQuoted(this ref decodeState d) {
+internal static any valueQuoted(this ж<decodeState> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
     var exprᴛ1 = d.opcode;
-    { /* default: */
-        throw panic(phasePanicMsg);
-    }
-    else if (exprᴛ1 == scanBeginArray || exprᴛ1 == scanBeginObject) {
-        d.skip();
-        d.scanNext();
+    if (exprᴛ1 == scanBeginArray || exprᴛ1 == scanBeginObject) {
+        Ꮡd.skip();
+        Ꮡd.scanNext();
     }
     else if (exprᴛ1 == scanBeginLiteral) {
-        var v = d.literalInterface();
+        var v = Ꮡd.literalInterface();
         switch (v.type()) {
-        case default! : {
-            return v;
-        }
-        case @string : {
+        case null:
+        case @string _: {
             return v;
         }}
 
+    }
+    { /* default: */
+        throw panic(phasePanicMsg);
     }
 
     return new unquotedValue(nil);
@@ -539,17 +555,19 @@ internal static (Unmarshaler, encoding.TextUnmarshaler, reflectꓸValue) indirec
 
 // array consumes an array from d.data[d.off-1:], decoding into v.
 // The first byte of the array ('[') has been read already.
-[GoRecv] internal static error Δarray(this ref decodeState d, reflectꓸValue v) {
+internal static error Δarray(this ж<decodeState> Ꮡd, reflectꓸValue v) {
+    ref var d = ref Ꮡd.Value;
+
     // Check for unmarshaler.
     var (u, ut, pv) = indirect(v, false);
     if (u != default!) {
         nint start = d.readIndex();
-        d.skip();
+        Ꮡd.skip();
         return u.UnmarshalJSON(d.data[(int)(start)..(int)(d.off)]);
     }
     if (ut != default!) {
-        d.saveError(new UnmarshalTypeError(Value: "array"u8, Type: v.Type(), Offset: ((int64)d.off)));
-        d.skip();
+        d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "array"u8, Type: v.Type(), Offset: (int64)d.off))));
+        Ꮡd.skip();
         return default!;
     }
     v = pv;
@@ -559,25 +577,28 @@ internal static (Unmarshaler, encoding.TextUnmarshaler, reflectꓸValue) indirec
     if (exprᴛ1 == reflect.ΔInterface) { matchᴛ1 = true;
         if (v.NumMethod() == 0) {
             // Decoding into nil interface? Switch to non-reflect code.
-            var ai = d.arrayInterface();
+            var ai = Ꮡd.arrayInterface();
             v.Set(reflect.ValueOf(ai));
             return default!;
         }
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1) { /* default: */
-        d.saveError(new UnmarshalTypeError(Value: "array"u8, Type: v.Type(), Offset: ((int64)d.off)));
-        d.skip();
+        d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError( // Otherwise it's invalid.
+Value: "array"u8, Type: v.Type(), Offset: (int64)d.off))));
+        Ꮡd.skip();
         return default!;
     }
     if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice) { matchᴛ1 = true;
-        break;
+        do {
+            break;
+        } while (false);
     }
 
     nint i = 0;
     while (ᐧ) {
         // Look ahead for ] - can only happen on first iteration.
-        d.scanWhile(scanSkipSpace);
+        Ꮡd.scanWhile(scanSkipSpace);
         if (d.opcode == scanEndArray) {
             break;
         }
@@ -593,14 +614,14 @@ internal static (Unmarshaler, encoding.TextUnmarshaler, reflectꓸValue) indirec
         if (i < v.Len()){
             // Decode into element.
             {
-                var err = d.value(v.Index(i)); if (err != default!) {
+                var err = Ꮡd.value(v.Index(i)); if (err != default!) {
                     return err;
                 }
             }
         } else {
             // Ran out of fixed array: skip.
             {
-                var err = d.value(new reflectꓸValue(nil)); if (err != default!) {
+                var err = Ꮡd.value(new reflectꓸValue(nil)); if (err != default!) {
                     return err;
                 }
             }
@@ -608,7 +629,7 @@ internal static (Unmarshaler, encoding.TextUnmarshaler, reflectꓸValue) indirec
         i++;
         // Next token must be , or ].
         if (d.opcode == scanSkipSpace) {
-            d.scanWhile(scanSkipSpace);
+            Ꮡd.scanWhile(scanSkipSpace);
         }
         if (d.opcode == scanEndArray) {
             break;
@@ -634,30 +655,32 @@ internal static (Unmarshaler, encoding.TextUnmarshaler, reflectꓸValue) indirec
     return default!;
 }
 
-internal static slice<byte> nullLiteral = slice<byte>("null");
+internal static slice<byte> nullLiteral = slice<byte>((@string)"null");
 
-internal static reflectꓸType textUnmarshalerType = reflect.TypeFor[encoding.TextUnmarshaler]();
+internal static reflectꓸType textUnmarshalerType = reflect.TypeFor<encoding.TextUnmarshaler>();
 
 // object consumes an object from d.data[d.off-1:], decoding into v.
 // The first byte ('{') of the object has been read already.
-[GoRecv] internal static error @object(this ref decodeState d, reflectꓸValue v) {
+internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
+    ref var d = ref Ꮡd.Value;
+
     // Check for unmarshaler.
     var (u, ut, pv) = indirect(v, false);
     if (u != default!) {
         nint start = d.readIndex();
-        d.skip();
+        Ꮡd.skip();
         return u.UnmarshalJSON(d.data[(int)(start)..(int)(d.off)]);
     }
     if (ut != default!) {
-        d.saveError(new UnmarshalTypeError(Value: "object"u8, Type: v.Type(), Offset: ((int64)d.off)));
-        d.skip();
+        d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "object"u8, Type: v.Type(), Offset: (int64)d.off))));
+        Ꮡd.skip();
         return default!;
     }
     v = pv;
     var t = v.Type();
     // Decoding into nil interface? Switch to non-reflect code.
     if (v.Kind() == reflect.ΔInterface && v.NumMethod() == 0) {
-        var oi = d.objectInterface();
+        var oi = Ꮡd.objectInterface();
         v.Set(reflect.ValueOf(oi));
         return default!;
     }
@@ -675,8 +698,8 @@ internal static reflectꓸType textUnmarshalerType = reflect.TypeFor[encoding.Te
             if (!reflect.PointerTo(t.Key()).Implements(textUnmarshalerType)) {
                 // Map key must either have string kind, have an integer kind,
                 // or be an encoding.TextUnmarshaler.
-                d.saveError(new UnmarshalTypeError(Value: "object"u8, Type: t, Offset: ((int64)d.off)));
-                d.skip();
+                d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "object"u8, Type: t, Offset: (int64)d.off))));
+                Ꮡd.skip();
                 return default!;
             }
         }
@@ -689,19 +712,20 @@ internal static reflectꓸType textUnmarshalerType = reflect.TypeFor[encoding.Te
         fields = cachedTypeFields(t);
     }
     else { /* default: */
-        d.saveError(new UnmarshalTypeError(Value: "object"u8, Type: t, Offset: ((int64)d.off)));
-        d.skip();
+        d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError( // ok
+Value: "object"u8, Type: t, Offset: (int64)d.off))));
+        Ꮡd.skip();
         return default!;
     }
 
-    reflectꓸValue mapElem = default!;
+    reflectꓸValue mapElem = new(nil);
     errorContext origErrorContext = default!;
     if (d.errorContext != nil) {
-        origErrorContext = d.errorContext.val;
+        origErrorContext = d.errorContext.Value;
     }
     while (ᐧ) {
         // Read opening " of string key or closing }.
-        d.scanWhile(scanSkipSpace);
+        Ꮡd.scanWhile(scanSkipSpace);
         if (d.opcode == scanEndObject) {
             // closing } - can only happen on first iteration.
             break;
@@ -711,14 +735,14 @@ internal static reflectꓸType textUnmarshalerType = reflect.TypeFor[encoding.Te
         }
         // Read key.
         nint start = d.readIndex();
-        d.rescanLiteral();
+        Ꮡd.rescanLiteral();
         var item = d.data[(int)(start)..(int)(d.readIndex())];
         var (key, ok) = unquoteBytes(item);
         if (!ok) {
             throw panic(phasePanicMsg);
         }
         // Figure out field corresponding to key.
-        reflectꓸValue subv = default!;
+        reflectꓸValue subv = new(nil);
         var destring = false;
         // whether the value is wrapped in a string to be decoded first
         if (v.Kind() == reflect.Map){
@@ -736,7 +760,7 @@ internal static reflectꓸType textUnmarshalerType = reflect.TypeFor[encoding.Te
             }
             if (f != nil){
                 subv = v;
-                destring = f.val.quoted;
+                destring = f.Value.quoted;
                 foreach (var (_, i) in (~f).index) {
                     if (subv.Kind() == reflect.ΔPointer) {
                         if (subv.IsNil()) {
@@ -762,8 +786,8 @@ internal static reflectꓸType textUnmarshalerType = reflect.TypeFor[encoding.Te
                 if (d.errorContext == nil) {
                     d.errorContext = @new<errorContext>();
                 }
-                d.errorContext.FieldStack = append(d.errorContext.FieldStack, (~f).name);
-                d.errorContext.Struct = t;
+                d.errorContext.Value.FieldStack = append((~d.errorContext).FieldStack, (~f).name);
+                d.errorContext.Value.Struct = t;
             } else 
             if (d.disallowUnknownFields) {
                 d.saveError(fmt.Errorf("json: unknown field %q"u8, key));
@@ -771,15 +795,16 @@ internal static reflectꓸType textUnmarshalerType = reflect.TypeFor[encoding.Te
         }
         // Read : before value.
         if (d.opcode == scanSkipSpace) {
-            d.scanWhile(scanSkipSpace);
+            Ꮡd.scanWhile(scanSkipSpace);
         }
         if (d.opcode != scanObjectKey) {
             throw panic(phasePanicMsg);
         }
-        d.scanWhile(scanSkipSpace);
+        Ꮡd.scanWhile(scanSkipSpace);
         if (destring){
-            switch (d.valueQuoted().type()) {
-            case default! qv: {
+            var switchᴛ1 = Ꮡd.valueQuoted();
+            switch (switchᴛ1.type()) {
+            case null: {
                 {
                     var err = d.literalStore(nullLiteral, subv, false); if (err != default!) {
                         return err;
@@ -796,13 +821,13 @@ internal static reflectꓸType textUnmarshalerType = reflect.TypeFor[encoding.Te
                 break;
             }
             default: {
-                var qv = d.valueQuoted().type();
+                var qv = switchᴛ1;
                 d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal unquoted value into %v"u8, subv.Type()));
                 break;
             }}
         } else {
             {
-                var err = d.value(subv); if (err != default!) {
+                var err = Ꮡd.value(subv); if (err != default!) {
                     return err;
                 }
             }
@@ -811,7 +836,7 @@ internal static reflectꓸType textUnmarshalerType = reflect.TypeFor[encoding.Te
         // if using struct, subv points into struct already.
         if (v.Kind() == reflect.Map) {
             var kt = t.Key();
-            reflectꓸValue kv = default!;
+            reflectꓸValue kv = new(nil);
             if (reflect.PointerTo(kt).Implements(textUnmarshalerType)){
                 kv = reflect.New(kt);
                 {
@@ -827,24 +852,28 @@ internal static reflectꓸType textUnmarshalerType = reflect.TypeFor[encoding.Te
                     kv.SetString(((@string)key));
                 }
                 else if (exprᴛ3 == reflect.ΔInt || exprᴛ3 == reflect.Int8 || exprᴛ3 == reflect.Int16 || exprᴛ3 == reflect.Int32 || exprᴛ3 == reflect.Int64) {
-                    @string s = ((@string)key);
-                    var (n, err) = strconv.ParseInt(s, 10, 64);
-                    if (err != default! || kt.OverflowInt(n)) {
-                        d.saveError(new UnmarshalTypeError(Value: "number "u8 + s, Type: kt, Offset: ((int64)(start + 1))));
-                        break;
-                    }
-                    kv = reflect.New(kt).Elem();
-                    kv.SetInt(n);
+                    do {
+                        @string s = ((@string)key);
+                        var (n, err) = strconv.ParseInt(s, 10, 64);
+                        if (err != default! || kt.OverflowInt(n)) {
+                            d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + s, Type: kt, Offset: (int64)(start + 1)))));
+                            break;
+                        }
+                        kv = reflect.New(kt).Elem();
+                        kv.SetInt(n);
+                    } while (false);
                 }
                 else if (exprᴛ3 == reflect.ΔUint || exprᴛ3 == reflect.Uint8 || exprᴛ3 == reflect.Uint16 || exprᴛ3 == reflect.Uint32 || exprᴛ3 == reflect.Uint64 || exprᴛ3 == reflect.Uintptr) {
-                    @string s = ((@string)key);
-                    var (n, err) = strconv.ParseUint(s, 10, 64);
-                    if (err != default! || kt.OverflowUint(n)) {
-                        d.saveError(new UnmarshalTypeError(Value: "number "u8 + s, Type: kt, Offset: ((int64)(start + 1))));
-                        break;
-                    }
-                    kv = reflect.New(kt).Elem();
-                    kv.SetUint(n);
+                    do {
+                        @string s = ((@string)key);
+                        var (n, err) = strconv.ParseUint(s, 10, 64);
+                        if (err != default! || kt.OverflowUint(n)) {
+                            d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + s, Type: kt, Offset: (int64)(start + 1)))));
+                            break;
+                        }
+                        kv = reflect.New(kt).Elem();
+                        kv.SetUint(n);
+                    } while (false);
                 }
                 else { /* default: */
                     throw panic("json: Unexpected key type");
@@ -858,14 +887,14 @@ internal static reflectꓸType textUnmarshalerType = reflect.TypeFor[encoding.Te
         }
         // Next token must be , or }.
         if (d.opcode == scanSkipSpace) {
-            d.scanWhile(scanSkipSpace);
+            Ꮡd.scanWhile(scanSkipSpace);
         }
         if (d.errorContext != nil) {
             // Reset errorContext to its original state.
             // Keep the same underlying array for FieldStack, to reuse the
             // space and avoid unnecessary allocs.
-            d.errorContext.FieldStack = d.errorContext.FieldStack[..(int)(len(origErrorContext.FieldStack))];
-            d.errorContext.Struct = origErrorContext.Struct;
+            d.errorContext.Value.FieldStack = (~d.errorContext).FieldStack[..(int)(len(origErrorContext.FieldStack))];
+            d.errorContext.Value.Struct = origErrorContext.Struct;
         }
         if (d.opcode == scanEndObject) {
             break;
@@ -885,7 +914,7 @@ internal static reflectꓸType textUnmarshalerType = reflect.TypeFor[encoding.Te
     }
     var (f, err) = strconv.ParseFloat(s, 64);
     if (err != default!) {
-        return (default!, new UnmarshalTypeError(Value: "number "u8 + s, Type: reflect.TypeFor<float64>(), Offset: ((int64)d.off)));
+        return (default!, new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + s, Type: reflect.TypeFor<float64>(), Offset: (int64)d.off))));
     }
     return (f, default!);
 }
@@ -916,7 +945,8 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
                 d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type()));
                 return default!;
             }
-            @string val = "number"u8;
+            ref var val = ref heap<@string>(out var Ꮡval);
+            val = "number"u8;
             switch (item[0]) {
             case (rune)'n': {
                 val = "null"u8;
@@ -927,7 +957,7 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
                 break;
             }}
 
-            d.saveError(new UnmarshalTypeError(Value: val, Type: v.Type(), Offset: ((int64)d.readIndex())));
+            d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: val, Type: v.Type(), Offset: (int64)d.readIndex()))));
             return default!;
         }
         var (s, ok) = unquoteBytes(item);
@@ -969,21 +999,21 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
                 break;
             }
             var exprᴛ2 = v.Kind();
-            { /* default: */
-                if (fromQuoted){
-                    d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type()));
-                } else {
-                    d.saveError(new UnmarshalTypeError(Value: "bool"u8, Type: v.Type(), Offset: ((int64)d.readIndex())));
-                }
-            }
-            else if (exprᴛ2 == reflect.ΔBool) {
+            if (exprᴛ2 == reflect.ΔBool) {
                 v.SetBool(value);
             }
             else if (exprᴛ2 == reflect.ΔInterface) {
                 if (v.NumMethod() == 0){
                     v.Set(reflect.ValueOf(value));
                 } else {
-                    d.saveError(new UnmarshalTypeError(Value: "bool"u8, Type: v.Type(), Offset: ((int64)d.readIndex())));
+                    d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "bool"u8, Type: v.Type(), Offset: (int64)d.readIndex()))));
+                }
+            }
+            else { /* default: */
+                if (fromQuoted){
+                    d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type()));
+                } else {
+                    d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "bool"u8, Type: v.Type(), Offset: (int64)d.readIndex()))));
                 }
             }
 
@@ -999,21 +1029,20 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
                 throw panic(phasePanicMsg);
             }
             var exprᴛ3 = v.Kind();
-            { /* default: */
-                d.saveError(new UnmarshalTypeError(Value: "string"u8, Type: v.Type(), Offset: ((int64)d.readIndex())));
-            }
-            else if (exprᴛ3 == reflect.ΔSlice) {
-                if (v.Type().Elem().Kind() != reflect.Uint8) {
-                    d.saveError(new UnmarshalTypeError(Value: "string"u8, Type: v.Type(), Offset: ((int64)d.readIndex())));
-                    break;
-                }
-                var b = new slice<byte>(base64.StdEncoding.DecodedLen(len(s)));
-                var (n, err) = base64.StdEncoding.Decode(b, s);
-                if (err != default!) {
-                    d.saveError(err);
-                    break;
-                }
-                v.SetBytes(b[..(int)(n)]);
+            if (exprᴛ3 == reflect.ΔSlice) {
+                do {
+                    if (v.Type().Elem().Kind() != reflect.Uint8) {
+                        d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "string"u8, Type: v.Type(), Offset: (int64)d.readIndex()))));
+                        break;
+                    }
+                    var b = new slice<byte>(base64.StdEncoding.DecodedLen(len(s)));
+                    var (n, err) = base64.StdEncoding.Decode(b, s);
+                    if (err != default!) {
+                        d.saveError(err);
+                        break;
+                    }
+                    v.SetBytes(b[..(int)(n)]);
+                } while (false);
             }
             else if (exprᴛ3 == reflect.ΔString) {
                 @string t = ((@string)s);
@@ -1026,8 +1055,11 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
                 if (v.NumMethod() == 0){
                     v.Set(reflect.ValueOf(((@string)s)));
                 } else {
-                    d.saveError(new UnmarshalTypeError(Value: "string"u8, Type: v.Type(), Offset: ((int64)d.readIndex())));
+                    d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "string"u8, Type: v.Type(), Offset: (int64)d.readIndex()))));
                 }
+            }
+            else { /* default: */
+                d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "string"u8, Type: v.Type(), Offset: (int64)d.readIndex()))));
             }
 
             break;
@@ -1041,53 +1073,63 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
                 throw panic(phasePanicMsg);
             }
             var exprᴛ4 = v.Kind();
-            { /* default: */
-                if (v.Kind() == reflect.ΔString && AreEqual(v.Type(), numberType)) {
-                    // s must be a valid number, because it's
-                    // already been tokenized.
-                    v.SetString(((@string)item));
-                    break;
-                }
-                if (fromQuoted) {
-                    return fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type());
-                }
-                d.saveError(new UnmarshalTypeError(Value: "number"u8, Type: v.Type(), Offset: ((int64)d.readIndex())));
-            }
-            else if (exprᴛ4 == reflect.ΔInterface) {
-                (n, err) = d.convertNumber(((@string)item));
-                if (err != default!) {
-                    d.saveError(err);
-                    break;
-                }
-                if (v.NumMethod() != 0) {
-                    d.saveError(new UnmarshalTypeError(Value: "number"u8, Type: v.Type(), Offset: ((int64)d.readIndex())));
-                    break;
-                }
-                v.Set(reflect.ValueOf(n));
+            if (exprᴛ4 == reflect.ΔInterface) {
+                do {
+                    var (n, err) = d.convertNumber(((@string)item));
+                    if (err != default!) {
+                        // s must be a valid number, because it's
+                        // already been tokenized.
+                        d.saveError(err);
+                        break;
+                    }
+                    if (v.NumMethod() != 0) {
+                        d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number"u8, Type: v.Type(), Offset: (int64)d.readIndex()))));
+                        break;
+                    }
+                    v.Set(reflect.ValueOf(n));
+                } while (false);
             }
             else if (exprᴛ4 == reflect.ΔInt || exprᴛ4 == reflect.Int8 || exprᴛ4 == reflect.Int16 || exprᴛ4 == reflect.Int32 || exprᴛ4 == reflect.Int64) {
-                var (n, err) = strconv.ParseInt(((@string)item), 10, 64);
-                if (err != default! || v.OverflowInt(n)) {
-                    d.saveError(new UnmarshalTypeError(Value: "number "u8 + ((@string)item), Type: v.Type(), Offset: ((int64)d.readIndex())));
-                    break;
-                }
-                v.SetInt(n);
+                do {
+                    var (n, err) = strconv.ParseInt(((@string)item), 10, 64);
+                    if (err != default! || v.OverflowInt(n)) {
+                        d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((@string)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
+                        break;
+                    }
+                    v.SetInt(n);
+                } while (false);
             }
             else if (exprᴛ4 == reflect.ΔUint || exprᴛ4 == reflect.Uint8 || exprᴛ4 == reflect.Uint16 || exprᴛ4 == reflect.Uint32 || exprᴛ4 == reflect.Uint64 || exprᴛ4 == reflect.Uintptr) {
-                var (n, err) = strconv.ParseUint(((@string)item), 10, 64);
-                if (err != default! || v.OverflowUint(n)) {
-                    d.saveError(new UnmarshalTypeError(Value: "number "u8 + ((@string)item), Type: v.Type(), Offset: ((int64)d.readIndex())));
-                    break;
-                }
-                v.SetUint(n);
+                do {
+                    var (n, err) = strconv.ParseUint(((@string)item), 10, 64);
+                    if (err != default! || v.OverflowUint(n)) {
+                        d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((@string)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
+                        break;
+                    }
+                    v.SetUint(n);
+                } while (false);
             }
             else if (exprᴛ4 == reflect.Float32 || exprᴛ4 == reflect.Float64) {
-                var (n, err) = strconv.ParseFloat(((@string)item), v.Type().Bits());
-                if (err != default! || v.OverflowFloat(n)) {
-                    d.saveError(new UnmarshalTypeError(Value: "number "u8 + ((@string)item), Type: v.Type(), Offset: ((int64)d.readIndex())));
-                    break;
-                }
-                v.SetFloat(n);
+                do {
+                    var (n, err) = strconv.ParseFloat(((@string)item), v.Type().Bits());
+                    if (err != default! || v.OverflowFloat(n)) {
+                        d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((@string)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
+                        break;
+                    }
+                    v.SetFloat(n);
+                } while (false);
+            }
+            else { /* default: */
+                do {
+                    if (v.Kind() == reflect.ΔString && AreEqual(v.Type(), numberType)) {
+                        v.SetString(((@string)item));
+                        break;
+                    }
+                    if (fromQuoted) {
+                        return fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type());
+                    }
+                    d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number"u8, Type: v.Type(), Offset: (int64)d.readIndex()))));
+                } while (false);
             }
 
             break;
@@ -1102,41 +1144,44 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
 // but they avoid the weight of reflection in this common case.
 
 // valueInterface is like value but returns interface{}
-[GoRecv] internal static any /*val*/ valueInterface(this ref decodeState d) {
+internal static any /*val*/ valueInterface(this ж<decodeState> Ꮡd) {
     any val = default!;
 
+    ref var d = ref Ꮡd.Value;
     var exprᴛ1 = d.opcode;
-    { /* default: */
-        throw panic(phasePanicMsg);
-    }
-    else if (exprᴛ1 == scanBeginArray) {
-        val = d.arrayInterface();
-        d.scanNext();
+    if (exprᴛ1 == scanBeginArray) {
+        val = Ꮡd.arrayInterface();
+        Ꮡd.scanNext();
     }
     else if (exprᴛ1 == scanBeginObject) {
-        val = d.objectInterface();
-        d.scanNext();
+        val = Ꮡd.objectInterface();
+        Ꮡd.scanNext();
     }
     else if (exprᴛ1 == scanBeginLiteral) {
-        val = d.literalInterface();
+        val = Ꮡd.literalInterface();
+    }
+    else { /* default: */
+        throw panic(phasePanicMsg);
     }
 
     return val;
 }
 
 // arrayInterface is like array but returns []interface{}.
-[GoRecv] internal static slice<any> arrayInterface(this ref decodeState d) {
+internal static slice<any> arrayInterface(this ж<decodeState> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
     slice<any> v = new slice<any>(0);
     while (ᐧ) {
         // Look ahead for ] - can only happen on first iteration.
-        d.scanWhile(scanSkipSpace);
+        Ꮡd.scanWhile(scanSkipSpace);
         if (d.opcode == scanEndArray) {
             break;
         }
-        v = append(v, d.valueInterface());
+        v = append(v, Ꮡd.valueInterface());
         // Next token must be , or ].
         if (d.opcode == scanSkipSpace) {
-            d.scanWhile(scanSkipSpace);
+            Ꮡd.scanWhile(scanSkipSpace);
         }
         if (d.opcode == scanEndArray) {
             break;
@@ -1149,11 +1194,13 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
 }
 
 // objectInterface is like object but returns map[string]interface{}.
-[GoRecv] internal static map<@string, any> objectInterface(this ref decodeState d) {
+internal static map<@string, any> objectInterface(this ж<decodeState> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
     var m = new map<@string, any>();
     while (ᐧ) {
         // Read opening " of string key or closing }.
-        d.scanWhile(scanSkipSpace);
+        Ꮡd.scanWhile(scanSkipSpace);
         if (d.opcode == scanEndObject) {
             // closing } - can only happen on first iteration.
             break;
@@ -1163,7 +1210,7 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
         }
         // Read string key.
         nint start = d.readIndex();
-        d.rescanLiteral();
+        Ꮡd.rescanLiteral();
         var item = d.data[(int)(start)..(int)(d.readIndex())];
         var (key, ok) = unquote(item);
         if (!ok) {
@@ -1171,17 +1218,17 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
         }
         // Read : before value.
         if (d.opcode == scanSkipSpace) {
-            d.scanWhile(scanSkipSpace);
+            Ꮡd.scanWhile(scanSkipSpace);
         }
         if (d.opcode != scanObjectKey) {
             throw panic(phasePanicMsg);
         }
-        d.scanWhile(scanSkipSpace);
+        Ꮡd.scanWhile(scanSkipSpace);
         // Read value.
-        m[key] = d.valueInterface();
+        m[key] = Ꮡd.valueInterface();
         // Next token must be , or }.
         if (d.opcode == scanSkipSpace) {
-            d.scanWhile(scanSkipSpace);
+            Ꮡd.scanWhile(scanSkipSpace);
         }
         if (d.opcode == scanEndObject) {
             break;
@@ -1196,10 +1243,12 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
 // literalInterface consumes and returns a literal from d.data[d.off-1:] and
 // it reads the following byte ahead. The first byte of the literal has been
 // read already (that's how the caller knows it's a literal).
-[GoRecv] internal static any literalInterface(this ref decodeState d) {
+internal static any literalInterface(this ж<decodeState> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
     // All bytes inside literal return scanContinue op code.
     nint start = d.readIndex();
-    d.rescanLiteral();
+    Ꮡd.rescanLiteral();
     var item = d.data[(int)(start)..(int)(d.readIndex())];
     {
         var c = item[0];
@@ -1225,7 +1274,7 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
                 // number
                 throw panic(phasePanicMsg);
             }
-            (n, err) = d.convertNumber(((@string)item));
+            var (n, err) = d.convertNumber(((@string)item));
             if (err != default!) {
                 d.saveError(err);
             }
@@ -1242,25 +1291,27 @@ internal static rune getu4(slice<byte> s) {
         return -1;
     }
     rune r = default!;
-    foreach (var (_, c) in s[2..6]) {
+    foreach (var (_, vᴛ1) in s[2..6]) {
+        var c = vᴛ1;
+
         switch (ᐧ) {
         case {} when (rune)'0' <= c && c <= (rune)'9': {
-            c = c - (rune)'0';
+            c = (byte)(c - (rune)'0');
             break;
         }
         case {} when (rune)'a' <= c && c <= (rune)'f': {
-            c = c - (rune)'a' + 10;
+            c = (byte)(c - (rune)'a' + 10);
             break;
         }
         case {} when (rune)'A' <= c && c <= (rune)'F': {
-            c = c - (rune)'A' + 10;
+            c = (byte)(c - (rune)'A' + 10);
             break;
         }
         default: {
             return -1;
         }}
 
-        r = r * 16 + ((rune)c);
+        r = r * 16 + (rune)c;
     }
     return r;
 }
@@ -1315,14 +1366,14 @@ internal static (slice<byte> t, bool ok) unquoteBytes(slice<byte> s) {
     if (r == len(s)) {
         return (s, true);
     }
-    var b = new slice<byte>(len(s) + 2 * utf8.UTFMax);
+    var b = new slice<byte>(len(s) + (nint)(2 * utf8.UTFMax));
     nint w = copy(b, s[0..(int)(r)]);
     while (r < len(s)) {
         // Out of room? Can only happen if s is full of
         // malformed UTF-8 and we're replacing each
         // byte with RuneError.
-        if (w >= len(b) - 2 * utf8.UTFMax) {
-            var nb = new slice<byte>((len(b) + utf8.UTFMax) * 2);
+        if (w >= len(b) - (nint)(2 * utf8.UTFMax)) {
+            var nb = new slice<byte>((len(b) + (nint)utf8.UTFMax) * 2);
             copy(nb, b[0..(int)(w)]);
             b = nb;
         }
@@ -1403,7 +1454,7 @@ internal static (slice<byte> t, bool ok) unquoteBytes(slice<byte> s) {
             case {} when c is (rune)'"' or < (rune)' ': {
                 return (t, ok);
             }
-            case {} when c is < utf8.RuneSelf: {
+            case {} when c < utf8.RuneSelf: {
                 b[w] = c;
                 r++;
                 w++;

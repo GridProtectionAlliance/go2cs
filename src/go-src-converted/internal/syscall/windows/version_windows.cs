@@ -32,7 +32,7 @@ internal static (uint32 major, uint32 minor, uint32 build) version() {
 
     ref var info = ref heap<_OSVERSIONINFOW>(out var Ꮡinfo);
     info = new _OSVERSIONINFOW(nil);
-    info.osVersionInfoSize = ((uint32)@unsafe.Sizeof(info));
+    info.osVersionInfoSize = (uint32)@unsafe.Sizeof(info);
     rtlGetVersion(Ꮡinfo);
     return (info.majorVersion, info.minorVersion, info.buildNumber);
 }
@@ -42,25 +42,24 @@ internal static bool supportTCPKeepAliveInterval;
 internal static bool supportTCPKeepAliveCount;
 
 // Fallback to checking the Windows version.
-internal static Action initTCPKeepAlive = sync.OnceFunc(() => {
+internal static Action initTCPKeepAlive = sync.OnceFunc(() => func((defer, recover) => {
     var (s, err) = WSASocket(syscall.AF_INET, syscall.SOCK_STREAM, syscall.IPPROTO_TCP, nil, 0, WSA_FLAG_NO_HANDLE_INHERIT);
     if (err != default!) {
         var (major, _, build) = version();
-        var supportTCPKeepAliveIdle = major >= 10 && build >= 16299;
-        var supportTCPKeepAliveInterval = major >= 10 && build >= 16299;
-        var supportTCPKeepAliveCount = major >= 10 && build >= 15063;
-        return (major, minor, build);
+        supportTCPKeepAliveIdle = major >= 10 && build >= 16299;
+        supportTCPKeepAliveInterval = major >= 10 && build >= 16299;
+        supportTCPKeepAliveCount = major >= 10 && build >= 15063;
+        return;
     }
     deferǃ(syscall.Closesocket, s, defer);
-    internal static Func<nint, bool> optSupported = (nint opt) => {
-        var err = syscall.SetsockoptInt(s, syscall.IPPROTO_TCP, opt, 1);
-        return !errors.Is(err, syscall.WSAENOPROTOOPT);
+    Func<nint, bool> optSupported = (nint opt) => {
+        var errΔ1 = syscall.SetsockoptInt(s, syscall.IPPROTO_TCP, opt, 1);
+        return !errors.Is(errΔ1, syscall.WSAENOPROTOOPT);
     };
-
-    var supportTCPKeepAliveIdle = optSupported(TCP_KEEPIDLE);
-    var supportTCPKeepAliveInterval = optSupported(TCP_KEEPINTVL);
-    var supportTCPKeepAliveCount = optSupported(TCP_KEEPCNT);
-});
+    supportTCPKeepAliveIdle = optSupported(TCP_KEEPIDLE);
+    supportTCPKeepAliveInterval = optSupported(TCP_KEEPINTVL);
+    supportTCPKeepAliveCount = optSupported(TCP_KEEPCNT);
+}));
 
 // SupportTCPKeepAliveInterval indicates whether TCP_KEEPIDLE is supported.
 // The minimal requirement is Windows 10.0.16299.
@@ -99,16 +98,15 @@ public static Func<bool> SupportTCPInitialRTONoSYNRetransmissions = sync.OnceVal
 // Unix Domain Sockets.
 // The minimal requirement is Windows 10.0.17063.
 public static Func<bool> SupportUnixSocket = sync.OnceValue(() => {
-    internal static uint32 size;
-
+    uint32 size = default!;
     (_, _) = syscall.WSAEnumProtocols(nil, nil, Ꮡ(size));
-    var n = ((int32)size) / ((int32)@unsafe.Sizeof(new syscall.WSAProtocolInfo(nil)));
+    var n = (int32)size / (int32)@unsafe.Sizeof(new syscall.WSAProtocolInfo(nil));
     var buf = new slice<syscall.WSAProtocolInfo>(n);
-    var (n, err) = syscall.WSAEnumProtocols(nil, Ꮡ(buf, 0), Ꮡ(size));
+    (n, var err) = syscall.WSAEnumProtocols(nil, Ꮡ(buf, 0), Ꮡ(size));
     if (err != default!) {
         return false;
     }
-    for (var i = ((int32)0); i < n; i++) {
+    for (var i = (int32)0; i < n; i++) {
         if (buf[i].AddressFamily == syscall.AF_UNIX) {
             return true;
         }

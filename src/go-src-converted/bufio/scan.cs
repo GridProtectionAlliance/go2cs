@@ -27,8 +27,8 @@ partial class bufio_package {
 // control over error handling or large tokens, or must run sequential scans
 // on a reader, should use [bufio.Reader] instead.
 [GoType] partial struct Scanner {
-    internal io_package.Reader r; // The reader provided by the client.
-    internal SplitFunc split; // The function to split the tokens.
+    internal io.Reader r; // The reader provided by the client.
+    internal Func<slice<byte>, bool, (nint advance, slice<byte> token, error err)> split; // The function to split the tokens.
     internal nint maxTokenSize;      // Maximum size of a token; modified by tests.
     internal slice<byte> token; // Last token returned by split.
     internal slice<byte> buf; // Buffer used as argument to split.
@@ -40,7 +40,7 @@ partial class bufio_package {
     internal bool done;      // Scan has finished.
 }
 
-public delegate (nint advance, slice<byte> token, error err) SplitFunc(slice<byte> data, bool atEOF);
+// type SplitFunc is a methodless func type — rendered inline as its base delegate
 
 // Errors returned by Scanner.
 public static error ErrTooLong = errors.New("bufio.Scanner: token too long"u8);
@@ -59,7 +59,7 @@ internal static readonly UntypedInt startBufSize = 4096; // Size of initial allo
 public static ж<Scanner> NewScanner(io.Reader r) {
     return Ꮡ(new Scanner(
         r: r,
-        split: ScanLines,
+        split: new Func<slice<byte>, bool, (nint, slice<byte>, error)>(ScanLines),
         maxTokenSize: MaxScanTokenSize
     ));
 }
@@ -117,9 +117,7 @@ public static error ErrFinalToken = errors.New("final token"u8);
         // If we've run out of data but have an error, give the split function
         // a chance to recover any remaining, possibly empty token.
         if (s.end > s.start || s.err != default!) {
-            nint advance = s.split(s.buf[(int)(s.start)..(int)(s.end)], s.err != default!);
-            var token = s.split(s.buf[(int)(s.start)..(int)(s.end)], s.err != default!);
-            var err = s.split(s.buf[(int)(s.start)..(int)(s.end)], s.err != default!);
+            var (advance, token, err) = s.split(s.buf[(int)(s.start)..(int)(s.end)], s.err != default!);
             if (err != default!) {
                 if (AreEqual(err, ErrFinalToken)) {
                     s.token = token;
@@ -168,8 +166,8 @@ public static error ErrFinalToken = errors.New("final token"u8);
         // Is the buffer full? If so, resize.
         if (s.end == len(s.buf)) {
             // Guarantee no overflow in the multiplication below.
-            const nint maxInt = /* int(^uint(0) >> 1) */ 9223372036854775807;
-            if (len(s.buf) >= s.maxTokenSize || len(s.buf) > maxInt / 2) {
+            nint maxInt = /* int(^uint(0) >> 1) */ unchecked((nint)9223372036854775807);
+            if (len(s.buf) >= s.maxTokenSize || len(s.buf) > 4611686018427387903L) {
                 s.setErr(ErrTooLong);
                 return false;
             }
@@ -253,7 +251,7 @@ public static error ErrFinalToken = errors.New("final token"u8);
 // The default split function is [ScanLines].
 //
 // Split panics if it is called after scanning has started.
-[GoRecv] public static void Split(this ref Scanner s, SplitFunc split) {
+[GoRecv] public static void Split(this ref Scanner s, Func<slice<byte>, bool, (nint, slice<byte>, error)> split) {
     if (s.scanCalled) {
         throw panic("Split called after Scan");
     }
@@ -274,7 +272,7 @@ public static (nint advance, slice<byte> token, error err) ScanBytes(slice<byte>
     return (1, data[0..1], default!);
 }
 
-internal static slice<byte> errorRune = slice<byte>(((@string)utf8.RuneError));
+internal static slice<byte> errorRune = slice<byte>(((@string)(rune)utf8.RuneError));
 
 // ScanRunes is a split function for a [Scanner] that returns each
 // UTF-8-encoded rune as a token. The sequence of runes returned is
@@ -390,14 +388,14 @@ public static (nint advance, slice<byte> token, error err) ScanWords(slice<byte>
     // Skip leading spaces.
     nint start = 0;
     for (nint width = 0; start < len(data); start += width) {
-        rune rΔ1 = default!;
-        (, width) = utf8.DecodeRune(data[(int)(start)..]);
-        if (!isSpace(rΔ1)) {
+        rune r = default!;
+        (r, width) = utf8.DecodeRune(data[(int)(start)..]);
+        if (!isSpace(r)) {
             break;
         }
     }
     // Scan until space, marking end of word.
-    for (nint width = 0;nint i = start; i < len(data); i += width) {
+    for ((nint width, nint i) = (0, start); i < len(data); i += width) {
         rune r = default!;
         (r, width) = utf8.DecodeRune(data[(int)(i)..]);
         if (isSpace(r)) {

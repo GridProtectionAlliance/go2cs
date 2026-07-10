@@ -50,9 +50,9 @@ internal const bool unsigned = false;
 }
 
 [GoRecv] internal static void init(this ref fmt f, ж<buffer> Ꮡbuf) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.Value;
 
-    f.buf = buf;
+    f.buf = Ꮡbuf;
     f.clearflags();
 }
 
@@ -62,26 +62,26 @@ internal const bool unsigned = false;
         // No padding bytes needed.
         return;
     }
-    var buf = f.buf.val;
+    var buf = f.buf.ValueSlot;
     nint oldLen = len(buf);
     nint newLen = oldLen + n;
     // Make enough room for padding.
     if (newLen > cap(buf)) {
         buf = new buffer(cap(buf) * 2 + n);
-        copy(buf, f.buf.val);
+        copy(buf, f.buf.ValueSlot);
     }
     // Decide which byte the padding should be filled with.
-    var padByte = ((byte)(rune)' ');
+    var padByte = (byte)(rune)' ';
     // Zero padding is allowed only to the left.
     if (f.zero && !f.minus) {
-        padByte = ((byte)(rune)'0');
+        padByte = (byte)(rune)'0';
     }
     // Fill padding with padByte.
     var padding = buf[(int)(oldLen)..(int)(newLen)];
     foreach (var (i, _) in padding) {
         padding[i] = padByte;
     }
-    f.buf.val = buf[..(int)(newLen)];
+    f.buf.ValueSlot = buf[..(int)(newLen)];
 }
 
 // pad appends b to f.buf, padded on left (!f.minus) or right (f.minus).
@@ -139,7 +139,7 @@ internal const bool unsigned = false;
     if (f.precPresent && f.prec > 4) {
         prec = f.prec;
         // Compute space needed for "U+" , number, " '", character, "'".
-        nint width = 2 + prec + 2 + utf8.UTFMax + 1;
+        nint width = 2 + prec + 2 + (nint)utf8.UTFMax + 1;
         if (width > len(buf)) {
             buf = new slice<byte>(width);
         }
@@ -147,11 +147,11 @@ internal const bool unsigned = false;
     // Format into buf, ending at buf[i]. Formatting numbers is easier right-to-left.
     nint i = len(buf);
     // For %#U we want to add a space and a quoted character at the end of the buffer.
-    if (f.sharp && u <= utf8.MaxRune && strconv.IsPrint(((rune)u))) {
+    if (f.sharp && u <= utf8.MaxRune && strconv.IsPrint((rune)u)) {
         i--;
         buf[i] = (rune)'\'';
-        i -= utf8.RuneLen(((rune)u));
-        utf8.EncodeRune(buf[(int)(i)..], ((rune)u));
+        i -= utf8.RuneLen((rune)u);
+        utf8.EncodeRune(buf[(int)(i)..], (rune)u);
         i--;
         buf[i] = (rune)'\'';
         i--;
@@ -160,12 +160,12 @@ internal const bool unsigned = false;
     // Format the Unicode code point u as a hexadecimal number.
     while (u >= 16) {
         i--;
-        buf[i] = udigits[(uint64)(u & 15)];
+        buf[i] = udigits[(int)((uint64)(u & 0xF))];
         prec--;
-        u >>= (UntypedInt)(4);
+        u >>= (int)(4);
     }
     i--;
-    buf[i] = udigits[u];
+    buf[i] = udigits[(int)(u)];
     prec--;
     // Add zeros in front of the number until requested precision is reached.
     while (prec > 0) {
@@ -186,9 +186,9 @@ internal const bool unsigned = false;
 
 // fmtInteger formats signed and unsigned integers.
 [GoRecv] internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSigned, rune verb, @string digits) {
-    var negative = isSigned && ((int64)u) < 0;
+    var negative = isSigned && (int64)u < 0;
     if (negative) {
-        u = -u;
+        u = ((uint64)0 - u);
     }
     var buf = f.intbuf[0..];
     // The already allocated f.intbuf with a capacity of 68 bytes
@@ -236,7 +236,7 @@ internal const bool unsigned = false;
         while (u >= 10) {
             i--;
             var next = u / 10;
-            buf[i] = ((byte)((rune)'0' + u - next * 10));
+            buf[i] = (byte)((rune)'0' + u - next * 10);
             u = next;
         }
         break;
@@ -244,24 +244,24 @@ internal const bool unsigned = false;
     case 16: {
         while (u >= 16) {
             i--;
-            buf[i] = digits[(uint64)(u & 15)];
-            u >>= (UntypedInt)(4);
+            buf[i] = digits[(int)((uint64)(u & 0xF))];
+            u >>= (int)(4);
         }
         break;
     }
     case 8: {
         while (u >= 8) {
             i--;
-            buf[i] = ((byte)((rune)'0' + (uint64)(u & 7)));
-            u >>= (UntypedInt)(3);
+            buf[i] = (byte)((rune)'0' + (uint64)(u & 7));
+            u >>= (int)(3);
         }
         break;
     }
     case 2: {
         while (u >= 2) {
             i--;
-            buf[i] = ((byte)((rune)'0' + (uint64)(u & 1)));
-            u >>= (UntypedInt)(1);
+            buf[i] = (byte)((rune)'0' + (uint64)(u & 1));
+            u >>= (int)(1);
         }
         break;
     }
@@ -271,7 +271,7 @@ internal const bool unsigned = false;
     }}
 
     i--;
-    buf[i] = digits[u];
+    buf[i] = digits[(int)(u)];
     while (i > 0 && prec > len(buf) - i) {
         i--;
         buf[i] = (rune)'0';
@@ -413,19 +413,19 @@ internal const bool unsigned = false;
         f.writePadding(f.wid - width);
     }
     // Write the encoding directly into the output buffer.
-    var buf = f.buf.val;
+    var buf = f.buf.ValueSlot;
     if (f.sharp) {
         // Add leading 0x or 0X.
-        buf = append(buf, (rune)'0', digits[16]);
+        buf = append(buf, (byte)((rune)'0'), digits[16]);
     }
     byte c = default!;
     for (nint i = 0; i < length; i++) {
         if (f.space && i > 0) {
             // Separate elements with a space.
-            buf = append(buf, (rune)' ');
+            buf = append(buf, (byte)((rune)' '));
             if (f.sharp) {
                 // Add leading 0x or 0X for each element.
-                buf = append(buf, (rune)'0', digits[16]);
+                buf = append(buf, (byte)((rune)'0'), digits[16]);
             }
         }
         if (b != default!){
@@ -436,9 +436,9 @@ internal const bool unsigned = false;
         }
         // Take a byte from the input string.
         // Encode each byte as two hexadecimal digits.
-        buf = append(buf, digits[c >> (int)(4)], digits[(byte)(c & 15)]);
+        buf = append(buf, digits[(c >> (int)(4))], digits[(byte)(c & 0xF)]);
     }
-    f.buf.val = buf;
+    f.buf.ValueSlot = buf;
     // Handle padding to the right.
     if (f.widPresent && f.wid > width && f.minus) {
         f.writePadding(f.wid - width);
@@ -477,7 +477,7 @@ internal const bool unsigned = false;
 [GoRecv] internal static void fmtC(this ref fmt f, uint64 c) {
     // Explicitly check whether c exceeds utf8.MaxRune since the conversion
     // of a uint64 to a rune may lose precision that indicates an overflow.
-    var r = ((rune)c);
+    var r = (rune)c;
     if (c > utf8.MaxRune) {
         r = utf8.RuneError;
     }
@@ -488,7 +488,7 @@ internal const bool unsigned = false;
 // fmtQc formats an integer as a single-quoted, escaped Go character constant.
 // If the character is not valid Unicode, it will print '\ufffd'.
 [GoRecv] internal static void fmtQc(this ref fmt f, uint64 c) {
-    var r = ((rune)c);
+    var r = (rune)c;
     if (c > utf8.MaxRune) {
         r = utf8.RuneError;
     }
@@ -508,7 +508,7 @@ internal const bool unsigned = false;
         prec = f.prec;
     }
     // Format number, reserving space for leading + sign if needed.
-    var num = strconv.AppendFloat(f.intbuf[..1], v, ((byte)verb), prec, size);
+    var num = strconv.AppendFloat(f.intbuf[..1], v, (byte)verb, prec, size);
     if (num[1] == (rune)'-' || num[1] == (rune)'+'){
         num = num[1..];
     } else {
@@ -564,11 +564,13 @@ internal const bool unsigned = false;
                 num = num[..(int)(i)];
             }
             else if (exprᴛ1 is (rune)'e' or (rune)'E') { matchᴛ1 = true;
-                if (verb != (rune)'x' && verb != (rune)'X') {
-                    tail = append(tail, num[(int)(i)..].ꓸꓸꓸ);
-                    num = num[..(int)(i)];
-                    break;
-                }
+                do {
+                    if (verb != (rune)'x' && verb != (rune)'X') {
+                        tail = append(tail, num[(int)(i)..].ꓸꓸꓸ);
+                        num = num[..(int)(i)];
+                        break;
+                    }
+                } while (false);
                 fallthrough = true;
             }
             if (fallthrough || !matchᴛ1) { /* default: */
@@ -587,10 +589,10 @@ internal const bool unsigned = false;
             if (len(num) == 2 && num[1] == (rune)'0') {
                 digits--;
             }
-            num = append(num, (rune)'.');
+            num = append(num, (byte)((rune)'.'));
         }
         while (digits > 0) {
-            num = append(num, (rune)'0');
+            num = append(num, (byte)((rune)'0'));
             digits--;
         }
         num = append(num, tail.ꓸꓸꓸ);

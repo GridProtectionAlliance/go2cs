@@ -4,7 +4,7 @@
 namespace go;
 
 using errors = errors_package;
-using sync = sync_package;
+using Δsync = sync_package;
 using syscall = syscall_package;
 
 partial class time_package {
@@ -54,24 +54,23 @@ partial class time_package {
 [GoType] partial struct zoneTrans {
     internal int64 when; // transition time, in seconds since 1970 GMT
     internal uint8 index; // the index of the zone that goes into effect at that time
-    internal bool isstd;  // ignored - no idea what these mean
-    internal bool isutc;
+    internal bool isstd, isutc;  // ignored - no idea what these mean
 }
 
 // alpha and omega are the beginning and end of time for zone
 // transitions.
-internal static readonly GoUntyped alpha = /* -1 << 63 */ // math.MinInt64
-    GoUntyped.Parse("-9223372036854775808");
+internal static readonly UntypedInt alpha = /* -1 << 63 */ -9223372036854775808; // math.MinInt64
 
 internal static readonly UntypedInt omega = /* 1<<63 - 1 */ 9223372036854775807; // math.MaxInt64
 
 // UTC represents Universal Coordinated Time (UTC).
-public static ж<ΔLocation> ΔUTC = Ꮡ(utcLoc);
+public static ж<ΔLocation> ΔUTC = ᏑutcLoc;
 
 // utcLoc is separate so that get can refer to &utcLoc
 // and ensure that it never returns a nil *Location,
 // even if a badly behaved client has changed UTC.
-internal static ΔLocation utcLoc = new ΔLocation(name: "UTC"u8);
+internal static ж<ΔLocation> ᏑutcLoc = new(new ΔLocation(name: "UTC"u8));
+internal static ref ΔLocation utcLoc => ref ᏑutcLoc.Value;
 
 // Local represents the system's local time zone.
 // On Unix systems, Local consults the TZ environment
@@ -79,52 +78,57 @@ internal static ΔLocation utcLoc = new ΔLocation(name: "UTC"u8);
 // use the system default /etc/localtime.
 // TZ="" means use UTC.
 // TZ="foo" means use file foo in the system timezone directory.
-public static ж<ΔLocation> ΔLocal = Ꮡ(localLoc);
+public static ж<ΔLocation> ΔLocal = ᏑlocalLoc;
 
 // localLoc is separate so that initLocal can initialize
 // it even if a client has changed Local.
-internal static ΔLocation localLoc;
+internal static ж<ΔLocation> ᏑlocalLoc = new(default(ΔLocation));
+internal static ref ΔLocation localLoc => ref ᏑlocalLoc.Value;
 
-internal static sync.Once localOnce;
+internal static ж<Δsync.Once> ᏑlocalOnce = new(default(Δsync.Once));
+internal static ref Δsync.Once localOnce => ref ᏑlocalOnce.Value;
 
-[GoRecv("capture")] internal static ж<ΔLocation> get(this ref ΔLocation l) {
+internal static ж<ΔLocation> get(this ж<ΔLocation> Ꮡl) {
+    ref var l = ref Ꮡl.Value;
+
     if (l == nil) {
-        return Ꮡ(utcLoc);
+        return ᏑutcLoc;
     }
-    if (l == Ꮡ(localLoc)) {
-        localOnce.Do(initLocal);
+    if (Ꮡl == ᏑlocalLoc) {
+        ᏑlocalOnce.Do(initLocal);
     }
-    return getꓸᏑl;
+    return Ꮡl;
 }
 
 // String returns a descriptive name for the time zone information,
 // corresponding to the name argument to [LoadLocation] or [FixedZone].
-[GoRecv] public static @string String(this ref ΔLocation l) {
-    return (~l.get()).name;
+public static @string String(this ж<ΔLocation> Ꮡl) {
+    ref var l = ref Ꮡl.Value;
+
+    return (~Ꮡl.get()).name;
 }
 
 internal static slice<ж<ΔLocation>> unnamedFixedZones;
 
-internal static sync.Once unnamedFixedZonesOnce;
+internal static ж<Δsync.Once> ᏑunnamedFixedZonesOnce = new(default(Δsync.Once));
+internal static ref Δsync.Once unnamedFixedZonesOnce => ref ᏑunnamedFixedZonesOnce.Value;
 
 // FixedZone returns a [Location] that always uses
 // the given zone name and offset (seconds east of UTC).
 public static ж<ΔLocation> FixedZone(@string name, nint offset) {
     // Most calls to FixedZone have an unnamed zone with an offset by the hour.
     // Optimize for that case by returning the same *Location for a given hour.
-    static readonly UntypedInt hoursBeforeUTC = 12;
-    static readonly UntypedInt hoursAfterUTC = 14;
+    UntypedInt hoursBeforeUTC = 12;
+    UntypedInt hoursAfterUTC = 14;
     nint hour = offset / 60 / 60;
     if (name == ""u8 && -hoursBeforeUTC <= hour && hour <= +hoursAfterUTC && hour * 60 * 60 == offset) {
-        unnamedFixedZonesOnce.Do(
-        var unnamedFixedZonesʗ2 = unnamedFixedZones;
-        () => {
-            unnamedFixedZonesʗ2 = new slice<ж<ΔLocation>>(hoursBeforeUTC + 1 + hoursAfterUTC);
+        ᏑunnamedFixedZonesOnce.Do(() => {
+            unnamedFixedZones = new slice<ж<ΔLocation>>(hoursBeforeUTC + 1 + hoursAfterUTC);
             for (nint hr = -hoursBeforeUTC; hr <= +hoursAfterUTC; hr++) {
-                unnamedFixedZonesʗ2[hr + hoursBeforeUTC] = fixedZone(""u8, hr * 60 * 60);
+                unnamedFixedZones[hr + (nint)hoursBeforeUTC] = fixedZone(""u8, hr * 60 * 60);
             }
         });
-        return unnamedFixedZones[hour + hoursBeforeUTC];
+        return unnamedFixedZones[hour + (nint)hoursBeforeUTC];
     }
     return fixedZone(name, offset);
 }
@@ -137,7 +141,7 @@ internal static ж<ΔLocation> fixedZone(@string name, nint offset) {
         cacheStart: alpha,
         cacheEnd: omega
     ));
-    l.val.cacheZone = Ꮡ((~l).zone, 0);
+    l.Value.cacheZone = Ꮡ((~l).zone, 0);
     return l;
 }
 
@@ -148,14 +152,15 @@ internal static ж<ΔLocation> fixedZone(@string name, nint offset) {
 // the start and end times bracketing sec when that zone is in effect,
 // the offset in seconds east of UTC (such as -5*60*60), and whether
 // the daylight savings is being observed at that time.
-[GoRecv] internal static (@string name, nint offset, int64 start, int64 end, bool isDST) lookup(this ref ΔLocation l, int64 sec) {
+internal static (@string name, nint offset, int64 start, int64 end, bool isDST) lookup(this ж<ΔLocation> Ꮡl, int64 sec) {
     @string name = default!;
     nint offset = default!;
     int64 start = default!;
     int64 end = default!;
     bool isDST = default!;
 
-    l = l.get();
+    ref var l = ref Ꮡl.Value;
+    Ꮡl = Ꮡl.get(); l = ref Ꮡl.Value;
     if (len(l.zone) == 0) {
         name = "UTC"u8;
         offset = 0;
@@ -166,25 +171,25 @@ internal static ж<ΔLocation> fixedZone(@string name, nint offset) {
     }
     {
         var zoneΔ1 = l.cacheZone; if (zoneΔ1 != nil && l.cacheStart <= sec && sec < l.cacheEnd) {
-            name = zoneΔ1.val.name;
-            offset = zoneΔ1.val.offset;
+            name = zoneΔ1.Value.name;
+            offset = zoneΔ1.Value.offset;
             start = l.cacheStart;
             end = l.cacheEnd;
-            isDST = zoneΔ1.val.isDST;
+            isDST = zoneΔ1.Value.isDST;
             return (name, offset, start, end, isDST);
         }
     }
     if (len(l.tx) == 0 || sec < l.tx[0].when) {
         var zoneΔ2 = Ꮡ(l.zone[l.lookupFirstZone()]);
-        name = zoneΔ2.val.name;
-        offset = zoneΔ2.val.offset;
+        name = zoneΔ2.Value.name;
+        offset = zoneΔ2.Value.offset;
         start = alpha;
         if (len(l.tx) > 0){
             end = l.tx[0].when;
         } else {
             end = omega;
         }
-        isDST = zoneΔ2.val.isDST;
+        isDST = zoneΔ2.Value.isDST;
         return (name, offset, start, end, isDST);
     }
     // Binary search for entry with largest time <= sec.
@@ -194,7 +199,7 @@ internal static ж<ΔLocation> fixedZone(@string name, nint offset) {
     nint lo = 0;
     nint hi = len(tx);
     while (hi - lo > 1) {
-        nint m = ((nint)(((nuint)(lo + hi)) >> (int)(1)));
+        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
         var lim = tx[m].when;
         if (sec < lim){
             end = lim;
@@ -204,11 +209,11 @@ internal static ж<ΔLocation> fixedZone(@string name, nint offset) {
         }
     }
     var zone = Ꮡ(l.zone[tx[lo].index]);
-    name = zone.val.name;
-    offset = zone.val.offset;
+    name = zone.Value.name;
+    offset = zone.Value.offset;
     start = tx[lo].when;
     // end = maintained during the search
-    isDST = zone.val.isDST;
+    isDST = zone.Value.isDST;
     // If we're at the end of the known zone transitions,
     // try the extend string.
     if (lo == len(tx) - 1 && l.extend != ""u8) {
@@ -243,7 +248,7 @@ internal static ж<ΔLocation> fixedZone(@string name, nint offset) {
     }
     // Case 2.
     if (len(l.tx) > 0 && l.zone[l.tx[0].index].isDST) {
-        for (nint zi = ((nint)l.tx[0].index) - 1; zi >= 0; zi--) {
+        for (nint zi = (nint)l.tx[0].index - 1; zi >= 0; zi--) {
             if (!l.zone[zi].isDST) {
                 return zi;
             }
@@ -306,7 +311,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST, 
     (dstName, s, ok) = tzsetName(s);
     if (ok) {
         if (len(s) == 0 || s[0] == (rune)','){
-            dstOffset = stdOffset + secondsPerHour;
+            dstOffset = stdOffset + (nint)secondsPerHour;
         } else {
             (dstOffset, s, ok) = tzsetOffset(s);
             dstOffset = -dstOffset;
@@ -336,14 +341,14 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST, 
     if (!ok || len(s) > 0) {
         return ("", 0, 0, 0, false, false);
     }
-    var (year, _, _, yday) = absDate(((uint64)(sec + unixToInternal + internalToAbsolute)), false);
-    var ysec = ((int64)(yday * secondsPerDay)) + sec % secondsPerDay;
+    var (year, _, _, yday) = absDate((uint64)(sec + unixToInternal + internalToAbsolute), false);
+    var ysec = (int64)(yday * (nint)secondsPerDay) + sec % (int64)secondsPerDay;
     // Compute start of year in seconds since Unix epoch.
     var d = daysSinceEpoch(year);
-    var abs = ((int64)(d * secondsPerDay));
-    abs += absoluteToInternal + internalToUnix;
-    var startSec = ((int64)tzruleTime(year, startRule, stdOffset));
-    var endSec = ((int64)tzruleTime(year, endRule, dstOffset));
+    var abs = (int64)(d * (uint64)secondsPerDay);
+    abs += -9223372028715321600L;
+    var startSec = (int64)tzruleTime(year, startRule, stdOffset);
+    var endSec = (int64)tzruleTime(year, endRule, dstOffset);
     var (dstIsDST, stdIsDST) = (true, false);
     // Note: this is a flipping of "DST" and "STD" while retaining the labels
     // This happens in southern hemispheres. The labelling here thus is a little
@@ -362,7 +367,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST, 
         return (stdName, stdOffset, abs, startSec + abs, stdIsDST, true);
     } else 
     if (ysec >= endSec){
-        return (stdName, stdOffset, endSec + abs, abs + 365 * secondsPerDay, stdIsDST, true);
+        return (stdName, stdOffset, endSec + abs, abs + (int64)(365 * secondsPerDay), stdIsDST, true);
     } else {
         return (dstName, dstOffset, startSec + abs, endSec + abs, dstIsDST, true);
     }
@@ -425,7 +430,7 @@ internal static (nint offset, @string rest, bool ok) tzsetOffset(@string s) {
     if (!ok) {
         return (0, "", false);
     }
-    nint off = hours * secondsPerHour;
+    nint off = hours * (nint)secondsPerHour;
     if (len(s) == 0 || s[0] != (rune)':') {
         if (neg) {
             off = -off;
@@ -437,7 +442,7 @@ internal static (nint offset, @string rest, bool ok) tzsetOffset(@string s) {
     if (!ok) {
         return (0, "", false);
     }
-    off += mins * secondsPerMinute;
+    off += mins * (nint)secondsPerMinute;
     if (len(s) == 0 || s[0] != (rune)':') {
         if (neg) {
             off = -off;
@@ -499,13 +504,13 @@ internal static (rule, @string, bool) tzsetRule(@string s) {
         if (!ok || len(s) == 0 || s[0] != (rune)'.') {
             return (new rule(nil), "", false);
         }
-        nint dayΔ1 = default!;
-        (, s, ok) = tzsetNum(s[1..], 0, 6);
+        nint day = default!;
+        (day, s, ok) = tzsetNum(s[1..], 0, 6);
         if (!ok) {
             return (new rule(nil), "", false);
         }
         r.kind = ruleMonthWeekDay;
-        r.day = dayΔ1;
+        r.day = day;
         r.week = week;
         r.mon = mon;
     } else {
@@ -522,7 +527,7 @@ internal static (rule, @string, bool) tzsetRule(@string s) {
         // 2am is the default
         return (r, s, true);
     }
-    var (offset, s, ok) = tzsetOffset(s[1..]);
+    (var offset, s, ok) = tzsetOffset(s[1..]);
     if (!ok) {
         return (new rule(nil), "", false);
     }
@@ -550,7 +555,7 @@ internal static (nint num, @string rest, bool ok) tzsetNum(@string s, nint min, 
             return (num, s[(int)(i)..], true);
         }
         num *= 10;
-        num += ((nint)r) - (rune)'0';
+        num += (nint)r - (rune)'0';
         if (num > max) {
             return (0, "", false);
         }
@@ -568,13 +573,13 @@ internal static nint tzruleTime(nint year, rule r, nint off) {
     nint s = default!;
     var exprᴛ1 = r.kind;
     if (exprᴛ1 == ruleJulian) {
-        s = (r.day - 1) * secondsPerDay;
+        s = (r.day - 1) * (nint)secondsPerDay;
         if (isLeap(year) && r.day >= 60) {
             s += secondsPerDay;
         }
     }
     else if (exprᴛ1 == ruleDOY) {
-        s = r.day * secondsPerDay;
+        s = r.day * (nint)secondsPerDay;
     }
     else if (exprᴛ1 == ruleMonthWeekDay) {
         nint m1 = (r.mon + 9) % 12 + 1;
@@ -601,11 +606,11 @@ internal static nint tzruleTime(nint year, rule r, nint off) {
             }
             d += 7;
         }
-        d += ((nint)daysBefore[r.mon - 1]);
+        d += (nint)daysBefore[r.mon - 1];
         if (isLeap(year) && r.mon > 2) {
             d++;
         }
-        s = d * secondsPerDay;
+        s = d * (nint)secondsPerDay;
     }
 
     return s + r.time - off;
@@ -614,11 +619,12 @@ internal static nint tzruleTime(nint year, rule r, nint off) {
 // lookupName returns information about the time zone with
 // the given name (such as "EST") at the given pseudo-Unix time
 // (what the given time of day would be in UTC).
-[GoRecv] internal static (nint offset, bool ok) lookupName(this ref ΔLocation l, @string name, int64 unix) {
+internal static (nint offset, bool ok) lookupName(this ж<ΔLocation> Ꮡl, @string name, int64 unix) {
     nint offset = default!;
     bool ok = default!;
 
-    l = l.get();
+    ref var l = ref Ꮡl.Value;
+    Ꮡl = Ꮡl.get(); l = ref Ꮡl.Value;
     // First try for a zone with the right name that was actually
     // in effect at the given time. (In Sydney, Australia, both standard
     // and daylight-savings time are abbreviated "EST". Using the
@@ -628,7 +634,7 @@ internal static nint tzruleTime(nint year, rule r, nint off) {
     foreach (var (i, _) in l.zone) {
         var zone = Ꮡ(l.zone[i]);
         if ((~zone).name == name) {
-            var (nam, offsetΔ1, _, _, _) = l.lookup(unix - ((int64)(~zone).offset));
+            var (nam, offsetΔ1, _, _, _) = Ꮡl.lookup(unix - (int64)(~zone).offset);
             if (nam == (~zone).name) {
                 return (offsetΔ1, true);
             }
@@ -651,7 +657,8 @@ internal static error errLocation = errors.New("time: invalid location name"u8);
 
 internal static ж<@string> zoneinfo;
 
-internal static sync.Once zoneinfoOnce;
+internal static ж<Δsync.Once> ᏑzoneinfoOnce = new(default(Δsync.Once));
+internal static ref Δsync.Once zoneinfoOnce => ref ᏑzoneinfoOnce.Value;
 
 // LoadLocation returns the Location with the given name.
 //
@@ -680,28 +687,29 @@ public static (ж<ΔLocation>, error) LoadLocation(@string name) {
         // much less dot dot. Likewise, none begin with a slash.
         return (default!, errLocation);
     }
-    zoneinfoOnce.Do(() => {
-        var (env, _) = syscall.Getenv("ZONEINFO"u8);
+    ᏑzoneinfoOnce.Do(() => {
+        ref var env = ref heap<@string>(out var Ꮡenv);
+        (env, _) = syscall.Getenv("ZONEINFO"u8);
         zoneinfo = Ꮡenv;
     });
     error firstErr = default!;
-    if (zoneinfo.val != ""u8) {
+    if (zoneinfo.Value != ""u8) {
         {
-            (zoneData, err) = loadTzinfoFromDirOrZip(zoneinfo.val, name); if (err == default!){
+            var (zoneData, err) = loadTzinfoFromDirOrZip(zoneinfo.Value, name); if (err == default!){
                 {
-                    (z, errΔ1) = LoadLocationFromTZData(name, zoneData); if (errΔ1 == default!) {
+                    var (z, errΔ1) = LoadLocationFromTZData(name, zoneData); if (errΔ1 == default!) {
                         return (z, default!);
                     }
                 }
                 firstErr = err;
             } else 
-            if (err != syscall.ENOENT) {
+            if (!AreEqual(err, syscall.ENOENT)) {
                 firstErr = err;
             }
         }
     }
     {
-        (z, err) = loadLocation(name, platformZoneSources); if (err == default!){
+        var (z, err) = loadLocation(name, platformZoneSources); if (err == default!){
             return (z, default!);
         } else 
         if (firstErr == default!) {

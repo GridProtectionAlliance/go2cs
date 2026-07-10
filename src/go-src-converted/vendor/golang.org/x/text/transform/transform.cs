@@ -14,7 +14,6 @@ using errors = errors_package;
 using io = io_package;
 using utf8 = unicode.utf8_package;
 using unicode;
-using ꓸꓸꓸTransformer = Span<Transformer>;
 
 partial class transform_package {
 
@@ -96,19 +95,17 @@ public static void Reset(this NopResetter _) {
 
 // Reader wraps another io.Reader by transforming the bytes read.
 [GoType] partial struct Reader {
-    internal io_package.Reader r;
+    internal io.Reader r;
     internal Transformer t;
     internal error err;
     // dst[dst0:dst1] contains bytes that have been transformed by t but
     // not yet copied out via Read.
     internal slice<byte> dst;
-    internal nint dst0;
-    internal nint dst1;
+    internal nint dst0, dst1;
     // src[src0:src1] contains bytes that have been read from r but not
     // yet transformed through t.
     internal slice<byte> src;
-    internal nint src0;
-    internal nint src1;
+    internal nint src0, src1;
     // transformComplete is whether the transformation is complete,
     // regardless of whether or not it was successful.
     internal bool transformComplete;
@@ -188,7 +185,8 @@ public static ж<Reader> NewReader(io.Reader r, Transformer t) {
         // Move any untransformed source bytes to the start of the buffer
         // and read more bytes.
         if (r.src0 != 0) {
-            (r.src0, r.src1) = (0, copy(r.src, r.src[(int)(r.src0)..(int)(r.src1)]));
+            r.src0 = 0;
+            r.src1 = copy(r.src, r.src[(int)(r.src0)..(int)(r.src1)]);
         }
         (n, r.err) = r.r.Read(r.src[(int)(r.src1)..]);
         r.src1 += n;
@@ -201,7 +199,7 @@ public static ж<Reader> NewReader(io.Reader r, Transformer t) {
 // The user needs to call Close to flush unwritten bytes that may
 // be buffered.
 [GoType] partial struct Writer {
-    internal io_package.Writer w;
+    internal io.Writer w;
     internal Transformer t;
     internal slice<byte> dst;
     // src[:n] contains bytes that have not yet passed through t.
@@ -258,13 +256,13 @@ public static ж<Writer> NewWriter(io.Writer w, Transformer t) {
             }
         }
         var exprᴛ1 = errΔ1;
-        if (exprᴛ1 == ErrShortDst) {
+        if (AreEqual(exprᴛ1, ErrShortDst)) {
             if (nDst > 0 || nSrc > 0) {
                 // This error is okay as long as we are making progress.
                 continue;
             }
         }
-        else if (exprᴛ1 == ErrShortSrc) {
+        else if (AreEqual(exprᴛ1, ErrShortSrc)) {
             if (len(src) < len(w.src)){
                 nint m = copy(w.src, src);
                 // If w.n > 0, bytes from data were already copied to w.src and n
@@ -285,7 +283,7 @@ public static ж<Writer> NewWriter(io.Writer w, Transformer t) {
                 continue;
             }
         }
-        else if (exprᴛ1 == default!) {
+        else if (AreEqual(exprᴛ1, default!)) {
             if (w.n > 0) {
                 errΔ1 = errInconsistentByteCount;
             }
@@ -391,7 +389,7 @@ public static SpanningTransformer Nop = new nop(nil);
 }
 
 // Chain returns a Transformer that applies t in sequence.
-public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
+public static Transformer Chain(params Span<transform_package.Transformer> tʗp) {
     var t = tʗp.slice();
 
     if (len(t) == 0) {
@@ -406,7 +404,7 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
     foreach (var (i, _) in b) {
         (~c).link[i + 1].b = b[i][..];
     }
-    return ~c;
+    return new chainжTransformer(c);
 }
 
 // Reset resets the state of Chain. It calls Reset on all the Transformers.
@@ -415,7 +413,8 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
         if (l.t != default!) {
             l.t.Reset();
         }
-        (c.link[i].p, c.link[i].n) = (0, 0);
+        c.link[i].p = 0;
+        c.link[i].n = 0;
     }
 }
 
@@ -430,8 +429,11 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
     // Set up src and dst in the chain.
     var srcL = Ꮡ(c.link[0]);
     var dstL = Ꮡ(c.link[len(c.link) - 1]);
-    (srcL.val.b, srcL.val.p, srcL.val.n) = (src, 0, len(src));
-    (dstL.val.b, dstL.val.n) = (dst, 0);
+    srcL.Value.b = src;
+    srcL.Value.p = 0;
+    srcL.Value.n = len(src);
+    dstL.Value.b = dst;
+    dstL.Value.n = 0;
     bool lastFull = default!;                // for detecting progress
     bool needProgress = default!;
     // i is the index of the next Transformer to apply, for i in [low, high].
@@ -439,19 +441,19 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
     // high is the highest index for which c.link[high] has a Transformer.
     // The error returned by Transform determines whether to increase or
     // decrease i. We try to completely fill a buffer before converting it.
-    for (nint low = c.errStart;nint i = c.errStart;nint high = len(c.link) - 2; low <= i && i <= high; ) {
-        var @in = Ꮡ(c.link[i]);
-        var @out = Ꮡ(c.link[i + 1]);
+    for ((nint low, nint i, nint high) = (c.errStart, c.errStart, len(c.link) - 2); low <= i && i <= high; ) {
+        var (@in, @out) = (Ꮡ(c.link[i]), Ꮡ(c.link[i + 1]));
         var (nDstΔ1, nSrcΔ1, err0) = (~@in).t.Transform(@out.dst(), @in.src(), atEOF && low == i);
-        @out.val.n += nDstΔ1;
-        @in.val.p += nSrcΔ1;
+        @out.Value.n += nDstΔ1;
+        @in.Value.p += nSrcΔ1;
         if (i > 0 && (~@in).p == (~@in).n) {
-            (@in.val.p, @in.val.n) = (0, 0);
+            @in.Value.p = 0;
+            @in.Value.n = 0;
         }
         (needProgress, lastFull) = (lastFull, false);
         var exprᴛ1 = err0;
         var matchᴛ1 = false;
-        if (exprᴛ1 == ErrShortDst) { matchᴛ1 = true;
+        if (AreEqual(exprᴛ1, ErrShortDst)) { matchᴛ1 = true;
             if (i == high) {
                 // Process the destination buffer next. Return if we are already
                 // at the high index.
@@ -470,27 +472,30 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
  // Return a fatal error as this transformation can never complete.
  errShortInternal);
         }
-        else if (exprᴛ1 == ErrShortSrc) { matchᴛ1 = true;
-            if (i == 0) {
-                // Save ErrShortSrc in err. All other errors take precedence.
-                err = ErrShortSrc;
-                break;
-            }
-            if (needProgress && nSrcΔ1 == 0 || (~@in).n - (~@in).p == len((~@in).b)) {
-                // Source bytes were depleted before filling up the destination buffer.
-                // Verify we made some progress, move the remaining bytes to the errStart
-                // and try to get more source bytes.
-                // There were not enough source bytes to proceed while the source
-                // buffer cannot hold any more bytes. Return a fatal error as this
-                // transformation can never complete.
-                c.fatalError(i, errShortInternal);
-                break;
-            }
-            (@in.val.p, @in.val.n) = (0, copy((~@in).b, // in.b is an internal buffer and we can make progress.
- @in.src()));
+        else if (AreEqual(exprᴛ1, ErrShortSrc)) { matchᴛ1 = true;
+            do {
+                if (i == 0) {
+                    // Save ErrShortSrc in err. All other errors take precedence.
+                    err = ErrShortSrc;
+                    break;
+                }
+                if (needProgress && nSrcΔ1 == 0 || (~@in).n - (~@in).p == len((~@in).b)) {
+                    // Source bytes were depleted before filling up the destination buffer.
+                    // Verify we made some progress, move the remaining bytes to the errStart
+                    // and try to get more source bytes.
+                    // There were not enough source bytes to proceed while the source
+                    // buffer cannot hold any more bytes. Return a fatal error as this
+                    // transformation can never complete.
+                    c.fatalError(i, errShortInternal);
+                    break;
+                }
+                @in.Value.p = 0;
+                @in.Value.n = copy((~@in).b, // in.b is an internal buffer and we can make progress.
+ @in.src());
+            } while (false);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 == default!)) {
+        if (fallthrough || !matchᴛ1 && AreEqual(exprᴛ1, default!)) {
             if (i > low) {
                 // if i == low, we have depleted the bytes at index i or any lower levels.
                 // In that case we increase low and i. In all other cases we decrease i to
@@ -513,16 +518,19 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
     // downstream, as Transform would have bailed while handling ErrShortDst.
     if (c.errStart > 0) {
         for (nint i = 1; i < c.errStart; i++) {
-            (c.link[i].p, c.link[i].n) = (0, 0);
+            c.link[i].p = 0;
+            c.link[i].n = 0;
         }
-        (err, c.errStart, c.err) = (c.err, 0, default!);
+        err = c.err;
+        c.errStart = 0;
+        c.err = default!;
     }
     return ((~dstL).n, (~srcL).p, err);
 }
 
 // Deprecated: Use runes.Remove instead.
 public static Transformer RemoveFunc(Func<rune, bool> f) {
-    return ((removeF)f);
+    return new removeFᴠTransformer(new removeF(f));
 }
 
 internal delegate bool removeF(rune r);
@@ -536,9 +544,9 @@ internal static (nint nDst, nint nSrc, error err) Transform(this removeF t, slic
     nint nSrc = default!;
     error err = default!;
 
-    for (var r = ((rune)0);nint sz = 0; len(src) > 0; src = src[(int)(sz)..]) {
+    for ((var r, nint sz) = ((rune)0, 0); len(src) > 0; src = src[(int)(sz)..]) {
         {
-            r = ((rune)src[0]); if (r < utf8.RuneSelf){
+            r = (rune)src[0]; if (r < utf8.RuneSelf){
                 sz = 1;
             } else {
                 (r, sz) = utf8.DecodeRune(src);
@@ -586,7 +594,7 @@ internal static slice<byte> grow(slice<byte> b, nint n) {
     if (m <= 256){
         m *= 2;
     } else {
-        m += m >> (int)(1);
+        m += (m >> (int)(1));
     }
     var buf = new slice<byte>(m);
     copy(buf, b[..(int)(n)]);

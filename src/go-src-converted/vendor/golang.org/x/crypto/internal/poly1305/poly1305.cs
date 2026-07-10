@@ -17,8 +17,8 @@
 // directly.
 namespace go.vendor.golang.org.x.crypto.@internal;
 
-using subtle = crypto.subtle_package;
-using crypto;
+using subtle = go.crypto.subtle_package;
+using go.crypto;
 
 partial class poly1305_package {
 
@@ -29,8 +29,8 @@ public static readonly UntypedInt TagSize = 16;
 // 16-byte result into out. Authenticating two different messages with the same
 // key allows an attacker to forge messages at will.
 public static void Sum(ж<array<byte>> Ꮡout, slice<byte> m, ж<array<byte>> Ꮡkey) {
-    ref var @out = ref Ꮡout.val;
-    ref var key = ref Ꮡkey.val;
+    ref var @out = ref Ꮡout.Value;
+    ref var key = ref Ꮡkey.Value;
 
     var h = New(Ꮡkey);
     h.Write(m);
@@ -39,8 +39,8 @@ public static void Sum(ж<array<byte>> Ꮡout, slice<byte> m, ж<array<byte>> �
 
 // Verify returns true if mac is a valid authenticator for m with the given key.
 public static bool Verify(ж<array<byte>> Ꮡmac, slice<byte> m, ж<array<byte>> Ꮡkey) {
-    ref var mac = ref Ꮡmac.val;
-    ref var key = ref Ꮡkey.val;
+    ref var mac = ref Ꮡmac.Value;
+    ref var key = ref Ꮡkey.Value;
 
     ref var tmp = ref heap(new array<byte>(16), out var Ꮡtmp);
     Sum(Ꮡtmp, m, Ꮡkey);
@@ -57,10 +57,10 @@ public static bool Verify(ж<array<byte>> Ꮡmac, slice<byte> m, ж<array<byte>>
 // two different messages with the same key allows an attacker
 // to forge messages at will.
 public static ж<MAC> New(ж<array<byte>> Ꮡkey) {
-    ref var key = ref Ꮡkey.val;
+    ref var key = ref Ꮡkey.Value;
 
     var m = Ꮡ(new MAC(nil));
-    initialize(Ꮡkey, Ꮡ(m.macState));
+    initialize(Ꮡkey, m.of(MAC.ᏑmacState));
     return m;
 }
 
@@ -85,14 +85,15 @@ public static ж<MAC> New(ж<array<byte>> Ꮡkey) {
 // It never returns an error.
 //
 // It must not be called after the first call of Sum or Verify.
-[GoRecv] public static (nint n, error err) Write(this ref MAC h, slice<byte> p) {
+public static (nint n, error err) Write(this ж<MAC> Ꮡh, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
+    ref var h = ref Ꮡh.Value;
     if (h.finalized) {
         throw panic("poly1305: write to MAC after Sum or Verify");
     }
-    return h.mac.Write(p);
+    return Ꮡh.of(MAC.Ꮡmac).Write(p);
 }
 
 // Sum computes the authenticator of all data written to the

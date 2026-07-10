@@ -11,12 +11,12 @@
 namespace go.crypto;
 
 using crypto = crypto_package;
-using boring = crypto.@internal.boring_package;
+using boring = go.crypto.@internal.boring_package;
 using errors = errors_package;
 using hash = hash_package;
-using byteorder = @internal.byteorder_package;
-using @internal;
-using crypto.@internal;
+using byteorder = go.@internal.byteorder_package;
+using go.@internal;
+using go.crypto.@internal;
 
 partial class sha512_package {
 
@@ -34,38 +34,38 @@ public static readonly UntypedInt Size384 = 48;
 public static readonly UntypedInt ΔBlockSize = 128;
 
 internal static readonly UntypedInt chunk = 128;
-internal static readonly UntypedInt init0 = /* 0x6a09e667f3bcc908 */ 7640891576956012808;
-internal static readonly UntypedInt init1 = /* 0xbb67ae8584caa73b */ 13503953896175478587;
-internal static readonly UntypedInt init2 = /* 0x3c6ef372fe94f82b */ 4354685564936845355;
-internal static readonly UntypedInt init3 = /* 0xa54ff53a5f1d36f1 */ 11912009170470909681;
-internal static readonly UntypedInt init4 = /* 0x510e527fade682d1 */ 5840696475078001361;
-internal static readonly UntypedInt init5 = /* 0x9b05688c2b3e6c1f */ 11170449401992604703;
-internal static readonly UntypedInt init6 = /* 0x1f83d9abfb41bd6b */ 2270897969802886507;
-internal static readonly UntypedInt init7 = /* 0x5be0cd19137e2179 */ 6620516959819538809;
-internal static readonly UntypedInt init0_224 = /* 0x8c3d37c819544da2 */ 10105294471447203234;
-internal static readonly UntypedInt init1_224 = /* 0x73e1996689dcd4d6 */ 8350123849800275158;
-internal static readonly UntypedInt init2_224 = /* 0x1dfab7ae32ff9c82 */ 2160240930085379202;
-internal static readonly UntypedInt init3_224 = /* 0x679dd514582f9fcf */ 7466358040605728719;
-internal static readonly UntypedInt init4_224 = /* 0x0f6d2b697bd44da8 */ 1111592415079452072;
-internal static readonly UntypedInt init5_224 = /* 0x77e36f7304c48942 */ 8638871050018654530;
-internal static readonly UntypedInt init6_224 = /* 0x3f9d85a86a1d36c8 */ 4583966954114332360;
-internal static readonly UntypedInt init7_224 = /* 0x1112e6ad91d692a1 */ 1230299281376055969;
-internal static readonly UntypedInt init0_256 = /* 0x22312194fc2bf72c */ 2463787394917988140;
-internal static readonly UntypedInt init1_256 = /* 0x9f555fa3c84c64c2 */ 11481187982095705282;
-internal static readonly UntypedInt init2_256 = /* 0x2393b86b6f53b151 */ 2563595384472711505;
-internal static readonly UntypedInt init3_256 = /* 0x963877195940eabd */ 10824532655140301501;
-internal static readonly UntypedInt init4_256 = /* 0x96283ee2a88effe3 */ 10819967247969091555;
-internal static readonly UntypedInt init5_256 = /* 0xbe5e1e2553863992 */ 13717434660681038226;
-internal static readonly UntypedInt init6_256 = /* 0x2b0199fc2c85b8aa */ 3098927326965381290;
-internal static readonly UntypedInt init7_256 = /* 0x0eb72ddc81c52ca2 */ 1060366662362279074;
-internal static readonly UntypedInt init0_384 = /* 0xcbbb9d5dc1059ed8 */ 14680500436340154072;
-internal static readonly UntypedInt init1_384 = /* 0x629a292a367cd507 */ 7105036623409894663;
-internal static readonly UntypedInt init2_384 = /* 0x9159015a3070dd17 */ 10473403895298186519;
-internal static readonly UntypedInt init3_384 = /* 0x152fecd8f70e5939 */ 1526699215303891257;
-internal static readonly UntypedInt init4_384 = /* 0x67332667ffc00b31 */ 7436329637833083697;
-internal static readonly UntypedInt init5_384 = /* 0x8eb44a8768581511 */ 10282925794625328401;
-internal static readonly UntypedInt init6_384 = /* 0xdb0c2e0d64f98fa7 */ 15784041429090275239;
-internal static readonly UntypedInt init7_384 = /* 0x47b5481dbefa4fa4 */ 5167115440072839076;
+internal static readonly UntypedInt init0 = 0x6a09e667f3bcc908;
+internal static readonly UntypedInt init1 = 0xbb67ae8584caa73b;
+internal static readonly UntypedInt init2 = 0x3c6ef372fe94f82b;
+internal static readonly UntypedInt init3 = 0xa54ff53a5f1d36f1;
+internal static readonly UntypedInt init4 = 0x510e527fade682d1;
+internal static readonly UntypedInt init5 = 0x9b05688c2b3e6c1f;
+internal static readonly UntypedInt init6 = 0x1f83d9abfb41bd6b;
+internal static readonly UntypedInt init7 = 0x5be0cd19137e2179;
+internal static readonly UntypedInt init0_224 = 0x8c3d37c819544da2;
+internal static readonly UntypedInt init1_224 = 0x73e1996689dcd4d6;
+internal static readonly UntypedInt init2_224 = 0x1dfab7ae32ff9c82;
+internal static readonly UntypedInt init3_224 = 0x679dd514582f9fcf;
+internal static readonly UntypedInt init4_224 = 0x0f6d2b697bd44da8;
+internal static readonly UntypedInt init5_224 = 0x77e36f7304c48942;
+internal static readonly UntypedInt init6_224 = 0x3f9d85a86a1d36c8;
+internal static readonly UntypedInt init7_224 = 0x1112e6ad91d692a1;
+internal static readonly UntypedInt init0_256 = 0x22312194fc2bf72c;
+internal static readonly UntypedInt init1_256 = 0x9f555fa3c84c64c2;
+internal static readonly UntypedInt init2_256 = 0x2393b86b6f53b151;
+internal static readonly UntypedInt init3_256 = 0x963877195940eabd;
+internal static readonly UntypedInt init4_256 = 0x96283ee2a88effe3;
+internal static readonly UntypedInt init5_256 = 0xbe5e1e2553863992;
+internal static readonly UntypedInt init6_256 = 0x2b0199fc2c85b8aa;
+internal static readonly UntypedInt init7_256 = 0x0eb72ddc81c52ca2;
+internal static readonly UntypedInt init0_384 = 0xcbbb9d5dc1059ed8;
+internal static readonly UntypedInt init1_384 = 0x629a292a367cd507;
+internal static readonly UntypedInt init2_384 = 0x9159015a3070dd17;
+internal static readonly UntypedInt init3_384 = 0x152fecd8f70e5939;
+internal static readonly UntypedInt init4_384 = 0x67332667ffc00b31;
+internal static readonly UntypedInt init5_384 = 0x8eb44a8768581511;
+internal static readonly UntypedInt init6_384 = 0xdb0c2e0d64f98fa7;
+internal static readonly UntypedInt init7_384 = 0x47b5481dbefa4fa4;
 
 // digest represents the partial evaluation of a checksum.
 [GoType] partial struct digest {
@@ -73,7 +73,7 @@ internal static readonly UntypedInt init7_384 = /* 0x47b5481dbefa4fa4 */ 5167115
     internal array<byte> x = new(chunk);
     internal nint nx;
     internal uint64 len;
-    internal crypto_package.Hash function;
+    internal crypto.Hash function;
 }
 
 [GoRecv] internal static void Reset(this ref digest d) {
@@ -198,7 +198,7 @@ internal const nint marshaledSize = /* len(magic512) + 8*8 + chunk + 8 */ 204;
     (b, d.h[7]) = consumeUint64(b);
     b = b[(int)(copy(d.x[..], b))..];
     (b, d.len) = consumeUint64(b);
-    d.nx = ((nint)(d.len % chunk));
+    d.nx = (nint)(d.len % (uint64)chunk);
     return default!;
 }
 
@@ -213,21 +213,21 @@ public static hash.Hash New() {
     }
     var d = Ꮡ(new digest(function: crypto.SHA512));
     d.Reset();
-    return ~d;
+    return new digestжHash(d);
 }
 
 // New512_224 returns a new hash.Hash computing the SHA-512/224 checksum.
 public static hash.Hash New512_224() {
     var d = Ꮡ(new digest(function: crypto.SHA512_224));
     d.Reset();
-    return ~d;
+    return new digestжHash(d);
 }
 
 // New512_256 returns a new hash.Hash computing the SHA-512/256 checksum.
 public static hash.Hash New512_256() {
     var d = Ꮡ(new digest(function: crypto.SHA512_256));
     d.Reset();
-    return ~d;
+    return new digestжHash(d);
 }
 
 // New384 returns a new hash.Hash computing the SHA-384 checksum.
@@ -237,7 +237,7 @@ public static hash.Hash New384() {
     }
     var d = Ꮡ(new digest(function: crypto.SHA384));
     d.Reset();
-    return ~d;
+    return new digestжHash(d);
 }
 
 [GoRecv] internal static nint Size(this ref digest d) {
@@ -261,27 +261,28 @@ public static hash.Hash New384() {
     return ΔBlockSize;
 }
 
-[GoRecv] internal static (nint nn, error err) Write(this ref digest d, slice<byte> p) {
+internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) {
     nint nn = default!;
     error err = default!;
 
+    ref var d = ref Ꮡd.Value;
     if (d.function != crypto.SHA512_224 && d.function != crypto.SHA512_256) {
         boring.Unreachable();
     }
     nn = len(p);
-    d.len += ((uint64)nn);
+    d.len += (uint64)nn;
     if (d.nx > 0) {
         nint n = copy(d.x[(int)(d.nx)..], p);
         d.nx += n;
         if (d.nx == chunk) {
-            block(d, d.x[..]);
+            block(Ꮡd, d.x[..]);
             d.nx = 0;
         }
         p = p[(int)(n)..];
     }
     if (len(p) >= chunk) {
-        nint n = (nint)(len(p) & ~(chunk - 1));
-        block(d, p[..(int)(n)]);
+        nint n = (nint)(len(p) & ~(nint)(chunk - 1));
+        block(Ꮡd, p[..(int)(n)]);
         p = p[(int)(n)..];
     }
     if (len(p) > 0) {
@@ -296,7 +297,7 @@ public static hash.Hash New384() {
     }
     // Make a copy of d so that caller can keep writing and summing.
     var d0 = @new<digest>();
-    d0.val = d;
+    d0.Value = d;
     var hash = d0.checkSum();
     var exprᴛ1 = (~d0).function;
     if (exprᴛ1 == crypto.SHA384) {
@@ -314,11 +315,13 @@ public static hash.Hash New384() {
 
 }
 
-[GoRecv] internal static array<byte> checkSum(this ref digest d) {
+internal static array<byte> checkSum(this ж<digest> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
     // Padding. Add a 1 bit and 0 bits until 112 bytes mod 128.
     var len = d.len;
     array<byte> tmp = new(144); /* 128 + 16 */                      // padding + length buffer
-    tmp[0] = 128;
+    tmp[0] = 0x80;
     uint64 t = default!;
     if (len % 128 < 112){
         t = 112 - len % 128;
@@ -326,13 +329,13 @@ public static hash.Hash New384() {
         t = 128 + 112 - len % 128;
     }
     // Length in bits.
-    len <<= (UntypedInt)(3);
+    len <<= (int)(3);
     var padlen = tmp[..(int)(t + 16)];
     // Upper 64 bits are always zero, because len variable has type uint64,
     // and tmp is already zeroed at that index, so we can skip updating it.
     // byteorder.BePutUint64(padlen[t+0:], 0)
     byteorder.BePutUint64(padlen[(int)(t + 8)..], len);
-    d.Write(padlen);
+    Ꮡd.Write(padlen);
     if (d.nx != 0) {
         throw panic("d.nx != 0");
     }
@@ -355,10 +358,11 @@ public static array<byte> Sum512(slice<byte> data) {
     if (boring.Enabled) {
         return boring.SHA512(data);
     }
-    var d = new digest(function: crypto.SHA512);
+    ref var d = ref heap<digest>(out var Ꮡd);
+    d = new digest(function: crypto.SHA512);
     d.Reset();
-    d.Write(data);
-    return d.checkSum();
+    Ꮡd.Write(data);
+    return Ꮡd.checkSum();
 }
 
 // Sum384 returns the SHA384 checksum of the data.
@@ -366,32 +370,35 @@ public static array<byte> Sum384(slice<byte> data) {
     if (boring.Enabled) {
         return boring.SHA384(data);
     }
-    var d = new digest(function: crypto.SHA384);
+    ref var d = ref heap<digest>(out var Ꮡd);
+    d = new digest(function: crypto.SHA384);
     d.Reset();
-    d.Write(data);
-    var sum = d.checkSum();
-    var ap = (ж<array<byte>>)(sum[..]);
-    return ap.val;
+    Ꮡd.Write(data);
+    var sum = Ꮡd.checkSum();
+    var ap = Ꮡ(new array<byte>(sum[..], 48));
+    return ap.Value;
 }
 
 // Sum512_224 returns the Sum512/224 checksum of the data.
 public static array<byte> Sum512_224(slice<byte> data) {
-    var d = new digest(function: crypto.SHA512_224);
+    ref var d = ref heap<digest>(out var Ꮡd);
+    d = new digest(function: crypto.SHA512_224);
     d.Reset();
-    d.Write(data);
-    var sum = d.checkSum();
-    var ap = (ж<array<byte>>)(sum[..]);
-    return ap.val;
+    Ꮡd.Write(data);
+    var sum = Ꮡd.checkSum();
+    var ap = Ꮡ(new array<byte>(sum[..], 28));
+    return ap.Value;
 }
 
 // Sum512_256 returns the Sum512/256 checksum of the data.
 public static array<byte> Sum512_256(slice<byte> data) {
-    var d = new digest(function: crypto.SHA512_256);
+    ref var d = ref heap<digest>(out var Ꮡd);
+    d = new digest(function: crypto.SHA512_256);
     d.Reset();
-    d.Write(data);
-    var sum = d.checkSum();
-    var ap = (ж<array<byte>>)(sum[..]);
-    return ap.val;
+    Ꮡd.Write(data);
+    var sum = Ꮡd.checkSum();
+    var ap = Ꮡ(new array<byte>(sum[..], 32));
+    return ap.Value;
 }
 
 } // end sha512_package

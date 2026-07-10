@@ -16,10 +16,10 @@ public static @string String(this HardwareAddr a) {
     var buf = new slice<byte>(0, len(a) * 3 - 1);
     foreach (var (i, b) in a) {
         if (i > 0) {
-            buf = append(buf, (rune)':');
+            buf = append(buf, (byte)((rune)':'));
         }
-        buf = append(buf, hexDigit[b >> (int)(4)]);
-        buf = append(buf, hexDigit[(byte)(b & 15)]);
+        buf = append(buf, hexDigit[(b >> (int)(4))]);
+        buf = append(buf, hexDigit[(byte)(b & 0xF)]);
     }
     return ((@string)buf);
 }
@@ -52,10 +52,10 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
             goto error;
         }
         hw = new HardwareAddr(n);
-        for (nint x = 0;nint i = 0; i < n; i++) {
-            bool okΔ1 = default!;
+        for ((nint x, nint i) = (0, 0); i < n; i++) {
+            bool ok = default!;
             {
-                var (hw[i], okΔ1) = xtoi2(s[(int)(x)..], s[2]); if (!okΔ1) {
+                (hw[i], ok) = xtoi2(s[(int)(x)..], s[2]); if (!ok) {
                     goto error;
                 }
             }
@@ -71,15 +71,15 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
             goto error;
         }
         hw = new HardwareAddr(n);
-        for (nint x = 0;nint i = 0; i < n; i += 2) {
+        for ((nint x, nint i) = (0, 0); i < n; i += 2) {
             bool ok = default!;
             {
-                var (hw[i], ok) = xtoi2(s[(int)(x)..(int)(x + 2)], 0); if (!ok) {
+                (hw[i], ok) = xtoi2(s[(int)(x)..(int)(x + 2)], 0); if (!ok) {
                     goto error;
                 }
             }
             {
-                var (hw[i + 1], ok) = xtoi2(s[(int)(x + 2)..], s[4]); if (!ok) {
+                (hw[i + 1], ok) = xtoi2(s[(int)(x + 2)..], s[4]); if (!ok) {
                     goto error;
                 }
             }
@@ -90,7 +90,7 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
     }
     return (hw, default!);
 error:
-    return (default!, new AddrError(Err: "invalid MAC address"u8, ΔAddr: s));
+    return (default!, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid MAC address"u8, Addr: s))));
 }
 
 } // end net_package

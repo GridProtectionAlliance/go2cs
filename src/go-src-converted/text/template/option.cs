@@ -5,7 +5,7 @@
 namespace go.text;
 
 using strings = strings_package;
-using ꓸꓸꓸ@string = Span<@string>;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class template_package {
 
@@ -37,14 +37,15 @@ internal static readonly missingKeyAction mapError = 2;    // Error out
 //		The operation returns the zero value for the map type's element.
 //	"missingkey=error"
 //		Execution stops immediately with an error.
-[GoRecv("capture")] public static ж<Template> Option(this ref Template t, params ꓸꓸꓸ@string optʗp) {
+public static ж<Template> Option(this ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) {
     var opt = optʗp.slice();
 
+    ref var t = ref Ꮡt.Value;
     t.init();
     foreach (var (_, s) in opt) {
         t.setOption(s);
     }
-    return OptionꓸᏑt;
+    return Ꮡt;
 }
 
 [GoRecv] internal static void setOption(this ref Template t, @string opt) {
@@ -74,7 +75,7 @@ internal static readonly missingKeyAction mapError = 2;    // Error out
 
         }
     }
-    throw panic("unrecognized option: "u8 + opt);
+    throw panic("unrecognized option: " + opt);
 }
 
 } // end template_package

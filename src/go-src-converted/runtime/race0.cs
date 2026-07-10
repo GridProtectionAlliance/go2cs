@@ -13,13 +13,13 @@ internal const bool raceenabled = false;
 
 // Because raceenabled is false, none of these functions should be called.
 internal static void raceReadObjectPC(ж<_type> Ꮡt, @unsafe.Pointer addr, uintptr callerpc, uintptr pc) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     @throw("race"u8);
 }
 
 internal static void raceWriteObjectPC(ж<_type> Ꮡt, @unsafe.Pointer addr, uintptr callerpc, uintptr pc) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     @throw("race"u8);
 }
@@ -67,7 +67,7 @@ internal static void raceacquire(@unsafe.Pointer addr) {
 }
 
 internal static void raceacquireg(ж<g> Ꮡgp, @unsafe.Pointer addr) {
-    ref var gp = ref Ꮡgp.val;
+    ref var gp = ref Ꮡgp.Value;
 
     @throw("race"u8);
 }
@@ -81,7 +81,7 @@ internal static void racerelease(@unsafe.Pointer addr) {
 }
 
 internal static void racereleaseg(ж<g> Ꮡgp, @unsafe.Pointer addr) {
-    ref var gp = ref Ꮡgp.val;
+    ref var gp = ref Ꮡgp.Value;
 
     @throw("race"u8);
 }
@@ -91,7 +91,7 @@ internal static void racereleaseacquire(@unsafe.Pointer addr) {
 }
 
 internal static void racereleaseacquireg(ж<g> Ꮡgp, @unsafe.Pointer addr) {
-    ref var gp = ref Ꮡgp.val;
+    ref var gp = ref Ꮡgp.Value;
 
     @throw("race"u8);
 }
@@ -101,7 +101,7 @@ internal static void racereleasemerge(@unsafe.Pointer addr) {
 }
 
 internal static void racereleasemergeg(ж<g> Ꮡgp, @unsafe.Pointer addr) {
-    ref var gp = ref Ꮡgp.val;
+    ref var gp = ref Ꮡgp.Value;
 
     @throw("race"u8);
 }

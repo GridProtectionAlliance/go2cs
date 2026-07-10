@@ -25,7 +25,7 @@ public static float64 Logb(float64 x) {
         return x;
     }}
 
-    return ((float64)ilogb(x));
+    return (float64)ilogb(x);
 }
 
 // Ilogb returns the binary exponent of x as an integer.
@@ -54,8 +54,8 @@ public static nint Ilogb(float64 x) {
 // ilogb returns the binary exponent of x. It assumes x is finite and
 // non-zero.
 internal static nint ilogb(float64 x) {
-    var (x, exp) = normalize(x);
-    return ((nint)((uint64)((Float64bits(x) >> (int)(shift)) & mask))) - bias + exp;
+    (x, var exp) = normalize(x);
+    return (nint)((uint64)(((Float64bits(x) >> (int)(shift))) & (uint64)mask)) - (nint)bias + exp;
 }
 
 } // end math_package

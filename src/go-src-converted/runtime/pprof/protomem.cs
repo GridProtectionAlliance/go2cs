@@ -3,12 +3,12 @@
 // license that can be found in the LICENSE file.
 namespace go.runtime;
 
-using profilerecord = @internal.profilerecord_package;
+using profilerecord = go.@internal.profilerecord_package;
 using io = io_package;
 using math = math_package;
 using runtime = runtime_package;
 using strings = strings_package;
-using @internal;
+using go.@internal;
 
 partial class pprof_package {
 
@@ -16,17 +16,19 @@ partial class pprof_package {
 internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfileRecord> p, int64 rate, @string defaultSampleType) {
     var b = newProfileBuilder(w);
     b.pbValueType(tagProfile_PeriodType, "space"u8, "bytes"u8);
-    (~b).pb.int64Opt(tagProfile_Period, rate);
+    b.of(profileBuilder.Ꮡpb).int64Opt(tagProfile_Period, rate);
     b.pbValueType(tagProfile_SampleType, "alloc_objects"u8, "count"u8);
     b.pbValueType(tagProfile_SampleType, "alloc_space"u8, "bytes"u8);
     b.pbValueType(tagProfile_SampleType, "inuse_objects"u8, "count"u8);
     b.pbValueType(tagProfile_SampleType, "inuse_space"u8, "bytes"u8);
     if (defaultSampleType != ""u8) {
-        (~b).pb.int64Opt(tagProfile_DefaultSampleType, b.stringIndex(defaultSampleType));
+        b.of(profileBuilder.Ꮡpb).int64Opt(tagProfile_DefaultSampleType, b.stringIndex(defaultSampleType));
     }
     var values = new int64[]{0, 0, 0, 0}.slice();
     slice<uint64> locs = default!;
-    foreach (var (_, r) in p) {
+    foreach (var (_, vᴛ1) in p) {
+        var r = vᴛ1;
+
         var hideRuntime = true;
         for (nint tries = 0; tries < 2; tries++) {
             var stk = r.Stack;
@@ -36,7 +38,7 @@ internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfile
             if (hideRuntime) {
                 foreach (var (i, addr) in stk) {
                     {
-                        var f = runtime.FuncForPC(addr); if (f != nil && strings.HasPrefix(f.Name(), "runtime."u8)) {
+                        var f = runtime.FuncForPC(addr); if (f != nil && strings_package.HasPrefix(f.Name(), "runtime."u8)) {
                             continue;
                         }
                     }
@@ -58,9 +60,8 @@ internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfile
         if (r.AllocObjects > 0) {
             blockSize = r.AllocBytes / r.AllocObjects;
         }
-        b.pbSample(values, locs, 
         var bʗ1 = b;
-        () => {
+        b.pbSample(values, locs, () => {
             if (blockSize != 0) {
                 bʗ1.pbLabel(tagSample_Label, "bytes"u8, ""u8, blockSize);
             }
@@ -88,9 +89,9 @@ internal static (int64, int64) scaleHeapSample(int64 count, int64 size, int64 ra
         // if rate<1 treat as unknown and skip scaling.
         return (count, size);
     }
-    var avgSize = ((float64)size) / ((float64)count);
-    var scale = 1 / (1 - math.Exp(-avgSize / ((float64)rate)));
-    return (((int64)(((float64)count) * scale)), ((int64)(((float64)size) * scale)));
+    var avgSize = (float64)size / (float64)count;
+    var scale = 1 / (1 - math.Exp(-avgSize / (float64)rate));
+    return ((int64)((float64)count * scale), (int64)((float64)size * scale));
 }
 
 } // end pprof_package

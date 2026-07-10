@@ -6,7 +6,7 @@ namespace go;
 partial class math_package {
 
 internal static bool isOddInt(float64 x) {
-    if (Abs(x) >= (1 << (int)(53))) {
+    if (Abs(x) >= ((1 << (int)(53)))) {
         // 1 << 53 is the largest exact integer in the float64 format.
         // Any number outside this range will be truncated before the decimal point and therefore will always be
         // an even integer.
@@ -15,7 +15,7 @@ internal static bool isOddInt(float64 x) {
         return false;
     }
     var (xi, xf) = Modf(x);
-    return xf == 0 && (int64)(((int64)xi) & 1) == 1;
+    return xf == 0 && (int64)((int64)xi & 1) == 1;
 }
 
 // Special cases taken from FreeBSD's /usr/src/lib/msun/src/e_pow.c
@@ -108,10 +108,10 @@ internal static float64 pow(float64 x, float64 y) {
 
         break;
     }
-    case {} when y is 0.5F: {
+    case {} when y is 0.5D: {
         return Sqrt(x);
     }
-    case {} when y == -0.5F: {
+    case {} when y == -0.5D: {
         return 1 / Sqrt(x);
     }}
 
@@ -120,14 +120,14 @@ internal static float64 pow(float64 x, float64 y) {
     if (yf != 0 && x < 0) {
         return NaN();
     }
-    if (yi >= 1 << (int)(63)) {
+    if (yi >= (1 << (int)(63))) {
         // yi is a large even int that will lead to overflow (or underflow to 0)
         // for all x except -1 (x == 1 was handled earlier)
         switch (ᐧ) {
         case {} when x == -1: {
             return 1;
         }
-        case {} when (Abs(x) < 1) is (y > 0): {
+        case {} when (Abs(x) < 1) == (y > 0): {
             return 0;
         }
         default: {
@@ -136,11 +136,11 @@ internal static float64 pow(float64 x, float64 y) {
 
     }
     // ans = a1 * 2**ae (= 1 for now).
-    var a1 = 1.0F;
+    var a1 = 1.0D;
     nint ae = 0;
     // ans *= x**yf
     if (yf != 0) {
-        if (yf > 0.5F) {
+        if (yf > 0.5D) {
             yf--;
             yi++;
         }
@@ -151,8 +151,8 @@ internal static float64 pow(float64 x, float64 y) {
     // of x according to bits of yi.
     // accumulate powers of two into exp.
     var (x1, xe) = Frexp(x);
-    for (var i = ((int64)yi); i != 0; i >>= (UntypedInt)(1)) {
-        if (xe < -1 << (int)(12) || 1 << (int)(12) < xe) {
+    for (var i = (int64)yi; i != 0; i >>= (int)(1)) {
+        if (xe < (-1 << (int)(12)) || (1 << (int)(12)) < xe) {
             // catch xe before it overflows the left shift below
             // Since i !=0 it has at least one bit still set, so ae will accumulate xe
             // on at least one more iteration, ae += xe is a lower bound on ae
@@ -166,8 +166,8 @@ internal static float64 pow(float64 x, float64 y) {
             ae += xe;
         }
         x1 *= x1;
-        xe <<= (UntypedInt)(1);
-        if (x1 < .5F) {
+        xe <<= (int)(1);
+        if (x1 < .5D) {
             x1 += x1;
             xe--;
         }

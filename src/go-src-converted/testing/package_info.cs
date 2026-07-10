@@ -56,18 +56,18 @@ using static go.testing_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(fuzzCrashError, bool), fuzzCrashError>]
-[assembly: GoImplement<(os.FileInfo, error), osꓸFileInfo>]
-[assembly: GoImplement<B, TB>]
-[assembly: GoImplement<F, TB>]
-[assembly: GoImplement<T, TB>]
+[assembly: GoImplement<B, TB>(Pointer = true)]
+[assembly: GoImplement<F, TB>(Pointer = true)]
+[assembly: GoImplement<T, TB>(Pointer = true)]
 [assembly: GoImplement<alternationMatch, filterMatch>]
-[assembly: GoImplement<chattyFlag, flag_package.Value>]
-[assembly: GoImplement<durationOrCountFlag, flag_package.Value>]
+[assembly: GoImplement<chattyFlag, flag_package.Value>(Pointer = true)]
+[assembly: GoImplement<discard, io_package.Writer>]
+[assembly: GoImplement<durationOrCountFlag, flag_package.Value>(Pointer = true)]
+[assembly: GoImplement<indenter, io_package.Writer>]
 [assembly: GoImplement<matchStringOnly, testDeps>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<simpleMatch, filterMatch>]
-[assembly: GoImplement<strings_package.Builder, io_package.Writer>]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

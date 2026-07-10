@@ -14,8 +14,10 @@ partial class types_package {
 
 // Len returns the number of type parameters in the list.
 // It is safe to call on a nil receiver.
-[GoRecv] public static nint Len(this ref TypeParamList l) {
-    return len(l.list());
+public static nint Len(this ж<TypeParamList> Ꮡl) {
+    ref var l = ref Ꮡl.Value;
+
+    return len(Ꮡl.list());
 }
 
 // At returns the i'th type parameter in the list.
@@ -26,7 +28,9 @@ partial class types_package {
 // list is for internal use where we expect a []*TypeParam.
 // TODO(rfindley): list should probably be eliminated: we can pass around a
 // TypeParamList instead.
-[GoRecv] internal static slice<ж<TypeParam>> list(this ref TypeParamList l) {
+internal static slice<ж<TypeParam>> list(this ж<TypeParamList> Ꮡl) {
+    ref var l = ref Ꮡl.Value;
+
     if (l == nil) {
         return default!;
     }
@@ -48,8 +52,10 @@ internal static ж<TypeList> newTypeList(slice<ΔType> list) {
 
 // Len returns the number of types in the list.
 // It is safe to call on a nil receiver.
-[GoRecv] public static nint Len(this ref TypeList l) {
-    return len(l.list());
+public static nint Len(this ж<TypeList> Ꮡl) {
+    ref var l = ref Ꮡl.Value;
+
+    return len(Ꮡl.list());
 }
 
 // At returns the i'th type in the list.
@@ -60,7 +66,9 @@ internal static ж<TypeList> newTypeList(slice<ΔType> list) {
 // list is for internal use where we expect a []Type.
 // TODO(rfindley): list should probably be eliminated: we can pass around a
 // TypeList instead.
-[GoRecv] internal static slice<ΔType> list(this ref TypeList l) {
+internal static slice<ΔType> list(this ж<TypeList> Ꮡl) {
+    ref var l = ref Ꮡl.Value;
+
     if (l == nil) {
         return default!;
     }
@@ -73,11 +81,13 @@ internal static ж<TypeParamList> bindTParams(slice<ж<TypeParam>> list) {
     if (len(list) == 0) {
         return default!;
     }
-    foreach (var (i, typ) in list) {
+    foreach (var (i, vᴛ1) in list) {
+        var typ = vᴛ1;
+
         if ((~typ).index >= 0) {
             throw panic("type parameter bound more than once");
         }
-        typ.val.index = i;
+        typ.Value.index = i;
     }
     return Ꮡ(new TypeParamList(tparams: list));
 }

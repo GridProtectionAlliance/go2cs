@@ -12,23 +12,26 @@ partial class buffer_package {
 [GoType("[]byte")] partial struct Buffer;
 
 // Having an initial size gives a dramatic speedup.
-internal static sync.Pool bufPool = new sync.Pool(
+internal static ж<sync.Pool> ᏑbufPool = new(new sync.Pool(
     New: () => {
         var b = new slice<byte>(0, 1024);
-        return ((ж<Buffer>)(Ꮡ(b)));
+        return Ꮡ(new Buffer(b));
     }
-);
+));
+internal static ref sync.Pool bufPool => ref ᏑbufPool.Value;
 
 public static ж<Buffer> New() {
-    return bufPool.Get()._<Buffer.val>();
+    return ᏑbufPool.Get()._<ж<Buffer>>();
 }
 
-[GoRecv] public static unsafe void Free(this ref Buffer b) {
+public static void Free(this ж<Buffer> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
+
     // To reduce peak allocation, return only smaller buffers to the pool.
-    static readonly UntypedInt maxBufferSize = /* 16 << 10 */ 16384;
+    UntypedInt maxBufferSize = /* 16 << 10 */ 16384;
     if (cap(b) <= maxBufferSize) {
-        b = new Span<ж<Buffer>>((Buffer**), 0);
-        bufPool.Put(b);
+        b = (b)[..0];
+        ᏑbufPool.Put(b);
     }
 }
 
@@ -52,15 +55,15 @@ public static ж<Buffer> New() {
 }
 
 [GoRecv] public static @string String(this ref Buffer b) {
-    return ((@string)(b));
+    return ((@string)(slice<byte>)b);
 }
 
 [GoRecv] public static nint Len(this ref Buffer b) {
     return len(b);
 }
 
-[GoRecv] public static unsafe void SetLen(this ref Buffer b, nint n) {
-    b = new Span<ж<Buffer>>((Buffer**), n);
+[GoRecv] public static void SetLen(this ref Buffer b, nint n) {
+    b = (b)[..(int)(n)];
 }
 
 } // end buffer_package

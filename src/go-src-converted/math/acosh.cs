@@ -49,7 +49,7 @@ public static float64 Acosh(float64 x) {
 }
 
 internal static float64 acosh(float64 x) {
-    static readonly UntypedInt Large = /* 1 << 28 */ 268435456; // 2**28
+    UntypedInt Large = /* 1 << 28 */ 268435456; // 2**28
     // first case is special case
     switch (ᐧ) {
     case {} when x < 1 || IsNaN(x): {
@@ -59,7 +59,7 @@ internal static float64 acosh(float64 x) {
         return 0;
     }
     case {} when x >= Large: {
-        return Log(x) + Ln2;
+        return Log(x) + (float64)Ln2;
     }
     case {} when x is > 2: {
         return Log(2 * x - 1 / (x + Sqrt(x * x - 1)));

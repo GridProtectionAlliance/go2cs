@@ -7,6 +7,7 @@ namespace go;
 using bytealg = @internal.bytealg_package;
 using @unsafe = unsafe_package;
 using @internal;
+using abi = @internal.abi_package;
 
 partial class reflect_package {
 
@@ -34,7 +35,7 @@ internal static bool deepValueEqual(ΔValue v1, ΔValue v2, map<visit, bool> vis
     // For any possible reference cycle that might be encountered,
     // hard(v1, v2) needs to return true for at least one of the types in the cycle,
     // and it's safe and valid to get Value's internal pointer.
-    var hard = (ΔValue v1, ΔValue v2) => {
+    var hard = (ΔValue v1Δ1, ΔValue v2Δ1) => {
         var exprᴛ1 = v1Δ1.Kind();
         var matchᴛ1 = false;
         if (exprᴛ1 == ΔPointer) {
@@ -60,26 +61,26 @@ internal static bool deepValueEqual(ΔValue v1, ΔValue v2, map<visit, bool> vis
         // which we do by calling the pointer method.
         // For Slice or Interface, flagIndir is always set,
         // and using v.ptr suffices.
-        var ptrval = (ΔValue v) => {
-            var exprᴛ2 = v.Kind();
+        var ptrval = @unsafe.Pointer (ΔValue vΔ1) => {
+            var exprᴛ2 = vΔ1.Kind();
             if (exprᴛ2 == ΔPointer || exprᴛ2 == Map) {
-                return (uintptr)v.pointer();
+                return (uintptr)vΔ1.pointer();
             }
             { /* default: */
-                return v.ptr;
+                return vΔ1.ptr;
             }
 
         };
         @unsafe.Pointer addr1 = (uintptr)ptrval(v1);
         @unsafe.Pointer addr2 = (uintptr)ptrval(v2);
-        if (((uintptr)addr1) > ((uintptr)addr2)) {
+        if ((uintptr)addr1 > (uintptr)addr2) {
             // Canonicalize order to reduce number of entries in visited.
             // Assumes non-moving garbage collector.
             (addr1, addr2) = (addr2, addr1);
         }
         // Short circuit if references are already seen.
         var typ = v1.Type();
-        var v = new visit(addr1.val, addr2.val, typ);
+        var v = new visit(addr1.Value, addr2.Value, typ);
         if (visited[v]) {
             return true;
         }
@@ -129,7 +130,7 @@ internal static bool deepValueEqual(ΔValue v1, ΔValue v2, map<visit, bool> vis
         return deepValueEqual(v1.Elem(), v2.Elem(), visited);
     }
     if (exprᴛ3 == Struct) {
-        for (nint i = 0;nint n = v1.NumField(); i < n; i++) {
+        for ((nint i, nint n) = (0, v1.NumField()); i < n; i++) {
             if (!deepValueEqual(v1.Field(i), v2.Field(i), visited)) {
                 return false;
             }

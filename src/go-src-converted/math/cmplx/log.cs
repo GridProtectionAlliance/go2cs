@@ -61,7 +61,7 @@ public static complex128 Log(complex128 x) {
 // Log10 returns the decimal logarithm of x.
 public static complex128 Log10(complex128 x) {
     var z = Log(x);
-    return complex(math.Log10E * real(z), math.Log10E * imag(z));
+    return complex((float64)math.Log10E * real(z), (float64)math.Log10E * imag(z));
 }
 
 } // end cmplx_package

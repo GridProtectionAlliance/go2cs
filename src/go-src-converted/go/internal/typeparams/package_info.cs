@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using astꓸFilter = go.go.ast_package.ΔFilter;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;
@@ -42,8 +41,8 @@ using static go.go.@internal.typeparams_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<go.ast_package.IndexExpr, go.ast_package.Expr>]
-[assembly: GoImplement<go.ast_package.IndexListExpr, go.ast_package.Expr>]
+[assembly: GoImplement<go.go.ast_package.IndexExpr, go.go.ast_package.Expr>(Pointer = true)]
+[assembly: GoImplement<go.go.ast_package.IndexListExpr, go.go.ast_package.Expr>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

@@ -38,7 +38,7 @@ using static go.@internal.chacha8rand_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<errUnmarshalChaCha8, error>]
+[assembly: GoImplement<errUnmarshalChaCha8, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

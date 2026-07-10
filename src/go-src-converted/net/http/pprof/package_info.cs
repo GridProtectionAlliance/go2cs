@@ -51,16 +51,15 @@ using static go.net.http.pprof_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<bytes_package.Buffer, io_package.Reader>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>]
-[assembly: GoImplement<handler, net.http_package.ΔHandler>]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<go.net.http_package.ResponseWriter, io_package.Writer>]
+[assembly: GoImplement<handler, go.net.http_package.ΔHandler>]
 [assembly: GoImplement<io_package.ReadCloser, io_package.Reader>]
-[assembly: GoImplement<net.http_package.ResponseWriter, io_package.Writer>]
-[assembly: GoImplement<strings_package.Reader, io_package.Reader>]
+[assembly: GoImplement<strings_package.Reader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<http.pattern; matches <>string; otherValues map<string>string}, http.pattern; matches <>string; otherValues map<string>string}>(Inverted = true)]
 // </ImplicitConversions>
 
 namespace go.net.http;

@@ -6,6 +6,7 @@ namespace go.go.doc;
 using bytes = bytes_package;
 using fmt = fmt_package;
 using strings = strings_package;
+using io = io_package;
 
 partial class comment_package {
 
@@ -55,20 +56,20 @@ partial class comment_package {
     return p.HeadingLevel;
 }
 
-[GoRecv] public static @string headingID(this ref Printer p, ж<Heading> Ꮡh) {
-    ref var h = ref Ꮡh.val;
+[GoRecv] internal static @string headingID(this ref Printer p, ж<Heading> Ꮡh) {
+    ref var h = ref Ꮡh.Value;
 
     if (p.HeadingID == default!) {
         return h.DefaultID();
     }
-    return p.HeadingID(h);
+    return p.HeadingID(Ꮡh);
 }
 
-[GoRecv] public static @string docLinkURL(this ref Printer p, ж<DocLink> Ꮡlink) {
-    ref var link = ref Ꮡlink.val;
+[GoRecv] internal static @string docLinkURL(this ref Printer p, ж<DocLink> Ꮡlink) {
+    ref var link = ref Ꮡlink.Value;
 
     if (p.DocLinkURL != default!) {
-        return p.DocLinkURL(link);
+        return p.DocLinkURL(Ꮡlink);
     }
     return link.DefaultURL(p.DocLinkBaseURL);
 }
@@ -127,20 +128,20 @@ partial class comment_package {
 [GoRecv] public static @string DefaultID(this ref Heading h) {
     // Note: The “hdr-” prefix is important to avoid DOM clobbering attacks.
     // See https://pkg.go.dev/github.com/google/safehtml#Identifier.
-    ref var out = ref heap(new strings_package.Builder(), out var Ꮡout);
-    textPrinter p = default!;
-    p.oneLongLine(Ꮡ@out, h.Text);
+    ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
+    textPrinter p = new(nil);
+    p.oneLongLine(Ꮡout, h.Text);
     @string s = strings.TrimSpace(@out.String());
     if (s == ""u8) {
         return ""u8;
     }
     @out.Reset();
-    @out.WriteString("hdr-"u8);
+    Ꮡout.WriteString("hdr-"u8);
     foreach (var (_, r) in s) {
-        if (r < 128 && isIdentASCII(((byte)r))){
-            @out.WriteByte(((byte)r));
+        if (r < 0x80 && isIdentASCII((byte)r)){
+            Ꮡout.WriteByte((byte)r);
         } else {
-            @out.WriteByte((rune)'_');
+            Ꮡout.WriteByte((rune)'_');
         }
     }
     return @out.String();
@@ -152,16 +153,17 @@ partial class comment_package {
 
 // Comment returns the standard Go formatting of the [Doc],
 // without any comment markers.
-[GoRecv] public static slice<byte> Comment(this ref Printer p, ж<Doc> Ꮡd) {
-    ref var d = ref Ꮡd.val;
+public static slice<byte> Comment(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
+    ref var p = ref Ꮡp.Value;
+    ref var d = ref Ꮡd.Value;
 
-    var cp = Ꮡ(new commentPrinter(Printer: p));
-    ref var out = ref heap(new bytes_package.Buffer(), out var Ꮡout);
-    foreach (var (iΔ1, x) in d.Content) {
-        if (iΔ1 > 0 && blankBefore(x)) {
+    var cp = Ꮡ(new commentPrinter(Printer: Ꮡp));
+    ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
+    foreach (var (i, x) in d.Content) {
+        if (i > 0 && blankBefore(x)) {
             @out.WriteString("\n"u8);
         }
-        cp.block(Ꮡ@out, x);
+        cp.block(Ꮡout, x);
     }
     // Print one block containing all the link definitions that were used,
     // and then a second block containing all the unused ones.
@@ -192,7 +194,7 @@ partial class comment_package {
 // All blocks do, except for Lists that return false from x.BlankBefore().
 internal static bool blankBefore(Block x) {
     {
-        var (xΔ1, ok) = x._<List.val>(ᐧ); if (ok) {
+        var (xΔ1, ok) = x._<ж<List>>(ᐧ); if (ok) {
             return xΔ1.BlankBefore();
         }
     }
@@ -201,27 +203,27 @@ internal static bool blankBefore(Block x) {
 
 // block prints the block x to out.
 [GoRecv] internal static void block(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
-    ref var @out = ref Ꮡout.val;
+    ref var @out = ref Ꮡout.Value;
 
     switch (x.type()) {
     default: {
-        var x = x.type();
-        fmt.Fprintf(~@out, "?%T"u8, x);
+        var xΔ1 = x;
+        fmt.Fprintf(new bytes_BufferжWriter(Ꮡout), "?%T"u8, xΔ1);
         break;
     }
-    case Paragraph.val x: {
-        p.text(Ꮡout, ""u8, (~x).Text);
+    case ж<Paragraph> xΔ1: {
+        p.text(Ꮡout, ""u8, (~xΔ1).Text);
         @out.WriteString("\n"u8);
         break;
     }
-    case Heading.val x: {
+    case ж<Heading> xΔ1: {
         @out.WriteString("# "u8);
-        p.text(Ꮡout, ""u8, (~x).Text);
+        p.text(Ꮡout, ""u8, (~xΔ1).Text);
         @out.WriteString("\n"u8);
         break;
     }
-    case Code.val x: {
-        @string md = x.val.Text;
+    case ж<Code> xΔ1: {
+        @string md = xΔ1.Value.Text;
         while (md != ""u8) {
             @string line = default!;
             (line, md, _) = strings.Cut(md, "\n"u8);
@@ -233,9 +235,9 @@ internal static bool blankBefore(Block x) {
         }
         break;
     }
-    case List.val x: {
-        var loose = x.BlankBetween();
-        foreach (var (i, item) in (~x).Items) {
+    case ж<List> xΔ1: {
+        var loose = xΔ1.BlankBetween();
+        foreach (var (i, item) in (~xΔ1).Items) {
             if (i > 0 && loose) {
                 @out.WriteString("\n"u8);
             }
@@ -251,7 +253,7 @@ internal static bool blankBefore(Block x) {
                 if (iΔ1 > 0) {
                     @out.WriteString("\n" + fourSpace);
                 }
-                p.text(Ꮡout, fourSpace, blk._<Paragraph.val>().Text);
+                p.text(Ꮡout, fourSpace, (~blk._<ж<Paragraph>>()).Text);
                 @out.WriteString("\n"u8);
             }
         }
@@ -261,31 +263,31 @@ internal static bool blankBefore(Block x) {
 
 // text prints the text sequence x to out.
 [GoRecv] internal static void text(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<ΔText> x) {
-    ref var @out = ref Ꮡout.val;
+    ref var @out = ref Ꮡout.Value;
 
     foreach (var (_, t) in x) {
         switch (t.type()) {
-        case Plain t: {
-            p.indent(Ꮡout, indent, ((@string)t));
+        case Plain tΔ1: {
+            p.indent(Ꮡout, indent, ((@string)tΔ1));
             break;
         }
-        case Italic t: {
-            p.indent(Ꮡout, indent, ((@string)t));
+        case Italic tΔ1: {
+            p.indent(Ꮡout, indent, ((@string)tΔ1));
             break;
         }
-        case Link.val t: {
-            if ((~t).Auto){
-                p.text(Ꮡout, indent, (~t).Text);
+        case ж<Link> tΔ1: {
+            if ((~tΔ1).Auto){
+                p.text(Ꮡout, indent, (~tΔ1).Text);
             } else {
                 @out.WriteString("["u8);
-                p.text(Ꮡout, indent, (~t).Text);
+                p.text(Ꮡout, indent, (~tΔ1).Text);
                 @out.WriteString("]"u8);
             }
             break;
         }
-        case DocLink.val t: {
+        case ж<DocLink> tΔ1: {
             @out.WriteString("["u8);
-            p.text(Ꮡout, indent, (~t).Text);
+            p.text(Ꮡout, indent, (~tΔ1).Text);
             @out.WriteString("]"u8);
             break;
         }}
@@ -295,7 +297,7 @@ internal static bool blankBefore(Block x) {
 // indent prints s to out, indenting with the indent string
 // after each newline in s.
 [GoRecv] internal static void indent(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, @string s) {
-    ref var @out = ref Ꮡout.val;
+    ref var @out = ref Ꮡout.Value;
 
     while (s != ""u8) {
         var (line, rest, ok) = strings.Cut(s, "\n"u8);

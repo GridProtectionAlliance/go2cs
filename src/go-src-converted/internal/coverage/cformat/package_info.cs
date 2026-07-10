@@ -38,8 +38,7 @@ using static go.@internal.coverage.cformat_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<float64, error>]
-[assembly: GoImplement<text.tabwriter_package.Writer, io_package.Writer>]
+[assembly: GoImplement<go.text.tabwriter_package.Writer, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

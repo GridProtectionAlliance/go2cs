@@ -40,9 +40,9 @@ internal static error errBufferTooSmall = errors.New("buffer too small"u8);
     uint16 Uint16(slice<byte> _);
     uint32 Uint32(slice<byte> _);
     uint64 Uint64(slice<byte> _);
-    void PutUint16(slice<byte> _, uint16 _);
-    void PutUint32(slice<byte> _, uint32 _);
-    void PutUint64(slice<byte> _, uint64 _);
+    void PutUint16(slice<byte> _Δp0, uint16 _Δp1);
+    void PutUint32(slice<byte> _Δp0, uint32 _Δp1);
+    void PutUint64(slice<byte> _Δp0, uint64 _Δp1);
     @string String();
 }
 
@@ -51,9 +51,9 @@ internal static error errBufferTooSmall = errors.New("buffer too small"u8);
 //
 // It is implemented by [LittleEndian], [BigEndian], and [NativeEndian].
 [GoType] partial interface AppendByteOrder {
-    slice<byte> AppendUint16(slice<byte> _, uint16 _);
-    slice<byte> AppendUint32(slice<byte> _, uint32 _);
-    slice<byte> AppendUint64(slice<byte> _, uint64 _);
+    slice<byte> AppendUint16(slice<byte> _Δp0, uint16 _Δp1);
+    slice<byte> AppendUint32(slice<byte> _Δp0, uint32 _Δp1);
+    slice<byte> AppendUint64(slice<byte> _Δp0, uint64 _Δp1);
     @string String();
 }
 
@@ -63,179 +63,179 @@ public static littleEndian LittleEndian;
 // BigEndian is the big-endian implementation of [ByteOrder] and [AppendByteOrder].
 public static bigEndian BigEndian;
 
-[GoType] partial struct littleEndian {
+[GoType] public partial struct littleEndian {
 }
 
-internal static uint16 Uint16(this littleEndian _, slice<byte> b) {
+public static uint16 Uint16(this littleEndian _Δp0, slice<byte> b) {
     _ = b[1];
     // bounds check hint to compiler; see golang.org/issue/14808
-    return (uint16)(((uint16)b[0]) | ((uint16)b[1]) << (int)(8));
+    return (uint16)((uint16)b[0] | ((uint16)b[1] << (int)(8)));
 }
 
-internal static void PutUint16(this littleEndian _, slice<byte> b, uint16 v) {
+public static void PutUint16(this littleEndian _Δp0, slice<byte> b, uint16 v) {
     _ = b[1];
     // early bounds check to guarantee safety of writes below
-    b[0] = ((byte)v);
-    b[1] = ((byte)(v >> (int)(8)));
+    b[0] = (byte)v;
+    b[1] = (byte)((v >> (int)(8)));
 }
 
-internal static slice<byte> AppendUint16(this littleEndian _, slice<byte> b, uint16 v) {
+public static slice<byte> AppendUint16(this littleEndian _, slice<byte> b, uint16 v) {
     return append(b,
-        ((byte)v),
-        ((byte)(v >> (int)(8))));
+        (byte)v,
+        (byte)((v >> (int)(8))));
 }
 
-internal static uint32 Uint32(this littleEndian _, slice<byte> b) {
+public static uint32 Uint32(this littleEndian _Δp0, slice<byte> b) {
     _ = b[3];
     // bounds check hint to compiler; see golang.org/issue/14808
-    return (uint32)((uint32)((uint32)(((uint32)b[0]) | ((uint32)b[1]) << (int)(8)) | ((uint32)b[2]) << (int)(16)) | ((uint32)b[3]) << (int)(24));
+    return (uint32)((uint32)((uint32)((uint32)b[0] | ((uint32)b[1] << (int)(8))) | ((uint32)b[2] << (int)(16))) | ((uint32)b[3] << (int)(24)));
 }
 
-internal static void PutUint32(this littleEndian _, slice<byte> b, uint32 v) {
+public static void PutUint32(this littleEndian _Δp0, slice<byte> b, uint32 v) {
     _ = b[3];
     // early bounds check to guarantee safety of writes below
-    b[0] = ((byte)v);
-    b[1] = ((byte)(v >> (int)(8)));
-    b[2] = ((byte)(v >> (int)(16)));
-    b[3] = ((byte)(v >> (int)(24)));
+    b[0] = (byte)v;
+    b[1] = (byte)((v >> (int)(8)));
+    b[2] = (byte)((v >> (int)(16)));
+    b[3] = (byte)((v >> (int)(24)));
 }
 
-internal static slice<byte> AppendUint32(this littleEndian _, slice<byte> b, uint32 v) {
+public static slice<byte> AppendUint32(this littleEndian _, slice<byte> b, uint32 v) {
     return append(b,
-        ((byte)v),
-        ((byte)(v >> (int)(8))),
-        ((byte)(v >> (int)(16))),
-        ((byte)(v >> (int)(24))));
+        (byte)v,
+        (byte)((v >> (int)(8))),
+        (byte)((v >> (int)(16))),
+        (byte)((v >> (int)(24))));
 }
 
-internal static uint64 Uint64(this littleEndian _, slice<byte> b) {
+public static uint64 Uint64(this littleEndian _Δp0, slice<byte> b) {
     _ = b[7];
     // bounds check hint to compiler; see golang.org/issue/14808
-    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)(((uint64)b[0]) | ((uint64)b[1]) << (int)(8)) | ((uint64)b[2]) << (int)(16)) | ((uint64)b[3]) << (int)(24)) | ((uint64)b[4]) << (int)(32)) | ((uint64)b[5]) << (int)(40)) | ((uint64)b[6]) << (int)(48)) | ((uint64)b[7]) << (int)(56));
+    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)b[0] | ((uint64)b[1] << (int)(8))) | ((uint64)b[2] << (int)(16))) | ((uint64)b[3] << (int)(24))) | ((uint64)b[4] << (int)(32))) | ((uint64)b[5] << (int)(40))) | ((uint64)b[6] << (int)(48))) | ((uint64)b[7] << (int)(56)));
 }
 
-internal static void PutUint64(this littleEndian _, slice<byte> b, uint64 v) {
+public static void PutUint64(this littleEndian _Δp0, slice<byte> b, uint64 v) {
     _ = b[7];
     // early bounds check to guarantee safety of writes below
-    b[0] = ((byte)v);
-    b[1] = ((byte)(v >> (int)(8)));
-    b[2] = ((byte)(v >> (int)(16)));
-    b[3] = ((byte)(v >> (int)(24)));
-    b[4] = ((byte)(v >> (int)(32)));
-    b[5] = ((byte)(v >> (int)(40)));
-    b[6] = ((byte)(v >> (int)(48)));
-    b[7] = ((byte)(v >> (int)(56)));
+    b[0] = (byte)v;
+    b[1] = (byte)((v >> (int)(8)));
+    b[2] = (byte)((v >> (int)(16)));
+    b[3] = (byte)((v >> (int)(24)));
+    b[4] = (byte)((v >> (int)(32)));
+    b[5] = (byte)((v >> (int)(40)));
+    b[6] = (byte)((v >> (int)(48)));
+    b[7] = (byte)((v >> (int)(56)));
 }
 
-internal static slice<byte> AppendUint64(this littleEndian _, slice<byte> b, uint64 v) {
+public static slice<byte> AppendUint64(this littleEndian _, slice<byte> b, uint64 v) {
     return append(b,
-        ((byte)v),
-        ((byte)(v >> (int)(8))),
-        ((byte)(v >> (int)(16))),
-        ((byte)(v >> (int)(24))),
-        ((byte)(v >> (int)(32))),
-        ((byte)(v >> (int)(40))),
-        ((byte)(v >> (int)(48))),
-        ((byte)(v >> (int)(56))));
+        (byte)v,
+        (byte)((v >> (int)(8))),
+        (byte)((v >> (int)(16))),
+        (byte)((v >> (int)(24))),
+        (byte)((v >> (int)(32))),
+        (byte)((v >> (int)(40))),
+        (byte)((v >> (int)(48))),
+        (byte)((v >> (int)(56))));
 }
 
-internal static @string String(this littleEndian _) {
+public static @string String(this littleEndian _) {
     return "LittleEndian"u8;
 }
 
-internal static @string GoString(this littleEndian _) {
+public static @string GoString(this littleEndian _) {
     return "binary.LittleEndian"u8;
 }
 
-[GoType] partial struct bigEndian {
+[GoType] public partial struct bigEndian {
 }
 
-internal static uint16 Uint16(this bigEndian _, slice<byte> b) {
+public static uint16 Uint16(this bigEndian _Δp0, slice<byte> b) {
     _ = b[1];
     // bounds check hint to compiler; see golang.org/issue/14808
-    return (uint16)(((uint16)b[1]) | ((uint16)b[0]) << (int)(8));
+    return (uint16)((uint16)b[1] | ((uint16)b[0] << (int)(8)));
 }
 
-internal static void PutUint16(this bigEndian _, slice<byte> b, uint16 v) {
+public static void PutUint16(this bigEndian _Δp0, slice<byte> b, uint16 v) {
     _ = b[1];
     // early bounds check to guarantee safety of writes below
-    b[0] = ((byte)(v >> (int)(8)));
-    b[1] = ((byte)v);
+    b[0] = (byte)((v >> (int)(8)));
+    b[1] = (byte)v;
 }
 
-internal static slice<byte> AppendUint16(this bigEndian _, slice<byte> b, uint16 v) {
+public static slice<byte> AppendUint16(this bigEndian _, slice<byte> b, uint16 v) {
     return append(b,
-        ((byte)(v >> (int)(8))),
-        ((byte)v));
+        (byte)((v >> (int)(8))),
+        (byte)v);
 }
 
-internal static uint32 Uint32(this bigEndian _, slice<byte> b) {
+public static uint32 Uint32(this bigEndian _Δp0, slice<byte> b) {
     _ = b[3];
     // bounds check hint to compiler; see golang.org/issue/14808
-    return (uint32)((uint32)((uint32)(((uint32)b[3]) | ((uint32)b[2]) << (int)(8)) | ((uint32)b[1]) << (int)(16)) | ((uint32)b[0]) << (int)(24));
+    return (uint32)((uint32)((uint32)((uint32)b[3] | ((uint32)b[2] << (int)(8))) | ((uint32)b[1] << (int)(16))) | ((uint32)b[0] << (int)(24)));
 }
 
-internal static void PutUint32(this bigEndian _, slice<byte> b, uint32 v) {
+public static void PutUint32(this bigEndian _Δp0, slice<byte> b, uint32 v) {
     _ = b[3];
     // early bounds check to guarantee safety of writes below
-    b[0] = ((byte)(v >> (int)(24)));
-    b[1] = ((byte)(v >> (int)(16)));
-    b[2] = ((byte)(v >> (int)(8)));
-    b[3] = ((byte)v);
+    b[0] = (byte)((v >> (int)(24)));
+    b[1] = (byte)((v >> (int)(16)));
+    b[2] = (byte)((v >> (int)(8)));
+    b[3] = (byte)v;
 }
 
-internal static slice<byte> AppendUint32(this bigEndian _, slice<byte> b, uint32 v) {
+public static slice<byte> AppendUint32(this bigEndian _, slice<byte> b, uint32 v) {
     return append(b,
-        ((byte)(v >> (int)(24))),
-        ((byte)(v >> (int)(16))),
-        ((byte)(v >> (int)(8))),
-        ((byte)v));
+        (byte)((v >> (int)(24))),
+        (byte)((v >> (int)(16))),
+        (byte)((v >> (int)(8))),
+        (byte)v);
 }
 
-internal static uint64 Uint64(this bigEndian _, slice<byte> b) {
+public static uint64 Uint64(this bigEndian _Δp0, slice<byte> b) {
     _ = b[7];
     // bounds check hint to compiler; see golang.org/issue/14808
-    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)(((uint64)b[7]) | ((uint64)b[6]) << (int)(8)) | ((uint64)b[5]) << (int)(16)) | ((uint64)b[4]) << (int)(24)) | ((uint64)b[3]) << (int)(32)) | ((uint64)b[2]) << (int)(40)) | ((uint64)b[1]) << (int)(48)) | ((uint64)b[0]) << (int)(56));
+    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)b[7] | ((uint64)b[6] << (int)(8))) | ((uint64)b[5] << (int)(16))) | ((uint64)b[4] << (int)(24))) | ((uint64)b[3] << (int)(32))) | ((uint64)b[2] << (int)(40))) | ((uint64)b[1] << (int)(48))) | ((uint64)b[0] << (int)(56)));
 }
 
-internal static void PutUint64(this bigEndian _, slice<byte> b, uint64 v) {
+public static void PutUint64(this bigEndian _Δp0, slice<byte> b, uint64 v) {
     _ = b[7];
     // early bounds check to guarantee safety of writes below
-    b[0] = ((byte)(v >> (int)(56)));
-    b[1] = ((byte)(v >> (int)(48)));
-    b[2] = ((byte)(v >> (int)(40)));
-    b[3] = ((byte)(v >> (int)(32)));
-    b[4] = ((byte)(v >> (int)(24)));
-    b[5] = ((byte)(v >> (int)(16)));
-    b[6] = ((byte)(v >> (int)(8)));
-    b[7] = ((byte)v);
+    b[0] = (byte)((v >> (int)(56)));
+    b[1] = (byte)((v >> (int)(48)));
+    b[2] = (byte)((v >> (int)(40)));
+    b[3] = (byte)((v >> (int)(32)));
+    b[4] = (byte)((v >> (int)(24)));
+    b[5] = (byte)((v >> (int)(16)));
+    b[6] = (byte)((v >> (int)(8)));
+    b[7] = (byte)v;
 }
 
-internal static slice<byte> AppendUint64(this bigEndian _, slice<byte> b, uint64 v) {
+public static slice<byte> AppendUint64(this bigEndian _, slice<byte> b, uint64 v) {
     return append(b,
-        ((byte)(v >> (int)(56))),
-        ((byte)(v >> (int)(48))),
-        ((byte)(v >> (int)(40))),
-        ((byte)(v >> (int)(32))),
-        ((byte)(v >> (int)(24))),
-        ((byte)(v >> (int)(16))),
-        ((byte)(v >> (int)(8))),
-        ((byte)v));
+        (byte)((v >> (int)(56))),
+        (byte)((v >> (int)(48))),
+        (byte)((v >> (int)(40))),
+        (byte)((v >> (int)(32))),
+        (byte)((v >> (int)(24))),
+        (byte)((v >> (int)(16))),
+        (byte)((v >> (int)(8))),
+        (byte)v);
 }
 
-internal static @string String(this bigEndian _) {
+public static @string String(this bigEndian _) {
     return "BigEndian"u8;
 }
 
-internal static @string GoString(this bigEndian _) {
+public static @string GoString(this bigEndian _) {
     return "binary.BigEndian"u8;
 }
 
-internal static @string String(this nativeEndian _) {
+public static @string String(this nativeEndian _) {
     return "NativeEndian"u8;
 }
 
-internal static @string GoString(this nativeEndian _) {
+public static @string GoString(this nativeEndian _) {
     return "binary.NativeEndian"u8;
 }
 
@@ -285,7 +285,7 @@ public static error Read(io.Reader r, ByteOrder order, any data) {
     if (size < 0) {
         return errors.New("binary.Read: invalid type "u8 + reflect.TypeOf(data).String());
     }
-    var d = Ꮡ(new decoder(order: order, buf: new slice<byte>(size)));
+    var d = Ꮡ(new decoder(new coder(order: order, buf: new slice<byte>(size))));
     {
         var (_, err) = io.ReadFull(r, (~d).buf); if (err != default!) {
             return err;
@@ -328,124 +328,124 @@ public static (nint, error) Decode(slice<byte> buf, ByteOrder order, any data) {
     if (len(buf) < size) {
         return (0, errBufferTooSmall);
     }
-    var d = Ꮡ(new decoder(order: order, buf: buf[..(int)(size)]));
+    var d = Ꮡ(new decoder(new coder(order: order, buf: buf[..(int)(size)])));
     d.value(v);
     return (size, default!);
 }
 
 internal static bool decodeFast(slice<byte> bs, ByteOrder order, any data) {
     switch (data.type()) {
-    case @bool.val data: {
-        data = bs[0] != 0;
+    case ж<bool> dataΔ1: {
+        dataΔ1.Value = bs[0] != 0;
         break;
     }
-    case int8.val data: {
-        data = ((int8)bs[0]);
+    case ж<int8> dataΔ1: {
+        dataΔ1.Value = (int8)bs[0];
         break;
     }
-    case uint8.val data: {
-        data = bs[0];
+    case ж<uint8> dataΔ1: {
+        dataΔ1.Value = bs[0];
         break;
     }
-    case int16.val data: {
-        data = ((int16)order.Uint16(bs));
+    case ж<int16> dataΔ1: {
+        dataΔ1.Value = (int16)order.Uint16(bs);
         break;
     }
-    case uint16.val data: {
-        data = order.Uint16(bs);
+    case ж<uint16> dataΔ1: {
+        dataΔ1.Value = order.Uint16(bs);
         break;
     }
-    case int32.val data: {
-        data = ((int32)order.Uint32(bs));
+    case ж<int32> dataΔ1: {
+        dataΔ1.Value = (int32)order.Uint32(bs);
         break;
     }
-    case uint32.val data: {
-        data = order.Uint32(bs);
+    case ж<uint32> dataΔ1: {
+        dataΔ1.Value = order.Uint32(bs);
         break;
     }
-    case int64.val data: {
-        data = ((int64)order.Uint64(bs));
+    case ж<int64> dataΔ1: {
+        dataΔ1.Value = (int64)order.Uint64(bs);
         break;
     }
-    case uint64.val data: {
-        data = order.Uint64(bs);
+    case ж<uint64> dataΔ1: {
+        dataΔ1.Value = order.Uint64(bs);
         break;
     }
-    case float32.val data: {
-        data = math.Float32frombits(order.Uint32(bs));
+    case ж<float32> dataΔ1: {
+        dataΔ1.Value = math.Float32frombits(order.Uint32(bs));
         break;
     }
-    case float64.val data: {
-        data = math.Float64frombits(order.Uint64(bs));
+    case ж<float64> dataΔ1: {
+        dataΔ1.Value = math.Float64frombits(order.Uint64(bs));
         break;
     }
-    case slice<bool> data: {
+    case slice<bool> dataΔ1: {
         foreach (var (i, x) in bs) {
             // Easier to loop over the input for 8-bit values.
-            data[i] = x != 0;
+            dataΔ1[i] = x != 0;
         }
         break;
     }
-    case slice<int8> data: {
+    case slice<int8> dataΔ1: {
         foreach (var (i, x) in bs) {
-            data[i] = ((int8)x);
+            dataΔ1[i] = (int8)x;
         }
         break;
     }
-    case slice<uint8> data: {
-        copy(data, bs);
+    case slice<uint8> dataΔ1: {
+        copy(dataΔ1, bs);
         break;
     }
-    case slice<int16> data: {
-        foreach (var (i, _) in data) {
-            data[i] = ((int16)order.Uint16(bs[(int)(2 * i)..]));
+    case slice<int16> dataΔ1: {
+        foreach (var (i, _) in dataΔ1) {
+            dataΔ1[i] = (int16)order.Uint16(bs[(int)(2 * i)..]);
         }
         break;
     }
-    case slice<uint16> data: {
-        foreach (var (i, _) in data) {
-            data[i] = order.Uint16(bs[(int)(2 * i)..]);
+    case slice<uint16> dataΔ1: {
+        foreach (var (i, _) in dataΔ1) {
+            dataΔ1[i] = order.Uint16(bs[(int)(2 * i)..]);
         }
         break;
     }
-    case slice<int32> data: {
-        foreach (var (i, _) in data) {
-            data[i] = ((int32)order.Uint32(bs[(int)(4 * i)..]));
+    case slice<int32> dataΔ1: {
+        foreach (var (i, _) in dataΔ1) {
+            dataΔ1[i] = (int32)order.Uint32(bs[(int)(4 * i)..]);
         }
         break;
     }
-    case slice<uint32> data: {
-        foreach (var (i, _) in data) {
-            data[i] = order.Uint32(bs[(int)(4 * i)..]);
+    case slice<uint32> dataΔ1: {
+        foreach (var (i, _) in dataΔ1) {
+            dataΔ1[i] = order.Uint32(bs[(int)(4 * i)..]);
         }
         break;
     }
-    case slice<int64> data: {
-        foreach (var (i, _) in data) {
-            data[i] = ((int64)order.Uint64(bs[(int)(8 * i)..]));
+    case slice<int64> dataΔ1: {
+        foreach (var (i, _) in dataΔ1) {
+            dataΔ1[i] = (int64)order.Uint64(bs[(int)(8 * i)..]);
         }
         break;
     }
-    case slice<uint64> data: {
-        foreach (var (i, _) in data) {
-            data[i] = order.Uint64(bs[(int)(8 * i)..]);
+    case slice<uint64> dataΔ1: {
+        foreach (var (i, _) in dataΔ1) {
+            dataΔ1[i] = order.Uint64(bs[(int)(8 * i)..]);
         }
         break;
     }
-    case slice<float32> data: {
-        foreach (var (i, _) in data) {
-            data[i] = math.Float32frombits(order.Uint32(bs[(int)(4 * i)..]));
+    case slice<float32> dataΔ1: {
+        foreach (var (i, _) in dataΔ1) {
+            dataΔ1[i] = math.Float32frombits(order.Uint32(bs[(int)(4 * i)..]));
         }
         break;
     }
-    case slice<float64> data: {
-        foreach (var (i, _) in data) {
-            data[i] = math.Float64frombits(order.Uint64(bs[(int)(8 * i)..]));
+    case slice<float64> dataΔ1: {
+        foreach (var (i, _) in dataΔ1) {
+            dataΔ1[i] = math.Float64frombits(order.Uint64(bs[(int)(8 * i)..]));
         }
         break;
     }
     default: {
-        var data = data.type();
+        var dataΔ1 = data;
         return false;
     }}
     return true;
@@ -478,7 +478,7 @@ public static error Write(io.Writer w, ByteOrder order, any data) {
         return errors.New("binary.Write: some values are not fixed-sized in type "u8 + reflect.TypeOf(data).String());
     }
     var buf = new slice<byte>(size);
-    var e = Ꮡ(new encoder(order: order, buf: buf));
+    var e = Ꮡ(new encoder(new coder(order: order, buf: buf)));
     e.value(v);
     var (_, err) = w.Write(buf);
     return err;
@@ -508,7 +508,7 @@ public static (nint, error) Encode(slice<byte> buf, ByteOrder order, any data) {
     if (len(buf) < size) {
         return (0, errBufferTooSmall);
     }
-    var e = Ꮡ(new encoder(order: order, buf: buf));
+    var e = Ꮡ(new encoder(new coder(order: order, buf: buf)));
     e.value(v);
     return (size, default!);
 }
@@ -521,7 +521,7 @@ public static (slice<byte>, error) Append(slice<byte> buf, ByteOrder order, any 
     // Fast path for basic types and slices.
     {
         var (n, _) = intDataSize(data); if (n != 0) {
-            (bufΔ1, posΔ1) = ensure(buf, n);
+            var (bufΔ1, posΔ1) = ensure(buf, n);
             encodeFast(posΔ1, order, data);
             return (bufΔ1, default!);
         }
@@ -532,16 +532,16 @@ public static (slice<byte>, error) Append(slice<byte> buf, ByteOrder order, any 
     if (size < 0) {
         return (default!, errors.New("binary.Append: some values are not fixed-sized in type "u8 + reflect.TypeOf(data).String()));
     }
-    (buf, pos) = ensure(buf, size);
-    var e = Ꮡ(new encoder(order: order, buf: pos));
+    (buf, var pos) = ensure(buf, size);
+    var e = Ꮡ(new encoder(new coder(order: order, buf: pos)));
     e.value(v);
     return (buf, default!);
 }
 
 internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
     switch (data.type()) {
-    case @bool.val v: {
-        if (v.val){
+    case ж<bool> v: {
+        if (v.Value){
             bs[0] = 1;
         } else {
             bs[0] = 0;
@@ -566,22 +566,22 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         }
         break;
     }
-    case int8.val v: {
-        bs[0] = ((byte)(v.val));
+    case ж<int8> v: {
+        bs[0] = (byte)(v.Value);
         break;
     }
     case int8 v: {
-        bs[0] = ((byte)v);
+        bs[0] = (byte)v;
         break;
     }
     case slice<int8> v: {
         foreach (var (i, x) in v) {
-            bs[i] = ((byte)x);
+            bs[i] = (byte)x;
         }
         break;
     }
-    case uint8.val v: {
-        bs[0] = v.val;
+    case ж<uint8> v: {
+        bs[0] = v.Value;
         break;
     }
     case uint8 v: {
@@ -592,22 +592,22 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         copy(bs, v);
         break;
     }
-    case int16.val v: {
-        order.PutUint16(bs, ((uint16)(v.val)));
+    case ж<int16> v: {
+        order.PutUint16(bs, (uint16)(v.Value));
         break;
     }
     case int16 v: {
-        order.PutUint16(bs, ((uint16)v));
+        order.PutUint16(bs, (uint16)v);
         break;
     }
     case slice<int16> v: {
         foreach (var (i, x) in v) {
-            order.PutUint16(bs[(int)(2 * i)..], ((uint16)x));
+            order.PutUint16(bs[(int)(2 * i)..], (uint16)x);
         }
         break;
     }
-    case uint16.val v: {
-        order.PutUint16(bs, v.val);
+    case ж<uint16> v: {
+        order.PutUint16(bs, v.Value);
         break;
     }
     case uint16 v: {
@@ -620,22 +620,22 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         }
         break;
     }
-    case int32.val v: {
-        order.PutUint32(bs, ((uint32)(v.val)));
+    case ж<int32> v: {
+        order.PutUint32(bs, (uint32)(v.Value));
         break;
     }
     case int32 v: {
-        order.PutUint32(bs, ((uint32)v));
+        order.PutUint32(bs, (uint32)v);
         break;
     }
     case slice<int32> v: {
         foreach (var (i, x) in v) {
-            order.PutUint32(bs[(int)(4 * i)..], ((uint32)x));
+            order.PutUint32(bs[(int)(4 * i)..], (uint32)x);
         }
         break;
     }
-    case uint32.val v: {
-        order.PutUint32(bs, v.val);
+    case ж<uint32> v: {
+        order.PutUint32(bs, v.Value);
         break;
     }
     case uint32 v: {
@@ -648,22 +648,22 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         }
         break;
     }
-    case int64.val v: {
-        order.PutUint64(bs, ((uint64)(v.val)));
+    case ж<int64> v: {
+        order.PutUint64(bs, (uint64)(v.Value));
         break;
     }
     case int64 v: {
-        order.PutUint64(bs, ((uint64)v));
+        order.PutUint64(bs, (uint64)v);
         break;
     }
     case slice<int64> v: {
         foreach (var (i, x) in v) {
-            order.PutUint64(bs[(int)(8 * i)..], ((uint64)x));
+            order.PutUint64(bs[(int)(8 * i)..], (uint64)x);
         }
         break;
     }
-    case uint64.val v: {
-        order.PutUint64(bs, v.val);
+    case ж<uint64> v: {
+        order.PutUint64(bs, v.Value);
         break;
     }
     case uint64 v: {
@@ -676,8 +676,8 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         }
         break;
     }
-    case float32.val v: {
-        order.PutUint32(bs, math.Float32bits(v.val));
+    case ж<float32> v: {
+        order.PutUint32(bs, math.Float32bits(v.Value));
         break;
     }
     case float32 v: {
@@ -690,8 +690,8 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
         }
         break;
     }
-    case float64.val v: {
-        order.PutUint64(bs, math.Float64bits(v.val));
+    case ж<float64> v: {
+        order.PutUint64(bs, math.Float64bits(v.Value));
         break;
     }
     case float64 v: {
@@ -711,28 +711,25 @@ internal static void encodeFast(slice<byte> bs, ByteOrder order, any data) {
 // If v is neither of these, Size returns -1.
 public static nint Size(any v) {
     switch (v.type()) {
-    case bool data: {
+    case bool _:
+    case int8 _:
+    case uint8 _: {
+        var data = v;
         return 1;
     }
-    case int8 data: {
-        return 1;
-    }
-    case uint8 data: {
-        return 1;
-    }
-    case @bool.val data: {
+    case ж<bool> data: {
         if (data == nil) {
             return -1;
         }
         return 1;
     }
-    case int8.val data: {
+    case ж<int8> data: {
         if (data == nil) {
             return -1;
         }
         return 1;
     }
-    case uint8.val data: {
+    case ж<uint8> data: {
         if (data == nil) {
             return -1;
         }
@@ -747,19 +744,18 @@ public static nint Size(any v) {
     case slice<uint8> data: {
         return len(data);
     }
-    case int16 data: {
+    case int16 _:
+    case uint16 _: {
+        var data = v;
         return 2;
     }
-    case uint16 data: {
-        return 2;
-    }
-    case int16.val data: {
+    case ж<int16> data: {
         if (data == nil) {
             return -1;
         }
         return 2;
     }
-    case uint16.val data: {
+    case ж<uint16> data: {
         if (data == nil) {
             return -1;
         }
@@ -771,19 +767,18 @@ public static nint Size(any v) {
     case slice<uint16> data: {
         return 2 * len(data);
     }
-    case int32 data: {
+    case int32 _:
+    case uint32 _: {
+        var data = v;
         return 4;
     }
-    case uint32 data: {
-        return 4;
-    }
-    case int32.val data: {
+    case ж<int32> data: {
         if (data == nil) {
             return -1;
         }
         return 4;
     }
-    case uint32.val data: {
+    case ж<uint32> data: {
         if (data == nil) {
             return -1;
         }
@@ -795,19 +790,18 @@ public static nint Size(any v) {
     case slice<uint32> data: {
         return 4 * len(data);
     }
-    case int64 data: {
+    case int64 _:
+    case uint64 _: {
+        var data = v;
         return 8;
     }
-    case uint64 data: {
-        return 8;
-    }
-    case int64.val data: {
+    case ж<int64> data: {
         if (data == nil) {
             return -1;
         }
         return 8;
     }
-    case uint64.val data: {
+    case ж<uint64> data: {
         if (data == nil) {
             return -1;
         }
@@ -822,7 +816,7 @@ public static nint Size(any v) {
     case float32 data: {
         return 4;
     }
-    case float32.val data: {
+    case ж<float32> data: {
         if (data == nil) {
             return -1;
         }
@@ -831,7 +825,7 @@ public static nint Size(any v) {
     case float64 data: {
         return 8;
     }
-    case float64.val data: {
+    case ж<float64> data: {
         if (data == nil) {
             return -1;
         }
@@ -846,7 +840,8 @@ public static nint Size(any v) {
     return dataSize(reflect.Indirect(reflect.ValueOf(v)));
 }
 
-internal static sync.Map structSize; // map[reflect.Type]int
+internal static ж<sync.Map> ᏑstructSize = new(default(sync.Map));
+internal static ref sync.Map structSize => ref ᏑstructSize.Value; // map[reflect.Type]int
 
 // dataSize returns the number of bytes the actual data represented by v occupies in memory.
 // For compound structures, it sums the sizes of the elements. Thus, for instance, for a slice
@@ -857,14 +852,14 @@ internal static nint dataSize(reflectꓸValue v) {
     if (exprᴛ1 == reflect.ΔSlice || exprᴛ1 == reflect.Array) {
         var t = v.Type().Elem();
         {
-            var (size, ok) = structSize.Load(t); if (ok) {
-                return size._<nint>() * v.Len();
+            var (sizeΔ2, ok) = ᏑstructSize.Load(t); if (ok) {
+                return sizeΔ2._<nint>() * v.Len();
             }
         }
         nint size = @sizeof(t);
         if (size >= 0) {
             if (t.Kind() == reflect.Struct) {
-                structSize.Store(t, size);
+                ᏑstructSize.Store(t, size);
             }
             return size * v.Len();
         }
@@ -872,12 +867,12 @@ internal static nint dataSize(reflectꓸValue v) {
     if (exprᴛ1 == reflect.Struct) {
         var t = v.Type();
         {
-            var (size, ok) = structSize.Load(t); if (ok) {
-                return size._<nint>();
+            var (sizeΔ1, ok) = ᏑstructSize.Load(t); if (ok) {
+                return sizeΔ1._<nint>();
             }
         }
         nint size = @sizeof(t);
-        structSize.Store(t, size);
+        ᏑstructSize.Store(t, size);
         return size;
     }
     { /* default: */
@@ -901,7 +896,7 @@ internal static nint @sizeof(reflectꓸType t) {
     }
     if (exprᴛ1 == reflect.Struct) {
         nint sum = 0;
-        for (nint i = 0;nint n = t.NumField(); i < n; i++) {
+        for ((nint i, nint n) = (0, t.NumField()); i < n; i++) {
             nint s = @sizeof(t.Field(i).Type);
             if (s < 0) {
                 return -1;
@@ -911,7 +906,7 @@ internal static nint @sizeof(reflectꓸType t) {
         return sum;
     }
     if (exprᴛ1 == reflect.ΔBool || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64 || exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64 || exprᴛ1 == reflect.Complex64 || exprᴛ1 == reflect.Complex128) {
-        return ((nint)t.Size());
+        return (nint)t.Size();
     }
 
     return -1;
@@ -923,9 +918,9 @@ internal static nint @sizeof(reflectꓸType t) {
     internal nint offset;
 }
 
-[GoType("struct{order encoding.binary.ByteOrder; buf <>byte; offset int}")] partial struct decoder;
+[GoType("coder")] partial struct decoder;
 
-[GoType("struct{order encoding.binary.ByteOrder; buf <>byte; offset int}")] partial struct encoder;
+[GoType("coder")] partial struct encoder;
 
 [GoRecv] internal static bool @bool(this ref decoder d) {
     var x = d.buf[d.offset];
@@ -987,35 +982,35 @@ internal static nint @sizeof(reflectꓸType t) {
 }
 
 [GoRecv] internal static int8 int8(this ref decoder d) {
-    return ((int8)d.uint8());
+    return (int8)d.uint8();
 }
 
 [GoRecv] internal static void int8(this ref encoder e, int8 x) {
-    e.uint8(((uint8)x));
+    e.uint8((uint8)x);
 }
 
 [GoRecv] internal static int16 int16(this ref decoder d) {
-    return ((int16)d.uint16());
+    return (int16)d.uint16();
 }
 
 [GoRecv] internal static void int16(this ref encoder e, int16 x) {
-    e.uint16(((uint16)x));
+    e.uint16((uint16)x);
 }
 
 [GoRecv] internal static int32 int32(this ref decoder d) {
-    return ((int32)d.uint32());
+    return (int32)d.uint32();
 }
 
 [GoRecv] internal static void int32(this ref encoder e, int32 x) {
-    e.uint32(((uint32)x));
+    e.uint32((uint32)x);
 }
 
 [GoRecv] internal static int64 int64(this ref decoder d) {
-    return ((int64)d.uint64());
+    return (int64)d.uint64();
 }
 
 [GoRecv] internal static void int64(this ref encoder e, int64 x) {
-    e.uint64(((uint64)x));
+    e.uint64((uint64)x);
 }
 
 [GoRecv] internal static void value(this ref decoder d, reflectꓸValue v) {
@@ -1054,39 +1049,39 @@ internal static nint @sizeof(reflectꓸType t) {
         v.SetBool(d.@bool());
     }
     else if (exprᴛ1 == reflect.Int8) {
-        v.SetInt(((int64)d.int8()));
+        v.SetInt((int64)d.int8());
     }
     else if (exprᴛ1 == reflect.Int16) {
-        v.SetInt(((int64)d.int16()));
+        v.SetInt((int64)d.int16());
     }
     else if (exprᴛ1 == reflect.Int32) {
-        v.SetInt(((int64)d.int32()));
+        v.SetInt((int64)d.int32());
     }
     else if (exprᴛ1 == reflect.Int64) {
         v.SetInt(d.int64());
     }
     else if (exprᴛ1 == reflect.Uint8) {
-        v.SetUint(((uint64)d.uint8()));
+        v.SetUint((uint64)d.uint8());
     }
     else if (exprᴛ1 == reflect.Uint16) {
-        v.SetUint(((uint64)d.uint16()));
+        v.SetUint((uint64)d.uint16());
     }
     else if (exprᴛ1 == reflect.Uint32) {
-        v.SetUint(((uint64)d.uint32()));
+        v.SetUint((uint64)d.uint32());
     }
     else if (exprᴛ1 == reflect.Uint64) {
         v.SetUint(d.uint64());
     }
     else if (exprᴛ1 == reflect.Float32) {
-        v.SetFloat(((float64)math.Float32frombits(d.uint32())));
+        v.SetFloat((float64)math.Float32frombits(d.uint32()));
     }
     else if (exprᴛ1 == reflect.Float64) {
         v.SetFloat(math.Float64frombits(d.uint64()));
     }
     else if (exprᴛ1 == reflect.Complex64) {
         v.SetComplex(complex(
-            ((float64)math.Float32frombits(d.uint32())),
-            ((float64)math.Float32frombits(d.uint32()))));
+            (float64)math.Float32frombits(d.uint32()),
+            (float64)math.Float32frombits(d.uint32())));
     }
     else if (exprᴛ1 == reflect.Complex128) {
         v.SetComplex(complex(
@@ -1128,39 +1123,39 @@ internal static nint @sizeof(reflectꓸType t) {
         e.@bool(v.Bool());
     }
     else if (exprᴛ1 == reflect.Int8) {
-        e.int8(((int8)v.Int()));
+        e.int8((int8)v.Int());
     }
     else if (exprᴛ1 == reflect.Int16) {
-        e.int16(((int16)v.Int()));
+        e.int16((int16)v.Int());
     }
     else if (exprᴛ1 == reflect.Int32) {
-        e.int32(((int32)v.Int()));
+        e.int32((int32)v.Int());
     }
     else if (exprᴛ1 == reflect.Int64) {
         e.int64(v.Int());
     }
     else if (exprᴛ1 == reflect.Uint8) {
-        e.uint8(((uint8)v.Uint()));
+        e.uint8((uint8)v.Uint());
     }
     else if (exprᴛ1 == reflect.Uint16) {
-        e.uint16(((uint16)v.Uint()));
+        e.uint16((uint16)v.Uint());
     }
     else if (exprᴛ1 == reflect.Uint32) {
-        e.uint32(((uint32)v.Uint()));
+        e.uint32((uint32)v.Uint());
     }
     else if (exprᴛ1 == reflect.Uint64) {
         e.uint64(v.Uint());
     }
     else if (exprᴛ1 == reflect.Float32) {
-        e.uint32(math.Float32bits(((float32)v.Float())));
+        e.uint32(math.Float32bits((float32)v.Float()));
     }
     else if (exprᴛ1 == reflect.Float64) {
         e.uint64(math.Float64bits(v.Float()));
     }
     else if (exprᴛ1 == reflect.Complex64) {
         var x = v.Complex();
-        e.uint32(math.Float32bits(((float32)real(x))));
-        e.uint32(math.Float32bits(((float32)imag(x))));
+        e.uint32(math.Float32bits((float32)real(x)));
+        e.uint32(math.Float32bits((float32)imag(x)));
     }
     else if (exprᴛ1 == reflect.Complex128) {
         var x = v.Complex();
@@ -1185,104 +1180,78 @@ internal static nint @sizeof(reflectꓸType t) {
 // It returns zero, nil if the type cannot be implemented by the fast path in Read or Write.
 internal static (nint, slice<byte>) intDataSize(any data) {
     switch (data.type()) {
-    case bool data: {
+    case bool _:
+    case int8 _:
+    case uint8 _:
+    case ж<bool> _:
+    case ж<int8> _:
+    case ж<uint8> _: {
+        var dataΔ1 = data;
         return (1, default!);
     }
-    case int8 data: {
-        return (1, default!);
+    case slice<bool> dataΔ1: {
+        return (len(dataΔ1), default!);
     }
-    case uint8 data: {
-        return (1, default!);
+    case slice<int8> dataΔ1: {
+        return (len(dataΔ1), default!);
     }
-    case @bool.val data: {
-        return (1, default!);
+    case slice<uint8> dataΔ1: {
+        return (len(dataΔ1), dataΔ1);
     }
-    case int8.val data: {
-        return (1, default!);
-    }
-    case uint8.val data: {
-        return (1, default!);
-    }
-    case slice<bool> data: {
-        return (len(data), default!);
-    }
-    case slice<int8> data: {
-        return (len(data), default!);
-    }
-    case slice<uint8> data: {
-        return (len(data), data);
-    }
-    case int16 data: {
+    case int16 _:
+    case uint16 _:
+    case ж<int16> _:
+    case ж<uint16> _: {
+        var dataΔ1 = data;
         return (2, default!);
     }
-    case uint16 data: {
-        return (2, default!);
+    case slice<int16> dataΔ1: {
+        return (2 * len(dataΔ1), default!);
     }
-    case int16.val data: {
-        return (2, default!);
+    case slice<uint16> dataΔ1: {
+        return (2 * len(dataΔ1), default!);
     }
-    case uint16.val data: {
-        return (2, default!);
-    }
-    case slice<int16> data: {
-        return (2 * len(data), default!);
-    }
-    case slice<uint16> data: {
-        return (2 * len(data), default!);
-    }
-    case int32 data: {
+    case int32 _:
+    case uint32 _:
+    case ж<int32> _:
+    case ж<uint32> _: {
+        var dataΔ1 = data;
         return (4, default!);
     }
-    case uint32 data: {
+    case slice<int32> dataΔ1: {
+        return (4 * len(dataΔ1), default!);
+    }
+    case slice<uint32> dataΔ1: {
+        return (4 * len(dataΔ1), default!);
+    }
+    case int64 _:
+    case uint64 _:
+    case ж<int64> _:
+    case ж<uint64> _: {
+        var dataΔ1 = data;
+        return (8, default!);
+    }
+    case slice<int64> dataΔ1: {
+        return (8 * len(dataΔ1), default!);
+    }
+    case slice<uint64> dataΔ1: {
+        return (8 * len(dataΔ1), default!);
+    }
+    case float32 _:
+    case ж<float32> _: {
+        var dataΔ1 = data;
         return (4, default!);
     }
-    case int32.val data: {
-        return (4, default!);
-    }
-    case uint32.val data: {
-        return (4, default!);
-    }
-    case slice<int32> data: {
-        return (4 * len(data), default!);
-    }
-    case slice<uint32> data: {
-        return (4 * len(data), default!);
-    }
-    case int64 data: {
+    case float64 _:
+    case ж<float64> _: {
+        var dataΔ1 = data;
         return (8, default!);
     }
-    case uint64 data: {
-        return (8, default!);
+    case slice<float32> dataΔ1: {
+        return (4 * len(dataΔ1), default!);
     }
-    case int64.val data: {
-        return (8, default!);
-    }
-    case uint64.val data: {
-        return (8, default!);
-    }
-    case slice<int64> data: {
-        return (8 * len(data), default!);
-    }
-    case slice<uint64> data: {
-        return (8 * len(data), default!);
-    }
-    case float32 data: {
-        return (4, default!);
-    }
-    case float32.val data: {
-        return (4, default!);
-    }
-    case float64 data: {
-        return (8, default!);
-    }
-    case float64.val data: {
-        return (8, default!);
-    }
-    case slice<float32> data: {
-        return (4 * len(data), default!);
-    }
-    case slice<float64> data: {
-        return (8 * len(data), default!);
+    case slice<float64> dataΔ1: {
+        return (8 * len(dataΔ1), default!);
     }}
     return (0, default!);
 }
@@ -1294,7 +1263,7 @@ internal static (slice<byte> buf2, slice<byte> pos) ensure(slice<byte> buf, nint
     slice<byte> pos = default!;
 
     nint l = len(buf);
-    buf = slices.Grow(buf, n)[..(int)(l + n)];
+    buf = slices.Grow<slice<byte>, byte>(buf, n)[..(int)(l + n)];
     return (buf, buf[(int)(l)..]);
 }
 

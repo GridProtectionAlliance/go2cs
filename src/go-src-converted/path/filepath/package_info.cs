@@ -47,10 +47,6 @@ using static go.path.filepath_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(os.FileInfo, error), osꓸFileInfo>]
-[assembly: GoImplement<osꓸDirEntry, io.fs_package.DirEntry>]
-[assembly: GoImplement<osꓸFileInfo, io.fs_package.FileInfo>]
-[assembly: GoImplement<syscall_package.Errno, error>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

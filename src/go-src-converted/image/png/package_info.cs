@@ -40,29 +40,18 @@ using static go.image.png_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(image.Image, error), image_package.Image>]
-[assembly: GoImplement<(image.PalettedImage, bool), image_package.PalettedImage>]
-[assembly: GoImplement<(io.ReadCloser, error), io_package.ReadCloser>]
-[assembly: GoImplement<(opaquer, bool), opaquer>]
 [assembly: GoImplement<FormatError, error>]
 [assembly: GoImplement<UnsupportedError, error>]
-[assembly: GoImplement<bufio_package.Writer, io_package.Writer>]
-[assembly: GoImplement<decoder, io_package.Reader>]
-[assembly: GoImplement<encoder, io_package.Writer>]
-[assembly: GoImplement<image.color_package.Palette, image.color_package.Model>]
-[assembly: GoImplement<image_package.Gray, image_package.Image>]
-[assembly: GoImplement<image_package.Gray16, image_package.Image>]
-[assembly: GoImplement<image_package.NRGBA, image_package.Image>]
-[assembly: GoImplement<image_package.NRGBA64, image_package.Image>]
-[assembly: GoImplement<image_package.Paletted, image_package.Image>]
-[assembly: GoImplement<image_package.RGBA64, image_package.Image>]
-[assembly: GoImplement<image_package.ΔRGBA, image_package.Image>]
-[assembly: GoImplement<io_package.ReadCloser, io_package.Reader>]
+[assembly: GoImplement<bufio_package.Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<decoder, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<encoder, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<go.image.color_package.NRGBA, go.image.color_package.Color>]
+[assembly: GoImplement<go.image.color_package.Palette, go.image.color_package.Model>]
+[assembly: GoImplement<go.image.color_package.ΔRGBA, go.image.color_package.Color>]
+[assembly: GoImplement<image_package.ΔRGBA, image_package.Image>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<EncoderBuffer, ж<encoder>>(Indirect = true)]
-[assembly: GoImplicitConv<encoder, ж<EncoderBuffer>>(Indirect = true)]
 // </ImplicitConversions>
 
 namespace go.image;

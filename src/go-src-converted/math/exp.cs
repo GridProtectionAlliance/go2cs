@@ -97,12 +97,12 @@ public static float64 Exp(float64 x) {
 // compiler will convert from decimal to binary accurately enough
 // to produce the hexadecimal values shown.
 internal static float64 exp(float64 x) {
-    static readonly UntypedFloat Ln2Hi = /* 6.93147180369123816490e-01 */ 0.693147;
-    static readonly UntypedFloat Ln2Lo = /* 1.90821492927058770002e-10 */ 1.90821e-10;
-    static readonly UntypedFloat Log2e = /* 1.44269504088896338700e+00 */ 1.4427;
-    static readonly UntypedFloat Overflow = /* 7.09782712893383973096e+02 */ 709.783;
-    static readonly UntypedFloat Underflow = /* -7.45133219101941108420e+02 */ -745.133;
-    static readonly UntypedFloat NearZero = /* 1.0 / (1 << 28) */ 3.72529e-09; // 2**-28
+    UntypedFloat Ln2Hi = /* 6.93147180369123816490e-01 */ 0.693147;
+    UntypedFloat Ln2Lo = /* 1.90821492927058770002e-10 */ 1.90821e-10;
+    UntypedFloat Log2e = /* 1.44269504088896338700e+00 */ 1.4427;
+    UntypedFloat Overflow = /* 7.09782712893383973096e+02 */ 709.783;
+    UntypedFloat Underflow = /* -7.45133219101941108420e+02 */ -745.133;
+    UntypedFloat NearZero = /* 1.0 / (1 << 28) */ 3.72529e-09; // 2**-28
     // special cases
     switch (ᐧ) {
     case {} when IsNaN(x) || IsInf(x, 1): {
@@ -125,16 +125,16 @@ internal static float64 exp(float64 x) {
     nint k = default!;
     switch (ᐧ) {
     case {} when x is < 0: {
-        k = ((nint)(Log2e * x - 0.5F));
+        k = (nint)((float64)Log2e * x - 0.5D);
         break;
     }
     case {} when x is > 0: {
-        k = ((nint)(Log2e * x + 0.5F));
+        k = (nint)((float64)Log2e * x + 0.5D);
         break;
     }}
 
-    var hi = x - ((float64)k) * Ln2Hi;
-    var lo = ((float64)k) * Ln2Lo;
+    var hi = x - (float64)k * (float64)Ln2Hi;
+    var lo = (float64)k * (float64)Ln2Lo;
     // compute
     return expmulti(hi, lo, k);
 }
@@ -150,10 +150,10 @@ public static float64 Exp2(float64 x) {
 }
 
 internal static float64 exp2(float64 x) {
-    static readonly UntypedFloat Ln2Hi = /* 6.93147180369123816490e-01 */ 0.693147;
-    static readonly UntypedFloat Ln2Lo = /* 1.90821492927058770002e-10 */ 1.90821e-10;
-    static readonly UntypedFloat Overflow = 1023.9999999999999;
-    static readonly UntypedFloat Underflow = -1074;
+    UntypedFloat Ln2Hi = /* 6.93147180369123816490e-01 */ 0.693147;
+    UntypedFloat Ln2Lo = /* 1.90821492927058770002e-10 */ 1.90821e-10;
+    UntypedFloat Overflow = 1023.9999999999999;
+    UntypedFloat Underflow = -1074;
     // special cases
     switch (ᐧ) {
     case {} when IsNaN(x) || IsInf(x, 1): {
@@ -174,31 +174,31 @@ internal static float64 exp2(float64 x) {
     nint k = default!;
     switch (ᐧ) {
     case {} when x is > 0: {
-        k = ((nint)(x + 0.5F));
+        k = (nint)(x + 0.5D);
         break;
     }
     case {} when x is < 0: {
-        k = ((nint)(x - 0.5F));
+        k = (nint)(x - 0.5D);
         break;
     }}
 
-    var t = x - ((float64)k);
-    var hi = t * Ln2Hi;
-    var lo = -t * Ln2Lo;
+    var t = x - (float64)k;
+    var hi = t * (float64)Ln2Hi;
+    var lo = -t * (float64)Ln2Lo;
     // compute
     return expmulti(hi, lo, k);
 }
 
 // exp1 returns e**r × 2**k where r = hi - lo and |r| ≤ ln(2)/2.
 internal static float64 expmulti(float64 hi, float64 lo, nint k) {
-    static readonly UntypedFloat P1 = /* 1.66666666666666657415e-01 */ 0.166667;     /* 0x3FC55555; 0x55555555 */
-    static readonly UntypedFloat P2 = /* -2.77777777770155933842e-03 */ -0.00277778; /* 0xBF66C16C; 0x16BEBD93 */
-    static readonly UntypedFloat P3 = /* 6.61375632143793436117e-05 */ 6.61376e-05;  /* 0x3F11566A; 0xAF25DE2C */
-    static readonly UntypedFloat P4 = /* -1.65339022054652515390e-06 */ -1.65339e-06; /* 0xBEBBBD41; 0xC5D26BF1 */
-    static readonly UntypedFloat P5 = /* 4.13813679705723846039e-08 */ 4.13814e-08;  /* 0x3E663769; 0x72BEA4D0 */
+    UntypedFloat P1 = /* 1.66666666666666657415e-01 */ 0.166667;     /* 0x3FC55555; 0x55555555 */
+    UntypedFloat P2 = /* -2.77777777770155933842e-03 */ -0.00277778; /* 0xBF66C16C; 0x16BEBD93 */
+    UntypedFloat P3 = /* 6.61375632143793436117e-05 */ 6.61376e-05;  /* 0x3F11566A; 0xAF25DE2C */
+    UntypedFloat P4 = /* -1.65339022054652515390e-06 */ -1.65339e-06; /* 0xBEBBBD41; 0xC5D26BF1 */
+    UntypedFloat P5 = /* 4.13813679705723846039e-08 */ 4.13814e-08;  /* 0x3E663769; 0x72BEA4D0 */
     var r = hi - lo;
     var t = r * r;
-    var c = r - t * (P1 + t * (P2 + t * (P3 + t * (P4 + t * P5))));
+    var c = r - t * ((float64)P1 + t * ((float64)P2 + t * ((float64)P3 + t * ((float64)P4 + t * (float64)P5))));
     var y = 1 - ((lo - (r * c) / (2 - c)) - hi);
     // TODO(rsc): make sure Ldexp can handle boundary k
     return Ldexp(y, k);

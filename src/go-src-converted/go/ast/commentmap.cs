@@ -6,9 +6,11 @@ namespace go.go;
 using bytes = bytes_package;
 using cmp = cmp_package;
 using fmt = fmt_package;
-using token = go.token_package;
+using token = global::go.go.token_package;
 using slices = slices_package;
 using strings = strings_package;
+using global::go.go;
+using io = io_package;
 
 partial class ast_package {
 
@@ -16,14 +18,15 @@ partial class ast_package {
 internal static void sortComments(slice<ж<CommentGroup>> list) {
     slices.SortFunc(list, (ж<CommentGroup> a, ж<CommentGroup> b) => cmp.Compare(a.Pos(), b.Pos()));
 }
-/* visitMapType: map[Node][]*CommentGroup */
 
-public static void addComment(this CommentMap cmap, Node n, ж<CommentGroup> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+[GoType("map[Node, slice<ж<CommentGroup>>]")] partial struct CommentMap;
+
+internal static void addComment(this CommentMap cmap, Node n, ж<CommentGroup> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
 
     var list = cmap[n];
     if (len(list) == 0){
-        list = new ж<CommentGroup>[]{c}.slice();
+        list = new ж<CommentGroup>[]{Ꮡc}.slice();
     } else {
         list = append(list, Ꮡc);
     }
@@ -48,23 +51,17 @@ internal static void Swap(this byInterval a, nint i, nint j) {
 
 // nodeList returns the list of nodes of the AST n in source order.
 internal static slice<Node> nodeList(Node n) {
-    slice<Node> list = default!;
-    Inspect(n, 
-    var listʗ1 = list;
-    (Node n) => {
+    ref var list = ref heap<slice<Node>>(out var Ꮡlist);
+    Inspect(n, (Node nΔ1) => {
         // don't collect comments
         switch (nΔ1.type()) {
-        case default! : {
-            return false;
-        }
-        case CommentGroup.val : {
-            return false;
-        }
-        case Comment.val : {
+        case null:
+        case ж<CommentGroup> _:
+        case ж<Comment> _: {
             return false;
         }}
 
-        listʗ1 = append(listʗ1, nΔ1);
+        Ꮡlist.ValueSlot = append(Ꮡlist.ValueSlot, nΔ1);
         return true;
     });
     // Note: The current implementation assumes that Inspect traverses the
@@ -83,12 +80,11 @@ internal static slice<Node> nodeList(Node n) {
 
 // A commentListReader helps iterating through a list of comment groups.
 [GoType] partial struct commentListReader {
-    internal ж<go.token_package.FileSet> fset;
+    internal ж<token.FileSet> fset;
     internal slice<ж<CommentGroup>> list;
     internal nint index;
     internal ж<CommentGroup> comment; // comment group at current index
-    internal go.token_package.ΔPosition pos; // source interval of comment group at current index
-    internal go.token_package.ΔPosition end;
+    internal tokenꓸPosition pos, end; // source interval of comment group at current index
 }
 
 [GoRecv] internal static bool eol(this ref commentListReader r) {
@@ -110,21 +106,21 @@ internal static slice<Node> nodeList(Node n) {
 // and then pushes n on the stack.
 [GoRecv] internal static void push(this ref nodeStack s, Node n) {
     s.pop(n.Pos());
-    s = append((ж<ж<nodeStack>>), n);
+    s = append((s), n);
 }
 
 // pop pops all nodes that appear lexically before pos
 // (i.e., whose lexical extent has ended before or at pos).
 // It returns the last node popped.
-[GoRecv] internal static unsafe Node /*top*/ pop(this ref nodeStack s, tokenꓸPos pos) {
+[GoRecv] internal static Node /*top*/ pop(this ref nodeStack s, tokenꓸPos pos) {
     Node top = default!;
 
     nint i = len(s);
-    while (i > 0 && (ж<ж<nodeStack>>)[i - 1].End() <= pos) {
-        top = (ж<ж<nodeStack>>)[i - 1];
+    while (i > 0 && (s)[i - 1].End() <= pos) {
+        top = (s)[i - 1];
         i--;
     }
-    s = new Span<ж<nodeStack>>((nodeStack**), i);
+    s = (s)[0..(int)(i)];
     return top;
 }
 
@@ -144,7 +140,7 @@ internal static slice<Node> nodeList(Node n) {
 // trailing an assignment, the comment is associated with the entire
 // assignment rather than just the last operand in the assignment.
 public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, slice<ж<CommentGroup>> comments) {
-    ref var fset = ref Ꮡfset.val;
+    ref var fset = ref Ꮡfset.Value;
 
     if (len(comments) == 0) {
         return default!;
@@ -156,13 +152,12 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
     copy(tmp, comments);
     // don't change incoming comments
     sortComments(tmp);
-    ref var r = ref heap<commentListReader>(out var Ꮡr);
-    r = new commentListReader(fset: fset, list: tmp);
+    var r = new commentListReader(fset: Ꮡfset, list: tmp);
     // !r.eol() because len(comments) > 0
     r.next();
     // create node list in lexical order
     var nodes = nodeList(node);
-    nodes = append(nodes, default!);
+    nodes = append(nodes, (Node)(default!));
     // append sentinel
     // set up iteration variables
     Node p = default!;                       // previous node
@@ -177,12 +172,12 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
     foreach (var (_, q) in nodes) {
         tokenꓸPosition qpos = default!;
         if (q != default!){
-            qpos = fset.Position(q.Pos());
+            qpos = Ꮡfset.Position(q.Pos());
         } else {
             // current node position
             // set fake sentinel position to infinity so that
             // all comments get processed before the sentinel
-            static readonly UntypedInt infinity = /* 1 << 30 */ 1073741824;
+            UntypedInt infinity = /* 1 << 30 */ 1073741824;
             qpos.Offset = infinity;
             qpos.Line = infinity;
         }
@@ -192,7 +187,7 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
             {
                 var top = stack.pop(r.comment.Pos()); if (top != default!) {
                     pg = top;
-                    pgend = fset.Position(pg.End());
+                    pgend = Ꮡfset.Position(pg.End());
                 }
             }
             // Try to associate a comment first with a node group
@@ -236,26 +231,14 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
         }
         // update previous node
         p = q;
-        pend = fset.Position(p.End());
+        pend = Ꮡfset.Position(p.End());
         // update previous node group if we see an "important" node
         switch (q.type()) {
-        case File.val : {
-            stack.push(q);
-            break;
-        }
-        case Field.val : {
-            stack.push(q);
-            break;
-        }
-        case Decl : {
-            stack.push(q);
-            break;
-        }
-        case Spec : {
-            stack.push(q);
-            break;
-        }
-        case Stmt : {
+        case ж<File> _:
+        case ж<Field> _:
+        case {} ᴛ2 when ᴛ2._<Decl>(out var _):
+        case {} ᴛ3 when ᴛ3._<Spec>(out var _):
+        case {} ᴛ4 when ᴛ4._<Stmt>(out var _): {
             stack.push(q);
             break;
         }}
@@ -271,7 +254,7 @@ public static Node Update(this CommentMap cmap, Node old, Node @new) {
     {
         var list = cmap[old]; if (len(list) > 0) {
             delete(cmap, old);
-            cmap[@new] = append(cmap[@new], Ꮡlist.ꓸꓸꓸ);
+            cmap[@new] = append(cmap[@new], list.ꓸꓸꓸ);
         }
     }
     return @new;
@@ -282,10 +265,9 @@ public static Node Update(this CommentMap cmap, Node old, Node @new) {
 // the AST specified by node.
 public static CommentMap Filter(this CommentMap cmap, Node node) {
     var umap = new CommentMap();
-    Inspect(node, 
     var cmapʗ1 = cmap;
     var umapʗ1 = umap;
-    (Node n) => {
+    Inspect(node, (Node n) => {
         {
             var g = cmapʗ1[n]; if (len(g) > 0) {
                 umapʗ1[n] = g;
@@ -301,14 +283,14 @@ public static CommentMap Filter(this CommentMap cmap, Node node) {
 public static slice<ж<CommentGroup>> Comments(this CommentMap cmap) {
     var list = new slice<ж<CommentGroup>>(0, len(cmap));
     foreach (var (_, e) in cmap) {
-        list = append(list, Ꮡe.ꓸꓸꓸ);
+        list = append(list, e.ꓸꓸꓸ);
     }
     sortComments(list);
     return list;
 }
 
 internal static @string summary(slice<ж<CommentGroup>> list) {
-    static readonly UntypedInt maxLen = 40;
+    UntypedInt maxLen = 40;
     bytes.Buffer buf = default!;
     // collect comments text
 loop:
@@ -322,23 +304,25 @@ loop:
             }
             buf.WriteString((~comment).Text);
         }
+continue_loop:;
     }
+break_loop:;
     // truncate if too long
     if (buf.Len() > maxLen) {
         buf.Truncate(maxLen - 3);
         buf.WriteString("..."u8);
     }
     // replace any invisibles with blanks
-    var bytes = buf.Bytes();
-    foreach (var (i, b) in bytes) {
+    var bytesΔ1 = buf.Bytes();
+    foreach (var (i, b) in bytesΔ1) {
         switch (b) {
         case (rune)'\t' or (rune)'\n' or (rune)'\r': {
-            bytes[i] = (rune)' ';
+            bytesΔ1[i] = (rune)' ';
             break;
         }}
 
     }
-    return ((@string)bytes);
+    return ((@string)bytesΔ1);
 }
 
 public static @string String(this CommentMap cmap) {
@@ -354,22 +338,22 @@ public static @string String(this CommentMap cmap) {
         }
         return cmp.Compare(a.End(), b.End());
     });
-    ref var buf = ref heap(new strings_package.Builder(), out var Ꮡbuf);
-    fmt.Fprintln(~Ꮡbuf, "CommentMap {");
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
+    fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), "CommentMap {");
     foreach (var (_, node) in nodes) {
         var comment = cmap[node];
         // print name of identifiers; print node type for other nodes
         @string s = default!;
         {
-            var (ident, ok) = node._<Ident.val>(ᐧ); if (ok){
-                s = ident.val.Name;
+            var (ident, ok) = node._<ж<Ident>>(ᐧ); if (ok){
+                s = ident.Value.Name;
             } else {
                 s = fmt.Sprintf("%T"u8, node);
             }
         }
-        fmt.Fprintf(~Ꮡbuf, "\t%p  %20s:  %s\n"u8, node, s, summary(comment));
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "\t%p  %20s:  %s\n"u8, node, s, summary(comment));
     }
-    fmt.Fprintln(~Ꮡbuf, "}");
+    fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), "}");
     return buf.String();
 }
 

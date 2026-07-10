@@ -47,14 +47,15 @@ using errors = errors_package;
 using filepathlite = @internal.filepathlite_package;
 using poll = @internal.poll_package;
 using testlog = @internal.testlog_package;
-using io = io_package;
-using fs = io.fs_package;
-using runtime = runtime_package;
+using Δio = io_package;
+using fs = go.io.fs_package;
+using Δruntime = runtime_package;
 using syscall = syscall_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using @internal;
-using io;
+using go.io;
+using go.sync;
 
 partial class os_package {
 
@@ -71,11 +72,11 @@ partial class os_package {
 // Note that the Go runtime writes to standard error for panics and crashes;
 // closing Stderr may cause those messages to go elsewhere, perhaps
 // to a file opened later.
-public static ж<File> Stdin = NewFile(((uintptr)syscall.Stdin), "/dev/stdin"u8);
+public static ж<File> Stdin = NewFile((uintptr)syscall.Stdin, "/dev/stdin"u8);
 
-public static ж<File> Stdout = NewFile(((uintptr)syscall.Stdout), "/dev/stdout"u8);
+public static ж<File> Stdout = NewFile((uintptr)syscall.Stdout, "/dev/stdout"u8);
 
-public static ж<File> Stderr = NewFile(((uintptr)syscall.Stderr), "/dev/stderr"u8);
+public static ж<File> Stderr = NewFile((uintptr)syscall.Stderr, "/dev/stderr"u8);
 
 // Flags to OpenFile wrapping those of the underlying system. Not all
 // flags may be implemented on a given system.
@@ -124,16 +125,17 @@ public const nint SEEK_END = 2; // seek relative to the end
 // Read reads up to len(b) bytes from the File and stores them in b.
 // It returns the number of bytes read and any error encountered.
 // At end of file, Read returns 0, io.EOF.
-[GoRecv] public static (nint n, error err) Read(this ref File f, slice<byte> b) {
+public static (nint n, error err) Read(this ж<File> Ꮡf, slice<byte> b) {
     nint n = default!;
     error err = default!;
 
+    ref var f = ref Ꮡf.Value;
     {
-        var errΔ1 = f.checkValid("read"u8); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡf.checkValid("read"u8); if (errΔ1 != default!) {
             return (0, errΔ1);
         }
     }
-    (n, e) = f.read(b);
+    (n, var e) = Ꮡf.read(b);
     return (n, f.wrapErr("read"u8, e));
 }
 
@@ -141,44 +143,46 @@ public const nint SEEK_END = 2; // seek relative to the end
 // It returns the number of bytes read and the error, if any.
 // ReadAt always returns a non-nil error when n < len(b).
 // At end of file, that error is io.EOF.
-[GoRecv] public static (nint n, error err) ReadAt(this ref File f, slice<byte> b, int64 off) {
+public static (nint n, error err) ReadAt(this ж<File> Ꮡf, slice<byte> b, int64 off) {
     nint n = default!;
     error err = default!;
 
+    ref var f = ref Ꮡf.Value;
     {
-        var errΔ1 = f.checkValid("read"u8); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡf.checkValid("read"u8); if (errΔ1 != default!) {
             return (0, errΔ1);
         }
     }
     if (off < 0) {
-        return (0, new PathError{Op: "readat"u8, Path: f.name, Err: errors.New("negative offset"u8)});
+        return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readat"u8, Path: f.name, Err: errors.New("negative offset"u8)))));
     }
     while (len(b) > 0) {
-        var (m, e) = f.pread(b, off);
+        var (m, e) = Ꮡf.pread(b, off);
         if (e != default!) {
             err = f.wrapErr("read"u8, e);
             break;
         }
         n += m;
         b = b[(int)(m)..];
-        off += ((int64)m);
+        off += (int64)m;
     }
     return (n, err);
 }
 
 // ReadFrom implements io.ReaderFrom.
-[GoRecv] public static (int64 n, error err) ReadFrom(this ref File f, io.Reader r) {
+public static (int64 n, error err) ReadFrom(this ж<File> Ꮡf, Δio.Reader r) {
     int64 n = default!;
     error err = default!;
 
+    ref var f = ref Ꮡf.Value;
     {
-        var errΔ1 = f.checkValid("write"u8); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡf.checkValid("write"u8); if (errΔ1 != default!) {
             return (0, errΔ1);
         }
     }
-    var (n, handled, e) = f.readFrom(r);
+    (n, var handled, var e) = f.readFrom(r);
     if (!handled) {
-        return genericReadFrom(f, r);
+        return genericReadFrom(Ꮡf, r);
     }
     // without wrapping
     return (n, f.wrapErr("write"u8, e));
@@ -191,7 +195,7 @@ public const nint SEEK_END = 2; // seek relative to the end
 
 // ReadFrom hides another ReadFrom method.
 // It should never be called.
-internal static (int64, error) ReadFrom(this noReadFrom _, io.Reader _) {
+internal static (int64, error) ReadFrom(this noReadFrom _Δp0, Δio.Reader _Δp1) {
     throw panic("can't happen");
 }
 
@@ -203,32 +207,33 @@ internal static (int64, error) ReadFrom(this noReadFrom _, io.Reader _) {
     public partial ref ж<File> File { get; }
 }
 
-internal static (int64, error) genericReadFrom(ж<File> Ꮡf, io.Reader r) {
-    ref var f = ref Ꮡf.val;
+internal static (int64, error) genericReadFrom(ж<File> Ꮡf, Δio.Reader r) {
+    ref var f = ref Ꮡf.Value;
 
-    return io.Copy(new fileWithoutReadFrom(File: f), r);
+    return Δio.Copy(new fileWithoutReadFrom(File: Ꮡf), r);
 }
 
 // Write writes len(b) bytes from b to the File.
 // It returns the number of bytes written and an error, if any.
 // Write returns a non-nil error when n != len(b).
-[GoRecv] public static (nint n, error err) Write(this ref File f, slice<byte> b) {
+public static (nint n, error err) Write(this ж<File> Ꮡf, slice<byte> b) {
     nint n = default!;
     error err = default!;
 
+    ref var f = ref Ꮡf.Value;
     {
-        var errΔ1 = f.checkValid("write"u8); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡf.checkValid("write"u8); if (errΔ1 != default!) {
             return (0, errΔ1);
         }
     }
-    (n, e) = f.write(b);
+    (n, var e) = Ꮡf.write(b);
     if (n < 0) {
         n = 0;
     }
     if (n != len(b)) {
-        err = io.ErrShortWrite;
+        err = Δio.ErrShortWrite;
     }
-    epipecheck(f, e);
+    epipecheck(Ꮡf, e);
     if (e != default!) {
         err = f.wrapErr("write"u8, e);
     }
@@ -242,12 +247,13 @@ internal static error errWriteAtInAppendMode = errors.New("os: invalid use of Wr
 // WriteAt returns a non-nil error when n != len(b).
 //
 // If file was opened with the O_APPEND flag, WriteAt returns an error.
-[GoRecv] public static (nint n, error err) WriteAt(this ref File f, slice<byte> b, int64 off) {
+public static (nint n, error err) WriteAt(this ж<File> Ꮡf, slice<byte> b, int64 off) {
     nint n = default!;
     error err = default!;
 
+    ref var f = ref Ꮡf.Value;
     {
-        var errΔ1 = f.checkValid("write"u8); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡf.checkValid("write"u8); if (errΔ1 != default!) {
             return (0, errΔ1);
         }
     }
@@ -255,36 +261,37 @@ internal static error errWriteAtInAppendMode = errors.New("os: invalid use of Wr
         return (0, errWriteAtInAppendMode);
     }
     if (off < 0) {
-        return (0, new PathError{Op: "writeat"u8, Path: f.name, Err: errors.New("negative offset"u8)});
+        return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "writeat"u8, Path: f.name, Err: errors.New("negative offset"u8)))));
     }
     while (len(b) > 0) {
-        var (m, e) = f.pwrite(b, off);
+        var (m, e) = Ꮡf.pwrite(b, off);
         if (e != default!) {
             err = f.wrapErr("write"u8, e);
             break;
         }
         n += m;
         b = b[(int)(m)..];
-        off += ((int64)m);
+        off += (int64)m;
     }
     return (n, err);
 }
 
 // WriteTo implements io.WriterTo.
-[GoRecv] public static (int64 n, error err) WriteTo(this ref File f, io.Writer w) {
+public static (int64 n, error err) WriteTo(this ж<File> Ꮡf, Δio.Writer w) {
     int64 n = default!;
     error err = default!;
 
+    ref var f = ref Ꮡf.Value;
     {
-        var errΔ1 = f.checkValid("read"u8); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡf.checkValid("read"u8); if (errΔ1 != default!) {
             return (0, errΔ1);
         }
     }
-    var (n, handled, e) = f.writeTo(w);
+    (n, var handled, var e) = f.writeTo(w);
     if (handled) {
         return (n, f.wrapErr("read"u8, e));
     }
-    return genericWriteTo(f, w);
+    return genericWriteTo(Ꮡf, w);
 }
 
 // without wrapping
@@ -296,7 +303,7 @@ internal static error errWriteAtInAppendMode = errors.New("os: invalid use of Wr
 
 // WriteTo hides another WriteTo method.
 // It should never be called.
-internal static (int64, error) WriteTo(this noWriteTo _, io.Writer _) {
+internal static (int64, error) WriteTo(this noWriteTo _Δp0, Δio.Writer _Δp1) {
     throw panic("can't happen");
 }
 
@@ -308,10 +315,10 @@ internal static (int64, error) WriteTo(this noWriteTo _, io.Writer _) {
     public partial ref ж<File> File { get; }
 }
 
-internal static (int64, error) genericWriteTo(ж<File> Ꮡf, io.Writer w) {
-    ref var f = ref Ꮡf.val;
+internal static (int64, error) genericWriteTo(ж<File> Ꮡf, Δio.Writer w) {
+    ref var f = ref Ꮡf.Value;
 
-    return io.Copy(w, new fileWithoutWriteTo(File: f));
+    return Δio.Copy(w, new fileWithoutWriteTo(File: Ꮡf));
 }
 
 // Seek sets the offset for the next Read or Write on file to offset, interpreted
@@ -319,17 +326,18 @@ internal static (int64, error) genericWriteTo(ж<File> Ꮡf, io.Writer w) {
 // relative to the current offset, and 2 means relative to the end.
 // It returns the new offset and an error, if any.
 // The behavior of Seek on a file opened with O_APPEND is not specified.
-[GoRecv] public static (int64 ret, error err) Seek(this ref File f, int64 offset, nint whence) {
+public static (int64 ret, error err) Seek(this ж<File> Ꮡf, int64 offset, nint whence) {
     int64 ret = default!;
     error err = default!;
 
+    ref var f = ref Ꮡf.Value;
     {
-        var errΔ1 = f.checkValid("seek"u8); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡf.checkValid("seek"u8); if (errΔ1 != default!) {
             return (0, errΔ1);
         }
     }
-    var (r, e) = f.seek(offset, whence);
-    if (e == default! && f.dirinfo.Load() != nil && r != 0) {
+    var (r, e) = Ꮡf.seek(offset, whence);
+    if (e == default! && Ꮡf.of(File.Ꮡdirinfo).Load() != nil && r != 0) {
         e = syscall.EISDIR;
     }
     if (e != default!) {
@@ -340,12 +348,13 @@ internal static (int64, error) genericWriteTo(ж<File> Ꮡf, io.Writer w) {
 
 // WriteString is like Write, but writes the contents of string s rather than
 // a slice of bytes.
-[GoRecv] public static (nint n, error err) WriteString(this ref File f, @string s) {
+public static (nint n, error err) WriteString(this ж<File> Ꮡf, @string s) {
     nint n = default!;
     error err = default!;
 
+    ref var f = ref Ꮡf.Value;
     var b = @unsafe.Slice(@unsafe.StringData(s), len(s));
-    return f.Write(b);
+    return Ꮡf.Write(b);
 }
 
 // Mkdir creates a new directory with the specified name and permission
@@ -355,7 +364,7 @@ public static error Mkdir(@string name, FileMode perm) {
     @string longName = fixLongPath(name);
     var e = ignoringEINTR(() => syscall.Mkdir(longName, syscallMode(perm)));
     if (e != default!) {
-        return new PathError{Op: "mkdir"u8, Path: name, Err: e};
+        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdir"u8, Path: name, Err: e)));
     }
     // mkdir(2) itself won't handle the sticky bit on *BSD and Solaris
     if (!supportsCreateWithStickyBit && (FileMode)(perm & ModeSticky) != 0) {
@@ -370,7 +379,7 @@ public static error Mkdir(@string name, FileMode perm) {
 
 // setStickyBit adds ModeSticky to the permission bits of path, non atomic.
 internal static error setStickyBit(@string name) {
-    (fi, err) = Stat(name);
+    var (fi, err) = Stat(name);
     if (err != default!) {
         return err;
     }
@@ -384,13 +393,13 @@ public static error Chdir(@string dir) {
         var e = syscall.Chdir(dir); if (e != default!) {
             testlog.Open(dir);
             // observe likely non-existent directory
-            return new PathError{Op: "chdir"u8, Path: dir, Err: e};
+            return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chdir"u8, Path: dir, Err: e)));
         }
     }
-    if (runtime.GOOS == "windows"u8) {
-        getwdCache.Lock();
+    if (Δruntime.GOOS == "windows"u8) {
+        ᏑgetwdCache.of(getwdCacheᴛ1.ᏑMutex).Lock();
         getwdCache.dir = dir;
-        getwdCache.Unlock();
+        ᏑgetwdCache.of(getwdCacheᴛ1.ᏑMutex).Unlock();
     }
     {
         var log = testlog.Logger(); if (log != default!) {
@@ -417,7 +426,7 @@ public static (ж<File>, error) Open(@string name) {
 // be used for I/O; the associated file descriptor has mode O_RDWR.
 // If there is an error, it will be of type *PathError.
 public static (ж<File>, error) Create(@string name) {
-    return OpenFile(name, (nint)((nint)(O_RDWR | O_CREATE) | O_TRUNC), 438);
+    return OpenFile(name, (nint)((nint)(nint)(O_RDWR | O_CREATE) | O_TRUNC), 438);
 }
 
 // OpenFile is the generalized open call; most users will use Open
@@ -428,11 +437,11 @@ public static (ж<File>, error) Create(@string name) {
 // If there is an error, it will be of type *PathError.
 public static (ж<File>, error) OpenFile(@string name, nint flag, FileMode perm) {
     testlog.Open(name);
-    (f, err) = openFileNolog(name, flag, perm);
+    var (f, err) = openFileNolog(name, flag, perm);
     if (err != default!) {
         return (default!, err);
     }
-    f.appendMode = (nint)(flag & O_APPEND) != 0;
+    f.Value.appendMode = (nint)(flag & O_APPEND) != 0;
     return (f, default!);
 }
 
@@ -482,16 +491,16 @@ internal static bool checkWrapErr = false;
 // It passes io.EOF through unchanged, otherwise converts
 // poll.ErrFileClosing to ErrClosed and wraps the error in a PathError.
 [GoRecv] internal static error wrapErr(this ref File f, @string op, error err) {
-    if (err == default! || AreEqual(err, io.EOF)) {
+    if (err == default! || AreEqual(err, Δio.EOF)) {
         return err;
     }
     if (AreEqual(err, poll.ErrFileClosing)){
         err = ErrClosed;
     } else 
     if (checkWrapErr && errors.Is(err, poll.ErrFileClosing)) {
-        throw panic("unexpected error wrapping poll.ErrFileClosing: "u8 + err.Error());
+        throw panic("unexpected error wrapping poll.ErrFileClosing: " + err.Error());
     }
-    return new PathError{Op: op, Path: f.name, Err: err};
+    return new fs.PathErrorжerror(Ꮡ(new PathError(Op: op, Path: f.name, Err: err)));
 }
 
 // TempDir returns the default directory to use for temporary files.
@@ -522,7 +531,7 @@ public static @string TempDir() {
 // then it will return an error.
 public static (@string, error) UserCacheDir() {
     @string dir = default!;
-    var exprᴛ1 = runtime.GOOS;
+    var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "windows"u8) {
         dir = Getenv("LocalAppData"u8);
         if (dir == ""u8) {
@@ -573,7 +582,7 @@ public static (@string, error) UserCacheDir() {
 // then it will return an error.
 public static (@string, error) UserConfigDir() {
     @string dir = default!;
-    var exprᴛ1 = runtime.GOOS;
+    var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "windows"u8) {
         dir = Getenv("AppData"u8);
         if (dir == ""u8) {
@@ -620,12 +629,12 @@ public static (@string, error) UserConfigDir() {
 public static (@string, error) UserHomeDir() {
     @string env = "HOME"u8;
     @string enverr = "$HOME"u8;
-    var exprᴛ1 = runtime.GOOS;
+    var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "windows"u8) {
-        (env, enverr) = ("USERPROFILE"u8, "%userprofile%"u8);
+        (env, enverr) = ("USERPROFILE", "%userprofile%");
     }
     else if (exprᴛ1 == "plan9"u8) {
-        (env, enverr) = ("home"u8, "$home"u8);
+        (env, enverr) = ("home", "$home");
     }
 
     {
@@ -634,7 +643,7 @@ public static (@string, error) UserHomeDir() {
         }
     }
     // On some geese the home directory is not always defined.
-    var exprᴛ2 = runtime.GOOS;
+    var exprᴛ2 = Δruntime.GOOS;
     if (exprᴛ2 == "android"u8) {
         return ("/sdcard", default!);
     }
@@ -669,8 +678,10 @@ public static error Chmod(@string name, FileMode mode) {
 
 // Chmod changes the mode of the file to mode.
 // If there is an error, it will be of type *PathError.
-[GoRecv] public static error Chmod(this ref File f, FileMode mode) {
-    return f.chmod(mode);
+public static error Chmod(this ж<File> Ꮡf, FileMode mode) {
+    ref var f = ref Ꮡf.Value;
+
+    return Ꮡf.chmod(mode);
 }
 
 // SetDeadline sets the read and write deadlines for a File.
@@ -697,16 +708,20 @@ public static error Chmod(@string name, FileMode mode) {
 // the deadline after successful Read or Write calls.
 //
 // A zero value for t means I/O operations will not time out.
-[GoRecv] public static error SetDeadline(this ref File f, time.Time t) {
-    return f.setDeadline(t);
+public static error SetDeadline(this ж<File> Ꮡf, time.Time t) {
+    ref var f = ref Ꮡf.Value;
+
+    return Ꮡf.setDeadline(t);
 }
 
 // SetReadDeadline sets the deadline for future Read calls and any
 // currently-blocked Read call.
 // A zero value for t means Read will not time out.
 // Not all files support setting deadlines; see SetDeadline.
-[GoRecv] public static error SetReadDeadline(this ref File f, time.Time t) {
-    return f.setReadDeadline(t);
+public static error SetReadDeadline(this ж<File> Ꮡf, time.Time t) {
+    ref var f = ref Ꮡf.Value;
+
+    return Ꮡf.setReadDeadline(t);
 }
 
 // SetWriteDeadline sets the deadline for any future Write calls and any
@@ -715,19 +730,24 @@ public static error Chmod(@string name, FileMode mode) {
 // some of the data was successfully written.
 // A zero value for t means Write will not time out.
 // Not all files support setting deadlines; see SetDeadline.
-[GoRecv] public static error SetWriteDeadline(this ref File f, time.Time t) {
-    return f.setWriteDeadline(t);
+public static error SetWriteDeadline(this ж<File> Ꮡf, time.Time t) {
+    ref var f = ref Ꮡf.Value;
+
+    return Ꮡf.setWriteDeadline(t);
 }
 
 // SyscallConn returns a raw file.
 // This implements the syscall.Conn interface.
-[GoRecv] public static (syscall.RawConn, error) SyscallConn(this ref File f) {
+public static (syscall.RawConn, error) SyscallConn(this ж<File> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
     {
-        var err = f.checkValid("SyscallConn"u8); if (err != default!) {
+        var err = Ꮡf.checkValid("SyscallConn"u8); if (err != default!) {
             return (default!, err);
         }
     }
-    return newRawConn(f);
+    var (ᴛ1, ᴛ2) = newRawConn(Ꮡf);
+    return (new rawConnжRawConn(ᴛ1), ᴛ2);
 }
 
 // DirFS returns a file system (an fs.FS) for the tree of files rooted at the directory dir.
@@ -754,18 +774,18 @@ public static fs.FS DirFS(@string dir) {
 internal static (fs.File, error) Open(this dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
     if (err != default!) {
-        return (default!, new PathError{Op: "open"u8, Path: name, Err: err});
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: err))));
     }
-    (f, err) = Open(fullname);
+    (var f, err) = Open(fullname);
     if (err != default!) {
         // DirFS takes a string appropriate for GOOS,
         // while the name argument here is always slash separated.
         // dir.join will have mixed the two; undo that for
         // error reporting.
-        err._<PathError.val>().Path = name;
+        err._<ж<PathError>>().Value.Path = name;
         return (default!, err);
     }
-    return (~f, default!);
+    return (new FileжFile(f), default!);
 }
 
 // The ReadFile method calls the [ReadFile] function for the file
@@ -775,14 +795,14 @@ internal static (fs.File, error) Open(this dirFS dir, @string name) {
 internal static (slice<byte>, error) ReadFile(this dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
     if (err != default!) {
-        return (default!, new PathError{Op: "readfile"u8, Path: name, Err: err});
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readfile"u8, Path: name, Err: err))));
     }
-    (b, err) = ReadFile(fullname);
+    (var b, err) = ReadFile(fullname);
     if (err != default!) {
         {
-            var (e, ok) = err._<PathError.val>(ᐧ); if (ok) {
+            var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
                 // See comment in dirFS.Open.
-                e.val.Path = name;
+                e.Value.Path = name;
             }
         }
         return (default!, err);
@@ -795,14 +815,14 @@ internal static (slice<byte>, error) ReadFile(this dirFS dir, @string name) {
 internal static (slice<DirEntry>, error) ReadDir(this dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
     if (err != default!) {
-        return (default!, new PathError{Op: "readdir"u8, Path: name, Err: err});
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readdir"u8, Path: name, Err: err))));
     }
-    (entries, err) = ReadDir(fullname);
+    (var entries, err) = ReadDir(fullname);
     if (err != default!) {
         {
-            var (e, ok) = err._<PathError.val>(ᐧ); if (ok) {
+            var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
                 // See comment in dirFS.Open.
-                e.val.Path = name;
+                e.Value.Path = name;
             }
         }
         return (default!, err);
@@ -813,12 +833,12 @@ internal static (slice<DirEntry>, error) ReadDir(this dirFS dir, @string name) {
 internal static (fs.FileInfo, error) Stat(this dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
     if (err != default!) {
-        return (default!, new PathError{Op: "stat"u8, Path: name, Err: err});
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "stat"u8, Path: name, Err: err))));
     }
-    (f, err) = Stat(fullname);
+    (var f, err) = Stat(fullname);
     if (err != default!) {
         // See comment in dirFS.Open.
-        err._<PathError.val>().Path = name;
+        err._<ж<PathError>>().Value.Path = name;
         return (default!, err);
     }
     return (f, default!);
@@ -829,33 +849,33 @@ internal static (@string, error) join(this dirFS dir, @string name) {
     if (dir == ""u8) {
         return ("", errors.New("os: DirFS with empty root"u8));
     }
-    (name, err) = filepathlite.Localize(name);
+    (name, var err) = filepathlite.Localize(name);
     if (err != default!) {
         return ("", ErrInvalid);
     }
     if (IsPathSeparator(dir[len(dir) - 1])) {
         return (((@string)dir) + name, default!);
     }
-    return (((@string)dir) + ((@string)PathSeparator) + name, default!);
+    return (((@string)dir) + ((@string)(rune)PathSeparator) + name, default!);
 }
 
 // ReadFile reads the named file and returns the contents.
 // A successful call returns err == nil, not err == EOF.
 // Because ReadFile reads the whole file, it does not treat an EOF from Read
 // as an error to be reported.
-public static (slice<byte>, error) ReadFile(@string name) => func((defer, _) => {
-    (f, err) = Open(name);
+public static (slice<byte>, error) ReadFile(@string name) => func<(slice<byte>, error)>((defer, recover) => {
+    var (f, err) = Open(name);
     if (err != default!) {
         return (default!, err);
     }
     var fʗ1 = f;
-    defer(fʗ1.Close);
+    defer(() => fʗ1.Close());
     nint size = default!;
     {
-        (info, errΔ1) = f.Stat(); if (errΔ1 == default!) {
+        var (info, errΔ1) = f.Stat(); if (errΔ1 == default!) {
             var size64 = info.Size();
-            if (((int64)((nint)size64)) == size64) {
-                size = ((nint)size64);
+            if ((int64)(nint)size64 == size64) {
+                size = (nint)size64;
             }
         }
     }
@@ -873,13 +893,13 @@ public static (slice<byte>, error) ReadFile(@string name) => func((defer, _) => 
         var (n, errΔ2) = f.Read(data[(int)(len(data))..(int)(cap(data))]);
         data = data[..(int)(len(data) + n)];
         if (errΔ2 != default!) {
-            if (AreEqual(errΔ2, io.EOF)) {
-                err = default!;
+            if (AreEqual(errΔ2, Δio.EOF)) {
+                errΔ2 = default!;
             }
             return (data, errΔ2);
         }
         if (len(data) >= cap(data)) {
-            var d = append(data[..(int)(cap(data))], 0);
+            var d = append(data[..(int)(cap(data))], (byte)(0));
             data = d[..(int)(len(data))];
         }
     }
@@ -891,7 +911,7 @@ public static (slice<byte>, error) ReadFile(@string name) => func((defer, _) => 
 // Since WriteFile requires multiple system calls to complete, a failure mid-operation
 // can leave the file in a partially written state.
 public static error WriteFile(@string name, slice<byte> data, FileMode perm) {
-    (f, err) = OpenFile(name, (nint)((nint)(O_WRONLY | O_CREATE) | O_TRUNC), perm);
+    var (f, err) = OpenFile(name, (nint)((nint)(nint)(O_WRONLY | O_CREATE) | O_TRUNC), perm);
     if (err != default!) {
         return err;
     }

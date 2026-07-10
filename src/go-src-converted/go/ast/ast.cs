@@ -6,8 +6,9 @@
 // packages.
 namespace go.go;
 
-using token = go.token_package;
+using token = global::go.go.token_package;
 using strings = strings_package;
+using global::go.go;
 
 partial class ast_package {
 
@@ -30,8 +31,8 @@ partial class ast_package {
 
 // All node types implement the Node interface.
 [GoType] partial interface Node {
-    token.Pos Pos(); // position of first character belonging to the node
-    token.Pos End(); // position of first character immediately after the node
+    tokenꓸPos Pos(); // position of first character belonging to the node
+    tokenꓸPos End(); // position of first character immediately after the node
 }
 
 // All expression nodes implement the Expr interface.
@@ -65,16 +66,16 @@ partial class ast_package {
 // computed using len(Text), the position reported by [Comment.End] does not match the
 // true source end position for comments containing carriage returns.
 [GoType] partial struct Comment {
-    public go.token_package.Pos Slash; // position of "/" starting the comment
+    public tokenꓸPos Slash; // position of "/" starting the comment
     public @string Text;   // comment text (excluding '\n' for //-style comments)
 }
 
-[GoRecv] public static token.Pos Pos(this ref Comment c) {
+[GoRecv] public static tokenꓸPos Pos(this ref Comment c) {
     return c.Slash;
 }
 
-[GoRecv] public static token.Pos End(this ref Comment c) {
-    return ((token.Pos)(((nint)c.Slash) + len(c.Text)));
+[GoRecv] public static tokenꓸPos End(this ref Comment c) {
+    return ((tokenꓸPos)((nint)c.Slash + len(c.Text)));
 }
 
 // A CommentGroup represents a sequence of comments
@@ -83,7 +84,7 @@ partial class ast_package {
     public slice<ж<Comment>> List; // len(List) > 0
 }
 
-[GoRecv] public static token.Pos Pos(this ref CommentGroup g) {
+[GoRecv] public static tokenꓸPos Pos(this ref CommentGroup g) {
     return g.List[0].Pos();
 }
 
@@ -109,17 +110,21 @@ internal static @string stripTrailingWhitespace(@string s) {
 // Comment directives like "//line" and "//go:noinline" are also removed.
 // Multiple empty lines are reduced to one, and trailing space on lines is trimmed.
 // Unless the result is empty, it is newline-terminated.
-[GoRecv] public static @string Text(this ref CommentGroup g) {
+public static @string Text(this ж<CommentGroup> Ꮡg) {
+    ref var g = ref Ꮡg.Value;
+
     if (g == nil) {
         return ""u8;
     }
     var comments = new slice<@string>(len(g.List));
     foreach (var (i, c) in g.List) {
-        comments[i] = c.val.Text;
+        comments[i] = c.Value.Text;
     }
     var lines = new slice<@string>(0, 10);
     // most comments are less than 10 lines
-    foreach (var (_, c) in comments) {
+    foreach (var (_, vᴛ1) in comments) {
+        var c = vᴛ1;
+
         // Remove comment markers.
         // The parser has given us exactly the comment text.
         switch (c[1]) {
@@ -241,9 +246,9 @@ internal static bool isDirective(@string c) {
 // A FieldList represents a list of Fields, enclosed by parentheses,
 // curly braces, or square brackets.
 [GoType] partial struct FieldList {
-    public go.token_package.ΔPos Opening; // position of opening parenthesis/brace/bracket, if any
+    public tokenꓸPos Opening; // position of opening parenthesis/brace/bracket, if any
     public slice<ж<Field>> List; // field list; or nil
-    public go.token_package.ΔPos Closing; // position of closing parenthesis/brace/bracket, if any
+    public tokenꓸPos Closing; // position of closing parenthesis/brace/bracket, if any
 }
 
 [GoRecv] public static tokenꓸPos Pos(this ref FieldList f) {
@@ -273,7 +278,9 @@ internal static bool isDirective(@string c) {
 }
 
 // NumFields returns the number of parameters or struct fields represented by a [FieldList].
-[GoRecv] public static nint NumFields(this ref FieldList f) {
+public static nint NumFields(this ж<FieldList> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
     nint n = 0;
     if (f != nil) {
         foreach (var (_, g) in f.List) {
@@ -290,27 +297,26 @@ internal static bool isDirective(@string c) {
 // An expression is represented by a tree consisting of one
 // or more of the following concrete expression nodes.
 [GoType] partial struct BadExpr {
-    public go.token_package.ΔPos From; // position range of bad expression
-    public go.token_package.ΔPos To;
+    public tokenꓸPos From, To; // position range of bad expression
 }
 
 
 [GoType] partial struct Ident {
-    public go.token_package.ΔPos NamePos; // identifier position
+    public tokenꓸPos NamePos; // identifier position
     public @string Name;   // identifier name
     public ж<Object> Obj; // denoted object, or nil. Deprecated: see Object.
 }
 
 
 [GoType] partial struct Ellipsis {
-    public go.token_package.ΔPos Ellipsis; // position of "..."
+    public tokenꓸPos ΔEllipsis; // position of "..."
     public Expr Elt;      // ellipsis element type (parameter lists only); or nil
 }
 
 
 [GoType] partial struct BasicLit {
-    public go.token_package.ΔPos ValuePos; // literal position
-    public go.token_package.Token Kind; // token.INT, token.FLOAT, token.IMAG, token.CHAR, or token.STRING
+    public tokenꓸPos ValuePos;   // literal position
+    public token.Token Kind; // token.INT, token.FLOAT, token.IMAG, token.CHAR, or token.STRING
     public @string Value;     // literal string; e.g. 42, 0x7f, 3.14, 1e-9, 2.4i, 'a', '\x7f', "foo" or `\m\n\o`
 }
 
@@ -323,17 +329,17 @@ internal static bool isDirective(@string c) {
 
 [GoType] partial struct CompositeLit {
     public Expr Type;      // literal type; or nil
-    public go.token_package.ΔPos Lbrace; // position of "{"
+    public tokenꓸPos Lbrace; // position of "{"
     public slice<Expr> Elts; // list of composite elements; or nil
-    public go.token_package.ΔPos Rbrace; // position of "}"
+    public tokenꓸPos Rbrace; // position of "}"
     public bool Incomplete;      // true if (source) expressions are missing in the Elts list
 }
 
 
 [GoType] partial struct ParenExpr {
-    public go.token_package.ΔPos Lparen; // position of "("
+    public tokenꓸPos Lparen; // position of "("
     public Expr X;      // parenthesized expression
-    public go.token_package.ΔPos Rparen; // position of ")"
+    public tokenꓸPos Rparen; // position of ")"
 }
 
 
@@ -345,72 +351,72 @@ internal static bool isDirective(@string c) {
 
 [GoType] partial struct IndexExpr {
     public Expr X;      // expression
-    public go.token_package.ΔPos Lbrack; // position of "["
+    public tokenꓸPos Lbrack; // position of "["
     public Expr Index;      // index expression
-    public go.token_package.ΔPos Rbrack; // position of "]"
+    public tokenꓸPos Rbrack; // position of "]"
 }
 
 
 [GoType] partial struct IndexListExpr {
     public Expr X;      // expression
-    public go.token_package.ΔPos Lbrack; // position of "["
+    public tokenꓸPos Lbrack; // position of "["
     public slice<Expr> Indices; // index expressions
-    public go.token_package.ΔPos Rbrack; // position of "]"
+    public tokenꓸPos Rbrack; // position of "]"
 }
 
 
 [GoType] partial struct SliceExpr {
     public Expr X;      // expression
-    public go.token_package.ΔPos Lbrack; // position of "["
+    public tokenꓸPos Lbrack; // position of "["
     public Expr Low;      // begin of slice range; or nil
     public Expr High;      // end of slice range; or nil
     public Expr Max;      // maximum capacity of slice; or nil
     public bool Slice3;      // true if 3-index slice (2 colons present)
-    public go.token_package.ΔPos Rbrack; // position of "]"
+    public tokenꓸPos Rbrack; // position of "]"
 }
 
 
 [GoType] partial struct TypeAssertExpr {
     public Expr X;      // expression
-    public go.token_package.ΔPos Lparen; // position of "("
+    public tokenꓸPos Lparen; // position of "("
     public Expr Type;      // asserted type; nil means type switch X.(type)
-    public go.token_package.ΔPos Rparen; // position of ")"
+    public tokenꓸPos Rparen; // position of ")"
 }
 
 
 [GoType] partial struct CallExpr {
     public Expr Fun;      // function expression
-    public go.token_package.ΔPos Lparen; // position of "("
+    public tokenꓸPos Lparen; // position of "("
     public slice<Expr> Args; // function arguments; or nil
-    public go.token_package.ΔPos Ellipsis; // position of "..." (token.NoPos if there is no "...")
-    public go.token_package.ΔPos Rparen; // position of ")"
+    public tokenꓸPos Ellipsis; // position of "..." (token.NoPos if there is no "...")
+    public tokenꓸPos Rparen; // position of ")"
 }
 
 
 [GoType] partial struct StarExpr {
-    public go.token_package.ΔPos Star; // position of "*"
+    public tokenꓸPos Star; // position of "*"
     public Expr X;      // operand
 }
 
 
 [GoType] partial struct UnaryExpr {
-    public go.token_package.ΔPos OpPos; // position of Op
-    public go.token_package.Token Op; // operator
+    public tokenꓸPos OpPos;   // position of Op
+    public token.Token Op; // operator
     public Expr X;        // operand
 }
 
 
 [GoType] partial struct BinaryExpr {
     public Expr X;        // left operand
-    public go.token_package.ΔPos OpPos; // position of Op
-    public go.token_package.Token Op; // operator
+    public tokenꓸPos OpPos;   // position of Op
+    public token.Token Op; // operator
     public Expr Y;        // right operand
 }
 
 
 [GoType] partial struct KeyValueExpr {
     public Expr Key;
-    public go.token_package.ΔPos Colon; // position of ":"
+    public tokenꓸPos Colon; // position of ":"
     public Expr Value;
 }
 
@@ -423,14 +429,14 @@ public static readonly ChanDir RECV = 2;
 // or more of the following type-specific expression
 // nodes.
 [GoType] partial struct ArrayType {
-    public go.token_package.ΔPos Lbrack; // position of "["
+    public tokenꓸPos Lbrack; // position of "["
     public Expr Len;      // Ellipsis node for [...]T array types, nil for slice types
     public Expr Elt;      // element type
 }
 
 
 [GoType] partial struct StructType {
-    public go.token_package.ΔPos Struct; // position of "struct" keyword
+    public tokenꓸPos Struct;  // position of "struct" keyword
     public ж<FieldList> Fields; // list of field declarations
     public bool Incomplete;       // true if (source) fields are missing in the Fields list
 }
@@ -438,7 +444,7 @@ public static readonly ChanDir RECV = 2;
 // Pointer types are represented via StarExpr nodes.
 
 [GoType] partial struct FuncType {
-    public go.token_package.ΔPos Func; // position of "func" keyword (token.NoPos if there is no "func")
+    public tokenꓸPos Func;  // position of "func" keyword (token.NoPos if there is no "func")
     public ж<FieldList> TypeParams; // type parameters; or nil
     public ж<FieldList> Params; // (incoming) parameters; non-nil
     public ж<FieldList> Results; // (outgoing) results; or nil
@@ -446,22 +452,22 @@ public static readonly ChanDir RECV = 2;
 
 
 [GoType] partial struct InterfaceType {
-    public go.token_package.ΔPos Interface; // position of "interface" keyword
+    public tokenꓸPos Interface;  // position of "interface" keyword
     public ж<FieldList> Methods; // list of embedded interfaces, methods, or types
     public bool Incomplete;       // true if (source) methods or types are missing in the Methods list
 }
 
 
 [GoType] partial struct MapType {
-    public go.token_package.ΔPos Map; // position of "map" keyword
+    public tokenꓸPos Map; // position of "map" keyword
     public Expr Key;
     public Expr Value;
 }
 
 
 [GoType] partial struct ChanType {
-    public go.token_package.ΔPos Begin; // position of "chan" keyword or "<-" (whichever comes first)
-    public go.token_package.ΔPos Arrow; // position of "<-" (token.NoPos if there is no "<-")
+    public tokenꓸPos Begin; // position of "chan" keyword or "<-" (whichever comes first)
+    public tokenꓸPos Arrow; // position of "<-" (token.NoPos if there is no "<-")
     public ChanDir Dir;   // channel direction
     public Expr Value;      // value type
 }
@@ -476,7 +482,7 @@ public static readonly ChanDir RECV = 2;
 }
 
 [GoRecv] public static tokenꓸPos Pos(this ref Ellipsis x) {
-    return x.Ellipsis;
+    return x.ΔEllipsis;
 }
 
 [GoRecv] public static tokenꓸPos Pos(this ref BasicLit x) {
@@ -572,19 +578,19 @@ public static readonly ChanDir RECV = 2;
 }
 
 [GoRecv] public static tokenꓸPos End(this ref Ident x) {
-    return ((tokenꓸPos)(((nint)x.NamePos) + len(x.Name)));
+    return ((tokenꓸPos)((nint)x.NamePos + len(x.Name)));
 }
 
 [GoRecv] public static tokenꓸPos End(this ref Ellipsis x) {
     if (x.Elt != default!) {
         return x.Elt.End();
     }
-    return x.Ellipsis + 3;
+    return x.ΔEllipsis + 3;
 }
 
 // len("...")
 [GoRecv] public static tokenꓸPos End(this ref BasicLit x) {
-    return ((tokenꓸPos)(((nint)x.ValuePos) + len(x.Value)));
+    return ((tokenꓸPos)((nint)x.ValuePos + len(x.Value)));
 }
 
 [GoRecv] public static tokenꓸPos End(this ref FuncLit x) {
@@ -756,7 +762,9 @@ public static bool IsExported(@string name) {
     return token.IsExported(id.Name);
 }
 
-[GoRecv] public static @string String(this ref Ident id) {
+public static @string String(this ж<Ident> Ꮡid) {
+    ref var id = ref Ꮡid.Value;
+
     if (id != nil) {
         return id.Name;
     }
@@ -769,8 +777,7 @@ public static bool IsExported(@string name) {
 // A statement is represented by a tree consisting of one
 // or more of the following concrete statement nodes.
 [GoType] partial struct BadStmt {
-    public go.token_package.ΔPos From; // position range of bad statement
-    public go.token_package.ΔPos To;
+    public tokenꓸPos From, To; // position range of bad statement
 }
 
 
@@ -780,14 +787,14 @@ public static bool IsExported(@string name) {
 
 
 [GoType] partial struct EmptyStmt {
-    public go.token_package.ΔPos Semicolon; // position of following ";"
+    public tokenꓸPos Semicolon; // position of following ";"
     public bool Implicit;      // if set, ";" was omitted in the source
 }
 
 
 [GoType] partial struct LabeledStmt {
     public ж<Ident> Label;
-    public go.token_package.ΔPos Colon; // position of ":"
+    public tokenꓸPos Colon; // position of ":"
     public Stmt Stmt;
 }
 
@@ -799,60 +806,60 @@ public static bool IsExported(@string name) {
 
 [GoType] partial struct SendStmt {
     public Expr Chan;
-    public go.token_package.ΔPos Arrow; // position of "<-"
+    public tokenꓸPos Arrow; // position of "<-"
     public Expr Value;
 }
 
 
 [GoType] partial struct IncDecStmt {
     public Expr X;
-    public go.token_package.ΔPos TokPos; // position of Tok
-    public go.token_package.Token Tok; // INC or DEC
+    public tokenꓸPos TokPos;   // position of Tok
+    public token.Token Tok; // INC or DEC
 }
 
 
 [GoType] partial struct AssignStmt {
     public slice<Expr> Lhs;
-    public go.token_package.ΔPos TokPos; // position of Tok
-    public go.token_package.Token Tok; // assignment token, DEFINE
+    public tokenꓸPos TokPos;   // position of Tok
+    public token.Token Tok; // assignment token, DEFINE
     public slice<Expr> Rhs;
 }
 
 
 [GoType] partial struct GoStmt {
-    public go.token_package.ΔPos Go; // position of "go" keyword
+    public tokenꓸPos Go; // position of "go" keyword
     public ж<CallExpr> Call;
 }
 
 
 [GoType] partial struct DeferStmt {
-    public go.token_package.ΔPos Defer; // position of "defer" keyword
+    public tokenꓸPos Defer; // position of "defer" keyword
     public ж<CallExpr> Call;
 }
 
 
 [GoType] partial struct ReturnStmt {
-    public go.token_package.ΔPos Return; // position of "return" keyword
+    public tokenꓸPos Return; // position of "return" keyword
     public slice<Expr> Results; // result expressions; or nil
 }
 
 
 [GoType] partial struct BranchStmt {
-    public go.token_package.ΔPos TokPos; // position of Tok
-    public go.token_package.Token Tok; // keyword token (BREAK, CONTINUE, GOTO, FALLTHROUGH)
+    public tokenꓸPos TokPos;   // position of Tok
+    public token.Token Tok; // keyword token (BREAK, CONTINUE, GOTO, FALLTHROUGH)
     public ж<Ident> Label;   // label name; or nil
 }
 
 
 [GoType] partial struct BlockStmt {
-    public go.token_package.ΔPos Lbrace; // position of "{"
+    public tokenꓸPos Lbrace; // position of "{"
     public slice<Stmt> List;
-    public go.token_package.ΔPos Rbrace; // position of "}", if any (may be absent due to syntax error)
+    public tokenꓸPos Rbrace; // position of "}", if any (may be absent due to syntax error)
 }
 
 
 [GoType] partial struct IfStmt {
-    public go.token_package.ΔPos If; // position of "if" keyword
+    public tokenꓸPos If; // position of "if" keyword
     public Stmt Init;      // initialization statement; or nil
     public Expr Cond;      // condition
     public ж<BlockStmt> Body;
@@ -861,15 +868,15 @@ public static bool IsExported(@string name) {
 
 
 [GoType] partial struct CaseClause {
-    public go.token_package.ΔPos Case; // position of "case" or "default" keyword
+    public tokenꓸPos Case; // position of "case" or "default" keyword
     public slice<Expr> List; // list of expressions or types; nil means default case
-    public go.token_package.ΔPos Colon; // position of ":"
+    public tokenꓸPos Colon; // position of ":"
     public slice<Stmt> Body; // statement list; or nil
 }
 
 
 [GoType] partial struct SwitchStmt {
-    public go.token_package.ΔPos Switch; // position of "switch" keyword
+    public tokenꓸPos Switch;  // position of "switch" keyword
     public Stmt Init;       // initialization statement; or nil
     public Expr Tag;       // tag expression; or nil
     public ж<BlockStmt> Body; // CaseClauses only
@@ -877,7 +884,7 @@ public static bool IsExported(@string name) {
 
 
 [GoType] partial struct TypeSwitchStmt {
-    public go.token_package.ΔPos Switch; // position of "switch" keyword
+    public tokenꓸPos Switch;  // position of "switch" keyword
     public Stmt Init;       // initialization statement; or nil
     public Stmt Assign;       // x := y.(type) or y.(type)
     public ж<BlockStmt> Body; // CaseClauses only
@@ -885,21 +892,21 @@ public static bool IsExported(@string name) {
 
 
 [GoType] partial struct CommClause {
-    public go.token_package.ΔPos Case; // position of "case" or "default" keyword
+    public tokenꓸPos Case; // position of "case" or "default" keyword
     public Stmt Comm;      // send or receive statement; nil means default case
-    public go.token_package.ΔPos Colon; // position of ":"
+    public tokenꓸPos Colon; // position of ":"
     public slice<Stmt> Body; // statement list; or nil
 }
 
 
 [GoType] partial struct SelectStmt {
-    public go.token_package.ΔPos Select; // position of "select" keyword
+    public tokenꓸPos Select;  // position of "select" keyword
     public ж<BlockStmt> Body; // CommClauses only
 }
 
 
 [GoType] partial struct ForStmt {
-    public go.token_package.ΔPos For; // position of "for" keyword
+    public tokenꓸPos For; // position of "for" keyword
     public Stmt Init;      // initialization statement; or nil
     public Expr Cond;      // condition; or nil
     public Stmt Post;      // post iteration statement; or nil
@@ -908,12 +915,11 @@ public static bool IsExported(@string name) {
 
 
 [GoType] partial struct RangeStmt {
-    public go.token_package.ΔPos For; // position of "for" keyword
-    public Expr Key;        // Key, Value may be nil
-    public Expr Value;
-    public go.token_package.ΔPos TokPos; // position of Tok; invalid if Key == nil
-    public go.token_package.Token Tok; // ILLEGAL if Key == nil, ASSIGN, DEFINE
-    public go.token_package.ΔPos Range; // position of "range" keyword
+    public tokenꓸPos For;   // position of "for" keyword
+    public Expr Key, Value;        // Key, Value may be nil
+    public tokenꓸPos TokPos;   // position of Tok; invalid if Key == nil
+    public token.Token Tok; // ILLEGAL if Key == nil, ASSIGN, DEFINE
+    public tokenꓸPos Range;   // position of "range" keyword
     public Expr X;        // value to range over
     public ж<BlockStmt> Body;
 }
@@ -1062,7 +1068,7 @@ public static bool IsExported(@string name) {
     if (s.Label != nil) {
         return s.Label.End();
     }
-    return ((tokenꓸPos)(((nint)s.TokPos) + len(s.Tok.String())));
+    return ((tokenꓸPos)((nint)s.TokPos + len(s.Tok.String())));
 }
 
 [GoRecv] public static tokenꓸPos End(this ref BlockStmt s) {
@@ -1204,7 +1210,7 @@ public static bool IsExported(@string name) {
     public ж<Ident> Name;     // local package name (including "."); or nil
     public ж<BasicLit> Path;  // import path
     public ж<CommentGroup> Comment; // line comments; or nil
-    public go.token_package.ΔPos EndPos;   // end of spec (overrides Path.Pos if nonzero)
+    public tokenꓸPos EndPos;     // end of spec (overrides Path.Pos if nonzero)
 }
 
 
@@ -1221,7 +1227,7 @@ public static bool IsExported(@string name) {
     public ж<CommentGroup> Doc; // associated documentation; or nil
     public ж<Ident> Name;     // type name
     public ж<FieldList> TypeParams; // type parameters; or nil
-    public go.token_package.ΔPos Assign;   // position of '=', if any
+    public tokenꓸPos Assign;     // position of '=', if any
     public Expr Type;          // *Ident, *ParenExpr, *SelectorExpr, *StarExpr, or any of the *XxxTypes
     public ж<CommentGroup> Comment; // line comments; or nil
 }
@@ -1278,18 +1284,17 @@ public static bool IsExported(@string name) {
 
 // A declaration is represented by one of the following declaration nodes.
 [GoType] partial struct BadDecl {
-    public go.token_package.ΔPos From; // position range of bad declaration
-    public go.token_package.ΔPos To;
+    public tokenꓸPos From, To; // position range of bad declaration
 }
 
 
 [GoType] partial struct GenDecl {
     public ж<CommentGroup> Doc; // associated documentation; or nil
-    public go.token_package.ΔPos TokPos;   // position of Tok
-    public go.token_package.Token Tok;   // IMPORT, CONST, TYPE, or VAR
-    public go.token_package.ΔPos Lparen;   // position of '(', if any
+    public tokenꓸPos TokPos;     // position of Tok
+    public token.Token Tok;   // IMPORT, CONST, TYPE, or VAR
+    public tokenꓸPos Lparen;     // position of '(', if any
     public slice<Spec> Specs;
-    public go.token_package.ΔPos Rparen; // position of ')', if any
+    public tokenꓸPos Rparen; // position of ')', if any
 }
 
 
@@ -1369,11 +1374,10 @@ public static bool IsExported(@string name) {
 // [#20744]: https://go.dev/issue/20744
 [GoType] partial struct File {
     public ж<CommentGroup> Doc; // associated documentation; or nil
-    public go.token_package.ΔPos Package;   // position of "package" keyword
+    public tokenꓸPos Package;     // position of "package" keyword
     public ж<Ident> Name;     // package name
     public slice<Decl> Decls;   // top-level declarations; or nil
-    public go.token_package.ΔPos FileStart;     // start and end of entire file
-    public go.token_package.ΔPos FileEnd;
+    public tokenꓸPos FileStart, FileEnd;       // start and end of entire file
     public ж<Scope> Scope;       // package scope (this file only). Deprecated: see Object
     public slice<ж<ImportSpec>> Imports; // imports in this file
     public slice<ж<Ident>> Unresolved; // unresolved identifiers in this file. Deprecated: see Object
@@ -1428,18 +1432,18 @@ public static bool IsExported(@string name) {
 //	if err != nil { ... }
 //	gen := ast.IsGenerated(f)
 public static bool IsGenerated(ж<File> Ꮡfile) {
-    ref var file = ref Ꮡfile.val;
+    ref var @file = ref Ꮡfile.Value;
 
     var (_, ok) = generator(Ꮡfile);
     return ok;
 }
 
 internal static (@string, bool) generator(ж<File> Ꮡfile) {
-    ref var file = ref Ꮡfile.val;
+    ref var @file = ref Ꮡfile.Value;
 
-    foreach (var (_, group) in file.Comments) {
+    foreach (var (_, group) in @file.Comments) {
         foreach (var (_, comment) in (~group).List) {
-            if (comment.Pos() > file.Package) {
+            if (comment.Pos() > @file.Package) {
                 break;
             }
             // after package declaration
@@ -1466,11 +1470,11 @@ internal static (@string, bool) generator(ж<File> Ꮡfile) {
 // Unparen returns the expression with any enclosing parentheses removed.
 public static Expr Unparen(Expr e) {
     while (ᐧ) {
-        var (paren, ok) = e._<ParenExpr.val>(ᐧ);
+        var (paren, ok) = e._<ж<ParenExpr>>(ᐧ);
         if (!ok) {
             return e;
         }
-        e = paren.val.X;
+        e = paren.Value.X;
     }
 }
 

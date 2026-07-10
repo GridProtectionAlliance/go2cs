@@ -52,8 +52,8 @@ using static go.@internal.testenv_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(context.Context, context.CancelFunc), context_package.Context>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

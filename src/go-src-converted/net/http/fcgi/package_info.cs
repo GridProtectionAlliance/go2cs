@@ -51,23 +51,19 @@ using static go.net.http.fcgi_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(*io.PipeReader, *io.PipeWriter), io_package.ReadCloser>]
-[assembly: GoImplement<(ln net.Listener, err error), net_package.Listener>]
-[assembly: GoImplement<(net.Conn, error), net_package.Conn>]
-[assembly: GoImplement<bufWriter, io_package.Writer>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>]
-[assembly: GoImplement<encoding.binary_package.bigEndian, encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<io_package.ReadCloser, io_package.Reader>]
-[assembly: GoImplement<io_package.ReadWriteCloser, io_package.Reader>]
-[assembly: GoImplement<net.http_package.ServeMux, net.http_package.ΔHandler>]
+[assembly: GoImplement<bufWriter, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<go.encoding.binary_package.bigEndian, go.encoding.binary_package.ByteOrder>]
+[assembly: GoImplement<go.net.http_package.ServeMux, go.net.http_package.ΔHandler>(Pointer = true)]
+[assembly: GoImplement<io_package.PipeReader, io_package.ReadCloser>(Pointer = true)]
 [assembly: GoImplement<net_package.Conn, io_package.ReadWriteCloser>]
-[assembly: GoImplement<response, net.http_package.ResponseWriter>]
-[assembly: GoImplement<streamWriter, io_package.Writer>]
-[assembly: GoImplement<strings_package.Reader, io_package.Reader>]
+[assembly: GoImplement<response, go.net.http_package.ResponseWriter>(Pointer = true)]
+[assembly: GoImplement<streamWriter, io_package.Closer>(Pointer = true)]
+[assembly: GoImplement<streamWriter, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<strings_package.Reader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<http.pattern; matches <>string; otherValues map<string>string}, http.pattern; matches <>string; otherValues map<string>string}>(Inverted = true)]
 [assembly: GoImplicitConv<request, ж<request>>(Indirect = true)]
 // </ImplicitConversions>
 

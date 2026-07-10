@@ -7,8 +7,8 @@ using bufio = bufio_package;
 using io = io_package;
 using strings = strings_package;
 using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
 
 partial class csv_package {
 
@@ -32,7 +32,7 @@ partial class csv_package {
 [GoType] partial struct Writer {
     public rune Comma; // Field delimiter (set to ',' by NewWriter)
     public bool UseCRLF; // True to use \r\n as the line terminator
-    internal ж<bufio_package.Writer> w;
+    internal ж<bufio.Writer> w;
 }
 
 // NewWriter returns a new Writer that writes to w.
@@ -51,7 +51,9 @@ public static ж<Writer> NewWriter(io.Writer w) {
     if (!validDelim(w.Comma)) {
         return errInvalidDelim;
     }
-    foreach (var (n, field) in record) {
+    foreach (var (n, vᴛ1) in record) {
+        var field = vᴛ1;
+
         if (n > 0) {
             {
                 var (_, errΔ1) = w.w.WriteRune(w.Comma); if (errΔ1 != default!) {
@@ -92,20 +94,20 @@ public static ж<Writer> NewWriter(io.Writer w) {
                 error errΔ5 = default!;
                 switch (field[0]) {
                 case (rune)'"': {
-                    (_, ) = w.w.WriteString(@""""""u8);
+                    (_, errΔ5) = w.w.WriteString(@""""""u8);
                     break;
                 }
                 case (rune)'\r': {
                     if (!w.UseCRLF) {
-                         = w.w.WriteByte((rune)'\r');
+                        errΔ5 = w.w.WriteByte((rune)'\r');
                     }
                     break;
                 }
                 case (rune)'\n': {
                     if (w.UseCRLF){
-                        (_, ) = w.w.WriteString("\r\n"u8);
+                        (_, errΔ5) = w.w.WriteString("\r\n"u8);
                     } else {
-                         = w.w.WriteByte((rune)'\n');
+                        errΔ5 = w.w.WriteByte((rune)'\n');
                     }
                     break;
                 }}
@@ -178,7 +180,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
     if (w.Comma < utf8.RuneSelf){
         for (nint i = 0; i < len(field); i++) {
             var c = field[i];
-            if (c == (rune)'\n' || c == (rune)'\r' || c == (rune)'"' || c == ((byte)w.Comma)) {
+            if (c == (rune)'\n' || c == (rune)'\r' || c == (rune)'"' || c == (byte)w.Comma) {
                 return true;
             }
         }

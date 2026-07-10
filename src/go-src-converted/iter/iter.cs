@@ -191,15 +191,15 @@ And then a client could delete boring values from the tree using:
 namespace go;
 
 using race = @internal.race_package;
-using runtime = runtime_package;
+using Δruntime = runtime_package;
 using @unsafe = unsafe_package;
 using @internal;
 
 partial class iter_package {
 
-public delegate void Seq(Func<V, bool> yield);
+public delegate void Seq<V>(Func<V, bool> yield);
 
-public delegate void Seq2(Func<K, V, bool> yield);
+public delegate void Seq2<K, V>(Func<K, V, bool> yield);
 
 [GoType] partial struct coro {
 }
@@ -232,33 +232,24 @@ internal static partial void coroswitch(ж<coro> _);
 //
 // If the iterator panics during a call to next (or stop),
 // then next (or stop) itself panics with the same value.
-public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq)
-    where V : new() => func((defer, recover) =>
-{
+public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq) {
     Func<(V, bool)> next = default!;
     Action stop = default!;
 
-    V v = default!;
+    ref var v = ref heap<V>(out var Ꮡv);
     bool ok = default!;
     bool done = default!;
     bool yieldNext = default!;
     ref var racer = ref heap(new nint(), out var Ꮡracer);
-    any panicValue = default!;
+    ref var panicValue = ref heap<any>(out var ᏑpanicValue);
     bool seqDone = default!;      // to detect Goexit
-    var c = newcoro(
-    var panicValueʗ3 = panicValue;
-    var racerʗ4 = racer;
-    var vʗ3 = v;
-    (ж<coro> c) => {
-        race.Acquire(new @unsafe.Pointer(Ꮡracerʗ4));
+    var c = newcoro((ж<coro> cΔ1) => func((defer, recover) => {
+        race.Acquire(new @unsafe.Pointer(Ꮡracer));
         if (done) {
-            race.Release(new @unsafe.Pointer(Ꮡracerʗ4));
-            return (next, stop);
+            race.Release(new @unsafe.Pointer(Ꮡracer));
+            return;
         }
-        var yield = 
-        var racerʗ5 = racer;
-        var vʗ4 = v;
-        (V v1) => {
+        var yield = (V v1) => {
             if (done) {
                 return false;
             }
@@ -266,85 +257,80 @@ public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq)
                 throw panic("iter.Pull: yield called again before next");
             }
             yieldNext = false;
-            (vʗ4, ok) = (v1, true);
-            race.Release(new @unsafe.Pointer(Ꮡracerʗ5));
+            (Ꮡv.ValueSlot, ok) = (v1, true);
+            race.Release(new @unsafe.Pointer(Ꮡracer));
             coroswitch(cΔ1);
-            race.Acquire(new @unsafe.Pointer(Ꮡracerʗ5));
+            race.Acquire(new @unsafe.Pointer(Ꮡracer));
             return !done;
         };
-        defer(var panicValueʗ4 = panicValue;
-        var racerʗ6 = racer;
-        () => {
+        // Recover and propagate panics from seq.
+        defer(() => {
             {
                 var p = recover(); if (p != default!){
-                    panicValueʗ4 = p;
+                    ᏑpanicValue.ValueSlot = p;
                 } else 
                 if (!seqDone) {
-                    panicValueʗ4 = goexitPanicValue;
+                    ᏑpanicValue.ValueSlot = goexitPanicValue;
                 }
             }
             done = true;
-            race.Release(new @unsafe.Pointer(Ꮡracerʗ6));
+            // Invalidate iterator
+            race.Release(new @unsafe.Pointer(Ꮡracer));
         });
         seq(yield);
         V v0 = default!;
-        (v, ok) = (v0, false);
+        (Ꮡv.ValueSlot, ok) = (v0, false);
         seqDone = true;
-    });
-    next = 
+    }));
     var cʗ1 = c;
-    var panicValueʗ7 = panicValue;
-    var racerʗ10 = racer;
-    var vʗ7 = v;
-    () => {
-        race.Write(new @unsafe.Pointer(Ꮡracerʗ10));
+    next = () => {
+        V v1 = default!;
+        bool ok1 = default!;
+        race.Write(new @unsafe.Pointer(Ꮡracer));
         // detect races
         if (done) {
-            return (next, stop);
+            return (v1, ok1);
         }
         if (yieldNext) {
             throw panic("iter.Pull: next called again before yield");
         }
         yieldNext = true;
-        race.Release(new @unsafe.Pointer(Ꮡracerʗ10));
+        race.Release(new @unsafe.Pointer(Ꮡracer));
         coroswitch(cʗ1);
-        race.Acquire(new @unsafe.Pointer(Ꮡracerʗ10));
+        race.Acquire(new @unsafe.Pointer(Ꮡracer));
         // Propagate panics and goexits from seq.
-        if (panicValueʗ7 != default!) {
-            if (AreEqual(panicValueʗ7, goexitPanicValue)){
+        if (ᏑpanicValue.ValueSlot != default!) {
+            if (AreEqual(ᏑpanicValue.ValueSlot, goexitPanicValue)){
                 // Propagate runtime.Goexit from seq.
-                runtime.Goexit();
+                Δruntime.Goexit();
             } else {
-                throw panic(panicValueʗ7);
+                throw panic(ᏑpanicValue.ValueSlot);
             }
         }
-        return (vʗ7, ok);
+        return (Ꮡv.ValueSlot, ok);
     };
-    stop = 
     var cʗ2 = c;
-    var panicValueʗ8 = panicValue;
-    var racerʗ11 = racer;
-    () => {
-        race.Write(new @unsafe.Pointer(Ꮡracerʗ11));
+    stop = () => {
+        race.Write(new @unsafe.Pointer(Ꮡracer));
         // detect races
         if (!done) {
             done = true;
-            race.Release(new @unsafe.Pointer(Ꮡracerʗ11));
+            race.Release(new @unsafe.Pointer(Ꮡracer));
             coroswitch(cʗ2);
-            race.Acquire(new @unsafe.Pointer(Ꮡracerʗ11));
+            race.Acquire(new @unsafe.Pointer(Ꮡracer));
             // Propagate panics and goexits from seq.
-            if (panicValueʗ8 != default!) {
-                if (AreEqual(panicValueʗ8, goexitPanicValue)){
+            if (ᏑpanicValue.ValueSlot != default!) {
+                if (AreEqual(ᏑpanicValue.ValueSlot, goexitPanicValue)){
                     // Propagate runtime.Goexit from seq.
-                    runtime.Goexit();
+                    Δruntime.Goexit();
                 } else {
-                    throw panic(panicValueʗ8);
+                    throw panic(ᏑpanicValue.ValueSlot);
                 }
             }
         }
     };
     return (next, stop);
-});
+}
 
 // Pull2 converts the “push-style” iterator sequence seq
 // into a “pull-style” iterator accessed by the two functions
@@ -368,37 +354,25 @@ public static (Func<(V, bool)> next, Action stop) Pull<V>(Seq<V> seq)
 //
 // If the iterator panics during a call to next (or stop),
 // then next (or stop) itself panics with the same value.
-public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq)
-    where K : new()
-    where V : new() => func((defer, recover) =>
-{
+public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq) {
     Func<(K, V, bool)> next = default!;
     Action stop = default!;
 
-    K k = default!;
-    V v = default!;
+    ref var k = ref heap<K>(out var Ꮡk);
+    ref var v = ref heap<V>(out var Ꮡv);
     bool ok = default!;
     bool done = default!;
     bool yieldNext = default!;
     ref var racer = ref heap(new nint(), out var Ꮡracer);
-    any panicValue = default!;
+    ref var panicValue = ref heap<any>(out var ᏑpanicValue);
     bool seqDone = default!;
-    var c = newcoro(
-    var kʗ3 = k;
-    var panicValueʗ3 = panicValue;
-    var racerʗ4 = racer;
-    var vʗ3 = v;
-    (ж<coro> c) => {
-        race.Acquire(new @unsafe.Pointer(Ꮡracerʗ4));
+    var c = newcoro((ж<coro> cΔ1) => func((defer, recover) => {
+        race.Acquire(new @unsafe.Pointer(Ꮡracer));
         if (done) {
-            race.Release(new @unsafe.Pointer(Ꮡracerʗ4));
-            return (next, stop);
+            race.Release(new @unsafe.Pointer(Ꮡracer));
+            return;
         }
-        var yield = 
-        var kʗ4 = k;
-        var racerʗ5 = racer;
-        var vʗ4 = v;
-        (K k1, V v1) => {
+        var yield = (K k1, V v1) => {
             if (done) {
                 return false;
             }
@@ -406,87 +380,82 @@ public static (Func<(K, V, bool)> next, Action stop) Pull2<K, V>(Seq2<K, V> seq)
                 throw panic("iter.Pull2: yield called again before next");
             }
             yieldNext = false;
-            (kʗ4, vʗ4, ok) = (k1, v1, true);
-            race.Release(new @unsafe.Pointer(Ꮡracerʗ5));
+            (Ꮡk.ValueSlot, Ꮡv.ValueSlot, ok) = (k1, v1, true);
+            race.Release(new @unsafe.Pointer(Ꮡracer));
             coroswitch(cΔ1);
-            race.Acquire(new @unsafe.Pointer(Ꮡracerʗ5));
+            race.Acquire(new @unsafe.Pointer(Ꮡracer));
             return !done;
         };
-        defer(var panicValueʗ4 = panicValue;
-        var racerʗ6 = racer;
-        () => {
+        // Recover and propagate panics from seq.
+        defer(() => {
             {
                 var p = recover(); if (p != default!){
-                    panicValueʗ4 = p;
+                    ᏑpanicValue.ValueSlot = p;
                 } else 
                 if (!seqDone) {
-                    panicValueʗ4 = goexitPanicValue;
+                    ᏑpanicValue.ValueSlot = goexitPanicValue;
                 }
             }
             done = true;
-            race.Release(new @unsafe.Pointer(Ꮡracerʗ6));
+            // Invalidate iterator.
+            race.Release(new @unsafe.Pointer(Ꮡracer));
         });
         seq(yield);
         K k0 = default!;
         V v0 = default!;
-        (k, v, ok) = (k0, v0, false);
+        (Ꮡk.ValueSlot, Ꮡv.ValueSlot, ok) = (k0, v0, false);
         seqDone = true;
-    });
-    next = 
+    }));
     var cʗ1 = c;
-    var kʗ7 = k;
-    var panicValueʗ7 = panicValue;
-    var racerʗ10 = racer;
-    var vʗ7 = v;
-    () => {
-        race.Write(new @unsafe.Pointer(Ꮡracerʗ10));
+    next = () => {
+        K k1 = default!;
+        V v1 = default!;
+        bool ok1 = default!;
+        race.Write(new @unsafe.Pointer(Ꮡracer));
         // detect races
         if (done) {
-            return (next, stop);
+            return (k1, v1, ok1);
         }
         if (yieldNext) {
             throw panic("iter.Pull2: next called again before yield");
         }
         yieldNext = true;
-        race.Release(new @unsafe.Pointer(Ꮡracerʗ10));
+        race.Release(new @unsafe.Pointer(Ꮡracer));
         coroswitch(cʗ1);
-        race.Acquire(new @unsafe.Pointer(Ꮡracerʗ10));
+        race.Acquire(new @unsafe.Pointer(Ꮡracer));
         // Propagate panics and goexits from seq.
-        if (panicValueʗ7 != default!) {
-            if (AreEqual(panicValueʗ7, goexitPanicValue)){
+        if (ᏑpanicValue.ValueSlot != default!) {
+            if (AreEqual(ᏑpanicValue.ValueSlot, goexitPanicValue)){
                 // Propagate runtime.Goexit from seq.
-                runtime.Goexit();
+                Δruntime.Goexit();
             } else {
-                throw panic(panicValueʗ7);
+                throw panic(ᏑpanicValue.ValueSlot);
             }
         }
-        return (kʗ7, vʗ7, ok);
+        return (Ꮡk.ValueSlot, Ꮡv.ValueSlot, ok);
     };
-    stop = 
     var cʗ2 = c;
-    var panicValueʗ8 = panicValue;
-    var racerʗ11 = racer;
-    () => {
-        race.Write(new @unsafe.Pointer(Ꮡracerʗ11));
+    stop = () => {
+        race.Write(new @unsafe.Pointer(Ꮡracer));
         // detect races
         if (!done) {
             done = true;
-            race.Release(new @unsafe.Pointer(Ꮡracerʗ11));
+            race.Release(new @unsafe.Pointer(Ꮡracer));
             coroswitch(cʗ2);
-            race.Acquire(new @unsafe.Pointer(Ꮡracerʗ11));
+            race.Acquire(new @unsafe.Pointer(Ꮡracer));
             // Propagate panics and goexits from seq.
-            if (panicValueʗ8 != default!) {
-                if (AreEqual(panicValueʗ8, goexitPanicValue)){
+            if (ᏑpanicValue.ValueSlot != default!) {
+                if (AreEqual(ᏑpanicValue.ValueSlot, goexitPanicValue)){
                     // Propagate runtime.Goexit from seq.
-                    runtime.Goexit();
+                    Δruntime.Goexit();
                 } else {
-                    throw panic(panicValueʗ8);
+                    throw panic(ᏑpanicValue.ValueSlot);
                 }
             }
         }
     };
     return (next, stop);
-});
+}
 
 // goexitPanicValue is a sentinel value indicating that an iterator
 // exited via runtime.Goexit.

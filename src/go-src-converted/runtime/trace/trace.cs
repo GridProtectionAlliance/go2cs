@@ -111,18 +111,17 @@ namespace go.runtime;
 using io = io_package;
 using runtime = runtime_package;
 using sync = sync_package;
-using atomic = sync.atomic_package;
-using sync;
+using atomic = go.sync.atomic_package;
+using go.sync;
 
 partial class trace_package {
 
 // Start enables tracing for the current program.
 // While tracing, the trace will be buffered and written to w.
 // Start returns an error if tracing is already enabled.
-public static error Start(io.Writer w) => func((defer, _) => {
-    tracing.Lock();
-    var tracingʗ1 = tracing;
-    defer(tracingʗ1.Unlock);
+public static error Start(io.Writer w) => func<error>((defer, recover) => {
+    Ꮡtracing.of(tracingᴛ1.ᏑMutex).Lock();
+    defer(Ꮡtracing.of(tracingᴛ1.ᏑMutex).Unlock);
     {
         var err = runtime.StartTrace(); if (err != default!) {
             return err;
@@ -137,25 +136,25 @@ public static error Start(io.Writer w) => func((defer, _) => {
             w.Write(data);
         }
     });
-    tracing.enabled.Store(true);
+    Ꮡtracing.of(tracingᴛ1.Ꮡenabled).Store(true);
     return default!;
 });
 
 // Stop stops the current tracing, if any.
 // Stop only returns after all the writes for the trace have completed.
-public static void Stop() => func((defer, _) => {
-    tracing.Lock();
-    var tracingʗ1 = tracing;
-    defer(tracingʗ1.Unlock);
-    tracing.enabled.Store(false);
+public static void Stop() => func((defer, recover) => {
+    Ꮡtracing.of(tracingᴛ1.ᏑMutex).Lock();
+    defer(Ꮡtracing.of(tracingᴛ1.ᏑMutex).Unlock);
+    Ꮡtracing.of(tracingᴛ1.Ꮡenabled).Store(false);
     runtime.StopTrace();
 });
 
 
 [GoType("dyn")] partial struct tracingᴛ1 {
     public partial ref sync_package.Mutex Mutex { get; } // gate mutators (Start, Stop)
-    internal sync.atomic_package.Bool enabled;
+    internal atomic.Bool enabled;
 }
-internal static tracingᴛ1 tracing;
+internal static ж<tracingᴛ1> Ꮡtracing = new(new tracingᴛ1(nil));
+internal static ref tracingᴛ1 tracing => ref Ꮡtracing.Value;
 
 } // end trace_package

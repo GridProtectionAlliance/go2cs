@@ -5,7 +5,7 @@
 namespace go;
 
 using goarch = @internal.goarch_package;
-using _ = unsafe_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using @internal;
 
 partial class runtime_package {
@@ -53,9 +53,9 @@ internal static readonly UntypedInt traceTimeDiv = /* (1-osHasLowResClockInt)*64
 //go:nosplit
 internal static traceTime traceClockNow() {
     if (osHasLowResClock) {
-        return ((traceTime)(cputicks() / traceTimeDiv));
+        return ((traceTime)(uint64)(cputicks() / (int64)traceTimeDiv));
     }
-    return ((traceTime)(nanotime() / traceTimeDiv));
+    return ((traceTime)(uint64)(nanotime() / (int64)traceTimeDiv));
 }
 
 // traceClockUnitsPerSecond estimates the number of trace clock units per
@@ -63,11 +63,11 @@ internal static traceTime traceClockNow() {
 internal static uint64 traceClockUnitsPerSecond() {
     if (osHasLowResClock) {
         // We're using cputicks as our clock, so we need a real estimate.
-        return ((uint64)(ticksPerSecond() / traceTimeDiv));
+        return (uint64)(ticksPerSecond() / (int64)traceTimeDiv);
     }
     // Our clock is nanotime, so it's just the constant time division.
     // (trace clock units / nanoseconds) * (1e9 nanoseconds / 1 second)
-    return ((uint64)(1.0F / ((float64)traceTimeDiv) * 1e9F));
+    return (uint64)((float64)(1.0D / (float64)traceTimeDiv) * 1e9D);
 }
 
 // traceFrequency writes a batch with a single EvFrequency event.
@@ -80,16 +80,14 @@ internal static void traceFrequency(uintptr gen) {
     (w, _) = w.ensure(1 + traceBytesPerNumber);
     /* traceEvFrequency + frequency */
     // Write out the string.
-    w.@byte(((byte)traceEvFrequency));
+    w.@byte((byte)traceEvFrequency);
     w.varint(traceClockUnitsPerSecond());
     // Immediately flush the buffer.
-    systemstack(
-    var traceʗ2 = Δtrace;
-    var wʗ2 = w;
-    () => {
-        @lock(Ꮡtraceʗ2.of(atomic.Int32; seqGC uint64; minPageHeapAddr uint64; debugMalloc bool}.Ꮡlock));
-        traceBufFlush(wʗ2.traceBuf, gen);
-        unlock(Ꮡtraceʗ2.of(atomic.Int32; seqGC uint64; minPageHeapAddr uint64; debugMalloc bool}.Ꮡlock));
+    var wʗ1 = w;
+    systemstack(() => {
+        @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+        traceBufFlush(wʗ1.traceBuf, gen);
+        unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
     });
 }
 

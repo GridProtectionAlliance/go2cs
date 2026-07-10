@@ -3,8 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.vendor.golang.org.x.text.unicode;
 
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
 
 partial class bidi_package {
 
@@ -28,27 +28,27 @@ internal static ж<bidiTrie> trie = newBidiTrie(0);
 
 // Class returns the Bidi class for p.
 public static ΔClass Class(this Properties p) {
-    ΔClass c = ((ΔClass)((uint8)(p.entry & 15)));
+    ΔClass c = ((ΔClass)(nuint)((uint8)(p.entry & 0x0F)));
     if (c == Control) {
-        c = controlByteToClass[(uint8)(p.last & 15)];
+        c = controlByteToClass[(uint8)(p.last & 0xF)];
     }
     return c;
 }
 
 // IsBracket reports whether the rune is a bracket.
 public static bool IsBracket(this Properties p) {
-    return (uint8)(p.entry & 240) != 0;
+    return (uint8)(p.entry & 0xF0) != 0;
 }
 
 // IsOpeningBracket reports whether the rune is an opening bracket.
 // IsBracket must return true.
 public static bool IsOpeningBracket(this Properties p) {
-    return (uint8)(p.entry & openMask) != 0;
+    return (uint8)(p.entry & (uint8)openMask) != 0;
 }
 
 // TODO: find a better API and expose.
 internal static rune reverseBracket(this Properties p, rune r) {
-    return (int32)(xorMasks[p.entry >> (int)(xorMaskShift)] ^ r);
+    return (int32)(xorMasks[(p.entry >> (int)(xorMaskShift))] ^ r);
 }
 
 // U+202D LeftToRightOverride,
@@ -61,15 +61,15 @@ internal static rune reverseBracket(this Properties p, rune r) {
 // U+2068 FirstStrongIsolate,
 // U+2069 PopDirectionalIsolate,
 internal static array<ΔClass> controlByteToClass = new array<ΔClass>(16){
-    [13] = LRO,
-    [14] = RLO,
-    [10] = LRE,
-    [11] = RLE,
-    [12] = PDF,
-    [6] = LRI,
-    [7] = RLI,
-    [8] = FSI,
-    [9] = PDI
+    [0xD] = LRO,
+    [0xE] = RLO,
+    [0xA] = LRE,
+    [0xB] = RLE,
+    [0xC] = PDF,
+    [0x6] = LRI,
+    [0x7] = RLI,
+    [0x8] = FSI,
+    [0x9] = PDI
 };
 
 // LookupRune returns properties for r.
@@ -106,66 +106,66 @@ public static (Properties p, nint sz) Lookup(slice<byte> s) {
 
     var c0 = s[0];
     switch (ᐧ) {
-    case {} when c0 is < 128: {
+    case {} when c0 is < 0x80: {
         return (new Properties( // is ASCII
 entry: bidiValues[c0]), 1);
     }
-    case {} when c0 is < 194: {
+    case {} when c0 is < 0xC2: {
         return (new Properties(nil), 1);
     }
-    case {} when c0 is < 224: {
+    case {} when c0 is < 0xE0: {
         if (len(s) < 2) {
             // 2-byte UTF-8
             return (new Properties(nil), 0);
         }
         var i = bidiIndex[c0];
         var c1 = s[1];
-        if (c1 < 128 || 192 <= c1) {
+        if (c1 < 0x80 || 0xC0 <= c1) {
             return (new Properties(nil), 1);
         }
-        return (new Properties(entry: trie.lookupValue(((uint32)i), c1)), 2);
+        return (new Properties(entry: trie.lookupValue((uint32)i, c1)), 2);
     }
-    case {} when c0 is < 240: {
+    case {} when c0 is < 0xF0: {
         if (len(s) < 3) {
             // 3-byte UTF-8
             return (new Properties(nil), 0);
         }
         var i = bidiIndex[c0];
         var c1 = s[1];
-        if (c1 < 128 || 192 <= c1) {
+        if (c1 < 0x80 || 0xC0 <= c1) {
             return (new Properties(nil), 1);
         }
-        var o = ((uint32)i) << (int)(6) + ((uint32)c1);
-        i = bidiIndex[o];
+        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        i = bidiIndex[(nint)(o)];
         var c2 = s[2];
-        if (c2 < 128 || 192 <= c2) {
+        if (c2 < 0x80 || 0xC0 <= c2) {
             return (new Properties(nil), 1);
         }
-        return (new Properties(entry: trie.lookupValue(((uint32)i), c2), last: c2), 3);
+        return (new Properties(entry: trie.lookupValue((uint32)i, c2), last: c2), 3);
     }
-    case {} when c0 is < 248: {
+    case {} when c0 is < 0xF8: {
         if (len(s) < 4) {
             // 4-byte UTF-8
             return (new Properties(nil), 0);
         }
         var i = bidiIndex[c0];
         var c1 = s[1];
-        if (c1 < 128 || 192 <= c1) {
+        if (c1 < 0x80 || 0xC0 <= c1) {
             return (new Properties(nil), 1);
         }
-        var o = ((uint32)i) << (int)(6) + ((uint32)c1);
-        i = bidiIndex[o];
+        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        i = bidiIndex[(nint)(o)];
         var c2 = s[2];
-        if (c2 < 128 || 192 <= c2) {
+        if (c2 < 0x80 || 0xC0 <= c2) {
             return (new Properties(nil), 1);
         }
-        o = ((uint32)i) << (int)(6) + ((uint32)c2);
-        i = bidiIndex[o];
+        o = ((uint32)i << (int)(6)) + (uint32)c2;
+        i = bidiIndex[(nint)(o)];
         var c3 = s[3];
-        if (c3 < 128 || 192 <= c3) {
+        if (c3 < 0x80 || 0xC0 <= c3) {
             return (new Properties(nil), 1);
         }
-        return (new Properties(entry: trie.lookupValue(((uint32)i), c3)), 4);
+        return (new Properties(entry: trie.lookupValue((uint32)i, c3)), 4);
     }}
 
     // Illegal rune
@@ -181,66 +181,66 @@ public static (Properties p, nint sz) LookupString(@string s) {
 
     var c0 = s[0];
     switch (ᐧ) {
-    case {} when c0 is < 128: {
+    case {} when c0 is < 0x80: {
         return (new Properties( // is ASCII
 entry: bidiValues[c0]), 1);
     }
-    case {} when c0 is < 194: {
+    case {} when c0 is < 0xC2: {
         return (new Properties(nil), 1);
     }
-    case {} when c0 is < 224: {
+    case {} when c0 is < 0xE0: {
         if (len(s) < 2) {
             // 2-byte UTF-8
             return (new Properties(nil), 0);
         }
         var i = bidiIndex[c0];
         var c1 = s[1];
-        if (c1 < 128 || 192 <= c1) {
+        if (c1 < 0x80 || 0xC0 <= c1) {
             return (new Properties(nil), 1);
         }
-        return (new Properties(entry: trie.lookupValue(((uint32)i), c1)), 2);
+        return (new Properties(entry: trie.lookupValue((uint32)i, c1)), 2);
     }
-    case {} when c0 is < 240: {
+    case {} when c0 is < 0xF0: {
         if (len(s) < 3) {
             // 3-byte UTF-8
             return (new Properties(nil), 0);
         }
         var i = bidiIndex[c0];
         var c1 = s[1];
-        if (c1 < 128 || 192 <= c1) {
+        if (c1 < 0x80 || 0xC0 <= c1) {
             return (new Properties(nil), 1);
         }
-        var o = ((uint32)i) << (int)(6) + ((uint32)c1);
-        i = bidiIndex[o];
+        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        i = bidiIndex[(nint)(o)];
         var c2 = s[2];
-        if (c2 < 128 || 192 <= c2) {
+        if (c2 < 0x80 || 0xC0 <= c2) {
             return (new Properties(nil), 1);
         }
-        return (new Properties(entry: trie.lookupValue(((uint32)i), c2), last: c2), 3);
+        return (new Properties(entry: trie.lookupValue((uint32)i, c2), last: c2), 3);
     }
-    case {} when c0 is < 248: {
+    case {} when c0 is < 0xF8: {
         if (len(s) < 4) {
             // 4-byte UTF-8
             return (new Properties(nil), 0);
         }
         var i = bidiIndex[c0];
         var c1 = s[1];
-        if (c1 < 128 || 192 <= c1) {
+        if (c1 < 0x80 || 0xC0 <= c1) {
             return (new Properties(nil), 1);
         }
-        var o = ((uint32)i) << (int)(6) + ((uint32)c1);
-        i = bidiIndex[o];
+        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        i = bidiIndex[(nint)(o)];
         var c2 = s[2];
-        if (c2 < 128 || 192 <= c2) {
+        if (c2 < 0x80 || 0xC0 <= c2) {
             return (new Properties(nil), 1);
         }
-        o = ((uint32)i) << (int)(6) + ((uint32)c2);
-        i = bidiIndex[o];
+        o = ((uint32)i << (int)(6)) + (uint32)c2;
+        i = bidiIndex[(nint)(o)];
         var c3 = s[3];
-        if (c3 < 128 || 192 <= c3) {
+        if (c3 < 0x80 || 0xC0 <= c3) {
             return (new Properties(nil), 1);
         }
-        return (new Properties(entry: trie.lookupValue(((uint32)i), c3)), 4);
+        return (new Properties(entry: trie.lookupValue((uint32)i, c3)), 4);
     }}
 
     // Illegal rune

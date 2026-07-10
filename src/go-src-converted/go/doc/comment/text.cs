@@ -7,15 +7,16 @@ using bytes = bytes_package;
 using fmt = fmt_package;
 using sort = sort_package;
 using strings = strings_package;
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = global::go.unicode.utf8_package;
+using global::go.unicode;
+using io = io_package;
 
 partial class comment_package {
 
 // A textPrinter holds the state needed for printing a Doc as plain text.
 [GoType] partial struct textPrinter {
     public partial ref ж<Printer> Printer { get; }
-    internal strings_package.Builder @long;
+    internal strings.Builder @long;
     internal @string prefix;
     internal @string codePrefix;
     internal nint width;
@@ -23,28 +24,29 @@ partial class comment_package {
 
 // Text returns a textual formatting of the [Doc].
 // See the [Printer] documentation for ways to customize the text output.
-[GoRecv] public static slice<byte> Text(this ref Printer p, ж<Doc> Ꮡd) {
-    ref var d = ref Ꮡd.val;
+public static slice<byte> Text(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
+    ref var p = ref Ꮡp.Value;
+    ref var d = ref Ꮡd.Value;
 
     var tp = Ꮡ(new textPrinter(
-        Printer: p,
+        Printer: Ꮡp,
         prefix: p.TextPrefix,
         codePrefix: p.TextCodePrefix,
         width: p.TextWidth
     ));
     if ((~tp).codePrefix == ""u8) {
-        tp.val.codePrefix = p.TextPrefix + "\t"u8;
+        tp.Value.codePrefix = p.TextPrefix + "\t"u8;
     }
     if ((~tp).width == 0) {
-        tp.val.width = 80 - utf8.RuneCountInString((~tp).prefix);
+        tp.Value.width = 80 - utf8.RuneCountInString((~tp).prefix);
     }
-    ref var out = ref heap(new bytes_package.Buffer(), out var Ꮡout);
+    ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
     foreach (var (i, x) in d.Content) {
         if (i > 0 && blankBefore(x)) {
             @out.WriteString((~tp).prefix);
-            writeNL(Ꮡ@out);
+            writeNL(Ꮡout);
         }
-        tp.block(Ꮡ@out, x);
+        tp.block(Ꮡout, x);
     }
     var anyUsed = false;
     foreach (var (_, def) in d.Links) {
@@ -54,10 +56,10 @@ partial class comment_package {
         }
     }
     if (anyUsed) {
-        writeNL(Ꮡ@out);
+        writeNL(Ꮡout);
         foreach (var (_, def) in d.Links) {
             if ((~def).Used) {
-                fmt.Fprintf(~Ꮡ@out, "[%s]: %s\n"u8, (~def).Text, (~def).URL);
+                fmt.Fprintf(new bytes_BufferжWriter(Ꮡout), "[%s]: %s\n"u8, (~def).Text, (~def).URL);
             }
         }
     }
@@ -67,7 +69,7 @@ partial class comment_package {
 // writeNL calls out.WriteByte('\n')
 // but first trims trailing spaces on the previous line.
 internal static void writeNL(ж<bytes.Buffer> Ꮡout) {
-    ref var @out = ref Ꮡout.val;
+    ref var @out = ref Ꮡout.Value;
 
     // Trim trailing spaces.
     var data = @out.Bytes();
@@ -82,28 +84,29 @@ internal static void writeNL(ж<bytes.Buffer> Ꮡout) {
 }
 
 // block prints the block x to out.
-[GoRecv] internal static void block(this ref textPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
-    ref var @out = ref Ꮡout.val;
+internal static void block(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) {
+    ref var p = ref Ꮡp.Value;
+    ref var @out = ref Ꮡout.Value;
 
     switch (x.type()) {
     default: {
-        var x = x.type();
-        fmt.Fprintf(~@out, "?%T\n"u8, x);
+        var xΔ1 = x;
+        fmt.Fprintf(new bytes_BufferжWriter(Ꮡout), "?%T\n"u8, xΔ1);
         break;
     }
-    case Paragraph.val x: {
+    case ж<Paragraph> xΔ1: {
         @out.WriteString(p.prefix);
-        p.text(Ꮡout, ""u8, (~x).Text);
+        Ꮡp.text(Ꮡout, ""u8, (~xΔ1).Text);
         break;
     }
-    case Heading.val x: {
+    case ж<Heading> xΔ1: {
         @out.WriteString(p.prefix);
         @out.WriteString("# "u8);
-        p.text(Ꮡout, ""u8, (~x).Text);
+        Ꮡp.text(Ꮡout, ""u8, (~xΔ1).Text);
         break;
     }
-    case Code.val x: {
-        @string text = x.val.Text;
+    case ж<Code> xΔ1: {
+        @string text = xΔ1.Value.Text;
         while (text != ""u8) {
             @string line = default!;
             (line, text, _) = strings.Cut(text, "\n"u8);
@@ -115,9 +118,9 @@ internal static void writeNL(ж<bytes.Buffer> Ꮡout) {
         }
         break;
     }
-    case List.val x: {
-        var loose = x.BlankBetween();
-        foreach (var (i, item) in (~x).Items) {
+    case ж<List> xΔ1: {
+        var loose = xΔ1.BlankBetween();
+        foreach (var (i, item) in (~xΔ1).Items) {
             if (i > 0 && loose) {
                 @out.WriteString(p.prefix);
                 writeNL(Ꮡout);
@@ -137,7 +140,7 @@ internal static void writeNL(ж<bytes.Buffer> Ꮡout) {
                     @out.WriteString(p.prefix);
                     @out.WriteString(fourSpace);
                 }
-                p.text(Ꮡout, fourSpace, blk._<Paragraph.val>().Text);
+                Ꮡp.text(Ꮡout, fourSpace, (~blk._<ж<Paragraph>>()).Text);
             }
         }
         break;
@@ -145,10 +148,11 @@ internal static void writeNL(ж<bytes.Buffer> Ꮡout) {
 }
 
 // text prints the text sequence x to out.
-[GoRecv] internal static void text(this ref textPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<ΔText> x) {
-    ref var @out = ref Ꮡout.val;
+internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @string indent, slice<ΔText> x) {
+    ref var p = ref Ꮡp.Value;
+    ref var @out = ref Ꮡout.Value;
 
-    p.oneLongLine(Ꮡ(p.@long), x);
+    p.oneLongLine(Ꮡp.of(textPrinter.Ꮡlong), x);
     var words = strings.Fields(p.@long.String());
     p.@long.Reset();
     slice<nint> seq = default!;
@@ -177,24 +181,24 @@ internal static void writeNL(ж<bytes.Buffer> Ꮡout) {
 // without worrying about line wrapping.
 // Explicit links have the [ ] dropped to improve readability.
 [GoRecv] internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> Ꮡout, slice<ΔText> x) {
-    ref var @out = ref Ꮡout.val;
+    ref var @out = ref Ꮡout.Value;
 
     foreach (var (_, t) in x) {
         switch (t.type()) {
-        case Plain t: {
-            @out.WriteString(((@string)t));
+        case Plain tΔ1: {
+            Ꮡout.WriteString(((@string)tΔ1));
             break;
         }
-        case Italic t: {
-            @out.WriteString(((@string)t));
+        case Italic tΔ1: {
+            Ꮡout.WriteString(((@string)tΔ1));
             break;
         }
-        case Link.val t: {
-            p.oneLongLine(Ꮡout, (~t).Text);
+        case ж<Link> tΔ1: {
+            p.oneLongLine(Ꮡout, (~tΔ1).Text);
             break;
         }
-        case DocLink.val t: {
-            p.oneLongLine(Ꮡout, (~t).Text);
+        case ж<DocLink> tΔ1: {
+            p.oneLongLine(Ꮡout, (~tΔ1).Text);
             break;
         }}
     }
@@ -252,19 +256,19 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
     // We care about ending in punctuation characters because
     // it makes the text easier to skim if not too many sentences
     // or phrases begin with a single word on the previous line.
-    var add = (wrap_score s, wrap_score t) => new score(s.hi + t.hi, s.lo + t.lo);
+    var add = (wrap_score s, wrap_score t) => new wrap_score(s.hi + t.hi, s.lo + t.lo);
     var cmp = (wrap_score s, wrap_score t) => {
         switch (ᐧ) {
-        case {} when s.hi is < t.hi: {
+        case {} when s.hi < t.hi: {
             return -1;
         }
-        case {} when s.hi is > t.hi: {
+        case {} when s.hi > t.hi: {
             return +1;
         }
-        case {} when s.lo is < t.lo: {
+        case {} when s.lo < t.lo: {
             return -1;
         }
-        case {} when s.lo is > t.lo: {
+        case {} when s.lo > t.lo: {
             return +1;
         }}
 
@@ -278,51 +282,47 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
         total[1 + i] = total[i] + utf8.RuneCountInString(s) + 1;
     }
     // weight returns weight(i, j).
-    var weight = 
     var totalʗ1 = total;
     var wordsʗ1 = words;
-    (nint i, nint j) => {
+    var weight = (nint i, nint j) => {
         // On the last line, there is zero weight for being too short.
         nint nΔ1 = totalʗ1[j] - 1 - totalʗ1[i];
         if (j == len(wordsʗ1) && nΔ1 <= max) {
-            return new score(0, 0);
+            return new wrap_score(0, 0);
         }
         // Otherwise the weight is the penalty plus the square of the number of
         // characters remaining on the line or by which the line goes over.
         // In the latter case, that value goes in the hi part of the score.
         // (See note above.)
         var p = wrapPenalty(wordsʗ1[j - 1]);
-        var v = ((int64)(max - nΔ1)) * ((int64)(max - nΔ1));
+        var v = (int64)(max - nΔ1) * (int64)(max - nΔ1);
         if (nΔ1 > max) {
-            return new score(v, p);
+            return new wrap_score(v, p);
         }
-        return new score(0, v + p);
+        return new wrap_score(0, v + p);
     };
     // The rest of this function is “The Basic Algorithm” from
     // Hirschberg and Larmore's conference paper,
     // using the same names as in the paper.
-    var f = new score[]{new(0, 0)}.slice();
-    var g = 
+    ref var f = ref heap<slice<wrap_score>>(out var Ꮡf);
+    f = new wrap_score[]{new(0, 0)}.slice();
     var addʗ1 = add;
-    var fʗ1 = f;
     var weightʗ1 = weight;
-    (nint i, nint j) => addʗ1(fʗ1[i], weightʗ1(i, j));
-    var bridge = 
+    var g = (nint i, nint j) => addʗ1(Ꮡf.ValueSlot[i], weightʗ1(i, j));
     var cmpʗ1 = cmp;
     var gʗ1 = g;
     var wordsʗ2 = words;
-    (nint a, nint b, nint c) => {
-        nint k = c + sort.Search(len(wordsʗ2) + 1 - c, 
-        var cmpʗ2 = cmp;
-        var gʗ2 = g;
-        (nint k) => {
+    var bridge = (nint a, nint b, nint c) => {
+        var cmpʗ2 = cmpʗ1;
+        var gʗ2 = gʗ1;
+        nint k = c + sort.Search(len(wordsʗ2) + 1 - c, (nint kΔ1) => {
             kΔ1 += c;
             return cmpʗ2(gʗ2(a, kΔ1), gʗ2(b, kΔ1)) > 0;
         });
-        if (k > len(words)) {
+        if (k > len(wordsʗ2)) {
             return true;
         }
-        return cmp(g(c, k), g(b, k)) <= 0;
+        return cmpʗ1(gʗ1(c, k), gʗ1(b, k)) <= 0;
     };
     // d is a one-ended deque implemented as a slice.
     var d = new slice<nint>(1, len(words));

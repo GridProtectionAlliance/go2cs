@@ -28,29 +28,29 @@ partial class pprof_package {
 
 [GoRecv] internal static ж<profMapEntry> lookup(this ref profMap m, slice<uint64> stk, @unsafe.Pointer tag) {
     // Compute hash of (stk, tag).
-    var h = ((uintptr)0);
+    var h = (uintptr)0;
     foreach (var (_, x) in stk) {
-        h = (uintptr)(h << (int)(8) | (h >> (int)((8 * (@unsafe.Sizeof(h) - 1)))));
-        h += ((uintptr)x) * 41;
+        h = (uintptr)((h << (int)(8)) | ((h >> (int)((8 * (@unsafe.Sizeof(h) - 1))))));
+        h += (uintptr)x * 41;
     }
-    h = (uintptr)(h << (int)(8) | (h >> (int)((8 * (@unsafe.Sizeof(h) - 1)))));
-    h += ((uintptr)tag) * 41;
+    h = (uintptr)((h << (int)(8)) | ((h >> (int)((8 * (@unsafe.Sizeof(h) - 1))))));
+    h += (uintptr)tag * 41;
     // Find entry if present.
     ж<profMapEntry> last = default!;
 Search:
-    for (var eΔ1 = m.hash[h]; eΔ1 != nil; (last, ) = (eΔ1, eΔ1.val.nextHash)) {
-        if (len((~eΔ1).stk) != len(stk) || (~eΔ1).tag != tag.val) {
+    for (var eΔ1 = m.hash[h]; eΔ1 != nil; (last, eΔ1) = (eΔ1, eΔ1.Value.nextHash)) {
+        if (len((~eΔ1).stk) != len(stk) || (~eΔ1).tag != tag.Value) {
             continue;
         }
         foreach (var (j, _) in stk) {
-            if ((~eΔ1).stk[j] != ((uintptr)stk[j])) {
+            if ((~eΔ1).stk[j] != (uintptr)stk[j]) {
                 goto continue_Search;
             }
         }
         // Move to front.
         if (last != nil) {
-            last.val.nextHash = eΔ1.val.nextHash;
-            .val.nextHash = m.hash[h];
+            last.Value.nextHash = eΔ1.Value.nextHash;
+            eΔ1.Value.nextHash = m.hash[h];
             m.hash[h] = eΔ1;
         }
         return eΔ1;
@@ -63,16 +63,16 @@ break_Search:;
     }
     var e = Ꮡ(m.free[0]);
     m.free = m.free[1..];
-    e.val.nextHash = m.hash[h];
-    e.val.tag = tag;
+    e.Value.nextHash = m.hash[h];
+    e.Value.tag = tag;
     if (len(m.freeStk) < len(stk)) {
         m.freeStk = new slice<uintptr>(1024);
     }
     // Limit cap to prevent append from clobbering freeStk.
-    e.val.stk = m.freeStk.slice(-1, len(stk), len(stk));
+    e.Value.stk = m.freeStk.slice(-1, len(stk), len(stk));
     m.freeStk = m.freeStk[(int)(len(stk))..];
     foreach (var (j, _) in stk) {
-        (~e).stk[j] = ((uintptr)stk[j]);
+        e.Value.stk[j] = (uintptr)stk[j];
     }
     if (m.hash == default!) {
         m.hash = new map<uintptr, ж<profMapEntry>>();
@@ -82,7 +82,7 @@ break_Search:;
         m.all = e;
         m.last = e;
     } else {
-        m.last.nextAll = e;
+        m.last.Value.nextAll = e;
         m.last = e;
     }
     return e;

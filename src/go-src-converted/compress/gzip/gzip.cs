@@ -3,12 +3,14 @@
 // license that can be found in the LICENSE file.
 namespace go.compress;
 
-using flate = compress.flate_package;
+using flate = go.compress.flate_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using crc32 = hash.crc32_package;
 using io = io_package;
 using time = time_package;
+using encoding;
+using go.compress;
 using hash;
 
 partial class gzip_package {
@@ -21,22 +23,20 @@ public static readonly UntypedInt BestSpeed = /* flate.BestSpeed */ 1;
 
 public static readonly UntypedInt BestCompression = /* flate.BestCompression */ 9;
 
-public static readonly GoUntyped DefaultCompression = /* flate.DefaultCompression */
-    GoUntyped.Parse("-1");
+public static readonly UntypedInt DefaultCompression = /* flate.DefaultCompression */ -1;
 
-public static readonly GoUntyped HuffmanOnly = /* flate.HuffmanOnly */
-    GoUntyped.Parse("-2");
+public static readonly UntypedInt HuffmanOnly = /* flate.HuffmanOnly */ -2;
 
 // A Writer is an io.WriteCloser.
 // Writes to a Writer are compressed and written to w.
 [GoType] partial struct Writer {
     public partial ref Header Header { get; }      // written at first call to Write, Flush, or Close
-    internal io_package.Writer w;
+    internal io.Writer w;
     internal nint level;
     internal bool wroteHeader;
     internal bool closed;
     internal array<byte> buf = new(10);
-    internal ж<compress.flate_package.Writer> compressor;
+    internal ж<flate.Writer> compressor;
     internal uint32 digest; // CRC-32, IEEE polynomial (section 8)
     internal uint32 size; // Uncompressed size (section 2.3.1)
     internal error err;
@@ -51,7 +51,7 @@ public static readonly GoUntyped HuffmanOnly = /* flate.HuffmanOnly */
 // Callers that wish to set the fields in Writer.Header must do so before
 // the first call to Write, Flush, or Close.
 public static ж<Writer> NewWriter(io.Writer w) {
-    (z, _) = NewWriterLevel(w, DefaultCompression);
+    var (z, _) = NewWriterLevel(w, DefaultCompression);
     return z;
 }
 
@@ -96,10 +96,10 @@ public static (ж<Writer>, error) NewWriterLevel(io.Writer w, nint level) {
 
 // writeBytes writes a length-prefixed byte slice to z.w.
 [GoRecv] internal static error writeBytes(this ref Writer z, slice<byte> b) {
-    if (len(b) > 65535) {
+    if (len(b) > 0xffff) {
         return errors.New("gzip.Write: Extra data is too large"u8);
     }
-    le.PutUint16(z.buf[..2], ((uint16)len(b)));
+    le.PutUint16(z.buf[..2], (uint16)len(b));
     var (_, err) = z.w.Write(z.buf[..2]);
     if (err != default!) {
         return err;
@@ -116,17 +116,17 @@ public static (ж<Writer>, error) NewWriterLevel(io.Writer w, nint level) {
     // GZIP stores Latin-1 strings; error if non-Latin-1; convert if non-ASCII.
     var needconv = false;
     foreach (var (_, v) in s) {
-        if (v == 0 || v > 255) {
+        if (v == 0 || v > 0xff) {
             return errors.New("gzip.Write: non-Latin-1 header string"u8);
         }
-        if (v > 127) {
+        if (v > 0x7f) {
             needconv = true;
         }
     }
     if (needconv){
         var b = new slice<byte>(0, len(s));
         foreach (var (_, v) in s) {
-            b = append(b, ((byte)v));
+            b = append(b, (byte)v);
         }
         (_, err) = z.w.Write(b);
     } else {
@@ -153,18 +153,18 @@ public static (ж<Writer>, error) NewWriterLevel(io.Writer w, nint level) {
         z.wroteHeader = true;
         z.buf = new array<byte>(10){[0] = gzipID1, [1] = gzipID2, [2] = gzipDeflate};
         if (z.Extra != default!) {
-            z.buf[3] |= (byte)(4);
+            z.buf[3] |= (byte)(0x04);
         }
         if (z.Name != ""u8) {
-            z.buf[3] |= (byte)(8);
+            z.buf[3] |= (byte)(0x08);
         }
         if (z.Comment != ""u8) {
-            z.buf[3] |= (byte)(16);
+            z.buf[3] |= (byte)(0x10);
         }
         if (z.ModTime.After(time.Unix(0, 0))) {
             // Section 2.3.1, the zero value for MTIME means that the
             // modified time is not set.
-            le.PutUint32(z.buf[4..8], ((uint32)z.ModTime.Unix()));
+            le.PutUint32(z.buf[4..8], (uint32)z.ModTime.Unix());
         }
         if (z.level == BestCompression){
             z.buf[8] = 2;
@@ -199,7 +199,7 @@ public static (ж<Writer>, error) NewWriterLevel(io.Writer w, nint level) {
             (z.compressor, _) = flate.NewWriter(z.w, z.level);
         }
     }
-    z.size += ((uint32)len(p));
+    z.size += (uint32)len(p);
     z.digest = crc32.Update(z.digest, crc32.IEEETable, p);
     (n, z.err) = z.compressor.Write(p);
     return (n, z.err);

@@ -38,7 +38,7 @@ partial class pe_package {
     if (err != default!) {
         return ("", err);
     }
-    return st.String(((uint32)i));
+    return st.String((uint32)i);
 }
 
 // TODO(brainman): copy all IMAGE_REL_* consts from ldpe.go here
@@ -52,17 +52,17 @@ partial class pe_package {
 }
 
 internal static (slice<Reloc>, error) readRelocs(ж<SectionHeader> Ꮡsh, io.ReadSeeker r) {
-    ref var sh = ref Ꮡsh.val;
+    ref var sh = ref Ꮡsh.Value;
 
     if (sh.NumberOfRelocations <= 0) {
         return (default!, default!);
     }
-    var (_, err) = r.Seek(((int64)sh.PointerToRelocations), io.SeekStart);
+    var (_, err) = r.Seek((int64)sh.PointerToRelocations, io.SeekStart);
     if (err != default!) {
         return (default!, fmt.Errorf("fail to seek to %q section relocations: %v"u8, sh.Name, err));
     }
     var relocs = new slice<Reloc>(sh.NumberOfRelocations);
-    err = binary.Read(r, binary.LittleEndian, relocs);
+    err = binary.Read(r, new binary_littleEndianᴠByteOrder(binary.LittleEndian), relocs);
     if (err != default!) {
         return (default!, fmt.Errorf("fail to read section relocations: %v"u8, err));
     }
@@ -94,8 +94,8 @@ internal static (slice<Reloc>, error) readRelocs(ж<SectionHeader> Ꮡsh, io.Rea
     // If a client wants Read and Seek it must use
     // Open() to avoid fighting over the seek offset
     // with other clients.
-    public partial ref io_package.ReaderAt ReaderAt { get; }
-    internal ж<io_package.SectionReader> sr;
+    public io_package.ReaderAt ReaderAt;
+    internal ж<io.SectionReader> sr;
 }
 
 // Data reads and returns the contents of the PE section s.
@@ -103,7 +103,7 @@ internal static (slice<Reloc>, error) readRelocs(ж<SectionHeader> Ꮡsh, io.Rea
 // If s.Offset is 0, the section has no contents,
 // and Data will always return a non-nil error.
 [GoRecv] public static (slice<byte>, error) Data(this ref ΔSection s) {
-    return saferio.ReadDataAt(~s.sr, ((uint64)s.Size), 0);
+    return saferio.ReadDataAt(new io_SectionReaderжReaderAt(s.sr), (uint64)s.Size, 0);
 }
 
 // Open returns a new ReadSeeker reading the PE section s.
@@ -111,24 +111,24 @@ internal static (slice<Reloc>, error) readRelocs(ж<SectionHeader> Ꮡsh, io.Rea
 // If s.Offset is 0, the section has no contents, and all calls
 // to the returned reader will return a non-nil error.
 [GoRecv] public static io.ReadSeeker Open(this ref ΔSection s) {
-    return ~io.NewSectionReader(~s.sr, 0, 1 << (int)(63) - 1);
+    return new io_SectionReaderжReadSeeker(io.NewSectionReader(new io_SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
 }
 
 // Section characteristics flags.
-public static readonly UntypedInt IMAGE_SCN_CNT_CODE = /* 0x00000020 */ 32;
+public static readonly UntypedInt IMAGE_SCN_CNT_CODE = 0x00000020;
 
-public static readonly UntypedInt IMAGE_SCN_CNT_INITIALIZED_DATA = /* 0x00000040 */ 64;
+public static readonly UntypedInt IMAGE_SCN_CNT_INITIALIZED_DATA = 0x00000040;
 
-public static readonly UntypedInt IMAGE_SCN_CNT_UNINITIALIZED_DATA = /* 0x00000080 */ 128;
+public static readonly UntypedInt IMAGE_SCN_CNT_UNINITIALIZED_DATA = 0x00000080;
 
-public static readonly UntypedInt IMAGE_SCN_LNK_COMDAT = /* 0x00001000 */ 4096;
+public static readonly UntypedInt IMAGE_SCN_LNK_COMDAT = 0x00001000;
 
-public static readonly UntypedInt IMAGE_SCN_MEM_DISCARDABLE = /* 0x02000000 */ 33554432;
+public static readonly UntypedInt IMAGE_SCN_MEM_DISCARDABLE = 0x02000000;
 
-public static readonly UntypedInt IMAGE_SCN_MEM_EXECUTE = /* 0x20000000 */ 536870912;
+public static readonly UntypedInt IMAGE_SCN_MEM_EXECUTE = 0x20000000;
 
-public static readonly UntypedInt IMAGE_SCN_MEM_READ = /* 0x40000000 */ 1073741824;
+public static readonly UntypedInt IMAGE_SCN_MEM_READ = 0x40000000;
 
-public static readonly UntypedInt IMAGE_SCN_MEM_WRITE = /* 0x80000000 */ 2147483648;
+public static readonly UntypedInt IMAGE_SCN_MEM_WRITE = 0x80000000;
 
 } // end pe_package

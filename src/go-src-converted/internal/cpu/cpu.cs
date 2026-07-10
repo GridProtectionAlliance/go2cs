@@ -6,7 +6,7 @@
 // used by the Go standard library.
 namespace go.@internal;
 
-using _ = unsafe_package; // for linkname
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
 
 partial class cpu_package {
 
@@ -54,7 +54,8 @@ public static uintptr CacheLineSize = CacheLinePadSize;
     public bool HasSSE42;
     internal CacheLinePad __;
 }
-public static X86ᴛ1 X86;
+public static ж<X86ᴛ1> ᏑX86 = new(default(X86ᴛ1));
+public static ref X86ᴛ1 X86 => ref ᏑX86.Value;
 
 // The booleans in ARM contain the correspondingly named cpu feature bit.
 // The struct is padded to avoid false sharing.
@@ -182,7 +183,7 @@ field:
         @string field = ""u8;
         nint i = indexByte(env, (rune)',');
         if (i < 0){
-            (field, env) = (env, ""u8);
+            (field, env) = (env, "");
         } else {
             (field, env) = (env[..(int)(i)], env[(int)(i + 1)..]);
         }
@@ -232,11 +233,11 @@ break_field:;
         if (!o.Specified) {
             continue;
         }
-        if (o.Enable && !o.Feature.val) {
+        if (o.Enable && !o.Feature.Value) {
             print("GODEBUG: can not enable \"", o.Name, "\", missing CPU support\n");
             continue;
         }
-        o.Feature.val = o.Enable;
+        o.Feature.Value = o.Enable;
     }
 }
 

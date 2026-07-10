@@ -7,11 +7,12 @@
 namespace go.go;
 
 using fmt = fmt_package;
-using token = go.token_package;
+using token = global::go.go.token_package;
 using io = io_package;
 using sort = sort_package;
 using strings = strings_package;
 using sync = sync_package;
+using global::go.go;
 
 partial class types_package {
 
@@ -24,8 +25,7 @@ partial class types_package {
     internal slice<ж<ΔScope>> children;
     internal nint number;              // parent.children[number-1] is this scope; 0 if there is no parent
     internal map<@string, Object> elems; // lazily allocated
-    internal go.token_package.ΔPos pos;       // scope extent; may be invalid
-    internal go.token_package.ΔPos end;
+    internal tokenꓸPos pos, end;         // scope extent; may be invalid
     internal @string comment;           // for debugging only
     internal bool isFunc;              // set if this is a function scope (internal use only)
 }
@@ -33,13 +33,13 @@ partial class types_package {
 // NewScope returns a new, empty scope contained in the given parent
 // scope, if any. The comment is for debugging only.
 public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, tokenꓸPos end, @string comment) {
-    ref var parent = ref Ꮡparent.val;
+    ref var parent = ref Ꮡparent.DerefOrNil();
 
     var s = Ꮡ(new ΔScope(Ꮡparent, default!, 0, default!, pos, end, comment, false));
     // don't add children to Universe scope!
-    if (parent != nil && Ꮡparent != Universe) {
+    if (Ꮡparent != nil && Ꮡparent != Universe) {
         parent.children = append(parent.children, s);
-        s.val.number = len(parent.children);
+        s.Value.number = len(parent.children);
     }
     return s;
 }
@@ -88,8 +88,8 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
     // s.elems. The only external API to access scope elements is Lookup.
     //
     // TODO: remove this once gotypesalias=0 is no longer supported.
-    if (Ꮡobj == ~universeAnyAlias && !aliasAny()) {
-        return ~universeAnyNoAlias;
+    if (AreEqual(obj, universeAnyAlias) && !aliasAny()) {
+        return new TypeNameжObject(universeAnyNoAlias);
     }
     return obj;
 }
@@ -104,11 +104,14 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
 // object was inserted into the scope and already had a parent at that
 // time (see Insert). This can only happen for dot-imported objects
 // whose scope is the scope of the package that exported them.
-[GoRecv("capture")] public static (ж<ΔScope>, Object) LookupParent(this ref ΔScope s, @string name, tokenꓸPos pos) {
-    for (; s != nil; s = s.parent) {
+public static (ж<ΔScope>, Object) LookupParent(this ж<ΔScope> Ꮡs, @string name, tokenꓸPos pos) {
+    ref var s = ref Ꮡs.Value;
+
+    for (; s != nil; Ꮡs = s.parent) {
+        s = ref Ꮡs.Value;
         {
             var obj = s.Lookup(name); if (obj != default! && (!pos.IsValid() || cmpPos(obj.scopePos(), pos) <= 0)) {
-                return (LookupParentꓸᏑs, obj);
+                return (Ꮡs, obj);
             }
         }
     }
@@ -120,7 +123,9 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
 // the same name, Insert leaves s unchanged and returns alt.
 // Otherwise it inserts obj, sets the object's parent scope
 // if not already set, and returns nil.
-[GoRecv] public static Object Insert(this ref ΔScope s, Object obj) {
+public static Object Insert(this ж<ΔScope> Ꮡs, Object obj) {
+    ref var s = ref Ꮡs.Value;
+
     @string name = obj.Name();
     {
         var alt = s.Lookup(name); if (alt != default!) {
@@ -129,7 +134,7 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
     }
     s.insert(name, obj);
     if (obj.Parent() == nil) {
-        obj.setParent(s);
+        obj.setParent(Ꮡs);
     }
     return default!;
 }
@@ -141,11 +146,13 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
 // InsertLazy leaves s unchanged and returns false. Otherwise it
 // records the binding and returns true. The object's parent scope
 // will be set to s after resolve is called.
-[GoRecv] internal static bool _InsertLazy(this ref ΔScope s, @string name, Func<Object> resolve) {
+internal static bool _InsertLazy(this ж<ΔScope> Ꮡs, @string name, Func<Object> resolve) {
+    ref var s = ref Ꮡs.Value;
+
     if (s.elems[name] != default!) {
         return false;
     }
-    s.insert(name, new lazyObject(parent: s, resolve: resolve));
+    s.insert(name, new lazyObjectжObject(Ꮡ(new lazyObject(parent: Ꮡs, resolve: resolve))));
     return true;
 }
 
@@ -162,10 +169,14 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
 // The function f is called for each object obj in s which
 // has an object alt in p. s should be discarded after
 // having been squashed.
-[GoRecv] internal static void squash(this ref ΔScope s, types.Object) err) {
+internal static void squash(this ж<ΔScope> Ꮡs, Action<Object, Object> err) {
+    ref var s = ref Ꮡs.Value;
+
     var p = s.parent;
     assert(p != nil);
-    foreach (var (name, obj) in s.elems) {
+    foreach (var (name, vᴛ1) in s.elems) {
+        var obj = vᴛ1;
+
         obj = resolve(name, obj);
         obj.setParent(nil);
         {
@@ -177,16 +188,16 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
     nint j = -1;
     // index of s in p.children
     foreach (var (i, ch) in (~p).children) {
-        if (ch == s) {
+        if (ch == Ꮡs) {
             j = i;
             break;
         }
     }
     assert(j >= 0);
     nint k = len((~p).children) - 1;
-    (~p).children[j] = (~p).children[k];
-    p.val.children = (~p).children[..(int)(k)];
-    p.val.children = append((~p).children, s.children.ꓸꓸꓸ);
+    p.Value.children[j] = (~p).children[k];
+    p.Value.children = (~p).children[..(int)(k)];
+    p.Value.children = append((~p).children, s.children.ꓸꓸꓸ);
     s.children = default!;
     s.elems = default!;
 }
@@ -215,7 +226,9 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
 // The result is also nil for the Universe scope.
 // The result is guaranteed to be valid only if the type-checked
 // AST has complete position information.
-[GoRecv("capture")] public static ж<ΔScope> Innermost(this ref ΔScope s, tokenꓸPos pos) {
+public static ж<ΔScope> Innermost(this ж<ΔScope> Ꮡs, tokenꓸPos pos) {
+    ref var s = ref Ꮡs.Value;
+
     // Package scopes do not have extents since they may be
     // discontiguous, so iterate over the package's files.
     if (s.parent == Universe) {
@@ -233,7 +246,7 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
                 return sΔ2.Innermost(pos);
             }
         }
-        return InnermostꓸᏑs;
+        return Ꮡs;
     }
     return default!;
 }
@@ -243,7 +256,9 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
 // The level of indentation is controlled by n >= 0, with
 // n == 0 for no indentation.
 // If recurse is set, it also writes nested (children) scopes.
-[GoRecv] public static void WriteTo(this ref ΔScope s, io.Writer w, nint n, bool recurse) {
+public static void WriteTo(this ж<ΔScope> Ꮡs, io.Writer w, nint n, bool recurse) {
+    ref var s = ref Ꮡs.Value;
+
     @string ind = ".  "u8;
     @string indn = strings.Repeat(ind, n);
     fmt.Fprintf(w, "%s%s scope %p {\n"u8, indn, s.comment, s);
@@ -260,9 +275,11 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
 }
 
 // String returns a string representation of the scope, for debugging.
-[GoRecv] public static @string String(this ref ΔScope s) {
-    ref var buf = ref heap(new strings_package.Builder(), out var Ꮡbuf);
-    s.WriteTo(~Ꮡbuf, 0, false);
+public static @string String(this ж<ΔScope> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
+    Ꮡs.WriteTo(new strings_BuilderжWriter(Ꮡbuf), 0, false);
     return buf.String();
 }
 
@@ -272,20 +289,19 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
     internal ж<ΔScope> parent;
     internal Func<Object> resolve;
     internal Object obj;
-    internal sync_package.Once once;
+    internal sync.Once once;
 }
 
 // resolve returns the Object represented by obj, resolving lazy
 // objects as appropriate.
 internal static Object resolve(@string name, Object obj) {
     {
-        var (lazy, ok) = obj._<lazyObject.val>(ᐧ); if (ok) {
-            (~lazy).once.Do(
-            var lazyʗ2 = lazy;
-            () => {
-                var objΔ1 = (~lazyʗ2).resolve();
+        var (lazy, ok) = obj._<ж<lazyObject>>(ᐧ); if (ok) {
+            var lazyʗ1 = lazy;
+            lazy.of(lazyObject.Ꮡonce).Do(() => {
+                var objΔ1 = (~lazyʗ1).resolve();
                 {
-                    var (_, okΔ1) = obj._<lazyObject.val>(ᐧ); if (okΔ1) {
+                    var (_, okΔ1) = objΔ1._<ж<lazyObject>>(ᐧ); if (okΔ1) {
                         throw panic("recursive lazy object");
                     }
                 }
@@ -293,11 +309,11 @@ internal static Object resolve(@string name, Object obj) {
                     throw panic("lazy object has unexpected name");
                 }
                 if (objΔ1.Parent() == nil) {
-                    objΔ1.setParent((~lazyʗ2).parent);
+                    objΔ1.setParent((~lazyʗ1).parent);
                 }
-                lazyʗ2.val.obj = objΔ1;
+                lazyʗ1.Value.obj = objΔ1;
             });
-            obj = lazy.val.obj;
+            obj = lazy.Value.obj;
         }
     }
     return obj;
@@ -345,11 +361,11 @@ internal static Object resolve(@string name, Object obj) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static void setType(this ref lazyObject _, ΔType _) {
+[GoRecv] internal static void setType(this ref lazyObject _Δp0, ΔType _Δp1) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static void setOrder(this ref lazyObject _, uint32 _) {
+[GoRecv] internal static void setOrder(this ref lazyObject _Δp0, uint32 _Δp1) {
     throw panic("unreachable");
 }
 
@@ -357,15 +373,11 @@ internal static Object resolve(@string name, Object obj) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static void setParent(this ref lazyObject , ж<ΔScope> Ꮡ) {
-    ref var  = ref Ꮡ.val;
-
+[GoRecv] internal static void setParent(this ref lazyObject _Δp0, ж<ΔScope> _Δp1) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static bool sameId(this ref lazyObject , ж<Package> Ꮡ, @string , bool ) {
-    ref var  = ref Ꮡ.val;
-
+[GoRecv] internal static bool sameId(this ref lazyObject _Δp0, ж<Package> _Δp1, @string _Δp2, bool _Δp3) {
     throw panic("unreachable");
 }
 
@@ -373,7 +385,7 @@ internal static Object resolve(@string name, Object obj) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static void setScopePos(this ref lazyObject _, tokenꓸPos _) {
+[GoRecv] internal static void setScopePos(this ref lazyObject _Δp0, tokenꓸPos _Δp1) {
     throw panic("unreachable");
 }
 

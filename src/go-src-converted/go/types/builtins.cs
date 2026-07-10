@@ -6,11 +6,12 @@
 // This file implements typechecking of builtin function calls.
 namespace go.go;
 
-using ast = go.ast_package;
-using constant = go.constant_package;
-using token = go.token_package;
-using static @internal.types.errors_package;
-using ꓸꓸꓸΔType = Span<ΔType>;
+using ast = global::go.go.ast_package;
+using constant = global::go.go.constant_package;
+using token = global::go.go.token_package;
+using static global::go.@internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
+using global::go.go;
 
 partial class types_package {
 
@@ -18,19 +19,20 @@ partial class types_package {
 // reports whether the call is valid, with *x holding the result;
 // but x.expr is not set. If the call is invalid, the result is
 // false, and *x is undefined.
-[GoRecv] public static bool /*_*/ builtin(this ref Checker check, ж<operand> Ꮡx, ж<ast.CallExpr> Ꮡcall, builtinId id) => func((defer, _) => {
-    ref var x = ref Ꮡx.val;
-    ref var call = ref Ꮡcall.val;
+internal static bool /*_*/ builtin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CallExpr> Ꮡcall, builtinId id) => func<bool /*_*/>((defer, recover) => {
+    ref var check = ref Ꮡcheck.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var call = ref Ꮡcall.Value;
 
     var argList = call.Args;
     // append is the only built-in that permits the use of ... for the last argument
     var bin = predeclaredFuncs[id];
     if (hasDots(Ꮡcall) && id != _Append) {
-        check.errorf(dddErrPos(Ꮡcall),
+        Ꮡcheck.errorf(dddErrPos(Ꮡcall),
             InvalidDotDotDot,
             invalidOp + "invalid use of ... with built-in %s", bin.name);
-        check.use(argList.ꓸꓸꓸ);
-        return _;
+        Ꮡcheck.use(argList.ꓸꓸꓸ);
+        return default!;
     }
     // For len(x) and cap(x) we need to know if x contains any function calls or
     // receive operations. Save/restore current setting and set hasCallOrRecv to
@@ -39,8 +41,8 @@ partial class types_package {
     //       all arguments.
     if (id == _Len || id == _Cap) {
         deferǃ((bool b) => {
-            check.hasCallOrRecv = b;
-        }, check.hasCallOrRecv, defer);
+            Ꮡcheck.Value.hasCallOrRecv = b;
+        }, Ꮡcheck.Value.hasCallOrRecv, defer);
         check.hasCallOrRecv = false;
     }
     // Evaluate arguments for built-ins that use ordinary (value) arguments.
@@ -49,22 +51,22 @@ partial class types_package {
     slice<ж<operand>> args = default!;                  // not valid for _Make, _New, _Offsetof, _Trace
     nint nargs = default!;
     var exprᴛ1 = id;
-    { /* default: */
-        args = check.exprList(argList);
+    if (exprᴛ1 == _Make || exprᴛ1 == _New || exprᴛ1 == _Offsetof || exprᴛ1 == _Trace) {
+        nargs = len(argList);
+    }
+    else { /* default: */
+        args = Ꮡcheck.exprList(argList);
         nargs = len(args);
         foreach (var (_, a) in args) {
             // check all arguments
             if ((~a).mode == invalid) {
-                return _;
+                return default!;
             }
         }
         if (nargs > 0) {
             // first argument is always in x
-            x = args[0].val;
+            x = args[0].Value;
         }
-    }
-    else if (exprᴛ1 == _Make || exprᴛ1 == _New || exprᴛ1 == _Offsetof || exprᴛ1 == _Trace) {
-        nargs = len(argList);
     }
 
     // arguments require special handling
@@ -78,102 +80,105 @@ partial class types_package {
             msg = "too many"u8;
         }
         if (msg != ""u8) {
-            check.errorf(argErrPos(Ꮡcall), WrongArgCount, invalidOp + "%s arguments for %v (expected %d, found %d)", msg, call, bin.nargs, nargs);
-            return _;
+            Ꮡcheck.errorf(argErrPos(Ꮡcall), WrongArgCount, invalidOp + "%s arguments for %v (expected %d, found %d)", msg, call, bin.nargs, nargs);
+            return default!;
         }
     }
     var exprᴛ2 = id;
     if (exprᴛ2 == _Append) {
-        var S = x.typ;
+        do {
+            var S = x.typ;
 // append(s S, x ...T) S, where T is the element type of S
 // spec: "The variadic function append appends zero or more values x to s of type
 // S, which must be a slice type, and returns the resulting slice, also of type S.
 // The values x are passed to a parameter of type ...T where T is the element type
 // of S and the respective parameter passing rules apply."
-        ΔType T = default!;
-        {
-            var (s, _) = coreType(S)._<Slice.val>(ᐧ); if (s != nil){
-                T = s.val.elem;
-            } else {
-                @string cause = default!;
-                switch (ᐧ) {
-                case {} when x.isNil(): {
-                    cause = "have untyped nil"u8;
-                    break;
-                }
-                case {} when isTypeParam(S): {
-                    {
-                        var u = coreType(S); if (u != default!){
-                            cause = check.sprintf("%s has core type %s"u8, x, u);
-                        } else {
-                            cause = check.sprintf("%s has no core type"u8, x);
-                        }
-                    }
-                    break;
-                }
-                default: {
-                    cause = check.sprintf("have %s"u8, x);
-                    break;
-                }}
-
-                // don't use invalidArg prefix here as it would repeat "argument" in the error message
-                check.errorf(~x, InvalidAppend, "first argument to append must be a slice; %s"u8, cause);
-                return _;
-            }
-        }
-        if (nargs == 2 && hasDots(Ꮡcall)) {
-            // spec: "As a special case, append also accepts a first argument assignable
-            // to type []byte with a second argument of string type followed by ... .
-            // This form appends the bytes of the string.
+            ΔType T = default!;
             {
-                var (ok, _) = x.assignableTo(check, ~NewSlice(universeByte), nil); if (ok) {
-                    var y = args[1];
-                    {
-                        var tΔ5 = coreString((~y).typ); if (tΔ5 != default! && isString(tΔ5)) {
-                            if (check.recordTypes()) {
-                                var sig = makeSig(S, S, (~y).typ);
-                                sig.val.variadic = true;
-                                check.recordBuiltinType(call.Fun, sig);
+                var (s, _) = coreType(S)._<ж<Slice>>(ᐧ); if (s != nil){
+                    T = s.Value.elem;
+                } else {
+                    @string cause = default!;
+                    switch (ᐧ) {
+                    case {} when x.isNil(): {
+                        cause = "have untyped nil"u8;
+                        break;
+                    }
+                    case {} when isTypeParam(S): {
+                        {
+                            var u = coreType(S); if (u != default!){
+                                cause = Ꮡcheck.sprintf("%s has core type %s"u8, x, u);
+                            } else {
+                                cause = Ꮡcheck.sprintf("%s has no core type"u8, x);
                             }
-                            x.mode = value;
-                            x.typ = S;
-                            break;
+                        }
+                        break;
+                    }
+                    default: {
+                        cause = Ꮡcheck.sprintf("have %s"u8, x);
+                        break;
+                    }}
+
+                    // don't use invalidArg prefix here as it would repeat "argument" in the error message
+                    Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidAppend, "first argument to append must be a slice; %s"u8, cause);
+                    return default!;
+                }
+            }
+            if (nargs == 2 && hasDots(Ꮡcall)) {
+                // spec: "As a special case, append also accepts a first argument assignable
+                // to type []byte with a second argument of string type followed by ... .
+                // This form appends the bytes of the string.
+                {
+                    var (ok, _) = Ꮡx.assignableTo(Ꮡcheck, new SliceжΔType(NewSlice(universeByte)), nil); if (ok) {
+                        var y = args[1];
+                        {
+                            var t = coreString((~y).typ); if (t != default! && isString(t)) {
+                                if (check.recordTypes()) {
+                                    var sigΔ1 = makeSig(S, S, (~y).typ);
+                                    sigΔ1.Value.variadic = true;
+                                    check.recordBuiltinType(call.Fun, sigΔ1);
+                                }
+                                x.mode = value;
+                                x.typ = S;
+                                break;
+                            }
                         }
                     }
                 }
             }
-        }
-        var sig = makeSig(S, // check general case by creating custom signature
- S, NewSlice(T));
-        sig.val.variadic = true;
-        check.arguments(Ꮡcall, // []T required for variadic signature
+            var sig = makeSig(S, // check general case by creating custom signature
+ S, new SliceжΔType(NewSlice(T)));
+            sig.Value.variadic = true;
+            Ꮡcheck.arguments(Ꮡcall, // []T required for variadic signature
  sig, default!, default!, args, default!, default!);
-        x.mode = value;
-        x.typ = S;
-        if (check.recordTypes()) {
-            // discard result (we know the result type)
-            // ok to continue even if check.arguments reported errors
-            check.recordBuiltinType(call.Fun, sig);
-        }
+            x.mode = value;
+            x.typ = S;
+            if (check.recordTypes()) {
+                // discard result (we know the result type)
+                // ok to continue even if check.arguments reported errors
+                check.recordBuiltinType(call.Fun, sig);
+            }
+        } while (false);
     }
     else if (exprᴛ2 == _Cap || exprᴛ2 == _Len) {
         var mode = invalid;
 // cap(x)
 // len(x)
         constant.Value val = default!;
-        switch (arrayPtrDeref(under(x.typ)).type()) {
-        case Basic.val t: {
-            if (isString(~t) && id == _Len) {
+        var switchᴛ1 = arrayPtrDeref(under(x.typ));
+        switch (switchᴛ1.type()) {
+        case ж<Basic> t: {
+            if (isString(new BasicжΔType(t)) && id == _Len) {
                 if (x.mode == constant_){
                     mode = constant_;
-                    val = constant.MakeInt64(((int64)len(constant.StringVal(x.val))));
+                    val = constant.MakeInt64((int64)len(constant.StringVal(x.val)));
                 } else {
                     mode = value;
                 }
             }
             break;
         }
-        case Array.val t: {
+        case ж<Array> t: {
             mode = value;
             if (!check.hasCallOrRecv) {
                 // spec: "The expressions len(s) and cap(s) are constants
@@ -189,42 +194,38 @@ partial class types_package {
             }
             break;
         }
-        case Slice.val t: {
+        case ж<Slice> _:
+        case ж<Chan> _: {
+            var t = switchᴛ1;
             mode = value;
             break;
         }
-        case Chan.val t: {
-            mode = value;
-            break;
-        }
-        case Map.val t: {
+        case ж<Map> t: {
             if (id == _Len) {
                 mode = value;
             }
             break;
         }
-        case Interface.val t: {
+        case ж<Interface> t: {
             if (!isTypeParam(x.typ)) {
                 break;
             }
-            if (t.typeSet().underIs((ΔType t) => {
-                switch (arrayPtrDeref(t).type()) {
-                case Basic.val t: {
-                    if (isString(~t) && id == _Len) {
+            if (t.typeSet().underIs((ΔType tΔ1) => {
+                var switchᴛ2 = arrayPtrDeref(tΔ1);
+                switch (switchᴛ2.type()) {
+                case ж<Basic> tΔ2: {
+                    if (isString(new BasicжΔType(tΔ2)) && id == _Len) {
                         return true;
                     }
                     break;
                 }
-                case Array.val t: {
+                case ж<Array> _:
+                case ж<Slice> _:
+                case ж<Chan> _: {
+                    var tΔ2 = switchᴛ2;
                     return true;
                 }
-                case Slice.val t: {
-                    return true;
-                }
-                case Chan.val t: {
-                    return true;
-                }
-                case Map.val t: {
+                case ж<Map> tΔ2: {
                     if (id == _Len) {
                         return true;
                     }
@@ -243,34 +244,32 @@ partial class types_package {
                 if (id == _Len) {
                     code = InvalidLen;
                 }
-                check.errorf(~x, code, invalidArg + "%s for built-in %s", x, bin.name);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, invalidArg + "%s for built-in %s", x, bin.name);
             }
-            return _;
+            return default!;
         }
         if (check.recordTypes() && mode != constant_) {
             // record the signature before changing x.typ
-            check.recordBuiltinType(call.Fun, makeSig(~Typ[Int], x.typ));
+            check.recordBuiltinType(call.Fun, makeSig(new BasicжΔType(Typ[Int]), x.typ));
         }
         x.mode = mode;
-        x.typ = Typ[Int];
+        x.typ = new BasicжΔType(Typ[Int]);
         x.val = val;
     }
     else if (exprᴛ2 == _Clear) {
-        check.verifyVersionf(call.Fun, // clear(m)
+        Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), // clear(m)
  go1_21, "clear"u8);
         if (!underIs(x.typ, (ΔType u) => {
             switch (u.type()) {
-            case Map.val : {
-                return true;
-            }
-            case Slice.val : {
+            case ж<Map> _:
+            case ж<Slice> _: {
                 return true;
             }}
 
-            check.errorf(~x, InvalidClear, invalidArg + "cannot clear %s: argument must be (or constrained by) map or slice", x);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidClear, invalidArg + "cannot clear %s: argument must be (or constrained by) map or slice", Ꮡx.Value);
             return false;
         })) {
-            return _;
+            return default!;
         }
         x.mode = novalue;
         if (check.recordTypes()) {
@@ -280,18 +279,18 @@ partial class types_package {
     else if (exprᴛ2 == _Close) {
         if (!underIs(x.typ, // close(c)
  (ΔType u) => {
-            var (uch, _) = u._<Chan.val>(ᐧ);
+            var (uch, _) = u._<ж<Chan>>(ᐧ);
             if (uch == nil) {
-                check.errorf(~x, InvalidClose, invalidOp + "cannot close non-channel %s", x);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidClose, invalidOp + "cannot close non-channel %s", Ꮡx.Value);
                 return false;
             }
             if ((~uch).dir == RecvOnly) {
-                check.errorf(~x, InvalidClose, invalidOp + "cannot close receive-only channel %s", x);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidClose, invalidOp + "cannot close receive-only channel %s", Ꮡx.Value);
                 return false;
             }
             return true;
         })) {
-            return _;
+            return default!;
         }
         x.mode = novalue;
         if (check.recordTypes()) {
@@ -314,13 +313,13 @@ partial class types_package {
             break;
         }
         case 1: {
-            check.convertUntyped(Ꮡx, // x and y are typed => nothing to do
+            Ꮡcheck.convertUntyped(Ꮡx, // x and y are typed => nothing to do
  // only x is untyped => convert to type of y
  (~y).typ);
             break;
         }
         case 2: {
-            check.convertUntyped(y, // only y is untyped => convert to type of x
+            Ꮡcheck.convertUntyped(y, // only y is untyped => convert to type of x
  x.typ);
             break;
         }
@@ -334,18 +333,16 @@ partial class types_package {
                 //    both of them to float64 since they must have the
                 //    same type to succeed (this will result in an error
                 //    because shifts of floats are not permitted)
-                var toFloat = 
-                var Typʗ1 = Typ;
-                (ж<operand> x) => {
+                var toFloat = (ж<operand> xΔ4) => {
                     if (isNumeric((~xΔ4).typ) && constant.Sign(constant.Imag((~xΔ4).val)) == 0) {
-                        xΔ4.val.typ = Typʗ1[ΔUntypedFloat];
+                        xΔ4.Value.typ = new BasicжΔType(Typ[ΔUntypedFloat]);
                     }
                 };
                 toFloat(Ꮡx);
                 toFloat(y);
             } else {
-                check.convertUntyped(Ꮡx, ~Typ[Float64]);
-                check.convertUntyped(y, ~Typ[Float64]);
+                Ꮡcheck.convertUntyped(Ꮡx, new BasicжΔType(Typ[Float64]));
+                Ꮡcheck.convertUntyped(y, new BasicжΔType(Typ[Float64]));
             }
             break;
         }}
@@ -353,40 +350,38 @@ partial class types_package {
         if (x.mode == invalid || (~y).mode == invalid) {
             // x and y should be invalid now, but be conservative
             // and check below
-            return _;
+            return default!;
         }
         if (!Identical(x.typ, // both argument types must be identical
  (~y).typ)) {
-            check.errorf(~x, InvalidComplex, invalidOp + "%v (mismatched types %s and %s)", call, x.typ, (~y).typ);
-            return _;
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidComplex, invalidOp + "%v (mismatched types %s and %s)", call, x.typ, (~y).typ);
+            return default!;
         }
-        var f = 
-        var Typʗ2 = Typ;
-        (ΔType typ) => {
+        var f = ΔType (ΔType typ) => {
             // the argument types must be of floating-point type
             // (applyTypeFunc never calls f with a type parameter)
             assert(!isTypeParam(typ));
             {
-                var (tΔ7, _) = under(typ)._<Basic.val>(ᐧ); if (tΔ7 != nil) {
-                    var exprᴛ3 = (~tΔ7).kind;
+                var (t, _) = under(typ)._<ж<Basic>>(ᐧ); if (t != nil) {
+                    var exprᴛ3 = (~t).kind;
                     if (exprᴛ3 == Float32) {
-                        return Typʗ2[Complex64];
+                        return new BasicжΔType(Typ[Complex64]);
                     }
                     if (exprᴛ3 == Float64) {
-                        return Typʗ2[Complex128];
+                        return new BasicжΔType(Typ[Complex128]);
                     }
                     if (exprᴛ3 == ΔUntypedFloat) {
-                        return Typʗ2[ΔUntypedComplex];
+                        return new BasicжΔType(Typ[ΔUntypedComplex]);
                     }
 
                 }
             }
             return default!;
         };
-        var resTyp = check.applyTypeFunc(f, Ꮡx, id);
+        var resTyp = Ꮡcheck.applyTypeFunc(f, Ꮡx, id);
         if (resTyp == default!) {
-            check.errorf(~x, InvalidComplex, invalidArg + "arguments have type %s, expected floating-point", x.typ);
-            return _;
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidComplex, invalidArg + "arguments have type %s, expected floating-point", x.typ);
+            return default!;
         }
         if (x.mode == constant_ && (~y).mode == constant_){
             // if both arguments are constants, the result is a constant
@@ -400,56 +395,54 @@ partial class types_package {
         x.typ = resTyp;
     }
     else if (exprᴛ2 == _Copy) {
-        var (dst, _) = coreType(x.typ)._<Slice.val>(ᐧ);
+        var (dst, _) = coreType(x.typ)._<ж<Slice>>(ᐧ);
         var y = args[1];
         var src0 = coreString((~y).typ);
         if (src0 != default! && isString(src0)) {
             // copy(x, y []T) int
-            src0 = ~NewSlice(universeByte);
+            src0 = new SliceжΔType(NewSlice(universeByte));
         }
-        var (src, _) = src0._<Slice.val>(ᐧ);
+        var (src, _) = src0._<ж<Slice>>(ᐧ);
         if (dst == nil || src == nil) {
-            check.errorf(~x, InvalidCopy, invalidArg + "copy expects slice arguments; found %s and %s", x, y);
-            return _;
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidCopy, invalidArg + "copy expects slice arguments; found %s and %s", x, y);
+            return default!;
         }
         if (!Identical((~dst).elem, (~src).elem)) {
-            check.errorf(~x, InvalidCopy, invalidArg + "arguments to copy %s and %s have different element types %s and %s", x, y, (~dst).elem, (~src).elem);
-            return _;
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidCopy, invalidArg + "arguments to copy %s and %s have different element types %s and %s", x, y, (~dst).elem, (~src).elem);
+            return default!;
         }
         if (check.recordTypes()) {
-            check.recordBuiltinType(call.Fun, makeSig(~Typ[Int], x.typ, (~y).typ));
+            check.recordBuiltinType(call.Fun, makeSig(new BasicжΔType(Typ[Int]), x.typ, (~y).typ));
         }
         x.mode = value;
-        x.typ = Typ[Int];
+        x.typ = new BasicжΔType(Typ[Int]);
     }
     else if (exprᴛ2 == _Delete) {
         var map_ = x.typ;
 // delete(map_, key)
 // map_ must be a map type or a type parameter describing map types.
 // The key cannot be a type parameter for now.
-        ΔType key = default!;
-        if (!underIs(map_, 
-        var keyʗ1 = key;
-        (ΔType u) => {
-            var (map_Δ1, _) = u._<Map.val>(ᐧ);
+        ref var key = ref heap<ΔType>(out var Ꮡkey);
+        if (!underIs(map_, (ΔType u) => {
+            var (map_Δ1, _) = u._<ж<Map>>(ᐧ);
             if (map_Δ1 == nil) {
-                check.errorf(~x, InvalidDelete, invalidArg + "%s is not a map", x);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidDelete, invalidArg + "%s is not a map", Ꮡx.Value);
                 return false;
             }
-            if (keyʗ1 != default! && !Identical((~map_Δ1).keyʗ1, keyʗ1)) {
-                check.errorf(~x, InvalidDelete, invalidArg + "maps of %s must have identical key types", x);
+            if (Ꮡkey.ValueSlot != default! && !Identical((~map_Δ1).key, Ꮡkey.ValueSlot)) {
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidDelete, invalidArg + "maps of %s must have identical key types", Ꮡx.Value);
                 return false;
             }
-            keyʗ1 = map_Δ1.val.keyʗ1;
+            Ꮡkey.ValueSlot = map_Δ1.Value.key;
             return true;
         })) {
-            return _;
+            return default!;
         }
-        x = args[1].val;
-        check.assignment(Ꮡx, // key
+        x = args[1].Value;
+        Ꮡcheck.assignment(Ꮡx, // key
  key, "argument to delete"u8);
         if (x.mode == invalid) {
-            return _;
+            return default!;
         }
         x.mode = novalue;
         if (check.recordTypes()) {
@@ -465,51 +458,49 @@ partial class types_package {
                 // an untyped constant number can always be considered
                 // as a complex constant
                 if (isNumeric(x.typ)) {
-                    x.typ = Typ[ΔUntypedComplex];
+                    x.typ = new BasicжΔType(Typ[ΔUntypedComplex]);
                 }
             } else {
                 // an untyped non-constant argument may appear if
                 // it contains a (yet untyped non-constant) shift
                 // expression: convert it to complex128 which will
                 // result in an error (shift of complex value)
-                check.convertUntyped(Ꮡx, ~Typ[Complex128]);
+                Ꮡcheck.convertUntyped(Ꮡx, new BasicжΔType(Typ[Complex128]));
                 // x should be invalid now, but be conservative and check
                 if (x.mode == invalid) {
-                    return _;
+                    return default!;
                 }
             }
         }
-        var f = 
-        var Typʗ3 = Typ;
-        (ΔType typ) => {
+        var f = ΔType (ΔType typ) => {
             // the argument must be of complex type
             // (applyTypeFunc never calls f with a type parameter)
             assert(!isTypeParam(typ));
             {
-                var (tΔ8, _) = under(typ)._<Basic.val>(ᐧ); if (tΔ8 != nil) {
-                    var exprᴛ4 = (~tΔ8).kind;
+                var (t, _) = under(typ)._<ж<Basic>>(ᐧ); if (t != nil) {
+                    var exprᴛ4 = (~t).kind;
                     if (exprᴛ4 == Complex64) {
-                        return Typʗ3[Float32];
+                        return new BasicжΔType(Typ[Float32]);
                     }
                     if (exprᴛ4 == Complex128) {
-                        return Typʗ3[Float64];
+                        return new BasicжΔType(Typ[Float64]);
                     }
                     if (exprᴛ4 == ΔUntypedComplex) {
-                        return Typʗ3[ΔUntypedFloat];
+                        return new BasicжΔType(Typ[ΔUntypedFloat]);
                     }
 
                 }
             }
             return default!;
         };
-        var resTyp = check.applyTypeFunc(f, Ꮡx, id);
+        var resTyp = Ꮡcheck.applyTypeFunc(f, Ꮡx, id);
         if (resTyp == default!) {
             errors.Code code = InvalidImag;
             if (id == _Real) {
                 code = InvalidReal;
             }
-            check.errorf(~x, code, invalidArg + "argument has type %s, expected complex type", x.typ);
-            return _;
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, invalidArg + "argument has type %s, expected complex type", x.typ);
+            return default!;
         }
         if (x.mode == constant_){
             // if the argument is a constant, the result is a constant
@@ -528,45 +519,41 @@ partial class types_package {
     }
     else if (exprᴛ2 == _Make) {
         var arg0 = argList[0];
-        var T = check.varType(arg0);
+        var T = Ꮡcheck.varType(arg0);
         if (!isValid(T)) {
             // make(T, n)
             // make(T, n, m)
             // (no argument evaluated yet)
-            return _;
+            return default!;
         }
         nint min = default!;     // minimum number of arguments
         switch (coreType(T).type()) {
-        case Slice.val : {
+        case ж<Slice>: {
             min = 2;
             break;
         }
-        case Map.val : {
+        case ж<Map> _:
+        case ж<Chan> _: {
             min = 1;
             break;
         }
-        case Chan.val : {
-            min = 1;
-            break;
-        }
-        case default! : {
-            check.errorf(arg0, InvalidMake, invalidArg + "cannot make %s: no core type", arg0);
-            return _;
+        case null: {
+            Ꮡcheck.errorf(new ast_Exprᴠpositioner(arg0), InvalidMake, invalidArg + "cannot make %s: no core type", arg0);
+            return default!;
         }
         default: {
-
-            check.errorf(arg0, InvalidMake, invalidArg + "cannot make %s; type must be slice, map, or channel", arg0);
-            return _;
+            Ꮡcheck.errorf(new ast_Exprᴠpositioner(arg0), InvalidMake, invalidArg + "cannot make %s; type must be slice, map, or channel", arg0);
+            return default!;
         }}
 
         if (nargs < min || min + 1 < nargs) {
-            check.errorf(~call, WrongArgCount, invalidOp + "%v expects %d or %d arguments; found %d", call, min, min + 1, nargs);
-            return _;
+            Ꮡcheck.errorf(new ast_CallExprжpositioner(Ꮡcall), WrongArgCount, invalidOp + "%v expects %d or %d arguments; found %d", call, min, min + 1, nargs);
+            return default!;
         }
         var types = new ΔType[]{T}.slice();
         slice<int64> sizes = default!;           // constant integer arguments, if any
         foreach (var (_, arg) in argList[1..]) {
-            var (typ, size) = check.index(arg, -1);
+            var (typ, size) = Ꮡcheck.index(arg, -1);
             // ok to continue with typ == Typ[Invalid]
             types = append(types, typ);
             if (size >= 0) {
@@ -574,7 +561,7 @@ partial class types_package {
             }
         }
         if (len(sizes) == 2 && sizes[0] > sizes[1]) {
-            check.error(argList[1], SwappedMakeArgs, invalidArg + "length and capacity swapped");
+            Ꮡcheck.error(new ast_Exprᴠpositioner(argList[1]), SwappedMakeArgs, invalidArg + "length and capacity swapped");
         }
         x.mode = value;
         x.typ = T;
@@ -584,7 +571,7 @@ partial class types_package {
         }
     }
     else if (exprᴛ2 == _Max || exprᴛ2 == _Min) {
-        check.verifyVersionf(call.Fun, // max(x, ...)
+        Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), // max(x, ...)
  // min(x, ...)
  go1_21, "built-in %s"u8, bin.name);
         token.Token op = token.LSS;
@@ -593,25 +580,25 @@ partial class types_package {
         }
         foreach (var (i, a) in args) {
             if ((~a).mode == invalid) {
-                return _;
+                return default!;
             }
             if (!allOrdered((~a).typ)) {
-                check.errorf(~a, InvalidMinMaxOperand, invalidArg + "%s cannot be ordered", a);
-                return _;
+                Ꮡcheck.errorf(new operandжpositioner(a), InvalidMinMaxOperand, invalidArg + "%s cannot be ordered", a);
+                return default!;
             }
             // The first argument is already in x and there's nothing left to do.
             if (i > 0) {
-                check.matchTypes(Ꮡx, a);
+                Ꮡcheck.matchTypes(Ꮡx, a);
                 if (x.mode == invalid) {
-                    return _;
+                    return default!;
                 }
                 if (!Identical(x.typ, (~a).typ)) {
-                    check.errorf(~a, MismatchedTypes, invalidArg + "mismatched types %s (previous argument) and %s (type of %s)", x.typ, (~a).typ, (~a).expr);
-                    return _;
+                    Ꮡcheck.errorf(new operandжpositioner(a), MismatchedTypes, invalidArg + "mismatched types %s (previous argument) and %s (type of %s)", x.typ, (~a).typ, (~a).expr);
+                    return default!;
                 }
                 if (x.mode == constant_ && (~a).mode == constant_){
                     if (constant.Compare((~a).val, op, x.val)) {
-                        x = a.val;
+                        x = a.Value;
                     }
                 } else {
                     x.mode = value;
@@ -622,14 +609,14 @@ partial class types_package {
             // If nargs == 1, make sure x.mode is either a value or a constant.
             x.mode = value;
             // A value must not be untyped.
-            check.assignment(Ꮡx, emptyInterface, "argument to built-in "u8 + bin.name);
+            Ꮡcheck.assignment(Ꮡx, new InterfaceжΔType(ᏑemptyInterface), "argument to built-in "u8 + bin.name);
             if (x.mode == invalid) {
-                return _;
+                return default!;
             }
         }
         foreach (var (_, a) in args) {
             // Use the final type computed above for all arguments.
-            check.updateExprType((~a).expr, x.typ, true);
+            Ꮡcheck.updateExprType((~a).expr, x.typ, true);
         }
         if (check.recordTypes() && x.mode != constant_) {
             var types = new slice<ΔType>(nargs);
@@ -640,20 +627,20 @@ partial class types_package {
         }
     }
     else if (exprᴛ2 == _New) {
-        var T = check.varType(argList[0]);
+        var T = Ꮡcheck.varType(argList[0]);
         if (!isValid(T)) {
             // new(T)
             // (no argument evaluated yet)
-            return _;
+            return default!;
         }
         x.mode = value;
-        x.typ = Ꮡ(new Pointer(@base: T));
+        x.typ = new PointerжΔType(Ꮡ(new Pointer(@base: T)));
         if (check.recordTypes()) {
             check.recordBuiltinType(call.Fun, makeSig(x.typ, T));
         }
     }
     else if (exprᴛ2 == _Panic) {
-        if (check.sig != nil && check.sig.results.Len() > 0) {
+        if (check.sig != nil && (~check.sig).results.Len() > 0) {
             // panic(x)
             // record panic call if inside a function with result parameters
             // (for use in Checker.isTerminating)
@@ -661,18 +648,18 @@ partial class types_package {
             var p = check.isPanic;
             if (p == default!) {
                 // allocate lazily
-                p = new ast.CallExpr>bool();
+                p = new map<ж<ast.CallExpr>, bool>();
                 check.isPanic = p;
             }
-            p[call] = true;
+            p[Ꮡcall] = true;
         }
-        check.assignment(Ꮡx, emptyInterface, "argument to panic"u8);
+        Ꮡcheck.assignment(Ꮡx, new InterfaceжΔType(ᏑemptyInterface), "argument to panic"u8);
         if (x.mode == invalid) {
-            return _;
+            return default!;
         }
         x.mode = novalue;
         if (check.recordTypes()) {
-            check.recordBuiltinType(call.Fun, makeSig(default!, emptyInterface));
+            check.recordBuiltinType(call.Fun, makeSig(default!, new InterfaceжΔType(ᏑemptyInterface)));
         }
     }
     else if (exprᴛ2 == _Print || exprᴛ2 == _Println) {
@@ -682,11 +669,11 @@ partial class types_package {
         if (nargs > 0) {
             @params = new slice<ΔType>(nargs);
             foreach (var (i, a) in args) {
-                check.assignment(a, default!, "argument to built-in"u8 + predeclaredFuncs[id].name);
+                Ꮡcheck.assignment(a, default!, "argument to built-in"u8 + predeclaredFuncs[id].name);
                 if ((~a).mode == invalid) {
-                    return _;
+                    return default!;
                 }
-                @params[i] = a.val.typ;
+                @params[i] = a.Value.typ;
             }
         }
         x.mode = novalue;
@@ -696,45 +683,45 @@ partial class types_package {
     }
     else if (exprᴛ2 == _Recover) {
         x.mode = value;
-        x.typ = Ꮡ(emptyInterface);
+        x.typ = new InterfaceжΔType(ᏑemptyInterface);
         if (check.recordTypes()) {
             // recover() interface{}
             check.recordBuiltinType(call.Fun, makeSig(x.typ));
         }
     }
     else if (exprᴛ2 == _Add) {
-        check.verifyVersionf(call.Fun, // unsafe.Add(ptr unsafe.Pointer, len IntegerType) unsafe.Pointer
+        Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), // unsafe.Add(ptr unsafe.Pointer, len IntegerType) unsafe.Pointer
  go1_17, "unsafe.Add"u8);
-        check.assignment(Ꮡx, ~Typ[UnsafePointer], "argument to unsafe.Add"u8);
+        Ꮡcheck.assignment(Ꮡx, new BasicжΔType(Typ[UnsafePointer]), "argument to unsafe.Add"u8);
         if (x.mode == invalid) {
-            return _;
+            return default!;
         }
         var y = args[1];
-        if (!check.isValidIndex(y, InvalidUnsafeAdd, "length"u8, true)) {
-            return _;
+        if (!Ꮡcheck.isValidIndex(y, InvalidUnsafeAdd, "length"u8, true)) {
+            return default!;
         }
         x.mode = value;
-        x.typ = Typ[UnsafePointer];
+        x.typ = new BasicжΔType(Typ[UnsafePointer]);
         if (check.recordTypes()) {
             check.recordBuiltinType(call.Fun, makeSig(x.typ, x.typ, (~y).typ));
         }
     }
     else if (exprᴛ2 == _Alignof) {
-        check.assignment(Ꮡx, // unsafe.Alignof(x T) uintptr
+        Ꮡcheck.assignment(Ꮡx, // unsafe.Alignof(x T) uintptr
  default!, "argument to unsafe.Alignof"u8);
         if (x.mode == invalid) {
-            return _;
+            return default!;
         }
         if (hasVarSize(x.typ, default!)){
             x.mode = value;
             if (check.recordTypes()) {
-                check.recordBuiltinType(call.Fun, makeSig(~Typ[Uintptr], x.typ));
+                check.recordBuiltinType(call.Fun, makeSig(new BasicжΔType(Typ[Uintptr]), x.typ));
             }
         } else {
             x.mode = constant_;
             x.val = constant.MakeInt64(check.conf.alignof(x.typ));
         }
-        x.typ = Typ[Uintptr];
+        x.typ = new BasicжΔType(Typ[Uintptr]);
     }
     else if (exprᴛ2 == _Offsetof) {
         var arg0 = argList[0];
@@ -743,34 +730,34 @@ partial class types_package {
             // result is constant - no need to record signature
             // unsafe.Offsetof(x T) uintptr, where x must be a selector
             // (no argument evaluated yet)
-            check.errorf(arg0, BadOffsetofSyntax, invalidArg + "%s is not a selector expression", arg0);
-            check.use(arg0);
-            return _;
+            Ꮡcheck.errorf(new ast_Exprᴠpositioner(arg0), BadOffsetofSyntax, invalidArg + "%s is not a selector expression", arg0);
+            Ꮡcheck.use(arg0);
+            return default!;
         }
-        check.expr(nil, Ꮡx, (~selx).X);
+        Ꮡcheck.expr(nil, Ꮡx, (~selx).X);
         if (x.mode == invalid) {
-            return _;
+            return default!;
         }
         var @base = derefStructPtr(x.typ);
-        @string sel = (~selx).Sel.val.Name;
+        @string sel = selx.Value.Sel.Value.Name;
         var (obj, index, indirect) = lookupFieldOrMethod(@base, false, check.pkg, sel, false);
         switch (obj.type()) {
-        case default! : {
-            check.errorf(~x, MissingFieldOrMethod, invalidArg + "%s has no single field %s", @base, sel);
-            return _;
+        case null: {
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), MissingFieldOrMethod, invalidArg + "%s has no single field %s", @base, sel);
+            return default!;
         }
-        case Func.val : {
-            check.errorf(arg0, // TODO(gri) Using derefStructPtr may result in methods being found
+        case ж<Func>: {
+            Ꮡcheck.errorf(new ast_Exprᴠpositioner(arg0), // TODO(gri) Using derefStructPtr may result in methods being found
  // that don't actually exist. An error either way, but the error
  // message is confusing. See: https://play.golang.org/p/al75v23kUy ,
  // but go/types reports: "invalid argument: x.m is a method value".
  InvalidOffsetof, invalidArg + "%s is a method value", arg0);
-            return _;
+            return default!;
         }}
 
         if (indirect) {
-            check.errorf(~x, InvalidOffsetof, invalidArg + "field %s is embedded via a pointer in %s", sel, @base);
-            return _;
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidOffsetof, invalidArg + "field %s is embedded via a pointer in %s", sel, @base);
+            return default!;
         }
         check.recordSelection(selx, // TODO(gri) Should we pass x.typ instead of base (and have indirect report if derefStructPtr indirected)?
  FieldVal, @base, obj, index, false);
@@ -781,7 +768,7 @@ partial class types_package {
             if (x.mode == variable || indirect) {
                 mode = variable;
             }
-            check.record(Ꮡ(new operand(mode, selx, obj.Type(), default!, 0)));
+            check.record(Ꮡ(new operand(mode, new ast_SelectorExprжExpr(selx), obj.Type(), default!, 0)));
         }
         if (hasVarSize(@base, // The field offset is considered a variable even if the field is declared before
  // the part of the struct which is variable-sized. This makes both the rules
@@ -790,103 +777,103 @@ partial class types_package {
  default!)){
             x.mode = value;
             if (check.recordTypes()) {
-                check.recordBuiltinType(call.Fun, makeSig(~Typ[Uintptr], obj.Type()));
+                check.recordBuiltinType(call.Fun, makeSig(new BasicжΔType(Typ[Uintptr]), obj.Type()));
             }
         } else {
             var offs = check.conf.offsetof(@base, index);
             if (offs < 0) {
-                check.errorf(~x, TypeTooLarge, "%s is too large"u8, x);
-                return _;
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), TypeTooLarge, "%s is too large"u8, x);
+                return default!;
             }
             x.mode = constant_;
             x.val = constant.MakeInt64(offs);
         }
-        x.typ = Typ[Uintptr];
+        x.typ = new BasicжΔType(Typ[Uintptr]);
     }
     else if (exprᴛ2 == _Sizeof) {
-        check.assignment(Ꮡx, // result is constant - no need to record signature
+        Ꮡcheck.assignment(Ꮡx, // result is constant - no need to record signature
  // unsafe.Sizeof(x T) uintptr
  default!, "argument to unsafe.Sizeof"u8);
         if (x.mode == invalid) {
-            return _;
+            return default!;
         }
         if (hasVarSize(x.typ, default!)){
             x.mode = value;
             if (check.recordTypes()) {
-                check.recordBuiltinType(call.Fun, makeSig(~Typ[Uintptr], x.typ));
+                check.recordBuiltinType(call.Fun, makeSig(new BasicжΔType(Typ[Uintptr]), x.typ));
             }
         } else {
             var size = check.conf.@sizeof(x.typ);
             if (size < 0) {
-                check.errorf(~x, TypeTooLarge, "%s is too large"u8, x);
-                return _;
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), TypeTooLarge, "%s is too large"u8, x);
+                return default!;
             }
             x.mode = constant_;
             x.val = constant.MakeInt64(size);
         }
-        x.typ = Typ[Uintptr];
+        x.typ = new BasicжΔType(Typ[Uintptr]);
     }
     else if (exprᴛ2 == _Slice) {
-        check.verifyVersionf(call.Fun, // result is constant - no need to record signature
+        Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), // result is constant - no need to record signature
  // unsafe.Slice(ptr *T, len IntegerType) []T
  go1_17, "unsafe.Slice"u8);
-        var (ptr, _) = coreType(x.typ)._<Pointer.val>(ᐧ);
+        var (ptr, _) = coreType(x.typ)._<ж<Pointer>>(ᐧ);
         if (ptr == nil) {
-            check.errorf(~x, InvalidUnsafeSlice, invalidArg + "%s is not a pointer", x);
-            return _;
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidUnsafeSlice, invalidArg + "%s is not a pointer", x);
+            return default!;
         }
         var y = args[1];
-        if (!check.isValidIndex(y, InvalidUnsafeSlice, "length"u8, false)) {
-            return _;
+        if (!Ꮡcheck.isValidIndex(y, InvalidUnsafeSlice, "length"u8, false)) {
+            return default!;
         }
         x.mode = value;
-        x.typ = NewSlice((~ptr).@base);
+        x.typ = new SliceжΔType(NewSlice((~ptr).@base));
         if (check.recordTypes()) {
-            check.recordBuiltinType(call.Fun, makeSig(x.typ, ~ptr, (~y).typ));
+            check.recordBuiltinType(call.Fun, makeSig(x.typ, new PointerжΔType(ptr), (~y).typ));
         }
     }
     else if (exprᴛ2 == _SliceData) {
-        check.verifyVersionf(call.Fun, // unsafe.SliceData(slice []T) *T
+        Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), // unsafe.SliceData(slice []T) *T
  go1_20, "unsafe.SliceData"u8);
-        var (Δslice, _) = coreType(x.typ)._<Slice.val>(ᐧ);
+        var (Δslice, _) = coreType(x.typ)._<ж<Slice>>(ᐧ);
         if (Δslice == nil) {
-            check.errorf(~x, InvalidUnsafeSliceData, invalidArg + "%s is not a slice", x);
-            return _;
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidUnsafeSliceData, invalidArg + "%s is not a slice", x);
+            return default!;
         }
         x.mode = value;
-        x.typ = NewPointer((~Δslice).elem);
+        x.typ = new PointerжΔType(NewPointer((~Δslice).elem));
         if (check.recordTypes()) {
-            check.recordBuiltinType(call.Fun, makeSig(x.typ, ~Δslice));
+            check.recordBuiltinType(call.Fun, makeSig(x.typ, new SliceжΔType(Δslice)));
         }
     }
     else if (exprᴛ2 == _String) {
-        check.verifyVersionf(call.Fun, // unsafe.String(ptr *byte, len IntegerType) string
+        Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), // unsafe.String(ptr *byte, len IntegerType) string
  go1_20, "unsafe.String"u8);
-        check.assignment(Ꮡx, ~NewPointer(universeByte), "argument to unsafe.String"u8);
+        Ꮡcheck.assignment(Ꮡx, new PointerжΔType(NewPointer(universeByte)), "argument to unsafe.String"u8);
         if (x.mode == invalid) {
-            return _;
+            return default!;
         }
         var y = args[1];
-        if (!check.isValidIndex(y, InvalidUnsafeString, "length"u8, false)) {
-            return _;
+        if (!Ꮡcheck.isValidIndex(y, InvalidUnsafeString, "length"u8, false)) {
+            return default!;
         }
         x.mode = value;
-        x.typ = Typ[ΔString];
+        x.typ = new BasicжΔType(Typ[ΔString]);
         if (check.recordTypes()) {
-            check.recordBuiltinType(call.Fun, makeSig(x.typ, ~NewPointer(universeByte), (~y).typ));
+            check.recordBuiltinType(call.Fun, makeSig(x.typ, new PointerжΔType(NewPointer(universeByte)), (~y).typ));
         }
     }
     else if (exprᴛ2 == _StringData) {
-        check.verifyVersionf(call.Fun, // unsafe.StringData(str string) *byte
+        Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), // unsafe.StringData(str string) *byte
  go1_20, "unsafe.StringData"u8);
-        check.assignment(Ꮡx, ~Typ[ΔString], "argument to unsafe.StringData"u8);
+        Ꮡcheck.assignment(Ꮡx, new BasicжΔType(Typ[ΔString]), "argument to unsafe.StringData"u8);
         if (x.mode == invalid) {
-            return _;
+            return default!;
         }
         x.mode = value;
-        x.typ = NewPointer(universeByte);
+        x.typ = new PointerжΔType(NewPointer(universeByte));
         if (check.recordTypes()) {
-            check.recordBuiltinType(call.Fun, makeSig(x.typ, ~Typ[ΔString]));
+            check.recordBuiltinType(call.Fun, makeSig(x.typ, new BasicжΔType(Typ[ΔString])));
         }
     }
     else if (exprᴛ2 == _Assert) {
@@ -894,42 +881,44 @@ partial class types_package {
             // assert(pred) causes a typechecker error if pred is false.
             // The result of assert is the value of pred if there is no error.
             // Note: assert is only available in self-test mode.
-            check.errorf(~x, Test, invalidArg + "%s is not a boolean constant", x);
-            return _;
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), Test, invalidArg + "%s is not a boolean constant", x);
+            return default!;
         }
         if (x.val.Kind() != constant.Bool) {
-            check.errorf(~x, Test, "internal error: value of %s should be a boolean constant"u8, x);
-            return _;
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), Test, "internal error: value of %s should be a boolean constant"u8, x);
+            return default!;
         }
         if (!constant.BoolVal(x.val)) {
-            check.errorf(~call, Test, "%v failed"u8, call);
+            Ꮡcheck.errorf(new ast_CallExprжpositioner(Ꮡcall), Test, "%v failed"u8, call);
         }
     }
     else if (exprᴛ2 == _Trace) {
-        if (nargs == 0) {
-            // compile-time assertion failure - safe to continue
-            // result is constant - no need to record signature
-            // trace(x, y, z, ...) dumps the positions, expressions, and
-            // values of its arguments. The result of trace is the value
-            // of the first argument.
-            // Note: trace is only available in self-test mode.
-            // (no argument evaluated yet)
-            check.dump("%v: trace() without arguments"u8, call.Pos());
-            x.mode = novalue;
-            break;
-        }
-        ref var t = ref heap(new operand(), out var Ꮡt);
-        var x1 = x;
-        foreach (var (_, arg) in argList) {
-            check.rawExpr(nil, x1, arg, default!, false);
-            // permit trace for types, e.g.: new(trace(T))
-            check.dump("%v: %s"u8, x1.Pos(), x1);
-            x1 = Ꮡt;
-        }
-        if (x.mode == invalid) {
-            // use incoming x only for first argument
-            return _;
-        }
+        do {
+            if (nargs == 0) {
+                // compile-time assertion failure - safe to continue
+                // result is constant - no need to record signature
+                // trace(x, y, z, ...) dumps the positions, expressions, and
+                // values of its arguments. The result of trace is the value
+                // of the first argument.
+                // Note: trace is only available in self-test mode.
+                // (no argument evaluated yet)
+                Ꮡcheck.dump("%v: trace() without arguments"u8, call.Pos());
+                x.mode = novalue;
+                break;
+            }
+            ref var t = ref heap(new operand(), out var Ꮡt);
+            var x1 = Ꮡx;
+            foreach (var (_, arg) in argList) {
+                Ꮡcheck.rawExpr(nil, x1, arg, default!, false);
+                // permit trace for types, e.g.: new(trace(T))
+                Ꮡcheck.dump("%v: %s"u8, x1.Pos(), x1);
+                x1 = Ꮡt;
+            }
+            if (x.mode == invalid) {
+                // use incoming x only for first argument
+                return default!;
+            }
+        } while (false);
     }
     { /* default: */
         throw panic("unreachable");
@@ -943,57 +932,58 @@ partial class types_package {
 // hasVarSize reports if the size of type t is variable due to type parameters
 // or if the type is infinitely-sized due to a cycle for which the type has not
 // yet been checked.
-internal static bool /*varSized*/ hasVarSize(ΔType t, map<ж<Named>, bool> seen) => func((defer, _) => {
+internal static bool /*varSized*/ hasVarSize(ΔType t, map<ж<Named>, bool> seen) {
     bool varSized = default!;
-
-    // Cycles are only possible through *Named types.
-    // The seen map is used to detect cycles and track
-    // the results of previously seen types.
-    {
-        var named = asNamed(t); if (named != nil) {
-            {
-                var (v, ok) = seen[named]; if (ok) {
-                    return v;
+    func((defer, recover) => {
+        // Cycles are only possible through *Named types.
+        // The seen map is used to detect cycles and track
+        // the results of previously seen types.
+        {
+            var named = asNamed(t); if (named != nil) {
+                {
+                    var (v, ok) = seen[named, ꟷ]; if (ok) {
+                        varSized = v; return;
+                    }
+                }
+                if (seen == default!) {
+                    seen = new map<ж<Named>, bool>();
+                }
+                seen[named] = true;
+                // possibly cyclic until proven otherwise
+                var namedʗ1 = named;
+                var seenʗ1 = seen;
+                defer(() => {
+                    seenʗ1[namedʗ1] = varSized;
+                });
+            }
+        }
+        // record final determination for named
+        var switchᴛ4 = under(t);
+        switch (switchᴛ4.type()) {
+        case ж<Array> u: {
+            varSized = hasVarSize((~u).elem, seen); return;
+        }
+        case ж<Struct> u: {
+            foreach (var (_, f) in (~u).fields) {
+                if (hasVarSize((~f).typ, seen)) {
+                    varSized = true; return;
                 }
             }
-            if (seen == default!) {
-                seen = new map<ж<Named>, bool>();
-            }
-            seen[named] = true;
-            // possibly cyclic until proven otherwise
-            var namedʗ1 = named;
-            var seenʗ1 = seen;
-            defer(() => {
-                seenʗ1[namedʗ1] = varSized;
-            });
+            break;
         }
-    }
-    // record final determination for named
-    switch (under(t).type()) {
-    case Array.val u: {
-        return hasVarSize((~u).elem, seen);
-    }
-    case Struct.val u: {
-        foreach (var (_, f) in (~u).fields) {
-            if (hasVarSize(f.typ, seen)) {
-                return true;
-            }
+        case ж<Interface> u: {
+            varSized = isTypeParam(t); return;
         }
-        break;
-    }
-    case Interface.val u: {
-        return isTypeParam(t);
-    }
-    case Named.val u: {
-        throw panic("unreachable");
-        break;
-    }
-    case Union.val u: {
-        throw panic("unreachable");
-        break;
-    }}
-    return false;
-});
+        case ж<Named> _:
+        case ж<Union> _: {
+            var u = switchᴛ4;
+            throw panic("unreachable");
+            break;
+        }}
+        varSized = false;
+    });
+    return varSized;
+}
 
 // applyTypeFunc applies f to x. If x is a type parameter,
 // the result is a type parameter constrained by a new
@@ -1002,23 +992,22 @@ internal static bool /*varSized*/ hasVarSize(ΔType t, map<ж<Named>, bool> seen
 // of x. If any of these applications of f return nil,
 // applyTypeFunc returns nil.
 // If x is not a type parameter, the result is f(x).
-[GoRecv] public static ΔType applyTypeFunc(this ref Checker check, types.Type f, ж<operand> Ꮡx, builtinId id) {
-    ref var x = ref Ꮡx.val;
+internal static ΔType applyTypeFunc(this ж<Checker> Ꮡcheck, Func<ΔType, ΔType> f, ж<operand> Ꮡx, builtinId id) {
+    ref var check = ref Ꮡcheck.Value;
+    ref var x = ref Ꮡx.Value;
 
     {
-        var (tp, _) = Unalias(x.typ)._<TypeParam.val>(ᐧ); if (tp != nil) {
+        var (tp, _) = Unalias(x.typ)._<ж<TypeParam>>(ᐧ); if (tp != nil) {
             // Test if t satisfies the requirements for the argument
             // type and collect possible result types at the same time.
-            slice<ж<ΔTerm>> terms = default!;
-            if (!tp.@is(
-            var termsʗ2 = terms;
-            (ж<term> t) => {
+            ref var terms = ref heap<slice<ж<ΔTerm>>>(out var Ꮡterms);
+            if (!tp.@is((ж<term> t) => {
                 if (t == nil) {
                     return false;
                 }
                 {
                     var r = f((~t).typ); if (r != default!) {
-                        termsʗ2 = append(termsʗ2, NewTerm((~t).tilde, r));
+                        Ꮡterms.ValueSlot = append(Ꮡterms.ValueSlot, NewTerm((~t).tilde, r));
                         return true;
                     }
                 }
@@ -1045,15 +1034,15 @@ internal static bool /*varSized*/ hasVarSize(ΔType t, map<ж<Named>, bool> seen
                 throw panic("unreachable");
             }
 
-            check.softErrorf(~x, code, "%s not supported as argument to built-in %s for go1.18 (see go.dev/issue/50937)"u8, x, predeclaredFuncs[id].name);
+            Ꮡcheck.softErrorf(new operandжpositioner(Ꮡx), code, "%s not supported as argument to built-in %s for go1.18 (see go.dev/issue/50937)"u8, x, predeclaredFuncs[id].name);
             // Construct a suitable new type parameter for the result type.
             // The type parameter is placed in the current package so export/import
             // works as expected.
-            var tpar = NewTypeName(nopos, check.pkg, (~tp).obj.name, default!);
-            var ptyp = check.newTypeParam(tpar, ~NewInterfaceType(default!, new ΔType[]{~NewUnion(terms)}.slice()));
+            var tpar = NewTypeName(nopos, check.pkg, (~(~tp).obj).name, default!);
+            var ptyp = Ꮡcheck.newTypeParam(tpar, new InterfaceжΔType(NewInterfaceType(default!, new ΔType[]{new UnionжΔType(NewUnion(terms))}.slice())));
             // assigns type to tpar as a side-effect
-            ptyp.val.index = tp.val.index;
-            return ~ptyp;
+            ptyp.Value.index = tp.Value.index;
+            return new TypeParamжΔType(ptyp);
         }
     }
     return f(x.typ);
@@ -1061,14 +1050,14 @@ internal static bool /*varSized*/ hasVarSize(ΔType t, map<ж<Named>, bool> seen
 
 // makeSig makes a signature for the given argument and result types.
 // Default types are used for untyped arguments, and res may be nil.
-internal static ж<ΔSignature> makeSig(ΔType res, params ꓸꓸꓸΔType argsʗp) {
+internal static ж<ΔSignature> makeSig(ΔType res, params Span<types_package.ΔType> argsʗp) {
     var args = argsʗp.slice();
 
     var list = new slice<ж<Var>>(len(args));
     foreach (var (i, param) in args) {
         list[i] = NewVar(nopos, nil, ""u8, Default(param));
     }
-    var @params = NewTuple(Ꮡlist.ꓸꓸꓸ);
+    var @params = NewTuple(list.ꓸꓸꓸ);
     ж<Tuple> result = default!;
     if (res != default!) {
         assert(!isUntyped(res));
@@ -1081,10 +1070,10 @@ internal static ж<ΔSignature> makeSig(ΔType res, params ꓸꓸꓸΔType args�
 // otherwise it returns typ.
 internal static ΔType arrayPtrDeref(ΔType typ) {
     {
-        var (p, ok) = Unalias(typ)._<Pointer.val>(ᐧ); if (ok) {
+        var (p, ok) = Unalias(typ)._<ж<Pointer>>(ᐧ); if (ok) {
             {
-                var (a, _) = under((~p).@base)._<Array.val>(ᐧ); if (a != nil) {
-                    return ~a;
+                var (a, _) = under((~p).@base)._<ж<Array>>(ᐧ); if (a != nil) {
+                    return new ArrayжΔType(a);
                 }
             }
         }

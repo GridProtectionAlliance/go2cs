@@ -39,6 +39,7 @@ using static go.vendor.golang.org.x.net.http2.hpack_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<DecodingError, error>]
+[assembly: GoImplement<InvalidIndexError, error>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

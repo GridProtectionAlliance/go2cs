@@ -3,8 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using bits = math.bits_package;
-using math;
+using bits = go.math.bits_package;
+using go.math;
 
 partial class strconv_package {
 
@@ -18,7 +18,7 @@ partial class strconv_package {
 
 // ryuFtoaFixed32 formats mant*(2^exp) with prec decimal digits.
 internal static void ryuFtoaFixed32(ж<decimalSlice> Ꮡd, uint32 mant, nint exp, nint prec) {
-    ref var d = ref Ꮡd.val;
+    ref var d = ref Ꮡd.Value;
 
     if (prec < 0) {
         throw panic("ryuFtoaFixed32 called with negative prec");
@@ -28,14 +28,15 @@ internal static void ryuFtoaFixed32(ж<decimalSlice> Ꮡd, uint32 mant, nint exp
     }
     // Zero input.
     if (mant == 0) {
-        (d.nd, d.dp) = (0, 0);
+        d.nd = 0;
+        d.dp = 0;
         return;
     }
     // Renormalize to a 25-bit mantissa.
     nint e2 = exp;
     {
         nint b = bits.Len32(mant); if (b < 25) {
-            mant <<= (nuint)(((nuint)(25 - b)));
+            mant <<= (int)((nuint)(25 - b));
             e2 += b - 25;
         }
     }
@@ -58,51 +59,52 @@ internal static void ryuFtoaFixed32(ж<decimalSlice> Ꮡd, uint32 mant, nint exp
     // was negative and if it amounts to computing an exact division.
     // In that case, we ignore all lower bits.
     // Note that division by 10^11 cannot be exact as 5^11 has 26 bits.
-    if (q < 0 && q >= -10 && divisibleByPower5(((uint64)mant), -q)) {
+    if (q < 0 && q >= -10 && divisibleByPower5((uint64)mant, -q)) {
         exact = true;
         d0 = true;
     }
     // Remove extra lower bits and keep rounding info.
-    nuint extra = ((nuint)(-dexp2));
-    var extraMask = ((uint32)(1 << (int)(extra) - 1));
-    di = di >> (int)(extra);
+    nuint extra = (nuint)(-dexp2);
+    var extraMask = (uint32)(((uint32)1 << (int)(extra)) - 1);
+    di = (di >> (int)(extra));
     var dfrac = (uint32)(di & extraMask);
     var roundUp = false;
     if (exact){
         // If we computed an exact product, d + 1/2
         // should round to d+1 if 'd' is odd.
-        roundUp = dfrac > 1 << (int)((extra - 1)) || (dfrac == 1 << (int)((extra - 1)) && !d0) || (dfrac == 1 << (int)((extra - 1)) && d0 && (uint32)(di & 1) == 1);
+        roundUp = dfrac > ((uint32)1 << (int)((extra - 1))) || (dfrac == ((uint32)1 << (int)((extra - 1))) && !d0) || (dfrac == ((uint32)1 << (int)((extra - 1))) && d0 && (uint32)(di & 1) == 1);
     } else {
         // otherwise, d+1/2 always rounds up because
         // we truncated below.
-        roundUp = dfrac >> (int)((extra - 1)) == 1;
+        roundUp = (dfrac >> (int)((extra - 1))) == 1;
     }
     if (dfrac != 0) {
         d0 = false;
     }
     // Proceed to the requested number of digits
-    formatDecimal(Ꮡd, ((uint64)di), !d0, roundUp, prec);
+    formatDecimal(Ꮡd, (uint64)di, !d0, roundUp, prec);
     // Adjust exponent
     d.dp -= q;
 }
 
 // ryuFtoaFixed64 formats mant*(2^exp) with prec decimal digits.
 internal static void ryuFtoaFixed64(ж<decimalSlice> Ꮡd, uint64 mant, nint exp, nint prec) {
-    ref var d = ref Ꮡd.val;
+    ref var d = ref Ꮡd.Value;
 
     if (prec > 18) {
         throw panic("ryuFtoaFixed64 called with prec > 18");
     }
     // Zero input.
     if (mant == 0) {
-        (d.nd, d.dp) = (0, 0);
+        d.nd = 0;
+        d.dp = 0;
         return;
     }
     // Renormalize to a 55-bit mantissa.
     nint e2 = exp;
     {
         nint b = bits.Len64(mant); if (b < 55) {
-            mant = mant << (int)(((nuint)(55 - b)));
+            mant = (mant << (int)((nuint)(55 - b)));
             e2 += b - 55;
         }
     }
@@ -133,19 +135,19 @@ internal static void ryuFtoaFixed64(ж<decimalSlice> Ꮡd, uint64 mant, nint exp
         d0 = true;
     }
     // Remove extra lower bits and keep rounding info.
-    nuint extra = ((nuint)(-dexp2));
-    var extraMask = ((uint64)(1 << (int)(extra) - 1));
-    di = di >> (int)(extra);
+    nuint extra = (nuint)(-dexp2);
+    var extraMask = (uint64)(((uint64)1 << (int)(extra)) - 1);
+    di = (di >> (int)(extra));
     var dfrac = (uint64)(di & extraMask);
     var roundUp = false;
     if (exact){
         // If we computed an exact product, d + 1/2
         // should round to d+1 if 'd' is odd.
-        roundUp = dfrac > 1 << (int)((extra - 1)) || (dfrac == 1 << (int)((extra - 1)) && !d0) || (dfrac == 1 << (int)((extra - 1)) && d0 && (uint64)(di & 1) == 1);
+        roundUp = dfrac > ((uint64)1 << (int)((extra - 1))) || (dfrac == ((uint64)1 << (int)((extra - 1))) && !d0) || (dfrac == ((uint64)1 << (int)((extra - 1))) && d0 && (uint64)(di & 1) == 1);
     } else {
         // otherwise, d+1/2 always rounds up because
         // we truncated below.
-        roundUp = dfrac >> (int)((extra - 1)) == 1;
+        roundUp = (dfrac >> (int)((extra - 1))) == 1;
     }
     if (dfrac != 0) {
         d0 = false;
@@ -157,15 +159,15 @@ internal static void ryuFtoaFixed64(ж<decimalSlice> Ꮡd, uint64 mant, nint exp
 }
 
 internal static array<uint64> uint64pow10 = new uint64[]{
-    1, 1e1F, 1e2F, 1e3F, 1e4F, 1e5F, 1e6F, 1e7F, 1e8F, 1e9F,
-    1e10F, 1e11F, 1e12F, 1e13F, 1e14F, 1e15F, 1e16F, 1e17F, 1e18F, 1e19F
+    1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000,
+    10000000000, 100000000000, 1000000000000, 10000000000000, 100000000000000, 1000000000000000, 10000000000000000, 100000000000000000, 1000000000000000000, 10000000000000000000
 }.array();
 
 // formatDecimal fills d with at most prec decimal digits
 // of mantissa m. The boolean trunc indicates whether m
 // is truncated compared to the original number being formatted.
 internal static void formatDecimal(ж<decimalSlice> Ꮡd, uint64 m, bool trunc, bool roundUp, nint prec) {
-    ref var d = ref Ꮡd.val;
+    ref var d = ref Ꮡd.Value;
 
     var max = uint64pow10[prec];
     nint trimmed = 0;
@@ -197,29 +199,29 @@ internal static void formatDecimal(ж<decimalSlice> Ꮡd, uint64 m, bool trunc, 
         trimmed++;
     }
     // render digits (similar to formatBits)
-    nuint n = ((nuint)prec);
+    nuint n = (nuint)prec;
     d.nd = prec;
     var v = m;
     while (v >= 100) {
         uint64 v1 = default!;
         uint64 v2 = default!;
-        if (v >> (int)(32) == 0){
-            (v1, v2) = (((uint64)(((uint32)v) / 100)), ((uint64)(((uint32)v) % 100)));
+        if ((v >> (int)(32)) == 0){
+            (v1, v2) = ((uint64)((uint32)v / 100), (uint64)((uint32)v % 100));
         } else {
             (v1, v2) = (v / 100, v % 100);
         }
         n -= 2;
-        d.d[n + 1] = smallsString[2 * v2 + 1];
-        d.d[n + 0] = smallsString[2 * v2 + 0];
+        d.d[(nint)(n + 1)] = smallsString[(int)(2 * v2 + 1)];
+        d.d[(nint)(n + 0)] = smallsString[(int)(2 * v2 + 0)];
         v = v1;
     }
     if (v > 0) {
         n--;
-        d.d[n] = smallsString[2 * v + 1];
+        d.d[(nint)(n)] = smallsString[(int)(2 * v + 1)];
     }
     if (v >= 10) {
         n--;
-        d.d[n] = smallsString[2 * v];
+        d.d[(nint)(n)] = smallsString[(int)(2 * v)];
     }
     while (d.d[d.nd - 1] == (rune)'0') {
         d.nd--;
@@ -230,17 +232,18 @@ internal static void formatDecimal(ж<decimalSlice> Ꮡd, uint64 m, bool trunc, 
 
 // ryuFtoaShortest formats mant*2^exp with prec decimal digits.
 internal static void ryuFtoaShortest(ж<decimalSlice> Ꮡd, uint64 mant, nint exp, ж<floatInfo> Ꮡflt) {
-    ref var d = ref Ꮡd.val;
-    ref var flt = ref Ꮡflt.val;
+    ref var d = ref Ꮡd.Value;
+    ref var flt = ref Ꮡflt.DerefOrNil();
 
     if (mant == 0) {
-        (d.nd, d.dp) = (0, 0);
+        d.nd = 0;
+        d.dp = 0;
         return;
     }
     // If input is an exact integer with fewer bits than the mantissa,
     // the previous and next integer are not admissible representations.
     if (exp <= 0 && bits.TrailingZeros64(mant) >= -exp) {
-        mant >>= (nuint)(((nuint)(-exp)));
+        mant >>= (int)((nuint)(-exp));
         ryuDigits(Ꮡd, mant, mant, mant, true, false);
         return;
     }
@@ -259,14 +262,14 @@ internal static void ryuFtoaShortest(ж<decimalSlice> Ꮡd, uint64 mant, nint ex
     bool dl0 = default!;
     bool dc0 = default!;
     bool du0 = default!;
-    if (Ꮡflt == Ꮡ(float32info)){
+    if (Ꮡflt == Ꮡfloat32info){
         uint32 dl32 = default!;
         uint32 dc32 = default!;
         uint32 du32 = default!;
-        (dl32, _, dl0) = mult64bitPow10(((uint32)ml), e2, q);
-        (dc32, _, dc0) = mult64bitPow10(((uint32)mc), e2, q);
-        (du32, e2, du0) = mult64bitPow10(((uint32)mu), e2, q);
-        (dl, dc, du) = (((uint64)dl32), ((uint64)dc32), ((uint64)du32));
+        (dl32, _, dl0) = mult64bitPow10((uint32)ml, e2, q);
+        (dc32, _, dc0) = mult64bitPow10((uint32)mc, e2, q);
+        (du32, e2, du0) = mult64bitPow10((uint32)mu, e2, q);
+        (dl, dc, du) = ((uint64)dl32, (uint64)dc32, (uint64)du32);
     } else {
         (dl, _, dl0) = mult128bitPow10(ml, e2, q);
         (dc, _, dc0) = mult128bitPow10(mc, e2, q);
@@ -295,14 +298,14 @@ internal static void ryuFtoaShortest(ж<decimalSlice> Ꮡd, uint64 mant, nint ex
     }
     // Express the results (dl, dc, du)*2^e2 as integers.
     // Extra bits must be removed and rounding hints computed.
-    nuint extra = ((nuint)(-e2));
-    var extraMask = ((uint64)(1 << (int)(extra) - 1));
+    nuint extra = (nuint)(-e2);
+    var extraMask = (uint64)(((uint64)1 << (int)(extra)) - 1);
     // Now compute the floored, integral base 10 mantissas.
-    dl = dl >> (int)(extra);
+    dl = (dl >> (int)(extra));
     var fracl = (uint64)(dl & extraMask);
-    dc = dc >> (int)(extra);
+    dc = (dc >> (int)(extra));
     var fracc = (uint64)(dc & extraMask);
-    du = du >> (int)(extra);
+    du = (du >> (int)(extra));
     var fracu = (uint64)(du & extraMask);
     // Is it allowed to use 'du' as a result?
     // It is always allowed when it is truncated, but also
@@ -322,11 +325,11 @@ internal static void ryuFtoaShortest(ж<decimalSlice> Ꮡd, uint64 mant, nint ex
     if (dc0){
         // If we computed an exact product, the half integer
         // should round to next (even) integer if 'dc' is odd.
-        cup = fracc > 1 << (int)((extra - 1)) || (fracc == 1 << (int)((extra - 1)) && (uint64)(dc & 1) == 1);
+        cup = fracc > ((uint64)1 << (int)((extra - 1))) || (fracc == ((uint64)1 << (int)((extra - 1))) && (uint64)(dc & 1) == 1);
     } else {
         // otherwise, the result is a lower truncation of the ideal
         // result.
-        cup = fracc >> (int)((extra - 1)) == 1;
+        cup = (fracc >> (int)((extra - 1))) == 1;
     }
     // Is 'dl' an allowed representation?
     // Only if it is an exact value, and if the original binary mantissa
@@ -349,7 +352,7 @@ internal static void ryuFtoaShortest(ж<decimalSlice> Ꮡd, uint64 mant, nint ex
 // slower floating point arithmetic. Correctness is verified by unit tests.
 internal static nint mulByLog2Log10(nint x) {
     // log(2)/log(10) ≈ 0.30102999566 ≈ 78913 / 2^18
-    return (x * 78913) >> (int)(18);
+    return ((x * 78913) >> (int)(18));
 }
 
 // mulByLog10Log2 returns math.Floor(x * log(10)/log(2)) for an integer x in
@@ -359,7 +362,7 @@ internal static nint mulByLog2Log10(nint x) {
 // slower floating point arithmetic. Correctness is verified by unit tests.
 internal static nint mulByLog10Log2(nint x) {
     // log(10)/log(2) ≈ 3.32192809489 ≈ 108853 / 2^15
-    return (x * 108853) >> (int)(15);
+    return ((x * 108853) >> (int)(15));
 }
 
 // computeBounds returns a floating-point vector (l, c, u)×2^e2
@@ -371,8 +374,8 @@ internal static (uint64 lower, uint64 central, uint64 upper, nint e2) computeBou
     uint64 upper = default!;
     nint e2 = default!;
 
-    ref var flt = ref Ꮡflt.val;
-    if (mant != 1 << (int)(flt.mantbits) || exp == flt.bias + 1 - ((nint)flt.mantbits)){
+    ref var flt = ref Ꮡflt.Value;
+    if (mant != ((uint64)1 << (int)(flt.mantbits)) || exp == flt.bias + 1 - (nint)flt.mantbits){
         // regular case (or denormals)
         (lower, central, upper) = (2 * mant - 1, 2 * mant, 2 * mant + 1);
         e2 = exp - 1;
@@ -386,7 +389,7 @@ internal static (uint64 lower, uint64 central, uint64 upper, nint e2) computeBou
 }
 
 internal static void ryuDigits(ж<decimalSlice> Ꮡd, uint64 lower, uint64 central, uint64 upper, bool c0, bool cup) {
-    ref var d = ref Ꮡd.val;
+    ref var d = ref Ꮡd.Value;
 
     var (lhi, llo) = divmod1e9(lower);
     var (chi, clo) = divmod1e9(central);
@@ -401,21 +404,21 @@ internal static void ryuDigits(ж<decimalSlice> Ꮡd, uint64 lower, uint64 centr
             lhi++;
         }
         c0 = c0 && clo == 0;
-        cup = (clo > 5e8F) || (clo == 5e8F && cup);
+        cup = (clo > 500000000) || (clo == 500000000 && cup);
         ryuDigits32(Ꮡd, lhi, chi, uhi, c0, cup, 8);
         d.dp += 9;
     } else {
         d.nd = 0;
         // emit high part
-        nuint n = ((nuint)9);
+        nuint n = (nuint)9;
         for (var v = chi; v > 0; ) {
             var (v1, v2) = (v / 10, v % 10);
             v = v1;
             n--;
-            d.d[n] = ((byte)(v2 + (rune)'0'));
+            d.d[(nint)(n)] = (byte)(v2 + (rune)'0');
         }
         d.d = d.d[(int)(n)..];
-        d.nd = ((nint)(9 - n));
+        d.nd = (nint)(9 - n);
         // emit low part
         ryuDigits32(Ꮡd, llo, clo, ulo,
             c0, cup, d.nd + 8);
@@ -434,7 +437,7 @@ internal static void ryuDigits(ж<decimalSlice> Ꮡd, uint64 lower, uint64 centr
 
 // ryuDigits32 emits decimal digits for a number less than 1e9.
 internal static void ryuDigits32(ж<decimalSlice> Ꮡd, uint32 lower, uint32 central, uint32 upper, bool c0, bool cup, nint endindex) {
-    ref var d = ref Ꮡd.val;
+    ref var d = ref Ꮡd.Value;
 
     if (upper == 0) {
         d.dp = endindex + 1;
@@ -475,7 +478,7 @@ internal static void ryuDigits32(ж<decimalSlice> Ꮡd, uint32 lower, uint32 cen
         trimmed++;
         // Remember trimmed digits of c
         c0 = c0 && cNextDigit == 0;
-        cNextDigit = ((nint)cdigit);
+        cNextDigit = (nint)cdigit;
         (lower, central, upper) = (l, c, u);
     }
     // should we round up?
@@ -491,13 +494,13 @@ internal static void ryuDigits32(ж<decimalSlice> Ꮡd, uint32 lower, uint32 cen
     nint n = endindex;
     while (n > d.nd) {
         var (v1, v2) = (v / 100, v % 100);
-        d.d[n] = smallsString[2 * v2 + 1];
-        d.d[n - 1] = smallsString[2 * v2 + 0];
+        d.d[n] = smallsString[(int)(2 * v2 + 1)];
+        d.d[n - 1] = smallsString[(int)(2 * v2 + 0)];
         n -= 2;
         v = v1;
     }
     if (n == d.nd) {
-        d.d[n] = ((byte)(v + (rune)'0'));
+        d.d[n] = (byte)(v + (rune)'0');
     }
     d.nd = endindex + 1;
     d.dp = d.nd + trimmed;
@@ -520,20 +523,20 @@ internal static (uint32 resM, nint resE, bool exact) mult64bitPow10(uint32 m, ni
 
     if (q == 0) {
         // P == 1<<63
-        return (m << (int)(6), e2 - 6, true);
+        return ((m << (int)(6)), e2 - 6, true);
     }
     if (q < detailedPowersOfTenMinExp10 || detailedPowersOfTenMaxExp10 < q) {
         // This never happens due to the range of float32/float64 exponent
         throw panic("mult64bitPow10: power of 10 is out of range");
     }
-    var pow = detailedPowersOfTen[q - detailedPowersOfTenMinExp10][1];
+    var pow = detailedPowersOfTen[q - (nint)detailedPowersOfTenMinExp10][1];
     if (q < 0) {
         // Inverse powers of ten must be rounded up.
         pow += 1;
     }
-    var (hi, lo) = bits.Mul64(((uint64)m), pow);
+    var (hi, lo) = bits.Mul64((uint64)m, pow);
     e2 += mulByLog10Log2(q) - 63 + 57;
-    return (((uint32)((uint64)(hi << (int)(7) | lo >> (int)(57)))), e2, lo << (int)(7) == 0);
+    return ((uint32)((uint64)((hi << (int)(7)) | (lo >> (int)(57)))), e2, (lo << (int)(7)) == 0);
 }
 
 // mult128bitPow10 takes a floating-point input with a 55-bit
@@ -553,13 +556,13 @@ internal static (uint64 resM, nint resE, bool exact) mult128bitPow10(uint64 m, n
 
     if (q == 0) {
         // P == 1<<127
-        return (m << (int)(8), e2 - 8, true);
+        return ((m << (int)(8)), e2 - 8, true);
     }
     if (q < detailedPowersOfTenMinExp10 || detailedPowersOfTenMaxExp10 < q) {
         // This never happens due to the range of float32/float64 exponent
         throw panic("mult128bitPow10: power of 10 is out of range");
     }
-    var pow = detailedPowersOfTen[q - detailedPowersOfTenMinExp10];
+    var pow = detailedPowersOfTen[q - (nint)detailedPowersOfTenMinExp10];
     if (q < 0) {
         // Inverse powers of ten must be rounded up.
         pow[0] += 1;
@@ -570,7 +573,7 @@ internal static (uint64 resM, nint resE, bool exact) mult128bitPow10(uint64 m, n
     var (h1, h0) = bits.Mul64(m, pow[1]);
     var (mid, carry) = bits.Add64(l1, h0, 0);
     h1 += carry;
-    return ((uint64)(h1 << (int)(9) | mid >> (int)(55)), e2, mid << (int)(9) == 0 && l0 == 0);
+    return ((uint64)((h1 << (int)(9)) | (mid >> (int)(55))), e2, (mid << (int)(9)) == 0 && l0 == 0);
 }
 
 internal static bool divisibleByPower5(uint64 m, nint k) {
@@ -590,13 +593,13 @@ internal static bool divisibleByPower5(uint64 m, nint k) {
 // avoiding runtime uint64 division on 32-bit platforms.
 internal static (uint32, uint32) divmod1e9(uint64 x) {
     if (!host32bit) {
-        return (((uint32)(x / 1e9F)), ((uint32)(x % 1e9F)));
+        return ((uint32)(x / 1000000000), (uint32)(x % 1000000000));
     }
     // Use the same sequence of operations as the amd64 compiler.
-    var (hi, _) = bits.Mul64(x >> (int)(1), (nuint)9903520314283042200UL);
+    var (hi, _) = bits.Mul64((x >> (int)(1)), (nuint)0x89705f4136b4a598UL);
     // binary digits of 1e-9
-    var q = hi >> (int)(28);
-    return (((uint32)q), ((uint32)(x - q * 1e9F)));
+    var q = (hi >> (int)(28));
+    return ((uint32)q, (uint32)(x - q * 1000000000));
 }
 
 } // end strconv_package

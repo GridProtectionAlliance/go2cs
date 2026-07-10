@@ -5,20 +5,21 @@ namespace go.crypto;
 
 using bytes = bytes_package;
 using crypto = crypto_package;
-using ecdsa = crypto.ecdsa_package;
-using ed25519 = crypto.ed25519_package;
-using elliptic = crypto.elliptic_package;
-using rsa = crypto.rsa_package;
+using ecdsa = go.crypto.ecdsa_package;
+using ed25519 = go.crypto.ed25519_package;
+using elliptic = go.crypto.elliptic_package;
+using rsa = go.crypto.rsa_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using hash = hash_package;
 using io = io_package;
+using go.crypto;
 
 partial class tls_package {
 
 // verifyHandshakeSignature verifies a signature against pre-hashed
 // (if required) handshake contents.
-internal static error verifyHandshakeSignature(uint8 sigType, crypto.PublicKey pubkey, crypto.Hash hashFunc, slice<byte> signed, slice<byte> sig) {
+internal static error verifyHandshakeSignature(uint8 sigType, cryptoꓸPublicKey pubkey, crypto.Hash hashFunc, slice<byte> signed, slice<byte> sig) {
     switch (sigType) {
     case signatureECDSA: {
         var (pubKey, ok) = pubkey._<ж<ecdsa.PublicKey>>(ᐧ);
@@ -76,14 +77,14 @@ internal static readonly @string serverSignatureContext = "TLS 1.3, server Certi
 internal static readonly @string clientSignatureContext = "TLS 1.3, client CertificateVerify\x00"u8;
 
 internal static slice<byte> signaturePadding = new byte[]{
-    32, 32, 32, 32, 32, 32, 32, 32,
-    32, 32, 32, 32, 32, 32, 32, 32,
-    32, 32, 32, 32, 32, 32, 32, 32,
-    32, 32, 32, 32, 32, 32, 32, 32,
-    32, 32, 32, 32, 32, 32, 32, 32,
-    32, 32, 32, 32, 32, 32, 32, 32,
-    32, 32, 32, 32, 32, 32, 32, 32,
-    32, 32, 32, 32, 32, 32, 32, 32
+    0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+    0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+    0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+    0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+    0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+    0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+    0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+    0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20
 }.slice();
 
 // signedMessage returns the pre-hashed (if necessary) message to be signed by
@@ -92,7 +93,7 @@ internal static slice<byte> signedMessage(crypto.Hash sigHash, @string context, 
     if (sigHash == directSigning) {
         var b = Ꮡ(new bytes.Buffer(nil));
         b.Write(signaturePadding);
-        io.WriteString(~b, context);
+        io.WriteString(new bytes_BufferжWriter(b), context);
         b.Write(transcript.Sum(default!));
         return b.Bytes();
     }
@@ -153,23 +154,22 @@ internal static (uint8 sigType, crypto.Hash hash, error err) typeAndHashFromSign
 // legacyTypeAndHashFromPublicKey returns the fixed signature type and crypto.Hash for
 // a given public key used with TLS 1.0 and 1.1, before the introduction of
 // signature algorithm negotiation.
-internal static (uint8 sigType, crypto.Hash hash, error err) legacyTypeAndHashFromPublicKey(crypto.PublicKey pub) {
+internal static (uint8 sigType, crypto.Hash hash, error err) legacyTypeAndHashFromPublicKey(cryptoꓸPublicKey pub) {
     uint8 sigType = default!;
     crypto.Hash hash = default!;
     error err = default!;
 
     switch (pub.type()) {
-    case ж<rsa.PublicKey> : {
+    case ж<rsa.PublicKey>: {
         return (signaturePKCS1v15, crypto.MD5SHA1, default!);
     }
-    case ж<ecdsa.PublicKey> : {
+    case ж<ecdsa.PublicKey>: {
         return (signatureECDSA, crypto.SHA1, default!);
     }
-    case ed25519.PublicKey : {
+    case ed25519.PublicKey: {
         return (0, 0, fmt.Errorf("tls: Ed25519 public keys are not supported before TLS 1.2"u8));
     }
     default: {
-
         return (0, 0, fmt.Errorf("tls: unsupported public key: %T"u8, // RFC 8422 specifies support for Ed25519 in TLS 1.0 and 1.1,
  // but it requires holding on to a handshake transcript to do a
  // full signature, and not even OpenSSL bothers with the
@@ -185,12 +185,12 @@ internal static (uint8 sigType, crypto.Hash hash, error err) legacyTypeAndHashFr
 //    emLen >= len(prefix) + hLen + 11
 // TLS 1.3 dropped support for PKCS #1 v1.5 in favor of RSA-PSS.
 
-[GoType("dyn")] partial struct Δtype {
+[GoType("dyn")] partial struct rsaSignatureSchemesᴛ1 {
     internal SignatureScheme scheme;
     internal nint minModulusBytes;
     internal uint16 maxVersion;
 }
-internal static slice<struct{scheme SignatureScheme; minModulusBytes int; maxVersion uint16}> rsaSignatureSchemes = new struct{scheme SignatureScheme; minModulusBytes int; maxVersion uint16}[]{
+internal static slice<rsaSignatureSchemesᴛ1> rsaSignatureSchemes = new rsaSignatureSchemesᴛ1[]{
     new(PSSWithSHA256, crypto.SHA256.Size() * 2 + 2, VersionTLS13),
     new(PSSWithSHA384, crypto.SHA384.Size() * 2 + 2, VersionTLS13),
     new(PSSWithSHA512, crypto.SHA512.Size() * 2 + 2, VersionTLS13),
@@ -207,14 +207,15 @@ internal static slice<struct{scheme SignatureScheme; minModulusBytes int; maxVer
 // This function must be kept in sync with supportedSignatureAlgorithms.
 // FIPS filtering is applied in the caller, selectSignatureScheme.
 internal static slice<SignatureScheme> signatureSchemesForCertificate(uint16 version, ж<Certificate> Ꮡcert) {
-    ref var cert = ref Ꮡcert.val;
+    ref var cert = ref Ꮡcert.Value;
 
     var (priv, ok) = cert.PrivateKey._<crypto.Signer>(ᐧ);
     if (!ok) {
         return default!;
     }
     slice<SignatureScheme> sigAlgs = default!;
-    switch (priv.Public().type()) {
+    var switchᴛ1 = priv.Public();
+    switch (switchᴛ1.type()) {
     case ж<ecdsa.PublicKey> pub: {
         if (version != VersionTLS13) {
             // In TLS 1.2 and earlier, ECDSA algorithms are not
@@ -228,13 +229,13 @@ internal static slice<SignatureScheme> signatureSchemesForCertificate(uint16 ver
             break;
         }
         var exprᴛ1 = (~pub).Curve;
-        if (exprᴛ1 == elliptic.P256()) {
+        if (AreEqual(exprᴛ1, elliptic.P256())) {
             sigAlgs = new SignatureScheme[]{ECDSAWithP256AndSHA256}.slice();
         }
-        else if (exprᴛ1 == elliptic.P384()) {
+        else if (AreEqual(exprᴛ1, elliptic.P384())) {
             sigAlgs = new SignatureScheme[]{ECDSAWithP384AndSHA384}.slice();
         }
-        else if (exprᴛ1 == elliptic.P521()) {
+        else if (AreEqual(exprᴛ1, elliptic.P521())) {
             sigAlgs = new SignatureScheme[]{ECDSAWithP521AndSHA512}.slice();
         }
         else { /* default: */
@@ -258,7 +259,7 @@ internal static slice<SignatureScheme> signatureSchemesForCertificate(uint16 ver
         break;
     }
     default: {
-        var pub = priv.Public().type();
+        var pub = switchᴛ1;
         return default!;
     }}
     if (cert.SupportedSignatureAlgorithms != default!) {
@@ -277,7 +278,7 @@ internal static slice<SignatureScheme> signatureSchemesForCertificate(uint16 ver
 // that works with the selected certificate. It's only called for protocol
 // versions that support signature algorithms, so TLS 1.2 and 1.3.
 internal static (SignatureScheme, error) selectSignatureScheme(uint16 vers, ж<Certificate> Ꮡc, slice<SignatureScheme> peerAlgs) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     var supportedAlgs = signatureSchemesForCertificate(vers, Ꮡc);
     if (len(supportedAlgs) == 0) {
@@ -304,18 +305,15 @@ internal static (SignatureScheme, error) selectSignatureScheme(uint16 vers, ж<C
 // unsupportedCertificateError returns a helpful error for certificates with
 // an unsupported private key.
 internal static error unsupportedCertificateError(ж<Certificate> Ꮡcert) {
-    ref var cert = ref Ꮡcert.val;
+    ref var cert = ref Ꮡcert.Value;
 
     switch (cert.PrivateKey.type()) {
-    case rsa.PrivateKey : {
+    case rsa.PrivateKey _:
+    case ecdsa.PrivateKey _: {
         return fmt.Errorf("tls: unsupported certificate: private key is %T, expected *%T"u8,
             cert.PrivateKey, cert.PrivateKey);
     }
-    case ecdsa.PrivateKey : {
-        return fmt.Errorf("tls: unsupported certificate: private key is %T, expected *%T"u8,
-            cert.PrivateKey, cert.PrivateKey);
-    }
-    case ж<ed25519.PrivateKey> : {
+    case ж<ed25519.PrivateKey>: {
         return fmt.Errorf("tls: unsupported certificate: private key is *ed25519.PrivateKey, expected ed25519.PrivateKey"u8);
     }}
 
@@ -324,14 +322,15 @@ internal static error unsupportedCertificateError(ж<Certificate> Ꮡcert) {
         return fmt.Errorf("tls: certificate private key (%T) does not implement crypto.Signer"u8,
             cert.PrivateKey);
     }
-    switch (signer.Public().type()) {
+    var switchᴛ2 = signer.Public();
+    switch (switchᴛ2.type()) {
     case ж<ecdsa.PublicKey> pub: {
         var exprᴛ1 = (~pub).Curve;
-        if (exprᴛ1 == elliptic.P256()) {
+        if (AreEqual(exprᴛ1, elliptic.P256())) {
         }
-        else if (exprᴛ1 == elliptic.P384()) {
+        else if (AreEqual(exprᴛ1, elliptic.P384())) {
         }
-        else if (exprᴛ1 == elliptic.P521()) {
+        else if (AreEqual(exprᴛ1, elliptic.P521())) {
         }
         else { /* default: */
             return fmt.Errorf("tls: unsupported certificate curve (%s)"u8, (~(~pub).Curve.Params()).Name);
@@ -343,9 +342,10 @@ internal static error unsupportedCertificateError(ж<Certificate> Ꮡcert) {
         return fmt.Errorf("tls: certificate RSA key size too small for supported signature algorithms"u8);
     }
     case ed25519.PublicKey pub: {
+        break;
     }
     default: {
-        var pub = signer.Public().type();
+        var pub = switchᴛ2;
         return fmt.Errorf("tls: unsupported certificate key (%T)"u8, pub);
     }}
     if (cert.SupportedSignatureAlgorithms != default!) {

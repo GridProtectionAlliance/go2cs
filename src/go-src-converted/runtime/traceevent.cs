@@ -8,7 +8,6 @@ using abi = @internal.abi_package;
 using sys = runtime.@internal.sys_package;
 using @internal;
 using runtime.@internal;
-using ꓸꓸꓸtraceArg = Span<traceArg>;
 
 partial class runtime_package {
 
@@ -91,13 +90,13 @@ internal static readonly traceEv traceEvExperimentalBatch = 49; // start of extr
 internal static traceEventWriter eventWriter(this traceLocker tl, traceGoStatus goStatus, traceProcStatus procStatus) {
     var w = tl.writer();
     {
-        var pp = tl.mp.p.ptr(); if (pp != nil && !(~pp).trace.statusWasTraced(tl.gen) && (~pp).trace.acquireStatus(tl.gen)) {
-            w = w.writeProcStatus(((uint64)(~pp).id), procStatus, (~pp).trace.inSweep);
+        var pp = (~tl.mp).p.ptr(); if (pp != nil && !pp.of(runtime_package.Δp.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).statusWasTraced(tl.gen) && pp.of(runtime_package.Δp.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).acquireStatus(tl.gen)) {
+            w = w.writeProcStatus((uint64)(~pp).id, procStatus, (~pp).trace.inSweep);
         }
     }
     {
-        var gp = tl.mp.curg; if (gp != nil && !(~gp).trace.statusWasTraced(tl.gen) && (~gp).trace.acquireStatus(tl.gen)) {
-            w = w.writeGoStatus(((uint64)(~gp).goid), ((int64)tl.mp.procid), goStatus, (~gp).inMarkAssist, 0);
+        var gp = tl.mp.Value.curg; if (gp != nil && !gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).statusWasTraced(tl.gen) && gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).acquireStatus(tl.gen)) {
+            w = w.writeGoStatus((uint64)(~gp).goid, (int64)(~tl.mp).procid, goStatus, (~gp).inMarkAssist, 0);
         }
     }
     /* no stack */
@@ -106,7 +105,7 @@ internal static traceEventWriter eventWriter(this traceLocker tl, traceGoStatus 
 
 // commit writes out a trace event and calls end. It's a helper to make the
 // common case of writing out a single event less error-prone.
-internal static void commit(this traceEventWriter e, traceEv ev, params ꓸꓸꓸtraceArg argsʗp) {
+internal static void commit(this traceEventWriter e, traceEv ev, params Span<runtime_package.traceArg> argsʗp) {
     var args = argsʗp.slice();
 
     e = e.write(ev, args.ꓸꓸꓸ);
@@ -114,7 +113,7 @@ internal static void commit(this traceEventWriter e, traceEv ev, params ꓸꓸ�
 }
 
 // write writes an event into the trace.
-internal static traceEventWriter write(this traceEventWriter e, traceEv ev, params ꓸꓸꓸtraceArg argsʗp) {
+internal static traceEventWriter write(this traceEventWriter e, traceEv ev, params Span<runtime_package.traceArg> argsʗp) {
     var args = argsʗp.slice();
 
     e.w = e.w.@event(ev, args.ꓸꓸꓸ);
@@ -127,23 +126,23 @@ internal static void end(this traceEventWriter e) {
 }
 
 // traceEventWrite is the part of traceEvent that actually writes the event.
-internal static traceWriter @event(this traceWriter w, traceEv ev, params ꓸꓸꓸtraceArg argsʗp) {
+internal static traceWriter @event(this traceWriter w, traceEv ev, params Span<runtime_package.traceArg> argsʗp) {
     var args = argsʗp.slice();
 
     // Make sure we have room.
-    (w, _) = w.ensure(1 + (len(args) + 1) * traceBytesPerNumber);
+    (w, _) = w.ensure(1 + (len(args) + 1) * (nint)traceBytesPerNumber);
     // Compute the timestamp diff that we'll put in the trace.
     var ts = traceClockNow();
-    if (ts <= w.traceBuf.lastTime) {
-        ts = w.traceBuf.lastTime + 1;
+    if (ts <= (~w.traceBuf).lastTime) {
+        ts = (~w.traceBuf).lastTime + 1;
     }
-    var tsDiff = ((uint64)(ts - w.traceBuf.lastTime));
-    w.traceBuf.lastTime = ts;
+    var tsDiff = (uint64)(ts - (~w.traceBuf).lastTime);
+    w.traceBuf.Value.lastTime = ts;
     // Write out event.
-    w.@byte(((byte)ev));
+    w.@byte((byte)ev);
     w.varint(tsDiff);
     foreach (var (_, arg) in args) {
-        w.varint(((uint64)arg));
+        w.varint((uint64)arg);
     }
     return w;
 }
@@ -162,9 +161,9 @@ internal static traceArg stack(this traceLocker tl, nint skip) {
 // passed to write.
 internal static traceArg startPC(this traceLocker tl, uintptr pc) {
     // +PCQuantum because makeTraceFrame expects return PCs and subtracts PCQuantum.
-    return ((traceArg)Δtrace.stackTab[tl.gen % 2].put(new uintptr[]{
+    return ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (nint)(tl.gen % 2)).put(new uintptr[]{
         logicalStackSentinel,
-        startPCForTrace(pc) + sys.PCQuantum
+        startPCForTrace(pc) + (uintptr)sys.PCQuantum
     }.slice()));
 }
 
@@ -172,21 +171,21 @@ internal static traceArg startPC(this traceLocker tl, uintptr pc) {
 // The string is assumed to be relatively short and popular, so it may be
 // stored for a while in the string dictionary.
 internal static traceArg @string(this traceLocker tl, @string s) {
-    return ((traceArg)Δtrace.stringTab[tl.gen % 2].put(tl.gen, s));
+    return ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (nint)(tl.gen % 2)).put(tl.gen, s));
 }
 
 // uniqueString returns a traceArg representing s which may be passed to write.
 // The string is assumed to be unique or long, so it will be written out to
 // the trace eagerly.
 internal static traceArg uniqueString(this traceLocker tl, @string s) {
-    return ((traceArg)Δtrace.stringTab[tl.gen % 2].emit(tl.gen, s));
+    return ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (nint)(tl.gen % 2)).emit(tl.gen, s));
 }
 
 // rtype returns a traceArg representing typ which may be passed to write.
 internal static traceArg rtype(this traceLocker tl, ж<abi.Type> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.Value;
 
-    return ((traceArg)Δtrace.typeTab[tl.gen % 2].put(Ꮡtyp));
+    return ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑtypeTab, (nint)(tl.gen % 2)).put(Ꮡtyp));
 }
 
 } // end runtime_package

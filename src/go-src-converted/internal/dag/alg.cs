@@ -14,34 +14,35 @@ partial class dag_package {
     }
     foreach (var (from, tos) in old) {
         foreach (var (to, _) in tos) {
-            g.edges[to][from] = true;
+            g.edges[to].Set(from, true);
         }
     }
 }
 
 // Topo returns a topological sort of g. This function is deterministic.
-[GoRecv] public static slice<@string> Topo(this ref Graph g) {
-    var topo = new slice<@string>(0, len(g.Nodes));
+public static slice<@string> Topo(this ж<Graph> Ꮡg) {
+    ref var g = ref Ꮡg.Value;
+
+    ref var topo = ref heap<slice<@string>>(out var Ꮡtopo);
+    topo = new slice<@string>(0, len(g.Nodes));
     var marks = new map<@string, bool>();
     Action<@string> visit = default!;
-    visit = 
     var marksʗ1 = marks;
-    var topoʗ1 = topo;
     var visitʗ1 = visit;
-    (@string n) => {
+    visit = (@string n) => {
         if (marksʗ1[n]) {
             return;
         }
-        foreach (var (_, to) in g.Edges(n)) {
+        foreach (var (_, to) in Ꮡg.Edges(n)) {
             visitʗ1(to);
         }
         marksʗ1[n] = true;
-        topoʗ1 = append(topoʗ1, n);
+        Ꮡtopo.ValueSlot = append(Ꮡtopo.ValueSlot, n);
     };
     foreach (var (_, root) in g.Nodes) {
         visit(root);
     }
-    for (nint i = 0;nint j = len(topo) - 1; i < j; (i, j) = (i + 1, j - 1)) {
+    for ((nint i, nint j) = (0, len(topo) - 1); i < j; (i, j) = (i + 1, j - 1)) {
         (topo[i], topo[j]) = (topo[j], topo[i]);
     }
     return topo;

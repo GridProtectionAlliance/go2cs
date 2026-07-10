@@ -6,21 +6,23 @@
 namespace go;
 
 using bytealg = @internal.bytealg_package;
-using io = io_package;
+using Δio = io_package;
 using os = os_package;
 using time = time_package;
 using @internal;
+using fs = go.io.fs_package;
+using go.io;
 
 partial class net_package {
 
 [GoType] partial struct Δfile {
-    internal ж<os_package.File> file;
+    internal ж<os.File> ΔΔfile;
     internal slice<byte> data;
     internal bool atEOF;
 }
 
 [GoRecv] internal static void close(this ref Δfile f) {
-    f.file.Close();
+    f.ΔΔfile.Close();
 }
 
 [GoRecv] internal static (@string s, bool ok) getLineFromData(this ref Δfile f) {
@@ -61,11 +63,11 @@ partial class net_package {
     }
     if (len(f.data) < cap(f.data)) {
         nint ln = len(f.data);
-        var (n, err) = io.ReadFull(~f.file, f.data[(int)(ln)..(int)(cap(f.data))]);
+        var (n, err) = Δio.ReadFull(new os_FileжReader(f.ΔΔfile), f.data[(int)(ln)..(int)(cap(f.data))]);
         if (n >= 0) {
             f.data = f.data[0..(int)(ln + n)];
         }
-        if (AreEqual(err, io.EOF) || AreEqual(err, io.ErrUnexpectedEOF)) {
+        if (AreEqual(err, Δio.EOF) || AreEqual(err, Δio.ErrUnexpectedEOF)) {
             f.atEOF = true;
         }
     }
@@ -78,7 +80,7 @@ partial class net_package {
     int64 size = default!;
     error err = default!;
 
-    (st, err) = f.file.Stat();
+    (var st, err) = f.ΔΔfile.Stat();
     if (err != default!) {
         return (new time.Time(nil), 0, err);
     }
@@ -86,7 +88,7 @@ partial class net_package {
 }
 
 internal static (ж<Δfile>, error) open(@string name) {
-    (fd, err) = os.Open(name);
+    var (fd, err) = os.Open(name);
     if (err != default!) {
         return (default!, err);
     }
@@ -98,7 +100,7 @@ internal static (time.Time mtime, int64 size, error err) stat(@string name) {
     int64 size = default!;
     error err = default!;
 
-    (st, err) = os.Stat(name);
+    (var st, err) = os.Stat(name);
     if (err != default!) {
         return (new time.Time(nil), 0, err);
     }
@@ -142,7 +144,7 @@ internal static slice<@string> getFields(@string s) {
 }
 
 // Bigger than we need, not too big to worry about overflow
-internal static readonly UntypedInt big = /* 0xFFFFFF */ 16777215;
+internal static readonly UntypedInt big = 0xFFFFFF;
 
 // Decimal to integer.
 // Returns number, characters consumed, success.
@@ -153,7 +155,7 @@ internal static (nint n, nint i, bool ok) dtoi(@string s) {
 
     n = 0;
     for (i = 0; i < len(s) && (rune)'0' <= s[i] && s[i] <= (rune)'9'; i++) {
-        n = n * 10 + ((nint)(s[i] - (rune)'0'));
+        n = n * 10 + (nint)(s[i] - (rune)'0');
         if (n >= big) {
             return (big, i, false);
         }
@@ -175,15 +177,15 @@ internal static (nint n, nint i, bool ok) xtoi(@string s) {
     for (i = 0; i < len(s); i++) {
         if ((rune)'0' <= s[i] && s[i] <= (rune)'9'){
             n *= 16;
-            n += ((nint)(s[i] - (rune)'0'));
+            n += (nint)(s[i] - (rune)'0');
         } else 
         if ((rune)'a' <= s[i] && s[i] <= (rune)'f'){
             n *= 16;
-            n += ((nint)(s[i] - (rune)'a')) + 10;
+            n += (nint)(s[i] - (rune)'a') + 10;
         } else 
         if ((rune)'A' <= s[i] && s[i] <= (rune)'F'){
             n *= 16;
-            n += ((nint)(s[i] - (rune)'A')) + 10;
+            n += (nint)(s[i] - (rune)'A') + 10;
         } else {
             break;
         }
@@ -206,7 +208,7 @@ internal static (byte, bool) xtoi2(@string s, byte e) {
         return (0, false);
     }
     var (n, ei, ok) = xtoi(s[..2]);
-    return (((byte)n), ok && ei == 2);
+    return ((byte)n, ok && ei == 2);
 }
 
 // hasUpperCase tells whether the given string contains at least one upper-case.
@@ -223,7 +225,7 @@ internal static bool hasUpperCase(@string s) {
 internal static void lowerASCIIBytes(slice<byte> x) {
     foreach (var (i, b) in x) {
         if ((rune)'A' <= b && b <= (rune)'Z') {
-            x[i] += (rune)'a' - (rune)'A';
+            x[i] += (byte)((rune)'a' - (rune)'A');
         }
     }
 }
@@ -231,7 +233,7 @@ internal static void lowerASCIIBytes(slice<byte> x) {
 // lowerASCII returns the ASCII lowercase version of b.
 internal static byte lowerASCII(byte b) {
     if ((rune)'A' <= b && b <= (rune)'Z') {
-        return b + ((rune)'a' - (rune)'A');
+        return (byte)(b + ((rune)'a' - (rune)'A'));
     }
     return b;
 }

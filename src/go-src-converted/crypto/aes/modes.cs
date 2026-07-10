@@ -3,7 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto;
 
-using cipher = crypto.cipher_package;
+using cipher = go.crypto.cipher_package;
+using go.crypto;
 
 partial class aes_package {
 

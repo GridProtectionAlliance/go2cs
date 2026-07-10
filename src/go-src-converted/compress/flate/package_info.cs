@@ -38,12 +38,13 @@ using static go.compress.flate_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(Reader, bool), Reader>]
 [assembly: GoImplement<CorruptInputError, error>]
 [assembly: GoImplement<InternalError, error>]
-[assembly: GoImplement<Reader, io_package.Reader>]
-[assembly: GoImplement<decompressor, io_package.ReadCloser>]
-[assembly: GoImplement<dictWriter, io_package.Writer>]
+[assembly: GoImplement<bufio_package.Reader, Reader>(Pointer = true)]
+[assembly: GoImplement<byFreq, sort_package.Interface>(Pointer = true)]
+[assembly: GoImplement<byLiteral, sort_package.Interface>(Pointer = true)]
+[assembly: GoImplement<decompressor, io_package.ReadCloser>(Pointer = true)]
+[assembly: GoImplement<dictWriter, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

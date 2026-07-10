@@ -11,11 +11,11 @@ using fmt = fmt_package;
 using io = io_package;
 using slices = slices_package;
 using strings = strings_package;
-using @event = @internal.trace.event_package;
-using go122 = @internal.trace.@event.go122_package;
-using @internal.trace;
-using @internal.trace.@event;
+using @event = go.@internal.trace.event_package;
+using go122 = go.@internal.trace.@event.go122_package;
 using encoding;
+using go.@internal.trace;
+using go.@internal.trace.@event;
 
 partial class trace_package {
 
@@ -25,9 +25,9 @@ partial class trace_package {
 // into the generation.
 [GoType] partial struct generation {
     internal uint64 gen;
-    internal trace.batch batches;
+    internal map<ThreadID, slice<batch>> batches;
     internal slice<cpuSample> cpuSamples;
-    public partial ref ж<evTable> evTable { get; }
+    internal partial ref ж<evTable> evTable { get; }
 }
 
 // spilledBatch represents a batch that was read out for the next generation,
@@ -35,7 +35,7 @@ partial class trace_package {
 // generation.
 [GoType] partial struct spilledBatch {
     internal uint64 gen;
-    public partial ref ж<batch> batch { get; }
+    internal partial ref ж<batch> batch { get; }
 }
 
 // readGeneration buffers and decodes the structural elements of a trace generation
@@ -46,20 +46,20 @@ partial class trace_package {
 // If gen is non-nil, it is valid and must be processed before handling the returned
 // error.
 internal static (ж<generation>, ж<spilledBatch>, error) readGeneration(ж<bufio.Reader> Ꮡr, ж<spilledBatch> Ꮡspill) {
-    ref var r = ref Ꮡr.val;
-    ref var spill = ref Ꮡspill.val;
+    ref var r = ref Ꮡr.Value;
+    ref var spill = ref Ꮡspill.DerefOrNil();
 
     var g = Ꮡ(new generation(
         evTable: Ꮡ(new evTable(
             pcs: new map<uint64, frame>()
         )),
-        batches: new trace.batch()
+        batches: new map<ThreadID, slice<batch>>()
     ));
     // Process the spilled batch.
-    if (spill != nil) {
-        g.val.gen = spill.gen;
+    if (Ꮡspill != nil) {
+        g.Value.gen = spill.gen;
         {
-            var err = processBatch(g, spill.batch); if (err != default!) {
+            var err = processBatch(g, spill.batch.Value); if (err != default!) {
                 return (default!, default!, err);
             }
         }
@@ -69,7 +69,9 @@ internal static (ж<generation>, ж<spilledBatch>, error) readGeneration(ж<bufi
     // the next generation.
     error spillErr = default!;
     while (ᐧ) {
-        (b, gen, err) = readBatch(~r);
+        ref var b = ref heap<batch>(out var Ꮡb);
+        ref var gen = ref heap<uint64>(out var Ꮡgen);
+        (b, gen, var err) = readBatch(new bufio_ReaderжreadBatch_r(Ꮡr));
         if (AreEqual(err, io.EOF)) {
             break;
         }
@@ -89,11 +91,11 @@ internal static (ж<generation>, ж<spilledBatch>, error) readGeneration(ж<bufi
         }
         if ((~g).gen == 0) {
             // Initialize gen.
-            g.val.gen = gen;
+            g.Value.gen = gen;
         }
         if (gen == (~g).gen + 1) {
             // TODO: advance this the same way the runtime does.
-            Ꮡspill = Ꮡ(new spilledBatch(gen: gen, batch: Ꮡb)); spill = ref Ꮡspill.val;
+            Ꮡspill = Ꮡ(new spilledBatch(gen: gen, batch: Ꮡb)); spill = ref Ꮡspill.DerefOrNil();
             break;
         }
         if (gen != (~g).gen) {
@@ -113,7 +115,7 @@ internal static (ж<generation>, ж<spilledBatch>, error) readGeneration(ж<bufi
         }
     }
     // Check some invariants.
-    if (g.freq == 0) {
+    if ((~g).freq == 0) {
         return (default!, default!, fmt.Errorf("no frequency event found"u8));
     }
     // N.B. Trust that the batch order is correct. We can't validate the batch order
@@ -122,18 +124,18 @@ internal static (ж<generation>, ж<spilledBatch>, error) readGeneration(ж<bufi
     // numbers on certain events. If it turns out the batch order is actually incorrect
     // we'll very likely fail to advance a partial order from the frontier.
     // Compactify stacks and strings for better lookup performance later.
-    g.stacks.compactify();
-    g.strings.compactify();
+    g.of(generation.Ꮡstacks).compactify();
+    g.of(generation.Ꮡstrings).compactify();
     // Validate stacks.
     {
-        var err = validateStackStrings(Ꮡ(g.stacks), Ꮡ(g.strings), g.pcs); if (err != default!) {
+        var err = validateStackStrings(g.of(generation.Ꮡstacks), g.of(generation.Ꮡstrings), (~g).pcs); if (err != default!) {
             return (default!, default!, err);
         }
     }
     // Fix up the CPU sample timestamps, now that we have freq.
     foreach (var (i, _) in (~g).cpuSamples) {
         var s = Ꮡ((~g).cpuSamples, i);
-        s.val.time = g.freq.mul(((timestamp)(~s).time));
+        s.Value.time = (~g).freq.mul(((timestamp)(uint64)(int64)(~s).time));
     }
     // Sort the CPU samples.
     slices.SortFunc((~g).cpuSamples, (cpuSample a, cpuSample b) => cmp.Compare(a.time, b.time));
@@ -142,12 +144,12 @@ internal static (ж<generation>, ж<spilledBatch>, error) readGeneration(ж<bufi
 
 // processBatch adds the batch to the generation.
 internal static error processBatch(ж<generation> Ꮡg, batch b) {
-    ref var g = ref Ꮡg.val;
+    ref var g = ref Ꮡg.Value;
 
     switch (ᐧ) {
     case {} when b.isStringsBatch(): {
         {
-            var err = addStrings(Ꮡ(g.strings), b); if (err != default!) {
+            var err = addStrings(Ꮡg.of(generation.Ꮡstrings), b); if (err != default!) {
                 return err;
             }
         }
@@ -155,14 +157,14 @@ internal static error processBatch(ж<generation> Ꮡg, batch b) {
     }
     case {} when b.isStacksBatch(): {
         {
-            var err = addStacks(Ꮡ(g.stacks), g.pcs, b); if (err != default!) {
+            var err = addStacks(Ꮡg.of(generation.Ꮡstacks), g.pcs, b); if (err != default!) {
                 return err;
             }
         }
         break;
     }
     case {} when b.isCPUSamplesBatch(): {
-        (samples, err) = addCPUSamples(g.cpuSamples, b);
+        var (samples, err) = addCPUSamples(g.cpuSamples, b);
         if (err != default!) {
             return err;
         }
@@ -180,9 +182,9 @@ internal static error processBatch(ж<generation> Ꮡg, batch b) {
         g.freq = freq;
         break;
     }
-    case {} when b.exp is != @event.NoExperiment: {
+    case {} when b.exp != @event.NoExperiment: {
         if (g.expData == default!) {
-            g.expData = new @event.Experiment>*ExperimentalData();
+            g.expData = new map<@event.Experiment, ж<ExperimentalData>>();
         }
         {
             var err = addExperimentalData(g.expData, b); if (err != default!) {
@@ -201,31 +203,28 @@ internal static error processBatch(ж<generation> Ꮡg, batch b) {
 
 // validateStackStrings makes sure all the string references in
 // the stack table are present in the string table.
-internal static error validateStackStrings(ж<trace.stack>> Ꮡstacks, ж<trace.stringID, string>> Ꮡstrings, map<uint64, frame> frames) {
-    ref var stacks = ref Ꮡstacks.val;
-    ref var strings = ref Ꮡstrings.val;
+internal static error validateStackStrings(ж<dataTable<stackID, stack>> Ꮡstacks, ж<dataTable<stringID, @string>> Ꮡstrings, map<uint64, frame> frames) {
+    ref var stacks = ref Ꮡstacks.Value;
+    ref var strings = ref Ꮡstrings.Value;
 
-    error err = default!;
-    stacks.forEach(
-    var errʗ2 = err;
-    var framesʗ2 = frames;
-    (stackID id, stack stk) => {
+    ref var err = ref heap<error>(out var Ꮡerr);
+    var framesʗ1 = frames;
+    stacks.forEach((stackID id, stack stk) => {
         foreach (var (_, pc) in stk.pcs) {
             ref var frame = ref heap<frame>(out var Ꮡframe);
-            frame = framesʗ2[pc];
-            var ok = framesʗ2[pc];
+            (frame, var ok) = framesʗ1[pc, ꟷ];
             if (!ok) {
-                errʗ2 = fmt.Errorf("found unknown pc %x for stack %d"u8, pc, id);
+                Ꮡerr.ValueSlot = fmt.Errorf("found unknown pc %x for stack %d"u8, pc, id);
                 return false;
             }
-            (_, ok) = strings.get(frame.funcID);
+            (_, ok) = Ꮡstrings.Value.get(frame.funcID);
             if (!ok) {
-                errʗ2 = fmt.Errorf("found invalid func string ID %d for stack %d"u8, frame.funcID, id);
+                Ꮡerr.ValueSlot = fmt.Errorf("found invalid func string ID %d for stack %d"u8, frame.funcID, id);
                 return false;
             }
-            (_, ok) = strings.get(frame.fileID);
+            (_, ok) = Ꮡstrings.Value.get(frame.fileID);
             if (!ok) {
-                errʗ2 = fmt.Errorf("found invalid file string ID %d for stack %d"u8, frame.fileID, id);
+                Ꮡerr.ValueSlot = fmt.Errorf("found invalid file string ID %d for stack %d"u8, frame.fileID, id);
                 return false;
             }
         }
@@ -237,8 +236,8 @@ internal static error validateStackStrings(ж<trace.stack>> Ꮡstacks, ж<trace.
 // addStrings takes a batch whose first byte is an EvStrings event
 // (indicating that the batch contains only strings) and adds each
 // string contained therein to the provided strings map.
-internal static error addStrings(ж<trace.stringID, string>> ᏑstringTable, batch b) {
-    ref var stringTable = ref ᏑstringTable.val;
+internal static error addStrings(ж<dataTable<stringID, @string>> ᏑstringTable, batch b) {
+    ref var stringTable = ref ᏑstringTable.Value;
 
     if (!b.isStringsBatch()) {
         return fmt.Errorf("internal error: addStrings called on non-string batch"u8);
@@ -249,7 +248,7 @@ internal static error addStrings(ж<trace.stringID, string>> ᏑstringTable, bat
     if (err != default! || ((@event.Type)hdr) != go122.EvStrings) {
         return fmt.Errorf("missing strings batch header"u8);
     }
-    ref var sb = ref heap(new strings_package.Builder(), out var Ꮡsb);
+    ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     while (r.Len() != 0) {
         // Read the header.
         var (ev, errΔ1) = r.ReadByte();
@@ -260,12 +259,12 @@ internal static error addStrings(ж<trace.stringID, string>> ᏑstringTable, bat
             return fmt.Errorf("expected string event, got %d"u8, ev);
         }
         // Read the string's ID.
-        var (id, err) = binary.ReadUvarint(~r);
+        (var id, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return errΔ1;
         }
         // Read the string's length.
-        var (len, err) = binary.ReadUvarint(~r);
+        (var len, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return errΔ1;
         }
@@ -273,8 +272,8 @@ internal static error addStrings(ж<trace.stringID, string>> ᏑstringTable, bat
             return fmt.Errorf("invalid string size %d, maximum is %d"u8, len, go122.MaxStringSize);
         }
         // Copy out the string.
-        var (n, err) = io.CopyN(~Ꮡsb, ~r, ((int64)len));
-        if (n != ((int64)len)) {
+        (var n, errΔ1) = io.CopyN(new strings_BuilderжWriter(Ꮡsb), new bytes_ReaderжReader(r), (int64)len);
+        if (n != (int64)len) {
             return fmt.Errorf("failed to read full string: read %d but wanted %d"u8, n, len);
         }
         if (errΔ1 != default!) {
@@ -295,8 +294,8 @@ internal static error addStrings(ж<trace.stringID, string>> ᏑstringTable, bat
 // addStacks takes a batch whose first byte is an EvStacks event
 // (indicating that the batch contains only stacks) and adds each
 // string contained therein to the provided stacks map.
-internal static error addStacks(ж<trace.stack>> ᏑstackTable, map<uint64, frame> pcs, batch b) {
-    ref var stackTable = ref ᏑstackTable.val;
+internal static error addStacks(ж<dataTable<stackID, stack>> ᏑstackTable, map<uint64, frame> pcs, batch b) {
+    ref var stackTable = ref ᏑstackTable.Value;
 
     if (!b.isStacksBatch()) {
         return fmt.Errorf("internal error: addStacks called on non-stacks batch"u8);
@@ -317,12 +316,12 @@ internal static error addStacks(ж<trace.stack>> ᏑstackTable, map<uint64, fram
             return fmt.Errorf("expected stack event, got %d"u8, ev);
         }
         // Read the stack's ID.
-        var (id, err) = binary.ReadUvarint(~r);
+        (var id, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return errΔ1;
         }
         // Read how many frames are in each stack.
-        var (nFrames, err) = binary.ReadUvarint(~r);
+        (var nFrames, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return errΔ1;
         }
@@ -330,28 +329,28 @@ internal static error addStacks(ж<trace.stack>> ᏑstackTable, map<uint64, fram
             return fmt.Errorf("invalid stack size %d, maximum is %d"u8, nFrames, go122.MaxFramesPerStack);
         }
         // Each frame consists of 4 fields: pc, funcID (string), fileID (string), line.
-        var frames = new slice<uint64>(0, nFrames);
-        for (var i = ((uint64)0); i < nFrames; i++) {
+        var frames = new slice<uint64>(0, (nint)(nFrames));
+        for (var i = (uint64)0; i < nFrames; i++) {
             // Read the frame data.
-            var (pc, errΔ2) = binary.ReadUvarint(~r);
+            var (pc, errΔ2) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
             if (errΔ2 != default!) {
                 return fmt.Errorf("reading frame %d's PC for stack %d: %w"u8, i + 1, id, errΔ2);
             }
-            var (funcID, err) = binary.ReadUvarint(~r);
+            (var funcID, errΔ2) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
             if (errΔ2 != default!) {
                 return fmt.Errorf("reading frame %d's funcID for stack %d: %w"u8, i + 1, id, errΔ2);
             }
-            var (fileID, err) = binary.ReadUvarint(~r);
+            (var fileID, errΔ2) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
             if (errΔ2 != default!) {
                 return fmt.Errorf("reading frame %d's fileID for stack %d: %w"u8, i + 1, id, errΔ2);
             }
-            var (line, err) = binary.ReadUvarint(~r);
+            (var line, errΔ2) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
             if (errΔ2 != default!) {
                 return fmt.Errorf("reading frame %d's line for stack %d: %w"u8, i + 1, id, errΔ2);
             }
             frames = append(frames, pc);
             {
-                var (_, ok) = pcs[pc]; if (!ok) {
+                var (_, ok) = pcs[pc, ꟷ]; if (!ok) {
                     pcs[pc] = new frame(
                         pc: pc,
                         funcID: ((stringID)funcID),
@@ -394,33 +393,33 @@ internal static (slice<cpuSample>, error) addCPUSamples(slice<cpuSample> samples
             return (default!, fmt.Errorf("expected CPU sample event, got %d"u8, ev));
         }
         // Read the sample's timestamp.
-        var (ts, err) = binary.ReadUvarint(~r);
+        (var ts, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
         // Read the sample's M.
-        var (m, err) = binary.ReadUvarint(~r);
+        (var m, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
-        var mid = ((ThreadID)m);
+        var mid = ((ThreadID)(int64)m);
         // Read the sample's P.
-        var (p, err) = binary.ReadUvarint(~r);
+        (var p, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
-        var pid = ((ProcID)p);
+        var pid = ((ProcID)(int64)p);
         // Read the sample's G.
-        var (g, err) = binary.ReadUvarint(~r);
+        (var g, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
-        var goid = ((GoID)g);
+        var goid = ((GoID)(int64)g);
         if (g == 0) {
             goid = NoGoroutine;
         }
         // Read the sample's stack.
-        var (s, err) = binary.ReadUvarint(~r);
+        (var s, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
@@ -431,7 +430,7 @@ internal static (slice<cpuSample>, error) addCPUSamples(slice<cpuSample> samples
                 P: pid,
                 G: goid
             ),
-            time: ((ΔTime)ts), // N.B. this is really a "timestamp," not a Time.
+            time: ((ΔTime)(int64)ts), // N.B. this is really a "timestamp," not a Time.
 
             stack: ((stackID)s)
         ));
@@ -448,27 +447,26 @@ internal static (frequency, error) parseFreq(batch b) {
     r.ReadByte();
     // Consume the EvFrequency byte.
     // Read the frequency. It'll come out as timestamp units per second.
-    var (f, err) = binary.ReadUvarint(~r);
+    var (f, err) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
     if (err != default!) {
         return (0, err);
     }
     // Convert to nanoseconds per timestamp unit.
-    return (((frequency)(1.0F / (((float64)f) / 1e9F))), default!);
+    return (((frequency)(1.0D / ((float64)f / 1e9D))), default!);
 }
 
 // addExperimentalData takes an experimental batch and adds it to the ExperimentalData
 // for the experiment its a part of.
-internal static error addExperimentalData(@event.Experiment>*ExperimentalData expData, batch b) {
+internal static error addExperimentalData(map<@event.Experiment, ж<ExperimentalData>> expData, batch b) {
     if (b.exp == @event.NoExperiment) {
         return fmt.Errorf("internal error: addExperimentalData called on non-experimental batch"u8);
     }
-    var ed = expData[b.exp];
-    var ok = expData[b.exp];
+    var (ed, ok) = expData[b.exp, ꟷ];
     if (!ok) {
         ed = @new<ExperimentalData>();
         expData[b.exp] = ed;
     }
-    ed.val.Batches = append((~ed).Batches, new ExperimentalBatch(
+    ed.Value.Batches = append((~ed).Batches, new ExperimentalBatch(
         Thread: b.m,
         Data: b.data
     ));

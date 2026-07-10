@@ -6,14 +6,15 @@ namespace go.go;
 
 using bytes = bytes_package;
 using errors = errors_package;
-using ast = go.ast_package;
-using token = go.token_package;
+using ast = global::go.go.ast_package;
+using token = global::go.go.token_package;
 using io = io_package;
-using fs = io.fs_package;
+using fs = global::go.io.fs_package;
 using os = os_package;
 using filepath = path.filepath_package;
 using strings = strings_package;
-using io;
+using global::go.go;
+using global::go.io;
 using path;
 
 partial class parser_package {
@@ -37,7 +38,7 @@ internal static (slice<byte>, error) readSource(@string filename, any src) {
             }
             break;
         }
-        case io.Reader s: {
+        case {} Δs when Δs._<io.Reader>(out var s): {
             return io.ReadAll(s);
         }}
         return (default!, errors.New("invalid source"u8));
@@ -80,53 +81,55 @@ public static readonly Mode AllErrors = /* SpuriousErrors */ 32;                
 // errors were found, the result is a partial AST (with [ast.Bad]* nodes
 // representing the fragments of erroneous source code). Multiple errors
 // are returned via a scanner.ErrorList which is sorted by source position.
-public static (ж<ast.File> f, error err) ParseFile(ж<token.FileSet> Ꮡfset, @string filename, any src, Mode mode) => func((defer, recover) => {
+public static (ж<ast.File> f, error err) ParseFile(ж<token.FileSet> Ꮡfset, @string filename, any src, Mode mode) {
     ж<ast.File> f = default!;
-    error err = default!;
+    heap<error>(out var Ꮡerr);
+    func((defer, recover) => {
+    ref var fset = ref Ꮡfset.DerefOrNil();
 
-    ref var fset = ref Ꮡfset.val;
-    if (fset == nil) {
-        throw panic("parser.ParseFile: no token.FileSet provided (fset == nil)");
-    }
-    // get source
-    (text, err) = readSource(filename, src);
-    if (err != default!) {
-        return (default!, err);
-    }
-    ref var p = ref heap(new parser(), out var Ꮡp);
-    var errʗ1 = err;
-    var pʗ1 = p;
-    defer(() => {
-        {
-            var e = recover(); if (e != default!) {
-                // resume same panic if it's not a bailout
-                var (bail, ok) = e._<bailout>(ᐧ);
-                if (!ok){
-                    throw panic(e);
-                } else 
-                if (bail.msg != ""u8) {
-                    pʗ1.errors.Add(pʗ1.file.Position(bail.pos), bail.msg);
+    ref var err = ref Ꮡerr.ValueSlot;
+        if (Ꮡfset == nil) {
+            throw panic("parser.ParseFile: no token.FileSet provided (fset == nil)");
+        }
+        // get source
+        (var text, err) = readSource(filename, src);
+        if (err != default!) {
+            (f, err) = (default!, err); return;
+        }
+        ref var p = ref heap(new parser(), out var Ꮡp);
+        defer(() => {
+            {
+                var e = recover(); if (e != default!) {
+                    // resume same panic if it's not a bailout
+                    ref var bail = ref heap<bailout>(out var Ꮡbail);
+                    (bail, var ok) = e._<bailout>(ᐧ);
+                    if (!ok){
+                        throw panic(e);
+                    } else 
+                    if (bail.msg != ""u8) {
+                        Ꮡp.Value.errors.Add(Ꮡp.Value.@file.Position(bail.pos), bail.msg);
+                    }
                 }
             }
-        }
-        // set result values
-        if (f == nil) {
-            // source is not a valid Go source file - satisfy
-            // ParseFile API and return a valid (but) empty
-            // *ast.File
-            f = Ꮡ(new ast.File(
-                Name: @new<ast.Ident>(),
-                Scope: ast.NewScope(nil)
-            ));
-        }
-        pʗ1.errors.Sort();
-        errʗ1 = pʗ1.errors.Err();
+            // set result values
+            if (f == nil) {
+                // source is not a valid Go source file - satisfy
+                // ParseFile API and return a valid (but) empty
+                // *ast.File
+                f = Ꮡ(new ast.File(
+                    Name: @new<ast.Ident>(),
+                    Scope: ast.NewScope(nil)
+                ));
+            }
+            Ꮡp.Value.errors.Sort();
+            Ꮡerr.ValueSlot = Ꮡp.Value.errors.Err();
+        });
+        // parse source
+        Ꮡp.init(Ꮡfset, filename, text, mode);
+        f = Ꮡp.parseFile();
     });
-    // parse source
-    p.init(Ꮡfset, filename, text, mode);
-    f = p.parseFile();
-    return (f, err);
-});
+    return (f, Ꮡerr.ValueSlot);
+}
 
 // ParseDir calls [ParseFile] for all files with names ending in ".go" in the
 // directory specified by path and returns a map of package name -> package
@@ -140,22 +143,22 @@ public static (ж<ast.File> f, error err) ParseFile(ж<token.FileSet> Ꮡfset, @
 // If the directory couldn't be read, a nil map and the respective error are
 // returned. If a parse error occurred, a non-nil but incomplete map and the
 // first error encountered are returned.
-public static (ast.Package pkgs, error first) ParseDir(ж<token.FileSet> Ꮡfset, @string path, fs.FileInfo) bool filter, Mode mode) {
-    ast.Package pkgs = default!;
+public static (map<@string, ж<ast.Package>> pkgs, error first) ParseDir(ж<token.FileSet> Ꮡfset, @string path, Func<fs.FileInfo, bool> filter, Mode mode) {
+    map<@string, ж<ast.Package>> pkgs = default!;
     error first = default!;
 
-    ref var fset = ref Ꮡfset.val;
-    (list, err) = os.ReadDir(path);
+    ref var fset = ref Ꮡfset.Value;
+    var (list, err) = os.ReadDir(path);
     if (err != default!) {
         return (default!, err);
     }
-    pkgs = new ast.Package();
+    pkgs = new map<@string, ж<ast.Package>>();
     foreach (var (_, d) in list) {
         if (d.IsDir() || !strings.HasSuffix(d.Name(), ".go"u8)) {
             continue;
         }
         if (filter != default!) {
-            (info, errΔ1) = d.Info();
+            var (info, errΔ1) = d.Info();
             if (errΔ1 != default!) {
                 return (default!, errΔ1);
             }
@@ -165,18 +168,18 @@ public static (ast.Package pkgs, error first) ParseDir(ж<token.FileSet> Ꮡfset
         }
         @string filename = filepath.Join(path, d.Name());
         {
-            (src, errΔ2) = ParseFile(Ꮡfset, filename, default!, mode); if (errΔ2 == default!){
-                @string name = (~src).Name.val.Name;
-                var pkg = pkgs[name];
-                var found = pkgs[name];
+            var (src, errΔ2) = ParseFile(Ꮡfset, filename, default!, mode); if (errΔ2 == default!){
+                ref var name = ref heap<@string>(out var Ꮡname);
+                name = src.Value.Name.Value.Name;
+                var (pkg, found) = pkgs[name, ꟷ];
                 if (!found) {
                     pkg = Ꮡ(new ast.Package(
                         Name: name,
-                        Files: new ast.File()
+                        Files: new map<@string, ж<ast.File>>()
                     ));
                     pkgs[name] = pkg;
                 }
-                (~pkg).Files[filename] = src;
+                pkg.Value.Files[filename] = src;
             } else 
             if (first == default!) {
                 first = errΔ2;
@@ -196,49 +199,51 @@ public static (ast.Package pkgs, error first) ParseDir(ж<token.FileSet> Ꮡfset
 // errors were found, the result is a partial AST (with [ast.Bad]* nodes
 // representing the fragments of erroneous source code). Multiple errors
 // are returned via a scanner.ErrorList which is sorted by source position.
-public static (ast.Expr expr, error err) ParseExprFrom(ж<token.FileSet> Ꮡfset, @string filename, any src, Mode mode) => func((defer, recover) => {
+public static (ast.Expr expr, error err) ParseExprFrom(ж<token.FileSet> Ꮡfset, @string filename, any src, Mode mode) {
     ast.Expr expr = default!;
-    error err = default!;
+    heap<error>(out var Ꮡerr);
+    func((defer, recover) => {
+    ref var fset = ref Ꮡfset.DerefOrNil();
 
-    ref var fset = ref Ꮡfset.val;
-    if (fset == nil) {
-        throw panic("parser.ParseExprFrom: no token.FileSet provided (fset == nil)");
-    }
-    // get source
-    (text, err) = readSource(filename, src);
-    if (err != default!) {
-        return (default!, err);
-    }
-    ref var p = ref heap(new parser(), out var Ꮡp);
-    var errʗ1 = err;
-    var pʗ1 = p;
-    defer(() => {
-        {
-            var e = recover(); if (e != default!) {
-                // resume same panic if it's not a bailout
-                var (bail, ok) = e._<bailout>(ᐧ);
-                if (!ok){
-                    throw panic(e);
-                } else 
-                if (bail.msg != ""u8) {
-                    pʗ1.errors.Add(pʗ1.file.Position(bail.pos), bail.msg);
+    ref var err = ref Ꮡerr.ValueSlot;
+        if (Ꮡfset == nil) {
+            throw panic("parser.ParseExprFrom: no token.FileSet provided (fset == nil)");
+        }
+        // get source
+        (var text, err) = readSource(filename, src);
+        if (err != default!) {
+            (expr, err) = (default!, err); return;
+        }
+        ref var p = ref heap(new parser(), out var Ꮡp);
+        defer(() => {
+            {
+                var e = recover(); if (e != default!) {
+                    // resume same panic if it's not a bailout
+                    ref var bail = ref heap<bailout>(out var Ꮡbail);
+                    (bail, var ok) = e._<bailout>(ᐧ);
+                    if (!ok){
+                        throw panic(e);
+                    } else 
+                    if (bail.msg != ""u8) {
+                        Ꮡp.Value.errors.Add(Ꮡp.Value.@file.Position(bail.pos), bail.msg);
+                    }
                 }
             }
+            Ꮡp.Value.errors.Sort();
+            Ꮡerr.ValueSlot = Ꮡp.Value.errors.Err();
+        });
+        // parse expr
+        Ꮡp.init(Ꮡfset, filename, text, mode);
+        expr = Ꮡp.parseRhs();
+        // If a semicolon was inserted, consume it;
+        // report an error if there's more tokens.
+        if (p.tok == token.SEMICOLON && p.lit == "\n"u8) {
+            p.next();
         }
-        pʗ1.errors.Sort();
-        errʗ1 = pʗ1.errors.Err();
+        Ꮡp.expect(token.EOF);
     });
-    // parse expr
-    p.init(Ꮡfset, filename, text, mode);
-    expr = p.parseRhs();
-    // If a semicolon was inserted, consume it;
-    // report an error if there's more tokens.
-    if (p.tok == token.SEMICOLON && p.lit == "\n"u8) {
-        p.next();
-    }
-    p.expect(token.EOF);
-    return (expr, err);
-});
+    return (expr, Ꮡerr.ValueSlot);
+}
 
 // ParseExpr is a convenience function for obtaining the AST of an expression x.
 // The position information recorded in the AST is undefined. The filename used

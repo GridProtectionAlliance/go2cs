@@ -22,28 +22,30 @@ partial class dwarf_package {
 }
 
 // Parse a .debug_types section.
-[GoRecv] internal static error parseTypes(this ref Data d, @string name, slice<byte> types) {
-    var b = makeBuf(d, new unknownFormat(nil), name, 0, types);
+internal static error parseTypes(this ж<Data> Ꮡd, @string name, slice<byte> types) {
+    ref var d = ref Ꮡd.Value;
+
+    var b = makeBuf(Ꮡd, new unknownFormat(nil), name, 0, types);
     while (len(b.data) > 0) {
         var @base = b.off;
         var (n, dwarf64) = b.unitLength();
-        if (n != ((Offset)((uint32)n))) {
+        if (n != ((Offset)(uint32)n)) {
             b.error("type unit length overflow"u8);
             return b.err;
         }
         var hdroff = b.off;
-        nint vers = ((nint)b.uint16());
+        nint vers = (nint)b.uint16();
         if (vers != 4) {
             b.error("unsupported DWARF version "u8 + strconv.Itoa(vers));
             return b.err;
         }
         uint64 ao = default!;
         if (!dwarf64){
-            ao = ((uint64)b.uint32());
+            ao = (uint64)b.uint32();
         } else {
             ao = b.uint64();
         }
-        (atable, err) = d.parseAbbrev(ao, vers);
+        var (atable, err) = Ꮡd.parseAbbrev(ao, vers);
         if (err != default!) {
             return err;
         }
@@ -54,20 +56,20 @@ partial class dwarf_package {
             toff = b.uint32();
         } else {
             var to64 = b.uint64();
-            if (to64 != ((uint64)((uint32)to64))) {
+            if (to64 != (uint64)(uint32)to64) {
                 b.error("type unit type offset overflow"u8);
                 return b.err;
             }
-            toff = ((uint32)to64);
+            toff = (uint32)to64;
         }
         var boff = b.off;
         d.typeSigs[sig] = Ꮡ(new typeUnit(
             unit: new unit(
                 @base: @base,
                 off: boff,
-                data: b.bytes(((nint)(n - (b.off - hdroff)))),
+                data: b.bytes((nint)(uint32)(n - (b.off - hdroff))),
                 atable: atable,
-                asize: ((nint)asize),
+                asize: (nint)asize,
                 vers: vers,
                 is64: dwarf64
             ),
@@ -82,7 +84,9 @@ partial class dwarf_package {
 }
 
 // Return the type for a type signature.
-[GoRecv] internal static (ΔType, error) sigToType(this ref Data d, uint64 sig) {
+internal static (ΔType, error) sigToType(this ж<Data> Ꮡd, uint64 sig) {
+    ref var d = ref Ꮡd.Value;
+
     var tu = d.typeSigs[sig];
     if (tu == nil) {
         return (default!, fmt.Errorf("no type unit with signature %v"u8, sig));
@@ -91,13 +95,13 @@ partial class dwarf_package {
         return ((~tu).cache, default!);
     }
     ref var b = ref heap<buf>(out var Ꮡb);
-    b = makeBuf(d, ~tu, (~tu).name, tu.off, tu.data);
-    var r = Ꮡ(new typeUnitReader(d: d, tu: tu, b: b));
-    (t, err) = d.readType((~tu).name, ~r, (~tu).toff, new dwarf.Type(), nil);
+    b = makeBuf(Ꮡd, new typeUnitжdataFormat(tu), (~tu).name, (~tu).off, (~tu).data);
+    var r = Ꮡ(new typeUnitReader(d: Ꮡd, tu: tu, b: b));
+    var (t, err) = Ꮡd.readType((~tu).name, new typeUnitReaderжtypeReader(r), (~tu).toff, new map<Offset, ΔType>(), nil);
     if (err != default!) {
         return (default!, err);
     }
-    tu.val.cache = t;
+    tu.Value.cache = t;
     return (t, default!);
 }
 
@@ -112,28 +116,30 @@ partial class dwarf_package {
 // Seek to a new position in the type unit.
 [GoRecv] internal static void Seek(this ref typeUnitReader tur, Offset off) {
     tur.err = default!;
-    var doff = off - tur.tu.off;
-    if (doff < 0 || doff >= ((Offset)len(tur.tu.data))) {
-        tur.err = fmt.Errorf("%s: offset %d out of range; max %d"u8, tur.tu.name, doff, len(tur.tu.data));
+    var doff = off - (~tur.tu).off;
+    if (doff < 0 || doff >= ((Offset)(uint32)len((~tur.tu).data))) {
+        tur.err = fmt.Errorf("%s: offset %d out of range; max %d"u8, (~tur.tu).name, doff, len((~tur.tu).data));
         return;
     }
-    tur.b = makeBuf(tur.d, ~tur.tu, tur.tu.name, off, tur.tu.data[(int)(doff)..]);
+    tur.b = makeBuf(tur.d, new typeUnitжdataFormat(tur.tu), (~tur.tu).name, off, (~tur.tu).data[(int)(uint32)(doff)..]);
 }
 
 // AddressSize returns the size in bytes of addresses in the current type unit.
 [GoRecv] internal static nint AddressSize(this ref typeUnitReader tur) {
-    return tur.tu.unit.asize;
+    return (~tur.tu).unit.asize;
 }
 
 // Next reads the next [Entry] from the type unit.
-[GoRecv] internal static (ж<Entry>, error) Next(this ref typeUnitReader tur) {
+internal static (ж<Entry>, error) Next(this ж<typeUnitReader> Ꮡtur) {
+    ref var tur = ref Ꮡtur.Value;
+
     if (tur.err != default!) {
         return (default!, tur.err);
     }
-    if (len(tur.tu.data) == 0) {
+    if (len((~tur.tu).data) == 0) {
         return (default!, default!);
     }
-    var e = tur.b.entry(nil, tur.tu.atable, tur.tu.@base, tur.tu.vers);
+    var e = Ꮡtur.of(typeUnitReader.Ꮡb).entry(nil, (~tur.tu).atable, (~tur.tu).@base, (~tur.tu).vers);
     if (tur.b.err != default!) {
         tur.err = tur.b.err;
         return (default!, tur.err);
@@ -143,11 +149,11 @@ partial class dwarf_package {
 
 // clone returns a new reader for the type unit.
 [GoRecv] internal static typeReader clone(this ref typeUnitReader tur) {
-    return new typeUnitReader(
+    return new typeUnitReaderжtypeReader(Ꮡ(new typeUnitReader(
         d: tur.d,
         tu: tur.tu,
-        b: makeBuf(tur.d, ~tur.tu, tur.tu.name, tur.tu.off, tur.tu.data)
-    );
+        b: makeBuf(tur.d, new typeUnitжdataFormat(tur.tu), (~tur.tu).name, (~tur.tu).off, (~tur.tu).data)
+    )));
 }
 
 // offset returns the current offset.

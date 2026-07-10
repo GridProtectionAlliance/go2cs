@@ -10,10 +10,10 @@ using @internal.syscall;
 partial class os_package {
 
 internal static (@string, error) getModuleFileName(syscallꓸHandle handle) {
-    var n = ((uint32)1024);
+    var n = (uint32)1024;
     slice<uint16> buf = default!;
     while (ᐧ) {
-        buf = new slice<uint16>(n);
+        buf = new slice<uint16>((nint)(n));
         var (r, err) = windows.GetModuleFileName(handle, Ꮡ(buf, 0), n);
         if (err != default!) {
             return ("", err);

@@ -38,7 +38,7 @@ using static go.encoding.csv_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<ParseError, error>]
+[assembly: GoImplement<ParseError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

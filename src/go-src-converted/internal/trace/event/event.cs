@@ -92,7 +92,7 @@ public static array<@string> ArgTypes = new @string[]{
 public static map<@string, Type> Names(slice<Spec> specs) {
     var nameToType = new map<@string, Type>();
     foreach (var (i, spec) in specs) {
-        nameToType[spec.Name] = ((Type)((byte)i));
+        nameToType[spec.Name] = ((Type)(byte)i);
     }
     return nameToType;
 }

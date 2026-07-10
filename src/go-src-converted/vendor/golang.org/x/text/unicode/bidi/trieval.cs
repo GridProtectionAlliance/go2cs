@@ -30,13 +30,13 @@ public static readonly ΔClass LRI = 21; // LeftToRightIsolate
 public static readonly ΔClass RLI = 22; // RightToLeftIsolate
 public static readonly ΔClass FSI = 23; // FirstStrongIsolate
 public static readonly ΔClass PDI = 24; // PopDirectionalIsolate
-internal static readonly ΔClass unknownClass = /* ^Class(0) */ 18446744073709551615;
+internal static readonly ΔClass unknownClass = /* ^Class(0) */ unchecked((ΔClass)18446744073709551615);
 
 // A trie entry has the following bits:
 // 7..5  XOR mask for brackets
 // 4     1: Bracket open, 0: Bracket close
 // 3..0  Class type
-internal static readonly UntypedInt openMask = /* 0x10 */ 16;
+internal static readonly UntypedInt openMask = 0x10;
 internal static readonly UntypedInt xorMaskShift = 5;
 
 } // end bidi_package

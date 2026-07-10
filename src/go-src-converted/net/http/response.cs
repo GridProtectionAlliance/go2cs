@@ -10,13 +10,15 @@ using tls = crypto.tls_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
-using textproto = net.textproto_package;
-using url = net.url_package;
+using textproto = go.net.textproto_package;
+using url = go.net.url_package;
 using strconv = strconv_package;
 using strings = strings_package;
-using httpguts = golang.org.x.net.http.httpguts_package;
+using httpguts = vendor.golang.org.x.net.http.httpguts_package;
 using crypto;
-using golang.org.x.net.http;
+using go.net;
+using httptrace = go.net.http.httptrace_package;
+using vendor.golang.org.x.net.http;
 
 partial class http_package {
 
@@ -66,7 +68,7 @@ internal static map<@string, bool> respExcludeHeader = new map<@string, bool>{
     // As of Go 1.12, the Body will also implement io.Writer
     // on a successful "101 Switching Protocols" response,
     // as used by WebSockets and HTTP/2's "h2c" mode.
-    public io_package.ReadCloser Body;
+    public io.ReadCloser Body;
     // ContentLength records the length of the associated content. The
     // value -1 indicates that the length is unknown. Unless Request.Method
     // is "HEAD", values >= 0 indicate that the given number of bytes may
@@ -108,7 +110,7 @@ internal static map<@string, bool> respExcludeHeader = new map<@string, bool>{
     // response was received. It is nil for unencrypted responses.
     // The pointer is shared between responses and should not be
     // modified.
-    public ж<crypto.tls_package.ΔConnectionState> TLS;
+    public ж<tlsꓸConnectionState> TLS;
 }
 
 // Cookies parses and returns the cookies set in the Set-Cookie headers.
@@ -129,8 +131,8 @@ public static error ErrNoLocation = errors.New("http: no Location header in resp
     if (lv == ""u8) {
         return (default!, ErrNoLocation);
     }
-    if (r.Request != nil && r.Request.URL != nil) {
-        return r.Request.URL.Parse(lv);
+    if (r.Request != nil && (~r.Request).URL != nil) {
+        return (~r.Request).URL.Parse(lv);
     }
     return url.Parse(lv);
 }
@@ -142,12 +144,12 @@ public static error ErrNoLocation = errors.New("http: no Location header in resp
 // After that call, clients can inspect resp.Trailer to find key/value
 // pairs included in the response trailer.
 public static (ж<Response>, error) ReadResponse(ж<bufio.Reader> Ꮡr, ж<Request> Ꮡreq) {
-    ref var r = ref Ꮡr.val;
-    ref var req = ref Ꮡreq.val;
+    ref var r = ref Ꮡr.Value;
+    ref var req = ref Ꮡreq.Value;
 
     var tp = textproto.NewReader(Ꮡr);
     var resp = Ꮡ(new Response(
-        Request: req
+        Request: Ꮡreq
     ));
     // Parse the first line of the response.
     var (line, err) = tp.ReadLine();
@@ -161,30 +163,30 @@ public static (ж<Response>, error) ReadResponse(ж<bufio.Reader> Ꮡr, ж<Reque
     if (!ok) {
         return (default!, badStringError("malformed HTTP response"u8, line));
     }
-    resp.val.Proto = proto;
-    resp.val.Status = strings.TrimLeft(status, " "u8);
+    resp.Value.Proto = proto;
+    resp.Value.Status = strings.TrimLeft(status, " "u8);
     var (statusCode, _, _) = strings.Cut((~resp).Status, " "u8);
-    if (len(statusCode) != 3) {
+    if (builtin.len(statusCode) != 3) {
         return (default!, badStringError("malformed HTTP status code"u8, statusCode));
     }
-    (resp.val.StatusCode, err) = strconv.Atoi(statusCode);
+    (resp.Value.StatusCode, err) = strconv.Atoi(statusCode);
     if (err != default! || (~resp).StatusCode < 0) {
         return (default!, badStringError("malformed HTTP status code"u8, statusCode));
     }
     {
-        (resp.val.ProtoMajor, resp.val.ProtoMinor, ok) = ParseHTTPVersion((~resp).Proto); if (!ok) {
+        (resp.Value.ProtoMajor, resp.Value.ProtoMinor, ok) = ParseHTTPVersion((~resp).Proto); if (!ok) {
             return (default!, badStringError("malformed HTTP version"u8, (~resp).Proto));
         }
     }
     // Parse the response headers.
-    (mimeHeader, err) = tp.ReadMIMEHeader();
+    (var mimeHeader, err) = tp.ReadMIMEHeader();
     if (err != default!) {
         if (AreEqual(err, io.EOF)) {
             err = io.ErrUnexpectedEOF;
         }
         return (default!, err);
     }
-    resp.val.Header = ((ΔHeader)mimeHeader);
+    resp.Value.Header = ((ΔHeader)(map<@string, slice<@string>>)mimeHeader);
     fixPragmaCacheControl((~resp).Header);
     err = readTransfer(resp, Ꮡr);
     if (err != default!) {
@@ -202,11 +204,9 @@ public static (ж<Response>, error) ReadResponse(ж<bufio.Reader> Ꮡr, ж<Reque
 //	Cache-Control: no-cache
 internal static void fixPragmaCacheControl(ΔHeader header) {
     {
-        var hp = header["Pragma"u8];
-        var ok = header["Pragma"u8]; if (ok && len(hp) > 0 && hp[0] == "no-cache") {
+        var (hp, ok) = header["Pragma"u8, ꟷ]; if (ok && builtin.len(hp) > 0 && hp[0] == "no-cache") {
             {
-                var _ = header["Cache-Control"u8];
-                var presentcc = header["Cache-Control"u8]; if (!presentcc) {
+                var (_, presentcc) = header["Cache-Control"u8, ꟷ]; if (!presentcc) {
                     header["Cache-Control"u8] = new @string[]{"no-cache"}.slice();
                 }
             }
@@ -220,9 +220,9 @@ internal static void fixPragmaCacheControl(ΔHeader header) {
     return r.ProtoMajor > major || r.ProtoMajor == major && r.ProtoMinor >= minor;
 }
 
-[GoType("dyn")] partial struct Write_r1 {
-    public partial ref io_package.Reader Reader { get; }
-    public partial ref io_package.Closer Closer { get; }
+[GoType("dyn")] partial struct Write_type {
+    public io_package.Reader Reader;
+    public io_package.Closer Closer;
 }
 
 // Write writes r to w in the HTTP/1.x server response format,
@@ -261,7 +261,7 @@ internal static void fixPragmaCacheControl(ΔHeader header) {
     }
     // Clone it, so we can modify r1 as needed.
     var r1 = @new<Response>();
-    r1.val = r;
+    r1.Value = r;
     if ((~r1).ContentLength == 0 && (~r1).Body != default!) {
         // Is it actually 0 length? Or just unknown?
         array<byte> buf = new(1);
@@ -272,11 +272,11 @@ internal static void fixPragmaCacheControl(ΔHeader header) {
         if (n == 0){
             // Reset it to a known zero reader, in case underlying one
             // is unhappy being read repeatedly.
-            r1.val.Body = NoBody;
+            r1.Value.Body = NoBody;
         } else {
-            r1.val.ContentLength = -1;
-            r1.val.Body = new Write_r1(
-                io.MultiReader(~bytes.NewReader(buf[..1]), r.Body),
+            r1.Value.ContentLength = -1;
+            r1.Value.Body = new Write_type(
+                io.MultiReader(new bytes_ReaderжReader(bytes.NewReader(buf[..1])), r.Body),
                 r.Body
             );
         }
@@ -286,10 +286,10 @@ internal static void fixPragmaCacheControl(ΔHeader header) {
     // way, by noting the EOF with a connection close, so we need
     // to set Close.
     if ((~r1).ContentLength == -1 && !(~r1).Close && r1.ProtoAtLeast(1, 1) && !chunked((~r1).TransferEncoding) && !(~r1).Uncompressed) {
-        r1.val.Close = true;
+        r1.Value.Close = true;
     }
     // Process Body,ContentLength,Close,Trailer
-    (tw, err) = newTransferWriter(r1);
+    var (tw, err) = newTransferWriter(r1);
     if (err != default!) {
         return err;
     }

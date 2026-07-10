@@ -9,11 +9,11 @@ using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
 using net = net_package;
-using http = net.http_package;
-using url = net.url_package;
+using http = go.net.http_package;
+using url = go.net.url_package;
 using strings = strings_package;
 using time = time_package;
-using net;
+using go.net;
 
 partial class httputil_package {
 
@@ -27,11 +27,11 @@ internal static (io.ReadCloser r1, io.ReadCloser r2, error err) drainBody(io.Rea
     io.ReadCloser r2 = default!;
     error err = default!;
 
-    if (b == default! || b == http.NoBody) {
+    if (b == default! || AreEqual(b, http.NoBody)) {
         // No copying needed. Preserve the magic sentinel meaning of NoBody.
         return (http.NoBody, http.NoBody, default!);
     }
-    ref var buf = ref heap(new bytes_package.Buffer(), out var Ꮡbuf);
+    ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
         (_, err) = buf.ReadFrom(b); if (err != default!) {
             return (default!, b, err);
@@ -42,13 +42,13 @@ internal static (io.ReadCloser r1, io.ReadCloser r2, error err) drainBody(io.Rea
             return (default!, b, err);
         }
     }
-    return (io.NopCloser(~Ꮡbuf), io.NopCloser(~bytes.NewReader(buf.Bytes())), default!);
+    return (io.NopCloser(new bytes_BufferжReader(Ꮡbuf)), io.NopCloser(new bytes_ReaderжReader(bytes.NewReader(buf.Bytes()))), default!);
 }
 
 // dumpConn is a net.Conn which writes to Writer and reads from Reader
 [GoType] partial struct dumpConn {
-    public partial ref io_package.Writer Writer { get; }
-    public partial ref io_package.Reader Reader { get; }
+    public io_package.Writer Writer;
+    public io_package.Reader Reader;
 }
 
 [GoRecv] internal static error Close(this ref dumpConn c) {
@@ -82,7 +82,7 @@ internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) {
     error err = default!;
 
     foreach (var (i, _) in p) {
-        p[i] = ((byte)b);
+        p[i] = (byte)b;
     }
     return (len(p), default!);
 }
@@ -90,9 +90,9 @@ internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) {
 // outgoingLength is a copy of the unexported
 // (*http.Request).outgoingLength method.
 internal static int64 outgoingLength(ж<http.Request> Ꮡreq) {
-    ref var req = ref Ꮡreq.val;
+    ref var req = ref Ꮡreq.Value;
 
-    if (req.Body == default! || req.Body == http.NoBody) {
+    if (req.Body == default! || AreEqual(req.Body, http.NoBody)) {
         return 0;
     }
     if (req.ContentLength != 0) {
@@ -104,8 +104,8 @@ internal static int64 outgoingLength(ж<http.Request> Ꮡreq) {
 // DumpRequestOut is like [DumpRequest] but for outgoing client requests. It
 // includes any headers that the standard [http.Transport] adds, such as
 // User-Agent.
-public static (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡreq, bool body) => func((defer, _) => {
-    ref var req = ref Ꮡreq.val;
+public static (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡreq, bool body) => func<(slice<byte>, error)>((defer, recover) => {
+    ref var req = ref Ꮡreq.Value;
 
     var save = req.Body;
     var dummyBody = false;
@@ -116,42 +116,40 @@ public static (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡreq, bool 
             dummyBody = true;
         }
     } else {
-        error err = default!;
-        (save, req.Body, err) = drainBody(req.Body);
-        if (err != default!) {
-            return (default!, err);
+        error errΔ1 = default!;
+        (save, req.Body, errΔ1) = drainBody(req.Body);
+        if (errΔ1 != default!) {
+            return (default!, errΔ1);
         }
     }
     // Since we're using the actual Transport code to write the request,
     // switch to http so the Transport doesn't try to do an SSL
     // negotiation with our dumpConn and its bytes.Buffer & pipe.
     // The wire format for https and http are the same, anyway.
-    var reqSend = req;
-    if (req.URL.Scheme == "https"u8) {
+    var reqSend = Ꮡreq;
+    if ((~req.URL).Scheme == "https"u8) {
         reqSend = @new<http.Request>();
-        reqSend.val = req;
-        reqSend.val.URL = @new<url.URL>();
-        (~reqSend).URL.val = req.URL;
-        (~reqSend).URL.val.Scheme = "http"u8;
+        reqSend.Value = req;
+        reqSend.Value.URL = @new<url.URL>();
+        (~reqSend).URL.Value = req.URL.Value;
+        reqSend.Value.URL.Value.Scheme = "http"u8;
     }
     // Use the actual Transport code to record what we would send
     // on the wire, but not using TCP.  Use a Transport with a
     // custom dialer that returns a fake net.Conn that waits
     // for the full input (and recording it), and then responds
     // with a dummy response.
-    ref var buf = ref heap(new bytes_package.Buffer(), out var Ꮡbuf);                       // records the output
-    (pr, pw) = io.Pipe();
+    ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);                       // records the output
+    var (pr, pw) = io.Pipe();
     var prʗ1 = pr;
-    defer(prʗ1.Close);
+    defer(() => prʗ1.Close());
     var pwʗ1 = pw;
-    defer(pwʗ1.Close);
+    defer(() => pwʗ1.Close());
     var dr = Ꮡ(new delegateReader(c: new channel<io.Reader>(1)));
-    var t = Ꮡ(new http.Transport(
-        Dial: 
-        var bufʗ1 = buf;
         var drʗ1 = dr;
         var pwʗ2 = pw;
-        (@string net, @string addr) => (Ꮡ(new dumpConn(io.MultiWriter(~Ꮡbufʗ1, pwʗ2), drʗ1)), default!)
+    var t = Ꮡ(new http.Transport(
+        Dial: (@string netΔ1, @string addr) => (new dumpConnжConn(Ꮡ(new dumpConn(io.MultiWriter(new bytes_BufferжWriter(Ꮡbuf), new io_PipeWriterжWriter(pwʗ2)), new delegateReaderжReader(drʗ1)))), default!)
     ));
     var tʗ1 = t;
     defer(tʗ1.CloseIdleConnections);
@@ -164,14 +162,14 @@ public static (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡreq, bool 
     var prʗ2 = pr;
     var quitReadChʗ1 = quitReadCh;
     goǃ(() => {
-        (reqΔ1, err) = http.ReadRequest(bufio.NewReader(~prʗ2));
-        if (err == default!) {
+        var (reqΔ1, errΔ2) = http.ReadRequest(bufio.NewReader(new io_PipeReaderжReader(prʗ2)));
+        if (errΔ2 == default!) {
             // Ensure all the body is read; otherwise
             // we'll get a partial dump.
             io.Copy(io.Discard, (~reqΔ1).Body);
             (~reqΔ1).Body.Close();
         }
-        switch (select((~drʗ2).c.ᐸꟷ(strings.NewReader("HTTP/1.1 204 No Content\r\nConnection: close\r\n\r\n"u8), ꓸꓸꓸ), ᐸꟷ(quitReadChʗ1, ꓸꓸꓸ))) {
+        switch (select((~drʗ2).c.ᐸꟷ(new strings_ReaderжReader(strings.NewReader("HTTP/1.1 204 No Content\r\nConnection: close\r\n\r\n"u8)), ꓸꓸꓸ), ᐸꟷ(quitReadChʗ1, ꓸꓸꓸ))) {
         case 0: {
             break;
         }
@@ -181,11 +179,11 @@ public static (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡreq, bool 
         }}
     });
     // Ensure delegateReader.Read doesn't block forever if we get an error.
-    (_, err) = t.RoundTrip(reqSend);
+    var (_, err) = t.RoundTrip(reqSend);
     req.Body = save;
     if (err != default!) {
         pw.Close();
-        dr.val.err = err;
+        dr.Value.err = err;
         close(quitReadCh);
         return (default!, err);
     }
@@ -197,7 +195,7 @@ public static (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡreq, bool 
     // discard the body earlier if this matters.
     if (dummyBody) {
         {
-            nint i = bytes.Index(dump, slice<byte>("\r\n\r\n")); if (i >= 0) {
+            nint i = bytes.Index(dump, slice<byte>((@string)"\r\n\r\n")); if (i >= 0) {
                 dump = dump[..(int)(i + 4)];
             }
         }
@@ -210,14 +208,14 @@ public static (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡreq, bool 
 [GoType] partial struct delegateReader {
     internal channel<io.Reader> c;
     internal error err;     // only used if r is nil and c is closed.
-    internal io_package.Reader r; // nil until received from c
+    internal io.Reader r; // nil until received from c
 }
 
 [GoRecv] internal static (nint, error) Read(this ref delegateReader r, slice<byte> p) {
     if (r.r == default!) {
         bool ok = default!;
         {
-            var (r.r, ok) = ᐸꟷ(r.c, ꟷ); if (!ok) {
+            (r.r, ok) = ᐸꟷ(r.c, ꟷ); if (!ok) {
                 return (0, r.err);
             }
         }
@@ -257,7 +255,7 @@ internal static map<@string, bool> reqWriteExcludeHeaderDump = new map<@string, 
 // The documentation for [http.Request.Write] details which fields
 // of req are included in the dump.
 public static (slice<byte>, error) DumpRequest(ж<http.Request> Ꮡreq, bool body) {
-    ref var req = ref Ꮡreq.val;
+    ref var req = ref Ꮡreq.Value;
 
     error err = default!;
     var save = req.Body;
@@ -269,7 +267,7 @@ public static (slice<byte>, error) DumpRequest(ж<http.Request> Ꮡreq, bool bod
             return (default!, err);
         }
     }
-    ref var b = ref heap(new bytes_package.Buffer(), out var Ꮡb);
+    ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     // By default, print out the unmodified req.RequestURI, which
     // is always set for incoming server requests. But because we
     // previously used req.URL.RequestURI and the docs weren't
@@ -280,36 +278,36 @@ public static (slice<byte>, error) DumpRequest(ж<http.Request> Ꮡreq, bool bod
     if (reqURI == ""u8) {
         reqURI = req.URL.RequestURI();
     }
-    fmt.Fprintf(~Ꮡb, "%s %s HTTP/%d.%d\r\n"u8, valueOrDefault(req.Method, "GET"u8),
+    fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "%s %s HTTP/%d.%d\r\n"u8, valueOrDefault(req.Method, "GET"u8),
         reqURI, req.ProtoMajor, req.ProtoMinor);
     var absRequestURI = strings.HasPrefix(req.RequestURI, "http://"u8) || strings.HasPrefix(req.RequestURI, "https://"u8);
     if (!absRequestURI) {
         @string host = req.Host;
         if (host == ""u8 && req.URL != nil) {
-            host = req.URL.Host;
+            host = req.URL.Value.Host;
         }
         if (host != ""u8) {
-            fmt.Fprintf(~Ꮡb, "Host: %s\r\n"u8, host);
+            fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "Host: %s\r\n"u8, host);
         }
     }
     var chunked = len(req.TransferEncoding) > 0 && req.TransferEncoding[0] == "chunked";
     if (len(req.TransferEncoding) > 0) {
-        fmt.Fprintf(~Ꮡb, "Transfer-Encoding: %s\r\n"u8, strings.Join(req.TransferEncoding, ","u8));
+        fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "Transfer-Encoding: %s\r\n"u8, strings.Join(req.TransferEncoding, ","u8));
     }
-    err = req.Header.WriteSubset(~Ꮡb, reqWriteExcludeHeaderDump);
+    err = req.Header.WriteSubset(new bytes_BufferжWriter(Ꮡb), reqWriteExcludeHeaderDump);
     if (err != default!) {
         return (default!, err);
     }
-    io.WriteString(~Ꮡb, "\r\n"u8);
+    io.WriteString(new bytes_BufferжWriter(Ꮡb), "\r\n"u8);
     if (req.Body != default!) {
-        io.Writer dest = Ꮡb;
+        io.Writer dest = new bytes_BufferжWriter(Ꮡb);
         if (chunked) {
-            dest = NewChunkedWriter(dest);
+            dest = new io_WriteCloserᴠWriter(NewChunkedWriter(dest));
         }
         (_, err) = io.Copy(dest, req.Body);
         if (chunked) {
             dest._<io.Closer>().Close();
-            io.WriteString(~Ꮡb, "\r\n"u8);
+            io.WriteString(new bytes_BufferжWriter(Ꮡb), "\r\n"u8);
         }
     }
     req.Body = save;
@@ -330,7 +328,7 @@ internal static error errNoBody = errors.New("sentinel error value"u8);
 [GoType] partial struct failureToReadBody {
 }
 
-internal static (nint, error) Read(this failureToReadBody _, slice<byte> _) {
+internal static (nint, error) Read(this failureToReadBody _Δp0, slice<byte> _Δp1) {
     return (0, errNoBody);
 }
 
@@ -339,13 +337,13 @@ internal static error Close(this failureToReadBody _) {
 }
 
 // emptyBody is an instance of empty reader.
-internal static io.ReadCloser emptyBody = io.NopCloser(~strings.NewReader(""u8));
+internal static io.ReadCloser emptyBody = io.NopCloser(new strings_ReaderжReader(strings.NewReader(""u8)));
 
 // DumpResponse is like DumpRequest but dumps a response.
 public static (slice<byte>, error) DumpResponse(ж<http.Response> Ꮡresp, bool body) {
-    ref var resp = ref Ꮡresp.val;
+    ref var resp = ref Ꮡresp.Value;
 
-    ref var b = ref heap(new bytes_package.Buffer(), out var Ꮡb);
+    ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     error err = default!;
     var save = resp.Body;
     var savecl = resp.ContentLength;
@@ -366,7 +364,7 @@ public static (slice<byte>, error) DumpResponse(ж<http.Response> Ꮡresp, bool 
             return (default!, err);
         }
     }
-    err = resp.Write(~Ꮡb);
+    err = resp.Write(new bytes_BufferжWriter(Ꮡb));
     if (AreEqual(err, errNoBody)) {
         err = default!;
     }

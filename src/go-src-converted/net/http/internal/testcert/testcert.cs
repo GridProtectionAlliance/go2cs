@@ -13,7 +13,7 @@ partial class testcert_package {
 // "127.0.0.1" and "[::1]", expiring at Jan 29 16:00:00 2084 GMT.
 // generated from src/crypto/tls:
 // go run generate_cert.go  --rsa-bits 2048 --host 127.0.0.1,::1,example.com --ca --start-date "Jan 1 00:00:00 1970" --duration=1000000h
-public static slice<byte> LocalhostCert = slice<byte>("""
+public static slice<byte> LocalhostCert = slice<byte>((@string)"""
 -----BEGIN CERTIFICATE-----
 MIIDOTCCAiGgAwIBAgIQSRJrEpBGFc7tNb1fb5pKFzANBgkqhkiG9w0BAQsFADAS
 MRAwDgYDVQQKEwdBY21lIENvMCAXDTcwMDEwMTAwMDAwMFoYDzIwODQwMTI5MTYw

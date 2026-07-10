@@ -4,8 +4,8 @@
 namespace go.@internal.trace.@event;
 
 using fmt = fmt_package;
-using @event = @internal.trace.event_package;
-using @internal.trace;
+using @event = go.@internal.trace.event_package;
+using go.@internal.trace;
 
 partial class go122_package {
 
@@ -87,7 +87,7 @@ public static readonly @event.Type EvGoroutineStackFree = 136; // stack free [ti
 
 // EventString returns the name of a Go 1.22 event.
 public static @string EventString(@event.Type typ) {
-    if (((nint)typ) < len(specs)) {
+    if ((nint)(uint8)typ < len(specs)) {
         return specs[typ].Name;
     }
     return fmt.Sprintf("Invalid(%d)"u8, typ);
@@ -104,7 +104,7 @@ public static slice<@event.Spec> Specs() {
 // Easier to represent for raw readers.
 // "Timed" Events.
 // Experimental events.
-internal static array<@event.Spec> specs = new runtime.SparseArray<@event.Spec>{
+internal static array<@event.Spec> specs = new golib.SparseArray<@event.Spec>{
     [EvEventBatch] = new @event.Spec(
         Name: "EventBatch"u8,
         Args: new @string[]{"gen", "m", "time", "size"}.slice()

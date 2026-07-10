@@ -5,8 +5,8 @@
 namespace go;
 
 using bytealg = @internal.bytealg_package;
-using runtime = runtime_package;
-using sync = sync_package;
+using Δruntime = runtime_package;
+using Δsync = sync_package;
 using utf16 = unicode.utf16_package;
 using @unsafe = unsafe_package;
 using @internal;
@@ -15,7 +15,7 @@ using unicode;
 partial class syscall_package {
 
 // ForkLock is not used on Windows.
-public static sync.RWMutex ForkLock;
+public static Δsync.RWMutex ForkLock;
 
 // EscapeArg rewrites command line argument s as prescribed
 // in https://msdn.microsoft.com/en-us/library/ms880421.
@@ -33,8 +33,7 @@ public static @string EscapeArg(@string s) {
     for (nint i = 0; i < len(s); i++) {
         switch (s[i]) {
         case (rune)'"' or (rune)'\\' or (rune)' ' or (rune)'\t': {
-            var b = new slice<byte>(0, // Some escaping required.
- len(s) + 2);
+            var b = new slice<byte>(0, len(s) + 2);
             b = appendEscapeArg(b, s);
             return ((@string)b);
         }}
@@ -47,7 +46,7 @@ public static @string EscapeArg(@string s) {
 // appends the result to b, and returns the updated slice.
 internal static slice<byte> appendEscapeArg(slice<byte> b, @string s) {
     if (len(s) == 0) {
-        return append(b, @""""""u8.ꓸꓸꓸ);
+        return append(b, ((@string)@""""""u8).ꓸꓸꓸ);
     }
     var needsBackslash = false;
     var hasSpace = false;
@@ -69,12 +68,12 @@ internal static slice<byte> appendEscapeArg(slice<byte> b, @string s) {
     }
     if (!needsBackslash) {
         // hasSpace is true, so we need to quote the string.
-        b = append(b, (rune)'"');
+        b = append(b, (byte)((rune)'"'));
         b = append(b, s.ꓸꓸꓸ);
-        return append(b, (rune)'"');
+        return append(b, (byte)((rune)'"'));
     }
     if (hasSpace) {
-        b = append(b, (rune)'"');
+        b = append(b, (byte)((rune)'"'));
     }
     nint slashes = 0;
     for (nint i = 0; i < len(s); i++) {
@@ -90,9 +89,9 @@ internal static slice<byte> appendEscapeArg(slice<byte> b, @string s) {
         }
         case (rune)'"': {
             for (; slashes > 0; slashes--) {
-                b = append(b, (rune)'\\');
+                b = append(b, (byte)((rune)'\\'));
             }
-            b = append(b, (rune)'\\');
+            b = append(b, (byte)((rune)'\\'));
             break;
         }}
 
@@ -100,9 +99,9 @@ internal static slice<byte> appendEscapeArg(slice<byte> b, @string s) {
     }
     if (hasSpace) {
         for (; slashes > 0; slashes--) {
-            b = append(b, (rune)'\\');
+            b = append(b, (byte)((rune)'\\'));
         }
-        b = append(b, (rune)'"');
+        b = append(b, (byte)((rune)'"'));
     }
     return b;
 }
@@ -113,7 +112,7 @@ internal static @string makeCmdLine(slice<@string> args) {
     slice<byte> b = default!;
     foreach (var (_, v) in args) {
         if (len(b) > 0) {
-            b = append(b, (rune)' ');
+            b = append(b, (byte)((rune)' '));
         }
         b = appendEscapeArg(b, v);
     }
@@ -149,7 +148,7 @@ internal static (slice<uint16>, error) createEnvBlock(slice<@string> envv) {
 }
 
 public static void CloseOnExec(ΔHandle fd) {
-    SetHandleInformation(((ΔHandle)fd), HANDLE_FLAG_INHERIT, 0);
+    SetHandleInformation(fd, HANDLE_FLAG_INHERIT, 0);
 }
 
 public static error /*err*/ SetNonblock(ΔHandle fd, bool nonblocking) {
@@ -163,18 +162,18 @@ public static (@string path, error err) FullPath(@string name) {
     @string path = default!;
     error err = default!;
 
-    (p, err) = UTF16PtrFromString(name);
+    (var p, err) = UTF16PtrFromString(name);
     if (err != default!) {
         return ("", err);
     }
-    var n = ((uint32)100);
+    var n = (uint32)100;
     while (ᐧ) {
-        var buf = new slice<uint16>(n);
-        (n, err) = GetFullPathName(p, ((uint32)len(buf)), Ꮡ(buf, 0), nil);
+        var buf = new slice<uint16>((nint)(n));
+        (n, err) = GetFullPathName(p, (uint32)len(buf), Ꮡ(buf, 0), nil);
         if (err != default!) {
             return ("", err);
         }
-        if (n <= ((uint32)len(buf))) {
+        if (n <= (uint32)len(buf)) {
             return (UTF16ToString(buf[..(int)(n)]), default!);
         }
     }
@@ -188,7 +187,7 @@ internal static (@string name, error err) normalizeDir(@string dir) {
     @string name = default!;
     error err = default!;
 
-    var (ndir, err) = FullPath(dir);
+    (var ndir, err) = FullPath(dir);
     if (err != default!) {
         return ("", err);
     }
@@ -229,8 +228,8 @@ internal static (@string name, error err) joinExeDirAndFName(@string dir, @strin
             if (errΔ1 != default!) {
                 return ("", errΔ1);
             }
-            if (volToUpper(((nint)p[0])) == volToUpper(((nint)d[0]))){
-                return FullPath(d + "\\"u8 + p[2..]);
+            if (volToUpper((nint)p[0]) == volToUpper((nint)d[0])){
+                return FullPath(d + "\\" + p[2..]);
             } else {
                 return FullPath(p);
             }
@@ -268,148 +267,151 @@ internal static (@string name, error err) joinExeDirAndFName(@string dir, @strin
     public ΔHandle ParentProcess;            // if non-zero, the new process regards the process given by this handle as its parent process, and AdditionalInheritedHandles, if set, should exist in this parent process
 }
 
-internal static ProcAttr zeroProcAttr;
+internal static ж<ProcAttr> ᏑzeroProcAttr = new(default(ProcAttr));
+internal static ref ProcAttr zeroProcAttr => ref ᏑzeroProcAttr.Value;
 
-internal static SysProcAttr zeroSysProcAttr;
+internal static ж<SysProcAttr> ᏑzeroSysProcAttr = new(default(SysProcAttr));
+internal static ref SysProcAttr zeroSysProcAttr => ref ᏑzeroSysProcAttr.Value;
 
-public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, slice<@string> argv, ж<ProcAttr> Ꮡattr) => func((defer, _) => {
+public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
     nint pid = default!;
     uintptr handle = default!;
-    error errΔ1 = default!;
+    error err = default!;
+    func((defer, recover) => {
+    ref var attr = ref Ꮡattr.DerefOrNil();
 
-    ref var attr = ref Ꮡattr.val;
-    if (len(argv0) == 0) {
-        return (0, 0, EWINDOWS);
-    }
-    if (attr == nil) {
-        Ꮡattr = Ꮡ(zeroProcAttr); attr = ref Ꮡattr.val;
-    }
-    var sys = attr.Sys;
-    if (sys == nil) {
-        sys = Ꮡ(zeroSysProcAttr);
-    }
-    if (len(attr.Files) > 3) {
-        return (0, 0, EWINDOWS);
-    }
-    if (len(attr.Files) < 3) {
-        return (0, 0, EINVAL);
-    }
-    if (len(attr.Dir) != 0) {
-        // StartProcess assumes that argv0 is relative to attr.Dir,
-        // because it implies Chdir(attr.Dir) before executing argv0.
-        // Windows CreateProcess assumes the opposite: it looks for
-        // argv0 relative to the current directory, and, only once the new
-        // process is started, it does Chdir(attr.Dir). We are adjusting
-        // for that difference here by making argv0 absolute.
-        error errΔ2 = default!;
-        (argv0, errΔ2) = joinExeDirAndFName(attr.Dir, argv0);
-        if (errΔ2 != default!) {
-            return (0, 0, errΔ2);
+        if (len(argv0) == 0) {
+            (pid, handle, err) = (0, 0, EWINDOWS); return;
         }
-    }
-    (argv0p, errΔ2) = UTF16PtrFromString(argv0);
-    if (errΔ1 != default!) {
-        return (0, 0, errΔ1);
-    }
-    @string cmdline = default!;
-    // Windows CreateProcess takes the command line as a single string:
-    // use attr.CmdLine if set, else build the command line by escaping
-    // and joining each argument with spaces
-    if ((~sys).CmdLine != ""u8){
-        cmdline = sys.val.CmdLine;
-    } else {
-        cmdline = makeCmdLine(argv);
-    }
-    ж<uint16> argvp = default!;
-    if (len(cmdline) != 0) {
-        (argvp, errΔ2) = UTF16PtrFromString(cmdline);
-        if (errΔ1 != default!) {
-            return (0, 0, errΔ1);
+        if (Ꮡattr == nil) {
+            Ꮡattr = ᏑzeroProcAttr; attr = ref Ꮡattr.DerefOrNil();
         }
-    }
-    ж<uint16> dirp = default!;
-    if (len(attr.Dir) != 0) {
-        (dirp, errΔ2) = UTF16PtrFromString(attr.Dir);
-        if (errΔ1 != default!) {
-            return (0, 0, errΔ1);
+        var sys = attr.Sys;
+        if (sys == nil) {
+            sys = ᏑzeroSysProcAttr;
         }
-    }
-    var (p, _) = GetCurrentProcess();
-    var parentProcess = p;
-    if ((~sys).ParentProcess != 0) {
-        parentProcess = sys.val.ParentProcess;
-    }
-    var fd = new slice<ΔHandle>(len(attr.Files));
-    ref var i = ref heap(new nint(), out var Ꮡi);
-
-    foreach (var (i, _) in attr.Files) {
-        if (attr.Files[i] > 0) {
-            var errΔ3 = DuplicateHandle(p, ((ΔHandle)attr.Files[i]), parentProcess, Ꮡ(fd, i), 0, true, DUPLICATE_SAME_ACCESS);
-            if (errΔ3 != default!) {
-                return (0, 0, errΔ3);
+        if (len(attr.Files) > 3) {
+            (pid, handle, err) = (0, 0, EWINDOWS); return;
+        }
+        if (len(attr.Files) < 3) {
+            (pid, handle, err) = (0, 0, EINVAL); return;
+        }
+        if (len(attr.Dir) != 0) {
+            // StartProcess assumes that argv0 is relative to attr.Dir,
+            // because it implies Chdir(attr.Dir) before executing argv0.
+            // Windows CreateProcess assumes the opposite: it looks for
+            // argv0 relative to the current directory, and, only once the new
+            // process is started, it does Chdir(attr.Dir). We are adjusting
+            // for that difference here by making argv0 absolute.
+            error errΔ1 = default!;
+            (argv0, errΔ1) = joinExeDirAndFName(attr.Dir, argv0);
+            if (errΔ1 != default!) {
+                (pid, handle, err) = (0, 0, errΔ1); return;
             }
-            deferǃ(DuplicateHandle, parentProcess, fd[i], 0, nil, 0, false, DUPLICATE_CLOSE_SOURCE, defer);
         }
-    }
-    var si = @new<_STARTUPINFOEXW>();
-    (si.val.ProcThreadAttributeList, errΔ2) = newProcThreadAttributeList(2);
-    if (errΔ1 != default!) {
-        return (0, 0, errΔ1);
-    }
-    deferǃ(deleteProcThreadAttributeList, (~si).ProcThreadAttributeList, defer);
-    si.Cb = ((uint32)@unsafe.Sizeof(si.val));
-    si.Flags = STARTF_USESTDHANDLES;
-    if ((~sys).HideWindow) {
-        si.Flags |= (uint32)(STARTF_USESHOWWINDOW);
-        si.ShowWindow = SW_HIDE;
-    }
-    if ((~sys).ParentProcess != 0) {
-        errΔ2 = updateProcThreadAttribute((~si).ProcThreadAttributeList, 0, _PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, ((@unsafe.Pointer)(Ꮡ((~sys).ParentProcess))), @unsafe.Sizeof((~sys).ParentProcess), nil, nil);
-        if (errΔ1 != default!) {
-            return (0, 0, errΔ1);
+        (var argv0p, err) = UTF16PtrFromString(argv0);
+        if (err != default!) {
+            (pid, handle, err) = (0, 0, err); return;
         }
-    }
-    si.StdInput = fd[0];
-    si.StdOutput = fd[1];
-    si.StdErr = fd[2];
-    fd = append(fd, (~sys).AdditionalInheritedHandles.ꓸꓸꓸ);
-    // The presence of a NULL handle in the list is enough to cause PROC_THREAD_ATTRIBUTE_HANDLE_LIST
-    // to treat the entire list as empty, so remove NULL handles.
-    nint j = 0;
-    foreach (var (i, _) in fd) {
-        if (fd[i] != 0) {
-            fd[j] = fd[i];
-            j++;
+        @string cmdline = default!;
+        // Windows CreateProcess takes the command line as a single string:
+        // use attr.CmdLine if set, else build the command line by escaping
+        // and joining each argument with spaces
+        if ((~sys).CmdLine != ""u8){
+            cmdline = sys.Value.CmdLine;
+        } else {
+            cmdline = makeCmdLine(argv);
         }
-    }
-    fd = fd[..(int)(j)];
-    var willInheritHandles = len(fd) > 0 && !(~sys).NoInheritHandles;
-    // Do not accidentally inherit more than these handles.
-    if (willInheritHandles) {
-        errΔ2 = updateProcThreadAttribute((~si).ProcThreadAttributeList, 0, _PROC_THREAD_ATTRIBUTE_HANDLE_LIST, ((@unsafe.Pointer)(Ꮡ(fd, 0))), ((uintptr)len(fd)) * @unsafe.Sizeof(fd[0]), nil, nil);
-        if (errΔ1 != default!) {
-            return (0, 0, errΔ1);
+        ж<uint16> argvp = default!;
+        if (len(cmdline) != 0) {
+            (argvp, err) = UTF16PtrFromString(cmdline);
+            if (err != default!) {
+                (pid, handle, err) = (0, 0, err); return;
+            }
         }
-    }
-    (envBlock, errΔ2) = createEnvBlock(attr.Env);
-    if (errΔ1 != default!) {
-        return (0, 0, errΔ1);
-    }
-    var pi = @new<ProcessInformation>();
-    var flags = (uint32)((uint32)((~sys).CreationFlags | CREATE_UNICODE_ENVIRONMENT) | _EXTENDED_STARTUPINFO_PRESENT);
-    if ((~sys).Token != 0){
-        errΔ2 = CreateProcessAsUser((~sys).Token, argv0p, argvp, (~sys).ProcessAttributes, (~sys).ThreadAttributes, willInheritHandles, flags, Ꮡ(envBlock, 0), dirp, Ꮡ((~si).StartupInfo), pi);
-    } else {
-        errΔ2 = CreateProcess(argv0p, argvp, (~sys).ProcessAttributes, (~sys).ThreadAttributes, willInheritHandles, flags, Ꮡ(envBlock, 0), dirp, Ꮡ((~si).StartupInfo), pi);
-    }
-    if (errΔ1 != default!) {
-        return (0, 0, errΔ1);
-    }
-    deferǃ(CloseHandle, ((ΔHandle)(~pi).Thread), defer);
-    runtime.KeepAlive(fd);
-    runtime.KeepAlive(sys);
-    return (((nint)(~pi).ProcessId), ((uintptr)(~pi).Process), default!);
-});
+        ж<uint16> dirp = default!;
+        if (len(attr.Dir) != 0) {
+            (dirp, err) = UTF16PtrFromString(attr.Dir);
+            if (err != default!) {
+                (pid, handle, err) = (0, 0, err); return;
+            }
+        }
+        var (p, _) = GetCurrentProcess();
+        var parentProcess = p;
+        if ((~sys).ParentProcess != 0) {
+            parentProcess = sys.Value.ParentProcess;
+        }
+        var fd = new slice<ΔHandle>(len(attr.Files));
+        foreach (var (i, _) in attr.Files) {
+            if (attr.Files[i] > 0) {
+                var errΔ2 = DuplicateHandle(p, ((ΔHandle)attr.Files[i]), parentProcess, Ꮡ(fd, i), 0, true, DUPLICATE_SAME_ACCESS);
+                if (errΔ2 != default!) {
+                    (pid, handle, err) = (0, 0, errΔ2); return;
+                }
+                deferǃ(DuplicateHandle, parentProcess, fd[i], (ΔHandle)(0), (ж<ΔHandle>)(nil), (uint32)(0), (bool)false, (uint32)(DUPLICATE_CLOSE_SOURCE), defer);
+            }
+        }
+        var si = @new<_STARTUPINFOEXW>();
+        (si.Value.ProcThreadAttributeList, err) = newProcThreadAttributeList(2);
+        if (err != default!) {
+            (pid, handle, err) = (0, 0, err); return;
+        }
+        deferǃ(deleteProcThreadAttributeList, (~si).ProcThreadAttributeList, defer);
+        si.Value.Cb = (uint32)@unsafe.Sizeof(si.Value);
+        si.Value.Flags = STARTF_USESTDHANDLES;
+        if ((~sys).HideWindow) {
+            si.Value.Flags |= STARTF_USESHOWWINDOW;
+            si.Value.ShowWindow = SW_HIDE;
+        }
+        if ((~sys).ParentProcess != 0) {
+            err = updateProcThreadAttribute((~si).ProcThreadAttributeList, 0, _PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, @unsafe.Pointer.FromRef(ref (sys.of(SysProcAttr.ᏑParentProcess)).Value), @unsafe.Sizeof((~sys).ParentProcess), nil, nil);
+            if (err != default!) {
+                (pid, handle, err) = (0, 0, err); return;
+            }
+        }
+        si.Value.StdInput = fd[0];
+        si.Value.StdOutput = fd[1];
+        si.Value.StdErr = fd[2];
+        fd = append(fd, (~sys).AdditionalInheritedHandles.ꓸꓸꓸ);
+        // The presence of a NULL handle in the list is enough to cause PROC_THREAD_ATTRIBUTE_HANDLE_LIST
+        // to treat the entire list as empty, so remove NULL handles.
+        nint j = 0;
+        foreach (var (i, _) in fd) {
+            if (fd[i] != 0) {
+                fd[j] = fd[i];
+                j++;
+            }
+        }
+        fd = fd[..(int)(j)];
+        var willInheritHandles = len(fd) > 0 && !(~sys).NoInheritHandles;
+        // Do not accidentally inherit more than these handles.
+        if (willInheritHandles) {
+            err = updateProcThreadAttribute((~si).ProcThreadAttributeList, 0, _PROC_THREAD_ATTRIBUTE_HANDLE_LIST, @unsafe.Pointer.FromRef(ref (Ꮡ(fd, 0)).Value), (uintptr)len(fd) * @unsafe.Sizeof(fd[0]), nil, nil);
+            if (err != default!) {
+                (pid, handle, err) = (0, 0, err); return;
+            }
+        }
+        (var envBlock, err) = createEnvBlock(attr.Env);
+        if (err != default!) {
+            (pid, handle, err) = (0, 0, err); return;
+        }
+        var pi = @new<ProcessInformation>();
+        var flags = (uint32)((uint32)((~sys).CreationFlags | (uint32)CREATE_UNICODE_ENVIRONMENT) | (uint32)_EXTENDED_STARTUPINFO_PRESENT);
+        if ((~sys).Token != 0){
+            err = CreateProcessAsUser((~sys).Token, argv0p, argvp, (~sys).ProcessAttributes, (~sys).ThreadAttributes, willInheritHandles, flags, Ꮡ(envBlock, 0), dirp, si.of(_STARTUPINFOEXW.ᏑStartupInfo), pi);
+        } else {
+            err = CreateProcess(argv0p, argvp, (~sys).ProcessAttributes, (~sys).ThreadAttributes, willInheritHandles, flags, Ꮡ(envBlock, 0), dirp, si.of(_STARTUPINFOEXW.ᏑStartupInfo), pi);
+        }
+        if (err != default!) {
+            (pid, handle, err) = (0, 0, err); return;
+        }
+        deferǃ(CloseHandle, (~pi).Thread, defer);
+        Δruntime.KeepAlive(fd);
+        Δruntime.KeepAlive(sys);
+        (pid, handle, err) = ((nint)(~pi).ProcessId, (uintptr)(~pi).Process, default!);
+    });
+    return (pid, handle, err);
+}
 
 public static error /*err*/ Exec(@string argv0, slice<@string> argv, slice<@string> envv) {
     error err = default!;

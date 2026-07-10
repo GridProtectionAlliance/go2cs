@@ -11,6 +11,8 @@ using slices = slices_package;
 using strings = strings_package;
 using utf8 = unicode.utf8_package;
 using @internal;
+using fs = io.fs_package;
+using io;
 using unicode;
 
 partial class filepath_package {
@@ -53,7 +55,7 @@ Pattern:
         (star, chunk, pattern) = scanChunk(pattern);
         if (star && chunk == ""u8) {
             // Trailing * matches rest of string unless it has a /.
-            return (!strings.Contains(name, ((@string)Separator)), default!);
+            return (!strings.Contains(name, ((@string)(rune)Separator)), default!);
         }
         // Look for match at current position.
         var (t, ok, errΔ1) = matchChunk(chunk, name);
@@ -256,7 +258,7 @@ internal static (rune r, @string nchunk, error err) getEsc(@string chunk) {
             return (r, nchunk, err);
         }
     }
-    var (r, n) = utf8.DecodeRuneInString(chunk);
+    (r, var n) = utf8.DecodeRuneInString(chunk);
     if (r == utf8.RuneError && n == 1) {
         err = ErrBadPattern;
     }
@@ -287,7 +289,7 @@ internal static (slice<@string> matches, error err) globWithLimit(@string patter
     error err = default!;
 
     // This limit is used prevent stack exhaustion issues. See CVE-2022-30632.
-    static readonly UntypedInt pathSeparatorsLimit = 10000;
+    UntypedInt pathSeparatorsLimit = 10000;
     if (depth == pathSeparatorsLimit) {
         return (default!, ErrBadPattern);
     }
@@ -305,7 +307,7 @@ internal static (slice<@string> matches, error err) globWithLimit(@string patter
         }
         return (new @string[]{pattern}.slice(), default!);
     }
-    var (dir, file) = Split(pattern);
+    var (dir, @file) = Split(pattern);
     nint volumeLen = 0;
     if (runtime.GOOS == "windows"u8){
         (volumeLen, dir) = cleanGlobPathWindows(dir);
@@ -313,7 +315,7 @@ internal static (slice<@string> matches, error err) globWithLimit(@string patter
         dir = cleanGlobPath(dir);
     }
     if (!hasMeta(dir[(int)(volumeLen)..])) {
-        return glob(dir, file, default!);
+        return glob(dir, @file, default!);
     }
     // Prevent infinite recursion. See issue 15879.
     if (dir == pattern) {
@@ -325,7 +327,7 @@ internal static (slice<@string> matches, error err) globWithLimit(@string patter
         return (matches, err);
     }
     foreach (var (_, d) in m) {
-        (matches, err) = glob(d, file, matches);
+        (matches, err) = glob(d, @file, matches);
         if (err != default!) {
             return (matches, err);
         }
@@ -339,7 +341,7 @@ internal static @string cleanGlobPath(@string path) {
     if (exprᴛ1 == ""u8) {
         return "."u8;
     }
-    if (exprᴛ1 == ((@string)Separator)) {
+    if (exprᴛ1 == ((@string)(rune)Separator)) {
         return path;
     }
     { /* default: */
@@ -365,7 +367,7 @@ internal static (nint prefixLen, @string cleaned) cleanGlobPathWindows(@string p
         return (vollen + 1, path);
     }
     case {} when vollen == len(path) && len(path) == 2: {
-        return (vollen, path + "."u8);
+        return (vollen, path + ".");
     }
     default: {
         if (vollen >= len(path)) {
@@ -386,40 +388,41 @@ internal static (nint prefixLen, @string cleaned) cleanGlobPathWindows(@string p
 // and appends them to matches. If the directory cannot be
 // opened, it returns the existing matches. New matches are
 // added in lexicographical order.
-internal static (slice<@string> m, error e) glob(@string dir, @string pattern, slice<@string> matches) => func((defer, _) => {
+internal static (slice<@string> m, error e) glob(@string dir, @string pattern, slice<@string> matches) {
     slice<@string> m = default!;
     error e = default!;
-
-    m = matches;
-    (fi, err) = os.Stat(dir);
-    if (err != default!) {
-        return (m, e);
-    }
-    // ignore I/O error
-    if (!fi.IsDir()) {
-        return (m, e);
-    }
-    // ignore I/O error
-    (d, err) = os.Open(dir);
-    if (err != default!) {
-        return (m, e);
-    }
-    // ignore I/O error
-    var dʗ1 = d;
-    defer(dʗ1.Close);
-    (names, _) = d.Readdirnames(-1);
-    slices.Sort(names);
-    foreach (var (_, n) in names) {
-        var (matched, errΔ1) = Match(pattern, n);
-        if (errΔ1 != default!) {
-            return (m, errΔ1);
+    func((defer, recover) => {
+        m = matches;
+        var (fi, err) = os.Stat(dir);
+        if (err != default!) {
+            return;
         }
-        if (matched) {
-            m = append(m, Join(dir, n));
+        // ignore I/O error
+        if (!fi.IsDir()) {
+            return;
         }
-    }
+        // ignore I/O error
+        (var d, err) = os.Open(dir);
+        if (err != default!) {
+            return;
+        }
+        // ignore I/O error
+        var dʗ1 = d;
+        defer(() => dʗ1.Close());
+        var (names, _) = d.Readdirnames(-1);
+        slices.Sort<slice<@string>, @string>(names);
+        foreach (var (_, n) in names) {
+            var (matched, errΔ1) = Match(pattern, n);
+            if (errΔ1 != default!) {
+                (m, e) = (m, errΔ1); return;
+            }
+            if (matched) {
+                m = append(m, Join(dir, n));
+            }
+        }
+    });
     return (m, e);
-});
+}
 
 // hasMeta reports whether path contains any of the magic characters
 // recognized by Match.

@@ -7,9 +7,10 @@ namespace go;
 using fmt = fmt_package;
 using goexperiment = @internal.goexperiment_package;
 using os = os_package;
-using atomic = sync.atomic_package;
+using atomic = go.sync.atomic_package;
 using @internal;
-using sync;
+using go.sync;
+using io = io_package;
 
 partial class testing_package {
 
@@ -53,8 +54,6 @@ public static float64 Coverage() {
     int64 n = default!;
     int64 d = default!;
     foreach (var (_, counters) in cover.Counters) {
-        ref var i = ref heap(new nint(), out var Ꮡi);
-
         foreach (var (i, _) in counters) {
             if (atomic.LoadUint32(Ꮡ(counters, i)) > 0) {
                 n++;
@@ -65,7 +64,7 @@ public static float64 Coverage() {
     if (d == 0) {
         return 0;
     }
-    return ((float64)n) / ((float64)d);
+    return (float64)n / (float64)d;
 }
 
 // RegisterCover records the coverage data accumulators for the tests.
@@ -78,23 +77,23 @@ public static void RegisterCover(Cover c) {
 // mustBeNil checks the error and, if present, reports it and exits.
 internal static void mustBeNil(error err) {
     if (err != default!) {
-        fmt.Fprintf(~os.Stderr, "testing: %s\n"u8, err);
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: %s\n"u8, err);
         os.Exit(2);
     }
 }
 
 // coverReport reports the coverage percentage and writes a coverage profile if requested.
-internal static void coverReport() => func((defer, _) => {
+internal static void coverReport() => func((defer, recover) => {
     if (goexperiment.CoverageRedesign) {
         coverReport2();
         return;
     }
     ж<os.File> f = default!;
     error err = default!;
-    if (coverProfile.val != ""u8) {
-        (f, err) = os.Create(toOutputDir(coverProfile.val));
+    if (coverProfile.Value != ""u8) {
+        (f, err) = os.Create(toOutputDir(coverProfile.Value));
         mustBeNil(err);
-        fmt.Fprintf(~f, "mode: %s\n"u8, cover.Mode);
+        fmt.Fprintf(new os.FileжWriter(f), "mode: %s\n"u8, cover.Mode);
         var fʗ1 = f;
         defer(() => {
             mustBeNil(fʗ1.Close());
@@ -105,10 +104,8 @@ internal static void coverReport() => func((defer, _) => {
     uint32 count = default!;
     foreach (var (name, counts) in cover.Counters) {
         var blocks = cover.Blocks[name];
-        ref var i = ref heap(new nint(), out var Ꮡi);
-
         foreach (var (i, _) in counts) {
-            var stmts = ((int64)blocks[i].Stmts);
+            var stmts = (int64)blocks[i].Stmts;
             total += stmts;
             count = atomic.LoadUint32(Ꮡ(counts, i));
             // For -mode=atomic.
@@ -116,7 +113,7 @@ internal static void coverReport() => func((defer, _) => {
                 active += stmts;
             }
             if (f != nil) {
-                var (_, errΔ1) = fmt.Fprintf(~f, "%s:%d.%d,%d.%d %d %d\n"u8, name,
+                var (_, errΔ1) = fmt.Fprintf(new os.FileжWriter(f), "%s:%d.%d,%d.%d %d %d\n"u8, name,
                     blocks[i].Line0, blocks[i].Col0,
                     blocks[i].Line1, blocks[i].Col1,
                     stmts,
@@ -129,7 +126,7 @@ internal static void coverReport() => func((defer, _) => {
         fmt.Println("coverage: [no statements]");
         return;
     }
-    fmt.Printf("coverage: %.1f%% of statements%s\n"u8, 100 * ((float64)active) / ((float64)total), cover.CoveredPackages);
+    fmt.Printf("coverage: %.1f%% of statements%s\n"u8, 100 * (float64)active / (float64)total, cover.CoveredPackages);
 });
 
 } // end testing_package

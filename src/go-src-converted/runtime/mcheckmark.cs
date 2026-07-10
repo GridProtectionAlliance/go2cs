@@ -25,7 +25,7 @@ partial class runtime_package {
 // is stored on the bit corresponding to the first word of the marked
 // allocation.
 [GoType] partial struct checkmarksMap {
-    internal runtime.@internal.sys_package.NotInHeap _;
+    internal sys.NotInHeap _;
     internal array<uint8> b = new(heapArenaBytes / goarch.PtrSize / 8);
 }
 
@@ -40,18 +40,18 @@ internal static void startCheckmarks() {
     assertWorldStopped();
     // Clear all checkmarks.
     foreach (var (_, ai) in mheap_.allArenas) {
-        var arena = mheap_.arenas[ai.l1()].val[ai.l2()];
-        var bitmap = arena.val.checkmarks;
+        var arena = mheap_.arenas[(nint)(ai.l1())].Value[ai.l2()];
+        var bitmap = arena.Value.checkmarks;
         if (bitmap == nil){
             // Allocate bitmap on first use.
-            bitmap = (ж<checkmarksMap>)(uintptr)(persistentalloc(@unsafe.Sizeof(bitmap.val), 0, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
+            bitmap = (ж<checkmarksMap>)(uintptr)(persistentalloc(@unsafe.Sizeof(bitmap.Value), 0, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
             if (bitmap == nil) {
                 @throw("out of memory allocating checkmarks bitmap"u8);
             }
-            arena.val.checkmarks = bitmap;
+            arena.Value.checkmarks = bitmap;
         } else {
             // Otherwise clear the existing bitmap.
-            clear((~bitmap).b[..]);
+            builtin.clear((~bitmap).b[..]);
         }
     }
     // Enable checkmarking.
@@ -72,20 +72,20 @@ internal static void endCheckmarks() {
 internal static bool setCheckmark(uintptr obj, uintptr @base, uintptr off, markBits mbits) {
     if (!mbits.isMarked()) {
         printlock();
-        print("runtime: checkmarks found unexpected unmarked object obj=", ((Δhex)obj), "\n");
-        print("runtime: found obj at *(", ((Δhex)@base), "+", ((Δhex)off), ")\n");
+        print("runtime: checkmarks found unexpected unmarked object obj=", ((Δhex)(uint64)obj), "\n");
+        print("runtime: found obj at *(", ((Δhex)(uint64)@base), "+", ((Δhex)(uint64)off), ")\n");
         // Dump the source (base) object
         gcDumpObject("base"u8, @base, off);
         // Dump the object
-        gcDumpObject("obj"u8, obj, ~((uintptr)0));
-        (~getg()).m.val.traceback = 2;
+        gcDumpObject("obj"u8, obj, ~(uintptr)0);
+        getg().Value.m.Value.traceback = 2;
         @throw("checkmark found unmarked object"u8);
     }
     arenaIdx ai = arenaIndex(obj);
-    var arena = mheap_.arenas[ai.l1()].val[ai.l2()];
-    var arenaWord = (obj / heapArenaBytes / 8) % ((uintptr)len((~(~arena).checkmarks).b));
-    var mask = ((byte)(1 << (int)(((obj / heapArenaBytes) % 8))));
-    var bytep = Ꮡ(~(~arena).checkmarks).b.at<uint8>(arenaWord);
+    var arena = mheap_.arenas[(nint)(ai.l1())].Value[ai.l2()];
+    var arenaWord = (obj / (uintptr)heapArenaBytes / 8) % (uintptr)len((~(~arena).checkmarks).b);
+    var mask = (byte)((byte)(1 << (int)(((obj / (uintptr)heapArenaBytes) % 8))));
+    var bytep = (~arena).checkmarks.at(checkmarksMap.Ꮡb, (nint)(arenaWord));
     if ((uint8)(atomic.Load8(bytep) & mask) != 0) {
         // Already checkmarked.
         return true;

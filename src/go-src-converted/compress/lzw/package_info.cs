@@ -38,12 +38,10 @@ using static go.compress.lzw_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(io.ByteReader, bool), io_package.ByteReader>]
-[assembly: GoImplement<(writer, bool), writer>]
-[assembly: GoImplement<Reader, io_package.ReadCloser>]
-[assembly: GoImplement<Writer, io_package.WriteCloser>]
-[assembly: GoImplement<bufio_package.Reader, io_package.ByteReader>]
-[assembly: GoImplement<bufio_package.Writer, writer>]
+[assembly: GoImplement<Reader, io_package.ReadCloser>(Pointer = true)]
+[assembly: GoImplement<Writer, io_package.WriteCloser>(Pointer = true)]
+[assembly: GoImplement<bufio_package.Reader, io_package.ByteReader>(Pointer = true)]
+[assembly: GoImplement<bufio_package.Writer, writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

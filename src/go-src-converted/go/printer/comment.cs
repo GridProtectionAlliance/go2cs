@@ -3,23 +3,24 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using ast = go.ast_package;
-using comment = go.doc.comment_package;
+using ast = global::go.go.ast_package;
+using comment = global::go.go.doc.comment_package;
 using strings = strings_package;
-using go.doc;
+using global::go.go;
+using global::go.go.doc;
 
 partial class printer_package {
 
 // formatDocComment reformats the doc comment list,
 // returning the canonical formatting.
-internal static slice<ast.Comment> formatDocComment(slice<ast.Comment> list) {
+internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> list) {
     // Extract comment text (removing comment markers).
     @string kind = default!;
     @string text = default!;
-    slice<ast.Comment> directives = default!;
-    if (len(list) == 1 && strings.HasPrefix(list[0].Text, "/*"u8)){
+    slice<ж<ast.Comment>> directives = default!;
+    if (len(list) == 1 && strings.HasPrefix((~list[0]).Text, "/*"u8)){
         kind = "/*"u8;
-        text = list[0].Text;
+        text = list[0].Value.Text;
         if (!strings.Contains(text, "\n"u8) || allStars(text)) {
             // Single-line /* .. */ comment in doc comment position,
             // or multiline old-style comment like
@@ -34,10 +35,10 @@ internal static slice<ast.Comment> formatDocComment(slice<ast.Comment> list) {
         }
         text = text[2..(int)(len(text) - 2)];
     } else 
-    if (strings.HasPrefix(list[0].Text, // cut /* and */
+    if (strings.HasPrefix((~list[0]).Text, // cut /* and */
  "//"u8)){
         kind = "//"u8;
-        strings.Builder b = default!;
+        ref var b = ref heap(new strings.Builder(), out var Ꮡb);
         foreach (var (_, c) in list) {
             var (after, found) = strings.CutPrefix((~c).Text, "//"u8);
             if (!found) {
@@ -48,8 +49,8 @@ internal static slice<ast.Comment> formatDocComment(slice<ast.Comment> list) {
                 directives = append(directives, c);
                 continue;
             }
-            b.WriteString(strings.TrimPrefix(after, " "u8));
-            b.WriteString("\n"u8);
+            Ꮡb.WriteString(strings.TrimPrefix(after, " "u8));
+            Ꮡb.WriteString("\n"u8);
         }
         text = b.String();
     } else {
@@ -60,22 +61,22 @@ internal static slice<ast.Comment> formatDocComment(slice<ast.Comment> list) {
         return list;
     }
     // Parse comment and reformat as text.
-    comment.Parser p = default!;
-    var d = p.Parse(text);
-    comment.Printer pr = default!;
-    text = ((@string)pr.Comment(d));
+    ref var p = ref heap(new comment.Parser(), out var Ꮡp);
+    var d = Ꮡp.Parse(text);
+    ref var pr = ref heap(new comment.Printer(), out var Ꮡpr);
+    text = ((@string)Ꮡpr.Comment(d));
     // For /* */ comment, return one big comment with text inside.
-    ref var slash = ref heap<go.token_package.ΔPos>(out var Ꮡslash);
-    slash = list[0].Slash;
+    ref var slash = ref heap<tokenꓸPos>(out var Ꮡslash);
+    slash = list[0].Value.Slash;
     if (kind == "/*"u8) {
         var c = Ꮡ(new ast.Comment(
             Slash: slash,
             Text: "/*\n"u8 + text + "*/"u8
         ));
-        return new ast.Comment[]{c}.slice();
+        return new ж<ast.Comment>[]{c}.slice();
     }
     // For // comment, return sequence of // lines.
-    slice<ast.Comment> @out = default!;
+    slice<ж<ast.Comment>> @out = default!;
     while (text != ""u8) {
         ref var line = ref heap(new @string(), out var Ꮡline);
         (line, text, _) = strings.Cut(text, "\n"u8);

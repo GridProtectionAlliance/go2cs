@@ -9,18 +9,19 @@ using io = io_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
-using @event = @internal.trace.event_package;
-using version = @internal.trace.version_package;
+using Δevent = go.@internal.trace.event_package;
+using version = go.@internal.trace.version_package;
+using go.@internal.trace;
 
 partial class raw_package {
 
 // TextReader parses a text format trace with only very basic validation
 // into an event stream.
 [GoType] partial struct TextReader {
-    internal @internal.trace.version_package.Version v;
-    internal @event.Spec specs;
-    internal @event.Type names;
-    internal ж<bufio_package.Scanner> s;
+    internal version.Version v;
+    internal slice<Δevent.Spec> specs;
+    internal map<@string, Δevent.Type> names;
+    internal ж<bufio.Scanner> s;
 }
 
 // NewTextReader creates a new reader for the trace text format.
@@ -30,25 +31,25 @@ public static (ж<TextReader>, error) NewTextReader(io.Reader r) {
     if (err != default!) {
         return (default!, err);
     }
-    var (trace, line) = readToken(line);
+    (var trace, line) = readToken(line);
     if (trace != "Trace"u8) {
         return (default!, fmt.Errorf("failed to parse header"u8));
     }
-    var (gover, line) = readToken(line);
+    (var gover, line) = readToken(line);
     if (!strings.HasPrefix(gover, "Go1."u8)) {
         return (default!, fmt.Errorf("failed to parse header Go version"u8));
     }
-    var (rawv, err) = strconv.ParseUint(gover[(int)(len("Go1."))..], 10, 64);
+    (var rawv, err) = strconv.ParseUint(gover[(int)(len("Go1."))..], 10, 64);
     if (err != default!) {
         return (default!, fmt.Errorf("failed to parse header Go version: %v"u8, err));
     }
-    var v = ((version.Version)rawv);
+    var v = ((version.Version)(uint32)rawv);
     if (!v.Valid()) {
         return (default!, fmt.Errorf("unknown or unsupported Go version 1.%d"u8, v));
     }
-    tr.val.v = v;
-    tr.val.specs = v.Specs();
-    tr.val.names = @event.Names((~tr).specs);
+    tr.Value.v = v;
+    tr.Value.specs = v.Specs();
+    tr.Value.names = Δevent.Names((~tr).specs);
     foreach (var (_, rΔ1) in line) {
         if (!unicode.IsSpace(rΔ1)) {
             return (default!, fmt.Errorf("encountered unexpected non-space at the end of the header: %q"u8, line));
@@ -68,18 +69,18 @@ public static (ж<TextReader>, error) NewTextReader(io.Reader r) {
     if (err != default!) {
         return (new Event(nil), err);
     }
-    var (evStr, line) = readToken(line);
-    var (ev, ok) = r.names[evStr];
+    (var evStr, line) = readToken(line);
+    var (ev, ok) = r.names[evStr, ꟷ];
     if (!ok) {
         return (new Event(nil), fmt.Errorf("unidentified event: %s"u8, evStr));
     }
     var spec = r.specs[ev];
-    (args, err) = readArgs(line, spec.Args);
+    (var args, err) = readArgs(line, spec.Args);
     if (err != default!) {
         return (new Event(nil), fmt.Errorf("reading args for %s: %v"u8, evStr, err));
     }
     if (spec.IsStack) {
-        nint len = ((nint)args[1]);
+        nint len = (nint)args[1];
         for (nint i = 0; i < len; i++) {
             var (lineΔ1, errΔ1) = r.nextLine();
             if (AreEqual(errΔ1, io.EOF)) {
@@ -88,7 +89,7 @@ public static (ж<TextReader>, error) NewTextReader(io.Reader r) {
             if (errΔ1 != default!) {
                 return (new Event(nil), errΔ1);
             }
-            (frame, err) = readArgs(lineΔ1, frameFields);
+            (var frame, errΔ1) = readArgs(lineΔ1, frameFields);
             if (errΔ1 != default!) {
                 return (new Event(nil), errΔ1);
             }
@@ -104,7 +105,7 @@ public static (ж<TextReader>, error) NewTextReader(io.Reader r) {
         if (errΔ2 != default!) {
             return (new Event(nil), errΔ2);
         }
-        (data, err) = readData(lineΔ2);
+        (data, errΔ2) = readData(lineΔ2);
         if (errΔ2 != default!) {
             return (new Event(nil), errΔ2);
         }

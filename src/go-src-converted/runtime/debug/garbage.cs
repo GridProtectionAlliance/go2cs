@@ -11,9 +11,9 @@ partial class debug_package {
 
 // GCStats collect information about recent garbage collections.
 [GoType] partial struct GCStats {
-    public time_package.Time LastGC;       // time of last collection
+    public time.Time LastGC;       // time of last collection
     public int64 NumGC;           // number of garbage collections
-    public time_package.Duration PauseTotal;   // total pause for all collections
+    public time.Duration PauseTotal;   // total pause for all collections
     public slice<time.Duration> Pause; // pause history, most recent first
     public slice<time.Time> PauseEnd; // pause end times history, most recent first
     public slice<time.Duration> PauseQuantiles;
@@ -28,7 +28,7 @@ partial class debug_package {
 // len(stats.PauseQuantiles) is 5, it will be filled with the minimum,
 // 25%, 50%, 75%, and maximum pause times.
 public static void ReadGCStats(ж<GCStats> Ꮡstats) {
-    ref var stats = ref Ꮡstats.val;
+    ref var stats = ref Ꮡstats.Value;
 
     // Create a buffer with space for at least two copies of the
     // pause history tracked by the runtime. One will be returned
@@ -45,10 +45,10 @@ public static void ReadGCStats(ж<GCStats> Ꮡstats) {
     // depend on the fact that time.Duration's native unit is
     // nanoseconds, so the pauses and the total pause time do not need
     // any conversion.
-    readGCStats(Ꮡ(stats.Pause));
+    readGCStats(Ꮡstats.of(GCStats.ᏑPause));
     nint n = len(stats.Pause) - 3;
-    stats.LastGC = time.Unix(0, ((int64)stats.Pause[n]));
-    stats.NumGC = ((int64)stats.Pause[n + 1]);
+    stats.LastGC = time.Unix(0, (int64)stats.Pause[n]);
+    stats.NumGC = (int64)stats.Pause[n + 1];
     stats.PauseTotal = stats.Pause[n + 2];
     n /= 2;
     // buffer holds pauses and end times
@@ -58,7 +58,7 @@ public static void ReadGCStats(ж<GCStats> Ꮡstats) {
     }
     stats.PauseEnd = stats.PauseEnd[..0];
     foreach (var (_, ns) in stats.Pause[(int)(n)..(int)(n + n)]) {
-        stats.PauseEnd = append(stats.PauseEnd, time.Unix(0, ((int64)ns)));
+        stats.PauseEnd = append(stats.PauseEnd, time.Unix(0, (int64)ns));
     }
     if (len(stats.PauseQuantiles) > 0) {
         if (n == 0){
@@ -68,7 +68,7 @@ public static void ReadGCStats(ж<GCStats> Ꮡstats) {
             // See the allocation at the top of the function.
             var sorted = stats.Pause[(int)(n)..(int)(n + n)];
             copy(sorted, stats.Pause);
-            slices.Sort(sorted);
+            slices.Sort<slice<time.Duration>, time.Duration>(sorted);
             nint nq = len(stats.PauseQuantiles) - 1;
             for (nint i = 0; i < nq; i++) {
                 stats.PauseQuantiles[i] = sorted[len(sorted) * i / nq];
@@ -90,7 +90,7 @@ public static void ReadGCStats(ж<GCStats> Ꮡstats) {
 // the memory limit is reached.
 // See SetMemoryLimit for more details.
 public static nint SetGCPercent(nint percent) {
-    return ((nint)setGCPercent(((int32)percent)));
+    return (nint)setGCPercent((int32)percent);
 }
 
 // FreeOSMemory forces a garbage collection followed by an

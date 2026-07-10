@@ -14,7 +14,7 @@ partial class signal_package {
 [GoType("dyn")] partial struct handlersᴛ1 {
     public partial ref sync_package.Mutex Mutex { get; }
     // Map a channel to the signals that should be sent to it.
-    internal map<channel/*<-*/<os.Signal>*handler>, > m;
+    internal map<channel/*<-*/<osꓸSignal>, ж<handler>> m;
     // Map a signal to the number of channels receiving it.
     internal array<int64> @ref = new(numSig);
     // Map channels to signals while the channel is being stopped.
@@ -24,7 +24,8 @@ partial class signal_package {
     // value for a channel being stopped. See the Stop function.
     internal slice<stopping> stopping;
 }
-internal static handlersᴛ1 handlers;
+internal static ж<handlersᴛ1> Ꮡhandlers = new(new handlersᴛ1(nil));
+internal static ref handlersᴛ1 handlers => ref Ꮡhandlers.Value;
 
 [GoType] partial struct stopping {
     internal channel/*<-*/<osꓸSignal> c;
@@ -36,34 +37,31 @@ internal static handlersᴛ1 handlers;
 }
 
 [GoRecv] internal static bool want(this ref handler h, nint sig) {
-    return (uint32)((h.mask[sig / 32] >> (int)(((nuint)((nint)(sig & 31))))) & 1) != 0;
+    return (uint32)(((h.mask[sig / 32] >> (int)((nuint)((nint)(sig & 31))))) & 1) != 0;
 }
 
 [GoRecv] internal static void set(this ref handler h, nint sig) {
-    h.mask[sig / 32] |= (uint32)(1 << (int)(((nuint)((nint)(sig & 31)))));
+    h.mask[sig / 32] |= (uint32)(((uint32)1 << (int)((nuint)((nint)(sig & 31)))));
 }
 
 [GoRecv] internal static void clear(this ref handler h, nint sig) {
-    h.mask[sig / 32] &= ~(uint32)(1 << (int)(((nuint)((nint)(sig & 31)))));
+    h.mask[sig / 32] &= unchecked((uint32)~(uint32)(((uint32)1 << (int)((nuint)((nint)(sig & 31))))));
 }
 
 // Stop relaying the signals, sigs, to any channels previously registered to
 // receive them and either reset the signal handlers to their original values
 // (action=disableSignal) or ignore the signals (action=ignoreSignal).
-internal static void cancel(slice<osꓸSignal> sigs, Action<nint> action) => func((defer, _) => {
-    handlers.Lock();
-    var handlersʗ1 = handlers;
-    defer(handlersʗ1.Unlock);
-    var remove = 
-    var handlersʗ2 = handlers;
-    (nint n) => {
+internal static void cancel(slice<osꓸSignal> sigs, Action<nint> action) => func((defer, recover) => {
+    Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
+    defer(Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock);
+    var remove = (nint n) => {
         ref var zerohandler = ref heap(new handler(), out var Ꮡzerohandler);
-        foreach (var (c, h) in handlersʗ2.m) {
+        foreach (var (c, h) in handlers.m) {
             if (h.want(n)) {
-                handlersʗ2.@ref[n]--;
+                handlers.@ref[n]--;
                 h.clear(n);
                 if ((~h).mask == zerohandler.mask) {
-                    delete(handlersʗ2.m, c);
+                    delete(handlers.m, c);
                 }
             }
         }
@@ -96,7 +94,8 @@ public static bool Ignored(osꓸSignal sig) {
     return sn >= 0 && signalIgnored(sn);
 }
 
-internal static sync.Once watchSignalLoopOnce;
+internal static ж<sync.Once> ᏑwatchSignalLoopOnce = new(default(sync.Once));
+internal static ref sync.Once watchSignalLoopOnce => ref ᏑwatchSignalLoopOnce.Value;
 internal static Action watchSignalLoop;
 
 // Notify causes package signal to relay incoming signals to c.
@@ -115,57 +114,53 @@ internal static Action watchSignalLoop;
 // It is allowed to call Notify multiple times with different channels
 // and the same signals: each channel receives copies of incoming
 // signals independently.
-public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSignal sigʗp) => func((defer, _) => {
+public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSignal sigʗp) {
     var sig = sigʗp.slice();
-
-    if (c == default!) {
-        throw panic("os/signal: Notify using nil channel");
-    }
-    handlers.Lock();
-    var handlersʗ1 = handlers;
-    defer(handlersʗ1.Unlock);
-    var h = handlers.m[c];
-    if (h == nil) {
-        if (handlers.m == default!) {
-            handlers.m = new map<channel/*<-*/<os.Signal>*handler>, >();
+    func((defer, recover) => {
+        if (c == default!) {
+            throw panic("os/signal: Notify using nil channel");
         }
-        h = @new<handler>();
-        handlers.m[c] = h;
-    }
-    var add = 
-    var hʗ1 = h;
-    var handlersʗ2 = handlers;
-    var watchSignalLoopOnceʗ1 = watchSignalLoopOnce;
-    (nint n) => {
-        if (n < 0) {
-            return;
-        }
-        if (!hʗ1.want(n)) {
-            hʗ1.set(n);
-            if (handlersʗ2.@ref[n] == 0) {
-                enableSignal(n);
-                // The runtime requires that we enable a
-                // signal before starting the watcher.
-                watchSignalLoopOnceʗ1.Do(
-                () => {
-                    if (watchSignalLoop != default!) {
-                        goǃ(watchSignalLoop);
-                    }
-                });
+        Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
+        defer(Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock);
+        var h = handlers.m[c];
+        if (h == nil) {
+            if (handlers.m == default!) {
+                handlers.m = new map<channel/*<-*/<osꓸSignal>, ж<handler>>();
             }
-            handlers.@ref[n]++;
+            h = @new<handler>();
+            handlers.m[c] = h;
         }
-    };
-    if (len(sig) == 0){
-        for (nint n = 0; n < numSig; n++) {
-            add(n);
+        var hʗ1 = h;
+        var add = (nint n) => {
+            if (n < 0) {
+                return;
+            }
+            if (!hʗ1.want(n)) {
+                hʗ1.set(n);
+                if (handlers.@ref[n] == 0) {
+                    enableSignal(n);
+                    // The runtime requires that we enable a
+                    // signal before starting the watcher.
+                    ᏑwatchSignalLoopOnce.Do(() => {
+                        if (watchSignalLoop != default!) {
+                            goǃ(watchSignalLoop);
+                        }
+                    });
+                }
+                handlers.@ref[n]++;
+            }
+        };
+        if (len(sig) == 0){
+            for (nint n = 0; n < numSig; n++) {
+                add(n);
+            }
+        } else {
+            foreach (var (_, s) in sig) {
+                add(signum(s));
+            }
         }
-    } else {
-        foreach (var (_, s) in sig) {
-            add(signum(s));
-        }
-    }
-});
+    });
+}
 
 // Reset undoes the effect of any prior calls to [Notify] for the provided
 // signals.
@@ -180,10 +175,10 @@ public static void Reset(params ꓸꓸꓸosꓸSignal sigʗp) {
 // It undoes the effect of all prior calls to [Notify] using c.
 // When Stop returns, it is guaranteed that c will receive no more signals.
 public static void Stop(channel/*<-*/<osꓸSignal> c) {
-    handlers.Lock();
+    Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
     var h = handlers.m[c];
     if (h == nil) {
-        handlers.Unlock();
+        Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock();
         return;
     }
     delete(handlers.m, c);
@@ -206,30 +201,29 @@ public static void Stop(channel/*<-*/<osꓸSignal> c) {
     // channels being stopped and wait for signal delivery to
     // quiesce before fully removing it.
     handlers.stopping = append(handlers.stopping, new stopping(c, h));
-    handlers.Unlock();
+    Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock();
     signalWaitUntilIdle();
-    handlers.Lock();
+    Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
     foreach (var (i, s) in handlers.stopping) {
         if (s.c == c) {
             handlers.stopping = append(handlers.stopping[..(int)(i)], handlers.stopping[(int)(i + 1)..].ꓸꓸꓸ);
             break;
         }
     }
-    handlers.Unlock();
+    Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock();
 }
 
 // Wait until there are no more signals waiting to be delivered.
 // Defined by the runtime package.
 internal static partial void signalWaitUntilIdle();
 
-internal static void process(osꓸSignal sig) => func((defer, _) => {
+internal static void process(osꓸSignal sig) => func((defer, recover) => {
     nint n = signum(sig);
     if (n < 0) {
         return;
     }
-    handlers.Lock();
-    var handlersʗ1 = handlers;
-    defer(handlersʗ1.Unlock);
+    Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
+    defer(Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock);
     foreach (var (c, h) in handlers.m) {
         if (h.want(n)) {
             // send but do not block for it
@@ -271,38 +265,38 @@ internal static void process(osꓸSignal sig) => func((defer, _) => {
 // The stop function releases resources associated with it, so code should
 // call stop as soon as the operations running in this Context complete and
 // signals no longer need to be diverted to the context.
-public static (context.Context ctx, context.CancelFunc stop) NotifyContext(context.Context parent, params ꓸꓸꓸosꓸSignal signalsʗp) {
+public static (context.Context ctx, Action stop) NotifyContext(context.Context parent, params ꓸꓸꓸosꓸSignal signalsʗp) {
     context.Context ctx = default!;
-    context.CancelFunc stop = default!;
+    Action stop = default!;
     var signals = signalsʗp.slice();
 
-    (ctx, cancel) = context.WithCancel(parent);
+    (ctx, var cancel) = context.WithCancel(parent);
     var c = Ꮡ(new signalCtx(
         Context: ctx,
         cancel: cancel,
         signals: signals
     ));
-    c.val.ch = new channel<osꓸSignal>(1);
+    c.Value.ch = new channel<osꓸSignal>(1);
     Notify((~c).ch, (~c).signals.ꓸꓸꓸ);
     if (ctx.Err() == default!) {
         var cʗ1 = c;
         goǃ(() => {
-            switch (select(ᐸꟷ((~cʗ1).ch, ꓸꓸꓸ), ᐸꟷ(cʗ1.Done(), ꓸꓸꓸ))) {
+            switch (select(ᐸꟷ((~cʗ1).ch, ꓸꓸꓸ), ᐸꟷ((~cʗ1).Context.Done(), ꓸꓸꓸ))) {
             case 0 when (~cʗ1).ch.ꟷᐳ(out _): {
                 (~cʗ1).cancel();
                 break;
             }
-            case 1 when cʗ1.Done().ꟷᐳ(out _): {
+            case 1 when (~cʗ1).Context.Done().ꟷᐳ(out _): {
                 break;
             }}
         });
     }
-    return (~c, c.stop);
+    return (new signalCtxжContext(c), c.stop);
 }
 
 [GoType] partial struct signalCtx {
-    public partial ref context_package.Context Context { get; }
-    internal context_package.CancelFunc cancel;
+    public context_package.Context Context;
+    internal Action cancel;
     internal slice<osꓸSignal> signals;
     internal channel<osꓸSignal> ch;
 }
@@ -322,18 +316,18 @@ public static (context.Context ctx, context.CancelFunc stop) NotifyContext(conte
     // String method of cancelCtx returns a string that ends with ".WithCancel".
     @string name = c.Context._<stringer>().String();
     name = name[..(int)(len(name) - len(".WithCancel"))];
-    buf = append(buf, "signal.NotifyContext("u8 + name.ꓸꓸꓸ);
+    buf = append(buf, ((@string)("signal.NotifyContext("u8 + name)).ꓸꓸꓸ);
     if (len(c.signals) != 0) {
-        buf = append(buf, ", ["u8.ꓸꓸꓸ);
+        buf = append(buf, ((@string)", ["u8).ꓸꓸꓸ);
         foreach (var (i, s) in c.signals) {
             buf = append(buf, s.String().ꓸꓸꓸ);
             if (i != len(c.signals) - 1) {
-                buf = append(buf, (rune)' ');
+                buf = append(buf, (byte)((rune)' '));
             }
         }
-        buf = append(buf, (rune)']');
+        buf = append(buf, (byte)((rune)']'));
     }
-    buf = append(buf, (rune)')');
+    buf = append(buf, (byte)((rune)')'));
     return ((@string)buf);
 }
 

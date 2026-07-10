@@ -43,6 +43,7 @@ using static go.go.scanner_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<ErrorList, error>]
+[assembly: GoImplement<ErrorList, sort_package.Interface>(Pointer = true)]
 [assembly: GoImplement<ErrorList, sort_package.Interface>]
 // </InterfaceImplementations>
 

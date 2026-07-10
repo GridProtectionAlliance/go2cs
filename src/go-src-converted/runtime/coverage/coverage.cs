@@ -3,9 +3,9 @@
 // license that can be found in the LICENSE file.
 namespace go.runtime;
 
-using cfile = @internal.coverage.cfile_package;
+using cfile = go.@internal.coverage.cfile_package;
 using io = io_package;
-using @internal.coverage;
+using go.@internal.coverage;
 
 partial class coverage_package {
 

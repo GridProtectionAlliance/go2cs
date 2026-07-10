@@ -13,15 +13,15 @@ namespace go.vendor.golang.org.x.net.http;
 using errors = errors_package;
 using fmt = fmt_package;
 using net = net_package;
-using url = net.url_package;
+using url = go.net.url_package;
 using os = os_package;
 using strings = strings_package;
 using utf8 = unicode.utf8_package;
-using idna = golang.org.x.net.idna_package;
-using golang.org.x.net;
-using net;
+using idna = go.vendor.golang.org.x.net.idna_package;
+using go.net;
+using go.vendor.golang.org.x.net;
 using unicode;
-using ꓸꓸꓸ@string = Span<@string>;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class httpproxy_package {
 
@@ -64,9 +64,9 @@ partial class httpproxy_package {
     // Config represents the original configuration as defined above.
     public partial ref Config Config { get; }
     // httpsProxy is the parsed URL of the HTTPSProxy if defined.
-    internal ж<net.url_package.URL> httpsProxy;
+    internal ж<url.URL> httpsProxy;
     // httpProxy is the parsed URL of the HTTPProxy if defined.
-    internal ж<net.url_package.URL> httpProxy;
+    internal ж<url.URL> httpProxy;
     // ipMatchers represent all values in the NoProxy that are IP address
     // prefixes or an IP address in CIDR notation.
     internal slice<matcher> ipMatchers;
@@ -91,7 +91,7 @@ public static ж<Config> FromEnvironment() {
     ));
 }
 
-internal static @string getEnvAny(params ꓸꓸꓸ@string namesʗp) {
+internal static @string getEnvAny(params ꓸꓸꓸstring namesʗp) {
     var names = namesʗp.slice();
 
     foreach (var (_, n) in names) {
@@ -114,7 +114,7 @@ internal static @string getEnvAny(params ꓸꓸꓸ@string namesʗp) {
 //
 // As a special case, if req.URL.Host is "localhost" or a loopback address
 // (with or without a port number), then a nil URL and nil error will be returned.
-[GoRecv] public static url.URL, error) ProxyFunc(this ref Config cfg) {
+[GoRecv] public static Func<ж<url.URL>, (ж<url.URL>, error)> ProxyFunc(this ref Config cfg) {
     // Preprocess the Config settings for more efficient evaluation.
     var cfg1 = Ꮡ(new config(
         Config: cfg
@@ -124,7 +124,7 @@ internal static @string getEnvAny(params ꓸꓸꓸ@string namesʗp) {
 }
 
 [GoRecv] internal static (ж<url.URL>, error) proxyForURL(this ref config cfg, ж<url.URL> ᏑreqURL) {
-    ref var reqURL = ref ᏑreqURL.val;
+    ref var reqURL = ref ᏑreqURL.Value;
 
     ж<url.URL> proxy = default!;
     if (reqURL.Scheme == "https"u8){
@@ -149,13 +149,13 @@ internal static (ж<url.URL>, error) parseProxy(@string proxy) {
     if (proxy == ""u8) {
         return (default!, default!);
     }
-    (proxyURL, err) = url.Parse(proxy);
+    var (proxyURL, err) = url.Parse(proxy);
     if (err != default! || (~proxyURL).Scheme == ""u8 || (~proxyURL).Host == ""u8) {
         // proxy was bogus. Try prepending "http://" to it and
         // see if that parses correctly. If not, we fall
         // through and complain about the original one.
         {
-            (proxyURLΔ1, errΔ1) = url.Parse("http://"u8 + proxy); if (errΔ1 == default!) {
+            var (proxyURLΔ1, errΔ1) = url.Parse("http://"u8 + proxy); if (errΔ1 == default!) {
                 return (proxyURLΔ1, default!);
             }
         }
@@ -204,16 +204,18 @@ internal static (ж<url.URL>, error) parseProxy(@string proxy) {
 
 [GoRecv] internal static void init(this ref config c) {
     {
-        (parsed, err) = parseProxy(c.HTTPProxy); if (err == default!) {
+        var (parsed, err) = parseProxy(c.HTTPProxy); if (err == default!) {
             c.httpProxy = parsed;
         }
     }
     {
-        (parsed, err) = parseProxy(c.HTTPSProxy); if (err == default!) {
+        var (parsed, err) = parseProxy(c.HTTPSProxy); if (err == default!) {
             c.httpsProxy = parsed;
         }
     }
-    foreach (var (_, p) in strings.Split(c.NoProxy, ","u8)) {
+    foreach (var (_, vᴛ1) in strings.Split(c.NoProxy, ","u8)) {
+        var p = vᴛ1;
+
         p = strings.ToLower(strings.TrimSpace(p));
         if (len(p) == 0) {
             continue;
@@ -225,8 +227,8 @@ internal static (ж<url.URL>, error) parseProxy(@string proxy) {
         }
         // IPv4/CIDR, IPv6/CIDR
         {
-            (_, pnet, err) = net.ParseCIDR(p); if (err == default!) {
-                c.ipMatchers = append(c.ipMatchers, new cidrMatch(cidr: pnet));
+            var (_, pnet, errΔ1) = net.ParseCIDR(p); if (errΔ1 == default!) {
+                c.ipMatchers = append(c.ipMatchers, (matcher)(new cidrMatch(cidr: pnet)));
                 continue;
             }
         }
@@ -246,7 +248,7 @@ internal static (ж<url.URL>, error) parseProxy(@string proxy) {
         // IPv4, IPv6
         {
             var pip = net.ParseIP(phost); if (pip != default!) {
-                c.ipMatchers = append(c.ipMatchers, new ipMatch(ip: pip, port: pport));
+                c.ipMatchers = append(c.ipMatchers, (matcher)(new ipMatch(ip: pip, port: pport)));
                 continue;
             }
         }
@@ -271,7 +273,7 @@ internal static (ж<url.URL>, error) parseProxy(@string proxy) {
                 phost = v;
             }
         }
-        c.domainMatchers = append(c.domainMatchers, new domainMatch(host: phost, port: pport, matchHost: matchHost));
+        c.domainMatchers = append(c.domainMatchers, (matcher)(new domainMatch(host: phost, port: pport, matchHost: matchHost)));
     }
 }
 
@@ -283,17 +285,17 @@ internal static map<@string, @string> portMap = new map<@string, @string>{
 
 // canonicalAddr returns url.Host but always with a ":port" suffix
 internal static @string canonicalAddr(ж<url.URL> Ꮡurl) {
-    ref var url = ref Ꮡurl.val;
+    ref var urlΔ1 = ref Ꮡurl.Value;
 
-    @string addr = url.Hostname();
+    @string addr = urlΔ1.Hostname();
     {
         var (v, err) = idnaASCII(addr); if (err == default!) {
             addr = v;
         }
     }
-    @string port = url.Port();
+    @string port = urlΔ1.Port();
     if (port == ""u8) {
-        port = portMap[url.Scheme];
+        port = portMap[urlΔ1.Scheme];
     }
     return net.JoinHostPort(addr, port);
 }
@@ -345,7 +347,7 @@ internal static bool match(this allMatch a, @string host, @string port, net.IP i
 }
 
 [GoType] partial struct cidrMatch {
-    internal ж<net_package.IPNet> cidr;
+    internal ж<net.IPNet> cidr;
 }
 
 internal static bool match(this cidrMatch m, @string host, @string port, net.IP ip) {
@@ -353,7 +355,7 @@ internal static bool match(this cidrMatch m, @string host, @string port, net.IP 
 }
 
 [GoType] partial struct ipMatch {
-    internal net_package.IP ip;
+    internal net.IP ip;
     internal @string port;
 }
 

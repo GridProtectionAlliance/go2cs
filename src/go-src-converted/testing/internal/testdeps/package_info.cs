@@ -10,7 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using fuzzꓸCorpusEntry = go.fuzz_package.CorpusEntryᴛ1;
+global using fuzzꓸCorpusEntry = go.@internal.fuzz_package.CorpusEntryᴛ1;
 global using osꓸDirEntry = go.io.fs_package.DirEntry;
 global using osꓸFileInfo = go.io.fs_package.FileInfo;
 global using osꓸFileMode = go.io.fs_package.FileMode;
@@ -53,9 +53,7 @@ using static go.testing.@internal.testdeps_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(ctx context.Context, stop context.CancelFunc), context_package.Context>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
-[assembly: GoImplement<testLog, @internal.testlog_package.Interface>]
+[assembly: GoImplement<testLog, go.@internal.testlog_package.Interface>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

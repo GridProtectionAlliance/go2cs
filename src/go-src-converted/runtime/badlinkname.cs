@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using _ = unsafe_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 
 partial class runtime_package {
 

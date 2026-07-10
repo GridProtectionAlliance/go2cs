@@ -38,11 +38,11 @@ using static go.debug.gosym_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<DecodingError, error>]
+[assembly: GoImplement<DecodingError, error>(Pointer = true)]
 [assembly: GoImplement<UnknownFileError, error>]
-[assembly: GoImplement<UnknownLineError, error>]
-[assembly: GoImplement<encoding.binary_package.bigEndian, encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<encoding.binary_package.littleEndian, encoding.binary_package.ByteOrder>]
+[assembly: GoImplement<UnknownLineError, error>(Pointer = true)]
+[assembly: GoImplement<go.encoding.binary_package.bigEndian, go.encoding.binary_package.ByteOrder>]
+[assembly: GoImplement<go.encoding.binary_package.littleEndian, go.encoding.binary_package.ByteOrder>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

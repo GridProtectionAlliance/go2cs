@@ -3,8 +3,6 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using ꓸꓸꓸж<RangeTable> = Span<ж<RangeTable>>;
-
 partial class unicode_package {
 
 // Bit masks for each code point under U+0100, for fast lookup.
@@ -47,10 +45,10 @@ public static slice<ж<RangeTable>> PrintRanges = new ж<RangeTable>[]{
 public static bool IsGraphic(rune r) {
     // We convert to uint32 to avoid the extra test for negative,
     // and in the index we convert to uint8 to avoid the range check.
-    if (((uint32)r) <= MaxLatin1) {
-        return (uint8)(properties[((uint8)r)] & pg) != 0;
+    if ((uint32)r <= MaxLatin1) {
+        return (uint8)(properties[(uint8)r] & (uint8)pg) != 0;
     }
-    return In(r, ᏑGraphicRanges.ꓸꓸꓸ);
+    return In(r, GraphicRanges.ꓸꓸꓸ);
 }
 
 // IsPrint reports whether the rune is defined as printable by Go. Such
@@ -59,10 +57,10 @@ public static bool IsGraphic(rune r) {
 // character. This categorization is the same as [IsGraphic] except that the
 // only spacing character is ASCII space, U+0020.
 public static bool IsPrint(rune r) {
-    if (((uint32)r) <= MaxLatin1) {
-        return (uint8)(properties[((uint8)r)] & pp) != 0;
+    if ((uint32)r <= MaxLatin1) {
+        return (uint8)(properties[(uint8)r] & (uint8)pp) != 0;
     }
-    return In(r, ᏑPrintRanges.ꓸꓸꓸ);
+    return In(r, PrintRanges.ꓸꓸꓸ);
 }
 
 // IsOneOf reports whether the rune is a member of one of the ranges.
@@ -77,7 +75,7 @@ public static bool IsOneOf(slice<ж<RangeTable>> ranges, rune r) {
 }
 
 // In reports whether the rune is a member of one of the ranges.
-public static bool In(rune r, params ꓸꓸꓸж<RangeTable> rangesʗp) {
+public static bool In(rune r, params Span<ж<RangeTable>> rangesʗp) {
     var ranges = rangesʗp.slice();
 
     foreach (var (_, inside) in ranges) {
@@ -92,8 +90,8 @@ public static bool In(rune r, params ꓸꓸꓸж<RangeTable> rangesʗp) {
 // The [C] ([Other]) Unicode category includes more code points
 // such as surrogates; use [Is](C, r) to test for them.
 public static bool IsControl(rune r) {
-    if (((uint32)r) <= MaxLatin1) {
-        return (uint8)(properties[((uint8)r)] & pC) != 0;
+    if ((uint32)r <= MaxLatin1) {
+        return (uint8)(properties[(uint8)r] & (uint8)pC) != 0;
     }
     // All control characters are < MaxLatin1.
     return false;
@@ -101,8 +99,8 @@ public static bool IsControl(rune r) {
 
 // IsLetter reports whether the rune is a letter (category [L]).
 public static bool IsLetter(rune r) {
-    if (((uint32)r) <= MaxLatin1) {
-        return (uint8)(properties[((uint8)r)] & (pLmask)) != 0;
+    if ((uint32)r <= MaxLatin1) {
+        return (uint8)(properties[(uint8)r] & (pLmask)) != 0;
     }
     return isExcludingLatin(Letter, r);
 }
@@ -115,8 +113,8 @@ public static bool IsMark(rune r) {
 
 // IsNumber reports whether the rune is a number (category [N]).
 public static bool IsNumber(rune r) {
-    if (((uint32)r) <= MaxLatin1) {
-        return (uint8)(properties[((uint8)r)] & pN) != 0;
+    if ((uint32)r <= MaxLatin1) {
+        return (uint8)(properties[(uint8)r] & (uint8)pN) != 0;
     }
     return isExcludingLatin(Number, r);
 }
@@ -124,8 +122,8 @@ public static bool IsNumber(rune r) {
 // IsPunct reports whether the rune is a Unicode punctuation character
 // (category [P]).
 public static bool IsPunct(rune r) {
-    if (((uint32)r) <= MaxLatin1) {
-        return (uint8)(properties[((uint8)r)] & pP) != 0;
+    if ((uint32)r <= MaxLatin1) {
+        return (uint8)(properties[(uint8)r] & (uint8)pP) != 0;
     }
     return Is(Punct, r);
 }
@@ -140,9 +138,9 @@ public static bool IsPunct(rune r) {
 // Z and property [Pattern_White_Space].
 public static bool IsSpace(rune r) {
     // This property isn't the same as Z; special-case it.
-    if (((uint32)r) <= MaxLatin1) {
+    if ((uint32)r <= MaxLatin1) {
         switch (r) {
-        case (rune)'\t' or (rune)'\n' or (rune)'\v' or (rune)'\f' or (rune)'\r' or (rune)' ' or 133 or 160: {
+        case (rune)'\t' or (rune)'\n' or (rune)'\v' or (rune)'\f' or (rune)'\r' or (rune)' ' or 0x85 or 0xA0: {
             return true;
         }}
 
@@ -153,8 +151,8 @@ public static bool IsSpace(rune r) {
 
 // IsSymbol reports whether the rune is a symbolic character.
 public static bool IsSymbol(rune r) {
-    if (((uint32)r) <= MaxLatin1) {
-        return (uint8)(properties[((uint8)r)] & pS) != 0;
+    if ((uint32)r <= MaxLatin1) {
+        return (uint8)(properties[(uint8)r] & (uint8)pS) != 0;
     }
     return isExcludingLatin(Symbol, r);
 }

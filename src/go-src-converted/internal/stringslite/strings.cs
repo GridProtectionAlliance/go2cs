@@ -8,8 +8,9 @@
 // Tests for these functions are in the strings package.
 namespace go.@internal;
 
-using bytealg = @internal.bytealg_package;
+using bytealg = go.@internal.bytealg_package;
 using @unsafe = unsafe_package;
+using go.@internal;
 
 partial class stringslite_package {
 
@@ -43,7 +44,7 @@ public static nint Index(@string s, @string substr) {
     case {} when n > len(s): {
         return -1;
     }
-    case {} when n is <= bytealg.MaxLen: {
+    case {} when n <= bytealg.MaxLen: {
         if (len(s) <= bytealg.MaxBruteForce) {
             // Use brute force when s and substr both are small
             return bytealg.IndexString(s, substr);
@@ -61,7 +62,7 @@ public static nint Index(@string s, @string substr) {
                 if (o < 0) {
                     return -1;
                 }
-                 += o + 1;
+                iΔ2 += o + 1;
             }
             if (s[iΔ2 + 1] == c1Δ2 && s[(int)(iΔ2)..(int)(iΔ2 + n)] == substr) {
                 return iΔ2;
@@ -98,7 +99,7 @@ public static nint Index(@string s, @string substr) {
         }
         i++;
         fails++;
-        if (fails >= 4 + i >> (int)(4) && i < t) {
+        if (fails >= 4 + (i >> (int)(4)) && i < t) {
             // See comment in ../bytes/bytes.go.
             nint j = bytealg.IndexRabinKarp(s[(int)(i)..], substr);
             if (j < 0) {

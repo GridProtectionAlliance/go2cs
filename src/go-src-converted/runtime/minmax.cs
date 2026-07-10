@@ -44,7 +44,7 @@ partial interface floaty<ΔT> {
 }
 
 internal static F fmin<F>(F x, F y)
-    where F : /* floaty */ IAdditionOperators<F, F, F>, ISubtractionOperators<F, F, F>, IMultiplyOperators<F, F, F>, IDivisionOperators<F, F, F>, IEqualityOperators<F, F, bool>, IComparisonOperators<F, F, bool>, new()
+    where F : /* floaty */ IAdditionOperators<F, F, F>, ISubtractionOperators<F, F, F>, IMultiplyOperators<F, F, F>, IDivisionOperators<F, F, F>, IIncrementOperators<F>, IDecrementOperators<F>, IEqualityOperators<F, F, bool>, IComparisonOperators<F, F, bool>, new()
 {
     if (!AreEqual(y, y) || y < x) {
         return y;
@@ -58,7 +58,7 @@ internal static F fmin<F>(F x, F y)
 }
 
 internal static F fmax<F>(F x, F y)
-    where F : /* floaty */ IAdditionOperators<F, F, F>, ISubtractionOperators<F, F, F>, IMultiplyOperators<F, F, F>, IDivisionOperators<F, F, F>, IEqualityOperators<F, F, bool>, IComparisonOperators<F, F, bool>, new()
+    where F : /* floaty */ IAdditionOperators<F, F, F>, ISubtractionOperators<F, F, F>, IMultiplyOperators<F, F, F>, IDivisionOperators<F, F, F>, IIncrementOperators<F>, IDecrementOperators<F>, IEqualityOperators<F, F, bool>, IComparisonOperators<F, F, bool>, new()
 {
     if (!AreEqual(y, y) || y > x) {
         return y;
@@ -72,33 +72,29 @@ internal static F fmax<F>(F x, F y)
 }
 
 internal static F forbits<F>(F x, F y)
-    where F : /* floaty */ IAdditionOperators<F, F, F>, ISubtractionOperators<F, F, F>, IMultiplyOperators<F, F, F>, IDivisionOperators<F, F, F>, IEqualityOperators<F, F, bool>, IComparisonOperators<F, F, bool>, new()
+    where F : /* floaty */ IAdditionOperators<F, F, F>, ISubtractionOperators<F, F, F>, IMultiplyOperators<F, F, F>, IDivisionOperators<F, F, F>, IIncrementOperators<F>, IDecrementOperators<F>, IEqualityOperators<F, F, bool>, IComparisonOperators<F, F, bool>, new()
 {
-    switch (@unsafe.Sizeof(x)) {
-    case 4: {
-        ((ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡ(x)))).val |= ((ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡ(y)))).val;
-        break;
+    var exprᴛ1 = @unsafe.Sizeof(x);
+    if (exprᴛ1 == 4) {
+        ((ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡ(x)))).Value |= ((ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡ(y)))).Value;
     }
-    case 8: {
-        ((ж<uint64>)(uintptr)(new @unsafe.Pointer(Ꮡ(x)))).val |= ((ж<uint64>)(uintptr)(new @unsafe.Pointer(Ꮡ(y)))).val;
-        break;
-    }}
+    else if (exprᴛ1 == 8) {
+        ((ж<uint64>)(uintptr)(new @unsafe.Pointer(Ꮡ(x)))).Value |= ((ж<uint64>)(uintptr)(new @unsafe.Pointer(Ꮡ(y)))).Value;
+    }
 
     return x;
 }
 
 internal static F fandbits<F>(F x, F y)
-    where F : /* floaty */ IAdditionOperators<F, F, F>, ISubtractionOperators<F, F, F>, IMultiplyOperators<F, F, F>, IDivisionOperators<F, F, F>, IEqualityOperators<F, F, bool>, IComparisonOperators<F, F, bool>, new()
+    where F : /* floaty */ IAdditionOperators<F, F, F>, ISubtractionOperators<F, F, F>, IMultiplyOperators<F, F, F>, IDivisionOperators<F, F, F>, IIncrementOperators<F>, IDecrementOperators<F>, IEqualityOperators<F, F, bool>, IComparisonOperators<F, F, bool>, new()
 {
-    switch (@unsafe.Sizeof(x)) {
-    case 4: {
-        ((ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡ(x)))).val &= ((ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡ(y)))).val;
-        break;
+    var exprᴛ1 = @unsafe.Sizeof(x);
+    if (exprᴛ1 == 4) {
+        ((ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡ(x)))).Value &= ((ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡ(y)))).Value;
     }
-    case 8: {
-        ((ж<uint64>)(uintptr)(new @unsafe.Pointer(Ꮡ(x)))).val &= ((ж<uint64>)(uintptr)(new @unsafe.Pointer(Ꮡ(y)))).val;
-        break;
-    }}
+    else if (exprᴛ1 == 8) {
+        ((ж<uint64>)(uintptr)(new @unsafe.Pointer(Ꮡ(x)))).Value &= ((ж<uint64>)(uintptr)(new @unsafe.Pointer(Ꮡ(y)))).Value;
+    }
 
     return x;
 }

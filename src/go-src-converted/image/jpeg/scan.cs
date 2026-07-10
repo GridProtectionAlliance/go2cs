@@ -19,28 +19,28 @@ partial class jpeg_package {
     nint hRatio = h0 / d.comp[1].h;
     nint vRatio = v0 / d.comp[1].v;
     image.YCbCrSubsampleRatio subsampleRatio = default!;
-    switch ((nint)(hRatio << (int)(4) | vRatio)) {
-    case 17: {
+    switch ((nint)((hRatio << (int)(4)) | vRatio)) {
+    case 0x11: {
         subsampleRatio = image.YCbCrSubsampleRatio444;
         break;
     }
-    case 18: {
+    case 0x12: {
         subsampleRatio = image.YCbCrSubsampleRatio440;
         break;
     }
-    case 33: {
+    case 0x21: {
         subsampleRatio = image.YCbCrSubsampleRatio422;
         break;
     }
-    case 34: {
+    case 0x22: {
         subsampleRatio = image.YCbCrSubsampleRatio420;
         break;
     }
-    case 65: {
+    case 0x41: {
         subsampleRatio = image.YCbCrSubsampleRatio411;
         break;
     }
-    case 66: {
+    case 0x42: {
         subsampleRatio = image.YCbCrSubsampleRatio410;
         break;
     }
@@ -68,21 +68,21 @@ partial class jpeg_package {
 // Specified in section B.2.3.
 [GoRecv] internal static error processSOS(this ref decoder d, nint n) {
     if (d.nComp == 0) {
-        return ((FormatError)"missing SOF marker"u8);
+        return ((FormatError)(@string)"missing SOF marker"u8);
     }
     if (n < 6 || 4 + 2 * d.nComp < n || n % 2 != 0) {
-        return ((FormatError)"SOS has wrong length"u8);
+        return ((FormatError)(@string)"SOS has wrong length"u8);
     }
     {
         var err = d.readFull(d.tmp[..(int)(n)]); if (err != default!) {
             return err;
         }
     }
-    nint nComp = ((nint)d.tmp[0]);
+    nint nComp = (nint)d.tmp[0];
     if (n != 4 + 2 * nComp) {
-        return ((FormatError)"SOS length inconsistent with number of components"u8);
+        return ((FormatError)(@string)"SOS length inconsistent with number of components"u8);
     }
-    ref var scan = ref heap(new array<struct{compIndex uint8; td uint8; ta uint8}>(4), out var Ꮡscan);
+    array<processSOS_scan> scan = new(4); /* maxComponents */
     nint totalHV = 0;
     for (nint i = 0; i < nComp; i++) {
         var cs = d.tmp[1 + 2 * i];
@@ -94,9 +94,9 @@ partial class jpeg_package {
             }
         }
         if (compIndex < 0) {
-            return ((FormatError)"unknown component selector"u8);
+            return ((FormatError)(@string)"unknown component selector"u8);
         }
-        scan[i].compIndex = ((uint8)compIndex);
+        scan[i].compIndex = (uint8)compIndex;
         // Section B.2.3 states that "the value of Cs_j shall be different from
         // the values of Cs_1 through Cs_(j-1)". Since we have previously
         // verified that a frame's component identifiers (C_i values in section
@@ -104,28 +104,28 @@ partial class jpeg_package {
         // into d.comp are unique.
         for (nint j = 0; j < i; j++) {
             if (scan[i].compIndex == scan[j].compIndex) {
-                return ((FormatError)"repeated component selector"u8);
+                return ((FormatError)(@string)"repeated component selector"u8);
             }
         }
         totalHV += d.comp[compIndex].h * d.comp[compIndex].v;
         // The baseline t <= 1 restriction is specified in table B.3.
-        scan[i].td = d.tmp[2 + 2 * i] >> (int)(4);
+        scan[i].td = (uint8)((d.tmp[2 + 2 * i] >> (int)(4)));
         {
             var t = scan[i].td; if (t > maxTh || (d.baseline && t > 1)) {
-                return ((FormatError)"bad Td value"u8);
+                return ((FormatError)(@string)"bad Td value"u8);
             }
         }
-        scan[i].ta = (byte)(d.tmp[2 + 2 * i] & 15);
+        scan[i].ta = (uint8)((byte)(d.tmp[2 + 2 * i] & 0x0f));
         {
             var t = scan[i].ta; if (t > maxTh || (d.baseline && t > 1)) {
-                return ((FormatError)"bad Ta value"u8);
+                return ((FormatError)(@string)"bad Ta value"u8);
             }
         }
     }
     // Section B.2.3 states that if there is more than one component then the
     // total H*V values in a scan must be <= 10.
     if (d.nComp > 1 && totalHV > 10) {
-        return ((FormatError)"total sampling factors too large"u8);
+        return ((FormatError)(@string)"total sampling factors too large"u8);
     }
     // zigStart and zigEnd are the spectral selection bounds.
     // ah and al are the successive approximation high and low values.
@@ -144,20 +144,20 @@ partial class jpeg_package {
     //
     // For sequential JPEGs, these parameters are hard-coded to 0/63/0/0, as
     // per table B.3.
-    var (zigStart, zigEnd, ah, al) = (((int32)0), ((int32)(blockSize - 1)), ((uint32)0), ((uint32)0));
+    var (zigStart, zigEnd, ah, al) = ((int32)0, (int32)(blockSize - 1), (uint32)0, (uint32)0);
     if (d.progressive) {
-        zigStart = ((int32)d.tmp[1 + 2 * nComp]);
-        zigEnd = ((int32)d.tmp[2 + 2 * nComp]);
-        ah = ((uint32)(d.tmp[3 + 2 * nComp] >> (int)(4)));
-        al = ((uint32)((byte)(d.tmp[3 + 2 * nComp] & 15)));
+        zigStart = (int32)d.tmp[1 + 2 * nComp];
+        zigEnd = (int32)d.tmp[2 + 2 * nComp];
+        ah = (uint32)((d.tmp[3 + 2 * nComp] >> (int)(4)));
+        al = (uint32)((byte)(d.tmp[3 + 2 * nComp] & 0x0f));
         if ((zigStart == 0 && zigEnd != 0) || zigStart > zigEnd || blockSize <= zigEnd) {
-            return ((FormatError)"bad spectral selection bounds"u8);
+            return ((FormatError)(@string)"bad spectral selection bounds"u8);
         }
         if (zigStart != 0 && nComp != 1) {
-            return ((FormatError)"progressive AC coefficients for more than one component"u8);
+            return ((FormatError)(@string)"progressive AC coefficients for more than one component"u8);
         }
         if (ah != 0 && ah != al + 1) {
-            return ((FormatError)"bad successive approximation values"u8);
+            return ((FormatError)(@string)"bad successive approximation values"u8);
         }
     }
     // mxx and myy are the number of MCUs (Minimum Coded Units) in the image.
@@ -179,7 +179,7 @@ partial class jpeg_package {
     }
     d.bits = new bits(nil);
     nint mcu = 0;
-    var expectedRST = ((uint8)rst0Marker);
+    var expectedRST = (uint8)rst0Marker;
     ref var b = ref heap(new block(), out var Ꮡb);
     array<int32> dc = new(4); /* maxComponents */
     nint bx = default!;
@@ -187,8 +187,7 @@ partial class jpeg_package {
     nint blockCount = default!;
     for (nint my = 0; my < myy; my++) {
         for (nint mx = 0; mx < mxx; mx++) {
-            ref var i = ref heap<nint>(out var Ꮡi);
-            for (i = 0; i < nComp; i++) {
+            for (nint i = 0; i < nComp; i++) {
                 var compIndex = scan[i].compIndex;
                 nint hi = d.comp[compIndex].h;
                 nint vi = d.comp[compIndex].v;
@@ -234,11 +233,11 @@ partial class jpeg_package {
                     if (d.progressive){
                         b = d.progCoeffs[compIndex][by * mxx * hi + bx];
                     } else {
-                        b = new block{nil};
+                        b = new block(new int32[64].array());
                     }
                     if (ah != 0){
                         {
-                            var err = d.refine(Ꮡb, Ꮡ(d.huff[acTable][scan[i].ta]), zigStart, zigEnd, 1 << (int)(al)); if (err != default!) {
+                            var err = d.refine(Ꮡb, Ꮡ(d.huff[acTable][scan[i].ta]), zigStart, zigEnd, (int32)(1 << (int)(al))); if (err != default!) {
                                 return err;
                             }
                         }
@@ -252,14 +251,14 @@ partial class jpeg_package {
                                 return err;
                             }
                             if (value > 16) {
-                                return ((UnsupportedError)"excessive DC component"u8);
+                                return ((UnsupportedError)(@string)"excessive DC component"u8);
                             }
-                            var (dcDelta, err) = d.receiveExtend(value);
+                            (var dcDelta, err) = d.receiveExtend(value);
                             if (err != default!) {
                                 return err;
                             }
                             dc[compIndex] += dcDelta;
-                            b[0] = dc[compIndex] << (int)(al);
+                            b[0] = (dc[compIndex] << (int)(al));
                         }
                         if (zig <= zigEnd && d.eobRun > 0){
                             d.eobRun--;
@@ -271,10 +270,10 @@ partial class jpeg_package {
                                 if (err != default!) {
                                     return err;
                                 }
-                                var val0 = value >> (int)(4);
-                                var val1 = (uint8)(value & 15);
+                                var val0 = (uint8)((value >> (int)(4)));
+                                var val1 = (uint8)(value & 0x0f);
                                 if (val1 != 0){
-                                    zig += ((int32)val0);
+                                    zig += (int32)val0;
                                     if (zig > zigEnd) {
                                         break;
                                     }
@@ -282,21 +281,21 @@ partial class jpeg_package {
                                     if (errΔ1 != default!) {
                                         return errΔ1;
                                     }
-                                    b[unzig[zig]] = ac << (int)(al);
+                                    b[unzig[zig]] = (ac << (int)(al));
                                 } else {
-                                    if (val0 != 15) {
-                                        d.eobRun = ((uint16)(1 << (int)(val0)));
+                                    if (val0 != 0x0f) {
+                                        d.eobRun = (uint16)((uint16)(1 << (int)(val0)));
                                         if (val0 != 0) {
-                                            var (bits, errΔ2) = d.decodeBits(((int32)val0));
+                                            var (bits, errΔ2) = d.decodeBits((int32)val0);
                                             if (errΔ2 != default!) {
                                                 return errΔ2;
                                             }
-                                            d.eobRun |= (uint16)(((uint16)bits));
+                                            d.eobRun |= (uint16)bits;
                                         }
                                         d.eobRun--;
                                         break;
                                     }
-                                    zig += 15;
+                                    zig += 0x0f;
                                 }
                             }
                         }
@@ -314,7 +313,7 @@ partial class jpeg_package {
                         continue;
                     }
                     {
-                        var err = d.reconstructBlock(Ꮡb, bx, by, ((nint)compIndex)); if (err != default!) {
+                        var err = d.reconstructBlock(Ꮡb, bx, by, (nint)compIndex); if (err != default!) {
                             return err;
                         }
                     }
@@ -331,7 +330,7 @@ partial class jpeg_package {
                     var err = d.readFull(d.tmp[..2]); if (err != default!){
                         return err;
                     } else 
-                    if (d.tmp[0] != 255 || d.tmp[1] != expectedRST) {
+                    if (d.tmp[0] != 0xff || d.tmp[1] != expectedRST) {
                         {
                             var errΔ1 = d.findRST(expectedRST); if (errΔ1 != default!) {
                                 return errΔ1;
@@ -360,8 +359,8 @@ partial class jpeg_package {
 // refine decodes a successive approximation refinement block, as specified in
 // section G.1.2.
 [GoRecv] internal static error refine(this ref decoder d, ж<block> Ꮡb, ж<huffman> Ꮡh, int32 zigStart, int32 zigEnd, int32 delta) {
-    ref var b = ref Ꮡb.val;
-    ref var h = ref Ꮡh.val;
+    ref var b = ref Ꮡb.Value;
+    ref var h = ref Ꮡh.Value;
 
     // Refining a DC component is trivial.
     if (zigStart == 0) {
@@ -382,23 +381,23 @@ partial class jpeg_package {
     if (d.eobRun == 0) {
 loop:
         for (; zig <= zigEnd; zig++) {
-            var z = ((int32)0);
+            var z = (int32)0;
             var (value, err) = d.decodeHuffman(Ꮡh);
             if (err != default!) {
                 return err;
             }
-            var val0 = value >> (int)(4);
-            var val1 = (uint8)(value & 15);
+            var val0 = (uint8)((value >> (int)(4)));
+            var val1 = (uint8)(value & 0x0f);
             switch (val1) {
             case 0: {
-                if (val0 != 15) {
-                    d.eobRun = ((uint16)(1 << (int)(val0)));
+                if (val0 != 0x0f) {
+                    d.eobRun = (uint16)((uint16)(1 << (int)(val0)));
                     if (val0 != 0) {
-                        var (bits, errΔ3) = d.decodeBits(((int32)val0));
+                        var (bits, errΔ3) = d.decodeBits((int32)val0);
                         if (errΔ3 != default!) {
                             return errΔ3;
                         }
-                        d.eobRun |= (uint16)(((uint16)bits));
+                        d.eobRun |= (uint16)bits;
                     }
                     goto break_loop;
                 }
@@ -416,15 +415,15 @@ loop:
                 break;
             }
             default: {
-                return ((FormatError)"unexpected Huffman code"u8);
+                return ((FormatError)(@string)"unexpected Huffman code"u8);
             }}
 
-            (zig, err) = d.refineNonZeroes(Ꮡb, zig, zigEnd, ((int32)val0), delta);
+            (zig, err) = d.refineNonZeroes(Ꮡb, zig, zigEnd, (int32)val0, delta);
             if (err != default!) {
                 return err;
             }
             if (zig > zigEnd) {
-                return ((FormatError)"too many coefficients"u8);
+                return ((FormatError)(@string)"too many coefficients"u8);
             }
             if (z != 0) {
                 b[unzig[zig]] = z;
@@ -447,7 +446,7 @@ break_loop:;
 // refineNonZeroes refines non-zero entries of b in zig-zag order. If nz >= 0,
 // the first nz zero entries are skipped over.
 [GoRecv] internal static (int32, error) refineNonZeroes(this ref decoder d, ж<block> Ꮡb, int32 zig, int32 zigEnd, int32 nz, int32 delta) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     for (; zig <= zigEnd; zig++) {
         nint u = unzig[zig];
@@ -479,19 +478,15 @@ break_loop:;
     // processSOS method.
     nint h0 = d.comp[0].h;
     nint mxx = (d.width + 8 * h0 - 1) / (8 * h0);
-    ref var i = ref heap<nint>(out var Ꮡi);
-    for (i = 0; i < d.nComp; i++) {
+    for (nint i = 0; i < d.nComp; i++) {
         if (d.progCoeffs[i] == default!) {
             continue;
         }
         nint v = 8 * d.comp[0].v / d.comp[i].v;
         nint h = 8 * d.comp[0].h / d.comp[i].h;
-        ref var stride = ref heap<nint>(out var Ꮡstride);
-        stride = mxx * d.comp[i].h;
-        ref var by = ref heap<nint>(out var Ꮡby);
-        for (by = 0; by * v < d.height; by++) {
-            ref var bx = ref heap<nint>(out var Ꮡbx);
-            for (bx = 0; bx * h < d.width; bx++) {
+        nint stride = mxx * d.comp[i].h;
+        for (nint by = 0; by * v < d.height; by++) {
+            for (nint bx = 0; bx * h < d.width; bx++) {
                 {
                     var err = d.reconstructBlock(Ꮡ(d.progCoeffs[i][by * stride + bx]), bx, by, i); if (err != default!) {
                         return err;
@@ -506,29 +501,29 @@ break_loop:;
 // reconstructBlock dequantizes, performs the inverse DCT and stores the block
 // to the image.
 [GoRecv] internal static error reconstructBlock(this ref decoder d, ж<block> Ꮡb, nint bx, nint by, nint compIndex) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     var qt = Ꮡ(d.quant[d.comp[compIndex].tq]);
     for (nint zig = 0; zig < blockSize; zig++) {
-        b[unzig[zig]] *= qt.val[zig];
+        b[unzig[zig]] *= qt.Value[zig];
     }
     idct(Ꮡb);
     var dst = slice<byte>(default!);
     nint stride = 0;
     if (d.nComp == 1){
-        (dst, stride) = (d.img1.Pix[(int)(8 * (by * d.img1.Stride + bx))..], d.img1.Stride);
+        (dst, stride) = ((~d.img1).Pix[(int)(8 * (by * (~d.img1).Stride + bx))..], d.img1.Value.Stride);
     } else {
         switch (compIndex) {
         case 0: {
-            (dst, stride) = (d.img3.Y[(int)(8 * (by * d.img3.YStride + bx))..], d.img3.YStride);
+            (dst, stride) = ((~d.img3).Y[(int)(8 * (by * (~d.img3).YStride + bx))..], d.img3.Value.YStride);
             break;
         }
         case 1: {
-            (dst, stride) = (d.img3.Cb[(int)(8 * (by * d.img3.CStride + bx))..], d.img3.CStride);
+            (dst, stride) = ((~d.img3).Cb[(int)(8 * (by * (~d.img3).CStride + bx))..], d.img3.Value.CStride);
             break;
         }
         case 2: {
-            (dst, stride) = (d.img3.Cr[(int)(8 * (by * d.img3.CStride + bx))..], d.img3.CStride);
+            (dst, stride) = ((~d.img3).Cr[(int)(8 * (by * (~d.img3).CStride + bx))..], d.img3.Value.CStride);
             break;
         }
         case 3: {
@@ -536,7 +531,7 @@ break_loop:;
             break;
         }
         default: {
-            return ((UnsupportedError)"too many components"u8);
+            return ((UnsupportedError)(@string)"too many components"u8);
         }}
 
     }
@@ -554,7 +549,7 @@ break_loop:;
             } else {
                 c += 128;
             }
-            dst[yStride + x] = ((uint8)c);
+            dst[yStride + x] = (uint8)c;
         }
     }
     return default!;
@@ -576,14 +571,14 @@ break_loop:;
         // holds the next two bytes of JPEG-encoded input. It is either 0 or 1,
         // so that each iteration advances by 1 or 2 bytes (or returns).
         nint i = 0;
-        if (d.tmp[0] == 255){
+        if (d.tmp[0] == 0xff){
             if (d.tmp[1] == expectedRST){
                 return default!;
             } else 
-            if (d.tmp[1] == 255){
+            if (d.tmp[1] == 0xff){
                 i = 1;
             } else 
-            if (d.tmp[1] != 0) {
+            if (d.tmp[1] != 0x00) {
                 // libjpeg's jdmarker.c's jpeg_resync_to_restart does something
                 // fancy here, treating RST markers within two (modulo 8) of
                 // expectedRST differently from RST markers that are 'more
@@ -591,11 +586,11 @@ break_loop:;
                 // cases is frequent enough to be worth the complexity, we take
                 // a simpler approach for now. Any marker that's not 0x00, 0xff
                 // or expectedRST is a fatal FormatError.
-                return ((FormatError)"bad RST marker"u8);
+                return ((FormatError)(@string)"bad RST marker"u8);
             }
         } else 
-        if (d.tmp[1] == 255) {
-            d.tmp[0] = 255;
+        if (d.tmp[1] == 0xff) {
+            d.tmp[0] = 0xff;
             i = 1;
         }
         {

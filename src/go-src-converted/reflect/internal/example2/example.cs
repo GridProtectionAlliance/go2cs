@@ -7,7 +7,7 @@ partial class example2_package {
 
 [GoType] partial struct MyStruct {
     public slice<MyStruct> MyStructs;
-    public ж<MyStruct> MyStruct;
+    public ж<MyStruct> ΔMyStruct;
 }
 
 } // end example2_package

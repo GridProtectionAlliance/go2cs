@@ -30,8 +30,10 @@ public static error ErrMessageTooLarge = errors.New("multipart: message too larg
 // disk in temporary files.
 // It returns [ErrMessageTooLarge] if all non-file parts can't be stored in
 // memory.
-[GoRecv] public static (ж<Form>, error) ReadForm(this ref Reader r, int64 maxMemory) {
-    return r.readForm(maxMemory);
+public static (ж<Form>, error) ReadForm(this ж<Reader> Ꮡr, int64 maxMemory) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.readForm(maxMemory);
 }
 
 internal static ж<godebug.Setting> multipartfiles = godebug.New("#multipartfiles"u8);   // TODO: document and remove #
@@ -39,14 +41,15 @@ internal static ж<godebug.Setting> multipartmaxparts = godebug.New("multipartma
 
 // os.File.ReadFrom will allocate its own copy buffer if we let io.Copy use it.
 [GoType("dyn")] partial struct readForm_writerOnly {
-    public partial ref io_package.Writer Writer { get; }
+    public io_package.Writer Writer;
 }
 
-[GoRecv] internal static (ж<Form> _, error err) readForm(this ref Reader r, int64 maxMemory) => func((defer, _) => {
+internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMemory) => func<(ж<Form>, error err)>((defer, recover) => {
     error err = default!;
 
+    ref var r = ref Ꮡr.Value;
     var form = Ꮡ(new Form(new map<@string, slice<@string>>(), new map<@string, slice<ж<FileHeader>>>()));
-    ж<os.File> file = default!;
+    ref var @file = ref heap<ж<os.File>>(out var Ꮡfile);
     int64 fileOff = default!;
     nint numDiskFiles = 0;
     var combineFiles = true;
@@ -66,27 +69,28 @@ internal static ж<godebug.Setting> multipartmaxparts = godebug.New("multipartma
         }
     }
     var maxHeaders = maxMIMEHeaders();
-    var fileʗ1 = file;
     var formʗ1 = form;
     defer(() => {
-        if (fileʗ1 != nil) {
+        if (Ꮡfile.ValueSlot != nil) {
             {
-                var cerr = fileʗ1.Close(); if (err == default!) {
+                var cerr = Ꮡfile.ValueSlot.Close(); if (err == default!) {
                     err = cerr;
                 }
             }
         }
         if (combineFiles && numDiskFiles > 1) {
             foreach (var (_, fhs) in (~formʗ1).File) {
-                foreach (var (_, fh) in fhs) {
-                    fh.val.tmpshared = true;
+                foreach (var (_, vᴛ1) in fhs) {
+                    var fh = vᴛ1;
+
+                    fh.Value.tmpshared = true;
                 }
             }
         }
         if (err != default!) {
             formʗ1.RemoveAll();
-            if (fileʗ1 != nil) {
-                os.Remove(fileʗ1.Name());
+            if (Ꮡfile.ValueSlot != nil) {
+                os.Remove(Ꮡfile.ValueSlot.Name());
             }
         }
     });
@@ -107,7 +111,7 @@ internal static ж<godebug.Setting> multipartmaxparts = godebug.New("multipartma
     if (maxFileMemoryBytes == math.MaxInt64) {
         maxFileMemoryBytes--;
     }
-    var maxMemoryBytes = maxMemory + ((int64)(10 << (int)(20)));
+    var maxMemoryBytes = maxMemory + (int64)(((int64)10 << (int)(20)));
     if (maxMemoryBytes <= 0) {
         if (maxMemory < 0){
             maxMemoryBytes = 0;
@@ -117,7 +121,7 @@ internal static ж<godebug.Setting> multipartmaxparts = godebug.New("multipartma
     }
     slice<byte> copyBuf = default!;
     while (ᐧ) {
-        (p, errΔ2) = r.nextPart(false, maxMemoryBytes, maxHeaders);
+        var (p, errΔ2) = Ꮡr.nextPart(false, maxMemoryBytes, maxHeaders);
         if (AreEqual(errΔ2, io.EOF)) {
             break;
         }
@@ -132,34 +136,35 @@ internal static ж<godebug.Setting> multipartmaxparts = godebug.New("multipartma
         if (name == ""u8) {
             continue;
         }
-        @string filename = p.FileName();
+        ref var filename = ref heap<@string>(out var Ꮡfilename);
+        filename = p.FileName();
         // Multiple values for the same key (one map entry, longer slice) are cheaper
         // than the same number of values for different keys (many map entries), but
         // using a consistent per-value cost for overhead is simpler.
-        static readonly UntypedInt mapEntryOverhead = 200;
-        maxMemoryBytes -= ((int64)len(name));
+        UntypedInt mapEntryOverhead = 200;
+        maxMemoryBytes -= (int64)len(name);
         maxMemoryBytes -= mapEntryOverhead;
         if (maxMemoryBytes < 0) {
             // We can't actually take this path, since nextPart would already have
             // rejected the MIME headers for being too large. Check anyway.
             return (default!, ErrMessageTooLarge);
         }
-        ref var b = ref heap(new bytes_package.Buffer(), out var Ꮡb);
+        ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
         if (filename == ""u8) {
             // value, store as string in memory
-            var (n, errΔ3) = io.CopyN(~Ꮡb, ~p, maxMemoryBytes + 1);
+            var (nΔ1, errΔ3) = io.CopyN(new bytes_BufferжWriter(Ꮡb), new PartжReader(p), maxMemoryBytes + 1);
             if (errΔ3 != default! && !AreEqual(errΔ3, io.EOF)) {
                 return (default!, errΔ3);
             }
-            maxMemoryBytes -= n;
+            maxMemoryBytes -= nΔ1;
             if (maxMemoryBytes < 0) {
                 return (default!, ErrMessageTooLarge);
             }
-            (~form).Value[name] = append((~form).Value[name], b.String());
+            form.Value.Value[name] = append((~form).Value[name], Ꮡb.String());
             continue;
         }
         // file, store in memory or on disk
-        static readonly UntypedInt fileHeaderSize = 100;
+        UntypedInt fileHeaderSize = 100;
         maxMemoryBytes -= mimeHeaderSize((~p).Header);
         maxMemoryBytes -= mapEntryOverhead;
         maxMemoryBytes -= fileHeaderSize;
@@ -167,26 +172,26 @@ internal static ж<godebug.Setting> multipartmaxparts = godebug.New("multipartma
             return (default!, ErrMessageTooLarge);
         }
         foreach (var (_, v) in (~p).Header) {
-            maxHeaders -= ((int64)len(v));
+            maxHeaders -= (int64)len(v);
         }
         var fh = Ꮡ(new FileHeader(
             Filename: filename,
             Header: (~p).Header
         ));
-        var (n, errΔ2) = io.CopyN(~Ꮡb, ~p, maxFileMemoryBytes + 1);
+        (var n, errΔ2) = io.CopyN(new bytes_BufferжWriter(Ꮡb), new PartжReader(p), maxFileMemoryBytes + 1);
         if (errΔ2 != default! && !AreEqual(errΔ2, io.EOF)) {
             return (default!, errΔ2);
         }
         if (n > maxFileMemoryBytes){
-            if (file == nil) {
-                (file, errΔ2) = os.CreateTemp(r.tempDir, "multipart-"u8);
+            if (@file == nil) {
+                (@file, errΔ2) = os.CreateTemp(r.tempDir, "multipart-"u8);
                 if (errΔ2 != default!) {
                     return (default!, errΔ2);
                 }
             }
             numDiskFiles++;
             {
-                var (_, errΔ4) = file.Write(b.Bytes()); if (errΔ4 != default!) {
+                var (_, errΔ4) = @file.Write(b.Bytes()); if (errΔ4 != default!) {
                     return (default!, errΔ4);
                 }
             }
@@ -194,29 +199,29 @@ internal static ж<godebug.Setting> multipartmaxparts = godebug.New("multipartma
                 copyBuf = new slice<byte>(32 * 1024);
             }
             // same buffer size as io.Copy uses
-            var (remainingSize, errΔ5) = io.CopyBuffer(new writerOnly(file), ~p, copyBuf);
+            var (remainingSize, errΔ5) = io.CopyBuffer(new readForm_writerOnly(new os.FileжWriter(@file)), new PartжReader(p), copyBuf);
             if (errΔ5 != default!) {
                 return (default!, errΔ5);
             }
-            fh.val.tmpfile = file.Name();
-            fh.val.Size = ((int64)b.Len()) + remainingSize;
-            fh.val.tmpoff = fileOff;
-            fileOff += fh.val.Size;
+            fh.Value.tmpfile = @file.Name();
+            fh.Value.Size = (int64)b.Len() + remainingSize;
+            fh.Value.tmpoff = fileOff;
+            fileOff += fh.Value.Size;
             if (!combineFiles) {
                 {
-                    var errΔ6 = file.Close(); if (errΔ6 != default!) {
+                    var errΔ6 = @file.Close(); if (errΔ6 != default!) {
                         return (default!, errΔ6);
                     }
                 }
-                file = default!;
+                @file = default!;
             }
         } else {
-            fh.val.content = b.Bytes();
-            fh.val.Size = ((int64)len((~fh).content));
+            fh.Value.content = b.Bytes();
+            fh.Value.Size = (int64)len((~fh).content);
             maxFileMemoryBytes -= n;
             maxMemoryBytes -= n;
         }
-        (~form).File[name] = append((~form).File[name], fh);
+        form.Value.File[name] = append((~form).File[name], fh);
     }
     return (form, default!);
 });
@@ -226,11 +231,11 @@ internal static int64 /*size*/ mimeHeaderSize(textproto.MIMEHeader h) {
 
     size = 400;
     foreach (var (k, vs) in h) {
-        size += ((int64)len(k));
+        size += (int64)len(k);
         size += 200;
         // map entry overhead
         foreach (var (_, v) in vs) {
-            size += ((int64)len(v));
+            size += (int64)len(v);
         }
     }
     return size;
@@ -265,7 +270,7 @@ internal static int64 /*size*/ mimeHeaderSize(textproto.MIMEHeader h) {
 // A FileHeader describes a file part of a multipart request.
 [GoType] partial struct FileHeader {
     public @string Filename;
-    public net.textproto_package.MIMEHeader Header;
+    public textproto.MIMEHeader Header;
     public int64 Size;
     internal slice<byte> content;
     internal @string tmpfile;
@@ -277,19 +282,20 @@ internal static int64 /*size*/ mimeHeaderSize(textproto.MIMEHeader h) {
 [GoRecv] public static (File, error) Open(this ref FileHeader fh) {
     {
         var b = fh.content; if (b != default!) {
-            var r = io.NewSectionReader(~bytes.NewReader(b), 0, ((int64)len(b)));
+            var r = io.NewSectionReader(new bytes_ReaderжReaderAt(bytes.NewReader(b)), 0, (int64)len(b));
             return (new sectionReadCloser(r, default!), default!);
         }
     }
     if (fh.tmpshared) {
-        (f, err) = os.Open(fh.tmpfile);
+        var (f, err) = os.Open(fh.tmpfile);
         if (err != default!) {
             return (default!, err);
         }
-        var r = io.NewSectionReader(~f, fh.tmpoff, fh.Size);
-        return (new sectionReadCloser(r, f), default!);
+        var r = io.NewSectionReader(new os_FileжReaderAt(f), fh.tmpoff, fh.Size);
+        return (new sectionReadCloser(r, new os_FileжCloser(f)), default!);
     }
-    return os.Open(fh.tmpfile);
+    var (ᴛ1, ᴛ2) = os.Open(fh.tmpfile);
+    return (new os_FileжFile(ᴛ1), ᴛ2);
 }
 
 // File is an interface to access the file part of a multipart message.
@@ -299,14 +305,15 @@ internal static int64 /*size*/ mimeHeaderSize(textproto.MIMEHeader h) {
     io.Reader,
     io.ReaderAt,
     io.Seeker,
-    io.Closer
+    io.Closer,
+    io.ReadSeekCloser
 {
 }
 
 // helper types to turn a []byte into a File
 [GoType] partial struct sectionReadCloser {
     public partial ref ж<io_package.SectionReader> SectionReader { get; }
-    public partial ref io_package.Closer Closer { get; }
+    public io_package.Closer Closer;
 }
 
 internal static error Close(this sectionReadCloser rc) {

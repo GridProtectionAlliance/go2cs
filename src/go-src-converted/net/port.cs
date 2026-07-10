@@ -33,7 +33,9 @@ internal static (nint port, bool needsLookup) parsePort(@string service) {
         service = service[1..];
     }
     uint32 n = default!;
-    foreach (var (_, d) in service) {
+    foreach (var (_, rᴛ1) in service) {
+        var d = rᴛ1;
+
         if ((rune)'0' <= d && d <= (rune)'9'){
             d -= (rune)'0';
         } else {
@@ -44,7 +46,7 @@ internal static (nint port, bool needsLookup) parsePort(@string service) {
             break;
         }
         n *= 10;
-        var nn = n + ((uint32)d);
+        var nn = n + (uint32)d;
         if (nn < n || nn > max) {
             n = max;
             break;
@@ -52,12 +54,12 @@ internal static (nint port, bool needsLookup) parsePort(@string service) {
         n = nn;
     }
     if (!neg && n >= cutoff){
-        port = ((nint)(cutoff - 1));
+        port = (nint)(cutoff - 1);
     } else 
     if (neg && n > cutoff){
-        port = ((nint)cutoff);
+        port = (nint)cutoff;
     } else {
-        port = ((nint)n);
+        port = (nint)n;
     }
     if (neg) {
         port = -port;

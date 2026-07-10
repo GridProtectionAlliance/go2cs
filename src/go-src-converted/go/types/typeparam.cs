@@ -5,20 +5,22 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using atomic = sync.atomic_package;
-using sync;
+using atomic = global::go.sync.atomic_package;
+using global::go.sync;
+using token = global::go.go.token_package;
 
 partial class types_package {
 
 // Note: This is a uint32 rather than a uint64 because the
 // respective 64 bit atomic instructions are not available
 // on all platforms.
-internal static atomic.Uint32 lastID;
+internal static ж<atomic.Uint32> ᏑlastID = new(default(atomic.Uint32));
+internal static ref atomic.Uint32 lastID => ref ᏑlastID.Value;
 
 // nextID returns a value increasing monotonically by 1 with
 // each call, starting with 1. It may be called concurrently.
 internal static uint64 nextID() {
-    return ((uint64)lastID.Add(1));
+    return (uint64)ᏑlastID.Add(1);
 }
 
 // A TypeParam represents a type parameter type.
@@ -37,14 +39,15 @@ internal static uint64 nextID() {
 // The constraint argument can be nil, and set later via SetConstraint. If the
 // constraint is non-nil, it must be fully defined.
 public static ж<TypeParam> NewTypeParam(ж<TypeName> Ꮡobj, ΔType constraint) {
-    ref var obj = ref Ꮡobj.val;
+    ref var obj = ref Ꮡobj.Value;
 
-    return ((ж<Checker>)(default!)).val.newTypeParam(Ꮡobj, constraint);
+    return ((ж<Checker>)(default!)).newTypeParam(Ꮡobj, constraint);
 }
 
 // check may be nil
-[GoRecv] public static ж<TypeParam> newTypeParam(this ref Checker check, ж<TypeName> Ꮡobj, ΔType constraint) {
-    ref var obj = ref Ꮡobj.val;
+internal static ж<TypeParam> newTypeParam(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ΔType constraint) {
+    ref var check = ref Ꮡcheck.Value;
+    ref var obj = ref Ꮡobj.Value;
 
     // Always increment lastID, even if it is not used.
     ref var id = ref heap<uint64>(out var Ꮡid);
@@ -53,14 +56,14 @@ public static ж<TypeParam> NewTypeParam(ж<TypeName> Ꮡobj, ΔType constraint)
         check.nextID++;
         id = check.nextID;
     }
-    var typ = Ꮡ(new TypeParam(check: check, id: id, obj: obj, index: -1, bound: constraint));
+    var typ = Ꮡ(new TypeParam(check: Ꮡcheck, id: id, obj: Ꮡobj, index: -1, bound: constraint));
     if (obj.typ == default!) {
-        obj.typ = typ;
+        obj.typ = new TypeParamжΔType(typ);
     }
     // iface may mutate typ.bound, so we must ensure that iface() is called
     // at least once before the resulting TypeParam escapes.
     if (check != nil){
-        check.needsCleanup(~typ);
+        check.needsCleanup(new TypeParamжcleaner(typ));
     } else 
     if (constraint != default!) {
         typ.iface();
@@ -105,11 +108,13 @@ public static ж<TypeParam> NewTypeParam(ж<TypeName> Ꮡobj, ΔType constraint)
 //
 // [underlying type]: https://go.dev/ref/spec#Underlying_types.
 [GoRecv] public static ΔType Underlying(this ref TypeParam t) {
-    return ~t.iface();
+    return new InterfaceжΔType(t.iface());
 }
 
-[GoRecv] public static @string String(this ref TypeParam t) {
-    return TypeString(~t, default!);
+public static @string String(this ж<TypeParam> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return TypeString(new TypeParamжΔType(Ꮡt), default!);
 }
 
 // ----------------------------------------------------------------------------
@@ -125,17 +130,17 @@ public static ж<TypeParam> NewTypeParam(ж<TypeName> Ꮡobj, ΔType constraint)
     // determine constraint interface
     ж<Interface> ityp = default!;
     switch (under(bound).type()) {
-    case Basic.val u: {
-        if (!isValid(~u)) {
+    case ж<Basic> u: {
+        if (!isValid(new BasicжΔType(u))) {
             // error is reported elsewhere
-            return Ꮡ(emptyInterface);
+            return ᏑemptyInterface;
         }
         break;
     }
-    case Interface.val u: {
+    case ж<Interface> u: {
         if (isTypeParam(bound)) {
             // error is reported in Checker.collectTypeParams
-            return Ꮡ(emptyInterface);
+            return ᏑemptyInterface;
         }
         ityp = u;
         break;
@@ -143,18 +148,18 @@ public static ж<TypeParam> NewTypeParam(ж<TypeName> Ꮡobj, ΔType constraint)
     // If we don't have an interface, wrap constraint into an implicit interface.
     if (ityp == nil) {
         ityp = NewInterfaceType(default!, new ΔType[]{bound}.slice());
-        ityp.val.@implicit = true;
-        t.bound = ityp;
+        ityp.Value.@implicit = true;
+        t.bound = new InterfaceжΔType(ityp);
     }
     // update t.bound for next time (optimization)
     // compute type set if necessary
     if ((~ityp).tset == nil) {
         // pos is used for tracing output; start with the type parameter position.
-        tokenꓸPos pos = t.obj.pos;
+        tokenꓸPos pos = t.obj.Value.pos;
         // use the (original or possibly instantiated) type bound position if we have one
         {
             var n = asNamed(bound); if (n != nil) {
-                pos = (~n).obj.pos;
+                pos = n.Value.obj.Value.pos;
             }
         }
         computeInterfaceTypeSet(t.check, pos, ityp);

@@ -7,11 +7,12 @@ using context = context_package;
 using poll = @internal.poll_package;
 using windows = @internal.syscall.windows_package;
 using os = os_package;
-using runtime = runtime_package;
+using Δruntime = runtime_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.syscall;
+using time = time_package;
 
 partial class net_package {
 
@@ -52,8 +53,10 @@ internal static (ж<netFD>, error) newFD(syscallꓸHandle sysfd, nint family, ni
     return (ret, default!);
 }
 
-[GoRecv] internal static error init(this ref netFD fd) {
-    var (errcall, err) = fd.pfd.Init(fd.net, true);
+internal static error init(this ж<netFD> Ꮡfd) {
+    ref var fd = ref Ꮡfd.Value;
+
+    var (errcall, err) = Ꮡfd.of(netFD.Ꮡpfd).Init(fd.net, true);
     if (errcall != ""u8) {
         err = wrapSyscallError(errcall, err);
     }
@@ -61,12 +64,14 @@ internal static (ж<netFD>, error) newFD(syscallꓸHandle sysfd, nint family, ni
 }
 
 // Always returns nil for connected peer address result.
-[GoRecv] internal static (syscallꓸSockaddr, error) connect(this ref netFD fd, context.Context ctx, syscallꓸSockaddr la, syscallꓸSockaddr ra) => func((defer, _) => {
+internal static (syscallꓸSockaddr, error) connect(this ж<netFD> Ꮡfd, context.Context ctx, syscallꓸSockaddr la, syscallꓸSockaddr ra) => func<(syscallꓸSockaddr, error)>((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+
     // Do not need to call fd.writeLock here,
     // because fd is not yet accessible to user,
     // so no concurrent operations are possible.
     {
-        var err = fd.init(); if (err != default!) {
+        var err = Ꮡfd.init(); if (err != default!) {
             return (default!, err);
         }
     }
@@ -75,24 +80,22 @@ internal static (ж<netFD>, error) newFD(syscallꓸHandle sysfd, nint family, ni
         // If the context is already done, or if it has a nonzero deadline,
         // ensure that that is applied before the call to ConnectEx begins
         // so that we don't return spurious connections.
-        deferǃ(fd.pfd.SetWriteDeadline, noDeadline, defer);
+        deferǃ(Ꮡfd.of(netFD.Ꮡpfd).SetWriteDeadline, noDeadline, defer);
         if (ctx.Err() != default!){
-            fd.pfd.SetWriteDeadline(aLongTimeAgo);
+            Ꮡfd.of(netFD.Ꮡpfd).SetWriteDeadline(aLongTimeAgo);
         } else {
             {
                 var (deadline, ok) = ctx.Deadline(); if (ok && !deadline.IsZero()) {
-                    fd.pfd.SetWriteDeadline(deadline);
+                    Ꮡfd.of(netFD.Ꮡpfd).SetWriteDeadline(deadline);
                 }
             }
             var done = new channel<EmptyStruct>(1);
-            var stop = context.AfterFunc(ctx, 
-            var aLongTimeAgoʗ1 = aLongTimeAgo;
             var doneʗ1 = done;
-            () => {
+            var stop = context.AfterFunc(ctx, () => {
                 // Force the runtime's poller to immediately give
                 // up waiting for writability.
-                fd.pfd.SetWriteDeadline(aLongTimeAgoʗ1);
-                close(doneʗ1);
+                Ꮡfd.of(netFD.Ꮡpfd).SetWriteDeadline(aLongTimeAgo);
+                builtin.close(doneʗ1);
             });
             var doneʗ3 = done;
             var stopʗ1 = stop;
@@ -112,16 +115,15 @@ internal static (ж<netFD>, error) newFD(syscallꓸHandle sysfd, nint family, ni
     // ConnectEx windows API requires an unconnected, previously bound socket.
     if (la == default!) {
         switch (ra.type()) {
-        case ж<syscall.SockaddrInet4> : {
-            Ꮡla = new syscall.SockaddrInet4(nil); la = ref Ꮡla.val;
+        case ж<syscall.SockaddrInet4>: {
+            la = new syscall.SockaddrInet4жΔSockaddr(Ꮡ(new syscall.SockaddrInet4(nil)));
             break;
         }
-        case ж<syscall.SockaddrInet6> : {
-            Ꮡla = new syscall.SockaddrInet6(nil); la = ref Ꮡla.val;
+        case ж<syscall.SockaddrInet6>: {
+            la = new syscall.SockaddrInet6жΔSockaddr(Ꮡ(new syscall.SockaddrInet6(nil)));
             break;
         }
         default: {
-
             throw panic("unexpected type in connect");
             break;
         }}
@@ -134,23 +136,23 @@ internal static (ж<netFD>, error) newFD(syscallꓸHandle sysfd, nint family, ni
     }
     bool isloopback = default!;
     switch (ra.type()) {
-    case ж<syscall.SockaddrInet4> ra: {
-        isloopback = (~ra).Addr[0] == 127;
+    case ж<syscall.SockaddrInet4> raΔ1: {
+        isloopback = (~raΔ1).Addr[0] == 127;
         break;
     }
-    case ж<syscall.SockaddrInet6> ra: {
-        isloopback = (~ra).Addr == array<byte>(IPv6loopback);
+    case ж<syscall.SockaddrInet6> raΔ1: {
+        isloopback = (~raΔ1).Addr == new array<byte>(IPv6loopback, 16);
         break;
     }
     default: {
-        var ra = ra.type();
+        var raΔ1 = ra;
         throw panic("unexpected type in connect");
         break;
     }}
     if (isloopback) {
         // This makes ConnectEx() fails faster if the target port on the localhost
         // is not reachable, instead of waiting for 2s.
-        ref var params = ref heap<@internal.syscall.windows_package.TCP_INITIAL_RTO_PARAMETERS>(out var Ꮡparams);
+        ref var @params = ref heap<windows.TCP_INITIAL_RTO_PARAMETERS>(out var Ꮡparams);
         @params = new windows.TCP_INITIAL_RTO_PARAMETERS(
             Rtt: windows.TCP_INITIAL_RTO_UNSPECIFIED_RTT, // use the default or overridden by the Administrator
 
@@ -161,14 +163,14 @@ internal static (ж<netFD>, error) newFD(syscallꓸHandle sysfd, nint family, ni
             // In Windows 10.0.16299 TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS makes ConnectEx() fails instantly.
             @params.MaxSynRetransmissions = windows.TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS;
         }
-        ref var out = ref heap(new uint32(), out var Ꮡout);
+        ref var @out = ref heap(new uint32(), out var Ꮡout);
         // Don't abort the connection if WSAIoctl fails, as it is only an optimization.
         // If it fails reliably, we expect TestDialClosedPortFailFast to detect it.
-        _ = fd.pfd.WSAIoctl(windows.SIO_TCP_INITIAL_RTO, (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡ@params)), ((uint32)@unsafe.Sizeof(@params)), nil, 0, Ꮡ@out, nil, 0);
+        _ = Ꮡfd.of(netFD.Ꮡpfd).WSAIoctl(windows.SIO_TCP_INITIAL_RTO, (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡparams)), (uint32)@unsafe.Sizeof(@params), nil, 0, Ꮡout, nil, 0);
     }
     // Call ConnectEx API.
     {
-        var err = fd.pfd.ConnectEx(ra); if (err != default!) {
+        var err = Ꮡfd.of(netFD.Ꮡpfd).ConnectEx(ra); if (err != default!) {
             switch (ᐧ) {
             case ᐧ when ctx.Done().ꟷᐳ(out _): {
                 return (default!, mapErr(ctx.Err()));
@@ -184,32 +186,36 @@ internal static (ж<netFD>, error) newFD(syscallꓸHandle sysfd, nint family, ni
         }
     }
     // Refresh socket properties.
-    return (default!, os.NewSyscallError("setsockopt"u8, syscall.Setsockopt(fd.pfd.Sysfd, syscall.SOL_SOCKET, syscall.SO_UPDATE_CONNECT_CONTEXT, (ж<byte>)(uintptr)(((@unsafe.Pointer)(Ꮡfd.pfd.of(poll.FD.ᏑSysfd)))), ((int32)@unsafe.Sizeof(fd.pfd.Sysfd)))));
+    return (default!, os.NewSyscallError("setsockopt"u8, syscall.Setsockopt(fd.pfd.Sysfd, syscall.SOL_SOCKET, syscall.SO_UPDATE_CONNECT_CONTEXT, (ж<byte>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡfd.of(netFD.Ꮡpfd).of(poll.FD.ᏑSysfd)).Value)), (int32)@unsafe.Sizeof(fd.pfd.Sysfd))));
 });
 
-[GoRecv] internal static (int64, error) writeBuffers(this ref conn c, ж<Buffers> Ꮡv) {
-    ref var v = ref Ꮡv.val;
+internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> Ꮡv) {
+    ref var c = ref Ꮡc.Value;
+    ref var v = ref Ꮡv.Value;
 
-    if (!c.ok()) {
+    if (!Ꮡc.ok()) {
         return (0, syscall.EINVAL);
     }
     var (n, err) = c.fd.writeBuffers(Ꮡv);
     if (err != default!) {
-        return (n, new OpError(Op: "wsasend"u8, Net: c.fd.net, Source: c.fd.laddr, ΔAddr: c.fd.raddr, Err: err));
+        return (n, new OpErrorжerror(Ꮡ(new OpError(Op: "wsasend"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err))));
     }
     return (n, default!);
 }
 
-[GoRecv] internal static (int64, error) writeBuffers(this ref netFD fd, ж<Buffers> Ꮡbuf) {
-    ref var buf = ref Ꮡbuf.val;
+internal static (int64, error) writeBuffers(this ж<netFD> Ꮡfd, ж<Buffers> Ꮡbuf) {
+    ref var fd = ref Ꮡfd.Value;
+    ref var buf = ref Ꮡbuf.Value;
 
-    var (n, err) = fd.pfd.Writev((ж<slice<slice<byte>>>)(buf));
-    runtime.KeepAlive(fd);
+    var (n, err) = Ꮡfd.of(netFD.Ꮡpfd).Writev(Ꮡbuf.of(Buffers.Ꮡm_value));
+    Δruntime.KeepAlive(fd);
     return (n, wrapSyscallError("wsasend"u8, err));
 }
 
-[GoRecv] internal static (ж<netFD>, error) accept(this ref netFD fd) {
-    var (s, rawsa, rsan, errcall, err) = fd.pfd.Accept(() => sysSocket(fd.family, fd.sotype, 0));
+internal static (ж<netFD>, error) accept(this ж<netFD> Ꮡfd) {
+    ref var fd = ref Ꮡfd.Value;
+
+    var (s, rawsa, rsan, errcall, err) = Ꮡfd.of(netFD.Ꮡpfd).Accept(() => sysSocket(Ꮡfd.Value.family, Ꮡfd.Value.sotype, 0));
     if (err != default!) {
         if (errcall != ""u8) {
             err = wrapSyscallError(errcall, err);
@@ -217,26 +223,26 @@ internal static (ж<netFD>, error) newFD(syscallꓸHandle sysfd, nint family, ni
         return (default!, err);
     }
     // Associate our new socket with IOCP.
-    (netfd, err) = newFD(s, fd.family, fd.sotype, fd.net);
+    (var netfd, err) = newFD(s, fd.family, fd.sotype, fd.net);
     if (err != default!) {
         poll.CloseFunc(s);
         return (default!, err);
     }
     {
         var errΔ1 = netfd.init(); if (errΔ1 != default!) {
-            fd.Close();
+            Ꮡfd.Close();
             return (default!, errΔ1);
         }
     }
     // Get local and peer addr out of AcceptEx buffer.
-    ж<syscall.RawSockaddrAny> lrsa = default!;
-    ж<syscall.RawSockaddrAny> rrsa = default!;
+    ref var lrsa = ref heap<ж<syscall.RawSockaddrAny>>(out var Ꮡlrsa);
+    ref var rrsa = ref heap<ж<syscall.RawSockaddrAny>>(out var Ꮡrrsa);
     ref var llen = ref heap(new int32(), out var Ꮡllen);
     ref var rlen = ref heap(new int32(), out var Ꮡrlen);
     syscall.GetAcceptExSockaddrs((ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡ(rawsa, 0))),
-        0, rsan, rsan, Ꮡ(lrsa), Ꮡllen, Ꮡ(rrsa), Ꮡrlen);
-    (lsa, _) = lrsa.Sockaddr();
-    (rsa, _) = rrsa.Sockaddr();
+        0, rsan, rsan, Ꮡlrsa, Ꮡllen, Ꮡrrsa, Ꮡrlen);
+    var (lsa, _) = lrsa.Sockaddr();
+    var (rsa, _) = rrsa.Sockaddr();
     netfd.setAddr(netfd.addrFunc()(lsa), netfd.addrFunc()(rsa));
     return (netfd, default!);
 }

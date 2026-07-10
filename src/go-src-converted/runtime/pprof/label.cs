@@ -7,7 +7,7 @@ using context = context_package;
 using fmt = fmt_package;
 using slices = slices_package;
 using strings = strings_package;
-using ꓸꓸꓸ@string = Span<@string>;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class pprof_package {
 
@@ -26,17 +26,20 @@ partial class pprof_package {
 }
 
 internal static labelMap labelValue(context.Context ctx) {
-    var (labels, _) = ctx.Value(new labelContextKey(nil))._<labelMap.val>(ᐧ);
+    var (labels, _) = ctx.Value(new labelContextKey(nil))._<ж<labelMap>>(ᐧ);
     if (labels == nil) {
         return ((labelMap)default!);
     }
-    return labels.val;
+    return labels.ValueSlot;
 }
-/* visitMapType: map[string]string */
+
+[GoType("map[@string, @string]")] partial struct labelMap;
 
 // String satisfies Stringer and returns key, value pairs in a consistent
 // order.
-[GoRecv] internal static @string String(this ref labelMap l) {
+internal static @string String(this ж<labelMap> Ꮡl) {
+    ref var l = ref Ꮡl.Value;
+
     if (l == nil) {
         return ""u8;
     }
@@ -44,15 +47,16 @@ internal static labelMap labelValue(context.Context ctx) {
     foreach (var (k, v) in l) {
         keyVals = append(keyVals, fmt.Sprintf("%q:%q"u8, k, v));
     }
-    slices.Sort(keyVals);
-    return "{"u8 + strings.Join(keyVals, ", "u8) + "}"u8;
+    slices.Sort<slice<@string>, @string>(keyVals);
+    return "{"u8 + strings_package.Join(keyVals, ", "u8) + "}"u8;
 }
 
 // WithLabels returns a new [context.Context] with the given labels added.
 // A label overwrites a prior label with the same key.
 public static context.Context WithLabels(context.Context ctx, LabelSet labels) {
     var parentLabels = labelValue(ctx);
-    var childLabels = new labelMap(len(parentLabels));
+    ref var childLabels = ref heap<labelMap>(out var ᏑchildLabels);
+    childLabels = new labelMap(len(parentLabels));
     // TODO(matloob): replace the map implementation with something
     // more efficient so creating a child context WithLabels doesn't need
     // to clone the map.
@@ -62,7 +66,7 @@ public static context.Context WithLabels(context.Context ctx, LabelSet labels) {
     foreach (var (_, label) in labels.list) {
         childLabels[label.key] = label.value;
     }
-    return context.WithValue(ctx, new labelContextKey(nil), Ꮡ(childLabels));
+    return context.WithValue(ctx, new labelContextKey(nil), ᏑchildLabels);
 }
 
 // Labels takes an even number of strings representing key-value pairs
@@ -71,7 +75,7 @@ public static context.Context WithLabels(context.Context ctx, LabelSet labels) {
 // Currently only the CPU and goroutine profiles utilize any labels
 // information.
 // See https://golang.org/issue/23458 for details.
-public static LabelSet Labels(params ꓸꓸꓸ@string argsʗp) {
+public static LabelSet Labels(params ꓸꓸꓸstring argsʗp) {
     var args = argsʗp.slice();
 
     if (len(args) % 2 != 0) {
@@ -88,8 +92,7 @@ public static LabelSet Labels(params ꓸꓸꓸ@string argsʗp) {
 // whether that label exists.
 public static (@string, bool) Label(context.Context ctx, @string key) {
     var ctxLabels = labelValue(ctx);
-    @string v = ctxLabels[key];
-    var ok = ctxLabels[key];
+    var (v, ok) = ctxLabels[key, ꟷ];
     return (v, ok);
 }
 

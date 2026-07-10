@@ -38,7 +38,22 @@ partial class runtime_package {
     internal bool enablegc;
 }
 
-internal static mstats memstats;
+internal static ж<mstats> Ꮡmemstats = new(default(mstats));
+internal static ref mstats memstats => ref Ꮡmemstats.Value;
+
+[GoType("dyn")] partial struct MemStats_BySize {
+    // Size is the maximum byte size of an object in this
+    // size class.
+    public uint32 Size;
+    // Mallocs is the cumulative count of heap objects
+    // allocated in this size class. The cumulative bytes
+    // of allocation is Size*Mallocs. The number of live
+    // objects in this size class is Mallocs - Frees.
+    public uint64 Mallocs;
+    // Frees is the cumulative count of heap objects freed
+    // in this size class.
+    public uint64 Frees;
+}
 
 // A MemStats records statistics about the memory allocator.
 [GoType] partial struct MemStats {
@@ -275,7 +290,7 @@ internal static mstats memstats;
     // BySize[N-1].Size < S ≤ BySize[N].Size.
     //
     // This does not report allocations larger than BySize[60].Size.
-    public array<struct{Size uint32; Mallocs uint64; Frees uint64}> BySize = new(61);
+    public array<MemStats_BySize> BySize = new(61);
 }
 
 [GoInit] internal static void initΔ4() {
@@ -302,7 +317,7 @@ internal static mstats memstats;
 // which is a snapshot as of the most recently completed garbage
 // collection cycle.
 public static void ReadMemStats(ж<MemStats> Ꮡm) {
-    ref var m = ref Ꮡm.val;
+    ref var m = ref Ꮡm.Value;
 
     _ = m.Alloc;
     // nil check test before we switch stacks, see issue 61158
@@ -328,7 +343,7 @@ internal static bool doubleCheckReadMemStats = false;
 //
 // The world must be stopped.
 internal static void readmemstats_m(ж<MemStats> Ꮡstats) {
-    ref var stats = ref Ꮡstats.val;
+    ref var stats = ref Ꮡstats.Value;
 
     assertWorldStopped();
     // Flush mcaches to mcentral before doing anything else.
@@ -345,24 +360,24 @@ internal static void readmemstats_m(ж<MemStats> Ꮡstats) {
     // plus amount of alive heap memory.
     // Collect consistent stats, which are the source-of-truth in some cases.
     ref var consStats = ref heap(new heapStatsDelta(), out var ᏑconsStats);
-    memstats.heapStats.unsafeRead(ᏑconsStats);
+    Ꮡmemstats.of(mstats.ᏑheapStats).unsafeRead(ᏑconsStats);
     // Collect large allocation stats.
     var totalAlloc = consStats.largeAlloc;
     var nMalloc = consStats.largeAllocCount;
     var totalFree = consStats.largeFree;
     var nFree = consStats.largeFreeCount;
     // Collect per-sizeclass stats.
-    array<struct{Size uint32; Mallocs uint64; Frees uint64}> bySize = new(68); /* _NumSizeClasses */
+    array<readmemstats_m_bySize> bySize = new(68); /* _NumSizeClasses */
     foreach (var (i, _) in bySize) {
-        bySize[i].Size = ((uint32)class_to_size[i]);
+        bySize[i].Size = (uint32)class_to_size[i];
         // Malloc stats.
         var a = consStats.smallAllocCount[i];
-        totalAlloc += a * ((uint64)class_to_size[i]);
+        totalAlloc += a * (uint64)class_to_size[i];
         nMalloc += a;
         bySize[i].Mallocs = a;
         // Free stats.
         var f = consStats.smallFreeCount[i];
-        totalFree += f * ((uint64)class_to_size[i]);
+        totalFree += f * (uint64)class_to_size[i];
         nFree += f;
         bySize[i].Frees = f;
     }
@@ -375,11 +390,11 @@ internal static void readmemstats_m(ж<MemStats> Ꮡstats) {
     nFree += consStats.tinyAllocCount;
     nMalloc += consStats.tinyAllocCount;
     // Calculate derived stats.
-    var stackInUse = ((uint64)consStats.inStacks);
-    var gcWorkBufInUse = ((uint64)consStats.inWorkBufs);
-    var gcProgPtrScalarBitsInUse = ((uint64)consStats.inPtrScalarBits);
-    var totalMapped = gcController.heapInUse.load() + gcController.heapFree.load() + gcController.heapReleased.load() + memstats.stacks_sys.load() + memstats.mspan_sys.load() + memstats.mcache_sys.load() + memstats.buckhash_sys.load() + memstats.gcMiscSys.load() + memstats.other_sys.load() + stackInUse + gcWorkBufInUse + gcProgPtrScalarBitsInUse;
-    var heapGoal = gcController.heapGoal();
+    var stackInUse = (uint64)consStats.inStacks;
+    var gcWorkBufInUse = (uint64)consStats.inWorkBufs;
+    var gcProgPtrScalarBitsInUse = (uint64)consStats.inPtrScalarBits;
+    var totalMapped = ᏑgcController.of(gcControllerState.ᏑheapInUse).load() + ᏑgcController.of(gcControllerState.ᏑheapFree).load() + ᏑgcController.of(gcControllerState.ᏑheapReleased).load() + Ꮡmemstats.of(mstats.Ꮡstacks_sys).load() + Ꮡmemstats.of(mstats.Ꮡmspan_sys).load() + Ꮡmemstats.of(mstats.Ꮡmcache_sys).load() + Ꮡmemstats.of(mstats.Ꮡbuckhash_sys).load() + Ꮡmemstats.of(mstats.ᏑgcMiscSys).load() + Ꮡmemstats.of(mstats.Ꮡother_sys).load() + stackInUse + gcWorkBufInUse + gcProgPtrScalarBitsInUse;
+    var heapGoal = ᏑgcController.heapGoal();
     if (doubleCheckReadMemStats) {
         // Only check this if we're debugging. It would be bad to crash an application
         // just because the debugging stats are wrong. We mostly rely on tests to catch
@@ -399,45 +414,45 @@ internal static void readmemstats_m(ж<MemStats> Ꮡstats) {
         // Prevent sysmon and the tracer from skewing the stats since they can
         // act without synchronizing with a STW. See #64401.
         @lock(Ꮡsched.of(schedt.Ꮡsysmonlock));
-        @lock(ᏑΔtrace.of(atomic.Int32; seqGC uint64; minPageHeapAddr uint64; debugMalloc bool}.Ꮡlock));
-        if (gcController.heapInUse.load() != ((uint64)consStats.inHeap)) {
-            print("runtime: heapInUse=", gcController.heapInUse.load(), "\n");
+        @lock(ᏑΔtrace.of(Δtraceᴛ1.Ꮡlock));
+        if (ᏑgcController.of(gcControllerState.ᏑheapInUse).load() != (uint64)consStats.inHeap) {
+            print("runtime: heapInUse=", ᏑgcController.of(gcControllerState.ᏑheapInUse).load(), "\n");
             print("runtime: consistent value=", consStats.inHeap, "\n");
             @throw("heapInUse and consistent stats are not equal"u8);
         }
-        if (gcController.heapReleased.load() != ((uint64)consStats.released)) {
-            print("runtime: heapReleased=", gcController.heapReleased.load(), "\n");
+        if (ᏑgcController.of(gcControllerState.ᏑheapReleased).load() != (uint64)consStats.released) {
+            print("runtime: heapReleased=", ᏑgcController.of(gcControllerState.ᏑheapReleased).load(), "\n");
             print("runtime: consistent value=", consStats.released, "\n");
             @throw("heapReleased and consistent stats are not equal"u8);
         }
-        var heapRetained = gcController.heapInUse.load() + gcController.heapFree.load();
-        var consRetained = ((uint64)(consStats.committed - consStats.inStacks - consStats.inWorkBufs - consStats.inPtrScalarBits));
+        var heapRetained = ᏑgcController.of(gcControllerState.ᏑheapInUse).load() + ᏑgcController.of(gcControllerState.ᏑheapFree).load();
+        var consRetained = (uint64)(consStats.committed - consStats.inStacks - consStats.inWorkBufs - consStats.inPtrScalarBits);
         if (heapRetained != consRetained) {
             print("runtime: global value=", heapRetained, "\n");
             print("runtime: consistent value=", consRetained, "\n");
             @throw("measures of the retained heap are not equal"u8);
         }
-        if (gcController.totalAlloc.Load() != totalAlloc) {
-            print("runtime: totalAlloc=", gcController.totalAlloc.Load(), "\n");
+        if (ᏑgcController.of(gcControllerState.ᏑtotalAlloc).Load() != totalAlloc) {
+            print("runtime: totalAlloc=", ᏑgcController.of(gcControllerState.ᏑtotalAlloc).Load(), "\n");
             print("runtime: consistent value=", totalAlloc, "\n");
             @throw("totalAlloc and consistent stats are not equal"u8);
         }
-        if (gcController.totalFree.Load() != totalFree) {
-            print("runtime: totalFree=", gcController.totalFree.Load(), "\n");
+        if (ᏑgcController.of(gcControllerState.ᏑtotalFree).Load() != totalFree) {
+            print("runtime: totalFree=", ᏑgcController.of(gcControllerState.ᏑtotalFree).Load(), "\n");
             print("runtime: consistent value=", totalFree, "\n");
             @throw("totalFree and consistent stats are not equal"u8);
         }
         // Also check that mappedReady lines up with totalMapped - released.
         // This isn't really the same type of "make sure consistent stats line up" situation,
         // but this is an opportune time to check.
-        if (gcController.mappedReady.Load() != totalMapped - ((uint64)consStats.released)) {
-            print("runtime: mappedReady=", gcController.mappedReady.Load(), "\n");
+        if (ᏑgcController.of(gcControllerState.ᏑmappedReady).Load() != totalMapped - (uint64)consStats.released) {
+            print("runtime: mappedReady=", ᏑgcController.of(gcControllerState.ᏑmappedReady).Load(), "\n");
             print("runtime: totalMapped=", totalMapped, "\n");
-            print("runtime: released=", ((uint64)consStats.released), "\n");
-            print("runtime: totalMapped-released=", totalMapped - ((uint64)consStats.released), "\n");
+            print("runtime: released=", (uint64)consStats.released, "\n");
+            print("runtime: totalMapped-released=", totalMapped - (uint64)consStats.released, "\n");
             @throw("mappedReady and other memstats are not equal"u8);
         }
-        unlock(ᏑΔtrace.of(atomic.Int32; seqGC uint64; minPageHeapAddr uint64; debugMalloc bool}.Ꮡlock));
+        unlock(ᏑΔtrace.of(Δtraceᴛ1.Ꮡlock));
         unlock(Ꮡsched.of(schedt.Ꮡsysmonlock));
     }
     // We've calculated all the values we need. Now, populate stats.
@@ -447,7 +462,7 @@ internal static void readmemstats_m(ж<MemStats> Ꮡstats) {
     stats.Mallocs = nMalloc;
     stats.Frees = nFree;
     stats.HeapAlloc = totalAlloc - totalFree;
-    stats.HeapSys = gcController.heapInUse.load() + gcController.heapFree.load() + gcController.heapReleased.load();
+    stats.HeapSys = ᏑgcController.of(gcControllerState.ᏑheapInUse).load() + ᏑgcController.of(gcControllerState.ᏑheapFree).load() + ᏑgcController.of(gcControllerState.ᏑheapReleased).load();
     // By definition, HeapIdle is memory that was mapped
     // for the heap but is not currently used to hold heap
     // objects. It also specifically is memory that can be
@@ -464,24 +479,24 @@ internal static void readmemstats_m(ж<MemStats> Ꮡstats) {
     // HeapIdle = sys - stacks_inuse - gcWorkBufInUse - gcProgPtrScalarBitsInUse - heapInUse
     //
     // => HeapIdle = HeapSys - heapInUse = heapFree + heapReleased
-    stats.HeapIdle = gcController.heapFree.load() + gcController.heapReleased.load();
-    stats.HeapInuse = gcController.heapInUse.load();
-    stats.HeapReleased = gcController.heapReleased.load();
+    stats.HeapIdle = ᏑgcController.of(gcControllerState.ᏑheapFree).load() + ᏑgcController.of(gcControllerState.ᏑheapReleased).load();
+    stats.HeapInuse = ᏑgcController.of(gcControllerState.ᏑheapInUse).load();
+    stats.HeapReleased = ᏑgcController.of(gcControllerState.ᏑheapReleased).load();
     stats.HeapObjects = nMalloc - nFree;
     stats.StackInuse = stackInUse;
     // memstats.stacks_sys is only memory mapped directly for OS stacks.
     // Add in heap-allocated stack memory for user consumption.
-    stats.StackSys = stackInUse + memstats.stacks_sys.load();
-    stats.MSpanInuse = ((uint64)mheap_.spanalloc.inuse);
-    stats.MSpanSys = memstats.mspan_sys.load();
-    stats.MCacheInuse = ((uint64)mheap_.cachealloc.inuse);
-    stats.MCacheSys = memstats.mcache_sys.load();
-    stats.BuckHashSys = memstats.buckhash_sys.load();
+    stats.StackSys = stackInUse + Ꮡmemstats.of(mstats.Ꮡstacks_sys).load();
+    stats.MSpanInuse = (uint64)mheap_.spanalloc.inuse;
+    stats.MSpanSys = Ꮡmemstats.of(mstats.Ꮡmspan_sys).load();
+    stats.MCacheInuse = (uint64)mheap_.cachealloc.inuse;
+    stats.MCacheSys = Ꮡmemstats.of(mstats.Ꮡmcache_sys).load();
+    stats.BuckHashSys = Ꮡmemstats.of(mstats.Ꮡbuckhash_sys).load();
     // MemStats defines GCSys as an aggregate of all memory related
     // to the memory management system, but we track this memory
     // at a more granular level in the runtime.
-    stats.GCSys = memstats.gcMiscSys.load() + gcWorkBufInUse + gcProgPtrScalarBitsInUse;
-    stats.OtherSys = memstats.other_sys.load();
+    stats.GCSys = Ꮡmemstats.of(mstats.ᏑgcMiscSys).load() + gcWorkBufInUse + gcProgPtrScalarBitsInUse;
+    stats.OtherSys = Ꮡmemstats.of(mstats.Ꮡother_sys).load();
     stats.NextGC = heapGoal;
     stats.LastGC = memstats.last_gc_unix;
     stats.PauseTotalNs = memstats.pause_total_ns;
@@ -500,7 +515,7 @@ internal static void readmemstats_m(ж<MemStats> Ꮡstats) {
 
 //go:linkname readGCStats runtime/debug.readGCStats
 internal static void readGCStats(ж<slice<uint64>> Ꮡpauses) {
-    ref var pauses = ref Ꮡpauses.val;
+    ref var pauses = ref Ꮡpauses.Value;
 
     systemstack(() => {
         readGCStats_m(Ꮡpauses);
@@ -512,7 +527,7 @@ internal static void readGCStats(ж<slice<uint64>> Ꮡpauses) {
 //
 //go:systemstack
 internal static void readGCStats_m(ж<slice<uint64>> Ꮡpauses) {
-    ref var pauses = ref Ꮡpauses.val;
+    ref var pauses = ref Ꮡpauses.Value;
 
     var Δp = pauses;
     // Calling code in runtime/debug should make the slice large enough.
@@ -522,22 +537,22 @@ internal static void readGCStats_m(ж<slice<uint64>> Ꮡpauses) {
     // Pass back: pauses, pause ends, last gc (absolute time), number of gc, total pause ns.
     @lock(Ꮡmheap_.of(mheap.Ꮡlock));
     var n = memstats.numgc;
-    if (n > ((uint32)len(memstats.pause_ns))) {
-        n = ((uint32)len(memstats.pause_ns));
+    if (n > (uint32)len(memstats.pause_ns)) {
+        n = (uint32)len(memstats.pause_ns);
     }
     // The pause buffer is circular. The most recent pause is at
     // pause_ns[(numgc-1)%len(pause_ns)], and then backward
     // from there to go back farther in time. We deliver the times
     // most recent first (in p[0]).
     Δp = Δp[..(int)(cap(Δp))];
-    for (var i = ((uint32)0); i < n; i++) {
-        var j = (memstats.numgc - 1 - i) % ((uint32)len(memstats.pause_ns));
-        Δp[i] = memstats.pause_ns[j];
-        Δp[n + i] = memstats.pause_end[j];
+    for (var i = (uint32)0; i < n; i++) {
+        var j = (memstats.numgc - 1 - i) % (uint32)len(memstats.pause_ns);
+        Δp[(nint)(i)] = memstats.pause_ns[(nint)(j)];
+        Δp[(nint)(n + i)] = memstats.pause_end[(nint)(j)];
     }
-    Δp[n + n] = memstats.last_gc_unix;
-    Δp[n + n + 1] = ((uint64)memstats.numgc);
-    Δp[n + n + 2] = memstats.pause_total_ns;
+    Δp[(nint)(n + n)] = memstats.last_gc_unix;
+    Δp[(nint)(n + n + 1)] = (uint64)memstats.numgc;
+    Δp[(nint)(n + n + 2)] = memstats.pause_total_ns;
     unlock(Ꮡmheap_.of(mheap.Ꮡlock));
     pauses = Δp[..(int)(n + n + 3)];
 }
@@ -550,7 +565,7 @@ internal static void readGCStats_m(ж<slice<uint64>> Ꮡpauses) {
 internal static void flushmcache(nint i) {
     assertWorldStopped();
     var Δp = allp[i];
-    var c = Δp.val.mcache;
+    var c = Δp.Value.mcache;
     if (c == nil) {
         return;
     }
@@ -565,7 +580,7 @@ internal static void flushmcache(nint i) {
 //go:nowritebarrier
 internal static void flushallmcaches() {
     assertWorldStopped();
-    for (nint i = 0; i < ((nint)gomaxprocs); i++) {
+    for (nint i = 0; i < (nint)gomaxprocs; i++) {
         flushmcache(i);
     }
 }
@@ -577,8 +592,10 @@ internal static void flushallmcaches() {
 // Must be nosplit as it is called in runtime initialization, e.g. newosproc0.
 //
 //go:nosplit
-[GoRecv] internal static uint64 load(this ref sysMemStat s) {
-    return atomic.Load64(((ж<uint64>)s));
+internal static uint64 load(this ж<sysMemStat> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    return atomic.Load64(Ꮡ((uint64)(s)));
 }
 
 // add atomically adds the sysMemStat by n.
@@ -586,9 +603,11 @@ internal static void flushallmcaches() {
 // Must be nosplit as it is called in runtime initialization, e.g. newosproc0.
 //
 //go:nosplit
-[GoRecv] internal static void add(this ref sysMemStat s, int64 n) {
-    var val = atomic.Xadd64(((ж<uint64>)s), n);
-    if ((n > 0 && ((int64)val) < n) || (n < 0 && ((int64)val) + n < n)) {
+internal static void add(this ж<sysMemStat> Ꮡs, int64 n) {
+    ref var s = ref Ꮡs.Value;
+
+    var val = atomic.Xadd64(Ꮡ((uint64)(s)), n);
+    if ((n > 0 && (int64)val < n) || (n < 0 && (int64)val + n < n)) {
         print("runtime: val=", val, " n=", n, "\n");
         @throw("sysMemStat overflow"u8);
     }
@@ -624,7 +643,7 @@ internal static void flushallmcaches() {
 
 // merge adds in the deltas from b into a.
 [GoRecv] internal static void merge(this ref heapStatsDelta a, ж<heapStatsDelta> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     a.committed += b.committed;
     a.released += b.released;
@@ -677,7 +696,7 @@ internal static void flushallmcaches() {
     internal array<heapStatsDelta> stats = new(3);
     // gen represents the current index into which writers
     // are writing, and can take on the value of 0, 1, or 2.
-    internal @internal.runtime.atomic_package.Uint32 gen;
+    internal atomic.Uint32 gen;
     // noPLock is intended to provide mutual exclusion for updating
     // stats when no P is available. It does not block other writers
     // with a P, only other writers without a P and the reader. Because
@@ -703,20 +722,22 @@ internal static void flushallmcaches() {
 // function.
 //
 //go:nosplit
-[GoRecv] internal static ж<heapStatsDelta> acquire(this ref consistentHeapStats m) {
+internal static ж<heapStatsDelta> acquire(this ж<consistentHeapStats> Ꮡm) {
+    ref var m = ref Ꮡm.Value;
+
     {
         var pp = (~(~getg()).m).p.ptr(); if (pp != nil){
-            var seq = (~pp).statsSeq.Add(1);
+            var seq = pp.of(runtime_package.Δp.ᏑstatsSeq).Add(1);
             if (seq % 2 == 0) {
                 // Should have been incremented to odd.
                 print("runtime: seq=", seq, "\n");
                 @throw("bad sequence number"u8);
             }
         } else {
-            @lock(Ꮡ(m.noPLock));
+            @lock(Ꮡm.of(consistentHeapStats.ᏑnoPLock));
         }
     }
-    var gen = m.gen.Load() % 3;
+    var gen = Ꮡm.of(consistentHeapStats.Ꮡgen).Load() % 3;
     return Ꮡ(m.stats[gen]);
 }
 
@@ -734,17 +755,19 @@ internal static void flushallmcaches() {
 // before this operation has completed.
 //
 //go:nosplit
-[GoRecv] internal static void release(this ref consistentHeapStats m) {
+internal static void release(this ж<consistentHeapStats> Ꮡm) {
+    ref var m = ref Ꮡm.Value;
+
     {
         var pp = (~(~getg()).m).p.ptr(); if (pp != nil){
-            var seq = (~pp).statsSeq.Add(1);
+            var seq = pp.of(runtime_package.Δp.ᏑstatsSeq).Add(1);
             if (seq % 2 != 0) {
                 // Should have been incremented to even.
                 print("runtime: seq=", seq, "\n");
                 @throw("bad sequence number"u8);
             }
         } else {
-            unlock(Ꮡ(m.noPLock));
+            unlock(Ꮡm.of(consistentHeapStats.ᏑnoPLock));
         }
     }
 }
@@ -754,11 +777,9 @@ internal static void flushallmcaches() {
 // Unsafe because it does so without any synchronization. The
 // world must be stopped.
 [GoRecv] internal static void unsafeRead(this ref consistentHeapStats m, ж<heapStatsDelta> Ꮡout) {
-    ref var @out = ref Ꮡout.val;
+    ref var @out = ref Ꮡout.Value;
 
     assertWorldStopped();
-    ref var i = ref heap(new nint(), out var Ꮡi);
-
     foreach (var (i, _) in m.stats) {
         @out.merge(Ꮡ(m.stats[i]));
     }
@@ -782,8 +803,9 @@ internal static void flushallmcaches() {
 //
 // Not safe to call concurrently. The world must be stopped
 // or metricsSema must be held.
-[GoRecv] internal static void read(this ref consistentHeapStats m, ж<heapStatsDelta> Ꮡout) {
-    ref var @out = ref Ꮡout.val;
+internal static void read(this ж<consistentHeapStats> Ꮡm, ж<heapStatsDelta> Ꮡout) {
+    ref var m = ref Ꮡm.Value;
+    ref var @out = ref Ꮡout.Value;
 
     // Getting preempted after this point is not safe because
     // we read allp. We need to make sure a STW can't happen
@@ -792,27 +814,26 @@ internal static void flushallmcaches() {
     // Get the current generation. We can be confident that this
     // will not change since read is serialized and is the only
     // one that modifies currGen.
-    var currGen = m.gen.Load();
-    ref var prevGen = ref heap<uint32>(out var ᏑprevGen);
-    prevGen = currGen - 1;
+    var currGen = Ꮡm.of(consistentHeapStats.Ꮡgen).Load();
+    var prevGen = currGen - 1;
     if (currGen == 0) {
         prevGen = 2;
     }
     // Prevent writers without a P from writing while we update gen.
-    @lock(Ꮡ(m.noPLock));
+    @lock(Ꮡm.of(consistentHeapStats.ᏑnoPLock));
     // Rotate gen, effectively taking a snapshot of the state of
     // these statistics at the point of the exchange by moving
     // writers to the next set of deltas.
     //
     // This exchange is safe to do because we won't race
     // with anyone else trying to update this value.
-    m.gen.Swap((currGen + 1) % 3);
+    Ꮡm.of(consistentHeapStats.Ꮡgen).Swap((currGen + 1) % 3);
     // Allow P-less writers to continue. They'll be writing to the
     // next generation now.
-    unlock(Ꮡ(m.noPLock));
+    unlock(Ꮡm.of(consistentHeapStats.ᏑnoPLock));
     foreach (var (_, Δp) in allp) {
         // Spin until there are no more writers.
-        while ((~Δp).statsSeq.Load() % 2 != 0) {
+        while (Δp.of(runtime_package.Δp.ᏑstatsSeq).Load() % 2 != 0) {
         }
     }
     // At this point we've observed that each sequence
@@ -822,10 +843,10 @@ internal static void flushallmcaches() {
     // Perform our responsibilities and free up
     // stats[prevGen] for the next time we want to take
     // a snapshot.
-    m.stats[currGen].merge(Ꮡ(m.stats[prevGen]));
-    m.stats[prevGen] = new heapStatsDelta(nil);
+    m.stats[(nint)(currGen)].merge(Ꮡ(m.stats[prevGen]));
+    m.stats[(nint)(prevGen)] = new heapStatsDelta(nil);
     // Finally, copy out the complete delta.
-    @out = m.stats[currGen];
+    @out = m.stats[(nint)(currGen)];
     releasem(mp);
 }
 
@@ -852,7 +873,7 @@ internal static void flushallmcaches() {
 // not work.stwprocs, since this number must be comparable to a total time computed
 // from GOMAXPROCS.
 [GoRecv] internal static void accumulateGCPauseTime(this ref cpuStats s, int64 dt, int32 maxProcs) {
-    var cpu = dt * ((int64)maxProcs);
+    var cpu = dt * (int64)maxProcs;
     s.GCPauseTime += cpu;
     s.GCTotalTime += cpu;
 }
@@ -875,15 +896,15 @@ internal static void flushallmcaches() {
     if (gcMarkPhase) {
         // N.B. These stats may have stale values if the GC is not
         // currently in the mark phase.
-        markAssistCpu = gcController.assistTime.Load();
-        markDedicatedCpu = gcController.dedicatedMarkTime.Load();
-        markFractionalCpu = gcController.fractionalMarkTime.Load();
-        markIdleCpu = gcController.idleMarkTime.Load();
+        markAssistCpu = ᏑgcController.of(gcControllerState.ᏑassistTime).Load();
+        markDedicatedCpu = ᏑgcController.of(gcControllerState.ᏑdedicatedMarkTime).Load();
+        markFractionalCpu = ᏑgcController.of(gcControllerState.ᏑfractionalMarkTime).Load();
+        markIdleCpu = ᏑgcController.of(gcControllerState.ᏑidleMarkTime).Load();
     }
     // The rest of the stats below are either derived from the above or
     // are reset on each mark termination.
-    var scavAssistCpu = Δscavenge.assistTime.Load();
-    var scavBgCpu = Δscavenge.backgroundTime.Load();
+    var scavAssistCpu = ᏑΔscavenge.of(runtime_package.Δscavengeᴛ1.ᏑassistTime).Load();
+    var scavBgCpu = ᏑΔscavenge.of(runtime_package.Δscavengeᴛ1.ᏑbackgroundTime).Load();
     // Update cumulative GC CPU stats.
     s.GCAssistTime += markAssistCpu;
     s.GCDedicatedTime += markDedicatedCpu + markFractionalCpu;
@@ -894,8 +915,8 @@ internal static void flushallmcaches() {
     s.ScavengeBgTime += scavBgCpu;
     s.ScavengeTotalTime += scavAssistCpu + scavBgCpu;
     // Update total CPU.
-    s.TotalTime = sched.totaltime + (now - sched.procresizetime) * ((int64)gomaxprocs);
-    s.IdleTime += sched.idleTime.Load();
+    s.TotalTime = sched.totaltime + (now - sched.procresizetime) * (int64)gomaxprocs;
+    s.IdleTime += Ꮡsched.of(schedt.ᏑidleTime).Load();
     // Compute userTime. We compute this indirectly as everything that's not the above.
     //
     // Since time spent in _Pgcstop is covered by gcPauseTime, and time spent in _Pidle

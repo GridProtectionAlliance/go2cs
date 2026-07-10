@@ -6,11 +6,12 @@ namespace go.crypto;
 // This file implements the RSASSA-PSS signature scheme according to RFC 8017.
 using bytes = bytes_package;
 using crypto = crypto_package;
-using boring = crypto.@internal.boring_package;
+using boring = go.crypto.@internal.boring_package;
 using errors = errors_package;
 using hash = hash_package;
 using io = io_package;
-using crypto.@internal;
+using go.crypto.@internal;
+using go.math;
 
 partial class rsa_package {
 
@@ -26,9 +27,9 @@ partial class rsa_package {
 //
 //     emLen = dbLen + hLen + 1 = psLen + sLen + hLen + 2
 //
-internal static (slice<byte>, error) emsaPSSEncode(slice<byte> mHash, nint emBits, slice<byte> salt, hash.Hash hash) {
+internal static (slice<byte>, error) emsaPSSEncode(slice<byte> mHash, nint emBits, slice<byte> salt, hash.Hash hashΔ1) {
     // See RFC 8017, Section 9.1.1.
-    nint hLen = hash.Size();
+    nint hLen = hashΔ1.Size();
     nint sLen = len(salt);
     nint emLen = (emBits + 7) / 8;
     // 1.  If the length of M is greater than the input limitation for the
@@ -58,34 +59,34 @@ internal static (slice<byte>, error) emsaPSSEncode(slice<byte> mHash, nint emBit
     //
     // 6.  Let H = Hash(M'), an octet string of length hLen.
     array<byte> prefix = new(8);
-    hash.Write(prefix[..]);
-    hash.Write(mHash);
-    hash.Write(salt);
-    h = hash.Sum(h[..0]);
-    hash.Reset();
+    hashΔ1.Write(prefix[..]);
+    hashΔ1.Write(mHash);
+    hashΔ1.Write(salt);
+    h = hashΔ1.Sum(h[..0]);
+    hashΔ1.Reset();
     // 7.  Generate an octet string PS consisting of emLen - sLen - hLen - 2
     //     zero octets. The length of PS may be 0.
     //
     // 8.  Let DB = PS || 0x01 || salt; DB is an octet string of length
     //     emLen - hLen - 1.
-    db[psLen] = 1;
+    db[psLen] = 0x01;
     copy(db[(int)(psLen + 1)..], salt);
     // 9.  Let dbMask = MGF(H, emLen - hLen - 1).
     //
     // 10. Let maskedDB = DB \xor dbMask.
-    mgf1XOR(db, hash, h);
+    mgf1XOR(db, hashΔ1, h);
     // 11. Set the leftmost 8 * emLen - emBits bits of the leftmost octet in
     //     maskedDB to zero.
-    db[0] &= (byte)(255 >> (int)((8 * emLen - emBits)));
+    db[0] &= (byte)((byte)(0xff >> (int)((8 * emLen - emBits))));
     // 12. Let EM = maskedDB || H || 0xbc.
-    em[emLen - 1] = 188;
+    em[emLen - 1] = 0xbc;
     // 13. Output EM.
     return (em, default!);
 }
 
-internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBits, nint sLen, hash.Hash hash) {
+internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBits, nint sLen, hash.Hash hashΔ1) {
     // See RFC 8017, Section 9.1.2.
-    nint hLen = hash.Size();
+    nint hLen = hashΔ1.Size();
     if (sLen == PSSSaltLengthEqualsHash) {
         sLen = hLen;
     }
@@ -107,7 +108,7 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
     }
     // 4.  If the rightmost octet of EM does not have hexadecimal value
     //     0xbc, output "inconsistent" and stop.
-    if (em[emLen - 1] != 188) {
+    if (em[emLen - 1] != 0xbc) {
         return ErrVerification;
     }
     // 5.  Let maskedDB be the leftmost emLen - hLen - 1 octets of EM, and
@@ -117,20 +118,20 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
     // 6.  If the leftmost 8 * emLen - emBits bits of the leftmost octet in
     //     maskedDB are not all equal to zero, output "inconsistent" and
     //     stop.
-    byte bitMask = 255 >> (int)((8 * emLen - emBits));
+    byte bitMask = (byte)(0xff >> (int)((8 * emLen - emBits)));
     if ((byte)(em[0] & ~bitMask) != 0) {
         return ErrVerification;
     }
     // 7.  Let dbMask = MGF(H, emLen - hLen - 1).
     //
     // 8.  Let DB = maskedDB \xor dbMask.
-    mgf1XOR(db, hash, h);
+    mgf1XOR(db, hashΔ1, h);
     // 9.  Set the leftmost 8 * emLen - emBits bits of the leftmost octet in DB
     //     to zero.
     db[0] &= (byte)(bitMask);
     // If we don't know the salt length, look for the 0x01 delimiter.
     if (sLen == PSSSaltLengthAuto) {
-        nint psLenΔ1 = bytes.IndexByte(db, 1);
+        nint psLenΔ1 = bytes.IndexByte(db, 0x01);
         if (psLenΔ1 < 0) {
             return ErrVerification;
         }
@@ -142,11 +143,11 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
     //     output "inconsistent" and stop.
     nint psLen = emLen - hLen - sLen - 2;
     foreach (var (_, e) in db[..(int)(psLen)]) {
-        if (e != 0) {
+        if (e != 0x00) {
             return ErrVerification;
         }
     }
-    if (db[psLen] != 1) {
+    if (db[psLen] != 0x01) {
         return ErrVerification;
     }
     // 11.  Let salt be the last sLen octets of DB.
@@ -158,10 +159,10 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
     //
     // 13. Let H' = Hash(M'), an octet string of length hLen.
     array<byte> prefix = new(8);
-    hash.Write(prefix[..]);
-    hash.Write(mHash);
-    hash.Write(salt);
-    var h0 = hash.Sum(default!);
+    hashΔ1.Write(prefix[..]);
+    hashΔ1.Write(mHash);
+    hashΔ1.Write(salt);
+    var h0 = hashΔ1.Sum(default!);
     // 14. If H = H', output "consistent." Otherwise, output "inconsistent."
     if (!bytes.Equal(h0, h)) {
         // TODO: constant time?
@@ -175,21 +176,21 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
 // given hash function. salt is a random sequence of bytes whose length will be
 // later used to verify the signature.
 internal static (slice<byte>, error) signPSSWithSalt(ж<PrivateKey> Ꮡpriv, crypto.Hash hash, slice<byte> hashed, slice<byte> salt) {
-    ref var priv = ref Ꮡpriv.val;
+    ref var priv = ref Ꮡpriv.Value;
 
     nint emBits = priv.N.BitLen() - 1;
-    (em, err) = emsaPSSEncode(hashed, emBits, salt, hash.New());
+    var (em, err) = emsaPSSEncode(hashed, emBits, salt, hash.New());
     if (err != default!) {
         return (default!, err);
     }
     if (boring.Enabled) {
-        (bkey, errΔ1) = boringPrivateKey(Ꮡpriv);
+        var (bkey, errΔ1) = boringPrivateKey(Ꮡpriv);
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
         // Note: BoringCrypto always does decrypt "withCheck".
         // (It's not just decrypt.)
-        (s, err) = boring.DecryptRSANoPadding(bkey, em);
+        (var s, errΔ1) = boring.DecryptRSANoPadding(bkey, em);
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
@@ -204,7 +205,7 @@ internal static (slice<byte>, error) signPSSWithSalt(ж<PrivateKey> Ꮡpriv, cry
     // weird modulus sizes, fix it by padding inefficiently.
     {
         nint emLen = len(em);
-        nint k = priv.Size(); if (emLen < k) {
+        nint k = Ꮡpriv.of(PrivateKey.ᏑPublicKey).Size(); if (emLen < k) {
             var emNew = new slice<byte>(k);
             copy(emNew[(int)(k - emLen)..], em);
             em = emNew;
@@ -214,8 +215,7 @@ internal static (slice<byte>, error) signPSSWithSalt(ж<PrivateKey> Ꮡpriv, cry
 }
 
 public static readonly UntypedInt PSSSaltLengthAuto = 0;
-public static readonly GoUntyped PSSSaltLengthEqualsHash = /* -1 */
-    GoUntyped.Parse("-1");
+public static readonly UntypedInt PSSSaltLengthEqualsHash = -1;
 
 // PSSOptions contains options for creating and verifying PSS signatures.
 [GoType] partial struct PSSOptions {
@@ -226,7 +226,7 @@ public static readonly GoUntyped PSSSaltLengthEqualsHash = /* -1 */
     // Hash is the hash function used to generate the message digest. If not
     // zero, it overrides the hash function passed to SignPSS. It's required
     // when using PrivateKey.Sign.
-    public crypto_package.Hash Hash;
+    public crypto.Hash Hash;
 }
 
 // HashFunc returns opts.Hash so that [PSSOptions] implements [crypto.SignerOpts].
@@ -234,7 +234,9 @@ public static readonly GoUntyped PSSSaltLengthEqualsHash = /* -1 */
     return opts.Hash;
 }
 
-[GoRecv] internal static nint saltLength(this ref PSSOptions opts) {
+internal static nint saltLength(this ж<PSSOptions> Ꮡopts) {
+    ref var opts = ref Ꮡopts.Value;
+
     if (opts == nil) {
         return PSSSaltLengthAuto;
     }
@@ -253,26 +255,26 @@ internal static error invalidSaltLenErr = errors.New("crypto/rsa: PSSOptions.Sal
 // using bytes from rand. Most applications should use [crypto/rand.Reader] as
 // rand.
 public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpriv, crypto.Hash hash, slice<byte> digest, ж<PSSOptions> Ꮡopts) {
-    ref var priv = ref Ꮡpriv.val;
-    ref var opts = ref Ꮡopts.val;
+    ref var priv = ref Ꮡpriv.Value;
+    ref var opts = ref Ꮡopts.DerefOrNil();
 
     // Note that while we don't commit to deterministic execution with respect
     // to the rand stream, we also don't apply MaybeReadByte, so per Hyrum's Law
     // it's probably relied upon by some. It's a tolerable promise because a
     // well-specified number of random bytes is included in the signature, in a
     // well-specified way.
-    if (boring.Enabled && rand == boring.RandReader) {
-        (bkey, err) = boringPrivateKey(Ꮡpriv);
+    if (boring.Enabled && AreEqual(rand, boring.RandReader)) {
+        var (bkey, err) = boringPrivateKey(Ꮡpriv);
         if (err != default!) {
             return (default!, err);
         }
-        return boring.SignRSAPSS(bkey, hash, digest, opts.saltLength());
+        return boring.SignRSAPSS(bkey, hash, digest, Ꮡopts.saltLength());
     }
     boring.UnreachableExceptTests();
-    if (opts != nil && opts.Hash != 0) {
+    if (Ꮡopts != nil && opts.Hash != 0) {
         hash = opts.Hash;
     }
-    nint saltLength = opts.saltLength();
+    nint saltLength = Ꮡopts.saltLength();
     var exprᴛ1 = saltLength;
     if (exprᴛ1 == PSSSaltLengthAuto) {
         saltLength = (priv.N.BitLen() - 1 + 7) / 8 - 2 - hash.Size();
@@ -310,16 +312,16 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpri
 // The inputs are not considered confidential, and may leak through timing side
 // channels, or if an attacker has control of part of the inputs.
 public static error VerifyPSS(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice<byte> digest, slice<byte> sig, ж<PSSOptions> Ꮡopts) {
-    ref var pub = ref Ꮡpub.val;
-    ref var opts = ref Ꮡopts.val;
+    ref var pub = ref Ꮡpub.Value;
+    ref var opts = ref Ꮡopts.Value;
 
     if (boring.Enabled) {
-        (bkey, errΔ1) = boringPublicKey(Ꮡpub);
+        var (bkey, errΔ1) = boringPublicKey(Ꮡpub);
         if (errΔ1 != default!) {
             return errΔ1;
         }
         {
-            var errΔ2 = boring.VerifyRSAPSS(bkey, hash, digest, sig, opts.saltLength()); if (errΔ2 != default!) {
+            var errΔ2 = boring.VerifyRSAPSS(bkey, hash, digest, sig, Ꮡopts.saltLength()); if (errΔ2 != default!) {
                 return ErrVerification;
             }
         }
@@ -331,12 +333,12 @@ public static error VerifyPSS(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice<byte
     // Salt length must be either one of the special constants (-1 or 0)
     // or otherwise positive. If it is < PSSSaltLengthEqualsHash (-1)
     // we return an error.
-    if (opts.saltLength() < PSSSaltLengthEqualsHash) {
+    if (Ꮡopts.saltLength() < PSSSaltLengthEqualsHash) {
         return invalidSaltLenErr;
     }
     nint emBits = pub.N.BitLen() - 1;
     nint emLen = (emBits + 7) / 8;
-    (em, err) = encrypt(Ꮡpub, sig);
+    var (em, err) = encrypt(Ꮡpub, sig);
     if (err != default!) {
         return ErrVerification;
     }
@@ -351,7 +353,7 @@ public static error VerifyPSS(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice<byte
         }
         em = em[1..];
     }
-    return emsaPSSVerify(digest, em, emBits, opts.saltLength(), hash.New());
+    return emsaPSSVerify(digest, em, emBits, Ꮡopts.saltLength(), hash.New());
 }
 
 } // end rsa_package

@@ -23,7 +23,7 @@ partial class sync_package {
     // The hot path is inlined at every call site.
     // Placing done first allows more compact instructions on some architectures (amd64/386),
     // and fewer instructions (to calculate offset) on other architectures.
-    internal sync.atomic_package.Uint32 done;
+    internal atomic.Uint32 done;
     internal Mutex m;
 }
 
@@ -47,7 +47,9 @@ partial class sync_package {
 //
 // If f panics, Do considers it to have returned; future calls of Do return
 // without calling f.
-[GoRecv] public static void Do(this ref Once o, Action f) {
+public static void Do(this ж<Once> Ꮡo, Action f) {
+    ref var o = ref Ꮡo.Value;
+
     // Note: Here is an incorrect implementation of Do:
     //
     //	if o.done.CompareAndSwap(0, 1) {
@@ -61,17 +63,19 @@ partial class sync_package {
     // waiting for the first's call to f to complete.
     // This is why the slow path falls back to a mutex, and why
     // the o.done.Store must be delayed until after f returns.
-    if (o.done.Load() == 0) {
+    if (Ꮡo.of(Once.Ꮡdone).Load() == 0) {
         // Outlined slow-path to allow inlining of the fast-path.
-        o.doSlow(f);
+        Ꮡo.doSlow(f);
     }
 }
 
-[GoRecv] internal static void doSlow(this ref Once o, Action f) => func((defer, _) => {
-    o.m.Lock();
-    defer(o.m.Unlock);
-    if (o.done.Load() == 0) {
-        deferǃ(o.done.Store, 1, defer);
+internal static void doSlow(this ж<Once> Ꮡo, Action f) => func((defer, recover) => {
+    ref var o = ref Ꮡo.Value;
+
+    Ꮡo.of(Once.Ꮡm).Lock();
+    defer(Ꮡo.of(Once.Ꮡm).Unlock);
+    if (Ꮡo.of(Once.Ꮡdone).Load() == 0) {
+        deferǃ(Ꮡo.of(Once.Ꮡdone).Store, (uint32)(1), defer);
         f();
     }
 });

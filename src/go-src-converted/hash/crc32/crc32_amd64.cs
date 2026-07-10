@@ -62,9 +62,9 @@ internal static void archInitCastagnoli() {
     array<byte> tmp = new(1344); /* castagnoliK2 */
     for (nint b = 0; b < 4; b++) {
         for (nint i = 0; i < 256; i++) {
-            var val = ((uint32)i) << (int)(((uint32)(b * 8)));
-            castagnoliSSE42TableK1.val[b][i] = castagnoliSSE42(val, tmp[..(int)(castagnoliK1)]);
-            castagnoliSSE42TableK2.val[b][i] = castagnoliSSE42(val, tmp[..]);
+            var val = ((uint32)i << (int)((uint32)(b * 8)));
+            castagnoliSSE42TableK1.Value[b][i] = castagnoliSSE42(val, tmp[..(int)(castagnoliK1)]);
+            castagnoliSSE42TableK2.Value[b][i] = castagnoliSSE42(val, tmp[..]);
         }
     }
 }
@@ -73,9 +73,9 @@ internal static void archInitCastagnoli() {
 // table given) with the given initial crc value. This corresponds to
 // CRC(crc, O) in the description in updateCastagnoli.
 internal static uint32 castagnoliShift(ж<sse42Table> Ꮡtable, uint32 crc) {
-    ref var table = ref Ꮡtable.val;
+    ref var table = ref Ꮡtable.Value;
 
-    return (uint32)((uint32)((uint32)(table[3][crc >> (int)(24)] ^ table[2][(uint32)((crc >> (int)(16)) & 255)]) ^ table[1][(uint32)((crc >> (int)(8)) & 255)]) ^ table[0][(uint32)(crc & 255)]);
+    return (uint32)((uint32)((uint32)(table[3][(nint)((crc >> (int)(24)))] ^ table[2][(nint)((uint32)(((crc >> (int)(16))) & 0xFF))]) ^ table[1][(nint)((uint32)(((crc >> (int)(8))) & 0xFF))]) ^ table[0][(nint)((uint32)(crc & 0xFF))]);
 }
 
 internal static uint32 archUpdateCastagnoli(uint32 crc, slice<byte> p) {
@@ -143,7 +143,7 @@ internal static uint32 archUpdateCastagnoli(uint32 crc, slice<byte> p) {
     // If a buffer is long enough to use the optimization, process the first few
     // bytes to align the buffer to an 8 byte boundary (if necessary).
     if (len(p) >= castagnoliK1 * 3) {
-        nint delta = ((nint)((uintptr)(((uintptr)new @unsafe.Pointer(Ꮡ(p, 0))) & 7)));
+        nint delta = (nint)((uintptr)((uintptr)new @unsafe.Pointer(Ꮡ(p, 0)) & 7));
         if (delta != 0) {
             delta = 8 - delta;
             crc = castagnoliSSE42(crc, p[..(int)(delta)]);

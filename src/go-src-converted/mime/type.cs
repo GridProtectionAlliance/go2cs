@@ -8,29 +8,32 @@ namespace go;
 using fmt = fmt_package;
 using slices = slices_package;
 using strings = strings_package;
-using sync = sync_package;
+using Δsync = sync_package;
 
 partial class mime_package {
 
-internal static sync.Map mimeTypes; // map[string]string; ".Z" => "application/x-compress"
-internal static sync.Map mimeTypesLower; // map[string]string; ".z" => "application/x-compress"
-internal static sync.Mutex extensionsMu; // Guards stores (but not loads) on extensions.
-internal static sync.Map extensions; // map[string][]string; slice values are append-only.
+internal static ж<Δsync.Map> ᏑmimeTypes = new(default(Δsync.Map));
+internal static ref Δsync.Map mimeTypes => ref ᏑmimeTypes.Value;  // map[string]string; ".Z" => "application/x-compress"
+internal static ж<Δsync.Map> ᏑmimeTypesLower = new(default(Δsync.Map));
+internal static ref Δsync.Map mimeTypesLower => ref ᏑmimeTypesLower.Value; // map[string]string; ".z" => "application/x-compress"
+internal static ж<Δsync.Mutex> ᏑextensionsMu = new(default(Δsync.Mutex));
+internal static ref Δsync.Mutex extensionsMu => ref ᏑextensionsMu.Value; // Guards stores (but not loads) on extensions.
+internal static ж<Δsync.Map> Ꮡextensions = new(default(Δsync.Map));
+internal static ref Δsync.Map extensions => ref Ꮡextensions.Value; // map[string][]string; slice values are append-only.
 
 // setMimeTypes is used by initMime's non-test path, and by tests.
-internal static void setMimeTypes(map<@string, @string> lowerExt, map<@string, @string> mixExt) => func((defer, _) => {
-    mimeTypes.Clear();
-    mimeTypesLower.Clear();
-    extensions.Clear();
+internal static void setMimeTypes(map<@string, @string> lowerExt, map<@string, @string> mixExt) => func((defer, recover) => {
+    ᏑmimeTypes.Clear();
+    ᏑmimeTypesLower.Clear();
+    Ꮡextensions.Clear();
     foreach (var (k, v) in lowerExt) {
-        mimeTypesLower.Store(k, v);
+        ᏑmimeTypesLower.Store(k, v);
     }
     foreach (var (k, v) in mixExt) {
-        mimeTypes.Store(k, v);
+        ᏑmimeTypes.Store(k, v);
     }
-    extensionsMu.Lock();
-    var extensionsMuʗ1 = extensionsMu;
-    defer(extensionsMuʗ1.Unlock);
+    ᏑextensionsMu.Lock();
+    defer(ᏑextensionsMu.Unlock);
     foreach (var (k, v) in lowerExt) {
         var (justType, _, err) = ParseMediaType(v);
         if (err != default!) {
@@ -38,11 +41,11 @@ internal static void setMimeTypes(map<@string, @string> lowerExt, map<@string, @
         }
         slice<@string> exts = default!;
         {
-            var (ei, ok) = extensions.Load(justType); if (ok) {
+            var (ei, ok) = Ꮡextensions.Load(justType); if (ok) {
                 exts = ei._<slice<@string>>();
             }
         }
-        extensions.Store(justType, append(exts, k));
+        Ꮡextensions.Store(justType, append(exts, k));
     }
 });
 
@@ -65,7 +68,8 @@ internal static map<@string, @string> builtinTypesLower = new map<@string, @stri
     [".xml"u8] = "text/xml; charset=utf-8"u8
 };
 
-internal static sync.Once once;  // guards initMime
+internal static ж<Δsync.Once> Ꮡonce = new(default(Δsync.Once));
+internal static ref Δsync.Once once => ref Ꮡonce.Value;    // guards initMime
 
 internal static Action testInitMime;
 internal static Action osInitMime;
@@ -101,10 +105,10 @@ internal static void initMime() {
 //
 // Text types have the charset parameter set to "utf-8" by default.
 public static @string TypeByExtension(@string ext) {
-    once.Do(initMime);
+    Ꮡonce.Do(initMime);
     // Case-sensitive lookup.
     {
-        var (v, ok) = mimeTypes.Load(ext); if (ok) {
+        var (v, ok) = ᏑmimeTypes.Load(ext); if (ok) {
             return v._<@string>();
         }
     }
@@ -113,22 +117,22 @@ public static @string TypeByExtension(@string ext) {
     // allocation-free in that case.
     array<byte> buf = new(10);
     var lower = buf[..0];
-    static readonly UntypedInt utf8RuneSelf = /* 0x80 */ 128; // from utf8 package, but not importing it.
+    UntypedInt utf8RuneSelf = 0x80; // from utf8 package, but not importing it.
     for (nint i = 0; i < len(ext); i++) {
         var c = ext[i];
         if (c >= utf8RuneSelf) {
             // Slow path.
-            var (siΔ1, _) = mimeTypesLower.Load(strings.ToLower(ext));
+            var (siΔ1, _) = ᏑmimeTypesLower.Load(strings.ToLower(ext));
             var (sΔ1, _) = siΔ1._<@string>(ᐧ);
             return sΔ1;
         }
         if ((rune)'A' <= c && c <= (rune)'Z'){
-            lower = append(lower, c + ((rune)'a' - (rune)'A'));
+            lower = append(lower, (byte)(c + ((rune)'a' - (rune)'A')));
         } else {
             lower = append(lower, c);
         }
     }
-    var (si, _) = mimeTypesLower.Load(((@string)lower));
+    var (si, _) = ᏑmimeTypesLower.Load(((@string)lower));
     var (s, _) = si._<@string>(ᐧ);
     return s;
 }
@@ -142,13 +146,13 @@ public static (slice<@string>, error) ExtensionsByType(@string typ) {
     if (err != default!) {
         return (default!, err);
     }
-    once.Do(initMime);
-    var (s, ok) = extensions.Load(justType);
+    Ꮡonce.Do(initMime);
+    var (s, ok) = Ꮡextensions.Load(justType);
     if (!ok) {
         return (default!, default!);
     }
     var ret = append(slice<@string>(default!), s._<slice<@string>>().ꓸꓸꓸ);
-    slices.Sort(ret);
+    slices.Sort<slice<@string>, @string>(ret);
     return (ret, default!);
 }
 
@@ -159,11 +163,11 @@ public static error AddExtensionType(@string ext, @string typ) {
     if (!strings.HasPrefix(ext, "."u8)) {
         return fmt.Errorf("mime: extension %q missing leading dot"u8, ext);
     }
-    once.Do(initMime);
+    Ꮡonce.Do(initMime);
     return setExtensionType(ext, typ);
 }
 
-internal static error setExtensionType(@string extension, @string mimeType) => func((defer, _) => {
+internal static error setExtensionType(@string extension, @string mimeType) => func<error>((defer, recover) => {
     var (justType, param, err) = ParseMediaType(mimeType);
     if (err != default!) {
         return err;
@@ -173,14 +177,13 @@ internal static error setExtensionType(@string extension, @string mimeType) => f
         mimeType = FormatMediaType(mimeType, param);
     }
     @string extLower = strings.ToLower(extension);
-    mimeTypes.Store(extension, mimeType);
-    mimeTypesLower.Store(extLower, mimeType);
-    extensionsMu.Lock();
-    var extensionsMuʗ1 = extensionsMu;
-    defer(extensionsMuʗ1.Unlock);
+    ᏑmimeTypes.Store(extension, mimeType);
+    ᏑmimeTypesLower.Store(extLower, mimeType);
+    ᏑextensionsMu.Lock();
+    defer(ᏑextensionsMu.Unlock);
     slice<@string> exts = default!;
     {
-        var (ei, ok) = extensions.Load(justType); if (ok) {
+        var (ei, ok) = Ꮡextensions.Load(justType); if (ok) {
             exts = ei._<slice<@string>>();
         }
     }
@@ -189,7 +192,7 @@ internal static error setExtensionType(@string extension, @string mimeType) => f
             return default!;
         }
     }
-    extensions.Store(justType, append(exts, extLower));
+    Ꮡextensions.Store(justType, append(exts, extLower));
     return default!;
 });
 

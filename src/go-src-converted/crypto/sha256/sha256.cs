@@ -7,12 +7,12 @@
 namespace go.crypto;
 
 using crypto = crypto_package;
-using boring = crypto.@internal.boring_package;
+using boring = go.crypto.@internal.boring_package;
 using errors = errors_package;
 using hash = hash_package;
-using byteorder = @internal.byteorder_package;
-using @internal;
-using crypto.@internal;
+using byteorder = go.@internal.byteorder_package;
+using go.@internal;
+using go.crypto.@internal;
 
 partial class sha256_package {
 
@@ -31,22 +31,22 @@ public static readonly UntypedInt Size224 = 28;
 public static readonly UntypedInt ΔBlockSize = 64;
 
 internal static readonly UntypedInt chunk = 64;
-internal static readonly UntypedInt init0 = /* 0x6A09E667 */ 1779033703;
-internal static readonly UntypedInt init1 = /* 0xBB67AE85 */ 3144134277;
-internal static readonly UntypedInt init2 = /* 0x3C6EF372 */ 1013904242;
-internal static readonly UntypedInt init3 = /* 0xA54FF53A */ 2773480762;
-internal static readonly UntypedInt init4 = /* 0x510E527F */ 1359893119;
-internal static readonly UntypedInt init5 = /* 0x9B05688C */ 2600822924;
-internal static readonly UntypedInt init6 = /* 0x1F83D9AB */ 528734635;
-internal static readonly UntypedInt init7 = /* 0x5BE0CD19 */ 1541459225;
-internal static readonly UntypedInt init0_224 = /* 0xC1059ED8 */ 3238371032;
-internal static readonly UntypedInt init1_224 = /* 0x367CD507 */ 914150663;
-internal static readonly UntypedInt init2_224 = /* 0x3070DD17 */ 812702999;
-internal static readonly UntypedInt init3_224 = /* 0xF70E5939 */ 4144912697;
-internal static readonly UntypedInt init4_224 = /* 0xFFC00B31 */ 4290775857;
-internal static readonly UntypedInt init5_224 = /* 0x68581511 */ 1750603025;
-internal static readonly UntypedInt init6_224 = /* 0x64F98FA7 */ 1694076839;
-internal static readonly UntypedInt init7_224 = /* 0xBEFA4FA4 */ 3204075428;
+internal static readonly UntypedInt init0 = 0x6A09E667;
+internal static readonly UntypedInt init1 = 0xBB67AE85;
+internal static readonly UntypedInt init2 = 0x3C6EF372;
+internal static readonly UntypedInt init3 = 0xA54FF53A;
+internal static readonly UntypedInt init4 = 0x510E527F;
+internal static readonly UntypedInt init5 = 0x9B05688C;
+internal static readonly UntypedInt init6 = 0x1F83D9AB;
+internal static readonly UntypedInt init7 = 0x5BE0CD19;
+internal static readonly UntypedInt init0_224 = 0xC1059ED8;
+internal static readonly UntypedInt init1_224 = 0x367CD507;
+internal static readonly UntypedInt init2_224 = 0x3070DD17;
+internal static readonly UntypedInt init3_224 = 0xF70E5939;
+internal static readonly UntypedInt init4_224 = 0xFFC00B31;
+internal static readonly UntypedInt init5_224 = 0x68581511;
+internal static readonly UntypedInt init6_224 = 0x64F98FA7;
+internal static readonly UntypedInt init7_224 = 0xBEFA4FA4;
 
 // digest represents the partial evaluation of a checksum.
 [GoType] partial struct digest {
@@ -101,7 +101,7 @@ internal const nint marshaledSize = /* len(magic256) + 8*4 + chunk + 8 */ 108;
     (b, d.h[7]) = consumeUint32(b);
     b = b[(int)(copy(d.x[..], b))..];
     (b, d.len) = consumeUint64(b);
-    d.nx = ((nint)(d.len % chunk));
+    d.nx = (nint)(d.len % (uint64)chunk);
     return default!;
 }
 
@@ -147,7 +147,7 @@ public static hash.Hash New() {
     }
     var d = @new<digest>();
     d.Reset();
-    return ~d;
+    return new digestжHash(d);
 }
 
 // New224 returns a new hash.Hash computing the SHA224 checksum.
@@ -156,9 +156,9 @@ public static hash.Hash New224() {
         return boring.NewSHA224();
     }
     var d = @new<digest>();
-    d.val.is224 = true;
+    d.Value.is224 = true;
     d.Reset();
-    return ~d;
+    return new digestжHash(d);
 }
 
 [GoRecv] internal static nint Size(this ref digest d) {
@@ -172,25 +172,26 @@ public static hash.Hash New224() {
     return ΔBlockSize;
 }
 
-[GoRecv] internal static (nint nn, error err) Write(this ref digest d, slice<byte> p) {
+internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) {
     nint nn = default!;
     error err = default!;
 
+    ref var d = ref Ꮡd.Value;
     boring.Unreachable();
     nn = len(p);
-    d.len += ((uint64)nn);
+    d.len += (uint64)nn;
     if (d.nx > 0) {
         nint n = copy(d.x[(int)(d.nx)..], p);
         d.nx += n;
         if (d.nx == chunk) {
-            block(d, d.x[..]);
+            block(Ꮡd, d.x[..]);
             d.nx = 0;
         }
         p = p[(int)(n)..];
     }
     if (len(p) >= chunk) {
-        nint n = (nint)(len(p) & ~(chunk - 1));
-        block(d, p[..(int)(n)]);
+        nint n = (nint)(len(p) & ~(nint)(chunk - 1));
+        block(Ꮡd, p[..(int)(n)]);
         p = p[(int)(n)..];
     }
     if (len(p) > 0) {
@@ -202,19 +203,22 @@ public static hash.Hash New224() {
 [GoRecv] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     boring.Unreachable();
     // Make a copy of d so that caller can keep writing and summing.
-    var d0 = d;
-    var hash = d0.checkSum();
+    ref var d0 = ref heap<digest>(out var Ꮡd0);
+    d0 = d;
+    var hash = Ꮡd0.checkSum();
     if (d0.is224) {
         return append(@in, hash[..(int)(Size224)].ꓸꓸꓸ);
     }
     return append(@in, hash[..].ꓸꓸꓸ);
 }
 
-[GoRecv] internal static array<byte> checkSum(this ref digest d) {
+internal static array<byte> checkSum(this ж<digest> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
     var len = d.len;
     // Padding. Add a 1 bit and 0 bits until 56 bytes mod 64.
     array<byte> tmp = new(72); /* 64 + 8 */                   // padding + length buffer
-    tmp[0] = 128;
+    tmp[0] = 0x80;
     uint64 t = default!;
     if (len % 64 < 56){
         t = 56 - len % 64;
@@ -222,10 +226,10 @@ public static hash.Hash New224() {
         t = 64 + 56 - len % 64;
     }
     // Length in bits.
-    len <<= (UntypedInt)(3);
+    len <<= (int)(3);
     var padlen = tmp[..(int)(t + 8)];
     byteorder.BePutUint64(padlen[(int)(t + 0)..], len);
-    d.Write(padlen);
+    Ꮡd.Write(padlen);
     if (d.nx != 0) {
         throw panic("d.nx != 0");
     }
@@ -248,10 +252,10 @@ public static array<byte> Sum256(slice<byte> data) {
     if (boring.Enabled) {
         return boring.SHA256(data);
     }
-    digest d = default!;
+    ref var d = ref heap(new digest(), out var Ꮡd);
     d.Reset();
-    d.Write(data);
-    return d.checkSum();
+    Ꮡd.Write(data);
+    return Ꮡd.checkSum();
 }
 
 // Sum224 returns the SHA224 checksum of the data.
@@ -259,13 +263,13 @@ public static array<byte> Sum224(slice<byte> data) {
     if (boring.Enabled) {
         return boring.SHA224(data);
     }
-    digest d = default!;
+    ref var d = ref heap(new digest(), out var Ꮡd);
     d.is224 = true;
     d.Reset();
-    d.Write(data);
-    var sum = d.checkSum();
-    var ap = (ж<array<byte>>)(sum[..]);
-    return ap.val;
+    Ꮡd.Write(data);
+    var sum = Ꮡd.checkSum();
+    var ap = Ꮡ(new array<byte>(sum[..], 28));
+    return ap.Value;
 }
 
 } // end sha256_package

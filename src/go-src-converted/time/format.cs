@@ -5,7 +5,7 @@ namespace go;
 
 using errors = errors_package;
 using stringslite = @internal.stringslite_package;
-using _ = unsafe_package; // for linkname
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
 using @internal;
 
 partial class time_package {
@@ -218,7 +218,7 @@ internal static (@string prefix, nint std, @string suffix) nextStdChunk(@string 
 
     for (nint i = 0; i < len(layout); i++) {
         {
-            nint c = ((nint)layout[i]);
+            nint c = (nint)layout[i];
             switch (c) {
             case (rune)'J': {
                 if (len(layout) >= i + 3 && layout[(int)(i)..(int)(i + 3)] == "Jan") {
@@ -455,19 +455,19 @@ internal static (nint, @string, error) lookup(slice<@string> tab, @string val) {
 // If the decimal form (excluding sign) is shorter than width, the result is padded with leading 0's.
 // Duplicates functionality in strconv, but avoids dependency.
 internal static slice<byte> appendInt(slice<byte> b, nint x, nint width) {
-    nuint u = ((nuint)x);
+    nuint u = (nuint)x;
     if (x < 0) {
-        b = append(b, (rune)'-');
-        u = ((nuint)(-x));
+        b = append(b, (byte)((rune)'-'));
+        u = (nuint)(-x);
     }
     // 2-digit and 4-digit fields are the most common in time formats.
-    var utod = (nuint u) => (rune)'0' + ((byte)uΔ1);
+    var utod = (nuint uΔ1) => (byte)((rune)'0' + (byte)uΔ1);
     switch (ᐧ) {
-    case {} when width == 2 && u < 1e2F: {
-        return append(b, utod(u / 1e1F), utod(u % 1e1F));
+    case {} when width == 2 && u < 100: {
+        return append(b, utod(u / 10), utod(u % 10));
     }
-    case {} when width == 4 && u < 1e4F: {
-        return append(b, utod(u / 1e3F), utod(u / 1e2F % 1e1F), utod(u / 1e1F % 1e1F), utod(u % 1e1F));
+    case {} when width == 4 && u < 10000: {
+        return append(b, utod(u / 1000), utod(u / 100 % 10), utod(u / 10 % 10), utod(u % 10));
     }}
 
     // Compute the number of decimal digits.
@@ -480,7 +480,7 @@ internal static slice<byte> appendInt(slice<byte> b, nint x, nint width) {
     }
     // Add 0-padding.
     for (nint pad = width - n; pad > 0; pad--) {
-        b = append(b, (rune)'0');
+        b = append(b, (byte)((rune)'0'));
     }
     // Ensure capacity.
     if (len(b) + n <= cap(b)){
@@ -505,7 +505,7 @@ internal static error errAtoi = errors.New("time: invalid number"u8);
 
 // Duplicates functionality in strconv, but avoids dependency.
 internal static (nint x, error err) atoi<bytes>(bytes s)
-    where bytes : /* []byte | string */ ISlice<byte | string>, ISupportMake<bytes>, IEqualityOperators<bytes, bytes, bool>, new()
+    where bytes : /* []byte | string */ IByteSeq<byte>, new()
 {
     nint x = default!;
     error err = default!;
@@ -513,10 +513,10 @@ internal static (nint x, error err) atoi<bytes>(bytes s)
     var neg = false;
     if (len(s) > 0 && (s[0] == (rune)'-' || s[0] == (rune)'+')) {
         neg = s[0] == (rune)'-';
-        s = s[1..];
+        s = ((bytes)(s[1..]));
     }
-    var (q, rem, err) = leadingInt(s);
-    x = ((nint)q);
+    (var q, var rem, err) = leadingInt(s);
+    x = (nint)q;
     if (err != default! || len(rem) > 0) {
         return (0, errAtoi);
     }
@@ -532,17 +532,17 @@ internal static (nint x, error err) atoi<bytes>(bytes s)
 internal static nint stdFracSecond(nint code, nint n, nint c) {
     // Use 0xfff to make the failure case even more absurd.
     if (c == (rune)'.') {
-        return (nint)(code | (((nint)(n & 4095)) << (int)(stdArgShift)));
+        return (nint)(code | ((((nint)(n & 0xfff)) << (int)(stdArgShift))));
     }
-    return (nint)((nint)(code | (((nint)(n & 4095)) << (int)(stdArgShift))) | 1 << (int)(stdSeparatorShift));
+    return (nint)((nint)(code | ((((nint)(n & 0xfff)) << (int)(stdArgShift)))) | (nint)(1 << (int)(stdSeparatorShift)));
 }
 
 internal static nint digitsLen(nint std) {
-    return (nint)((std >> (int)(stdArgShift)) & 4095);
+    return (nint)(((std >> (int)(stdArgShift))) & 0xfff);
 }
 
 internal static byte separator(nint std) {
-    if ((std >> (int)(stdSeparatorShift)) == 0) {
+    if (((std >> (int)(stdSeparatorShift))) == 0) {
         return (rune)'.';
     }
     return (rune)',';
@@ -551,7 +551,7 @@ internal static byte separator(nint std) {
 // appendNano appends a fractional second, as nanoseconds, to b
 // and returns the result. The nanosec must be within [0, 999999999].
 internal static slice<byte> appendNano(slice<byte> b, nint nanosec, nint std) {
-    var trim = (nint)(std & stdMask) == stdFracSecond9;
+    var trim = (nint)(std & (nint)stdMask) == stdFracSecond9;
     nint n = digitsLen(std);
     if (trim && (n == 0 || nanosec == 0)) {
         return b;
@@ -587,28 +587,28 @@ internal static slice<byte> appendNano(slice<byte> b, nint nanosec, nint std) {
 public static @string String(this Time t) {
     @string s = t.Format("2006-01-02 15:04:05.999999999 -0700 MST"u8);
     // Format monotonic clock reading as m=±ddd.nnnnnnnnn.
-    if ((uint64)(t.wall & hasMonotonic) != 0) {
-        var m2 = ((uint64)t.ext);
-        var sign = ((byte)(rune)'+');
+    if ((uint64)(t.wall & (uint64)hasMonotonic) != 0) {
+        var m2 = (uint64)t.ext;
+        var sign = (byte)(rune)'+';
         if (t.ext < 0) {
             sign = (rune)'-';
-            m2 = -m2;
+            m2 = ((uint64)0 - m2);
         }
-        var m1 = m2 / 1e9F;
-        m2 = m2 % 1e9F;
-        var m0 = m1 / 1e9F;
-        m1 = m1 % 1e9F;
+        var m1 = m2 / 1000000000;
+        m2 = m2 % 1000000000;
+        var m0 = m1 / 1000000000;
+        m1 = m1 % 1000000000;
         var buf = new slice<byte>(0, 24);
-        buf = append(buf, " m="u8.ꓸꓸꓸ);
+        buf = append(buf, ((@string)" m="u8).ꓸꓸꓸ);
         buf = append(buf, sign);
         nint wid = 0;
         if (m0 != 0) {
-            buf = appendInt(buf, ((nint)m0), 0);
+            buf = appendInt(buf, (nint)m0, 0);
             wid = 9;
         }
-        buf = appendInt(buf, ((nint)m1), wid);
-        buf = append(buf, (rune)'.');
-        buf = appendInt(buf, ((nint)m2), 9);
+        buf = appendInt(buf, (nint)m1, wid);
+        buf = append(buf, (byte)((rune)'.'));
+        buf = appendInt(buf, (nint)m2, 9);
         s += ((@string)buf);
     }
     return s;
@@ -621,35 +621,35 @@ public static @string GoString(this Time t) {
     var (year, month, day, _) = absDate(abs, true);
     var (hour, minute, second) = absClock(abs);
     var buf = new slice<byte>(0, len("time.Date(9999, time.September, 31, 23, 59, 59, 999999999, time.Local)"));
-    buf = append(buf, "time.Date("u8.ꓸꓸꓸ);
+    buf = append(buf, ((@string)"time.Date("u8).ꓸꓸꓸ);
     buf = appendInt(buf, year, 0);
     if (January <= month && month <= December){
-        buf = append(buf, ", time."u8.ꓸꓸꓸ);
+        buf = append(buf, ((@string)", time."u8).ꓸꓸꓸ);
         buf = append(buf, longMonthNames[month - 1].ꓸꓸꓸ);
     } else {
         // It's difficult to construct a time.Time with a date outside the
         // standard range but we might as well try to handle the case.
-        buf = appendInt(buf, ((nint)month), 0);
+        buf = appendInt(buf, (nint)month, 0);
     }
-    buf = append(buf, ", "u8.ꓸꓸꓸ);
+    buf = append(buf, ((@string)", "u8).ꓸꓸꓸ);
     buf = appendInt(buf, day, 0);
-    buf = append(buf, ", "u8.ꓸꓸꓸ);
+    buf = append(buf, ((@string)", "u8).ꓸꓸꓸ);
     buf = appendInt(buf, hour, 0);
-    buf = append(buf, ", "u8.ꓸꓸꓸ);
+    buf = append(buf, ((@string)", "u8).ꓸꓸꓸ);
     buf = appendInt(buf, minute, 0);
-    buf = append(buf, ", "u8.ꓸꓸꓸ);
+    buf = append(buf, ((@string)", "u8).ꓸꓸꓸ);
     buf = appendInt(buf, second, 0);
-    buf = append(buf, ", "u8.ꓸꓸꓸ);
+    buf = append(buf, ((@string)", "u8).ꓸꓸꓸ);
     buf = appendInt(buf, t.Nanosecond(), 0);
-    buf = append(buf, ", "u8.ꓸꓸꓸ);
+    buf = append(buf, ((@string)", "u8).ꓸꓸꓸ);
     {
         var loc = t.Location();
         var exprᴛ1 = loc;
         if (exprᴛ1 == ΔUTC || exprᴛ1 == default!) {
-            buf = append(buf, "time.UTC"u8.ꓸꓸꓸ);
+            buf = append(buf, ((@string)"time.UTC"u8).ꓸꓸꓸ);
         }
-        else if (exprᴛ1 is ΔLocal) {
-            buf = append(buf, "time.Local"u8.ꓸꓸꓸ);
+        else if (exprᴛ1 == ΔLocal) {
+            buf = append(buf, ((@string)"time.Local"u8).ꓸꓸꓸ);
         }
         else { /* default: */
             buf = append(buf, // there are several options for how we could display this, none of
@@ -667,13 +667,13 @@ public static @string GoString(this Time t) {
  //
  // Of these, Location(loc.name) is the least disruptive. This is an edge
  // case we hope not to hit too often.
- @"time.Location("u8.ꓸꓸꓸ);
+ ((@string)@"time.Location("u8).ꓸꓸꓸ);
             buf = append(buf, quote((~loc).name).ꓸꓸꓸ);
-            buf = append(buf, (rune)')');
+            buf = append(buf, (byte)((rune)')'));
         }
     }
 
-    buf = append(buf, (rune)')');
+    buf = append(buf, (byte)((rune)')'));
     return ((@string)buf);
 }
 
@@ -684,7 +684,7 @@ public static @string GoString(this Time t) {
 // The executable example for [Time.Format] demonstrates the working
 // of the layout string in detail and is a good reference.
 public static @string Format(this Time t, @string layout) {
-    static readonly UntypedInt bufSize = 64;
+    UntypedInt bufSize = 64;
     slice<byte> b = default!;
     nint max = len(layout) + 10;
     if (max < bufSize){
@@ -715,9 +715,8 @@ public static slice<byte> AppendFormat(this Time t, slice<byte> b, @string layou
 }
 
 internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string layout) {
-    @string name = t.locabs();
-    nint offset = default!;
-    uint64 abs = default!;
+
+    var (name, offset, abs) = t.locabs();
     nint year = -1;
     ΔMonth month = default!;
     nint day = default!;
@@ -736,15 +735,15 @@ internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string lay
         }
         layout = suffix;
         // Compute year, month, day if needed.
-        if (year < 0 && (nint)(std & stdNeedDate) != 0) {
+        if (year < 0 && (nint)(std & (nint)stdNeedDate) != 0) {
             (year, month, day, yday) = absDate(abs, true);
             yday++;
         }
         // Compute hour, minute, second if needed.
-        if (hour < 0 && (nint)(std & stdNeedClock) != 0) {
+        if (hour < 0 && (nint)(std & (nint)stdNeedClock) != 0) {
             (hour, min, sec) = absClock(abs);
         }
-        var exprᴛ1 = (nint)(std & stdMask);
+        var exprᴛ1 = (nint)(std & (nint)stdMask);
         if (exprᴛ1 == stdYear) {
             nint y = year;
             if (y < 0) {
@@ -763,10 +762,10 @@ internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string lay
             b = append(b, m.ꓸꓸꓸ);
         }
         else if (exprᴛ1 == stdNumMonth) {
-            b = appendInt(b, ((nint)month), 0);
+            b = appendInt(b, (nint)month, 0);
         }
         else if (exprᴛ1 == stdZeroMonth) {
-            b = appendInt(b, ((nint)month), 2);
+            b = appendInt(b, (nint)month, 2);
         }
         else if (exprᴛ1 == stdWeekDay) {
             b = append(b, absWeekday(abs).String()[..3].ꓸꓸꓸ);
@@ -780,7 +779,7 @@ internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string lay
         }
         else if (exprᴛ1 == stdUnderDay) {
             if (day < 10) {
-                b = append(b, (rune)' ');
+                b = append(b, (byte)((rune)' '));
             }
             b = appendInt(b, day, 0);
         }
@@ -789,9 +788,9 @@ internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string lay
         }
         else if (exprᴛ1 == stdUnderYearDay) {
             if (yday < 100) {
-                b = append(b, (rune)' ');
+                b = append(b, (byte)((rune)' '));
                 if (yday < 10) {
-                    b = append(b, (rune)' ');
+                    b = append(b, (byte)((rune)' '));
                 }
             }
             b = appendInt(b, yday, 0);
@@ -832,67 +831,71 @@ internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string lay
         }
         else if (exprᴛ1 == stdPM) {
             if (hour >= 12){
-                b = append(b, "PM"u8.ꓸꓸꓸ);
+                b = append(b, ((@string)"PM"u8).ꓸꓸꓸ);
             } else {
-                b = append(b, "AM"u8.ꓸꓸꓸ);
+                b = append(b, ((@string)"AM"u8).ꓸꓸꓸ);
             }
         }
         else if (exprᴛ1 == stdpm) {
             if (hour >= 12){
-                b = append(b, "pm"u8.ꓸꓸꓸ);
+                b = append(b, ((@string)"pm"u8).ꓸꓸꓸ);
             } else {
-                b = append(b, "am"u8.ꓸꓸꓸ);
+                b = append(b, ((@string)"am"u8).ꓸꓸꓸ);
             }
         }
         else if (exprᴛ1 == stdISO8601TZ || exprᴛ1 == stdISO8601ColonTZ || exprᴛ1 == stdISO8601SecondsTZ || exprᴛ1 == stdISO8601ShortTZ || exprᴛ1 == stdISO8601ColonSecondsTZ || exprᴛ1 == stdNumTZ || exprᴛ1 == stdNumColonTZ || exprᴛ1 == stdNumSecondsTz || exprᴛ1 == stdNumShortTZ || exprᴛ1 == stdNumColonSecondsTZ) {
-            if (offset == 0 && (std == stdISO8601TZ || std == stdISO8601ColonTZ || std == stdISO8601SecondsTZ || std == stdISO8601ShortTZ || std == stdISO8601ColonSecondsTZ)) {
-                // Ugly special case. We cheat and take the "Z" variants
-                // to mean "the time zone as formatted for ISO 8601".
-                b = append(b, (rune)'Z');
-                break;
-            }
-            nint zone = offset / 60;
-            nint absoffset = offset;
-            if (zone < 0){
-                // convert to minutes
-                b = append(b, (rune)'-');
-                zone = -zone;
-                absoffset = -absoffset;
-            } else {
-                b = append(b, (rune)'+');
-            }
-            b = appendInt(b, zone / 60, 2);
-            if (std == stdISO8601ColonTZ || std == stdNumColonTZ || std == stdISO8601ColonSecondsTZ || std == stdNumColonSecondsTZ) {
-                b = append(b, (rune)':');
-            }
-            if (std != stdNumShortTZ && std != stdISO8601ShortTZ) {
-                b = appendInt(b, zone % 60, 2);
-            }
-            if (std == stdISO8601SecondsTZ || std == stdNumSecondsTz || std == stdNumColonSecondsTZ || std == stdISO8601ColonSecondsTZ) {
-                // append seconds if appropriate
-                if (std == stdNumColonSecondsTZ || std == stdISO8601ColonSecondsTZ) {
-                    b = append(b, (rune)':');
+            do {
+                if (offset == 0 && (std == stdISO8601TZ || std == stdISO8601ColonTZ || std == stdISO8601SecondsTZ || std == stdISO8601ShortTZ || std == stdISO8601ColonSecondsTZ)) {
+                    // Ugly special case. We cheat and take the "Z" variants
+                    // to mean "the time zone as formatted for ISO 8601".
+                    b = append(b, (byte)((rune)'Z'));
+                    break;
                 }
-                b = appendInt(b, absoffset % 60, 2);
-            }
+                nint zone = offset / 60;
+                nint absoffset = offset;
+                if (zone < 0){
+                    // convert to minutes
+                    b = append(b, (byte)((rune)'-'));
+                    zone = -zone;
+                    absoffset = -absoffset;
+                } else {
+                    b = append(b, (byte)((rune)'+'));
+                }
+                b = appendInt(b, zone / 60, 2);
+                if (std == stdISO8601ColonTZ || std == stdNumColonTZ || std == stdISO8601ColonSecondsTZ || std == stdNumColonSecondsTZ) {
+                    b = append(b, (byte)((rune)':'));
+                }
+                if (std != stdNumShortTZ && std != stdISO8601ShortTZ) {
+                    b = appendInt(b, zone % 60, 2);
+                }
+                if (std == stdISO8601SecondsTZ || std == stdNumSecondsTz || std == stdNumColonSecondsTZ || std == stdISO8601ColonSecondsTZ) {
+                    // append seconds if appropriate
+                    if (std == stdNumColonSecondsTZ || std == stdISO8601ColonSecondsTZ) {
+                        b = append(b, (byte)((rune)':'));
+                    }
+                    b = appendInt(b, absoffset % 60, 2);
+                }
+            } while (false);
         }
         else if (exprᴛ1 == stdTZ) {
-            if (name != ""u8) {
-                b = append(b, name.ꓸꓸꓸ);
-                break;
-            }
-            nint zone = offset / 60;
-            if (zone < 0){
-                // No time zone known for this time, but we must print one.
-                // Use the -0700 format.
-                // convert to minutes
-                b = append(b, (rune)'-');
-                zone = -zone;
-            } else {
-                b = append(b, (rune)'+');
-            }
-            b = appendInt(b, zone / 60, 2);
-            b = appendInt(b, zone % 60, 2);
+            do {
+                if (name != ""u8) {
+                    b = append(b, name.ꓸꓸꓸ);
+                    break;
+                }
+                nint zone = offset / 60;
+                if (zone < 0){
+                    // No time zone known for this time, but we must print one.
+                    // Use the -0700 format.
+                    // convert to minutes
+                    b = append(b, (byte)((rune)'-'));
+                    zone = -zone;
+                } else {
+                    b = append(b, (byte)((rune)'+'));
+                }
+                b = appendInt(b, zone / 60, 2);
+                b = appendInt(b, zone % 60, 2);
+            } while (false);
         }
         else if (exprᴛ1 == stdFracSecond0 || exprᴛ1 == stdFracSecond9) {
             b = appendNano(b, t.Nanosecond(), std);
@@ -916,8 +919,10 @@ internal static error errBad = errors.New("bad value for field"u8); // placehold
 // newParseError creates a new ParseError.
 // The provided value and valueElem are cloned to avoid escaping their values.
 internal static ж<ParseError> newParseError(@string layout, @string value, @string layoutElem, @string valueElem, @string message) {
-    @string valueCopy = stringslite.Clone(value);
-    @string valueElemCopy = stringslite.Clone(valueElem);
+    ref var valueCopy = ref heap<@string>(out var ᏑvalueCopy);
+    valueCopy = stringslite.Clone(value);
+    ref var valueElemCopy = ref heap<@string>(out var ᏑvalueElemCopy);
+    valueElemCopy = stringslite.Clone(valueElem);
     return Ꮡ(new ParseError(layout, valueCopy, layoutElem, valueElemCopy, message));
 }
 
@@ -925,7 +930,7 @@ internal static ж<ParseError> newParseError(@string layout, @string value, @str
 // that package, since we can't take a dependency on either.
 internal static readonly @string lowerhex = "0123456789abcdef"u8;
 
-internal static readonly UntypedInt runeSelf = /* 0x80 */ 128;
+internal static readonly UntypedInt runeSelf = 0x80;
 
 internal static readonly UntypedInt runeError = /* '\uFFFD' */ 65533;
 
@@ -944,25 +949,25 @@ internal static @string quote(@string s) {
             nint width = default!;
             if (c == runeError){
                 width = 1;
-                if (i + 2 < len(s) && s[(int)(i)..(int)(i + 3)] == ((@string)runeError)) {
+                if (i + 2 < len(s) && s[(int)(i)..(int)(i + 3)] == ((@string)(rune)runeError)) {
                     width = 3;
                 }
             } else {
                 width = len(((@string)c));
             }
             for (nint j = 0; j < width; j++) {
-                buf = append(buf, @"\x"u8.ꓸꓸꓸ);
-                buf = append(buf, lowerhex[s[i + j] >> (int)(4)]);
-                buf = append(buf, lowerhex[(byte)(s[i + j] & 15)]);
+                buf = append(buf, ((@string)@"\x"u8).ꓸꓸꓸ);
+                buf = append(buf, lowerhex[(s[i + j] >> (int)(4))]);
+                buf = append(buf, lowerhex[(byte)(s[i + j] & 0xF)]);
             }
         } else {
             if (c == (rune)'"' || c == (rune)'\\') {
-                buf = append(buf, (rune)'\\');
+                buf = append(buf, (byte)((rune)'\\'));
             }
             buf = append(buf, ((@string)c).ꓸꓸꓸ);
         }
     }
-    buf = append(buf, (rune)'"');
+    buf = append(buf, (byte)((rune)'"'));
     return ((@string)buf);
 }
 
@@ -976,7 +981,7 @@ internal static @string quote(@string s) {
 
 // isDigit reports whether s[i] is in range and is a decimal digit.
 internal static bool isDigit<bytes>(bytes s, nint i)
-    where bytes : /* []byte | string */ ISlice<byte | string>, ISupportMake<bytes>, IEqualityOperators<bytes, bytes, bool>, new()
+    where bytes : /* []byte | string */ IByteSeq<byte>, new()
 {
     if (len(s) <= i) {
         return false;
@@ -996,9 +1001,9 @@ internal static (nint, @string, error) getnum(@string s, bool @fixed) {
         if (@fixed) {
             return (0, s, errBad);
         }
-        return (((nint)(s[0] - (rune)'0')), s[1..], default!);
+        return ((nint)(s[0] - (rune)'0'), s[1..], default!);
     }
-    return (((nint)(s[0] - (rune)'0')) * 10 + ((nint)(s[1] - (rune)'0')), s[2..], default!);
+    return ((nint)(s[0] - (rune)'0') * 10 + (nint)(s[1] - (rune)'0'), s[2..], default!);
 }
 
 // getnum3 parses s[0:1], s[0:2], or s[0:3] (fixed forces s[0:3])
@@ -1008,7 +1013,7 @@ internal static (nint, @string, error) getnum3(@string s, bool @fixed) {
     nint n = default!;
     nint i = default!;
     for (i = 0; i < 3 && isDigit(s, i); i++) {
-        n = n * 10 + ((nint)(s[i] - (rune)'0'));
+        n = n * 10 + (nint)(s[i] - (rune)'0');
     }
     if (i == 0 || @fixed && i != 3) {
         return (0, s, errBad);
@@ -1104,7 +1109,7 @@ public static (Time, error) Parse(@string layout, @string value) {
 // Second, when given a zone offset or abbreviation, Parse tries to match it
 // against the Local location; ParseInLocation uses the given location.
 public static (Time, error) ParseInLocation(@string layout, @string value, ж<ΔLocation> Ꮡloc) {
-    ref var loc = ref Ꮡloc.val;
+    ref var loc = ref Ꮡloc.Value;
 
     // Optimize for RFC3339 as it accounts for over half of all representations.
     if (layout == RFC3339 || layout == RFC3339Nano) {
@@ -1118,8 +1123,8 @@ public static (Time, error) ParseInLocation(@string layout, @string value, ж<Δ
 }
 
 internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation> ᏑdefaultLocation, ж<ΔLocation> Ꮡlocal) {
-    ref var defaultLocation = ref ᏑdefaultLocation.val;
-    ref var local = ref Ꮡlocal.val;
+    ref var defaultLocation = ref ᏑdefaultLocation.Value;
+    ref var local = ref Ꮡlocal.Value;
 
     @string alayout = layout;
     @string avalue = value;
@@ -1138,9 +1143,9 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
     
     nint yday = -1;
     
-    nint hourΔ1 = default!;
+    nint hour = default!;
     
-    nint minΔ1 = default!;
+    nint min = default!;
     
     nint sec = default!;
     
@@ -1158,43 +1163,47 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
         @string stdstr = layout[(int)(len(prefix))..(int)(len(layout) - len(suffix))];
         (value, err) = skip(value, prefix);
         if (err != default!) {
-            return (new Time(nil), ~newParseError(alayout, avalue, prefix, value, ""u8));
+            return (new Time(nil), new ParseErrorжerror(newParseError(alayout, avalue, prefix, value, ""u8)));
         }
         if (std == 0) {
             if (len(value) != 0) {
-                return (new Time(nil), ~newParseError(alayout, avalue, ""u8, value, ": extra text: "u8 + quote(value)));
+                return (new Time(nil), new ParseErrorжerror(newParseError(alayout, avalue, ""u8, value, ": extra text: "u8 + quote(value))));
             }
             break;
         }
         layout = suffix;
         @string p = default!;
         @string hold = value;
-        var exprᴛ1 = (nint)(std & stdMask);
+        var exprᴛ1 = (nint)(std & (nint)stdMask);
         var matchᴛ1 = false;
         if (exprᴛ1 == stdYear) { matchᴛ1 = true;
-            if (len(value) < 2) {
-                err = errBad;
-                break;
-            }
-            (p, value) = (value[0..2], value[2..]);
-            (year, err) = atoi(p);
-            if (err != default!) {
-                break;
-            }
-            if (year >= 69){
-                // Unix time starts Dec 31 1969 in some time zones
-                year += 1900;
-            } else {
-                year += 2000;
-            }
+            do {
+                if (len(value) < 2) {
+                    err = errBad;
+                    break;
+                }
+                (p, value) = (value[0..2], value[2..]);
+                (year, err) = atoi(p);
+                if (err != default!) {
+                    break;
+                }
+                if (year >= 69){
+                    // Unix time starts Dec 31 1969 in some time zones
+                    year += 1900;
+                } else {
+                    year += 2000;
+                }
+            } while (false);
         }
         else if (exprᴛ1 == stdLongYear) { matchᴛ1 = true;
-            if (len(value) < 4 || !isDigit(value, 0)) {
-                err = errBad;
-                break;
-            }
-            (p, value) = (value[0..4], value[4..]);
-            (year, err) = atoi(p);
+            do {
+                if (len(value) < 4 || !isDigit(value, 0)) {
+                    err = errBad;
+                    break;
+                }
+                (p, value) = (value[0..4], value[4..]);
+                (year, err) = atoi(p);
+            } while (false);
         }
         else if (exprᴛ1 == stdMonth) { matchᴛ1 = true;
             (month, value, err) = lookup(shortMonthNames, value);
@@ -1237,229 +1246,245 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
             (hour, value, err) = getnum(value, // Note that we allow any one-, two-, or three-digit year-day here.
  // The year-day, year combination is validated after we've completed parsing.
  false);
-            if (hourΔ1 < 0 || 24 <= hourΔ1) {
+            if (hour < 0 || 24 <= hour) {
                 rangeErrString = "hour"u8;
             }
         }
         else if (exprᴛ1 == stdHour12 || exprᴛ1 == stdZeroHour12) { matchᴛ1 = true;
             (hour, value, err) = getnum(value, std == stdZeroHour12);
-            if (hourΔ1 < 0 || 12 < hourΔ1) {
+            if (hour < 0 || 12 < hour) {
                 rangeErrString = "hour"u8;
             }
         }
         else if (exprᴛ1 == stdMinute || exprᴛ1 == stdZeroMinute) { matchᴛ1 = true;
             (min, value, err) = getnum(value, std == stdZeroMinute);
-            if (minΔ1 < 0 || 60 <= minΔ1) {
+            if (min < 0 || 60 <= min) {
                 rangeErrString = "minute"u8;
             }
         }
         else if (exprᴛ1 == stdSecond || exprᴛ1 == stdZeroSecond) { matchᴛ1 = true;
-            (sec, value, err) = getnum(value, std == stdZeroSecond);
-            if (err != default!) {
-                break;
-            }
-            if (sec < 0 || 60 <= sec) {
-                rangeErrString = "second"u8;
-                break;
-            }
-            if (len(value) >= 2 && commaOrPeriod(value[0]) && isDigit(value, // Special case: do we have a fractional second but no
- // fractional second in the format?
- 1)) {
-                (_, std, _) = nextStdChunk(layout);
-                std &= (nint)(stdMask);
-                if (std == stdFracSecond0 || std == stdFracSecond9) {
-                    // Fractional second in the layout; proceed normally
+            do {
+                (sec, value, err) = getnum(value, std == stdZeroSecond);
+                if (err != default!) {
                     break;
                 }
-                // No fractional second in the layout but we have one in the input.
-                nint n = 2;
-                for (; n < len(value) && isDigit(value, n); n++) {
+                if (sec < 0 || 60 <= sec) {
+                    rangeErrString = "second"u8;
+                    break;
                 }
-                (nsec, rangeErrString, err) = parseNanoseconds(value, n);
-                value = value[(int)(n)..];
-            }
+                if (len(value) >= 2 && commaOrPeriod(value[0]) && isDigit(value, // Special case: do we have a fractional second but no
+ // fractional second in the format?
+ 1)) {
+                    (_, std, _) = nextStdChunk(layout);
+                    std &= (nint)(stdMask);
+                    if (std == stdFracSecond0 || std == stdFracSecond9) {
+                        // Fractional second in the layout; proceed normally
+                        break;
+                    }
+                    // No fractional second in the layout but we have one in the input.
+                    nint n = 2;
+                    for (; n < len(value) && isDigit(value, n); n++) {
+                    }
+                    (nsec, rangeErrString, err) = parseNanoseconds(value, n);
+                    value = value[(int)(n)..];
+                }
+            } while (false);
         }
         else if (exprᴛ1 == stdPM) { matchᴛ1 = true;
-            if (len(value) < 2) {
-                err = errBad;
-                break;
-            }
-            (p, value) = (value[0..2], value[2..]);
-            var exprᴛ2 = p;
-            if (exprᴛ2 == "PM"u8) {
-                pmSet = true;
-            }
-            else if (exprᴛ2 == "AM"u8) {
-                amSet = true;
-            }
-            else { /* default: */
-                err = errBad;
-            }
+            do {
+                if (len(value) < 2) {
+                    err = errBad;
+                    break;
+                }
+                (p, value) = (value[0..2], value[2..]);
+                var exprᴛ2 = p;
+                if (exprᴛ2 == "PM"u8) {
+                    pmSet = true;
+                }
+                else if (exprᴛ2 == "AM"u8) {
+                    amSet = true;
+                }
+                else { /* default: */
+                    err = errBad;
+                }
 
+            } while (false);
         }
         else if (exprᴛ1 == stdpm) { matchᴛ1 = true;
-            if (len(value) < 2) {
-                err = errBad;
-                break;
-            }
-            (p, value) = (value[0..2], value[2..]);
-            var exprᴛ3 = p;
-            if (exprᴛ3 == "pm"u8) {
-                pmSet = true;
-            }
-            else if (exprᴛ3 == "am"u8) {
-                amSet = true;
-            }
-            else { /* default: */
-                err = errBad;
-            }
+            do {
+                if (len(value) < 2) {
+                    err = errBad;
+                    break;
+                }
+                (p, value) = (value[0..2], value[2..]);
+                var exprᴛ3 = p;
+                if (exprᴛ3 == "pm"u8) {
+                    pmSet = true;
+                }
+                else if (exprᴛ3 == "am"u8) {
+                    amSet = true;
+                }
+                else { /* default: */
+                    err = errBad;
+                }
 
+            } while (false);
         }
         else if (exprᴛ1 == stdISO8601TZ || exprᴛ1 == stdISO8601ShortTZ || exprᴛ1 == stdISO8601ColonTZ || exprᴛ1 == stdISO8601SecondsTZ || exprᴛ1 == stdISO8601ColonSecondsTZ) { matchᴛ1 = true;
-            if (len(value) >= 1 && value[0] == (rune)'Z') {
-                value = value[1..];
-                z = ΔUTC;
-                break;
-            }
+            do {
+                if (len(value) >= 1 && value[0] == (rune)'Z') {
+                    value = value[1..];
+                    z = ΔUTC;
+                    break;
+                }
+            } while (false);
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && (exprᴛ1 == stdNumTZ || exprᴛ1 == stdNumShortTZ || exprᴛ1 == stdNumColonTZ || exprᴛ1 == stdNumSecondsTz || exprᴛ1 == stdNumColonSecondsTZ)) { matchᴛ1 = true;
-            @string sign = default!;
-            @string hourΔ2 = default!;
-            @string minΔ2 = default!;
-            @string seconds = default!;
-            if (std == stdISO8601ColonTZ || std == stdNumColonTZ){
-                if (len(value) < 6) {
-                    err = errBad;
+            do {
+                @string sign = default!;
+                @string hourΔ2 = default!;
+                @string minΔ2 = default!;
+                @string seconds = default!;
+                if (std == stdISO8601ColonTZ || std == stdNumColonTZ){
+                    if (len(value) < 6) {
+                        err = errBad;
+                        break;
+                    }
+                    if (value[3] != (rune)':') {
+                        err = errBad;
+                        break;
+                    }
+                    (sign, hourΔ2, minΔ2, seconds, value) = (value[0..1], value[1..3], value[4..6], "00", value[6..]);
+                } else 
+                if (std == stdNumShortTZ || std == stdISO8601ShortTZ){
+                    if (len(value) < 3) {
+                        err = errBad;
+                        break;
+                    }
+                    (sign, hourΔ2, minΔ2, seconds, value) = (value[0..1], value[1..3], "00", "00", value[3..]);
+                } else 
+                if (std == stdISO8601ColonSecondsTZ || std == stdNumColonSecondsTZ){
+                    if (len(value) < 9) {
+                        err = errBad;
+                        break;
+                    }
+                    if (value[3] != (rune)':' || value[6] != (rune)':') {
+                        err = errBad;
+                        break;
+                    }
+                    (sign, hourΔ2, minΔ2, seconds, value) = (value[0..1], value[1..3], value[4..6], value[7..9], value[9..]);
+                } else 
+                if (std == stdISO8601SecondsTZ || std == stdNumSecondsTz){
+                    if (len(value) < 7) {
+                        err = errBad;
+                        break;
+                    }
+                    (sign, hourΔ2, minΔ2, seconds, value) = (value[0..1], value[1..3], value[3..5], value[5..7], value[7..]);
+                } else {
+                    if (len(value) < 5) {
+                        err = errBad;
+                        break;
+                    }
+                    (sign, hourΔ2, minΔ2, seconds, value) = (value[0..1], value[1..3], value[3..5], "00", value[5..]);
+                }
+                nint hr = default!;
+                nint mm = default!;
+                nint ss = default!;
+                (hr, _, err) = getnum(hourΔ2, true);
+                if (err == default!) {
+                    (mm, _, err) = getnum(minΔ2, true);
+                }
+                if (err == default!) {
+                    (ss, _, err) = getnum(seconds, true);
+                }
+                if (hr > 24) {
+                    // The range test use > rather than >=,
+                    // as some people do write offsets of 24 hours
+                    // or 60 minutes or 60 seconds.
+                    rangeErrString = "time zone offset hour"u8;
+                }
+                if (mm > 60) {
+                    rangeErrString = "time zone offset minute"u8;
+                }
+                if (ss > 60) {
+                    rangeErrString = "time zone offset second"u8;
+                }
+                zoneOffset = (hr * 60 + mm) * 60 + ss;
+                switch (sign[0]) {
+                case (rune)'+': {
                     break;
                 }
-                if (value[3] != (rune)':') {
-                    err = errBad;
+                case (rune)'-': {
+                    zoneOffset = -zoneOffset;
                     break;
                 }
-                (sign, hourΔ2, minΔ2, seconds, value) = (value[0..1], value[1..3], value[4..6], "00"u8, value[6..]);
-            } else 
-            if (std == stdNumShortTZ || std == stdISO8601ShortTZ){
-                if (len(value) < 3) {
+                default: {
                     err = errBad;
                     break;
-                }
-                (sign, hourΔ2, minΔ2, seconds, value) = (value[0..1], value[1..3], "00"u8, "00"u8, value[3..]);
-            } else 
-            if (std == stdISO8601ColonSecondsTZ || std == stdNumColonSecondsTZ){
-                if (len(value) < 9) {
-                    err = errBad;
-                    break;
-                }
-                if (value[3] != (rune)':' || value[6] != (rune)':') {
-                    err = errBad;
-                    break;
-                }
-                (sign, hourΔ2, minΔ2, seconds, value) = (value[0..1], value[1..3], value[4..6], value[7..9], value[9..]);
-            } else 
-            if (std == stdISO8601SecondsTZ || std == stdNumSecondsTz){
-                if (len(value) < 7) {
-                    err = errBad;
-                    break;
-                }
-                (sign, hourΔ2, minΔ2, seconds, value) = (value[0..1], value[1..3], value[3..5], value[5..7], value[7..]);
-            } else {
-                if (len(value) < 5) {
-                    err = errBad;
-                    break;
-                }
-                (sign, hourΔ2, minΔ2, seconds, value) = (value[0..1], value[1..3], value[3..5], "00"u8, value[5..]);
-            }
-            nint hr = default!;
-            nint mm = default!;
-            nint ss = default!;
-            (hr, _, err) = getnum(hourΔ2, true);
-            if (err == default!) {
-                (mm, _, err) = getnum(minΔ2, true);
-            }
-            if (err == default!) {
-                (ss, _, err) = getnum(seconds, true);
-            }
-            if (hr > 24) {
-                // The range test use > rather than >=,
-                // as some people do write offsets of 24 hours
-                // or 60 minutes or 60 seconds.
-                rangeErrString = "time zone offset hour"u8;
-            }
-            if (mm > 60) {
-                rangeErrString = "time zone offset minute"u8;
-            }
-            if (ss > 60) {
-                rangeErrString = "time zone offset second"u8;
-            }
-            zoneOffset = (hr * 60 + mm) * 60 + ss;
-            switch (sign[0]) {
-            case (rune)'+': {
-                break;
-            }
-            case (rune)'-': {
-                zoneOffset = -zoneOffset;
-                break;
-            }
-            default: {
-                err = errBad;
-                break;
-            }}
+                }}
 
+            } while (false);
         }
         else if (exprᴛ1 == stdTZ) { matchᴛ1 = true;
-            if (len(value) >= 3 && value[0..3] == "UTC") {
-                // offset is in seconds
-                // Does it look like a time zone?
-                z = ΔUTC;
-                value = value[3..];
-                break;
-            }
-            var (n, ok) = parseTimeZone(value);
-            if (!ok) {
-                err = errBad;
-                break;
-            }
-            (zoneName, value) = (value[..(int)(n)], value[(int)(n)..]);
+            do {
+                if (len(value) >= 3 && value[0..3] == "UTC") {
+                    // offset is in seconds
+                    // Does it look like a time zone?
+                    z = ΔUTC;
+                    value = value[3..];
+                    break;
+                }
+                var (n, ok) = parseTimeZone(value);
+                if (!ok) {
+                    err = errBad;
+                    break;
+                }
+                (zoneName, value) = (value[..(int)(n)], value[(int)(n)..]);
+            } while (false);
         }
         else if (exprᴛ1 == stdFracSecond0) {
-            nint ndigit = 1 + digitsLen(std);
-            if (len(value) < ndigit) {
-                // stdFracSecond0 requires the exact number of digits as specified in
-                // the layout.
-                err = errBad;
-                break;
-            }
-            (nsec, rangeErrString, err) = parseNanoseconds(value, ndigit);
-            value = value[(int)(ndigit)..];
+            do {
+                nint ndigit = 1 + digitsLen(std);
+                if (len(value) < ndigit) {
+                    // stdFracSecond0 requires the exact number of digits as specified in
+                    // the layout.
+                    err = errBad;
+                    break;
+                }
+                (nsec, rangeErrString, err) = parseNanoseconds(value, ndigit);
+                value = value[(int)(ndigit)..];
+            } while (false);
         }
         else if (exprᴛ1 == stdFracSecond9) { matchᴛ1 = true;
-            if (len(value) < 2 || !commaOrPeriod(value[0]) || value[1] < (rune)'0' || (rune)'9' < value[1]) {
-                // Fractional second omitted.
-                break;
-            }
-            nint i = 0;
-            while (i + 1 < len(value) && (rune)'0' <= value[i + 1] && value[i + 1] <= (rune)'9') {
-                // Take any number of digits, even more than asked for,
-                // because it is what the stdSecond case would do.
-                i++;
-            }
-            (nsec, rangeErrString, err) = parseNanoseconds(value, 1 + i);
-            value = value[(int)(1 + i)..];
+            do {
+                if (len(value) < 2 || !commaOrPeriod(value[0]) || value[1] < (rune)'0' || (rune)'9' < value[1]) {
+                    // Fractional second omitted.
+                    break;
+                }
+                nint i = 0;
+                while (i + 1 < len(value) && (rune)'0' <= value[i + 1] && value[i + 1] <= (rune)'9') {
+                    // Take any number of digits, even more than asked for,
+                    // because it is what the stdSecond case would do.
+                    i++;
+                }
+                (nsec, rangeErrString, err) = parseNanoseconds(value, 1 + i);
+                value = value[(int)(1 + i)..];
+            } while (false);
         }
 
         if (rangeErrString != ""u8) {
-            return (new Time(nil), ~newParseError(alayout, avalue, stdstr, value, ": "u8 + rangeErrString + " out of range"u8));
+            return (new Time(nil), new ParseErrorжerror(newParseError(alayout, avalue, stdstr, value, ": "u8 + rangeErrString + " out of range"u8)));
         }
         if (err != default!) {
-            return (new Time(nil), ~newParseError(alayout, avalue, stdstr, hold, ""u8));
+            return (new Time(nil), new ParseErrorжerror(newParseError(alayout, avalue, stdstr, hold, ""u8)));
         }
     }
-    if (pmSet && hourΔ1 < 12){
-        hourΔ2 += 12;
+    if (pmSet && hour < 12){
+        hour += 12;
     } else 
-    if (amSet && hourΔ1 == 12) {
-        hourΔ2 = 0;
+    if (amSet && hour == 12) {
+        hour = 0;
     }
     // Convert yday to day, month.
     if (yday >= 0){
@@ -1467,7 +1492,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
         nint m = default!;
         if (isLeap(year)) {
             if (yday == 31 + 29){
-                m = ((nint)February);
+                m = (nint)February;
                 d = 29;
             } else 
             if (yday > 31 + 29) {
@@ -1475,28 +1500,28 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
             }
         }
         if (yday < 1 || yday > 365) {
-            return (new Time(nil), ~newParseError(alayout, avalue, ""u8, value, ": day-of-year out of range"u8));
+            return (new Time(nil), new ParseErrorжerror(newParseError(alayout, avalue, ""u8, value, ": day-of-year out of range"u8)));
         }
         if (m == 0) {
             m = (yday - 1) / 31 + 1;
-            if (((nint)daysBefore[m]) < yday) {
+            if ((nint)daysBefore[m] < yday) {
                 m++;
             }
-            d = yday - ((nint)daysBefore[m - 1]);
+            d = yday - (nint)daysBefore[m - 1];
         }
         // If month, day already seen, yday's m, d must match.
         // Otherwise, set them from m, d.
         if (month >= 0 && month != m) {
-            return (new Time(nil), ~newParseError(alayout, avalue, ""u8, value, ": day-of-year does not match month"u8));
+            return (new Time(nil), new ParseErrorжerror(newParseError(alayout, avalue, ""u8, value, ": day-of-year does not match month"u8)));
         }
         month = m;
         if (day >= 0 && day != d) {
-            return (new Time(nil), ~newParseError(alayout, avalue, ""u8, value, ": day-of-year does not match day"u8));
+            return (new Time(nil), new ParseErrorжerror(newParseError(alayout, avalue, ""u8, value, ": day-of-year does not match day"u8)));
         }
         day = d;
     } else {
         if (month < 0) {
-            month = ((nint)January);
+            month = (nint)January;
         }
         if (day < 0) {
             day = 1;
@@ -1504,17 +1529,17 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
     }
     // Validate the day of the month.
     if (day < 1 || day > daysIn(((ΔMonth)month), year)) {
-        return (new Time(nil), ~newParseError(alayout, avalue, ""u8, value, ": day out of range"u8));
+        return (new Time(nil), new ParseErrorжerror(newParseError(alayout, avalue, ""u8, value, ": day out of range"u8)));
     }
     if (z != nil) {
-        return (Date(year, ((ΔMonth)month), day, hourΔ1, minΔ1, sec, nsec, z), default!);
+        return (Date(year, ((ΔMonth)month), day, hour, min, sec, nsec, z), default!);
     }
     if (zoneOffset != -1) {
-        var t = Date(year, ((ΔMonth)month), day, hourΔ1, minΔ1, sec, nsec, ΔUTC);
-        t.addSec(-((int64)zoneOffset));
+        var t = Date(year, ((ΔMonth)month), day, hour, min, sec, nsec, ΔUTC);
+        t.addSec(-(int64)zoneOffset);
         // Look for local zone with the given offset.
         // If that zone was in effect at the given time, use it.
-        var (name, offset, _, _, _) = local.lookup(t.unixSec());
+        var (name, offset, _, _, _) = Ꮡlocal.lookup(t.unixSec());
         if (offset == zoneOffset && (zoneName == ""u8 || name == zoneName)) {
             t.setLoc(Ꮡlocal);
             return (t, default!);
@@ -1526,12 +1551,12 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
         return (t, default!);
     }
     if (zoneName != ""u8) {
-        var t = Date(year, ((ΔMonth)month), day, hourΔ1, minΔ1, sec, nsec, ΔUTC);
+        var t = Date(year, ((ΔMonth)month), day, hour, min, sec, nsec, ΔUTC);
         // Look for local zone with the given offset.
         // If that zone was in effect at the given time, use it.
-        var (offset, ok) = local.lookupName(zoneName, t.unixSec());
+        var (offset, ok) = Ꮡlocal.lookupName(zoneName, t.unixSec());
         if (ok) {
-            t.addSec(-((int64)offset));
+            t.addSec(-(int64)offset);
             t.setLoc(Ꮡlocal);
             return (t, default!);
         }
@@ -1547,7 +1572,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
         return (t, default!);
     }
     // Otherwise, fall back to default.
-    return (Date(year, ((ΔMonth)month), day, hourΔ1, minΔ1, sec, nsec, ᏑdefaultLocation), default!);
+    return (Date(year, ((ΔMonth)month), day, hour, min, sec, nsec, ᏑdefaultLocation), default!);
 }
 
 // parseTimeZone parses a time zone string and returns its length. Time zones
@@ -1655,7 +1680,7 @@ internal static bool commaOrPeriod(byte b) {
 }
 
 internal static (nint ns, @string rangeErrString, error err) parseNanoseconds<bytes>(bytes value, nint nbytes)
-    where bytes : /* []byte | string */ ISlice<byte | string>, ISupportMake<bytes>, IEqualityOperators<bytes, bytes, bool>, new()
+    where bytes : /* []byte | string */ IByteSeq<byte>, new()
 {
     nint ns = default!;
     @string rangeErrString = default!;
@@ -1666,11 +1691,11 @@ internal static (nint ns, @string rangeErrString, error err) parseNanoseconds<by
         return (ns, rangeErrString, err);
     }
     if (nbytes > 10) {
-        value = value[..10];
+        value = ((bytes)(value[..10]));
         nbytes = 10;
     }
     {
-        (ns, err) = atoi(value[1..(int)(nbytes)]); if (err != default!) {
+        (ns, err) = atoi(((bytes)(value[1..(int)(nbytes)]))); if (err != default!) {
             return (ns, rangeErrString, err);
         }
     }
@@ -1691,7 +1716,7 @@ internal static error errLeadingInt = errors.New("time: bad [0-9]*"u8); // never
 
 // leadingInt consumes the leading [0-9]* from s.
 internal static (uint64 x, bytes rem, error err) leadingInt<bytes>(bytes s)
-    where bytes : /* []byte | string */ ISlice<byte | string>, ISupportMake<bytes>, IEqualityOperators<bytes, bytes, bool>, new()
+    where bytes : /* []byte | string */ IByteSeq<byte>, new()
 {
     uint64 x = default!;
     bytes rem = default!;
@@ -1703,17 +1728,17 @@ internal static (uint64 x, bytes rem, error err) leadingInt<bytes>(bytes s)
         if (c < (rune)'0' || c > (rune)'9') {
             break;
         }
-        if (x > 1 << (int)(63) / 10) {
+        if (x > 922337203685477580UL) {
             // overflow
             return (0, rem, errLeadingInt);
         }
-        x = x * 10 + ((uint64)c) - (rune)'0';
-        if (x > 1 << (int)(63)) {
+        x = x * 10 + (uint64)c - (rune)'0';
+        if (x > ((uint64)1 << (int)(63))) {
             // overflow
             return (0, rem, errLeadingInt);
         }
     }
-    return (x, s[(int)(i)..], default!);
+    return (x, ((bytes)(s[(int)(i)..])), default!);
 }
 
 // leadingFraction consumes the leading [0-9]* from s.
@@ -1735,13 +1760,13 @@ internal static (uint64 x, float64 scale, @string rem) leadingFraction(@string s
         if (overflow) {
             continue;
         }
-        if (x > (1 << (int)(63) - 1) / 10) {
+        if (x > 922337203685477580UL) {
             // It's possible for overflow to give a positive number, so take care.
             overflow = true;
             continue;
         }
-        var y = x * 10 + ((uint64)c) - (rune)'0';
-        if (y > 1 << (int)(63)) {
+        var y = x * 10 + (uint64)c - (rune)'0';
+        if (y > ((uint64)1 << (int)(63))) {
             overflow = true;
             continue;
         }
@@ -1754,14 +1779,14 @@ internal static (uint64 x, float64 scale, @string rem) leadingFraction(@string s
 // U+00B5 = micro symbol
 // U+03BC = Greek letter mu
 internal static map<@string, uint64> unitMap = new map<@string, uint64>{
-    ["ns"u8] = ((uint64)ΔNanosecond),
-    ["us"u8] = ((uint64)Microsecond),
-    ["µs"u8] = ((uint64)Microsecond),
-    ["μs"u8] = ((uint64)Microsecond),
-    ["ms"u8] = ((uint64)Millisecond),
-    ["s"u8] = ((uint64)ΔSecond),
-    ["m"u8] = ((uint64)ΔMinute),
-    ["h"u8] = ((uint64)ΔHour)
+    ["ns"u8] = (uint64)(int64)ΔNanosecond,
+    ["us"u8] = (uint64)(int64)Microsecond,
+    ["µs"u8] = (uint64)(int64)Microsecond,
+    ["μs"u8] = (uint64)(int64)Microsecond,
+    ["ms"u8] = (uint64)(int64)Millisecond,
+    ["s"u8] = (uint64)(int64)ΔSecond,
+    ["m"u8] = (uint64)(int64)ΔMinute,
+    ["h"u8] = (uint64)(int64)ΔHour
 };
 
 // ParseDuration parses a duration string.
@@ -1831,11 +1856,11 @@ public static (Duration, error) ParseDuration(@string s) {
         }
         @string u = s[..(int)(i)];
         s = s[(int)(i)..];
-        var (unit, ok) = unitMap[u];
+        var (unit, ok) = unitMap[u, ꟷ];
         if (!ok) {
             return (0, errors.New("time: unknown unit "u8 + quote(u) + " in duration "u8 + quote(orig)));
         }
-        if (v > 1 << (int)(63) / unit) {
+        if (v > ((uint64)1 << (int)(63)) / unit) {
             // overflow
             return (0, errors.New("time: invalid duration "u8 + quote(orig)));
         }
@@ -1843,24 +1868,24 @@ public static (Duration, error) ParseDuration(@string s) {
         if (f > 0) {
             // float64 is needed to be nanosecond accurate for fractions of hours.
             // v >= 0 && (f*unit/scale) <= 3.6e+12 (ns/h, h is the largest unit)
-            v += ((uint64)(((float64)f) * (((float64)unit) / scale)));
-            if (v > 1 << (int)(63)) {
+            v += (uint64)((float64)f * ((float64)unit / scale));
+            if (v > ((uint64)1 << (int)(63))) {
                 // overflow
                 return (0, errors.New("time: invalid duration "u8 + quote(orig)));
             }
         }
         d += v;
-        if (d > 1 << (int)(63)) {
+        if (d > ((uint64)1 << (int)(63))) {
             return (0, errors.New("time: invalid duration "u8 + quote(orig)));
         }
     }
     if (neg) {
-        return (-((Duration)d), default!);
+        return (-((Duration)(int64)d), default!);
     }
-    if (d > 1 << (int)(63) - 1) {
+    if (d > 9223372036854775807UL) {
         return (0, errors.New("time: invalid duration "u8 + quote(orig)));
     }
-    return (((Duration)d), default!);
+    return (((Duration)(int64)d), default!);
 }
 
 } // end time_package

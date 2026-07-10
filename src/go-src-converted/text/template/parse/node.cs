@@ -15,9 +15,10 @@ internal static @string textFormat = "%s"u8; // Changed to "%q" in tests for bet
 // A Node is an element in the parse tree. The interface is trivial.
 // The interface contains an unexported method so that only
 // types local to this package can satisfy it.
-[GoType] partial interface Node {
+[GoType] partial interface Node :
+    fmt.Stringer
+{
     NodeType Type();
-    @string String();
     // Copy does a deep copy of the Node and all its components.
     // To avoid type assertions, some XxxNodes also have specialized
     // CopyXxx methods that return *XxxNode.
@@ -78,12 +79,14 @@ public static readonly NodeType NodeContinue = 22;    // A continue action.
     public slice<Node> Nodes; // The element nodes in lexical order.
 }
 
-[GoRecv] internal static ж<ListNode> newList(this ref Tree t, Pos pos) {
-    return Ꮡ(new ListNode(tr: t, NodeType: NodeList, Pos: pos));
+internal static ж<ListNode> newList(this ж<Tree> Ꮡt, Pos pos) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡ(new ListNode(tr: Ꮡt, NodeType: NodeList, Pos: pos));
 }
 
 [GoRecv] internal static void append(this ref ListNode l, Node n) {
-    l.Nodes = append(l.Nodes, n);
+    l.Nodes = builtin.append(l.Nodes, n);
 }
 
 [GoRecv] internal static ж<Tree> tree(this ref ListNode l) {
@@ -91,22 +94,24 @@ public static readonly NodeType NodeContinue = 22;    // A continue action.
 }
 
 [GoRecv] public static @string String(this ref ListNode l) {
-    ref var sb = ref heap(new strings_package.Builder(), out var Ꮡsb);
+    ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     l.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoRecv] public static void writeTo(this ref ListNode l, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref ListNode l, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
     foreach (var (_, n) in l.Nodes) {
         n.writeTo(Ꮡsb);
     }
 }
 
-[GoRecv("capture")] public static ж<ListNode> CopyList(this ref ListNode l) {
+public static ж<ListNode> CopyList(this ж<ListNode> Ꮡl) {
+    ref var l = ref Ꮡl.Value;
+
     if (l == nil) {
-        return CopyListꓸᏑl;
+        return Ꮡl;
     }
     var n = l.tr.newList(l.Pos);
     foreach (var (_, elem) in l.Nodes) {
@@ -115,8 +120,10 @@ public static readonly NodeType NodeContinue = 22;    // A continue action.
     return n;
 }
 
-[GoRecv] public static Node Copy(this ref ListNode l) {
-    return ~l.CopyList();
+public static Node Copy(this ж<ListNode> Ꮡl) {
+    ref var l = ref Ꮡl.Value;
+
+    return new ListNodeжNode(Ꮡl.CopyList());
 }
 
 // TextNode holds plain text.
@@ -127,18 +134,20 @@ public static readonly NodeType NodeContinue = 22;    // A continue action.
     public slice<byte> Text; // The text; may span newlines.
 }
 
-[GoRecv] internal static ж<TextNode> newText(this ref Tree t, Pos pos, @string text) {
-    return Ꮡ(new TextNode(tr: t, NodeType: NodeText, Pos: pos, Text: slice<byte>(text)));
+internal static ж<TextNode> newText(this ж<Tree> Ꮡt, Pos pos, @string text) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡ(new TextNode(tr: Ꮡt, NodeType: NodeText, Pos: pos, Text: slice<byte>(text)));
 }
 
 [GoRecv] public static @string String(this ref TextNode t) {
     return fmt.Sprintf(textFormat, t.Text);
 }
 
-[GoRecv] public static void writeTo(this ref TextNode t, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref TextNode t, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
-    sb.WriteString(t.String());
+    Ꮡsb.WriteString(t.String());
 }
 
 [GoRecv] internal static ж<Tree> tree(this ref TextNode t) {
@@ -146,7 +155,7 @@ public static readonly NodeType NodeContinue = 22;    // A continue action.
 }
 
 [GoRecv] public static Node Copy(this ref TextNode t) {
-    return new TextNode(tr: t.tr, NodeType: NodeText, Pos: t.Pos, Text: append(new byte[]{}.slice(), t.Text.ꓸꓸꓸ));
+    return new TextNodeжNode(Ꮡ(new TextNode(tr: t.tr, NodeType: NodeText, Pos: t.Pos, Text: builtin.append(new byte[]{}.slice(), t.Text.ꓸꓸꓸ))));
 }
 
 // CommentNode holds a comment.
@@ -157,22 +166,24 @@ public static readonly NodeType NodeContinue = 22;    // A continue action.
     public @string Text; // Comment text.
 }
 
-[GoRecv] internal static ж<CommentNode> newComment(this ref Tree t, Pos pos, @string text) {
-    return Ꮡ(new CommentNode(tr: t, NodeType: NodeComment, Pos: pos, Text: text));
+internal static ж<CommentNode> newComment(this ж<Tree> Ꮡt, Pos pos, @string text) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡ(new CommentNode(tr: Ꮡt, NodeType: NodeComment, Pos: pos, Text: text));
 }
 
 [GoRecv] public static @string String(this ref CommentNode c) {
-    ref var sb = ref heap(new strings_package.Builder(), out var Ꮡsb);
+    ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     c.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoRecv] public static void writeTo(this ref CommentNode c, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref CommentNode c, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
-    sb.WriteString("{{"u8);
-    sb.WriteString(c.Text);
-    sb.WriteString("}}"u8);
+    Ꮡsb.WriteString("{{"u8);
+    Ꮡsb.WriteString(c.Text);
+    Ꮡsb.WriteString("}}"u8);
 }
 
 [GoRecv] internal static ж<Tree> tree(this ref CommentNode c) {
@@ -180,7 +191,7 @@ public static readonly NodeType NodeContinue = 22;    // A continue action.
 }
 
 [GoRecv] public static Node Copy(this ref CommentNode c) {
-    return new CommentNode(tr: c.tr, NodeType: NodeComment, Pos: c.Pos, Text: c.Text);
+    return new CommentNodeжNode(Ꮡ(new CommentNode(tr: c.tr, NodeType: NodeComment, Pos: c.Pos, Text: c.Text)));
 }
 
 // PipeNode holds a pipeline with optional declaration
@@ -194,41 +205,43 @@ public static readonly NodeType NodeContinue = 22;    // A continue action.
     public slice<ж<CommandNode>> Cmds; // The commands in lexical order.
 }
 
-[GoRecv] internal static ж<PipeNode> newPipeline(this ref Tree t, Pos pos, nint line, slice<ж<VariableNode>> vars) {
-    return Ꮡ(new PipeNode(tr: t, NodeType: NodePipe, Pos: pos, Line: line, Decl: vars));
+internal static ж<PipeNode> newPipeline(this ж<Tree> Ꮡt, Pos pos, nint line, slice<ж<VariableNode>> vars) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡ(new PipeNode(tr: Ꮡt, NodeType: NodePipe, Pos: pos, Line: line, Decl: vars));
 }
 
-[GoRecv] public static void append(this ref PipeNode p, ж<CommandNode> Ꮡcommand) {
-    ref var command = ref Ꮡcommand.val;
+[GoRecv] internal static void append(this ref PipeNode p, ж<CommandNode> Ꮡcommand) {
+    ref var command = ref Ꮡcommand.Value;
 
-    p.Cmds = append(p.Cmds, Ꮡcommand);
+    p.Cmds = builtin.append(p.Cmds, Ꮡcommand);
 }
 
 [GoRecv] public static @string String(this ref PipeNode p) {
-    ref var sb = ref heap(new strings_package.Builder(), out var Ꮡsb);
+    ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     p.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoRecv] public static void writeTo(this ref PipeNode p, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref PipeNode p, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
     if (len(p.Decl) > 0) {
         foreach (var (i, v) in p.Decl) {
             if (i > 0) {
-                sb.WriteString(", "u8);
+                Ꮡsb.WriteString(", "u8);
             }
             v.writeTo(Ꮡsb);
         }
         if (p.IsAssign){
-            sb.WriteString(" = "u8);
+            Ꮡsb.WriteString(" = "u8);
         } else {
-            sb.WriteString(" := "u8);
+            Ꮡsb.WriteString(" := "u8);
         }
     }
     foreach (var (i, c) in p.Cmds) {
         if (i > 0) {
-            sb.WriteString(" | "u8);
+            Ꮡsb.WriteString(" | "u8);
         }
         c.writeTo(Ꮡsb);
     }
@@ -238,24 +251,28 @@ public static readonly NodeType NodeContinue = 22;    // A continue action.
     return p.tr;
 }
 
-[GoRecv("capture")] public static ж<PipeNode> CopyPipe(this ref PipeNode p) {
+public static ж<PipeNode> CopyPipe(this ж<PipeNode> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     if (p == nil) {
-        return CopyPipeꓸᏑp;
+        return Ꮡp;
     }
     var vars = new slice<ж<VariableNode>>(len(p.Decl));
     foreach (var (i, d) in p.Decl) {
-        vars[i] = d.Copy()._<VariableNode.val>();
+        vars[i] = d.Copy()._<ж<VariableNode>>();
     }
     var n = p.tr.newPipeline(p.Pos, p.Line, vars);
-    n.val.IsAssign = p.IsAssign;
+    n.Value.IsAssign = p.IsAssign;
     foreach (var (_, c) in p.Cmds) {
-        n.append(c.Copy()._<CommandNode.val>());
+        n.append(c.Copy()._<ж<CommandNode>>());
     }
     return n;
 }
 
-[GoRecv] public static Node Copy(this ref PipeNode p) {
-    return ~p.CopyPipe();
+public static Node Copy(this ж<PipeNode> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    return new PipeNodeжNode(Ꮡp.CopyPipe());
 }
 
 // ActionNode holds an action (something bounded by delimiters).
@@ -269,24 +286,25 @@ public static readonly NodeType NodeContinue = 22;    // A continue action.
     public ж<PipeNode> Pipe; // The pipeline in the action.
 }
 
-[GoRecv] public static ж<ActionNode> newAction(this ref Tree t, Pos pos, nint line, ж<PipeNode> Ꮡpipe) {
-    ref var pipe = ref Ꮡpipe.val;
+internal static ж<ActionNode> newAction(this ж<Tree> Ꮡt, Pos pos, nint line, ж<PipeNode> Ꮡpipe) {
+    ref var t = ref Ꮡt.Value;
+    ref var pipe = ref Ꮡpipe.Value;
 
-    return Ꮡ(new ActionNode(tr: t, NodeType: NodeAction, Pos: pos, Line: line, Pipe: pipe));
+    return Ꮡ(new ActionNode(tr: Ꮡt, NodeType: NodeAction, Pos: pos, Line: line, Pipe: Ꮡpipe));
 }
 
 [GoRecv] public static @string String(this ref ActionNode a) {
-    ref var sb = ref heap(new strings_package.Builder(), out var Ꮡsb);
+    ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     a.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoRecv] public static void writeTo(this ref ActionNode a, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref ActionNode a, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
-    sb.WriteString("{{"u8);
+    Ꮡsb.WriteString("{{"u8);
     a.Pipe.writeTo(Ꮡsb);
-    sb.WriteString("}}"u8);
+    Ꮡsb.WriteString("}}"u8);
 }
 
 [GoRecv] internal static ж<Tree> tree(this ref ActionNode a) {
@@ -294,7 +312,7 @@ public static readonly NodeType NodeContinue = 22;    // A continue action.
 }
 
 [GoRecv] public static Node Copy(this ref ActionNode a) {
-    return ~a.tr.newAction(a.Pos, a.Line, a.Pipe.CopyPipe());
+    return new ActionNodeжNode(a.tr.newAction(a.Pos, a.Line, a.Pipe.CopyPipe()));
 }
 
 // CommandNode holds a command (a pipeline inside an evaluating action).
@@ -305,32 +323,34 @@ public static readonly NodeType NodeContinue = 22;    // A continue action.
     public slice<Node> Args; // Arguments in lexical order: Identifier, field, or constant.
 }
 
-[GoRecv] internal static ж<CommandNode> newCommand(this ref Tree t, Pos pos) {
-    return Ꮡ(new CommandNode(tr: t, NodeType: NodeCommand, Pos: pos));
+internal static ж<CommandNode> newCommand(this ж<Tree> Ꮡt, Pos pos) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡ(new CommandNode(tr: Ꮡt, NodeType: NodeCommand, Pos: pos));
 }
 
 [GoRecv] internal static void append(this ref CommandNode c, Node arg) {
-    c.Args = append(c.Args, arg);
+    c.Args = builtin.append(c.Args, arg);
 }
 
 [GoRecv] public static @string String(this ref CommandNode c) {
-    ref var sb = ref heap(new strings_package.Builder(), out var Ꮡsb);
+    ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     c.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoRecv] public static void writeTo(this ref CommandNode c, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref CommandNode c, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
     foreach (var (i, arg) in c.Args) {
         if (i > 0) {
-            sb.WriteByte((rune)' ');
+            Ꮡsb.WriteByte((rune)' ');
         }
         {
-            var (argΔ1, ok) = arg._<PipeNode.val>(ᐧ); if (ok) {
-                sb.WriteByte((rune)'(');
+            var (argΔ1, ok) = arg._<ж<PipeNode>>(ᐧ); if (ok) {
+                Ꮡsb.WriteByte((rune)'(');
                 argΔ1.writeTo(Ꮡsb);
-                sb.WriteByte((rune)')');
+                Ꮡsb.WriteByte((rune)')');
                 continue;
             }
         }
@@ -342,15 +362,17 @@ public static readonly NodeType NodeContinue = 22;    // A continue action.
     return c.tr;
 }
 
-[GoRecv("capture")] public static Node Copy(this ref CommandNode c) {
+public static Node Copy(this ж<CommandNode> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     if (c == nil) {
-        return ~c;
+        return new CommandNodeжNode(Ꮡc);
     }
     var n = c.tr.newCommand(c.Pos);
     foreach (var (_, cΔ1) in c.Args) {
         n.append(cΔ1.Copy());
     }
-    return ~n;
+    return new CommandNodeжNode(n);
 }
 
 // IdentifierNode holds an identifier.
@@ -369,29 +391,32 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 // SetPos sets the position. [NewIdentifier] is a public method so we can't modify its signature.
 // Chained for convenience.
 // TODO: fix one day?
-[GoRecv("capture")] public static ж<IdentifierNode> SetPos(this ref IdentifierNode i, Pos pos) {
+public static ж<IdentifierNode> SetPos(this ж<IdentifierNode> Ꮡi, Pos pos) {
+    ref var i = ref Ꮡi.Value;
+
     i.Pos = pos;
-    return SetPosꓸᏑi;
+    return Ꮡi;
 }
 
 // SetTree sets the parent tree for the node. [NewIdentifier] is a public method so we can't modify its signature.
 // Chained for convenience.
 // TODO: fix one day?
-[GoRecv("capture")] public static ж<IdentifierNode> SetTree(this ref IdentifierNode i, ж<Tree> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+public static ж<IdentifierNode> SetTree(this ж<IdentifierNode> Ꮡi, ж<Tree> Ꮡt) {
+    ref var i = ref Ꮡi.Value;
+    ref var t = ref Ꮡt.Value;
 
-    i.tr = t;
-    return SetTreeꓸᏑi;
+    i.tr = Ꮡt;
+    return Ꮡi;
 }
 
 [GoRecv] public static @string String(this ref IdentifierNode i) {
     return i.Ident;
 }
 
-[GoRecv] public static void writeTo(this ref IdentifierNode i, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref IdentifierNode i, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
-    sb.WriteString(i.String());
+    Ꮡsb.WriteString(i.String());
 }
 
 [GoRecv] internal static ж<Tree> tree(this ref IdentifierNode i) {
@@ -399,7 +424,7 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 }
 
 [GoRecv] public static Node Copy(this ref IdentifierNode i) {
-    return ~NewIdentifier(i.Ident).SetTree(i.tr).SetPos(i.Pos);
+    return new IdentifierNodeжNode(NewIdentifier(i.Ident).SetTree(i.tr).SetPos(i.Pos));
 }
 
 // VariableNode holds a list of variable names, possibly with chained field
@@ -411,24 +436,26 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     public slice<@string> Ident; // Variable name and fields in lexical order.
 }
 
-[GoRecv] internal static ж<VariableNode> newVariable(this ref Tree t, Pos pos, @string ident) {
-    return Ꮡ(new VariableNode(tr: t, NodeType: NodeVariable, Pos: pos, Ident: strings.Split(ident, "."u8)));
+internal static ж<VariableNode> newVariable(this ж<Tree> Ꮡt, Pos pos, @string ident) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡ(new VariableNode(tr: Ꮡt, NodeType: NodeVariable, Pos: pos, Ident: strings.Split(ident, "."u8)));
 }
 
 [GoRecv] public static @string String(this ref VariableNode v) {
-    ref var sb = ref heap(new strings_package.Builder(), out var Ꮡsb);
+    ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     v.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoRecv] public static void writeTo(this ref VariableNode v, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref VariableNode v, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
     foreach (var (i, id) in v.Ident) {
         if (i > 0) {
-            sb.WriteByte((rune)'.');
+            Ꮡsb.WriteByte((rune)'.');
         }
-        sb.WriteString(id);
+        Ꮡsb.WriteString(id);
     }
 }
 
@@ -437,7 +464,7 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 }
 
 [GoRecv] public static Node Copy(this ref VariableNode v) {
-    return new VariableNode(tr: v.tr, NodeType: NodeVariable, Pos: v.Pos, Ident: append(new @string[]{}.slice(), v.Ident.ꓸꓸꓸ));
+    return new VariableNodeжNode(Ꮡ(new VariableNode(tr: v.tr, NodeType: NodeVariable, Pos: v.Pos, Ident: builtin.append(new @string[]{}.slice(), v.Ident.ꓸꓸꓸ))));
 }
 
 // DotNode holds the special identifier '.'.
@@ -447,8 +474,10 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     internal ж<Tree> tr;
 }
 
-[GoRecv] internal static ж<DotNode> newDot(this ref Tree t, Pos pos) {
-    return Ꮡ(new DotNode(tr: t, NodeType: NodeDot, Pos: pos));
+internal static ж<DotNode> newDot(this ж<Tree> Ꮡt, Pos pos) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡ(new DotNode(tr: Ꮡt, NodeType: NodeDot, Pos: pos));
 }
 
 [GoRecv] public static NodeType Type(this ref DotNode d) {
@@ -462,10 +491,10 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     return "."u8;
 }
 
-[GoRecv] public static void writeTo(this ref DotNode d, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref DotNode d, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
-    sb.WriteString(d.String());
+    Ꮡsb.WriteString(d.String());
 }
 
 [GoRecv] internal static ж<Tree> tree(this ref DotNode d) {
@@ -473,7 +502,7 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 }
 
 [GoRecv] public static Node Copy(this ref DotNode d) {
-    return ~d.tr.newDot(d.Pos);
+    return new DotNodeжNode(d.tr.newDot(d.Pos));
 }
 
 // NilNode holds the special identifier 'nil' representing an untyped nil constant.
@@ -483,8 +512,10 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     internal ж<Tree> tr;
 }
 
-[GoRecv] internal static ж<NilNode> newNil(this ref Tree t, Pos pos) {
-    return Ꮡ(new NilNode(tr: t, NodeType: NodeNil, Pos: pos));
+internal static ж<NilNode> newNil(this ж<Tree> Ꮡt, Pos pos) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡ(new NilNode(tr: Ꮡt, NodeType: NodeNil, Pos: pos));
 }
 
 [GoRecv] public static NodeType Type(this ref NilNode n) {
@@ -498,10 +529,10 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     return "nil"u8;
 }
 
-[GoRecv] public static void writeTo(this ref NilNode n, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref NilNode n, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
-    sb.WriteString(n.String());
+    Ꮡsb.WriteString(n.String());
 }
 
 [GoRecv] internal static ж<Tree> tree(this ref NilNode n) {
@@ -509,7 +540,7 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 }
 
 [GoRecv] public static Node Copy(this ref NilNode n) {
-    return ~n.tr.newNil(n.Pos);
+    return new NilNodeжNode(n.tr.newNil(n.Pos));
 }
 
 // FieldNode holds a field (identifier starting with '.').
@@ -522,23 +553,25 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     public slice<@string> Ident; // The identifiers in lexical order.
 }
 
-[GoRecv] internal static ж<FieldNode> newField(this ref Tree t, Pos pos, @string ident) {
-    return Ꮡ(new FieldNode(tr: t, NodeType: NodeField, Pos: pos, Ident: strings.Split(ident[1..], "."u8)));
+internal static ж<FieldNode> newField(this ж<Tree> Ꮡt, Pos pos, @string ident) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡ(new FieldNode(tr: Ꮡt, NodeType: NodeField, Pos: pos, Ident: strings.Split(ident[1..], "."u8)));
 }
 
 // [1:] to drop leading period
 [GoRecv] public static @string String(this ref FieldNode f) {
-    ref var sb = ref heap(new strings_package.Builder(), out var Ꮡsb);
+    ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     f.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoRecv] public static void writeTo(this ref FieldNode f, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref FieldNode f, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
     foreach (var (_, id) in f.Ident) {
-        sb.WriteByte((rune)'.');
-        sb.WriteString(id);
+        Ꮡsb.WriteByte((rune)'.');
+        Ꮡsb.WriteString(id);
     }
 }
 
@@ -547,7 +580,7 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 }
 
 [GoRecv] public static Node Copy(this ref FieldNode f) {
-    return new FieldNode(tr: f.tr, NodeType: NodeField, Pos: f.Pos, Ident: append(new @string[]{}.slice(), f.Ident.ꓸꓸꓸ));
+    return new FieldNodeжNode(Ꮡ(new FieldNode(tr: f.tr, NodeType: NodeField, Pos: f.Pos, Ident: builtin.append(new @string[]{}.slice(), f.Ident.ꓸꓸꓸ))));
 }
 
 // ChainNode holds a term followed by a chain of field accesses (identifier starting with '.').
@@ -561,8 +594,10 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     public slice<@string> Field; // The identifiers in lexical order.
 }
 
-[GoRecv] internal static ж<ChainNode> newChain(this ref Tree t, Pos pos, Node node) {
-    return Ꮡ(new ChainNode(tr: t, NodeType: NodeChain, Pos: pos, Node: node));
+internal static ж<ChainNode> newChain(this ж<Tree> Ꮡt, Pos pos, Node node) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡ(new ChainNode(tr: Ꮡt, NodeType: NodeChain, Pos: pos, Node: node));
 }
 
 // Add adds the named field (which should start with a period) to the end of the chain.
@@ -575,30 +610,30 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     if (field == ""u8) {
         throw panic("empty field");
     }
-    c.Field = append(c.Field, field);
+    c.Field = builtin.append(c.Field, field);
 }
 
 [GoRecv] public static @string String(this ref ChainNode c) {
-    ref var sb = ref heap(new strings_package.Builder(), out var Ꮡsb);
+    ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     c.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoRecv] public static void writeTo(this ref ChainNode c, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref ChainNode c, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
     {
-        var (_, ok) = c.Node._<PipeNode.val>(ᐧ); if (ok){
-            sb.WriteByte((rune)'(');
+        var (_, ok) = c.Node._<ж<PipeNode>>(ᐧ); if (ok){
+            Ꮡsb.WriteByte((rune)'(');
             c.Node.writeTo(Ꮡsb);
-            sb.WriteByte((rune)')');
+            Ꮡsb.WriteByte((rune)')');
         } else {
             c.Node.writeTo(Ꮡsb);
         }
     }
     foreach (var (_, field) in c.Field) {
-        sb.WriteByte((rune)'.');
-        sb.WriteString(field);
+        Ꮡsb.WriteByte((rune)'.');
+        Ꮡsb.WriteString(field);
     }
 }
 
@@ -607,7 +642,7 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 }
 
 [GoRecv] public static Node Copy(this ref ChainNode c) {
-    return new ChainNode(tr: c.tr, NodeType: NodeChain, Pos: c.Pos, Node: c.Node, Field: append(new @string[]{}.slice(), c.Field.ꓸꓸꓸ));
+    return new ChainNodeжNode(Ꮡ(new ChainNode(tr: c.tr, NodeType: NodeChain, Pos: c.Pos, Node: c.Node, Field: builtin.append(new @string[]{}.slice(), c.Field.ꓸꓸꓸ))));
 }
 
 // BoolNode holds a boolean constant.
@@ -618,8 +653,10 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     public bool True; // The value of the boolean constant.
 }
 
-[GoRecv] internal static ж<BoolNode> newBool(this ref Tree t, Pos pos, bool true) {
-    return Ꮡ(new BoolNode(tr: t, NodeType: NodeBool, Pos: pos, True: true));
+internal static ж<BoolNode> newBool(this ж<Tree> Ꮡt, Pos pos, bool @true) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡ(new BoolNode(tr: Ꮡt, NodeType: NodeBool, Pos: pos, True: @true));
 }
 
 [GoRecv] public static @string String(this ref BoolNode b) {
@@ -629,10 +666,10 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     return "false"u8;
 }
 
-[GoRecv] public static void writeTo(this ref BoolNode b, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref BoolNode b, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
-    sb.WriteString(b.String());
+    Ꮡsb.WriteString(b.String());
 }
 
 [GoRecv] internal static ж<Tree> tree(this ref BoolNode b) {
@@ -640,7 +677,7 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 }
 
 [GoRecv] public static Node Copy(this ref BoolNode b) {
-    return ~b.tr.newBool(b.Pos, b.True);
+    return new BoolNodeжNode(b.tr.newBool(b.Pos, b.True));
 }
 
 // NumberNode holds a number: signed or unsigned integer, float, or complex.
@@ -661,8 +698,10 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     public @string Text;    // The original textual representation from the input.
 }
 
-[GoRecv] internal static (ж<NumberNode>, error) newNumber(this ref Tree t, Pos pos, @string text, itemType typ) {
-    var n = Ꮡ(new NumberNode(tr: t, NodeType: NodeNumber, Pos: pos, Text: text));
+internal static (ж<NumberNode>, error) newNumber(this ж<Tree> Ꮡt, Pos pos, @string text, itemType typ) {
+    ref var t = ref Ꮡt.Value;
+
+    var n = Ꮡ(new NumberNode(tr: Ꮡt, NodeType: NodeNumber, Pos: pos, Text: text));
     var exprᴛ1 = typ;
     if (exprᴛ1 == itemCharConstant) {
         var (rune, _, tail, errΔ3) = strconv.UnquoteChar(text[1..], text[0]);
@@ -672,23 +711,23 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
         if (tail != "'"u8) {
             return (default!, fmt.Errorf("malformed character constant: %s"u8, text));
         }
-        n.val.Int64 = ((int64)rune);
-        n.val.IsInt = true;
-        n.val.Uint64 = ((uint64)rune);
-        n.val.IsUint = true;
-        n.val.Float64 = ((float64)rune);
-        n.val.IsFloat = true;
+        n.Value.Int64 = (int64)rune;
+        n.Value.IsInt = true;
+        n.Value.Uint64 = (uint64)rune;
+        n.Value.IsUint = true;
+        n.Value.Float64 = (float64)rune;
+        n.Value.IsFloat = true;
         return (n, default!);
     }
     if (exprᴛ1 == itemComplex) {
         {
             var (_, errΔ4) = fmt.Sscan(text, // odd but those are the rules.
  // fmt.Sscan can parse the pair, so let it do the work.
- Ꮡ((~n).Complex128)); if (errΔ4 != default!) {
+ n.of(NumberNode.ᏑComplex128)); if (errΔ4 != default!) {
                 return (default!, errΔ4);
             }
         }
-        n.val.IsComplex = true;
+        n.Value.IsComplex = true;
         n.simplifyComplex();
         return (n, default!);
     }
@@ -697,8 +736,8 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     if (len(text) > 0 && text[len(text) - 1] == (rune)'i') {
         var (f, errΔ5) = strconv.ParseFloat(text[..(int)(len(text) - 1)], 64);
         if (errΔ5 == default!) {
-            n.val.IsComplex = true;
-            n.val.Complex128 = complex(0, f);
+            n.Value.IsComplex = true;
+            n.Value.Complex128 = complex(0, f);
             n.simplifyComplex();
             return (n, default!);
         }
@@ -707,27 +746,27 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     var (u, err) = strconv.ParseUint(text, 0, 64);
     // will fail for -0; fixed below.
     if (err == default!) {
-        n.val.IsUint = true;
-        n.val.Uint64 = u;
+        n.Value.IsUint = true;
+        n.Value.Uint64 = u;
     }
-    var (i, err) = strconv.ParseInt(text, 0, 64);
+    (var i, err) = strconv.ParseInt(text, 0, 64);
     if (err == default!) {
-        n.val.IsInt = true;
-        n.val.Int64 = i;
+        n.Value.IsInt = true;
+        n.Value.Int64 = i;
         if (i == 0) {
-            n.val.IsUint = true;
+            n.Value.IsUint = true;
             // in case of -0.
-            n.val.Uint64 = u;
+            n.Value.Uint64 = u;
         }
     }
     // If an integer extraction succeeded, promote the float.
     if ((~n).IsInt){
-        n.val.IsFloat = true;
-        n.val.Float64 = ((float64)(~n).Int64);
+        n.Value.IsFloat = true;
+        n.Value.Float64 = (float64)(~n).Int64;
     } else 
     if ((~n).IsUint){
-        n.val.IsFloat = true;
-        n.val.Float64 = ((float64)(~n).Uint64);
+        n.Value.IsFloat = true;
+        n.Value.Float64 = (float64)(~n).Uint64;
     } else {
         var (f, errΔ6) = strconv.ParseFloat(text, 64);
         if (errΔ6 == default!) {
@@ -736,16 +775,16 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
             if (!strings.ContainsAny(text, ".eEpP"u8)) {
                 return (default!, fmt.Errorf("integer overflow: %q"u8, text));
             }
-            n.val.IsFloat = true;
-            n.val.Float64 = f;
+            n.Value.IsFloat = true;
+            n.Value.Float64 = f;
             // If a floating-point extraction succeeded, extract the int if needed.
-            if (!(~n).IsInt && ((float64)((int64)f)) == f) {
-                n.val.IsInt = true;
-                n.val.Int64 = ((int64)f);
+            if (!(~n).IsInt && (float64)(int64)f == f) {
+                n.Value.IsInt = true;
+                n.Value.Int64 = (int64)f;
             }
-            if (!(~n).IsUint && ((float64)((uint64)f)) == f) {
-                n.val.IsUint = true;
-                n.val.Uint64 = ((uint64)f);
+            if (!(~n).IsUint && (float64)(uint64)f == f) {
+                n.Value.IsUint = true;
+                n.Value.Uint64 = (uint64)f;
             }
         }
     }
@@ -761,13 +800,13 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     n.IsFloat = imag(n.Complex128) == 0;
     if (n.IsFloat) {
         n.Float64 = real(n.Complex128);
-        n.IsInt = ((float64)((int64)n.Float64)) == n.Float64;
+        n.IsInt = (float64)(int64)n.Float64 == n.Float64;
         if (n.IsInt) {
-            n.Int64 = ((int64)n.Float64);
+            n.Int64 = (int64)n.Float64;
         }
-        n.IsUint = ((float64)((uint64)n.Float64)) == n.Float64;
+        n.IsUint = (float64)(uint64)n.Float64 == n.Float64;
         if (n.IsUint) {
-            n.Uint64 = ((uint64)n.Float64);
+            n.Uint64 = (uint64)n.Float64;
         }
     }
 }
@@ -776,10 +815,10 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     return n.Text;
 }
 
-[GoRecv] public static void writeTo(this ref NumberNode n, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref NumberNode n, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
-    sb.WriteString(n.String());
+    Ꮡsb.WriteString(n.String());
 }
 
 [GoRecv] internal static ж<Tree> tree(this ref NumberNode n) {
@@ -788,9 +827,9 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 
 [GoRecv] public static Node Copy(this ref NumberNode n) {
     var nn = @new<NumberNode>();
-    nn.val = n;
+    nn.Value = n;
     // Easy, fast, correct.
-    return ~nn;
+    return new NumberNodeжNode(nn);
 }
 
 // StringNode holds a string constant. The value has been "unquoted".
@@ -802,18 +841,20 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     public @string Text; // The string, after quote processing.
 }
 
-[GoRecv] internal static ж<StringNode> newString(this ref Tree t, Pos pos, @string orig, @string text) {
-    return Ꮡ(new StringNode(tr: t, NodeType: NodeString, Pos: pos, Quoted: orig, Text: text));
+internal static ж<StringNode> newString(this ж<Tree> Ꮡt, Pos pos, @string orig, @string text) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡ(new StringNode(tr: Ꮡt, NodeType: NodeString, Pos: pos, Quoted: orig, Text: text));
 }
 
 [GoRecv] public static @string String(this ref StringNode s) {
     return s.Quoted;
 }
 
-[GoRecv] public static void writeTo(this ref StringNode s, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref StringNode s, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
-    sb.WriteString(s.String());
+    Ꮡsb.WriteString(s.String());
 }
 
 [GoRecv] internal static ж<Tree> tree(this ref StringNode s) {
@@ -821,7 +862,7 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 }
 
 [GoRecv] public static Node Copy(this ref StringNode s) {
-    return ~s.tr.newString(s.Pos, s.Quoted, s.Text);
+    return new StringNodeжNode(s.tr.newString(s.Pos, s.Quoted, s.Text));
 }
 
 // endNode represents an {{end}} action.
@@ -832,8 +873,10 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     internal ж<Tree> tr;
 }
 
-[GoRecv] internal static ж<endNode> newEnd(this ref Tree t, Pos pos) {
-    return Ꮡ(new endNode(tr: t, NodeType: nodeEnd, Pos: pos));
+internal static ж<endNode> newEnd(this ж<Tree> Ꮡt, Pos pos) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡ(new endNode(tr: Ꮡt, NodeType: nodeEnd, Pos: pos));
 }
 
 [GoRecv] internal static @string String(this ref endNode e) {
@@ -841,9 +884,9 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 }
 
 [GoRecv] internal static void writeTo(this ref endNode e, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+    ref var sb = ref Ꮡsb.Value;
 
-    sb.WriteString(e.String());
+    Ꮡsb.WriteString(e.String());
 }
 
 [GoRecv] internal static ж<Tree> tree(this ref endNode e) {
@@ -851,7 +894,7 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 }
 
 [GoRecv] internal static Node Copy(this ref endNode e) {
-    return ~e.tr.newEnd(e.Pos);
+    return new endNodeжNode(e.tr.newEnd(e.Pos));
 }
 
 // elseNode represents an {{else}} action. Does not appear in the final tree.
@@ -862,8 +905,10 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     public nint Line; // The line number in the input. Deprecated: Kept for compatibility.
 }
 
-[GoRecv] internal static ж<elseNode> newElse(this ref Tree t, Pos pos, nint line) {
-    return Ꮡ(new elseNode(tr: t, NodeType: nodeElse, Pos: pos, Line: line));
+internal static ж<elseNode> newElse(this ж<Tree> Ꮡt, Pos pos, nint line) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡ(new elseNode(tr: Ꮡt, NodeType: nodeElse, Pos: pos, Line: line));
 }
 
 [GoRecv] internal static NodeType Type(this ref elseNode e) {
@@ -875,9 +920,9 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 }
 
 [GoRecv] internal static void writeTo(this ref elseNode e, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+    ref var sb = ref Ꮡsb.Value;
 
-    sb.WriteString(e.String());
+    Ꮡsb.WriteString(e.String());
 }
 
 [GoRecv] internal static ж<Tree> tree(this ref elseNode e) {
@@ -885,7 +930,7 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 }
 
 [GoRecv] internal static Node Copy(this ref elseNode e) {
-    return ~e.tr.newElse(e.Pos, e.Line);
+    return new elseNodeжNode(e.tr.newElse(e.Pos, e.Line));
 }
 
 // BranchNode is the common representation of if, range, and with.
@@ -900,13 +945,13 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 }
 
 [GoRecv] public static @string String(this ref BranchNode b) {
-    ref var sb = ref heap(new strings_package.Builder(), out var Ꮡsb);
+    ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     b.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoRecv] public static void writeTo(this ref BranchNode b, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref BranchNode b, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
     @string name = ""u8;
     var exprᴛ1 = b.NodeType;
@@ -923,17 +968,17 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
         throw panic("unknown branch type");
     }
 
-    sb.WriteString("{{"u8);
-    sb.WriteString(name);
-    sb.WriteByte((rune)' ');
+    Ꮡsb.WriteString("{{"u8);
+    Ꮡsb.WriteString(name);
+    Ꮡsb.WriteByte((rune)' ');
     b.Pipe.writeTo(Ꮡsb);
-    sb.WriteString("}}"u8);
+    Ꮡsb.WriteString("}}"u8);
     b.List.writeTo(Ꮡsb);
     if (b.ElseList != nil) {
-        sb.WriteString("{{else}}"u8);
+        Ꮡsb.WriteString("{{else}}"u8);
         b.ElseList.writeTo(Ꮡsb);
     }
-    sb.WriteString("{{end}}"u8);
+    Ꮡsb.WriteString("{{end}}"u8);
 }
 
 [GoRecv] internal static ж<Tree> tree(this ref BranchNode b) {
@@ -943,13 +988,13 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 [GoRecv] public static Node Copy(this ref BranchNode b) {
     var exprᴛ1 = b.NodeType;
     if (exprᴛ1 == NodeIf) {
-        return ~b.tr.newIf(b.Pos, b.Line, b.Pipe, b.List, b.ElseList);
+        return new IfNodeжNode(b.tr.newIf(b.Pos, b.Line, b.Pipe, b.List, b.ElseList));
     }
     if (exprᴛ1 == NodeRange) {
-        return ~b.tr.newRange(b.Pos, b.Line, b.Pipe, b.List, b.ElseList);
+        return new RangeNodeжNode(b.tr.newRange(b.Pos, b.Line, b.Pipe, b.List, b.ElseList));
     }
     if (exprᴛ1 == NodeWith) {
-        return ~b.tr.newWith(b.Pos, b.Line, b.Pipe, b.List, b.ElseList);
+        return new WithNodeжNode(b.tr.newWith(b.Pos, b.Line, b.Pipe, b.List, b.ElseList));
     }
     { /* default: */
         throw panic("unknown branch type");
@@ -962,16 +1007,17 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     public partial ref BranchNode BranchNode { get; }
 }
 
-[GoRecv] public static ж<IfNode> newIf(this ref Tree t, Pos pos, nint line, ж<PipeNode> Ꮡpipe, ж<ListNode> Ꮡlist, ж<ListNode> ᏑelseList) {
-    ref var pipe = ref Ꮡpipe.val;
-    ref var list = ref Ꮡlist.val;
-    ref var elseList = ref ᏑelseList.val;
+internal static ж<IfNode> newIf(this ж<Tree> Ꮡt, Pos pos, nint line, ж<PipeNode> Ꮡpipe, ж<ListNode> Ꮡlist, ж<ListNode> ᏑelseList) {
+    ref var t = ref Ꮡt.Value;
+    ref var pipe = ref Ꮡpipe.Value;
+    ref var list = ref Ꮡlist.Value;
+    ref var elseList = ref ᏑelseList.Value;
 
-    return Ꮡ(new IfNode(new BranchNode(tr: t, NodeType: NodeIf, Pos: pos, Line: line, Pipe: pipe, List: list, ElseList: elseList)));
+    return Ꮡ(new IfNode(new BranchNode(tr: Ꮡt, NodeType: NodeIf, Pos: pos, Line: line, Pipe: Ꮡpipe, List: Ꮡlist, ElseList: ᏑelseList)));
 }
 
 [GoRecv] public static Node Copy(this ref IfNode i) {
-    return ~i.tr.newIf(i.Pos, i.Line, i.Pipe.CopyPipe(), i.List.CopyList(), i.ElseList.CopyList());
+    return new IfNodeжNode(i.tr.newIf(i.Pos, i.Line, i.Pipe.CopyPipe(), i.List.CopyList(), i.ElseList.CopyList()));
 }
 
 // BreakNode represents a {{break}} action.
@@ -982,12 +1028,14 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     public nint Line;
 }
 
-[GoRecv] internal static ж<BreakNode> newBreak(this ref Tree t, Pos pos, nint line) {
-    return Ꮡ(new BreakNode(tr: t, NodeType: NodeBreak, Pos: pos, Line: line));
+internal static ж<BreakNode> newBreak(this ж<Tree> Ꮡt, Pos pos, nint line) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡ(new BreakNode(tr: Ꮡt, NodeType: NodeBreak, Pos: pos, Line: line));
 }
 
 [GoRecv] public static Node Copy(this ref BreakNode b) {
-    return ~b.tr.newBreak(b.Pos, b.Line);
+    return new BreakNodeжNode(b.tr.newBreak(b.Pos, b.Line));
 }
 
 [GoRecv] public static @string String(this ref BreakNode b) {
@@ -998,10 +1046,10 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     return b.tr;
 }
 
-[GoRecv] public static void writeTo(this ref BreakNode b, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref BreakNode b, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
-    sb.WriteString("{{break}}"u8);
+    Ꮡsb.WriteString("{{break}}"u8);
 }
 
 // ContinueNode represents a {{continue}} action.
@@ -1012,12 +1060,14 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     public nint Line;
 }
 
-[GoRecv] internal static ж<ContinueNode> newContinue(this ref Tree t, Pos pos, nint line) {
-    return Ꮡ(new ContinueNode(tr: t, NodeType: NodeContinue, Pos: pos, Line: line));
+internal static ж<ContinueNode> newContinue(this ж<Tree> Ꮡt, Pos pos, nint line) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡ(new ContinueNode(tr: Ꮡt, NodeType: NodeContinue, Pos: pos, Line: line));
 }
 
 [GoRecv] public static Node Copy(this ref ContinueNode c) {
-    return ~c.tr.newContinue(c.Pos, c.Line);
+    return new ContinueNodeжNode(c.tr.newContinue(c.Pos, c.Line));
 }
 
 [GoRecv] public static @string String(this ref ContinueNode c) {
@@ -1028,10 +1078,10 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     return c.tr;
 }
 
-[GoRecv] public static void writeTo(this ref ContinueNode c, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref ContinueNode c, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
-    sb.WriteString("{{continue}}"u8);
+    Ꮡsb.WriteString("{{continue}}"u8);
 }
 
 // RangeNode represents a {{range}} action and its commands.
@@ -1039,16 +1089,17 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     public partial ref BranchNode BranchNode { get; }
 }
 
-[GoRecv] public static ж<RangeNode> newRange(this ref Tree t, Pos pos, nint line, ж<PipeNode> Ꮡpipe, ж<ListNode> Ꮡlist, ж<ListNode> ᏑelseList) {
-    ref var pipe = ref Ꮡpipe.val;
-    ref var list = ref Ꮡlist.val;
-    ref var elseList = ref ᏑelseList.val;
+internal static ж<RangeNode> newRange(this ж<Tree> Ꮡt, Pos pos, nint line, ж<PipeNode> Ꮡpipe, ж<ListNode> Ꮡlist, ж<ListNode> ᏑelseList) {
+    ref var t = ref Ꮡt.Value;
+    ref var pipe = ref Ꮡpipe.Value;
+    ref var list = ref Ꮡlist.Value;
+    ref var elseList = ref ᏑelseList.Value;
 
-    return Ꮡ(new RangeNode(new BranchNode(tr: t, NodeType: NodeRange, Pos: pos, Line: line, Pipe: pipe, List: list, ElseList: elseList)));
+    return Ꮡ(new RangeNode(new BranchNode(tr: Ꮡt, NodeType: NodeRange, Pos: pos, Line: line, Pipe: Ꮡpipe, List: Ꮡlist, ElseList: ᏑelseList)));
 }
 
 [GoRecv] public static Node Copy(this ref RangeNode r) {
-    return ~r.tr.newRange(r.Pos, r.Line, r.Pipe.CopyPipe(), r.List.CopyList(), r.ElseList.CopyList());
+    return new RangeNodeжNode(r.tr.newRange(r.Pos, r.Line, r.Pipe.CopyPipe(), r.List.CopyList(), r.ElseList.CopyList()));
 }
 
 // WithNode represents a {{with}} action and its commands.
@@ -1056,16 +1107,17 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     public partial ref BranchNode BranchNode { get; }
 }
 
-[GoRecv] public static ж<WithNode> newWith(this ref Tree t, Pos pos, nint line, ж<PipeNode> Ꮡpipe, ж<ListNode> Ꮡlist, ж<ListNode> ᏑelseList) {
-    ref var pipe = ref Ꮡpipe.val;
-    ref var list = ref Ꮡlist.val;
-    ref var elseList = ref ᏑelseList.val;
+internal static ж<WithNode> newWith(this ж<Tree> Ꮡt, Pos pos, nint line, ж<PipeNode> Ꮡpipe, ж<ListNode> Ꮡlist, ж<ListNode> ᏑelseList) {
+    ref var t = ref Ꮡt.Value;
+    ref var pipe = ref Ꮡpipe.Value;
+    ref var list = ref Ꮡlist.Value;
+    ref var elseList = ref ᏑelseList.Value;
 
-    return Ꮡ(new WithNode(new BranchNode(tr: t, NodeType: NodeWith, Pos: pos, Line: line, Pipe: pipe, List: list, ElseList: elseList)));
+    return Ꮡ(new WithNode(new BranchNode(tr: Ꮡt, NodeType: NodeWith, Pos: pos, Line: line, Pipe: Ꮡpipe, List: Ꮡlist, ElseList: ᏑelseList)));
 }
 
 [GoRecv] public static Node Copy(this ref WithNode w) {
-    return ~w.tr.newWith(w.Pos, w.Line, w.Pipe.CopyPipe(), w.List.CopyList(), w.ElseList.CopyList());
+    return new WithNodeжNode(w.tr.newWith(w.Pos, w.Line, w.Pipe.CopyPipe(), w.List.CopyList(), w.ElseList.CopyList()));
 }
 
 // TemplateNode represents a {{template}} action.
@@ -1078,28 +1130,29 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
     public ж<PipeNode> Pipe; // The command to evaluate as dot for the template.
 }
 
-[GoRecv] public static ж<TemplateNode> newTemplate(this ref Tree t, Pos pos, nint line, @string name, ж<PipeNode> Ꮡpipe) {
-    ref var pipe = ref Ꮡpipe.val;
+internal static ж<TemplateNode> newTemplate(this ж<Tree> Ꮡt, Pos pos, nint line, @string name, ж<PipeNode> Ꮡpipe) {
+    ref var t = ref Ꮡt.Value;
+    ref var pipe = ref Ꮡpipe.Value;
 
-    return Ꮡ(new TemplateNode(tr: t, NodeType: NodeTemplate, Pos: pos, Line: line, Name: name, Pipe: pipe));
+    return Ꮡ(new TemplateNode(tr: Ꮡt, NodeType: NodeTemplate, Pos: pos, Line: line, Name: name, Pipe: Ꮡpipe));
 }
 
 [GoRecv] public static @string String(this ref TemplateNode t) {
-    ref var sb = ref heap(new strings_package.Builder(), out var Ꮡsb);
+    ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     t.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoRecv] public static void writeTo(this ref TemplateNode t, ж<strings.Builder> Ꮡsb) {
-    ref var sb = ref Ꮡsb.val;
+[GoRecv] internal static void writeTo(this ref TemplateNode t, ж<strings.Builder> Ꮡsb) {
+    ref var sb = ref Ꮡsb.Value;
 
-    sb.WriteString("{{template "u8);
-    sb.WriteString(strconv.Quote(t.Name));
+    Ꮡsb.WriteString("{{template "u8);
+    Ꮡsb.WriteString(strconv.Quote(t.Name));
     if (t.Pipe != nil) {
-        sb.WriteByte((rune)' ');
+        Ꮡsb.WriteByte((rune)' ');
         t.Pipe.writeTo(Ꮡsb);
     }
-    sb.WriteString("}}"u8);
+    Ꮡsb.WriteString("}}"u8);
 }
 
 [GoRecv] internal static ж<Tree> tree(this ref TemplateNode t) {
@@ -1107,7 +1160,7 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 }
 
 [GoRecv] public static Node Copy(this ref TemplateNode t) {
-    return ~t.tr.newTemplate(t.Pos, t.Line, t.Name, t.Pipe.CopyPipe());
+    return new TemplateNodeжNode(t.tr.newTemplate(t.Pos, t.Line, t.Name, t.Pipe.CopyPipe()));
 }
 
 } // end parse_package

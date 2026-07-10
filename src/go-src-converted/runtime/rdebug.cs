@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using _ = unsafe_package; // for go:linkname
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
 
 partial class runtime_package {
 
@@ -11,8 +11,8 @@ partial class runtime_package {
 internal static nint /*out*/ setMaxStack(nint @in) {
     nint @out = default!;
 
-    @out = ((nint)maxstacksize);
-    maxstacksize = ((uintptr)@in);
+    @out = (nint)maxstacksize;
+    maxstacksize = (uintptr)@in;
     return @out;
 }
 
@@ -21,8 +21,8 @@ internal static bool /*old*/ setPanicOnFault(bool @new) {
     bool old = default!;
 
     var gp = getg();
-    old = gp.val.paniconfault;
-    gp.val.paniconfault = @new;
+    old = gp.Value.paniconfault;
+    gp.Value.paniconfault = @new;
     return old;
 }
 

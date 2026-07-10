@@ -3,10 +3,10 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using comment = go.doc.comment_package;
+using comment = global::go.go.doc.comment_package;
 using strings = strings_package;
 using unicode = unicode_package;
-using go.doc;
+using global::go.go.doc;
 
 partial class doc_package {
 
@@ -17,7 +17,9 @@ internal static @string firstSentence(@string s) {
     rune ppp = default!;
     rune pp = default!;
     rune p = default!;
-    foreach (var (i, q) in s) {
+    foreach (var (i, rᴛ1) in s) {
+        var q = rᴛ1;
+
         if (q == (rune)'\n' || q == (rune)'\r' || q == (rune)'\t') {
             q = (rune)' ';
         }
@@ -37,8 +39,8 @@ internal static @string firstSentence(@string s) {
 // Deprecated: New programs should use [Package.Synopsis] instead,
 // which handles links in text properly.
 public static @string Synopsis(@string text) {
-    Package p = default!;
-    return p.Synopsis(text);
+    ref var p = ref heap(new Package(), out var Ꮡp);
+    return Ꮡp.Synopsis(text);
 }
 
 // IllegalPrefixes is a list of lower-case prefixes that identify
@@ -58,7 +60,9 @@ public static slice<@string> IllegalPrefixes = new @string[]{
 // The result string has no \n, \r, or \t characters and uses only single
 // spaces between words. If text starts with any of the [IllegalPrefixes],
 // the result is the empty string.
-[GoRecv] public static @string Synopsis(this ref Package p, @string text) {
+public static @string Synopsis(this ж<Package> Ꮡp, @string text) {
+    ref var p = ref Ꮡp.Value;
+
     text = firstSentence(text);
     @string lower = strings.ToLower(text);
     foreach (var (_, prefix) in IllegalPrefixes) {
@@ -67,8 +71,8 @@ public static slice<@string> IllegalPrefixes = new @string[]{
         }
     }
     var pr = p.Printer();
-    pr.val.TextWidth = -1;
-    var d = p.Parser().Parse(text);
+    pr.Value.TextWidth = -1;
+    var d = Ꮡp.Parser().Parse(text);
     if (len((~d).Content) == 0) {
         return ""u8;
     }
@@ -77,7 +81,7 @@ public static slice<@string> IllegalPrefixes = new @string[]{
             return ""u8;
         }
     }
-    d.val.Content = (~d).Content[..1];
+    d.Value.Content = (~d).Content[..1];
     // might be blank lines, code blocks, etc in “first sentence”
     return strings.TrimSpace(((@string)pr.Text(d)));
 }

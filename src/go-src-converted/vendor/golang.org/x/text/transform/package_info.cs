@@ -38,7 +38,7 @@ using static go.vendor.golang.org.x.text.transform_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<chain, Transformer>]
+[assembly: GoImplement<chain, Transformer>(Pointer = true)]
 [assembly: GoImplement<discard, Transformer>]
 [assembly: GoImplement<nop, SpanningTransformer>]
 [assembly: GoImplement<removeF, Transformer>]

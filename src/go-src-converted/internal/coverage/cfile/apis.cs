@@ -4,12 +4,13 @@
 namespace go.@internal.coverage;
 
 using fmt = fmt_package;
-using coverage = @internal.coverage_package;
-using rtcov = @internal.coverage.rtcov_package;
+using coverage = go.@internal.coverage_package;
+using rtcov = go.@internal.coverage.rtcov_package;
 using io = io_package;
 using atomic = sync.atomic_package;
 using @unsafe = unsafe_package;
-using @internal;
+using go.@internal;
+using go.@internal.coverage;
 using sync;
 
 partial class cfile_package {
@@ -132,20 +133,20 @@ public static error ClearCounters() {
     // inconsistency when reading the counter array from the thread
     // running ClearCounters.
     foreach (var (_, c) in cl) {
-        var sd = @unsafe.Slice((ж<atomic.Uint32>)(uintptr)(new @unsafe.Pointer(c.Counters)), ((nint)c.Len));
+        var sd = @unsafe.Slice((ж<atomic.Uint32>)(uintptr)(new @unsafe.Pointer(c.Counters)), (nint)c.Len);
         for (nint i = 0; i < len(sd); i++) {
             // Skip ahead until the next non-zero value.
-            var sdi = sd[i].Load();
+            var sdi = Ꮡ(sd, i).Load();
             if (sdi == 0) {
                 continue;
             }
             // We found a function that was executed; clear its counters.
             var nCtrs = sdi;
-            for (nint j = 0; j < ((nint)nCtrs); j++) {
-                sd[i + coverage.FirstCtrOffset + j].Store(0);
+            for (nint j = 0; j < (nint)nCtrs; j++) {
+                Ꮡ(sd, i + (nint)coverage.FirstCtrOffset + j).Store(0);
             }
             // Move to next function.
-            i += coverage.FirstCtrOffset + ((nint)nCtrs) - 1;
+            i += (nint)coverage.FirstCtrOffset + (nint)nCtrs - 1;
         }
     }
     return default!;

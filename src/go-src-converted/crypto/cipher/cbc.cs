@@ -8,9 +8,10 @@
 namespace go.crypto;
 
 using bytes = bytes_package;
-using alias = crypto.@internal.alias_package;
-using subtle = crypto.subtle_package;
-using crypto.@internal;
+using alias = go.crypto.@internal.alias_package;
+using subtle = go.crypto.subtle_package;
+using go.crypto;
+using go.crypto.@internal;
 
 partial class cipher_package {
 
@@ -30,7 +31,7 @@ internal static ж<cbc> newCBC(Block b, slice<byte> iv) {
     ));
 }
 
-[GoType("struct{b crypto.cipher.Block; blockSize int; iv <>byte; tmp <>byte}")] partial struct cbcEncrypter;
+[GoType("cbc")] partial struct cbcEncrypter;
 
 // cbcEncAble is an interface implemented by ciphers that have a specific
 // optimized implementation of CBC encryption, like crypto/aes.
@@ -52,7 +53,7 @@ public static BlockMode NewCBCEncrypter(Block b, slice<byte> iv) {
             return cbc.NewCBCEncrypter(iv);
         }
     }
-    return ~((ж<cbcEncrypter>)(newCBC(b, iv)?.val ?? default!));
+    return new cbcEncrypterжBlockMode(Ꮡ((cbcEncrypter)(~newCBC(b, iv))));
 }
 
 // newCBCGenericEncrypter returns a BlockMode which encrypts in cipher block chaining
@@ -63,7 +64,7 @@ internal static BlockMode newCBCGenericEncrypter(Block b, slice<byte> iv) {
     if (len(iv) != b.BlockSize()) {
         throw panic("cipher.NewCBCEncrypter: IV length must equal block size");
     }
-    return ~((ж<cbcEncrypter>)(newCBC(b, iv)?.val ?? default!));
+    return new cbcEncrypterжBlockMode(Ꮡ((cbcEncrypter)(~newCBC(b, iv))));
 }
 
 [GoRecv] internal static nint BlockSize(this ref cbcEncrypter x) {
@@ -101,7 +102,7 @@ internal static BlockMode newCBCGenericEncrypter(Block b, slice<byte> iv) {
     copy(x.iv, iv);
 }
 
-[GoType("struct{b crypto.cipher.Block; blockSize int; iv <>byte; tmp <>byte}")] partial struct cbcDecrypter;
+[GoType("cbc")] partial struct cbcDecrypter;
 
 // cbcDecAble is an interface implemented by ciphers that have a specific
 // optimized implementation of CBC decryption, like crypto/aes.
@@ -123,7 +124,7 @@ public static BlockMode NewCBCDecrypter(Block b, slice<byte> iv) {
             return cbc.NewCBCDecrypter(iv);
         }
     }
-    return ~((ж<cbcDecrypter>)(newCBC(b, iv)?.val ?? default!));
+    return new cbcDecrypterжBlockMode(Ꮡ((cbcDecrypter)(~newCBC(b, iv))));
 }
 
 // newCBCGenericDecrypter returns a BlockMode which encrypts in cipher block chaining
@@ -134,7 +135,7 @@ internal static BlockMode newCBCGenericDecrypter(Block b, slice<byte> iv) {
     if (len(iv) != b.BlockSize()) {
         throw panic("cipher.NewCBCDecrypter: IV length must equal block size");
     }
-    return ~((ж<cbcDecrypter>)(newCBC(b, iv)?.val ?? default!));
+    return new cbcDecrypterжBlockMode(Ꮡ((cbcDecrypter)(~newCBC(b, iv))));
 }
 
 [GoRecv] internal static nint BlockSize(this ref cbcDecrypter x) {
@@ -173,7 +174,8 @@ internal static BlockMode newCBCGenericDecrypter(Block b, slice<byte> iv) {
     x.b.Decrypt(dst[(int)(start)..(int)(end)], src[(int)(start)..(int)(end)]);
     subtle.XORBytes(dst[(int)(start)..(int)(end)], dst[(int)(start)..(int)(end)], x.iv);
     // Set the new iv to the first block we copied earlier.
-    (x.iv, x.tmp) = (x.tmp, x.iv);
+    x.iv = x.tmp;
+    x.tmp = x.iv;
 }
 
 [GoRecv] internal static void SetIV(this ref cbcDecrypter x, slice<byte> iv) {

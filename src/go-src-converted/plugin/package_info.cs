@@ -27,6 +27,7 @@ using static go.plugin_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoTypeAlias("Symbol", "object")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter

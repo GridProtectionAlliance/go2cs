@@ -6,11 +6,11 @@ namespace go.@internal;
 using cmp = cmp_package;
 using binary = encoding.binary_package;
 using fmt = fmt_package;
-using @event = @internal.trace.event_package;
-using go122 = @internal.trace.@event.go122_package;
-using @internal.trace;
-using @internal.trace.@event;
+using @event = go.@internal.trace.event_package;
+using go122 = go.@internal.trace.@event.go122_package;
 using encoding;
+using go.@internal.trace;
+using go.@internal.trace.@event;
 
 partial class trace_package {
 
@@ -22,10 +22,11 @@ partial class trace_package {
     internal baseEvent ev; // last read event
 }
 
-[GoRecv] internal static (bool ok, error err) nextEvent(this ref batchCursor b, slice<batch> batches, frequency freq) {
+internal static (bool ok, error err) nextEvent(this ж<batchCursor> Ꮡb, slice<batch> batches, frequency freq) {
     bool ok = default!;
     error err = default!;
 
+    ref var b = ref Ꮡb.Value;
     // Batches should generally always have at least one event,
     // but let's be defensive about that and accept empty batches.
     while (b.idx < len(batches) && len(batches[b.idx].data) == b.dataOff) {
@@ -42,7 +43,7 @@ partial class trace_package {
         b.lastTs = freq.mul(batches[b.idx].time);
     }
     // Read an event out.
-    var (n, tsdiff, err) = readTimedBaseEvent(batches[b.idx].data[(int)(b.dataOff)..], Ꮡ(b.ev));
+    (var n, var tsdiff, err) = readTimedBaseEvent(batches[b.idx].data[(int)(b.dataOff)..], Ꮡb.of(batchCursor.Ꮡev));
     if (err != default!) {
         return (false, err);
     }
@@ -56,7 +57,7 @@ partial class trace_package {
 }
 
 [GoRecv] internal static nint compare(this ref batchCursor b, ж<batchCursor> Ꮡa) {
-    ref var a = ref Ꮡa.val;
+    ref var a = ref Ꮡa.Value;
 
     return cmp.Compare(b.ev.time, a.ev.time);
 }
@@ -69,12 +70,12 @@ partial class trace_package {
 // It requires that the event its reading be timed, which must
 // be the case for every event in a plain EventBatch.
 internal static (nint, timestamp, error) readTimedBaseEvent(slice<byte> b, ж<baseEvent> Ꮡe) {
-    ref var e = ref Ꮡe.val;
+    ref var e = ref Ꮡe.Value;
 
     // Get the event type.
     var typ = ((@event.Type)b[0]);
     var specs = go122.Specs();
-    if (((nint)typ) >= len(specs)) {
+    if ((nint)(uint8)typ >= len(specs)) {
         return (0, 0, fmt.Errorf("found invalid event type: %v"u8, typ));
     }
     e.typ = typ;
@@ -103,7 +104,7 @@ internal static (nint, timestamp, error) readTimedBaseEvent(slice<byte> b, ж<ba
 }
 
 internal static slice<ж<batchCursor>> heapInsert(slice<ж<batchCursor>> heap, ж<batchCursor> Ꮡbc) {
-    ref var bc = ref Ꮡbc.val;
+    ref var bc = ref Ꮡbc.Value;
 
     // Add the cursor to the end of the heap.
     heap = append(heap, Ꮡbc);
@@ -136,7 +137,7 @@ internal static slice<ж<batchCursor>> heapRemove(slice<ж<batchCursor>> heap, n
 }
 
 internal static nint heapSiftUp(slice<ж<batchCursor>> heap, nint i) {
-    while (i > 0 && heap[(i - 1) / 2].ev.time > heap[i].ev.time) {
+    while (i > 0 && (~heap[(i - 1) / 2]).ev.time > (~heap[i]).ev.time) {
         (heap[(i - 1) / 2], heap[i]) = (heap[i], heap[(i - 1) / 2]);
         i = (i - 1) / 2;
     }
@@ -160,11 +161,11 @@ internal static nint min3(slice<ж<batchCursor>> b, nint i0, nint i1, nint i2) {
     nint minIdx = i0;
     var minT = maxTime;
     if (i0 < len(b)) {
-        minT = b[i0].ev.time;
+        minT = b[i0].Value.ev.time;
     }
     if (i1 < len(b)) {
         {
-            var t = b[i1].ev.time; if (t < minT) {
+            var t = b[i1].Value.ev.time; if (t < minT) {
                 minT = t;
                 minIdx = i1;
             }
@@ -172,7 +173,7 @@ internal static nint min3(slice<ж<batchCursor>> b, nint i0, nint i1, nint i2) {
     }
     if (i2 < len(b)) {
         {
-            var t = b[i2].ev.time; if (t < minT) {
+            var t = b[i2].Value.ev.time; if (t < minT) {
                 minT = t;
                 minIdx = i2;
             }

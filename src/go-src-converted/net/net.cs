@@ -94,12 +94,12 @@ namespace go;
 using context = context_package;
 using errors = errors_package;
 using poll = @internal.poll_package;
-using io = io_package;
+using Δio = io_package;
 using os = os_package;
-using sync = sync_package;
+using Δsync = sync_package;
 using syscall = syscall_package;
 using time = time_package;
-using _ = unsafe_package; // for linkname
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
 using @internal;
 
 partial class net_package {
@@ -117,18 +117,9 @@ partial class net_package {
 // Conn is a generic stream-oriented network connection.
 //
 // Multiple goroutines may invoke methods on a Conn simultaneously.
-[GoType] partial interface Conn {
-    // Read reads data from the connection.
-    // Read can be made to time out and return an error after a fixed
-    // time limit; see SetDeadline and SetReadDeadline.
-    (nint n, error err) Read(slice<byte> b);
-    // Write writes data to the connection.
-    // Write can be made to time out and return an error after a fixed
-    // time limit; see SetDeadline and SetWriteDeadline.
-    (nint n, error err) Write(slice<byte> b);
-    // Close closes the connection.
-    // Any blocked Read or Write operations will be unblocked and return errors.
-    error Close();
+[GoType] partial interface Conn :
+    Δio.ReadWriteCloser
+{
     // LocalAddr returns the local network address, if known.
     ΔAddr LocalAddr();
     // RemoteAddr returns the remote network address, if known.
@@ -171,44 +162,52 @@ partial class net_package {
     internal ж<netFD> fd;
 }
 
-[GoRecv] internal static bool ok(this ref conn c) {
+internal static bool ok(this ж<conn> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     return c != nil && c.fd != nil;
 }
 
 // Implementation of the Conn interface.
 
 // Read implements the Conn Read method.
-[GoRecv] internal static (nint, error) Read(this ref conn c, slice<byte> b) {
-    if (!c.ok()) {
+internal static (nint, error) Read(this ж<conn> Ꮡc, slice<byte> b) {
+    ref var c = ref Ꮡc.Value;
+
+    if (!Ꮡc.ok()) {
         return (0, syscall.EINVAL);
     }
     var (n, err) = c.fd.Read(b);
-    if (err != default! && !AreEqual(err, io.EOF)) {
-        Ꮡerr = new OpError(Op: "read"u8, Net: c.fd.net, Source: c.fd.laddr, ΔAddr: c.fd.raddr, Err: err); err = ref Ꮡerr.val;
+    if (err != default! && !AreEqual(err, Δio.EOF)) {
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "read"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
     }
     return (n, err);
 }
 
 // Write implements the Conn Write method.
-[GoRecv] internal static (nint, error) Write(this ref conn c, slice<byte> b) {
-    if (!c.ok()) {
+internal static (nint, error) Write(this ж<conn> Ꮡc, slice<byte> b) {
+    ref var c = ref Ꮡc.Value;
+
+    if (!Ꮡc.ok()) {
         return (0, syscall.EINVAL);
     }
     var (n, err) = c.fd.Write(b);
     if (err != default!) {
-        Ꮡerr = new OpError(Op: "write"u8, Net: c.fd.net, Source: c.fd.laddr, ΔAddr: c.fd.raddr, Err: err); err = ref Ꮡerr.val;
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "write"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
     }
     return (n, err);
 }
 
 // Close closes the connection.
-[GoRecv] internal static error Close(this ref conn c) {
-    if (!c.ok()) {
+internal static error Close(this ж<conn> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    if (!Ꮡc.ok()) {
         return syscall.EINVAL;
     }
     var err = c.fd.Close();
     if (err != default!) {
-        Ꮡerr = new OpError(Op: "close"u8, Net: c.fd.net, Source: c.fd.laddr, ΔAddr: c.fd.raddr, Err: err); err = ref Ꮡerr.val;
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "close"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
     }
     return err;
 }
@@ -216,57 +215,67 @@ partial class net_package {
 // LocalAddr returns the local network address.
 // The Addr returned is shared by all invocations of LocalAddr, so
 // do not modify it.
-[GoRecv] internal static ΔAddr LocalAddr(this ref conn c) {
-    if (!c.ok()) {
+internal static ΔAddr LocalAddr(this ж<conn> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    if (!Ꮡc.ok()) {
         return default!;
     }
-    return c.fd.laddr;
+    return (~c.fd).laddr;
 }
 
 // RemoteAddr returns the remote network address.
 // The Addr returned is shared by all invocations of RemoteAddr, so
 // do not modify it.
-[GoRecv] internal static ΔAddr RemoteAddr(this ref conn c) {
-    if (!c.ok()) {
+internal static ΔAddr RemoteAddr(this ж<conn> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    if (!Ꮡc.ok()) {
         return default!;
     }
-    return c.fd.raddr;
+    return (~c.fd).raddr;
 }
 
 // SetDeadline implements the Conn SetDeadline method.
-[GoRecv] internal static error SetDeadline(this ref conn c, time.Time t) {
-    if (!c.ok()) {
+internal static error SetDeadline(this ж<conn> Ꮡc, time.Time t) {
+    ref var c = ref Ꮡc.Value;
+
+    if (!Ꮡc.ok()) {
         return syscall.EINVAL;
     }
     {
         var err = c.fd.SetDeadline(t); if (err != default!) {
-            return new OpError(Op: "set"u8, Net: c.fd.net, Source: default!, ΔAddr: c.fd.laddr, Err: err);
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: default!, Addr: (~c.fd).laddr, Err: err)));
         }
     }
     return default!;
 }
 
 // SetReadDeadline implements the Conn SetReadDeadline method.
-[GoRecv] internal static error SetReadDeadline(this ref conn c, time.Time t) {
-    if (!c.ok()) {
+internal static error SetReadDeadline(this ж<conn> Ꮡc, time.Time t) {
+    ref var c = ref Ꮡc.Value;
+
+    if (!Ꮡc.ok()) {
         return syscall.EINVAL;
     }
     {
         var err = c.fd.SetReadDeadline(t); if (err != default!) {
-            return new OpError(Op: "set"u8, Net: c.fd.net, Source: default!, ΔAddr: c.fd.laddr, Err: err);
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: default!, Addr: (~c.fd).laddr, Err: err)));
         }
     }
     return default!;
 }
 
 // SetWriteDeadline implements the Conn SetWriteDeadline method.
-[GoRecv] internal static error SetWriteDeadline(this ref conn c, time.Time t) {
-    if (!c.ok()) {
+internal static error SetWriteDeadline(this ж<conn> Ꮡc, time.Time t) {
+    ref var c = ref Ꮡc.Value;
+
+    if (!Ꮡc.ok()) {
         return syscall.EINVAL;
     }
     {
         var err = c.fd.SetWriteDeadline(t); if (err != default!) {
-            return new OpError(Op: "set"u8, Net: c.fd.net, Source: default!, ΔAddr: c.fd.laddr, Err: err);
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: default!, Addr: (~c.fd).laddr, Err: err)));
         }
     }
     return default!;
@@ -274,13 +283,15 @@ partial class net_package {
 
 // SetReadBuffer sets the size of the operating system's
 // receive buffer associated with the connection.
-[GoRecv] internal static error SetReadBuffer(this ref conn c, nint bytes) {
-    if (!c.ok()) {
+internal static error SetReadBuffer(this ж<conn> Ꮡc, nint bytes) {
+    ref var c = ref Ꮡc.Value;
+
+    if (!Ꮡc.ok()) {
         return syscall.EINVAL;
     }
     {
         var err = setReadBuffer(c.fd, bytes); if (err != default!) {
-            return new OpError(Op: "set"u8, Net: c.fd.net, Source: default!, ΔAddr: c.fd.laddr, Err: err);
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: default!, Addr: (~c.fd).laddr, Err: err)));
         }
     }
     return default!;
@@ -288,13 +299,15 @@ partial class net_package {
 
 // SetWriteBuffer sets the size of the operating system's
 // transmit buffer associated with the connection.
-[GoRecv] internal static error SetWriteBuffer(this ref conn c, nint bytes) {
-    if (!c.ok()) {
+internal static error SetWriteBuffer(this ж<conn> Ꮡc, nint bytes) {
+    ref var c = ref Ꮡc.Value;
+
+    if (!Ꮡc.ok()) {
         return syscall.EINVAL;
     }
     {
         var err = setWriteBuffer(c.fd, bytes); if (err != default!) {
-            return new OpError(Op: "set"u8, Net: c.fd.net, Source: default!, ΔAddr: c.fd.laddr, Err: err);
+            return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: default!, Addr: (~c.fd).laddr, Err: err)));
         }
     }
     return default!;
@@ -313,7 +326,7 @@ partial class net_package {
 
     (f, err) = c.fd.dup();
     if (err != default!) {
-        Ꮡerr = new OpError(Op: "file"u8, Net: c.fd.net, Source: c.fd.laddr, ΔAddr: c.fd.raddr, Err: err); err = ref Ꮡerr.val;
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "file"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
     }
     return (f, err);
 }
@@ -321,7 +334,9 @@ partial class net_package {
 // PacketConn is a generic packet-oriented network connection.
 //
 // Multiple goroutines may invoke methods on a PacketConn simultaneously.
-[GoType] partial interface PacketConn {
+[GoType] partial interface PacketConn :
+    Δio.Closer
+{
     // ReadFrom reads a packet from the connection,
     // copying the payload into p. It returns the number of
     // bytes copied into p and the return address that
@@ -337,9 +352,6 @@ partial class net_package {
     // fixed time limit; see SetDeadline and SetWriteDeadline.
     // On packet-oriented connections, write timeouts are rare.
     (nint n, error err) WriteTo(slice<byte> p, ΔAddr addr);
-    // Close closes the connection.
-    // Any blocked ReadFrom or WriteTo operations will be unblocked and return errors.
-    error Close();
     // LocalAddr returns the local network address, if known.
     ΔAddr LocalAddr();
     // SetDeadline sets the read and write deadlines associated
@@ -381,7 +393,8 @@ partial class net_package {
     public partial ref sync_package.Once Once { get; }
     internal nint val;
 }
-internal static listenerBacklogCacheᴛ1 listenerBacklogCache;
+internal static ж<listenerBacklogCacheᴛ1> ᏑlistenerBacklogCache = new(new listenerBacklogCacheᴛ1(nil));
+internal static ref listenerBacklogCacheᴛ1 listenerBacklogCache => ref ᏑlistenerBacklogCache.Value;
 
 // listenerBacklog is a caching wrapper around maxListenerBacklog.
 //
@@ -397,10 +410,8 @@ internal static listenerBacklogCacheᴛ1 listenerBacklogCache;
 //
 //go:linkname listenerBacklog
 internal static nint listenerBacklog() {
-    listenerBacklogCache.Do(
-    var listenerBacklogCacheʗ2 = listenerBacklogCache;
-    () => {
-        listenerBacklogCacheʗ2.val = maxListenerBacklog();
+    ᏑlistenerBacklogCache.of(listenerBacklogCacheᴛ1.ᏑOnce).Do(() => {
+        listenerBacklogCache.val = maxListenerBacklog();
     });
     return listenerBacklogCache.val;
 }
@@ -408,12 +419,11 @@ internal static nint listenerBacklog() {
 // A Listener is a generic network listener for stream-oriented protocols.
 //
 // Multiple goroutines may invoke methods on a Listener simultaneously.
-[GoType] partial interface Listener {
+[GoType] partial interface Listener :
+    Δio.Closer
+{
     // Accept waits for and returns the next connection to the listener.
     (Conn, error) Accept();
-    // Close closes the listener.
-    // Any blocked Accept operations will be unblocked and return errors.
-    error Close();
     // Addr returns the listener's network address.
     ΔAddr Addr();
 }
@@ -455,10 +465,10 @@ internal static bool Is(this canceledError _, error err) {
 // error values.
 internal static error mapErr(error err) {
     var exprᴛ1 = err;
-    if (exprᴛ1 == context.Canceled) {
+    if (AreEqual(exprᴛ1, context.Canceled)) {
         return errCanceled;
     }
-    if (exprᴛ1 == context.DeadlineExceeded) {
+    if (AreEqual(exprᴛ1, context.DeadlineExceeded)) {
         return errTimeout;
     }
     { /* default: */
@@ -497,7 +507,9 @@ internal static error mapErr(error err) {
     return e.Err;
 }
 
-[GoRecv] public static @string Error(this ref OpError e) {
+public static @string Error(this ж<OpError> Ꮡe) {
+    ref var e = ref Ꮡe.Value;
+
     if (e == nil) {
         return "<nil>"u8;
     }
@@ -585,7 +597,9 @@ internal static channel<EmptyStruct> noCancel = (channel<EmptyStruct>)(default!)
     public @string Addr;
 }
 
-[GoRecv] public static @string Error(this ref AddrError e) {
+public static @string Error(this ж<AddrError> Ꮡe) {
+    ref var e = ref Ꮡe.Value;
+
     if (e == nil) {
         return "<nil>"u8;
     }
@@ -643,7 +657,7 @@ public static bool Temporary(this InvalidAddrError e) {
 //	errors.Is(os.ErrDeadlineExceeded, context.DeadlineExceeded)
 //
 // return true.
-internal static error errTimeout = Ꮡ(new timeoutError(nil));
+internal static error errTimeout = new timeoutErrorжerror(Ꮡ(new timeoutError(nil)));
 
 [GoType] partial struct timeoutError {
 }
@@ -750,7 +764,8 @@ internal static ж<DNSError> newDNSError(error err, @string name, @string server
     if (errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled)) {
         unwrapErr = err;
     }
-    (_, isNotFound) = err._<notFoundError.val>(ᐧ);
+    ref var isNotFound = ref heap<bool>(out var ᏑisNotFound);
+    (_, isNotFound) = err._<ж<notFoundError>>(ᐧ);
     return Ꮡ(new DNSError(
         UnwrapErr: unwrapErr,
         Err: err.Error(),
@@ -767,7 +782,9 @@ internal static ж<DNSError> newDNSError(error err, @string name, @string server
     return e.UnwrapErr;
 }
 
-[GoRecv] public static @string Error(this ref DNSError e) {
+public static @string Error(this ж<DNSError> Ꮡe) {
+    ref var e = ref Ꮡe.Value;
+
     if (e == nil) {
         return "<nil>"u8;
     }
@@ -811,7 +828,7 @@ public static error ErrClosed = errClosed;
 
 // ReadFrom hides another ReadFrom method.
 // It should never be called.
-internal static (int64, error) ReadFrom(this noReadFrom _, io.Reader _) {
+internal static (int64, error) ReadFrom(this noReadFrom _Δp0, Δio.Reader _Δp1) {
     throw panic("can't happen");
 }
 
@@ -825,13 +842,13 @@ internal static (int64, error) ReadFrom(this noReadFrom _, io.Reader _) {
 
 // Fallback implementation of io.ReaderFrom's ReadFrom, when sendfile isn't
 // applicable.
-internal static (int64 n, error err) genericReadFrom(ж<TCPConn> Ꮡc, io.Reader r) {
+internal static (int64 n, error err) genericReadFrom(ж<TCPConn> Ꮡc, Δio.Reader r) {
     int64 n = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
     // Use wrapper to hide existing r.ReadFrom from io.Copy.
-    return io.Copy(new tcpConnWithoutReadFrom(TCPConn: c), r);
+    return Δio.Copy(new tcpConnWithoutReadFrom(TCPConn: Ꮡc), r);
 }
 
 // noWriteTo can be embedded alongside another type to
@@ -841,7 +858,7 @@ internal static (int64 n, error err) genericReadFrom(ж<TCPConn> Ꮡc, io.Reader
 
 // WriteTo hides another WriteTo method.
 // It should never be called.
-internal static (int64, error) WriteTo(this noWriteTo _, io.Writer _) {
+internal static (int64, error) WriteTo(this noWriteTo _Δp0, Δio.Writer _Δp1) {
     throw panic("can't happen");
 }
 
@@ -854,13 +871,13 @@ internal static (int64, error) WriteTo(this noWriteTo _, io.Writer _) {
 }
 
 // Fallback implementation of io.WriterTo's WriteTo, when zero-copy isn't applicable.
-internal static (int64 n, error err) genericWriteTo(ж<TCPConn> Ꮡc, io.Writer w) {
+internal static (int64 n, error err) genericWriteTo(ж<TCPConn> Ꮡc, Δio.Writer w) {
     int64 n = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
     // Use wrapper to hide existing w.WriteTo from io.Copy.
-    return io.Copy(w, new tcpConnWithoutWriteTo(TCPConn: c));
+    return Δio.Copy(w, new tcpConnWithoutWriteTo(TCPConn: Ꮡc));
 }
 
 // Limit the number of concurrent cgo-using goroutines, because
@@ -870,24 +887,21 @@ internal static (int64 n, error err) genericWriteTo(ж<TCPConn> Ꮡc, io.Writer 
 // thread, and the system or the program runs out of threads.
 internal static channel<EmptyStruct> threadLimit;
 
-internal static sync.Once threadOnce;
-
-[GoType("dyn")] partial struct acquireThread_type {
-}
+internal static ж<Δsync.Once> ᏑthreadOnce = new(default(Δsync.Once));
+internal static ref Δsync.Once threadOnce => ref ᏑthreadOnce.Value;
 
 internal static error acquireThread(context.Context ctx) {
-    threadOnce.Do(
-    var threadLimitʗ2 = threadLimit;
-    () => {
-        threadLimitʗ2 = new channel<EmptyStruct>(concurrentThreadsLimit());
+    ᏑthreadOnce.Do(() => {
+        threadLimit = new channel<EmptyStruct>(concurrentThreadsLimit());
     });
-    switch (select(threadLimit.ᐸꟷ(new acquireThread_type(), ꓸꓸꓸ), ᐸꟷ(ctx.Done(), ꓸꓸꓸ))) {
+    switch (select(threadLimit.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ), ᐸꟷ(ctx.Done(), ꓸꓸꓸ))) {
     case 0: {
         return default!;
     }
     case 1 when ctx.Done().ꟷᐳ(out _): {
         return ctx.Err();
     }}
+    return default!;
 }
 
 internal static void releaseThread() {
@@ -902,10 +916,10 @@ internal static void releaseThread() {
     (int64, error) writeBuffers(ж<Buffers> _);
 }
 
-[GoType("[]byte")] partial struct Buffers;
+[GoType("[]slice<byte>")] partial struct Buffers;
 
-internal static io.WriterTo _ᴛ1ʗ = ((ж<Buffers>)default!);
-internal static io.Reader _ᴛ2ʗ = ((ж<Buffers>)default!);
+internal static Δio.WriterTo _ᴛ2ʗ = new BuffersжWriterTo(((ж<Buffers>)default!));
+internal static Δio.Reader _ᴛ3ʗ = new BuffersжReader(((ж<Buffers>)default!));
 
 // WriteTo writes contents of the buffers to w.
 //
@@ -913,18 +927,19 @@ internal static io.Reader _ᴛ2ʗ = ((ж<Buffers>)default!);
 //
 // WriteTo modifies the slice v as well as v[i] for 0 <= i < len(v),
 // but does not modify v[i][j] for any i, j.
-[GoRecv] public static (int64 n, error err) WriteTo(this ref Buffers v, io.Writer w) {
+public static (int64 n, error err) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w) {
     int64 n = default!;
     error err = default!;
 
+    ref var v = ref Ꮡv.Value;
     {
         var (wv, ok) = w._<buffersWriter>(ᐧ); if (ok) {
-            return wv.writeBuffers(v);
+            return wv.writeBuffers(Ꮡv);
         }
     }
     foreach (var (_, b) in v) {
         var (nb, errΔ1) = w.Write(b);
-        n += ((int64)nb);
+        n += (int64)nb;
         if (errΔ1 != default!) {
             v.consume(n);
             return (n, errΔ1);
@@ -945,27 +960,27 @@ internal static io.Reader _ᴛ2ʗ = ((ж<Buffers>)default!);
     error err = default!;
 
     while (len(p) > 0 && len(v) > 0) {
-        nint n0 = copy(p, (ж<ж<Buffers>>)[0]);
-        v.consume(((int64)n0));
+        nint n0 = copy(p, (v)[0]);
+        v.consume((int64)n0);
         p = p[(int)(n0)..];
         n += n0;
     }
     if (len(v) == 0) {
-        err = io.EOF;
+        err = Δio.EOF;
     }
     return (n, err);
 }
 
 [GoRecv] internal static void consume(this ref Buffers v, int64 n) {
     while (len(v) > 0) {
-        var ln0 = ((int64)len((ж<ж<Buffers>>)[0]));
+        var ln0 = (int64)len((v)[0]);
         if (ln0 > n) {
-            (ж<ж<Buffers>>)[0] = (ж<ж<Buffers>>)[0][(int)(n)..];
+            (v)[0] = (v)[0][(int)(n)..];
             return;
         }
         n -= ln0;
-        (ж<ж<Buffers>>)[0] = default!;
-        v = (ж<ж<Buffers>>)[1..];
+        (v)[0] = default!;
+        v = (v)[1..];
     }
 }
 

@@ -5,9 +5,9 @@ namespace go;
 
 using context = context_package;
 using bytealg = @internal.bytealg_package;
-using runtime = runtime_package;
-using sync = sync_package;
-using _ = unsafe_package; // for linkname
+using Δruntime = runtime_package;
+using Δsync = sync_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
 using @internal;
 
 partial class net_package {
@@ -25,19 +25,20 @@ partial class net_package {
     internal bool ipv4MappedIPv6Enabled;
 }
 
-internal static ipStackCapabilities ipStackCaps;
+internal static ж<ipStackCapabilities> ᏑipStackCaps = new(new ipStackCapabilities(nil));
+internal static ref ipStackCapabilities ipStackCaps => ref ᏑipStackCaps.Value;
 
 // supportsIPv4 reports whether the platform supports IPv4 networking
 // functionality.
 internal static bool supportsIPv4() {
-    ipStackCaps.Once.Do(ipStackCaps.probe);
+    ᏑipStackCaps.of(ipStackCapabilities.ᏑOnce).Do(ᏑipStackCaps.probe);
     return ipStackCaps.ipv4Enabled;
 }
 
 // supportsIPv6 reports whether the platform supports IPv6 networking
 // functionality.
 internal static bool supportsIPv6() {
-    ipStackCaps.Once.Do(ipStackCaps.probe);
+    ᏑipStackCaps.of(ipStackCapabilities.ᏑOnce).Do(ᏑipStackCaps.probe);
     return ipStackCaps.ipv6Enabled;
 }
 
@@ -47,12 +48,12 @@ internal static bool supportsIPv6() {
 internal static bool supportsIPv4map() {
     // Some operating systems provide no support for mapping IPv4
     // addresses to IPv6, and a runtime check is unnecessary.
-    var exprᴛ1 = runtime.GOOS;
+    var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "openbsd"u8) {
         return false;
     }
 
-    ipStackCaps.Once.Do(ipStackCaps.probe);
+    ᏑipStackCaps.of(ipStackCapabilities.ᏑOnce).Do(ᏑipStackCaps.probe);
     return ipStackCaps.ipv4MappedIPv6Enabled;
 }
 
@@ -61,14 +62,14 @@ internal static bool supportsIPv4map() {
 // isIPv4 reports whether addr contains an IPv4 address.
 internal static bool isIPv4(ΔAddr addr) {
     switch (addr.type()) {
-    case TCPAddr.val addr: {
-        return (~addr).IP.To4() != default!;
+    case ж<TCPAddr> addrΔ1: {
+        return (~addrΔ1).IP.To4() != default!;
     }
-    case UDPAddr.val addr: {
-        return (~addr).IP.To4() != default!;
+    case ж<UDPAddr> addrΔ1: {
+        return (~addrΔ1).IP.To4() != default!;
     }
-    case IPAddr.val addr: {
-        return (~addr).IP.To4() != default!;
+    case ж<IPAddr> addrΔ1: {
+        return (~addrΔ1).IP.To4() != default!;
     }}
     return false;
 }
@@ -137,7 +138,7 @@ internal static (addrList primaries, addrList fallbacks) partition(this addrList
 // yielding a list of Addr objects. Known filters are nil, ipv4only,
 // and ipv6only. It returns every address when the filter is nil.
 // The result contains at least one address when error is nil.
-internal static (addrList, error) filterAddrList(Func<IPAddr, bool> filter, slice<IPAddr> ips, Func<IPAddr, net.Addr> inetaddr, @string originalAddr) {
+internal static (addrList, error) filterAddrList(Func<IPAddr, bool> filter, slice<IPAddr> ips, Func<IPAddr, ΔAddr> inetaddr, @string originalAddr) {
     addrList addrs = default!;
     foreach (var (_, ip) in ips) {
         if (filter == default! || filter(ip)) {
@@ -145,7 +146,7 @@ internal static (addrList, error) filterAddrList(Func<IPAddr, bool> filter, slic
         }
     }
     if (len(addrs) == 0) {
-        return (default!, new AddrError(Err: errNoSuitableAddress.Error(), ΔAddr: originalAddr));
+        return (default!, new AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: originalAddr))));
     }
     return (addrs, default!);
 }
@@ -176,7 +177,12 @@ public static (@string host, @string port, error err) SplitHostPort(@string host
 
     @string missingPort = "missing port in address"u8;
     @string tooManyColons = "too many colons in address"u8;
-    var addrErr = (@string addr, @string why) => ("", "", new AddrError(Err: why, ΔAddr: addr));
+    var addrErr = (@string host, @string port, error err) (@string addr, @string why) => {
+        @string hostΔ1 = default!;
+        @string portΔ1 = default!;
+        error errΔ1 = default!;
+        return ("", "", new AddrErrorжerror(Ꮡ(new AddrError(Err: why, Addr: addr))));
+    };
     nint j = 0;
     nint k = 0;
     // The port starts after the last colon.
@@ -195,7 +201,7 @@ public static (@string host, @string port, error err) SplitHostPort(@string host
             return addrErr(hostport, // There can't be a ':' behind the ']' now.
  missingPort);
         }
-        if (exprᴛ1 is i) {
+        if (exprᴛ1 == i) {
         }
         { /* default: */
             if (hostport[end + 1] == (rune)':') {
@@ -260,7 +266,9 @@ public static @string JoinHostPort(@string host, @string port) {
 // address or a DNS name, and returns a list of internet protocol
 // family addresses. The result contains at least one address when
 // error is nil.
-[GoRecv] internal static (addrList, error) internetAddrList(this ref Resolver r, context.Context ctx, @string net, @string addr) {
+internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, context.Context ctx, @string net, @string addr) {
+    ref var r = ref Ꮡr.Value;
+
     error err = default!;
     @string host = default!;
     @string port = default!;
@@ -274,7 +282,7 @@ public static @string JoinHostPort(@string host, @string port) {
                 }
             }
             {
-                (portnum, err) = r.LookupPort(ctx, net, port); if (err != default!) {
+                (portnum, err) = Ꮡr.LookupPort(ctx, net, port); if (err != default!) {
                     return (default!, err);
                 }
             }
@@ -289,29 +297,28 @@ public static @string JoinHostPort(@string host, @string port) {
         return (default!, ((UnknownNetworkError)net));
     }
 
-    var inetaddr = 
     var portnumʗ1 = portnum;
-    (IPAddr ip) => {
+    var inetaddr = ΔAddr (IPAddr ip) => {
         var exprᴛ2 = net;
         if (exprᴛ2 == "tcp"u8 || exprᴛ2 == "tcp4"u8 || exprᴛ2 == "tcp6"u8) {
-            return Ꮡ(new TCPAddr(IP: ip.IP, Port: portnumʗ1, Zone: ip.Zone));
+            return new TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ip.IP, Port: portnumʗ1, Zone: ip.Zone)));
         }
         if (exprᴛ2 == "udp"u8 || exprᴛ2 == "udp4"u8 || exprᴛ2 == "udp6"u8) {
-            return Ꮡ(new UDPAddr(IP: ip.IP, Port: portnumʗ1, Zone: ip.Zone));
+            return new UDPAddrжΔAddr(Ꮡ(new UDPAddr(IP: ip.IP, Port: portnumʗ1, Zone: ip.Zone)));
         }
         if (exprᴛ2 == "ip"u8 || exprᴛ2 == "ip4"u8 || exprᴛ2 == "ip6"u8) {
-            return Ꮡ(new IPAddr(IP: ip.IP, Zone: ip.Zone));
+            return new IPAddrжΔAddr(Ꮡ(new IPAddr(IP: ip.IP, Zone: ip.Zone)));
         }
         { /* default: */
-            throw panic("unexpected network: "u8 + net);
+            throw panic("unexpected network: " + net);
         }
 
     };
     if (host == ""u8) {
-        return (new addrList{inetaddr(new IPAddr(nil))}, default!);
+        return (new addrList(new ΔAddr[]{inetaddr(new IPAddr(nil))}.slice()), default!);
     }
     // Try as a literal IP address, then as a DNS name.
-    (ips, err) = r.lookupIPAddr(ctx, net, host);
+    (var ips, err) = Ꮡr.lookupIPAddr(ctx, net, host);
     if (err != default!) {
         return (default!, err);
     }
@@ -347,7 +354,7 @@ internal static IP loopbackIP(@string net) {
     if (net != ""u8 && net[len(net) - 1] == (rune)'6') {
         return IPv6loopback;
     }
-    return new IP{127, 0, 0, 1};
+    return new IP(new byte[]{127, 0, 0, 1}.slice());
 }
 
 } // end net_package

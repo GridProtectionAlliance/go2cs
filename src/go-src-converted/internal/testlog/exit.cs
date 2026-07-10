@@ -4,7 +4,7 @@
 namespace go.@internal;
 
 using sync = sync_package;
-using _ = unsafe_package; // for linkname
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
 
 partial class testlog_package {
 
@@ -13,10 +13,9 @@ partial class testlog_package {
 // package testlog, it is a hook between the testing package and the
 // os package. This is used to ensure that an early call to os.Exit(0)
 // does not cause a test to pass.
-public static bool PanicOnExit0() => func((defer, _) => {
-    panicOnExit0.mu.Lock();
-    var panicOnExit0ʗ1 = panicOnExit0;
-    defer(panicOnExit0ʗ1.mu.Unlock);
+public static bool PanicOnExit0() => func((defer, recover) => {
+    ᏑpanicOnExit0.of(panicOnExit0ᴛ1.Ꮡmu).Lock();
+    defer(ᏑpanicOnExit0.of(panicOnExit0ᴛ1.Ꮡmu).Unlock);
     return panicOnExit0.val;
 });
 
@@ -25,10 +24,11 @@ public static bool PanicOnExit0() => func((defer, _) => {
 // with calls to os.Exit
 
 [GoType("dyn")] partial struct panicOnExit0ᴛ1 {
-    internal sync_package.Mutex mu;
+    internal sync.Mutex mu;
     internal bool val;
 }
-internal static panicOnExit0ᴛ1 panicOnExit0;
+internal static ж<panicOnExit0ᴛ1> ᏑpanicOnExit0 = new(default(panicOnExit0ᴛ1));
+internal static ref panicOnExit0ᴛ1 panicOnExit0 => ref ᏑpanicOnExit0.Value;
 
 // SetPanicOnExit0 sets panicOnExit0 to v.
 //
@@ -40,10 +40,9 @@ internal static panicOnExit0ᴛ1 panicOnExit0;
 // See go.dev/issue/67401.
 //
 //go:linkname SetPanicOnExit0
-public static void SetPanicOnExit0(bool v) => func((defer, _) => {
-    panicOnExit0.mu.Lock();
-    var panicOnExit0ʗ1 = panicOnExit0;
-    defer(panicOnExit0ʗ1.mu.Unlock);
+public static void SetPanicOnExit0(bool v) => func((defer, recover) => {
+    ᏑpanicOnExit0.of(panicOnExit0ᴛ1.Ꮡmu).Lock();
+    defer(ᏑpanicOnExit0.of(panicOnExit0ᴛ1.Ꮡmu).Unlock);
     panicOnExit0.val = v;
 });
 

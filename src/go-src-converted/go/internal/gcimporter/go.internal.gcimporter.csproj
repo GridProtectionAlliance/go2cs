@@ -9,7 +9,7 @@
     <Version>0.1.4</Version>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>
-    <Copyright>Copyright © 2025</Copyright>
+    <Copyright>Copyright © 2026</Copyright>
     <Authors>$(Product) Authors</Authors>
     <Company>Grid Protection Alliance</Company>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
@@ -86,7 +86,6 @@
     <Using Include="System.Double" Alias="float64" />
     <Using Include="System.Numerics.Complex" Alias="complex128" />
     <Using Include="System.Int32" Alias="rune" />
-    <Using Include="System.UIntPtr" Alias="uintptr" />
     <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
     <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTagAttribute" />
     <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
@@ -108,7 +107,9 @@
     <ProjectReference Include="$(go2csPath)go-src-converted\bufio\bufio.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\bytes\bytes.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\encoding\binary\encoding.binary.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\errors\errors.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\fmt\fmt.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\go\build\go.build.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\go\constant\go.constant.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\go\token\go.token.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\go\types\go.types.csproj" />
@@ -118,6 +119,9 @@
     <ProjectReference Include="$(go2csPath)go-src-converted\io\io.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\math\big\math.big.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\math\math.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\os\exec\os.exec.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\os\os.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\path\filepath\path.filepath.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\slices\slices.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\strconv\strconv.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\strings\strings.csproj" />

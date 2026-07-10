@@ -41,13 +41,13 @@ internal static error Close(this errorReader r) {
 // data.
 [GoType] partial struct readSeekerFromReader {
     internal Func<(io.Reader, error)> reset;
-    internal io_package.Reader r;
+    internal io.Reader r;
     internal int64 size;
     internal int64 offset;
 }
 
 [GoRecv] internal static void start(this ref readSeekerFromReader r) {
-    (x, err) = r.reset();
+    var (x, err) = r.reset();
     if (err != default!){
         r.r = new errorReader(err);
     } else {
@@ -64,41 +64,38 @@ internal static error Close(this errorReader r) {
         r.start();
     }
     (n, err) = r.r.Read(p);
-    r.offset += ((int64)n);
+    r.offset += (int64)n;
     return (n, err);
 }
 
 [GoRecv] internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offset, nint whence) {
     int64 newOffset = default!;
-    switch (whence) {
-    case io.SeekStart: {
+    var exprᴛ1 = whence;
+    if (exprᴛ1 == io.SeekStart) {
         newOffset = offset;
-        break;
     }
-    case io.SeekCurrent: {
+    else if (exprᴛ1 == io.SeekCurrent) {
         newOffset = r.offset + offset;
-        break;
     }
-    case io.SeekEnd: {
+    else if (exprᴛ1 == io.SeekEnd) {
         newOffset = r.size + offset;
-        break;
     }
-    default: {
+    else { /* default: */
         return (0, os.ErrInvalid);
-    }}
+    }
 
     switch (ᐧ) {
-    case {} when newOffset is r.offset: {
+    case {} when newOffset == r.offset: {
         return (newOffset, default!);
     }
-    case {} when newOffset is < 0 or > r.size: {
+    case {} when (newOffset < 0) || (newOffset > r.size): {
         return (0, os.ErrInvalid);
     }
     case {} when newOffset is 0: {
         r.r = default!;
         break;
     }
-    case {} when newOffset is r.size: {
+    case {} when newOffset == r.size: {
         r.r = new errorReader(io.EOF);
         break;
     }
@@ -111,7 +108,7 @@ internal static error Close(this errorReader r) {
         array<byte> buf = new(512);
         while (r.offset < newOffset) {
             var b = buf[..];
-            if (newOffset - r.offset < ((int64)len(buf))) {
+            if (newOffset - r.offset < (int64)len(buf)) {
                 b = buf[..(int)(newOffset - r.offset)];
             }
             {

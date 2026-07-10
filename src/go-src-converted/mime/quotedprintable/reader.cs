@@ -15,7 +15,7 @@ partial class quotedprintable_package {
 
 // Reader is a quoted-printable decoder.
 [GoType] partial struct Reader {
-    internal ж<bufio_package.Reader> br;
+    internal ж<bufio.Reader> br;
     internal error rerr;  // last read error
     internal slice<byte> line; // to be consumed before more of br
 }
@@ -30,13 +30,13 @@ public static ж<Reader> NewReader(io.Reader r) {
 internal static (byte, error) fromHex(byte b) {
     switch (ᐧ) {
     case {} when b >= (rune)'0' && b <= (rune)'9': {
-        return (b - (rune)'0', default!);
+        return ((byte)(b - (rune)'0'), default!);
     }
     case {} when b >= (rune)'A' && b <= (rune)'F': {
-        return (b - (rune)'A' + 10, default!);
+        return ((byte)(b - (rune)'A' + 10), default!);
     }
     case {} when b >= (rune)'a' && b <= (rune)'f': {
-        return (b - (rune)'a' + 10, default!);
+        return ((byte)(b - (rune)'a' + 10), default!);
     }}
 
     // Accept badly encoded bytes.
@@ -62,7 +62,7 @@ internal static (byte b, error err) readHexByte(slice<byte> v) {
             return (0, err);
         }
     }
-    return ((byte)(hb << (int)(4) | lb), default!);
+    return ((byte)((hb << (int)(4)) | lb), default!);
 }
 
 internal static bool isQPDiscardWhitespace(rune r) {
@@ -74,9 +74,9 @@ internal static bool isQPDiscardWhitespace(rune r) {
     return false;
 }
 
-internal static slice<byte> crlf = slice<byte>("\r\n");
-internal static slice<byte> lf = slice<byte>("\n");
-internal static slice<byte> softSuffix = slice<byte>("=");
+internal static slice<byte> crlf = slice<byte>((@string)"\r\n");
+internal static slice<byte> lf = slice<byte>((@string)"\n");
+internal static slice<byte> softSuffix = slice<byte>((@string)"=");
 
 // Read reads and decodes quoted-printable data from the underlying reader.
 [GoRecv] public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {
@@ -112,9 +112,9 @@ internal static slice<byte> softSuffix = slice<byte>("=");
             } else 
             if (hasLF) {
                 if (hasCR){
-                    r.line = append(r.line, (rune)'\r', (rune)'\n');
+                    r.line = append(r.line, (byte)((rune)'\r'), (byte)((rune)'\n'));
                 } else {
-                    r.line = append(r.line, (rune)'\n');
+                    r.line = append(r.line, (byte)((rune)'\n'));
                 }
             }
             continue;
@@ -138,7 +138,7 @@ internal static slice<byte> softSuffix = slice<byte>("=");
             break;
             break;
         }
-        case {} when b is >= 128: {
+        case {} when b is >= 0x80: {
             break;
             break;
         }

@@ -7,46 +7,51 @@ namespace go.net.@internal;
 
 using fmt = fmt_package;
 using sync = sync_package;
+using syscall = syscall_package;
 
 partial class socktest_package {
 
 // A Switch represents a callpath point switch for socket system
 // calls.
 [GoType] partial struct Switch {
-    internal sync_package.Once once;
-    internal sync_package.RWMutex fmu;
-    internal socktest.Filter fltab;
-    internal sync_package.RWMutex smu;
+    internal sync.Once once;
+    internal sync.RWMutex fmu;
+    internal map<FilterType, Filter> fltab;
+    internal sync.RWMutex smu;
     internal ΔSockets sotab;
     internal stats stats;
 }
 
 [GoRecv] internal static void init(this ref Switch sw) {
-    sw.fltab = new socktest.Filter();
+    sw.fltab = new map<FilterType, Filter>();
     sw.sotab = new ΔSockets();
     sw.stats = new stats();
 }
 
 // Stats returns a list of per-cookie socket statistics.
-[GoRecv] public static slice<Stat> Stats(this ref Switch sw) {
+public static slice<Stat> Stats(this ж<Switch> Ꮡsw) {
+    ref var sw = ref Ꮡsw.Value;
+
     slice<Stat> st = default!;
-    sw.smu.RLock();
+    Ꮡsw.of(Switch.Ꮡsmu).RLock();
     foreach (var (_, s) in sw.stats) {
-        var ns = s.val;
+        var ns = s.Value;
         st = append(st, ns);
     }
-    sw.smu.RUnlock();
+    Ꮡsw.of(Switch.Ꮡsmu).RUnlock();
     return st;
 }
 
 // Sockets returns mappings of socket descriptor to socket status.
-[GoRecv] public static ΔSockets Sockets(this ref Switch sw) {
-    sw.smu.RLock();
+public static ΔSockets Sockets(this ж<Switch> Ꮡsw) {
+    ref var sw = ref Ꮡsw.Value;
+
+    Ꮡsw.of(Switch.Ꮡsmu).RLock();
     var tab = new ΔSockets(len(sw.sotab));
     foreach (var (i, s) in sw.sotab) {
         tab[i] = s;
     }
-    sw.smu.RUnlock();
+    Ꮡsw.of(Switch.Ꮡsmu).RUnlock();
     return tab;
 }
 
@@ -54,21 +59,21 @@ partial class socktest_package {
 
 // Family returns an address family.
 public static nint Family(this Cookie c) {
-    return ((nint)(c >> (int)(48)));
+    return (nint)(uint64)((c >> (int)(48)));
 }
 
 // Type returns a socket type.
 public static nint Type(this Cookie c) {
-    return ((nint)(c << (int)(16) >> (int)(32)));
+    return (nint)(uint64)(((c << (int)(16)) >> (int)(32)));
 }
 
 // Protocol returns a protocol number.
 public static nint Protocol(this Cookie c) {
-    return ((nint)((Cookie)(c & 255)));
+    return (nint)(uint64)((Cookie)(c & 0xff));
 }
 
 internal static Cookie cookie(nint family, nint sotype, nint proto) {
-    return (Cookie)((Cookie)(((Cookie)family) << (int)(48) | (Cookie)(((Cookie)sotype) & (nint)4294967295L) << (int)(16)) | (Cookie)(((Cookie)proto) & 255));
+    return (Cookie)((Cookie)((((Cookie)(uint64)family) << (int)(48)) | ((Cookie)(((Cookie)(uint64)sotype) & 0xffffffffU) << (int)(16))) | (Cookie)(((Cookie)(uint64)proto) & 0xff));
 }
 
 // A Status represents the status of a socket.
@@ -102,11 +107,11 @@ public static @string String(this Status so) {
 public static @string String(this Stat st) {
     return fmt.Sprintf("(%s, %s, %s): opened=%d connected=%d listened=%d accepted=%d closed=%d openfailed=%d connectfailed=%d listenfailed=%d acceptfailed=%d closefailed=%d"u8, familyString(st.Family), typeString(st.Type), protocolString(st.Protocol), st.Opened, st.Connected, st.Listened, st.Accepted, st.Closed, st.OpenFailed, st.ConnectFailed, st.ListenFailed, st.AcceptFailed, st.CloseFailed);
 }
-/* visitMapType: map[Cookie]*Stat */
+
+[GoType("map[Cookie, ж<Stat>]")] partial struct stats;
 
 internal static ж<Stat> getLocked(this stats st, Cookie c) {
-    var s = st[c];
-    var ok = st[c];
+    var (s, ok) = st[c, ꟷ];
     if (!ok) {
         s = Ꮡ(new Stat(Family: c.Family(), Type: c.Type(), Protocol: c.Protocol()));
         st[c] = s;
@@ -125,8 +130,8 @@ public static readonly FilterType FilterClose = 5;          // for Close or Clos
 
 public delegate (AfterFilter, error) Filter(ж<Status> _);
 
-public static (AfterFilter, error) apply(this Filter f, ж<Status> Ꮡst) {
-    ref var st = ref Ꮡst.val;
+internal static (AfterFilter, error) apply(this Filter f, ж<Status> Ꮡst) {
+    ref var st = ref Ꮡst.Value;
 
     if (f == default!) {
         return (default!, default!);
@@ -136,8 +141,8 @@ public static (AfterFilter, error) apply(this Filter f, ж<Status> Ꮡst) {
 
 public delegate error AfterFilter(ж<Status> _);
 
-public static error apply(this AfterFilter f, ж<Status> Ꮡst) {
-    ref var st = ref Ꮡst.val;
+internal static error apply(this AfterFilter f, ж<Status> Ꮡst) {
+    ref var st = ref Ꮡst.Value;
 
     if (f == default!) {
         return default!;
@@ -146,11 +151,13 @@ public static error apply(this AfterFilter f, ж<Status> Ꮡst) {
 }
 
 // Set deploys the socket system call filter f for the filter type t.
-[GoRecv] public static void Set(this ref Switch sw, FilterType t, Filter f) {
-    sw.once.Do(sw.init);
-    sw.fmu.Lock();
+public static void Set(this ж<Switch> Ꮡsw, FilterType t, Filter f) {
+    ref var sw = ref Ꮡsw.Value;
+
+    Ꮡsw.of(Switch.Ꮡonce).Do(Ꮡsw.init);
+    Ꮡsw.of(Switch.Ꮡfmu).Lock();
     sw.fltab[t] = f;
-    sw.fmu.Unlock();
+    Ꮡsw.of(Switch.Ꮡfmu).Unlock();
 }
 
 } // end socktest_package

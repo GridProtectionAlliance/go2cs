@@ -7,19 +7,23 @@ namespace go.go;
 
 using bytes = bytes_package;
 using fmt = fmt_package;
-using constant = go.constant_package;
-using token = go.token_package;
+using constant = global::go.go.constant_package;
+using token = global::go.go.token_package;
 using strings = strings_package;
 using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = global::go.unicode.utf8_package;
+using global::go.go;
+using global::go.unicode;
+using io = io_package;
 
 partial class types_package {
 
 // An Object describes a named language entity such as a package,
 // constant, type, variable, function (incl. methods), or label.
 // All objects implement the Object interface.
-[GoType] partial interface Object {
+[GoType] partial interface Object :
+    fmt.Stringer
+{
     ж<ΔScope> Parent(); // scope in which this object is declared; nil for methods and struct fields
     tokenꓸPos Pos(); // position of object identifier in declaration
     ж<Package> Pkg(); // package to which this object belongs; nil for labels and objects in the Universe scope
@@ -27,8 +31,6 @@ partial class types_package {
     ΔType Type();   // object type
     bool Exported(); // reports whether the name starts with a capital letter
     @string Id();    // object name if exported, qualified name if not exported (see func Id)
-    // String returns a human-readable string of the object.
-    @string String();
     // order reflects a package-level object's source order: if object
     // a is before object b in the source, then a.order() < b.order().
     // order returns a value > 0 for package-level objects; it returns
@@ -62,7 +64,7 @@ internal static bool isExported(@string name) {
 // Id returns name if it is exported, otherwise it
 // returns the name qualified with the package path.
 public static @string Id(ж<Package> Ꮡpkg, @string name) {
-    ref var pkg = ref Ꮡpkg.val;
+    ref var pkg = ref Ꮡpkg.DerefOrNil();
 
     if (isExported(name)) {
         return name;
@@ -75,7 +77,7 @@ public static @string Id(ж<Package> Ꮡpkg, @string name) {
     @string path = "_"u8;
     // pkg is nil for objects in Universe scope and possibly types
     // introduced via Eval (see also comment in object.sameId)
-    if (pkg != nil && pkg.path != ""u8) {
+    if (Ꮡpkg != nil && pkg.path != ""u8) {
         path = pkg.path;
     }
     return path + "."u8 + name;
@@ -84,13 +86,13 @@ public static @string Id(ж<Package> Ꮡpkg, @string name) {
 // An object implements the common parts of an Object.
 [GoType] partial struct @object {
     internal ж<ΔScope> parent;
-    internal go.token_package.ΔPos pos;
+    internal tokenꓸPos pos;
     internal ж<Package> pkg;
     internal @string name;
     internal ΔType typ;
     internal uint32 order_;
     internal Δcolor color_;
-    internal go.token_package.ΔPos scopePos_;
+    internal tokenꓸPos scopePos_;
 }
 
 [GoType("num:uint32")] partial struct Δcolor;
@@ -103,7 +105,7 @@ internal static readonly Δcolor black = 1;
 
 internal static readonly Δcolor grey = 2; // must be > white and black
 
-public static @string String(this Δcolor c) {
+internal static @string String(this Δcolor c) {
     var exprᴛ1 = c;
     if (exprᴛ1 == white) {
         return "white"u8;
@@ -128,44 +130,44 @@ internal static Δcolor colorFor(ΔType t) {
 
 // Parent returns the scope in which the object is declared.
 // The result is nil for methods and struct fields.
-[GoRecv] public static ж<ΔScope> Parent(this ref @object obj) {
+[GoRecv] internal static ж<ΔScope> Parent(this ref @object obj) {
     return obj.parent;
 }
 
 // Pos returns the declaration position of the object's identifier.
-[GoRecv] public static tokenꓸPos Pos(this ref @object obj) {
+[GoRecv] internal static tokenꓸPos Pos(this ref @object obj) {
     return obj.pos;
 }
 
 // Pkg returns the package to which the object belongs.
 // The result is nil for labels and objects in the Universe scope.
-[GoRecv] public static ж<Package> Pkg(this ref @object obj) {
+[GoRecv] internal static ж<Package> Pkg(this ref @object obj) {
     return obj.pkg;
 }
 
 // Name returns the object's (package-local, unqualified) name.
-[GoRecv] public static @string Name(this ref @object obj) {
+[GoRecv] internal static @string Name(this ref @object obj) {
     return obj.name;
 }
 
 // Type returns the object's type.
-[GoRecv] public static ΔType Type(this ref @object obj) {
+[GoRecv] internal static ΔType Type(this ref @object obj) {
     return obj.typ;
 }
 
 // Exported reports whether the object is exported (starts with a capital letter).
 // It doesn't take into account whether the object is in a local (function) scope
 // or not.
-[GoRecv] public static bool Exported(this ref @object obj) {
+[GoRecv] internal static bool Exported(this ref @object obj) {
     return isExported(obj.name);
 }
 
 // Id is a wrapper for Id(obj.Pkg(), obj.Name()).
-[GoRecv] public static @string Id(this ref @object obj) {
+[GoRecv] internal static @string Id(this ref @object obj) {
     return Id(obj.pkg, obj.name);
 }
 
-[GoRecv] public static @string String(this ref @object obj) {
+[GoRecv] internal static @string String(this ref @object obj) {
     throw panic("abstract");
 }
 
@@ -181,10 +183,10 @@ internal static Δcolor colorFor(ΔType t) {
     return obj.scopePos_;
 }
 
-[GoRecv] public static void setParent(this ref @object obj, ж<ΔScope> Ꮡparent) {
-    ref var parent = ref Ꮡparent.val;
+[GoRecv] internal static void setParent(this ref @object obj, ж<ΔScope> Ꮡparent) {
+    ref var parent = ref Ꮡparent.Value;
 
-    obj.parent = parent;
+    obj.parent = Ꮡparent;
 }
 
 [GoRecv] internal static void setType(this ref @object obj, ΔType typ) {
@@ -205,8 +207,8 @@ internal static Δcolor colorFor(ΔType t) {
     obj.scopePos_ = pos;
 }
 
-[GoRecv] public static bool sameId(this ref @object obj, ж<Package> Ꮡpkg, @string name, bool foldCase) {
-    ref var pkg = ref Ꮡpkg.val;
+[GoRecv] internal static bool sameId(this ref @object obj, ж<Package> Ꮡpkg, @string name, bool foldCase) {
+    ref var pkg = ref Ꮡpkg.Value;
 
     // If we don't care about capitalization, we also ignore packages.
     if (foldCase && strings.EqualFold(obj.name, name)) {
@@ -232,17 +234,18 @@ internal static Δcolor colorFor(ΔType t) {
 // Objects are ordered nil before non-nil, exported before
 // non-exported, then by name, and finally (for non-exported
 // functions) by package path.
-[GoRecv] public static bool less(this ref @object a, ж<@object> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+internal static bool less(this ж<@object> Ꮡa, ж<@object> Ꮡb) {
+    ref var a = ref Ꮡa.Value;
+    ref var b = ref Ꮡb.DerefOrNil();
 
-    if (a == Ꮡb) {
+    if (Ꮡa == Ꮡb) {
         return false;
     }
     // Nil before non-nil.
     if (a == nil) {
         return true;
     }
-    if (b == nil) {
+    if (Ꮡb == nil) {
         return false;
     }
     // Exported functions before non-exported.
@@ -256,7 +259,7 @@ internal static Δcolor colorFor(ΔType t) {
         return a.name < b.name;
     }
     if (!ea) {
-        return a.pkg.path < b.pkg.path;
+        return (~a.pkg).path < (~b.pkg).path;
     }
     return false;
 }
@@ -272,10 +275,10 @@ internal static Δcolor colorFor(ΔType t) {
 // NewPkgName returns a new PkgName object representing an imported package.
 // The remaining arguments set the attributes found with all Objects.
 public static ж<PkgName> NewPkgName(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, ж<Package> Ꮡimported) {
-    ref var pkg = ref Ꮡpkg.val;
-    ref var imported = ref Ꮡimported.val;
+    ref var pkg = ref Ꮡpkg.Value;
+    ref var imported = ref Ꮡimported.Value;
 
-    return Ꮡ(new PkgName(new @object(nil, pos, Ꮡpkg, name, Typ[Invalid], 0, black, nopos), Ꮡimported, false));
+    return Ꮡ(new PkgName(new @object(nil, pos, Ꮡpkg, name, new BasicжΔType(Typ[Invalid]), 0, black, nopos), Ꮡimported, false));
 }
 
 // Imported returns the package that was imported.
@@ -287,13 +290,13 @@ public static ж<PkgName> NewPkgName(tokenꓸPos pos, ж<Package> Ꮡpkg, @strin
 // A Const represents a declared constant.
 [GoType] partial struct Const {
     internal partial ref @object @object { get; }
-    internal go.constant_package.Value val;
+    internal constant.Value val;
 }
 
 // NewConst returns a new constant with value val.
 // The remaining arguments set the attributes found with all Objects.
 public static ж<Const> NewConst(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, ΔType typ, constant.Value val) {
-    ref var pkg = ref Ꮡpkg.val;
+    ref var pkg = ref Ꮡpkg.Value;
 
     return Ꮡ(new Const(new @object(nil, pos, Ꮡpkg, name, typ, 0, colorFor(typ), nopos), val));
 }
@@ -321,44 +324,46 @@ public static ж<Const> NewConst(tokenꓸPos pos, ж<Package> Ꮡpkg, @string na
 // argument for NewNamed, which will set the TypeName's type as a side-
 // effect.
 public static ж<TypeName> NewTypeName(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, ΔType typ) {
-    ref var pkg = ref Ꮡpkg.val;
+    ref var pkg = ref Ꮡpkg.Value;
 
     return Ꮡ(new TypeName(new @object(nil, pos, Ꮡpkg, name, typ, 0, colorFor(typ), nopos)));
 }
 
 // NewTypeNameLazy returns a new defined type like NewTypeName, but it
 // lazily calls resolve to finish constructing the Named object.
-internal static ж<TypeName> _NewTypeNameLazy(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, types.Func) load) {
-    ref var pkg = ref Ꮡpkg.val;
+internal static ж<TypeName> _NewTypeNameLazy(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, Func<ж<Named>, (slice<ж<TypeParam>>, ΔType, slice<ж<Func>>)> load) {
+    ref var pkg = ref Ꮡpkg.Value;
 
     var obj = NewTypeName(pos, Ꮡpkg, name, default!);
-    NewNamed(obj, default!, default!).val.loader = load;
+    NewNamed(obj, default!, default!).Value.loader = load;
     return obj;
 }
 
 // IsAlias reports whether obj is an alias name for a type.
-[GoRecv] public static bool IsAlias(this ref TypeName obj) {
+public static bool IsAlias(this ж<TypeName> Ꮡobj) {
+    ref var obj = ref Ꮡobj.Value;
+
     switch (obj.typ.type()) {
-    case default! t: {
+    case null: {
         return false;
     }
-    case Basic.val t: {
+    case ж<Basic> t: {
         if (obj.pkg == Unsafe) {
             // case *Alias:
             //	handled by default case
             // unsafe.Pointer is not an alias.
             return false;
         }
-        return obj.pkg != nil || (~t).name != obj.name || ~t == ᏑuniverseByte || ~t == ᏑuniverseRune;
+        return obj.pkg != nil || (~t).name != obj.name || AreEqual(t, universeByte) || AreEqual(t, universeRune);
     }
-    case Named.val t: {
-        return obj != (~t).obj;
+    case ж<Named> t: {
+        return Ꮡobj != (~t).obj;
     }
-    case TypeParam.val t: {
-        return obj != (~t).obj;
+    case ж<TypeParam> t: {
+        return Ꮡobj != (~t).obj;
     }
     default: {
-        var t = obj.typ.type();
+        var t = obj.typ;
         return true;
     }}
 }
@@ -382,14 +387,14 @@ internal static ж<TypeName> _NewTypeNameLazy(tokenꓸPos pos, ж<Package> Ꮡpk
 // NewVar returns a new variable.
 // The arguments set the attributes found with all Objects.
 public static ж<Var> NewVar(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, ΔType typ) {
-    ref var pkg = ref Ꮡpkg.val;
+    ref var pkg = ref Ꮡpkg.Value;
 
     return Ꮡ(new Var(@object: new @object(nil, pos, Ꮡpkg, name, typ, 0, colorFor(typ), nopos)));
 }
 
 // NewParam returns a new variable representing a function parameter.
 public static ж<Var> NewParam(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, ΔType typ) {
-    ref var pkg = ref Ꮡpkg.val;
+    ref var pkg = ref Ꮡpkg.Value;
 
     return Ꮡ(new Var(@object: new @object(nil, pos, Ꮡpkg, name, typ, 0, colorFor(typ), nopos), used: true));
 }
@@ -400,7 +405,7 @@ public static ж<Var> NewParam(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name
 // For embedded fields, the name is the unqualified type name
 // under which the field is accessible.
 public static ж<Var> NewField(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, ΔType typ, bool embedded) {
-    ref var pkg = ref Ꮡpkg.val;
+    ref var pkg = ref Ꮡpkg.Value;
 
     return Ꮡ(new Var(@object: new @object(nil, pos, Ꮡpkg, name, typ, 0, colorFor(typ), nopos), embedded: embedded, isField: true));
 }
@@ -428,11 +433,13 @@ public static ж<Var> NewField(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name
 // function parameters that depend on type arguments), this will be the
 // corresponding Var on the generic (uninstantiated) type. For all other Vars
 // Origin returns the receiver.
-[GoRecv("capture")] public static ж<Var> Origin(this ref Var obj) {
+public static ж<Var> Origin(this ж<Var> Ꮡobj) {
+    ref var obj = ref Ꮡobj.Value;
+
     if (obj.origin != nil) {
         return obj.origin;
     }
-    return OriginꓸᏑobj;
+    return Ꮡobj;
 }
 
 [GoRecv] internal static void isDependency(this ref Var _) {
@@ -452,12 +459,12 @@ public static ж<Var> NewField(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name
 // NewFunc returns a new function with the given signature, representing
 // the function's type.
 public static ж<Func> NewFunc(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, ж<ΔSignature> Ꮡsig) {
-    ref var pkg = ref Ꮡpkg.val;
-    ref var sig = ref Ꮡsig.val;
+    ref var pkg = ref Ꮡpkg.Value;
+    ref var sig = ref Ꮡsig.DerefOrNil();
 
     ΔType typ = default!;
-    if (sig != nil){
-        typ = ~sig;
+    if (Ꮡsig != nil){
+        typ = new ΔSignatureжΔType(Ꮡsig);
     } else {
     }
     // Don't store a (typed) nil *Signature.
@@ -470,7 +477,7 @@ public static ж<Func> NewFunc(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name
 // Signature returns the signature (type) of the function or method.
 [GoRecv] public static ж<ΔSignature> Signature(this ref Func obj) {
     if (obj.typ != default!) {
-        return obj.typ._<ΔSignature.val>();
+        return obj.typ._<ж<ΔSignature>>();
     }
     // normal case
     // No signature: Signature was called either:
@@ -486,17 +493,19 @@ public static ж<Func> NewFunc(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name
 
 // FullName returns the package- or receiver-type-qualified name of
 // function or method obj.
-[GoRecv] public static @string FullName(this ref Func obj) {
-    ref var buf = ref heap(new bytes_package.Buffer(), out var Ꮡbuf);
-    writeFuncName(Ꮡbuf, obj, default!);
-    return buf.String();
+public static @string FullName(this ж<Func> Ꮡobj) {
+    ref var obj = ref Ꮡobj.Value;
+
+    ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+    writeFuncName(Ꮡbuf, Ꮡobj, default!);
+    return Ꮡbuf.String();
 }
 
 // Scope returns the scope of the function's body block.
 // The result is nil for imported or instantiated functions and methods
 // (but there is also no mechanism to get to an instantiated function).
 [GoRecv] public static ж<ΔScope> Scope(this ref Func obj) {
-    return obj.typ._<ΔSignature.val>().scope;
+    return (~obj.typ._<ж<ΔSignature>>()).scope;
 }
 
 // Origin returns the canonical Func for its receiver, i.e. the Func object
@@ -506,11 +515,13 @@ public static ж<Func> NewFunc(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name
 // instantiated Named type or interface methods that depend on type arguments),
 // this will be the corresponding Func on the generic (uninstantiated) type.
 // For all other Funcs Origin returns the receiver.
-[GoRecv("capture")] public static ж<Func> Origin(this ref Func obj) {
+public static ж<Func> Origin(this ж<Func> Ꮡobj) {
+    ref var obj = ref Ꮡobj.Value;
+
     if (obj.origin != nil) {
         return obj.origin;
     }
-    return OriginꓸᏑobj;
+    return Ꮡobj;
 }
 
 // Pkg returns the package to which the function belongs.
@@ -528,8 +539,8 @@ public static ж<Func> NewFunc(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name
     // signature. We may reach here before the signature is fully set up: we must explicitly
     // check if the receiver is set (we cannot just look for non-nil obj.typ).
     {
-        var (sig, _) = obj.typ._<ΔSignature.val>(ᐧ); if (sig != nil && (~sig).recv != nil) {
-            var (_, isPtr) = deref((~sig).recv.typ);
+        var (sig, _) = obj.typ._<ж<ΔSignature>>(ᐧ); if (sig != nil && (~sig).recv != nil) {
+            var (_, isPtr) = deref((~(~sig).recv).typ);
             return isPtr;
         }
     }
@@ -555,9 +566,9 @@ public static ж<Func> NewFunc(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name
 
 // NewLabel returns a new label.
 public static ж<Label> NewLabel(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name) {
-    ref var pkg = ref Ꮡpkg.val;
+    ref var pkg = ref Ꮡpkg.Value;
 
-    return Ꮡ(new Label(new @object(pos: pos, pkg: pkg, name: name, typ: Typ[Invalid], color_: black), false));
+    return Ꮡ(new Label(new @object(pos: pos, pkg: Ꮡpkg, name: name, typ: new BasicжΔType(Typ[Invalid]), color_: black), false));
 }
 
 // A Builtin represents a built-in function.
@@ -568,7 +579,7 @@ public static ж<Label> NewLabel(tokenꓸPos pos, ж<Package> Ꮡpkg, @string na
 }
 
 internal static ж<Builtin> newBuiltin(builtinId id) {
-    return Ꮡ(new Builtin(new @object(name: predeclaredFuncs[id].name, typ: Typ[Invalid], color_: black), id));
+    return Ꮡ(new Builtin(new @object(name: predeclaredFuncs[id].name, typ: new BasicжΔType(Typ[Invalid]), color_: black), id));
 }
 
 // Nil represents the predeclared value nil.
@@ -576,66 +587,66 @@ internal static ж<Builtin> newBuiltin(builtinId id) {
     internal partial ref @object @object { get; }
 }
 
-internal static void writeObject(ж<bytes.Buffer> Ꮡbuf, Object obj, Qualifier qf) {
-    ref var buf = ref Ꮡbuf.val;
+internal static void writeObject(ж<bytes.Buffer> Ꮡbuf, Object obj, Func<ж<Package>, @string> qf) {
+    ref var buf = ref Ꮡbuf.Value;
 
     ж<TypeName> tname = default!;
     var typ = obj.Type();
     switch (obj.type()) {
-    case PkgName.val obj: {
-        fmt.Fprintf(~buf, "package %s"u8, obj.Name());
+    case ж<PkgName> objΔ1: {
+        fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), "package %s"u8, objΔ1.of(PkgName.Ꮡobject).Name());
         {
-            @string path = (~obj).imported.val.path; if (path != ""u8 && path != obj.name) {
-                fmt.Fprintf(~buf, " (%q)"u8, path);
+            @string path = objΔ1.Value.imported.Value.path; if (path != ""u8 && path != (~objΔ1).name) {
+                fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), " (%q)"u8, path);
             }
         }
         return;
     }
-    case Const.val obj: {
+    case ж<Const> objΔ1: {
         buf.WriteString("const"u8);
         break;
     }
-    case TypeName.val obj: {
-        tname = obj;
+    case ж<TypeName> objΔ1: {
+        tname = objΔ1;
         buf.WriteString("type"u8);
         if (isTypeParam(typ)) {
             buf.WriteString(" parameter"u8);
         }
         break;
     }
-    case Var.val obj: {
-        if ((~obj).isField){
+    case ж<Var> objΔ1: {
+        if ((~objΔ1).isField){
             buf.WriteString("field"u8);
         } else {
             buf.WriteString("var"u8);
         }
         break;
     }
-    case Func.val obj: {
+    case ж<Func> objΔ1: {
         buf.WriteString("func "u8);
-        writeFuncName(Ꮡbuf, Ꮡobj, qf);
+        writeFuncName(Ꮡbuf, objΔ1, qf);
         if (typ != default!) {
-            WriteSignature(Ꮡbuf, typ._<ΔSignature.val>(), qf);
+            WriteSignature(Ꮡbuf, typ._<ж<ΔSignature>>(), qf);
         }
         return;
     }
-    case Label.val obj: {
+    case ж<Label> objΔ1: {
         buf.WriteString("label"u8);
         typ = default!;
         break;
     }
-    case Builtin.val obj: {
+    case ж<Builtin> objΔ1: {
         buf.WriteString("builtin"u8);
         typ = default!;
         break;
     }
-    case Nil.val obj: {
+    case ж<Nil> objΔ1: {
         buf.WriteString("nil"u8);
         return;
     }
     default: {
-        var obj = obj.type();
-        throw panic(fmt.Sprintf("writeObject(%T)"u8, obj));
+        var objΔ1 = obj;
+        throw panic(fmt.Sprintf("writeObject(%T)"u8, objΔ1));
         break;
     }}
     buf.WriteByte((rune)' ');
@@ -649,10 +660,10 @@ internal static void writeObject(ж<bytes.Buffer> Ꮡbuf, Object obj, Qualifier 
     }
     if (tname != nil) {
         switch (typ.type()) {
-        case Basic.val t: {
+        case ж<Basic> t: {
             return;
         }
-        case Named.val t: {
+        case ж<Named> t: {
             if (t.TypeParams().Len() > 0) {
                 // Don't print anything more for basic types since there's
                 // no more information.
@@ -663,15 +674,15 @@ internal static void writeObject(ж<bytes.Buffer> Ꮡbuf, Object obj, Qualifier 
         if (tname.IsAlias()){
             buf.WriteString(" ="u8);
             {
-                var (alias, ok) = typ._<Alias.val>(ᐧ); if (ok) {
+                var (alias, ok) = typ._<ж<Alias>>(ᐧ); if (ok) {
                     // materialized? (gotypesalias=1)
-                    typ = alias.val.fromRHS;
+                    typ = alias.Value.fromRHS;
                 }
             }
         } else 
         {
-            var (t, _) = typ._<TypeParam.val>(ᐧ); if (t != nil){
-                typ = t.val.bound;
+            var (t, _) = typ._<ж<TypeParam>>(ᐧ); if (t != nil){
+                typ = t.Value.bound;
             } else {
                 // TODO(gri) should this be fromRHS for *Named?
                 // (See discussion in #66559.)
@@ -683,17 +694,17 @@ internal static void writeObject(ж<bytes.Buffer> Ꮡbuf, Object obj, Qualifier 
     // resulting in the object string `type any = any` rather than `type any =
     // interface{}`. To avoid this, swap in a different empty interface.
     if (obj.Name() == "any"u8 && obj.Parent() == Universe) {
-        assert(Identical(typ, emptyInterface));
-        Ꮡtyp = emptyInterface; typ = ref Ꮡtyp.val;
+        assert(Identical(typ, new InterfaceжΔType(ᏑemptyInterface)));
+        typ = new InterfaceжΔType(ᏑemptyInterface);
     }
     buf.WriteByte((rune)' ');
     WriteType(Ꮡbuf, typ, qf);
 }
 
-internal static @string packagePrefix(ж<Package> Ꮡpkg, Qualifier qf) {
-    ref var pkg = ref Ꮡpkg.val;
+internal static @string packagePrefix(ж<Package> Ꮡpkg, Func<ж<Package>, @string> qf) {
+    ref var pkg = ref Ꮡpkg.DerefOrNil();
 
-    if (pkg == nil) {
+    if (Ꮡpkg == nil) {
         return ""u8;
     }
     @string s = default!;
@@ -711,62 +722,78 @@ internal static @string packagePrefix(ж<Package> Ꮡpkg, Qualifier qf) {
 // ObjectString returns the string form of obj.
 // The Qualifier controls the printing of
 // package-level objects, and may be nil.
-public static @string ObjectString(Object obj, Qualifier qf) {
-    ref var buf = ref heap(new bytes_package.Buffer(), out var Ꮡbuf);
+public static @string ObjectString(Object obj, Func<ж<Package>, @string> qf) {
+    ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     writeObject(Ꮡbuf, obj, qf);
-    return buf.String();
+    return Ꮡbuf.String();
 }
 
-[GoRecv] public static @string String(this ref PkgName obj) {
-    return ObjectString(~obj, default!);
+public static @string String(this ж<PkgName> Ꮡobj) {
+    ref var obj = ref Ꮡobj.Value;
+
+    return ObjectString(new PkgNameжObject(Ꮡobj), default!);
 }
 
-[GoRecv] public static @string String(this ref Const obj) {
-    return ObjectString(~obj, default!);
+public static @string String(this ж<Const> Ꮡobj) {
+    ref var obj = ref Ꮡobj.Value;
+
+    return ObjectString(new ConstжObject(Ꮡobj), default!);
 }
 
-[GoRecv] public static @string String(this ref TypeName obj) {
-    return ObjectString(~obj, default!);
+public static @string String(this ж<TypeName> Ꮡobj) {
+    ref var obj = ref Ꮡobj.Value;
+
+    return ObjectString(new TypeNameжObject(Ꮡobj), default!);
 }
 
-[GoRecv] public static @string String(this ref Var obj) {
-    return ObjectString(~obj, default!);
+public static @string String(this ж<Var> Ꮡobj) {
+    ref var obj = ref Ꮡobj.Value;
+
+    return ObjectString(new VarжObject(Ꮡobj), default!);
 }
 
-[GoRecv] public static @string String(this ref Func obj) {
-    return ObjectString(~obj, default!);
+public static @string String(this ж<Func> Ꮡobj) {
+    ref var obj = ref Ꮡobj.Value;
+
+    return ObjectString(new FuncжObject(Ꮡobj), default!);
 }
 
-[GoRecv] public static @string String(this ref Label obj) {
-    return ObjectString(~obj, default!);
+public static @string String(this ж<Label> Ꮡobj) {
+    ref var obj = ref Ꮡobj.Value;
+
+    return ObjectString(new LabelжObject(Ꮡobj), default!);
 }
 
-[GoRecv] public static @string String(this ref Builtin obj) {
-    return ObjectString(~obj, default!);
+public static @string String(this ж<Builtin> Ꮡobj) {
+    ref var obj = ref Ꮡobj.Value;
+
+    return ObjectString(new BuiltinжObject(Ꮡobj), default!);
 }
 
-[GoRecv] public static @string String(this ref Nil obj) {
-    return ObjectString(~obj, default!);
+public static @string String(this ж<Nil> Ꮡobj) {
+    ref var obj = ref Ꮡobj.Value;
+
+    return ObjectString(new NilжObject(Ꮡobj), default!);
 }
 
-internal static void writeFuncName(ж<bytes.Buffer> Ꮡbuf, ж<Func> Ꮡf, Qualifier qf) {
-    ref var buf = ref Ꮡbuf.val;
-    ref var f = ref Ꮡf.val;
+internal static void writeFuncName(ж<bytes.Buffer> Ꮡbuf, ж<Func> Ꮡf, Func<ж<Package>, @string> qf) {
+    ref var buf = ref Ꮡbuf.Value;
+    ref var f = ref Ꮡf.Value;
 
     if (f.typ != default!) {
-        var sig = f.typ._<ΔSignature.val>();
+        var sig = f.typ._<ж<ΔSignature>>();
         {
             var recv = sig.Recv(); if (recv != nil){
                 buf.WriteByte((rune)'(');
                 {
-                    var (_, ok) = recv.Type()._<Interface.val>(ᐧ); if (ok){
+                    var (_, ok) = recv.of(Var.Ꮡobject).Type()._<ж<Interface>>(ᐧ); if (ok){
                         // gcimporter creates abstract methods of
                         // named interfaces using the interface type
                         // (not the named type) as the receiver.
                         // Don't print it in full.
                         buf.WriteString("interface"u8);
                     } else {
-                        WriteType(Ꮡbuf, recv.Type(), qf);
+                        WriteType(Ꮡbuf, recv.of(Var.Ꮡobject).Type(), qf);
                     }
                 }
                 buf.WriteByte((rune)')');

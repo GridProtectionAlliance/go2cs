@@ -91,7 +91,7 @@
 namespace go;
 
 using errors = errors_package;
-using _ = unsafe_package; // for go:linkname
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
 
 partial class time_package {
 
@@ -170,13 +170,13 @@ internal static readonly UntypedInt nsecShift = 30;
 
 // nsec returns the time's nanoseconds.
 [GoRecv] internal static int32 nsec(this ref Time t) {
-    return ((int32)((uint64)(t.wall & nsecMask)));
+    return (int32)((uint64)(t.wall & (uint64)nsecMask));
 }
 
 // sec returns the time's seconds since Jan 1 year 1.
 [GoRecv] internal static int64 sec(this ref Time t) {
-    if ((uint64)(t.wall & hasMonotonic) != 0) {
-        return wallToInternal + ((int64)(t.wall << (int)(1) >> (int)((nsecShift + 1))));
+    if ((uint64)(t.wall & (uint64)hasMonotonic) != 0) {
+        return wallToInternal + (int64)(((t.wall << (int)(1)) >> (int)((nsecShift + 1))));
     }
     return t.ext;
 }
@@ -188,11 +188,11 @@ internal static readonly UntypedInt nsecShift = 30;
 
 // addSec adds d seconds to the time.
 [GoRecv] internal static void addSec(this ref Time t, int64 d) {
-    if ((uint64)(t.wall & hasMonotonic) != 0) {
-        var sec = ((int64)(t.wall << (int)(1) >> (int)((nsecShift + 1))));
+    if ((uint64)(t.wall & (uint64)hasMonotonic) != 0) {
+        var sec = (int64)(((t.wall << (int)(1)) >> (int)((nsecShift + 1))));
         var dsec = sec + d;
-        if (0 <= dsec && dsec <= 1 << (int)(33) - 1) {
-            t.wall = (uint64)((uint64)((uint64)(t.wall & nsecMask) | ((uint64)dsec) << (int)(nsecShift)) | hasMonotonic);
+        if (0 <= dsec && dsec <= 8589934591L) {
+            t.wall = (uint64)((uint64)((uint64)(t.wall & (uint64)nsecMask) | ((uint64)dsec << (int)(nsecShift))) | (uint64)hasMonotonic);
             return;
         }
         // Wall second now out of range for packed field.
@@ -205,28 +205,28 @@ internal static readonly UntypedInt nsecShift = 30;
         t.ext = sum;
     } else 
     if (d > 0){
-        t.ext = 1 << (int)(63) - 1;
+        t.ext = 9223372036854775807L;
     } else {
-        t.ext = -(1 << (int)(63) - 1);
+        t.ext = -(9223372036854775807L);
     }
 }
 
 // setLoc sets the location associated with the time.
-[GoRecv] public static void setLoc(this ref Time t, ж<ΔLocation> Ꮡloc) {
-    ref var loc = ref Ꮡloc.val;
+[GoRecv] internal static void setLoc(this ref Time t, ж<ΔLocation> Ꮡloc) {
+    ref var loc = ref Ꮡloc.DerefOrNil();
 
-    if (Ꮡloc == Ꮡ(utcLoc)) {
+    if (Ꮡloc == ᏑutcLoc) {
         loc = default!;
     }
     t.stripMono();
-    t.loc = loc;
+    t.loc = Ꮡloc;
 }
 
 // stripMono strips the monotonic clock reading in t.
 [GoRecv] internal static void stripMono(this ref Time t) {
-    if ((uint64)(t.wall & hasMonotonic) != 0) {
+    if ((uint64)(t.wall & (uint64)hasMonotonic) != 0) {
         t.ext = t.sec();
-        t.wall &= (uint64)(nsecMask);
+        t.wall &= nsecMask;
     }
 }
 
@@ -235,12 +235,12 @@ internal static readonly UntypedInt nsecShift = 30;
 // because its wall time is too large,
 // setMono is a no-op.
 [GoRecv] internal static void setMono(this ref Time t, int64 m) {
-    if ((uint64)(t.wall & hasMonotonic) == 0) {
+    if ((uint64)(t.wall & (uint64)hasMonotonic) == 0) {
         var sec = t.ext;
         if (sec < minWall || maxWall < sec) {
             return;
         }
-        t.wall |= (uint64)((uint64)(hasMonotonic | ((uint64)(sec - minWall)) << (int)(nsecShift)));
+        t.wall |= (uint64)((uint64)hasMonotonic | ((uint64)(sec - minWall) << (int)(nsecShift)));
     }
     t.ext = m;
 }
@@ -251,7 +251,7 @@ internal static readonly UntypedInt nsecShift = 30;
 // so it's OK that technically 0 is a valid
 // monotonic clock reading as well.
 [GoRecv] internal static int64 mono(this ref Time t) {
-    if ((uint64)(t.wall & hasMonotonic) == 0) {
+    if ((uint64)(t.wall & (uint64)hasMonotonic) == 0) {
         return 0;
     }
     return t.ext;
@@ -259,7 +259,7 @@ internal static readonly UntypedInt nsecShift = 30;
 
 // After reports whether the time instant t is after u.
 public static bool After(this Time t, Time u) {
-    if ((uint64)((uint64)(t.wall & u.wall) & hasMonotonic) != 0) {
+    if ((uint64)((uint64)(t.wall & u.wall) & (uint64)hasMonotonic) != 0) {
         return t.ext > u.ext;
     }
     var ts = t.sec();
@@ -269,7 +269,7 @@ public static bool After(this Time t, Time u) {
 
 // Before reports whether the time instant t is before u.
 public static bool Before(this Time t, Time u) {
-    if ((uint64)((uint64)(t.wall & u.wall) & hasMonotonic) != 0) {
+    if ((uint64)((uint64)(t.wall & u.wall) & (uint64)hasMonotonic) != 0) {
         return t.ext < u.ext;
     }
     var ts = t.sec();
@@ -282,19 +282,19 @@ public static bool Before(this Time t, Time u) {
 public static nint Compare(this Time t, Time u) {
     int64 tc = default!;
     int64 uc = default!;
-    if ((uint64)((uint64)(t.wall & u.wall) & hasMonotonic) != 0){
+    if ((uint64)((uint64)(t.wall & u.wall) & (uint64)hasMonotonic) != 0){
         (tc, uc) = (t.ext, u.ext);
     } else {
         (tc, uc) = (t.sec(), u.sec());
         if (tc == uc) {
-            (tc, uc) = (((int64)t.nsec()), ((int64)u.nsec()));
+            (tc, uc) = ((int64)t.nsec(), (int64)u.nsec());
         }
     }
     switch (ᐧ) {
-    case {} when tc is < uc: {
+    case {} when tc < uc: {
         return -1;
     }
-    case {} when tc is > uc: {
+    case {} when tc > uc: {
         return +1;
     }}
 
@@ -307,7 +307,7 @@ public static nint Compare(this Time t, Time u) {
 // See the documentation on the Time type for the pitfalls of using == with
 // Time values; most code should use Equal instead.
 public static bool Equal(this Time t, Time u) {
-    if ((uint64)((uint64)(t.wall & u.wall) & hasMonotonic) != 0) {
+    if ((uint64)((uint64)(t.wall & u.wall) & (uint64)hasMonotonic) != 0) {
         return t.ext == u.ext;
     }
     return t.sec() == u.sec() && t.nsec() == u.nsec();
@@ -334,7 +334,7 @@ public static @string String(this ΔMonth m) {
         return longMonthNames[m - 1];
     }
     var buf = new slice<byte>(20);
-    nint n = fmtInt(buf, ((uint64)m));
+    nint n = fmtInt(buf, (uint64)(nint)m);
     return "%!Month("u8 + ((@string)(buf[(int)(n)..])) + ")"u8;
 }
 
@@ -354,7 +354,7 @@ public static @string String(this ΔWeekday d) {
         return longDayNames[d];
     }
     var buf = new slice<byte>(20);
-    nint n = fmtInt(buf, ((uint64)d));
+    nint n = fmtInt(buf, (uint64)(nint)d);
     return "%!Weekday("u8 + ((@string)(buf[(int)(n)..])) + ")"u8;
 }
 
@@ -437,15 +437,12 @@ public static @string String(this ΔWeekday d) {
 //
 // All this is opaque to clients of the API and can be changed if a
 // better implementation presents itself.
-internal static readonly GoUntyped absoluteZeroYear = /* -292277022399 */
-    GoUntyped.Parse("-292277022399");
+internal static readonly UntypedInt absoluteZeroYear = -292277022399;
 internal static readonly UntypedInt internalYear = 1;
-internal static readonly GoUntyped absoluteToInternal = /* (absoluteZeroYear - internalYear) * 365.2425 * secondsPerDay */
-    GoUntyped.Parse("-9223371966579724800");
+internal const int64 absoluteToInternal = /* (absoluteZeroYear - internalYear) * 365.2425 * secondsPerDay */ -9223371966579724800;
 internal const int64 internalToAbsolute = /* -absoluteToInternal */ 9223371966579724800;
 internal const int64 unixToInternal = /* (1969*365 + 1969/4 - 1969/100 + 1969/400) * secondsPerDay */ 62135596800;
-internal static readonly GoUntyped internalToUnix = /* -unixToInternal */
-    GoUntyped.Parse("-62135596800");
+internal const int64 internalToUnix = /* -unixToInternal */ -62135596800;
 internal const int64 wallToInternal = /* (1884*365 + 1884/4 - 1884/100 + 1884/400) * secondsPerDay */ 59453308800;
 
 // IsZero reports whether t represents the zero time instant,
@@ -459,19 +456,19 @@ public static bool IsZero(this Time t) {
 internal static uint64 abs(this Time t) {
     var l = t.loc;
     // Avoid function calls when possible.
-    if (l == nil || l == Ꮡ(localLoc)) {
+    if (l == nil || l == ᏑlocalLoc) {
         l = l.get();
     }
     var sec = t.unixSec();
-    if (l != Ꮡ(utcLoc)) {
+    if (l != ᏑutcLoc) {
         if ((~l).cacheZone != nil && (~l).cacheStart <= sec && sec < (~l).cacheEnd){
-            sec += ((int64)(~(~l).cacheZone).offset);
+            sec += (int64)(~(~l).cacheZone).offset;
         } else {
             var (_, offset, _, _, _) = l.lookup(sec);
-            sec += ((int64)offset);
+            sec += (int64)offset;
         }
     }
-    return ((uint64)(sec + (unixToInternal + internalToAbsolute)));
+    return (uint64)(sec + (9223372028715321600L));
 }
 
 // locabs is a combination of the Zone and abs methods,
@@ -482,23 +479,23 @@ internal static (@string name, nint offset, uint64 abs) locabs(this Time t) {
     uint64 abs = default!;
 
     var l = t.loc;
-    if (l == nil || l == Ꮡ(localLoc)) {
+    if (l == nil || l == ᏑlocalLoc) {
         l = l.get();
     }
     // Avoid function call if we hit the local time cache.
     var sec = t.unixSec();
-    if (l != Ꮡ(utcLoc)){
+    if (l != ᏑutcLoc){
         if ((~l).cacheZone != nil && (~l).cacheStart <= sec && sec < (~l).cacheEnd){
-            name = (~l).cacheZone.val.name;
-            offset = (~l).cacheZone.val.offset;
+            name = l.Value.cacheZone.Value.name;
+            offset = l.Value.cacheZone.Value.offset;
         } else {
             (name, offset, _, _, _) = l.lookup(sec);
         }
-        sec += ((int64)offset);
+        sec += (int64)offset;
     } else {
         name = "UTC"u8;
     }
-    abs = ((uint64)(sec + (unixToInternal + internalToAbsolute)));
+    abs = (uint64)(sec + (9223372028715321600L));
     return (name, offset, abs);
 }
 
@@ -538,8 +535,8 @@ public static ΔWeekday Weekday(this Time t) {
 // absWeekday is like Weekday but operates on an absolute time.
 internal static ΔWeekday absWeekday(uint64 abs) {
     // January 1 of the absolute year, like January 1 of 2001, was a Monday.
-    var sec = (abs + ((uint64)Monday) * secondsPerDay) % secondsPerWeek;
-    return ((ΔWeekday)(((nint)sec) / secondsPerDay));
+    var sec = (abs + (uint64)((uint64)(nint)Monday * (uint64)secondsPerDay)) % (uint64)secondsPerWeek;
+    return ((ΔWeekday)((nint)sec / (nint)secondsPerDay));
 }
 
 // ISOWeek returns the ISO 8601 year and week number in which t occurs.
@@ -566,8 +563,8 @@ public static (nint year, nint week) ISOWeek(this Time t) {
         d = -3;
     }
     // find the Thursday of the calendar week
-    abs += ((uint64)d) * secondsPerDay;
-    var (year, _, _, yday) = absDate(abs, false);
+    abs += (uint64)(nint)d * (uint64)secondsPerDay;
+    (year, _, _, var yday) = absDate(abs, false);
     return (year, yday / 7 + 1);
 }
 
@@ -596,33 +593,33 @@ internal static (nint hour, nint min, nint sec) absClock(uint64 abs) {
     nint min = default!;
     nint sec = default!;
 
-    sec = ((nint)(abs % secondsPerDay));
-    hour = sec / secondsPerHour;
-    sec -= hour * secondsPerHour;
-    min = sec / secondsPerMinute;
-    sec -= min * secondsPerMinute;
+    sec = (nint)(abs % (uint64)secondsPerDay);
+    hour = sec / (nint)secondsPerHour;
+    sec -= hour * (nint)secondsPerHour;
+    min = sec / (nint)secondsPerMinute;
+    sec -= min * (nint)secondsPerMinute;
     return (hour, min, sec);
 }
 
 // Hour returns the hour within the day specified by t, in the range [0, 23].
 public static nint Hour(this Time t) {
-    return ((nint)(t.abs() % secondsPerDay)) / secondsPerHour;
+    return (nint)(t.abs() % (uint64)secondsPerDay) / (nint)secondsPerHour;
 }
 
 // Minute returns the minute offset within the hour specified by t, in the range [0, 59].
 public static nint Minute(this Time t) {
-    return ((nint)(t.abs() % secondsPerHour)) / secondsPerMinute;
+    return (nint)(t.abs() % (uint64)secondsPerHour) / (nint)secondsPerMinute;
 }
 
 // Second returns the second offset within the minute specified by t, in the range [0, 59].
 public static nint Second(this Time t) {
-    return ((nint)(t.abs() % secondsPerMinute));
+    return (nint)(t.abs() % (uint64)secondsPerMinute);
 }
 
 // Nanosecond returns the nanosecond offset within the second specified by t,
 // in the range [0, 999999999].
 public static nint Nanosecond(this Time t) {
-    return ((nint)t.nsec());
+    return (nint)t.nsec();
 }
 
 // YearDay returns the day of the year specified by t, in the range [1,365] for non-leap years,
@@ -634,8 +631,7 @@ public static nint YearDay(this Time t) {
 
 [GoType("num:int64")] partial struct Duration;
 
-internal static readonly GoUntyped minDuration = /* -1 << 63 */
-    GoUntyped.Parse("-9223372036854775808");
+internal static readonly Duration minDuration = /* -1 << 63 */ -9223372036854775808;
 internal static readonly Duration maxDuration = /* 1<<63 - 1 */ 9223372036854775807;
 
 // Common durations. There is no definition for units of Day or larger
@@ -676,17 +672,17 @@ public static @string String(this Duration d) {
 
 // format formats the representation of d into the end of buf and
 // returns the offset of the first character.
-public static nint format(this Duration d, ж<array<byte>> Ꮡbuf) {
-    ref var buf = ref Ꮡbuf.val;
+internal static nint format(this Duration d, ж<array<byte>> Ꮡbuf) {
+    ref var buf = ref Ꮡbuf.Value;
 
     // Largest time is 2540400h10m10.000000000s
     nint w = len(buf);
-    var u = ((uint64)d);
+    var u = (uint64)(int64)d;
     var neg = d < 0;
     if (neg) {
-        u = -u;
+        u = ((uint64)0 - u);
     }
-    if (u < ((uint64)ΔSecond)){
+    if (u < (uint64)(int64)ΔSecond){
         // Special case: if duration is smaller than a second,
         // use smaller units, like 1.2ms
         nint prec = default!;
@@ -698,12 +694,12 @@ public static nint format(this Duration d, ж<array<byte>> Ꮡbuf) {
             buf[w] = (rune)'0';
             return w;
         }
-        case {} when u < ((uint64)Microsecond): {
+        case {} when u < (uint64)(int64)Microsecond: {
             prec = 0;
             buf[w] = (rune)'n';
             break;
         }
-        case {} when u < ((uint64)Millisecond): {
+        case {} when u < (uint64)(int64)Millisecond: {
             prec = 3;
             w--;
             copy(buf[(int)(w)..], // print nanoseconds
@@ -767,7 +763,7 @@ internal static (nint nw, uint64 nv) fmtFrac(slice<byte> buf, uint64 v, nint pre
         print = print || digit != 0;
         if (print) {
             w--;
-            buf[w] = ((byte)digit) + (rune)'0';
+            buf[w] = (byte)((byte)digit + (rune)'0');
         }
         v /= 10;
     }
@@ -788,7 +784,7 @@ internal static nint fmtInt(slice<byte> buf, uint64 v) {
     } else {
         while (v > 0) {
             w--;
-            buf[w] = ((byte)(v % 10)) + (rune)'0';
+            buf[w] = (byte)((byte)(v % 10) + (rune)'0');
             v /= 10;
         }
     }
@@ -797,17 +793,17 @@ internal static nint fmtInt(slice<byte> buf, uint64 v) {
 
 // Nanoseconds returns the duration as an integer nanosecond count.
 public static int64 Nanoseconds(this Duration d) {
-    return ((int64)d);
+    return (int64)d;
 }
 
 // Microseconds returns the duration as an integer microsecond count.
 public static int64 Microseconds(this Duration d) {
-    return ((int64)d) / 1e3F;
+    return (int64)d / 1000;
 }
 
 // Milliseconds returns the duration as an integer millisecond count.
 public static int64 Milliseconds(this Duration d) {
-    return ((int64)d) / 1e6F;
+    return (int64)d / 1000000;
 }
 
 // These methods return float64 because the dominant
@@ -823,21 +819,21 @@ public static int64 Milliseconds(this Duration d) {
 public static float64 Seconds(this Duration d) {
     var sec = d / ΔSecond;
     var nsec = d % ΔSecond;
-    return ((float64)sec) + ((float64)nsec) / 1e9F;
+    return (float64)(int64)sec + (float64)(int64)nsec / 1e9D;
 }
 
 // Minutes returns the duration as a floating point number of minutes.
 public static float64 Minutes(this Duration d) {
     var min = d / ΔMinute;
     var nsec = d % ΔMinute;
-    return ((float64)min) + ((float64)nsec) / (60 * 1e9F);
+    return (float64)(int64)min + (float64)(int64)nsec / (60 * 1e9D);
 }
 
 // Hours returns the duration as a floating point number of hours.
 public static float64 Hours(this Duration d) {
     var hour = d / ΔHour;
     var nsec = d % ΔHour;
-    return ((float64)hour) + ((float64)nsec) / (60 * 60 * 1e9F);
+    return (float64)(int64)hour + (float64)(int64)nsec / (60 * 60 * 1e9D);
 }
 
 // Truncate returns the result of rounding d toward zero to a multiple of m.
@@ -852,7 +848,7 @@ public static Duration Truncate(this Duration d, Duration m) {
 // lessThanHalf reports whether x+x < y but avoids overflow,
 // assuming x and y are both positive (Duration is signed).
 internal static bool lessThanHalf(Duration x, Duration y) {
-    return ((uint64)x) + ((uint64)x) < ((uint64)y);
+    return (uint64)(int64)x + (uint64)(int64)x < (uint64)(int64)y;
 }
 
 // Round returns the result of rounding d to the nearest multiple of m.
@@ -896,10 +892,10 @@ public static Duration Round(this Duration d, Duration m) {
 // As a special case, [math.MinInt64] is converted to [math.MaxInt64].
 public static Duration Abs(this Duration d) {
     switch (ᐧ) {
-    case {} when d is >= 0: {
+    case {} when d >= 0: {
         return d;
     }
-    case {} when d is minDuration: {
+    case {} when d == minDuration: {
         return maxDuration;
     }
     default: {
@@ -910,21 +906,21 @@ public static Duration Abs(this Duration d) {
 
 // Add returns the time t+d.
 public static Time Add(this Time t, Duration d) {
-    var dsec = ((int64)(d / 1e9F));
-    var nsec = t.nsec() + ((int32)(d % 1e9F));
-    if (nsec >= 1e9F){
+    var dsec = (int64)(d / 1000000000);
+    var nsec = t.nsec() + (int32)(int64)(d % 1000000000);
+    if (nsec >= 1000000000){
         dsec++;
-        nsec -= 1e9F;
+        nsec -= 1000000000;
     } else 
     if (nsec < 0) {
         dsec--;
-        nsec += 1e9F;
+        nsec += 1000000000;
     }
-    t.wall = (uint64)((uint64)(t.wall & ~nsecMask) | ((uint64)nsec));
+    t.wall = (uint64)((uint64)(t.wall & ~(uint64)nsecMask) | (uint64)nsec);
     // update nsec
     t.addSec(dsec);
-    if ((uint64)(t.wall & hasMonotonic) != 0) {
-        var te = t.ext + ((int64)d);
+    if ((uint64)(t.wall & (uint64)hasMonotonic) != 0) {
+        var te = t.ext + (int64)d;
         if (d < 0 && te > t.ext || d > 0 && te < t.ext){
             // Monotonic clock reading now out of range; degrade to wall-only.
             t.stripMono();
@@ -940,10 +936,10 @@ public static Time Add(this Time t, Duration d) {
 // will be returned.
 // To compute t-d for a duration d, use t.Add(-d).
 public static Duration Sub(this Time t, Time u) {
-    if ((uint64)((uint64)(t.wall & u.wall) & hasMonotonic) != 0) {
+    if ((uint64)((uint64)(t.wall & u.wall) & (uint64)hasMonotonic) != 0) {
         return subMono(t.ext, u.ext);
     }
-    var d = ((Duration)(t.sec() - u.sec())) * ΔSecond + ((Duration)(t.nsec() - u.nsec()));
+    var d = ((Duration)(t.sec() - u.sec())) * ΔSecond + ((Duration)(int64)(t.nsec() - u.nsec()));
     // Check for overflow or underflow.
     switch (ᐧ) {
     case {} when u.Add(d).Equal(t): {
@@ -977,7 +973,7 @@ internal static Duration subMono(int64 t, int64 u) {
 // Since returns the time elapsed since t.
 // It is shorthand for time.Now().Sub(t).
 public static Duration Since(Time t) {
-    if ((uint64)(t.wall & hasMonotonic) != 0) {
+    if ((uint64)(t.wall & (uint64)hasMonotonic) != 0) {
         // Common case optimization: if t has monotonic time, then Sub will use only it.
         return subMono(runtimeNano() - startNano, t.ext);
     }
@@ -987,7 +983,7 @@ public static Duration Since(Time t) {
 // Until returns the duration until t.
 // It is shorthand for t.Sub(time.Now()).
 public static Duration Until(Time t) {
-    if ((uint64)(t.wall & hasMonotonic) != 0) {
+    if ((uint64)(t.wall & (uint64)hasMonotonic) != 0) {
         // Common case optimization: if t has monotonic time, then Sub will use only it.
         return subMono(t.ext, runtimeNano() - startNano);
     }
@@ -1014,7 +1010,7 @@ public static Duration Until(Time t) {
 public static Time AddDate(this Time t, nint years, nint months, nint days) {
     var (year, month, day) = t.Date();
     var (hour, min, sec) = t.Clock();
-    return Date(year + years, month + ((ΔMonth)months), day + days, hour, min, sec, ((nint)t.nsec()), t.Location());
+    return Date(year + years, month + ((ΔMonth)months), day + days, hour, min, sec, (nint)t.nsec(), t.Location());
 }
 
 internal static readonly UntypedInt secondsPerMinute = 60;
@@ -1055,35 +1051,35 @@ internal static (nint year, ΔMonth month, nint day, nint yday) absDate(uint64 a
     nint yday = default!;
 
     // Split into time and day.
-    var d = abs / secondsPerDay;
+    var d = abs / (uint64)secondsPerDay;
     // Account for 400 year cycles.
-    var n = d / daysPer400Years;
+    var n = d / (uint64)daysPer400Years;
     var y = 400 * n;
-    d -= daysPer400Years * n;
+    d -= (uint64)daysPer400Years * n;
     // Cut off 100-year cycles.
     // The last cycle has one extra leap year, so on the last day
     // of that year, day / daysPer100Years will be 4 instead of 3.
     // Cut it back down to 3 by subtracting n>>2.
-    n = d / daysPer100Years;
-    n -= n >> (int)(2);
+    n = d / (uint64)daysPer100Years;
+    n -= (n >> (int)(2));
     y += 100 * n;
-    d -= daysPer100Years * n;
+    d -= (uint64)daysPer100Years * n;
     // Cut off 4-year cycles.
     // The last cycle has a missing leap year, which does not
     // affect the computation.
-    n = d / daysPer4Years;
+    n = d / (uint64)daysPer4Years;
     y += 4 * n;
-    d -= daysPer4Years * n;
+    d -= (uint64)daysPer4Years * n;
     // Cut off years within a 4-year cycle.
     // The last year is a leap year, so on the last day of that year,
     // day / 365 will be 4 instead of 3. Cut it back down to 3
     // by subtracting n>>2.
     n = d / 365;
-    n -= n >> (int)(2);
+    n -= (n >> (int)(2));
     y += n;
     d -= 365 * n;
-    year = ((nint)(((int64)y) + absoluteZeroYear));
-    yday = ((nint)d);
+    year = (nint)((int64)y + (int64)absoluteZeroYear);
+    yday = (nint)d;
     if (!full) {
         return (year, month, day, yday);
     }
@@ -1107,13 +1103,13 @@ internal static (nint year, ΔMonth month, nint day, nint yday) absDate(uint64 a
     // Estimate month on assumption that every month has 31 days.
     // The estimate may be too low by at most one month, so adjust.
     month = ((ΔMonth)(day / 31));
-    nint end = ((nint)daysBefore[month + 1]);
+    nint end = (nint)daysBefore[month + 1];
     nint begin = default!;
     if (day >= end){
         month++;
         begin = end;
     } else {
-        begin = ((nint)daysBefore[month]);
+        begin = (nint)daysBefore[month];
     }
     month++;
     // because January is 1
@@ -1144,26 +1140,26 @@ internal static nint daysIn(ΔMonth m, nint year) {
     if (m == February && isLeap(year)) {
         return 29;
     }
-    return ((nint)(daysBefore[m] - daysBefore[m - 1]));
+    return (nint)(daysBefore[m] - daysBefore[m - 1]);
 }
 
 // daysSinceEpoch takes a year and returns the number of days from
 // the absolute epoch to the start of that year.
 // This is basically (year - zeroYear) * 365, but accounting for leap days.
 internal static uint64 daysSinceEpoch(nint year) {
-    var y = ((uint64)(((int64)year) - absoluteZeroYear));
+    var y = (uint64)((int64)year - (int64)absoluteZeroYear);
     // Add in days from 400-year cycles.
     var n = y / 400;
     y -= 400 * n;
-    var d = daysPer400Years * n;
+    var d = (uint64)daysPer400Years * n;
     // Add in 100-year cycles.
     n = y / 100;
     y -= 100 * n;
-    d += daysPer100Years * n;
+    d += (uint64)daysPer100Years * n;
     // Add in 4-year cycles.
     n = y / 4;
     y -= 4 * n;
-    d += daysPer4Years * n;
+    d += (uint64)daysPer4Years * n;
     // Add in non-leap years.
     n = y;
     d += 365 * n;
@@ -1193,23 +1189,23 @@ internal static int64 startNano = runtimeNano() - 1;
 public static Time Now() {
     var (sec, nsec, mono) = now();
     mono -= startNano;
-    sec += unixToInternal - minWall;
-    if (((uint64)sec) >> (int)(33) != 0) {
+    sec += 2682288000L;
+    if (((uint64)sec >> (int)(33)) != 0) {
         // Seconds field overflowed the 33 bits available when
         // storing a monotonic time. This will be true after
         // March 16, 2157.
-        return new Time(((uint64)nsec), sec + minWall, ΔLocal);
+        return new Time((uint64)nsec, sec + minWall, ΔLocal);
     }
-    return new Time((uint64)((uint64)(hasMonotonic | ((uint64)sec) << (int)(nsecShift)) | ((uint64)nsec)), mono, ΔLocal);
+    return new Time((uint64)((uint64)((uint64)hasMonotonic | ((uint64)sec << (int)(nsecShift))) | (uint64)nsec), mono, ΔLocal);
 }
 
 internal static Time unixTime(int64 sec, int32 nsec) {
-    return new Time(((uint64)nsec), sec + unixToInternal, ΔLocal);
+    return new Time((uint64)nsec, sec + unixToInternal, ΔLocal);
 }
 
 // UTC returns t with the location set to UTC.
 public static Time UTC(this Time t) {
-    t.setLoc(Ꮡ(utcLoc));
+    t.setLoc(ᏑutcLoc);
     return t;
 }
 
@@ -1225,9 +1221,9 @@ public static Time Local(this Time t) {
 //
 // In panics if loc is nil.
 public static Time In(this Time t, ж<ΔLocation> Ꮡloc) {
-    ref var loc = ref Ꮡloc.val;
+    ref var loc = ref Ꮡloc.DerefOrNil();
 
-    if (loc == nil) {
+    if (Ꮡloc == nil) {
         throw panic("time: missing Location in call to Time.In");
     }
     t.setLoc(Ꮡloc);
@@ -1290,7 +1286,7 @@ public static int64 Unix(this Time t) {
 // years before or after 1970). The result does not depend on the
 // location associated with t.
 public static int64 UnixMilli(this Time t) {
-    return t.unixSec() * 1e3F + ((int64)t.nsec()) / 1e6F;
+    return t.unixSec() * 1000 + (int64)t.nsec() / 1000000;
 }
 
 // UnixMicro returns t as a Unix time, the number of microseconds elapsed since
@@ -1299,7 +1295,7 @@ public static int64 UnixMilli(this Time t) {
 // after year 294246). The result does not depend on the location associated
 // with t.
 public static int64 UnixMicro(this Time t) {
-    return t.unixSec() * 1e6F + ((int64)t.nsec()) / 1e3F;
+    return t.unixSec() * 1000000 + (int64)t.nsec() / 1000;
 }
 
 // UnixNano returns t as a Unix time, the number of nanoseconds elapsed
@@ -1309,7 +1305,7 @@ public static int64 UnixMicro(this Time t) {
 // on the zero Time is undefined. The result does not depend on the
 // location associated with t.
 public static int64 UnixNano(this Time t) {
-    return (t.unixSec()) * 1e9F + ((int64)t.nsec());
+    return (t.unixSec()) * 1000000000 + (int64)t.nsec();
 }
 
 internal const byte timeBinaryVersionV1 = /* iota + 1 */ 1;    // For general situation
@@ -1321,44 +1317,44 @@ public static (slice<byte>, error) MarshalBinary(this Time t) {
     int8 offsetSec = default!;
     var version = timeBinaryVersionV1;
     if (t.Location() == ΔUTC){
-        offsetMin = -1;
+        offsetMin = (int16)(-1);
     } else {
         var (_, offset) = t.Zone();
         if (offset % 60 != 0) {
             version = timeBinaryVersionV2;
-            offsetSec = ((int8)(offset % 60));
+            offsetSec = (int8)(offset % 60);
         }
         offset /= 60;
         if (offset < -32768 || offset == -1 || offset > 32767) {
             return (default!, errors.New("Time.MarshalBinary: unexpected zone offset"u8));
         }
-        offsetMin = ((int16)offset);
+        offsetMin = (int16)offset;
     }
     var sec = t.sec();
     var nsec = t.nsec();
     var enc = new byte[]{
         version, // byte 0 : version
 
-        ((byte)(sec >> (int)(56))), // bytes 1-8: seconds
+        (byte)((sec >> (int)(56))), // bytes 1-8: seconds
 
-        ((byte)(sec >> (int)(48))),
-        ((byte)(sec >> (int)(40))),
-        ((byte)(sec >> (int)(32))),
-        ((byte)(sec >> (int)(24))),
-        ((byte)(sec >> (int)(16))),
-        ((byte)(sec >> (int)(8))),
-        ((byte)sec),
-        ((byte)(nsec >> (int)(24))), // bytes 9-12: nanoseconds
+        (byte)((sec >> (int)(48))),
+        (byte)((sec >> (int)(40))),
+        (byte)((sec >> (int)(32))),
+        (byte)((sec >> (int)(24))),
+        (byte)((sec >> (int)(16))),
+        (byte)((sec >> (int)(8))),
+        (byte)sec,
+        (byte)((nsec >> (int)(24))), // bytes 9-12: nanoseconds
 
-        ((byte)(nsec >> (int)(16))),
-        ((byte)(nsec >> (int)(8))),
-        ((byte)nsec),
-        ((byte)(offsetMin >> (int)(8))), // bytes 13-14: zone offset in minutes
+        (byte)((nsec >> (int)(16))),
+        (byte)((nsec >> (int)(8))),
+        (byte)nsec,
+        (byte)((offsetMin >> (int)(8))), // bytes 13-14: zone offset in minutes
 
-        ((byte)offsetMin)
+        (byte)offsetMin
     }.slice();
     if (version == timeBinaryVersionV2) {
-        enc = append(enc, ((byte)offsetSec));
+        enc = append(enc, (byte)offsetSec);
     }
     return (enc, default!);
 }
@@ -1385,19 +1381,19 @@ public static (slice<byte>, error) MarshalBinary(this Time t) {
         return errors.New("Time.UnmarshalBinary: invalid length"u8);
     }
     buf = buf[1..];
-    var sec = (int64)((int64)((int64)((int64)((int64)((int64)((int64)(((int64)buf[7]) | ((int64)buf[6]) << (int)(8)) | ((int64)buf[5]) << (int)(16)) | ((int64)buf[4]) << (int)(24)) | ((int64)buf[3]) << (int)(32)) | ((int64)buf[2]) << (int)(40)) | ((int64)buf[1]) << (int)(48)) | ((int64)buf[0]) << (int)(56));
+    var sec = (int64)((int64)((int64)((int64)((int64)((int64)((int64)((int64)buf[7] | ((int64)buf[6] << (int)(8))) | ((int64)buf[5] << (int)(16))) | ((int64)buf[4] << (int)(24))) | ((int64)buf[3] << (int)(32))) | ((int64)buf[2] << (int)(40))) | ((int64)buf[1] << (int)(48))) | ((int64)buf[0] << (int)(56)));
     buf = buf[8..];
-    var nsec = (int32)((int32)((int32)(((int32)buf[3]) | ((int32)buf[2]) << (int)(8)) | ((int32)buf[1]) << (int)(16)) | ((int32)buf[0]) << (int)(24));
+    var nsec = (int32)((int32)((int32)((int32)buf[3] | ((int32)buf[2] << (int)(8))) | ((int32)buf[1] << (int)(16))) | ((int32)buf[0] << (int)(24)));
     buf = buf[4..];
-    nint offset = ((nint)((int16)(((int16)buf[1]) | ((int16)buf[0]) << (int)(8)))) * 60;
+    nint offset = (nint)((int16)((int16)buf[1] | ((int16)buf[0] << (int)(8)))) * 60;
     if (version == timeBinaryVersionV2) {
-        offset += ((nint)buf[2]);
+        offset += (nint)buf[2];
     }
     t = new Time(nil);
-    t.wall = ((uint64)nsec);
+    t.wall = (uint64)nsec;
     t.ext = sec;
     if (offset == -1 * 60){
-        t.setLoc(Ꮡ(utcLoc));
+        t.setLoc(ᏑutcLoc);
     } else 
     {
         var (_, localoff, _, _, _) = ΔLocal.lookup(t.unixSec()); if (offset == localoff){
@@ -1429,9 +1425,9 @@ public static (slice<byte>, error) GobEncode(this Time t) {
 // (e.g., the year is out of range), then an error is reported.
 public static (slice<byte>, error) MarshalJSON(this Time t) {
     var b = new slice<byte>(0, len(RFC3339Nano) + len(@""""""));
-    b = append(b, (rune)'"');
-    (b, err) = t.appendStrictRFC3339(b);
-    b = append(b, (rune)'"');
+    b = append(b, (byte)((rune)'"'));
+    (b, var err) = t.appendStrictRFC3339(b);
+    b = append(b, (byte)((rune)'"'));
     if (err != default!) {
         return (default!, errors.New("Time.MarshalJSON: "u8 + err.Error()));
     }
@@ -1460,7 +1456,7 @@ public static (slice<byte>, error) MarshalJSON(this Time t) {
 // (e.g., the year is out of range), then an error is reported.
 public static (slice<byte>, error) MarshalText(this Time t) {
     var b = new slice<byte>(0, len(RFC3339Nano));
-    (b, err) = t.appendStrictRFC3339(b);
+    (b, var err) = t.appendStrictRFC3339(b);
     if (err != default!) {
         return (default!, errors.New("Time.MarshalText: "u8 + err.Error()));
     }
@@ -1481,28 +1477,28 @@ public static (slice<byte>, error) MarshalText(this Time t) {
 // Not all sec values have a corresponding time value. One such
 // value is 1<<63-1 (the largest int64 value).
 public static Time Unix(int64 sec, int64 nsec) {
-    if (nsec < 0 || nsec >= 1e9F) {
-        var n = nsec / 1e9F;
+    if (nsec < 0 || nsec >= 1000000000) {
+        var n = nsec / 1000000000;
         sec += n;
-        nsec -= n * 1e9F;
+        nsec -= n * 1000000000;
         if (nsec < 0) {
-            nsec += 1e9F;
+            nsec += 1000000000;
             sec--;
         }
     }
-    return unixTime(sec, ((int32)nsec));
+    return unixTime(sec, (int32)nsec);
 }
 
 // UnixMilli returns the local Time corresponding to the given Unix time,
 // msec milliseconds since January 1, 1970 UTC.
 public static Time UnixMilli(int64 msec) {
-    return Unix(msec / 1e3F, (msec % 1e3F) * 1e6F);
+    return Unix(msec / 1000, (msec % 1000) * 1000000);
 }
 
 // UnixMicro returns the local Time corresponding to the given Unix time,
 // usec microseconds since January 1, 1970 UTC.
 public static Time UnixMicro(int64 usec) {
-    return Unix(usec / 1e6F, (usec % 1e6F) * 1e3F);
+    return Unix(usec / 1000000, (usec % 1000000) * 1000);
 }
 
 // IsDST reports whether the time in the configured location is in Daylight Savings Time.
@@ -1555,49 +1551,49 @@ internal static (nint nhi, nint nlo) norm(nint hi, nint lo, nint @base) {
 //
 // Date panics if loc is nil.
 public static Time Date(nint year, ΔMonth month, nint day, nint hour, nint min, nint sec, nint nsec, ж<ΔLocation> Ꮡloc) {
-    ref var loc = ref Ꮡloc.val;
+    ref var loc = ref Ꮡloc.DerefOrNil();
 
-    if (loc == nil) {
+    if (Ꮡloc == nil) {
         throw panic("time: missing Location in call to Date");
     }
     // Normalize month, overflowing into year.
-    nint m = ((nint)month) - 1;
+    nint m = (nint)month - 1;
     (year, m) = norm(year, m, 12);
     month = ((ΔMonth)m) + 1;
     // Normalize nsec, sec, min, hour, overflowing into day.
-    (sec, nsec) = norm(sec, nsec, 1e9F);
+    (sec, nsec) = norm(sec, nsec, 1000000000);
     (min, sec) = norm(min, sec, 60);
     (hour, min) = norm(hour, min, 60);
     (day, hour) = norm(day, hour, 24);
     // Compute days since the absolute epoch.
     var d = daysSinceEpoch(year);
     // Add in days before this month.
-    d += ((uint64)daysBefore[month - 1]);
+    d += (uint64)daysBefore[month - 1];
     if (isLeap(year) && month >= March) {
         d++;
     }
     // February 29
     // Add in days before today.
-    d += ((uint64)(day - 1));
+    d += (uint64)(day - 1);
     // Add in time elapsed today.
-    var abs = d * secondsPerDay;
-    abs += ((uint64)(hour * secondsPerHour + min * secondsPerMinute + sec));
-    var unix = ((int64)abs) + (absoluteToInternal + internalToUnix);
+    var abs = d * (uint64)secondsPerDay;
+    abs += (uint64)(hour * (nint)secondsPerHour + min * (nint)secondsPerMinute + sec);
+    var unix = (int64)abs + (-9223372028715321600L);
     // Look for zone offset for expected time, so we can adjust to UTC.
     // The lookup function expects UTC, so first we pass unix in the
     // hope that it will not be too close to a zone transition,
     // and then adjust if it is.
-    var (_, offset, start, end, _) = loc.lookup(unix);
+    var (_, offset, start, end, _) = Ꮡloc.lookup(unix);
     if (offset != 0) {
-        var utc = unix - ((int64)offset);
+        var utc = unix - (int64)offset;
         // If utc is valid for the time zone we found, then we have the right offset.
         // If not, we get the correct offset by looking up utc in the location.
         if (utc < start || utc >= end) {
-            (_, offset, _, _, _) = loc.lookup(utc);
+            (_, offset, _, _, _) = Ꮡloc.lookup(utc);
         }
-        unix -= ((int64)offset);
+        unix -= (int64)offset;
     }
-    var t = unixTime(unix, ((int32)nsec));
+    var t = unixTime(unix, (int32)nsec);
     t.setLoc(Ꮡloc);
     return t;
 }
@@ -1654,29 +1650,29 @@ internal static (nint qmod2, Duration r) div(Time t, Duration d) {
         sec = -sec;
         nsec = -nsec;
         if (nsec < 0) {
-            nsec += 1e9F;
+            nsec += 1000000000;
             sec--;
         }
     }
     // sec >= 1 before the -- so safe
     switch (ᐧ) {
     case {} when d < ΔSecond && ΔSecond % (d + d) == 0: {
-        qmod2 = (nint)(((nint)(nsec / ((int32)d))) & 1);
-        r = ((Duration)(nsec % ((int32)d)));
+        qmod2 = (nint)((nint)(nsec / (int32)(int64)d) & 1);
+        r = ((Duration)(int64)(nsec % (int32)(int64)d));
         break;
     }
-    case {} when d % ΔSecond is 0: {
-        var d1 = ((int64)(d / ΔSecond));
-        qmod2 = (nint)(((nint)(sec / d1)) & 1);
-        r = ((Duration)(sec % d1)) * ΔSecond + ((Duration)nsec);
+    case {} when d % ΔSecond == 0: {
+        var d1 = (int64)(d / ΔSecond);
+        qmod2 = (nint)((nint)(sec / d1) & 1);
+        r = ((Duration)(sec % d1)) * ΔSecond + ((Duration)(int64)nsec);
         break;
     }
     default: {
-        var secΔ2 = ((uint64)sec);
-        var tmp = (secΔ2 >> (int)(32)) * 1e9F;
-        var u1 = tmp >> (int)(32);
-        var u0 = tmp << (int)(32);
-        tmp = ((uint64)(secΔ2 & (nint)4294967295L)) * 1e9F;
+        var secΔ2 = (uint64)sec;
+        var tmp = ((secΔ2 >> (int)(32))) * 1000000000;
+        var u1 = (tmp >> (int)(32));
+        var u0 = (tmp << (int)(32));
+        tmp = ((uint64)(secΔ2 & 0xFFFFFFFFU)) * 1000000000;
         var u0x = u0;
         u0 = u0 + tmp;
         if (u0 < u0x) {
@@ -1689,17 +1685,17 @@ internal static (nint qmod2, Duration r) div(Time t, Duration d) {
             // Compute nanoseconds as 128-bit number.
             u1++;
         }
-        (u0x, u0) = (u0, u0 + ((uint64)nsec));
+        (u0x, u0) = (u0, u0 + (uint64)nsec);
         if (u0 < u0x) {
             u1++;
         }
-        var d1 = ((uint64)d);
-        while (d1 >> (int)(63) != 1) {
+        var d1 = (uint64)(int64)d;
+        while ((d1 >> (int)(63)) != 1) {
             // Compute remainder by subtracting r<<k for decreasing k.
             // Quotient parity is whether we subtract on last round.
-            d1 <<= (UntypedInt)(1);
+            d1 <<= (int)(1);
         }
-        var d0 = ((uint64)0);
+        var d0 = (uint64)0;
         while (ᐧ) {
             qmod2 = 0;
             if (u1 > d1 || u1 == d1 && u0 >= d0) {
@@ -1711,14 +1707,14 @@ internal static (nint qmod2, Duration r) div(Time t, Duration d) {
                 }
                 u1 -= d1;
             }
-            if (d1 == 0 && d0 == ((uint64)d)) {
+            if (d1 == 0 && d0 == (uint64)(int64)d) {
                 break;
             }
-            d0 >>= (UntypedInt)(1);
-            d0 |= (uint64)(((uint64)(d1 & 1)) << (int)(63));
-            d1 >>= (UntypedInt)(1);
+            d0 >>= (int)(1);
+            d0 |= (uint64)((((uint64)(d1 & 1)) << (int)(63)));
+            d1 >>= (int)(1);
         }
-        r = ((Duration)u0);
+        r = ((Duration)(int64)u0);
         break;
     }}
 

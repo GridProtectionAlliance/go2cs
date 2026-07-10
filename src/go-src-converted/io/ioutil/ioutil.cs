@@ -11,10 +11,11 @@
 namespace go.io;
 
 using io = io_package;
-using fs = io.fs_package;
+using fs = go.io.fs_package;
 using os = os_package;
 using slices = slices_package;
 using strings = strings_package;
+using go.io;
 
 partial class ioutil_package {
 
@@ -68,16 +69,16 @@ public static error WriteFile(@string filename, slice<byte> data, fs.FileMode pe
 //		infos = append(infos, info)
 //	}
 public static (slice<fs.FileInfo>, error) ReadDir(@string dirname) {
-    (f, err) = os.Open(dirname);
+    var (f, err) = os.Open(dirname);
     if (err != default!) {
         return (default!, err);
     }
-    (list, err) = f.Readdir(-1);
+    (var list, err) = f.Readdir(-1);
     f.Close();
     if (err != default!) {
         return (default!, err);
     }
-    slices.SortFunc(list, (osꓸFileInfo a, osꓸFileInfo b) => strings.Compare(a.Name(), b.Name()));
+    slices.SortFunc(list, (fs.FileInfo a, fs.FileInfo b) => strings.Compare(a.Name(), b.Name()));
     return (list, default!);
 }
 

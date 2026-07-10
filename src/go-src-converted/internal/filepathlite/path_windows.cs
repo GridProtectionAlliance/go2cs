@@ -3,9 +3,10 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal;
 
-using bytealg = @internal.bytealg_package;
-using stringslite = @internal.stringslite_package;
-using syscall = syscall_package;
+using bytealg = go.@internal.bytealg_package;
+using stringslite = go.@internal.stringslite_package;
+using Δsyscall = syscall_package;
+using go.@internal;
 
 partial class filepathlite_package {
 
@@ -31,7 +32,7 @@ internal static bool isLocal(@string path) {
     }
     var hasDots = false;
     // contains . or .. path elements
-    for (@string p = path;; p != ""u8; ) {
+    for (@string p = path; p != ""u8; ) {
         @string part = default!;
         (part, p, _) = cutPath(p);
         if (part == "."u8 || part == ".."u8) {
@@ -59,7 +60,7 @@ internal static (@string, error) localize(@string path) {
 
     }
     var containsSlash = false;
-    for (@string p = path;; p != ""u8; ) {
+    for (@string p = path; p != ""u8; ) {
         // Find the next path element.
         @string element = default!;
         nint i = bytealg.IndexByteString(p, (rune)'/');
@@ -119,7 +120,7 @@ internal static bool isReservedName(@string name) {
     // while others do not. Use FullPath to see if the name is
     // reserved.
     {
-        var (p, _) = syscall.FullPath(name); if (len(p) >= 4 && p[..4] == @"\\.\") {
+        var (p, _) = Δsyscall.FullPath(name); if (len(p) >= 4 && p[..4] == @"\\.\") {
             return true;
         }
     }
@@ -178,7 +179,7 @@ internal static bool equalFold(@string a, @string b) {
 
 internal static byte toUpper(byte c) {
     if ((rune)'a' <= c && c <= (rune)'z') {
-        return c - ((rune)'a' - (rune)'A');
+        return (byte)(c - ((rune)'a' - (rune)'A'));
     }
     return c;
 }
@@ -318,7 +319,7 @@ internal static bool isUNC(@string path) {
 // postClean adjusts the results of Clean to avoid turning a relative path
 // into an absolute or rooted one.
 internal static void postClean(ж<lazybuf> Ꮡout) {
-    ref var @out = ref Ꮡout.val;
+    ref var @out = ref Ꮡout.Value;
 
     if (@out.volLen != 0 || @out.buf == default!) {
         return;

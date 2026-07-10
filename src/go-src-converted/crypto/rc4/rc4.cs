@@ -9,23 +9,22 @@
 // applications.
 namespace go.crypto;
 
-using alias = crypto.@internal.alias_package;
+using alias = go.crypto.@internal.alias_package;
 using strconv = strconv_package;
-using crypto.@internal;
+using go.crypto.@internal;
 
 partial class rc4_package {
 
 // A Cipher is an instance of RC4 using a particular key.
 [GoType] partial struct Cipher {
     internal array<uint32> s = new(256);
-    internal uint8 i;
-    internal uint8 j;
+    internal uint8 i, j;
 }
 
 [GoType("num:nint")] partial struct KeySizeError;
 
 public static @string Error(this KeySizeError k) {
-    return "crypto/rc4: invalid key size "u8 + strconv.Itoa(((nint)k));
+    return "crypto/rc4: invalid key size "u8 + strconv.Itoa((nint)k);
 }
 
 // NewCipher creates and returns a new [Cipher]. The key argument should be the
@@ -37,11 +36,11 @@ public static (ж<Cipher>, error) NewCipher(slice<byte> key) {
     }
     ref var c = ref heap(new Cipher(), out var Ꮡc);
     for (nint i = 0; i < 256; i++) {
-        c.s[i] = ((uint32)i);
+        c.s[i] = (uint32)i;
     }
     uint8 j = 0;
     for (nint i = 0; i < 256; i++) {
-        j += ((uint8)c.s[i]) + key[i % k];
+        j += (uint8)((uint8)c.s[i] + key[i % k]);
         (c.s[i], c.s[j]) = (c.s[j], c.s[i]);
     }
     return (Ꮡc, default!);
@@ -55,7 +54,8 @@ public static (ж<Cipher>, error) NewCipher(slice<byte> key) {
     foreach (var (i, _) in c.s) {
         c.s[i] = 0;
     }
-    (c.i, c.j) = (0, 0);
+    c.i = 0;
+    c.j = 0;
 }
 
 // XORKeyStream sets dst to the result of XORing src with the key stream.
@@ -74,12 +74,13 @@ public static (ж<Cipher>, error) NewCipher(slice<byte> key) {
     foreach (var (k, v) in src) {
         i += 1;
         var x = c.s[i];
-        j += ((uint8)x);
+        j += (uint8)x;
         var y = c.s[j];
         (c.s[i], c.s[j]) = (y, x);
-        dst[k] = (byte)(v ^ ((uint8)c.s[((uint8)(x + y))]));
+        dst[k] = (byte)(v ^ (uint8)c.s[(uint8)(x + y)]);
     }
-    (c.i, c.j) = (i, j);
+    c.i = i;
+    c.j = j;
 }
 
 } // end rc4_package

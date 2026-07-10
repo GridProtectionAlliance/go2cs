@@ -187,8 +187,8 @@ public static float64 Erf(float64 x) {
 }
 
 internal static float64 erf(float64 x) {
-    static readonly UntypedFloat VeryTiny = /* 2.848094538889218e-306 */ 2.84809e-306; // 0x0080000000000000
-    static readonly UntypedFloat Small = /* 1.0 / (1 << 28) */ 3.72529e-09; // 2**-28
+    UntypedFloat VeryTiny = /* 2.848094538889218e-306 */ 2.84809e-306; // 0x0080000000000000
+    UntypedFloat Small = /* 1.0 / (1 << 28) */ 3.72529e-09; // 2**-28
     // special cases
     switch (ᐧ) {
     case {} when IsNaN(x): {
@@ -206,21 +206,21 @@ internal static float64 erf(float64 x) {
         x = -x;
         sign = true;
     }
-    if (x < 0.84375F) {
+    if (x < 0.84375D) {
         // |x| < 0.84375
         float64 temp = default!;
         if (x < Small){
             // |x| < 2**-28
             if (x < VeryTiny){
-                temp = 0.125F * (8.0F * x + efx8 * x);
+                temp = 0.125D * (8.0D * x + (float64)efx8 * x);
             } else {
                 // avoid underflow
-                temp = x + efx * x;
+                temp = x + (float64)efx * x;
             }
         } else {
             var zΔ1 = x * x;
-            var rΔ1 = pp0 + zΔ1 * (pp1 + zΔ1 * (pp2 + zΔ1 * (pp3 + zΔ1 * pp4)));
-            var sΔ1 = 1 + zΔ1 * (qq1 + zΔ1 * (qq2 + zΔ1 * (qq3 + zΔ1 * (qq4 + zΔ1 * qq5))));
+            var rΔ1 = (float64)pp0 + zΔ1 * ((float64)pp1 + zΔ1 * ((float64)pp2 + zΔ1 * ((float64)pp3 + zΔ1 * (float64)pp4)));
+            var sΔ1 = 1 + zΔ1 * ((float64)qq1 + zΔ1 * ((float64)qq2 + zΔ1 * ((float64)qq3 + zΔ1 * ((float64)qq4 + zΔ1 * (float64)qq5))));
             var y = rΔ1 / sΔ1;
             temp = x + x * y;
         }
@@ -229,15 +229,15 @@ internal static float64 erf(float64 x) {
         }
         return temp;
     }
-    if (x < 1.25F) {
+    if (x < 1.25D) {
         // 0.84375 <= |x| < 1.25
         var sΔ2 = x - 1;
-        var P = pa0 + sΔ2 * (pa1 + sΔ2 * (pa2 + sΔ2 * (pa3 + sΔ2 * (pa4 + sΔ2 * (pa5 + sΔ2 * pa6)))));
-        var Q = 1 + sΔ2 * (qa1 + sΔ2 * (qa2 + sΔ2 * (qa3 + sΔ2 * (qa4 + sΔ2 * (qa5 + sΔ2 * qa6)))));
+        var P = (float64)pa0 + sΔ2 * ((float64)pa1 + sΔ2 * ((float64)pa2 + sΔ2 * ((float64)pa3 + sΔ2 * ((float64)pa4 + sΔ2 * ((float64)pa5 + sΔ2 * (float64)pa6)))));
+        var Q = 1 + sΔ2 * ((float64)qa1 + sΔ2 * ((float64)qa2 + sΔ2 * ((float64)qa3 + sΔ2 * ((float64)qa4 + sΔ2 * ((float64)qa5 + sΔ2 * (float64)qa6)))));
         if (sign) {
-            return -erx - P / Q;
+            return (float64)(-erx) - P / Q;
         }
-        return erx + P / Q;
+        return (float64)erx + P / Q;
     }
     if (x >= 6) {
         // inf > |x| >= 6
@@ -249,18 +249,18 @@ internal static float64 erf(float64 x) {
     var s = 1 / (x * x);
     float64 R = default!;
     float64 S = default!;
-    if (x < 1 / 0.35F){
+    if (x < 1 / 0.35D){
         // |x| < 1 / 0.35  ~ 2.857143
-        R = ra0 + s * (ra1 + s * (ra2 + s * (ra3 + s * (ra4 + s * (ra5 + s * (ra6 + s * ra7))))));
-        S = 1 + s * (sa1 + s * (sa2 + s * (sa3 + s * (sa4 + s * (sa5 + s * (sa6 + s * (sa7 + s * sa8)))))));
+        R = (float64)ra0 + s * ((float64)ra1 + s * ((float64)ra2 + s * ((float64)ra3 + s * ((float64)ra4 + s * ((float64)ra5 + s * ((float64)ra6 + s * (float64)ra7))))));
+        S = 1 + s * ((float64)sa1 + s * ((float64)sa2 + s * ((float64)sa3 + s * ((float64)sa4 + s * ((float64)sa5 + s * ((float64)sa6 + s * ((float64)sa7 + s * (float64)sa8)))))));
     } else {
         // |x| >= 1 / 0.35  ~ 2.857143
-        R = rb0 + s * (rb1 + s * (rb2 + s * (rb3 + s * (rb4 + s * (rb5 + s * rb6)))));
-        S = 1 + s * (sb1 + s * (sb2 + s * (sb3 + s * (sb4 + s * (sb5 + s * (sb6 + s * sb7))))));
+        R = (float64)rb0 + s * ((float64)rb1 + s * ((float64)rb2 + s * ((float64)rb3 + s * ((float64)rb4 + s * ((float64)rb5 + s * (float64)rb6)))));
+        S = 1 + s * ((float64)sb1 + s * ((float64)sb2 + s * ((float64)sb3 + s * ((float64)sb4 + s * ((float64)sb5 + s * ((float64)sb6 + s * (float64)sb7))))));
     }
-    var z = Float64frombits((uint64)(Float64bits(x) & (nuint)18446744069414584320UL));
+    var z = Float64frombits((uint64)(Float64bits(x) & (nuint)0xffffffff00000000UL));
     // pseudo-single (20-bit) precision x
-    var r = Exp(-z * z - 0.5625F) * Exp((z - x) * (z + x) + R / S);
+    var r = Exp(-z * z - 0.5625D) * Exp((z - x) * (z + x) + R / S);
     if (sign) {
         return r / x - 1;
     }
@@ -282,7 +282,7 @@ public static float64 Erfc(float64 x) {
 }
 
 internal static float64 erfc(float64 x) {
-    static readonly UntypedFloat Tiny = /* 1.0 / (1 << 56) */ 1.38778e-17; // 2**-56
+    UntypedFloat Tiny = /* 1.0 / (1 << 56) */ 1.38778e-17; // 2**-56
     // special cases
     switch (ᐧ) {
     case {} when IsNaN(x): {
@@ -300,7 +300,7 @@ internal static float64 erfc(float64 x) {
         x = -x;
         sign = true;
     }
-    if (x < 0.84375F) {
+    if (x < 0.84375D) {
         // |x| < 0.84375
         float64 temp = default!;
         if (x < Tiny){
@@ -308,14 +308,14 @@ internal static float64 erfc(float64 x) {
             temp = x;
         } else {
             var z = x * x;
-            var r = pp0 + z * (pp1 + z * (pp2 + z * (pp3 + z * pp4)));
-            var s = 1 + z * (qq1 + z * (qq2 + z * (qq3 + z * (qq4 + z * qq5))));
+            var r = (float64)pp0 + z * ((float64)pp1 + z * ((float64)pp2 + z * ((float64)pp3 + z * (float64)pp4)));
+            var s = 1 + z * ((float64)qq1 + z * ((float64)qq2 + z * ((float64)qq3 + z * ((float64)qq4 + z * (float64)qq5))));
             var y = r / s;
-            if (x < 0.25F){
+            if (x < 0.25D){
                 // |x| < 1/4
                 temp = x + x * y;
             } else {
-                temp = 0.5F + (x * y + (x - 0.5F));
+                temp = 0.5D + (x * y + (x - 0.5D));
             }
         }
         if (sign) {
@@ -323,37 +323,37 @@ internal static float64 erfc(float64 x) {
         }
         return 1 - temp;
     }
-    if (x < 1.25F) {
+    if (x < 1.25D) {
         // 0.84375 <= |x| < 1.25
         var s = x - 1;
-        var P = pa0 + s * (pa1 + s * (pa2 + s * (pa3 + s * (pa4 + s * (pa5 + s * pa6)))));
-        var Q = 1 + s * (qa1 + s * (qa2 + s * (qa3 + s * (qa4 + s * (qa5 + s * qa6)))));
+        var P = (float64)pa0 + s * ((float64)pa1 + s * ((float64)pa2 + s * ((float64)pa3 + s * ((float64)pa4 + s * ((float64)pa5 + s * (float64)pa6)))));
+        var Q = 1 + s * ((float64)qa1 + s * ((float64)qa2 + s * ((float64)qa3 + s * ((float64)qa4 + s * ((float64)qa5 + s * (float64)qa6)))));
         if (sign) {
-            return 1 + erx + P / Q;
+            return (float64)(1 + erx) + P / Q;
         }
-        return 1 - erx - P / Q;
+        return (float64)(1 - erx) - P / Q;
     }
     if (x < 28) {
         // |x| < 28
         var s = 1 / (x * x);
         float64 R = default!;
         float64 S = default!;
-        if (x < 1 / 0.35F){
+        if (x < 1 / 0.35D){
             // |x| < 1 / 0.35 ~ 2.857143
-            R = ra0 + s * (ra1 + s * (ra2 + s * (ra3 + s * (ra4 + s * (ra5 + s * (ra6 + s * ra7))))));
-            S = 1 + s * (sa1 + s * (sa2 + s * (sa3 + s * (sa4 + s * (sa5 + s * (sa6 + s * (sa7 + s * sa8)))))));
+            R = (float64)ra0 + s * ((float64)ra1 + s * ((float64)ra2 + s * ((float64)ra3 + s * ((float64)ra4 + s * ((float64)ra5 + s * ((float64)ra6 + s * (float64)ra7))))));
+            S = 1 + s * ((float64)sa1 + s * ((float64)sa2 + s * ((float64)sa3 + s * ((float64)sa4 + s * ((float64)sa5 + s * ((float64)sa6 + s * ((float64)sa7 + s * (float64)sa8)))))));
         } else {
             // |x| >= 1 / 0.35 ~ 2.857143
             if (sign && x > 6) {
                 return 2;
             }
             // x < -6
-            R = rb0 + s * (rb1 + s * (rb2 + s * (rb3 + s * (rb4 + s * (rb5 + s * rb6)))));
-            S = 1 + s * (sb1 + s * (sb2 + s * (sb3 + s * (sb4 + s * (sb5 + s * (sb6 + s * sb7))))));
+            R = (float64)rb0 + s * ((float64)rb1 + s * ((float64)rb2 + s * ((float64)rb3 + s * ((float64)rb4 + s * ((float64)rb5 + s * (float64)rb6)))));
+            S = 1 + s * ((float64)sb1 + s * ((float64)sb2 + s * ((float64)sb3 + s * ((float64)sb4 + s * ((float64)sb5 + s * ((float64)sb6 + s * (float64)sb7))))));
         }
-        var z = Float64frombits((uint64)(Float64bits(x) & (nuint)18446744069414584320UL));
+        var z = Float64frombits((uint64)(Float64bits(x) & (nuint)0xffffffff00000000UL));
         // pseudo-single (20-bit) precision x
-        var r = Exp(-z * z - 0.5625F) * Exp((z - x) * (z + x) + R / S);
+        var r = Exp(-z * z - 0.5625D) * Exp((z - x) * (z + x) + R / S);
         if (sign) {
             return 2 - r / x;
         }

@@ -61,7 +61,7 @@ public static slice<OSArch> List = new OSArch[]{
     new("windows"u8, "arm64"u8)
 }.slice();
 
-internal static platform.osArchInfo distInfo = new map<OSArch, osArchInfo>{
+internal static map<OSArch, osArchInfo> distInfo = new map<OSArch, osArchInfo>{
     [new("aix"u8, "ppc64"u8)] = new(CgoSupported: true),
     [new("android"u8, "386"u8)] = new(CgoSupported: true),
     [new("android"u8, "amd64"u8)] = new(CgoSupported: true),

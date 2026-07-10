@@ -16,7 +16,6 @@ namespace go.vendor.golang.org.x.text.unicode;
 // - Transformer for reordering?
 // - Transformer (validator, really) for Bidi Rule.
 using bytes = bytes_package;
-using ꓸꓸꓸOption = Span<Option>;
 
 partial class bidi_package {
 
@@ -31,11 +30,11 @@ public static readonly ΔDirection RightToLeft = 1;
 public static readonly ΔDirection Mixed = 2;
 public static readonly ΔDirection Neutral = 3;
 
-[GoType] partial struct options {
+[GoType] public partial struct options {
     internal ΔDirection defaultDirection;
 }
 
-public delegate void Option(ж<options> _);
+// type Option is a methodless func type — rendered inline as its base delegate
 
 // ICU allows the user to define embedding levels. This may be used, for example,
 // to use hierarchical structure of markup languages to define embeddings.
@@ -48,9 +47,9 @@ public delegate void Option(ж<options> _);
 
 // DefaultDirection sets the default direction for a Paragraph. The direction is
 // overridden if the text contains directional characters.
-public static Option DefaultDirection(ΔDirection d) {
+public static Action<ж<options>> DefaultDirection(ΔDirection d) {
     return (ж<options> opts) => {
-        opts.val.defaultDirection = d;
+        opts.Value.defaultDirection = d;
     };
 }
 
@@ -58,7 +57,7 @@ public static Option DefaultDirection(ΔDirection d) {
 [GoType] partial struct Paragraph {
     internal slice<byte> p;
     internal Ordering o;
-    internal slice<Option> opts;
+    internal slice<Action<ж<options>>> opts;
     internal slice<ΔClass> types;
     internal slice<bracketType> pairTypes;
     internal slice<rune> pairValues;
@@ -104,7 +103,7 @@ public static Option DefaultDirection(ΔDirection d) {
             p.pairValues = append(p.pairValues, r);
         } else {
             p.pairTypes = append(p.pairTypes, bpNone);
-            p.pairValues = append(p.pairValues, 0);
+            p.pairValues = append(p.pairValues, (rune)(0));
         }
     }
     return (bytecount, default!);
@@ -115,7 +114,7 @@ public static Option DefaultDirection(ΔDirection d) {
 // it will only process the first paragraph and report the number of bytes
 // consumed from b including this separator. Error may be non-nil if options are
 // given.
-[GoRecv] public static (nint n, error err) SetBytes(this ref Paragraph p, slice<byte> b, params ꓸꓸꓸOption optsʗp) {
+[GoRecv] public static (nint n, error err) SetBytes(this ref Paragraph p, slice<byte> b, params Span<Action<ж<options>>> optsʗp) {
     nint n = default!;
     error err = default!;
     var opts = optsʗp.slice();
@@ -130,7 +129,7 @@ public static Option DefaultDirection(ΔDirection d) {
 // it will only process the first paragraph and report the number of bytes
 // consumed from s including this separator. Error may be non-nil if options are
 // given.
-[GoRecv] public static (nint n, error err) SetString(this ref Paragraph p, @string s, params ꓸꓸꓸOption optsʗp) {
+[GoRecv] public static (nint n, error err) SetString(this ref Paragraph p, @string s, params Span<Action<ж<options>>> optsʗp) {
     nint n = default!;
     error err = default!;
     var opts = optsʗp.slice();
@@ -201,18 +200,20 @@ internal static Ordering calculateOrdering(slice<level> levels, slice<rune> rune
 }
 
 // Order computes the visual ordering of all the runs in a Paragraph.
-[GoRecv] public static (Ordering, error) Order(this ref Paragraph p) {
+public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     if (len(p.types) == 0) {
         return (new Ordering(nil), default!);
     }
     foreach (var (_, fn) in p.opts) {
-        fn(Ꮡ(p.options));
+        fn(Ꮡp.of(Paragraph.Ꮡoptions));
     }
     var lvl = ((level)(-1));
     if (p.options.defaultDirection == RightToLeft) {
         lvl = 1;
     }
-    (para, err) = newParagraph(p.types, p.pairTypes, p.pairValues, lvl);
+    var (para, err) = newParagraph(p.types, p.pairTypes, p.pairValues, lvl);
     if (err != default!) {
         return (new Ordering(nil), err);
     }
@@ -225,7 +226,7 @@ internal static Ordering calculateOrdering(slice<level> levels, slice<rune> rune
 // ending at the given positions in the original text.
 [GoRecv] public static (Ordering, error) Line(this ref Paragraph p, nint start, nint end) {
     var lineTypes = p.types[(int)(start)..(int)(end)];
-    (para, err) = newParagraph(lineTypes, p.pairTypes[(int)(start)..(int)(end)], p.pairValues[(int)(start)..(int)(end)], -1);
+    var (para, err) = newParagraph(lineTypes, p.pairTypes[(int)(start)..(int)(end)], p.pairValues[(int)(start)..(int)(end)], (level)(-1));
     if (err != default!) {
         return (new Ordering(nil), err);
     }
@@ -315,13 +316,13 @@ public static slice<byte> AppendReverse(slice<byte> @out, slice<byte> @in) {
     var ret = new slice<byte>(len(@in) + len(@out));
     copy(ret, @out);
     var inRunes = bytes.Runes(@in);
-    foreach (var (iΔ1, r) in inRunes) {
+    foreach (var (i, r) in inRunes) {
         var (prop, _) = LookupRune(r);
         if (prop.IsBracket()) {
-            inRunes[iΔ1] = prop.reverseBracket(r);
+            inRunes[i] = prop.reverseBracket(r);
         }
     }
-    for (nint i = 0;nint j = len(inRunes) - 1; i < j; (i, j) = (i + 1, j - 1)) {
+    for ((nint i, nint j) = (0, len(inRunes) - 1); i < j; (i, j) = (i + 1, j - 1)) {
         (inRunes[i], inRunes[j]) = (inRunes[j], inRunes[i]);
     }
     copy(ret[(int)(len(@out))..], ((@string)inRunes));

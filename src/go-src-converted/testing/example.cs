@@ -31,7 +31,7 @@ internal static (bool ran, bool ok) runExamples(Func<@string, @string, (bool, er
     bool ok = default!;
 
     ok = true;
-    var m = newMatcher(matchString, match.val, "-test.run"u8, skip.val);
+    var m = newMatcher(matchString, match.Value, "-test.run"u8, skip.Value);
     InternalExample eg = default!;
     foreach (var (_, vᴛ1) in examples) {
         eg = vᴛ1;
@@ -50,7 +50,7 @@ internal static (bool ran, bool ok) runExamples(Func<@string, @string, (bool, er
 
 internal static @string sortLines(@string output) {
     var lines = strings.Split(output, "\n"u8);
-    slices.Sort(lines);
+    slices.Sort<slice<@string>, @string>(lines);
     return strings.Join(lines, "\n"u8);
 }
 

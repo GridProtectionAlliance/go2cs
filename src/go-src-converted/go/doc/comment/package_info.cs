@@ -39,15 +39,15 @@ using static go.go.doc.comment_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<Code, Block>]
-[assembly: GoImplement<DocLink, ΔText>]
-[assembly: GoImplement<Heading, Block>]
+[assembly: GoImplement<Code, Block>(Pointer = true)]
+[assembly: GoImplement<DocLink, ΔText>(Pointer = true)]
+[assembly: GoImplement<Heading, Block>(Pointer = true)]
 [assembly: GoImplement<Italic, ΔText>]
-[assembly: GoImplement<Link, ΔText>]
-[assembly: GoImplement<List, Block>]
-[assembly: GoImplement<Paragraph, Block>]
+[assembly: GoImplement<Link, ΔText>(Pointer = true)]
+[assembly: GoImplement<List, Block>(Pointer = true)]
+[assembly: GoImplement<Paragraph, Block>(Pointer = true)]
 [assembly: GoImplement<Plain, ΔText>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

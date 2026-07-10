@@ -61,7 +61,7 @@ partial class errors_package {
 // New returns an error that formats as the given text.
 // Each call to New returns a distinct error value even if the text is identical.
 public static error New(@string text) {
-    return new errorString(text);
+    return new errorStringжerror(Ꮡ(new errorString(text)));
 }
 
 // errorString is a trivial implementation of error.

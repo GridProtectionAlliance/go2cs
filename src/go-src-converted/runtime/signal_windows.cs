@@ -7,33 +7,34 @@ using abi = @internal.abi_package;
 using sys = runtime.@internal.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime;
 using runtime.@internal;
 
 partial class runtime_package {
 
-internal static readonly UntypedInt _SEM_FAILCRITICALERRORS = /* 0x0001 */ 1;
-internal static readonly UntypedInt _SEM_NOGPFAULTERRORBOX = /* 0x0002 */ 2;
-internal static readonly UntypedInt _SEM_NOOPENFILEERRORBOX = /* 0x8000 */ 32768;
-internal static readonly UntypedInt _WER_FAULT_REPORTING_NO_UI = /* 0x0020 */ 32;
+internal static readonly UntypedInt _SEM_FAILCRITICALERRORS = 0x0001;
+internal static readonly UntypedInt _SEM_NOGPFAULTERRORBOX = 0x0002;
+internal static readonly UntypedInt _SEM_NOOPENFILEERRORBOX = 0x8000;
+internal static readonly UntypedInt _WER_FAULT_REPORTING_NO_UI = 0x0020;
 
 internal static void preventErrorDialogs() {
     var errormode = stdcall0(_GetErrorMode);
-    stdcall1(_SetErrorMode, (uintptr)((uintptr)((uintptr)(errormode | _SEM_FAILCRITICALERRORS) | _SEM_NOGPFAULTERRORBOX) | _SEM_NOOPENFILEERRORBOX));
+    stdcall1(_SetErrorMode, (uintptr)((uintptr)((uintptr)(errormode | (uintptr)_SEM_FAILCRITICALERRORS) | (uintptr)_SEM_NOGPFAULTERRORBOX) | (uintptr)_SEM_NOOPENFILEERRORBOX));
     // Disable WER fault reporting UI.
     // Do this even if WER is disabled as a whole,
     // as WER might be enabled later with setTraceback("wer")
     // and we still want the fault reporting UI to be disabled if this happens.
     ref var werflags = ref heap(new uintptr(), out var Ꮡwerflags);
-    stdcall2(_WerGetFlags, currentProcess, ((uintptr)((@unsafe.Pointer)(Ꮡwerflags))));
-    stdcall1(_WerSetFlags, (uintptr)(werflags | _WER_FAULT_REPORTING_NO_UI));
+    stdcall2(_WerGetFlags, currentProcess, (uintptr)@unsafe.Pointer.FromRef(ref (Ꮡwerflags).Value));
+    stdcall1(_WerSetFlags, (uintptr)(werflags | (uintptr)_WER_FAULT_REPORTING_NO_UI));
 }
 
 // enableWER re-enables Windows error reporting without fault reporting UI.
 internal static void enableWER() {
     // re-enable Windows Error Reporting
     var errormode = stdcall0(_GetErrorMode);
-    if ((uintptr)(errormode & _SEM_NOGPFAULTERRORBOX) != 0) {
-        stdcall1(_SetErrorMode, (uintptr)(errormode ^ _SEM_NOGPFAULTERRORBOX));
+    if ((uintptr)(errormode & (uintptr)_SEM_NOGPFAULTERRORBOX) != 0) {
+        stdcall1(_SetErrorMode, (uintptr)(errormode ^ (uintptr)_SEM_NOGPFAULTERRORBOX));
     }
 }
 
@@ -65,7 +66,7 @@ internal static void initExceptionHandler() {
 //
 //go:nosplit
 internal static bool isAbort(ж<context> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     var pc = r.ip();
     if (GOARCH == "386"u8 || GOARCH == "amd64"u8 || GOARCH == "arm"u8) {
@@ -85,8 +86,8 @@ internal static bool isAbort(ж<context> Ꮡr) {
 //
 //go:nosplit
 internal static bool isgoexception(ж<exceptionrecord> Ꮡinfo, ж<context> Ꮡr) {
-    ref var info = ref Ꮡinfo.val;
-    ref var r = ref Ꮡr.val;
+    ref var info = ref Ꮡinfo.Value;
+    ref var r = ref Ꮡr.Value;
 
     // Only handle exception if executing instructions in Go binary
     // (not Windows library code).
@@ -96,30 +97,30 @@ internal static bool isgoexception(ж<exceptionrecord> Ꮡinfo, ж<context> Ꮡr
     }
     // Go will only handle some exceptions.
     var exprᴛ1 = info.exceptioncode;
-    { /* default: */
-        return false;
-    }
     if (exprᴛ1 == _EXCEPTION_ACCESS_VIOLATION) {
     }
-    if (exprᴛ1 == _EXCEPTION_IN_PAGE_ERROR) {
+    else if (exprᴛ1 == _EXCEPTION_IN_PAGE_ERROR) {
     }
-    if (exprᴛ1 == _EXCEPTION_INT_DIVIDE_BY_ZERO) {
+    else if (exprᴛ1 == _EXCEPTION_INT_DIVIDE_BY_ZERO) {
     }
-    if (exprᴛ1 == _EXCEPTION_INT_OVERFLOW) {
+    else if (exprᴛ1 == _EXCEPTION_INT_OVERFLOW) {
     }
-    if (exprᴛ1 == _EXCEPTION_FLT_DENORMAL_OPERAND) {
+    else if (exprᴛ1 == _EXCEPTION_FLT_DENORMAL_OPERAND) {
     }
-    if (exprᴛ1 == _EXCEPTION_FLT_DIVIDE_BY_ZERO) {
+    else if (exprᴛ1 == _EXCEPTION_FLT_DIVIDE_BY_ZERO) {
     }
-    if (exprᴛ1 == _EXCEPTION_FLT_INEXACT_RESULT) {
+    else if (exprᴛ1 == _EXCEPTION_FLT_INEXACT_RESULT) {
     }
-    if (exprᴛ1 == _EXCEPTION_FLT_OVERFLOW) {
+    else if (exprᴛ1 == _EXCEPTION_FLT_OVERFLOW) {
     }
-    if (exprᴛ1 == _EXCEPTION_FLT_UNDERFLOW) {
+    else if (exprᴛ1 == _EXCEPTION_FLT_UNDERFLOW) {
     }
-    if (exprᴛ1 == _EXCEPTION_BREAKPOINT) {
+    else if (exprᴛ1 == _EXCEPTION_BREAKPOINT) {
     }
-    if (exprᴛ1 == _EXCEPTION_ILLEGAL_INSTRUCTION) {
+    else if (exprᴛ1 == _EXCEPTION_ILLEGAL_INSTRUCTION) {
+    }
+    else { /* default: */
+        return false;
     }
 
     // breakpoint arrives this way on arm64
@@ -153,13 +154,13 @@ internal static ж<g> sigFetchG() {
 //
 //go:nosplit
 internal static int32 sigtrampgo(ж<exceptionpointers> Ꮡep, nint kind) {
-    ref var ep = ref Ꮡep.val;
+    ref var ep = ref Ꮡep.Value;
 
     var gp = sigFetchG();
     if (gp == nil) {
         return _EXCEPTION_CONTINUE_SEARCH;
     }
-    Func<ж<exceptionrecord>, ж<runtime.context>, ж<runtime.g>, int32> fn = default!;
+    Func<ж<exceptionrecord>, ж<context>, ж<g>, int32> fn = default!;
     var exprᴛ1 = kind;
     if (exprᴛ1 == callbackVEH) {
         fn = exceptionhandler;
@@ -190,11 +191,10 @@ internal static int32 sigtrampgo(ж<exceptionpointers> Ꮡep, nint kind) {
     // be treated as a bug.
     int32 ret = default!;
     if (gp != (~(~gp).m).g0){
-        systemstack(
-        var fnʗ2 = fn;
-        var gpʗ2 = gp;
-        () => {
-            ret = fnʗ2(ep.record, ep.context, gpʗ2);
+        var fnʗ1 = fn;
+        var gpʗ1 = gp;
+        systemstack(() => {
+            ret = fnʗ1(Ꮡep.Value.record, Ꮡep.Value.context, gpʗ1);
         });
     } else {
         ret = fn(ep.record, ep.context, gp);
@@ -232,9 +232,9 @@ internal static int32 sigtrampgo(ж<exceptionpointers> Ꮡep, nint kind) {
 //
 //go:nosplit
 internal static int32 exceptionhandler(ж<exceptionrecord> Ꮡinfo, ж<context> Ꮡr, ж<g> Ꮡgp) {
-    ref var info = ref Ꮡinfo.val;
-    ref var r = ref Ꮡr.val;
-    ref var gp = ref Ꮡgp.val;
+    ref var info = ref Ꮡinfo.Value;
+    ref var r = ref Ꮡr.Value;
+    ref var gp = ref Ꮡgp.Value;
 
     if (!isgoexception(Ꮡinfo, Ꮡr)) {
         return _EXCEPTION_CONTINUE_SEARCH;
@@ -269,15 +269,15 @@ internal static int32 exceptionhandler(ж<exceptionrecord> Ꮡinfo, ж<context> 
     // sigpanic call to make it look like that. Instead, just
     // overwrite the PC. (See issue #35773)
     if (r.ip() != 0 && r.ip() != abi.FuncPCABI0(asyncPreempt)) {
-        @unsafe.Pointer sp = ((@unsafe.Pointer)r.sp());
-        var delta = ((uintptr)sys.StackAlign);
-        sp = (uintptr)add(sp, -delta);
-        r.set_sp(((uintptr)sp));
+        @unsafe.Pointer sp = (@unsafe.Pointer)r.sp();
+        var delta = (uintptr)sys.StackAlign;
+        sp = (uintptr)add(sp, ((uintptr)0 - delta));
+        r.set_sp((uintptr)sp);
         if (usesLR){
-            (((ж<uintptr>)sp)).val = r.lr();
+            ((ж<uintptr>)(uintptr)(sp)).Value = r.lr();
             r.set_lr(r.ip());
         } else {
-            (((ж<uintptr>)sp)).val = r.ip();
+            ((ж<uintptr>)(uintptr)(sp)).Value = r.ip();
         }
     }
     r.set_ip(abi.FuncPCABI0(sigpanic0));
@@ -289,10 +289,8 @@ internal static int32 exceptionhandler(ж<exceptionrecord> Ꮡinfo, ж<context> 
 // It is nosplit for the same reason as exceptionhandler.
 //
 //go:nosplit
-internal static int32 sehhandler(ж<exceptionrecord> Ꮡ_, uint64 _, ж<context> Ꮡ_, ж<_DISPATCHER_CONTEXT> Ꮡdctxt) {
-    ref var _ = ref Ꮡ_.val;
-    ref var _ = ref Ꮡ_.val;
-    ref var dctxt = ref Ꮡdctxt.val;
+internal static int32 sehhandler(ж<exceptionrecord> _Δp0, uint64 _Δp1, ж<context> _Δp2, ж<_DISPATCHER_CONTEXT> Ꮡdctxt) {
+    ref var dctxt = ref Ꮡdctxt.Value;
 
     var g0 = getg();
     if (g0 == nil || (~(~g0).m).curg == nil) {
@@ -309,16 +307,16 @@ internal static int32 sehhandler(ж<exceptionrecord> Ꮡ_, uint64 _, ж<context>
     //
     // To work around this, manually unwind the stack until the top of the goroutine
     // stack is reached, and then pass the control back to Windows.
-    var gp = (~g0).m.val.curg;
+    var gp = g0.Value.m.Value.curg;
     var ctxt = dctxt.ctx();
-    ref var base = ref heap(new uintptr(), out var Ꮡbase);
+    ref var @base = ref heap(new uintptr(), out var Ꮡbase);
     ref var sp = ref heap(new uintptr(), out var Ꮡsp);
     while (ᐧ) {
-        var entry = stdcall3(_RtlLookupFunctionEntry, ctxt.ip(), ((uintptr)((@unsafe.Pointer)(Ꮡ@base))), 0);
+        var entry = stdcall3(_RtlLookupFunctionEntry, ctxt.ip(), (uintptr)@unsafe.Pointer.FromRef(ref (Ꮡbase).Value), 0);
         if (entry == 0) {
             break;
         }
-        stdcall8(_RtlVirtualUnwind, 0, @base, ctxt.ip(), entry, ((uintptr)new @unsafe.Pointer(ctxt)), 0, ((uintptr)((@unsafe.Pointer)(Ꮡsp))), 0);
+        stdcall8(_RtlVirtualUnwind, 0, @base, ctxt.ip(), entry, (uintptr)new @unsafe.Pointer(ctxt), 0, (uintptr)@unsafe.Pointer.FromRef(ref (Ꮡsp).Value), 0);
         if (sp < (~gp).stack.lo || (~gp).stack.hi <= sp) {
             break;
         }
@@ -335,9 +333,9 @@ internal static int32 sehhandler(ж<exceptionrecord> Ꮡ_, uint64 _, ж<context>
 //
 //go:nosplit
 internal static int32 firstcontinuehandler(ж<exceptionrecord> Ꮡinfo, ж<context> Ꮡr, ж<g> Ꮡgp) {
-    ref var info = ref Ꮡinfo.val;
-    ref var r = ref Ꮡr.val;
-    ref var gp = ref Ꮡgp.val;
+    ref var info = ref Ꮡinfo.Value;
+    ref var r = ref Ꮡr.Value;
+    ref var gp = ref Ꮡgp.Value;
 
     if (!isgoexception(Ꮡinfo, Ꮡr)) {
         return _EXCEPTION_CONTINUE_SEARCH;
@@ -352,9 +350,9 @@ internal static int32 firstcontinuehandler(ж<exceptionrecord> Ꮡinfo, ж<conte
 //
 //go:nosplit
 internal static int32 lastcontinuehandler(ж<exceptionrecord> Ꮡinfo, ж<context> Ꮡr, ж<g> Ꮡgp) {
-    ref var info = ref Ꮡinfo.val;
-    ref var r = ref Ꮡr.val;
-    ref var gp = ref Ꮡgp.val;
+    ref var info = ref Ꮡinfo.Value;
+    ref var r = ref Ꮡr.Value;
+    ref var gp = ref Ꮡgp.Value;
 
     if (islibrary || isarchive) {
         // Go DLL/archive has been loaded in a non-go program.
@@ -381,33 +379,33 @@ internal static int32 lastcontinuehandler(ж<exceptionrecord> Ꮡinfo, ж<contex
 //
 //go:nosplit
 internal static void winthrow(ж<exceptionrecord> Ꮡinfo, ж<context> Ꮡr, ж<g> Ꮡgp) {
-    ref var info = ref Ꮡinfo.val;
-    ref var r = ref Ꮡr.val;
-    ref var gp = ref Ꮡgp.val;
+    ref var info = ref Ꮡinfo.Value;
+    ref var r = ref Ꮡr.Value;
+    ref var gp = ref Ꮡgp.DerefOrNil();
 
     var g0 = getg();
-    if (panicking.Load() != 0) {
+    if (Ꮡpanicking.Load() != 0) {
         // traceback already printed
         exit(2);
     }
-    panicking.Store(1);
+    Ꮡpanicking.Store(1);
     // In case we're handling a g0 stack overflow, blow away the
     // g0 stack bounds so we have room to print the traceback. If
     // this somehow overflows the stack, the OS will trap it.
-    (~g0).stack.lo = 0;
-    g0.val.stackguard0 = (~g0).stack.lo + stackGuard;
-    g0.val.stackguard1 = g0.val.stackguard0;
-    print("Exception ", ((Δhex)info.exceptioncode), " ", ((Δhex)info.exceptioninformation[0]), " ", ((Δhex)info.exceptioninformation[1]), " ", ((Δhex)r.ip()), "\n");
-    print("PC=", ((Δhex)r.ip()), "\n");
+    g0.Value.stack.lo = 0;
+    g0.Value.stackguard0 = (~g0).stack.lo + (uintptr)stackGuard;
+    g0.Value.stackguard1 = g0.Value.stackguard0;
+    print("Exception ", ((Δhex)(uint64)info.exceptioncode), " ", ((Δhex)(uint64)info.exceptioninformation[0]), " ", ((Δhex)(uint64)info.exceptioninformation[1]), " ", ((Δhex)(uint64)r.ip()), "\n");
+    print("PC=", ((Δhex)(uint64)r.ip()), "\n");
     if ((~(~g0).m).incgo && Ꮡgp == (~(~g0).m).g0 && (~(~g0).m).curg != nil) {
         if (iscgo) {
             print("signal arrived during external code execution\n");
         }
-        gp = (~g0).m.val.curg;
+        Ꮡgp = g0.Value.m.Value.curg; gp = ref Ꮡgp.DerefOrNil();
     }
     print("\n");
-    (~g0).m.val.throwing = throwTypeRuntime;
-    (~(~g0).m).caughtsig.set(Ꮡgp);
+    g0.Value.m.Value.throwing = throwTypeRuntime;
+    (~g0).m.of(m.Ꮡcaughtsig).set(Ꮡgp);
     var (level, _, docrash) = gotraceback();
     if (level > 0) {
         tracebacktrap(r.ip(), r.sp(), r.lr(), Ꮡgp);
@@ -427,7 +425,7 @@ internal static void sigpanic() {
     }
     var exprᴛ1 = (~gp).sig;
     if (exprᴛ1 == _EXCEPTION_ACCESS_VIOLATION || exprᴛ1 == _EXCEPTION_IN_PAGE_ERROR) {
-        if ((~gp).sigcode1 < 4096) {
+        if ((~gp).sigcode1 < 0x1000) {
             panicmem();
         }
         if ((~gp).paniconfault) {
@@ -437,9 +435,9 @@ internal static void sigpanic() {
             // We could check that the arena chunk is explicitly set to fault,
             // but the fact that we faulted on accessing it is enough to prove
             // that it is.
-            print("accessed data from freed user arena ", ((Δhex)(~gp).sigcode1), "\n");
+            print("accessed data from freed user arena ", ((Δhex)(uint64)(~gp).sigcode1), "\n");
         } else {
-            print("unexpected fault address ", ((Δhex)(~gp).sigcode1), "\n");
+            print("unexpected fault address ", ((Δhex)(uint64)(~gp).sigcode1), "\n");
         }
         @throw("fault"u8);
     }
@@ -483,10 +481,10 @@ internal static void crash() {
 //
 //go:nosplit
 internal static void dieFromException(ж<exceptionrecord> Ꮡinfo, ж<context> Ꮡr) {
-    ref var info = ref Ꮡinfo.val;
-    ref var r = ref Ꮡr.val;
+    ref var info = ref Ꮡinfo.DerefOrNil();
+    ref var r = ref Ꮡr.Value;
 
-    if (info == nil) {
+    if (Ꮡinfo == nil) {
         var gp = getg();
         if ((~gp).sig != 0){
             // Try to reconstruct an exception record from
@@ -495,19 +493,19 @@ internal static void dieFromException(ж<exceptionrecord> Ꮡinfo, ж<context> �
                 exceptionaddress: (~gp).sigpc,
                 exceptioncode: (~gp).sig,
                 numberparameters: 2
-            )); info = ref Ꮡinfo.val;
-            info.exceptioninformation[0] = gp.val.sigcode0;
-            info.exceptioninformation[1] = gp.val.sigcode1;
+            )); info = ref Ꮡinfo.DerefOrNil();
+            info.exceptioninformation[0] = gp.Value.sigcode0;
+            info.exceptioninformation[1] = gp.Value.sigcode1;
         } else {
             // By default, a failing Go application exits with exit code 2.
             // Use this value when gp does not contain exception info.
             Ꮡinfo = Ꮡ(new exceptionrecord(
                 exceptioncode: 2
-            )); info = ref Ꮡinfo.val;
+            )); info = ref Ꮡinfo.DerefOrNil();
         }
     }
-    static readonly UntypedInt FAIL_FAST_GENERATE_EXCEPTION_ADDRESS = /* 0x1 */ 1;
-    stdcall3(_RaiseFailFastException, ((uintptr)new @unsafe.Pointer(Ꮡinfo)), ((uintptr)new @unsafe.Pointer(Ꮡr)), FAIL_FAST_GENERATE_EXCEPTION_ADDRESS);
+    UntypedInt FAIL_FAST_GENERATE_EXCEPTION_ADDRESS = 0x1;
+    stdcall3(_RaiseFailFastException, (uintptr)new @unsafe.Pointer(Ꮡinfo), (uintptr)new @unsafe.Pointer(Ꮡr), FAIL_FAST_GENERATE_EXCEPTION_ADDRESS);
 }
 
 // gsignalStack is unused on Windows.

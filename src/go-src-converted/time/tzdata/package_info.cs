@@ -41,7 +41,6 @@ using static go.time.tzdata_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<syscall_package.Errno, error>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

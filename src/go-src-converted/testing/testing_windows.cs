@@ -6,11 +6,11 @@ namespace go;
 
 using errors = errors_package;
 using windows = @internal.syscall.windows_package;
-using bits = math.bits_package;
+using bits = go.math.bits_package;
 using syscall = syscall_package;
 using time = time_package;
 using @internal.syscall;
-using math;
+using go.math;
 
 partial class testing_package {
 
@@ -24,11 +24,11 @@ internal static bool isWindowsRetryable(error err) {
         }
         err = unwrapped;
     }
-    if (err == syscall.ERROR_ACCESS_DENIED) {
+    if (AreEqual(err, syscall.ERROR_ACCESS_DENIED)) {
         return true;
     }
     // Observed in https://go.dev/issue/50051.
-    if (err == windows.ERROR_SHARING_VIOLATION) {
+    if (AreEqual(err, windows.ERROR_SHARING_VIOLATION)) {
         return true;
     }
     // Observed in https://go.dev/issue/51442.
@@ -58,9 +58,9 @@ internal static time.Duration sub(this highPrecisionTime a, highPrecisionTime b)
     if (queryPerformanceFrequency == 0) {
         queryPerformanceFrequency = windows.QueryPerformanceFrequency();
     }
-    var (hi, lo) = bits.Mul64(((uint64)delta), ((uint64)time.ΔSecond) / ((uint64)time.ΔNanosecond));
-    var (quo, _) = bits.Div64(hi, lo, ((uint64)queryPerformanceFrequency));
-    return ((time.Duration)quo);
+    var (hi, lo) = bits.Mul64((uint64)delta, (uint64)(int64)time.ΔSecond / (uint64)(int64)time.ΔNanosecond);
+    var (quo, _) = bits.Div64(hi, lo, (uint64)queryPerformanceFrequency);
+    return ((time.Duration)(int64)quo);
 }
 
 internal static int64 queryPerformanceFrequency;

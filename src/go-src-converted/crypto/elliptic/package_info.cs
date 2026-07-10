@@ -40,23 +40,22 @@ using static go.crypto.elliptic_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(Curve, bool), Curve>]
-[assembly: GoImplement<(Point, error), Point>]
-[assembly: GoImplement<(p Point, err error), Point>]
-[assembly: GoImplement<(unmarshaler, bool), unmarshaler>]
-[assembly: GoImplement<CurveParams, Curve>]
-[assembly: GoImplement<nistec.P224Point>, Curve>]
-[assembly: GoImplement<nistec.P224Point>, unmarshaler>]
-[assembly: GoImplement<nistec.P384Point>, Curve>]
-[assembly: GoImplement<nistec.P384Point>, unmarshaler>]
-[assembly: GoImplement<nistec.P521Point>, Curve>]
-[assembly: GoImplement<nistec.P521Point>, unmarshaler>]
-[assembly: GoImplement<p256Curve, Curve>]
-[assembly: GoImplement<p256Curve, unmarshaler>]
+[assembly: GoImplement<CurveParams, Curve>(Pointer = true)]
+[assembly: GoImplement<go.crypto.@internal.nistec_package.P224Point, nistPoint<go.crypto.@internal.nistec_package.P224Point>>(ConstraintProxy = true)]
+[assembly: GoImplement<go.crypto.@internal.nistec_package.P256Point, nistPoint<go.crypto.@internal.nistec_package.P256Point>>(ConstraintProxy = true)]
+[assembly: GoImplement<go.crypto.@internal.nistec_package.P384Point, nistPoint<go.crypto.@internal.nistec_package.P384Point>>(ConstraintProxy = true)]
+[assembly: GoImplement<go.crypto.@internal.nistec_package.P521Point, nistPoint<go.crypto.@internal.nistec_package.P521Point>>(ConstraintProxy = true)]
+[assembly: GoImplement<nistCurve<P224PointжnistPoint>, Curve>(Pointer = true)]
+[assembly: GoImplement<nistCurve<P224PointжnistPoint>, unmarshaler>(Pointer = true)]
+[assembly: GoImplement<nistCurve<P384PointжnistPoint>, Curve>(Pointer = true)]
+[assembly: GoImplement<nistCurve<P384PointжnistPoint>, unmarshaler>(Pointer = true)]
+[assembly: GoImplement<nistCurve<P521PointжnistPoint>, Curve>(Pointer = true)]
+[assembly: GoImplement<nistCurve<P521PointжnistPoint>, unmarshaler>(Pointer = true)]
+[assembly: GoImplement<p256Curve, Curve>(Pointer = true)]
+[assembly: GoImplement<p256Curve, unmarshaler>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<big.nat}, big.nat}>(Inverted = true)]
 // </ImplicitConversions>
 
 namespace go.crypto;

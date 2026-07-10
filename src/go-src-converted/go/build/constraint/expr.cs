@@ -12,8 +12,8 @@ namespace go.go.build;
 using errors = errors_package;
 using strings = strings_package;
 using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = global::go.unicode.utf8_package;
+using global::go.unicode;
 
 partial class constraint_package {
 
@@ -53,7 +53,7 @@ internal static readonly UntypedInt maxSize = 1000;
 }
 
 internal static Expr tag(@string tag) {
-    return new TagExpr(tag);
+    return new TagExprжExpr(Ꮡ(new TagExpr(tag)));
 }
 
 // A NotExpr represents the expression !X (the negation of X).
@@ -71,11 +71,8 @@ internal static Expr tag(@string tag) {
 [GoRecv] public static @string String(this ref NotExpr x) {
     @string s = x.X.String();
     switch (x.X.type()) {
-    case AndExpr.val : {
-        s = "("u8 + s + ")"u8;
-        break;
-    }
-    case OrExpr.val : {
+    case ж<AndExpr> _:
+    case ж<OrExpr> _: {
         s = "("u8 + s + ")"u8;
         break;
     }}
@@ -84,13 +81,12 @@ internal static Expr tag(@string tag) {
 }
 
 internal static Expr not(Expr x) {
-    return new NotExpr(x);
+    return new NotExprжExpr(Ꮡ(new NotExpr(x)));
 }
 
 // An AndExpr represents the expression X && Y.
 [GoType] partial struct AndExpr {
-    public Expr X;
-    public Expr Y;
+    public Expr X, Y;
 }
 
 [GoRecv] internal static void isExpr(this ref AndExpr x) {
@@ -110,7 +106,7 @@ internal static Expr not(Expr x) {
 internal static @string andArg(Expr x) {
     @string s = x.String();
     {
-        var (_, ok) = x._<OrExpr.val>(ᐧ); if (ok) {
+        var (_, ok) = x._<ж<OrExpr>>(ᐧ); if (ok) {
             s = "("u8 + s + ")"u8;
         }
     }
@@ -118,13 +114,12 @@ internal static @string andArg(Expr x) {
 }
 
 internal static Expr and(Expr x, Expr y) {
-    return new AndExpr(x, y);
+    return new AndExprжExpr(Ꮡ(new AndExpr(x, y)));
 }
 
 // An OrExpr represents the expression X || Y.
 [GoType] partial struct OrExpr {
-    public Expr X;
-    public Expr Y;
+    public Expr X, Y;
 }
 
 [GoRecv] internal static void isExpr(this ref OrExpr x) {
@@ -144,7 +139,7 @@ internal static Expr and(Expr x, Expr y) {
 internal static @string orArg(Expr x) {
     @string s = x.String();
     {
-        var (_, ok) = x._<AndExpr.val>(ᐧ); if (ok) {
+        var (_, ok) = x._<ж<AndExpr>>(ᐧ); if (ok) {
             s = "("u8 + s + ")"u8;
         }
     }
@@ -152,7 +147,7 @@ internal static @string orArg(Expr x) {
 }
 
 internal static Expr or(Expr x, Expr y) {
-    return new OrExpr(x, y);
+    return new OrExprжExpr(Ꮡ(new OrExpr(x, y)));
 }
 
 // A SyntaxError reports a syntax error in a parsed build expression.
@@ -230,39 +225,43 @@ internal static (@string expr, bool ok) splitGoBuild(@string line) {
 }
 
 // parseExpr parses a boolean build tag expression.
-internal static (Expr x, error err) parseExpr(@string text) => func((defer, recover) => {
+internal static (Expr x, error err) parseExpr(@string text) {
     Expr x = default!;
     error err = default!;
-
-    defer(() => {
-        {
-            var e = recover(); if (e != default!) {
-                {
-                    var (eΔ1, ok) = e._<SyntaxError.val>(ᐧ); if (ok) {
-                        err = ~eΔ1;
-                        return (x, err);
+    func((defer, recover) => {
+        defer(() => {
+            {
+                var e = recover(); if (e != default!) {
+                    {
+                        var (eΔ1, ok) = e._<ж<SyntaxError>>(ᐧ); if (ok) {
+                            err = new SyntaxErrorжerror(eΔ1);
+                            return;
+                        }
                     }
+                    throw panic(e);
                 }
-                throw panic(e);
             }
+        });
+        // unreachable unless parser has a bug
+        var p = Ꮡ(new exprParser(s: text));
+        x = p.or();
+        if ((~p).tok != ""u8) {
+            throw panic(Ꮡ(new SyntaxError(Offset: (~p).pos, Err: "unexpected token "u8 + (~p).tok)));
         }
+        (x, err) = (x, default!);
     });
-    // unreachable unless parser has a bug
-    var p = Ꮡ(new exprParser(s: text));
-    x = p.or();
-    if ((~p).tok != ""u8) {
-        throw panic(Ꮡ(new SyntaxError(Offset: (~p).pos, Err: "unexpected token "u8 + (~p).tok)));
-    }
-    return (x, default!);
-});
+    return (x, err);
+}
 
 // or parses a sequence of || expressions.
 // On entry, the next input token has not yet been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
-[GoRecv] internal static Expr or(this ref exprParser p) {
-    var x = p.and();
+internal static Expr or(this ж<exprParser> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    var x = Ꮡp.and();
     while (p.tok == "||"u8) {
-        x = or(x, p.and());
+        x = or(x, Ꮡp.and());
     }
     return x;
 }
@@ -270,10 +269,12 @@ internal static (Expr x, error err) parseExpr(@string text) => func((defer, reco
 // and parses a sequence of && expressions.
 // On entry, the next input token has not yet been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
-[GoRecv] internal static Expr and(this ref exprParser p) {
-    var x = p.not();
+internal static Expr and(this ж<exprParser> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    var x = Ꮡp.not();
     while (p.tok == "&&"u8) {
-        x = and(x, p.not());
+        x = and(x, Ꮡp.not());
     }
     return x;
 }
@@ -281,7 +282,9 @@ internal static (Expr x, error err) parseExpr(@string text) => func((defer, reco
 // not parses a ! expression.
 // On entry, the next input token has not yet been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
-[GoRecv] internal static Expr not(this ref exprParser p) {
+internal static Expr not(this ж<exprParser> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     p.size++;
     if (p.size > maxSize) {
         throw panic(Ꮡ(new SyntaxError(Offset: p.pos, Err: "build expression too large"u8)));
@@ -292,15 +295,17 @@ internal static (Expr x, error err) parseExpr(@string text) => func((defer, reco
         if (p.tok == "!"u8) {
             throw panic(Ꮡ(new SyntaxError(Offset: p.pos, Err: "double negation not allowed"u8)));
         }
-        return not(p.atom());
+        return not(Ꮡp.atom());
     }
-    return p.atom();
+    return Ꮡp.atom();
 }
 
 // atom parses a tag or a parenthesized expression.
 // On entry, the next input token HAS been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
-[GoRecv] internal static Expr atom(this ref exprParser p) => func((defer, recover) => {
+internal static Expr atom(this ж<exprParser> Ꮡp) => func((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
+
     // first token already in p.tok
     if (p.tok == "("u8) {
         ref var pos = ref heap<nint>(out var Ꮡpos);
@@ -309,15 +314,15 @@ internal static (Expr x, error err) parseExpr(@string text) => func((defer, reco
             {
                 var e = recover(); if (e != default!) {
                     {
-                        var (eΔ1, ok) = e._<SyntaxError.val>(ᐧ); if (ok && (~eΔ1).Err == "unexpected end of expression"u8) {
-                            eΔ1.val.Err = "missing close paren"u8;
+                        var (eΔ1, ok) = e._<ж<SyntaxError>>(ᐧ); if (ok && (~eΔ1).Err == "unexpected end of expression"u8) {
+                            eΔ1.Value.Err = "missing close paren"u8;
                         }
                     }
                     throw panic(e);
                 }
             }
         });
-        var x = p.or();
+        var x = Ꮡp.or();
         if (p.tok != ")"u8) {
             throw panic(Ꮡ(new SyntaxError(Offset: pos, Err: "missing close paren"u8)));
         }
@@ -360,7 +365,7 @@ internal static (Expr x, error err) parseExpr(@string text) => func((defer, reco
     }
     case (rune)'&' or (rune)'|': {
         if (p.i + 1 >= len(p.s) || p.s[p.i + 1] != p.s[p.i]) {
-            throw panic(Ꮡ(new SyntaxError(Offset: p.i, Err: "invalid syntax at "u8 + ((@string)((rune)p.s[p.i])))));
+            throw panic(Ꮡ(new SyntaxError(Offset: p.i, Err: "invalid syntax at "u8 + ((@string)(rune)p.s[p.i]))));
         }
         p.pos = p.i;
         p.i += 2;
@@ -431,12 +436,14 @@ internal static (Expr, error) parsePlusBuildExpr(@string text) {
     // Only allow up to 100 AND/OR operators for "old" syntax.
     // This is much less than the limit for "new" syntax,
     // but uses of old syntax were always very simple.
-    static readonly UntypedInt maxOldSize = 100;
+    UntypedInt maxOldSize = 100;
     nint size = 0;
     Expr x = default!;
     foreach (var (_, clause) in strings.Fields(text)) {
         Expr y = default!;
-        foreach (var (_, lit) in strings.Split(clause, ","u8)) {
+        foreach (var (_, vᴛ1) in strings.Split(clause, ","u8)) {
+            var lit = vᴛ1;
+
             Expr z = default!;
             bool neg = default!;
             if (strings.HasPrefix(lit, "!!"u8) || lit == "!"u8){
@@ -512,24 +519,20 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
     foreach (var (_, or) in appendSplitAnd(default!, x)) {
         slice<slice<Expr>> ands = default!;
         foreach (var (_, and) in appendSplitOr(default!, or)) {
-            slice<Expr> litsΔ1 = default!;
+            slice<Expr> lits = default!;
             foreach (var (_, lit) in appendSplitAnd(default!, and)) {
                 switch (lit.type()) {
-                case TagExpr.val : {
-                     = append(litsΔ1, lit);
-                    break;
-                }
-                case NotExpr.val : {
-                     = append(litsΔ1, lit);
+                case ж<TagExpr> _:
+                case ж<NotExpr> _: {
+                    lits = append(lits, lit);
                     break;
                 }
                 default: {
-
                     return (default!, errComplex);
                 }}
 
             }
-            ands = append(ands, litsΔ1);
+            ands = append(ands, lits);
         }
         split = append(split, ands);
     }
@@ -547,7 +550,7 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
         foreach (var (_, or) in split) {
             lits = append(lits, or[0].ꓸꓸꓸ);
         }
-        split = new slice<slice<Expr>>[]{new(lits)}.slice();
+        split = new slice<slice<Expr>>[]{new slice<Expr>[]{lits}.slice()}.slice();
     }
     // Prepare the +build lines.
     slice<@string> lines = default!;
@@ -574,43 +577,43 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
 internal static Expr pushNot(Expr x, bool not) {
     switch (x.type()) {
     default: {
-        var x = x.type();
-        return x;
+        var xΔ1 = x;
+        return xΔ1;
     }
-    case NotExpr.val x: {
+    case ж<NotExpr> xΔ1: {
         {
-            var (_, ok) = (~x).X._<TagExpr.val>(ᐧ); if (ok && !not) {
+            var (_, ok) = (~xΔ1).X._<ж<TagExpr>>(ᐧ); if (ok && !not) {
                 // unreachable
-                return ~x;
+                return new NotExprжExpr(xΔ1);
             }
         }
-        return pushNot((~x).X, !not);
+        return pushNot((~xΔ1).X, !not);
     }
-    case TagExpr.val x: {
+    case ж<TagExpr> xΔ1: {
         if (not) {
-            return new NotExpr(X: x);
+            return new NotExprжExpr(Ꮡ(new NotExpr(X: new TagExprжExpr(xΔ1))));
         }
-        return ~x;
+        return new TagExprжExpr(xΔ1);
     }
-    case AndExpr.val x: {
-        var x1 = pushNot((~x).X, not);
-        var y1 = pushNot((~x).Y, not);
+    case ж<AndExpr> xΔ1: {
+        var x1 = pushNot((~xΔ1).X, not);
+        var y1 = pushNot((~xΔ1).Y, not);
         if (not) {
             return or(x1, y1);
         }
-        if (AreEqual(x1, (~x).X) && AreEqual(y1, (~x).Y)) {
-            return ~x;
+        if (AreEqual(x1, (~xΔ1).X) && AreEqual(y1, (~xΔ1).Y)) {
+            return new AndExprжExpr(xΔ1);
         }
         return and(x1, y1);
     }
-    case OrExpr.val x: {
-        x1 = pushNot((~x).X, not);
-        y1 = pushNot((~x).Y, not);
+    case ж<OrExpr> xΔ1: {
+        var x1 = pushNot((~xΔ1).X, not);
+        var y1 = pushNot((~xΔ1).Y, not);
         if (not) {
             return and(x1, y1);
         }
-        if (AreEqual(x1, (~x).X) && AreEqual(y1, (~x).Y)) {
-            return ~x;
+        if (AreEqual(x1, (~xΔ1).X) && AreEqual(y1, (~xΔ1).Y)) {
+            return new OrExprжExpr(xΔ1);
         }
         return or(x1, y1);
     }}
@@ -620,7 +623,7 @@ internal static Expr pushNot(Expr x, bool not) {
 // For example, appendSplitAnd({W}, X && Y && Z) = {W, X, Y, Z}.
 internal static slice<Expr> appendSplitAnd(slice<Expr> list, Expr x) {
     {
-        var (xΔ1, ok) = x._<AndExpr.val>(ᐧ); if (ok) {
+        var (xΔ1, ok) = x._<ж<AndExpr>>(ᐧ); if (ok) {
             list = appendSplitAnd(list, (~xΔ1).X);
             list = appendSplitAnd(list, (~xΔ1).Y);
             return list;
@@ -633,7 +636,7 @@ internal static slice<Expr> appendSplitAnd(slice<Expr> list, Expr x) {
 // For example, appendSplitOr({W}, X || Y || Z) = {W, X, Y, Z}.
 internal static slice<Expr> appendSplitOr(slice<Expr> list, Expr x) {
     {
-        var (xΔ1, ok) = x._<OrExpr.val>(ᐧ); if (ok) {
+        var (xΔ1, ok) = x._<ж<OrExpr>>(ᐧ); if (ok) {
             list = appendSplitOr(list, (~xΔ1).X);
             list = appendSplitOr(list, (~xΔ1).Y);
             return list;

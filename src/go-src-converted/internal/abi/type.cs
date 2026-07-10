@@ -85,13 +85,13 @@ public static readonly TFlag TFlagUnrolledBitmap = /* 1 << 4 */ 16;
 
 // String returns the name of k.
 public static @string String(this ΔKind k) {
-    if (((nint)k) < len(kindNames)) {
+    if ((nint)(uint8)k < len(kindNames)) {
         return kindNames[k];
     }
     return kindNames[0];
 }
 
-internal static slice<@string> kindNames = new runtime.SparseArray<@string>{
+internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [Invalid] = "invalid"u8,
     [Bool] = "bool"u8,
     [Int] = "int"u8,
@@ -133,9 +133,7 @@ public static ж<Type> TypeOf(any a) {
 }
 
 // TypeFor returns the abi.Type for a type parameter.
-public static ж<Type> TypeFor<T>()
-    where T : new()
-{
+public static ж<Type> TypeFor<T>() {
     T v = default!;
     {
         var t = TypeOf(v); if (t != nil) {
@@ -171,7 +169,7 @@ public static ж<Type> TypeFor<T>()
 }
 
 [GoRecv] public static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) {
-    return @unsafe.Slice(t.GCData, ((nint)end))[(int)(begin)..];
+    return @unsafe.Slice(t.GCData, (nint)end)[(int)(begin)..];
 }
 
 // Method on non-interface type
@@ -194,18 +192,22 @@ public static ж<Type> TypeFor<T>()
     internal uint32 _;  // unused
 }
 
-[GoRecv] public static unsafe slice<Method> Methods(this ref UncommonType t) {
+public static unsafe slice<Method> Methods(this ж<UncommonType> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t.Mcount == 0) {
         return default!;
     }
-    return new Span<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.mcount > 0"u8)), t.Mcount);
+    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, "t.mcount > 0"u8)), (int)(t.Mcount)));
 }
 
-[GoRecv] public static unsafe slice<Method> ExportedMethods(this ref UncommonType t) {
+public static unsafe slice<Method> ExportedMethods(this ж<UncommonType> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t.Xcount == 0) {
         return default!;
     }
-    return new Span<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.xcount > 0"u8)), t.Xcount);
+    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, "t.xcount > 0"u8)), (int)(t.Xcount)));
 }
 
 // addChecked returns p+x.
@@ -216,7 +218,7 @@ public static ж<Type> TypeFor<T>()
 // does not cause x to advance to the very end of p's allocation
 // and therefore point incorrectly at the next block in memory.
 internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string whySafe) {
-    return ((@unsafe.Pointer)(((uintptr)p) + x));
+    return (@unsafe.Pointer)((uintptr)p + x);
 }
 
 // Imethod represents a method on an interface type
@@ -234,15 +236,19 @@ internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string
 }
 
 // Len returns the length of t if t is an array type, otherwise 0
-[GoRecv] public static nint Len(this ref Type t) {
+public static nint Len(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t.Kind() == Array) {
-        return ((nint)((ж<ΔArrayType>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.Len);
+        return (nint)((ж<ΔArrayType>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.Len;
     }
     return 0;
 }
 
-[GoRecv("capture")] public static ж<Type> Common(this ref Type t) {
-    return CommonꓸᏑt;
+public static ж<Type> Common(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡt;
 }
 
 [GoType("num:nint")] partial struct ΔChanDir;
@@ -265,7 +271,9 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // ChanDir returns the direction of t if t is a channel type, otherwise InvalidDir (0).
-[GoRecv] public static ΔChanDir ChanDir(this ref Type t) {
+public static ΔChanDir ChanDir(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t.Kind() == Chan) {
         var ch = (ж<ChanType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
         return (~ch).Dir;
@@ -314,43 +322,47 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // Uncommon returns a pointer to T's "uncommon" data if there is any, otherwise nil
-[GoRecv] public static ж<UncommonType> Uncommon(this ref Type t) {
+public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if ((TFlag)(t.TFlag & TFlagUncommon) == 0) {
         return default!;
     }
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == Struct) {
-        return Ꮡ(((ж<structTypeUncommon>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<structTypeUncommon>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
     if (exprᴛ1 == Pointer) {
-        return Ꮡ(((ж<Uncommon_u>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_u>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
     if (exprᴛ1 == Func) {
-        return Ꮡ(((ж<Uncommon_uᴛ1>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ1>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
     if (exprᴛ1 == Slice) {
-        return Ꮡ(((ж<Uncommon_uᴛ2>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ2>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
     if (exprᴛ1 == Array) {
-        return Ꮡ(((ж<Uncommon_uᴛ3>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ3>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
     if (exprᴛ1 == Chan) {
-        return Ꮡ(((ж<Uncommon_uᴛ4>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ4>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
     if (exprᴛ1 == Map) {
-        return Ꮡ(((ж<Uncommon_uᴛ5>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ5>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
     if (exprᴛ1 == Interface) {
-        return Ꮡ(((ж<Uncommon_uᴛ6>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ6>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
     { /* default: */
-        return Ꮡ(((ж<Uncommon_uᴛ7>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ7>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
 
 }
 
 // Elem returns the element type for t if t is an array, channel, map, pointer, or slice, otherwise nil.
-[GoRecv] public static ж<Type> Elem(this ref Type t) {
+public static ж<Type> Elem(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == Array) {
         var tt = (ж<ΔArrayType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
@@ -377,7 +389,9 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // StructType returns t cast to a *StructType, or nil if its tag does not match.
-[GoRecv] public static ж<ΔStructType> StructType(this ref Type t) {
+public static ж<ΔStructType> StructType(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t.Kind() != Struct) {
         return default!;
     }
@@ -385,7 +399,9 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // MapType returns t cast to a *MapType, or nil if its tag does not match.
-[GoRecv] public static ж<ΔMapType> MapType(this ref Type t) {
+public static ж<ΔMapType> MapType(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t.Kind() != Map) {
         return default!;
     }
@@ -393,7 +409,9 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // ArrayType returns t cast to a *ArrayType, or nil if its tag does not match.
-[GoRecv] public static ж<ΔArrayType> ArrayType(this ref Type t) {
+public static ж<ΔArrayType> ArrayType(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t.Kind() != Array) {
         return default!;
     }
@@ -401,7 +419,9 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // FuncType returns t cast to a *FuncType, or nil if its tag does not match.
-[GoRecv] public static ж<ΔFuncType> FuncType(this ref Type t) {
+public static ж<ΔFuncType> FuncType(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t.Kind() != Func) {
         return default!;
     }
@@ -409,7 +429,9 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // InterfaceType returns t cast to a *InterfaceType, or nil if its tag does not match.
-[GoRecv] public static ж<ΔInterfaceType> InterfaceType(this ref Type t) {
+public static ж<ΔInterfaceType> InterfaceType(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t.Kind() != Interface) {
         return default!;
     }
@@ -423,11 +445,11 @@ public static readonly ΔChanDir InvalidDir = 0;
 
 // Align returns the alignment of data with type t.
 [GoRecv] public static nint Align(this ref Type t) {
-    return ((nint)t.Align_);
+    return (nint)t.Align_;
 }
 
 [GoRecv] public static nint FieldAlign(this ref Type t) {
-    return ((nint)t.FieldAlign_);
+    return (nint)t.FieldAlign_;
 }
 
 [GoType] partial struct ΔInterfaceType {
@@ -436,20 +458,24 @@ public static readonly ΔChanDir InvalidDir = 0;
     public slice<Imethod> Methods; // sorted by hash
 }
 
-[GoRecv] public static slice<Method> ExportedMethods(this ref Type t) {
-    var ut = t.Uncommon();
+public static slice<Method> ExportedMethods(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    var ut = Ꮡt.Uncommon();
     if (ut == nil) {
         return default!;
     }
     return ut.ExportedMethods();
 }
 
-[GoRecv] public static nint NumMethod(this ref Type t) {
+public static nint NumMethod(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t.Kind() == Interface) {
         var tt = (ж<ΔInterfaceType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
         return tt.NumMethod();
     }
-    return len(t.ExportedMethods());
+    return len(Ꮡt.ExportedMethods());
 }
 
 // NumMethod returns the number of interface methods in the type's method set.
@@ -497,9 +523,11 @@ public static readonly ΔChanDir InvalidDir = 0;
     return (uint32)(mt.Flags & 16) != 0;
 }
 
-[GoRecv] public static ж<Type> Key(this ref Type t) {
+public static ж<Type> Key(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t.Kind() == Map) {
-        return ((ж<ΔMapType>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.Key;
+        return ((ж<ΔMapType>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.Key;
     }
     return default!;
 }
@@ -526,23 +554,29 @@ public static readonly ΔChanDir InvalidDir = 0;
     public uint16 OutCount; // top bit is set if last input parameter is ...
 }
 
-[GoRecv] public static ж<Type> In(this ref ΔFuncType t, nint i) {
-    return t.InSlice()[i];
+public static ж<Type> In(this ж<ΔFuncType> Ꮡt, nint i) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡt.InSlice()[i];
 }
 
 [GoRecv] public static nint NumIn(this ref ΔFuncType t) {
-    return ((nint)t.InCount);
+    return (nint)t.InCount;
 }
 
 [GoRecv] public static nint NumOut(this ref ΔFuncType t) {
-    return ((nint)((uint16)(t.OutCount & (1 << (int)(15) - 1))));
+    return (nint)((uint16)(t.OutCount & ((1 << (int)(15)) - 1)));
 }
 
-[GoRecv] public static ж<Type> Out(this ref ΔFuncType t, nint i) {
-    return (t.OutSlice()[i]);
+public static ж<Type> Out(this ж<ΔFuncType> Ꮡt, nint i) {
+    ref var t = ref Ꮡt.Value;
+
+    return (Ꮡt.OutSlice()[i]);
 }
 
-[GoRecv] public static unsafe slice<ж<Type>> InSlice(this ref ΔFuncType t) {
+public static unsafe slice<ж<Type>> InSlice(this ж<ΔFuncType> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     var uadd = @unsafe.Sizeof(t);
     if ((TFlag)(t.TFlag & TFlagUncommon) != 0) {
         uadd += @unsafe.Sizeof(new UncommonType(nil));
@@ -550,11 +584,13 @@ public static readonly ΔChanDir InvalidDir = 0;
     if (t.InCount == 0) {
         return default!;
     }
-    return new Span<ж<Type>>((Type**)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "t.inCount > 0"u8)), t.InCount);
+    return new slice<ж<Type>>(new ReadOnlySpan<ж<Type>>((Type**)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "t.inCount > 0"u8)), (int)(t.InCount)));
 }
 
-[GoRecv] public static unsafe slice<ж<Type>> OutSlice(this ref ΔFuncType t) {
-    var outCount = ((uint16)t.NumOut());
+public static unsafe slice<ж<Type>> OutSlice(this ж<ΔFuncType> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    var outCount = (uint16)t.NumOut();
     if (outCount == 0) {
         return default!;
     }
@@ -562,11 +598,11 @@ public static readonly ΔChanDir InvalidDir = 0;
     if ((TFlag)(t.TFlag & TFlagUncommon) != 0) {
         uadd += @unsafe.Sizeof(new UncommonType(nil));
     }
-    return new Span<ж<Type>>((Type**)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "outCount > 0"u8)), t.InCount + outCount);
+    return new slice<ж<Type>>(new ReadOnlySpan<ж<Type>>((Type**)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "outCount > 0"u8)), (int)(t.InCount + outCount)));
 }
 
 [GoRecv] public static bool IsVariadic(this ref ΔFuncType t) {
-    return (uint16)(t.OutCount & (1 << (int)(15))) != 0;
+    return (uint16)(t.OutCount & ((uint16)(1 << (int)(15)))) != 0;
 }
 
 [GoType] partial struct PtrType {
@@ -622,28 +658,28 @@ public static readonly ΔChanDir InvalidDir = 0;
 // DataChecked does pointer arithmetic on n's Bytes, and that arithmetic is asserted to
 // be safe for the reason in whySafe (which can appear in a backtrace, etc.)
 public static ж<byte> DataChecked(this ΔName n, nint off, @string whySafe) {
-    return (ж<byte>)(uintptr)(addChecked(new @unsafe.Pointer(n.Bytes), ((uintptr)off), whySafe));
+    return (ж<byte>)(uintptr)(addChecked(new @unsafe.Pointer(n.Bytes), (uintptr)off, whySafe));
 }
 
 // Data does pointer arithmetic on n's Bytes, and that arithmetic is asserted to
 // be safe because the runtime made the call (other packages use DataChecked)
 public static ж<byte> Data(this ΔName n, nint off) {
-    return (ж<byte>)(uintptr)(addChecked(new @unsafe.Pointer(n.Bytes), ((uintptr)off), "the runtime doesn't need to give you a reason"u8));
+    return (ж<byte>)(uintptr)(addChecked(new @unsafe.Pointer(n.Bytes), (uintptr)off, "the runtime doesn't need to give you a reason"u8));
 }
 
 // IsExported returns "is n exported?"
 public static bool IsExported(this ΔName n) {
-    return (byte)((n.Bytes.val) & (1 << (int)(0))) != 0;
+    return (byte)((n.Bytes.Value) & ((byte)(1 << (int)(0)))) != 0;
 }
 
 // HasTag returns true iff there is tag data following this name
 public static bool HasTag(this ΔName n) {
-    return (byte)((n.Bytes.val) & (1 << (int)(1))) != 0;
+    return (byte)((n.Bytes.Value) & ((byte)(1 << (int)(1)))) != 0;
 }
 
 // IsEmbedded returns true iff n is embedded (an anonymous field).
 public static bool IsEmbedded(this ΔName n) {
-    return (byte)((n.Bytes.val) & (1 << (int)(3))) != 0;
+    return (byte)((n.Bytes.Value) & ((byte)(1 << (int)(3)))) != 0;
 }
 
 // ReadVarint parses a varint as encoded by encoding/binary.
@@ -651,9 +687,9 @@ public static bool IsEmbedded(this ΔName n) {
 public static (nint, nint) ReadVarint(this ΔName n, nint off) {
     nint v = 0;
     for (nint i = 0; ᐧ ; i++) {
-        var x = n.DataChecked(off + i, "read varint"u8).val;
-        v += ((nint)((byte)(x & 127))) << (int)((7 * i));
-        if ((byte)(x & 128) == 0) {
+        var x = n.DataChecked(off + i, "read varint"u8).Value;
+        v += ((nint)((byte)(x & 0x7f)) << (int)((7 * i)));
+        if ((byte)(x & 0x80) == 0) {
             return (i + 1, v);
         }
     }
@@ -665,7 +701,7 @@ public static bool IsBlank(this ΔName n) {
         return false;
     }
     var (_, l) = n.ReadVarint(1);
-    return l == 1 && n.Data(2).val == (rune)'_';
+    return l == 1 && n.Data(2).Value == (rune)'_';
 }
 
 // writeVarint writes n to buf in varint form. Returns the
@@ -673,13 +709,13 @@ public static bool IsBlank(this ΔName n) {
 // Writes at most 10 bytes.
 internal static nint writeVarint(slice<byte> buf, nint n) {
     for (nint i = 0; ᐧ ; i++) {
-        var b = ((byte)((nint)(n & 127)));
-        n >>= (UntypedInt)(7);
+        var b = (byte)((nint)(n & 0x7f));
+        n >>= (int)(7);
         if (n == 0) {
             buf[i] = b;
             return i + 1;
         }
-        buf[i] = (byte)(b | 128);
+        buf[i] = (byte)(b | 0x80);
     }
 }
 
@@ -703,10 +739,10 @@ public static @string Tag(this ΔName n) {
 }
 
 public static ΔName NewName(@string n, @string tag, bool exported, bool embedded) {
-    if (len(n) >= 1 << (int)(29)) {
+    if (len(n) >= (1 << (int)(29))) {
         throw panic("abi.NewName: name too long: " + n[..1024] + "...");
     }
-    if (len(tag) >= 1 << (int)(29)) {
+    if (len(tag) >= (1 << (int)(29))) {
         throw panic("abi.NewName: tag too long: " + tag[..1024] + "...");
     }
     array<byte> nameLen = new(10);
@@ -716,14 +752,14 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     byte bits = default!;
     nint l = 1 + nameLenLen + len(n);
     if (exported) {
-        bits |= (byte)(1 << (int)(0));
+        bits |= (byte)((byte)(1 << (int)(0)));
     }
     if (len(tag) > 0) {
         l += tagLenLen + len(tag);
-        bits |= (byte)(1 << (int)(1));
+        bits |= (byte)((byte)(1 << (int)(1)));
     }
     if (embedded) {
-        bits |= (byte)(1 << (int)(3));
+        bits |= (byte)((byte)(1 << (int)(3)));
     }
     var b = new slice<byte>(l);
     b[0] = bits;
@@ -753,17 +789,17 @@ public static readonly UntypedInt TraceArgsMaxLen = /* (TraceArgsMaxDepth*3+2)*T
 //   - 0xfd - print } (at the end of an aggregate-typed argument)
 //   - 0xfc - print ... (more args/fields/elements)
 //   - 0xfb - print _ (offset too large)
-public static readonly UntypedInt TraceArgsEndSeq = /* 0xff */ 255;
+public static readonly UntypedInt TraceArgsEndSeq = 0xff;
 
-public static readonly UntypedInt TraceArgsStartAgg = /* 0xfe */ 254;
+public static readonly UntypedInt TraceArgsStartAgg = 0xfe;
 
-public static readonly UntypedInt TraceArgsEndAgg = /* 0xfd */ 253;
+public static readonly UntypedInt TraceArgsEndAgg = 0xfd;
 
-public static readonly UntypedInt TraceArgsDotdotdot = /* 0xfc */ 252;
+public static readonly UntypedInt TraceArgsDotdotdot = 0xfc;
 
-public static readonly UntypedInt TraceArgsOffsetTooLarge = /* 0xfb */ 251;
+public static readonly UntypedInt TraceArgsOffsetTooLarge = 0xfb;
 
-public static readonly UntypedInt TraceArgsSpecial = /* 0xf0 */ 240; // above this are operators, below this are ordinary offsets
+public static readonly UntypedInt TraceArgsSpecial = 0xf0; // above this are operators, below this are ordinary offsets
 
 // MaxPtrmaskBytes is the maximum length of a GC ptrmask bitmap,
 // which holds 1-bit entries describing where pointers are in a given type.

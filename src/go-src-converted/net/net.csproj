@@ -9,7 +9,7 @@
     <Version>0.1.4</Version>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>
-    <Copyright>Copyright © 2025</Copyright>
+    <Copyright>Copyright © 2026</Copyright>
     <Authors>$(Product) Authors</Authors>
     <Company>Grid Protection Alliance</Company>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
@@ -86,7 +86,6 @@
     <Using Include="System.Double" Alias="float64" />
     <Using Include="System.Numerics.Complex" Alias="complex128" />
     <Using Include="System.Int32" Alias="rune" />
-    <Using Include="System.UIntPtr" Alias="uintptr" />
     <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
     <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTagAttribute" />
     <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
@@ -113,6 +112,7 @@
     <ProjectReference Include="$(go2csPath)go-src-converted\internal\itoa\internal.itoa.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\internal\nettrace\internal.nettrace.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\internal\poll\internal.poll.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\internal\singleflight\internal.singleflight.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\internal\stringslite\internal.stringslite.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\internal\syscall\windows\internal.syscall.windows.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\io\fs\io.fs.csproj" />
@@ -127,6 +127,7 @@
     <ProjectReference Include="$(go2csPath)go-src-converted\syscall\syscall.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\time\time.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\unsafe\unsafe.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\vendor\golang.org\x\net\dns\dnsmessage\vendor.golang.org.x.net.dns.dnsmessage.csproj" />
   </ItemGroup>
 
 </Project>

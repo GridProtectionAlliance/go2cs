@@ -42,7 +42,7 @@ internal static (slice<@string> matches, error err) globWithLimit(FS fsys, @stri
 
     // This limit is added to prevent stack exhaustion issues. See
     // CVE-2022-30630.
-    static readonly UntypedInt pathSeparatorsLimit = 10000;
+    UntypedInt pathSeparatorsLimit = 10000;
     if (depth > pathSeparatorsLimit) {
         return (default!, path.ErrBadPattern);
     }
@@ -65,10 +65,10 @@ internal static (slice<@string> matches, error err) globWithLimit(FS fsys, @stri
         }
         return (new @string[]{pattern}.slice(), default!);
     }
-    var (dir, file) = path.Split(pattern);
+    var (dir, @file) = path.Split(pattern);
     dir = cleanGlobPath(dir);
     if (!hasMeta(dir)) {
-        return glob(fsys, dir, file, default!);
+        return glob(fsys, dir, @file, default!);
     }
     // Prevent infinite recursion. See issue 15879.
     if (dir == pattern) {
@@ -80,7 +80,7 @@ internal static (slice<@string> matches, error err) globWithLimit(FS fsys, @stri
         return (default!, err);
     }
     foreach (var (_, d) in m) {
-        (matches, err) = glob(fsys, d, file, matches);
+        (matches, err) = glob(fsys, d, @file, matches);
         if (err != default!) {
             return (matches, err);
         }
@@ -111,7 +111,7 @@ internal static (slice<@string> m, error e) glob(FS fs, @string dir, @string pat
     error e = default!;
 
     m = matches;
-    (infos, err) = ReadDir(fs, dir);
+    var (infos, err) = ReadDir(fs, dir);
     if (err != default!) {
         return (m, e);
     }

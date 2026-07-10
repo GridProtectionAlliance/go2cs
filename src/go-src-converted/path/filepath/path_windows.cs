@@ -66,9 +66,11 @@ internal static (@string, error) abs(@string path) {
 }
 
 internal static @string join(slice<@string> elem) {
-    strings.Builder b = default!;
+    ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     byte lastChar = default!;
-    foreach (var (_, e) in elem) {
+    foreach (var (_, vᴛ1) in elem) {
+        var e = vᴛ1;
+
         switch (ᐧ) {
         case {} when b.Len() is 0: {
             break;
@@ -89,7 +91,7 @@ internal static @string join(slice<@string> elem) {
  // add an extra .\ to create \.\?? rather than \??\
  // (a Root Local Device path).
  "??"u8) && (len(e) == len("??") || os.IsPathSeparator(e[2]))) {
-                b.WriteString(@".\"u8);
+                Ꮡb.WriteString(@".\"u8);
             }
             break;
         }
@@ -97,7 +99,7 @@ internal static @string join(slice<@string> elem) {
             break;
         }
         default: {
-            b.WriteByte((rune)'\\');
+            Ꮡb.WriteByte((rune)'\\');
             lastChar = (rune)'\\';
             break;
         }}
@@ -110,7 +112,7 @@ internal static @string join(slice<@string> elem) {
         //	Join(`C:`, `\f`) = `C:\f`
         // In all other cases, add a separator between elements.
         if (len(e) > 0) {
-            b.WriteString(e);
+            Ꮡb.WriteString(e);
             lastChar = e[len(e) - 1];
         }
     }

@@ -6,8 +6,8 @@ namespace go.text.template;
 using fmt = fmt_package;
 using strings = strings_package;
 using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
 using ꓸꓸꓸany = Span<any>;
 
 partial class parse_package {
@@ -22,13 +22,13 @@ partial class parse_package {
 
 internal static @string String(this item i) {
     switch (ᐧ) {
-    case {} when i.typ is itemEOF: {
+    case {} when i.typ == itemEOF: {
         return "EOF"u8;
     }
-    case {} when i.typ is itemError: {
+    case {} when i.typ == itemError: {
         return i.val;
     }
-    case {} when i.typ is > itemKeyword: {
+    case {} when i.typ > itemKeyword: {
         return fmt.Sprintf("<%s>"u8, i.val);
     }
     case {} when len(i.val) is > 10: {
@@ -91,8 +91,7 @@ internal static map<@string, itemType> key = new map<@string, itemType>{
     ["with"u8] = itemWith
 };
 
-internal static readonly GoUntyped eof = /* -1 */
-    GoUntyped.Parse("-1");
+internal static readonly UntypedInt eof = -1;
 
 // Trimming spaces.
 // If the action begins "{{- " rather than "{{", then all space/tab/newlines
@@ -136,11 +135,11 @@ internal delegate stateFn stateFn(ж<lexer> _);
 
 // next returns the next rune in the input.
 [GoRecv] internal static rune next(this ref lexer l) {
-    if (((nint)l.pos) >= len(l.input)) {
+    if ((nint)l.pos >= len(l.input)) {
         l.atEOF = true;
         return eof;
     }
-    var (r, w) = utf8.DecodeRuneInString(l.input[(int)(l.pos)..]);
+    var (r, w) = utf8.DecodeRuneInString(l.input[(int)(nint)(l.pos)..]);
     l.pos += ((Pos)w);
     if (r == (rune)'\n') {
         l.line++;
@@ -158,7 +157,7 @@ internal delegate stateFn stateFn(ж<lexer> _);
 // backup steps back one rune.
 [GoRecv] internal static void backup(this ref lexer l) {
     if (!l.atEOF && l.pos > 0) {
-        var (r, w) = utf8.DecodeLastRuneInString(l.input[..(int)(l.pos)]);
+        var (r, w) = utf8.DecodeLastRuneInString(l.input[..(int)(nint)(l.pos)]);
         l.pos -= ((Pos)w);
         // Correct newline count.
         if (r == (rune)'\n') {
@@ -170,7 +169,7 @@ internal delegate stateFn stateFn(ж<lexer> _);
 // thisItem returns the item at the current input point with the specified type
 // and advances the input.
 [GoRecv] internal static item thisItem(this ref lexer l, itemType t) {
-    var i = new item(t, l.start, l.input[(int)(l.start)..(int)(l.pos)], l.startLine);
+    var i = new item(t, l.start, l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)], l.startLine);
     l.start = l.pos;
     l.startLine = l.line;
     return i;
@@ -191,7 +190,7 @@ internal delegate stateFn stateFn(ж<lexer> _);
 // It tracks newlines in the ignored text, so use it only
 // for text that is skipped without calling l.next.
 [GoRecv] internal static void ignore(this ref lexer l) {
-    l.line += strings.Count(l.input[(int)(l.start)..(int)(l.pos)], "\n"u8);
+    l.line += strings.Count(l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)], "\n"u8);
     l.start = l.pos;
     l.startLine = l.line;
 }
@@ -226,14 +225,16 @@ internal delegate stateFn stateFn(ж<lexer> _);
 
 // nextItem returns the next item from the input.
 // Called by the parser, not in the lexing goroutine.
-[GoRecv] internal static item nextItem(this ref lexer l) {
+internal static item nextItem(this ж<lexer> Ꮡl) {
+    ref var l = ref Ꮡl.Value;
+
     l.item = new item(itemEOF, l.pos, "EOF", l.startLine);
-    var state = lexText;
+    stateFn state = lexText;
     if (l.insideAction) {
         state = lexInsideAction;
     }
     while (ᐧ) {
-        state = state(l);
+        state = state(Ꮡl);
         if (state == default!) {
             return l.item;
         }
@@ -268,20 +269,20 @@ internal static readonly @string rightComment = "*/"u8;
 
 // lexText scans until an opening action delimiter, "{{".
 internal static stateFn lexText(ж<lexer> Ꮡl) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
     {
-        nint x = strings.Index(l.input[(int)(l.pos)..], l.leftDelim); if (x >= 0) {
+        nint x = strings.Index(l.input[(int)(nint)(l.pos)..], l.leftDelim); if (x >= 0) {
             if (x > 0) {
                 l.pos += ((Pos)x);
                 // Do we trim any trailing space?
                 Pos trimLength = ((Pos)0);
                 Pos delimEnd = l.pos + ((Pos)len(l.leftDelim));
-                if (hasLeftTrimMarker(l.input[(int)(delimEnd)..])) {
-                    trimLength = rightTrimLength(l.input[(int)(l.start)..(int)(l.pos)]);
+                if (hasLeftTrimMarker(l.input[(int)(nint)(delimEnd)..])) {
+                    trimLength = rightTrimLength(l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)]);
                 }
                 l.pos -= trimLength;
-                l.line += strings.Count(l.input[(int)(l.start)..(int)(l.pos)], "\n"u8);
+                l.line += strings.Count(l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)], "\n"u8);
                 var i = l.thisItem(itemText);
                 l.pos += trimLength;
                 l.ignore();
@@ -295,7 +296,7 @@ internal static stateFn lexText(ж<lexer> Ꮡl) {
     l.pos = ((Pos)len(l.input));
     // Correctly reached EOF.
     if (l.pos > l.start) {
-        l.line += strings.Count(l.input[(int)(l.start)..(int)(l.pos)], "\n"u8);
+        l.line += strings.Count(l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)], "\n"u8);
         return l.emit(itemText);
     }
     return l.emit(itemEOF);
@@ -311,11 +312,11 @@ internal static Pos rightTrimLength(@string s) {
     bool delim = default!;
     bool trimSpaces = default!;
 
-    if (hasRightTrimMarker(l.input[(int)(l.pos)..]) && strings.HasPrefix(l.input[(int)(l.pos + trimMarkerLen)..], l.rightDelim)) {
+    if (hasRightTrimMarker(l.input[(int)(nint)(l.pos)..]) && strings.HasPrefix(l.input[(int)(nint)(l.pos + trimMarkerLen)..], l.rightDelim)) {
         // With trim marker.
         return (true, true);
     }
-    if (strings.HasPrefix(l.input[(int)(l.pos)..], l.rightDelim)) {
+    if (strings.HasPrefix(l.input[(int)(nint)(l.pos)..], l.rightDelim)) {
         // Without trim marker.
         return (true, false);
     }
@@ -330,15 +331,15 @@ internal static Pos leftTrimLength(@string s) {
 // lexLeftDelim scans the left delimiter, which is known to be present, possibly with a trim marker.
 // (The text to be trimmed has already been emitted.)
 internal static stateFn lexLeftDelim(ж<lexer> Ꮡl) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
     l.pos += ((Pos)len(l.leftDelim));
-    var trimSpace = hasLeftTrimMarker(l.input[(int)(l.pos)..]);
+    var trimSpace = hasLeftTrimMarker(l.input[(int)(nint)(l.pos)..]);
     Pos afterMarker = ((Pos)0);
     if (trimSpace) {
         afterMarker = trimMarkerLen;
     }
-    if (strings.HasPrefix(l.input[(int)(l.pos + afterMarker)..], leftComment)) {
+    if (strings.HasPrefix(l.input[(int)(nint)(l.pos + afterMarker)..], leftComment)) {
         l.pos += afterMarker;
         l.ignore();
         return lexComment;
@@ -353,10 +354,10 @@ internal static stateFn lexLeftDelim(ж<lexer> Ꮡl) {
 
 // lexComment scans a comment. The left comment marker is known to be present.
 internal static stateFn lexComment(ж<lexer> Ꮡl) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
     l.pos += ((Pos)len(leftComment));
-    nint x = strings.Index(l.input[(int)(l.pos)..], rightComment);
+    nint x = strings.Index(l.input[(int)(nint)(l.pos)..], rightComment);
     if (x < 0) {
         return l.errorf("unclosed comment"u8);
     }
@@ -371,7 +372,7 @@ internal static stateFn lexComment(ж<lexer> Ꮡl) {
     }
     l.pos += ((Pos)len(l.rightDelim));
     if (trimSpace) {
-        l.pos += leftTrimLength(l.input[(int)(l.pos)..]);
+        l.pos += leftTrimLength(l.input[(int)(nint)(l.pos)..]);
     }
     l.ignore();
     if (l.options.emitComment) {
@@ -382,7 +383,7 @@ internal static stateFn lexComment(ж<lexer> Ꮡl) {
 
 // lexRightDelim scans the right delimiter, which is known to be present, possibly with a trim marker.
 internal static stateFn lexRightDelim(ж<lexer> Ꮡl) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
     var (_, trimSpace) = l.atRightDelim();
     if (trimSpace) {
@@ -392,7 +393,7 @@ internal static stateFn lexRightDelim(ж<lexer> Ꮡl) {
     l.pos += ((Pos)len(l.rightDelim));
     var i = l.thisItem(itemRightDelim);
     if (trimSpace) {
-        l.pos += leftTrimLength(l.input[(int)(l.pos)..]);
+        l.pos += leftTrimLength(l.input[(int)(nint)(l.pos)..]);
         l.ignore();
     }
     l.insideAction = false;
@@ -401,7 +402,7 @@ internal static stateFn lexRightDelim(ж<lexer> Ꮡl) {
 
 // lexInsideAction scans the elements inside action delimiters.
 internal static stateFn lexInsideAction(ж<lexer> Ꮡl) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
     // Either number, quoted string, or identifier.
     // Spaces separate arguments; runs of spaces turn into itemSpace.
@@ -492,7 +493,7 @@ internal static stateFn lexInsideAction(ж<lexer> Ꮡl) {
 // We have not consumed the first space, which is known to be present.
 // Take care if there is a trim-marked right delimiter, which starts with a space.
 internal static stateFn lexSpace(ж<lexer> Ꮡl) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
     rune r = default!;
     nint numSpaces = default!;
@@ -506,7 +507,7 @@ internal static stateFn lexSpace(ж<lexer> Ꮡl) {
     }
     // Be careful about a trim-marked closing delimiter, which has a minus
     // after a space. We know there is a space, so check for the '-' that might follow.
-    if (hasRightTrimMarker(l.input[(int)(l.pos - 1)..]) && strings.HasPrefix(l.input[(int)(l.pos - 1 + trimMarkerLen)..], l.rightDelim)) {
+    if (hasRightTrimMarker(l.input[(int)(nint)(l.pos - 1)..]) && strings.HasPrefix(l.input[(int)(nint)(l.pos - 1 + trimMarkerLen)..], l.rightDelim)) {
         l.backup();
         // Before the space.
         if (numSpaces == 1) {
@@ -519,7 +520,7 @@ internal static stateFn lexSpace(ж<lexer> Ꮡl) {
 
 // lexIdentifier scans an alphanumeric.
 internal static stateFn lexIdentifier(ж<lexer> Ꮡl) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
     while (ᐧ) {
         {
@@ -530,13 +531,13 @@ internal static stateFn lexIdentifier(ж<lexer> Ꮡl) {
             }
             default: {
                 l.backup();
-                @string word = l.input[(int)(l.start)..(int)(l.pos)];
+                @string word = l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)];
                 if (!l.atTerminator()) {
                     // absorb.
                     return l.errorf("bad character %#U"u8, r);
                 }
                 switch (ᐧ) {
-                case {} when key[word] is > itemKeyword: {
+                case {} when key[word] > itemKeyword: {
                     itemType item = key[word];
                     if (item == itemBreak && !l.options.breakOK || item == itemContinue && !l.options.continueOK) {
                         return l.emit(itemIdentifier);
@@ -563,7 +564,7 @@ internal static stateFn lexIdentifier(ж<lexer> Ꮡl) {
 // lexField scans a field: .Alphanumeric.
 // The . has been scanned.
 internal static stateFn lexField(ж<lexer> Ꮡl) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
     return lexFieldOrVariable(Ꮡl, itemField);
 }
@@ -571,7 +572,7 @@ internal static stateFn lexField(ж<lexer> Ꮡl) {
 // lexVariable scans a Variable: $Alphanumeric.
 // The $ has been scanned.
 internal static stateFn lexVariable(ж<lexer> Ꮡl) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
     if (l.atTerminator()) {
         // Nothing interesting follows -> "$".
@@ -583,7 +584,7 @@ internal static stateFn lexVariable(ж<lexer> Ꮡl) {
 // lexFieldOrVariable scans a field or variable: [.$]Alphanumeric.
 // The . or $ has been scanned.
 internal static stateFn lexFieldOrVariable(ж<lexer> Ꮡl, itemType typ) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
     if (l.atTerminator()) {
         // Nothing interesting follows -> "." or "$".
@@ -620,24 +621,26 @@ internal static stateFn lexFieldOrVariable(ж<lexer> Ꮡl, itemType typ) {
         return true;
     }
 
-    return strings.HasPrefix(l.input[(int)(l.pos)..], l.rightDelim);
+    return strings.HasPrefix(l.input[(int)(nint)(l.pos)..], l.rightDelim);
 }
 
 // lexChar scans a character constant. The initial quote is already
 // scanned. Syntax checking is done by the parser.
 internal static stateFn lexChar(ж<lexer> Ꮡl) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
 Loop:
     while (ᐧ) {
         var exprᴛ1 = l.next();
         var matchᴛ1 = false;
         if (exprᴛ1 is (rune)'\\') { matchᴛ1 = true;
-            {
-                var r = l.next(); if (r != eof && r != (rune)'\n') {
-                    break;
+            do {
+                {
+                    var r = l.next(); if (r != eof && r != (rune)'\n') {
+                        break;
+                    }
                 }
-            }
+            } while (false);
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && (exprᴛ1 == eof || exprᴛ1 == (rune)'\n')) {
@@ -658,16 +661,16 @@ break_Loop:;
 // and "089" - but when it's wrong the input is invalid and the parser (via
 // strconv) will notice.
 internal static stateFn lexNumber(ж<lexer> Ꮡl) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
     if (!l.scanNumber()) {
-        return l.errorf("bad number syntax: %q"u8, l.input[(int)(l.start)..(int)(l.pos)]);
+        return l.errorf("bad number syntax: %q"u8, l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)]);
     }
     {
         var sign = l.peek(); if (sign == (rune)'+' || sign == (rune)'-') {
             // Complex: 1+2i. No spaces, must end in 'i'.
             if (!l.scanNumber() || l.input[l.pos - 1] != (rune)'i') {
-                return l.errorf("bad number syntax: %q"u8, l.input[(int)(l.start)..(int)(l.pos)]);
+                return l.errorf("bad number syntax: %q"u8, l.input[(int)(nint)(l.start)..(int)(nint)(l.pos)]);
             }
             return l.emit(itemComplex);
         }
@@ -716,18 +719,20 @@ internal static stateFn lexNumber(ж<lexer> Ꮡl) {
 
 // lexQuote scans a quoted string.
 internal static stateFn lexQuote(ж<lexer> Ꮡl) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
 Loop:
     while (ᐧ) {
         var exprᴛ1 = l.next();
         var matchᴛ1 = false;
         if (exprᴛ1 is (rune)'\\') { matchᴛ1 = true;
-            {
-                var r = l.next(); if (r != eof && r != (rune)'\n') {
-                    break;
+            do {
+                {
+                    var r = l.next(); if (r != eof && r != (rune)'\n') {
+                        break;
+                    }
                 }
-            }
+            } while (false);
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && (exprᴛ1 == eof || exprᴛ1 == (rune)'\n')) {
@@ -745,7 +750,7 @@ break_Loop:;
 
 // lexRawQuote scans a raw quoted string.
 internal static stateFn lexRawQuote(ж<lexer> Ꮡl) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
 Loop:
     while (ᐧ) {
@@ -774,11 +779,11 @@ internal static bool isAlphaNumeric(rune r) {
 }
 
 internal static bool hasLeftTrimMarker(@string s) {
-    return len(s) >= 2 && s[0] == trimMarker && isSpace(((rune)s[1]));
+    return len(s) >= 2 && s[0] == trimMarker && isSpace((rune)s[1]);
 }
 
 internal static bool hasRightTrimMarker(@string s) {
-    return len(s) >= 2 && isSpace(((rune)s[0])) && s[1] == trimMarker;
+    return len(s) >= 2 && isSpace((rune)s[0]) && s[1] == trimMarker;
 }
 
 } // end parse_package

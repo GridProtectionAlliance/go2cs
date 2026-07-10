@@ -46,7 +46,7 @@ partial class sync_package {
     // Entries stored in read may be updated concurrently without mu, but updating
     // a previously-expunged entry requires that the entry be copied to the dirty
     // map and unexpunged with mu held.
-    internal sync.atomic_package.Pointer read;
+    internal atomic.Pointer<readOnly> read;
     // dirty contains the portion of the map's contents that require mu to be
     // held. To ensure that the dirty map can be promoted to the read map quickly,
     // it also includes all of the non-expunged entries in the read map.
@@ -98,19 +98,21 @@ internal static ж<any> expunged = @new<any>();
     // p != expunged. If p == expunged, an entry's associated value can be updated
     // only after first setting m.dirty[key] = e so that lookups using the dirty
     // map find the entry.
-    internal sync.atomic_package.Pointer p;
+    internal atomic.Pointer<any> p;
 }
 
 internal static ж<entry> newEntry(any i) {
     var e = Ꮡ(new entry(nil));
-    (~e).p.Store(Ꮡ(i));
+    e.of(entry.Ꮡp).Store(Ꮡ(i));
     return e;
 }
 
-[GoRecv] internal static readOnly loadReadOnly(this ref Map m) {
+internal static readOnly loadReadOnly(this ж<Map> Ꮡm) {
+    ref var m = ref Ꮡm.Value;
+
     {
-        var p = m.read.Load(); if (p != nil) {
-            return p.val;
+        var p = Ꮡm.of(Map.Ꮡread).Load(); if (p != nil) {
+            return p.Value;
         }
     }
     return new readOnly(nil);
@@ -119,28 +121,28 @@ internal static ж<entry> newEntry(any i) {
 // Load returns the value stored in the map for a key, or nil if no
 // value is present.
 // The ok result indicates whether value was found in the map.
-[GoRecv] public static (any value, bool ok) Load(this ref Map m, any key) {
+public static (any value, bool ok) Load(this ж<Map> Ꮡm, any key) {
     any value = default!;
     bool ok = default!;
 
-    var read = m.loadReadOnly();
-    var e = read.m[key];
-    ok = read.m[key];
+    ref var m = ref Ꮡm.Value;
+    var read = Ꮡm.loadReadOnly();
+    (var e, ok) = read.m[key, ꟷ];
     if (!ok && read.amended) {
-        m.mu.Lock();
+        Ꮡm.of(Map.Ꮡmu).Lock();
         // Avoid reporting a spurious miss if m.dirty got promoted while we were
         // blocked on m.mu. (If further loads of the same key will not miss, it's
         // not worth copying the dirty map for this key.)
-        read = m.loadReadOnly();
-        (e, ok) = read.m[key];
+        read = Ꮡm.loadReadOnly();
+        (e, ok) = read.m[key, ꟷ];
         if (!ok && read.amended) {
-            (e, ok) = m.dirty[key];
+            (e, ok) = m.dirty[key, ꟷ];
             // Regardless of whether the entry was present, record a miss: this key
             // will take the slow path until the dirty map is promoted to the read
             // map.
-            m.missLocked();
+            Ꮡm.missLocked();
         }
-        m.mu.Unlock();
+        Ꮡm.of(Map.Ꮡmu).Unlock();
     }
     if (!ok) {
         return (default!, false);
@@ -148,34 +150,39 @@ internal static ж<entry> newEntry(any i) {
     return e.load();
 }
 
-[GoRecv] internal static (any value, bool ok) load(this ref entry e) {
+internal static (any value, bool ok) load(this ж<entry> Ꮡe) {
     any value = default!;
     bool ok = default!;
 
-    var p = e.p.Load();
+    ref var e = ref Ꮡe.Value;
+    var p = Ꮡe.of(entry.Ꮡp).Load();
     if (p == nil || p == expunged) {
         return (default!, false);
     }
-    return (p.val, true);
+    return (p.ValueSlot, true);
 }
 
 // Store sets the value for a key.
-[GoRecv] public static void Store(this ref Map m, any key, any value) {
-    (_, _) = m.Swap(key, value);
+public static void Store(this ж<Map> Ꮡm, any key, any value) {
+    ref var m = ref Ꮡm.Value;
+
+    (_, _) = Ꮡm.Swap(key, value);
 }
 
 // Clear deletes all the entries, resulting in an empty Map.
-[GoRecv] public static void Clear(this ref Map m) => func((defer, _) => {
-    var read = m.loadReadOnly();
+public static void Clear(this ж<Map> Ꮡm) => func((defer, recover) => {
+    ref var m = ref Ꮡm.Value;
+
+    var read = Ꮡm.loadReadOnly();
     if (len(read.m) == 0 && !read.amended) {
         // Avoid allocating a new readOnly when the map is already clear.
         return;
     }
-    m.mu.Lock();
-    defer(m.mu.Unlock);
-    read = m.loadReadOnly();
+    Ꮡm.of(Map.Ꮡmu).Lock();
+    defer(Ꮡm.of(Map.Ꮡmu).Unlock);
+    read = Ꮡm.loadReadOnly();
     if (len(read.m) > 0 || read.amended) {
-        m.read.Store(Ꮡ(new readOnly(nil)));
+        Ꮡm.of(Map.Ꮡread).Store(Ꮡ(new readOnly(nil)));
     }
     clear(m.dirty);
     // Don't immediately promote the newly-cleared dirty map on the next operation.
@@ -188,21 +195,24 @@ internal static ж<entry> newEntry(any i) {
 //
 // If the entry is expunged, tryCompareAndSwap returns false and leaves
 // the entry unchanged.
-[GoRecv] internal static bool tryCompareAndSwap(this ref entry e, any old, any @new) {
-    var p = e.p.Load();
-    if (p == nil || p == expunged || !AreEqual(p.val, old)) {
+internal static bool tryCompareAndSwap(this ж<entry> Ꮡe, any old, any @new) {
+    ref var e = ref Ꮡe.Value;
+
+    var p = Ꮡe.of(entry.Ꮡp).Load();
+    if (p == nil || p == expunged || !AreEqual(p.ValueSlot, old)) {
         return false;
     }
     // Copy the interface after the first load to make this method more amenable
     // to escape analysis: if the comparison fails from the start, we shouldn't
     // bother heap-allocating an interface value to store.
-    var nc = @new;
+    ref var nc = ref heap<any>(out var Ꮡnc);
+    nc = @new;
     while (ᐧ) {
-        if (e.p.CompareAndSwap(p, Ꮡ(nc))) {
+        if (Ꮡe.of(entry.Ꮡp).CompareAndSwap(p, Ꮡnc)) {
             return true;
         }
-        p = e.p.Load();
-        if (p == nil || p == expunged || !AreEqual(p.val, old)) {
+        p = Ꮡe.of(entry.Ꮡp).Load();
+        if (p == nil || p == expunged || !AreEqual(p.ValueSlot, old)) {
             return false;
         }
     }
@@ -212,68 +222,67 @@ internal static ж<entry> newEntry(any i) {
 //
 // If the entry was previously expunged, it must be added to the dirty map
 // before m.mu is unlocked.
-[GoRecv] internal static bool /*wasExpunged*/ unexpungeLocked(this ref entry e) {
+internal static bool /*wasExpunged*/ unexpungeLocked(this ж<entry> Ꮡe) {
     bool wasExpunged = default!;
 
-    return e.p.CompareAndSwap(expunged, nil);
+    ref var e = ref Ꮡe.Value;
+    return Ꮡe.of(entry.Ꮡp).CompareAndSwap(expunged, nil);
 }
 
 // swapLocked unconditionally swaps a value into the entry.
 //
 // The entry must be known not to be expunged.
-[GoRecv] internal static ж<any> swapLocked(this ref entry e, ж<any> Ꮡi) {
-    ref var i = ref Ꮡi.val;
+internal static ж<any> swapLocked(this ж<entry> Ꮡe, ж<any> Ꮡi) {
+    ref var e = ref Ꮡe.Value;
+    ref var i = ref Ꮡi.Value;
 
-    return e.p.Swap(Ꮡi);
+    return Ꮡe.of(entry.Ꮡp).Swap(Ꮡi);
 }
 
 // LoadOrStore returns the existing value for the key if present.
 // Otherwise, it stores and returns the given value.
 // The loaded result is true if the value was loaded, false if stored.
-[GoRecv] public static (any actual, bool loaded) LoadOrStore(this ref Map m, any key, any value) {
+public static (any actual, bool loaded) LoadOrStore(this ж<Map> Ꮡm, any key, any value) {
     any actual = default!;
     bool loaded = default!;
 
+    ref var m = ref Ꮡm.Value;
     // Avoid locking if it's a clean hit.
-    ref var read = ref heap<readOnly>(out var Ꮡread);
-    read = m.loadReadOnly();
+    var read = Ꮡm.loadReadOnly();
     {
-        var e = read.m[key];
-        var ok = read.m[key]; if (ok) {
+        var (e, ok) = read.m[key, ꟷ]; if (ok) {
             var (actualΔ1, loadedΔ1, okΔ1) = e.tryLoadOrStore(value);
             if (okΔ1) {
                 return (actualΔ1, loadedΔ1);
             }
         }
     }
-    m.mu.Lock();
-    read = m.loadReadOnly();
+    Ꮡm.of(Map.Ꮡmu).Lock();
+    read = Ꮡm.loadReadOnly();
     {
-        var e = read.m[key];
-        var ok = read.m[key]; if (ok){
+        var (e, ok) = read.m[key, ꟷ]; if (ok){
             if (e.unexpungeLocked()) {
                 m.dirty[key] = e;
             }
             (actual, loaded, _) = e.tryLoadOrStore(value);
         } else 
         {
-            var eΔ1 = m.dirty[key];
-            var okΔ1 = m.dirty[key]; if (okΔ1){
+            var (eΔ1, okΔ1) = m.dirty[key, ꟷ]; if (okΔ1){
                 (actual, loaded, _) = eΔ1.tryLoadOrStore(value);
-                m.missLocked();
+                Ꮡm.missLocked();
             } else {
                 if (!read.amended) {
                     // We're adding the first new key to the dirty map.
                     // Make sure it is allocated and mark the read-only map as incomplete.
-                    m.dirtyLocked();
-                    m.read.Store(Ꮡ(new readOnly(m: read.m, amended: true)));
+                    Ꮡm.dirtyLocked();
+                    Ꮡm.of(Map.Ꮡread).Store(Ꮡ(new readOnly(m: read.m, amended: true)));
                 }
                 m.dirty[key] = newEntry(value);
                 (actual, loaded) = (value, false);
             }
         }
     }
-    m.mu.Unlock();
+    Ꮡm.of(Map.Ꮡmu).Unlock();
     return (actual, loaded);
 }
 
@@ -282,58 +291,60 @@ internal static ж<entry> newEntry(any i) {
 //
 // If the entry is expunged, tryLoadOrStore leaves the entry unchanged and
 // returns with ok==false.
-[GoRecv] internal static (any actual, bool loaded, bool ok) tryLoadOrStore(this ref entry e, any i) {
+internal static (any actual, bool loaded, bool ok) tryLoadOrStore(this ж<entry> Ꮡe, any i) {
     any actual = default!;
     bool loaded = default!;
     bool ok = default!;
 
-    var p = e.p.Load();
+    ref var e = ref Ꮡe.Value;
+    var p = Ꮡe.of(entry.Ꮡp).Load();
     if (p == expunged) {
         return (default!, false, false);
     }
     if (p != nil) {
-        return (p.val, true, true);
+        return (p.ValueSlot, true, true);
     }
     // Copy the interface after the first load to make this method more amenable
     // to escape analysis: if we hit the "load" path or the entry is expunged, we
     // shouldn't bother heap-allocating.
-    var ic = i;
+    ref var ic = ref heap<any>(out var Ꮡic);
+    ic = i;
     while (ᐧ) {
-        if (e.p.CompareAndSwap(nil, Ꮡ(ic))) {
+        if (Ꮡe.of(entry.Ꮡp).CompareAndSwap(nil, Ꮡic)) {
             return (i, false, true);
         }
-        p = e.p.Load();
+        p = Ꮡe.of(entry.Ꮡp).Load();
         if (p == expunged) {
             return (default!, false, false);
         }
         if (p != nil) {
-            return (p.val, true, true);
+            return (p.ValueSlot, true, true);
         }
     }
 }
 
 // LoadAndDelete deletes the value for a key, returning the previous value if any.
 // The loaded result reports whether the key was present.
-[GoRecv] public static (any value, bool loaded) LoadAndDelete(this ref Map m, any key) {
+public static (any value, bool loaded) LoadAndDelete(this ж<Map> Ꮡm, any key) {
     any value = default!;
     bool loaded = default!;
 
-    var read = m.loadReadOnly();
-    var e = read.m[key];
-    var ok = read.m[key];
+    ref var m = ref Ꮡm.Value;
+    var read = Ꮡm.loadReadOnly();
+    var (e, ok) = read.m[key, ꟷ];
     if (!ok && read.amended) {
-        m.mu.Lock();
-        read = m.loadReadOnly();
-        (e, ok) = read.m[key];
+        Ꮡm.of(Map.Ꮡmu).Lock();
+        read = Ꮡm.loadReadOnly();
+        (e, ok) = read.m[key, ꟷ];
         if (!ok && read.amended) {
-            (e, ok) = m.dirty[key];
-            delete(m.dirty, key);
+            (e, ok) = m.dirty[key, ꟷ];
+            builtin.delete(m.dirty, key);
             // Regardless of whether the entry was present, record a miss: this key
             // will take the slow path until the dirty map is promoted to the read
             // map.
-            m.missLocked();
+            Ꮡm.missLocked();
         }
-        m.mu.Unlock();
+        Ꮡm.of(Map.Ꮡmu).Unlock();
     }
     if (ok) {
         return e.delete();
@@ -342,21 +353,24 @@ internal static ж<entry> newEntry(any i) {
 }
 
 // Delete deletes the value for a key.
-[GoRecv] public static void Delete(this ref Map m, any key) {
-    m.LoadAndDelete(key);
+public static void Delete(this ж<Map> Ꮡm, any key) {
+    ref var m = ref Ꮡm.Value;
+
+    Ꮡm.LoadAndDelete(key);
 }
 
-[GoRecv] internal static (any value, bool ok) delete(this ref entry e) {
+internal static (any value, bool ok) delete(this ж<entry> Ꮡe) {
     any value = default!;
     bool ok = default!;
 
+    ref var e = ref Ꮡe.Value;
     while (ᐧ) {
-        var p = e.p.Load();
+        var p = Ꮡe.of(entry.Ꮡp).Load();
         if (p == nil || p == expunged) {
             return (default!, false);
         }
-        if (e.p.CompareAndSwap(p, nil)) {
-            return (p.val, true);
+        if (Ꮡe.of(entry.Ꮡp).CompareAndSwap(p, nil)) {
+            return (p.ValueSlot, true);
         }
     }
 }
@@ -365,15 +379,16 @@ internal static ж<entry> newEntry(any i) {
 //
 // If the entry is expunged, trySwap returns false and leaves the entry
 // unchanged.
-[GoRecv] internal static (ж<any>, bool) trySwap(this ref entry e, ж<any> Ꮡi) {
-    ref var i = ref Ꮡi.val;
+internal static (ж<any>, bool) trySwap(this ж<entry> Ꮡe, ж<any> Ꮡi) {
+    ref var e = ref Ꮡe.Value;
+    ref var i = ref Ꮡi.Value;
 
     while (ᐧ) {
-        var p = e.p.Load();
+        var p = Ꮡe.of(entry.Ꮡp).Load();
         if (p == expunged) {
             return (default!, false);
         }
-        if (e.p.CompareAndSwap(p, Ꮡi)) {
+        if (Ꮡe.of(entry.Ꮡp).CompareAndSwap(p, Ꮡi)) {
             return (p, true);
         }
     }
@@ -381,30 +396,28 @@ internal static ж<entry> newEntry(any i) {
 
 // Swap swaps the value for a key and returns the previous value if any.
 // The loaded result reports whether the key was present.
-[GoRecv] public static (any previous, bool loaded) Swap(this ref Map m, any key, any value) {
+public static (any previous, bool loaded) Swap(this ж<Map> Ꮡm, any key, any value) {
     any previous = default!;
     bool loaded = default!;
 
-    ref var read = ref heap<readOnly>(out var Ꮡread);
-    read = m.loadReadOnly();
+    ref var m = ref Ꮡm.Value;
+    var read = Ꮡm.loadReadOnly();
     {
-        var e = read.m[key];
-        var ok = read.m[key]; if (ok) {
+        var (e, ok) = read.m[key, ꟷ]; if (ok) {
             {
                 var (v, okΔ1) = e.trySwap(Ꮡ(value)); if (okΔ1) {
                     if (v == nil) {
                         return (default!, false);
                     }
-                    return (v.val, true);
+                    return (v.ValueSlot, true);
                 }
             }
         }
     }
-    m.mu.Lock();
-    read = m.loadReadOnly();
+    Ꮡm.of(Map.Ꮡmu).Lock();
+    read = Ꮡm.loadReadOnly();
     {
-        var e = read.m[key];
-        var ok = read.m[key]; if (ok){
+        var (e, ok) = read.m[key, ꟷ]; if (ok){
             if (e.unexpungeLocked()) {
                 // The entry was previously expunged, which implies that there is a
                 // non-nil dirty map and this entry is not in it.
@@ -413,94 +426,93 @@ internal static ж<entry> newEntry(any i) {
             {
                 var v = e.swapLocked(Ꮡ(value)); if (v != nil) {
                     loaded = true;
-                    previous = v.val;
+                    previous = v.ValueSlot;
                 }
             }
         } else 
         {
-            var eΔ1 = m.dirty[key];
-            var okΔ1 = m.dirty[key]; if (okΔ1){
+            var (eΔ1, okΔ1) = m.dirty[key, ꟷ]; if (okΔ1){
                 {
                     var v = eΔ1.swapLocked(Ꮡ(value)); if (v != nil) {
                         loaded = true;
-                        previous = v.val;
+                        previous = v.ValueSlot;
                     }
                 }
             } else {
                 if (!read.amended) {
                     // We're adding the first new key to the dirty map.
                     // Make sure it is allocated and mark the read-only map as incomplete.
-                    m.dirtyLocked();
-                    m.read.Store(Ꮡ(new readOnly(m: read.m, amended: true)));
+                    Ꮡm.dirtyLocked();
+                    Ꮡm.of(Map.Ꮡread).Store(Ꮡ(new readOnly(m: read.m, amended: true)));
                 }
                 m.dirty[key] = newEntry(value);
             }
         }
     }
-    m.mu.Unlock();
+    Ꮡm.of(Map.Ꮡmu).Unlock();
     return (previous, loaded);
 }
 
 // CompareAndSwap swaps the old and new values for key
 // if the value stored in the map is equal to old.
 // The old value must be of a comparable type.
-[GoRecv] public static bool /*swapped*/ CompareAndSwap(this ref Map m, any key, any old, any @new) => func((defer, _) => {
+public static bool /*swapped*/ CompareAndSwap(this ж<Map> Ꮡm, any key, any old, any @new) {
     bool swapped = default!;
+    func((defer, recover) => {
+    ref var m = ref Ꮡm.Value;
 
-    var read = m.loadReadOnly();
-    {
-        var e = read.m[key];
-        var ok = read.m[key]; if (ok){
-            return e.tryCompareAndSwap(old, @new);
-        } else 
-        if (!read.amended) {
-            return false;
-        }
-    }
-    // No existing value for key.
-    m.mu.Lock();
-    defer(m.mu.Unlock);
-    read = m.loadReadOnly();
-    swapped = false;
-    {
-        var e = read.m[key];
-        var ok = read.m[key]; if (ok){
-            swapped = e.tryCompareAndSwap(old, @new);
-        } else 
+        var read = Ꮡm.loadReadOnly();
         {
-            var eΔ1 = m.dirty[key];
-            var okΔ1 = m.dirty[key]; if (okΔ1) {
-                swapped = eΔ1.tryCompareAndSwap(old, @new);
-                // We needed to lock mu in order to load the entry for key,
-                // and the operation didn't change the set of keys in the map
-                // (so it would be made more efficient by promoting the dirty
-                // map to read-only).
-                // Count it as a miss so that we will eventually switch to the
-                // more efficient steady state.
-                m.missLocked();
+            var (e, ok) = read.m[key, ꟷ]; if (ok){
+                swapped = e.tryCompareAndSwap(old, @new); return;
+            } else 
+            if (!read.amended) {
+                swapped = false; return;
             }
         }
-    }
+        // No existing value for key.
+        Ꮡm.of(Map.Ꮡmu).Lock();
+        defer(Ꮡm.of(Map.Ꮡmu).Unlock);
+        read = Ꮡm.loadReadOnly();
+        swapped = false;
+        {
+            var (e, ok) = read.m[key, ꟷ]; if (ok){
+                swapped = e.tryCompareAndSwap(old, @new);
+            } else 
+            {
+                var (eΔ1, okΔ1) = m.dirty[key, ꟷ]; if (okΔ1) {
+                    swapped = eΔ1.tryCompareAndSwap(old, @new);
+                    // We needed to lock mu in order to load the entry for key,
+                    // and the operation didn't change the set of keys in the map
+                    // (so it would be made more efficient by promoting the dirty
+                    // map to read-only).
+                    // Count it as a miss so that we will eventually switch to the
+                    // more efficient steady state.
+                    Ꮡm.missLocked();
+                }
+            }
+        }
+    });
     return swapped;
-});
+}
 
 // CompareAndDelete deletes the entry for key if its value is equal to old.
 // The old value must be of a comparable type.
 //
 // If there is no current value for key in the map, CompareAndDelete
 // returns false (even if the old value is the nil interface value).
-[GoRecv] public static bool /*deleted*/ CompareAndDelete(this ref Map m, any key, any old) {
+public static bool /*deleted*/ CompareAndDelete(this ж<Map> Ꮡm, any key, any old) {
     bool deleted = default!;
 
-    var read = m.loadReadOnly();
-    var e = read.m[key];
-    var ok = read.m[key];
+    ref var m = ref Ꮡm.Value;
+    var read = Ꮡm.loadReadOnly();
+    var (e, ok) = read.m[key, ꟷ];
     if (!ok && read.amended) {
-        m.mu.Lock();
-        read = m.loadReadOnly();
-        (e, ok) = read.m[key];
+        Ꮡm.of(Map.Ꮡmu).Lock();
+        read = Ꮡm.loadReadOnly();
+        (e, ok) = read.m[key, ꟷ];
         if (!ok && read.amended) {
-            (e, ok) = m.dirty[key];
+            (e, ok) = m.dirty[key, ꟷ];
             // Don't delete key from m.dirty: we still need to do the “compare” part
             // of the operation. The entry will eventually be expunged when the
             // dirty map is promoted to the read map.
@@ -508,16 +520,16 @@ internal static ж<entry> newEntry(any i) {
             // Regardless of whether the entry was present, record a miss: this key
             // will take the slow path until the dirty map is promoted to the read
             // map.
-            m.missLocked();
+            Ꮡm.missLocked();
         }
-        m.mu.Unlock();
+        Ꮡm.of(Map.Ꮡmu).Unlock();
     }
     while (ok) {
-        var p = (~e).p.Load();
-        if (p == nil || p == expunged || !AreEqual(p.val, old)) {
+        var p = e.of(entry.Ꮡp).Load();
+        if (p == nil || p == expunged || !AreEqual(p.ValueSlot, old)) {
             return false;
         }
-        if ((~e).p.CompareAndSwap(p, nil)) {
+        if (e.of(entry.Ꮡp).CompareAndSwap(p, nil)) {
             return true;
         }
     }
@@ -535,28 +547,30 @@ internal static ж<entry> newEntry(any i) {
 //
 // Range may be O(N) with the number of elements in the map even if f returns
 // false after a constant number of calls.
-[GoRecv] public static void Range(this ref Map m, Func<any, any, bool> f) {
+public static void Range(this ж<Map> Ꮡm, Func<any, any, bool> f) {
+    ref var m = ref Ꮡm.Value;
+
     // We need to be able to iterate over all of the keys that were already
     // present at the start of the call to Range.
     // If read.amended is false, then read.m satisfies that property without
     // requiring us to hold m.mu for a long time.
-    var read = m.loadReadOnly();
+    var read = Ꮡm.loadReadOnly();
     if (read.amended) {
         // m.dirty contains keys not in read.m. Fortunately, Range is already O(N)
         // (assuming the caller does not break out early), so a call to Range
         // amortizes an entire copy of the map: we can promote the dirty copy
         // immediately!
-        m.mu.Lock();
-        read = m.loadReadOnly();
+        Ꮡm.of(Map.Ꮡmu).Lock();
+        read = Ꮡm.loadReadOnly();
         if (read.amended) {
             read = new readOnly(m: m.dirty);
             ref var copyRead = ref heap<readOnly>(out var ᏑcopyRead);
             copyRead = read;
-            m.read.Store(ᏑcopyRead);
+            Ꮡm.of(Map.Ꮡread).Store(ᏑcopyRead);
             m.dirty = default!;
             m.misses = 0;
         }
-        m.mu.Unlock();
+        Ꮡm.of(Map.Ꮡmu).Unlock();
     }
     foreach (var (k, e) in read.m) {
         var (v, ok) = e.load();
@@ -569,21 +583,25 @@ internal static ж<entry> newEntry(any i) {
     }
 }
 
-[GoRecv] internal static void missLocked(this ref Map m) {
+internal static void missLocked(this ж<Map> Ꮡm) {
+    ref var m = ref Ꮡm.Value;
+
     m.misses++;
     if (m.misses < len(m.dirty)) {
         return;
     }
-    m.read.Store(Ꮡ(new readOnly(m: m.dirty)));
+    Ꮡm.of(Map.Ꮡread).Store(Ꮡ(new readOnly(m: m.dirty)));
     m.dirty = default!;
     m.misses = 0;
 }
 
-[GoRecv] internal static void dirtyLocked(this ref Map m) {
+internal static void dirtyLocked(this ж<Map> Ꮡm) {
+    ref var m = ref Ꮡm.Value;
+
     if (m.dirty != default!) {
         return;
     }
-    var read = m.loadReadOnly();
+    var read = Ꮡm.loadReadOnly();
     m.dirty = new map<any, ж<entry>>(len(read.m));
     foreach (var (k, e) in read.m) {
         if (!e.tryExpungeLocked()) {
@@ -592,15 +610,16 @@ internal static ж<entry> newEntry(any i) {
     }
 }
 
-[GoRecv] internal static bool /*isExpunged*/ tryExpungeLocked(this ref entry e) {
+internal static bool /*isExpunged*/ tryExpungeLocked(this ж<entry> Ꮡe) {
     bool isExpunged = default!;
 
-    var p = e.p.Load();
+    ref var e = ref Ꮡe.Value;
+    var p = Ꮡe.of(entry.Ꮡp).Load();
     while (p == nil) {
-        if (e.p.CompareAndSwap(nil, expunged)) {
+        if (Ꮡe.of(entry.Ꮡp).CompareAndSwap(nil, expunged)) {
             return true;
         }
-        p = e.p.Load();
+        p = Ꮡe.of(entry.Ꮡp).Load();
     }
     return p == expunged;
 }

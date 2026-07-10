@@ -10,6 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using strings = go.strings_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -40,7 +41,7 @@ using static go.regexp.syntax_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<ranges, sort_package.Interface>]
-[assembly: GoImplement<ΔError, error>]
+[assembly: GoImplement<ΔError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

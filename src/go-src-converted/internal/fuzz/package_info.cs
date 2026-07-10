@@ -10,9 +10,9 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using astꓸFilter = go.go.ast_package.ΔFilter;
 global using execꓸError = go.os.exec_package.ΔError;
-global using jsonꓸToken = go.encoding.json_package.ΔToken;
+global using jsonꓸToken = object;
+global using jsonꓸΔToken = object;
 global using osꓸDirEntry = go.io.fs_package.DirEntry;
 global using osꓸFileInfo = go.io.fs_package.FileInfo;
 global using osꓸFileMode = go.io.fs_package.FileMode;
@@ -50,7 +50,7 @@ using static go.@internal.fuzz_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("CorpusEntry", "go.fuzz_package.CorpusEntryᴛ1")]
+[assembly: GoTypeAlias("CorpusEntry", "go.@internal.fuzz_package.CorpusEntryᴛ1")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -62,21 +62,15 @@ using static go.@internal.fuzz_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(context.Context, context.CancelFunc), context_package.Context>]
-[assembly: GoImplement<(ctx context.Context, cancel context.CancelFunc), context_package.Context>]
-[assembly: GoImplement<(os.FileInfo, error), osꓸFileInfo>]
-[assembly: GoImplement<(os.Signal, bool), os_package.ΔSignal>]
-[assembly: GoImplement<MalformedCorpusError, error>]
-[assembly: GoImplement<ast.Expr, err error), go.ast_package.Expr>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>]
-[assembly: GoImplement<contextReader, io_package.Reader>]
-[assembly: GoImplement<crashError, error>]
-[assembly: GoImplement<encoding.binary_package.bigEndian, encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<encoding.binary_package.littleEndian, encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<os_package.File, io_package.Reader>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
+[assembly: GoImplement<MalformedCorpusError, error>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<contextReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<crashError, error>(Pointer = true)]
+[assembly: GoImplement<go.encoding.binary_package.bigEndian, go.encoding.binary_package.ByteOrder>]
+[assembly: GoImplement<go.encoding.binary_package.littleEndian, go.encoding.binary_package.ByteOrder>]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<pcgRand, mutatorRand>(Pointer = true)]
 [assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
-[assembly: GoImplement<time_package.Duration, error>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

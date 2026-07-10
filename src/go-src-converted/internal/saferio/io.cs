@@ -26,13 +26,13 @@ internal static readonly UntypedInt chunk = /* 10 << 20 */ 10485760; // 10M
 // If an io.EOF happens after reading some but not all the bytes,
 // ReadData returns io.ErrUnexpectedEOF.
 public static (slice<byte>, error) ReadData(io.Reader r, uint64 n) {
-    if (((int64)n) < 0 || n != ((uint64)((nint)n))) {
+    if ((int64)n < 0 || n != (uint64)(nint)n) {
         // n is too large to fit in int, so we can't allocate
         // a buffer large enough. Treat this as a read failure.
         return (default!, io.ErrUnexpectedEOF);
     }
     if (n < chunk) {
-        var bufΔ1 = new slice<byte>(n);
+        var bufΔ1 = new slice<byte>((nint)(n));
         var (_, err) = io.ReadFull(r, bufΔ1);
         if (err != default!) {
             return (default!, err);
@@ -63,13 +63,13 @@ public static (slice<byte>, error) ReadData(io.Reader r, uint64 n) {
 // allocating all n bytes if n is large. This avoids crashing the program
 // by allocating all n bytes in cases where n is incorrect.
 public static (slice<byte>, error) ReadDataAt(io.ReaderAt r, uint64 n, int64 off) {
-    if (((int64)n) < 0 || n != ((uint64)((nint)n))) {
+    if ((int64)n < 0 || n != (uint64)(nint)n) {
         // n is too large to fit in int, so we can't allocate
         // a buffer large enough. Treat this as a read failure.
         return (default!, io.ErrUnexpectedEOF);
     }
     if (n < chunk) {
-        var bufΔ1 = new slice<byte>(n);
+        var bufΔ1 = new slice<byte>((nint)(n));
         var (_, err) = r.ReadAt(bufΔ1, off);
         if (err != default!) {
             // io.SectionReader can return EOF for n == 0,
@@ -93,7 +93,7 @@ public static (slice<byte>, error) ReadDataAt(io.ReaderAt r, uint64 n, int64 off
         }
         buf = append(buf, buf1[..(int)(next)].ꓸꓸꓸ);
         n -= next;
-        off += ((int64)next);
+        off += (int64)next;
     }
     return (buf, default!);
 }
@@ -105,27 +105,25 @@ public static (slice<byte>, error) ReadDataAt(io.ReaderAt r, uint64 n, int64 off
 //
 // A negative result means that the value is always too big.
 public static nint SliceCapWithSize(uint64 size, uint64 c) {
-    if (((int64)c) < 0 || c != ((uint64)((nint)c))) {
+    if ((int64)c < 0 || c != (uint64)(nint)c) {
         return -1;
     }
-    if (size > 0 && c > (1 << (int)(64) - 1) / size) {
+    if (size > 0 && c > (18446744073709551615UL) / size) {
         return -1;
     }
     if (c * size > chunk) {
-        c = chunk / size;
+        c = (uint64)chunk / size;
         if (c == 0) {
             c = 1;
         }
     }
-    return ((nint)c);
+    return (nint)c;
 }
 
 // SliceCap is like SliceCapWithSize but using generics.
-public static nint SliceCap<E>(uint64 c)
-    where E : new()
-{
+public static nint SliceCap<E>(uint64 c) {
     E v = default!;
-    var size = ((uint64)@unsafe.Sizeof(v));
+    var size = (uint64)@unsafe.Sizeof(v);
     return SliceCapWithSize(size, c);
 }
 

@@ -37,6 +37,7 @@ using static go.database.sql.driver_package;
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("RowsAffected", "ΔRowsAffected")]
 [assembly: GoTypeAlias("String", "const:ΔString")]
+[assembly: GoTypeAlias("Value", "object")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter

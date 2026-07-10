@@ -26,8 +26,7 @@ partial class base32_package {
 }
 
 public const rune StdPadding = /* '=' */ 61; // Standard padding character
-public static readonly GoUntyped NoPadding = /* -1 */            // No padding
-    GoUntyped.Parse("-1");
+public const rune NoPadding = -1;  // No padding
 
 internal static readonly @string decodeMapInitialize = "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff";
 internal static readonly UntypedInt invalidIndex = /* '\xff' */ 255;
@@ -44,7 +43,7 @@ public static ж<Encoding> NewEncoding(@string encoder) {
         throw panic("encoding alphabet is not 32-bytes long");
     }
     var e = @new<Encoding>();
-    e.val.padChar = StdPadding;
+    e.Value.padChar = StdPadding;
     copy((~e).encode[..], encoder);
     copy((~e).decodeMap[..], decodeMapInitialize);
     for (nint i = 0; i < len(encoder); i++) {
@@ -61,7 +60,7 @@ public static ж<Encoding> NewEncoding(@string encoder) {
             break;
         }}
 
-        (~e).decodeMap[encoder[i]] = ((uint8)i);
+        e.Value.decodeMap[encoder[i]] = (uint8)i;
     }
     return e;
 }
@@ -82,11 +81,11 @@ public static ж<Encoding> HexEncoding = NewEncoding("0123456789ABCDEFGHIJKLMNOP
 // rather than using the UTF-8 representation of the codepoint.
 public static ж<Encoding> WithPadding(this Encoding enc, rune padding) {
     switch (ᐧ) {
-    case {} when padding < NoPadding || padding == (rune)'\r' || padding == (rune)'\n' || padding > 255: {
+    case {} when padding < NoPadding || padding == (rune)'\r' || padding == (rune)'\n' || padding > 0xff: {
         throw panic("invalid padding");
         break;
     }
-    case {} when padding != NoPadding && enc.decodeMap[((byte)padding)] != invalidIndex: {
+    case {} when padding != NoPadding && enc.decodeMap[(byte)padding] != invalidIndex: {
         throw panic("padding contained in alphabet");
         break;
     }}
@@ -119,16 +118,16 @@ public static ж<Encoding> WithPadding(this Encoding enc, rune padding) {
     while (si < n) {
         // Combining two 32 bit loads allows the same code to be used
         // for 32 and 64 bit platforms.
-        var hi = (uint32)((uint32)((uint32)(((uint32)src[si + 0]) << (int)(24) | ((uint32)src[si + 1]) << (int)(16)) | ((uint32)src[si + 2]) << (int)(8)) | ((uint32)src[si + 3]));
-        var lo = (uint32)(hi << (int)(8) | ((uint32)src[si + 4]));
-        dst[di + 0] = enc.encode[(uint32)((hi >> (int)(27)) & 31)];
-        dst[di + 1] = enc.encode[(uint32)((hi >> (int)(22)) & 31)];
-        dst[di + 2] = enc.encode[(uint32)((hi >> (int)(17)) & 31)];
-        dst[di + 3] = enc.encode[(uint32)((hi >> (int)(12)) & 31)];
-        dst[di + 4] = enc.encode[(uint32)((hi >> (int)(7)) & 31)];
-        dst[di + 5] = enc.encode[(uint32)((hi >> (int)(2)) & 31)];
-        dst[di + 6] = enc.encode[(uint32)((lo >> (int)(5)) & 31)];
-        dst[di + 7] = enc.encode[(uint32)((lo) & 31)];
+        var hi = (uint32)((uint32)((uint32)(((uint32)src[si + 0] << (int)(24)) | ((uint32)src[si + 1] << (int)(16))) | ((uint32)src[si + 2] << (int)(8))) | (uint32)src[si + 3]);
+        var lo = (uint32)((hi << (int)(8)) | (uint32)src[si + 4]);
+        dst[di + 0] = enc.encode[(nint)((uint32)(((hi >> (int)(27))) & 0x1F))];
+        dst[di + 1] = enc.encode[(nint)((uint32)(((hi >> (int)(22))) & 0x1F))];
+        dst[di + 2] = enc.encode[(nint)((uint32)(((hi >> (int)(17))) & 0x1F))];
+        dst[di + 3] = enc.encode[(nint)((uint32)(((hi >> (int)(12))) & 0x1F))];
+        dst[di + 4] = enc.encode[(nint)((uint32)(((hi >> (int)(7))) & 0x1F))];
+        dst[di + 5] = enc.encode[(nint)((uint32)(((hi >> (int)(2))) & 0x1F))];
+        dst[di + 6] = enc.encode[(nint)((uint32)(((lo >> (int)(5))) & 0x1F))];
+        dst[di + 7] = enc.encode[(nint)((uint32)((lo) & 0x1F))];
         si += 5;
         di += 8;
     }
@@ -138,37 +137,37 @@ public static ж<Encoding> WithPadding(this Encoding enc, rune padding) {
         return;
     }
     // Encode the remaining bytes in reverse order.
-    var val = ((uint32)0);
+    var val = (uint32)0;
     var exprᴛ1 = remain;
     var matchᴛ1 = false;
     if (exprᴛ1 is 4) { matchᴛ1 = true;
-        val |= (uint32)(((uint32)src[si + 3]));
-        dst[di + 6] = enc.encode[(uint32)(val << (int)(3) & 31)];
-        dst[di + 5] = enc.encode[(uint32)(val >> (int)(2) & 31)];
+        val |= (uint32)((uint32)src[si + 3]);
+        dst[di + 6] = enc.encode[(nint)((uint32)((val << (int)(3)) & 0x1F))];
+        dst[di + 5] = enc.encode[(nint)((uint32)((val >> (int)(2)) & 0x1F))];
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 3)) { matchᴛ1 = true;
-        val |= (uint32)(((uint32)src[si + 2]) << (int)(8));
-        dst[di + 4] = enc.encode[(uint32)(val >> (int)(7) & 31)];
+    if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) { matchᴛ1 = true;
+        val |= (uint32)(((uint32)src[si + 2] << (int)(8)));
+        dst[di + 4] = enc.encode[(nint)((uint32)((val >> (int)(7)) & 0x1F))];
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 2)) {
-        val |= (uint32)(((uint32)src[si + 1]) << (int)(16));
-        dst[di + 3] = enc.encode[(uint32)(val >> (int)(12) & 31)];
-        dst[di + 2] = enc.encode[(uint32)(val >> (int)(17) & 31)];
+    if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) {
+        val |= (uint32)(((uint32)src[si + 1] << (int)(16)));
+        dst[di + 3] = enc.encode[(nint)((uint32)((val >> (int)(12)) & 0x1F))];
+        dst[di + 2] = enc.encode[(nint)((uint32)((val >> (int)(17)) & 0x1F))];
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 1)) { matchᴛ1 = true;
-        val |= (uint32)(((uint32)src[si + 0]) << (int)(24));
-        dst[di + 1] = enc.encode[(uint32)(val >> (int)(22) & 31)];
-        dst[di + 0] = enc.encode[(uint32)(val >> (int)(27) & 31)];
+    if (fallthrough || !matchᴛ1 && exprᴛ1 is 1) { matchᴛ1 = true;
+        val |= (uint32)(((uint32)src[si + 0] << (int)(24)));
+        dst[di + 1] = enc.encode[(nint)((uint32)((val >> (int)(22)) & 0x1F))];
+        dst[di + 0] = enc.encode[(nint)((uint32)((val >> (int)(27)) & 0x1F))];
     }
 
     // Pad the final quantum
     if (enc.padChar != NoPadding) {
         nint nPad = (remain * 8 / 5) + 1;
         for (nint i = nPad; i < 8; i++) {
-            dst[di + i] = ((byte)enc.padChar);
+            dst[di + i] = (byte)enc.padChar;
         }
     }
 }
@@ -177,7 +176,7 @@ public static ж<Encoding> WithPadding(this Encoding enc, rune padding) {
 // and returns the extended buffer.
 [GoRecv] public static slice<byte> AppendEncode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
     nint n = enc.EncodedLen(len(src));
-    dst = slices.Grow(dst, n);
+    dst = slices.Grow<slice<byte>, byte>(dst, n);
     enc.Encode(dst[(int)(len(dst))..][..(int)(n)], src);
     return dst[..(int)(len(dst) + n)];
 }
@@ -192,7 +191,7 @@ public static ж<Encoding> WithPadding(this Encoding enc, rune padding) {
 [GoType] partial struct encoder {
     internal error err;
     internal ж<Encoding> enc;
-    internal io_package.Writer w;
+    internal io.Writer w;
     internal array<byte> buf = new(5); // buffered data waiting to be encoded
     internal nint nbuf;       // number of bytes in buf
     internal array<byte> @out = new(1024); // output buffer
@@ -219,7 +218,7 @@ public static ж<Encoding> WithPadding(this Encoding enc, rune padding) {
         }
         e.enc.Encode(e.@out[0..], e.buf[0..]);
         {
-            var (_, e.err) = e.w.Write(e.@out[0..8]); if (e.err != default!) {
+            (_, e.err) = e.w.Write(e.@out[0..8]); if (e.err != default!) {
                 return (n, e.err);
             }
         }
@@ -234,7 +233,7 @@ public static ж<Encoding> WithPadding(this Encoding enc, rune padding) {
         }
         e.enc.Encode(e.@out[0..], p[0..(int)(nn)]);
         {
-            var (_, e.err) = e.w.Write(e.@out[0..(int)(nn / 5 * 8)]); if (e.err != default!) {
+            (_, e.err) = e.w.Write(e.@out[0..(int)(nn / 5 * 8)]); if (e.err != default!) {
                 return (n, e.err);
             }
         }
@@ -267,9 +266,9 @@ public static ж<Encoding> WithPadding(this Encoding enc, rune padding) {
 // writing, the caller must Close the returned encoder to flush any
 // partially written blocks.
 public static io.WriteCloser NewEncoder(ж<Encoding> Ꮡenc, io.Writer w) {
-    ref var enc = ref Ꮡenc.val;
+    ref var enc = ref Ꮡenc.Value;
 
-    return new encoder(enc: enc, w: w);
+    return new encoderжWriteCloser(Ꮡ(new encoder(enc: Ꮡenc, w: w)));
 }
 
 // EncodedLen returns the length in bytes of the base32 encoding
@@ -287,7 +286,7 @@ public static io.WriteCloser NewEncoder(ж<Encoding> Ꮡenc, io.Writer w) {
  * Decoder
  */
 public static @string Error(this CorruptInputError e) {
-    return "illegal base32 data at input byte "u8 + strconv.FormatInt(((int64)e), 10);
+    return "illegal base32 data at input byte "u8 + strconv.FormatInt((int64)e, 10);
 }
 
 // decode is like Decode but returns an additional 'end' value, which
@@ -311,7 +310,7 @@ public static @string Error(this CorruptInputError e) {
             if (len(src) == 0) {
                 if (enc.padChar != NoPadding) {
                     // We have reached the end and are missing padding
-                    return (n, false, ((CorruptInputError)(olen - len(src) - j)));
+                    return (n, false, ((CorruptInputError)(int64)(olen - len(src) - j)));
                 }
                 // We have reached the end and are not expecting any padding
                 (dlen, end) = (j, true);
@@ -319,16 +318,16 @@ public static @string Error(this CorruptInputError e) {
             }
             var @in = src[0];
             src = src[1..];
-            if (@in == ((byte)enc.padChar) && j >= 2 && len(src) < 8) {
+            if (@in == (byte)enc.padChar && j >= 2 && len(src) < 8) {
                 // We've reached the end and there's padding
                 if (len(src) + j < 8 - 1) {
                     // not enough padding
-                    return (n, false, ((CorruptInputError)olen));
+                    return (n, false, ((CorruptInputError)(int64)olen));
                 }
                 for (nint k = 0; k < 8 - 1 - j; k++) {
-                    if (len(src) > k && src[k] != ((byte)enc.padChar)) {
+                    if (len(src) > k && src[k] != (byte)enc.padChar) {
                         // incorrect padding
-                        return (n, false, ((CorruptInputError)(olen - len(src) + k - 1)));
+                        return (n, false, ((CorruptInputError)(int64)(olen - len(src) + k - 1)));
                     }
                 }
                 (dlen, end) = (j, true);
@@ -338,13 +337,13 @@ public static @string Error(this CorruptInputError e) {
                 // Examples" for an illustration for how the 1st, 3rd and 6th base32
                 // src bytes do not yield enough information to decode a dst byte.
                 if (dlen == 1 || dlen == 3 || dlen == 6) {
-                    return (n, false, ((CorruptInputError)(olen - len(src) - 1)));
+                    return (n, false, ((CorruptInputError)(int64)(olen - len(src) - 1)));
                 }
                 break;
             }
             dbuf[j] = enc.decodeMap[@in];
-            if (dbuf[j] == 255) {
-                return (n, false, ((CorruptInputError)(olen - len(src) - 1)));
+            if (dbuf[j] == 0xFF) {
+                return (n, false, ((CorruptInputError)(int64)(olen - len(src) - 1)));
             }
             j++;
         }
@@ -353,27 +352,27 @@ public static @string Error(this CorruptInputError e) {
         var exprᴛ1 = dlen;
         var matchᴛ1 = false;
         if (exprᴛ1 is 8) { matchᴛ1 = true;
-            dst[dsti + 4] = (byte)(dbuf[6] << (int)(5) | dbuf[7]);
+            dst[dsti + 4] = (byte)((dbuf[6] << (int)(5)) | dbuf[7]);
             n++;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 7)) { matchᴛ1 = true;
-            dst[dsti + 3] = (byte)((byte)(dbuf[4] << (int)(7) | dbuf[5] << (int)(2)) | dbuf[6] >> (int)(3));
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 7) { matchᴛ1 = true;
+            dst[dsti + 3] = (byte)((byte)((dbuf[4] << (int)(7)) | (dbuf[5] << (int)(2))) | (dbuf[6] >> (int)(3)));
             n++;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 5)) { matchᴛ1 = true;
-            dst[dsti + 2] = (byte)(dbuf[3] << (int)(4) | dbuf[4] >> (int)(1));
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 5) { matchᴛ1 = true;
+            dst[dsti + 2] = (byte)((dbuf[3] << (int)(4)) | (dbuf[4] >> (int)(1)));
             n++;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 4)) {
-            dst[dsti + 1] = (byte)((byte)(dbuf[1] << (int)(6) | dbuf[2] << (int)(1)) | dbuf[3] >> (int)(4));
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 4) {
+            dst[dsti + 1] = (byte)((byte)((dbuf[1] << (int)(6)) | (dbuf[2] << (int)(1))) | (dbuf[3] >> (int)(4)));
             n++;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 2)) { matchᴛ1 = true;
-            dst[dsti + 0] = (byte)(dbuf[0] << (int)(3) | dbuf[1] >> (int)(2));
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) { matchᴛ1 = true;
+            dst[dsti + 0] = (byte)((dbuf[0] << (int)(3)) | (dbuf[1] >> (int)(2)));
             n++;
         }
 
@@ -403,12 +402,12 @@ public static @string Error(this CorruptInputError e) {
 [GoRecv] public static (slice<byte>, error) AppendDecode(this ref Encoding enc, slice<byte> dst, slice<byte> src) {
     // Compute the output size without padding to avoid over allocating.
     nint n = len(src);
-    while (n > 0 && ((rune)src[n - 1]) == enc.padChar) {
+    while (n > 0 && (rune)src[n - 1] == enc.padChar) {
         n--;
     }
     n = decodedLen(n, NoPadding);
-    dst = slices.Grow(dst, n);
-    (n, err) = enc.Decode(dst[(int)(len(dst))..][..(int)(n)], src);
+    dst = slices.Grow<slice<byte>, byte>(dst, n);
+    (n, var err) = enc.Decode(dst[(int)(len(dst))..][..(int)(n)], src);
     return (dst[..(int)(len(dst) + n)], err);
 }
 
@@ -423,7 +422,7 @@ public static @string Error(this CorruptInputError e) {
 [GoType] partial struct decoder {
     internal error err;
     internal ж<Encoding> enc;
-    internal io_package.Reader r;
+    internal io.Reader r;
     internal bool end;       // saw end of message
     internal array<byte> buf = new(1024); // leftover input
     internal nint nbuf;
@@ -480,7 +479,7 @@ internal static (nint n, error err) readEncodedData(io.Reader r, slice<byte> buf
     // Minimum amount of bytes that needs to be read each cycle
     nint min = default!;
     bool expectsPadding = default!;
-    if (d.enc.padChar == NoPadding){
+    if ((~d.enc).padChar == NoPadding){
         min = 1;
         expectsPadding = false;
     } else {
@@ -497,7 +496,7 @@ internal static (nint n, error err) readEncodedData(io.Reader r, slice<byte> buf
     }
     // Decode chunk into p, or d.out and then p if p is too small.
     nint nr = default!;
-    if (d.enc.padChar == NoPadding){
+    if ((~d.enc).padChar == NoPadding){
         nr = d.nbuf;
     } else {
         nr = d.nbuf / 8 * 8;
@@ -529,7 +528,7 @@ internal static (nint n, error err) readEncodedData(io.Reader r, slice<byte> buf
 }
 
 [GoType] partial struct newlineFilteringReader {
-    internal io_package.Reader wrapped;
+    internal io.Reader wrapped;
 }
 
 // stripNewlines removes newline characters and returns the number
@@ -562,9 +561,9 @@ internal static nint stripNewlines(slice<byte> dst, slice<byte> src) {
 
 // NewDecoder constructs a new base32 stream decoder.
 public static io.Reader NewDecoder(ж<Encoding> Ꮡenc, io.Reader r) {
-    ref var enc = ref Ꮡenc.val;
+    ref var enc = ref Ꮡenc.Value;
 
-    return new decoder(enc: enc, r: Ꮡ(new newlineFilteringReader(r)));
+    return new decoderжReader(Ꮡ(new decoder(enc: Ꮡenc, r: new newlineFilteringReaderжReader(Ꮡ(new newlineFilteringReader(r))))));
 }
 
 // DecodedLen returns the maximum length in bytes of the decoded data

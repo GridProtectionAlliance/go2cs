@@ -3,8 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using runtime = runtime_package;
-using sync = sync_package;
+using Δruntime = runtime_package;
+using Δsync = sync_package;
 using syscall = syscall_package;
 
 partial class os_package {
@@ -14,7 +14,8 @@ partial class os_package {
     public partial ref sync_package.Mutex Mutex { get; }
     internal @string dir;
 }
-internal static getwdCacheᴛ1 getwdCache;
+internal static ж<getwdCacheᴛ1> ᏑgetwdCache = new(new getwdCacheᴛ1(nil));
+internal static ref getwdCacheᴛ1 getwdCache => ref ᏑgetwdCache.Value;
 
 // Getwd returns a rooted path name corresponding to the
 // current directory. If the current directory can be
@@ -24,18 +25,18 @@ public static (@string dir, error err) Getwd() {
     @string dir = default!;
     error err = default!;
 
-    if (runtime.GOOS == "windows"u8 || runtime.GOOS == "plan9"u8) {
+    if (Δruntime.GOOS == "windows"u8 || Δruntime.GOOS == "plan9"u8) {
         return syscall.Getwd();
     }
     // Clumsy but widespread kludge:
     // if $PWD is set and matches ".", use it.
-    (dot, err) = statNolog("."u8);
+    (var dot, err) = statNolog("."u8);
     if (err != default!) {
         return ("", err);
     }
     dir = Getenv("PWD"u8);
     if (len(dir) > 0 && dir[0] == (rune)'/') {
-        (d, errΔ1) = statNolog(dir);
+        var (d, errΔ1) = statNolog(dir);
         if (errΔ1 == default! && SameFile(dot, d)) {
             return (dir, default!);
         }
@@ -47,25 +48,25 @@ public static (@string dir, error err) Getwd() {
         error e = default!;
         while (ᐧ) {
             (s, e) = syscall.Getwd();
-            if (e != syscall.EINTR) {
+            if (!AreEqual(e, syscall.EINTR)) {
                 break;
             }
         }
         return (s, NewSyscallError("getwd"u8, e));
     }
     // Apply same kludge but to cached dir instead of $PWD.
-    getwdCache.Lock();
+    ᏑgetwdCache.of(getwdCacheᴛ1.ᏑMutex).Lock();
     dir = getwdCache.dir;
-    getwdCache.Unlock();
+    ᏑgetwdCache.of(getwdCacheᴛ1.ᏑMutex).Unlock();
     if (len(dir) > 0) {
-        (d, errΔ2) = statNolog(dir);
+        var (d, errΔ2) = statNolog(dir);
         if (errΔ2 == default! && SameFile(dot, d)) {
             return (dir, default!);
         }
     }
     // Root is a special case because it has no parent
     // and ends in a slash.
-    (root, err) = statNolog("/"u8);
+    (var root, err) = statNolog("/"u8);
     if (err != default!) {
         // Can't stat root - no hope.
         return ("", err);
@@ -77,23 +78,23 @@ public static (@string dir, error err) Getwd() {
     // and then find name of parent. Each iteration
     // adds /name to the beginning of dir.
     dir = ""u8;
-    for (@string parent = ".."u8;; ᐧ ; parent = "../"u8 + parent) {
+    for (@string parent = ".."u8; ᐧ ; parent = "../"u8 + parent) {
         if (len(parent) >= 1024) {
             // Sanity check
             return ("", syscall.ENAMETOOLONG);
         }
-        (fd, errΔ3) = openFileNolog(parent, O_RDONLY, 0);
+        var (fd, errΔ3) = openFileNolog(parent, O_RDONLY, 0);
         if (errΔ3 != default!) {
             return ("", errΔ3);
         }
         while (ᐧ) {
-            (names, errΔ4) = fd.Readdirnames(100);
+            var (names, errΔ4) = fd.Readdirnames(100);
             if (errΔ4 != default!) {
                 fd.Close();
                 return ("", errΔ4);
             }
             foreach (var (_, name) in names) {
-                (d, _) = lstatNolog(parent + "/"u8 + name);
+                var (d, _) = lstatNolog(parent + "/"u8 + name);
                 if (SameFile(d, dot)) {
                     dir = "/"u8 + name + dir;
                     goto Found;
@@ -101,7 +102,7 @@ public static (@string dir, error err) Getwd() {
             }
         }
 Found:
-        (pd, errΔ3) = fd.Stat();
+        (var pd, errΔ3) = fd.Stat();
         fd.Close();
         if (errΔ3 != default!) {
             return ("", errΔ3);
@@ -113,9 +114,9 @@ Found:
         dot = pd;
     }
     // Save answer as hint to avoid the expensive path next time.
-    getwdCache.Lock();
+    ᏑgetwdCache.of(getwdCacheᴛ1.ᏑMutex).Lock();
     getwdCache.dir = dir;
-    getwdCache.Unlock();
+    ᏑgetwdCache.of(getwdCacheᴛ1.ᏑMutex).Unlock();
     return (dir, default!);
 }
 

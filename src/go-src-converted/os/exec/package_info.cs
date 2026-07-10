@@ -51,16 +51,15 @@ using static go.os.exec_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(os.FileInfo, error), osꓸFileInfo>]
-[assembly: GoImplement<@string, error>]
-[assembly: GoImplement<ExitError, error>]
-[assembly: GoImplement<os_package.File, io_package.Closer>]
-[assembly: GoImplement<os_package.File, io_package.ReadCloser>]
-[assembly: GoImplement<os_package.File, io_package.Reader>]
-[assembly: GoImplement<os_package.File, io_package.WriteCloser>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
+[assembly: GoImplement<ExitError, error>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.ReadCloser>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.WriteCloser>(Pointer = true)]
+[assembly: GoImplement<prefixSuffixSaver, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<wrappedError, error>]
-[assembly: GoImplement<ΔError, error>]
+[assembly: GoImplement<ΔError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

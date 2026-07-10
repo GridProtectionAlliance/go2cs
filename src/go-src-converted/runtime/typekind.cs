@@ -10,7 +10,7 @@ partial class runtime_package {
 
 // isDirectIface reports whether t is stored directly in an interface value.
 internal static bool isDirectIface(ж<_type> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     return (abiꓸKind)(t.Kind_ & abi.KindDirectIface) != 0;
 }

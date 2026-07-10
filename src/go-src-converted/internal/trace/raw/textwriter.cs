@@ -5,14 +5,15 @@ namespace go.@internal.trace;
 
 using fmt = fmt_package;
 using io = io_package;
-using version = @internal.trace.version_package;
+using version = go.@internal.trace.version_package;
+using go.@internal.trace;
 
 partial class raw_package {
 
 // TextWriter emits the text format of a trace.
 [GoType] partial struct TextWriter {
-    internal io_package.Writer w;
-    internal @internal.trace.version_package.Version v;
+    internal io.Writer w;
+    internal version.Version v;
 }
 
 // NewTextWriter creates a new write for the trace text format.

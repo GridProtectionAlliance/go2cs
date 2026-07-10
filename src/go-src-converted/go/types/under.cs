@@ -28,24 +28,23 @@ internal static ΔType under(ΔType t) {
 // channel type if the restrictions are always the same, or nil otherwise.
 internal static ΔType coreType(ΔType t) {
     t = Unalias(t);
-    var (tpar, _) = t._<TypeParam.val>(ᐧ);
+    var (tpar, _) = t._<ж<TypeParam>>(ᐧ);
     if (tpar == nil) {
         return under(t);
     }
-    ΔType su = default!;
-    if (tpar.underIs(
-    var suʗ2 = su;
-    (ΔType u) => {
+    ref var su = ref heap<ΔType>(out var Ꮡsu);
+    if (tpar.underIs((ΔType u) => {
         if (u == default!) {
             return false;
         }
-        if (suʗ2 != default!) {
-            u = match(suʗ2, u);
+        if (Ꮡsu.ValueSlot != default!) {
+            u = match(Ꮡsu.ValueSlot, u);
             if (u == default!) {
                 return false;
             }
         }
-        suʗ2 = u;
+        // su == nil || match(su, u) != nil
+        Ꮡsu.ValueSlot = u;
         return true;
     })) {
         return su;
@@ -58,34 +57,33 @@ internal static ΔType coreType(ΔType t) {
 // a string, the result is of type (possibly untyped) string.
 internal static ΔType coreString(ΔType t) {
     t = Unalias(t);
-    var (tpar, _) = t._<TypeParam.val>(ᐧ);
+    var (tpar, _) = t._<ж<TypeParam>>(ᐧ);
     if (tpar == nil) {
         return under(t);
     }
     // string or untyped string
-    ΔType su = default!;
+    ref var su = ref heap<ΔType>(out var Ꮡsu);
     var hasString = false;
-    if (tpar.underIs(
-    var suʗ2 = su;
-    (ΔType u) => {
+    if (tpar.underIs((ΔType u) => {
         if (u == default!) {
             return false;
         }
         if (isString(u)) {
-            u = ~NewSlice(universeByte);
+            u = new SliceжΔType(NewSlice(universeByte));
             hasString = true;
         }
-        if (suʗ2 != default!) {
-            u = match(suʗ2, u);
+        if (Ꮡsu.ValueSlot != default!) {
+            u = match(Ꮡsu.ValueSlot, u);
             if (u == default!) {
                 return false;
             }
         }
-        suʗ2 = u;
+        // su == nil || match(su, u) != nil
+        Ꮡsu.ValueSlot = u;
         return true;
     })) {
         if (hasString) {
-            return ~Typ[ΔString];
+            return new BasicжΔType(Typ[ΔString]);
         }
         return su;
     }
@@ -104,17 +102,17 @@ internal static ΔType match(ΔType x, ΔType y) {
     }
     // We may have channels that differ in direction only.
     {
-        var (xΔ1, _) = x._<Chan.val>(ᐧ); if (xΔ1 != nil) {
+        var (xΔ1, _) = x._<ж<Chan>>(ᐧ); if (xΔ1 != nil) {
             {
-                var (yΔ1, _) = y._<Chan.val>(ᐧ); if (yΔ1 != nil && Identical((~xΔ1).elem, (~yΔ1).elem)) {
+                var (yΔ1, _) = y._<ж<Chan>>(ᐧ); if (yΔ1 != nil && Identical((~xΔ1).elem, (~yΔ1).elem)) {
                     // We have channels that differ in direction only.
                     // If there's an unrestricted channel, select the restricted one.
                     switch (ᐧ) {
-                    case {} when (~xΔ1).dir is SendRecv: {
-                        return ~yΔ1;
+                    case {} when (~xΔ1).dir == SendRecv: {
+                        return new ChanжΔType(yΔ1);
                     }
-                    case {} when (~yΔ1).dir is SendRecv: {
-                        return ~xΔ1;
+                    case {} when (~yΔ1).dir == SendRecv: {
+                        return new ChanжΔType(xΔ1);
                     }}
 
                 }

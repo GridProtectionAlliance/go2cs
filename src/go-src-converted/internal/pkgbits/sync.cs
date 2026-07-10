@@ -4,7 +4,7 @@
 namespace go.@internal;
 
 using fmt = fmt_package;
-using runtime = runtime_package;
+using Δruntime = runtime_package;
 using strings = strings_package;
 using ꓸꓸꓸuintptr = Span<uintptr>;
 
@@ -14,27 +14,26 @@ partial class pkgbits_package {
 internal static slice<@string> fmtFrames(params ꓸꓸꓸuintptr pcsʗp) {
     var pcs = pcsʗp.slice();
 
-    var res = new slice<@string>(0, len(pcs));
-    walkFrames(pcs, 
-    var resʗ1 = res;
-    (@string file, nint line, @string name, uintptr offset) => {
+    ref var res = ref heap<slice<@string>>(out var Ꮡres);
+    res = new slice<@string>(0, len(pcs));
+    walkFrames(pcs, (@string @file, nint line, @string name, uintptr offset) => {
         // Trim package from function name. It's just redundant noise.
         name = strings.TrimPrefix(name, "cmd/compile/internal/noder."u8);
-        resʗ1 = append(resʗ1, fmt.Sprintf("%s:%v: %s +0x%v"u8, file, line, name, offset));
+        Ꮡres.ValueSlot = append(Ꮡres.ValueSlot, fmt.Sprintf("%s:%v: %s +0x%v"u8, @file, line, name, offset));
     });
     return res;
 }
 
-internal delegate void frameVisitor(@string file, nint line, @string name, uintptr offset);
+// type frameVisitor is a methodless func type — rendered inline as its base delegate
 
 // walkFrames calls visit for each call frame represented by pcs.
 //
 // pcs should be a slice of PCs, as returned by runtime.Callers.
-internal static void walkFrames(slice<uintptr> pcs, frameVisitor visit) {
+internal static void walkFrames(slice<uintptr> pcs, Action<@string, nint, @string, uintptr> visit) {
     if (len(pcs) == 0) {
         return;
     }
-    var frames = runtime.CallersFrames(pcs);
+    var frames = Δruntime.CallersFrames(pcs);
     while (ᐧ) {
         var (frame, more) = frames.Next();
         visit(frame.File, frame.Line, frame.Function, frame.PC - frame.Entry);
@@ -47,7 +46,7 @@ internal static void walkFrames(slice<uintptr> pcs, frameVisitor visit) {
 [GoType("num:nint")] partial struct SyncMarker;
 
 //go:generate stringer -type=SyncMarker -trimprefix=Sync
-internal static readonly SyncMarker Δ_ = /* iota */ 0;
+internal static readonly SyncMarker _ᴛ1ʗ = /* iota */ 0;
 // Public markers (known to go/types importers).
 public static readonly SyncMarker SyncEOF = 1;
 public static readonly SyncMarker SyncBool = 2;

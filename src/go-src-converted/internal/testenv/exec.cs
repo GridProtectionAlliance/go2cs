@@ -7,15 +7,15 @@ using context = context_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using os = os_package;
-using exec = os.exec_package;
-using runtime = runtime_package;
+using exec = go.os.exec_package;
+using Δruntime = runtime_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using time = time_package;
-using os;
-using ꓸꓸꓸ@string = Span<@string>;
+using go.os;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class testenv_package {
 
@@ -32,19 +32,20 @@ partial class testenv_package {
 // If exec is not supported, testenv.SyscallIsNotSupported will return true
 // for the resulting error.
 public static void MustHaveExec(testing.TB t) {
-    tryExecOnce.Do(() => {
+    ᏑtryExecOnce.Do(() => {
         tryExecErr = tryExec();
     });
     if (tryExecErr != default!) {
-        t.Skipf("skipping test: cannot exec subprocess on %s/%s: %v"u8, runtime.GOOS, runtime.GOARCH, tryExecErr);
+        t.Skipf("skipping test: cannot exec subprocess on %s/%s: %v"u8, Δruntime.GOOS, Δruntime.GOARCH, tryExecErr);
     }
 }
 
-internal static sync.Once tryExecOnce;
+internal static ж<sync.Once> ᏑtryExecOnce = new(default(sync.Once));
+internal static ref sync.Once tryExecOnce => ref ᏑtryExecOnce.Value;
 internal static error tryExecErr;
 
 internal static error tryExec() {
-    var exprᴛ1 = runtime.GOOS;
+    var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "wasip1"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "ios"u8) {
     }
     else { /* default: */
@@ -73,21 +74,22 @@ internal static error tryExec() {
         return fmt.Errorf("can't probe for exec support: %w"u8, err);
     }
     var cmd = exec.Command(exe, "-test.list=^$"u8);
-    cmd.val.Env = origEnv;
+    cmd.Value.Env = origEnv;
     return cmd.Run();
 }
 
-internal static sync.Map execPaths; // path -> error
+internal static ж<sync.Map> ᏑexecPaths = new(default(sync.Map));
+internal static ref sync.Map execPaths => ref ᏑexecPaths.Value; // path -> error
 
 // MustHaveExecPath checks that the current system can start the named executable
 // using os.StartProcess or (more commonly) exec.Command.
 // If not, MustHaveExecPath calls t.Skip with an explanation.
 public static void MustHaveExecPath(testing.TB t, @string path) {
     MustHaveExec(t);
-    var (err, found) = execPaths.Load(path);
+    var (err, found) = ᏑexecPaths.Load(path);
     if (!found) {
         (_, err) = exec.LookPath(path);
-        (err, _) = execPaths.LoadOrStore(path, err);
+        (err, _) = ᏑexecPaths.LoadOrStore(path, err);
     }
     if (err != default!) {
         t.Skipf("skipping test: %s: %s"u8, path, err);
@@ -101,7 +103,7 @@ public static void MustHaveExecPath(testing.TB t, @string path) {
 // If the caller wants to set cmd.Dir, set it before calling this function,
 // so PWD will be set correctly in the environment.
 public static ж<exec.Cmd> CleanCmdEnv(ж<exec.Cmd> Ꮡcmd) {
-    ref var cmd = ref Ꮡcmd.val;
+    ref var cmd = ref Ꮡcmd.Value;
 
     if (cmd.Env != default!) {
         throw panic("environment already set");
@@ -135,12 +137,12 @@ public static ж<exec.Cmd> CleanCmdEnv(ж<exec.Cmd> Ꮡcmd) {
 //     for an arbitrary grace period before the test's deadline expires,
 //   - fails the test if the command does not complete before the test's deadline, and
 //   - sets a Cleanup function that verifies that the test did not leak a subprocess.
-public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @string name, params ꓸꓸꓸ@string argsʗp) {
+public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @string name, params ꓸꓸꓸstring argsʗp) {
     var args = argsʗp.slice();
 
     t.Helper();
     MustHaveExec(t);
-    context.CancelFunc cancelCtx = default!;
+    Action cancelCtx = default!;
     time.Duration gracePeriod = default!;                 // unlimited unless the test has a deadline (to allow for interactive debugging)
     {
         var (tΔ1, ok) = t._<CommandContext_type>(ᐧ); if (ok) {
@@ -155,7 +157,7 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
                             if (err != default!) {
                                 tΔ1.Fatalf("invalid GO_TEST_TIMEOUT_SCALE: %v"u8, err);
                             }
-                            gracePeriod *= ((time.Duration)scale);
+                            gracePeriod *= ((time.Duration)(int64)scale);
                         }
                     }
                     // If time allows, increase the termination grace period to 5% of the
@@ -189,10 +191,9 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
         }
     }
     var cmd = exec.CommandContext(ctx, name, args.ꓸꓸꓸ);
-    cmd.val.Cancel = 
     var cancelCtxʗ1 = cancelCtx;
     var cmdʗ1 = cmd;
-    () => {
+    cmd.Value.Cancel = () => {
         if (cancelCtxʗ1 != default! && AreEqual(ctx.Err(), context.DeadlineExceeded)){
             // The command timed out due to running too close to the test's deadline.
             // There is no way the test did that intentionally — it's too close to the
@@ -209,16 +210,15 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
         }
         return (~cmdʗ1).Process.Signal(Sigquit);
     };
-    cmd.val.WaitDelay = gracePeriod;
-    t.Cleanup(
-    var cancelCtxʗ3 = cancelCtx;
-    var cmdʗ3 = cmd;
-    () => {
-        if (cancelCtxʗ3 != default!) {
-            cancelCtxʗ3();
+    cmd.Value.WaitDelay = gracePeriod;
+    var cancelCtxʗ2 = cancelCtx;
+    var cmdʗ2 = cmd;
+    t.Cleanup(() => {
+        if (cancelCtxʗ2 != default!) {
+            cancelCtxʗ2();
         }
-        if ((~cmdʗ3).Process != nil && (~cmdʗ3).ProcessState == nil) {
-            t.Errorf("command was started, but test did not wait for it to complete: %v"u8, cmdʗ3);
+        if ((~cmdʗ2).Process != nil && (~cmdʗ2).ProcessState == nil) {
+            t.Errorf("command was started, but test did not wait for it to complete: %v"u8, cmdʗ2);
         }
     });
     return cmd;
@@ -226,7 +226,7 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
 
 // Command is like exec.Command, but applies the same changes as
 // testenv.CommandContext (with a default Context).
-public static ж<exec.Cmd> Command(testing.TB t, @string name, params ꓸꓸꓸ@string argsʗp) {
+public static ж<exec.Cmd> Command(testing.TB t, @string name, params ꓸꓸꓸstring argsʗp) {
     var args = argsʗp.slice();
 
     t.Helper();

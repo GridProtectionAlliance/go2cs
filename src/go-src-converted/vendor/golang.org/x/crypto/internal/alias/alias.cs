@@ -13,7 +13,7 @@ partial class alias_package {
 // AnyOverlap reports whether x and y share memory at any (not necessarily
 // corresponding) index. The memory beyond the slice length is ignored.
 public static bool AnyOverlap(slice<byte> x, slice<byte> y) {
-    return len(x) > 0 && len(y) > 0 && ((uintptr)new @unsafe.Pointer(Ꮡ(x, 0))) <= ((uintptr)new @unsafe.Pointer(Ꮡ(y, len(y) - 1))) && ((uintptr)new @unsafe.Pointer(Ꮡ(y, 0))) <= ((uintptr)new @unsafe.Pointer(Ꮡ(x, len(x) - 1)));
+    return len(x) > 0 && len(y) > 0 && (uintptr)new @unsafe.Pointer(Ꮡ(x, 0)) <= (uintptr)new @unsafe.Pointer(Ꮡ(y, len(y) - 1)) && (uintptr)new @unsafe.Pointer(Ꮡ(y, 0)) <= (uintptr)new @unsafe.Pointer(Ꮡ(x, len(x) - 1));
 }
 
 // InexactOverlap reports whether x and y share memory at any non-corresponding

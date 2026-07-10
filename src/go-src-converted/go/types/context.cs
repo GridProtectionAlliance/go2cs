@@ -40,7 +40,7 @@ partial class types_package {
 // The use of a shared context does not guarantee that identical instances are
 // deduplicated in all cases.
 [GoType] partial struct Context {
-    internal sync_package.Mutex mu;
+    internal sync.Mutex mu;
     internal map<@string, slice<ctxtEntry>> typeMap; // type hash -> instances entries
     internal nint nextID;                   // next unique ID
     internal map<ΔType, nint> originIDs;      // origin type -> unique ID
@@ -63,12 +63,14 @@ public static ж<Context> NewContext() {
 // instanceHash returns a string representation of typ instantiated with targs.
 // The hash should be a perfect hash, though out of caution the type checker
 // does not assume this. The result is guaranteed to not contain blanks.
-[GoRecv] internal static @string instanceHash(this ref Context ctxt, ΔType orig, slice<ΔType> targs) {
+internal static @string instanceHash(this ж<Context> Ꮡctxt, ΔType orig, slice<ΔType> targs) {
+    ref var ctxt = ref Ꮡctxt.Value;
+
     assert(ctxt != nil);
     assert(orig != default!);
-    ref var buf = ref heap(new bytes_package.Buffer(), out var Ꮡbuf);
-    var h = newTypeHasher(Ꮡbuf, ctxt);
-    h.@string(strconv.Itoa(ctxt.getID(orig)));
+    ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+    var h = newTypeHasher(Ꮡbuf, Ꮡctxt);
+    h.@string(strconv.Itoa(Ꮡctxt.getID(orig)));
     // Because we've already written the unique origin ID this call to h.typ is
     // unnecessary, but we leave it for hash readability. It can be removed later
     // if performance is an issue.
@@ -78,14 +80,16 @@ public static ж<Context> NewContext() {
         // isGeneric handles *Signature types.
         h.typeList(targs);
     }
-    return strings.ReplaceAll(buf.String(), " "u8, "#"u8);
+    return strings.ReplaceAll(Ꮡbuf.String(), " "u8, "#"u8);
 }
 
 // lookup returns an existing instantiation of orig with targs, if it exists.
 // Otherwise, it returns nil.
-[GoRecv] internal static ΔType lookup(this ref Context ctxt, @string h, ΔType orig, slice<ΔType> targs) => func((defer, _) => {
-    ctxt.mu.Lock();
-    defer(ctxt.mu.Unlock);
+internal static ΔType lookup(this ж<Context> Ꮡctxt, @string h, ΔType orig, slice<ΔType> targs) => func<ΔType>((defer, recover) => {
+    ref var ctxt = ref Ꮡctxt.Value;
+
+    Ꮡctxt.of(Context.Ꮡmu).Lock();
+    defer(Ꮡctxt.of(Context.Ꮡmu).Unlock);
     foreach (var (_, e) in ctxt.typeMap[h]) {
         if (identicalInstance(orig, targs, e.orig, e.targs)) {
             return e.instance;
@@ -102,10 +106,12 @@ public static ж<Context> NewContext() {
 // identical type is found with the type hash h, the previously seen type is
 // returned. Otherwise, n is returned, and recorded in the Context for the hash
 // h.
-[GoRecv] internal static ΔType update(this ref Context ctxt, @string h, ΔType orig, slice<ΔType> targs, ΔType inst) => func((defer, _) => {
+internal static ΔType update(this ж<Context> Ꮡctxt, @string h, ΔType orig, slice<ΔType> targs, ΔType inst) => func((defer, recover) => {
+    ref var ctxt = ref Ꮡctxt.Value;
+
     assert(inst != default!);
-    ctxt.mu.Lock();
-    defer(ctxt.mu.Unlock);
+    Ꮡctxt.of(Context.Ꮡmu).Lock();
+    defer(Ꮡctxt.of(Context.Ꮡmu).Unlock);
     foreach (var (_, e) in ctxt.typeMap[h]) {
         if (inst == default! || Identical(inst, e.instance)) {
             return e.instance;
@@ -118,17 +124,18 @@ public static ж<Context> NewContext() {
     ctxt.typeMap[h] = append(ctxt.typeMap[h], new ctxtEntry(
         orig: orig,
         targs: targs,
-        Δinstance: inst
+        instance: inst
     ));
     return inst;
 });
 
 // getID returns a unique ID for the type t.
-[GoRecv] internal static nint getID(this ref Context ctxt, ΔType t) => func((defer, _) => {
-    ctxt.mu.Lock();
-    defer(ctxt.mu.Unlock);
-    nint id = ctxt.originIDs[t];
-    var ok = ctxt.originIDs[t];
+internal static nint getID(this ж<Context> Ꮡctxt, ΔType t) => func((defer, recover) => {
+    ref var ctxt = ref Ꮡctxt.Value;
+
+    Ꮡctxt.of(Context.Ꮡmu).Lock();
+    defer(Ꮡctxt.of(Context.Ꮡmu).Unlock);
+    var (id, ok) = ctxt.originIDs[t, ꟷ];
     if (!ok) {
         id = ctxt.nextID;
         ctxt.originIDs[t] = id;

@@ -21,28 +21,29 @@ partial class zstd_package {
 // The FSE is written into table, which must be at least 1<<maxBits in size.
 // This returns the number of bits in the FSE table and the new offset.
 // RFC 4.1.1.
-[GoRecv] internal static (nint tableBits, nint roff, error err) readFSE(this ref Reader r, block data, nint off, nint maxSym, nint maxBits, slice<fseEntry> table) {
+internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> Ꮡr, block data, nint off, nint maxSym, nint maxBits, slice<fseEntry> table) {
     nint tableBits = default!;
     nint roff = default!;
     error err = default!;
 
-    var br = r.makeBitReader(data, off);
+    ref var r = ref Ꮡr.Value;
+    var br = Ꮡr.makeBitReader(data, off);
     {
         var errΔ1 = br.moreBits(); if (errΔ1 != default!) {
             return (0, 0, errΔ1);
         }
     }
-    nint accuracyLog = ((nint)br.val(4)) + 5;
+    nint accuracyLog = (nint)br.val(4) + 5;
     if (accuracyLog > maxBits) {
         return (0, 0, br.makeError("FSE accuracy log too large"u8));
     }
     // The number of remaining probabilities, plus 1.
     // This determines the number of bits to be read for the next value.
-    nint remaining = (1 << (int)(accuracyLog)) + 1;
+    nint remaining = ((1 << (int)(accuracyLog))) + 1;
     // The current difference between small and large values,
     // which depends on the number of remaining values.
     // Small values use 1 less bit.
-    nint threshold = 1 << (int)(accuracyLog);
+    nint threshold = (1 << (int)(accuracyLog));
     // The number of bits needed to compute threshold.
     nint bitsNeeded = accuracyLog + 1;
     // The next character value.
@@ -61,9 +62,9 @@ partial class zstd_package {
             // repeat flag. If the 2-bit flag is 0b11,
             // it adds 3 and then there is another repeat flag.
             nint zsym = sym;
-            while (((uint32)(br.bits & 4095)) == 4095) {
+            while (((uint32)(br.bits & 0xfff)) == 0xfff) {
                 zsym += 3 * 6;
-                br.bits >>= (UntypedInt)(12);
+                br.bits >>= (int)(12);
                 br.cnt -= 12;
                 {
                     var errΔ3 = br.moreBits(); if (errΔ3 != default!) {
@@ -73,7 +74,7 @@ partial class zstd_package {
             }
             while (((uint32)(br.bits & 3)) == 3) {
                 zsym += 3;
-                br.bits >>= (UntypedInt)(2);
+                br.bits >>= (int)(2);
                 br.cnt -= 2;
                 {
                     var errΔ4 = br.moreBits(); if (errΔ4 != default!) {
@@ -83,31 +84,31 @@ partial class zstd_package {
             }
             // We have at least 14 bits here,
             // no need to call moreBits
-            zsym += ((nint)br.val(2));
+            zsym += (nint)br.val(2);
             if (zsym > maxSym) {
                 return (0, 0, br.makeError("FSE symbol index overflow"u8));
             }
             for (; sym < zsym; sym++) {
-                norm[((uint8)sym)] = 0;
+                norm[(uint8)sym] = 0;
             }
             prev0 = false;
             continue;
         }
         nint max = (2 * threshold - 1) - remaining;
         nint count = default!;
-        if (((nint)((uint32)(br.bits & ((uint32)(threshold - 1))))) < max){
+        if ((nint)((uint32)(br.bits & (uint32)(threshold - 1))) < max){
             // A small value.
-            count = ((nint)((uint32)(br.bits & ((uint32)(threshold - 1)))));
-            br.bits >>= (nint)(bitsNeeded - 1);
-            br.cnt -= ((uint32)(bitsNeeded - 1));
+            count = (nint)((uint32)(br.bits & (uint32)(threshold - 1)));
+            br.bits >>= (int)(bitsNeeded - 1);
+            br.cnt -= (uint32)(bitsNeeded - 1);
         } else {
             // A large value.
-            count = ((nint)((uint32)(br.bits & ((uint32)(2 * threshold - 1)))));
+            count = (nint)((uint32)(br.bits & (uint32)(2 * threshold - 1)));
             if (count >= threshold) {
                 count -= max;
             }
-            br.bits >>= (nint)(bitsNeeded);
-            br.cnt -= ((uint32)bitsNeeded);
+            br.bits >>= (int)(bitsNeeded);
+            br.cnt -= (uint32)bitsNeeded;
         }
         count--;
         if (count >= 0){
@@ -118,19 +119,19 @@ partial class zstd_package {
         if (sym >= 256) {
             return (0, 0, br.makeError("FSE sym overflow"u8));
         }
-        norm[((uint8)sym)] = ((int16)count);
+        norm[(uint8)sym] = (int16)count;
         sym++;
         prev0 = count == 0;
         while (remaining < threshold) {
             bitsNeeded--;
-            threshold >>= (UntypedInt)(1);
+            threshold >>= (int)(1);
         }
     }
     if (remaining != 1) {
         return (0, 0, br.makeError("too many symbols in FSE table"u8));
     }
     for (; sym <= maxSym; sym++) {
-        norm[((uint8)sym)] = 0;
+        norm[(uint8)sym] = 0;
     }
     br.backup();
     {
@@ -138,31 +139,31 @@ partial class zstd_package {
             return (0, 0, errΔ5);
         }
     }
-    return (accuracyLog, ((nint)br.off), default!);
+    return (accuracyLog, (nint)br.off, default!);
 }
 
 // buildFSE builds an FSE decoding table from a list of probabilities.
 // The probabilities are in norm. next is scratch space. The number of bits
 // in the table is tableBits.
 [GoRecv] internal static error buildFSE(this ref Reader r, nint off, slice<int16> norm, slice<fseEntry> table, nint tableBits) {
-    nint tableSize = 1 << (int)(tableBits);
+    nint tableSize = (1 << (int)(tableBits));
     nint highThreshold = tableSize - 1;
     array<uint16> next = new(256);
-    foreach (var (iΔ1, n) in norm) {
+    foreach (var (i, n) in norm) {
         if (n >= 0){
-            next[((uint8)iΔ1)] = ((uint16)n);
+            next[(uint8)i] = (uint16)n;
         } else {
-            table[highThreshold].sym = ((uint8)iΔ1);
+            table[highThreshold].sym = (uint8)i;
             highThreshold--;
-            next[((uint8)iΔ1)] = 1;
+            next[(uint8)i] = 1;
         }
     }
     nint pos = 0;
-    nint step = (tableSize >> (int)(1)) + (tableSize >> (int)(3)) + 3;
+    nint step = ((tableSize >> (int)(1))) + ((tableSize >> (int)(3))) + 3;
     nint mask = tableSize - 1;
-    foreach (var (iΔ2, n) in norm) {
-        for (nint j = 0; j < ((nint)n); j++) {
-            table[pos].sym = ((uint8)iΔ2);
+    foreach (var (i, n) in norm) {
+        for (nint j = 0; j < (nint)n; j++) {
+            table[pos].sym = (uint8)i;
             pos = (nint)((pos + step) & mask);
             while (pos > highThreshold) {
                 pos = (nint)((pos + step) & mask);
@@ -180,9 +181,9 @@ partial class zstd_package {
             return r.makeError(off, "FSE state error"u8);
         }
         nint highBit = 15 - bits.LeadingZeros16(nextState);
-        nint bits = tableBits - highBit;
-        table[i].bits = ((uint8)bits);
-        table[i].@base = (nextState << (int)(bits)) - ((uint16)tableSize);
+        nint bitsΔ1 = tableBits - highBit;
+        table[i].bits = (uint8)bitsΔ1;
+        table[i].@base = (uint16)(((nextState << (int)(bitsΔ1))) - (uint16)tableSize);
     }
     return default!;
 }
@@ -206,26 +207,26 @@ partial class zstd_package {
 internal static readonly UntypedInt literalLengthOffset = 16;
 
 internal static slice<uint32> literalLengthBase = new uint32[]{
-    (uint32)(16 | (1 << (int)(24))),
-    (uint32)(18 | (1 << (int)(24))),
-    (uint32)(20 | (1 << (int)(24))),
-    (uint32)(22 | (1 << (int)(24))),
-    (uint32)(24 | (2 << (int)(24))),
-    (uint32)(28 | (2 << (int)(24))),
-    (uint32)(32 | (3 << (int)(24))),
-    (uint32)(40 | (3 << (int)(24))),
-    (uint32)(48 | (4 << (int)(24))),
-    (uint32)(64 | (6 << (int)(24))),
-    (uint32)(128 | (7 << (int)(24))),
-    (uint32)(256 | (8 << (int)(24))),
-    (uint32)(512 | (9 << (int)(24))),
-    (uint32)(1024 | (10 << (int)(24))),
-    (uint32)(2048 | (11 << (int)(24))),
-    (uint32)(4096 | (12 << (int)(24))),
-    (uint32)(8192 | (13 << (int)(24))),
-    (uint32)(16384 | (14 << (int)(24))),
-    (uint32)(32768 | (15 << (int)(24))),
-    (uint32)(65536 | (16 << (int)(24)))
+    (uint32)(16 | ((1 << (int)(24)))),
+    (uint32)(18 | ((1 << (int)(24)))),
+    (uint32)(20 | ((1 << (int)(24)))),
+    (uint32)(22 | ((1 << (int)(24)))),
+    (uint32)(24 | ((2 << (int)(24)))),
+    (uint32)(28 | ((2 << (int)(24)))),
+    (uint32)(32 | ((3 << (int)(24)))),
+    (uint32)(40 | ((3 << (int)(24)))),
+    (uint32)(48 | ((4 << (int)(24)))),
+    (uint32)(64 | ((6 << (int)(24)))),
+    (uint32)(128 | ((7 << (int)(24)))),
+    (uint32)(256 | ((8 << (int)(24)))),
+    (uint32)(512 | ((9 << (int)(24)))),
+    (uint32)(1024 | ((10 << (int)(24)))),
+    (uint32)(2048 | ((11 << (int)(24)))),
+    (uint32)(4096 | ((12 << (int)(24)))),
+    (uint32)(8192 | ((13 << (int)(24)))),
+    (uint32)(16384 | ((14 << (int)(24)))),
+    (uint32)(32768 | ((15 << (int)(24)))),
+    (uint32)(65536 | ((16 << (int)(24))))
 }.slice();
 
 // makeLiteralBaselineFSE converts the literal length fseTable to baselineTable.
@@ -236,16 +237,16 @@ internal static slice<uint32> literalLengthBase = new uint32[]{
             @base: e.@base
         );
         if (e.sym < literalLengthOffset){
-            be.baseline = ((uint32)e.sym);
+            be.baseline = (uint32)e.sym;
             be.basebits = 0;
         } else {
             if (e.sym > 35) {
                 return r.makeError(off, "FSE baseline symbol overflow"u8);
             }
-            var idx = e.sym - literalLengthOffset;
+            var idx = (uint8)(e.sym - (uint8)literalLengthOffset);
             var basebits = literalLengthBase[idx];
-            be.baseline = (uint32)(basebits & 16777215);
-            be.basebits = ((uint8)(basebits >> (int)(24)));
+            be.baseline = (uint32)(basebits & 0xffffff);
+            be.basebits = (uint8)((basebits >> (int)(24)));
         }
         baselineTable[i] = be;
     }
@@ -279,7 +280,7 @@ internal static slice<uint32> literalLengthBase = new uint32[]{
         // So we can check for RFC offset <= 3 by checking for
         // basebits <= 1. That means that we can subtract 3 here
         // and not worry about doing it in the hot loop.
-        be.baseline = 1 << (int)(e.sym);
+        be.baseline = ((uint32)1 << (int)(e.sym));
         if (e.sym >= 2) {
             be.baseline -= 3;
         }
@@ -295,27 +296,27 @@ internal static slice<uint32> literalLengthBase = new uint32[]{
 internal static readonly UntypedInt matchLengthOffset = 32;
 
 internal static slice<uint32> matchLengthBase = new uint32[]{
-    (uint32)(35 | (1 << (int)(24))),
-    (uint32)(37 | (1 << (int)(24))),
-    (uint32)(39 | (1 << (int)(24))),
-    (uint32)(41 | (1 << (int)(24))),
-    (uint32)(43 | (2 << (int)(24))),
-    (uint32)(47 | (2 << (int)(24))),
-    (uint32)(51 | (3 << (int)(24))),
-    (uint32)(59 | (3 << (int)(24))),
-    (uint32)(67 | (4 << (int)(24))),
-    (uint32)(83 | (4 << (int)(24))),
-    (uint32)(99 | (5 << (int)(24))),
-    (uint32)(131 | (7 << (int)(24))),
-    (uint32)(259 | (8 << (int)(24))),
-    (uint32)(515 | (9 << (int)(24))),
-    (uint32)(1027 | (10 << (int)(24))),
-    (uint32)(2051 | (11 << (int)(24))),
-    (uint32)(4099 | (12 << (int)(24))),
-    (uint32)(8195 | (13 << (int)(24))),
-    (uint32)(16387 | (14 << (int)(24))),
-    (uint32)(32771 | (15 << (int)(24))),
-    (uint32)(65539 | (16 << (int)(24)))
+    (uint32)(35 | ((1 << (int)(24)))),
+    (uint32)(37 | ((1 << (int)(24)))),
+    (uint32)(39 | ((1 << (int)(24)))),
+    (uint32)(41 | ((1 << (int)(24)))),
+    (uint32)(43 | ((2 << (int)(24)))),
+    (uint32)(47 | ((2 << (int)(24)))),
+    (uint32)(51 | ((3 << (int)(24)))),
+    (uint32)(59 | ((3 << (int)(24)))),
+    (uint32)(67 | ((4 << (int)(24)))),
+    (uint32)(83 | ((4 << (int)(24)))),
+    (uint32)(99 | ((5 << (int)(24)))),
+    (uint32)(131 | ((7 << (int)(24)))),
+    (uint32)(259 | ((8 << (int)(24)))),
+    (uint32)(515 | ((9 << (int)(24)))),
+    (uint32)(1027 | ((10 << (int)(24)))),
+    (uint32)(2051 | ((11 << (int)(24)))),
+    (uint32)(4099 | ((12 << (int)(24)))),
+    (uint32)(8195 | ((13 << (int)(24)))),
+    (uint32)(16387 | ((14 << (int)(24)))),
+    (uint32)(32771 | ((15 << (int)(24)))),
+    (uint32)(65539 | ((16 << (int)(24))))
 }.slice();
 
 // makeMatchBaselineFSE converts the match length fseTable to baselineTable.
@@ -326,16 +327,16 @@ internal static slice<uint32> matchLengthBase = new uint32[]{
             @base: e.@base
         );
         if (e.sym < matchLengthOffset){
-            be.baseline = ((uint32)e.sym) + 3;
+            be.baseline = (uint32)e.sym + 3;
             be.basebits = 0;
         } else {
             if (e.sym > 52) {
                 return r.makeError(off, "FSE baseline symbol overflow"u8);
             }
-            var idx = e.sym - matchLengthOffset;
+            var idx = (uint8)(e.sym - (uint8)matchLengthOffset);
             var basebits = matchLengthBase[idx];
-            be.baseline = (uint32)(basebits & 16777215);
-            be.basebits = ((uint8)(basebits >> (int)(24)));
+            be.baseline = (uint32)(basebits & 0xffffff);
+            be.basebits = (uint8)((basebits >> (int)(24)));
         }
         baselineTable[i] = be;
     }

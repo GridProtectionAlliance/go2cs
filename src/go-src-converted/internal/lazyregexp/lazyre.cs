@@ -17,12 +17,14 @@ partial class lazyregexp_package {
 // compiled the first time it is needed.
 [GoType] partial struct Regexp {
     internal @string str;
-    internal sync_package.Once once;
-    internal ж<regexp_package.Regexp> rx;
+    internal sync.Once once;
+    internal ж<regexp.Regexp> rx;
 }
 
-[GoRecv] internal static ж<regexp.Regexp> re(this ref Regexp r) {
-    r.once.Do(r.build);
+internal static ж<regexp.Regexp> re(this ж<Regexp> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    Ꮡr.of(Regexp.Ꮡonce).Do(Ꮡr.build);
     return r.rx;
 }
 
@@ -31,36 +33,52 @@ partial class lazyregexp_package {
     r.str = ""u8;
 }
 
-[GoRecv] public static slice<slice<byte>> FindSubmatch(this ref Regexp r, slice<byte> s) {
-    return r.re().FindSubmatch(s);
+public static slice<slice<byte>> FindSubmatch(this ж<Regexp> Ꮡr, slice<byte> s) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.re().FindSubmatch(s);
 }
 
-[GoRecv] public static slice<@string> FindStringSubmatch(this ref Regexp r, @string s) {
-    return r.re().FindStringSubmatch(s);
+public static slice<@string> FindStringSubmatch(this ж<Regexp> Ꮡr, @string s) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.re().FindStringSubmatch(s);
 }
 
-[GoRecv] public static slice<nint> FindStringSubmatchIndex(this ref Regexp r, @string s) {
-    return r.re().FindStringSubmatchIndex(s);
+public static slice<nint> FindStringSubmatchIndex(this ж<Regexp> Ꮡr, @string s) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.re().FindStringSubmatchIndex(s);
 }
 
-[GoRecv] public static @string ReplaceAllString(this ref Regexp r, @string src, @string repl) {
-    return r.re().ReplaceAllString(src, repl);
+public static @string ReplaceAllString(this ж<Regexp> Ꮡr, @string src, @string repl) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.re().ReplaceAllString(src, repl);
 }
 
-[GoRecv] public static @string FindString(this ref Regexp r, @string s) {
-    return r.re().FindString(s);
+public static @string FindString(this ж<Regexp> Ꮡr, @string s) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.re().FindString(s);
 }
 
-[GoRecv] public static slice<@string> FindAllString(this ref Regexp r, @string s, nint n) {
-    return r.re().FindAllString(s, n);
+public static slice<@string> FindAllString(this ж<Regexp> Ꮡr, @string s, nint n) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.re().FindAllString(s, n);
 }
 
-[GoRecv] public static bool MatchString(this ref Regexp r, @string s) {
-    return r.re().MatchString(s);
+public static bool MatchString(this ж<Regexp> Ꮡr, @string s) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.re().MatchString(s);
 }
 
-[GoRecv] public static slice<@string> SubexpNames(this ref Regexp r) {
-    return r.re().SubexpNames();
+public static slice<@string> SubexpNames(this ж<Regexp> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.re().SubexpNames();
 }
 
 internal static bool inTest = len(os.Args) > 0 && strings.HasSuffix(strings.TrimSuffix(os.Args[0], ".exe"u8), ".test"u8);

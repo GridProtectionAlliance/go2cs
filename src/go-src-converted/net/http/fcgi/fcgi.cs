@@ -22,7 +22,7 @@ using encoding;
 
 partial class fcgi_package {
 
-[GoType("num:uint8")] partial struct recType;
+[GoType("num:uint8")] public partial struct recType;
 
 internal static readonly recType typeBeginRequest = 1;
 internal static readonly recType typeAbortRequest = 2;
@@ -77,24 +77,24 @@ internal static readonly UntypedInt statusUnknownRole = 3;
 
 // for padding so we don't have to allocate all the time
 // not synchronized because we don't care what the contents are
-internal static array<byte> pad;
+internal static array<byte> pad = new(255);
 
 [GoRecv] internal static void init(this ref header h, recType recType, uint16 reqId, nint contentLength) {
     h.Version = 1;
     h.Type = recType;
     h.Id = reqId;
-    h.ContentLength = ((uint16)contentLength);
-    h.PaddingLength = ((uint8)((nint)(-contentLength & 7)));
+    h.ContentLength = (uint16)contentLength;
+    h.PaddingLength = (uint8)((nint)(-contentLength & 7));
 }
 
 // conn sends records over rwc
 [GoType] partial struct conn {
-    internal sync_package.Mutex mutex;
-    internal io_package.ReadWriteCloser rwc;
+    internal sync.Mutex mutex;
+    internal io.ReadWriteCloser rwc;
     internal error closeErr;
     internal bool closed;
     // to avoid allocations
-    internal bytes_package.Buffer buf;
+    internal bytes.Buffer buf;
     internal header h;
 }
 
@@ -103,9 +103,11 @@ internal static ж<conn> newConn(io.ReadWriteCloser rwc) {
 }
 
 // Close closes the conn if it is not already closed.
-[GoRecv] internal static error Close(this ref conn c) => func((defer, _) => {
-    c.mutex.Lock();
-    defer(c.mutex.Unlock);
+internal static error Close(this ж<conn> Ꮡc) => func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+
+    Ꮡc.of(conn.Ꮡmutex).Lock();
+    defer(Ꮡc.of(conn.Ꮡmutex).Unlock);
     if (!c.closed) {
         c.closeErr = c.rwc.Close();
         c.closed = true;
@@ -118,18 +120,19 @@ internal static ж<conn> newConn(io.ReadWriteCloser rwc) {
     internal array<byte> buf = new(maxWrite + maxPad);
 }
 
-[GoRecv] internal static error /*err*/ read(this ref record rec, io.Reader r) {
+internal static error /*err*/ read(this ж<record> Ꮡrec, io.Reader r) {
     error err = default!;
 
+    ref var rec = ref Ꮡrec.Value;
     {
-        err = binary.Read(r, binary.BigEndian, Ꮡ(rec.h)); if (err != default!) {
+        err = binary.Read(r, new binary_bigEndianᴠByteOrder(binary.BigEndian), Ꮡrec.of(record.Ꮡh)); if (err != default!) {
             return err;
         }
     }
     if (rec.h.Version != 1) {
         return errors.New("fcgi: invalid header version"u8);
     }
-    nint n = ((nint)rec.h.ContentLength) + ((nint)rec.h.PaddingLength);
+    nint n = (nint)rec.h.ContentLength + (nint)rec.h.PaddingLength;
     {
         (_, err) = io.ReadFull(r, rec.buf[..(int)(n)]); if (err != default!) {
             return err;
@@ -143,13 +146,15 @@ internal static ж<conn> newConn(io.ReadWriteCloser rwc) {
 }
 
 // writeRecord writes and sends a single record.
-[GoRecv] internal static error writeRecord(this ref conn c, recType recType, uint16 reqId, slice<byte> b) => func((defer, _) => {
-    c.mutex.Lock();
-    defer(c.mutex.Unlock);
+internal static error writeRecord(this ж<conn> Ꮡc, recType recType, uint16 reqId, slice<byte> b) => func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+
+    Ꮡc.of(conn.Ꮡmutex).Lock();
+    defer(Ꮡc.of(conn.Ꮡmutex).Unlock);
     c.buf.Reset();
     c.h.init(recType, reqId, len(b));
     {
-        var errΔ1 = binary.Write(c.buf, binary.BigEndian, c.h); if (errΔ1 != default!) {
+        var errΔ1 = binary.Write(new bytes_BufferжWriter(Ꮡc.of(conn.Ꮡbuf)), new binary_bigEndianᴠByteOrder(binary.BigEndian), c.h); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
@@ -167,31 +172,35 @@ internal static ж<conn> newConn(io.ReadWriteCloser rwc) {
     return err;
 });
 
-[GoRecv] internal static error writeEndRequest(this ref conn c, uint16 reqId, nint appStatus, uint8 protocolStatus) {
+internal static error writeEndRequest(this ж<conn> Ꮡc, uint16 reqId, nint appStatus, uint8 protocolStatus) {
+    ref var c = ref Ꮡc.Value;
+
     var b = new slice<byte>(8);
-    binary.BigEndian.PutUint32(b, ((uint32)appStatus));
+    binary.BigEndian.PutUint32(b, (uint32)appStatus);
     b[4] = protocolStatus;
-    return c.writeRecord(typeEndRequest, reqId, b);
+    return Ꮡc.writeRecord(typeEndRequest, reqId, b);
 }
 
-[GoRecv] internal static error writePairs(this ref conn c, recType recType, uint16 reqId, map<@string, @string> pairs) {
-    var w = newWriter(c, recType, reqId);
+internal static error writePairs(this ж<conn> Ꮡc, recType recType, uint16 reqId, map<@string, @string> pairs) {
+    ref var c = ref Ꮡc.Value;
+
+    var w = newWriter(Ꮡc, recType, reqId);
     var b = new slice<byte>(8);
     foreach (var (k, v) in pairs) {
-        nint n = encodeSize(b, ((uint32)len(k)));
-        n += encodeSize(b[(int)(n)..], ((uint32)len(v)));
+        nint n = encodeSize(b, (uint32)len(k));
+        n += encodeSize(b[(int)(n)..], (uint32)len(v));
         {
-            var (_, err) = w.Write(b[..(int)(n)]); if (err != default!) {
+            var (_, err) = w.Value.Writer.Value.Write(b[..(int)(n)]); if (err != default!) {
                 return err;
             }
         }
         {
-            var (_, err) = w.WriteString(k); if (err != default!) {
+            var (_, err) = w.Value.Writer.Value.WriteString(k); if (err != default!) {
                 return err;
             }
         }
         {
-            var (_, err) = w.WriteString(v); if (err != default!) {
+            var (_, err) = w.Value.Writer.Value.WriteString(v); if (err != default!) {
                 return err;
             }
         }
@@ -204,21 +213,21 @@ internal static (uint32, nint) readSize(slice<byte> s) {
     if (len(s) == 0) {
         return (0, 0);
     }
-    var size = ((uint32)s[0]);
+    var size = (uint32)s[0];
     nint n = 1;
-    if ((uint32)(size & (1 << (int)(7))) != 0) {
+    if ((uint32)(size & (((uint32)1 << (int)(7)))) != 0) {
         if (len(s) < 4) {
             return (0, 0);
         }
         n = 4;
         size = binary.BigEndian.Uint32(s);
-        size &= ~(uint32)(1 << (int)(31));
+        size &= unchecked((uint32)~(uint32)(((uint32)1 << (int)(31))));
     }
     return (size, n);
 }
 
 internal static @string readString(slice<byte> s, uint32 size) {
-    if (size > ((uint32)len(s))) {
+    if (size > (uint32)len(s)) {
         return ""u8;
     }
     return ((@string)(s[..(int)(size)]));
@@ -226,18 +235,18 @@ internal static @string readString(slice<byte> s, uint32 size) {
 
 internal static nint encodeSize(slice<byte> b, uint32 size) {
     if (size > 127) {
-        size |= (uint32)(1 << (int)(31));
+        size |= (uint32)(((uint32)1 << (int)(31)));
         binary.BigEndian.PutUint32(b, size);
         return 4;
     }
-    b[0] = ((byte)size);
+    b[0] = (byte)size;
     return 1;
 }
 
 // bufWriter encapsulates bufio.Writer but also closes the underlying stream when
 // Closed.
 [GoType] partial struct bufWriter {
-    internal io_package.Closer closer;
+    internal io.Closer closer;
     public partial ref ж<bufio_package.Writer> Writer { get; }
 }
 
@@ -252,11 +261,11 @@ internal static nint encodeSize(slice<byte> b, uint32 size) {
 }
 
 internal static ж<bufWriter> newWriter(ж<conn> Ꮡc, recType recType, uint16 reqId) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
-    var s = Ꮡ(new streamWriter(c: c, recType: recType, reqId: reqId));
-    var w = bufio.NewWriterSize(~s, maxWrite);
-    return Ꮡ(new bufWriter(s, w));
+    var s = Ꮡ(new streamWriter(c: Ꮡc, recType: recType, reqId: reqId));
+    var w = bufio.NewWriterSize(new streamWriterжWriter(s), maxWrite);
+    return Ꮡ(new bufWriter(new streamWriterжCloser(s), w));
 }
 
 // streamWriter abstracts out the separation of a stream into discrete records.

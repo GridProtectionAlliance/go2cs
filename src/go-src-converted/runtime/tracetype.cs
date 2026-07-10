@@ -8,6 +8,8 @@ using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime;
+using atomic = @internal.runtime.atomic_package;
 
 partial class runtime_package {
 
@@ -21,38 +23,41 @@ partial class runtime_package {
 // if it's seeing it for the first time.
 //
 // N.B. typ must be kept alive forever for this to work correctly.
-[GoRecv] internal static uint64 put(this ref traceTypeTable t, ж<abi.Type> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.val;
+internal static uint64 put(this ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
+    ref var t = ref Ꮡt.Value;
+    ref var typ = ref Ꮡtyp.DerefOrNil();
 
-    if (typ == nil) {
+    if (Ꮡtyp == nil) {
         return 0;
     }
     // Insert the pointer to the type itself.
-    var (id, _) = t.tab.put((uintptr)noescape(((@unsafe.Pointer)(Ꮡ(typ)))), goarch.PtrSize);
+    var (id, _) = Ꮡt.of(traceTypeTable.Ꮡtab).put((uintptr)noescape(@unsafe.Pointer.FromRef(ref (Ꮡ(typ)).Value)), goarch.PtrSize);
     return id;
 }
 
 // dump writes all previously cached types to trace buffers and
 // releases all memory and resets state. It must only be called once the caller
 // can guarantee that there are no more writers to the table.
-[GoRecv] internal static void dump(this ref traceTypeTable t, uintptr gen) {
+internal static void dump(this ж<traceTypeTable> Ꮡt, uintptr gen) {
+    ref var t = ref Ꮡt.Value;
+
     var w = unsafeTraceExpWriter(gen, nil, traceExperimentAllocFree);
     {
-        var root = (ж<traceMapNode>)(uintptr)(t.tab.root.Load()); if (root != nil) {
+        var root = (ж<traceMapNode>)(uintptr)(Ꮡt.of(traceTypeTable.Ꮡtab).of(traceMap.Ꮡroot).Load()); if (root != nil) {
             w = dumpTypesRec(root, w);
         }
     }
     w.flush().end();
-    t.tab.reset();
+    Ꮡt.of(traceTypeTable.Ꮡtab).reset();
 }
 
 internal static traceExpWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceExpWriter w) {
-    ref var node = ref Ꮡnode.val;
+    ref var node = ref Ꮡnode.Value;
 
     var typ = (ж<abi.Type>)(uintptr)(~(ж<@unsafe.Pointer>)(uintptr)(new @unsafe.Pointer(Ꮡ(node.data, 0))));
     @string typName = toRType(typ).@string();
     // The maximum number of bytes required to hold the encoded type.
-    nint maxBytes = 1 + 5 * traceBytesPerNumber + len(typName);
+    nint maxBytes = (nint)(1 + 5 * traceBytesPerNumber) + len(typName);
     // Estimate the size of this record. This
     // bound is pretty loose, but avoids counting
     // lots of varint sizes.
@@ -62,18 +67,18 @@ internal static traceExpWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceExpWr
     (w, flushed) = w.ensure(1 + maxBytes);
     if (flushed) {
         // Annotate the batch as containing types.
-        w.@byte(((byte)traceAllocFreeTypesBatch));
+        w.@byte((byte)traceAllocFreeTypesBatch);
     }
     // Emit type.
-    w.varint(((uint64)node.id));
-    w.varint(((uint64)((uintptr)new @unsafe.Pointer(typ))));
-    w.varint(((uint64)typ.Size()));
-    w.varint(((uint64)(~typ).PtrBytes));
-    w.varint(((uint64)len(typName)));
+    w.varint((uint64)node.id);
+    w.varint((uint64)(uintptr)new @unsafe.Pointer(typ));
+    w.varint((uint64)typ.Size());
+    w.varint((uint64)(~typ).PtrBytes);
+    w.varint((uint64)len(typName));
     w.stringData(typName);
     // Recursively walk all child nodes.
     foreach (var (i, _) in node.children) {
-        @unsafe.Pointer child = (uintptr)node.children[i].Load();
+        @unsafe.Pointer child = (uintptr)Ꮡnode.at(traceMapNode.Ꮡchildren, i).Load();
         if (child == nil) {
             continue;
         }

@@ -40,8 +40,8 @@ using static go.errors_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<errorString, error>]
-[assembly: GoImplement<joinError, error>]
+[assembly: GoImplement<errorString, error>(Pointer = true)]
+[assembly: GoImplement<joinError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

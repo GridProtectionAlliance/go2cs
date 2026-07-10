@@ -7,11 +7,11 @@ using bytes = bytes_package;
 using binary = encoding.binary_package;
 using fmt = fmt_package;
 using io = io_package;
-using @event = @internal.trace.event_package;
-using go122 = @internal.trace.@event.go122_package;
-using @internal.trace;
-using @internal.trace.@event;
+using @event = go.@internal.trace.event_package;
+using go122 = go.@internal.trace.@event.go122_package;
 using encoding;
+using go.@internal.trace;
+using go.@internal.trace.@event;
 
 partial class trace_package {
 
@@ -23,7 +23,7 @@ partial class trace_package {
     internal ThreadID m;
     internal timestamp time;
     internal slice<byte> data;
-    internal @internal.trace.event_package.Experiment exp;
+    internal @event.Experiment exp;
 }
 
 [GoRecv] internal static bool isStringsBatch(this ref batch b) {
@@ -67,24 +67,24 @@ internal static (batch, uint64, error) readBatch(readBatch_r r) {
         if (errΔ1 != default!) {
             return (new batch(nil), 0, errΔ1);
         }
-        exp = ((@event.Experiment)e);
+        exp = ((@event.Experiment)(nuint)e);
     }
     // Read the batch header: gen (generation), thread (M) ID, base timestamp
     // for the batch.
-    var (gen, err) = binary.ReadUvarint(r);
+    (var gen, err) = binary.ReadUvarint(r);
     if (err != default!) {
         return (new batch(nil), gen, fmt.Errorf("error reading batch gen: %w"u8, err));
     }
-    var (m, err) = binary.ReadUvarint(r);
+    (var m, err) = binary.ReadUvarint(r);
     if (err != default!) {
         return (new batch(nil), gen, fmt.Errorf("error reading batch M ID: %w"u8, err));
     }
-    var (ts, err) = binary.ReadUvarint(r);
+    (var ts, err) = binary.ReadUvarint(r);
     if (err != default!) {
         return (new batch(nil), gen, fmt.Errorf("error reading batch timestamp: %w"u8, err));
     }
     // Read in the size of the batch to follow.
-    var (size, err) = binary.ReadUvarint(r);
+    (var size, err) = binary.ReadUvarint(r);
     if (err != default!) {
         return (new batch(nil), gen, fmt.Errorf("error reading batch size: %w"u8, err));
     }
@@ -92,10 +92,10 @@ internal static (batch, uint64, error) readBatch(readBatch_r r) {
         return (new batch(nil), gen, fmt.Errorf("invalid batch size %d, maximum is %d"u8, size, go122.MaxBatchSize));
     }
     // Copy out the batch for later processing.
-    ref var data = ref heap(new bytes_package.Buffer(), out var Ꮡdata);
-    data.Grow(((nint)size));
-    var (n, err) = io.CopyN(~Ꮡdata, r, ((int64)size));
-    if (n != ((int64)size)) {
+    ref var data = ref heap(new bytes.Buffer(), out var Ꮡdata);
+    data.Grow((nint)size);
+    (var n, err) = io.CopyN(new bytes_BufferжWriter(Ꮡdata), r, (int64)size);
+    if (n != (int64)size) {
         return (new batch(nil), gen, fmt.Errorf("failed to read full batch: read %d but wanted %d"u8, n, size));
     }
     if (err != default!) {
@@ -103,7 +103,7 @@ internal static (batch, uint64, error) readBatch(readBatch_r r) {
     }
     // Return the batch.
     return (new batch(
-        m: ((ThreadID)m),
+        m: ((ThreadID)(int64)m),
         time: ((timestamp)ts),
         data: data.Bytes(),
         exp: exp

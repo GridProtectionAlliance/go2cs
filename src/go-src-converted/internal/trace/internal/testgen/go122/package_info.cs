@@ -55,7 +55,7 @@ using static go.@internal.trace.@internal.testgen.testkit_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

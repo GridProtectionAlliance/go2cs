@@ -41,18 +41,18 @@ using static go.@internal.profile_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(map<@string>string, error), error>]
-[assembly: GoImplement<Function, message>]
+[assembly: GoImplement<Function, message>(Pointer = true)]
+[assembly: GoImplement<Label, message>(Pointer = true)]
 [assembly: GoImplement<Label, message>]
-[assembly: GoImplement<Line, message>]
-[assembly: GoImplement<Location, message>]
-[assembly: GoImplement<Mapping, message>]
-[assembly: GoImplement<Profile, message>]
-[assembly: GoImplement<Sample, message>]
-[assembly: GoImplement<ValueType, message>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Reader>]
-[assembly: GoImplement<compress.gzip_package.Reader, io_package.Reader>]
+[assembly: GoImplement<Line, message>(Pointer = true)]
+[assembly: GoImplement<Location, message>(Pointer = true)]
+[assembly: GoImplement<Mapping, message>(Pointer = true)]
+[assembly: GoImplement<Profile, message>(Pointer = true)]
+[assembly: GoImplement<Sample, message>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<edgeList, sort_package.Interface>]
+[assembly: GoImplement<go.@internal.profile_package.ValueType, message>(Pointer = true)]
+[assembly: GoImplement<go.compress.gzip_package.Reader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -63,8 +63,7 @@ using static go.@internal.profile_package;
 [assembly: GoImplicitConv<Mapping, ж<Mapping>>(Indirect = true)]
 [assembly: GoImplicitConv<Options, ж<Options>>(Indirect = true)]
 [assembly: GoImplicitConv<Sample, ж<Sample>>(Indirect = true)]
-[assembly: GoImplicitConv<ValueType, ж<ValueType>>(Indirect = true)]
-[assembly: GoImplicitConv<struct{field int; typ int; u64 uint64; data <>byte; tmp <16>byte}, struct{field int; typ int; u64 uint64; data <>byte; tmp <16>byte}>(Inverted = true)]
+[assembly: GoImplicitConv<go.@internal.profile_package.ValueType, ж<go.@internal.profile_package.ValueType>>(Indirect = true)]
 // </ImplicitConversions>
 
 namespace go.@internal;

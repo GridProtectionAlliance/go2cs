@@ -17,7 +17,7 @@ namespace go.debug;
 
 using bytes = bytes_package;
 using zlib = compress.zlib_package;
-using dwarf = debug.dwarf_package;
+using dwarf = go.debug.dwarf_package;
 using binary = encoding.binary_package;
 using errors = errors_package;
 using fmt = fmt_package;
@@ -30,6 +30,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using compress;
 using encoding;
+using go.debug;
 
 partial class elf_package {
 
@@ -45,7 +46,7 @@ partial class elf_package {
     public Version Version;
     public OSABI OSABI;
     public uint8 ABIVersion;
-    public encoding.binary_package.ByteOrder ByteOrder;
+    public binary.ByteOrder ByteOrder;
     public Type Type;
     public Machine Machine;
     public uint64 Entry;
@@ -56,7 +57,7 @@ partial class elf_package {
     public partial ref FileHeader FileHeader { get; }
     public slice<ж<ΔSection>> Sections;
     public slice<ж<Prog>> Progs;
-    internal io_package.Closer closer;
+    internal io.Closer closer;
     internal slice<verneed> gnuNeed;
     internal slice<byte> gnuVersym;
 }
@@ -93,8 +94,8 @@ partial class elf_package {
     // ReaderAt may be nil if the section is not easily available
     // in a random-access form. For example, a compressed section
     // may have a nil ReaderAt.
-    public partial ref io_package.ReaderAt ReaderAt { get; }
-    internal ж<io_package.SectionReader> sr;
+    public io_package.ReaderAt ReaderAt;
+    internal ж<io.SectionReader> sr;
     internal CompressionType compressionType;
     internal int64 compressionOffset;
 }
@@ -104,17 +105,19 @@ partial class elf_package {
 // Data returns uncompressed data.
 //
 // For an [SHT_NOBITS] section, Data always returns a non-nil error.
-[GoRecv] public static (slice<byte>, error) Data(this ref ΔSection s) {
-    return saferio.ReadData(s.Open(), s.Size);
+public static (slice<byte>, error) Data(this ж<ΔSection> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    return saferio.ReadData(new io_ReadSeekerᴠReader(Ꮡs.Open()), s.Size);
 }
 
 // stringTable reads and returns the string table given by the
 // specified link value.
 [GoRecv] internal static (slice<byte>, error) stringTable(this ref File f, uint32 link) {
-    if (link <= 0 || link >= ((uint32)len(f.Sections))) {
+    if (link <= 0 || link >= (uint32)len(f.Sections)) {
         return (default!, errors.New("section has invalid string table link"u8));
     }
-    return f.Sections[link].Data();
+    return f.Sections[(nint)(link)].Data();
 }
 
 // Open returns a new ReadSeeker reading the ELF section.
@@ -123,19 +126,21 @@ partial class elf_package {
 //
 // For an [SHT_NOBITS] section, all calls to the opened reader
 // will return a non-nil error.
-[GoRecv] public static io.ReadSeeker Open(this ref ΔSection s) {
+public static io.ReadSeeker Open(this ж<ΔSection> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
     if (s.Type == SHT_NOBITS) {
-        return ~io.NewSectionReader(new nobitsSectionReader(nil), 0, ((int64)s.Size));
+        return new io_SectionReaderжReadSeeker(io.NewSectionReader(new nobitsSectionReaderжReaderAt(Ꮡ(new nobitsSectionReader(nil))), 0, (int64)s.Size));
     }
     Func<io.Reader, (io.ReadCloser, error)> zrd = default!;
     if ((SectionFlag)(s.Flags & SHF_COMPRESSED) == 0){
         if (!strings.HasPrefix(s.Name, ".zdebug"u8)) {
-            return ~io.NewSectionReader(~s.sr, 0, 1 << (int)(63) - 1);
+            return new io_SectionReaderжReadSeeker(io.NewSectionReader(new io_SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
         }
         var b = new slice<byte>(12);
         var (n, _) = s.sr.ReadAt(b, 0);
         if (n != 12 || ((@string)(b[..4])) != "ZLIB"u8) {
-            return ~io.NewSectionReader(~s.sr, 0, 1 << (int)(63) - 1);
+            return new io_SectionReaderжReadSeeker(io.NewSectionReader(new io_SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
         }
         s.compressionOffset = 12;
         s.compressionType = COMPRESS_ZLIB;
@@ -143,8 +148,8 @@ partial class elf_package {
         zrd = zlib.NewReader;
     } else 
     if ((SectionFlag)(s.Flags & SHF_ALLOC) != 0) {
-        return new errorReader(Ꮡ(new FormatError(((int64)s.Offset),
-            "SHF_COMPRESSED applies only to non-allocable sections", s.compressionType))
+        return new errorReader(new FormatErrorжerror(Ꮡ(new FormatError((int64)s.Offset,
+            "SHF_COMPRESSED applies only to non-allocable sections", s.compressionType)))
         );
     }
     var exprᴛ1 = s.compressionType;
@@ -152,21 +157,20 @@ partial class elf_package {
         zrd = zlib.NewReader;
     }
     else if (exprᴛ1 == COMPRESS_ZSTD) {
-        zrd = (io.Reader r) => (io.NopCloser(~zstd.NewReader(r)), default!);
+        zrd = (io.ReadCloser, error) (io.Reader r) => (io.NopCloser(new zstd_ReaderжReader(zstd.NewReader(r))), default!);
     }
 
     if (zrd == default!) {
-        return new errorReader(Ꮡ(new FormatError(((int64)s.Offset), "unknown compression type", s.compressionType)));
+        return new errorReader(new FormatErrorжerror(Ꮡ(new FormatError((int64)s.Offset, "unknown compression type", s.compressionType))));
     }
-    return new readSeekerFromReader(
-        reset: 
         var zrdʗ1 = zrd;
-        () => {
-            var fr = io.NewSectionReader(~s.sr, s.compressionOffset, ((int64)s.FileSize) - s.compressionOffset);
-            return zrdʗ1(~fr);
+    return new readSeekerFromReaderжReadSeeker(Ꮡ(new readSeekerFromReader(
+        reset: () => {
+            var fr = io.NewSectionReader(new io_SectionReaderжReaderAt(Ꮡs.Value.sr), Ꮡs.Value.compressionOffset, (int64)Ꮡs.Value.FileSize - Ꮡs.Value.compressionOffset);
+            return zrdʗ1(new io_SectionReaderжReader(fr));
         },
-        size: ((int64)s.Size)
-    );
+        size: (int64)s.Size
+    )));
 }
 
 // A ProgHeader represents a single ELF program header.
@@ -190,23 +194,21 @@ partial class elf_package {
     // If a client wants Read and Seek it must use
     // Open() to avoid fighting over the seek offset
     // with other clients.
-    public partial ref io_package.ReaderAt ReaderAt { get; }
-    internal ж<io_package.SectionReader> sr;
+    public io_package.ReaderAt ReaderAt;
+    internal ж<io.SectionReader> sr;
 }
 
 // Open returns a new ReadSeeker reading the ELF program body.
 [GoRecv] public static io.ReadSeeker Open(this ref Prog p) {
-    return ~io.NewSectionReader(~p.sr, 0, 1 << (int)(63) - 1);
+    return new io_SectionReaderжReadSeeker(io.NewSectionReader(new io_SectionReaderжReaderAt(p.sr), 0, 9223372036854775807L));
 }
 
 // A Symbol represents an entry in an ELF symbol table section.
 [GoType] partial struct Symbol {
     public @string Name;
-    public byte Info;
-    public byte Other;
+    public byte Info, Other;
     public SectionIndex Section;
-    public uint64 Value;
-    public uint64 Size;
+    public uint64 Value, Size;
     // Version and Library are present only for the dynamic symbol
     // table.
     public @string Version;
@@ -233,16 +235,16 @@ partial class elf_package {
 
 // Open opens the named file using [os.Open] and prepares it for use as an ELF binary.
 public static (ж<File>, error) Open(@string name) {
-    (f, err) = os.Open(name);
+    var (f, err) = os.Open(name);
     if (err != default!) {
         return (default!, err);
     }
-    (ff, err) = NewFile(~f);
+    (var ff, err) = NewFile(new os_FileжReaderAt(f));
     if (err != default!) {
         f.Close();
         return (default!, err);
     }
-    ff.val.closer = f;
+    ff.Value.closer = new os_FileжCloser(f);
     return (ff, default!);
 }
 
@@ -262,7 +264,7 @@ public static (ж<File>, error) Open(@string name) {
 // given type, or nil if there is no such section.
 [GoRecv] public static ж<ΔSection> SectionByType(this ref File f, SectionType typ) {
     foreach (var (_, s) in f.Sections) {
-        if (s.Type == typ) {
+        if ((~s).Type == typ) {
             return s;
         }
     }
@@ -272,7 +274,7 @@ public static (ж<File>, error) Open(@string name) {
 // NewFile creates a new [File] for accessing an ELF binary in an underlying reader.
 // The ELF binary is expected to start at position 0 in the ReaderAt.
 public static (ж<File>, error) NewFile(io.ReaderAt r) {
-    var sr = io.NewSectionReader(r, 0, 1 << (int)(63) - 1);
+    var sr = io.NewSectionReader(r, 0, 9223372036854775807L);
     // Read and decode ELF identifier
     array<uint8> ident = new(16);
     {
@@ -281,40 +283,40 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         }
     }
     if (ident[0] != (rune)'\x7f' || ident[1] != (rune)'E' || ident[2] != (rune)'L' || ident[3] != (rune)'F') {
-        return (default!, new FormatError(0, "bad magic number", ident[0..4]));
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "bad magic number", ident[0..4]))));
     }
     var f = @new<File>();
-    f.Class = ((Class)ident[EI_CLASS]);
-    var exprᴛ1 = f.Class;
+    f.Value.Class = ((Class)ident[EI_CLASS]);
+    var exprᴛ1 = (~f).Class;
     if (exprᴛ1 == ELFCLASS32) {
     }
     else if (exprᴛ1 == ELFCLASS64) {
     }
     else { /* default: */
-        return (default!, new FormatError( // ok
-0, "unknown ELF class", f.Class));
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError( // ok
+0, "unknown ELF class", (~f).Class))));
     }
 
-    f.Data = ((ΔData)ident[EI_DATA]);
+    f.Value.Data = ((ΔData)ident[EI_DATA]);
     binary.ByteOrder bo = default!;
-    var exprᴛ2 = f.Data;
+    var exprᴛ2 = (~f).Data;
     if (exprᴛ2 == ELFDATA2LSB) {
-        bo = binary.LittleEndian;
+        bo = new binary_littleEndianᴠByteOrder(binary.LittleEndian);
     }
     else if (exprᴛ2 == ELFDATA2MSB) {
-        bo = binary.BigEndian;
+        bo = new binary_bigEndianᴠByteOrder(binary.BigEndian);
     }
     else { /* default: */
-        return (default!, new FormatError(0, "unknown ELF data encoding", f.Data));
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "unknown ELF data encoding", (~f).Data))));
     }
 
-    f.ByteOrder = bo;
-    f.Version = ((Version)ident[EI_VERSION]);
-    if (f.Version != EV_CURRENT) {
-        return (default!, new FormatError(0, "unknown ELF version", f.Version));
+    f.Value.ByteOrder = bo;
+    f.Value.Version = ((Version)ident[EI_VERSION]);
+    if ((~f).Version != EV_CURRENT) {
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "unknown ELF version", (~f).Version))));
     }
-    f.OSABI = ((OSABI)ident[EI_OSABI]);
-    f.ABIVersion = ident[EI_ABIVERSION];
+    f.Value.OSABI = ((OSABI)ident[EI_OSABI]);
+    f.Value.ABIVersion = ident[EI_ABIVERSION];
     // Read ELF file header
     ref var phoff = ref heap(new int64(), out var Ꮡphoff);
     ref var phentsize = ref heap(new nint(), out var Ꮡphentsize);
@@ -323,73 +325,73 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     ref var shentsize = ref heap(new nint(), out var Ꮡshentsize);
     ref var shnum = ref heap(new nint(), out var Ꮡshnum);
     ref var shstrndx = ref heap(new nint(), out var Ꮡshstrndx);
-    var exprᴛ3 = f.Class;
+    var exprᴛ3 = (~f).Class;
     if (exprᴛ3 == ELFCLASS32) {
-        Header32 hdrΔ2 = default!;
-        var data = new slice<byte>(@unsafe.Sizeof(hdrΔ2));
+        Header32 hdr = default!;
+        var data = new slice<byte>((nint)(@unsafe.Sizeof(hdr)));
         {
             var (_, errΔ4) = sr.ReadAt(data, 0); if (errΔ4 != default!) {
                 return (default!, errΔ4);
             }
         }
-        f.Type = ((Type)bo.Uint16(data[(int)(@unsafe.Offsetof(hdrΔ2.GetType(), "Type"))..]));
-        f.Machine = ((Machine)bo.Uint16(data[(int)(@unsafe.Offsetof(hdrΔ2.GetType(), "Machine"))..]));
-        f.Entry = ((uint64)bo.Uint32(data[(int)(@unsafe.Offsetof(hdrΔ2.GetType(), "Entry"))..]));
+        f.Value.Type = ((Type)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Type"))..]));
+        f.Value.Machine = ((Machine)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Machine"))..]));
+        f.Value.Entry = (uint64)bo.Uint32(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Entry"))..]);
         {
             ref var v = ref heap<Version>(out var Ꮡv);
-            v = ((Version)bo.Uint32(data[(int)(@unsafe.Offsetof(hdrΔ2.GetType(), "Version"))..])); if (v != f.Version) {
-                return (default!, new FormatError(0, "mismatched ELF version", v));
+            v = ((Version)(byte)bo.Uint32(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Version"))..])); if (v != (~f).Version) {
+                return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "mismatched ELF version", v))));
             }
         }
-        phoff = ((int64)bo.Uint32(data[(int)(@unsafe.Offsetof(hdrΔ2.GetType(), "Phoff"))..]));
-        phentsize = ((nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdrΔ2.GetType(), "Phentsize"))..]));
-        phnum = ((nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdrΔ2.GetType(), "Phnum"))..]));
-        shoff = ((int64)bo.Uint32(data[(int)(@unsafe.Offsetof(hdrΔ2.GetType(), "Shoff"))..]));
-        shentsize = ((nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdrΔ2.GetType(), "Shentsize"))..]));
-        shnum = ((nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdrΔ2.GetType(), "Shnum"))..]));
-        shstrndx = ((nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdrΔ2.GetType(), "Shstrndx"))..]));
+        phoff = (int64)bo.Uint32(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Phoff"))..]);
+        phentsize = (nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Phentsize"))..]);
+        phnum = (nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Phnum"))..]);
+        shoff = (int64)bo.Uint32(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Shoff"))..]);
+        shentsize = (nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Shentsize"))..]);
+        shnum = (nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Shnum"))..]);
+        shstrndx = (nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Shstrndx"))..]);
     }
     else if (exprᴛ3 == ELFCLASS64) {
         Header64 hdr = default!;
-        var data = new slice<byte>(@unsafe.Sizeof(hdr));
+        var data = new slice<byte>((nint)(@unsafe.Sizeof(hdr)));
         {
             var (_, errΔ5) = sr.ReadAt(data, 0); if (errΔ5 != default!) {
                 return (default!, errΔ5);
             }
         }
-        f.Type = ((Type)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Type"))..]));
-        f.Machine = ((Machine)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Machine"))..]));
-        f.Entry = bo.Uint64(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Entry"))..]);
+        f.Value.Type = ((Type)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Type"))..]));
+        f.Value.Machine = ((Machine)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Machine"))..]));
+        f.Value.Entry = bo.Uint64(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Entry"))..]);
         {
             ref var v = ref heap<Version>(out var Ꮡv);
-            v = ((Version)bo.Uint32(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Version"))..])); if (v != f.Version) {
-                return (default!, new FormatError(0, "mismatched ELF version", v));
+            v = ((Version)(byte)bo.Uint32(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Version"))..])); if (v != (~f).Version) {
+                return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "mismatched ELF version", v))));
             }
         }
-        phoff = ((int64)bo.Uint64(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Phoff"))..]));
-        phentsize = ((nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Phentsize"))..]));
-        phnum = ((nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Phnum"))..]));
-        shoff = ((int64)bo.Uint64(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Shoff"))..]));
-        shentsize = ((nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Shentsize"))..]));
-        shnum = ((nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Shnum"))..]));
-        shstrndx = ((nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Shstrndx"))..]));
+        phoff = (int64)bo.Uint64(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Phoff"))..]);
+        phentsize = (nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Phentsize"))..]);
+        phnum = (nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Phnum"))..]);
+        shoff = (int64)bo.Uint64(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Shoff"))..]);
+        shentsize = (nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Shentsize"))..]);
+        shnum = (nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Shnum"))..]);
+        shstrndx = (nint)bo.Uint16(data[(int)(@unsafe.Offsetof(hdr.GetType(), "Shstrndx"))..]);
     }
 
     if (shoff < 0) {
-        return (default!, new FormatError(0, "invalid shoff", shoff));
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "invalid shoff", shoff))));
     }
     if (phoff < 0) {
-        return (default!, new FormatError(0, "invalid phoff", phoff));
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "invalid phoff", phoff))));
     }
     if (shoff == 0 && shnum != 0) {
-        return (default!, new FormatError(0, "invalid ELF shnum for shoff=0", shnum));
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "invalid ELF shnum for shoff=0", shnum))));
     }
     if (shnum > 0 && shstrndx >= shnum) {
-        return (default!, new FormatError(0, "invalid ELF shstrndx", shstrndx));
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "invalid ELF shstrndx", shstrndx))));
     }
     nint wantPhentsize = default!;
     nint wantShentsize = default!;
-    var exprᴛ4 = f.Class;
+    var exprᴛ4 = (~f).Class;
     if (exprᴛ4 == ELFCLASS32) {
         wantPhentsize = 8 * 4;
         wantShentsize = 10 * 4;
@@ -400,35 +402,35 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     }
 
     if (phnum > 0 && phentsize < wantPhentsize) {
-        return (default!, new FormatError(0, "invalid ELF phentsize", phentsize));
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "invalid ELF phentsize", phentsize))));
     }
     // Read program headers
-    f.val.Progs = new slice<ж<Prog>>(phnum);
-    (phdata, err) = saferio.ReadDataAt(~sr, ((uint64)phnum) * ((uint64)phentsize), phoff);
+    f.Value.Progs = new slice<ж<Prog>>(phnum);
+    var (phdata, err) = saferio.ReadDataAt(new io_SectionReaderжReaderAt(sr), (uint64)phnum * (uint64)phentsize, phoff);
     if (err != default!) {
         return (default!, err);
     }
     for (nint i = 0; i < phnum; i++) {
-        var off = ((uintptr)i) * ((uintptr)phentsize);
+        var off = (uintptr)i * (uintptr)phentsize;
         var p = @new<Prog>();
-        var exprᴛ5 = f.Class;
+        var exprᴛ5 = (~f).Class;
         if (exprᴛ5 == ELFCLASS32) {
-            Prog32 phΔ2 = default!;
-            p.val.ProgHeader = new ProgHeader(
-                Type: ((ProgType)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(phΔ2.GetType(), "Type"))..])),
-                Flags: ((ProgFlag)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(phΔ2.GetType(), "Flags"))..])),
-                Off: ((uint64)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(phΔ2.GetType(), "Off"))..])),
-                Vaddr: ((uint64)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(phΔ2.GetType(), "Vaddr"))..])),
-                Paddr: ((uint64)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(phΔ2.GetType(), "Paddr"))..])),
-                Filesz: ((uint64)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(phΔ2.GetType(), "Filesz"))..])),
-                Memsz: ((uint64)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(phΔ2.GetType(), "Memsz"))..])),
-                Align: ((uint64)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(phΔ2.GetType(), "Align"))..]))
+            Prog32 ph = default!;
+            p.Value.ProgHeader = new ProgHeader(
+                Type: ((ProgType)(nint)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(ph.GetType(), "Type"))..])),
+                Flags: ((ProgFlag)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(ph.GetType(), "Flags"))..])),
+                Off: (uint64)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(ph.GetType(), "Off"))..]),
+                Vaddr: (uint64)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(ph.GetType(), "Vaddr"))..]),
+                Paddr: (uint64)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(ph.GetType(), "Paddr"))..]),
+                Filesz: (uint64)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(ph.GetType(), "Filesz"))..]),
+                Memsz: (uint64)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(ph.GetType(), "Memsz"))..]),
+                Align: (uint64)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(ph.GetType(), "Align"))..])
             );
         }
         else if (exprᴛ5 == ELFCLASS64) {
             Prog64 ph = default!;
-            p.val.ProgHeader = new ProgHeader(
-                Type: ((ProgType)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(ph.GetType(), "Type"))..])),
+            p.Value.ProgHeader = new ProgHeader(
+                Type: ((ProgType)(nint)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(ph.GetType(), "Type"))..])),
                 Flags: ((ProgFlag)bo.Uint32(phdata[(int)(off + @unsafe.Offsetof(ph.GetType(), "Flags"))..])),
                 Off: bo.Uint64(phdata[(int)(off + @unsafe.Offsetof(ph.GetType(), "Off"))..]),
                 Vaddr: bo.Uint64(phdata[(int)(off + @unsafe.Offsetof(ph.GetType(), "Vaddr"))..]),
@@ -439,15 +441,15 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             );
         }
 
-        if (((int64)p.Off) < 0) {
-            return (default!, new FormatError(phoff + ((int64)off), "invalid program header offset", p.Off));
+        if ((int64)(~p).Off < 0) {
+            return (default!, new FormatErrorжerror(Ꮡ(new FormatError(phoff + (int64)off, "invalid program header offset", (~p).Off))));
         }
-        if (((int64)p.Filesz) < 0) {
-            return (default!, new FormatError(phoff + ((int64)off), "invalid program header file size", p.Filesz));
+        if ((int64)(~p).Filesz < 0) {
+            return (default!, new FormatErrorжerror(Ꮡ(new FormatError(phoff + (int64)off, "invalid program header file size", (~p).Filesz))));
         }
-        p.val.sr = io.NewSectionReader(r, ((int64)p.Off), ((int64)p.Filesz));
-        p.val.ReaderAt = p.val.sr;
-        (~f).Progs[i] = p;
+        p.Value.sr = io.NewSectionReader(r, (int64)(~p).Off, (int64)(~p).Filesz);
+        p.Value.ReaderAt = new io_SectionReaderжReaderAt(p.Value.sr);
+        f.Value.Progs[i] = p;
     }
     // If the number of sections is greater than or equal to SHN_LORESERVE
     // (0xff00), shnum has the value zero and the actual number of section
@@ -457,87 +459,87 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         uint32 typ = default!;
         uint32 link = default!;
         sr.Seek(shoff, io.SeekStart);
-        var exprᴛ6 = f.Class;
+        var exprᴛ6 = (~f).Class;
         if (exprᴛ6 == ELFCLASS32) {
-            var shΔ2 = @new<Section32>();
+            var sh = @new<Section32>();
             {
-                var errΔ8 = binary.Read(~sr, bo, shΔ2); if (errΔ8 != default!) {
+                var errΔ8 = binary.Read(new io_SectionReaderжReader(sr), bo, sh); if (errΔ8 != default!) {
                     return (default!, errΔ8);
                 }
             }
-            shnum = ((nint)(~shΔ2).Size);
-            typ = shΔ2.val.Type;
-            link = shΔ2.val.Link;
+            shnum = (nint)(~sh).Size;
+            typ = sh.Value.Type;
+            link = sh.Value.Link;
         }
         else if (exprᴛ6 == ELFCLASS64) {
-            var shΔ3 = @new<Section64>();
+            var sh = @new<Section64>();
             {
-                var errΔ9 = binary.Read(~sr, bo, shΔ3); if (errΔ9 != default!) {
+                var errΔ9 = binary.Read(new io_SectionReaderжReader(sr), bo, sh); if (errΔ9 != default!) {
                     return (default!, errΔ9);
                 }
             }
-            shnum = ((nint)(~shΔ3).Size);
-            typ = shΔ3.val.Type;
-            link = shΔ3.val.Link;
+            shnum = (nint)(~sh).Size;
+            typ = sh.Value.Type;
+            link = sh.Value.Link;
         }
 
         if (((SectionType)typ) != SHT_NULL) {
-            return (default!, new FormatError(shoff, "invalid type of the initial section", ((SectionType)typ)));
+            return (default!, new FormatErrorжerror(Ꮡ(new FormatError(shoff, "invalid type of the initial section", ((SectionType)typ)))));
         }
-        if (shnum < ((nint)SHN_LORESERVE)) {
-            return (default!, new FormatError(shoff, "invalid ELF shnum contained in sh_size", shnum));
+        if (shnum < (nint)SHN_LORESERVE) {
+            return (default!, new FormatErrorжerror(Ꮡ(new FormatError(shoff, "invalid ELF shnum contained in sh_size", shnum))));
         }
         // If the section name string table section index is greater than or
         // equal to SHN_LORESERVE (0xff00), this member has the value
         // SHN_XINDEX (0xffff) and the actual index of the section name
         // string table section is contained in the sh_link field of the
         // section header at index 0.
-        if (shstrndx == ((nint)SHN_XINDEX)) {
-            shstrndx = ((nint)link);
-            if (shstrndx < ((nint)SHN_LORESERVE)) {
-                return (default!, new FormatError(shoff, "invalid ELF shstrndx contained in sh_link", shstrndx));
+        if (shstrndx == (nint)SHN_XINDEX) {
+            shstrndx = (nint)link;
+            if (shstrndx < (nint)SHN_LORESERVE) {
+                return (default!, new FormatErrorжerror(Ꮡ(new FormatError(shoff, "invalid ELF shstrndx contained in sh_link", shstrndx))));
             }
         }
     }
     if (shnum > 0 && shentsize < wantShentsize) {
-        return (default!, new FormatError(0, "invalid ELF shentsize", shentsize));
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "invalid ELF shentsize", shentsize))));
     }
     // Read section headers
-    nint c = saferio.SliceCap<ΔSection>(((uint64)shnum));
+    nint c = saferio.SliceCap<ΔSection>((uint64)shnum);
     if (c < 0) {
-        return (default!, new FormatError(0, "too many sections", shnum));
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "too many sections", shnum))));
     }
-    f.val.Sections = new slice<ж<ΔSection>>(0, c);
+    f.Value.Sections = new slice<ж<ΔSection>>(0, c);
     var names = new slice<uint32>(0, c);
-    (shdata, err) = saferio.ReadDataAt(~sr, ((uint64)shnum) * ((uint64)shentsize), shoff);
+    (var shdata, err) = saferio.ReadDataAt(new io_SectionReaderжReaderAt(sr), (uint64)shnum * (uint64)shentsize, shoff);
     if (err != default!) {
         return (default!, err);
     }
     for (nint i = 0; i < shnum; i++) {
-        var off = ((uintptr)i) * ((uintptr)shentsize);
+        var off = (uintptr)i * (uintptr)shentsize;
         var s = @new<ΔSection>();
-        var exprᴛ7 = f.Class;
+        var exprᴛ7 = (~f).Class;
         if (exprᴛ7 == ELFCLASS32) {
-            Section32 shΔ5 = default!;
-            names = append(names, bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(shΔ5.GetType(), "Name"))..]));
-            s.val.SectionHeader = new SectionHeader(
-                Type: ((SectionType)bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(shΔ5.GetType(), "Type"))..])),
-                Flags: ((SectionFlag)bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(shΔ5.GetType(), "Flags"))..])),
-                Addr: ((uint64)bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(shΔ5.GetType(), "Addr"))..])),
-                Offset: ((uint64)bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(shΔ5.GetType(), "Off"))..])),
-                FileSize: ((uint64)bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(shΔ5.GetType(), "Size"))..])),
-                Link: bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(shΔ5.GetType(), "Link"))..]),
-                Info: bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(shΔ5.GetType(), "Info"))..]),
-                Addralign: ((uint64)bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(shΔ5.GetType(), "Addralign"))..])),
-                Entsize: ((uint64)bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(shΔ5.GetType(), "Entsize"))..]))
+            Section32 sh = default!;
+            names = append(names, bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Name"))..]));
+            s.Value.SectionHeader = new SectionHeader(
+                Type: ((SectionType)bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Type"))..])),
+                Flags: ((SectionFlag)bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Flags"))..])),
+                Addr: (uint64)bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Addr"))..]),
+                Offset: (uint64)bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Off"))..]),
+                FileSize: (uint64)bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Size"))..]),
+                Link: bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Link"))..]),
+                Info: bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Info"))..]),
+                Addralign: (uint64)bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Addralign"))..]),
+                Entsize: (uint64)bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Entsize"))..])
             );
         }
         else if (exprᴛ7 == ELFCLASS64) {
             Section64 sh = default!;
             names = append(names, bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Name"))..]));
-            s.val.SectionHeader = new SectionHeader(
+            s.Value.SectionHeader = new SectionHeader(
                 Type: ((SectionType)bo.Uint32(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Type"))..])),
-                Flags: ((SectionFlag)bo.Uint64(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Flags"))..])),
+                Flags: ((SectionFlag)(uint32)bo.Uint64(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Flags"))..])),
                 Offset: bo.Uint64(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Off"))..]),
                 FileSize: bo.Uint64(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Size"))..]),
                 Addr: bo.Uint64(shdata[(int)(off + @unsafe.Offsetof(sh.GetType(), "Addr"))..]),
@@ -548,48 +550,48 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             );
         }
 
-        if (((int64)s.Offset) < 0) {
-            return (default!, new FormatError(shoff + ((int64)off), "invalid section offset", ((int64)s.Offset)));
+        if ((int64)(~s).Offset < 0) {
+            return (default!, new FormatErrorжerror(Ꮡ(new FormatError(shoff + (int64)off, "invalid section offset", (int64)(~s).Offset))));
         }
-        if (((int64)s.FileSize) < 0) {
-            return (default!, new FormatError(shoff + ((int64)off), "invalid section size", ((int64)s.FileSize)));
+        if ((int64)(~s).FileSize < 0) {
+            return (default!, new FormatErrorжerror(Ꮡ(new FormatError(shoff + (int64)off, "invalid section size", (int64)(~s).FileSize))));
         }
-        s.val.sr = io.NewSectionReader(r, ((int64)s.Offset), ((int64)s.FileSize));
-        if ((SectionFlag)(s.Flags & SHF_COMPRESSED) == 0){
-            s.val.ReaderAt = s.val.sr;
-            s.Size = s.FileSize;
+        s.Value.sr = io.NewSectionReader(r, (int64)(~s).Offset, (int64)(~s).FileSize);
+        if ((SectionFlag)((~s).Flags & SHF_COMPRESSED) == 0){
+            s.Value.ReaderAt = new io_SectionReaderжReaderAt(s.Value.sr);
+            s.Value.Size = s.Value.FileSize;
         } else {
             // Read the compression header.
-            var exprᴛ8 = f.Class;
+            var exprᴛ8 = (~f).Class;
             if (exprᴛ8 == ELFCLASS32) {
-                Chdr32 chΔ2 = default!;
-                var chdata = new slice<byte>(@unsafe.Sizeof(chΔ2));
+                Chdr32 ch = default!;
+                var chdata = new slice<byte>((nint)(@unsafe.Sizeof(ch)));
                 {
                     var (_, errΔ12) = (~s).sr.ReadAt(chdata, 0); if (errΔ12 != default!) {
                         return (default!, errΔ12);
                     }
                 }
-                s.val.compressionType = ((CompressionType)bo.Uint32(chdata[(int)(@unsafe.Offsetof(chΔ2.GetType(), "Type"))..]));
-                s.Size = ((uint64)bo.Uint32(chdata[(int)(@unsafe.Offsetof(chΔ2.GetType(), "Size"))..]));
-                s.Addralign = ((uint64)bo.Uint32(chdata[(int)(@unsafe.Offsetof(chΔ2.GetType(), "Addralign"))..]));
-                s.val.compressionOffset = ((int64)@unsafe.Sizeof(chΔ2));
+                s.Value.compressionType = ((CompressionType)(nint)bo.Uint32(chdata[(int)(@unsafe.Offsetof(ch.GetType(), "Type"))..]));
+                s.Value.Size = (uint64)bo.Uint32(chdata[(int)(@unsafe.Offsetof(ch.GetType(), "Size"))..]);
+                s.Value.Addralign = (uint64)bo.Uint32(chdata[(int)(@unsafe.Offsetof(ch.GetType(), "Addralign"))..]);
+                s.Value.compressionOffset = (int64)@unsafe.Sizeof(ch);
             }
             else if (exprᴛ8 == ELFCLASS64) {
                 Chdr64 ch = default!;
-                var chdata = new slice<byte>(@unsafe.Sizeof(ch));
+                var chdata = new slice<byte>((nint)(@unsafe.Sizeof(ch)));
                 {
                     var (_, errΔ13) = (~s).sr.ReadAt(chdata, 0); if (errΔ13 != default!) {
                         return (default!, errΔ13);
                     }
                 }
-                s.val.compressionType = ((CompressionType)bo.Uint32(chdata[(int)(@unsafe.Offsetof(ch.GetType(), "Type"))..]));
-                s.Size = bo.Uint64(chdata[(int)(@unsafe.Offsetof(ch.GetType(), "Size"))..]);
-                s.Addralign = bo.Uint64(chdata[(int)(@unsafe.Offsetof(ch.GetType(), "Addralign"))..]);
-                s.val.compressionOffset = ((int64)@unsafe.Sizeof(ch));
+                s.Value.compressionType = ((CompressionType)(nint)bo.Uint32(chdata[(int)(@unsafe.Offsetof(ch.GetType(), "Type"))..]));
+                s.Value.Size = bo.Uint64(chdata[(int)(@unsafe.Offsetof(ch.GetType(), "Size"))..]);
+                s.Value.Addralign = bo.Uint64(chdata[(int)(@unsafe.Offsetof(ch.GetType(), "Addralign"))..]);
+                s.Value.compressionOffset = (int64)@unsafe.Sizeof(ch);
             }
 
         }
-        f.val.Sections = append((~f).Sections, s);
+        f.Value.Sections = append((~f).Sections, s);
     }
     if (len((~f).Sections) == 0) {
         return (f, default!);
@@ -601,18 +603,20 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         return (f, default!);
     }
     var shstr = (~f).Sections[shstrndx];
-    if (shstr.Type != SHT_STRTAB) {
-        return (default!, new FormatError(shoff + ((int64)(shstrndx * shentsize)), "invalid ELF section name string table type", shstr.Type));
+    if ((~shstr).Type != SHT_STRTAB) {
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError(shoff + (int64)(shstrndx * shentsize), "invalid ELF section name string table type", (~shstr).Type))));
     }
-    (shstrtab, err) = shstr.Data();
+    (var shstrtab, err) = shstr.Data();
     if (err != default!) {
         return (default!, err);
     }
-    foreach (var (i, s) in (~f).Sections) {
+    foreach (var (i, vᴛ1) in (~f).Sections) {
+        var s = vᴛ1;
+
         bool ok = default!;
-        (s.Name, ok) = getString(shstrtab, ((nint)names[i]));
+        (s.Value.Name, ok) = getString(shstrtab, (nint)names[i]);
         if (!ok) {
-            return (default!, new FormatError(shoff + ((int64)(i * shentsize)), "bad section name index", names[i]));
+            return (default!, new FormatErrorжerror(Ꮡ(new FormatError(shoff + (int64)(i * shentsize), "bad section name index", names[i]))));
         }
     }
     return (f, default!);
@@ -641,23 +645,23 @@ public static error ErrNoSymbols = errors.New("no symbol section"u8);
     if (symtabSection == nil) {
         return (default!, default!, ErrNoSymbols);
     }
-    (data, err) = symtabSection.Data();
+    var (data, err) = symtabSection.Data();
     if (err != default!) {
         return (default!, default!, fmt.Errorf("cannot load symbol section: %w"u8, err));
     }
     if (len(data) == 0) {
         return (default!, default!, errors.New("symbol section is empty"u8));
     }
-    if (len(data) % Sym32Size != 0) {
+    if (len(data) % (nint)Sym32Size != 0) {
         return (default!, default!, errors.New("length of symbol section is not a multiple of SymSize"u8));
     }
-    (strdata, err) = f.stringTable(symtabSection.Link);
+    (var strdata, err) = f.stringTable((~symtabSection).Link);
     if (err != default!) {
         return (default!, default!, fmt.Errorf("cannot load string table section: %w"u8, err));
     }
     // The first entry is all zeros.
     data = data[(int)(Sym32Size)..];
-    var symbols = new slice<Symbol>(len(data) / Sym32Size);
+    var symbols = new slice<Symbol>(len(data) / (nint)Sym32Size);
     nint i = 0;
     Sym32 sym = default!;
     while (len(data) > 0) {
@@ -667,13 +671,13 @@ public static error ErrNoSymbols = errors.New("no symbol section"u8);
         sym.Info = data[12];
         sym.Other = data[13];
         sym.Shndx = f.ByteOrder.Uint16(data[14..16]);
-        var (str, _) = getString(strdata, ((nint)sym.Name));
+        var (str, _) = getString(strdata, (nint)sym.Name);
         symbols[i].Name = str;
         symbols[i].Info = sym.Info;
         symbols[i].Other = sym.Other;
-        symbols[i].Section = ((SectionIndex)sym.Shndx);
-        symbols[i].Value = ((uint64)sym.Value);
-        symbols[i].Size = ((uint64)sym.Size);
+        symbols[i].Section = ((SectionIndex)(nint)sym.Shndx);
+        symbols[i].Value = (uint64)sym.Value;
+        symbols[i].Size = (uint64)sym.Size;
         i++;
         data = data[(int)(Sym32Size)..];
     }
@@ -685,20 +689,20 @@ public static error ErrNoSymbols = errors.New("no symbol section"u8);
     if (symtabSection == nil) {
         return (default!, default!, ErrNoSymbols);
     }
-    (data, err) = symtabSection.Data();
+    var (data, err) = symtabSection.Data();
     if (err != default!) {
         return (default!, default!, fmt.Errorf("cannot load symbol section: %w"u8, err));
     }
-    if (len(data) % Sym64Size != 0) {
+    if (len(data) % (nint)Sym64Size != 0) {
         return (default!, default!, errors.New("length of symbol section is not a multiple of Sym64Size"u8));
     }
-    (strdata, err) = f.stringTable(symtabSection.Link);
+    (var strdata, err) = f.stringTable((~symtabSection).Link);
     if (err != default!) {
         return (default!, default!, fmt.Errorf("cannot load string table section: %w"u8, err));
     }
     // The first entry is all zeros.
     data = data[(int)(Sym64Size)..];
-    var symbols = new slice<Symbol>(len(data) / Sym64Size);
+    var symbols = new slice<Symbol>(len(data) / (nint)Sym64Size);
     nint i = 0;
     Sym64 sym = default!;
     while (len(data) > 0) {
@@ -708,11 +712,11 @@ public static error ErrNoSymbols = errors.New("no symbol section"u8);
         sym.Shndx = f.ByteOrder.Uint16(data[6..8]);
         sym.Value = f.ByteOrder.Uint64(data[8..16]);
         sym.Size = f.ByteOrder.Uint64(data[16..24]);
-        var (str, _) = getString(strdata, ((nint)sym.Name));
+        var (str, _) = getString(strdata, (nint)sym.Name);
         symbols[i].Name = str;
         symbols[i].Info = sym.Info;
         symbols[i].Other = sym.Other;
-        symbols[i].Section = ((SectionIndex)sym.Shndx);
+        symbols[i].Section = ((SectionIndex)(nint)sym.Shndx);
         symbols[i].Value = sym.Value;
         symbols[i].Size = sym.Size;
         i++;
@@ -738,7 +742,7 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
 // section exists.
 [GoRecv] public static ж<ΔSection> Section(this ref File f, @string name) {
     foreach (var (_, s) in f.Sections) {
-        if (s.Name == name) {
+        if ((~s).Name == name) {
             return s;
         }
     }
@@ -798,7 +802,7 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
 // some target non-section symbols (for example, low_PC attrs on
 // subprogram or compilation unit DIEs that target function symbols).
 internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
-    ref var sym = ref Ꮡsym.val;
+    ref var sym = ref Ꮡsym.Value;
 
     return sym.Section != SHN_UNDEF && sym.Section < SHN_LORESERVE;
 }
@@ -808,20 +812,20 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     if (len(rels) % 24 != 0) {
         return errors.New("length of relocation section is not a multiple of 24"u8);
     }
-    (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
+    var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela64(), out var Ꮡrela);
     while (b.Len() > 0) {
-        binary.Read(~b, f.ByteOrder, Ꮡrela);
-        var symNo = rela.Info >> (int)(32);
-        R_X86_64 t = ((R_X86_64)((uint64)(rela.Info & 65535)));
-        if (symNo == 0 || symNo > ((uint64)len(symbols))) {
+        binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
+        var symNo = (rela.Info >> (int)(32));
+        R_X86_64 t = ((R_X86_64)(nint)((uint64)(rela.Info & 0xffff)));
+        if (symNo == 0 || symNo > (uint64)len(symbols)) {
             continue;
         }
-        var sym = Ꮡ(symbols, symNo - 1);
+        var sym = Ꮡ(symbols, (int)(symNo - 1));
         if (!canApplyRelocation(sym)) {
             continue;
         }
@@ -830,17 +834,17 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
         // of the form S + A (symbol plus addend).
         var exprᴛ1 = t;
         if (exprᴛ1 == R_X86_64_64) {
-            if (rela.Off + 8 >= ((uint64)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val64 = (~sym).Value + ((uint64)rela.Addend);
+            var val64 = (~sym).Value + (uint64)rela.Addend;
             f.ByteOrder.PutUint64(dst[(int)(rela.Off)..(int)(rela.Off + 8)], val64);
         }
         else if (exprᴛ1 == R_X86_64_32) {
-            if (rela.Off + 4 >= ((uint64)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val32 = ((uint32)(~sym).Value) + ((uint32)rela.Addend);
+            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
         }
 
@@ -853,26 +857,26 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     if (len(rels) % 8 != 0) {
         return errors.New("length of relocation section is not a multiple of 8"u8);
     }
-    (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
+    var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
     var b = bytes.NewReader(rels);
     ref var rel = ref heap(new Rel32(), out var Ꮡrel);
     while (b.Len() > 0) {
-        binary.Read(~b, f.ByteOrder, Ꮡrel);
-        var symNo = rel.Info >> (int)(8);
-        R_386 t = ((R_386)((uint32)(rel.Info & 255)));
-        if (symNo == 0 || symNo > ((uint32)len(symbols))) {
+        binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrel);
+        var symNo = (rel.Info >> (int)(8));
+        R_386 t = ((R_386)(nint)((uint32)(rel.Info & 0xff)));
+        if (symNo == 0 || symNo > (uint32)len(symbols)) {
             continue;
         }
-        var sym = Ꮡ(symbols, symNo - 1);
+        var sym = Ꮡ(symbols, (int)(symNo - 1));
         if (t == R_386_32) {
-            if (rel.Off + 4 >= ((uint32)len(dst))) {
+            if (rel.Off + 4 >= (uint32)len(dst)) {
                 continue;
             }
             var val = f.ByteOrder.Uint32(dst[(int)(rel.Off)..(int)(rel.Off + 4)]);
-            val += ((uint32)(~sym).Value);
+            val += (uint32)(~sym).Value;
             f.ByteOrder.PutUint32(dst[(int)(rel.Off)..(int)(rel.Off + 4)], val);
         }
     }
@@ -884,27 +888,27 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     if (len(rels) % 8 != 0) {
         return errors.New("length of relocation section is not a multiple of 8"u8);
     }
-    (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
+    var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
     var b = bytes.NewReader(rels);
     ref var rel = ref heap(new Rel32(), out var Ꮡrel);
     while (b.Len() > 0) {
-        binary.Read(~b, f.ByteOrder, Ꮡrel);
-        var symNo = rel.Info >> (int)(8);
-        R_ARM t = ((R_ARM)((uint32)(rel.Info & 255)));
-        if (symNo == 0 || symNo > ((uint32)len(symbols))) {
+        binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrel);
+        var symNo = (rel.Info >> (int)(8));
+        R_ARM t = ((R_ARM)(nint)((uint32)(rel.Info & 0xff)));
+        if (symNo == 0 || symNo > (uint32)len(symbols)) {
             continue;
         }
-        var sym = Ꮡ(symbols, symNo - 1);
+        var sym = Ꮡ(symbols, (int)(symNo - 1));
         var exprᴛ1 = t;
         if (exprᴛ1 == R_ARM_ABS32) {
-            if (rel.Off + 4 >= ((uint32)len(dst))) {
+            if (rel.Off + 4 >= (uint32)len(dst)) {
                 continue;
             }
             var val = f.ByteOrder.Uint32(dst[(int)(rel.Off)..(int)(rel.Off + 4)]);
-            val += ((uint32)(~sym).Value);
+            val += (uint32)(~sym).Value;
             f.ByteOrder.PutUint32(dst[(int)(rel.Off)..(int)(rel.Off + 4)], val);
         }
 
@@ -917,20 +921,20 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     if (len(rels) % 24 != 0) {
         return errors.New("length of relocation section is not a multiple of 24"u8);
     }
-    (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
+    var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela64(), out var Ꮡrela);
     while (b.Len() > 0) {
-        binary.Read(~b, f.ByteOrder, Ꮡrela);
-        var symNo = rela.Info >> (int)(32);
-        R_AARCH64 t = ((R_AARCH64)((uint64)(rela.Info & 65535)));
-        if (symNo == 0 || symNo > ((uint64)len(symbols))) {
+        binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
+        var symNo = (rela.Info >> (int)(32));
+        R_AARCH64 t = ((R_AARCH64)(nint)((uint64)(rela.Info & 0xffff)));
+        if (symNo == 0 || symNo > (uint64)len(symbols)) {
             continue;
         }
-        var sym = Ꮡ(symbols, symNo - 1);
+        var sym = Ꮡ(symbols, (int)(symNo - 1));
         if (!canApplyRelocation(sym)) {
             continue;
         }
@@ -939,17 +943,17 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
         // of the form S + A (symbol plus addend).
         var exprᴛ1 = t;
         if (exprᴛ1 == R_AARCH64_ABS64) {
-            if (rela.Off + 8 >= ((uint64)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val64 = (~sym).Value + ((uint64)rela.Addend);
+            var val64 = (~sym).Value + (uint64)rela.Addend;
             f.ByteOrder.PutUint64(dst[(int)(rela.Off)..(int)(rela.Off + 8)], val64);
         }
         else if (exprᴛ1 == R_AARCH64_ABS32) {
-            if (rela.Off + 4 >= ((uint64)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val32 = ((uint32)(~sym).Value) + ((uint32)rela.Addend);
+            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
         }
 
@@ -962,29 +966,29 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     if (len(rels) % 12 != 0) {
         return errors.New("length of relocation section is not a multiple of 12"u8);
     }
-    (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
+    var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela32(), out var Ꮡrela);
     while (b.Len() > 0) {
-        binary.Read(~b, f.ByteOrder, Ꮡrela);
-        var symNo = rela.Info >> (int)(8);
-        R_PPC t = ((R_PPC)((uint32)(rela.Info & 255)));
-        if (symNo == 0 || symNo > ((uint32)len(symbols))) {
+        binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
+        var symNo = (rela.Info >> (int)(8));
+        R_PPC t = ((R_PPC)(nint)((uint32)(rela.Info & 0xff)));
+        if (symNo == 0 || symNo > (uint32)len(symbols)) {
             continue;
         }
-        var sym = Ꮡ(symbols, symNo - 1);
+        var sym = Ꮡ(symbols, (int)(symNo - 1));
         if (!canApplyRelocation(sym)) {
             continue;
         }
         var exprᴛ1 = t;
         if (exprᴛ1 == R_PPC_ADDR32) {
-            if (rela.Off + 4 >= ((uint32)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 4 >= (uint32)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val32 = ((uint32)(~sym).Value) + ((uint32)rela.Addend);
+            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
         }
 
@@ -997,36 +1001,36 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     if (len(rels) % 24 != 0) {
         return errors.New("length of relocation section is not a multiple of 24"u8);
     }
-    (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
+    var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela64(), out var Ꮡrela);
     while (b.Len() > 0) {
-        binary.Read(~b, f.ByteOrder, Ꮡrela);
-        var symNo = rela.Info >> (int)(32);
-        R_PPC64 t = ((R_PPC64)((uint64)(rela.Info & 65535)));
-        if (symNo == 0 || symNo > ((uint64)len(symbols))) {
+        binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
+        var symNo = (rela.Info >> (int)(32));
+        R_PPC64 t = ((R_PPC64)(nint)((uint64)(rela.Info & 0xffff)));
+        if (symNo == 0 || symNo > (uint64)len(symbols)) {
             continue;
         }
-        var sym = Ꮡ(symbols, symNo - 1);
+        var sym = Ꮡ(symbols, (int)(symNo - 1));
         if (!canApplyRelocation(sym)) {
             continue;
         }
         var exprᴛ1 = t;
         if (exprᴛ1 == R_PPC64_ADDR64) {
-            if (rela.Off + 8 >= ((uint64)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val64 = (~sym).Value + ((uint64)rela.Addend);
+            var val64 = (~sym).Value + (uint64)rela.Addend;
             f.ByteOrder.PutUint64(dst[(int)(rela.Off)..(int)(rela.Off + 8)], val64);
         }
         else if (exprᴛ1 == R_PPC64_ADDR32) {
-            if (rela.Off + 4 >= ((uint64)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val32 = ((uint32)(~sym).Value) + ((uint32)rela.Addend);
+            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
         }
 
@@ -1039,27 +1043,27 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     if (len(rels) % 8 != 0) {
         return errors.New("length of relocation section is not a multiple of 8"u8);
     }
-    (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
+    var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
     var b = bytes.NewReader(rels);
     ref var rel = ref heap(new Rel32(), out var Ꮡrel);
     while (b.Len() > 0) {
-        binary.Read(~b, f.ByteOrder, Ꮡrel);
-        var symNo = rel.Info >> (int)(8);
-        R_MIPS t = ((R_MIPS)((uint32)(rel.Info & 255)));
-        if (symNo == 0 || symNo > ((uint32)len(symbols))) {
+        binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrel);
+        var symNo = (rel.Info >> (int)(8));
+        R_MIPS t = ((R_MIPS)(nint)((uint32)(rel.Info & 0xff)));
+        if (symNo == 0 || symNo > (uint32)len(symbols)) {
             continue;
         }
-        var sym = Ꮡ(symbols, symNo - 1);
+        var sym = Ꮡ(symbols, (int)(symNo - 1));
         var exprᴛ1 = t;
         if (exprᴛ1 == R_MIPS_32) {
-            if (rel.Off + 4 >= ((uint32)len(dst))) {
+            if (rel.Off + 4 >= (uint32)len(dst)) {
                 continue;
             }
             var val = f.ByteOrder.Uint32(dst[(int)(rel.Off)..(int)(rel.Off + 4)]);
-            val += ((uint32)(~sym).Value);
+            val += (uint32)(~sym).Value;
             f.ByteOrder.PutUint32(dst[(int)(rel.Off)..(int)(rel.Off + 4)], val);
         }
 
@@ -1072,43 +1076,43 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     if (len(rels) % 24 != 0) {
         return errors.New("length of relocation section is not a multiple of 24"u8);
     }
-    (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
+    var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela64(), out var Ꮡrela);
     while (b.Len() > 0) {
-        binary.Read(~b, f.ByteOrder, Ꮡrela);
+        binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
         uint64 symNo = default!;
         R_MIPS t = default!;
-        if (f.ByteOrder == binary.BigEndian){
-            symNo = rela.Info >> (int)(32);
-            t = ((R_MIPS)((uint64)(rela.Info & 255)));
+        if (AreEqual(f.ByteOrder, binary.BigEndian)){
+            symNo = (rela.Info >> (int)(32));
+            t = ((R_MIPS)(nint)((uint64)(rela.Info & 0xff)));
         } else {
-            symNo = (uint64)(rela.Info & (nint)4294967295L);
-            t = ((R_MIPS)(rela.Info >> (int)(56)));
+            symNo = (uint64)(rela.Info & 0xffffffffU);
+            t = ((R_MIPS)(nint)((rela.Info >> (int)(56))));
         }
-        if (symNo == 0 || symNo > ((uint64)len(symbols))) {
+        if (symNo == 0 || symNo > (uint64)len(symbols)) {
             continue;
         }
-        var sym = Ꮡ(symbols, symNo - 1);
+        var sym = Ꮡ(symbols, (int)(symNo - 1));
         if (!canApplyRelocation(sym)) {
             continue;
         }
         var exprᴛ1 = t;
         if (exprᴛ1 == R_MIPS_64) {
-            if (rela.Off + 8 >= ((uint64)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val64 = (~sym).Value + ((uint64)rela.Addend);
+            var val64 = (~sym).Value + (uint64)rela.Addend;
             f.ByteOrder.PutUint64(dst[(int)(rela.Off)..(int)(rela.Off + 8)], val64);
         }
         else if (exprᴛ1 == R_MIPS_32) {
-            if (rela.Off + 4 >= ((uint64)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val32 = ((uint32)(~sym).Value) + ((uint32)rela.Addend);
+            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
         }
 
@@ -1121,38 +1125,38 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     if (len(rels) % 24 != 0) {
         return errors.New("length of relocation section is not a multiple of 24"u8);
     }
-    (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
+    var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela64(), out var Ꮡrela);
     while (b.Len() > 0) {
-        binary.Read(~b, f.ByteOrder, Ꮡrela);
+        binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
         uint64 symNo = default!;
         R_LARCH t = default!;
-        symNo = rela.Info >> (int)(32);
-        t = ((R_LARCH)((uint64)(rela.Info & 65535)));
-        if (symNo == 0 || symNo > ((uint64)len(symbols))) {
+        symNo = (rela.Info >> (int)(32));
+        t = ((R_LARCH)(nint)((uint64)(rela.Info & 0xffff)));
+        if (symNo == 0 || symNo > (uint64)len(symbols)) {
             continue;
         }
-        var sym = Ꮡ(symbols, symNo - 1);
+        var sym = Ꮡ(symbols, (int)(symNo - 1));
         if (!canApplyRelocation(sym)) {
             continue;
         }
         var exprᴛ1 = t;
         if (exprᴛ1 == R_LARCH_64) {
-            if (rela.Off + 8 >= ((uint64)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val64 = (~sym).Value + ((uint64)rela.Addend);
+            var val64 = (~sym).Value + (uint64)rela.Addend;
             f.ByteOrder.PutUint64(dst[(int)(rela.Off)..(int)(rela.Off + 8)], val64);
         }
         else if (exprᴛ1 == R_LARCH_32) {
-            if (rela.Off + 4 >= ((uint64)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val32 = ((uint32)(~sym).Value) + ((uint32)rela.Addend);
+            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
         }
 
@@ -1165,36 +1169,36 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     if (len(rels) % 24 != 0) {
         return errors.New("length of relocation section is not a multiple of 24"u8);
     }
-    (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
+    var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela64(), out var Ꮡrela);
     while (b.Len() > 0) {
-        binary.Read(~b, f.ByteOrder, Ꮡrela);
-        var symNo = rela.Info >> (int)(32);
-        R_RISCV t = ((R_RISCV)((uint64)(rela.Info & 65535)));
-        if (symNo == 0 || symNo > ((uint64)len(symbols))) {
+        binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
+        var symNo = (rela.Info >> (int)(32));
+        R_RISCV t = ((R_RISCV)(nint)((uint64)(rela.Info & 0xffff)));
+        if (symNo == 0 || symNo > (uint64)len(symbols)) {
             continue;
         }
-        var sym = Ꮡ(symbols, symNo - 1);
+        var sym = Ꮡ(symbols, (int)(symNo - 1));
         if (!canApplyRelocation(sym)) {
             continue;
         }
         var exprᴛ1 = t;
         if (exprᴛ1 == R_RISCV_64) {
-            if (rela.Off + 8 >= ((uint64)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val64 = (~sym).Value + ((uint64)rela.Addend);
+            var val64 = (~sym).Value + (uint64)rela.Addend;
             f.ByteOrder.PutUint64(dst[(int)(rela.Off)..(int)(rela.Off + 8)], val64);
         }
         else if (exprᴛ1 == R_RISCV_32) {
-            if (rela.Off + 4 >= ((uint64)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val32 = ((uint32)(~sym).Value) + ((uint32)rela.Addend);
+            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
         }
 
@@ -1207,36 +1211,36 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     if (len(rels) % 24 != 0) {
         return errors.New("length of relocation section is not a multiple of 24"u8);
     }
-    (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
+    var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela64(), out var Ꮡrela);
     while (b.Len() > 0) {
-        binary.Read(~b, f.ByteOrder, Ꮡrela);
-        var symNo = rela.Info >> (int)(32);
-        R_390 t = ((R_390)((uint64)(rela.Info & 65535)));
-        if (symNo == 0 || symNo > ((uint64)len(symbols))) {
+        binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
+        var symNo = (rela.Info >> (int)(32));
+        R_390 t = ((R_390)(nint)((uint64)(rela.Info & 0xffff)));
+        if (symNo == 0 || symNo > (uint64)len(symbols)) {
             continue;
         }
-        var sym = Ꮡ(symbols, symNo - 1);
+        var sym = Ꮡ(symbols, (int)(symNo - 1));
         if (!canApplyRelocation(sym)) {
             continue;
         }
         var exprᴛ1 = t;
         if (exprᴛ1 == R_390_64) {
-            if (rela.Off + 8 >= ((uint64)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val64 = (~sym).Value + ((uint64)rela.Addend);
+            var val64 = (~sym).Value + (uint64)rela.Addend;
             f.ByteOrder.PutUint64(dst[(int)(rela.Off)..(int)(rela.Off + 8)], val64);
         }
         else if (exprᴛ1 == R_390_32) {
-            if (rela.Off + 4 >= ((uint64)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val32 = ((uint32)(~sym).Value) + ((uint32)rela.Addend);
+            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
         }
 
@@ -1249,36 +1253,36 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     if (len(rels) % 24 != 0) {
         return errors.New("length of relocation section is not a multiple of 24"u8);
     }
-    (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
+    var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela64(), out var Ꮡrela);
     while (b.Len() > 0) {
-        binary.Read(~b, f.ByteOrder, Ꮡrela);
-        var symNo = rela.Info >> (int)(32);
-        R_SPARC t = ((R_SPARC)((uint64)(rela.Info & 255)));
-        if (symNo == 0 || symNo > ((uint64)len(symbols))) {
+        binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
+        var symNo = (rela.Info >> (int)(32));
+        R_SPARC t = ((R_SPARC)(nint)((uint64)(rela.Info & 0xff)));
+        if (symNo == 0 || symNo > (uint64)len(symbols)) {
             continue;
         }
-        var sym = Ꮡ(symbols, symNo - 1);
+        var sym = Ꮡ(symbols, (int)(symNo - 1));
         if (!canApplyRelocation(sym)) {
             continue;
         }
         var exprᴛ1 = t;
         if (exprᴛ1 == R_SPARC_64 || exprᴛ1 == R_SPARC_UA64) {
-            if (rela.Off + 8 >= ((uint64)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val64 = (~sym).Value + ((uint64)rela.Addend);
+            var val64 = (~sym).Value + (uint64)rela.Addend;
             f.ByteOrder.PutUint64(dst[(int)(rela.Off)..(int)(rela.Off + 8)], val64);
         }
         else if (exprᴛ1 == R_SPARC_32 || exprᴛ1 == R_SPARC_UA32) {
-            if (rela.Off + 4 >= ((uint64)len(dst)) || rela.Addend < 0) {
+            if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
                 continue;
             }
-            var val32 = ((uint32)(~sym).Value) + ((uint32)rela.Addend);
+            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst[(int)(rela.Off)..(int)(rela.Off + 4)], val32);
         }
 
@@ -1286,14 +1290,16 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     return default!;
 }
 
-[GoRecv] public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
-    var dwarfSuffix = (ж<ΔSection> s) => {
+public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
+    var dwarfSuffix = @string (ж<ΔSection> s) => {
         switch (ᐧ) {
-        case {} when strings.HasPrefix(s.Name, ".debug_"u8): {
-            return s.Name[7..];
+        case {} when strings.HasPrefix((~s).Name, ".debug_"u8): {
+            return (~s).Name[7..];
         }
-        case {} when strings.HasPrefix(s.Name, ".zdebug_"u8): {
-            return s.Name[8..];
+        case {} when strings.HasPrefix((~s).Name, ".zdebug_"u8): {
+            return (~s).Name[8..];
         }
         default: {
             return ""u8;
@@ -1302,29 +1308,29 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     };
     // sectionData gets the data for s, checks its size, and
     // applies any applicable relations.
-    var sectionData = (nint i, ж<ΔSection> s) => {
-        (b, errΔ1) = s.Data();
-        if (errΔ1 != default! && ((uint64)len(b)) < s.Size) {
+    var sectionData = (slice<byte>, error) (nint i, ж<ΔSection> s) => {
+        var (b, errΔ1) = s.Data();
+        if (errΔ1 != default! && (uint64)len(b) < (~s).Size) {
             return (default!, errΔ1);
         }
-        if (f.Type == ET_EXEC) {
+        if (Ꮡf.Value.Type == ET_EXEC) {
             // Do not apply relocations to DWARF sections for ET_EXEC binaries.
             // Relocations should already be applied, and .rela sections may
             // contain incorrect data.
             return (b, default!);
         }
-        foreach (var (_, r) in f.Sections) {
-            if (r.Type != SHT_RELA && r.Type != SHT_REL) {
+        foreach (var (_, r) in Ꮡf.Value.Sections) {
+            if ((~r).Type != SHT_RELA && (~r).Type != SHT_REL) {
                 continue;
             }
-            if (((nint)r.Info) != i) {
+            if ((nint)(~r).Info != i) {
                 continue;
             }
-            (rd, errΔ2) = r.Data();
+            var (rd, errΔ2) = r.Data();
             if (errΔ2 != default!) {
                 return (default!, errΔ2);
             }
-             = f.applyRelocations(b, rd);
+            errΔ2 = Ꮡf.Value.applyRelocations(b, rd);
             if (errΔ2 != default!) {
                 return (default!, errΔ2);
             }
@@ -1340,18 +1346,17 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
             continue;
         }
         {
-            var _ = dat[suffix];
-            var ok = dat[suffix]; if (!ok) {
+            var (_, ok) = dat[suffix, ꟷ]; if (!ok) {
                 continue;
             }
         }
-        (b, errΔ3) = sectionData(i, s);
+        var (b, errΔ3) = sectionData(i, s);
         if (errΔ3 != default!) {
             return (default!, errΔ3);
         }
         dat[suffix] = b;
     }
-    (d, err) = dwarf.New(dat["abbrev"u8], default!, default!, dat["info"u8], dat["line"u8], default!, dat["ranges"u8], dat["str"u8]);
+    var (d, err) = dwarf.New(dat["abbrev"u8], default!, default!, dat["info"u8], dat["line"u8], default!, dat["ranges"u8], dat["str"u8]);
     if (err != default!) {
         return (default!, err);
     }
@@ -1362,26 +1367,25 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
             continue;
         }
         {
-            var _ = dat[suffix];
-            var ok = dat[suffix]; if (ok) {
+            var (_, ok) = dat[suffix, ꟷ]; if (ok) {
                 // Already handled.
                 continue;
             }
         }
-        (b, err) = sectionData(i, s);
-        if (err != default!) {
-            return (default!, err);
+        var (b, errΔ4) = sectionData(i, s);
+        if (errΔ4 != default!) {
+            return (default!, errΔ4);
         }
         if (suffix == "types"u8){
             {
-                var errΔ4 = d.AddTypes(fmt.Sprintf("types-%d"u8, i), b); if (errΔ4 != default!) {
-                    return (default!, errΔ4);
+                var errΔ5 = d.AddTypes(fmt.Sprintf("types-%d"u8, i), b); if (errΔ5 != default!) {
+                    return (default!, errΔ5);
                 }
             }
         } else {
             {
-                var errΔ5 = d.AddSection(".debug_"u8 + suffix, b); if (errΔ5 != default!) {
-                    return (default!, errΔ5);
+                var errΔ6 = d.AddSection(".debug_"u8 + suffix, b); if (errΔ6 != default!) {
+                    return (default!, errΔ6);
                 }
             }
         }
@@ -1396,7 +1400,7 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
 // After retrieving the symbols as symtab, an externally supplied index x
 // corresponds to symtab[x-1], not symtab[x].
 [GoRecv] public static (slice<Symbol>, error) Symbols(this ref File f) {
-    (sym, _, err) = f.getSymbols(SHT_SYMTAB);
+    var (sym, _, err) = f.getSymbols(SHT_SYMTAB);
     return (sym, err);
 }
 
@@ -1410,7 +1414,7 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
 // After retrieving the symbols as symtab, an externally supplied index x
 // corresponds to symtab[x-1], not symtab[x].
 [GoRecv] public static (slice<Symbol>, error) DynamicSymbols(this ref File f) {
-    (sym, str, err) = f.getSymbols(SHT_DYNSYM);
+    var (sym, str, err) = f.getSymbols(SHT_DYNSYM);
     if (err != default!) {
         return (default!, err);
     }
@@ -1433,7 +1437,7 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
 // satisfied by other libraries at dynamic load time.
 // It does not return weak symbols.
 [GoRecv] public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
-    (sym, str, err) = f.getSymbols(SHT_DYNSYM);
+    var (sym, str, err) = f.getSymbols(SHT_DYNSYM);
     if (err != default!) {
         return (default!, err);
     }
@@ -1443,7 +1447,7 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
         if (ST_BIND(s.Info) == STB_GLOBAL && s.Section == SHN_UNDEF) {
             all = append(all, new ImportedSymbol(Name: s.Name));
             var symΔ1 = Ꮡ(all, len(all) - 1);
-            (sym.val.Library, sym.val.Version) = f.gnuVersion(i);
+            (symΔ1.Value.Library, symΔ1.Value.Version) = f.gnuVersion(i);
         }
     }
     return (all, default!);
@@ -1466,7 +1470,7 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     if (vn == nil) {
         return false;
     }
-    (d, _) = vn.Data();
+    var (d, _) = vn.Data();
     slice<verneed> need = default!;
     nint i = 0;
     while (ᐧ) {
@@ -1481,10 +1485,10 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
         var fileoff = f.ByteOrder.Uint32(d[(int)(i + 4)..(int)(i + 8)]);
         var aux = f.ByteOrder.Uint32(d[(int)(i + 8)..(int)(i + 12)]);
         var next = f.ByteOrder.Uint32(d[(int)(i + 12)..(int)(i + 16)]);
-        var (file, _) = getString(str, ((nint)fileoff));
+        var (@file, _) = getString(str, (nint)fileoff);
         @string name = default!;
-        nint j = i + ((nint)aux);
-        for (nint c = 0; c < ((nint)cnt); c++) {
+        nint j = i + (nint)aux;
+        for (nint c = 0; c < (nint)cnt; c++) {
             if (j + 16 > len(d)) {
                 break;
             }
@@ -1493,23 +1497,23 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
             var other = f.ByteOrder.Uint16(d[(int)(j + 6)..(int)(j + 8)]);
             var nameoff = f.ByteOrder.Uint32(d[(int)(j + 8)..(int)(j + 12)]);
             var nextΔ1 = f.ByteOrder.Uint32(d[(int)(j + 12)..(int)(j + 16)]);
-            (name, _) = getString(str, ((nint)nameoff));
-            nint ndx = ((nint)other);
+            (name, _) = getString(str, (nint)nameoff);
+            nint ndx = (nint)other;
             if (ndx >= len(need)) {
                 var a = new slice<verneed>(2 * (ndx + 1));
                 copy(a, need);
                 need = a;
             }
-            need[ndx] = new verneed(file, name);
+            need[ndx] = new verneed(@file, name);
             if (nextΔ1 == 0) {
                 break;
             }
-            j += ((nint)nextΔ1);
+            j += (nint)nextΔ1;
         }
         if (next == 0) {
             break;
         }
-        i += ((nint)next);
+        i += (nint)next;
     }
     // Versym parallels symbol table, indexing into verneed.
     var vs = f.SectionByType(SHT_GNU_VERSYM);
@@ -1537,7 +1541,7 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     if (len(s) < 2) {
         return (library, version);
     }
-    nint j = ((nint)f.ByteOrder.Uint16(s));
+    nint j = (nint)f.ByteOrder.Uint16(s);
     if (j < 2 || j >= len(f.gnuNeed)) {
         return (library, version);
     }
@@ -1570,7 +1574,7 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
         // not dynamic, so no libraries
         return (default!, default!);
     }
-    (d, err) = ds.Data();
+    var (d, err) = ds.Data();
     if (err != default!) {
         return (default!, err);
     }
@@ -1581,7 +1585,7 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     if (len(d) % dynSize != 0) {
         return (default!, errors.New("length of dynamic section is not a multiple of dynamic entry size"u8));
     }
-    (str, err) = f.stringTable(ds.Link);
+    (var str, err) = f.stringTable((~ds).Link);
     if (err != default!) {
         return (default!, err);
     }
@@ -1591,18 +1595,18 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
         uint64 v = default!;
         var exprᴛ2 = f.Class;
         if (exprᴛ2 == ELFCLASS32) {
-            t = ((DynTag)f.ByteOrder.Uint32(d[0..4]));
-            v = ((uint64)f.ByteOrder.Uint32(d[4..8]));
+            t = ((DynTag)(nint)f.ByteOrder.Uint32(d[0..4]));
+            v = (uint64)f.ByteOrder.Uint32(d[4..8]);
             d = d[8..];
         }
         else if (exprᴛ2 == ELFCLASS64) {
-            t = ((DynTag)f.ByteOrder.Uint64(d[0..8]));
+            t = ((DynTag)(nint)f.ByteOrder.Uint64(d[0..8]));
             v = f.ByteOrder.Uint64(d[8..16]);
             d = d[16..];
         }
 
         if (t == tag) {
-            var (s, ok) = getString(str, ((nint)v));
+            var (s, ok) = getString(str, (nint)v);
             if (ok) {
                 all = append(all, s);
             }
@@ -1618,7 +1622,7 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
     if (ds == nil) {
         return (default!, default!);
     }
-    (d, err) = ds.Data();
+    var (d, err) = ds.Data();
     if (err != default!) {
         return (default!, err);
     }
@@ -1636,12 +1640,12 @@ internal static bool canApplyRelocation(ж<Symbol> Ꮡsym) {
         uint64 v = default!;
         var exprᴛ1 = f.Class;
         if (exprᴛ1 == ELFCLASS32) {
-            t = ((DynTag)f.ByteOrder.Uint32(d[0..4]));
-            v = ((uint64)f.ByteOrder.Uint32(d[4..8]));
+            t = ((DynTag)(nint)f.ByteOrder.Uint32(d[0..4]));
+            v = (uint64)f.ByteOrder.Uint32(d[4..8]);
             d = d[8..];
         }
         else if (exprᴛ1 == ELFCLASS64) {
-            t = ((DynTag)f.ByteOrder.Uint64(d[0..8]));
+            t = ((DynTag)(nint)f.ByteOrder.Uint64(d[0..8]));
             v = f.ByteOrder.Uint64(d[8..16]);
             d = d[16..];
         }

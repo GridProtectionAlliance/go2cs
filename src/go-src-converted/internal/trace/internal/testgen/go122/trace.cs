@@ -9,29 +9,30 @@ using fmt = fmt_package;
 using os = os_package;
 using regexp = regexp_package;
 using strings = strings_package;
-using trace = @internal.trace_package;
-using @event = @internal.trace.event_package;
-using go122 = @internal.trace.@event.go122_package;
-using raw = @internal.trace.raw_package;
-using version = @internal.trace.version_package;
-using txtar = @internal.txtar_package;
-using @internal;
-using @internal.trace;
-using @internal.trace.@event;
+using trace = go.@internal.trace_package;
+using @event = go.@internal.trace.event_package;
+using go122 = go.@internal.trace.@event.go122_package;
+using raw = go.@internal.trace.raw_package;
+using version = go.@internal.trace.version_package;
+using txtar = go.@internal.txtar_package;
 using encoding;
+using go.@internal;
+using go.@internal.trace;
+using go.@internal.trace.@event;
+using io = io_package;
 using ꓸꓸꓸany = Span<any>;
 using ꓸꓸꓸuint64 = Span<uint64>;
 
 partial class testkit_package {
 
-public static void ΔMain(Action<ж<Trace>> f) => func((defer, _) => {
+public static void ΔMain(Action<ж<Trace>> f) => func((defer, recover) => {
     // Create an output file.
-    (@out, err) = os.Create(os.Args[1]);
+    var (@out, err) = os.Create(os.Args[1]);
     if (err != default!) {
         throw panic(err.Error());
     }
     var outʗ1 = @out;
-    defer(outʗ1.Close);
+    defer(() => outʗ1.Close());
     // Create a new trace.
     var trace = NewTrace();
     // Call the generator.
@@ -54,15 +55,15 @@ public static void ΔMain(Action<ж<Trace>> f) => func((defer, _) => {
 // Otherwise, it performs no validation on the trace at all.
 [GoType] partial struct Trace {
     // Trace data state.
-    internal @internal.trace.version_package.Version ver;
-    internal @event.Type names;
-    internal @event.Spec specs;
-    internal raw.Event events;
+    internal version.Version ver;
+    internal map<@string, @event.Type> names;
+    internal slice<@event.Spec> specs;
+    internal slice<raw.Event> events;
     internal slice<ж<ΔGeneration>> gens;
     internal bool validTimestamps;
     // Expectation state.
     internal bool bad;
-    internal ж<regexp_package.Regexp> badMatch;
+    internal ж<regexp.Regexp> badMatch;
 }
 
 // NewTrace creates a new trace.
@@ -107,9 +108,11 @@ public static ж<Trace> NewTrace() {
 //
 // This provides more structure than Event to allow for more easily
 // creating complex traces that are mostly or completely correct.
-[GoRecv] public static ж<ΔGeneration> Generation(this ref Trace t, uint64 gen) {
+public static ж<ΔGeneration> Generation(this ж<Trace> Ꮡt, uint64 gen) {
+    ref var t = ref Ꮡt.Value;
+
     var g = Ꮡ(new ΔGeneration(
-        trace: t,
+        trace: Ꮡt,
         gen: gen,
         strings: new map<@string, uint64>(),
         stacks: new map<stack, uint64>()
@@ -121,8 +124,8 @@ public static ж<Trace> NewTrace() {
 // Generate creates a test file for the trace.
 [GoRecv] public static slice<byte> Generate(this ref Trace t) {
     // Trace file contents.
-    ref var buf = ref heap(new bytes_package.Buffer(), out var Ꮡbuf);
-    (tw, err) = raw.NewTextWriter(~Ꮡbuf, version.Go122);
+    ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+    var (tw, err) = raw.NewTextWriter(new bytes_BufferжWriter(Ꮡbuf), version.Go122);
     if (err != default!) {
         throw panic(err.Error());
     }
@@ -135,7 +138,7 @@ public static ж<Trace> NewTrace() {
         g.writeEventsTo(tw);
     }
     // Expectation file contents.
-    var expect = slice<byte>("SUCCESS\n");
+    var expect = slice<byte>((@string)"SUCCESS\n");
     if (t.bad) {
         expect = slice<byte>(fmt.Sprintf("FAILURE %q\n"u8, t.badMatch));
     }
@@ -168,7 +171,7 @@ public static ж<Trace> NewTrace() {
 }
 
 [GoType] partial struct stack {
-    internal trace.StackFrame stk = new(32);
+    internal array<trace.StackFrame> stk = new(32);
     internal nint len;
 }
 
@@ -190,12 +193,14 @@ public static slice<trace.StackFrame> NoStack = new trace.StackFrame[]{}.slice()
 // Batch starts a new event batch in the trace data.
 //
 // This is convenience function for generating correct batches.
-[GoRecv] public static ж<ΔBatch> Batch(this ref ΔGeneration g, trace.ThreadID thread, Time time) {
-    if (!g.trace.validTimestamps) {
+public static ж<ΔBatch> Batch(this ж<ΔGeneration> Ꮡg, trace.ThreadID thread, Time time) {
+    ref var g = ref Ꮡg.Value;
+
+    if (!(~g.trace).validTimestamps) {
         time = 0;
     }
     var b = Ꮡ(new ΔBatch(
-        gen: g,
+        gen: Ꮡg,
         thread: thread,
         timestamp: time
     ));
@@ -212,11 +217,11 @@ public static slice<trace.StackFrame> NoStack = new trace.StackFrame[]{}.slice()
         return 0;
     }
     {
-        var (idΔ1, ok) = g.strings[s]; if (ok) {
+        var (idΔ1, ok) = g.strings[s, ꟷ]; if (ok) {
             return idΔ1;
         }
     }
-    var id = ((uint64)(len(g.strings) + 1));
+    var id = (uint64)(len(g.strings) + 1);
     g.strings[s] = id;
     return id;
 }
@@ -236,29 +241,30 @@ public static slice<trace.StackFrame> NoStack = new trace.StackFrame[]{}.slice()
     copy(stkc.stk[..], stk);
     stkc.len = len(stk);
     {
-        var (idΔ1, ok) = g.stacks[stkc]; if (ok) {
+        var (idΔ1, ok) = g.stacks[stkc, ꟷ]; if (ok) {
             return idΔ1;
         }
     }
-    var id = ((uint64)(len(g.stacks) + 1));
+    var id = (uint64)(len(g.stacks) + 1);
     g.stacks[stkc] = id;
     return id;
 }
 
 // writeEventsTo emits event batches in the generation to tw.
-[GoRecv] public static void writeEventsTo(this ref ΔGeneration g, ж<raw.TextWriter> Ꮡtw) {
-    ref var tw = ref Ꮡtw.val;
+internal static void writeEventsTo(this ж<ΔGeneration> Ꮡg, ж<raw.TextWriter> Ꮡtw) {
+    ref var g = ref Ꮡg.Value;
+    ref var tw = ref Ꮡtw.Value;
 
     // Write event batches for the generation.
     foreach (var (_, bΔ1) in g.batches) {
         bΔ1.writeEventsTo(Ꮡtw);
     }
     // Write frequency.
-    var b = g.newStructuralBatch();
+    var b = Ꮡg.newStructuralBatch();
     b.RawEvent(go122.EvFrequency, default!, 15625000);
     b.writeEventsTo(Ꮡtw);
     // Write stacks.
-    b = g.newStructuralBatch();
+    b = Ꮡg.newStructuralBatch();
     b.RawEvent(go122.EvStacks, default!);
     foreach (var (stk, id) in g.stacks) {
         var stkΔ1 = stk.stk[..(int)(stk.len)];
@@ -270,35 +276,37 @@ public static slice<trace.StackFrame> NoStack = new trace.StackFrame[]{}.slice()
         // Flush the batch if necessary.
         if (!g.ignoreStackBatchSizeLimit && (~b).size > go122.MaxBatchSize / 2) {
             b.writeEventsTo(Ꮡtw);
-            b = g.newStructuralBatch();
+            b = Ꮡg.newStructuralBatch();
         }
     }
     b.writeEventsTo(Ꮡtw);
     // Write strings.
-    b = g.newStructuralBatch();
+    b = Ꮡg.newStructuralBatch();
     b.RawEvent(go122.EvStrings, default!);
     foreach (var (s, id) in g.strings) {
         b.RawEvent(go122.EvString, slice<byte>(s), id);
         // Flush the batch if necessary.
         if (!g.ignoreStringBatchSizeLimit && (~b).size > go122.MaxBatchSize / 2) {
             b.writeEventsTo(Ꮡtw);
-            b = g.newStructuralBatch();
+            b = Ꮡg.newStructuralBatch();
         }
     }
     b.writeEventsTo(Ꮡtw);
 }
 
-[GoRecv] internal static ж<ΔBatch> newStructuralBatch(this ref ΔGeneration g) {
-    return Ꮡ(new ΔBatch(gen: g, thread: trace.NoThread));
+internal static ж<ΔBatch> newStructuralBatch(this ж<ΔGeneration> Ꮡg) {
+    ref var g = ref Ꮡg.Value;
+
+    return Ꮡ(new ΔBatch(gen: Ꮡg, thread: trace.NoThread));
 }
 
 // Batch represents an event batch.
 [GoType] partial struct ΔBatch {
     internal ж<ΔGeneration> gen;
-    internal @internal.trace_package.ThreadID thread;
+    internal trace.ThreadID thread;
     internal Time timestamp;
     internal uint64 size;
-    internal raw.Event events;
+    internal slice<raw.Event> events;
 }
 
 // Event emits an event into a batch. name must correspond to one
@@ -307,21 +315,21 @@ public static slice<trace.StackFrame> NoStack = new trace.StackFrame[]{}.slice()
 [GoRecv] public static void Event(this ref ΔBatch b, @string name, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    var (ev, ok) = b.gen.trace.names[name];
+    var (ev, ok) = (~(~b.gen).trace).names[name, ꟷ];
     if (!ok) {
         throw panic(fmt.Sprintf("invalid or unknown event %s"u8, name));
     }
     slice<uint64> uintArgs = default!;
     nint argOff = 0;
-    if (b.gen.trace.specs[ev].IsTimedEvent) {
-        if (b.gen.trace.validTimestamps){
+    if ((~(~b.gen).trace).specs[ev].IsTimedEvent) {
+        if ((~(~b.gen).trace).validTimestamps){
             uintArgs = new uint64[]{1}.slice();
         } else {
             uintArgs = new uint64[]{0}.slice();
         }
         argOff = 1;
     }
-    var spec = b.gen.trace.specs[ev];
+    var spec = (~(~b.gen).trace).specs[ev];
     {
         nint arity = len(spec.Args) - argOff; if (len(args) != arity) {
             throw panic(fmt.Sprintf("expected %d args for %s, got %d"u8, arity, spec.Name, len(args)));
@@ -348,28 +356,28 @@ public static slice<trace.StackFrame> NoStack = new trace.StackFrame[]{}.slice()
         u = b.gen.Stack(arg._<slice<trace.StackFrame>>());
     }
     else if (exprᴛ1 == "seq"u8) {
-        u = ((uint64)(arg._<Seq>()));
+        u = (uint64)(arg._<Seq>());
     }
     else if (exprᴛ1 == "pstatus"u8) {
-        u = ((uint64)(arg._<go122.ProcStatus>()));
+        u = (uint64)(uint8)(arg._<go122.ProcStatus>());
     }
     else if (exprᴛ1 == "gstatus"u8) {
-        u = ((uint64)(arg._<go122.GoStatus>()));
+        u = (uint64)(uint8)(arg._<go122.GoStatus>());
     }
     else if (exprᴛ1 == "g"u8) {
-        u = ((uint64)(arg._<trace.GoID>()));
+        u = (uint64)(int64)(arg._<trace.GoID>());
     }
     else if (exprᴛ1 == "m"u8) {
-        u = ((uint64)(arg._<trace.ThreadID>()));
+        u = (uint64)(int64)(arg._<trace.ThreadID>());
     }
     else if (exprᴛ1 == "p"u8) {
-        u = ((uint64)(arg._<trace.ProcID>()));
+        u = (uint64)(int64)(arg._<trace.ProcID>());
     }
     else if (exprᴛ1 == "string"u8) {
         u = b.gen.String(arg._<@string>());
     }
     else if (exprᴛ1 == "task"u8) {
-        u = ((uint64)(arg._<trace.TaskID>()));
+        u = (uint64)(arg._<trace.TaskID>());
     }
     else { /* default: */
         throw panic(fmt.Sprintf("unsupported arg type %q for spec %q"u8, typStr, argSpec));
@@ -384,30 +392,30 @@ public static slice<trace.StackFrame> NoStack = new trace.StackFrame[]{}.slice()
 [GoRecv] public static void RawEvent(this ref ΔBatch b, @event.Type typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
     var args = argsʗp.slice();
 
-    var ev = b.gen.trace.createEvent(typ, data, args.ꓸꓸꓸ);
+    var ev = (~b.gen).trace.createEvent(typ, data, args.ꓸꓸꓸ);
     // Compute the size of the event and add it to the batch.
     b.size += 1;
     // One byte for the event header.
     array<byte> buf = new(10); /* binary.MaxVarintLen64 */
     foreach (var (_, arg) in args) {
-        b.size += ((uint64)binary.PutUvarint(buf[..], arg));
+        b.size += (uint64)binary.PutUvarint(buf[..], arg);
     }
     if (len(data) != 0) {
-        b.size += ((uint64)binary.PutUvarint(buf[..], ((uint64)len(data))));
-        b.size += ((uint64)len(data));
+        b.size += (uint64)binary.PutUvarint(buf[..], (uint64)len(data));
+        b.size += (uint64)len(data);
     }
     // Add the event.
     b.events = append(b.events, ev);
 }
 
 // writeEventsTo emits events in the batch, including the batch header, to tw.
-[GoRecv] public static void writeEventsTo(this ref ΔBatch b, ж<raw.TextWriter> Ꮡtw) {
-    ref var tw = ref Ꮡtw.val;
+[GoRecv] internal static void writeEventsTo(this ref ΔBatch b, ж<raw.TextWriter> Ꮡtw) {
+    ref var tw = ref Ꮡtw.Value;
 
     tw.WriteEvent(new raw.Event(
         Version: version.Go122,
         Ev: go122.EvEventBatch,
-        Args: new uint64[]{b.gen.gen, ((uint64)b.thread), ((uint64)b.timestamp), b.size}.slice()
+        Args: new uint64[]{(~b.gen).gen, (uint64)(int64)b.thread, (uint64)b.timestamp, b.size}.slice()
     ));
     foreach (var (_, e) in b.events) {
         tw.WriteEvent(e);

@@ -31,11 +31,13 @@ namespace go.go;
 
 using bytes = bytes_package;
 using fmt = fmt_package;
-using ast = go.ast_package;
-using constant = go.constant_package;
-using token = go.token_package;
-using static @internal.types.errors_package;
-using _ = unsafe_package; // for linkname
+using ast = global::go.go.ast_package;
+using constant = global::go.go.constant_package;
+using token = global::go.go.token_package;
+using static global::go.@internal.types.errors_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+using errors = global::go.@internal.types.errors_package;
+using global::go.go;
 
 partial class types_package {
 
@@ -44,8 +46,8 @@ partial class types_package {
 // package (such as "unused variable"); "hard" errors may lead to unpredictable
 // behavior if ignored.
 [GoType] partial struct ΔError {
-    public ж<go.token_package.FileSet> Fset; // file set for interpretation of Pos
-    public go.token_package.ΔPos Pos;    // error position
+    public ж<token.FileSet> Fset; // file set for interpretation of Pos
+    public tokenꓸPos Pos;      // error position
     public @string Msg;        // error message
     public bool Soft;           // if set, error is "soft"
     // go116code is a future API, unexported as the set of error codes is large
@@ -53,9 +55,9 @@ partial class types_package {
     // to preview this feature may read go116code using reflection (see
     // errorcodes_test.go), but beware that there is no guarantee of future
     // compatibility.
-    internal @internal.types.errors_package.Code go116code;
-    internal go.token_package.ΔPos go116start;
-    internal go.token_package.ΔPos go116end;
+    internal errors.Code go116code;
+    internal tokenꓸPos go116start;
+    internal tokenꓸPos go116end;
 }
 
 // Error returns an error string formatted as follows:
@@ -183,7 +185,7 @@ public static @string Error(this ΔError err) {
 // Linkname for use from srcimporter.
 //go:linkname srcimporter_setUsesCgo
 internal static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
-    ref var conf = ref Ꮡconf.val;
+    ref var conf = ref Ꮡconf.Value;
 
     conf.go115UsesCgo = true;
 }
@@ -210,7 +212,7 @@ internal static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
     // identifier z in a variable declaration 'var z int' is found
     // only in the Defs map, and identifiers denoting packages in
     // qualified identifiers are collected in the Uses map.
-    public ast.Expr>TypeAndValue Types;
+    public map<ast.Expr, TypeAndValue> Types;
     // Instances maps identifiers denoting generic types or functions to their
     // type arguments and instantiated type.
     //
@@ -223,7 +225,7 @@ internal static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
     //
     // Invariant: Instantiating Uses[id].Type() with Instances[id].TypeArgs
     // results in an equivalent of Instances[id].Type.
-    public ast.Ident>Instance Instances;
+    public map<ж<ast.Ident>, Instance> Instances;
     // Defs maps identifiers to the objects they define (including
     // package names, dots "." of dot-imports, and blank "_" identifiers).
     // For identifiers that do not denote objects (e.g., the package name
@@ -233,13 +235,13 @@ internal static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
     // For an embedded field, Defs returns the field *Var it defines.
     //
     // Invariant: Defs[id] == nil || Defs[id].Pos() == id.Pos()
-    public ast.Ident>Object Defs;
+    public map<ж<ast.Ident>, Object> Defs;
     // Uses maps identifiers to the objects they denote.
     //
     // For an embedded field, Uses returns the *TypeName it denotes.
     //
     // Invariant: Uses[id].Pos() != id.Pos()
-    public ast.Ident>Object Uses;
+    public map<ж<ast.Ident>, Object> Uses;
     // Implicits maps nodes to their implicitly declared objects, if any.
     // The following node and object types may appear:
     //
@@ -249,10 +251,10 @@ internal static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
     //     *ast.CaseClause    type-specific *Var for each type switch case clause (incl. default)
     //     *ast.Field         anonymous parameter *Var (incl. unnamed results)
     //
-    public ast.Node>Object Implicits;
+    public map<ast.Node, Object> Implicits;
     // Selections maps selector expressions (excluding qualified identifiers)
     // to their corresponding selections.
-    public ast.SelectorExpr>*Selection Selections;
+    public map<ж<ast.SelectorExpr>, ж<Selection>> Selections;
     // Scopes maps ast.Nodes to the scopes they define. Package scopes are not
     // associated with a specific node but with all files belonging to a package.
     // Thus, the package scope can be found in the type-checked Package object.
@@ -286,7 +288,7 @@ internal static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
     //     *ast.ForStmt
     //     *ast.RangeStmt
     //
-    public ast.Node>*Scope Scopes;
+    public map<ast.Node, ж<ΔScope>> Scopes;
     // InitOrder is the list of package-level initializers in the order in which
     // they must be executed. Initializers referring to variables related by an
     // initialization dependency appear in topological order, the others appear
@@ -298,7 +300,7 @@ internal static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
     // string is Config.GoVersion.
     // Version strings begin with “go”, like “go1.21”, and
     // are suitable for use with the [go/version] package.
-    public ast.File>string FileVersions;
+    public map<ж<ast.File>, @string> FileVersions;
 }
 
 [GoRecv] internal static bool recordTypes(this ref ΔInfo info) {
@@ -309,7 +311,7 @@ internal static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
 // Precondition: the Types, Uses and Defs maps are populated.
 [GoRecv] public static ΔType TypeOf(this ref ΔInfo info, ast.Expr e) {
     {
-        var (t, ok) = info.Types[e]; if (ok) {
+        var (t, ok) = info.Types[e, ꟷ]; if (ok) {
             return t.Type;
         }
     }
@@ -333,14 +335,14 @@ internal static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
 //
 // Precondition: the Uses and Defs maps are populated.
 [GoRecv] public static Object ObjectOf(this ref ΔInfo info, ж<ast.Ident> Ꮡid) {
-    ref var id = ref Ꮡid.val;
+    ref var id = ref Ꮡid.Value;
 
     {
-        var obj = info.Defs[id]; if (obj != default!) {
+        var obj = info.Defs[Ꮡid]; if (obj != default!) {
             return obj;
         }
     }
-    return info.Uses[id];
+    return info.Uses[Ꮡid];
 }
 
 // PkgNameOf returns the local package name defined by the import,
@@ -350,15 +352,15 @@ internal static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
 //
 // Precondition: the Defs and Implicts maps are populated.
 [GoRecv] public static ж<PkgName> PkgNameOf(this ref ΔInfo info, ж<ast.ImportSpec> Ꮡimp) {
-    ref var imp = ref Ꮡimp.val;
+    ref var imp = ref Ꮡimp.Value;
 
     Object obj = default!;
     if (imp.Name != nil){
         obj = info.Defs[imp.Name];
     } else {
-        obj = info.Implicits[imp];
+        obj = info.Implicits[new ast_ImportSpecжNode(Ꮡimp)];
     }
-    var (pkgname, _) = obj._<PkgName.val>(ᐧ);
+    var (pkgname, _) = obj._<ж<PkgName>>(ᐧ);
     return pkgname;
 }
 
@@ -367,7 +369,7 @@ internal static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
 [GoType] partial struct TypeAndValue {
     internal operandMode mode;
     public ΔType Type;
-    public go.constant_package.Value Value;
+    public constant.Value Value;
 }
 
 // IsVoid reports whether the corresponding expression
@@ -402,7 +404,7 @@ public static bool IsValue(this TypeAndValue tv) {
 // IsNil reports whether the corresponding expression denotes the
 // predeclared value nil.
 public static bool IsNil(this TypeAndValue tv) {
-    return tv.mode == value && tv.Type == ~Typ[UntypedNil];
+    return tv.mode == value && AreEqual(tv.Type, Typ[UntypedNil]);
 }
 
 // Addressable reports whether the corresponding expression
@@ -437,20 +439,20 @@ public static bool HasOk(this TypeAndValue tv) {
 // expression.
 [GoType] partial struct Initializer {
     public slice<ж<Var>> Lhs; // var Lhs = Rhs
-    public go.ast_package.Expr Rhs;
+    public ast.Expr Rhs;
 }
 
 [GoRecv] public static @string String(this ref Initializer init) {
-    ref var buf = ref heap(new bytes_package.Buffer(), out var Ꮡbuf);
+    ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     foreach (var (i, lhs) in init.Lhs) {
         if (i > 0) {
             buf.WriteString(", "u8);
         }
-        buf.WriteString(lhs.Name());
+        buf.WriteString(lhs.of(Var.Ꮡobject).Name());
     }
     buf.WriteString(" = "u8);
     WriteExpr(Ꮡbuf, init.Rhs);
-    return buf.String();
+    return Ꮡbuf.String();
 }
 
 // Check type-checks a package and returns the resulting package object and
@@ -464,12 +466,13 @@ public static bool HasOk(this TypeAndValue tv) {
 // The package is specified by a list of *ast.Files and corresponding
 // file set, and the package path the package is identified with.
 // The clean path must not be empty or dot (".").
-[GoRecv] public static (ж<Package>, error) Check(this ref Config conf, @string path, ж<token.FileSet> Ꮡfset, slice<ast.File> files, ж<ΔInfo> Ꮡinfo) {
-    ref var fset = ref Ꮡfset.val;
-    ref var info = ref Ꮡinfo.val;
+public static (ж<Package>, error) Check(this ж<Config> Ꮡconf, @string path, ж<token.FileSet> Ꮡfset, slice<ж<ast.File>> files, ж<ΔInfo> Ꮡinfo) {
+    ref var conf = ref Ꮡconf.Value;
+    ref var fset = ref Ꮡfset.Value;
+    ref var info = ref Ꮡinfo.Value;
 
     var pkg = NewPackage(path, ""u8);
-    return (pkg, NewChecker(conf, Ꮡfset, pkg, Ꮡinfo).Files(files));
+    return (pkg, NewChecker(Ꮡconf, Ꮡfset, pkg, Ꮡinfo).Files(files));
 }
 
 } // end types_package

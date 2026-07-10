@@ -3,10 +3,10 @@
 // license that can be found in the LICENSE file.
 namespace go.vendor.golang.org.x.text.unicode;
 
-using utf8 = unicode.utf8_package;
-using transform = golang.org.x.text.transform_package;
-using golang.org.x.text;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using transform = go.vendor.golang.org.x.text.transform_package;
+using go.unicode;
+using go.vendor.golang.org.x.text;
 
 partial class norm_package {
 
@@ -28,7 +28,7 @@ public static (nint nDst, nint nSrc, error err) Transform(this Form f, slice<byt
     var eof = atEOF;
     {
         nint ns = len(dst); if (ns < len(b)) {
-            err = transform.ErrShortDst;
+            err = go.vendor.golang.org.x.text.transform_package.ErrShortDst;
             eof = false;
             b = b[..(int)(ns)];
         }
@@ -40,23 +40,23 @@ public static (nint nDst, nint nSrc, error err) Transform(this Form f, slice<byt
         return (nDst + n, nSrc + n, err);
     }
     if (err == default! && n < len(src) && !atEOF) {
-        err = transform.ErrShortSrc;
+        err = go.vendor.golang.org.x.text.transform_package.ErrShortSrc;
     }
     return (n, n, err);
 }
 
 internal static bool flushTransform(ж<reorderBuffer> Ꮡrb) {
-    ref var rb = ref Ꮡrb.val;
+    ref var rb = ref Ꮡrb.Value;
 
     // Write out (must fully fit in dst, or else it is an ErrShortDst).
-    if (len(rb.@out) < rb.nrune * utf8.UTFMax) {
+    if (len(rb.@out) < rb.nrune * (nint)utf8.UTFMax) {
         return false;
     }
     rb.@out = rb.@out[(int)(rb.flushCopy(rb.@out))..];
     return true;
 }
 
-internal static slice<error> errs = new error[]{default!, transform.ErrShortDst, transform.ErrShortSrc}.slice();
+internal static slice<error> errs = new error[]{default!, go.vendor.golang.org.x.text.transform_package.ErrShortDst, go.vendor.golang.org.x.text.transform_package.ErrShortSrc}.slice();
 
 // transform implements the transform.Transformer interface. It is only called
 // when quickSpan does not pass for a given string.
@@ -82,19 +82,19 @@ internal static (nint nDst, nint nSrc, error err) transform(this Form f, slice<b
         end = rb.nsrc;
         var eof = atEOF;
         {
-            nint n = nSrc + len(dst) - nDst; if (n < end) {
-                err = transform.ErrShortDst;
-                end = n;
+            nint nΔ1 = nSrc + len(dst) - nDst; if (nΔ1 < end) {
+                err = go.vendor.golang.org.x.text.transform_package.ErrShortDst;
+                end = nΔ1;
                 eof = false;
             }
         }
-        var (end, ok) = rb.f.quickSpan(rb.src, nSrc, end, eof);
+        (end, var ok) = rb.f.quickSpan(rb.src, nSrc, end, eof);
         nint n = copy(dst[(int)(nDst)..], rb.src.bytes[(int)(nSrc)..(int)(end)]);
         nSrc += n;
         nDst += n;
         if (ok) {
             if (err == default! && n < rb.nsrc && !atEOF) {
-                err = transform.ErrShortSrc;
+                err = go.vendor.golang.org.x.text.transform_package.ErrShortSrc;
             }
             return (nDst, nSrc, err);
         }

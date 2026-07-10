@@ -6,6 +6,8 @@ namespace go;
 using filepathlite = @internal.filepathlite_package;
 using syscall = syscall_package;
 using @internal;
+using fs = go.io.fs_package;
+using go.io;
 
 partial class os_package {
 
@@ -18,12 +20,12 @@ partial class os_package {
 // and returns nil.
 public static error MkdirAll(@string path, FileMode perm) {
     // Fast path: if we can tell whether path is a directory or file, stop with success or error.
-    (dir, err) = Stat(path);
+    var (dir, err) = Stat(path);
     if (err == default!) {
         if (dir.IsDir()) {
             return default!;
         }
-        return new PathError{Op: "mkdir"u8, Path: path, Err: syscall.ENOTDIR};
+        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdir"u8, Path: path, Err: syscall.ENOTDIR)));
     }
     // Slow path: make sure parent exists and then call Mkdir for path.
     // Extract the parent folder from path by first removing any trailing
@@ -54,7 +56,7 @@ public static error MkdirAll(@string path, FileMode perm) {
     if (err != default!) {
         // Handle arguments like "foo/." by
         // double-checking that directory doesn't exist.
-        (dirΔ1, err1) = Lstat(path);
+        var (dirΔ1, err1) = Lstat(path);
         if (err1 == default! && dirΔ1.IsDir()) {
             return default!;
         }

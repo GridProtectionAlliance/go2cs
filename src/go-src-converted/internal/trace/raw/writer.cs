@@ -6,9 +6,10 @@ namespace go.@internal.trace;
 using binary = encoding.binary_package;
 using fmt = fmt_package;
 using io = io_package;
-using @event = @internal.trace.event_package;
-using version = @internal.trace.version_package;
+using Δevent = go.@internal.trace.event_package;
+using version = go.@internal.trace.version_package;
 using encoding;
+using go.@internal.trace;
 
 partial class raw_package {
 
@@ -19,10 +20,10 @@ partial class raw_package {
 // in the LEB128 encoding that the runtime adds but isn't necessary
 // when you know the data up-front.
 [GoType] partial struct Writer {
-    internal io_package.Writer w;
+    internal io.Writer w;
     internal slice<byte> buf;
-    internal @internal.trace.version_package.Version v;
-    internal @event.Spec specs;
+    internal version.Version v;
+    internal slice<Δevent.Spec> specs;
 }
 
 // NewWriter creates a new byte format writer.
@@ -38,7 +39,7 @@ public static (ж<Writer>, error) NewWriter(io.Writer w, version.Version v) {
         return fmt.Errorf("mismatched version between writer (go 1.%d) and event (go 1.%d)"u8, w.v, e.Version);
     }
     // Write event header byte.
-    w.buf = append(w.buf, ((uint8)e.Ev));
+    w.buf = append(w.buf, (uint8)e.Ev);
     // Write out all arguments.
     var spec = w.specs[e.Ev];
     foreach (var (_, arg) in e.Args[..(int)(len(spec.Args))]) {
@@ -52,7 +53,7 @@ public static (ж<Writer>, error) NewWriter(io.Writer w, version.Version v) {
     }
     // Write out the length of the data.
     if (spec.HasData) {
-        w.buf = binary.AppendUvarint(w.buf, ((uint64)len(e.Data)));
+        w.buf = binary.AppendUvarint(w.buf, (uint64)len(e.Data));
     }
     // Write out varint events.
     var (_, err) = w.w.Write(w.buf);

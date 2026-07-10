@@ -104,14 +104,14 @@ internal const bool stackTraceDebug = false;
 // Buffer for pointers found during stack tracing.
 // Must be smaller than or equal to workbuf.
 [GoType] partial struct stackWorkBuf {
-    internal runtime.@internal.sys_package.NotInHeap _;
+    internal sys.NotInHeap _;
     internal partial ref stackWorkBufHdr stackWorkBufHdr { get; }
-    internal array<uintptr> obj = new((_WorkbufSize - @unsafe.Sizeof(new stackWorkBufHdr(nil))) / goarch.PtrSize);
+    internal array<uintptr> obj = new((uintptr)((uintptr)_WorkbufSize - @unsafe.Sizeof(new stackWorkBufHdr(nil))) / goarch.PtrSize);
 }
 
 // Header declaration must come after the buf declaration above, because of issue #14620.
 [GoType] partial struct stackWorkBufHdr {
-    internal runtime.@internal.sys_package.NotInHeap _;
+    internal sys.NotInHeap _;
     internal partial ref workbufhdr workbufhdr { get; }
     internal ж<stackWorkBuf> next; // linked list of workbufs
 }
@@ -123,13 +123,13 @@ internal const bool stackTraceDebug = false;
 // Buffer for stack objects found on a goroutine stack.
 // Must be smaller than or equal to workbuf.
 [GoType] partial struct stackObjectBuf {
-    internal runtime.@internal.sys_package.NotInHeap _;
+    internal sys.NotInHeap _;
     internal partial ref stackObjectBufHdr stackObjectBufHdr { get; }
-    internal array<stackObject> obj = new((_WorkbufSize - @unsafe.Sizeof(new stackObjectBufHdr(nil))) / @unsafe.Sizeof(new stackObject(nil)));
+    internal array<stackObject> obj = new((uintptr)((uintptr)_WorkbufSize - @unsafe.Sizeof(new stackObjectBufHdr(nil))) / @unsafe.Sizeof(new stackObject(nil)));
 }
 
 [GoType] partial struct stackObjectBufHdr {
-    internal runtime.@internal.sys_package.NotInHeap _;
+    internal sys.NotInHeap _;
     internal partial ref workbufhdr workbufhdr { get; }
     internal ж<stackObjectBuf> next;
 }
@@ -146,7 +146,7 @@ internal const bool stackTraceDebug = false;
 // A stackObject represents a variable on the stack that has had
 // its address taken.
 [GoType] partial struct stackObject {
-    internal runtime.@internal.sys_package.NotInHeap _;
+    internal sys.NotInHeap _;
     internal uint32 off;             // offset above stack.lo
     internal uint32 size;             // size of object
     internal ж<stackObjectRecord> r; // info of the object (for ptr/nonptr bits). nil if object has been scanned.
@@ -157,12 +157,13 @@ internal const bool stackTraceDebug = false;
 // obj.r = r, but with no write barrier.
 //
 //go:nowritebarrier
-[GoRecv] internal static void setRecord(this ref stackObject obj, ж<stackObjectRecord> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+internal static void setRecord(this ж<stackObject> Ꮡobj, ж<stackObjectRecord> Ꮡr) {
+    ref var obj = ref Ꮡobj.Value;
+    ref var r = ref Ꮡr.Value;
 
     // Types of stack objects are always in read-only memory, not the heap.
     // So not using a write barrier is ok.
-    ((ж<uintptr>)(uintptr)(((@unsafe.Pointer)(Ꮡ(obj.r))))).val = ((uintptr)new @unsafe.Pointer(Ꮡr));
+    ((ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡobj.of(stackObject.Ꮡr)).Value))).Value = (uintptr)new @unsafe.Pointer(Ꮡr);
 }
 
 // A stackScanState keeps track of the state used during the GC walk
@@ -196,35 +197,37 @@ internal const bool stackTraceDebug = false;
 
 // Add p as a potential pointer to a stack object.
 // p must be a stack address.
-[GoRecv] internal static void putPtr(this ref stackScanState s, uintptr Δp, bool conservative) {
+internal static void putPtr(this ж<stackScanState> Ꮡs, uintptr Δp, bool conservative) {
+    ref var s = ref Ꮡs.Value;
+
     if (Δp < s.stack.lo || Δp >= s.stack.hi) {
         @throw("address not a stack address"u8);
     }
-    var head = Ꮡ(s.buf);
+    var head = Ꮡs.of(stackScanState.Ꮡbuf);
     if (conservative) {
-        head = Ꮡ(s.cbuf);
+        head = Ꮡs.of(stackScanState.Ꮡcbuf);
     }
-    var buf = head.val;
+    var buf = head.ValueSlot;
     if (buf == nil){
         // Initial setup.
         buf = (ж<stackWorkBuf>)(uintptr)(new @unsafe.Pointer(getempty()));
-        buf.nobj = 0;
-        buf.next = default!;
-        head.val = buf;
+        buf.Value.nobj = 0;
+        buf.Value.next = default!;
+        head.ValueSlot = buf;
     } else 
-    if (buf.nobj == len((~buf).obj)) {
+    if ((~buf).nobj == len((~buf).obj)) {
         if (s.freeBuf != nil){
             buf = s.freeBuf;
             s.freeBuf = default!;
         } else {
             buf = (ж<stackWorkBuf>)(uintptr)(new @unsafe.Pointer(getempty()));
         }
-        buf.nobj = 0;
-        buf.next = head.val;
-        head.val = buf;
+        buf.Value.nobj = 0;
+        buf.Value.next = head.ValueSlot;
+        head.ValueSlot = buf;
     }
-    (~buf).obj[buf.nobj] = Δp;
-    buf.nobj++;
+    buf.Value.obj[(~buf).nobj] = Δp;
+    buf.Value.nobj++;
 }
 
 // Remove and return a potential pointer to a stack object.
@@ -232,32 +235,33 @@ internal const bool stackTraceDebug = false;
 //
 // This prefers non-conservative pointers so we scan stack objects
 // precisely if there are any non-conservative pointers to them.
-[GoRecv] internal static (uintptr Δp, bool conservative) getPtr(this ref stackScanState s) {
+internal static (uintptr Δp, bool conservative) getPtr(this ж<stackScanState> Ꮡs) {
     uintptr Δp = default!;
     bool conservative = default!;
 
-    foreach (var (_, head) in new ж<ж<stackWorkBuf>>[]{Ꮡ(s.buf), Ꮡ(s.cbuf)}.slice()) {
-        var buf = head.val;
+    ref var s = ref Ꮡs.Value;
+    foreach (var (_, head) in new ж<ж<stackWorkBuf>>[]{Ꮡs.of(stackScanState.Ꮡbuf), Ꮡs.of(stackScanState.Ꮡcbuf)}.slice()) {
+        var buf = head.ValueSlot;
         if (buf == nil) {
             // Never had any data.
             continue;
         }
-        if (buf.nobj == 0) {
+        if ((~buf).nobj == 0) {
             if (s.freeBuf != nil) {
                 // Free old freeBuf.
                 putempty((ж<workbuf>)(uintptr)(new @unsafe.Pointer(s.freeBuf)));
             }
             // Move buf to the freeBuf.
             s.freeBuf = buf;
-            buf = buf.next;
-            head.val = buf;
+            buf = buf.Value.next;
+            head.ValueSlot = buf;
             if (buf == nil) {
                 // No more data in this list.
                 continue;
             }
         }
-        buf.nobj--;
-        return ((~buf).obj[buf.nobj], head == Ꮡ(s.cbuf));
+        buf.Value.nobj--;
+        return ((~buf).obj[(~buf).nobj], head == Ꮡs.of(stackScanState.Ꮡcbuf));
     }
     // No more data in either list.
     if (s.freeBuf != nil) {
@@ -269,31 +273,31 @@ internal const bool stackTraceDebug = false;
 
 // addObject adds a stack object at addr of type typ to the set of stack objects.
 [GoRecv] internal static void addObject(this ref stackScanState s, uintptr addr, ж<stackObjectRecord> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     var x = s.tail;
     if (x == nil) {
         // initial setup
         x = (ж<stackObjectBuf>)(uintptr)(new @unsafe.Pointer(getempty()));
-        x.next = default!;
+        x.Value.next = default!;
         s.head = x;
         s.tail = x;
     }
-    if (x.nobj > 0 && ((uint32)(addr - s.stack.lo)) < (~x).obj[x.nobj - 1].off + (~x).obj[x.nobj - 1].size) {
+    if ((~x).nobj > 0 && (uint32)(addr - s.stack.lo) < (~x).obj[(~x).nobj - 1].off + (~x).obj[(~x).nobj - 1].size) {
         @throw("objects added out of order or overlapping"u8);
     }
-    if (x.nobj == len((~x).obj)) {
+    if ((~x).nobj == len((~x).obj)) {
         // full buffer - allocate a new buffer, add to end of linked list
         var y = (ж<stackObjectBuf>)(uintptr)(new @unsafe.Pointer(getempty()));
-        y.next = default!;
-        x.next = y;
+        y.Value.next = default!;
+        x.Value.next = y;
         s.tail = y;
         x = y;
     }
-    var obj = Ꮡ(~x).obj.at<stackObject>(x.nobj);
-    x.nobj++;
-    obj.val.off = ((uint32)(addr - s.stack.lo));
-    obj.val.size = ((uint32)r.size);
+    var obj = x.at(stackObjectBuf.Ꮡobj, (~x).nobj);
+    x.Value.nobj++;
+    obj.Value.off = (uint32)(addr - s.stack.lo);
+    obj.Value.size = (uint32)r.size;
     obj.setRecord(Ꮡr);
     // obj.left and obj.right will be initialized by buildIndex before use.
     s.nobjs++;
@@ -316,40 +320,40 @@ internal static (ж<stackObject> root, ж<stackObjectBuf> restBuf, nint restIdx)
     ж<stackObjectBuf> restBuf = default!;
     nint restIdx = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     if (n == 0) {
         return (default!, Ꮡx, idx);
     }
     ж<stackObject> left = default!;
     ж<stackObject> right = default!;
-    (left, x, idx) = binarySearchTree(Ꮡx, idx, n / 2);
-    root = Ꮡx.obj.at<stackObject>(idx);
+    (left, Ꮡx, idx) = binarySearchTree(Ꮡx, idx, n / 2); x = ref Ꮡx.Value;
+    root = Ꮡx.at(stackObjectBuf.Ꮡobj, idx);
     idx++;
     if (idx == len(x.obj)) {
-        x = x.next;
+        Ꮡx = x.next; x = ref Ꮡx.Value;
         idx = 0;
     }
-    (right, x, idx) = binarySearchTree(Ꮡx, idx, n - n / 2 - 1);
-    root.val.left = left;
-    root.val.right = right;
+    (right, Ꮡx, idx) = binarySearchTree(Ꮡx, idx, n - n / 2 - 1); x = ref Ꮡx.Value;
+    root.Value.left = left;
+    root.Value.right = right;
     return (root, Ꮡx, idx);
 }
 
 // findObject returns the stack object containing address a, if any.
 // Must have called buildIndex previously.
 [GoRecv] internal static ж<stackObject> findObject(this ref stackScanState s, uintptr a) {
-    var off = ((uint32)(a - s.stack.lo));
+    var off = (uint32)(a - s.stack.lo);
     var obj = s.root;
     while (ᐧ) {
         if (obj == nil) {
             return default!;
         }
         if (off < (~obj).off) {
-            obj = obj.val.left;
+            obj = obj.Value.left;
             continue;
         }
         if (off >= (~obj).off + (~obj).size) {
-            obj = obj.val.right;
+            obj = obj.Value.right;
             continue;
         }
         return obj;

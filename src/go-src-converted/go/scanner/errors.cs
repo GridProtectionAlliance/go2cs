@@ -4,9 +4,10 @@
 namespace go.go;
 
 using fmt = fmt_package;
-using token = go.token_package;
+using token = global::go.go.token_package;
 using io = io_package;
 using sort = sort_package;
+using global::go.go;
 
 partial class scanner_package {
 
@@ -15,7 +16,7 @@ partial class scanner_package {
 // the offending token, and the error condition is described
 // by Msg.
 [GoType] partial struct ΔError {
-    public go.token_package.ΔPosition Pos;
+    public tokenꓸPosition Pos;
     public @string Msg;
 }
 
@@ -29,7 +30,7 @@ public static @string Error(this ΔError e) {
     return e.Msg;
 }
 
-[GoType("[]ΔError")] partial struct ErrorList;
+[GoType("[]ж<ΔError>")] partial struct ErrorList;
 
 // Add adds an [Error] with given position and error message to an [ErrorList].
 [GoRecv] public static void Add(this ref ErrorList p, tokenꓸPosition pos, @string msg) {
@@ -37,8 +38,8 @@ public static @string Error(this ΔError e) {
 }
 
 // Reset resets an [ErrorList] to no errors.
-[GoRecv] public static unsafe void Reset(this ref ErrorList p) {
-    p = new Span<ж<ErrorList>>((ErrorList**), 0);
+[GoRecv] public static void Reset(this ref ErrorList p) {
+    p = (p)[0..0];
 }
 
 // [ErrorList] implements the sort Interface.
@@ -51,8 +52,8 @@ public static void Swap(this ErrorList p, nint i, nint j) {
 }
 
 public static bool Less(this ErrorList p, nint i, nint j) {
-    var e = Ꮡ(p[i].Pos);
-    var f = Ꮡ(p[j].Pos);
+    var e = p[i].of(scanner_package.ΔError.ᏑPos);
+    var f = p[j].of(scanner_package.ΔError.ᏑPos);
     // Note that it is not sufficient to simply compare file offsets because
     // the offsets do not reflect modified line information (through //line
     // comments).
@@ -65,7 +66,7 @@ public static bool Less(this ErrorList p, nint i, nint j) {
     if ((~e).Column != (~f).Column) {
         return (~e).Column < (~f).Column;
     }
-    return p[i].Msg < p[j].Msg;
+    return (~p[i]).Msg < (~p[j]).Msg;
 }
 
 // Sort sorts an [ErrorList]. *[Error] entries are sorted by position,
@@ -76,18 +77,20 @@ public static void Sort(this ErrorList p) {
 }
 
 // RemoveMultiples sorts an [ErrorList] and removes all but the first error per line.
-[GoRecv] public static unsafe void RemoveMultiples(this ref ErrorList p) {
-    sort.Sort(~p);
+public static void RemoveMultiples(this ж<ErrorList> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    sort.Sort(new ErrorListжInterface(Ꮡp));
     tokenꓸPosition last = default!;                          // initial last.Line is != any legal error line
     nint i = 0;
     foreach (var (_, e) in p) {
         if ((~e).Pos.Filename != last.Filename || (~e).Pos.Line != last.Line) {
-            last = e.val.Pos;
-            (ж<ж<ErrorList>>)[i] = e;
+            last = e.Value.Pos;
+            (p)[i] = e;
             i++;
         }
     }
-    p = new Span<ж<ErrorList>>((ErrorList**), i);
+    p = (p)[0..(int)(i)];
 }
 
 // An [ErrorList] implements the error interface.
@@ -97,7 +100,7 @@ public static @string Error(this ErrorList p) {
         return "no errors"u8;
     }
     case 1: {
-        return p[0].Error();
+        return (~p[0]).Error();
     }}
 
     return fmt.Sprintf("%s (and %d more errors)"u8, p[0], len(p) - 1);

@@ -24,11 +24,12 @@ using io = io_package;
 using log = log_package;
 using mime = mime_package;
 using net = net_package;
-using textproto = net.textproto_package;
+using textproto = go.net.textproto_package;
 using strings = strings_package;
 using sync = sync_package;
 using time = time_package;
 using utf8 = unicode.utf8_package;
+using go.net;
 using unicode;
 using ꓸꓸꓸany = Span<any>;
 
@@ -49,7 +50,7 @@ internal static void Printf(this debugT d, @string format, params ꓸꓸꓸany a
 // A Message represents a parsed mail message.
 [GoType] partial struct Message {
     public Header Header;
-    public io_package.Reader Body;
+    public io.Reader Body;
 }
 
 // ReadMessage reads a message from r.
@@ -60,13 +61,13 @@ public static (ж<Message> msg, error err) ReadMessage(io.Reader r) {
     error err = default!;
 
     var tp = textproto.NewReader(bufio.NewReader(r));
-    (hdr, err) = readHeader(tp);
-    if (err != default! && (!AreEqual(err, io.EOF) || len(hdr) == 0)) {
+    (var hdr, err) = readHeader(tp);
+    if (err != default! && (!AreEqual(err, io.EOF) || builtin.len(hdr) == 0)) {
         return (default!, err);
     }
     return (Ꮡ(new Message(
         Header: ((Header)hdr),
-        Body: (~tp).R
+        Body: new bufio_ReaderжReader((~tp).R)
     )), default!);
 }
 
@@ -78,12 +79,12 @@ public static (ж<Message> msg, error err) ReadMessage(io.Reader r) {
 // This function copies the relevant code from net/textproto,
 // simplified for RFC 5322.
 internal static (map<@string, slice<@string>>, error) readHeader(ж<textproto.Reader> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     var m = new map<@string, slice<@string>>();
     // The first line cannot start with a leading space.
     {
-        (buf, err) = r.R.Peek(1); if (err == default! && (buf[0] == (rune)' ' || buf[0] == (rune)'\t')) {
+        var (buf, err) = r.R.Peek(1); if (err == default! && (buf[0] == (rune)' ' || buf[0] == (rune)'\t')) {
             var (line, errΔ1) = r.ReadLine();
             if (errΔ1 != default!) {
                 return (m, errΔ1);
@@ -117,7 +118,8 @@ internal static (map<@string, slice<@string>>, error) readHeader(ж<textproto.Re
 
 // Layouts suitable for passing to time.Parse.
 // These are tried in order.
-internal static sync.Once dateLayoutsBuildOnce;
+internal static ж<sync.Once> ᏑdateLayoutsBuildOnce = new(default(sync.Once));
+internal static ref sync.Once dateLayoutsBuildOnce => ref ᏑdateLayoutsBuildOnce.Value;
 
 internal static slice<@string> dateLayouts;
 
@@ -150,7 +152,7 @@ internal static void buildDateLayouts() {
 
 // ParseDate parses an RFC 5322 date string.
 public static (time.Time, error) ParseDate(@string date) {
-    dateLayoutsBuildOnce.Do(buildDateLayouts);
+    ᏑdateLayoutsBuildOnce.Do(buildDateLayouts);
     // CR and LF must match and are tolerated anywhere in the date field.
     date = strings.ReplaceAll(date, "\r\n"u8, ""u8);
     if (strings.Contains(date, "\r"u8)) {
@@ -162,7 +164,7 @@ public static (time.Time, error) ParseDate(@string date) {
     // RFC 5322: zone = (FWS ( "+" / "-" ) 4DIGIT) / obs-zone
     // zone length is always 5 chars unless obsolete (obs-zone)
     {
-        nint ind = strings.IndexAny(p.s, "+-"u8); if (ind != -1 && len(p.s) >= ind + 5){
+        nint ind = strings.IndexAny(p.s, "+-"u8); if (ind != -1 && builtin.len(p.s) >= ind + 5){
             date = p.s[..(int)(ind + 5)];
             p.s = p.s[(int)(ind + 5)..];
         } else {
@@ -177,7 +179,7 @@ public static (time.Time, error) ParseDate(@string date) {
                     indΔ1++;
                 }
             }
-            if (indΔ1 != -1 && len(p.s) >= indΔ1 + 5) {
+            if (indΔ1 != -1 && builtin.len(p.s) >= indΔ1 + 5) {
                 // The last letter T of the obsolete time zone is checked when no standard time zone is found.
                 // If T is misplaced, the date to parse is garbage.
                 date = p.s[..(int)(indΔ1 + 1)];
@@ -196,7 +198,8 @@ public static (time.Time, error) ParseDate(@string date) {
     }
     return (new time.Time(nil), errors.New("mail: header could not be parsed"u8));
 }
-/* visitMapType: map[string][]string */
+
+[GoType("map[@string, slice<@string>]")] partial struct Header;
 
 // Get gets the first value associated with the given key.
 // It is case insensitive; CanonicalMIMEHeaderKey is used
@@ -205,7 +208,7 @@ public static (time.Time, error) ParseDate(@string date) {
 // To access multiple values of a key, or to use non-canonical keys,
 // access the map directly.
 public static @string Get(this Header h, @string key) {
-    return ((textproto.MIMEHeader)h).Get(key);
+    return ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Get(key);
 }
 
 public static error ErrHeaderNotPresent = errors.New("mail: header not in message"u8);
@@ -233,7 +236,7 @@ public static (slice<ж<Address>>, error) AddressList(this Header h, @string key
 // as Address{Name: "Barry Gibbs", Address: "bg@example.com"}.
 [GoType] partial struct Address {
     public @string Name; // Proper name; may be empty.
-    public @string Address; // user@domain
+    public @string ΔAddress; // user@domain
 }
 
 // ParseAddress parses a single RFC 5322 address, e.g. "Barry Gibbs <bg@example.com>"
@@ -249,7 +252,7 @@ public static (slice<ж<Address>>, error) ParseAddressList(@string list) {
 // An AddressParser is an RFC 5322 address parser.
 [GoType] partial struct AddressParser {
     // WordDecoder optionally specifies a decoder for RFC 2047 encoded-words.
-    public ж<mime_package.WordDecoder> WordDecoder;
+    public ж<mime.WordDecoder> WordDecoder;
 }
 
 // Parse parses a single RFC 5322 address of the
@@ -269,15 +272,15 @@ public static (slice<ж<Address>>, error) ParseAddressList(@string list) {
 // the name will be rendered according to RFC 2047.
 [GoRecv] public static @string String(this ref Address a) {
     // Format address local@domain
-    nint at = strings.LastIndex(a.Address, "@"u8);
+    nint at = strings.LastIndex(a.ΔAddress, "@"u8);
     @string local = default!;
     @string domain = default!;
     if (at < 0){
         // This is a malformed address ("@" is required in addr-spec);
         // treat the whole address as local-part.
-        local = a.Address;
+        local = a.ΔAddress;
     } else {
-        (local, domain) = (a.Address[..(int)(at)], a.Address[(int)(at + 1)..]);
+        (local, domain) = (a.ΔAddress[..(int)(at)], a.ΔAddress[(int)(at + 1)..]);
     }
     // Add quotes if needed
     var quoteLocal = false;
@@ -289,7 +292,7 @@ public static (slice<ж<Address>>, error) ParseAddressList(@string list) {
             // Dots are okay if they are surrounded by atext.
             // We only need to check that the previous byte is
             // not a dot, and this isn't the end of the string.
-            if (i > 0 && local[i - 1] != (rune)'.' && i < len(local) - 1) {
+            if (i > 0 && local[i - 1] != (rune)'.' && i < builtin.len(local) - 1) {
                 continue;
             }
         }
@@ -327,10 +330,12 @@ public static (slice<ж<Address>>, error) ParseAddressList(@string list) {
 
 [GoType] partial struct addrParser {
     internal @string s;
-    internal ж<mime_package.WordDecoder> dec; // may be nil
+    internal ж<mime.WordDecoder> dec; // may be nil
 }
 
-[GoRecv] internal static (slice<ж<Address>>, error) parseAddressList(this ref addrParser p) {
+internal static (slice<ж<Address>>, error) parseAddressList(this ж<addrParser> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     slice<ж<Address>> list = default!;
     while (ᐧ) {
         p.skipSpace();
@@ -338,11 +343,11 @@ public static (slice<ж<Address>>, error) ParseAddressList(@string list) {
         if (p.consume((rune)',')) {
             continue;
         }
-        (addrs, err) = p.parseAddress(true);
+        var (addrs, err) = Ꮡp.parseAddress(true);
         if (err != default!) {
             return (default!, err);
         }
-        list = append(list, Ꮡaddrs.ꓸꓸꓸ);
+        list = append(list, addrs.ꓸꓸꓸ);
         if (!p.skipCFWS()) {
             return (default!, errors.New("mail: misformatted parenthetical comment"u8));
         }
@@ -363,8 +368,10 @@ public static (slice<ж<Address>>, error) ParseAddressList(@string list) {
     return (list, default!);
 }
 
-[GoRecv] internal static (ж<Address>, error) parseSingleAddress(this ref addrParser p) {
-    (addrs, err) = p.parseAddress(true);
+internal static (ж<Address>, error) parseSingleAddress(this ж<addrParser> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    var (addrs, err) = Ꮡp.parseAddress(true);
     if (err != default!) {
         return (default!, err);
     }
@@ -374,17 +381,19 @@ public static (slice<ж<Address>>, error) ParseAddressList(@string list) {
     if (!p.empty()) {
         return (default!, fmt.Errorf("mail: expected single address, got %q"u8, p.s));
     }
-    if (len(addrs) == 0) {
+    if (builtin.len(addrs) == 0) {
         return (default!, errors.New("mail: empty group"u8));
     }
-    if (len(addrs) > 1) {
+    if (builtin.len(addrs) > 1) {
         return (default!, errors.New("mail: group with multiple addresses"u8));
     }
     return (addrs[0], default!);
 }
 
 // parseAddress parses a single RFC 5322 address at the start of p.
-[GoRecv] internal static (slice<ж<Address>>, error) parseAddress(this ref addrParser p, bool handleGroup) {
+internal static (slice<ж<Address>>, error) parseAddress(this ж<addrParser> Ꮡp, bool handleGroup) {
+    ref var p = ref Ꮡp.Value;
+
     debug.Printf("parseAddress: %q"u8, p.s);
     p.skipSpace();
     if (p.empty()) {
@@ -396,20 +405,19 @@ public static (slice<ж<Address>>, error) ParseAddressList(@string list) {
     // addr-spec has a more restricted grammar than name-addr,
     // so try parsing it first, and fallback to name-addr.
     // TODO(dsymonds): Is this really correct?
-    var (spec, err) = p.consumeAddrSpec();
+    var (spec, err) = Ꮡp.consumeAddrSpec();
     if (err == default!) {
         @string displayNameΔ1 = default!;
         p.skipSpace();
         if (!p.empty() && p.peek() == (rune)'(') {
-            (, err) = p.consumeDisplayNameComment();
+            (displayNameΔ1, err) = p.consumeDisplayNameComment();
             if (err != default!) {
                 return (default!, err);
             }
         }
-        return (new ж<Address>[]{new(
+        return (new ж<Address>[]{Ꮡ(new Address(
             Name: displayNameΔ1,
-            Address: spec
-        )
+            ΔAddress: spec))
         }.slice(), err);
     }
     debug.Printf("parseAddress: not an addr-spec: %v"u8, err);
@@ -426,7 +434,7 @@ public static (slice<ж<Address>>, error) ParseAddressList(@string list) {
     p.skipSpace();
     if (handleGroup) {
         if (p.consume((rune)':')) {
-            return p.consumeGroupList();
+            return Ꮡp.consumeGroupList();
         }
     }
     // angle-addr = "<" addr-spec ">"
@@ -448,7 +456,7 @@ public static (slice<ж<Address>>, error) ParseAddressList(@string list) {
         // likely meant to be "Full Name <...>".
         return (default!, errors.New("mail: no angle-addr"u8));
     }
-    (spec, err) = p.consumeAddrSpec();
+    (spec, err) = Ꮡp.consumeAddrSpec();
     if (err != default!) {
         return (default!, err);
     }
@@ -456,14 +464,15 @@ public static (slice<ж<Address>>, error) ParseAddressList(@string list) {
         return (default!, errors.New("mail: unclosed angle-addr"u8));
     }
     debug.Printf("parseAddress: spec=%q"u8, spec);
-    return (new ж<Address>[]{new(
+    return (new ж<Address>[]{Ꮡ(new Address(
         Name: displayName,
-        Address: spec
-    )
+        ΔAddress: spec))
     }.slice(), default!);
 }
 
-[GoRecv] internal static (slice<ж<Address>>, error) consumeGroupList(this ref addrParser p) {
+internal static (slice<ж<Address>>, error) consumeGroupList(this ж<addrParser> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     slice<ж<Address>> group = default!;
     // handle empty group.
     p.skipSpace();
@@ -476,11 +485,11 @@ public static (slice<ж<Address>>, error) ParseAddressList(@string list) {
     while (ᐧ) {
         p.skipSpace();
         // embedded groups not allowed.
-        (addrs, err) = p.parseAddress(false);
+        var (addrs, err) = Ꮡp.parseAddress(false);
         if (err != default!) {
             return (default!, err);
         }
-        group = append(group, Ꮡaddrs.ꓸꓸꓸ);
+        group = append(group, addrs.ꓸꓸꓸ);
         if (!p.skipCFWS()) {
             return (default!, errors.New("mail: misformatted parenthetical comment"u8));
         }
@@ -498,65 +507,69 @@ public static (slice<ж<Address>>, error) ParseAddressList(@string list) {
 }
 
 // consumeAddrSpec parses a single RFC 5322 addr-spec at the start of p.
-[GoRecv] internal static (@string spec, error err) consumeAddrSpec(this ref addrParser p) => func((defer, _) => {
+internal static (@string spec, error err) consumeAddrSpec(this ж<addrParser> Ꮡp) {
     @string spec = default!;
     error err = default!;
+    func((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
 
-    debug.Printf("consumeAddrSpec: %q"u8, p.s);
-    ref var orig = ref heap<addrParser>(out var Ꮡorig);
-    orig = p;
-    var origʗ1 = orig;
-    defer(() => {
-        if (err != default!) {
-            p = origʗ1;
+        debug.Printf("consumeAddrSpec: %q"u8, p.s);
+        ref var orig = ref heap<addrParser>(out var Ꮡorig);
+        orig = p;
+        var origʗ1 = orig;
+        defer(() => {
+            if (err != default!) {
+                Ꮡp.Value = origʗ1;
+            }
+        });
+        // local-part = dot-atom / quoted-string
+        @string localPart = default!;
+        p.skipSpace();
+        if (p.empty()) {
+            (spec, err) = ("", errors.New("mail: no addr-spec"u8)); return;
         }
+        if (p.peek() == (rune)'"'){
+            // quoted-string
+            debug.Printf("consumeAddrSpec: parsing quoted-string"u8);
+            (localPart, err) = p.consumeQuotedString();
+            if (localPart == ""u8) {
+                err = errors.New("mail: empty quoted string in addr-spec"u8);
+            }
+        } else {
+            // dot-atom
+            debug.Printf("consumeAddrSpec: parsing dot-atom"u8);
+            (localPart, err) = p.consumeAtom(true, false);
+        }
+        if (err != default!) {
+            debug.Printf("consumeAddrSpec: failed: %v"u8, err);
+            (spec, err) = ("", err); return;
+        }
+        if (!p.consume((rune)'@')) {
+            (spec, err) = ("", errors.New("mail: missing @ in addr-spec"u8)); return;
+        }
+        // domain = dot-atom / domain-literal
+        @string domain = default!;
+        p.skipSpace();
+        if (p.empty()) {
+            (spec, err) = ("", errors.New("mail: no domain in addr-spec"u8)); return;
+        }
+        if (p.peek() == (rune)'['){
+            // domain-literal
+            (domain, err) = p.consumeDomainLiteral();
+            if (err != default!) {
+                (spec, err) = ("", err); return;
+            }
+        } else {
+            // dot-atom
+            (domain, err) = p.consumeAtom(true, false);
+            if (err != default!) {
+                (spec, err) = ("", err); return;
+            }
+        }
+        (spec, err) = (localPart + "@" + domain, default!);
     });
-    // local-part = dot-atom / quoted-string
-    @string localPart = default!;
-    p.skipSpace();
-    if (p.empty()) {
-        return ("", errors.New("mail: no addr-spec"u8));
-    }
-    if (p.peek() == (rune)'"'){
-        // quoted-string
-        debug.Printf("consumeAddrSpec: parsing quoted-string"u8);
-        (localPart, err) = p.consumeQuotedString();
-        if (localPart == ""u8) {
-            err = errors.New("mail: empty quoted string in addr-spec"u8);
-        }
-    } else {
-        // dot-atom
-        debug.Printf("consumeAddrSpec: parsing dot-atom"u8);
-        (localPart, err) = p.consumeAtom(true, false);
-    }
-    if (err != default!) {
-        debug.Printf("consumeAddrSpec: failed: %v"u8, err);
-        return ("", err);
-    }
-    if (!p.consume((rune)'@')) {
-        return ("", errors.New("mail: missing @ in addr-spec"u8));
-    }
-    // domain = dot-atom / domain-literal
-    @string domain = default!;
-    p.skipSpace();
-    if (p.empty()) {
-        return ("", errors.New("mail: no domain in addr-spec"u8));
-    }
-    if (p.peek() == (rune)'['){
-        // domain-literal
-        (domain, err) = p.consumeDomainLiteral();
-        if (err != default!) {
-            return ("", err);
-        }
-    } else {
-        // dot-atom
-        (domain, err) = p.consumeAtom(true, false);
-        if (err != default!) {
-            return ("", err);
-        }
-    }
-    return (localPart + "@"u8 + domain, default!);
-});
+    return (spec, err);
+}
 
 // consumePhrase parses the RFC 5322 phrase at the start of p.
 [GoRecv] internal static (@string phrase, error err) consumePhrase(this ref addrParser p) {
@@ -569,7 +582,7 @@ public static (slice<ж<Address>>, error) ParseAddressList(@string list) {
     bool isPrevEncoded = default!;
     while (ᐧ) {
         // obs-phrase allows CFWS after one word
-        if (len(words) > 0) {
+        if (builtin.len(words) > 0) {
             if (!p.skipCFWS()) {
                 return ("", errors.New("mail: misformatted parenthetical comment"u8));
             }
@@ -598,14 +611,14 @@ public static (slice<ж<Address>>, error) ParseAddressList(@string list) {
         }
         debug.Printf("consumePhrase: consumed %q"u8, word);
         if (isPrevEncoded && isEncoded){
-            words[len(words) - 1] += word;
+            words[builtin.len(words) - 1] += word;
         } else {
             words = append(words, word);
         }
         isPrevEncoded = isEncoded;
     }
     // Ignore any error if we got at least one word.
-    if (err != default! && len(words) == 0) {
+    if (err != default! && builtin.len(words) == 0) {
         debug.Printf("consumePhrase: hit err: %v"u8, err);
         return ("", fmt.Errorf("mail: missing word in phrase: %v"u8, err));
     }
@@ -698,7 +711,8 @@ break_Loop:;
     if (i == 0) {
         return ("", errors.New("mail: invalid string"u8));
     }
-    (atom, p.s) = (p.s[..(int)(i)], p.s[(int)(i)..]);
+    atom = p.s[..(int)(i)];
+    p.s = p.s[(int)(i)..];
     if (!permissive) {
         if (strings.HasPrefix(atom, "."u8)) {
             return ("", errors.New("mail: leading dot in atom"u8));
@@ -746,7 +760,7 @@ break_Loop:;
     if (net.ParseIP(dtext) == default!) {
         return ("", fmt.Errorf("mail: invalid IP address in domain-literal: %q"u8, dtext));
     }
-    return ("["u8 + dtext + "]"u8, default!);
+    return ("[" + dtext + "]", default!);
 }
 
 [GoRecv] internal static (@string, error) consumeDisplayNameComment(this ref addrParser p) {
@@ -793,7 +807,7 @@ break_Loop:;
 }
 
 [GoRecv] internal static nint len(this ref addrParser p) {
-    return len(p.s);
+    return builtin.len(p.s);
 }
 
 // skipCFWS skips CFWS as defined in RFC5322.
@@ -845,7 +859,7 @@ break_Loop:;
 
     var dec = p.dec;
     if (dec == nil) {
-        dec = Ꮡ(rfc2047Decoder);
+        dec = Ꮡrfc2047Decoder;
     }
     // Substitute our own CharsetReader function so that we can tell
     // whether an error from the Decode method was due to the
@@ -853,16 +867,15 @@ break_Loop:;
     // We used to look for the charsetError type in the error result,
     // but that behaves badly with CharsetReaders other than the
     // one in rfc2047Decoder.
-    var adec = dec.val;
+    var adec = dec.Value;
     var charsetReaderError = false;
-    adec.CharsetReader = 
     var decʗ1 = dec;
-    (@string charset, io.Reader input) => {
+    adec.CharsetReader = (@string charset, io.Reader input) => {
         if ((~decʗ1).CharsetReader == default!) {
             charsetReaderError = true;
             return (default!, ((charsetError)charset));
         }
-        (r, errΔ1) = (~decʗ1).CharsetReader(charset, input);
+        var (r, errΔ1) = (~decʗ1).CharsetReader(charset, input);
         if (errΔ1 != default!) {
             charsetReaderError = true;
         }
@@ -884,10 +897,10 @@ break_Loop:;
     return (s, false, default!);
 }
 
-internal static mime.WordDecoder rfc2047Decoder = new mime.WordDecoder(
-    CharsetReader: 
-    (@string charset, io.Reader input) => (default!, ((charsetError)charset))
-);
+internal static ж<mime.WordDecoder> Ꮡrfc2047Decoder = new(new mime.WordDecoder(
+    CharsetReader: (@string charset, io.Reader input) => (default!, ((charsetError)charset))
+));
+internal static ref mime.WordDecoder rfc2047Decoder => ref Ꮡrfc2047Decoder.Value;
 
 [GoType("@string")] partial struct charsetError;
 
@@ -922,18 +935,18 @@ internal static bool isQtext(rune r) {
 
 // quoteString renders a string as an RFC 5322 quoted-string.
 internal static @string quoteString(@string s) {
-    strings.Builder b = default!;
-    b.WriteByte((rune)'"');
+    ref var b = ref heap(new strings.Builder(), out var Ꮡb);
+    Ꮡb.WriteByte((rune)'"');
     foreach (var (_, r) in s) {
         if (isQtext(r) || isWSP(r)){
-            b.WriteRune(r);
+            Ꮡb.WriteRune(r);
         } else 
         if (isVchar(r)) {
-            b.WriteByte((rune)'\\');
-            b.WriteRune(r);
+            Ꮡb.WriteByte((rune)'\\');
+            Ꮡb.WriteRune(r);
         }
     }
-    b.WriteByte((rune)'"');
+    Ꮡb.WriteByte((rune)'"');
     return b.String();
 }
 

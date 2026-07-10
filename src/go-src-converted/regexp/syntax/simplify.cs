@@ -12,34 +12,34 @@ partial class syntax_package {
 // may have been duplicated or removed. For example, the simplified form
 // for /(x){1,2}/ is /(x)(x)?/ but both parentheses capture as $1.
 // The returned regexp may share structure with or be the original.
-[GoRecv("capture")] public static ж<Regexp> Simplify(this ref Regexp re) {
+public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
+    ref var re = ref Ꮡre.Value;
+
     if (re == nil) {
         return default!;
     }
     var exprᴛ1 = re.Op;
     if (exprᴛ1 == OpCapture || exprᴛ1 == OpConcat || exprᴛ1 == OpAlternate) {
-        var nre = re;
-        ref var i = ref heap(new nint(), out var Ꮡi);
-
+        var nre = Ꮡre;
         foreach (var (i, sub) in re.Sub) {
             // Simplify children, building new Regexp if children change.
             var nsub = sub.Simplify();
-            if (nre == re && nsub != sub) {
+            if (nre == Ꮡre && nsub != sub) {
                 // Start a copy.
                 nre = @new<Regexp>();
-                nre.val = re;
-                nre.val.Rune = default!;
-                nre.val.Sub = append((~nre).Sub0[..0], re.Sub[..(int)(i)].ꓸꓸꓸ);
+                nre.Value = re;
+                nre.Value.Rune = default!;
+                nre.Value.Sub = builtin.append((~nre).Sub0[..0], re.Sub[..(int)(i)].ꓸꓸꓸ);
             }
-            if (nre != re) {
-                nre.val.Sub = append((~nre).Sub, nsub);
+            if (nre != Ꮡre) {
+                nre.Value.Sub = builtin.append((~nre).Sub, nsub);
             }
         }
         return nre;
     }
     if (exprᴛ1 == OpStar || exprᴛ1 == OpPlus || exprᴛ1 == OpQuest) {
         var sub = re.Sub[0].Simplify();
-        return simplify1(re.Op, re.Flags, sub, re);
+        return simplify1(re.Op, re.Flags, sub, Ꮡre);
     }
     if (exprᴛ1 == OpRepeat) {
         if (re.Min == 0 && re.Max == 0) {
@@ -61,11 +61,11 @@ partial class syntax_package {
             }
             // General case: x{4,} is xxxx+.
             var nre = Ꮡ(new Regexp(Op: OpConcat));
-            nre.val.Sub = (~nre).Sub0[..0];
+            nre.Value.Sub = (~nre).Sub0[..0];
             for (nint i = 0; i < re.Min - 1; i++) {
-                nre.val.Sub = append((~nre).Sub, sub);
+                nre.Value.Sub = builtin.append((~nre).Sub, sub);
             }
-            nre.val.Sub = append((~nre).Sub, simplify1(OpPlus, re.Flags, sub, nil));
+            nre.Value.Sub = builtin.append((~nre).Sub, simplify1(OpPlus, re.Flags, sub, nil));
             return nre;
         }
         if (re.Min == 1 && re.Max == 1) {
@@ -81,9 +81,9 @@ partial class syntax_package {
         ж<Regexp> prefix = default!;
         if (re.Min > 0) {
             prefix = Ꮡ(new Regexp(Op: OpConcat));
-            prefix.val.Sub = (~prefix).Sub0[..0];
+            prefix.Value.Sub = (~prefix).Sub0[..0];
             for (nint i = 0; i < re.Min; i++) {
-                prefix.val.Sub = append((~prefix).Sub, sub);
+                prefix.Value.Sub = builtin.append((~prefix).Sub, sub);
             }
         }
         if (re.Max > re.Min) {
@@ -91,13 +91,13 @@ partial class syntax_package {
             var suffix = simplify1(OpQuest, re.Flags, sub, nil);
             for (nint i = re.Min + 1; i < re.Max; i++) {
                 var nre2 = Ꮡ(new Regexp(Op: OpConcat));
-                nre2.val.Sub = append((~nre2).Sub0[..0], sub, suffix);
+                nre2.Value.Sub = builtin.append((~nre2).Sub0[..0], sub, suffix);
                 suffix = simplify1(OpQuest, re.Flags, nre2, nil);
             }
             if (prefix == nil) {
                 return suffix;
             }
-            prefix.val.Sub = append((~prefix).Sub, suffix);
+            prefix.Value.Sub = builtin.append((~prefix).Sub, suffix);
         }
         if (prefix != nil) {
             return prefix;
@@ -107,7 +107,7 @@ partial class syntax_package {
 Op: OpNoMatch));
     }
 
-    return SimplifyꓸᏑre;
+    return Ꮡre;
 }
 
 // simplify1 implements Simplify for the unary OpStar,
@@ -126,8 +126,8 @@ Op: OpNoMatch));
 // Letting them call simplify1 makes sure the expressions they
 // generate are simple.
 internal static ж<Regexp> simplify1(Op op, Flags flags, ж<Regexp> Ꮡsub, ж<Regexp> Ꮡre) {
-    ref var sub = ref Ꮡsub.val;
-    ref var re = ref Ꮡre.val;
+    ref var sub = ref Ꮡsub.DerefOrNil();
+    ref var re = ref Ꮡre.DerefOrNil();
 
     // Special case: repeat the empty string as much as
     // you want, but it's still the empty string.
@@ -138,11 +138,11 @@ internal static ж<Regexp> simplify1(Op op, Flags flags, ж<Regexp> Ꮡsub, ж<R
     if (op == sub.Op && (Flags)(flags & NonGreedy) == (Flags)(sub.Flags & NonGreedy)) {
         return Ꮡsub;
     }
-    if (re != nil && re.Op == op && (Flags)(re.Flags & NonGreedy) == (Flags)(flags & NonGreedy) && Ꮡsub == re.Sub[0]) {
+    if (Ꮡre != nil && re.Op == op && (Flags)(re.Flags & NonGreedy) == (Flags)(flags & NonGreedy) && Ꮡsub == re.Sub[0]) {
         return Ꮡre;
     }
-    Ꮡre = Ꮡ(new Regexp(Op: op, Flags: flags)); re = ref Ꮡre.val;
-    re.Sub = append(re.Sub0[..0], Ꮡsub);
+    Ꮡre = Ꮡ(new Regexp(Op: op, Flags: flags)); re = ref Ꮡre.DerefOrNil();
+    re.Sub = builtin.append(re.Sub0[..0], Ꮡsub);
     return Ꮡre;
 }
 

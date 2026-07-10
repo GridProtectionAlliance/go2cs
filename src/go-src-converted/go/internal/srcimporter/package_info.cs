@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using astꓸFilter = go.go.ast_package.ΔFilter;
 global using execꓸError = go.os.exec_package.ΔError;
 global using osꓸDirEntry = go.io.fs_package.DirEntry;
 global using osꓸFileInfo = go.io.fs_package.FileInfo;
@@ -55,7 +54,8 @@ using static go.go.@internal.srcimporter_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(io.ReadCloser, error), io_package.ReadCloser>]
+[assembly: GoImplement<Importer, go.go.types_package.Importer>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.ReadCloser>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

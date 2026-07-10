@@ -5,11 +5,12 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using token = go.token_package;
+using token = global::go.go.token_package;
 using strings = strings_package;
 using sync = sync_package;
-using atomic = sync.atomic_package;
-using sync;
+using atomic = global::go.sync.atomic_package;
+using global::go.go;
+using global::go.sync;
 
 partial class types_package {
 
@@ -103,7 +104,7 @@ partial class types_package {
     internal ΔType fromRHS;
     // information for instantiated types; nil otherwise
     internal ж<Δinstance> inst;
-    internal sync_package.Mutex mu;     // guards all fields below
+    internal sync.Mutex mu;     // guards all fields below
     internal uint32 state_;         // the current state of this type; must only be accessed atomically
     internal ΔType underlying;         // possibly a *Named during setup; never a *Named once set up completely
     internal ж<TypeParamList> tparams; // type parameters, or nil
@@ -114,7 +115,7 @@ partial class types_package {
     // accessed.
     internal slice<ж<Func>> methods;
     // loader may be provided to lazily load type parameters, underlying type, and methods.
-    internal types.Func) loader;
+    internal Func<ж<Named>, (slice<ж<TypeParam>> tparams, ΔType underlying, slice<ж<Func>> methods)> loader;
 }
 
 // instance holds information that is only necessary for instantiated named
@@ -136,12 +137,12 @@ internal static readonly namedState complete = 2;  // all data is known
 // If the given type name obj doesn't have a type yet, its type is set to the returned named type.
 // The underlying type must not be a *Named.
 public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<ж<Func>> methods) {
-    ref var obj = ref Ꮡobj.val;
+    ref var obj = ref Ꮡobj.Value;
 
     if (asNamed(underlying) != nil) {
         throw panic("underlying type must not be *Named");
     }
-    return ((ж<Checker>)(default!)).val.newNamed(Ꮡobj, underlying, methods);
+    return ((ж<Checker>)(default!)).newNamed(Ꮡobj, underlying, methods);
 }
 
 // resolve resolves the type parameters, methods, and underlying type of n.
@@ -151,38 +152,40 @@ public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<�
 // After resolution, the type parameters, methods, and underlying type of n are
 // accessible; but if n is an instantiated type, its methods may still be
 // unexpanded.
-[GoRecv("capture")] internal static ж<Named> resolve(this ref Named n) => func((defer, _) => {
-    if (n.state() >= resolved) {
+internal static ж<Named> resolve(this ж<Named> Ꮡn) => func((defer, recover) => {
+    ref var n = ref Ꮡn.Value;
+
+    if (Ꮡn.state() >= resolved) {
         // avoid locking below
-        return resolveꓸᏑn;
+        return Ꮡn;
     }
     // TODO(rfindley): if n.check is non-nil we can avoid locking here, since
     // type-checking is not concurrent. Evaluate if this is worth doing.
-    n.mu.Lock();
-    defer(n.mu.Unlock);
-    if (n.state() >= resolved) {
-        return resolveꓸᏑn;
+    Ꮡn.of(Named.Ꮡmu).Lock();
+    defer(Ꮡn.of(Named.Ꮡmu).Unlock);
+    if (Ꮡn.state() >= resolved) {
+        return Ꮡn;
     }
     if (n.inst != nil) {
         assert(n.underlying == default!);
         // n is an unresolved instance
         assert(n.loader == default!);
         // instances are created by instantiation, in which case n.loader is nil
-        var orig = n.inst.orig;
+        var orig = n.inst.Value.orig;
         orig.resolve();
-        var underlying = n.expandUnderlying();
-        n.tparams = orig.val.tparams;
+        var underlying = Ꮡn.expandUnderlying();
+        n.tparams = orig.Value.tparams;
         n.underlying = underlying;
-        n.fromRHS = orig.val.fromRHS;
+        n.fromRHS = orig.Value.fromRHS;
         // for cycle detection
         if (len((~orig).methods) == 0){
-            n.setState(complete);
+            Ꮡn.setState(complete);
             // nothing further to do
-            n.inst.ctxt = default!;
+            n.inst.Value.ctxt = default!;
         } else {
-            n.setState(resolved);
+            Ꮡn.setState(resolved);
         }
-        return resolveꓸᏑn;
+        return Ꮡn;
     }
     // TODO(mdempsky): Since we're passing n to the loader anyway
     // (necessary because types2 expects the receiver type for methods
@@ -195,7 +198,7 @@ public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<�
         assert(n.underlying == default!);
         assert(n.TypeArgs().Len() == 0);
         // instances are created by instantiation, in which case n.loader is nil
-        (tparams, underlying, methods) = n.loader(n);
+        var (tparams, underlying, methods) = n.loader(Ꮡn);
         n.tparams = bindTParams(tparams);
         n.underlying = underlying;
         n.fromRHS = underlying;
@@ -203,32 +206,37 @@ public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<�
         n.methods = methods;
         n.loader = default!;
     }
-    n.setState(complete);
-    return resolveꓸᏑn;
+    Ꮡn.setState(complete);
+    return Ꮡn;
 });
 
 // state atomically accesses the current state of the receiver.
-[GoRecv] internal static namedState state(this ref Named n) {
-    return ((namedState)atomic.LoadUint32(Ꮡ(n.state_)));
+internal static namedState state(this ж<Named> Ꮡn) {
+    ref var n = ref Ꮡn.Value;
+
+    return ((namedState)atomic.LoadUint32(Ꮡn.of(Named.Ꮡstate_)));
 }
 
 // setState atomically stores the given state for n.
 // Must only be called while holding n.mu.
-[GoRecv] internal static void setState(this ref Named n, namedState state) {
-    atomic.StoreUint32(Ꮡ(n.state_), ((uint32)state));
+internal static void setState(this ж<Named> Ꮡn, namedState state) {
+    ref var n = ref Ꮡn.Value;
+
+    atomic.StoreUint32(Ꮡn.of(Named.Ꮡstate_), (uint32)state);
 }
 
 // newNamed is like NewNamed but with a *Checker receiver.
-[GoRecv] public static ж<Named> newNamed(this ref Checker check, ж<TypeName> Ꮡobj, ΔType underlying, slice<ж<Func>> methods) {
-    ref var obj = ref Ꮡobj.val;
+internal static ж<Named> newNamed(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ΔType underlying, slice<ж<Func>> methods) {
+    ref var check = ref Ꮡcheck.Value;
+    ref var obj = ref Ꮡobj.Value;
 
-    var typ = Ꮡ(new Named(check: check, obj: obj, fromRHS: underlying, underlying: underlying, methods: methods));
+    var typ = Ꮡ(new Named(check: Ꮡcheck, obj: Ꮡobj, fromRHS: underlying, underlying: underlying, methods: methods));
     if (obj.typ == default!) {
-        obj.typ = typ;
+        obj.typ = new NamedжΔType(typ);
     }
     // Ensure that typ is always sanity-checked.
     if (check != nil) {
-        check.needsCleanup(~typ);
+        check.needsCleanup(new Namedжcleaner(typ));
     }
     return typ;
 }
@@ -239,32 +247,35 @@ public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<�
 //
 // If set, expanding is the named type instance currently being expanded, that
 // led to the creation of this instance.
-[GoRecv] public static ж<Named> newNamedInstance(this ref Checker check, tokenꓸPos pos, ж<Named> Ꮡorig, slice<ΔType> targs, ж<Named> Ꮡexpanding) {
-    ref var orig = ref Ꮡorig.val;
-    ref var expanding = ref Ꮡexpanding.val;
+internal static ж<Named> newNamedInstance(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ж<Named> Ꮡorig, slice<ΔType> targs, ж<Named> Ꮡexpanding) {
+    ref var check = ref Ꮡcheck.Value;
+    ref var orig = ref Ꮡorig.Value;
+    ref var expanding = ref Ꮡexpanding.DerefOrNil();
 
     assert(len(targs) > 0);
-    var obj = NewTypeName(pos, orig.obj.pkg, orig.obj.name, default!);
-    var inst = Ꮡ(new Δinstance(orig: orig, targs: newTypeList(targs)));
+    var obj = NewTypeName(pos, (~orig.obj).pkg, (~orig.obj).name, default!);
+    var inst = Ꮡ(new Δinstance(orig: Ꮡorig, targs: newTypeList(targs)));
     // Only pass the expanding context to the new instance if their packages
     // match. Since type reference cycles are only possible within a single
     // package, this is sufficient for the purposes of short-circuiting cycles.
     // Avoiding passing the context in other cases prevents unnecessary coupling
     // of types across packages.
-    if (expanding != nil && expanding.Obj().pkg == obj.pkg) {
-        inst.val.ctxt = expanding.inst.ctxt;
+    if (Ꮡexpanding != nil && (~expanding.Obj()).pkg == (~obj).pkg) {
+        inst.Value.ctxt = expanding.inst.Value.ctxt;
     }
-    var typ = Ꮡ(new Named(check: check, obj: obj, inst: inst));
-    obj.typ = typ;
+    var typ = Ꮡ(new Named(check: Ꮡcheck, obj: obj, inst: inst));
+    obj.Value.typ = new NamedжΔType(typ);
     // Ensure that typ is always sanity-checked.
     if (check != nil) {
-        check.needsCleanup(~typ);
+        check.needsCleanup(new Namedжcleaner(typ));
     }
     return typ;
 }
 
-[GoRecv] internal static void cleanup(this ref Named t) {
-    assert(t.inst == nil || t.inst.orig.inst == nil);
+internal static void cleanup(this ж<Named> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    assert(t.inst == nil || (~(~t.inst).orig).inst == nil);
     // Ensure that every defined type created in the course of type-checking has
     // either non-*Named underlying type, or is unexpanded.
     //
@@ -274,18 +285,15 @@ public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<�
     // The origin must have either been imported or type-checked and expanded
     // here, and in either case its underlying type will be fully expanded.
     switch (t.underlying.type()) {
-    case default! : {
+    case null: {
         if (t.TypeArgs().Len() == 0) {
             throw panic("nil underlying");
         }
         break;
     }
-    case Named.val : {
-        t.under();
-        break;
-    }
-    case Alias.val : {
-        t.under();
+    case ж<Named> _:
+    case ж<Alias> _: {
+        Ꮡt.under();
         break;
     }}
 
@@ -299,29 +307,35 @@ public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<�
     if (t.inst == nil) {
         return t.obj;
     }
-    return t.inst.orig.obj;
+    return (~(~t.inst).orig).obj;
 }
 
 // Origin returns the generic type from which the named type t is
 // instantiated. If t is not an instantiated type, the result is t.
-[GoRecv("capture")] public static ж<Named> Origin(this ref Named t) {
+public static ж<Named> Origin(this ж<Named> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t.inst == nil) {
-        return OriginꓸᏑt;
+        return Ꮡt;
     }
-    return t.inst.orig;
+    return (~t.inst).orig;
 }
 
 // TypeParams returns the type parameters of the named type t, or nil.
 // The result is non-nil for an (originally) generic type even if it is instantiated.
-[GoRecv] public static ж<TypeParamList> TypeParams(this ref Named t) {
-    return (~t.resolve()).tparams;
+public static ж<TypeParamList> TypeParams(this ж<Named> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return (~Ꮡt.resolve()).tparams;
 }
 
 // SetTypeParams sets the type parameters of the named type t.
 // t must not have type arguments.
-[GoRecv] public static void SetTypeParams(this ref Named t, slice<ж<TypeParam>> tparams) {
+public static void SetTypeParams(this ж<Named> Ꮡt, slice<ж<TypeParam>> tparams) {
+    ref var t = ref Ꮡt.Value;
+
     assert(t.inst == nil);
-    t.resolve().val.tparams = bindTParams(tparams);
+    Ꮡt.resolve().Value.tparams = bindTParams(tparams);
 }
 
 // TypeArgs returns the type arguments used to instantiate the named type t.
@@ -329,12 +343,14 @@ public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<�
     if (t.inst == nil) {
         return default!;
     }
-    return t.inst.targs;
+    return (~t.inst).targs;
 }
 
 // NumMethods returns the number of explicit methods defined for t.
-[GoRecv] public static nint NumMethods(this ref Named t) {
-    return len((~t.Origin().resolve()).methods);
+public static nint NumMethods(this ж<Named> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return len((~Ꮡt.Origin().resolve()).methods);
 }
 
 // Method returns the i'th method of named type t for 0 <= i < t.NumMethods().
@@ -348,30 +364,32 @@ public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<�
 // calls, the mapping from method index to corresponding method remains the same.
 // But the specific ordering is not specified and must not be relied on as it may
 // change in the future.
-[GoRecv] public static ж<Func> Method(this ref Named t, nint i) => func((defer, _) => {
-    t.resolve();
-    if (t.state() >= complete) {
+public static ж<Func> Method(this ж<Named> Ꮡt, nint i) => func((defer, recover) => {
+    ref var t = ref Ꮡt.Value;
+
+    Ꮡt.resolve();
+    if (Ꮡt.state() >= complete) {
         return t.methods[i];
     }
     assert(t.inst != nil);
     // only instances should have incomplete methods
-    var orig = t.inst.orig;
-    t.mu.Lock();
-    defer(t.mu.Unlock);
+    var orig = t.inst.Value.orig;
+    Ꮡt.of(Named.Ꮡmu).Lock();
+    defer(Ꮡt.of(Named.Ꮡmu).Unlock);
     if (len(t.methods) != len((~orig).methods)) {
         assert(len(t.methods) == 0);
         t.methods = new slice<ж<Func>>(len((~orig).methods));
     }
     if (t.methods[i] == nil) {
-        assert(t.inst.ctxt != nil);
+        assert((~t.inst).ctxt != nil);
         // we should still have a context remaining from the resolution phase
-        t.methods[i] = t.expandMethod(i);
-        t.inst.expandedMethods++;
+        t.methods[i] = Ꮡt.expandMethod(i);
+        t.inst.Value.expandedMethods++;
         // Check if we've created all methods at this point. If we have, mark the
         // type as fully expanded.
-        if (t.inst.expandedMethods == len((~orig).methods)) {
-            t.setState(complete);
-            t.inst.ctxt = default!;
+        if ((~t.inst).expandedMethods == len((~orig).methods)) {
+            Ꮡt.setState(complete);
+            t.inst.Value.ctxt = default!;
         }
     }
     // no need for a context anymore
@@ -380,18 +398,20 @@ public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<�
 
 // expandMethod substitutes type arguments in the i'th method for an
 // instantiated receiver.
-[GoRecv] internal static ж<Func> expandMethod(this ref Named t, nint i) {
+internal static ж<Func> expandMethod(this ж<Named> Ꮡt, nint i) {
+    ref var t = ref Ꮡt.Value;
+
     // t.orig.methods is not lazy. origm is the method instantiated with its
     // receiver type parameters (the "origin" method).
-    var origm = t.inst.orig.Method(i);
+    var origm = (~t.inst).orig.Method(i);
     assert(origm != nil);
     var check = t.check;
     // Ensure that the original method is type-checked.
     if (check != nil) {
-        check.objDecl(~origm, nil);
+        check.objDecl(new FuncжObject(origm), nil);
     }
-    var origSig = origm.typ._<ΔSignature.val>();
-    var (rbase, _) = deref(origSig.Recv().Type());
+    var origSig = (~origm).typ._<ж<ΔSignature>>();
+    var (rbase, _) = deref(origSig.Recv().of(Var.Ꮡobject).Type());
     // If rbase is t, then origm is already the instantiated method we're looking
     // for. In this case, we return origm to preserve the invariant that
     // traversing Method->Receiver Type->Method should get back to the same
@@ -399,41 +419,43 @@ public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<�
     //
     // This occurs if t is instantiated with the receiver type parameters, as in
     // the use of m in func (r T[_]) m() { r.m() }.
-    if (Ꮡrbase == ~t) {
+    if (AreEqual(rbase, t)) {
         return origm;
     }
     var sig = origSig;
     // We can only substitute if we have a correspondence between type arguments
     // and type parameters. This check is necessary in the presence of invalid
     // code.
-    if (origSig.RecvTypeParams().Len() == t.inst.targs.Len()) {
-        var smap = makeSubstMap(origSig.RecvTypeParams().list(), t.inst.targs.list());
+    if (origSig.RecvTypeParams().Len() == (~t.inst).targs.Len()) {
+        var smap = makeSubstMap(origSig.RecvTypeParams().list(), (~t.inst).targs.list());
         ж<Context> ctxt = default!;
         if (check != nil) {
             ctxt = check.context();
         }
-        sig = check.subst(origm.pos, ~origSig, smap, t, ctxt)._<ΔSignature.val>();
+        sig = check.subst((~origm).pos, new ΔSignatureжΔType(origSig), smap, Ꮡt, ctxt)._<ж<ΔSignature>>();
     }
     if (sig == origSig) {
         // No substitution occurred, but we still need to create a new signature to
         // hold the instantiated receiver.
         ref var copy = ref heap<ΔSignature>(out var Ꮡcopy);
-        copy = origSig.val;
+        copy = origSig.Value;
         sig = Ꮡcopy;
     }
     ΔType rtyp = default!;
     if (origm.hasPtrRecv()){
-        rtyp = ~NewPointer(~t);
+        rtyp = new PointerжΔType(NewPointer(new NamedжΔType(Ꮡt)));
     } else {
-        rtyp = ~t;
+        rtyp = new NamedжΔType(Ꮡt);
     }
-    sig.val.recv = substVar((~origSig).recv, rtyp);
-    return substFunc(origm, ~sig);
+    sig.Value.recv = substVar((~origSig).recv, rtyp);
+    return substFunc(origm, new ΔSignatureжΔType(sig));
 }
 
 // SetUnderlying sets the underlying type and marks t as complete.
 // t must not have type arguments.
-[GoRecv] public static void SetUnderlying(this ref Named t, ΔType underlying) {
+public static void SetUnderlying(this ж<Named> Ꮡt, ΔType underlying) {
+    ref var t = ref Ꮡt.Value;
+
     assert(t.inst == nil);
     if (underlying == default!) {
         throw panic("underlying type must not be nil");
@@ -441,7 +463,7 @@ public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<�
     if (asNamed(underlying) != nil) {
         throw panic("underlying type must not be *Named");
     }
-    t.resolve().val.underlying = underlying;
+    Ꮡt.resolve().Value.underlying = underlying;
     if (t.fromRHS == default!) {
         t.fromRHS = underlying;
     }
@@ -452,12 +474,13 @@ public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<�
 // AddMethod adds method m unless it is already in the method list.
 // The method must be in the same package as t, and t must not have
 // type arguments.
-[GoRecv] public static void AddMethod(this ref Named t, ж<Func> Ꮡm) {
-    ref var m = ref Ꮡm.val;
+public static void AddMethod(this ж<Named> Ꮡt, ж<Func> Ꮡm) {
+    ref var t = ref Ꮡt.Value;
+    ref var m = ref Ꮡm.Value;
 
-    assert(samePkg(t.obj.pkg, m.pkg));
+    assert(samePkg((~t.obj).pkg, m.pkg));
     assert(t.inst == nil);
-    t.resolve();
+    Ꮡt.resolve();
     if (t.methodIndex(m.name, false) < 0) {
         t.methods = append(t.methods, Ꮡm);
     }
@@ -472,13 +495,13 @@ public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<�
     }
     if (foldCase){
         foreach (var (i, m) in t.methods) {
-            if (strings.EqualFold(m.name, name)) {
+            if (strings.EqualFold((~m).name, name)) {
                 return i;
             }
         }
     } else {
         foreach (var (i, m) in t.methods) {
-            if (m.name == name) {
+            if ((~m).name == name) {
                 return i;
             }
         }
@@ -491,13 +514,17 @@ public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<�
 // Alias types.
 //
 // [underlying type]: https://go.dev/ref/spec#Underlying_types.
-[GoRecv] public static ΔType Underlying(this ref Named t) {
+public static ΔType Underlying(this ж<Named> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     // TODO(gri) Investigate if Unalias can be moved to where underlying is set.
-    return Unalias((~t.resolve()).underlying);
+    return Unalias((~Ꮡt.resolve()).underlying);
 }
 
-[GoRecv] public static @string String(this ref Named t) {
-    return TypeString(~t, default!);
+public static @string String(this ж<Named> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return TypeString(new NamedжΔType(Ꮡt), default!);
 }
 
 // ----------------------------------------------------------------------------
@@ -524,22 +551,24 @@ public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<�
 //
 // The type of C is the (named) type of A which is incomplete,
 // and which has as its underlying type the named type B.
-[GoRecv] internal static ΔType under(this ref Named n0) {
-    var u = n0.Underlying();
+internal static ΔType under(this ж<Named> Ꮡn0) {
+    ref var n0 = ref Ꮡn0.Value;
+
+    var u = Ꮡn0.Underlying();
     // If the underlying type of a defined type is not a defined
     // (incl. instance) type, then that is the desired underlying
     // type.
     ж<Named> n1 = default!;
     switch (u.type()) {
-    case default! u1: {
+    case null: {
         throw panic("nil underlying");
         break;
     }
     default: {
-        var u1 = u.type();
+        var u1 = u;
         return u;
     }
-    case Named.val u1: {
+    case ж<Named> u1: {
         n1 = u1;
         break;
     }}
@@ -553,37 +582,36 @@ public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<�
     // Invariant: after this point n0 as well as any named types in its
     // underlying chain should be set up when this function exits.
     var check = n0.check;
-    var n = n0;
+    var n = Ꮡn0;
     var seen = new map<ж<Named>, nint>();
     // types that need their underlying type resolved
     slice<Object> path = default!;                         // objects encountered, for cycle reporting
 loop:
     while (ᐧ) {
         seen[n] = len(seen);
-        path = append(path, ~(~n).obj);
+        path = append(path, (Object)(new TypeNameжObject((~n).obj)));
         n = n1;
         {
-            nint i = seen[n];
-            var ok = seen[n]; if (ok) {
+            var (i, ok) = seen[n, ꟷ]; if (ok) {
                 // cycle
                 check.cycleError(path[(int)(i)..], firstInSrc(path[(int)(i)..]));
-                u = ~Typ[Invalid];
+                u = new BasicжΔType(Typ[Invalid]);
                 break;
             }
         }
         u = n.Underlying();
         switch (u.type()) {
-        case default! u1: {
-            u = ~Typ[Invalid];
+        case null: {
+            u = new BasicжΔType(Typ[Invalid]);
             goto break_loop;
             break;
         }
         default: {
-            var u1 = u.type();
+            var u1 = u;
             goto break_loop;
             break;
         }
-        case Named.val u1: {
+        case ж<Named> u1: {
             n1 = u1;
             break;
         }}
@@ -591,31 +619,34 @@ continue_loop:;
     }
 break_loop:;
     // Continue collecting *Named types in the chain.
-    foreach (var (nΔ1, _) in seen) {
+    foreach (var (kᴛ1, _) in seen) {
+        var nΔ1 = kᴛ1;
+
         // We should never have to update the underlying type of an imported type;
         // those underlying types should have been resolved during the import.
         // Also, doing so would lead to a race condition (was go.dev/issue/31749).
         // Do this check always, not just in debug mode (it's cheap).
-        if ((~nΔ1).obj.pkg != (~check).pkg) {
+        if ((~(~nΔ1).obj).pkg != (~check).pkg) {
             throw panic("imported type with unresolved underlying type");
         }
-        n.val.underlying = u;
+        nΔ1.Value.underlying = u;
     }
     return u;
 }
 
-[GoRecv] public static (nint, ж<Func>) lookupMethod(this ref Named n, ж<Package> Ꮡpkg, @string name, bool foldCase) {
-    ref var pkg = ref Ꮡpkg.val;
+internal static (nint, ж<Func>) lookupMethod(this ж<Named> Ꮡn, ж<Package> Ꮡpkg, @string name, bool foldCase) {
+    ref var n = ref Ꮡn.Value;
+    ref var pkg = ref Ꮡpkg.Value;
 
-    n.resolve();
-    if (samePkg(n.obj.pkg, Ꮡpkg) || isExported(name) || foldCase) {
+    Ꮡn.resolve();
+    if (samePkg((~n.obj).pkg, Ꮡpkg) || isExported(name) || foldCase) {
         // If n is an instance, we may not have yet instantiated all of its methods.
         // Look up the method index in orig, and only instantiate method at the
         // matching index (if any).
         {
-            nint i = n.Origin().methodIndex(name, foldCase); if (i >= 0) {
+            nint i = Ꮡn.Origin().methodIndex(name, foldCase); if (i >= 0) {
                 // For instances, m.Method(i) will be different from the orig method.
-                return (i, n.Method(i));
+                return (i, Ꮡn.Method(i));
             }
         }
     }
@@ -632,23 +663,25 @@ break_loop:;
 
 // expandUnderlying substitutes type arguments in the underlying type n.orig,
 // returning the result. Returns Typ[Invalid] if there was an error.
-[GoRecv] internal static ΔType expandUnderlying(this ref Named n) => func((defer, _) => {
+internal static ΔType expandUnderlying(this ж<Named> Ꮡn) => func((defer, recover) => {
+    ref var n = ref Ꮡn.Value;
+
     var check = n.check;
     if (check != nil && (~(~check).conf)._Trace) {
-        check.trace(n.obj.pos, "-- Named.expandUnderlying %s"u8, n);
-        (~check).indent++;
+        check.trace((~n.obj).pos, "-- Named.expandUnderlying %s"u8, n);
+        check.Value.indent++;
         var checkʗ1 = check;
         defer(() => {
-            (~checkʗ1).indent--;
-            checkʗ1.trace(n.obj.pos, "=> %s (tparams = %s, under = %s)"u8, n, n.tparams.list(), n.underlying);
+            checkʗ1.Value.indent--;
+            checkʗ1.trace((~Ꮡn.Value.obj).pos, "=> %s (tparams = %s, under = %s)"u8, Ꮡn.Value, Ꮡn.Value.tparams.list(), Ꮡn.Value.underlying);
         });
     }
-    assert(n.inst.orig.underlying != default!);
-    if (n.inst.ctxt == nil) {
-        n.inst.ctxt = NewContext();
+    assert((~(~n.inst).orig).underlying != default!);
+    if ((~n.inst).ctxt == nil) {
+        n.inst.Value.ctxt = NewContext();
     }
-    var orig = n.inst.orig;
-    var targs = n.inst.targs;
+    var orig = n.inst.Value.orig;
+    var targs = n.inst.Value.targs;
     if (asNamed((~orig).underlying) != nil) {
         // We should only get a Named underlying type here during type checking
         // (for example, in recursive type declarations).
@@ -656,42 +689,42 @@ break_loop:;
     }
     if ((~orig).tparams.Len() != targs.Len()) {
         // Mismatching arg and tparam length may be checked elsewhere.
-        return ~Typ[Invalid];
+        return new BasicжΔType(Typ[Invalid]);
     }
     // Ensure that an instance is recorded before substituting, so that we
     // resolve n for any recursive references.
-    @string h = n.inst.ctxt.instanceHash(~orig, targs.list());
-    var n2 = n.inst.ctxt.update(h, ~orig, n.TypeArgs().list(), ~n);
-    assert(~n == Ꮡn2);
+    @string h = (~n.inst).ctxt.instanceHash(new NamedжΔType(orig), targs.list());
+    var n2 = (~n.inst).ctxt.update(h, new NamedжΔType(orig), n.TypeArgs().list(), new NamedжΔType(Ꮡn));
+    assert(AreEqual(n, n2));
     var smap = makeSubstMap((~orig).tparams.list(), targs.list());
     ж<Context> ctxt = default!;
     if (check != nil) {
         ctxt = check.context();
     }
-    var underlying = n.check.subst(n.obj.pos, (~orig).underlying, smap, n, ctxt);
+    var underlying = n.check.subst((~n.obj).pos, (~orig).underlying, smap, Ꮡn, ctxt);
     // If the underlying type of n is an interface, we need to set the receiver of
     // its methods accurately -- we set the receiver of interface methods on
     // the RHS of a type declaration to the defined type.
     {
-        var (iface, _) = underlying._<Interface.val>(ᐧ); if (iface != nil) {
+        var (iface, _) = underlying._<ж<Interface>>(ᐧ); if (iface != nil) {
             {
-                var (methods, copied) = replaceRecvType((~iface).methods, ~orig, ~n); if (copied) {
+                var (methods, copied) = replaceRecvType((~iface).methods, new NamedжΔType(orig), new NamedжΔType(Ꮡn)); if (copied) {
                     // If the underlying type doesn't actually use type parameters, it's
                     // possible that it wasn't substituted. In this case we need to create
                     // a new *Interface before modifying receivers.
-                    if (~iface == (~orig).underlying) {
+                    if (AreEqual(iface, (~orig).underlying)) {
                         var old = iface;
                         iface = check.newInterface();
-                        iface.val.embeddeds = old.val.embeddeds;
+                        iface.Value.embeddeds = old.Value.embeddeds;
                         assert((~old).complete);
                         // otherwise we are copying incomplete data
-                        iface.val.complete = old.val.complete;
-                        iface.val.@implicit = old.val.@implicit;
+                        iface.Value.complete = old.Value.complete;
+                        iface.Value.@implicit = old.Value.@implicit;
                         // should be false but be conservative
-                        underlying = ~iface;
+                        underlying = new InterfaceжΔType(iface);
                     }
-                    iface.val.methods = methods;
-                    iface.val.tset = default!;
+                    iface.Value.methods = methods;
+                    iface.Value.tset = default!;
                     // recompute type set with new methods
                     // If check != nil, check.newInterface will have saved the interface for later completion.
                     if (check == nil) {

@@ -95,7 +95,7 @@ partial class profile_package {
 // Line corresponds to Profile.Line
 [GoType] partial struct Line {
     public ж<Function> Function;
-    public int64 Line;
+    public int64 ΔLine;
     internal uint64 functionIDX;
 }
 
@@ -114,22 +114,22 @@ partial class profile_package {
 // Parse parses a profile and checks for its validity. The input must be an
 // encoded pprof protobuf, which may optionally be gzip-compressed.
 public static (ж<Profile>, error) Parse(io.Reader r) {
-    (orig, err) = io.ReadAll(r);
+    var (orig, err) = io.ReadAll(r);
     if (err != default!) {
         return (default!, err);
     }
-    if (len(orig) >= 2 && orig[0] == 31 && orig[1] == 139) {
-        (gz, errΔ1) = gzip.NewReader(~bytes.NewBuffer(orig));
+    if (len(orig) >= 2 && orig[0] == 0x1f && orig[1] == 0x8b) {
+        var (gz, errΔ1) = gzip.NewReader(new bytes_BufferжReader(bytes.NewBuffer(orig)));
         if (errΔ1 != default!) {
             return (default!, fmt.Errorf("decompressing profile: %v"u8, errΔ1));
         }
-        (data, err) = io.ReadAll(~gz);
+        (var data, errΔ1) = io.ReadAll(new gzip_ReaderжReader(gz));
         if (errΔ1 != default!) {
             return (default!, fmt.Errorf("decompressing profile: %v"u8, errΔ1));
         }
         orig = data;
     }
-    (p, err) = parseUncompressed(orig);
+    (var p, err) = parseUncompressed(orig);
     if (err != default!) {
         return (default!, fmt.Errorf("parsing profile: %w"u8, err));
     }
@@ -151,7 +151,7 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
     }
     var p = Ꮡ(new Profile(nil));
     {
-        var err = unmarshal(data, ~p); if (err != default!) {
+        var err = unmarshal(data, new Profileжmessage(p)); if (err != default!) {
             return (default!, err);
         }
     }
@@ -164,12 +164,14 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
 }
 
 // Write writes the profile as a gzip-compressed marshaled protobuf.
-[GoRecv] public static error Write(this ref Profile p, io.Writer w) => func((defer, _) => {
+public static error Write(this ж<Profile> Ꮡp, io.Writer w) => func((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
+
     p.preEncode();
-    var b = marshal(~p);
+    var b = marshal(new Profileжmessage(Ꮡp));
     var zw = gzip.NewWriter(w);
     var zwʗ1 = zw;
-    defer(zwʗ1.Close);
+    defer(() => zwʗ1.Close());
     var (_, err) = zw.Write(b);
     return err;
 });
@@ -221,7 +223,7 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
         }
         locations[(~l).ID] = l;
         {
-            var m = l.val.Mapping; if (m != nil) {
+            var m = l.Value.Mapping; if (m != nil) {
                 if ((~m).ID == 0 || mappings[(~m).ID] != m) {
                     return fmt.Errorf("inconsistent mapping %p: %d"u8, m, (~m).ID);
                 }
@@ -244,37 +246,43 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
 // classes preserving the request attributes. It also updates the
 // samples to point to the merged locations.
 [GoRecv] public static error Aggregate(this ref Profile p, bool inlineFrame, bool function, bool filename, bool linenumber, bool address) {
-    foreach (var (_, m) in p.Mapping) {
-        m.val.HasInlineFrames = (~m).HasInlineFrames && inlineFrame;
-        m.val.HasFunctions = (~m).HasFunctions && function;
-        m.val.HasFilenames = (~m).HasFilenames && filename;
-        m.val.HasLineNumbers = (~m).HasLineNumbers && linenumber;
+    foreach (var (_, vᴛ1) in p.Mapping) {
+        var m = vᴛ1;
+
+        m.Value.HasInlineFrames = (~m).HasInlineFrames && inlineFrame;
+        m.Value.HasFunctions = (~m).HasFunctions && function;
+        m.Value.HasFilenames = (~m).HasFilenames && filename;
+        m.Value.HasLineNumbers = (~m).HasLineNumbers && linenumber;
     }
     // Aggregate functions
     if (!function || !filename) {
-        foreach (var (_, f) in p.Function) {
+        foreach (var (_, vᴛ2) in p.Function) {
+            var f = vᴛ2;
+
             if (!function) {
-                f.val.Name = ""u8;
-                f.val.SystemName = ""u8;
+                f.Value.Name = ""u8;
+                f.Value.SystemName = ""u8;
             }
             if (!filename) {
-                f.val.Filename = ""u8;
+                f.Value.Filename = ""u8;
             }
         }
     }
     // Aggregate locations
     if (!inlineFrame || !address || !linenumber) {
-        foreach (var (_, l) in p.Location) {
+        foreach (var (_, vᴛ3) in p.Location) {
+            var l = vᴛ3;
+
             if (!inlineFrame && len((~l).Line) > 1) {
-                l.val.Line = (~l).Line[(int)(len((~l).Line) - 1)..];
+                l.Value.Line = (~l).Line[(int)(len((~l).Line) - 1)..];
             }
             if (!linenumber) {
                 foreach (var (i, _) in (~l).Line) {
-                    (~l).Line[i].Line = 0;
+                    (~l).Line[i].ΔLine = 0;
                 }
             }
             if (!address) {
-                l.val.Address = 0;
+                l.Value.Address = 0;
             }
         }
     }
@@ -333,7 +341,7 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
     foreach (var (_, l) in p.Location) {
         @string locStr = fmt.Sprintf("%6d: %#x "u8, (~l).ID, (~l).Address);
         {
-            var m = l.val.Mapping; if (m != nil) {
+            var m = l.Value.Mapping; if (m != nil) {
                 locStr = locStr + fmt.Sprintf("M=%d "u8, (~m).ID);
             }
         }
@@ -347,7 +355,7 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
                     lnStr = fmt.Sprintf("%s %s:%d s=%d"u8,
                         (~fn).Name,
                         (~fn).Filename,
-                        (~l).Line[li].Line,
+                        (~l).Line[li].ΔLine,
                         (~fn).StartLine);
                     if ((~fn).Name != (~fn).SystemName) {
                         lnStr = lnStr + "("u8 + (~fn).SystemName + ")"u8;
@@ -389,35 +397,41 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
 // TODO(rsilvera): consider normalizing the profiles based on the
 // total samples collected.
 [GoRecv] public static error Merge(this ref Profile p, ж<Profile> Ꮡpb, float64 r) {
-    ref var pb = ref Ꮡpb.val;
+    ref var pb = ref Ꮡpb.Value;
 
     {
         var err = p.Compatible(Ꮡpb); if (err != default!) {
             return err;
         }
     }
-    pb = pb.Copy();
+    Ꮡpb = Ꮡpb.Copy(); pb = ref Ꮡpb.Value;
     // Keep the largest of the two periods.
     if (pb.Period > p.Period) {
         p.Period = pb.Period;
     }
     p.DurationNanos += pb.DurationNanos;
     p.Mapping = append(p.Mapping, pb.Mapping.ꓸꓸꓸ);
-    foreach (var (i, m) in p.Mapping) {
-        m.val.ID = ((uint64)(i + 1));
+    foreach (var (i, vᴛ1) in p.Mapping) {
+        var m = vᴛ1;
+
+        m.Value.ID = (uint64)(i + 1);
     }
     p.Location = append(p.Location, pb.Location.ꓸꓸꓸ);
-    foreach (var (i, l) in p.Location) {
-        l.val.ID = ((uint64)(i + 1));
+    foreach (var (i, vᴛ2) in p.Location) {
+        var l = vᴛ2;
+
+        l.Value.ID = (uint64)(i + 1);
     }
     p.Function = append(p.Function, pb.Function.ꓸꓸꓸ);
-    foreach (var (i, f) in p.Function) {
-        f.val.ID = ((uint64)(i + 1));
+    foreach (var (i, vᴛ3) in p.Function) {
+        var f = vᴛ3;
+
+        f.Value.ID = (uint64)(i + 1);
     }
-    if (r != 1.0F) {
+    if (r != 1.0D) {
         foreach (var (_, s) in pb.Sample) {
             foreach (var (i, v) in (~s).Value) {
-                (~s).Value[i] = ((int64)(((float64)v) * r));
+                s.Value.Value[i] = (int64)((float64)v * r);
             }
         }
     }
@@ -429,7 +443,7 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
 // returns nil if the profiles are compatible; otherwise an error with
 // details on the incompatibility.
 [GoRecv] public static error Compatible(this ref Profile p, ж<Profile> Ꮡpb) {
-    ref var pb = ref Ꮡpb.val;
+    ref var pb = ref Ꮡpb.Value;
 
     if (!compatibleValueTypes(p.PeriodType, pb.PeriodType)) {
         return fmt.Errorf("incompatible period types %v and %v"u8, p.PeriodType, pb.PeriodType);
@@ -437,8 +451,6 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
     if (len(p.SampleType) != len(pb.SampleType)) {
         return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
     }
-    ref var i = ref heap(new nint(), out var Ꮡi);
-
     foreach (var (i, _) in p.SampleType) {
         if (!compatibleValueTypes(p.SampleType[i], pb.SampleType[i])) {
             return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
@@ -470,10 +482,10 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
 }
 
 internal static bool compatibleValueTypes(ж<ValueType> Ꮡv1, ж<ValueType> Ꮡv2) {
-    ref var v1 = ref Ꮡv1.val;
-    ref var v2 = ref Ꮡv2.val;
+    ref var v1 = ref Ꮡv1.DerefOrNil();
+    ref var v2 = ref Ꮡv2.DerefOrNil();
 
-    if (v1 == nil || v2 == nil) {
+    if (Ꮡv1 == nil || Ꮡv2 == nil) {
         return true;
     }
     // No grounds to disqualify.
@@ -481,12 +493,14 @@ internal static bool compatibleValueTypes(ж<ValueType> Ꮡv1, ж<ValueType> Ꮡ
 }
 
 // Copy makes a fully independent copy of a profile.
-[GoRecv] public static ж<Profile> Copy(this ref Profile p) {
+public static ж<Profile> Copy(this ж<Profile> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     p.preEncode();
-    var b = marshal(~p);
+    var b = marshal(new Profileжmessage(Ꮡp));
     var pp = Ꮡ(new Profile(nil));
     {
-        var err = unmarshal(b, ~pp); if (err != default!) {
+        var err = unmarshal(b, new Profileжmessage(pp)); if (err != default!) {
             throw panic(err);
         }
     }
@@ -498,28 +512,28 @@ internal static bool compatibleValueTypes(ж<ValueType> Ꮡv1, ж<ValueType> Ꮡ
     return pp;
 }
 
-public delegate (map<@string, @string>, error) Demangler(slice<@string> name);
+// type Demangler is a methodless func type — rendered inline as its base delegate
 
 // Demangle attempts to demangle and optionally simplify any function
 // names referenced in the profile. It works on a best-effort basis:
 // it will silently preserve the original names in case of any errors.
-[GoRecv] public static error Demangle(this ref Profile p, Demangler d) {
+[GoRecv] public static error Demangle(this ref Profile p, Func<slice<@string>, (map<@string, @string>, error)> d) {
     // Collect names to demangle.
     slice<@string> names = default!;
     foreach (var (_, fn) in p.Function) {
         names = append(names, (~fn).SystemName);
     }
     // Update profile with demangled names.
-    var demangled = d(names);
-    var err = d(names);
+    var (demangled, err) = d(names);
     if (err != default!) {
         return err;
     }
-    foreach (var (_, fn) in p.Function) {
+    foreach (var (_, vᴛ1) in p.Function) {
+        var fn = vᴛ1;
+
         {
-            @string dd = demangled[(~fn).SystemName];
-            var ok = demangled[(~fn).SystemName]; if (ok) {
-                fn.val.Name = dd;
+            var (dd, ok) = demangled[(~fn).SystemName, ꟷ]; if (ok) {
+                fn.Value.Name = dd;
             }
         }
     }
@@ -561,7 +575,7 @@ public delegate (map<@string, @string>, error) Demangler(slice<@string> name);
     foreach (var (_, s) in p.Sample) {
         foreach (var (i, v) in (~s).Value) {
             if (ratios[i] != 1) {
-                (~s).Value[i] = ((int64)(((float64)v) * ratios[i]));
+                s.Value.Value[i] = (int64)((float64)v * ratios[i]);
             }
         }
     }

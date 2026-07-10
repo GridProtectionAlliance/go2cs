@@ -13,7 +13,7 @@ partial class mime_package {
 }
 
 internal static void initMimeWindows() {
-    (names, err) = registry.CLASSES_ROOT.ReadSubKeyNames();
+    var (names, err) = registry.CLASSES_ROOT.ReadSubKeyNames();
     if (err != default!) {
         return;
     }
@@ -22,13 +22,13 @@ internal static void initMimeWindows() {
             // looking for extensions only
             continue;
         }
-        var (k, err) = registry.OpenKey(registry.CLASSES_ROOT, name, registry.READ);
-        if (err != default!) {
+        var (k, errΔ1) = registry.OpenKey(registry.CLASSES_ROOT, name, registry.READ);
+        if (errΔ1 != default!) {
             continue;
         }
-        var (v, _, err) = k.GetStringValue("Content Type"u8);
+        (var v, _, errΔ1) = k.GetStringValue("Content Type"u8);
         k.Close();
-        if (err != default!) {
+        if (errΔ1 != default!) {
             continue;
         }
         // There is a long-standing problem on Windows: the

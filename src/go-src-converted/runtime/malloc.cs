@@ -104,6 +104,7 @@ using sys = runtime.@internal.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using abi = @internal.abi_package;
 using runtime.@internal;
 
 partial class runtime_package {
@@ -147,9 +148,9 @@ internal static readonly UntypedInt arenaL2Bits = /* heapAddrBits - logHeapArena
 internal static readonly UntypedInt arenaL1Shift = /* arenaL2Bits */ 20;
 internal static readonly UntypedInt arenaBits = /* arenaL1Bits + arenaL2Bits */ 26;
 internal static readonly UntypedInt arenaBaseOffset = /* 0xffff800000000000*goarch.IsAmd64 + 0x0a00000000000000*goos.IsAix */ 18446603336221196288;
-internal const uintptr arenaBaseOffsetUintptr = /* uintptr(arenaBaseOffset) */ 18446603336221196288;
+internal static readonly uintptr arenaBaseOffsetUintptr = /* uintptr(arenaBaseOffset) */ unchecked((uintptr)18446603336221196288);
 internal static readonly UntypedInt _MaxGcproc = 32;
-internal const uintptr minLegalPointer = 4096;
+internal static readonly uintptr minLegalPointer = 4096;
 internal static readonly UntypedInt minHeapForMetadataHugePages = /* 1 << 30 */ 1073741824;
 
 // physPageSize is the size in bytes of the OS's physical pages.
@@ -216,7 +217,7 @@ internal static void mallocinit() {
     if (physHugePageSize != 0) {
         // Since physHugePageSize is a power of 2, it suffices to increase
         // physHugePageShift until 1<<physHugePageShift == physHugePageSize.
-        while (1 << (int)(physHugePageShift) != physHugePageSize) {
+        while ((uintptr)(1 << (int)(physHugePageShift)) != physHugePageSize) {
             physHugePageShift++;
         }
     }
@@ -233,7 +234,7 @@ internal static void mallocinit() {
     // across different parts of the runtime.
     var minSizeForMallocHeaderIsSizeClass = false;
     for (nint i = 0; i < len(class_to_size); i++) {
-        if (minSizeForMallocHeader == ((uintptr)class_to_size[i])) {
+        if (minSizeForMallocHeader == (uintptr)class_to_size[i]) {
             minSizeForMallocHeaderIsSizeClass = true;
             break;
         }
@@ -250,18 +251,16 @@ internal static void mallocinit() {
         @throw("taggedPointerbits too small"u8);
     }
     // Initialize the heap.
-    mheap_.init();
+    Ꮡmheap_.init();
     mcache0 = allocmcache();
-    lockInit(ᏑgcBitsArenas.of(struct{lock mutex; free *runtime.gcBitsArena; next *runtime.gcBitsArena; current *runtime.gcBitsArena; previous *runtime.gcBitsArena}.Ꮡlock), lockRankGcBitsArenas);
-    lockInit(Ꮡ(profInsertLock), lockRankProfInsert);
-    lockInit(Ꮡ(profBlockLock), lockRankProfBlock);
-    lockInit(Ꮡ(profMemActiveLock), lockRankProfMemActive);
-    ref var i = ref heap(new nint(), out var Ꮡi);
-
+    lockInit(ᏑgcBitsArenas.of(gcBitsArenasᴛ1.Ꮡlock), lockRankGcBitsArenas);
+    lockInit(ᏑprofInsertLock, lockRankProfInsert);
+    lockInit(ᏑprofBlockLock, lockRankProfBlock);
+    lockInit(ᏑprofMemActiveLock, lockRankProfMemActive);
     foreach (var (i, _) in profMemFutureLock) {
         lockInit(ᏑprofMemFutureLock.at<mutex>(i), lockRankProfMemFuture);
     }
-    lockInit(ᏑglobalAlloc.of(struct{mutex; runtime.persistentAlloc}.Ꮡmutex), lockRankGlobalAlloc);
+    lockInit(ᏑglobalAlloc.of(globalAllocᴛ1.Ꮡmutex), lockRankGlobalAlloc);
     // Create initial arena growth hints.
     if (goarch.PtrSize == 8){
         // On a 64-bit machine, we pick the following hints
@@ -305,12 +304,12 @@ internal static void mallocinit() {
         //
         // In race mode we have no choice but to just use the same hints because
         // the race detector requires that the heap be mapped contiguously.
-        for (nint i = 127; i >= 0; i--) {
+        for (nint i = 0x7f; i >= 0; i--) {
             uintptr Δp = default!;
             switch (ᐧ) {
             case {} when raceenabled: {
-                Δp = (uintptr)(((uintptr)i) << (int)(32) | (uintptr)(uintptrMask & (192 << (int)(32))));
-                if (Δp >= (uintptr)(uintptrMask & (nint)962072674304L)) {
+                Δp = (uintptr)(((uintptr)i << (int)(32)) | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(824633720832L)));
+                if (Δp >= (uintptr)((uintptr)uintptrMask & (uintptr)(nint)0x00e000000000L)) {
                     // The TSAN runtime requires the heap
                     // to be in the range [0x00c000000000,
                     // 0x00e000000000).
@@ -319,11 +318,11 @@ internal static void mallocinit() {
                 break;
             }
             case {} when GOARCH == "arm64"u8 && GOOS == "ios"u8: {
-                Δp = (uintptr)(((uintptr)i) << (int)(40) | (uintptr)(uintptrMask & (19 << (int)(28))));
+                Δp = (uintptr)(((uintptr)i << (int)(40)) | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(5100273664L)));
                 break;
             }
             case {} when GOARCH == "arm64"u8: {
-                Δp = (uintptr)(((uintptr)i) << (int)(40) | (uintptr)(uintptrMask & (64 << (int)(32))));
+                Δp = (uintptr)(((uintptr)i << (int)(40)) | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(274877906944L)));
                 break;
             }
             case {} when GOOS == "aix"u8: {
@@ -332,11 +331,11 @@ internal static void mallocinit() {
                     // to avoid collisions with others mmaps done by non-go programs.
                     continue;
                 }
-                Δp = (uintptr)(((uintptr)i) << (int)(40) | (uintptr)(uintptrMask & (160 << (int)(52))));
+                Δp = (uintptr)(((uintptr)i << (int)(40)) | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(720575940379279360L)));
                 break;
             }
             default: {
-                Δp = (uintptr)(((uintptr)i) << (int)(40) | (uintptr)(uintptrMask & (192 << (int)(32))));
+                Δp = (uintptr)(((uintptr)i << (int)(40)) | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(824633720832L)));
                 break;
             }}
 
@@ -344,12 +343,13 @@ internal static void mallocinit() {
             // through about half the hints. In race mode, take only about
             // a quarter; we don't have very much space to work with.
             var hintList = Ꮡmheap_.of(mheap.ᏑarenaHints);
-            if ((!raceenabled && i > 63) || (raceenabled && i > 95)) {
-                hintList = Ꮡmheap_.userArena.of(struct{arenaHints *arenaHint; quarantineList runtime.mSpanList; readyList runtime.mSpanList}.ᏑarenaHints);
+            if ((!raceenabled && i > 0x3f) || (raceenabled && i > 0x5f)) {
+                hintList = Ꮡmheap_.of(mheap.ᏑuserArena).of(mheap_userArena.ᏑarenaHints);
             }
-            var hint = (ж<arenaHint>)(uintptr)(mheap_.arenaHintAlloc.alloc());
-            hint.val.addr = Δp;
-            (hint.val.next, hintList.val) = (hintList.val, hint);
+            var hint = (ж<arenaHint>)(uintptr)(Ꮡmheap_.of(mheap.ᏑarenaHintAlloc).alloc());
+            hint.Value.addr = Δp;
+            hint.Value.next = hintList.ValueSlot;
+            hintList.ValueSlot = hint;
         }
     } else {
         // On a 32-bit machine, we're much more concerned
@@ -368,10 +368,10 @@ internal static void mallocinit() {
         //
         // 3. We try to stake out a reasonably large initial
         // heap reservation.
-        const uintptr arenaMetaSize = /* (1 << arenaBits) * unsafe.Sizeof(heapArena{}) */ 288836550656;
-        var meta = ((uintptr)(uintptr)sysReserve(nil, arenaMetaSize));
+        uintptr arenaMetaSize = /* (1 << arenaBits) * unsafe.Sizeof(heapArena{}) */ unchecked((uintptr)288836550656);
+        var meta = (uintptr)(uintptr)sysReserve(nil, arenaMetaSize);
         if (meta != 0) {
-            mheap_.heapArenaAlloc.init(meta, arenaMetaSize, true);
+            Ꮡmheap_.of(mheap.ᏑheapArenaAlloc).init(meta, arenaMetaSize, true);
         }
         // We want to start the arena low, but if we're linked
         // against C code, it's possible global constructors
@@ -395,37 +395,39 @@ internal static void mallocinit() {
         if (mheap_.heapArenaAlloc.next <= Δp && Δp < mheap_.heapArenaAlloc.end) {
             Δp = mheap_.heapArenaAlloc.end;
         }
-        Δp = alignUp(Δp + (256 << (int)(10)), heapArenaBytes);
+        Δp = alignUp(Δp + ((uintptr)(256 << (int)(10))), heapArenaBytes);
         // Because we're worried about fragmentation on
         // 32-bit, we try to make a large initial reservation.
         var arenaSizes = new uintptr[]{
-            512 << (int)(20),
-            256 << (int)(20),
-            128 << (int)(20)
+            (uintptr)(512 << (int)(20)),
+            (uintptr)(256 << (int)(20)),
+            (uintptr)(128 << (int)(20))
         }.slice();
         foreach (var (_, arenaSize) in arenaSizes) {
-            var (a, size) = sysReserveAligned(((@unsafe.Pointer)Δp), arenaSize, heapArenaBytes);
+            var (a, size) = sysReserveAligned((@unsafe.Pointer)Δp, arenaSize, heapArenaBytes);
             if (a != nil) {
-                mheap_.arena.init(((uintptr)a), size, false);
+                Ꮡmheap_.of(mheap.Ꮡarena).init((uintptr)a, size, false);
                 Δp = mheap_.arena.end;
                 // For hint below
                 break;
             }
         }
-        var hint = (ж<arenaHint>)(uintptr)(mheap_.arenaHintAlloc.alloc());
-        hint.val.addr = Δp;
-        (hint.val.next, mheap_.arenaHints) = (mheap_.arenaHints, hint);
+        var hint = (ж<arenaHint>)(uintptr)(Ꮡmheap_.of(mheap.ᏑarenaHintAlloc).alloc());
+        hint.Value.addr = Δp;
+        hint.Value.next = mheap_.arenaHints;
+        mheap_.arenaHints = hint;
         // Place the hint for user arenas just after the large reservation.
         //
         // While this potentially competes with the hint above, in practice we probably
         // aren't going to be getting this far anyway on 32-bit platforms.
-        var userArenaHint = (ж<arenaHint>)(uintptr)(mheap_.arenaHintAlloc.alloc());
-        userArenaHint.val.addr = Δp;
-        (userArenaHint.val.next, mheap_.userArena.arenaHints) = (mheap_.userArena.arenaHints, userArenaHint);
+        var userArenaHint = (ж<arenaHint>)(uintptr)(Ꮡmheap_.of(mheap.ᏑarenaHintAlloc).alloc());
+        userArenaHint.Value.addr = Δp;
+        userArenaHint.Value.next = mheap_.userArena.arenaHints;
+        mheap_.userArena.arenaHints = userArenaHint;
     }
     // Initialize the memory limit here because the allocator is going to look at it
     // but we haven't called gcinit yet and we're definitely going to allocate memory before then.
-    gcController.memoryLimit.Store(maxInt64);
+    ᏑgcController.of(gcControllerState.ᏑmemoryLimit).Store(maxInt64);
 }
 
 // sysAlloc allocates heap arena space for at least n bytes. The
@@ -444,14 +446,15 @@ internal static void mallocinit() {
 // be transitioned to Prepared and then Ready before use.
 //
 // h must be locked.
-[GoRecv] internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ref mheap h, uintptr n, ж<ж<arenaHint>> ᏑhintList, bool register) {
+internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, uintptr n, ж<ж<arenaHint>> ᏑhintList, bool register) {
     @unsafe.Pointer v = default!;
     uintptr size = default!;
 
-    ref var hintList = ref ᏑhintList.val;
-    assertLockHeld(Ꮡ(h.@lock));
+    ref var h = ref Ꮡh.Value;
+    ref var hintList = ref ᏑhintList.DerefOrNil();
+    assertLockHeld(Ꮡh.of(mheap.Ꮡlock));
     n = alignUp(n, heapArenaBytes);
-    if (ᏑhintList == Ꮡ(h.arenaHints)) {
+    if (ᏑhintList == Ꮡh.of(mheap.ᏑarenaHints)) {
         // First, try the arena pre-reservation.
         // Newly-used mappings are considered released.
         //
@@ -466,7 +469,7 @@ internal static void mallocinit() {
     // Try to grow the heap at a hint address.
     while (hintList != nil) {
         var hint = hintList;
-        var Δp = hint.val.addr;
+        var Δp = hint.Value.addr;
         if ((~hint).down) {
             Δp -= n;
         }
@@ -474,18 +477,18 @@ internal static void mallocinit() {
             // We can't use this, so don't ask.
             v = default!;
         } else 
-        if (arenaIndex(Δp + n - 1) >= 1 << (int)(arenaBits)){
+        if (arenaIndex(Δp + n - 1) >= (arenaIdx)((nuint)1 << (int)(arenaBits))){
             // Outside addressable heap. Can't use.
             v = default!;
         } else {
-            v = (uintptr)sysReserve(((@unsafe.Pointer)Δp), n);
+            v = (uintptr)sysReserve((@unsafe.Pointer)Δp, n);
         }
-        if (Δp == ((uintptr)v)) {
+        if (Δp == (uintptr)v) {
             // Success. Update the hint.
             if (!(~hint).down) {
                 Δp += n;
             }
-            hint.val.addr = Δp;
+            hint.Value.addr = Δp;
             size = n;
             break;
         }
@@ -498,7 +501,7 @@ internal static void mallocinit() {
         if (v != nil) {
             sysFreeOS(v, n);
         }
-        hintList = hint.val.next;
+        hintList = hint.Value.next;
         h.arenaHintAlloc.free(new @unsafe.Pointer(hint));
     }
     if (size == 0) {
@@ -518,39 +521,42 @@ internal static void mallocinit() {
         }
         // Create new hints for extending this region.
         var hint = (ж<arenaHint>)(uintptr)(h.arenaHintAlloc.alloc());
-        (hint.val.addr, hint.val.down) = (((uintptr)v), true);
-        (hint.val.next, mheap_.arenaHints) = (mheap_.arenaHints, hint);
+        hint.Value.addr = (uintptr)v;
+        hint.Value.down = true;
+        hint.Value.next = mheap_.arenaHints;
+        mheap_.arenaHints = hint;
         hint = (ж<arenaHint>)(uintptr)(h.arenaHintAlloc.alloc());
-        hint.val.addr = ((uintptr)v) + size;
-        (hint.val.next, mheap_.arenaHints) = (mheap_.arenaHints, hint);
+        hint.Value.addr = (uintptr)v + size;
+        hint.Value.next = mheap_.arenaHints;
+        mheap_.arenaHints = hint;
     }
     // Check for bad pointers or pointers we can't use.
     {
         @string bad = default!;
-        var Δp = ((uintptr)v);
+        var Δp = (uintptr)v;
         if (Δp + size < Δp){
             bad = "region exceeds uintptr range"u8;
         } else 
-        if (arenaIndex(Δp) >= 1 << (int)(arenaBits)){
+        if (arenaIndex(Δp) >= (arenaIdx)((nuint)1 << (int)(arenaBits))){
             bad = "base outside usable address space"u8;
         } else 
-        if (arenaIndex(Δp + size - 1) >= 1 << (int)(arenaBits)) {
+        if (arenaIndex(Δp + size - 1) >= (arenaIdx)((nuint)1 << (int)(arenaBits))) {
             bad = "end outside usable address space"u8;
         }
         if (bad != ""u8) {
             // This should be impossible on most architectures,
             // but it would be really confusing to debug.
-            print("runtime: memory allocated by OS [", ((Δhex)Δp), ", ", ((Δhex)(Δp + size)), ") not in usable address space: ", bad, "\n");
+            print("runtime: memory allocated by OS [", ((Δhex)(uint64)Δp), ", ", ((Δhex)(uint64)(Δp + size)), ") not in usable address space: ", bad, "\n");
             @throw("memory reservation exceeds address space limit"u8);
         }
     }
-    if ((uintptr)(((uintptr)v) & (heapArenaBytes - 1)) != 0) {
+    if ((uintptr)((uintptr)v & (uintptr)(heapArenaBytes - 1)) != 0) {
         @throw("misrounded allocation in sysAlloc"u8);
     }
 mapped:
-    for (arenaIdx ri = arenaIndex(((uintptr)v)); ri <= arenaIndex(((uintptr)v) + size - 1); ri++) {
+    for (arenaIdx ri = arenaIndex((uintptr)v); ri <= arenaIndex((uintptr)v + size - 1); ri++) {
         // Create arena metadata.
-        var l2 = h.arenas[ri.l1()];
+        var l2 = h.arenas[(nint)(ri.l1())];
         if (l2 == nil) {
             // Allocate an L2 arena map.
             //
@@ -560,24 +566,24 @@ mapped:
             // is paged in is too expensive. Trying to account for the whole region means
             // that it will appear like an enormous memory overhead in statistics, even though
             // it is not.
-            l2 = (ж<array<ж<heapArena>>>)(uintptr)(sysAllocOS(@unsafe.Sizeof(l2.val)));
+            l2 = (ж<array<ж<heapArena>>>)(uintptr)(sysAllocOS(@unsafe.Sizeof(l2.Value)));
             if (l2 == nil) {
                 @throw("out of memory allocating heap arena map"u8);
             }
             if (h.arenasHugePages){
-                sysHugePage(new @unsafe.Pointer(l2), @unsafe.Sizeof(l2.val));
+                sysHugePage(new @unsafe.Pointer(l2), @unsafe.Sizeof(l2.Value));
             } else {
-                sysNoHugePage(new @unsafe.Pointer(l2), @unsafe.Sizeof(l2.val));
+                sysNoHugePage(new @unsafe.Pointer(l2), @unsafe.Sizeof(l2.Value));
             }
-            atomic.StorepNoWB(((@unsafe.Pointer)(Ꮡ(h.arenas[ri.l1()]))), new @unsafe.Pointer(l2));
+            atomic.StorepNoWB(@unsafe.Pointer.FromRef(ref (Ꮡ(h.arenas[ri.l1()])).Value), new @unsafe.Pointer(l2));
         }
-        if (l2.val[ri.l2()] != nil) {
+        if (l2.Value[ri.l2()] != nil) {
             @throw("arena already initialized"u8);
         }
         ж<heapArena> r = default!;
-        r = (ж<heapArena>)(uintptr)(h.heapArenaAlloc.alloc(@unsafe.Sizeof(r.val), goarch.PtrSize, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
+        r = (ж<heapArena>)(uintptr)(h.heapArenaAlloc.alloc(@unsafe.Sizeof(r.Value), goarch.PtrSize, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
         if (r == nil) {
-            r = (ж<heapArena>)(uintptr)(persistentalloc(@unsafe.Sizeof(r.val), goarch.PtrSize, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
+            r = (ж<heapArena>)(uintptr)(persistentalloc(@unsafe.Sizeof(r.Value), goarch.PtrSize, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
             if (r == nil) {
                 @throw("out of memory allocating heap arena metadata"u8);
             }
@@ -585,7 +591,7 @@ mapped:
         // Register the arena in allArenas if requested.
         if (register) {
             if (len(h.allArenas) == cap(h.allArenas)) {
-                var sizeΔ1 = 2 * ((uintptr)cap(h.allArenas)) * goarch.PtrSize;
+                var sizeΔ1 = 2 * (uintptr)cap(h.allArenas) * (uintptr)goarch.PtrSize;
                 if (sizeΔ1 == 0) {
                     sizeΔ1 = physPageSize;
                 }
@@ -594,7 +600,7 @@ mapped:
                     @throw("out of memory allocating allArenas"u8);
                 }
                 var oldSlice = h.allArenas;
-                ((ж<notInHeapSlice>)(uintptr)(new @unsafe.Pointer(Ꮡ(h.allArenas)))).val = new notInHeapSlice(newArray, len(h.allArenas), ((nint)(sizeΔ1 / goarch.PtrSize)));
+                ((ж<notInHeapSlice>)(uintptr)(new @unsafe.Pointer(Ꮡh.of(mheap.ᏑallArenas)))).Value = new notInHeapSlice(newArray, len(h.allArenas), (nint)(sizeΔ1 / (uintptr)goarch.PtrSize));
                 copy(h.allArenas, oldSlice);
             }
             // Do not free the old backing array because
@@ -608,7 +614,7 @@ mapped:
         // new heap arena becomes visible before the heap lock
         // is released (which shouldn't happen, but there's
         // little downside to this).
-        atomic.StorepNoWB(((@unsafe.Pointer)(Ꮡ(l2.val[ri.l2()]))), new @unsafe.Pointer(r));
+        atomic.StorepNoWB(@unsafe.Pointer.FromRef(ref (Ꮡ(l2.Value[ri.l2()])).Value), new @unsafe.Pointer(r));
 continue_mapped:;
     }
 break_mapped:;
@@ -628,23 +634,23 @@ internal static (@unsafe.Pointer, uintptr) sysReserveAligned(@unsafe.Pointer v, 
     // for a larger region and remove the parts we don't need.
     nint retries = 0;
 retry:
-    var Δp = ((uintptr)(uintptr)sysReserve(v.val, size + align));
+    var Δp = (uintptr)(uintptr)sysReserve(v, size + align);
     switch (ᐧ) {
-    case {} when Δp is 0: {
+    case {} when Δp == 0: {
         return (default!, 0);
     }
     case {} when (uintptr)(Δp & (align - 1)) == 0: {
-        return (((@unsafe.Pointer)Δp), size + align);
+        return ((@unsafe.Pointer)Δp, size + align);
     }
-    case {} when GOOS == "windows"u8: {
-        sysFreeOS(((@unsafe.Pointer)Δp), // On Windows we can't release pieces of a
+    case {} when ᐧᐧ: {
+        sysFreeOS((@unsafe.Pointer)Δp, // On Windows we can't release pieces of a
  // reservation, so we release the whole thing and
  // re-reserve the aligned sub-region. This may race,
  // so we may have to try again.
  size + align);
         Δp = alignUp(Δp, align);
-        @unsafe.Pointer p2 = (uintptr)sysReserve(((@unsafe.Pointer)Δp), size);
-        if (Δp != ((uintptr)p2)) {
+        @unsafe.Pointer p2 = (uintptr)sysReserve((@unsafe.Pointer)Δp, size);
+        if (Δp != (uintptr)p2) {
             // Must have raced. Try again.
             sysFreeOS(p2, size);
             {
@@ -660,13 +666,13 @@ retry:
         var pAligned = alignUp(Δp, // Success.
  // Trim off the unaligned parts.
  align);
-        sysFreeOS(((@unsafe.Pointer)Δp), pAligned - Δp);
+        sysFreeOS((@unsafe.Pointer)Δp, pAligned - Δp);
         var end = pAligned + size;
         var endLen = (Δp + size + align) - end;
         if (endLen > 0) {
-            sysFreeOS(((@unsafe.Pointer)end), endLen);
+            sysFreeOS((@unsafe.Pointer)end, endLen);
         }
-        return (((@unsafe.Pointer)pAligned), size);
+        return ((@unsafe.Pointer)pAligned, size);
     }}
 
 }
@@ -684,52 +690,55 @@ retry:
 // Must be called on the system stack because it acquires the heap lock.
 //
 //go:systemstack
-[GoRecv] internal static void enableMetadataHugePages(this ref mheap h) {
+internal static void enableMetadataHugePages(this ж<mheap> Ꮡh) {
+    ref var h = ref Ꮡh.Value;
+
     // Enable huge pages for page structure.
     h.pages.enableChunkHugePages();
     // Grab the lock and set arenasHugePages if it's not.
     //
     // Once arenasHugePages is set, all new L2 entries will be eligible for
     // huge pages. We'll set all the old entries after we release the lock.
-    @lock(Ꮡ(h.@lock));
+    @lock(Ꮡh.of(mheap.Ꮡlock));
     if (h.arenasHugePages) {
-        unlock(Ꮡ(h.@lock));
+        unlock(Ꮡh.of(mheap.Ꮡlock));
         return;
     }
     h.arenasHugePages = true;
-    unlock(Ꮡ(h.@lock));
+    unlock(Ꮡh.of(mheap.Ꮡlock));
     // N.B. The arenas L1 map is quite small on all platforms, so it's fine to
     // just iterate over the whole thing.
     foreach (var (i, _) in h.arenas) {
-        var l2 = (ж<array<ж<heapArena>>>)(uintptr)(atomic.Loadp(((@unsafe.Pointer)(Ꮡ(h.arenas[i])))));
+        var l2 = (ж<array<ж<heapArena>>>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromRef(ref (Ꮡ(h.arenas[i])).Value)));
         if (l2 == nil) {
             continue;
         }
-        sysHugePage(new @unsafe.Pointer(l2), @unsafe.Sizeof(l2.val));
+        sysHugePage(new @unsafe.Pointer(l2), @unsafe.Sizeof(l2.Value));
     }
 }
 
 // base address for all 0-byte allocations
-internal static uintptr zerobase;
+internal static ж<uintptr> Ꮡzerobase = new(default(uintptr));
+internal static ref uintptr zerobase => ref Ꮡzerobase.Value;
 
 // nextFreeFast returns the next free object if one is quickly available.
 // Otherwise it returns 0.
 internal static gclinkptr nextFreeFast(ж<mspan> Ꮡs) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     nint theBit = sys.TrailingZeros64(s.allocCache);
     // Is there a free object in the allocCache?
     if (theBit < 64) {
-        var result = s.freeindex + ((uint16)theBit);
+        var result = (uint16)(s.freeindex + (uint16)theBit);
         if (result < s.nelems) {
-            var freeidx = result + 1;
+            var freeidx = (uint16)(result + 1);
             if (freeidx % 64 == 0 && freeidx != s.nelems) {
                 return 0;
             }
-            s.allocCache >>= (nuint)(((nuint)(theBit + 1)));
+            s.allocCache >>= (int)((nuint)(theBit + 1));
             s.freeindex = freeidx;
             s.allocCount++;
-            return ((gclinkptr)(((uintptr)result) * s.elemsize + s.@base()));
+            return ((gclinkptr)((uintptr)result * s.elemsize + s.@base()));
         }
     }
     return 0;
@@ -766,8 +775,8 @@ internal static gclinkptr nextFreeFast(ж<mspan> Ꮡs) {
     if (freeIndex >= (~s).nelems) {
         @throw("freeIndex is not valid"u8);
     }
-    v = ((gclinkptr)(((uintptr)freeIndex) * (~s).elemsize + s.@base()));
-    (~s).allocCount++;
+    v = ((gclinkptr)((uintptr)freeIndex * (~s).elemsize + s.@base()));
+    s.Value.allocCount++;
     if ((~s).allocCount > (~s).nelems) {
         println("s.allocCount=", (~s).allocCount, "s.nelems=", (~s).nelems);
         @throw("s.allocCount > s.nelems"u8);
@@ -794,13 +803,13 @@ internal static gclinkptr nextFreeFast(ж<mspan> Ꮡs) {
 //
 //go:linkname mallocgc
 internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool needzero) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.DerefOrNil();
 
     if (gcphase == _GCmarktermination) {
         @throw("mallocgc called with gcphase == _GCmarktermination"u8);
     }
     if (size == 0) {
-        return ((@unsafe.Pointer)(Ꮡ(zerobase)));
+        return @unsafe.Pointer.FromRef(ref (Ꮡzerobase).Value);
     }
     // It's possible for any malloc to trigger sweeping, which may in
     // turn queue finalizers. Record this dynamic lock edge.
@@ -815,8 +824,8 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
     }
     if (debug.malloc) {
         if (debug.sbrk != 0) {
-            var align = ((uintptr)16);
-            if (typ != nil) {
+            var align = (uintptr)16;
+            if (Ꮡtyp != nil) {
                 // TODO(austin): This should be just
                 //   align = uintptr(typ.align)
                 // but that's only 4 on 32-bit platforms,
@@ -854,7 +863,7 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
     if ((~mp).gsignal == getg()) {
         @throw("malloc during signal"u8);
     }
-    mp.val.mallocing = 1;
+    mp.Value.mallocing = 1;
     var shouldhelpgc = false;
     var dataSize = userSize;
     var c = getMCache(mp);
@@ -864,7 +873,7 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
     ж<mspan> span = default!;
     ж<ж<_type>> header = default!;
     @unsafe.Pointer x = default!;
-    var noscan = typ == nil || !typ.Pointers();
+    var noscan = Ꮡtyp == nil || !typ.Pointers();
     // In some cases block zeroing can profitably (for latency reduction purposes)
     // be delayed till preemption is possible; delayedZeroing tracks that state.
     var delayedZeroing = false;
@@ -908,7 +917,7 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
             // standalone escaping variables. On a json benchmark
             // the allocator reduces number of allocations by ~12% and
             // reduces heap size by ~20%.
-            var off = c.val.tinyoffset;
+            var off = c.Value.tinyoffset;
             // Align tiny pointer for required (conservative) alignment.
             if ((uintptr)(size & 7) == 0){
                 off = alignUp(off, 8);
@@ -930,10 +939,10 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
             }
             if (off + size <= maxTinySize && (~c).tiny != 0) {
                 // The object fits into existing tiny block.
-                x = ((@unsafe.Pointer)((~c).tiny + off));
-                c.val.tinyoffset = off + size;
-                (~c).tinyAllocs++;
-                mp.val.mallocing = 0;
+                x = (@unsafe.Pointer)((~c).tiny + off);
+                c.Value.tinyoffset = off + size;
+                c.Value.tinyAllocs++;
+                mp.Value.mallocing = 0;
                 releasem(mp);
                 return x;
             }
@@ -943,15 +952,15 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
             if (v == 0) {
                 (v, span, shouldhelpgc) = c.nextFree(tinySpanClass);
             }
-            x = ((@unsafe.Pointer)v);
-            (ж<array<uint64>>)(uintptr)(x).val[0] = 0;
-            (ж<array<uint64>>)(uintptr)(x).val[1] = 0;
+            x = ((@unsafe.Pointer)(uintptr)v);
+            ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
+            ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
             // See if we need to replace the existing tiny block with the new one
             // based on amount of remaining free space.
             if (!raceenabled && (size < (~c).tinyoffset || (~c).tiny == 0)) {
                 // Note: disabled when race detector is on, see comment near end of this function.
-                c.val.tiny = ((uintptr)x);
-                c.val.tinyoffset = size;
+                c.Value.tiny = (uintptr)x;
+                c.Value.tinyoffset = size;
             }
             size = maxTinySize;
         } else {
@@ -961,18 +970,18 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
             }
             uint8 sizeclass = default!;
             if (size <= smallSizeMax - 8){
-                sizeclass = size_to_class8[divRoundUp(size, smallSizeDiv)];
+                sizeclass = size_to_class8[(nint)(divRoundUp(size, smallSizeDiv))];
             } else {
-                sizeclass = size_to_class128[divRoundUp(size - smallSizeMax, largeSizeDiv)];
+                sizeclass = size_to_class128[(nint)(divRoundUp(size - (uintptr)smallSizeMax, largeSizeDiv))];
             }
-            size = ((uintptr)class_to_size[sizeclass]);
+            size = (uintptr)class_to_size[sizeclass];
             var spc = makeSpanClass(sizeclass, noscan);
             span = (~c).alloc[spc];
             var v = nextFreeFast(span);
             if (v == 0) {
                 (v, span, shouldhelpgc) = c.nextFree(spc);
             }
-            x = ((@unsafe.Pointer)v);
+            x = ((@unsafe.Pointer)(uintptr)v);
             if (needzero && (~span).needzero != 0) {
                 memclrNoHeapPointers(x, size);
             }
@@ -987,21 +996,21 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
         // For large allocations, keep track of zeroed state so that
         // bulk zeroing can be happen later in a preemptible context.
         span = c.allocLarge(size, noscan);
-        span.val.freeindex = 1;
-        span.val.allocCount = 1;
-        size = span.val.elemsize;
-        x = ((@unsafe.Pointer)span.@base());
+        span.Value.freeindex = 1;
+        span.Value.allocCount = 1;
+        size = span.Value.elemsize;
+        x = (@unsafe.Pointer)span.@base();
         if (needzero && (~span).needzero != 0) {
             delayedZeroing = true;
         }
         if (!noscan) {
             // Tell the GC not to look at this yet.
-            span.val.largeType = default!;
-            header = Ꮡ((~span).largeType);
+            span.Value.largeType = default!;
+            header = span.of(mspan.ᏑlargeType);
         }
     }
     if (!noscan && !delayedZeroing) {
-        c.val.scanAlloc += heapSetType(((uintptr)x), dataSize, Ꮡtyp, header, span);
+        c.Value.scanAlloc += heapSetType((uintptr)x, dataSize, Ꮡtyp, header, span);
     }
     // Ensure that the stores above that initialize x to
     // type-safe memory and set the heap bits occur before
@@ -1019,13 +1028,13 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
     // object. Delaying this update until now ensures that
     // conservative scanning considers this pointer dead until
     // this point.
-    span.val.freeIndexForScan = span.val.freeindex;
+    span.Value.freeIndexForScan = span.Value.freeindex;
     // Allocate black during GC.
     // All slots hold nil so no scanning is needed.
     // This may be racing with GC so do it atomically if there can be
     // a race marking the bit.
     if (gcphase != _GCoff) {
-        gcmarknewobject(span, ((uintptr)x));
+        gcmarknewobject(span, (uintptr)x);
     }
     if (raceenabled) {
         racemalloc(x, size);
@@ -1047,7 +1056,7 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
     // of gc_sys or something. The code below just pretends it is
     // internal fragmentation and matches the GC's accounting by
     // using the whole allocation slot.
-    var fullSize = span.val.elemsize;
+    var fullSize = span.Value.elemsize;
     {
         nint rate = MemProfileRate; if (rate > 0) {
             // Note cache c only valid while m acquired; see #47302
@@ -1055,13 +1064,13 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
             // N.B. Use the full size because that matches how the GC
             // will update the mem profile on the "free" side.
             if (rate != 1 && fullSize < (~c).nextSample){
-                c.val.nextSample -= fullSize;
+                c.Value.nextSample -= fullSize;
             } else {
                 profilealloc(mp, x, fullSize);
             }
         }
     }
-    mp.val.mallocing = 0;
+    mp.Value.mallocing = 0;
     releasem(mp);
     // Objects can be zeroed late in a context where preemption can occur.
     // If the object contains pointers, its pointer data must be cleared
@@ -1074,7 +1083,7 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
         // Finish storing the type information for this case.
         if (!noscan) {
             var mpΔ1 = acquirem();
-            getMCache(mp).val.scanAlloc += heapSetType(((uintptr)x), dataSize, Ꮡtyp, header, span);
+            getMCache(mpΔ1).Value.scanAlloc += heapSetType((uintptr)x, dataSize, Ꮡtyp, header, span);
             // Publish the type information with the zeroed memory.
             publicationBarrier();
             releasem(mpΔ1);
@@ -1083,12 +1092,12 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
     if (debug.malloc) {
         if (inittrace.active && inittrace.id == (~getg()).goid) {
             // Init functions are executed sequentially in a single goroutine.
-            inittrace.bytes += ((uint64)fullSize);
+            inittrace.bytes += (uint64)fullSize;
         }
         if (traceAllocFreeEnabled()) {
             var Δtrace = traceAcquire();
             if (Δtrace.ok()) {
-                Δtrace.HeapObjectAlloc(((uintptr)x), Ꮡtyp);
+                Δtrace.HeapObjectAlloc((uintptr)x, Ꮡtyp);
                 traceRelease(Δtrace);
             }
         }
@@ -1099,7 +1108,7 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
         //
         // N.B. Use the full size because that's how the rest
         // of the GC accounts for bytes marked.
-        assistG.val.gcAssistBytes -= ((int64)(fullSize - dataSize));
+        assistG.Value.gcAssistBytes -= (int64)(fullSize - dataSize);
     }
     if (shouldhelpgc) {
         {
@@ -1138,11 +1147,11 @@ internal static ж<g> deductAssistCredit(uintptr size) {
         // Charge the current user G for this allocation.
         assistG = getg();
         if ((~(~assistG).m).curg != nil) {
-            assistG = (~assistG).m.val.curg;
+            assistG = assistG.Value.m.Value.curg;
         }
         // Charge the allocation against the G. We'll account
         // for internal fragmentation at the end of mallocgc.
-        assistG.val.gcAssistBytes -= ((int64)size);
+        assistG.Value.gcAssistBytes -= (int64)size;
         if ((~assistG).gcAssistBytes < 0) {
             // This G is in debt. Assist the GC to correct
             // this before allocating. This must happen
@@ -1162,11 +1171,11 @@ internal static ж<g> deductAssistCredit(uintptr size) {
 // Use this with care; if the data being cleared is tagged to contain
 // pointers, this allows the GC to run before it is all cleared.
 internal static void memclrNoHeapPointersChunked(uintptr size, @unsafe.Pointer x) {
-    var v = ((uintptr)x);
+    var v = (uintptr)x;
     // got this from benchmarking. 128k is too small, 512k is too large.
-    static readonly UntypedInt chunkBytes = /* 256 * 1024 */ 262144;
+    UntypedInt chunkBytes = /* 256 * 1024 */ 262144;
     var vsize = v + size;
-    for (var voff = v; voff < vsize; voff = voff + chunkBytes) {
+    for (var voff = v; voff < vsize; voff = voff + (uintptr)chunkBytes) {
         if ((~getg()).preempt) {
             // may hold locks, e.g., profiling
             goschedguarded();
@@ -1176,7 +1185,7 @@ internal static void memclrNoHeapPointersChunked(uintptr size, @unsafe.Pointer x
         if (n > chunkBytes) {
             n = chunkBytes;
         }
-        memclrNoHeapPointers(((@unsafe.Pointer)voff), n);
+        memclrNoHeapPointers((@unsafe.Pointer)voff, n);
     }
 }
 
@@ -1184,7 +1193,7 @@ internal static void memclrNoHeapPointersChunked(uintptr size, @unsafe.Pointer x
 // compiler (both frontend and SSA backend) knows the signature
 // of this function.
 internal static @unsafe.Pointer newobject(ж<_type> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.Value;
 
     return (uintptr)mallocgc(typ.Size_, Ꮡtyp, true);
 }
@@ -1202,14 +1211,14 @@ internal static @unsafe.Pointer newobject(ж<_type> Ꮡtyp) {
 //
 //go:linkname reflect_unsafe_New reflect.unsafe_New
 internal static @unsafe.Pointer reflect_unsafe_New(ж<_type> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.Value;
 
     return (uintptr)mallocgc(typ.Size_, Ꮡtyp, true);
 }
 
 //go:linkname reflectlite_unsafe_New internal/reflectlite.unsafe_New
 internal static @unsafe.Pointer reflectlite_unsafe_New(ж<_type> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.Value;
 
     return (uintptr)mallocgc(typ.Size_, Ꮡtyp, true);
 }
@@ -1228,14 +1237,14 @@ internal static @unsafe.Pointer reflectlite_unsafe_New(ж<_type> Ꮡtyp) {
 //
 //go:linkname newarray
 internal static @unsafe.Pointer newarray(ж<_type> Ꮡtyp, nint n) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.Value;
 
     if (n == 1) {
         return (uintptr)mallocgc(typ.Size_, Ꮡtyp, true);
     }
-    var (mem, overflow) = math.MulUintptr(typ.Size_, ((uintptr)n));
+    var (mem, overflow) = math.MulUintptr(typ.Size_, (uintptr)n);
     if (overflow || mem > maxAlloc || n < 0) {
-        throw panic(((plainError)"runtime: allocation size out of range"u8));
+        throw panic(((plainError)(@string)"runtime: allocation size out of range"u8));
     }
     return (uintptr)mallocgc(mem, Ꮡtyp, true);
 }
@@ -1256,20 +1265,20 @@ internal static @unsafe.Pointer newarray(ж<_type> Ꮡtyp, nint n) {
 //
 //go:linkname reflect_unsafe_NewArray reflect.unsafe_NewArray
 internal static @unsafe.Pointer reflect_unsafe_NewArray(ж<_type> Ꮡtyp, nint n) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.Value;
 
     return (uintptr)newarray(Ꮡtyp, n);
 }
 
 internal static void profilealloc(ж<m> Ꮡmp, @unsafe.Pointer x, uintptr size) {
-    ref var mp = ref Ꮡmp.val;
+    ref var mp = ref Ꮡmp.Value;
 
     var c = getMCache(Ꮡmp);
     if (c == nil) {
         @throw("profilealloc called without a P or outside bootstrapping"u8);
     }
-    c.val.nextSample = nextSample();
-    mProf_Malloc(Ꮡmp, x.val, size);
+    c.Value.nextSample = nextSample();
+    mProf_Malloc(Ꮡmp, x, size);
 }
 
 // nextSample returns the next sampling point for heap profiling. The goal is
@@ -1295,7 +1304,7 @@ internal static uintptr nextSample() {
             }
         }
     }
-    return ((uintptr)fastexprand(MemProfileRate));
+    return (uintptr)fastexprand(MemProfileRate);
 }
 
 // fastexprand returns a random number from an exponential distribution with
@@ -1304,8 +1313,8 @@ internal static int32 fastexprand(nint mean) {
     // Avoid overflow. Maximum possible step is
     // -ln(1/(1<<randomBitCount)) * mean, approximately 20 * mean.
     switch (ᐧ) {
-    case {} when mean is > 117440512: {
-        mean = 117440512;
+    case {} when mean is > 0x7000000: {
+        mean = 0x7000000;
         break;
     }
     case {} when mean is 0: {
@@ -1320,14 +1329,14 @@ internal static int32 fastexprand(nint mean) {
     // -log_e(q)/mean = x
     // x = -log_e(q) * mean
     // x = log_2(q) * (-log_e(2)) * mean    ; Using log_2 for efficiency
-    static readonly UntypedInt randomBitCount = 26;
-    var q = cheaprandn(1 << (int)(randomBitCount)) + 1;
-    var qlog = fastlog2(((float64)q)) - randomBitCount;
+    UntypedInt randomBitCount = 26;
+    var q = cheaprandn(((uint32)1 << (int)(randomBitCount))) + 1;
+    var qlog = fastlog2((float64)q) - (float64)randomBitCount;
     if (qlog > 0) {
         qlog = 0;
     }
-    static readonly UntypedFloat minusLog2 = /* -0.6931471805599453 */ -0.693147; // -ln(2)
-    return ((int32)(qlog * (minusLog2 * ((float64)mean)))) + 1;
+    UntypedFloat minusLog2 = /* -0.6931471805599453 */ -0.693147; // -ln(2)
+    return (int32)(qlog * ((float64)minusLog2 * (float64)mean)) + 1;
 }
 
 // nextSampleNoFP is similar to nextSample, but uses older,
@@ -1335,12 +1344,12 @@ internal static int32 fastexprand(nint mean) {
 internal static uintptr nextSampleNoFP() {
     // Set first allocation sample size.
     nint rate = MemProfileRate;
-    if (rate > 1073741823) {
+    if (rate > 0x3fffffff) {
         // make 2*rate not overflow
-        rate = 1073741823;
+        rate = 0x3fffffff;
     }
     if (rate != 0) {
-        return ((uintptr)cheaprandn(((uint32)(2 * rate))));
+        return (uintptr)cheaprandn((uint32)(2 * rate));
     }
     return 0;
 }
@@ -1355,7 +1364,8 @@ internal static uintptr nextSampleNoFP() {
     internal partial ref mutex mutex { get; }
     internal partial ref persistentAlloc persistentAlloc { get; }
 }
-internal static globalAllocᴛ1 globalAlloc;
+internal static ж<globalAllocᴛ1> ᏑglobalAlloc = new(new globalAllocᴛ1(nil));
+internal static ref globalAllocᴛ1 globalAlloc => ref ᏑglobalAlloc.Value;
 
 // persistentChunkSize is the number of bytes we allocate when we grow
 // a persistentAlloc.
@@ -1364,7 +1374,8 @@ internal static readonly UntypedInt persistentChunkSize = /* 256 << 10 */ 262144
 // persistentChunks is a list of all the persistent chunks we have
 // allocated. The list is maintained through the first word in the
 // persistent chunk. This is updated atomically.
-internal static ж<notInHeap> persistentChunks;
+internal static ж<ж<notInHeap>> ᏑpersistentChunks = new(default(ж<notInHeap>));
+internal static ref ж<notInHeap> persistentChunks => ref ᏑpersistentChunks.ValueSlot;
 
 // Wrapper around sysAlloc that can allocate small chunks.
 // There is no associated free operation.
@@ -1376,13 +1387,11 @@ internal static ж<notInHeap> persistentChunks;
 // Consider marking persistentalloc'd types not in heap by embedding
 // runtime/internal/sys.NotInHeap.
 internal static @unsafe.Pointer persistentalloc(uintptr size, uintptr align, ж<sysMemStat> ᏑsysStat) {
-    ref var sysStat = ref ᏑsysStat.val;
+    ref var sysStat = ref ᏑsysStat.Value;
 
-    ж<notInHeap> Δp = default!;
-    systemstack(
-    var pʗ2 = Δp;
-    () => {
-        pʗ2 = persistentalloc1(size, align, ᏑsysStat);
+    ref var Δp = ref heap<ж<notInHeap>>(out var Ꮡp);
+    systemstack(() => {
+        Ꮡp.ValueSlot = persistentalloc1(size, align, ᏑsysStat);
     });
     return new @unsafe.Pointer(Δp);
 }
@@ -1392,9 +1401,9 @@ internal static @unsafe.Pointer persistentalloc(uintptr size, uintptr align, ж<
 //
 //go:systemstack
 internal static ж<notInHeap> persistentalloc1(uintptr size, uintptr align, ж<sysMemStat> ᏑsysStat) {
-    ref var sysStat = ref ᏑsysStat.val;
+    ref var sysStat = ref ᏑsysStat.DerefOrNil();
 
-    static readonly UntypedInt maxBlock = /* 64 << 10 */ 65536; // VM reservation granularity is 64K on windows
+    UntypedInt maxBlock = /* 64 << 10 */ 65536; // VM reservation granularity is 64K on windows
     if (size == 0) {
         @throw("persistentalloc: size == 0"u8);
     }
@@ -1414,14 +1423,14 @@ internal static ж<notInHeap> persistentalloc1(uintptr size, uintptr align, ж<s
     var mp = acquirem();
     ж<persistentAlloc> persistent = default!;
     if (mp != nil && (~mp).p != 0){
-        persistent = Ꮡ((~(~mp).p.ptr()).palloc);
+        persistent = (~mp).p.ptr().of(runtime_package.Δp.Ꮡpalloc);
     } else {
         @lock(ᏑglobalAlloc.of(globalAllocᴛ1.Ꮡmutex));
         persistent = ᏑglobalAlloc.of(globalAllocᴛ1.ᏑpersistentAlloc);
     }
-    persistent.val.off = alignUp((~persistent).off, align);
+    persistent.Value.off = alignUp((~persistent).off, align);
     if ((~persistent).off + size > persistentChunkSize || (~persistent).@base == nil) {
-        persistent.val.@base = (ж<notInHeap>)(uintptr)(sysAlloc(persistentChunkSize, Ꮡmemstats.of(mstats.Ꮡother_sys)));
+        persistent.Value.@base = (ж<notInHeap>)(uintptr)(sysAlloc(persistentChunkSize, Ꮡmemstats.of(mstats.Ꮡother_sys)));
         if ((~persistent).@base == nil) {
             if (persistent == ᏑglobalAlloc.of(globalAllocᴛ1.ᏑpersistentAlloc)) {
                 unlock(ᏑglobalAlloc.of(globalAllocᴛ1.Ꮡmutex));
@@ -1430,23 +1439,23 @@ internal static ж<notInHeap> persistentalloc1(uintptr size, uintptr align, ж<s
         }
         // Add the new chunk to the persistentChunks list.
         while (ᐧ) {
-            var chunks = ((uintptr)new @unsafe.Pointer(persistentChunks));
-            ((ж<uintptr>)(uintptr)(new @unsafe.Pointer((~persistent).@base))).val = chunks;
-            if (atomic.Casuintptr(((ж<uintptr>)((@unsafe.Pointer)(Ꮡ(persistentChunks)))), chunks, ((uintptr)new @unsafe.Pointer((~persistent).@base)))) {
+            var chunks = (uintptr)new @unsafe.Pointer(persistentChunks);
+            ((ж<uintptr>)(uintptr)(new @unsafe.Pointer((~persistent).@base))).Value = chunks;
+            if (atomic.Casuintptr((ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref (ᏑpersistentChunks).Value)), chunks, (uintptr)new @unsafe.Pointer((~persistent).@base))) {
                 break;
             }
         }
-        persistent.val.off = alignUp(goarch.PtrSize, align);
+        persistent.Value.off = alignUp(goarch.PtrSize, align);
     }
     var Δp = (~persistent).@base.add((~persistent).off);
-    persistent.val.off += size;
+    persistent.Value.off += size;
     releasem(mp);
     if (persistent == ᏑglobalAlloc.of(globalAllocᴛ1.ᏑpersistentAlloc)) {
         unlock(ᏑglobalAlloc.of(globalAllocᴛ1.Ꮡmutex));
     }
     if (ᏑsysStat != Ꮡmemstats.of(mstats.Ꮡother_sys)) {
-        sysStat.add(((int64)size));
-        memstats.other_sys.add(-((int64)size));
+        ᏑsysStat.add((int64)size);
+        Ꮡmemstats.of(mstats.Ꮡother_sys).add(-(int64)size);
     }
     return Δp;
 }
@@ -1457,12 +1466,12 @@ internal static ж<notInHeap> persistentalloc1(uintptr size, uintptr align, ж<s
 //
 //go:nosplit
 internal static bool inPersistentAlloc(uintptr Δp) {
-    var chunk = atomic.Loaduintptr(((ж<uintptr>)((@unsafe.Pointer)(Ꮡ(persistentChunks)))));
+    var chunk = atomic.Loaduintptr((ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref (ᏑpersistentChunks).Value)));
     while (chunk != 0) {
-        if (Δp >= chunk && Δp < chunk + persistentChunkSize) {
+        if (Δp >= chunk && Δp < chunk + (uintptr)persistentChunkSize) {
             return true;
         }
-        chunk = ~(ж<uintptr>)(uintptr)(((@unsafe.Pointer)chunk));
+        chunk = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)chunk);
     }
     return false;
 }
@@ -1487,13 +1496,14 @@ internal static bool inPersistentAlloc(uintptr Δp) {
         // later.
         size -= 1;
     }
-    (l.next, l.mapped) = (@base, @base);
+    l.next = @base;
+    l.mapped = @base;
     l.end = @base + size;
     l.mapMemory = mapMemory;
 }
 
 [GoRecv] internal static @unsafe.Pointer alloc(this ref linearAlloc l, uintptr size, uintptr align, ж<sysMemStat> ᏑsysStat) {
-    ref var sysStat = ref ᏑsysStat.val;
+    ref var sysStat = ref ᏑsysStat.Value;
 
     var Δp = alignUp(l.next, align);
     if (Δp + size > l.end) {
@@ -1505,13 +1515,13 @@ internal static bool inPersistentAlloc(uintptr Δp) {
             if (l.mapMemory) {
                 // Transition from Reserved to Prepared to Ready.
                 var n = pEnd - l.mapped;
-                sysMap(((@unsafe.Pointer)l.mapped), n, ᏑsysStat);
-                sysUsed(((@unsafe.Pointer)l.mapped), n, n);
+                sysMap((@unsafe.Pointer)l.mapped, n, ᏑsysStat);
+                sysUsed((@unsafe.Pointer)l.mapped, n, n);
             }
             l.mapped = pEnd;
         }
     }
-    return ((@unsafe.Pointer)Δp);
+    return (@unsafe.Pointer)Δp;
 }
 
 // notInHeap is off-heap memory allocated by a lower-level allocator
@@ -1523,11 +1533,13 @@ internal static bool inPersistentAlloc(uintptr Δp) {
 //
 // TODO: Use this as the return type of sysAlloc, persistentAlloc, etc?
 [GoType] partial struct notInHeap {
-    internal runtime.@internal.sys_package.NotInHeap _;
+    internal sys.NotInHeap _;
 }
 
-[GoRecv] internal static ж<notInHeap> add(this ref notInHeap Δp, uintptr bytes) {
-    return (ж<notInHeap>)(uintptr)(((@unsafe.Pointer)(((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref Δp)) + bytes)));
+internal static ж<notInHeap> add(this ж<notInHeap> Ꮡp, uintptr bytes) {
+    ref var Δp = ref Ꮡp.Value;
+
+    return (ж<notInHeap>)(uintptr)((@unsafe.Pointer)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref Δp) + bytes));
 }
 
 // computeRZlog computes the size of the redzone.
@@ -1535,28 +1547,28 @@ internal static bool inPersistentAlloc(uintptr Δp) {
 internal static uintptr computeRZlog(uintptr userSize) {
     switch (ᐧ) {
     case {} when userSize <= (64 - 16): {
-        return 16 << (int)(0);
+        return (uintptr)(16 << (int)(0));
     }
     case {} when userSize <= (128 - 32): {
-        return 16 << (int)(1);
+        return (uintptr)(16 << (int)(1));
     }
     case {} when userSize <= (512 - 64): {
-        return 16 << (int)(2);
+        return (uintptr)(16 << (int)(2));
     }
     case {} when userSize <= (4096 - 128): {
-        return 16 << (int)(3);
+        return (uintptr)(16 << (int)(3));
     }
-    case {} when userSize <= (1 << (int)(14)) - 256: {
-        return 16 << (int)(4);
+    case {} when userSize <= ((1 << (int)(14))) - 256: {
+        return (uintptr)(16 << (int)(4));
     }
-    case {} when userSize <= (1 << (int)(15)) - 512: {
-        return 16 << (int)(5);
+    case {} when userSize <= ((1 << (int)(15))) - 512: {
+        return (uintptr)(16 << (int)(5));
     }
-    case {} when userSize <= (1 << (int)(16)) - 1024: {
-        return 16 << (int)(6);
+    case {} when userSize <= ((1 << (int)(16))) - 1024: {
+        return (uintptr)(16 << (int)(6));
     }
     default: {
-        return 16 << (int)(7);
+        return (uintptr)(16 << (int)(7));
     }}
 
 }

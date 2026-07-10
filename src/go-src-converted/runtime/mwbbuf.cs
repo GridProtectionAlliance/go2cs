@@ -60,15 +60,15 @@ internal static readonly UntypedInt wbMaxEntriesPerCall = 8;
 
 // reset empties b by resetting its next and end pointers.
 [GoRecv] internal static void reset(this ref wbBuf b) {
-    var start = ((uintptr)((@unsafe.Pointer)(Ꮡ(b.buf[0]))));
+    var start = (uintptr)@unsafe.Pointer.FromRef(ref (Ꮡ(b.buf[0])).Value);
     b.next = start;
     if (testSmallBuf){
         // For testing, make the buffer smaller but more than
         // 1 write barrier's worth, so it tests both the
         // immediate flush and delayed flush cases.
-        b.end = ((uintptr)((@unsafe.Pointer)(Ꮡ(b.buf[wbMaxEntriesPerCall + 1]))));
+        b.end = (uintptr)@unsafe.Pointer.FromRef(ref (Ꮡ(b.buf[wbMaxEntriesPerCall + 1])).Value);
     } else {
-        b.end = start + ((uintptr)len(b.buf)) * @unsafe.Sizeof(b.buf[0]);
+        b.end = start + (uintptr)len(b.buf) * @unsafe.Sizeof(b.buf[0]);
     }
     if ((b.end - b.next) % @unsafe.Sizeof(b.buf[0]) != 0) {
         @throw("bad write barrier buffer bounds"u8);
@@ -81,12 +81,12 @@ internal static readonly UntypedInt wbMaxEntriesPerCall = 8;
 //
 //go:nosplit
 [GoRecv] internal static void discard(this ref wbBuf b) {
-    b.next = ((uintptr)((@unsafe.Pointer)(Ꮡ(b.buf[0]))));
+    b.next = (uintptr)@unsafe.Pointer.FromRef(ref (Ꮡ(b.buf[0])).Value);
 }
 
 // empty reports whether b contains no pointers.
 [GoRecv] internal static bool empty(this ref wbBuf b) {
-    return b.next == ((uintptr)((@unsafe.Pointer)(Ꮡ(b.buf[0]))));
+    return b.next == (uintptr)@unsafe.Pointer.FromRef(ref (Ꮡ(b.buf[0])).Value);
 }
 
 // getX returns space in the write barrier buffer to store X pointers.
@@ -112,10 +112,10 @@ internal static readonly UntypedInt wbMaxEntriesPerCall = 8;
 //go:nowritebarrierrec
 //go:nosplit
 [GoRecv] internal static ж<array<uintptr>> get1(this ref wbBuf b) {
-    if (b.next + goarch.PtrSize > b.end) {
+    if (b.next + (uintptr)goarch.PtrSize > b.end) {
         wbBufFlush();
     }
-    var Δp = (ж<array<uintptr>>)(uintptr)(((@unsafe.Pointer)b.next));
+    var Δp = (ж<array<uintptr>>)(uintptr)((@unsafe.Pointer)b.next);
     b.next += goarch.PtrSize;
     return Δp;
 }
@@ -123,10 +123,10 @@ internal static readonly UntypedInt wbMaxEntriesPerCall = 8;
 //go:nowritebarrierrec
 //go:nosplit
 [GoRecv] internal static ж<array<uintptr>> get2(this ref wbBuf b) {
-    if (b.next + 2 * goarch.PtrSize > b.end) {
+    if (b.next + (uintptr)(2 * goarch.PtrSize) > b.end) {
         wbBufFlush();
     }
-    var Δp = (ж<array<uintptr>>)(uintptr)(((@unsafe.Pointer)b.next));
+    var Δp = (ж<array<uintptr>>)(uintptr)((@unsafe.Pointer)b.next);
     b.next += 2 * goarch.PtrSize;
     return Δp;
 }
@@ -153,7 +153,7 @@ internal static void wbBufFlush() {
         // We're going down. Not much point in write barriers
         // and this way we can allow write barriers in the
         // panic path.
-        (~(~(~getg()).m).p.ptr()).wbBuf.discard();
+        (~(~getg()).m).p.ptr().of(runtime_package.Δp.ᏑwbBuf).discard();
         return;
     }
     // Switch to the system stack so we don't have to worry about
@@ -174,10 +174,10 @@ internal static void wbBufFlush() {
 //go:nowritebarrierrec
 //go:systemstack
 internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
-    ref var pp = ref Ꮡpp.val;
+    ref var pp = ref Ꮡpp.Value;
 
     // Get the buffered pointers.
-    var start = ((uintptr)((@unsafe.Pointer)(Ꮡpp.wbBuf.buf.at<uintptr>(0))));
+    var start = (uintptr)@unsafe.Pointer.FromRef(ref (Ꮡpp.of(runtime_package.Δp.ᏑwbBuf).at(wbBuf.Ꮡbuf, 0)).Value);
     var n = (pp.wbBuf.next - start) / @unsafe.Sizeof(pp.wbBuf.buf[0]);
     var ptrs = pp.wbBuf.buf[..(int)(n)];
     // Poison the buffer to make extra sure nothing is enqueued
@@ -205,7 +205,7 @@ internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
     // could track whether any un-shaded goroutine has used the
     // buffer, or just track globally whether there are any
     // un-shaded stacks and flush after each stack scan.
-    var gcw = Ꮡ(pp.gcw);
+    var gcw = Ꮡpp.of(runtime_package.Δp.Ꮡgcw);
     nint pos = 0;
     foreach (var (_, ptr) in ptrs) {
         if (ptr < minLegalPointer) {
@@ -230,11 +230,11 @@ internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
         mbits.setMarked();
         // Mark span.
         var (arena, pageIdx, pageMask) = pageIndexOf(span.@base());
-        if ((uint8)((~arena).pageMarks[pageIdx] & pageMask) == 0) {
-            atomic.Or8(Ꮡ(~arena).pageMarks.at<uint8>(pageIdx), pageMask);
+        if ((uint8)((~arena).pageMarks[(nint)(pageIdx)] & pageMask) == 0) {
+            atomic.Or8(arena.at(heapArena.ᏑpageMarks, (nint)(pageIdx)), pageMask);
         }
         if ((~span).spanclass.noscan()) {
-            gcw.val.bytesMarked += ((uint64)(~span).elemsize);
+            gcw.Value.bytesMarked += (uint64)(~span).elemsize;
             continue;
         }
         ptrs[pos] = obj;

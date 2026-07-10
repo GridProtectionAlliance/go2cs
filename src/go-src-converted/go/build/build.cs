@@ -6,35 +6,36 @@ namespace go.go;
 using bytes = bytes_package;
 using errors = errors_package;
 using fmt = fmt_package;
-using ast = go.ast_package;
-using constraint = go.build.constraint_package;
-using doc = go.doc_package;
-using token = go.token_package;
-using buildcfg = @internal.buildcfg_package;
-using godebug = @internal.godebug_package;
-using goroot = @internal.goroot_package;
-using goversion = @internal.goversion_package;
-using platform = @internal.platform_package;
+using ast = global::go.go.ast_package;
+using constraint = global::go.go.build.constraint_package;
+using Δdoc = global::go.go.doc_package;
+using token = global::go.go.token_package;
+using buildcfg = global::go.@internal.buildcfg_package;
+using godebug = global::go.@internal.godebug_package;
+using goroot = global::go.@internal.goroot_package;
+using goversion = global::go.@internal.goversion_package;
+using platform = global::go.@internal.platform_package;
 using io = io_package;
-using fs = io.fs_package;
+using fs = global::go.io.fs_package;
 using os = os_package;
-using exec = os.exec_package;
+using exec = global::go.os.exec_package;
 using pathpkg = path_package;
-using filepath = path.filepath_package;
+using filepath = global::go.path.filepath_package;
 using runtime = runtime_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
-using _ = unsafe_package; // for linkname
-using @internal;
-using go.build;
-using io;
-using os;
-using path;
-using unicode;
-using ꓸꓸꓸ@string = Span<@string>;
+using utf8 = global::go.unicode.utf8_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+using global::go.@internal;
+using global::go.go;
+using global::go.go.build;
+using global::go.io;
+using global::go.os;
+using global::go.path;
+using global::go.unicode;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class build_package {
 
@@ -82,7 +83,7 @@ partial class build_package {
 
     // JoinPath joins the sequence of path fragments into a single path.
     // If JoinPath is nil, Import uses filepath.Join.
-    public Func<.@string, @string> JoinPath;
+    public Funcꓸꓸꓸ<@string, @string> JoinPath;
     // SplitPathList splits the path list into a slice of individual paths.
     // If SplitPathList is nil, Import uses filepath.SplitList.
     public Func<@string, slice<@string>> SplitPathList;
@@ -99,18 +100,18 @@ partial class build_package {
     // can be joined to root to produce a path equivalent to dir.
     // If HasSubdir is nil, Import uses an implementation built on
     // filepath.EvalSymlinks.
-    public Func<@string, @string, (rel string, ok bool)> HasSubdir;
+    public Func<@string, @string, (@string rel, bool ok)> HasSubdir;
     // ReadDir returns a slice of fs.FileInfo, sorted by Name,
     // describing the content of the named directory.
     // If ReadDir is nil, Import uses os.ReadDir.
-    public fs.FileInfo, error) ReadDir;
+    public Func<@string, (slice<fs.FileInfo>, error)> ReadDir;
     // OpenFile opens a file (not a directory) for reading.
     // If OpenFile is nil, Import uses os.Open.
     public Func<@string, (io.ReadCloser, error)> OpenFile;
 }
 
 // joinPath calls ctxt.JoinPath (if not nil) or else filepath.Join.
-[GoRecv] internal static @string joinPath(this ref Context ctxt, params ꓸꓸꓸ@string elemʗp) {
+[GoRecv] internal static @string joinPath(this ref Context ctxt, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.slice();
 
     {
@@ -148,7 +149,7 @@ partial class build_package {
             return f(path);
         }
     }
-    (fi, err) = os.Stat(path);
+    var (fi, err) = os.Stat(path);
     return err == default! && fi.IsDir();
 }
 
@@ -210,7 +211,7 @@ internal static (@string rel, bool ok) hasSubdir(@string root, @string dir) {
     // TODO: add a fs.DirEntry version of Context.ReadDir
     {
         var f = ctxt.ReadDir; if (f != default!) {
-            (fis, err) = f(path);
+            var (fis, err) = f(path);
             if (err != default!) {
                 return (default!, err);
             }
@@ -231,19 +232,19 @@ internal static (@string rel, bool ok) hasSubdir(@string root, @string dir) {
             return fn(path);
         }
     }
-    (f, err) = os.Open(path);
+    var (f, err) = os.Open(path);
     if (err != default!) {
         return (default!, err);
     }
     // nil interface
-    return (~f, default!);
+    return (new os_FileжReadCloser(f), default!);
 }
 
 // isFile determines whether path is a file by trying to open it.
 // It reuses openFile instead of adding another function to the
 // list in Context.
 [GoRecv] internal static bool isFile(this ref Context ctxt, @string path) {
-    (f, err) = ctxt.openFile(path);
+    var (f, err) = ctxt.openFile(path);
     if (err != default!) {
         return false;
     }
@@ -305,7 +306,8 @@ internal static (@string rel, bool ok) hasSubdir(@string root, @string dir) {
 // Default is the default Context for builds.
 // It uses the GOARCH, GOOS, GOROOT, and GOPATH environment variables
 // if set, or else the compiled code's GOARCH, GOOS, and GOROOT.
-public static Context Default = defaultContext();
+public static ж<Context> ᏑDefault = new(defaultContext());
+public static ref Context Default => ref ᏑDefault.Value;
 
 // Keep consistent with cmd/go/internal/cfg.defaultGOPATH.
 internal static @string defaultGOPATH() {
@@ -390,12 +392,14 @@ internal static Context defaultContext() {
         c.CgoEnabled = false;
     }
     else { /* default: */
-        if (runtime.GOARCH == c.GOARCH && runtime.GOOS == c.GOOS) {
-            // cgo must be explicitly enabled for cross compilation builds
-            c.CgoEnabled = platform.CgoSupported(c.GOOS, c.GOARCH);
-            break;
-        }
-        c.CgoEnabled = false;
+        do {
+            if (runtime.GOARCH == c.GOARCH && runtime.GOOS == c.GOOS) {
+                // cgo must be explicitly enabled for cross compilation builds
+                c.CgoEnabled = platform.CgoSupported(c.GOOS, c.GOARCH);
+                break;
+            }
+            c.CgoEnabled = false;
+        } while (false);
     }
 
     return c;
@@ -464,28 +468,28 @@ public static readonly ImportMode IgnoreVendor = 8;
     public slice<Directive> XTestDirectives;
     // Dependency information
     public slice<@string> Imports;              // import paths from GoFiles, CgoFiles
-    public tokenꓸPosition ImportPos; // line information for Imports
+    public map<@string, slice<tokenꓸPosition>> ImportPos; // line information for Imports
     public slice<@string> TestImports;              // import paths from TestGoFiles
-    public tokenꓸPosition TestImportPos; // line information for TestImports
+    public map<@string, slice<tokenꓸPosition>> TestImportPos; // line information for TestImports
     public slice<@string> XTestImports;              // import paths from XTestGoFiles
-    public tokenꓸPosition XTestImportPos; // line information for XTestImports
+    public map<@string, slice<tokenꓸPosition>> XTestImportPos; // line information for XTestImports
     // //go:embed patterns found in Go source files
     // For example, if a source file says
     //	//go:embed a* b.c
     // then the list will contain those two strings as separate entries.
     // (See package embed for more details about //go:embed.)
     public slice<@string> EmbedPatterns;              // patterns from GoFiles, CgoFiles
-    public tokenꓸPosition EmbedPatternPos; // line information for EmbedPatterns
+    public map<@string, slice<tokenꓸPosition>> EmbedPatternPos; // line information for EmbedPatterns
     public slice<@string> TestEmbedPatterns;              // patterns from TestGoFiles
-    public tokenꓸPosition TestEmbedPatternPos; // line information for TestEmbedPatterns
+    public map<@string, slice<tokenꓸPosition>> TestEmbedPatternPos; // line information for TestEmbedPatterns
     public slice<@string> XTestEmbedPatterns;              // patterns from XTestGoFiles
-    public tokenꓸPosition XTestEmbedPatternPos; // line information for XTestEmbedPatternPos
+    public map<@string, slice<tokenꓸPosition>> XTestEmbedPatternPos; // line information for XTestEmbedPatternPos
 }
 
 // A Directive is a Go directive comment (//go:zzz...) found in a source file.
 [GoType] partial struct Directive {
     public @string Text;        // full line comment including leading slashes
-    public go.token_package.ΔPosition Pos; // position of comment
+    public tokenꓸPosition Pos; // position of comment
 }
 
 // IsCommand reports whether the package is considered a
@@ -497,8 +501,10 @@ public static readonly ImportMode IgnoreVendor = 8;
 
 // ImportDir is like [Import] but processes the Go package found in
 // the named directory.
-[GoRecv] public static (ж<Package>, error) ImportDir(this ref Context ctxt, @string dir, ImportMode mode) {
-    return ctxt.Import("."u8, dir, mode);
+public static (ж<Package>, error) ImportDir(this ж<Context> Ꮡctxt, @string dir, ImportMode mode) {
+    ref var ctxt = ref Ꮡctxt.Value;
+
+    return Ꮡctxt.Import("."u8, dir, mode);
 }
 
 // NoGoError is the error used by [Import] to describe a directory
@@ -556,7 +562,9 @@ internal static ж<godebug.Setting> installgoroot = godebug.New("installgoroot"u
 //
 // If an error occurs, Import returns a non-nil error and a non-nil
 // *[Package] containing partial information.
-[GoRecv] public static (ж<Package>, error) Import(this ref Context ctxt, @string path, @string srcDir, ImportMode mode) {
+public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path, @string srcDir, ImportMode mode) {
+    ref var ctxt = ref Ꮡctxt.Value;
+
     var p = Ꮡ(new Package(
         ImportPath: path
     ));
@@ -582,10 +590,9 @@ internal static ж<godebug.Setting> installgoroot = godebug.New("installgoroot"u
  path, ctxt.Compiler);
     }
 
-    var setPkga = 
     var pʗ1 = p;
-    () => {
-        var exprᴛ2 = ctxt.Compiler;
+    var setPkga = () => {
+        var exprᴛ2 = Ꮡctxt.Value.Compiler;
         if (exprᴛ2 == "gccgo"u8) {
             var (dir, elem) = pathpkg.Split((~pʗ1).ImportPath);
             pkga = pkgtargetroot + "/"u8 + dir + "lib"u8 + elem + ".a"u8;
@@ -604,20 +611,19 @@ internal static ж<godebug.Setting> installgoroot = godebug.New("installgoroot"u
             return (p, fmt.Errorf("import %q: import relative to unknown directory"u8, path));
         }
         if (!ctxt.isAbsPath(path)) {
-            p.val.Dir = ctxt.joinPath(srcDir, path);
+            p.Value.Dir = ctxt.joinPath(srcDir, path);
         }
         // p.Dir directory may or may not exist. Gather partial information first, check if it exists later.
         // Determine canonical import path, if any.
         // Exclude results where the import path would include /testdata/.
-        var inTestdata = 
-        (@string sub) => strings.Contains(sub, "/testdata/"u8) || strings.HasSuffix(sub, "/testdata"u8) || strings.HasPrefix(sub, "testdata/"u8) || sub == "testdata"u8;
+        var inTestdata = (@string sub) => strings.Contains(sub, "/testdata/"u8) || strings.HasSuffix(sub, "/testdata"u8) || strings.HasPrefix(sub, "testdata/"u8) || sub == "testdata"u8;
         if (ctxt.GOROOT != ""u8) {
             @string root = ctxt.joinPath(ctxt.GOROOT, "src");
             {
                 var (sub, ok) = ctxt.hasSubdir(root, (~p).Dir); if (ok && !inTestdata(sub)) {
-                    p.val.Goroot = true;
-                    p.val.ImportPath = sub;
-                    p.val.Root = ctxt.GOROOT;
+                    p.Value.Goroot = true;
+                    p.Value.ImportPath = sub;
+                    p.Value.Root = ctxt.GOROOT;
                     setPkga();
                     // p.ImportPath changed
                     goto Found;
@@ -635,7 +641,7 @@ internal static ж<godebug.Setting> installgoroot = godebug.New("installgoroot"u
                     if (ctxt.GOROOT != ""u8 && ctxt.Compiler != "gccgo"u8) {
                         {
                             @string dir = ctxt.joinPath(ctxt.GOROOT, "src", sub); if (ctxt.isDir(dir)) {
-                                p.val.ConflictDir = dir;
+                                p.Value.ConflictDir = dir;
                                 goto Found;
                             }
                         }
@@ -643,15 +649,15 @@ internal static ж<godebug.Setting> installgoroot = godebug.New("installgoroot"u
                     foreach (var (_, earlyRoot) in all[..(int)(i)]) {
                         {
                             @string dir = ctxt.joinPath(earlyRoot, "src", sub); if (ctxt.isDir(dir)) {
-                                p.val.ConflictDir = dir;
+                                p.Value.ConflictDir = dir;
                                 goto Found;
                             }
                         }
                     }
                     // sub would not name some other directory instead of this one.
                     // Record it.
-                    p.val.ImportPath = sub;
-                    p.val.Root = root;
+                    p.Value.ImportPath = sub;
+                    p.Value.Root = root;
                     setPkga();
                     // p.ImportPath changed
                     goto Found;
@@ -678,29 +684,27 @@ internal static ж<godebug.Setting> installgoroot = godebug.New("installgoroot"u
         ref var tried = ref heap(new Import_tried(), out var Ꮡtried);
         // Vendor directories get first chance to satisfy import.
         if ((ImportMode)(mode & IgnoreVendor) == 0 && srcDir != ""u8) {
-            var searchVendor = 
             var pʗ2 = p;
             var setPkgaʗ1 = setPkga;
-            var triedʗ1 = tried;
-            (@string root, bool isGoroot) => {
-                var (sub, ok) = ctxt.hasSubdir(root, srcDir);
+            var searchVendor = (@string root, bool isGoroot) => {
+                var (sub, ok) = Ꮡctxt.Value.hasSubdir(root, srcDir);
                 if (!ok || !strings.HasPrefix(sub, "src/"u8) || strings.Contains(sub, "/testdata/"u8)) {
                     return false;
                 }
                 while (ᐧ) {
-                    @string vendor = ctxt.joinPath(root, sub, "vendor");
-                    if (ctxt.isDir(vendor)) {
-                        @string dir = ctxt.joinPath(vendor, path);
-                        if (ctxt.isDir(dir) && hasGoFiles(ctxt, dir)) {
-                            pʗ2.val.Dir = dir;
-                            pʗ2.val.ImportPath = strings.TrimPrefix(pathpkg.Join(sub, "vendor", path), "src/"u8);
-                            pʗ2.val.Goroot = isGoroot;
-                            pʗ2.val.Root = root;
+                    @string vendor = Ꮡctxt.Value.joinPath(root, sub, "vendor");
+                    if (Ꮡctxt.Value.isDir(vendor)) {
+                        @string dir = Ꮡctxt.Value.joinPath(vendor, path);
+                        if (Ꮡctxt.Value.isDir(dir) && hasGoFiles(Ꮡctxt, dir)) {
+                            pʗ2.Value.Dir = dir;
+                            pʗ2.Value.ImportPath = strings.TrimPrefix(pathpkg.Join(sub, "vendor", path), "src/"u8);
+                            pʗ2.Value.Goroot = isGoroot;
+                            pʗ2.Value.Root = root;
                             setPkgaʗ1();
                             // p.ImportPath changed
                             return true;
                         }
-                        triedʗ1.vendor = append(triedʗ1.vendor, dir);
+                        Ꮡtried.Value.vendor = append(Ꮡtried.Value.vendor, dir);
                     }
                     nint i = strings.LastIndex(sub, "/"u8);
                     if (i < 0) {
@@ -735,9 +739,9 @@ internal static ж<godebug.Setting> installgoroot = godebug.New("installgoroot"u
                     var isDir = ctxt.isDir(dir);
                     binaryOnly = !isDir && (ImportMode)(mode & AllowBinary) != 0 && pkga != ""u8 && ctxt.isFile(ctxt.joinPath(ctxt.GOROOT, pkga));
                     if (isDir || binaryOnly) {
-                        p.val.Dir = dir;
-                        p.val.Goroot = true;
-                        p.val.Root = ctxt.GOROOT;
+                        p.Value.Dir = dir;
+                        p.Value.Goroot = true;
+                        p.Value.Root = ctxt.GOROOT;
                         goto Found;
                     }
                 }
@@ -747,9 +751,9 @@ internal static ж<godebug.Setting> installgoroot = godebug.New("installgoroot"u
                 // TODO(bcmills): Setting p.Dir here is misleading, because gccgo
                 // doesn't actually load its standard-library packages from this
                 // directory. See if we can leave it unset.
-                p.val.Dir = ctxt.joinPath(ctxt.GOROOT, "src", path);
-                p.val.Goroot = true;
-                p.val.Root = ctxt.GOROOT;
+                p.Value.Dir = ctxt.joinPath(ctxt.GOROOT, "src", path);
+                p.Value.Goroot = true;
+                p.Value.Root = ctxt.GOROOT;
                 goto Found;
             }
         }
@@ -758,8 +762,8 @@ internal static ж<godebug.Setting> installgoroot = godebug.New("installgoroot"u
             var isDir = ctxt.isDir(dir);
             binaryOnly = !isDir && (ImportMode)(mode & AllowBinary) != 0 && pkga != ""u8 && ctxt.isFile(ctxt.joinPath(root, pkga));
             if (isDir || binaryOnly) {
-                p.val.Dir = dir;
-                p.val.Root = root;
+                p.Value.Dir = dir;
+                p.Value.Root = root;
                 goto Found;
             }
             tried.gopath = append(tried.gopath, dir);
@@ -773,9 +777,9 @@ internal static ж<godebug.Setting> installgoroot = godebug.New("installgoroot"u
                 var isDir = ctxt.isDir(dir);
                 binaryOnly = !isDir && (ImportMode)(mode & AllowBinary) != 0 && pkga != ""u8 && ctxt.isFile(ctxt.joinPath(ctxt.GOROOT, pkga));
                 if (isDir || binaryOnly) {
-                    p.val.Dir = dir;
-                    p.val.Goroot = true;
-                    p.val.Root = ctxt.GOROOT;
+                    p.Value.Dir = dir;
+                    p.Value.Goroot = true;
+                    p.Value.Root = ctxt.GOROOT;
                     goto Found;
                 }
             }
@@ -805,19 +809,19 @@ internal static ж<godebug.Setting> installgoroot = godebug.New("installgoroot"u
     }
 Found:
     if ((~p).Root != ""u8) {
-        p.val.SrcRoot = ctxt.joinPath((~p).Root, "src");
-        p.val.PkgRoot = ctxt.joinPath((~p).Root, "pkg");
-        p.val.BinDir = ctxt.joinPath((~p).Root, "bin");
+        p.Value.SrcRoot = ctxt.joinPath((~p).Root, "src");
+        p.Value.PkgRoot = ctxt.joinPath((~p).Root, "pkg");
+        p.Value.BinDir = ctxt.joinPath((~p).Root, "bin");
         if (pkga != ""u8) {
             // Always set PkgTargetRoot. It might be used when building in shared
             // mode.
-            p.val.PkgTargetRoot = ctxt.joinPath((~p).Root, pkgtargetroot);
+            p.Value.PkgTargetRoot = ctxt.joinPath((~p).Root, pkgtargetroot);
             // Set the install target if applicable.
             if (!(~p).Goroot || (installgoroot.Value() == "all"u8 && (~p).ImportPath != "unsafe"u8 && (~p).ImportPath != "builtin"u8)) {
                 if ((~p).Goroot) {
                     installgoroot.IncNonDefault();
                 }
-                p.val.PkgObj = ctxt.joinPath((~p).Root, pkga);
+                p.Value.PkgObj = ctxt.joinPath((~p).Root, pkga);
             }
         }
     }
@@ -844,34 +848,32 @@ Found:
         // gccgo has no sources for GOROOT packages.
         return (p, default!);
     }
-    (dirs, err) = ctxt.readDir((~p).Dir);
+    var (dirs, err) = ctxt.readDir((~p).Dir);
     if (err != default!) {
         return (p, err);
     }
-    error badGoError = default!;
+    ref var badGoError = ref heap<error>(out var ᏑbadGoError);
     var badGoFiles = new map<@string, bool>();
-    var badGoFile = 
-    var badGoErrorʗ1 = badGoError;
     var badGoFilesʗ1 = badGoFiles;
     var pʗ3 = p;
-    (@string name, error err) => {
-        if (badGoErrorʗ1 == default!) {
-            badGoErrorʗ1 = errΔ2;
+    var badGoFile = (@string name, error errΔ2) => {
+        if (ᏑbadGoError.ValueSlot == default!) {
+            ᏑbadGoError.ValueSlot = errΔ2;
         }
         if (!badGoFilesʗ1[name]) {
-            pʗ3.val.InvalidGoFiles = append((~pʗ3).InvalidGoFiles, name);
+            pʗ3.Value.InvalidGoFiles = append((~pʗ3).InvalidGoFiles, name);
             badGoFilesʗ1[name] = true;
         }
     };
     slice<@string> Sfiles = default!;            // files with ".S"(capital S)/.sx(capital s equivalent for case insensitive filesystems)
     @string firstFile = default!;
     @string firstCommentFile = default!;
-    var embedPos = new tokenꓸPosition();
-    var testEmbedPos = new tokenꓸPosition();
-    var xTestEmbedPos = new tokenꓸPosition();
-    var importPos = new tokenꓸPosition();
-    var testImportPos = new tokenꓸPosition();
-    var xTestImportPos = new tokenꓸPosition();
+    var embedPos = new map<@string, slice<tokenꓸPosition>>();
+    var testEmbedPos = new map<@string, slice<tokenꓸPosition>>();
+    var xTestEmbedPos = new map<@string, slice<tokenꓸPosition>>();
+    var importPos = new map<@string, slice<tokenꓸPosition>>();
+    var testImportPos = new map<@string, slice<tokenꓸPosition>>();
+    var xTestImportPos = new map<@string, slice<tokenꓸPosition>>();
     var allTags = new map<@string, bool>();
     var fset = token.NewFileSet();
     foreach (var (_, d) in dirs) {
@@ -886,9 +888,9 @@ Found:
         }
         @string name = d.Name();
         @string ext = nameExt(name);
-        (info, err) = ctxt.matchFile((~p).Dir, name, allTags, Ꮡ((~p).BinaryOnly), fset);
-        if (err != default! && strings.HasSuffix(name, ".go"u8)) {
-            badGoFile(name, err);
+        var (info, errΔ3) = Ꮡctxt.matchFile((~p).Dir, name, allTags, p.of(Package.ᏑBinaryOnly), fset);
+        if (errΔ3 != default! && strings.HasSuffix(name, ".go"u8)) {
+            badGoFile(name, errΔ3);
             continue;
         }
         if (info == nil) {
@@ -896,10 +898,10 @@ Found:
             } else 
             if (ext == ".go"u8){
                 // not due to build constraints - don't report
-                p.val.IgnoredGoFiles = append((~p).IgnoredGoFiles, name);
+                p.Value.IgnoredGoFiles = append((~p).IgnoredGoFiles, name);
             } else 
             if (fileListForExt(p, ext) != nil) {
-                p.val.IgnoredOtherFiles = append((~p).IgnoredOtherFiles, name);
+                p.Value.IgnoredOtherFiles = append((~p).IgnoredOtherFiles, name);
             }
             continue;
         }
@@ -916,14 +918,14 @@ Found:
         else { /* default: */
             {
                 var list = fileListForExt(p, ext); if (list != nil) {
-                    list.val = append(list.val, name);
+                    list.ValueSlot = append(list.ValueSlot, name);
                 }
             }
             continue;
         }
 
-        var data = info.val.header;
-        @string filename = info.val.name;
+        var data = info.Value.header;
+        @string filename = info.Value.name;
         if ((~info).parseErr != default!) {
             badGoFile(name, (~info).parseErr);
         }
@@ -931,9 +933,9 @@ Found:
         // and we want to list files with parse errors anyway.
         @string pkg = default!;
         if ((~info).parsed != nil) {
-            pkg = (~(~info).parsed).Name.val.Name;
+            pkg = info.Value.parsed.Value.Name.Value.Name;
             if (pkg == "documentation"u8) {
-                p.val.IgnoredGoFiles = append((~p).IgnoredGoFiles, name);
+                p.Value.IgnoredGoFiles = append((~p).IgnoredGoFiles, name);
                 continue;
             }
         }
@@ -944,32 +946,32 @@ Found:
             pkg = pkg[..(int)(len(pkg) - len("_test"))];
         }
         if ((~p).Name == ""u8){
-            p.val.Name = pkg;
+            p.Value.Name = pkg;
             firstFile = name;
         } else 
         if (pkg != (~p).Name) {
             // TODO(#45999): The choice of p.Name is arbitrary based on file iteration
             // order. Instead of resolving p.Name arbitrarily, we should clear out the
             // existing name and mark the existing files as also invalid.
-            badGoFile(name, new MultiplePackageError(
+            badGoFile(name, new MultiplePackageErrorжerror(Ꮡ(new MultiplePackageError(
                 Dir: (~p).Dir,
                 Packages: new @string[]{(~p).Name, pkg}.slice(),
                 Files: new @string[]{firstFile, name}.slice()
-            ));
+            ))));
         }
         // Grab the first package comment as docs, provided it is not from a test file.
         if ((~info).parsed != nil && (~(~info).parsed).Doc != nil && (~p).Doc == ""u8 && !isTest && !isXTest) {
-            p.val.Doc = doc.Synopsis((~(~info).parsed).Doc.Text());
+            p.Value.Doc = Δdoc.Synopsis((~(~info).parsed).Doc.Text());
         }
         if ((ImportMode)(mode & ImportComment) != 0) {
             var (qcom, line) = findImportComment(data);
             if (line != 0) {
-                var (com, errΔ3) = strconv.Unquote(qcom);
-                if (errΔ3 != default!){
+                var (com, errΔ4) = strconv.Unquote(qcom);
+                if (errΔ4 != default!){
                     badGoFile(name, fmt.Errorf("%s:%d: cannot parse import comment"u8, filename, line));
                 } else 
                 if ((~p).ImportComment == ""u8){
-                    p.val.ImportComment = com;
+                    p.Value.ImportComment = com;
                     firstCommentFile = name;
                 } else 
                 if ((~p).ImportComment != com) {
@@ -979,8 +981,6 @@ Found:
         }
         // Record imports and information about cgo.
         var isCgo = false;
-        ref var imp = ref heap(new fileImport(), out var Ꮡimp);
-
         foreach (var (_, imp) in (~info).imports) {
             if (imp.path == "C"u8) {
                 if (isTest) {
@@ -990,54 +990,54 @@ Found:
                 isCgo = true;
                 if (imp.doc != nil) {
                     {
-                        var errΔ4 = ctxt.saveCgo(filename, p, imp.doc); if (errΔ4 != default!) {
-                            badGoFile(name, errΔ4);
+                        var errΔ5 = Ꮡctxt.saveCgo(filename, p, imp.doc); if (errΔ5 != default!) {
+                            badGoFile(name, errΔ5);
                         }
                     }
                 }
             }
         }
         ж<slice<@string>> fileList = default!;
-        tokenꓸPosition importMap = default!;
-        tokenꓸPosition embedMap = default!;
+        map<@string, slice<tokenꓸPosition>> importMap = default!;
+        map<@string, slice<tokenꓸPosition>> embedMap = default!;
         ж<slice<Directive>> directives = default!;
         switch (ᐧ) {
         case {} when isCgo: {
             allTags["cgo"u8] = true;
             if (ctxt.CgoEnabled){
-                fileList = Ꮡ((~p).CgoFiles);
+                fileList = p.of(Package.ᏑCgoFiles);
                 importMap = importPos;
                 embedMap = embedPos;
-                directives = Ꮡ((~p).Directives);
+                directives = p.of(Package.ᏑDirectives);
             } else {
                 // Ignore imports and embeds from cgo files if cgo is disabled.
-                fileList = Ꮡ((~p).IgnoredGoFiles);
+                fileList = p.of(Package.ᏑIgnoredGoFiles);
             }
             break;
         }
         case {} when isXTest: {
-            fileList = Ꮡ((~p).XTestGoFiles);
+            fileList = p.of(Package.ᏑXTestGoFiles);
             importMap = xTestImportPos;
             embedMap = xTestEmbedPos;
-            directives = Ꮡ((~p).XTestDirectives);
+            directives = p.of(Package.ᏑXTestDirectives);
             break;
         }
         case {} when isTest: {
-            fileList = Ꮡ((~p).TestGoFiles);
+            fileList = p.of(Package.ᏑTestGoFiles);
             importMap = testImportPos;
             embedMap = testEmbedPos;
-            directives = Ꮡ((~p).TestDirectives);
+            directives = p.of(Package.ᏑTestDirectives);
             break;
         }
         default: {
-            fileList = Ꮡ((~p).GoFiles);
+            fileList = p.of(Package.ᏑGoFiles);
             importMap = importPos;
             embedMap = embedPos;
-            directives = Ꮡ((~p).Directives);
+            directives = p.of(Package.ᏑDirectives);
             break;
         }}
 
-        fileList.val = append(fileList.val, name);
+        fileList.ValueSlot = append(fileList.ValueSlot, name);
         if (importMap != default!) {
             foreach (var (_, imp) in (~info).imports) {
                 importMap[imp.path] = append(importMap[imp.path], fset.Position(imp.pos));
@@ -1049,68 +1049,68 @@ Found:
             }
         }
         if (directives != nil) {
-            directives.val = append(directives.val, (~info).directives.ꓸꓸꓸ);
+            directives.ValueSlot = append(directives.ValueSlot, (~info).directives.ꓸꓸꓸ);
         }
     }
     foreach (var (tag, _) in allTags) {
-        p.val.AllTags = append((~p).AllTags, tag);
+        p.Value.AllTags = append((~p).AllTags, tag);
     }
-    slices.Sort((~p).AllTags);
-    (p.val.EmbedPatterns, p.val.EmbedPatternPos) = cleanDecls(embedPos);
-    (p.val.TestEmbedPatterns, p.val.TestEmbedPatternPos) = cleanDecls(testEmbedPos);
-    (p.val.XTestEmbedPatterns, p.val.XTestEmbedPatternPos) = cleanDecls(xTestEmbedPos);
-    (p.val.Imports, p.val.ImportPos) = cleanDecls(importPos);
-    (p.val.TestImports, p.val.TestImportPos) = cleanDecls(testImportPos);
-    (p.val.XTestImports, p.val.XTestImportPos) = cleanDecls(xTestImportPos);
+    slices.Sort<slice<@string>, @string>((~p).AllTags);
+    (p.Value.EmbedPatterns, p.Value.EmbedPatternPos) = cleanDecls(embedPos);
+    (p.Value.TestEmbedPatterns, p.Value.TestEmbedPatternPos) = cleanDecls(testEmbedPos);
+    (p.Value.XTestEmbedPatterns, p.Value.XTestEmbedPatternPos) = cleanDecls(xTestEmbedPos);
+    (p.Value.Imports, p.Value.ImportPos) = cleanDecls(importPos);
+    (p.Value.TestImports, p.Value.TestImportPos) = cleanDecls(testImportPos);
+    (p.Value.XTestImports, p.Value.XTestImportPos) = cleanDecls(xTestImportPos);
     // add the .S/.sx files only if we are using cgo
     // (which means gcc will compile them).
     // The standard assemblers expect .s files.
     if (len((~p).CgoFiles) > 0){
-        p.val.SFiles = append((~p).SFiles, Sfiles.ꓸꓸꓸ);
-        slices.Sort((~p).SFiles);
+        p.Value.SFiles = append((~p).SFiles, Sfiles.ꓸꓸꓸ);
+        slices.Sort<slice<@string>, @string>((~p).SFiles);
     } else {
-        p.val.IgnoredOtherFiles = append((~p).IgnoredOtherFiles, Sfiles.ꓸꓸꓸ);
-        slices.Sort((~p).IgnoredOtherFiles);
+        p.Value.IgnoredOtherFiles = append((~p).IgnoredOtherFiles, Sfiles.ꓸꓸꓸ);
+        slices.Sort<slice<@string>, @string>((~p).IgnoredOtherFiles);
     }
     if (badGoError != default!) {
         return (p, badGoError);
     }
     if (len((~p).GoFiles) + len((~p).CgoFiles) + len((~p).TestGoFiles) + len((~p).XTestGoFiles) == 0) {
-        return (p, new NoGoError((~p).Dir));
+        return (p, new NoGoErrorжerror(Ꮡ(new NoGoError((~p).Dir))));
     }
     return (p, pkgerr);
 }
 
 internal static ж<slice<@string>> fileListForExt(ж<Package> Ꮡp, @string ext) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     var exprᴛ1 = ext;
     if (exprᴛ1 == ".c"u8) {
-        return Ꮡ(p.CFiles);
+        return Ꮡp.of(Package.ᏑCFiles);
     }
     if (exprᴛ1 == ".cc"u8 || exprᴛ1 == ".cpp"u8 || exprᴛ1 == ".cxx"u8) {
-        return Ꮡ(p.CXXFiles);
+        return Ꮡp.of(Package.ᏑCXXFiles);
     }
     if (exprᴛ1 == ".m"u8) {
-        return Ꮡ(p.MFiles);
+        return Ꮡp.of(Package.ᏑMFiles);
     }
     if (exprᴛ1 == ".h"u8 || exprᴛ1 == ".hh"u8 || exprᴛ1 == ".hpp"u8 || exprᴛ1 == ".hxx"u8) {
-        return Ꮡ(p.HFiles);
+        return Ꮡp.of(Package.ᏑHFiles);
     }
     if (exprᴛ1 == ".f"u8 || exprᴛ1 == ".F"u8 || exprᴛ1 == ".for"u8 || exprᴛ1 == ".f90"u8) {
-        return Ꮡ(p.FFiles);
+        return Ꮡp.of(Package.ᏑFFiles);
     }
     if (exprᴛ1 == ".s"u8 || exprᴛ1 == ".S"u8 || exprᴛ1 == ".sx"u8) {
-        return Ꮡ(p.SFiles);
+        return Ꮡp.of(Package.ᏑSFiles);
     }
     if (exprᴛ1 == ".swig"u8) {
-        return Ꮡ(p.SwigFiles);
+        return Ꮡp.of(Package.ᏑSwigFiles);
     }
     if (exprᴛ1 == ".swigcxx"u8) {
-        return Ꮡ(p.SwigCXXFiles);
+        return Ꮡp.of(Package.ᏑSwigCXXFiles);
     }
     if (exprᴛ1 == ".syso"u8) {
-        return Ꮡ(p.SysoFiles);
+        return Ꮡp.of(Package.ᏑSysoFiles);
     }
 
     return default!;
@@ -1122,7 +1122,7 @@ internal static slice<@string> uniq(slice<@string> list) {
     }
     var @out = new slice<@string>(len(list));
     copy(@out, list);
-    slices.Sort(@out);
+    slices.Sort<slice<@string>, @string>(@out);
     var uniq = @out[..0];
     foreach (var (_, x) in @out) {
         if (len(uniq) == 0 || uniq[len(uniq) - 1] != x) {
@@ -1144,8 +1144,8 @@ internal static error errNoModules = errors.New("not using modules"u8);
 // about the requested package and all dependencies and then only reports about the requested package.
 // Then we reinvoke it for every dependency. But this is still better than not working at all.
 // See golang.org/issue/26504.
-[GoRecv] public static error importGo(this ref Context ctxt, ж<Package> Ꮡp, @string path, @string srcDir, ImportMode mode) {
-    ref var p = ref Ꮡp.val;
+[GoRecv] internal static error importGo(this ref Context ctxt, ж<Package> Ꮡp, @string path, @string srcDir, ImportMode mode) {
+    ref var p = ref Ꮡp.Value;
 
     // To invoke the go command,
     // we must not being doing special things like AllowBinary or IgnoreVendor,
@@ -1183,9 +1183,9 @@ internal static error errNoModules = errors.New("not using modules"u8);
         } else {
             // Find the absolute source directory. hasSubdir does not handle
             // relative paths (and can't because the callbacks don't support this).
-            error errΔ1 = default!;
-            (absSrcDir, ) = filepath.Abs(srcDir);
-            if (errΔ1 != default!) {
+            error err = default!;
+            (absSrcDir, err) = filepath.Abs(srcDir);
+            if (err != default!) {
                 return errNoModules;
             }
         }
@@ -1225,11 +1225,11 @@ internal static error errNoModules = errors.New("not using modules"u8);
         }
         while (ᐧ) {
             {
-                (fΔ1, errΔ2) = ctxt.openFile(ctxt.joinPath(parent, "go.mod")); if (errΔ2 == default!) {
+                var (fΔ1, errΔ1) = ctxt.openFile(ctxt.joinPath(parent, "go.mod")); if (errΔ1 == default!) {
                     var buf = new slice<byte>(100);
-                    var (_, errΔ3) = fΔ1.Read(buf);
+                    var (_, errΔ2) = fΔ1.Read(buf);
                     fΔ1.Close();
-                    if (errΔ3 == default! || AreEqual(errΔ3, io.EOF)) {
+                    if (errΔ2 == default! || AreEqual(errΔ2, io.EOF)) {
                         // go.mod exists and is readable (is a file, not a directory).
                         break;
                     }
@@ -1244,24 +1244,24 @@ internal static error errNoModules = errors.New("not using modules"u8);
         }
     }
     @string goCmd = filepath.Join(ctxt.GOROOT, "bin", "go");
-    var cmd = exec.Command(goCmd, "list"u8, "-e", "-compiler="u8 + ctxt.Compiler, "-tags="u8 + strings.Join(ctxt.BuildTags, ","u8), "-installsuffix="u8 + ctxt.InstallSuffix, "-f={{.Dir}}\n{{.ImportPath}}\n{{.Root}}\n{{.Goroot}}\n{{if .Error}}{{.Error}}{{end}}\n", "--", path);
+    var cmd = exec.Command(goCmd, "list"u8, "-e", "-compiler=" + ctxt.Compiler, "-tags=" + strings.Join(ctxt.BuildTags, ","u8), "-installsuffix=" + ctxt.InstallSuffix, "-f={{.Dir}}\n{{.ImportPath}}\n{{.Root}}\n{{.Goroot}}\n{{if .Error}}{{.Error}}{{end}}\n", "--", path);
     if (ctxt.Dir != ""u8) {
-        cmd.val.Dir = ctxt.Dir;
+        cmd.Value.Dir = ctxt.Dir;
     }
-    ref var stdout = ref heap(new strings_package.Builder(), out var Ꮡstdout);
-    ref var stderr = ref heap(new strings_package.Builder(), out var Ꮡstderr);
-    cmd.val.Stdout = Ꮡstdout;
-    cmd.val.Stderr = Ꮡstderr;
+    ref var stdout = ref heap(new strings.Builder(), out var Ꮡstdout);
+    ref var stderr = ref heap(new strings.Builder(), out var Ꮡstderr);
+    cmd.Value.Stdout = new strings_BuilderжWriter(Ꮡstdout);
+    cmd.Value.Stderr = new strings_BuilderжWriter(Ꮡstderr);
     @string cgo = "0"u8;
     if (ctxt.CgoEnabled) {
         cgo = "1"u8;
     }
-    cmd.val.Env = append(cmd.Environ(),
+    cmd.Value.Env = append(cmd.Environ(),
         "GOOS="u8 + ctxt.GOOS,
-        "GOARCH="u8 + ctxt.GOARCH,
-        "GOROOT="u8 + ctxt.GOROOT,
-        "GOPATH="u8 + ctxt.GOPATH,
-        "CGO_ENABLED="u8 + cgo);
+        "GOARCH=" + ctxt.GOARCH,
+        "GOROOT=" + ctxt.GOROOT,
+        "GOPATH=" + ctxt.GOPATH,
+        "CGO_ENABLED=" + cgo);
     {
         var err = cmd.Run(); if (err != default!) {
             return fmt.Errorf("go/build: go list %s: %v\n%s\n"u8, path, err, stderr.String());
@@ -1305,9 +1305,9 @@ internal static bool equal(slice<@string> x, slice<@string> y) {
 // Otherwise it is not possible to vendor just a/b/c and still import the
 // non-vendored a/b. See golang.org/issue/13832.
 internal static bool hasGoFiles(ж<Context> Ꮡctxt, @string dir) {
-    ref var ctxt = ref Ꮡctxt.val;
+    ref var ctxt = ref Ꮡctxt.Value;
 
-    (ents, _) = ctxt.readDir(dir);
+    var (ents, _) = ctxt.readDir(dir);
     foreach (var (_, ent) in ents) {
         if (!ent.IsDir() && strings.HasSuffix(ent.Name(), ".go"u8)) {
             return true;
@@ -1321,7 +1321,7 @@ internal static (@string s, nint line) findImportComment(slice<byte> data) {
     nint line = default!;
 
     // expect keyword package
-    (word, data) = parseWord(data);
+    (var word, data) = parseWord(data);
     if (((@string)word) != "package"u8) {
         return ("", 0);
     }
@@ -1353,7 +1353,7 @@ internal static (@string s, nint line) findImportComment(slice<byte> data) {
 
     comment = bytes.TrimSpace(comment);
     // split comment into `import`, `"pkg"`
-    (word, arg) = parseWord(comment);
+    (word, var arg) = parseWord(comment);
     if (((@string)word) != "import"u8) {
         return ("", 0);
     }
@@ -1361,10 +1361,10 @@ internal static (@string s, nint line) findImportComment(slice<byte> data) {
     return (strings.TrimSpace(((@string)arg)), line);
 }
 
-internal static slice<byte> slashSlash = slice<byte>("//");
-internal static slice<byte> slashStar = slice<byte>("/*");
-internal static slice<byte> starSlash = slice<byte>("*/");
-internal static slice<byte> newline = slice<byte>("\n");
+internal static slice<byte> slashSlash = slice<byte>((@string)"//");
+internal static slice<byte> slashStar = slice<byte>((@string)"/*");
+internal static slice<byte> starSlash = slice<byte>((@string)"*/");
+internal static slice<byte> newline = slice<byte>((@string)"\n");
 
 // skipSpaceOrComment returns data with any leading spaces or comments removed.
 internal static slice<byte> skipSpaceOrComment(slice<byte> data) {
@@ -1432,22 +1432,24 @@ internal static (slice<byte> word, slice<byte> rest) parseWord(slice<byte> data)
 //
 // MatchFile considers the name of the file and may use ctxt.OpenFile to
 // read some or all of the file's content.
-[GoRecv] public static (bool match, error err) MatchFile(this ref Context ctxt, @string dir, @string name) {
+public static (bool match, error err) MatchFile(this ж<Context> Ꮡctxt, @string dir, @string name) {
     bool match = default!;
     error err = default!;
 
-    (info, err) = ctxt.matchFile(dir, name, default!, nil, nil);
+    ref var ctxt = ref Ꮡctxt.Value;
+    (var info, err) = Ꮡctxt.matchFile(dir, name, default!, nil, nil);
     return (info != nil, err);
 }
 
-internal static Package dummyPkg;
+internal static ж<Package> ᏑdummyPkg = new(default(Package));
+internal static ref Package dummyPkg => ref ᏑdummyPkg.Value;
 
 // fileInfo records information learned about a file included in a build.
 [GoType] partial struct fileInfo {
     internal @string name; // full name including dir
     internal slice<byte> header;
-    internal ж<go.token_package.FileSet> fset;
-    internal ж<go.ast_package.File> parsed;
+    internal ж<token.FileSet> fset;
+    internal ж<ast.File> parsed;
     internal error parseErr;
     internal slice<fileImport> imports;
     internal slice<fileEmbed> embeds;
@@ -1456,13 +1458,13 @@ internal static Package dummyPkg;
 
 [GoType] partial struct fileImport {
     internal @string path;
-    internal go.token_package.ΔPos pos;
-    internal ж<go.ast_package.CommentGroup> doc;
+    internal tokenꓸPos pos;
+    internal ж<ast.CommentGroup> doc;
 }
 
 [GoType] partial struct fileEmbed {
     internal @string pattern;
-    internal go.token_package.ΔPosition pos;
+    internal tokenꓸPosition pos;
 }
 
 // matchFile determines whether the file with the given name in the given directory
@@ -1477,9 +1479,10 @@ internal static Package dummyPkg;
 //
 // If allTags is non-nil, matchFile records any encountered build tag
 // by setting allTags[tag] = true.
-[GoRecv] public static (ж<fileInfo>, error) matchFile(this ref Context ctxt, @string dir, @string name, map<@string, bool> allTags, ж<bool> ᏑbinaryOnly, ж<token.FileSet> Ꮡfset) {
-    ref var binaryOnly = ref ᏑbinaryOnly.val;
-    ref var fset = ref Ꮡfset.val;
+internal static (ж<fileInfo>, error) matchFile(this ж<Context> Ꮡctxt, @string dir, @string name, map<@string, bool> allTags, ж<bool> ᏑbinaryOnly, ж<token.FileSet> Ꮡfset) {
+    ref var ctxt = ref Ꮡctxt.Value;
+    ref var binaryOnly = ref ᏑbinaryOnly.DerefOrNil();
+    ref var fset = ref Ꮡfset.Value;
 
     if (strings.HasPrefix(name, "_"u8) || strings.HasPrefix(name, "."u8)) {
         return (default!, default!);
@@ -1489,19 +1492,19 @@ internal static Package dummyPkg;
         i = len(name);
     }
     @string ext = name[(int)(i)..];
-    if (ext != ".go"u8 && fileListForExt(Ꮡ(dummyPkg), ext) == nil) {
+    if (ext != ".go"u8 && fileListForExt(ᏑdummyPkg, ext) == nil) {
         // skip
         return (default!, default!);
     }
     if (!ctxt.goodOSArchFile(name, allTags) && !ctxt.UseAllFiles) {
         return (default!, default!);
     }
-    var info = Ꮡ(new fileInfo(name: ctxt.joinPath(dir, name), fset: fset));
+    var info = Ꮡ(new fileInfo(name: ctxt.joinPath(dir, name), fset: Ꮡfset));
     if (ext == ".syso"u8) {
         // binary, no reading
         return (info, default!);
     }
-    (f, err) = ctxt.openFile((~info).name);
+    var (f, err) = ctxt.openFile((~info).name);
     if (err != default!) {
         return (default!, err);
     }
@@ -1514,47 +1517,47 @@ internal static Package dummyPkg;
         // ignore //go:binary-only-package comments in _test.go files
         binaryOnly = default!;
         // ignore //go:binary-only-package comments in non-Go sources
-        (info.val.header, err) = readComments(f);
+        (info.Value.header, err) = readComments(f);
     }
     f.Close();
     if (err != default!) {
         return (info, fmt.Errorf("read %s: %v"u8, (~info).name, err));
     }
     // Look for go:build comments to accept or reject the file.
-    var (ok, sawBinaryOnly, err) = ctxt.shouldBuild((~info).header, allTags);
+    (var ok, var sawBinaryOnly, err) = Ꮡctxt.shouldBuild((~info).header, allTags);
     if (err != default!) {
         return (default!, fmt.Errorf("%s: %v"u8, name, err));
     }
     if (!ok && !ctxt.UseAllFiles) {
         return (default!, default!);
     }
-    if (binaryOnly != nil && sawBinaryOnly) {
+    if (ᏑbinaryOnly != nil && sawBinaryOnly) {
         binaryOnly = true;
     }
     return (info, default!);
 }
 
-internal static (slice<@string>, tokenꓸPosition) cleanDecls(tokenꓸPosition m) {
+internal static (slice<@string>, map<@string, slice<tokenꓸPosition>>) cleanDecls(map<@string, slice<tokenꓸPosition>> m) {
     var all = new slice<@string>(0, len(m));
     foreach (var (path, _) in m) {
         all = append(all, path);
     }
-    slices.Sort(all);
+    slices.Sort<slice<@string>, @string>(all);
     return (all, m);
 }
 
 // Import is shorthand for Default.Import.
 public static (ж<Package>, error) Import(@string path, @string srcDir, ImportMode mode) {
-    return Default.Import(path, srcDir, mode);
+    return ᏑDefault.Import(path, srcDir, mode);
 }
 
 // ImportDir is shorthand for Default.ImportDir.
 public static (ж<Package>, error) ImportDir(@string dir, ImportMode mode) {
-    return Default.ImportDir(dir, mode);
+    return ᏑDefault.ImportDir(dir, mode);
 }
 
-internal static slice<byte> plusBuild = slice<byte>("+build");
-internal static slice<byte> goBuildComment = slice<byte>("//go:build");
+internal static slice<byte> plusBuild = slice<byte>((@string)"+build");
+internal static slice<byte> goBuildComment = slice<byte>((@string)"//go:build");
 internal static error errMultipleGoBuild = errors.New("multiple //go:build comments"u8);
 
 internal static bool isGoBuildComment(slice<byte> line) {
@@ -1569,7 +1572,7 @@ internal static bool isGoBuildComment(slice<byte> line) {
 // Special comment denoting a binary-only package.
 // See https://golang.org/design/2775-binary-only-packages
 // for more about the design of binary-only packages.
-internal static slice<byte> binaryOnlyComment = slice<byte>("//go:binary-only-package");
+internal static slice<byte> binaryOnlyComment = slice<byte>((@string)"//go:binary-only-package");
 
 // shouldBuild reports whether it is okay to use this file,
 // The rule is that in the file's leading run of // comments
@@ -1588,15 +1591,16 @@ internal static slice<byte> binaryOnlyComment = slice<byte>("//go:binary-only-pa
 //
 // shouldBuild reports whether the file should be built
 // and whether a //go:binary-only-package comment was found.
-[GoRecv] internal static (bool shouldBuild, bool binaryOnly, error err) shouldBuild(this ref Context ctxt, slice<byte> content, map<@string, bool> allTags) {
+internal static (bool shouldBuild, bool binaryOnly, error err) shouldBuild(this ж<Context> Ꮡctxt, slice<byte> content, map<@string, bool> allTags) {
     bool shouldBuild = default!;
     bool binaryOnly = default!;
     error err = default!;
 
+    ref var ctxt = ref Ꮡctxt.Value;
     // Identify leading run of // comments and blank lines,
     // which must be followed by a blank line.
     // Also identify any //go:build comments.
-    var (content, goBuild, sawBinaryOnly, err) = parseFileHeader(content);
+    (content, var goBuild, var sawBinaryOnly, err) = parseFileHeader(content);
     if (err != default!) {
         return (false, false, err);
     }
@@ -1604,11 +1608,11 @@ internal static slice<byte> binaryOnlyComment = slice<byte>("//go:binary-only-pa
     // Otherwise fall back to +build processing.
     switch (ᐧ) {
     case {} when goBuild != default!: {
-        (x, errΔ3) = constraint.Parse(((@string)goBuild));
+        var (x, errΔ3) = constraint.Parse(((@string)goBuild));
         if (errΔ3 != default!) {
             return (false, false, fmt.Errorf("parsing //go:build line: %v"u8, errΔ3));
         }
-        shouldBuild = ctxt.eval(x, allTags);
+        shouldBuild = Ꮡctxt.eval(x, allTags);
         break;
     }
     default: {
@@ -1632,8 +1636,8 @@ internal static slice<byte> binaryOnlyComment = slice<byte>("//go:binary-only-pa
                 continue;
             }
             {
-                (x, errΔ4) = constraint.Parse(text); if (errΔ4 == default!) {
-                    if (!ctxt.eval(x, allTags)) {
+                var (x, errΔ4) = constraint.Parse(text); if (errΔ4 == default!) {
+                    if (!Ꮡctxt.eval(x, allTags)) {
                         shouldBuild = false;
                     }
                 }
@@ -1737,12 +1741,15 @@ break_Lines:;
 // saveCgo saves the information from the #cgo lines in the import "C" comment.
 // These lines set CFLAGS, CPPFLAGS, CXXFLAGS and LDFLAGS and pkg-config directives
 // that affect the way cgo's C code is built.
-[GoRecv] public static error saveCgo(this ref Context ctxt, @string filename, ж<Package> Ꮡdi, ж<ast.CommentGroup> Ꮡcg) {
-    ref var di = ref Ꮡdi.val;
-    ref var cg = ref Ꮡcg.val;
+internal static error saveCgo(this ж<Context> Ꮡctxt, @string filename, ж<Package> Ꮡdi, ж<ast.CommentGroup> Ꮡcg) {
+    ref var ctxt = ref Ꮡctxt.Value;
+    ref var di = ref Ꮡdi.Value;
+    ref var cg = ref Ꮡcg.Value;
 
-    @string text = cg.Text();
-    foreach (var (_, line) in strings.Split(text, "\n"u8)) {
+    @string text = Ꮡcg.Text();
+    foreach (var (_, vᴛ1) in strings.Split(text, "\n"u8)) {
+        var line = vᴛ1;
+
         @string orig = line;
         // Line is
         //	#cgo [GOOS/GOARCH...] LDFLAGS: stuff
@@ -1772,7 +1779,7 @@ break_Lines:;
         if (len(cond) > 0) {
             var okΔ1 = false;
             foreach (var (_, c) in cond) {
-                if (ctxt.matchAuto(c, default!)) {
+                if (Ꮡctxt.matchAuto(c, default!)) {
                     okΔ1 = true;
                     break;
                 }
@@ -1781,11 +1788,13 @@ break_Lines:;
                 continue;
             }
         }
-        (args, err) = splitQuoted(argstr);
+        var (args, err) = splitQuoted(argstr);
         if (err != default!) {
             return fmt.Errorf("%s: invalid #cgo line: %s"u8, filename, orig);
         }
-        foreach (var (i, arg) in args) {
+        foreach (var (i, vᴛ2) in args) {
+            var arg = vᴛ2;
+
             {
                 (arg, ok) = expandSrcDir(arg, di.Dir); if (!ok) {
                     return fmt.Errorf("%s: malformed #cgo argument: %s"u8, filename, arg);
@@ -1937,7 +1946,7 @@ internal static (slice<@string> r, error err) splitQuoted(@string s) {
             continue;
             break;
         }
-        case {} when quote is != (rune)'\x00': {
+        case {} when quote is not (rune)'\x00': {
             if (rune == quote) {
                 quote = (rune)'\x00';
                 continue;
@@ -1980,23 +1989,26 @@ internal static (slice<@string> r, error err) splitQuoted(@string s) {
 //
 // matchAuto is only used for testing of tag evaluation
 // and in #cgo lines, which accept either syntax.
-[GoRecv] internal static bool matchAuto(this ref Context ctxt, @string text, map<@string, bool> allTags) {
+internal static bool matchAuto(this ж<Context> Ꮡctxt, @string text, map<@string, bool> allTags) {
+    ref var ctxt = ref Ꮡctxt.Value;
+
     if (strings.ContainsAny(text, "&|()"u8)){
         text = "//go:build "u8 + text;
     } else {
         text = "// +build "u8 + text;
     }
-    (x, err) = constraint.Parse(text);
+    var (x, err) = constraint.Parse(text);
     if (err != default!) {
         return false;
     }
-    return ctxt.eval(x, allTags);
+    return Ꮡctxt.eval(x, allTags);
 }
 
-[GoRecv] internal static bool eval(this ref Context ctxt, constraint.Expr x, map<@string, bool> allTags) {
-    return x.Eval(
-    var allTagsʗ2 = allTags;
-    (@string tag) => ctxt.matchTag(tag, allTagsʗ2));
+internal static bool eval(this ж<Context> Ꮡctxt, constraint.Expr x, map<@string, bool> allTags) {
+    ref var ctxt = ref Ꮡctxt.Value;
+
+    var allTagsʗ1 = allTags;
+    return x.Eval((@string tag) => Ꮡctxt.Value.matchTag(tag, allTagsʗ1));
 }
 
 // matchTag reports whether the name is one of:

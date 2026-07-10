@@ -16,41 +16,41 @@ partial class utf8_package {
 // Numbers fundamental to the encoding.
 public static readonly UntypedInt RuneError = /* '\uFFFD' */ 65533; // the "error" Rune or "Unicode replacement character"
 
-public static readonly UntypedInt RuneSelf = /* 0x80 */ 128; // characters below RuneSelf are represented as themselves in a single byte.
+public static readonly UntypedInt RuneSelf = 0x80; // characters below RuneSelf are represented as themselves in a single byte.
 
 public static readonly UntypedInt MaxRune = /* '\U0010FFFF' */ 1114111; // Maximum valid Unicode code point.
 
 public static readonly UntypedInt UTFMax = 4; // maximum number of bytes of a UTF-8 encoded Unicode character.
 
 // Code points in the surrogate range are not valid for UTF-8.
-internal static readonly UntypedInt surrogateMin = /* 0xD800 */ 55296;
+internal static readonly UntypedInt surrogateMin = 0xD800;
 
-internal static readonly UntypedInt surrogateMax = /* 0xDFFF */ 57343;
+internal static readonly UntypedInt surrogateMax = 0xDFFF;
 
-internal static readonly UntypedInt t1 = /* 0b00000000 */ 0;
-internal static readonly UntypedInt tx = /* 0b10000000 */ 128;
-internal static readonly UntypedInt t2 = /* 0b11000000 */ 192;
-internal static readonly UntypedInt t3 = /* 0b11100000 */ 224;
-internal static readonly UntypedInt t4 = /* 0b11110000 */ 240;
-internal static readonly UntypedInt t5 = /* 0b11111000 */ 248;
-internal static readonly UntypedInt maskx = /* 0b00111111 */ 63;
-internal static readonly UntypedInt mask2 = /* 0b00011111 */ 31;
-internal static readonly UntypedInt mask3 = /* 0b00001111 */ 15;
-internal static readonly UntypedInt mask4 = /* 0b00000111 */ 7;
+internal static readonly UntypedInt t1 = 0b00000000;
+internal static readonly UntypedInt tx = 0b10000000;
+internal static readonly UntypedInt t2 = 0b11000000;
+internal static readonly UntypedInt t3 = 0b11100000;
+internal static readonly UntypedInt t4 = 0b11110000;
+internal static readonly UntypedInt t5 = 0b11111000;
+internal static readonly UntypedInt maskx = 0b00111111;
+internal static readonly UntypedInt mask2 = 0b00011111;
+internal static readonly UntypedInt mask3 = 0b00001111;
+internal static readonly UntypedInt mask4 = 0b00000111;
 internal static readonly UntypedInt rune1Max = /* 1<<7 - 1 */ 127;
 internal static readonly UntypedInt rune2Max = /* 1<<11 - 1 */ 2047;
 internal static readonly UntypedInt rune3Max = /* 1<<16 - 1 */ 65535;
-internal static readonly UntypedInt locb = /* 0b10000000 */ 128;
-internal static readonly UntypedInt hicb = /* 0b10111111 */ 191;
-internal static readonly UntypedInt xx = /* 0xF1 */ 241; // invalid: size 1
-internal static readonly UntypedInt @as = /* 0xF0 */ 240; // ASCII: size 1
-internal static readonly UntypedInt s1 = /* 0x02 */ 2; // accept 0, size 2
-internal static readonly UntypedInt s2 = /* 0x13 */ 19; // accept 1, size 3
-internal static readonly UntypedInt s3 = /* 0x03 */ 3; // accept 0, size 3
-internal static readonly UntypedInt s4 = /* 0x23 */ 35; // accept 2, size 3
-internal static readonly UntypedInt s5 = /* 0x34 */ 52; // accept 3, size 4
-internal static readonly UntypedInt s6 = /* 0x04 */ 4; // accept 0, size 4
-internal static readonly UntypedInt s7 = /* 0x44 */ 68; // accept 4, size 4
+internal static readonly UntypedInt locb = 0b10000000;
+internal static readonly UntypedInt hicb = 0b10111111;
+internal static readonly UntypedInt xx = 0xF1; // invalid: size 1
+internal static readonly UntypedInt @as = 0xF0; // ASCII: size 1
+internal static readonly UntypedInt s1 = 0x02; // accept 0, size 2
+internal static readonly UntypedInt s2 = 0x13; // accept 1, size 3
+internal static readonly UntypedInt s3 = 0x03; // accept 0, size 3
+internal static readonly UntypedInt s4 = 0x23; // accept 2, size 3
+internal static readonly UntypedInt s5 = 0x34; // accept 3, size 4
+internal static readonly UntypedInt s6 = 0x04; // accept 0, size 4
+internal static readonly UntypedInt s7 = 0x44; // accept 4, size 4
 
 //   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
 // 0x00-0x0F
@@ -100,10 +100,10 @@ internal static array<uint8> first = new uint8[]{
 // acceptRanges has size 16 to avoid bounds checks in the code that uses it.
 internal static array<acceptRange> acceptRanges = new array<acceptRange>(16){
     [0] = new(locb, hicb),
-    [1] = new(160, hicb),
-    [2] = new(locb, 159),
-    [3] = new(144, hicb),
-    [4] = new(locb, 143)
+    [1] = new(0xA0, hicb),
+    [2] = new(locb, 0x9F),
+    [3] = new(0x90, hicb),
+    [4] = new(locb, 0x8F)
 };
 
 // FullRune reports whether the bytes in p begin with a full UTF-8 encoding of a rune.
@@ -114,12 +114,12 @@ public static bool FullRune(slice<byte> p) {
         return false;
     }
     var x = first[p[0]];
-    if (n >= ((nint)((uint8)(x & 7)))) {
+    if (n >= (nint)((uint8)(x & 7))) {
         return true;
     }
     // ASCII, invalid or valid.
     // Must be short or invalid.
-    var accept = acceptRanges[x >> (int)(4)];
+    var accept = acceptRanges[(x >> (int)(4))];
     if (n > 1 && (p[1] < accept.lo || accept.hi < p[1])){
         return true;
     } else 
@@ -136,12 +136,12 @@ public static bool FullRuneInString(@string s) {
         return false;
     }
     var x = first[s[0]];
-    if (n >= ((nint)((uint8)(x & 7)))) {
+    if (n >= (nint)((uint8)(x & 7))) {
         return true;
     }
     // ASCII, invalid, or valid.
     // Must be short or invalid.
-    var accept = acceptRanges[x >> (int)(4)];
+    var accept = acceptRanges[(x >> (int)(4))];
     if (n > 1 && (s[1] < accept.lo || accept.hi < s[1])){
         return true;
     } else 
@@ -173,12 +173,12 @@ public static (rune r, nint size) DecodeRune(slice<byte> p) {
         // The following code simulates an additional check for x == xx and
         // handling the ASCII and invalid cases accordingly. This mask-and-or
         // approach prevents an additional branch.
-        var mask = ((rune)x) << (int)(31) >> (int)(31);
+        var mask = (((rune)x << (int)(31)) >> (int)(31));
         // Create 0x0000 or 0xFFFF.
-        return ((rune)((rune)(((rune)p[0]) & ~mask) | (rune)(RuneError & mask)), 1);
+        return ((rune)((rune)((rune)p[0] & ~mask) | (rune)((rune)RuneError & mask)), 1);
     }
-    nint sz = ((nint)((uint8)(x & 7)));
-    var accept = acceptRanges[x >> (int)(4)];
+    nint sz = (nint)((uint8)(x & 7));
+    var accept = acceptRanges[(x >> (int)(4))];
     if (n < sz) {
         return (RuneError, 1);
     }
@@ -188,20 +188,20 @@ public static (rune r, nint size) DecodeRune(slice<byte> p) {
     }
     if (sz <= 2) {
         // <= instead of == to help the compiler eliminate some bounds checks
-        return ((rune)(((rune)((byte)(p0 & mask2))) << (int)(6) | ((rune)((byte)(b1 & maskx)))), 2);
+        return ((rune)(((rune)((byte)(p0 & (byte)mask2)) << (int)(6)) | (rune)((byte)(b1 & (byte)maskx))), 2);
     }
     var b2 = p[2];
     if (b2 < locb || hicb < b2) {
         return (RuneError, 1);
     }
     if (sz <= 3) {
-        return ((rune)((rune)(((rune)((byte)(p0 & mask3))) << (int)(12) | ((rune)((byte)(b1 & maskx))) << (int)(6)) | ((rune)((byte)(b2 & maskx)))), 3);
+        return ((rune)((rune)(((rune)((byte)(p0 & (byte)mask3)) << (int)(12)) | ((rune)((byte)(b1 & (byte)maskx)) << (int)(6))) | (rune)((byte)(b2 & (byte)maskx))), 3);
     }
     var b3 = p[3];
     if (b3 < locb || hicb < b3) {
         return (RuneError, 1);
     }
-    return ((rune)((rune)((rune)(((rune)((byte)(p0 & mask4))) << (int)(18) | ((rune)((byte)(b1 & maskx))) << (int)(12)) | ((rune)((byte)(b2 & maskx))) << (int)(6)) | ((rune)((byte)(b3 & maskx)))), 4);
+    return ((rune)((rune)((rune)(((rune)((byte)(p0 & (byte)mask4)) << (int)(18)) | ((rune)((byte)(b1 & (byte)maskx)) << (int)(12))) | ((rune)((byte)(b2 & (byte)maskx)) << (int)(6))) | (rune)((byte)(b3 & (byte)maskx))), 4);
 }
 
 // DecodeRuneInString is like [DecodeRune] but its input is a string. If s is
@@ -226,12 +226,12 @@ public static (rune r, nint size) DecodeRuneInString(@string s) {
         // The following code simulates an additional check for x == xx and
         // handling the ASCII and invalid cases accordingly. This mask-and-or
         // approach prevents an additional branch.
-        var mask = ((rune)x) << (int)(31) >> (int)(31);
+        var mask = (((rune)x << (int)(31)) >> (int)(31));
         // Create 0x0000 or 0xFFFF.
-        return ((rune)((rune)(((rune)s[0]) & ~mask) | (rune)(RuneError & mask)), 1);
+        return ((rune)((rune)((rune)s[0] & ~mask) | (rune)((rune)RuneError & mask)), 1);
     }
-    nint sz = ((nint)((uint8)(x & 7)));
-    var accept = acceptRanges[x >> (int)(4)];
+    nint sz = (nint)((uint8)(x & 7));
+    var accept = acceptRanges[(x >> (int)(4))];
     if (n < sz) {
         return (RuneError, 1);
     }
@@ -241,20 +241,20 @@ public static (rune r, nint size) DecodeRuneInString(@string s) {
     }
     if (sz <= 2) {
         // <= instead of == to help the compiler eliminate some bounds checks
-        return ((rune)(((rune)((byte)(s0 & mask2))) << (int)(6) | ((rune)((byte)(s1 & maskx)))), 2);
+        return ((rune)(((rune)((byte)(s0 & (byte)mask2)) << (int)(6)) | (rune)((byte)(s1 & (byte)maskx))), 2);
     }
     var s2 = s[2];
     if (s2 < locb || hicb < s2) {
         return (RuneError, 1);
     }
     if (sz <= 3) {
-        return ((rune)((rune)(((rune)((byte)(s0 & mask3))) << (int)(12) | ((rune)((byte)(s1 & maskx))) << (int)(6)) | ((rune)((byte)(s2 & maskx)))), 3);
+        return ((rune)((rune)(((rune)((byte)(s0 & (byte)mask3)) << (int)(12)) | ((rune)((byte)(s1 & (byte)maskx)) << (int)(6))) | (rune)((byte)(s2 & (byte)maskx))), 3);
     }
     var s3 = s[3];
     if (s3 < locb || hicb < s3) {
         return (RuneError, 1);
     }
-    return ((rune)((rune)((rune)(((rune)((byte)(s0 & mask4))) << (int)(18) | ((rune)((byte)(s1 & maskx))) << (int)(12)) | ((rune)((byte)(s2 & maskx))) << (int)(6)) | ((rune)((byte)(s3 & maskx)))), 4);
+    return ((rune)((rune)((rune)(((rune)((byte)(s0 & (byte)mask4)) << (int)(18)) | ((rune)((byte)(s1 & (byte)maskx)) << (int)(12))) | ((rune)((byte)(s2 & (byte)maskx)) << (int)(6))) | (rune)((byte)(s3 & (byte)maskx))), 4);
 }
 
 // DecodeLastRune unpacks the last UTF-8 encoding in p and returns the rune and
@@ -274,14 +274,14 @@ public static (rune r, nint size) DecodeLastRune(slice<byte> p) {
         return (RuneError, 0);
     }
     nint start = end - 1;
-    r = ((rune)p[start]);
+    r = (rune)p[start];
     if (r < RuneSelf) {
         return (r, 1);
     }
     // guard against O(n^2) behavior when traversing
     // backwards through strings with long sequences of
     // invalid UTF-8.
-    nint lim = end - UTFMax;
+    nint lim = end - (nint)UTFMax;
     if (lim < 0) {
         lim = 0;
     }
@@ -317,14 +317,14 @@ public static (rune r, nint size) DecodeLastRuneInString(@string s) {
         return (RuneError, 0);
     }
     nint start = end - 1;
-    r = ((rune)s[start]);
+    r = (rune)s[start];
     if (r < RuneSelf) {
         return (r, 1);
     }
     // guard against O(n^2) behavior when traversing
     // backwards through strings with long sequences of
     // invalid UTF-8.
-    nint lim = end - UTFMax;
+    nint lim = end - (nint)UTFMax;
     if (lim < 0) {
         lim = 0;
     }
@@ -375,16 +375,16 @@ public static nint RuneLen(rune r) {
 public static nint EncodeRune(slice<byte> p, rune r) {
     // Negative values are erroneous. Making it unsigned addresses the problem.
     {
-        var i = ((uint32)r);
+        var i = (uint32)r;
         var matchᴛ1 = false;
         if (i <= rune1Max) { matchᴛ1 = true;
-            p[0] = ((byte)r);
+            p[0] = (byte)r;
             return 1;
         }
         if (i <= rune2Max) { matchᴛ1 = true;
             _ = p[1];
-            p[0] = (byte)(t2 | ((byte)(r >> (int)(6))));
-            p[1] = (byte)(tx | (byte)(((byte)r) & maskx));
+            p[0] = (byte)((byte)t2 | (byte)((r >> (int)(6))));
+            p[1] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
             return 2;
         }
         if ((i > MaxRune) || (surrogateMin <= i && i <= surrogateMax)) { matchᴛ1 = true;
@@ -393,17 +393,17 @@ public static nint EncodeRune(slice<byte> p, rune r) {
         }
         if (fallthrough || !matchᴛ1 && (i <= rune3Max)) {
             _ = p[2];
-            p[0] = (byte)(t3 | ((byte)(r >> (int)(12))));
-            p[1] = (byte)(tx | (byte)(((byte)(r >> (int)(6))) & maskx));
-            p[2] = (byte)(tx | (byte)(((byte)r) & maskx));
+            p[0] = (byte)((byte)t3 | (byte)((r >> (int)(12))));
+            p[1] = (byte)((byte)tx | (byte)((byte)((r >> (int)(6))) & (byte)maskx));
+            p[2] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
             return 3;
         }
         { /* default: */
             _ = p[3];
-            p[0] = (byte)(t4 | ((byte)(r >> (int)(18))));
-            p[1] = (byte)(tx | (byte)(((byte)(r >> (int)(12))) & maskx));
-            p[2] = (byte)(tx | (byte)(((byte)(r >> (int)(6))) & maskx));
-            p[3] = (byte)(tx | (byte)(((byte)r) & maskx));
+            p[0] = (byte)((byte)t4 | (byte)((r >> (int)(18))));
+            p[1] = (byte)((byte)tx | (byte)((byte)((r >> (int)(12))) & (byte)maskx));
+            p[2] = (byte)((byte)tx | (byte)((byte)((r >> (int)(6))) & (byte)maskx));
+            p[3] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
             return 4;
         }
     }
@@ -419,8 +419,8 @@ public static nint EncodeRune(slice<byte> p, rune r) {
 // it appends the encoding of [RuneError].
 public static slice<byte> AppendRune(slice<byte> p, rune r) {
     // This function is inlineable for fast handling of ASCII.
-    if (((uint32)r) <= rune1Max) {
-        return append(p, ((byte)r));
+    if ((uint32)r <= rune1Max) {
+        return append(p, (byte)r);
     }
     return appendRuneNonASCII(p, r);
 }
@@ -428,20 +428,20 @@ public static slice<byte> AppendRune(slice<byte> p, rune r) {
 internal static slice<byte> appendRuneNonASCII(slice<byte> p, rune r) {
     // Negative values are erroneous. Making it unsigned addresses the problem.
     {
-        var i = ((uint32)r);
+        var i = (uint32)r;
         var matchᴛ1 = false;
         if (i <= rune2Max) { matchᴛ1 = true;
-            return append(p, (byte)(t2 | ((byte)(r >> (int)(6)))), (byte)(tx | (byte)(((byte)r) & maskx)));
+            return append(p, (byte)((byte)t2 | (byte)((r >> (int)(6)))), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
         }
         if ((i > MaxRune) || (surrogateMin <= i && i <= surrogateMax)) { matchᴛ1 = true;
             r = RuneError;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && (i <= rune3Max)) {
-            return append(p, (byte)(t3 | ((byte)(r >> (int)(12)))), (byte)(tx | (byte)(((byte)(r >> (int)(6))) & maskx)), (byte)(tx | (byte)(((byte)r) & maskx)));
+            return append(p, (byte)((byte)t3 | (byte)((r >> (int)(12)))), (byte)((byte)tx | (byte)((byte)((r >> (int)(6))) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
         }
         { /* default: */
-            return append(p, (byte)(t4 | ((byte)(r >> (int)(18)))), (byte)(tx | (byte)(((byte)(r >> (int)(12))) & maskx)), (byte)(tx | (byte)(((byte)(r >> (int)(6))) & maskx)), (byte)(tx | (byte)(((byte)r) & maskx)));
+            return append(p, (byte)((byte)t4 | (byte)((r >> (int)(18)))), (byte)((byte)tx | (byte)((byte)((r >> (int)(12))) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)((r >> (int)(6))) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
         }
     }
 
@@ -466,13 +466,13 @@ public static nint RuneCount(slice<byte> p) {
             // invalid.
             continue;
         }
-        nint size = ((nint)((uint8)(x & 7)));
+        nint size = (nint)((uint8)(x & 7));
         if (i + size > np) {
             i++;
             // Short or invalid.
             continue;
         }
-        var accept = acceptRanges[x >> (int)(4)];
+        var accept = acceptRanges[(x >> (int)(4))];
         {
             var cΔ1 = p[i + 1]; if (cΔ1 < accept.lo || accept.hi < cΔ1){
                 size = 1;
@@ -515,13 +515,13 @@ public static nint /*n*/ RuneCountInString(@string s) {
             // invalid.
             continue;
         }
-        nint size = ((nint)((uint8)(x & 7)));
+        nint size = (nint)((uint8)(x & 7));
         if (i + size > ns) {
             i++;
             // Short or invalid.
             continue;
         }
-        var accept = acceptRanges[x >> (int)(4)];
+        var accept = acceptRanges[(x >> (int)(4))];
         {
             var cΔ1 = s[i + 1]; if (cΔ1 < accept.lo || accept.hi < cΔ1){
                 size = 1;
@@ -550,7 +550,7 @@ public static nint /*n*/ RuneCountInString(@string s) {
 // possibly invalid rune. Second and subsequent bytes always have the top two
 // bits set to 10.
 public static bool RuneStart(byte b) {
-    return (byte)(b & 192) != 128;
+    return (byte)(b & 0xC0) != 0x80;
 }
 
 // Valid reports whether p consists entirely of valid UTF-8-encoded runes.
@@ -565,9 +565,9 @@ public static bool Valid(slice<byte> p) {
         // for 32 and 64 bit platforms.
         // The compiler can generate a 32bit load for first32 and second32
         // on many platforms. See test/codegen/memcombine.go.
-        var first32 = (uint32)((uint32)((uint32)(((uint32)p[0]) | ((uint32)p[1]) << (int)(8)) | ((uint32)p[2]) << (int)(16)) | ((uint32)p[3]) << (int)(24));
-        var second32 = (uint32)((uint32)((uint32)(((uint32)p[4]) | ((uint32)p[5]) << (int)(8)) | ((uint32)p[6]) << (int)(16)) | ((uint32)p[7]) << (int)(24));
-        if ((uint32)(((uint32)(first32 | second32)) & (nint)2155905152L) != 0) {
+        var first32 = (uint32)((uint32)((uint32)((uint32)p[0] | ((uint32)p[1] << (int)(8))) | ((uint32)p[2] << (int)(16))) | ((uint32)p[3] << (int)(24)));
+        var second32 = (uint32)((uint32)((uint32)((uint32)p[4] | ((uint32)p[5] << (int)(8))) | ((uint32)p[6] << (int)(16))) | ((uint32)p[7] << (int)(24)));
+        if ((uint32)(((uint32)(first32 | second32)) & 0x80808080U) != 0) {
             // Found a non ASCII byte (>= RuneSelf).
             break;
         }
@@ -585,12 +585,12 @@ public static bool Valid(slice<byte> p) {
             return false;
         }
         // Illegal starter byte.
-        nint size = ((nint)((uint8)(x & 7)));
+        nint size = (nint)((uint8)(x & 7));
         if (i + size > n) {
             return false;
         }
         // Short or invalid.
-        var accept = acceptRanges[x >> (int)(4)];
+        var accept = acceptRanges[(x >> (int)(4))];
         {
             var c = p[i + 1]; if (c < accept.lo || accept.hi < c){
                 return false;
@@ -623,9 +623,9 @@ public static bool ValidString(@string s) {
         // for 32 and 64 bit platforms.
         // The compiler can generate a 32bit load for first32 and second32
         // on many platforms. See test/codegen/memcombine.go.
-        var first32 = (uint32)((uint32)((uint32)(((uint32)s[0]) | ((uint32)s[1]) << (int)(8)) | ((uint32)s[2]) << (int)(16)) | ((uint32)s[3]) << (int)(24));
-        var second32 = (uint32)((uint32)((uint32)(((uint32)s[4]) | ((uint32)s[5]) << (int)(8)) | ((uint32)s[6]) << (int)(16)) | ((uint32)s[7]) << (int)(24));
-        if ((uint32)(((uint32)(first32 | second32)) & (nint)2155905152L) != 0) {
+        var first32 = (uint32)((uint32)((uint32)((uint32)s[0] | ((uint32)s[1] << (int)(8))) | ((uint32)s[2] << (int)(16))) | ((uint32)s[3] << (int)(24)));
+        var second32 = (uint32)((uint32)((uint32)((uint32)s[4] | ((uint32)s[5] << (int)(8))) | ((uint32)s[6] << (int)(16))) | ((uint32)s[7] << (int)(24)));
+        if ((uint32)(((uint32)(first32 | second32)) & 0x80808080U) != 0) {
             // Found a non ASCII byte (>= RuneSelf).
             break;
         }
@@ -643,12 +643,12 @@ public static bool ValidString(@string s) {
             return false;
         }
         // Illegal starter byte.
-        nint size = ((nint)((uint8)(x & 7)));
+        nint size = (nint)((uint8)(x & 7));
         if (i + size > n) {
             return false;
         }
         // Short or invalid.
-        var accept = acceptRanges[x >> (int)(4)];
+        var accept = acceptRanges[(x >> (int)(4))];
         {
             var c = s[i + 1]; if (c < accept.lo || accept.hi < c){
                 return false;

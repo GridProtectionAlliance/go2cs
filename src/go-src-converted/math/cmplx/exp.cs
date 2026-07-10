@@ -61,7 +61,7 @@ public static complex128 Exp(complex128 x) {
                 if (re < 0){
                     return complex(0, math.Copysign(0, im));
                 } else {
-                    return complex(math.Inf(1.0F), math.NaN());
+                    return complex(math.Inf(1), math.NaN());
                 }
                 break;
             }}

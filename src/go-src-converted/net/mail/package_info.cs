@@ -44,7 +44,8 @@ using static go.net.mail_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(io.Reader, error), io_package.Reader>]
+[assembly: GoImplement<bufio_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<charsetError, error>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

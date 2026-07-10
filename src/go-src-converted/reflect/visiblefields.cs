@@ -40,7 +40,7 @@ public static slice<StructField> VisibleFields(ΔType t) {
         if (i != j) {
             // A field has been removed. We need to shuffle
             // all the subsequent elements up.
-            (~w).fields[j] = f.val;
+            w.Value.fields[j] = f.Value;
         }
         j++;
     }
@@ -66,23 +66,22 @@ public static slice<StructField> VisibleFields(ΔType t) {
     w.visiting[t] = true;
     for (nint i = 0; i < t.NumField(); i++) {
         var f = t.Field(i);
-        w.index = append(w.index, i);
+        w.index = builtin.append(w.index, i);
         var add = true;
         {
-            nint oldIndex = w.byName[f.Name];
-            var ok = w.byName[f.Name]; if (ok) {
+            var (oldIndex, ok) = w.byName[f.Name, ꟷ]; if (ok) {
                 var old = Ꮡ(w.fields[oldIndex]);
                 if (len(w.index) == len((~old).Index)){
                     // Fields with the same name at the same depth
                     // cancel one another out. Set the field name
                     // to empty to signify that has happened, and
                     // there's no need to add this field.
-                    old.val.Name = ""u8;
+                    old.Value.Name = ""u8;
                     add = false;
                 } else 
                 if (len(w.index) < len((~old).Index)){
                     // The old field loses because it's deeper than the new one.
-                    old.val.Name = ""u8;
+                    old.Value.Name = ""u8;
                 } else {
                     // The old field wins because it's shallower than the new one.
                     add = false;
@@ -92,9 +91,9 @@ public static slice<StructField> VisibleFields(ΔType t) {
         if (add) {
             // Copy the index so that it's not overwritten
             // by the other appends.
-            f.Index = append(slice<nint>(default!), w.index.ꓸꓸꓸ);
+            f.Index = builtin.append(slice<nint>(default!), w.index.ꓸꓸꓸ);
             w.byName[f.Name] = len(w.fields);
-            w.fields = append(w.fields, f);
+            w.fields = builtin.append(w.fields, f);
         }
         if (f.Anonymous) {
             if (f.Type.Kind() == ΔPointer) {

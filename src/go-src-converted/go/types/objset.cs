@@ -11,7 +11,8 @@
 namespace go.go;
 
 partial class types_package {
-/* visitMapType: map[string]Object */
+
+[GoType("map[@string, Object]")] partial struct objset;
 
 // insert attempts to insert an object obj into objset s.
 // If s already contains an alternative object alt with
@@ -20,14 +21,14 @@ partial class types_package {
 [GoRecv] internal static Object insert(this ref objset s, Object obj) {
     @string id = obj.Id();
     {
-        var alt = (ж<ж<objset>>)[id]; if (alt != default!) {
+        var alt = (s)[id]; if (alt != default!) {
             return alt;
         }
     }
     if (s == default!) {
         s = new map<@string, Object>();
     }
-    (ж<ж<objset>>)[id] = obj;
+    (s)[id] = obj;
     return default!;
 }
 

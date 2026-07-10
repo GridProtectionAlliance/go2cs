@@ -6,6 +6,7 @@ namespace go;
 
 using sys = runtime.@internal.sys_package;
 using @unsafe = unsafe_package;
+using @internal.runtime;
 using runtime.@internal;
 
 partial class runtime_package {
@@ -23,12 +24,12 @@ internal static readonly UntypedInt traceBytesPerNumber = 10;
 // we can change it if it's deemed too error-prone.
 [GoType] partial struct traceWriter {
     internal partial ref traceLocker traceLocker { get; }
-    public partial ref ж<traceBuf> traceBuf { get; }
+    internal partial ref ж<traceBuf> traceBuf { get; }
 }
 
 // write returns an a traceWriter that writes into the current M's stream.
 internal static traceWriter writer(this traceLocker tl) {
-    return new traceWriter(traceLocker: tl, traceBuf: tl.mp.trace.buf[tl.gen % 2]);
+    return new traceWriter(traceLocker: tl, traceBuf: (~tl.mp).trace.buf[(nint)(tl.gen % 2)]);
 }
 
 // unsafeTraceWriter produces a traceWriter that doesn't lock the trace.
@@ -39,9 +40,9 @@ internal static traceWriter writer(this traceLocker tl) {
 //
 // buf may be nil.
 internal static traceWriter unsafeTraceWriter(uintptr gen, ж<traceBuf> Ꮡbuf) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.Value;
 
-    return new traceWriter(traceLocker: new traceLocker(gen: gen), traceBuf: buf);
+    return new traceWriter(traceLocker: new traceLocker(gen: gen), traceBuf: Ꮡbuf);
 }
 
 // end writes the buffer back into the m.
@@ -51,7 +52,7 @@ internal static void end(this traceWriter w) {
         // less error-prone.
         return;
     }
-    w.mp.trace.buf[w.gen % 2] = w.traceBuf;
+    w.mp.Value.trace.buf[(nint)(w.gen % 2)] = w.traceBuf;
 }
 
 // ensure makes sure that at least maxSize bytes are available to write.
@@ -67,15 +68,12 @@ internal static (traceWriter, bool) ensure(this traceWriter w, nint maxSize) {
 
 // flush puts w.traceBuf on the queue of full buffers.
 internal static traceWriter flush(this traceWriter w) {
-    systemstack(
-    var traceʗ2 = Δtrace;
-    var wʗ2 = w;
-    () => {
-        @lock(Ꮡtraceʗ2.of(atomic.Int32; seqGC uint64; minPageHeapAddr uint64; debugMalloc bool}.Ꮡlock));
-        if (wʗ2.traceBuf != nil) {
-            traceBufFlush(wʗ2.traceBuf, wʗ2.gen);
+    systemstack(() => {
+        @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+        if (w.traceBuf != nil) {
+            traceBufFlush(w.traceBuf, w.gen);
         }
-        unlock(Ꮡtraceʗ2.of(atomic.Int32; seqGC uint64; minPageHeapAddr uint64; debugMalloc bool}.Ꮡlock));
+        unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
     });
     w.traceBuf = default!;
     return w;
@@ -85,71 +83,66 @@ internal static traceWriter flush(this traceWriter w) {
 //
 // exp indicates whether the refilled batch should be EvExperimentalBatch.
 internal static traceWriter refill(this traceWriter w, traceExperiment exp) {
-    systemstack(
-    var memstatsʗ2 = memstats;
-    var traceʗ2 = Δtrace;
-    var wʗ2 = w;
-    () => {
-        @lock(Ꮡtraceʗ2.of(atomic.Int32; seqGC uint64; minPageHeapAddr uint64; debugMalloc bool}.Ꮡlock));
-        if (wʗ2.traceBuf != nil) {
-            traceBufFlush(wʗ2.traceBuf, wʗ2.gen);
+    systemstack(() => {
+        @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+        if (w.traceBuf != nil) {
+            traceBufFlush(w.traceBuf, w.gen);
         }
-        if (traceʗ2.empty != nil){
-            wʗ2.traceBuf = traceʗ2.empty;
-            traceʗ2.empty = wʗ2.traceBuf.link;
-            unlock(Ꮡtraceʗ2.of(atomic.Int32; seqGC uint64; minPageHeapAddr uint64; debugMalloc bool}.Ꮡlock));
+        if (Δtrace.empty != nil){
+            w.traceBuf = Δtrace.empty;
+            Δtrace.empty = w.traceBuf.Value.link;
+            unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
         } else {
-            unlock(Ꮡtraceʗ2.of(atomic.Int32; seqGC uint64; minPageHeapAddr uint64; debugMalloc bool}.Ꮡlock));
-            wʗ2.traceBuf = (ж<traceBuf>)(uintptr)(sysAlloc(@unsafe.Sizeof(new traceBuf(nil)), Ꮡmemstatsʗ2.of(mstats.Ꮡother_sys)));
-            if (wʗ2.traceBuf == nil) {
+            unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+            w.traceBuf = (ж<traceBuf>)(uintptr)(sysAlloc(@unsafe.Sizeof(new traceBuf(nil)), Ꮡmemstats.of(mstats.Ꮡother_sys)));
+            if (w.traceBuf == nil) {
                 @throw("trace: out of memory"u8);
             }
         }
     });
     // Initialize the buffer.
     var ts = traceClockNow();
-    if (ts <= w.traceBuf.lastTime) {
-        ts = w.traceBuf.lastTime + 1;
+    if (ts <= (~w.traceBuf).lastTime) {
+        ts = (~w.traceBuf).lastTime + 1;
     }
-    w.traceBuf.lastTime = ts;
-    w.traceBuf.link = default!;
-    w.traceBuf.pos = 0;
+    w.traceBuf.Value.lastTime = ts;
+    w.traceBuf.Value.link = default!;
+    w.traceBuf.Value.pos = 0;
     // Tolerate a nil mp.
-    var mID = ~((uint64)0);
+    var mID = ~(uint64)0;
     if (w.mp != nil) {
-        mID = ((uint64)w.mp.procid);
+        mID = (uint64)(~w.mp).procid;
     }
     // Write the buffer's header.
     if (exp == traceNoExperiment){
-        w.@byte(((byte)traceEvEventBatch));
+        w.@byte((byte)traceEvEventBatch);
     } else {
-        w.@byte(((byte)traceEvExperimentalBatch));
-        w.@byte(((byte)exp));
+        w.@byte((byte)traceEvExperimentalBatch);
+        w.@byte((byte)exp);
     }
-    w.varint(((uint64)w.gen));
-    w.varint(((uint64)mID));
-    w.varint(((uint64)ts));
-    w.traceBuf.lenPos = w.varintReserve();
+    w.varint((uint64)w.gen);
+    w.varint((uint64)mID);
+    w.varint((uint64)ts);
+    w.traceBuf.Value.lenPos = w.varintReserve();
     return w;
 }
 
 // traceBufQueue is a FIFO of traceBufs.
 [GoType] partial struct traceBufQueue {
-    internal ж<traceBuf> head;
-    internal ж<traceBuf> tail;
+    internal ж<traceBuf> head, tail;
 }
 
 // push queues buf into queue of buffers.
 [GoRecv] internal static void push(this ref traceBufQueue q, ж<traceBuf> Ꮡbuf) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.Value;
 
     buf.link = default!;
     if (q.head == nil){
-        q.head = buf;
+        q.head = Ꮡbuf;
     } else {
-        q.tail.link = buf;
+        q.tail.Value.link = Ꮡbuf;
     }
-    q.tail = buf;
+    q.tail = Ꮡbuf;
 }
 
 // pop dequeues from the queue of buffers.
@@ -158,11 +151,11 @@ internal static traceWriter refill(this traceWriter w, traceExperiment exp) {
     if (buf == nil) {
         return default!;
     }
-    q.head = buf.link;
+    q.head = buf.Value.link;
     if (q.head == nil) {
         q.tail = default!;
     }
-    buf.link = default!;
+    buf.Value.link = default!;
     return buf;
 }
 
@@ -182,9 +175,9 @@ internal static traceWriter refill(this traceWriter w, traceExperiment exp) {
 //
 // TODO(mknyszek): Rename traceBuf to traceBatch, since they map 1:1 with event batches.
 [GoType] partial struct traceBuf {
-    internal runtime.@internal.sys_package.NotInHeap _;
+    internal sys.NotInHeap _;
     internal partial ref traceBufHeader traceBufHeader { get; }
-    internal array<byte> arr = new(64 << (int)(10) - @unsafe.Sizeof(new traceBufHeader(nil))); // underlying buffer for traceBufHeader.buf
+    internal array<byte> arr = new((uintptr)(64 << (int)(10)) - @unsafe.Sizeof(new traceBufHeader(nil))); // underlying buffer for traceBufHeader.buf
 }
 
 // byte appends v to buf.
@@ -196,15 +189,15 @@ internal static traceWriter refill(this traceWriter w, traceExperiment exp) {
 // varint appends v to buf in little-endian-base-128 encoding.
 [GoRecv] internal static void varint(this ref traceBuf buf, uint64 v) {
     nint pos = buf.pos;
-    var arr = buf.arr[(int)(pos)..(int)(pos + traceBytesPerNumber)];
+    var arr = buf.arr[(int)(pos)..(int)(pos + (nint)traceBytesPerNumber)];
     foreach (var (i, _) in arr) {
-        if (v < 128) {
+        if (v < 0x80) {
             pos += i + 1;
-            arr[i] = ((byte)v);
+            arr[i] = (byte)v;
             break;
         }
-        arr[i] = (byte)(128 | ((byte)v));
-        v >>= (UntypedInt)(7);
+        arr[i] = (byte)(0x80 | (byte)v);
+        v >>= (int)(7);
     }
     buf.pos = pos;
 }
@@ -234,11 +227,11 @@ internal static traceWriter refill(this traceWriter w, traceExperiment exp) {
 [GoRecv] internal static void varintAt(this ref traceBuf buf, nint pos, uint64 v) {
     for (nint i = 0; i < traceBytesPerNumber; i++) {
         if (i < traceBytesPerNumber - 1){
-            buf.arr[pos] = (byte)(128 | ((byte)v));
+            buf.arr[pos] = (byte)(0x80 | (byte)v);
         } else {
-            buf.arr[pos] = ((byte)v);
+            buf.arr[pos] = (byte)v;
         }
-        v >>= (UntypedInt)(7);
+        v >>= (int)(7);
         pos++;
     }
     if (v != 0) {
@@ -252,9 +245,9 @@ internal static traceWriter refill(this traceWriter w, traceExperiment exp) {
 //
 //go:systemstack
 internal static void traceBufFlush(ж<traceBuf> Ꮡbuf, uintptr gen) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.Value;
 
-    assertLockHeld(ᏑΔtrace.of(atomic.Int32; seqGC uint64; minPageHeapAddr uint64; debugMalloc bool}.Ꮡlock));
+    assertLockHeld(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
     // Write out the non-header length of the batch in the header.
     //
     // Note: the length of the header is not included to make it easier
@@ -263,12 +256,12 @@ internal static void traceBufFlush(ж<traceBuf> Ꮡbuf, uintptr gen) {
     // quite difficult to preserve, and if we include the header we
     // force serializers to do more work. Nothing else actually needs
     // padding.
-    buf.varintAt(buf.lenPos, ((uint64)(buf.pos - (buf.lenPos + traceBytesPerNumber))));
-    Δtrace.full[gen % 2].push(Ꮡbuf);
+    buf.varintAt(buf.lenPos, (uint64)(buf.pos - (buf.lenPos + (nint)traceBytesPerNumber)));
+    Δtrace.full[(nint)(gen % 2)].push(Ꮡbuf);
     // Notify the scheduler that there's work available and that the trace
     // reader should be scheduled.
-    if (!Δtrace.workAvailable.Load()) {
-        Δtrace.workAvailable.Store(true);
+    if (!ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑworkAvailable).Load()) {
+        ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑworkAvailable).Store(true);
     }
 }
 

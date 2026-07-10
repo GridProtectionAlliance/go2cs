@@ -14,7 +14,7 @@ partial class runtime_package {
 internal static uint32 addCovMeta(@unsafe.Pointer Δp, uint32 dlen, array<byte> hash, @string pkgpath, nint pkgid, uint8 cmode, uint8 cgran) {
     hash = hash.Clone();
 
-    var id = rtcov.AddMeta(p.val, dlen, hash, pkgpath, pkgid, cmode, cgran);
+    var id = rtcov.AddMeta(Δp, dlen, hash, pkgpath, pkgid, cmode, cgran);
     if (id == 0) {
         @throw("runtime.addCovMeta: coverage package map collision"u8);
     }

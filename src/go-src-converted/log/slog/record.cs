@@ -6,7 +6,6 @@ namespace go.log;
 using runtime = runtime_package;
 using slices = slices_package;
 using time = time_package;
-using ꓸꓸꓸAttr = Span<Attr>;
 using ꓸꓸꓸany = Span<any>;
 
 partial class slog_package {
@@ -20,7 +19,7 @@ internal static readonly UntypedInt nAttrsInline = 5;
 // Use [Record.Clone] to create a copy with no shared state.
 [GoType] partial struct Record {
     // The time at which the output method (Log, Info, etc.) was called.
-    public time_package.Time Time;
+    public time.Time Time;
     // The log message.
     public @string Message;
     // The level of the event.
@@ -54,7 +53,7 @@ public static Record NewRecord(time.Time t, ΔLevel level, @string msg, uintptr 
     return new Record(
         Time: t,
         Message: msg,
-        ΔLevel: level,
+        Level: level,
         PC: pc
     );
 }
@@ -63,7 +62,7 @@ public static Record NewRecord(time.Time t, ΔLevel level, @string msg, uintptr 
 // The original record and the clone can both be modified
 // without interfering with each other.
 public static Record Clone(this Record r) {
-    r.back = slices.Clip(r.back);
+    r.back = slices.Clip<slice<Attr>, Attr>(r.back);
     // prevent append from mutating shared array
     return r;
 }
@@ -90,7 +89,7 @@ public static void Attrs(this Record r, Func<Attr, bool> f) {
 
 // AddAttrs appends the given Attrs to the [Record]'s list of Attrs.
 // It omits empty groups.
-[GoRecv] public static void AddAttrs(this ref Record r, params ꓸꓸꓸAttr attrsʗp) {
+[GoRecv] public static void AddAttrs(this ref Record r, params Span<slog_package.Attr> attrsʗp) {
     var attrs = attrsʗp.slice();
 
     nint i = default!;
@@ -108,15 +107,15 @@ public static void Attrs(this Record r, Func<Attr, bool> f) {
         var end = r.back[..(int)(len(r.back) + 1)][len(r.back)];
         if (!end.isEmpty()) {
             // Don't panic; copy and muddle through.
-            r.back = slices.Clip(r.back);
-            r.back = append(r.back, String("!BUG"u8, "AddAttrs unsafely called on copy of Record made without using Record.Clone"u8));
+            r.back = slices.Clip<slice<Attr>, Attr>(r.back);
+            r.back = builtin.append(r.back, String("!BUG"u8, "AddAttrs unsafely called on copy of Record made without using Record.Clone"u8));
         }
     }
     nint ne = countEmptyGroups(attrs[(int)(i)..]);
-    r.back = slices.Grow(r.back, len(attrs[(int)(i)..]) - ne);
+    r.back = slices.Grow<slice<Attr>, Attr>(r.back, len(attrs[(int)(i)..]) - ne);
     foreach (var (_, a) in attrs[(int)(i)..]) {
         if (!a.Value.isEmptyGroup()) {
-            r.back = append(r.back, a);
+            r.back = builtin.append(r.back, a);
         }
     }
 }
@@ -140,7 +139,7 @@ public static void Attrs(this Record r, Func<Attr, bool> f) {
             if (r.back == default!) {
                 r.back = new slice<Attr>(0, countAttrs(args) + 1);
             }
-            r.back = append(r.back, a);
+            r.back = builtin.append(r.back, a);
         }
     }
 }
@@ -179,7 +178,7 @@ internal static (Attr, slice<any>) argsToAttr(slice<any> args) {
         return (x, args[1..]);
     }
     default: {
-        var x = args[0].type();
+        var x = args[0];
         return (Any(badKey, x), args[1..]);
     }}
 }
@@ -206,13 +205,13 @@ internal static (Attr, slice<any>) argsToAttr(slice<any> args) {
 [GoRecv] internal static Value group(this ref Source s) {
     slice<Attr> @as = default!;
     if (s.Function != ""u8) {
-        @as = append(@as, String("function"u8, s.Function));
+        @as = builtin.append(@as, String("function"u8, s.Function));
     }
     if (s.File != ""u8) {
-        @as = append(@as, String("file"u8, s.File));
+        @as = builtin.append(@as, String("file"u8, s.File));
     }
     if (s.Line != 0) {
-        @as = append(@as, Int("line"u8, s.Line));
+        @as = builtin.append(@as, Int("line"u8, s.Line));
     }
     return GroupValue(@as.ꓸꓸꓸ);
 }

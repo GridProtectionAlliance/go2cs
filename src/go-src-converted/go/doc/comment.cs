@@ -3,9 +3,9 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using comment = go.doc.comment_package;
+using comment = global::go.go.doc.comment_package;
 using io = io_package;
-using go.doc;
+using global::go.go.doc;
 
 partial class doc_package {
 
@@ -31,7 +31,7 @@ partial class doc_package {
 //	w.Write(p.Printer().HTML(parser.Parse(d)))
 public static void ToHTML(io.Writer w, @string text, map<@string, @string> words) {
     var p = @new<Package>().Parser();
-    p.val.Words = words;
+    p.Value.Words = words;
     var d = p.Parse(text);
     var pr = @new<comment.Printer>();
     w.Write(pr.HTML(d));

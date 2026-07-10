@@ -6,14 +6,15 @@ namespace go.@internal;
 using bytes = bytes_package;
 using md5 = crypto.md5_package;
 using binary = encoding.binary_package;
-using constant = go.constant_package;
+using constant = global::go.go.constant_package;
 using io = io_package;
 using big = math.big_package;
-using runtime = runtime_package;
+using Δruntime = runtime_package;
 using strings = strings_package;
 using crypto;
 using encoding;
-using go;
+using global::go.go;
+using hash = hash_package;
 using math;
 
 partial class pkgbits_package {
@@ -64,15 +65,15 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
 
 // DumpTo writes the package's encoded data to out0 and returns the
 // package fingerprint.
-[GoRecv] public static array<byte> /*fingerprint*/ DumpTo(this ref PkgEncoder pw, io.Writer out0) {
+public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.Writer out0) {
     array<byte> fingerprint = default!;
 
+    ref var pw = ref Ꮡpw.Value;
     var h = md5.New();
     var @out = io.MultiWriter(out0, h);
-    var writeUint32 = 
     var outʗ1 = @out;
-    (uint32 x) => {
-        assert(binary.Write(outʗ1, binary.LittleEndian, x) == default!);
+    var writeUint32 = (uint32 x) => {
+        assert(binary.Write(outʗ1, new binary_littleEndianᴠByteOrder(binary.LittleEndian), x) == default!);
     };
     writeUint32(currentVersion);
     uint32 flags = default!;
@@ -82,28 +83,28 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
     writeUint32(flags);
     // Write elemEndsEnds.
     uint32 sum = default!;
-    foreach (var (Δ_, elems) in Ꮡ(pw.elems).val) {
-        sum += ((uint32)len(elems));
+    foreach (var (_, elems) in Ꮡpw.of(PkgEncoder.Ꮡelems).Value) {
+        sum += (uint32)len(elems);
         writeUint32(sum);
     }
     // Write elemEnds.
     sum = 0;
-    foreach (var (Δ_, elems) in Ꮡ(pw.elems).val) {
-        foreach (var (Δ_, elem) in elems) {
-            sum += ((uint32)len(elem));
+    foreach (var (_, elems) in Ꮡpw.of(PkgEncoder.Ꮡelems).Value) {
+        foreach (var (_, elem) in elems) {
+            sum += (uint32)len(elem);
             writeUint32(sum);
         }
     }
     // Write elemData.
-    foreach (var (Δ_, elems) in Ꮡ(pw.elems).val) {
-        foreach (var (Δ_, elem) in elems) {
-            var (Δ_, errΔ1) = io.WriteString(@out, elem);
+    foreach (var (_, elems) in Ꮡpw.of(PkgEncoder.Ꮡelems).Value) {
+        foreach (var (_, elem) in elems) {
+            var (_, errΔ1) = io.WriteString(@out, elem);
             assert(errΔ1 == default!);
         }
     }
     // Write fingerprint.
     copy(fingerprint[..], h.Sum(default!));
-    var (Δ_, err) = out0.Write(fingerprint[..]);
+    var (_, err) = out0.Write(fingerprint[..]);
     assert(err == default!);
     return fingerprint;
 }
@@ -112,12 +113,12 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
 // already present, and returns its index.
 [GoRecv] public static Index StringIdx(this ref PkgEncoder pw, @string s) {
     {
-        var (idxΔ1, ok) = pw.stringsIdx[s]; if (ok) {
+        var (idxΔ1, ok) = pw.stringsIdx[s, ꟷ]; if (ok) {
             assert(pw.elems[RelocString][idxΔ1] == s);
             return idxΔ1;
         }
     }
-    var idx = ((Index)len(pw.elems[RelocString]));
+    var idx = ((Index)(int32)len(pw.elems[RelocString]));
     pw.elems[RelocString] = append(pw.elems[RelocString], s);
     pw.stringsIdx[s] = idx;
     return idx;
@@ -126,8 +127,10 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
 // NewEncoder returns an Encoder for a new element within the given
 // section, and encodes the given SyncMarker as the start of the
 // element bitstream.
-[GoRecv] public static Encoder NewEncoder(this ref PkgEncoder pw, RelocKind k, SyncMarker marker) {
-    var e = pw.NewEncoderRaw(k);
+public static Encoder NewEncoder(this ж<PkgEncoder> Ꮡpw, RelocKind k, SyncMarker marker) {
+    ref var pw = ref Ꮡpw.Value;
+
+    var e = Ꮡpw.NewEncoderRaw(k);
     e.Sync(marker);
     return e;
 }
@@ -136,12 +139,14 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
 // section.
 //
 // Most callers should use NewEncoder instead.
-[GoRecv] public static Encoder NewEncoderRaw(this ref PkgEncoder pw, RelocKind k) {
-    var idx = ((Index)len(pw.elems[k]));
+public static Encoder NewEncoderRaw(this ж<PkgEncoder> Ꮡpw, RelocKind k) {
+    ref var pw = ref Ꮡpw.Value;
+
+    var idx = ((Index)(int32)len(pw.elems[k]));
     pw.elems[k] = append(pw.elems[k], ""u8);
     // placeholder
     return new Encoder(
-        p: pw,
+        p: Ꮡpw,
         k: k,
         Idx: idx
     );
@@ -153,18 +158,20 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
     internal ж<PkgEncoder> p;
     public slice<RelocEnt> Relocs;
     public map<RelocEnt, uint32> RelocMap;
-    public bytes_package.Buffer Data; // accumulated element bitstream data
+    public bytes.Buffer Data; // accumulated element bitstream data
     internal bool encodingRelocHeader;
     internal RelocKind k;
     public Index Idx; // index within relocation section
 }
 
 // Flush finalizes the element's bitstream and returns its Index.
-[GoRecv] public static Index Flush(this ref Encoder w) {
-    ref var sb = ref heap(new strings_package.Builder(), out var Ꮡsb);
+public static Index Flush(this ж<Encoder> Ꮡw) {
+    ref var w = ref Ꮡw.Value;
+
+    ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     // Backup the data so we write the relocations at the front.
-    ref var tmp = ref heap(new bytes_package.Buffer(), out var Ꮡtmp);
-    io.Copy(~Ꮡtmp, w.Data);
+    ref var tmp = ref heap(new bytes.Buffer(), out var Ꮡtmp);
+    io.Copy(new bytes_BufferжWriter(Ꮡtmp), new bytes_BufferжReader(Ꮡw.of(Encoder.ᏑData)));
     // TODO(mdempsky): Consider writing these out separately so they're
     // easier to strip, along with function bodies, so that we can prune
     // down to just the data that's relevant to go/types.
@@ -174,14 +181,14 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
     w.encodingRelocHeader = true;
     w.Sync(SyncRelocs);
     w.Len(len(w.Relocs));
-    foreach (var (Δ_, rEnt) in w.Relocs) {
+    foreach (var (_, rEnt) in w.Relocs) {
         w.Sync(SyncReloc);
-        w.Len(((nint)rEnt.Kind));
-        w.Len(((nint)rEnt.Idx));
+        w.Len((nint)(int32)rEnt.Kind);
+        w.Len((nint)(int32)rEnt.Idx);
     }
-    io.Copy(~Ꮡsb, w.Data);
-    io.Copy(~Ꮡsb, ~Ꮡtmp);
-    w.p.elems[w.k][w.Idx] = sb.String();
+    io.Copy(new strings_BuilderжWriter(Ꮡsb), new bytes_BufferжReader(Ꮡw.of(Encoder.ᏑData)));
+    io.Copy(new strings_BuilderжWriter(Ꮡsb), new bytes_BufferжReader(Ꮡtmp));
+    (~w.p).elems[w.k][w.Idx] = sb.String();
     return w.Idx;
 }
 
@@ -194,13 +201,13 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
 [GoRecv] internal static void rawUvarint(this ref Encoder w, uint64 x) {
     array<byte> buf = new(10); /* binary.MaxVarintLen64 */
     nint n = binary.PutUvarint(buf[..], x);
-    var (Δ_, err) = w.Data.Write(buf[..(int)(n)]);
+    var (_, err) = w.Data.Write(buf[..(int)(n)]);
     w.checkErr(err);
 }
 
 [GoRecv] internal static void rawVarint(this ref Encoder w, int64 x) {
     // Zig-zag encode.
-    var ux = ((uint64)x) << (int)(1);
+    var ux = ((uint64)x << (int)(1));
     if (x < 0) {
         ux = ~ux;
     }
@@ -211,15 +218,15 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
     var e = new RelocEnt(r, idx);
     if (w.RelocMap != default!){
         {
-            var (iΔ1, ok) = w.RelocMap[e]; if (ok) {
-                return ((nint)iΔ1);
+            var (iΔ1, ok) = w.RelocMap[e, ꟷ]; if (ok) {
+                return (nint)iΔ1;
             }
         }
     } else {
         w.RelocMap = new map<RelocEnt, uint32>();
     }
     nint i = len(w.Relocs);
-    w.RelocMap[e] = ((uint32)i);
+    w.RelocMap[e] = (uint32)i;
     w.Relocs = append(w.Relocs, e);
     return i;
 }
@@ -233,17 +240,17 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
     // sync markers. To prevent infinite recursion, we simply trim the
     // stack frame for sync markers within the relocation header.
     slice<@string> frames = default!;
-    if (!w.encodingRelocHeader && w.p.syncFrames > 0) {
-        var pcs = new slice<uintptr>(w.p.syncFrames);
-        nint n = runtime.Callers(2, pcs);
+    if (!w.encodingRelocHeader && (~w.p).syncFrames > 0) {
+        var pcs = new slice<uintptr>((~w.p).syncFrames);
+        nint n = Δruntime.Callers(2, pcs);
         frames = fmtFrames(pcs[..(int)(n)].ꓸꓸꓸ);
     }
     // TODO(mdempsky): Save space by writing out stack frames as a
     // linked list so we can share common stack frames.
-    w.rawUvarint(((uint64)m));
-    w.rawUvarint(((uint64)len(frames)));
-    foreach (var (Δ_, frame) in frames) {
-        w.rawUvarint(((uint64)w.rawReloc(RelocString, w.p.StringIdx(frame))));
+    w.rawUvarint((uint64)(nint)m);
+    w.rawUvarint((uint64)len(frames));
+    foreach (var (_, frame) in frames) {
+        w.rawUvarint((uint64)w.rawReloc(RelocString, w.p.StringIdx(frame)));
     }
 }
 
@@ -286,17 +293,17 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
 // Len encodes and writes a non-negative int value into the element bitstream.
 [GoRecv] public static void Len(this ref Encoder w, nint x) {
     assert(x >= 0);
-    w.Uint64(((uint64)x));
+    w.Uint64((uint64)x);
 }
 
 // Int encodes and writes an int value into the element bitstream.
 [GoRecv] public static void Int(this ref Encoder w, nint x) {
-    w.Int64(((int64)x));
+    w.Int64((int64)x);
 }
 
 // Len encodes and writes a uint value into the element bitstream.
 [GoRecv] public static void Uint(this ref Encoder w, nuint x) {
-    w.Uint64(((uint64)x));
+    w.Uint64((uint64)x);
 }
 
 // Reloc encodes and writes a relocation for the given (section,
@@ -337,7 +344,7 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
 // the element bitstream.
 [GoRecv] public static void Strings(this ref Encoder w, slice<@string> ss) {
     w.Len(len(ss));
-    foreach (var (Δ_, s) in ss) {
+    foreach (var (_, s) in ss) {
         w.String(s);
     }
 }
@@ -355,9 +362,10 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
 }
 
 [GoRecv] internal static void scalar(this ref Encoder w, constant.Value val) {
-    switch (constant.Val(val).type()) {
+    var switchᴛ1 = constant.Val(val);
+    switch (switchᴛ1.type()) {
     default: {
-        var v = constant.Val(val).type();
+        var v = switchᴛ1;
         errorf("unhandled %v (%v)"u8, val, val.Kind());
         break;
     }
@@ -394,8 +402,8 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
     }}
 }
 
-[GoRecv] public static void bigInt(this ref Encoder w, ж<bigꓸInt> Ꮡv) {
-    ref var v = ref Ꮡv.val;
+[GoRecv] internal static void bigInt(this ref Encoder w, ж<bigꓸInt> Ꮡv) {
+    ref var v = ref Ꮡv.Value;
 
     var b = v.Bytes();
     w.String(((@string)b));
@@ -403,10 +411,10 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
     w.Bool(v.Sign() < 0);
 }
 
-[GoRecv] public static void bigFloat(this ref Encoder w, ж<big.Float> Ꮡv) {
-    ref var v = ref Ꮡv.val;
+[GoRecv] internal static void bigFloat(this ref Encoder w, ж<big.Float> Ꮡv) {
+    ref var v = ref Ꮡv.Value;
 
-    var b = v.Append(default!, (rune)'p', -1);
+    var b = Ꮡv.Append(default!, (rune)'p', -1);
     w.String(((@string)b));
 }
 

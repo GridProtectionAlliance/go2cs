@@ -17,7 +17,7 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
     @string errstr = default!;
 
     ж<moduledata> md = default!;
-    for (var pmd = firstmoduledata.next; pmd != nil; pmd = pmd.val.next) {
+    for (var pmd = firstmoduledata.next; pmd != nil; pmd = pmd.Value.next) {
         if ((~pmd).bad) {
             md = default!;
             // we only want the last module
@@ -36,26 +36,26 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
     }
     foreach (var (_, pmd) in activeModules()) {
         if ((~pmd).pluginpath == (~md).pluginpath) {
-            md.val.bad = true;
+            md.Value.bad = true;
             return ("", default!, default!, "plugin already loaded");
         }
         if (inRange((~pmd).text, (~pmd).etext, (~md).text, (~md).etext) || inRange((~pmd).bss, (~pmd).ebss, (~md).bss, (~md).ebss) || inRange((~pmd).data, (~pmd).edata, (~md).data, (~md).edata) || inRange((~pmd).types, (~pmd).etypes, (~md).types, (~md).etypes)) {
             println("plugin: new module data overlaps with previous moduledata");
-            println("\tpmd.text-etext=", ((Δhex)(~pmd).text), "-", ((Δhex)(~pmd).etext));
-            println("\tpmd.bss-ebss=", ((Δhex)(~pmd).bss), "-", ((Δhex)(~pmd).ebss));
-            println("\tpmd.data-edata=", ((Δhex)(~pmd).data), "-", ((Δhex)(~pmd).edata));
-            println("\tpmd.types-etypes=", ((Δhex)(~pmd).types), "-", ((Δhex)(~pmd).etypes));
-            println("\tmd.text-etext=", ((Δhex)(~md).text), "-", ((Δhex)(~md).etext));
-            println("\tmd.bss-ebss=", ((Δhex)(~md).bss), "-", ((Δhex)(~md).ebss));
-            println("\tmd.data-edata=", ((Δhex)(~md).data), "-", ((Δhex)(~md).edata));
-            println("\tmd.types-etypes=", ((Δhex)(~md).types), "-", ((Δhex)(~md).etypes));
+            println("\tpmd.text-etext=", ((Δhex)(uint64)(~pmd).text), "-", ((Δhex)(uint64)(~pmd).etext));
+            println("\tpmd.bss-ebss=", ((Δhex)(uint64)(~pmd).bss), "-", ((Δhex)(uint64)(~pmd).ebss));
+            println("\tpmd.data-edata=", ((Δhex)(uint64)(~pmd).data), "-", ((Δhex)(uint64)(~pmd).edata));
+            println("\tpmd.types-etypes=", ((Δhex)(uint64)(~pmd).types), "-", ((Δhex)(uint64)(~pmd).etypes));
+            println("\tmd.text-etext=", ((Δhex)(uint64)(~md).text), "-", ((Δhex)(uint64)(~md).etext));
+            println("\tmd.bss-ebss=", ((Δhex)(uint64)(~md).bss), "-", ((Δhex)(uint64)(~md).ebss));
+            println("\tmd.data-edata=", ((Δhex)(uint64)(~md).data), "-", ((Δhex)(uint64)(~md).edata));
+            println("\tmd.types-etypes=", ((Δhex)(uint64)(~md).types), "-", ((Δhex)(uint64)(~md).etypes));
             @throw("plugin: new module data overlaps with previous moduledata"u8);
         }
     }
     foreach (var (_, pkghash) in (~md).pkghashes) {
-        if (pkghash.linktimehash != pkghash.runtimehash.val) {
-            md.val.bad = true;
-            return ("", default!, default!, "plugin was built with a different version of package "u8 + pkghash.modulename);
+        if (pkghash.linktimehash != pkghash.runtimehash.Value) {
+            md.Value.bad = true;
+            return ("", default!, default!, "plugin was built with a different version of package " + pkghash.modulename);
         }
     }
     // Initialize the freshly loaded module.
@@ -63,11 +63,11 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
     typelinksinit();
     pluginftabverify(md);
     moduledataverify1(md);
-    @lock(Ꮡ(itabLock));
+    @lock(ᏑitabLock);
     foreach (var (_, i) in (~md).itablinks) {
         itabAdd(i);
     }
-    unlock(Ꮡ(itabLock));
+    unlock(ᏑitabLock);
     // Build a map of symbol names to symbols. Here in the runtime
     // we fill out the first word of the interface, the type. We
     // pass these zero value interfaces to the plugin package,
@@ -78,12 +78,12 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
     // a dependency on the reflect package.
     syms = new map<@string, any>(len((~md).ptab));
     foreach (var (_, ptab) in (~md).ptab) {
-        var symName = resolveNameOff(((@unsafe.Pointer)(~md).types), ptab.name);
-        var t = toRType((ж<_type>)(uintptr)(((@unsafe.Pointer)(~md).types))).typeOff(ptab.typ);
+        var symName = resolveNameOff((@unsafe.Pointer)(~md).types, ptab.name);
+        var t = toRType((ж<_type>)(uintptr)((@unsafe.Pointer)(~md).types)).typeOff(ptab.typ);
         // TODO can this stack of conversions be simpler?
-        any val = default!;
-        var valp = (ж<array<@unsafe.Pointer>>)(uintptr)(new @unsafe.Pointer(Ꮡ(val)));
-        (ж<ж<array<@unsafe.Pointer>>>)[0] = new @unsafe.Pointer(t);
+        ref var val = ref heap<any>(out var Ꮡval);
+        var valp = (ж<array<@unsafe.Pointer>>)(uintptr)(new @unsafe.Pointer(Ꮡval));
+        (valp.Value)[0] = new @unsafe.Pointer(t);
         @string name = symName.Name();
         if ((abiꓸKind)((~t).Kind_ & abi.KindMask) == abi.Func) {
             name = "."u8 + name;
@@ -94,7 +94,7 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
 }
 
 internal static void pluginftabverify(ж<moduledata> Ꮡmd) {
-    ref var md = ref Ꮡmd.val;
+    ref var md = ref Ꮡmd.Value;
 
     var badtable = false;
     for (nint i = 0; i < len(md.ftab); i++) {
@@ -102,21 +102,21 @@ internal static void pluginftabverify(ж<moduledata> Ꮡmd) {
         if (md.minpc <= entry && entry <= md.maxpc) {
             continue;
         }
-        var f = new ΔfuncInfo((ж<_func>)(uintptr)(new @unsafe.Pointer(Ꮡ(md.pclntable, md.ftab[i].funcoff))), Ꮡmd);
+        var f = new ΔfuncInfo((ж<_func>)(uintptr)(new @unsafe.Pointer(Ꮡ(md.pclntable, (int)(md.ftab[i].funcoff)))), Ꮡmd);
         @string name = funcname(f);
         // A common bug is f.entry has a relocation to a duplicate
         // function symbol, meaning if we search for its PC we get
         // a valid entry with a name that is useful for debugging.
         @string name2 = "none"u8;
-        var entry2 = ((uintptr)0);
+        var entry2 = (uintptr)0;
         var f2 = findfunc(entry);
         if (f2.valid()) {
             name2 = funcname(f2);
             entry2 = f2.entry();
         }
         badtable = true;
-        println("ftab entry", ((Δhex)entry), "/", ((Δhex)entry2), ": ",
-            name, "/", name2, "outside pc range:[", ((Δhex)md.minpc), ",", ((Δhex)md.maxpc), "], modulename=", md.modulename, ", pluginpath=", md.pluginpath);
+        println("ftab entry", ((Δhex)(uint64)entry), "/", ((Δhex)(uint64)entry2), ": ",
+            name, "/", name2, "outside pc range:[", ((Δhex)(uint64)md.minpc), ",", ((Δhex)(uint64)md.maxpc), "], modulename=", md.modulename, ", pluginpath=", md.pluginpath);
     }
     if (badtable) {
         @throw("runtime: plugin has bad symbol table"u8);

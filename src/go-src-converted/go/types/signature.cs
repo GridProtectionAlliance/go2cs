@@ -4,9 +4,12 @@
 namespace go.go;
 
 using fmt = fmt_package;
-using ast = go.ast_package;
-using token = go.token_package;
-using static @internal.types.errors_package;
+using ast = global::go.go.ast_package;
+using token = global::go.go.token_package;
+using static global::go.@internal.types.errors_package;
+using constant = global::go.go.constant_package;
+using errors = global::go.@internal.types.errors_package;
+using global::go.go;
 
 partial class types_package {
 
@@ -36,9 +39,9 @@ partial class types_package {
 //
 // Deprecated: Use [NewSignatureType] instead which allows for type parameters.
 public static ж<ΔSignature> NewSignature(ж<Var> Ꮡrecv, ж<Tuple> Ꮡparams, ж<Tuple> Ꮡresults, bool variadic) {
-    ref var recv = ref Ꮡrecv.val;
-    ref var @params = ref Ꮡparams.val;
-    ref var results = ref Ꮡresults.val;
+    ref var recv = ref Ꮡrecv.Value;
+    ref var @params = ref Ꮡparams.Value;
+    ref var results = ref Ꮡresults.Value;
 
     return NewSignatureType(Ꮡrecv, default!, default!, Ꮡparams, Ꮡresults, variadic);
 }
@@ -50,34 +53,34 @@ public static ж<ΔSignature> NewSignature(ж<Var> Ꮡrecv, ж<Tuple> Ꮡparams,
 // If recv is non-nil, typeParams must be empty. If recvTypeParams is
 // non-empty, recv must be non-nil.
 public static ж<ΔSignature> NewSignatureType(ж<Var> Ꮡrecv, slice<ж<TypeParam>> recvTypeParams, slice<ж<TypeParam>> typeParams, ж<Tuple> Ꮡparams, ж<Tuple> Ꮡresults, bool variadic) {
-    ref var recv = ref Ꮡrecv.val;
-    ref var @params = ref Ꮡparams.val;
-    ref var results = ref Ꮡresults.val;
+    ref var recv = ref Ꮡrecv.DerefOrNil();
+    ref var @params = ref Ꮡparams.Value;
+    ref var results = ref Ꮡresults.Value;
 
     if (variadic) {
-        nint n = @params.Len();
+        nint n = Ꮡparams.Len();
         if (n == 0) {
             throw panic("variadic function must have at least one parameter");
         }
-        var core = coreString(@params.At(n - 1).typ);
+        var core = coreString((~@params.At(n - 1)).typ);
         {
-            var (_, ok) = core._<Slice.val>(ᐧ); if (!ok && !isString(core)) {
+            var (_, ok) = core._<ж<Slice>>(ᐧ); if (!ok && !isString(core)) {
                 throw panic(fmt.Sprintf("got %s, want variadic parameter with unnamed slice type or string as core type"u8, core.String()));
             }
         }
     }
-    var sig = Ꮡ(new ΔSignature(recv: recv, @params: @params, results: results, variadic: variadic));
+    var sig = Ꮡ(new ΔSignature(recv: Ꮡrecv, @params: Ꮡparams, results: Ꮡresults, variadic: variadic));
     if (len(recvTypeParams) != 0) {
-        if (recv == nil) {
+        if (Ꮡrecv == nil) {
             throw panic("function with receiver type parameters must have a receiver");
         }
-        sig.val.rparams = bindTParams(recvTypeParams);
+        sig.Value.rparams = bindTParams(recvTypeParams);
     }
     if (len(typeParams) != 0) {
-        if (recv != nil) {
+        if (Ꮡrecv != nil) {
             throw panic("function with type parameters cannot have a receiver");
         }
-        sig.val.tparams = bindTParams(typeParams);
+        sig.Value.tparams = bindTParams(typeParams);
     }
     return sig;
 }
@@ -117,38 +120,43 @@ public static ж<ΔSignature> NewSignatureType(ж<Var> Ꮡrecv, slice<ж<TypePar
     return s.variadic;
 }
 
-[GoRecv("capture")] public static ΔType Underlying(this ref ΔSignature t) {
-    return ~t;
+public static ΔType Underlying(this ж<ΔSignature> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return new ΔSignatureжΔType(Ꮡt);
 }
 
-[GoRecv] public static @string String(this ref ΔSignature t) {
-    return TypeString(~t, default!);
+public static @string String(this ж<ΔSignature> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return TypeString(new ΔSignatureжΔType(Ꮡt), default!);
 }
 
 // ----------------------------------------------------------------------------
 // Implementation
 
 // funcType type-checks a function or method type.
-[GoRecv] public static void funcType(this ref Checker check, ж<ΔSignature> Ꮡsig, ж<ast.FieldList> ᏑrecvPar, ж<ast.FuncType> Ꮡftyp) => func((defer, _) => {
-    ref var sig = ref Ꮡsig.val;
-    ref var recvPar = ref ᏑrecvPar.val;
-    ref var ftyp = ref Ꮡftyp.val;
+internal static void funcType(this ж<Checker> Ꮡcheck, ж<ΔSignature> Ꮡsig, ж<ast.FieldList> ᏑrecvPar, ж<ast.FuncType> Ꮡftyp) => func((defer, recover) => {
+    ref var check = ref Ꮡcheck.Value;
+    ref var sig = ref Ꮡsig.Value;
+    ref var recvPar = ref ᏑrecvPar.DerefOrNil();
+    ref var ftyp = ref Ꮡftyp.Value;
 
-    check.openScope(~ftyp, "function"u8);
-    check.scope.isFunc = true;
-    check.recordScope(~ftyp, check.scope);
+    check.openScope(new ast.FuncTypeжNode(Ꮡftyp), "function"u8);
+    check.scope.Value.isFunc = true;
+    check.recordScope(new ast.FuncTypeжNode(Ꮡftyp), check.scope);
     sig.scope = check.scope;
-    defer(check.closeScope);
-    if (recvPar != nil && len(recvPar.List) > 0) {
+    defer(Ꮡcheck.closeScope);
+    if (ᏑrecvPar != nil && len(recvPar.List) > 0) {
         // collect generic receiver type parameters, if any
         // - a receiver type parameter is like any other type parameter, except that it is declared implicitly
         // - the receiver specification acts as local declaration for its type parameters, which may be blank
-        var (_, rname, rparams) = check.unpackRecv(recvPar.List[0].Type, true);
+        var (_, rname, rparams) = Ꮡcheck.unpackRecv((~recvPar.List[0]).Type, true);
         if (len(rparams) > 0) {
             // The scope of the type parameter T in "func (r T[T]) f()"
             // starts after f, not at "r"; see #52038.
             tokenꓸPos scopePosΔ1 = ftyp.Params.Pos();
-            var tparams = check.declareTypeParams(default!, rparams, scopePosΔ1);
+            var tparams = Ꮡcheck.declareTypeParams(default!, rparams, scopePosΔ1);
             sig.rparams = bindTParams(tparams);
             // Blank identifiers don't get declared, so naive type-checking of the
             // receiver type expression would fail in Checker.collectParams below,
@@ -160,7 +168,7 @@ public static ж<ΔSignature> NewSignatureType(ж<Var> Ꮡrecv, slice<ж<TypePar
             foreach (var (i, p) in rparams) {
                 if ((~p).Name == "_"u8) {
                     if (check.recvTParamMap == default!) {
-                        check.recvTParamMap = new ast.Ident>*TypeParam();
+                        check.recvTParamMap = new map<ж<ast.Ident>, ж<TypeParam>>();
                     }
                     check.recvTParamMap[p] = tparams[i];
                 }
@@ -174,21 +182,23 @@ public static ж<ΔSignature> NewSignatureType(ж<Var> Ꮡrecv, slice<ж<TypePar
                 //       again when we type-check the signature.
                 // TODO(gri) maybe the receiver should be marked as invalid instead?
                 {
-                    var recvΔ1 = asNamed(check.genericType(~rname, nil)); if (recvΔ1 != nil) {
-                        recvTParams = recvΔ1.TypeParams().list();
+                    var recv = asNamed(Ꮡcheck.genericType(new ast_IdentжExpr(rname), nil)); if (recv != nil) {
+                        recvTParams = recv.TypeParams().list();
                     }
                 }
             }
             // provide type parameter bounds
             if (len(tparams) == len(recvTParams)){
                 var smap = makeRenameMap(recvTParams, tparams);
-                foreach (var (i, tpar) in tparams) {
+                foreach (var (i, vᴛ1) in tparams) {
+                    var tpar = vᴛ1;
+
                     var recvTPar = recvTParams[i];
                     check.mono.recordCanon(tpar, recvTPar);
                     // recvTPar.bound is (possibly) parameterized in the context of the
                     // receiver type declaration. Substitute parameters for the current
                     // context.
-                    tpar.val.bound = check.subst((~tpar).obj.pos, (~recvTPar).bound, smap, nil, check.context());
+                    tpar.Value.bound = Ꮡcheck.subst((~(~tpar).obj).pos, (~recvTPar).bound, smap, nil, check.context());
                 }
             } else 
             if (len(tparams) < len(recvTParams)) {
@@ -197,17 +207,17 @@ public static ж<ΔSignature> NewSignatureType(ж<Var> Ꮡrecv, slice<ж<TypePar
                 // may lead to follow-on errors (see issues go.dev/issue/51339, go.dev/issue/51343).
                 // TODO(gri) find a better solution
                 @string got = measure(len(tparams), "type parameter"u8);
-                check.errorf(~recvPar, BadRecv, "got %s, but receiver base type declares %d"u8, got, len(recvTParams));
+                Ꮡcheck.errorf(new ast_FieldListжpositioner(ᏑrecvPar), BadRecv, "got %s, but receiver base type declares %d"u8, got, len(recvTParams));
             }
         }
     }
     if (ftyp.TypeParams != nil) {
-        check.collectTypeParams(Ꮡ(sig.tparams), ftyp.TypeParams);
+        Ꮡcheck.collectTypeParams(Ꮡsig.of(types_package.ΔSignature.Ꮡtparams), ftyp.TypeParams);
         // Always type-check method type parameters but complain that they are not allowed.
         // (A separate check is needed when type-checking interface method signatures because
         // they don't have a receiver specification.)
-        if (recvPar != nil) {
-            check.error(~ftyp.TypeParams, InvalidMethodTypeParams, "methods cannot have type parameters"u8);
+        if (ᏑrecvPar != nil) {
+            Ꮡcheck.error(new ast_FieldListжpositioner(ftyp.TypeParams), InvalidMethodTypeParams, "methods cannot have type parameters"u8);
         }
     }
     // Use a temporary scope for all parameter declarations and then
@@ -220,151 +230,156 @@ public static ж<ΔSignature> NewSignatureType(ж<Var> Ꮡrecv, slice<ж<TypePar
     var scope = NewScope(check.scope, nopos, nopos, "function body (temp. scope)"u8);
     tokenꓸPos scopePos = ftyp.End();
     // all parameters' scopes start after the signature
-    var (recvList, _) = check.collectParams(scope, ᏑrecvPar, false, scopePos);
-    var (@params, variadic) = check.collectParams(scope, ftyp.Params, true, scopePos);
-    var (results, _) = check.collectParams(scope, ftyp.Results, false, scopePos);
+    var (recvList, _) = Ꮡcheck.collectParams(scope, ᏑrecvPar, false, scopePos);
+    var (@params, variadic) = Ꮡcheck.collectParams(scope, ftyp.Params, true, scopePos);
+    var (results, _) = Ꮡcheck.collectParams(scope, ftyp.Results, false, scopePos);
     scope.squash((Object obj, Object alt) => {
-        var err = check.newError(DuplicateDecl);
-        err.addf(obj, "%s redeclared in this block"u8, obj.Name());
+        var err = Ꮡcheck.newError(DuplicateDecl);
+        err.addf(new Objectᴠpositioner(obj), "%s redeclared in this block"u8, obj.Name());
         err.addAltDecl(alt);
         err.report();
     });
-    if (recvPar != nil) {
+    if (ᏑrecvPar != nil) {
         // recv parameter list present (may be empty)
         // spec: "The receiver is specified via an extra parameter section preceding the
         // method name. That parameter section must declare a single parameter, the receiver."
         ж<Var> recv = default!;
-        switch (len(recvList)) {
-        case 0: {
+        var exprᴛ1 = len(recvList);
+        var matchᴛ1 = false;
+        var matchᴛ2 = exprᴛ1 is 0 || exprᴛ1 is 1;
+        if (exprᴛ1 is 0) {
             recv = NewParam(nopos, // error reported by resolver
- nil, ""u8, ~Typ[Invalid]);
-            break;
+ nil, ""u8, new BasicжΔType(Typ[Invalid]));
         }
-        default: {
-            check.error(~recvList[len(recvList) - 1], // ignore recv below
+        else if (!matchᴛ2) { /* default: */
+            Ꮡcheck.error(new Varжpositioner(recvList[len(recvList) - 1]), // ignore recv below
  // more than one receiver
  InvalidRecv, "method has multiple receivers"u8);
-            break;
+            fallthrough = true;
         }
-        case 1: {
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 1) { matchᴛ1 = true;
             recv = recvList[0];
-            break;
-        }}
+        }
 
         // continue with first receiver
         sig.recv = recv;
         // Delay validation of receiver type as it may cause premature expansion
         // of types the receiver type is dependent on (see issues go.dev/issue/51232, go.dev/issue/51233).
-        check.later(
-        var recvʗ11 = recv;
-        () => {
-            var (rtyp, _) = deref(recvʗ11.typ);
+        var recvʗ1 = recv;
+
+        var recvʗ3 = recv;
+
+        var recvʗ5 = recv;
+
+        var recvʗ7 = recv;
+        check.later(() => {
+            var (rtyp, _) = deref((~recvʗ7).typ);
             var atyp = Unalias(rtyp);
             if (!isValid(atyp)) {
                 return;
             }
             switch (atyp.type()) {
-            case Named.val T: {
-                if (T.TypeArgs() != nil && sig.RecvTypeParams() == nil) {
-                    check.errorf(~recvʗ11, InvalidRecv, "cannot define new methods on instantiated type %s"u8, rtyp);
+            case ж<Named> T: {
+                if (T.TypeArgs() != nil && Ꮡsig.Value.RecvTypeParams() == nil) {
+                    Ꮡcheck.errorf(new Varжpositioner(recvʗ7), InvalidRecv, "cannot define new methods on instantiated type %s"u8, rtyp);
                     break;
                 }
-                if ((~T).obj.pkg != check.pkg) {
-                    check.errorf(~recvʗ11, InvalidRecv, "cannot define new methods on non-local type %s"u8, rtyp);
+                if ((~(~T).obj).pkg != Ꮡcheck.Value.pkg) {
+                    Ꮡcheck.errorf(new Varжpositioner(recvʗ7), InvalidRecv, "cannot define new methods on non-local type %s"u8, rtyp);
                     break;
                 }
                 @string cause = default!;
-                switch (T.under().type()) {
-                case Basic.val u: {
+                var switchᴛ20 = T.under();
+                switch (switchᴛ20.type()) {
+                case ж<Basic> u: {
                     if ((~u).kind == UnsafePointer) {
                         cause = "unsafe.Pointer"u8;
                     }
                     break;
                 }
-                case Pointer.val u: {
+                case ж<Pointer> _:
+                case ж<Interface> _: {
+                    var u = switchᴛ20;
                     cause = "pointer or interface type"u8;
                     break;
                 }
-                case Interface.val u: {
-                    cause = "pointer or interface type"u8;
-                    break;
-                }
-                case TypeParam.val u: {
+                case ж<TypeParam> u: {
                     throw panic("unreachable");
                     break;
                 }}
                 if (cause != ""u8) {
-                    check.errorf(~recvʗ11, InvalidRecv, "invalid receiver type %s (%s)"u8, rtyp, cause);
+                    Ꮡcheck.errorf(new Varжpositioner(recvʗ7), InvalidRecv, "invalid receiver type %s (%s)"u8, rtyp, cause);
                 }
                 break;
             }
-            case Basic.val T: {
-                check.errorf(~recvʗ11, InvalidRecv, "cannot define new methods on non-local type %s"u8, rtyp);
+            case ж<Basic> T: {
+                Ꮡcheck.errorf(new Varжpositioner(recvʗ7), InvalidRecv, "cannot define new methods on non-local type %s"u8, rtyp);
                 break;
             }
             default: {
-                var T = atyp.type();
-                check.errorf(~recvʗ11, InvalidRecv, "invalid receiver type %s"u8, recvʗ11.typ);
+                var T = atyp;
+                Ꮡcheck.errorf(new Varжpositioner(recvʗ7), InvalidRecv, "invalid receiver type %s"u8, (~recvʗ7).typ);
                 break;
             }}
-        }).describef(~recv, "validate receiver %s"u8, recv);
+        }).describef(new Varжpositioner(recv), "validate receiver %s"u8, recv);
     }
-    sig.@params = NewTuple(Ꮡparams.ꓸꓸꓸ);
-    sig.results = NewTuple(Ꮡresults.ꓸꓸꓸ);
+    sig.@params = NewTuple(@params.ꓸꓸꓸ);
+    sig.results = NewTuple(results.ꓸꓸꓸ);
     sig.variadic = variadic;
 });
 
 // collectParams declares the parameters of list in scope and returns the corresponding
 // variable list.
-[GoRecv] public static (slice<ж<Var>> @params, bool variadic) collectParams(this ref Checker check, ж<ΔScope> Ꮡscope, ж<ast.FieldList> Ꮡlist, bool variadicOk, tokenꓸPos scopePos) {
+internal static (slice<ж<Var>> @params, bool variadic) collectParams(this ж<Checker> Ꮡcheck, ж<ΔScope> Ꮡscope, ж<ast.FieldList> Ꮡlist, bool variadicOk, tokenꓸPos scopePos) {
     slice<ж<Var>> @params = default!;
     bool variadic = default!;
 
-    ref var scope = ref Ꮡscope.val;
-    ref var list = ref Ꮡlist.val;
-    if (list == nil) {
+    ref var check = ref Ꮡcheck.Value;
+    ref var scope = ref Ꮡscope.Value;
+    ref var list = ref Ꮡlist.DerefOrNil();
+    if (Ꮡlist == nil) {
         return (@params, variadic);
     }
     bool named = default!;
     bool anonymous = default!;
     foreach (var (i, field) in list.List) {
-        var ftype = field.val.Type;
+        var ftype = field.Value.Type;
         {
             var (t, _) = ftype._<ж<ast.Ellipsis>>(ᐧ); if (t != nil) {
-                ftype = t.val.Elt;
+                ftype = t.Value.Elt;
                 if (variadicOk && i == len(list.List) - 1 && len((~field).Names) <= 1){
                     variadic = true;
                 } else {
-                    check.softErrorf(~t, MisplacedDotDotDot, "can only use ... with final parameter in list"u8);
+                    Ꮡcheck.softErrorf(new ast_Ellipsisжpositioner(t), MisplacedDotDotDot, "can only use ... with final parameter in list"u8);
                 }
             }
         }
         // ignore ... and continue
-        var typ = check.varType(ftype);
+        var typ = Ꮡcheck.varType(ftype);
         // The parser ensures that f.Tag is nil and we don't
         // care if a constructed AST contains a non-nil tag.
         if (len((~field).Names) > 0){
             // named parameter
             foreach (var (_, name) in (~field).Names) {
                 if ((~name).Name == ""u8) {
-                    check.error(~name, InvalidSyntaxTree, "anonymous parameter"u8);
+                    Ꮡcheck.error(new ast_Identжpositioner(name), InvalidSyntaxTree, "anonymous parameter"u8);
                 }
                 // ok to continue
                 var par = NewParam(name.Pos(), check.pkg, (~name).Name, typ);
-                check.declare(Ꮡscope, name, ~par, scopePos);
+                Ꮡcheck.declare(Ꮡscope, name, new VarжObject(par), scopePos);
                 @params = append(@params, par);
             }
             named = true;
         } else {
             // anonymous parameter
             var par = NewParam(ftype.Pos(), check.pkg, ""u8, typ);
-            check.recordImplicit(~field, ~par);
+            check.recordImplicit(new ast.FieldжNode(field), new VarжObject(par));
             @params = append(@params, par);
             anonymous = true;
         }
     }
     if (named && anonymous) {
-        check.error(~list, InvalidSyntaxTree, "list contains both named and anonymous parameters"u8);
+        Ꮡcheck.error(new ast_FieldListжpositioner(Ꮡlist), InvalidSyntaxTree, "list contains both named and anonymous parameters"u8);
     }
     // ok to continue
     // For a variadic function, change the last parameter's type from T to []T.
@@ -372,8 +387,8 @@ public static ж<ΔSignature> NewSignatureType(ж<Var> Ꮡrecv, slice<ж<TypePar
     // record the type for ...T.
     if (variadic) {
         var last = @params[len(@params) - 1];
-        last.typ = Ꮡ(new Slice(elem: last.typ));
-        check.recordTypeAndValue(list.List[len(list.List) - 1].Type, typexpr, last.typ, default!);
+        last.Value.typ = new SliceжΔType(Ꮡ(new Slice(elem: (~last).typ)));
+        check.recordTypeAndValue((~list.List[len(list.List) - 1]).Type, typexpr, (~last).typ, default!);
     }
     return (@params, variadic);
 }

@@ -3,11 +3,11 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto;
 
-using randutil = crypto.@internal.randutil_package;
+using randutil = go.crypto.@internal.randutil_package;
 using errors = errors_package;
 using io = io_package;
 using big = math.big_package;
-using crypto.@internal;
+using go.crypto.@internal;
 using math;
 
 partial class rand_package {
@@ -19,7 +19,7 @@ public static (ж<bigꓸInt>, error) Prime(io.Reader rand, nint bits) {
         return (default!, errors.New("crypto/rand: prime size must be at least 2-bit"u8));
     }
     randutil.MaybeReadByte(rand);
-    nuint b = ((nuint)(bits % 8));
+    nuint b = (nuint)(bits % 8);
     if (b == 0) {
         b = 8;
     }
@@ -32,18 +32,18 @@ public static (ж<bigꓸInt>, error) Prime(io.Reader rand, nint bits) {
             }
         }
         // Clear bits in the first byte to make sure the candidate has a size <= bits.
-        bytes[0] &= (uint8)(((uint8)(((nint)(1 << (int)(b))) - 1)));
+        bytes[0] &= (uint8)((uint8)((nint)((1 << (int)(b))) - 1));
         // Don't let the value be too small, i.e, set the most significant two bits.
         // Setting the top two bits, rather than just the top bit,
         // means that when two of these values are multiplied together,
         // the result isn't ever one bit short.
         if (b >= 2){
-            bytes[0] |= (byte)(3 << (int)((b - 2)));
+            bytes[0] |= (byte)((byte)(3 << (int)((b - 2))));
         } else {
             // Here b==1, because b cannot be zero.
             bytes[0] |= (byte)(1);
             if (len(bytes) > 1) {
-                bytes[1] |= (byte)(128);
+                bytes[1] |= (byte)(0x80);
             }
         }
         // Make the value odd since an even number this large certainly isn't prime.
@@ -60,7 +60,7 @@ public static (ж<bigꓸInt> n, error err) Int(io.Reader rand, ж<bigꓸInt> Ꮡ
     ж<bigꓸInt> n = default!;
     error err = default!;
 
-    ref var max = ref Ꮡmax.val;
+    ref var max = ref Ꮡmax.Value;
     if (max.Sign() <= 0) {
         throw panic("crypto/rand: argument to Int is <= 0");
     }
@@ -75,7 +75,7 @@ public static (ж<bigꓸInt> n, error err) Int(io.Reader rand, ж<bigꓸInt> Ꮡ
     // k is the maximum byte length needed to encode a value < max.
     nint k = (bitLen + 7) / 8;
     // b is the number of bits in the most significant byte of max-1.
-    nuint b = ((nuint)(bitLen % 8));
+    nuint b = (nuint)(bitLen % 8);
     if (b == 0) {
         b = 8;
     }
@@ -87,7 +87,7 @@ public static (ж<bigꓸInt> n, error err) Int(io.Reader rand, ж<bigꓸInt> Ꮡ
         }
         // Clear bits in the first byte to increase the probability
         // that the candidate is < max.
-        bytes[0] &= (uint8)(((uint8)(((nint)(1 << (int)(b))) - 1)));
+        bytes[0] &= (uint8)((uint8)((nint)((1 << (int)(b))) - 1));
         n.SetBytes(bytes);
         if (n.Cmp(Ꮡmax) < 0) {
             return (n, err);

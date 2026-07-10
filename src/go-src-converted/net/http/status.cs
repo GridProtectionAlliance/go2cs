@@ -47,7 +47,7 @@ public static readonly UntypedInt StatusNotModified = 304; // RFC 9110, 15.4.5
 
 public static readonly UntypedInt StatusUseProxy = 305; // RFC 9110, 15.4.6
 
-internal static readonly UntypedInt _ᴛ1ʗ = 306; // RFC 9110, 15.4.7 (Unused)
+internal static readonly UntypedInt _ᴛ11ʗ = 306; // RFC 9110, 15.4.7 (Unused)
 
 public static readonly UntypedInt StatusTemporaryRedirect = 307; // RFC 9110, 15.4.8
 

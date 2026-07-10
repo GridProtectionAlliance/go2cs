@@ -90,7 +90,7 @@ partial class tabwriter_package {
 // call Flush when done calling [Writer.Write].
 [GoType] partial struct Writer {
     // configuration
-    internal io_package.Writer output;
+    internal io.Writer output;
     internal nint minwidth;
     internal nint tabwidth;
     internal nint padding;
@@ -117,7 +117,7 @@ partial class tabwriter_package {
             b.lines = b.lines[..(int)(n)];
             b.lines[n - 1] = b.lines[n - 1][..0];
         } else {
-            b.lines = append(b.lines, default!);
+            b.lines = builtin.append(b.lines, default!);
         }
     }
     if (!flushed) {
@@ -197,7 +197,9 @@ public const nuint Debug = 32;
 //			(for correct-looking results, tabwidth must correspond
 //			to the tab width in the viewer displaying the result)
 //	flags		formatting control
-[GoRecv("capture")] public static ж<Writer> Init(this ref Writer b, io.Writer output, nint minwidth, nint tabwidth, nint padding, byte padchar, nuint flags) {
+public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwidth, nint tabwidth, nint padding, byte padchar, nuint flags) {
+    ref var b = ref Ꮡb.Value;
+
     if (minwidth < 0 || tabwidth < 0 || padding < 0) {
         throw panic("negative minwidth, tabwidth, or padding");
     }
@@ -210,11 +212,11 @@ public const nuint Debug = 32;
     }
     if (padchar == (rune)'\t') {
         // tab padding enforces left-alignment
-        flags &= ~(nuint)(AlignRight);
+        flags &= unchecked((nuint)~(nuint)(AlignRight));
     }
     b.flags = flags;
     b.reset();
-    return InitꓸᏑb;
+    return Ꮡb;
 }
 
 // debugging support (keep code around)
@@ -256,7 +258,7 @@ public const nuint Debug = 32;
 }
 
 internal static slice<byte> newline = new byte[]{(rune)'\n'}.slice();
-internal static slice<byte> tabs = slice<byte>("\t\t\t\t\t\t\t\t");
+internal static slice<byte> tabs = slice<byte>((@string)"\t\t\t\t\t\t\t\t");
 
 [GoRecv] internal static void writePadding(this ref Writer b, nint textw, nint cellw, bool useTabs) {
     if (b.padbytes[0] == (rune)'\t' || useTabs) {
@@ -385,7 +387,7 @@ internal static slice<byte> vbar = new byte[]{(rune)'|'}.slice();
         }
         // format and print all columns to the right of this column
         // (we know the widths of this column and all columns to the left)
-        b.widths = append(b.widths, width);
+        b.widths = builtin.append(b.widths, width);
         // push width
         pos = b.format(pos, line0, @this);
         b.widths = b.widths[0..(int)(len(b.widths) - 1)];
@@ -398,7 +400,7 @@ internal static slice<byte> vbar = new byte[]{(rune)'|'}.slice();
 
 // Append text to current cell.
 [GoRecv] internal static void append(this ref Writer b, slice<byte> text) {
-    b.buf = append(b.buf, text.ꓸꓸꓸ);
+    b.buf = builtin.append(b.buf, text.ꓸꓸꓸ);
     b.cell.size += len(text);
 }
 
@@ -461,13 +463,14 @@ public static readonly UntypedInt Escape = /* '\xff' */ 255;
 [GoRecv] internal static nint terminateCell(this ref Writer b, bool htab) {
     b.cell.htab = htab;
     var line = Ꮡ(b.lines[len(b.lines) - 1]);
-    line.val = append(line.val, b.cell);
+    line.ValueSlot = builtin.append(line.ValueSlot, b.cell);
     b.cell = new cell(nil);
-    return len(line.val);
+    return len(line.ValueSlot);
 }
 
-[GoRecv] public static void handlePanic(this ref Writer b, ж<error> Ꮡerr, @string op) => func((_, recover) => {
-    ref var err = ref Ꮡerr.val;
+internal static void handlePanic(this ж<Writer> Ꮡb, ж<error> Ꮡerr, @string op) => func((defer, recover) => {
+    ref var b = ref Ꮡb.Value;
+    ref var err = ref Ꮡerr.Value;
 
     {
         var e = recover(); if (e != default!) {
@@ -490,19 +493,25 @@ public static readonly UntypedInt Escape = /* '\xff' */ 255;
 // that any data buffered in the [Writer] is written to output. Any
 // incomplete escape sequence at the end is considered
 // complete for formatting purposes.
-[GoRecv] public static error Flush(this ref Writer b) {
-    return b.flush();
+public static error Flush(this ж<Writer> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
+
+    return Ꮡb.flush();
 }
 
 // flush is the internal version of Flush, with a named return value which we
 // don't want to expose.
-[GoRecv] internal static error /*err*/ flush(this ref Writer b) => func((defer, _) => {
+internal static error /*err*/ flush(this ж<Writer> Ꮡb) {
     error err = default!;
+    func((defer, recover) => {
+    ref var b = ref Ꮡb.Value;
 
-    deferǃ(b.handlePanic, Ꮡ(err), "Flush", defer);
-    b.flushNoDefers();
-    return default!;
-});
+        deferǃ(Ꮡb.handlePanic, Ꮡ(err), (@string)"Flush", defer);
+        b.flushNoDefers();
+        err = default!;
+    });
+    return err;
+}
 
 // flushNoDefers is like flush, but without a deferred handlePanic call. This
 // can be called from other methods which already have their own deferred
@@ -521,89 +530,92 @@ public static readonly UntypedInt Escape = /* '\xff' */ 255;
     b.reset();
 }
 
-internal static slice<byte> hbar = slice<byte>("---\n");
+internal static slice<byte> hbar = slice<byte>((@string)"---\n");
 
 // Write writes buf to the writer b.
 // The only errors returned are ones encountered
 // while writing to the underlying output stream.
-[GoRecv] public static (nint n, error err) Write(this ref Writer b, slice<byte> buf) => func((defer, _) => {
+public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
     nint n = default!;
     error err = default!;
+    func((defer, recover) => {
+    ref var b = ref Ꮡb.Value;
 
-    deferǃ(b.handlePanic, Ꮡ(err), "Write", defer);
-    // split text into cells
-    n = 0;
-    foreach (var (i, ch) in buf) {
-        if (b.endChar == 0){
-            // outside escape
-            var exprᴛ1 = ch;
-            if (exprᴛ1 is (rune)'\t' or (rune)'\v' or (rune)'\n' or (rune)'\f') {
-                b.append(buf[(int)(n)..(int)(i)]);
-                b.updateWidth();
-                n = i + 1;
-                nint ncells = b.terminateCell(ch == (rune)'\t');
-                if (ch == (rune)'\n' || ch == (rune)'\f') {
-                    // end of cell
-                    // ch consumed
-                    // terminate line
-                    b.addLine(ch == (rune)'\f');
-                    if (ch == (rune)'\f' || ncells == 1) {
-                        // A '\f' always forces a flush. Otherwise, if the previous
-                        // line has only one cell which does not have an impact on
-                        // the formatting of the following lines (the last cell per
-                        // line is ignored by format()), thus we can flush the
-                        // Writer contents.
-                        b.flushNoDefers();
-                        if (ch == (rune)'\f' && (nuint)(b.flags & Debug) != 0) {
-                            // indicate section break
-                            b.write0(hbar);
+        deferǃ(Ꮡb.handlePanic, Ꮡ(err), (@string)"Write", defer);
+        // split text into cells
+        n = 0;
+        foreach (var (i, ch) in buf) {
+            if (b.endChar == 0){
+                // outside escape
+                var exprᴛ1 = ch;
+                if (exprᴛ1 is (rune)'\t' or (rune)'\v' or (rune)'\n' or (rune)'\f') {
+                    b.append(buf[(int)(n)..(int)(i)]);
+                    b.updateWidth();
+                    n = i + 1;
+                    nint ncells = b.terminateCell(ch == (rune)'\t');
+                    if (ch == (rune)'\n' || ch == (rune)'\f') {
+                        // end of cell
+                        // ch consumed
+                        // terminate line
+                        b.addLine(ch == (rune)'\f');
+                        if (ch == (rune)'\f' || ncells == 1) {
+                            // A '\f' always forces a flush. Otherwise, if the previous
+                            // line has only one cell which does not have an impact on
+                            // the formatting of the following lines (the last cell per
+                            // line is ignored by format()), thus we can flush the
+                            // Writer contents.
+                            b.flushNoDefers();
+                            if (ch == (rune)'\f' && (nuint)(b.flags & Debug) != 0) {
+                                // indicate section break
+                                b.write0(hbar);
+                            }
                         }
                     }
                 }
-            }
-            else if (exprᴛ1 == Escape) {
-                b.append(buf[(int)(n)..(int)(i)]);
-                b.updateWidth();
-                n = i;
-                if ((nuint)(b.flags & StripEscape) != 0) {
-                    // start of escaped sequence
-                    n++;
-                }
-                b.startEscape(Escape);
-            }
-            else if (exprᴛ1 is (rune)'<' or (rune)'&') {
-                if ((nuint)(b.flags & FilterHTML) != 0) {
-                    // strip Escape
-                    // possibly an html tag/entity
-                    // begin of tag/entity
+                else if (exprᴛ1 == Escape) {
                     b.append(buf[(int)(n)..(int)(i)]);
                     b.updateWidth();
                     n = i;
-                    b.startEscape(ch);
+                    if ((nuint)(b.flags & StripEscape) != 0) {
+                        // start of escaped sequence
+                        n++;
+                    }
+                    b.startEscape(Escape);
                 }
-            }
+                else if (exprᴛ1 is (rune)'<' or (rune)'&') {
+                    if ((nuint)(b.flags & FilterHTML) != 0) {
+                        // strip Escape
+                        // possibly an html tag/entity
+                        // begin of tag/entity
+                        b.append(buf[(int)(n)..(int)(i)]);
+                        b.updateWidth();
+                        n = i;
+                        b.startEscape(ch);
+                    }
+                }
 
-        } else {
-            // inside escape
-            if (ch == b.endChar) {
-                // end of tag/entity
-                nint j = i + 1;
-                if (ch == Escape && (nuint)(b.flags & StripEscape) != 0) {
-                    j = i;
+            } else {
+                // inside escape
+                if (ch == b.endChar) {
+                    // end of tag/entity
+                    nint j = i + 1;
+                    if (ch == Escape && (nuint)(b.flags & StripEscape) != 0) {
+                        j = i;
+                    }
+                    // strip Escape
+                    b.append(buf[(int)(n)..(int)(j)]);
+                    n = i + 1;
+                    // ch consumed
+                    b.endEscape();
                 }
-                // strip Escape
-                b.append(buf[(int)(n)..(int)(j)]);
-                n = i + 1;
-                // ch consumed
-                b.endEscape();
             }
         }
-    }
-    // append leftover text
-    b.append(buf[(int)(n)..]);
-    n = len(buf);
+        // append leftover text
+        b.append(buf[(int)(n)..]);
+        n = len(buf);
+    });
     return (n, err);
-});
+}
 
 // NewWriter allocates and initializes a new [Writer].
 // The parameters are the same as for the Init function.

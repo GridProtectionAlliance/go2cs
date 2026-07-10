@@ -41,12 +41,9 @@ using static go.io.fs_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(FS, error), FS>]
-[assembly: GoImplement<(File, error), File>]
-[assembly: GoImplement<(FileInfo, error), FileInfo>]
-[assembly: GoImplement<PathError, error>]
+[assembly: GoImplement<PathError, error>(Pointer = true)]
 [assembly: GoImplement<dirInfo, DirEntry>]
-[assembly: GoImplement<subFS, FS>]
+[assembly: GoImplement<subFS, FS>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

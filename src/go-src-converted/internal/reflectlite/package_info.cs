@@ -18,6 +18,8 @@ global using abiꓸKind = go.@internal.abi_package.ΔKind;
 global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
 global using abiꓸName = go.@internal.abi_package.ΔName;
 global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
+global using runtimeꓸError = go.runtime_package.ΔError;
+using abi = go.@internal.abi_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,12 +51,11 @@ using static go.@internal.reflectlite_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-//[assembly: GoImplement<rtype, ΔType>]
+[assembly: GoImplement<rtype, ΔType>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-//[assembly: GoImplicitConv<flag, Kind>(Inverted = true, ValueType = "uintptr")]
-//[assembly: GoImplicitConv<flag, abiꓸKind>(Inverted = false, ValueType = "uint8")]
+[assembly: GoImplicitConv<flag, abiꓸKind>(Inverted = false, ValueType = "abiꓸKind")]
 // </ImplicitConversions>
 
 namespace go.@internal;

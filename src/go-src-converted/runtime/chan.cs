@@ -25,7 +25,7 @@ using runtime.@internal;
 partial class runtime_package {
 
 internal static readonly UntypedInt maxAlign = 8;
-internal const uintptr hchanSize = /* unsafe.Sizeof(hchan{}) + uintptr(-int(unsafe.Sizeof(hchan{}))&(maxAlign-1)) */ 104;
+internal static readonly uintptr hchanSize = /* unsafe.Sizeof(hchan{}) + uintptr(-int(unsafe.Sizeof(hchan{}))&(maxAlign-1)) */ 104;
 internal const bool debugChan = false;
 
 [GoType] partial struct Δhchan {
@@ -56,34 +56,34 @@ internal const bool debugChan = false;
 
 //go:linkname reflect_makechan reflect.makechan
 internal static ж<Δhchan> reflect_makechan(ж<chantype> Ꮡt, nint size) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     return makechan(Ꮡt, size);
 }
 
 internal static ж<Δhchan> makechan64(ж<chantype> Ꮡt, int64 size) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
-    if (((int64)((nint)size)) != size) {
-        throw panic(((plainError)"makechan: size out of range"u8));
+    if ((int64)(nint)size != size) {
+        throw panic(((plainError)(@string)"makechan: size out of range"u8));
     }
-    return makechan(Ꮡt, ((nint)size));
+    return makechan(Ꮡt, (nint)size);
 }
 
 internal static ж<Δhchan> makechan(ж<chantype> Ꮡt, nint size) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     var elem = t.Elem;
     // compiler checks this but be safe.
-    if ((~elem).Size_ >= 1 << (int)(16)) {
+    if ((~elem).Size_ >= (uintptr)(1 << (int)(16))) {
         @throw("makechan: invalid channel element type"u8);
     }
-    if (hchanSize % maxAlign != 0 || (~elem).Align_ > maxAlign) {
+    if (hchanSize % (uintptr)maxAlign != 0 || (~elem).Align_ > maxAlign) {
         @throw("makechan: bad alignment"u8);
     }
-    var (mem, overflow) = math.MulUintptr((~elem).Size_, ((uintptr)size));
-    if (overflow || mem > maxAlloc - hchanSize || size < 0) {
-        throw panic(((plainError)"makechan: size out of range"u8));
+    var (mem, overflow) = math.MulUintptr((~elem).Size_, (uintptr)size);
+    if (overflow || mem > (uintptr)maxAlloc - hchanSize || size < 0) {
+        throw panic(((plainError)(@string)"makechan: size out of range"u8));
     }
     // Hchan does not contain pointers interesting for GC when elements stored in buf do not contain pointers.
     // buf points into the same allocation, elemtype is persistent.
@@ -91,27 +91,31 @@ internal static ж<Δhchan> makechan(ж<chantype> Ꮡt, nint size) {
     // TODO(dvyukov,rlh): Rethink when collector can move allocated objects.
     ж<Δhchan> c = default!;
     switch (ᐧ) {
-    case {} when mem is 0: {
-        c = (ж<Δhchan>)(uintptr)(mallocgc(hchanSize, nil, true));
-        c.val.buf = (uintptr)c.raceaddr();
+    case {} when mem == 0: {
+        c = (ж<Δhchan>)(uintptr)(mallocgc(hchanSize, // Queue or element size is zero.
+ nil, true));
+        c.Value.buf = (uintptr)c.raceaddr();
         break;
     }
     case {} when !elem.Pointers(): {
-        c = (ж<Δhchan>)(uintptr)(mallocgc(hchanSize + mem, nil, true));
-        c.val.buf = (uintptr)add(new @unsafe.Pointer(c), hchanSize);
+        c = (ж<Δhchan>)(uintptr)(mallocgc(hchanSize + mem, // Race detector uses this location for synchronization.
+ // Elements do not contain pointers.
+ // Allocate hchan and buf in one call.
+ nil, true));
+        c.Value.buf = (uintptr)add(new @unsafe.Pointer(c), hchanSize);
         break;
     }
     default: {
         c = @new<Δhchan>();
-        c.val.buf = (uintptr)mallocgc(mem, // Elements contain pointers.
+        c.Value.buf = (uintptr)mallocgc(mem, // Elements contain pointers.
  elem, true);
         break;
     }}
 
-    c.val.elemsize = ((uint16)(~elem).Size_);
-    c.val.elemtype = elem;
-    c.val.dataqsiz = ((nuint)size);
-    lockInit(Ꮡ((~c).@lock), lockRankHchan);
+    c.Value.elemsize = (uint16)(~elem).Size_;
+    c.Value.elemtype = elem;
+    c.Value.dataqsiz = (nuint)size;
+    lockInit(c.of(runtime_package.Δhchan.Ꮡlock), lockRankHchan);
     if (debugChan) {
         print("makechan: chan=", c, "; elemsize=", (~elem).Size_, "; dataqsiz=", size, "\n");
     }
@@ -130,9 +134,9 @@ internal static ж<Δhchan> makechan(ж<chantype> Ꮡt, nint size) {
 //
 //go:linkname chanbuf
 internal static @unsafe.Pointer chanbuf(ж<Δhchan> Ꮡc, nuint i) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
-    return (uintptr)add(c.buf, ((uintptr)i) * ((uintptr)c.elemsize));
+    return (uintptr)add(c.buf, (uintptr)i * (uintptr)c.elemsize);
 }
 
 // full reports whether a send on c would block (that is, the channel is full).
@@ -140,7 +144,7 @@ internal static @unsafe.Pointer chanbuf(ж<Δhchan> Ꮡc, nuint i) {
 // the answer is instantaneously true, the correct answer may have changed
 // by the time the calling function receives the return value.
 internal static bool full(ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     // c.dataqsiz is immutable (never written after the channel is created)
     // so it is safe to read at any time during channel operation.
@@ -156,9 +160,9 @@ internal static bool full(ж<Δhchan> Ꮡc) {
 //
 //go:nosplit
 internal static void chansend1(ж<Δhchan> Ꮡc, @unsafe.Pointer elem) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
-    chansend(Ꮡc, elem.val, true, getcallerpc());
+    chansend(Ꮡc, elem, true, getcallerpc());
 }
 
 /*
@@ -174,9 +178,9 @@ internal static void chansend1(ж<Δhchan> Ꮡc, @unsafe.Pointer elem) {
  * the operation; we'll see that it's now closed.
  */
 internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, uintptr callerpc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.DerefOrNil();
 
-    if (c == nil) {
+    if (Ꮡc == nil) {
         if (!block) {
             return false;
         }
@@ -187,7 +191,7 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
         print("chansend: chan=", c, "\n");
     }
     if (raceenabled) {
-        racereadpc((uintptr)c.raceaddr(), callerpc, abi.FuncPCABIInternal(chansend));
+        racereadpc((uintptr)Ꮡc.raceaddr(), callerpc, abi.FuncPCABIInternal(chansend));
     }
     // Fast path: check for failed non-blocking operation without acquiring the lock.
     //
@@ -212,17 +216,17 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
     if (blockprofilerate > 0) {
         t0 = cputicks();
     }
-    @lock(Ꮡ(c.@lock));
+    @lock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
     if (c.closed != 0) {
-        unlock(Ꮡ(c.@lock));
-        throw panic(((plainError)"send on closed channel"u8));
+        unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
+        throw panic(((plainError)(@string)"send on closed channel"u8));
     }
     {
         var sg = c.recvq.dequeue(); if (sg != nil) {
             // Found a waiting receiver. We pass the value we want to send
             // directly to the receiver, bypassing the channel buffer (if any).
-            send(Ꮡc, sg, ep.val, () => {
-                unlock(Ꮡ(c.@lock));
+            send(Ꮡc, sg, ep, () => {
+                unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
             }, 3);
             return true;
         }
@@ -233,42 +237,42 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
         if (raceenabled) {
             racenotify(Ꮡc, c.sendx, nil);
         }
-        typedmemmove(c.elemtype, qp, ep.val);
+        typedmemmove(c.elemtype, qp, ep);
         c.sendx++;
         if (c.sendx == c.dataqsiz) {
             c.sendx = 0;
         }
         c.qcount++;
-        unlock(Ꮡ(c.@lock));
+        unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
         return true;
     }
     if (!block) {
-        unlock(Ꮡ(c.@lock));
+        unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
         return false;
     }
     // Block on the channel. Some receiver will complete our operation for us.
     var gp = getg();
     var mysg = acquireSudog();
-    mysg.val.releasetime = 0;
+    mysg.Value.releasetime = 0;
     if (t0 != 0) {
-        mysg.val.releasetime = -1;
+        mysg.Value.releasetime = -1;
     }
     // No stack splits between assigning elem and enqueuing mysg
     // on gp.waiting where copystack can find it.
-    mysg.val.elem = ep;
-    mysg.val.waitlink = default!;
-    mysg.val.g = gp;
-    mysg.val.isSelect = false;
-    mysg.val.c = c;
-    gp.val.waiting = mysg;
-    gp.val.param = default!;
+    mysg.Value.elem = ep;
+    mysg.Value.waitlink = default!;
+    mysg.Value.g = gp;
+    mysg.Value.isSelect = false;
+    mysg.Value.c = Ꮡc;
+    gp.Value.waiting = mysg;
+    gp.Value.param = default!;
     c.sendq.enqueue(mysg);
     // Signal to anyone trying to shrink our stack that we're about
     // to park on a channel. The window between when this G's status
     // changes and when we set gp.activeStackChans is not safe for
     // stack shrinking.
-    (~gp).parkingOnChan.Store(true);
-    gopark(chanparkcommit, new @unsafe.Pointer(Ꮡ(c.@lock)), waitReasonChanSend, traceBlockChanSend, 2);
+    gp.of(g.ᏑparkingOnChan).Store(true);
+    gopark(chanparkcommit, new @unsafe.Pointer(Ꮡc.of(runtime_package.Δhchan.Ꮡlock)), waitReasonChanSend, traceBlockChanSend, 2);
     // Ensure the value being sent is kept alive until the
     // receiver copies it out. The sudog has a pointer to the
     // stack object, but sudogs aren't considered as roots of the
@@ -278,20 +282,20 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
     if (mysg != (~gp).waiting) {
         @throw("G waiting list is corrupted"u8);
     }
-    gp.val.waiting = default!;
-    gp.val.activeStackChans = false;
+    gp.Value.waiting = default!;
+    gp.Value.activeStackChans = false;
     var closed = !(~mysg).success;
-    gp.val.param = default!;
+    gp.Value.param = default!;
     if ((~mysg).releasetime > 0) {
         blockevent((~mysg).releasetime - t0, 2);
     }
-    mysg.val.c = default!;
+    mysg.Value.c = default!;
     releaseSudog(mysg);
     if (closed) {
         if (c.closed == 0) {
             @throw("chansend: spurious wakeup"u8);
         }
-        throw panic(((plainError)"send on closed channel"u8));
+        throw panic(((plainError)(@string)"send on closed channel"u8));
     }
     return true;
 }
@@ -303,8 +307,8 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
 // sg must already be dequeued from c.
 // ep must be non-nil and point to the heap or the caller's stack.
 internal static void send(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep, Action unlockf, nint skip) {
-    ref var c = ref Ꮡc.val;
-    ref var sg = ref Ꮡsg.val;
+    ref var c = ref Ꮡc.Value;
+    ref var sg = ref Ꮡsg.Value;
 
     if (raceenabled) {
         if (c.dataqsiz == 0){
@@ -324,12 +328,12 @@ internal static void send(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep,
     }
     // c.sendx = (c.sendx+1) % c.dataqsiz
     if (sg.elem != nil) {
-        sendDirect(c.elemtype, Ꮡsg, ep.val);
+        sendDirect(c.elemtype, Ꮡsg, ep);
         sg.elem = default!;
     }
     var gp = sg.g;
     unlockf();
-    gp.val.param = new @unsafe.Pointer(Ꮡsg);
+    gp.Value.param = new @unsafe.Pointer(Ꮡsg);
     sg.success = true;
     if (sg.releasetime != 0) {
         sg.releasetime = cputicks();
@@ -343,17 +347,17 @@ internal static void send(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep,
 // handle waiting senders at all (all timer channels
 // use non-blocking sends to fill the buffer).
 internal static bool timerchandrain(ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     // Note: Cannot use empty(c) because we are called
     // while holding c.timer.sendLock, and empty(c) will
     // call c.timer.maybeRunChan, which will deadlock.
     // We are emptying the channel, so we only care about
     // the count, not about potentially filling it up.
-    if (atomic.Loaduint(Ꮡ(c.qcount)) == 0) {
+    if (atomic.Loaduint(Ꮡc.of(runtime_package.Δhchan.Ꮡqcount)) == 0) {
         return false;
     }
-    @lock(Ꮡ(c.@lock));
+    @lock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
     var any = false;
     while (c.qcount > 0) {
         any = true;
@@ -364,7 +368,7 @@ internal static bool timerchandrain(ж<Δhchan> Ꮡc) {
         }
         c.qcount--;
     }
-    unlock(Ꮡ(c.@lock));
+    unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
     return any;
 }
 
@@ -378,47 +382,47 @@ internal static bool timerchandrain(ж<Δhchan> Ꮡc) {
 // are not in the heap, so that will not help. We arrange to call
 // memmove and typeBitsBulkBarrier instead.
 internal static void sendDirect(ж<_type> Ꮡt, ж<sudog> Ꮡsg, @unsafe.Pointer src) {
-    ref var t = ref Ꮡt.val;
-    ref var sg = ref Ꮡsg.val;
+    ref var t = ref Ꮡt.Value;
+    ref var sg = ref Ꮡsg.Value;
 
     // src is on our stack, dst is a slot on another stack.
     // Once we read sg.elem out of sg, it will no longer
     // be updated if the destination's stack gets copied (shrunk).
     // So make sure that no preemption points can happen between read & use.
     @unsafe.Pointer dst = sg.elem;
-    typeBitsBulkBarrier(Ꮡt, ((uintptr)dst), ((uintptr)src), t.Size_);
+    typeBitsBulkBarrier(Ꮡt, (uintptr)dst, (uintptr)src, t.Size_);
     // No need for cgo write barrier checks because dst is always
     // Go memory.
-    memmove(dst, src.val, t.Size_);
+    memmove(dst, src, t.Size_);
 }
 
 internal static void recvDirect(ж<_type> Ꮡt, ж<sudog> Ꮡsg, @unsafe.Pointer dst) {
-    ref var t = ref Ꮡt.val;
-    ref var sg = ref Ꮡsg.val;
+    ref var t = ref Ꮡt.Value;
+    ref var sg = ref Ꮡsg.Value;
 
     // dst is on our stack or the heap, src is on another stack.
     // The channel is locked, so src will not move during this
     // operation.
     @unsafe.Pointer src = sg.elem;
-    typeBitsBulkBarrier(Ꮡt, ((uintptr)dst), ((uintptr)src), t.Size_);
-    memmove(dst.val, src, t.Size_);
+    typeBitsBulkBarrier(Ꮡt, (uintptr)dst, (uintptr)src, t.Size_);
+    memmove(dst, src, t.Size_);
 }
 
 internal static void closechan(ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.DerefOrNil();
 
-    if (c == nil) {
-        throw panic(((plainError)"close of nil channel"u8));
+    if (Ꮡc == nil) {
+        throw panic(((plainError)(@string)"close of nil channel"u8));
     }
-    @lock(Ꮡ(c.@lock));
+    @lock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
     if (c.closed != 0) {
-        unlock(Ꮡ(c.@lock));
-        throw panic(((plainError)"close of closed channel"u8));
+        unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
+        throw panic(((plainError)(@string)"close of closed channel"u8));
     }
     if (raceenabled) {
         var callerpc = getcallerpc();
-        racewritepc((uintptr)c.raceaddr(), callerpc, abi.FuncPCABIInternal(closechan));
-        racerelease((uintptr)c.raceaddr());
+        racewritepc((uintptr)Ꮡc.raceaddr(), callerpc, abi.FuncPCABIInternal(closechan));
+        racerelease((uintptr)Ꮡc.raceaddr());
     }
     c.closed = 1;
     gList glist = default!;
@@ -430,16 +434,16 @@ internal static void closechan(ж<Δhchan> Ꮡc) {
         }
         if ((~sg).elem != nil) {
             typedmemclr(c.elemtype, (~sg).elem);
-            sg.val.elem = default!;
+            sg.Value.elem = default!;
         }
         if ((~sg).releasetime != 0) {
-            sg.val.releasetime = cputicks();
+            sg.Value.releasetime = cputicks();
         }
-        var gp = sg.val.g;
-        gp.val.param = new @unsafe.Pointer(sg);
-        sg.val.success = false;
+        var gp = sg.Value.g;
+        gp.Value.param = new @unsafe.Pointer(sg);
+        sg.Value.success = false;
         if (raceenabled) {
-            raceacquireg(gp, (uintptr)c.raceaddr());
+            raceacquireg(gp, (uintptr)Ꮡc.raceaddr());
         }
         glist.push(gp);
     }
@@ -449,23 +453,23 @@ internal static void closechan(ж<Δhchan> Ꮡc) {
         if (sg == nil) {
             break;
         }
-        sg.val.elem = default!;
+        sg.Value.elem = default!;
         if ((~sg).releasetime != 0) {
-            sg.val.releasetime = cputicks();
+            sg.Value.releasetime = cputicks();
         }
-        var gp = sg.val.g;
-        gp.val.param = new @unsafe.Pointer(sg);
-        sg.val.success = false;
+        var gp = sg.Value.g;
+        gp.Value.param = new @unsafe.Pointer(sg);
+        sg.Value.success = false;
         if (raceenabled) {
-            raceacquireg(gp, (uintptr)c.raceaddr());
+            raceacquireg(gp, (uintptr)Ꮡc.raceaddr());
         }
         glist.push(gp);
     }
-    unlock(Ꮡ(c.@lock));
+    unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
     // Ready all Gs now that we've dropped the channel lock.
     while (!glist.empty()) {
         var gp = glist.pop();
-        gp.val.schedlink = 0;
+        gp.Value.schedlink = 0;
         goready(gp, 3);
     }
 }
@@ -475,35 +479,35 @@ internal static void closechan(ж<Δhchan> Ꮡc) {
 // it returns, but since the channel is unlocked, the channel may become
 // non-empty immediately afterward.
 internal static bool empty(ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     // c.dataqsiz is immutable.
     if (c.dataqsiz == 0) {
-        return (uintptr)atomic.Loadp(((@unsafe.Pointer)(Ꮡc.sendq.of(waitq.Ꮡfirst)))) == nil;
+        return (uintptr)atomic.Loadp(@unsafe.Pointer.FromRef(ref (Ꮡc.of(runtime_package.Δhchan.Ꮡsendq).of(waitq.Ꮡfirst)).Value)) == nil;
     }
     // c.timer is also immutable (it is set after make(chan) but before any channel operations).
     // All timer channels have dataqsiz > 0.
     if (c.timer != nil) {
         c.timer.maybeRunChan();
     }
-    return atomic.Loaduint(Ꮡ(c.qcount)) == 0;
+    return atomic.Loaduint(Ꮡc.of(runtime_package.Δhchan.Ꮡqcount)) == 0;
 }
 
 // entry points for <- c from compiled code.
 //
 //go:nosplit
 internal static void chanrecv1(ж<Δhchan> Ꮡc, @unsafe.Pointer elem) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
-    chanrecv(Ꮡc, elem.val, true);
+    chanrecv(Ꮡc, elem, true);
 }
 
 //go:nosplit
 internal static bool /*received*/ chanrecv2(ж<Δhchan> Ꮡc, @unsafe.Pointer elem) {
     bool received = default!;
 
-    ref var c = ref Ꮡc.val;
-    (_, received) = chanrecv(Ꮡc, elem.val, true);
+    ref var c = ref Ꮡc.Value;
+    (_, received) = chanrecv(Ꮡc, elem, true);
     return received;
 }
 
@@ -517,13 +521,13 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
     bool selected = default!;
     bool received = default!;
 
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.DerefOrNil();
     // raceenabled: don't need to check ep, as it is always on the stack
     // or is new memory allocated by reflect.
     if (debugChan) {
         print("chanrecv: chan=", c, "\n");
     }
-    if (c == nil) {
+    if (Ꮡc == nil) {
         if (!block) {
             return (selected, received);
         }
@@ -544,7 +548,7 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
         // we use atomic loads for both checks, and rely on emptying and closing to happen in
         // separate critical sections under the same lock.  This assumption fails when closing
         // an unbuffered channel with a blocked send, but that is an error condition anyway.
-        if (atomic.Load(Ꮡ(c.closed)) == 0) {
+        if (atomic.Load(Ꮡc.of(runtime_package.Δhchan.Ꮡclosed)) == 0) {
             // Because a channel cannot be reopened, the later observation of the channel
             // being not closed implies that it was also not closed at the moment of the
             // first observation. We behave as if we observed the channel at that moment
@@ -557,10 +561,10 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
         if (empty(Ꮡc)) {
             // The channel is irreversibly closed and empty.
             if (raceenabled) {
-                raceacquire((uintptr)c.raceaddr());
+                raceacquire((uintptr)Ꮡc.raceaddr());
             }
             if (ep != nil) {
-                typedmemclr(c.elemtype, ep.val);
+                typedmemclr(c.elemtype, ep);
             }
             return (true, false);
         }
@@ -569,15 +573,15 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
     if (blockprofilerate > 0) {
         t0 = cputicks();
     }
-    @lock(Ꮡ(c.@lock));
+    @lock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
     if (c.closed != 0){
         if (c.qcount == 0) {
             if (raceenabled) {
-                raceacquire((uintptr)c.raceaddr());
+                raceacquire((uintptr)Ꮡc.raceaddr());
             }
-            unlock(Ꮡ(c.@lock));
+            unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
             if (ep != nil) {
-                typedmemclr(c.elemtype, ep.val);
+                typedmemclr(c.elemtype, ep);
             }
             return (true, false);
         }
@@ -590,8 +594,8 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
                 // directly from sender. Otherwise, receive from head of queue
                 // and add sender's value to the tail of the queue (both map to
                 // the same buffer slot because the queue is full).
-                recv(Ꮡc, sg, ep.val, () => {
-                    unlock(Ꮡ(c.@lock));
+                recv(Ꮡc, sg, ep, () => {
+                    unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
                 }, 3);
                 return (true, true);
             }
@@ -604,7 +608,7 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
             racenotify(Ꮡc, c.recvx, nil);
         }
         if (ep != nil) {
-            typedmemmove(c.elemtype, ep.val, qp);
+            typedmemmove(c.elemtype, ep, qp);
         }
         typedmemclr(c.elemtype, qp);
         c.recvx++;
@@ -612,29 +616,29 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
             c.recvx = 0;
         }
         c.qcount--;
-        unlock(Ꮡ(c.@lock));
+        unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
         return (true, true);
     }
     if (!block) {
-        unlock(Ꮡ(c.@lock));
+        unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
         return (false, false);
     }
     // no sender available: block on this channel.
     var gp = getg();
     var mysg = acquireSudog();
-    mysg.val.releasetime = 0;
+    mysg.Value.releasetime = 0;
     if (t0 != 0) {
-        mysg.val.releasetime = -1;
+        mysg.Value.releasetime = -1;
     }
     // No stack splits between assigning elem and enqueuing mysg
     // on gp.waiting where copystack can find it.
-    mysg.val.elem = ep;
-    mysg.val.waitlink = default!;
-    gp.val.waiting = mysg;
-    mysg.val.g = gp;
-    mysg.val.isSelect = false;
-    mysg.val.c = c;
-    gp.val.param = default!;
+    mysg.Value.elem = ep;
+    mysg.Value.waitlink = default!;
+    gp.Value.waiting = mysg;
+    mysg.Value.g = gp;
+    mysg.Value.isSelect = false;
+    mysg.Value.c = Ꮡc;
+    gp.Value.param = default!;
     c.recvq.enqueue(mysg);
     if (c.timer != nil) {
         blockTimerChan(Ꮡc);
@@ -643,8 +647,8 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
     // to park on a channel. The window between when this G's status
     // changes and when we set gp.activeStackChans is not safe for
     // stack shrinking.
-    (~gp).parkingOnChan.Store(true);
-    gopark(chanparkcommit, new @unsafe.Pointer(Ꮡ(c.@lock)), waitReasonChanReceive, traceBlockChanRecv, 2);
+    gp.of(g.ᏑparkingOnChan).Store(true);
+    gopark(chanparkcommit, new @unsafe.Pointer(Ꮡc.of(runtime_package.Δhchan.Ꮡlock)), waitReasonChanReceive, traceBlockChanRecv, 2);
     // someone woke us up
     if (mysg != (~gp).waiting) {
         @throw("G waiting list is corrupted"u8);
@@ -652,14 +656,14 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
     if (c.timer != nil) {
         unblockTimerChan(Ꮡc);
     }
-    gp.val.waiting = default!;
-    gp.val.activeStackChans = false;
+    gp.Value.waiting = default!;
+    gp.Value.activeStackChans = false;
     if ((~mysg).releasetime > 0) {
         blockevent((~mysg).releasetime - t0, 2);
     }
-    var success = mysg.val.success;
-    gp.val.param = default!;
-    mysg.val.c = default!;
+    var success = mysg.Value.success;
+    gp.Value.param = default!;
+    mysg.Value.c = default!;
     releaseSudog(mysg);
     return (true, success);
 }
@@ -679,8 +683,8 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
 // sg must already be dequeued from c.
 // A non-nil ep must point to the heap or the caller's stack.
 internal static void recv(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep, Action unlockf, nint skip) {
-    ref var c = ref Ꮡc.val;
-    ref var sg = ref Ꮡsg.val;
+    ref var c = ref Ꮡc.Value;
+    ref var sg = ref Ꮡsg.Value;
 
     if (c.dataqsiz == 0){
         if (raceenabled) {
@@ -688,7 +692,7 @@ internal static void recv(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep,
         }
         if (ep != nil) {
             // copy data from sender
-            recvDirect(c.elemtype, Ꮡsg, ep.val);
+            recvDirect(c.elemtype, Ꮡsg, ep);
         }
     } else {
         // Queue is full. Take the item at the
@@ -702,7 +706,7 @@ internal static void recv(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep,
         }
         // copy data from queue to receiver
         if (ep != nil) {
-            typedmemmove(c.elemtype, ep.val, qp);
+            typedmemmove(c.elemtype, ep, qp);
         }
         // copy data from sender to queue
         typedmemmove(c.elemtype, qp, sg.elem);
@@ -716,7 +720,7 @@ internal static void recv(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep,
     sg.elem = default!;
     var gp = sg.g;
     unlockf();
-    gp.val.param = new @unsafe.Pointer(Ꮡsg);
+    gp.Value.param = new @unsafe.Pointer(Ꮡsg);
     sg.success = true;
     if (sg.releasetime != 0) {
         sg.releasetime = cputicks();
@@ -725,7 +729,7 @@ internal static void recv(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg, @unsafe.Pointer ep,
 }
 
 internal static bool chanparkcommit(ж<g> Ꮡgp, @unsafe.Pointer chanLock) {
-    ref var gp = ref Ꮡgp.val;
+    ref var gp = ref Ꮡgp.Value;
 
     // There are unlocked sudogs that point into gp's stack. Stack
     // copying must lock the channels of those sudogs.
@@ -736,7 +740,7 @@ internal static bool chanparkcommit(ж<g> Ꮡgp, @unsafe.Pointer chanLock) {
     // Mark that it's safe for stack shrinking to occur now,
     // because any thread acquiring this G's stack for shrinking
     // is guaranteed to observe activeStackChans after this store.
-    gp.parkingOnChan.Store(false);
+    Ꮡgp.of(g.ᏑparkingOnChan).Store(false);
     // Make sure we unlock after setting activeStackChans and
     // unsetting parkingOnChan. The moment we unlock chanLock
     // we risk gp getting readied by a channel operation and
@@ -765,8 +769,8 @@ internal static bool chanparkcommit(ж<g> Ꮡgp, @unsafe.Pointer chanLock) {
 internal static bool /*selected*/ selectnbsend(ж<Δhchan> Ꮡc, @unsafe.Pointer elem) {
     bool selected = default!;
 
-    ref var c = ref Ꮡc.val;
-    return chansend(Ꮡc, elem.val, false, getcallerpc());
+    ref var c = ref Ꮡc.Value;
+    return chansend(Ꮡc, elem, false, getcallerpc());
 }
 
 // compiler implements
@@ -789,16 +793,16 @@ internal static (bool selected, bool received) selectnbrecv(@unsafe.Pointer elem
     bool selected = default!;
     bool received = default!;
 
-    ref var c = ref Ꮡc.val;
-    return chanrecv(Ꮡc, elem.val, false);
+    ref var c = ref Ꮡc.Value;
+    return chanrecv(Ꮡc, elem, false);
 }
 
 //go:linkname reflect_chansend reflect.chansend0
 internal static bool /*selected*/ reflect_chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer elem, bool nb) {
     bool selected = default!;
 
-    ref var c = ref Ꮡc.val;
-    return chansend(Ꮡc, elem.val, !nb, getcallerpc());
+    ref var c = ref Ꮡc.Value;
+    return chansend(Ꮡc, elem, !nb, getcallerpc());
 }
 
 //go:linkname reflect_chanrecv reflect.chanrecv
@@ -806,17 +810,17 @@ internal static (bool selected, bool received) reflect_chanrecv(ж<Δhchan> Ꮡc
     bool selected = default!;
     bool received = default!;
 
-    ref var c = ref Ꮡc.val;
-    return chanrecv(Ꮡc, elem.val, !nb);
+    ref var c = ref Ꮡc.Value;
+    return chanrecv(Ꮡc, elem, !nb);
 }
 
 internal static nint chanlen(ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.DerefOrNil();
 
-    if (c == nil) {
+    if (Ꮡc == nil) {
         return 0;
     }
-    var async = debug.asynctimerchan.Load() != 0;
+    var async = Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan).Load() != 0;
     if (c.timer != nil && async) {
         c.timer.maybeRunChan();
     }
@@ -826,70 +830,70 @@ internal static nint chanlen(ж<Δhchan> Ꮡc) {
         // undo sends without users noticing.
         return 0;
     }
-    return ((nint)c.qcount);
+    return (nint)c.qcount;
 }
 
 internal static nint chancap(ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.DerefOrNil();
 
-    if (c == nil) {
+    if (Ꮡc == nil) {
         return 0;
     }
     if (c.timer != nil) {
-        var async = debug.asynctimerchan.Load() != 0;
+        var async = Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan).Load() != 0;
         if (async) {
-            return ((nint)c.dataqsiz);
+            return (nint)c.dataqsiz;
         }
         // timer channels have a buffered implementation
         // but present to users as unbuffered, so that we can
         // undo sends without users noticing.
         return 0;
     }
-    return ((nint)c.dataqsiz);
+    return (nint)c.dataqsiz;
 }
 
 //go:linkname reflect_chanlen reflect.chanlen
 internal static nint reflect_chanlen(ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     return chanlen(Ꮡc);
 }
 
 //go:linkname reflectlite_chanlen internal/reflectlite.chanlen
 internal static nint reflectlite_chanlen(ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     return chanlen(Ꮡc);
 }
 
 //go:linkname reflect_chancap reflect.chancap
 internal static nint reflect_chancap(ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     return chancap(Ꮡc);
 }
 
 //go:linkname reflect_chanclose reflect.chanclose
 internal static void reflect_chanclose(ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     closechan(Ꮡc);
 }
 
 [GoRecv] internal static void enqueue(this ref waitq q, ж<sudog> Ꮡsgp) {
-    ref var sgp = ref Ꮡsgp.val;
+    ref var sgp = ref Ꮡsgp.Value;
 
     sgp.next = default!;
     var x = q.last;
     if (x == nil) {
         sgp.prev = default!;
-        q.first = sgp;
-        q.last = sgp;
+        q.first = Ꮡsgp;
+        q.last = Ꮡsgp;
         return;
     }
     sgp.prev = x;
-    x.val.next = sgp;
-    q.last = sgp;
+    x.Value.next = Ꮡsgp;
+    q.last = Ꮡsgp;
 }
 
 [GoRecv] internal static ж<sudog> dequeue(this ref waitq q) {
@@ -898,14 +902,14 @@ internal static void reflect_chanclose(ж<Δhchan> Ꮡc) {
         if (sgp == nil) {
             return default!;
         }
-        var y = sgp.val.next;
+        var y = sgp.Value.next;
         if (y == nil){
             q.first = default!;
             q.last = default!;
         } else {
-            y.val.prev = default!;
+            y.Value.prev = default!;
             q.first = y;
-            sgp.val.next = default!;
+            sgp.Value.next = default!;
         }
         // mark as removed (see dequeueSudoG)
         // if a goroutine was put on this queue because of a
@@ -916,25 +920,27 @@ internal static void reflect_chanclose(ж<Δhchan> Ꮡc) {
         // We use a flag in the G struct to tell us when someone
         // else has won the race to signal this goroutine but the goroutine
         // hasn't removed itself from the queue yet.
-        if ((~sgp).isSelect && !(~(~sgp).g).selectDone.CompareAndSwap(0, 1)) {
+        if ((~sgp).isSelect && !(~sgp).g.of(g.ᏑselectDone).CompareAndSwap(0, 1)) {
             continue;
         }
         return sgp;
     }
 }
 
-[GoRecv] internal static @unsafe.Pointer raceaddr(this ref Δhchan c) {
+internal static @unsafe.Pointer raceaddr(this ж<Δhchan> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     // Treat read-like and write-like operations on the channel to
     // happen at this address. Avoid using the address of qcount
     // or dataqsiz, because the len() and cap() builtins read
     // those addresses, and we don't want them racing with
     // operations like close().
-    return ((@unsafe.Pointer)(Ꮡ(c.buf)));
+    return @unsafe.Pointer.FromRef(ref (Ꮡc.of(runtime_package.Δhchan.Ꮡbuf)).Value);
 }
 
 internal static void racesync(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg) {
-    ref var c = ref Ꮡc.val;
-    ref var sg = ref Ꮡsg.val;
+    ref var c = ref Ꮡc.Value;
+    ref var sg = ref Ꮡsg.Value;
 
     racerelease((uintptr)chanbuf(Ꮡc, 0));
     raceacquireg(sg.g, (uintptr)chanbuf(Ꮡc, 0));
@@ -946,8 +952,8 @@ internal static void racesync(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg) {
 // and a channel c or its communicating partner sg.
 // This function handles the special case of c.elemsize==0.
 internal static void racenotify(ж<Δhchan> Ꮡc, nuint idx, ж<sudog> Ꮡsg) {
-    ref var c = ref Ꮡc.val;
-    ref var sg = ref Ꮡsg.val;
+    ref var c = ref Ꮡc.Value;
+    ref var sg = ref Ꮡsg.DerefOrNil();
 
     // We could have passed the unsafe.Pointer corresponding to entry idx
     // instead of idx itself.  However, in a future version of this function,
@@ -964,7 +970,7 @@ internal static void racenotify(ж<Δhchan> Ꮡc, nuint idx, ж<sudog> Ꮡsg) {
     // implemented in racereleaseacquire).  Instead, we accumulate happens-before
     // information in the synchronization object associated with c.buf.
     if (c.elemsize == 0){
-        if (sg == nil){
+        if (Ꮡsg == nil){
             raceacquire(qp);
             racerelease(qp);
         } else {
@@ -972,7 +978,7 @@ internal static void racenotify(ж<Δhchan> Ꮡc, nuint idx, ж<sudog> Ꮡsg) {
             racereleaseg(sg.g, qp);
         }
     } else {
-        if (sg == nil){
+        if (Ꮡsg == nil){
             racereleaseacquire(qp);
         } else {
             racereleaseacquireg(sg.g, qp);

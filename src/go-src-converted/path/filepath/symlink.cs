@@ -16,14 +16,14 @@ partial class filepath_package {
 
 internal static (@string, error) walkSymlinks(@string path) {
     nint volLen = filepathlite.VolumeNameLen(path);
-    @string pathSeparator = ((@string)os.PathSeparator);
+    @string pathSeparator = ((@string)(rune)os.PathSeparator);
     if (volLen < len(path) && os.IsPathSeparator(path[volLen])) {
         volLen++;
     }
     @string vol = path[..(int)(volLen)];
     @string dest = vol;
     nint linksWalked = 0;
-    for (nint start = volLen;nint end = volLen; start < len(path); start = end) {
+    for ((nint start, nint end) = (volLen, volLen); start < len(path); start = end) {
         while (start < len(path) && os.IsPathSeparator(path[start])) {
             start++;
         }
@@ -49,13 +49,13 @@ internal static (@string, error) walkSymlinks(@string path) {
             // Note that volLen includes any leading slash.
             // Set r to the index of the last slash in dest,
             // after the volume.
-            nint rΔ1 = default!;
-            for (rΔ1 = len(dest) - 1; rΔ1 >= volLen; rΔ1--) {
-                if (os.IsPathSeparator(dest[rΔ1])) {
+            nint r = default!;
+            for (r = len(dest) - 1; r >= volLen; r--) {
+                if (os.IsPathSeparator(dest[r])) {
                     break;
                 }
             }
-            if (rΔ1 < volLen || dest[(int)(rΔ1 + 1)..] == ".."){
+            if (r < volLen || dest[(int)(r + 1)..] == ".."){
                 // Either path has no slashes
                 // (it's empty or just "C:")
                 // or it ends in a ".." we had to keep.
@@ -66,7 +66,7 @@ internal static (@string, error) walkSymlinks(@string path) {
                 dest += ".."u8;
             } else {
                 // Discard everything since the last slash.
-                dest = dest[..(int)(rΔ1)];
+                dest = dest[..(int)(r)];
             }
             continue;
         }
@@ -76,7 +76,7 @@ internal static (@string, error) walkSymlinks(@string path) {
         }
         dest += path[(int)(start)..(int)(end)];
         // Resolve symlink.
-        (fi, err) = os.Lstat(dest);
+        var (fi, err) = os.Lstat(dest);
         if (err != default!) {
             return ("", err);
         }
@@ -91,7 +91,7 @@ internal static (@string, error) walkSymlinks(@string path) {
         if (linksWalked > 255) {
             return ("", errors.New("EvalSymlinks: too many links"u8));
         }
-        var (link, err) = os.Readlink(dest);
+        (var link, err) = os.Readlink(dest);
         if (err != default!) {
             return ("", err);
         }

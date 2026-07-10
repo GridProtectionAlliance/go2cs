@@ -3,8 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.vendor.golang.org.x.text.unicode;
 
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
 
 partial class norm_package {
 

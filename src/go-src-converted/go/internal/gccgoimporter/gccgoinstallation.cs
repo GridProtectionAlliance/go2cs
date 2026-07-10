@@ -4,15 +4,18 @@
 namespace go.go.@internal;
 
 using bufio = bufio_package;
-using types = go.types_package;
+using types = global::go.go.types_package;
 using os = os_package;
-using exec = os.exec_package;
+using exec = global::go.os.exec_package;
 using filepath = path.filepath_package;
 using strings = strings_package;
-using go;
-using os;
+using fs = global::go.io.fs_package;
+using global::go.go;
+using global::go.io;
+using global::go.os;
+using io = io_package;
 using path;
-using ꓸꓸꓸ@string = Span<@string>;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class gccgoimporter_package {
 
@@ -28,13 +31,13 @@ partial class gccgoimporter_package {
 
 // Ask the driver at the given path for information for this GccgoInstallation.
 // The given arguments are passed directly to the call of the driver.
-[GoRecv] public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @string gccgoPath, params ꓸꓸꓸ@string argsʗp) {
+[GoRecv] public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @string gccgoPath, params ꓸꓸꓸstring argsʗp) {
     error err = default!;
     var args = argsʗp.slice();
 
     var argv = append(new @string[]{"-###", "-S", "-x", "go", "-"}.slice(), args.ꓸꓸꓸ);
     var cmd = exec.Command(gccgoPath, argv.ꓸꓸꓸ);
-    (stderr, err) = cmd.StderrPipe();
+    (var stderr, err) = cmd.StderrPipe();
     if (err != default!) {
         return err;
     }
@@ -62,7 +65,7 @@ partial class gccgoimporter_package {
 
     }
     argv = append(new @string[]{"-dumpversion"}.slice(), args.ꓸꓸꓸ);
-    (stdout, err) = exec.Command(gccgoPath, argv.ꓸꓸꓸ).Output();
+    (var stdout, err) = exec.Command(gccgoPath, argv.ꓸꓸꓸ).Output();
     if (err != default!) {
         return err;
     }
@@ -76,7 +79,7 @@ partial class gccgoimporter_package {
 
     foreach (var (_, lpath) in inst.LibPaths) {
         @string spath = filepath.Join(lpath, "go", inst.GccVersion);
-        (fi, err) = os.Stat(spath);
+        var (fi, err) = os.Stat(spath);
         if (err != default! || !fi.IsDir()) {
             continue;
         }
@@ -94,7 +97,7 @@ partial class gccgoimporter_package {
 
 // Return an importer that searches incpaths followed by the gcc installation's
 // built-in search paths and the current directory.
-[GoRecv] public static Importer GetImporter(this ref GccgoInstallation inst, slice<@string> incpaths, types.Package>InitData initmap) {
+[GoRecv] public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> GetImporter(this ref GccgoInstallation inst, slice<@string> incpaths, map<ж<types.Package>, InitData> initmap) {
     return GetImporter(append(append(incpaths, inst.SearchPaths().ꓸꓸꓸ), "."u8), initmap);
 }
 

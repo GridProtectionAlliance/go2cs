@@ -7,10 +7,10 @@ using cmp = cmp_package;
 using bytealg = @internal.bytealg_package;
 using itoa = @internal.itoa_package;
 using slices = slices_package;
-using _ = unsafe_package; // for go:linkname
-using dnsmessage = golang.org.x.net.dns.dnsmessage_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
 using @internal;
-using golang.org.x.net.dns;
+using vendor.golang.org.x.net.dns;
 
 partial class net_package {
 
@@ -20,7 +20,7 @@ partial class net_package {
 internal static partial uint64 runtime_rand();
 
 internal static nint randInt() {
-    return ((nint)(((nuint)runtime_rand()) >> (int)(1)));
+    return (nint)(((nuint)runtime_rand() >> (int)(1)));
 }
 
 // clear sign bit
@@ -37,23 +37,23 @@ internal static (@string arpa, error err) reverseaddr(@string addr) {
 
     var ip = ParseIP(addr);
     if (ip == default!) {
-        return ("", new DNSError(Err: "unrecognized address"u8, Name: addr));
+        return ("", new DNSErrorжerror(Ꮡ(new DNSError(Err: "unrecognized address"u8, Name: addr))));
     }
     if (ip.To4() != default!) {
-        return (itoa.Uitoa(((nuint)ip[15])) + "."u8 + itoa.Uitoa(((nuint)ip[14])) + "."u8 + itoa.Uitoa(((nuint)ip[13])) + "."u8 + itoa.Uitoa(((nuint)ip[12])) + ".in-addr.arpa."u8, default!);
+        return (itoa.Uitoa((nuint)ip[15]) + "." + itoa.Uitoa((nuint)ip[14]) + "." + itoa.Uitoa((nuint)ip[13]) + "." + itoa.Uitoa((nuint)ip[12]) + ".in-addr.arpa.", default!);
     }
     // Must be IPv6
     var buf = new slice<byte>(0, len(ip) * 4 + len("ip6.arpa."));
     // Add it, in reverse, to the buffer
     for (nint i = len(ip) - 1; i >= 0; i--) {
         var v = ip[i];
-        buf = append(buf, hexDigit[(byte)(v & 15)],
-            (rune)'.',
-            hexDigit[v >> (int)(4)],
-            (rune)'.');
+        buf = append(buf, hexDigit[(byte)(v & 0xF)],
+            (byte)((rune)'.'),
+            hexDigit[(v >> (int)(4))],
+            (byte)((rune)'.'));
     }
     // Append "ip6.arpa." and return (buf already has the final .)
-    buf = append(buf, "ip6.arpa."u8.ꓸꓸꓸ);
+    buf = append(buf, ((@string)"ip6.arpa."u8).ꓸꓸꓸ);
     return (((@string)buf), default!);
 }
 
@@ -61,14 +61,14 @@ internal static bool equalASCIIName(dnsmessage.Name x, dnsmessage.Name y) {
     if (x.Length != y.Length) {
         return false;
     }
-    for (nint i = 0; i < ((nint)x.Length); i++) {
+    for (nint i = 0; i < (nint)x.Length; i++) {
         var a = x.Data[i];
         var b = y.Data[i];
         if ((rune)'A' <= a && a <= (rune)'Z') {
-            a += 32;
+            a += 0x20;
         }
         if ((rune)'A' <= b && b <= (rune)'Z') {
-            b += 32;
+            b += 0x20;
         }
         if (a != b) {
             return false;
@@ -107,7 +107,7 @@ internal static bool isDomainName(@string s) {
     if (l == 0 || l > 254 || l == 254 && s[l - 1] != (rune)'.') {
         return false;
     }
-    var last = ((byte)(rune)'.');
+    var last = (byte)(rune)'.';
     var nonNumeric = false;
     // true once we've seen a letter or hyphen
     nint partlen = 0;
@@ -179,20 +179,20 @@ internal static @string absDomainName(@string s) {
     public uint16 Weight;
 }
 
-[GoType("[]SRV")] partial struct byPriorityWeight;
+[GoType("[]ж<SRV>")] partial struct byPriorityWeight;
 
 // shuffleByWeight shuffles SRV records by weight using the algorithm
 // described in RFC 2782.
 internal static void shuffleByWeight(this byPriorityWeight addrs) {
     nint sum = 0;
     foreach (var (_, addr) in addrs) {
-        sum += ((nint)(~addr).Weight);
+        sum += (nint)(~addr).Weight;
     }
     while (sum > 0 && len(addrs) > 1) {
         nint s = 0;
         nint n = randIntn(sum);
         foreach (var (i, _) in addrs) {
-            s += ((nint)addrs[i].Weight);
+            s += (nint)(~addrs[i]).Weight;
             if (s > n) {
                 if (i > 0) {
                     (addrs[0], addrs[i]) = (addrs[i], addrs[0]);
@@ -200,7 +200,7 @@ internal static void shuffleByWeight(this byPriorityWeight addrs) {
                 break;
             }
         }
-        sum -= ((nint)addrs[0].Weight);
+        sum -= (nint)(~addrs[0]).Weight;
         addrs = addrs[1..];
     }
 }
@@ -217,7 +217,7 @@ internal static void sort(this byPriorityWeight addrs) {
     });
     nint i = 0;
     for (nint j = 1; j < len(addrs); j++) {
-        if (addrs[i].Priority != addrs[j].Priority) {
+        if ((~addrs[i]).Priority != (~addrs[j]).Priority) {
             addrs[(int)(i)..(int)(j)].shuffleByWeight();
             i = j;
         }
@@ -231,7 +231,7 @@ internal static void sort(this byPriorityWeight addrs) {
     public uint16 Pref;
 }
 
-[GoType("[]MX")] partial struct byPref;
+[GoType("[]ж<MX>")] partial struct byPref;
 
 // sort reorders MX records as specified in RFC 5321.
 internal static void sort(this byPref s) {

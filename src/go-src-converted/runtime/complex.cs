@@ -8,9 +8,9 @@ partial class runtime_package {
 // inf2one returns a signed 1 if f is an infinity and a signed 0 otherwise.
 // The sign of the result is the sign of f.
 internal static float64 inf2one(float64 f) {
-    var g = 0.0F;
+    var g = 0.0D;
     if (isInf(f)) {
-        g = 1.0F;
+        g = 1.0D;
     }
     return copysign(g, f);
 }

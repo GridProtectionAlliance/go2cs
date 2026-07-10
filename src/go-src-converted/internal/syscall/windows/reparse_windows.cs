@@ -10,13 +10,13 @@ partial class windows_package {
 
 // Reparse tag values are taken from
 // https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fscc/c8e77b37-3909-4fe6-a4ea-2b9d423b1ee4
-public static readonly UntypedInt FSCTL_SET_REPARSE_POINT = /* 0x000900A4 */ 589988;
+public static readonly UntypedInt FSCTL_SET_REPARSE_POINT = 0x000900A4;
 
-public static readonly UntypedInt IO_REPARSE_TAG_MOUNT_POINT = /* 0xA0000003 */ 2684354563;
+public static readonly UntypedInt IO_REPARSE_TAG_MOUNT_POINT = 0xA0000003;
 
-public static readonly UntypedInt IO_REPARSE_TAG_DEDUP = /* 0x80000013 */ 2147483667;
+public static readonly UntypedInt IO_REPARSE_TAG_DEDUP = 0x80000013;
 
-public static readonly UntypedInt IO_REPARSE_TAG_AF_UNIX = /* 0x80000023 */ 2147483683;
+public static readonly UntypedInt IO_REPARSE_TAG_AF_UNIX = 0x80000023;
 
 public static readonly UntypedInt SYMLINK_FLAG_RELATIVE = 1;
 
@@ -63,9 +63,9 @@ public static readonly UntypedInt SYMLINK_FLAG_RELATIVE = 1;
 
 // Path returns path stored in rb.
 [GoRecv] public static unsafe @string Path(this ref SymbolicLinkReparseBuffer rb) {
-    var n1 = rb.SubstituteNameOffset / 2;
-    var n2 = (rb.SubstituteNameOffset + rb.SubstituteNameLength) / 2;
-    return syscall.UTF16ToString(new Span<uint16>((uint16*)(uintptr)(new @unsafe.Pointer(Ꮡ(rb.PathBuffer[0]))), n2));
+    var n1 = (uint16)(rb.SubstituteNameOffset / 2);
+    var n2 = (uint16)((rb.SubstituteNameOffset + rb.SubstituteNameLength) / 2);
+    return syscall.UTF16ToString(new slice<uint16>(new ReadOnlySpan<uint16>((uint16*)(uintptr)(new @unsafe.Pointer(Ꮡ(rb.PathBuffer[0]))), (int)(n2))));
 }
 
 [GoType] partial struct MountPointReparseBuffer {
@@ -87,9 +87,9 @@ public static readonly UntypedInt SYMLINK_FLAG_RELATIVE = 1;
 
 // Path returns path stored in rb.
 [GoRecv] public static unsafe @string Path(this ref MountPointReparseBuffer rb) {
-    var n1 = rb.SubstituteNameOffset / 2;
-    var n2 = (rb.SubstituteNameOffset + rb.SubstituteNameLength) / 2;
-    return syscall.UTF16ToString(new Span<uint16>((uint16*)(uintptr)(new @unsafe.Pointer(Ꮡ(rb.PathBuffer[0]))), n2));
+    var n1 = (uint16)(rb.SubstituteNameOffset / 2);
+    var n2 = (uint16)((rb.SubstituteNameOffset + rb.SubstituteNameLength) / 2);
+    return syscall.UTF16ToString(new slice<uint16>(new ReadOnlySpan<uint16>((uint16*)(uintptr)(new @unsafe.Pointer(Ꮡ(rb.PathBuffer[0]))), (int)(n2))));
 }
 
 } // end windows_package

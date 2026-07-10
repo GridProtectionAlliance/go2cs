@@ -30,9 +30,9 @@ partial class norm_package {
 // there is an additional leading ccc. The value of tccc itself is the
 // trailing CCC shifted left 2 bits. The two least-significant bits of tccc
 // are the number of trailing non-starters.
-internal static readonly UntypedInt qcInfoMask = /* 0x3F */ 63; // to clear all but the relevant bits in a qcInfo
-internal static readonly UntypedInt headerLenMask = /* 0x3F */ 63; // extract the length value from the header byte
-internal static readonly UntypedInt headerFlagsMask = /* 0xC0 */ 192; // extract the qcInfo bits from the header byte
+internal static readonly UntypedInt qcInfoMask = 0x3F; // to clear all but the relevant bits in a qcInfo
+internal static readonly UntypedInt headerLenMask = 0x3F; // extract the length value from the header byte
+internal static readonly UntypedInt headerFlagsMask = 0xC0; // extract the qcInfo bits from the header byte
 
 // Properties provides access to normalization properties of a rune.
 [GoType] partial struct ΔProperties {
@@ -45,42 +45,37 @@ internal static readonly UntypedInt headerFlagsMask = /* 0xC0 */ 192; // extract
     internal uint16 index;
 }
 
-internal delegate ΔProperties lookupFunc(input b, nint i);
+// type lookupFunc is a methodless func type — rendered inline as its base delegate
 
 // formInfo holds Form-specific functions and tables.
 [GoType] partial struct formInfo {
     internal Form form;
-    internal bool composing; // form type
-    internal bool compatibility;
-    internal lookupFunc info;
-    internal iterFunc nextMain;
+    internal bool composing, compatibility; // form type
+    internal Func<input, nint, ΔProperties> info;
+    internal Func<ж<Iter>, slice<byte>> nextMain;
 }
 
-internal static slice<ж<formInfo>> formTable = new ж<formInfo>[]{new(
+internal static slice<ж<formInfo>> formTable = new ж<formInfo>[]{Ꮡ(new formInfo(
     form: NFC,
     composing: true,
     compatibility: false,
     info: lookupInfoNFC,
-    nextMain: nextComposed
-), new(
+    nextMain: nextComposed)), Ꮡ(new formInfo(
     form: NFD,
     composing: false,
     compatibility: false,
     info: lookupInfoNFC,
-    nextMain: nextDecomposed
-), new(
+    nextMain: nextDecomposed)), Ꮡ(new formInfo(
     form: NFKC,
     composing: true,
     compatibility: true,
     info: lookupInfoNFKC,
-    nextMain: nextComposed
-), new(
+    nextMain: nextComposed)), Ꮡ(new formInfo(
     form: NFKD,
     composing: false,
     compatibility: true,
     info: lookupInfoNFKC,
-    nextMain: nextDecomposed
-)
+    nextMain: nextDecomposed))
 }.slice();
 
 // We do not distinguish between boundaries for NFC, NFD, etc. to avoid
@@ -111,29 +106,29 @@ public static bool BoundaryAfter(this ΔProperties p) {
 [GoType("num:uint8")] partial struct qcInfo;
 
 internal static bool isYesC(this ΔProperties p) {
-    return (qcInfo)(p.flags & 16) == 0;
+    return (qcInfo)(p.flags & 0x10) == 0;
 }
 
 internal static bool isYesD(this ΔProperties p) {
-    return (qcInfo)(p.flags & 4) == 0;
+    return (qcInfo)(p.flags & 0x4) == 0;
 }
 
 internal static bool combinesForward(this ΔProperties p) {
-    return (qcInfo)(p.flags & 32) != 0;
+    return (qcInfo)(p.flags & 0x20) != 0;
 }
 
 internal static bool combinesBackward(this ΔProperties p) {
-    return (qcInfo)(p.flags & 8) != 0;
+    return (qcInfo)(p.flags & 0x8) != 0;
 }
 
 // == isMaybe
 internal static bool hasDecomposition(this ΔProperties p) {
-    return (qcInfo)(p.flags & 4) != 0;
+    return (qcInfo)(p.flags & 0x4) != 0;
 }
 
 // == isNoD
 internal static bool isInert(this ΔProperties p) {
-    return (qcInfo)(p.flags & qcInfoMask) == 0 && p.ccc == 0;
+    return (qcInfo)(p.flags & (uint8)qcInfoMask) == 0 && p.ccc == 0;
 }
 
 internal static bool multiSegment(this ΔProperties p) {
@@ -145,7 +140,7 @@ internal static uint8 nLeadingNonStarters(this ΔProperties p) {
 }
 
 internal static uint8 nTrailingNonStarters(this ΔProperties p) {
-    return ((uint8)((qcInfo)(p.flags & 3)));
+    return (uint8)((qcInfo)(p.flags & 0x03));
 }
 
 // Decomposition returns the decomposition for the underlying rune
@@ -156,14 +151,14 @@ public static slice<byte> Decomposition(this ΔProperties p) {
         return default!;
     }
     var i = p.index;
-    var n = (byte)(decomps[i] & headerLenMask);
+    var n = (byte)(decomps[i] & (byte)headerLenMask);
     i++;
-    return decomps[(int)(i)..(int)(i + ((uint16)n))];
+    return decomps[(int)(i)..(int)(i + (uint16)n)];
 }
 
 // Size returns the length of UTF-8 encoding of the rune.
 public static nint Size(this ΔProperties p) {
-    return ((nint)p.size);
+    return (nint)p.size;
 }
 
 // CCC returns the canonical combining class of the underlying rune.
@@ -193,7 +188,7 @@ internal static void buildRecompMap() {
         copy(buf[..], recompMapPacked[(int)(i)..(int)(i + 8)]);
         var key = binary.BigEndian.Uint32(buf[..4]);
         var val = binary.BigEndian.Uint32(buf[4..]);
-        recompMap[key] = ((rune)val);
+        recompMap[key] = (rune)val;
     }
 }
 
@@ -209,7 +204,7 @@ internal static void buildRecompMap() {
 // The caller is responsible for calling
 // recompMapOnce.Do(buildRecompMap) sometime before this is called.
 internal static rune combine(rune a, rune b) {
-    var key = ((uint32)((uint16)a)) << (int)(16) + ((uint32)((uint16)b));
+    var key = ((uint32)(uint16)a << (int)(16)) + (uint32)(uint16)b;
     if (recompMap == default!) {
         throw panic("caller error");
     }
@@ -230,17 +225,21 @@ internal static ΔProperties lookupInfoNFKC(input b, nint i) {
 // Properties returns properties for the first rune in s.
 public static ΔProperties Properties(this Form f, slice<byte> s) {
     if (f == NFC || f == NFD) {
-        return compInfo(nfcData.lookup(s));
+        var (ᴛ1, ᴛ2) = nfcData.lookup(s);
+        return compInfo(ᴛ1, ᴛ2);
     }
-    return compInfo(nfkcData.lookup(s));
+    var (ᴛ3, ᴛ4) = nfkcData.lookup(s);
+    return compInfo(ᴛ3, ᴛ4);
 }
 
 // PropertiesString returns properties for the first rune in s.
 public static ΔProperties PropertiesString(this Form f, @string s) {
     if (f == NFC || f == NFD) {
-        return compInfo(nfcData.lookupString(s));
+        var (ᴛ5, ᴛ6) = nfcData.lookupString(s);
+        return compInfo(ᴛ5, ᴛ6);
     }
-    return compInfo(nfkcData.lookupString(s));
+    var (ᴛ7, ᴛ8) = nfkcData.lookupString(s);
+    return compInfo(ᴛ7, ᴛ8);
 }
 
 // compInfo converts the information contained in v and sz
@@ -248,34 +247,34 @@ public static ΔProperties PropertiesString(this Form f, @string s) {
 // for more information on the format.
 internal static ΔProperties compInfo(uint16 v, nint sz) {
     if (v == 0){
-        return new ΔProperties(size: ((uint8)sz));
+        return new ΔProperties(size: (uint8)sz);
     } else 
-    if (v >= 32768) {
+    if (v >= 0x8000) {
         var pΔ1 = new ΔProperties(
-            size: ((uint8)sz),
-            ccc: ((uint8)v),
-            tccc: ((uint8)v),
-            flags: ((qcInfo)(v >> (int)(8)))
+            size: (uint8)sz,
+            ccc: (uint8)v,
+            tccc: (uint8)v,
+            flags: ((qcInfo)(uint8)((v >> (int)(8))))
         );
         if (pΔ1.ccc > 0 || pΔ1.combinesBackward()) {
-            .nLead = ((uint8)((qcInfo)(pΔ1.flags & 3)));
+            pΔ1.nLead = (uint8)((qcInfo)(pΔ1.flags & 0x3));
         }
         return pΔ1;
     }
     // has decomposition
     var h = decomps[v];
-    var f = (qcInfo)((((qcInfo)((byte)(h & headerFlagsMask))) >> (int)(2)) | 4);
-    var p = new ΔProperties(size: ((uint8)sz), flags: f, index: v);
+    var f = (qcInfo)(((((qcInfo)((byte)(h & (byte)headerFlagsMask))) >> (int)(2))) | 0x4);
+    var p = new ΔProperties(size: (uint8)sz, flags: f, index: v);
     if (v >= firstCCC) {
-        v += ((uint16)((byte)(h & headerLenMask))) + 1;
+        v += (uint16)((uint16)((byte)(h & (byte)headerLenMask)) + 1);
         var c = decomps[v];
-        p.tccc = c >> (int)(2);
-        p.flags |= (qcInfo)(((qcInfo)((byte)(c & 3))));
+        p.tccc = (uint8)((c >> (int)(2)));
+        p.flags |= ((qcInfo)((byte)(c & 0x3)));
         if (v >= firstLeadingCCC) {
-            p.nLead = (byte)(c & 3);
+            p.nLead = (uint8)((byte)(c & 0x3));
             if (v >= firstStarterWithNLead) {
                 // We were tricked. Remove the decomposition.
-                p.flags &= (qcInfo)(3);
+                p.flags &= 0x03;
                 p.index = 0;
                 return p;
             }

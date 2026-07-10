@@ -6,9 +6,9 @@ global using PathError = go.io.fs_package.PathError;
 namespace go;
 
 using poll = @internal.poll_package;
-using fs = io.fs_package;
+using fs = go.io.fs_package;
 using @internal;
-using io;
+using go.io;
 
 partial class os_package {
 
@@ -76,7 +76,7 @@ public static error NewSyscallError(@string syscall, error err) {
     if (err == default!) {
         return default!;
     }
-    return new SyscallError(syscall, err);
+    return new SyscallErrorжerror(Ꮡ(new SyscallError(syscall, err)));
 }
 
 // IsExist returns a boolean indicating whether its argument is known to report
@@ -138,14 +138,14 @@ internal static bool underlyingErrorIs(error err, error target) {
 // underlyingError returns the underlying error for known os error types.
 internal static error underlyingError(error err) {
     switch (err.type()) {
-    case PathError.val err: {
-        return (~err).Err;
+    case ж<PathError> errΔ1: {
+        return (~errΔ1).Err;
     }
-    case LinkError.val err: {
-        return (~err).Err;
+    case ж<LinkError> errΔ1: {
+        return (~errΔ1).Err;
     }
-    case SyscallError.val err: {
-        return (~err).Err;
+    case ж<SyscallError> errΔ1: {
+        return (~errΔ1).Err;
     }}
     return err;
 }

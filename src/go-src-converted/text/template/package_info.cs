@@ -22,6 +22,8 @@ global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 global using runtimeꓸError = go.runtime_package.ΔError;
 global using urlꓸError = go.net.url_package.ΔError;
+using parse = go.text.template.parse_package;
+using reflect = go.reflect_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -50,19 +52,19 @@ using static go.text.template_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(error, bool), error>]
-[assembly: GoImplement<strings_package.Builder, io_package.Writer>]
-[assembly: GoImplement<text.template.parse_package.ActionNode, text.template.parse_package.Node>]
-[assembly: GoImplement<text.template.parse_package.ChainNode, text.template.parse_package.Node>]
-[assembly: GoImplement<text.template.parse_package.CommandNode, text.template.parse_package.Node>]
-[assembly: GoImplement<text.template.parse_package.FieldNode, text.template.parse_package.Node>]
-[assembly: GoImplement<text.template.parse_package.IdentifierNode, text.template.parse_package.Node>]
-[assembly: GoImplement<text.template.parse_package.ListNode, text.template.parse_package.Node>]
-[assembly: GoImplement<text.template.parse_package.NumberNode, text.template.parse_package.Node>]
-[assembly: GoImplement<text.template.parse_package.PipeNode, text.template.parse_package.Node>]
-[assembly: GoImplement<text.template.parse_package.RangeNode, text.template.parse_package.Node>]
-[assembly: GoImplement<text.template.parse_package.TemplateNode, text.template.parse_package.Node>]
-[assembly: GoImplement<text.template.parse_package.VariableNode, text.template.parse_package.Node>]
+[assembly: GoImplement<ExecError, error>]
+[assembly: GoImplement<go.text.template.parse_package.ActionNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<go.text.template.parse_package.ChainNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<go.text.template.parse_package.CommandNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<go.text.template.parse_package.FieldNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<go.text.template.parse_package.IdentifierNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<go.text.template.parse_package.ListNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<go.text.template.parse_package.NumberNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<go.text.template.parse_package.PipeNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<go.text.template.parse_package.RangeNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<go.text.template.parse_package.TemplateNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<go.text.template.parse_package.VariableNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

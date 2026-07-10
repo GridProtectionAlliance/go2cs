@@ -9,15 +9,16 @@
 namespace go.crypto;
 
 using bytes = bytes_package;
-using alias = crypto.@internal.alias_package;
-using subtle = crypto.subtle_package;
-using crypto.@internal;
+using alias = go.crypto.@internal.alias_package;
+using subtle = go.crypto.subtle_package;
+using go.crypto;
+using go.crypto.@internal;
 
 partial class cipher_package {
 
 [GoType] partial struct ctr {
     internal Block b;
-    internal slice<byte> ctr;
+    internal slice<byte> Δctr;
     internal slice<byte> @out;
     internal nint outUsed;
 }
@@ -46,12 +47,12 @@ public static Stream NewCTR(Block block, slice<byte> iv) {
     if (bufSize < block.BlockSize()) {
         bufSize = block.BlockSize();
     }
-    return new ctr(
+    return new ctrжStream(Ꮡ(new ctr(
         b: block,
-        ctr: bytes.Clone(iv),
+        Δctr: bytes.Clone(iv),
         @out: new slice<byte>(0, bufSize),
         outUsed: 0
-    );
+    )));
 }
 
 [GoRecv] internal static void refill(this ref ctr x) {
@@ -60,12 +61,12 @@ public static Stream NewCTR(Block block, slice<byte> iv) {
     x.@out = x.@out[..(int)(cap(x.@out))];
     nint bs = x.b.BlockSize();
     while (remain <= len(x.@out) - bs) {
-        x.b.Encrypt(x.@out[(int)(remain)..], x.ctr);
+        x.b.Encrypt(x.@out[(int)(remain)..], x.Δctr);
         remain += bs;
         // Increment counter
-        for (nint i = len(x.ctr) - 1; i >= 0; i--) {
-            x.ctr[i]++;
-            if (x.ctr[i] != 0) {
+        for (nint i = len(x.Δctr) - 1; i >= 0; i--) {
+            x.Δctr[i]++;
+            if (x.Δctr[i] != 0) {
                 break;
             }
         }

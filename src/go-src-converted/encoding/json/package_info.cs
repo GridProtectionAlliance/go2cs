@@ -33,6 +33,7 @@ using static go.encoding.json_package;
 
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("Token", "ΔToken")]
+[assembly: GoTypeAlias("ΔToken", "object")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -44,20 +45,15 @@ using static go.encoding.json_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(Marshaler, bool), Marshaler>]
-[assembly: GoImplement<(Unmarshaler, bool), Unmarshaler>]
-[assembly: GoImplement<(Unmarshaler, encoding.TextUnmarshaler, reflect.Value), Unmarshaler>]
-[assembly: GoImplement<(encoding.TextMarshaler, bool), encoding_package.TextMarshaler>]
-[assembly: GoImplement<(encoding.TextUnmarshaler, bool), encoding_package.TextUnmarshaler>]
-[assembly: GoImplement<InvalidUnmarshalError, error>]
-[assembly: GoImplement<MarshalerError, error>]
-[assembly: GoImplement<RawMessage, Marshaler>]
-[assembly: GoImplement<RawMessage, Unmarshaler>]
-[assembly: GoImplement<SyntaxError, error>]
-[assembly: GoImplement<UnmarshalTypeError, error>]
-[assembly: GoImplement<UnsupportedTypeError, error>]
-[assembly: GoImplement<UnsupportedValueError, error>]
-[assembly: GoImplement<bytes_package.Reader, io_package.Reader>]
+[assembly: GoImplement<InvalidUnmarshalError, error>(Pointer = true)]
+[assembly: GoImplement<MarshalerError, error>(Pointer = true)]
+[assembly: GoImplement<RawMessage, Marshaler>(Pointer = true)]
+[assembly: GoImplement<RawMessage, Unmarshaler>(Pointer = true)]
+[assembly: GoImplement<SyntaxError, error>(Pointer = true)]
+[assembly: GoImplement<UnmarshalTypeError, error>(Pointer = true)]
+[assembly: GoImplement<UnsupportedTypeError, error>(Pointer = true)]
+[assembly: GoImplement<UnsupportedValueError, error>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<jsonError, error>(Promoted = true)]
 // </InterfaceImplementations>
 

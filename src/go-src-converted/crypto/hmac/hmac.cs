@@ -21,10 +21,11 @@ timing side-channels:
 */
 namespace go.crypto;
 
-using boring = crypto.@internal.boring_package;
-using subtle = crypto.subtle_package;
+using boring = go.crypto.@internal.boring_package;
+using subtle = go.crypto.subtle_package;
 using hash = hash_package;
-using crypto.@internal;
+using go.crypto;
+using go.crypto.@internal;
 
 partial class hmac_package {
 
@@ -44,10 +45,8 @@ partial class hmac_package {
 }
 
 [GoType] partial struct hmac {
-    internal slice<byte> opad;
-    internal slice<byte> ipad;
-    internal hash_package.Hash outer;
-    internal hash_package.Hash inner;
+    internal slice<byte> opad, ipad;
+    internal hash.Hash outer, inner;
     // If marshaled is true, then opad and ipad do not contain a padded
     // copy of the key, but rather the marshaled state of outer/inner after
     // opad/ipad has been fed into it.
@@ -111,13 +110,13 @@ partial class hmac_package {
     if (!outerOK) {
         return;
     }
-    (imarshal, err) = marshalableInner.MarshalBinary();
+    var (imarshal, err) = marshalableInner.MarshalBinary();
     if (err != default!) {
         return;
     }
     h.outer.Reset();
     h.outer.Write(h.opad);
-    (omarshal, err) = marshalableOuter.MarshalBinary();
+    (var omarshal, err) = marshalableOuter.MarshalBinary();
     if (err != default!) {
         return;
     }
@@ -133,7 +132,7 @@ partial class hmac_package {
 // Note that unlike other hash implementations in the standard library,
 // the returned Hash does not implement [encoding.BinaryMarshaler]
 // or [encoding.BinaryUnmarshaler].
-public static hash.Hash New(Func<hash.Hash> h, slice<byte> key) => func((defer, recover) => {
+public static hash.Hash New(Func<hash.Hash> h, slice<byte> key) {
     if (boring.Enabled) {
         var hmΔ1 = boring.NewHMAC(h, key);
         if (hmΔ1 != default!) {
@@ -142,26 +141,25 @@ public static hash.Hash New(Func<hash.Hash> h, slice<byte> key) => func((defer, 
     }
     // BoringCrypto did not recognize h, so fall through to standard Go code.
     var hm = @new<hmac>();
-    hm.val.outer = h();
-    hm.val.inner = h();
+    hm.Value.outer = h();
+    hm.Value.inner = h();
     var unique = true;
-    
     var hmʗ1 = hm;
-    () => {
+    ((Action)(() => func((defer, recover) => {
         defer(() => {
             // The comparison might panic if the underlying types are not comparable.
             _ = recover();
         });
-        if (AreEqual((~hm).outer, (~hm).inner)) {
+        if (AreEqual((~hmʗ1).outer, (~hmʗ1).inner)) {
             unique = false;
         }
-    }();
+    })))();
     if (!unique) {
         throw panic("crypto/hmac: hash generation function does not produce unique values");
     }
     nint blocksize = (~hm).inner.BlockSize();
-    hm.val.ipad = new slice<byte>(blocksize);
-    hm.val.opad = new slice<byte>(blocksize);
+    hm.Value.ipad = new slice<byte>(blocksize);
+    hm.Value.opad = new slice<byte>(blocksize);
     if (len(key) > blocksize) {
         // If key is too big, hash it.
         (~hm).outer.Write(key);
@@ -170,14 +168,14 @@ public static hash.Hash New(Func<hash.Hash> h, slice<byte> key) => func((defer, 
     copy((~hm).ipad, key);
     copy((~hm).opad, key);
     foreach (var (i, _) in (~hm).ipad) {
-        (~hm).ipad[i] ^= (byte)(54);
+        hm.Value.ipad[i] ^= (byte)(0x36);
     }
     foreach (var (i, _) in (~hm).opad) {
-        (~hm).opad[i] ^= (byte)(92);
+        hm.Value.opad[i] ^= (byte)(0x5c);
     }
     (~hm).inner.Write((~hm).ipad);
-    return ~hm;
-});
+    return new hmacжHash(hm);
+}
 
 // Equal compares two MACs for equality without leaking timing information.
 public static bool Equal(slice<byte> mac1, slice<byte> mac2) {

@@ -10,6 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using jsonꓸToken = object;
+global using jsonꓸΔToken = object;
 global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
 global using reflectꓸKind = go.reflect_package.ΔKind;
 global using reflectꓸMethod = go.reflect_package.ΔMethod;
@@ -51,17 +53,17 @@ using static go.log.slog_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<defaultHandler, ΔHandler>]
-[assembly: GoImplement<handlerWriter, io_package.Writer>]
-[assembly: GoImplement<strings_package.Builder, io_package.Writer>]
+[assembly: GoImplement<JSONHandler, ΔHandler>(Pointer = true)]
+[assembly: GoImplement<LevelVar, Leveler>(Pointer = true)]
+[assembly: GoImplement<TextHandler, ΔHandler>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<defaultHandler, ΔHandler>(Pointer = true)]
+[assembly: GoImplement<handlerWriter, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<ΔLevel, Leveler>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<kind, ΔKind>(Inverted = true, ValueType = "kind")]
-[assembly: GoImplicitConv<slog.Attr}, slog.Attr}>(Inverted = true)]
-[assembly: GoImplicitConv<time.Time, timeTime>]
-[assembly: GoImplicitConv<timeTime, time.Time>]
-[assembly: GoImplicitConv<ΔKind, kind>(Inverted = true, ValueType = "ΔKind")]
 // </ImplicitConversions>
 
 namespace go.log;

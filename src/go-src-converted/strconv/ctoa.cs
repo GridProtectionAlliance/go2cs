@@ -16,7 +16,7 @@ public static @string FormatComplex(complex128 c, byte fmt, nint prec, nint bitS
     if (bitSize != 64 && bitSize != 128) {
         throw panic("invalid bitSize");
     }
-    bitSize >>= (UntypedInt)(1);
+    bitSize >>= (int)(1);
     // complex64 uses float32 internally
     // Check if imaginary part has a sign. If not, add one.
     @string im = FormatFloat(imag(c), fmt, prec, bitSize);

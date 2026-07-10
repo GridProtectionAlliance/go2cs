@@ -13,16 +13,16 @@ partial class runtime_package {
 // used to load limits from a table of constants and the rest are used
 // to scale linearly between them.
 internal static float64 fastlog2(float64 x) {
-    static readonly UntypedInt fastlogScaleBits = 20;
-    static readonly UntypedFloat fastlogScaleRatio = /* 1.0 / (1 << fastlogScaleBits) */ 9.53674e-07;
+    UntypedInt fastlogScaleBits = 20;
+    UntypedFloat fastlogScaleRatio = /* 1.0 / (1 << fastlogScaleBits) */ 9.53674e-07;
     var xBits = float64bits(x);
     // Extract the exponent from the IEEE float64, and index a constant
     // table with the first 10 bits from the mantissa.
-    var xExp = ((int64)((uint64)((xBits >> (int)(52)) & 2047))) - 1023;
-    var xManIndex = (xBits >> (int)((52 - fastlogNumBits))) % (1 << (int)(fastlogNumBits));
-    var xManScale = (xBits >> (int)((52 - fastlogNumBits - fastlogScaleBits))) % (1 << (int)(fastlogScaleBits));
-    var (low, high) = (fastlog2Table[xManIndex], fastlog2Table[xManIndex + 1]);
-    return ((float64)xExp) + low + (high - low) * ((float64)xManScale) * fastlogScaleRatio;
+    var xExp = (int64)((uint64)(((xBits >> (int)(52))) & 0x7FF)) - 1023;
+    var xManIndex = ((xBits >> (int)((52 - fastlogNumBits)))) % (uint64)(((uint64)1 << (int)(fastlogNumBits)));
+    var xManScale = ((xBits >> (int)((52 - fastlogNumBits - fastlogScaleBits)))) % (uint64)(((uint64)1 << (int)(fastlogScaleBits)));
+    var (low, high) = (fastlog2Table[(nint)(xManIndex)], fastlog2Table[(nint)(xManIndex + 1)]);
+    return (float64)xExp + low + (high - low) * (float64)xManScale * (float64)fastlogScaleRatio;
 }
 
 } // end runtime_package

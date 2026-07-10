@@ -8,11 +8,12 @@
 namespace go.encoding;
 
 using bytes = bytes_package;
-using base64 = encoding.base64_package;
+using base64 = go.encoding.base64_package;
 using errors = errors_package;
 using io = io_package;
 using slices = slices_package;
 using strings = strings_package;
+using go.encoding;
 
 partial class pem_package {
 
@@ -78,13 +79,13 @@ internal static slice<byte> removeSpacesAndTabs(slice<byte> data) {
     return result[0..(int)(n)];
 }
 
-internal static slice<byte> pemStart = slice<byte>("\n-----BEGIN ");
+internal static slice<byte> pemStart = slice<byte>((@string)"\n-----BEGIN ");
 
-internal static slice<byte> pemEnd = slice<byte>("\n-----END ");
+internal static slice<byte> pemEnd = slice<byte>((@string)"\n-----END ");
 
-internal static slice<byte> pemEndOfLine = slice<byte>("-----");
+internal static slice<byte> pemEndOfLine = slice<byte>((@string)"-----");
 
-internal static slice<byte> colon = slice<byte>(":");
+internal static slice<byte> colon = slice<byte>((@string)":");
 
 // Decode will find the next PEM formatted block (certificate, private key
 // etc) in the input. It returns that block and the remainder of the input. If
@@ -124,7 +125,7 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
             if (len(rest) == 0) {
                 return (default!, data);
             }
-            (line, next) = getLine(rest);
+            var (line, next) = getLine(rest);
             var (key, val, ok) = bytes.Cut(line, colon);
             if (!ok) {
                 break;
@@ -132,7 +133,7 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
             // TODO(agl): need to cope with values that spread across lines.
             key = bytes.TrimSpace(key);
             val = bytes.TrimSpace(val);
-            (~p).Headers[((@string)key)] = ((@string)val);
+            p.Value.Headers[((@string)key)] = ((@string)val);
             rest = next;
         }
         nint endIndex = default!;
@@ -163,17 +164,17 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
         }
         // The line must end with only whitespace.
         {
-            (s, _) = getLine(restOfEndLine); if (len(s) != 0) {
+            var (s, _) = getLine(restOfEndLine); if (len(s) != 0) {
                 continue;
             }
         }
         var base64Data = removeSpacesAndTabs(rest[..(int)(endIndex)]);
-        p.val.Bytes = new slice<byte>(base64.StdEncoding.DecodedLen(len(base64Data)));
+        p.Value.Bytes = new slice<byte>(base64.StdEncoding.DecodedLen(len(base64Data)));
         var (n, err) = base64.StdEncoding.Decode((~p).Bytes, base64Data);
         if (err != default!) {
             continue;
         }
-        p.val.Bytes = (~p).Bytes[..(int)(n)];
+        p.Value.Bytes = (~p).Bytes[..(int)(n)];
         // the -1 is because we might have only matched pemEnd without the
         // leading newline if the PEM block was empty.
         (_, rest) = getLine(rest[(int)(endIndex + len(pemEnd) - 1)..]);
@@ -186,7 +187,7 @@ internal static readonly UntypedInt pemLineLength = 64;
 [GoType] partial struct lineBreaker {
     internal array<byte> line = new(pemLineLength);
     internal nint used;
-    internal io_package.Writer @out;
+    internal io.Writer @out;
 }
 
 internal static slice<byte> nl = new byte[]{(rune)'\n'}.slice();
@@ -204,7 +205,7 @@ internal static slice<byte> nl = new byte[]{(rune)'\n'}.slice();
     if (err != default!) {
         return (n, err);
     }
-    nint excess = pemLineLength - l.used;
+    nint excess = (nint)pemLineLength - l.used;
     l.used = 0;
     (n, err) = l.@out.Write(b[0..(int)(excess)]);
     if (err != default!) {
@@ -231,13 +232,13 @@ internal static slice<byte> nl = new byte[]{(rune)'\n'}.slice();
 }
 
 internal static error writeHeader(io.Writer @out, @string k, @string v) {
-    var (_, err) = @out.Write(slice<byte>(k + ": "u8 + v + "\n"u8));
+    var (_, err) = @out.Write(slice<byte>(k + ": " + v + "\n"));
     return err;
 }
 
 // Encode writes the PEM encoding of b to out.
 public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     // Check for invalid block before writing any output.
     foreach (var (k, _) in b.Headers) {
@@ -253,7 +254,7 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
         }
     }
     {
-        var (_, errΔ2) = @out.Write(slice<byte>(b.Type + "-----\n"u8)); if (errΔ2 != default!) {
+        var (_, errΔ2) = @out.Write(slice<byte>(b.Type + "-----\n")); if (errΔ2 != default!) {
             return errΔ2;
         }
     }
@@ -278,7 +279,7 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
             }
         }
         // For consistency of output, write other headers sorted by key.
-        slices.Sort(h);
+        slices.Sort<slice<@string>, @string>(h);
         foreach (var (_, k) in h) {
             {
                 var errΔ4 = writeHeader(@out, k, b.Headers[k]); if (errΔ4 != default!) {
@@ -294,7 +295,7 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
     }
     ref var breaker = ref heap(new lineBreaker(), out var Ꮡbreaker);
     breaker.@out = @out;
-    var b64 = base64.NewEncoder(base64.StdEncoding, ~Ꮡbreaker);
+    var b64 = base64.NewEncoder(base64.StdEncoding, new lineBreakerжWriter(Ꮡbreaker));
     {
         var (_, errΔ6) = b64.Write(b.Bytes); if (errΔ6 != default!) {
             return errΔ6;
@@ -307,7 +308,7 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
             return errΔ7;
         }
     }
-    var (_, err) = @out.Write(slice<byte>(b.Type + "-----\n"u8));
+    var (_, err) = @out.Write(slice<byte>(b.Type + "-----\n"));
     return err;
 }
 
@@ -317,11 +318,11 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
 // EncodeToMemory returns nil. If it is important to
 // report details about this error case, use [Encode] instead.
 public static slice<byte> EncodeToMemory(ж<Block> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
-    ref var buf = ref heap(new bytes_package.Buffer(), out var Ꮡbuf);
+    ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
-        var err = Encode(~Ꮡbuf, Ꮡb); if (err != default!) {
+        var err = Encode(new bytes_BufferжWriter(Ꮡbuf), Ꮡb); if (err != default!) {
             return default!;
         }
     }

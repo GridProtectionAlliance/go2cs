@@ -13,11 +13,11 @@ partial class slices_package {
 // Sort sorts a slice of any ordered type in ascending order.
 // When sorting floating-point numbers, NaNs are ordered before other values.
 public static void Sort<S, E>(S x)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
     nint n = len(x);
-    pdqsortOrdered(x, 0, n, bits.Len(((nuint)n)));
+    pdqsortOrdered(new slice<E>(x), 0, n, bits.Len((nuint)n));
 }
 
 // SortFunc sorts the slice x in ascending order as determined by the cmp
@@ -30,25 +30,23 @@ public static void Sort<S, E>(S x)
 // See https://en.wikipedia.org/wiki/Weak_ordering#Strict_weak_orderings.
 // The function should return 0 for incomparable items.
 public static void SortFunc<S, E>(S x, Func<E, E, nint> cmp)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     nint n = len(x);
-    pdqsortCmpFunc(x, 0, n, bits.Len(((nuint)n)), cmp);
+    pdqsortCmpFunc(new slice<E>(x), 0, n, bits.Len((nuint)n), cmp);
 }
 
 // SortStableFunc sorts the slice x while keeping the original order of equal
 // elements, using cmp to compare elements in the same way as [SortFunc].
 public static void SortStableFunc<S, E>(S x, Func<E, E, nint> cmp)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
-    stableCmpFunc(x, len(x), cmp);
+    stableCmpFunc(new slice<E>(x), len(x), cmp);
 }
 
 // IsSorted reports whether x is sorted in ascending order.
 public static bool IsSorted<S, E>(S x)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
     for (nint i = len(x) - 1; i > 0; i--) {
@@ -62,8 +60,7 @@ public static bool IsSorted<S, E>(S x)
 // IsSortedFunc reports whether x is sorted in ascending order, with cmp as the
 // comparison function as defined by [SortFunc].
 public static bool IsSortedFunc<S, E>(S x, Func<E, E, nint> cmp)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     for (nint i = len(x) - 1; i > 0; i--) {
         if (cmp(x[i], x[i - 1]) < 0) {
@@ -77,7 +74,7 @@ public static bool IsSortedFunc<S, E>(S x, Func<E, E, nint> cmp)
 // For floating-point numbers, Min propagates NaNs (any NaN value in x
 // forces the output to be NaN).
 public static E Min<S, E>(S x)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
     if (len(x) < 1) {
@@ -94,8 +91,7 @@ public static E Min<S, E>(S x)
 // It panics if x is empty. If there is more than one minimal element
 // according to the cmp function, MinFunc returns the first one.
 public static E MinFunc<S, E>(S x, Func<E, E, nint> cmp)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     if (len(x) < 1) {
         throw panic("slices.MinFunc: empty list");
@@ -113,7 +109,7 @@ public static E MinFunc<S, E>(S x, Func<E, E, nint> cmp)
 // For floating-point E, Max propagates NaNs (any NaN value in x
 // forces the output to be NaN).
 public static E Max<S, E>(S x)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
     if (len(x) < 1) {
@@ -130,8 +126,7 @@ public static E Max<S, E>(S x)
 // It panics if x is empty. If there is more than one maximal element
 // according to the cmp function, MaxFunc returns the first one.
 public static E MaxFunc<S, E>(S x, Func<E, E, nint> cmp)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     if (len(x) < 1) {
         throw panic("slices.MaxFunc: empty list");
@@ -150,7 +145,7 @@ public static E MaxFunc<S, E>(S x, Func<E, E, nint> cmp)
 // in the sort order; it also returns a bool saying whether the target is
 // really found in the slice. The slice must be sorted in increasing order.
 public static (nint, bool) BinarySearch<S, E>(S x, E target)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
     // Inlining is faster than calling BinarySearchFunc with a lambda.
@@ -160,7 +155,7 @@ public static (nint, bool) BinarySearch<S, E>(S x, E target)
     nint i = 0;
     nint j = n;
     while (i < j) {
-        nint h = ((nint)(((nuint)(i + j)) >> (int)(1)));
+        nint h = (nint)(((nuint)(i + j) >> (int)(1)));
         // avoid overflow when computing h
         // i ≤ h < j
         if (cmp.Less(x[h], target)){
@@ -183,9 +178,7 @@ public static (nint, bool) BinarySearch<S, E>(S x, E target)
 // cmp must implement the same ordering as the slice, such that if
 // cmp(a, t) < 0 and cmp(b, t) >= 0, then a must precede b in the slice.
 public static (nint, bool) BinarySearchFunc<S, E, T>(S x, T target, Func<E, T, nint> cmp)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
-    where T : new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     nint n = len(x);
     // Define cmp(x[-1], target) < 0 and cmp(x[n], target) >= 0 .
@@ -193,7 +186,7 @@ public static (nint, bool) BinarySearchFunc<S, E, T>(S x, T target, Func<E, T, n
     nint i = 0;
     nint j = n;
     while (i < j) {
-        nint h = ((nint)(((nuint)(i + j)) >> (int)(1)));
+        nint h = (nint)(((nuint)(i + j) >> (int)(1)));
         // avoid overflow when computing h
         // i ≤ h < j
         if (cmp(x[h], target) < 0){
@@ -217,14 +210,14 @@ internal static readonly sortedHint decreasingHint = 2;
 [GoType("num:uint64")] partial struct xorshift;
 
 [GoRecv] internal static uint64 Next(this ref xorshift r) {
-    r ^= (xorshift)(r << (int)(13));
-    r ^= (xorshift)(r >> (int)(17));
-    r ^= (xorshift)(r << (int)(5));
-    return ((uint64)(r));
+    r ^= (xorshift)((r << (int)(13)));
+    r ^= (xorshift)((r >> (int)(17)));
+    r ^= (xorshift)((r << (int)(5)));
+    return (uint64)(r);
 }
 
 internal static nuint nextPowerOfTwo(nint length) {
-    return 1 << (int)(bits.Len(((nuint)length)));
+    return ((nuint)1 << (int)(bits.Len((nuint)length)));
 }
 
 // isNaN reports whether x is a NaN without requiring the math package.

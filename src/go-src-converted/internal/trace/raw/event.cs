@@ -5,8 +5,9 @@ namespace go.@internal.trace;
 
 using strconv = strconv_package;
 using strings = strings_package;
-using @event = @internal.trace.event_package;
-using version = @internal.trace.version_package;
+using Δevent = go.@internal.trace.event_package;
+using version = go.@internal.trace.version_package;
+using go.@internal.trace;
 
 partial class raw_package {
 
@@ -16,8 +17,8 @@ partial class raw_package {
 // timestamped events, and it also represents parts of the
 // trace format's framing. (But not interpreted.)
 [GoType] partial struct Event {
-    public @internal.trace.version_package.Version Version;
-    public @internal.trace.event_package.Type Ev;
+    public version.Version Version;
+    public Δevent.Type Ev;
     public slice<uint64> Args;
     public slice<byte> Data;
 }
@@ -28,30 +29,30 @@ partial class raw_package {
 // and emitted by the TextWriter.
 [GoRecv] public static @string String(this ref Event e) {
     var spec = e.Version.Specs()[e.Ev];
-    strings.Builder s = default!;
-    s.WriteString(spec.Name);
+    ref var s = ref heap(new strings.Builder(), out var Ꮡs);
+    Ꮡs.WriteString(spec.Name);
     foreach (var (i, _) in spec.Args) {
-        s.WriteString(" "u8);
-        s.WriteString(spec.Args[i]);
-        s.WriteString("="u8);
-        s.WriteString(strconv.FormatUint(e.Args[i], 10));
+        Ꮡs.WriteString(" "u8);
+        Ꮡs.WriteString(spec.Args[i]);
+        Ꮡs.WriteString("="u8);
+        Ꮡs.WriteString(strconv.FormatUint(e.Args[i], 10));
     }
     if (spec.IsStack) {
         var frames = e.Args[(int)(len(spec.Args))..];
         for (nint i = 0; i < len(frames); i++) {
             if (i % 4 == 0){
-                s.WriteString("\n\t"u8);
+                Ꮡs.WriteString("\n\t"u8);
             } else {
-                s.WriteString(" "u8);
+                Ꮡs.WriteString(" "u8);
             }
-            s.WriteString(frameFields[i % 4]);
-            s.WriteString("="u8);
-            s.WriteString(strconv.FormatUint(frames[i], 10));
+            Ꮡs.WriteString(frameFields[i % 4]);
+            Ꮡs.WriteString("="u8);
+            Ꮡs.WriteString(strconv.FormatUint(frames[i], 10));
         }
     }
     if (e.Data != default!) {
-        s.WriteString("\n\tdata="u8);
-        s.WriteString(strconv.Quote(((@string)e.Data)));
+        Ꮡs.WriteString("\n\tdata="u8);
+        Ꮡs.WriteString(strconv.Quote(((@string)e.Data)));
     }
     return s.String();
 }

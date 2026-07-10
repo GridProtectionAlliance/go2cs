@@ -44,12 +44,14 @@ using static go.debug.plan9obj_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<encoding.binary_package.bigEndian, encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<formatError, error>]
-[assembly: GoImplement<io_package.SectionReader, io_package.ReadSeeker>]
-[assembly: GoImplement<io_package.SectionReader, io_package.Reader>]
-[assembly: GoImplement<io_package.SectionReader, io_package.ReaderAt>]
-[assembly: GoImplement<os_package.File, io_package.ReaderAt>]
+[assembly: GoImplement<formatError, error>(Pointer = true)]
+[assembly: GoImplement<go.encoding.binary_package.bigEndian, go.encoding.binary_package.ByteOrder>]
+[assembly: GoImplement<io_package.SectionReader, io_package.ReadSeeker>(Pointer = true)]
+[assembly: GoImplement<io_package.SectionReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<io_package.SectionReader, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<ΔSection, io_package.ReaderAt>(Promoted = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

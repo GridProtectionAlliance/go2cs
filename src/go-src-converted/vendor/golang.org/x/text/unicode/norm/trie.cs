@@ -7,8 +7,7 @@ partial class norm_package {
 
 [GoType] partial struct valueRange {
     internal uint16 value; // header: value:stride
-    internal byte lo;   // header: lo:n
-    internal byte hi;
+    internal byte lo, hi;   // header: lo:n
 }
 
 [GoType] partial struct sparseBlocks {
@@ -16,15 +15,17 @@ partial class norm_package {
     internal slice<uint16> offset;
 }
 
-internal static sparseBlocks nfcSparse = new sparseBlocks(
+internal static ж<sparseBlocks> ᏑnfcSparse = new(new sparseBlocks(
     values: nfcSparseValues[..],
     offset: nfcSparseOffset[..]
-);
+));
+internal static ref sparseBlocks nfcSparse => ref ᏑnfcSparse.Value;
 
-internal static sparseBlocks nfkcSparse = new sparseBlocks(
+internal static ж<sparseBlocks> ᏑnfkcSparse = new(new sparseBlocks(
     values: nfkcSparseValues[..],
     offset: nfkcSparseOffset[..]
-);
+));
+internal static ref sparseBlocks nfkcSparse => ref ᏑnfkcSparse.Value;
 
 internal static ж<nfcTrie> nfcData = newNfcTrie(0);
 internal static ж<nfkcTrie> nfkcData = newNfkcTrie(0);
@@ -34,20 +35,20 @@ internal static ж<nfkcTrie> nfkcData = newNfkcTrie(0);
 // is a list of ranges with an accompanying value. Given a matching range r,
 // the value for b is by r.value + (b - r.lo) * stride.
 [GoRecv] internal static uint16 lookup(this ref sparseBlocks t, uint32 n, byte b) {
-    var offset = t.offset[n];
+    var offset = t.offset[(nint)(n)];
     var header = t.values[offset];
-    var lo = offset + 1;
-    var hi = lo + ((uint16)header.lo);
+    var lo = (uint16)(offset + 1);
+    var hi = (uint16)(lo + (uint16)header.lo);
     while (lo < hi) {
-        var m = lo + (hi - lo) / 2;
+        var m = (uint16)(lo + (hi - lo) / 2);
         var r = t.values[m];
         if (r.lo <= b && b <= r.hi) {
-            return r.value + ((uint16)(b - r.lo)) * header.value;
+            return (uint16)(r.value + (uint16)(b - r.lo) * header.value);
         }
         if (b < r.lo){
             hi = m;
         } else {
-            lo = m + 1;
+            lo = (uint16)(m + 1);
         }
     }
     return 0;

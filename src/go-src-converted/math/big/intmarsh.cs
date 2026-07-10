@@ -6,6 +6,7 @@ namespace go.math;
 
 using bytes = bytes_package;
 using fmt = fmt_package;
+using io = io_package;
 
 partial class big_package {
 
@@ -13,15 +14,17 @@ partial class big_package {
 internal const byte intGobVersion = 1;
 
 // GobEncode implements the [encoding/gob.GobEncoder] interface.
-[GoRecv] public static (slice<byte>, error) GobEncode(this ref ΔInt x) {
+public static (slice<byte>, error) GobEncode(this ж<ΔInt> Ꮡx) {
+    ref var x = ref Ꮡx.Value;
+
     if (x == nil) {
         return (default!, default!);
     }
-    var buf = new slice<byte>(1 + len(x.abs) * _S);
+    var buf = new slice<byte>(1 + len(x.abs) * (nint)_S);
     // extra byte for version and sign bit
     nint i = x.abs.bytes(buf) - 1;
     // i >= 0
-    var b = intGobVersion << (int)(1);
+    var b = (byte)((intGobVersion << (int)(1)));
     // make space for sign bit
     if (x.neg) {
         b |= (byte)(1);
@@ -38,8 +41,8 @@ internal const byte intGobVersion = 1;
         return default!;
     }
     var b = buf[0];
-    if (b >> (int)(1) != intGobVersion) {
-        return fmt.Errorf("Int.GobDecode: encoding version %d not supported"u8, b >> (int)(1));
+    if ((b >> (int)(1)) != intGobVersion) {
+        return fmt.Errorf("Int.GobDecode: encoding version %d not supported"u8, (b >> (int)(1)));
     }
     z.neg = (byte)(b & 1) != 0;
     z.abs = z.abs.setBytes(buf[1..]);
@@ -47,20 +50,23 @@ internal const byte intGobVersion = 1;
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-[GoRecv] public static (slice<byte> text, error err) MarshalText(this ref ΔInt x) {
+public static (slice<byte> text, error err) MarshalText(this ж<ΔInt> Ꮡx) {
     slice<byte> text = default!;
     error err = default!;
 
+    ref var x = ref Ꮡx.Value;
     if (x == nil) {
-        return (slice<byte>("<nil>"), default!);
+        return (slice<byte>((@string)"<nil>"), default!);
     }
     return (x.abs.itoa(x.neg, 10), default!);
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-[GoRecv] public static error UnmarshalText(this ref ΔInt z, slice<byte> text) {
+public static error UnmarshalText(this ж<ΔInt> Ꮡz, slice<byte> text) {
+    ref var z = ref Ꮡz.Value;
+
     {
-        var (Δ_, ok) = z.setFromScanner(~bytes.NewReader(text), 0); if (!ok) {
+        var (_, ok) = Ꮡz.setFromScanner(new bytes_ReaderжByteScanner(bytes_package.NewReader(text)), 0); if (!ok) {
             return fmt.Errorf("math/big: cannot unmarshal %q into a *big.Int"u8, text);
         }
     }
@@ -72,20 +78,24 @@ internal const byte intGobVersion = 1;
 // fine with the TextMarshaler only.
 
 // MarshalJSON implements the [encoding/json.Marshaler] interface.
-[GoRecv] public static (slice<byte>, error) MarshalJSON(this ref ΔInt x) {
+public static (slice<byte>, error) MarshalJSON(this ж<ΔInt> Ꮡx) {
+    ref var x = ref Ꮡx.Value;
+
     if (x == nil) {
-        return (slice<byte>("null"), default!);
+        return (slice<byte>((@string)"null"), default!);
     }
     return (x.abs.itoa(x.neg, 10), default!);
 }
 
 // UnmarshalJSON implements the [encoding/json.Unmarshaler] interface.
-[GoRecv] public static error UnmarshalJSON(this ref ΔInt z, slice<byte> text) {
+public static error UnmarshalJSON(this ж<ΔInt> Ꮡz, slice<byte> text) {
+    ref var z = ref Ꮡz.Value;
+
     // Ignore null, like in the main JSON package.
     if (((@string)text) == "null"u8) {
         return default!;
     }
-    return z.UnmarshalText(text);
+    return Ꮡz.UnmarshalText(text);
 }
 
 } // end big_package

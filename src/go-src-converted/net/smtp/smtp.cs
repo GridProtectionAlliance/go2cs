@@ -23,10 +23,12 @@ using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
 using net = net_package;
-using textproto = net.textproto_package;
+using textproto = go.net.textproto_package;
 using strings = strings_package;
 using crypto;
 using encoding;
+using go.net;
+using time = time_package;
 using ꓸꓸꓸany = Span<any>;
 
 partial class smtp_package {
@@ -35,10 +37,10 @@ partial class smtp_package {
 [GoType] partial struct Client {
     // Text is the textproto.Conn used by the Client. It is exported to allow for
     // clients to add extensions.
-    public ж<net.textproto_package.Conn> Text;
+    public ж<textproto.Conn> Text;
     // keep a reference to the connection so it can be used to create a TLS
     // connection later
-    internal net_package.Conn conn;
+    internal net.Conn conn;
     // whether the Client is using TLS
     internal bool tls;
     internal @string serverName;
@@ -54,7 +56,7 @@ partial class smtp_package {
 // Dial returns a new [Client] connected to an SMTP server at addr.
 // The addr must include a port, as in "mail.example.com:smtp".
 public static (ж<Client>, error) Dial(@string addr) {
-    (conn, err) = net.Dial("tcp"u8, addr);
+    var (conn, err) = net.Dial("tcp"u8, addr);
     if (err != default!) {
         return (default!, err);
     }
@@ -65,14 +67,14 @@ public static (ж<Client>, error) Dial(@string addr) {
 // NewClient returns a new [Client] using an existing connection and host as a
 // server name to be used when authenticating.
 public static (ж<Client>, error) NewClient(net.Conn conn, @string host) {
-    var text = textproto.NewConn(conn);
-    var (_, _, err) = text.ReadResponse(220);
+    var text = textproto.NewConn(new net_ConnᴠReadWriteCloser(conn));
+    var (_, _, err) = text.of(textproto.Conn.ᏑReader).ReadResponse(220);
     if (err != default!) {
         text.Close();
         return (default!, err);
     }
     var c = Ꮡ(new Client(Text: text, conn: conn, serverName: host, localName: "localhost"u8));
-    (_, c.val.tls) = conn._<ж<tls.Conn>>(ᐧ);
+    (_, c.Value.tls) = conn._<ж<tls.Conn>>(ᐧ);
     return (c, default!);
 }
 
@@ -82,12 +84,14 @@ public static (ж<Client>, error) NewClient(net.Conn conn, @string host) {
 }
 
 // hello runs a hello exchange if needed.
-[GoRecv] internal static error hello(this ref Client c) {
+internal static error hello(this ж<Client> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     if (!c.didHello) {
         c.didHello = true;
-        var err = c.ehlo();
+        var err = Ꮡc.ehlo();
         if (err != default!) {
-            c.helloError = c.helo();
+            c.helloError = Ꮡc.helo();
         }
     }
     return c.helloError;
@@ -98,7 +102,9 @@ public static (ж<Client>, error) NewClient(net.Conn conn, @string host) {
 // over the host name used. The client will introduce itself as "localhost"
 // automatically otherwise. If Hello is called, it must be called before
 // any of the other methods.
-[GoRecv] public static error Hello(this ref Client c, @string localName) {
+public static error Hello(this ж<Client> Ꮡc, @string localName) {
+    ref var c = ref Ꮡc.Value;
+
     {
         var err = validateLine(localName); if (err != default!) {
             return err;
@@ -108,35 +114,42 @@ public static (ж<Client>, error) NewClient(net.Conn conn, @string host) {
         return errors.New("smtp: Hello called after other methods"u8);
     }
     c.localName = localName;
-    return c.hello();
+    return Ꮡc.hello();
 }
 
 // cmd is a convenience function that sends a command and returns the response
-[GoRecv] internal static (nint, @string, error) cmd(this ref Client c, nint expectCode, @string format, params ꓸꓸꓸany argsʗp) => func((defer, _) => {
+internal static (nint, @string, error) cmd(this ж<Client> Ꮡc, nint expectCode, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
+    return func<(nint, @string, error)>((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
 
-    var (id, err) = c.Text.Cmd(format, args.ꓸꓸꓸ);
-    if (err != default!) {
-        return (0, "", err);
-    }
-    c.Text.StartResponse(id);
-    deferǃ(c.Text.EndResponse, id, defer);
-    var (code, msg, err) = c.Text.ReadResponse(expectCode);
-    return (code, msg, err);
-});
+        var (id, err) = c.Text.Cmd(format, args.ꓸꓸꓸ);
+        if (err != default!) {
+            return (0, "", err);
+        }
+        c.Text.of(textproto.Conn.ᏑPipeline).StartResponse(id);
+        deferǃ(Ꮡc.Value.Text.of(textproto.Conn.ᏑPipeline).EndResponse, id, defer);
+        (var code, var msg, err) = c.Text.of(textproto.Conn.ᏑReader).ReadResponse(expectCode);
+        return (code, msg, err);
+    });
+}
 
 // helo sends the HELO greeting to the server. It should be used only when the
 // server does not support ehlo.
-[GoRecv] internal static error helo(this ref Client c) {
+internal static error helo(this ж<Client> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     c.ext = default!;
-    var (_, _, err) = c.cmd(250, "HELO %s"u8, c.localName);
+    var (_, _, err) = Ꮡc.cmd(250, "HELO %s"u8, c.localName);
     return err;
 }
 
 // ehlo sends the EHLO (extended hello) greeting to the server. It
 // should be the preferred greeting for servers that support it.
-[GoRecv] internal static error ehlo(this ref Client c) {
-    var (_, msg, err) = c.cmd(250, "EHLO %s"u8, c.localName);
+internal static error ehlo(this ж<Client> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    var (_, msg, err) = Ꮡc.cmd(250, "EHLO %s"u8, c.localName);
     if (err != default!) {
         return err;
     }
@@ -150,8 +163,7 @@ public static (ж<Client>, error) NewClient(net.Conn conn, @string host) {
         }
     }
     {
-        @string mechs = ext["AUTH"u8];
-        var ok = ext["AUTH"u8]; if (ok) {
+        var (mechs, ok) = ext["AUTH"u8, ꟷ]; if (ok) {
             c.auth = strings.Split(mechs, " "u8);
         }
     }
@@ -161,22 +173,23 @@ public static (ж<Client>, error) NewClient(net.Conn conn, @string host) {
 
 // StartTLS sends the STARTTLS command and encrypts all further communication.
 // Only servers that advertise the STARTTLS extension support this function.
-[GoRecv] public static error StartTLS(this ref Client c, ж<tls.Config> Ꮡconfig) {
-    ref var config = ref Ꮡconfig.val;
+public static error StartTLS(this ж<Client> Ꮡc, ж<tls.Config> Ꮡconfig) {
+    ref var c = ref Ꮡc.Value;
+    ref var config = ref Ꮡconfig.Value;
 
     {
-        var errΔ1 = c.hello(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡc.hello(); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
-    var (_, _, err) = c.cmd(220, "STARTTLS"u8);
+    var (_, _, err) = Ꮡc.cmd(220, "STARTTLS"u8);
     if (err != default!) {
         return err;
     }
-    c.conn = tls.Client(c.conn, Ꮡconfig);
-    c.Text = textproto.NewConn(c.conn);
+    c.conn = new tls.ConnжConn(tls.Client(c.conn, Ꮡconfig));
+    c.Text = textproto.NewConn(new net_ConnᴠReadWriteCloser(c.conn));
     c.tls = true;
-    return c.ehlo();
+    return Ꮡc.ehlo();
 }
 
 // TLSConnectionState returns the client's TLS connection state.
@@ -186,7 +199,7 @@ public static (ж<Client>, error) NewClient(net.Conn conn, @string host) {
     tlsꓸConnectionState state = default!;
     bool ok = default!;
 
-    (tc, ok) = c.conn._<ж<tls.Conn>>(ᐧ);
+    (var tc, ok) = c.conn._<ж<tls.Conn>>(ᐧ);
     if (!ok) {
         return (state, ok);
     }
@@ -197,39 +210,45 @@ public static (ж<Client>, error) NewClient(net.Conn conn, @string host) {
 // If Verify returns nil, the address is valid. A non-nil return
 // does not necessarily indicate an invalid address. Many servers
 // will not verify addresses for security reasons.
-[GoRecv] public static error Verify(this ref Client c, @string addr) {
+public static error Verify(this ж<Client> Ꮡc, @string addr) {
+    ref var c = ref Ꮡc.Value;
+
     {
         var errΔ1 = validateLine(addr); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
     {
-        var errΔ2 = c.hello(); if (errΔ2 != default!) {
+        var errΔ2 = Ꮡc.hello(); if (errΔ2 != default!) {
             return errΔ2;
         }
     }
-    var (_, _, err) = c.cmd(250, "VRFY %s"u8, addr);
+    var (_, _, err) = Ꮡc.cmd(250, "VRFY %s"u8, addr);
     return err;
 }
 
 // Auth authenticates a client using the provided authentication mechanism.
 // A failed authentication closes the connection.
 // Only servers that advertise the AUTH extension support this function.
-[GoRecv] public static error Auth(this ref Client c, ΔAuth a) {
+public static error Auth(this ж<Client> Ꮡc, ΔAuth a) {
+    ref var c = ref Ꮡc.Value;
+
     {
-        var errΔ1 = c.hello(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡc.hello(); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
     var encoding = base64.StdEncoding;
     var (mech, resp, err) = a.Start(Ꮡ(new ServerInfo(c.serverName, c.tls, c.auth)));
     if (err != default!) {
-        c.Quit();
+        Ꮡc.Quit();
         return err;
     }
     var resp64 = new slice<byte>(encoding.EncodedLen(len(resp)));
     encoding.Encode(resp64, resp);
-    (code, msg64, err) = c.cmd(0, "%s"u8, strings.TrimSpace(fmt.Sprintf("AUTH %s %s"u8, mech, resp64)));
+    ref var code = ref heap<nint>(out var Ꮡcode);
+    ref var msg64 = ref heap<@string>(out var Ꮡmsg64);
+    (code, msg64, err) = Ꮡc.cmd(0, "%s"u8, strings.TrimSpace(fmt.Sprintf("AUTH %s %s"u8, mech, resp64)));
     while (err == default!) {
         slice<byte> msg = default!;
         switch (code) {
@@ -242,8 +261,8 @@ public static (ж<Client>, error) NewClient(net.Conn conn, @string host) {
             break;
         }
         default: {
-            Ꮡerr = new textprotoꓸError( // the last message isn't base64 because it isn't a challenge
-Code: code, Msg: msg64); err = ref Ꮡerr.val;
+            err = new textproto_ΔErrorжerror(Ꮡ(new textprotoꓸError( // the last message isn't base64 because it isn't a challenge
+Code: code, Msg: msg64)));
             break;
         }}
 
@@ -252,8 +271,8 @@ Code: code, Msg: msg64); err = ref Ꮡerr.val;
         }
         if (err != default!) {
             // abort the AUTH
-            c.cmd(501, "*"u8);
-            c.Quit();
+            Ꮡc.cmd(501, "*"u8);
+            Ꮡc.Quit();
             break;
         }
         if (resp == default!) {
@@ -261,7 +280,7 @@ Code: code, Msg: msg64); err = ref Ꮡerr.val;
         }
         resp64 = new slice<byte>(encoding.EncodedLen(len(resp)));
         encoding.Encode(resp64, resp);
-        (code, msg64, err) = c.cmd(0, "%s"u8, resp64);
+        (code, msg64, err) = Ꮡc.cmd(0, "%s"u8, resp64);
     }
     return err;
 }
@@ -271,57 +290,59 @@ Code: code, Msg: msg64); err = ref Ꮡerr.val;
 // parameter. If the server supports the SMTPUTF8 extension, Mail adds the
 // SMTPUTF8 parameter.
 // This initiates a mail transaction and is followed by one or more [Client.Rcpt] calls.
-[GoRecv] public static error Mail(this ref Client c, @string from) {
+public static error Mail(this ж<Client> Ꮡc, @string from) {
+    ref var c = ref Ꮡc.Value;
+
     {
         var errΔ1 = validateLine(from); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
     {
-        var errΔ2 = c.hello(); if (errΔ2 != default!) {
+        var errΔ2 = Ꮡc.hello(); if (errΔ2 != default!) {
             return errΔ2;
         }
     }
     @string cmdStr = "MAIL FROM:<%s>"u8;
     if (c.ext != default!) {
         {
-            @string _ = c.ext["8BITMIME"u8];
-            var ok = c.ext["8BITMIME"u8]; if (ok) {
+            var (_, ok) = c.ext["8BITMIME"u8, ꟷ]; if (ok) {
                 cmdStr += " BODY=8BITMIME"u8;
             }
         }
         {
-            @string _ = c.ext["SMTPUTF8"u8];
-            var ok = c.ext["SMTPUTF8"u8]; if (ok) {
+            var (_, ok) = c.ext["SMTPUTF8"u8, ꟷ]; if (ok) {
                 cmdStr += " SMTPUTF8"u8;
             }
         }
     }
-    var (_, _, err) = c.cmd(250, cmdStr, from);
+    var (_, _, err) = Ꮡc.cmd(250, cmdStr, from);
     return err;
 }
 
 // Rcpt issues a RCPT command to the server using the provided email address.
 // A call to Rcpt must be preceded by a call to [Client.Mail] and may be followed by
 // a [Client.Data] call or another Rcpt call.
-[GoRecv] public static error Rcpt(this ref Client c, @string to) {
+public static error Rcpt(this ж<Client> Ꮡc, @string to) {
+    ref var c = ref Ꮡc.Value;
+
     {
         var errΔ1 = validateLine(to); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
-    var (_, _, err) = c.cmd(25, "RCPT TO:<%s>"u8, to);
+    var (_, _, err) = Ꮡc.cmd(25, "RCPT TO:<%s>"u8, to);
     return err;
 }
 
 [GoType] partial struct dataCloser {
     internal ж<Client> c;
-    public partial ref io_package.WriteCloser WriteCloser { get; }
+    public io_package.WriteCloser WriteCloser;
 }
 
 [GoRecv] internal static error Close(this ref dataCloser d) {
     d.WriteCloser.Close();
-    var (_, _, err) = d.c.Text.ReadResponse(250);
+    var (_, _, err) = (~d.c).Text.of(textproto.Conn.ᏑReader).ReadResponse(250);
     return err;
 }
 
@@ -329,15 +350,17 @@ Code: code, Msg: msg64); err = ref Ꮡerr.val;
 // can be used to write the mail headers and body. The caller should
 // close the writer before calling any more methods on c. A call to
 // Data must be preceded by one or more calls to [Client.Rcpt].
-[GoRecv] public static (io.WriteCloser, error) Data(this ref Client c) {
-    var (_, _, err) = c.cmd(354, "DATA"u8);
+public static (io.WriteCloser, error) Data(this ж<Client> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    var (_, _, err) = Ꮡc.cmd(354, "DATA"u8);
     if (err != default!) {
         return (default!, err);
     }
-    return (new dataCloser(c, c.Text.DotWriter()), default!);
+    return (new dataCloserжWriteCloser(Ꮡ(new dataCloser(Ꮡc, c.Text.of(textproto.Conn.ᏑWriter).DotWriter()))), default!);
 }
 
-internal static tls.Config) testHookStartTLS; // nil, except for tests
+internal static Action<ж<tls.Config>> testHookStartTLS;      // nil, except for tests
 
 // SendMail connects to the server at addr, switches to TLS if
 // possible, authenticates with the optional mechanism a if possible,
@@ -359,7 +382,7 @@ internal static tls.Config) testHookStartTLS; // nil, except for tests
 // attachments (see the mime/multipart package), or other mail
 // functionality. Higher-level packages exist outside of the standard
 // library.
-public static error SendMail(@string addr, ΔAuth a, @string from, slice<@string> to, slice<byte> msg) => func((defer, _) => {
+public static error SendMail(@string addr, ΔAuth a, @string from, slice<@string> to, slice<byte> msg) => func((defer, recover) => {
     {
         var errΔ1 = validateLine(from); if (errΔ1 != default!) {
             return errΔ1;
@@ -372,12 +395,12 @@ public static error SendMail(@string addr, ΔAuth a, @string from, slice<@string
             }
         }
     }
-    (c, err) = Dial(addr);
+    var (c, err) = Dial(addr);
     if (err != default!) {
         return err;
     }
     var cʗ1 = c;
-    defer(cʗ1.Close);
+    defer(() => cʗ1.Close());
     {
         err = c.hello(); if (err != default!) {
             return err;
@@ -398,8 +421,7 @@ public static error SendMail(@string addr, ΔAuth a, @string from, slice<@string
     }
     if (a != default! && (~c).ext != default!) {
         {
-            @string _ = (~c).ext["AUTH"u8];
-            var ok = (~c).ext["AUTH"u8]; if (!ok) {
+            var (_, ok) = (~c).ext["AUTH"u8, ꟷ]; if (!ok) {
                 return errors.New("smtp: server doesn't support AUTH"u8);
             }
         }
@@ -421,7 +443,7 @@ public static error SendMail(@string addr, ΔAuth a, @string from, slice<@string
             }
         }
     }
-    (w, err) = c.Data();
+    (var w, err) = c.Data();
     if (err != default!) {
         return err;
     }
@@ -440,9 +462,11 @@ public static error SendMail(@string addr, ΔAuth a, @string from, slice<@string
 // The extension name is case-insensitive. If the extension is supported,
 // Extension also returns a string that contains any parameters the
 // server specifies for the extension.
-[GoRecv] public static (bool, @string) Extension(this ref Client c, @string ext) {
+public static (bool, @string) Extension(this ж<Client> Ꮡc, @string ext) {
+    ref var c = ref Ꮡc.Value;
+
     {
-        var err = c.hello(); if (err != default!) {
+        var err = Ꮡc.hello(); if (err != default!) {
             return (false, "");
         }
     }
@@ -450,43 +474,48 @@ public static error SendMail(@string addr, ΔAuth a, @string from, slice<@string
         return (false, "");
     }
     ext = strings.ToUpper(ext);
-    @string param = c.ext[ext];
-    var ok = c.ext[ext];
+    var (param, ok) = c.ext[ext, ꟷ];
     return (ok, param);
 }
 
 // Reset sends the RSET command to the server, aborting the current mail
 // transaction.
-[GoRecv] public static error Reset(this ref Client c) {
+public static error Reset(this ж<Client> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     {
-        var errΔ1 = c.hello(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡc.hello(); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
-    var (_, _, err) = c.cmd(250, "RSET"u8);
+    var (_, _, err) = Ꮡc.cmd(250, "RSET"u8);
     return err;
 }
 
 // Noop sends the NOOP command to the server. It does nothing but check
 // that the connection to the server is okay.
-[GoRecv] public static error Noop(this ref Client c) {
+public static error Noop(this ж<Client> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     {
-        var errΔ1 = c.hello(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡc.hello(); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
-    var (_, _, err) = c.cmd(250, "NOOP"u8);
+    var (_, _, err) = Ꮡc.cmd(250, "NOOP"u8);
     return err;
 }
 
 // Quit sends the QUIT command and closes the connection to the server.
-[GoRecv] public static error Quit(this ref Client c) {
+public static error Quit(this ж<Client> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     {
-        var errΔ1 = c.hello(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡc.hello(); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
-    var (_, _, err) = c.cmd(221, "QUIT"u8);
+    var (_, _, err) = Ꮡc.cmd(221, "QUIT"u8);
     if (err != default!) {
         return err;
     }

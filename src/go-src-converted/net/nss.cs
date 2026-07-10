@@ -6,31 +6,34 @@ namespace go;
 using errors = errors_package;
 using bytealg = @internal.bytealg_package;
 using os = os_package;
-using sync = sync_package;
+using Δsync = sync_package;
 using time = time_package;
 using @internal;
+using fs = go.io.fs_package;
+using go.io;
 
 partial class net_package {
 
 internal static readonly @string nssConfigPath = "/etc/nsswitch.conf"u8;
 
-internal static nsswitchConfig nssConfig;
+internal static ж<nsswitchConfig> ᏑnssConfig = new(default(nsswitchConfig));
+internal static ref nsswitchConfig nssConfig => ref ᏑnssConfig.Value;
 
 [GoType] partial struct nsswitchConfig {
-    internal sync_package.Once initOnce; // guards init of nsswitchConfig
+    internal Δsync.Once initOnce; // guards init of nsswitchConfig
     // ch is used as a semaphore that only allows one lookup at a
     // time to recheck nsswitch.conf
     internal channel<EmptyStruct> ch; // guards lastChecked and modTime
-    internal time_package.Time lastChecked;     // last time nsswitch.conf was checked
-    internal sync_package.Mutex mu; // protects nssConf
+    internal time.Time lastChecked;     // last time nsswitch.conf was checked
+    internal Δsync.Mutex mu; // protects nssConf
     internal ж<nssConf> nssConf;
 }
 
 internal static ж<nssConf> getSystemNSS() {
-    nssConfig.tryUpdate();
-    nssConfig.mu.Lock();
+    ᏑnssConfig.tryUpdate();
+    ᏑnssConfig.of(nsswitchConfig.Ꮡmu).Lock();
     var conf = nssConfig.nssConf;
-    nssConfig.mu.Unlock();
+    ᏑnssConfig.of(nsswitchConfig.Ꮡmu).Unlock();
     return conf;
 }
 
@@ -42,38 +45,37 @@ internal static ж<nssConf> getSystemNSS() {
 }
 
 // tryUpdate tries to update conf.
-[GoRecv] internal static void tryUpdate(this ref nsswitchConfig conf) => func((defer, _) => {
-    conf.initOnce.Do(conf.init);
+internal static void tryUpdate(this ж<nsswitchConfig> Ꮡconf) => func((defer, recover) => {
+    ref var conf = ref Ꮡconf.Value;
+
+    Ꮡconf.of(nsswitchConfig.ᏑinitOnce).Do(Ꮡconf.init);
     // Ensure only one update at a time checks nsswitch.conf
     if (!conf.tryAcquireSema()) {
         return;
     }
-    defer(conf.releaseSema);
+    defer(Ꮡconf.releaseSema);
     var now = time.Now();
-    if (conf.lastChecked.After(now.Add(-5 * time.ΔSecond))) {
+    if (conf.lastChecked.After(now.Add(-5000000000L))) {
         return;
     }
     conf.lastChecked = now;
     time.Time mtime = default!;
     {
-        (fi, err) = os.Stat(nssConfigPath); if (err == default!) {
+        var (fi, err) = os.Stat(nssConfigPath); if (err == default!) {
             mtime = fi.ModTime();
         }
     }
-    if (mtime.Equal(conf.nssConf.mtime)) {
+    if (mtime.Equal((~conf.nssConf).mtime)) {
         return;
     }
     var nssConf = parseNSSConfFile(nssConfigPath);
-    conf.mu.Lock();
+    Ꮡconf.of(nsswitchConfig.Ꮡmu).Lock();
     conf.nssConf = nssConf;
-    conf.mu.Unlock();
+    Ꮡconf.of(nsswitchConfig.Ꮡmu).Unlock();
 });
 
-[GoType("dyn")] partial struct acquireSema_type {
-}
-
 [GoRecv] internal static void acquireSema(this ref nsswitchConfig conf) {
-    conf.ch.ᐸꟷ(new acquireSema_type());
+    conf.ch.ᐸꟷ(new EmptyStruct());
 }
 
 [GoRecv] internal static bool tryAcquireSema(this ref nsswitchConfig conf) {
@@ -92,7 +94,7 @@ internal static ж<nssConf> getSystemNSS() {
 
 // nssConf represents the state of the machine's /etc/nsswitch.conf file.
 [GoType] partial struct nssConf {
-    internal time_package.Time mtime;              // time of nsswitch.conf modification
+    internal time.Time mtime;              // time of nsswitch.conf modification
     internal error err;                  // any error encountered opening or parsing the file
     internal map<@string, slice<nssSource>> sources; // keyed by database (e.g. "hosts")
 }
@@ -147,24 +149,24 @@ internal static bool standardStatusAction(this nssCriterion c, bool last) {
     return c.action == def;
 }
 
-internal static ж<nssConf> parseNSSConfFile(@string Δfile) => func((defer, _) => {
-    (f, err) = open(Δfile);
+internal static ж<nssConf> parseNSSConfFile(@string Δfile) => func((defer, recover) => {
+    var (f, err) = open(Δfile);
     if (err != default!) {
         return Ꮡ(new nssConf(err: err));
     }
     var fʗ1 = f;
     defer(fʗ1.close);
-    var (mtime, _, err) = f.stat();
+    (var mtime, _, err) = f.stat();
     if (err != default!) {
         return Ꮡ(new nssConf(err: err));
     }
     var conf = parseNSSConf(f);
-    conf.val.mtime = mtime;
+    conf.Value.mtime = mtime;
     return conf;
 });
 
 internal static ж<nssConf> parseNSSConf(ж<Δfile> Ꮡf) {
-    ref var f = ref Ꮡf.val;
+    ref var f = ref Ꮡf.Value;
 
     var conf = @new<nssConf>();
     for (var (line, ok) = f.readLine(); ok; (line, ok) = f.readLine()) {
@@ -174,7 +176,7 @@ internal static ж<nssConf> parseNSSConf(ж<Δfile> Ꮡf) {
         }
         nint colon = bytealg.IndexByteString(line, (rune)':');
         if (colon == -1) {
-            conf.val.err = errors.New("no colon on line"u8);
+            conf.Value.err = errors.New("no colon on line"u8);
             return conf;
         }
         @string db = trimSpace(line[..(int)(colon)]);
@@ -199,21 +201,21 @@ internal static ж<nssConf> parseNSSConf(ж<Δfile> Ꮡf) {
             if (len(srcs) > 0 && srcs[0] == (rune)'[') {
                 nint bclose = bytealg.IndexByteString(srcs, (rune)']');
                 if (bclose == -1) {
-                    conf.val.err = errors.New("unclosed criterion bracket"u8);
+                    conf.Value.err = errors.New("unclosed criterion bracket"u8);
                     return conf;
                 }
                 error err = default!;
                 (criteria, err) = parseCriteria(srcs[1..(int)(bclose)]);
                 if (err != default!) {
-                    conf.val.err = errors.New("invalid criteria: " + srcs[1..(int)(bclose)]);
+                    conf.Value.err = errors.New("invalid criteria: " + srcs[1..(int)(bclose)]);
                     return conf;
                 }
                 srcs = srcs[(int)(bclose + 1)..];
             }
             if ((~conf).sources == default!) {
-                conf.val.sources = new map<@string, slice<nssSource>>();
+                conf.Value.sources = new map<@string, slice<nssSource>>();
             }
-            (~conf).sources[db] = append((~conf).sources[db], new nssSource(
+            conf.Value.sources[db] = append((~conf).sources[db], new nssSource(
                 source: src,
                 criteria: criteria
             ));
@@ -227,9 +229,7 @@ internal static (slice<nssCriterion> c, error err) parseCriteria(@string x) {
     slice<nssCriterion> c = default!;
     error err = default!;
 
-    err = foreachField(x, 
-    var cʗ1 = c;
-    (@string f) => {
+    err = foreachField(x, error (@string f) => {
         var not = false;
         if (len(f) > 0 && f[0] == (rune)'!') {
             not = true;
@@ -247,7 +247,7 @@ internal static (slice<nssCriterion> c, error err) parseCriteria(@string x) {
             lowerASCIIBytes(lower);
             f = ((@string)lower);
         }
-        cʗ1 = append(cʗ1, new nssCriterion(
+        c = append(c, new nssCriterion(
             negate: not,
             status: f[..(int)(eq)],
             action: f[(int)(eq + 1)..]

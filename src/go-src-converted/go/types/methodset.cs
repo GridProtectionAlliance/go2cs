@@ -7,6 +7,7 @@ namespace go.go;
 using fmt = fmt_package;
 using sort = sort_package;
 using strings = strings_package;
+using io = io_package;
 
 partial class types_package {
 
@@ -21,12 +22,12 @@ partial class types_package {
     if (s.Len() == 0) {
         return "MethodSet {}"u8;
     }
-    ref var buf = ref heap(new strings_package.Builder(), out var Ꮡbuf);
-    fmt.Fprintln(~Ꮡbuf, "MethodSet {");
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
+    fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), "MethodSet {");
     foreach (var (_, f) in s.list) {
-        fmt.Fprintf(~Ꮡbuf, "\t%s\n"u8, f);
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "\t%s\n"u8, f);
     }
-    fmt.Fprintln(~Ꮡbuf, "}");
+    fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), "}");
     return buf.String();
 }
 
@@ -41,15 +42,16 @@ partial class types_package {
 }
 
 // Lookup returns the method with matching package and name, or nil if not found.
-[GoRecv] public static ж<Selection> Lookup(this ref MethodSet s, ж<Package> Ꮡpkg, @string name) {
-    ref var pkg = ref Ꮡpkg.val;
+public static ж<Selection> Lookup(this ж<MethodSet> Ꮡs, ж<Package> Ꮡpkg, @string name) {
+    ref var s = ref Ꮡs.Value;
+    ref var pkg = ref Ꮡpkg.Value;
 
     if (s.Len() == 0) {
         return default!;
     }
     @string key = Id(Ꮡpkg, name);
-    nint i = sort.Search(len(s.list), (nint i) => {
-        var m = s.list[iΔ1];
+    nint i = sort.Search(len(s.list), (nint iΔ1) => {
+        var m = Ꮡs.Value.list[iΔ1];
         return (~m).obj.Id() >= key;
     });
     if (i < len(s.list)) {
@@ -62,7 +64,8 @@ partial class types_package {
 }
 
 // Shared empty method set.
-internal static MethodSet emptyMethodSet;
+internal static ж<MethodSet> ᏑemptyMethodSet = new(default(MethodSet));
+internal static ref MethodSet emptyMethodSet => ref ᏑemptyMethodSet.Value;
 
 // Note: NewMethodSet is intended for external use only as it
 //       requires interfaces to be complete. It may be used
@@ -81,8 +84,8 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
     // it must not be a pointer or interface type and it must be declared
     // in the same package as the method.").
     {
-        var t = asNamed(T); if (t != nil && isPointer(~t)) {
-            return Ꮡ(emptyMethodSet);
+        var t = asNamed(T); if (t != nil && isPointer(new NamedжΔType(t))) {
+            return ᏑemptyMethodSet;
         }
     }
     // method set up to the current depth, allocated lazily
@@ -90,7 +93,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
     var (typ, isPtr) = deref(T);
     // *typ where typ is an interface has no methods.
     if (isPtr && IsInterface(typ)) {
-        return Ꮡ(emptyMethodSet);
+        return ᏑemptyMethodSet;
     }
     // Start with typ as single entry at shallowest depth.
     var current = new embeddedType[]{new(typ, default!, isPtr, false)}.slice();
@@ -128,19 +131,19 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
                     }
                 }
             }
-            switch (under(typ).type()) {
-            case Struct.val t: {
+            switch (under(typΔ1).type()) {
+            case ж<Struct> t: {
                 foreach (var (i, f) in (~t).fields) {
                     if (fset == default!) {
                         fset = new map<@string, bool>();
                     }
-                    fset[f.Id()] = true;
+                    fset[f.of(Var.Ꮡobject).Id()] = true;
                     // Embedded fields are always of the form T or *T where
                     // T is a type name. If typ appeared multiple times at
                     // this depth, f.Type appears multiple times at the next
                     // depth.
                     if ((~f).embedded) {
-                        var (typΔ2, isPtrΔ1) = deref(f.typ);
+                        var (typΔ2, isPtrΔ1) = deref((~f).typ);
                         // TODO(gri) optimization: ignore types that can't
                         // have fields or methods (only Named, Struct, and
                         // Interface types need to be considered).
@@ -149,17 +152,18 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
                 }
                 break;
             }
-            case Interface.val t: {
+            case ж<Interface> t: {
                 mset = mset.add((~t.typeSet()).methods, e.index, true, e.multiples);
                 break;
             }}
         }
         // Add methods and collisions at this depth to base if no entries with matching
         // names exist already.
-        foreach (var (k, m) in mset) {
+        foreach (var (k, vᴛ1) in mset) {
+            var m = vᴛ1;
+
             {
-                var _ = @base[k];
-                var found = @base[k]; if (!found) {
+                var (_, found) = @base[k, ꟷ]; if (!found) {
                     // Fields collide with methods of the same name at this depth.
                     if (fset[k]) {
                         m = default!;
@@ -176,8 +180,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
         // hide any method further down) if no entries with matching names exist already.
         foreach (var (k, _) in fset) {
             {
-                var _ = @base[k];
-                var found = @base[k]; if (!found) {
+                var (_, found) = @base[k, ꟷ]; if (!found) {
                     if (@base == default!) {
                         @base = new methodSet();
                     }
@@ -189,23 +192,25 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
         current = consolidateMultiples(next);
     }
     if (len(@base) == 0) {
-        return Ꮡ(emptyMethodSet);
+        return ᏑemptyMethodSet;
     }
     // collect methods
     slice<ж<Selection>> list = default!;
-    foreach (var (_, m) in @base) {
+    foreach (var (_, vᴛ2) in @base) {
+        var m = vᴛ2;
+
         if (m != nil) {
-            m.val.recv = T;
+            m.Value.recv = T;
             list = append(list, m);
         }
     }
     // sort by unique name
-    sort.Slice(list, 
     var listʗ1 = list;
-    (nint i, nint j) => (~listʗ1[i]).obj.Id() < (~listʗ1[j]).obj.Id());
+    sort.Slice(list, (nint i, nint j) => (~listʗ1[i]).obj.Id() < (~listʗ1[j]).obj.Id());
     return Ꮡ(new MethodSet(list));
 }
-/* visitMapType: map[string]*Selection */
+
+[GoType("map[@string, ж<Selection>]")] partial struct methodSet;
 
 // Add adds all functions in list to the method set s.
 // If multiples is set, every function in list appears multiple times
@@ -221,12 +226,12 @@ internal static methodSet add(this methodSet s, slice<ж<Func>> list, slice<nint
 }
 
 internal static methodSet addOne(this methodSet s, ж<Func> Ꮡf, slice<nint> index, bool indirect, bool multiples) {
-    ref var f = ref Ꮡf.val;
+    ref var f = ref Ꮡf.Value;
 
     if (s == default!) {
         s = new methodSet();
     }
-    @string key = f.Id();
+    @string key = Ꮡf.of(Func.Ꮡobject).Id();
     // if f is not in the set, add it
     if (!multiples) {
         // TODO(gri) A found method may not be added because it's not in the method set
@@ -234,9 +239,8 @@ internal static methodSet addOne(this methodSet s, ж<Func> Ꮡf, slice<nint> in
         // set and may not collide with the first one, thus leading to a false positive.
         // Is that possible? Investigate.
         {
-            var _ = s[key];
-            var found = s[key]; if (!found && (indirect || !f.hasPtrRecv())) {
-                s[key] = Ꮡ(new Selection(MethodVal, default!, f, index, indirect));
+            var (_, found) = s[key, ꟷ]; if (!found && (indirect || !f.hasPtrRecv())) {
+                s[key] = Ꮡ(new Selection(MethodVal, default!, new FuncжObject(Ꮡf), index, indirect));
                 return s;
             }
         }

@@ -14,7 +14,7 @@ partial class cipher_package {
 // to process each slice of data which passes through.
 [GoType] partial struct StreamReader {
     public Stream S;
-    public io_package.Reader R;
+    public io.Reader R;
 }
 
 public static (nint n, error err) Read(this StreamReader r, slice<byte> dst) {
@@ -33,7 +33,7 @@ public static (nint n, error err) Read(this StreamReader r, slice<byte> dst) {
 // to be called to flush write data.
 [GoType] partial struct StreamWriter {
     public Stream S;
-    public io_package.Writer W;
+    public io.Writer W;
     public error Err; // unused
 }
 

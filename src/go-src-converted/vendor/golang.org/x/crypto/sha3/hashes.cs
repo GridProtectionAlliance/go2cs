@@ -14,44 +14,44 @@ partial class sha3_package {
 // Its generic security strength is 224 bits against preimage attacks,
 // and 112 bits against collision attacks.
 public static hash.Hash New224() {
-    return ~new224();
+    return new stateжHash(new224());
 }
 
 // New256 creates a new SHA3-256 hash.
 // Its generic security strength is 256 bits against preimage attacks,
 // and 128 bits against collision attacks.
 public static hash.Hash New256() {
-    return ~new256();
+    return new stateжHash(new256());
 }
 
 // New384 creates a new SHA3-384 hash.
 // Its generic security strength is 384 bits against preimage attacks,
 // and 192 bits against collision attacks.
 public static hash.Hash New384() {
-    return ~new384();
+    return new stateжHash(new384());
 }
 
 // New512 creates a new SHA3-512 hash.
 // Its generic security strength is 512 bits against preimage attacks,
 // and 256 bits against collision attacks.
 public static hash.Hash New512() {
-    return ~new512();
+    return new stateжHash(new512());
 }
 
 internal static ж<state> new224Generic() {
-    return Ꮡ(new state(rate: 144, outputLen: 28, dsbyte: 6));
+    return Ꮡ(new state(rate: 144, outputLen: 28, dsbyte: 0x06));
 }
 
 internal static ж<state> new256Generic() {
-    return Ꮡ(new state(rate: 136, outputLen: 32, dsbyte: 6));
+    return Ꮡ(new state(rate: 136, outputLen: 32, dsbyte: 0x06));
 }
 
 internal static ж<state> new384Generic() {
-    return Ꮡ(new state(rate: 104, outputLen: 48, dsbyte: 6));
+    return Ꮡ(new state(rate: 104, outputLen: 48, dsbyte: 0x06));
 }
 
 internal static ж<state> new512Generic() {
-    return Ꮡ(new state(rate: 72, outputLen: 64, dsbyte: 6));
+    return Ꮡ(new state(rate: 72, outputLen: 64, dsbyte: 0x06));
 }
 
 // NewLegacyKeccak256 creates a new Keccak-256 hash.
@@ -59,7 +59,7 @@ internal static ж<state> new512Generic() {
 // Only use this function if you require compatibility with an existing cryptosystem
 // that uses non-standard padding. All other users should use New256 instead.
 public static hash.Hash NewLegacyKeccak256() {
-    return new state(rate: 136, outputLen: 32, dsbyte: 1);
+    return new stateжHash(Ꮡ(new state(rate: 136, outputLen: 32, dsbyte: 0x01)));
 }
 
 // NewLegacyKeccak512 creates a new Keccak-512 hash.
@@ -67,7 +67,7 @@ public static hash.Hash NewLegacyKeccak256() {
 // Only use this function if you require compatibility with an existing cryptosystem
 // that uses non-standard padding. All other users should use New512 instead.
 public static hash.Hash NewLegacyKeccak512() {
-    return new state(rate: 72, outputLen: 64, dsbyte: 1);
+    return new stateжHash(Ꮡ(new state(rate: 72, outputLen: 64, dsbyte: 0x01)));
 }
 
 // Sum224 returns the SHA3-224 digest of the data.

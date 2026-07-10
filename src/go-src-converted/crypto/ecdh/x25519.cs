@@ -3,12 +3,12 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto;
 
-using field = crypto.@internal.edwards25519.field_package;
-using randutil = crypto.@internal.randutil_package;
+using field = go.crypto.@internal.edwards25519.field_package;
+using randutil = go.crypto.@internal.randutil_package;
 using errors = errors_package;
 using io = io_package;
-using crypto.@internal;
-using crypto.@internal.edwards25519;
+using go.crypto.@internal;
+using go.crypto.@internal.edwards25519;
 
 partial class ecdh_package {
 
@@ -22,7 +22,7 @@ internal static nint x25519SharedSecretSize = 32;
 // Multiple invocations of this function will return the same value, so it can
 // be used for equality checks and switch statements.
 public static ΔCurve X25519() {
-    return ~x25519;
+    return new x25519CurveжΔCurve(x25519);
 }
 
 internal static ж<x25519Curve> x25519 = Ꮡ(new x25519Curve(nil));
@@ -34,7 +34,9 @@ internal static ж<x25519Curve> x25519 = Ꮡ(new x25519Curve(nil));
     return "X25519"u8;
 }
 
-[GoRecv] internal static (ж<PrivateKey>, error) GenerateKey(this ref x25519Curve c, io.Reader rand) {
+internal static (ж<PrivateKey>, error) GenerateKey(this ж<x25519Curve> Ꮡc, io.Reader rand) {
+    ref var c = ref Ꮡc.Value;
+
     var key = new slice<byte>(x25519PrivateKeySize);
     randutil.MaybeReadByte(rand);
     {
@@ -42,23 +44,26 @@ internal static ж<x25519Curve> x25519 = Ꮡ(new x25519Curve(nil));
             return (default!, err);
         }
     }
-    return c.NewPrivateKey(key);
+    return Ꮡc.NewPrivateKey(key);
 }
 
-[GoRecv] internal static (ж<PrivateKey>, error) NewPrivateKey(this ref x25519Curve c, slice<byte> key) {
+internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<x25519Curve> Ꮡc, slice<byte> key) {
+    ref var c = ref Ꮡc.Value;
+
     if (len(key) != x25519PrivateKeySize) {
         return (default!, errors.New("crypto/ecdh: invalid private key size"u8));
     }
     return (Ꮡ(new PrivateKey(
-        curve: c,
+        curve: new x25519CurveжΔCurve(Ꮡc),
         privateKey: append(new byte[]{}.slice(), key.ꓸꓸꓸ)
     )), default!);
 }
 
-[GoRecv] internal static ж<ΔPublicKey> privateKeyToPublicKey(this ref x25519Curve c, ж<PrivateKey> Ꮡkey) {
-    ref var key = ref Ꮡkey.val;
+internal static ж<ΔPublicKey> privateKeyToPublicKey(this ж<x25519Curve> Ꮡc, ж<PrivateKey> Ꮡkey) {
+    ref var c = ref Ꮡc.Value;
+    ref var key = ref Ꮡkey.Value;
 
-    if (key.curve != ~c) {
+    if (!AreEqual(key.curve, c)) {
         throw panic("crypto/ecdh: internal error: converting the wrong key type");
     }
     var k = Ꮡ(new ΔPublicKey(
@@ -70,19 +75,21 @@ internal static ж<x25519Curve> x25519 = Ꮡ(new x25519Curve(nil));
     return k;
 }
 
-[GoRecv] internal static (ж<ΔPublicKey>, error) NewPublicKey(this ref x25519Curve c, slice<byte> key) {
+internal static (ж<ΔPublicKey>, error) NewPublicKey(this ж<x25519Curve> Ꮡc, slice<byte> key) {
+    ref var c = ref Ꮡc.Value;
+
     if (len(key) != x25519PublicKeySize) {
         return (default!, errors.New("crypto/ecdh: invalid public key"u8));
     }
     return (Ꮡ(new ΔPublicKey(
-        curve: c,
+        curve: new x25519CurveжΔCurve(Ꮡc),
         publicKey: append(new byte[]{}.slice(), key.ꓸꓸꓸ)
     )), default!);
 }
 
 [GoRecv] internal static (slice<byte>, error) ecdh(this ref x25519Curve c, ж<PrivateKey> Ꮡlocal, ж<ΔPublicKey> Ꮡremote) {
-    ref var local = ref Ꮡlocal.val;
-    ref var remote = ref Ꮡremote.val;
+    ref var local = ref Ꮡlocal.Value;
+    ref var remote = ref Ꮡremote.Value;
 
     var @out = new slice<byte>(x25519SharedSecretSize);
     x25519ScalarMult(@out, local.privateKey, remote.publicKey);
@@ -98,48 +105,48 @@ internal static void x25519ScalarMult(slice<byte> dst, slice<byte> scalar, slice
     e[0] &= (byte)(248);
     e[31] &= (byte)(127);
     e[31] |= (byte)(64);
-    ref var x1 = ref heap(new crypto.@internal.edwards25519.field_package.Element(), out var Ꮡx1);
-    ref var x2 = ref heap(new crypto.@internal.edwards25519.field_package.Element(), out var Ꮡx2);
-    ref var z2 = ref heap(new crypto.@internal.edwards25519.field_package.Element(), out var Ꮡz2);
-    ref var x3 = ref heap(new crypto.@internal.edwards25519.field_package.Element(), out var Ꮡx3);
-    ref var z3 = ref heap(new crypto.@internal.edwards25519.field_package.Element(), out var Ꮡz3);
-    ref var tmp0 = ref heap(new crypto.@internal.edwards25519.field_package.Element(), out var Ꮡtmp0);
-    ref var tmp1 = ref heap(new crypto.@internal.edwards25519.field_package.Element(), out var Ꮡtmp1);
-    x1.SetBytes(point[..]);
-    x2.One();
-    x3.Set(Ꮡx1);
-    z3.One();
+    ref var x1 = ref heap(new field.Element(), out var Ꮡx1);
+    ref var x2 = ref heap(new field.Element(), out var Ꮡx2);
+    ref var z2 = ref heap(new field.Element(), out var Ꮡz2);
+    ref var x3 = ref heap(new field.Element(), out var Ꮡx3);
+    ref var z3 = ref heap(new field.Element(), out var Ꮡz3);
+    ref var tmp0 = ref heap(new field.Element(), out var Ꮡtmp0);
+    ref var tmp1 = ref heap(new field.Element(), out var Ꮡtmp1);
+    Ꮡx1.SetBytes(point[..]);
+    Ꮡx2.One();
+    Ꮡx3.Set(Ꮡx1);
+    Ꮡz3.One();
     nint swap = 0;
     for (nint pos = 254; pos >= 0; pos--) {
-        var b = e[pos / 8] >> (int)(((nuint)((nint)(pos & 7))));
+        var b = (byte)((e[pos / 8] >> (int)((nuint)((nint)(pos & 7)))));
         b &= (byte)(1);
-        swap ^= (nint)(((nint)b));
+        swap ^= (nint)((nint)b);
         x2.Swap(Ꮡx3, swap);
         z2.Swap(Ꮡz3, swap);
-        swap = ((nint)b);
-        tmp0.Subtract(Ꮡx3, Ꮡz3);
-        tmp1.Subtract(Ꮡx2, Ꮡz2);
-        x2.Add(Ꮡx2, Ꮡz2);
-        z2.Add(Ꮡx3, Ꮡz3);
-        z3.Multiply(Ꮡtmp0, Ꮡx2);
-        z2.Multiply(Ꮡz2, Ꮡtmp1);
-        tmp0.Square(Ꮡtmp1);
-        tmp1.Square(Ꮡx2);
-        x3.Add(Ꮡz3, Ꮡz2);
-        z2.Subtract(Ꮡz3, Ꮡz2);
-        x2.Multiply(Ꮡtmp1, Ꮡtmp0);
-        tmp1.Subtract(Ꮡtmp1, Ꮡtmp0);
-        z2.Square(Ꮡz2);
-        z3.Mult32(Ꮡtmp1, 121666);
-        x3.Square(Ꮡx3);
-        tmp0.Add(Ꮡtmp0, Ꮡz3);
-        z3.Multiply(Ꮡx1, Ꮡz2);
-        z2.Multiply(Ꮡtmp1, Ꮡtmp0);
+        swap = (nint)b;
+        Ꮡtmp0.Subtract(Ꮡx3, Ꮡz3);
+        Ꮡtmp1.Subtract(Ꮡx2, Ꮡz2);
+        Ꮡx2.Add(Ꮡx2, Ꮡz2);
+        Ꮡz2.Add(Ꮡx3, Ꮡz3);
+        Ꮡz3.Multiply(Ꮡtmp0, Ꮡx2);
+        Ꮡz2.Multiply(Ꮡz2, Ꮡtmp1);
+        Ꮡtmp0.Square(Ꮡtmp1);
+        Ꮡtmp1.Square(Ꮡx2);
+        Ꮡx3.Add(Ꮡz3, Ꮡz2);
+        Ꮡz2.Subtract(Ꮡz3, Ꮡz2);
+        Ꮡx2.Multiply(Ꮡtmp1, Ꮡtmp0);
+        Ꮡtmp1.Subtract(Ꮡtmp1, Ꮡtmp0);
+        Ꮡz2.Square(Ꮡz2);
+        Ꮡz3.Mult32(Ꮡtmp1, 121666);
+        Ꮡx3.Square(Ꮡx3);
+        Ꮡtmp0.Add(Ꮡtmp0, Ꮡz3);
+        Ꮡz3.Multiply(Ꮡx1, Ꮡz2);
+        Ꮡz2.Multiply(Ꮡtmp1, Ꮡtmp0);
     }
     x2.Swap(Ꮡx3, swap);
     z2.Swap(Ꮡz3, swap);
-    z2.Invert(Ꮡz2);
-    x2.Multiply(Ꮡx2, Ꮡz2);
+    Ꮡz2.Invert(Ꮡz2);
+    Ꮡx2.Multiply(Ꮡx2, Ꮡz2);
     copy(dst[..], x2.Bytes());
 }
 

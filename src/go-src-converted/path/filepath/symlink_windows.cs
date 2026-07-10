@@ -22,12 +22,12 @@ internal static @string normVolumeName(@string path) {
 
 // normBase returns the last element of path with correct case.
 internal static (@string, error) normBase(@string path) {
-    (p, err) = syscall.UTF16PtrFromString(path);
+    var (p, err) = syscall.UTF16PtrFromString(path);
     if (err != default!) {
         return ("", err);
     }
-    ref var data = ref heap(new syscall_package.Win32finddata(), out var Ꮡdata);
-    var (h, err) = syscall.FindFirstFile(p, Ꮡdata);
+    ref var data = ref heap(new syscall.Win32finddata(), out var Ꮡdata);
+    (var h, err) = syscall.FindFirstFile(p, Ꮡdata);
     if (err != default!) {
         return ("", err);
     }
@@ -53,7 +53,7 @@ internal static bool baseIsDotDot(@string path) {
 // The returned normalized path will be in the same form (of 5 listed above) as the input path.
 // If two paths A and B are indicating the same file with the same format, toNorm(A) should be equal to toNorm(B).
 // The normBase parameter should be equal to the normBase func, except for in tests.  See docs on the normBase func.
-internal static (@string, error) toNorm(@string path, Func<@string, (string, error)> normBase) {
+internal static (@string, error) toNorm(@string path, Func<@string, (@string, error)> normBase) {
     if (path == ""u8) {
         return (path, default!);
     }

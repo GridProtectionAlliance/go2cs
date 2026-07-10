@@ -3,17 +3,18 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto;
 
-using x509 = crypto.x509_package;
+using Δx509 = go.crypto.x509_package;
 using runtime = runtime_package;
 using sync = sync_package;
-using atomic = sync.atomic_package;
-using sync;
+using atomic = go.sync.atomic_package;
+using go.crypto;
+using go.sync;
 
 partial class tls_package {
 
 [GoType] partial struct cacheEntry {
-    internal sync.atomic_package.Int64 refs;
-    internal ж<crypto.x509_package.Certificate> cert;
+    internal atomic.Int64 refs;
+    internal ж<Δx509.Certificate> cert;
 }
 
 // certCache implements an intern table for reference counted x509.Certificates,
@@ -45,7 +46,7 @@ internal static ж<certCache> globalCertCache = @new<certCache>();
 // no alive activeCerts for a given certificate, the certificate is removed
 // from the cache by a finalizer.
 [GoType] partial struct activeCert {
-    internal ж<crypto.x509_package.Certificate> cert;
+    internal ж<Δx509.Certificate> cert;
 }
 
 // active increments the number of references to the entry, wraps the
@@ -57,47 +58,51 @@ internal static ж<certCache> globalCertCache = @new<certCache>();
 // safe, since the caller holding an activeCert for an entry that is no longer
 // in the cache is fine, with the only side effect being the memory overhead of
 // there being more than one distinct reference to a certificate alive at once.
-[GoRecv] internal static ж<activeCert> active(this ref certCache cc, ж<cacheEntry> Ꮡe) {
-    ref var e = ref Ꮡe.val;
+internal static ж<activeCert> active(this ж<certCache> Ꮡcc, ж<cacheEntry> Ꮡe) {
+    ref var cc = ref Ꮡcc.Value;
+    ref var e = ref Ꮡe.Value;
 
-    e.refs.Add(1);
+    Ꮡe.of(cacheEntry.Ꮡrefs).Add(1);
     var a = Ꮡ(new activeCert(e.cert));
     runtime.SetFinalizer(a, (ж<activeCert> _) => {
-        if (e.refs.Add(-1) == 0) {
-            cc.evict(Ꮡe);
+        if (Ꮡe.of(cacheEntry.Ꮡrefs).Add(-1) == 0) {
+            Ꮡcc.evict(Ꮡe);
         }
     });
     return a;
 }
 
 // evict removes a cacheEntry from the cache.
-[GoRecv] internal static void evict(this ref certCache cc, ж<cacheEntry> Ꮡe) {
-    ref var e = ref Ꮡe.val;
+internal static void evict(this ж<certCache> Ꮡcc, ж<cacheEntry> Ꮡe) {
+    ref var cc = ref Ꮡcc.Value;
+    ref var e = ref Ꮡe.Value;
 
-    cc.Delete(((@string)e.cert.Raw));
+    Ꮡcc.of(certCache.ᏑMap).Delete(((@string)(~e.cert).Raw));
 }
 
 // newCert returns a x509.Certificate parsed from der. If there is already a copy
 // of the certificate in the cache, a reference to the existing certificate will
 // be returned. Otherwise, a fresh certificate will be added to the cache, and
 // the reference returned. The returned reference should not be mutated.
-[GoRecv] internal static (ж<activeCert>, error) newCert(this ref certCache cc, slice<byte> der) {
+internal static (ж<activeCert>, error) newCert(this ж<certCache> Ꮡcc, slice<byte> der) {
+    ref var cc = ref Ꮡcc.Value;
+
     {
-        var (entryΔ1, ok) = cc.Load(((@string)der)); if (ok) {
-            return (cc.active(entryΔ1._<cacheEntry.val>()), default!);
+        var (entryΔ1, ok) = Ꮡcc.of(certCache.ᏑMap).Load(((@string)der)); if (ok) {
+            return (Ꮡcc.active(entryΔ1._<ж<cacheEntry>>()), default!);
         }
     }
-    (cert, err) = x509.ParseCertificate(der);
+    var (cert, err) = Δx509.ParseCertificate(der);
     if (err != default!) {
         return (default!, err);
     }
     var entry = Ꮡ(new cacheEntry(cert: cert));
     {
-        var (entryΔ2, loaded) = cc.LoadOrStore(((@string)der), entry); if (loaded) {
-            return (cc.active(entryΔ2._<cacheEntry.val>()), default!);
+        var (entryΔ2, loaded) = Ꮡcc.of(certCache.ᏑMap).LoadOrStore(((@string)der), entry); if (loaded) {
+            return (Ꮡcc.active(entryΔ2._<ж<cacheEntry>>()), default!);
         }
     }
-    return (cc.active(entry), default!);
+    return (Ꮡcc.active(entry), default!);
 }
 
 } // end tls_package

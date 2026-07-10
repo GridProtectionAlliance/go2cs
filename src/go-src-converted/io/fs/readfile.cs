@@ -30,40 +30,40 @@ partial class fs_package {
 // If fs implements [ReadFileFS], ReadFile calls fs.ReadFile.
 // Otherwise ReadFile calls fs.Open and uses Read and Close
 // on the returned [File].
-public static (slice<byte>, error) ReadFile(FS fsys, @string name) => func((defer, _) => {
+public static (slice<byte>, error) ReadFile(FS fsys, @string name) => func<(slice<byte>, error)>((defer, recover) => {
     {
         var (fsysΔ1, ok) = fsys._<ReadFileFS>(ᐧ); if (ok) {
             return fsysΔ1.ReadFile(name);
         }
     }
-    (file, err) = fsys.Open(name);
+    var (@file, err) = fsys.Open(name);
     if (err != default!) {
         return (default!, err);
     }
-    var fileʗ1 = file;
-    defer(fileʗ1.Close);
+    var fileʗ1 = @file;
+    defer(() => fileʗ1.Close());
     nint size = default!;
     {
-        (info, errΔ1) = file.Stat(); if (errΔ1 == default!) {
+        var (info, errΔ1) = @file.Stat(); if (errΔ1 == default!) {
             var size64 = info.Size();
-            if (((int64)((nint)size64)) == size64) {
-                size = ((nint)size64);
+            if ((int64)(nint)size64 == size64) {
+                size = (nint)size64;
             }
         }
     }
     var data = new slice<byte>(0, size + 1);
     while (ᐧ) {
         if (len(data) >= cap(data)) {
-            var d = append(data[..(int)(cap(data))], 0);
+            var d = append(data[..(int)(cap(data))], (byte)(0));
             data = d[..(int)(len(data))];
         }
-        var (n, err) = file.Read(data[(int)(len(data))..(int)(cap(data))]);
+        var (n, errΔ2) = @file.Read(data[(int)(len(data))..(int)(cap(data))]);
         data = data[..(int)(len(data) + n)];
-        if (err != default!) {
-            if (AreEqual(err, io.EOF)) {
-                err = default!;
+        if (errΔ2 != default!) {
+            if (AreEqual(errΔ2, io.EOF)) {
+                errΔ2 = default!;
             }
-            return (data, err);
+            return (data, errΔ2);
         }
     }
 });

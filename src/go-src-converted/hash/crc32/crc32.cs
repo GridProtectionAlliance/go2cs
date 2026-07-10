@@ -16,9 +16,9 @@ using errors = errors_package;
 using hash = hash_package;
 using byteorder = @internal.byteorder_package;
 using sync = sync_package;
-using atomic = sync.atomic_package;
+using atomic = go.sync.atomic_package;
 using @internal;
-using sync;
+using go.sync;
 
 partial class crc32_package {
 
@@ -26,11 +26,11 @@ partial class crc32_package {
 public static readonly UntypedInt ΔSize = 4;
 
 // Predefined polynomials.
-public static readonly UntypedInt IEEE = /* 0xedb88320 */ 3988292384;
+public static readonly UntypedInt IEEE = 0xedb88320;
 
-public static readonly UntypedInt Castagnoli = /* 0x82f63b78 */ 2197175160;
+public static readonly UntypedInt Castagnoli = 0x82f63b78;
 
-public static readonly UntypedInt Koopman = /* 0xeb31d82e */ 3945912366;
+public static readonly UntypedInt Koopman = 0xeb31d82e;
 
 [GoType("[256]uint32")] partial struct Table;
 
@@ -72,9 +72,11 @@ internal static ж<slicing8Table> castagnoliTable8;
 
 internal static Func<uint32, slice<byte>, uint32> updateCastagnoli;
 
-internal static sync.Once castagnoliOnce;
+internal static ж<sync.Once> ᏑcastagnoliOnce = new(default(sync.Once));
+internal static ref sync.Once castagnoliOnce => ref ᏑcastagnoliOnce.Value;
 
-internal static atomic.Bool haveCastagnoli;
+internal static ж<atomic.Bool> ᏑhaveCastagnoli = new(default(atomic.Bool));
+internal static ref atomic.Bool haveCastagnoli => ref ᏑhaveCastagnoli.Value;
 
 internal static void castagnoliInit() {
     castagnoliTable = simpleMakeTable(Castagnoli);
@@ -86,7 +88,7 @@ internal static void castagnoliInit() {
         castagnoliTable8 = slicingMakeTable(Castagnoli);
         updateCastagnoli = (uint32 crc, slice<byte> p) => slicingUpdate(crc, castagnoliTable8, p);
     }
-    haveCastagnoli.Store(true);
+    ᏑhaveCastagnoli.Store(true);
 }
 
 // IEEETable is the table for the [IEEE] polynomial.
@@ -97,7 +99,8 @@ internal static ж<slicing8Table> ieeeTable8;
 
 internal static Func<uint32, slice<byte>, uint32> updateIEEE;
 
-internal static sync.Once ieeeOnce;
+internal static ж<sync.Once> ᏑieeeOnce = new(default(sync.Once));
+internal static ref sync.Once ieeeOnce => ref ᏑieeeOnce.Value;
 
 internal static void ieeeInit() {
     if (archAvailableIEEE()){
@@ -115,11 +118,11 @@ internal static void ieeeInit() {
 public static ж<Table> MakeTable(uint32 poly) {
     var exprᴛ1 = poly;
     if (exprᴛ1 == IEEE) {
-        ieeeOnce.Do(ieeeInit);
+        ᏑieeeOnce.Do(ieeeInit);
         return IEEETable;
     }
     if (exprᴛ1 == Castagnoli) {
-        castagnoliOnce.Do(castagnoliInit);
+        ᏑcastagnoliOnce.Do(castagnoliInit);
         return castagnoliTable;
     }
     { /* default: */
@@ -140,12 +143,12 @@ public static ж<Table> MakeTable(uint32 poly) {
 // implements [encoding.BinaryMarshaler] and [encoding.BinaryUnmarshaler] to
 // marshal and unmarshal the internal state of the hash.
 public static hash.Hash32 New(ж<Table> Ꮡtab) {
-    ref var tab = ref Ꮡtab.val;
+    ref var tab = ref Ꮡtab.DerefOrNil();
 
     if (Ꮡtab == IEEETable) {
-        ieeeOnce.Do(ieeeInit);
+        ᏑieeeOnce.Do(ieeeInit);
     }
-    return new digest(0, Ꮡtab);
+    return new digestжHash32(Ꮡ(new digest(0, Ꮡtab)));
 }
 
 // NewIEEE creates a new [hash.Hash32] computing the CRC-32 checksum using
@@ -195,15 +198,15 @@ internal const nint marshaledSize = /* len(magic) + 4 + 4 */ 12;
 }
 
 internal static uint32 update(uint32 crc, ж<Table> Ꮡtab, slice<byte> p, bool checkInitIEEE) {
-    ref var tab = ref Ꮡtab.val;
+    ref var tab = ref Ꮡtab.DerefOrNil();
 
     switch (ᐧ) {
-    case {} when haveCastagnoli.Load() && Ꮡtab == castagnoliTable: {
+    case {} when ᏑhaveCastagnoli.Load() && Ꮡtab == castagnoliTable: {
         return updateCastagnoli(crc, p);
     }
-    case {} when Ꮡtab is IEEETable: {
+    case {} when Ꮡtab == IEEETable: {
         if (checkInitIEEE) {
-            ieeeOnce.Do(ieeeInit);
+            ᏑieeeOnce.Do(ieeeInit);
         }
         return updateIEEE(crc, p);
     }
@@ -215,7 +218,7 @@ internal static uint32 update(uint32 crc, ж<Table> Ꮡtab, slice<byte> p, bool 
 
 // Update returns the result of adding the bytes in p to the crc.
 public static uint32 Update(uint32 crc, ж<Table> Ꮡtab, slice<byte> p) {
-    ref var tab = ref Ꮡtab.val;
+    ref var tab = ref Ꮡtab.Value;
 
     // Unfortunately, because IEEETable is exported, IEEE may be used without a
     // call to MakeTable. We have to make sure it gets initialized in that case.
@@ -238,13 +241,13 @@ public static uint32 Update(uint32 crc, ж<Table> Ꮡtab, slice<byte> p) {
 
 [GoRecv] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     var s = d.Sum32();
-    return append(@in, ((byte)(s >> (int)(24))), ((byte)(s >> (int)(16))), ((byte)(s >> (int)(8))), ((byte)s));
+    return append(@in, (byte)((s >> (int)(24))), (byte)((s >> (int)(16))), (byte)((s >> (int)(8))), (byte)s);
 }
 
 // Checksum returns the CRC-32 checksum of data
 // using the polynomial represented by the [Table].
 public static uint32 Checksum(slice<byte> data, ж<Table> Ꮡtab) {
-    ref var tab = ref Ꮡtab.val;
+    ref var tab = ref Ꮡtab.Value;
 
     return Update(0, Ꮡtab, data);
 }
@@ -252,18 +255,18 @@ public static uint32 Checksum(slice<byte> data, ж<Table> Ꮡtab) {
 // ChecksumIEEE returns the CRC-32 checksum of data
 // using the [IEEE] polynomial.
 public static uint32 ChecksumIEEE(slice<byte> data) {
-    ieeeOnce.Do(ieeeInit);
+    ᏑieeeOnce.Do(ieeeInit);
     return updateIEEE(0, data);
 }
 
 // tableSum returns the IEEE checksum of table t.
 internal static uint32 tableSum(ж<Table> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.DerefOrNil();
 
     array<byte> a = new(1024);
     var b = a[..0];
-    if (t != nil) {
-        foreach (var (_, x) in t.val) {
+    if (Ꮡt != nil) {
+        foreach (var (_, x) in t) {
             b = byteorder.BeAppendUint32(b, x);
         }
     }

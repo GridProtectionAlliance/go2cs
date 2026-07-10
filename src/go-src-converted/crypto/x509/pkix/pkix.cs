@@ -19,9 +19,9 @@ partial class pkix_package {
 // AlgorithmIdentifier represents the ASN.1 structure of the same name. See RFC
 // 5280, section 4.1.1.2.
 [GoType] partial struct AlgorithmIdentifier {
-    public encoding.asn1_package.ObjectIdentifier Algorithm;
+    public asn1.ObjectIdentifier Algorithm;
     [GoTag(@"asn1:""optional""")]
-    public encoding.asn1_package.RawValue Parameters;
+    public asn1.RawValue Parameters;
 }
 
 [GoType("[]RelativeDistinguishedNameSET")] partial struct RDNSequence;
@@ -52,10 +52,9 @@ public static @string String(this RDNSequence r) {
                 s += "+"u8;
             }
             @string oidString = tv.Type.String();
-            @string typeName = attributeTypeNames[oidString];
-            var ok = attributeTypeNames[oidString];
+            var (typeName, ok) = attributeTypeNames[oidString, ꟷ];
             if (!ok) {
-                (derBytes, err) = asn1.Marshal(tv.Value);
+                var (derBytes, err) = asn1.Marshal(tv.Value);
                 if (err == default!) {
                     s += oidString + "=#"u8 + hex.EncodeToString(derBytes);
                     continue;
@@ -82,7 +81,7 @@ public static @string String(this RDNSequence r) {
                 }}
 
                 if (escape){
-                    escaped = append(escaped, (rune)'\\', c);
+                    escaped = append(escaped, (rune)((rune)'\\'), c);
                 } else {
                     escaped = append(escaped, c);
                 }
@@ -98,14 +97,14 @@ public static @string String(this RDNSequence r) {
 // AttributeTypeAndValue mirrors the ASN.1 structure of the same name in
 // RFC 5280, Section 4.1.2.4.
 [GoType] partial struct AttributeTypeAndValue {
-    public encoding.asn1_package.ObjectIdentifier Type;
+    public asn1.ObjectIdentifier Type;
     public any Value;
 }
 
 // AttributeTypeAndValueSET represents a set of ASN.1 sequences of
 // [AttributeTypeAndValue] sequences from RFC 2986 (PKCS #10).
 [GoType] partial struct AttributeTypeAndValueSET {
-    public encoding.asn1_package.ObjectIdentifier Type;
+    public asn1.ObjectIdentifier Type;
     [GoTag(@"asn1:""set""")]
     public slice<slice<AttributeTypeAndValue>> Value;
 }
@@ -113,7 +112,7 @@ public static @string String(this RDNSequence r) {
 // Extension represents the ASN.1 structure of the same name. See RFC
 // 5280, section 4.2.
 [GoType] partial struct Extension {
-    public encoding.asn1_package.ObjectIdentifier Id;
+    public asn1.ObjectIdentifier Id;
     [GoTag(@"asn1:""optional""")]
     public bool Critical;
     public slice<byte> Value;
@@ -124,15 +123,10 @@ public static @string String(this RDNSequence r) {
 // structure. If an accurate representation is needed, asn1.Unmarshal the raw
 // subject or issuer as an [RDNSequence].
 [GoType] partial struct Name {
-    public slice<@string> Country;
-    public slice<@string> Organization;
-    public slice<@string> OrganizationalUnit;
-    public slice<@string> Locality;
-    public slice<@string> Province;
-    public slice<@string> StreetAddress;
-    public slice<@string> PostalCode;
-    public @string SerialNumber;
-    public @string CommonName;
+    public slice<@string> Country, Organization, OrganizationalUnit;
+    public slice<@string> Locality, Province;
+    public slice<@string> StreetAddress, PostalCode;
+    public @string SerialNumber, CommonName;
     // Names contains all parsed attributes. When parsing distinguished names,
     // this can be used to extract non-standard attributes that are not parsed
     // by this package. When marshaling to RDNSequences, the Names field is
@@ -148,7 +142,7 @@ public static @string String(this RDNSequence r) {
 // Multi-entry RDNs are flattened, all entries are added to the
 // relevant n fields, and the grouping is not preserved.
 [GoRecv] public static void FillFromRDNSequence(this ref Name n, ж<RDNSequence> Ꮡrdns) {
-    ref var rdns = ref Ꮡrdns.val;
+    ref var rdns = ref Ꮡrdns.Value;
 
     foreach (var (_, rdn) in rdns) {
         if (len(rdn) == 0) {
@@ -228,7 +222,7 @@ internal static RDNSequence appendRDNs(this Name n, RDNSequence @in, slice<@stri
         s[i].Type = oid;
         s[i].Value = value;
     }
-    return append(@in, s);
+    return append(@in, (RelativeDistinguishedNameSET)(s));
 }
 
 // ToRDNSequence converts n into a single [RDNSequence]. The following
@@ -260,7 +254,7 @@ public static RDNSequence /*ret*/ ToRDNSequence(this Name n) {
         ret = n.appendRDNs(ret, new @string[]{n.SerialNumber}.slice(), oidSerialNumber);
     }
     foreach (var (_, atv) in n.ExtraNames) {
-        ret = append(ret, new AttributeTypeAndValue[]{atv}.slice());
+        ret = append(ret, (RelativeDistinguishedNameSET)(new AttributeTypeAndValue[]{atv}.slice()));
     }
     return ret;
 }
@@ -285,7 +279,7 @@ public static @string String(this Name n) {
             // These attributes were already parsed into named fields.
             // Place non-standard parsed values at the beginning of the sequence
             // so they will be at the end of the string. See Issue 39924.
-            rdns = append(rdns, new AttributeTypeAndValue[]{atv}.slice());
+            rdns = append(rdns, (RelativeDistinguishedNameSET)(new AttributeTypeAndValue[]{atv}.slice()));
         }
     }
     rdns = append(rdns, n.ToRDNSequence().ꓸꓸꓸ);
@@ -311,7 +305,7 @@ internal static bool oidInAttributeTypeAndValue(asn1.ObjectIdentifier oid, slice
 [GoType] partial struct CertificateList {
     public TBSCertificateList TBSCertList;
     public AlgorithmIdentifier SignatureAlgorithm;
-    public encoding.asn1_package.BitString SignatureValue;
+    public asn1.BitString SignatureValue;
 }
 
 // HasExpired reports whether certList should have been updated by now.
@@ -324,14 +318,14 @@ internal static bool oidInAttributeTypeAndValue(asn1.ObjectIdentifier oid, slice
 //
 // Deprecated: x509.RevocationList should be used instead.
 [GoType] partial struct TBSCertificateList {
-    public encoding.asn1_package.RawContent Raw;
+    public asn1.RawContent Raw;
     [GoTag(@"asn1:""optional,default:0""")]
     public nint Version;
     public AlgorithmIdentifier Signature;
     public RDNSequence Issuer;
-    public time_package.Time ThisUpdate;
+    public time.Time ThisUpdate;
     [GoTag(@"asn1:""optional""")]
-    public time_package.Time NextUpdate;
+    public time.Time NextUpdate;
     [GoTag(@"asn1:""optional""")]
     public slice<RevokedCertificate> RevokedCertificates;
     [GoTag(@"asn1:""tag:0,optional,explicit""")]
@@ -341,8 +335,8 @@ internal static bool oidInAttributeTypeAndValue(asn1.ObjectIdentifier oid, slice
 // RevokedCertificate represents the ASN.1 structure of the same name. See RFC
 // 5280, section 5.1.
 [GoType] partial struct RevokedCertificate {
-    public ж<math.big_package.ΔInt> SerialNumber;
-    public time_package.Time RevocationTime;
+    public ж<bigꓸInt> SerialNumber;
+    public time.Time RevocationTime;
     [GoTag(@"asn1:""optional""")]
     public slice<Extension> Extensions;
 }

@@ -40,8 +40,8 @@ internal static float64 asin(float64 x) {
     }
     // special case
     var temp = Sqrt(1 - x * x);
-    if (x > 0.7F){
-        temp = Pi / 2 - satan(temp / x);
+    if (x > 0.7D){
+        temp = (float64)(Pi / 2) - satan(temp / x);
     } else {
         temp = satan(x / temp);
     }
@@ -64,7 +64,7 @@ public static float64 Acos(float64 x) {
 }
 
 internal static float64 acos(float64 x) {
-    return Pi / 2 - Asin(x);
+    return (float64)(Pi / 2) - Asin(x);
 }
 
 } // end math_package

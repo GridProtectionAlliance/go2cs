@@ -8,15 +8,15 @@ using image;
 
 partial class image_package {
 
-public static ж<Uniform> Black = NewUniform(color.Black);
-public static ж<Uniform> White = NewUniform(color.White);
-public static ж<Uniform> Transparent = NewUniform(color.Transparent);
-public static ж<Uniform> ΔOpaque = NewUniform(color.Opaque);
+public static ж<Uniform> Black = NewUniform(new color_Gray16ᴠColor(color.Black));
+public static ж<Uniform> White = NewUniform(new color_Gray16ᴠColor(color.White));
+public static ж<Uniform> Transparent = NewUniform(new color_Alpha16ᴠColor(color.Transparent));
+public static ж<Uniform> ΔOpaque = NewUniform(new color_Alpha16ᴠColor(color.Opaque));
 
 // Uniform is an infinite-sized [Image] of uniform color.
 // It implements the [color.Color], [color.Model], and [Image] interfaces.
 [GoType] partial struct Uniform {
-    public image.color_package.Color C;
+    public color.Color C;
 }
 
 [GoRecv] public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this ref Uniform c) {
@@ -28,8 +28,10 @@ public static ж<Uniform> ΔOpaque = NewUniform(color.Opaque);
     return c.C.RGBA();
 }
 
-[GoRecv("capture")] public static color.Model ColorModel(this ref Uniform c) {
-    return ~c;
+public static color.Model ColorModel(this ж<Uniform> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    return new UniformжModel(Ꮡc);
 }
 
 [GoRecv] public static color.Color Convert(this ref Uniform c, color.Color _) {
@@ -37,7 +39,7 @@ public static ж<Uniform> ΔOpaque = NewUniform(color.Opaque);
 }
 
 [GoRecv] public static Rectangle Bounds(this ref Uniform c) {
-    return new Rectangle(new Point(-1e9F, -1e9F), new Point(1e9F, 1e9F));
+    return new Rectangle(new Point(-1000000000, -1000000000), new Point(1000000000, 1000000000));
 }
 
 [GoRecv] public static color.Color At(this ref Uniform c, nint x, nint y) {
@@ -46,13 +48,13 @@ public static ж<Uniform> ΔOpaque = NewUniform(color.Opaque);
 
 [GoRecv] public static color.RGBA64 RGBA64At(this ref Uniform c, nint x, nint y) {
     var (r, g, b, a) = c.C.RGBA();
-    return new color.RGBA64(((uint16)r), ((uint16)g), ((uint16)b), ((uint16)a));
+    return new color.RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
 [GoRecv] public static bool Opaque(this ref Uniform c) {
     var (_, _, _, a) = c.C.RGBA();
-    return a == 65535;
+    return a == 0xffff;
 }
 
 // NewUniform returns a new [Uniform] image of the given color.

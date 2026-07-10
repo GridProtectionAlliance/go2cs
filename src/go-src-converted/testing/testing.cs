@@ -375,26 +375,27 @@ using flag = flag_package;
 using fmt = fmt_package;
 using goexperiment = @internal.goexperiment_package;
 using race = @internal.race_package;
-using io = io_package;
-using rand = math.rand_package;
+using Δio = io_package;
+using rand = go.math.rand_package;
 using os = os_package;
 using reflect = reflect_package;
-using runtime = runtime_package;
-using debug = runtime.debug_package;
-using trace = runtime.trace_package;
+using Δruntime = runtime_package;
+using debug = go.runtime.debug_package;
+using trace = go.runtime.trace_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
-using sync = sync_package;
-using atomic = sync.atomic_package;
+using Δsync = sync_package;
+using atomic = go.sync.atomic_package;
 using time = time_package;
-using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
+using Δunicode = unicode_package;
+using utf8 = go.unicode.utf8_package;
 using @internal;
-using math;
-using runtime;
-using sync;
-using unicode;
+using fs = go.io.fs_package;
+using go.math;
+using go.runtime;
+using go.sync;
+using go.unicode;
 using ꓸꓸꓸany = Span<any>;
 
 partial class testing_package {
@@ -425,7 +426,7 @@ public static void Init() {
     // the "go test" command is run.
     outputDir = flag.String("test.outputdir"u8, ""u8, "write profiles to `dir`"u8);
     // Report as tests are run; default is silent for success.
-    flag.Var(chatty, "test.v"u8, "verbose: print additional output"u8);
+    flag.Var(new chattyFlagжValue(Ꮡchatty), "test.v"u8, "verbose: print additional output"u8);
     count = flag.Uint("test.count"u8, 1, "run tests and benchmarks `n` times"u8);
     coverProfile = flag.String("test.coverprofile"u8, ""u8, "write a coverage profile to `file`"u8);
     gocoverdir = flag.String("test.gocoverdir"u8, ""u8, "write coverage intermediate files to this directory"u8);
@@ -443,7 +444,7 @@ public static void Init() {
     traceFile = flag.String("test.trace"u8, ""u8, "write an execution trace to `file`"u8);
     timeout = flag.Duration("test.timeout"u8, 0, "panic test binary after duration `d` (default 0, timeout disabled)"u8);
     cpuListStr = flag.String("test.cpu"u8, ""u8, "comma-separated `list` of cpu counts to run each test with"u8);
-    parallel = flag.Int("test.parallel"u8, runtime.GOMAXPROCS(0), "run at most `n` tests in parallel"u8);
+    parallel = flag.Int("test.parallel"u8, Δruntime.GOMAXPROCS(0), "run at most `n` tests in parallel"u8);
     testlog = flag.String("test.testlogfile"u8, ""u8, "write test action log to `file` (for use only by cmd/go)"u8);
     shuffle = flag.String("test.shuffle"u8, "off"u8, "randomize the execution order of tests and benchmarks"u8);
     fullPath = flag.Bool("test.fullpath"u8, false, "show full file names in error messages"u8);
@@ -451,10 +452,11 @@ public static void Init() {
     initFuzzFlags();
 }
 
-public static ж<bool> @short;
+internal static ж<bool> @short;
 internal static ж<bool> failFast;
 internal static ж<@string> outputDir;
-internal static chattyFlag chatty;
+internal static ж<chattyFlag> Ꮡchatty = new(default(chattyFlag));
+internal static ref chattyFlag chatty => ref Ꮡchatty.Value;
 internal static ж<nuint> count;
 internal static ж<@string> coverProfile;
 internal static ж<@string> gocoverdir;
@@ -479,8 +481,10 @@ internal static ж<bool> fullPath;
 internal static bool haveExamples; // are there examples?
 internal static slice<nint> cpuList;
 internal static ж<os.File> testlogFile;
-internal static atomic.Uint32 numFailed;     // number of test failures
-internal static sync.Map running; // map[string]time.Time of running, unpaused tests
+internal static ж<atomic.Uint32> ᏑnumFailed = new(default(atomic.Uint32));
+internal static ref atomic.Uint32 numFailed => ref ᏑnumFailed.Value;     // number of test failures
+internal static ж<Δsync.Map> Ꮡrunning = new(default(Δsync.Map));
+internal static ref Δsync.Map running => ref Ꮡrunning.Value; // map[string]time.Time of running, unpaused tests
 
 [GoType] partial struct chattyFlag {
     internal bool on; // -v is set in some form
@@ -493,9 +497,6 @@ internal static sync.Map running; // map[string]time.Time of running, unpaused t
 
 [GoRecv] internal static error Set(this ref chattyFlag f, @string arg) {
     var exprᴛ1 = arg;
-    { /* default: */
-        return fmt.Errorf("invalid flag -test.v=%s"u8, arg);
-    }
     if (exprᴛ1 == "true"u8 || exprᴛ1 == "test2json"u8) {
         f.on = true;
         f.json = arg == "test2json"u8;
@@ -503,6 +504,9 @@ internal static sync.Map running; // map[string]time.Time of running, unpaused t
     else if (exprᴛ1 == "false"u8) {
         f.on = false;
         f.json = false;
+    }
+    else { /* default: */
+        return fmt.Errorf("invalid flag -test.v=%s"u8, arg);
     }
 
     return default!;
@@ -520,7 +524,7 @@ internal static sync.Map running; // map[string]time.Time of running, unpaused t
 
 [GoRecv] internal static any Get(this ref chattyFlag f) {
     if (f.json) {
-        return "test2json"u8;
+        return (@string)"test2json";
     }
     return f.on;
 }
@@ -535,13 +539,13 @@ internal const byte marker = /* byte(0x16) */ 22; // ^V for framing
 }
 
 [GoType] partial struct chattyPrinter {
-    internal io_package.Writer w;
-    internal sync_package.Mutex lastNameMu; // guards lastName
+    internal Δio.Writer w;
+    internal Δsync.Mutex lastNameMu; // guards lastName
     internal @string lastName;    // last printed test name in chatty mode
     internal bool json;       // -v=json output mode
 }
 
-internal static ж<chattyPrinter> newChattyPrinter(io.Writer w) {
+internal static ж<chattyPrinter> newChattyPrinter(Δio.Writer w) {
     return Ꮡ(new chattyPrinter(w: w, json: chatty.json));
 }
 
@@ -549,7 +553,9 @@ internal static ж<chattyPrinter> newChattyPrinter(io.Writer w) {
 // Using p.json allows tests to check the json behavior without modifying
 // the global variable. For convenience, we allow p == nil and treat
 // that as not in json mode (because it's not chatty at all).
-[GoRecv] internal static @string prefix(this ref chattyPrinter p) {
+internal static @string prefix(this ж<chattyPrinter> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     if (p != nil && p.json) {
         return ((@string)marker);
     }
@@ -559,35 +565,41 @@ internal static ж<chattyPrinter> newChattyPrinter(io.Writer w) {
 // Updatef prints a message about the status of the named test to w.
 //
 // The formatted message must include the test name itself.
-[GoRecv] internal static void Updatef(this ref chattyPrinter p, @string testName, @string format, params ꓸꓸꓸany argsʗp) => func((defer, _) => {
+internal static void Updatef(this ж<chattyPrinter> Ꮡp, @string testName, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
+    func((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
 
-    p.lastNameMu.Lock();
-    defer(p.lastNameMu.Unlock);
-    // Since the message already implies an association with a specific new test,
-    // we don't need to check what the old test name was or log an extra NAME line
-    // for it. (We're updating it anyway, and the current message already includes
-    // the test name.)
-    p.lastName = testName;
-    fmt.Fprintf(p.w, p.prefix() + format, args.ꓸꓸꓸ);
-});
+        Ꮡp.of(chattyPrinter.ᏑlastNameMu).Lock();
+        defer(Ꮡp.of(chattyPrinter.ᏑlastNameMu).Unlock);
+        // Since the message already implies an association with a specific new test,
+        // we don't need to check what the old test name was or log an extra NAME line
+        // for it. (We're updating it anyway, and the current message already includes
+        // the test name.)
+        p.lastName = testName;
+        fmt.Fprintf(p.w, Ꮡp.prefix() + format, args.ꓸꓸꓸ);
+    });
+}
 
 // Printf prints a message, generated by the named test, that does not
 // necessarily mention that tests's name itself.
-[GoRecv] internal static void Printf(this ref chattyPrinter p, @string testName, @string format, params ꓸꓸꓸany argsʗp) => func((defer, _) => {
+internal static void Printf(this ж<chattyPrinter> Ꮡp, @string testName, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
+    func((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
 
-    p.lastNameMu.Lock();
-    defer(p.lastNameMu.Unlock);
-    if (p.lastName == ""u8){
-        p.lastName = testName;
-    } else 
-    if (p.lastName != testName) {
-        fmt.Fprintf(p.w, "%s=== NAME  %s\n"u8, p.prefix(), testName);
-        p.lastName = testName;
-    }
-    fmt.Fprintf(p.w, format, args.ꓸꓸꓸ);
-});
+        Ꮡp.of(chattyPrinter.ᏑlastNameMu).Lock();
+        defer(Ꮡp.of(chattyPrinter.ᏑlastNameMu).Unlock);
+        if (p.lastName == ""u8){
+            p.lastName = testName;
+        } else 
+        if (p.lastName != testName) {
+            fmt.Fprintf(p.w, "%s=== NAME  %s\n"u8, Ꮡp.prefix(), testName);
+            p.lastName = testName;
+        }
+        fmt.Fprintf(p.w, format, args.ꓸꓸꓸ);
+    });
+}
 
 // The maximum number of stack frames to go through when skipping helper functions for
 // the purpose of decorating log messages.
@@ -596,9 +608,9 @@ internal static readonly UntypedInt maxStackLen = 50;
 // common holds the elements common between T and B and
 // captures common methods such as Errorf.
 [GoType] partial struct common {
-    internal sync_package.RWMutex mu;         // guards this group of fields
+    internal Δsync.RWMutex mu;         // guards this group of fields
     internal slice<byte> output;          // Output generated by test or benchmark.
-    internal io_package.Writer w;            // For flushToParent.
+    internal Δio.Writer w;            // For flushToParent.
     internal bool ran;                 // Test or benchmark (or one of its subtests) was executed.
     internal bool failed;                 // Test or benchmark has failed.
     internal bool skipped;                 // Test or benchmark has been skipped.
@@ -612,8 +624,8 @@ internal static readonly UntypedInt maxStackLen = 50;
     internal bool inFuzzFn;                 // Whether the fuzz target, if this is one, is running.
     internal ж<chattyPrinter> chatty; // A copy of chattyPrinter, if the chatty flag is set.
     internal bool bench;           // Whether the current test is a benchmark.
-    internal sync.atomic_package.Bool hasSub;    // whether there are sub-benchmarks.
-    internal sync.atomic_package.Bool cleanupStarted;    // Registered cleanup callbacks have started to execute
+    internal atomic.Bool hasSub;    // whether there are sub-benchmarks.
+    internal atomic.Bool cleanupStarted;    // Registered cleanup callbacks have started to execute
     internal @string runner;        // Function name of tRunner running the test.
     internal bool isParallel;           // Whether the test is parallel.
     internal ж<common> parent;
@@ -621,13 +633,13 @@ internal static readonly UntypedInt maxStackLen = 50;
     internal slice<uintptr> creator;    // If level > 0, the stack trace at the point where the parent called t.Run.
     internal @string name;           // Name of test or benchmark.
     internal highPrecisionTime start; // Time test or benchmark started
-    internal time_package.Duration duration;
+    internal time.Duration duration;
     internal channel<bool> barrier; // To signal parallel subtests they may start. Nil when T.Parallel is not present (B) or not usable (when fuzzing).
     internal channel<bool> signal; // To signal a test is done.
     internal slice<ж<T>> sub; // Queue of subtests to be run in parallel.
-    internal sync.atomic_package.Int64 lastRaceErrors; // Max value of race.Errors seen during the test or its subtests.
-    internal sync.atomic_package.Bool raceErrorLogged;
-    internal sync_package.Mutex tempDirMu;
+    internal atomic.Int64 lastRaceErrors; // Max value of race.Errors seen during the test or its subtests.
+    internal atomic.Bool raceErrorLogged;
+    internal Δsync.Mutex tempDirMu;
     internal @string tempDir;
     internal error tempDirErr;
     internal int32 tempDirSeq;
@@ -642,7 +654,7 @@ public static bool Short() {
     if (!flag.Parsed()) {
         throw panic("testing: Short called before Parse");
     }
-    return @short.val;
+    return @short.Value;
 }
 
 // testBinary is set by cmd/go to "1" if this is a binary built by "go test".
@@ -686,41 +698,40 @@ public static bool Verbose() {
     }
 }
 
-[GoType("dyn")] partial struct frameSkip_c {
-}
-
 // frameSkip searches, starting after skip frames, for the first caller frame
 // in a function not marked as a helper and returns that frame.
 // The search stops if it finds a tRunner function that
 // was the entry point into the test and the test is not a subtest.
 // This function must be called with c.mu held.
-[GoRecv] internal static runtime.Frame frameSkip(this ref common c, nint skip) => func((defer, _) => {
+internal static Δruntime.Frame frameSkip(this ж<common> Ꮡc, nint skip) => func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+
     // If the search continues into the parent test, we'll have to hold
     // its mu temporarily. If we then return, we need to unlock it.
     var shouldUnlock = false;
     defer(() => {
         if (shouldUnlock) {
-            c.mu.Unlock();
+            Ꮡc.of(common.Ꮡmu).Unlock();
         }
     });
     array<uintptr> pc = new(50); /* maxStackLen */
     // Skip two extra frames to account for this function
     // and runtime.Callers itself.
-    nint n = runtime.Callers(skip + 2, pc[..]);
+    nint n = Δruntime.Callers(skip + 2, pc[..]);
     if (n == 0) {
         throw panic("testing: zero callers found");
     }
-    var frames = runtime.CallersFrames(pc[..(int)(n)]);
-    runtime.Frame firstFrame = default!;
-    runtime.Frame prevFrame = default!;
-    runtime.Frame frame = default!;
+    var frames = Δruntime.CallersFrames(pc[..(int)(n)]);
+    Δruntime.Frame firstFrame = default!;
+    Δruntime.Frame prevFrame = default!;
+    Δruntime.Frame frame = default!;
     for (var more = true; more; prevFrame = frame) {
         (frame, more) = frames.Next();
         if (frame.Function == "runtime.gopanic"u8) {
             continue;
         }
         if (frame.Function == c.cleanupName) {
-            frames = runtime.CallersFrames(c.cleanupPc);
+            frames = Δruntime.CallersFrames(c.cleanupPc);
             continue;
         }
         if (firstFrame.PC == 0) {
@@ -734,20 +745,20 @@ public static bool Verbose() {
             // If we're in a subtest, continue searching in the parent test,
             // starting from the point of the call to Run which created this subtest.
             if (c.level > 1) {
-                frames = runtime.CallersFrames(c.creator);
+                frames = Δruntime.CallersFrames(c.creator);
                 var parent = c.parent;
                 // We're no longer looking at the current c after this point,
                 // so we should unlock its mu, unless it's the original receiver,
                 // in which case our caller doesn't expect us to do that.
                 if (shouldUnlock) {
-                    c.mu.Unlock();
+                    Ꮡc.of(common.Ꮡmu).Unlock();
                 }
-                c = parent;
+                Ꮡc = parent; c = ref Ꮡc.Value;
                 // Remember to unlock c.mu when we no longer need it, either
                 // because we went up another nesting level, or because we
                 // returned.
                 shouldUnlock = true;
-                c.mu.Lock();
+                Ꮡc.of(common.Ꮡmu).Lock();
                 continue;
             }
             return prevFrame;
@@ -756,11 +767,11 @@ public static bool Verbose() {
         if (c.helperNames == default!) {
             c.helperNames = new map<@string, EmptyStruct>();
             foreach (var (pcΔ1, _) in c.helperPCs) {
-                c.helperNames[pcToName(pcΔ1)] = new frameSkip_c();
+                c.helperNames[pcToName(pcΔ1)] = new EmptyStruct();
             }
         }
         {
-            var (_, ok) = c.helperNames[frame.Function]; if (!ok) {
+            var (_, ok) = c.helperNames[frame.Function, ꟷ]; if (!ok) {
                 // Found a frame that wasn't inside a helper function.
                 return frame;
             }
@@ -772,21 +783,23 @@ public static bool Verbose() {
 // decorate prefixes the string with the file and line of the call site
 // and inserts the final newline if needed and indentation spaces for formatting.
 // This function must be called with c.mu held.
-[GoRecv] internal static @string decorate(this ref common c, @string s, nint skip) {
-    var frame = c.frameSkip(skip);
-    @string file = frame.File;
+internal static @string decorate(this ж<common> Ꮡc, @string s, nint skip) {
+    ref var c = ref Ꮡc.Value;
+
+    var frame = Ꮡc.frameSkip(skip);
+    @string @file = frame.File;
     nint line = frame.Line;
-    if (file != ""u8){
-        if (fullPath.val){
+    if (@file != ""u8){
+        if (fullPath.Value){
         } else 
         {
-            nint index = strings.LastIndexAny(file, // If relative path, truncate file name at last file name separator.
+            nint index = strings.LastIndexAny(@file, // If relative path, truncate file name at last file name separator.
  @"/\"u8); if (index >= 0) {
-                file = file[(int)(index + 1)..];
+                @file = @file[(int)(index + 1)..];
             }
         }
     } else {
-        file = "???"u8;
+        @file = "???"u8;
     }
     if (line == 0) {
         line = 1;
@@ -794,7 +807,7 @@ public static bool Verbose() {
     var buf = @new<strings.Builder>();
     // Every line is indented at least 4 spaces.
     buf.WriteString("    "u8);
-    fmt.Fprintf(~buf, "%s:%d: "u8, file, line);
+    fmt.Fprintf(new strings_BuilderжWriter(buf), "%s:%d: "u8, @file, line);
     var lines = strings.Split(s, "\n"u8);
     {
         nint l = len(lines); if (l > 1 && lines[l - 1] == "") {
@@ -814,44 +827,47 @@ public static bool Verbose() {
 
 // flushToParent writes c.output to the parent after first writing the header
 // with the given format and arguments.
-[GoRecv] internal static void flushToParent(this ref common c, @string testName, @string format, params ꓸꓸꓸany argsʗp) => func((defer, _) => {
+internal static void flushToParent(this ж<common> Ꮡc, @string testName, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
+    func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
 
-    var p = c.parent;
-    (~p).mu.Lock();
-    var pʗ1 = p;
-    defer((~pʗ1).mu.Unlock);
-    c.mu.Lock();
-    defer(c.mu.Unlock);
-    if (len(c.output) > 0) {
-        // Add the current c.output to the print,
-        // and then arrange for the print to replace c.output.
-        // (This displays the logged output after the --- FAIL line.)
-        format += "%s"u8;
-        args = append(args.slice(-1, len(args), len(args)), c.output);
-        c.output = c.output[..0];
-    }
-    if (c.chatty != nil && (AreEqual((~p).w, c.chatty.w) || c.chatty.json)){
-        // We're flushing to the actual output, so track that this output is
-        // associated with a specific test (and, specifically, that the next output
-        // is *not* associated with that test).
-        //
-        // Moreover, if c.output is non-empty it is important that this write be
-        // atomic with respect to the output of other tests, so that we don't end up
-        // with confusing '=== NAME' lines in the middle of our '--- PASS' block.
-        // Neither humans nor cmd/test2json can parse those easily.
-        // (See https://go.dev/issue/40771.)
-        //
-        // If test2json is used, we never flush to parent tests,
-        // so that the json stream shows subtests as they finish.
-        // (See https://go.dev/issue/29811.)
-        c.chatty.Updatef(testName, format, args.ꓸꓸꓸ);
-    } else {
-        // We're flushing to the output buffer of the parent test, which will
-        // itself follow a test-name header when it is finally flushed to stdout.
-        fmt.Fprintf((~p).w, c.chatty.prefix() + format, args.ꓸꓸꓸ);
-    }
-});
+        var p = c.parent;
+        p.of(common.Ꮡmu).Lock();
+        var pʗ1 = p;
+        defer(pʗ1.of(common.Ꮡmu).Unlock);
+        Ꮡc.of(common.Ꮡmu).Lock();
+        defer(Ꮡc.of(common.Ꮡmu).Unlock);
+        if (len(c.output) > 0) {
+            // Add the current c.output to the print,
+            // and then arrange for the print to replace c.output.
+            // (This displays the logged output after the --- FAIL line.)
+            format += "%s"u8;
+            args = append(args.slice(-1, len(args), len(args)), (any)(c.output));
+            c.output = c.output[..0];
+        }
+        if (c.chatty != nil && (AreEqual((~p).w, (~c.chatty).w) || (~c.chatty).json)){
+            // We're flushing to the actual output, so track that this output is
+            // associated with a specific test (and, specifically, that the next output
+            // is *not* associated with that test).
+            //
+            // Moreover, if c.output is non-empty it is important that this write be
+            // atomic with respect to the output of other tests, so that we don't end up
+            // with confusing '=== NAME' lines in the middle of our '--- PASS' block.
+            // Neither humans nor cmd/test2json can parse those easily.
+            // (See https://go.dev/issue/40771.)
+            //
+            // If test2json is used, we never flush to parent tests,
+            // so that the json stream shows subtests as they finish.
+            // (See https://go.dev/issue/29811.)
+            c.chatty.Updatef(testName, format, args.ꓸꓸꓸ);
+        } else {
+            // We're flushing to the output buffer of the parent test, which will
+            // itself follow a test-name header when it is finally flushed to stdout.
+            fmt.Fprintf((~p).w, c.chatty.prefix() + format, args.ꓸꓸꓸ);
+        }
+    });
+}
 
 [GoType] partial struct indenter {
     internal ж<common> c;
@@ -873,12 +889,12 @@ internal static (nint n, error err) Write(this indenter w, slice<byte> b) {
         // indicator of the parent.
         var line = b[..(int)(end)];
         if (line[0] == marker) {
-            w.c.output = append(w.c.output, marker);
+            w.c.Value.output = append((~w.c).output, marker);
             line = line[1..];
         }
         @string indent = "    "u8;
-        w.c.output = append(w.c.output, indent.ꓸꓸꓸ);
-        w.c.output = append(w.c.output, line.ꓸꓸꓸ);
+        w.c.Value.output = append((~w.c).output, indent.ꓸꓸꓸ);
+        w.c.Value.output = append((~w.c).output, line.ꓸꓸꓸ);
         b = b[(int)(end)..];
     }
     return (n, err);
@@ -915,9 +931,9 @@ internal static @string fmtDuration(time.Duration d) {
     void @private();
 }
 
-internal static TB _ᴛ2ʗ = (ж<T>)(default!);
+internal static TB _ᴛ2ʗ = new TжTB((ж<T>)(default!));
 
-internal static TB _ᴛ3ʗ = (ж<B>)(default!);
+internal static TB _ᴛ3ʗ = new BжTB((ж<B>)(default!));
 
 // T is a type passed to Test functions to manage test state and support formatted test logs.
 //
@@ -946,37 +962,43 @@ internal static TB _ᴛ3ʗ = (ж<B>)(default!);
     return c.name;
 }
 
-[GoRecv] internal static void setRan(this ref common c) => func((defer, _) => {
+internal static void setRan(this ж<common> Ꮡc) => func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+
     if (c.parent != nil) {
         c.parent.setRan();
     }
-    c.mu.Lock();
-    defer(c.mu.Unlock);
+    Ꮡc.of(common.Ꮡmu).Lock();
+    defer(Ꮡc.of(common.Ꮡmu).Unlock);
     c.ran = true;
 });
 
 // Fail marks the function as having failed but continues execution.
-[GoRecv] internal static void Fail(this ref common c) => func((defer, _) => {
+internal static void Fail(this ж<common> Ꮡc) => func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+
     if (c.parent != nil) {
         c.parent.Fail();
     }
-    c.mu.Lock();
-    defer(c.mu.Unlock);
+    Ꮡc.of(common.Ꮡmu).Lock();
+    defer(Ꮡc.of(common.Ꮡmu).Unlock);
     // c.done needs to be locked to synchronize checks to c.done in parent tests.
     if (c.done) {
-        throw panic("Fail in goroutine after "u8 + c.name + " has completed"u8);
+        throw panic("Fail in goroutine after " + c.name + " has completed");
     }
     c.failed = true;
 });
 
 // Failed reports whether the function has failed.
-[GoRecv] internal static bool Failed(this ref common c) => func((defer, _) => {
-    c.mu.RLock();
-    defer(c.mu.RUnlock);
-    if (!c.done && ((int64)race.Errors()) > c.lastRaceErrors.Load()) {
-        c.mu.RUnlock();
-        c.checkRaces();
-        c.mu.RLock();
+internal static bool Failed(this ж<common> Ꮡc) => func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+
+    Ꮡc.of(common.Ꮡmu).RLock();
+    defer(Ꮡc.of(common.Ꮡmu).RUnlock);
+    if (!c.done && (int64)race.Errors() > Ꮡc.of(common.ᏑlastRaceErrors).Load()) {
+        Ꮡc.of(common.Ꮡmu).RUnlock();
+        Ꮡc.checkRaces();
+        Ꮡc.of(common.Ꮡmu).RLock();
     }
     return c.failed;
 });
@@ -989,9 +1011,11 @@ internal static TB _ᴛ3ʗ = (ж<B>)(default!);
 // test or benchmark function, not from other goroutines
 // created during the test. Calling FailNow does not stop
 // those other goroutines.
-[GoRecv] internal static void FailNow(this ref common c) {
+internal static void FailNow(this ж<common> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     c.checkFuzzFn("FailNow"u8);
-    c.Fail();
+    Ꮡc.Fail();
     // Calling runtime.Goexit will exit the goroutine, which
     // will run the deferred functions in this goroutine,
     // which will eventually run the deferred lines in tRunner,
@@ -1011,48 +1035,52 @@ internal static TB _ᴛ3ʗ = (ж<B>)(default!);
     // it would run on a test failure. Because we send on c.signal during
     // a top-of-stack deferred function now, we know that the send
     // only happens after any other stacked defers have completed.
-    c.mu.Lock();
+    Ꮡc.of(common.Ꮡmu).Lock();
     c.finished = true;
-    c.mu.Unlock();
-    runtime.Goexit();
+    Ꮡc.of(common.Ꮡmu).Unlock();
+    Δruntime.Goexit();
 }
 
 // log generates the output. It's always at the same stack depth.
-[GoRecv] internal static void log(this ref common c, @string s) {
-    c.logDepth(s, 3);
+internal static void log(this ж<common> Ꮡc, @string s) {
+    ref var c = ref Ꮡc.Value;
+
+    Ꮡc.logDepth(s, 3);
 }
 
 // logDepth + log + public function
 
 // logDepth generates the output at an arbitrary stack depth.
-[GoRecv] internal static void logDepth(this ref common c, @string s, nint depth) => func((defer, _) => {
-    c.mu.Lock();
-    defer(c.mu.Unlock);
+internal static void logDepth(this ж<common> Ꮡc, @string s, nint depth) => func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+
+    Ꮡc.of(common.Ꮡmu).Lock();
+    defer(Ꮡc.of(common.Ꮡmu).Unlock);
     if (c.done){
         // This test has already finished. Try and log this message
         // with our parent. If we don't have a parent, panic.
-        for (var parent = c.parent; parent != nil; parent = parent.val.parent) {
-            (~parent).mu.Lock();
+        for (var parent = c.parent; parent != nil; parent = parent.Value.parent) {
+            parent.of(common.Ꮡmu).Lock();
             var parentʗ1 = parent;
-            defer((~parentʗ1).mu.Unlock);
+            defer(parentʗ1.of(common.Ꮡmu).Unlock);
             if (!(~parent).done) {
-                parent.val.output = append((~parent).output, parent.decorate(s, depth + 1).ꓸꓸꓸ);
+                parent.Value.output = append((~parent).output, parent.decorate(s, depth + 1).ꓸꓸꓸ);
                 return;
             }
         }
-        throw panic("Log in goroutine after "u8 + c.name + " has completed: "u8 + s);
+        throw panic("Log in goroutine after " + c.name + " has completed: " + s);
     } else {
         if (c.chatty != nil) {
             if (c.bench){
                 // Benchmarks don't print === CONT, so we should skip the test
                 // printer and just print straight to stdout.
-                fmt.Print(c.decorate(s, depth + 1));
+                fmt.Print(Ꮡc.decorate(s, depth + 1));
             } else {
-                c.chatty.Printf(c.name, "%s"u8, c.decorate(s, depth + 1));
+                c.chatty.Printf(c.name, "%s"u8, Ꮡc.decorate(s, depth + 1));
             }
             return;
         }
-        c.output = append(c.output, c.decorate(s, depth + 1).ꓸꓸꓸ);
+        c.output = append(c.output, Ꮡc.decorate(s, depth + 1).ꓸꓸꓸ);
     }
 });
 
@@ -1060,11 +1088,12 @@ internal static TB _ᴛ3ʗ = (ж<B>)(default!);
 // and records the text in the error log. For tests, the text will be printed only if
 // the test fails or the -test.v flag is set. For benchmarks, the text is always
 // printed to avoid having performance depend on the value of the -test.v flag.
-[GoRecv] internal static void Log(this ref common c, params ꓸꓸꓸany argsʗp) {
+internal static void Log(this ж<common> Ꮡc, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
+    ref var c = ref Ꮡc.Value;
     c.checkFuzzFn("Log"u8);
-    c.log(fmt.Sprintln(args.ꓸꓸꓸ));
+    Ꮡc.log(fmt.Sprintln(args.ꓸꓸꓸ));
 }
 
 // Logf formats its arguments according to the format, analogous to Printf, and
@@ -1072,65 +1101,72 @@ internal static TB _ᴛ3ʗ = (ж<B>)(default!);
 // tests, the text will be printed only if the test fails or the -test.v flag is
 // set. For benchmarks, the text is always printed to avoid having performance
 // depend on the value of the -test.v flag.
-[GoRecv] internal static void Logf(this ref common c, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void Logf(this ж<common> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
+    ref var c = ref Ꮡc.Value;
     c.checkFuzzFn("Logf"u8);
-    c.log(fmt.Sprintf(format, args.ꓸꓸꓸ));
+    Ꮡc.log(fmt.Sprintf(format, args.ꓸꓸꓸ));
 }
 
 // Error is equivalent to Log followed by Fail.
-[GoRecv] internal static void Error(this ref common c, params ꓸꓸꓸany argsʗp) {
+internal static void Error(this ж<common> Ꮡc, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
+    ref var c = ref Ꮡc.Value;
     c.checkFuzzFn("Error"u8);
-    c.log(fmt.Sprintln(args.ꓸꓸꓸ));
-    c.Fail();
+    Ꮡc.log(fmt.Sprintln(args.ꓸꓸꓸ));
+    Ꮡc.Fail();
 }
 
 // Errorf is equivalent to Logf followed by Fail.
-[GoRecv] internal static void Errorf(this ref common c, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void Errorf(this ж<common> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
+    ref var c = ref Ꮡc.Value;
     c.checkFuzzFn("Errorf"u8);
-    c.log(fmt.Sprintf(format, args.ꓸꓸꓸ));
-    c.Fail();
+    Ꮡc.log(fmt.Sprintf(format, args.ꓸꓸꓸ));
+    Ꮡc.Fail();
 }
 
 // Fatal is equivalent to Log followed by FailNow.
-[GoRecv] internal static void Fatal(this ref common c, params ꓸꓸꓸany argsʗp) {
+internal static void Fatal(this ж<common> Ꮡc, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
+    ref var c = ref Ꮡc.Value;
     c.checkFuzzFn("Fatal"u8);
-    c.log(fmt.Sprintln(args.ꓸꓸꓸ));
-    c.FailNow();
+    Ꮡc.log(fmt.Sprintln(args.ꓸꓸꓸ));
+    Ꮡc.FailNow();
 }
 
 // Fatalf is equivalent to Logf followed by FailNow.
-[GoRecv] internal static void Fatalf(this ref common c, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void Fatalf(this ж<common> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
+    ref var c = ref Ꮡc.Value;
     c.checkFuzzFn("Fatalf"u8);
-    c.log(fmt.Sprintf(format, args.ꓸꓸꓸ));
-    c.FailNow();
+    Ꮡc.log(fmt.Sprintf(format, args.ꓸꓸꓸ));
+    Ꮡc.FailNow();
 }
 
 // Skip is equivalent to Log followed by SkipNow.
-[GoRecv] internal static void Skip(this ref common c, params ꓸꓸꓸany argsʗp) {
+internal static void Skip(this ж<common> Ꮡc, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
+    ref var c = ref Ꮡc.Value;
     c.checkFuzzFn("Skip"u8);
-    c.log(fmt.Sprintln(args.ꓸꓸꓸ));
-    c.SkipNow();
+    Ꮡc.log(fmt.Sprintln(args.ꓸꓸꓸ));
+    Ꮡc.SkipNow();
 }
 
 // Skipf is equivalent to Logf followed by SkipNow.
-[GoRecv] internal static void Skipf(this ref common c, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void Skipf(this ж<common> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
+    ref var c = ref Ꮡc.Value;
     c.checkFuzzFn("Skipf"u8);
-    c.log(fmt.Sprintf(format, args.ꓸꓸꓸ));
-    c.SkipNow();
+    Ꮡc.log(fmt.Sprintf(format, args.ꓸꓸꓸ));
+    Ꮡc.SkipNow();
 }
 
 // SkipNow marks the test as having been skipped and stops its execution
@@ -1141,44 +1177,47 @@ internal static TB _ᴛ3ʗ = (ж<B>)(default!);
 // SkipNow must be called from the goroutine running the test, not from
 // other goroutines created during the test. Calling SkipNow does not stop
 // those other goroutines.
-[GoRecv] internal static void SkipNow(this ref common c) {
+internal static void SkipNow(this ж<common> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     c.checkFuzzFn("SkipNow"u8);
-    c.mu.Lock();
+    Ꮡc.of(common.Ꮡmu).Lock();
     c.skipped = true;
     c.finished = true;
-    c.mu.Unlock();
-    runtime.Goexit();
+    Ꮡc.of(common.Ꮡmu).Unlock();
+    Δruntime.Goexit();
 }
 
 // Skipped reports whether the test was skipped.
-[GoRecv] internal static bool Skipped(this ref common c) => func((defer, _) => {
-    c.mu.RLock();
-    defer(c.mu.RUnlock);
+internal static bool Skipped(this ж<common> Ꮡc) => func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+
+    Ꮡc.of(common.Ꮡmu).RLock();
+    defer(Ꮡc.of(common.Ꮡmu).RUnlock);
     return c.skipped;
 });
-
-[GoType("dyn")] partial struct Helper_c {
-}
 
 // Helper marks the calling function as a test helper function.
 // When printing file and line information, that function will be skipped.
 // Helper may be called simultaneously from multiple goroutines.
-[GoRecv] internal static void Helper(this ref common c) => func((defer, _) => {
-    c.mu.Lock();
-    defer(c.mu.Unlock);
+internal static void Helper(this ж<common> Ꮡc) => func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+
+    Ꮡc.of(common.Ꮡmu).Lock();
+    defer(Ꮡc.of(common.Ꮡmu).Unlock);
     if (c.helperPCs == default!) {
         c.helperPCs = new map<uintptr, EmptyStruct>();
     }
     // repeating code from callerName here to save walking a stack frame
     array<uintptr> pc = new(1);
-    nint n = runtime.Callers(2, pc[..]);
+    nint n = Δruntime.Callers(2, pc[..]);
     // skip runtime.Callers + Helper
     if (n == 0) {
         throw panic("testing: zero callers found");
     }
     {
-        var (_, found) = c.helperPCs[pc[0]]; if (!found) {
-            c.helperPCs[pc[0]] = new Helper_c();
+        var (_, found) = c.helperPCs[pc[0], ꟷ]; if (!found) {
+            c.helperPCs[pc[0]] = new EmptyStruct();
             c.helperNames = default!;
         }
     }
@@ -1189,30 +1228,31 @@ internal static TB _ᴛ3ʗ = (ж<B>)(default!);
 // Cleanup registers a function to be called when the test (or subtest) and all its
 // subtests complete. Cleanup functions will be called in last added,
 // first called order.
-[GoRecv] internal static void Cleanup(this ref common c, Action f) => func((defer, _) => {
+internal static void Cleanup(this ж<common> Ꮡc, Action f) => func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+
     c.checkFuzzFn("Cleanup"u8);
     array<uintptr> pc = new(50); /* maxStackLen */
     // Skip two extra frames to account for this function and runtime.Callers itself.
-    nint n = runtime.Callers(2, pc[..]);
+    nint n = Δruntime.Callers(2, pc[..]);
     var cleanupPc = pc[..(int)(n)];
-    var fn = 
     var cleanupPcʗ1 = cleanupPc;
-    () => {
+    var fn = () => func((defer, recover) => {
         defer(() => {
-            c.mu.Lock();
-            defer(c.mu.Unlock);
-            c.cleanupName = ""u8;
-            c.cleanupPc = default!;
+            Ꮡc.of(common.Ꮡmu).Lock();
+            defer(Ꮡc.of(common.Ꮡmu).Unlock);
+            Ꮡc.Value.cleanupName = ""u8;
+            Ꮡc.Value.cleanupPc = default!;
         });
         @string name = callerName(0);
-        c.mu.Lock();
-        c.cleanupName = name;
-        c.cleanupPc = cleanupPc;
-        c.mu.Unlock();
+        Ꮡc.of(common.Ꮡmu).Lock();
+        Ꮡc.Value.cleanupName = name;
+        Ꮡc.Value.cleanupPc = cleanupPcʗ1;
+        Ꮡc.of(common.Ꮡmu).Unlock();
         f();
-    };
-    c.mu.Lock();
-    defer(c.mu.Unlock);
+    });
+    Ꮡc.of(common.Ꮡmu).Lock();
+    defer(Ꮡc.of(common.Ꮡmu).Unlock);
     c.cleanups = append(c.cleanups, fn);
 });
 
@@ -1221,24 +1261,26 @@ internal static TB _ᴛ3ʗ = (ж<B>)(default!);
 // all its subtests complete.
 // Each subsequent call to t.TempDir returns a unique directory;
 // if the directory creation fails, TempDir terminates the test by calling Fatal.
-[GoRecv] internal static @string TempDir(this ref common c) {
+internal static @string TempDir(this ж<common> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     c.checkFuzzFn("TempDir"u8);
     // Use a single parent directory for all the temporary directories
     // created by a test, each numbered sequentially.
-    c.tempDirMu.Lock();
+    Ꮡc.of(common.ᏑtempDirMu).Lock();
     bool nonExistent = default!;
     if (c.tempDir == ""u8){
         // Usually the case with js/wasm
         nonExistent = true;
     } else {
-        (_, err) = os.Stat(c.tempDir);
+        var (_, err) = os.Stat(c.tempDir);
         nonExistent = os.IsNotExist(err);
         if (err != default! && !nonExistent) {
-            c.Fatalf("TempDir: %v"u8, err);
+            Ꮡc.Fatalf("TempDir: %v"u8, err);
         }
     }
     if (nonExistent) {
-        c.Helper();
+        Ꮡc.Helper();
         // Drop unusual characters (such as path separators or
         // characters interacting with globs) from the directory name to
         // avoid surprising os.MkdirTemp behavior.
@@ -1252,7 +1294,7 @@ internal static TB _ᴛ3ʗ = (ж<B>)(default!);
                     return r;
                 }
             } else 
-            if (unicode.IsLetter(r) || unicode.IsNumber(r)) {
+            if (Δunicode.IsLetter(r) || Δunicode.IsNumber(r)) {
                 return r;
             }
             return -1;
@@ -1260,10 +1302,10 @@ internal static TB _ᴛ3ʗ = (ж<B>)(default!);
         @string pattern = strings.Map(mapper, c.Name());
         (c.tempDir, c.tempDirErr) = os.MkdirTemp(""u8, pattern);
         if (c.tempDirErr == default!) {
-            c.Cleanup(() => {
+            Ꮡc.Cleanup(() => {
                 {
-                    var err = removeAll(c.tempDir); if (err != default!) {
-                        c.Errorf("TempDir RemoveAll cleanup: %v"u8, err);
+                    var err = removeAll(Ꮡc.Value.tempDir); if (err != default!) {
+                        Ꮡc.Errorf("TempDir RemoveAll cleanup: %v"u8, err);
                     }
                 }
             });
@@ -1273,14 +1315,14 @@ internal static TB _ᴛ3ʗ = (ж<B>)(default!);
         c.tempDirSeq++;
     }
     var seq = c.tempDirSeq;
-    c.tempDirMu.Unlock();
+    Ꮡc.of(common.ᏑtempDirMu).Unlock();
     if (c.tempDirErr != default!) {
-        c.Fatalf("TempDir: %v"u8, c.tempDirErr);
+        Ꮡc.Fatalf("TempDir: %v"u8, c.tempDirErr);
     }
     @string dir = fmt.Sprintf("%s%c%03d"u8, c.tempDir, os.PathSeparator, seq);
     {
         var err = os.Mkdir(dir, 511); if (err != default!) {
-            c.Fatalf("TempDir: %v"u8, err);
+            Ꮡc.Fatalf("TempDir: %v"u8, err);
         }
     }
     return dir;
@@ -1296,7 +1338,7 @@ internal static TB _ᴛ3ʗ = (ж<B>)(default!);
 // failures, a failing test may take a bit longer to fail, but once the test is
 // fixed the extra latency will go away.
 internal static error removeAll(@string path) {
-    static readonly time.Duration arbitraryTimeout = /* 2 * time.Second */ 2000000000;
+    time.Duration arbitraryTimeout = /* 2 * time.Second */ 2000000000;
     time.Time start = default!;
     time.Duration nextSleep = 1 * time.Millisecond;
     while (ᐧ) {
@@ -1313,7 +1355,7 @@ internal static error removeAll(@string path) {
             }
         }
         time.Sleep(nextSleep);
-        nextSleep += ((time.Duration)rand.Int63n(((int64)nextSleep)));
+        nextSleep += ((time.Duration)rand.Int63n((int64)nextSleep));
     }
 }
 
@@ -1323,20 +1365,22 @@ internal static error removeAll(@string path) {
 //
 // Because Setenv affects the whole process, it cannot be used
 // in parallel tests or tests with parallel ancestors.
-[GoRecv] internal static void Setenv(this ref common c, @string key, @string value) {
+internal static void Setenv(this ж<common> Ꮡc, @string key, @string value) {
+    ref var c = ref Ꮡc.Value;
+
     c.checkFuzzFn("Setenv"u8);
     var (prevValue, ok) = os.LookupEnv(key);
     {
         var err = os.Setenv(key, value); if (err != default!) {
-            c.Fatalf("cannot set environment variable: %v"u8, err);
+            Ꮡc.Fatalf("cannot set environment variable: %v"u8, err);
         }
     }
     if (ok){
-        c.Cleanup(() => {
+        Ꮡc.Cleanup(() => {
             os.Setenv(key, prevValue);
         });
     } else {
-        c.Cleanup(() => {
+        Ꮡc.Cleanup(() => {
             os.Unsetenv(key);
         });
     }
@@ -1350,52 +1394,58 @@ internal static readonly panicHandling recoverAndReturnPanic = 1;
 // runCleanup is called at the end of the test.
 // If ph is recoverAndReturnPanic, it will catch panics, and return the
 // recovered value if any.
-[GoRecv] internal static any /*panicVal*/ runCleanup(this ref common c, panicHandling ph) => func((defer, recover) => {
+internal static any /*panicVal*/ runCleanup(this ж<common> Ꮡc, panicHandling ph) {
     any panicVal = default!;
+    func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
 
-    c.cleanupStarted.Store(true);
-    deferǃ(c.cleanupStarted.Store, false, defer);
-    if (ph == recoverAndReturnPanic) {
+        Ꮡc.of(common.ᏑcleanupStarted).Store(true);
+        deferǃ(Ꮡc.of(common.ᏑcleanupStarted).Store, (bool)false, defer);
+        if (ph == recoverAndReturnPanic) {
+            defer(() => {
+                panicVal = recover();
+            });
+        }
+        // Make sure that if a cleanup function panics,
+        // we still run the remaining cleanup functions.
         defer(() => {
-            panicVal = recover();
+            Ꮡc.of(common.Ꮡmu).Lock();
+            var recur = len(Ꮡc.Value.cleanups) > 0;
+            Ꮡc.of(common.Ꮡmu).Unlock();
+            if (recur) {
+                Ꮡc.runCleanup(normalPanic);
+            }
         });
-    }
-    // Make sure that if a cleanup function panics,
-    // we still run the remaining cleanup functions.
-    defer(() => {
-        c.mu.Lock();
-        var recur = len(c.cleanups) > 0;
-        c.mu.Unlock();
-        if (recur) {
-            c.runCleanup(normalPanic);
+        while (ᐧ) {
+            Action cleanup = default!;
+            Ꮡc.of(common.Ꮡmu).Lock();
+            if (len(c.cleanups) > 0) {
+                nint last = len(c.cleanups) - 1;
+                cleanup = c.cleanups[last];
+                c.cleanups = c.cleanups[..(int)(last)];
+            }
+            Ꮡc.of(common.Ꮡmu).Unlock();
+            if (cleanup == default!) {
+                panicVal = default!; return;
+            }
+            cleanup();
         }
     });
-    while (ᐧ) {
-        Action cleanup = default!;
-        c.mu.Lock();
-        if (len(c.cleanups) > 0) {
-            nint last = len(c.cleanups) - 1;
-            cleanup = c.cleanups[last];
-            c.cleanups = c.cleanups[..(int)(last)];
-        }
-        c.mu.Unlock();
-        if (cleanup == default!) {
-            return default!;
-        }
-        cleanup();
-    }
-});
+    return panicVal;
+}
 
 // resetRaces updates c.parent's count of data race errors (or the global count,
 // if c has no parent), and updates c.lastRaceErrors to match.
 //
 // Any races that occurred prior to this call to resetRaces will
 // not be attributed to c.
-[GoRecv] internal static void resetRaces(this ref common c) {
+internal static void resetRaces(this ж<common> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     if (c.parent == nil){
-        c.lastRaceErrors.Store(((int64)race.Errors()));
+        Ꮡc.of(common.ᏑlastRaceErrors).Store((int64)race.Errors());
     } else {
-        c.lastRaceErrors.Store(c.parent.checkRaces());
+        Ꮡc.of(common.ᏑlastRaceErrors).Store(c.parent.checkRaces());
     }
 }
 
@@ -1409,41 +1459,42 @@ internal static readonly panicHandling recoverAndReturnPanic = 1;
 //
 // Note that multiple tests may be marked as failed due to the same race if they
 // are executing in parallel.
-[GoRecv] internal static int64 /*raceErrors*/ checkRaces(this ref common c) {
+internal static int64 /*raceErrors*/ checkRaces(this ж<common> Ꮡc) {
     int64 raceErrors = default!;
 
-    raceErrors = ((int64)race.Errors());
+    ref var c = ref Ꮡc.Value;
+    raceErrors = (int64)race.Errors();
     while (ᐧ) {
-        var last = c.lastRaceErrors.Load();
+        var last = Ꮡc.of(common.ᏑlastRaceErrors).Load();
         if (raceErrors <= last) {
             // All races have already been reported.
             return raceErrors;
         }
-        if (c.lastRaceErrors.CompareAndSwap(last, raceErrors)) {
+        if (Ꮡc.of(common.ᏑlastRaceErrors).CompareAndSwap(last, raceErrors)) {
             break;
         }
     }
-    if (c.raceErrorLogged.CompareAndSwap(false, true)) {
+    if (Ꮡc.of(common.ᏑraceErrorLogged).CompareAndSwap(false, true)) {
         // This is the first race we've encountered for this test.
         // Mark the test as failed, and log the reason why only once.
         // (Note that the race detector itself will still write a goroutine
         // dump for any further races it detects.)
-        c.Errorf("race detected during execution of test"u8);
+        Ꮡc.Errorf("race detected during execution of test"u8);
     }
     // Update the parent(s) of this test so that they don't re-report the race.
     var parent = c.parent;
     while (parent != nil) {
         while (ᐧ) {
-            var last = (~parent).lastRaceErrors.Load();
+            var last = parent.of(common.ᏑlastRaceErrors).Load();
             if (raceErrors <= last) {
                 // This race was already reported by another (likely parallel) subtest.
                 return raceErrors;
             }
-            if ((~parent).lastRaceErrors.CompareAndSwap(last, raceErrors)) {
+            if (parent.of(common.ᏑlastRaceErrors).CompareAndSwap(last, raceErrors)) {
                 break;
             }
         }
-        parent = parent.val.parent;
+        parent = parent.Value.parent;
     }
     return raceErrors;
 }
@@ -1452,7 +1503,7 @@ internal static readonly panicHandling recoverAndReturnPanic = 1;
 // for the caller after skip frames (where 0 means the current function).
 internal static @string callerName(nint skip) {
     array<uintptr> pc = new(1);
-    nint n = runtime.Callers(skip + 2, pc[..]);
+    nint n = Δruntime.Callers(skip + 2, pc[..]);
     // skip + runtime.Callers + callerName
     if (n == 0) {
         throw panic("testing: zero callers found");
@@ -1462,7 +1513,7 @@ internal static @string callerName(nint skip) {
 
 internal static @string pcToName(uintptr pc) {
     var pcs = new uintptr[]{pc}.slice();
-    var frames = runtime.CallersFrames(pcs);
+    var frames = Δruntime.CallersFrames(pcs);
     var (frame, _) = frames.Next();
     return frame.Function;
 }
@@ -1471,7 +1522,9 @@ internal static @string pcToName(uintptr pc) {
 // other parallel tests. When a test is run multiple times due to use of
 // -test.count or -test.cpu, multiple instances of a single test never run in
 // parallel with each other.
-[GoRecv] public static void Parallel(this ref T t) {
+public static void Parallel(this ж<T> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t.isParallel) {
         throw panic("testing: t.Parallel called multiple times");
     }
@@ -1479,7 +1532,7 @@ internal static @string pcToName(uintptr pc) {
         throw panic("testing: t.Parallel called after t.Setenv; cannot set environment variables in parallel tests");
     }
     t.isParallel = true;
-    if (t.parent.barrier == default!) {
+    if ((~t.parent).barrier == default!) {
         // T.Parallel has no effect when fuzzing.
         // Multiple processes may run in parallel, but only one input can run at a
         // time per process so we can attribute crashes to specific inputs.
@@ -1490,7 +1543,7 @@ internal static @string pcToName(uintptr pc) {
     // timer afterwards.
     t.duration += highPrecisionTimeSince(t.start);
     // Add to the list of tests to be released by the parent.
-    t.parent.sub = append(t.parent.sub, t);
+    t.parent.Value.sub = append((~t.parent).sub, Ꮡt);
     // Report any races during execution of this test up to this point.
     //
     // We will assume that any races that occur between here and the point where
@@ -1501,20 +1554,20 @@ internal static @string pcToName(uintptr pc) {
     // test, or to no test at all — but that false-negative is so unlikely that it
     // is not worth adding race-report noise for the common case where the test is
     // completely suspended during the call to Parallel.
-    t.checkRaces();
+    Ꮡt.of(T.Ꮡcommon).checkRaces();
     if (t.chatty != nil) {
         t.chatty.Updatef(t.name, "=== PAUSE %s\n"u8, t.name);
     }
-    running.Delete(t.name);
+    Ꮡrunning.Delete(t.name);
     t.signal.ᐸꟷ(true);
     // Release calling test.
-    ᐸꟷ(t.parent.barrier);
+    ᐸꟷ((~t.parent).barrier);
     // Wait for the parent test to complete.
     t.context.waitParallel();
     if (t.chatty != nil) {
         t.chatty.Updatef(t.name, "=== CONT  %s\n"u8, t.name);
     }
-    running.Store(t.name, highPrecisionTimeNow());
+    Ꮡrunning.Store(t.name, highPrecisionTimeNow());
     t.start = highPrecisionTimeNow();
     // Reset the local race counter to ignore any races that happened while this
     // goroutine was blocked, such as in the parent test or in other parallel
@@ -1523,7 +1576,7 @@ internal static @string pcToName(uintptr pc) {
     // (Note that we don't call parent.checkRaces here:
     // if other parallel subtests have already introduced races, we want to
     // let them report those races instead of attributing them to the parent.)
-    t.lastRaceErrors.Store(((int64)race.Errors()));
+    Ꮡt.of(T.ᏑlastRaceErrors).Store((int64)race.Errors());
 }
 
 // Setenv calls os.Setenv(key, value) and uses Cleanup to
@@ -1532,14 +1585,16 @@ internal static @string pcToName(uintptr pc) {
 //
 // Because Setenv affects the whole process, it cannot be used
 // in parallel tests or tests with parallel ancestors.
-[GoRecv] public static void Setenv(this ref T t, @string key, @string value) {
+public static void Setenv(this ж<T> Ꮡt, @string key, @string value) {
+    ref var t = ref Ꮡt.Value;
+
     // Non-parallel subtests that have parallel ancestors may still
     // run in parallel with other tests: they are only non-parallel
     // with respect to the other subtests of the same parent.
     // Since SetEnv affects the whole process, we need to disallow it
     // if the current test or any parent is parallel.
     var isParallel = false;
-    for (var c = Ꮡ(t.common); c != nil; c = c.val.parent) {
+    for (var c = Ꮡt.of(T.Ꮡcommon); c != nil; c = c.Value.parent) {
         if ((~c).isParallel) {
             isParallel = true;
             break;
@@ -1549,7 +1604,7 @@ internal static @string pcToName(uintptr pc) {
         throw panic("testing: t.Setenv called after t.Parallel; cannot set environment variables in parallel tests");
     }
     t.isEnvSet = true;
-    t.common.Setenv(key, value);
+    Ꮡt.of(T.Ꮡcommon).Setenv(key, value);
 }
 
 // InternalTest is an internal type but exported because it is cross-package;
@@ -1562,20 +1617,18 @@ internal static @string pcToName(uintptr pc) {
 internal static error errNilPanicOrGoexit = errors.New("test executed panic(nil) or runtime.Goexit"u8);
 
 internal static void tRunner(ж<T> Ꮡt, Action<ж<T>> fn) => func((defer, recover) => {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     t.runner = callerName(0);
     // When this goroutine is done, either because fn(t)
     // returned normally or because a test failure triggered
     // a call to runtime.Goexit, record the duration and send
     // a signal saying that the test is done.
-    var numFailedʗ1 = numFailed;
-    var runningʗ1 = running;
     defer(() => {
-        t.checkRaces();
+        Ꮡt.of(T.Ꮡcommon).checkRaces();
         // TODO(#61034): This is the wrong place for this check.
-        if (t.Failed()) {
-            numFailedʗ1.Add(1);
+        if (Ꮡt.of(T.Ꮡcommon).Failed()) {
+            ᏑnumFailed.Add(1);
         }
         // Check if the test panicked or Goexited inappropriately.
         //
@@ -1585,43 +1638,42 @@ internal static void tRunner(ж<T> Ꮡt, Action<ж<T>> fn) => func((defer, recov
         // If this happens while fuzzing, recover from the panic and treat it like a
         // normal failure. It's important that the process keeps running in order to
         // find short inputs that cause panics.
-        var err = recover();
+        ref var err = ref heap<any>(out var Ꮡerr);
+        Ꮡerr.ValueSlot = recover();
         var signal = true;
-        t.mu.RLock();
-        var finished = t.finished;
-        t.mu.RUnlock();
-        if (!finished && err == default!) {
-            err = errNilPanicOrGoexit;
-            for (var p = t.parent; p != nil; p = p.val.parent) {
-                (~p).mu.RLock();
-                finished = p.val.finished;
-                (~p).mu.RUnlock();
+        Ꮡt.of(T.Ꮡmu).RLock();
+        var finished = Ꮡt.Value.finished;
+        Ꮡt.of(T.Ꮡmu).RUnlock();
+        if (!finished && Ꮡerr.ValueSlot == default!) {
+            Ꮡerr.ValueSlot = errNilPanicOrGoexit;
+            for (var p = Ꮡt.Value.parent; p != nil; p = p.Value.parent) {
+                p.of(common.Ꮡmu).RLock();
+                finished = p.Value.finished;
+                p.of(common.Ꮡmu).RUnlock();
                 if (finished) {
-                    if (!t.isParallel) {
-                        t.Errorf("%v: subtest may have called FailNow on a parent test"u8, err);
-                        err = default!;
+                    if (!Ꮡt.Value.isParallel) {
+                        Ꮡt.of(T.Ꮡcommon).Errorf("%v: subtest may have called FailNow on a parent test"u8, Ꮡerr.ValueSlot);
+                        Ꮡerr.ValueSlot = default!;
                     }
                     signal = false;
                     break;
                 }
             }
         }
-        if (err != default! && t.context.isFuzzing) {
+        if (Ꮡerr.ValueSlot != default! && (~Ꮡt.Value.context).isFuzzing) {
             @string prefix = "panic: "u8;
-            if (AreEqual(err, errNilPanicOrGoexit)) {
+            if (AreEqual(Ꮡerr.ValueSlot, errNilPanicOrGoexit)) {
                 prefix = ""u8;
             }
-            t.Errorf("%s%s\n%s\n"u8, prefix, err, ((@string)debug.Stack()));
-            t.mu.Lock();
-            t.finished = true;
-            t.mu.Unlock();
-            err = default!;
+            Ꮡt.of(T.Ꮡcommon).Errorf("%s%s\n%s\n"u8, prefix, Ꮡerr.ValueSlot, ((@string)debug.Stack()));
+            Ꮡt.of(T.Ꮡmu).Lock();
+            Ꮡt.Value.finished = true;
+            Ꮡt.of(T.Ꮡmu).Unlock();
+            Ꮡerr.ValueSlot = default!;
         }
         // Use a deferred call to ensure that we report that the test is
         // complete even if a cleanup function calls t.FailNow. See issue 41355.
         var didPanic = false;
-        var errʗ1 = err;
-        var runningʗ2 = running;
         defer(() => {
             // Only report that the test is complete if it doesn't panic,
             // as otherwise the test binary can exit before the panic is
@@ -1629,26 +1681,25 @@ internal static void tRunner(ж<T> Ꮡt, Action<ж<T>> fn) => func((defer, recov
             if (didPanic) {
                 return;
             }
-            if (errʗ1 != default!) {
-                throw panic(errʗ1);
+            if (Ꮡerr.ValueSlot != default!) {
+                throw panic(Ꮡerr.ValueSlot);
             }
-            runningʗ2.Delete(t.name);
-            t.signal.ᐸꟷ(signal);
+            Ꮡrunning.Delete(Ꮡt.Value.name);
+            Ꮡt.Value.signal.ᐸꟷ(signal);
         });
-        var doPanic = 
-        (any err) => {
-            t.Fail();
+        var doPanic = (any errΔ1) => {
+            Ꮡt.of(T.Ꮡcommon).Fail();
             {
-                var r = t.runCleanup(recoverAndReturnPanic); if (r != default!) {
-                    t.Logf("cleanup panicked with %v"u8, r);
+                var r = Ꮡt.of(T.Ꮡcommon).runCleanup(recoverAndReturnPanic); if (r != default!) {
+                    Ꮡt.of(T.Ꮡcommon).Logf("cleanup panicked with %v"u8, r);
                 }
             }
             // Flush the output log up to the root before dying.
-            for (var root = Ꮡ(t.common); (~root).parent != nil; root = root.val.parent) {
-                (~root).mu.Lock();
-                root.val.duration += highPrecisionTimeSince((~root).start);
-                var d = root.val.duration;
-                (~root).mu.Unlock();
+            for (var root = Ꮡt.of(T.Ꮡcommon); (~root).parent != nil; root = root.Value.parent) {
+                root.of(common.Ꮡmu).Lock();
+                root.Value.duration += highPrecisionTimeSince((~root).start);
+                var d = root.Value.duration;
+                root.of(common.Ꮡmu).Unlock();
                 root.flushToParent((~root).name, "--- FAIL: %s (%s)\n"u8, (~root).name, fmtDuration(d));
                 {
                     var r = (~root).parent.runCleanup(recoverAndReturnPanic); if (r != default!) {
@@ -1659,63 +1710,63 @@ internal static void tRunner(ж<T> Ꮡt, Action<ж<T>> fn) => func((defer, recov
             didPanic = true;
             throw panic(errΔ1);
         };
-        if (err != default!) {
-            doPanic(err);
+        if (Ꮡerr.ValueSlot != default!) {
+            doPanic(Ꮡerr.ValueSlot);
         }
-        t.duration += highPrecisionTimeSince(t.start);
-        if (len(t.sub) > 0){
+        Ꮡt.Value.duration += highPrecisionTimeSince(Ꮡt.Value.start);
+        if (len(Ꮡt.Value.sub) > 0){
             // Run parallel subtests.
             // Decrease the running count for this test and mark it as no longer running.
-            t.context.release();
-            running.Delete(t.name);
+            Ꮡt.Value.context.release();
+            Ꮡrunning.Delete(Ꮡt.Value.name);
             // Release the parallel subtests.
-            close(t.barrier);
+            close(Ꮡt.Value.barrier);
             // Wait for subtests to complete.
-            foreach (var (_, sub) in t.sub) {
-                ᐸꟷ(sub.signal);
+            foreach (var (_, sub) in Ꮡt.Value.sub) {
+                ᐸꟷ((~sub).signal);
             }
             // Run any cleanup callbacks, marking the test as running
             // in case the cleanup hangs.
             ref var cleanupStart = ref heap<highPrecisionTime>(out var ᏑcleanupStart);
             cleanupStart = highPrecisionTimeNow();
-            running.Store(t.name, cleanupStart);
-            var errΔ2 = t.runCleanup(recoverAndReturnPanic);
-            t.duration += highPrecisionTimeSince(cleanupStart);
+            Ꮡrunning.Store(Ꮡt.Value.name, cleanupStart);
+            var errΔ2 = Ꮡt.of(T.Ꮡcommon).runCleanup(recoverAndReturnPanic);
+            Ꮡt.Value.duration += highPrecisionTimeSince(cleanupStart);
             if (errΔ2 != default!) {
                 doPanic(errΔ2);
             }
-            t.checkRaces();
-            if (!t.isParallel) {
+            Ꮡt.of(T.Ꮡcommon).checkRaces();
+            if (!Ꮡt.Value.isParallel) {
                 // Reacquire the count for sequential tests. See comment in Run.
-                t.context.waitParallel();
+                Ꮡt.Value.context.waitParallel();
             }
         } else 
-        if (t.isParallel) {
+        if (Ꮡt.Value.isParallel) {
             // Only release the count for this test if it was run as a parallel
             // test. See comment in Run method.
-            t.context.release();
+            Ꮡt.Value.context.release();
         }
-        t.report();
+        Ꮡt.report();
         // Report after all subtests have finished.
         // Do not lock t.done to allow race detector to detect race in case
         // the user does not appropriately synchronize a goroutine.
-        t.done = true;
-        if (t.parent != nil && !t.hasSub.Load()) {
-            t.setRan();
+        Ꮡt.Value.done = true;
+        if (Ꮡt.Value.parent != nil && !Ꮡt.of(T.ᏑhasSub).Load()) {
+            Ꮡt.of(T.Ꮡcommon).setRan();
         }
     });
     defer(() => {
-        if (len(t.sub) == 0) {
-            t.runCleanup(normalPanic);
+        if (len(Ꮡt.Value.sub) == 0) {
+            Ꮡt.of(T.Ꮡcommon).runCleanup(normalPanic);
         }
     });
     t.start = highPrecisionTimeNow();
-    t.resetRaces();
+    Ꮡt.of(T.Ꮡcommon).resetRaces();
     fn(Ꮡt);
     // code beyond here will not be executed when FailNow is invoked
-    t.mu.Lock();
+    Ꮡt.of(T.Ꮡmu).Lock();
     t.finished = true;
-    t.mu.Unlock();
+    Ꮡt.of(T.Ꮡmu).Unlock();
 });
 
 // Run runs f as a subtest of t called name. It runs f in a separate goroutine
@@ -1724,12 +1775,14 @@ internal static void tRunner(ж<T> Ꮡt, Action<ж<T>> fn) => func((defer, recov
 //
 // Run may be called simultaneously from multiple goroutines, but all such calls
 // must return before the outer test function for t returns.
-[GoRecv] public static bool Run(this ref T t, @string name, Action<ж<T>> f) {
-    if (t.cleanupStarted.Load()) {
+public static bool Run(this ж<T> Ꮡt, @string name, Action<ж<T>> f) {
+    ref var t = ref Ꮡt.Value;
+
+    if (Ꮡt.of(T.ᏑcleanupStarted).Load()) {
         throw panic("testing: t.Run called during t.Cleanup");
     }
-    t.hasSub.Store(true);
-    var (testName, ok, _) = t.context.match.fullName(Ꮡ(t.common), name);
+    Ꮡt.of(T.ᏑhasSub).Store(true);
+    var (testName, ok, _) = (~t.context).match.fullName(Ꮡt.of(T.Ꮡcommon), name);
     if (!ok || shouldFailFast()) {
         return true;
     }
@@ -1737,30 +1790,30 @@ internal static void tRunner(ж<T> Ꮡt, Action<ж<T>> fn) => func((defer, recov
     // function - which runs in a separate stack - is marked as a helper, we can
     // continue walking the stack into the parent test.
     array<uintptr> pc = new(50); /* maxStackLen */
-    nint n = runtime.Callers(2, pc[..]);
-    t = Ꮡ(new T(
+    nint n = Δruntime.Callers(2, pc[..]);
+    Ꮡt = Ꮡ(new T(
         common: new common(
             barrier: new channel<bool>(1),
             signal: new channel<bool>(1),
             name: testName,
-            parent: Ꮡ(t.common),
+            parent: Ꮡt.of(T.Ꮡcommon),
             level: t.level + 1,
             creator: pc[..(int)(n)],
             chatty: t.chatty
         ),
         context: t.context
-    ));
-    t.w = new indenter(Ꮡ(t.common));
+    )); t = ref Ꮡt.Value;
+    t.w = new indenter(Ꮡt.of(T.Ꮡcommon));
     if (t.chatty != nil) {
         t.chatty.Updatef(t.name, "=== RUN   %s\n"u8, t.name);
     }
-    running.Store(t.name, highPrecisionTimeNow());
+    Ꮡrunning.Store(t.name, highPrecisionTimeNow());
     // Instead of reducing the running count of this test before calling the
     // tRunner and increasing it afterwards, we rely on tRunner keeping the
     // count correct. This ensures that a sequence of sequential tests runs
     // without being preempted, even when their parent is a parallel test. This
     // may especially reduce surprises if *parallel == 1.
-    goǃ(tRunner, t, f);
+    goǃ(tRunner, Ꮡt, f);
     // The parent goroutine will block until the subtest either finishes or calls
     // Parallel, but in general we don't know whether the parent goroutine is the
     // top-level test function or some other goroutine it has spawned.
@@ -1769,10 +1822,10 @@ internal static void tRunner(ж<T> Ꮡt, Action<ж<T>> fn) => func((defer, recov
     if (!ᐸꟷ(t.signal)) {
         // At this point, it is likely that FailNow was called on one of the
         // parent tests by one of the subtests. Continue aborting up the chain.
-        runtime.Goexit();
+        Δruntime.Goexit();
     }
-    if (t.chatty != nil && t.chatty.json) {
-        t.chatty.Updatef(t.parent.name, "=== NAME  %s\n"u8, t.parent.name);
+    if (t.chatty != nil && (~t.chatty).json) {
+        t.chatty.Updatef((~t.parent).name, "=== NAME  %s\n"u8, (~t.parent).name);
     }
     return !t.failed;
 }
@@ -1785,7 +1838,7 @@ internal static void tRunner(ж<T> Ꮡt, Action<ж<T>> fn) => func((defer, recov
     time.Time deadline = default!;
     bool ok = default!;
 
-    deadline = t.context.deadline;
+    deadline = t.context.Value.deadline;
     return (deadline, !deadline.IsZero());
 }
 
@@ -1793,13 +1846,13 @@ internal static void tRunner(ж<T> Ꮡt, Action<ж<T>> fn) => func((defer, recov
 // synchronization primitives to run at most *parallel tests.
 [GoType] partial struct testContext {
     internal ж<matcher> match;
-    internal time_package.Time deadline;
+    internal time.Time deadline;
     // isFuzzing is true in the context used when generating random inputs
     // for fuzz targets. isFuzzing is false when running normal tests and
     // when running fuzz tests as unit tests (without -fuzz or when -fuzz
     // does not match).
     internal bool isFuzzing;
-    internal sync_package.Mutex mu;
+    internal Δsync.Mutex mu;
     // Channel used to signal tests that are ready to be run in parallel.
     internal channel<bool> startParallel;
     // running is the number of tests currently running in parallel.
@@ -1812,10 +1865,10 @@ internal static void tRunner(ж<T> Ꮡt, Action<ж<T>> fn) => func((defer, recov
 }
 
 internal static ж<testContext> newTestContext(nint maxParallel, ж<matcher> Ꮡm) {
-    ref var m = ref Ꮡm.val;
+    ref var m = ref Ꮡm.Value;
 
     return Ꮡ(new testContext(
-        match: m,
+        match: Ꮡm,
         startParallel: new channel<bool>(1),
         maxParallel: maxParallel,
         running: 1
@@ -1823,27 +1876,31 @@ internal static ж<testContext> newTestContext(nint maxParallel, ж<matcher> Ꮡ
 }
 
 // Set the count to 1 for the main (sequential) test.
-[GoRecv] internal static void waitParallel(this ref testContext c) {
-    c.mu.Lock();
+internal static void waitParallel(this ж<testContext> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    Ꮡc.of(testContext.Ꮡmu).Lock();
     if (c.running < c.maxParallel) {
         c.running++;
-        c.mu.Unlock();
+        Ꮡc.of(testContext.Ꮡmu).Unlock();
         return;
     }
     c.numWaiting++;
-    c.mu.Unlock();
+    Ꮡc.of(testContext.Ꮡmu).Unlock();
     ᐸꟷ(c.startParallel);
 }
 
-[GoRecv] internal static void release(this ref testContext c) {
-    c.mu.Lock();
+internal static void release(this ж<testContext> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    Ꮡc.of(testContext.Ꮡmu).Lock();
     if (c.numWaiting == 0) {
         c.running--;
-        c.mu.Unlock();
+        Ꮡc.of(testContext.Ꮡmu).Unlock();
         return;
     }
     c.numWaiting--;
-    c.mu.Unlock();
+    Ꮡc.of(testContext.Ꮡmu).Unlock();
     c.startParallel.ᐸꟷ(true);
 }
 
@@ -1859,14 +1916,14 @@ internal static (bool, error) MatchString(this matchStringOnly f, @string pat, @
     return f(pat, str);
 }
 
-internal static error StartCPUProfile(this matchStringOnly f, io.Writer w) {
+internal static error StartCPUProfile(this matchStringOnly f, Δio.Writer w) {
     return errMain;
 }
 
 internal static void StopCPUProfile(this matchStringOnly f) {
 }
 
-internal static error WriteProfileTo(this matchStringOnly f, @string _, io.Writer _, nint _) {
+internal static error WriteProfileTo(this matchStringOnly f, @string _Δp1, Δio.Writer _Δp2, nint _Δp3) {
     return errMain;
 }
 
@@ -1874,7 +1931,7 @@ internal static @string ImportPath(this matchStringOnly f) {
     return ""u8;
 }
 
-internal static void StartTestLog(this matchStringOnly f, io.Writer _) {
+internal static void StartTestLog(this matchStringOnly f, Δio.Writer _) {
 }
 
 internal static error StopTestLog(this matchStringOnly f) {
@@ -1884,7 +1941,7 @@ internal static error StopTestLog(this matchStringOnly f) {
 internal static void SetPanicOnExit0(this matchStringOnly f, bool _) {
 }
 
-internal static error CoordinateFuzzing(this matchStringOnly f, time.Duration _, int64 _, time.Duration _, int64 _, nint _, slice<corpusEntry> _, slice<reflectꓸType> _, @string _, @string _) {
+internal static error CoordinateFuzzing(this matchStringOnly f, time.Duration _Δp1, int64 _Δp2, time.Duration _Δp3, int64 _Δp4, nint _Δp5, slice<corpusEntry> _Δp6, slice<reflectꓸType> _Δp7, @string _Δp8, @string _Δp9) {
     return errMain;
 }
 
@@ -1892,11 +1949,11 @@ internal static error RunFuzzWorker(this matchStringOnly f, Func<corpusEntry, er
     return errMain;
 }
 
-internal static (slice<corpusEntry>, error) ReadCorpus(this matchStringOnly f, @string _, slice<reflectꓸType> _) {
+internal static (slice<corpusEntry>, error) ReadCorpus(this matchStringOnly f, @string _Δp1, slice<reflectꓸType> _Δp2) {
     return (default!, errMain);
 }
 
-internal static error CheckCorpus(this matchStringOnly f, slice<any> _, slice<reflectꓸType> _) {
+internal static error CheckCorpus(this matchStringOnly f, slice<any> _Δp1, slice<reflectꓸType> _Δp2) {
     return default!;
 }
 
@@ -1906,9 +1963,9 @@ internal static void ResetCoverage(this matchStringOnly f) {
 internal static void SnapshotCoverage(this matchStringOnly f) {
 }
 
-internal static (@string mode, Func<@string, @string, (string, error)> tearDown, Func<float64> snapcov) InitRuntimeCoverage(this matchStringOnly f) {
+internal static (@string mode, Func<@string, @string, (@string, error)> tearDown, Func<float64> snapcov) InitRuntimeCoverage(this matchStringOnly f) {
     @string mode = default!;
-    Func<@string, @string, (string, error)> tearDown = default!;
+    Func<@string, @string, (@string, error)> tearDown = default!;
     Func<float64> snapcov = default!;
 
     return (mode, tearDown, snapcov);
@@ -1921,7 +1978,7 @@ internal static (@string mode, Func<@string, @string, (string, error)> tearDown,
 // new functionality is added to the testing package.
 // Systems simulating "go test" should be updated to use MainStart.
 public static void ΔMain(Func<@string, @string, (bool, error)> matchString, slice<InternalTest> tests, slice<InternalBenchmark> benchmarks, slice<InternalExample> examples) {
-    os.Exit(MainStart(((matchStringOnly)matchString), tests, benchmarks, default!, examples).Run());
+    os.Exit(MainStart(new matchStringOnlyᴠtestDeps(new matchStringOnly(matchString)), tests, benchmarks, default!, examples).Run());
 }
 
 // M is a type passed to a TestMain function to run the actual tests.
@@ -1931,8 +1988,8 @@ public static void ΔMain(Func<@string, @string, (bool, error)> matchString, sli
     internal slice<InternalBenchmark> benchmarks;
     internal slice<InternalFuzzTarget> fuzzTargets;
     internal slice<InternalExample> examples;
-    internal ж<time_package.Timer> timer;
-    internal sync_package.Once afterOnce;
+    internal ж<time.Timer> timer;
+    internal Δsync.Once afterOnce;
     internal nint numRun;
     // value to pass to os.Exit, the outer test func main
     // harness calls os.Exit with this code. See #34129.
@@ -1943,29 +2000,30 @@ public static void ΔMain(Func<@string, @string, (bool, error)> matchString, sli
 // passed into this package by a test's generated main package.
 // The canonical implementation of this interface is
 // testing/internal/testdeps's TestDeps.
-[GoType] partial interface testDeps {
+[GoType] public partial interface testDeps {
     @string ImportPath();
     (bool, error) MatchString(@string pat, @string str);
     void SetPanicOnExit0(bool _);
-    error StartCPUProfile(io.Writer _);
+    error StartCPUProfile(Δio.Writer _);
     void StopCPUProfile();
-    void StartTestLog(io.Writer _);
+    void StartTestLog(Δio.Writer _);
     error StopTestLog();
-    error WriteProfileTo(@string _, io.Writer _, nint _);
-    error CoordinateFuzzing(time.Duration _, int64 _, time.Duration _, int64 _, nint _, slice<corpusEntry> _, slice<reflectꓸType> _, @string _, @string _);
+    error WriteProfileTo(@string _Δp0, Δio.Writer _Δp1, nint _Δp2);
+    error CoordinateFuzzing(time.Duration _Δp0, int64 _Δp1, time.Duration _Δp2, int64 _Δp3, nint _Δp4, slice<corpusEntry> _Δp5, slice<reflectꓸType> _Δp6, @string _Δp7, @string _Δp8);
     error RunFuzzWorker(Func<corpusEntry, error> _);
-    (slice<corpusEntry>, error) ReadCorpus(@string _, slice<reflectꓸType> _);
-    error CheckCorpus(slice<any> _, slice<reflectꓸType> _);
+    (slice<corpusEntry>, error) ReadCorpus(@string _Δp0, slice<reflectꓸType> _Δp1);
+    error CheckCorpus(slice<any> _Δp0, slice<reflectꓸType> _Δp1);
     void ResetCoverage();
     void SnapshotCoverage();
-    (@string mode, Func<@string, @string, (string, error)> tearDown, Func<float64> snapcov) InitRuntimeCoverage();
+    (@string mode, Func<@string, @string, (@string, error)> tearDown, Func<float64> snapcov) InitRuntimeCoverage();
 }
 
 // MainStart is meant for use by tests generated by 'go test'.
 // It is not meant to be called directly and is not subject to the Go 1 compatibility document.
 // It may change signature from release to release.
 public static ж<M> MainStart(testDeps deps, slice<InternalTest> tests, slice<InternalBenchmark> benchmarks, slice<InternalFuzzTarget> fuzzTargets, slice<InternalExample> examples) {
-    registerCover2(deps.InitRuntimeCoverage());
+    var (ᴛ1, ᴛ2, ᴛ3) = deps.InitRuntimeCoverage();
+    registerCover2(ᴛ1, ᴛ2, ᴛ3);
     Init();
     return Ꮡ(new M(
         deps: deps,
@@ -1981,199 +2039,204 @@ internal static bool testingTesting;
 internal static ж<os.File> realStderr;
 
 // Run runs the tests. It returns an exit code to pass to os.Exit.
-[GoRecv] public static nint /*code*/ Run(this ref M m) => func((defer, _) => {
+public static nint /*code*/ Run(this ж<M> Ꮡm) {
     nint code = default!;
+    func((defer, recover) => {
+    ref var m = ref Ꮡm.Value;
 
-    defer(() => {
-        code = m.exitCode;
-    });
-    // Count the number of calls to m.Run.
-    // We only ever expected 1, but we didn't enforce that,
-    // and now there are tests in the wild that call m.Run multiple times.
-    // Sigh. go.dev/issue/23129.
-    m.numRun++;
-    // TestMain may have already called flag.Parse.
-    if (!flag.Parsed()) {
-        flag.Parse();
-    }
-    if (chatty.json) {
-        // With -v=json, stdout and stderr are pointing to the same pipe,
-        // which is leading into test2json. In general, operating systems
-        // do a good job of ensuring that writes to the same pipe through
-        // different file descriptors are delivered whole, so that writing
-        // AAA to stdout and BBB to stderr simultaneously produces
-        // AAABBB or BBBAAA on the pipe, not something like AABBBA.
-        // However, the exception to this is when the pipe fills: in that
-        // case, Go's use of non-blocking I/O means that writing AAA
-        // or BBB might be split across multiple system calls, making it
-        // entirely possible to get output like AABBBA. The same problem
-        // happens inside the operating system kernel if we switch to
-        // blocking I/O on the pipe. This interleaved output can do things
-        // like print unrelated messages in the middle of a TestFoo line,
-        // which confuses test2json. Setting os.Stderr = os.Stdout will make
-        // them share a single pfd, which will hold a lock for each program
-        // write, preventing any interleaving.
-        //
-        // It might be nice to set Stderr = Stdout always, or perhaps if
-        // we can tell they are the same file, but for now -v=json is
-        // a very clear signal. Making the two files the same may cause
-        // surprises if programs close os.Stdout but expect to be able
-        // to continue to write to os.Stderr, but it's hard to see why a
-        // test would think it could take over global state that way.
-        //
-        // This fix only helps programs where the output is coming directly
-        // from Go code. It does not help programs in which a subprocess is
-        // writing to stderr or stdout at the same time that a Go test is writing output.
-        // It also does not help when the output is coming from the runtime,
-        // such as when using the print/println functions, since that code writes
-        // directly to fd 2 without any locking.
-        // We keep realStderr around to prevent fd 2 from being closed.
-        //
-        // See go.dev/issue/33419.
-        realStderr = os.Stderr;
-        var os.Stderr = os.Stdout;
-    }
-    if (parallel.val < 1) {
-        fmt.Fprintln(~os.Stderr, "testing: -parallel can only be given a positive integer");
-        flag.Usage();
-        m.exitCode = 2;
-        return code;
-    }
-    if (matchFuzz.val != ""u8 && fuzzCacheDir.val == ""u8) {
-        fmt.Fprintln(~os.Stderr, "testing: -test.fuzzcachedir must be set if -test.fuzz is set");
-        flag.Usage();
-        m.exitCode = 2;
-        return code;
-    }
-    if (matchList.val != ""u8) {
-        listTests(m.deps.MatchString, m.tests, m.benchmarks, m.fuzzTargets, m.examples);
-        m.exitCode = 0;
-        return code;
-    }
-    if (shuffle.val != "off"u8) {
-        int64 n = default!;
-        error err = default!;
-        if (shuffle.val == "on"u8){
-            n = time.Now().UnixNano();
-        } else {
-            (n, err) = strconv.ParseInt(shuffle.val, 10, 64);
-            if (err != default!) {
-                fmt.Fprintln(~os.Stderr, @"testing: -shuffle should be ""off"", ""on"", or a valid integer:", err);
-                m.exitCode = 2;
-                return code;
+        defer(() => {
+            code = Ꮡm.Value.exitCode;
+        });
+        // Count the number of calls to m.Run.
+        // We only ever expected 1, but we didn't enforce that,
+        // and now there are tests in the wild that call m.Run multiple times.
+        // Sigh. go.dev/issue/23129.
+        m.numRun++;
+        // TestMain may have already called flag.Parse.
+        if (!flag.Parsed()) {
+            flag.Parse();
+        }
+        if (chatty.json) {
+            // With -v=json, stdout and stderr are pointing to the same pipe,
+            // which is leading into test2json. In general, operating systems
+            // do a good job of ensuring that writes to the same pipe through
+            // different file descriptors are delivered whole, so that writing
+            // AAA to stdout and BBB to stderr simultaneously produces
+            // AAABBB or BBBAAA on the pipe, not something like AABBBA.
+            // However, the exception to this is when the pipe fills: in that
+            // case, Go's use of non-blocking I/O means that writing AAA
+            // or BBB might be split across multiple system calls, making it
+            // entirely possible to get output like AABBBA. The same problem
+            // happens inside the operating system kernel if we switch to
+            // blocking I/O on the pipe. This interleaved output can do things
+            // like print unrelated messages in the middle of a TestFoo line,
+            // which confuses test2json. Setting os.Stderr = os.Stdout will make
+            // them share a single pfd, which will hold a lock for each program
+            // write, preventing any interleaving.
+            //
+            // It might be nice to set Stderr = Stdout always, or perhaps if
+            // we can tell they are the same file, but for now -v=json is
+            // a very clear signal. Making the two files the same may cause
+            // surprises if programs close os.Stdout but expect to be able
+            // to continue to write to os.Stderr, but it's hard to see why a
+            // test would think it could take over global state that way.
+            //
+            // This fix only helps programs where the output is coming directly
+            // from Go code. It does not help programs in which a subprocess is
+            // writing to stderr or stdout at the same time that a Go test is writing output.
+            // It also does not help when the output is coming from the runtime,
+            // such as when using the print/println functions, since that code writes
+            // directly to fd 2 without any locking.
+            // We keep realStderr around to prevent fd 2 from being closed.
+            //
+            // See go.dev/issue/33419.
+            realStderr = os.Stderr;
+            os.Stderr = os.Stdout;
+        }
+        if (parallel.Value < 1) {
+            fmt.Fprintln(new os.FileжWriter(os.Stderr), "testing: -parallel can only be given a positive integer");
+            flag.Usage();
+            m.exitCode = 2;
+            return;
+        }
+        if (matchFuzz.Value != ""u8 && fuzzCacheDir.Value == ""u8) {
+            fmt.Fprintln(new os.FileжWriter(os.Stderr), "testing: -test.fuzzcachedir must be set if -test.fuzz is set");
+            flag.Usage();
+            m.exitCode = 2;
+            return;
+        }
+        if (matchList.Value != ""u8) {
+            listTests(m.deps.MatchString, m.tests, m.benchmarks, m.fuzzTargets, m.examples);
+            m.exitCode = 0;
+            return;
+        }
+        if (shuffle.Value != "off"u8) {
+            int64 n = default!;
+            error err = default!;
+            if (shuffle.Value == "on"u8){
+                n = time.Now().UnixNano();
+            } else {
+                (n, err) = strconv.ParseInt(shuffle.Value, 10, 64);
+                if (err != default!) {
+                    fmt.Fprintln(new os.FileжWriter(os.Stderr), @"testing: -shuffle should be ""off"", ""on"", or a valid integer:", err);
+                    m.exitCode = 2;
+                    return;
+                }
+            }
+            fmt.Println("-test.shuffle", n);
+            var rng = rand.New(rand.NewSource(n));
+            rng.Shuffle(len(m.tests), (nint i, nint j) => {
+                (Ꮡm.Value.tests[i], Ꮡm.Value.tests[j]) = (Ꮡm.Value.tests[j], Ꮡm.Value.tests[i]);
+            });
+            rng.Shuffle(len(m.benchmarks), (nint i, nint j) => {
+                (Ꮡm.Value.benchmarks[i], Ꮡm.Value.benchmarks[j]) = (Ꮡm.Value.benchmarks[j], Ꮡm.Value.benchmarks[i]);
+            });
+        }
+        parseCpuList();
+        m.before();
+        defer(Ꮡm.after);
+        // Run tests, examples, and benchmarks unless this is a fuzz worker process.
+        // Workers start after this is done by their parent process, and they should
+        // not repeat this work.
+        if (!isFuzzWorker.Value) {
+            var deadline = Ꮡm.startAlarm();
+            haveExamples = len(m.examples) > 0;
+            var (testRan, testOk) = runTests(m.deps.MatchString, m.tests, deadline);
+            var (fuzzTargetsRan, fuzzTargetsOk) = runFuzzTests(m.deps, m.fuzzTargets, deadline);
+            var (exampleRan, exampleOk) = runExamples(m.deps.MatchString, m.examples);
+            m.stopAlarm();
+            if (!testRan && !exampleRan && !fuzzTargetsRan && matchBenchmarks.Value == ""u8 && matchFuzz.Value == ""u8) {
+                fmt.Fprintln(new os.FileжWriter(os.Stderr), "testing: warning: no tests to run");
+                if (testingTesting && match.Value != "^$"u8) {
+                    // If this happens during testing of package testing it could be that
+                    // package testing's own logic for when to run a test is broken,
+                    // in which case every test will run nothing and succeed,
+                    // with no obvious way to detect this problem (since no tests are running).
+                    // So make 'no tests to run' a hard failure when testing package testing itself.
+                    fmt.Print(chatty.prefix(), "FAIL: package testing must run tests\n");
+                    testOk = false;
+                }
+            }
+            var anyFailed = !testOk || !exampleOk || !fuzzTargetsOk || !runBenchmarks(m.deps.ImportPath(), m.deps.MatchString, m.benchmarks);
+            if (!anyFailed && race.Errors() > 0) {
+                fmt.Print(chatty.prefix(), "testing: race detected outside of test execution\n");
+                anyFailed = true;
+            }
+            if (anyFailed) {
+                fmt.Print(chatty.prefix(), "FAIL\n");
+                m.exitCode = 1;
+                return;
             }
         }
-        fmt.Println("-test.shuffle", n);
-        var rng = rand.New(rand.NewSource(n));
-        rng.Shuffle(len(m.tests), (nint i, nint j) => {
-            (m.tests[i], m.tests[j]) = (m.tests[j], m.tests[i]);
-        });
-        rng.Shuffle(len(m.benchmarks), (nint i, nint j) => {
-            (m.benchmarks[i], m.benchmarks[j]) = (m.benchmarks[j], m.benchmarks[i]);
-        });
-    }
-    parseCpuList();
-    m.before();
-    defer(m.after);
-    // Run tests, examples, and benchmarks unless this is a fuzz worker process.
-    // Workers start after this is done by their parent process, and they should
-    // not repeat this work.
-    if (!isFuzzWorker.val) {
-        var deadline = m.startAlarm();
-        haveExamples = len(m.examples) > 0;
-        var (testRan, testOk) = runTests(m.deps.MatchString, m.tests, deadline);
-        var (fuzzTargetsRan, fuzzTargetsOk) = runFuzzTests(m.deps, m.fuzzTargets, deadline);
-        var (exampleRan, exampleOk) = runExamples(m.deps.MatchString, m.examples);
-        m.stopAlarm();
-        if (!testRan && !exampleRan && !fuzzTargetsRan && matchBenchmarks.val == ""u8 && matchFuzz.val == ""u8) {
-            fmt.Fprintln(~os.Stderr, "testing: warning: no tests to run");
-            if (testingTesting && match.val != "^$"u8) {
-                // If this happens during testing of package testing it could be that
-                // package testing's own logic for when to run a test is broken,
-                // in which case every test will run nothing and succeed,
-                // with no obvious way to detect this problem (since no tests are running).
-                // So make 'no tests to run' a hard failure when testing package testing itself.
-                fmt.Print(chatty.prefix(), "FAIL: package testing must run tests\n");
-                testOk = false;
-            }
-        }
-        var anyFailed = !testOk || !exampleOk || !fuzzTargetsOk || !runBenchmarks(m.deps.ImportPath(), m.deps.MatchString, m.benchmarks);
-        if (!anyFailed && race.Errors() > 0) {
-            fmt.Print(chatty.prefix(), "testing: race detected outside of test execution\n");
-            anyFailed = true;
-        }
-        if (anyFailed) {
+        var fuzzingOk = runFuzzing(m.deps, m.fuzzTargets);
+        if (!fuzzingOk) {
             fmt.Print(chatty.prefix(), "FAIL\n");
-            m.exitCode = 1;
-            return code;
+            if (isFuzzWorker.Value){
+                m.exitCode = fuzzWorkerExitCode;
+            } else {
+                m.exitCode = 1;
+            }
+            return;
         }
-    }
-    var fuzzingOk = runFuzzing(m.deps, m.fuzzTargets);
-    if (!fuzzingOk) {
-        fmt.Print(chatty.prefix(), "FAIL\n");
-        if (isFuzzWorker.val){
-            m.exitCode = fuzzWorkerExitCode;
-        } else {
-            m.exitCode = 1;
+        m.exitCode = 0;
+        if (!isFuzzWorker.Value) {
+            fmt.Print(chatty.prefix(), "PASS\n");
         }
-        return code;
-    }
-    m.exitCode = 0;
-    if (!isFuzzWorker.val) {
-        fmt.Print(chatty.prefix(), "PASS\n");
-    }
+    });
     return code;
-});
+}
 
-[GoRecv] internal static void report(this ref T t) {
+internal static void report(this ж<T> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t.parent == nil) {
         return;
     }
     @string dstr = fmtDuration(t.duration);
     @string format = "--- %s: %s (%s)\n"u8;
-    if (t.Failed()){
-        t.flushToParent(t.name, format, "FAIL", t.name, dstr);
+    if (Ꮡt.of(T.Ꮡcommon).Failed()){
+        Ꮡt.of(T.Ꮡcommon).flushToParent(t.name, format, "FAIL", t.name, dstr);
     } else 
     if (t.chatty != nil) {
-        if (t.Skipped()){
-            t.flushToParent(t.name, format, "SKIP", t.name, dstr);
+        if (Ꮡt.of(T.Ꮡcommon).Skipped()){
+            Ꮡt.of(T.Ꮡcommon).flushToParent(t.name, format, "SKIP", t.name, dstr);
         } else {
-            t.flushToParent(t.name, format, "PASS", t.name, dstr);
+            Ꮡt.of(T.Ꮡcommon).flushToParent(t.name, format, "PASS", t.name, dstr);
         }
     }
 }
 
 internal static void listTests(Func<@string, @string, (bool, error)> matchString, slice<InternalTest> tests, slice<InternalBenchmark> benchmarks, slice<InternalFuzzTarget> fuzzTargets, slice<InternalExample> examples) {
     {
-        var (_, err) = matchString(matchList.val, "non-empty"u8); if (err != default!) {
-            fmt.Fprintf(~os.Stderr, "testing: invalid regexp in -test.list (%q): %s\n"u8, matchList.val, err);
+        var (_, err) = matchString(matchList.Value, "non-empty"u8); if (err != default!) {
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: invalid regexp in -test.list (%q): %s\n"u8, matchList.Value, err);
             os.Exit(1);
         }
     }
     foreach (var (_, test) in tests) {
         {
-            var (ok, _) = matchString(matchList.val, test.Name); if (ok) {
+            var (ok, _) = matchString(matchList.Value, test.Name); if (ok) {
                 fmt.Println(test.Name);
             }
         }
     }
     foreach (var (_, bench) in benchmarks) {
         {
-            var (ok, _) = matchString(matchList.val, bench.Name); if (ok) {
+            var (ok, _) = matchString(matchList.Value, bench.Name); if (ok) {
                 fmt.Println(bench.Name);
             }
         }
     }
     foreach (var (_, fuzzTarget) in fuzzTargets) {
         {
-            var (ok, _) = matchString(matchList.val, fuzzTarget.Name); if (ok) {
+            var (ok, _) = matchString(matchList.Value, fuzzTarget.Name); if (ok) {
                 fmt.Println(fuzzTarget.Name);
             }
         }
     }
     foreach (var (_, example) in examples) {
         {
-            var (ok, _) = matchString(matchList.val, example.Name); if (ok) {
+            var (ok, _) = matchString(matchList.Value, example.Name); if (ok) {
                 fmt.Println(example.Name);
             }
         }
@@ -2186,12 +2249,12 @@ public static bool /*ok*/ RunTests(Func<@string, @string, (bool, error)> matchSt
     bool ok = default!;
 
     time.Time deadline = default!;
-    if (timeout.val > 0) {
-        deadline = time.Now().Add(timeout.val);
+    if (timeout.Value > 0) {
+        deadline = time.Now().Add(timeout.Value);
     }
-    var (ran, ok) = runTests(matchString, tests, deadline);
+    (var ran, ok) = runTests(matchString, tests, deadline);
     if (!ran && !haveExamples) {
-        fmt.Fprintln(~os.Stderr, "testing: warning: no tests to run");
+        fmt.Fprintln(new os.FileжWriter(os.Stderr), "testing: warning: no tests to run");
     }
     return ok;
 }
@@ -2202,8 +2265,8 @@ internal static (bool ran, bool ok) runTests(Func<@string, @string, (bool, error
 
     ok = true;
     foreach (var (_, procs) in cpuList) {
-        runtime.GOMAXPROCS(procs);
-        for (nuint i = ((nuint)0); i < count.val; i++) {
+        Δruntime.GOMAXPROCS(procs);
+        for (nuint i = (nuint)0; i < count.Value; i++) {
             if (shouldFailFast()) {
                 break;
             }
@@ -2213,38 +2276,38 @@ internal static (bool ran, bool ok) runTests(Func<@string, @string, (bool, error
                 // to keep trying.
                 break;
             }
-            var ctx = newTestContext(parallel.val, newMatcher(matchString, match.val, "-test.run"u8, skip.val));
-            ctx.val.deadline = deadline;
+            var ctx = newTestContext(parallel.Value, newMatcher(matchString, match.Value, "-test.run"u8, skip.Value));
+            ctx.Value.deadline = deadline;
             var t = Ꮡ(new T(
                 common: new common(
                     signal: new channel<bool>(1),
                     barrier: new channel<bool>(1),
-                    w: os.Stdout
+                    w: new os.FileжWriter(os.Stdout)
                 ),
                 context: ctx
             ));
             if (Verbose()) {
-                t.chatty = newChattyPrinter(t.w);
+                t.Value.chatty = newChattyPrinter((~t).w);
             }
-            tRunner(t, 
             var testsʗ1 = tests;
-            (ж<T> t) => {
-                ref var test = ref heap(new InternalTest(), out var Ꮡtest);
+            tRunner(t, (ж<T> tΔ1) => {
+                foreach (var (_, vᴛ1) in testsʗ1) {
+                    ref var test = ref heap(new InternalTest(), out var Ꮡtest);
+                    test = vᴛ1;
 
-                foreach (var (_, test) in testsʗ1) {
                     tΔ1.Run(test.Name, test.F);
                 }
             });
             switch (ᐧ) {
-            case ᐧ when t.signal.ꟷᐳ(out _): {
+            case ᐧ when (~t).signal.ꟷᐳ(out _): {
                 break;
             }
             default: {
                 throw panic("internal error: tRunner exited without sending on t.signal");
                 break;
             }}
-            ok = ok && !t.Failed();
-            ran = ran || t.ran;
+            ok = ok && !t.of(T.Ꮡcommon).Failed();
+            ran = ran || (~t).ran;
         }
     }
     return (ran, ok);
@@ -2252,153 +2315,155 @@ internal static (bool ran, bool ok) runTests(Func<@string, @string, (bool, error
 
 // before runs before all testing.
 [GoRecv] internal static void before(this ref M m) {
-    if (memProfileRate.val > 0) {
-        var runtime.MemProfileRate = memProfileRate.val;
+    if (memProfileRate.Value > 0) {
+        Δruntime.MemProfileRate = memProfileRate.Value;
     }
-    if (cpuProfile.val != ""u8) {
-        (fΔ1, errΔ1) = os.Create(toOutputDir(cpuProfile.val));
-        if (errΔ1 != default!) {
-            fmt.Fprintf(~os.Stderr, "testing: %s\n"u8, errΔ1);
+    if (cpuProfile.Value != ""u8) {
+        var (f, err) = os.Create(toOutputDir(cpuProfile.Value));
+        if (err != default!) {
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: %s\n"u8, err);
             return;
         }
         {
-            var errΔ2 = m.deps.StartCPUProfile(~fΔ1); if (errΔ2 != default!) {
-                fmt.Fprintf(~os.Stderr, "testing: can't start cpu profile: %s\n"u8, errΔ2);
-                fΔ1.Close();
+            var errΔ1 = m.deps.StartCPUProfile(new os.FileжWriter(f)); if (errΔ1 != default!) {
+                fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: can't start cpu profile: %s\n"u8, errΔ1);
+                f.Close();
                 return;
             }
         }
     }
     // Could save f so after can call f.Close; not worth the effort.
-    if (traceFile.val != ""u8) {
-        (fΔ2, errΔ3) = os.Create(toOutputDir(traceFile.val));
-        if (errΔ3 != default!) {
-            fmt.Fprintf(~os.Stderr, "testing: %s\n"u8, errΔ3);
+    if (traceFile.Value != ""u8) {
+        var (f, err) = os.Create(toOutputDir(traceFile.Value));
+        if (err != default!) {
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: %s\n"u8, err);
             return;
         }
         {
-            var errΔ4 = trace.Start(~fΔ2); if (errΔ4 != default!) {
-                fmt.Fprintf(~os.Stderr, "testing: can't start tracing: %s\n"u8, errΔ4);
-                fΔ2.Close();
+            var errΔ1 = trace.Start(new os.FileжWriter(f)); if (errΔ1 != default!) {
+                fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: can't start tracing: %s\n"u8, errΔ1);
+                f.Close();
                 return;
             }
         }
     }
     // Could save f so after can call f.Close; not worth the effort.
-    if (blockProfile.val != ""u8 && blockProfileRate.val >= 0) {
-        runtime.SetBlockProfileRate(blockProfileRate.val);
+    if (blockProfile.Value != ""u8 && blockProfileRate.Value >= 0) {
+        Δruntime.SetBlockProfileRate(blockProfileRate.Value);
     }
-    if (mutexProfile.val != ""u8 && mutexProfileFraction.val >= 0) {
-        runtime.SetMutexProfileFraction(mutexProfileFraction.val);
+    if (mutexProfile.Value != ""u8 && mutexProfileFraction.Value >= 0) {
+        Δruntime.SetMutexProfileFraction(mutexProfileFraction.Value);
     }
-    if (coverProfile.val != ""u8 && CoverMode() == ""u8) {
-        fmt.Fprintf(~os.Stderr, "testing: cannot use -test.coverprofile because test binary was not built with coverage enabled\n"u8);
+    if (coverProfile.Value != ""u8 && CoverMode() == ""u8) {
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: cannot use -test.coverprofile because test binary was not built with coverage enabled\n"u8);
         os.Exit(2);
     }
-    if (gocoverdir.val != ""u8 && CoverMode() == ""u8) {
-        fmt.Fprintf(~os.Stderr, "testing: cannot use -test.gocoverdir because test binary was not built with coverage enabled\n"u8);
+    if (gocoverdir.Value != ""u8 && CoverMode() == ""u8) {
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: cannot use -test.gocoverdir because test binary was not built with coverage enabled\n"u8);
         os.Exit(2);
     }
-    if (testlog.val != ""u8) {
+    if (testlog.Value != ""u8) {
         // Note: Not using toOutputDir.
         // This file is for use by cmd/go, not users.
         ж<os.File> f = default!;
         error err = default!;
         if (m.numRun == 1){
-            (f, err) = os.Create(testlog.val);
+            (f, err) = os.Create(testlog.Value);
         } else {
-            (f, err) = os.OpenFile(testlog.val, os.O_WRONLY, 0);
+            (f, err) = os.OpenFile(testlog.Value, os.O_WRONLY, 0);
             if (err == default!) {
-                f.Seek(0, io.SeekEnd);
+                f.Seek(0, Δio.SeekEnd);
             }
         }
         if (err != default!) {
-            fmt.Fprintf(~os.Stderr, "testing: %s\n"u8, err);
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: %s\n"u8, err);
             os.Exit(2);
         }
-        m.deps.StartTestLog(~f);
+        m.deps.StartTestLog(new os.FileжWriter(f));
         testlogFile = f;
     }
-    if (panicOnExit0.val) {
+    if (panicOnExit0.Value) {
         m.deps.SetPanicOnExit0(true);
     }
 }
 
 // after runs after all testing.
-[GoRecv] internal static void after(this ref M m) {
-    m.afterOnce.Do(() => {
-        m.writeProfiles();
+internal static void after(this ж<M> Ꮡm) {
+    ref var m = ref Ꮡm.Value;
+
+    Ꮡm.of(M.ᏑafterOnce).Do(() => {
+        Ꮡm.Value.writeProfiles();
     });
     // Restore PanicOnExit0 after every run, because we set it to true before
     // every run. Otherwise, if m.Run is called multiple times the behavior of
     // os.Exit(0) will not be restored after the second run.
-    if (panicOnExit0.val) {
+    if (panicOnExit0.Value) {
         m.deps.SetPanicOnExit0(false);
     }
 }
 
 [GoRecv] internal static void writeProfiles(this ref M m) {
-    if (testlog.val != ""u8) {
+    if (testlog.Value != ""u8) {
         {
             var err = m.deps.StopTestLog(); if (err != default!) {
-                fmt.Fprintf(~os.Stderr, "testing: can't write %s: %s\n"u8, testlog.val, err);
+                fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: can't write %s: %s\n"u8, testlog.Value, err);
                 os.Exit(2);
             }
         }
         {
             var err = testlogFile.Close(); if (err != default!) {
-                fmt.Fprintf(~os.Stderr, "testing: can't write %s: %s\n"u8, testlog.val, err);
+                fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: can't write %s: %s\n"u8, testlog.Value, err);
                 os.Exit(2);
             }
         }
     }
-    if (cpuProfile.val != ""u8) {
+    if (cpuProfile.Value != ""u8) {
         m.deps.StopCPUProfile();
     }
     // flushes profile to disk
-    if (traceFile.val != ""u8) {
+    if (traceFile.Value != ""u8) {
         trace.Stop();
     }
     // flushes trace to disk
-    if (memProfile.val != ""u8) {
-        (f, err) = os.Create(toOutputDir(memProfile.val));
+    if (memProfile.Value != ""u8) {
+        var (f, err) = os.Create(toOutputDir(memProfile.Value));
         if (err != default!) {
-            fmt.Fprintf(~os.Stderr, "testing: %s\n"u8, err);
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: %s\n"u8, err);
             os.Exit(2);
         }
-        runtime.GC();
+        Δruntime.GC();
         // materialize all statistics
         {
-            err = m.deps.WriteProfileTo("allocs"u8, ~f, 0); if (err != default!) {
-                fmt.Fprintf(~os.Stderr, "testing: can't write %s: %s\n"u8, memProfile.val, err);
+            err = m.deps.WriteProfileTo("allocs"u8, new os.FileжWriter(f), 0); if (err != default!) {
+                fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: can't write %s: %s\n"u8, memProfile.Value, err);
                 os.Exit(2);
             }
         }
         f.Close();
     }
-    if (blockProfile.val != ""u8 && blockProfileRate.val >= 0) {
-        (f, err) = os.Create(toOutputDir(blockProfile.val));
+    if (blockProfile.Value != ""u8 && blockProfileRate.Value >= 0) {
+        var (f, err) = os.Create(toOutputDir(blockProfile.Value));
         if (err != default!) {
-            fmt.Fprintf(~os.Stderr, "testing: %s\n"u8, err);
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: %s\n"u8, err);
             os.Exit(2);
         }
         {
-            err = m.deps.WriteProfileTo("block"u8, ~f, 0); if (err != default!) {
-                fmt.Fprintf(~os.Stderr, "testing: can't write %s: %s\n"u8, blockProfile.val, err);
+            err = m.deps.WriteProfileTo("block"u8, new os.FileжWriter(f), 0); if (err != default!) {
+                fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: can't write %s: %s\n"u8, blockProfile.Value, err);
                 os.Exit(2);
             }
         }
         f.Close();
     }
-    if (mutexProfile.val != ""u8 && mutexProfileFraction.val >= 0) {
-        (f, err) = os.Create(toOutputDir(mutexProfile.val));
+    if (mutexProfile.Value != ""u8 && mutexProfileFraction.Value >= 0) {
+        var (f, err) = os.Create(toOutputDir(mutexProfile.Value));
         if (err != default!) {
-            fmt.Fprintf(~os.Stderr, "testing: %s\n"u8, err);
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: %s\n"u8, err);
             os.Exit(2);
         }
         {
-            err = m.deps.WriteProfileTo("mutex"u8, ~f, 0); if (err != default!) {
-                fmt.Fprintf(~os.Stderr, "testing: can't write %s: %s\n"u8, mutexProfile.val, err);
+            err = m.deps.WriteProfileTo("mutex"u8, new os.FileжWriter(f), 0); if (err != default!) {
+                fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: can't write %s: %s\n"u8, mutexProfile.Value, err);
                 os.Exit(2);
             }
         }
@@ -2412,7 +2477,7 @@ internal static (bool ran, bool ok) runTests(Func<@string, @string, (bool, error
 // toOutputDir returns the file name relocated, if required, to outputDir.
 // Simple implementation to avoid pulling in path/filepath.
 internal static @string toOutputDir(@string path) {
-    if (outputDir.val == ""u8 || path == ""u8) {
+    if (outputDir.Value == ""u8 || path == ""u8) {
         return path;
     }
     // On Windows, it's clumsy, but we can be almost always correct
@@ -2422,7 +2487,7 @@ internal static @string toOutputDir(@string path) {
     // what to do, but even then path/filepath doesn't help.
     // TODO: Worth doing better? Probably not, because we're here only
     // under the management of go test.
-    if (runtime.GOOS == "windows"u8 && len(path) >= 2) {
+    if (Δruntime.GOOS == "windows"u8 && len(path) >= 2) {
         var (letter, colon) = (path[0], path[1]);
         if (((rune)'a' <= letter && letter <= (rune)'z' || (rune)'A' <= letter && letter <= (rune)'Z') && colon == (rune)':') {
             // If path starts with a drive letter we're stuck with it regardless.
@@ -2432,75 +2497,77 @@ internal static @string toOutputDir(@string path) {
     if (os.IsPathSeparator(path[0])) {
         return path;
     }
-    return fmt.Sprintf("%s%c%s"u8, outputDir.val, os.PathSeparator, path);
+    return fmt.Sprintf("%s%c%s"u8, outputDir.Value, os.PathSeparator, path);
 }
 
 // startAlarm starts an alarm if requested.
-[GoRecv] internal static time.Time startAlarm(this ref M m) {
-    if (timeout.val <= 0) {
+internal static time.Time startAlarm(this ж<M> Ꮡm) {
+    ref var m = ref Ꮡm.Value;
+
+    if (timeout.Value <= 0) {
         return new time.Time(nil);
     }
-    var deadline = time.Now().Add(timeout.val);
-    m.timer = time.AfterFunc(timeout.val, () => {
-        m.after();
+    var deadline = time.Now().Add(timeout.Value);
+    m.timer = time.AfterFunc(timeout.Value, () => {
+        Ꮡm.after();
         debug.SetTraceback("all"u8);
         @string extra = ""u8;
         {
             var list = runningList(); if (len(list) > 0) {
-                ref var b = ref heap(new strings_package.Builder(), out var Ꮡb);
-                b.WriteString("\nrunning tests:"u8);
+                ref var b = ref heap(new strings.Builder(), out var Ꮡb);
+                Ꮡb.WriteString("\nrunning tests:"u8);
                 foreach (var (_, name) in list) {
-                    b.WriteString("\n\t"u8);
-                    b.WriteString(name);
+                    Ꮡb.WriteString("\n\t"u8);
+                    Ꮡb.WriteString(name);
                 }
                 extra = b.String();
             }
         }
-        throw panic(fmt.Sprintf("test timed out after %v%s"u8, timeout.val, extra));
+        throw panic(fmt.Sprintf("test timed out after %v%s"u8, timeout.Value, extra));
     });
     return deadline;
 }
 
 // runningList returns the list of running tests.
 internal static slice<@string> runningList() {
-    slice<@string> list = default!;
-    running.Range(
-    var listʗ2 = list;
-    (any k, any v) => {
-        listʗ2 = append(listʗ2, fmt.Sprintf("%s (%v)"u8, k._<@string>(), highPrecisionTimeSince(v._<highPrecisionTime>()).Round(time.ΔSecond)));
+    ref var list = ref heap<slice<@string>>(out var Ꮡlist);
+    Ꮡrunning.Range((any k, any v) => {
+        Ꮡlist.ValueSlot = append(Ꮡlist.ValueSlot, fmt.Sprintf("%s (%v)"u8, k._<@string>(), highPrecisionTimeSince(v._<highPrecisionTime>()).Round(time.ΔSecond)));
         return true;
     });
-    slices.Sort(list);
+    slices.Sort<slice<@string>, @string>(list);
     return list;
 }
 
 // stopAlarm turns off the alarm.
 [GoRecv] internal static void stopAlarm(this ref M m) {
-    if (timeout.val > 0) {
+    if (timeout.Value > 0) {
         m.timer.Stop();
     }
 }
 
 internal static void parseCpuList() {
-    foreach (var (_, val) in strings.Split(cpuListStr.val, ","u8)) {
+    foreach (var (_, vᴛ1) in strings.Split(cpuListStr.Value, ","u8)) {
+        var val = vᴛ1;
+
         val = strings.TrimSpace(val);
         if (val == ""u8) {
             continue;
         }
         var (cpu, err) = strconv.Atoi(val);
         if (err != default! || cpu <= 0) {
-            fmt.Fprintf(~os.Stderr, "testing: invalid value %q for -test.cpu\n"u8, val);
+            fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: invalid value %q for -test.cpu\n"u8, val);
             os.Exit(1);
         }
         cpuList = append(cpuList, cpu);
     }
     if (cpuList == default!) {
-        cpuList = append(cpuList, runtime.GOMAXPROCS(-1));
+        cpuList = append(cpuList, Δruntime.GOMAXPROCS(-1));
     }
 }
 
 internal static bool shouldFailFast() {
-    return failFast.val && numFailed.Load() > 0;
+    return failFast.Value && ᏑnumFailed.Load() > 0;
 }
 
 } // end testing_package

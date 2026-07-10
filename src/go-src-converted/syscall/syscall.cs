@@ -38,7 +38,7 @@ partial class syscall_package {
 //
 // Deprecated: Use ByteSliceFromString instead.
 public static slice<byte> StringByteSlice(@string s) {
-    (a, err) = ByteSliceFromString(s);
+    var (a, err) = ByteSliceFromString(s);
     if (err != default!) {
         throw panic("syscall: string with NUL passed to StringByteSlice");
     }
@@ -63,14 +63,14 @@ public static (slice<byte>, error) ByteSliceFromString(@string s) {
 //
 // Deprecated: Use [BytePtrFromString] instead.
 public static ж<byte> StringBytePtr(@string s) {
-    return ᏑStringByteSlice(s).at<byte>(0);
+    return Ꮡ(StringByteSlice(s), 0);
 }
 
 // BytePtrFromString returns a pointer to a NUL-terminated array of
 // bytes containing the text of s. If s contains a NUL byte at any
 // location, it returns (nil, [EINVAL]).
 public static (ж<byte>, error) BytePtrFromString(@string s) {
-    (a, err) = ByteSliceFromString(s);
+    var (a, err) = ByteSliceFromString(s);
     if (err != default!) {
         return (default!, err);
     }
@@ -86,7 +86,7 @@ internal static uintptr _zero;
     int64 sec = default!;
     int64 nsec = default!;
 
-    return (((int64)ts.Sec), ((int64)ts.Nsec));
+    return ((int64)ts.Sec, (int64)ts.Nsec);
 }
 
 // Unix returns the time stored in tv as seconds plus nanoseconds.
@@ -94,17 +94,17 @@ internal static uintptr _zero;
     int64 sec = default!;
     int64 nsec = default!;
 
-    return (((int64)tv.Sec), ((int64)tv.Usec) * 1000);
+    return ((int64)tv.Sec, (int64)tv.Usec * 1000);
 }
 
 // Nano returns the time stored in ts as nanoseconds.
 [GoRecv] public static int64 Nano(this ref Timespec ts) {
-    return ((int64)ts.Sec) * 1e9F + ((int64)ts.Nsec);
+    return (int64)ts.Sec * 1000000000 + (int64)ts.Nsec;
 }
 
 // Nano returns the time stored in tv as nanoseconds.
 [GoRecv] public static int64 Nano(this ref Timeval tv) {
-    return ((int64)tv.Sec) * 1e9F + ((int64)tv.Usec) * 1000;
+    return (int64)tv.Sec * 1000000000 + (int64)tv.Usec * 1000;
 }
 
 // Getpagesize and Exit are provided by the runtime.

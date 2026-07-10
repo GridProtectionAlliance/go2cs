@@ -8,11 +8,13 @@ using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime;
+using atomic = @internal.runtime.atomic_package;
 
 partial class runtime_package {
 
 internal static readonly UntypedInt traceStackSize = 128;
-internal const uintptr logicalStackSentinel = /* ^uintptr(0) */ 18446744073709551615;
+internal static readonly uintptr logicalStackSentinel = /* ^uintptr(0) */ unchecked((uintptr)18446744073709551615);
 
 // traceStack captures a stack trace from a goroutine and registers it in the trace
 // stack table. It then returns its unique ID. If gp == nil, then traceStack will
@@ -25,20 +27,20 @@ internal const uintptr logicalStackSentinel = /* ^uintptr(0) */ 1844674407370955
 // that this stack trace is being written out for, which needs to be synchronized with
 // generations moving forward. Prefer traceEventWriter.stack.
 internal static uint64 traceStack(nint skip, ж<g> Ꮡgp, uintptr gen) {
-    ref var gp = ref Ꮡgp.val;
+    ref var gp = ref Ꮡgp.DerefOrNil();
 
     array<uintptr> pcBuf = new(128); /* traceStackSize */
     // Figure out gp and mp for the backtrace.
     ж<m> mp = default!;
-    if (gp == nil) {
-        mp = getg().val.m;
-        gp = mp.val.curg;
+    if (Ꮡgp == nil) {
+        mp = getg().Value.m;
+        Ꮡgp = mp.Value.curg; gp = ref Ꮡgp.DerefOrNil();
     }
     // Double-check that we own the stack we're about to trace.
-    if (debug.traceCheckStackOwnership != 0 && gp != nil) {
+    if (debug.traceCheckStackOwnership != 0 && Ꮡgp != nil) {
         var status = readgstatus(Ꮡgp);
         // If the scan bit is set, assume we're the ones that acquired it.
-        if ((uint32)(status & _Gscan) == 0) {
+        if ((uint32)(status & (uint32)_Gscan) == 0) {
             // Use the trace status to check this. There are a number of cases
             // where a running goroutine might be in _Gwaiting, and these cases
             // are totally fine for taking a stack trace. They're captured
@@ -46,19 +48,21 @@ internal static uint64 traceStack(nint skip, ж<g> Ꮡgp, uintptr gen) {
             var exprᴛ1 = goStatusToTraceGoStatus(status, gp.waitreason);
             var matchᴛ1 = false;
             if (exprᴛ1 == traceGoRunning || exprᴛ1 == traceGoSyscall) { matchᴛ1 = true;
-                if (getg() == Ꮡgp || (~mp).curg == Ꮡgp) {
-                    break;
-                }
+                do {
+                    if (getg() == Ꮡgp || (~mp).curg == Ꮡgp) {
+                        break;
+                    }
+                } while (false);
                 fallthrough = true;
             }
             if (fallthrough || !matchᴛ1) { /* default: */
-                print("runtime: gp=", new @unsafe.Pointer(Ꮡgp), " gp.goid=", gp.goid, " status=", gStatusStrings[status], "\n");
+                print("runtime: gp=", new @unsafe.Pointer(Ꮡgp), " gp.goid=", gp.goid, " status=", gStatusStrings[(nint)(status)], "\n");
                 @throw("attempted to trace stack of a goroutine this thread does not own"u8);
             }
 
         }
     }
-    if (gp != nil && mp == nil) {
+    if (Ꮡgp != nil && mp == nil) {
         // We're getting the backtrace for a G that's not currently executing.
         // It may still have an M, if it's locked to some M.
         mp = gp.lockedm.ptr();
@@ -75,16 +79,16 @@ internal static uint64 traceStack(nint skip, ж<g> Ꮡgp, uintptr gen) {
         if (getg() == Ꮡgp){
             nstk += callers(skip + 1, pcBuf[1..]);
         } else 
-        if (gp != nil) {
+        if (Ꮡgp != nil) {
             nstk += gcallers(Ꮡgp, skip, pcBuf[1..]);
         }
     } else {
         // Fast path: Unwind using frame pointers.
-        pcBuf[0] = ((uintptr)skip);
+        pcBuf[0] = (uintptr)skip;
         if (getg() == Ꮡgp){
-            nstk += fpTracebackPCs(((@unsafe.Pointer)getfp()), pcBuf[1..]);
+            nstk += fpTracebackPCs((@unsafe.Pointer)getfp(), pcBuf[1..]);
         } else 
-        if (gp != nil) {
+        if (Ꮡgp != nil) {
             // Three cases:
             //
             // (1) We're called on the g0 stack through mcall(fn) or systemstack(fn). To
@@ -103,10 +107,10 @@ internal static uint64 traceStack(nint skip, ж<g> Ꮡgp, uintptr gen) {
             // information about where it stopped, and like case (1), we match gcallers here.
             if (gp.syscallsp != 0){
                 pcBuf[1] = gp.syscallpc;
-                nstk += 1 + fpTracebackPCs(((@unsafe.Pointer)gp.syscallbp), pcBuf[2..]);
+                nstk += 1 + fpTracebackPCs((@unsafe.Pointer)gp.syscallbp, pcBuf[2..]);
             } else {
                 pcBuf[1] = gp.sched.pc;
-                nstk += 1 + fpTracebackPCs(((@unsafe.Pointer)gp.sched.bp), pcBuf[2..]);
+                nstk += 1 + fpTracebackPCs((@unsafe.Pointer)gp.sched.bp, pcBuf[2..]);
             }
         }
     }
@@ -118,7 +122,7 @@ internal static uint64 traceStack(nint skip, ж<g> Ꮡgp, uintptr gen) {
         nstk--;
     }
     // skip runtime.main
-    var id = Δtrace.stackTab[gen % 2].put(pcBuf[..(int)(nstk)]);
+    var id = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (nint)(gen % 2)).put(pcBuf[..(int)(nstk)]);
     return id;
 }
 
@@ -130,40 +134,44 @@ internal static uint64 traceStack(nint skip, ж<g> Ꮡgp, uintptr gen) {
 
 // put returns a unique id for the stack trace pcs and caches it in the table,
 // if it sees the trace for the first time.
-[GoRecv] internal static uint64 put(this ref traceStackTable t, slice<uintptr> pcs) {
+internal static uint64 put(this ж<traceStackTable> Ꮡt, slice<uintptr> pcs) {
+    ref var t = ref Ꮡt.Value;
+
     if (len(pcs) == 0) {
         return 0;
     }
-    var (id, _) = t.tab.put((uintptr)noescape(((@unsafe.Pointer)(Ꮡ(pcs, 0)))), ((uintptr)len(pcs)) * @unsafe.Sizeof(((uintptr)0)));
+    var (id, _) = Ꮡt.of(traceStackTable.Ꮡtab).put((uintptr)noescape(@unsafe.Pointer.FromRef(ref (Ꮡ(pcs, 0)).Value)), (uintptr)len(pcs) * @unsafe.Sizeof((uintptr)0));
     return id;
 }
 
 // dump writes all previously cached stacks to trace buffers,
 // releases all memory and resets state. It must only be called once the caller
 // can guarantee that there are no more writers to the table.
-[GoRecv] internal static void dump(this ref traceStackTable t, uintptr gen) {
+internal static void dump(this ж<traceStackTable> Ꮡt, uintptr gen) {
+    ref var t = ref Ꮡt.Value;
+
     var stackBuf = new slice<uintptr>(traceStackSize);
     var w = unsafeTraceWriter(gen, nil);
     {
-        var root = (ж<traceMapNode>)(uintptr)(t.tab.root.Load()); if (root != nil) {
+        var root = (ж<traceMapNode>)(uintptr)(Ꮡt.of(traceStackTable.Ꮡtab).of(traceMap.Ꮡroot).Load()); if (root != nil) {
             w = dumpStacksRec(root, w, stackBuf);
         }
     }
     w.flush().end();
-    t.tab.reset();
+    Ꮡt.of(traceStackTable.Ꮡtab).reset();
 }
 
 internal static traceWriter dumpStacksRec(ж<traceMapNode> Ꮡnode, traceWriter w, slice<uintptr> stackBuf) {
-    ref var node = ref Ꮡnode.val;
+    ref var node = ref Ꮡnode.Value;
 
-    var Δstack = @unsafe.Slice(((ж<uintptr>)new @unsafe.Pointer(Ꮡ(node.data, 0))), ((uintptr)len(node.data)) / @unsafe.Sizeof(((uintptr)0)));
+    var Δstack = @unsafe.Slice((ж<uintptr>)(uintptr)(new @unsafe.Pointer(Ꮡ(node.data, 0))), (uintptr)len(node.data) / @unsafe.Sizeof((uintptr)0));
     // N.B. This might allocate, but that's OK because we're not writing to the M's buffer,
     // but one we're about to create (with ensure).
     nint n = fpunwindExpand(stackBuf, Δstack);
     var frames = makeTraceFrames(w.gen, stackBuf[..(int)(n)]);
     // The maximum number of bytes required to hold the encoded stack, given that
     // it contains N frames.
-    nint maxBytes = 1 + (2 + 4 * len(frames)) * traceBytesPerNumber;
+    nint maxBytes = 1 + (2 + 4 * len(frames)) * (nint)traceBytesPerNumber;
     // Estimate the size of this record. This
     // bound is pretty loose, but avoids counting
     // lots of varint sizes.
@@ -172,21 +180,21 @@ internal static traceWriter dumpStacksRec(ж<traceMapNode> Ꮡnode, traceWriter 
     bool flushed = default!;
     (w, flushed) = w.ensure(1 + maxBytes);
     if (flushed) {
-        w.@byte(((byte)traceEvStacks));
+        w.@byte((byte)traceEvStacks);
     }
     // Emit stack event.
-    w.@byte(((byte)traceEvStack));
-    w.varint(((uint64)node.id));
-    w.varint(((uint64)len(frames)));
+    w.@byte((byte)traceEvStack);
+    w.varint((uint64)node.id);
+    w.varint((uint64)len(frames));
     foreach (var (_, frame) in frames) {
-        w.varint(((uint64)frame.PC));
+        w.varint((uint64)frame.PC);
         w.varint(frame.funcID);
         w.varint(frame.fileID);
         w.varint(frame.line);
     }
     // Recursively walk all child nodes.
     foreach (var (i, _) in node.children) {
-        @unsafe.Pointer child = (uintptr)node.children[i].Load();
+        @unsafe.Pointer child = (uintptr)Ꮡnode.at(traceMapNode.Ꮡchildren, i).Load();
         if (child == nil) {
             continue;
         }
@@ -221,17 +229,17 @@ internal static traceFrame makeTraceFrame(uintptr gen, Frame f) {
     traceFrame frame = default!;
     frame.PC = f.PC;
     @string fn = f.Function;
-    static readonly UntypedInt maxLen = /* 1 << 10 */ 1024;
+    UntypedInt maxLen = /* 1 << 10 */ 1024;
     if (len(fn) > maxLen) {
-        fn = fn[(int)(len(fn) - maxLen)..];
+        fn = fn[(int)(len(fn) - (nint)maxLen)..];
     }
-    frame.funcID = Δtrace.stringTab[gen % 2].put(gen, fn);
-    frame.line = ((uint64)f.Line);
-    @string file = f.File;
-    if (len(file) > maxLen) {
-        file = file[(int)(len(file) - maxLen)..];
+    frame.funcID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (nint)(gen % 2)).put(gen, fn);
+    frame.line = (uint64)f.Line;
+    @string @file = f.File;
+    if (len(@file) > maxLen) {
+        @file = @file[(int)(len(@file) - (nint)maxLen)..];
     }
-    frame.fileID = Δtrace.stringTab[gen % 2].put(gen, file);
+    frame.fileID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (nint)(gen % 2)).put(gen, @file);
     return frame;
 }
 
@@ -250,9 +258,9 @@ internal static nint /*i*/ fpTracebackPCs(@unsafe.Pointer fp, slice<uintptr> pcB
 
     for (i = 0; i < len(pcBuf) && fp != nil; i++) {
         // return addr sits one word above the frame pointer
-        pcBuf[i] = ~(ж<uintptr>)(uintptr)(((@unsafe.Pointer)(((uintptr)fp) + goarch.PtrSize)));
+        pcBuf[i] = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)((uintptr)fp + (uintptr)goarch.PtrSize));
         // follow the frame pointer to the next one
-        fp = ((@unsafe.Pointer)(~(ж<uintptr>)(uintptr)(fp)));
+        fp.Value = (@unsafe.Pointer)(~(ж<uintptr>)(uintptr)(fp));
     }
     return i;
 }
@@ -283,9 +291,9 @@ internal static nint fpunwindExpand(slice<uintptr> dst, slice<uintptr> pcBuf) {
     nint n = default!;
     abi.FuncID lastFuncID = abi.FuncIDNormal;
     uintptr skip = pcBuf[0];
-    Func<uintptr, bool> skipOrAdd = 
+
     var dstʗ1 = dst;
-    (uintptr retPC) => {
+    Func<uintptr, bool> skipOrAdd = (uintptr retPC) => {
         if (skip > 0){
             skip--;
         } else 
@@ -322,7 +330,9 @@ outer:
             }
             lastFuncID = sf.funcID;
         }
+continue_outer:;
     }
+break_outer:;
     return n;
 }
 

@@ -12,19 +12,20 @@
 namespace go.math;
 
 using byteorder = @internal.byteorder_package;
-using bits = math.bits_package;
-using rand = math.rand_package;
+using bits = go.math.bits_package;
+using rand = go.math.rand_package;
 using sync = sync_package;
 using @internal;
+using go.math;
 
 partial class big_package {
 
 [GoType("[]Word")] partial struct nat;
 
-internal static nat natOne = new nat{1};
-internal static nat natTwo = new nat{2};
-internal static nat natFive = new nat{5};
-internal static nat natTen = new nat{10};
+internal static nat natOne = new nat(new Word[]{1}.slice());
+internal static nat natTwo = new nat(new Word[]{2}.slice());
+internal static nat natFive = new nat(new Word[]{5}.slice());
+internal static nat natTen = new nat(new Word[]{10}.slice());
 
 internal static @string String(this nat z) {
     return "0x"u8 + ((@string)z.itoa(false, 16));
@@ -49,8 +50,8 @@ internal static nat make(this nat z, nint n) {
     }
     // Choosing a good value for e has significant performance impact
     // because it increases the chance that a value can be reused.
-    static readonly UntypedInt e = 4; // extra capacity
-    return new nat(n, n + e);
+    UntypedInt e = 4; // extra capacity
+    return new nat(n, n + (nint)e);
 }
 
 internal static nat setWord(this nat z, Word x) {
@@ -65,14 +66,14 @@ internal static nat setWord(this nat z, Word x) {
 internal static nat setUint64(this nat z, uint64 x) {
     // single-word value
     {
-        Word w = ((Word)x); if (((uint64)w) == x) {
+        Word w = ((Word)(nuint)x); if ((uint64)(nuint)w == x) {
             return z.setWord(w);
         }
     }
     // 2-word value
     z = z.make(2);
-    z[1] = ((Word)(x >> (int)(32)));
-    z[0] = ((Word)x);
+    z[1] = ((Word)(nuint)((x >> (int)(32))));
+    z[0] = ((Word)(nuint)x);
     return z;
 }
 
@@ -86,7 +87,7 @@ internal static nat add(this nat z, nat x, nat y) {
     nint m = len(x);
     nint n = len(y);
     switch (ᐧ) {
-    case {} when m is < n: {
+    case {} when m < n: {
         return z.add(y, x);
     }
     case {} when m is 0: {
@@ -112,7 +113,7 @@ internal static nat sub(this nat z, nat x, nat y) {
     nint m = len(x);
     nint n = len(y);
     switch (ᐧ) {
-    case {} when m is < n: {
+    case {} when m < n: {
         throw panic("underflow");
         break;
     }
@@ -144,11 +145,11 @@ internal static nint /*r*/ cmp(this nat x, nat y) {
     nint n = len(y);
     if (m != n || m == 0) {
         switch (ᐧ) {
-        case {} when m is < n: {
+        case {} when m < n: {
             r = -1;
             break;
         }
-        case {} when m is > n: {
+        case {} when m > n: {
             r = 1;
             break;
         }}
@@ -160,11 +161,11 @@ internal static nint /*r*/ cmp(this nat x, nat y) {
         i--;
     }
     switch (ᐧ) {
-    case {} when x[i] is < y[i]: {
+    case {} when x[i] < y[i]: {
         r = -1;
         break;
     }
-    case {} when x[i] is > y[i]: {
+    case {} when x[i] > y[i]: {
         r = 1;
         break;
     }}
@@ -243,7 +244,7 @@ internal static nat montgomery(this nat z, nat x, nat y, nat m, Word k, nint n) 
 internal static void karatsubaAdd(nat z, nat x, nint n) {
     {
         Word c = addVV(z[0..(int)(n)], z, x); if (c != 0) {
-            addVW(z[(int)(n)..(int)(n + n >> (int)(1))], z[(int)(n)..], c);
+            addVW(z[(int)(n)..(int)(n + (n >> (int)(1)))], z[(int)(n)..], c);
         }
     }
 }
@@ -252,7 +253,7 @@ internal static void karatsubaAdd(nat z, nat x, nint n) {
 internal static void karatsubaSub(nat z, nat x, nint n) {
     {
         Word c = subVV(z[0..(int)(n)], z, x); if (c != 0) {
-            subVW(z[(int)(n)..(int)(n + n >> (int)(1))], z[(int)(n)..], c);
+            subVW(z[(int)(n)..(int)(n + (n >> (int)(1)))], z[(int)(n)..], c);
         }
     }
 }
@@ -299,13 +300,11 @@ internal static void karatsuba(nat z, nat x, nat y) {
     //      = x1*y0 -    z2 -    z0 + x0*y1 + z2 + z0
     //      = x1*y0                 + x0*y1
     // split x, y into "digits"
-    nint n2 = n >> (int)(1);
+    nint n2 = (n >> (int)(1));
     // n2 >= 1
-    var x1 = x[(int)(n2)..];
-    var x0 = x[0..(int)(n2)];
+    var (x1, x0) = (x[(int)(n2)..], x[0..(int)(n2)]);
     // x = x1*b + y0
-    var y1 = y[(int)(n2)..];
-    var y0 = y[0..(int)(n2)];
+    var (y1, y0) = (y[(int)(n2)..], y[0..(int)(n2)]);
     // y = y1*b + y0
     // z is used for the result and temporary storage:
     //
@@ -370,7 +369,7 @@ internal static void karatsuba(nat z, nat x, nat y) {
 // no 3-operand slice expressions in this code (or worse,
 // reflect-based operations to the same effect).
 internal static bool alias(nat x, nat y) {
-    return cap(x) > 0 && cap(y) > 0 && Ꮡx[0..(int)(cap(x))].at<Word>(cap(x) - 1) == Ꮡy[0..(int)(cap(y))].at<Word>(cap(y) - 1);
+    return cap(x) > 0 && cap(y) > 0 && Ꮡ(x[0..(int)(cap(x))], cap(x) - 1) == Ꮡ(y[0..(int)(cap(y))], cap(y) - 1);
 }
 
 // addAt implements z += x<<(_W*i); z must be long enough.
@@ -396,19 +395,19 @@ internal static void addAt(nat z, nat x, nint i) {
 // result is the largest number that can be divided repeatedly by 2 before
 // becoming about the value of threshold.
 internal static nint karatsubaLen(nint n, nint threshold) {
-    nuint i = ((nuint)0);
+    nuint i = (nuint)0;
     while (n > threshold) {
-        n >>= (UntypedInt)(1);
+        n >>= (int)(1);
         i++;
     }
-    return n << (int)(i);
+    return (n << (int)(i));
 }
 
 internal static nat mul(this nat z, nat x, nat y) {
     nint m = len(x);
     nint n = len(y);
     switch (ᐧ) {
-    case {} when m is < n: {
+    case {} when m < n: {
         return z.mul(y, x);
     }
     case {} when m == 0 || n == 0: {
@@ -466,7 +465,7 @@ internal static nat mul(this nat z, nat x, nat y) {
     //
     if (k < n || m != n) {
         var tp = getNat(3 * k);
-        var t = tp.val;
+        var t = tp.ValueSlot;
         // add x0*y1*b
         var x0Δ1 = x0.norm();
         var y1 = y[(int)(k)..];
@@ -499,7 +498,7 @@ internal static nat mul(this nat z, nat x, nat y) {
 internal static void basicSqr(nat z, nat x) {
     nint n = len(x);
     var tp = getNat(2 * n);
-    var t = tp.val;
+    var t = tp.ValueSlot;
     // temporary variable to hold the products
     clear(t);
     (z[1], z[0]) = mulWW(x[0], x[0]);
@@ -529,9 +528,8 @@ internal static void karatsubaSqr(nat z, nat x) {
         basicSqr(z[..(int)(2 * n)], x);
         return;
     }
-    nint n2 = n >> (int)(1);
-    var x1 = x[(int)(n2)..];
-    var x0 = x[0..(int)(n2)];
+    nint n2 = (n >> (int)(1));
+    var (x1, x0) = (x[(int)(n2)..], x[0..(int)(n2)]);
     karatsubaSqr(z, x0);
     karatsubaSqr(z[(int)(n)..], x1);
     // s = sign(xd*yd) == -1 for xd != 0; s == 1 for xd == 0
@@ -597,7 +595,7 @@ internal static nat sqr(this nat z, nat x) {
     clear(z[(int)(2 * k)..]);
     if (k < n) {
         var tp = getNat(2 * k);
-        var t = tp.val;
+        var t = tp.ValueSlot;
         var x0Δ1 = x0.norm();
         var x1 = x[(int)(k)..];
         t = t.mul(x0Δ1, x1);
@@ -619,13 +617,13 @@ internal static nat mulRange(this nat z, uint64 a, uint64 b) {
     case {} when a is 0: {
         return z.setUint64(0);
     }
-    case {} when a is > b: {
+    case {} when a > b: {
         return z.setUint64(1);
     }
-    case {} when a is b: {
+    case {} when a == b: {
         return z.setUint64(a);
     }
-    case {} when a + 1 is b: {
+    case {} when a + 1 == b: {
         return z.mul(((nat)default!).setUint64(a), // cut long ranges short (optimization)
  ((nat)default!).setUint64(b));
     }}
@@ -640,28 +638,29 @@ internal static nat mulRange(this nat z, uint64 a, uint64 b) {
 internal static ж<nat> getNat(nint n) {
     ж<nat> z = default!;
     {
-        var v = natPool.Get(); if (v != default!) {
-            z = v._<nat.val>();
+        var v = ᏑnatPool.Get(); if (v != default!) {
+            z = v._<ж<nat>>();
         }
     }
     if (z == nil) {
         z = @new<nat>();
     }
-    z.val = z.make(n);
+    z.ValueSlot = (~z).make(n);
     if (n > 0) {
-        (ж<ж<nat>>)[0] = 1043915;
+        (z.ValueSlot)[0] = 0xfedcb;
     }
     // break code expecting zero
     return z;
 }
 
 internal static void putNat(ж<nat> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
-    natPool.Put(x);
+    ᏑnatPool.Put(x);
 }
 
-internal static sync.Pool natPool;
+internal static ж<sync.Pool> ᏑnatPool = new(default(sync.Pool));
+internal static ref sync.Pool natPool => ref ᏑnatPool.Value;
 
 // bitLen returns the length of x in bits.
 // Unlike most methods, it works even if x is not normalized.
@@ -674,15 +673,15 @@ internal static nint bitLen(this nat x) {
             // bits.Len uses a lookup table for the low-order bits on some
             // architectures. Neutralize any input-dependent behavior by setting all
             // bits after the first one bit.
-            nuint top = ((nuint)x[i]);
-            top |= (nuint)(top >> (int)(1));
-            top |= (nuint)(top >> (int)(2));
-            top |= (nuint)(top >> (int)(4));
-            top |= (nuint)(top >> (int)(8));
-            top |= (nuint)(top >> (int)(16));
-            top |= (nuint)(top >> (int)(16) >> (int)(16));
+            nuint top = (nuint)x[i];
+            top |= (nuint)((top >> (int)(1)));
+            top |= (nuint)((top >> (int)(2)));
+            top |= (nuint)((top >> (int)(4)));
+            top |= (nuint)((top >> (int)(8)));
+            top |= (nuint)((top >> (int)(16)));
+            top |= (nuint)(((top >> (int)(16)) >> (int)(16)));
             // ">> 32" doesn't compile on 32-bit architectures
-            return i * _W + bits.Len(top);
+            return i * (nint)_W + bits.Len(top);
         }
     }
     return 0;
@@ -695,21 +694,21 @@ internal static nuint trailingZeroBits(this nat x) {
         return 0;
     }
     nuint i = default!;
-    while (x[i] == 0) {
+    while (x[(nint)(i)] == 0) {
         i++;
     }
     // x[i] != 0
-    return i * _W + ((nuint)bits.TrailingZeros(((nuint)x[i])));
+    return i * (nuint)_W + (nuint)bits.TrailingZeros((nuint)x[(nint)(i)]);
 }
 
 // isPow2 returns i, true when x == 2**i and 0, false otherwise.
 internal static (nuint, bool) isPow2(this nat x) {
     nuint i = default!;
-    while (x[i] == 0) {
+    while (x[(nint)(i)] == 0) {
         i++;
     }
-    if (i == ((nuint)len(x)) - 1 && (Word)(x[i] & (x[i] - 1)) == 0) {
-        return (i * _W + ((nuint)bits.TrailingZeros(((nuint)x[i]))), true);
+    if (i == (nuint)len(x) - 1 && (Word)(x[(nint)(i)] & (x[(nint)(i)] - 1)) == 0) {
+        return (i * (nuint)_W + (nuint)bits.TrailingZeros((nuint)x[(nint)(i)]), true);
     }
     return (0, false);
 }
@@ -733,9 +732,9 @@ internal static nat shl(this nat z, nat x, nuint s) {
         return z[..0];
     }
     // m > 0
-    nint n = m + ((nint)(s / _W));
+    nint n = m + (nint)(s / (nuint)_W);
     z = z.make(n + 1);
-    z[n] = shlVU(z[(int)(n - m)..(int)(n)], x, s % _W);
+    z[n] = shlVU(z[(int)(n - m)..(int)(n)], x, s % (nuint)_W);
     clear(z[0..(int)(n - m)]);
     return z.norm();
 }
@@ -751,19 +750,19 @@ internal static nat shr(this nat z, nat x, nuint s) {
         }
     }
     nint m = len(x);
-    nint n = m - ((nint)(s / _W));
+    nint n = m - (nint)(s / (nuint)_W);
     if (n <= 0) {
         return z[..0];
     }
     // n > 0
     z = z.make(n);
-    shrVU(z, x[(int)(m - n)..], s % _W);
+    shrVU(z, x[(int)(m - n)..], s % (nuint)_W);
     return z.norm();
 }
 
 internal static nat setBit(this nat z, nat x, nuint i, nuint b) {
-    nint j = ((nint)(i / _W));
-    Word m = ((Word)1) << (int)((i % _W));
+    nint j = (nint)(i / (nuint)_W);
+    Word m = (((Word)1) << (int)((i % (nuint)_W)));
     nint n = len(x);
     switch (b) {
     case 0: {
@@ -773,7 +772,7 @@ internal static nat setBit(this nat z, nat x, nuint i, nuint b) {
             // no need to grow
             return z;
         }
-        z[j] &= ~(Word)(m);
+        z[j] &= unchecked((Word)~(Word)(m));
         return z.norm();
     }
     case 1: {
@@ -794,31 +793,31 @@ internal static nat setBit(this nat z, nat x, nuint i, nuint b) {
 
 // bit returns the value of the i'th bit, with lsb == bit 0.
 internal static nuint bit(this nat x, nuint i) {
-    nuint j = i / _W;
-    if (j >= ((nuint)len(x))) {
+    nuint j = i / (nuint)_W;
+    if (j >= (nuint)len(x)) {
         return 0;
     }
     // 0 <= j < len(x)
-    return ((nuint)((Word)(x[j] >> (int)((i % _W)) & 1)));
+    return (nuint)((Word)((x[(nint)(j)] >> (int)((i % (nuint)_W))) & 1));
 }
 
 // sticky returns 1 if there's a 1 bit within the
 // i least significant bits, otherwise it returns 0.
 internal static nuint sticky(this nat x, nuint i) {
-    nuint j = i / _W;
-    if (j >= ((nuint)len(x))) {
+    nuint j = i / (nuint)_W;
+    if (j >= (nuint)len(x)) {
         if (len(x) == 0) {
             return 0;
         }
         return 1;
     }
     // 0 <= j < len(x)
-    foreach (var (Δ_, xΔ1) in x[..(int)(j)]) {
+    foreach (var (_, xΔ1) in x[..(int)(j)]) {
         if (xΔ1 != 0) {
             return 1;
         }
     }
-    if (x[j] << (int)((_W - i % _W)) != 0) {
+    if ((x[(nint)(j)] << (int)(((nuint)_W - i % (nuint)_W))) != 0) {
         return 1;
     }
     return 0;
@@ -840,14 +839,14 @@ internal static nat and(this nat z, nat x, nat y) {
 
 // trunc returns z = x mod 2ⁿ.
 internal static nat trunc(this nat z, nat x, nuint n) {
-    nuint w = (n + _W - 1) / _W;
-    if (((nuint)len(x)) < w) {
+    nuint w = (n + (nuint)_W - 1) / (nuint)_W;
+    if ((nuint)len(x) < w) {
         return z.set(x);
     }
-    z = z.make(((nint)w));
+    z = z.make((nint)w);
     copy(z, x);
-    if (n % _W != 0) {
-        z[len(z) - 1] &= (Word)(1 << (int)((n % _W)) - 1);
+    if (n % (nuint)_W != 0) {
+        z[len(z) - 1] &= (Word)((Word)((nuint)1 << (int)((n % (nuint)_W))) - 1);
     }
     return z.norm();
 }
@@ -904,36 +903,33 @@ internal static nat xor(this nat z, nat x, nat y) {
 // random creates a random integer in [0..limit), using the space in z if
 // possible. n is the bit length of limit.
 internal static nat random(this nat z, ж<rand.Rand> Ꮡrand, nat limit, nint n) {
-    ref var rand = ref Ꮡrand.val;
+    ref var randΔ1 = ref Ꮡrand.Value;
 
     if (alias(z, limit)) {
         z = default!;
     }
     // z is an alias for limit - cannot reuse
     z = z.make(len(limit));
-    nuint bitLengthOfMSW = ((nuint)(n % _W));
+    nuint bitLengthOfMSW = (nuint)(n % (nint)_W);
     if (bitLengthOfMSW == 0) {
         bitLengthOfMSW = _W;
     }
-    Word mask = ((Word)((1 << (int)(bitLengthOfMSW)) - 1));
+    Word mask = ((Word)((nuint)1 << (int)(bitLengthOfMSW))) - 1;
     while (ᐧ) {
-        switch (_W) {
-        case 32: {
+        var exprᴛ1 = _W;
+        if (exprᴛ1 == 32) {
             foreach (var (i, _) in z) {
-                z[i] = ((Word)rand.Uint32());
+                z[i] = ((Word)(nuint)randΔ1.Uint32());
             }
-            break;
         }
-        case 64: {
+        else if (exprᴛ1 == 64) {
             foreach (var (i, _) in z) {
-                z[i] = (Word)(((Word)rand.Uint32()) | ((Word)rand.Uint32()) << (int)(32));
+                z[i] = (Word)(((Word)(nuint)randΔ1.Uint32()) | (((Word)(nuint)randΔ1.Uint32()) << (int)(32)));
             }
-            break;
         }
-        default: {
+        else { /* default: */
             throw panic("unknown word size");
-            break;
-        }}
+        }
 
         z[len(limit) - 1] &= (Word)(mask);
         if (z.cmp(limit) < 0) {
@@ -1002,13 +998,13 @@ internal static nat expNN(this nat z, nat x, nat y, nat m, bool slow) {
     Word v = y[len(y) - 1];
     // v > 0 because y is normalized and y > 0
     nuint shift = nlz(v) + 1;
-    v <<= (nuint)(shift);
+    v <<= (int)(shift);
     nat q = default!;
-    static readonly UntypedInt mask = /* 1 << (_W - 1) */ 9223372036854775808;
+    UntypedInt mask = /* 1 << (_W - 1) */ 9223372036854775808;
     // We walk through the bits of the exponent one by one. Each time we
     // see a bit, we square, thus doubling the power. If the bit is a one,
     // we also multiply by x, thus adding one to the power.
-    nint w = _W - ((nint)shift);
+    nint w = (nint)_W - (nint)shift;
     // zz and r are used to avoid allocating in mul and div as
     // otherwise the arguments would alias.
     nat zz = default!;
@@ -1016,7 +1012,7 @@ internal static nat expNN(this nat z, nat x, nat y, nat m, bool slow) {
     for (nint j = 0; j < w; j++) {
         zz = zz.sqr(z);
         (zz, z) = (z, zz);
-        if ((Word)(v & mask) != 0) {
+        if ((Word)(v & (nuint)mask) != 0) {
             zz = zz.mul(z, x);
             (zz, z) = (z, zz);
         }
@@ -1024,14 +1020,14 @@ internal static nat expNN(this nat z, nat x, nat y, nat m, bool slow) {
             (zz, r) = zz.div(r, z, m);
             (zz, r, q, z) = (q, z, zz, r);
         }
-        v <<= (UntypedInt)(1);
+        v <<= (int)(1);
     }
     for (nint i = len(y) - 2; i >= 0; i--) {
         v = y[i];
         for (nint j = 0; j < _W; j++) {
             zz = zz.sqr(z);
             (zz, z) = (z, zz);
-            if ((Word)(v & mask) != 0) {
+            if ((Word)(v & (nuint)mask) != 0) {
                 zz = zz.mul(z, x);
                 (zz, z) = (z, zz);
             }
@@ -1039,7 +1035,7 @@ internal static nat expNN(this nat z, nat x, nat y, nat m, bool slow) {
                 (zz, r) = zz.div(r, z, m);
                 (zz, r, q, z) = (q, z, zz, r);
             }
-            v <<= (UntypedInt)(1);
+            v <<= (int)(1);
         }
     }
     return z.norm();
@@ -1104,25 +1100,23 @@ internal static nat expNNWindowed(this nat z, nat x, nat y, nuint logM) {
     }
     // zz is used to avoid allocating in mul as otherwise
     // the arguments would alias.
-    nint w = ((nint)((logM + _W - 1) / _W));
+    nint w = (nint)((logM + (nuint)_W - 1) / (nuint)_W);
     var zzp = getNat(w);
-    var zz = zzp.val;
-    static readonly UntypedInt n = 4;
+    var zz = zzp.ValueSlot;
+    UntypedInt n = 4;
     // powers[i] contains x^i.
-    ref var powers = ref heap(new array<ж<nat>>(16), out var Ꮡpowers);
+    array<ж<nat>> powers = new(16); /* (1 << (int)(n)) */
     foreach (var (iΔ1, _) in powers) {
         powers[iΔ1] = getNat(w);
     }
-    powers[0].val = powers[0].set(natOne);
-    powers[1].val = powers[1].trunc(x, logM);
-    for (nint i = 2; i < 1 << (int)(n); i += 2) {
-        var p2 = powers[i / 2];
-        var p = powers[i];
-        var p1 = powers[i + 1];
-        p.val = p.sqr(p2.val);
-        p.val = p.trunc(p.val, logM);
-        p1.val = p1.mul(p.val, x);
-        p1.val = p1.trunc(p1.val, logM);
+    powers[0].ValueSlot = (~powers[0]).set(natOne);
+    powers[1].ValueSlot = (~powers[1]).trunc(x, logM);
+    for (nint iΔ2 = 2; iΔ2 < (1 << (int)(n)); iΔ2 += 2) {
+        var (p2, p, p1) = (powers[iΔ2 / 2], powers[iΔ2], powers[iΔ2 + 1]);
+        p.ValueSlot = (~p).sqr(p2.ValueSlot);
+        p.ValueSlot = (~p).trunc(p.ValueSlot, logM);
+        p1.ValueSlot = (~p1).mul(p.ValueSlot, x);
+        p1.ValueSlot = (~p1).trunc(p1.ValueSlot, logM);
     }
     // Because phi(2**logM) = 2**(logM-1), x**(2**(logM-1)) = 1,
     // so we can compute x**(y mod 2**(logM-1)) instead of x**y.
@@ -1130,12 +1124,12 @@ internal static nat expNNWindowed(this nat z, nat x, nat y, nuint logM) {
     // Instead of allocating a new y, we start reading y at the right word
     // and truncate it appropriately at the start of the loop.
     nint i = len(y) - 1;
-    nint mtop = ((nint)((logM - 2) / _W));
+    nint mtop = (nint)((logM - 2) / (nuint)_W);
     // -2 because the top word of N bits is the (N-1)/W'th word.
-    Word mmask = ~((Word)0);
+    Word mmask = ~((Word)((Word)0));
     {
-        nuint mbits = (nuint)((logM - 1) & (_W - 1)); if (mbits != 0) {
-            mmask = (1 << (int)(mbits)) - 1;
+        nuint mbits = (nuint)((logM - 1) & (nuint)(_W - 1)); if (mbits != 0) {
+            mmask = ((Word)((nuint)1 << (int)(mbits))) - 1;
         }
     }
     if (i > mtop) {
@@ -1167,19 +1161,17 @@ internal static nat expNNWindowed(this nat z, nat x, nat y, nuint logM) {
                 (zz, z) = (z, zz);
                 z = z.trunc(z, logM);
             }
-            zz = zz.mul(z, powers[yi >> (int)((_W - n))].val);
+            zz = zz.mul(z, powers[(yi >> (int)((_W - n)))].ValueSlot);
             (zz, z) = (z, zz);
             z = z.trunc(z, logM);
-            yi <<= (UntypedInt)(n);
+            yi <<= (int)(n);
             advance = true;
         }
     }
-    zzp.val = zz;
+    zzp.ValueSlot = zz;
     putNat(zzp);
-    ref var iΔ2 = ref heap(new nint(), out var ᏑiΔ2);
-
-    foreach (var (iΔ2, _) in powers) {
-        putNat(powers[iΔ2]);
+    foreach (var (iΔ3, _) in powers) {
+        putNat(powers[iΔ3]);
     }
     return z.norm();
 }
@@ -1191,7 +1183,7 @@ internal static nat expNNMontgomery(this nat z, nat x, nat y, nat m) {
     // We want the lengths of x and m to be equal.
     // It is OK if x >= m as long as len(x) == len(m).
     if (len(x) > numWords) {
-        (Δ_, x) = ((nat)default!).div(default!, x, m);
+        (_, x) = ((nat)default!).div(default!, x, m);
     }
     // Note: now len(x) <= numWords, not guaranteed ==.
     if (len(x) < numWords) {
@@ -1204,15 +1196,15 @@ internal static nat expNNMontgomery(this nat z, nat x, nat y, nat m) {
     // Iteration for Multiplicative Inverses Modulo Prime Powers".
     Word k0 = 2 - m[0];
     Word t = m[0] - 1;
-    for (nint i = 1; i < _W; i <<= (UntypedInt)(1)) {
+    for (nint i = 1; i < _W; i <<= (int)(1)) {
         t *= t;
         k0 *= (t + 1);
     }
-    k0 = -k0;
+    k0 = ((Word)0 - k0);
     // RR = 2**(2*_W*len(m)) mod m
     var RR = ((nat)default!).setWord(1);
-    var zz = ((nat)default!).shl(RR, ((nuint)(2 * numWords * _W)));
-    (Δ_, RR) = ((nat)default!).div(RR, zz, m);
+    var zz = ((nat)default!).shl(RR, (nuint)(2 * numWords * (nint)_W));
+    (_, RR) = ((nat)default!).div(RR, zz, m);
     if (len(RR) < numWords) {
         zz = zz.make(numWords);
         copy(zz, RR);
@@ -1221,12 +1213,12 @@ internal static nat expNNMontgomery(this nat z, nat x, nat y, nat m) {
     // one = 1, with equal length to that of m
     var one = new nat(numWords);
     one[0] = 1;
-    static readonly UntypedInt n = 4;
+    UntypedInt n = 4;
     // powers[i] contains x^i
-    array<nat> powers = new(16); /* 1 << (int)(n) */
+    array<nat> powers = new(16); /* (1 << (int)(n)) */
     powers[0] = powers[0].montgomery(one, RR, m, k0, numWords);
     powers[1] = powers[1].montgomery(x, RR, m, k0, numWords);
-    for (nint i = 2; i < 1 << (int)(n); i++) {
+    for (nint i = 2; i < (1 << (int)(n)); i++) {
         powers[i] = powers[i].montgomery(powers[i - 1], powers[1], m, k0, numWords);
     }
     // initialize z = 1 (Montgomery 1)
@@ -1243,9 +1235,9 @@ internal static nat expNNMontgomery(this nat z, nat x, nat y, nat m) {
                 zz = zz.montgomery(z, z, m, k0, numWords);
                 z = z.montgomery(zz, zz, m, k0, numWords);
             }
-            zz = zz.montgomery(z, powers[yi >> (int)((_W - n))], m, k0, numWords);
+            zz = zz.montgomery(z, powers[(yi >> (int)((_W - n)))], m, k0, numWords);
             (z, zz) = (zz, z);
-            yi <<= (UntypedInt)(n);
+            yi <<= (int)(n);
         }
     }
     // convert to regular number
@@ -1262,7 +1254,7 @@ internal static nat expNNMontgomery(this nat z, nat x, nat y, nat m) {
         // The div is not expected to be reached.
         zz = zz.sub(zz, m);
         if (zz.cmp(m) >= 0) {
-            (Δ_, zz) = ((nat)default!).div(default!, zz, m);
+            (_, zz) = ((nat)default!).div(default!, zz, m);
         }
     }
     return zz.norm();
@@ -1279,16 +1271,18 @@ internal static nint /*i*/ bytes(this nat z, slice<byte> buf) {
     // anything but the Int's sign and bit size through side-channels. Any
     // changes must be reviewed by a security expert.
     i = len(buf);
-    foreach (var (Δ_, d) in z) {
+    foreach (var (_, vᴛ1) in z) {
+        var d = vᴛ1;
+
         for (nint j = 0; j < _S; j++) {
             i--;
             if (i >= 0){
-                buf[i] = ((byte)d);
+                buf[i] = (byte)(nuint)d;
             } else 
-            if (((byte)d) != 0) {
+            if ((byte)(nuint)d != 0) {
                 throw panic("math/big: buffer too small to fit value");
             }
-            d >>= (UntypedInt)(8);
+            d >>= (int)(8);
         }
     }
     if (i < 0) {
@@ -1303,24 +1297,24 @@ internal static nint /*i*/ bytes(this nat z, slice<byte> buf) {
 // bigEndianWord returns the contents of buf interpreted as a big-endian encoded Word value.
 internal static Word bigEndianWord(slice<byte> buf) {
     if (_W == 64) {
-        return ((Word)byteorder.BeUint64(buf));
+        return ((Word)(nuint)byteorder.BeUint64(buf));
     }
-    return ((Word)byteorder.BeUint32(buf));
+    return ((Word)(nuint)byteorder.BeUint32(buf));
 }
 
 // setBytes interprets buf as the bytes of a big-endian unsigned
 // integer, sets z to that value, and returns z.
 internal static nat setBytes(this nat z, slice<byte> buf) {
-    z = z.make((len(buf) + _S - 1) / _S);
+    z = z.make((len(buf) + (nint)_S - 1) / (nint)_S);
     nint i = len(buf);
     for (nint k = 0; i >= _S; k++) {
-        z[k] = bigEndianWord(buf[(int)(i - _S)..(int)(i)]);
+        z[k] = bigEndianWord(buf[(int)(i - (nint)_S)..(int)(i)]);
         i -= _S;
     }
     if (i > 0) {
         Word d = default!;
-        for (nuint s = ((nuint)0); i > 0; s += 8) {
-            d |= (Word)(((Word)buf[i - 1]) << (int)(s));
+        for (nuint s = (nuint)0; i > 0; s += 8) {
+            d |= (Word)((((Word)(nuint)buf[i - 1]) << (int)(s)));
             i--;
         }
         z[len(z) - 1] = d;
@@ -1345,10 +1339,10 @@ internal static nat sqrt(this nat z, nat x) {
     nat z2 = default!;
     z1 = z;
     z1 = z1.setUint64(1);
-    z1 = z1.shl(z1, ((nuint)(x.bitLen() + 1)) / 2);
+    z1 = z1.shl(z1, (nuint)(x.bitLen() + 1) / 2);
     // must be ≥ √x
     for (nint n = 0; ᐧ ; n++) {
-        (z2, Δ_) = z2.div(default!, x, z1);
+        (z2, _) = z2.div(default!, x, z1);
         z2 = z2.add(z2, z1);
         z2 = z2.shr(z2, 1);
         if (z2.cmp(z1) >= 0) {
@@ -1365,7 +1359,7 @@ internal static nat sqrt(this nat z, nat x) {
 
 // subMod2N returns z = (x - y) mod 2ⁿ.
 internal static nat subMod2N(this nat z, nat x, nat y, nuint n) {
-    if (((nuint)x.bitLen()) > n) {
+    if ((nuint)x.bitLen() > n) {
         if (alias(z, x)){
             // ok to overwrite x in place
             x = x.trunc(x, n);
@@ -1373,7 +1367,7 @@ internal static nat subMod2N(this nat z, nat x, nat y, nuint n) {
             x = ((nat)default!).trunc(x, n);
         }
     }
-    if (((nuint)y.bitLen()) > n) {
+    if ((nuint)y.bitLen() > n) {
         if (alias(z, y)){
             // ok to overwrite y in place
             y = y.trunc(y, n);
@@ -1386,8 +1380,8 @@ internal static nat subMod2N(this nat z, nat x, nat y, nuint n) {
     }
     // x - y < 0; x - y mod 2ⁿ = x - y + 2ⁿ = 2ⁿ - (y - x) = 1 + 2ⁿ-1 - (y - x) = 1 + ^(y - x).
     z = z.sub(y, x);
-    while (((nuint)len(z)) * _W < n) {
-        z = append(z, 0);
+    while ((nuint)len(z) * (nuint)_W < n) {
+        z = append(z, (Word)(0));
     }
     foreach (var (i, _) in z) {
         z[i] = ~z[i];

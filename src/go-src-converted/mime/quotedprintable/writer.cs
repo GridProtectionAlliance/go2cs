@@ -14,7 +14,7 @@ internal static readonly UntypedInt lineMaxLen = 76;
     // Binary mode treats the writer's input as pure binary and processes end of
     // line bytes as binary data.
     public bool Binary;
-    internal io_package.Writer w;
+    internal io.Writer w;
     internal nint i;
     internal array<byte> line = new(78);
     internal bool cr;
@@ -120,7 +120,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
 }
 
 [GoRecv] internal static error encode(this ref Writer w, byte b) {
-    if (lineMaxLen - 1 - w.i < 3) {
+    if ((nint)(lineMaxLen - 1) - w.i < 3) {
         {
             var err = w.insertSoftLineBreak(); if (err != default!) {
                 return err;
@@ -128,8 +128,8 @@ public static ж<Writer> NewWriter(io.Writer w) {
         }
     }
     w.line[w.i] = (rune)'=';
-    w.line[w.i + 1] = upperhex[b >> (int)(4)];
-    w.line[w.i + 2] = upperhex[(byte)(b & 15)];
+    w.line[w.i + 1] = upperhex[(b >> (int)(4))];
+    w.line[w.i + 2] = upperhex[(byte)(b & 0x0f)];
     w.i += 3;
     return default!;
 }

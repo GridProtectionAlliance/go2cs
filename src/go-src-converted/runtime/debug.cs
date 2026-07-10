@@ -19,14 +19,14 @@ public static nint GOMAXPROCS(nint n) {
     }
     // WebAssembly has no threads yet, so only one CPU is possible.
     @lock(Ꮡsched.of(schedt.Ꮡlock));
-    nint ret = ((nint)gomaxprocs);
+    nint ret = (nint)gomaxprocs;
     unlock(Ꮡsched.of(schedt.Ꮡlock));
     if (n <= 0 || n == ret) {
         return ret;
     }
     var stw = stopTheWorldGC(stwGOMAXPROCS);
     // newprocs will be processed by startTheWorld
-    newprocs = ((int32)n);
+    newprocs = (int32)n;
     startTheWorldGC(stw);
     return ret;
 }
@@ -37,30 +37,30 @@ public static nint GOMAXPROCS(nint n) {
 // at process startup. Changes to operating system CPU allocation after
 // process startup are not reflected.
 public static nint NumCPU() {
-    return ((nint)ncpu);
+    return (nint)ncpu;
 }
 
 // NumCgoCall returns the number of cgo calls made by the current process.
 public static int64 NumCgoCall() {
-    int64 n = ((int64)atomic.Load64(Ꮡ(ncgocall)));
-    for (var mp = (ж<m>)(uintptr)(atomic.Loadp(((@unsafe.Pointer)(Ꮡ(allm))))); mp != nil; mp = mp.val.alllink) {
-        n += ((int64)(~mp).ncgocall);
+    int64 n = (int64)atomic.Load64(Ꮡncgocall);
+    for (var mp = (ж<m>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromRef(ref (Ꮡallm).Value))); mp != nil; mp = mp.Value.alllink) {
+        n += (int64)(~mp).ncgocall;
     }
     return n;
 }
 
 internal static int64 totalMutexWaitTimeNanos() {
-    var total = sched.totalMutexWaitTime.Load();
-    total += sched.totalRuntimeLockWaitTime.Load();
-    for (var mp = (ж<m>)(uintptr)(atomic.Loadp(((@unsafe.Pointer)(Ꮡ(allm))))); mp != nil; mp = mp.val.alllink) {
-        total += (~mp).mLockProfile.waitTime.Load();
+    var total = Ꮡsched.of(schedt.ᏑtotalMutexWaitTime).Load();
+    total += Ꮡsched.of(schedt.ᏑtotalRuntimeLockWaitTime).Load();
+    for (var mp = (ж<m>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromRef(ref (Ꮡallm).Value))); mp != nil; mp = mp.Value.alllink) {
+        total += mp.of(m.ᏑmLockProfile).of(mLockProfile.ᏑwaitTime).Load();
     }
     return total;
 }
 
 // NumGoroutine returns the number of goroutines that currently exist.
 public static nint NumGoroutine() {
-    return ((nint)gcount());
+    return (nint)gcount();
 }
 
 //go:linkname debug_modinfo runtime/debug.modinfo
@@ -97,7 +97,7 @@ internal static void mayMoreStackPreempt() {
     }
     // Force a preemption, unless the stack is already poisoned.
     if ((~gp).stackguard0 < stackPoisonMin) {
-        gp.val.stackguard0 = stackPreempt;
+        gp.Value.stackguard0 = stackPreempt;
     }
 }
 
@@ -116,7 +116,7 @@ internal static void mayMoreStackMove() {
     }
     // Force stack movement, unless the stack is already poisoned.
     if ((~gp).stackguard0 < stackPoisonMin) {
-        gp.val.stackguard0 = stackForceMove;
+        gp.Value.stackguard0 = stackForceMove;
     }
 }
 

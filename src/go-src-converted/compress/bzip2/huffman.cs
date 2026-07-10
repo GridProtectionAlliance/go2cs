@@ -26,22 +26,20 @@ partial class bzip2_package {
 // tree, but also two magic values for run-length encoding and an EOF symbol.
 // Thus there are more than 256 possible symbols.
 [GoType] partial struct huffmanNode {
-    internal uint16 left;
-    internal uint16 right;
-    internal uint16 leftValue;
-    internal uint16 rightValue;
+    internal uint16 left, right;
+    internal uint16 leftValue, rightValue;
 }
 
 // invalidNodeValue is an invalid index which marks a leaf node in the tree.
-internal static readonly UntypedInt invalidNodeValue = /* 0xffff */ 65535;
+internal static readonly UntypedInt invalidNodeValue = 0xffff;
 
 // Decode reads bits from the given bitReader and navigates the tree until a
 // symbol is found.
 [GoRecv] internal static uint16 /*v*/ Decode(this ref huffmanTree t, ж<bitReader> Ꮡbr) {
     uint16 v = default!;
 
-    ref var br = ref Ꮡbr.val;
-    var nodeIndex = ((uint16)0);
+    ref var br = ref Ꮡbr.Value;
+    var nodeIndex = (uint16)0;
     // node 0 is the root of the tree.
     while (ᐧ) {
         var node = Ꮡ(t.nodes[nodeIndex]);
@@ -49,16 +47,16 @@ internal static readonly UntypedInt invalidNodeValue = /* 0xffff */ 65535;
         if (br.bits > 0){
             // Get next bit - fast path.
             br.bits--;
-            bit = (uint16)(((uint16)(br.n >> (int)(((nuint)(br.bits & 63))))) & 1);
+            bit = (uint16)((uint16)((br.n >> (int)(((nuint)(br.bits & 63))))) & 1);
         } else {
             // Get next bit - slow path.
             // Use ReadBits to retrieve a single bit
             // from the underling io.ByteReader.
-            bit = ((uint16)br.ReadBits(1));
+            bit = (uint16)br.ReadBits(1);
         }
         // Trick a compiler into generating conditional move instead of branch,
         // by making both loads unconditional.
-        var (l, r) = (node.val.left, node.val.right);
+        var (l, r) = (node.Value.left, node.Value.right);
         if (bit == 1){
             nodeIndex = l;
         } else {
@@ -67,7 +65,7 @@ internal static readonly UntypedInt invalidNodeValue = /* 0xffff */ 65535;
         if (nodeIndex == invalidNodeValue) {
             // We found a leaf. Use the value of bit to decide
             // whether is a left or a right value.
-            var (lΔ1, rΔ1) = (node.val.leftValue, node.val.rightValue);
+            var (lΔ1, rΔ1) = (node.Value.leftValue, node.Value.rightValue);
             if (bit == 1){
                 v = lΔ1;
             } else {
@@ -95,9 +93,9 @@ internal static (huffmanTree, error) newHuffmanTree(slice<uint8> lengths) {
     // First we sort the code length assignments by ascending code length,
     // using the symbol value to break ties.
     var pairs = new slice<huffmanSymbolLengthPair>(len(lengths));
-    foreach (var (iΔ1, lengthΔ1) in lengths) {
-        pairs[iΔ1].value = ((uint16)iΔ1);
-        pairs[iΔ1].lengthΔ1 = lengthΔ1;
+    foreach (var (i, lengthΔ1) in lengths) {
+        pairs[i].value = (uint16)i;
+        pairs[i].length = lengthΔ1;
     }
     slices.SortFunc(pairs, (huffmanSymbolLengthPair a, huffmanSymbolLengthPair b) => {
         {
@@ -111,8 +109,8 @@ internal static (huffmanTree, error) newHuffmanTree(slice<uint8> lengths) {
     // We keep the codes packed into a uint32, at the most-significant end.
     // So branches are taken from the MSB downwards. This makes it easy to
     // sort them later.
-    var code = ((uint32)0);
-    var length = ((uint8)32);
+    var code = (uint32)0;
+    var length = (uint8)32;
     var codes = new slice<huffmanCode>(len(lengths));
     for (nint i = len(pairs) - 1; i >= 0; i--) {
         if (length > pairs[i].length) {
@@ -123,7 +121,7 @@ internal static (huffmanTree, error) newHuffmanTree(slice<uint8> lengths) {
         codes[i].value = pairs[i].value;
         // We need to 'increment' the code, which means treating |code|
         // like a |length| bit number.
-        code += 1 << (int)((32 - length));
+        code += ((uint32)1 << (int)((32 - length)));
     }
     // Now we can sort by the code so that the left half of each branch are
     // grouped together, recursively.
@@ -153,8 +151,8 @@ internal static (uint16 nodeIndex, error err) buildHuffmanNode(ж<huffmanTree> �
     uint16 nodeIndex = default!;
     error err = default!;
 
-    ref var t = ref Ꮡt.val;
-    var test = ((uint32)1) << (int)((31 - level));
+    ref var t = ref Ꮡt.Value;
+    var test = ((uint32)1 << (int)((31 - level)));
     // We have to search the list of codes to find the divide between the left and right sides.
     nint firstRightIndex = len(codes);
     foreach (var (i, code) in codes) {
@@ -178,7 +176,7 @@ internal static (uint16 nodeIndex, error err) buildHuffmanNode(ж<huffmanTree> �
         // tree cannot encode anything and a length-1 tree can only
         // encode EOF and so is superfluous. We reject both.
         if (len(codes) < 2) {
-            return (0, ((StructuralError)"empty Huffman tree"u8));
+            return (0, ((StructuralError)(@string)"empty Huffman tree"u8));
         }
         // In this case the recursion doesn't always reduce the length
         // of codes so we need to ensure termination via another
@@ -188,32 +186,32 @@ internal static (uint16 nodeIndex, error err) buildHuffmanNode(ж<huffmanTree> �
             // can match at all 32 bits is if they are equal, which
             // is invalid. This ensures that we never enter
             // infinite recursion.
-            return (0, ((StructuralError)"equal symbols in Huffman tree"u8));
+            return (0, ((StructuralError)(@string)"equal symbols in Huffman tree"u8));
         }
         if (len(left) == 0) {
             return buildHuffmanNode(Ꮡt, right, level + 1);
         }
         return buildHuffmanNode(Ꮡt, left, level + 1);
     }
-    nodeIndex = ((uint16)t.nextNode);
+    nodeIndex = (uint16)t.nextNode;
     var node = Ꮡ(t.nodes, t.nextNode);
     t.nextNode++;
     if (len(left) == 1){
         // leaf node
-        node.val.left = invalidNodeValue;
-        node.val.leftValue = left[0].value;
+        node.Value.left = invalidNodeValue;
+        node.Value.leftValue = left[0].value;
     } else {
-        (node.val.left, err) = buildHuffmanNode(Ꮡt, left, level + 1);
+        (node.Value.left, err) = buildHuffmanNode(Ꮡt, left, level + 1);
     }
     if (err != default!) {
         return (nodeIndex, err);
     }
     if (len(right) == 1){
         // leaf node
-        node.val.right = invalidNodeValue;
-        node.val.rightValue = right[0].value;
+        node.Value.right = invalidNodeValue;
+        node.Value.rightValue = right[0].value;
     } else {
-        (node.val.right, err) = buildHuffmanNode(Ꮡt, right, level + 1);
+        (node.Value.right, err) = buildHuffmanNode(Ꮡt, right, level + 1);
     }
     return (nodeIndex, err);
 }

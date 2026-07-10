@@ -9,8 +9,7 @@ partial class types_package {
 
 // A Map represents a map type.
 [GoType] partial struct Map {
-    internal ΔType key;
-    internal ΔType elem;
+    internal ΔType key, elem;
 }
 
 // NewMap returns a new map for the given key and element types.
@@ -28,12 +27,16 @@ public static ж<Map> NewMap(ΔType key, ΔType elem) {
     return m.elem;
 }
 
-[GoRecv("capture")] public static ΔType Underlying(this ref Map t) {
-    return ~t;
+public static ΔType Underlying(this ж<Map> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return new MapжΔType(Ꮡt);
 }
 
-[GoRecv] public static @string String(this ref Map t) {
-    return TypeString(~t, default!);
+public static @string String(this ж<Map> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return TypeString(new MapжΔType(Ꮡt), default!);
 }
 
 } // end types_package

@@ -255,7 +255,7 @@ internal static (rune r, @string nchunk, error err) getEsc(@string chunk) {
             return (r, nchunk, err);
         }
     }
-    var (r, n) = utf8.DecodeRuneInString(chunk);
+    (r, var n) = utf8.DecodeRuneInString(chunk);
     if (r == utf8.RuneError && n == 1) {
         err = ErrBadPattern;
     }

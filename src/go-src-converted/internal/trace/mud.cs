@@ -24,8 +24,7 @@ partial class trace_package {
 // functions and Dirac delta functions (which are treated as
 // degenerate uniform distributions).
 [GoType] partial struct mud {
-    internal slice<edge> sorted;
-    internal slice<edge> unsorted;
+    internal slice<edge> sorted, unsorted;
     // trackMass is the inverse cumulative sum to track as the
     // distribution is updated.
     internal float64 trackMass;
@@ -44,15 +43,16 @@ internal static readonly UntypedInt mudDegree = 1024;
 
 [GoType] partial struct edge {
     // At x, the function increases by y.
-    internal float64 x;
-    internal float64 delta;
+    internal float64 x, delta;
     // Additionally at x is a Dirac delta function with area dirac.
     internal float64 dirac;
 }
 
 // add adds a uniform function over [l, r] scaled so the total weight
 // of the uniform is area. If l==r, this adds a Dirac delta function.
-[GoRecv] internal static void add(this ref mud d, float64 l, float64 r, float64 area) {
+internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) {
+    ref var d = ref Ꮡd.Value;
+
     if (area == 0) {
         return;
     }
@@ -67,34 +67,34 @@ internal static readonly UntypedInt mudDegree = 1024;
         d.unsorted = append(d.unsorted, new edge(l, delta, 0), new edge(r, -delta, 0));
     }
     // Update the histogram.
-    var h = Ꮡ(d.hist);
-    var (lbFloat, lf) = math.Modf(l * mudDegree);
-    nint lb = ((nint)lbFloat);
+    var h = Ꮡd.of(mud.Ꮡhist);
+    var (lbFloat, lf) = math.Modf(l * (float64)mudDegree);
+    nint lb = (nint)lbFloat;
     if (lb >= mudDegree) {
         (lb, lf) = (mudDegree - 1, 1);
     }
     if (l == r){
-        h.val[lb] += area;
+        h.Value[lb] += area;
     } else {
-        var (rbFloat, rf) = math.Modf(r * mudDegree);
-        nint rb = ((nint)rbFloat);
+        var (rbFloat, rf) = math.Modf(r * (float64)mudDegree);
+        nint rb = (nint)rbFloat;
         if (rb >= mudDegree) {
             (rb, rf) = (mudDegree - 1, 1);
         }
         if (lb == rb){
-            h.val[lb] += area;
+            h.Value[lb] += area;
         } else {
-            var perBucket = area / (r - l) / mudDegree;
-            h.val[lb] += perBucket * (1 - lf);
-            h.val[rb] += perBucket * rf;
+            var perBucket = area / (r - l) / (float64)mudDegree;
+            h.Value[lb] += perBucket * (1 - lf);
+            h.Value[rb] += perBucket * rf;
             for (nint i = lb + 1; i < rb; i++) {
-                h.val[i] += perBucket;
+                h.Value[i] += perBucket;
             }
         }
     }
     // Update mass tracking.
     {
-        var thresh = ((float64)d.trackBucket) / mudDegree; if (l < thresh) {
+        var thresh = (float64)d.trackBucket / (float64)mudDegree; if (l < thresh) {
             if (r < thresh){
                 d.trackSum += area;
             } else {
@@ -118,7 +118,7 @@ internal static readonly UntypedInt mudDegree = 1024;
     d.trackMass = mass;
     // Find the bucket currently containing trackMass by computing
     // the cumulative sum.
-    var sum = 0.0F;
+    var sum = 0.0D;
     foreach (var (i, val) in d.hist[..]) {
         var newSum = sum + val;
         if (newSum > mass) {
@@ -142,7 +142,7 @@ internal static readonly UntypedInt mudDegree = 1024;
     if (d.trackBucket == len(d.hist)) {
         return (math.NaN(), math.NaN(), false);
     }
-    return (((float64)d.trackBucket) / mudDegree, ((float64)(d.trackBucket + 1)) / mudDegree, true);
+    return ((float64)d.trackBucket / (float64)mudDegree, (float64)(d.trackBucket + 1) / (float64)mudDegree, true);
 }
 
 // invCumulativeSum returns x such that the integral of d from -∞ to x
@@ -188,7 +188,7 @@ internal static readonly UntypedInt mudDegree = 1024;
         d.sorted = newSorted;
     }
     // Traverse edges in order computing a cumulative sum.
-    var (csum, rate, prevX) = (0.0F, 0.0F, 0.0F);
+    var (csum, rate, prevX) = (0.0D, 0.0D, 0.0D);
     foreach (var (_, e) in d.sorted) {
         var newCsum = csum + (e.x - prevX) * rate;
         if (newCsum >= y) {

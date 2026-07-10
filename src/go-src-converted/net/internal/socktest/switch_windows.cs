@@ -6,14 +6,16 @@ namespace go.net.@internal;
 using syscall = syscall_package;
 
 partial class socktest_package {
-/* visitMapType: map[syscall.Handle]Status */
 
-[GoRecv] internal static ж<Status> sockso(this ref Switch sw, syscallꓸHandle s) => func((defer, _) => {
-    sw.smu.RLock();
-    defer(sw.smu.RUnlock);
+[GoType("map[syscallꓸHandle, Status]")] partial struct ΔSockets;
+
+internal static ж<Status> sockso(this ж<Switch> Ꮡsw, syscallꓸHandle s) => func<ж<Status>>((defer, recover) => {
+    ref var sw = ref Ꮡsw.Value;
+
+    Ꮡsw.of(Switch.Ꮡsmu).RLock();
+    defer(Ꮡsw.of(Switch.Ꮡsmu).RUnlock);
     ref var so = ref heap<Status>(out var Ꮡso);
-    so = sw.sotab[s];
-    var ok = sw.sotab[s];
+    (so, var ok) = sw.sotab[s, ꟷ];
     if (!ok) {
         return default!;
     }
@@ -22,8 +24,10 @@ partial class socktest_package {
 
 // addLocked returns a new Status without locking.
 // sw.smu must be held before call.
-[GoRecv] internal static ж<Status> addLocked(this ref Switch sw, syscallꓸHandle s, nint family, nint sotype, nint proto) {
-    sw.once.Do(sw.init);
+internal static ж<Status> addLocked(this ж<Switch> Ꮡsw, syscallꓸHandle s, nint family, nint sotype, nint proto) {
+    ref var sw = ref Ꮡsw.Value;
+
+    Ꮡsw.of(Switch.Ꮡonce).Do(Ꮡsw.init);
     ref var so = ref heap<Status>(out var Ꮡso);
     so = new Status(Cookie: cookie(family, sotype, proto));
     sw.sotab[s] = so;

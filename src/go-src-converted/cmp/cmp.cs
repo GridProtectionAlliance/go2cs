@@ -6,8 +6,6 @@
 // ordered values.
 namespace go;
 
-using ꓸꓸꓸT = Span<T>;
-
 partial class cmp_package {
 
 // Ordered is a constraint that permits any ordered type: any type
@@ -21,10 +19,7 @@ partial class cmp_package {
 // See the [Compare] function for a consistent way to compare NaN values.
 [GoType("operators = Sum, Comparable, Ordered")]
 partial interface Ordered<ΔT> {
-    //  Type constraints: ~int | ~int8 | ~int16 | ~int32 | ~int64 |
-	~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
-	~float32 | ~float64 |
-	~string
+    //  Type constraints: ~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr | ~float32 | ~float64 | ~string
     // Derived operators: +, ==, !=, <, <=, >, >=
 }
 
@@ -78,8 +73,8 @@ internal static bool isNaN<T>(T x)
 
 // Or returns the first of its arguments that is not equal to the zero value.
 // If no argument is non-zero, it returns the zero value.
-public static T Or<T>(params ꓸꓸꓸT valsʗp)
-    where T : /* comparable */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
+public static T Or<T>(params Span<T> valsʗp)
+    where T : /* comparable */ new()
 {
     var vals = valsʗp.slice();
 

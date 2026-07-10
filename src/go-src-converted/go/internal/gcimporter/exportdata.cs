@@ -17,10 +17,10 @@ internal static (@string name, nint size, error err) readGopackHeader(ж<bufio.R
     nint size = default!;
     error err = default!;
 
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
     // See $GOROOT/include/ar.h.
     var hdr = new slice<byte>(16 + 12 + 6 + 6 + 8 + 10 + 2);
-    (_, err) = io.ReadFull(~r, hdr);
+    (_, err) = io.ReadFull(new bufio_ReaderжReader(Ꮡr), hdr);
     if (err != default!) {
         return (name, size, err);
     }
@@ -48,9 +48,9 @@ public static (@string hdr, nint size, error err) FindExportData(ж<bufio.Reader
     nint size = default!;
     error err = default!;
 
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
     // Read first line to make sure this is an object file.
-    (line, err) = r.ReadSlice((rune)'\n');
+    (var line, err) = r.ReadSlice((rune)'\n');
     if (err != default!) {
         err = fmt.Errorf("can't find export data (%v)"u8, err);
         return (hdr, size, err);

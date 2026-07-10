@@ -47,12 +47,11 @@ using static go.go.constant_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<boolVal, Value>]
 [assembly: GoImplement<complexVal, Value>]
-[assembly: GoImplement<constant.Value), Value>]
 [assembly: GoImplement<floatVal, Value>]
 [assembly: GoImplement<int64Val, Value>]
 [assembly: GoImplement<intVal, Value>]
 [assembly: GoImplement<ratVal, Value>]
-[assembly: GoImplement<stringVal, Value>]
+[assembly: GoImplement<stringVal, Value>(Pointer = true)]
 [assembly: GoImplement<unknownVal, Value>]
 // </InterfaceImplementations>
 

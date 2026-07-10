@@ -30,12 +30,16 @@ public static ж<Array> NewArray(ΔType elem, int64 len) {
     return a.elem;
 }
 
-[GoRecv("capture")] public static ΔType Underlying(this ref Array a) {
-    return ~a;
+public static ΔType Underlying(this ж<Array> Ꮡa) {
+    ref var a = ref Ꮡa.Value;
+
+    return new ArrayжΔType(Ꮡa);
 }
 
-[GoRecv] public static @string String(this ref Array a) {
-    return TypeString(~a, default!);
+public static @string String(this ж<Array> Ꮡa) {
+    ref var a = ref Ꮡa.Value;
+
+    return TypeString(new ArrayжΔType(Ꮡa), default!);
 }
 
 } // end types_package

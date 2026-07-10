@@ -19,13 +19,13 @@ partial class unique_package {
 // strings if value is of interface or slice type (that is, found via an
 // indirection).
 internal static T clone<T>(T value, ж<cloneSeq> Ꮡseq)
-    where T : /* comparable */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
+    where T : /* comparable */ new()
 {
-    ref var seq = ref Ꮡseq.val;
+    ref var seq = ref Ꮡseq.Value;
 
     foreach (var (_, offset) in seq.stringOffsets) {
-        var ps = (ж<@string>)(uintptr)(((@unsafe.Pointer)(((uintptr)new @unsafe.Pointer(Ꮡ(value))) + offset)));
-        ps.val = stringslite.Clone(ps.val);
+        var ps = (ж<@string>)(uintptr)((@unsafe.Pointer)((uintptr)new @unsafe.Pointer(Ꮡ(value)) + offset));
+        ps.Value = stringslite.Clone(ps.Value);
     }
     return value;
 }
@@ -40,9 +40,9 @@ internal static cloneSeq singleStringClone = new cloneSeq(stringOffsets: new uin
 
 // makeCloneSeq creates a cloneSeq for a type.
 internal static cloneSeq makeCloneSeq(ж<abi.Type> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.DerefOrNil();
 
-    if (typ == nil) {
+    if (Ꮡtyp == nil) {
         return new cloneSeq(nil);
     }
     if (typ.Kind() == abi.ΔString) {
@@ -62,10 +62,10 @@ internal static cloneSeq makeCloneSeq(ж<abi.Type> Ꮡtyp) {
 
 // buildStructCloneSeq populates a cloneSeq for an abi.Type that has Kind abi.Struct.
 internal static void buildStructCloneSeq(ж<abi.Type> Ꮡtyp, ж<cloneSeq> Ꮡseq, uintptr baseOffset) {
-    ref var typ = ref Ꮡtyp.val;
-    ref var seq = ref Ꮡseq.val;
+    ref var typ = ref Ꮡtyp.Value;
+    ref var seq = ref Ꮡseq.Value;
 
-    var styp = typ.StructType();
+    var styp = Ꮡtyp.StructType();
     foreach (var (i, _) in (~styp).Fields) {
         var f = Ꮡ((~styp).Fields, i);
         var exprᴛ1 = (~f).Typ.Kind();
@@ -84,11 +84,11 @@ internal static void buildStructCloneSeq(ж<abi.Type> Ꮡtyp, ж<cloneSeq> Ꮡse
 
 // buildArrayCloneSeq populates a cloneSeq for an abi.Type that has Kind abi.Array.
 internal static void buildArrayCloneSeq(ж<abi.Type> Ꮡtyp, ж<cloneSeq> Ꮡseq, uintptr baseOffset) {
-    ref var typ = ref Ꮡtyp.val;
-    ref var seq = ref Ꮡseq.val;
+    ref var typ = ref Ꮡtyp.Value;
+    ref var seq = ref Ꮡseq.Value;
 
-    var atyp = typ.ArrayType();
-    var etyp = atyp.val.Elem;
+    var atyp = Ꮡtyp.ArrayType();
+    var etyp = atyp.Value.Elem;
     var offset = baseOffset;
     /* for range atyp.Len {
 	switch etyp.Kind() {

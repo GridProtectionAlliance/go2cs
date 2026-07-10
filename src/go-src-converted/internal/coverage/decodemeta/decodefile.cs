@@ -12,27 +12,28 @@ using bufio = bufio_package;
 using md5 = crypto.md5_package;
 using binary = encoding.binary_package;
 using fmt = fmt_package;
-using coverage = @internal.coverage_package;
-using slicereader = @internal.coverage.slicereader_package;
-using stringtab = @internal.coverage.stringtab_package;
+using coverage = go.@internal.coverage_package;
+using slicereader = go.@internal.coverage.slicereader_package;
+using stringtab = go.@internal.coverage.stringtab_package;
 using io = io_package;
 using os = os_package;
-using @internal;
 using crypto;
 using encoding;
+using go.@internal;
+using go.@internal.coverage;
 
 partial class decodemeta_package {
 
 // CoverageMetaFileReader provides state and methods for reading
 // a meta-data file from a code coverage run.
 [GoType] partial struct CoverageMetaFileReader {
-    internal ж<os_package.File> f;
-    internal @internal.coverage_package.MetaFileHeader hdr;
+    internal ж<os.File> f;
+    internal coverage.MetaFileHeader hdr;
     internal slice<byte> tmp;
     internal slice<uint64> pkgOffsets;
     internal slice<uint64> pkgLengths;
-    internal ж<@internal.coverage.stringtab_package.Reader> strtab;
-    internal ж<bufio_package.Reader> fileRdr;
+    internal ж<stringtab.Reader> strtab;
+    internal ж<bufio.Reader> fileRdr;
     internal slice<byte> fileView;
     internal bool debug;
 }
@@ -44,10 +45,10 @@ partial class decodemeta_package {
 // will read the contents of the file using regular file Read
 // operations.
 public static (ж<CoverageMetaFileReader>, error) NewCoverageMetaFileReader(ж<os.File> Ꮡf, slice<byte> fileView) {
-    ref var f = ref Ꮡf.val;
+    ref var f = ref Ꮡf.Value;
 
     var r = Ꮡ(new CoverageMetaFileReader(
-        f: f,
+        f: Ꮡf,
         fileView: fileView,
         tmp: new slice<byte>(256)
     ));
@@ -59,12 +60,14 @@ public static (ж<CoverageMetaFileReader>, error) NewCoverageMetaFileReader(ж<o
     return (r, default!);
 }
 
-[GoRecv] internal static error readFileHeader(this ref CoverageMetaFileReader r) {
+internal static error readFileHeader(this ж<CoverageMetaFileReader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
     error err = default!;
-    r.fileRdr = bufio.NewReader(~r.f);
+    r.fileRdr = bufio.NewReader(new os_FileжReader(r.f));
     // Read file header.
     {
-        var errΔ1 = binary.Read(~r.fileRdr, binary.LittleEndian, Ꮡ(r.hdr)); if (errΔ1 != default!) {
+        var errΔ1 = binary.Read(new bufio_ReaderжReader(r.fileRdr), new binary_littleEndianᴠByteOrder(binary.LittleEndian), Ꮡr.of(CoverageMetaFileReader.Ꮡhdr)); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
@@ -80,37 +83,37 @@ public static (ж<CoverageMetaFileReader>, error) NewCoverageMetaFileReader(ж<o
         return fmt.Errorf("meta-data file withn unknown version %d (expected %d)"u8, r.hdr.Version, coverage.MetaFileVersion);
     }
     // Read package offsets for good measure
-    r.pkgOffsets = new slice<uint64>(r.hdr.Entries);
-    for (var i = ((uint64)0); i < r.hdr.Entries; i++) {
+    r.pkgOffsets = new slice<uint64>((nint)(r.hdr.Entries));
+    for (var i = (uint64)0; i < r.hdr.Entries; i++) {
         {
-            var (r.pkgOffsets[i], err) = r.rdUint64(); if (err != default!) {
+            (r.pkgOffsets[(nint)(i)], err) = r.rdUint64(); if (err != default!) {
                 return err;
             }
         }
-        if (r.pkgOffsets[i] > r.hdr.TotalLength) {
+        if (r.pkgOffsets[(nint)(i)] > r.hdr.TotalLength) {
             return fmt.Errorf("insane pkg offset %d: %d > totlen %d"u8,
-                i, r.pkgOffsets[i], r.hdr.TotalLength);
+                i, r.pkgOffsets[(nint)(i)], r.hdr.TotalLength);
         }
     }
-    r.pkgLengths = new slice<uint64>(r.hdr.Entries);
-    for (var i = ((uint64)0); i < r.hdr.Entries; i++) {
+    r.pkgLengths = new slice<uint64>((nint)(r.hdr.Entries));
+    for (var i = (uint64)0; i < r.hdr.Entries; i++) {
         {
-            var (r.pkgLengths[i], err) = r.rdUint64(); if (err != default!) {
+            (r.pkgLengths[(nint)(i)], err) = r.rdUint64(); if (err != default!) {
                 return err;
             }
         }
-        if (r.pkgLengths[i] > r.hdr.TotalLength) {
+        if (r.pkgLengths[(nint)(i)] > r.hdr.TotalLength) {
             return fmt.Errorf("insane pkg length %d: %d > totlen %d"u8,
-                i, r.pkgLengths[i], r.hdr.TotalLength);
+                i, r.pkgLengths[(nint)(i)], r.hdr.TotalLength);
         }
     }
     // Read string table.
-    var b = new slice<byte>(r.hdr.StrTabLength);
-    var (nr, err) = r.fileRdr.Read(b);
+    var b = new slice<byte>((nint)(r.hdr.StrTabLength));
+    (var nr, err) = r.fileRdr.Read(b);
     if (err != default!) {
         return err;
     }
-    if (nr != ((nint)r.hdr.StrTabLength)) {
+    if (nr != (nint)r.hdr.StrTabLength) {
         return fmt.Errorf("error: short read on string table"u8);
     }
     var slr = slicereader.NewReader(b, false);
@@ -118,7 +121,7 @@ public static (ж<CoverageMetaFileReader>, error) NewCoverageMetaFileReader(ж<o
     r.strtab = stringtab.NewReader(slr);
     r.strtab.Read();
     if (r.debug) {
-        fmt.Fprintf(~os.Stderr, "=-= read-in header is: %+v\n"u8, r);
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "=-= read-in header is: %+v\n"u8, r);
     }
     return default!;
 }
@@ -172,15 +175,15 @@ public static (ж<CoverageMetaFileReader>, error) NewCoverageMetaFileReader(ж<o
 // size, a new buffer will be allocated). Return value is the decoder,
 // a byte slice with the encoded meta-data, and an error.
 [GoRecv] public static (ж<CoverageMetaDataDecoder>, slice<byte>, error) GetPackageDecoder(this ref CoverageMetaFileReader r, uint32 pkIdx, slice<byte> payloadbuf) {
-    (pp, err) = r.GetPackagePayload(pkIdx, payloadbuf);
+    var (pp, err) = r.GetPackagePayload(pkIdx, payloadbuf);
     if (r.debug) {
-        fmt.Fprintf(~os.Stderr, "=-= pkidx=%d payload length is %d hash=%s\n"u8,
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "=-= pkidx=%d payload length is %d hash=%s\n"u8,
             pkIdx, len(pp), fmt.Sprintf("%x"u8, md5.Sum(pp)));
     }
     if (err != default!) {
         return (default!, default!, err);
     }
-    (mdd, err) = NewCoverageMetaDataDecoder(pp, r.fileView != default!);
+    (var mdd, err) = NewCoverageMetaDataDecoder(pp, r.fileView != default!);
     if (err != default!) {
         return (default!, default!, err);
     }
@@ -196,29 +199,29 @@ public static (ж<CoverageMetaFileReader>, error) NewCoverageMetaFileReader(ж<o
 // a byte slice with the encoded meta-data, and an error.
 [GoRecv] public static (slice<byte>, error) GetPackagePayload(this ref CoverageMetaFileReader r, uint32 pkIdx, slice<byte> payloadbuf) {
     // Determine correct offset/length.
-    if (((uint64)pkIdx) >= r.hdr.Entries) {
+    if ((uint64)pkIdx >= r.hdr.Entries) {
         return (default!, fmt.Errorf("GetPackagePayload: illegal pkg index %d"u8, pkIdx));
     }
-    var off = r.pkgOffsets[pkIdx];
-    var len = r.pkgLengths[pkIdx];
+    var off = r.pkgOffsets[(nint)(pkIdx)];
+    var len = r.pkgLengths[(nint)(pkIdx)];
     if (r.debug) {
-        fmt.Fprintf(~os.Stderr, "=-= for pk %d, off=%d len=%d\n"u8, pkIdx, off, len);
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "=-= for pk %d, off=%d len=%d\n"u8, pkIdx, off, len);
     }
     if (r.fileView != default!) {
         return (r.fileView[(int)(off)..(int)(off + len)], default!);
     }
     var payload = payloadbuf[..0];
-    if (cap(payload) < ((nint)len)) {
-        payload = new slice<byte>(0, len);
+    if (cap(payload) < (nint)len) {
+        payload = new slice<byte>(0, (nint)(len));
     }
-    payload = append(payload, new slice<byte>(len).ꓸꓸꓸ);
+    payload = append(payload, new slice<byte>((nint)(len)).ꓸꓸꓸ);
     {
-        var (_, err) = r.f.Seek(((int64)off), io.SeekStart); if (err != default!) {
+        var (_, err) = r.f.Seek((int64)off, io.SeekStart); if (err != default!) {
             return (default!, err);
         }
     }
     {
-        var (_, err) = io.ReadFull(~r.f, payload); if (err != default!) {
+        var (_, err) = io.ReadFull(new os_FileжReader(r.f), payload); if (err != default!) {
             return (default!, err);
         }
     }

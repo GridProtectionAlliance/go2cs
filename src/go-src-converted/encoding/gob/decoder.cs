@@ -26,12 +26,12 @@ internal static readonly UntypedInt tooBig = /* (1 << 30) << (^uint(0) >> 62) */
 // and its limits are not configurable. Take caution when decoding gob data
 // from untrusted sources.
 [GoType] partial struct Decoder {
-    internal sync_package.Mutex mutex;                              // each item must be received atomically
-    internal io_package.Reader r;                               // source of the data
+    internal sync.Mutex mutex;                              // each item must be received atomically
+    internal io.Reader r;                               // source of the data
     internal decBuffer buf;                               // buffer for more efficient i/o from r
-    internal gob.wireType wireType;                    // map from remote ID to local description
-    internal gob.decEngine decoderCache; // cache of compiled engines
-    internal gob.decEngine ignorerCache;                  // ditto for ignored objects
+    internal map<typeId, ж<wireType>> wireType;               // map from remote ID to local description
+    internal map<reflectꓸType, map<typeId, ж<ж<decEngine>>>> decoderCache; // cache of compiled engines
+    internal map<typeId, ж<ж<decEngine>>> ignorerCache;          // ditto for ignored objects
     internal ж<decoderState> freeList;                        // list of free decoderStates; avoids reallocation
     internal slice<byte> countBuf;                             // used for decoding integers while parsing messages
     internal error err;
@@ -47,20 +47,22 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
     // We use the ability to read bytes as a plausible surrogate for buffering.
     {
         var (_, ok) = r._<io.ByteReader>(ᐧ); if (!ok) {
-            r = ~bufio.NewReader(r);
+            r = new bufio_ReaderжReader(bufio.NewReader(r));
         }
     }
-    dec.val.r = r;
-    dec.val.wireType = new gob.wireType();
-    dec.val.decoderCache = new gob.decEngine();
-    dec.val.ignorerCache = new gob.decEngine();
-    dec.val.countBuf = new slice<byte>(9);
+    dec.Value.r = r;
+    dec.Value.wireType = new map<typeId, ж<wireType>>();
+    dec.Value.decoderCache = new map<reflectꓸType, map<typeId, ж<ж<decEngine>>>>();
+    dec.Value.ignorerCache = new map<typeId, ж<ж<decEngine>>>();
+    dec.Value.countBuf = new slice<byte>(9);
     // counts may be uint64s (unlikely!), require 9 bytes
     return dec;
 }
 
 // recvType loads the definition of a type.
-[GoRecv] internal static void recvType(this ref Decoder dec, typeId id) {
+internal static void recvType(this ж<Decoder> Ꮡdec, typeId id) {
+    ref var dec = ref Ꮡdec.Value;
+
     // Have we already seen this type? That's an error
     if (id < firstUserId || dec.wireType[id] != nil) {
         dec.err = errors.New("gob: duplicate type received"u8);
@@ -68,7 +70,7 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
     }
     // Type:
     var wire = @new<wireType>();
-    dec.decodeValue(tWireType, reflect.ValueOf(wire));
+    Ꮡdec.decodeValue(tWireType, reflect.ValueOf(wire));
     if (dec.err != default!) {
         return;
     }
@@ -91,7 +93,7 @@ internal static error errBadCount = errors.New("invalid message length"u8);
         dec.err = errBadCount;
         return false;
     }
-    dec.readMessage(((nint)nbytes));
+    dec.readMessage((nint)nbytes);
     return dec.err == default!;
 }
 
@@ -103,7 +105,7 @@ internal static error errBadCount = errors.New("invalid message length"u8);
     }
     // Read the data
     slice<byte> buf = default!;
-    (buf, dec.err) = saferio.ReadData(dec.r, ((uint64)nbytes));
+    (buf, dec.err) = saferio.ReadData(dec.r, (uint64)nbytes);
     dec.buf.SetBytes(buf);
     if (AreEqual(dec.err, io.EOF)) {
         dec.err = io.ErrUnexpectedEOF;
@@ -112,23 +114,27 @@ internal static error errBadCount = errors.New("invalid message length"u8);
 
 // toInt turns an encoded uint64 into an int, according to the marshaling rules.
 internal static int64 toInt(uint64 x) {
-    var i = ((int64)(x >> (int)(1)));
+    var i = (int64)((x >> (int)(1)));
     if ((uint64)(x & 1) != 0) {
         i = ~i;
     }
     return i;
 }
 
-[GoRecv] internal static int64 nextInt(this ref Decoder dec) {
-    var (n, _, err) = decodeUintReader(dec.buf, dec.countBuf);
+internal static int64 nextInt(this ж<Decoder> Ꮡdec) {
+    ref var dec = ref Ꮡdec.Value;
+
+    var (n, _, err) = decodeUintReader(new decBufferжReader(Ꮡdec.of(Decoder.Ꮡbuf)), dec.countBuf);
     if (err != default!) {
         dec.err = err;
     }
     return toInt(n);
 }
 
-[GoRecv] internal static uint64 nextUint(this ref Decoder dec) {
-    var (n, _, err) = decodeUintReader(dec.buf, dec.countBuf);
+internal static uint64 nextUint(this ж<Decoder> Ꮡdec) {
+    ref var dec = ref Ꮡdec.Value;
+
+    var (n, _, err) = decodeUintReader(new decBufferжReader(Ꮡdec.of(Decoder.Ꮡbuf)), dec.countBuf);
     if (err != default!) {
         dec.err = err;
     }
@@ -144,7 +150,9 @@ internal static int64 toInt(uint64 x) {
 // EOF.  Upon return, the remainder of dec.buf is the value to be
 // decoded. If this is an interface value, it can be ignored by
 // resetting that buffer.
-[GoRecv] internal static typeId decodeTypeSequence(this ref Decoder dec, bool isInterface) {
+internal static typeId decodeTypeSequence(this ж<Decoder> Ꮡdec, bool isInterface) {
+    ref var dec = ref Ꮡdec.Value;
+
     var firstMessage = true;
     while (dec.err == default!) {
         if (dec.buf.Len() == 0) {
@@ -160,13 +168,13 @@ internal static int64 toInt(uint64 x) {
             }
         }
         // Receive a type id.
-        var id = ((typeId)dec.nextInt());
+        var id = ((typeId)(int32)Ꮡdec.nextInt());
         if (id >= 0) {
             // Value follows.
             return id;
         }
         // Type definition for (-id) follows.
-        dec.recvType(-id);
+        Ꮡdec.recvType(-id);
         if (dec.err != default!) {
             break;
         }
@@ -179,7 +187,7 @@ internal static int64 toInt(uint64 x) {
                 dec.err = errors.New("extra data in buffer"u8);
                 break;
             }
-            dec.nextUint();
+            Ꮡdec.nextUint();
         }
         firstMessage = false;
     }
@@ -193,9 +201,11 @@ internal static int64 toInt(uint64 x) {
 // correct type for the next data item received.
 // If the input is at EOF, Decode returns [io.EOF] and
 // does not modify e.
-[GoRecv] public static error Decode(this ref Decoder dec, any e) {
+public static error Decode(this ж<Decoder> Ꮡdec, any e) {
+    ref var dec = ref Ꮡdec.Value;
+
     if (e == default!) {
-        return dec.DecodeValue(new reflectꓸValue(nil));
+        return Ꮡdec.DecodeValue(new reflectꓸValue(nil));
     }
     var value = reflect.ValueOf(e);
     // If e represents a value as opposed to a pointer, the answer won't
@@ -204,7 +214,7 @@ internal static int64 toInt(uint64 x) {
         dec.err = errors.New("gob: attempt to decode into a non-pointer"u8);
         return dec.err;
     }
-    return dec.DecodeValue(value);
+    return Ꮡdec.DecodeValue(value);
 }
 
 // DecodeValue reads the next value from the input stream.
@@ -213,7 +223,9 @@ internal static int64 toInt(uint64 x) {
 // a non-nil pointer to data or be an assignable reflect.Value (v.CanSet())
 // If the input is at EOF, DecodeValue returns [io.EOF] and
 // does not modify v.
-[GoRecv] public static error DecodeValue(this ref Decoder dec, reflectꓸValue v) => func((defer, _) => {
+public static error DecodeValue(this ж<Decoder> Ꮡdec, reflectꓸValue v) => func((defer, recover) => {
+    ref var dec = ref Ꮡdec.Value;
+
     if (v.IsValid()) {
         if (v.Kind() == reflect.ΔPointer && !v.IsNil()){
         } else 
@@ -223,14 +235,14 @@ internal static int64 toInt(uint64 x) {
         }
     }
     // Make sure we're single-threaded through here.
-    dec.mutex.Lock();
-    defer(dec.mutex.Unlock);
+    Ꮡdec.of(Decoder.Ꮡmutex).Lock();
+    defer(Ꮡdec.of(Decoder.Ꮡmutex).Unlock);
     dec.buf.Reset();
     // In case data lingers from previous invocation.
     dec.err = default!;
-    var id = dec.decodeTypeSequence(false);
+    var id = Ꮡdec.decodeTypeSequence(false);
     if (dec.err == default!) {
-        dec.decodeValue(id, v);
+        Ꮡdec.decodeValue(id, v);
     }
     return dec.err;
 });

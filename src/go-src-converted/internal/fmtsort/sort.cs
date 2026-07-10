@@ -21,8 +21,7 @@ partial class fmtsort_package {
 
 // KeyValue holds a single key and value pair found in a map.
 [GoType] partial struct KeyValue {
-    public reflect_package.ΔValue Key;
-    public reflect_package.ΔValue Value;
+    public reflectꓸValue Key, Value;
 }
 
 // Sort accepts a map and returns a SortedMap that has the same keys and
@@ -65,8 +64,7 @@ public static SortedMap Sort(reflectꓸValue mapValue) {
 // If the types differ, it returns -1.
 // See the comment on Sort for the comparison rules.
 internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
-    var aType = aVal.Type();
-    var bType = bVal.Type();
+    var (aType, bType) = (aVal.Type(), bVal.Type());
     if (!AreEqual(aType, bType)) {
         return -1;
     }
@@ -96,7 +94,7 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
     if (exprᴛ1 == reflect.ΔBool) {
         var (a, b) = (aVal.Bool(), bVal.Bool());
         switch (ᐧ) {
-        case {} when a is b: {
+        case {} when a == b: {
             return 0;
         }
         case {} when a: {
@@ -140,8 +138,8 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
     }
     if (exprᴛ1 == reflect.ΔInterface) {
         {
-            var (c, ok) = nilCompare(aVal, bVal); if (ok) {
-                return c;
+            var (cΔ1, ok) = nilCompare(aVal, bVal); if (ok) {
+                return cΔ1;
             }
         }
         nint c = compare(reflect.ValueOf(aVal.Elem().Type()), reflect.ValueOf(bVal.Elem().Type()));
@@ -151,7 +149,7 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         return compare(aVal.Elem(), bVal.Elem());
     }
     { /* default: */
-        throw panic("bad type in compare: "u8 + aType.String());
+        throw panic("bad type in compare: " + aType.String());
     }
 
 }

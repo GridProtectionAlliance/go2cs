@@ -11,12 +11,13 @@ namespace go.net;
 // servemux121.go exists solely to provide a snapshot of
 // the pre-Go 1.22 ServeMux implementation for backwards compatibility.
 // Do not modify this file, it should remain frozen.
-using godebug = @internal.godebug_package;
-using url = net.url_package;
+using godebug = go.@internal.godebug_package;
+using url = go.net.url_package;
 using sort = sort_package;
 using strings = strings_package;
 using sync = sync_package;
-using @internal;
+using go.@internal;
+using go.net;
 
 partial class http_package {
 
@@ -26,7 +27,7 @@ internal static bool use121;
 
 // Read httpmuxgo121 once at startup, since dealing with changes to it during
 // program execution is too complex and error-prone.
-[GoInit] internal static void init() {
+[GoInit] internal static void initΔ1() {
     if (httpmuxgo121.Value() == "1"u8) {
         use121 = true;
         httpmuxgo121.IncNonDefault();
@@ -35,7 +36,7 @@ internal static bool use121;
 
 // serveMux121 holds the state of a ServeMux needed for Go 1.21 behavior.
 [GoType] partial struct serveMux121 {
-    internal sync_package.RWMutex mu;
+    internal sync.RWMutex mu;
     internal map<@string, muxEntry> m;
     internal slice<muxEntry> es; // slice of entries sorted from longest to shortest.
     internal bool hosts;       // whether any patterns contain hostnames
@@ -47,9 +48,11 @@ internal static bool use121;
 }
 
 // Formerly ServeMux.Handle.
-[GoRecv] internal static void handle(this ref serveMux121 mux, @string pattern, ΔHandler handler) => func((defer, _) => {
-    mux.mu.Lock();
-    defer(mux.mu.Unlock);
+internal static void handle(this ж<serveMux121> Ꮡmux, @string pattern, ΔHandler handler) => func((defer, recover) => {
+    ref var mux = ref Ꮡmux.Value;
+
+    Ꮡmux.of(serveMux121.Ꮡmu).Lock();
+    defer(Ꮡmux.of(serveMux121.Ꮡmu).Unlock);
     if (pattern == ""u8) {
         throw panic("http: invalid pattern");
     }
@@ -57,8 +60,8 @@ internal static bool use121;
         throw panic("http: nil handler");
     }
     {
-        var (_, exist) = mux.m[pattern]; if (exist) {
-            throw panic("http: multiple registrations for "u8 + pattern);
+        var (_, exist) = mux.m[pattern, ꟷ]; if (exist) {
+            throw panic("http: multiple registrations for " + pattern);
         }
     }
     if (mux.m == default!) {
@@ -66,7 +69,7 @@ internal static bool use121;
     }
     var e = new muxEntry(h: handler, pattern: pattern);
     mux.m[pattern] = e;
-    if (pattern[len(pattern) - 1] == (rune)'/') {
+    if (pattern[builtin.len(pattern) - 1] == (rune)'/') {
         mux.es = appendSorted(mux.es, e);
     }
     if (pattern[0] != (rune)'/') {
@@ -75,11 +78,9 @@ internal static bool use121;
 });
 
 internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
-    nint n = len(es);
-    nint i = sort.Search(n, 
+    nint n = builtin.len(es);
     var eʗ1 = e;
-    var esʗ1 = es;
-    (nint i) => len(esʗ1[iΔ1].pattern) < len(eʗ1.pattern));
+    nint i = sort.Search(n, (nint iΔ1) => builtin.len(es[iΔ1].pattern) < builtin.len(eʗ1.pattern));
     if (i == n) {
         return append(es, e);
     }
@@ -93,70 +94,77 @@ internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
 }
 
 // Formerly ServeMux.HandleFunc.
-[GoRecv] internal static void handleFunc(this ref serveMux121 mux, @string pattern, http.Request) handler) {
+internal static void handleFunc(this ж<serveMux121> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
+    ref var mux = ref Ꮡmux.Value;
+
     if (handler == default!) {
         throw panic("http: nil handler");
     }
-    mux.handle(pattern, ((HandlerFunc)handler));
+    Ꮡmux.handle(pattern, new HandlerFuncᴠΔHandler(new HandlerFunc(handler)));
 }
 
 // Formerly ServeMux.Handler.
-[GoRecv] internal static (ΔHandler h, @string pattern) findHandler(this ref serveMux121 mux, ж<Request> Ꮡr) {
+internal static (ΔHandler h, @string pattern) findHandler(this ж<serveMux121> Ꮡmux, ж<Request> Ꮡr) {
     ΔHandler h = default!;
     @string pattern = default!;
 
-    ref var r = ref Ꮡr.val;
+    ref var mux = ref Ꮡmux.Value;
+    ref var r = ref Ꮡr.Value;
     // CONNECT requests are not canonicalized.
     if (r.Method == "CONNECT"u8) {
         // If r.URL.Path is /tree and its handler is not registered,
         // the /tree -> /tree/ redirect applies to CONNECT requests
         // but the path canonicalization does not.
         {
-            var (u, ok) = mux.redirectToPathSlash(r.URL.Host, r.URL.Path, r.URL); if (ok) {
+            var (u, ok) = Ꮡmux.redirectToPathSlash((~r.URL).Host, (~r.URL).Path, r.URL); if (ok) {
                 return (RedirectHandler(u.String(), StatusMovedPermanently), (~u).Path);
             }
         }
-        return mux.handler(r.Host, r.URL.Path);
+        return Ꮡmux.handler(r.Host, (~r.URL).Path);
     }
     // All other requests have any port stripped and path cleaned
     // before passing to mux.handler.
     @string host = stripHostPort(r.Host);
-    @string path = cleanPath(r.URL.Path);
+    ref var path = ref heap<@string>(out var Ꮡpath);
+    path = cleanPath((~r.URL).Path);
     // If the given path is /tree and its handler is not registered,
     // redirect for /tree/.
     {
-        var (u, ok) = mux.redirectToPathSlash(host, path, r.URL); if (ok) {
+        var (u, ok) = Ꮡmux.redirectToPathSlash(host, path, r.URL); if (ok) {
             return (RedirectHandler(u.String(), StatusMovedPermanently), (~u).Path);
         }
     }
-    if (path != r.URL.Path) {
-        (_, pattern) = mux.handler(host, path);
-        var u = Ꮡ(new url.URL(Path: path, RawQuery: r.URL.RawQuery));
+    if (path != (~r.URL).Path) {
+        (_, pattern) = Ꮡmux.handler(host, path);
+        var u = Ꮡ(new url.URL(Path: path, RawQuery: (~r.URL).RawQuery));
         return (RedirectHandler(u.String(), StatusMovedPermanently), pattern);
     }
-    return mux.handler(host, r.URL.Path);
+    return Ꮡmux.handler(host, (~r.URL).Path);
 }
 
 // handler is the main implementation of findHandler.
 // The path is known to be in canonical form, except for CONNECT methods.
-[GoRecv] internal static (ΔHandler h, @string pattern) handler(this ref serveMux121 mux, @string host, @string path) => func((defer, _) => {
+internal static (ΔHandler h, @string pattern) handler(this ж<serveMux121> Ꮡmux, @string host, @string path) {
     ΔHandler h = default!;
     @string pattern = default!;
+    func((defer, recover) => {
+    ref var mux = ref Ꮡmux.Value;
 
-    mux.mu.RLock();
-    defer(mux.mu.RUnlock);
-    // Host-specific pattern takes precedence over generic ones
-    if (mux.hosts) {
-        (h, pattern) = mux.match(host + path);
-    }
-    if (h == default!) {
-        (h, pattern) = mux.match(path);
-    }
-    if (h == default!) {
-        (h, pattern) = (NotFoundHandler(), ""u8);
-    }
+        Ꮡmux.of(serveMux121.Ꮡmu).RLock();
+        defer(Ꮡmux.of(serveMux121.Ꮡmu).RUnlock);
+        // Host-specific pattern takes precedence over generic ones
+        if (mux.hosts) {
+            (h, pattern) = mux.match(host + path);
+        }
+        if (h == default!) {
+            (h, pattern) = mux.match(path);
+        }
+        if (h == default!) {
+            (h, pattern) = (NotFoundHandler(), "");
+        }
+    });
     return (h, pattern);
-});
+}
 
 // Find a handler on a handler map given a path string.
 // Most-specific (longest) pattern wins.
@@ -165,7 +173,7 @@ internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
     @string pattern = default!;
 
     // Check for exact match first.
-    var (v, ok) = mux.m[path];
+    var (v, ok) = mux.m[path, ꟷ];
     if (ok) {
         return (v.h, v.pattern);
     }
@@ -183,17 +191,18 @@ internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
 // This occurs when a handler for path + "/" was already registered, but
 // not for path itself. If the path needs appending to, it creates a new
 // URL, setting the path to u.Path + "/" and returning true to indicate so.
-[GoRecv] internal static (ж<url.URL>, bool) redirectToPathSlash(this ref serveMux121 mux, @string host, @string path, ж<url.URL> Ꮡu) {
-    ref var u = ref Ꮡu.val;
+internal static (ж<url.URL>, bool) redirectToPathSlash(this ж<serveMux121> Ꮡmux, @string host, @string path, ж<url.URL> Ꮡu) {
+    ref var mux = ref Ꮡmux.Value;
+    ref var u = ref Ꮡu.Value;
 
-    mux.mu.RLock();
+    Ꮡmux.of(serveMux121.Ꮡmu).RLock();
     var shouldRedirect = mux.shouldRedirectRLocked(host, path);
-    mux.mu.RUnlock();
+    Ꮡmux.of(serveMux121.Ꮡmu).RUnlock();
     if (!shouldRedirect) {
         return (Ꮡu, false);
     }
     path = path + "/"u8;
-    Ꮡu = Ꮡ(new url.URL(Path: path, RawQuery: u.RawQuery)); u = ref Ꮡu.val;
+    Ꮡu = Ꮡ(new url.URL(Path: path, RawQuery: u.RawQuery)); u = ref Ꮡu.Value;
     return (Ꮡu, true);
 }
 
@@ -204,18 +213,18 @@ internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
     var p = new @string[]{path, host + path}.slice();
     foreach (var (_, c) in p) {
         {
-            var (_, exist) = mux.m[c]; if (exist) {
+            var (_, exist) = mux.m[c, ꟷ]; if (exist) {
                 return false;
             }
         }
     }
-    nint n = len(path);
+    nint n = builtin.len(path);
     if (n == 0) {
         return false;
     }
     foreach (var (_, c) in p) {
         {
-            var (_, exist) = mux.m[c + "/"u8]; if (exist) {
+            var (_, exist) = mux.m[c + "/"u8, ꟷ]; if (exist) {
                 return path[n - 1] != (rune)'/';
             }
         }

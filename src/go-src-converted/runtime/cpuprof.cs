@@ -14,6 +14,7 @@ using abi = @internal.abi_package;
 using sys = runtime.@internal.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime;
 using runtime.@internal;
 
 partial class runtime_package {
@@ -43,7 +44,8 @@ internal static readonly UntypedInt profBufTagCount = /* 1 << 14 */ 16384;
     internal uint64 lostAtomic; // count of frames lost because of being in atomic64 on mips/arm; updated racily
 }
 
-internal static cpuProfile cpuprof;
+internal static ж<cpuProfile> Ꮡcpuprof = new(default(cpuProfile));
+internal static ref cpuProfile cpuprof => ref Ꮡcpuprof.Value;
 
 // SetCPUProfileRate sets the CPU profiling rate to hz samples per second.
 // If hz <= 0, SetCPUProfileRate turns off profiling.
@@ -69,9 +71,9 @@ public static void SetCPUProfileRate(nint hz) {
         }
         cpuprof.on = true;
         cpuprof.log = newProfBuf(1, profBufWordCount, profBufTagCount);
-        var hdr = new uint64[]{((uint64)hz)}.array();
+        var hdr = new uint64[]{(uint64)hz}.array();
         cpuprof.log.write(nil, nanotime(), hdr[..], default!);
-        setcpuprofilerate(((int32)hz));
+        setcpuprofilerate((int32)hz);
     } else 
     if (cpuprof.on) {
         setcpuprofilerate(0);
@@ -90,14 +92,14 @@ public static void SetCPUProfileRate(nint hz) {
 //
 //go:nowritebarrierrec
 [GoRecv] internal static void add(this ref cpuProfile Δp, ж<@unsafe.Pointer> ᏑtagPtr, slice<uintptr> stk) {
-    ref var tagPtr = ref ᏑtagPtr.val;
+    ref var tagPtr = ref ᏑtagPtr.Value;
 
     // Simple cas-lock to coordinate with setcpuprofilerate.
-    while (!prof.signalLock.CompareAndSwap(0, 1)) {
+    while (!Ꮡprof.of(profᴛ1.ᏑsignalLock).CompareAndSwap(0, 1)) {
         // TODO: Is it safe to osyield here? https://go.dev/issue/52672
         osyield();
     }
-    if (prof.hz.Load() != 0) {
+    if (Ꮡprof.of(profᴛ1.Ꮡhz).Load() != 0) {
         // implies cpuprof.log != nil
         if (Δp.numExtra > 0 || Δp.lostExtra > 0 || Δp.lostAtomic > 0) {
             Δp.addExtra();
@@ -109,7 +111,7 @@ public static void SetCPUProfileRate(nint hz) {
         // changing the argument here.
         cpuprof.log.write(ᏑtagPtr, nanotime(), hdr[..], stk);
     }
-    prof.signalLock.Store(0);
+    Ꮡprof.of(profᴛ1.ᏑsignalLock).Store(0);
 }
 
 // addNonGo adds the non-Go stack trace to the profile.
@@ -129,19 +131,19 @@ public static void SetCPUProfileRate(nint hz) {
     // process at a time. If not, this lock will serialize those too.
     // The use of timer_create(2) on Linux to request process-targeted
     // signals may have changed this.)
-    while (!prof.signalLock.CompareAndSwap(0, 1)) {
+    while (!Ꮡprof.of(profᴛ1.ᏑsignalLock).CompareAndSwap(0, 1)) {
         // TODO: Is it safe to osyield here? https://go.dev/issue/52672
         osyield();
     }
     if (cpuprof.numExtra + 1 + len(stk) < len(cpuprof.extra)){
         nint i = cpuprof.numExtra;
-        cpuprof.extra[i] = ((uintptr)(1 + len(stk)));
+        cpuprof.extra[i] = (uintptr)(1 + len(stk));
         copy(cpuprof.extra[(int)(i + 1)..], stk);
         cpuprof.numExtra += 1 + len(stk);
     } else {
         cpuprof.lostExtra++;
     }
-    prof.signalLock.Store(0);
+    Ꮡprof.of(profᴛ1.ᏑsignalLock).Store(0);
 }
 
 // addExtra adds the "extra" profiling events,
@@ -153,16 +155,16 @@ public static void SetCPUProfileRate(nint hz) {
     // Copy accumulated non-Go profile events.
     var hdr = new uint64[]{1}.array();
     for (nint i = 0; i < Δp.numExtra; ) {
-        Δp.log.write(nil, 0, hdr[..], Δp.extra[(int)(i + 1)..(int)(i + ((nint)Δp.extra[i]))]);
-        i += ((nint)Δp.extra[i]);
+        Δp.log.write(nil, 0, hdr[..], Δp.extra[(int)(i + 1)..(int)(i + (nint)Δp.extra[i])]);
+        i += (nint)Δp.extra[i];
     }
     Δp.numExtra = 0;
     // Report any lost events.
     if (Δp.lostExtra > 0) {
         var hdrΔ1 = new uint64[]{Δp.lostExtra}.array();
         var lostStk = new uintptr[]{
-            abi.FuncPCABIInternal(_LostExternalCode) + sys.PCQuantum,
-            abi.FuncPCABIInternal(_ExternalCode) + sys.PCQuantum
+            abi.FuncPCABIInternal(_LostExternalCode) + (uintptr)sys.PCQuantum,
+            abi.FuncPCABIInternal(_ExternalCode) + (uintptr)sys.PCQuantum
         }.array();
         Δp.log.write(nil, 0, hdrΔ1[..], lostStk[..]);
         Δp.lostExtra = 0;
@@ -170,8 +172,8 @@ public static void SetCPUProfileRate(nint hz) {
     if (Δp.lostAtomic > 0) {
         var hdrΔ2 = new uint64[]{Δp.lostAtomic}.array();
         var lostStk = new uintptr[]{
-            abi.FuncPCABIInternal(_LostSIGPROFDuringAtomic64) + sys.PCQuantum,
-            abi.FuncPCABIInternal(_System) + sys.PCQuantum
+            abi.FuncPCABIInternal(_LostSIGPROFDuringAtomic64) + (uintptr)sys.PCQuantum,
+            abi.FuncPCABIInternal(_System) + (uintptr)sys.PCQuantum
         }.array();
         Δp.log.write(nil, 0, hdrΔ2[..], lostStk[..]);
         Δp.lostAtomic = 0;

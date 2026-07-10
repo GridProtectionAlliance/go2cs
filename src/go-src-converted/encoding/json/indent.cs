@@ -13,7 +13,7 @@ partial class json_package {
 // For historical reasons, web browsers don't honor standard HTML
 // escaping within <script> tags, so an alternative JSON encoding must be used.
 public static void HTMLEscape(ж<bytes.Buffer> Ꮡdst, slice<byte> src) {
-    ref var dst = ref Ꮡdst.val;
+    ref var dst = ref Ꮡdst.Value;
 
     dst.Grow(len(src));
     dst.Write(appendHTMLEscape(dst.AvailableBuffer(), src));
@@ -26,13 +26,13 @@ internal static slice<byte> appendHTMLEscape(slice<byte> dst, slice<byte> src) {
     foreach (var (i, c) in src) {
         if (c == (rune)'<' || c == (rune)'>' || c == (rune)'&') {
             dst = append(dst, src[(int)(start)..(int)(i)].ꓸꓸꓸ);
-            dst = append(dst, (rune)'\\', (rune)'u', (rune)'0', (rune)'0', hex[c >> (int)(4)], hex[(byte)(c & 15)]);
+            dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(c >> (int)(4))], hex[(byte)(c & 0xF)]);
             start = i + 1;
         }
         // Convert U+2028 and U+2029 (E2 80 A8 and E2 80 A9).
-        if (c == 226 && i + 2 < len(src) && src[i + 1] == 128 && (byte)(src[i + 2] & ~1) == 168) {
+        if (c == 0xE2 && i + 2 < len(src) && src[i + 1] == 0x80 && (byte)(src[i + 2] & ~1) == 0xA8) {
             dst = append(dst, src[(int)(start)..(int)(i)].ꓸꓸꓸ);
-            dst = append(dst, (rune)'\\', (rune)'u', (rune)'2', (rune)'0', (rune)'2', hex[(byte)(src[i + 2] & 15)]);
+            dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'2'), (byte)((rune)'0'), (byte)((rune)'2'), hex[(byte)(src[i + 2] & 0xF)]);
             start = i + len("\u2029");
         }
     }
@@ -42,16 +42,16 @@ internal static slice<byte> appendHTMLEscape(slice<byte> dst, slice<byte> src) {
 // Compact appends to dst the JSON-encoded src with
 // insignificant space characters elided.
 public static error Compact(ж<bytes.Buffer> Ꮡdst, slice<byte> src) {
-    ref var dst = ref Ꮡdst.val;
+    ref var dst = ref Ꮡdst.Value;
 
     dst.Grow(len(src));
     var b = dst.AvailableBuffer();
-    (b, err) = appendCompact(b, src, false);
+    (b, var err) = appendCompact(b, src, false);
     dst.Write(b);
     return err;
 }
 
-internal static (slice<byte>, error) appendCompact(slice<byte> dst, slice<byte> src, bool escape) => func((defer, _) => {
+internal static (slice<byte>, error) appendCompact(slice<byte> dst, slice<byte> src, bool escape) => func<(slice<byte>, error)>((defer, recover) => {
     nint origLen = len(dst);
     var scan = newScanner();
     deferǃ(freeScanner, scan, defer);
@@ -61,15 +61,15 @@ internal static (slice<byte>, error) appendCompact(slice<byte> dst, slice<byte> 
             if (start < i) {
                 dst = append(dst, src[(int)(start)..(int)(i)].ꓸꓸꓸ);
             }
-            dst = append(dst, (rune)'\\', (rune)'u', (rune)'0', (rune)'0', hex[c >> (int)(4)], hex[(byte)(c & 15)]);
+            dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(c >> (int)(4))], hex[(byte)(c & 0xF)]);
             start = i + 1;
         }
         // Convert U+2028 and U+2029 (E2 80 A8 and E2 80 A9).
-        if (escape && c == 226 && i + 2 < len(src) && src[i + 1] == 128 && (byte)(src[i + 2] & ~1) == 168) {
+        if (escape && c == 0xE2 && i + 2 < len(src) && src[i + 1] == 0x80 && (byte)(src[i + 2] & ~1) == 0xA8) {
             if (start < i) {
                 dst = append(dst, src[(int)(start)..(int)(i)].ꓸꓸꓸ);
             }
-            dst = append(dst, (rune)'\\', (rune)'u', (rune)'2', (rune)'0', (rune)'2', hex[(byte)(src[i + 2] & 15)]);
+            dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'2'), (byte)((rune)'0'), (byte)((rune)'2'), hex[(byte)(src[i + 2] & 0xF)]);
             start = i + 3;
         }
         nint v = (~scan).step(scan, c);
@@ -93,7 +93,7 @@ internal static (slice<byte>, error) appendCompact(slice<byte> dst, slice<byte> 
 });
 
 internal static slice<byte> appendNewline(slice<byte> dst, @string prefix, @string indent, nint depth) {
-    dst = append(dst, (rune)'\n');
+    dst = append(dst, (byte)((rune)'\n'));
     dst = append(dst, prefix.ꓸꓸꓸ);
     for (nint i = 0; i < depth; i++) {
         dst = append(dst, indent.ꓸꓸꓸ);
@@ -121,23 +121,23 @@ internal static readonly UntypedInt indentGrowthFactor = 2;
 // For example, if src has no trailing spaces, neither will dst;
 // if src ends in a trailing newline, so will dst.
 public static error Indent(ж<bytes.Buffer> Ꮡdst, slice<byte> src, @string prefix, @string indent) {
-    ref var dst = ref Ꮡdst.val;
+    ref var dst = ref Ꮡdst.Value;
 
-    dst.Grow(indentGrowthFactor * len(src));
+    dst.Grow((nint)indentGrowthFactor * len(src));
     var b = dst.AvailableBuffer();
-    (b, err) = appendIndent(b, src, prefix, indent);
+    (b, var err) = appendIndent(b, src, prefix, indent);
     dst.Write(b);
     return err;
 }
 
-internal static (slice<byte>, error) appendIndent(slice<byte> dst, slice<byte> src, @string prefix, @string indent) => func((defer, _) => {
+internal static (slice<byte>, error) appendIndent(slice<byte> dst, slice<byte> src, @string prefix, @string indent) => func<(slice<byte>, error)>((defer, recover) => {
     nint origLen = len(dst);
     var scan = newScanner();
     deferǃ(freeScanner, scan, defer);
     var needIndent = false;
     nint depth = 0;
     foreach (var (_, c) in src) {
-        (~scan).bytes++;
+        scan.Value.bytes++;
         nint v = (~scan).step(scan, c);
         if (v == scanSkipSpace) {
             continue;
@@ -170,7 +170,7 @@ internal static (slice<byte>, error) appendIndent(slice<byte> dst, slice<byte> s
             break;
         }
         case (rune)':': {
-            dst = append(dst, c, (rune)' ');
+            dst = append(dst, c, (byte)((rune)' '));
             break;
         }
         case (rune)'}' or (rune)']': {

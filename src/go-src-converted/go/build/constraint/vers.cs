@@ -42,35 +42,35 @@ public static @string GoVersion(Expr x) {
 internal static nint minVersion(Expr z, nint sign) {
     switch (z.type()) {
     default: {
-        var z = z.type();
+        var zΔ1 = z;
         return -1;
     }
-    case AndExpr.val z: {
+    case ж<AndExpr> zΔ1: {
         var op = andVersion;
         if (sign < 0) {
             op = orVersion;
         }
-        return op(minVersion((~z).X, sign), minVersion((~z).Y, sign));
+        return op(minVersion((~zΔ1).X, sign), minVersion((~zΔ1).Y, sign));
     }
-    case OrExpr.val z: {
-        op = orVersion;
+    case ж<OrExpr> zΔ1: {
+        var op = orVersion;
         if (sign < 0) {
             op = andVersion;
         }
-        return op(minVersion((~z).X, sign), minVersion((~z).Y, sign));
+        return op(minVersion((~zΔ1).X, sign), minVersion((~zΔ1).Y, sign));
     }
-    case NotExpr.val z: {
-        return minVersion((~z).X, -sign);
+    case ж<NotExpr> zΔ1: {
+        return minVersion((~zΔ1).X, -sign);
     }
-    case TagExpr.val z: {
+    case ж<TagExpr> zΔ1: {
         if (sign < 0) {
             // !foo implies nothing
             return -1;
         }
-        if ((~z).Tag == "go1"u8) {
+        if ((~zΔ1).Tag == "go1"u8) {
             return 0;
         }
-        var (_, v, _) = strings.Cut((~z).Tag, "go1."u8);
+        var (_, v, _) = strings.Cut((~zΔ1).Tag, "go1."u8);
         var (n, err) = strconv.Atoi(v);
         if (err != default!) {
             // not a go1.N tag

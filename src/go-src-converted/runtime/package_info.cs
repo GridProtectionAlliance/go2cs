@@ -18,6 +18,7 @@ global using abiꓸKind = go.@internal.abi_package.ΔKind;
 global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
 global using abiꓸName = go.@internal.abi_package.ΔName;
 global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
+using abi = go.@internal.abi_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -54,6 +55,7 @@ using static go.runtime_package;
 [assembly: GoImplicitConv<_type, ж<_type>>(Indirect = true)]
 [assembly: GoImplicitConv<abi.RegArgs, ж<abi.RegArgs>>(Indirect = true)]
 [assembly: GoImplicitConv<abi.Type, ж<abi.Type>>(Indirect = true)]
+[assembly: GoImplicitConv<abiꓸMapType, ж<maptype>>(Indirect = true)]
 [assembly: GoImplicitConv<adjustinfo, ж<adjustinfo>>(Indirect = true)]
 [assembly: GoImplicitConv<bmap, ж<bmap>>(Indirect = true)]
 [assembly: GoImplicitConv<childInfo, ж<childInfo>>(Indirect = true)]
@@ -62,21 +64,16 @@ using static go.runtime_package;
 [assembly: GoImplicitConv<g, ж<g>>(Indirect = true)]
 [assembly: GoImplicitConv<g, ж<g>>]
 [assembly: GoImplicitConv<gQueue, ж<gQueue>>(Indirect = true)]
-[assembly: GoImplicitConv<gcBits, ж<pinnerBits>>(Indirect = true)]
 [assembly: GoImplicitConv<gcWork, ж<gcWork>>(Indirect = true)]
-[assembly: GoImplicitConv<goroutineProfileStateHolder, ж<goroutineProfileStateHolder>>(Indirect = true)]
 [assembly: GoImplicitConv<hiter, ж<hiter>>(Indirect = true)]
 [assembly: GoImplicitConv<hmap, ж<hmap>>(Indirect = true)]
 [assembly: GoImplicitConv<itab, ж<itab>>(Indirect = true)]
 [assembly: GoImplicitConv<lfstack, Δhex>(Inverted = true, ValueType = "lfstack")]
 [assembly: GoImplicitConv<limiterEventStamp, limiterEventType>(Inverted = true, ValueType = "limiterEventStamp")]
 [assembly: GoImplicitConv<m, ж<m>>(Indirect = true)]
-[assembly: GoImplicitConv<maptype, ж<maptype>>(Indirect = true)]
 [assembly: GoImplicitConv<metricValue, ж<metricValue>>(Indirect = true)]
 [assembly: GoImplicitConv<mspan, ж<mspan>>(Indirect = true)]
-[assembly: GoImplicitConv<muintptr, Δhex>(Inverted = true, ValueType = "muintptr")]
 [assembly: GoImplicitConv<nameOff, Δhex>(Inverted = true, ValueType = "nameOff")]
-[assembly: GoImplicitConv<pinnerBits, ж<gcBits>>(Indirect = true)]
 [assembly: GoImplicitConv<pollDesc, ж<pollDesc>>(Indirect = true)]
 [assembly: GoImplicitConv<ptrtype, ж<ptrtype>>(Indirect = true)]
 [assembly: GoImplicitConv<spanClass, traceArg>(Inverted = true, ValueType = "spanClass")]
@@ -88,9 +85,8 @@ using static go.runtime_package;
 [assembly: GoImplicitConv<traceGoStatus, traceArg>(Inverted = true, ValueType = "traceGoStatus")]
 [assembly: GoImplicitConv<traceProcStatus, traceArg>(Inverted = true, ValueType = "traceProcStatus")]
 [assembly: GoImplicitConv<typeOff, Δhex>(Inverted = true, ValueType = "typeOff")]
-[assembly: GoImplicitConv<Δguintptr, Δhex>(Inverted = true, ValueType = "Δguintptr")]
 [assembly: GoImplicitConv<Δp, ж<Δp>>(Indirect = true)]
-[assembly: GoImplicitConv<Δslice, ж<Δslice>>(Indirect = true)]
+[assembly: GoImplicitConv<Δsliceᴛ, ж<Δsliceᴛ>>(Indirect = true)]
 // </ImplicitConversions>
 
 namespace go;

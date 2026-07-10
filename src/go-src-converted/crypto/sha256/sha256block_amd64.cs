@@ -4,8 +4,8 @@
 //go:build !purego
 namespace go.crypto;
 
-using cpu = @internal.cpu_package;
-using @internal;
+using cpu = go.@internal.cpu_package;
+using go.@internal;
 
 partial class sha256_package {
 

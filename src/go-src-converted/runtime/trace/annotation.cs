@@ -5,9 +5,9 @@ namespace go.runtime;
 
 using context = context_package;
 using fmt = fmt_package;
-using atomic = sync.atomic_package;
-using _ = unsafe_package;
-using sync;
+using atomic = go.sync.atomic_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+using go.sync;
 using ꓸꓸꓸany = Span<any>;
 
 partial class trace_package {
@@ -41,7 +41,7 @@ public static (context.Context ctx, ж<Task> task) NewTask(context.Context pctx,
     context.Context ctx = default!;
     ж<Task> task = default!;
 
-    var pid = fromContext(pctx).val.id;
+    var pid = fromContext(pctx).Value.id;
     ref var id = ref heap<uint64>(out var Ꮡid);
     id = newID();
     userTaskCreate(id, pid, taskType);
@@ -69,11 +69,11 @@ public static (context.Context ctx, ж<Task> task) NewTask(context.Context pctx,
 // tracing round.
 internal static ж<Task> fromContext(context.Context ctx) {
     {
-        var (s, ok) = ctx.Value(new traceContextKey(nil))._<Task.val>(ᐧ); if (ok) {
+        var (s, ok) = ctx.Value(new traceContextKey(nil))._<ж<Task>>(ᐧ); if (ok) {
             return s;
         }
     }
-    return Ꮡ(bgTask);
+    return ᏑbgTask;
 }
 
 // Task is a data type for tracing a user-defined, logical operation.
@@ -88,20 +88,22 @@ internal static ж<Task> fromContext(context.Context ctx) {
     userTaskEnd(t.id);
 }
 
-internal static uint64 lastTaskID = 0; // task id issued last time
+internal static ж<uint64> ᏑlastTaskID = new(0);
+internal static ref uint64 lastTaskID => ref ᏑlastTaskID.Value; // task id issued last time
 
 internal static uint64 newID() {
     // TODO(hyangah): use per-P cache
-    return atomic.AddUint64(Ꮡ(lastTaskID), 1);
+    return atomic.AddUint64(ᏑlastTaskID, 1);
 }
 
-internal static Task bgTask = new Task(id: ((uint64)0));
+internal static ж<Task> ᏑbgTask = new(new Task(id: (uint64)0));
+internal static ref Task bgTask => ref ᏑbgTask.Value;
 
 // Log emits a one-off event with the given category and message.
 // Category can be empty and the API assumes there are only a handful of
 // unique categories in the system.
 public static void Log(context.Context ctx, @string category, @string message) {
-    var id = fromContext(ctx).val.id;
+    var id = fromContext(ctx).Value.id;
     userLog(id, category, message);
 }
 
@@ -112,7 +114,7 @@ public static void Logf(context.Context ctx, @string category, @string format, p
     if (IsEnabled()) {
         // Ideally this should be just Log, but that will
         // add one more frame in the stack trace.
-        var id = fromContext(ctx).val.id;
+        var id = fromContext(ctx).Value.id;
         userLog(id, category, fmt.Sprintf(format, args.ꓸꓸꓸ));
     }
 }
@@ -127,7 +129,7 @@ internal const uint64 regionEndCode = /* uint64(1) */ 1;
 //
 // The regionType is used to classify regions, so there should be only a
 // handful of unique region types.
-public static void WithRegion(context.Context ctx, @string regionType, Action fn) => func((defer, _) => {
+public static void WithRegion(context.Context ctx, @string regionType, Action fn) => func((defer, recover) => {
     // NOTE:
     // WithRegion helps avoiding misuse of the API but in practice,
     // this is very restrictive:
@@ -142,7 +144,7 @@ public static void WithRegion(context.Context ctx, @string regionType, Action fn
     //   longer.
     // This causes more churns in code than I hoped, and sometimes
     // makes the code less readable.
-    var id = fromContext(ctx).val.id;
+    var id = fromContext(ctx).Value.id;
     userRegion(id, regionStartCode, regionType);
     deferǃ(userRegion, id, regionEndCode, regionType, defer);
     fn();
@@ -161,7 +163,7 @@ public static ж<Region> StartRegion(context.Context ctx, @string regionType) {
         return noopRegion;
     }
     ref var id = ref heap<uint64>(out var Ꮡid);
-    id = fromContext(ctx).val.id;
+    id = fromContext(ctx).Value.id;
     userRegion(id, regionStartCode, regionType);
     return Ꮡ(new Region(id, regionType));
 }
@@ -175,8 +177,10 @@ public static ж<Region> StartRegion(context.Context ctx, @string regionType) {
 internal static ж<Region> noopRegion = Ꮡ(new Region(nil));
 
 // End marks the end of the traced code region.
-[GoRecv] public static void End(this ref Region r) {
-    if (r == noopRegion) {
+public static void End(this ж<Region> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    if (Ꮡr == noopRegion) {
         return;
     }
     userRegion(r.id, regionEndCode, r.regionType);
@@ -186,7 +190,7 @@ internal static ж<Region> noopRegion = Ꮡ(new Region(nil));
 // The information is advisory only. The tracing status
 // may have changed by the time this function returns.
 public static bool IsEnabled() {
-    return tracing.enabled.Load();
+    return Ꮡtracing.of(tracingᴛ1.Ꮡenabled).Load();
 }
 
 //

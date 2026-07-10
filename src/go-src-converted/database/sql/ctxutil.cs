@@ -4,9 +4,9 @@
 namespace go.database;
 
 using context = context_package;
-using driver = database.sql.driver_package;
+using driver = go.database.sql.driver_package;
 using errors = errors_package;
-using database.sql;
+using go.database.sql;
 
 partial class sql_package {
 
@@ -16,7 +16,7 @@ internal static (driver.Stmt, error) ctxDriverPrepare(context.Context ctx, drive
             return ciCtx.PrepareContext(ctx, query);
         }
     }
-    (si, err) = ci.Prepare(query);
+    var (si, err) = ci.Prepare(query);
     if (err == default!) {
         switch (ᐧ) {
         case ᐧ when ctx.Done().ꟷᐳ(out _): {
@@ -24,6 +24,7 @@ internal static (driver.Stmt, error) ctxDriverPrepare(context.Context ctx, drive
             return (default!, ctx.Err());
         }
         default: {
+            break;
         }}
     }
     return (si, err);
@@ -33,7 +34,7 @@ internal static (driver.Result, error) ctxDriverExec(context.Context ctx, driver
     if (execerCtx != default!) {
         return execerCtx.ExecContext(ctx, query, nvdargs);
     }
-    (dargs, err) = namedValueToValue(nvdargs);
+    var (dargs, err) = namedValueToValue(nvdargs);
     if (err != default!) {
         return (default!, err);
     }
@@ -42,6 +43,7 @@ internal static (driver.Result, error) ctxDriverExec(context.Context ctx, driver
         return (default!, ctx.Err());
     }
     default: {
+        break;
     }}
     return execer.Exec(query, dargs);
 }
@@ -50,7 +52,7 @@ internal static (driver.Rows, error) ctxDriverQuery(context.Context ctx, driver.
     if (queryerCtx != default!) {
         return queryerCtx.QueryContext(ctx, query, nvdargs);
     }
-    (dargs, err) = namedValueToValue(nvdargs);
+    var (dargs, err) = namedValueToValue(nvdargs);
     if (err != default!) {
         return (default!, err);
     }
@@ -59,6 +61,7 @@ internal static (driver.Rows, error) ctxDriverQuery(context.Context ctx, driver.
         return (default!, ctx.Err());
     }
     default: {
+        break;
     }}
     return queryer.Query(query, dargs);
 }
@@ -69,7 +72,7 @@ internal static (driver.Result, error) ctxDriverStmtExec(context.Context ctx, dr
             return siCtx.ExecContext(ctx, nvdargs);
         }
     }
-    (dargs, err) = namedValueToValue(nvdargs);
+    var (dargs, err) = namedValueToValue(nvdargs);
     if (err != default!) {
         return (default!, err);
     }
@@ -78,6 +81,7 @@ internal static (driver.Result, error) ctxDriverStmtExec(context.Context ctx, dr
         return (default!, ctx.Err());
     }
     default: {
+        break;
     }}
     return si.Exec(dargs);
 }
@@ -88,7 +92,7 @@ internal static (driver.Rows, error) ctxDriverStmtQuery(context.Context ctx, dri
             return siCtx.QueryContext(ctx, nvdargs);
         }
     }
-    (dargs, err) = namedValueToValue(nvdargs);
+    var (dargs, err) = namedValueToValue(nvdargs);
     if (err != default!) {
         return (default!, err);
     }
@@ -97,24 +101,25 @@ internal static (driver.Rows, error) ctxDriverStmtQuery(context.Context ctx, dri
         return (default!, ctx.Err());
     }
     default: {
+        break;
     }}
     return si.Query(dargs);
 }
 
 internal static (driver.Tx, error) ctxDriverBegin(context.Context ctx, ж<TxOptions> Ꮡopts, driver.Conn ci) {
-    ref var opts = ref Ꮡopts.val;
+    ref var opts = ref Ꮡopts.DerefOrNil();
 
     {
         var (ciCtx, @is) = ci._<driver.ConnBeginTx>(ᐧ); if (@is) {
             var dopts = new driver.TxOptions(nil);
-            if (opts != nil) {
-                dopts.Isolation = ((driver.IsolationLevel)opts.Isolation);
+            if (Ꮡopts != nil) {
+                dopts.Isolation = ((driver.IsolationLevel)(nint)opts.Isolation);
                 dopts.ReadOnly = opts.ReadOnly;
             }
             return ciCtx.BeginTx(ctx, dopts);
         }
     }
-    if (opts != nil) {
+    if (Ꮡopts != nil) {
         // Check the transaction level. If the transaction level is non-default
         // then return an error here as the BeginTx driver value is not supported.
         if (opts.Isolation != LevelDefault) {
@@ -129,7 +134,7 @@ internal static (driver.Tx, error) ctxDriverBegin(context.Context ctx, ж<TxOpti
     if (ctx.Done() == default!) {
         return ci.Begin();
     }
-    (txi, err) = ci.Begin();
+    var (txi, err) = ci.Begin();
     if (err == default!) {
         switch (ᐧ) {
         case ᐧ when ctx.Done().ꟷᐳ(out _): {
@@ -137,13 +142,14 @@ internal static (driver.Tx, error) ctxDriverBegin(context.Context ctx, ж<TxOpti
             return (default!, ctx.Err());
         }
         default: {
+            break;
         }}
     }
     return (txi, err);
 }
 
-internal static (slice<driver.Value>, error) namedValueToValue(slice<driver.NamedValue> named) {
-    var dargs = new slice<driver.Value>(len(named));
+internal static (slice<driverꓸValue>, error) namedValueToValue(slice<driver.NamedValue> named) {
+    var dargs = new slice<driverꓸValue>(len(named));
     foreach (var (n, param) in named) {
         if (len(param.Name) > 0) {
             return (default!, errors.New("sql: driver does not support the use of Named Parameters"u8));

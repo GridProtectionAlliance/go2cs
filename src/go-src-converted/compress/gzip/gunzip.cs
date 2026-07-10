@@ -7,19 +7,20 @@
 namespace go.compress;
 
 using bufio = bufio_package;
-using flate = compress.flate_package;
+using flate = go.compress.flate_package;
 using binary = encoding.binary_package;
 using errors = errors_package;
 using crc32 = hash.crc32_package;
 using io = io_package;
 using time = time_package;
 using encoding;
+using go.compress;
 using hash;
 
 partial class gzip_package {
 
-internal static readonly UntypedInt gzipID1 = /* 0x1f */ 31;
-internal static readonly UntypedInt gzipID2 = /* 0x8b */ 139;
+internal static readonly UntypedInt gzipID1 = 0x1f;
+internal static readonly UntypedInt gzipID2 = 0x8b;
 internal static readonly UntypedInt gzipDeflate = 8;
 internal static readonly UntypedInt flagText = /* 1 << 0 */ 1;
 internal static readonly UntypedInt flagHdrCrc = /* 1 << 1 */ 2;
@@ -48,7 +49,7 @@ internal static error noEOF(error err) {
 [GoType] partial struct Header {
     public @string Comment;   // comment
     public slice<byte> Extra; // "extra data"
-    public time_package.Time ModTime; // modification time
+    public time.Time ModTime; // modification time
     public @string Name;   // file name
     public byte OS;      // operating system type
 }
@@ -69,8 +70,8 @@ internal static error noEOF(error err) {
 // marking the end of the data.
 [GoType] partial struct Reader {
     public partial ref Header Header { get; }       // valid after NewReader or Reader.Reset
-    internal compress.flate_package.Reader r;
-    internal io_package.ReadCloser decompressor;
+    internal flate.Reader r;
+    internal io.ReadCloser decompressor;
     internal uint32 digest; // CRC-32, IEEE polynomial (section 8)
     internal uint32 size; // Uncompressed size (section 2.3.1)
     internal array<byte> buf = new(512);
@@ -107,7 +108,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
         var (rr, ok) = r._<flate.Reader>(ᐧ); if (ok){
             z.r = rr;
         } else {
-            z.r = bufio.NewReader(r);
+            z.r = new bufio_ReaderжReader(bufio.NewReader(r));
         }
     }
     (z.Header, z.err) = z.readHeader();
@@ -149,7 +150,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
         if (err != default!) {
             return ("", err);
         }
-        if (z.buf[i] > 127) {
+        if (z.buf[i] > 0x7f) {
             needConv = true;
         }
         if (z.buf[i] == 0) {
@@ -159,7 +160,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
             if (needConv) {
                 var s = new slice<rune>(0, i);
                 foreach (var (_, v) in z.buf[..(int)(i)]) {
-                    s = append(s, ((rune)v));
+                    s = append(s, (rune)v);
                 }
                 return (((@string)s), default!);
             }
@@ -191,7 +192,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
     }
     var flg = z.buf[3];
     {
-        var t = ((int64)le.Uint32(z.buf[4..8])); if (t > 0) {
+        var t = (int64)le.Uint32(z.buf[4..8]); if (t > 0) {
             // Section 2.3.1, the zero value for MTIME means that the
             // modified time is not set.
             hdr.ModTime = time.Unix(t, 0);
@@ -200,7 +201,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
     // z.buf[8] is XFL and is currently ignored.
     hdr.OS = z.buf[9];
     z.digest = crc32.ChecksumIEEE(z.buf[..10]);
-    if ((byte)(flg & flagExtra) != 0) {
+    if ((byte)(flg & (byte)flagExtra) != 0) {
         {
             (_, err) = io.ReadFull(z.r, z.buf[..2]); if (err != default!) {
                 return (hdr, noEOF(err));
@@ -217,7 +218,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
         hdr.Extra = data;
     }
     @string s = default!;
-    if ((byte)(flg & flagName) != 0) {
+    if ((byte)(flg & (byte)flagName) != 0) {
         {
             (s, err) = z.readString(); if (err != default!) {
                 return (hdr, noEOF(err));
@@ -225,7 +226,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
         }
         hdr.Name = s;
     }
-    if ((byte)(flg & flagComment) != 0) {
+    if ((byte)(flg & (byte)flagComment) != 0) {
         {
             (s, err) = z.readString(); if (err != default!) {
                 return (hdr, noEOF(err));
@@ -233,14 +234,14 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
         }
         hdr.Comment = s;
     }
-    if ((byte)(flg & flagHdrCrc) != 0) {
+    if ((byte)(flg & (byte)flagHdrCrc) != 0) {
         {
             (_, err) = io.ReadFull(z.r, z.buf[..2]); if (err != default!) {
                 return (hdr, noEOF(err));
             }
         }
         var digest = le.Uint16(z.buf[..2]);
-        if (digest != ((uint16)z.digest)) {
+        if (digest != (uint16)z.digest) {
             return (hdr, ErrHeader);
         }
     }
@@ -264,7 +265,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
     while (n == 0) {
         (n, z.err) = z.decompressor.Read(p);
         z.digest = crc32.Update(z.digest, crc32.IEEETable, p[..(int)(n)]);
-        z.size += ((uint32)n);
+        z.size += (uint32)n;
         if (!AreEqual(z.err, io.EOF)) {
             // In the normal case we return here.
             return (n, z.err);
@@ -282,7 +283,8 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
             z.err = ErrChecksum;
             return (n, z.err);
         }
-        (z.digest, z.size) = (0, 0);
+        z.digest = 0;
+        z.size = 0;
         // File is ok; check if there is another.
         if (!z.multistream) {
             return (n, io.EOF);
@@ -290,7 +292,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
         z.err = default!;
         // Remove io.EOF
         {
-            var (_, z.err) = z.readHeader(); if (z.err != default!) {
+            (_, z.err) = z.readHeader(); if (z.err != default!) {
                 return (n, z.err);
             }
         }

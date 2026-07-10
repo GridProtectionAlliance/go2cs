@@ -4,14 +4,15 @@
 namespace go;
 
 using abi = @internal.abi_package;
-using _ = unsafe_package; // for linkname
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
 using @internal;
+using @unsafe = unsafe_package;
 
 partial class runtime_package {
 
 // inlinedCall is the encoding of entries in the FUNCDATA_InlTree table.
 [GoType] partial struct inlinedCall {
-    internal @internal.abi_package.FuncID funcID; // type of the called function
+    internal abi.FuncID funcID; // type of the called function
     internal array<byte> _ = new(3);
     internal int32 nameOff; // offset into pclntab for name of called function
     internal int32 parentPc; // position of an instruction whose source position is the call site (offset from entry)
@@ -92,8 +93,8 @@ internal static bool valid(this inlineFrame uf) {
         uf.pc = 0;
         return uf;
     }
-    var parentPc = u.inlTree.val[uf.index].parentPc;
-    return u.resolveInternal(u.f.entry() + ((uintptr)parentPc));
+    var parentPc = u.inlTree.Value[uf.index].parentPc;
+    return u.resolveInternal(u.f.entry() + (uintptr)parentPc);
 }
 
 // isInlined returns whether uf is an inlined frame.
@@ -116,7 +117,7 @@ internal static bool valid(this inlineFrame uf) {
     if (uf.index < 0) {
         return u.f.srcFunc();
     }
-    var t = Ꮡ(u.inlTree.val[uf.index]);
+    var t = Ꮡ(u.inlTree.Value[uf.index]);
     return new ΔsrcFunc(
         u.f.datap,
         (~t).nameOff,
@@ -126,7 +127,7 @@ internal static bool valid(this inlineFrame uf) {
 }
 
 //go:linkname badSrcFunc runtime.(*inlineUnwinder).srcFunc
-internal static partial ΔsrcFunc badSrcFunc(ж<inlineUnwinder> _, inlineFrame _);
+internal static partial ΔsrcFunc badSrcFunc(ж<inlineUnwinder> _Δp0, inlineFrame _Δp1);
 
 // fileLine returns the file name and line number of the call within the given
 // frame. As a convenience, for the innermost frame, it returns the file and
@@ -134,12 +135,12 @@ internal static partial ΔsrcFunc badSrcFunc(ж<inlineUnwinder> _, inlineFrame _
 // physical function).
 //
 // It returns "?", 0 if something goes wrong.
-[GoRecv] internal static (@string file, nint line) fileLine(this ref inlineUnwinder u, inlineFrame uf) {
-    @string file = default!;
+[GoRecv] internal static (@string @file, nint line) fileLine(this ref inlineUnwinder u, inlineFrame uf) {
+    @string @file = default!;
     nint line = default!;
 
-    var (file, line32) = funcline1(u.f, uf.pc, false);
-    return (file, ((nint)line32));
+    (@file, var line32) = funcline1(u.f, uf.pc, false);
+    return (@file, (nint)line32);
 }
 
 } // end runtime_package

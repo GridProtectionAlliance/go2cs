@@ -72,7 +72,7 @@ public static float64 Erfinv(float64 x) {
     // special cases
     if (IsNaN(x) || x <= -1 || x >= 1) {
         if (x == -1 || x == 1) {
-            return Inf(((nint)x));
+            return Inf((nint)x);
         }
         return NaN();
     }
@@ -82,24 +82,24 @@ public static float64 Erfinv(float64 x) {
         sign = true;
     }
     float64 ans = default!;
-    if (x <= 0.85F){
+    if (x <= 0.85D){
         // |x| <= 0.85
-        var r = 0.180625F - 0.25F * x * x;
-        var z1Δ1 = ((((((a7 * r + a6) * r + a5) * r + a4) * r + a3) * r + a2) * r + a1) * r + a0;
-        var z2Δ1 = ((((((b7 * r + b6) * r + b5) * r + b4) * r + b3) * r + b2) * r + b1) * r + b0;
-        ans = (x * z1Δ1) / z2Δ1;
+        var r = 0.180625D - 0.25D * x * x;
+        var z1 = (((((((float64)a7 * r + (float64)a6) * r + (float64)a5) * r + (float64)a4) * r + (float64)a3) * r + (float64)a2) * r + (float64)a1) * r + (float64)a0;
+        var z2 = (((((((float64)b7 * r + (float64)b6) * r + (float64)b5) * r + (float64)b4) * r + (float64)b3) * r + (float64)b2) * r + (float64)b1) * r + (float64)b0;
+        ans = (x * z1) / z2;
     } else {
         float64 z1 = default!;
         float64 z2 = default!;
-        var r = Sqrt(Ln2 - Log(1.0F - x));
-        if (r <= 5.0F){
-            r -= 1.6F;
-            z1 = ((((((c7 * r + c6) * r + c5) * r + c4) * r + c3) * r + c2) * r + c1) * r + c0;
-            z2 = ((((((d7 * r + d6) * r + d5) * r + d4) * r + d3) * r + d2) * r + d1) * r + d0;
+        var r = Sqrt((float64)Ln2 - Log(1.0D - x));
+        if (r <= 5.0D){
+            r -= 1.6D;
+            z1 = (((((((float64)c7 * r + (float64)c6) * r + (float64)c5) * r + (float64)c4) * r + (float64)c3) * r + (float64)c2) * r + (float64)c1) * r + (float64)c0;
+            z2 = (((((((float64)d7 * r + (float64)d6) * r + (float64)d5) * r + (float64)d4) * r + (float64)d3) * r + (float64)d2) * r + (float64)d1) * r + (float64)d0;
         } else {
-            r -= 5.0F;
-            z1 = ((((((e7 * r + e6) * r + e5) * r + e4) * r + e3) * r + e2) * r + e1) * r + e0;
-            z2 = ((((((f7 * r + f6) * r + f5) * r + f4) * r + f3) * r + f2) * r + f1) * r + f0;
+            r -= 5.0D;
+            z1 = (((((((float64)e7 * r + (float64)e6) * r + (float64)e5) * r + (float64)e4) * r + (float64)e3) * r + (float64)e2) * r + (float64)e1) * r + (float64)e0;
+            z2 = (((((((float64)f7 * r + (float64)f6) * r + (float64)f5) * r + (float64)f4) * r + (float64)f3) * r + (float64)f2) * r + (float64)f1) * r + (float64)f0;
         }
         ans = z1 / z2;
     }

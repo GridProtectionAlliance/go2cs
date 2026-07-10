@@ -18,8 +18,7 @@ partial class fuzz_package {
     // The queue is full (until grow is called) when end = begin + N - 1 (mod N)
     // where N = cap(elems).
     internal slice<any> elems;
-    internal nint head;
-    internal nint len;
+    internal nint head, len;
 }
 
 [GoRecv] internal static nint cap(this ref queue q) {

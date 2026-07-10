@@ -52,22 +52,31 @@ internal static @string debugCallCheck(uintptr pc) {
             return;
         }
         @string name = funcname(f);
-        var exprᴛ2 = name;
-        if (exprᴛ2 == "debugCall32"u8 || exprᴛ2 == "debugCall64"u8 || exprᴛ2 == "debugCall128"u8 || exprᴛ2 == "debugCall256"u8 || exprᴛ2 == "debugCall512"u8 || exprᴛ2 == "debugCall1024"u8 || exprᴛ2 == "debugCall2048"u8 || exprᴛ2 == "debugCall4096"u8 || exprᴛ2 == "debugCall8192"u8 || exprᴛ2 == "debugCall16384"u8 || exprᴛ2 == "debugCall32768"u8 || exprᴛ2 == "debugCall65536"u8) {
+        var exprᴛ1 = name;
+        if (exprᴛ1 == "debugCall32"u8 || exprᴛ1 == "debugCall64"u8 || exprᴛ1 == "debugCall128"u8 || exprᴛ1 == "debugCall256"u8 || exprᴛ1 == "debugCall512"u8 || exprᴛ1 == "debugCall1024"u8 || exprᴛ1 == "debugCall2048"u8 || exprᴛ1 == "debugCall4096"u8 || exprᴛ1 == "debugCall8192"u8 || exprᴛ1 == "debugCall16384"u8 || exprᴛ1 == "debugCall32768"u8 || exprᴛ1 == "debugCall65536"u8) {
             return;
         }
 
+        // These functions are allowed so that the debugger can initiate multiple function calls.
+        // See: https://golang.org/cl/161137/
+        // Disallow calls from the runtime. We could
+        // potentially make this condition tighter (e.g., not
+        // when locks are held), but there are enough tightly
+        // coded sequences (e.g., defer handling) that it's
+        // better to play it safe.
         {
             @string pfx = "runtime."u8; if (len(name) > len(pfx) && name[..(int)(len(pfx))] == pfx) {
                 ret = debugCallRuntime;
                 return;
             }
         }
+        // Check that this isn't an unsafe-point.
         if (pc != f.entry()) {
             pc--;
         }
         var up = pcdatavalue(f, abi.PCDATA_UnsafePoint, pc);
         if (up != abi.UnsafePointSafe) {
+            // Not at a safe point.
             ret = debugCallUnsafePoint;
         }
     });
@@ -96,36 +105,55 @@ internal static void debugCallWrap(uintptr dispatch) {
     lockOSThread();
     // Create a new goroutine to execute the call on. Run this on
     // the system stack to avoid growing our stack.
-    systemstack(
-    var gpʗ2 = gp;
-    () => {
-        var fn = debugCallWrap1;
-        var newg = newproc1(~(ж<ж<funcval>>)(uintptr)(new @unsafe.Pointer(Ꮡ(fn))), gpʗ2, callerpc, false, waitReasonZero);
+    var gpʗ1 = gp;
+    systemstack(() => {
+        // TODO(mknyszek): It would be nice to wrap these arguments in an allocated
+        // closure and start the goroutine with that closure, but the compiler disallows
+        // implicit closure allocation in the runtime.
+        ref var fn = ref heap<Action>(out var Ꮡfn);
+        fn = debugCallWrap1;
+        var newg = newproc1(~(ж<ж<funcval>>)(uintptr)(new @unsafe.Pointer(Ꮡfn)), gpʗ1, callerpc, false, waitReasonZero);
         var args = Ꮡ(new debugCallWrapArgs(
             dispatch: dispatch,
-            callingG: gpʗ2
+            callingG: gpʗ1
         ));
-        newg.val.param = new @unsafe.Pointer(args);
-        var mpΔ1 = gpʗ2.val.m;
-        if (mpΔ1 != (~gpʗ2).lockedm.ptr()) {
+        newg.Value.param = new @unsafe.Pointer(args);
+        // Transfer locked-ness to the new goroutine.
+        // Save lock state to restore later.
+        var mpΔ1 = gpʗ1.Value.m;
+        if (mpΔ1 != (~gpʗ1).lockedm.ptr()) {
             @throw("inconsistent lockedm"u8);
         }
-        lockedExt = mpΔ1.val.lockedExt;
-        .val.lockedExt = 0;
-        (~mpΔ1).lockedg.set(newg);
-        (~newg).lockedm.set(mpΔ1);
-        gpʗ2.val.lockedm = 0;
-        gpʗ2.val.asyncSafePoint = true;
-        (~gpʗ2).schedlink.set(newg);
+        // Save the external lock count and clear it so
+        // that it can't be unlocked from the debug call.
+        // Note: we already locked internally to the thread,
+        // so if we were locked before we're still locked now.
+        lockedExt = mpΔ1.Value.lockedExt;
+        mpΔ1.Value.lockedExt = 0;
+        mpΔ1.of(m.Ꮡlockedg).set(newg);
+        newg.of(g.Ꮡlockedm).set(mpΔ1);
+        gpʗ1.Value.lockedm = 0;
+        // Mark the calling goroutine as being at an async
+        // safe-point, since it has a few conservative frames
+        // at the bottom of the stack. This also prevents
+        // stack shrinks.
+        gpʗ1.Value.asyncSafePoint = true;
+        // Stash newg away so we can execute it below (mcall's
+        // closure can't capture anything).
+        gpʗ1.of(g.Ꮡschedlink).set(newg);
     });
     // Switch to the new goroutine.
-    mcall(
-    (ж<g> gp) => {
+    mcall((ж<g> gpΔ1) => {
+        // Get newg.
         var newg = (~gpΔ1).schedlink.ptr();
-        gp.val.schedlink = 0;
-        ref var trace = ref heap<traceLocker>(out var Ꮡtrace);
+        gpΔ1.Value.schedlink = 0;
+        // Park the calling goroutine.
+        ref var Δtrace = ref heap<traceLocker>(out var Ꮡtrace);
         Δtrace = traceAcquire();
         if (Δtrace.ok()) {
+            // Trace the event before the transition. It may take a
+            // stack trace, but we won't own the stack after the
+            // transition anymore.
             Δtrace.GoPark(traceBlockDebugCall, 1);
         }
         casGToWaiting(gpΔ1, _Grunning, waitReasonDebugCall);
@@ -133,17 +161,21 @@ internal static void debugCallWrap(uintptr dispatch) {
             traceRelease(Δtrace);
         }
         dropg();
+        // Directly execute the new goroutine. The debug
+        // protocol will continue on the new goroutine, so
+        // it's important we not just let the scheduler do
+        // this or it may resume a different goroutine.
         execute(newg, true);
     });
     // We'll resume here when the call returns.
     // Restore locked state.
-    var mp = gp.val.m;
-    mp.val.lockedExt = lockedExt;
-    (~mp).lockedg.set(gp);
-    (~gp).lockedm.set(mp);
+    var mp = gp.Value.m;
+    mp.Value.lockedExt = lockedExt;
+    mp.of(m.Ꮡlockedg).set(gp);
+    gp.of(g.Ꮡlockedm).set(mp);
     // Undo the lockOSThread we did earlier.
     unlockOSThread();
-    gp.val.asyncSafePoint = false;
+    gp.Value.asyncSafePoint = false;
 }
 
 [GoType] partial struct debugCallWrapArgs {
@@ -156,25 +188,30 @@ internal static void debugCallWrap(uintptr dispatch) {
 internal static void debugCallWrap1() {
     var gp = getg();
     var args = (ж<debugCallWrapArgs>)(uintptr)((~gp).param);
-    var dispatch = args.val.dispatch;
-    var callingG = args.val.callingG;
-    gp.val.param = default!;
+    var (dispatch, callingG) = (args.Value.dispatch, args.Value.callingG);
+    gp.Value.param = default!;
     // Dispatch call and trap panics.
     debugCallWrap2(dispatch);
     // Resume the caller goroutine.
-    (~getg()).schedlink.set(callingG);
-    mcall(
-    var schedʗ2 = sched;
-    (ж<g> gp) => {
+    getg().of(g.Ꮡschedlink).set(callingG);
+    mcall((ж<g> gpΔ1) => {
         var callingGΔ1 = (~gpΔ1).schedlink.ptr();
-        gp.val.schedlink = 0;
+        gpΔ1.Value.schedlink = 0;
+        // Unlock this goroutine from the M if necessary. The
+        // calling G will relock.
         if ((~gpΔ1).lockedm != 0) {
-            gp.val.lockedm = 0;
-            (~gp).m.val.lockedg = 0;
+            gpΔ1.Value.lockedm = 0;
+            gpΔ1.Value.m.Value.lockedg = 0;
         }
-        ref var trace = ref heap<traceLocker>(out var Ꮡtrace);
+        // Switch back to the calling goroutine. At some point
+        // the scheduler will schedule us again and we'll
+        // finish exiting.
+        ref var Δtrace = ref heap<traceLocker>(out var Ꮡtrace);
         Δtrace = traceAcquire();
         if (Δtrace.ok()) {
+            // Trace the event before the transition. It may take a
+            // stack trace, but we won't own the stack after the
+            // transition anymore.
             Δtrace.GoSched();
         }
         casgstatus(gpΔ1, _Grunning, _Grunnable);
@@ -182,9 +219,9 @@ internal static void debugCallWrap1() {
             traceRelease(Δtrace);
         }
         dropg();
-        @lock(Ꮡschedʗ2.of(schedt.Ꮡlock));
+        @lock(Ꮡsched.of(schedt.Ꮡlock));
         globrunqput(gpΔ1);
-        unlock(Ꮡschedʗ2.of(schedt.Ꮡlock));
+        unlock(Ꮡsched.of(schedt.Ꮡlock));
         Δtrace = traceAcquire();
         casgstatus(callingGΔ1, _Gwaiting, _Grunnable);
         if (Δtrace.ok()) {
@@ -197,10 +234,10 @@ internal static void debugCallWrap1() {
 
 internal static void debugCallWrap2(uintptr dispatch) => func((defer, recover) => {
     // Call the dispatch function and trap panics.
-    Action dispatchF = default!;
+    ref var dispatchF = ref heap<Action>(out var ᏑdispatchF);
     ref var dispatchFV = ref heap<funcval>(out var ᏑdispatchFV);
     dispatchFV = new funcval(dispatch);
-    ((ж<@unsafe.Pointer>)(uintptr)(new @unsafe.Pointer(Ꮡ(dispatchF)))).val = (uintptr)noescape(new @unsafe.Pointer(ᏑdispatchFV));
+    ((ж<@unsafe.Pointer>)(uintptr)(new @unsafe.Pointer(ᏑdispatchF))).Value = (uintptr)noescape(new @unsafe.Pointer(ᏑdispatchFV));
     bool ok = default!;
     defer(() => {
         if (!ok) {

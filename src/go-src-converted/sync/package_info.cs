@@ -39,12 +39,10 @@ using static go.sync_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<rlocker, Locker>]
+[assembly: GoImplement<rlocker, Locker>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<RWMutex, ж<rlocker>>(Indirect = true)]
-[assembly: GoImplicitConv<rlocker, ж<RWMutex>>(Indirect = true)]
 // </ImplicitConversions>
 
 namespace go;

@@ -26,19 +26,19 @@ internal static @string cstring(slice<byte> b) {
 [GoType("[]byte")] partial struct StringTable;
 
 internal static (StringTable, error) readStringTable(ж<FileHeader> Ꮡfh, io.ReadSeeker r) {
-    ref var fh = ref Ꮡfh.val;
+    ref var fh = ref Ꮡfh.Value;
 
     // COFF string table is located right after COFF symbol table.
     if (fh.PointerToSymbolTable <= 0) {
         return (default!, default!);
     }
-    var offset = fh.PointerToSymbolTable + COFFSymbolSize * fh.NumberOfSymbols;
-    var (_, err) = r.Seek(((int64)offset), io.SeekStart);
+    var offset = fh.PointerToSymbolTable + (uint32)COFFSymbolSize * fh.NumberOfSymbols;
+    var (_, err) = r.Seek((int64)offset, io.SeekStart);
     if (err != default!) {
         return (default!, fmt.Errorf("fail to seek to string table: %v"u8, err));
     }
     ref var l = ref heap(new uint32(), out var Ꮡl);
-    err = binary.Read(r, binary.LittleEndian, Ꮡl);
+    err = binary.Read(r, new binary_littleEndianᴠByteOrder(binary.LittleEndian), Ꮡl);
     if (err != default!) {
         return (default!, fmt.Errorf("fail to read string table length: %v"u8, err));
     }
@@ -47,7 +47,7 @@ internal static (StringTable, error) readStringTable(ж<FileHeader> Ꮡfh, io.Re
         return (default!, default!);
     }
     l -= 4;
-    (buf, err) = saferio.ReadData(r, ((uint64)l));
+    (var buf, err) = saferio.ReadData(r, (uint64)l);
     if (err != default!) {
         return (default!, fmt.Errorf("fail to read string table: %v"u8, err));
     }
@@ -63,7 +63,7 @@ public static (@string, error) String(this StringTable st, uint32 start) {
         return ("", fmt.Errorf("offset %d is before the start of string table"u8, start));
     }
     start -= 4;
-    if (((nint)start) > len(st)) {
+    if ((nint)start > len(st)) {
         return ("", fmt.Errorf("offset %d is beyond the end of string table"u8, start));
     }
     return (cstring(st[(int)(start)..]), default!);

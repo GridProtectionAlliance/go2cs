@@ -1,0 +1,511 @@
+// Copyright 2018 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+namespace go;
+
+using abi = @internal.abi_package;
+using goarch = @internal.goarch_package;
+using @unsafe = unsafe_package;
+using @internal;
+
+partial class runtime_package {
+
+internal static @unsafe.Pointer mapaccess1_fast64(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uint64 key) {
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.DerefOrNil();
+
+    if (raceenabled && Ꮡh != nil) {
+        var callerpc = getcallerpc();
+        racereadpc(new @unsafe.Pointer(Ꮡh), callerpc, abi.FuncPCABIInternal(mapaccess1_fast64));
+    }
+    if (Ꮡh == nil || h.count == 0) {
+        return new @unsafe.Pointer(ᏑzeroVal.at<byte>(0));
+    }
+    if ((uint8)(h.flags & (uint8)hashWriting) != 0) {
+        fatal("concurrent map read and map write"u8);
+    }
+    ж<bmap> b = default!;
+    if (h.B == 0){
+        // One-bucket table. No need to hash.
+        b = (ж<bmap>)(uintptr)(h.buckets);
+    } else {
+        var hash = t.Hasher((uintptr)noescape(new @unsafe.Pointer(Ꮡ(key))), (uintptr)h.hash0);
+        var m = bucketMask(h.B);
+        b = (ж<bmap>)(uintptr)(add(h.buckets, ((uintptr)(hash & m)) * (uintptr)t.BucketSize));
+        {
+            @unsafe.Pointer c = h.oldbuckets; if (c != nil) {
+                if (!h.sameSizeGrow()) {
+                    // There used to be half as many buckets; mask down one more power of two.
+                    m >>= (int)(1);
+                }
+                var oldb = (ж<bmap>)(uintptr)(add(c, ((uintptr)(hash & m)) * (uintptr)t.BucketSize));
+                if (!evacuated(oldb)) {
+                    b = oldb;
+                }
+            }
+        }
+    }
+    for (; b != nil; b = b.overflow(Ꮡt)) {
+        for ((var i, @unsafe.Pointer k) = ((uintptr)0, (uintptr)b.keys()); i < abi.MapBucketCount; (i, k) = (i + 1, (uintptr)add(k, 8))) {
+            if (~(ж<uint64>)(uintptr)(k) == key && !isEmpty((~b).tophash[(nint)(i)])) {
+                return (uintptr)add(new @unsafe.Pointer(b), (uintptr)(dataOffset + (uintptr)(abi.MapBucketCount * 8)) + i * (uintptr)t.ValueSize);
+            }
+        }
+    }
+    return new @unsafe.Pointer(ᏑzeroVal.at<byte>(0));
+}
+
+// mapaccess2_fast64 should be an internal detail,
+// but widely used packages access it using linkname.
+// Notable members of the hall of shame include:
+//   - github.com/ugorji/go/codec
+//
+// Do not remove or change the type signature.
+// See go.dev/issue/67401.
+//
+//go:linkname mapaccess2_fast64
+internal static (@unsafe.Pointer, bool) mapaccess2_fast64(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uint64 key) {
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.DerefOrNil();
+
+    if (raceenabled && Ꮡh != nil) {
+        var callerpc = getcallerpc();
+        racereadpc(new @unsafe.Pointer(Ꮡh), callerpc, abi.FuncPCABIInternal(mapaccess2_fast64));
+    }
+    if (Ꮡh == nil || h.count == 0) {
+        return (new @unsafe.Pointer(ᏑzeroVal.at<byte>(0)), false);
+    }
+    if ((uint8)(h.flags & (uint8)hashWriting) != 0) {
+        fatal("concurrent map read and map write"u8);
+    }
+    ж<bmap> b = default!;
+    if (h.B == 0){
+        // One-bucket table. No need to hash.
+        b = (ж<bmap>)(uintptr)(h.buckets);
+    } else {
+        var hash = t.Hasher((uintptr)noescape(new @unsafe.Pointer(Ꮡ(key))), (uintptr)h.hash0);
+        var m = bucketMask(h.B);
+        b = (ж<bmap>)(uintptr)(add(h.buckets, ((uintptr)(hash & m)) * (uintptr)t.BucketSize));
+        {
+            @unsafe.Pointer c = h.oldbuckets; if (c != nil) {
+                if (!h.sameSizeGrow()) {
+                    // There used to be half as many buckets; mask down one more power of two.
+                    m >>= (int)(1);
+                }
+                var oldb = (ж<bmap>)(uintptr)(add(c, ((uintptr)(hash & m)) * (uintptr)t.BucketSize));
+                if (!evacuated(oldb)) {
+                    b = oldb;
+                }
+            }
+        }
+    }
+    for (; b != nil; b = b.overflow(Ꮡt)) {
+        for ((var i, @unsafe.Pointer k) = ((uintptr)0, (uintptr)b.keys()); i < abi.MapBucketCount; (i, k) = (i + 1, (uintptr)add(k, 8))) {
+            if (~(ж<uint64>)(uintptr)(k) == key && !isEmpty((~b).tophash[(nint)(i)])) {
+                return ((uintptr)add(new @unsafe.Pointer(b), (uintptr)(dataOffset + (uintptr)(abi.MapBucketCount * 8)) + i * (uintptr)t.ValueSize), true);
+            }
+        }
+    }
+    return (new @unsafe.Pointer(ᏑzeroVal.at<byte>(0)), false);
+}
+
+// mapassign_fast64 should be an internal detail,
+// but widely used packages access it using linkname.
+// Notable members of the hall of shame include:
+//   - github.com/bytedance/sonic
+//   - github.com/cloudwego/frugal
+//   - github.com/ugorji/go/codec
+//
+// Do not remove or change the type signature.
+// See go.dev/issue/67401.
+//
+//go:linkname mapassign_fast64
+internal static @unsafe.Pointer mapassign_fast64(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uint64 key) {
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.DerefOrNil();
+
+    if (Ꮡh == nil) {
+        throw panic(((plainError)(@string)"assignment to entry in nil map"u8));
+    }
+    if (raceenabled) {
+        var callerpc = getcallerpc();
+        racewritepc(new @unsafe.Pointer(Ꮡh), callerpc, abi.FuncPCABIInternal(mapassign_fast64));
+    }
+    if ((uint8)(h.flags & (uint8)hashWriting) != 0) {
+        fatal("concurrent map writes"u8);
+    }
+    var hash = t.Hasher((uintptr)noescape(new @unsafe.Pointer(Ꮡ(key))), (uintptr)h.hash0);
+    // Set hashWriting after calling t.hasher for consistency with mapassign.
+    h.flags ^= hashWriting;
+    if (h.buckets == nil) {
+        h.buckets = (uintptr)newobject(t.Bucket);
+    }
+    // newarray(t.bucket, 1)
+again:
+    var bucket = (uintptr)(hash & bucketMask(h.B));
+    if (h.growing()) {
+        growWork_fast64(Ꮡt, Ꮡh, bucket);
+    }
+    var b = (ж<bmap>)(uintptr)(add(h.buckets, bucket * (uintptr)t.BucketSize));
+    ж<bmap> insertb = default!;
+    uintptr inserti = default!;
+    @unsafe.Pointer insertk = default!;
+bucketloop:
+    while (ᐧ) {
+        for (var i = (uintptr)0; i < abi.MapBucketCount; i++) {
+            if (isEmpty((~b).tophash[(nint)(i)])) {
+                if (insertb == nil) {
+                    insertb = b;
+                    inserti = i;
+                }
+                if ((~b).tophash[(nint)(i)] == emptyRest) {
+                    goto break_bucketloop;
+                }
+                continue;
+            }
+            var k = ((ж<uint64>)(uintptr)(add(new @unsafe.Pointer(b), dataOffset + i * 8))).Value;
+            if (k != key) {
+                continue;
+            }
+            insertb = b;
+            inserti = i;
+            goto done;
+        }
+        var ovf = b.overflow(Ꮡt);
+        if (ovf == nil) {
+            break;
+        }
+        b = ovf;
+continue_bucketloop:;
+    }
+break_bucketloop:;
+    // Did not find mapping for key. Allocate new cell & add entry.
+    // If we hit the max load factor or we have too many overflow buckets,
+    // and we're not already in the middle of growing, start growing.
+    if (!h.growing() && (overLoadFactor(h.count + 1, h.B) || tooManyOverflowBuckets(h.noverflow, h.B))) {
+        hashGrow(Ꮡt, Ꮡh);
+        goto again;
+    }
+    // Growing the table invalidates everything, so try again
+    if (insertb == nil) {
+        // The current bucket and all the overflow buckets connected to it are full, allocate a new one.
+        insertb = h.newoverflow(Ꮡt, b);
+        inserti = 0;
+    }
+    // not necessary, but avoids needlessly spilling inserti
+    insertb.Value.tophash[(nint)((uintptr)(inserti & (uintptr)(abi.MapBucketCount - 1)))] = tophash(hash);
+    // mask inserti to avoid bounds checks
+    insertk = (uintptr)add(new @unsafe.Pointer(insertb), dataOffset + inserti * 8);
+    // store new key at insert position
+    ((ж<uint64>)(uintptr)(insertk)).Value = key;
+    h.count++;
+done:
+    @unsafe.Pointer elem = (uintptr)add(new @unsafe.Pointer(insertb), (uintptr)(dataOffset + (uintptr)(abi.MapBucketCount * 8)) + inserti * (uintptr)t.ValueSize);
+    if ((uint8)(h.flags & (uint8)hashWriting) == 0) {
+        fatal("concurrent map writes"u8);
+    }
+    h.flags &= unchecked((uint8)~hashWriting);
+    return elem;
+}
+
+// mapassign_fast64ptr should be an internal detail,
+// but widely used packages access it using linkname.
+// Notable members of the hall of shame include:
+//   - github.com/bytedance/sonic
+//   - github.com/cloudwego/frugal
+//   - github.com/ugorji/go/codec
+//
+// Do not remove or change the type signature.
+// See go.dev/issue/67401.
+//
+//go:linkname mapassign_fast64ptr
+internal static @unsafe.Pointer mapassign_fast64ptr(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.Pointer key) {
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.DerefOrNil();
+
+    if (Ꮡh == nil) {
+        throw panic(((plainError)(@string)"assignment to entry in nil map"u8));
+    }
+    if (raceenabled) {
+        var callerpc = getcallerpc();
+        racewritepc(new @unsafe.Pointer(Ꮡh), callerpc, abi.FuncPCABIInternal(mapassign_fast64));
+    }
+    if ((uint8)(h.flags & (uint8)hashWriting) != 0) {
+        fatal("concurrent map writes"u8);
+    }
+    var hash = t.Hasher((uintptr)noescape(@unsafe.Pointer.FromRef(ref (Ꮡ(key)).Value)), (uintptr)h.hash0);
+    // Set hashWriting after calling t.hasher for consistency with mapassign.
+    h.flags ^= hashWriting;
+    if (h.buckets == nil) {
+        h.buckets = (uintptr)newobject(t.Bucket);
+    }
+    // newarray(t.bucket, 1)
+again:
+    var bucket = (uintptr)(hash & bucketMask(h.B));
+    if (h.growing()) {
+        growWork_fast64(Ꮡt, Ꮡh, bucket);
+    }
+    var b = (ж<bmap>)(uintptr)(add(h.buckets, bucket * (uintptr)t.BucketSize));
+    ж<bmap> insertb = default!;
+    uintptr inserti = default!;
+    @unsafe.Pointer insertk = default!;
+bucketloop:
+    while (ᐧ) {
+        for (var i = (uintptr)0; i < abi.MapBucketCount; i++) {
+            if (isEmpty((~b).tophash[(nint)(i)])) {
+                if (insertb == nil) {
+                    insertb = b;
+                    inserti = i;
+                }
+                if ((~b).tophash[(nint)(i)] == emptyRest) {
+                    goto break_bucketloop;
+                }
+                continue;
+            }
+            @unsafe.Pointer k = ((ж<@unsafe.Pointer>)(uintptr)((uintptr)add(new @unsafe.Pointer(b), dataOffset + i * 8))).Value;
+            if (k.Value != key.Value) {
+                continue;
+            }
+            insertb = b;
+            inserti = i;
+            goto done;
+        }
+        var ovf = b.overflow(Ꮡt);
+        if (ovf == nil) {
+            break;
+        }
+        b = ovf;
+continue_bucketloop:;
+    }
+break_bucketloop:;
+    // Did not find mapping for key. Allocate new cell & add entry.
+    // If we hit the max load factor or we have too many overflow buckets,
+    // and we're not already in the middle of growing, start growing.
+    if (!h.growing() && (overLoadFactor(h.count + 1, h.B) || tooManyOverflowBuckets(h.noverflow, h.B))) {
+        hashGrow(Ꮡt, Ꮡh);
+        goto again;
+    }
+    // Growing the table invalidates everything, so try again
+    if (insertb == nil) {
+        // The current bucket and all the overflow buckets connected to it are full, allocate a new one.
+        insertb = h.newoverflow(Ꮡt, b);
+        inserti = 0;
+    }
+    // not necessary, but avoids needlessly spilling inserti
+    insertb.Value.tophash[(nint)((uintptr)(inserti & (uintptr)(abi.MapBucketCount - 1)))] = tophash(hash);
+    // mask inserti to avoid bounds checks
+    insertk = (uintptr)add(new @unsafe.Pointer(insertb), dataOffset + inserti * 8);
+    // store new key at insert position
+    ((ж<@unsafe.Pointer>)(uintptr)(insertk)).Value = key;
+    h.count++;
+done:
+    @unsafe.Pointer elem = (uintptr)add(new @unsafe.Pointer(insertb), (uintptr)(dataOffset + (uintptr)(abi.MapBucketCount * 8)) + inserti * (uintptr)t.ValueSize);
+    if ((uint8)(h.flags & (uint8)hashWriting) == 0) {
+        fatal("concurrent map writes"u8);
+    }
+    h.flags &= unchecked((uint8)~hashWriting);
+    return elem;
+}
+
+internal static void mapdelete_fast64(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uint64 key) {
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.DerefOrNil();
+
+    if (raceenabled && Ꮡh != nil) {
+        var callerpc = getcallerpc();
+        racewritepc(new @unsafe.Pointer(Ꮡh), callerpc, abi.FuncPCABIInternal(mapdelete_fast64));
+    }
+    if (Ꮡh == nil || h.count == 0) {
+        return;
+    }
+    if ((uint8)(h.flags & (uint8)hashWriting) != 0) {
+        fatal("concurrent map writes"u8);
+    }
+    var hash = t.Hasher((uintptr)noescape(new @unsafe.Pointer(Ꮡ(key))), (uintptr)h.hash0);
+    // Set hashWriting after calling t.hasher for consistency with mapdelete
+    h.flags ^= hashWriting;
+    var bucket = (uintptr)(hash & bucketMask(h.B));
+    if (h.growing()) {
+        growWork_fast64(Ꮡt, Ꮡh, bucket);
+    }
+    var b = (ж<bmap>)(uintptr)(add(h.buckets, bucket * (uintptr)t.BucketSize));
+    var bOrig = b;
+search:
+    for (; b != nil; b = b.overflow(Ꮡt)) {
+        for ((var i, @unsafe.Pointer k) = ((uintptr)0, (uintptr)b.keys()); i < abi.MapBucketCount; (i, k) = (i + 1, (uintptr)add(k, 8))) {
+            if (key != ~(ж<uint64>)(uintptr)(k) || isEmpty((~b).tophash[(nint)(i)])) {
+                continue;
+            }
+            // Only clear key if there are pointers in it.
+            if (t.Key.Pointers()) {
+                if (goarch.PtrSize == 8){
+                    ((ж<@unsafe.Pointer>)(uintptr)(k)).Value = default!;
+                } else {
+                    // There are three ways to squeeze at one or more 32 bit pointers into 64 bits.
+                    // Just call memclrHasPointers instead of trying to handle all cases here.
+                    memclrHasPointers(k, 8);
+                }
+            }
+            @unsafe.Pointer e = (uintptr)add(new @unsafe.Pointer(b), (uintptr)(dataOffset + (uintptr)(abi.MapBucketCount * 8)) + i * (uintptr)t.ValueSize);
+            if (t.Elem.Pointers()){
+                memclrHasPointers(e, (~t.Elem).Size_);
+            } else {
+                memclrNoHeapPointers(e, (~t.Elem).Size_);
+            }
+            b.Value.tophash[(nint)(i)] = emptyOne;
+            // If the bucket now ends in a bunch of emptyOne states,
+            // change those to emptyRest states.
+            if (i == abi.MapBucketCount - 1){
+                if (b.overflow(Ꮡt) != nil && (~b.overflow(Ꮡt)).tophash[0] != emptyRest) {
+                    goto notLast;
+                }
+            } else {
+                if ((~b).tophash[(nint)(i + 1)] != emptyRest) {
+                    goto notLast;
+                }
+            }
+            while (ᐧ) {
+                b.Value.tophash[(nint)(i)] = emptyRest;
+                if (i == 0){
+                    if (b == bOrig) {
+                        break;
+                    }
+                    // beginning of initial bucket, we're done.
+                    // Find previous bucket, continue at its last entry.
+                    var c = b;
+                    for (b = bOrig; b.overflow(Ꮡt) != c; b = b.overflow(Ꮡt)) {
+                    }
+                    i = abi.MapBucketCount - 1;
+                } else {
+                    i--;
+                }
+                if ((~b).tophash[(nint)(i)] != emptyOne) {
+                    break;
+                }
+            }
+notLast:
+            h.count--;
+            // Reset the hash seed to make it more difficult for attackers to
+            // repeatedly trigger hash collisions. See issue 25237.
+            if (h.count == 0) {
+                h.hash0 = (uint32)rand();
+            }
+            goto break_search;
+        }
+continue_search:;
+    }
+break_search:;
+    if ((uint8)(h.flags & (uint8)hashWriting) == 0) {
+        fatal("concurrent map writes"u8);
+    }
+    h.flags &= unchecked((uint8)~hashWriting);
+}
+
+internal static void growWork_fast64(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uintptr bucket) {
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
+
+    // make sure we evacuate the oldbucket corresponding
+    // to the bucket we're about to use
+    evacuate_fast64(Ꮡt, Ꮡh, (uintptr)(bucket & h.oldbucketmask()));
+    // evacuate one more oldbucket to make progress on growing
+    if (h.growing()) {
+        evacuate_fast64(Ꮡt, Ꮡh, h.nevacuate);
+    }
+}
+
+internal static void evacuate_fast64(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uintptr oldbucket) {
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
+
+    var b = (ж<bmap>)(uintptr)(add(h.oldbuckets, oldbucket * (uintptr)t.BucketSize));
+    var newbit = h.noldbuckets();
+    if (!evacuated(b)) {
+        // TODO: reuse overflow buckets instead of using new ones, if there
+        // is no iterator using the old buckets.  (If !oldIterator.)
+        // xy contains the x and y (low and high) evacuation destinations.
+        ref var xy = ref heap(new array<evacDst>(2), out var Ꮡxy);
+        var x = Ꮡxy.at<evacDst>(0);
+        x.Value.b = (ж<bmap>)(uintptr)(add(h.buckets, oldbucket * (uintptr)t.BucketSize));
+        x.Value.k = (uintptr)add(new @unsafe.Pointer((~x).b), dataOffset);
+        x.Value.e = (uintptr)add((~x).k, abi.MapBucketCount * 8);
+        if (!h.sameSizeGrow()) {
+            // Only calculate y pointers if we're growing bigger.
+            // Otherwise GC can see bad pointers.
+            var y = Ꮡxy.at<evacDst>(1);
+            y.Value.b = (ж<bmap>)(uintptr)(add(h.buckets, (oldbucket + newbit) * (uintptr)t.BucketSize));
+            y.Value.k = (uintptr)add(new @unsafe.Pointer((~y).b), dataOffset);
+            y.Value.e = (uintptr)add((~y).k, abi.MapBucketCount * 8);
+        }
+        for (; b != nil; b = b.overflow(Ꮡt)) {
+            @unsafe.Pointer k = (uintptr)add(new @unsafe.Pointer(b), dataOffset);
+            @unsafe.Pointer e = (uintptr)add(k, abi.MapBucketCount * 8);
+            for (nint i = 0; i < abi.MapBucketCount; (i, k, e) = (i + 1, (uintptr)add(k, 8), (uintptr)add(e, (uintptr)t.ValueSize))) {
+                var top = (~b).tophash[i];
+                if (isEmpty(top)) {
+                    b.Value.tophash[i] = evacuatedEmpty;
+                    continue;
+                }
+                if (top < minTopHash) {
+                    @throw("bad map state"u8);
+                }
+                uint8 useY = default!;
+                if (!h.sameSizeGrow()) {
+                    // Compute hash to make our evacuation decision (whether we need
+                    // to send this key/elem to bucket x or bucket y).
+                    var hash = t.Hasher(k, (uintptr)h.hash0);
+                    if ((uintptr)(hash & newbit) != 0) {
+                        useY = 1;
+                    }
+                }
+                b.Value.tophash[i] = (uint8)((uint8)evacuatedX + useY);
+                // evacuatedX + 1 == evacuatedY, enforced in makemap
+                var dst = Ꮡxy.at<evacDst>((nint)(useY));
+                // evacuation destination
+                if ((~dst).i == abi.MapBucketCount) {
+                    dst.Value.b = h.newoverflow(Ꮡt, (~dst).b);
+                    dst.Value.i = 0;
+                    dst.Value.k = (uintptr)add(new @unsafe.Pointer((~dst).b), dataOffset);
+                    dst.Value.e = (uintptr)add((~dst).k, abi.MapBucketCount * 8);
+                }
+                dst.Value.b.Value.tophash[(nint)((~dst).i & (nint)(abi.MapBucketCount - 1))] = top;
+                // mask dst.i as an optimization, to avoid a bounds check
+                // Copy key.
+                if (t.Key.Pointers() && writeBarrier.enabled){
+                    if (goarch.PtrSize == 8){
+                        // Write with a write barrier.
+                        ((ж<@unsafe.Pointer>)(uintptr)((~dst).k)).Value = ((ж<@unsafe.Pointer>)(uintptr)(k)).Value;
+                    } else {
+                        // There are three ways to squeeze at least one 32 bit pointer into 64 bits.
+                        // Give up and call typedmemmove.
+                        typedmemmove(t.Key, (~dst).k, k);
+                    }
+                } else {
+                    ((ж<uint64>)(uintptr)((~dst).k)).Value = ((ж<uint64>)(uintptr)(k)).Value;
+                }
+                typedmemmove(t.Elem, (~dst).e, e);
+                dst.Value.i++;
+                // These updates might push these pointers past the end of the
+                // key or elem arrays.  That's ok, as we have the overflow pointer
+                // at the end of the bucket to protect against pointing past the
+                // end of the bucket.
+                dst.Value.k = (uintptr)add((~dst).k, 8);
+                dst.Value.e = (uintptr)add((~dst).e, (uintptr)t.ValueSize);
+            }
+        }
+        // Unlink the overflow buckets & clear key/elem to help GC.
+        if ((uint8)(h.flags & (uint8)oldIterator) == 0 && t.Bucket.Pointers()) {
+            @unsafe.Pointer bΔ1 = (uintptr)add(h.oldbuckets, oldbucket * (uintptr)t.BucketSize);
+            // Preserve b.tophash because the evacuation
+            // state is maintained there.
+            @unsafe.Pointer ptr = (uintptr)add(bΔ1, dataOffset);
+            var n = (uintptr)t.BucketSize - dataOffset;
+            memclrHasPointers(ptr, n);
+        }
+    }
+    if (oldbucket == h.nevacuate) {
+        advanceEvacuationMark(Ꮡh, Ꮡt, newbit);
+    }
+}
+
+} // end runtime_package

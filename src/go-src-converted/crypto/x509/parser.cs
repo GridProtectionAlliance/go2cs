@@ -4,34 +4,36 @@
 namespace go.crypto;
 
 using bytes = bytes_package;
-using dsa = crypto.dsa_package;
-using ecdh = crypto.ecdh_package;
-using ecdsa = crypto.ecdsa_package;
-using ed25519 = crypto.ed25519_package;
-using elliptic = crypto.elliptic_package;
-using rsa = crypto.rsa_package;
-using pkix = crypto.x509.pkix_package;
+using dsa = go.crypto.dsa_package;
+using ecdh = go.crypto.ecdh_package;
+using ecdsa = go.crypto.ecdsa_package;
+using ed25519 = go.crypto.ed25519_package;
+using elliptic = go.crypto.elliptic_package;
+using rsa = go.crypto.rsa_package;
+using pkix = go.crypto.x509.pkix_package;
 using asn1 = encoding.asn1_package;
 using errors = errors_package;
 using fmt = fmt_package;
-using godebug = @internal.godebug_package;
-using big = math.big_package;
+using godebug = go.@internal.godebug_package;
+using big = go.math.big_package;
 using net = net_package;
-using url = net.url_package;
+using url = go.net.url_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using time = time_package;
-using utf16 = unicode.utf16_package;
-using utf8 = unicode.utf8_package;
-using cryptobyte = golang.org.x.crypto.cryptobyte_package;
-using cryptobyte_asn1 = golang.org.x.crypto.cryptobyte.asn1_package;
-using @internal;
-using crypto.x509;
+using utf16 = go.unicode.utf16_package;
+using utf8 = go.unicode.utf8_package;
+using cryptobyte = vendor.golang.org.x.crypto.cryptobyte_package;
+using cryptobyte_asn1 = vendor.golang.org.x.crypto.cryptobyte.asn1_package;
 using encoding;
-using golang.org.x.crypto;
-using math;
-using net;
-using unicode;
+using go.@internal;
+using go.crypto;
+using go.crypto.x509;
+using go.math;
+using go.net;
+using go.unicode;
+using vendor.golang.org.x.crypto;
+using vendor.golang.org.x.crypto.cryptobyte;
 
 partial class x509_package {
 
@@ -53,7 +55,7 @@ internal static bool isPrintable(byte b) {
 // UTF8String, BMPString, IA5String, and NumericString. This is mostly copied
 // from the respective encoding/asn1.parse... methods, rather than just
 // increasing the API surface of that package.
-internal static (@string, error) parseASN1String(asn1.Tag tag, slice<byte> value) {
+internal static (@string, error) parseASN1String(cryptobyte_asn1.Tag tag, slice<byte> value) {
     var exprᴛ1 = tag;
     if (exprᴛ1 == cryptobyte_asn1.T61String) {
         return (((@string)value), default!);
@@ -72,19 +74,19 @@ internal static (@string, error) parseASN1String(asn1.Tag tag, slice<byte> value
         }
         return (((@string)value), default!);
     }
-    if (exprᴛ1 == ((asn1.Tag)asn1.TagBMPString)) {
-        if (len(value) % 2 != 0) {
+    if (exprᴛ1 == ((cryptobyte_asn1.Tag)asn1.TagBMPString)) {
+        if (builtin.len(value) % 2 != 0) {
             return ("", errors.New("invalid BMPString"u8));
         }
         {
-            nint l = len(value); if (l >= 2 && value[l - 1] == 0 && value[l - 2] == 0) {
+            nint l = builtin.len(value); if (l >= 2 && value[l - 1] == 0 && value[l - 2] == 0) {
                 // Strip terminator if present.
                 value = value[..(int)(l - 2)];
             }
         }
-        var s = new slice<uint16>(0, len(value) / 2);
-        while (len(value) > 0) {
-            s = append(s, ((uint16)value[0]) << (int)(8) + ((uint16)value[1]));
+        var s = new slice<uint16>(0, builtin.len(value) / 2);
+        while (builtin.len(value) > 0) {
+            s = append(s, (uint16)(((uint16)value[0] << (int)(8)) + (uint16)value[1]));
             value = value[2..];
         }
         return (((@string)utf16.Decode(s)), default!);
@@ -96,7 +98,7 @@ internal static (@string, error) parseASN1String(asn1.Tag tag, slice<byte> value
         }
         return (s, default!);
     }
-    if (exprᴛ1 == ((asn1.Tag)asn1.TagNumericString)) {
+    if (exprᴛ1 == ((cryptobyte_asn1.Tag)asn1.TagNumericString)) {
         foreach (var (_, b) in value) {
             if (!((rune)'0' <= b && b <= (rune)'9' || b == (rune)' ')) {
                 return ("", errors.New("invalid NumericString"u8));
@@ -114,25 +116,25 @@ internal static (ж<pkix.RDNSequence>, error) parseName(cryptobyte.String raw) {
     if (!raw.ReadASN1(Ꮡ(raw), cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: invalid RDNSequence"u8));
     }
-    pkix.RDNSequence rdnSeq = default!;
+    ref var rdnSeq = ref heap<pkix.RDNSequence>(out var ᏑrdnSeq);
     while (!raw.Empty()) {
         pkix.RelativeDistinguishedNameSET rdnSet = default!;
-        cryptobyte.String set = default!;
-        if (!raw.ReadASN1(Ꮡ(set), cryptobyte_asn1.SET)) {
+        ref var set = ref heap<cryptobyte.String>(out var Ꮡset);
+        if (!raw.ReadASN1(Ꮡset, cryptobyte_asn1.SET)) {
             return (default!, errors.New("x509: invalid RDNSequence"u8));
         }
         while (!set.Empty()) {
-            cryptobyte.String atav = default!;
-            if (!set.ReadASN1(Ꮡ(atav), cryptobyte_asn1.SEQUENCE)) {
+            ref var atav = ref heap<cryptobyte.String>(out var Ꮡatav);
+            if (!set.ReadASN1(Ꮡatav, cryptobyte_asn1.SEQUENCE)) {
                 return (default!, errors.New("x509: invalid RDNSequence: invalid attribute"u8));
             }
-            ref var attr = ref heap(new crypto.x509.pkix_package.AttributeTypeAndValue(), out var Ꮡattr);
+            ref var attr = ref heap(new pkix.AttributeTypeAndValue(), out var Ꮡattr);
             if (!atav.ReadASN1ObjectIdentifier(Ꮡattr.of(pkix.AttributeTypeAndValue.ᏑType))) {
                 return (default!, errors.New("x509: invalid RDNSequence: invalid attribute type"u8));
             }
-            cryptobyte.String rawValue = default!;
-            ref var valueTag = ref heap(new vendor.golang.org.x.crypto.cryptobyte.asn1_package.Tag(), out var ᏑvalueTag);
-            if (!atav.ReadAnyASN1(Ꮡ(rawValue), ᏑvalueTag)) {
+            ref var rawValue = ref heap<cryptobyte.String>(out var ᏑrawValue);
+            ref var valueTag = ref heap(new cryptobyte_asn1.Tag(), out var ᏑvalueTag);
+            if (!atav.ReadAnyASN1(ᏑrawValue, ᏑvalueTag)) {
                 return (default!, errors.New("x509: invalid RDNSequence: invalid attribute value"u8));
             }
             error err = default!;
@@ -144,11 +146,11 @@ internal static (ж<pkix.RDNSequence>, error) parseName(cryptobyte.String raw) {
         }
         rdnSeq = append(rdnSeq, rdnSet);
     }
-    return (Ꮡ(rdnSeq), default!);
+    return (ᏑrdnSeq, default!);
 }
 
 internal static (pkix.AlgorithmIdentifier, error) parseAI(cryptobyte.String der) {
-    ref var ai = ref heap<crypto.x509.pkix_package.AlgorithmIdentifier>(out var Ꮡai);
+    ref var ai = ref heap<pkix.AlgorithmIdentifier>(out var Ꮡai);
     ai = new pkix.AlgorithmIdentifier(nil);
     if (!der.ReadASN1ObjectIdentifier(Ꮡai.of(pkix.AlgorithmIdentifier.ᏑAlgorithm))) {
         return (ai, errors.New("x509: malformed OID"u8));
@@ -156,20 +158,20 @@ internal static (pkix.AlgorithmIdentifier, error) parseAI(cryptobyte.String der)
     if (der.Empty()) {
         return (ai, default!);
     }
-    cryptobyte.String @params = default!;
-    ref var tag = ref heap(new vendor.golang.org.x.crypto.cryptobyte.asn1_package.Tag(), out var Ꮡtag);
-    if (!der.ReadAnyASN1Element(Ꮡ(@params), Ꮡtag)) {
+    ref var @params = ref heap<cryptobyte.String>(out var Ꮡparams);
+    ref var tag = ref heap(new cryptobyte_asn1.Tag(), out var Ꮡtag);
+    if (!der.ReadAnyASN1Element(Ꮡparams, Ꮡtag)) {
         return (ai, errors.New("x509: malformed parameters"u8));
     }
-    ai.Parameters.Tag = ((nint)tag);
+    ai.Parameters.Tag = (nint)(uint8)tag;
     ai.Parameters.FullBytes = @params;
     return (ai, default!);
 }
 
 internal static (time.Time, error) parseTime(ж<cryptobyte.String> Ꮡder) {
-    ref var der = ref Ꮡder.val;
+    ref var der = ref Ꮡder.Value;
 
-    ref var t = ref heap(new time_package.Time(), out var Ꮡt);
+    ref var t = ref heap(new time.Time(), out var Ꮡt);
     switch (ᐧ) {
     case {} when der.PeekASN1Tag(cryptobyte_asn1.UTCTime): {
         if (!der.ReadASN1UTCTime(Ꮡt)) {
@@ -195,7 +197,7 @@ internal static (time.Time, time.Time, error) parseValidity(cryptobyte.String de
     if (err != default!) {
         return (new time.Time(nil), new time.Time(nil), err);
     }
-    var (notAfter, err) = parseTime(Ꮡ(der));
+    (var notAfter, err) = parseTime(Ꮡ(der));
     if (err != default!) {
         return (new time.Time(nil), new time.Time(nil), err);
     }
@@ -203,7 +205,7 @@ internal static (time.Time, time.Time, error) parseValidity(cryptobyte.String de
 }
 
 internal static (pkix.Extension, error) parseExtension(cryptobyte.String der) {
-    ref var ext = ref heap(new crypto.x509.pkix_package.Extension(), out var Ꮡext);
+    ref var ext = ref heap(new pkix.Extension(), out var Ꮡext);
     if (!der.ReadASN1ObjectIdentifier(Ꮡext.of(pkix.Extension.ᏑId))) {
         return (ext, errors.New("x509: malformed extension OID field"u8));
     }
@@ -212,8 +214,8 @@ internal static (pkix.Extension, error) parseExtension(cryptobyte.String der) {
             return (ext, errors.New("x509: malformed extension critical field"u8));
         }
     }
-    cryptobyte.String val = default!;
-    if (!der.ReadASN1(Ꮡ(val), cryptobyte_asn1.OCTET_STRING)) {
+    ref var val = ref heap<cryptobyte.String>(out var Ꮡval);
+    if (!der.ReadASN1(Ꮡval, cryptobyte_asn1.OCTET_STRING)) {
         return (ext, errors.New("x509: malformed extension value field"u8));
     }
     ext.Value = val;
@@ -221,11 +223,12 @@ internal static (pkix.Extension, error) parseExtension(cryptobyte.String der) {
 }
 
 internal static (any, error) parsePublicKey(ж<publicKeyInfo> ᏑkeyData) {
-    ref var keyData = ref ᏑkeyData.val;
+    ref var keyData = ref ᏑkeyData.Value;
 
     var oid = keyData.Algorithm.Algorithm;
     var @params = keyData.Algorithm.Parameters;
-    var der = ((cryptobyte.String)keyData.PublicKey.RightAlign());
+    ref var der = ref heap<cryptobyte.String>(out var Ꮡder);
+    der = ((cryptobyte.String)keyData.PublicKey.RightAlign());
     switch (ᐧ) {
     case {} when oid.Equal(oidPublicKeyRSA): {
         if (!bytes.Equal(@params.FullBytes, // RSA public keys must have a NULL in the parameters.
@@ -234,13 +237,13 @@ internal static (any, error) parsePublicKey(ж<publicKeyInfo> ᏑkeyData) {
             return (default!, errors.New("x509: RSA key missing NULL parameters"u8));
         }
         var p = Ꮡ(new pkcs1PublicKey(N: @new<bigꓸInt>()));
-        if (!der.ReadASN1(Ꮡ(der), cryptobyte_asn1.SEQUENCE)) {
+        if (!der.ReadASN1(Ꮡder, cryptobyte_asn1.SEQUENCE)) {
             return (default!, errors.New("x509: invalid RSA public key"u8));
         }
         if (!der.ReadASN1Integer((~p).N)) {
             return (default!, errors.New("x509: invalid RSA modulus"u8));
         }
-        if (!der.ReadASN1Integer(Ꮡ((~p).E))) {
+        if (!der.ReadASN1Integer(p.of(pkcs1PublicKey.ᏑE))) {
             return (default!, errors.New("x509: invalid RSA public exponent"u8));
         }
         if ((~p).N.Sign() <= 0) {
@@ -261,11 +264,11 @@ internal static (any, error) parsePublicKey(ж<publicKeyInfo> ᏑkeyData) {
         if (!paramsDer.ReadASN1ObjectIdentifier(namedCurveOID)) {
             return (default!, errors.New("x509: invalid ECDSA parameters"u8));
         }
-        var namedCurve = namedCurveFromOID(namedCurveOID.val);
+        var namedCurve = namedCurveFromOID(namedCurveOID.ValueSlot);
         if (namedCurve == default!) {
             return (default!, errors.New("x509: unsupported elliptic curve"u8));
         }
-        (x, y) = elliptic.Unmarshal(namedCurve, der);
+        var (x, y) = elliptic.Unmarshal(namedCurve, der);
         if (x == nil) {
             return (default!, errors.New("x509: failed to unmarshal elliptic curve point"u8));
         }
@@ -277,23 +280,24 @@ internal static (any, error) parsePublicKey(ж<publicKeyInfo> ᏑkeyData) {
         return (pub, default!);
     }
     case {} when oid.Equal(oidPublicKeyEd25519): {
-        if (len(@params.FullBytes) != 0) {
+        if (builtin.len(@params.FullBytes) != 0) {
             // RFC 8410, Section 3
             // > For all of the OIDs, the parameters MUST be absent.
             return (default!, errors.New("x509: Ed25519 key encoded with illegal parameters"u8));
         }
-        if (len(der) != ed25519.PublicKeySize) {
+        if (builtin.len(der) != ed25519.PublicKeySize) {
             return (default!, errors.New("x509: wrong Ed25519 public key size"u8));
         }
-        return (((ed25519.PublicKey)der), default!);
+        return (((ed25519.PublicKey)(slice<byte>)(der)), default!);
     }
     case {} when oid.Equal(oidPublicKeyX25519): {
-        if (len(@params.FullBytes) != 0) {
+        if (builtin.len(@params.FullBytes) != 0) {
             // RFC 8410, Section 3
             // > For all of the OIDs, the parameters MUST be absent.
             return (default!, errors.New("x509: X25519 key encoded with illegal parameters"u8));
         }
-        return ecdh.X25519().NewPublicKey(der);
+        var (ᴛ1, ᴛ2) = ecdh.X25519().NewPublicKey(der);
+        return (~ᴛ1, ᴛ2);
     }
     case {} when oid.Equal(oidPublicKeyDSA): {
         var y = @new<bigꓸInt>();
@@ -308,8 +312,9 @@ internal static (any, error) parsePublicKey(ж<publicKeyInfo> ᏑkeyData) {
                 G: @new<bigꓸInt>()
             )
         ));
-        var paramsDer = ((cryptobyte.String)@params.FullBytes);
-        if (!paramsDer.ReadASN1(Ꮡ(paramsDer), cryptobyte_asn1.SEQUENCE) || !paramsDer.ReadASN1Integer((~pub).Parameters.P) || !paramsDer.ReadASN1Integer((~pub).Parameters.Q) || !paramsDer.ReadASN1Integer((~pub).Parameters.G)) {
+        ref var paramsDer = ref heap<cryptobyte.String>(out var ᏑparamsDer);
+        paramsDer = ((cryptobyte.String)@params.FullBytes);
+        if (!paramsDer.ReadASN1(ᏑparamsDer, cryptobyte_asn1.SEQUENCE) || !paramsDer.ReadASN1Integer((~pub).Parameters.P) || !paramsDer.ReadASN1Integer((~pub).Parameters.Q) || !paramsDer.ReadASN1Integer((~pub).Parameters.G)) {
             return (default!, errors.New("x509: invalid DSA parameters"u8));
         }
         if ((~pub).Y.Sign() <= 0 || (~pub).Parameters.P.Sign() <= 0 || (~pub).Parameters.Q.Sign() <= 0 || (~pub).Parameters.G.Sign() <= 0) {
@@ -324,14 +329,14 @@ internal static (any, error) parsePublicKey(ж<publicKeyInfo> ᏑkeyData) {
 }
 
 internal static (KeyUsage, error) parseKeyUsageExtension(cryptobyte.String der) {
-    ref var usageBits = ref heap(new encoding.asn1_package.BitString(), out var ᏑusageBits);
+    ref var usageBits = ref heap(new asn1.BitString(), out var ᏑusageBits);
     if (!der.ReadASN1BitString(ᏑusageBits)) {
         return (0, errors.New("x509: invalid key usage"u8));
     }
     nint usage = default!;
     for (nint i = 0; i < 9; i++) {
         if (usageBits.At(i) != 0) {
-            usage |= (nint)(1 << (int)(((nuint)i)));
+            usage |= (nint)((1 << (int)((nuint)i)));
         }
     }
     return (((KeyUsage)usage), default!);
@@ -363,13 +368,13 @@ internal static error forEachSAN(cryptobyte.String der, Func<nint, slice<byte>, 
         return errors.New("x509: invalid subject alternative names"u8);
     }
     while (!der.Empty()) {
-        cryptobyte.String san = default!;
-        ref var tag = ref heap(new vendor.golang.org.x.crypto.cryptobyte.asn1_package.Tag(), out var Ꮡtag);
-        if (!der.ReadAnyASN1(Ꮡ(san), Ꮡtag)) {
+        ref var san = ref heap<cryptobyte.String>(out var Ꮡsan);
+        ref var tag = ref heap(new cryptobyte_asn1.Tag(), out var Ꮡtag);
+        if (!der.ReadAnyASN1(Ꮡsan, Ꮡtag)) {
             return errors.New("x509: invalid subject alternative name"u8);
         }
         {
-            var err = callback(((nint)((asn1.Tag)(tag ^ 128))), san); if (err != default!) {
+            var err = callback((nint)(uint8)((cryptobyte_asn1.Tag)(tag ^ 0x80)), san); if (err != default!) {
                 return err;
             }
         }
@@ -377,19 +382,14 @@ internal static error forEachSAN(cryptobyte.String der, Func<nint, slice<byte>, 
     return default!;
 }
 
-internal static (slice<@string> dnsNames, slice<@string> emailAddresses, slice<net.IP> ipAddresses, slice<url.URL> uris, error err) parseSANExtension(cryptobyte.String der) {
+internal static (slice<@string> dnsNames, slice<@string> emailAddresses, slice<net.IP> ipAddresses, slice<ж<url.URL>> uris, error err) parseSANExtension(cryptobyte.String der) {
     slice<@string> dnsNames = default!;
     slice<@string> emailAddresses = default!;
     slice<net.IP> ipAddresses = default!;
-    slice<url.URL> uris = default!;
+    slice<ж<url.URL>> uris = default!;
     error err = default!;
 
-    err = forEachSAN(der, 
-    var dnsNamesʗ1 = dnsNames;
-    var emailAddressesʗ1 = emailAddresses;
-    var ipAddressesʗ1 = ipAddresses;
-    var urisʗ1 = uris;
-    (nint tag, slice<byte> data) => {
+    err = forEachSAN(der, error (nint tag, slice<byte> data) => {
         var exprᴛ1 = tag;
         if (exprᴛ1 == nameTypeEmail) {
             @string email = ((@string)data);
@@ -398,7 +398,7 @@ internal static (slice<@string> dnsNames, slice<@string> emailAddresses, slice<n
                     return errors.New("x509: SAN rfc822Name is malformed"u8);
                 }
             }
-            emailAddressesʗ1 = append(emailAddressesʗ1, email);
+            emailAddresses = append(emailAddresses, email);
         }
         else if (exprᴛ1 == nameTypeDNS) {
             @string name = ((@string)data);
@@ -407,7 +407,7 @@ internal static (slice<@string> dnsNames, slice<@string> emailAddresses, slice<n
                     return errors.New("x509: SAN dNSName is malformed"u8);
                 }
             }
-            dnsNamesʗ1 = append(dnsNamesʗ1, ((@string)name));
+            dnsNames = append(dnsNames, ((@string)name));
         }
         else if (exprᴛ1 == nameTypeURI) {
             @string uriStr = ((@string)data);
@@ -416,28 +416,27 @@ internal static (slice<@string> dnsNames, slice<@string> emailAddresses, slice<n
                     return errors.New("x509: SAN uniformResourceIdentifier is malformed"u8);
                 }
             }
-            (uri, errΔ8) = url.Parse(uriStr);
+            var (uri, errΔ8) = url.Parse(uriStr);
             if (errΔ8 != default!) {
                 return fmt.Errorf("x509: cannot parse URI %q: %s"u8, uriStr, errΔ8);
             }
-            if (len((~uri).Host) > 0) {
+            if (builtin.len((~uri).Host) > 0) {
                 {
                     var (_, ok) = domainToReverseLabels((~uri).Host); if (!ok) {
                         return fmt.Errorf("x509: cannot parse URI %q: invalid domain"u8, uriStr);
                     }
                 }
             }
-            urisʗ1 = append(urisʗ1, uri);
+            uris = append(uris, uri);
         }
         else if (exprᴛ1 == nameTypeIP) {
-            switch (len(data)) {
-            case net.IPv4len or net.IPv6len: {
-                ipAddressesʗ1 = append(ipAddressesʗ1, data);
-                break;
+            var exprᴛ2 = builtin.len(data);
+            if (exprᴛ2 == net.IPv4len || exprᴛ2 == net.IPv6len) {
+                ipAddresses = append(ipAddresses, (net.IP)(data));
             }
-            default: {
-                return errors.New("x509: cannot parse IP address of length "u8 + strconv.Itoa(len(data)));
-            }}
+            else { /* default: */
+                return errors.New("x509: cannot parse IP address of length "u8 + strconv.Itoa(builtin.len(data)));
+            }
 
         }
 
@@ -453,12 +452,12 @@ internal static (slice<byte>, error) parseAuthorityKeyIdentifier(pkix.Extension 
         return (default!, errors.New("x509: authority key identifier incorrectly marked critical"u8));
     }
     var val = ((cryptobyte.String)e.Value);
-    cryptobyte.String akid = default!;
-    if (!val.ReadASN1(Ꮡ(akid), cryptobyte_asn1.SEQUENCE)) {
+    ref var akid = ref heap<cryptobyte.String>(out var Ꮡakid);
+    if (!val.ReadASN1(Ꮡakid, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: invalid authority key identifier"u8));
     }
-    if (akid.PeekASN1Tag(((asn1.Tag)0).ContextSpecific())) {
-        if (!akid.ReadASN1(Ꮡ(akid), ((asn1.Tag)0).ContextSpecific())) {
+    if (akid.PeekASN1Tag(((cryptobyte_asn1.Tag)0).ContextSpecific())) {
+        if (!akid.ReadASN1(Ꮡakid, ((cryptobyte_asn1.Tag)0).ContextSpecific())) {
             return (default!, errors.New("x509: invalid authority key identifier"u8));
         }
         return (akid, default!);
@@ -473,8 +472,8 @@ internal static (slice<ExtKeyUsage>, slice<asn1.ObjectIdentifier>, error) parseE
         return (default!, default!, errors.New("x509: invalid extended key usages"u8));
     }
     while (!der.Empty()) {
-        asn1.ObjectIdentifier eku = default!;
-        if (!der.ReadASN1ObjectIdentifier(Ꮡ(eku))) {
+        ref var eku = ref heap<asn1.ObjectIdentifier>(out var Ꮡeku);
+        if (!der.ReadASN1ObjectIdentifier(Ꮡeku)) {
             return (default!, default!, errors.New("x509: invalid extended key usages"u8));
         }
         {
@@ -494,9 +493,9 @@ internal static (slice<OID>, error) parseCertificatePoliciesExtension(cryptobyte
         return (default!, errors.New("x509: invalid certificate policies"u8));
     }
     while (!der.Empty()) {
-        cryptobyte.String cp = default!;
-        cryptobyte.String OIDBytes = default!;
-        if (!der.ReadASN1(Ꮡ(cp), cryptobyte_asn1.SEQUENCE) || !cp.ReadASN1(Ꮡ(OIDBytes), cryptobyte_asn1.OBJECT_IDENTIFIER)) {
+        ref var cp = ref heap<cryptobyte.String>(out var Ꮡcp);
+        ref var OIDBytes = ref heap<cryptobyte.String>(out var ᏑOIDBytes);
+        if (!der.ReadASN1(Ꮡcp, cryptobyte_asn1.SEQUENCE) || !cp.ReadASN1(ᏑOIDBytes, cryptobyte_asn1.OBJECT_IDENTIFIER)) {
             return (default!, errors.New("x509: invalid certificate policies"u8));
         }
         var (oid, ok) = newOIDFromDER(OIDBytes);
@@ -519,11 +518,11 @@ internal static bool isValidIPMask(slice<byte> mask) {
             continue;
         }
         switch (b) {
-        case 0 or 128 or 192 or 224 or 240 or 248 or 252 or 254: {
+        case 0x00 or 0x80 or 0xc0 or 0xe0 or 0xf0 or 0xf8 or 0xfc or 0xfe: {
             seenZero = true;
             break;
         }
-        case 255: {
+        case 0xff: {
             break;
         }
         default: {
@@ -538,7 +537,7 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ж<Cer
     bool unhandled = default!;
     error err = default!;
 
-    ref var @out = ref Ꮡout.val;
+    ref var @out = ref Ꮡout.Value;
     // RFC 5280, 4.2.1.10
     // NameConstraints ::= SEQUENCE {
     //      permittedSubtrees       [0]     GeneralSubtrees OPTIONAL,
@@ -553,48 +552,48 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ж<Cer
     //
     // BaseDistance ::= INTEGER (0..MAX)
     var outer = ((cryptobyte.String)e.Value);
-    cryptobyte.String toplevel = default!;
-    cryptobyte.String permitted = default!;
-    cryptobyte.String excluded = default!;
+    ref var toplevel = ref heap<cryptobyte.String>(out var Ꮡtoplevel);
+    ref var permitted = ref heap<cryptobyte.String>(out var Ꮡpermitted);
+    ref var excluded = ref heap<cryptobyte.String>(out var Ꮡexcluded);
     ref var havePermitted = ref heap(new bool(), out var ᏑhavePermitted);
     ref var haveExcluded = ref heap(new bool(), out var ᏑhaveExcluded);
-    if (!outer.ReadASN1(Ꮡ(toplevel), cryptobyte_asn1.SEQUENCE) || !outer.Empty() || !toplevel.ReadOptionalASN1(Ꮡ(permitted), ᏑhavePermitted, ((asn1.Tag)0).ContextSpecific().Constructed()) || !toplevel.ReadOptionalASN1(Ꮡ(excluded), ᏑhaveExcluded, ((asn1.Tag)1).ContextSpecific().Constructed()) || !toplevel.Empty()) {
+    if (!outer.ReadASN1(Ꮡtoplevel, cryptobyte_asn1.SEQUENCE) || !outer.Empty() || !toplevel.ReadOptionalASN1(Ꮡpermitted, ᏑhavePermitted, ((cryptobyte_asn1.Tag)0).ContextSpecific().Constructed()) || !toplevel.ReadOptionalASN1(Ꮡexcluded, ᏑhaveExcluded, ((cryptobyte_asn1.Tag)1).ContextSpecific().Constructed()) || !toplevel.Empty()) {
         return (false, errors.New("x509: invalid NameConstraints extension"u8));
     }
-    if (!havePermitted && !haveExcluded || len(permitted) == 0 && len(excluded) == 0) {
+    if (!havePermitted && !haveExcluded || builtin.len(permitted) == 0 && builtin.len(excluded) == 0) {
         // From RFC 5280, Section 4.2.1.10:
         //   “either the permittedSubtrees field
         //   or the excludedSubtrees MUST be
         //   present”
         return (false, errors.New("x509: empty name constraints extension"u8));
     }
-    var getValues = 
-    var dnsNamesʗ1 = dnsNames;
-    var emailsʗ1 = emails;
-    var ipsʗ1 = ips;
-    var uriDomainsʗ1 = uriDomains;
-    (cryptobyte.String subtrees) => {
+    var getValues = (slice<@string> dnsNames, slice<ж<net.IPNet>> ips, slice<@string> emails, slice<@string> uriDomains, error err) (cryptobyte.String subtrees) => {
+        slice<@string> dnsNames = default!;
+        slice<ж<net.IPNet>> ips = default!;
+        slice<@string> emails = default!;
+        slice<@string> uriDomains = default!;
+        error errΔ1 = default!;
         while (!subtrees.Empty()) {
-            cryptobyte.String seq = default!;
-            cryptobyte.String value = default!;
-            ref var tag = ref heap(new vendor.golang.org.x.crypto.cryptobyte.asn1_package.Tag(), out var Ꮡtag);
-            if (!subtrees.ReadASN1(Ꮡ(seq), cryptobyte_asn1.SEQUENCE) || !seq.ReadAnyASN1(Ꮡ(value), Ꮡtag)) {
+            ref var seq = ref heap<cryptobyte.String>(out var Ꮡseq);
+            ref var value = ref heap<cryptobyte.String>(out var Ꮡvalue);
+            ref var tag = ref heap(new cryptobyte_asn1.Tag(), out var Ꮡtag);
+            if (!subtrees.ReadASN1(Ꮡseq, cryptobyte_asn1.SEQUENCE) || !seq.ReadAnyASN1(Ꮡvalue, Ꮡtag)) {
                 return (default!, default!, default!, default!, fmt.Errorf("x509: invalid NameConstraints extension"u8));
             }
-            asn1.Tag dnsTag = ((asn1.Tag)2).ContextSpecific();
-            asn1.Tag emailTag = ((asn1.Tag)1).ContextSpecific();
-            asn1.Tag ipTag = ((asn1.Tag)7).ContextSpecific();
-            asn1.Tag uriTag = ((asn1.Tag)6).ContextSpecific();
+            cryptobyte_asn1.Tag dnsTag = ((cryptobyte_asn1.Tag)2).ContextSpecific();
+            cryptobyte_asn1.Tag emailTag = ((cryptobyte_asn1.Tag)1).ContextSpecific();
+            cryptobyte_asn1.Tag ipTag = ((cryptobyte_asn1.Tag)7).ContextSpecific();
+            cryptobyte_asn1.Tag uriTag = ((cryptobyte_asn1.Tag)6).ContextSpecific();
             var exprᴛ1 = tag;
             if (exprᴛ1 == dnsTag) {
-                @string domain = ((@string)value);
+                @string domain = ((@string)(slice<byte>)value);
                 {
                     var errΔ5 = isIA5String(domain); if (errΔ5 != default!) {
                         return (default!, default!, default!, default!, errors.New("x509: invalid constraint value: "u8 + errΔ5.Error()));
                     }
                 }
                 @string trimmedDomain = domain;
-                if (len(trimmedDomain) > 0 && trimmedDomain[0] == (rune)'.') {
+                if (builtin.len(trimmedDomain) > 0 && trimmedDomain[0] == (rune)'.') {
                     // constraints can have a leading
                     // period to exclude the domain
                     // itself, but that's not valid in a
@@ -606,10 +605,10 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ж<Cer
                         return (default!, default!, default!, default!, fmt.Errorf("x509: failed to parse dnsName constraint %q"u8, domain));
                     }
                 }
-                dnsNamesʗ1 = append(dnsNamesʗ1, domain);
+                dnsNames = append(dnsNames, domain);
             }
             else if (exprᴛ1 == ipTag) {
-                nint l = len(value);
+                nint l = builtin.len(value);
                 slice<byte> ip = default!;
                 slice<byte> mask = default!;
                 switch (l) {
@@ -630,10 +629,10 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ж<Cer
                 if (!isValidIPMask(mask)) {
                     return (default!, default!, default!, default!, fmt.Errorf("x509: IP constraint contained invalid mask %x"u8, mask));
                 }
-                ipsʗ1 = append(ipsʗ1, Ꮡ(new net.IPNet(IP: ((net.IP)ip), Mask: ((net.IPMask)mask))));
+                ips = append(ips, Ꮡ(new net.IPNet(IP: ((net.IP)ip), Mask: ((net.IPMask)mask))));
             }
             else if (exprᴛ1 == emailTag) {
-                @string constraint = ((@string)value);
+                @string constraint = ((@string)(slice<byte>)value);
                 {
                     var errΔ6 = isIA5String(constraint); if (errΔ6 != default!) {
                         return (default!, default!, default!, default!, errors.New("x509: invalid constraint value: "u8 + errΔ6.Error()));
@@ -650,7 +649,7 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ж<Cer
                 } else {
                     // Otherwise it's a domain name.
                     @string domain = constraint;
-                    if (len(domain) > 0 && domain[0] == (rune)'.') {
+                    if (builtin.len(domain) > 0 && domain[0] == (rune)'.') {
                         domain = domain[1..];
                     }
                     {
@@ -659,10 +658,10 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ж<Cer
                         }
                     }
                 }
-                emailsʗ1 = append(emailsʗ1, constraint);
+                emails = append(emails, constraint);
             }
             else if (exprᴛ1 == uriTag) {
-                @string domain = ((@string)value);
+                @string domain = ((@string)(slice<byte>)value);
                 {
                     var errΔ7 = isIA5String(domain); if (errΔ7 != default!) {
                         return (default!, default!, default!, default!, errors.New("x509: invalid constraint value: "u8 + errΔ7.Error()));
@@ -672,7 +671,7 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ж<Cer
                     return (default!, default!, default!, default!, fmt.Errorf("x509: failed to parse URI constraint %q: cannot be IP address"u8, domain));
                 }
                 @string trimmedDomain = domain;
-                if (len(trimmedDomain) > 0 && trimmedDomain[0] == (rune)'.') {
+                if (builtin.len(trimmedDomain) > 0 && trimmedDomain[0] == (rune)'.') {
                     // constraints can have a leading
                     // period to exclude the domain itself,
                     // but that's not valid in a normal
@@ -684,22 +683,22 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ж<Cer
                         return (default!, default!, default!, default!, fmt.Errorf("x509: failed to parse URI constraint %q"u8, domain));
                     }
                 }
-                uriDomainsʗ1 = append(uriDomainsʗ1, domain);
+                uriDomains = append(uriDomains, domain);
             }
             else { /* default: */
                 unhandled = true;
             }
 
         }
-        return (dnsNamesʗ1, ipsʗ1, emailsʗ1, uriDomainsʗ1, default!);
+        return (dnsNames, ips, emails, uriDomains, default!);
     };
     {
-        var (@out.PermittedDNSDomains, @out.PermittedIPRanges, @out.PermittedEmailAddresses, @out.PermittedURIDomains, err) = getValues(permitted); if (err != default!) {
+        (@out.PermittedDNSDomains, @out.PermittedIPRanges, @out.PermittedEmailAddresses, @out.PermittedURIDomains, err) = getValues(permitted); if (err != default!) {
             return (false, err);
         }
     }
     {
-        var (@out.ExcludedDNSDomains, @out.ExcludedIPRanges, @out.ExcludedEmailAddresses, @out.ExcludedURIDomains, err) = getValues(excluded); if (err != default!) {
+        (@out.ExcludedDNSDomains, @out.ExcludedIPRanges, @out.ExcludedEmailAddresses, @out.ExcludedURIDomains, err) = getValues(excluded); if (err != default!) {
             return (false, err);
         }
     }
@@ -708,12 +707,12 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ж<Cer
 }
 
 internal static error processExtensions(ж<Certificate> Ꮡout) {
-    ref var @out = ref Ꮡout.val;
+    ref var @out = ref Ꮡout.Value;
 
     error err = default!;
     foreach (var (_, e) in @out.Extensions) {
         var unhandled = false;
-        if (len(e.Id) == 4 && e.Id[0] == 2 && e.Id[1] == 5 && e.Id[2] == 29){
+        if (builtin.len(e.Id) == 4 && e.Id[0] == 2 && e.Id[1] == 5 && e.Id[2] == 29){
             switch (e.Id[3]) {
             case 15: {
                 (@out.KeyUsage, err) = parseKeyUsageExtension(e.Value);
@@ -736,7 +735,7 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
                 if (err != default!) {
                     return err;
                 }
-                if (len(@out.DNSNames) == 0 && len(@out.EmailAddresses) == 0 && len(@out.IPAddresses) == 0 && len(@out.URIs) == 0) {
+                if (builtin.len(@out.DNSNames) == 0 && builtin.len(@out.EmailAddresses) == 0 && builtin.len(@out.IPAddresses) == 0 && builtin.len(@out.URIs) == 0) {
                     // If we didn't parse anything then we do the critical check, below.
                     unhandled = true;
                 }
@@ -750,8 +749,9 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
                 break;
             }
             case 31: {
-                var val = ((cryptobyte.String)e.Value);
-                if (!val.ReadASN1(Ꮡ(val), // RFC 5280, 4.2.1.13
+                ref var val = ref heap<cryptobyte.String>(out var Ꮡval);
+                val = ((cryptobyte.String)e.Value);
+                if (!val.ReadASN1(Ꮡval, // RFC 5280, 4.2.1.13
  // CRLDistributionPoints ::= SEQUENCE SIZE (1..MAX) OF DistributionPoint
  //
  // DistributionPoint ::= SEQUENCE {
@@ -766,30 +766,30 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
                     return errors.New("x509: invalid CRL distribution points"u8);
                 }
                 while (!val.Empty()) {
-                    cryptobyte.String dpDER = default!;
-                    if (!val.ReadASN1(Ꮡ(dpDER), cryptobyte_asn1.SEQUENCE)) {
+                    ref var dpDER = ref heap<cryptobyte.String>(out var ᏑdpDER);
+                    if (!val.ReadASN1(ᏑdpDER, cryptobyte_asn1.SEQUENCE)) {
                         return errors.New("x509: invalid CRL distribution point"u8);
                     }
-                    cryptobyte.String dpNameDER = default!;
+                    ref var dpNameDER = ref heap<cryptobyte.String>(out var ᏑdpNameDER);
                     ref var dpNamePresent = ref heap(new bool(), out var ᏑdpNamePresent);
-                    if (!dpDER.ReadOptionalASN1(Ꮡ(dpNameDER), ᏑdpNamePresent, ((asn1.Tag)0).Constructed().ContextSpecific())) {
+                    if (!dpDER.ReadOptionalASN1(ᏑdpNameDER, ᏑdpNamePresent, ((cryptobyte_asn1.Tag)0).Constructed().ContextSpecific())) {
                         return errors.New("x509: invalid CRL distribution point"u8);
                     }
                     if (!dpNamePresent) {
                         continue;
                     }
-                    if (!dpNameDER.ReadASN1(Ꮡ(dpNameDER), ((asn1.Tag)0).Constructed().ContextSpecific())) {
+                    if (!dpNameDER.ReadASN1(ᏑdpNameDER, ((cryptobyte_asn1.Tag)0).Constructed().ContextSpecific())) {
                         return errors.New("x509: invalid CRL distribution point"u8);
                     }
                     while (!dpNameDER.Empty()) {
-                        if (!dpNameDER.PeekASN1Tag(((asn1.Tag)6).ContextSpecific())) {
+                        if (!dpNameDER.PeekASN1Tag(((cryptobyte_asn1.Tag)6).ContextSpecific())) {
                             break;
                         }
-                        cryptobyte.String uri = default!;
-                        if (!dpNameDER.ReadASN1(Ꮡ(uri), ((asn1.Tag)6).ContextSpecific())) {
+                        ref var uri = ref heap<cryptobyte.String>(out var Ꮡuri);
+                        if (!dpNameDER.ReadASN1(Ꮡuri, ((cryptobyte_asn1.Tag)6).ContextSpecific())) {
                             return errors.New("x509: invalid CRL distribution point"u8);
                         }
-                        @out.CRLDistributionPoints = append(@out.CRLDistributionPoints, ((@string)uri));
+                        @out.CRLDistributionPoints = append(@out.CRLDistributionPoints, ((@string)(slice<byte>)uri));
                     }
                 }
                 break;
@@ -815,8 +815,8 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
                     return errors.New("x509: subject key identifier incorrectly marked critical"u8);
                 }
                 var val = ((cryptobyte.String)e.Value);
-                cryptobyte.String skid = default!;
-                if (!val.ReadASN1(Ꮡ(skid), cryptobyte_asn1.OCTET_STRING)) {
+                ref var skid = ref heap<cryptobyte.String>(out var Ꮡskid);
+                if (!val.ReadASN1(Ꮡskid, cryptobyte_asn1.OCTET_STRING)) {
                     return errors.New("x509: invalid subject key identifier"u8);
                 }
                 @out.SubjectKeyId = skid;
@@ -827,7 +827,7 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
                 if (err != default!) {
                     return err;
                 }
-                @out.PolicyIdentifiers = new slice<asn1.ObjectIdentifier>(0, len(@out.Policies));
+                @out.PolicyIdentifiers = new slice<asn1.ObjectIdentifier>(0, builtin.len(@out.Policies));
                 foreach (var (_, oid) in @out.Policies) {
                     {
                         var (oidΔ1, ok) = oid.toASN1OID(); if (ok) {
@@ -850,32 +850,33 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
                 // Conforming CAs MUST mark this extension as non-critical
                 return errors.New("x509: authority info access incorrectly marked critical"u8);
             }
-            var val = ((cryptobyte.String)e.Value);
-            if (!val.ReadASN1(Ꮡ(val), cryptobyte_asn1.SEQUENCE)) {
+            ref var val = ref heap<cryptobyte.String>(out var Ꮡval);
+            val = ((cryptobyte.String)e.Value);
+            if (!val.ReadASN1(Ꮡval, cryptobyte_asn1.SEQUENCE)) {
                 return errors.New("x509: invalid authority info access"u8);
             }
             while (!val.Empty()) {
-                cryptobyte.String aiaDER = default!;
-                if (!val.ReadASN1(Ꮡ(aiaDER), cryptobyte_asn1.SEQUENCE)) {
+                ref var aiaDER = ref heap<cryptobyte.String>(out var ᏑaiaDER);
+                if (!val.ReadASN1(ᏑaiaDER, cryptobyte_asn1.SEQUENCE)) {
                     return errors.New("x509: invalid authority info access"u8);
                 }
-                asn1.ObjectIdentifier method = default!;
-                if (!aiaDER.ReadASN1ObjectIdentifier(Ꮡ(method))) {
+                ref var method = ref heap<asn1.ObjectIdentifier>(out var Ꮡmethod);
+                if (!aiaDER.ReadASN1ObjectIdentifier(Ꮡmethod)) {
                     return errors.New("x509: invalid authority info access"u8);
                 }
-                if (!aiaDER.PeekASN1Tag(((asn1.Tag)6).ContextSpecific())) {
+                if (!aiaDER.PeekASN1Tag(((cryptobyte_asn1.Tag)6).ContextSpecific())) {
                     continue;
                 }
-                if (!aiaDER.ReadASN1(Ꮡ(aiaDER), ((asn1.Tag)6).ContextSpecific())) {
+                if (!aiaDER.ReadASN1(ᏑaiaDER, ((cryptobyte_asn1.Tag)6).ContextSpecific())) {
                     return errors.New("x509: invalid authority info access"u8);
                 }
                 switch (ᐧ) {
                 case {} when method.Equal(oidAuthorityInfoAccessOcsp): {
-                    @out.OCSPServer = append(@out.OCSPServer, ((@string)aiaDER));
+                    @out.OCSPServer = append(@out.OCSPServer, ((@string)(slice<byte>)aiaDER));
                     break;
                 }
                 case {} when method.Equal(oidAuthorityInfoAccessIssuers): {
-                    @out.IssuingCertificateURL = append(@out.IssuingCertificateURL, ((@string)aiaDER));
+                    @out.IssuingCertificateURL = append(@out.IssuingCertificateURL, ((@string)(slice<byte>)aiaDER));
                     break;
                 }}
 
@@ -895,28 +896,29 @@ internal static ж<godebug.Setting> x509negativeserial = godebug.New("x509negati
 
 internal static (ж<Certificate>, error) parseCertificate(slice<byte> der) {
     var cert = Ꮡ(new Certificate(nil));
-    var input = ((cryptobyte.String)der);
+    ref var input = ref heap<cryptobyte.String>(out var Ꮡinput);
+    input = ((cryptobyte.String)der);
     // we read the SEQUENCE including length and tag bytes so that
     // we can populate Certificate.Raw, before unwrapping the
     // SEQUENCE so it can be operated on
-    if (!input.ReadASN1Element(Ꮡ(input), cryptobyte_asn1.SEQUENCE)) {
+    if (!input.ReadASN1Element(Ꮡinput, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed certificate"u8));
     }
-    cert.val.Raw = input;
-    if (!input.ReadASN1(Ꮡ(input), cryptobyte_asn1.SEQUENCE)) {
+    cert.Value.Raw = input;
+    if (!input.ReadASN1(Ꮡinput, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed certificate"u8));
     }
-    cryptobyte.String tbs = default!;
+    ref var tbs = ref heap<cryptobyte.String>(out var Ꮡtbs);
     // do the same trick again as above to extract the raw
     // bytes for Certificate.RawTBSCertificate
-    if (!input.ReadASN1Element(Ꮡ(tbs), cryptobyte_asn1.SEQUENCE)) {
+    if (!input.ReadASN1Element(Ꮡtbs, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed tbs certificate"u8));
     }
-    cert.val.RawTBSCertificate = tbs;
-    if (!tbs.ReadASN1(Ꮡ(tbs), cryptobyte_asn1.SEQUENCE)) {
+    cert.Value.RawTBSCertificate = tbs;
+    if (!tbs.ReadASN1(Ꮡtbs, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed tbs certificate"u8));
     }
-    if (!tbs.ReadOptionalASN1Integer(Ꮡ((~cert).Version), ((asn1.Tag)0).Constructed().ContextSpecific(), 0)) {
+    if (!tbs.ReadOptionalASN1Integer(cert.of(Certificate.ᏑVersion), ((cryptobyte_asn1.Tag)0).Constructed().ContextSpecific(), 0)) {
         return (default!, errors.New("x509: malformed version"u8));
     }
     if ((~cert).Version < 0) {
@@ -924,7 +926,7 @@ internal static (ж<Certificate>, error) parseCertificate(slice<byte> der) {
     }
     // for backwards compat reasons Version is one-indexed,
     // rather than zero-indexed as defined in 5280
-    (~cert).Version++;
+    cert.Value.Version++;
     if ((~cert).Version > 3) {
         return (default!, errors.New("x509: invalid version"u8));
     }
@@ -939,16 +941,16 @@ internal static (ж<Certificate>, error) parseCertificate(slice<byte> der) {
             x509negativeserial.IncNonDefault();
         }
     }
-    cert.val.SerialNumber = serial;
-    cryptobyte.String sigAISeq = default!;
-    if (!tbs.ReadASN1(Ꮡ(sigAISeq), cryptobyte_asn1.SEQUENCE)) {
+    cert.Value.SerialNumber = serial;
+    ref var sigAISeq = ref heap<cryptobyte.String>(out var ᏑsigAISeq);
+    if (!tbs.ReadASN1(ᏑsigAISeq, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed signature algorithm identifier"u8));
     }
     // Before parsing the inner algorithm identifier, extract
     // the outer algorithm identifier and make sure that they
     // match.
-    cryptobyte.String outerSigAISeq = default!;
-    if (!input.ReadASN1(Ꮡ(outerSigAISeq), cryptobyte_asn1.SEQUENCE)) {
+    ref var outerSigAISeq = ref heap<cryptobyte.String>(out var ᏑouterSigAISeq);
+    if (!input.ReadASN1(ᏑouterSigAISeq, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed algorithm identifier"u8));
     }
     if (!bytes.Equal(outerSigAISeq, sigAISeq)) {
@@ -958,58 +960,59 @@ internal static (ж<Certificate>, error) parseCertificate(slice<byte> der) {
     if (err != default!) {
         return (default!, err);
     }
-    cert.val.SignatureAlgorithm = getSignatureAlgorithmFromAI(sigAI);
-    cryptobyte.String issuerSeq = default!;
-    if (!tbs.ReadASN1Element(Ꮡ(issuerSeq), cryptobyte_asn1.SEQUENCE)) {
+    cert.Value.SignatureAlgorithm = getSignatureAlgorithmFromAI(sigAI);
+    ref var issuerSeq = ref heap<cryptobyte.String>(out var ᏑissuerSeq);
+    if (!tbs.ReadASN1Element(ᏑissuerSeq, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed issuer"u8));
     }
-    cert.val.RawIssuer = issuerSeq;
-    (issuerRDNs, err) = parseName(issuerSeq);
+    cert.Value.RawIssuer = issuerSeq;
+    (var issuerRDNs, err) = parseName(issuerSeq);
     if (err != default!) {
         return (default!, err);
     }
-    (~cert).Issuer.FillFromRDNSequence(issuerRDNs);
-    cryptobyte.String validity = default!;
-    if (!tbs.ReadASN1(Ꮡ(validity), cryptobyte_asn1.SEQUENCE)) {
+    cert.of(Certificate.ᏑIssuer).FillFromRDNSequence(issuerRDNs);
+    ref var validity = ref heap<cryptobyte.String>(out var Ꮡvalidity);
+    if (!tbs.ReadASN1(Ꮡvalidity, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed validity"u8));
     }
-    (cert.val.NotBefore, cert.val.NotAfter, err) = parseValidity(validity);
+    (cert.Value.NotBefore, cert.Value.NotAfter, err) = parseValidity(validity);
     if (err != default!) {
         return (default!, err);
     }
-    cryptobyte.String subjectSeq = default!;
-    if (!tbs.ReadASN1Element(Ꮡ(subjectSeq), cryptobyte_asn1.SEQUENCE)) {
+    ref var subjectSeq = ref heap<cryptobyte.String>(out var ᏑsubjectSeq);
+    if (!tbs.ReadASN1Element(ᏑsubjectSeq, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed issuer"u8));
     }
-    cert.val.RawSubject = subjectSeq;
-    (subjectRDNs, err) = parseName(subjectSeq);
+    cert.Value.RawSubject = subjectSeq;
+    (var subjectRDNs, err) = parseName(subjectSeq);
     if (err != default!) {
         return (default!, err);
     }
-    (~cert).Subject.FillFromRDNSequence(subjectRDNs);
-    cryptobyte.String spki = default!;
-    if (!tbs.ReadASN1Element(Ꮡ(spki), cryptobyte_asn1.SEQUENCE)) {
+    cert.of(Certificate.ᏑSubject).FillFromRDNSequence(subjectRDNs);
+    ref var spki = ref heap<cryptobyte.String>(out var Ꮡspki);
+    if (!tbs.ReadASN1Element(Ꮡspki, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed spki"u8));
     }
-    cert.val.RawSubjectPublicKeyInfo = spki;
-    if (!spki.ReadASN1(Ꮡ(spki), cryptobyte_asn1.SEQUENCE)) {
+    cert.Value.RawSubjectPublicKeyInfo = spki;
+    if (!spki.ReadASN1(Ꮡspki, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed spki"u8));
     }
-    cryptobyte.String pkAISeq = default!;
-    if (!spki.ReadASN1(Ꮡ(pkAISeq), cryptobyte_asn1.SEQUENCE)) {
+    ref var pkAISeq = ref heap<cryptobyte.String>(out var ᏑpkAISeq);
+    if (!spki.ReadASN1(ᏑpkAISeq, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed public key algorithm identifier"u8));
     }
+    ref var pkAI = ref heap<pkix.AlgorithmIdentifier>(out var ᏑpkAI);
     (pkAI, err) = parseAI(pkAISeq);
     if (err != default!) {
         return (default!, err);
     }
-    cert.val.PublicKeyAlgorithm = getPublicKeyAlgorithmFromOID(pkAI.Algorithm);
-    ref var spk = ref heap(new encoding.asn1_package.BitString(), out var Ꮡspk);
+    cert.Value.PublicKeyAlgorithm = getPublicKeyAlgorithmFromOID(pkAI.Algorithm);
+    ref var spk = ref heap(new asn1.BitString(), out var Ꮡspk);
     if (!spki.ReadASN1BitString(Ꮡspk)) {
         return (default!, errors.New("x509: malformed subjectPublicKey"u8));
     }
     if ((~cert).PublicKeyAlgorithm != UnknownPublicKeyAlgorithm) {
-        (cert.val.PublicKey, err) = parsePublicKey(Ꮡ(new publicKeyInfo(
+        (cert.Value.PublicKey, err) = parsePublicKey(Ꮡ(new publicKeyInfo(
             Algorithm: pkAI,
             PublicKey: spk
         )));
@@ -1018,38 +1021,38 @@ internal static (ж<Certificate>, error) parseCertificate(slice<byte> der) {
         }
     }
     if ((~cert).Version > 1) {
-        if (!tbs.SkipOptionalASN1(((asn1.Tag)1).ContextSpecific())) {
+        if (!tbs.SkipOptionalASN1(((cryptobyte_asn1.Tag)1).ContextSpecific())) {
             return (default!, errors.New("x509: malformed issuerUniqueID"u8));
         }
-        if (!tbs.SkipOptionalASN1(((asn1.Tag)2).ContextSpecific())) {
+        if (!tbs.SkipOptionalASN1(((cryptobyte_asn1.Tag)2).ContextSpecific())) {
             return (default!, errors.New("x509: malformed subjectUniqueID"u8));
         }
         if ((~cert).Version == 3) {
-            cryptobyte.String extensions = default!;
+            ref var extensions = ref heap<cryptobyte.String>(out var Ꮡextensions);
             ref var present = ref heap(new bool(), out var Ꮡpresent);
-            if (!tbs.ReadOptionalASN1(Ꮡ(extensions), Ꮡpresent, ((asn1.Tag)3).Constructed().ContextSpecific())) {
+            if (!tbs.ReadOptionalASN1(Ꮡextensions, Ꮡpresent, ((cryptobyte_asn1.Tag)3).Constructed().ContextSpecific())) {
                 return (default!, errors.New("x509: malformed extensions"u8));
             }
             if (present) {
                 var seenExts = new map<@string, bool>();
-                if (!extensions.ReadASN1(Ꮡ(extensions), cryptobyte_asn1.SEQUENCE)) {
+                if (!extensions.ReadASN1(Ꮡextensions, cryptobyte_asn1.SEQUENCE)) {
                     return (default!, errors.New("x509: malformed extensions"u8));
                 }
                 while (!extensions.Empty()) {
-                    cryptobyte.String extension = default!;
-                    if (!extensions.ReadASN1(Ꮡ(extension), cryptobyte_asn1.SEQUENCE)) {
+                    ref var extension = ref heap<cryptobyte.String>(out var Ꮡextension);
+                    if (!extensions.ReadASN1(Ꮡextension, cryptobyte_asn1.SEQUENCE)) {
                         return (default!, errors.New("x509: malformed extension"u8));
                     }
-                    var (ext, err) = parseExtension(extension);
-                    if (err != default!) {
-                        return (default!, err);
+                    var (ext, errΔ1) = parseExtension(extension);
+                    if (errΔ1 != default!) {
+                        return (default!, errΔ1);
                     }
                     @string oidStr = ext.Id.String();
                     if (seenExts[oidStr]) {
                         return (default!, fmt.Errorf("x509: certificate contains duplicate extension with OID %q"u8, oidStr));
                     }
                     seenExts[oidStr] = true;
-                    cert.val.Extensions = append((~cert).Extensions, ext);
+                    cert.Value.Extensions = append((~cert).Extensions, ext);
                 }
                 err = processExtensions(cert);
                 if (err != default!) {
@@ -1058,11 +1061,11 @@ internal static (ж<Certificate>, error) parseCertificate(slice<byte> der) {
             }
         }
     }
-    ref var signature = ref heap(new encoding.asn1_package.BitString(), out var Ꮡsignature);
+    ref var signature = ref heap(new asn1.BitString(), out var Ꮡsignature);
     if (!input.ReadASN1BitString(Ꮡsignature)) {
         return (default!, errors.New("x509: malformed signature"u8));
     }
-    cert.val.Signature = signature.RightAlign();
+    cert.Value.Signature = signature.RightAlign();
     return (cert, default!);
 }
 
@@ -1072,11 +1075,11 @@ internal static (ж<Certificate>, error) parseCertificate(slice<byte> der) {
 // numbers. This behavior can be restored by including "x509negativeserial=1" in
 // the GODEBUG environment variable.
 public static (ж<Certificate>, error) ParseCertificate(slice<byte> der) {
-    (cert, err) = parseCertificate(der);
+    var (cert, err) = parseCertificate(der);
     if (err != default!) {
         return (default!, err);
     }
-    if (len(der) != len((~cert).Raw)) {
+    if (builtin.len(der) != builtin.len((~cert).Raw)) {
         return (default!, errors.New("x509: trailing data"u8));
     }
     return (cert, err);
@@ -1086,13 +1089,13 @@ public static (ж<Certificate>, error) ParseCertificate(slice<byte> der) {
 // data. The certificates must be concatenated with no intermediate padding.
 public static (slice<ж<Certificate>>, error) ParseCertificates(slice<byte> der) {
     slice<ж<Certificate>> certs = default!;
-    while (len(der) > 0) {
-        (cert, err) = parseCertificate(der);
+    while (builtin.len(der) > 0) {
+        var (cert, err) = parseCertificate(der);
         if (err != default!) {
             return (default!, err);
         }
         certs = append(certs, cert);
-        der = der[(int)(len((~cert).Raw))..];
+        der = der[(int)(builtin.len((~cert).Raw))..];
     }
     return (certs, default!);
 }
@@ -1105,25 +1108,26 @@ internal static readonly UntypedInt x509v2Version = 1;
 // ASN.1 DER data.
 public static (ж<RevocationList>, error) ParseRevocationList(slice<byte> der) {
     var rl = Ꮡ(new RevocationList(nil));
-    var input = ((cryptobyte.String)der);
+    ref var input = ref heap<cryptobyte.String>(out var Ꮡinput);
+    input = ((cryptobyte.String)der);
     // we read the SEQUENCE including length and tag bytes so that
     // we can populate RevocationList.Raw, before unwrapping the
     // SEQUENCE so it can be operated on
-    if (!input.ReadASN1Element(Ꮡ(input), cryptobyte_asn1.SEQUENCE)) {
+    if (!input.ReadASN1Element(Ꮡinput, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed crl"u8));
     }
-    rl.val.Raw = input;
-    if (!input.ReadASN1(Ꮡ(input), cryptobyte_asn1.SEQUENCE)) {
+    rl.Value.Raw = input;
+    if (!input.ReadASN1(Ꮡinput, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed crl"u8));
     }
-    cryptobyte.String tbs = default!;
+    ref var tbs = ref heap<cryptobyte.String>(out var Ꮡtbs);
     // do the same trick again as above to extract the raw
     // bytes for Certificate.RawTBSCertificate
-    if (!input.ReadASN1Element(Ꮡ(tbs), cryptobyte_asn1.SEQUENCE)) {
+    if (!input.ReadASN1Element(Ꮡtbs, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed tbs crl"u8));
     }
-    rl.val.RawTBSRevocationList = tbs;
-    if (!tbs.ReadASN1(Ꮡ(tbs), cryptobyte_asn1.SEQUENCE)) {
+    rl.Value.RawTBSRevocationList = tbs;
+    if (!tbs.ReadASN1(Ꮡtbs, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed tbs crl"u8));
     }
     ref var version = ref heap(new nint(), out var Ꮡversion);
@@ -1136,15 +1140,15 @@ public static (ж<RevocationList>, error) ParseRevocationList(slice<byte> der) {
     if (version != x509v2Version) {
         return (default!, fmt.Errorf("x509: unsupported crl version: %d"u8, version));
     }
-    cryptobyte.String sigAISeq = default!;
-    if (!tbs.ReadASN1(Ꮡ(sigAISeq), cryptobyte_asn1.SEQUENCE)) {
+    ref var sigAISeq = ref heap<cryptobyte.String>(out var ᏑsigAISeq);
+    if (!tbs.ReadASN1(ᏑsigAISeq, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed signature algorithm identifier"u8));
     }
     // Before parsing the inner algorithm identifier, extract
     // the outer algorithm identifier and make sure that they
     // match.
-    cryptobyte.String outerSigAISeq = default!;
-    if (!input.ReadASN1(Ꮡ(outerSigAISeq), cryptobyte_asn1.SEQUENCE)) {
+    ref var outerSigAISeq = ref heap<cryptobyte.String>(out var ᏑouterSigAISeq);
+    if (!input.ReadASN1(ᏑouterSigAISeq, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed algorithm identifier"u8));
     }
     if (!bytes.Equal(outerSigAISeq, sigAISeq)) {
@@ -1154,70 +1158,70 @@ public static (ж<RevocationList>, error) ParseRevocationList(slice<byte> der) {
     if (err != default!) {
         return (default!, err);
     }
-    rl.val.SignatureAlgorithm = getSignatureAlgorithmFromAI(sigAI);
-    ref var signature = ref heap(new encoding.asn1_package.BitString(), out var Ꮡsignature);
+    rl.Value.SignatureAlgorithm = getSignatureAlgorithmFromAI(sigAI);
+    ref var signature = ref heap(new asn1.BitString(), out var Ꮡsignature);
     if (!input.ReadASN1BitString(Ꮡsignature)) {
         return (default!, errors.New("x509: malformed signature"u8));
     }
-    rl.val.Signature = signature.RightAlign();
-    cryptobyte.String issuerSeq = default!;
-    if (!tbs.ReadASN1Element(Ꮡ(issuerSeq), cryptobyte_asn1.SEQUENCE)) {
+    rl.Value.Signature = signature.RightAlign();
+    ref var issuerSeq = ref heap<cryptobyte.String>(out var ᏑissuerSeq);
+    if (!tbs.ReadASN1Element(ᏑissuerSeq, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed issuer"u8));
     }
-    rl.val.RawIssuer = issuerSeq;
-    (issuerRDNs, err) = parseName(issuerSeq);
+    rl.Value.RawIssuer = issuerSeq;
+    (var issuerRDNs, err) = parseName(issuerSeq);
     if (err != default!) {
         return (default!, err);
     }
-    (~rl).Issuer.FillFromRDNSequence(issuerRDNs);
-    (rl.val.ThisUpdate, err) = parseTime(Ꮡ(tbs));
+    rl.of(RevocationList.ᏑIssuer).FillFromRDNSequence(issuerRDNs);
+    (rl.Value.ThisUpdate, err) = parseTime(Ꮡtbs);
     if (err != default!) {
         return (default!, err);
     }
     if (tbs.PeekASN1Tag(cryptobyte_asn1.GeneralizedTime) || tbs.PeekASN1Tag(cryptobyte_asn1.UTCTime)) {
-        (rl.val.NextUpdate, err) = parseTime(Ꮡ(tbs));
+        (rl.Value.NextUpdate, err) = parseTime(Ꮡtbs);
         if (err != default!) {
             return (default!, err);
         }
     }
     if (tbs.PeekASN1Tag(cryptobyte_asn1.SEQUENCE)) {
-        cryptobyte.String revokedSeq = default!;
-        if (!tbs.ReadASN1(Ꮡ(revokedSeq), cryptobyte_asn1.SEQUENCE)) {
+        ref var revokedSeq = ref heap<cryptobyte.String>(out var ᏑrevokedSeq);
+        if (!tbs.ReadASN1(ᏑrevokedSeq, cryptobyte_asn1.SEQUENCE)) {
             return (default!, errors.New("x509: malformed crl"u8));
         }
         while (!revokedSeq.Empty()) {
             ref var rce = ref heap<RevocationListEntry>(out var Ꮡrce);
             rce = new RevocationListEntry(nil);
-            cryptobyte.String certSeq = default!;
-            if (!revokedSeq.ReadASN1Element(Ꮡ(certSeq), cryptobyte_asn1.SEQUENCE)) {
+            ref var certSeq = ref heap<cryptobyte.String>(out var ᏑcertSeq);
+            if (!revokedSeq.ReadASN1Element(ᏑcertSeq, cryptobyte_asn1.SEQUENCE)) {
                 return (default!, errors.New("x509: malformed crl"u8));
             }
             rce.Raw = certSeq;
-            if (!certSeq.ReadASN1(Ꮡ(certSeq), cryptobyte_asn1.SEQUENCE)) {
+            if (!certSeq.ReadASN1(ᏑcertSeq, cryptobyte_asn1.SEQUENCE)) {
                 return (default!, errors.New("x509: malformed crl"u8));
             }
             rce.SerialNumber = @new<bigꓸInt>();
             if (!certSeq.ReadASN1Integer(rce.SerialNumber)) {
                 return (default!, errors.New("x509: malformed serial number"u8));
             }
-            (rce.RevocationTime, err) = parseTime(Ꮡ(certSeq));
+            (rce.RevocationTime, err) = parseTime(ᏑcertSeq);
             if (err != default!) {
                 return (default!, err);
             }
-            cryptobyte.String extensionsΔ1 = default!;
+            ref var extensionsΔ1 = ref heap<cryptobyte.String>(out var ᏑextensionsΔ1);
             ref var presentΔ1 = ref heap(new bool(), out var ᏑpresentΔ1);
-            if (!certSeq.ReadOptionalASN1(Ꮡ(extensionsΔ1), ᏑpresentΔ1, cryptobyte_asn1.SEQUENCE)) {
+            if (!certSeq.ReadOptionalASN1(ᏑextensionsΔ1, ᏑpresentΔ1, cryptobyte_asn1.SEQUENCE)) {
                 return (default!, errors.New("x509: malformed extensions"u8));
             }
             if (presentΔ1) {
                 while (!extensionsΔ1.Empty()) {
-                    cryptobyte.String extensionΔ1 = default!;
-                    if (!extensionsΔ1.ReadASN1(Ꮡ(extensionΔ1), cryptobyte_asn1.SEQUENCE)) {
+                    ref var extension = ref heap<cryptobyte.String>(out var Ꮡextension);
+                    if (!extensionsΔ1.ReadASN1(Ꮡextension, cryptobyte_asn1.SEQUENCE)) {
                         return (default!, errors.New("x509: malformed extension"u8));
                     }
-                    var (ext, err) = parseExtension(extensionΔ1);
-                    if (err != default!) {
-                        return (default!, err);
+                    var (ext, errΔ1) = parseExtension(extension);
+                    if (errΔ1 != default!) {
+                        return (default!, errΔ1);
                     }
                     if (ext.Id.Equal(oidExtensionReasonCode)) {
                         var val = ((cryptobyte.String)ext.Value);
@@ -1228,47 +1232,47 @@ public static (ж<RevocationList>, error) ParseRevocationList(slice<byte> der) {
                     rce.Extensions = append(rce.Extensions, ext);
                 }
             }
-            rl.val.RevokedCertificateEntries = append((~rl).RevokedCertificateEntries, rce);
+            rl.Value.RevokedCertificateEntries = append((~rl).RevokedCertificateEntries, rce);
             var rcDeprecated = new pkix.RevokedCertificate(
                 SerialNumber: rce.SerialNumber,
                 RevocationTime: rce.RevocationTime,
                 Extensions: rce.Extensions
             );
-            rl.val.RevokedCertificates = append((~rl).RevokedCertificates, rcDeprecated);
+            rl.Value.RevokedCertificates = append((~rl).RevokedCertificates, rcDeprecated);
         }
     }
-    cryptobyte.String extensions = default!;
+    ref var extensions = ref heap<cryptobyte.String>(out var Ꮡextensions);
     ref var present = ref heap(new bool(), out var Ꮡpresent);
-    if (!tbs.ReadOptionalASN1(Ꮡ(extensions), Ꮡpresent, ((asn1.Tag)0).Constructed().ContextSpecific())) {
+    if (!tbs.ReadOptionalASN1(Ꮡextensions, Ꮡpresent, ((cryptobyte_asn1.Tag)0).Constructed().ContextSpecific())) {
         return (default!, errors.New("x509: malformed extensions"u8));
     }
     if (present) {
-        if (!extensions.ReadASN1(Ꮡ(extensions), cryptobyte_asn1.SEQUENCE)) {
+        if (!extensions.ReadASN1(Ꮡextensions, cryptobyte_asn1.SEQUENCE)) {
             return (default!, errors.New("x509: malformed extensions"u8));
         }
         while (!extensions.Empty()) {
-            cryptobyte.String extension = default!;
-            if (!extensions.ReadASN1(Ꮡ(extension), cryptobyte_asn1.SEQUENCE)) {
+            ref var extension = ref heap<cryptobyte.String>(out var Ꮡextension);
+            if (!extensions.ReadASN1(Ꮡextension, cryptobyte_asn1.SEQUENCE)) {
                 return (default!, errors.New("x509: malformed extension"u8));
             }
-            var (ext, err) = parseExtension(extension);
-            if (err != default!) {
-                return (default!, err);
+            var (ext, errΔ2) = parseExtension(extension);
+            if (errΔ2 != default!) {
+                return (default!, errΔ2);
             }
             if (ext.Id.Equal(oidExtensionAuthorityKeyId)){
-                (rl.val.AuthorityKeyId, err) = parseAuthorityKeyIdentifier(ext);
-                if (err != default!) {
-                    return (default!, err);
+                (rl.Value.AuthorityKeyId, errΔ2) = parseAuthorityKeyIdentifier(ext);
+                if (errΔ2 != default!) {
+                    return (default!, errΔ2);
                 }
             } else 
             if (ext.Id.Equal(oidExtensionCRLNumber)) {
                 var value = ((cryptobyte.String)ext.Value);
-                rl.val.Number = @new<bigꓸInt>();
+                rl.Value.Number = @new<bigꓸInt>();
                 if (!value.ReadASN1Integer((~rl).Number)) {
                     return (default!, errors.New("x509: malformed crl number"u8));
                 }
             }
-            rl.val.Extensions = append((~rl).Extensions, ext);
+            rl.Value.Extensions = append((~rl).Extensions, ext);
         }
     }
     return (rl, default!);

@@ -3,21 +3,21 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto;
 
-using hpke = crypto.@internal.hpke_package;
+using hpke = go.crypto.@internal.hpke_package;
 using errors = errors_package;
 using strings = strings_package;
-using cryptobyte = golang.org.x.crypto.cryptobyte_package;
-using crypto.@internal;
-using golang.org.x.crypto;
+using cryptobyte = vendor.golang.org.x.crypto.cryptobyte_package;
+using go.crypto.@internal;
+using vendor.golang.org.x.crypto;
 
 partial class tls_package {
 
-[GoType] partial struct echCipher {
+[GoType] public partial struct echCipher {
     public uint16 KDFID;
     public uint16 AEADID;
 }
 
-[GoType] partial struct echExtension {
+[GoType] public partial struct echExtension {
     public uint16 Type;
     public slice<byte> Data;
 }
@@ -47,25 +47,25 @@ internal static (slice<echConfig>, error) parseECHConfigList(slice<byte> data) {
     if (!s.ReadUint16(Ꮡlength)) {
         return (default!, errMalformedECHConfig);
     }
-    if (length != ((uint16)(len(data) - 2))) {
+    if (length != (uint16)(len(data) - 2)) {
         return (default!, errMalformedECHConfig);
     }
     slice<echConfig> configs = default!;
     while (len(s) > 0) {
         ref var ec = ref heap(new echConfig(), out var Ꮡec);
-        ec.raw = slice<byte>(s);
+        ec.raw = ((slice<byte>)s);
         if (!s.ReadUint16(Ꮡec.of(echConfig.ᏑVersion))) {
             return (default!, errMalformedECHConfig);
         }
         if (!s.ReadUint16(Ꮡec.of(echConfig.ᏑLength))) {
             return (default!, errMalformedECHConfig);
         }
-        if (len(ec.raw) < ((nint)ec.Length) + 4) {
+        if (len(ec.raw) < (nint)ec.Length + 4) {
             return (default!, errMalformedECHConfig);
         }
         ec.raw = ec.raw[..(int)(ec.Length + 4)];
         if (ec.Version != extensionEncryptedClientHello) {
-            s.Skip(((nint)ec.Length));
+            s.Skip((nint)ec.Length);
             continue;
         }
         if (!s.ReadUint8(Ꮡec.of(echConfig.ᏑConfigID))) {
@@ -74,11 +74,11 @@ internal static (slice<echConfig>, error) parseECHConfigList(slice<byte> data) {
         if (!s.ReadUint16(Ꮡec.of(echConfig.ᏑKemID))) {
             return (default!, errMalformedECHConfig);
         }
-        if (!s.ReadUint16LengthPrefixed((ж<cryptobyte.String>)(Ꮡec.of(echConfig.ᏑPublicKey)))) {
+        if (!s.ReadUint16LengthPrefixed(Ꮡ(new cryptobyte.String(ec.PublicKey)))) {
             return (default!, errMalformedECHConfig);
         }
-        cryptobyte.String ΔcipherSuites = default!;
-        if (!s.ReadUint16LengthPrefixed(Ꮡ(ΔcipherSuites))) {
+        ref var ΔcipherSuites = ref heap<cryptobyte.String>(out var ᏑcipherSuites);
+        if (!s.ReadUint16LengthPrefixed(ᏑcipherSuites)) {
             return (default!, errMalformedECHConfig);
         }
         while (!ΔcipherSuites.Empty()) {
@@ -94,13 +94,13 @@ internal static (slice<echConfig>, error) parseECHConfigList(slice<byte> data) {
         if (!s.ReadUint8(Ꮡec.of(echConfig.ᏑMaxNameLength))) {
             return (default!, errMalformedECHConfig);
         }
-        cryptobyte.String publicName = default!;
-        if (!s.ReadUint8LengthPrefixed(Ꮡ(publicName))) {
+        ref var publicName = ref heap<cryptobyte.String>(out var ᏑpublicName);
+        if (!s.ReadUint8LengthPrefixed(ᏑpublicName)) {
             return (default!, errMalformedECHConfig);
         }
         ec.PublicName = publicName;
-        cryptobyte.String extensions = default!;
-        if (!s.ReadUint16LengthPrefixed(Ꮡ(extensions))) {
+        ref var extensions = ref heap<cryptobyte.String>(out var Ꮡextensions);
+        if (!s.ReadUint16LengthPrefixed(Ꮡextensions)) {
             return (default!, errMalformedECHConfig);
         }
         while (!extensions.Empty()) {
@@ -108,7 +108,7 @@ internal static (slice<echConfig>, error) parseECHConfigList(slice<byte> data) {
             if (!extensions.ReadUint16(Ꮡe.of(echExtension.ᏑType))) {
                 return (default!, errMalformedECHConfig);
             }
-            if (!extensions.ReadUint16LengthPrefixed((ж<cryptobyte.String>)(Ꮡe.of(echExtension.ᏑData)))) {
+            if (!extensions.ReadUint16LengthPrefixed(Ꮡ(new cryptobyte.String(e.Data)))) {
                 return (default!, errMalformedECHConfig);
             }
             ec.Extensions = append(ec.Extensions, e);
@@ -119,24 +119,24 @@ internal static (slice<echConfig>, error) parseECHConfigList(slice<byte> data) {
 }
 
 internal static ж<echConfig> pickECHConfig(slice<echConfig> list) {
-    ref var ec = ref heap(new echConfig(), out var Ꮡec);
+    foreach (var (_, vᴛ1) in list) {
+        ref var ec = ref heap(new echConfig(), out var Ꮡec);
+        ec = vᴛ1;
 
-    foreach (var (_, ec) in list) {
         {
-            var (_, ok) = hpke.SupportedKEMs[ec.KemID]; if (!ok) {
+            var (_, ok) = hpke.SupportedKEMs[ec.KemID, ꟷ]; if (!ok) {
                 continue;
             }
         }
         bool validSCS = default!;
         foreach (var (_, cs) in ec.SymmetricCipherSuite) {
             {
-                var (_, ok) = hpke.SupportedAEADs[cs.AEADID]; if (!ok) {
+                var (_, ok) = hpke.SupportedAEADs[cs.AEADID, ꟷ]; if (!ok) {
                     continue;
                 }
             }
             {
-                var _ = hpke.SupportedKDFs[cs.KDFID];
-                var ok = hpke.SupportedKDFs[cs.KDFID]; if (!ok) {
+                var (_, ok) = hpke.SupportedKDFs[cs.KDFID, ꟷ]; if (!ok) {
                     continue;
                 }
             }
@@ -154,7 +154,7 @@ internal static ж<echConfig> pickECHConfig(slice<echConfig> list) {
             // If high order bit is set to 1 the extension is mandatory.
             // Since we don't support any extensions, if we see a mandatory
             // bit, we skip the config.
-            if ((uint16)(ext.Type & ((uint16)(1 << (int)(15)))) != 0) {
+            if ((uint16)(ext.Type & (uint16)((uint16)(1 << (int)(15)))) != 0) {
                 unsupportedExt = true;
             }
         }
@@ -172,13 +172,12 @@ internal static (echCipher, error) pickECHCipherSuite(slice<echCipher> suites) {
         // imposing some sort of preference here, we just pick the first valid
         // suite.
         {
-            var (_, ok) = hpke.SupportedAEADs[s.AEADID]; if (!ok) {
+            var (_, ok) = hpke.SupportedAEADs[s.AEADID, ꟷ]; if (!ok) {
                 continue;
             }
         }
         {
-            var _ = hpke.SupportedKDFs[s.KDFID];
-            var ok = hpke.SupportedKDFs[s.KDFID]; if (!ok) {
+            var (_, ok) = hpke.SupportedKDFs[s.KDFID, ꟷ]; if (!ok) {
                 continue;
             }
         }
@@ -188,9 +187,9 @@ internal static (echCipher, error) pickECHCipherSuite(slice<echCipher> suites) {
 }
 
 internal static (slice<byte>, error) encodeInnerClientHello(ж<clientHelloMsg> Ꮡinner, nint maxNameLength) {
-    ref var inner = ref Ꮡinner.val;
+    ref var inner = ref Ꮡinner.Value;
 
-    (h, err) = inner.marshalMsg(true);
+    var (h, err) = Ꮡinner.marshalMsg(true);
     if (err != default!) {
         return (default!, err);
     }
@@ -207,35 +206,33 @@ internal static (slice<byte>, error) encodeInnerClientHello(ж<clientHelloMsg> �
 }
 
 internal static (slice<byte>, error) generateOuterECHExt(uint8 id, uint16 kdfID, uint16 aeadID, slice<byte> encodedKey, slice<byte> payload) {
-    cryptobyte.Builder b = default!;
+    ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(0);
     // outer
     b.AddUint16(kdfID);
     b.AddUint16(aeadID);
     b.AddUint8(id);
-    b.AddUint16LengthPrefixed(
-    var encodedKeyʗ2 = encodedKey;
-    (ж<cryptobyte.Builder> b) => {
-        bΔ1.AddBytes(encodedKeyʗ2);
+    var encodedKeyʗ1 = encodedKey;
+    Ꮡb.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+        bΔ1.AddBytes(encodedKeyʗ1);
     });
-    b.AddUint16LengthPrefixed(
-    var payloadʗ2 = payload;
-    (ж<cryptobyte.Builder> b) => {
-        bΔ2.AddBytes(payloadʗ2);
+    var payloadʗ1 = payload;
+    Ꮡb.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
+        bΔ2.AddBytes(payloadʗ1);
     });
     return b.Bytes();
 }
 
 internal static error computeAndUpdateOuterECHExtension(ж<clientHelloMsg> Ꮡouter, ж<clientHelloMsg> Ꮡinner, ж<echContext> Ꮡech, bool useKey) {
-    ref var outer = ref Ꮡouter.val;
-    ref var inner = ref Ꮡinner.val;
-    ref var ech = ref Ꮡech.val;
+    ref var outer = ref Ꮡouter.Value;
+    ref var inner = ref Ꮡinner.Value;
+    ref var ech = ref Ꮡech.Value;
 
     slice<byte> encapKey = default!;
     if (useKey) {
         encapKey = ech.encapsulatedKey;
     }
-    (encodedInner, err) = encodeInnerClientHello(Ꮡinner, ((nint)ech.config.MaxNameLength));
+    var (encodedInner, err) = encodeInnerClientHello(Ꮡinner, (nint)(~ech.config).MaxNameLength);
     if (err != default!) {
         return err;
     }
@@ -244,21 +241,21 @@ internal static error computeAndUpdateOuterECHExtension(ж<clientHelloMsg> Ꮡou
     // with a different tag length, we will need to change this.
     nint encryptedLen = len(encodedInner) + 16;
     // AEAD tag length
-    (outer.encryptedClientHello, err) = generateOuterECHExt(ech.config.ConfigID, ech.kdfID, ech.aeadID, encapKey, new slice<byte>(encryptedLen));
+    (outer.encryptedClientHello, err) = generateOuterECHExt((~ech.config).ConfigID, ech.kdfID, ech.aeadID, encapKey, new slice<byte>(encryptedLen));
     if (err != default!) {
         return err;
     }
-    (serializedOuter, err) = outer.marshal();
+    (var serializedOuter, err) = Ꮡouter.marshal();
     if (err != default!) {
         return err;
     }
     serializedOuter = serializedOuter[4..];
     // strip the four byte prefix
-    (encryptedInner, err) = ech.hpkeContext.Seal(serializedOuter, encodedInner);
+    (var encryptedInner, err) = ech.hpkeContext.Seal(serializedOuter, encodedInner);
     if (err != default!) {
         return err;
     }
-    (outer.encryptedClientHello, err) = generateOuterECHExt(ech.config.ConfigID, ech.kdfID, ech.aeadID, encapKey, encryptedInner);
+    (outer.encryptedClientHello, err) = generateOuterECHExt((~ech.config).ConfigID, ech.kdfID, ech.aeadID, encapKey, encryptedInner);
     if (err != default!) {
         return err;
     }

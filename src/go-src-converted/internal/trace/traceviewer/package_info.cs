@@ -14,7 +14,8 @@ global using execꓸError = go.os.exec_package.ΔError;
 global using httpꓸCookie = go.net.http_package.ΔCookie;
 global using httpꓸHandler = go.net.http_package.ΔHandler;
 global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using jsonꓸToken = go.encoding.json_package.ΔToken;
+global using jsonꓸToken = object;
+global using jsonꓸΔToken = object;
 global using osꓸDirEntry = go.io.fs_package.DirEntry;
 global using osꓸFileInfo = go.io.fs_package.FileInfo;
 global using osꓸFileMode = go.io.fs_package.FileMode;
@@ -22,7 +23,7 @@ global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
 global using runtimeꓸError = go.runtime_package.ΔError;
 global using templateꓸError = go.html.template_package.ΔError;
-global using templateꓸFuncMap = go.template.FuncMap;
+global using templateꓸFuncMap = go.text.template_package.FuncMap;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
@@ -64,21 +65,16 @@ using static go.@internal.trace.traceviewer_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(<>ProfileRecord, error), error>]
-[assembly: GoImplement<(os.FileInfo, error), osꓸFileInfo>]
-[assembly: GoImplement<bufio_package.Writer, io_package.Writer>]
-[assembly: GoImplement<countingWriter, io_package.Writer>]
-[assembly: GoImplement<embed_package.FS, io.fs_package.FS>]
-[assembly: GoImplement<net.http_package.HandlerFunc, net.http_package.ΔHandler>]
-[assembly: GoImplement<net.http_package.ResponseWriter, io_package.Writer>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
-[assembly: GoImplement<strings_package.Builder, io_package.Writer>]
-[assembly: GoImplement<strings_package.Reader, io_package.ReadSeeker>]
-[assembly: GoImplement<trace.MutatorUtil, error), error>]
+[assembly: GoImplement<bufio_package.Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<countingWriter, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<embed_package.FS, go.io.fs_package.FS>]
+[assembly: GoImplement<go.net.http_package.HandlerFunc, go.net.http_package.ΔHandler>]
+[assembly: GoImplement<go.net.http_package.ResponseWriter, io_package.Writer>]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<strings_package.Reader, io_package.ReadSeeker>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<http.pattern; matches <>string; otherValues map<string>string}, http.pattern; matches <>string; otherValues map<string>string}>(Inverted = true)]
 // </ImplicitConversions>
 
 namespace go.@internal.trace;

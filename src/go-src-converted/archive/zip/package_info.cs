@@ -18,6 +18,8 @@ global using osꓸSignal = go.os_package.ΔSignal;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
+using bufio = go.bufio_package;
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -46,33 +48,25 @@ using static go.archive.zip_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(fileInfoDirEntry, error), fileInfoDirEntry>]
-[assembly: GoImplement<(fileInfoDirEntry, error), io.fs_package.FileInfo>]
-[assembly: GoImplement<(io.ReadCloser, bool), io_package.ReadCloser>]
-[assembly: GoImplement<(io.ReadCloser, error), io_package.ReadCloser>]
-[assembly: GoImplement<(io.Reader, error), io_package.Reader>]
-[assembly: GoImplement<(io.Writer, error), io_package.Writer>]
-[assembly: GoImplement<(os.FileInfo, error), osꓸFileInfo>]
-[assembly: GoImplement<bufio_package.Reader, io_package.Reader>]
-[assembly: GoImplement<checksumReader, io_package.ReadCloser>]
-[assembly: GoImplement<countWriter, io_package.Writer>]
-[assembly: GoImplement<dirReader, io_package.ReadCloser>]
+[assembly: GoImplement<bufio_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<bufio_package.Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<checksumReader, io_package.ReadCloser>(Pointer = true)]
+[assembly: GoImplement<countWriter, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<dirReader, io_package.ReadCloser>(Pointer = true)]
 [assembly: GoImplement<dirWriter, io_package.Writer>]
-[assembly: GoImplement<fileListEntry, fileInfoDirEntry>]
-[assembly: GoImplement<fileListEntry, io.fs_package.DirEntry>]
-[assembly: GoImplement<fileListEntry, io.fs_package.FileInfo>]
-[assembly: GoImplement<fileWriter, io_package.Writer>]
-[assembly: GoImplement<fs.File, error), io.fs_package.File>]
-[assembly: GoImplement<fs.FileInfo, error), io.fs_package.FileInfo>]
+[assembly: GoImplement<fileListEntry, fileInfoDirEntry>(Pointer = true)]
+[assembly: GoImplement<fileListEntry, go.io.fs_package.DirEntry>(Pointer = true)]
+[assembly: GoImplement<fileListEntry, go.io.fs_package.FileInfo>(Pointer = true)]
+[assembly: GoImplement<fileWriter, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<go.io.fs_package.File, io_package.Reader>]
 [assembly: GoImplement<headerFileInfo, fileInfoDirEntry>]
-[assembly: GoImplement<headerFileInfo, io.fs_package.FileInfo>]
-[assembly: GoImplement<io.fs_package.File, io_package.Reader>]
-[assembly: GoImplement<io.fs_package.PathError, error>]
-[assembly: GoImplement<io_package.SectionReader, io_package.Reader>]
-[assembly: GoImplement<openDir, io.fs_package.File>]
-[assembly: GoImplement<os_package.File, io_package.ReaderAt>]
-[assembly: GoImplement<pooledFlateReader, io_package.ReadCloser>]
-[assembly: GoImplement<pooledFlateWriter, io_package.WriteCloser>]
+[assembly: GoImplement<io_package.SectionReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<nopCloser, io_package.WriteCloser>(Pointer = true)]
+[assembly: GoImplement<nopCloser, io_package.Writer>(Promoted = true)]
+[assembly: GoImplement<openDir, go.io.fs_package.File>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<pooledFlateReader, io_package.ReadCloser>(Pointer = true)]
+[assembly: GoImplement<pooledFlateWriter, io_package.WriteCloser>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

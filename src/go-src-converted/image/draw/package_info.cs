@@ -12,6 +12,7 @@
 // <ImportedTypeAliases>
 global using colorꓸRGBA = go.image.color_package.ΔRGBA;
 global using imageꓸRGBA = go.image_package.ΔRGBA;
+using image = go.image_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -40,13 +41,11 @@ using static go.image.draw_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(RGBA64Image, bool), RGBA64Image>]
-[assembly: GoImplement<(image.RGBA64Image, bool), image_package.RGBA64Image>]
-[assembly: GoImplement<Image, image_package.Image>]
 [assembly: GoImplement<floydSteinberg, Drawer>]
-[assembly: GoImplement<image.color_package.Alpha16, image.color_package.Color>]
-[assembly: GoImplement<image.color_package.RGBA64, image.color_package.Color>]
-[assembly: GoImplement<image_package.Paletted, Image>]
+[assembly: GoImplement<go.image.color_package.Alpha16, go.image.color_package.Color>]
+[assembly: GoImplement<go.image.color_package.RGBA64, go.image.color_package.Color>(Pointer = true)]
+[assembly: GoImplement<image_package.Paletted, Image>(Pointer = true)]
+[assembly: GoImplement<image_package.ΔRGBA, image_package.Image>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -56,8 +55,6 @@ using static go.image.draw_package;
 [assembly: GoImplicitConv<image.NRGBA, ж<image.NRGBA>>(Indirect = true)]
 [assembly: GoImplicitConv<image.Uniform, ж<image.Uniform>>(Indirect = true)]
 [assembly: GoImplicitConv<image.YCbCr, ж<image.YCbCr>>(Indirect = true)]
-[assembly: GoImplicitConv<struct{Min image.Point; Max image.Point}, struct{Min image.Point; Max image.Point}>(Inverted = true)]
-[assembly: GoImplicitConv<struct{X int; Y int}, struct{X int; Y int}>(Inverted = true)]
 // </ImplicitConversions>
 
 namespace go.image;

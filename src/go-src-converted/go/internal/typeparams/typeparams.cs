@@ -3,9 +3,9 @@
 // license that can be found in the LICENSE file.
 namespace go.go.@internal;
 
-using ast = go.ast_package;
-using token = go.token_package;
-using go;
+using ast = global::go.go.ast_package;
+using token = global::go.go.token_package;
+using global::go.go;
 
 partial class typeparams_package {
 
@@ -16,20 +16,20 @@ public static ast.Expr PackIndexExpr(ast.Expr x, tokenꓸPos lbrack, slice<ast.E
         break;
     }
     case 1: {
-        return new ast.IndexExpr(
+        return new ast_IndexExprжExpr(Ꮡ(new ast.IndexExpr(
             X: x,
             Lbrack: lbrack,
             Index: exprs[0],
             Rbrack: rbrack
-        );
+        )));
     }
     default: {
-        return new ast.IndexListExpr(
+        return new ast_IndexListExprжExpr(Ꮡ(new ast.IndexListExpr(
             X: x,
             Lbrack: lbrack,
             Indices: exprs,
             Rbrack: rbrack
-        );
+        )));
     }}
 
 }
@@ -44,11 +44,11 @@ public static ast.Expr PackIndexExpr(ast.Expr x, tokenꓸPos lbrack, slice<ast.E
 // TODO(rfindley): remove this helper, in favor of just having a helper
 // function that returns indices.
 [GoType] partial struct IndexExpr {
-    public go.ast_package.Expr Orig;   // the wrapped expr, which may be distinct from the IndexListExpr below.
-    public go.ast_package.Expr X;   // expression
-    public go.token_package.ΔPos Lbrack; // position of "["
-    public ast.Expr Indices; // index expressions
-    public go.token_package.ΔPos Rbrack; // position of "]"
+    public ast.Expr Orig;   // the wrapped expr, which may be distinct from the IndexListExpr below.
+    public ast.Expr X;   // expression
+    public tokenꓸPos Lbrack;  // position of "["
+    public slice<ast.Expr> Indices; // index expressions
+    public tokenꓸPos Rbrack;  // position of "]"
 }
 
 [GoRecv] public static tokenꓸPos Pos(this ref IndexExpr x) {
@@ -59,7 +59,7 @@ public static ж<IndexExpr> UnpackIndexExpr(ast.Node n) {
     switch (n.type()) {
     case ж<ast.IndexExpr> e: {
         return Ꮡ(new IndexExpr(
-            Orig: e,
+            Orig: new ast_IndexExprжExpr(e),
             X: (~e).X,
             Lbrack: (~e).Lbrack,
             Indices: new ast.Expr[]{(~e).Index}.slice(),
@@ -68,7 +68,7 @@ public static ж<IndexExpr> UnpackIndexExpr(ast.Node n) {
     }
     case ж<ast.IndexListExpr> e: {
         return Ꮡ(new IndexExpr(
-            Orig: e,
+            Orig: new ast_IndexListExprжExpr(e),
             X: (~e).X,
             Lbrack: (~e).Lbrack,
             Indices: (~e).Indices,

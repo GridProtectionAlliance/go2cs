@@ -3,12 +3,13 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto;
 
-using alias = crypto.@internal.alias_package;
-using subtle = crypto.subtle_package;
+using alias = go.crypto.@internal.alias_package;
+using subtle = go.crypto.subtle_package;
 using errors = errors_package;
-using byteorder = @internal.byteorder_package;
-using @internal;
-using crypto.@internal;
+using byteorder = go.@internal.byteorder_package;
+using go.@internal;
+using go.crypto;
+using go.crypto.@internal;
 
 partial class cipher_package {
 
@@ -60,8 +61,7 @@ partial class cipher_package {
 //	the coefficient of x⁶⁴ can be obtained by v.high >> 63.
 //	the coefficient of x¹²⁷ can be obtained by v.high & 1.
 [GoType] partial struct gcmFieldElement {
-    internal uint64 low;
-    internal uint64 high;
+    internal uint64 low, high;
 }
 
 // gcm represents a Galois Counter Mode with a specific key. See
@@ -136,13 +136,12 @@ internal static (AEAD, error) newGCMWithNonceAndTagSize(Block cipher, nint nonce
         byteorder.BeUint64(key[..8]),
         byteorder.BeUint64(key[8..])
     );
-    (~g).productTable[reverseBits(1)] = x;
-    ref var i = ref heap<nint>(out var Ꮡi);
-    for (i = 2; i < 16; i += 2) {
-        (~g).productTable[reverseBits(i)] = gcmDouble(Ꮡ(~g).productTable.at<gcmFieldElement>(reverseBits(i / 2)));
-        (~g).productTable[reverseBits(i + 1)] = gcmAdd(Ꮡ(~g).productTable.at<gcmFieldElement>(reverseBits(i)), Ꮡx);
+    g.Value.productTable[reverseBits(1)] = x;
+    for (nint i = 2; i < 16; i += 2) {
+        g.Value.productTable[reverseBits(i)] = gcmDouble(g.at(gcm.ᏑproductTable, reverseBits(i / 2)));
+        g.Value.productTable[reverseBits(i + 1)] = gcmAdd(g.at(gcm.ᏑproductTable, reverseBits(i)), Ꮡx);
     }
-    return (~g, default!);
+    return (new gcmжAEAD(g), default!);
 }
 
 internal static readonly UntypedInt gcmBlockSize = 16;
@@ -162,10 +161,10 @@ internal static readonly UntypedInt gcmStandardNonceSize = 12;
     if (len(nonce) != g.nonceSize) {
         throw panic("crypto/cipher: incorrect nonce length given to GCM");
     }
-    if (((uint64)len(plaintext)) > ((1 << (int)(32)) - 2) * ((uint64)g.cipher.BlockSize())) {
+    if ((uint64)len(plaintext) > ((4294967296L) - 2) * (uint64)g.cipher.BlockSize()) {
         throw panic("crypto/cipher: message too large for GCM");
     }
-    (ret, @out) = sliceForAppend(dst, len(plaintext) + g.tagSize);
+    var (ret, @out) = sliceForAppend(dst, len(plaintext) + g.tagSize);
     if (alias.InexactOverlap(@out, plaintext)) {
         throw panic("crypto/cipher: invalid buffer overlap");
     }
@@ -195,7 +194,7 @@ internal static error errOpen = errors.New("cipher: message authentication faile
     if (len(ciphertext) < g.tagSize) {
         return (default!, errOpen);
     }
-    if (((uint64)len(ciphertext)) > ((1 << (int)(32)) - 2) * ((uint64)g.cipher.BlockSize()) + ((uint64)g.tagSize)) {
+    if ((uint64)len(ciphertext) > ((4294967296L) - 2) * (uint64)g.cipher.BlockSize() + (uint64)g.tagSize) {
         return (default!, errOpen);
     }
     var tag = ciphertext[(int)(len(ciphertext) - g.tagSize)..];
@@ -207,7 +206,7 @@ internal static error errOpen = errors.New("cipher: message authentication faile
     gcmInc32(Ꮡcounter);
     array<byte> expectedTag = new(16); /* gcmTagSize */
     g.auth(expectedTag[..], ciphertext, data, ᏑtagMask);
-    (ret, @out) = sliceForAppend(dst, len(ciphertext));
+    var (ret, @out) = sliceForAppend(dst, len(ciphertext));
     if (alias.InexactOverlap(@out, ciphertext)) {
         throw panic("crypto/cipher: invalid buffer overlap");
     }
@@ -225,15 +224,15 @@ internal static error errOpen = errors.New("cipher: message authentication faile
 
 // reverseBits reverses the order of the bits of 4-bit number in i.
 internal static nint reverseBits(nint i) {
-    i = (nint)(((nint)((i << (int)(2)) & 12)) | ((nint)((i >> (int)(2)) & 3)));
-    i = (nint)(((nint)((i << (int)(1)) & 10)) | ((nint)((i >> (int)(1)) & 5)));
+    i = (nint)(((nint)(((i << (int)(2))) & 0xc)) | ((nint)(((i >> (int)(2))) & 0x3)));
+    i = (nint)(((nint)(((i << (int)(1))) & 0xa)) | ((nint)(((i >> (int)(1))) & 0x5)));
     return i;
 }
 
 // gcmAdd adds two elements of GF(2¹²⁸) and returns the sum.
 internal static gcmFieldElement gcmAdd(ж<gcmFieldElement> Ꮡx, ж<gcmFieldElement> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     // Addition in a characteristic 2 field is just XOR.
     return new gcmFieldElement((uint64)(x.low ^ y.low), (uint64)(x.high ^ y.high));
@@ -243,12 +242,12 @@ internal static gcmFieldElement gcmAdd(ж<gcmFieldElement> Ꮡx, ж<gcmFieldElem
 internal static gcmFieldElement /*double*/ gcmDouble(ж<gcmFieldElement> Ꮡx) {
     gcmFieldElement @double = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     var msbSet = (uint64)(x.high & 1) == 1;
     // Because of the bit-ordering, doubling is actually a right shift.
-    @double.high = x.high >> (int)(1);
-    @double.high |= (uint64)(x.low << (int)(63));
-    @double.low = x.low >> (int)(1);
+    @double.high = (x.high >> (int)(1));
+    @double.high |= (x.low << (int)(63));
+    @double.low = (x.low >> (int)(1));
     // If the most-significant bit was set before shifting then it,
     // conceptually, becomes a term of x^128. This is greater than the
     // irreducible polynomial so the result has to be reduced. The
@@ -257,19 +256,19 @@ internal static gcmFieldElement /*double*/ gcmDouble(ж<gcmFieldElement> Ꮡx) {
     // four terms. In characteristic 2 fields, subtraction == addition ==
     // XOR.
     if (msbSet) {
-        @double.low ^= (uint64)((nuint)16212958658533785600UL);
+        @double.low ^= (nuint)0xe100000000000000UL;
     }
     return @double;
 }
 
 internal static slice<uint16> gcmReductionTable = new uint16[]{
-    0, 7200, 14400, 9312, 28800, 27808, 18624, 21728,
-    57600, 64800, 55616, 50528, 37248, 36256, 43456, 46560
+    0x0000, 0x1c20, 0x3840, 0x2460, 0x7080, 0x6ca0, 0x48c0, 0x54e0,
+    0xe100, 0xfd20, 0xd940, 0xc560, 0x9180, 0x8da0, 0xa9c0, 0xb5e0
 }.slice();
 
 // mul sets y to y*H, where H is the GCM key, fixed during NewGCMWithNonceSize.
 [GoRecv] internal static void mul(this ref gcm g, ж<gcmFieldElement> Ꮡy) {
-    ref var y = ref Ꮡy.val;
+    ref var y = ref Ꮡy.Value;
 
     gcmFieldElement z = default!;
     for (nint i = 0; i < 2; i++) {
@@ -280,18 +279,18 @@ internal static slice<uint16> gcmReductionTable = new uint16[]{
         // Multiplication works by multiplying z by 16 and adding in
         // one of the precomputed multiples of H.
         for (nint j = 0; j < 64; j += 4) {
-            var msw = (uint64)(z.high & 15);
-            z.high >>= (UntypedInt)(4);
-            z.high |= (uint64)(z.low << (int)(60));
-            z.low >>= (UntypedInt)(4);
-            z.low ^= (uint64)(((uint64)gcmReductionTable[msw]) << (int)(48));
+            var msw = (uint64)(z.high & 0xf);
+            z.high >>= (int)(4);
+            z.high |= (z.low << (int)(60));
+            z.low >>= (int)(4);
+            z.low ^= ((uint64)gcmReductionTable[(nint)(msw)] << (int)(48));
             // the values in |table| are ordered for
             // little-endian bit positions. See the comment
             // in NewGCMWithNonceSize.
-            var t = Ꮡ(g.productTable[(uint64)(word & 15)]);
-            z.low ^= (uint64)(t.val.low);
-            z.high ^= (uint64)(t.val.high);
-            word >>= (UntypedInt)(4);
+            var t = Ꮡ(g.productTable[(uint64)(word & 0xf)]);
+            z.low ^= t.Value.low;
+            z.high ^= t.Value.high;
+            word >>= (int)(4);
         }
     }
     y = z;
@@ -300,11 +299,11 @@ internal static slice<uint16> gcmReductionTable = new uint16[]{
 // updateBlocks extends y with more polynomial terms from blocks, based on
 // Horner's rule. There must be a multiple of gcmBlockSize bytes in blocks.
 [GoRecv] internal static void updateBlocks(this ref gcm g, ж<gcmFieldElement> Ꮡy, slice<byte> blocks) {
-    ref var y = ref Ꮡy.val;
+    ref var y = ref Ꮡy.Value;
 
     while (len(blocks) > 0) {
-        y.low ^= (uint64)(byteorder.BeUint64(blocks));
-        y.high ^= (uint64)(byteorder.BeUint64(blocks[8..]));
+        y.low ^= byteorder.BeUint64(blocks);
+        y.high ^= byteorder.BeUint64(blocks[8..]);
         g.mul(Ꮡy);
         blocks = blocks[(int)(gcmBlockSize)..];
     }
@@ -313,9 +312,9 @@ internal static slice<uint16> gcmReductionTable = new uint16[]{
 // update extends y with more polynomial terms from data. If data is not a
 // multiple of gcmBlockSize bytes long then the remainder is zero padded.
 [GoRecv] internal static void update(this ref gcm g, ж<gcmFieldElement> Ꮡy, slice<byte> data) {
-    ref var y = ref Ꮡy.val;
+    ref var y = ref Ꮡy.Value;
 
-    nint fullBlocks = (len(data) >> (int)(4)) << (int)(4);
+    nint fullBlocks = (((len(data) >> (int)(4))) << (int)(4));
     g.updateBlocks(Ꮡy, data[..(int)(fullBlocks)]);
     if (len(data) != fullBlocks) {
         array<byte> partialBlock = new(16); /* gcmBlockSize */
@@ -327,7 +326,7 @@ internal static slice<uint16> gcmReductionTable = new uint16[]{
 // gcmInc32 treats the final four bytes of counterBlock as a big-endian value
 // and increments it.
 internal static void gcmInc32(ж<array<byte>> ᏑcounterBlock) {
-    ref var counterBlock = ref ᏑcounterBlock.val;
+    ref var counterBlock = ref ᏑcounterBlock.Value;
 
     var ctr = counterBlock[(int)(len(counterBlock) - 4)..];
     byteorder.BePutUint32(ctr, byteorder.BeUint32(ctr) + 1);
@@ -355,7 +354,7 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
 
 // counterCrypt crypts in to out using g.cipher in counter mode.
 [GoRecv] internal static void counterCrypt(this ref gcm g, slice<byte> @out, slice<byte> @in, ж<array<byte>> Ꮡcounter) {
-    ref var counter = ref Ꮡcounter.val;
+    ref var counter = ref Ꮡcounter.Value;
 
     array<byte> mask = new(16); /* gcmBlockSize */
     while (len(@in) >= gcmBlockSize) {
@@ -376,7 +375,7 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
 // See NIST SP 800-38D, section 7.1. This assumes that counter is filled with
 // zeros on entry.
 [GoRecv] internal static void deriveCounter(this ref gcm g, ж<array<byte>> Ꮡcounter, slice<byte> nonce) {
-    ref var counter = ref Ꮡcounter.val;
+    ref var counter = ref Ꮡcounter.Value;
 
     // GCM has two modes of operation with respect to the initial counter
     // state: a "fast path" for 96-bit (12-byte) nonces, and a "slow path"
@@ -390,7 +389,7 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
     } else {
         ref var y = ref heap(new gcmFieldElement(), out var Ꮡy);
         g.update(Ꮡy, nonce);
-        y.high ^= (uint64)(((uint64)len(nonce)) * 8);
+        y.high ^= (uint64)len(nonce) * 8;
         g.mul(Ꮡy);
         byteorder.BePutUint64(counter[..8], y.low);
         byteorder.BePutUint64(counter[8..], y.high);
@@ -400,13 +399,13 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
 // auth calculates GHASH(ciphertext, additionalData), masks the result with
 // tagMask and writes the result to out.
 [GoRecv] internal static void auth(this ref gcm g, slice<byte> @out, slice<byte> ciphertext, slice<byte> additionalData, ж<array<byte>> ᏑtagMask) {
-    ref var tagMask = ref ᏑtagMask.val;
+    ref var tagMask = ref ᏑtagMask.Value;
 
     ref var y = ref heap(new gcmFieldElement(), out var Ꮡy);
     g.update(Ꮡy, additionalData);
     g.update(Ꮡy, ciphertext);
-    y.low ^= (uint64)(((uint64)len(additionalData)) * 8);
-    y.high ^= (uint64)(((uint64)len(ciphertext)) * 8);
+    y.low ^= (uint64)len(additionalData) * 8;
+    y.high ^= (uint64)len(ciphertext) * 8;
     g.mul(Ꮡy);
     byteorder.BePutUint64(@out, y.low);
     byteorder.BePutUint64(@out[8..], y.high);

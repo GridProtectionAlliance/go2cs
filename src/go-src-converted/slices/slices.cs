@@ -9,8 +9,6 @@ using cmp = cmp_package;
 using bits = math.bits_package;
 using @unsafe = unsafe_package;
 using math;
-using ꓸꓸꓸE = Span<E>;
-using ꓸꓸꓸS = Span<S>;
 
 partial class slices_package {
 
@@ -21,8 +19,8 @@ partial class slices_package {
 // Empty and nil slices are considered equal.
 // Floating point NaNs are not considered equal.
 public static bool Equal<S, E>(S s1, S s2)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : /* comparable */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
+    where E : /* comparable */ new()
 {
     if (len(s1) != len(s2)) {
         return false;
@@ -41,10 +39,8 @@ public static bool Equal<S, E>(S s1, S s2)
 // increasing index order, and the comparison stops at the first index
 // for which eq returns false.
 public static bool EqualFunc<S1, S2, E1, E2>(S1 s1, S2 s2, Func<E1, E2, bool> eq)
-    where S1 : /* ~[]E1 */ ISlice<E1>, ISupportMake<S1>, IEqualityOperators<S1, S1, bool>, new()
-    where S2 : /* ~[]E2 */ ISlice<E2>, ISupportMake<S2>, IEqualityOperators<S2, S2, bool>, new()
-    where E1 : new()
-    where E2 : new()
+    where S1 : /* ~[]E1 */ ISlice<E1>, ISupportMake<S1>, ISliceWrap<S1, E1>, new()
+    where S2 : /* ~[]E2 */ ISlice<E2>, ISupportMake<S2>, ISliceWrap<S2, E2>, new()
 {
     if (len(s1) != len(s2)) {
         return false;
@@ -66,7 +62,7 @@ public static bool EqualFunc<S1, S2, E1, E2>(S1 s1, S2 s2, Func<E1, E2, bool> eq
 // considered less than the longer one.
 // The result is 0 if s1 == s2, -1 if s1 < s2, and +1 if s1 > s2.
 public static nint Compare<S, E>(S s1, S s2)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
     foreach (var (i, v1) in s1) {
@@ -92,10 +88,8 @@ public static nint Compare<S, E>(S s1, S s2)
 // returns 0 the result is 0 if len(s1) == len(s2), -1 if len(s1) < len(s2),
 // and +1 if len(s1) > len(s2).
 public static nint CompareFunc<S1, S2, E1, E2>(S1 s1, S2 s2, Func<E1, E2, nint> cmp)
-    where S1 : /* ~[]E1 */ ISlice<E1>, ISupportMake<S1>, IEqualityOperators<S1, S1, bool>, new()
-    where S2 : /* ~[]E2 */ ISlice<E2>, ISupportMake<S2>, IEqualityOperators<S2, S2, bool>, new()
-    where E1 : new()
-    where E2 : new()
+    where S1 : /* ~[]E1 */ ISlice<E1>, ISupportMake<S1>, ISliceWrap<S1, E1>, new()
+    where S2 : /* ~[]E2 */ ISlice<E2>, ISupportMake<S2>, ISliceWrap<S2, E2>, new()
 {
     foreach (var (i, v1) in s1) {
         if (i >= len(s2)) {
@@ -117,8 +111,8 @@ public static nint CompareFunc<S1, S2, E1, E2>(S1 s1, S2 s2, Func<E1, E2, nint> 
 // Index returns the index of the first occurrence of v in s,
 // or -1 if not present.
 public static nint Index<S, E>(S s, E v)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : /* comparable */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
+    where E : /* comparable */ new()
 {
     foreach (var (i, _) in s) {
         if (AreEqual(v, s[i])) {
@@ -131,8 +125,7 @@ public static nint Index<S, E>(S s, E v)
 // IndexFunc returns the first index i satisfying f(s[i]),
 // or -1 if none do.
 public static nint IndexFunc<S, E>(S s, Func<E, bool> f)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     foreach (var (i, _) in s) {
         if (f(s[i])) {
@@ -144,8 +137,8 @@ public static nint IndexFunc<S, E>(S s, Func<E, bool> f)
 
 // Contains reports whether v is present in s.
 public static bool Contains<S, E>(S s, E v)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : /* comparable */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
+    where E : /* comparable */ new()
 {
     return Index(s, v) >= 0;
 }
@@ -153,8 +146,7 @@ public static bool Contains<S, E>(S s, E v)
 // ContainsFunc reports whether at least one
 // element e of s satisfies f(e).
 public static bool ContainsFunc<S, E>(S s, Func<E, bool> f)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     return IndexFunc(s, f) >= 0;
 }
@@ -166,13 +158,12 @@ public static bool ContainsFunc<S, E>(S s, Func<E, bool> f)
 // and r[i+len(v)] == value originally at r[i].
 // Insert panics if i is out of range.
 // This function is O(len(s) + len(v)).
-public static S Insert<S, E>(S s, nint i, params ꓸꓸꓸE vʗp)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+public static S Insert<S, E>(S s, nint i, params Span<E> vʗp)
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     var v = vʗp.slice();
 
-    _ = s[(int)(i)..];
+    _ = subslice<S, E>(s, i, -1);
     // bounds check
     nint m = len(v);
     if (m == 0) {
@@ -187,12 +178,12 @@ public static S Insert<S, E>(S s, nint i, params ꓸꓸꓸE vʗp)
         // the slice up to the next storage class.
         // This is what Grow does but we don't call Grow because
         // that might copy the values twice.
-        var s2 = append(s[..(int)(i)], make<S>(n + m - i).ꓸꓸꓸ);
-        copy(s2[(int)(i)..], v);
-        copy(s2[(int)(i + m)..], s[(int)(i)..]);
+        var s2 = append(subslice<S, E>(s, -1, i), make<S>(n + m - i).ꓸꓸꓸ);
+        copy(subslice<S, E>(s2, i, -1), v);
+        copy(subslice<S, E>(s2, i + m, -1), subslice<S, E>(s, i, -1));
         return s2;
     }
-    s = s[..(int)(n + m)];
+    s = subslice<S, E>(s, -1, n + m);
     // before:
     // s: aaaaaaaabbbbccccccccdddd
     //            ^   ^       ^   ^
@@ -206,17 +197,17 @@ public static S Insert<S, E>(S s, nint i, params ꓸꓸꓸE vʗp)
     // v are the values copied in from v.
     // b and c are the values from s that are shifted up in index.
     // d are the values that get overwritten, never to be seen again.
-    if (!overlaps(v, s[(int)(i + m)..])) {
+    if (!overlaps(v, new slice<E>(subslice<S, E>(s, i + m, -1)))) {
         // Easy case - v does not overlap either the c or d regions.
         // (It might be in some of a or b, or elsewhere entirely.)
         // The data we copy up doesn't write to v at all, so just do it.
-        copy(s[(int)(i + m)..], s[(int)(i)..]);
+        copy(subslice<S, E>(s, i + m, -1), subslice<S, E>(s, i, -1));
         // Now we have
         // s: aaaaaaaabbbbbbbbcccccccc
         //            ^   ^       ^   ^
         //            i  i+m      n  n+m
         // Note the b values are duplicated.
-        copy(s[(int)(i)..], v);
+        copy(subslice<S, E>(s, i, -1), v);
         // Now we have
         // s: aaaaaaaavvvvbbbbcccccccc
         //            ^   ^       ^   ^
@@ -228,12 +219,12 @@ public static S Insert<S, E>(S s, nint i, params ꓸꓸꓸE vʗp)
     // the data because we'd move or clobber the values we're trying
     // to insert.
     // So instead, write v on top of d, then rotate.
-    copy(s[(int)(n)..], v);
+    copy(subslice<S, E>(s, n, -1), v);
     // Now we have
     // s: aaaaaaaabbbbccccccccvvvv
     //            ^   ^       ^   ^
     //            i  i+m      n  n+m
-    rotateRight(s[(int)(i)..], m);
+    rotateRight(new slice<E>(subslice<S, E>(s, i, -1)), m);
     // Now we have
     // s: aaaaaaaavvvvbbbbcccccccc
     //            ^   ^       ^   ^
@@ -248,17 +239,16 @@ public static S Insert<S, E>(S s, nint i, params ꓸꓸꓸE vʗp)
 // make a single call deleting them all together than to delete one at a time.
 // Delete zeroes the elements s[len(s)-(j-i):len(s)].
 public static S Delete<S, E>(S s, nint i, nint j)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
-    _ = s.slice(i, j, len(s));
+    _ = subslice3<S, E>(s, i, j, len(s));
     // bounds check
     if (i == j) {
         return s;
     }
     nint oldlen = len(s);
-    s = append(s[..(int)(i)], s[(int)(j)..].ꓸꓸꓸ);
-    clear(s[(int)(len(s))..(int)(oldlen)]);
+    s = append(subslice<S, E>(s, -1, i), subslice<S, E>(s, j, -1).ꓸꓸꓸ);
+    clear(subslice<S, E>(s, len(s), oldlen));
     // zero/nil out the obsolete elements, for GC
     return s;
 }
@@ -267,8 +257,7 @@ public static S Delete<S, E>(S s, nint i, nint j)
 // returning the modified slice.
 // DeleteFunc zeroes the elements between the new length and the original length.
 public static S DeleteFunc<S, E>(S s, Func<E, bool> del)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     nint i = IndexFunc(s, del);
     if (i == -1) {
@@ -283,49 +272,48 @@ public static S DeleteFunc<S, E>(S s, Func<E, bool> del)
             }
         }
     }
-    clear(s[(int)(i)..]);
+    clear(subslice<S, E>(s, i, -1));
     // zero/nil out the obsolete elements, for GC
-    return s[..(int)(i)];
+    return subslice<S, E>(s, -1, i);
 }
 
 // Replace replaces the elements s[i:j] by the given v, and returns the
 // modified slice.
 // Replace panics if j > len(s) or s[i:j] is not a valid slice of s.
 // When len(v) < (j-i), Replace zeroes the elements between the new length and the original length.
-public static S Replace<S, E>(S s, nint i, nint j, params ꓸꓸꓸE vʗp)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+public static S Replace<S, E>(S s, nint i, nint j, params Span<E> vʗp)
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     var v = vʗp.slice();
 
-    _ = s[(int)(i)..(int)(j)];
+    _ = subslice<S, E>(s, i, j);
     // bounds check
     if (i == j) {
         return Insert(s, i, v.ꓸꓸꓸ);
     }
     if (j == len(s)) {
-        var s2 = append(s[..(int)(i)], v.ꓸꓸꓸ);
+        var s2 = append(subslice<S, E>(s, -1, i), v.ꓸꓸꓸ);
         if (len(s2) < len(s)) {
-            clear(s[(int)(len(s2))..]);
+            clear(subslice<S, E>(s, len(s2), -1));
         }
         // zero/nil out the obsolete elements, for GC
         return s2;
     }
-    nint tot = len(s[..(int)(i)]) + len(v) + len(s[(int)(j)..]);
+    nint tot = len(subslice<S, E>(s, -1, i)) + len(v) + len(subslice<S, E>(s, j, -1));
     if (tot > cap(s)) {
         // Too big to fit, allocate and copy over.
-        var s2 = append(s[..(int)(i)], make<S>(tot - i).ꓸꓸꓸ);
+        var s2 = append(subslice<S, E>(s, -1, i), make<S>(tot - i).ꓸꓸꓸ);
         // See Insert
-        copy(s2[(int)(i)..], v);
-        copy(s2[(int)(i + len(v))..], s[(int)(j)..]);
+        copy(subslice<S, E>(s2, i, -1), v);
+        copy(subslice<S, E>(s2, i + len(v), -1), subslice<S, E>(s, j, -1));
         return s2;
     }
-    var r = s[..(int)(tot)];
+    var r = subslice<S, E>(s, -1, tot);
     if (i + len(v) <= j) {
         // Easy, as v fits in the deleted portion.
-        copy(r[(int)(i)..], v);
-        copy(r[(int)(i + len(v))..], s[(int)(j)..]);
-        clear(s[(int)(tot)..]);
+        copy(subslice<S, E>(r, i, -1), v);
+        copy(subslice<S, E>(r, i + len(v), -1), subslice<S, E>(s, j, -1));
+        clear(subslice<S, E>(s, tot, -1));
         // zero/nil out the obsolete elements, for GC
         return r;
     }
@@ -339,10 +327,10 @@ public static S Replace<S, E>(S s, nint i, nint j, params ꓸꓸꓸE vʗp)
     // x: deleted range
     // b: more of s
     // y: area to expand into
-    if (!overlaps(r[(int)(i + len(v))..], v)) {
+    if (!overlaps(new slice<E>(subslice<S, E>(r, i + len(v), -1)), v)) {
         // Easy, as v is not clobbered by the first copy.
-        copy(r[(int)(i + len(v))..], s[(int)(j)..]);
-        copy(r[(int)(i)..], v);
+        copy(subslice<S, E>(r, i + len(v), -1), subslice<S, E>(s, j, -1));
+        copy(subslice<S, E>(r, i, -1), v);
         return r;
     }
     // This is a situation where we don't have a single place to which
@@ -359,16 +347,16 @@ public static S Replace<S, E>(S s, nint i, nint j, params ꓸꓸꓸE vʗp)
     // If either of those two destinations don't alias v, then we're good.
     nint y = len(v) - (j - i);
     // length of y portion
-    if (!overlaps(r[(int)(i)..(int)(j)], v)) {
-        copy(r[(int)(i)..(int)(j)], v[(int)(y)..]);
-        copy(r[(int)(len(s))..], v[..(int)(y)]);
-        rotateRight(r[(int)(i)..], y);
+    if (!overlaps(new slice<E>(subslice<S, E>(r, i, j)), v)) {
+        copy(subslice<S, E>(r, i, j), v[(int)(y)..]);
+        copy(subslice<S, E>(r, len(s), -1), v[..(int)(y)]);
+        rotateRight(new slice<E>(subslice<S, E>(r, i, -1)), y);
         return r;
     }
-    if (!overlaps(r[(int)(len(s))..], v)) {
-        copy(r[(int)(len(s))..], v[..(int)(y)]);
-        copy(r[(int)(i)..(int)(j)], v[(int)(y)..]);
-        rotateRight(r[(int)(i)..], y);
+    if (!overlaps(new slice<E>(subslice<S, E>(r, len(s), -1)), v)) {
+        copy(subslice<S, E>(r, len(s), -1), v[..(int)(y)]);
+        copy(subslice<S, E>(r, i, j), v[(int)(y)..]);
+        rotateRight(new slice<E>(subslice<S, E>(r, i, -1)), y);
         return r;
     }
     // Now we know that v overlaps both x and y.
@@ -376,9 +364,9 @@ public static S Replace<S, E>(S s, nint i, nint j, params ꓸꓸꓸE vʗp)
     // So we don't need to preserve b at all; instead we
     // can copy v first, then copy the b part of v out of
     // v to the right destination.
-    nint k = startIdx(v, s[(int)(j)..]);
-    copy(r[(int)(i)..], v);
-    copy(r[(int)(i + len(v))..], r[(int)(i + k)..]);
+    nint k = startIdx(v, new slice<E>(subslice<S, E>(s, j, -1)));
+    copy(subslice<S, E>(r, i, -1), v);
+    copy(subslice<S, E>(r, i + len(v), -1), subslice<S, E>(r, i + k, -1));
     return r;
 }
 
@@ -386,11 +374,10 @@ public static S Replace<S, E>(S s, nint i, nint j, params ꓸꓸꓸE vʗp)
 // The elements are copied using assignment, so this is a shallow clone.
 // The result may have additional unused capacity.
 public static S Clone<S, E>(S s)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     // The s[:0:0] preserves nil in case it matters.
-    return append(s.slice(-1, 0, 0), s.ꓸꓸꓸ);
+    return append(subslice3<S, E>(s, -1, 0, 0), s.ꓸꓸꓸ);
 }
 
 // Compact replaces consecutive runs of equal elements with a single copy.
@@ -399,24 +386,24 @@ public static S Clone<S, E>(S s)
 // which may have a smaller length.
 // Compact zeroes the elements between the new length and the original length.
 public static S Compact<S, E>(S s)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : /* comparable */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
+    where E : /* comparable */ new()
 {
     if (len(s) < 2) {
         return s;
     }
     for (nint k = 1; k < len(s); k++) {
         if (AreEqual(s[k], s[k - 1])) {
-            var s2 = s[(int)(k)..];
+            var s2 = subslice<S, E>(s, k, -1);
             for (nint k2 = 1; k2 < len(s2); k2++) {
                 if (!AreEqual(s2[k2], s2[k2 - 1])) {
                     s[k] = s2[k2];
                     k++;
                 }
             }
-            clear(s[(int)(k)..]);
+            clear(subslice<S, E>(s, k, -1));
             // zero/nil out the obsolete elements, for GC
-            return s[..(int)(k)];
+            return subslice<S, E>(s, -1, k);
         }
     }
     return s;
@@ -426,24 +413,23 @@ public static S Compact<S, E>(S s)
 // For runs of elements that compare equal, CompactFunc keeps the first one.
 // CompactFunc zeroes the elements between the new length and the original length.
 public static S CompactFunc<S, E>(S s, Func<E, E, bool> eq)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     if (len(s) < 2) {
         return s;
     }
     for (nint k = 1; k < len(s); k++) {
         if (eq(s[k], s[k - 1])) {
-            var s2 = s[(int)(k)..];
+            var s2 = subslice<S, E>(s, k, -1);
             for (nint k2 = 1; k2 < len(s2); k2++) {
                 if (!eq(s2[k2], s2[k2 - 1])) {
                     s[k] = s2[k2];
                     k++;
                 }
             }
-            clear(s[(int)(k)..]);
+            clear(subslice<S, E>(s, k, -1));
             // zero/nil out the obsolete elements, for GC
-            return s[..(int)(k)];
+            return subslice<S, E>(s, -1, k);
         }
     }
     return s;
@@ -454,15 +440,14 @@ public static S CompactFunc<S, E>(S s, Func<E, E, bool> eq)
 // to the slice without another allocation. If n is negative or too large to
 // allocate the memory, Grow panics.
 public static S Grow<S, E>(S s, nint n)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     if (n < 0) {
         throw panic("cannot be negative");
     }
     {
         n -= cap(s) - len(s); if (n > 0) {
-            s = append(s[..(int)(cap(s))], new slice<E>(n).ꓸꓸꓸ)[..(int)(len(s))];
+            s = subslice<S, E>(append(subslice<S, E>(s, -1, cap(s)), new slice<E>(n).ꓸꓸꓸ), -1, len(s));
         }
     }
     return s;
@@ -470,10 +455,9 @@ public static S Grow<S, E>(S s, nint n)
 
 // Clip removes unused capacity from the slice, returning s[:len(s):len(s)].
 public static S Clip<S, E>(S s)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
-    return s.slice(-1, len(s), len(s));
+    return subslice3<S, E>(s, -1, len(s), len(s));
 }
 
 // TODO: There are other rotate algorithms.
@@ -482,24 +466,18 @@ public static S Clip<S, E>(S s)
 
 // rotateLeft rotates s left by r spaces.
 // s_final[i] = s_orig[i+r], wrapping around.
-internal static void rotateLeft<E>(slice<E> s, nint r)
-    where E : new()
-{
-    Reverse(s[..(int)(r)]);
-    Reverse(s[(int)(r)..]);
-    Reverse(s);
+internal static void rotateLeft<E>(slice<E> s, nint r) {
+    Reverse<slice<E>, E>(s[..(int)(r)]);
+    Reverse<slice<E>, E>(s[(int)(r)..]);
+    Reverse<slice<E>, E>(s);
 }
 
-internal static void rotateRight<E>(slice<E> s, nint r)
-    where E : new()
-{
+internal static void rotateRight<E>(slice<E> s, nint r) {
     rotateLeft(s, len(s) - r);
 }
 
 // overlaps reports whether the memory ranges a[0:len(a)] and b[0:len(b)] overlap.
-internal static bool overlaps<E>(slice<E> a, slice<E> b)
-    where E : new()
-{
+internal static bool overlaps<E>(slice<E> a, slice<E> b) {
     if (len(a) == 0 || len(b) == 0) {
         return false;
     }
@@ -509,14 +487,12 @@ internal static bool overlaps<E>(slice<E> a, slice<E> b)
     }
     // TODO: use a runtime/unsafe facility once one becomes available. See issue 12445.
     // Also see crypto/internal/alias/alias.go:AnyOverlap
-    return ((uintptr)new @unsafe.Pointer(Ꮡ(a, 0))) <= ((uintptr)new @unsafe.Pointer(Ꮡ(b, len(b) - 1))) + (elemSize - 1) && ((uintptr)new @unsafe.Pointer(Ꮡ(b, 0))) <= ((uintptr)new @unsafe.Pointer(Ꮡ(a, len(a) - 1))) + (elemSize - 1);
+    return (uintptr)new @unsafe.Pointer(Ꮡ(a, 0)) <= (uintptr)new @unsafe.Pointer(Ꮡ(b, len(b) - 1)) + (elemSize - 1) && (uintptr)new @unsafe.Pointer(Ꮡ(b, 0)) <= (uintptr)new @unsafe.Pointer(Ꮡ(a, len(a) - 1)) + (elemSize - 1);
 }
 
 // startIdx returns the index in haystack where the needle starts.
 // prerequisite: the needle must be aliased entirely inside the haystack.
-internal static nint startIdx<E>(slice<E> haystack, slice<E> needle)
-    where E : new()
-{
+internal static nint startIdx<E>(slice<E> haystack, slice<E> needle) {
     var p = Ꮡ(needle, 0);
     foreach (var (i, _) in haystack) {
         if (p == Ꮡ(haystack, i)) {
@@ -529,18 +505,16 @@ internal static nint startIdx<E>(slice<E> haystack, slice<E> needle)
 
 // Reverse reverses the elements of the slice in place.
 public static void Reverse<S, E>(S s)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
-    for (nint i = 0;nint j = len(s) - 1; i < j; (i, j) = (i + 1, j - 1)) {
+    for ((nint i, nint j) = (0, len(s) - 1); i < j; (i, j) = (i + 1, j - 1)) {
         (s[i], s[j]) = (s[j], s[i]);
     }
 }
 
 // Concat returns a new slice concatenating the passed in slices.
-public static S Concat<S, E>(params ꓸꓸꓸS slicesʗp)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+public static S Concat<S, E>(params Span<S> slicesʗp)
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     var slices = slicesʗp.slice();
 
@@ -551,7 +525,7 @@ public static S Concat<S, E>(params ꓸꓸꓸS slicesʗp)
             throw panic("len out of range");
         }
     }
-    var newslice = Grow<S>(default!, size);
+    var newslice = Grow<S, E>(default!, size);
     foreach (var (_, s) in slices) {
         newslice = append(newslice, s.ꓸꓸꓸ);
     }
@@ -564,22 +538,21 @@ public static S Concat<S, E>(params ꓸꓸꓸS slicesʗp)
 // Repeat panics if count is negative or if the result of (len(x) * count)
 // overflows.
 public static S Repeat<S, E>(S x, nint count)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, IEqualityOperators<S, S, bool>, new()
-    where E : new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
     if (count < 0) {
         throw panic("cannot be negative");
     }
-    const nuint maxInt = /* ^uint(0) >> 1 */ 9223372036854775807;
+    nuint maxInt = /* ^uint(0) >> 1 */ unchecked((nuint)9223372036854775807);
     {
-        var (hi, lo) = bits.Mul(((nuint)len(x)), ((nuint)count)); if (hi > 0 || lo > maxInt) {
+        var (hi, lo) = bits.Mul((nuint)len(x), (nuint)count); if (hi > 0 || lo > maxInt) {
             throw panic("the result of (len(x) * count) overflows");
         }
     }
     var newslice = make<S>(len(x) * count);
     nint n = copy(newslice, x);
     while (n < len(newslice)) {
-        n += copy(newslice[(int)(n)..], newslice[..(int)(n)]);
+        n += copy(subslice<S, E>(newslice, n, -1), subslice<S, E>(newslice, -1, n));
     }
     return newslice;
 }

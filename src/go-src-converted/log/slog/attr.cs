@@ -27,7 +27,7 @@ public static Attr Int64(@string key, int64 value) {
 // Int converts an int to an int64 and returns
 // an Attr with that value.
 public static Attr Int(@string key, nint value) {
-    return Int64(key, ((int64)value));
+    return Int64(key, (int64)value);
 }
 
 // Uint64 returns an Attr for a uint64.
@@ -74,7 +74,7 @@ internal static slice<Attr> argsToAttrSlice(slice<any> args) {
     slice<Attr> attrs = default!;
     while (len(args) > 0) {
         (attr, args) = argsToAttr(args);
-        attrs = append(attrs, attr);
+        attrs = builtin.append(attrs, attr);
     }
     return attrs;
 }

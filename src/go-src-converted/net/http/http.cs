@@ -8,13 +8,14 @@ using io = io_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using time = time_package;
-using utf8 = unicode.utf8_package;
-using httpguts = golang.org.x.net.http.httpguts_package;
-using golang.org.x.net.http;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using httpguts = vendor.golang.org.x.net.http.httpguts_package;
+using go.unicode;
+using vendor.golang.org.x.net.http;
 
 partial class http_package {
-// [...]func()
+
+[GoType("[0]Action")] partial struct incomparable;
 
 // maxInt64 is the effective "infinite" value for the Server and
 // Transport's byte-limiting readers.
@@ -34,11 +35,11 @@ internal static bool omitBundledHTTP2;
 
 // contextKey is a value for use with context.WithValue. It's used as
 // a pointer so it fits in an interface{} without allocation.
-[GoType] partial struct contextKey {
+[GoType] public partial struct contextKey {
     internal @string name;
 }
 
-[GoRecv] internal static @string String(this ref contextKey k) {
+[GoRecv] public static @string String(this ref contextKey k) {
     return "net/http context value "u8 + k.name;
 }
 
@@ -63,9 +64,9 @@ internal static bool isNotToken(rune r) {
 
 // stringContainsCTLByte reports whether s contains any ASCII control character.
 internal static bool stringContainsCTLByte(@string s) {
-    for (nint i = 0; i < len(s); i++) {
+    for (nint i = 0; i < builtin.len(s); i++) {
         var b = s[i];
-        if (b < (rune)' ' || b == 127) {
+        if (b < (rune)' ' || b == 0x7f) {
             return true;
         }
     }
@@ -74,29 +75,29 @@ internal static bool stringContainsCTLByte(@string s) {
 
 internal static @string hexEscapeNonASCII(@string s) {
     nint newLen = 0;
-    for (nint i = 0; i < len(s); i++) {
+    for (nint i = 0; i < builtin.len(s); i++) {
         if (s[i] >= utf8.RuneSelf){
             newLen += 3;
         } else {
             newLen++;
         }
     }
-    if (newLen == len(s)) {
+    if (newLen == builtin.len(s)) {
         return s;
     }
     var b = new slice<byte>(0, newLen);
     nint pos = default!;
-    for (nint i = 0; i < len(s); i++) {
+    for (nint i = 0; i < builtin.len(s); i++) {
         if (s[i] >= utf8.RuneSelf) {
             if (pos < i) {
                 b = append(b, s[(int)(pos)..(int)(i)].ꓸꓸꓸ);
             }
-            b = append(b, (rune)'%');
-            b = strconv.AppendInt(b, ((int64)s[i]), 16);
+            b = append(b, (byte)((rune)'%'));
+            b = strconv.AppendInt(b, (int64)s[i], 16);
             pos = i + 1;
         }
     }
-    if (pos < len(s)) {
+    if (pos < builtin.len(s)) {
         b = append(b, s[(int)(pos)..].ꓸꓸꓸ);
     }
     return ((@string)b);
@@ -108,23 +109,23 @@ internal static @string hexEscapeNonASCII(@string s) {
 // An alternative, however, is to simply set [Request.Body] to nil.
 public static noBody NoBody = new noBody(nil);
 
-[GoType] partial struct noBody {
+[GoType] public partial struct noBody {
 }
 
-internal static (nint, error) Read(this noBody _, slice<byte> _) {
+public static (nint, error) Read(this noBody _Δp0, slice<byte> _Δp1) {
     return (0, io.EOF);
 }
 
-internal static error Close(this noBody _) {
+public static error Close(this noBody _) {
     return default!;
 }
 
-internal static (int64, error) WriteTo(this noBody _, io.Writer _) {
+public static (int64, error) WriteTo(this noBody _Δp0, io.Writer _Δp1) {
     return (0, default!);
 }
 
-internal static io.WriterTo _ᴛ2ʗ = NoBody;
-internal static io.ReadCloser _ᴛ3ʗ = NoBody;
+internal static io.WriterTo _ᴛ7ʗ = NoBody;
+internal static io.ReadCloser _ᴛ8ʗ = NoBody;
 
 // PushOptions describes options for [Pusher.Push].
 [GoType] partial struct PushOptions {

@@ -7,7 +7,7 @@ using @unsafe = unsafe_package;
 
 partial class runtime_package {
 
-internal static float64 inf = float64frombits((nint)9218868437227405312L);
+internal static float64 inf = float64frombits(0x7FF0000000000000UL);
 
 // isNaN reports whether f is an IEEE 754 “not-a-number” value.
 internal static bool /*is*/ isNaN(float64 f) {
@@ -34,15 +34,15 @@ internal static bool isInf(float64 f) {
 //	abs(±Inf) = +Inf
 //	abs(NaN) = NaN
 internal static float64 abs(float64 x) {
-    static readonly UntypedInt sign = /* 1 << 63 */ 9223372036854775808;
-    return float64frombits((uint64)(float64bits(x) & ~sign));
+    UntypedInt sign = /* 1 << 63 */ 9223372036854775808;
+    return float64frombits((uint64)(float64bits(x) & ~(uint64)sign));
 }
 
 // copysign returns a value with the magnitude
 // of x and the sign of y.
 internal static float64 copysign(float64 x, float64 y) {
-    static readonly UntypedInt sign = /* 1 << 63 */ 9223372036854775808;
-    return float64frombits((uint64)((uint64)(float64bits(x) & ~sign) | (uint64)(float64bits(y) & sign)));
+    UntypedInt sign = /* 1 << 63 */ 9223372036854775808;
+    return float64frombits((uint64)((uint64)(float64bits(x) & ~(uint64)sign) | (uint64)(float64bits(y) & (uint64)sign)));
 }
 
 // float64bits returns the IEEE 754 binary representation of f.

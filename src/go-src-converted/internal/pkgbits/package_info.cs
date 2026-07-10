@@ -52,11 +52,11 @@ using static go.@internal.pkgbits_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<CodeVal, ΔCode>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Reader>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>]
-[assembly: GoImplement<encoding.binary_package.littleEndian, encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<strings_package.Builder, io_package.Writer>]
-[assembly: GoImplement<strings_package.Reader, io_package.Reader>]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<go.encoding.binary_package.littleEndian, go.encoding.binary_package.ByteOrder>]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<strings_package.Reader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

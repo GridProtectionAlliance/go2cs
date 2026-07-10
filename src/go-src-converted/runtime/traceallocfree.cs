@@ -29,94 +29,92 @@ internal static void traceSnapshotMemory(uintptr gen) {
     (w, flushed) = w.ensure(1 + 4 * traceBytesPerNumber);
     if (flushed) {
         // Annotate the batch as containing additional info.
-        w.@byte(((byte)traceAllocFreeInfoBatch));
+        w.@byte((byte)traceAllocFreeInfoBatch);
     }
     // Emit info.
-    w.varint(((uint64)Δtrace.minPageHeapAddr));
-    w.varint(((uint64)pageSize));
-    w.varint(((uint64)minHeapAlign));
-    w.varint(((uint64)fixedStack));
+    w.varint((uint64)runtime_package.Δtrace.minPageHeapAddr);
+    w.varint((uint64)pageSize);
+    w.varint((uint64)minHeapAlign);
+    w.varint((uint64)fixedStack);
     // Finish writing the batch.
     w.flush().end();
     // Start tracing.
-    ref var trace = ref heap<traceLocker>(out var Ꮡtrace);
-    Δtrace = traceAcquire();
-    if (!Δtrace.ok()) {
+    ref var traceΔ1 = ref heap<traceLocker>(out var ᏑtraceΔ1);
+    traceΔ1 = traceAcquire();
+    if (!traceΔ1.ok()) {
         @throw("traceSnapshotMemory: tracing is not enabled"u8);
     }
     // Write out all the heap spans and heap objects.
     foreach (var (_, s) in mheap_.allspans) {
-        if ((~s).state.get() == mSpanDead) {
+        if (s.of(mspan.Ꮡstate).get() == mSpanDead) {
             continue;
         }
         // It's some kind of span, so trace that it exists.
-        Δtrace.SpanExists(s);
+        traceΔ1.SpanExists(s);
         // Write out allocated objects if it's a heap span.
-        if ((~s).state.get() != mSpanInUse) {
+        if (s.of(mspan.Ꮡstate).get() != mSpanInUse) {
             continue;
         }
         // Find all allocated objects.
         var abits = s.allocBitsForIndex(0);
-        for (var i = ((uintptr)0); i < ((uintptr)(~s).nelems); i++) {
-            if (abits.index < ((uintptr)(~s).freeindex) || abits.isMarked()) {
-                ref var x = ref heap<uintptr>(out var Ꮡx);
-                x = s.@base() + i * (~s).elemsize;
-                Δtrace.HeapObjectExists(x, s.typePointersOfUnchecked(x).typ);
+        for (var i = (uintptr)0; i < (uintptr)(~s).nelems; i++) {
+            if (abits.index < (uintptr)(~s).freeindex || abits.isMarked()) {
+                var x = s.@base() + i * (~s).elemsize;
+                traceΔ1.HeapObjectExists(x, s.typePointersOfUnchecked(x).typ);
             }
             abits.advance();
         }
     }
     // Write out all the goroutine stacks.
-    forEachGRace(
-    var traceʗ2 = Δtrace;
-    (ж<g> gp) => {
-        traceʗ2.GoroutineStackExists((~gp).stack.lo, (~gp).stack.hi - (~gp).stack.lo);
+    var traceʗ1 = traceΔ1;
+    forEachGRace((ж<g> gp) => {
+        traceʗ1.GoroutineStackExists((~gp).stack.lo, (~gp).stack.hi - (~gp).stack.lo);
     });
-    traceRelease(Δtrace);
+    traceRelease(traceΔ1);
 }
 
 internal static traceArg traceSpanTypeAndClass(ж<mspan> Ꮡs) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
-    if (s.state.get() == mSpanInUse) {
-        return ((traceArg)s.spanclass) << (int)(1);
+    if (Ꮡs.of(mspan.Ꮡstate).get() == mSpanInUse) {
+        return (((traceArg)(uint64)(uint8)s.spanclass) << (int)(1));
     }
     return ((traceArg)1);
 }
 
 // SpanExists records an event indicating that the span exists.
 internal static void SpanExists(this traceLocker tl, ж<mspan> Ꮡs) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
-    tl.eventWriter(traceGoRunning, traceProcRunning).commit(traceEvSpan, traceSpanID(Ꮡs), ((traceArg)s.npages), traceSpanTypeAndClass(Ꮡs));
+    tl.eventWriter(traceGoRunning, traceProcRunning).commit(traceEvSpan, traceSpanID(Ꮡs), ((traceArg)(uint64)s.npages), traceSpanTypeAndClass(Ꮡs));
 }
 
 // SpanAlloc records an event indicating that the span has just been allocated.
 internal static void SpanAlloc(this traceLocker tl, ж<mspan> Ꮡs) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
-    tl.eventWriter(traceGoRunning, traceProcRunning).commit(traceEvSpanAlloc, traceSpanID(Ꮡs), ((traceArg)s.npages), traceSpanTypeAndClass(Ꮡs));
+    tl.eventWriter(traceGoRunning, traceProcRunning).commit(traceEvSpanAlloc, traceSpanID(Ꮡs), ((traceArg)(uint64)s.npages), traceSpanTypeAndClass(Ꮡs));
 }
 
 // SpanFree records an event indicating that the span is about to be freed.
 internal static void SpanFree(this traceLocker tl, ж<mspan> Ꮡs) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     tl.eventWriter(traceGoRunning, traceProcRunning).commit(traceEvSpanFree, traceSpanID(Ꮡs));
 }
 
 // traceSpanID creates a trace ID for the span s for the trace.
 internal static traceArg traceSpanID(ж<mspan> Ꮡs) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
-    return ((traceArg)(((uint64)s.@base()) - Δtrace.minPageHeapAddr)) / pageSize;
+    return ((traceArg)((uint64)s.@base() - Δtrace.minPageHeapAddr)) / (uint64)pageSize;
 }
 
 // HeapObjectExists records that an object already exists at addr with the provided type.
 // The type is optional, and the size of the slot occupied the object is inferred from the
 // span containing it.
 internal static void HeapObjectExists(this traceLocker tl, uintptr addr, ж<abi.Type> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.Value;
 
     tl.eventWriter(traceGoRunning, traceProcRunning).commit(traceEvHeapObject, traceHeapObjectID(addr), tl.rtype(Ꮡtyp));
 }
@@ -125,7 +123,7 @@ internal static void HeapObjectExists(this traceLocker tl, uintptr addr, ж<abi.
 // The type is optional, and the size of the slot occupied the object is inferred from the
 // span containing it.
 internal static void HeapObjectAlloc(this traceLocker tl, uintptr addr, ж<abi.Type> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.Value;
 
     tl.eventWriter(traceGoRunning, traceProcRunning).commit(traceEvHeapObjectAlloc, traceHeapObjectID(addr), tl.rtype(Ꮡtyp));
 }
@@ -137,7 +135,7 @@ internal static void HeapObjectFree(this traceLocker tl, uintptr addr) {
 
 // traceHeapObjectID creates a trace ID for a heap object at address addr.
 internal static traceArg traceHeapObjectID(uintptr addr) {
-    return ((traceArg)(((uint64)addr) - Δtrace.minPageHeapAddr)) / minHeapAlign;
+    return ((traceArg)((uint64)addr - Δtrace.minPageHeapAddr)) / (uint64)minHeapAlign;
 }
 
 // GoroutineStackExists records that a goroutine stack already exists at address base with the provided size.
@@ -159,7 +157,7 @@ internal static void GoroutineStackFree(this traceLocker tl, uintptr @base) {
 
 // traceGoroutineStackID creates a trace ID for the goroutine stack from its base address.
 internal static traceArg traceGoroutineStackID(uintptr @base) {
-    return ((traceArg)(((uint64)@base) - Δtrace.minPageHeapAddr)) / fixedStack;
+    return ((traceArg)((uint64)@base - Δtrace.minPageHeapAddr)) / (uint64)fixedStack;
 }
 
 // traceCompressStackSize assumes size is a power of 2 and returns log2(size).
@@ -167,7 +165,7 @@ internal static traceArg traceCompressStackSize(uintptr size) {
     if ((uintptr)(size & (size - 1)) != 0) {
         @throw("goroutine stack size is not a power of 2"u8);
     }
-    return ((traceArg)sys.Len64(((uint64)size)));
+    return ((traceArg)(uint64)sys.Len64((uint64)size));
 }
 
 } // end runtime_package

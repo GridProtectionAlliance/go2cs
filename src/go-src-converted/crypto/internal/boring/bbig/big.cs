@@ -3,25 +3,25 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto.@internal.boring;
 
-using boring = crypto.@internal.boring_package;
+using boring = go.crypto.@internal.boring_package;
 using big = math.big_package;
 using @unsafe = unsafe_package;
-using crypto.@internal;
+using go.crypto.@internal;
 using math;
 
 partial class bbig_package {
 
 public static boring.BigInt Enc(ж<bigꓸInt> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.DerefOrNil();
 
-    if (b == nil) {
+    if (Ꮡb == nil) {
         return default!;
     }
     var x = b.Bits();
     if (len(x) == 0) {
-        return new boring.BigInt{nil};
+        return new boring.BigInt(new nuint[]{}.slice());
     }
-    return @unsafe.Slice(((ж<nuint>)(Ꮡ(x, 0))), len(x));
+    return @unsafe.Slice(Ꮡ((nuint)(~Ꮡ(x, 0))), len(x));
 }
 
 public static ж<bigꓸInt> Dec(boring.BigInt b) {
@@ -31,7 +31,7 @@ public static ж<bigꓸInt> Dec(boring.BigInt b) {
     if (len(b) == 0) {
         return @new<bigꓸInt>();
     }
-    var x = @unsafe.Slice((ж<big.Word>)(Ꮡ(b, 0)), len(b));
+    var x = @unsafe.Slice(Ꮡ((big.Word)(b[0])), len(b));
     return @new<bigꓸInt>().SetBits(x);
 }
 

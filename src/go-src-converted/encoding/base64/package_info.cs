@@ -39,8 +39,9 @@ using static go.encoding.base64_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<CorruptInputError, error>]
-[assembly: GoImplement<decoder, io_package.Reader>]
-[assembly: GoImplement<encoder, io_package.WriteCloser>]
+[assembly: GoImplement<decoder, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<encoder, io_package.WriteCloser>(Pointer = true)]
+[assembly: GoImplement<newlineFilteringReader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

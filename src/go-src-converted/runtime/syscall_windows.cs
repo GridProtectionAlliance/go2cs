@@ -19,7 +19,8 @@ partial class runtime_package {
     internal map<winCallbackKey, nint> index;
     internal nint n;
 }
-internal static cbsᴛ1 cbs;
+internal static ж<cbsᴛ1> Ꮡcbs = new(default(cbsᴛ1));
+internal static ref cbsᴛ1 cbs => ref Ꮡcbs.Value;
 
 internal static void cbsLock() {
     @lock(Ꮡcbs.of(cbsᴛ1.Ꮡlock));
@@ -89,7 +90,7 @@ internal static readonly abiPartKind abiPartReg = 2; // Move a value from memory
 }
 
 [GoRecv] internal static void assignArg(this ref abiDesc Δp, ж<_type> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     if (t.Size_ > goarch.PtrSize) {
         // We don't support this right now. In
@@ -117,7 +118,7 @@ internal static readonly abiPartKind abiPartReg = 2; // Move a value from memory
     }
     if (t.Size_ == 0) {
         // The Go ABI aligns for zero-sized types.
-        Δp.dstStackSize = alignUp(Δp.dstStackSize, ((uintptr)t.Align_));
+        Δp.dstStackSize = alignUp(Δp.dstStackSize, (uintptr)t.Align_);
         return;
     }
     // In the C ABI, we're already on a word boundary.
@@ -133,14 +134,14 @@ internal static readonly abiPartKind abiPartReg = 2; // Move a value from memory
         //
         // TODO(mknyszek): Remove this when we no longer have
         // caller reserved spill space.
-        Δp.dstSpill = alignUp(Δp.dstSpill, ((uintptr)t.Align_));
+        Δp.dstSpill = alignUp(Δp.dstSpill, (uintptr)t.Align_);
         Δp.dstSpill += t.Size_;
     } else {
         // Register assignment failed.
         // Undo the work and stack assign.
         Δp.parts = oldParts;
         // The Go ABI aligns arguments.
-        Δp.dstStackSize = alignUp(Δp.dstStackSize, ((uintptr)t.Align_));
+        Δp.dstStackSize = alignUp(Δp.dstStackSize, (uintptr)t.Align_);
         // Copy just the size of the argument. Note that this
         // could be a small by-value struct, but C and Go
         // struct layouts are compatible, so we can copy these
@@ -170,7 +171,7 @@ internal static readonly abiPartKind abiPartReg = 2; // Move a value from memory
 //
 // Returns whether the assignment succeeded.
 [GoRecv] internal static bool tryRegAssignArg(this ref abiDesc Δp, ж<_type> Ꮡt, uintptr offset) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     {
         var k = (abiꓸKind)(t.Kind_ & abi.KindMask);
@@ -206,7 +207,7 @@ internal static readonly abiPartKind abiPartReg = 2; // Move a value from memory
 
     // Pointer-sized types such as maps and channels are currently
     // not supported.
-    throw panic("compileCallback: type "u8 + toRType(Ꮡt).@string() + " is currently not supported for use in system callbacks"u8);
+    throw panic("compileCallback: type " + toRType(Ꮡt).@string() + " is currently not supported for use in system callbacks");
 }
 
 // assignReg attempts to assign a single register for an
@@ -247,19 +248,19 @@ internal static partial void callbackasm();
 internal static uintptr callbackasmAddr(nint i) {
     nint entrySize = default!;
     var exprᴛ1 = GOARCH;
-    { /* default: */
-        throw panic("unsupported architecture");
-    }
-    else if (exprᴛ1 == "386"u8 || exprᴛ1 == "amd64"u8) {
+    if (exprᴛ1 == "386"u8 || exprᴛ1 == "amd64"u8) {
         entrySize = 5;
     }
     else if (exprᴛ1 == "arm"u8 || exprᴛ1 == "arm64"u8) {
         entrySize = 8;
     }
+    else { /* default: */
+        throw panic("unsupported architecture");
+    }
 
     // On ARM and ARM64, each entry is a MOV instruction
     // followed by a branch instruction
-    return abi.FuncPCABI0(callbackasm) + ((uintptr)(i * entrySize));
+    return abi.FuncPCABI0(callbackasm) + (uintptr)(i * entrySize);
 }
 
 internal static readonly UntypedInt callbackMaxFrame = /* 64 * goarch.PtrSize */ 512;
@@ -279,7 +280,7 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
         // cdecl is only meaningful on 386.
         cdecl = false;
     }
-    if (fn._type == nil || ((abiꓸKind)(fn._type.Kind_ & abi.KindMask)) != abi.Func) {
+    if (fn._type == nil || ((abiꓸKind)((~fn._type).Kind_ & abi.KindMask)) != abi.Func) {
         throw panic("compileCallback: expected function with one uintptr-sized result");
     }
     var ft = (ж<functype>)(uintptr)(new @unsafe.Pointer(fn._type));
@@ -329,8 +330,7 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
     cbsLock();
     // Check if this callback is already registered.
     {
-        nint nΔ1 = cbs.index[key];
-        var ok = cbs.index[key]; if (ok) {
+        var (nΔ1, ok) = cbs.index[key, ꟷ]; if (ok) {
             cbsUnlock();
             return callbackasmAddr(nΔ1);
         }
@@ -373,12 +373,12 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
 
 // callbackWrap is called by callbackasm to invoke a registered C callback.
 internal static void callbackWrap(ж<callbackArgs> Ꮡa) {
-    ref var a = ref Ꮡa.val;
+    ref var a = ref Ꮡa.Value;
 
-    var c = cbs.ctxt[a.index];
+    var c = cbs.ctxt[(nint)(a.index)];
     a.retPop = c.retPop;
     // Convert from C to Go ABI.
-    ref var regs = ref heap(new @internal.abi_package.RegArgs(), out var Ꮡregs);
+    ref var regs = ref heap(new abi.RegArgs(), out var Ꮡregs);
     ref var frame = ref heap(new array<byte>(512), out var Ꮡframe);
     @unsafe.Pointer goArgs = new @unsafe.Pointer(Ꮡframe);
     foreach (var (_, part) in c.abiMap.parts) {
@@ -387,7 +387,7 @@ internal static void callbackWrap(ж<callbackArgs> Ꮡa) {
             memmove((uintptr)add(goArgs, part.dstStackOffset), (uintptr)add(a.args, part.srcStackOffset), part.len);
         }
         else if (exprᴛ1 == abiPartReg) {
-            @unsafe.Pointer goReg = ((@unsafe.Pointer)(Ꮡregs.Ints.at<uintptr>(part.dstRegister)));
+            @unsafe.Pointer goReg = @unsafe.Pointer.FromRef(ref (Ꮡregs.at(abi.RegArgs.ᏑInts, part.dstRegister)).Value);
             memmove(goReg, (uintptr)add(a.args, part.srcStackOffset), part.len);
         }
         else { /* default: */
@@ -401,14 +401,14 @@ internal static void callbackWrap(ж<callbackArgs> Ꮡa) {
     frameSize += c.abiMap.dstSpill;
     // Even though this is copying back results, we can pass a nil
     // type because those results must not require write barriers.
-    reflectcall(nil, new @unsafe.Pointer(c.fn), (uintptr)noescape(goArgs), ((uint32)c.abiMap.dstStackSize), ((uint32)c.abiMap.retOffset), ((uint32)frameSize), Ꮡregs);
+    reflectcall(nil, new @unsafe.Pointer(c.fn), (uintptr)noescape(goArgs), (uint32)c.abiMap.dstStackSize, (uint32)c.abiMap.retOffset, (uint32)frameSize, Ꮡregs);
     // Extract the result.
     //
     // There's always exactly one return value, one pointer in size.
     // If it's on the stack, then we will have reserved space for it
     // at the end of the frame, otherwise it was passed in a register.
     if (c.abiMap.dstStackSize != c.abiMap.retOffset){
-        a.result = ~(ж<uintptr>)(uintptr)(new @unsafe.Pointer(Ꮡframe.at<byte>(c.abiMap.retOffset)));
+        a.result = ~(ж<uintptr>)(uintptr)(new @unsafe.Pointer(Ꮡframe.at<byte>((nint)(c.abiMap.retOffset))));
     } else {
         nint zero = default!;
         // On architectures with no registers, Ints[0] would be a compile error,
@@ -418,15 +418,15 @@ internal static void callbackWrap(ж<callbackArgs> Ꮡa) {
     }
 }
 
-internal static readonly UntypedInt _LOAD_LIBRARY_SEARCH_SYSTEM32 = /* 0x00000800 */ 2048;
+internal static readonly UntypedInt _LOAD_LIBRARY_SEARCH_SYSTEM32 = 0x00000800;
 
 //go:linkname syscall_loadsystemlibrary syscall.loadsystemlibrary
 internal static (uintptr handle, uintptr err) syscall_loadsystemlibrary(ж<uint16> Ꮡfilename) {
     uintptr handle = default!;
     uintptr err = default!;
 
-    ref var filename = ref Ꮡfilename.val;
-    (handle, _, err) = syscall_SyscallN(((uintptr)((@unsafe.Pointer)_LoadLibraryExW)), ((uintptr)new @unsafe.Pointer(Ꮡfilename)), 0, _LOAD_LIBRARY_SEARCH_SYSTEM32);
+    ref var filename = ref Ꮡfilename.Value;
+    (handle, _, err) = syscall_SyscallN((uintptr)(@unsafe.Pointer)_LoadLibraryExW, (uintptr)new @unsafe.Pointer(Ꮡfilename), 0, _LOAD_LIBRARY_SEARCH_SYSTEM32);
     KeepAlive(filename);
     if (handle != 0) {
         err = 0;
@@ -443,8 +443,8 @@ internal static (uintptr handle, uintptr err) syscall_loadlibrary(ж<uint16> Ꮡ
     uintptr handle = default!;
     uintptr err = default!;
 
-    ref var filename = ref Ꮡfilename.val;
-    (handle, _, err) = syscall_SyscallN(((uintptr)((@unsafe.Pointer)_LoadLibraryW)), ((uintptr)new @unsafe.Pointer(Ꮡfilename)));
+    ref var filename = ref Ꮡfilename.Value;
+    (handle, _, err) = syscall_SyscallN((uintptr)(@unsafe.Pointer)_LoadLibraryW, (uintptr)new @unsafe.Pointer(Ꮡfilename));
     KeepAlive(filename);
     if (handle != 0) {
         err = 0;
@@ -461,8 +461,8 @@ internal static (uintptr outhandle, uintptr err) syscall_getprocaddress(uintptr 
     uintptr outhandle = default!;
     uintptr err = default!;
 
-    ref var procname = ref Ꮡprocname.val;
-    (outhandle, _, err) = syscall_SyscallN(((uintptr)((@unsafe.Pointer)_GetProcAddress)), handle, ((uintptr)new @unsafe.Pointer(Ꮡprocname)));
+    ref var procname = ref Ꮡprocname.Value;
+    (outhandle, _, err) = syscall_SyscallN((uintptr)(@unsafe.Pointer)_GetProcAddress, handle, (uintptr)new @unsafe.Pointer(Ꮡprocname));
     KeepAlive(procname);
     if (outhandle != 0) {
         err = 0;
@@ -557,17 +557,17 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_SyscallN(uintptr f
     // The cgocall parameters are stored in m instead of in
     // the stack because the stack can move during fn if it
     // calls back into Go.
-    var c = Ꮡ((~(~getg()).m).winsyscall);
-    c.val.fn = fn;
-    c.val.n = ((uintptr)len(args));
+    var c = (~getg()).m.of(m.Ꮡwinsyscall);
+    c.Value.fn = fn;
+    c.Value.n = (uintptr)len(args);
     if ((~c).n != 0) {
-        c.val.args = ((uintptr)(uintptr)noescape(((@unsafe.Pointer)(Ꮡ(args, 0)))));
+        c.Value.args = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromRef(ref (Ꮡ(args, 0)).Value));
     }
     cgocall(asmstdcallAddr, new @unsafe.Pointer(c));
     // cgocall may reschedule us on to a different M,
     // but it copies the return values into the new M's
     // so we can read them from there.
-    c = Ꮡ((~(~getg()).m).winsyscall);
+    c = (~getg()).m.of(m.Ꮡwinsyscall);
     return ((~c).r1, (~c).r2, (~c).err);
 }
 

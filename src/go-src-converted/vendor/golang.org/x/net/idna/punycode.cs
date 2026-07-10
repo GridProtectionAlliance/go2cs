@@ -31,7 +31,7 @@ internal const int32 tmax = 26;
 internal const int32 tmin = 1;
 
 internal static error punyError(@string s) {
-    return new labelError(s, "A3");
+    return new labelErrorжerror(Ꮡ(new labelError(s, "A3")));
 }
 
 // decode decodes a string as specified in section 6.2.
@@ -52,10 +52,10 @@ internal static (@string, error) decode(@string encoded) {
             output = append(output, r);
         }
     }
-    var (i, n, bias) = (((int32)0), initialN, initialBias);
+    var (i, n, bias) = ((int32)0, initialN, initialBias);
     var overflow = false;
     while (pos < len(encoded)) {
-        var (oldI, w) = (i, ((int32)1));
+        var (oldI, w) = (i, (int32)1);
         for (var k = @base; ᐧ ; k += @base) {
             if (pos == len(encoded)) {
                 return ("", punyError(encoded));
@@ -87,14 +87,14 @@ internal static (@string, error) decode(@string encoded) {
         if (len(output) >= 1024) {
             return ("", punyError(encoded));
         }
-        var x = ((int32)(len(output) + 1));
+        var x = (int32)(len(output) + 1);
         bias = adapt(i - oldI, x, oldI == 0);
         n += i / x;
         i %= x;
         if (n < 0 || n > utf8.MaxRune) {
             return ("", punyError(encoded));
         }
-        output = append(output, 0);
+        output = append(output, (rune)(0));
         copy(output[(int)(i + 1)..], output[(int)(i)..]);
         output[i] = n;
         i++;
@@ -110,23 +110,23 @@ internal static (@string, error) decode(@string encoded) {
 internal static (@string, error) encode(@string prefix, @string s) {
     var output = new slice<byte>(len(prefix), len(prefix) + 1 + 2 * len(s));
     copy(output, prefix);
-    var (delta, n, bias) = (((int32)0), initialN, initialBias);
-    var (b, remaining) = (((int32)0), ((int32)0));
+    var (delta, n, bias) = ((int32)0, initialN, initialBias);
+    var (b, remaining) = ((int32)0, (int32)0);
     foreach (var (_, r) in s) {
-        if (r < 128){
+        if (r < 0x80){
             b++;
-            output = append(output, ((byte)r));
+            output = append(output, (byte)r);
         } else {
             remaining++;
         }
     }
     var h = b;
     if (b > 0) {
-        output = append(output, (rune)'-');
+        output = append(output, (byte)((rune)'-'));
     }
     var overflow = false;
     while (remaining != 0) {
-        var m = ((int32)2147483647);
+        var m = (int32)0x7fffffff;
         foreach (var (_, r) in s) {
             if (m > r && r >= n) {
                 m = r;
@@ -180,11 +180,11 @@ internal static (int32 next, bool overflow) madd(int32 a, int32 b, int32 c) {
     int32 next = default!;
     bool overflow = default!;
 
-    var p = ((int64)b) * ((int64)c);
-    if (p > math.MaxInt32 - ((int64)a)) {
+    var p = (int64)b * (int64)c;
+    if (p > (int64)math.MaxInt32 - (int64)a) {
         return (0, true);
     }
-    return (a + ((int32)p), false);
+    return (a + (int32)p, false);
 }
 
 internal static (int32 digit, bool ok) decodeDigit(byte x) {
@@ -193,13 +193,13 @@ internal static (int32 digit, bool ok) decodeDigit(byte x) {
 
     switch (ᐧ) {
     case {} when (rune)'0' <= x && x <= (rune)'9': {
-        return (((int32)(x - ((rune)'0' - 26))), true);
+        return ((int32)(x - ((rune)'0' - 26)), true);
     }
     case {} when (rune)'A' <= x && x <= (rune)'Z': {
-        return (((int32)(x - (rune)'A')), true);
+        return ((int32)(x - (rune)'A'), true);
     }
     case {} when (rune)'a' <= x && x <= (rune)'z': {
-        return (((int32)(x - (rune)'a')), true);
+        return ((int32)(x - (rune)'a'), true);
     }}
 
     return (0, false);
@@ -208,10 +208,10 @@ internal static (int32 digit, bool ok) decodeDigit(byte x) {
 internal static byte encodeDigit(int32 digit) {
     switch (ᐧ) {
     case {} when 0 <= digit && digit < 26: {
-        return ((byte)(digit + (rune)'a'));
+        return (byte)(digit + (rune)'a');
     }
     case {} when 26 <= digit && digit < 36: {
-        return ((byte)(digit + ((rune)'0' - 26)));
+        return (byte)(digit + ((rune)'0' - 26));
     }}
 
     throw panic("idna: internal error in punycode encoding");
@@ -225,7 +225,7 @@ internal static int32 adapt(int32 delta, int32 numPoints, bool firstTime) {
         delta /= 2;
     }
     delta += delta / numPoints;
-    var k = ((int32)0);
+    var k = (int32)0;
     while (delta > ((@base - tmin) * tmax) / 2) {
         delta /= @base - tmin;
         k += @base;

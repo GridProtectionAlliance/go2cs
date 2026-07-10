@@ -17,11 +17,11 @@ internal static (error syntax, error range_) convErr(error err, @string s) {
     error range_ = default!;
 
     {
-        var (x, ok) = err._<NumError.val>(ᐧ); if (ok) {
-            x.val.Func = fnParseComplex;
-            x.val.Num = stringslite.Clone(s);
+        var (x, ok) = err._<ж<NumError>>(ᐧ); if (ok) {
+            x.Value.Func = fnParseComplex;
+            x.Value.Num = stringslite.Clone(s);
             if (AreEqual((~x).Err, ErrRange)) {
-                return (default!, ~x);
+                return (default!, new NumErrorжerror(x));
             }
         }
     }
@@ -94,11 +94,11 @@ public static (complex128, error) ParseComplex(@string s, nint bitSize) {
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1) { /* default: */
-        return (0, ~syntaxError(fnParseComplex, orig));
+        return (0, new NumErrorжerror(syntaxError(fnParseComplex, orig)));
     }
 
     // Read imaginary part.
-    var (im, n, err) = parseFloatPrefix(s, size);
+    (var im, n, err) = parseFloatPrefix(s, size);
     if (err != default!) {
         (err, pending) = convErr(err, orig);
         if (err != default!) {
@@ -107,7 +107,7 @@ public static (complex128, error) ParseComplex(@string s, nint bitSize) {
     }
     s = s[(int)(n)..];
     if (s != "i"u8) {
-        return (0, ~syntaxError(fnParseComplex, orig));
+        return (0, new NumErrorжerror(syntaxError(fnParseComplex, orig)));
     }
     return (complex(re, im), pending);
 }

@@ -58,8 +58,8 @@ using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
 using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
 
 partial class csv_package {
 
@@ -143,7 +143,7 @@ internal static bool validDelim(rune r) {
     public bool ReuseRecord;
     // Deprecated: TrailingComma is no longer used.
     public bool TrailingComma;
-    internal ж<bufio_package.Reader> r;
+    internal ж<bufio.Reader> r;
     // numLine is the current line being read in the CSV file.
     internal nint numLine;
     // offset is the input stream byte offset of the current reader position.
@@ -221,8 +221,7 @@ public static ж<Reader> NewReader(io.Reader r) {
 
 // pos holds the position of a field in the current line.
 [GoType] partial struct position {
-    internal nint line;
-    internal nint col;
+    internal nint line, col;
 }
 
 // ReadAll reads all the remaining records from r.
@@ -235,7 +234,7 @@ public static ж<Reader> NewReader(io.Reader r) {
     error err = default!;
 
     while (ᐧ) {
-        (record, errΔ1) = r.readRecord(default!);
+        var (record, errΔ1) = r.readRecord(default!);
         if (AreEqual(errΔ1, io.EOF)) {
             return (records, default!);
         }
@@ -251,7 +250,7 @@ public static ж<Reader> NewReader(io.Reader r) {
 // If some bytes were read, then the error is never [io.EOF].
 // The result is only valid until the next call to readLine.
 [GoRecv] internal static (slice<byte>, error) readLine(this ref Reader r) {
-    (line, err) = r.r.ReadSlice((rune)'\n');
+    var (line, err) = r.r.ReadSlice((rune)'\n');
     if (AreEqual(err, bufio.ErrBufferFull)) {
         r.rawBuffer = append(r.rawBuffer[..0], line.ꓸꓸꓸ);
         while (AreEqual(err, bufio.ErrBufferFull)) {
@@ -269,7 +268,7 @@ public static ж<Reader> NewReader(io.Reader r) {
         }
     }
     r.numLine++;
-    r.offset += ((int64)readSize);
+    r.offset += (int64)readSize;
     // Normalize \r\n to \n on all input lines.
     {
         nint n = len(line); if (n >= 2 && line[n - 2] == (rune)'\r' && line[n - 1] == (rune)'\n') {
@@ -332,7 +331,7 @@ internal static rune nextRune(slice<byte> b) {
 parseField:
     while (ᐧ) {
         if (r.TrimLeadingSpace) {
-            nint i = bytes.IndexFunc(line, (rune r) => !unicode.IsSpace(rΔ1));
+            nint i = bytes.IndexFunc(line, (rune rΔ1) => !unicode.IsSpace(rΔ1));
             if (i < 0) {
                 i = len(line);
                 pos.col -= lengthNL(line);
@@ -355,7 +354,7 @@ parseField:
                     nint j = bytes.IndexByte(field, (rune)'"'); if (j >= 0) {
                         ref var col = ref heap<nint>(out var Ꮡcol);
                         col = pos.col + j;
-                        Ꮡerr = new ParseError(StartLine: recLine, Line: r.numLine, Column: col, Err: ErrBareQuote); err = ref Ꮡerr.val;
+                        err = new ParseErrorжerror(Ꮡ(new ParseError(StartLine: recLine, Line: r.numLine, Column: col, Err: ErrBareQuote)));
                         goto break_parseField;
                     }
                 }
@@ -386,12 +385,12 @@ parseField:
                         switch (ᐧ) {
                         case {} when rn is (rune)'"': {
                             r.recordBuffer = append(r.recordBuffer, // `""` sequence (append quote).
- (rune)'"');
+ (byte)((rune)'"'));
                             line = line[(int)(quoteLen)..];
                             pos.col += quoteLen;
                             break;
                         }
-                        case {} when rn is r.Comma: {
+                        case {} when rn == r.Comma: {
                             line = line[(int)(commaLen)..];
                             pos.col += commaLen;
                             r.fieldIndexes = append(r.fieldIndexes, // `",` sequence (end of field).
@@ -409,12 +408,12 @@ parseField:
                         }
                         case {} when r.LazyQuotes: {
                             r.recordBuffer = append(r.recordBuffer, // `"` sequence (bare quote).
- (rune)'"');
+ (byte)((rune)'"'));
                             break;
                         }
                         default: {
-                            Ꮡerr = new ParseError( // `"*` sequence (invalid non-escaped quote).
-StartLine: recLine, Line: r.numLine, Column: pos.col - quoteLen, Err: ErrQuote); err = ref Ꮡerr.val;
+                            err = new ParseErrorжerror(Ꮡ(new ParseError( // `"*` sequence (invalid non-escaped quote).
+StartLine: recLine, Line: r.numLine, Column: pos.col - quoteLen, Err: ErrQuote)));
                             goto break_parseField;
                             break;
                         }}
@@ -439,7 +438,7 @@ StartLine: recLine, Line: r.numLine, Column: pos.col - quoteLen, Err: ErrQuote);
                 } else {
                     // Abrupt end of file (EOF or error).
                     if (!r.LazyQuotes && errRead == default!) {
-                        Ꮡerr = new ParseError(StartLine: recLine, Line: pos.line, Column: pos.col, Err: ErrQuote); err = ref Ꮡerr.val;
+                        err = new ParseErrorжerror(Ꮡ(new ParseError(StartLine: recLine, Line: pos.line, Column: pos.col, Err: ErrQuote)));
                         goto break_parseField;
                     }
                     r.fieldIndexes = append(r.fieldIndexes, len(r.recordBuffer));
@@ -471,12 +470,12 @@ break_parseField:;
     // Check or update the expected fields per record.
     if (r.FieldsPerRecord > 0){
         if (len(dst) != r.FieldsPerRecord && err == default!) {
-            Ꮡerr = new ParseError(
+            err = new ParseErrorжerror(Ꮡ(new ParseError(
                 StartLine: recLine,
                 Line: recLine,
                 Column: 1,
                 Err: ErrFieldCount
-            ); err = ref Ꮡerr.val;
+            )));
         }
     } else 
     if (r.FieldsPerRecord == 0) {

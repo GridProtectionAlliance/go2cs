@@ -17,31 +17,31 @@ public static @string FormatFileInfo(FileInfo info) {
     @string name = info.Name();
     var b = new slice<byte>(0, 40 + len(name));
     b = append(b, info.Mode().String().ꓸꓸꓸ);
-    b = append(b, (rune)' ');
+    b = append(b, (byte)((rune)' '));
     var size = info.Size();
     uint64 usize = default!;
     if (size >= 0){
-        usize = ((uint64)size);
+        usize = (uint64)size;
     } else {
-        b = append(b, (rune)'-');
-        usize = ((uint64)(-size));
+        b = append(b, (byte)((rune)'-'));
+        usize = (uint64)(-size);
     }
     array<byte> buf = new(20);
     nint i = len(buf) - 1;
     while (usize >= 10) {
         var q = usize / 10;
-        buf[i] = ((byte)((rune)'0' + usize - q * 10));
+        buf[i] = (byte)((rune)'0' + usize - q * 10);
         i--;
         usize = q;
     }
-    buf[i] = ((byte)((rune)'0' + usize));
+    buf[i] = (byte)((rune)'0' + usize);
     b = append(b, buf[(int)(i)..].ꓸꓸꓸ);
-    b = append(b, (rune)' ');
+    b = append(b, (byte)((rune)' '));
     b = append(b, info.ModTime().Format(time.DateTime).ꓸꓸꓸ);
-    b = append(b, (rune)' ');
+    b = append(b, (byte)((rune)' '));
     b = append(b, name.ꓸꓸꓸ);
     if (info.IsDir()) {
-        b = append(b, (rune)'/');
+        b = append(b, (byte)((rune)'/'));
     }
     return ((@string)b);
 }
@@ -60,10 +60,10 @@ public static @string FormatDirEntry(DirEntry dir) {
     @string mode = dir.Type().String();
     mode = mode[..(int)(len(mode) - 9)];
     b = append(b, mode.ꓸꓸꓸ);
-    b = append(b, (rune)' ');
+    b = append(b, (byte)((rune)' '));
     b = append(b, name.ꓸꓸꓸ);
     if (dir.IsDir()) {
-        b = append(b, (rune)'/');
+        b = append(b, (byte)((rune)'/'));
     }
     return ((@string)b);
 }

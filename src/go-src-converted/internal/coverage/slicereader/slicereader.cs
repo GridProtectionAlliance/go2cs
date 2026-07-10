@@ -36,7 +36,7 @@ public static ж<Reader> NewReader(slice<byte> b, bool @readonly) {
         amt = len(toread);
     }
     copy(b, toread);
-    r.off += ((int64)amt);
+    r.off += (int64)amt;
     return (amt, default!);
 }
 
@@ -44,30 +44,30 @@ public static ж<Reader> NewReader(slice<byte> b, bool @readonly) {
     int64 ret = default!;
     error err = default!;
 
-    switch (whence) {
-    case io.SeekStart: {
-        if (offset < 0 || offset > ((int64)len(r.b))) {
+    var exprᴛ1 = whence;
+    if (exprᴛ1 == io.SeekStart) {
+        if (offset < 0 || offset > (int64)len(r.b)) {
             return (0, fmt.Errorf("invalid seek: new offset %d (out of range [0 %d]"u8, offset, len(r.b)));
         }
         r.off = offset;
         return (offset, default!);
     }
-    case io.SeekCurrent: {
+    if (exprᴛ1 == io.SeekCurrent) {
         var newoff = r.off + offset;
-        if (newoff < 0 || newoff > ((int64)len(r.b))) {
+        if (newoff < 0 || newoff > (int64)len(r.b)) {
             return (0, fmt.Errorf("invalid seek: new offset %d (out of range [0 %d]"u8, newoff, len(r.b)));
         }
         r.off = newoff;
         return (r.off, default!);
     }
-    case io.SeekEnd: {
-        var newoff = ((int64)len(r.b)) + offset;
-        if (newoff < 0 || newoff > ((int64)len(r.b))) {
+    if (exprᴛ1 == io.SeekEnd) {
+        var newoff = (int64)len(r.b) + offset;
+        if (newoff < 0 || newoff > (int64)len(r.b)) {
             return (0, fmt.Errorf("invalid seek: new offset %d (out of range [0 %d]"u8, newoff, len(r.b)));
         }
         r.off = newoff;
         return (r.off, default!);
-    }}
+    }
 
     // other modes are not supported
     return (0, fmt.Errorf("unsupported seek mode %d"u8, whence));
@@ -78,21 +78,21 @@ public static ж<Reader> NewReader(slice<byte> b, bool @readonly) {
 }
 
 [GoRecv] public static uint8 ReadUint8(this ref Reader r) {
-    var rv = ((uint8)r.b[((nint)r.off)]);
+    var rv = (uint8)r.b[(nint)r.off];
     r.off += 1;
     return rv;
 }
 
 [GoRecv] public static uint32 ReadUint32(this ref Reader r) {
-    nint end = ((nint)r.off) + 4;
-    var rv = binary.LittleEndian.Uint32(r.b.slice(((nint)r.off), end, end));
+    nint end = (nint)r.off + 4;
+    var rv = binary.LittleEndian.Uint32(r.b.slice((nint)r.off, end, end));
     r.off += 4;
     return rv;
 }
 
 [GoRecv] public static uint64 ReadUint64(this ref Reader r) {
-    nint end = ((nint)r.off) + 8;
-    var rv = binary.LittleEndian.Uint64(r.b.slice(((nint)r.off), end, end));
+    nint end = (nint)r.off + 8;
+    var rv = binary.LittleEndian.Uint64(r.b.slice((nint)r.off, end, end));
     r.off += 8;
     return rv;
 }
@@ -102,10 +102,10 @@ public static ж<Reader> NewReader(slice<byte> b, bool @readonly) {
 
     nuint shift = default!;
     while (ᐧ) {
-        var b = r.b[r.off];
+        var b = r.b[(nint)(r.off)];
         r.off++;
-        value |= (uint64)((((uint64)((byte)(b & 127))) << (int)(shift)));
-        if ((byte)(b & 128) == 0) {
+        value |= (uint64)((((uint64)((byte)(b & 0x7F)) << (int)(shift))));
+        if ((byte)(b & 0x80) == 0) {
             break;
         }
         shift += 7;

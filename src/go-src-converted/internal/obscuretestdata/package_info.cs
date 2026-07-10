@@ -15,6 +15,8 @@ global using osꓸFileInfo = go.io.fs_package.FileInfo;
 global using osꓸFileMode = go.io.fs_package.FileMode;
 global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
+using base64 = go.encoding.base64_package;
+using os = go.os_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -43,8 +45,7 @@ using static go.@internal.obscuretestdata_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<os_package.File, io_package.Reader>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

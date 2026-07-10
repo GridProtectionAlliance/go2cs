@@ -7,7 +7,8 @@
 namespace go.net.http;
 
 using io = io_package;
-using @internal = net.http.internal_package;
+using Δinternal = go.net.http.internal_package;
+using go.net.http;
 
 partial class httputil_package {
 
@@ -18,7 +19,7 @@ partial class httputil_package {
 // NewChunkedReader is not needed by normal applications. The http package
 // automatically decodes chunking when reading response bodies.
 public static io.Reader NewChunkedReader(io.Reader r) {
-    return @internal.NewChunkedReader(r);
+    return Δinternal.NewChunkedReader(r);
 }
 
 // NewChunkedWriter returns a new chunkedWriter that translates writes into HTTP
@@ -33,11 +34,11 @@ public static io.Reader NewChunkedReader(io.Reader r) {
 // would result in double chunking or chunking with a Content-Length
 // length, both of which are wrong.
 public static io.WriteCloser NewChunkedWriter(io.Writer w) {
-    return @internal.NewChunkedWriter(w);
+    return Δinternal.NewChunkedWriter(w);
 }
 
 // ErrLineTooLong is returned when reading malformed chunked data
 // with lines that are too long.
-public static error ErrLineTooLong = @internal.ErrLineTooLong;
+public static error ErrLineTooLong = Δinternal.ErrLineTooLong;
 
 } // end httputil_package

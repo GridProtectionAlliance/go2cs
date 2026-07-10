@@ -10,7 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using jsonꓸToken = go.encoding.json_package.ΔToken;
+global using jsonꓸToken = object;
+global using jsonꓸΔToken = object;
 global using osꓸDirEntry = go.io.fs_package.DirEntry;
 global using osꓸFileInfo = go.io.fs_package.FileInfo;
 global using osꓸFileMode = go.io.fs_package.FileMode;
@@ -21,6 +22,8 @@ global using reflectꓸKind = go.reflect_package.ΔKind;
 global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
+using parse = go.text.template.parse_package;
+using template = go.text.template_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -39,7 +42,7 @@ using static go.html.template_package;
 
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("Error", "ΔError")]
-[assembly: GoTypeAlias("FuncMap", "go.template.FuncMap")]
+[assembly: GoTypeAlias("FuncMap", "go.text.template_package.FuncMap")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -51,13 +54,15 @@ using static go.html.template_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<strings_package.Builder, io_package.Writer>]
-[assembly: GoImplement<text.template.parse_package.ActionNode, text.template.parse_package.Node>]
-[assembly: GoImplement<text.template.parse_package.BranchNode, text.template.parse_package.Node>]
-[assembly: GoImplement<text.template.parse_package.IdentifierNode, text.template.parse_package.Node>]
-[assembly: GoImplement<text.template.parse_package.ListNode, text.template.parse_package.Node>]
-[assembly: GoImplement<text.template.parse_package.TemplateNode, text.template.parse_package.Node>]
-[assembly: GoImplement<ΔError, error>]
+[assembly: GoImplement<go.text.template.parse_package.ActionNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<go.text.template.parse_package.BranchNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<go.text.template.parse_package.BreakNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<go.text.template.parse_package.ContinueNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<go.text.template.parse_package.IdentifierNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<go.text.template.parse_package.ListNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<go.text.template.parse_package.TemplateNode, go.text.template.parse_package.Node>(Pointer = true)]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<ΔError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

@@ -19,10 +19,10 @@ namespace go.math;
 
 using godebug = @internal.godebug_package;
 using sync = sync_package;
-using atomic = sync.atomic_package;
-using _ = unsafe_package; // for go:linkname
+using atomic = go.sync.atomic_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
 using @internal;
-using sync;
+using go.sync;
 
 partial class rand_package {
 
@@ -52,7 +52,7 @@ partial class rand_package {
 // safe for concurrent use by multiple goroutines.
 // The returned [Source] implements [Source64].
 public static Source NewSource(int64 seed) {
-    return ~newSource(seed);
+    return new rngSourceжSource(newSource(seed));
 }
 
 internal static ж<rngSource> newSource(int64 seed) {
@@ -84,10 +84,12 @@ public static ж<Rand> New(Source src) {
 
 // Seed uses the provided seed value to initialize the generator to a deterministic state.
 // Seed should not be called concurrently with any other [Rand] method.
-[GoRecv] public static void Seed(this ref Rand r, int64 seed) {
+public static void Seed(this ж<Rand> Ꮡr, int64 seed) {
+    ref var r = ref Ꮡr.Value;
+
     {
-        var (lk, ok) = r.src._<lockedSource.val>(ᐧ); if (ok) {
-            lk.seedPos(seed, Ꮡ(r.readPos));
+        var (lk, ok) = r.src._<ж<lockedSource>>(ᐧ); if (ok) {
+            lk.seedPos(seed, Ꮡr.of(Rand.ᏑreadPos));
             return;
         }
     }
@@ -102,7 +104,7 @@ public static ж<Rand> New(Source src) {
 
 // Uint32 returns a pseudo-random 32-bit value as a uint32.
 [GoRecv] public static uint32 Uint32(this ref Rand r) {
-    return ((uint32)(r.Int63() >> (int)(31)));
+    return (uint32)((r.Int63() >> (int)(31)));
 }
 
 // Uint64 returns a pseudo-random 64-bit value as a uint64.
@@ -110,18 +112,18 @@ public static ж<Rand> New(Source src) {
     if (r.s64 != default!) {
         return r.s64.Uint64();
     }
-    return (uint64)(((uint64)r.Int63()) >> (int)(31) | ((uint64)r.Int63()) << (int)(32));
+    return (uint64)(((uint64)r.Int63() >> (int)(31)) | ((uint64)r.Int63() << (int)(32)));
 }
 
 // Int31 returns a non-negative pseudo-random 31-bit integer as an int32.
 [GoRecv] public static int32 Int31(this ref Rand r) {
-    return ((int32)(r.Int63() >> (int)(32)));
+    return (int32)((r.Int63() >> (int)(32)));
 }
 
 // Int returns a non-negative pseudo-random int.
 [GoRecv] public static nint Int(this ref Rand r) {
-    nuint u = ((nuint)r.Int63());
-    return ((nint)(u << (int)(1) >> (int)(1)));
+    nuint u = (nuint)r.Int63();
+    return (nint)(((u << (int)(1)) >> (int)(1)));
 }
 
 // clear sign bit if int == int32
@@ -136,7 +138,7 @@ public static ж<Rand> New(Source src) {
         // n is power of two, can mask
         return (int64)(r.Int63() & (n - 1));
     }
-    var max = ((int64)((1 << (int)(63)) - 1 - (1 << (int)(63)) % ((uint64)n)));
+    var max = (int64)(9223372036854775807UL - (((uint64)1 << (int)(63))) % (uint64)n);
     var v = r.Int63();
     while (v > max) {
         v = r.Int63();
@@ -154,7 +156,7 @@ public static ж<Rand> New(Source src) {
         // n is power of two, can mask
         return (int32)(r.Int31() & (n - 1));
     }
-    var max = ((int32)((1 << (int)(31)) - 1 - (1 << (int)(31)) % ((uint32)n)));
+    var max = (int32)((2147483648L) - 1 - (((uint32)1 << (int)(31))) % (uint32)n);
     var v = r.Int31();
     while (v > max) {
         v = r.Int31();
@@ -173,17 +175,17 @@ public static ж<Rand> New(Source src) {
 // https://lemire.me/blog/2016/06/30/fast-random-shuffling
 [GoRecv] internal static int32 int31n(this ref Rand r, int32 n) {
     var v = r.Uint32();
-    var prod = ((uint64)v) * ((uint64)n);
-    var low = ((uint32)prod);
-    if (low < ((uint32)n)) {
-        var thresh = ((uint32)(-n)) % ((uint32)n);
+    var prod = (uint64)v * (uint64)n;
+    var low = (uint32)prod;
+    if (low < (uint32)n) {
+        var thresh = (uint32)(-n) % (uint32)n;
         while (low < thresh) {
             v = r.Uint32();
-            prod = ((uint64)v) * ((uint64)n);
-            low = ((uint32)prod);
+            prod = (uint64)v * (uint64)n;
+            low = (uint32)prod;
         }
     }
-    return ((int32)(prod >> (int)(32)));
+    return (int32)((prod >> (int)(32)));
 }
 
 // Intn returns, as an int, a non-negative pseudo-random number in the half-open interval [0,n).
@@ -192,10 +194,10 @@ public static ж<Rand> New(Source src) {
     if (n <= 0) {
         throw panic("invalid argument to Intn");
     }
-    if (n <= 1 << (int)(31) - 1) {
-        return ((nint)r.Int31n(((int32)n)));
+    if (n <= 2147483648L - 1) {
+        return (nint)r.Int31n((int32)n);
     }
-    return ((nint)r.Int63n(((int64)n)));
+    return (nint)r.Int63n((int64)n);
 }
 
 // Float64 returns, as a float64, a pseudo-random number in the half-open interval [0.0,1.0).
@@ -217,7 +219,7 @@ public static ж<Rand> New(Source src) {
     // Getting 1 only happens 1/2⁵³ of the time, so most clients
     // will not observe it anyway.
 again:
-    var f = ((float64)r.Int63()) / (1 << (int)(63));
+    var f = (float64)r.Int63() / ((1 << (int)(63)));
     if (f == 1) {
         goto again;
     }
@@ -231,7 +233,7 @@ again:
     // stream except we want to fix it not to return 1.0
     // This only happens 1/2²⁴ of the time (plus the 1/2⁵³ of the time in Float64).
 again:
-    var f = ((float32)r.Float64());
+    var f = (float32)r.Float64();
     if (f == 1) {
         goto again;
     }
@@ -270,12 +272,12 @@ again:
     // generate even a minuscule percentage of the possible permutations.
     // Nevertheless, the right API signature accepts an int n, so handle it as best we can.
     nint i = n - 1;
-    for (; i > 1 << (int)(31) - 1 - 1; i--) {
-        nint j = ((nint)r.Int63n(((int64)(i + 1))));
+    for (; i > 2147483648L - 1 - 1; i--) {
+        nint j = (nint)r.Int63n((int64)(i + 1));
         swap(i, j);
     }
     for (; i > 0; i--) {
-        nint j = ((nint)r.int31n(((int32)(i + 1))));
+        nint j = (nint)r.int31n((int32)(i + 1));
         swap(i, j);
     }
 }
@@ -283,29 +285,30 @@ again:
 // Read generates len(p) random bytes and writes them into p. It
 // always returns len(p) and a nil error.
 // Read should not be called concurrently with any other Rand method.
-[GoRecv] public static (nint n, error err) Read(this ref Rand r, slice<byte> p) {
+public static (nint n, error err) Read(this ж<Rand> Ꮡr, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
+    ref var r = ref Ꮡr.Value;
     switch (r.src.type()) {
-    case lockedSource.val src: {
-        return src.read(p, Ꮡ(r.readVal), Ꮡ(r.readPos));
+    case ж<lockedSource> src: {
+        return src.read(p, Ꮡr.of(Rand.ᏑreadVal), Ꮡr.of(Rand.ᏑreadPos));
     }
-    case runtimeSource.val src: {
-        return src.read(p, Ꮡ(r.readVal), Ꮡ(r.readPos));
+    case ж<runtimeSource> src: {
+        return src.read(p, Ꮡr.of(Rand.ᏑreadVal), Ꮡr.of(Rand.ᏑreadPos));
     }}
-    return read(p, r.src, Ꮡ(r.readVal), Ꮡ(r.readPos));
+    return read(p, r.src, Ꮡr.of(Rand.ᏑreadVal), Ꮡr.of(Rand.ᏑreadPos));
 }
 
 internal static (nint n, error err) read(slice<byte> p, Source src, ж<int64> ᏑreadVal, ж<int8> ᏑreadPos) {
     nint n = default!;
     error err = default!;
 
-    ref var readVal = ref ᏑreadVal.val;
-    ref var readPos = ref ᏑreadPos.val;
+    ref var readVal = ref ᏑreadVal.Value;
+    ref var readPos = ref ᏑreadPos.Value;
     var pos = readPos;
     var val = readVal;
-    var (rng, _) = src._<rngSource.val>(ᐧ);
+    var (rng, _) = src._<ж<rngSource>>(ᐧ);
     for (n = 0; n < len(p); n++) {
         if (pos == 0) {
             if (rng != nil){
@@ -315,8 +318,8 @@ internal static (nint n, error err) read(slice<byte> p, Source src, ж<int64> �
             }
             pos = 7;
         }
-        p[n] = ((byte)val);
-        val >>= (UntypedInt)(8);
+        p[n] = (byte)val;
+        val >>= (int)(8);
         pos--;
     }
     readPos = pos;
@@ -332,7 +335,8 @@ internal static (nint n, error err) read(slice<byte> p, Source src, ж<int64> �
 // convenience functions. When possible it uses the runtime fastrand64
 // function to avoid locking. This is not possible if the user called Seed,
 // either explicitly or implicitly via GODEBUG=randautoseed=0.
-internal static atomic.Pointer<Rand> globalRandGenerator;
+internal static ж<atomic.Pointer<Rand>> ᏑglobalRandGenerator = new(default(atomic.Pointer<Rand>));
+internal static ref atomic.Pointer<Rand> globalRandGenerator => ref ᏑglobalRandGenerator.Value;
 
 internal static ж<godebug.Setting> randautoseed = godebug.New("randautoseed"u8);
 
@@ -340,7 +344,7 @@ internal static ж<godebug.Setting> randautoseed = godebug.New("randautoseed"u8)
 // functions.
 internal static ж<Rand> globalRand() {
     {
-        var rΔ1 = globalRandGenerator.Load(); if (rΔ1 != nil) {
+        var rΔ1 = ᏑglobalRandGenerator.Load(); if (rΔ1 != nil) {
             return rΔ1;
         }
     }
@@ -348,22 +352,22 @@ internal static ж<Rand> globalRand() {
     ж<Rand> r = default!;
     if (randautoseed.Value() == "0"u8){
         randautoseed.IncNonDefault();
-        r = New(new lockedSource());
+        r = New(new lockedSourceжSource(@new<lockedSource>()));
         r.Seed(1);
     } else {
         r = Ꮡ(new Rand(
-            src: Ꮡ(new runtimeSource(nil)),
-            s64: Ꮡ(new runtimeSource(nil))
+            src: new runtimeSourceжSource(Ꮡ(new runtimeSource(nil))),
+            s64: new runtimeSourceжSource64(Ꮡ(new runtimeSource(nil)))
         ));
     }
-    if (!globalRandGenerator.CompareAndSwap(nil, r)) {
+    if (!ᏑglobalRandGenerator.CompareAndSwap(nil, r)) {
         // Two different goroutines called some top-level
         // function at the same time. While the results in
         // that case are unpredictable, if we just use r here,
         // and we are using a seed, we will most likely return
         // the same value for both calls. That doesn't seem ideal.
         // Just use the first one to get in.
-        return globalRandGenerator.Load();
+        return ᏑglobalRandGenerator.Load();
     }
     return r;
 }
@@ -375,14 +379,14 @@ internal static partial uint64 runtime_rand();
 // fastrand functions.
 [GoType] partial struct runtimeSource {
     // The mutex is used to avoid race conditions in Read.
-    internal sync_package.Mutex mu;
+    internal sync.Mutex mu;
 }
 
 [GoRecv] internal static int64 Int63(this ref runtimeSource _) {
-    return ((int64)((uint64)(runtime_rand() & rngMask)));
+    return (int64)((uint64)(runtime_rand() & (uint64)rngMask));
 }
 
-[GoRecv] internal static void Seed(this ref runtimeSource _, int64 _) {
+[GoRecv] internal static void Seed(this ref runtimeSource _Δp0, int64 _Δp1) {
     throw panic("internal error: call to runtimeSource.Seed");
 }
 
@@ -390,15 +394,16 @@ internal static partial uint64 runtime_rand();
     return runtime_rand();
 }
 
-[GoRecv] internal static (nint n, error err) read(this ref runtimeSource fs, slice<byte> p, ж<int64> ᏑreadVal, ж<int8> ᏑreadPos) {
+internal static (nint n, error err) read(this ж<runtimeSource> Ꮡfs, slice<byte> p, ж<int64> ᏑreadVal, ж<int8> ᏑreadPos) {
     nint n = default!;
     error err = default!;
 
-    ref var readVal = ref ᏑreadVal.val;
-    ref var readPos = ref ᏑreadPos.val;
-    fs.mu.Lock();
-    (n, err) = read(p, ~fs, ᏑreadVal, ᏑreadPos);
-    fs.mu.Unlock();
+    ref var fs = ref Ꮡfs.Value;
+    ref var readVal = ref ᏑreadVal.Value;
+    ref var readPos = ref ᏑreadPos.Value;
+    Ꮡfs.of(runtimeSource.Ꮡmu).Lock();
+    (n, err) = read(p, new runtimeSourceжSource(Ꮡfs), ᏑreadVal, ᏑreadPos);
+    Ꮡfs.of(runtimeSource.Ꮡmu).Unlock();
     return (n, err);
 }
 
@@ -419,11 +424,11 @@ internal static partial uint64 runtime_rand();
 // a specific sequence of results should use New(NewSource(seed)) to
 // obtain a local random generator.
 public static void Seed(int64 seed) {
-    var orig = globalRandGenerator.Load();
+    var orig = ᏑglobalRandGenerator.Load();
     // If we are already using a lockedSource, we can just re-seed it.
     if (orig != nil) {
         {
-            var (_, ok) = (~orig).src._<lockedSource.val>(ᐧ); if (ok) {
+            var (_, ok) = (~orig).src._<ж<lockedSource>>(ᐧ); if (ok) {
                 orig.Seed(seed);
                 return;
             }
@@ -435,9 +440,9 @@ public static void Seed(int64 seed) {
     // 2) orig is already a runtimeSource, in which case we need to change
     // to a lockedSource.
     // Either way we do the same thing.
-    var r = New(new lockedSource());
+    var r = New(new lockedSourceжSource(@new<lockedSource>()));
     r.Seed(seed);
-    if (!globalRandGenerator.CompareAndSwap(orig, r)) {
+    if (!ᏑglobalRandGenerator.CompareAndSwap(orig, r)) {
         // Something changed underfoot. Retry to be safe.
         Seed(seed);
     }
@@ -555,42 +560,47 @@ public static float64 ExpFloat64() {
 }
 
 [GoType] partial struct lockedSource {
-    internal sync_package.Mutex lk;
+    internal sync.Mutex lk;
     internal ж<rngSource> s;
 }
 
-[GoRecv] internal static int64 /*n*/ Int63(this ref lockedSource r) {
+internal static int64 /*n*/ Int63(this ж<lockedSource> Ꮡr) {
     int64 n = default!;
 
-    r.lk.Lock();
+    ref var r = ref Ꮡr.Value;
+    Ꮡr.of(lockedSource.Ꮡlk).Lock();
     n = r.s.Int63();
-    r.lk.Unlock();
+    Ꮡr.of(lockedSource.Ꮡlk).Unlock();
     return n;
 }
 
-[GoRecv] internal static uint64 /*n*/ Uint64(this ref lockedSource r) {
+internal static uint64 /*n*/ Uint64(this ж<lockedSource> Ꮡr) {
     uint64 n = default!;
 
-    r.lk.Lock();
+    ref var r = ref Ꮡr.Value;
+    Ꮡr.of(lockedSource.Ꮡlk).Lock();
     n = r.s.Uint64();
-    r.lk.Unlock();
+    Ꮡr.of(lockedSource.Ꮡlk).Unlock();
     return n;
 }
 
-[GoRecv] internal static void Seed(this ref lockedSource r, int64 seed) {
-    r.lk.Lock();
+internal static void Seed(this ж<lockedSource> Ꮡr, int64 seed) {
+    ref var r = ref Ꮡr.Value;
+
+    Ꮡr.of(lockedSource.Ꮡlk).Lock();
     r.seed(seed);
-    r.lk.Unlock();
+    Ꮡr.of(lockedSource.Ꮡlk).Unlock();
 }
 
 // seedPos implements Seed for a lockedSource without a race condition.
-[GoRecv] internal static void seedPos(this ref lockedSource r, int64 seed, ж<int8> ᏑreadPos) {
-    ref var readPos = ref ᏑreadPos.val;
+internal static void seedPos(this ж<lockedSource> Ꮡr, int64 seed, ж<int8> ᏑreadPos) {
+    ref var r = ref Ꮡr.Value;
+    ref var readPos = ref ᏑreadPos.Value;
 
-    r.lk.Lock();
+    Ꮡr.of(lockedSource.Ꮡlk).Lock();
     r.seed(seed);
     readPos = 0;
-    r.lk.Unlock();
+    Ꮡr.of(lockedSource.Ꮡlk).Unlock();
 }
 
 // seed seeds the underlying source.
@@ -604,15 +614,16 @@ public static float64 ExpFloat64() {
 }
 
 // read implements Read for a lockedSource without a race condition.
-[GoRecv] internal static (nint n, error err) read(this ref lockedSource r, slice<byte> p, ж<int64> ᏑreadVal, ж<int8> ᏑreadPos) {
+internal static (nint n, error err) read(this ж<lockedSource> Ꮡr, slice<byte> p, ж<int64> ᏑreadVal, ж<int8> ᏑreadPos) {
     nint n = default!;
     error err = default!;
 
-    ref var readVal = ref ᏑreadVal.val;
-    ref var readPos = ref ᏑreadPos.val;
-    r.lk.Lock();
-    (n, err) = read(p, ~r.s, ᏑreadVal, ᏑreadPos);
-    r.lk.Unlock();
+    ref var r = ref Ꮡr.Value;
+    ref var readVal = ref ᏑreadVal.Value;
+    ref var readPos = ref ᏑreadPos.Value;
+    Ꮡr.of(lockedSource.Ꮡlk).Lock();
+    (n, err) = read(p, new rngSourceжSource(r.s), ᏑreadVal, ᏑreadPos);
+    Ꮡr.of(lockedSource.Ꮡlk).Unlock();
     return (n, err);
 }
 

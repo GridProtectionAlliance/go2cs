@@ -19,7 +19,7 @@ partial class strconv_package {
     internal bool trunc;      // discarded nonzero digits beyond d[:nd]
 }
 
-[GoRecv] public static @string String(this ref @decimal a) {
+[GoRecv] internal static @string String(this ref @decimal a) {
     nint n = 10 + a.nd;
     if (a.dp > 0) {
         n += a.dp;
@@ -43,7 +43,7 @@ partial class strconv_package {
  a.d[0..(int)(a.nd)]);
         break;
     }
-    case {} when a.dp is < a.nd: {
+    case {} when a.dp < a.nd: {
         w += copy(buf[(int)(w)..], // decimal point in middle of digits
  a.d[0..(int)(a.dp)]);
         buf[w] = (rune)'.';
@@ -72,7 +72,7 @@ internal static nint digitZero(slice<byte> dst) {
 // (They are meaningless; the decimal point is tracked
 // independent of the number of digits.)
 internal static void trim(ж<@decimal> Ꮡa) {
-    ref var a = ref Ꮡa.val;
+    ref var a = ref Ꮡa.Value;
 
     while (a.nd > 0 && a.d[a.nd - 1] == (rune)'0') {
         a.nd--;
@@ -83,14 +83,16 @@ internal static void trim(ж<@decimal> Ꮡa) {
 }
 
 // Assign v to a.
-[GoRecv] public static void Assign(this ref @decimal a, uint64 v) {
+internal static void Assign(this ж<@decimal> Ꮡa, uint64 v) {
+    ref var a = ref Ꮡa.Value;
+
     array<byte> buf = new(24);
     // Write reversed decimal in buf.
     nint n = 0;
     while (v > 0) {
         var v1 = v / 10;
         v -= 10 * v1;
-        buf[n] = ((byte)(v + (rune)'0'));
+        buf[n] = (byte)(v + (rune)'0');
         n++;
         v = v1;
     }
@@ -101,7 +103,7 @@ internal static void trim(ж<@decimal> Ꮡa) {
         a.nd++;
     }
     a.dp = a.nd;
-    trim(a);
+    trim(Ꮡa);
 }
 
 // Maximum shift that we can do in one pass without overflow.
@@ -112,7 +114,7 @@ internal static readonly UntypedInt maxShift = /* uintSize - 4 */ 60;
 
 // Binary shift right (/ 2) by k bits.  k <= maxShift to avoid overflow.
 internal static void rightShift(ж<@decimal> Ꮡa, nuint k) {
-    ref var a = ref Ꮡa.val;
+    ref var a = ref Ꮡa.Value;
 
     nint r = 0;
     // read pointer
@@ -120,39 +122,39 @@ internal static void rightShift(ж<@decimal> Ꮡa, nuint k) {
     // write pointer
     // Pick up enough leading digits to cover first shift.
     nuint n = default!;
-    for (; n >> (int)(k) == 0; r++) {
+    for (; (n >> (int)(k)) == 0; r++) {
         if (r >= a.nd) {
             if (n == 0) {
                 // a == 0; shouldn't get here, but handle anyway.
                 a.nd = 0;
                 return;
             }
-            while (n >> (int)(k) == 0) {
+            while ((n >> (int)(k)) == 0) {
                 n = n * 10;
                 r++;
             }
             break;
         }
-        nuint c = ((nuint)a.d[r]);
+        nuint c = (nuint)a.d[r];
         n = n * 10 + c - (rune)'0';
     }
     a.dp -= r - 1;
-    nuint mask = (1 << (int)(k)) - 1;
+    nuint mask = (((nuint)1 << (int)(k))) - 1;
     // Pick up a digit, put down a digit.
     for (; r < a.nd; r++) {
-        nuint c = ((nuint)a.d[r]);
-        nuint dig = n >> (int)(k);
+        nuint c = (nuint)a.d[r];
+        nuint dig = (n >> (int)(k));
         n &= (nuint)(mask);
-        a.d[w] = ((byte)(dig + (rune)'0'));
+        a.d[w] = (byte)(dig + (rune)'0');
         w++;
         n = n * 10 + c - (rune)'0';
     }
     // Put down extra digits.
     while (n > 0) {
-        nuint dig = n >> (int)(k);
+        nuint dig = (n >> (int)(k));
         n &= (nuint)(mask);
         if (w < len(a.d)){
-            a.d[w] = ((byte)(dig + (rune)'0'));
+            a.d[w] = (byte)(dig + (rune)'0');
             w++;
         } else 
         if (dig > 0) {
@@ -330,10 +332,10 @@ internal static bool prefixIsLessThan(slice<byte> b, @string s) {
 
 // Binary shift left (* 2) by k bits.  k <= maxShift to avoid overflow.
 internal static void leftShift(ж<@decimal> Ꮡa, nuint k) {
-    ref var a = ref Ꮡa.val;
+    ref var a = ref Ꮡa.Value;
 
-    nint delta = leftcheats[k].delta;
-    if (prefixIsLessThan(a.d[0..(int)(a.nd)], leftcheats[k].cutoff)) {
+    nint delta = leftcheats[(nint)(k)].delta;
+    if (prefixIsLessThan(a.d[0..(int)(a.nd)], leftcheats[(nint)(k)].cutoff)) {
         delta--;
     }
     nint r = a.nd;
@@ -343,12 +345,12 @@ internal static void leftShift(ж<@decimal> Ꮡa, nuint k) {
     // Pick up a digit, put down a digit.
     nuint n = default!;
     for (r--; r >= 0; r--) {
-        n += (((nuint)a.d[r]) - (rune)'0') << (int)(k);
+        n += (((nuint)a.d[r] - (rune)'0') << (int)(k));
         nuint quo = n / 10;
         nuint rem = n - 10 * quo;
         w--;
         if (w < len(a.d)){
-            a.d[w] = ((byte)(rem + (rune)'0'));
+            a.d[w] = (byte)(rem + (rune)'0');
         } else 
         if (rem != 0) {
             a.trunc = true;
@@ -361,7 +363,7 @@ internal static void leftShift(ж<@decimal> Ꮡa, nuint k) {
         nuint rem = n - 10 * quo;
         w--;
         if (w < len(a.d)){
-            a.d[w] = ((byte)(rem + (rune)'0'));
+            a.d[w] = (byte)(rem + (rune)'0');
         } else 
         if (rem != 0) {
             a.trunc = true;
@@ -377,7 +379,9 @@ internal static void leftShift(ж<@decimal> Ꮡa, nuint k) {
 }
 
 // Binary shift left (k > 0) or right (k < 0).
-[GoRecv] public static void Shift(this ref @decimal a, nint k) {
+internal static void Shift(this ж<@decimal> Ꮡa, nint k) {
+    ref var a = ref Ꮡa.Value;
+
     switch (ᐧ) {
     case {} when a.nd is 0: {
         break;
@@ -385,18 +389,18 @@ internal static void leftShift(ж<@decimal> Ꮡa, nuint k) {
     case {} when k is > 0: {
         while (k > maxShift) {
             // nothing to do: a == 0
-            leftShift(a, maxShift);
+            leftShift(Ꮡa, maxShift);
             k -= maxShift;
         }
-        leftShift(a, ((nuint)k));
+        leftShift(Ꮡa, (nuint)k);
         break;
     }
     case {} when k is < 0: {
         while (k < -maxShift) {
-            rightShift(a, maxShift);
+            rightShift(Ꮡa, maxShift);
             k += maxShift;
         }
-        rightShift(a, ((nuint)(-k)));
+        rightShift(Ꮡa, (nuint)(-k));
         break;
     }}
 
@@ -404,7 +408,7 @@ internal static void leftShift(ж<@decimal> Ꮡa, nuint k) {
 
 // If we chop a at nd digits, should we round up?
 internal static bool shouldRoundUp(ж<@decimal> Ꮡa, nint nd) {
-    ref var a = ref Ꮡa.val;
+    ref var a = ref Ꮡa.Value;
 
     if (nd < 0 || nd >= a.nd) {
         return false;
@@ -425,28 +429,32 @@ internal static bool shouldRoundUp(ж<@decimal> Ꮡa, nint nd) {
 // If nd is zero, it means we're rounding
 // just to the left of the digits, as in
 // 0.09 -> 0.1.
-[GoRecv] public static void Round(this ref @decimal a, nint nd) {
+internal static void Round(this ж<@decimal> Ꮡa, nint nd) {
+    ref var a = ref Ꮡa.Value;
+
     if (nd < 0 || nd >= a.nd) {
         return;
     }
-    if (shouldRoundUp(a, nd)){
+    if (shouldRoundUp(Ꮡa, nd)){
         a.RoundUp(nd);
     } else {
-        a.RoundDown(nd);
+        Ꮡa.RoundDown(nd);
     }
 }
 
 // Round a down to nd digits (or fewer).
-[GoRecv] public static void RoundDown(this ref @decimal a, nint nd) {
+internal static void RoundDown(this ж<@decimal> Ꮡa, nint nd) {
+    ref var a = ref Ꮡa.Value;
+
     if (nd < 0 || nd >= a.nd) {
         return;
     }
     a.nd = nd;
-    trim(a);
+    trim(Ꮡa);
 }
 
 // Round a up to nd digits (or fewer).
-[GoRecv] public static void RoundUp(this ref @decimal a, nint nd) {
+[GoRecv] internal static void RoundUp(this ref @decimal a, nint nd) {
     if (nd < 0 || nd >= a.nd) {
         return;
     }
@@ -469,19 +477,21 @@ internal static bool shouldRoundUp(ж<@decimal> Ꮡa, nint nd) {
 
 // Extract integer part, rounded appropriately.
 // No guarantees about overflow.
-[GoRecv] public static uint64 RoundedInteger(this ref @decimal a) {
+internal static uint64 RoundedInteger(this ж<@decimal> Ꮡa) {
+    ref var a = ref Ꮡa.Value;
+
     if (a.dp > 20) {
-        return (nuint)18446744073709551615UL;
+        return (nuint)0xFFFFFFFFFFFFFFFFUL;
     }
     nint i = default!;
-    var n = ((uint64)0);
+    var n = (uint64)0;
     for (i = 0; i < a.dp && i < a.nd; i++) {
-        n = n * 10 + ((uint64)(a.d[i] - (rune)'0'));
+        n = n * 10 + (uint64)(a.d[i] - (rune)'0');
     }
     for (; i < a.dp; i++) {
         n *= 10;
     }
-    if (shouldRoundUp(a, a.dp)) {
+    if (shouldRoundUp(Ꮡa, a.dp)) {
         n++;
     }
     return n;

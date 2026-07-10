@@ -39,8 +39,7 @@ internal static readonly UntypedInt invalidEntry = 0;
     internal uint32 bits;
     // hi is the code implied by the next code emission.
     // overflow is the code at which hi overflows the code width.
-    internal uint32 hi;
-    internal uint32 overflow;
+    internal uint32 hi, overflow;
     // savedCode is the accumulated code at the end of the most recent Write
     // call. It is equal to invalidCode if there was no such call.
     internal uint32 savedCode;
@@ -56,15 +55,15 @@ internal static readonly UntypedInt invalidEntry = 0;
 
 // writeLSB writes the code c for "Least Significant Bits first" data.
 [GoRecv] internal static error writeLSB(this ref Writer w, uint32 c) {
-    w.bits |= (uint32)(c << (int)(w.nBits));
+    w.bits |= (c << (int)(w.nBits));
     w.nBits += w.width;
     while (w.nBits >= 8) {
         {
-            var err = w.w.WriteByte(((uint8)w.bits)); if (err != default!) {
+            var err = w.w.WriteByte((uint8)w.bits); if (err != default!) {
                 return err;
             }
         }
-        w.bits >>= (UntypedInt)(8);
+        w.bits >>= (int)(8);
         w.nBits -= 8;
     }
     return default!;
@@ -72,15 +71,15 @@ internal static readonly UntypedInt invalidEntry = 0;
 
 // writeMSB writes the code c for "Most Significant Bits first" data.
 [GoRecv] internal static error writeMSB(this ref Writer w, uint32 c) {
-    w.bits |= (uint32)(c << (int)((32 - w.width - w.nBits)));
+    w.bits |= (c << (int)((32 - w.width - w.nBits)));
     w.nBits += w.width;
     while (w.nBits >= 8) {
         {
-            var err = w.w.WriteByte(((uint8)(w.bits >> (int)(24)))); if (err != default!) {
+            var err = w.w.WriteByte((uint8)((w.bits >> (int)(24)))); if (err != default!) {
                 return err;
             }
         }
-        w.bits <<= (UntypedInt)(8);
+        w.bits <<= (int)(8);
         w.nBits -= 8;
     }
     return default!;
@@ -93,22 +92,24 @@ internal static error errOutOfCodes = errors.New("lzw: out of codes"u8);
 // incHi increments e.hi and checks for both overflow and running out of
 // unused codes. In the latter case, incHi sends a clear code, resets the
 // writer state and returns errOutOfCodes.
-[GoRecv] internal static error incHi(this ref Writer w) {
+internal static error incHi(this ж<Writer> Ꮡw) {
+    ref var w = ref Ꮡw.Value;
+
     w.hi++;
     if (w.hi == w.overflow) {
         w.width++;
-        w.overflow <<= (UntypedInt)(1);
+        w.overflow <<= (int)(1);
     }
     if (w.hi == maxCode) {
-        var clear = ((uint32)1) << (int)(w.litWidth);
+        var clear = ((uint32)1 << (int)(w.litWidth));
         {
-            var err = w.write(w, clear); if (err != default!) {
+            var err = w.write(Ꮡw, clear); if (err != default!) {
                 return err;
             }
         }
         w.width = w.litWidth + 1;
         w.hi = clear + 1;
-        w.overflow = clear << (int)(1);
+        w.overflow = (clear << (int)(1));
         foreach (var (i, _) in w.table) {
             w.table[i] = invalidEntry;
         }
@@ -118,10 +119,11 @@ internal static error errOutOfCodes = errors.New("lzw: out of codes"u8);
 }
 
 // Write writes a compressed representation of p to w's underlying writer.
-[GoRecv] public static (nint n, error err) Write(this ref Writer w, slice<byte> p) {
+public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
+    ref var w = ref Ꮡw.Value;
     if (w.err != default!) {
         return (0, w.err);
     }
@@ -129,7 +131,7 @@ internal static error errOutOfCodes = errors.New("lzw: out of codes"u8);
         return (0, default!);
     }
     {
-        var maxLit = ((uint8)(1 << (int)(w.litWidth) - 1)); if (maxLit != 255) {
+        var maxLit = (uint8)((uint8)(1 << (int)(w.litWidth)) - 1); if (maxLit != 0xff) {
             foreach (var (_, x) in p) {
                 if (x > maxLit) {
                     w.err = errors.New("lzw: input byte too large for the litWidth"u8);
@@ -148,35 +150,35 @@ internal static error errOutOfCodes = errors.New("lzw: out of codes"u8);
         //
         // LZW compression isn't only used by GIF, but it's cheap to follow
         // that directive unconditionally.
-        var clear = ((uint32)1) << (int)(w.litWidth);
+        var clear = ((uint32)1 << (int)(w.litWidth));
         {
-            var errΔ1 = w.write(w, clear); if (errΔ1 != default!) {
+            var errΔ1 = w.write(Ꮡw, clear); if (errΔ1 != default!) {
                 return (0, errΔ1);
             }
         }
         // After the starting clear code, the next code sent (for non-empty
         // input) is always a literal code.
-        (code, p) = (((uint32)p[0]), p[1..]);
+        (code, p) = ((uint32)p[0], p[1..]);
     }
 loop:
     foreach (var (_, x) in p) {
-        var literal = ((uint32)x);
-        var key = (uint32)(code << (int)(8) | literal);
+        var literal = (uint32)x;
+        var key = (uint32)((code << (int)(8)) | literal);
         // If there is a hash table hit for this key then we continue the loop
         // and do not emit a code yet.
-        var hash = (uint32)(((uint32)(key >> (int)(12) ^ key)) & tableMask);
-        for (var (h, t) = (hash, w.table[hash]); t != invalidEntry; ) {
-            if (key == t >> (int)(12)) {
-                code = (uint32)(t & maxCode);
+        var hash = (uint32)(((uint32)((key >> (int)(12)) ^ key)) & (uint32)tableMask);
+        for (var (h, t) = (hash, w.table[(nint)(hash)]); t != invalidEntry; ) {
+            if (key == (t >> (int)(12))) {
+                code = (uint32)(t & (uint32)maxCode);
                 goto continue_loop;
             }
-            h = (uint32)((h + 1) & tableMask);
-            t = w.table[h];
+            h = (uint32)((h + 1) & (uint32)tableMask);
+            t = w.table[(nint)(h)];
         }
         // Otherwise, write the current code, and literal becomes the start of
         // the next emitted code.
         {
-            var w.err = w.write(w, code); if (w.err != default!) {
+            w.err = w.write(Ꮡw, code); if (w.err != default!) {
                 return (0, w.err);
             }
         }
@@ -184,7 +186,7 @@ loop:
         // Increment e.hi, the next implied code. If we run out of codes, reset
         // the writer state (including clearing the hash table) and continue.
         {
-            var err1 = w.incHi(); if (err1 != default!) {
+            var err1 = Ꮡw.incHi(); if (err1 != default!) {
                 if (AreEqual(err1, errOutOfCodes)) {
                     continue;
                 }
@@ -194,20 +196,24 @@ loop:
         }
         // Otherwise, insert key -> e.hi into the map that e.table represents.
         while (ᐧ) {
-            if (w.table[hash] == invalidEntry) {
-                w.table[hash] = (uint32)((key << (int)(12)) | w.hi);
+            if (w.table[(nint)(hash)] == invalidEntry) {
+                w.table[(nint)(hash)] = (uint32)(((key << (int)(12))) | w.hi);
                 break;
             }
-            hash = (uint32)((hash + 1) & tableMask);
+            hash = (uint32)((hash + 1) & (uint32)tableMask);
         }
+continue_loop:;
     }
+break_loop:;
     w.savedCode = code;
     return (n, default!);
 }
 
 // Close closes the [Writer], flushing any pending output. It does not close
 // w's underlying writer.
-[GoRecv] public static error Close(this ref Writer w) {
+public static error Close(this ж<Writer> Ꮡw) {
+    ref var w = ref Ꮡw.Value;
+
     if (w.err != default!) {
         if (AreEqual(w.err, errClosed)) {
             return default!;
@@ -219,38 +225,38 @@ loop:
     // Write the savedCode if valid.
     if (w.savedCode != invalidCode){
         {
-            var err = w.write(w, w.savedCode); if (err != default!) {
+            var err = w.write(Ꮡw, w.savedCode); if (err != default!) {
                 return err;
             }
         }
         {
-            var err = w.incHi(); if (err != default! && !AreEqual(err, errOutOfCodes)) {
+            var err = Ꮡw.incHi(); if (err != default! && !AreEqual(err, errOutOfCodes)) {
                 return err;
             }
         }
     } else {
         // Write the starting clear code, as w.Write did not.
-        var clear = ((uint32)1) << (int)(w.litWidth);
+        var clear = ((uint32)1 << (int)(w.litWidth));
         {
-            var err = w.write(w, clear); if (err != default!) {
+            var err = w.write(Ꮡw, clear); if (err != default!) {
                 return err;
             }
         }
     }
     // Write the eof code.
-    var eof = ((uint32)1) << (int)(w.litWidth) + 1;
+    var eof = ((uint32)1 << (int)(w.litWidth)) + 1;
     {
-        var err = w.write(w, eof); if (err != default!) {
+        var err = w.write(Ꮡw, eof); if (err != default!) {
             return err;
         }
     }
     // Write the final bits.
     if (w.nBits > 0) {
         if (w.order == MSB) {
-            w.bits >>= (UntypedInt)(24);
+            w.bits >>= (int)(24);
         }
         {
-            var err = w.w.WriteByte(((uint8)w.bits)); if (err != default!) {
+            var err = w.w.WriteByte((uint8)w.bits); if (err != default!) {
                 return err;
             }
         }
@@ -275,7 +281,7 @@ loop:
 // It is guaranteed that the underlying type of the returned [io.WriteCloser]
 // is a *[Writer].
 public static io.WriteCloser NewWriter(io.Writer w, Order order, nint litWidth) {
-    return ~newWriter(w, order, litWidth);
+    return new WriterжWriteCloser(newWriter(w, order, litWidth));
 }
 
 internal static ж<Writer> newWriter(io.Writer dst, Order order, nint litWidth) {
@@ -287,10 +293,10 @@ internal static ж<Writer> newWriter(io.Writer dst, Order order, nint litWidth) 
 [GoRecv] internal static void init(this ref Writer w, io.Writer dst, Order order, nint litWidth) {
     var exprᴛ1 = order;
     if (exprᴛ1 == LSB) {
-        w.write = () => (ж<Writer>).writeLSB();
+        w.write = (Func<ж<Writer>, uint32, error>)(writeLSB);
     }
     else if (exprᴛ1 == MSB) {
-        w.write = () => (ж<Writer>).writeMSB();
+        w.write = (Func<ж<Writer>, uint32, error>)(writeMSB);
     }
     else { /* default: */
         w.err = errors.New("lzw: unknown order"u8);
@@ -303,15 +309,15 @@ internal static ж<Writer> newWriter(io.Writer dst, Order order, nint litWidth) 
     }
     var (bw, ok) = dst._<writer>(ᐧ);
     if (!ok && dst != default!) {
-        bw = ~bufio.NewWriter(dst);
+        bw = new bufio_Writerжwriter(bufio.NewWriter(dst));
     }
     w.w = bw;
-    nuint lw = ((nuint)litWidth);
+    nuint lw = (nuint)litWidth;
     w.order = order;
     w.width = 1 + lw;
     w.litWidth = lw;
-    w.hi = 1 << (int)(lw) + 1;
-    w.overflow = 1 << (int)((lw + 1));
+    w.hi = ((uint32)1 << (int)(lw)) + 1;
+    w.overflow = ((uint32)1 << (int)((lw + 1)));
     w.savedCode = invalidCode;
 }
 

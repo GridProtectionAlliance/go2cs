@@ -53,26 +53,21 @@ using static go.flag_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(encoding.TextMarshaler, bool), encoding_package.TextMarshaler>]
 [assembly: GoImplement<boolFuncValue, Value>]
-[assembly: GoImplement<boolValue, Value>]
-[assembly: GoImplement<durationValue, Value>]
-[assembly: GoImplement<float64Value, Value>]
+[assembly: GoImplement<boolValue, Value>(Pointer = true)]
+[assembly: GoImplement<durationValue, Value>(Pointer = true)]
+[assembly: GoImplement<float64Value, Value>(Pointer = true)]
 [assembly: GoImplement<funcValue, Value>]
-[assembly: GoImplement<int64Value, Value>]
-[assembly: GoImplement<intValue, Value>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
-[assembly: GoImplement<stringValue, Value>]
-[assembly: GoImplement<strings_package.Builder, io_package.Writer>]
+[assembly: GoImplement<int64Value, Value>(Pointer = true)]
+[assembly: GoImplement<intValue, Value>(Pointer = true)]
+[assembly: GoImplement<stringValue, Value>(Pointer = true)]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<textValue, Value>]
-[assembly: GoImplement<uint64Value, Value>]
-[assembly: GoImplement<uintValue, Value>]
+[assembly: GoImplement<uint64Value, Value>(Pointer = true)]
+[assembly: GoImplement<uintValue, Value>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<durationValue, time.Duration>(Inverted = true, ValueType = "durationValue")]
-[assembly: GoImplicitConv<durationValue, ж<durationValue>>(Inverted = true, Indirect = true, ValueType = "durationValue")]
-[assembly: GoImplicitConv<ж<durationValue>, time.Duration>(Inverted = false, Indirect = true, ValueType = "time.Duration")]
 // </ImplicitConversions>
 
 namespace go;

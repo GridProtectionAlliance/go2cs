@@ -5,7 +5,7 @@ namespace go;
 
 using abi = @internal.abi_package;
 using @unsafe = unsafe_package;
-using _ = unsafe_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using @internal;
 
 partial class reflect_package {
@@ -27,7 +27,7 @@ partial class reflect_package {
 //
 //go:linkname unusedIfaceIndir reflect.ifaceIndir
 internal static bool unusedIfaceIndir(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     return (abiꓸKind)(t.Kind_ & abi.KindDirectIface) == 0;
 }
@@ -41,7 +41,7 @@ internal static bool unusedIfaceIndir(ж<abi.Type> Ꮡt) {
 internal static partial nint badlinkname_rtype_Align(ж<rtype> _);
 
 //go:linkname badlinkname_rtype_AssignableTo reflect.(*rtype).AssignableTo
-internal static partial bool badlinkname_rtype_AssignableTo(ж<rtype> _, ΔType _);
+internal static partial bool badlinkname_rtype_AssignableTo(ж<rtype> _Δp0, ΔType _Δp1);
 
 //go:linkname badlinkname_rtype_Bits reflect.(*rtype).Bits
 internal static partial nint badlinkname_rtype_Bits(ж<rtype> _);
@@ -53,31 +53,31 @@ internal static partial ΔChanDir badlinkname_rtype_ChanDir(ж<rtype> _);
 internal static partial bool badlinkname_rtype_Comparable(ж<rtype> _);
 
 //go:linkname badlinkname_rtype_ConvertibleTo reflect.(*rtype).ConvertibleTo
-internal static partial bool badlinkname_rtype_ConvertibleTo(ж<rtype> _, ΔType _);
+internal static partial bool badlinkname_rtype_ConvertibleTo(ж<rtype> _Δp0, ΔType _Δp1);
 
 //go:linkname badlinkname_rtype_Elem reflect.(*rtype).Elem
 internal static partial ΔType badlinkname_rtype_Elem(ж<rtype> _);
 
 //go:linkname badlinkname_rtype_Field reflect.(*rtype).Field
-internal static partial StructField badlinkname_rtype_Field(ж<rtype> _, nint _);
+internal static partial StructField badlinkname_rtype_Field(ж<rtype> _Δp0, nint _Δp1);
 
 //go:linkname badlinkname_rtype_FieldAlign reflect.(*rtype).FieldAlign
 internal static partial nint badlinkname_rtype_FieldAlign(ж<rtype> _);
 
 //go:linkname badlinkname_rtype_FieldByIndex reflect.(*rtype).FieldByIndex
-internal static partial StructField badlinkname_rtype_FieldByIndex(ж<rtype> _, slice<nint> _);
+internal static partial StructField badlinkname_rtype_FieldByIndex(ж<rtype> _Δp0, slice<nint> _Δp1);
 
 //go:linkname badlinkname_rtype_FieldByName reflect.(*rtype).FieldByName
-internal static partial (StructField, bool) badlinkname_rtype_FieldByName(ж<rtype> _, @string _);
+internal static partial (StructField, bool) badlinkname_rtype_FieldByName(ж<rtype> _Δp0, @string _Δp1);
 
 //go:linkname badlinkname_rtype_FieldByNameFunc reflect.(*rtype).FieldByNameFunc
-internal static partial (StructField, bool) badlinkname_rtype_FieldByNameFunc(ж<rtype> _, Func<@string, bool> _);
+internal static partial (StructField, bool) badlinkname_rtype_FieldByNameFunc(ж<rtype> _Δp0, Func<@string, bool> _Δp1);
 
 //go:linkname badlinkname_rtype_Implements reflect.(*rtype).Implements
-internal static partial bool badlinkname_rtype_Implements(ж<rtype> _, ΔType _);
+internal static partial bool badlinkname_rtype_Implements(ж<rtype> _Δp0, ΔType _Δp1);
 
 //go:linkname badlinkname_rtype_In reflect.(*rtype).In
-internal static partial ΔType badlinkname_rtype_In(ж<rtype> _, nint _);
+internal static partial ΔType badlinkname_rtype_In(ж<rtype> _Δp0, nint _Δp1);
 
 //go:linkname badlinkname_rtype_IsVariadic reflect.(*rtype).IsVariadic
 internal static partial bool badlinkname_rtype_IsVariadic(ж<rtype> _);
@@ -92,10 +92,10 @@ internal static partial ΔKind badlinkname_rtype_Kind(ж<rtype> _);
 internal static partial nint badlinkname_rtype_Len(ж<rtype> _);
 
 //go:linkname badlinkname_rtype_Method reflect.(*rtype).Method
-internal static partial ΔMethod badlinkname_rtype_Method(ж<rtype> _, nint _);
+internal static partial ΔMethod badlinkname_rtype_Method(ж<rtype> _Δp0, nint _Δp1);
 
 //go:linkname badlinkname_rtype_MethodByName reflect.(*rtype).MethodByName
-internal static partial (ΔMethod, bool) badlinkname_rtype_MethodByName(ж<rtype> _, @string _);
+internal static partial (ΔMethod, bool) badlinkname_rtype_MethodByName(ж<rtype> _Δp0, @string _Δp1);
 
 //go:linkname badlinkname_rtype_Name reflect.(*rtype).Name
 internal static partial @string badlinkname_rtype_Name(ж<rtype> _);
@@ -113,7 +113,7 @@ internal static partial nint badlinkname_rtype_NumMethod(ж<rtype> _);
 internal static partial nint badlinkname_rtype_NumOut(ж<rtype> _);
 
 //go:linkname badlinkname_rtype_Out reflect.(*rtype).Out
-internal static partial ΔType badlinkname_rtype_Out(ж<rtype> _, nint _);
+internal static partial ΔType badlinkname_rtype_Out(ж<rtype> _Δp0, nint _Δp1);
 
 //go:linkname badlinkname_rtype_PkgPath reflect.(*rtype).PkgPath
 internal static partial @string badlinkname_rtype_PkgPath(ж<rtype> _);

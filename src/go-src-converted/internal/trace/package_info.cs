@@ -14,6 +14,8 @@ global using oldtraceꓸSTWReason = go.@internal.trace.@internal.oldtrace_packag
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
+using bufio = go.bufio_package;
+using oldtrace = go.@internal.trace.@internal.oldtrace_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -52,25 +54,21 @@ using static go.@internal.trace_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(schedCtx, bool, error), error>]
-[assembly: GoImplement<bandUtilHeap, container.heap_package.Interface>]
-[assembly: GoImplement<bool, error>]
-[assembly: GoImplement<bufio_package.Reader, interface{io.Reader; io.ByteReader}>]
-[assembly: GoImplement<bufio_package.Reader, io_package.Reader>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>]
-[assembly: GoImplement<bytes_package.Reader, io_package.ByteReader>]
-[assembly: GoImplement<bytes_package.Reader, io_package.Reader>]
-[assembly: GoImplement<readBatch_r, io_package.ByteReader>]
-[assembly: GoImplement<readBatch_r, io_package.Reader>]
-[assembly: GoImplement<strings_package.Builder, io_package.Writer>]
-[assembly: GoImplement<utilHeap, container.heap_package.Interface>]
+[assembly: GoImplement<bandUtilHeap, go.container.heap_package.Interface>(Pointer = true)]
+[assembly: GoImplement<bufio_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<bufio_package.Reader, readBatch_r>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Reader, io_package.ByteReader>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<utilHeap, go.container.heap_package.Interface>(Pointer = true)]
 [assembly: GoImplement<utilHeap, sort_package.Interface>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
+[assembly: GoImplicitConv<dataTable<stringID, @string>, ж<dataTable<stringID, @string>>>(Indirect = true)]
 [assembly: GoImplicitConv<evTable, ж<evTable>>(Indirect = true)]
 [assembly: GoImplicitConv<spilledBatch, ж<spilledBatch>>(Indirect = true)]
-[assembly: GoImplicitConv<trace.stringID, string>, ж<trace.stringID, string>>>(Indirect = true)]
 [assembly: GoImplicitConv<ΔTime, oldtrace.Timestamp>(Inverted = false, ValueType = "oldtrace.Timestamp")]
 [assembly: GoImplicitConv<ΔTime, timestamp>(Inverted = true, ValueType = "ΔTime")]
 // </ImplicitConversions>

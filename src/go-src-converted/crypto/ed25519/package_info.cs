@@ -10,6 +10,10 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using cryptoꓸDecrypterOpts = object;
+global using cryptoꓸPrivateKey = object;
+global using cryptoꓸPublicKey = object;
+using edwards25519 = go.crypto.@internal.edwards25519_package;
 // </ImportedTypeAliases>
 
 using go;

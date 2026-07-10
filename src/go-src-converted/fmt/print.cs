@@ -4,13 +4,14 @@
 namespace go;
 
 using fmtsort = @internal.fmtsort_package;
-using io = io_package;
+using Δio = io_package;
 using os = os_package;
 using reflect = reflect_package;
 using strconv = strconv_package;
-using sync = sync_package;
+using Δsync = sync_package;
 using utf8 = unicode.utf8_package;
 using @internal;
+using @unsafe = unsafe_package;
 using unicode;
 using ꓸꓸꓸany = Span<any>;
 
@@ -49,9 +50,9 @@ internal static readonly @string invReflectString = "<invalid reflect.Value>"u8;
 // State represents the printer state passed to custom formatters.
 // It provides access to the [io.Writer] interface plus information about
 // the flags and options for the operand's format specifier.
-[GoType] partial interface State {
-    // Write is the function to call to emit formatted output to be printed.
-    (nint n, error err) Write(slice<byte> b);
+[GoType] partial interface State :
+    Δio.Writer
+{
     // Width returns the value of the width option and whether it has been set.
     (nint wid, bool ok) Width();
     // Precision returns the value of the precision option and whether it has been set.
@@ -92,23 +93,23 @@ internal static readonly @string invReflectString = "<invalid reflect.Value>"u8;
 // directive triggering the call to Format.
 public static @string FormatString(State state, rune verb) {
     array<byte> tmp = new(16);               // Use a local buffer.
-    var b = append(tmp[..0], (rune)'%');
+    var b = append(tmp[..0], (byte)((rune)'%'));
     foreach (var (_, c) in (@string)" +-#0"u8) {
         // All known flags
-        if (state.Flag(((nint)c))) {
+        if (state.Flag((nint)c)) {
             // The argument is an int for historical reasons.
-            b = append(b, ((byte)c));
+            b = append(b, (byte)c);
         }
     }
     {
         var (w, ok) = state.Width(); if (ok) {
-            b = strconv.AppendInt(b, ((int64)w), 10);
+            b = strconv.AppendInt(b, (int64)w, 10);
         }
     }
     {
         var (p, ok) = state.Precision(); if (ok) {
-            b = append(b, (rune)'.');
-            b = strconv.AppendInt(b, ((int64)p), 10);
+            b = append(b, (byte)((rune)'.'));
+            b = strconv.AppendInt(b, (int64)p, 10);
         }
     }
     b = utf8.AppendRune(b, verb);
@@ -139,7 +140,7 @@ public static @string FormatString(State state, rune verb) {
     // arg holds the current item, as an interface{}.
     internal any arg;
     // value is used instead of arg for reflect values.
-    internal reflect_package.ΔValue value;
+    internal reflectꓸValue value;
     // fmt is used to format basic items such as integers or strings.
     internal fmt fmt;
     // reordered records whether the format string used argument reordering.
@@ -156,22 +157,25 @@ public static @string FormatString(State state, rune verb) {
     internal slice<nint> wrappedErrs;
 }
 
-internal static sync.Pool ppFree = new sync.Pool(
+internal static ж<Δsync.Pool> ᏑppFree = new(new Δsync.Pool(
     New: () => @new<pp>()
-);
+));
+internal static ref Δsync.Pool ppFree => ref ᏑppFree.Value;
 
 // newPrinter allocates a new pp struct or grabs a cached one.
 internal static ж<pp> newPrinter() {
-    var p = ppFree.Get()._<pp.val>();
-    p.val.panicking = false;
-    p.val.erroring = false;
-    p.val.wrapErrs = false;
-    (~p).fmt.init(Ꮡ((~p).buf));
+    var p = ᏑppFree.Get()._<ж<pp>>();
+    p.Value.panicking = false;
+    p.Value.erroring = false;
+    p.Value.wrapErrs = false;
+    p.of(pp.Ꮡfmt).init(p.of(pp.Ꮡbuf));
     return p;
 }
 
 // free saves used pp structs in ppFree; avoids an allocation per invocation.
-[GoRecv] internal static void free(this ref pp p) {
+internal static void free(this ж<pp> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     // Proper usage of a sync.Pool requires each entry to have approximately
     // the same memory cost. To obtain this property when the stored type
     // contains a variably-sized buffer, we add a hard limit on the maximum
@@ -190,7 +194,7 @@ internal static ж<pp> newPrinter() {
     p.arg = default!;
     p.value = new reflectꓸValue(nil);
     p.wrappedErrs = p.wrappedErrs[..0];
-    ppFree.Put(p);
+    ᏑppFree.Put(p);
 }
 
 [GoRecv] internal static (nint wid, bool ok) Width(this ref pp p) {
@@ -252,7 +256,7 @@ internal static ж<pp> newPrinter() {
 
 // Fprintf formats according to a format specifier and writes to w.
 // It returns the number of bytes written and any write error encountered.
-public static (nint n, error err) Fprintf(io.Writer w, @string format, params ꓸꓸꓸany aʗp) {
+public static (nint n, error err) Fprintf(Δio.Writer w, @string format, params ꓸꓸꓸany aʗp) {
     nint n = default!;
     error err = default!;
     var a = aʗp.slice();
@@ -271,7 +275,7 @@ public static (nint n, error err) Printf(@string format, params ꓸꓸꓸany aʗ
     error err = default!;
     var a = aʗp.slice();
 
-    return Fprintf(~os.Stdout, format, a.ꓸꓸꓸ);
+    return Fprintf(new os.FileжWriter(os.Stdout), format, a.ꓸꓸꓸ);
 }
 
 // Sprintf formats according to a format specifier and returns the resulting string.
@@ -280,7 +284,7 @@ public static @string Sprintf(@string format, params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrintf(format, a);
-    @string s = ((@string)(~p).buf);
+    @string s = ((@string)(slice<byte>)(~p).buf);
     p.free();
     return s;
 }
@@ -302,7 +306,7 @@ public static slice<byte> Appendf(slice<byte> b, @string format, params ꓸꓸ�
 // Fprint formats using the default formats for its operands and writes to w.
 // Spaces are added between operands when neither is a string.
 // It returns the number of bytes written and any write error encountered.
-public static (nint n, error err) Fprint(io.Writer w, params ꓸꓸꓸany aʗp) {
+public static (nint n, error err) Fprint(Δio.Writer w, params ꓸꓸꓸany aʗp) {
     nint n = default!;
     error err = default!;
     var a = aʗp.slice();
@@ -322,7 +326,7 @@ public static (nint n, error err) Print(params ꓸꓸꓸany aʗp) {
     error err = default!;
     var a = aʗp.slice();
 
-    return Fprint(~os.Stdout, a.ꓸꓸꓸ);
+    return Fprint(new os.FileжWriter(os.Stdout), a.ꓸꓸꓸ);
 }
 
 // Sprint formats using the default formats for its operands and returns the resulting string.
@@ -332,7 +336,7 @@ public static @string Sprint(params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrint(a);
-    @string s = ((@string)(~p).buf);
+    @string s = ((@string)(slice<byte>)(~p).buf);
     p.free();
     return s;
 }
@@ -356,7 +360,7 @@ public static slice<byte> Append(slice<byte> b, params ꓸꓸꓸany aʗp) {
 // Fprintln formats using the default formats for its operands and writes to w.
 // Spaces are always added between operands and a newline is appended.
 // It returns the number of bytes written and any write error encountered.
-public static (nint n, error err) Fprintln(io.Writer w, params ꓸꓸꓸany aʗp) {
+public static (nint n, error err) Fprintln(Δio.Writer w, params ꓸꓸꓸany aʗp) {
     nint n = default!;
     error err = default!;
     var a = aʗp.slice();
@@ -376,7 +380,7 @@ public static (nint n, error err) Println(params ꓸꓸꓸany aʗp) {
     error err = default!;
     var a = aʗp.slice();
 
-    return Fprintln(~os.Stdout, a.ꓸꓸꓸ);
+    return Fprintln(new os.FileжWriter(os.Stdout), a.ꓸꓸꓸ);
 }
 
 // Sprintln formats using the default formats for its operands and returns the resulting string.
@@ -386,7 +390,7 @@ public static @string Sprintln(params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrintln(a);
-    @string s = ((@string)(~p).buf);
+    @string s = ((@string)(slice<byte>)(~p).buf);
     p.free();
     return s;
 }
@@ -436,7 +440,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
             return (0, false, end);
         }
         // Overflow; crazy long number most likely.
-        num = num * 10 + ((nint)(s[newi] - (rune)'0'));
+        num = num * 10 + (nint)(s[newi] - (rune)'0');
         isnum = true;
     }
     return (num, isnum, newi);
@@ -452,7 +456,9 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
     p.buf.writeByte((rune)'?');
 }
 
-[GoRecv] internal static void badVerb(this ref pp p, rune verb) {
+internal static void badVerb(this ж<pp> Ꮡp, rune verb) {
+    ref var p = ref Ꮡp.Value;
+
     p.erroring = true;
     p.buf.writeString(percentBangString);
     p.buf.writeRune(verb);
@@ -461,13 +467,13 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
     case {} when p.arg != default!: {
         p.buf.writeString(reflect.TypeOf(p.arg).String());
         p.buf.writeByte((rune)'=');
-        p.printArg(p.arg, (rune)'v');
+        Ꮡp.printArg(p.arg, (rune)'v');
         break;
     }
     case {} when p.value.IsValid(): {
         p.buf.writeString(p.value.Type().String());
         p.buf.writeByte((rune)'=');
-        p.printValue(p.value, (rune)'v', 0);
+        Ꮡp.printValue(p.value, (rune)'v', 0);
         break;
     }
     default: {
@@ -479,14 +485,16 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
     p.erroring = false;
 }
 
-[GoRecv] internal static void fmtBool(this ref pp p, bool v, rune verb) {
+internal static void fmtBool(this ж<pp> Ꮡp, bool v, rune verb) {
+    ref var p = ref Ꮡp.Value;
+
     switch (verb) {
     case (rune)'t' or (rune)'v': {
         p.fmt.fmtBoolean(v);
         break;
     }
     default: {
-        p.badVerb(verb);
+        Ꮡp.badVerb(verb);
         break;
     }}
 
@@ -502,7 +510,9 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
 }
 
 // fmtInteger formats a signed or unsigned integer.
-[GoRecv] internal static void fmtInteger(this ref pp p, uint64 v, bool isSigned, rune verb) {
+internal static void fmtInteger(this ж<pp> Ꮡp, uint64 v, bool isSigned, rune verb) {
+    ref var p = ref Ꮡp.Value;
+
     switch (verb) {
     case (rune)'v': {
         if (p.fmt.sharpV && !isSigned){
@@ -545,7 +555,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
         break;
     }
     default: {
-        p.badVerb(verb);
+        Ꮡp.badVerb(verb);
         break;
     }}
 
@@ -553,7 +563,9 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
 
 // fmtFloat formats a float. The default precision for each verb
 // is specified as last argument in the call to fmt_float.
-[GoRecv] internal static void fmtFloat(this ref pp p, float64 v, nint size, rune verb) {
+internal static void fmtFloat(this ж<pp> Ꮡp, float64 v, nint size, rune verb) {
+    ref var p = ref Ꮡp.Value;
+
     switch (verb) {
     case (rune)'v': {
         p.fmt.fmtFloat(v, size, (rune)'g', -1);
@@ -572,7 +584,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
         break;
     }
     default: {
-        p.badVerb(verb);
+        Ꮡp.badVerb(verb);
         break;
     }}
 
@@ -581,29 +593,33 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
 // fmtComplex formats a complex number v with
 // r = real(v) and j = imag(v) as (r+ji) using
 // fmtFloat for r and j formatting.
-[GoRecv] internal static void fmtComplex(this ref pp p, complex128 v, nint size, rune verb) {
+internal static void fmtComplex(this ж<pp> Ꮡp, complex128 v, nint size, rune verb) {
+    ref var p = ref Ꮡp.Value;
+
     // Make sure any unsupported verbs are found before the
     // calls to fmtFloat to not generate an incorrect error string.
     switch (verb) {
     case (rune)'v' or (rune)'b' or (rune)'g' or (rune)'G' or (rune)'x' or (rune)'X' or (rune)'f' or (rune)'F' or (rune)'e' or (rune)'E': {
         var oldPlus = p.fmt.plus;
         p.buf.writeByte((rune)'(');
-        p.fmtFloat(real(v), size / 2, verb);
+        Ꮡp.fmtFloat(real(v), size / 2, verb);
         p.fmt.plus = true;
-        p.fmtFloat(imag(v), // Imaginary part always has a sign.
+        Ꮡp.fmtFloat(imag(v), // Imaginary part always has a sign.
  size / 2, verb);
         p.buf.writeString("i)"u8);
         p.fmt.plus = oldPlus;
         break;
     }
     default: {
-        p.badVerb(verb);
+        Ꮡp.badVerb(verb);
         break;
     }}
 
 }
 
-[GoRecv] internal static void fmtString(this ref pp p, @string v, rune verb) {
+internal static void fmtString(this ж<pp> Ꮡp, @string v, rune verb) {
+    ref var p = ref Ꮡp.Value;
+
     switch (verb) {
     case (rune)'v': {
         if (p.fmt.sharpV){
@@ -630,13 +646,15 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
         break;
     }
     default: {
-        p.badVerb(verb);
+        Ꮡp.badVerb(verb);
         break;
     }}
 
 }
 
-[GoRecv] internal static void fmtBytes(this ref pp p, slice<byte> v, rune verb, @string typeString) {
+internal static void fmtBytes(this ж<pp> Ꮡp, slice<byte> v, rune verb, @string typeString) {
+    ref var p = ref Ꮡp.Value;
+
     switch (verb) {
     case (rune)'v' or (rune)'d': {
         if (p.fmt.sharpV){
@@ -650,7 +668,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
                 if (i > 0) {
                     p.buf.writeString(commaSpaceString);
                 }
-                p.fmt0x64(((uint64)c), true);
+                p.fmt0x64((uint64)c, true);
             }
             p.buf.writeByte((rune)'}');
         } else {
@@ -659,7 +677,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
                 if (i > 0) {
                     p.buf.writeByte((rune)' ');
                 }
-                p.fmt.fmtInteger(((uint64)c), 10, unsigned, verb, ldigits);
+                p.fmt.fmtInteger((uint64)c, 10, unsigned, verb, ldigits);
             }
             p.buf.writeByte((rune)']');
         }
@@ -682,20 +700,22 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
         break;
     }
     default: {
-        p.printValue(reflect.ValueOf(v), verb, 0);
+        Ꮡp.printValue(reflect.ValueOf(v), verb, 0);
         break;
     }}
 
 }
 
-[GoRecv] internal static void fmtPointer(this ref pp p, reflectꓸValue value, rune verb) {
+internal static void fmtPointer(this ж<pp> Ꮡp, reflectꓸValue value, rune verb) {
+    ref var p = ref Ꮡp.Value;
+
     uintptr u = default!;
     var exprᴛ1 = value.Kind();
     if (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func || exprᴛ1 == reflect.Map || exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.ΔSlice || exprᴛ1 == reflect.ΔUnsafePointer) {
-        u = ((uintptr)(uintptr)value.UnsafePointer());
+        u = (uintptr)(uintptr)value.UnsafePointer();
     }
     else { /* default: */
-        p.badVerb(verb);
+        Ꮡp.badVerb(verb);
         return;
     }
 
@@ -708,34 +728,36 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
             if (u == 0){
                 p.buf.writeString(nilString);
             } else {
-                p.fmt0x64(((uint64)u), true);
+                p.fmt0x64((uint64)u, true);
             }
             p.buf.writeByte((rune)')');
         } else {
             if (u == 0){
                 p.fmt.padString(nilAngleString);
             } else {
-                p.fmt0x64(((uint64)u), !p.fmt.sharp);
+                p.fmt0x64((uint64)u, !p.fmt.sharp);
             }
         }
         break;
     }
     case (rune)'p': {
-        p.fmt0x64(((uint64)u), !p.fmt.sharp);
+        p.fmt0x64((uint64)u, !p.fmt.sharp);
         break;
     }
     case (rune)'b' or (rune)'o' or (rune)'d' or (rune)'x' or (rune)'X': {
-        p.fmtInteger(((uint64)u), unsigned, verb);
+        Ꮡp.fmtInteger((uint64)u, unsigned, verb);
         break;
     }
     default: {
-        p.badVerb(verb);
+        Ꮡp.badVerb(verb);
         break;
     }}
 
 }
 
-[GoRecv] internal static void catchPanic(this ref pp p, any arg, rune verb, @string method) => func((_, recover) => {
+internal static void catchPanic(this ж<pp> Ꮡp, any arg, rune verb, @string method) => func((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
+
     {
         var err = recover(); if (err != default!) {
             // If it's a nil pointer, just say "<nil>". The likeliest causes are a
@@ -762,7 +784,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
             p.buf.writeString(method);
             p.buf.writeString(" method: "u8);
             p.panicking = true;
-            p.printArg(err, (rune)'v');
+            Ꮡp.printArg(err, (rune)'v');
             p.panicking = false;
             p.buf.writeByte((rune)')');
             p.fmt.fmtFlags = oldFlags;
@@ -770,69 +792,75 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
     }
 });
 
-[GoRecv] internal static bool /*handled*/ handleMethods(this ref pp p, rune verb) => func((defer, _) => {
+internal static bool /*handled*/ handleMethods(this ж<pp> Ꮡp, rune verb) {
     bool handled = default!;
+    func((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
 
-    if (p.erroring) {
-        return handled;
-    }
-    if (verb == (rune)'w') {
-        // It is invalid to use %w other than with Errorf or with a non-error arg.
-        var (_, ok) = p.arg._<error>(ᐧ);
-        if (!ok || !p.wrapErrs) {
-            p.badVerb(verb);
-            return true;
+        if (p.erroring) {
+            return;
         }
-        // If the arg is a Formatter, pass 'v' as the verb to it.
-        verb = (rune)'v';
-    }
-    // Is it a Formatter?
-    {
-        var (formatter, ok) = p.arg._<Formatter>(ᐧ); if (ok) {
-            handled = true;
-            deferǃ(p.catchPanic, p.arg, verb, "Format", defer);
-            formatter.Format(~p, verb);
-            return handled;
+        if (verb == (rune)'w') {
+            // It is invalid to use %w other than with Errorf or with a non-error arg.
+            var (_, ok) = p.arg._<error>(ᐧ);
+            if (!ok || !p.wrapErrs) {
+                Ꮡp.badVerb(verb);
+                handled = true; return;
+            }
+            // If the arg is a Formatter, pass 'v' as the verb to it.
+            verb = (rune)'v';
         }
-    }
-    // If we're doing Go syntax and the argument knows how to supply it, take care of it now.
-    if (p.fmt.sharpV){
+        // Is it a Formatter?
         {
-            var (stringer, ok) = p.arg._<GoStringer>(ᐧ); if (ok) {
+            var (formatter, ok) = p.arg._<Formatter>(ᐧ); if (ok) {
                 handled = true;
-                deferǃ(p.catchPanic, p.arg, verb, "GoString", defer);
-                // Print the result of GoString unadorned.
-                p.fmt.fmtS(stringer.GoString());
-                return handled;
+                deferǃ(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, (@string)"Format", defer);
+                formatter.Format(new ppжState(Ꮡp), verb);
+                return;
             }
         }
-    } else {
-        // If a string is acceptable according to the format, see if
-        // the value satisfies one of the string-valued interfaces.
-        // Println etc. set verb to %v, which is "stringable".
-        switch (verb) {
-        case (rune)'v' or (rune)'s' or (rune)'x' or (rune)'X' or (rune)'q': {
-            switch (p.arg.type()) {
-            case error v: {
-                handled = true;
-                deferǃ(p.catchPanic, p.arg, verb, "Error", defer);
-                p.fmtString(v.Error(), verb);
-                return handled;
+        // If we're doing Go syntax and the argument knows how to supply it, take care of it now.
+        if (p.fmt.sharpV){
+            {
+                var (stringer, ok) = p.arg._<GoStringer>(ᐧ); if (ok) {
+                    handled = true;
+                    deferǃ(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, (@string)"GoString", defer);
+                    // Print the result of GoString unadorned.
+                    p.fmt.fmtS(stringer.GoString());
+                    return;
+                }
             }
-            case Stringer v: {
-                handled = true;
-                deferǃ(p.catchPanic, p.arg, verb, "String", defer);
-                p.fmtString(v.String(), verb);
-                return handled;
+        } else {
+            // If a string is acceptable according to the format, see if
+            // the value satisfies one of the string-valued interfaces.
+            // Println etc. set verb to %v, which is "stringable".
+            switch (verb) {
+            case (rune)'v' or (rune)'s' or (rune)'x' or (rune)'X' or (rune)'q': {
+                switch (p.arg.type()) {
+                case {} Δv when Δv._<error>(out var v): {
+                    handled = true;
+                    deferǃ(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, (@string)"Error", defer);
+                    Ꮡp.fmtString(v.Error(), verb);
+                    return;
+                }
+                case {} Δv when Δv._<Stringer>(out var v): {
+                    handled = true;
+                    deferǃ(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, (@string)"String", defer);
+                    Ꮡp.fmtString(v.String(), verb);
+                    return;
+                }}
+                break;
             }}
-            break;
-        }}
 
-    }
-    return false;
-});
+        }
+        handled = false;
+    });
+    return handled;
+}
 
-[GoRecv] internal static void printArg(this ref pp p, any arg, rune verb) {
+internal static void printArg(this ж<pp> Ꮡp, any arg, rune verb) {
+    ref var p = ref Ꮡp.Value;
+
     p.arg = arg;
     p.value = new reflectꓸValue(nil);
     if (arg == default!) {
@@ -842,7 +870,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
             break;
         }
         default: {
-            p.badVerb(verb);
+            Ꮡp.badVerb(verb);
             break;
         }}
 
@@ -856,90 +884,82 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
         return;
     }
     case (rune)'p': {
-        p.fmtPointer(reflect.ValueOf(arg), (rune)'p');
+        Ꮡp.fmtPointer(reflect.ValueOf(arg), (rune)'p');
         return;
     }}
 
     // Some types can be done without reflection.
     switch (arg.type()) {
     case bool f: {
-        p.fmtBool(f, verb);
+        Ꮡp.fmtBool(f, verb);
         break;
     }
     case float32 f: {
-        p.fmtFloat(((float64)f), 32, verb);
+        Ꮡp.fmtFloat((float64)f, 32, verb);
         break;
     }
     case float64 f: {
-        p.fmtFloat(f, 64, verb);
+        Ꮡp.fmtFloat(f, 64, verb);
         break;
     }
     case complex64 f: {
-        p.fmtComplex(((complex128)f), 64, verb);
+        Ꮡp.fmtComplex((complex128)f, 64, verb);
         break;
     }
     case complex128 f: {
-        p.fmtComplex(f, 128, verb);
+        Ꮡp.fmtComplex(f, 128, verb);
         break;
     }
     case nint f: {
-        p.fmtInteger(((uint64)f), signed, verb);
-        break;
-    }
-    case int32 f: {
-        p.fmtInteger(((uint64)f), signed, verb);
+        Ꮡp.fmtInteger((uint64)f, signed, verb);
         break;
     }
     case int8 f: {
-        p.fmtInteger(((uint64)f), signed, verb);
+        Ꮡp.fmtInteger((uint64)f, signed, verb);
         break;
     }
     case int16 f: {
-        p.fmtInteger(((uint64)f), signed, verb);
+        Ꮡp.fmtInteger((uint64)f, signed, verb);
         break;
     }
     case int32 f: {
-        p.fmtInteger(((uint64)f), signed, verb);
+        Ꮡp.fmtInteger((uint64)f, signed, verb);
         break;
     }
     case int64 f: {
-        p.fmtInteger(((uint64)f), signed, verb);
+        Ꮡp.fmtInteger((uint64)f, signed, verb);
         break;
     }
     case nuint f: {
-        p.fmtInteger(((uint64)f), unsigned, verb);
-        break;
-    }
-    case uint32 f: {
-        p.fmtInteger(((uint64)f), unsigned, verb);
+        Ꮡp.fmtInteger((uint64)f, unsigned, verb);
         break;
     }
     case uint8 f: {
-        p.fmtInteger(((uint64)f), unsigned, verb);
+        Ꮡp.fmtInteger((uint64)f, unsigned, verb);
         break;
     }
     case uint16 f: {
-        p.fmtInteger(((uint64)f), unsigned, verb);
+        Ꮡp.fmtInteger((uint64)f, unsigned, verb);
         break;
     }
     case uint32 f: {
-        p.fmtInteger(((uint64)f), unsigned, verb);
+        Ꮡp.fmtInteger((uint64)f, unsigned, verb);
         break;
     }
     case uint64 f: {
-        p.fmtInteger(f, unsigned, verb);
+        Ꮡp.fmtInteger(f, unsigned, verb);
         break;
     }
     case uintptr f: {
-        p.fmtInteger(((uint64)f), unsigned, verb);
+        Ꮡp.fmtInteger((uint64)f, unsigned, verb);
         break;
     }
     case @string f: {
-        p.fmtString(f, verb);
+        Ꮡp.fmtString(f, verb);
         break;
     }
     case slice<byte> f: {
-        p.fmtBytes(f, verb, "[]byte"u8);
+        Ꮡp.fmtBytes(f, verb, "[]byte"u8);
         break;
     }
     case reflectꓸValue f: {
@@ -947,20 +967,20 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
             // Handle extractable values with special methods
             // since printValue does not handle them at depth 0.
             p.arg = f.Interface();
-            if (p.handleMethods(verb)) {
+            if (Ꮡp.handleMethods(verb)) {
                 return;
             }
         }
-        p.printValue(f, verb, 0);
+        Ꮡp.printValue(f, verb, 0);
         break;
     }
     default: {
-        var f = arg.type();
-        if (!p.handleMethods(verb)) {
+        var f = arg;
+        if (!Ꮡp.handleMethods(verb)) {
             // If the type is not simple, it might have methods.
             // Need to use reflection, since the type had no
             // interface methods that could be used for formatting.
-            p.printValue(reflect.ValueOf(f), verb, 0);
+            Ꮡp.printValue(reflect.ValueOf(f), verb, 0);
         }
         break;
     }}
@@ -968,11 +988,13 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
 
 // printValue is similar to printArg but starts with a reflect value, not an interface{} value.
 // It does not handle 'p' and 'T' verbs because these should have been already handled by printArg.
-[GoRecv] internal static void printValue(this ref pp p, reflectꓸValue value, rune verb, nint depth) {
+internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune verb, nint depth) {
+    ref var p = ref Ꮡp.Value;
+
     // Handle values with special methods if not already handled by printArg (depth == 0).
     if (depth > 0 && value.IsValid() && value.CanInterface()) {
         p.arg = value.Interface();
-        if (p.handleMethods(verb)) {
+        if (Ꮡp.handleMethods(verb)) {
             return;
         }
     }
@@ -992,35 +1014,35 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
                     break;
                 }
                 default: {
-                    p.badVerb(verb);
+                    Ꮡp.badVerb(verb);
                     break;
                 }}
 
             }
         }
         else if (exprᴛ1 == reflect.ΔBool) { matchᴛ1 = true;
-            p.fmtBool(f.Bool(), verb);
+            Ꮡp.fmtBool(f.Bool(), verb);
         }
         else if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) { matchᴛ1 = true;
-            p.fmtInteger(((uint64)f.Int()), signed, verb);
+            Ꮡp.fmtInteger((uint64)f.Int(), signed, verb);
         }
         else if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) { matchᴛ1 = true;
-            p.fmtInteger(f.Uint(), unsigned, verb);
+            Ꮡp.fmtInteger(f.Uint(), unsigned, verb);
         }
         else if (exprᴛ1 == reflect.Float32) { matchᴛ1 = true;
-            p.fmtFloat(f.Float(), 32, verb);
+            Ꮡp.fmtFloat(f.Float(), 32, verb);
         }
         else if (exprᴛ1 == reflect.Float64) { matchᴛ1 = true;
-            p.fmtFloat(f.Float(), 64, verb);
+            Ꮡp.fmtFloat(f.Float(), 64, verb);
         }
         else if (exprᴛ1 == reflect.Complex64) { matchᴛ1 = true;
-            p.fmtComplex(f.Complex(), 64, verb);
+            Ꮡp.fmtComplex(f.Complex(), 64, verb);
         }
         else if (exprᴛ1 == reflect.Complex128) { matchᴛ1 = true;
-            p.fmtComplex(f.Complex(), 128, verb);
+            Ꮡp.fmtComplex(f.Complex(), 128, verb);
         }
         else if (exprᴛ1 == reflect.ΔString) { matchᴛ1 = true;
-            p.fmtString(f.String(), verb);
+            Ꮡp.fmtString(f.String(), verb);
         }
         else if (exprᴛ1 == reflect.Map) { matchᴛ1 = true;
             if (p.fmt.sharpV){
@@ -1042,9 +1064,9 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
                         p.buf.writeByte((rune)' ');
                     }
                 }
-                p.printValue(m.Key, verb, depth + 1);
+                Ꮡp.printValue(m.Key, verb, depth + 1);
                 p.buf.writeByte((rune)':');
-                p.printValue(m.Value, verb, depth + 1);
+                Ꮡp.printValue(m.Value, verb, depth + 1);
             }
             if (p.fmt.sharpV){
                 p.buf.writeByte((rune)'}');
@@ -1073,7 +1095,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
                         }
                     }
                 }
-                p.printValue(getField(f, i), verb, depth + 1);
+                Ꮡp.printValue(getField(f, i), verb, depth + 1);
             }
             p.buf.writeByte((rune)'}');
         }
@@ -1087,7 +1109,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
                     p.buf.writeString(nilAngleString);
                 }
             } else {
-                p.printValue(valueΔ2, verb, depth + 1);
+                Ꮡp.printValue(valueΔ2, verb, depth + 1);
             }
         }
         else if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice) { matchᴛ1 = true;
@@ -1105,10 +1127,10 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
                         // if reflection could help a little more.
                         bytes = new slice<byte>(f.Len());
                         foreach (var (i, _) in bytes) {
-                            bytes[i] = ((byte)f.Index(i).Uint());
+                            bytes[i] = (byte)f.Index(i).Uint();
                         }
                     }
-                    p.fmtBytes(bytes, verb, t.String());
+                    Ꮡp.fmtBytes(bytes, verb, t.String());
                     return;
                 }
                 break;
@@ -1125,7 +1147,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
                     if (i > 0) {
                         p.buf.writeString(commaSpaceString);
                     }
-                    p.printValue(f.Index(i), verb, depth + 1);
+                    Ꮡp.printValue(f.Index(i), verb, depth + 1);
                 }
                 p.buf.writeByte((rune)'}');
             } else {
@@ -1134,7 +1156,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
                     if (i > 0) {
                         p.buf.writeByte((rune)' ');
                     }
-                    p.printValue(f.Index(i), verb, depth + 1);
+                    Ꮡp.printValue(f.Index(i), verb, depth + 1);
                 }
                 p.buf.writeByte((rune)']');
             }
@@ -1148,7 +1170,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
                     var exprᴛ2 = a.Kind();
                     if (exprᴛ2 == reflect.Array || exprᴛ2 == reflect.ΔSlice || exprᴛ2 == reflect.Struct || exprᴛ2 == reflect.Map) {
                         p.buf.writeByte((rune)'&');
-                        p.printValue(a, verb, depth + 1);
+                        Ꮡp.printValue(a, verb, depth + 1);
                         return;
                     }
                 }
@@ -1157,7 +1179,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func || exprᴛ1 == reflect.ΔUnsafePointer)) {
-            p.fmtPointer(f, verb);
+            Ꮡp.fmtPointer(f, verb);
         }
         else { /* default: */
             p.unknownType(f);
@@ -1183,15 +1205,15 @@ internal static (nint num, bool isInt, nint newArgNum) intFromArg(slice<any> a, 
                 var exprᴛ1 = v.Kind();
                 if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
                     var n = v.Int();
-                    if (((int64)((nint)n)) == n) {
-                        num = ((nint)n);
+                    if ((int64)(nint)n == n) {
+                        num = (nint)n;
                         isInt = true;
                     }
                 }
                 else if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) {
                     var n = v.Uint();
-                    if (((int64)n) >= 0 && ((uint64)((nint)n)) == n) {
-                        num = ((nint)n);
+                    if ((int64)n >= 0 && (uint64)(nint)n == n) {
+                        num = (nint)n;
                         isInt = true;
                     }
                 }
@@ -1271,7 +1293,9 @@ internal static (nint index, nint wid, bool ok) parseArgNumber(@string format) {
     p.buf.writeString(missingString);
 }
 
-[GoRecv] internal static void doPrintf(this ref pp p, @string format, slice<any> a) {
+internal static void doPrintf(this ж<pp> Ꮡp, @string format, slice<any> a) {
+    ref var p = ref Ꮡp.Value;
+
     nint end = len(format);
     nint argNum = 0;
     // we process one argument per non-trivial format
@@ -1330,7 +1354,7 @@ simpleFormat:
                         p.wrappedErrs = append(p.wrappedErrs, argNum);
                         fallthrough = true;
                     }
-                    if (fallthrough || !matchᴛ1 && exprᴛ1 is (rune)'v')) { matchᴛ1 = true;
+                    if (fallthrough || !matchᴛ1 && exprᴛ1 is (rune)'v') { matchᴛ1 = true;
                         p.fmt.sharpV = p.fmt.sharp;
                         p.fmt.sharp = false;
                         p.fmt.plusV = p.fmt.plus;
@@ -1339,7 +1363,7 @@ simpleFormat:
 
                     // Go syntax
                     // Struct-field syntax
-                    p.printArg(a[argNum], ((rune)c));
+                    Ꮡp.printArg(a[argNum], (rune)c);
                     argNum++;
                     i++;
                     goto continue_formatLoop;
@@ -1412,7 +1436,7 @@ break_simpleFormat:;
             p.buf.writeString(noVerbString);
             break;
         }
-        var verb = ((rune)format[i]);
+        var verb = (rune)format[i];
         nint size = 1;
         if (verb >= utf8.RuneSelf) {
             (verb, size) = utf8.DecodeRuneInString(format[(int)(i)..]);
@@ -1434,7 +1458,7 @@ break_simpleFormat:;
  argNum);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ2 && verb is (rune)'v')) { matchᴛ2 = true;
+        if (fallthrough || !matchᴛ2 && verb is (rune)'v') { matchᴛ2 = true;
             p.fmt.sharpV = p.fmt.sharp;
             p.fmt.sharp = false;
             p.fmt.plusV = p.fmt.plus;
@@ -1442,7 +1466,7 @@ break_simpleFormat:;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ2) { /* default: */
-            p.printArg(a[argNum], // Go syntax
+            Ꮡp.printArg(a[argNum], // Go syntax
  // Struct-field syntax
  verb);
             argNum++;
@@ -1466,14 +1490,16 @@ break_formatLoop:;
             } else {
                 p.buf.writeString(reflect.TypeOf(arg).String());
                 p.buf.writeByte((rune)'=');
-                p.printArg(arg, (rune)'v');
+                Ꮡp.printArg(arg, (rune)'v');
             }
         }
         p.buf.writeByte((rune)')');
     }
 }
 
-[GoRecv] internal static void doPrint(this ref pp p, slice<any> a) {
+internal static void doPrint(this ж<pp> Ꮡp, slice<any> a) {
+    ref var p = ref Ꮡp.Value;
+
     var prevString = false;
     foreach (var (argNum, arg) in a) {
         var isString = arg != default! && reflect.TypeOf(arg).Kind() == reflect.ΔString;
@@ -1481,19 +1507,21 @@ break_formatLoop:;
         if (argNum > 0 && !isString && !prevString) {
             p.buf.writeByte((rune)' ');
         }
-        p.printArg(arg, (rune)'v');
+        Ꮡp.printArg(arg, (rune)'v');
         prevString = isString;
     }
 }
 
 // doPrintln is like doPrint but always adds a space between arguments
 // and a newline after the last argument.
-[GoRecv] internal static void doPrintln(this ref pp p, slice<any> a) {
+internal static void doPrintln(this ж<pp> Ꮡp, slice<any> a) {
+    ref var p = ref Ꮡp.Value;
+
     foreach (var (argNum, arg) in a) {
         if (argNum > 0) {
             p.buf.writeByte((rune)' ');
         }
-        p.printArg(arg, (rune)'v');
+        Ꮡp.printArg(arg, (rune)'v');
     }
     p.buf.writeByte((rune)'\n');
 }

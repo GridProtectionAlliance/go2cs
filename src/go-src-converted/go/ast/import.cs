@@ -4,20 +4,21 @@
 namespace go.go;
 
 using cmp = cmp_package;
-using token = go.token_package;
+using token = global::go.go.token_package;
 using slices = slices_package;
 using strconv = strconv_package;
+using global::go.go;
 
 partial class ast_package {
 
 // SortImports sorts runs of consecutive import lines in import blocks in f.
 // It also removes duplicate imports when it is possible to do so without data loss.
 public static void SortImports(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf) {
-    ref var fset = ref Ꮡfset.val;
-    ref var f = ref Ꮡf.val;
+    ref var fset = ref Ꮡfset.Value;
+    ref var f = ref Ꮡf.Value;
 
     foreach (var (_, d) in f.Decls) {
-        var (dΔ1, ok) = d._<GenDecl.val>(ᐧ);
+        var (dΔ1, ok) = d._<ж<GenDecl>>(ᐧ);
         if (!ok || (~dΔ1).Tok != token.IMPORT) {
             // Not an import declaration, so we're done.
             // Imports are always first.
@@ -38,7 +39,7 @@ public static void SortImports(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf) {
             }
         }
         specs = append(specs, sortSpecs(Ꮡfset, Ꮡf, (~dΔ1).Specs[(int)(i)..]).ꓸꓸꓸ);
-        dΔ1.val.Specs = specs;
+        dΔ1.Value.Specs = specs;
         // Deduping can leave a blank line before the rparen; clean that up.
         if (len((~dΔ1).Specs) > 0) {
             var lastSpec = (~dΔ1).Specs[len((~dΔ1).Specs) - 1];
@@ -46,20 +47,20 @@ public static void SortImports(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf) {
             nint rParenLine = lineAt(Ꮡfset, (~dΔ1).Rparen);
             while (rParenLine > lastLine + 1) {
                 rParenLine--;
-                fset.File((~dΔ1).Rparen).MergeLine(rParenLine);
+                Ꮡfset.File((~dΔ1).Rparen).MergeLine(rParenLine);
             }
         }
     }
 }
 
 internal static nint lineAt(ж<token.FileSet> Ꮡfset, tokenꓸPos pos) {
-    ref var fset = ref Ꮡfset.val;
+    ref var fset = ref Ꮡfset.Value;
 
-    return fset.PositionFor(pos, false).Line;
+    return Ꮡfset.PositionFor(pos, false).Line;
 }
 
 internal static @string importPath(Spec s) {
-    var (t, err) = strconv.Unquote(s._<ImportSpec.val>().Path.Value);
+    var (t, err) = strconv.Unquote((~(~s._<ж<ImportSpec>>()).Path).Value);
     if (err == default!) {
         return t;
     }
@@ -67,7 +68,7 @@ internal static @string importPath(Spec s) {
 }
 
 internal static @string importName(Spec s) {
-    var n = s._<ImportSpec.val>().Name;
+    var n = s._<ж<ImportSpec>>().Value.Name;
     if (n == nil) {
         return ""u8;
     }
@@ -75,7 +76,7 @@ internal static @string importName(Spec s) {
 }
 
 internal static @string importComment(Spec s) {
-    var c = s._<ImportSpec.val>().Comment;
+    var c = s._<ж<ImportSpec>>().Value.Comment;
     if (c == nil) {
         return ""u8;
     }
@@ -87,12 +88,12 @@ internal static bool collapse(Spec prev, Spec next) {
     if (importPath(next) != importPath(prev) || importName(next) != importName(prev)) {
         return false;
     }
-    return prev._<ImportSpec.val>().Comment == nil;
+    return (~prev._<ж<ImportSpec>>()).Comment == nil;
 }
 
 [GoType] partial struct posSpan {
-    public go.token_package.ΔPos Start;
-    public go.token_package.ΔPos End;
+    public tokenꓸPos Start;
+    public tokenꓸPos End;
 }
 
 [GoType] partial struct cgPos {
@@ -101,8 +102,8 @@ internal static bool collapse(Spec prev, Spec next) {
 }
 
 internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf, slice<Spec> specs) {
-    ref var fset = ref Ꮡfset.val;
-    ref var f = ref Ꮡf.val;
+    ref var fset = ref Ꮡfset.Value;
+    ref var f = ref Ꮡf.Value;
 
     // Can't short-circuit here even if specs are already sorted,
     // since they might yet need deduplication.
@@ -118,9 +119,9 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf, 
     // Identify comments in this range.
     tokenꓸPos begSpecs = pos[0].Start;
     tokenꓸPos endSpecs = pos[len(pos) - 1].End;
-    tokenꓸPos beg = fset.File(begSpecs).LineStart(lineAt(Ꮡfset, begSpecs));
+    tokenꓸPos beg = Ꮡfset.File(begSpecs).LineStart(lineAt(Ꮡfset, begSpecs));
     nint endLine = lineAt(Ꮡfset, endSpecs);
-    var endFile = fset.File(endSpecs);
+    var endFile = Ꮡfset.File(endSpecs);
     tokenꓸPos end = default!;
     if (endLine == endFile.LineCount()){
         end = endSpecs;
@@ -166,7 +167,7 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf, 
             specIndex++;
             left = true;
         }
-        var s = specs[specIndex]._<ImportSpec.val>();
+        var s = specs[specIndex]._<ж<ImportSpec>>();
         importComments[s] = append(importComments[s], new cgPos(left: left, cg: g));
     }
     // Sort the import specs by import path.
@@ -197,28 +198,30 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf, 
             deduped = append(deduped, s);
         } else {
             tokenꓸPos p = s.Pos();
-            fset.File(p).MergeLine(lineAt(Ꮡfset, p));
+            Ꮡfset.File(p).MergeLine(lineAt(Ꮡfset, p));
         }
     }
     specs = deduped;
     // Fix up comment positions
     foreach (var (i, s) in specs) {
-        var sΔ1 = s._<ImportSpec.val>();
+        var sΔ1 = s._<ж<ImportSpec>>();
         if ((~sΔ1).Name != nil) {
-            (~sΔ1).Name.val.NamePos = pos[i].Start;
+            sΔ1.Value.Name.Value.NamePos = pos[i].Start;
         }
-        (~sΔ1).Path.val.ValuePos = pos[i].Start;
-        sΔ1.val.EndPos = pos[i].End;
+        sΔ1.Value.Path.Value.ValuePos = pos[i].Start;
+        sΔ1.Value.EndPos = pos[i].End;
         foreach (var (_, g) in importComments[sΔ1]) {
-            foreach (var (_, c) in (~g.cg).List) {
+            foreach (var (_, vᴛ1) in (~g.cg).List) {
+                var c = vᴛ1;
+
                 if (g.left){
-                    c.val.Slash = pos[i].Start - 1;
+                    c.Value.Slash = pos[i].Start - 1;
                 } else {
                     // An import spec can have both block comment and a line comment
                     // to its right. In that case, both of them will have the same pos.
                     // But while formatting the AST, the line comment gets moved to
                     // after the block comment.
-                    c.val.Slash = pos[i].End;
+                    c.Value.Slash = pos[i].End;
                 }
             }
         }

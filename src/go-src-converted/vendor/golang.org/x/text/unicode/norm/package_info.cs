@@ -39,10 +39,8 @@ using static go.vendor.golang.org.x.text.unicode.norm_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<normReader, io_package.Reader>]
-[assembly: GoImplement<normWriter, io_package.WriteCloser>]
-[assembly: GoImplement<reorderBuffer, io_package.Reader>]
-[assembly: GoImplement<reorderBuffer, io_package.Writer>]
+[assembly: GoImplement<normReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<normWriter, io_package.WriteCloser>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

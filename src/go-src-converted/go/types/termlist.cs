@@ -9,26 +9,26 @@ using strings = strings_package;
 
 partial class types_package {
 
-[GoType("[]term")] partial struct Δtermlist;
+[GoType("[]ж<term>")] partial struct Δtermlist;
 
 // allTermlist represents the set of all types.
 // It is in normal form.
-internal static Δtermlist allTermlist = new Δtermlist{@new<term>()};
+internal static Δtermlist allTermlist = new Δtermlist(new ж<term>[]{@new<term>()}.slice());
 
 // termSep is the separator used between individual terms.
 internal static readonly @string termSep = " | "u8;
 
 // String prints the termlist exactly (without normalization).
-public static @string String(this Δtermlist xl) {
+internal static @string String(this Δtermlist xl) {
     if (len(xl) == 0) {
         return "∅"u8;
     }
-    strings.Builder buf = default!;
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     foreach (var (i, x) in xl) {
         if (i > 0) {
-            buf.WriteString(termSep);
+            Ꮡbuf.WriteString(termSep);
         }
-        buf.WriteString(x.String());
+        Ꮡbuf.WriteString(x.String());
     }
     return buf.String();
 }
@@ -65,7 +65,9 @@ internal static Δtermlist norm(this Δtermlist xl) {
     // TODO(gri) fix asymptotic performance
     var used = new slice<bool>(len(xl));
     Δtermlist rl = default!;
-    foreach (var (i, xi) in xl) {
+    foreach (var (i, vᴛ1) in xl) {
+        var xi = vᴛ1;
+
         if (xi == nil || used[i]) {
             continue;
         }
@@ -75,7 +77,7 @@ internal static Δtermlist norm(this Δtermlist xl) {
                 continue;
             }
             {
-                (u1, u2) = xi.union(xj); if (u2 == nil) {
+                var (u1, u2) = xi.union(xj); if (u2 == nil) {
                     // If we encounter a 𝓤 term, the entire list is 𝓤.
                     // Exit early.
                     // (Note that this is not just an optimization;
@@ -98,7 +100,7 @@ internal static Δtermlist norm(this Δtermlist xl) {
 
 // union returns the union xl ∪ yl.
 internal static Δtermlist union(this Δtermlist xl, Δtermlist yl) {
-    return append(xl, Ꮡyl.ꓸꓸꓸ).norm();
+    return append(xl, yl.ꓸꓸꓸ).norm();
 }
 
 // intersect returns the intersection xl ∩ yl.
@@ -138,11 +140,11 @@ internal static bool includes(this Δtermlist xl, ΔType t) {
 }
 
 // supersetOf reports whether y ⊆ xl.
-public static bool supersetOf(this Δtermlist xl, ж<term> Ꮡy) {
-    ref var y = ref Ꮡy.val;
+internal static bool supersetOf(this Δtermlist xl, ж<term> Ꮡy) {
+    ref var y = ref Ꮡy.Value;
 
     foreach (var (_, x) in xl) {
-        if (y.subsetOf(x)) {
+        if (Ꮡy.subsetOf(x)) {
             return true;
         }
     }

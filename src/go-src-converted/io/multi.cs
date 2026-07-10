@@ -3,15 +3,12 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using ꓸꓸꓸReader = Span<Reader>;
-using ꓸꓸꓸWriter = Span<Writer>;
-
 partial class io_package {
 
 [GoType] partial struct eofReader {
 }
 
-internal static (nint, error) Read(this eofReader _, slice<byte> _) {
+internal static (nint, error) Read(this eofReader _Δp0, slice<byte> _Δp1) {
     return (0, EOF);
 }
 
@@ -27,8 +24,8 @@ internal static (nint, error) Read(this eofReader _, slice<byte> _) {
         // Optimization to flatten nested multiReaders (Issue 13558).
         if (len(mr.readers) == 1) {
             {
-                var (r, ok) = mr.readers[0]._<multiReader.val>(ᐧ); if (ok) {
-                    mr.readers = r.val.readers;
+                var (r, ok) = mr.readers[0]._<ж<multiReader>>(ᐧ); if (ok) {
+                    mr.readers = r.Value.readers;
                     continue;
                 }
             }
@@ -66,7 +63,7 @@ internal static (nint, error) Read(this eofReader _, slice<byte> _) {
     foreach (var (i, r) in mr.readers) {
         int64 n = default!;
         {
-            var (subMr, ok) = r._<multiReader.val>(ᐧ); if (ok){
+            var (subMr, ok) = r._<ж<multiReader>>(ᐧ); if (ok){
                 // reuse buffer with nested multiReaders
                 (n, err) = subMr.writeToWithBuffer(w, buf);
             } else {
@@ -86,18 +83,18 @@ internal static (nint, error) Read(this eofReader _, slice<byte> _) {
     return (sum, default!);
 }
 
-internal static WriterTo _ᴛ1ʗ = (ж<multiReader>)(default!);
+internal static WriterTo _ᴛ2ʗ = new multiReaderжWriterTo((ж<multiReader>)(default!));
 
 // MultiReader returns a Reader that's the logical concatenation of
 // the provided input readers. They're read sequentially. Once all
 // inputs have returned EOF, Read will return EOF.  If any of the readers
 // return a non-nil, non-EOF error, Read will return that error.
-public static Reader MultiReader(params ꓸꓸꓸReader readersʗp) {
+public static Reader MultiReader(params Span<io_package.Reader> readersʗp) {
     var readers = readersʗp.slice();
 
     var r = new slice<Reader>(len(readers));
     copy(r, readers);
-    return new multiReader(r);
+    return new multiReaderжReader(Ꮡ(new multiReader(r)));
 }
 
 [GoType] partial struct multiWriter {
@@ -121,7 +118,7 @@ public static Reader MultiReader(params ꓸꓸꓸReader readersʗp) {
     return (len(p), default!);
 }
 
-internal static StringWriter _ᴛ2ʗ = (ж<multiWriter>)(default!);
+internal static StringWriter _ᴛ3ʗ = new multiWriterжStringWriter((ж<multiWriter>)(default!));
 
 [GoRecv] internal static (nint n, error err) WriteString(this ref multiWriter t, @string s) {
     nint n = default!;
@@ -156,20 +153,20 @@ internal static StringWriter _ᴛ2ʗ = (ж<multiWriter>)(default!);
 // Each write is written to each listed writer, one at a time.
 // If a listed writer returns an error, that overall write operation
 // stops and returns the error; it does not continue down the list.
-public static Writer MultiWriter(params ꓸꓸꓸWriter writersʗp) {
+public static Writer MultiWriter(params Span<io_package.Writer> writersʗp) {
     var writers = writersʗp.slice();
 
     var allWriters = new slice<Writer>(0, len(writers));
     foreach (var (_, w) in writers) {
         {
-            var (mw, ok) = w._<multiWriter.val>(ᐧ); if (ok){
+            var (mw, ok) = w._<ж<multiWriter>>(ᐧ); if (ok){
                 allWriters = append(allWriters, (~mw).writers.ꓸꓸꓸ);
             } else {
                 allWriters = append(allWriters, w);
             }
         }
     }
-    return new multiWriter(allWriters);
+    return new multiWriterжWriter(Ꮡ(new multiWriter(allWriters)));
 }
 
 } // end io_package

@@ -3,12 +3,13 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto;
 
-using cipher = crypto.cipher_package;
-using alias = crypto.@internal.alias_package;
-using byteorder = @internal.byteorder_package;
+using cipher = go.crypto.cipher_package;
+using alias = go.crypto.@internal.alias_package;
+using byteorder = go.@internal.byteorder_package;
 using strconv = strconv_package;
-using @internal;
-using crypto.@internal;
+using go.@internal;
+using go.crypto;
+using go.crypto.@internal;
 
 partial class des_package {
 
@@ -18,7 +19,7 @@ public static readonly UntypedInt ΔBlockSize = 8;
 [GoType("num:nint")] partial struct KeySizeError;
 
 public static @string Error(this KeySizeError k) {
-    return "crypto/des: invalid key size "u8 + strconv.Itoa(((nint)k));
+    return "crypto/des: invalid key size "u8 + strconv.Itoa((nint)k);
 }
 
 // desCipher is an instance of DES encryption.
@@ -33,7 +34,7 @@ public static (cipher.Block, error) NewCipher(slice<byte> key) {
     }
     var c = @new<desCipher>();
     c.generateSubkeys(key);
-    return (~c, default!);
+    return (new desCipherжBlock(c), default!);
 }
 
 [GoRecv] internal static nint BlockSize(this ref desCipher c) {
@@ -68,9 +69,7 @@ public static (cipher.Block, error) NewCipher(slice<byte> key) {
 
 // A tripleDESCipher is an instance of TripleDES encryption.
 [GoType] partial struct tripleDESCipher {
-    internal desCipher cipher1;
-    internal desCipher cipher2;
-    internal desCipher cipher3;
+    internal desCipher cipher1, cipher2, cipher3;
 }
 
 // NewTripleDESCipher creates and returns a new [cipher.Block].
@@ -79,10 +78,10 @@ public static (cipher.Block, error) NewTripleDESCipher(slice<byte> key) {
         return (default!, ((KeySizeError)len(key)));
     }
     var c = @new<tripleDESCipher>();
-    (~c).cipher1.generateSubkeys(key[..8]);
-    (~c).cipher2.generateSubkeys(key[8..16]);
-    (~c).cipher3.generateSubkeys(key[16..]);
-    return (~c, default!);
+    c.of(tripleDESCipher.Ꮡcipher1).generateSubkeys(key[..8]);
+    c.of(tripleDESCipher.Ꮡcipher2).generateSubkeys(key[8..16]);
+    c.of(tripleDESCipher.Ꮡcipher3).generateSubkeys(key[16..]);
+    return (new tripleDESCipherжBlock(c), default!);
 }
 
 [GoRecv] internal static nint BlockSize(this ref tripleDESCipher c) {
@@ -101,9 +100,9 @@ public static (cipher.Block, error) NewTripleDESCipher(slice<byte> key) {
     }
     var b = byteorder.BeUint64(src);
     b = permuteInitialBlock(b);
-    var (left, right) = (((uint32)(b >> (int)(32))), ((uint32)b));
-    left = (uint32)((left << (int)(1)) | (left >> (int)(31)));
-    right = (uint32)((right << (int)(1)) | (right >> (int)(31)));
+    var (left, right) = ((uint32)((b >> (int)(32))), (uint32)b);
+    left = (uint32)(((left << (int)(1))) | ((left >> (int)(31))));
+    right = (uint32)(((right << (int)(1))) | ((right >> (int)(31))));
     for (nint i = 0; i < 8; i++) {
         (left, right) = feistel(left, right, c.cipher1.subkeys[2 * i], c.cipher1.subkeys[2 * i + 1]);
     }
@@ -113,9 +112,9 @@ public static (cipher.Block, error) NewTripleDESCipher(slice<byte> key) {
     for (nint i = 0; i < 8; i++) {
         (left, right) = feistel(left, right, c.cipher3.subkeys[2 * i], c.cipher3.subkeys[2 * i + 1]);
     }
-    left = (uint32)((left << (int)(31)) | (left >> (int)(1)));
-    right = (uint32)((right << (int)(31)) | (right >> (int)(1)));
-    var preOutput = (uint64)((((uint64)right) << (int)(32)) | ((uint64)left));
+    left = (uint32)(((left << (int)(31))) | ((left >> (int)(1))));
+    right = (uint32)(((right << (int)(31))) | ((right >> (int)(1))));
+    var preOutput = (uint64)((((uint64)right << (int)(32))) | (uint64)left);
     byteorder.BePutUint64(dst, permuteFinalBlock(preOutput));
 }
 
@@ -131,9 +130,9 @@ public static (cipher.Block, error) NewTripleDESCipher(slice<byte> key) {
     }
     var b = byteorder.BeUint64(src);
     b = permuteInitialBlock(b);
-    var (left, right) = (((uint32)(b >> (int)(32))), ((uint32)b));
-    left = (uint32)((left << (int)(1)) | (left >> (int)(31)));
-    right = (uint32)((right << (int)(1)) | (right >> (int)(31)));
+    var (left, right) = ((uint32)((b >> (int)(32))), (uint32)b);
+    left = (uint32)(((left << (int)(1))) | ((left >> (int)(31))));
+    right = (uint32)(((right << (int)(1))) | ((right >> (int)(31))));
     for (nint i = 0; i < 8; i++) {
         (left, right) = feistel(left, right, c.cipher3.subkeys[15 - 2 * i], c.cipher3.subkeys[15 - (2 * i + 1)]);
     }
@@ -143,9 +142,9 @@ public static (cipher.Block, error) NewTripleDESCipher(slice<byte> key) {
     for (nint i = 0; i < 8; i++) {
         (left, right) = feistel(left, right, c.cipher1.subkeys[15 - 2 * i], c.cipher1.subkeys[15 - (2 * i + 1)]);
     }
-    left = (uint32)((left << (int)(31)) | (left >> (int)(1)));
-    right = (uint32)((right << (int)(31)) | (right >> (int)(1)));
-    var preOutput = (uint64)((((uint64)right) << (int)(32)) | ((uint64)left));
+    left = (uint32)(((left << (int)(31))) | ((left >> (int)(1))));
+    right = (uint32)(((right << (int)(31))) | ((right >> (int)(1))));
+    var preOutput = (uint64)((((uint64)right << (int)(32))) | (uint64)left);
     byteorder.BePutUint64(dst, permuteFinalBlock(preOutput));
 }
 

@@ -15,10 +15,8 @@ partial class profilerecord_package {
 }
 
 [GoType] partial struct MemProfileRecord {
-    public int64 AllocBytes;
-    public int64 FreeBytes;
-    public int64 AllocObjects;
-    public int64 FreeObjects;
+    public int64 AllocBytes, FreeBytes;
+    public int64 AllocObjects, FreeObjects;
     public slice<uintptr> Stack;
 }
 

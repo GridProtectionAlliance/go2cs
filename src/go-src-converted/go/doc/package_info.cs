@@ -10,11 +10,11 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using astꓸFilter = go.go.ast_package.ΔFilter;
 global using commentꓸText = go.go.doc.comment_package.ΔText;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;
+using ast = go.go.ast_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -32,7 +32,6 @@ using static go.go.doc_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Filter", "ΔFilter")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -44,19 +43,14 @@ using static go.go.doc_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<ast.Decl, go.ast_package.Decl>]
-[assembly: GoImplement<ast.Spec, go.ast_package.Spec>]
-[assembly: GoImplement<go.ast_package.BlockStmt, go.ast_package.Node>]
-[assembly: GoImplement<go.ast_package.Expr, go.ast_package.Node>]
-[assembly: GoImplement<go.ast_package.FuncDecl, go.ast_package.Decl>]
-[assembly: GoImplement<go.ast_package.GenDecl, go.ast_package.Decl>]
-[assembly: GoImplement<go.ast_package.Ident, go.ast_package.Expr>]
-[assembly: GoImplement<go.ast_package.ImportSpec, go.ast_package.Spec>]
-[assembly: GoImplement<go.ast_package.SelectorExpr, go.ast_package.Expr>]
-[assembly: GoImplement<go.ast_package.Spec, go.ast_package.Node>]
-[assembly: GoImplement<go.ast_package.StarExpr, go.ast_package.Expr>]
-[assembly: GoImplement<go.ast_package.TypeSpec, go.ast_package.Spec>]
-[assembly: GoImplement<go.ast_package.ValueSpec, go.ast_package.Spec>]
+[assembly: GoImplement<go.go.ast_package.FuncDecl, go.go.ast_package.Decl>(Pointer = true)]
+[assembly: GoImplement<go.go.ast_package.GenDecl, go.go.ast_package.Decl>(Pointer = true)]
+[assembly: GoImplement<go.go.ast_package.Ident, go.go.ast_package.Expr>(Pointer = true)]
+[assembly: GoImplement<go.go.ast_package.ImportSpec, go.go.ast_package.Spec>(Pointer = true)]
+[assembly: GoImplement<go.go.ast_package.SelectorExpr, go.go.ast_package.Expr>(Pointer = true)]
+[assembly: GoImplement<go.go.ast_package.StarExpr, go.go.ast_package.Expr>(Pointer = true)]
+[assembly: GoImplement<go.go.ast_package.TypeSpec, go.go.ast_package.Spec>(Pointer = true)]
+[assembly: GoImplement<go.go.ast_package.ValueSpec, go.go.ast_package.Spec>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

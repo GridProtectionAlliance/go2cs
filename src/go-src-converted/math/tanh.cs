@@ -55,15 +55,15 @@ partial class math_package {
 //   moshier@na-net.ornl.gov
 //
 internal static array<float64> tanhP = new float64[]{
-    -9.64399179425052238628e-1F,
-    -9.92877231001918586564e1F,
-    -1.61468768441708447952e3F
+    -9.64399179425052238628e-1D,
+    -9.92877231001918586564e1D,
+    -1.61468768441708447952e3D
 }.array();
 
 internal static array<float64> tanhQ = new float64[]{
-    1.12811678491632931402e2F,
-    2.23548839060100448583e3F,
-    4.84406305325125486048e3F
+    1.12811678491632931402e2D,
+    2.23548839060100448583e3D,
+    4.84406305325125486048e3D
 }.array();
 
 // Tanh returns the hyperbolic tangent of x.
@@ -81,16 +81,16 @@ public static float64 Tanh(float64 x) {
 }
 
 internal static float64 tanh(float64 x) {
-    static readonly UntypedFloat MAXLOG = /* 8.8029691931113054295988e+01 */ 88.0297;       // log(2**127)
+    UntypedFloat MAXLOG = /* 8.8029691931113054295988e+01 */ 88.0297;       // log(2**127)
     var z = Abs(x);
     switch (ᐧ) {
-    case {} when z > 0.5F * MAXLOG: {
+    case {} when z > 0.5D * MAXLOG: {
         if (x < 0) {
             return -1;
         }
         return 1;
     }
-    case {} when z is >= 0.625F: {
+    case {} when z is >= 0.625D: {
         var s = Exp(2 * z);
         z = 1 - 2 / (s + 1);
         if (x < 0) {

@@ -39,7 +39,8 @@ using static go.compress.bzip2_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<StructuralError, error>]
-[assembly: GoImplement<reader, io_package.Reader>]
+[assembly: GoImplement<bufio_package.Reader, io_package.ByteReader>(Pointer = true)]
+[assembly: GoImplement<reader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

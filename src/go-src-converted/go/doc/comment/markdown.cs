@@ -6,6 +6,7 @@ namespace go.go.doc;
 using bytes = bytes_package;
 using fmt = fmt_package;
 using strings = strings_package;
+using io = io_package;
 
 partial class comment_package {
 
@@ -13,48 +14,50 @@ partial class comment_package {
 [GoType] partial struct mdPrinter {
     public partial ref ж<Printer> Printer { get; }
     internal @string headingPrefix;
-    internal bytes_package.Buffer raw;
+    internal bytes.Buffer raw;
 }
 
 // Markdown returns a Markdown formatting of the Doc.
 // See the [Printer] documentation for ways to customize the Markdown output.
-[GoRecv] public static slice<byte> Markdown(this ref Printer p, ж<Doc> Ꮡd) {
-    ref var d = ref Ꮡd.val;
+public static slice<byte> Markdown(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
+    ref var p = ref Ꮡp.Value;
+    ref var d = ref Ꮡd.Value;
 
     var mp = Ꮡ(new mdPrinter(
-        Printer: p,
+        Printer: Ꮡp,
         headingPrefix: strings.Repeat("#"u8, p.headingLevel()) + " "u8
     ));
-    ref var out = ref heap(new bytes_package.Buffer(), out var Ꮡout);
+    ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
     foreach (var (i, x) in d.Content) {
         if (i > 0) {
             @out.WriteByte((rune)'\n');
         }
-        mp.block(Ꮡ@out, x);
+        mp.block(Ꮡout, x);
     }
     return @out.Bytes();
 }
 
 // block prints the block x to out.
-[GoRecv] internal static void block(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
-    ref var @out = ref Ꮡout.val;
+internal static void block(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) {
+    ref var p = ref Ꮡp.Value;
+    ref var @out = ref Ꮡout.Value;
 
     switch (x.type()) {
     default: {
-        var x = x.type();
-        fmt.Fprintf(~@out, "?%T"u8, x);
+        var xΔ1 = x;
+        fmt.Fprintf(new bytes_BufferжWriter(Ꮡout), "?%T"u8, xΔ1);
         break;
     }
-    case Paragraph.val x: {
-        p.text(Ꮡout, (~x).Text);
+    case ж<Paragraph> xΔ1: {
+        Ꮡp.text(Ꮡout, (~xΔ1).Text);
         @out.WriteString("\n"u8);
         break;
     }
-    case Heading.val x: {
+    case ж<Heading> xΔ1: {
         @out.WriteString(p.headingPrefix);
-        p.text(Ꮡout, (~x).Text);
+        Ꮡp.text(Ꮡout, (~xΔ1).Text);
         {
-            @string id = p.headingID(Ꮡx); if (id != ""u8) {
+            @string id = p.headingID(xΔ1); if (id != ""u8) {
                 @out.WriteString(" {#"u8);
                 @out.WriteString(id);
                 @out.WriteString("}"u8);
@@ -63,8 +66,8 @@ partial class comment_package {
         @out.WriteString("\n"u8);
         break;
     }
-    case Code.val x: {
-        @string md = x.val.Text;
+    case ж<Code> xΔ1: {
+        @string md = xΔ1.Value.Text;
         while (md != ""u8) {
             @string line = default!;
             (line, md, _) = strings.Cut(md, "\n"u8);
@@ -76,14 +79,14 @@ partial class comment_package {
         }
         break;
     }
-    case List.val x: {
-        var loose = x.BlankBetween();
-        foreach (var (i, item) in (~x).Items) {
+    case ж<List> xΔ1: {
+        var loose = xΔ1.BlankBetween();
+        foreach (var (i, item) in (~xΔ1).Items) {
             if (i > 0 && loose) {
                 @out.WriteString("\n"u8);
             }
             {
-                @string n = item.val.Number; if (n != ""u8){
+                @string n = item.Value.Number; if (n != ""u8){
                     @out.WriteString(" "u8);
                     @out.WriteString(n);
                     @out.WriteString(". "u8);
@@ -97,7 +100,7 @@ partial class comment_package {
                 if (iΔ1 > 0) {
                     @out.WriteString("\n" + fourSpace);
                 }
-                p.text(Ꮡout, blk._<Paragraph.val>().Text);
+                Ꮡp.text(Ꮡout, (~blk._<ж<Paragraph>>()).Text);
                 @out.WriteString("\n"u8);
             }
         }
@@ -106,11 +109,12 @@ partial class comment_package {
 }
 
 // text prints the text sequence x to out.
-[GoRecv] internal static void text(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slice<ΔText> x) {
-    ref var @out = ref Ꮡout.val;
+internal static void text(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slice<ΔText> x) {
+    ref var p = ref Ꮡp.Value;
+    ref var @out = ref Ꮡout.Value;
 
     p.raw.Reset();
-    p.rawText(Ꮡ(p.raw), x);
+    p.rawText(Ꮡp.of(mdPrinter.Ꮡraw), x);
     var line = bytes.TrimSpace(p.raw.Bytes());
     if (len(line) == 0) {
         return;
@@ -142,34 +146,34 @@ partial class comment_package {
 // without worrying about escaping characters
 // that have special meaning at the start of a Markdown line.
 [GoRecv] internal static void rawText(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slice<ΔText> x) {
-    ref var @out = ref Ꮡout.val;
+    ref var @out = ref Ꮡout.Value;
 
     foreach (var (_, t) in x) {
         switch (t.type()) {
-        case Plain t: {
-            p.escape(Ꮡout, ((@string)t));
+        case Plain tΔ1: {
+            p.escape(Ꮡout, ((@string)tΔ1));
             break;
         }
-        case Italic t: {
+        case Italic tΔ1: {
             @out.WriteString("*"u8);
-            p.escape(Ꮡout, ((@string)t));
+            p.escape(Ꮡout, ((@string)tΔ1));
             @out.WriteString("*"u8);
             break;
         }
-        case Link.val t: {
+        case ж<Link> tΔ1: {
             @out.WriteString("["u8);
-            p.rawText(Ꮡout, (~t).Text);
+            p.rawText(Ꮡout, (~tΔ1).Text);
             @out.WriteString("]("u8);
-            @out.WriteString((~t).URL);
+            @out.WriteString((~tΔ1).URL);
             @out.WriteString(")"u8);
             break;
         }
-        case DocLink.val t: {
-            @string url = p.docLinkURL(t);
+        case ж<DocLink> tΔ1: {
+            @string url = p.docLinkURL(tΔ1);
             if (url != ""u8) {
                 @out.WriteString("["u8);
             }
-            p.rawText(Ꮡout, (~t).Text);
+            p.rawText(Ꮡout, (~tΔ1).Text);
             if (url != ""u8) {
                 @out.WriteString("]("u8);
                 url = strings.ReplaceAll(url, "("u8, "%28"u8);
@@ -186,7 +190,7 @@ partial class comment_package {
 // escaping special characters to avoid being misinterpreted
 // as Markdown markup sequences.
 [GoRecv] internal static void escape(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
-    ref var @out = ref Ꮡout.val;
+    ref var @out = ref Ꮡout.Value;
 
     nint start = 0;
     for (nint i = 0; i < len(s); i++) {

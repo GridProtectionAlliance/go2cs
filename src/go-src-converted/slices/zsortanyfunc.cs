@@ -7,9 +7,7 @@ namespace go;
 partial class slices_package {
 
 // insertionSortCmpFunc sorts data[a:b] using insertion sort.
-internal static void insertionSortCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E, nint> cmp)
-    where E : new()
-{
+internal static void insertionSortCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E, nint> cmp) {
     for (nint i = a + 1; i < b; i++) {
         for (nint j = i; j > a && (cmp(data[j], data[j - 1]) < 0); j--) {
             (data[j], data[j - 1]) = (data[j - 1], data[j]);
@@ -19,9 +17,7 @@ internal static void insertionSortCmpFunc<E>(slice<E> data, nint a, nint b, Func
 
 // siftDownCmpFunc implements the heap property on data[lo:hi].
 // first is an offset into the array where the root of the heap lies.
-internal static void siftDownCmpFunc<E>(slice<E> data, nint lo, nint hi, nint first, Func<E, E, nint> cmp)
-    where E : new()
-{
+internal static void siftDownCmpFunc<E>(slice<E> data, nint lo, nint hi, nint first, Func<E, E, nint> cmp) {
     nint root = lo;
     while (ᐧ) {
         nint child = 2 * root + 1;
@@ -39,9 +35,7 @@ internal static void siftDownCmpFunc<E>(slice<E> data, nint lo, nint hi, nint fi
     }
 }
 
-internal static void heapSortCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E, nint> cmp)
-    where E : new()
-{
+internal static void heapSortCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E, nint> cmp) {
     nint first = a;
     nint lo = 0;
     nint hi = b - a;
@@ -62,10 +56,8 @@ internal static void heapSortCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E
 // C++ implementation: https://github.com/orlp/pdqsort
 // Rust implementation: https://docs.rs/pdqsort/latest/pdqsort/
 // limit is the number of allowed bad (very unbalanced) pivots before falling back to heapsort.
-internal static void pdqsortCmpFunc<E>(slice<E> data, nint a, nint b, nint limit, Func<E, E, nint> cmp)
-    where E : new()
-{
-    static readonly UntypedInt maxInsertion = 12;
+internal static void pdqsortCmpFunc<E>(slice<E> data, nint a, nint b, nint limit, Func<E, E, nint> cmp) {
+    UntypedInt maxInsertion = 12;
     bool wasBalanced = true;   // whether the last partitioning was reasonably balanced
     bool wasPartitioned = true; // whether the slice was already partitioned
     while (ᐧ) {
@@ -102,8 +94,8 @@ internal static void pdqsortCmpFunc<E>(slice<E> data, nint a, nint b, nint limit
         // Probably the slice contains many duplicate elements, partition the slice into
         // elements equal to and elements greater than the pivot.
         if (a > 0 && !(cmp(data[a - 1], data[pivot]) < 0)) {
-            nint mid = partitionEqualCmpFunc(data, a, b, pivot, cmp);
-            a = mid;
+            nint midΔ1 = partitionEqualCmpFunc(data, a, b, pivot, cmp);
+            a = midΔ1;
             continue;
         }
         var (mid, alreadyPartitioned) = partitionCmpFunc(data, a, b, pivot, cmp);
@@ -127,9 +119,7 @@ internal static void pdqsortCmpFunc<E>(slice<E> data, nint a, nint b, nint limit
 // Let p = data[pivot]
 // Moves elements in data[a:b] around, so that data[i]<p and data[j]>=p for i<newpivot and j>newpivot.
 // On return, data[newpivot] = p
-internal static (nint newpivot, bool alreadyPartitioned) partitionCmpFunc<E>(slice<E> data, nint a, nint b, nint pivot, Func<E, E, nint> cmp)
-    where E : new()
-{
+internal static (nint newpivot, bool alreadyPartitioned) partitionCmpFunc<E>(slice<E> data, nint a, nint b, nint pivot, Func<E, E, nint> cmp) {
     nint newpivot = default!;
     bool alreadyPartitioned = default!;
 
@@ -170,9 +160,7 @@ internal static (nint newpivot, bool alreadyPartitioned) partitionCmpFunc<E>(sli
 
 // partitionEqualCmpFunc partitions data[a:b] into elements equal to data[pivot] followed by elements greater than data[pivot].
 // It assumed that data[a:b] does not contain elements smaller than the data[pivot].
-internal static nint /*newpivot*/ partitionEqualCmpFunc<E>(slice<E> data, nint a, nint b, nint pivot, Func<E, E, nint> cmp)
-    where E : new()
-{
+internal static nint /*newpivot*/ partitionEqualCmpFunc<E>(slice<E> data, nint a, nint b, nint pivot, Func<E, E, nint> cmp) {
     nint newpivot = default!;
 
     (data[a], data[pivot]) = (data[pivot], data[a]);
@@ -197,11 +185,9 @@ internal static nint /*newpivot*/ partitionEqualCmpFunc<E>(slice<E> data, nint a
 }
 
 // partialInsertionSortCmpFunc partially sorts a slice, returns true if the slice is sorted at the end.
-internal static bool partialInsertionSortCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E, nint> cmp)
-    where E : new()
-{
-    static readonly UntypedInt maxSteps = 5; // maximum number of adjacent out-of-order pairs that will get shifted
-    static readonly UntypedInt shortestShifting = 50; // don't shift any elements on short arrays
+internal static bool partialInsertionSortCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E, nint> cmp) {
+    UntypedInt maxSteps = 5; // maximum number of adjacent out-of-order pairs that will get shifted
+    UntypedInt shortestShifting = 50; // don't shift any elements on short arrays
     nint i = a + 1;
     for (nint j = 0; j < maxSteps; j++) {
         while (i < b && !(cmp(data[i], data[i - 1]) < 0)) {
@@ -220,7 +206,7 @@ internal static bool partialInsertionSortCmpFunc<E>(slice<E> data, nint a, nint 
                 if (!(cmp(data[jΔ1], data[jΔ1 - 1]) < 0)) {
                     break;
                 }
-                (data[j], data[j - 1]) = (data[jΔ1 - 1], data[jΔ1]);
+                (data[jΔ1], data[jΔ1 - 1]) = (data[jΔ1 - 1], data[jΔ1]);
             }
         }
         // Shift the greater one to the right.
@@ -229,7 +215,7 @@ internal static bool partialInsertionSortCmpFunc<E>(slice<E> data, nint a, nint 
                 if (!(cmp(data[jΔ2], data[jΔ2 - 1]) < 0)) {
                     break;
                 }
-                (data[j], data[j - 1]) = (data[jΔ2 - 1], data[jΔ2]);
+                (data[jΔ2], data[jΔ2 - 1]) = (data[jΔ2 - 1], data[jΔ2]);
             }
         }
     }
@@ -238,15 +224,13 @@ internal static bool partialInsertionSortCmpFunc<E>(slice<E> data, nint a, nint 
 
 // breakPatternsCmpFunc scatters some elements around in an attempt to break some patterns
 // that might cause imbalanced partitions in quicksort.
-internal static void breakPatternsCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E, nint> cmp)
-    where E : new()
-{
+internal static void breakPatternsCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E, nint> cmp) {
     nint length = b - a;
     if (length >= 8) {
-        var random = ((xorshift)length);
+        var random = ((xorshift)(uint64)length);
         nuint modulus = nextPowerOfTwo(length);
         for (nint idx = a + (length / 4) * 2 - 1; idx <= a + (length / 4) * 2 + 1; idx++) {
-            nint other = ((nint)((nuint)(((nuint)random.Next()) & (modulus - 1))));
+            nint other = (nint)((nuint)((nuint)random.Next() & (modulus - 1)));
             if (other >= length) {
                 other -= length;
             }
@@ -260,14 +244,12 @@ internal static void breakPatternsCmpFunc<E>(slice<E> data, nint a, nint b, Func
 // [0,8): chooses a static pivot.
 // [8,shortestNinther): uses the simple median-of-three method.
 // [shortestNinther,∞): uses the Tukey ninther method.
-internal static (nint pivot, sortedHint hint) choosePivotCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E, nint> cmp)
-    where E : new()
-{
+internal static (nint pivot, sortedHint hint) choosePivotCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E, nint> cmp) {
     nint pivot = default!;
     sortedHint hint = default!;
 
-    static readonly UntypedInt shortestNinther = 50;
-    static readonly UntypedInt maxSwaps = /* 4 * 3 */ 12;
+    UntypedInt shortestNinther = 50;
+    UntypedInt maxSwaps = /* 4 * 3 */ 12;
     nint l = b - a;
     ref var swaps = ref heap(new nint(), out var Ꮡswaps);
     nint i = a + l / 4 * 1;
@@ -297,10 +279,8 @@ internal static (nint pivot, sortedHint hint) choosePivotCmpFunc<E>(slice<E> dat
 }
 
 // order2CmpFunc returns x,y where data[x] <= data[y], where x,y=a,b or x,y=b,a.
-internal static (nint, nint) order2CmpFunc<E>(slice<E> data, nint a, nint b, ж<nint> Ꮡswaps, Func<E, E, nint> cmp)
-    where E : new()
-{
-    ref var swaps = ref Ꮡswaps.val;
+internal static (nint, nint) order2CmpFunc<E>(slice<E> data, nint a, nint b, ж<nint> Ꮡswaps, Func<E, E, nint> cmp) {
+    ref var swaps = ref Ꮡswaps.Value;
 
     if (cmp(data[b], data[a]) < 0) {
         swaps++;
@@ -310,10 +290,8 @@ internal static (nint, nint) order2CmpFunc<E>(slice<E> data, nint a, nint b, ж<
 }
 
 // medianCmpFunc returns x where data[x] is the median of data[a],data[b],data[c], where x is a, b, or c.
-internal static nint medianCmpFunc<E>(slice<E> data, nint a, nint b, nint c, ж<nint> Ꮡswaps, Func<E, E, nint> cmp)
-    where E : new()
-{
-    ref var swaps = ref Ꮡswaps.val;
+internal static nint medianCmpFunc<E>(slice<E> data, nint a, nint b, nint c, ж<nint> Ꮡswaps, Func<E, E, nint> cmp) {
+    ref var swaps = ref Ꮡswaps.Value;
 
     (a, b) = order2CmpFunc(data, a, b, Ꮡswaps, cmp);
     (b, c) = order2CmpFunc(data, b, c, Ꮡswaps, cmp);
@@ -322,17 +300,13 @@ internal static nint medianCmpFunc<E>(slice<E> data, nint a, nint b, nint c, ж<
 }
 
 // medianAdjacentCmpFunc finds the median of data[a - 1], data[a], data[a + 1] and stores the index into a.
-internal static nint medianAdjacentCmpFunc<E>(slice<E> data, nint a, ж<nint> Ꮡswaps, Func<E, E, nint> cmp)
-    where E : new()
-{
-    ref var swaps = ref Ꮡswaps.val;
+internal static nint medianAdjacentCmpFunc<E>(slice<E> data, nint a, ж<nint> Ꮡswaps, Func<E, E, nint> cmp) {
+    ref var swaps = ref Ꮡswaps.Value;
 
     return medianCmpFunc(data, a - 1, a, a + 1, Ꮡswaps, cmp);
 }
 
-internal static void reverseRangeCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E, nint> cmp)
-    where E : new()
-{
+internal static void reverseRangeCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E, nint> cmp) {
     nint i = a;
     nint j = b - 1;
     while (i < j) {
@@ -342,17 +316,13 @@ internal static void reverseRangeCmpFunc<E>(slice<E> data, nint a, nint b, Func<
     }
 }
 
-internal static void swapRangeCmpFunc<E>(slice<E> data, nint a, nint b, nint n, Func<E, E, nint> cmp)
-    where E : new()
-{
+internal static void swapRangeCmpFunc<E>(slice<E> data, nint a, nint b, nint n, Func<E, E, nint> cmp) {
     for (nint i = 0; i < n; i++) {
         (data[a + i], data[b + i]) = (data[b + i], data[a + i]);
     }
 }
 
-internal static void stableCmpFunc<E>(slice<E> data, nint n, Func<E, E, nint> cmp)
-    where E : new()
-{
+internal static void stableCmpFunc<E>(slice<E> data, nint n, Func<E, E, nint> cmp) {
     nint blockSize = 20;
     // must be > 0
     nint a = 0;
@@ -398,9 +368,7 @@ internal static void stableCmpFunc<E>(slice<E> data, nint n, Func<E, E, nint> cm
 // symMerge assumes non-degenerate arguments: a < m && m < b.
 // Having the caller check this condition eliminates many leaf recursion calls,
 // which improves performance.
-internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, Func<E, E, nint> cmp)
-    where E : new()
-{
+internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, Func<E, E, nint> cmp) {
     // Avoid unnecessary recursions of symMerge
     // by direct insertion of data[a] into data[m:b]
     // if data[a:m] only contains one element.
@@ -411,7 +379,7 @@ internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, F
         nint i = m;
         nint j = b;
         while (i < j) {
-            nint h = ((nint)(((nuint)(i + j)) >> (int)(1)));
+            nint h = (nint)(((nuint)(i + j) >> (int)(1)));
             if (cmp(data[h], data[a]) < 0){
                 i = h + 1;
             } else {
@@ -434,7 +402,7 @@ internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, F
         nint i = a;
         nint j = m;
         while (i < j) {
-            nint h = ((nint)(((nuint)(i + j)) >> (int)(1)));
+            nint h = (nint)(((nuint)(i + j) >> (int)(1)));
             if (!(cmp(data[m], data[h]) < 0)){
                 i = h + 1;
             } else {
@@ -447,7 +415,7 @@ internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, F
         }
         return;
     }
-    nint mid = ((nint)(((nuint)(a + b)) >> (int)(1)));
+    nint mid = (nint)(((nuint)(a + b) >> (int)(1)));
     nint n = mid + m;
     nint start = default!;
     nint r = default!;
@@ -460,7 +428,7 @@ internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, F
     }
     nint p = n - 1;
     while (start < r) {
-        nint c = ((nint)(((nuint)(start + r)) >> (int)(1)));
+        nint c = (nint)(((nuint)(start + r) >> (int)(1)));
         if (!(cmp(data[p - c], data[c]) < 0)){
             start = c + 1;
         } else {
@@ -483,9 +451,7 @@ internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, F
 // Data of the form 'x u v y' is changed to 'x v u y'.
 // rotate performs at most b-a many calls to data.Swap,
 // and it assumes non-degenerate arguments: a < m && m < b.
-internal static void rotateCmpFunc<E>(slice<E> data, nint a, nint m, nint b, Func<E, E, nint> cmp)
-    where E : new()
-{
+internal static void rotateCmpFunc<E>(slice<E> data, nint a, nint m, nint b, Func<E, E, nint> cmp) {
     nint i = m - a;
     nint j = b - m;
     while (i != j) {

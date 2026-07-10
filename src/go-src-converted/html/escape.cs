@@ -88,20 +88,20 @@ internal static (nint dst1, nint src1) unescapeEntity(slice<byte> b, nint dst, n
             i++;
             if (hex){
                 if ((rune)'0' <= c && c <= (rune)'9'){
-                    x = 16 * x + ((rune)c) - (rune)'0';
+                    x = 16 * x + (rune)c - (rune)'0';
                     continue;
                 } else 
                 if ((rune)'a' <= c && c <= (rune)'f'){
-                    x = 16 * x + ((rune)c) - (rune)'a' + 10;
+                    x = 16 * x + (rune)c - (rune)'a' + 10;
                     continue;
                 } else 
                 if ((rune)'A' <= c && c <= (rune)'F') {
-                    x = 16 * x + ((rune)c) - (rune)'A' + 10;
+                    x = 16 * x + (rune)c - (rune)'A' + 10;
                     continue;
                 }
             } else 
             if ((rune)'0' <= c && c <= (rune)'9') {
-                x = 10 * x + ((rune)c) - (rune)'0';
+                x = 10 * x + (rune)c - (rune)'0';
                 continue;
             }
             if (c != (rune)';') {
@@ -114,11 +114,11 @@ internal static (nint dst1, nint src1) unescapeEntity(slice<byte> b, nint dst, n
             b[dst] = b[src];
             return (dst + 1, src + 1);
         }
-        if (128 <= x && x <= 159){
+        if (0x80 <= x && x <= 0x9F){
             // Replace characters from Windows-1252 with UTF-8 equivalents.
-            x = replacementTable[x - 128];
+            x = replacementTable[x - 0x80];
         } else 
-        if (x == 0 || (55296 <= x && x <= 57343) || x > 1114111) {
+        if (x == 0 || (0xD800 <= x && x <= 0xDFFF) || x > 0x10FFFF) {
             // Replace invalid characters with the replacement character.
             x = (rune)'\uFFFD';
         }
@@ -197,7 +197,7 @@ public static @string EscapeString(@string s) {
 // UnescapeString(EscapeString(s)) == s always holds, but the converse isn't
 // always true.
 public static @string UnescapeString(@string s) {
-    populateMapsOnce.Do(populateMaps);
+    ᏑpopulateMapsOnce.Do(populateMaps);
     nint i = strings.IndexByte(s, (rune)'&');
     if (i < 0) {
         return s;

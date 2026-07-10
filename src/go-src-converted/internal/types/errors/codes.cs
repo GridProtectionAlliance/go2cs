@@ -31,10 +31,9 @@ partial class errors_package {
 // "_DuplicateDecl" or "_InvalidSliceExpr". For brevity, naming follows the
 // convention that "bad" implies a problem with syntax, and "invalid" implies a
 // problem with types.
-public static readonly GoUntyped InvalidSyntaxTree = /* -1 */
-    GoUntyped.Parse("-1");
+public static readonly Code InvalidSyntaxTree = -1;
 
-internal static readonly Code Δ_ = /* iota */ 0;
+internal static readonly Code _ᴛ2ʗ = /* iota */ 0;
 public static readonly Code Test = 1;
 public static readonly Code BlankPkgName = 2;
 public static readonly Code MismatchedPkgName = 3;
@@ -63,7 +62,7 @@ public static readonly Code NotAType = 25;
 public static readonly Code InvalidArrayLen = 26;
 public static readonly Code BlankIfaceMethod = 27;
 public static readonly Code IncomparableMapKey = 28;
-internal static readonly Code Δ_ = 29; // not used anymore
+internal static readonly Code _ᴛ3ʗ = 29; // not used anymore
 public static readonly Code InvalidPtrEmbed = 30;
 public static readonly Code BadRecv = 31;
 public static readonly Code InvalidRecv = 32;
@@ -114,7 +113,7 @@ public static readonly Code MissingFieldOrMethod = 76;
 public static readonly Code BadDotDotDotSyntax = 77;
 public static readonly Code NonVariadicDotDotDot = 78;
 public static readonly Code MisplacedDotDotDot = 79;
-internal static readonly Code Δ_ = 80; // InvalidDotDotDotOperand was removed.
+internal static readonly Code _ᴛ4ʗ = 80; // InvalidDotDotDotOperand was removed.
 public static readonly Code InvalidDotDotDot = 81;
 public static readonly Code UncalledBuiltin = 82;
 public static readonly Code InvalidAppend = 83;
@@ -141,7 +140,7 @@ public static readonly Code WrongResultCount = 103;
 public static readonly Code OutOfScopeResult = 104;
 public static readonly Code InvalidCond = 105;
 public static readonly Code InvalidPostDecl = 106;
-internal static readonly Code Δ_ = 107; // InvalidChanRange was removed.
+internal static readonly Code _ᴛ5ʗ = 107; // InvalidChanRange was removed.
 public static readonly Code InvalidIterVar = 108;
 public static readonly Code InvalidRangeExpr = 109;
 public static readonly Code MisplacedBreak = 110;
@@ -183,7 +182,7 @@ public static readonly Code InvalidMethodTypeParams = 143;
 public static readonly Code MisplacedTypeParam = 144;
 public static readonly Code InvalidUnsafeSliceData = 145;
 public static readonly Code InvalidUnsafeString = 146;
-internal static readonly Code Δ_ = 147; // not used anymore
+internal static readonly Code _ᴛ6ʗ = 147; // not used anymore
 public static readonly Code InvalidClear = 148;
 public static readonly Code TypeTooLarge = 149;
 public static readonly Code InvalidMinMaxOperand = 150;

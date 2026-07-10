@@ -6,7 +6,8 @@
 namespace go.go;
 
 using fmt = fmt_package;
-using token = go.token_package;
+using token = global::go.go.token_package;
+using global::go.go;
 
 partial class types_package {
 
@@ -28,9 +29,9 @@ partial class types_package {
 // NewAlias creates a new Alias type with the given type name and rhs.
 // rhs must not be nil.
 public static ж<Alias> NewAlias(ж<TypeName> Ꮡobj, ΔType rhs) {
-    ref var obj = ref Ꮡobj.val;
+    ref var obj = ref Ꮡobj.Value;
 
-    var alias = ((ж<Checker>)(default!)).val.newAlias(Ꮡobj, rhs);
+    var alias = ((ж<Checker>)(default!)).newAlias(Ꮡobj, rhs);
     // Ensure that alias.actual is set (#65455).
     alias.cleanup();
     return alias;
@@ -39,11 +40,13 @@ public static ж<Alias> NewAlias(ж<TypeName> Ꮡobj, ΔType rhs) {
 // Obj returns the type name for the declaration defining the alias type a.
 // For instantiated types, this is same as the type name of the origin type.
 [GoRecv] public static ж<TypeName> Obj(this ref Alias a) {
-    return a.orig.obj;
+    return (~a.orig).obj;
 }
 
-[GoRecv] public static @string String(this ref Alias a) {
-    return TypeString(~a, default!);
+public static @string String(this ж<Alias> Ꮡa) {
+    ref var a = ref Ꮡa.Value;
+
+    return TypeString(new AliasжΔType(Ꮡa), default!);
 }
 
 // Underlying returns the [underlying type] of the alias type a, which is the
@@ -51,8 +54,10 @@ public static ж<Alias> NewAlias(ж<TypeName> Ꮡobj, ΔType rhs) {
 // TypeParam, or Alias types.
 //
 // [underlying type]: https://go.dev/ref/spec#Underlying_types.
-[GoRecv] public static ΔType Underlying(this ref Alias a) {
-    return unalias(a).Underlying();
+public static ΔType Underlying(this ж<Alias> Ꮡa) {
+    ref var a = ref Ꮡa.Value;
+
+    return unalias(Ꮡa).Underlying();
 }
 
 // Origin returns the generic Alias type of which a is an instance.
@@ -92,7 +97,7 @@ public static ж<Alias> NewAlias(ж<TypeName> Ꮡobj, ΔType rhs) {
 // Consequently, the result is never an alias type.
 public static ΔType Unalias(ΔType t) {
     {
-        var (a0, _) = t._<Alias.val>(ᐧ); if (a0 != nil) {
+        var (a0, _) = t._<ж<Alias>>(ᐧ); if (a0 != nil) {
             return unalias(a0);
         }
     }
@@ -100,24 +105,24 @@ public static ΔType Unalias(ΔType t) {
 }
 
 internal static ΔType unalias(ж<Alias> Ꮡa0) {
-    ref var a0 = ref Ꮡa0.val;
+    ref var a0 = ref Ꮡa0.Value;
 
     if (a0.actual != default!) {
         return a0.actual;
     }
     ΔType t = default!;
-    for (var a = a0; a != nil; (a, _) = t._<Alias.val>(ᐧ)) {
-        t = a.val.fromRHS;
+    for (var a = Ꮡa0; a != nil; (a, _) = t._<ж<Alias>>(ᐧ)) {
+        t = a.Value.fromRHS;
     }
     if (t == default!) {
-        throw panic(fmt.Sprintf("non-terminated alias %s"u8, a0.obj.name));
+        throw panic(fmt.Sprintf("non-terminated alias %s"u8, (~a0.obj).name));
     }
     // Memoize the type only if valid.
     // In the presence of unfinished cyclic declarations, Unalias
     // would otherwise latch the invalid value (#66704).
     // TODO(adonovan): rethink, along with checker.typeDecl's use
     // of Invalid to mark unfinished aliases.
-    if (Ꮡt != ~Typ[Invalid]) {
+    if (!AreEqual(t, Typ[Invalid])) {
         a0.actual = t;
     }
     return t;
@@ -126,26 +131,27 @@ internal static ΔType unalias(ж<Alias> Ꮡa0) {
 // asNamed returns t as *Named if that is t's
 // actual type. It returns nil otherwise.
 internal static ж<Named> asNamed(ΔType t) {
-    var (n, _) = Unalias(t)._<Named.val>(ᐧ);
+    var (n, _) = Unalias(t)._<ж<Named>>(ᐧ);
     return n;
 }
 
 // newAlias creates a new Alias type with the given type name and rhs.
 // rhs must not be nil.
-[GoRecv] public static ж<Alias> newAlias(this ref Checker check, ж<TypeName> Ꮡobj, ΔType rhs) {
-    ref var obj = ref Ꮡobj.val;
+internal static ж<Alias> newAlias(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ΔType rhs) {
+    ref var check = ref Ꮡcheck.Value;
+    ref var obj = ref Ꮡobj.Value;
 
     assert(rhs != default!);
     var a = @new<Alias>();
-    a.val.obj = obj;
-    a.val.orig = a;
-    a.val.fromRHS = rhs;
+    a.Value.obj = Ꮡobj;
+    a.Value.orig = a;
+    a.Value.fromRHS = rhs;
     if (obj.typ == default!) {
-        obj.typ = a;
+        obj.typ = new AliasжΔType(a);
     }
     // Ensure that a.actual is set at the end of type checking.
     if (check != nil) {
-        check.needsCleanup(~a);
+        check.needsCleanup(new Aliasжcleaner(a));
     }
     return a;
 }
@@ -153,26 +159,29 @@ internal static ж<Named> asNamed(ΔType t) {
 // newAliasInstance creates a new alias instance for the given origin and type
 // arguments, recording pos as the position of its synthetic object (for error
 // reporting).
-[GoRecv] public static ж<Alias> newAliasInstance(this ref Checker check, tokenꓸPos pos, ж<Alias> Ꮡorig, slice<ΔType> targs, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) {
-    ref var orig = ref Ꮡorig.val;
-    ref var expanding = ref Ꮡexpanding.val;
-    ref var ctxt = ref Ꮡctxt.val;
+internal static ж<Alias> newAliasInstance(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ж<Alias> Ꮡorig, slice<ΔType> targs, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) {
+    ref var check = ref Ꮡcheck.Value;
+    ref var orig = ref Ꮡorig.Value;
+    ref var expanding = ref Ꮡexpanding.Value;
+    ref var ctxt = ref Ꮡctxt.Value;
 
     assert(len(targs) > 0);
-    var obj = NewTypeName(pos, orig.obj.pkg, orig.obj.name, default!);
-    var rhs = check.subst(pos, orig.fromRHS, makeSubstMap(orig.TypeParams().list(), targs), Ꮡexpanding, Ꮡctxt);
-    var res = check.newAlias(obj, rhs);
-    res.val.orig = orig;
-    res.val.tparams = orig.tparams;
-    res.val.targs = newTypeList(targs);
+    var obj = NewTypeName(pos, (~orig.obj).pkg, (~orig.obj).name, default!);
+    var rhs = Ꮡcheck.subst(pos, orig.fromRHS, makeSubstMap(orig.TypeParams().list(), targs), Ꮡexpanding, Ꮡctxt);
+    var res = Ꮡcheck.newAlias(obj, rhs);
+    res.Value.orig = Ꮡorig;
+    res.Value.tparams = orig.tparams;
+    res.Value.targs = newTypeList(targs);
     return res;
 }
 
-[GoRecv] internal static void cleanup(this ref Alias a) {
+internal static void cleanup(this ж<Alias> Ꮡa) {
+    ref var a = ref Ꮡa.Value;
+
     // Ensure a.actual is set before types are published,
     // so Unalias is a pure "getter", not a "setter".
-    var actual = Unalias(~a);
-    if (Ꮡactual == ~Typ[Invalid]) {
+    var actual = Unalias(new AliasжΔType(Ꮡa));
+    if (AreEqual(actual, Typ[Invalid])) {
         // We don't set a.actual to Typ[Invalid] during type checking,
         // as it may indicate that the RHS is not fully set up.
         a.actual = actual;

@@ -18,19 +18,19 @@ partial class fs_package {
 //
 // If fs implements [StatFS], Stat calls fs.Stat.
 // Otherwise, Stat opens the [File] to stat it.
-public static (FileInfo, error) Stat(FS fsys, @string name) => func((defer, _) => {
+public static (FileInfo, error) Stat(FS fsys, @string name) => func<(FileInfo, error)>((defer, recover) => {
     {
         var (fsysΔ1, ok) = fsys._<StatFS>(ᐧ); if (ok) {
             return fsysΔ1.Stat(name);
         }
     }
-    (file, err) = fsys.Open(name);
+    var (@file, err) = fsys.Open(name);
     if (err != default!) {
         return (default!, err);
     }
-    var fileʗ1 = file;
-    defer(fileʗ1.Close);
-    return file.Stat();
+    var fileʗ1 = @file;
+    defer(() => fileʗ1.Close());
+    return @file.Stat();
 });
 
 } // end fs_package

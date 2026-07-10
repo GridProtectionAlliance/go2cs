@@ -11,22 +11,23 @@ using md5 = crypto.md5_package;
 using binary = encoding.binary_package;
 using fmt = fmt_package;
 using hash = hash_package;
-using coverage = @internal.coverage_package;
-using stringtab = @internal.coverage.stringtab_package;
-using uleb128 = @internal.coverage.uleb128_package;
+using coverage = go.@internal.coverage_package;
+using stringtab = go.@internal.coverage.stringtab_package;
+using uleb128 = go.@internal.coverage.uleb128_package;
 using io = io_package;
 using os = os_package;
-using @internal;
 using crypto;
 using encoding;
+using go.@internal;
+using go.@internal.coverage;
 
 partial class encodemeta_package {
 
 [GoType] partial struct CoverageMetaDataBuilder {
-    internal @internal.coverage.stringtab_package.Writer stab;
+    internal stringtab.Writer stab;
     internal slice<funcDesc> funcs;
     internal slice<byte> tmp; // temp work slice
-    internal hash_package.Hash h;
+    internal hash.Hash h;
     internal uint32 pkgpath;
     internal uint32 pkgname;
     internal uint32 modpath;
@@ -42,11 +43,11 @@ public static (ж<CoverageMetaDataBuilder>, error) NewCoverageMetaDataBuilder(@s
         tmp: new slice<byte>(0, 256),
         h: md5.New()
     ));
-    (~x).stab.InitWriter();
-    (~x).stab.Lookup(""u8);
-    x.val.pkgpath = (~x).stab.Lookup(pkgpath);
-    x.val.pkgname = (~x).stab.Lookup(pkgname);
-    x.val.modpath = (~x).stab.Lookup(modulepath);
+    x.of(CoverageMetaDataBuilder.Ꮡstab).InitWriter();
+    x.of(CoverageMetaDataBuilder.Ꮡstab).Lookup(""u8);
+    x.Value.pkgpath = x.of(CoverageMetaDataBuilder.Ꮡstab).Lookup(pkgpath);
+    x.Value.pkgname = x.of(CoverageMetaDataBuilder.Ꮡstab).Lookup(pkgname);
+    x.Value.modpath = x.of(CoverageMetaDataBuilder.Ꮡstab).Lookup(modulepath);
     io.WriteString((~x).h, pkgpath);
     io.WriteString((~x).h, pkgname);
     io.WriteString((~x).h, modulepath);
@@ -55,7 +56,7 @@ public static (ж<CoverageMetaDataBuilder>, error) NewCoverageMetaDataBuilder(@s
 
 internal static void h32(uint32 x, hash.Hash h, slice<byte> tmp) {
     tmp = tmp[..0];
-    tmp = append(tmp, 0, 0, 0, 0);
+    tmp = append(tmp, (byte)(0), (byte)(0), (byte)(0), (byte)(0));
     binary.LittleEndian.PutUint32(tmp, x);
     h.Write(tmp);
 }
@@ -69,35 +70,35 @@ internal static void h32(uint32 x, hash.Hash h, slice<byte> tmp) {
     hashFuncDesc(b.h, Ꮡ(f), b.tmp);
     var fd = new funcDesc(nil);
     b.tmp = b.tmp[..0];
-    b.tmp = uleb128.AppendUleb128(b.tmp, ((nuint)len(f.Units)));
-    b.tmp = uleb128.AppendUleb128(b.tmp, ((nuint)b.stab.Lookup(f.Funcname)));
-    b.tmp = uleb128.AppendUleb128(b.tmp, ((nuint)b.stab.Lookup(f.Srcfile)));
+    b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)len(f.Units));
+    b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)b.stab.Lookup(f.Funcname));
+    b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)b.stab.Lookup(f.Srcfile));
     foreach (var (_, u) in f.Units) {
-        b.tmp = uleb128.AppendUleb128(b.tmp, ((nuint)u.StLine));
-        b.tmp = uleb128.AppendUleb128(b.tmp, ((nuint)u.StCol));
-        b.tmp = uleb128.AppendUleb128(b.tmp, ((nuint)u.EnLine));
-        b.tmp = uleb128.AppendUleb128(b.tmp, ((nuint)u.EnCol));
-        b.tmp = uleb128.AppendUleb128(b.tmp, ((nuint)u.NxStmts));
+        b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)u.StLine);
+        b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)u.StCol);
+        b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)u.EnLine);
+        b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)u.EnCol);
+        b.tmp = uleb128.AppendUleb128(b.tmp, (nuint)u.NxStmts);
     }
-    nuint lit = ((nuint)0);
+    nuint lit = (nuint)0;
     if (f.Lit) {
         lit = 1;
     }
     b.tmp = uleb128.AppendUleb128(b.tmp, lit);
     fd.encoded = bytes.Clone(b.tmp);
-    nuint rv = ((nuint)len(b.funcs));
+    nuint rv = (nuint)len(b.funcs);
     b.funcs = append(b.funcs, fd);
     return rv;
 }
 
 [GoRecv] internal static int64 emitFuncOffsets(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, int64 off) {
     nint nFuncs = len(b.funcs);
-    int64 foff = coverage.CovMetaHeaderSize + ((int64)b.stab.Size()) + ((int64)nFuncs) * 4;
+    int64 foff = (int64)coverage.CovMetaHeaderSize + (int64)b.stab.Size() + (int64)nFuncs * 4;
     for (nint idx = 0; idx < nFuncs; idx++) {
-        b.wrUint32(w, ((uint32)foff));
-        foff += ((int64)len(b.funcs[idx].encoded));
+        b.wrUint32(w, (uint32)foff);
+        foff += (int64)len(b.funcs[idx].encoded);
     }
-    return off + (((int64)len(b.funcs)) * 4);
+    return off + ((int64)len(b.funcs) * 4);
 }
 
 [GoRecv] internal static (int64, error) emitFunc(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, int64 off, funcDesc f) {
@@ -110,7 +111,7 @@ internal static void h32(uint32 x, hash.Hash h, slice<byte> tmp) {
             return (0, fmt.Errorf("short write emitting coverage meta-data"u8));
         }
     }
-    return (off + ((int64)ew), default!);
+    return (off + (int64)ew, default!);
 }
 
 [GoRecv] internal static void reportWriteError(this ref CoverageMetaDataBuilder b, error err) {
@@ -121,7 +122,7 @@ internal static void h32(uint32 x, hash.Hash h, slice<byte> tmp) {
 
 [GoRecv] internal static void wrUint32(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, uint32 v) {
     b.tmp = b.tmp[..0];
-    b.tmp = append(b.tmp, 0, 0, 0, 0);
+    b.tmp = append(b.tmp, (byte)(0), (byte)(0), (byte)(0), (byte)(0));
     binary.LittleEndian.PutUint32(b.tmp, v);
     {
         var (nw, err) = w.Write(b.tmp); if (err != default!){
@@ -135,29 +136,31 @@ internal static void h32(uint32 x, hash.Hash h, slice<byte> tmp) {
 
 // Emit writes the meta-data accumulated so far in this builder to 'w'.
 // Returns a hash of the meta-data payload and an error.
-[GoRecv] public static (array<byte>, error) Emit(this ref CoverageMetaDataBuilder b, io.WriteSeeker w) {
+public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, io.WriteSeeker w) {
+    ref var b = ref Ꮡb.Value;
+
     // Emit header.  Length will initially be zero, we'll
     // back-patch it later.
     array<byte> digest = new(16);
     copy(digest[..], b.h.Sum(default!));
     var mh = new coverage.MetaSymbolHeader( // hash and length initially zero, will be back-patched
 
-        PkgPath: ((uint32)b.pkgpath),
-        PkgName: ((uint32)b.pkgname),
-        ModulePath: ((uint32)b.modpath),
-        NumFiles: ((uint32)b.stab.Nentries()),
-        NumFuncs: ((uint32)len(b.funcs)),
+        PkgPath: (uint32)b.pkgpath,
+        PkgName: (uint32)b.pkgname,
+        ModulePath: (uint32)b.modpath,
+        NumFiles: (uint32)b.stab.Nentries(),
+        NumFuncs: (uint32)len(b.funcs),
         MetaHash: digest
     );
     if (b.debug) {
-        fmt.Fprintf(~os.Stderr, "=-= writing header: %+v\n"u8, mh);
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "=-= writing header: %+v\n"u8, mh);
     }
     {
-        var errΔ1 = binary.Write(w, binary.LittleEndian, mh); if (errΔ1 != default!) {
-            return (digest, fmt.Errorf("error writing meta-file header: %v"u8, errΔ1));
+        var err = binary.Write(w, new binary_littleEndianᴠByteOrder(binary.LittleEndian), mh); if (err != default!) {
+            return (digest, fmt.Errorf("error writing meta-file header: %v"u8, err));
         }
     }
-    var off = ((int64)coverage.CovMetaHeaderSize);
+    var off = (int64)coverage.CovMetaHeaderSize;
     // Write function offsets section
     off = b.emitFuncOffsets(w, off);
     // Check for any errors up to this point.
@@ -166,11 +169,11 @@ internal static void h32(uint32 x, hash.Hash h, slice<byte> tmp) {
     }
     // Write string table.
     {
-        var errΔ2 = b.stab.Write(w); if (errΔ2 != default!) {
-            return (digest, errΔ2);
+        var err = Ꮡb.of(CoverageMetaDataBuilder.Ꮡstab).Write(w); if (err != default!) {
+            return (digest, err);
         }
     }
-    off += ((int64)b.stab.Size());
+    off += (int64)b.stab.Size();
     // Write functions
     foreach (var (_, f) in b.funcs) {
         error err = default!;
@@ -180,7 +183,7 @@ internal static void h32(uint32 x, hash.Hash h, slice<byte> tmp) {
         }
     }
     // Back-patch the length.
-    var totalLength = ((uint32)off);
+    var totalLength = (uint32)off;
     {
         var (_, err) = w.Seek(0, io.SeekStart); if (err != default!) {
             return (digest, err);
@@ -196,7 +199,7 @@ internal static void h32(uint32 x, hash.Hash h, slice<byte> tmp) {
 // HashFuncDesc computes an md5 sum of a coverage.FuncDesc and returns
 // a digest for it.
 public static array<byte> HashFuncDesc(ж<coverage.FuncDesc> Ꮡf) {
-    ref var f = ref Ꮡf.val;
+    ref var f = ref Ꮡf.Value;
 
     var h = md5.New();
     var tmp = new slice<byte>(0, 32);
@@ -208,7 +211,7 @@ public static array<byte> HashFuncDesc(ж<coverage.FuncDesc> Ꮡf) {
 
 // hashFuncDesc incorporates a given function 'f' into the hash 'h'.
 internal static void hashFuncDesc(hash.Hash h, ж<coverage.FuncDesc> Ꮡf, slice<byte> tmp) {
-    ref var f = ref Ꮡf.val;
+    ref var f = ref Ꮡf.Value;
 
     io.WriteString(h, f.Funcname);
     io.WriteString(h, f.Srcfile);
@@ -219,7 +222,7 @@ internal static void hashFuncDesc(hash.Hash h, ж<coverage.FuncDesc> Ꮡf, slice
         h32(u.EnCol, h, tmp);
         h32(u.NxStmts, h, tmp);
     }
-    var lit = ((uint32)0);
+    var lit = (uint32)0;
     if (f.Lit) {
         lit = 1;
     }

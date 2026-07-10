@@ -6,18 +6,18 @@ namespace go.encoding;
 using bytes = bytes_package;
 using errors = errors_package;
 using fmt = fmt_package;
-using big = math.big_package;
+using big = go.math.big_package;
 using reflect = reflect_package;
 using slices = slices_package;
 using time = time_package;
 using utf8 = unicode.utf8_package;
-using math;
+using go.math;
 using unicode;
 
 partial class asn1_package {
 
-internal static byteEncoder byte00Encoder = ((byteEncoder)0);
-internal static byteEncoder byteFFEncoder = ((byteEncoder)255);
+internal static encoder byte00Encoder = ((byteEncoder)0x00);
+internal static encoder byteFFEncoder = ((byteEncoder)0xff);
 
 // encoder represents an ASN.1 element that is waiting to be marshaled.
 [GoType] partial interface encoder {
@@ -34,7 +34,7 @@ internal static nint Len(this byteEncoder c) {
 }
 
 internal static void Encode(this byteEncoder c, slice<byte> dst) {
-    dst[0] = ((byte)c);
+    dst[0] = (byte)c;
 }
 
 [GoType("[]byte")] partial struct bytesEncoder;
@@ -109,7 +109,7 @@ internal static void Encode(this setEncoder s, slice<byte> dst) {
     // s[i], which is the first determining byte, will inherently be
     // smaller than the length octet of s[j]. This lets us skip the
     // padding step.
-    slices.SortFunc(l, bytes.Compare);
+    slices.SortFunc<slice<slice<byte>>, slice<byte>>(l, bytes.Compare);
     nint off = default!;
     foreach (var (_, b) in l) {
         copy(dst[(int)(off)..], b);
@@ -140,11 +140,11 @@ internal static nint Len(this int64Encoder i) {
     nint n = 1;
     while (i > 127) {
         n++;
-        i >>= (UntypedInt)(8);
+        i >>= (int)(8);
     }
     while (i < -128) {
         n++;
-        i >>= (UntypedInt)(8);
+        i >>= (int)(8);
     }
     return n;
 }
@@ -152,7 +152,7 @@ internal static nint Len(this int64Encoder i) {
 internal static void Encode(this int64Encoder i, slice<byte> dst) {
     nint n = i.Len();
     for (nint j = 0; j < n; j++) {
-        dst[j] = ((byte)(i >> (int)(((nuint)((n - 1 - j) * 8)))));
+        dst[j] = (byte)(int64)((i >> (int)((nuint)((n - 1 - j) * 8))));
     }
 }
 
@@ -161,7 +161,7 @@ internal static nint base128IntLength(int64 n) {
         return 1;
     }
     nint l = 0;
-    for (var i = n; i > 0; i >>= (UntypedInt)(7)) {
+    for (var i = n; i > 0; i >>= (int)(7)) {
         l++;
     }
     return l;
@@ -170,10 +170,10 @@ internal static nint base128IntLength(int64 n) {
 internal static slice<byte> appendBase128Int(slice<byte> dst, int64 n) {
     nint l = base128IntLength(n);
     for (nint i = l - 1; i >= 0; i--) {
-        var o = ((byte)(n >> (int)(((nuint)(i * 7)))));
-        o &= (byte)(127);
+        var o = (byte)((n >> (int)((nuint)(i * 7))));
+        o &= (byte)(0x7f);
         if (i != 0) {
-            o |= (byte)(128);
+            o |= (byte)(0x80);
         }
         dst = append(dst, o);
     }
@@ -181,9 +181,9 @@ internal static slice<byte> appendBase128Int(slice<byte> dst, int64 n) {
 }
 
 internal static (encoder, error) makeBigInt(ж<bigꓸInt> Ꮡn) {
-    ref var n = ref Ꮡn.val;
+    ref var n = ref Ꮡn.DerefOrNil();
 
-    if (n == nil) {
+    if (Ꮡn == nil) {
         return (default!, new StructuralError("empty integer"));
     }
     if (n.Sign() < 0){
@@ -195,9 +195,9 @@ internal static (encoder, error) makeBigInt(ж<bigꓸInt> Ꮡn) {
         nMinus1.Sub(nMinus1, bigOne);
         var bytes = nMinus1.Bytes();
         foreach (var (i, _) in bytes) {
-            bytes[i] ^= (byte)(255);
+            bytes[i] ^= (byte)(0xff);
         }
-        if (len(bytes) == 0 || (byte)(bytes[0] & 128) == 0) {
+        if (len(bytes) == 0 || (byte)(bytes[0] & 0x80) == 0) {
             return (((multiEncoder)new encoder[]{byteFFEncoder, ((bytesEncoder)bytes)}.slice()), default!);
         }
         return (((bytesEncoder)bytes), default!);
@@ -207,7 +207,7 @@ internal static (encoder, error) makeBigInt(ж<bigꓸInt> Ꮡn) {
         return (byte00Encoder, default!);
     } else {
         var bytes = n.Bytes();
-        if (len(bytes) > 0 && (byte)(bytes[0] & 128) != 0) {
+        if (len(bytes) > 0 && (byte)(bytes[0] & 0x80) != 0) {
             // We'll have to pad this with 0x00 in order to stop it
             // looking like a negative number.
             return (((multiEncoder)new encoder[]{byte00Encoder, ((bytesEncoder)bytes)}.slice()), default!);
@@ -219,7 +219,7 @@ internal static (encoder, error) makeBigInt(ж<bigꓸInt> Ꮡn) {
 internal static slice<byte> appendLength(slice<byte> dst, nint i) {
     nint n = lengthLength(i);
     for (; n > 0; n--) {
-        dst = append(dst, ((byte)(i >> (int)(((nuint)((n - 1) * 8))))));
+        dst = append(dst, (byte)((i >> (int)((nuint)((n - 1) * 8)))));
     }
     return dst;
 }
@@ -230,42 +230,42 @@ internal static nint /*numBytes*/ lengthLength(nint i) {
     numBytes = 1;
     while (i > 255) {
         numBytes++;
-        i >>= (UntypedInt)(8);
+        i >>= (int)(8);
     }
     return numBytes;
 }
 
 internal static slice<byte> appendTagAndLength(slice<byte> dst, tagAndLength t) {
-    var b = ((uint8)t.@class) << (int)(6);
+    var b = (uint8)(((uint8)t.@class << (int)(6)));
     if (t.isCompound) {
-        b |= (uint8)(32);
+        b |= (uint8)(0x20);
     }
     if (t.tag >= 31){
-        b |= (uint8)(31);
+        b |= (uint8)(0x1f);
         dst = append(dst, b);
-        dst = appendBase128Int(dst, ((int64)t.tag));
+        dst = appendBase128Int(dst, (int64)t.tag);
     } else {
-        b |= (uint8)(((uint8)t.tag));
+        b |= (uint8)((uint8)t.tag);
         dst = append(dst, b);
     }
     if (t.length >= 128){
         nint l = lengthLength(t.length);
-        dst = append(dst, (byte)(128 | ((byte)l)));
+        dst = append(dst, (byte)(0x80 | (byte)l));
         dst = appendLength(dst, t.length);
     } else {
-        dst = append(dst, ((byte)t.length));
+        dst = append(dst, (byte)t.length);
     }
     return dst;
 }
 
-[GoType("struct{Bytes <>byte; BitLength int}")] partial struct bitStringEncoder;
+[GoType("BitString")] partial struct bitStringEncoder;
 
 internal static nint Len(this bitStringEncoder b) {
     return len(b.Bytes) + 1;
 }
 
 internal static void Encode(this bitStringEncoder b, slice<byte> dst) {
-    dst[0] = ((byte)((8 - b.BitLength % 8) % 8));
+    dst[0] = (byte)((8 - b.BitLength % 8) % 8);
     if (copy(dst[1..], b.Bytes) != len(b.Bytes)) {
         throw panic("internal error");
     }
@@ -274,17 +274,17 @@ internal static void Encode(this bitStringEncoder b, slice<byte> dst) {
 [GoType("[]nint")] partial struct oidEncoder;
 
 internal static nint Len(this oidEncoder oid) {
-    nint l = base128IntLength(((int64)(oid[0] * 40 + oid[1])));
+    nint l = base128IntLength((int64)(oid[0] * 40 + oid[1]));
     for (nint i = 2; i < len(oid); i++) {
-        l += base128IntLength(((int64)oid[i]));
+        l += base128IntLength((int64)oid[i]);
     }
     return l;
 }
 
 internal static void Encode(this oidEncoder oid, slice<byte> dst) {
-    dst = appendBase128Int(dst[..0], ((int64)(oid[0] * 40 + oid[1])));
+    dst = appendBase128Int(dst[..0], (int64)(oid[0] * 40 + oid[1]));
     for (nint i = 2; i < len(oid); i++) {
-        dst = appendBase128Int(dst, ((int64)oid[i]));
+        dst = appendBase128Int(dst, (int64)oid[i]);
     }
 }
 
@@ -345,15 +345,15 @@ internal static encoder makeUTF8String(@string s) {
 }
 
 internal static slice<byte> appendTwoDigits(slice<byte> dst, nint v) {
-    return append(dst, ((byte)((rune)'0' + (v / 10) % 10)), ((byte)((rune)'0' + v % 10)));
+    return append(dst, (byte)((rune)'0' + (v / 10) % 10), (byte)((rune)'0' + v % 10));
 }
 
 internal static slice<byte> appendFourDigits(slice<byte> dst, nint v) {
     return append(dst,
-        ((byte)((rune)'0' + (v / 1000) % 10)),
-        ((byte)((rune)'0' + (v / 100) % 10)),
-        ((byte)((rune)'0' + (v / 10) % 10)),
-        ((byte)((rune)'0' + v % 10)));
+        (byte)((rune)'0' + (v / 1000) % 10),
+        (byte)((rune)'0' + (v / 100) % 10),
+        (byte)((rune)'0' + (v / 10) % 10),
+        (byte)((rune)'0' + v % 10));
 }
 
 internal static bool outsideUTCRange(time.Time t) {
@@ -420,7 +420,7 @@ internal static (slice<byte> ret, error err) appendGeneralizedTime(slice<byte> d
 
 internal static slice<byte> appendTimeCommon(slice<byte> dst, time.Time t) {
     var (_, month, day) = t.Date();
-    dst = appendTwoDigits(dst, ((nint)month));
+    dst = appendTwoDigits(dst, (nint)month);
     dst = appendTwoDigits(dst, day);
     var (hour, min, sec) = t.Clock();
     dst = appendTwoDigits(dst, hour);
@@ -429,14 +429,14 @@ internal static slice<byte> appendTimeCommon(slice<byte> dst, time.Time t) {
     var (_, offset) = t.Zone();
     switch (ᐧ) {
     case {} when offset / 60 is 0: {
-        return append(dst, (rune)'Z');
+        return append(dst, (byte)((rune)'Z'));
     }
     case {} when offset is > 0: {
-        dst = append(dst, (rune)'+');
+        dst = append(dst, (byte)((rune)'+'));
         break;
     }
     case {} when offset is < 0: {
-        dst = append(dst, (rune)'-');
+        dst = append(dst, (byte)((rune)'-'));
         break;
     }}
 
@@ -462,23 +462,23 @@ internal static (encoder e, error err) makeBody(reflectꓸValue value, fieldPara
     error err = default!;
 
     var exprᴛ1 = value.Type();
-    if (exprᴛ1 == flagType) {
+    if (AreEqual(exprᴛ1, flagType)) {
         return (((bytesEncoder)default!), default!);
     }
-    if (exprᴛ1 == timeType) {
+    if (AreEqual(exprᴛ1, timeType)) {
         var t = value.Interface()._<time.Time>();
         if (@params.timeType == TagGeneralizedTime || outsideUTCRange(t)) {
             return makeGeneralizedTime(t);
         }
         return makeUTCTime(t);
     }
-    if (exprᴛ1 == bitStringType) {
+    if (AreEqual(exprᴛ1, bitStringType)) {
         return (((bitStringEncoder)(value.Interface()._<BitString>())), default!);
     }
-    if (exprᴛ1 == objectIdentifierType) {
+    if (AreEqual(exprᴛ1, objectIdentifierType)) {
         return makeObjectIdentifier(value.Interface()._<ObjectIdentifier>());
     }
-    if (exprᴛ1 == bigIntType) {
+    if (AreEqual(exprᴛ1, bigIntType)) {
         return makeBigInt(value.Interface()._<ж<bigꓸInt>>());
     }
 
@@ -610,7 +610,7 @@ internal static (encoder e, error err) makeField(reflectꓸValue v, fieldParamet
     }
     if (@params.optional && @params.defaultValue != nil && canHaveDefaultValue(v.Kind())) {
         var defaultValue = reflect.New(v.Type()).Elem();
-        defaultValue.SetInt(@params.defaultValue);
+        defaultValue.SetInt(@params.defaultValue.Value);
         if (reflect.DeepEqual(v.Interface(), defaultValue.Interface())) {
             return (((bytesEncoder)default!), default!);
         }
@@ -629,9 +629,9 @@ internal static (encoder e, error err) makeField(reflectꓸValue v, fieldParamet
             return (((bytesEncoder)rv.FullBytes), default!);
         }
         var tΔ1 = @new<taggedEncoder>();
-        .val.tag = ((bytesEncoder)appendTagAndLength((~tΔ1).scratch[..0], new tagAndLength(rv.Class, rv.Tag, len(rv.Bytes), rv.IsCompound)));
-        .val.body = ((bytesEncoder)rv.Bytes);
-        return (~tΔ1, default!);
+        tΔ1.Value.tag = ((bytesEncoder)appendTagAndLength((~tΔ1).scratch[..0], new tagAndLength(rv.Class, rv.Tag, len(rv.Bytes), rv.IsCompound)));
+        tΔ1.Value.body = ((bytesEncoder)rv.Bytes);
+        return (new taggedEncoderжencoder(tΔ1), default!);
     }
     var (matchAny, tag, isCompound, ok) = getUniversalType(v.Type());
     if (!ok || matchAny) {
@@ -650,7 +650,7 @@ internal static (encoder e, error err) makeField(reflectꓸValue v, fieldParamet
             // a PrintableString if the character set in the string is
             // sufficiently limited, otherwise we'll use a UTF8String.
             foreach (var (_, r) in v.String()) {
-                if (r >= utf8.RuneSelf || !isPrintable(((byte)r), rejectAsterisk, rejectAmpersand)) {
+                if (r >= utf8.RuneSelf || !isPrintable((byte)r, rejectAsterisk, rejectAmpersand)) {
                     if (!utf8.ValidString(v.String())) {
                         return (default!, errors.New("asn1: string not valid UTF-8"u8));
                     }
@@ -683,7 +683,7 @@ internal static (encoder e, error err) makeField(reflectꓸValue v, fieldParamet
         @params.set = true;
     }
     var t = @new<taggedEncoder>();
-    (t.val.body, err) = makeBody(v, @params);
+    (t.Value.body, err) = makeBody(v, @params);
     if (err != default!) {
         return (default!, err);
     }
@@ -699,22 +699,22 @@ internal static (encoder e, error err) makeField(reflectꓸValue v, fieldParamet
             @class = ClassContextSpecific;
         }
         if (@params.@explicit) {
-            t.val.tag = ((bytesEncoder)appendTagAndLength((~t).scratch[..0], new tagAndLength(ClassUniversal, tag, bodyLen, isCompound)));
+            t.Value.tag = ((bytesEncoder)appendTagAndLength((~t).scratch[..0], new tagAndLength(ClassUniversal, tag, bodyLen, isCompound)));
             var tt = @new<taggedEncoder>();
-            tt.val.body = t;
-            tt.val.tag = ((bytesEncoder)appendTagAndLength((~tt).scratch[..0], new tagAndLength(
+            tt.Value.body = new taggedEncoderжencoder(t);
+            tt.Value.tag = ((bytesEncoder)appendTagAndLength((~tt).scratch[..0], new tagAndLength(
                 @class: @class,
-                tag: @params.tag,
+                tag: @params.tag.Value,
                 length: bodyLen + (~t).tag.Len(),
                 isCompound: true
             )));
-            return (~tt, default!);
+            return (new taggedEncoderжencoder(tt), default!);
         }
         // implicit tag.
-        tag = @params.tag;
+        tag = @params.tag.Value;
     }
-    t.val.tag = ((bytesEncoder)appendTagAndLength((~t).scratch[..0], new tagAndLength(@class, tag, bodyLen, isCompound)));
-    return (~t, default!);
+    t.Value.tag = ((bytesEncoder)appendTagAndLength((~t).scratch[..0], new tagAndLength(@class, tag, bodyLen, isCompound)));
+    return (new taggedEncoderжencoder(t), default!);
 }
 
 // Marshal returns the ASN.1 encoding of val.
@@ -735,7 +735,7 @@ public static (slice<byte>, error) Marshal(any val) {
 // MarshalWithParams allows field parameters to be specified for the
 // top-level element. The form of the params is the same as the field tags.
 public static (slice<byte>, error) MarshalWithParams(any val, @string @params) {
-    (e, err) = makeField(reflect.ValueOf(val), parseFieldParameters(@params));
+    var (e, err) = makeField(reflect.ValueOf(val), parseFieldParameters(@params));
     if (err != default!) {
         return (default!, err);
     }

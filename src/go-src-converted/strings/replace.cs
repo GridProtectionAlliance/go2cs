@@ -4,15 +4,15 @@
 namespace go;
 
 using io = io_package;
-using sync = sync_package;
-using ꓸꓸꓸ@string = Span<@string>;
+using Δsync = sync_package;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class strings_package {
 
 // Replacer replaces a list of strings with replacements.
 // It is safe for concurrent use by multiple goroutines.
 [GoType] partial struct Replacer {
-    internal sync_package.Once once; // guards buildOnce method
+    internal Δsync.Once once; // guards buildOnce method
     internal replacer r;
     internal slice<@string> oldnew;
 }
@@ -29,7 +29,7 @@ partial class strings_package {
 // comparisons are done in argument order.
 //
 // NewReplacer panics if given an odd number of arguments.
-public static ж<Replacer> NewReplacer(params ꓸꓸꓸ@string oldnewʗp) {
+public static ж<Replacer> NewReplacer(params ꓸꓸꓸstring oldnewʗp) {
     var oldnew = oldnewʗp.slice();
 
     if (len(oldnew) % 2 == 1) {
@@ -46,12 +46,12 @@ public static ж<Replacer> NewReplacer(params ꓸꓸꓸ@string oldnewʗp) {
 [GoRecv] internal static replacer build(this ref Replacer b) {
     var oldnew = b.oldnew;
     if (len(oldnew) == 2 && len(oldnew[0]) > 1) {
-        return ~makeSingleStringReplacer(oldnew[0], oldnew[1]);
+        return new singleStringReplacerжreplacer(makeSingleStringReplacer(oldnew[0], oldnew[1]));
     }
     var allNewBytes = true;
     for (nint i = 0; i < len(oldnew); i += 2) {
         if (len(oldnew[i]) != 1) {
-            return ~makeGenericReplacer(oldnew);
+            return new genericReplacerжreplacer(makeGenericReplacer(oldnew));
         }
         if (len(oldnew[i + 1]) != 1) {
             allNewBytes = false;
@@ -59,18 +59,18 @@ public static ж<Replacer> NewReplacer(params ꓸꓸꓸ@string oldnewʗp) {
     }
     if (allNewBytes) {
         ref var rΔ1 = ref heap<byteReplacer>(out var ᏑrΔ1);
-        rΔ1 = new byteReplacer{nil};
+        rΔ1 = new byteReplacer(new byte[256].array());
         foreach (var (i, _) in rΔ1) {
-            [i] = ((byte)i);
+            rΔ1[i] = (byte)i;
         }
         // The first occurrence of old->new map takes precedence
         // over the others with the same old string.
         for (nint i = len(oldnew) - 2; i >= 0; i -= 2) {
             var o = oldnew[i][0];
             var n = oldnew[i + 1][0];
-            [o] = n;
+            rΔ1[o] = n;
         }
-        return ~ᏑrΔ1;
+        return new byteReplacerжreplacer(ᏑrΔ1);
     }
     ref var r = ref heap<byteStringReplacer>(out var Ꮡr);
     r = new byteStringReplacer(toReplace: new slice<@string>(0, len(oldnew) / 2));
@@ -88,21 +88,24 @@ public static ж<Replacer> NewReplacer(params ꓸꓸꓸ@string oldnewʗp) {
         }
         r.replacements[o] = slice<byte>(n);
     }
-    return ~Ꮡr;
+    return new byteStringReplacerжreplacer(Ꮡr);
 }
 
 // Replace returns a copy of s with all replacements performed.
-[GoRecv] public static @string Replace(this ref Replacer r, @string s) {
-    r.once.Do(r.buildOnce);
+public static @string Replace(this ж<Replacer> Ꮡr, @string s) {
+    ref var r = ref Ꮡr.Value;
+
+    Ꮡr.of(Replacer.Ꮡonce).Do(Ꮡr.buildOnce);
     return r.r.Replace(s);
 }
 
 // WriteString writes s to w with all replacements performed.
-[GoRecv] public static (nint n, error err) WriteString(this ref Replacer r, io.Writer w, @string s) {
+public static (nint n, error err) WriteString(this ж<Replacer> Ꮡr, io.Writer w, @string s) {
     nint n = default!;
     error err = default!;
 
-    r.once.Do(r.buildOnce);
+    ref var r = ref Ꮡr.Value;
+    Ꮡr.of(Replacer.Ꮡonce).Do(Ꮡr.buildOnce);
     return r.r.WriteString(w, s);
 }
 
@@ -157,7 +160,7 @@ public static ж<Replacer> NewReplacer(params ꓸꓸꓸ@string oldnewʗp) {
 }
 
 [GoRecv] internal static void add(this ref trieNode t, @string key, @string val, nint priority, ж<genericReplacer> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     if (key == ""u8) {
         if (t.priority == 0) {
@@ -222,20 +225,21 @@ public static ж<Replacer> NewReplacer(params ꓸꓸꓸ@string oldnewʗp) {
     }
 }
 
-[GoRecv] internal static (@string val, nint keylen, bool found) lookup(this ref genericReplacer r, @string s, bool ignoreRoot) {
+internal static (@string val, nint keylen, bool found) lookup(this ж<genericReplacer> Ꮡr, @string s, bool ignoreRoot) {
     @string val = default!;
     nint keylen = default!;
     bool found = default!;
 
+    ref var r = ref Ꮡr.Value;
     // Iterate down the trie to the end, and grab the value and keylen with
     // the highest priority.
     nint bestPriority = 0;
-    var node = Ꮡ(r.root);
+    var node = Ꮡr.of(genericReplacer.Ꮡroot);
     nint n = 0;
     while (node != nil) {
-        if ((~node).priority > bestPriority && !(ignoreRoot && node == Ꮡ(r.root))) {
-            bestPriority = node.val.priority;
-            val = node.val.value;
+        if ((~node).priority > bestPriority && !(ignoreRoot && node == Ꮡr.of(genericReplacer.Ꮡroot))) {
+            bestPriority = node.Value.priority;
+            val = node.Value.value;
             keylen = n;
             found = true;
         }
@@ -244,7 +248,7 @@ public static ж<Replacer> NewReplacer(params ꓸꓸꓸ@string oldnewʗp) {
         }
         if ((~node).table != default!){
             var index = r.mapping[s[0]];
-            if (((nint)index) == r.tableSize) {
+            if ((nint)index == r.tableSize) {
                 break;
             }
             node = (~node).table[index];
@@ -254,7 +258,7 @@ public static ж<Replacer> NewReplacer(params ꓸꓸꓸ@string oldnewʗp) {
         if ((~node).prefix != ""u8 && HasPrefix(s, (~node).prefix)){
             n += len((~node).prefix);
             s = s[(int)(len((~node).prefix))..];
-            node = node.val.next;
+            node = node.Value.next;
         } else {
             break;
         }
@@ -279,25 +283,25 @@ internal static ж<genericReplacer> makeGenericReplacer(slice<@string> oldnew) {
     for (nint i = 0; i < len(oldnew); i += 2) {
         @string key = oldnew[i];
         for (nint j = 0; j < len(key); j++) {
-            (~r).mapping[key[j]] = 1;
+            r.Value.mapping[key[j]] = 1;
         }
     }
     foreach (var (_, b) in (~r).mapping) {
-        r.val.tableSize += ((nint)b);
+        r.Value.tableSize += (nint)b;
     }
     byte index = default!;
     foreach (var (i, b) in (~r).mapping) {
         if (b == 0){
-            (~r).mapping[i] = ((byte)(~r).tableSize);
+            r.Value.mapping[i] = (byte)(~r).tableSize;
         } else {
-            (~r).mapping[i] = index;
+            r.Value.mapping[i] = index;
             index++;
         }
     }
     // Ensure root node uses a lookup table (for performance).
-    (~r).root.table = new slice<ж<trieNode>>((~r).tableSize);
+    r.Value.root.table = new slice<ж<trieNode>>((~r).tableSize);
     for (nint i = 0; i < len(oldnew); i += 2) {
-        (~r).root.add(oldnew[i], oldnew[i + 1], len(oldnew) - i, r);
+        r.of(genericReplacer.Ꮡroot).add(oldnew[i], oldnew[i + 1], len(oldnew) - i, r);
     }
     return r;
 }
@@ -317,7 +321,7 @@ internal static ж<genericReplacer> makeGenericReplacer(slice<@string> oldnew) {
 }
 
 [GoType] partial struct stringWriter {
-    internal io_package.Writer w;
+    internal io.Writer w;
 }
 
 internal static (nint, error) WriteString(this stringWriter w, @string s) {
@@ -332,16 +336,20 @@ internal static io.StringWriter getStringWriter(io.Writer w) {
     return sw;
 }
 
-[GoRecv] internal static @string Replace(this ref genericReplacer r, @string s) {
-    var buf = new appendSliceWriter(0, len(s));
-    r.WriteString(buf, s);
-    return ((@string)buf);
+internal static @string Replace(this ж<genericReplacer> Ꮡr, @string s) {
+    ref var r = ref Ꮡr.Value;
+
+    ref var buf = ref heap<appendSliceWriter>(out var Ꮡbuf);
+    buf = new appendSliceWriter(0, len(s));
+    Ꮡr.WriteString(new appendSliceWriterжWriter(Ꮡbuf), s);
+    return ((@string)(slice<byte>)buf);
 }
 
-[GoRecv] internal static (nint n, error err) WriteString(this ref genericReplacer r, io.Writer w, @string s) {
+internal static (nint n, error err) WriteString(this ж<genericReplacer> Ꮡr, io.Writer w, @string s) {
     nint n = default!;
     error err = default!;
 
+    ref var r = ref Ꮡr.Value;
     var sw = getStringWriter(w);
     nint last = default!;
     nint wn = default!;
@@ -349,14 +357,14 @@ internal static io.StringWriter getStringWriter(io.Writer w) {
     for (nint i = 0; i <= len(s); ) {
         // Fast path: s[i] is not a prefix of any pattern.
         if (i != len(s) && r.root.priority == 0) {
-            nint index = ((nint)r.mapping[s[i]]);
+            nint index = (nint)r.mapping[s[i]];
             if (index == r.tableSize || r.root.table[index] == nil) {
                 i++;
                 continue;
             }
         }
         // Ignore the empty match iff the previous loop found the empty match.
-        var (val, keylen, match) = r.lookup(s[(int)(i)..], prevMatchEmpty);
+        var (val, keylen, match) = Ꮡr.lookup(s[(int)(i)..], prevMatchEmpty);
         prevMatchEmpty = match && keylen == 0;
         if (match) {
             (wn, err) = sw.WriteString(s[(int)(last)..(int)(i)]);
@@ -395,7 +403,7 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
 }
 
 [GoRecv] internal static @string Replace(this ref singleStringReplacer r, @string s) {
-    Builder buf = default!;
+    ref var buf = ref heap(new Builder(), out var Ꮡbuf);
     nint i = 0;
     var matched = false;
     while (ᐧ) {
@@ -404,15 +412,15 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
             break;
         }
         matched = true;
-        buf.Grow(match + len(r.value));
-        buf.WriteString(s[(int)(i)..(int)(i + match)]);
-        buf.WriteString(r.value);
-        i += match + len(r.finder.pattern);
+        Ꮡbuf.Grow(match + len(r.value));
+        Ꮡbuf.WriteString(s[(int)(i)..(int)(i + match)]);
+        Ꮡbuf.WriteString(r.value);
+        i += match + len((~r.finder).pattern);
     }
     if (!matched) {
         return s;
     }
-    buf.WriteString(s[(int)(i)..]);
+    Ꮡbuf.WriteString(s[(int)(i)..]);
     return buf.String();
 }
 
@@ -438,7 +446,7 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
         if (err != default!) {
             return (n, err);
         }
-        i += match + len(r.finder.pattern);
+        i += match + len((~r.finder).pattern);
     }
     (wn, err) = sw.WriteString(s[(int)(i)..]);
     n += wn;
@@ -451,11 +459,11 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
     slice<byte> buf = default!;           // lazily allocated
     for (nint i = 0; i < len(s); i++) {
         var b = s[i];
-        if (r.val[b] != b) {
+        if (r.Value[b] != b) {
             if (buf == default!) {
                 buf = slice<byte>(s);
             }
-            buf[i] = r.val[b];
+            buf[i] = r.Value[b];
         }
     }
     if (buf == default!) {
@@ -472,7 +480,7 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
     nint last = 0;
     for (nint i = 0; i < len(s); i++) {
         var b = s[i];
-        if (r.val[b] == b) {
+        if (r.Value[b] == b) {
             continue;
         }
         if (last != i) {
@@ -483,7 +491,7 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
             }
         }
         last = i + 1;
-        var (nw, errΔ2) = w.Write(r[(int)(b)..(int)(((nint)b) + 1)]);
+        var (nw, errΔ2) = w.Write(r.Value[(int)(b)..(int)((nint)b + 1)]);
         n += nw;
         if (errΔ2 != default!) {
             return (n, errΔ2);
@@ -524,7 +532,7 @@ internal static readonly UntypedInt countCutOff = 8;
     nint newSize = len(s);
     var anyChanges = false;
     // Is it faster to use Count?
-    if (len(r.toReplace) * countCutOff <= len(s)){
+    if (len(r.toReplace) * (nint)countCutOff <= len(s)){
         foreach (var (_, x) in r.toReplace) {
             {
                 nint c = Count(s, x); if (c != 0) {
@@ -535,8 +543,8 @@ internal static readonly UntypedInt countCutOff = 8;
             }
         }
     } else {
-        for (nint iΔ1 = 0; iΔ1 < len(s); iΔ1++) {
-            var b = s[iΔ1];
+        for (nint i = 0; i < len(s); i++) {
+            var b = s[i];
             if (r.replacements[b] != default!) {
                 // See above for explanation of -1
                 newSize += len(r.replacements[b]) - 1;
@@ -580,8 +588,8 @@ internal static readonly UntypedInt countCutOff = 8;
             }
         }
         last = i + 1;
-        var (nwΔ2, errΔ2) = w.Write(r.replacements[b]);
-        n += nwΔ2;
+        var (nw, errΔ2) = w.Write(r.replacements[b]);
+        n += nw;
         if (errΔ2 != default!) {
             return (n, errΔ2);
         }

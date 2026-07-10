@@ -48,19 +48,13 @@ using static go.fmt_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(Formatter, bool), Formatter>]
-[assembly: GoImplement<(GoStringer, bool), GoStringer>]
-[assembly: GoImplement<(Scanner, bool), Scanner>]
-[assembly: GoImplement<(error, bool), error>]
-[assembly: GoImplement<(io.RuneScanner, bool), io_package.RuneScanner>]
-[assembly: GoImplement<os_package.File, io_package.Reader>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
-[assembly: GoImplement<pp, State>]
-[assembly: GoImplement<ss, ScanState>]
-[assembly: GoImplement<ss, error>]
-[assembly: GoImplement<stringReader, io_package.Reader>]
-[assembly: GoImplement<wrapError, error>]
-[assembly: GoImplement<wrapErrors, error>]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<pp, State>(Pointer = true)]
+[assembly: GoImplement<readRune, io_package.RuneScanner>(Pointer = true)]
+[assembly: GoImplement<ss, ScanState>(Pointer = true)]
+[assembly: GoImplement<stringReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<wrapError, error>(Pointer = true)]
+[assembly: GoImplement<wrapErrors, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

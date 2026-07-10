@@ -8,8 +8,7 @@ partial class platform_package {
 
 // An OSArch is a pair of GOOS and GOARCH values indicating a platform.
 [GoType] partial struct OSArch {
-    public @string GOOS;
-    public @string GOARCH;
+    public @string GOOS, GOARCH;
 }
 
 public static @string String(this OSArch p) {
@@ -153,7 +152,7 @@ public static bool BuildModeSupported(@string compiler, @string buildmode, @stri
         return true;
     }
     {
-        var (_, ok) = distInfo[new OSArch(goos, goarch)]; if (!ok) {
+        var (_, ok) = distInfo[new OSArch(goos, goarch), ꟷ]; if (!ok) {
             return false;
         }
     }

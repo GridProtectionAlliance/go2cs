@@ -19,7 +19,7 @@ internal static bool hasNUL(@string s) {
 // isASCII reports whether the input is an ASCII C-style string.
 internal static bool isASCII(@string s) {
     foreach (var (_, c) in s) {
-        if (c >= 128 || c == 0) {
+        if (c >= 0x80 || c == 0x00) {
             return false;
         }
     }
@@ -34,8 +34,8 @@ internal static @string toASCII(@string s) {
     }
     var b = new slice<byte>(0, len(s));
     foreach (var (_, c) in s) {
-        if (c < 128 && c != 0) {
-            b = append(b, ((byte)c));
+        if (c < 0x80 && c != 0x00) {
+            b = append(b, (byte)c);
         }
     }
     return ((@string)b);
@@ -88,8 +88,8 @@ internal static @string toASCII(@string s) {
 // that the first byte can only be either 0x80 or 0xff. Thus, the first byte is
 // equivalent to the sign bit in two's complement form.
 internal static bool fitsInBase256(nint n, int64 x) {
-    nuint binBits = ((nuint)(n - 1)) * 8;
-    return n >= 9 || (x >= -1 << (int)(binBits) && x < 1 << (int)(binBits));
+    nuint binBits = (nuint)(n - 1) * 8;
+    return n >= 9 || (x >= ((int64)(-1) << (int)(binBits)) && x < ((int64)1 << (int)(binBits)));
 }
 
 // parseNumeric parses the input as being encoded in either base-256 or octal.
@@ -99,40 +99,42 @@ internal static bool fitsInBase256(nint n, int64 x) {
     // Check for base-256 (binary) format first.
     // If the first bit is set, then all following bits constitute a two's
     // complement encoded number in big-endian byte order.
-    if (len(b) > 0 && (byte)(b[0] & 128) != 0) {
+    if (len(b) > 0 && (byte)(b[0] & 0x80) != 0) {
         // Handling negative numbers relies on the following identity:
         //	-a-1 == ^a
         //
         // If the number is negative, we use an inversion mask to invert the
         // data bytes and treat the value as an unsigned number.
         byte inv = default!;       // 0x00 if positive or zero, 0xff if negative
-        if ((byte)(b[0] & 64) != 0) {
-            inv = 255;
+        if ((byte)(b[0] & 0x40) != 0) {
+            inv = 0xff;
         }
         uint64 x = default!;
-        foreach (var (i, c) in b) {
+        foreach (var (i, vᴛ1) in b) {
+            var c = vᴛ1;
+
             c ^= (byte)(inv);
             // Inverts c only if inv is 0xff, otherwise does nothing
             if (i == 0) {
-                c &= (byte)(127);
+                c &= (byte)(0x7f);
             }
             // Ignore signal bit in first byte
-            if ((x >> (int)(56)) > 0) {
+            if (((x >> (int)(56))) > 0) {
                 p.err = ErrHeader;
                 // Integer overflow
                 return 0;
             }
-            x = (uint64)(x << (int)(8) | ((uint64)c));
+            x = (uint64)((x << (int)(8)) | (uint64)c);
         }
-        if ((x >> (int)(63)) > 0) {
+        if (((x >> (int)(63))) > 0) {
             p.err = ErrHeader;
             // Integer overflow
             return 0;
         }
-        if (inv == 255) {
-            return ~((int64)x);
+        if (inv == 0xff) {
+            return ~(int64)x;
         }
-        return ((int64)x);
+        return (int64)x;
     }
     // Normal case is base-8 (octal) format.
     return p.parseOctal(b);
@@ -147,10 +149,10 @@ internal static bool fitsInBase256(nint n, int64 x) {
     }
     if (fitsInBase256(len(b), x)) {
         for (nint i = len(b) - 1; i >= 0; i--) {
-            b[i] = ((byte)x);
-            x >>= (UntypedInt)(8);
+            b[i] = (byte)x;
+            x >>= (int)(8);
         }
-        b[0] |= (byte)(128);
+        b[0] |= (byte)(0x80);
         // Highest bit indicates binary format
         return;
     }
@@ -173,7 +175,7 @@ internal static bool fitsInBase256(nint n, int64 x) {
     if (perr != default!) {
         p.err = ErrHeader;
     }
-    return ((int64)x);
+    return (int64)x;
 }
 
 [GoRecv] internal static void formatOctal(this ref formatter f, slice<byte> b, int64 x) {
@@ -195,15 +197,15 @@ internal static bool fitsInBase256(nint n, int64 x) {
 // fitsInOctal reports whether the integer x fits in a field n-bytes long
 // using octal encoding with the appropriate NUL terminator.
 internal static bool fitsInOctal(nint n, int64 x) {
-    nuint octBits = ((nuint)(n - 1)) * 3;
-    return x >= 0 && (n >= 22 || x < 1 << (int)(octBits));
+    nuint octBits = (nuint)(n - 1) * 3;
+    return x >= 0 && (n >= 22 || x < ((int64)1 << (int)(octBits)));
 }
 
 // parsePAXTime takes a string of the form %d.%d as described in the PAX
 // specification. Note that this implementation allows for negative timestamps,
 // which is allowed for by the PAX specification, but not always portable.
 internal static (time.Time, error) parsePAXTime(@string s) {
-    static readonly UntypedInt maxNanoSecondDigits = 9;
+    UntypedInt maxNanoSecondDigits = 9;
     // Split string into seconds and sub-seconds parts.
     var (ss, sn, _) = strings.Cut(s, "."u8);
     // Parse the seconds.
@@ -220,7 +222,7 @@ internal static (time.Time, error) parsePAXTime(@string s) {
         return (new time.Time(nil), ErrHeader);
     }
     if (len(sn) < maxNanoSecondDigits){
-        sn += strings.Repeat("0"u8, maxNanoSecondDigits - len(sn));
+        sn += strings.Repeat("0"u8, (nint)maxNanoSecondDigits - len(sn));
     } else {
         // Right pad
         sn = sn[..(int)(maxNanoSecondDigits)];
@@ -252,7 +254,7 @@ internal static @string /*s*/ formatPAXTime(time.Time ts) {
         // Remember sign
         secs = -(secs + 1);
         // Add a second to secs
-        nsecs = -(nsecs - 1e9F);
+        nsecs = -(nsecs - 1000000000);
     }
     // Take that second away from nsecs
     return strings.TrimRight(fmt.Sprintf("%s%d.%09d"u8, sign, secs, nsecs), "0"u8);
@@ -275,10 +277,10 @@ internal static (@string k, @string v, @string r, error err) parsePAXRecord(@str
     // Parse the first token as a decimal integer.
     var (n, perr) = strconv.ParseInt(nStr, 10, 0);
     // Intentionally parse as native int
-    if (perr != default! || n < 5 || n > ((int64)len(s))) {
+    if (perr != default! || n < 5 || n > (int64)len(s)) {
         return ("", "", s, ErrHeader);
     }
-    n -= ((int64)(len(nStr) + 1));
+    n -= (int64)(len(nStr) + 1);
     // convert from index in s to index in rest
     if (n <= 0) {
         return ("", "", s, ErrHeader);
@@ -307,8 +309,8 @@ internal static (@string, error) formatPAXRecord(@string k, @string v) {
     if (!validPAXRecord(k, v)) {
         return ("", ErrHeader);
     }
-    static readonly UntypedInt padding = 3; // Extra padding for ' ', '=', and '\n'
-    nint size = len(k) + len(v) + padding;
+    UntypedInt padding = 3; // Extra padding for ' ', '=', and '\n'
+    nint size = len(k) + len(v) + (nint)padding;
     size += len(strconv.Itoa(size));
     @string record = strconv.Itoa(size) + " "u8 + k + "="u8 + v + "\n"u8;
     // Final adjustment if adding size field increased the record size.

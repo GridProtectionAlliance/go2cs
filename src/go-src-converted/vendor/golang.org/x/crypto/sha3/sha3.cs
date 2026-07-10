@@ -29,12 +29,11 @@ internal static readonly UntypedInt maxRate = 168;
     //     "Draft FIPS 202: SHA-3 Standard: Permutation-Based Hash and
     //      Extendable-Output Functions (May 2014)"
     internal byte dsbyte;
-    internal nint i; // storage[i:n] is the buffer, i is only used while squeezing
-    internal nint n;
+    internal nint i, n; // storage[i:n] is the buffer, i is only used while squeezing
     internal array<byte> storage = new(maxRate);
     // Specific to SHA-3 and SHAKE.
     internal nint outputLen;            // the default output size in bytes
-    internal spongeDirection state; // whether the sponge is absorbing or squeezing
+    internal spongeDirection Δstate; // whether the sponge is absorbing or squeezing
 }
 
 // BlockSize returns the rate of sponge underlying this hash function.
@@ -54,8 +53,9 @@ internal static readonly UntypedInt maxRate = 168;
     foreach (var (i, _) in d.a) {
         d.a[i] = 0;
     }
-    d.state = spongeAbsorbing;
-    (d.i, d.n) = (0, 0);
+    d.Δstate = spongeAbsorbing;
+    d.i = 0;
+    d.n = 0;
 }
 
 [GoRecv] internal static ж<state> clone(this ref state d) {
@@ -66,19 +66,21 @@ internal static readonly UntypedInt maxRate = 168;
 
 // permute applies the KeccakF-1600 permutation. It handles
 // any input-output buffering.
-[GoRecv] internal static void permute(this ref state d) {
-    var exprᴛ1 = d.state;
+internal static void permute(this ж<state> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
+    var exprᴛ1 = d.Δstate;
     if (exprᴛ1 == spongeAbsorbing) {
-        xorIn(d, // If we're absorbing, we need to xor the input into the state
+        xorIn(Ꮡd, // If we're absorbing, we need to xor the input into the state
  // before applying the permutation.
  d.storage[..(int)(d.rate)]);
         d.n = 0;
-        keccakF1600(Ꮡ(d.a));
+        keccakF1600(Ꮡd.of(state.Ꮡa));
     }
     else if (exprᴛ1 == spongeSqueezing) {
-        keccakF1600(Ꮡ(d.a));
+        keccakF1600(Ꮡd.of(state.Ꮡa));
         d.i = 0;
-        copyOut(d, // If we're squeezing, we need to apply the permutation before
+        copyOut(Ꮡd, // If we're squeezing, we need to apply the permutation before
  // copying more output.
  d.storage[..(int)(d.rate)]);
     }
@@ -87,7 +89,9 @@ internal static readonly UntypedInt maxRate = 168;
 
 // pads appends the domain separation bits in dsbyte, applies
 // the multi-bitrate 10..1 padding rule, and permutes the state.
-[GoRecv] internal static void padAndPermute(this ref state d) {
+internal static void padAndPermute(this ж<state> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
     // Pad with this instance's domain-separator bits. We know that there's
     // at least one byte of space in d.buf because, if it were full,
     // permute would have been called to empty it. dsbyte also contains the
@@ -101,30 +105,31 @@ internal static readonly UntypedInt maxRate = 168;
     // This adds the final one bit for the padding. Because of the way that
     // bits are numbered from the LSB upwards, the final bit is the MSB of
     // the last byte.
-    d.storage[d.rate - 1] ^= (byte)(128);
+    d.storage[d.rate - 1] ^= (byte)(0x80);
     // Apply the permutation
-    d.permute();
-    d.state = spongeSqueezing;
+    Ꮡd.permute();
+    d.Δstate = spongeSqueezing;
     d.n = d.rate;
-    copyOut(d, d.storage[..(int)(d.rate)]);
+    copyOut(Ꮡd, d.storage[..(int)(d.rate)]);
 }
 
 // Write absorbs more data into the hash's state. It panics if any
 // output has already been read.
-[GoRecv] internal static (nint written, error err) Write(this ref state d, slice<byte> p) {
+internal static (nint written, error err) Write(this ж<state> Ꮡd, slice<byte> p) {
     nint written = default!;
     error err = default!;
 
-    if (d.state != spongeAbsorbing) {
+    ref var d = ref Ꮡd.Value;
+    if (d.Δstate != spongeAbsorbing) {
         throw panic("sha3: Write after Read");
     }
     written = len(p);
     while (len(p) > 0) {
         if (d.n == 0 && len(p) >= d.rate){
             // The fast path; absorb a full "rate" bytes of input and apply the permutation.
-            xorIn(d, p[..(int)(d.rate)]);
+            xorIn(Ꮡd, p[..(int)(d.rate)]);
             p = p[(int)(d.rate)..];
-            keccakF1600(Ꮡ(d.a));
+            keccakF1600(Ꮡd.of(state.Ꮡa));
         } else {
             // The slow path; buffer the input until we can fill the sponge, and then xor it in.
             nint todo = d.rate - d.n;
@@ -135,7 +140,7 @@ internal static readonly UntypedInt maxRate = 168;
             p = p[(int)(todo)..];
             // If the sponge is full, apply the permutation.
             if (d.n == d.rate) {
-                d.permute();
+                Ꮡd.permute();
             }
         }
     }
@@ -143,13 +148,14 @@ internal static readonly UntypedInt maxRate = 168;
 }
 
 // Read squeezes an arbitrary number of bytes from the sponge.
-[GoRecv] internal static (nint n, error err) Read(this ref state d, slice<byte> @out) {
+internal static (nint n, error err) Read(this ж<state> Ꮡd, slice<byte> @out) {
     nint n = default!;
     error err = default!;
 
+    ref var d = ref Ꮡd.Value;
     // If we're still absorbing, pad and apply the permutation.
-    if (d.state == spongeAbsorbing) {
-        d.padAndPermute();
+    if (d.Δstate == spongeAbsorbing) {
+        Ꮡd.padAndPermute();
     }
     n = len(@out);
     // Now, do the squeezing.
@@ -159,7 +165,7 @@ internal static readonly UntypedInt maxRate = 168;
         @out = @out[(int)(nΔ1)..];
         // Apply the permutation if we've squeezed the sponge dry.
         if (d.i == d.rate) {
-            d.permute();
+            Ꮡd.permute();
         }
     }
     return (n, err);
@@ -168,7 +174,7 @@ internal static readonly UntypedInt maxRate = 168;
 // Sum applies padding to the hash state and then squeezes out the desired
 // number of output bytes. It panics if any output has already been read.
 [GoRecv] internal static slice<byte> Sum(this ref state d, slice<byte> @in) {
-    if (d.state != spongeAbsorbing) {
+    if (d.Δstate != spongeAbsorbing) {
         throw panic("sha3: Sum after Read");
     }
     // Make a copy of the original hash so that caller can keep writing

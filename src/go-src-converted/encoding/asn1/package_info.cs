@@ -48,24 +48,21 @@ using static go.encoding.asn1_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(e encoder, err error), encoder>]
-[assembly: GoImplement<(encoder, error), encoder>]
 [assembly: GoImplement<StructuralError, error>]
 [assembly: GoImplement<SyntaxError, error>]
 [assembly: GoImplement<bitStringEncoder, encoder>]
 [assembly: GoImplement<byteEncoder, encoder>]
 [assembly: GoImplement<bytesEncoder, encoder>]
 [assembly: GoImplement<int64Encoder, encoder>]
-[assembly: GoImplement<invalidUnmarshalError, error>]
+[assembly: GoImplement<invalidUnmarshalError, error>(Pointer = true)]
 [assembly: GoImplement<multiEncoder, encoder>]
 [assembly: GoImplement<oidEncoder, encoder>]
 [assembly: GoImplement<setEncoder, encoder>]
 [assembly: GoImplement<stringEncoder, encoder>]
-[assembly: GoImplement<taggedEncoder, encoder>]
+[assembly: GoImplement<taggedEncoder, encoder>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<BitString, bitStringEncoder>]
 // </ImplicitConversions>
 
 namespace go.encoding;

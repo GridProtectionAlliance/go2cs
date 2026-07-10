@@ -30,6 +30,7 @@ global using typesꓸSignature = go.go.types_package.ΔSignature;
 global using typesꓸTerm = go.go.types_package.ΔTerm;
 global using typesꓸType = go.go.types_package.ΔType;
 global using xcoffꓸSection = go.@internal.xcoff_package.ΔSection;
+using types = go.go.types_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -58,38 +59,20 @@ using static go.go.@internal.gccgoimporter_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(io.ReadCloser, error), io_package.ReadCloser>]
-[assembly: GoImplement<(io.ReadSeeker, bool), io_package.ReadSeeker>]
-[assembly: GoImplement<(io.ReadSeeker, error), io_package.ReadSeeker>]
-[assembly: GoImplement<(io.ReaderAt, bool), io_package.ReaderAt>]
-[assembly: GoImplement<(os.FileInfo, error), osꓸFileInfo>]
-[assembly: GoImplement<(reader io.ReadSeeker, closer io.Closer, err error), io_package.ReadSeeker>]
-[assembly: GoImplement<, go.types_package.ΔType>]
-[assembly: GoImplement<bytes_package.Reader, io_package.ReadSeeker>]
-[assembly: GoImplement<go.types_package.Array, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Basic, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Chan, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Const, go.types_package.Object>]
-[assembly: GoImplement<go.types_package.Func, go.types_package.Object>]
-[assembly: GoImplement<go.types_package.Interface, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Map, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Named, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Pointer, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Slice, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.Struct, go.types_package.ΔType>]
-[assembly: GoImplement<go.types_package.TypeName, go.types_package.Object>]
-[assembly: GoImplement<go.types_package.Var, go.types_package.Object>]
-[assembly: GoImplement<go.types_package.ΔSignature, go.types_package.ΔType>]
-[assembly: GoImplement<io_package.ReadCloser, io_package.Reader>]
-[assembly: GoImplement<io_package.ReadSeeker, io_package.Reader>]
-[assembly: GoImplement<io_package.SectionReader, io_package.ReaderAt>]
-[assembly: GoImplement<os_package.File, io_package.Closer>]
-[assembly: GoImplement<os_package.File, io_package.ReadSeeker>]
-[assembly: GoImplement<os_package.File, io_package.ReaderAt>]
+[assembly: GoImplement<bytes_package.Reader, io_package.ReadSeeker>(Pointer = true)]
+[assembly: GoImplement<go.go.types_package.Const, go.go.types_package.Object>(Pointer = true)]
+[assembly: GoImplement<go.go.types_package.Func, go.go.types_package.Object>(Pointer = true)]
+[assembly: GoImplement<go.go.types_package.TypeName, go.go.types_package.Object>(Pointer = true)]
+[assembly: GoImplement<go.go.types_package.Var, go.go.types_package.Object>(Pointer = true)]
+[assembly: GoImplement<go.go.types_package.ΔSignature, go.go.types_package.ΔType>(Pointer = true)]
+[assembly: GoImplement<io_package.SectionReader, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.ReadSeeker>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<reservedᴛ1, go.go.types_package.ΔType>(Pointer = true)]
+[assembly: GoImplement<reservedᴛ1, go.go.types_package.ΔType>(Promoted = true)]
 [assembly: GoImplement<seekerReadAt, io_package.ReaderAt>]
-[assembly: GoImplement<strings_package.Reader, io_package.Reader>]
-[assembly: GoImplement<types.Type), go.constant_package.Value>]
-[assembly: GoImplement<types.Type, n1 int), go.types_package.ΔType>]
+[assembly: GoImplement<strings_package.Reader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

@@ -3,9 +3,11 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using ast = go.ast_package;
-using token = go.token_package;
-using static @internal.types.errors_package;
+using ast = global::go.go.ast_package;
+using token = global::go.go.token_package;
+using static global::go.@internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
+using global::go.go;
 
 partial class types_package {
 
@@ -17,19 +19,22 @@ partial class types_package {
     internal ж<Checker> check;  // for error reporting; nil once type set is computed
     internal slice<ж<Func>> methods; // ordered list of explicitly declared methods
     internal slice<ΔType> embeddeds; // ordered list of explicitly embedded elements
-    internal ж<tokenꓸPos> embedPos; // positions of embedded elements; or nil (for error messages) - use pointer to save space
+    internal ж<slice<tokenꓸPos>> embedPos; // positions of embedded elements; or nil (for error messages) - use pointer to save space
     internal bool @implicit;         // interface is wrapper for type set literal (non-interface T, ~T, or A|B)
     internal bool complete;         // indicates that obj, methods, and embeddeds are set and type set can be computed
     internal ж<_TypeSet> tset; // type set described by this interface, computed lazily
 }
 
 // typeSet returns the type set for interface t.
-[GoRecv] internal static ж<_TypeSet> typeSet(this ref Interface t) {
-    return computeInterfaceTypeSet(t.check, nopos, t);
+internal static ж<_TypeSet> typeSet(this ж<Interface> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return computeInterfaceTypeSet(t.check, nopos, Ꮡt);
 }
 
 // emptyInterface represents the empty (completed) interface
-internal static Interface emptyInterface = new Interface(complete: true, tset: Ꮡ(topTypeSet));
+internal static ж<Interface> ᏑemptyInterface = new(new Interface(complete: true, tset: ᏑtopTypeSet));
+internal static ref Interface emptyInterface => ref ᏑemptyInterface.Value;
 
 // NewInterface returns a new interface for the given methods and embedded types.
 // NewInterface takes ownership of the provided methods and may modify their types
@@ -39,7 +44,7 @@ internal static Interface emptyInterface = new Interface(complete: true, tset: �
 public static ж<Interface> NewInterface(slice<ж<Func>> methods, slice<ж<Named>> embeddeds) {
     var tnames = new slice<ΔType>(len(embeddeds));
     foreach (var (i, t) in embeddeds) {
-        tnames[i] = t;
+        tnames[i] = new NamedжΔType(t);
     }
     return NewInterfaceType(methods, tnames);
 }
@@ -52,30 +57,32 @@ public static ж<Interface> NewInterface(slice<ж<Func>> methods, slice<ж<Named
 // concurrent use of the interface, by explicitly calling Complete.
 public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<ΔType> embeddeds) {
     if (len(methods) == 0 && len(embeddeds) == 0) {
-        return Ꮡ(emptyInterface);
+        return ᏑemptyInterface;
     }
     // set method receivers if necessary
-    var typ = ((ж<Checker>)(default!)).val.newInterface();
+    var typ = ((ж<Checker>)(default!)).newInterface();
     foreach (var (_, m) in methods) {
         {
-            var sig = m.typ._<ΔSignature.val>(); if ((~sig).recv == nil) {
-                sig.val.recv = NewVar(m.pos, m.pkg, ""u8, ~typ);
+            var sig = (~m).typ._<ж<ΔSignature>>(); if ((~sig).recv == nil) {
+                sig.Value.recv = NewVar((~m).pos, (~m).pkg, ""u8, new InterfaceжΔType(typ));
             }
         }
     }
     // sort for API stability
     sortMethods(methods);
-    typ.val.methods = methods;
-    typ.val.embeddeds = embeddeds;
-    typ.val.complete = true;
+    typ.Value.methods = methods;
+    typ.Value.embeddeds = embeddeds;
+    typ.Value.complete = true;
     return typ;
 }
 
 // check may be nil
-[GoRecv] internal static ж<Interface> newInterface(this ref Checker check) {
-    var typ = Ꮡ(new Interface(check: check));
+internal static ж<Interface> newInterface(this ж<Checker> Ꮡcheck) {
+    ref var check = ref Ꮡcheck.Value;
+
+    var typ = Ꮡ(new Interface(check: Ꮡcheck));
     if (check != nil) {
-        check.needsCleanup(~typ);
+        check.needsCleanup(new Interfaceжcleaner(typ));
     }
     return typ;
 }
@@ -118,30 +125,40 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<ΔTy
 }
 
 // NumMethods returns the total number of methods of interface t.
-[GoRecv] public static nint NumMethods(this ref Interface t) {
-    return t.typeSet().NumMethods();
+public static nint NumMethods(this ж<Interface> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡt.typeSet().NumMethods();
 }
 
 // Method returns the i'th method of interface t for 0 <= i < t.NumMethods().
 // The methods are ordered by their unique Id.
-[GoRecv] public static ж<Func> Method(this ref Interface t, nint i) {
-    return t.typeSet().Method(i);
+public static ж<Func> Method(this ж<Interface> Ꮡt, nint i) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡt.typeSet().Method(i);
 }
 
 // Empty reports whether t is the empty interface.
-[GoRecv] public static bool Empty(this ref Interface t) {
-    return t.typeSet().IsAll();
+public static bool Empty(this ж<Interface> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡt.typeSet().IsAll();
 }
 
 // IsComparable reports whether each type in interface t's type set is comparable.
-[GoRecv] public static bool IsComparable(this ref Interface t) {
-    return t.typeSet().IsComparable(default!);
+public static bool IsComparable(this ж<Interface> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡt.typeSet().IsComparable(default!);
 }
 
 // IsMethodSet reports whether the interface t is fully described by its method
 // set.
-[GoRecv] public static bool IsMethodSet(this ref Interface t) {
-    return t.typeSet().IsMethodSet();
+public static bool IsMethodSet(this ж<Interface> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return Ꮡt.typeSet().IsMethodSet();
 }
 
 // IsImplicit reports whether the interface t is a wrapper for a type set literal.
@@ -156,88 +173,97 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<ΔTy
 // panic occurs. Complete returns the receiver.
 //
 // Interface types that have been completed are safe for concurrent use.
-[GoRecv("capture")] public static ж<Interface> Complete(this ref Interface t) {
+public static ж<Interface> Complete(this ж<Interface> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (!t.complete) {
         t.complete = true;
     }
-    t.typeSet();
+    Ꮡt.typeSet();
     // checks if t.tset is already set
-    return CompleteꓸᏑt;
+    return Ꮡt;
 }
 
-[GoRecv("capture")] public static ΔType Underlying(this ref Interface t) {
-    return ~t;
+public static ΔType Underlying(this ж<Interface> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return new InterfaceжΔType(Ꮡt);
 }
 
-[GoRecv] public static @string String(this ref Interface t) {
-    return TypeString(~t, default!);
+public static @string String(this ж<Interface> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return TypeString(new InterfaceжΔType(Ꮡt), default!);
 }
 
 // ----------------------------------------------------------------------------
 // Implementation
-[GoRecv] internal static void cleanup(this ref Interface t) {
-    t.typeSet();
+internal static void cleanup(this ж<Interface> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    Ꮡt.typeSet();
     // any interface that escapes type checking must be safe for concurrent use
     t.check = default!;
     t.embedPos = default!;
 }
 
-[GoRecv] public static void interfaceType(this ref Checker check, ж<Interface> Ꮡityp, ж<ast.InterfaceType> Ꮡiface, ж<TypeName> Ꮡdef) {
-    ref var ityp = ref Ꮡityp.val;
-    ref var iface = ref Ꮡiface.val;
-    ref var def = ref Ꮡdef.val;
+internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡityp, ж<ast.InterfaceType> Ꮡiface, ж<TypeName> Ꮡdef) {
+    ref var check = ref Ꮡcheck.Value;
+    ref var ityp = ref Ꮡityp.Value;
+    ref var iface = ref Ꮡiface.Value;
+    ref var def = ref Ꮡdef.DerefOrNil();
 
     var addEmbedded = (tokenꓸPos pos, ΔType typ) => {
-        ityp.embeddeds = append(ityp.embeddeds, typ);
-        if (ityp.embedPos == nil) {
-            ityp.embedPos = @new<slice<tokenꓸPos>>();
+        Ꮡityp.Value.embeddeds = append(Ꮡityp.Value.embeddeds, typ);
+        if (Ꮡityp.Value.embedPos == nil) {
+            Ꮡityp.Value.embedPos = @new<slice<tokenꓸPos>>();
         }
-        ityp.embedPos = append(ityp.embedPos, pos);
+        Ꮡityp.Value.embedPos.ValueSlot = append(Ꮡityp.Value.embedPos.ValueSlot, pos);
     };
-    foreach (var (_, f) in iface.Methods.List) {
+    foreach (var (_, f) in (~iface.Methods).List) {
         if (len((~f).Names) == 0) {
-            addEmbedded((~f).Type.Pos(), parseUnion(check, (~f).Type));
+            addEmbedded((~f).Type.Pos(), parseUnion(Ꮡcheck, (~f).Type));
             continue;
         }
         // f.Name != nil
         // We have a method with name f.Names[0].
         var name = (~f).Names[0];
         if ((~name).Name == "_"u8) {
-            check.error(~name, BlankIfaceMethod, "methods must have a unique non-blank name"u8);
+            Ꮡcheck.error(new ast_Identжpositioner(name), BlankIfaceMethod, "methods must have a unique non-blank name"u8);
             continue;
         }
         // ignore
-        var typ = check.typ((~f).Type);
-        var (sig, _) = typ._<ΔSignature.val>(ᐧ);
+        var typ = Ꮡcheck.typ((~f).Type);
+        var (sig, _) = typ._<ж<ΔSignature>>(ᐧ);
         if (sig == nil) {
             if (isValid(typ)) {
-                check.errorf((~f).Type, InvalidSyntaxTree, "%s is not a method signature"u8, typ);
+                Ꮡcheck.errorf(new ast_Exprᴠpositioner((~f).Type), InvalidSyntaxTree, "%s is not a method signature"u8, typ);
             }
             continue;
         }
         // ignore
         // The go/parser doesn't accept method type parameters but an ast.FuncType may have them.
         if ((~sig).tparams != nil) {
-            positioner at = (~f).Type;
+            positioner at = new ast_Exprᴠpositioner((~f).Type);
             {
                 var (ftyp, _) = (~f).Type._<ж<ast.FuncType>>(ᐧ); if (ftyp != nil && (~ftyp).TypeParams != nil) {
-                    at = ~ftyp.val.TypeParams;
+                    at = new ast_FieldListжpositioner(ftyp.Value.TypeParams);
                 }
             }
-            check.error(at, InvalidSyntaxTree, "methods cannot have type parameters"u8);
+            Ꮡcheck.error(at, InvalidSyntaxTree, "methods cannot have type parameters"u8);
         }
         // use named receiver type if available (for better error messages)
-        ΔType recvTyp = ityp;
-        if (def != nil) {
+        ΔType recvTyp = new InterfaceжΔType(Ꮡityp);
+        if (Ꮡdef != nil) {
             {
                 var named = asNamed(def.typ); if (named != nil) {
-                    recvTyp = ~named;
+                    recvTyp = new NamedжΔType(named);
                 }
             }
         }
-        sig.val.recv = NewVar(name.Pos(), check.pkg, ""u8, recvTyp);
+        sig.Value.recv = NewVar(name.Pos(), check.pkg, ""u8, recvTyp);
         var m = NewFunc(name.Pos(), check.pkg, (~name).Name, sig);
-        check.recordDef(name, ~m);
+        check.recordDef(name, new FuncжObject(m));
         ityp.methods = append(ityp.methods, m);
     }
     // All methods and embedded elements for this interface are collected;
@@ -245,7 +271,7 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<ΔTy
     ityp.complete = true;
     if (len(ityp.methods) == 0 && len(ityp.embeddeds) == 0) {
         // empty interface
-        ityp.tset = Ꮡ(topTypeSet);
+        ityp.tset = ᏑtopTypeSet;
         return;
     }
     // sort for API stability
@@ -255,8 +281,8 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<ΔTy
     // Subsequent uses of type sets will use this computed type
     // set and won't need to pass in a *Checker.
     check.later(() => {
-        computeInterfaceTypeSet(check, iface.Pos(), Ꮡityp);
-    }).describef(~iface, "compute type set for %s"u8, ityp);
+        computeInterfaceTypeSet(Ꮡcheck, Ꮡiface.Value.Pos(), Ꮡityp);
+    }).describef(new ast_InterfaceTypeжpositioner(Ꮡiface), "compute type set for %s"u8, ityp);
 }
 
 } // end types_package

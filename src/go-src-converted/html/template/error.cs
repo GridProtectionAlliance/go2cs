@@ -16,7 +16,7 @@ partial class template_package {
     public ErrorCode ErrorCode;
     // Node is the node that caused the problem, if known.
     // If not nil, it overrides Name and Line.
-    public text.template.parse_package.Node Node;
+    public parse.Node Node;
     // Name is the name of the template in which the error was encountered.
     public @string Name;
     // Line is the line number of the error in the template source or 0.
@@ -72,10 +72,10 @@ public static readonly ErrorCode ErrJSTemplate = 12;
 [GoRecv] public static @string Error(this ref ΔError e) {
     switch (ᐧ) {
     case {} when e.Node != default!: {
-        var (loc, _) = ((ж<parse.Tree>)(default!)).val.ErrorContext(e.Node);
+        var (loc, _) = ((ж<parse.Tree>)(default!)).ErrorContext(e.Node);
         return fmt.Sprintf("html/template:%s: %s"u8, loc, e.Description);
     }
-    case {} when e.Line is != 0: {
+    case {} when e.Line is not 0: {
         return fmt.Sprintf("html/template:%s:%d: %s"u8, e.Name, e.Line, e.Description);
     }
     case {} when e.Name != ""u8: {

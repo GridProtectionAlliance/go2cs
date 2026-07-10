@@ -78,18 +78,18 @@ internal static offAddr maxSearchAddr() {
 // chunkIndex returns the global index of the palloc chunk containing the
 // pointer p.
 internal static chunkIdx chunkIndex(uintptr Δp) {
-    return ((chunkIdx)((Δp - arenaBaseOffset) / pallocChunkBytes));
+    return ((chunkIdx)(nuint)((Δp - (uintptr)arenaBaseOffset) / (uintptr)pallocChunkBytes));
 }
 
 // chunkBase returns the base address of the palloc chunk at index ci.
 internal static uintptr chunkBase(chunkIdx ci) {
-    return ((uintptr)ci) * pallocChunkBytes + arenaBaseOffset;
+    return (uintptr)(nuint)ci * (uintptr)pallocChunkBytes + (uintptr)arenaBaseOffset;
 }
 
 // chunkPageIndex computes the index of the page that contains p,
 // relative to the chunk which contains p.
 internal static nuint chunkPageIndex(uintptr Δp) {
-    return ((nuint)(Δp % pallocChunkBytes / pageSize));
+    return (nuint)(Δp % (uintptr)pallocChunkBytes / (uintptr)pageSize);
 }
 
 // l1 returns the index into the first level of (*pageAlloc).chunks.
@@ -99,29 +99,29 @@ internal static nuint l1(this chunkIdx i) {
         // L1 map.
         return 0;
     } else {
-        return ((nuint)i) >> (int)(pallocChunksL1Shift);
+        return ((nuint)i >> (int)(pallocChunksL1Shift));
     }
 }
 
 // l2 returns the index into the second level of (*pageAlloc).chunks.
 internal static nuint l2(this chunkIdx i) {
     if (pallocChunksL1Bits == 0){
-        return ((nuint)i);
+        return (nuint)i;
     } else {
-        return (nuint)(((nuint)i) & (1 << (int)(pallocChunksL2Bits) - 1));
+        return (nuint)((nuint)i & (nuint)((1 << (int)(pallocChunksL2Bits)) - 1));
     }
 }
 
 // offAddrToLevelIndex converts an address in the offset address space
 // to the index into summary[level] containing addr.
 internal static nint offAddrToLevelIndex(nint level, offAddr addr) {
-    return ((nint)((addr.a - arenaBaseOffset) >> (int)(levelShift[level])));
+    return (nint)(((addr.a - (uintptr)arenaBaseOffset) >> (int)(levelShift[level])));
 }
 
 // levelIndexToOffAddr converts an index into summary[level] into
 // the corresponding address in the offset address space.
 internal static offAddr levelIndexToOffAddr(nint level, nint idx) {
-    return new offAddr((((uintptr)idx) << (int)(levelShift[level])) + arenaBaseOffset);
+    return new offAddr((((uintptr)idx << (int)(levelShift[level]))) + (uintptr)arenaBaseOffset);
 }
 
 // addrsToSummaryRange converts base and limit pointers into a range
@@ -141,8 +141,8 @@ internal static (nint lo, nint hi) addrsToSummaryRange(nint level, uintptr @base
     // of a summary's max page count boundary for this level
     // (1 << levelLogPages[level]). So, make limit an inclusive upper bound
     // then shift, then add 1, so we get an exclusive upper bound at the end.
-    lo = ((nint)((@base - arenaBaseOffset) >> (int)(levelShift[level])));
-    hi = ((nint)(((limit - 1) - arenaBaseOffset) >> (int)(levelShift[level]))) + 1;
+    lo = (nint)(((@base - (uintptr)arenaBaseOffset) >> (int)(levelShift[level])));
+    hi = (nint)((((limit - 1) - (uintptr)arenaBaseOffset) >> (int)(levelShift[level]))) + 1;
     return (lo, hi);
 }
 
@@ -150,8 +150,8 @@ internal static (nint lo, nint hi) addrsToSummaryRange(nint level, uintptr @base
 // level's block width (1 << levelBits[level]). It assumes lo is inclusive
 // and hi is exclusive, and so aligns them down and up respectively.
 internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi) {
-    var e = ((uintptr)1) << (int)(levelBits[level]);
-    return (((nint)alignDown(((uintptr)lo), e)), ((nint)alignUp(((uintptr)hi), e)));
+    var e = ((uintptr)1 << (int)(levelBits[level]));
+    return ((nint)alignDown((uintptr)lo, e), (nint)alignUp((uintptr)hi, e));
 }
 
 [GoType("dyn")] partial struct pageAlloc_scav {
@@ -160,10 +160,10 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
     internal scavengeIndex index;
     // releasedBg is the amount of memory released in the background this
     // scavenge cycle.
-    internal @internal.runtime.atomic_package.Uintptr releasedBg;
+    internal atomic.Uintptr releasedBg;
     // releasedEager is the amount of memory released eagerly this scavenge
     // cycle.
-    internal @internal.runtime.atomic_package.Uintptr releasedEager;
+    internal atomic.Uintptr releasedEager;
 }
 
 [GoType] partial struct pageAlloc {
@@ -224,7 +224,7 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
     // TODO(mknyszek): Consider changing the definition of the bitmap
     // such that 1 means free and 0 means in-use so that summaries and
     // the bitmaps align better on zero-values.
-    internal array<ж<array<pallocData>>> chunks = new(1 << (int)(pallocChunksL1Bits));
+    internal array<ж<array<pallocData>>> chunks = new((1 << (int)(pallocChunksL1Bits)));
     // The address to start an allocation search with. It must never
     // point to any memory that is not contained in inUse, i.e.
     // inUse.contains(searchAddr.addr()) must always be true. The one
@@ -238,8 +238,7 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
     // which pageAlloc knows about. It assumes
     // chunks in the range [start, end) are
     // currently ready to use.
-    internal chunkIdx start;
-    internal chunkIdx end;
+    internal chunkIdx start, end;
     // inUse is a slice of ranges of address space which are
     // known by the page allocator to be currently in-use (passed
     // to grow).
@@ -270,29 +269,30 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
     internal bool test;
 }
 
-[GoRecv] internal static void init(this ref pageAlloc Δp, ж<mutex> ᏑmheapLock, ж<sysMemStat> ᏑsysStat, bool test) {
-    ref var mheapLock = ref ᏑmheapLock.val;
-    ref var sysStat = ref ᏑsysStat.val;
+internal static void init(this ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sysMemStat> ᏑsysStat, bool test) {
+    ref var Δp = ref Ꮡp.Value;
+    ref var mheapLock = ref ᏑmheapLock.Value;
+    ref var sysStat = ref ᏑsysStat.Value;
 
     if (levelLogPages[0] > logMaxPackedValue) {
         // We can't represent 1<<levelLogPages[0] pages, the maximum number
         // of pages we need to represent at the root level, in a summary, which
         // is a big problem. Throw.
-        print("runtime: root level max pages = ", 1 << (int)(levelLogPages[0]), "\n");
+        print("runtime: root level max pages = ", (1 << (int)(levelLogPages[0])), "\n");
         print("runtime: summary max pages = ", maxPackedValue, "\n");
         @throw("root level max pages doesn't fit in summary"u8);
     }
-    Δp.sysStat = sysStat;
+    Δp.sysStat = ᏑsysStat;
     // Initialize p.inUse.
-    Δp.inUse.init(ᏑsysStat);
+    Ꮡp.of(pageAlloc.ᏑinUse).init(ᏑsysStat);
     // System-dependent initialization.
     Δp.sysInit(test);
     // Start with the searchAddr in a state indicating there's no free memory.
     Δp.searchAddr = maxSearchAddr();
     // Set the mheapLock.
-    Δp.mheapLock = mheapLock;
+    Δp.mheapLock = ᏑmheapLock;
     // Initialize the scavenge index.
-    Δp.summaryMappedReady += Δp.scav.index.init(test, ᏑsysStat);
+    Δp.summaryMappedReady += Ꮡp.of(pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).init(test, ᏑsysStat);
     // Set if we're in a test.
     Δp.test = test;
 }
@@ -301,25 +301,27 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
 //
 // Returns nil if the chunk data has not been mapped.
 [GoRecv] internal static ж<pallocData> tryChunkOf(this ref pageAlloc Δp, chunkIdx ci) {
-    var l2 = Δp.chunks[ci.l1()];
+    var l2 = Δp.chunks[(nint)(ci.l1())];
     if (l2 == nil) {
         return default!;
     }
-    return Ꮡ(l2.val[ci.l2()]);
+    return Ꮡ(l2.Value[ci.l2()]);
 }
 
 // chunkOf returns the chunk at the given chunk index.
 //
 // The chunk index must be valid or this method may throw.
 [GoRecv] internal static ж<pallocData> chunkOf(this ref pageAlloc Δp, chunkIdx ci) {
-    return Ꮡ(Δp.chunks[ci.l1()].val[ci.l2()]);
+    return Ꮡ(Δp.chunks[(nint)(ci.l1())].Value[ci.l2()]);
 }
 
 // grow sets up the metadata for the address range [base, base+size).
 // It may allocate metadata, in which case *p.sysStat will be updated.
 //
 // p.mheapLock must be held.
-[GoRecv] internal static void grow(this ref pageAlloc Δp, uintptr @base, uintptr size) {
+internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) {
+    ref var Δp = ref Ꮡp.Value;
+
     assertLockHeld(Δp.mheapLock);
     // Round up to chunks, since we can't deal with increments smaller
     // than chunks. Also, sysGrow expects aligned values.
@@ -327,9 +329,9 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
     @base = alignDown(@base, pallocChunkBytes);
     // Grow the summary levels in a system-dependent manner.
     // We just update a bunch of additional metadata here.
-    Δp.sysGrow(@base, limit);
+    Ꮡp.sysGrow(@base, limit);
     // Grow the scavenge index.
-    Δp.summaryMappedReady += Δp.scav.index.grow(@base, limit, Δp.sysStat);
+    Δp.summaryMappedReady += Ꮡp.of(pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).grow(@base, limit, Δp.sysStat);
     // Update p.start and p.end.
     // If no growth happened yet, start == 0. This is generally
     // safe since the zero page is unmapped.
@@ -345,7 +347,7 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
     // Note that [base, limit) will never overlap with any existing
     // range inUse because grow only ever adds never-used memory
     // regions to the page allocator.
-    Δp.inUse.add(makeAddrRange(@base, limit));
+    Ꮡp.of(pageAlloc.ᏑinUse).add(makeAddrRange(@base, limit));
     // A grow operation is a lot like a free operation, so if our
     // chunk ends up below p.searchAddr, update p.searchAddr to the
     // new address, just like in free.
@@ -360,9 +362,9 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
     // Newly-grown memory is always considered scavenged.
     // Set all the bits in the scavenged bitmaps high.
     for (chunkIdx c = chunkIndex(@base); c < chunkIndex(limit); c++) {
-        if (Δp.chunks[c.l1()] == nil) {
+        if (Δp.chunks[(nint)(c.l1())] == nil) {
             // Create the necessary l2 entry.
-            const uintptr l2Size = /* unsafe.Sizeof(*p.chunks[0]) */ 1048576;
+            uintptr l2Size = /* unsafe.Sizeof(*p.chunks[0]) */ 1048576;
             @unsafe.Pointer r = (uintptr)sysAlloc(l2Size, Δp.sysStat);
             if (r == nil) {
                 @throw("pageAlloc: out of memory"u8);
@@ -379,14 +381,14 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
             }
             // Store the new chunk block but avoid a write barrier.
             // grow is used in call chains that disallow write barriers.
-            ((ж<uintptr>)(uintptr)(((@unsafe.Pointer)(Ꮡ(Δp.chunks[c.l1()]))))).val = ((uintptr)r);
+            ((ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡ(Δp.chunks[c.l1()])).Value))).Value = (uintptr)r;
         }
-        (~Δp.chunkOf(c)).scavenged.setRange(0, pallocChunkPages);
+        Δp.chunkOf(c).of(pallocData.Ꮡscavenged).setRange(0, pallocChunkPages);
     }
     // Update summaries accordingly. The grow acts like a free, so
     // we need to ensure this newly-free memory is visible in the
     // summaries.
-    Δp.update(@base, size / pageSize, true, false);
+    Δp.update(@base, size / (uintptr)pageSize, true, false);
 }
 
 // enableChunkHugePages enables huge pages for the chunk bitmap mappings (disabled by default).
@@ -429,7 +431,7 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
         for (nuint i = chunkIndex(r.@base.addr()).l1(); i < chunkIndex(r.limit.addr() - 1).l1(); i++) {
             // N.B. We can assume that p.chunks[i] is non-nil and in a mapped part of p.chunks
             // because it's derived from inUse, which never shrinks.
-            sysHugePage(new @unsafe.Pointer(Δp.chunks[i]), @unsafe.Sizeof(Δp.chunks[0]));
+            sysHugePage(new @unsafe.Pointer(Δp.chunks[(nint)(i)]), @unsafe.Sizeof(Δp.chunks[0].Value));
         }
     }
 }
@@ -445,7 +447,7 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
 [GoRecv] internal static void update(this ref pageAlloc Δp, uintptr @base, uintptr npages, bool contig, bool alloc) {
     assertLockHeld(Δp.mheapLock);
     // base, limit, start, and end are inclusive.
-    var limit = @base + npages * pageSize - 1;
+    var limit = @base + npages * (uintptr)pageSize - 1;
     chunkIdx sc = chunkIndex(@base);
     chunkIdx ec = chunkIndex(limit);
     // Handle updating the lowest level first.
@@ -453,7 +455,7 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
         // Fast path: the allocation doesn't span more than one chunk,
         // so update this one and if the summary didn't change, return.
         var x = Δp.summary[len(Δp.summary) - 1][sc];
-        var y = Δp.chunkOf(sc).summarize();
+        var y = Δp.chunkOf(sc).of(pallocData.ᏑpallocBits).summarize();
         if (x == y) {
             return;
         }
@@ -464,19 +466,19 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
         // and at least one summary is guaranteed to change.
         var summary = Δp.summary[len(Δp.summary) - 1];
         // Update the summary for chunk sc.
-        summary[sc] = Δp.chunkOf(sc).summarize();
+        summary[sc] = Δp.chunkOf(sc).of(pallocData.ᏑpallocBits).summarize();
         // Update the summaries for chunks in between, which are
         // either totally allocated or freed.
-        var whole = Δp.summary[len(Δp.summary) - 1][(int)(sc + 1)..(int)(ec)];
+        var whole = Δp.summary[len(Δp.summary) - 1][(int)(nuint)(sc + 1)..(int)(nuint)(ec)];
         if (alloc){
-            clear(whole);
+            builtin.clear(whole);
         } else {
             foreach (var (i, _) in whole) {
                 whole[i] = freeChunkSum;
             }
         }
         // Update the summary for chunk ec.
-        summary[ec] = Δp.chunkOf(ec).summarize();
+        summary[ec] = Δp.chunkOf(ec).of(pallocData.ᏑpallocBits).summarize();
     } else {
         // Slow general path: the allocation spans more than one chunk
         // and at least one summary is guaranteed to change.
@@ -485,7 +487,7 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
         // every chunk in the range and manually recompute the summary.
         var summary = Δp.summary[len(Δp.summary) - 1];
         for (chunkIdx c = sc; c <= ec; c++) {
-            summary[c] = Δp.chunkOf(c).summarize();
+            summary[c] = Δp.chunkOf(c).of(pallocData.ᏑpallocBits).summarize();
         }
     }
     // Walk up the radix tree and update the summaries appropriately.
@@ -501,7 +503,7 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
         var (lo, hi) = addrsToSummaryRange(l, @base, limit + 1);
         // Iterate over each block, updating the corresponding summary in the less-granular level.
         for (nint i = lo; i < hi; i++) {
-            var children = Δp.summary[l + 1][(int)(i << (int)(logEntriesPerBlock))..(int)((i + 1) << (int)(logEntriesPerBlock))];
+            var children = Δp.summary[l + 1][(int)((i << (int)(logEntriesPerBlock)))..(int)(((i + 1) << (int)(logEntriesPerBlock)))];
             var sum = mergeSummaries(children, logMaxPages);
             var old = Δp.summary[l][i];
             if (old != sum) {
@@ -522,37 +524,37 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
 // p.mheapLock must be held.
 [GoRecv] internal static uintptr allocRange(this ref pageAlloc Δp, uintptr @base, uintptr npages) {
     assertLockHeld(Δp.mheapLock);
-    var limit = @base + npages * pageSize - 1;
+    var limit = @base + npages * (uintptr)pageSize - 1;
     chunkIdx sc = chunkIndex(@base);
     chunkIdx ec = chunkIndex(limit);
     nuint si = chunkPageIndex(@base);
     nuint ei = chunkPageIndex(limit);
-    nuint scav = ((nuint)0);
+    nuint scav = (nuint)0;
     if (sc == ec){
         // The range doesn't cross any chunk boundaries.
         var chunk = Δp.chunkOf(sc);
-        scav += (~chunk).scavenged.popcntRange(si, ei + 1 - si);
+        scav += chunk.of(pallocData.Ꮡscavenged).popcntRange(si, ei + 1 - si);
         chunk.allocRange(si, ei + 1 - si);
         Δp.scav.index.alloc(sc, ei + 1 - si);
     } else {
         // The range crosses at least one chunk boundary.
         var chunk = Δp.chunkOf(sc);
-        scav += (~chunk).scavenged.popcntRange(si, pallocChunkPages - si);
-        chunk.allocRange(si, pallocChunkPages - si);
-        Δp.scav.index.alloc(sc, pallocChunkPages - si);
+        scav += chunk.of(pallocData.Ꮡscavenged).popcntRange(si, (nuint)pallocChunkPages - si);
+        chunk.allocRange(si, (nuint)pallocChunkPages - si);
+        Δp.scav.index.alloc(sc, (nuint)pallocChunkPages - si);
         for (chunkIdx c = sc + 1; c < ec; c++) {
             var chunkΔ1 = Δp.chunkOf(c);
-            scav += (~chunkΔ1).scavenged.popcntRange(0, pallocChunkPages);
+            scav += chunkΔ1.of(pallocData.Ꮡscavenged).popcntRange(0, pallocChunkPages);
             chunkΔ1.allocAll();
             Δp.scav.index.alloc(c, pallocChunkPages);
         }
         chunk = Δp.chunkOf(ec);
-        scav += (~chunk).scavenged.popcntRange(0, ei + 1);
+        scav += chunk.of(pallocData.Ꮡscavenged).popcntRange(0, ei + 1);
         chunk.allocRange(0, ei + 1);
         Δp.scav.index.alloc(ec, ei + 1);
     }
     Δp.update(@base, npages, true, true);
-    return ((uintptr)scav) * pageSize;
+    return (uintptr)scav * (uintptr)pageSize;
 }
 
 // findMappedAddr returns the smallest mapped offAddr that is
@@ -566,7 +568,7 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
     // If we're not in a test, validate first by checking mheap_.arenas.
     // This is a fast path which is only safe to use outside of testing.
     arenaIdx ai = arenaIndex(addr.addr());
-    if (Δp.test || mheap_.arenas[ai.l1()] == nil || mheap_.arenas[ai.l1()].val[ai.l2()] == nil) {
+    if (Δp.test || mheap_.arenas[(nint)(ai.l1())] == nil || mheap_.arenas[(nint)(ai.l1())].Value[ai.l2()] == nil) {
         var (vAddr, ok) = Δp.inUse.findAddrGreaterEqual(addr.addr());
         if (ok){
             return new offAddr(vAddr);
@@ -581,8 +583,7 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
 }
 
 [GoType("dyn")] partial struct find_firstFree {
-    internal offAddr @base;
-    internal offAddr bound;
+    internal offAddr @base, bound;
 }
 
 // find searches for the first (address-ordered) contiguous free region of
@@ -642,7 +643,7 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
     //
     // At the end of the search, base.addr() is the best new
     // searchAddr we could deduce in this search.
-    ref var firstFree = ref heap<struct{base offAddr; bound runtime.offAddr}>(out var ᏑfirstFree);
+    ref var firstFree = ref heap<find_firstFree>(out var ᏑfirstFree);
     firstFree = new find_firstFree(
         @base: minOffAddr,
         bound: maxOffAddr
@@ -656,20 +657,18 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
     // pages on the root level and narrow that down if we descend into
     // that summary. But as soon as we need to iterate beyond that summary
     // in a level to find a large enough range, we'll stop narrowing.
-    var foundFree = 
-    var firstFreeʗ1 = firstFree;
-    (offAddr addr, uintptr size) => {
-        if (firstFreeʗ1.@base.lessEqual(addrΔ1) && addrΔ1.add(sizeΔ1 - 1).lessEqual(firstFreeʗ1.bound)){
+    var foundFree = (offAddr addrΔ1, uintptr size) => {
+        if (ᏑfirstFree.Value.@base.lessEqual(addrΔ1) && addrΔ1.add(size - 1).lessEqual(ᏑfirstFree.Value.bound)){
             // This range fits within the current firstFree window, so narrow
             // down the firstFree window to the base and bound of this range.
-            firstFreeʗ1.@base = addrΔ1;
-            firstFreeʗ1.bound = addrΔ1.add(sizeΔ1 - 1);
+            ᏑfirstFree.Value.@base = addrΔ1;
+            ᏑfirstFree.Value.bound = addrΔ1.add(size - 1);
         } else 
-        if (!(addrΔ1.add(sizeΔ1 - 1).lessThan(firstFreeʗ1.@base) || firstFreeʗ1.bound.lessThan(addrΔ1))) {
+        if (!(addrΔ1.add(size - 1).lessThan(ᏑfirstFree.Value.@base) || ᏑfirstFree.Value.bound.lessThan(addrΔ1))) {
             // This range only partially overlaps with the firstFree range,
             // so throw.
-            print("runtime: addr = ", ((Δhex)addrΔ1.addr()), ", size = ", sizeΔ1, "\n");
-            print("runtime: base = ", ((Δhex)firstFreeʗ1.@base.addr()), ", bound = ", ((Δhex)firstFreeʗ1.bound.addr()), "\n");
+            print("runtime: addr = ", ((Δhex)(uint64)addrΔ1.addr()), ", size = ", size, "\n");
+            print("runtime: base = ", ((Δhex)(uint64)ᏑfirstFree.Value.@base.addr()), ", bound = ", ((Δhex)(uint64)ᏑfirstFree.Value.bound.addr()), "\n");
             @throw("range partially overlaps"u8);
         }
     };
@@ -682,11 +681,11 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
 nextLevel:
     for (nint l = 0; l < len(Δp.summary); l++) {
         // For the root level, entriesPerBlock is the whole level.
-        nint entriesPerBlock = 1 << (int)(levelBits[l]);
+        nint entriesPerBlock = (1 << (int)(levelBits[l]));
         nuint logMaxPages = levelLogPages[l];
         // We've moved into a new level, so let's update i to our new
         // starting index. This is a no-op for level 0.
-        i <<= (nuint)(levelBits[l]);
+        i <<= (int)(levelBits[l]);
         // Slice out the block of entries we care about.
         var entries = Δp.summary[l][(int)(i)..(int)(i + entriesPerBlock)];
         // Determine j0, the first index we should start iterating from.
@@ -721,20 +720,20 @@ nextLevel:
             }
             // We've encountered a non-zero summary which means
             // free memory, so update firstFree.
-            foundFree(levelIndexToOffAddr(l, i + jΔ1), (((uintptr)1) << (int)(logMaxPages)) * pageSize);
+            foundFree(levelIndexToOffAddr(l, i + jΔ1), (((uintptr)1 << (int)(logMaxPages))) * (uintptr)pageSize);
             nuint s = sum.start();
-            if (size + s >= ((nuint)npages)) {
+            if (size + s >= (nuint)npages) {
                 // If size == 0 we don't have a run yet,
                 // which means base isn't valid. So, set
                 // base to the first page in this block.
                 if (size == 0) {
-                    @base = ((nuint)jΔ1) << (int)(logMaxPages);
+                    @base = ((nuint)jΔ1 << (int)(logMaxPages));
                 }
                 // We hit npages; we're done!
                 size += s;
                 break;
             }
-            if (sum.max() >= ((nuint)npages)) {
+            if (sum.max() >= (nuint)npages) {
                 // The entry itself contains npages contiguous
                 // free pages, so continue on the next level
                 // to find that run.
@@ -743,22 +742,22 @@ nextLevel:
                 lastSum = sum;
                 goto continue_nextLevel;
             }
-            if (size == 0 || s < 1 << (int)(logMaxPages)) {
+            if (size == 0 || s < ((nuint)1 << (int)(logMaxPages))) {
                 // We either don't have a current run started, or this entry
                 // isn't totally free (meaning we can't continue the current
                 // one), so try to begin a new run by setting size and base
                 // based on sum.end.
                 size = sum.end();
-                @base = ((nuint)(jΔ1 + 1)) << (int)(logMaxPages) - size;
+                @base = ((nuint)(jΔ1 + 1) << (int)(logMaxPages)) - size;
                 continue;
             }
             // The entry is completely free, so continue the run.
-            size += 1 << (int)(logMaxPages);
+            size += ((nuint)1 << (int)(logMaxPages));
         }
-        if (size >= ((nuint)npages)) {
+        if (size >= (nuint)npages) {
             // We found a sufficiently large run of free pages straddling
             // some boundary, so compute the address and return it.
-            var addrΔ2 = levelIndexToOffAddr(l, i).add(((uintptr)@base) * pageSize).addr();
+            var addrΔ2 = levelIndexToOffAddr(l, i).add((uintptr)@base * (uintptr)pageSize).addr();
             return (addrΔ2, Δp.findMappedAddr(firstFree.@base));
         }
         if (l == 0) {
@@ -770,7 +769,7 @@ nextLevel:
         // lied to us. In either case, dump some useful state and throw.
         print("runtime: summary[", l - 1, "][", lastSumIdx, "] = ", lastSum.start(), ", ", lastSum.max(), ", ", lastSum.end(), "\n");
         print("runtime: level = ", l, ", npages = ", npages, ", j0 = ", j0, "\n");
-        print("runtime: p.searchAddr = ", ((Δhex)Δp.searchAddr.addr()), ", i = ", i, "\n");
+        print("runtime: p.searchAddr = ", ((Δhex)(uint64)Δp.searchAddr.addr()), ", i = ", i, "\n");
         print("runtime: levelShift[level] = ", levelShift[l], ", levelBits[level] = ", levelBits[l], "\n");
         for (nint jΔ2 = 0; jΔ2 < len(entries); jΔ2++) {
             var sum = entries[jΔ2];
@@ -787,9 +786,9 @@ break_nextLevel:;
     //
     // After iterating over all levels, i must contain a chunk index which
     // is what the final level represents.
-    chunkIdx ci = ((chunkIdx)i);
-    var (j, searchIdx) = Δp.chunkOf(ci).find(npages, 0);
-    if (j == ~((nuint)0)) {
+    chunkIdx ci = ((chunkIdx)(nuint)i);
+    var (j, searchIdx) = Δp.chunkOf(ci).of(pallocData.ᏑpallocBits).find(npages, 0);
+    if (j == ~(nuint)0) {
         // We couldn't find any space in this chunk despite the summaries telling
         // us it should be there. There's likely a bug, so dump some state and throw.
         var sum = Δp.summary[len(Δp.summary) - 1][i];
@@ -798,10 +797,10 @@ break_nextLevel:;
         @throw("bad summary data"u8);
     }
     // Compute the address at which the free space starts.
-    var addr = chunkBase(ci) + ((uintptr)j) * pageSize;
+    var addr = chunkBase(ci) + (uintptr)j * (uintptr)pageSize;
     // Since we actually searched the chunk, we may have
     // found an even narrower free window.
-    var searchAddr = chunkBase(ci) + ((uintptr)searchIdx) * pageSize;
+    var searchAddr = chunkBase(ci) + (uintptr)searchIdx * (uintptr)pageSize;
     foundFree(new offAddr(searchAddr), chunkBase(ci + 1) - searchAddr);
     return (addr, Δp.findMappedAddr(firstFree.@base));
 }
@@ -831,19 +830,19 @@ break_nextLevel:;
     // If npages has a chance of fitting in the chunk where the searchAddr is,
     // search it directly.
     var searchAddr = minOffAddr;
-    if (pallocChunkPages - chunkPageIndex(Δp.searchAddr.addr()) >= ((nuint)npages)) {
+    if ((nuint)pallocChunkPages - chunkPageIndex(Δp.searchAddr.addr()) >= (nuint)npages) {
         // npages is guaranteed to be no greater than pallocChunkPages here.
         chunkIdx i = chunkIndex(Δp.searchAddr.addr());
         {
-            nuint max = Δp.summary[len(Δp.summary) - 1][i].max(); if (max >= ((nuint)npages)) {
-                var (j, searchIdx) = Δp.chunkOf(i).find(npages, chunkPageIndex(Δp.searchAddr.addr()));
-                if (j == ~((nuint)0)) {
+            nuint max = Δp.summary[len(Δp.summary) - 1][i].max(); if (max >= (nuint)npages) {
+                var (j, searchIdx) = Δp.chunkOf(i).of(pallocData.ᏑpallocBits).find(npages, chunkPageIndex(Δp.searchAddr.addr()));
+                if (j == ~(nuint)0) {
                     print("runtime: max = ", max, ", npages = ", npages, "\n");
-                    print("runtime: searchIdx = ", chunkPageIndex(Δp.searchAddr.addr()), ", p.searchAddr = ", ((Δhex)Δp.searchAddr.addr()), "\n");
+                    print("runtime: searchIdx = ", chunkPageIndex(Δp.searchAddr.addr()), ", p.searchAddr = ", ((Δhex)(uint64)Δp.searchAddr.addr()), "\n");
                     @throw("bad summary data"u8);
                 }
-                addr = chunkBase(i) + ((uintptr)j) * pageSize;
-                searchAddr = new offAddr(chunkBase(i) + ((uintptr)searchIdx) * pageSize);
+                addr = chunkBase(i) + (uintptr)j * (uintptr)pageSize;
+                searchAddr = new offAddr(chunkBase(i) + (uintptr)searchIdx * (uintptr)pageSize);
                 goto Found;
             }
         }
@@ -881,7 +880,9 @@ Found:
 // Must run on the system stack because p.mheapLock must be held.
 //
 //go:systemstack
-[GoRecv] internal static void free(this ref pageAlloc Δp, uintptr @base, uintptr npages) {
+internal static void free(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr npages) {
+    ref var Δp = ref Ꮡp.Value;
+
     assertLockHeld(Δp.mheapLock);
     // If we're freeing pages below the p.searchAddr, update searchAddr.
     {
@@ -889,14 +890,14 @@ Found:
             Δp.searchAddr = b;
         }
     }
-    var limit = @base + npages * pageSize - 1;
+    var limit = @base + npages * (uintptr)pageSize - 1;
     if (npages == 1){
         // Fast path: we're clearing a single bit, and we know exactly
         // where it is, so mark it directly.
         chunkIdx i = chunkIndex(@base);
         nuint pi = chunkPageIndex(@base);
-        Δp.chunkOf(i).free1(pi);
-        Δp.scav.index.free(i, pi, 1);
+        Δp.chunkOf(i).of(pallocData.ᏑpallocBits).free1(pi);
+        Ꮡp.of(pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).free(i, pi, 1);
     } else {
         // Slow path: we're clearing more bits so we may need to iterate.
         chunkIdx sc = chunkIndex(@base);
@@ -905,70 +906,70 @@ Found:
         nuint ei = chunkPageIndex(limit);
         if (sc == ec){
             // The range doesn't cross any chunk boundaries.
-            Δp.chunkOf(sc).free(si, ei + 1 - si);
-            Δp.scav.index.free(sc, si, ei + 1 - si);
+            Δp.chunkOf(sc).of(pallocData.ᏑpallocBits).free(si, ei + 1 - si);
+            Ꮡp.of(pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).free(sc, si, ei + 1 - si);
         } else {
             // The range crosses at least one chunk boundary.
-            Δp.chunkOf(sc).free(si, pallocChunkPages - si);
-            Δp.scav.index.free(sc, si, pallocChunkPages - si);
+            Δp.chunkOf(sc).of(pallocData.ᏑpallocBits).free(si, (nuint)pallocChunkPages - si);
+            Ꮡp.of(pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).free(sc, si, (nuint)pallocChunkPages - si);
             for (chunkIdx c = sc + 1; c < ec; c++) {
-                Δp.chunkOf(c).freeAll();
-                Δp.scav.index.free(c, 0, pallocChunkPages);
+                Δp.chunkOf(c).of(pallocData.ᏑpallocBits).freeAll();
+                Ꮡp.of(pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).free(c, 0, pallocChunkPages);
             }
-            Δp.chunkOf(ec).free(0, ei + 1);
-            Δp.scav.index.free(ec, 0, ei + 1);
+            Δp.chunkOf(ec).of(pallocData.ᏑpallocBits).free(0, ei + 1);
+            Ꮡp.of(pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).free(ec, 0, ei + 1);
         }
     }
     Δp.update(@base, npages, true, false);
 }
 
-internal const uintptr pallocSumBytes = /* unsafe.Sizeof(pallocSum(0)) */ 8;
+internal static readonly uintptr pallocSumBytes = /* unsafe.Sizeof(pallocSum(0)) */ 8;
 internal static readonly UntypedInt maxPackedValue = /* 1 << logMaxPackedValue */ 2097152;
 internal static readonly UntypedInt logMaxPackedValue = /* logPallocChunkPages + (summaryLevels-1)*summaryLevelBits */ 21;
 internal static readonly pallocSum freeChunkSum = /* pallocSum(uint64(pallocChunkPages) |
 	uint64(pallocChunkPages<<logMaxPackedValue) |
-	uint64(pallocChunkPages<<(2*logMaxPackedValue))) */ 2251800887427584;
+	uint64(pallocChunkPages<<(2*logMaxPackedValue))) */ unchecked((pallocSum)2251800887427584);
 
 [GoType("num:uint64")] partial struct pallocSum;
 
 // packPallocSum takes a start, max, and end value and produces a pallocSum.
 internal static pallocSum packPallocSum(nuint start, nuint max, nuint end) {
     if (max == maxPackedValue) {
-        return ((pallocSum)((uint64)(1 << (int)(63))));
+        return ((pallocSum)(uint64)(((uint64)1 << (int)(63))));
     }
-    return ((pallocSum)((uint64)((uint64)(((uint64)(((uint64)start) & (maxPackedValue - 1))) | (((uint64)(((uint64)max) & (maxPackedValue - 1))) << (int)(logMaxPackedValue))) | (((uint64)(((uint64)end) & (maxPackedValue - 1))) << (int)((2 * logMaxPackedValue))))));
+    return ((pallocSum)((uint64)((uint64)(((uint64)((uint64)start & (uint64)((maxPackedValue - 1)))) | ((((uint64)((uint64)max & (uint64)((maxPackedValue - 1)))) << (int)(logMaxPackedValue)))) | ((((uint64)((uint64)end & (uint64)((maxPackedValue - 1)))) << (int)((2 * logMaxPackedValue)))))));
 }
 
 // start extracts the start value from a packed sum.
 internal static nuint start(this pallocSum Δp) {
-    if ((uint64)(((uint64)Δp) & ((uint64)(1 << (int)(63)))) != 0) {
+    if ((uint64)((uint64)Δp & (uint64)(((uint64)1 << (int)(63)))) != 0) {
         return maxPackedValue;
     }
-    return ((nuint)((uint64)(((uint64)Δp) & (maxPackedValue - 1))));
+    return (nuint)((uint64)((uint64)Δp & (uint64)((maxPackedValue - 1))));
 }
 
 // max extracts the max value from a packed sum.
 internal static nuint max(this pallocSum Δp) {
-    if ((uint64)(((uint64)Δp) & ((uint64)(1 << (int)(63)))) != 0) {
+    if ((uint64)((uint64)Δp & (uint64)(((uint64)1 << (int)(63)))) != 0) {
         return maxPackedValue;
     }
-    return ((nuint)((uint64)((((uint64)Δp) >> (int)(logMaxPackedValue)) & (maxPackedValue - 1))));
+    return (nuint)((uint64)((((uint64)Δp >> (int)(logMaxPackedValue))) & (uint64)((maxPackedValue - 1))));
 }
 
 // end extracts the end value from a packed sum.
 internal static nuint end(this pallocSum Δp) {
-    if ((uint64)(((uint64)Δp) & ((uint64)(1 << (int)(63)))) != 0) {
+    if ((uint64)((uint64)Δp & (uint64)(((uint64)1 << (int)(63)))) != 0) {
         return maxPackedValue;
     }
-    return ((nuint)((uint64)((((uint64)Δp) >> (int)((2 * logMaxPackedValue))) & (maxPackedValue - 1))));
+    return (nuint)((uint64)((((uint64)Δp >> (int)((2 * logMaxPackedValue)))) & (uint64)((maxPackedValue - 1))));
 }
 
 // unpack unpacks all three values from the summary.
 internal static (nuint, nuint, nuint) unpack(this pallocSum Δp) {
-    if ((uint64)(((uint64)Δp) & ((uint64)(1 << (int)(63)))) != 0) {
+    if ((uint64)((uint64)Δp & (uint64)(((uint64)1 << (int)(63)))) != 0) {
         return (maxPackedValue, maxPackedValue, maxPackedValue);
     }
-    return (((nuint)((uint64)(((uint64)Δp) & (maxPackedValue - 1)))), ((nuint)((uint64)((((uint64)Δp) >> (int)(logMaxPackedValue)) & (maxPackedValue - 1)))), ((nuint)((uint64)((((uint64)Δp) >> (int)((2 * logMaxPackedValue))) & (maxPackedValue - 1)))));
+    return ((nuint)((uint64)((uint64)Δp & (uint64)((maxPackedValue - 1)))), (nuint)((uint64)((((uint64)Δp >> (int)(logMaxPackedValue))) & (uint64)((maxPackedValue - 1)))), (nuint)((uint64)((((uint64)Δp >> (int)((2 * logMaxPackedValue)))) & (uint64)((maxPackedValue - 1)))));
 }
 
 // mergeSummaries merges consecutive summaries which may each represent at
@@ -985,21 +986,21 @@ internal static pallocSum mergeSummaries(slice<pallocSum> sums, nuint logMaxPage
         // Merge in sums[i].start only if the running summary is
         // completely free, otherwise this summary's start
         // plays no role in the combined sum.
-        if (start == ((nuint)i) << (int)(logMaxPagesPerSum)) {
+        if (start == ((nuint)i << (int)(logMaxPagesPerSum))) {
             start += si;
         }
         // Recompute the max value of the running sum by looking
         // across the boundary between the running sum and sums[i]
         // and at the max sums[i], taking the greatest of those two
         // and the max of the running sum.
-        most = max(most, end + si, mi);
+        most = builtin.max(most, end + si, mi);
         // Merge in end by checking if this new summary is totally
         // free. If it is, then we want to extend the running sum's
         // end by the new summary. If not, then we have some alloc'd
         // pages in there and we just want to take the end value in
         // sums[i].
-        if (ei == 1 << (int)(logMaxPagesPerSum)){
-            end += 1 << (int)(logMaxPagesPerSum);
+        if (ei == ((nuint)1 << (int)(logMaxPagesPerSum))){
+            end += ((nuint)1 << (int)(logMaxPagesPerSum));
         } else {
             end = ei;
         }

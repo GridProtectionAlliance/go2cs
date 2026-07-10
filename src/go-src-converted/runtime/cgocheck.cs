@@ -23,7 +23,7 @@ internal static readonly @string cgoWriteBarrierFail = "unpinned Go pointer stor
 //go:nosplit
 //go:nowritebarrier
 internal static void cgoCheckPtrWrite(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointer src) {
-    ref var dst = ref Ꮡdst.val;
+    ref var dst = ref Ꮡdst.Value;
 
     if (!mainStarted) {
         // Something early in startup hates this function.
@@ -31,10 +31,10 @@ internal static void cgoCheckPtrWrite(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointe
         // runtime has set itself up.
         return;
     }
-    if (!cgoIsGoPointer(src.val)) {
+    if (!cgoIsGoPointer(src)) {
         return;
     }
-    if (cgoIsGoPointer(((@unsafe.Pointer)dst))) {
+    if (cgoIsGoPointer(@unsafe.Pointer.FromRef(ref dst))) {
         return;
     }
     // If we are running on the system stack then dst might be an
@@ -50,17 +50,17 @@ internal static void cgoCheckPtrWrite(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointe
     }
     // If the object is pinned, it's safe to store it in C memory. The GC
     // ensures it will not be moved or freed.
-    if (isPinned(src.val)) {
+    if (isPinned(src)) {
         return;
     }
     // It's OK if writing to memory allocated by persistentalloc.
     // Do this check last because it is more expensive and rarely true.
     // If it is false the expense doesn't matter since we are crashing.
-    if (inPersistentAlloc(((uintptr)((@unsafe.Pointer)dst)))) {
+    if (inPersistentAlloc((uintptr)@unsafe.Pointer.FromRef(ref dst))) {
         return;
     }
     systemstack(() => {
-        println("write of unpinned Go pointer", ((Δhex)((uintptr)src)), "to non-Go memory", ((Δhex)((uintptr)((@unsafe.Pointer)dst))));
+        println("write of unpinned Go pointer", ((Δhex)(uint64)(uintptr)src), "to non-Go memory", ((Δhex)(uint64)(uintptr)@unsafe.Pointer.FromRef(ref Ꮡdst.Value)));
         @throw(cgoWriteBarrierFail);
     });
 }
@@ -74,9 +74,9 @@ internal static void cgoCheckPtrWrite(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointe
 //go:nosplit
 //go:nowritebarrier
 internal static void cgoCheckMemmove(ж<_type> Ꮡtyp, @unsafe.Pointer dst, @unsafe.Pointer src) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.Value;
 
-    cgoCheckMemmove2(Ꮡtyp, dst.val, src.val, 0, typ.Size_);
+    cgoCheckMemmove2(Ꮡtyp, dst, src, 0, typ.Size_);
 }
 
 // cgoCheckMemmove2 is called when moving a block of memory.
@@ -88,18 +88,18 @@ internal static void cgoCheckMemmove(ж<_type> Ꮡtyp, @unsafe.Pointer dst, @uns
 //go:nosplit
 //go:nowritebarrier
 internal static void cgoCheckMemmove2(ж<_type> Ꮡtyp, @unsafe.Pointer dst, @unsafe.Pointer src, uintptr off, uintptr size) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.Value;
 
     if (!typ.Pointers()) {
         return;
     }
-    if (!cgoIsGoPointer(src.val)) {
+    if (!cgoIsGoPointer(src)) {
         return;
     }
-    if (cgoIsGoPointer(dst.val)) {
+    if (cgoIsGoPointer(dst)) {
         return;
     }
-    cgoCheckTypedBlock(Ꮡtyp, src.val, off, size);
+    cgoCheckTypedBlock(Ꮡtyp, src, off, size);
 }
 
 // cgoCheckSliceCopy is called when copying n elements of a slice.
@@ -111,15 +111,15 @@ internal static void cgoCheckMemmove2(ж<_type> Ꮡtyp, @unsafe.Pointer dst, @un
 //go:nosplit
 //go:nowritebarrier
 internal static void cgoCheckSliceCopy(ж<_type> Ꮡtyp, @unsafe.Pointer dst, @unsafe.Pointer src, nint n) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.Value;
 
     if (!typ.Pointers()) {
         return;
     }
-    if (!cgoIsGoPointer(src.val)) {
+    if (!cgoIsGoPointer(src)) {
         return;
     }
-    if (cgoIsGoPointer(dst.val)) {
+    if (cgoIsGoPointer(dst)) {
         return;
     }
     @unsafe.Pointer Δp = src;
@@ -136,7 +136,7 @@ internal static void cgoCheckSliceCopy(ж<_type> Ꮡtyp, @unsafe.Pointer dst, @u
 //go:nosplit
 //go:nowritebarrier
 internal static void cgoCheckTypedBlock(ж<_type> Ꮡtyp, @unsafe.Pointer src, uintptr off, uintptr size) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.Value;
 
     // Anything past typ.PtrBytes is not a pointer.
     if (typ.PtrBytes <= off) {
@@ -148,24 +148,24 @@ internal static void cgoCheckTypedBlock(ж<_type> Ꮡtyp, @unsafe.Pointer src, u
         }
     }
     if ((abiꓸKind)(typ.Kind_ & abi.KindGCProg) == 0) {
-        cgoCheckBits(src.val, typ.GCData, off, size);
+        cgoCheckBits(src, typ.GCData, off, size);
         return;
     }
     // The type has a GC program. Try to find GC bits somewhere else.
     foreach (var (_, datap) in activeModules()) {
-        if (cgoInRange(src.val, (~datap).data, (~datap).edata)) {
-            var doff = ((uintptr)src) - (~datap).data;
-            cgoCheckBits((uintptr)add(src.val, -doff), (~datap).gcdatamask.bytedata, off + doff, size);
+        if (cgoInRange(src, (~datap).data, (~datap).edata)) {
+            var doff = (uintptr)src - (~datap).data;
+            cgoCheckBits((uintptr)add(src, ((uintptr)0 - doff)), (~datap).gcdatamask.bytedata, off + doff, size);
             return;
         }
-        if (cgoInRange(src.val, (~datap).bss, (~datap).ebss)) {
-            var boff = ((uintptr)src) - (~datap).bss;
-            cgoCheckBits((uintptr)add(src.val, -boff), (~datap).gcbssmask.bytedata, off + boff, size);
+        if (cgoInRange(src, (~datap).bss, (~datap).ebss)) {
+            var boff = (uintptr)src - (~datap).bss;
+            cgoCheckBits((uintptr)add(src, ((uintptr)0 - boff)), (~datap).gcbssmask.bytedata, off + boff, size);
             return;
         }
     }
-    var s = spanOfUnchecked(((uintptr)src));
-    if ((~s).state.get() == mSpanManual) {
+    var s = spanOfUnchecked((uintptr)src);
+    if (s.of(mspan.Ꮡstate).get() == mSpanManual) {
         // There are no heap bits for value stored on the stack.
         // For a channel receive src might be on the stack of some
         // other goroutine, so we can't unwind the stack even if
@@ -174,20 +174,20 @@ internal static void cgoCheckTypedBlock(ж<_type> Ꮡtyp, @unsafe.Pointer src, u
         // space we can't easily get.
         // Fortunately we have the type information.
         systemstack(() => {
-            cgoCheckUsingType(Ꮡtyp, src.val, off, size);
+            cgoCheckUsingType(Ꮡtyp, src, off, size);
         });
         return;
     }
     // src must be in the regular heap.
-    var tp = s.typePointersOf(((uintptr)src), size);
+    var tp = s.typePointersOf((uintptr)src, size);
     while (ᐧ) {
         uintptr addr = default!;
         {
-            (tp, addr) = tp.next(((uintptr)src) + size); if (addr == 0) {
+            (tp, addr) = tp.next((uintptr)src + size); if (addr == 0) {
                 break;
             }
         }
-        @unsafe.Pointer v = ~(ж<@unsafe.Pointer>)(uintptr)(((@unsafe.Pointer)addr));
+        @unsafe.Pointer v = ~(ж<@unsafe.Pointer>)(uintptr)((@unsafe.Pointer)addr);
         if (cgoIsGoPointer(v) && !isPinned(v)) {
             @throw(cgoWriteBarrierFail);
         }
@@ -201,27 +201,27 @@ internal static void cgoCheckTypedBlock(ж<_type> Ꮡtyp, @unsafe.Pointer src, u
 //go:nosplit
 //go:nowritebarrier
 internal static void cgoCheckBits(@unsafe.Pointer src, ж<byte> Ꮡgcbits, uintptr off, uintptr size) {
-    ref var gcbits = ref Ꮡgcbits.val;
+    ref var gcbits = ref Ꮡgcbits.Value;
 
-    var skipMask = off / goarch.PtrSize / 8;
-    var skipBytes = skipMask * goarch.PtrSize * 8;
+    var skipMask = off / (uintptr)goarch.PtrSize / 8;
+    var skipBytes = skipMask * (uintptr)goarch.PtrSize * 8;
     var ptrmask = addb(Ꮡgcbits, skipMask);
-    src = (uintptr)add(src.val, skipBytes);
+    src.Value = (uintptr)add(src, skipBytes);
     off -= skipBytes;
     size += off;
     uint32 bits = default!;
-    for (var i = ((uintptr)0); i < size; i += goarch.PtrSize) {
-        if ((uintptr)(i & (goarch.PtrSize * 8 - 1)) == 0){
-            bits = ((uint32)(ptrmask.val));
+    for (var i = (uintptr)0; i < size; i += goarch.PtrSize) {
+        if ((uintptr)(i & (uintptr)(goarch.PtrSize * 8 - 1)) == 0){
+            bits = (uint32)(ptrmask.Value);
             ptrmask = addb(ptrmask, 1);
         } else {
-            bits >>= (UntypedInt)(1);
+            bits >>= (int)(1);
         }
         if (off > 0){
             off -= goarch.PtrSize;
         } else {
             if ((uint32)(bits & 1) != 0) {
-                @unsafe.Pointer v = ~(ж<@unsafe.Pointer>)(uintptr)(add(src.val, i));
+                @unsafe.Pointer v = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)add(src, i));
                 if (cgoIsGoPointer(v) && !isPinned(v)) {
                     @throw(cgoWriteBarrierFail);
                 }
@@ -239,7 +239,7 @@ internal static void cgoCheckBits(@unsafe.Pointer src, ж<byte> Ꮡgcbits, uintp
 //go:nowritebarrier
 //go:systemstack
 internal static void cgoCheckUsingType(ж<_type> Ꮡtyp, @unsafe.Pointer src, uintptr off, uintptr size) {
-    ref var typ = ref Ꮡtyp.val;
+    ref var typ = ref Ꮡtyp.Value;
 
     if (!typ.Pointers()) {
         return;
@@ -254,23 +254,20 @@ internal static void cgoCheckUsingType(ж<_type> Ꮡtyp, @unsafe.Pointer src, ui
         }
     }
     if ((abiꓸKind)(typ.Kind_ & abi.KindGCProg) == 0) {
-        cgoCheckBits(src.val, typ.GCData, off, size);
+        cgoCheckBits(src, typ.GCData, off, size);
         return;
     }
     var exprᴛ1 = (abiꓸKind)(typ.Kind_ & abi.KindMask);
-    { /* default: */
-        @throw("can't happen"u8);
-    }
-    else if (exprᴛ1 == abi.Array) {
+    if (exprᴛ1 == abi.Array) {
         var at = (ж<arraytype>)(uintptr)(new @unsafe.Pointer(Ꮡtyp));
-        for (var i = ((uintptr)0); i < (~at).Len; i++) {
+        for (var i = (uintptr)0; i < (~at).Len; i++) {
             if (off < (~(~at).Elem).Size_) {
-                cgoCheckUsingType((~at).Elem, src.val, off, size);
+                cgoCheckUsingType((~at).Elem, src, off, size);
             }
-            src = (uintptr)add(src.val, (~(~at).Elem).Size_);
+            src.Value = (uintptr)add(src, (~(~at).Elem).Size_);
             var skipped = off;
             if (skipped > (~(~at).Elem).Size_) {
-                skipped = (~at).Elem.val.Size_;
+                skipped = at.Value.Elem.Value.Size_;
             }
             var @checked = (~(~at).Elem).Size_ - skipped;
             off -= skipped;
@@ -282,16 +279,14 @@ internal static void cgoCheckUsingType(ж<_type> Ꮡtyp, @unsafe.Pointer src, ui
     }
     else if (exprᴛ1 == abi.Struct) {
         var st = (ж<structtype>)(uintptr)(new @unsafe.Pointer(Ꮡtyp));
-        ref var f = ref heap(new @internal.abi_package.StructField(), out var Ꮡf);
-
         foreach (var (_, f) in (~st).Fields) {
             if (off < (~f.Typ).Size_) {
-                cgoCheckUsingType(f.Typ, src.val, off, size);
+                cgoCheckUsingType(f.Typ, src, off, size);
             }
-            src = (uintptr)add(src.val, (~f.Typ).Size_);
+            src.Value = (uintptr)add(src, (~f.Typ).Size_);
             var skipped = off;
             if (skipped > (~f.Typ).Size_) {
-                skipped = f.Typ.val.Size_;
+                skipped = f.Typ.Value.Size_;
             }
             var @checked = (~f.Typ).Size_ - skipped;
             off -= skipped;
@@ -300,6 +295,9 @@ internal static void cgoCheckUsingType(ж<_type> Ꮡtyp, @unsafe.Pointer src, ui
             }
             size -= @checked;
         }
+    }
+    else { /* default: */
+        @throw("can't happen"u8);
     }
 
 }

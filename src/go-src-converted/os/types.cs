@@ -6,9 +6,9 @@ global using FileMode = go.io.fs_package.FileMode;
 
 namespace go;
 
-using fs = io.fs_package;
+using fs = go.io.fs_package;
 using syscall = syscall_package;
-using io;
+using go.io;
 
 partial class os_package {
 
@@ -21,7 +21,7 @@ public static nint Getpagesize() {
 //
 // The methods of File are safe for concurrent use.
 [GoType] partial struct File {
-    public partial ref ж<file> file { get; } // os specific
+    internal partial ref ж<@file> @file { get; } // os specific
 }
 
 // The defined file mode bits are the most significant bits of the [FileMode].
@@ -74,8 +74,8 @@ public static readonly fs.FileMode ModePerm = /* fs.ModePerm */ 511; // Unix per
 // SameFile only applies to results returned by this package's [Stat].
 // It returns false in other cases.
 public static bool SameFile(FileInfo fi1, FileInfo fi2) {
-    var (fs1, ok1) = fi1._<fileStat.val>(ᐧ);
-    var (fs2, ok2) = fi2._<fileStat.val>(ᐧ);
+    var (fs1, ok1) = fi1._<ж<fileStat>>(ᐧ);
+    var (fs2, ok2) = fi2._<ж<fileStat>>(ᐧ);
     if (!ok1 || !ok2) {
         return false;
     }

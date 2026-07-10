@@ -4,7 +4,7 @@
 namespace go;
 
 using poll = @internal.poll_package;
-using io = io_package;
+using Δio = io_package;
 using os = os_package;
 using syscall = syscall_package;
 using @internal;
@@ -20,25 +20,25 @@ internal const bool supportsSendfile = true;
 // non-EOF error.
 //
 // if handled == false, sendFile performed no work.
-internal static (int64 written, error err, bool handled) sendFile(ж<netFD> Ꮡfd, io.Reader r) {
+internal static (int64 written, error err, bool handled) sendFile(ж<netFD> Ꮡfd, Δio.Reader r) {
     int64 written = default!;
     error err = default!;
     bool handled = default!;
 
-    ref var fd = ref Ꮡfd.val;
+    ref var fd = ref Ꮡfd.Value;
     int64 n = 0;     // by default, copy until EOF.
-    var (lr, ok) = r._<ж<io.LimitedReader>>(ᐧ);
+    var (lr, ok) = r._<ж<Δio.LimitedReader>>(ᐧ);
     if (ok) {
-        (n, r) = (lr.val.N, lr.val.R);
+        (n, r) = (lr.Value.N, lr.Value.R);
         if (n <= 0) {
             return (0, default!, true);
         }
     }
-    (f, ok) = r._<ж<os.File>>(ᐧ);
+    (var f, ok) = r._<ж<os.File>>(ᐧ);
     if (!ok) {
         return (0, default!, false);
     }
-    (written, err) = poll.SendFile(Ꮡ(fd.pfd), ((syscallꓸHandle)f.Fd()), n);
+    (written, err) = poll.SendFile(Ꮡfd.of(netFD.Ꮡpfd), ((syscallꓸHandle)f.Fd()), n);
     if (err != default!) {
         err = wrapSyscallError("transmitfile"u8, err);
     }

@@ -10,6 +10,18 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using dnsmessageꓸAAAAResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔAAAAResource;
+global using dnsmessageꓸAResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔAResource;
+global using dnsmessageꓸCNAMEResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔCNAMEResource;
+global using dnsmessageꓸMXResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔMXResource;
+global using dnsmessageꓸNSResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔNSResource;
+global using dnsmessageꓸOPTResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔOPTResource;
+global using dnsmessageꓸPTRResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔPTRResource;
+global using dnsmessageꓸQuestion = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔQuestion;
+global using dnsmessageꓸSOAResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔSOAResource;
+global using dnsmessageꓸSRVResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔSRVResource;
+global using dnsmessageꓸTXTResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔTXTResource;
+global using dnsmessageꓸUnknownResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔUnknownResource;
 global using netipꓸAddr = go.net.netip_package.ΔAddr;
 global using netipꓸPrefix = go.net.netip_package.ΔPrefix;
 global using osꓸDirEntry = go.io.fs_package.DirEntry;
@@ -24,6 +36,7 @@ global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
+using syscall = go.syscall_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -54,64 +67,55 @@ using static go.net_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(*IPConn, error), Conn>]
-[assembly: GoImplement<(*IPConn, error), PacketConn>]
-[assembly: GoImplement<(*TCPConn, error), Conn>]
-[assembly: GoImplement<(*TCPListener, error), Listener>]
-[assembly: GoImplement<(*UDPConn, error), Conn>]
-[assembly: GoImplement<(*UDPConn, error), PacketConn>]
-[assembly: GoImplement<(*UnixConn, error), Conn>]
-[assembly: GoImplement<(*UnixConn, error), PacketConn>]
-[assembly: GoImplement<(*UnixListener, error), Listener>]
-[assembly: GoImplement<(Conn, error), Conn>]
-[assembly: GoImplement<(Error, bool), ΔError>]
-[assembly: GoImplement<(Listener, error), Listener>]
-[assembly: GoImplement<(PacketConn, error), PacketConn>]
-[assembly: GoImplement<(buffersWriter, bool), buffersWriter>]
-[assembly: GoImplement<(c Conn, err error), Conn>]
-[assembly: GoImplement<(context.Context, context.CancelFunc), context_package.Context>]
-[assembly: GoImplement<(ctx context.Context, cancel context.CancelFunc), context_package.Context>]
-[assembly: GoImplement<(os.FileInfo, error), osꓸFileInfo>]
-[assembly: GoImplement<(syscall.Sockaddr, error), syscall_package.ΔSockaddr>]
-[assembly: GoImplement<(temporary, bool), temporary>]
-[assembly: GoImplement<(timeout, bool), timeout>]
-[assembly: GoImplement<@internal.poll_package.errNetClosing, error>]
-[assembly: GoImplement<AddrError, error>]
-[assembly: GoImplement<Buffers, io_package.Reader>]
-[assembly: GoImplement<Buffers, io_package.WriterTo>]
-[assembly: GoImplement<Conn, error>]
-[assembly: GoImplement<DNSError, error>]
-[assembly: GoImplement<IPAddr, ΔAddr>]
-[assembly: GoImplement<IPNet, ΔAddr>]
-[assembly: GoImplement<OpError, error>]
-[assembly: GoImplement<ParseError, error>]
-[assembly: GoImplement<TCPAddr, ΔAddr>]
-[assembly: GoImplement<TCPConn, Conn>]
-[assembly: GoImplement<UDPAddr, ΔAddr>]
-[assembly: GoImplement<UnixAddr, ΔAddr>]
-[assembly: GoImplement<UnixConn, Conn>]
+[assembly: GoImplement<AddrError, error>(Pointer = true)]
+[assembly: GoImplement<Buffers, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<Buffers, io_package.WriterTo>(Pointer = true)]
+[assembly: GoImplement<Conn, io_package.Reader>]
+[assembly: GoImplement<DNSError, error>(Pointer = true)]
+[assembly: GoImplement<IPAddr, ΔAddr>(Pointer = true)]
+[assembly: GoImplement<IPAddr, Δsockaddr>(Pointer = true)]
+[assembly: GoImplement<IPConn, Conn>(Pointer = true)]
+[assembly: GoImplement<IPConn, PacketConn>(Pointer = true)]
+[assembly: GoImplement<IPNet, ΔAddr>(Pointer = true)]
+[assembly: GoImplement<OpError, error>(Pointer = true)]
+[assembly: GoImplement<ParseError, error>(Pointer = true)]
+[assembly: GoImplement<TCPAddr, ΔAddr>(Pointer = true)]
+[assembly: GoImplement<TCPAddr, Δsockaddr>(Pointer = true)]
+[assembly: GoImplement<TCPConn, Conn>(Pointer = true)]
+[assembly: GoImplement<TCPListener, Listener>(Pointer = true)]
+[assembly: GoImplement<UDPAddr, ΔAddr>(Pointer = true)]
+[assembly: GoImplement<UDPAddr, Δsockaddr>(Pointer = true)]
+[assembly: GoImplement<UDPConn, Conn>(Pointer = true)]
+[assembly: GoImplement<UDPConn, PacketConn>(Pointer = true)]
+[assembly: GoImplement<UnixAddr, ΔAddr>(Pointer = true)]
+[assembly: GoImplement<UnixAddr, Δsockaddr>(Pointer = true)]
+[assembly: GoImplement<UnixConn, Conn>(Pointer = true)]
+[assembly: GoImplement<UnixConn, PacketConn>(Pointer = true)]
+[assembly: GoImplement<UnixListener, Listener>(Pointer = true)]
 [assembly: GoImplement<UnknownNetworkError, error>]
-[assembly: GoImplement<byRFC6724, sort_package.Interface>]
+[assembly: GoImplement<addrPortUDPAddr, ΔAddr>]
+[assembly: GoImplement<byRFC6724, sort_package.Interface>(Pointer = true)]
 [assembly: GoImplement<canceledError, error>]
 [assembly: GoImplement<dialParallel_dialResult, Conn>(Promoted = true)]
 [assembly: GoImplement<dialParallel_dialResult, error>(Promoted = true)]
-[assembly: GoImplement<notFoundError, error>]
-[assembly: GoImplement<onlyValuesCtx, context_package.Context>]
-[assembly: GoImplement<os_package.File, io_package.Reader>]
-[assembly: GoImplement<pipe, Conn>]
+[assembly: GoImplement<fileAddr, ΔAddr>]
+[assembly: GoImplement<goLookupIPCNAMEOrder_result, error>(Promoted = true)]
+[assembly: GoImplement<notFoundError, error>(Pointer = true)]
+[assembly: GoImplement<onlyValuesCtx, context_package.Context>(Pointer = true)]
+[assembly: GoImplement<onlyValuesCtx, context_package.Context>(Promoted = true)]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<pipe, Conn>(Pointer = true)]
 [assembly: GoImplement<pipeAddr, ΔAddr>]
-[assembly: GoImplement<rawConn, syscall_package.RawConn>]
-[assembly: GoImplement<rawListener, syscall_package.RawConn>]
-[assembly: GoImplement<syscall_package.Errno, error>]
-[assembly: GoImplement<syscall_package.SockaddrInet4, syscall_package.ΔSockaddr>]
-[assembly: GoImplement<syscall_package.SockaddrInet6, syscall_package.ΔSockaddr>]
+[assembly: GoImplement<rawConn, syscall_package.RawConn>(Pointer = true)]
+[assembly: GoImplement<rawListener, syscall_package.RawConn>(Pointer = true)]
 [assembly: GoImplement<tcpConnWithoutReadFrom, io_package.Writer>]
 [assembly: GoImplement<tcpConnWithoutWriteTo, io_package.Reader>]
-[assembly: GoImplement<timeoutError, error>]
+[assembly: GoImplement<temporaryError, error>(Pointer = true)]
+[assembly: GoImplement<timeoutError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<struct{wall uint64; ext int64; loc *time.Location}, struct{wall uint64; ext int64; loc *time.Location}>(Inverted = true)]
+[assembly: GoImplicitConv<Interface, ж<Interface>>(Indirect = true)]
 // </ImplicitConversions>
 
 namespace go;

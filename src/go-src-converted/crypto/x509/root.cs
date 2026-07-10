@@ -3,10 +3,10 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto;
 
-using godebug = @internal.godebug_package;
+using godebug = go.@internal.godebug_package;
 using sync = sync_package;
-using _ = unsafe_package; // for linkname
-using @internal;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+using go.@internal;
 
 partial class x509_package {
 
@@ -19,9 +19,11 @@ partial class x509_package {
 // See go.dev/issue/67401.
 //
 //go:linkname systemRoots
-internal static sync.Once once;
+internal static ж<sync.Once> Ꮡonce = new(default(sync.Once));
+internal static ref sync.Once once => ref Ꮡonce.Value;
 
-internal static sync.RWMutex systemRootsMu;
+internal static ж<sync.RWMutex> ᏑsystemRootsMu = new(default(sync.RWMutex));
+internal static ref sync.RWMutex systemRootsMu => ref ᏑsystemRootsMu.Value;
 
 internal static ж<CertPool> systemRoots;
 
@@ -29,18 +31,16 @@ internal static error systemRootsErr;
 
 internal static bool fallbacksSet;
 
-internal static ж<CertPool> systemRootsPool() => func((defer, _) => {
-    once.Do(initSystemRoots);
-    systemRootsMu.RLock();
-    var systemRootsMuʗ1 = systemRootsMu;
-    defer(systemRootsMuʗ1.RUnlock);
+internal static ж<CertPool> systemRootsPool() => func((defer, recover) => {
+    Ꮡonce.Do(initSystemRoots);
+    ᏑsystemRootsMu.RLock();
+    defer(ᏑsystemRootsMu.RUnlock);
     return systemRoots;
 });
 
-internal static void initSystemRoots() => func((defer, _) => {
-    systemRootsMu.Lock();
-    var systemRootsMuʗ1 = systemRootsMu;
-    defer(systemRootsMuʗ1.Unlock);
+internal static void initSystemRoots() => func((defer, recover) => {
+    ᏑsystemRootsMu.Lock();
+    defer(ᏑsystemRootsMu.Unlock);
     (systemRoots, systemRootsErr) = loadSystemRoots();
     if (systemRootsErr != default!) {
         systemRoots = default!;
@@ -62,18 +62,17 @@ internal static ж<godebug.Setting> x509usefallbackroots = godebug.New("x509usef
 // on Windows and macOS this will disable usage of the platform verification
 // APIs and cause the pure Go verifier to be used). Setting
 // x509usefallbackroots=1 without calling SetFallbackRoots has no effect.
-public static void SetFallbackRoots(ж<CertPool> Ꮡroots) => func((defer, _) => {
-    ref var roots = ref Ꮡroots.val;
+public static void SetFallbackRoots(ж<CertPool> Ꮡroots) => func((defer, recover) => {
+    ref var roots = ref Ꮡroots.DerefOrNil();
 
-    if (roots == nil) {
+    if (Ꮡroots == nil) {
         throw panic("roots must be non-nil");
     }
     // trigger initSystemRoots if it hasn't already been called before we
     // take the lock
     _ = systemRootsPool();
-    systemRootsMu.Lock();
-    var systemRootsMuʗ1 = systemRootsMu;
-    defer(systemRootsMuʗ1.Unlock);
+    ᏑsystemRootsMu.Lock();
+    defer(ᏑsystemRootsMu.Unlock);
     if (fallbacksSet) {
         throw panic("SetFallbackRoots has already been called");
     }
@@ -84,7 +83,7 @@ public static void SetFallbackRoots(ж<CertPool> Ꮡroots) => func((defer, _) =>
         }
         x509usefallbackroots.IncNonDefault();
     }
-    (systemRoots, systemRootsErr) = (roots, default!);
+    (systemRoots, systemRootsErr) = (Ꮡroots, default!);
 });
 
 } // end x509_package

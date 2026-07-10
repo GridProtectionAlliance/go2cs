@@ -51,7 +51,9 @@ internal static readonly UntypedInt maxShift = /* _W - 4 */ 60;
 
 // Init initializes x to the decimal representation of m << shift (for
 // shift >= 0), or m >> -shift (for shift < 0).
-[GoRecv] internal static void init(this ref @decimal x, nat m, nint shift) {
+internal static void init(this ж<@decimal> Ꮡx, nat m, nint shift) {
+    ref var x = ref Ꮡx.Value;
+
     // special case 0
     if (len(m) == 0) {
         x.mant = x.mant[..0];
@@ -63,17 +65,17 @@ internal static readonly UntypedInt maxShift = /* _W - 4 */ 60;
     // decimal format (since that is likely slower).
     if (shift < 0) {
         nuint ntz = m.trailingZeroBits();
-        nuint sΔ1 = ((nuint)(-shift));
+        nuint sΔ1 = (nuint)(-shift);
         if (sΔ1 >= ntz) {
-             = ntz;
+            sΔ1 = ntz;
         }
         // shift at most ntz bits
         m = ((nat)default!).shr(m, sΔ1);
-        shift += ((nint)sΔ1);
+        shift += (nint)sΔ1;
     }
     // Do any shift left in binary representation.
     if (shift > 0) {
-        m = ((nat)default!).shl(m, ((nuint)shift));
+        m = ((nat)default!).shl(m, (nuint)shift);
         shift = 0;
     }
     // Convert mantissa into decimal representation.
@@ -89,24 +91,24 @@ internal static readonly UntypedInt maxShift = /* _W - 4 */ 60;
     // Do any (remaining) shift right in decimal representation.
     if (shift < 0) {
         while (shift < -maxShift) {
-            shr(x, maxShift);
+            shr(Ꮡx, maxShift);
             shift += maxShift;
         }
-        shr(x, ((nuint)(-shift)));
+        shr(Ꮡx, (nuint)(-shift));
     }
 }
 
 // shr implements x >> s, for s <= maxShift.
 internal static void shr(ж<@decimal> Ꮡx, nuint s) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     // Division by 1<<s using shift-and-subtract algorithm.
     // pick up enough leading digits to cover first shift
     nint r = 0;
     // read index
     Word n = default!;
-    while (n >> (int)(s) == 0 && r < len(x.mant)) {
-        Word ch = ((Word)x.mant[r]);
+    while ((n >> (int)(s)) == 0 && r < len(x.mant)) {
+        Word ch = ((Word)(nuint)x.mant[r]);
         r++;
         n = n * 10 + ch - (rune)'0';
     }
@@ -115,7 +117,7 @@ internal static void shr(ж<@decimal> Ꮡx, nuint s) {
         x.mant = x.mant[..0];
         return;
     }
-    while (n >> (int)(s) == 0) {
+    while ((n >> (int)(s)) == 0) {
         r++;
         n *= 10;
     }
@@ -123,22 +125,22 @@ internal static void shr(ж<@decimal> Ꮡx, nuint s) {
     // read a digit, write a digit
     nint w = 0;
     // write index
-    Word mask = ((Word)1) << (int)(s) - 1;
+    Word mask = (((Word)1) << (int)(s)) - 1;
     while (r < len(x.mant)) {
-        Word ch = ((Word)x.mant[r]);
+        Word ch = ((Word)(nuint)x.mant[r]);
         r++;
-        Word d = n >> (int)(s);
+        Word d = (n >> (int)(s));
         n &= (Word)(mask);
         // n -= d << s
-        x.mant[w] = ((byte)(d + (rune)'0'));
+        x.mant[w] = (byte)(nuint)(d + (rune)'0');
         w++;
         n = n * 10 + ch - (rune)'0';
     }
     // write extra digits that still fit
     while (n > 0 && w < len(x.mant)) {
-        Word d = n >> (int)(s);
+        Word d = (n >> (int)(s));
         n &= (Word)(mask);
-        x.mant[w] = ((byte)(d + (rune)'0'));
+        x.mant[w] = (byte)(nuint)(d + (rune)'0');
         w++;
         n = n * 10;
     }
@@ -146,41 +148,36 @@ internal static void shr(ж<@decimal> Ꮡx, nuint s) {
     // the number may be shorter (e.g. 1024 >> 10)
     // append additional digits that didn't fit
     while (n > 0) {
-        Word d = n >> (int)(s);
+        Word d = (n >> (int)(s));
         n &= (Word)(mask);
-        x.mant = append(x.mant, ((byte)(d + (rune)'0')));
+        x.mant = append(x.mant, (byte)(nuint)(d + (rune)'0'));
         n = n * 10;
     }
     trim(Ꮡx);
 }
 
-[GoRecv] public static @string String(this ref @decimal x) {
+[GoRecv] internal static @string String(this ref @decimal x) {
     if (len(x.mant) == 0) {
         return "0"u8;
     }
     slice<byte> buf = default!;
     switch (ᐧ) {
     case {} when x.exp is <= 0: {
-        buf = new slice<byte>(0, // 0.00ddd
- 2 + (-x.exp) + len(x.mant));
-        buf = append(buf, "0."u8.ꓸꓸꓸ);
+        buf = new slice<byte>(0, 2 + (-x.exp) + len(x.mant));
+        buf = append(buf, ((@string)"0."u8).ꓸꓸꓸ);
         buf = appendZeros(buf, -x.exp);
         buf = append(buf, x.mant.ꓸꓸꓸ);
         break;
     }
     case {} when x.exp < len(x.mant): {
-        buf = new slice<byte>(0, /* 0 < */
- // dd.ddd
- 1 + len(x.mant));
+        buf = new slice<byte>(0, 1 + len(x.mant));
         buf = append(buf, x.mant[..(int)(x.exp)].ꓸꓸꓸ);
-        buf = append(buf, (rune)'.');
+        buf = append(buf, (byte)((rune)'.'));
         buf = append(buf, x.mant[(int)(x.exp)..].ꓸꓸꓸ);
         break;
     }
     default: {
-        buf = new slice<byte>(0, // len(x.mant) <= x.exp
- // ddd00
- x.exp);
+        buf = new slice<byte>(0, x.exp);
         buf = append(buf, x.mant.ꓸꓸꓸ);
         buf = appendZeros(buf, x.exp - len(x.mant));
         break;
@@ -192,7 +189,7 @@ internal static void shr(ж<@decimal> Ꮡx, nuint s) {
 // appendZeros appends n 0 digits to buf and returns buf.
 internal static slice<byte> appendZeros(slice<byte> buf, nint n) {
     for (; n > 0; n--) {
-        buf = append(buf, (rune)'0');
+        buf = append(buf, (byte)((rune)'0'));
     }
     return buf;
 }
@@ -201,7 +198,7 @@ internal static slice<byte> appendZeros(slice<byte> buf, nint n) {
 // if shortened to n digits. n must be a valid index
 // for x.mant.
 internal static bool shouldRoundUp(ж<@decimal> Ꮡx, nint n) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     if (x.mant[n] == (rune)'5' && n + 1 == len(x.mant)) {
         // exactly halfway - round to even
@@ -214,15 +211,17 @@ internal static bool shouldRoundUp(ж<@decimal> Ꮡx, nint n) {
 // round sets x to (at most) n mantissa digits by rounding it
 // to the nearest even value with n (or fever) mantissa digits.
 // If n < 0, x remains unchanged.
-[GoRecv] internal static void round(this ref @decimal x, nint n) {
+internal static void round(this ж<@decimal> Ꮡx, nint n) {
+    ref var x = ref Ꮡx.Value;
+
     if (n < 0 || n >= len(x.mant)) {
         return;
     }
     // nothing to do
-    if (shouldRoundUp(x, n)){
+    if (shouldRoundUp(Ꮡx, n)){
         x.roundUp(n);
     } else {
-        x.roundDown(n);
+        Ꮡx.roundDown(n);
     }
 }
 
@@ -250,19 +249,21 @@ internal static bool shouldRoundUp(ж<@decimal> Ꮡx, nint n) {
 }
 
 // x already trimmed
-[GoRecv] internal static void roundDown(this ref @decimal x, nint n) {
+internal static void roundDown(this ж<@decimal> Ꮡx, nint n) {
+    ref var x = ref Ꮡx.Value;
+
     if (n < 0 || n >= len(x.mant)) {
         return;
     }
     // nothing to do
     x.mant = x.mant[..(int)(n)];
-    trim(x);
+    trim(Ꮡx);
 }
 
 // trim cuts off any trailing zeros from x's mantissa;
 // they are meaningless for the value of x.
 internal static void trim(ж<@decimal> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     nint i = len(x.mant);
     while (i > 0 && x.mant[i - 1] == (rune)'0') {

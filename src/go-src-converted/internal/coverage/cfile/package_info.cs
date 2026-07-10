@@ -10,7 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using jsonꓸToken = go.encoding.json_package.ΔToken;
+global using jsonꓸToken = object;
+global using jsonꓸΔToken = object;
 global using osꓸDirEntry = go.io.fs_package.DirEntry;
 global using osꓸFileInfo = go.io.fs_package.FileInfo;
 global using osꓸFileMode = go.io.fs_package.FileMode;
@@ -48,12 +49,8 @@ using static go.@internal.coverage.cfile_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(error, bool), error>]
-[assembly: GoImplement<(os.FileInfo, error), osꓸFileInfo>]
-[assembly: GoImplement<emitState, @internal.coverage.encodecounter_package.CounterVisitor>]
-[assembly: GoImplement<os_package.File, io_package.ReadSeeker>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
-[assembly: GoImplement<slice<uint32>, error>]
+[assembly: GoImplement<emitState, go.@internal.coverage.encodecounter_package.CounterVisitor>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.ReadSeeker>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

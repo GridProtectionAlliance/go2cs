@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go.runtime;
 
-using _ = runtime_package; // depends on the runtime via a linkname'd function
+// blank import: runtime_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // depends on the runtime via a linkname'd function
 using @unsafe = unsafe_package;
 
 partial class metrics_package {
@@ -20,7 +20,7 @@ partial class metrics_package {
 }
 
 // Implemented in the runtime.
-internal static partial void runtime_readMetrics(@unsafe.Pointer _, nint _, nint _);
+internal static partial void runtime_readMetrics(@unsafe.Pointer _Δp0, nint _Δp1, nint _Δp2);
 
 // Read populates each [Value] field in the given slice of metric samples.
 //

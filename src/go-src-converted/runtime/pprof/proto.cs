@@ -6,15 +6,15 @@ namespace go.runtime;
 using bytes = bytes_package;
 using gzip = compress.gzip_package;
 using fmt = fmt_package;
-using abi = @internal.abi_package;
+using abi = go.@internal.abi_package;
 using io = io_package;
 using runtime = runtime_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using time = time_package;
 using @unsafe = unsafe_package;
-using @internal;
 using compress;
+using go.@internal;
 
 partial class pprof_package {
 
@@ -28,14 +28,14 @@ internal static void lostProfileEvent() {
 // A profileBuilder writes a profile incrementally from a
 // stream of profile samples delivered by the runtime.
 [GoType] partial struct profileBuilder {
-    internal time_package.Time start;
-    internal time_package.Time end;
+    internal time.Time start;
+    internal time.Time end;
     internal bool havePeriod;
     internal int64 period;
     internal profMap m;
     // encoding state
-    internal io_package.Writer w;
-    internal ж<compress.gzip_package.Writer> zw;
+    internal io.Writer w;
+    internal ж<gzip.Writer> zw;
     internal protobuf pb;
     internal slice<@string> strings;
     internal map<@string, nint> stringMap;
@@ -50,7 +50,7 @@ internal static void lostProfileEvent() {
     internal uintptr start; // Address at which the binary (or DLL) is loaded into memory.
     internal uintptr end; // The limit of the address range occupied by this mapping.
     internal uint64 offset;  // Offset in the binary that corresponds to the first mapped address.
-    internal @string file; // The object this entry is loaded from.
+    internal @string @file; // The object this entry is loaded from.
     internal @string buildID; // A string that uniquely identifies a particular program version with high probability.
     internal symbolizeFlag funcs;
     internal bool fake; // map entry was faked; /proc/self/maps wasn't available
@@ -108,18 +108,17 @@ internal static readonly UntypedInt tagFunction_StartLine = 5; // int64
 // stringIndex adds s to the string table if not already present
 // and returns the index of s in the string table.
 [GoRecv] internal static int64 stringIndex(this ref profileBuilder b, @string s) {
-    nint id = b.stringMap[s];
-    var ok = b.stringMap[s];
+    var (id, ok) = b.stringMap[s, ꟷ];
     if (!ok) {
         id = len(b.strings);
         b.strings = append(b.strings, s);
         b.stringMap[s] = id;
     }
-    return ((int64)id);
+    return (int64)id;
 }
 
 [GoRecv] internal static void flush(this ref profileBuilder b) {
-    static readonly UntypedInt dataFlush = 4096;
+    UntypedInt dataFlush = 4096;
     if (b.pb.nest == 0 && len(b.pb.data) > dataFlush) {
         b.zw.Write(b.pb.data);
         b.pb.data = b.pb.data[..0];
@@ -164,13 +163,13 @@ internal static readonly UntypedInt tagFunction_StartLine = 5; // int64
 }
 
 // pbMapping encodes a Mapping message to b.pb.
-[GoRecv] internal static void pbMapping(this ref profileBuilder b, nint tag, uint64 id, uint64 @base, uint64 limit, uint64 offset, @string file, @string buildID, bool hasFuncs) {
+[GoRecv] internal static void pbMapping(this ref profileBuilder b, nint tag, uint64 id, uint64 @base, uint64 limit, uint64 offset, @string @file, @string buildID, bool hasFuncs) {
     msgOffset start = b.pb.startMessage();
     b.pb.uint64Opt(tagMapping_ID, id);
     b.pb.uint64Opt(tagMapping_Start, @base);
     b.pb.uint64Opt(tagMapping_Limit, limit);
     b.pb.uint64Opt(tagMapping_Offset, offset);
-    b.pb.int64Opt(tagMapping_Filename, b.stringIndex(file));
+    b.pb.int64Opt(tagMapping_Filename, b.stringIndex(@file));
     b.pb.int64Opt(tagMapping_BuildID, b.stringIndex(buildID));
     // TODO: we set HasFunctions if all symbols from samples were symbolized (hasFuncs).
     // Decide what to do about HasInlineFrames and HasLineNumbers.
@@ -231,7 +230,7 @@ internal static (slice<runtime.Frame>, symbolizeFlag) allFrames(uintptr addr) {
 // by calling b.addCPUData, and then the eventual profile
 // can be obtained by calling b.finish.
 internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
-    (zw, _) = gzip.NewWriterLevel(w, gzip.BestSpeed);
+    var (zw, _) = gzip.NewWriterLevel(w, gzip.BestSpeed);
     var b = Ꮡ(new profileBuilder(
         w: w,
         zw: zw,
@@ -260,7 +259,7 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
         }
         // data[2] is sampling rate in Hz. Convert to sampling
         // period in nanoseconds.
-        b.period = 1e9F / ((int64)data[2]);
+        b.period = 1000000000 / (int64)data[2];
         b.havePeriod = true;
         data = data[3..];
         // Consume tag slot. Note that there isn't a meaningful tag
@@ -283,7 +282,7 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
     // we want to deduplicate immediately, which we do
     // using the b.m profMap.
     while (len(data) > 0) {
-        if (len(data) < 3 || data[0] > ((uint64)len(data))) {
+        if (len(data) < 3 || data[0] > (uint64)len(data)) {
             return fmt.Errorf("truncated profile"u8);
         }
         if (data[0] < 3 || tags != default! && len(tags) < 1) {
@@ -299,15 +298,15 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
         tags = tags[1..];
         if (count == 0 && len(stk) == 1) {
             // overflow record
-            count = ((uint64)stk[0]);
+            count = (uint64)stk[0];
             stk = new uint64[]{ // gentraceback guarantees that PCs in the
  // stack can be unconditionally decremented and
  // still be valid, so we must do the same.
 
-                ((uint64)(abi.FuncPCABIInternal(lostProfileEvent) + 1))
+                (uint64)(abi.FuncPCABIInternal(lostProfileEvent) + 1)
             }.slice();
         }
-        b.m.lookup(stk, tag).val.count += ((int64)count);
+        b.m.lookup(stk, tag).Value.count += (int64)count;
     }
     if (len(tags) != 0) {
         return fmt.Errorf("mismatched profile records and tags"u8);
@@ -316,7 +315,9 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
 }
 
 // build completes and returns the constructed profile.
-[GoRecv] internal static void build(this ref profileBuilder b) {
+internal static void build(this ж<profileBuilder> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
+
     b.end = time.Now();
     b.pb.int64Opt(tagProfile_TimeNanos, b.start.UnixNano());
     if (b.havePeriod) {
@@ -329,26 +330,26 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
     }
     var values = new int64[]{0, 0}.slice();
     slice<uint64> locs = default!;
-    for (var e = b.m.all; e != nil; e = e.val.nextAll) {
-        values[0] = e.val.count;
+    for (var eᴛ1 = b.m.all; eᴛ1 != nil; eᴛ1 = eᴛ1.Value.nextAll) {
+        var e = eᴛ1;
+        values[0] = e.Value.count;
         values[1] = (~e).count * b.period;
         Action labels = default!;
         if ((~e).tag != nil) {
-            labels = 
             var eʗ1 = e;
-            () => {
+            labels = () => {
                 foreach (var (k, v) in ~(ж<labelMap>)(uintptr)((~eʗ1).tag)) {
-                    b.pbLabel(tagSample_Label, k, v, 0);
+                    Ꮡb.Value.pbLabel(tagSample_Label, k, v, 0);
                 }
             };
         }
-        locs = b.appendLocsForStack(locs[..0], (~e).stk);
+        locs = Ꮡb.appendLocsForStack(locs[..0], (~e).stk);
         b.pbSample(values, locs, labels);
     }
     foreach (var (i, m) in b.mem) {
         var hasFunctions = m.funcs == lookupTried;
         // lookupTried but not lookupFailed
-        b.pbMapping(tagProfile_Mapping, ((uint64)(i + 1)), ((uint64)m.start), ((uint64)m.end), m.offset, m.file, m.buildID, hasFunctions);
+        b.pbMapping(tagProfile_Mapping, (uint64)(i + 1), (uint64)m.start, (uint64)m.end, m.offset, m.@file, m.buildID, hasFunctions);
     }
     // TODO: Anything for tagProfile_DropFrames?
     // TODO: Anything for tagProfile_KeepFrames?
@@ -366,16 +367,17 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
 // get the right cumulative sample count.
 //
 // It may emit to b.pb, so there must be no message encoding in progress.
-[GoRecv] internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ref profileBuilder b, slice<uint64> locs, slice<uintptr> stk) {
+internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuilder> Ꮡb, slice<uint64> locs, slice<uintptr> stk) {
     slice<uint64> newLocs = default!;
 
+    ref var b = ref Ꮡb.Value;
     b.deck.reset();
     // The last frame might be truncated. Recover lost inline frames.
     stk = runtime_expandFinalInlineFrame(stk);
     while (len(stk) > 0) {
         var addr = stk[0];
         {
-            var (l, ok) = b.locs[addr]; if (ok) {
+            var (l, ok) = b.locs[addr, ꟷ]; if (ok) {
                 // When generating code for an inlined function, the compiler adds
                 // NOP instructions to the outermost function as a placeholder for
                 // each layer of inlining. When the runtime generates tracebacks for
@@ -397,7 +399,7 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
                 }
                 // first record the location if there is any pending accumulated info.
                 {
-                    var id = b.emitLocation(); if (id > 0) {
+                    var id = Ꮡb.emitLocation(); if (id > 0) {
                         locs = append(locs, id);
                     }
                 }
@@ -416,7 +418,7 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
         if (len(frames) == 0) {
             // runtime.goexit.
             {
-                var id = b.emitLocation(); if (id > 0) {
+                var id = Ꮡb.emitLocation(); if (id > 0) {
                     locs = append(locs, id);
                 }
             }
@@ -433,13 +435,13 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
         // existing PCs in the deck. Flush the deck and retry handling
         // this pc.
         {
-            var id = b.emitLocation(); if (id > 0) {
+            var id = Ꮡb.emitLocation(); if (id > 0) {
                 locs = append(locs, id);
             }
         }
         // check cache again - previous emitLocation added a new entry
         {
-            var (l, ok) = b.locs[addr]; if (ok){
+            var (l, ok) = b.locs[addr, ꟷ]; if (ok){
                 locs = append(locs, l.id);
                 stk = stk[(int)(len(l.pcs))..];
             } else {
@@ -451,7 +453,7 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
         }
     }
     {
-        var id = b.emitLocation(); if (id > 0) {
+        var id = Ꮡb.emitLocation(); if (id > 0) {
             // emit remaining location.
             locs = append(locs, id);
         }
@@ -531,9 +533,9 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
         nint existing = len(d.frames); if (existing > 0) {
             // 'd.frames' are all expanded from one 'pc' and represent all
             // inlined functions so we check only the last one.
-            ref var newFrame = ref heap<runtime_package.Frame>(out var ᏑnewFrame);
+            ref var newFrame = ref heap<runtime.Frame>(out var ᏑnewFrame);
             newFrame = frames[0];
-            ref var last = ref heap<runtime_package.Frame>(out var Ꮡlast);
+            ref var last = ref heap<runtime.Frame>(out var Ꮡlast);
             last = d.frames[existing - 1];
             if (last.Func != nil) {
                 // the last frame can't be inlined. Flush.
@@ -555,7 +557,7 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
     }
     d.pcs = append(d.pcs, pc);
     d.frames = append(d.frames, frames.ꓸꓸꓸ);
-    d.symbolizeResult |= (symbolizeFlag)(symbolizeResult);
+    d.symbolizeResult |= symbolizeResult;
     if (len(d.pcs) == 1) {
         d.firstPCFrames = len(d.frames);
         d.firstPCSymbolizeResult = symbolizeResult;
@@ -568,8 +570,7 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
 // write them out after the Location.
 [GoType("dyn")] partial struct emitLocation_newFunc {
     internal uint64 id;
-    internal @string name;
-    internal @string file;
+    internal @string name, @file;
     internal int64 startLine;
 }
 
@@ -577,15 +578,17 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
 // and returns the location ID encoded in the profile protobuf.
 // It emits to b.pb, so there must be no message encoding in progress.
 // It resets the deck.
-[GoRecv] internal static uint64 emitLocation(this ref profileBuilder b) => func((defer, _) => {
+internal static uint64 emitLocation(this ж<profileBuilder> Ꮡb) => func<uint64>((defer, recover) => {
+    ref var b = ref Ꮡb.Value;
+
     if (len(b.deck.pcs) == 0) {
         return 0;
     }
-    defer(b.deck.reset);
+    defer(Ꮡb.of(profileBuilder.Ꮡdeck).reset);
     var addr = b.deck.pcs[0];
     var firstFrame = b.deck.frames[0];
-    var newFuncs = new slice<newFunc>(0, 8);
-    var id = ((uint64)len(b.locs)) + 1;
+    var newFuncs = new slice<emitLocation_newFunc>(0, 8);
+    var id = (uint64)len(b.locs) + 1;
     b.locs[addr] = new locInfo(
         id: id,
         pcs: append(new uintptr[]{}.slice(), b.deck.pcs.ꓸꓸꓸ),
@@ -594,30 +597,31 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
     );
     msgOffset start = b.pb.startMessage();
     b.pb.uint64Opt(tagLocation_ID, id);
-    b.pb.uint64Opt(tagLocation_Address, ((uint64)firstFrame.PC));
-    ref var frame = ref heap(new runtime_package.Frame(), out var Ꮡframe);
+    b.pb.uint64Opt(tagLocation_Address, (uint64)firstFrame.PC);
+    foreach (var (_, vᴛ1) in b.deck.frames) {
+        ref var frame = ref heap(new runtime.Frame(), out var Ꮡframe);
+        frame = vᴛ1;
 
-    foreach (var (_, frame) in b.deck.frames) {
         // Write out each line in frame expansion.
         @string funcName = runtime_FrameSymbolName(Ꮡframe);
-        var funcID = ((uint64)b.funcs[funcName]);
+        var funcID = (uint64)b.funcs[funcName];
         if (funcID == 0) {
-            funcID = ((uint64)len(b.funcs)) + 1;
-            b.funcs[funcName] = ((nint)funcID);
-            newFuncs = append(newFuncs, new newFunc(
+            funcID = (uint64)len(b.funcs) + 1;
+            b.funcs[funcName] = (nint)funcID;
+            newFuncs = append(newFuncs, new emitLocation_newFunc(
                 id: funcID,
                 name: funcName,
-                file: frame.File,
-                startLine: ((int64)runtime_FrameStartLine(Ꮡframe))
+                @file: frame.File,
+                startLine: (int64)runtime_FrameStartLine(Ꮡframe)
             ));
         }
-        b.pbLine(tagLocation_Line, funcID, ((int64)frame.Line));
+        b.pbLine(tagLocation_Line, funcID, (int64)frame.Line);
     }
     foreach (var (i, _) in b.mem) {
         if (b.mem[i].start <= addr && addr < b.mem[i].end || b.mem[i].fake) {
-            b.pb.uint64Opt(tagLocation_MappingID, ((uint64)(i + 1)));
+            b.pb.uint64Opt(tagLocation_MappingID, (uint64)(i + 1));
             var m = b.mem[i];
-            m.funcs |= (symbolizeFlag)(b.deck.symbolizeResult);
+            m.funcs |= b.deck.symbolizeResult;
             b.mem[i] = m;
             break;
         }
@@ -629,7 +633,7 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
         b.pb.uint64Opt(tagFunction_ID, fn.id);
         b.pb.int64Opt(tagFunction_Name, b.stringIndex(fn.name));
         b.pb.int64Opt(tagFunction_SystemName, b.stringIndex(fn.name));
-        b.pb.int64Opt(tagFunction_Filename, b.stringIndex(fn.file));
+        b.pb.int64Opt(tagFunction_Filename, b.stringIndex(fn.@file));
         b.pb.int64Opt(tagFunction_StartLine, fn.startLine);
         b.pb.endMessage(tagProfile_Function, startΔ1);
     }
@@ -637,9 +641,9 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
     return id;
 });
 
-internal static slice<byte> space = slice<byte>(" ");
+internal static slice<byte> space = slice<byte>((@string)" ");
 
-internal static slice<byte> newline = slice<byte>("\n");
+internal static slice<byte> newline = slice<byte>((@string)"\n");
 
 internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, uint64, @string, @string> addMapping) {
     // $ cat /proc/self/maps
@@ -662,22 +666,19 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
     // 7ffc342a2000-7ffc342c3000 rw-p 00000000 00:00 0                          [stack]
     // 7ffc34343000-7ffc34345000 r-xp 00000000 00:00 0                          [vdso]
     // ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
-    slice<byte> line = default!;
+    ref var line = ref heap<slice<byte>>(out var Ꮡline);
     // next removes and returns the next field in the line.
     // It also removes from line any spaces following the field.
-    var next = 
-    var lineʗ1 = line;
-    var spaceʗ1 = space;
-    () => {
+    var next = () => {
         slice<byte> f = default!;
-        (f, lineʗ1, _) = bytes.Cut(lineʗ1, spaceʗ1);
-        lineʗ1 = bytes.TrimLeft(lineʗ1, " "u8);
+        (f, Ꮡline.ValueSlot, _) = bytes.Cut(Ꮡline.ValueSlot, space);
+        Ꮡline.ValueSlot = bytes.TrimLeft(Ꮡline.ValueSlot, " "u8);
         return f;
     };
     while (len(data) > 0) {
         (line, data, _) = bytes.Cut(data, newline);
         var addr = next();
-        var (loStr, hiStr, ok) = strings.Cut(((@string)addr), "-"u8);
+        var (loStr, hiStr, ok) = strings_package.Cut(((@string)addr), "-"u8);
         if (!ok) {
             continue;
         }
@@ -685,7 +686,7 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
         if (err != default!) {
             continue;
         }
-        var (hi, err) = strconv.ParseUint(hiStr, 16, 64);
+        (var hi, err) = strconv.ParseUint(hiStr, 16, 64);
         if (err != default!) {
             continue;
         }
@@ -694,7 +695,7 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
             // Only interested in executable mappings.
             continue;
         }
-        var (offset, err) = strconv.ParseUint(((@string)next()), 16, 64);
+        (var offset, err) = strconv.ParseUint(((@string)next()), 16, 64);
         if (err != default!) {
             continue;
         }
@@ -705,14 +706,14 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
         if (line == default!) {
             continue;
         }
-        @string file = ((@string)line);
+        @string @file = ((@string)line);
         // Trim deleted file marker.
         @string deletedStr = " (deleted)"u8;
         nint deletedLen = len(deletedStr);
-        if (len(file) >= deletedLen && file[(int)(len(file) - deletedLen)..] == deletedStr) {
-            file = file[..(int)(len(file) - deletedLen)];
+        if (len(@file) >= deletedLen && @file[(int)(len(@file) - deletedLen)..] == deletedStr) {
+            @file = @file[..(int)(len(@file) - deletedLen)];
         }
-        if (len(inode) == 1 && inode[0] == (rune)'0' && file == ""u8) {
+        if (len(inode) == 1 && inode[0] == (rune)'0' && @file == ""u8) {
             // Huge-page text mappings list the initial fragment of
             // mapped but unpopulated memory as being inode 0.
             // Don't report that part.
@@ -726,21 +727,21 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
         // Let's try not doing this and see what breaks.
         // If we do need it, it would go here, before we
         // enter the mappings into b.mem in the first place.
-        var (buildID, _) = elfBuildID(file);
-        addMapping(lo, hi, offset, file, buildID);
+        var (buildID, _) = elfBuildID(@file);
+        addMapping(lo, hi, offset, @file, buildID);
     }
 }
 
-[GoRecv] internal static void addMapping(this ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string file, @string buildID) {
-    b.addMappingEntry(lo, hi, offset, file, buildID, false);
+[GoRecv] internal static void addMapping(this ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID) {
+    b.addMappingEntry(lo, hi, offset, @file, buildID, false);
 }
 
-[GoRecv] internal static void addMappingEntry(this ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string file, @string buildID, bool fake) {
+[GoRecv] internal static void addMappingEntry(this ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID, bool fake) {
     b.mem = append(b.mem, new memMap(
-        start: ((uintptr)lo),
-        end: ((uintptr)hi),
+        start: (uintptr)lo,
+        end: (uintptr)hi,
         offset: offset,
-        file: file,
+        @file: @file,
         buildID: buildID,
         fake: fake
     ));

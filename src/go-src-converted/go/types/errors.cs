@@ -5,11 +5,14 @@
 namespace go.go;
 
 using fmt = fmt_package;
-using ast = go.ast_package;
-using token = go.token_package;
-using static @internal.types.errors_package;
+using ast = global::go.go.ast_package;
+using token = global::go.go.token_package;
+using static global::go.@internal.types.errors_package;
 using runtime = runtime_package;
 using strings = strings_package;
+using errors = global::go.@internal.types.errors_package;
+using global::go.go;
+using io = io_package;
 using ꓸꓸꓸany = Span<any>;
 
 partial class types_package {
@@ -20,8 +23,8 @@ internal static void assert(bool p) {
         // Include information about the assertion location. Due to panic recovery,
         // this location is otherwise buried in the middle of the panicking stack.
         {
-            var (_, file, line, ok) = runtime.Caller(1); if (ok) {
-                msg = fmt.Sprintf("%s:%d: %s"u8, file, line, msg);
+            var (_, @file, line, ok) = runtime.Caller(1); if (ok) {
+                msg = fmt.Sprintf("%s:%d: %s"u8, @file, line, msg);
             }
         }
         throw panic(msg);
@@ -40,16 +43,18 @@ internal static void assert(bool p) {
 [GoType] partial struct error_ {
     internal ж<Checker> check;
     internal slice<errorDesc> desc;
-    internal @internal.types.errors_package.Code code;
+    internal errors.Code code;
     internal bool soft; // TODO(gri) eventually determine this from an error code
 }
 
 // newError returns a new error_ with the given error code.
-[GoRecv] internal static ж<error_> newError(this ref Checker check, errors.Code code) {
+internal static ж<error_> newError(this ж<Checker> Ꮡcheck, errors.Code code) {
+    ref var check = ref Ꮡcheck.Value;
+
     if (code == 0) {
         throw panic("error code must not be 0");
     }
-    return Ꮡ(new error_(check: check, code: code));
+    return Ꮡ(new error_(check: Ꮡcheck, code: code));
 }
 
 // addf adds formatted error information to err.
@@ -71,7 +76,7 @@ internal static void assert(bool p) {
             // We use "other" rather than "previous" here because
             // the first declaration seen may not be textually
             // earlier in the source.
-            err.addf(obj, "other declaration of %s"u8, obj.Name());
+            err.addf(new Objectᴠpositioner(obj), "other declaration of %s"u8, obj.Name());
         }
     }
 }
@@ -92,16 +97,16 @@ internal static void assert(bool p) {
     if (err.empty()) {
         return "no error"u8;
     }
-    ref var buf = ref heap(new strings_package.Builder(), out var Ꮡbuf);
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     foreach (var (i, _) in err.desc) {
         var p = Ꮡ(err.desc[i]);
         if (i > 0) {
-            fmt.Fprint(~Ꮡbuf, "\n\t");
+            fmt.Fprint(new strings_BuilderжWriter(Ꮡbuf), "\n\t");
             if ((~p).posn.Pos().IsValid()) {
-                fmt.Fprintf(~Ꮡbuf, "%s: "u8, err.check.fset.Position((~p).posn.Pos()));
+                fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "%s: "u8, (~err.check).fset.Position((~p).posn.Pos()));
             }
         }
-        buf.WriteString((~p).msg);
+        Ꮡbuf.WriteString((~p).msg);
     }
     return buf.String();
 }
@@ -170,8 +175,8 @@ internal static void assert(bool p) {
             msg = "invalid syntax tree: "u8 + msg;
         }
         // If we have a URL for error codes, add a link to the first line.
-        if (check.conf._ErrorURL != ""u8) {
-            @string url = fmt.Sprintf(check.conf._ErrorURL, code);
+        if ((~check.conf)._ErrorURL != ""u8) {
+            @string url = fmt.Sprintf((~check.conf)._ErrorURL, code);
             {
                 nint i = strings.Index(msg, "\n"u8); if (i >= 0){
                     msg = msg[..(int)(i)] + url + msg[(int)(i)..];
@@ -208,7 +213,7 @@ internal static void assert(bool p) {
     if (check.firstErr == default!) {
         check.firstErr = e;
     }
-    var f = check.conf.Error;
+    var f = check.conf.Value.Error;
     if (f == default!) {
         throw panic(new bailout(nil));
     }
@@ -224,38 +229,45 @@ internal static readonly @string invalidOp = "invalid operation: "u8;
     tokenꓸPos Pos();
 }
 
-[GoRecv] internal static void error(this ref Checker check, positioner at, errors.Code code, @string msg) {
-    var err = check.newError(code);
+internal static void error(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string msg) {
+    ref var check = ref Ꮡcheck.Value;
+
+    var err = Ꮡcheck.newError(code);
     err.addf(at, "%s"u8, msg);
     err.report();
 }
 
-[GoRecv] internal static void errorf(this ref Checker check, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    var err = check.newError(code);
+    ref var check = ref Ꮡcheck.Value;
+    var err = Ꮡcheck.newError(code);
     err.addf(at, format, args.ꓸꓸꓸ);
     err.report();
 }
 
-[GoRecv] internal static void softErrorf(this ref Checker check, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void softErrorf(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    var err = check.newError(code);
+    ref var check = ref Ꮡcheck.Value;
+    var err = Ꮡcheck.newError(code);
     err.addf(at, format, args.ꓸꓸꓸ);
-    err.val.soft = true;
+    err.Value.soft = true;
     err.report();
 }
 
-[GoRecv] internal static void versionErrorf(this ref Checker check, positioner at, goVersion v, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void versionErrorf(this ж<Checker> Ꮡcheck, positioner at, goVersion v, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    @string msg = check.sprintf(format, args.ꓸꓸꓸ);
-    var err = check.newError(UnsupportedFeature);
+    ref var check = ref Ꮡcheck.Value;
+    @string msg = Ꮡcheck.sprintf(format, args.ꓸꓸꓸ);
+    var err = Ꮡcheck.newError(UnsupportedFeature);
     err.addf(at, "%s requires %s or later"u8, msg, v);
     err.report();
 }
-tokenꓸPos
+
+[GoType("go.token_package.ΔPos")] partial struct atPos;
+
 internal static tokenꓸPos Pos(this atPos s) {
     return ((tokenꓸPos)s);
 }
@@ -266,9 +278,7 @@ internal static tokenꓸPos Pos(this atPos s) {
 // and end defining the full span of syntax being considered when the error was
 // detected. Invariant: start <= pos < end || start == pos == end.
 [GoType] partial struct posSpan {
-    internal go.token_package.ΔPos start;
-    internal go.token_package.ΔPos pos;
-    internal go.token_package.ΔPos end;
+    internal tokenꓸPos start, pos, end;
 }
 
 internal static tokenꓸPos Pos(this posSpan e) {
@@ -292,27 +302,27 @@ internal static posSpan inNode(ast.Node node, tokenꓸPos pos) {
 // the argument naturally corresponds to a span of source code.
 internal static posSpan spanOf(positioner at) {
     switch (at.type()) {
-    case default! x: {
+    case null: {
         throw panic("nil positioner");
         break;
     }
     case posSpan x: {
         return x;
     }
-    case ast.Node x: {
+    case {} Δx when Δx._<ast.Node>(out var x): {
         tokenꓸPos pos = x.Pos();
         return new posSpan(pos, pos, x.End());
     }
-    case operand.val x: {
+    case ж<operand> x: {
         if ((~x).expr != default!) {
-            tokenꓸPos posΔ1 = x.Pos();
-            return new posSpan(posΔ1, posΔ1, (~x).expr.End());
+            tokenꓸPos pos = x.Pos();
+            return new posSpan(pos, pos, (~x).expr.End());
         }
         return new posSpan(nopos, nopos, nopos);
     }
     default: {
-        var x = at.type();
-        pos = at.Pos();
+        var x = at;
+        tokenꓸPos pos = at.Pos();
         return new posSpan(pos, pos, pos);
     }}
 }

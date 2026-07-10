@@ -29,16 +29,16 @@ internal static readonly UntypedInt timeHistTotalBuckets = /* timeHistNumBuckets
 //
 // The histogram is safe for concurrent reads and writes.
 [GoType] partial struct timeHistogram {
-    internal atomic.Uint64 counts = new(timeHistNumBuckets * timeHistNumSubBuckets);
+    internal array<atomic.Uint64> counts = new(timeHistNumBuckets * timeHistNumSubBuckets);
     // underflow counts all the times we got a negative duration
     // sample. Because of how time works on some platforms, it's
     // possible to measure negative durations. We could ignore them,
     // but we record them anyway because it's better to have some
     // signal that it's happening than just missing samples.
-    internal @internal.runtime.atomic_package.Uint64 underflow;
+    internal atomic.Uint64 underflow;
     // overflow counts all the times we got a duration that exceeded
     // the range counts represents.
-    internal @internal.runtime.atomic_package.Uint64 overflow;
+    internal atomic.Uint64 overflow;
 }
 
 // record adds the given duration to the distribution.
@@ -47,10 +47,12 @@ internal static readonly UntypedInt timeHistTotalBuckets = /* timeHistNumBuckets
 // may run in sensitive locations.
 //
 //go:nosplit
-[GoRecv] internal static void record(this ref timeHistogram h, int64 duration) {
+internal static void record(this ж<timeHistogram> Ꮡh, int64 duration) {
+    ref var h = ref Ꮡh.Value;
+
     // If the duration is negative, capture that in underflow.
     if (duration < 0) {
-        h.underflow.Add(1);
+        Ꮡh.of(timeHistogram.Ꮡunderflow).Add(1);
         return;
     }
     // bucketBit is the target bit for the bucket which is usually the
@@ -63,53 +65,54 @@ internal static readonly UntypedInt timeHistTotalBuckets = /* timeHistNumBuckets
     nuint bucketBit = default!;
     nuint bucket = default!;
     {
-        nint l = sys.Len64(((uint64)duration)); if (l < timeHistMinBucketBits){
+        nint l = sys.Len64((uint64)duration); if (l < timeHistMinBucketBits){
             bucketBit = timeHistMinBucketBits;
             bucket = 0;
         } else {
             // bucketBit - timeHistMinBucketBits
-            bucketBit = ((nuint)l);
-            bucket = bucketBit - timeHistMinBucketBits + 1;
+            bucketBit = (nuint)l;
+            bucket = bucketBit - (nuint)timeHistMinBucketBits + 1;
         }
     }
     // If the bucket we computed is greater than the number of buckets,
     // count that in overflow.
     if (bucket >= timeHistNumBuckets) {
-        h.overflow.Add(1);
+        Ꮡh.of(timeHistogram.Ꮡoverflow).Add(1);
         return;
     }
     // The sub-bucket index is just next timeHistSubBucketBits after the bucketBit.
-    nuint subBucket = ((nuint)(duration >> (int)((bucketBit - 1 - timeHistSubBucketBits)))) % timeHistNumSubBuckets;
-    h.counts[bucket * timeHistNumSubBuckets + subBucket].Add(1);
+    nuint subBucket = (nuint)((duration >> (int)((bucketBit - 1 - (nuint)timeHistSubBucketBits)))) % (nuint)timeHistNumSubBuckets;
+    Ꮡ(h.counts[bucket * (nuint)timeHistNumSubBuckets + subBucket]).Add(1);
 }
 
 // write dumps the histogram to the passed metricValue as a float64 histogram.
-[GoRecv] internal static void write(this ref timeHistogram h, ж<metricValue> Ꮡout) {
-    ref var @out = ref Ꮡout.val;
+internal static void write(this ж<timeHistogram> Ꮡh, ж<metricValue> Ꮡout) {
+    ref var h = ref Ꮡh.Value;
+    ref var @out = ref Ꮡout.Value;
 
     var hist = @out.float64HistOrInit(timeHistBuckets);
     // The bottom-most bucket, containing negative values, is tracked
     // separately as underflow, so fill that in manually and then iterate
     // over the rest.
-    (~hist).counts[0] = h.underflow.Load();
+    hist.Value.counts[0] = Ꮡh.of(timeHistogram.Ꮡunderflow).Load();
     foreach (var (i, _) in h.counts) {
-        (~hist).counts[i + 1] = h.counts[i].Load();
+        hist.Value.counts[i + 1] = Ꮡ(h.counts[i]).Load();
     }
-    (~hist).counts[len((~hist).counts) - 1] = h.overflow.Load();
+    hist.Value.counts[len((~hist).counts) - 1] = Ꮡh.of(timeHistogram.Ꮡoverflow).Load();
 }
 
-internal static readonly UntypedInt fInf = /* 0x7FF0000000000000 */ 9218868437227405312;
-internal static readonly UntypedInt fNegInf = /* 0xFFF0000000000000 */ 18442240474082181120;
+internal static readonly UntypedInt fInf = 0x7FF0000000000000;
+internal static readonly UntypedInt fNegInf = 0xFFF0000000000000;
 
 internal static float64 float64Inf() {
     ref var inf = ref heap<uint64>(out var Ꮡinf);
-    inf = ((uint64)fInf);
+    inf = (uint64)fInf;
     return ~(ж<float64>)(uintptr)(new @unsafe.Pointer(Ꮡinf));
 }
 
 internal static float64 float64NegInf() {
     ref var inf = ref heap<uint64>(out var Ꮡinf);
-    inf = ((uint64)fNegInf);
+    inf = (uint64)fNegInf;
     return ~(ж<float64>)(uintptr)(new @unsafe.Pointer(Ꮡinf));
 }
 
@@ -123,31 +126,31 @@ internal static slice<float64> timeHistogramMetricsBuckets() {
     for (nint j = 0; j < timeHistNumSubBuckets; j++) {
         // No bucket bit for the first few buckets. Just sub-bucket bits after the
         // min bucket bit.
-        var bucketNanos = ((uint64)j) << (int)((timeHistMinBucketBits - 1 - timeHistSubBucketBits));
+        var bucketNanos = ((uint64)j << (int)((timeHistMinBucketBits - 1 - timeHistSubBucketBits)));
         // Convert nanoseconds to seconds via a division.
         // These values will all be exactly representable by a float64.
-        b[j + 1] = ((float64)bucketNanos) / 1e9F;
+        b[j + 1] = (float64)bucketNanos / 1e9D;
     }
     // Generate the rest of the buckets. It's easier to reason
     // about if we cut out the 0'th bucket.
     for (nint i = timeHistMinBucketBits; i < timeHistMaxBucketBits; i++) {
         for (nint j = 0; j < timeHistNumSubBuckets; j++) {
             // Set the bucket bit.
-            var bucketNanos = ((uint64)1) << (int)((i - 1));
+            var bucketNanos = ((uint64)1 << (int)((i - 1)));
             // Set the sub-bucket bits.
-            bucketNanos |= (uint64)(((uint64)j) << (int)((i - 1 - timeHistSubBucketBits)));
+            bucketNanos |= (uint64)(((uint64)j << (int)((i - 1 - (nint)timeHistSubBucketBits))));
             // The index for this bucket is going to be the (i+1)'th bucket
             // (note that we're starting from zero, but handled the first bucket
             // earlier, so we need to compensate), and the j'th sub bucket.
             // Add 1 because we left space for -Inf.
-            nint bucketIndex = (i - timeHistMinBucketBits + 1) * timeHistNumSubBuckets + j + 1;
+            nint bucketIndex = (i - (nint)timeHistMinBucketBits + 1) * (nint)timeHistNumSubBuckets + j + 1;
             // Convert nanoseconds to seconds via a division.
             // These values will all be exactly representable by a float64.
-            b[bucketIndex] = ((float64)bucketNanos) / 1e9F;
+            b[bucketIndex] = (float64)bucketNanos / 1e9D;
         }
     }
     // Overflow bucket.
-    b[len(b) - 2] = ((float64)(((uint64)1) << (int)((timeHistMaxBucketBits - 1)))) / 1e9F;
+    b[len(b) - 2] = (float64)(((uint64)1 << (int)((timeHistMaxBucketBits - 1)))) / 1e9D;
     b[len(b) - 1] = float64Inf();
     return b;
 }

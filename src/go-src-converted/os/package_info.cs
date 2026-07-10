@@ -51,25 +51,19 @@ using static go.os_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(*rawConn, error), syscall_package.RawConn>]
-[assembly: GoImplement<(FileInfo, error), FileInfo>]
-[assembly: GoImplement<(timeout, bool), timeout>]
-[assembly: GoImplement<File, io.fs_package.File>]
-[assembly: GoImplement<File, io_package.Writer>]
-[assembly: GoImplement<FileInfo, io.fs_package.FileInfo>]
-[assembly: GoImplement<LinkError, error>]
-[assembly: GoImplement<PathError, error>]
-[assembly: GoImplement<SyscallError, error>]
+[assembly: GoImplement<File, go.io.fs_package.File>(Pointer = true)]
+[assembly: GoImplement<File, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<LinkError, error>(Pointer = true)]
+[assembly: GoImplement<SyscallError, error>(Pointer = true)]
 [assembly: GoImplement<dirEntry, DirEntry>]
-[assembly: GoImplement<dirEntry, io.fs_package.DirEntry>]
-[assembly: GoImplement<dirFS, io.fs_package.FS>]
-[assembly: GoImplement<fileStat, FileInfo>]
+[assembly: GoImplement<dirEntry, go.io.fs_package.DirEntry>]
+[assembly: GoImplement<dirFS, go.io.fs_package.FS>]
+[assembly: GoImplement<fileStat, FileInfo>(Pointer = true)]
 [assembly: GoImplement<fileWithoutReadFrom, io_package.Writer>]
 [assembly: GoImplement<fileWithoutWriteTo, io_package.Reader>]
-[assembly: GoImplement<fs.File, error), io.fs_package.File>]
-[assembly: GoImplement<fs.FileInfo, error), io.fs_package.FileInfo>]
-[assembly: GoImplement<io.fs_package.File, io_package.Reader>]
-[assembly: GoImplement<syscall_package.Errno, error>]
+[assembly: GoImplement<go.io.fs_package.File, io_package.Reader>]
+[assembly: GoImplement<rawConn, syscall_package.RawConn>(Pointer = true)]
+[assembly: GoImplement<syscall_package.ΔSignal, ΔSignal>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

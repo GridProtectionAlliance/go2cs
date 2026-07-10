@@ -38,20 +38,19 @@ using static go.io_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(ReaderFrom, bool), ReaderFrom>]
-[assembly: GoImplement<(StringWriter, bool), StringWriter>]
-[assembly: GoImplement<(WriterTo, bool), WriterTo>]
-[assembly: GoImplement<LimitedReader, Reader>]
+[assembly: GoImplement<LimitedReader, Reader>(Pointer = true)]
 [assembly: GoImplement<discard, ReaderFrom>]
 [assembly: GoImplement<discard, Writer>]
-[assembly: GoImplement<multiReader, Reader>]
-[assembly: GoImplement<multiReader, WriterTo>]
-[assembly: GoImplement<multiWriter, StringWriter>]
-[assembly: GoImplement<multiWriter, Writer>]
+[assembly: GoImplement<eofReader, Reader>]
+[assembly: GoImplement<multiReader, Reader>(Pointer = true)]
+[assembly: GoImplement<multiReader, WriterTo>(Pointer = true)]
+[assembly: GoImplement<multiWriter, StringWriter>(Pointer = true)]
+[assembly: GoImplement<multiWriter, Writer>(Pointer = true)]
+[assembly: GoImplement<nopCloser, ReadCloser>]
 [assembly: GoImplement<nopCloser, Reader>(Promoted = true)]
+[assembly: GoImplement<nopCloserWriterTo, ReadCloser>]
 [assembly: GoImplement<nopCloserWriterTo, Reader>(Promoted = true)]
-[assembly: GoImplement<slice<Writer>, Writer>]
-[assembly: GoImplement<teeReader, Reader>]
+[assembly: GoImplement<teeReader, Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

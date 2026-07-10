@@ -5,21 +5,23 @@ namespace go.log;
 
 using context = context_package;
 using log = log_package;
-using loginternal = log.internal_package;
-using @internal = log.slog.internal_package;
+using loginternal = go.log.internal_package;
+using @internal = go.log.slog.internal_package;
 using runtime = runtime_package;
-using atomic = sync.atomic_package;
+using atomic = go.sync.atomic_package;
 using time = time_package;
-using log.slog;
-using sync;
-using ꓸꓸꓸAttr = Span<Attr>;
+using go.log.slog;
+using go.sync;
+using io = io_package;
 using ꓸꓸꓸany = Span<any>;
 
 partial class slog_package {
 
-internal static atomic.Pointer<Logger> defaultLogger;
+internal static ж<atomic.Pointer<Logger>> ᏑdefaultLogger = new(default(atomic.Pointer<Logger>));
+internal static ref atomic.Pointer<Logger> defaultLogger => ref ᏑdefaultLogger.Value;
 
-internal static LevelVar logLoggerLevel;
+internal static ж<LevelVar> ᏑlogLoggerLevel = new(default(LevelVar));
+internal static ref LevelVar logLoggerLevel => ref ᏑlogLoggerLevel.Value;
 
 // SetLogLoggerLevel controls the level for the bridge to the [log] package.
 //
@@ -46,18 +48,18 @@ internal static LevelVar logLoggerLevel;
 public static ΔLevel /*oldLevel*/ SetLogLoggerLevel(ΔLevel level) {
     ΔLevel oldLevel = default!;
 
-    oldLevel = logLoggerLevel.Level();
-    logLoggerLevel.Set(level);
+    oldLevel = ᏑlogLoggerLevel.Level();
+    ᏑlogLoggerLevel.Set(level);
     return oldLevel;
 }
 
 [GoInit] internal static void init() {
-    defaultLogger.Store(New(~newDefaultHandler(loginternal.DefaultOutput)));
+    ᏑdefaultLogger.Store(New(new defaultHandlerжΔHandler(newDefaultHandler(loginternal.DefaultOutput))));
 }
 
 // Default returns the default [Logger].
 public static ж<Logger> Default() {
-    return defaultLogger.Load();
+    return ᏑdefaultLogger.Load();
 }
 
 // SetDefault makes l the default [Logger], which is used by
@@ -66,9 +68,9 @@ public static ж<Logger> Default() {
 // (as with [log.Print], etc.) will be logged using l's Handler,
 // at a level controlled by [SetLogLoggerLevel].
 public static void SetDefault(ж<Logger> Ꮡl) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
-    defaultLogger.Store(Ꮡl);
+    ᏑdefaultLogger.Store(Ꮡl);
     // If the default's handler is a defaultHandler, then don't use a handleWriter,
     // or we'll deadlock as they both try to acquire the log default mutex.
     // The defaultHandler will use whatever the log default writer is currently
@@ -76,11 +78,11 @@ public static void SetDefault(ж<Logger> Ꮡl) {
     // This can occur with SetDefault(Default()).
     // See TestSetDefault.
     {
-        var (_, ok) = l.Handler()._<defaultHandler.val>(ᐧ); if (!ok) {
+        var (_, ok) = l.Handler()._<ж<defaultHandler>>(ᐧ); if (!ok) {
             ref var capturePC = ref heap<bool>(out var ᏑcapturePC);
-            capturePC = (nint)(log.Flags() & ((nint)(log.Lshortfile | log.Llongfile))) != 0;
-            log.SetOutput(new handlerWriter(l.Handler(), Ꮡ(logLoggerLevel), capturePC));
-            log.SetFlags(0);
+            capturePC = (nint)(log_package.Flags() & (nint)((nint)((nint)log_package.Lshortfile | (nint)log_package.Llongfile))) != 0;
+            log_package.SetOutput(new handlerWriterжWriter(Ꮡ(new handlerWriter(l.Handler(), new LevelVarжLeveler(ᏑlogLoggerLevel), capturePC))));
+            log_package.SetFlags(0);
         }
     }
 }
@@ -113,7 +115,7 @@ public static void SetDefault(ж<Logger> Ꮡl) {
     if (len(buf) > 0 && buf[len(buf) - 1] == (rune)'\n') {
         buf = buf[..(int)(len(buf) - 1)];
     }
-    var r = NewRecord(time.Now(), level, ((@string)buf), pc);
+    var r = NewRecord(time_package.Now(), level, ((@string)buf), pc);
     return (origLen, w.h.Handle(context.Background(), r));
 }
 
@@ -141,14 +143,15 @@ public static void SetDefault(ж<Logger> Ꮡl) {
 // With returns a Logger that includes the given attributes
 // in each output operation. Arguments are converted to
 // attributes as if by [Logger.Log].
-[GoRecv("capture")] public static ж<Logger> With(this ref Logger l, params ꓸꓸꓸany argsʗp) {
+public static ж<Logger> With(this ж<Logger> Ꮡl, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
+    ref var l = ref Ꮡl.Value;
     if (len(args) == 0) {
-        return WithꓸᏑl;
+        return Ꮡl;
     }
     var c = l.clone();
-    c.val.handler = l.handler.WithAttrs(argsToAttrSlice(args));
+    c.Value.handler = l.handler.WithAttrs(argsToAttrSlice(args));
     return c;
 }
 
@@ -158,12 +161,14 @@ public static void SetDefault(ж<Logger> Ꮡl) {
 // method of the Logger's Handler.)
 //
 // If name is empty, WithGroup returns the receiver.
-[GoRecv("capture")] public static ж<Logger> WithGroup(this ref Logger l, @string name) {
+public static ж<Logger> WithGroup(this ж<Logger> Ꮡl, @string name) {
+    ref var l = ref Ꮡl.Value;
+
     if (name == ""u8) {
-        return WithGroupꓸᏑl;
+        return Ꮡl;
     }
     var c = l.clone();
-    c.val.handler = l.handler.WithGroup(name);
+    c.Value.handler = l.handler.WithGroup(name);
     return c;
 }
 
@@ -194,7 +199,7 @@ public static ж<Logger> With(params ꓸꓸꓸany argsʗp) {
 // dispatches a Record to the specified handler. The logger acts as a bridge from
 // the older log API to newer structured logging handlers.
 public static ж<log.Logger> NewLogLogger(ΔHandler h, ΔLevel level) {
-    return log.New(new handlerWriter(h, level, true), ""u8, 0);
+    return log_package.New(new handlerWriterжWriter(Ꮡ(new handlerWriter(h, level, true))), ""u8, 0);
 }
 
 // Log emits a log record with the current time and the given level and message.
@@ -214,7 +219,7 @@ public static ж<log.Logger> NewLogLogger(ΔHandler h, ΔLevel level) {
 }
 
 // LogAttrs is a more efficient version of [Logger.Log] that accepts only Attrs.
-[GoRecv] public static void LogAttrs(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
+[GoRecv] public static void LogAttrs(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params Span<slog_package.Attr> attrsʗp) {
     var attrs = attrsʗp.slice();
 
     l.logAttrs(ctx, level, msg, attrs.ꓸꓸꓸ);
@@ -292,7 +297,7 @@ public static ж<log.Logger> NewLogLogger(ΔHandler h, ΔLevel level) {
         runtime.Callers(3, pcs[..]);
         pc = pcs[0];
     }
-    var r = NewRecord(time.Now(), level, msg, pc);
+    var r = NewRecord(time_package.Now(), level, msg, pc);
     r.Add(args.ꓸꓸꓸ);
     if (ctx == default!) {
         ctx = context.Background();
@@ -301,7 +306,7 @@ public static ж<log.Logger> NewLogLogger(ΔHandler h, ΔLevel level) {
 }
 
 // logAttrs is like [Logger.log], but for methods that take ...Attr.
-[GoRecv] internal static void logAttrs(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
+[GoRecv] internal static void logAttrs(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params Span<slog_package.Attr> attrsʗp) {
     var attrs = attrsʗp.slice();
 
     if (!l.Enabled(ctx, level)) {
@@ -314,7 +319,7 @@ public static ж<log.Logger> NewLogLogger(ΔHandler h, ΔLevel level) {
         runtime.Callers(3, pcs[..]);
         pc = pcs[0];
     }
-    var r = NewRecord(time.Now(), level, msg, pc);
+    var r = NewRecord(time_package.Now(), level, msg, pc);
     r.AddAttrs(attrs.ꓸꓸꓸ);
     if (ctx == default!) {
         ctx = context.Background();
@@ -386,7 +391,7 @@ public static void Log(context.Context ctx, ΔLevel level, @string msg, params �
 }
 
 // LogAttrs calls [Logger.LogAttrs] on the default logger.
-public static void LogAttrs(context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
+public static void LogAttrs(context.Context ctx, ΔLevel level, @string msg, params Span<slog_package.Attr> attrsʗp) {
     var attrs = attrsʗp.slice();
 
     Default().logAttrs(ctx, level, msg, attrs.ꓸꓸꓸ);

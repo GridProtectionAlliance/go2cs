@@ -5,6 +5,7 @@
 namespace go.vendor.golang.org.x.crypto;
 
 using crypto = crypto_package;
+using hash = hash_package;
 
 partial class sha3_package {
 

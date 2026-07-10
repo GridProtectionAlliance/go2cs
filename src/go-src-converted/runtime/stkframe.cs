@@ -69,12 +69,12 @@ partial class runtime_package {
 // argBytes returns the argument frame size for a call to frame.fn.
 [GoRecv] internal static uintptr argBytes(this ref stkframe frame) {
     if (frame.fn.args != abi.ArgsSizeUnknown) {
-        return ((uintptr)frame.fn.args);
+        return (uintptr)frame.fn.args;
     }
     // This is an uncommon and complicated case. Fall back to fully
     // fetching the argument map to compute its size.
     var (argMap, _) = frame.argMapInternal();
-    return ((uintptr)argMap.n) * goarch.PtrSize;
+    return (uintptr)argMap.n * (uintptr)goarch.PtrSize;
 }
 
 // argMapInternal is used internally by stkframe to fetch special
@@ -95,13 +95,13 @@ partial class runtime_package {
 
     var f = frame.fn;
     if (f.args != abi.ArgsSizeUnknown) {
-        argMap.n = f.args / goarch.PtrSize;
+        argMap.n = f.args / (int32)goarch.PtrSize;
         return (argMap, hasReflectStackObj);
     }
     // Extract argument bitmaps for reflect stubs from the calls they made to reflect.
     var exprᴛ1 = funcname(f);
     if (exprᴛ1 == "reflect.makeFuncStub"u8 || exprᴛ1 == "reflect.methodValueCall"u8) {
-        var arg0 = frame.sp + sys.MinFrameSize;
+        var arg0 = frame.sp + (uintptr)sys.MinFrameSize;
         var minSP = frame.fp;
         if (!usesLR) {
             // These take a *reflect.methodValue as their
@@ -124,14 +124,14 @@ partial class runtime_package {
             // also know its argument map is
             // empty.
             if (frame.pc != f.entry()) {
-                print("runtime: confused by ", funcname(f), ": no frame (sp=", ((Δhex)frame.sp), " fp=", ((Δhex)frame.fp), ") at entry+", ((Δhex)(frame.pc - f.entry())), "\n");
+                print("runtime: confused by ", funcname(f), ": no frame (sp=", ((Δhex)(uint64)frame.sp), " fp=", ((Δhex)(uint64)frame.fp), ") at entry+", ((Δhex)(uint64)(frame.pc - f.entry())), "\n");
                 @throw("reflect mismatch"u8);
             }
             return (new bitvector(nil), false);
         }
         hasReflectStackObj = true;
-        var mv = ~(ж<ж<reflectMethodValue>>)(uintptr)(((@unsafe.Pointer)arg0));
-        var retValid = ~(ж<bool>)(uintptr)(((@unsafe.Pointer)(arg0 + 4 * goarch.PtrSize)));
+        var mv = ~(ж<ж<reflectMethodValue>>)(uintptr)((@unsafe.Pointer)arg0);
+        var retValid = ~(ж<bool>)(uintptr)((@unsafe.Pointer)(arg0 + (uintptr)(4 * goarch.PtrSize)));
         if ((~mv).fn != f.entry()) {
             // No locals, so also no stack objects
             // Figure out whether the return values are valid.
@@ -140,11 +140,11 @@ partial class runtime_package {
             print("runtime: confused by ", funcname(f), "\n");
             @throw("reflect mismatch"u8);
         }
-        argMap = (~mv).stack.val;
+        argMap = (~mv).stack.Value;
         if (!retValid) {
             // argMap.n includes the results, but
             // those aren't valid, so drop them.
-            var n = ((int32)(((uintptr)((~mv).argLen & ~(goarch.PtrSize - 1))) / goarch.PtrSize));
+            var n = (int32)(((uintptr)((~mv).argLen & ~(uintptr)(goarch.PtrSize - 1))) / (uintptr)goarch.PtrSize);
             if (n < argMap.n) {
                 argMap.n = n;
             }
@@ -167,7 +167,7 @@ partial class runtime_package {
         return (locals, args, objs);
     }
     var f = frame.fn;
-    var pcdata = ((int32)(-1));
+    var pcdata = (int32)(-1);
     if (targetpc != f.entry()) {
         // Back up to the CALL. If we're at the function entry
         // point, we want to use the entry map (-1), even if
@@ -197,14 +197,14 @@ partial class runtime_package {
         var stackid = pcdata;
         var stkmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_LocalsPointerMaps));
         if (stkmap == nil || (~stkmap).n <= 0) {
-            print("runtime: frame ", funcname(f), " untyped locals ", ((Δhex)(frame.varp - size)), "+", ((Δhex)size), "\n");
+            print("runtime: frame ", funcname(f), " untyped locals ", ((Δhex)(uint64)(frame.varp - size)), "+", ((Δhex)(uint64)size), "\n");
             @throw("missing stackmap"u8);
         }
         // If nbit == 0, there's no work to do.
         if ((~stkmap).nbit > 0){
             if (stackid < 0 || stackid >= (~stkmap).n) {
                 // don't know where we are
-                print("runtime: pcdata is ", stackid, " and ", (~stkmap).n, " locals stack map entries for ", funcname(f), " (targetpc=", ((Δhex)targetpc), ")\n");
+                print("runtime: pcdata is ", stackid, " and ", (~stkmap).n, " locals stack map entries for ", funcname(f), " (targetpc=", ((Δhex)(uint64)targetpc), ")\n");
                 @throw("bad symbol table"u8);
             }
             locals = stackmapdata(stkmap, stackid);
@@ -224,12 +224,12 @@ partial class runtime_package {
         // Fetch the argument map at pcdata.
         var stackmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_ArgsPointerMaps));
         if (stackmap == nil || (~stackmap).n <= 0) {
-            print("runtime: frame ", funcname(f), " untyped args ", ((Δhex)frame.argp), "+", ((Δhex)(args.n * goarch.PtrSize)), "\n");
+            print("runtime: frame ", funcname(f), " untyped args ", ((Δhex)(uint64)frame.argp), "+", ((Δhex)(uint64)(args.n * (int32)goarch.PtrSize)), "\n");
             @throw("missing stackmap"u8);
         }
         if (pcdata < 0 || pcdata >= (~stackmap).n) {
             // don't know where we are
-            print("runtime: pcdata is ", pcdata, " and ", (~stackmap).n, " args stack map entries for ", funcname(f), " (targetpc=", ((Δhex)targetpc), ")\n");
+            print("runtime: pcdata is ", pcdata, " and ", (~stackmap).n, " args stack map entries for ", funcname(f), " (targetpc=", ((Δhex)(uint64)targetpc), ")\n");
             @throw("bad symbol table"u8);
         }
         if ((~stackmap).nbit == 0){
@@ -251,7 +251,7 @@ partial class runtime_package {
             var n = ~(ж<uintptr>)(uintptr)(Δp);
             Δp = (uintptr)add(Δp, goarch.PtrSize);
             var r0 = (ж<stackObjectRecord>)(uintptr)(noescape(Δp));
-            objs = @unsafe.Slice(r0, ((nint)n));
+            objs = @unsafe.Slice(r0, (nint)n);
         }
     }
     // Note: the noescape above is needed to keep
@@ -262,19 +262,22 @@ partial class runtime_package {
     return (locals, args, objs);
 }
 
-internal static array<stackObjectRecord> methodValueCallFrameObjs;    // initialized in stackobjectinit
+internal static ж<array<stackObjectRecord>> ᏑmethodValueCallFrameObjs = new(new array<stackObjectRecord>(1));
+internal static ref array<stackObjectRecord> methodValueCallFrameObjs => ref ᏑmethodValueCallFrameObjs.Value;    // initialized in stackobjectinit
 
 internal static void stkobjinit() {
-    any abiRegArgsEface = new abi.RegArgs(nil);
-    var abiRegArgsType = efaceOf(Ꮡ(abiRegArgsEface)).val._type;
+    ref var abiRegArgsEface = ref heap<any>(out var ᏑabiRegArgsEface);
+
+    abiRegArgsEface = new abi.RegArgs(nil);
+    var abiRegArgsType = efaceOf(ᏑabiRegArgsEface).Value._type;
     if ((abiꓸKind)((~abiRegArgsType).Kind_ & abi.KindGCProg) != 0) {
         @throw("abiRegArgsType needs GC Prog, update methodValueCallFrameObjs"u8);
     }
     // Set methodValueCallFrameObjs[0].gcdataoff so that
     // stackObjectRecord.gcdata() will work correctly with it.
-    var ptr = ((uintptr)new @unsafe.Pointer(ᏑmethodValueCallFrameObjs.at<stackObjectRecord>(0)));
+    var ptr = (uintptr)new @unsafe.Pointer(ᏑmethodValueCallFrameObjs.at<stackObjectRecord>(0));
     ж<moduledata> mod = default!;
-    for (var datap = Ꮡ(firstmoduledata); datap != nil; datap = datap.val.next) {
+    for (var datap = Ꮡfirstmoduledata; datap != nil; datap = datap.Value.next) {
         if ((~datap).gofunc <= ptr && ptr < (~datap).end) {
             mod = datap;
             break;
@@ -284,11 +287,11 @@ internal static void stkobjinit() {
         @throw("methodValueCallFrameObjs is not in a module"u8);
     }
     methodValueCallFrameObjs[0] = new stackObjectRecord(
-        off: -((int32)alignUp((~abiRegArgsType).Size_, 8)), // It's always the highest address local.
+        off: -(int32)alignUp((~abiRegArgsType).Size_, 8), // It's always the highest address local.
 
-        size: ((int32)(~abiRegArgsType).Size_),
-        _ptrdata: ((int32)(~abiRegArgsType).PtrBytes),
-        gcdataoff: ((uint32)(((uintptr)new @unsafe.Pointer((~abiRegArgsType).GCData)) - (~mod).rodata))
+        size: (int32)(~abiRegArgsType).Size_,
+        _ptrdata: (int32)(~abiRegArgsType).PtrBytes,
+        gcdataoff: (uint32)((uintptr)new @unsafe.Pointer((~abiRegArgsType).GCData) - (~mod).rodata)
     );
 }
 

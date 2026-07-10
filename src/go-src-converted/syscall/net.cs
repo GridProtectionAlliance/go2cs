@@ -20,9 +20,9 @@ partial class syscall_package {
     // tries again repeatedly.
     // The file descriptor is guaranteed to remain valid while f
     // executes but not after f returns.
-    error Read(Func<uintptr, (done bool)> f);
+    error Read(Func<uintptr, bool> f);
     // Write is like Read but for writing.
-    error Write(Func<uintptr, (done bool)> f);
+    error Write(Func<uintptr, bool> f);
 }
 
 // Conn is implemented by some types in the net and os packages to provide

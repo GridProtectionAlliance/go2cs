@@ -10,7 +10,7 @@ partial class tls_package {
 [GoType("num:uint8")] partial struct AlertError;
 
 public static @string Error(this AlertError e) {
-    return ((alert)e).String();
+    return ((alert)(uint8)e).String();
 }
 
 [GoType("num:uint8")] partial struct alert;
@@ -91,12 +91,11 @@ internal static map<alert, @string> alertText = new map<alert, @string>{
 };
 
 internal static @string String(this alert e) {
-    @string s = alertText[e];
-    var ok = alertText[e];
+    var (s, ok) = alertText[e, ꟷ];
     if (ok) {
         return "tls: "u8 + s;
     }
-    return "tls: alert("u8 + strconv.Itoa(((nint)e)) + ")"u8;
+    return "tls: alert("u8 + strconv.Itoa((nint)(uint8)e) + ")"u8;
 }
 
 internal static @string Error(this alert e) {

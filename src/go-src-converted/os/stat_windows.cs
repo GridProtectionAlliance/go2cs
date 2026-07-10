@@ -9,32 +9,35 @@ using syscall = syscall_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.syscall;
+using fs = go.io.fs_package;
 
 partial class os_package {
 
 // Stat returns the [FileInfo] structure describing file.
 // If there is an error, it will be of type [*PathError].
-[GoRecv] public static (FileInfo, error) Stat(this ref File file) {
-    if (file == nil) {
+public static (FileInfo, error) Stat(this ж<File> Ꮡfile) {
+    ref var @file = ref Ꮡfile.Value;
+
+    if (@file == nil) {
         return (default!, ErrInvalid);
     }
-    return statHandle(file.name, file.pfd.Sysfd);
+    return statHandle(@file.name, @file.pfd.Sysfd);
 }
 
 // stat implements both Stat and Lstat of a file.
-internal static (FileInfo, error) stat(@string funcname, @string name, bool followSurrogates) => func((defer, _) => {
+internal static (FileInfo, error) stat(@string funcname, @string name, bool followSurrogates) => func<(FileInfo, error)>((defer, recover) => {
     if (len(name) == 0) {
-        return (default!, new PathError{Op: funcname, Path: name, Err: ((syscall.Errno)syscall.ERROR_PATH_NOT_FOUND)});
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: funcname, Path: name, Err: ((syscall.Errno)syscall.ERROR_PATH_NOT_FOUND)))));
     }
-    (namep, err) = syscall.UTF16PtrFromString(fixLongPath(name));
+    var (namep, err) = syscall.UTF16PtrFromString(fixLongPath(name));
     if (err != default!) {
-        return (default!, new PathError{Op: funcname, Path: name, Err: err});
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: funcname, Path: name, Err: err))));
     }
     // Try GetFileAttributesEx first, because it is faster than CreateFile.
     // See https://golang.org/issues/19922#issuecomment-300031421 for details.
-    ref var fa = ref heap(new syscall_package.Win32FileAttributeData(), out var Ꮡfa);
+    ref var fa = ref heap(new syscall.Win32FileAttributeData(), out var Ꮡfa);
     err = syscall.GetFileAttributesEx(namep, syscall.GetFileExInfoStandard, (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡfa)));
-    if (err == default! && (uint32)(fa.FileAttributes & syscall.FILE_ATTRIBUTE_REPARSE_POINT) == 0) {
+    if (err == default! && (uint32)(fa.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) == 0) {
         // Not a surrogate for another named entity, because it isn't any kind of reparse point.
         // The information we got from GetFileAttributesEx is good enough for now.
         var fs = newFileStatFromWin32FileAttributeData(Ꮡfa);
@@ -43,18 +46,18 @@ internal static (FileInfo, error) stat(@string funcname, @string name, bool foll
                 return (default!, errΔ1);
             }
         }
-        return (~fs, default!);
+        return (new fileStatжFileInfo(fs), default!);
     }
     // GetFileAttributesEx fails with ERROR_SHARING_VIOLATION error for
     // files like c:\pagefile.sys. Use FindFirstFile for such files.
-    if (err == windows.ERROR_SHARING_VIOLATION) {
-        ref var fd = ref heap(new syscall_package.Win32finddata(), out var Ꮡfd);
+    if (AreEqual(err, windows.ERROR_SHARING_VIOLATION)) {
+        ref var fd = ref heap(new syscall.Win32finddata(), out var Ꮡfd);
         var (sh, errΔ2) = syscall.FindFirstFile(namep, Ꮡfd);
         if (errΔ2 != default!) {
-            return (default!, new PathError{Op: "FindFirstFile"u8, Path: name, Err: errΔ2});
+            return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "FindFirstFile"u8, Path: name, Err: errΔ2))));
         }
         syscall.FindClose(sh);
-        if ((uint32)(fd.FileAttributes & syscall.FILE_ATTRIBUTE_REPARSE_POINT) == 0) {
+        if ((uint32)(fd.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) == 0) {
             // Not a surrogate for another named entity. FindFirstFile is good enough.
             var fs = newFileStatFromWin32finddata(Ꮡfd);
             {
@@ -62,16 +65,16 @@ internal static (FileInfo, error) stat(@string funcname, @string name, bool foll
                     return (default!, errΔ3);
                 }
             }
-            return (~fs, default!);
+            return (new fileStatжFileInfo(fs), default!);
         }
     }
     // Use CreateFile to determine whether the file is a name surrogate and, if so,
     // save information about the link target.
     // Set FILE_FLAG_BACKUP_SEMANTICS so that CreateFile will create the handle
     // even if name refers to a directory.
-    uint32 flags = (uint32)(syscall.FILE_FLAG_BACKUP_SEMANTICS | syscall.FILE_FLAG_OPEN_REPARSE_POINT);
-    var (h, err) = syscall.CreateFile(namep, 0, 0, nil, syscall.OPEN_EXISTING, flags, 0);
-    if (err == windows.ERROR_INVALID_PARAMETER) {
+    uint32 flags = (uint32)((uint32)syscall.FILE_FLAG_BACKUP_SEMANTICS | (uint32)syscall.FILE_FLAG_OPEN_REPARSE_POINT);
+    (var h, err) = syscall.CreateFile(namep, 0, 0, nil, syscall.OPEN_EXISTING, flags, 0);
+    if (AreEqual(err, windows.ERROR_INVALID_PARAMETER)) {
         // Console handles, like "\\.\con", require generic read access. See
         // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew#consoles.
         // We haven't set it previously because it is normally not required
@@ -82,18 +85,18 @@ internal static (FileInfo, error) stat(@string funcname, @string name, bool foll
         // Since CreateFile failed, we can't determine whether name refers to a
         // name surrogate, or some other kind of reparse point. Since we can't return a
         // FileInfo with a known-accurate Mode, we must return an error.
-        return (default!, new PathError{Op: "CreateFile"u8, Path: name, Err: err});
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "CreateFile"u8, Path: name, Err: err))));
     }
-    (fi, err) = statHandle(name, h);
+    (var fi, err) = statHandle(name, h);
     syscall.CloseHandle(h);
-    if (err == default! && followSurrogates && fi._<fileStat.val>().isReparseTagNameSurrogate()) {
+    if (err == default! && followSurrogates && fi._<ж<fileStat>>().isReparseTagNameSurrogate()) {
         // To obtain information about the link target, we reopen the file without
         // FILE_FLAG_OPEN_REPARSE_POINT and examine the resulting handle.
         // (See https://devblogs.microsoft.com/oldnewthing/20100212-00/?p=14963.)
         (h, err) = syscall.CreateFile(namep, 0, 0, nil, syscall.OPEN_EXISTING, syscall.FILE_FLAG_BACKUP_SEMANTICS, 0);
         if (err != default!) {
             // name refers to a symlink, but we couldn't resolve the symlink target.
-            return (default!, new PathError{Op: "CreateFile"u8, Path: name, Err: err});
+            return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "CreateFile"u8, Path: name, Err: err))));
         }
         deferǃ(syscall.CloseHandle, h, defer);
         return statHandle(name, h);
@@ -102,21 +105,22 @@ internal static (FileInfo, error) stat(@string funcname, @string name, bool foll
 });
 
 internal static (FileInfo, error) statHandle(@string name, syscallꓸHandle h) {
-    (ft, err) = syscall.GetFileType(h);
+    ref var ft = ref heap<uint32>(out var Ꮡft);
+    (ft, var err) = syscall.GetFileType(h);
     if (err != default!) {
-        return (default!, new PathError{Op: "GetFileType"u8, Path: name, Err: err});
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "GetFileType"u8, Path: name, Err: err))));
     }
-    switch (ft) {
-    case syscall.FILE_TYPE_PIPE or syscall.FILE_TYPE_CHAR: {
-        return (new fileStat(name: filepathlite.Base(name), filetype: ft), default!);
-    }}
+    var exprᴛ1 = ft;
+    if (exprᴛ1 == syscall.FILE_TYPE_PIPE || exprᴛ1 == syscall.FILE_TYPE_CHAR) {
+        return (new fileStatжFileInfo(Ꮡ(new fileStat(name: filepathlite.Base(name), filetype: ft))), default!);
+    }
 
-    (fs, err) = newFileStatFromGetFileInformationByHandle(name, h);
+    (var fs, err) = newFileStatFromGetFileInformationByHandle(name, h);
     if (err != default!) {
         return (default!, err);
     }
-    fs.val.filetype = ft;
-    return (~fs, err);
+    fs.Value.filetype = ft;
+    return (new fileStatжFileInfo(fs), err);
 }
 
 // statNolog implements Stat for Windows.

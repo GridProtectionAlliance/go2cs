@@ -6,6 +6,7 @@
 namespace go.go;
 
 using fmt = fmt_package;
+using token = global::go.go.token_package;
 
 partial class types_package {
 
@@ -55,7 +56,9 @@ public static ж<Package> NewPackage(@string path, @string name) {
 // holding the objects declared at package level (TypeNames,
 // Consts, Vars, and Funcs).
 // For a nil pkg receiver, Scope returns the Universe scope.
-[GoRecv] public static ж<ΔScope> Scope(this ref Package pkg) {
+public static ж<ΔScope> Scope(this ж<Package> Ꮡpkg) {
+    ref var pkg = ref Ꮡpkg.Value;
+
     if (pkg != nil) {
         return pkg.scope;
     }

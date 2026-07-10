@@ -9,7 +9,7 @@
     <Version>0.1.4</Version>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>
-    <Copyright>Copyright © 2025</Copyright>
+    <Copyright>Copyright © 2026</Copyright>
     <Authors>$(Product) Authors</Authors>
     <Company>Grid Protection Alliance</Company>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
@@ -86,7 +86,6 @@
     <Using Include="System.Double" Alias="float64" />
     <Using Include="System.Numerics.Complex" Alias="complex128" />
     <Using Include="System.Int32" Alias="rune" />
-    <Using Include="System.UIntPtr" Alias="uintptr" />
     <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
     <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTagAttribute" />
     <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
@@ -106,18 +105,23 @@
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\bytes\bytes.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\crypto\aes\crypto.aes.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\crypto\cipher\crypto.cipher.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\crypto\crypto.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\crypto\des\crypto.des.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\crypto\dsa\crypto.dsa.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\crypto\ecdh\crypto.ecdh.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\crypto\ecdsa\crypto.ecdsa.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\crypto\ed25519\crypto.ed25519.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\crypto\elliptic\crypto.elliptic.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\crypto\md5\crypto.md5.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\crypto\rsa\crypto.rsa.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\crypto\sha1\crypto.sha1.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\crypto\sha256\crypto.sha256.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\crypto\sha512\crypto.sha512.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\crypto\x509\pkix\crypto.x509.pkix.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\encoding\asn1\encoding.asn1.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\encoding\hex\encoding.hex.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\encoding\pem\encoding.pem.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\errors\errors.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\fmt\fmt.csproj" />
@@ -139,6 +143,8 @@
     <ProjectReference Include="$(go2csPath)go-src-converted\unicode\utf16\unicode.utf16.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\unicode\utf8\unicode.utf8.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\unsafe\unsafe.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\vendor\golang.org\x\crypto\cryptobyte\asn1\vendor.golang.org.x.crypto.cryptobyte.asn1.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\vendor\golang.org\x\crypto\cryptobyte\vendor.golang.org.x.crypto.cryptobyte.csproj" />
   </ItemGroup>
 
 </Project>

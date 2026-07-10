@@ -13,10 +13,10 @@ partial class utf16_package {
 internal static readonly UntypedInt replacementChar = /* '\uFFFD' */ 65533; // Unicode replacement character
 internal static readonly UntypedInt maxRune = /* '\U0010FFFF' */ 1114111; // Maximum valid Unicode code point.
 
-internal static readonly UntypedInt surr1 = /* 0xd800 */ 55296;
-internal static readonly UntypedInt surr2 = /* 0xdc00 */ 56320;
-internal static readonly UntypedInt surr3 = /* 0xe000 */ 57344;
-internal static readonly UntypedInt surrSelf = /* 0x10000 */ 65536;
+internal static readonly UntypedInt surr1 = 0xd800;
+internal static readonly UntypedInt surr2 = 0xdc00;
+internal static readonly UntypedInt surr3 = 0xe000;
+internal static readonly UntypedInt surrSelf = 0x10000;
 
 // IsSurrogate reports whether the specified Unicode code point
 // can appear in a surrogate pair.
@@ -29,7 +29,7 @@ public static bool IsSurrogate(rune r) {
 // the Unicode replacement code point U+FFFD.
 public static rune DecodeRune(rune r1, rune r2) {
     if (surr1 <= r1 && r1 < surr2 && surr2 <= r2 && r2 < surr3) {
-        return (rune)((r1 - surr1) << (int)(10) | (r2 - surr2)) + surrSelf;
+        return (rune)(((r1 - (rune)surr1) << (int)(10)) | (r2 - (rune)surr2)) + (rune)surrSelf;
     }
     return replacementChar;
 }
@@ -45,7 +45,7 @@ public static (rune r1, rune r2) EncodeRune(rune r) {
         return (replacementChar, replacementChar);
     }
     r -= surrSelf;
-    return (surr1 + (rune)((r >> (int)(10)) & 1023), surr2 + (rune)(r & 1023));
+    return ((rune)surr1 + (rune)(((r >> (int)(10))) & 0x3ff), (rune)surr2 + (rune)(r & 0x3ff));
 }
 
 // RuneLen returns the number of 16-bit words in the UTF-16 encoding of the rune.
@@ -77,19 +77,19 @@ public static slice<uint16> Encode(slice<rune> s) {
     foreach (var (_, v) in s) {
         switch (RuneLen(v)) {
         case 1: {
-            a[n] = ((uint16)v);
+            a[n] = (uint16)v;
             n++;
             break;
         }
         case 2: {
             var (r1, r2) = EncodeRune(v);
-            a[n] = ((uint16)r1);
-            a[n + 1] = ((uint16)r2);
+            a[n] = (uint16)r1;
+            a[n + 1] = (uint16)r2;
             n += 2;
             break;
         }
         default: {
-            a[n] = ((uint16)replacementChar);
+            a[n] = (uint16)replacementChar;
             n++;
             break;
         }}
@@ -108,15 +108,15 @@ public static slice<uint16> AppendRune(slice<uint16> a, rune r) {
     switch (ᐧ) {
     case {} when (0 <= r && r < surr1) || (surr3 <= r && r < surrSelf): {
         return append(a, // normal rune
- ((uint16)r));
+ (uint16)r);
     }
     case {} when surrSelf <= r && r <= maxRune: {
         var (r1, r2) = EncodeRune(r);
         return append(a, // needs surrogate sequence
- ((uint16)r1), ((uint16)r2));
+ (uint16)r1, (uint16)r2);
     }}
 
-    return append(a, replacementChar);
+    return append(a, (uint16)(replacementChar));
 }
 
 // Decode returns the Unicode code point sequence represented
@@ -137,13 +137,13 @@ internal static slice<rune> decode(slice<uint16> s, slice<rune> buf) {
             var r = s[i];
             switch (ᐧ) {
             case {} when (r < surr1) || (surr3 <= r): {
-                ar = ((rune)r);
+                ar = (rune)r;
                 break;
             }
             case {} when surr1 <= r && r < surr2 && i + 1 < len(s) && surr2 <= s[i + 1] && s[i + 1] < surr3: {
-                ar = DecodeRune(((rune)r), // normal rune
+                ar = DecodeRune((rune)r, // normal rune
  // valid surrogate sequence
- ((rune)s[i + 1]));
+ (rune)s[i + 1]);
                 i++;
                 break;
             }

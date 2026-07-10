@@ -28,9 +28,8 @@ public static error ErrNegativeCount = errors.New("bufio: negative count"u8);
 // Reader implements buffering for an io.Reader object.
 [GoType] partial struct Reader {
     internal slice<byte> buf;
-    internal io_package.Reader rd; // reader provided by the client
-    internal nint r;      // buf read and write positions
-    internal nint w;
+    internal io.Reader rd; // reader provided by the client
+    internal nint r, w;      // buf read and write positions
     internal error err;
     internal nint lastByte; // last byte read for UnreadByte; -1 means invalid
     internal nint lastRuneSize; // size of last rune read for UnreadRune; -1 means invalid
@@ -45,12 +44,12 @@ internal static readonly UntypedInt maxConsecutiveEmptyReads = 100;
 // size, it returns the underlying [Reader].
 public static ж<Reader> NewReaderSize(io.Reader rd, nint size) {
     // Is it already a Reader?
-    var (b, ok) = rd._<Reader.val>(ᐧ);
+    var (b, ok) = rd._<ж<Reader>>(ᐧ);
     if (ok && len((~b).buf) >= size) {
         return b;
     }
     var r = @new<Reader>();
-    r.reset(new slice<byte>(max(size, minReadBufferSize)), rd);
+    r.reset(new slice<byte>(max(size, (nint)(minReadBufferSize))), rd);
     return r;
 }
 
@@ -69,11 +68,13 @@ public static ж<Reader> NewReader(io.Reader rd) {
 // Calling Reset on the zero value of [Reader] initializes the internal buffer
 // to the default size.
 // Calling b.Reset(b) (that is, resetting a [Reader] to itself) does nothing.
-[GoRecv] public static void Reset(this ref Reader b, io.Reader r) {
+public static void Reset(this ж<Reader> Ꮡb, io.Reader r) {
+    ref var b = ref Ꮡb.Value;
+
     // If a Reader r is passed to NewReader, NewReader will return r.
     // Different layers of code may do that, and then later pass r
     // to Reset. Avoid infinite recursion in that case.
-    if (~b == Ꮡr) {
+    if (AreEqual(b, r)) {
         return;
     }
     if (b.buf == default!) {
@@ -231,7 +232,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
                 throw panic(errNegativeRead);
             }
             if (n > 0) {
-                b.lastByte = ((nint)p[n - 1]);
+                b.lastByte = (nint)p[n - 1];
                 b.lastRuneSize = -1;
             }
             return (n, b.readErr());
@@ -254,7 +255,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
     // the underlying reader returned a bad count. See issue 49795.
     n = copy(p, b.buf[(int)(b.r)..(int)(b.w)]);
     b.r += n;
-    b.lastByte = ((nint)b.buf[b.r - 1]);
+    b.lastByte = (nint)b.buf[b.r - 1];
     b.lastRuneSize = -1;
     return (n, default!);
 }
@@ -272,7 +273,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
     // buffer is empty
     var c = b.buf[b.r];
     b.r++;
-    b.lastByte = ((nint)c);
+    b.lastByte = (nint)c;
     return (c, default!);
 }
 
@@ -292,7 +293,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
         // b.r == 0 && b.w == 0
         b.w = 1;
     }
-    b.buf[b.r] = ((byte)b.lastByte);
+    b.buf[b.r] = (byte)b.lastByte;
     b.lastByte = -1;
     b.lastRuneSize = -1;
     return default!;
@@ -306,7 +307,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
     nint size = default!;
     error err = default!;
 
-    while (b.r + utf8.UTFMax > b.w && !utf8.FullRune(b.buf[(int)(b.r)..(int)(b.w)]) && b.err == default! && b.w - b.r < len(b.buf)) {
+    while (b.r + (nint)utf8.UTFMax > b.w && !utf8.FullRune(b.buf[(int)(b.r)..(int)(b.w)]) && b.err == default! && b.w - b.r < len(b.buf)) {
         b.fill();
     }
     // b.w-b.r < len(buf) => buffer is not full
@@ -314,12 +315,12 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
     if (b.r == b.w) {
         return (0, 0, b.readErr());
     }
-    (r, size) = (((rune)b.buf[b.r]), 1);
+    (r, size) = ((rune)b.buf[b.r], 1);
     if (r >= utf8.RuneSelf) {
         (r, size) = utf8.DecodeRune(b.buf[(int)(b.r)..(int)(b.w)]);
     }
     b.r += size;
-    b.lastByte = ((nint)b.buf[b.r - 1]);
+    b.lastByte = (nint)b.buf[b.r - 1];
     b.lastRuneSize = size;
     return (r, size, default!);
 }
@@ -391,7 +392,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
     // Handle last byte, if any.
     {
         nint i = len(line) - 1; if (i >= 0) {
-            b.lastByte = ((nint)line[i]);
+            b.lastByte = (nint)line[i];
             b.lastRuneSize = -1;
         }
     }
@@ -517,13 +518,13 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 [GoRecv] public static (@string, error) ReadString(this ref Reader b, byte delim) {
     var (full, frag, n, err) = b.collectFragments(delim);
     // Allocate new buffer to hold the full pieces and the fragment.
-    strings.Builder buf = default!;
-    buf.Grow(n);
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
+    Ꮡbuf.Grow(n);
     // Copy full pieces and fragment in.
     foreach (var (_, fb) in full) {
-        buf.Write(fb);
+        Ꮡbuf.Write(fb);
     }
-    buf.Write(frag);
+    Ꮡbuf.Write(frag);
     return (buf.String(), err);
 }
 
@@ -584,7 +585,7 @@ internal static error errNegativeWrite = errors.New("bufio: writer returned nega
         throw panic(errNegativeWrite);
     }
     b.r += n;
-    return (((int64)n), err);
+    return ((int64)n, err);
 }
 
 // buffered output
@@ -599,7 +600,7 @@ internal static error errNegativeWrite = errors.New("bufio: writer returned nega
     internal error err;
     internal slice<byte> buf;
     internal nint n;
-    internal io_package.Writer wr;
+    internal io.Writer wr;
 }
 
 // NewWriterSize returns a new [Writer] whose buffer has at least the specified
@@ -607,7 +608,7 @@ internal static error errNegativeWrite = errors.New("bufio: writer returned nega
 // size, it returns the underlying [Writer].
 public static ж<Writer> NewWriterSize(io.Writer w, nint size) {
     // Is it already a Writer?
-    var (b, ok) = w._<Writer.val>(ᐧ);
+    var (b, ok) = w._<ж<Writer>>(ᐧ);
     if (ok && len((~b).buf) >= size) {
         return b;
     }
@@ -637,11 +638,13 @@ public static ж<Writer> NewWriter(io.Writer w) {
 // Calling Reset on the zero value of [Writer] initializes the internal buffer
 // to the default size.
 // Calling w.Reset(w) (that is, resetting a [Writer] to itself) does nothing.
-[GoRecv] public static void Reset(this ref Writer b, io.Writer w) {
+public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
+    ref var b = ref Ꮡb.Value;
+
     // If a Writer w is passed to NewWriter, NewWriter will return w.
     // Different layers of code may do that, and then later pass w
     // to Reset. Avoid infinite recursion in that case.
-    if (~b == Ꮡw) {
+    if (AreEqual(b, w)) {
         return;
     }
     if (b.buf == default!) {
@@ -703,18 +706,18 @@ public static ж<Writer> NewWriter(io.Writer w) {
     error err = default!;
 
     while (len(p) > b.Available() && b.err == default!) {
-        nint n = default!;
+        nint nΔ1 = default!;
         if (b.Buffered() == 0){
             // Large write, empty buffer.
             // Write directly from p to avoid copy.
-            (n, b.err) = b.wr.Write(p);
+            (nΔ1, b.err) = b.wr.Write(p);
         } else {
-            n = copy(b.buf[(int)(b.n)..], p);
-            b.n += n;
+            nΔ1 = copy(b.buf[(int)(b.n)..], p);
+            b.n += nΔ1;
             b.Flush();
         }
-        nn += n;
-        p = p[(int)(n)..];
+        nn += nΔ1;
+        p = p[(int)(nΔ1)..];
     }
     if (b.err != default!) {
         return (nn, b.err);
@@ -745,8 +748,8 @@ public static ж<Writer> NewWriter(io.Writer w) {
     error err = default!;
 
     // Compare as uint32 to correctly handle negative runes.
-    if (((uint32)r) < utf8.RuneSelf) {
-        err = b.WriteByte(((byte)r));
+    if ((uint32)r < utf8.RuneSelf) {
+        err = b.WriteByte((byte)r);
         if (err != default!) {
             return (0, err);
         }
@@ -782,7 +785,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
     var tryStringWriter = true;
     nint nn = 0;
     while (len(s) > b.Available() && b.err == default!) {
-        nint n = default!;
+        nint nΔ1 = default!;
         if (b.Buffered() == 0 && sw == default! && tryStringWriter) {
             // Check at most once whether b.wr is a StringWriter.
             (sw, tryStringWriter) = b.wr._<io.StringWriter>(ᐧ);
@@ -791,14 +794,14 @@ public static ж<Writer> NewWriter(io.Writer w) {
             // Large write, empty buffer, and the underlying writer supports
             // WriteString: forward the write to the underlying StringWriter.
             // This avoids an extra copy.
-            (n, b.err) = sw.WriteString(s);
+            (nΔ1, b.err) = sw.WriteString(s);
         } else {
-            n = copy(b.buf[(int)(b.n)..], s);
-            b.n += n;
+            nΔ1 = copy(b.buf[(int)(b.n)..], s);
+            b.n += nΔ1;
             b.Flush();
         }
-        nn += n;
-        s = s[(int)(n)..];
+        nn += nΔ1;
+        s = s[(int)(nΔ1)..];
     }
     if (b.err != default!) {
         return (nn, b.err);
@@ -848,7 +851,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
             return (n, io.ErrNoProgress);
         }
         b.n += m;
-        n += ((int64)m);
+        n += (int64)m;
         if (err != default!) {
             break;
         }
@@ -875,8 +878,8 @@ public static ж<Writer> NewWriter(io.Writer w) {
 
 // NewReadWriter allocates a new [ReadWriter] that dispatches to r and w.
 public static ж<ReadWriter> NewReadWriter(ж<Reader> Ꮡr, ж<Writer> Ꮡw) {
-    ref var r = ref Ꮡr.val;
-    ref var w = ref Ꮡw.val;
+    ref var r = ref Ꮡr.Value;
+    ref var w = ref Ꮡw.Value;
 
     return Ꮡ(new ReadWriter(Ꮡr, Ꮡw));
 }

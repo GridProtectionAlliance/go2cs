@@ -8,11 +8,12 @@ namespace go.@internal;
 using fmt = fmt_package;
 using math = math_package;
 using strings = strings_package;
-using @event = @internal.trace.event_package;
-using go122 = @internal.trace.@event.go122_package;
-using version = @internal.trace.version_package;
-using @internal.trace;
-using @internal.trace.@event;
+using @event = go.@internal.trace.event_package;
+using go122 = go.@internal.trace.@event.go122_package;
+using version = go.@internal.trace.version_package;
+using go.@internal.trace;
+using go.@internal.trace.@event;
+using io = io_package;
 
 partial class trace_package {
 
@@ -30,7 +31,7 @@ partial struct timedEventArgs;
 // baseEvent is the basic unprocessed event. This serves as a common
 // fundamental data structure across.
 [GoType] partial struct baseEvent {
-    internal @internal.trace.event_package.Type typ;
+    internal @event.Type typ;
     internal ΔTime time;
     internal timedEventArgs args;
 }
@@ -50,8 +51,8 @@ partial struct timedEventArgs;
 // interpret an individual event.
 [GoType] partial struct evTable {
     internal frequency freq;
-    internal trace.stringID, string> strings;
-    internal trace.stack> stacks;
+    internal dataTable<stringID, @string> strings;
+    internal dataTable<stackID, stack> stacks;
     internal map<uint64, frame> pcs;
     // extraStrings are strings that get generated during
     // parsing but haven't come directly from the trace, so
@@ -61,7 +62,7 @@ partial struct timedEventArgs;
     internal extraStringID nextExtra;
     // expData contains extra unparsed data that is accessible
     // only to ExperimentEvent via an EventExperimental event.
-    internal @event.Experiment>*ExperimentalData expData;
+    internal map<@event.Experiment, ж<ExperimentalData>> expData;
 }
 
 // addExtraString adds an extra string to the evTable and returns
@@ -74,7 +75,7 @@ partial struct timedEventArgs;
         t.extraStringIDs = new map<@string, extraStringID>();
     }
     {
-        var (idΔ1, ok) = t.extraStringIDs[s]; if (ok) {
+        var (idΔ1, ok) = t.extraStringIDs[s, ꟷ]; if (ok) {
             return idΔ1;
         }
     }
@@ -96,8 +97,7 @@ partial struct timedEventArgs;
 
 // dataTable is a mapping from EIs to Es.
 [GoType] partial struct dataTable<EI, E>
-    where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, EI, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
-    where E : new()
+    where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     internal slice<uint8> present;
     internal slice<E> dense;
@@ -110,8 +110,7 @@ partial struct timedEventArgs;
 // of whether or not s is the same in content. This should be used
 // for validation during parsing.
 [GoRecv] internal static error insert<EI, E>(this ref dataTable<EI, E> d, EI id, E data)
-    where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, EI, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
-    where E : new()
+    where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     if (d.sparse == default!) {
         d.sparse = new map<EI, E>();
@@ -129,16 +128,15 @@ partial struct timedEventArgs;
 //
 // This is intended to be called only once after insertions are done.
 [GoRecv] internal static void compactify<EI, E>(this ref dataTable<EI, E> d)
-    where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, EI, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
-    where E : new()
+    where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     if (d.sparse == default! || len(d.dense) != 0) {
         // Already compactified.
         return;
     }
     // Find the range of IDs.
-    var maxID = ((EI)0);
-    var minID = ~((EI)0);
+    var maxID = ConvertToType<EI>(0);
+    var minID = ~ConvertToType<EI>(0);
     foreach (var (id, _) in d.sparse) {
         if (id > maxID) {
             maxID = id;
@@ -147,23 +145,23 @@ partial struct timedEventArgs;
             minID = id;
         }
     }
-    if (maxID >= math.MaxInt) {
+    if (maxID >= ConvertToType<EI>(math.MaxInt)) {
         // We can't create a slice big enough to hold maxID elements
         return;
     }
     // We're willing to waste at most 2x memory.
-    if (((nint)(maxID - minID)) > max(len(d.sparse), 2 * len(d.sparse))) {
+    if ((nint)ConvertToUInt64<EI>(maxID - minID) > max(len(d.sparse), 2 * len(d.sparse))) {
         return;
     }
-    if (((nint)minID) > len(d.sparse)) {
+    if ((nint)ConvertToUInt64<EI>(minID) > len(d.sparse)) {
         return;
     }
-    nint size = ((nint)maxID) + 1;
+    nint size = (nint)ConvertToUInt64<EI>(maxID) + 1;
     d.present = new slice<uint8>((size + 7) / 8);
     d.dense = new slice<E>(size);
     foreach (var (id, data) in d.sparse) {
-        d.dense[id] = data;
-        d.present[id / 8] |= (uint8)(((uint8)1) << (int)((id % 8)));
+        d.dense[(nint)(ConvertToUInt64<EI>(id))] = data;
+        d.present[(nint)(ConvertToUInt64<EI>(id / ConvertToType<EI>(8)))] |= (uint8)(((uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))));
     }
     d.sparse = default!;
 }
@@ -171,38 +169,35 @@ partial struct timedEventArgs;
 // get returns the E for id or false if it doesn't
 // exist. This should be used for validation during parsing.
 [GoRecv] internal static (E, bool) get<EI, E>(this ref dataTable<EI, E> d, EI id)
-    where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, EI, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
-    where E : new()
+    where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
-    if (AreEqual(id, 0)) {
-        return (@new<E>().val, true);
+    if (AreEqual(id, ConvertToType<EI>(0))) {
+        return (@new<E>().ValueSlot, true);
     }
-    if (((uint64)id) < ((uint64)len(d.dense))){
-        if ((uint8)(d.present[id / 8] & (((uint8)1) << (int)((id % 8)))) != 0) {
-            return (d.dense[id], true);
+    if (ConvertToUInt64<EI>(id) < (uint64)len(d.dense)){
+        if ((uint8)(d.present[(nint)(ConvertToUInt64<EI>(id / ConvertToType<EI>(8)))] & (((uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))))) != 0) {
+            return (d.dense[(nint)(ConvertToUInt64<EI>(id))], true);
         }
     } else 
     if (d.sparse != default!) {
         {
-            var data = d.sparse[id];
-            var ok = d.sparse[id]; if (ok) {
+            var (data, ok) = d.sparse[id, ꟷ]; if (ok) {
                 return (data, true);
             }
         }
     }
-    return (@new<E>().val, false);
+    return (@new<E>().ValueSlot, false);
 }
 
 // forEach iterates over all ID/value pairs in the data table.
 [GoRecv] internal static bool forEach<EI, E>(this ref dataTable<EI, E> d, Func<EI, E, bool> yield)
-    where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, EI, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
-    where E : new()
+    where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     foreach (var (id, value) in d.dense) {
-        if ((uint8)(d.present[id / 8] & (((uint8)1) << (int)((id % 8)))) == 0) {
+        if ((uint8)(d.present[id / 8] & (((uint8)1 << (int)((id % 8))))) == 0) {
             continue;
         }
-        if (!yield(((EI)id), value)) {
+        if (!yield(ConvertToType<EI>(id), value)) {
             return false;
         }
     }
@@ -221,8 +216,7 @@ partial struct timedEventArgs;
 //
 // This should only be used if id has already been validated.
 [GoRecv] internal static E mustGet<EI, E>(this ref dataTable<EI, E> d, EI id)
-    where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, EI, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
-    where E : new()
+    where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     var (data, ok) = d.get(id);
     if (!ok) {
@@ -235,7 +229,7 @@ partial struct timedEventArgs;
 
 // mul multiplies an unprocessed to produce a time in nanoseconds.
 internal static ΔTime mul(this frequency f, timestamp t) {
-    return ((ΔTime)(((float64)t) * ((float64)f)));
+    return ((ΔTime)(int64)((float64)(uint64)t * (float64)f));
 }
 
 [GoType("num:uint64")] partial struct stringID;
@@ -257,19 +251,19 @@ internal static ΔTime mul(this frequency f, timestamp t) {
 // We don't just store it as an Event in generation to minimize
 // the amount of pointer data floating around.
 internal static ΔEvent asEvent(this cpuSample s, ж<evTable> Ꮡtable) {
-    ref var table = ref Ꮡtable.val;
+    ref var table = ref Ꮡtable.Value;
 
     // TODO(mknyszek): This is go122-specific, but shouldn't be.
     // Generalize this in the future.
     var e = new ΔEvent(
-        table: table,
+        table: Ꮡtable,
         ctx: s.schedCtx,
         @base: new baseEvent(
             typ: go122.EvCPUSample,
             time: s.time
         )
     );
-    e.@base.args[0] = ((uint64)s.stack);
+    e.@base.args[0] = (uint64)s.stack;
     return e;
 }
 
@@ -279,9 +273,9 @@ internal static ΔEvent asEvent(this cpuSample s, ж<evTable> Ꮡtable) {
 }
 
 internal static @string String(this stack s) {
-    ref var sb = ref heap(new strings_package.Builder(), out var Ꮡsb);
+    ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     foreach (var (_, frame) in s.pcs) {
-        fmt.Fprintf(~Ꮡsb, "\t%#v\n"u8, frame);
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "\t%#v\n"u8, frame);
     }
     return sb.String();
 }

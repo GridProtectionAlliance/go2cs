@@ -4,7 +4,8 @@
 namespace go.math;
 
 using math = math_package;
-using bits = math.bits_package;
+using bits = go.math.bits_package;
+using go.math;
 
 partial class cmplx_package {
 
@@ -75,7 +76,7 @@ public static complex128 Tan(complex128 x) {
     }
 
     var d = math.Cos(2 * real(x)) + math.Cosh(2 * imag(x));
-    if (math.Abs(d) < 0.25F) {
+    if (math.Abs(d) < 0.25D) {
         d = tanSeries(x);
     }
     if (d == 0) {
@@ -141,65 +142,65 @@ internal static float64 reducePi(float64 x) {
     const float64 reduceThreshold = /* 1 << 30 */ 1.07374e+09;
     if (math.Abs(x) < reduceThreshold) {
         // Use Cody-Waite reduction in three parts.
-        static readonly UntypedFloat PI1 = /* 3.141592502593994 */ 3.14159; // 0x400921fb40000000
+        UntypedFloat PI1 = /* 3.141592502593994 */ 3.14159; // 0x400921fb40000000
         
-        static readonly UntypedFloat PI2 = /* 1.5099578831723193e-07 */ 1.50996e-07; // 0x3e84442d00000000
+        UntypedFloat PI2 = /* 1.5099578831723193e-07 */ 1.50996e-07; // 0x3e84442d00000000
         
-        static readonly UntypedFloat PI3 = /* 1.0780605716316238e-14 */ 1.07806e-14; // 0x3d08469898cc5170
-        var t = x / math.Pi;
-        t += 0.5F;
-        t = ((float64)((int64)t));
+        UntypedFloat PI3 = /* 1.0780605716316238e-14 */ 1.07806e-14; // 0x3d08469898cc5170
+        var t = x / (float64)math.Pi;
+        t += 0.5D;
+        t = (float64)(int64)t;
         // int64(t) = the multiple
-        return ((x - t * PI1) - t * PI2) - t * PI3;
+        return ((x - t * (float64)PI1) - t * (float64)PI2) - t * (float64)PI3;
     }
     // Must apply Payne-Hanek range reduction
-    static readonly UntypedInt mask = /* 0x7FF */ 2047;
+    UntypedInt mask = 0x7FF;
     
-    static readonly UntypedInt shift = /* 64 - 11 - 1 */ 52;
+    UntypedInt shift = /* 64 - 11 - 1 */ 52;
     
-    static readonly UntypedInt bias = 1023;
+    UntypedInt bias = 1023;
     
-    static readonly UntypedInt fracMask = /* 1<<shift - 1 */ 4503599627370495;
+    UntypedInt fracMask = /* 1<<shift - 1 */ 4503599627370495;
     // Extract out the integer and exponent such that,
     // x = ix * 2 ** exp.
     var ix = math.Float64bits(x);
-    nint exp = ((nint)((uint64)(ix >> (int)(shift) & mask))) - bias - shift;
+    nint exp = (nint)((uint64)((ix >> (int)(shift)) & (uint64)mask)) - (nint)bias - (nint)shift;
     ix &= (uint64)(fracMask);
-    ix |= (uint64)(1 << (int)(shift));
+    ix |= (uint64)(((uint64)1 << (int)(shift)));
     // mPi is the binary digits of 1/Pi as a uint64 array,
     // that is, 1/Pi = Sum mPi[i]*2^(-64*i).
     // 19 64-bit digits give 1216 bits of precision
     // to handle the largest possible float64 exponent.
     array<uint64> mPi = new uint64[]{
-        0,
-        (nint)5871781006564002452L,
-        (nuint)18308165927316385504UL,
-        (nint)7904181063698728992L,
-        (nuint)18386141011142107824UL,
-        (nuint)15821769039155751280UL,
-        (nint)226472410124699918L,
-        (nint)9155525084211106719L,
-        (nint)8377006445469475394L,
-        (nint)8416726409370648352L,
-        (nuint)11297538173999619322UL,
-        (nint)5639122210317440029L,
-        (nuint)10375251204153461767UL,
-        (nuint)17840878831444244111UL,
-        (nuint)13158180450388509915UL,
-        (nuint)12079533480525952278UL,
-        (nuint)13444332734028904637UL,
-        (nuint)11422145685100251509UL,
-        (nint)3890458997777936004L,
-        (nint)3098925296816862677L
+        0x0000000000000000,
+        0x517cc1b727220a94UL,
+        (nuint)0xfe13abe8fa9a6ee0UL,
+        0x6db14acc9e21c820UL,
+        (nuint)0xff28b1d5ef5de2b0UL,
+        (nuint)0xdb92371d2126e970UL,
+        0x0324977504e8c90eUL,
+        0x7f0ef58e5894d39fUL,
+        0x74411afa975da242UL,
+        0x74ce38135a2fbf20UL,
+        (nuint)0x9cc8eb1cc1a99cfaUL,
+        0x4e422fc5defc941dUL,
+        (nuint)0x8ffc4bffef02cc07UL,
+        (nuint)0xf79788c5ad05368fUL,
+        (nuint)0xb69b3f6793e584dbUL,
+        (nuint)0xa7a31fb34f2ff516UL,
+        (nuint)0xba93dd63f5f2f8bdUL,
+        (nuint)0x9e839cfbc5294975UL,
+        0x35fdafd88fc6ae84UL,
+        0x2b0198237e3db5d5UL
     }.array();
     // Use the exponent to extract the 3 appropriate uint64 digits from mPi,
     // B ~ (z0, z1, z2), such that the product leading digit has the exponent -64.
     // Note, exp >= 50 since x >= reduceThreshold and exp < 971 for maximum float64.
-    nuint digit = ((nuint)(exp + 64)) / 64;
-    nuint bitshift = ((nuint)(exp + 64)) % 64;
-    var z0 = (uint64)((mPi[digit] << (int)(bitshift)) | (mPi[digit + 1] >> (int)((64 - bitshift))));
-    var z1 = (uint64)((mPi[digit + 1] << (int)(bitshift)) | (mPi[digit + 2] >> (int)((64 - bitshift))));
-    var z2 = (uint64)((mPi[digit + 2] << (int)(bitshift)) | (mPi[digit + 3] >> (int)((64 - bitshift))));
+    nuint digit = (nuint)(exp + 64) / 64;
+    nuint bitshift = (nuint)(exp + 64) % 64;
+    var z0 = (uint64)(((mPi[(nint)(digit)] << (int)(bitshift))) | ((mPi[(nint)(digit + 1)] >> (int)((64 - bitshift)))));
+    var z1 = (uint64)(((mPi[(nint)(digit + 1)] << (int)(bitshift))) | ((mPi[(nint)(digit + 2)] >> (int)((64 - bitshift)))));
+    var z2 = (uint64)(((mPi[(nint)(digit + 2)] << (int)(bitshift))) | ((mPi[(nint)(digit + 3)] >> (int)((64 - bitshift)))));
     // Multiply mantissa by the digits and extract the upper two digits (hi, lo).
     var (z2hi, _) = bits.Mul64(z2, ix);
     var (z1hi, z1lo) = bits.Mul64(z1, ix);
@@ -207,34 +208,34 @@ internal static float64 reducePi(float64 x) {
     var (lo, c) = bits.Add64(z1lo, z2hi, 0);
     var (hi, _) = bits.Add64(z0lo, z1hi, c);
     // Find the magnitude of the fraction.
-    nuint lz = ((nuint)bits.LeadingZeros64(hi));
-    var e = ((uint64)(bias - (lz + 1)));
+    nuint lz = (nuint)bits.LeadingZeros64(hi);
+    var e = (uint64)((nuint)bias - (lz + 1));
     // Clear implicit mantissa bit and shift into place.
-    hi = (uint64)((hi << (int)((lz + 1))) | (lo >> (int)((64 - (lz + 1)))));
-    hi >>= (UntypedInt)(64 - shift);
+    hi = (uint64)(((hi << (int)((lz + 1)))) | ((lo >> (int)((64 - (lz + 1))))));
+    hi >>= (int)(64 - shift);
     // Include the exponent and convert to a float.
-    hi |= (uint64)(e << (int)(shift));
+    hi |= (uint64)((e << (int)(shift)));
     x = math.Float64frombits(hi);
     // map to (-Pi/2, Pi/2]
-    if (x > 0.5F) {
+    if (x > 0.5D) {
         x--;
     }
-    return math.Pi * x;
+    return (float64)math.Pi * x;
 }
 
 // Taylor series expansion for cosh(2y) - cos(2x)
 internal static float64 tanSeries(complex128 z) {
-    static readonly UntypedFloat MACHEP = /* 1.0 / (1 << 53) */ 1.11022e-16;
+    UntypedFloat MACHEP = /* 1.0 / (1 << 53) */ 1.11022e-16;
     var x = math.Abs(2 * real(z));
     var y = math.Abs(2 * imag(z));
     x = reducePi(x);
     x = x * x;
     y = y * y;
-    var x2 = 1.0F;
-    var y2 = 1.0F;
-    var f = 1.0F;
-    var rn = 0.0F;
-    var d = 0.0F;
+    var x2 = 1.0D;
+    var y2 = 1.0D;
+    var f = 1.0D;
+    var rn = 0.0D;
+    var d = 0.0D;
     while (ᐧ) {
         rn++;
         f *= rn;
@@ -291,7 +292,7 @@ internal static float64 tanSeries(complex128 z) {
 // Cot returns the cotangent of x.
 public static complex128 Cot(complex128 x) {
     var d = math.Cosh(2 * imag(x)) - math.Cos(2 * real(x));
-    if (math.Abs(d) < 0.25F) {
+    if (math.Abs(d) < 0.25D) {
         d = tanSeries(x);
     }
     if (d == 0) {

@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using astꓸFilter = go.go.ast_package.ΔFilter;
 global using commentꓸText = go.go.doc.comment_package.ΔText;
 global using osꓸDirEntry = go.io.fs_package.DirEntry;
 global using osꓸFileInfo = go.io.fs_package.FileInfo;
@@ -20,6 +19,8 @@ global using osꓸSignal = go.os_package.ΔSignal;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;
+using ast = go.go.ast_package;
+using token = go.go.token_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -48,23 +49,15 @@ using static go.go.printer_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<ast.Node, bool), go.ast_package.Node>]
-[assembly: GoImplement<bool, go.ast_package.Expr>]
-[assembly: GoImplement<constraint.Expr, error), go.build.constraint_package.Expr>]
-[assembly: GoImplement<go.ast_package.BasicLit, go.ast_package.Expr>]
-[assembly: GoImplement<go.ast_package.BinaryExpr, go.ast_package.Expr>]
-[assembly: GoImplement<go.ast_package.CallExpr, go.ast_package.Expr>]
-[assembly: GoImplement<go.ast_package.Decl, go.ast_package.Node>]
-[assembly: GoImplement<go.ast_package.Expr, go.ast_package.Node>]
-[assembly: GoImplement<go.ast_package.Ident, go.ast_package.Expr>]
-[assembly: GoImplement<go.ast_package.Spec, go.ast_package.Node>]
-[assembly: GoImplement<go.ast_package.Stmt, go.ast_package.Node>]
-[assembly: GoImplement<go.ast_package.UnaryExpr, go.ast_package.Expr>]
-[assembly: GoImplement<go.build.constraint_package.AndExpr, go.build.constraint_package.Expr>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
-[assembly: GoImplement<sizeCounter, io_package.Writer>]
-[assembly: GoImplement<text.tabwriter_package.Writer, io_package.Writer>]
-[assembly: GoImplement<trimmer, io_package.Writer>]
+[assembly: GoImplement<go.go.ast_package.BasicLit, go.go.ast_package.Expr>(Pointer = true)]
+[assembly: GoImplement<go.go.ast_package.BinaryExpr, go.go.ast_package.Expr>(Pointer = true)]
+[assembly: GoImplement<go.go.ast_package.CallExpr, go.go.ast_package.Expr>(Pointer = true)]
+[assembly: GoImplement<go.go.ast_package.Ident, go.go.ast_package.Expr>(Pointer = true)]
+[assembly: GoImplement<go.go.ast_package.UnaryExpr, go.go.ast_package.Expr>(Pointer = true)]
+[assembly: GoImplement<go.go.build.constraint_package.AndExpr, go.go.build.constraint_package.Expr>(Pointer = true)]
+[assembly: GoImplement<go.text.tabwriter_package.Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<sizeCounter, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<trimmer, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

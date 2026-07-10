@@ -18,7 +18,7 @@ internal static bool isTSpecial(rune r) {
 internal static bool isTokenChar(rune r) {
     // token := 1*<any (US-ASCII) CHAR except SPACE, CTLs,
     //             or tspecials>
-    return r > 32 && r < 127 && !isTSpecial(r);
+    return r > 0x20 && r < 0x7f && !isTSpecial(r);
 }
 
 // isToken reports whether s is a 'token' as defined by RFC 1521

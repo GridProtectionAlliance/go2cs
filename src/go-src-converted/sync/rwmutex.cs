@@ -39,8 +39,8 @@ partial class sync_package {
     internal Mutex w;        // held if there are pending writers
     internal uint32 writerSem;       // semaphore for writers to wait for completing readers
     internal uint32 readerSem;       // semaphore for readers to wait for completing writers
-    internal sync.atomic_package.Int32 readerCount; // number of pending readers
-    internal sync.atomic_package.Int32 readerWait; // number of departing readers
+    internal atomic.Int32 readerCount; // number of pending readers
+    internal atomic.Int32 readerWait; // number of departing readers
 }
 
 internal static readonly UntypedInt rwmutexMaxReaders = /* 1 << 30 */ 1073741824;
@@ -63,18 +63,20 @@ internal static readonly UntypedInt rwmutexMaxReaders = /* 1 << 30 */ 1073741824
 // It should not be used for recursive read locking; a blocked Lock
 // call excludes new readers from acquiring the lock. See the
 // documentation on the [RWMutex] type.
-[GoRecv] public static void RLock(this ref RWMutex rw) {
+public static void RLock(this ж<RWMutex> Ꮡrw) {
+    ref var rw = ref Ꮡrw.Value;
+
     if (race.Enabled) {
         _ = rw.w.state;
         race.Disable();
     }
-    if (rw.readerCount.Add(1) < 0) {
+    if (Ꮡrw.of(RWMutex.ᏑreaderCount).Add(1) < 0) {
         // A writer is pending, wait for it.
-        runtime_SemacquireRWMutexR(Ꮡ(rw.readerSem), false, 0);
+        runtime_SemacquireRWMutexR(Ꮡrw.of(RWMutex.ᏑreaderSem), false, 0);
     }
     if (race.Enabled) {
         race.Enable();
-        race.Acquire(new @unsafe.Pointer(Ꮡ(rw.readerSem)));
+        race.Acquire(new @unsafe.Pointer(Ꮡrw.of(RWMutex.ᏑreaderSem)));
     }
 }
 
@@ -83,23 +85,25 @@ internal static readonly UntypedInt rwmutexMaxReaders = /* 1 << 30 */ 1073741824
 // Note that while correct uses of TryRLock do exist, they are rare,
 // and use of TryRLock is often a sign of a deeper problem
 // in a particular use of mutexes.
-[GoRecv] public static bool TryRLock(this ref RWMutex rw) {
+public static bool TryRLock(this ж<RWMutex> Ꮡrw) {
+    ref var rw = ref Ꮡrw.Value;
+
     if (race.Enabled) {
         _ = rw.w.state;
         race.Disable();
     }
     while (ᐧ) {
-        var c = rw.readerCount.Load();
+        var c = Ꮡrw.of(RWMutex.ᏑreaderCount).Load();
         if (c < 0) {
             if (race.Enabled) {
                 race.Enable();
             }
             return false;
         }
-        if (rw.readerCount.CompareAndSwap(c, c + 1)) {
+        if (Ꮡrw.of(RWMutex.ᏑreaderCount).CompareAndSwap(c, c + 1)) {
             if (race.Enabled) {
                 race.Enable();
-                race.Acquire(new @unsafe.Pointer(Ꮡ(rw.readerSem)));
+                race.Acquire(new @unsafe.Pointer(Ꮡrw.of(RWMutex.ᏑreaderSem)));
             }
             return true;
         }
@@ -110,16 +114,18 @@ internal static readonly UntypedInt rwmutexMaxReaders = /* 1 << 30 */ 1073741824
 // it does not affect other simultaneous readers.
 // It is a run-time error if rw is not locked for reading
 // on entry to RUnlock.
-[GoRecv] public static void RUnlock(this ref RWMutex rw) {
+public static void RUnlock(this ж<RWMutex> Ꮡrw) {
+    ref var rw = ref Ꮡrw.Value;
+
     if (race.Enabled) {
         _ = rw.w.state;
-        race.ReleaseMerge(new @unsafe.Pointer(Ꮡ(rw.writerSem)));
+        race.ReleaseMerge(new @unsafe.Pointer(Ꮡrw.of(RWMutex.ᏑwriterSem)));
         race.Disable();
     }
     {
-        var r = rw.readerCount.Add(-1); if (r < 0) {
+        var r = Ꮡrw.of(RWMutex.ᏑreaderCount).Add(-1); if (r < 0) {
             // Outlined slow-path to allow the fast-path to be inlined
-            rw.rUnlockSlow(r);
+            Ꮡrw.rUnlockSlow(r);
         }
     }
     if (race.Enabled) {
@@ -127,38 +133,42 @@ internal static readonly UntypedInt rwmutexMaxReaders = /* 1 << 30 */ 1073741824
     }
 }
 
-[GoRecv] internal static void rUnlockSlow(this ref RWMutex rw, int32 r) {
+internal static void rUnlockSlow(this ж<RWMutex> Ꮡrw, int32 r) {
+    ref var rw = ref Ꮡrw.Value;
+
     if (r + 1 == 0 || r + 1 == -rwmutexMaxReaders) {
         race.Enable();
         fatal("sync: RUnlock of unlocked RWMutex"u8);
     }
     // A writer is pending.
-    if (rw.readerWait.Add(-1) == 0) {
+    if (Ꮡrw.of(RWMutex.ᏑreaderWait).Add(-1) == 0) {
         // The last reader unblocks the writer.
-        runtime_Semrelease(Ꮡ(rw.writerSem), false, 1);
+        runtime_Semrelease(Ꮡrw.of(RWMutex.ᏑwriterSem), false, 1);
     }
 }
 
 // Lock locks rw for writing.
 // If the lock is already locked for reading or writing,
 // Lock blocks until the lock is available.
-[GoRecv] public static void Lock(this ref RWMutex rw) {
+public static void Lock(this ж<RWMutex> Ꮡrw) {
+    ref var rw = ref Ꮡrw.Value;
+
     if (race.Enabled) {
         _ = rw.w.state;
         race.Disable();
     }
     // First, resolve competition with other writers.
-    rw.w.Lock();
+    Ꮡrw.of(RWMutex.Ꮡw).Lock();
     // Announce to readers there is a pending writer.
-    var r = rw.readerCount.Add(-rwmutexMaxReaders) + rwmutexMaxReaders;
+    var r = Ꮡrw.of(RWMutex.ᏑreaderCount).Add(-rwmutexMaxReaders) + (int32)rwmutexMaxReaders;
     // Wait for active readers.
-    if (r != 0 && rw.readerWait.Add(r) != 0) {
-        runtime_SemacquireRWMutex(Ꮡ(rw.writerSem), false, 0);
+    if (r != 0 && Ꮡrw.of(RWMutex.ᏑreaderWait).Add(r) != 0) {
+        runtime_SemacquireRWMutex(Ꮡrw.of(RWMutex.ᏑwriterSem), false, 0);
     }
     if (race.Enabled) {
         race.Enable();
-        race.Acquire(new @unsafe.Pointer(Ꮡ(rw.readerSem)));
-        race.Acquire(new @unsafe.Pointer(Ꮡ(rw.writerSem)));
+        race.Acquire(new @unsafe.Pointer(Ꮡrw.of(RWMutex.ᏑreaderSem)));
+        race.Acquire(new @unsafe.Pointer(Ꮡrw.of(RWMutex.ᏑwriterSem)));
     }
 }
 
@@ -167,19 +177,21 @@ internal static readonly UntypedInt rwmutexMaxReaders = /* 1 << 30 */ 1073741824
 // Note that while correct uses of TryLock do exist, they are rare,
 // and use of TryLock is often a sign of a deeper problem
 // in a particular use of mutexes.
-[GoRecv] public static bool TryLock(this ref RWMutex rw) {
+public static bool TryLock(this ж<RWMutex> Ꮡrw) {
+    ref var rw = ref Ꮡrw.Value;
+
     if (race.Enabled) {
         _ = rw.w.state;
         race.Disable();
     }
-    if (!rw.w.TryLock()) {
+    if (!Ꮡrw.of(RWMutex.Ꮡw).TryLock()) {
         if (race.Enabled) {
             race.Enable();
         }
         return false;
     }
-    if (!rw.readerCount.CompareAndSwap(0, -rwmutexMaxReaders)) {
-        rw.w.Unlock();
+    if (!Ꮡrw.of(RWMutex.ᏑreaderCount).CompareAndSwap(0, -rwmutexMaxReaders)) {
+        Ꮡrw.of(RWMutex.Ꮡw).Unlock();
         if (race.Enabled) {
             race.Enable();
         }
@@ -187,8 +199,8 @@ internal static readonly UntypedInt rwmutexMaxReaders = /* 1 << 30 */ 1073741824
     }
     if (race.Enabled) {
         race.Enable();
-        race.Acquire(new @unsafe.Pointer(Ꮡ(rw.readerSem)));
-        race.Acquire(new @unsafe.Pointer(Ꮡ(rw.writerSem)));
+        race.Acquire(new @unsafe.Pointer(Ꮡrw.of(RWMutex.ᏑreaderSem)));
+        race.Acquire(new @unsafe.Pointer(Ꮡrw.of(RWMutex.ᏑwriterSem)));
     }
     return true;
 }
@@ -199,24 +211,26 @@ internal static readonly UntypedInt rwmutexMaxReaders = /* 1 << 30 */ 1073741824
 // As with Mutexes, a locked [RWMutex] is not associated with a particular
 // goroutine. One goroutine may [RWMutex.RLock] ([RWMutex.Lock]) a RWMutex and then
 // arrange for another goroutine to [RWMutex.RUnlock] ([RWMutex.Unlock]) it.
-[GoRecv] public static void Unlock(this ref RWMutex rw) {
+public static void Unlock(this ж<RWMutex> Ꮡrw) {
+    ref var rw = ref Ꮡrw.Value;
+
     if (race.Enabled) {
         _ = rw.w.state;
-        race.Release(new @unsafe.Pointer(Ꮡ(rw.readerSem)));
+        race.Release(new @unsafe.Pointer(Ꮡrw.of(RWMutex.ᏑreaderSem)));
         race.Disable();
     }
     // Announce to readers there is no active writer.
-    var r = rw.readerCount.Add(rwmutexMaxReaders);
+    var r = Ꮡrw.of(RWMutex.ᏑreaderCount).Add(rwmutexMaxReaders);
     if (r >= rwmutexMaxReaders) {
         race.Enable();
         fatal("sync: Unlock of unlocked RWMutex"u8);
     }
     // Unblock blocked readers, if any.
-    for (nint i = 0; i < ((nint)r); i++) {
-        runtime_Semrelease(Ꮡ(rw.readerSem), false, 0);
+    for (nint i = 0; i < (nint)r; i++) {
+        runtime_Semrelease(Ꮡrw.of(RWMutex.ᏑreaderSem), false, 0);
     }
     // Allow other writers to proceed.
-    rw.w.Unlock();
+    Ꮡrw.of(RWMutex.Ꮡw).Unlock();
     if (race.Enabled) {
         race.Enable();
     }
@@ -231,26 +245,32 @@ internal static readonly UntypedInt rwmutexMaxReaders = /* 1 << 30 */ 1073741824
 //
 //go:linkname syscall_hasWaitingReaders syscall.hasWaitingReaders
 internal static bool syscall_hasWaitingReaders(ж<RWMutex> Ꮡrw) {
-    ref var rw = ref Ꮡrw.val;
+    ref var rw = ref Ꮡrw.Value;
 
-    var r = rw.readerCount.Load();
-    return r < 0 && r + rwmutexMaxReaders > 0;
+    var r = Ꮡrw.of(RWMutex.ᏑreaderCount).Load();
+    return r < 0 && r + (int32)rwmutexMaxReaders > 0;
 }
 
 // RLocker returns a [Locker] interface that implements
 // the [Locker.Lock] and [Locker.Unlock] methods by calling rw.RLock and rw.RUnlock.
-[GoRecv] public static Locker RLocker(this ref RWMutex rw) {
-    return ~((ж<rlocker>)(rw?.val ?? default!));
+public static Locker RLocker(this ж<RWMutex> Ꮡrw) {
+    ref var rw = ref Ꮡrw.Value;
+
+    return new rlockerжLocker(Ꮡ((rlocker)(rw)));
 }
 
-[GoType("struct{w sync.Mutex; writerSem uint32; readerSem uint32; readerCount sync.atomic.Int32; readerWait sync.atomic.Int32}")] partial struct rlocker;
+[GoType("RWMutex")] partial struct rlocker;
 
-[GoRecv] internal static void Lock(this ref rlocker r) {
-    (((ж<RWMutex>)(r?.val ?? default!))).val.RLock();
+internal static void Lock(this ж<rlocker> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    (Ꮡ((RWMutex)(r))).RLock();
 }
 
-[GoRecv] internal static void Unlock(this ref rlocker r) {
-    (((ж<RWMutex>)(r?.val ?? default!))).val.RUnlock();
+internal static void Unlock(this ж<rlocker> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    (Ꮡ((RWMutex)(r))).RUnlock();
 }
 
 } // end sync_package

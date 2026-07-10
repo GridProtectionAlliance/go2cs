@@ -5,7 +5,7 @@ namespace go;
 
 using io = io_package;
 using syntax = regexp.syntax_package;
-using sync = sync_package;
+using Δsync = sync_package;
 using regexp;
 
 partial class regexp_package {
@@ -30,16 +30,15 @@ partial class regexp_package {
 // an instruction and a corresponding capture array.
 // See https://swtch.com/~rsc/regexp/regexp2.html
 [GoType] partial struct thread {
-    internal ж<regexp.syntax_package.Inst> inst;
+    internal ж<syntax.Inst> inst;
     internal slice<nint> cap;
 }
 
 // A machine holds all the state during an NFA simulation for p.
 [GoType] partial struct machine {
     internal ж<Regexp> re;   // corresponding Regexp
-    internal ж<regexp.syntax_package.Prog> p; // compiled program
-    internal queue q0;        // two queues for runq, nextq
-    internal queue q1;
+    internal ж<syntax.Prog> p; // compiled program
+    internal queue q0, q1;        // two queues for runq, nextq
     internal slice<ж<thread>> pool; // pool of available threads
     internal bool matched;         // whether a match was found
     internal slice<nint> matchcap;  // capture information for the match
@@ -53,21 +52,27 @@ partial class regexp_package {
     internal inputReader reader;
 }
 
-[GoRecv] internal static input newBytes(this ref inputs i, slice<byte> b) {
+internal static input newBytes(this ж<inputs> Ꮡi, slice<byte> b) {
+    ref var i = ref Ꮡi.Value;
+
     i.bytes.str = b;
-    return i.bytes;
+    return new inputBytesжinput(Ꮡi.of(inputs.Ꮡbytes));
 }
 
-[GoRecv] internal static input newString(this ref inputs i, @string s) {
+internal static input newString(this ж<inputs> Ꮡi, @string s) {
+    ref var i = ref Ꮡi.Value;
+
     i.@string.str = s;
-    return i.@string;
+    return new inputStringжinput(Ꮡi.of(inputs.Ꮡstring));
 }
 
-[GoRecv] internal static input newReader(this ref inputs i, io.RuneReader r) {
+internal static input newReader(this ж<inputs> Ꮡi, io.RuneReader r) {
+    ref var i = ref Ꮡi.Value;
+
     i.reader.r = r;
     i.reader.atEOT = false;
     i.reader.pos = 0;
-    return i.reader;
+    return new inputReaderжinput(Ꮡi.of(inputs.Ꮡreader));
 }
 
 [GoRecv] internal static void clear(this ref inputs i) {
@@ -83,19 +88,23 @@ partial class regexp_package {
     }
 }
 
-[GoRecv] internal static (input, nint) init(this ref inputs i, io.RuneReader r, slice<byte> b, @string s) {
+internal static (input, nint) init(this ж<inputs> Ꮡi, io.RuneReader r, slice<byte> b, @string s) {
+    ref var i = ref Ꮡi.Value;
+
     if (r != default!) {
-        return (i.newReader(r), 0);
+        return (Ꮡi.newReader(r), 0);
     }
     if (b != default!) {
-        return (i.newBytes(b), len(b));
+        return (Ꮡi.newBytes(b), len(b));
     }
-    return (i.newString(s), len(s));
+    return (Ꮡi.newString(s), len(s));
 }
 
 [GoRecv] internal static void init(this ref machine m, nint ncap) {
-    foreach (var (_, t) in m.pool) {
-        t.val.cap = (~t).cap[..(int)(ncap)];
+    foreach (var (_, vᴛ1) in m.pool) {
+        var t = vᴛ1;
+
+        t.Value.cap = (~t).cap[..(int)(ncap)];
     }
     m.matchcap = m.matchcap[..(int)(ncap)];
 }
@@ -103,7 +112,7 @@ partial class regexp_package {
 // alloc allocates a new thread with the given instruction.
 // It uses the free pool if possible.
 [GoRecv] internal static ж<thread> alloc(this ref machine m, ж<syntax.Inst> Ꮡi) {
-    ref var i = ref Ꮡi.val;
+    ref var i = ref Ꮡi.Value;
 
     ж<thread> t = default!;
     {
@@ -112,59 +121,59 @@ partial class regexp_package {
             m.pool = m.pool[..(int)(n - 1)];
         } else {
             t = @new<thread>();
-            t.val.cap = new slice<nint>(len(m.matchcap), cap(m.matchcap));
+            t.Value.cap = new slice<nint>(len(m.matchcap), cap(m.matchcap));
         }
     }
-    t.val.inst = i;
+    t.Value.inst = Ꮡi;
     return t;
 }
 
 [GoType("num:uint64")] partial struct lazyFlag;
 
 internal static lazyFlag newLazyFlag(rune r1, rune r2) {
-    return ((lazyFlag)((uint64)(((uint64)r1) << (int)(32) | ((uint64)((uint32)r2)))));
+    return ((lazyFlag)((uint64)(((uint64)r1 << (int)(32)) | (uint64)(uint32)r2)));
 }
 
 internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
     if (op == 0) {
         return true;
     }
-    var r1 = ((rune)(f >> (int)(32)));
+    var r1 = (rune)(uint64)((f >> (int)(32)));
     if ((syntax.EmptyOp)(op & syntax.EmptyBeginLine) != 0) {
         if (r1 != (rune)'\n' && r1 >= 0) {
             return false;
         }
-        op &= ~(syntax.EmptyOp)(syntax.EmptyBeginLine);
+        op &= unchecked((syntax.EmptyOp)~(syntax.EmptyOp)(syntax.EmptyBeginLine));
     }
     if ((syntax.EmptyOp)(op & syntax.EmptyBeginText) != 0) {
         if (r1 >= 0) {
             return false;
         }
-        op &= ~(syntax.EmptyOp)(syntax.EmptyBeginText);
+        op &= unchecked((syntax.EmptyOp)~(syntax.EmptyOp)(syntax.EmptyBeginText));
     }
     if (op == 0) {
         return true;
     }
-    var r2 = ((rune)f);
+    var r2 = (rune)(uint64)f;
     if ((syntax.EmptyOp)(op & syntax.EmptyEndLine) != 0) {
         if (r2 != (rune)'\n' && r2 >= 0) {
             return false;
         }
-        op &= ~(syntax.EmptyOp)(syntax.EmptyEndLine);
+        op &= unchecked((syntax.EmptyOp)~(syntax.EmptyOp)(syntax.EmptyEndLine));
     }
     if ((syntax.EmptyOp)(op & syntax.EmptyEndText) != 0) {
         if (r2 >= 0) {
             return false;
         }
-        op &= ~(syntax.EmptyOp)(syntax.EmptyEndText);
+        op &= unchecked((syntax.EmptyOp)~(syntax.EmptyOp)(syntax.EmptyEndText));
     }
     if (op == 0) {
         return true;
     }
     if (syntax.IsWordChar(r1) != syntax.IsWordChar(r2)){
-        op &= ~(syntax.EmptyOp)(syntax.EmptyWordBoundary);
+        op &= unchecked((syntax.EmptyOp)~(syntax.EmptyOp)(syntax.EmptyWordBoundary));
     } else {
-        op &= ~(syntax.EmptyOp)(syntax.EmptyNoWordBoundary);
+        op &= unchecked((syntax.EmptyOp)~(syntax.EmptyOp)(syntax.EmptyNoWordBoundary));
     }
     return op == 0;
 }
@@ -172,9 +181,11 @@ internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
 // match runs the machine over the input starting at pos.
 // It reports whether a match was found.
 // If so, m.matchcap holds the submatch information.
-[GoRecv] internal static bool match(this ref machine m, input i, nint pos) {
-    var startCond = m.re.cond;
-    if (startCond == ~((syntax.EmptyOp)0)) {
+internal static bool match(this ж<machine> Ꮡm, input i, nint pos) {
+    ref var m = ref Ꮡm.Value;
+
+    var startCond = m.re.Value.cond;
+    if (startCond == ~((syntax.EmptyOp)((syntax.EmptyOp)0))) {
         // impossible
         return false;
     }
@@ -182,8 +193,7 @@ internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
     foreach (var (iΔ1, _) in m.matchcap) {
         m.matchcap[iΔ1] = -1;
     }
-    var runq = Ꮡ(m.q0);
-    var nextq = Ꮡ(m.q1);
+    var (runq, nextq) = (Ꮡm.of(machine.Ꮡq0), Ꮡm.of(machine.Ꮡq1));
     var (r, r1) = (endOfText, endOfText);
     nint width = 0;
     nint width1 = 0;
@@ -207,7 +217,7 @@ internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
                 // Have match; finished exploring alternatives.
                 break;
             }
-            if (len(m.re.prefix) > 0 && r1 != m.re.prefixRune && i.canCheckPrefix()) {
+            if (len((~m.re).prefix) > 0 && r1 != (~m.re).prefixRune && i.canCheckPrefix()) {
                 // Match requires literal prefix; fast search for it.
                 nint advance = i.index(m.re, pos);
                 if (advance < 0) {
@@ -222,7 +232,7 @@ internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
             if (len(m.matchcap) > 0) {
                 m.matchcap[0] = pos;
             }
-            m.add(runq, ((uint32)m.p.Start), pos, m.matchcap, Ꮡflag, nil);
+            m.add(runq, (uint32)(~m.p).Start, pos, m.matchcap, Ꮡflag, nil);
         }
         flag = newLazyFlag(r, r1);
         m.step(runq, nextq, pos, pos + width, r, Ꮡflag);
@@ -247,9 +257,7 @@ internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
 
 // clear frees all threads on the thread queue.
 [GoRecv] internal static void clear(this ref machine m, ж<queue> Ꮡq) {
-    ref var q = ref Ꮡq.val;
-
-    ref var d = ref heap(new entry(), out var Ꮡd);
+    ref var q = ref Ꮡq.Value;
 
     foreach (var (_, d) in q.dense) {
         if (d.t != nil) {
@@ -265,14 +273,14 @@ internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
 // which starts at position pos and ends at nextPos.
 // nextCond gives the setting for the empty-width flags after c.
 [GoRecv] internal static void step(this ref machine m, ж<queue> Ꮡrunq, ж<queue> Ꮡnextq, nint pos, nint nextPos, rune c, ж<lazyFlag> ᏑnextCond) {
-    ref var runq = ref Ꮡrunq.val;
-    ref var nextq = ref Ꮡnextq.val;
-    ref var nextCond = ref ᏑnextCond.val;
+    ref var runq = ref Ꮡrunq.Value;
+    ref var nextq = ref Ꮡnextq.Value;
+    ref var nextCond = ref ᏑnextCond.Value;
 
-    var longest = m.re.longest;
+    var longest = m.re.Value.longest;
     for (nint j = 0; j < len(runq.dense); j++) {
         var d = Ꮡ(runq.dense, j);
-        var t = d.val.t;
+        var t = d.Value.t;
         if (t == nil) {
             continue;
         }
@@ -280,21 +288,16 @@ internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
             m.pool = append(m.pool, t);
             continue;
         }
-        var i = t.val.inst;
+        var i = t.Value.inst;
         var add = false;
         var exprᴛ1 = (~i).Op;
-        { /* default: */
-            throw panic("bad inst");
-        }
-        else if (exprᴛ1 == syntax.InstMatch) {
+        if (exprᴛ1 == syntax.InstMatch) {
             if (len((~t).cap) > 0 && (!longest || !m.matched || m.matchcap[1] < pos)) {
-                (~t).cap[1] = pos;
+                t.Value.cap[1] = pos;
                 copy(m.matchcap, (~t).cap);
             }
             if (!longest) {
                 // First-match mode: cut off all lower-priority threads.
-                ref var dΔ2 = ref heap(new entry(), out var ᏑdΔ2);
-
                 foreach (var (_, dΔ2) in runq.dense[(int)(j + 1)..]) {
                     if (dΔ2.t != nil) {
                         m.pool = append(m.pool, dΔ2.t);
@@ -316,6 +319,9 @@ internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
         else if (exprᴛ1 == syntax.InstRuneAnyNotNL) {
             add = c != (rune)'\n';
         }
+        else { /* default: */
+            throw panic("bad inst");
+        }
 
         if (add) {
             t = m.add(Ꮡnextq, (~i).Out, nextPos, (~t).cap, ᏑnextCond, t);
@@ -332,70 +338,70 @@ internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
 // empty-width conditions satisfied by cond.  pos gives the current position
 // in the input.
 [GoRecv] internal static ж<thread> add(this ref machine m, ж<queue> Ꮡq, uint32 pc, nint pos, slice<nint> cap, ж<lazyFlag> Ꮡcond, ж<thread> Ꮡt) {
-    ref var q = ref Ꮡq.val;
-    ref var cond = ref Ꮡcond.val;
-    ref var t = ref Ꮡt.val;
+    ref var q = ref Ꮡq.Value;
+    ref var cond = ref Ꮡcond.Value;
+    ref var t = ref Ꮡt.DerefOrNil();
 
 Again:
     if (pc == 0) {
         return Ꮡt;
     }
     {
-        var jΔ1 = q.sparse[pc]; if (jΔ1 < ((uint32)len(q.dense)) && q.dense[jΔ1].pc == pc) {
+        var jΔ1 = q.sparse[(nint)(pc)]; if (jΔ1 < (uint32)len(q.dense) && q.dense[(nint)(jΔ1)].pc == pc) {
             return Ꮡt;
         }
     }
     nint j = len(q.dense);
     q.dense = q.dense[..(int)(j + 1)];
     var d = Ꮡ(q.dense, j);
-    d.val.t = default!;
-    d.val.pc = pc;
-    q.sparse[pc] = ((uint32)j);
-    var i = Ꮡ(m.p.Inst[pc]);
+    d.Value.t = default!;
+    d.Value.pc = pc;
+    q.sparse[(nint)(pc)] = (uint32)j;
+    var i = Ꮡ((~m.p).Inst[pc]);
     var exprᴛ1 = (~i).Op;
-    { /* default: */
-        throw panic("unhandled");
-    }
-    else if (exprᴛ1 == syntax.InstFail) {
+    if (exprᴛ1 == syntax.InstFail) {
     }
     else if (exprᴛ1 == syntax.InstAlt || exprᴛ1 == syntax.InstAltMatch) {
-        t = m.add(Ꮡq, // nothing
- (~i).Out, pos, cap, Ꮡcond, Ꮡt);
-        pc = i.val.Arg;
+        Ꮡt = m.add(Ꮡq, // nothing
+ (~i).Out, pos, cap, Ꮡcond, Ꮡt); t = ref Ꮡt.DerefOrNil();
+        pc = i.Value.Arg;
         goto Again;
     }
     else if (exprᴛ1 == syntax.InstEmptyWidth) {
-        if (cond.match(((syntax.EmptyOp)(~i).Arg))) {
-            pc = i.val.Out;
+        if (cond.match(((syntax.EmptyOp)(uint8)(~i).Arg))) {
+            pc = i.Value.Out;
             goto Again;
         }
     }
     else if (exprᴛ1 == syntax.InstNop) {
-        pc = i.val.Out;
+        pc = i.Value.Out;
         goto Again;
     }
     else if (exprᴛ1 == syntax.InstCapture) {
-        if (((nint)(~i).Arg) < len(cap)){
-            nint opos = cap[(~i).Arg];
-            cap[(~i).Arg] = pos;
+        if ((nint)(~i).Arg < len(cap)){
+            nint opos = cap[(nint)((~i).Arg)];
+            cap[(nint)((~i).Arg)] = pos;
             m.add(Ꮡq, (~i).Out, pos, cap, Ꮡcond, nil);
-            cap[(~i).Arg] = opos;
+            cap[(nint)((~i).Arg)] = opos;
         } else {
-            pc = i.val.Out;
+            pc = i.Value.Out;
             goto Again;
         }
     }
     else if (exprᴛ1 == syntax.InstMatch || exprᴛ1 == syntax.InstRune || exprᴛ1 == syntax.InstRune1 || exprᴛ1 == syntax.InstRuneAny || exprᴛ1 == syntax.InstRuneAnyNotNL) {
-        if (t == nil){
-            t = m.alloc(i);
+        if (Ꮡt == nil){
+            Ꮡt = m.alloc(i); t = ref Ꮡt.DerefOrNil();
         } else {
             t.inst = i;
         }
         if (len(cap) > 0 && Ꮡ(t.cap, 0) != Ꮡ(cap, 0)) {
             copy(t.cap, cap);
         }
-        d.val.t = t;
+        d.Value.t = Ꮡt;
         t = default!;
+    }
+    else { /* default: */
+        throw panic("unhandled");
     }
 
     return Ꮡt;
@@ -406,10 +412,11 @@ Again:
     internal slice<nint> matchcap;
 }
 
-internal static sync.Pool onePassPool;
+internal static ж<Δsync.Pool> ᏑonePassPool = new(default(Δsync.Pool));
+internal static ref Δsync.Pool onePassPool => ref ᏑonePassPool.Value;
 
 internal static ж<onePassMachine> newOnePassMachine() {
-    var (m, ok) = onePassPool.Get()._<onePassMachine.val>(ᐧ);
+    var (m, ok) = ᏑonePassPool.Get()._<ж<onePassMachine>>(ᐧ);
     if (!ok) {
         m = @new<onePassMachine>();
     }
@@ -417,30 +424,32 @@ internal static ж<onePassMachine> newOnePassMachine() {
 }
 
 internal static void freeOnePassMachine(ж<onePassMachine> Ꮡm) {
-    ref var m = ref Ꮡm.val;
+    ref var m = ref Ꮡm.Value;
 
     m.inputs.clear();
-    onePassPool.Put(m);
+    ᏑonePassPool.Put(m);
 }
 
 // doOnePass implements r.doExecute using the one-pass execution engine.
-[GoRecv] internal static slice<nint> doOnePass(this ref Regexp re, io.RuneReader ir, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) {
+internal static slice<nint> doOnePass(this ж<Regexp> Ꮡre, io.RuneReader ir, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) {
+    ref var re = ref Ꮡre.Value;
+
     var startCond = re.cond;
-    if (startCond == ~((syntax.EmptyOp)0)) {
+    if (startCond == ~((syntax.EmptyOp)((syntax.EmptyOp)0))) {
         // impossible
         return default!;
     }
     var m = newOnePassMachine();
     if (cap((~m).matchcap) < ncap){
-        m.val.matchcap = new slice<nint>(ncap);
+        m.Value.matchcap = new slice<nint>(ncap);
     } else {
-        m.val.matchcap = (~m).matchcap[..(int)(ncap)];
+        m.Value.matchcap = (~m).matchcap[..(int)(ncap)];
     }
     var matched = false;
     foreach (var (iΔ1, _) in (~m).matchcap) {
-        (~m).matchcap[iΔ1] = -1;
+        m.Value.matchcap[iΔ1] = -1;
     }
-    var (i, _) = (~m).inputs.init(ir, ib, @is);
+    var (i, _) = m.of(onePassMachine.Ꮡinputs).init(ir, ib, @is);
     var (r, r1) = (endOfText, endOfText);
     nint width = 0;
     nint width1 = 0;
@@ -454,42 +463,39 @@ internal static void freeOnePassMachine(ж<onePassMachine> Ꮡm) {
     } else {
         flag = i.context(pos);
     }
-    nint pc = re.onepass.Start;
-    var inst = Ꮡ(re.onepass.Inst[pc]);
+    nint pc = re.onepass.Value.Start;
+    var inst = Ꮡ((~re.onepass).Inst[pc]);
     // If there is a simple literal prefix, skip over it.
-    if (pos == 0 && flag.match(((syntax.EmptyOp)inst.Arg)) && len(re.prefix) > 0 && i.canCheckPrefix()) {
+    if (pos == 0 && flag.match(((syntax.EmptyOp)(uint8)(~inst).Arg)) && len(re.prefix) > 0 && i.canCheckPrefix()) {
         // Match requires literal prefix; fast search for it.
-        if (!i.hasPrefix(re)) {
+        if (!i.hasPrefix(Ꮡre)) {
             goto Return;
         }
         pos += len(re.prefix);
         (r, width) = i.step(pos);
         (r1, width1) = i.step(pos + width);
         flag = i.context(pos);
-        pc = ((nint)re.prefixEnd);
+        pc = (nint)re.prefixEnd;
     }
     while (ᐧ) {
-        inst = Ꮡ(re.onepass.Inst[pc]);
-        pc = ((nint)inst.Out);
-        var exprᴛ1 = inst.Op;
-        { /* default: */
-            throw panic("bad inst");
-        }
-        else if (exprᴛ1 == syntax.InstMatch) {
+        inst = Ꮡ((~re.onepass).Inst[pc]);
+        pc = (nint)(~inst).Out;
+        var exprᴛ1 = (~inst).Op;
+        if (exprᴛ1 == syntax.InstMatch) {
             matched = true;
             if (len((~m).matchcap) > 0) {
-                (~m).matchcap[0] = 0;
-                (~m).matchcap[1] = pos;
+                m.Value.matchcap[0] = 0;
+                m.Value.matchcap[1] = pos;
             }
             goto Return;
         }
         else if (exprᴛ1 == syntax.InstRune) {
-            if (!inst.MatchRune(r)) {
+            if (!inst.of(onePassInst.ᏑInst).MatchRune(r)) {
                 goto Return;
             }
         }
         else if (exprᴛ1 == syntax.InstRune1) {
-            if (r != inst.Rune[0]) {
+            if (r != (~inst).Rune[0]) {
                 goto Return;
             }
         }
@@ -502,8 +508,8 @@ internal static void freeOnePassMachine(ж<onePassMachine> Ꮡm) {
             }
         }
         else if (exprᴛ1 == syntax.InstAlt || exprᴛ1 == syntax.InstAltMatch) {
-            pc = ((nint)onePassNext(inst, // peek at the input rune to see which branch of the Alt to take
- r));
+            pc = (nint)onePassNext(inst, // peek at the input rune to see which branch of the Alt to take
+ r);
             continue;
         }
         else if (exprᴛ1 == syntax.InstFail) {
@@ -513,16 +519,19 @@ internal static void freeOnePassMachine(ж<onePassMachine> Ꮡm) {
             continue;
         }
         else if (exprᴛ1 == syntax.InstEmptyWidth) {
-            if (!flag.match(((syntax.EmptyOp)inst.Arg))) {
+            if (!flag.match(((syntax.EmptyOp)(uint8)(~inst).Arg))) {
                 goto Return;
             }
             continue;
         }
         else if (exprᴛ1 == syntax.InstCapture) {
-            if (((nint)inst.Arg) < len((~m).matchcap)) {
-                (~m).matchcap[inst.Arg] = pos;
+            if ((nint)(~inst).Arg < len((~m).matchcap)) {
+                m.Value.matchcap[(nint)((~inst).Arg)] = pos;
             }
             continue;
+        }
+        else { /* default: */
+            throw panic("bad inst");
         }
 
         if (width == 0) {
@@ -546,15 +555,19 @@ Return:
 }
 
 // doMatch reports whether either r, b or s match the regexp.
-[GoRecv] internal static bool doMatch(this ref Regexp re, io.RuneReader r, slice<byte> b, @string s) {
-    return re.doExecute(r, b, s, 0, 0, default!) != default!;
+internal static bool doMatch(this ж<Regexp> Ꮡre, io.RuneReader r, slice<byte> b, @string s) {
+    ref var re = ref Ꮡre.Value;
+
+    return Ꮡre.doExecute(r, b, s, 0, 0, default!) != default!;
 }
 
 // doExecute finds the leftmost match in the input, appends the position
 // of its subexpressions to dstCap and returns dstCap.
 //
 // nil is returned if no matches are found and non-nil if matches are found.
-[GoRecv] internal static slice<nint> doExecute(this ref Regexp re, io.RuneReader r, slice<byte> b, @string s, nint pos, nint ncap, slice<nint> dstCap) {
+internal static slice<nint> doExecute(this ж<Regexp> Ꮡre, io.RuneReader r, slice<byte> b, @string s, nint pos, nint ncap, slice<nint> dstCap) {
+    ref var re = ref Ꮡre.Value;
+
     if (dstCap == default!) {
         // Make sure 'return dstCap' is non-nil.
         dstCap = arrayNoInts.slice(-1, 0, 0);
@@ -563,13 +576,13 @@ Return:
         return default!;
     }
     if (re.onepass != nil) {
-        return re.doOnePass(r, b, s, pos, ncap, dstCap);
+        return Ꮡre.doOnePass(r, b, s, pos, ncap, dstCap);
     }
     if (r == default! && len(b) + len(s) < re.maxBitStateLen) {
-        return re.backtrack(b, s, pos, ncap, dstCap);
+        return Ꮡre.backtrack(b, s, pos, ncap, dstCap);
     }
-    var m = re.get();
-    var (i, _) = (~m).inputs.init(r, b, s);
+    var m = Ꮡre.get();
+    var (i, _) = m.of(machine.Ꮡinputs).init(r, b, s);
     m.init(ncap);
     if (!m.match(i, pos)) {
         re.put(m);
@@ -582,6 +595,6 @@ Return:
 
 // arrayNoInts is returned by doExecute match if nil dstCap is passed
 // to it with ncap=0.
-internal static array<nint> arrayNoInts;
+internal static array<nint> arrayNoInts = new(0);
 
 } // end regexp_package

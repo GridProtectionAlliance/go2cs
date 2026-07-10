@@ -10,7 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using jsonꓸToken = go.encoding.json_package.ΔToken;
+global using jsonꓸToken = object;
+global using jsonꓸΔToken = object;
 global using netꓸAddr = go.net_package.ΔAddr;
 global using netꓸError = go.net_package.ΔError;
 global using rpcꓸCall = go.net.rpc_package.ΔCall;
@@ -42,17 +43,15 @@ using static go.net.rpc.jsonrpc_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(net.Conn, error), net_package.Conn>]
-[assembly: GoImplement<clientCodec, net.rpc_package.ClientCodec>]
+[assembly: GoImplement<clientCodec, go.net.rpc_package.ClientCodec>(Pointer = true)]
+[assembly: GoImplement<io_package.ReadWriteCloser, io_package.Closer>]
 [assembly: GoImplement<io_package.ReadWriteCloser, io_package.Reader>]
 [assembly: GoImplement<io_package.ReadWriteCloser, io_package.Writer>]
 [assembly: GoImplement<net_package.Conn, io_package.ReadWriteCloser>]
-[assembly: GoImplement<serverCodec, net.rpc_package.ServerCodec>]
+[assembly: GoImplement<serverCodec, go.net.rpc_package.ServerCodec>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<rpc.Request}, rpc.Request}>(Inverted = true)]
-[assembly: GoImplicitConv<rpc.Response}, rpc.Response}>(Inverted = true)]
 // </ImplicitConversions>
 
 namespace go.net.rpc;

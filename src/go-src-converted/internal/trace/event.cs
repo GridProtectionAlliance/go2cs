@@ -7,11 +7,12 @@ using fmt = fmt_package;
 using math = math_package;
 using strings = strings_package;
 using time = time_package;
-using @event = @internal.trace.event_package;
-using go122 = @internal.trace.@event.go122_package;
-using version = @internal.trace.version_package;
-using @internal.trace;
-using @internal.trace.@event;
+using @event = go.@internal.trace.event_package;
+using go122 = go.@internal.trace.@event.go122_package;
+using version = go.@internal.trace.version_package;
+using go.@internal.trace;
+using go.@internal.trace.@event;
+using io = io_package;
 
 partial class trace_package {
 
@@ -35,13 +36,13 @@ public static readonly EventKind EventExperimental = 14;
 
 // String returns a string form of the EventKind.
 public static @string String(this EventKind e) {
-    if (((nint)e) >= len(eventKindStrings)) {
+    if ((nint)(uint16)e >= len(eventKindStrings)) {
         return eventKindStrings[0];
     }
     return eventKindStrings[e];
 }
 
-internal static array<@string> eventKindStrings = new runtime.SparseArray<@string>{
+internal static array<@string> eventKindStrings = new golib.SparseArray<@string>{
     [EventBad] = "Bad"u8,
     [EventSync] = "Sync"u8,
     [EventMetric] = "Metric"u8,
@@ -65,7 +66,7 @@ internal static readonly ΔTime maxTime = /* Time(math.MaxInt64) */ 922337203685
 
 // Sub subtracts t0 from t, returning the duration in nanoseconds.
 public static time.Duration Sub(this ΔTime t, ΔTime t0) {
-    return ((time.Duration)(((int64)t) - ((int64)t0)));
+    return ((time.Duration)((int64)t - (int64)t0));
 }
 
 // Metric provides details about a Metric event.
@@ -89,7 +90,7 @@ public static time.Duration Sub(this ΔTime t, ΔTime t0) {
 // Label provides details about a Label event.
 [GoType] partial struct ΔLabel {
     // Label is the label applied to some resource.
-    public @string Label;
+    public @string ΔΔLabel;
     // Resource is the resource to which this label should be applied.
     public ResourceID Resource;
 }
@@ -132,7 +133,7 @@ public static time.Duration Sub(this ΔTime t, ΔTime t0) {
 
 [GoType("num:uint64")] partial struct TaskID;
 
-public static readonly TaskID NoTask = /* TaskID(^uint64(0)) */ 18446744073709551615;
+public static readonly TaskID NoTask = /* TaskID(^uint64(0)) */ unchecked((TaskID)18446744073709551615);
 public static readonly TaskID BackgroundTask = /* TaskID(0) */ 0;
 
 // Task provides details about a Task event.
@@ -181,13 +182,13 @@ public static bool Frames(this ΔStack s, Func<StackFrame, bool> yield) {
     if (s.id == 0) {
         return true;
     }
-    var stk = s.table.stacks.mustGet(s.id);
+    var stk = s.table.of(evTable.Ꮡstacks).mustGet(s.id);
     foreach (var (_, pc) in stk.pcs) {
-        var f = s.table.pcs[pc];
+        var f = (~s.table).pcs[pc];
         var sf = new StackFrame(
             PC: f.pc,
-            Func: s.table.strings.mustGet(f.funcID),
-            File: s.table.strings.mustGet(f.fileID),
+            Func: s.table.of(evTable.Ꮡstrings).mustGet(f.funcID),
+            File: s.table.of(evTable.Ꮡstrings).mustGet(f.fileID),
             Line: f.line
         );
         if (!yield(sf)) {
@@ -364,8 +365,8 @@ public static ΔLabel Label(this ΔEvent e) {
         throw panic(fmt.Sprintf("internal error: unexpected event type for Label kind: %s"u8, go122.EventString(e.@base.typ)));
     }
     return new ΔLabel(
-        ΔLabel: e.table.strings.mustGet(((stringID)e.@base.args[0])),
-        Resource: new ResourceID(Kind: ResourceGoroutine, id: ((int64)e.ctx.G))
+        ΔΔLabel: e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[0])),
+        Resource: new ResourceID(Kind: ResourceGoroutine, id: (int64)e.ctx.G)
     );
 }
 
@@ -381,10 +382,10 @@ public static ΔRange Range(this ΔEvent e) {
     ΔRange r = default!;
     var exprᴛ1 = e.@base.typ;
     if (exprᴛ1 == go122.EvSTWBegin || exprᴛ1 == go122.EvSTWEnd) {
-        r.Name = "stop-the-world ("u8 + e.table.strings.mustGet(((stringID)e.@base.args[0])) + ")"u8;
+        r.Name = "stop-the-world ("u8 + e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[0])) + ")"u8;
         r.Scope = new ResourceID( // N.B. ordering.advance smuggles in the STW reason as e.base.args[0]
  // for go122.EvSTWEnd (it's already there for Begin).
-Kind: ResourceGoroutine, id: ((int64)e.Goroutine()));
+Kind: ResourceGoroutine, id: (int64)e.Goroutine());
     }
     else if (exprᴛ1 == go122.EvGCBegin || exprᴛ1 == go122.EvGCActive || exprᴛ1 == go122.EvGCEnd) {
         r.Name = "GC concurrent mark phase"u8;
@@ -394,19 +395,19 @@ Kind: ResourceGoroutine, id: ((int64)e.Goroutine()));
         r.Name = "GC incremental sweep"u8;
         r.Scope = new ResourceID(Kind: ResourceProc);
         if (e.@base.typ == go122.EvGCSweepActive){
-            r.Scope.id = ((int64)e.@base.args[0]);
+            r.Scope.id = (int64)e.@base.args[0];
         } else {
-            r.Scope.id = ((int64)e.Proc());
+            r.Scope.id = (int64)e.Proc();
         }
-        r.Scope.id = ((int64)e.Proc());
+        r.Scope.id = (int64)e.Proc();
     }
     else if (exprᴛ1 == go122.EvGCMarkAssistBegin || exprᴛ1 == go122.EvGCMarkAssistActive || exprᴛ1 == go122.EvGCMarkAssistEnd) {
         r.Name = "GC mark assist"u8;
         r.Scope = new ResourceID(Kind: ResourceGoroutine);
         if (e.@base.typ == go122.EvGCMarkAssistActive){
-            r.Scope.id = ((int64)e.@base.args[0]);
+            r.Scope.id = (int64)e.@base.args[0];
         } else {
-            r.Scope.id = ((int64)e.Goroutine());
+            r.Scope.id = (int64)e.Goroutine();
         }
     }
     else { /* default: */
@@ -452,7 +453,7 @@ public static ΔTask Task(this ΔEvent e) {
     var exprᴛ1 = e.@base.typ;
     if (exprᴛ1 == go122.EvUserTaskBegin) {
         parentID = ((TaskID)e.@base.args[1]);
-        typ = e.table.strings.mustGet(((stringID)e.@base.args[2]));
+        typ = e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[2]));
     }
     else if (exprᴛ1 == go122.EvUserTaskEnd) {
         parentID = ((TaskID)e.@base.extra(version.Go122)[0]);
@@ -482,8 +483,8 @@ public static ΔRegion Region(this ΔEvent e) {
         throw panic(fmt.Sprintf("internal error: unexpected event type for Region kind: %s"u8, go122.EventString(e.@base.typ)));
     }
     return new ΔRegion(
-        ΔTask: ((TaskID)e.@base.args[0]),
-        Type: e.table.strings.mustGet(((stringID)e.@base.args[1]))
+        Task: ((TaskID)e.@base.args[0]),
+        Type: e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[1]))
     );
 }
 
@@ -498,9 +499,9 @@ public static ΔLog Log(this ΔEvent e) {
         throw panic(fmt.Sprintf("internal error: unexpected event type for Log kind: %s"u8, go122.EventString(e.@base.typ)));
     }
     return new ΔLog(
-        ΔTask: ((TaskID)e.@base.args[0]),
-        Category: e.table.strings.mustGet(((stringID)e.@base.args[1])),
-        Message: e.table.strings.mustGet(((stringID)e.@base.args[2]))
+        Task: ((TaskID)e.@base.args[0]),
+        Category: e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[1])),
+        Message: e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[2]))
     );
 }
 
@@ -514,14 +515,14 @@ public static ΔStateTransition StateTransition(this ΔEvent e) {
     ΔStateTransition s = default!;
     var exprᴛ1 = e.@base.typ;
     if (exprᴛ1 == go122.EvProcStart) {
-        s = procStateTransition(((ProcID)e.@base.args[0]), ProcIdle, ProcRunning);
+        s = procStateTransition(((ProcID)(int64)e.@base.args[0]), ProcIdle, ProcRunning);
     }
     else if (exprᴛ1 == go122.EvProcStop) {
         s = procStateTransition(e.ctx.P, ProcRunning, ProcIdle);
     }
     else if (exprᴛ1 == go122.EvProcSteal) {
         var beforeState = ProcRunning;
-        if (((go122.ProcStatus)e.@base.extra(version.Go122)[0]) == go122.ProcSyscallAbandoned) {
+        if (((go122.ProcStatus)(uint8)e.@base.extra(version.Go122)[0]) == go122.ProcSyscallAbandoned) {
             // N.B. ordering.advance populates e.base.extra.
             // We've lost information because this ProcSteal advanced on a
             // SyscallAbandoned state. Treat the P as idle because ProcStatus
@@ -529,25 +530,25 @@ public static ΔStateTransition StateTransition(this ΔEvent e) {
             // transition.
             beforeState = ProcIdle;
         }
-        s = procStateTransition(((ProcID)e.@base.args[0]), beforeState, ProcIdle);
+        s = procStateTransition(((ProcID)(int64)e.@base.args[0]), beforeState, ProcIdle);
     }
     else if (exprᴛ1 == go122.EvProcStatus) {
-        s = procStateTransition(((ProcID)e.@base.args[0]), // N.B. ordering.advance populates e.base.extra.
- ((ProcState)e.@base.extra(version.Go122)[0]), go122ProcStatus2ProcState[e.@base.args[1]]);
+        s = procStateTransition(((ProcID)(int64)e.@base.args[0]), // N.B. ordering.advance populates e.base.extra.
+ ((ProcState)(uint8)e.@base.extra(version.Go122)[0]), go122ProcStatus2ProcState[(nint)(e.@base.args[1])]);
     }
     else if (exprᴛ1 == go122.EvGoCreate || exprᴛ1 == go122.EvGoCreateBlocked) {
         var status = GoRunnable;
         if (e.@base.typ == go122.EvGoCreateBlocked) {
             status = GoWaiting;
         }
-        s = goStateTransition(((GoID)e.@base.args[0]), GoNotExist, status);
+        s = goStateTransition(((GoID)(int64)e.@base.args[0]), GoNotExist, status);
         s.Stack = new ΔStack(table: e.table, id: ((stackID)e.@base.args[1]));
     }
     else if (exprᴛ1 == go122.EvGoCreateSyscall) {
-        s = goStateTransition(((GoID)e.@base.args[0]), GoNotExist, GoSyscall);
+        s = goStateTransition(((GoID)(int64)e.@base.args[0]), GoNotExist, GoSyscall);
     }
     else if (exprᴛ1 == go122.EvGoStart) {
-        s = goStateTransition(((GoID)e.@base.args[0]), GoRunnable, GoRunning);
+        s = goStateTransition(((GoID)(int64)e.@base.args[0]), GoRunnable, GoRunning);
     }
     else if (exprᴛ1 == go122.EvGoDestroy) {
         s = goStateTransition(e.ctx.G, GoRunning, GoNotExist);
@@ -559,17 +560,17 @@ public static ΔStateTransition StateTransition(this ΔEvent e) {
     }
     else if (exprᴛ1 == go122.EvGoStop) {
         s = goStateTransition(e.ctx.G, GoRunning, GoRunnable);
-        s.Reason = e.table.strings.mustGet(((stringID)e.@base.args[0]));
+        s.Reason = e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[0]));
         s.Stack = e.Stack();
     }
     else if (exprᴛ1 == go122.EvGoBlock) {
         s = goStateTransition(e.ctx.G, // This event references the resource the event happened on.
  GoRunning, GoWaiting);
-        s.Reason = e.table.strings.mustGet(((stringID)e.@base.args[0]));
+        s.Reason = e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[0]));
         s.Stack = e.Stack();
     }
     else if (exprᴛ1 == go122.EvGoUnblock || exprᴛ1 == go122.EvGoSwitch || exprᴛ1 == go122.EvGoSwitchDestroy) {
-        s = goStateTransition(((GoID)e.@base.args[0]), // This event references the resource the event happened on.
+        s = goStateTransition(((GoID)(int64)e.@base.args[0]), // This event references the resource the event happened on.
  // N.B. GoSwitch and GoSwitchDestroy both emit additional events, but
  // the first thing they both do is unblock the goroutine they name,
  // identically to an unblock event (even their arguments match).
@@ -590,9 +591,9 @@ public static ΔStateTransition StateTransition(this ΔEvent e) {
         s.Stack = e.Stack();
     }
     else if (exprᴛ1 == go122.EvGoStatus || exprᴛ1 == go122.EvGoStatusStack) {
-        s = goStateTransition(((GoID)e.@base.args[0]), // This event references the resource the event happened on.
+        s = goStateTransition(((GoID)(int64)e.@base.args[0]), // This event references the resource the event happened on.
  // N.B. ordering.advance populates e.base.extra.
- ((GoState)e.@base.extra(version.Go122)[0]), go122GoStatus2GoState[e.@base.args[2]]);
+ ((GoState)(uint8)e.@base.extra(version.Go122)[0]), go122GoStatus2GoState[(nint)(e.@base.args[2])]);
     }
     else { /* default: */
         throw panic(fmt.Sprintf("internal error: unexpected event type for StateTransition kind: %s"u8, go122.EventString(e.@base.typ)));
@@ -615,13 +616,13 @@ public static ExperimentalEvent Experimental(this ΔEvent e) {
         Name: spec.Name,
         ArgNames: argNames,
         Args: e.@base.args[..(int)(len(argNames))],
-        Data: e.table.expData[spec.Experiment]
+        Data: (~e.table).expData[spec.Experiment]
     );
 }
 
 internal static readonly @event.Type evSync = /* ^event.Type(0) */ 255;
 
-internal static array<EventKind> go122Type2Kind = new runtime.SparseArray<EventKind>{
+internal static array<EventKind> go122Type2Kind = new golib.SparseArray<EventKind>{
     [go122.EvCPUSample] = EventStackSample,
     [go122.EvProcsChange] = EventMetric,
     [go122.EvProcStart] = EventStateTransition,
@@ -675,14 +676,14 @@ internal static array<EventKind> go122Type2Kind = new runtime.SparseArray<EventK
     [evSync] = EventSync
 }.array();
 
-internal static array<GoState> go122GoStatus2GoState = new runtime.SparseArray<GoState>{
+internal static array<GoState> go122GoStatus2GoState = new golib.SparseArray<GoState>{
     [go122.GoRunnable] = GoRunnable,
     [go122.GoRunning] = GoRunning,
     [go122.GoWaiting] = GoWaiting,
     [go122.GoSyscall] = GoSyscall
 }.array();
 
-internal static array<ProcState> go122ProcStatus2ProcState = new runtime.SparseArray<ProcState>{
+internal static array<ProcState> go122ProcStatus2ProcState = new golib.SparseArray<ProcState>{
     [go122.ProcRunning] = ProcRunning,
     [go122.ProcIdle] = ProcIdle,
     [go122.ProcSyscall] = ProcRunning,
@@ -693,89 +694,85 @@ internal static array<ProcState> go122ProcStatus2ProcState = new runtime.SparseA
 //
 // The format of the string is intended for debugging and is subject to change.
 public static @string String(this ΔEvent e) {
-    ref var sb = ref heap(new strings_package.Builder(), out var Ꮡsb);
-    fmt.Fprintf(~Ꮡsb, "M=%d P=%d G=%d"u8, e.Thread(), e.Proc(), e.Goroutine());
-    fmt.Fprintf(~Ꮡsb, " %s Time=%d"u8, e.Kind(), e.Time());
+    ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
+    fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "M=%d P=%d G=%d"u8, e.Thread(), e.Proc(), e.Goroutine());
+    fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " %s Time=%d"u8, e.Kind(), e.Time());
     // Kind-specific fields.
     {
         var kind = e.Kind();
         var exprᴛ1 = kind;
         if (exprᴛ1 == EventMetric) {
             var m = e.Metric();
-            fmt.Fprintf(~Ꮡsb, " Name=%q Value=%s"u8, m.Name, valueAsString(m.Value));
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Name=%q Value=%s"u8, m.Name, valueAsString(m.Value));
         }
         else if (exprᴛ1 == EventLabel) {
             var l = e.Label();
-            fmt.Fprintf(~Ꮡsb, " Label=%q Resource=%s"u8, l.Label, l.Resource);
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Label=%q Resource=%s"u8, l.ΔΔLabel, l.Resource);
         }
         else if (exprᴛ1 == EventRangeBegin || exprᴛ1 == EventRangeActive || exprᴛ1 == EventRangeEnd) {
             var r = e.Range();
-            fmt.Fprintf(~Ꮡsb, " Name=%q Scope=%s"u8, r.Name, r.Scope);
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Name=%q Scope=%s"u8, r.Name, r.Scope);
             if (kind == EventRangeEnd) {
-                fmt.Fprintf(~Ꮡsb, " Attributes=["u8);
+                fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Attributes=["u8);
                 foreach (var (i, attr) in e.RangeAttributes()) {
                     if (i != 0) {
-                        fmt.Fprintf(~Ꮡsb, " "u8);
+                        fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " "u8);
                     }
-                    fmt.Fprintf(~Ꮡsb, "%q=%s"u8, attr.Name, valueAsString(attr.Value));
+                    fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "%q=%s"u8, attr.Name, valueAsString(attr.Value));
                 }
-                fmt.Fprintf(~Ꮡsb, "]"u8);
+                fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "]"u8);
             }
         }
         else if (exprᴛ1 == EventTaskBegin || exprᴛ1 == EventTaskEnd) {
             var t = e.Task();
-            fmt.Fprintf(~Ꮡsb, " ID=%d Parent=%d Type=%q"u8, t.ID, t.Parent, t.Type);
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " ID=%d Parent=%d Type=%q"u8, t.ID, t.Parent, t.Type);
         }
         else if (exprᴛ1 == EventRegionBegin || exprᴛ1 == EventRegionEnd) {
             var r = e.Region();
-            fmt.Fprintf(~Ꮡsb, " Task=%d Type=%q"u8, r.Task, r.Type);
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Task=%d Type=%q"u8, r.Task, r.Type);
         }
         else if (exprᴛ1 == EventLog) {
             var l = e.Log();
-            fmt.Fprintf(~Ꮡsb, " Task=%d Category=%q Message=%q"u8, l.Task, l.Category, l.Message);
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Task=%d Category=%q Message=%q"u8, l.Task, l.Category, l.Message);
         }
         else if (exprᴛ1 == EventStateTransition) {
             var s = e.StateTransition();
-            fmt.Fprintf(~Ꮡsb, " Resource=%s Reason=%q"u8, s.Resource, s.Reason);
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Resource=%s Reason=%q"u8, s.Resource, s.Reason);
             var exprᴛ2 = s.Resource.Kind;
             if (exprᴛ2 == ResourceGoroutine) {
                 var id = s.Resource.Goroutine();
                 var (old, @new) = s.Goroutine();
-                fmt.Fprintf(~Ꮡsb, " GoID=%d %s->%s"u8, id, old, @new);
+                fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " GoID=%d %s->%s"u8, id, old, @new);
             }
             else if (exprᴛ2 == ResourceProc) {
                 var id = s.Resource.Proc();
                 var (old, @new) = s.Proc();
-                fmt.Fprintf(~Ꮡsb, " ProcID=%d %s->%s"u8, id, old, @new);
+                fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " ProcID=%d %s->%s"u8, id, old, @new);
             }
 
             if (s.Stack != NoStack) {
-                fmt.Fprintln(~Ꮡsb);
-                fmt.Fprintln(~Ꮡsb, "TransitionStack=");
-                s.Stack.Frames(
-                var sbʗ2 = sb;
-                (StackFrame f) => {
-                    fmt.Fprintf(~Ꮡsbʗ2, "\t%s @ 0x%x\n"u8, f.Func, f.PC);
-                    fmt.Fprintf(~Ꮡsbʗ2, "\t\t%s:%d\n"u8, f.File, f.Line);
+                fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb));
+                fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb), "TransitionStack=");
+                s.Stack.Frames((StackFrame f) => {
+                    fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "\t%s @ 0x%x\n"u8, f.Func, f.PC);
+                    fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "\t\t%s:%d\n"u8, f.File, f.Line);
                     return true;
                 });
             }
         }
         if (exprᴛ1 == EventExperimental) {
             var r = e.Experimental();
-            fmt.Fprintf(~Ꮡsb, " Name=%s ArgNames=%v Args=%v"u8, r.Name, r.ArgNames, r.Args);
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Name=%s ArgNames=%v Args=%v"u8, r.Name, r.ArgNames, r.Args);
         }
     }
 
     {
         var stk = e.Stack(); if (stk != NoStack) {
-            fmt.Fprintln(~Ꮡsb);
-            fmt.Fprintln(~Ꮡsb, "Stack=");
-            stk.Frames(
-            var sbʗ5 = sb;
-            (StackFrame f) => {
-                fmt.Fprintf(~Ꮡsbʗ5, "\t%s @ 0x%x\n"u8, f.Func, f.PC);
-                fmt.Fprintf(~Ꮡsbʗ5, "\t\t%s:%d\n"u8, f.File, f.Line);
+            fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb));
+            fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb), "Stack=");
+            stk.Frames((StackFrame f) => {
+                fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "\t%s @ 0x%x\n"u8, f.Func, f.PC);
+                fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "\t\t%s:%d\n"u8, f.File, f.Line);
                 return true;
             });
         }
@@ -793,7 +790,7 @@ internal static error validateTableIDs(this ΔEvent e) {
     // Check stacks.
     foreach (var (_, i) in spec.StackIDs) {
         var id = ((stackID)e.@base.args[i - 1]);
-        var (_, ok) = e.table.stacks.get(id);
+        var (_, ok) = e.table.of(evTable.Ꮡstacks).get(id);
         if (!ok) {
             return fmt.Errorf("found invalid stack ID %d for event %s"u8, id, spec.Name);
         }
@@ -803,7 +800,7 @@ internal static error validateTableIDs(this ΔEvent e) {
     // Check strings.
     foreach (var (_, i) in spec.StringIDs) {
         var id = ((stringID)e.@base.args[i - 1]);
-        var (_, ok) = e.table.strings.get(id);
+        var (_, ok) = e.table.of(evTable.Ꮡstrings).get(id);
         if (!ok) {
             return fmt.Errorf("found invalid string ID %d for event %s"u8, id, spec.Name);
         }
@@ -812,10 +809,10 @@ internal static error validateTableIDs(this ΔEvent e) {
 }
 
 internal static ΔEvent syncEvent(ж<evTable> Ꮡtable, ΔTime ts) {
-    ref var table = ref Ꮡtable.val;
+    ref var table = ref Ꮡtable.Value;
 
     return new ΔEvent(
-        table: table,
+        table: Ꮡtable,
         ctx: new schedCtx(
             G: NoGoroutine,
             P: NoProc,

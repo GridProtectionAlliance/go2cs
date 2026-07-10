@@ -40,18 +40,13 @@ using static go.image.gif_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(reader, bool), reader>]
-[assembly: GoImplement<(writer, bool), writer>]
-[assembly: GoImplement<GIF, writer>]
-[assembly: GoImplement<blockReader, io_package.Reader>]
+[assembly: GoImplement<blockReader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<blockWriter, io_package.Writer>]
-[assembly: GoImplement<image.color_package.Palette, image.color_package.Color>]
-[assembly: GoImplement<image_package.Paletted, image.draw_package.Image>]
-[assembly: GoImplement<image_package.Paletted, image_package.Image>]
-[assembly: GoImplement<io_package.ReadCloser, io_package.Reader>]
-[assembly: GoImplement<reader, io_package.ByteReader>]
-[assembly: GoImplement<reader, io_package.Reader>]
-[assembly: GoImplement<writer, io_package.Writer>]
+[assembly: GoImplement<bufio_package.Reader, reader>(Pointer = true)]
+[assembly: GoImplement<bufio_package.Writer, writer>(Pointer = true)]
+[assembly: GoImplement<go.image.color_package.Palette, go.image.color_package.Model>]
+[assembly: GoImplement<go.image.color_package.ΔRGBA, go.image.color_package.Color>]
+[assembly: GoImplement<image_package.Paletted, go.image.draw_package.Image>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

@@ -25,7 +25,8 @@ internal static @unsafe.Pointer _cgo_sys_thread_create;
 internal static @unsafe.Pointer _cgo_notify_runtime_init_done;
 internal static @unsafe.Pointer _cgo_callers;
 internal static @unsafe.Pointer _cgo_set_context_function;
-internal static @unsafe.Pointer _cgo_yield;
+internal static ж<@unsafe.Pointer> Ꮡ_cgo_yield = new(default(@unsafe.Pointer));
+internal static ref @unsafe.Pointer _cgo_yield => ref Ꮡ_cgo_yield.Value;
 internal static @unsafe.Pointer _cgo_pthread_key_created;
 internal static @unsafe.Pointer _cgo_bindm;
 internal static @unsafe.Pointer _cgo_getstackbound;
@@ -77,14 +78,14 @@ internal static void cgoUse(any _) {
 // escape analysis result. The test is cheaper than the call.
 internal static bool cgoAlwaysFalse;
 
-internal static ж<@unsafe.Pointer> cgo_yield = Ꮡ(_cgo_yield);
+internal static ж<@unsafe.Pointer> cgo_yield = Ꮡ_cgo_yield;
 
 internal static void cgoNoCallback(bool v) {
     var g = getg();
     if ((~g).nocgocallback && v) {
         throw panic("runtime: unexpected setting cgoNoCallback");
     }
-    g.val.nocgocallback = v;
+    g.Value.nocgocallback = v;
 }
 
 } // end runtime_package

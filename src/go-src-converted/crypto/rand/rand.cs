@@ -35,7 +35,7 @@ public static (nint n, error err) Read(slice<byte> b) {
 // batched returns a function that calls f to populate a []byte by chunking it
 // into subslices of, at most, readMax bytes.
 internal static Func<slice<byte>, error> batched(Func<slice<byte>, error> f, nint readMax) {
-    return (slice<byte> @out) => {
+    return error (slice<byte> @out) => {
         while (len(@out) > 0) {
             nint read = len(@out);
             if (read > readMax) {

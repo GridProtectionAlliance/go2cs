@@ -35,7 +35,7 @@ internal static (uint64 g, gState init, gState next) stateTransition(ж<Event> �
     gState init = default!;
     gState next = default!;
 
-    ref var ev = ref Ꮡev.val;
+    ref var ev = ref Ꮡev.Value;
     // Note that we have an explicit return in each case, as that produces slightly better code (tested on Go 1.19).
     var exprᴛ1 = ev.Type;
     if (exprᴛ1 == EvGoCreate) {
@@ -137,26 +137,30 @@ internal static error transition(map<uint64, gState> gs, uint64 g, gState init, 
 [GoType("[]orderEvent")] partial struct orderEventList;
 
 [GoRecv] internal static bool Less(this ref orderEventList l, nint i, nint j) {
-    return (ж<ж<orderEventList>>)[i].ev.Ts < (ж<ж<orderEventList>>)[j].ev.Ts;
+    return (l)[i].ev.Ts < (l)[j].ev.Ts;
 }
 
-[GoRecv] internal static void Push(this ref orderEventList h, orderEvent x) {
-    h = append(h, x);
-    heapUp(h, len(h) - 1);
+internal static void Push(this ж<orderEventList> Ꮡh, orderEvent x) {
+    ref var h = ref Ꮡh.Value;
+
+    h = builtin.append(h, x);
+    heapUp(Ꮡh, len(h) - 1);
 }
 
-[GoRecv] internal static unsafe orderEvent Pop(this ref orderEventList h) {
+internal static orderEvent Pop(this ж<orderEventList> Ꮡh) {
+    ref var h = ref Ꮡh.Value;
+
     nint n = len(h) - 1;
-    (ж<ж<orderEventList>>)[0] = (ж<ж<orderEventList>>)[n];
-    (ж<ж<orderEventList>>)[n] = (ж<ж<orderEventList>>)[0];
-    heapDown(h, 0, n);
-    var x = (ж<ж<orderEventList>>)[len(h) - 1];
-    h = new Span<ж<orderEventList>>((orderEventList**), len(h) - 1);
+    (h)[0] = (h)[n];
+    (h)[n] = (h)[0];
+    heapDown(Ꮡh, 0, n);
+    var x = (h)[len(h) - 1];
+    h = (h)[..(int)(len(h) - 1)];
     return x;
 }
 
 internal static void heapUp(ж<orderEventList> Ꮡh, nint j) {
-    ref var h = ref Ꮡh.val;
+    ref var h = ref Ꮡh.Value;
 
     while (ᐧ) {
         nint i = (j - 1) / 2;
@@ -171,7 +175,7 @@ internal static void heapUp(ж<orderEventList> Ꮡh, nint j) {
 }
 
 internal static bool heapDown(ж<orderEventList> Ꮡh, nint i0, nint n) {
-    ref var h = ref Ꮡh.val;
+    ref var h = ref Ꮡh.Value;
 
     nint i = i0;
     while (ᐧ) {

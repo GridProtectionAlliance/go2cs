@@ -12,19 +12,19 @@ namespace go.testing.@internal;
 
 using bufio = bufio_package;
 using context = context_package;
-using fuzz = @internal.fuzz_package;
-using testlog = @internal.testlog_package;
+using fuzz = global::go.@internal.fuzz_package;
+using testlog = global::go.@internal.testlog_package;
 using io = io_package;
 using os = os_package;
-using signal = os.signal_package;
+using signal = global::go.os.signal_package;
 using reflect = reflect_package;
 using regexp = regexp_package;
 using pprof = runtime.pprof_package;
 using strings = strings_package;
 using sync = sync_package;
 using time = time_package;
-using @internal;
-using os;
+using global::go.@internal;
+using global::go.os;
 using runtime;
 
 partial class testdeps_package {
@@ -76,34 +76,44 @@ public static @string ImportPath(this TestDeps _) {
 
 // testLog implements testlog.Interface, logging actions by package os.
 [GoType] partial struct testLog {
-    internal sync_package.Mutex mu;
-    internal ж<bufio_package.Writer> w;
+    internal sync.Mutex mu;
+    internal ж<bufio.Writer> w;
     internal bool set;
 }
 
-[GoRecv] internal static void Getenv(this ref testLog l, @string key) {
-    l.add("getenv"u8, key);
+internal static void Getenv(this ж<testLog> Ꮡl, @string key) {
+    ref var l = ref Ꮡl.Value;
+
+    Ꮡl.add("getenv"u8, key);
 }
 
-[GoRecv] internal static void Open(this ref testLog l, @string name) {
-    l.add("open"u8, name);
+internal static void Open(this ж<testLog> Ꮡl, @string name) {
+    ref var l = ref Ꮡl.Value;
+
+    Ꮡl.add("open"u8, name);
 }
 
-[GoRecv] internal static void Stat(this ref testLog l, @string name) {
-    l.add("stat"u8, name);
+internal static void Stat(this ж<testLog> Ꮡl, @string name) {
+    ref var l = ref Ꮡl.Value;
+
+    Ꮡl.add("stat"u8, name);
 }
 
-[GoRecv] internal static void Chdir(this ref testLog l, @string name) {
-    l.add("chdir"u8, name);
+internal static void Chdir(this ж<testLog> Ꮡl, @string name) {
+    ref var l = ref Ꮡl.Value;
+
+    Ꮡl.add("chdir"u8, name);
 }
 
 // add adds the (op, name) pair to the test log.
-[GoRecv] internal static void add(this ref testLog l, @string op, @string name) => func((defer, _) => {
+internal static void add(this ж<testLog> Ꮡl, @string op, @string name) => func((defer, recover) => {
+    ref var l = ref Ꮡl.Value;
+
     if (strings.Contains(name, "\n"u8) || name == ""u8) {
         return;
     }
-    l.mu.Lock();
-    defer(l.mu.Unlock);
+    Ꮡl.of(testLog.Ꮡmu).Lock();
+    defer(Ꮡl.of(testLog.Ꮡmu).Unlock);
     if (l.w == nil) {
         return;
     }
@@ -113,10 +123,11 @@ public static @string ImportPath(this TestDeps _) {
     l.w.WriteByte((rune)'\n');
 });
 
-internal static testLog log;
+internal static ж<testLog> Ꮡlog = new(default(testLog));
+internal static ref testLog log => ref Ꮡlog.Value;
 
 public static void StartTestLog(this TestDeps _, io.Writer w) {
-    log.mu.Lock();
+    Ꮡlog.of(testLog.Ꮡmu).Lock();
     log.w = bufio.NewWriter(w);
     if (!log.set) {
         // Tests that define TestMain and then run m.Run multiple times
@@ -124,17 +135,16 @@ public static void StartTestLog(this TestDeps _, io.Writer w) {
         // Checking log.set avoids calling testlog.SetLogger multiple times
         // (which will panic) and also avoids writing the header multiple times.
         log.set = true;
-        testlog.SetLogger(log);
+        testlog.SetLogger(new testLogжInterface(Ꮡlog));
         log.w.WriteString("# test log\n"u8);
     }
     // known to cmd/go/internal/test/test.go
-    log.mu.Unlock();
+    Ꮡlog.of(testLog.Ꮡmu).Unlock();
 }
 
-public static error StopTestLog(this TestDeps _) => func((defer, _) => {
-    log.mu.Lock();
-    var logʗ1 = log;
-    defer(logʗ1.mu.Unlock);
+public static error StopTestLog(this TestDeps _) => func((defer, recover) => {
+    Ꮡlog.of(testLog.Ꮡmu).Lock();
+    defer(Ꮡlog.of(testLog.Ꮡmu).Unlock);
     var err = log.w.Flush();
     log.w = default!;
     return err;
@@ -145,43 +155,44 @@ public static void SetPanicOnExit0(this TestDeps _, bool v) {
     testlog.SetPanicOnExit0(v);
 }
 
-public static error /*err*/ CoordinateFuzzing(this TestDeps _, time.Duration timeout, int64 limit, time.Duration minimizeTimeout, int64 minimizeLimit, nint parallel, slice<fuzzꓸCorpusEntry> seed, slice<reflectꓸType> types, @string corpusDir, @string cacheDir) => func((defer, _) => {
+public static error /*err*/ CoordinateFuzzing(this TestDeps _, time.Duration timeout, int64 limit, time.Duration minimizeTimeout, int64 minimizeLimit, nint parallel, slice<fuzzꓸCorpusEntry> seed, slice<reflectꓸType> types, @string corpusDir, @string cacheDir) {
     error err = default!;
-
-    // Fuzzing may be interrupted with a timeout or if the user presses ^C.
-    // In either case, we'll stop worker processes gracefully and save
-    // crashers and interesting values.
-    (ctx, cancel) = signal.NotifyContext(context.Background(), os.Interrupt);
-    var cancelʗ1 = cancel;
-    defer(cancelʗ1);
-    err = fuzz.CoordinateFuzzing(ctx, new fuzz.CoordinateFuzzingOpts(
-        Log: os.Stderr,
-        Timeout: timeout,
-        Limit: limit,
-        MinimizeTimeout: minimizeTimeout,
-        MinimizeLimit: minimizeLimit,
-        Parallel: parallel,
-        Seed: seed,
-        Types: types,
-        CorpusDir: corpusDir,
-        CacheDir: cacheDir
-    ));
-    if (AreEqual(err, ctx.Err())) {
-        return default!;
-    }
+    func((defer, recover) => {
+        // Fuzzing may be interrupted with a timeout or if the user presses ^C.
+        // In either case, we'll stop worker processes gracefully and save
+        // crashers and interesting values.
+        var (ctx, cancel) = signal.NotifyContext(context.Background(), os.Interrupt);
+        var cancelʗ1 = cancel;
+        defer(() => cancelʗ1());
+        err = fuzz.CoordinateFuzzing(ctx, new fuzz.CoordinateFuzzingOpts(
+            Log: new os.FileжWriter(os.Stderr),
+            Timeout: timeout,
+            Limit: limit,
+            MinimizeTimeout: minimizeTimeout,
+            MinimizeLimit: minimizeLimit,
+            Parallel: parallel,
+            Seed: seed,
+            Types: types,
+            CorpusDir: corpusDir,
+            CacheDir: cacheDir
+        ));
+        if (AreEqual(err, ctx.Err())) {
+            err = default!; return;
+        }
+    });
     return err;
-});
+}
 
-public static error RunFuzzWorker(this TestDeps _, fuzz.CorpusEntry) error fn) => func((defer, _) => {
+public static error RunFuzzWorker(this TestDeps _, Func<fuzzꓸCorpusEntry, error> fn) => func<error>((defer, recover) => {
     // Worker processes may or may not receive a signal when the user presses ^C
     // On POSIX operating systems, a signal sent to a process group is delivered
     // to all processes in that group. This is not the case on Windows.
     // If the worker is interrupted, return quickly and without error.
     // If only the coordinator process is interrupted, it tells each worker
     // process to stop by closing its "fuzz_in" pipe.
-    (ctx, cancel) = signal.NotifyContext(context.Background(), os.Interrupt);
+    var (ctx, cancel) = signal.NotifyContext(context.Background(), os.Interrupt);
     var cancelʗ1 = cancel;
-    defer(cancelʗ1);
+    defer(() => cancelʗ1());
     var err = fuzz.RunFuzzWorker(ctx, fn);
     if (AreEqual(err, ctx.Err())) {
         return default!;
@@ -221,9 +232,9 @@ public static Func<@string, @string, @string, @string, io.Writer, slice<@string>
 
 public static Action<bool> CoverMarkProfileEmittedFunc;
 
-public static (@string mode, Func<@string, @string, (string, error)> tearDown, Func<float64> snapcov) InitRuntimeCoverage(this TestDeps _) {
+public static (@string mode, Func<@string, @string, (@string, error)> tearDown, Func<float64> snapcov) InitRuntimeCoverage(this TestDeps _) {
     @string mode = default!;
-    Func<@string, @string, (string, error)> tearDown = default!;
+    Func<@string, @string, (@string, error)> tearDown = default!;
     Func<float64> snapcov = default!;
 
     if (CoverMode == ""u8) {
@@ -232,7 +243,7 @@ public static (@string mode, Func<@string, @string, (string, error)> tearDown, F
     return (CoverMode, coverTearDown, CoverSnapshotFunc);
 }
 
-internal static (@string, error) coverTearDown(@string coverprofile, @string gocoverdir) => func((defer, _) => {
+internal static (@string, error) coverTearDown(@string coverprofile, @string gocoverdir) => func<(@string, error)>((defer, recover) => {
     error err = default!;
     if (gocoverdir == ""u8) {
         (gocoverdir, err) = os.MkdirTemp(""u8, "gocoverdir"u8);
@@ -244,7 +255,7 @@ internal static (@string, error) coverTearDown(@string coverprofile, @string goc
     CoverMarkProfileEmittedFunc(true);
     @string cmode = CoverMode;
     {
-        var errΔ1 = CoverProcessTestDirFunc(gocoverdir, coverprofile, cmode, Covered, ~os.Stdout, CoverSelectedPackages); if (errΔ1 != default!) {
+        var errΔ1 = CoverProcessTestDirFunc(gocoverdir, coverprofile, cmode, Covered, new os.FileжWriter(os.Stdout), CoverSelectedPackages); if (errΔ1 != default!) {
             return ("error generating coverage report", errΔ1);
         }
     }

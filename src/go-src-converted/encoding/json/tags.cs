@@ -12,7 +12,7 @@ partial class json_package {
 // parseTag splits a struct field's json tag into its name and
 // comma-separated options.
 internal static (@string, tagOptions) parseTag(@string tag) {
-    var (tag, opt, _) = strings.Cut(tag, ","u8);
+    (tag, var opt, _) = strings.Cut(tag, ","u8);
     return (tag, ((tagOptions)opt));
 }
 

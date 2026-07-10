@@ -5,8 +5,8 @@
 // Package slogtest contains support functions for testing slog.
 namespace go.log.slog.@internal;
 
-using slog = log.slog_package;
-using log;
+using slog = go.log.slog_package;
+using go.log;
 
 partial class slogtest_package {
 

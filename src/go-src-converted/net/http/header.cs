@@ -4,27 +4,29 @@
 namespace go.net;
 
 using io = io_package;
-using httptrace = net.http.httptrace_package;
-using ascii = net.http.@internal.ascii_package;
-using textproto = net.textproto_package;
+using httptrace = go.net.http.httptrace_package;
+using ascii = go.net.http.@internal.ascii_package;
+using textproto = go.net.textproto_package;
 using slices = slices_package;
 using strings = strings_package;
 using sync = sync_package;
 using time = time_package;
-using httpguts = golang.org.x.net.http.httpguts_package;
-using golang.org.x.net.http;
-using net.http;
-using net.http.@internal;
+using httpguts = vendor.golang.org.x.net.http.httpguts_package;
+using go.net;
+using go.net.http;
+using go.net.http.@internal;
+using vendor.golang.org.x.net.http;
 
 partial class http_package {
-/* visitMapType: map[string][]string */
+
+[GoType("map[@string, slice<@string>]")] partial struct ΔHeader;
 
 // Add adds the key, value pair to the header.
 // It appends to any existing values associated with key.
 // The key is case insensitive; it is canonicalized by
 // [CanonicalHeaderKey].
 public static void Add(this ΔHeader h, @string key, @string value) {
-    ((textproto.MIMEHeader)h).Add(key, value);
+    ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Add(key, value);
 }
 
 // Set sets the header entries associated with key to the
@@ -33,7 +35,7 @@ public static void Add(this ΔHeader h, @string key, @string value) {
 // canonicalized by [textproto.CanonicalMIMEHeaderKey].
 // To use non-canonical keys, assign to the map directly.
 public static void Set(this ΔHeader h, @string key, @string value) {
-    ((textproto.MIMEHeader)h).Set(key, value);
+    ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Set(key, value);
 }
 
 // Get gets the first value associated with the given key. If
@@ -43,7 +45,7 @@ public static void Set(this ΔHeader h, @string key, @string value) {
 // keys are stored in canonical form. To use non-canonical keys,
 // access the map directly.
 public static @string Get(this ΔHeader h, @string key) {
-    return ((textproto.MIMEHeader)h).Get(key);
+    return ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Get(key);
 }
 
 // Values returns all values associated with the given key.
@@ -52,13 +54,13 @@ public static @string Get(this ΔHeader h, @string key) {
 // keys, access the map directly.
 // The returned slice is not a copy.
 public static slice<@string> Values(this ΔHeader h, @string key) {
-    return ((textproto.MIMEHeader)h).Values(key);
+    return ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Values(key);
 }
 
 // get is like Get, but key must already be in CanonicalHeaderKey form.
 internal static @string get(this ΔHeader h, @string key) {
     {
-        var v = h[key]; if (len(v) > 0) {
+        var v = h[key]; if (builtin.len(v) > 0) {
             return v[0];
         }
     }
@@ -68,8 +70,7 @@ internal static @string get(this ΔHeader h, @string key) {
 // has reports whether h has the provided key defined, even if it's
 // set to 0-length slice.
 internal static bool has(this ΔHeader h, @string key) {
-    var _ = h[key];
-    var ok = h[key];
+    var (_, ok) = h[key, ꟷ];
     return ok;
 }
 
@@ -77,7 +78,7 @@ internal static bool has(this ΔHeader h, @string key) {
 // The key is case insensitive; it is canonicalized by
 // [CanonicalHeaderKey].
 public static void Del(this ΔHeader h, @string key) {
-    ((textproto.MIMEHeader)h).Del(key);
+    ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Del(key);
 }
 
 // Write writes a header in wire format.
@@ -85,8 +86,8 @@ public static error Write(this ΔHeader h, io.Writer w) {
     return h.write(w, nil);
 }
 
-public static error write(this ΔHeader h, io.Writer w, ж<httptrace.ClientTrace> Ꮡtrace) {
-    ref var trace = ref Ꮡtrace.val;
+internal static error write(this ΔHeader h, io.Writer w, ж<httptrace.ClientTrace> Ꮡtrace) {
+    ref var trace = ref Ꮡtrace.Value;
 
     return h.writeSubset(w, default!, Ꮡtrace);
 }
@@ -99,11 +100,11 @@ public static ΔHeader Clone(this ΔHeader h) {
     // Find total number of values.
     nint nv = 0;
     foreach (var (_, vv) in h) {
-        nv += len(vv);
+        nv += builtin.len(vv);
     }
     var sv = new slice<@string>(nv);
     // shared backing array for headers' values
-    var h2 = new ΔHeader(len(h));
+    var h2 = new ΔHeader(builtin.len(h));
     foreach (var (k, vv) in h) {
         if (vv == default!) {
             // Preserve nil values. ReverseProxy distinguishes
@@ -144,7 +145,7 @@ internal static ж<strings.Replacer> headerNewlineToSpace = strings.NewReplacer(
 
 // stringWriter implements WriteString on a Writer.
 [GoType] partial struct stringWriter {
-    internal io_package.Writer w;
+    internal io.Writer w;
 }
 
 internal static (nint n, error err) WriteString(this stringWriter w, @string s) {
@@ -164,9 +165,10 @@ internal static (nint n, error err) WriteString(this stringWriter w, @string s) 
     internal slice<keyValues> kvs;
 }
 
-internal static sync.Pool headerSorterPool = new sync.Pool(
+internal static ж<sync.Pool> ᏑheaderSorterPool = new(new sync.Pool(
     New: () => @new<headerSorter>()
-);
+));
+internal static ref sync.Pool headerSorterPool => ref ᏑheaderSorterPool.Value;
 
 // sortedKeyValues returns h's keys sorted in the returned kvs
 // slice. The headerSorter used to sort is also returned, for possible
@@ -175,9 +177,9 @@ internal static (slice<keyValues> kvs, ж<headerSorter> hs) sortedKeyValues(this
     slice<keyValues> kvs = default!;
     ж<headerSorter> hs = default!;
 
-    hs = headerSorterPool.Get()._<headerSorter.val>();
-    if (cap((~hs).kvs) < len(h)) {
-        hs.val.kvs = new slice<keyValues>(0, len(h));
+    hs = ᏑheaderSorterPool.Get()._<ж<headerSorter>>();
+    if (cap((~hs).kvs) < builtin.len(h)) {
+        hs.Value.kvs = new slice<keyValues>(0, builtin.len(h));
     }
     kvs = (~hs).kvs[..0];
     foreach (var (k, vv) in h) {
@@ -185,7 +187,7 @@ internal static (slice<keyValues> kvs, ж<headerSorter> hs) sortedKeyValues(this
             kvs = append(kvs, new keyValues(k, vv));
         }
     }
-    hs.val.kvs = kvs;
+    hs.Value.kvs = kvs;
     slices.SortFunc((~hs).kvs, (keyValues a, keyValues b) => strings.Compare(a.key, b.key));
     return (kvs, hs);
 }
@@ -197,14 +199,14 @@ public static error WriteSubset(this ΔHeader h, io.Writer w, map<@string, bool>
     return h.writeSubset(w, exclude, nil);
 }
 
-public static error writeSubset(this ΔHeader h, io.Writer w, map<@string, bool> exclude, ж<httptrace.ClientTrace> Ꮡtrace) {
-    ref var trace = ref Ꮡtrace.val;
+internal static error writeSubset(this ΔHeader h, io.Writer w, map<@string, bool> exclude, ж<httptrace.ClientTrace> Ꮡtrace) {
+    ref var trace = ref Ꮡtrace.DerefOrNil();
 
     var (ws, ok) = w._<io.StringWriter>(ᐧ);
     if (!ok) {
         ws = new stringWriter(w);
     }
-    (kvs, sorter) = h.sortedKeyValues(exclude);
+    var (kvs, sorter) = h.sortedKeyValues(exclude);
     slice<@string> formattedVals = default!;
     foreach (var (_, kv) in kvs) {
         if (!httpguts.ValidHeaderFieldName(kv.key)) {
@@ -214,27 +216,29 @@ public static error writeSubset(this ΔHeader h, io.Writer w, map<@string, bool>
             // handler, so just drop invalid headers instead.
             continue;
         }
-        foreach (var (_, v) in kv.values) {
+        foreach (var (_, vᴛ1) in kv.values) {
+            var v = vᴛ1;
+
             v = headerNewlineToSpace.Replace(v);
             v = textproto.TrimString(v);
             foreach (var (_, s) in new @string[]{kv.key, ": ", v, "\r\n"}.slice()) {
                 {
                     var (_, err) = ws.WriteString(s); if (err != default!) {
-                        headerSorterPool.Put(sorter);
+                        ᏑheaderSorterPool.Put(sorter);
                         return err;
                     }
                 }
             }
-            if (trace != nil && trace.WroteHeaderField != default!) {
+            if (Ꮡtrace != nil && trace.WroteHeaderField != default!) {
                 formattedVals = append(formattedVals, v);
             }
         }
-        if (trace != nil && trace.WroteHeaderField != default!) {
+        if (Ꮡtrace != nil && trace.WroteHeaderField != default!) {
             trace.WroteHeaderField(kv.key, formattedVals);
             formattedVals = default!;
         }
     }
-    headerSorterPool.Put(sorter);
+    ᏑheaderSorterPool.Put(sorter);
     return default!;
 }
 
@@ -254,13 +258,13 @@ public static @string CanonicalHeaderKey(@string s) {
 // token must be all lowercase.
 // v may contain mixed cased.
 internal static bool hasToken(@string v, @string token) {
-    if (len(token) > len(v) || token == ""u8) {
+    if (builtin.len(token) > builtin.len(v) || token == ""u8) {
         return false;
     }
     if (v == token) {
         return true;
     }
-    for (nint sp = 0; sp <= len(v) - len(token); sp++) {
+    for (nint sp = 0; sp <= builtin.len(v) - builtin.len(token); sp++) {
         // Check that first character is good.
         // The token is ASCII, so checking only a single byte
         // is sufficient. We skip this potential starting
@@ -268,7 +272,7 @@ internal static bool hasToken(@string v, @string token) {
         // ASCII uppercase equivalent (b|0x20) don't match.
         // False positives ('^' => '~') are caught by EqualFold.
         {
-            var b = v[sp]; if (b != token[0] && (byte)(b | 32) != token[0]) {
+            var b = v[sp]; if (b != token[0] && (byte)(b | 0x20) != token[0]) {
                 continue;
             }
         }
@@ -278,11 +282,11 @@ internal static bool hasToken(@string v, @string token) {
         }
         // Check that end pos is on a valid token boundary.
         {
-            nint endPos = sp + len(token); if (endPos != len(v) && !isTokenBoundary(v[endPos])) {
+            nint endPos = sp + builtin.len(token); if (endPos != builtin.len(v) && !isTokenBoundary(v[endPos])) {
                 continue;
             }
         }
-        if (ascii.EqualFold(v[(int)(sp)..(int)(sp + len(token))], token)) {
+        if (ascii.EqualFold(v[(int)(sp)..(int)(sp + builtin.len(token))], token)) {
             return true;
         }
     }

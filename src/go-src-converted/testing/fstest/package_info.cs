@@ -46,25 +46,15 @@ using static go.testing.fstest_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<MapFS, io.fs_package.FS>]
-[assembly: GoImplement<fs.DirEntry, io.fs_package.DirEntry>]
-[assembly: GoImplement<fs.FS, error), io.fs_package.FS>]
-[assembly: GoImplement<fs.File, error), io.fs_package.File>]
-[assembly: GoImplement<fs.FileInfo, error), io.fs_package.FileInfo>]
-[assembly: GoImplement<fs.GlobFS, bool), io.fs_package.GlobFS>]
-[assembly: GoImplement<fs.ReadDirFS, bool), io.fs_package.ReadDirFS>]
-[assembly: GoImplement<fs.ReadDirFile, bool), io.fs_package.ReadDirFile>]
-[assembly: GoImplement<fs.ReadFileFS, bool), io.fs_package.ReadFileFS>]
-[assembly: GoImplement<fs.StatFS, bool), io.fs_package.StatFS>]
-[assembly: GoImplement<fsOnly, io.fs_package.FS>]
-[assembly: GoImplement<io.fs_package.File, io_package.Reader>]
-[assembly: GoImplement<io.fs_package.PathError, error>]
-[assembly: GoImplement<mapDir, io.fs_package.File>]
-[assembly: GoImplement<mapFileInfo, io.fs_package.FileInfo>]
-[assembly: GoImplement<nint, io.fs_package.File>]
-[assembly: GoImplement<noSub, io.fs_package.FS>]
-[assembly: GoImplement<openMapFile, io.fs_package.File>]
-[assembly: GoImplement<slice<error>, error>]
+[assembly: GoImplement<MapFS, go.io.fs_package.FS>]
+[assembly: GoImplement<fsOnly, go.io.fs_package.FS>(Promoted = true)]
+[assembly: GoImplement<fsOnly, go.io.fs_package.FS>]
+[assembly: GoImplement<go.io.fs_package.File, io_package.Reader>]
+[assembly: GoImplement<mapDir, go.io.fs_package.File>(Pointer = true)]
+[assembly: GoImplement<mapFileInfo, go.io.fs_package.DirEntry>(Pointer = true)]
+[assembly: GoImplement<mapFileInfo, go.io.fs_package.FileInfo>(Pointer = true)]
+[assembly: GoImplement<noSub, go.io.fs_package.FS>]
+[assembly: GoImplement<openMapFile, go.io.fs_package.File>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

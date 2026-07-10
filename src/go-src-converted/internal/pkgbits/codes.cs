@@ -23,7 +23,7 @@ public static SyncMarker Marker(this CodeVal c) {
 }
 
 public static nint Value(this CodeVal c) {
-    return ((nint)c);
+    return (nint)c;
 }
 
 // Note: These values are public and cannot be changed without
@@ -42,7 +42,7 @@ public static SyncMarker Marker(this CodeType c) {
 }
 
 public static nint Value(this CodeType c) {
-    return ((nint)c);
+    return (nint)c;
 }
 
 // Note: These values are public and cannot be changed without
@@ -67,7 +67,7 @@ public static SyncMarker Marker(this CodeObj c) {
 }
 
 public static nint Value(this CodeObj c) {
-    return ((nint)c);
+    return (nint)c;
 }
 
 // Note: These values are public and cannot be changed without

@@ -74,7 +74,7 @@ internal static readonly UntypedInt maxUint64 = /* 1<<64 - 1 */ 1844674407370955
 public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
     @string fnParseUint = "ParseUint"u8;
     if (s == ""u8) {
-        return (0, ~syntaxError(fnParseUint, s));
+        return (0, new NumErrorжerror(syntaxError(fnParseUint, s)));
     }
     var base0 = @base == 0;
     @string s0 = s;
@@ -113,33 +113,33 @@ public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
         break;
     }
     default: {
-        return (0, ~baseError(fnParseUint, s0, @base));
+        return (0, new NumErrorжerror(baseError(fnParseUint, s0, @base)));
     }}
 
     if (bitSize == 0){
         bitSize = IntSize;
     } else 
     if (bitSize < 0 || bitSize > 64) {
-        return (0, ~bitSizeError(fnParseUint, s0, bitSize));
+        return (0, new NumErrorжerror(bitSizeError(fnParseUint, s0, bitSize)));
     }
     // Cutoff is the smallest number such that cutoff*base > maxUint64.
     // Use compile-time constants for common cases.
     uint64 cutoff = default!;
     switch (@base) {
     case 10: {
-        cutoff = maxUint64 / 10 + 1;
+        cutoff = 1844674407370955161L + 1;
         break;
     }
     case 16: {
-        cutoff = maxUint64 / 16 + 1;
+        cutoff = 1152921504606846975L + 1;
         break;
     }
     default: {
-        cutoff = maxUint64 / ((uint64)@base) + 1;
+        cutoff = (uint64)maxUint64 / (uint64)@base + 1;
         break;
     }}
 
-    var maxVal = ((uint64)1) << (int)(((nuint)bitSize)) - 1;
+    var maxVal = ((uint64)1 << (int)((nuint)bitSize)) - 1;
     var underscores = false;
     uint64 n = default!;
     foreach (var (_, c) in slice<byte>(s)) {
@@ -151,34 +151,34 @@ public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
             break;
         }
         case {} when (rune)'0' <= c && c <= (rune)'9': {
-            d = c - (rune)'0';
+            d = (byte)(c - (rune)'0');
             break;
         }
         case {} when (rune)'a' <= lower(c) && lower(c) <= (rune)'z': {
-            d = lower(c) - (rune)'a' + 10;
+            d = (byte)(lower(c) - (rune)'a' + 10);
             break;
         }
         default: {
-            return (0, ~syntaxError(fnParseUint, s0));
+            return (0, new NumErrorжerror(syntaxError(fnParseUint, s0)));
         }}
 
-        if (d >= ((byte)@base)) {
-            return (0, ~syntaxError(fnParseUint, s0));
+        if (d >= (byte)@base) {
+            return (0, new NumErrorжerror(syntaxError(fnParseUint, s0)));
         }
         if (n >= cutoff) {
             // n*base overflows
-            return (maxVal, ~rangeError(fnParseUint, s0));
+            return (maxVal, new NumErrorжerror(rangeError(fnParseUint, s0)));
         }
-        n *= ((uint64)@base);
-        var n1 = n + ((uint64)d);
+        n *= (uint64)@base;
+        var n1 = n + (uint64)d;
         if (n1 < n || n1 > maxVal) {
             // n+d overflows
-            return (maxVal, ~rangeError(fnParseUint, s0));
+            return (maxVal, new NumErrorжerror(rangeError(fnParseUint, s0)));
         }
         n = n1;
     }
     if (underscores && !underscoreOK(s0)) {
-        return (0, ~syntaxError(fnParseUint, s0));
+        return (0, new NumErrorжerror(syntaxError(fnParseUint, s0)));
     }
     return (n, default!);
 }
@@ -214,7 +214,7 @@ public static (int64 i, error err) ParseInt(@string s, nint @base, nint bitSize)
 
     @string fnParseInt = "ParseInt"u8;
     if (s == ""u8) {
-        return (0, ~syntaxError(fnParseInt, s));
+        return (0, new NumErrorжerror(syntaxError(fnParseInt, s)));
     }
     // Pick off leading sign.
     @string s0 = s;
@@ -229,22 +229,22 @@ public static (int64 i, error err) ParseInt(@string s, nint @base, nint bitSize)
     // Convert unsigned and check range.
     uint64 un = default!;
     (un, err) = ParseUint(s, @base, bitSize);
-    if (err != default! && !AreEqual(err._<NumError.val>().Err, ErrRange)) {
-        err._<NumError.val>().Func = fnParseInt;
-        err._<NumError.val>().Num = stringslite.Clone(s0);
+    if (err != default! && !AreEqual((~err._<ж<NumError>>()).Err, ErrRange)) {
+        err._<ж<NumError>>().Value.Func = fnParseInt;
+        err._<ж<NumError>>().Value.Num = stringslite.Clone(s0);
         return (0, err);
     }
     if (bitSize == 0) {
         bitSize = IntSize;
     }
-    var cutoff = ((uint64)(1 << (int)(((nuint)(bitSize - 1)))));
+    var cutoff = (uint64)(((uint64)1 << (int)((nuint)(bitSize - 1))));
     if (!neg && un >= cutoff) {
-        return (((int64)(cutoff - 1)), ~rangeError(fnParseInt, s0));
+        return ((int64)(cutoff - 1), new NumErrorжerror(rangeError(fnParseInt, s0)));
     }
     if (neg && un > cutoff) {
-        return (-((int64)cutoff), ~rangeError(fnParseInt, s0));
+        return (-(int64)cutoff, new NumErrorжerror(rangeError(fnParseInt, s0)));
     }
-    var n = ((int64)un);
+    var n = (int64)un;
     if (neg) {
         n = -n;
     }
@@ -261,16 +261,18 @@ public static (nint, error) Atoi(@string s) {
         if (s[0] == (rune)'-' || s[0] == (rune)'+') {
             s = s[1..];
             if (len(s) < 1) {
-                return (0, ~syntaxError(fnAtoi, s0));
+                return (0, new NumErrorжerror(syntaxError(fnAtoi, s0)));
             }
         }
         nint n = 0;
-        foreach (var (_, ch) in slice<byte>(s)) {
+        foreach (var (_, vᴛ1) in slice<byte>(s)) {
+            var ch = vᴛ1;
+
             ch -= (rune)'0';
             if (ch > 9) {
-                return (0, ~syntaxError(fnAtoi, s0));
+                return (0, new NumErrorжerror(syntaxError(fnAtoi, s0)));
             }
-            n = n * 10 + ((nint)ch);
+            n = n * 10 + (nint)ch;
         }
         if (s0[0] == (rune)'-') {
             n = -n;
@@ -280,11 +282,11 @@ public static (nint, error) Atoi(@string s) {
     // Slow path for invalid, big, or underscored integers.
     var (i64, err) = ParseInt(s, 10, 0);
     {
-        var (nerr, ok) = err._<NumError.val>(ᐧ); if (ok) {
-            nerr.val.Func = fnAtoi;
+        var (nerr, ok) = err._<ж<NumError>>(ᐧ); if (ok) {
+            nerr.Value.Func = fnAtoi;
         }
     }
-    return (((nint)i64), err);
+    return ((nint)i64, err);
 }
 
 // underscoreOK reports whether the underscores in s are allowed.

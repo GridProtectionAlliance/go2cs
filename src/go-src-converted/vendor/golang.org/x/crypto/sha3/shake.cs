@@ -26,7 +26,8 @@ partial class sha3_package {
 // security.
 [GoType] partial interface ShakeHash :
     hash.Hash,
-    io.Reader
+    io.Reader,
+    io.ReadWriter
 {
     // Clone returns a copy of the ShakeHash in its current state.
     ShakeHash Clone();
@@ -34,7 +35,7 @@ partial class sha3_package {
 
 // cSHAKE specific context
 [GoType] partial struct cshakeState {
-    public partial ref ж<state> state { get; } // SHA-3 state context and Read/Write operations
+    internal partial ref ж<state> state { get; } // SHA-3 state context and Read/Write operations
     // initBlock is the cSHAKE specific initialization set of bytes. It is initialized
     // by newCShake function and stores concatenation of N followed by S, encoded
     // by the method specified in 3.3 of [1].
@@ -44,9 +45,9 @@ partial class sha3_package {
 }
 
 // Consts for configuring initial SHA-3 state
-internal static readonly UntypedInt dsbyteShake = /* 0x1f */ 31;
+internal static readonly UntypedInt dsbyteShake = 0x1f;
 
-internal static readonly UntypedInt dsbyteCShake = /* 0x04 */ 4;
+internal static readonly UntypedInt dsbyteCShake = 0x04;
 
 internal static readonly UntypedInt rate128 = 168;
 
@@ -55,7 +56,7 @@ internal static readonly UntypedInt rate256 = 136;
 internal static slice<byte> bytepad(slice<byte> input, nint w) {
     // leftEncode always returns max 9 bytes
     var buf = new slice<byte>(0, 9 + len(input) + w);
-    buf = append(buf, leftEncode(((uint64)w)).ꓸꓸꓸ);
+    buf = append(buf, leftEncode((uint64)w).ꓸꓸꓸ);
     buf = append(buf, input.ꓸꓸꓸ);
     nint padlen = w - (len(buf) % w);
     return append(buf, new slice<byte>(padlen).ꓸꓸꓸ);
@@ -65,12 +66,12 @@ internal static slice<byte> leftEncode(uint64 value) {
     array<byte> b = new(9);
     binary.BigEndian.PutUint64(b[1..], value);
     // Trim all but last leading zero bytes
-    var i = ((byte)1);
+    var i = (byte)1;
     while (i < 8 && b[i] == 0) {
         i++;
     }
     // Prepend number of encoded bytes
-    b[i - 1] = 9 - i;
+    b[i - 1] = (byte)(9 - i);
     return b[(int)(i - 1)..];
 }
 
@@ -79,44 +80,46 @@ internal static ShakeHash newCShake(slice<byte> N, slice<byte> S, nint rate, nin
     c = new cshakeState(state: Ꮡ(new state(rate: rate, outputLen: outputLen, dsbyte: dsbyte)));
     // leftEncode returns max 9 bytes
     c.initBlock = new slice<byte>(0, 9 * 2 + len(N) + len(S));
-    c.initBlock = append(c.initBlock, leftEncode(((uint64)(len(N) * 8))).ꓸꓸꓸ);
+    c.initBlock = append(c.initBlock, leftEncode((uint64)(len(N) * 8)).ꓸꓸꓸ);
     c.initBlock = append(c.initBlock, N.ꓸꓸꓸ);
-    c.initBlock = append(c.initBlock, leftEncode(((uint64)(len(S) * 8))).ꓸꓸꓸ);
+    c.initBlock = append(c.initBlock, leftEncode((uint64)(len(S) * 8)).ꓸꓸꓸ);
     c.initBlock = append(c.initBlock, S.ꓸꓸꓸ);
-    c.Write(bytepad(c.initBlock, c.rate));
-    return ~Ꮡc;
+    Ꮡc.Write(bytepad(c.initBlock, c.rate));
+    return new cshakeStateжShakeHash(Ꮡc);
 }
 
 // Reset resets the hash to initial state.
-[GoRecv] internal static void Reset(this ref cshakeState c) {
+internal static void Reset(this ж<cshakeState> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     c.state.Reset();
-    c.Write(bytepad(c.initBlock, c.rate));
+    Ꮡc.Write(bytepad(c.initBlock, c.rate));
 }
 
 // Clone returns copy of a cSHAKE context within its current state.
 [GoRecv] internal static ShakeHash Clone(this ref cshakeState c) {
     var b = new slice<byte>(len(c.initBlock));
     copy(b, c.initBlock);
-    return new cshakeState(state: c.clone(), initBlock: b);
+    return new cshakeStateжShakeHash(Ꮡ(new cshakeState(state: c.clone(), initBlock: b)));
 }
 
 // Clone returns copy of SHAKE context within its current state.
 [GoRecv] internal static ShakeHash Clone(this ref state c) {
-    return ~c.clone();
+    return new stateжShakeHash(c.clone());
 }
 
 // NewShake128 creates a new SHAKE128 variable-output-length ShakeHash.
 // Its generic security strength is 128 bits against all attacks if at
 // least 32 bytes of its output are used.
 public static ShakeHash NewShake128() {
-    return ~newShake128();
+    return new stateжShakeHash(newShake128());
 }
 
 // NewShake256 creates a new SHAKE256 variable-output-length ShakeHash.
 // Its generic security strength is 256 bits against all attacks if
 // at least 64 bytes of its output are used.
 public static ShakeHash NewShake256() {
-    return ~newShake256();
+    return new stateжShakeHash(newShake256());
 }
 
 internal static ж<state> newShake128Generic() {

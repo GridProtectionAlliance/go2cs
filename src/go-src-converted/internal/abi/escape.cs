@@ -18,8 +18,8 @@ partial class abi_package {
 //go:nosplit
 //go:nocheckptr
 public static @unsafe.Pointer NoEscape(@unsafe.Pointer p) {
-    var x = ((uintptr)p);
-    return ((@unsafe.Pointer)((uintptr)(x ^ 0)));
+    var x = (uintptr)p;
+    return (@unsafe.Pointer)((uintptr)(x ^ 0));
 }
 
 internal static bool alwaysFalse;
@@ -27,9 +27,7 @@ internal static bool alwaysFalse;
 internal static any escapeSink;
 
 // Escape forces any pointers in x to escape to the heap.
-public static T Escape<T>(T x)
-    where T : new()
-{
+public static T Escape<T>(T x) {
     if (alwaysFalse) {
         escapeSink = x;
     }

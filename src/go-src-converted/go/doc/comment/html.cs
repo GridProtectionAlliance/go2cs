@@ -6,6 +6,7 @@ namespace go.go.doc;
 using bytes = bytes_package;
 using fmt = fmt_package;
 using strconv = strconv_package;
+using io = io_package;
 
 partial class comment_package {
 
@@ -17,71 +18,72 @@ partial class comment_package {
 
 // HTML returns an HTML formatting of the [Doc].
 // See the [Printer] documentation for ways to customize the HTML output.
-[GoRecv] public static slice<byte> HTML(this ref Printer p, ж<Doc> Ꮡd) {
-    ref var d = ref Ꮡd.val;
+public static slice<byte> HTML(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
+    ref var p = ref Ꮡp.Value;
+    ref var d = ref Ꮡd.Value;
 
-    var hp = Ꮡ(new htmlPrinter(Printer: p));
-    ref var out = ref heap(new bytes_package.Buffer(), out var Ꮡout);
+    var hp = Ꮡ(new htmlPrinter(Printer: Ꮡp));
+    ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
     foreach (var (_, x) in d.Content) {
-        hp.block(Ꮡ@out, x);
+        hp.block(Ꮡout, x);
     }
     return @out.Bytes();
 }
 
 // block prints the block x to out.
 [GoRecv] internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
-    ref var @out = ref Ꮡout.val;
+    ref var @out = ref Ꮡout.Value;
 
     switch (x.type()) {
     default: {
-        var x = x.type();
-        fmt.Fprintf(~@out, "?%T"u8, x);
+        var xΔ1 = x;
+        fmt.Fprintf(new bytes_BufferжWriter(Ꮡout), "?%T"u8, xΔ1);
         break;
     }
-    case Paragraph.val x: {
+    case ж<Paragraph> xΔ1: {
         if (!p.tight) {
             @out.WriteString("<p>"u8);
         }
-        p.text(Ꮡout, (~x).Text);
+        p.text(Ꮡout, (~xΔ1).Text);
         @out.WriteString("\n"u8);
         break;
     }
-    case Heading.val x: {
+    case ж<Heading> xΔ1: {
         @out.WriteString("<h"u8);
         @string h = strconv.Itoa(p.headingLevel());
         @out.WriteString(h);
         {
-            @string id = p.headingID(Ꮡx); if (id != ""u8) {
+            @string id = p.headingID(xΔ1); if (id != ""u8) {
                 @out.WriteString(@" id="""u8);
                 p.escape(Ꮡout, id);
                 @out.WriteString(@""""u8);
             }
         }
         @out.WriteString(">"u8);
-        p.text(Ꮡout, (~x).Text);
+        p.text(Ꮡout, (~xΔ1).Text);
         @out.WriteString("</h"u8);
         @out.WriteString(h);
         @out.WriteString(">\n"u8);
         break;
     }
-    case Code.val x: {
+    case ж<Code> xΔ1: {
         @out.WriteString("<pre>"u8);
-        p.escape(Ꮡout, (~x).Text);
+        p.escape(Ꮡout, (~xΔ1).Text);
         @out.WriteString("</pre>\n"u8);
         break;
     }
-    case List.val x: {
+    case ж<List> xΔ1: {
         @string kind = "ol>\n"u8;
-        if ((~(~x).Items[0]).Number == ""u8) {
+        if ((~(~xΔ1).Items[0]).Number == ""u8) {
             kind = "ul>\n"u8;
         }
         @out.WriteString("<"u8);
         @out.WriteString(kind);
         @string next = "1"u8;
-        foreach (var (_, item) in (~x).Items) {
+        foreach (var (_, item) in (~xΔ1).Items) {
             @out.WriteString("<li"u8);
             {
-                @string n = item.val.Number; if (n != ""u8) {
+                @string n = item.Value.Number; if (n != ""u8) {
                     if (n != next) {
                         @out.WriteString(@" value="""u8);
                         @out.WriteString(n);
@@ -92,7 +94,7 @@ partial class comment_package {
                 }
             }
             @out.WriteString(">"u8);
-            p.tight = !x.BlankBetween();
+            p.tight = !xΔ1.BlankBetween();
             foreach (var (_, blk) in (~item).Content) {
                 p.block(Ꮡout, blk);
             }
@@ -120,36 +122,36 @@ internal static @string inc(@string s) {
 
 // text prints the text sequence x to out.
 [GoRecv] internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<ΔText> x) {
-    ref var @out = ref Ꮡout.val;
+    ref var @out = ref Ꮡout.Value;
 
     foreach (var (_, t) in x) {
         switch (t.type()) {
-        case Plain t: {
-            p.escape(Ꮡout, ((@string)t));
+        case Plain tΔ1: {
+            p.escape(Ꮡout, ((@string)tΔ1));
             break;
         }
-        case Italic t: {
+        case Italic tΔ1: {
             @out.WriteString("<i>"u8);
-            p.escape(Ꮡout, ((@string)t));
+            p.escape(Ꮡout, ((@string)tΔ1));
             @out.WriteString("</i>"u8);
             break;
         }
-        case Link.val t: {
+        case ж<Link> tΔ1: {
             @out.WriteString(@"<a href="""u8);
-            p.escape(Ꮡout, (~t).URL);
+            p.escape(Ꮡout, (~tΔ1).URL);
             @out.WriteString(@""">"u8);
-            p.text(Ꮡout, (~t).Text);
+            p.text(Ꮡout, (~tΔ1).Text);
             @out.WriteString("</a>"u8);
             break;
         }
-        case DocLink.val t: {
-            @string url = p.docLinkURL(t);
+        case ж<DocLink> tΔ1: {
+            @string url = p.docLinkURL(tΔ1);
             if (url != ""u8) {
                 @out.WriteString(@"<a href="""u8);
                 p.escape(Ꮡout, url);
                 @out.WriteString(@""">"u8);
             }
-            p.text(Ꮡout, (~t).Text);
+            p.text(Ꮡout, (~tΔ1).Text);
             if (url != ""u8) {
                 @out.WriteString("</a>"u8);
             }
@@ -162,7 +164,7 @@ internal static @string inc(@string s) {
 // escaping < & " ' and > to avoid being misinterpreted
 // in larger HTML constructs.
 [GoRecv] internal static void escape(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
-    ref var @out = ref Ꮡout.val;
+    ref var @out = ref Ꮡout.Value;
 
     nint start = 0;
     for (nint i = 0; i < len(s); i++) {

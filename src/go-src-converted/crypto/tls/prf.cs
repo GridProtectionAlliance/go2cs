@@ -4,14 +4,15 @@
 namespace go.crypto;
 
 using crypto = crypto_package;
-using hmac = crypto.hmac_package;
-using md5 = crypto.md5_package;
-using sha1 = crypto.sha1_package;
-using sha256 = crypto.sha256_package;
-using sha512 = crypto.sha512_package;
+using hmac = go.crypto.hmac_package;
+using md5 = go.crypto.md5_package;
+using sha1 = go.crypto.sha1_package;
+using sha256 = go.crypto.sha256_package;
+using sha512 = go.crypto.sha512_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using hash = hash_package;
+using go.crypto;
 
 partial class tls_package {
 
@@ -26,8 +27,8 @@ internal static (slice<byte> s1, slice<byte> s2) splitPreMasterSecret(slice<byte
 }
 
 // pHash implements the P_hash function, as defined in RFC 4346, Section 5.
-internal static void pHash(slice<byte> result, slice<byte> secret, slice<byte> seed, Func<hash.Hash> hash) {
-    var h = hmac.New(hash, secret);
+internal static void pHash(slice<byte> result, slice<byte> secret, slice<byte> seed, Func<hash.Hash> hashΔ1) {
+    var h = hmac.New(hashΔ1, secret);
     h.Write(seed);
     var a = h.Sum(default!);
     nint j = 0;
@@ -51,7 +52,7 @@ internal static void prf10(slice<byte> result, slice<byte> secret, slice<byte> l
     var labelAndSeed = new slice<byte>(len(label) + len(seed));
     copy(labelAndSeed, label);
     copy(labelAndSeed[(int)(len(label))..], seed);
-    (s1, s2) = splitPreMasterSecret(secret);
+    var (s1, s2) = splitPreMasterSecret(secret);
     pHash(result, s1, labelAndSeed, hashMD5);
     var result2 = new slice<byte>(len(result));
     pHash(result2, s2, labelAndSeed, hashSHA1);
@@ -73,25 +74,25 @@ internal static Action<slice<byte>, slice<byte>, slice<byte>, slice<byte>> prf12
 internal static readonly UntypedInt masterSecretLength = 48; // Length of a master secret in TLS 1.1.
 internal static readonly UntypedInt finishedVerifyLength = 12; // Length of verify_data in a Finished message.
 
-internal static slice<byte> masterSecretLabel = slice<byte>("master secret");
+internal static slice<byte> masterSecretLabel = slice<byte>((@string)"master secret");
 
-internal static slice<byte> extendedMasterSecretLabel = slice<byte>("extended master secret");
+internal static slice<byte> extendedMasterSecretLabel = slice<byte>((@string)"extended master secret");
 
-internal static slice<byte> keyExpansionLabel = slice<byte>("key expansion");
+internal static slice<byte> keyExpansionLabel = slice<byte>((@string)"key expansion");
 
-internal static slice<byte> clientFinishedLabel = slice<byte>("client finished");
+internal static slice<byte> clientFinishedLabel = slice<byte>((@string)"client finished");
 
-internal static slice<byte> serverFinishedLabel = slice<byte>("server finished");
+internal static slice<byte> serverFinishedLabel = slice<byte>((@string)"server finished");
 
 internal static (Action<slice<byte>, slice<byte>, slice<byte>, slice<byte>>, crypto.Hash) prfAndHashForVersion(uint16 version, ж<cipherSuite> Ꮡsuite) {
-    ref var suite = ref Ꮡsuite.val;
+    ref var suite = ref Ꮡsuite.Value;
 
     var exprᴛ1 = version;
     if (exprᴛ1 == VersionTLS10 || exprᴛ1 == VersionTLS11) {
         return (prf10, ((crypto.Hash)0));
     }
     if (exprᴛ1 == VersionTLS12) {
-        if ((nint)(suite.flags & suiteSHA384) != 0) {
+        if ((nint)(suite.flags & (nint)suiteSHA384) != 0) {
             return (prf12(sha512.New384), crypto.SHA384);
         }
         return (prf12(sha256.New), crypto.SHA256);
@@ -103,7 +104,7 @@ internal static (Action<slice<byte>, slice<byte>, slice<byte>, slice<byte>>, cry
 }
 
 internal static Action<slice<byte>, slice<byte>, slice<byte>, slice<byte>> prfForVersion(uint16 version, ж<cipherSuite> Ꮡsuite) {
-    ref var suite = ref Ꮡsuite.val;
+    ref var suite = ref Ꮡsuite.Value;
 
     var (prf, _) = prfAndHashForVersion(version, Ꮡsuite);
     return prf;
@@ -112,7 +113,7 @@ internal static Action<slice<byte>, slice<byte>, slice<byte>, slice<byte>> prfFo
 // masterFromPreMasterSecret generates the master secret from the pre-master
 // secret. See RFC 5246, Section 8.1.
 internal static slice<byte> masterFromPreMasterSecret(uint16 version, ж<cipherSuite> Ꮡsuite, slice<byte> preMasterSecret, slice<byte> clientRandom, slice<byte> serverRandom) {
-    ref var suite = ref Ꮡsuite.val;
+    ref var suite = ref Ꮡsuite.Value;
 
     var seed = new slice<byte>(0, len(clientRandom) + len(serverRandom));
     seed = append(seed, clientRandom.ꓸꓸꓸ);
@@ -125,7 +126,7 @@ internal static slice<byte> masterFromPreMasterSecret(uint16 version, ж<cipherS
 // extMasterFromPreMasterSecret generates the extended master secret from the
 // pre-master secret. See RFC 7627.
 internal static slice<byte> extMasterFromPreMasterSecret(uint16 version, ж<cipherSuite> Ꮡsuite, slice<byte> preMasterSecret, slice<byte> transcript) {
-    ref var suite = ref Ꮡsuite.val;
+    ref var suite = ref Ꮡsuite.Value;
 
     var masterSecret = new slice<byte>(masterSecretLength);
     prfForVersion(version, Ꮡsuite)(masterSecret, preMasterSecret, extendedMasterSecretLabel, transcript);
@@ -143,7 +144,7 @@ internal static (slice<byte> clientMAC, slice<byte> serverMAC, slice<byte> clien
     slice<byte> clientIV = default!;
     slice<byte> serverIV = default!;
 
-    ref var suite = ref Ꮡsuite.val;
+    ref var suite = ref Ꮡsuite.Value;
     var seed = new slice<byte>(0, len(serverRandom) + len(clientRandom));
     seed = append(seed, serverRandom.ꓸꓸꓸ);
     seed = append(seed, clientRandom.ꓸꓸꓸ);
@@ -165,7 +166,7 @@ internal static (slice<byte> clientMAC, slice<byte> serverMAC, slice<byte> clien
 }
 
 internal static ΔfinishedHash newFinishedHash(uint16 version, ж<cipherSuite> ᏑcipherSuite) {
-    ref var cipherSuite = ref ᏑcipherSuite.val;
+    ref var cipherSuite = ref ᏑcipherSuite.Value;
 
     slice<byte> buffer = default!;
     if (version >= VersionTLS12) {
@@ -181,18 +182,18 @@ internal static ΔfinishedHash newFinishedHash(uint16 version, ж<cipherSuite> �
 // A finishedHash calculates the hash of a set of handshake messages suitable
 // for including in a Finished message.
 [GoType] partial struct ΔfinishedHash {
-    internal hash_package.Hash client;
-    internal hash_package.Hash server;
+    internal hash.Hash client;
+    internal hash.Hash server;
     // Prior to TLS 1.2, an additional MD5 hash is required.
-    internal hash_package.Hash clientMD5;
-    internal hash_package.Hash serverMD5;
+    internal hash.Hash clientMD5;
+    internal hash.Hash serverMD5;
     // In TLS 1.2, a full buffer is sadly required.
     internal slice<byte> buffer;
     internal uint16 version;
     internal Action<slice<byte>, slice<byte>, slice<byte>, slice<byte>> prf;
 }
 
-[GoRecv] public static (nint n, error err) Write(this ref ΔfinishedHash h, slice<byte> msg) {
+[GoRecv] internal static (nint n, error err) Write(this ref ΔfinishedHash h, slice<byte> msg) {
     nint n = default!;
     error err = default!;
 
@@ -208,7 +209,7 @@ internal static ΔfinishedHash newFinishedHash(uint16 version, ж<cipherSuite> �
     return (len(msg), default!);
 }
 
-public static slice<byte> Sum(this ΔfinishedHash h) {
+internal static slice<byte> Sum(this ΔfinishedHash h) {
     if (h.version >= VersionTLS12) {
         return h.client.Sum(default!);
     }
@@ -274,8 +275,8 @@ internal static (slice<byte>, error) noEKMBecauseNoEMS(@string label, slice<byte
 }
 
 // ekmFromMasterSecret generates exported keying material as defined in RFC 5705.
-internal static Func<@string, slice<byte>, nint, (<>byte, error)> ekmFromMasterSecret(uint16 version, ж<cipherSuite> Ꮡsuite, slice<byte> masterSecret, slice<byte> clientRandom, slice<byte> serverRandom) {
-    ref var suite = ref Ꮡsuite.val;
+internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> ekmFromMasterSecret(uint16 version, ж<cipherSuite> Ꮡsuite, slice<byte> masterSecret, slice<byte> clientRandom, slice<byte> serverRandom) {
+    ref var suite = ref Ꮡsuite.Value;
 
     var clientRandomʗ1 = clientRandom;
     var masterSecretʗ1 = masterSecret;
@@ -295,10 +296,10 @@ internal static Func<@string, slice<byte>, nint, (<>byte, error)> ekmFromMasterS
         seed = append(seed, clientRandomʗ1.ꓸꓸꓸ);
         seed = append(seed, serverRandomʗ1.ꓸꓸꓸ);
         if (context != default!) {
-            if (len(context) >= 1 << (int)(16)) {
+            if (len(context) >= (1 << (int)(16))) {
                 return (default!, fmt.Errorf("crypto/tls: ExportKeyingMaterial context too long"u8));
             }
-            seed = append(seed, ((byte)(len(context) >> (int)(8))), ((byte)len(context)));
+            seed = append(seed, (byte)((len(context) >> (int)(8))), (byte)len(context));
             seed = append(seed, context.ꓸꓸꓸ);
         }
         var keyMaterial = new slice<byte>(length);

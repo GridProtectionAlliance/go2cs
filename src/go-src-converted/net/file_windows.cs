@@ -9,21 +9,21 @@ using syscall = syscall_package;
 partial class net_package {
 
 internal static (Conn, error) fileConn(ж<os.File> Ꮡf) {
-    ref var f = ref Ꮡf.val;
+    ref var f = ref Ꮡf.Value;
 
     // TODO: Implement this
     return (default!, syscall.EWINDOWS);
 }
 
 internal static (Listener, error) fileListener(ж<os.File> Ꮡf) {
-    ref var f = ref Ꮡf.val;
+    ref var f = ref Ꮡf.Value;
 
     // TODO: Implement this
     return (default!, syscall.EWINDOWS);
 }
 
 internal static (PacketConn, error) filePacketConn(ж<os.File> Ꮡf) {
-    ref var f = ref Ꮡf.val;
+    ref var f = ref Ꮡf.Value;
 
     // TODO: Implement this
     return (default!, syscall.EWINDOWS);

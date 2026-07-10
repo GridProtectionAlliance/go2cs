@@ -10,6 +10,10 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using bidiꓸClass = go.vendor.golang.org.x.text.unicode.bidi_package.ΔClass;
+global using bidiꓸDirection = go.vendor.golang.org.x.text.unicode.bidi_package.ΔDirection;
+global using bidiꓸRun = go.vendor.golang.org.x.text.unicode.bidi_package.ΔRun;
+global using normꓸProperties = go.vendor.golang.org.x.text.unicode.norm_package.ΔProperties;
 // </ImportedTypeAliases>
 
 using go;
@@ -38,7 +42,7 @@ using static go.vendor.golang.org.x.net.idna_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<labelError, error>]
+[assembly: GoImplement<labelError, error>(Pointer = true)]
 [assembly: GoImplement<runeError, error>]
 // </InterfaceImplementations>
 

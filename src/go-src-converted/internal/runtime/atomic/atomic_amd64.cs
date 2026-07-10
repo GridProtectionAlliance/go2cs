@@ -16,7 +16,7 @@ partial class atomic_package {
 //go:nosplit
 //go:noinline
 public static uint32 Load(ж<uint32> Ꮡptr) {
-    ref var ptr = ref Ꮡptr.val;
+    ref var ptr = ref Ꮡptr.Value;
 
     return ptr;
 }
@@ -30,7 +30,7 @@ public static @unsafe.Pointer Loadp(@unsafe.Pointer ptr) {
 //go:nosplit
 //go:noinline
 public static uint64 Load64(ж<uint64> Ꮡptr) {
-    ref var ptr = ref Ꮡptr.val;
+    ref var ptr = ref Ꮡptr.Value;
 
     return ptr;
 }
@@ -38,7 +38,7 @@ public static uint64 Load64(ж<uint64> Ꮡptr) {
 //go:nosplit
 //go:noinline
 public static uint32 LoadAcq(ж<uint32> Ꮡptr) {
-    ref var ptr = ref Ꮡptr.val;
+    ref var ptr = ref Ꮡptr.Value;
 
     return ptr;
 }
@@ -46,7 +46,7 @@ public static uint32 LoadAcq(ж<uint32> Ꮡptr) {
 //go:nosplit
 //go:noinline
 public static uint64 LoadAcq64(ж<uint64> Ꮡptr) {
-    ref var ptr = ref Ꮡptr.val;
+    ref var ptr = ref Ꮡptr.Value;
 
     return ptr;
 }
@@ -54,7 +54,7 @@ public static uint64 LoadAcq64(ж<uint64> Ꮡptr) {
 //go:nosplit
 //go:noinline
 public static uintptr LoadAcquintptr(ж<uintptr> Ꮡptr) {
-    ref var ptr = ref Ꮡptr.val;
+    ref var ptr = ref Ꮡptr.Value;
 
     return ptr;
 }
@@ -80,7 +80,7 @@ public static partial uintptr Xchguintptr(ж<uintptr> ptr, uintptr @new);
 //go:nosplit
 //go:noinline
 public static uint8 Load8(ж<uint8> Ꮡptr) {
-    ref var ptr = ref Ꮡptr.val;
+    ref var ptr = ref Ꮡptr.Value;
 
     return ptr;
 }

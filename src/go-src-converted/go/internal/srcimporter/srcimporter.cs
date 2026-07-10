@@ -8,31 +8,31 @@ namespace go.go.@internal;
 
 // import "go/internal/srcimporter"
 using fmt = fmt_package;
-using ast = go.ast_package;
-using build = go.build_package;
-using parser = go.parser_package;
-using token = go.token_package;
-using types = go.types_package;
+using ast = global::go.go.ast_package;
+using build = global::go.go.build_package;
+using parser = global::go.go.parser_package;
+using token = global::go.go.token_package;
+using types = global::go.go.types_package;
 using io = io_package;
 using os = os_package;
-using exec = os.exec_package;
+using exec = global::go.os.exec_package;
 using filepath = path.filepath_package;
 using strings = strings_package;
 using sync = sync_package;
-using _ = unsafe_package; // for go:linkname
-using go;
-using os;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+using global::go.go;
+using global::go.os;
 using path;
-using ꓸꓸꓸ@string = Span<@string>;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class srcimporter_package {
 
 // An Importer provides the context for importing packages from source code.
 [GoType] partial struct Importer {
-    internal ж<go.build_package.Context> ctxt;
-    internal ж<go.token_package.FileSet> fset;
-    internal go.types_package.Sizes sizes;
-    internal types.Package packages;
+    internal ж<build.Context> ctxt;
+    internal ж<token.FileSet> fset;
+    internal types.Sizes sizes;
+    internal map<@string, ж<types.Package>> packages;
 }
 
 // New returns a new Importer for the given context, file set, and map
@@ -41,13 +41,13 @@ partial class srcimporter_package {
 // non-nil file system functions, they are used instead of the regular package
 // os functions. The file set is used to track position information of package
 // files; and imported packages are added to the packages map.
-public static ж<Importer> New(ж<build.Context> Ꮡctxt, ж<token.FileSet> Ꮡfset, types.Package packages) {
-    ref var ctxt = ref Ꮡctxt.val;
-    ref var fset = ref Ꮡfset.val;
+public static ж<Importer> New(ж<build.Context> Ꮡctxt, ж<token.FileSet> Ꮡfset, map<@string, ж<types.Package>> packages) {
+    ref var ctxt = ref Ꮡctxt.Value;
+    ref var fset = ref Ꮡfset.Value;
 
     return Ꮡ(new Importer(
-        ctxt: ctxt,
-        fset: fset,
+        ctxt: Ꮡctxt,
+        fset: Ꮡfset,
         sizes: types.SizesFor(ctxt.Compiler, ctxt.GOARCH), // uses go/types default if GOARCH not found
 
         packages: packages
@@ -56,11 +56,14 @@ public static ж<Importer> New(ж<build.Context> Ꮡctxt, ж<token.FileSet> Ꮡf
 
 // Importing is a sentinel taking the place in Importer.packages
 // for a package that is in the process of being imported.
-internal static types.Package importing;
+internal static ж<types.Package> Ꮡimporting = new(default(types.Package));
+internal static ref types.Package importing => ref Ꮡimporting.Value;
 
 // Import(path) is a shortcut for ImportFrom(path, ".", 0).
-[GoRecv] public static (ж<types.Package>, error) Import(this ref Importer p, @string path) {
-    return p.ImportFrom(path, "."u8, 0);
+public static (ж<types.Package>, error) Import(this ж<Importer> Ꮡp, @string path) {
+    ref var p = ref Ꮡp.Value;
+
+    return Ꮡp.ImportFrom(path, "."u8, 0);
 }
 
 // use "." rather than "" (see issue #24441)
@@ -71,7 +74,9 @@ internal static types.Package importing;
 // maintained with the importer. The import mode must be zero but is otherwise ignored.
 // Packages that are not comprised entirely of pure Go files may fail to import because the
 // type checker may not be able to determine all exported entities (e.g. due to cgo dependencies).
-[GoRecv] public static (ж<types.Package>, error) ImportFrom(this ref Importer p, @string path, @string srcDir, types.ImportMode mode) => func((defer, _) => {
+public static (ж<types.Package>, error) ImportFrom(this ж<Importer> Ꮡp, @string path, @string srcDir, types.ImportMode mode) => func<(ж<types.Package>, error)>((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
+
     if (mode != 0) {
         throw panic("non-zero import mode");
     }
@@ -81,7 +86,7 @@ internal static types.Package importing;
             srcDir = abs;
         }
     }
-    (bp, err) = p.ctxt.Import(path, srcDir, 0);
+    var (bp, err) = p.ctxt.Import(path, srcDir, 0);
     if (err != default!) {
         return (default!, err);
     }
@@ -93,7 +98,7 @@ internal static types.Package importing;
     // no need to re-import if the package was imported completely before
     var pkg = p.packages[(~bp).ImportPath];
     if (pkg != nil) {
-        if (pkg == Ꮡ(importing)) {
+        if (pkg == Ꮡimporting) {
             return (default!, fmt.Errorf("import cycle through package %q"u8, (~bp).ImportPath));
         }
         if (!pkg.Complete()) {
@@ -105,56 +110,53 @@ internal static types.Package importing;
         }
         return (pkg, default!);
     }
-    p.packages[(~bp).ImportPath] = Ꮡ(importing);
+    p.packages[(~bp).ImportPath] = Ꮡimporting;
     var bpʗ1 = bp;
-    var importingʗ1 = importing;
     defer(() => {
         // clean up in case of error
         // TODO(gri) Eventually we may want to leave a (possibly empty)
         // package in the map in all cases (and use that package to
         // identify cycles). See also issue 16088.
-        if (p.packages[(~bpʗ1).ImportPath] == Ꮡ(importingʗ1)) {
-            p.packages[(~bpʗ1).ImportPath] = default!;
+        if (Ꮡp.Value.packages[(~bpʗ1).ImportPath] == Ꮡimporting) {
+            Ꮡp.Value.packages[(~bpʗ1).ImportPath] = default!;
         }
     });
     slice<@string> filenames = default!;
     filenames = append(filenames, (~bp).GoFiles.ꓸꓸꓸ);
     filenames = append(filenames, (~bp).CgoFiles.ꓸꓸꓸ);
-    (files, err) = p.parseFiles((~bp).Dir, filenames);
+    (var files, err) = Ꮡp.parseFiles((~bp).Dir, filenames);
     if (err != default!) {
         return (default!, err);
     }
     // type-check package files
-    error firstHardErr = default!;
-    ref var conf = ref heap<go.types_package.Config>(out var Ꮡconf);
+    ref var firstHardErr = ref heap<error>(out var ᏑfirstHardErr);
+    ref var conf = ref heap<types.Config>(out var Ꮡconf);
     conf = new types.Config(
         IgnoreFuncBodies: true, // continue type-checking after the first error
 
-        Error: 
-        var firstHardErrʗ1 = firstHardErr;
-        (error err) => {
-            if (firstHardErrʗ1 == default! && !errΔ2._<typesꓸError>().Soft) {
-                firstHardErrʗ1 = errΔ2;
+        Error: (error errΔ2) => {
+            if (ᏑfirstHardErr.ValueSlot == default! && !errΔ2._<typesꓸError>().Soft) {
+                ᏑfirstHardErr.ValueSlot = errΔ2;
             }
         },
-        Importer: p,
+        Importer: new ImporterжImporter(Ꮡp),
         Sizes: p.sizes
     );
     if (len((~bp).CgoFiles) > 0) {
-        if (p.ctxt.OpenFile != default!){
+        if ((~p.ctxt).OpenFile != default!){
             // cgo, gcc, pkg-config, etc. do not support
             // build.Context's VFS.
             conf.FakeImportC = true;
         } else {
             setUsesCgo(Ꮡconf);
-            (file, errΔ3) = p.cgo(bp);
+            var (@file, errΔ3) = Ꮡp.cgo(bp);
             if (errΔ3 != default!) {
                 return (default!, fmt.Errorf("error processing cgo for package %q: %w"u8, (~bp).ImportPath, errΔ3));
             }
-            files = append(files, file);
+            files = append(files, @file);
         }
     }
-    (pkg, err) = conf.Check((~bp).ImportPath, p.fset, files, nil);
+    (pkg, err) = Ꮡconf.Check((~bp).ImportPath, p.fset, files, nil);
     if (err != default!) {
         // If there was a hard error it is possibly unsafe
         // to use the package as it may not be fully populated.
@@ -174,34 +176,37 @@ internal static types.Package importing;
     return (pkg, default!);
 });
 
-[GoRecv] internal static (slice<ast.File>, error) parseFiles(this ref Importer p, @string dir, slice<@string> filenames) => func((defer, _) => {
+internal static (slice<ж<ast.File>>, error) parseFiles(this ж<Importer> Ꮡp, @string dir, slice<@string> filenames) {
+    ref var p = ref Ꮡp.Value;
+
     // use build.Context's OpenFile if there is one
-    var open = p.ctxt.OpenFile;
+    var open = p.ctxt.Value.OpenFile;
     if (open == default!) {
-        open = (@string name) => os.Open(name);
+        open = (@string name) => {
+            var (ᴛ1, ᴛ2) = os.Open(name);
+            return (new os_FileжReadCloser(ᴛ1), ᴛ2);
+        };
     }
-    var files = new slice<ast.File>(len(filenames));
+    var files = new slice<ж<ast.File>>(len(filenames));
     var errors = new slice<error>(len(filenames));
-    ref var wg = ref heap(new sync_package.WaitGroup(), out var Ꮡwg);
-    wg.Add(len(filenames));
+    ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
+    Ꮡwg.Add(len(filenames));
     foreach (var (i, filename) in filenames) {
         var errorsʗ3 = errors;
         var filesʗ3 = files;
         var openʗ3 = open;
-        var wgʗ5 = wg;
-        goǃ((nint i, @string filepath) => {
-            var wgʗ6 = wg;
-            defer(wgʗ6.Done);
-            (src, err) = open(filepath);
+        goǃ((nint iΔ1, @string filepath) => func((defer, recover) => {
+            defer(Ꮡwg.Done);
+            var (src, err) = openʗ3(filepath);
             if (err != default!) {
-                errors[i] = err;
+                errorsʗ3[iΔ1] = err;
                 return;
             }
-            (files[i], errors[i]) = parser.ParseFile(p.fset, filepath, src, parser.SkipObjectResolution);
+            (filesʗ3[iΔ1], errorsʗ3[iΔ1]) = parser.ParseFile(Ꮡp.Value.fset, filepath, src, parser.SkipObjectResolution);
             src.Close();
-        }, i, p.joinPath(dir, filename));
+        }), i, Ꮡp.Value.joinPath(dir, filename));
     }
-    wg.Wait();
+    Ꮡwg.Wait();
     // if there are errors, return the first one for deterministic results
     foreach (var (_, err) in errors) {
         if (err != default!) {
@@ -209,10 +214,11 @@ internal static types.Package importing;
         }
     }
     return (files, default!);
-});
+}
 
-[GoRecv] public static (ж<ast.File>, error) cgo(this ref Importer p, ж<build.Package> Ꮡbp) => func((defer, _) => {
-    ref var bp = ref Ꮡbp.val;
+internal static (ж<ast.File>, error) cgo(this ж<Importer> Ꮡp, ж<build.Package> Ꮡbp) => func<(ж<ast.File>, error)>((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
+    ref var bp = ref Ꮡbp.Value;
 
     var (tmpdir, err) = os.MkdirTemp(""u8, "srcimporter"u8);
     if (err != default!) {
@@ -220,8 +226,8 @@ internal static types.Package importing;
     }
     deferǃ(os.RemoveAll, tmpdir, defer);
     @string goCmd = "go"u8;
-    if (p.ctxt.GOROOT != ""u8) {
-        goCmd = filepath.Join(p.ctxt.GOROOT, "bin", "go");
+    if ((~p.ctxt).GOROOT != ""u8) {
+        goCmd = filepath.Join((~p.ctxt).GOROOT, "bin", "go");
     }
     var args = new @string[]{goCmd, "tool", "cgo", "-objdir", tmpdir}.slice();
     if (bp.Goroot) {
@@ -239,7 +245,7 @@ internal static types.Package importing;
     args = append(args, bp.CgoCPPFLAGS.ꓸꓸꓸ);
     if (len(bp.CgoPkgConfig) > 0) {
         var cmdΔ1 = exec.Command("pkg-config"u8, append(new @string[]{"--cflags"}.slice(), bp.CgoPkgConfig.ꓸꓸꓸ).ꓸꓸꓸ);
-        (@out, errΔ1) = cmdΔ1.Output();
+        var (@out, errΔ1) = cmdΔ1.Output();
         if (errΔ1 != default!) {
             return (default!, fmt.Errorf("pkg-config --cflags: %w"u8, errΔ1));
         }
@@ -250,7 +256,7 @@ internal static types.Package importing;
     args = append(args, bp.CgoCFLAGS.ꓸꓸꓸ);
     args = append(args, bp.CgoFiles.ꓸꓸꓸ);
     var cmd = exec.Command(args[0], args[1..].ꓸꓸꓸ);
-    cmd.val.Dir = bp.Dir;
+    cmd.Value.Dir = bp.Dir;
     {
         var errΔ2 = cmd.Run(); if (errΔ2 != default!) {
             return (default!, fmt.Errorf("go tool cgo: %w"u8, errΔ2));
@@ -268,18 +274,18 @@ internal static types.Package importing;
 
 [GoRecv] internal static bool isAbsPath(this ref Importer p, @string path) {
     {
-        var f = p.ctxt.IsAbsPath; if (f != default!) {
+        var f = p.ctxt.Value.IsAbsPath; if (f != default!) {
             return f(path);
         }
     }
     return filepath.IsAbs(path);
 }
 
-[GoRecv] internal static @string joinPath(this ref Importer p, params ꓸꓸꓸ@string elemʗp) {
+[GoRecv] internal static @string joinPath(this ref Importer p, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.slice();
 
     {
-        var f = p.ctxt.JoinPath; if (f != default!) {
+        var f = p.ctxt.Value.JoinPath; if (f != default!) {
             return f(elem.ꓸꓸꓸ);
         }
     }

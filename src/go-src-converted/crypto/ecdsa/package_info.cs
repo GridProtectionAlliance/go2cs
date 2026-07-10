@@ -13,8 +13,13 @@
 global using bigmodꓸNat = go.crypto.@internal.bigmod_package.ΔNat;
 global using bigꓸInt = go.math.big_package.ΔInt;
 global using bigꓸRat = go.math.big_package.ΔRat;
+global using cryptoꓸDecrypterOpts = object;
+global using cryptoꓸPrivateKey = object;
+global using cryptoꓸPublicKey = object;
 global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
 global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
+using bigmod = go.crypto.@internal.bigmod_package;
+using nistec = go.crypto.@internal.nistec_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -43,21 +48,19 @@ using static go.crypto.ecdsa_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(Point, error), Point>]
-[assembly: GoImplement<(io.Reader, error), io_package.Reader>]
-[assembly: GoImplement<(p Point, err error), Point>]
-[assembly: GoImplement<cipher.Block, error), crypto.cipher_package.Block>]
-[assembly: GoImplement<crypto.cipher_package.StreamReader, io_package.Reader>]
-[assembly: GoImplement<zr, crypto.cipher_package.Stream>]
+[assembly: GoImplement<PublicKey, go.crypto.elliptic_package.Curve>(Promoted = true)]
+[assembly: GoImplement<go.crypto.@internal.nistec_package.P224Point, nistPoint<go.crypto.@internal.nistec_package.P224Point>>(ConstraintProxy = true)]
+[assembly: GoImplement<go.crypto.@internal.nistec_package.P256Point, nistPoint<go.crypto.@internal.nistec_package.P256Point>>(ConstraintProxy = true)]
+[assembly: GoImplement<go.crypto.@internal.nistec_package.P384Point, nistPoint<go.crypto.@internal.nistec_package.P384Point>>(ConstraintProxy = true)]
+[assembly: GoImplement<go.crypto.@internal.nistec_package.P521Point, nistPoint<go.crypto.@internal.nistec_package.P521Point>>(ConstraintProxy = true)]
+[assembly: GoImplement<go.crypto.cipher_package.StreamReader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<zr, io_package.Reader>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 [assembly: GoImplicitConv<PrivateKey, ж<PrivateKey>>(Indirect = true)]
 [assembly: GoImplicitConv<PublicKey, ж<PublicKey>>(Indirect = true)]
-[assembly: GoImplicitConv<big.nat}, big.nat}>(Inverted = true)]
 [assembly: GoImplicitConv<bigmod.Modulus, ж<bigmod.Modulus>>(Indirect = true)]
-[assembly: GoImplicitConv<bigmodꓸNat, ж<bigmodꓸNat>>(Indirect = true)]
 // </ImplicitConversions>
 
 namespace go.crypto;

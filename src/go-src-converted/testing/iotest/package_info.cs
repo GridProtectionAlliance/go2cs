@@ -38,18 +38,15 @@ using static go.testing.iotest_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(io.ReadSeeker, bool), io_package.ReadSeeker>]
-[assembly: GoImplement<(io.ReaderAt, bool), io_package.ReaderAt>]
-[assembly: GoImplement<dataErrReader, io_package.Reader>]
-[assembly: GoImplement<errReader, io_package.Reader>]
-[assembly: GoImplement<halfReader, io_package.Reader>]
-[assembly: GoImplement<io_package.ReadSeeker, io_package.Reader>]
-[assembly: GoImplement<oneByteReader, io_package.Reader>]
-[assembly: GoImplement<readLogger, io_package.Reader>]
-[assembly: GoImplement<smallByteReader, io_package.Reader>]
-[assembly: GoImplement<timeoutReader, io_package.Reader>]
-[assembly: GoImplement<truncateWriter, io_package.Writer>]
-[assembly: GoImplement<writeLogger, io_package.Writer>]
+[assembly: GoImplement<dataErrReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<errReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<halfReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<oneByteReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<readLogger, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<smallByteReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<timeoutReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<truncateWriter, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<writeLogger, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

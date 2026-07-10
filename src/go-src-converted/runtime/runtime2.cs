@@ -54,7 +54,7 @@ internal static readonly UntypedInt _Gcopystack = 8; // 8
 
 internal static readonly UntypedInt _Gpreempted = 9; // 9
 
-internal static readonly UntypedInt _Gscan = /* 0x1000 */ 4096;
+internal static readonly UntypedInt _Gscan = 0x1000;
 
 internal static readonly UntypedInt _Gscanrunnable = /* _Gscan + _Grunnable */ 4097; // 0x1001
 
@@ -130,12 +130,36 @@ internal static readonly UntypedInt _Pdead = 4;
 }
 
 internal static ж<eface> efaceOf(ж<any> Ꮡep) {
-    ref var ep = ref Ꮡep.val;
+    ref var ep = ref Ꮡep.Value;
 
     return (ж<eface>)(uintptr)(new @unsafe.Pointer(Ꮡep));
 }
 
-[GoType("num:uintptr")] partial struct Δguintptr;
+// type Δguintptr is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+
+// func ptr is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+
+// func set is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+
+// func cas is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+
+// func guintptr is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+
+// func setGNoWB is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+
+// type puintptr is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+
+// func ptr is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+
+// func set is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+
+// type muintptr is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+
+// func ptr is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+
+// func set is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+
+// func setMNoWB is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
 // The guintptr, muintptr, and puintptr are all used to bypass write barriers.
 // It is particularly important to avoid write barriers when the current P has
@@ -159,81 +183,6 @@ internal static ж<eface> efaceOf(ж<any> Ꮡep) {
 // Ms are always reachable via true pointers either from allm or
 // freem. Unlike Gs and Ps we do free Ms, so it's important that
 // nothing ever hold an muintptr across a safe point.
-
-//go:nosplit
-internal static ж<g> ptr(this Δguintptr gp) {
-    return (ж<g>)(uintptr)(((@unsafe.Pointer)gp));
-}
-
-//go:nosplit
-[GoRecv] public static void set(this ref Δguintptr gp, ж<g> Ꮡg) {
-    ref var g = ref Ꮡg.val;
-
-    gp = ((Δguintptr)new @unsafe.Pointer(Ꮡg));
-}
-
-//go:nosplit
-[GoRecv] internal static bool cas(this ref Δguintptr gp, Δguintptr old, Δguintptr @new) {
-    return atomic.Casuintptr(((ж<uintptr>)((@unsafe.Pointer)gp)), ((uintptr)old), ((uintptr)@new));
-}
-
-//go:nosplit
-[GoRecv] internal static Δguintptr guintptr(this ref g gp) {
-    return ((Δguintptr)(uintptr)@unsafe.Pointer.FromRef(ref gp));
-}
-
-// setGNoWB performs *gp = new without a write barrier.
-// For times when it's impractical to use a guintptr.
-//
-//go:nosplit
-//go:nowritebarrier
-internal static void setGNoWB(ж<ж<g>> Ꮡgp, ж<g> Ꮡnew) {
-    ref var gp = ref Ꮡgp.val;
-    ref var @new = ref Ꮡnew.val;
-
-    (((ж<Δguintptr>)((@unsafe.Pointer)gp))).val.set(Ꮡnew);
-}
-
-[GoType("num:uintptr")] partial struct puintptr;
-
-//go:nosplit
-internal static ж<Δp> ptr(this puintptr pp) {
-    return (ж<Δp>)(uintptr)(((@unsafe.Pointer)pp));
-}
-
-//go:nosplit
-[GoRecv] internal static void set(this ref puintptr pp, ж<Δp> Ꮡp) {
-    ref var Δp = ref Ꮡp.val;
-
-    pp = ((puintptr)new @unsafe.Pointer(Ꮡp));
-}
-
-[GoType("num:uintptr")] partial struct muintptr;
-
-//go:nosplit
-internal static ж<m> ptr(this muintptr mp) {
-    return (ж<m>)(uintptr)(((@unsafe.Pointer)mp));
-}
-
-//go:nosplit
-[GoRecv] internal static void set(this ref muintptr mp, ж<m> Ꮡm) {
-    ref var m = ref Ꮡm.val;
-
-    mp = ((muintptr)new @unsafe.Pointer(Ꮡm));
-}
-
-// setMNoWB performs *mp = new without a write barrier.
-// For times when it's impractical to use an muintptr.
-//
-//go:nosplit
-//go:nowritebarrier
-internal static void setMNoWB(ж<ж<m>> Ꮡmp, ж<m> Ꮡnew) {
-    ref var mp = ref Ꮡmp.val;
-    ref var @new = ref Ꮡnew.val;
-
-    (((ж<muintptr>)((@unsafe.Pointer)mp))).val.set(Ꮡnew);
-}
-
 [GoType] partial struct gobuf {
     // The offsets of sp, pc, and g are known to (hard-coded in) libmach.
     //
@@ -357,7 +306,7 @@ internal static void setMNoWB(ж<ж<m>> Ꮡmp, ж<m> Ꮡnew) {
     // 4. When a panic is recovered and control returns to the respective frame,
     //    param may point to a savedOpenDeferState.
     internal @unsafe.Pointer param;
-    internal @internal.runtime.atomic_package.Uint32 atomicstatus;
+    internal atomic.Uint32 atomicstatus;
     internal uint32 stackLock; // sigprof/scang lock; TODO: fold in to atomicstatus
     internal uint64 goid;
     internal Δguintptr schedlink;
@@ -381,7 +330,7 @@ internal static void setMNoWB(ж<ж<m>> Ꮡmp, ж<m> Ꮡnew) {
     // parkingOnChan indicates that the goroutine is about to
     // park on a chansend or chanrecv. Used to signal an unsafe point
     // for stack shrinking.
-    internal @internal.runtime.atomic_package.Bool parkingOnChan;
+    internal atomic.Bool parkingOnChan;
     // inMarkAssist indicates whether the goroutine is in mark assist.
     // Used by the execution tracer.
     internal bool inMarkAssist;
@@ -408,7 +357,7 @@ internal static void setMNoWB(ж<ж<m>> Ꮡmp, ж<m> Ꮡnew) {
     internal @unsafe.Pointer labels; // profiler labels
     internal ж<timer> timer;      // cached timer for time.Sleep
     internal int64 sleepWhen;          // when to sleep until
-    internal @internal.runtime.atomic_package.Uint32 selectDone; // are we participating in a select and did someone win the race?
+    internal atomic.Uint32 selectDone;  // are we participating in a select and did someone win the race?
     // goroutineProfiled indicates the status of this goroutine's stack for the
     // current in-progress goroutine profile
     internal goroutineProfileStateHolder goroutineProfiled;
@@ -473,12 +422,12 @@ internal static readonly UntypedInt freeMWait = 2; // M still in use.
     internal bool isextra;          // m is an extra m
     internal bool isExtraInC;          // m is an extra m that is not executing Go code
     internal bool isExtraInSig;          // m is an extra m in a signal handler
-    internal @internal.runtime.atomic_package.Uint32 freeWait; // Whether it is safe to free g0 and delete m (one of freeMRef, freeMStack, freeMWait)
+    internal atomic.Uint32 freeWait; // Whether it is safe to free g0 and delete m (one of freeMRef, freeMStack, freeMWait)
     internal bool needextram;
     internal uint8 traceback;
     internal uint64 ncgocall;        // number of cgo calls in total
     internal int32 ncgo;         // number of cgo calls currently in progress
-    internal @internal.runtime.atomic_package.Uint32 cgoCallersUse; // if non-zero, cgoCallers in use temporarily
+    internal atomic.Uint32 cgoCallersUse; // if non-zero, cgoCallers in use temporarily
     internal ж<ΔcgoCallers> cgoCallers; // cgo traceback if crashing in cgo call
     internal note park;
     internal ж<m> alllink; // on allm
@@ -511,26 +460,26 @@ internal static readonly UntypedInt freeMWait = 2; // M still in use.
     // preemptGen counts the number of completed preemption
     // signals. This is used to detect when a preemption is
     // requested, but fails.
-    internal @internal.runtime.atomic_package.Uint32 preemptGen;
+    internal atomic.Uint32 preemptGen;
     // Whether this is a pending preemption signal on this M.
-    internal @internal.runtime.atomic_package.Uint32 signalPending;
+    internal atomic.Uint32 signalPending;
     // pcvalue lookup cache
     internal pcvalueCache pcvalueCache;
     internal partial ref dlogPerM dlogPerM { get; }
     internal partial ref mOS mOS { get; }
-    internal @internal.chacha8rand_package.State chacha8;
+    internal chacha8rand.State chacha8;
     internal uint64 cheaprand;
     // Up to 10 locks held by this m, maintained by the lock ranking code.
     internal nint locksHeldLen;
     internal array<heldLockInfo> locksHeld = new(10);
 }
 
-[GoType("dyn")] partial struct Δp_gFree {
+[GoType("dyn")] partial struct p_gFree {
     internal partial ref gList gList { get; }
     internal int32 n;
 }
 
-[GoType("dyn")] partial struct Δp_mspancache {
+[GoType("dyn")] partial struct p_mspancache {
     // We need an explicit length here because this field is used
     // in allocation codepaths where write barriers are not allowed,
     // and eliminating the write barrier/keeping it eliminated from
@@ -574,11 +523,11 @@ internal static readonly UntypedInt freeMWait = 2; // M still in use.
     // only the owner P can CAS it to a valid G.
     internal Δguintptr runnext;
     // Available G's (status == Gdead)
-    internal Δp_gFree gFree;
+    internal p_gFree gFree;
     internal slice<ж<sudog>> sudogcache;
     internal array<ж<sudog>> sudogbuf = new(128);
     // Cache of mspan objects from the heap.
-    internal Δp_mspancache mspancache;
+    internal p_mspancache mspancache;
     // Cache of a single pinner object to reduce allocations from repeated
     // pinner creation.
     internal ж<pinner> pinnerCache;
@@ -609,7 +558,7 @@ internal static readonly UntypedInt freeMWait = 2; // M still in use.
     internal uint32 runSafePointFn; // if 1, run sched.safePointFn at next safe point
     // statsSeq is a counter indicating whether this P is currently
     // writing any stats. Its value is even when not, odd when it is.
-    internal @internal.runtime.atomic_package.Uint32 statsSeq;
+    internal atomic.Uint32 statsSeq;
     // Timer heap.
     internal timers timers;
     // maxStackScanDelta accumulates the amount of stack space held by
@@ -648,9 +597,9 @@ internal static readonly UntypedInt freeMWait = 2; // M still in use.
 // Padding is no longer needed. False sharing is now not a worry because p is large enough
 // that its size class is an integer multiple of the cache line size (for any of our architectures).
 [GoType] partial struct schedt {
-    internal @internal.runtime.atomic_package.Uint64 goidgen;
-    internal @internal.runtime.atomic_package.Int64 lastpoll; // time of last network poll, 0 if currently polling
-    internal @internal.runtime.atomic_package.Int64 pollUntil; // time to which current poll is sleeping
+    internal atomic.Uint64 goidgen;
+    internal atomic.Int64 lastpoll; // time of last network poll, 0 if currently polling
+    internal atomic.Int64 pollUntil; // time to which current poll is sleeping
     internal mutex @lock;
 // When increasing nmidle, nmidlelocked, nmsys, or nmfreed, be
 // sure to call checkdead().
@@ -661,11 +610,11 @@ internal static readonly UntypedInt freeMWait = 2; // M still in use.
     internal int32 maxmcount;    // maximum number of m's allowed (or die)
     internal int32 nmsys;    // number of system m's not counted for deadlock
     internal int64 nmfreed;    // cumulative number of freed m's
-    internal @internal.runtime.atomic_package.Int32 ngsys; // number of system goroutines
+    internal atomic.Int32 ngsys; // number of system goroutines
     internal puintptr pidle; // idle p's
-    internal @internal.runtime.atomic_package.Int32 npidle;
-    internal @internal.runtime.atomic_package.Int32 nmspinning; // See "Worker thread parking/unparking" comment in proc.go.
-    internal @internal.runtime.atomic_package.Uint32 needspinning; // See "Delicate dance" comment in proc.go. Boolean. Must hold sched.lock to set to 1.
+    internal atomic.Int32 npidle;
+    internal atomic.Int32 nmspinning;  // See "Worker thread parking/unparking" comment in proc.go.
+    internal atomic.Uint32 needspinning; // See "Delicate dance" comment in proc.go. Boolean. Must hold sched.lock to set to 1.
     // Global runnable queue.
     internal gQueue runq;
     internal int32 runqsize;
@@ -686,10 +635,10 @@ internal static readonly UntypedInt freeMWait = 2; // M still in use.
     // freem is the list of m's waiting to be freed when their
     // m.exited is set. Linked through m.freelink.
     internal ж<m> freem;
-    internal @internal.runtime.atomic_package.Bool gcwaiting; // gc is waiting to run
+    internal atomic.Bool gcwaiting; // gc is waiting to run
     internal int32 stopwait;
     internal note stopnote;
-    internal @internal.runtime.atomic_package.Bool sysmonwait;
+    internal atomic.Bool sysmonwait;
     internal note sysmonnote;
     // safePointFn should be called on each P at the next GC
     // safepoint if p.runSafePointFn is set.
@@ -711,10 +660,10 @@ internal static readonly UntypedInt freeMWait = 2; // M still in use.
     // idleTime is the total CPU time Ps have "spent" idle.
     //
     // Reset on each GC cycle.
-    internal @internal.runtime.atomic_package.Int64 idleTime;
+    internal atomic.Int64 idleTime;
     // totalMutexWaitTime is the sum of time goroutines have spent in _Gwaiting
     // with a waitreason of the form waitReasonSync{RW,}Mutex{R,}Lock.
-    internal @internal.runtime.atomic_package.Int64 totalMutexWaitTime;
+    internal atomic.Int64 totalMutexWaitTime;
     // stwStoppingTimeGC/Other are distributions of stop-the-world stopping
     // latencies, defined as the time taken by stopTheWorldWithSema to get
     // all Ps to stop. stwStoppingTimeGC covers all GC-related STWs,
@@ -732,7 +681,7 @@ internal static readonly UntypedInt freeMWait = 2; // M still in use.
     // allm) is the sum of time goroutines have spent in _Grunnable and with an
     // M, but waiting for locks within the runtime. This field stores the value
     // for Ms that have exited.
-    internal @internal.runtime.atomic_package.Int64 totalRuntimeLockWaitTime;
+    internal atomic.Int64 totalRuntimeLockWaitTime;
 }
 
 // Values for the flags field of a sigTabT.
@@ -770,8 +719,8 @@ internal static readonly UntypedInt _SigIgn = 256; // _SIG_DFL action is to igno
     internal uint32 npcdata;
     internal uint32 cuOffset;     // runtime.cutab offset of this function's CU
     internal int32 startLine;      // line number of start of function (func keyword/TEXT directive)
-    internal @internal.abi_package.FuncID funcID; // set for certain special runtime functions
-    internal @internal.abi_package.FuncFlag flag;
+    internal abi.FuncID funcID; // set for certain special runtime functions
+    internal abi.FuncFlag flag;
     internal array<byte> _ = new(1); // pad
     internal uint8 nfuncdata;   // must be last, must end on a uint32-aligned boundary
 }
@@ -805,7 +754,7 @@ internal static readonly UntypedInt _SigIgn = 256; // _SIG_DFL action is to igno
     internal uint32 ones;  // set to ^0 to distinguish from _func
     internal uintptr entry; // entry of the real (the "outermost") frame
     internal @string name;
-    internal @string file;
+    internal @string @file;
     internal int32 line;
     internal int32 startLine;
 }
@@ -820,7 +769,7 @@ internal static readonly UntypedInt _SigIgn = 256; // _SIG_DFL action is to igno
 [GoType] partial struct forcegcstate {
     internal mutex @lock;
     internal ж<g> g;
-    internal @internal.runtime.atomic_package.Bool idle;
+    internal atomic.Bool idle;
 }
 
 // A _defer holds an entry on the list of deferred calls.
@@ -840,7 +789,7 @@ internal static readonly UntypedInt _SigIgn = 256; // _SIG_DFL action is to igno
     internal ж<_defer> link; // next defer on G; can point to either heap or stack!
     // If rangefunc is true, *head is the head of the atomic linked list
     // during a range-over-func execution.
-    internal ж<@internal.runtime.atomic_package.Pointer> head;
+    internal ж<atomic.Pointer<_defer>> head;
 }
 
 // A _panic holds information about an active panic.
@@ -929,7 +878,7 @@ internal static readonly waitReason waitReasonTraceProcStatus = 34;      // "tra
 internal static readonly waitReason waitReasonPageTraceFlush = 35;       // "page trace flush"
 internal static readonly waitReason waitReasonCoroutine = 36;            // "coroutine"
 
-internal static array<@string> waitReasonStrings = new runtime.SparseArray<@string>{
+internal static array<@string> waitReasonStrings = new golib.SparseArray<@string>{
     [waitReasonZero] = ""u8,
     [waitReasonGCAssistMarking] = "GC assist marking"u8,
     [waitReasonIOWait] = "IO wait"u8,
@@ -970,7 +919,7 @@ internal static array<@string> waitReasonStrings = new runtime.SparseArray<@stri
 }.array();
 
 internal static @string String(this waitReason w) {
-    if (w < 0 || w >= ((waitReason)len(waitReasonStrings))) {
+    if (w < 0 || w >= ((waitReason)(uint8)len(waitReasonStrings))) {
         return "unknown wait reason"u8;
     }
     return waitReasonStrings[w];
@@ -990,7 +939,7 @@ internal static bool isWaitingForGC(this waitReason w) {
 // these cases.
 //
 // TODO(mknyszek): Consider replacing this with a new dedicated G status.
-public static array<bool> ΔisWaitingForGC = new runtime.SparseArray<bool>{
+internal static array<bool> ΔisWaitingForGC = new golib.SparseArray<bool>{
     [waitReasonStoppingTheWorld] = true,
     [waitReasonGCMarkTermination] = true,
     [waitReasonGarbageCollection] = true,
@@ -1003,22 +952,29 @@ public static array<bool> ΔisWaitingForGC = new runtime.SparseArray<bool>{
     [waitReasonFlushProcCaches] = true
 }.array();
 
-internal static ж<m> allm;
-internal static int32 gomaxprocs;
+internal static ж<ж<m>> Ꮡallm = new(default(ж<m>));
+internal static ref ж<m> allm => ref Ꮡallm.ValueSlot;
+internal static ж<int32> Ꮡgomaxprocs = new(default(int32));
+internal static ref int32 gomaxprocs => ref Ꮡgomaxprocs.Value;
 internal static int32 ncpu;
-internal static forcegcstate forcegc;
-internal static schedt sched;
+internal static ж<forcegcstate> Ꮡforcegc = new(default(forcegcstate));
+internal static ref forcegcstate forcegc => ref Ꮡforcegc.Value;
+internal static ж<schedt> Ꮡsched = new(default(schedt));
+internal static ref schedt sched => ref Ꮡsched.Value;
 internal static int32 newprocs;
 
-internal static mutex allpLock;
-internal static slice<ж<Δp>> allp;
+internal static ж<mutex> ᏑallpLock = new(new mutex(nil));
+internal static ref mutex allpLock => ref ᏑallpLock.Value;
+internal static ж<slice<ж<Δp>>> Ꮡallp = new(default(slice<ж<Δp>>));
+internal static ref slice<ж<Δp>> allp => ref Ꮡallp.ValueSlot;
 internal static pMask idlepMask;
 internal static pMask timerpMask;
 
 // goarmsoftfp is used by runtime/cgo assembly.
 //
 //go:linkname goarmsoftfp
-internal static lfstack gcBgMarkWorkerPool;
+internal static ж<lfstack> ᏑgcBgMarkWorkerPool = new(default(lfstack));
+internal static ref lfstack gcBgMarkWorkerPool => ref ᏑgcBgMarkWorkerPool.Value;
 internal static int32 gcBgMarkWorkerCount;
 internal static uint32 processorVersionInfo;
 internal static bool isIntel;
@@ -1056,9 +1012,9 @@ internal static uintptr getcallerfp() {
     var fp = getfp();
     // This frame's FP.
     if (fp != 0) {
-        fp = ~(ж<uintptr>)(uintptr)(((@unsafe.Pointer)fp));
+        fp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)fp);
         // The caller's FP.
-        fp = ~(ж<uintptr>)(uintptr)(((@unsafe.Pointer)fp));
+        fp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)fp);
     }
     // The caller's caller's FP.
     return fp;

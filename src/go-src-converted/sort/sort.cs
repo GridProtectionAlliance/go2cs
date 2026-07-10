@@ -47,7 +47,7 @@ public static void Sort(Interface data) {
     if (n <= 1) {
         return;
     }
-    nint limit = bits.Len(((nuint)n));
+    nint limit = bits.Len((nuint)n);
     pdqsort(data, 0, n, limit);
 }
 
@@ -60,15 +60,15 @@ internal static readonly sortedHint decreasingHint = 2;
 [GoType("num:uint64")] partial struct xorshift;
 
 [GoRecv] internal static uint64 Next(this ref xorshift r) {
-    r ^= (xorshift)(r << (int)(13));
-    r ^= (xorshift)(r >> (int)(17));
-    r ^= (xorshift)(r << (int)(5));
-    return ((uint64)(r));
+    r ^= (xorshift)((r << (int)(13)));
+    r ^= (xorshift)((r >> (int)(17)));
+    r ^= (xorshift)((r << (int)(5)));
+    return (uint64)(r);
 }
 
 internal static nuint nextPowerOfTwo(nint length) {
-    nuint shift = ((nuint)bits.Len(((nuint)length)));
-    return ((nuint)(1 << (int)(shift)));
+    nuint shift = (nuint)bits.Len((nuint)length);
+    return (nuint)(((nuint)1 << (int)(shift)));
 }
 
 // lessSwap is a pair of Less and Swap function for use with the
@@ -92,7 +92,7 @@ internal static bool Less(this reverse r, nint i, nint j) {
 
 // Reverse returns the reverse order for data.
 public static Interface Reverse(Interface data) {
-    return new reverse(data);
+    return new reverseжInterface(Ꮡ(new reverse(data)));
 }
 
 // IsSorted reports whether data is sorted.

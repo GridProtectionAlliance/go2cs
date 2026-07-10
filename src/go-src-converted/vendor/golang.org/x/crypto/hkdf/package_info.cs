@@ -38,7 +38,7 @@ using static go.vendor.golang.org.x.crypto.hkdf_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<hkdf, io_package.Reader>]
+[assembly: GoImplement<hkdf, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

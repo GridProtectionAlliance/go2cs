@@ -5,8 +5,8 @@ namespace go.net;
 
 using fmt = fmt_package;
 using io = io_package;
-using fs = io.fs_package;
-using io;
+using fs = go.io.fs_package;
+using go.io;
 
 partial class http_package {
 
@@ -54,34 +54,33 @@ internal static (ж<Response> resp, error err) RoundTrip(this fileTransport t, �
     ж<Response> resp = default!;
     error err = default!;
 
-    ref var req = ref Ꮡreq.val;
+    ref var req = ref Ꮡreq.Value;
     // We start ServeHTTP in a goroutine, which may take a long
     // time if the file is large. The newPopulateResponseWriter
     // call returns a channel which either ServeHTTP or finish()
     // sends our *Response on, once the *Response itself has been
     // populated (even if the body itself is still being
     // written to the res.Body, a pipe)
-    (rw, resc) = newPopulateResponseWriter();
+    var (rw, resc) = newPopulateResponseWriter();
     var rwʗ1 = rw;
-    var tʗ1 = t;
     goǃ(() => {
-        tʗ1.fh.ServeHTTP(~rwʗ1, Ꮡreq);
+        t.fh.ServeHTTP(new populateResponseжResponseWriter(rwʗ1), Ꮡreq);
         rwʗ1.finish();
     });
     return (ᐸꟷ(resc), default!);
 }
 
 internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateResponseWriter() {
-    (pr, pw) = io.Pipe();
+    var (pr, pw) = io.Pipe();
     var rw = Ꮡ(new populateResponse(
         ch: new channel<ж<Response>>(1),
         pw: pw,
         res: Ꮡ(new Response(
             Proto: "HTTP/1.0"u8,
             ProtoMajor: 1,
-            ΔHeader: new ΔHeader(),
+            Header: new ΔHeader(),
             Close: true,
-            Body: pr
+            Body: new io_PipeReaderжReadCloser(pr)
         ))
     ));
     return (rw, (~rw).ch);
@@ -97,7 +96,7 @@ internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateR
     internal bool wroteHeader;
     internal bool hasContent;
     internal bool sentResponse;
-    internal ж<io_package.PipeWriter> pw;
+    internal ж<io.PipeWriter> pw;
 }
 
 [GoRecv] internal static void finish(this ref populateResponse pr) {
@@ -116,13 +115,13 @@ internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateR
     }
     pr.sentResponse = true;
     if (pr.hasContent) {
-        pr.res.ContentLength = -1;
+        pr.res.Value.ContentLength = -1;
     }
     pr.ch.ᐸꟷ(pr.res);
 }
 
 [GoRecv] internal static ΔHeader Header(this ref populateResponse pr) {
-    return pr.res.Header;
+    return (~pr.res).Header;
 }
 
 [GoRecv] internal static void WriteHeader(this ref populateResponse pr, nint code) {
@@ -130,8 +129,8 @@ internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateR
         return;
     }
     pr.wroteHeader = true;
-    pr.res.StatusCode = code;
-    pr.res.Status = fmt.Sprintf("%d %s"u8, code, StatusText(code));
+    pr.res.Value.StatusCode = code;
+    pr.res.Value.Status = fmt.Sprintf("%d %s"u8, code, StatusText(code));
 }
 
 [GoRecv] internal static (nint n, error err) Write(this ref populateResponse pr, slice<byte> p) {

@@ -5,6 +5,7 @@ namespace go.html;
 
 using bytes = bytes_package;
 using strings = strings_package;
+using parse = text.template.parse_package;
 
 partial class template_package {
 
@@ -12,7 +13,7 @@ partial class template_package {
 // A transition function takes a context and template text input, and returns
 // the updated context and the number of bytes consumed from the front of the
 // input.
-internal static array<template.context, int)> transitionFunc = new runtime.SparseArray<template.context, int)>{
+internal static array<Func<context, slice<byte>, (context, nint)>> transitionFunc = new golib.SparseArray<Func<context, slice<byte>, (context, nint)>>{
     [stateText] = tText,
     [stateTag] = tTag,
     [stateAttrName] = tAttrName,
@@ -43,9 +44,9 @@ internal static array<template.context, int)> transitionFunc = new runtime.Spars
     [stateError] = tError
 }.array();
 
-internal static slice<byte> commentStart = slice<byte>("<!--");
+internal static slice<byte> commentStart = slice<byte>((@string)"<!--");
 
-internal static slice<byte> commentEnd = slice<byte>("-->");
+internal static slice<byte> commentEnd = slice<byte>((@string)"-->");
 
 // tText is the context transition function for the text state.
 internal static (context, nint) tText(context c, slice<byte> s) {
@@ -78,7 +79,7 @@ internal static (context, nint) tText(context c, slice<byte> s) {
     }
 }
 
-internal static array<state> elementContentType = new runtime.SparseArray<state>{
+internal static array<state> elementContentType = new golib.SparseArray<state>{
     [elementNone] = stateText,
     [elementScript] = stateJS,
     [elementStyle] = stateCSS,
@@ -166,7 +167,7 @@ internal static (context, nint) tAfterName(context c, slice<byte> s) {
     return (c, i + 1);
 }
 
-internal static array<state> attrStartStates = new runtime.SparseArray<state>{
+internal static array<state> attrStartStates = new golib.SparseArray<state>{
     [attrNone] = stateAttr,
     [attrScript] = stateJS,
     [attrScriptType] = stateAttr,
@@ -193,7 +194,8 @@ internal static (context, nint) tBeforeValue(context c, slice<byte> s) {
         break;
     }}
 
-    (c.state, c.delim) = (attrStartStates[c.attr], delim);
+    c.state = attrStartStates[c.attr];
+    c.delim = delim;
     return (c, i);
 }
 
@@ -209,15 +211,15 @@ internal static (context, nint) tHTMLCmt(context c, slice<byte> s) {
 
 // specialTagEndMarkers maps element types to the character sequence that
 // case-insensitively signals the end of the special tag body.
-internal static array<slice<byte>> specialTagEndMarkers = new runtime.SparseArray<slice<byte>>{
-    [elementScript] = slice<byte>("script"),
-    [elementStyle] = slice<byte>("style"),
-    [elementTextarea] = slice<byte>("textarea"),
-    [elementTitle] = slice<byte>("title")
+internal static array<slice<byte>> specialTagEndMarkers = new golib.SparseArray<slice<byte>>{
+    [elementScript] = slice<byte>((@string)"script"),
+    [elementStyle] = slice<byte>((@string)"style"),
+    [elementTextarea] = slice<byte>((@string)"textarea"),
+    [elementTitle] = slice<byte>((@string)"title")
 }.array();
 
-internal static slice<byte> specialTagEndPrefix = slice<byte>("</");
-internal static slice<byte> tagEndSeparators = slice<byte>("> \t\n\f/");
+internal static slice<byte> specialTagEndPrefix = slice<byte>((@string)"</");
+internal static slice<byte> tagEndSeparators = slice<byte>((@string)"> \t\n\f/");
 
 // tSpecialTagEnd is the context transition function for raw text and RCDATA
 // element states.
@@ -291,32 +293,37 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
     c.jsCtx = nextJSCtx(s[..(int)(i)], c.jsCtx);
     switch (s[i]) {
     case (rune)'"': {
-        (c.state, c.jsCtx) = (stateJSDqStr, jsCtxRegexp);
+        c.state = stateJSDqStr;
+        c.jsCtx = jsCtxRegexp;
         break;
     }
     case (rune)'\'': {
-        (c.state, c.jsCtx) = (stateJSSqStr, jsCtxRegexp);
+        c.state = stateJSSqStr;
+        c.jsCtx = jsCtxRegexp;
         break;
     }
     case (rune)'`': {
-        (c.state, c.jsCtx) = (stateJSTmplLit, jsCtxRegexp);
+        c.state = stateJSTmplLit;
+        c.jsCtx = jsCtxRegexp;
         break;
     }
     case (rune)'/': {
         switch (ᐧ) {
         case {} when i + 1 < len(s) && s[i + 1] == (rune)'/': {
-            (c.state, i) = (stateJSLineCmt, i + 1);
+            c.state = stateJSLineCmt;
+            i = i + 1;
             break;
         }
         case {} when i + 1 < len(s) && s[i + 1] == (rune)'*': {
-            (c.state, i) = (stateJSBlockCmt, i + 1);
+            c.state = stateJSBlockCmt;
+            i = i + 1;
             break;
         }
-        case {} when c.jsCtx is jsCtxRegexp: {
+        case {} when c.jsCtx == jsCtxRegexp: {
             c.state = stateJSRegexp;
             break;
         }
-        case {} when c.jsCtx is jsCtxDivOp: {
+        case {} when c.jsCtx == jsCtxDivOp: {
             c.jsCtx = jsCtxRegexp;
             break;
         }
@@ -338,20 +345,23 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
  // ignored. As such we simply treat any line prefixed with "<!--" or "-->"
  // as if it were actually prefixed with "//" and move on.
  s[(int)(i)..(int)(i + 4)])) {
-            (c.state, i) = (stateJSHTMLOpenCmt, i + 3);
+            c.state = stateJSHTMLOpenCmt;
+            i = i + 3;
         }
         break;
     }
     case (rune)'-': {
         if (i + 2 < len(s) && bytes.Equal(commentEnd, s[(int)(i)..(int)(i + 3)])) {
-            (c.state, i) = (stateJSHTMLCloseCmt, i + 2);
+            c.state = stateJSHTMLCloseCmt;
+            i = i + 2;
         }
         break;
     }
     case (rune)'#': {
         if (i + 1 < len(s) && s[i + 1] == (rune)'!') {
             // ECMAScript also supports "hashbang" comment lines, see Section 12.5.
-            (c.state, i) = (stateJSLineCmt, i + 1);
+            c.state = stateJSLineCmt;
+            i = i + 1;
         }
         break;
     }
@@ -408,7 +418,7 @@ internal static (context, nint) tJSTmpl(context c, slice<byte> s) {
         }
         case (rune)'$': {
             if (len(s) >= i + 2 && s[i + 1] == (rune)'{') {
-                c.jsBraceDepth = append(c.jsBraceDepth, 0);
+                c.jsBraceDepth = append(c.jsBraceDepth, (nint)(0));
                 c.state = stateJS;
                 return (c, i + 2);
             }
@@ -467,11 +477,12 @@ internal static (context, nint) tJSDelimited(context c, slice<byte> s) {
             if (i > 0 && i + 7 <= len(s) && bytes.Equal(bytes.ToLower(s[(int)(i - 1)..(int)(i + 7)]), // If "</script" appears in a regex literal, the '/' should not
  // close the regex literal, and it will later be escaped to
  // "\x3C/script" in escapeText.
- slice<byte>("</script"))){
+ slice<byte>((@string)"</script"))){
                 i++;
             } else 
             if (!inCharset) {
-                (c.state, c.jsCtx) = (stateJS, jsCtxDivOp);
+                c.state = stateJS;
+                c.jsCtx = jsCtxDivOp;
                 return (c, i + 1);
             }
             break;
@@ -479,7 +490,8 @@ internal static (context, nint) tJSDelimited(context c, slice<byte> s) {
         default: {
             if (!inCharset) {
                 // end delimiter
-                (c.state, c.jsCtx) = (stateJS, jsCtxDivOp);
+                c.state = stateJS;
+                c.jsCtx = jsCtxDivOp;
                 return (c, i + 1);
             }
             break;
@@ -498,7 +510,7 @@ internal static (context, nint) tJSDelimited(context c, slice<byte> s) {
     return (c, len(s));
 }
 
-internal static slice<byte> blockCommentEnd = slice<byte>("*/");
+internal static slice<byte> blockCommentEnd = slice<byte>((@string)"*/");
 
 // tBlockCmt is the context transition function for /*comment*/ states.
 internal static (context, nint) tBlockCmt(context c, slice<byte> s) {
@@ -526,10 +538,10 @@ internal static (context, nint) tLineCmt(context c, slice<byte> s) {
     state endState = default!;
     var exprᴛ1 = c.state;
     if (exprᴛ1 == stateJSLineCmt || exprᴛ1 == stateJSHTMLOpenCmt || exprᴛ1 == stateJSHTMLCloseCmt) {
-        (lineTerminators, endState) = ("\n\r\u2028\u2029"u8, stateJS);
+        (lineTerminators, endState) = ("\n\r\u2028\u2029", stateJS);
     }
     else if (exprᴛ1 == stateCSSLineCmt) {
-        (lineTerminators, endState) = ("\n\f\r"u8, stateCSS);
+        (lineTerminators, endState) = ("\n\f\r", stateCSS);
     }
     else { /* default: */
         throw panic(c.state.String());
@@ -597,11 +609,13 @@ internal static (context, nint) tCSS(context c, slice<byte> s) {
                 nint j = len(s) - len(bytes.TrimLeft(s[(int)(i + 1)..], "\t\n\f\r "u8));
                 switch (ᐧ) {
                 case {} when j != len(s) && s[j] == (rune)'"': {
-                    (c.state, j) = (stateCSSDqURL, j + 1);
+                    c.state = stateCSSDqURL;
+                    j = j + 1;
                     break;
                 }
                 case {} when j != len(s) && s[j] == (rune)'\'': {
-                    (c.state, j) = (stateCSSSqURL, j + 1);
+                    c.state = stateCSSSqURL;
+                    j = j + 1;
                     break;
                 }
                 default: {
@@ -706,6 +720,7 @@ internal static (nint, ж<ΔError>) eatAttrName(slice<byte> s, nint i) {
  default!, 0, "%q in attribute name: %.32q"u8, s[(int)(j)..(int)(j + 1)], s));
         }
         default: {
+            break;
         }}
 
     }

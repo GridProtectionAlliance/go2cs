@@ -7,12 +7,13 @@
 namespace go.crypto;
 
 using crypto = crypto_package;
-using boring = crypto.@internal.boring_package;
-using subtle = crypto.subtle_package;
+using boring = go.crypto.@internal.boring_package;
+using subtle = go.crypto.subtle_package;
 using errors = errors_package;
 using io = io_package;
 using sync = sync_package;
-using crypto.@internal;
+using go.crypto;
+using go.crypto.@internal;
 
 partial class ecdh_package {
 
@@ -65,7 +66,7 @@ partial class ecdh_package {
 [GoType] partial struct ΔPublicKey {
     internal ΔCurve curve;
     internal slice<byte> publicKey;
-    internal ж<crypto.@internal.boring_package.PublicKeyECDH> boring;
+    internal ж<boring.PublicKeyECDH> boring;
 }
 
 // Bytes returns a copy of the encoding of the public key.
@@ -83,8 +84,8 @@ partial class ecdh_package {
 //
 // This check is performed in constant time as long as the key types and their
 // curve match.
-[GoRecv] public static bool Equal(this ref ΔPublicKey k, crypto.PublicKey x) {
-    var (xx, ok) = x._<ΔPublicKey.val>(ᐧ);
+[GoRecv] public static bool Equal(this ref ΔPublicKey k, cryptoꓸPublicKey x) {
+    var (xx, ok) = x._<ж<ΔPublicKey>>(ᐧ);
     if (!ok) {
         return false;
     }
@@ -103,11 +104,11 @@ partial class ecdh_package {
 [GoType] partial struct PrivateKey {
     internal ΔCurve curve;
     internal slice<byte> privateKey;
-    internal ж<crypto.@internal.boring_package.PrivateKeyECDH> boring;
+    internal ж<boring.PrivateKeyECDH> boring;
     // publicKey is set under publicKeyOnce, to allow loading private keys with
     // NewPrivateKey without having to perform a scalar multiplication.
     internal ж<ΔPublicKey> publicKey;
-    internal sync_package.Once publicKeyOnce;
+    internal sync.Once publicKeyOnce;
 }
 
 // ECDH performs an ECDH exchange and returns the shared secret. The [PrivateKey]
@@ -119,13 +120,14 @@ partial class ecdh_package {
 //
 // For [X25519], this performs ECDH as specified in RFC 7748, Section 6.1. If
 // the result is the all-zero value, ECDH returns an error.
-[GoRecv] public static (slice<byte>, error) ECDH(this ref PrivateKey k, ж<ΔPublicKey> Ꮡremote) {
-    ref var remote = ref Ꮡremote.val;
+public static (slice<byte>, error) ECDH(this ж<PrivateKey> Ꮡk, ж<ΔPublicKey> Ꮡremote) {
+    ref var k = ref Ꮡk.Value;
+    ref var remote = ref Ꮡremote.Value;
 
     if (!AreEqual(k.curve, remote.curve)) {
         return (default!, errors.New("crypto/ecdh: private key and public key curves do not match"u8));
     }
-    return k.curve.ecdh(k, Ꮡremote);
+    return k.curve.ecdh(Ꮡk, Ꮡremote);
 }
 
 // Bytes returns a copy of the encoding of the private key.
@@ -143,8 +145,8 @@ partial class ecdh_package {
 //
 // This check is performed in constant time as long as the key types and their
 // curve match.
-[GoRecv] public static bool Equal(this ref PrivateKey k, crypto.PrivateKey x) {
-    var (xx, ok) = x._<PrivateKey.val>(ᐧ);
+[GoRecv] public static bool Equal(this ref PrivateKey k, cryptoꓸPrivateKey x) {
+    var (xx, ok) = x._<ж<PrivateKey>>(ᐧ);
     if (!ok) {
         return false;
     }
@@ -155,20 +157,26 @@ partial class ecdh_package {
     return k.curve;
 }
 
-[GoRecv] public static ж<ΔPublicKey> PublicKey(this ref PrivateKey k) {
-    k.publicKeyOnce.Do(() => {
-        if (k.boring != nil){
-            (kpub, err) = k.boring.PublicKey();
+public static ж<ΔPublicKey> PublicKey(this ж<PrivateKey> Ꮡk) {
+    ref var k = ref Ꮡk.Value;
+
+    Ꮡk.of(PrivateKey.ᏑpublicKeyOnce).Do(() => {
+        if (Ꮡk.Value.boring != nil){
+            // Because we already checked in NewPrivateKey that the key is valid,
+            // there should not be any possible errors from BoringCrypto,
+            // so we turn the error into a panic.
+            // (We can't return it anyhow.)
+            var (kpub, err) = Ꮡk.Value.boring.PublicKey();
             if (err != default!) {
-                throw panic("boringcrypto: "u8 + err.Error());
+                throw panic("boringcrypto: " + err.Error());
             }
-            k.publicKey = Ꮡ(new ΔPublicKey(
-                curve: k.curve,
+            Ꮡk.Value.publicKey = Ꮡ(new ΔPublicKey(
+                curve: Ꮡk.Value.curve,
                 publicKey: kpub.Bytes(),
                 boring: kpub
             ));
         } else {
-            k.publicKey = k.curve.privateKeyToPublicKey(k);
+            Ꮡk.Value.publicKey = Ꮡk.Value.curve.privateKeyToPublicKey(Ꮡk);
         }
     });
     return k.publicKey;
@@ -176,8 +184,10 @@ partial class ecdh_package {
 
 // Public implements the implicit interface of all standard library private
 // keys. See the docs of [crypto.PrivateKey].
-[GoRecv] public static crypto.PublicKey Public(this ref PrivateKey k) {
-    return k.PublicKey();
+public static cryptoꓸPublicKey Public(this ж<PrivateKey> Ꮡk) {
+    ref var k = ref Ꮡk.Value;
+
+    return Ꮡk.PublicKey();
 }
 
 } // end ecdh_package

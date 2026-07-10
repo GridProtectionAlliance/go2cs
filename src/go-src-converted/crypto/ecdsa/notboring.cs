@@ -4,20 +4,16 @@
 //go:build !boringcrypto
 namespace go.crypto;
 
-using boring = crypto.@internal.boring_package;
-using crypto.@internal;
+using boring = go.crypto.@internal.boring_package;
+using go.crypto.@internal;
 
 partial class ecdsa_package {
 
-internal static (ж<boring.PublicKeyECDSA>, error) boringPublicKey(ж<PublicKey> Ꮡ) {
-    ref var  = ref Ꮡ.val;
-
+internal static (ж<boring.PublicKeyECDSA>, error) boringPublicKey(ж<PublicKey> _) {
     throw panic("boringcrypto: not available");
 }
 
-internal static (ж<boring.PrivateKeyECDSA>, error) boringPrivateKey(ж<PrivateKey> Ꮡ) {
-    ref var  = ref Ꮡ.val;
-
+internal static (ж<boring.PrivateKeyECDSA>, error) boringPrivateKey(ж<PrivateKey> _) {
     throw panic("boringcrypto: not available");
 }
 

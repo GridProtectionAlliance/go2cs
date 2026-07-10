@@ -15,8 +15,8 @@ public static readonly UntypedInt SecurityDelegation = 3;
 
 //sys	ImpersonateSelf(impersonationlevel uint32) (err error) = advapi32.ImpersonateSelf
 //sys	RevertToSelf() (err error) = advapi32.RevertToSelf
-public static readonly UntypedInt TOKEN_ADJUST_PRIVILEGES = /* 0x0020 */ 32;
-public static readonly UntypedInt SE_PRIVILEGE_ENABLED = /* 0x00000002 */ 2;
+public static readonly UntypedInt TOKEN_ADJUST_PRIVILEGES = 0x0020;
+public static readonly UntypedInt SE_PRIVILEGE_ENABLED = 0x00000002;
 
 [GoType] partial struct LUID {
     public uint32 LowPart;
@@ -37,9 +37,9 @@ public static readonly UntypedInt SE_PRIVILEGE_ENABLED = /* 0x00000002 */ 2;
 //sys	LookupPrivilegeValue(systemname *uint16, name *uint16, luid *LUID) (err error) = advapi32.LookupPrivilegeValueW
 //sys	adjustTokenPrivileges(token syscall.Token, disableAllPrivileges bool, newstate *TOKEN_PRIVILEGES, buflen uint32, prevstate *TOKEN_PRIVILEGES, returnlen *uint32) (ret uint32, err error) [true] = advapi32.AdjustTokenPrivileges
 public static error AdjustTokenPrivileges(syscall.Token token, bool disableAllPrivileges, ж<TOKEN_PRIVILEGES> Ꮡnewstate, uint32 buflen, ж<TOKEN_PRIVILEGES> Ꮡprevstate, ж<uint32> Ꮡreturnlen) {
-    ref var newstate = ref Ꮡnewstate.val;
-    ref var prevstate = ref Ꮡprevstate.val;
-    ref var returnlen = ref Ꮡreturnlen.val;
+    ref var newstate = ref Ꮡnewstate.Value;
+    ref var prevstate = ref Ꮡprevstate.Value;
+    ref var returnlen = ref Ꮡreturnlen.Value;
 
     var (ret, err) = adjustTokenPrivileges(token, disableAllPrivileges, Ꮡnewstate, buflen, Ꮡprevstate, Ꮡreturnlen);
     if (ret == 0) {
@@ -47,7 +47,7 @@ public static error AdjustTokenPrivileges(syscall.Token token, bool disableAllPr
         return err;
     }
     // AdjustTokenPrivileges call succeeded
-    if (err == syscall.EINVAL) {
+    if (AreEqual(err, syscall.EINVAL)) {
         // GetLastError returned ERROR_SUCCESS
         return default!;
     }
@@ -57,7 +57,7 @@ public static error AdjustTokenPrivileges(syscall.Token token, bool disableAllPr
 //sys DuplicateTokenEx(hExistingToken syscall.Token, dwDesiredAccess uint32, lpTokenAttributes *syscall.SecurityAttributes, impersonationLevel uint32, tokenType TokenType, phNewToken *syscall.Token) (err error) = advapi32.DuplicateTokenEx
 //sys SetTokenInformation(tokenHandle syscall.Token, tokenInformationClass uint32, tokenInformation uintptr, tokenInformationLength uint32) (err error) = advapi32.SetTokenInformation
 [GoType] partial struct SID_AND_ATTRIBUTES {
-    public ж<syscall_package.SID> Sid;
+    public ж<syscall.SID> Sid;
     public uint32 Attributes;
 }
 
@@ -66,10 +66,10 @@ public static error AdjustTokenPrivileges(syscall.Token token, bool disableAllPr
 }
 
 [GoRecv] public static uint32 Size(this ref TOKEN_MANDATORY_LABEL tml) {
-    return ((uint32)@unsafe.Sizeof(new TOKEN_MANDATORY_LABEL(nil))) + syscall.GetLengthSid(tml.Label.Sid);
+    return (uint32)@unsafe.Sizeof(new TOKEN_MANDATORY_LABEL(nil)) + syscall.GetLengthSid(tml.Label.Sid);
 }
 
-public static readonly UntypedInt SE_GROUP_INTEGRITY = /* 0x00000020 */ 32;
+public static readonly UntypedInt SE_GROUP_INTEGRITY = 0x00000020;
 
 [GoType("num:uint32")] partial struct TokenType;
 
@@ -77,8 +77,8 @@ public static readonly TokenType TokenPrimary = 1;
 public static readonly TokenType TokenImpersonation = 2;
 
 //sys	GetProfilesDirectory(dir *uint16, dirLen *uint32) (err error) = userenv.GetProfilesDirectoryW
-public static readonly UntypedInt LG_INCLUDE_INDIRECT = /* 0x1 */ 1;
-public static readonly UntypedInt MAX_PREFERRED_LENGTH = /* 0xFFFFFFFF */ 4294967295;
+public static readonly UntypedInt LG_INCLUDE_INDIRECT = 0x1;
+public static readonly UntypedInt MAX_PREFERRED_LENGTH = 0xFFFFFFFF;
 
 [GoType] partial struct LocalGroupUserInfo0 {
     public ж<uint16> Name;
@@ -109,7 +109,7 @@ public static readonly UntypedInt MAX_PREFERRED_LENGTH = /* 0xFFFFFFFF */ 429496
     public ж<uint16> LogonServer;
     public uint32 CountryCode;
     public uint32 CodePage;
-    public ж<syscall_package.SID> UserSid;
+    public ж<syscall.SID> UserSid;
     public uint32 PrimaryGroupID;
     public ж<uint16> Profile;
     public ж<uint16> HomeDirDrive;

@@ -11,7 +11,7 @@ using strconv = strconv_package;
 using strings = strings_package;
 using time = time_package;
 using @unsafe = unsafe_package;
-using ꓸꓸꓸAttr = Span<Attr>;
+using io = io_package;
 
 partial class slog_package {
 
@@ -34,7 +34,11 @@ partial class slog_package {
     // or stringptr.)
     internal any any;
 }
-@byte.valAttr.val
+
+[GoType("ж<byte>")] partial class stringptr;
+
+[GoType("ж<Attr>")] partial class groupptr;
+
 [GoType("num:nint")] partial struct ΔKind;
 
 // The following list is sorted alphabetically, but it's also important that
@@ -64,7 +68,7 @@ internal static slice<@string> kindStrings = new @string[]{
 }.slice();
 
 public static @string String(this ΔKind k) {
-    if (k >= 0 && ((nint)k) < len(kindStrings)) {
+    if (k >= 0 && (nint)k < len(kindStrings)) {
         return kindStrings[k];
     }
     return "<unknown slog.Kind>"u8;
@@ -81,23 +85,22 @@ public static ΔKind Kind(this Value v) {
     case stringptr x: {
         return KindString;
     }
-    case timeLocation x: {
-        return KindTime;
-    }
-    case timeTime x: {
+    case timeLocation _:
+    case timeTime _: {
+        var x = v.any;
         return KindTime;
     }
     case groupptr x: {
         return KindGroup;
     }
-    case ΔLogValuer x: {
+    case {} Δx when Δx._<ΔLogValuer>(out var x): {
         return KindLogValuer;
     }
     case kind x: {
         return KindAny;
     }
     default: {
-        var x = v.any.type();
+        var x = v.any;
         return KindAny;
     }}
 }
@@ -107,17 +110,17 @@ public static ΔKind Kind(this Value v) {
 
 // StringValue returns a new [Value] for a string.
 public static Value StringValue(@string value) {
-    return new Value(num: ((uint64)len(value)), any: new stringptr(@unsafe.StringData(value)));
+    return new Value(num: (uint64)len(value), any: new stringptr(@unsafe.StringData(value)));
 }
 
 // IntValue returns a [Value] for an int.
 public static Value IntValue(nint v) {
-    return Int64Value(((int64)v));
+    return Int64Value((int64)v);
 }
 
 // Int64Value returns a [Value] for an int64.
 public static Value Int64Value(int64 v) {
-    return new Value(num: ((uint64)v), any: KindInt64);
+    return new Value(num: (uint64)v, any: KindInt64);
 }
 
 // Uint64Value returns a [Value] for a uint64.
@@ -132,13 +135,17 @@ public static Value Float64Value(float64 v) {
 
 // BoolValue returns a [Value] for a bool.
 public static Value BoolValue(bool v) {
-    var u = ((uint64)0);
+    var u = (uint64)0;
     if (v) {
         u = 1;
     }
     return new Value(num: u, any: KindBool);
 }
-ж<timeꓸLocation>time.Time
+
+[GoType("ж<timeꓸLocation>")] partial class timeLocation;
+
+[GoType("time_package.Time")] partial struct timeTime;
+
 // TimeValue returns a [Value] for a [time.Time].
 // It discards the monotonic portion.
 public static Value TimeValue(time.Time v) {
@@ -150,10 +157,10 @@ public static Value TimeValue(time.Time v) {
         return new Value(any: ((timeLocation)default!));
     }
     var nsec = v.UnixNano();
-    var t = time.Unix(0, nsec);
+    var t = time_package.Unix(0, nsec);
     if (v.Equal(t)) {
         // UnixNano correctly represents the time, so use a zero-alloc representation.
-        return new Value(num: ((uint64)nsec), any: new timeLocation(v.Location()));
+        return new Value(num: (uint64)nsec, any: new timeLocation(v.Location()));
     }
     // Fall back to the general form.
     // Strip the monotonic portion to match the other representation.
@@ -162,12 +169,12 @@ public static Value TimeValue(time.Time v) {
 
 // DurationValue returns a [Value] for a [time.Duration].
 public static Value DurationValue(time.Duration v) {
-    return new Value(num: ((uint64)v.Nanoseconds()), any: KindDuration);
+    return new Value(num: (uint64)v.Nanoseconds(), any: KindDuration);
 }
 
 // GroupValue returns a new [Value] for a list of Attrs.
 // The caller must not subsequently mutate the argument slice.
-public static Value GroupValue(params ꓸꓸꓸAttr @asʗp) {
+public static Value GroupValue(params Span<slog_package.Attr> @asʗp) {
     var @as = @asʗp.slice();
 
     // Remove empty groups.
@@ -178,13 +185,13 @@ public static Value GroupValue(params ꓸꓸꓸAttr @asʗp) {
             var as2 = new slice<Attr>(0, len(@as) - n);
             foreach (var (_, a) in @as) {
                 if (!a.Value.isEmptyGroup()) {
-                    as2 = append(as2, a);
+                    as2 = builtin.append(as2, a);
                 }
             }
             @as = as2;
         }
     }
-    return new Value(num: ((uint64)len(@as)), any: new groupptr(@unsafe.SliceData(@as)));
+    return new Value(num: (uint64)len(@as), any: new groupptr(@unsafe.SliceData(@as)));
 }
 
 // countEmptyGroups returns the number of empty group values in its argument.
@@ -215,75 +222,69 @@ internal static nint countEmptyGroups(slice<Attr> @as) {
 // underlying type is numeric, AnyValue returns a value of kind [KindAny].
 public static Value AnyValue(any v) {
     switch (v.type()) {
-    case @string v: {
-        return StringValue(v);
+    case @string vΔ1: {
+        return StringValue(vΔ1);
     }
-    case nint v: {
-        return Int64Value(((int64)v));
+    case nint vΔ1: {
+        return Int64Value((int64)vΔ1);
     }
-    case int32 v: {
-        return Int64Value(((int64)v));
+    case nuint vΔ1: {
+        return Uint64Value((uint64)vΔ1);
     }
-    case nuint v: {
-        return Uint64Value(((uint64)v));
+    case int64 vΔ1: {
+        return Int64Value(vΔ1);
     }
-    case uint32 v: {
-        return Uint64Value(((uint64)v));
+    case uint64 vΔ1: {
+        return Uint64Value(vΔ1);
     }
-    case int64 v: {
-        return Int64Value(v);
+    case bool vΔ1: {
+        return BoolValue(vΔ1);
     }
-    case uint64 v: {
-        return Uint64Value(v);
+    case time_package.Duration vΔ1: {
+        return DurationValue(vΔ1);
     }
-    case bool v: {
-        return BoolValue(v);
+    case time_package.Time vΔ1: {
+        return TimeValue(vΔ1);
     }
-    case time.Duration v: {
-        return DurationValue(v);
+    case uint8 vΔ1: {
+        return Uint64Value((uint64)vΔ1);
     }
-    case time.Time v: {
-        return TimeValue(v);
+    case uint16 vΔ1: {
+        return Uint64Value((uint64)vΔ1);
     }
-    case uint8 v: {
-        return Uint64Value(((uint64)v));
+    case uint32 vΔ1: {
+        return Uint64Value((uint64)vΔ1);
     }
-    case uint16 v: {
-        return Uint64Value(((uint64)v));
+    case uintptr vΔ1: {
+        return Uint64Value((uint64)vΔ1);
     }
-    case uint32 v: {
-        return Uint64Value(((uint64)v));
+    case int8 vΔ1: {
+        return Int64Value((int64)vΔ1);
     }
-    case uintptr v: {
-        return Uint64Value(((uint64)v));
+    case int16 vΔ1: {
+        return Int64Value((int64)vΔ1);
     }
-    case int8 v: {
-        return Int64Value(((int64)v));
+    case int32 vΔ1: {
+        return Int64Value((int64)vΔ1);
     }
-    case int16 v: {
-        return Int64Value(((int64)v));
+    case float64 vΔ1: {
+        return Float64Value(vΔ1);
     }
-    case int32 v: {
-        return Int64Value(((int64)v));
+    case float32 vΔ1: {
+        return Float64Value((float64)vΔ1);
     }
-    case float64 v: {
-        return Float64Value(v);
+    case slice<Attr> vΔ1: {
+        return GroupValue(vΔ1.ꓸꓸꓸ);
     }
-    case float32 v: {
-        return Float64Value(((float64)v));
+    case ΔKind vΔ1: {
+        return new Value(any: ((kind)(nint)vΔ1));
     }
-    case slice<Attr> v: {
-        return GroupValue(v.ꓸꓸꓸ);
-    }
-    case ΔKind v: {
-        return new Value(any: ((kind)v));
-    }
-    case Value v: {
-        return v;
+    case Value vΔ1: {
+        return vΔ1;
     }
     default: {
-        var v = v.type();
-        return new Value(any: v);
+        var vΔ1 = v;
+        return new Value(any: vΔ1);
     }}
 }
 
@@ -295,7 +296,7 @@ public static any Any(this Value v) {
     if (exprᴛ1 == KindAny) {
         {
             var (k, ok) = v.any._<kind>(ᐧ); if (ok) {
-                return ((ΔKind)k);
+                return ((ΔKind)(nint)k);
             }
         }
         return v.any;
@@ -307,7 +308,7 @@ public static any Any(this Value v) {
         return v.group();
     }
     if (exprᴛ1 == KindInt64) {
-        return ((int64)v.num);
+        return (int64)v.num;
     }
     if (exprᴛ1 == KindUint64) {
         return v.num;
@@ -359,7 +360,7 @@ public static int64 Int64(this Value v) {
             throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
         }
     }
-    return ((int64)v.num);
+    return (int64)v.num;
 }
 
 // Uint64 returns v's value as a uint64. It panics
@@ -403,7 +404,7 @@ public static time.Duration Duration(this Value v) {
 }
 
 internal static time.Duration duration(this Value v) {
-    return ((time.Duration)((int64)v.num));
+    return ((time.Duration)(int64)v.num);
 }
 
 // Float64 returns v's value as a float64. It panics
@@ -439,15 +440,15 @@ internal static time.Time time(this Value v) {
     switch (v.any.type()) {
     case timeLocation a: {
         if (a == nil) {
-            return new time.Time(nil);
+            return new time_package.Time(nil);
         }
-        return time.Unix(0, ((int64)v.num)).In(a);
+        return time_package.Unix(0, (int64)v.num).In(a);
     }
     case timeTime a: {
         return ((time.Time)a);
     }
     default: {
-        var a = v.any.type();
+        var a = v.any;
         throw panic(fmt.Sprintf("bad time type %T"u8, v.any));
         break;
     }}
@@ -500,8 +501,8 @@ public static bool Equal(this Value v, Value w) {
         return AreEqual(v.any, w.any);
     }
     if (exprᴛ1 == KindGroup) {
-        return slices.EqualFunc(v.group(), // may panic if non-comparable
- w.group(), Attr.Equal);
+        return slices.EqualFunc<slice<Attr>, slice<Attr>, Attr, Attr>(v.group(), // may panic if non-comparable
+ w.group(), (Func<Attr, Attr, bool>)(Equal));
     }
     { /* default: */
         throw panic(fmt.Sprintf("bad kind: %s"u8, k1));
@@ -525,10 +526,10 @@ internal static bool isEmptyGroup(this Value v) {
 internal static slice<byte> append(this Value v, slice<byte> dst) {
     var exprᴛ1 = v.Kind();
     if (exprᴛ1 == KindString) {
-        return append(dst, v.str().ꓸꓸꓸ);
+        return builtin.append(dst, v.str().ꓸꓸꓸ);
     }
     if (exprᴛ1 == KindInt64) {
-        return strconv.AppendInt(dst, ((int64)v.num), 10);
+        return strconv.AppendInt(dst, (int64)v.num, 10);
     }
     if (exprᴛ1 == KindUint64) {
         return strconv.AppendUint(dst, v.num, 10);
@@ -540,10 +541,10 @@ internal static slice<byte> append(this Value v, slice<byte> dst) {
         return strconv.AppendBool(dst, v.@bool());
     }
     if (exprᴛ1 == KindDuration) {
-        return append(dst, v.duration().String().ꓸꓸꓸ);
+        return builtin.append(dst, v.duration().String().ꓸꓸꓸ);
     }
     if (exprᴛ1 == KindTime) {
-        return append(dst, v.time().String().ꓸꓸꓸ);
+        return builtin.append(dst, v.time().String().ꓸꓸꓸ);
     }
     if (exprᴛ1 == KindGroup) {
         return fmt.Append(dst, v.group());
@@ -574,27 +575,28 @@ internal static readonly UntypedInt maxLogValues = 100;
 // If the number of LogValue calls exceeds a threshold, a Value containing an
 // error is returned.
 // Resolve's return value is guaranteed not to be of Kind [KindLogValuer].
-public static Value /*rv*/ Resolve(this Value v) => func((defer, recover) => {
+public static Value /*rv*/ Resolve(this Value v) {
     Value rv = default!;
-
-    var orig = v;
-    var rvʗ1 = rv;
-    defer(() => {
-        {
-            var r = recover(); if (r != default!) {
-                rvʗ1 = AnyValue(fmt.Errorf("LogValue panicked\n%s"u8, stack(3, 5)));
+    func((defer, recover) => {
+        var orig = v;
+        defer(() => {
+            {
+                var r = recover(); if (r != default!) {
+                    rv = AnyValue(fmt.Errorf("LogValue panicked\n%s"u8, stack(3, 5)));
+                }
             }
+        });
+        for (nint i = 0; i < maxLogValues; i++) {
+            if (v.Kind() != KindLogValuer) {
+                rv = v; return;
+            }
+            v = v.LogValuer().LogValue();
         }
+        var err = fmt.Errorf("LogValue called too many times on Value of type %T"u8, orig.Any());
+        rv = AnyValue(err);
     });
-    for (nint i = 0; i < maxLogValues; i++) {
-        if (v.Kind() != KindLogValuer) {
-            return v;
-        }
-        v = v.LogValuer().LogValue();
-    }
-    var err = fmt.Errorf("LogValue called too many times on Value of type %T"u8, orig.Any());
-    return AnyValue(err);
-});
+    return rv;
+}
 
 internal static @string stack(nint skip, nint nFrames) {
     var pcs = new slice<uintptr>(nFrames + 1);
@@ -603,17 +605,17 @@ internal static @string stack(nint skip, nint nFrames) {
         return "(no stack)"u8;
     }
     var frames = runtime.CallersFrames(pcs[..(int)(n)]);
-    ref var b = ref heap(new strings_package.Builder(), out var Ꮡb);
+    ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     nint i = 0;
     while (ᐧ) {
         var (frame, more) = frames.Next();
-        fmt.Fprintf(~Ꮡb, "called from %s (%s:%d)\n"u8, frame.Function, frame.File, frame.Line);
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "called from %s (%s:%d)\n"u8, frame.Function, frame.File, frame.Line);
         if (!more) {
             break;
         }
         i++;
         if (i >= nFrames) {
-            fmt.Fprintf(~Ꮡb, "(rest of stack elided)\n"u8);
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "(rest of stack elided)\n"u8);
             break;
         }
     }

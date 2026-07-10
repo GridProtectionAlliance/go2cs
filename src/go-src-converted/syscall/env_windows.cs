@@ -12,29 +12,29 @@ public static (@string value, bool found) Getenv(@string key) {
     @string value = default!;
     bool found = default!;
 
-    (keyp, err) = UTF16PtrFromString(key);
+    var (keyp, err) = UTF16PtrFromString(key);
     if (err != default!) {
         return ("", false);
     }
-    var n = ((uint32)100);
+    var n = (uint32)100;
     while (ᐧ) {
-        var b = new slice<uint16>(n);
-        (n, err) = GetEnvironmentVariable(keyp, Ꮡ(b, 0), ((uint32)len(b)));
-        if (n == 0 && err == ERROR_ENVVAR_NOT_FOUND) {
+        var b = new slice<uint16>((nint)(n));
+        (n, err) = GetEnvironmentVariable(keyp, Ꮡ(b, 0), (uint32)len(b));
+        if (n == 0 && AreEqual(err, ERROR_ENVVAR_NOT_FOUND)) {
             return ("", false);
         }
-        if (n <= ((uint32)len(b))) {
+        if (n <= (uint32)len(b)) {
             return (UTF16ToString(b[..(int)(n)]), true);
         }
     }
 }
 
 public static error Setenv(@string key, @string value) {
-    (v, err) = UTF16PtrFromString(value);
+    var (v, err) = UTF16PtrFromString(value);
     if (err != default!) {
         return err;
     }
-    (keyp, err) = UTF16PtrFromString(key);
+    (var keyp, err) = UTF16PtrFromString(key);
     if (err != default!) {
         return err;
     }
@@ -47,7 +47,7 @@ public static error Setenv(@string key, @string value) {
 }
 
 public static error Unsetenv(@string key) {
-    (keyp, err) = UTF16PtrFromString(key);
+    var (keyp, err) = UTF16PtrFromString(key);
     if (err != default!) {
         return err;
     }
@@ -73,23 +73,23 @@ public static void Clearenv() {
     }
 }
 
-public static slice<@string> Environ() => func((defer, _) => {
-    (envp, e) = GetEnvironmentStrings();
+public static slice<@string> Environ() => func<slice<@string>>((defer, recover) => {
+    var (envp, e) = GetEnvironmentStrings();
     if (e != default!) {
         return default!;
     }
     deferǃ(FreeEnvironmentStrings, envp, defer);
     var r = new slice<@string>(0, 50);
     // Empty with room to grow.
-    const uintptr size = /* unsafe.Sizeof(*envp) */ 2;
-    while (envp.val != 0) {
+    uintptr size = /* unsafe.Sizeof(*envp) */ 2;
+    while (envp.Value != 0) {
         // environment block ends with empty string
         // find NUL terminator
         @unsafe.Pointer end = new @unsafe.Pointer(envp);
         while (~(ж<uint16>)(uintptr)(end) != 0) {
             end = (uintptr)@unsafe.Add(end, size);
         }
-        var entry = @unsafe.Slice(envp, (((uintptr)end) - ((uintptr)new @unsafe.Pointer(envp))) / size);
+        var entry = @unsafe.Slice(envp, ((uintptr)end - (uintptr)new @unsafe.Pointer(envp)) / size);
         r = append(r, UTF16ToString(entry));
         envp = (ж<uint16>)(uintptr)(@unsafe.Add(end, size));
     }

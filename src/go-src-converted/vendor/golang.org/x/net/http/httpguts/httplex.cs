@@ -6,8 +6,8 @@ namespace go.vendor.golang.org.x.net.http;
 using net = net_package;
 using strings = strings_package;
 using utf8 = unicode.utf8_package;
-using idna = golang.org.x.net.idna_package;
-using golang.org.x.net;
+using idna = go.vendor.golang.org.x.net.idna_package;
+using go.vendor.golang.org.x.net;
 using unicode;
 
 partial class httpguts_package {
@@ -18,7 +18,7 @@ internal static array<bool> isTokenTable = new array<bool>(256){
     [(rune)'$'] = true,
     [(rune)'%'] = true,
     [(rune)'&'] = true,
-    [(rune)'\'] = true,
+    [(rune)'\''] = true,
     [(rune)'*'] = true,
     [(rune)'+'] = true,
     [(rune)'-'] = true,
@@ -93,7 +93,7 @@ internal static array<bool> isTokenTable = new array<bool>(256){
 };
 
 public static bool IsTokenRune(rune r) {
-    return r < utf8.RuneSelf && isTokenTable[((byte)r)];
+    return r < utf8.RuneSelf && isTokenTable[(byte)r];
 }
 
 // HeaderValuesContainsToken reports whether any string in values
@@ -146,7 +146,7 @@ internal static bool headerValueContainsToken(@string v, @string token) {
 // lowerASCII returns the ASCII lowercase version of b.
 internal static byte lowerASCII(byte b) {
     if ((rune)'A' <= b && b <= (rune)'Z') {
-        return b + ((rune)'a' - (rune)'A');
+        return (byte)(b + ((rune)'a' - (rune)'A'));
     }
     return b;
 }
@@ -161,7 +161,7 @@ internal static bool tokenEqual(@string t1, @string t2) {
             // No UTF-8 or non-ASCII allowed in tokens.
             return false;
         }
-        if (lowerASCII(((byte)b)) != lowerASCII(t2[i])) {
+        if (lowerASCII((byte)b) != lowerASCII(t2[i])) {
             return false;
         }
     }
@@ -182,7 +182,7 @@ internal static bool isLWS(byte b) {
 //	CTL            = <any US-ASCII control character
 //	                 (octets 0 - 31) and DEL (127)>
 internal static bool isCTL(byte b) {
-    static readonly UntypedInt del = /* 0x7f */ 127; // a CTL
+    UntypedInt del = 0x7f; // a CTL
     return b < (rune)' ' || b == del;
 }
 
@@ -274,7 +274,7 @@ internal static array<bool> validHostByte = new array<bool>(256){
     [(rune)';'] = true,
     [(rune)'='] = true,
     [(rune)'['] = true,
-    [(rune)'\'] = true,
+    [(rune)'\''] = true,
     [(rune)']'] = true,
     [(rune)'_'] = true,
     [(rune)'~'] = true

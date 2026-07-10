@@ -7,8 +7,8 @@
 // environment variables and files a test consults.
 namespace go.@internal;
 
-using atomic = sync.atomic_package;
-using sync;
+using atomic = go.sync.atomic_package;
+using go.sync;
 
 partial class testlog_package {
 
@@ -18,8 +18,8 @@ partial class testlog_package {
 // Multiple goroutines may call these methods simultaneously.
 [GoType] partial interface Interface {
     void Getenv(@string key);
-    void Stat(@string file);
-    void Open(@string file);
+    void Stat(@string @file);
+    void Open(@string @file);
     void Chdir(@string dir);
 }
 
@@ -29,25 +29,26 @@ partial class testlog_package {
 // That must not cause a race detector failure,
 // although it will still result in limited visibility
 // into exactly what those goroutines do.
-internal static atomic.Value logger;
+internal static ж<atomic.Value> Ꮡlogger = new(default(atomic.Value));
+internal static ref atomic.Value logger => ref Ꮡlogger.Value;
 
 // SetLogger sets the test logger implementation for the current process.
 // It must be called only once, at process startup.
 public static void SetLogger(Interface impl) {
-    if (logger.Load() != default!) {
+    if (Ꮡlogger.Load() != default!) {
         throw panic("testlog: SetLogger must be called only once");
     }
-    logger.Store(Ꮡ(impl));
+    Ꮡlogger.Store(Ꮡ(impl));
 }
 
 // Logger returns the current test logger implementation.
 // It returns nil if there is no logger.
 public static Interface Logger() {
-    var impl = logger.Load();
+    var impl = Ꮡlogger.Load();
     if (impl == default!) {
         return default!;
     }
-    return impl._<Interface.val>().val;
+    return impl._<ж<Interface>>().ValueSlot;
 }
 
 // Getenv calls Logger().Getenv, if a logger has been set.

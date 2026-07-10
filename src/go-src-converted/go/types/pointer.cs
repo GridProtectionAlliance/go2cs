@@ -22,12 +22,16 @@ public static ж<Pointer> NewPointer(ΔType elem) {
     return p.@base;
 }
 
-[GoRecv("capture")] public static ΔType Underlying(this ref Pointer p) {
-    return ~p;
+public static ΔType Underlying(this ж<Pointer> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    return new PointerжΔType(Ꮡp);
 }
 
-[GoRecv] public static @string String(this ref Pointer p) {
-    return TypeString(~p, default!);
+public static @string String(this ж<Pointer> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    return TypeString(new PointerжΔType(Ꮡp), default!);
 }
 
 } // end types_package

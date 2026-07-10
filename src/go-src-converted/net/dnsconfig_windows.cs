@@ -10,67 +10,67 @@ using @internal.syscall;
 
 partial class net_package {
 
-internal static ж<dnsConfig> /*conf*/ dnsReadConfig(@string ignoredFilename) => func((defer, _) => {
+internal static ж<dnsConfig> /*conf*/ dnsReadConfig(@string ignoredFilename) {
     ж<dnsConfig> conf = default!;
-
-    conf = Ꮡ(new dnsConfig(
-        ndots: 1,
-        timeout: 5 * time.ΔSecond,
-        attempts: 2
-    ));
-    var defaultNSʗ1 = defaultNS;
-    defer(() => {
-        if (len((~conf).servers) == 0) {
-            conf.val.servers = defaultNSʗ1;
+    func((defer, recover) => {
+        conf = Ꮡ(new dnsConfig(
+            ndots: 1,
+            timeout: 5000000000L,
+            attempts: 2
+        ));
+        defer(() => {
+            if (len((~conf).servers) == 0) {
+                conf.Value.servers = defaultNS;
+            }
+        });
+        var (aas, err) = adapterAddresses();
+        if (err != default!) {
+            return;
         }
-    });
-    (aas, err) = adapterAddresses();
-    if (err != default!) {
-        return conf;
-    }
-    foreach (var (_, aa) in aas) {
-        // Only take interfaces whose OperStatus is IfOperStatusUp(0x01) into DNS configs.
-        if ((~aa).OperStatus != windows.IfOperStatusUp) {
-            continue;
-        }
-        // Only take interfaces which have at least one gateway
-        if ((~aa).FirstGatewayAddress == nil) {
-            continue;
-        }
-        for (var dns = aa.val.FirstDnsServerAddress; dns != nil; dns = dns.val.Next) {
-            (sa, errΔ1) = (~dns).Address.Sockaddr.Sockaddr();
-            if (errΔ1 != default!) {
+        foreach (var (_, aa) in aas) {
+            // Only take interfaces whose OperStatus is IfOperStatusUp(0x01) into DNS configs.
+            if ((~aa).OperStatus != windows.IfOperStatusUp) {
                 continue;
             }
-            IP ip = default!;
-            switch (sa.type()) {
-            case ж<syscall.SockaddrInet4> sa: {
-                ip = IPv4((~sa).Addr[0], (~sa).Addr[1], (~sa).Addr[2], (~sa).Addr[3]);
-                break;
+            // Only take interfaces which have at least one gateway
+            if ((~aa).FirstGatewayAddress == nil) {
+                continue;
             }
-            case ж<syscall.SockaddrInet6> sa: {
-                ip = new IP(IPv6len);
-                copy(ip, (~sa).Addr[..]);
-                if (ip[0] == 254 && ip[1] == 192) {
-                    // fec0/10 IPv6 addresses are site local anycast DNS
-                    // addresses Microsoft sets by default if no other
-                    // IPv6 DNS address is set. Site local anycast is
-                    // deprecated since 2004, see
-                    // https://datatracker.ietf.org/doc/html/rfc3879
+            for (var dns = aa.Value.FirstDnsServerAddress; dns != nil; dns = dns.Value.Next) {
+                var (sa, errΔ1) = (~dns).Address.Sockaddr.Sockaddr();
+                if (errΔ1 != default!) {
                     continue;
                 }
-                break;
+                IP ip = default!;
+                switch (sa.type()) {
+                case ж<syscall.SockaddrInet4> saΔ1: {
+                    ip = IPv4((~saΔ1).Addr[0], (~saΔ1).Addr[1], (~saΔ1).Addr[2], (~saΔ1).Addr[3]);
+                    break;
+                }
+                case ж<syscall.SockaddrInet6> saΔ1: {
+                    ip = new IP(IPv6len);
+                    copy(ip, (~saΔ1).Addr[..]);
+                    if (ip[0] == 0xfe && ip[1] == 0xc0) {
+                        // fec0/10 IPv6 addresses are site local anycast DNS
+                        // addresses Microsoft sets by default if no other
+                        // IPv6 DNS address is set. Site local anycast is
+                        // deprecated since 2004, see
+                        // https://datatracker.ietf.org/doc/html/rfc3879
+                        continue;
+                    }
+                    break;
+                }
+                default: {
+                    var saΔ1 = sa;
+                    continue;
+                    break;
+                }}
+                // Unexpected type.
+                conf.Value.servers = append((~conf).servers, JoinHostPort(ip.String(), "53"u8));
             }
-            default: {
-                var sa = sa.type();
-                continue;
-                break;
-            }}
-            // Unexpected type.
-            conf.val.servers = append((~conf).servers, JoinHostPort(ip.String(), "53"u8));
         }
-    }
+    });
     return conf;
-});
+}
 
 } // end net_package

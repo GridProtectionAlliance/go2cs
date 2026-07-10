@@ -13,25 +13,26 @@ using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
 using mime = mime_package;
-using multipart = mime.multipart_package;
-using httptrace = net.http.httptrace_package;
-using ascii = net.http.@internal.ascii_package;
-using textproto = net.textproto_package;
-using url = net.url_package;
-using urlpkg = net.url_package;
+using multipart = go.mime.multipart_package;
+using httptrace = go.net.http.httptrace_package;
+using ascii = go.net.http.@internal.ascii_package;
+using textproto = go.net.textproto_package;
+using url = go.net.url_package;
+using urlpkg = go.net.url_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using sync = sync_package;
-using _ = unsafe_package; // for linkname
-using httpguts = golang.org.x.net.http.httpguts_package;
-using idna = golang.org.x.net.idna_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+using httpguts = vendor.golang.org.x.net.http.httpguts_package;
+using idna = vendor.golang.org.x.net.idna_package;
 using crypto;
 using encoding;
-using golang.org.x.net;
-using golang.org.x.net.http;
-using mime;
-using net.http;
-using net.http.@internal;
+using go.mime;
+using go.net;
+using go.net.http;
+using go.net.http.@internal;
+using vendor.golang.org.x.net;
+using vendor.golang.org.x.net.http;
 
 partial class http_package {
 
@@ -54,8 +55,10 @@ public static error ErrMissingFile = errors.New("http: no such file"u8);
 }
 
 // Is lets http.ErrNotSupported match errors.ErrUnsupported.
-[GoRecv] public static bool Is(this ref ProtocolError pe, error err) {
-    return pe == ErrNotSupported && AreEqual(err, errors.ErrUnsupported);
+public static bool Is(this ж<ProtocolError> Ꮡpe, error err) {
+    ref var pe = ref Ꮡpe.Value;
+
+    return Ꮡpe == ErrNotSupported && AreEqual(err, errors.ErrUnsupported);
 }
 
 public static ж<ProtocolError> ErrNotSupported = Ꮡ(new ProtocolError("feature not supported"));
@@ -102,7 +105,7 @@ internal static map<@string, bool> reqWriteExcludeHeader = new map<@string, bool
     // connect to, while the Request's Host field optionally
     // specifies the Host header value to send in the HTTP
     // request.
-    public ж<net.url_package.URL> URL;
+    public ж<urlpkg.URL> URL;
     // The protocol version for incoming server requests.
     //
     // For client requests, these fields are ignored. The HTTP
@@ -157,7 +160,7 @@ internal static map<@string, bool> reqWriteExcludeHeader = new map<@string, bool
     // Body must allow Read to be called concurrently with Close.
     // In particular, calling Close should unblock a Read waiting
     // for input.
-    public io_package.ReadCloser Body;
+    public io.ReadCloser Body;
     // GetBody defines an optional func to return a new copy of
     // Body. It is used for client requests when a redirect requires
     // reading the body more than once. Use of GetBody still
@@ -214,17 +217,17 @@ internal static map<@string, bool> reqWriteExcludeHeader = new map<@string, bool
     // field's query parameters and the PATCH, POST, or PUT form data.
     // This field is only available after ParseForm is called.
     // The HTTP client ignores Form and uses Body instead.
-    public net.url_package.Values Form;
+    public urlpkg.Values Form;
     // PostForm contains the parsed form data from PATCH, POST
     // or PUT body parameters.
     //
     // This field is only available after ParseForm is called.
     // The HTTP client ignores PostForm and uses Body instead.
-    public net.url_package.Values PostForm;
+    public urlpkg.Values PostForm;
     // MultipartForm is the parsed multipart form, including file uploads.
     // This field is only available after ParseMultipartForm is called.
     // The HTTP client ignores MultipartForm and uses Body instead.
-    public ж<mime.multipart_package.Form> MultipartForm;
+    public ж<multipart.Form> MultipartForm;
     // Trailer specifies additional headers that are sent after the request
     // body.
     //
@@ -264,7 +267,7 @@ internal static map<@string, bool> reqWriteExcludeHeader = new map<@string, bool
     // TLS-enabled connections before invoking a handler;
     // otherwise it leaves the field nil.
     // This field is ignored by the HTTP client.
-    public ж<crypto.tls_package.ΔConnectionState> TLS;
+    public ж<tlsꓸConnectionState> TLS;
     // Cancel is an optional channel whose closure indicates that the client
     // request should be regarded as canceled. Not all implementations of
     // RoundTripper may support Cancel.
@@ -286,7 +289,7 @@ internal static map<@string, bool> reqWriteExcludeHeader = new map<@string, bool
     // be modified via copying the whole Request using Clone or WithContext.
     // It is unexported to prevent people from using Context wrong
     // and mutating the contexts held by callers of the same request.
-    internal context_package.Context ctx;
+    internal context.Context ctx;
     // The following fields are for requests matched by ServeMux.
     internal ж<pattern> pat;       // the pattern that matched
     internal slice<@string> matches;    // values for the matching wildcards in pat
@@ -308,7 +311,7 @@ internal static map<@string, bool> reqWriteExcludeHeader = new map<@string, bool
     if (r.ctx != default!) {
         return r.ctx;
     }
-    return context.Background();
+    return context_package.Background();
 }
 
 // WithContext returns a shallow copy of r with its context changed
@@ -325,8 +328,8 @@ internal static map<@string, bool> reqWriteExcludeHeader = new map<@string, bool
         throw panic("nil context");
     }
     var r2 = @new<Request>();
-    r2.val = r;
-    r2.val.ctx = ctx;
+    r2.Value = r;
+    r2.Value.ctx = ctx;
     return r2;
 }
 
@@ -343,40 +346,40 @@ internal static map<@string, bool> reqWriteExcludeHeader = new map<@string, bool
         throw panic("nil context");
     }
     var r2 = @new<Request>();
-    r2.val = r;
-    r2.val.ctx = ctx;
-    r2.val.URL = cloneURL(r.URL);
+    r2.Value = r;
+    r2.Value.ctx = ctx;
+    r2.Value.URL = cloneURL(r.URL);
     if (r.Header != default!) {
-        r2.val.Header = r.Header.Clone();
+        r2.Value.Header = r.Header.Clone();
     }
     if (r.Trailer != default!) {
-        r2.val.Trailer = r.Trailer.Clone();
+        r2.Value.Trailer = r.Trailer.Clone();
     }
     {
         var s = r.TransferEncoding; if (s != default!) {
-            var s2 = new slice<@string>(len(s));
+            var s2 = new slice<@string>(builtin.len(s));
             copy(s2, s);
-            r2.val.TransferEncoding = s2;
+            r2.Value.TransferEncoding = s2;
         }
     }
-    r2.val.Form = cloneURLValues(r.Form);
-    r2.val.PostForm = cloneURLValues(r.PostForm);
-    r2.val.MultipartForm = cloneMultipartForm(r.MultipartForm);
+    r2.Value.Form = cloneURLValues(r.Form);
+    r2.Value.PostForm = cloneURLValues(r.PostForm);
+    r2.Value.MultipartForm = cloneMultipartForm(r.MultipartForm);
     // Copy matches and otherValues. See issue 61410.
     {
         var s = r.matches; if (s != default!) {
-            var s2 = new slice<@string>(len(s));
+            var s2 = new slice<@string>(builtin.len(s));
             copy(s2, s);
-            r2.val.matches = s2;
+            r2.Value.matches = s2;
         }
     }
     {
         var s = r.otherValues; if (s != default!) {
-            var s2 = new map<@string, @string>(len(s));
+            var s2 = new map<@string, @string>(builtin.len(s));
             foreach (var (k, v) in s) {
                 s2[k] = v;
             }
-            r2.val.otherValues = s2;
+            r2.Value.otherValues = s2;
         }
     }
     return r2;
@@ -431,7 +434,7 @@ public static error ErrNoCookie = errors.New("http: named cookie not present"u8)
 // AddCookie only sanitizes c's name and value, and does not sanitize
 // a Cookie header already present in the request.
 [GoRecv] public static void AddCookie(this ref Request r, ж<ΔCookie> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     @string s = fmt.Sprintf("%s=%s"u8, sanitizeCookieName(c.Name), sanitizeCookieValue(c.Value, c.Quoted));
     {
@@ -460,7 +463,7 @@ public static error ErrNoCookie = errors.New("http: named cookie not present"u8)
 // body has been handed off to a MultipartReader instead of ParseMultipartForm.
 internal static ж<multipart.Form> multipartByReader = Ꮡ(new multipart.Form(
     Value: new map<@string, slice<@string>>(),
-    File: new multipart.FileHeader()
+    File: new map<@string, slice<ж<multipart.FileHeader>>>()
 ));
 
 // MultipartReader returns a MIME multipart reader if this is a
@@ -481,19 +484,18 @@ internal static ж<multipart.Form> multipartByReader = Ꮡ(new multipart.Form(
 [GoRecv] internal static (ж<multipart.Reader>, error) multipartReader(this ref Request r, bool allowMixed) {
     @string v = r.Header.Get("Content-Type"u8);
     if (v == ""u8) {
-        return (default!, ~ErrNotMultipart);
+        return (default!, new ProtocolErrorжerror(ErrNotMultipart));
     }
     if (r.Body == default!) {
         return (default!, errors.New("missing form body"u8));
     }
     var (d, @params, err) = mime.ParseMediaType(v);
     if (err != default! || !(d == "multipart/form-data"u8 || allowMixed && d == "multipart/mixed"u8)) {
-        return (default!, ~ErrNotMultipart);
+        return (default!, new ProtocolErrorжerror(ErrNotMultipart));
     }
-    @string boundary = @params["boundary"u8];
-    var ok = @params["boundary"u8];
+    var (boundary, ok) = @params["boundary"u8, ꟷ];
     if (!ok) {
-        return (default!, ~ErrMissingBoundary);
+        return (default!, new ProtocolErrorжerror(ErrMissingBoundary));
     }
     return (multipart.NewReader(r.Body, boundary), default!);
 }
@@ -501,7 +503,7 @@ internal static ж<multipart.Form> multipartByReader = Ꮡ(new multipart.Form(
 // isH2Upgrade reports whether r represents the http2 "client preface"
 // magic string.
 [GoRecv] internal static bool isH2Upgrade(this ref Request r) {
-    return r.Method == "PRI"u8 && len(r.Header) == 0 && r.URL.Path == "*"u8 && r.Proto == "HTTP/2.0"u8;
+    return r.Method == "PRI"u8 && builtin.len(r.Header) == 0 && (~r.URL).Path == "*"u8 && r.Proto == "HTTP/2.0"u8;
 }
 
 // Return value if nonempty, def otherwise.
@@ -532,8 +534,10 @@ internal static readonly @string defaultUserAgent = "Go-http-client/1.1"u8;
 // If Body is present, Content-Length is <= 0 and [Request.TransferEncoding]
 // hasn't been set to "identity", Write adds "Transfer-Encoding:
 // chunked" to the header. Body is closed after it is sent.
-[GoRecv] public static error Write(this ref Request r, io.Writer w) {
-    return r.write(w, false, default!, default!);
+public static error Write(this ж<Request> Ꮡr, io.Writer w) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.write(w, false, default!, default!);
 }
 
 // WriteProxy is like [Request.Write] but writes the request in the form
@@ -542,8 +546,10 @@ internal static readonly @string defaultUserAgent = "Go-http-client/1.1"u8;
 // section 5.3 of RFC 7230, including the scheme and host.
 // In either case, WriteProxy also writes a Host header, using
 // either r.Host or r.URL.Host.
-[GoRecv] public static error WriteProxy(this ref Request r, io.Writer w) {
-    return r.write(w, true, default!, default!);
+public static error WriteProxy(this ж<Request> Ꮡr, io.Writer w) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.write(w, true, default!, default!);
 }
 
 // errMissingHost is returned by Write when there is no Host or URL present in
@@ -553,199 +559,202 @@ internal static error errMissingHost = errors.New("http: Request.Write on Reques
 // extraHeaders may be nil
 // waitForContinue may be nil
 // always closes body
-[GoRecv] internal static error /*err*/ write(this ref Request r, io.Writer w, bool usingProxy, ΔHeader extraHeaders, Func<bool> waitForContinue) => func((defer, _) => {
-    error err = default!;
+internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usingProxy, ΔHeader extraHeaders, Func<bool> waitForContinue) {
+    heap<error>(out var Ꮡerr);
+    func((defer, recover) => {
+    ref var r = ref Ꮡr.Value;
 
-    var trace = httptrace.ContextClientTrace(r.Context());
-    if (trace != nil && (~trace).WroteRequest != default!) {
-        var errʗ1 = err;
-        var traceʗ1 = trace;
-        defer(() => {
-            (~traceʗ1).WroteRequest(new httptrace.WroteRequestInfo(
-                Err: errʗ1
-            ));
-        });
-    }
-    var closed = false;
-    var errʗ2 = err;
-    defer(() => {
-        if (closed) {
-            return errʗ2;
+    ref var err = ref Ꮡerr.ValueSlot;
+        var trace = httptrace.ContextClientTrace(r.Context());
+        if (trace != nil && (~trace).WroteRequest != default!) {
+            var traceʗ1 = trace;
+            defer(() => {
+                (~traceʗ1).WroteRequest(new httptrace.WroteRequestInfo(
+                    Err: Ꮡerr.ValueSlot
+                ));
+            });
         }
-        {
-            var closeErr = r.closeBody(); if (closeErr != default! && errʗ2 == default!) {
-                errʗ2 = closeErr;
+        var closed = false;
+        defer(() => {
+            if (closed) {
+                return;
+            }
+            {
+                var closeErr = Ꮡr.Value.closeBody(); if (closeErr != default! && Ꮡerr.ValueSlot == default!) {
+                    Ꮡerr.ValueSlot = closeErr;
+                }
+            }
+        });
+        // Find the target host. Prefer the Host: header, but if that
+        // is not given, use the host from the request URL.
+        //
+        // Clean the host, in case it arrives with unexpected stuff in it.
+        @string host = r.Host;
+        if (host == ""u8) {
+            if (r.URL == nil) {
+                err = errMissingHost; return;
+            }
+            host = r.URL.Value.Host;
+        }
+        (host, err) = httpguts.PunycodeHostPort(host);
+        if (err != default!) {
+            return;
+        }
+        // Validate that the Host header is a valid header in general,
+        // but don't validate the host itself. This is sufficient to avoid
+        // header or request smuggling via the Host field.
+        // The server can (and will, if it's a net/http server) reject
+        // the request if it doesn't consider the host valid.
+        if (!httpguts.ValidHostHeader(host)) {
+            // Historically, we would truncate the Host header after '/' or ' '.
+            // Some users have relied on this truncation to convert a network
+            // address such as Unix domain socket path into a valid, ignored
+            // Host header (see https://go.dev/issue/61431).
+            //
+            // We don't preserve the truncation, because sending an altered
+            // header field opens a smuggling vector. Instead, zero out the
+            // Host header entirely if it isn't valid. (An empty Host is valid;
+            // see RFC 9112 Section 3.2.)
+            //
+            // Return an error if we're sending to a proxy, since the proxy
+            // probably can't do anything useful with an empty Host header.
+            if (!usingProxy){
+                host = ""u8;
+            } else {
+                err = errors.New("http: invalid Host header"u8); return;
             }
         }
-    });
-    // Find the target host. Prefer the Host: header, but if that
-    // is not given, use the host from the request URL.
-    //
-    // Clean the host, in case it arrives with unexpected stuff in it.
-    @string host = r.Host;
-    if (host == ""u8) {
-        if (r.URL == nil) {
-            return errMissingHost;
+        // According to RFC 6874, an HTTP client, proxy, or other
+        // intermediary must remove any IPv6 zone identifier attached
+        // to an outgoing URI.
+        host = removeZone(host);
+        @string ruri = r.URL.RequestURI();
+        if (usingProxy && (~r.URL).Scheme != ""u8 && (~r.URL).Opaque == ""u8){
+            ruri = (~r.URL).Scheme + "://"u8 + host + ruri;
+        } else 
+        if (r.Method == "CONNECT"u8 && (~r.URL).Path == ""u8) {
+            // CONNECT requests normally give just the host and port, not a full URL.
+            ruri = host;
+            if ((~r.URL).Opaque != ""u8) {
+                ruri = r.URL.Value.Opaque;
+            }
         }
-        host = r.URL.Host;
-    }
-    (host, err) = httpguts.PunycodeHostPort(host);
-    if (err != default!) {
-        return err;
-    }
-    // Validate that the Host header is a valid header in general,
-    // but don't validate the host itself. This is sufficient to avoid
-    // header or request smuggling via the Host field.
-    // The server can (and will, if it's a net/http server) reject
-    // the request if it doesn't consider the host valid.
-    if (!httpguts.ValidHostHeader(host)) {
-        // Historically, we would truncate the Host header after '/' or ' '.
-        // Some users have relied on this truncation to convert a network
-        // address such as Unix domain socket path into a valid, ignored
-        // Host header (see https://go.dev/issue/61431).
-        //
-        // We don't preserve the truncation, because sending an altered
-        // header field opens a smuggling vector. Instead, zero out the
-        // Host header entirely if it isn't valid. (An empty Host is valid;
-        // see RFC 9112 Section 3.2.)
-        //
-        // Return an error if we're sending to a proxy, since the proxy
-        // probably can't do anything useful with an empty Host header.
-        if (!usingProxy){
-            host = ""u8;
-        } else {
-            return errors.New("http: invalid Host header"u8);
+        if (stringContainsCTLByte(ruri)) {
+            err = errors.New("net/http: can't write control character in Request.URL"u8); return;
         }
-    }
-    // According to RFC 6874, an HTTP client, proxy, or other
-    // intermediary must remove any IPv6 zone identifier attached
-    // to an outgoing URI.
-    host = removeZone(host);
-    @string ruri = r.URL.RequestURI();
-    if (usingProxy && r.URL.Scheme != ""u8 && r.URL.Opaque == ""u8){
-        ruri = r.URL.Scheme + "://"u8 + host + ruri;
-    } else 
-    if (r.Method == "CONNECT"u8 && r.URL.Path == ""u8) {
-        // CONNECT requests normally give just the host and port, not a full URL.
-        ruri = host;
-        if (r.URL.Opaque != ""u8) {
-            ruri = r.URL.Opaque;
+        // TODO: validate r.Method too? At least it's less likely to
+        // come from an attacker (more likely to be a constant in
+        // code).
+        // Wrap the writer in a bufio Writer if it's not already buffered.
+        // Don't always call NewWriter, as that forces a bytes.Buffer
+        // and other small bufio Writers to have a minimum 4k buffer
+        // size.
+        ж<bufio.Writer> bw = default!;
+        {
+            var (_, ok) = w._<io.ByteWriter>(ᐧ); if (!ok) {
+                bw = bufio.NewWriter(w);
+                w = new bufio_WriterжWriter(bw);
+            }
         }
-    }
-    if (stringContainsCTLByte(ruri)) {
-        return errors.New("net/http: can't write control character in Request.URL"u8);
-    }
-    // TODO: validate r.Method too? At least it's less likely to
-    // come from an attacker (more likely to be a constant in
-    // code).
-    // Wrap the writer in a bufio Writer if it's not already buffered.
-    // Don't always call NewWriter, as that forces a bytes.Buffer
-    // and other small bufio Writers to have a minimum 4k buffer
-    // size.
-    ж<bufio.Writer> bw = default!;
-    {
-        var (_, ok) = w._<io.ByteWriter>(ᐧ); if (!ok) {
-            bw = bufio.NewWriter(w);
-            w = ~bw;
-        }
-    }
-    (_, err) = fmt.Fprintf(w, "%s %s HTTP/1.1\r\n"u8, valueOrDefault(r.Method, "GET"u8), ruri);
-    if (err != default!) {
-        return err;
-    }
-    // Header lines
-    (_, err) = fmt.Fprintf(w, "Host: %s\r\n"u8, host);
-    if (err != default!) {
-        return err;
-    }
-    if (trace != nil && (~trace).WroteHeaderField != default!) {
-        (~trace).WroteHeaderField("Host", new @string[]{host}.slice());
-    }
-    // Use the defaultUserAgent unless the Header contains one, which
-    // may be blank to not send the header.
-    @string userAgent = defaultUserAgent;
-    if (r.Header.has("User-Agent"u8)) {
-        userAgent = r.Header.Get("User-Agent"u8);
-    }
-    if (userAgent != ""u8) {
-        userAgent = headerNewlineToSpace.Replace(userAgent);
-        userAgent = textproto.TrimString(userAgent);
-        (_, err) = fmt.Fprintf(w, "User-Agent: %s\r\n"u8, userAgent);
+        (_, err) = fmt.Fprintf(w, "%s %s HTTP/1.1\r\n"u8, valueOrDefault(r.Method, "GET"u8), ruri);
         if (err != default!) {
-            return err;
+            return;
+        }
+        // Header lines
+        (_, err) = fmt.Fprintf(w, "Host: %s\r\n"u8, host);
+        if (err != default!) {
+            return;
         }
         if (trace != nil && (~trace).WroteHeaderField != default!) {
-            (~trace).WroteHeaderField("User-Agent", new @string[]{userAgent}.slice());
+            (~trace).WroteHeaderField("Host"u8, new @string[]{host}.slice());
         }
-    }
-    // Process Body,ContentLength,Close,Trailer
-    (tw, err) = newTransferWriter(r);
-    if (err != default!) {
-        return err;
-    }
-    err = tw.writeHeader(w, trace);
-    if (err != default!) {
-        return err;
-    }
-    err = r.Header.writeSubset(w, reqWriteExcludeHeader, trace);
-    if (err != default!) {
-        return err;
-    }
-    if (extraHeaders != default!) {
-        err = extraHeaders.write(w, trace);
+        // Use the defaultUserAgent unless the Header contains one, which
+        // may be blank to not send the header.
+        @string userAgent = defaultUserAgent;
+        if (r.Header.has("User-Agent"u8)) {
+            userAgent = r.Header.Get("User-Agent"u8);
+        }
+        if (userAgent != ""u8) {
+            userAgent = headerNewlineToSpace.Replace(userAgent);
+            userAgent = textproto.TrimString(userAgent);
+            (_, err) = fmt.Fprintf(w, "User-Agent: %s\r\n"u8, userAgent);
+            if (err != default!) {
+                return;
+            }
+            if (trace != nil && (~trace).WroteHeaderField != default!) {
+                (~trace).WroteHeaderField("User-Agent"u8, new @string[]{userAgent}.slice());
+            }
+        }
+        // Process Body,ContentLength,Close,Trailer
+        (var tw, err) = newTransferWriter(r);
         if (err != default!) {
-            return err;
+            return;
         }
-    }
-    (_, err) = io.WriteString(w, "\r\n"u8);
-    if (err != default!) {
-        return err;
-    }
-    if (trace != nil && (~trace).WroteHeaders != default!) {
-        (~trace).WroteHeaders();
-    }
-    // Flush and wait for 100-continue if expected.
-    if (waitForContinue != default!) {
-        {
-            var (bwΔ1, ok) = w._<ж<bufio.Writer>>(ᐧ); if (ok) {
-                err = bwΔ1.Flush();
-                if (err != default!) {
-                    return err;
-                }
+        err = tw.writeHeader(w, trace);
+        if (err != default!) {
+            return;
+        }
+        err = r.Header.writeSubset(w, reqWriteExcludeHeader, trace);
+        if (err != default!) {
+            return;
+        }
+        if (extraHeaders != default!) {
+            err = extraHeaders.write(w, trace);
+            if (err != default!) {
+                return;
             }
         }
-        if (trace != nil && (~trace).Wait100Continue != default!) {
-            (~trace).Wait100Continue();
+        (_, err) = io.WriteString(w, "\r\n"u8);
+        if (err != default!) {
+            return;
         }
-        if (!waitForContinue()) {
-            closed = true;
-            r.closeBody();
-            return default!;
+        if (trace != nil && (~trace).WroteHeaders != default!) {
+            (~trace).WroteHeaders();
         }
-    }
-    {
-        var (bwΔ2, ok) = w._<ж<bufio.Writer>>(ᐧ); if (ok && (~tw).FlushHeaders) {
+        // Flush and wait for 100-continue if expected.
+        if (waitForContinue != default!) {
             {
-                var errΔ1 = bwΔ2.Flush(); if (errΔ1 != default!) {
-                    return errΔ1;
+                var (bwΔ1, ok) = w._<ж<bufio.Writer>>(ᐧ); if (ok) {
+                    err = bwΔ1.Flush();
+                    if (err != default!) {
+                        return;
+                    }
+                }
+            }
+            if (trace != nil && (~trace).Wait100Continue != default!) {
+                (~trace).Wait100Continue();
+            }
+            if (!waitForContinue()) {
+                closed = true;
+                r.closeBody();
+                err = default!; return;
+            }
+        }
+        {
+            var (bwΔ2, ok) = w._<ж<bufio.Writer>>(ᐧ); if (ok && (~tw).FlushHeaders) {
+                {
+                    var errΔ1 = bwΔ2.Flush(); if (errΔ1 != default!) {
+                        err = errΔ1; return;
+                    }
                 }
             }
         }
-    }
-    // Write body and trailer
-    closed = true;
-    err = tw.writeBody(w);
-    if (err != default!) {
-        if (AreEqual((~tw).bodyReadError, err)) {
-            err = new requestBodyReadError(err);
+        // Write body and trailer
+        closed = true;
+        err = tw.writeBody(w);
+        if (err != default!) {
+            if (AreEqual((~tw).bodyReadError, err)) {
+                err = new requestBodyReadError(err);
+            }
+            return;
         }
-        return err;
-    }
-    if (bw != nil) {
-        return bw.Flush();
-    }
-    return default!;
-});
+        if (bw != nil) {
+            err = bw.Flush(); return;
+        }
+        err = default!;
+    });
+    return Ꮡerr.ValueSlot;
+}
 
 // requestBodyReadError wraps an error from (*Request).write to indicate
 // that the error came from a Read call on the Request.Body.
@@ -806,7 +815,7 @@ public static (nint major, nint minor, bool ok) ParseHTTPVersion(@string vers) {
     if (!strings.HasPrefix(vers, "HTTP/"u8)) {
         return (0, 0, false);
     }
-    if (len(vers) != len("HTTP/X.Y")) {
+    if (builtin.len(vers) != builtin.len("HTTP/X.Y")) {
         return (0, 0, false);
     }
     if (vers[6] != (rune)'.') {
@@ -816,11 +825,11 @@ public static (nint major, nint minor, bool ok) ParseHTTPVersion(@string vers) {
     if (err != default!) {
         return (0, 0, false);
     }
-    var (min, err) = strconv.ParseUint(vers[7..8], 10, 0);
+    (var min, err) = strconv.ParseUint(vers[7..8], 10, 0);
     if (err != default!) {
         return (0, 0, false);
     }
-    return (((nint)maj), ((nint)min), true);
+    return ((nint)maj, (nint)min, true);
 }
 
 internal static bool validMethod(@string method) {
@@ -837,12 +846,12 @@ internal static bool validMethod(@string method) {
 	   extension-method = token
 	     token          = 1*<any CHAR except CTLs or separators>
 	*/
-    return len(method) > 0 && strings.IndexFunc(method, isNotToken) == -1;
+    return builtin.len(method) > 0 && strings.IndexFunc(method, isNotToken) == -1;
 }
 
 // NewRequest wraps [NewRequestWithContext] using [context.Background].
 public static (ж<Request>, error) NewRequest(@string method, @string url, io.Reader body) {
-    return NewRequestWithContext(context.Background(), method, url, body);
+    return NewRequestWithContext(context_package.Background(), method, url, body);
 }
 
 // NewRequestWithContext returns a new [Request] given a method, URL, and
@@ -881,7 +890,7 @@ public static (ж<Request>, error) NewRequestWithContext(context.Context ctx, @s
     if (ctx == default!) {
         return (default!, errors.New("net/http: nil Context"u8));
     }
-    (u, err) = urlpkg.Parse(url);
+    var (u, err) = urlpkg.Parse(url);
     if (err != default!) {
         return (default!, err);
     }
@@ -890,7 +899,7 @@ public static (ж<Request>, error) NewRequestWithContext(context.Context ctx, @s
         rc = io.NopCloser(body);
     }
     // The host's colon:port should be normalized. See Issue 14836.
-    u.val.Host = removeEmptyPort((~u).Host);
+    u.Value.Host = removeEmptyPort((~u).Host);
     var req = Ꮡ(new Request(
         ctx: ctx,
         Method: method,
@@ -898,49 +907,48 @@ public static (ж<Request>, error) NewRequestWithContext(context.Context ctx, @s
         Proto: "HTTP/1.1"u8,
         ProtoMajor: 1,
         ProtoMinor: 1,
-        ΔHeader: new ΔHeader(),
+        Header: new ΔHeader(),
         Body: rc,
         Host: (~u).Host
     ));
     if (body != default!) {
         switch (body.type()) {
         case ж<bytes.Buffer> v: {
-            req.val.ContentLength = ((int64)v.Len());
+            req.Value.ContentLength = (int64)v.Len();
             var buf = v.Bytes();
-            req.val.GetBody = 
             var bufʗ1 = buf;
-            () => {
+            req.Value.GetBody = (io.ReadCloser, error) () => {
                 var r = bytes.NewReader(bufʗ1);
-                return (io.NopCloser(~r), default!);
+                return (io.NopCloser(new bytes_ReaderжReader(r)), default!);
             };
             break;
         }
         case ж<bytes.Reader> v: {
-            req.val.ContentLength = ((int64)v.Len());
-            ref var snapshot = ref heap<bytes_package.Reader>(out var Ꮡsnapshot);
-            snapshot = v.val;
-            req.val.GetBody = 
+            req.Value.ContentLength = (int64)v.Len();
+            ref var snapshot = ref heap<bytes.Reader>(out var Ꮡsnapshot);
+            snapshot = v.Value;
             var snapshotʗ1 = snapshot;
-            () => {
-                ref var r = ref heap<bytes_package.Reader>(out var Ꮡr);
+            req.Value.GetBody = (io.ReadCloser, error) () => {
+                ref var r = ref heap<bytes.Reader>(out var Ꮡr);
                 r = snapshotʗ1;
-                return (io.NopCloser(~Ꮡr), default!);
+                return (io.NopCloser(new bytes_ReaderжReader(Ꮡr)), default!);
             };
             break;
         }
         case ж<strings.Reader> v: {
-            req.val.ContentLength = ((int64)v.Len());
-            snapshot = v.val;
-            req.val.GetBody = 
-            () => {
-                ref var r = ref heap<strings_package.Reader>(out var Ꮡr);
-                r = snapshot;
-                return (io.NopCloser(~Ꮡr), default!);
+            req.Value.ContentLength = (int64)v.Len();
+            ref var snapshot = ref heap<strings.Reader>(out var Ꮡsnapshot);
+            snapshot = v.Value;
+            var snapshotʗ2 = snapshot;
+            req.Value.GetBody = (io.ReadCloser, error) () => {
+                ref var r = ref heap<strings.Reader>(out var Ꮡr);
+                r = snapshotʗ2;
+                return (io.NopCloser(new strings_ReaderжReader(Ꮡr)), default!);
             };
             break;
         }
         default: {
-            var v = body.type();
+            var v = body;
             break;
         }}
         // This is where we'd set it to -1 (at least
@@ -957,10 +965,8 @@ public static (ж<Request>, error) NewRequestWithContext(context.Context ctx, @s
         // and have the http package also treat that sentinel
         // variable to mean explicitly zero.
         if ((~req).GetBody != default! && (~req).ContentLength == 0) {
-            req.val.Body = NoBody;
-            req.val.GetBody = 
-            var NoBodyʗ1 = NoBody;
-            () => (NoBodyʗ1, default!);
+            req.Value.Body = NoBody;
+            req.Value.GetBody = (io.ReadCloser, error) () => (NoBody, default!);
         }
     }
     return (req, default!);
@@ -1000,10 +1006,10 @@ internal static (@string username, @string password, bool ok) parseBasicAuth(@st
 
     @string prefix = "Basic "u8;
     // Case insensitive prefix match. See Issue 22736.
-    if (len(auth) < len(prefix) || !ascii.EqualFold(auth[..(int)(len(prefix))], prefix)) {
+    if (builtin.len(auth) < builtin.len(prefix) || !ascii.EqualFold(auth[..(int)(builtin.len(prefix))], prefix)) {
         return ("", "", false);
     }
-    (c, err) = base64.StdEncoding.DecodeString(auth[(int)(len(prefix))..]);
+    var (c, err) = base64.StdEncoding.DecodeString(auth[(int)(builtin.len(prefix))..]);
     if (err != default!) {
         return ("", "", false);
     }
@@ -1037,23 +1043,24 @@ internal static (@string method, @string requestURI, @string proto, bool ok) par
     @string proto = default!;
     bool ok = default!;
 
-    var (method, rest, ok1) = strings.Cut(line, " "u8);
-    var (requestURI, proto, ok2) = strings.Cut(rest, " "u8);
+    (method, var rest, var ok1) = strings.Cut(line, " "u8);
+    (requestURI, proto, var ok2) = strings.Cut(rest, " "u8);
     if (!ok1 || !ok2) {
         return ("", "", "", false);
     }
     return (method, requestURI, proto, true);
 }
 
-internal static sync.Pool textprotoReaderPool;
+internal static ж<sync.Pool> ᏑtextprotoReaderPool = new(default(sync.Pool));
+internal static ref sync.Pool textprotoReaderPool => ref ᏑtextprotoReaderPool.Value;
 
 internal static ж<textproto.Reader> newTextprotoReader(ж<bufio.Reader> Ꮡbr) {
-    ref var br = ref Ꮡbr.val;
+    ref var br = ref Ꮡbr.Value;
 
     {
-        var v = textprotoReaderPool.Get(); if (v != default!) {
+        var v = ᏑtextprotoReaderPool.Get(); if (v != default!) {
             var tr = v._<ж<textproto.Reader>>();
-            tr.val.R = br;
+            tr.Value.R = Ꮡbr;
             return tr;
         }
     }
@@ -1061,10 +1068,10 @@ internal static ж<textproto.Reader> newTextprotoReader(ж<bufio.Reader> Ꮡbr) 
 }
 
 internal static void putTextprotoReader(ж<textproto.Reader> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     r.R = default!;
-    textprotoReaderPool.Put(r);
+    ᏑtextprotoReaderPool.Put(r);
 }
 
 // ReadRequest reads and parses an incoming request from b.
@@ -1074,9 +1081,9 @@ internal static void putTextprotoReader(ж<textproto.Reader> Ꮡr) {
 // requests and handle them via the [Handler] interface. ReadRequest
 // only supports HTTP/1.x requests. For HTTP/2, use golang.org/x/net/http2.
 public static (ж<Request>, error) ReadRequest(ж<bufio.Reader> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
-    (req, err) = readRequest(Ꮡb);
+    var (req, err) = readRequest(Ꮡb);
     if (err != default!) {
         return (default!, err);
     }
@@ -1095,100 +1102,103 @@ public static (ж<Request>, error) ReadRequest(ж<bufio.Reader> Ꮡb) {
 // See go.dev/issue/67401.
 //
 //go:linkname readRequest
-internal static (ж<Request> req, error err) readRequest(ж<bufio.Reader> Ꮡb) => func((defer, _) => {
+internal static (ж<Request> req, error err) readRequest(ж<bufio.Reader> Ꮡb) {
     ж<Request> req = default!;
-    error err = default!;
+    heap<error>(out var Ꮡerr);
+    func((defer, recover) => {
+    ref var b = ref Ꮡb.Value;
 
-    ref var b = ref Ꮡb.val;
-    var tp = newTextprotoReader(Ꮡb);
-    deferǃ(putTextprotoReader, tp, defer);
-    req = @new<Request>();
-    // First line: GET /index.html HTTP/1.0
-    @string s = default!;
-    {
-        (s, err) = tp.ReadLine(); if (err != default!) {
-            return (default!, err);
+    ref var err = ref Ꮡerr.ValueSlot;
+        var tp = newTextprotoReader(Ꮡb);
+        deferǃ(putTextprotoReader, tp, defer);
+        req = @new<Request>();
+        // First line: GET /index.html HTTP/1.0
+        @string s = default!;
+        {
+            (s, err) = tp.ReadLine(); if (err != default!) {
+                (req, err) = (default!, err); return;
+            }
         }
-    }
-    var errʗ1 = err;
-    defer(() => {
-        if (AreEqual(errʗ1, io.EOF)) {
-            errʗ1 = io.ErrUnexpectedEOF;
+        defer(() => {
+            if (AreEqual(Ꮡerr.ValueSlot, io.EOF)) {
+                Ꮡerr.ValueSlot = io.ErrUnexpectedEOF;
+            }
+        });
+        bool ok = default!;
+        (req.Value.Method, req.Value.RequestURI, req.Value.Proto, ok) = parseRequestLine(s);
+        if (!ok) {
+            (req, err) = (default!, badStringError("malformed HTTP request"u8, s)); return;
         }
+        if (!validMethod((~req).Method)) {
+            (req, err) = (default!, badStringError("invalid method"u8, (~req).Method)); return;
+        }
+        @string rawurl = req.Value.RequestURI;
+        {
+            (req.Value.ProtoMajor, req.Value.ProtoMinor, ok) = ParseHTTPVersion((~req).Proto); if (!ok) {
+                (req, err) = (default!, badStringError("malformed HTTP version"u8, (~req).Proto)); return;
+            }
+        }
+        // CONNECT requests are used two different ways, and neither uses a full URL:
+        // The standard use is to tunnel HTTPS through an HTTP proxy.
+        // It looks like "CONNECT www.google.com:443 HTTP/1.1", and the parameter is
+        // just the authority section of a URL. This information should go in req.URL.Host.
+        //
+        // The net/rpc package also uses CONNECT, but there the parameter is a path
+        // that starts with a slash. It can be parsed with the regular URL parser,
+        // and the path will end up in req.URL.Path, where it needs to be in order for
+        // RPC to work.
+        var justAuthority = (~req).Method == "CONNECT"u8 && !strings.HasPrefix(rawurl, "/"u8);
+        if (justAuthority) {
+            rawurl = "http://"u8 + rawurl;
+        }
+        {
+            (req.Value.URL, err) = url.ParseRequestURI(rawurl); if (err != default!) {
+                (req, err) = (default!, err); return;
+            }
+        }
+        if (justAuthority) {
+            // Strip the bogus "http://" back off.
+            req.Value.URL.Value.Scheme = ""u8;
+        }
+        // Subsequent lines: Key: value.
+        (var mimeHeader, err) = tp.ReadMIMEHeader();
+        if (err != default!) {
+            (req, err) = (default!, err); return;
+        }
+        req.Value.Header = ((ΔHeader)(map<@string, slice<@string>>)mimeHeader);
+        if (builtin.len((~req).Header["Host"u8]) > 1) {
+            (req, err) = (default!, fmt.Errorf("too many Host headers"u8)); return;
+        }
+        // RFC 7230, section 5.3: Must treat
+        //	GET /index.html HTTP/1.1
+        //	Host: www.google.com
+        // and
+        //	GET http://www.google.com/index.html HTTP/1.1
+        //	Host: doesntmatter
+        // the same. In the second case, any Host line is ignored.
+        req.Value.Host = req.Value.URL.Value.Host;
+        if ((~req).Host == ""u8) {
+            req.Value.Host = (~req).Header.get("Host"u8);
+        }
+        fixPragmaCacheControl((~req).Header);
+        req.Value.Close = shouldClose((~req).ProtoMajor, (~req).ProtoMinor, (~req).Header, false);
+        err = readTransfer(req, Ꮡb);
+        if (err != default!) {
+            (req, err) = (default!, err); return;
+        }
+        if (req.isH2Upgrade()) {
+            // Because it's neither chunked, nor declared:
+            req.Value.ContentLength = -1;
+            // We want to give handlers a chance to hijack the
+            // connection, but we need to prevent the Server from
+            // dealing with the connection further if it's not
+            // hijacked. Set Close to ensure that:
+            req.Value.Close = true;
+        }
+        (req, err) = (req, default!);
     });
-    bool ok = default!;
-    (req.val.Method, req.val.RequestURI, req.val.Proto, ok) = parseRequestLine(s);
-    if (!ok) {
-        return (default!, badStringError("malformed HTTP request"u8, s));
-    }
-    if (!validMethod((~req).Method)) {
-        return (default!, badStringError("invalid method"u8, (~req).Method));
-    }
-    @string rawurl = req.val.RequestURI;
-    {
-        var (req.val.ProtoMajor, req.val.ProtoMinor, ok) = ParseHTTPVersion((~req).Proto); if (!ok) {
-            return (default!, badStringError("malformed HTTP version"u8, (~req).Proto));
-        }
-    }
-    // CONNECT requests are used two different ways, and neither uses a full URL:
-    // The standard use is to tunnel HTTPS through an HTTP proxy.
-    // It looks like "CONNECT www.google.com:443 HTTP/1.1", and the parameter is
-    // just the authority section of a URL. This information should go in req.URL.Host.
-    //
-    // The net/rpc package also uses CONNECT, but there the parameter is a path
-    // that starts with a slash. It can be parsed with the regular URL parser,
-    // and the path will end up in req.URL.Path, where it needs to be in order for
-    // RPC to work.
-    var justAuthority = (~req).Method == "CONNECT"u8 && !strings.HasPrefix(rawurl, "/"u8);
-    if (justAuthority) {
-        rawurl = "http://"u8 + rawurl;
-    }
-    {
-        var (req.val.URL, err) = url.ParseRequestURI(rawurl); if (err != default!) {
-            return (default!, err);
-        }
-    }
-    if (justAuthority) {
-        // Strip the bogus "http://" back off.
-        (~req).URL.val.Scheme = ""u8;
-    }
-    // Subsequent lines: Key: value.
-    (mimeHeader, err) = tp.ReadMIMEHeader();
-    if (err != default!) {
-        return (default!, err);
-    }
-    req.val.Header = ((ΔHeader)mimeHeader);
-    if (len((~req).Header["Host"u8]) > 1) {
-        return (default!, fmt.Errorf("too many Host headers"u8));
-    }
-    // RFC 7230, section 5.3: Must treat
-    //	GET /index.html HTTP/1.1
-    //	Host: www.google.com
-    // and
-    //	GET http://www.google.com/index.html HTTP/1.1
-    //	Host: doesntmatter
-    // the same. In the second case, any Host line is ignored.
-    req.val.Host = (~req).URL.val.Host;
-    if ((~req).Host == ""u8) {
-        req.val.Host = (~req).Header.get("Host"u8);
-    }
-    fixPragmaCacheControl((~req).Header);
-    req.val.Close = shouldClose((~req).ProtoMajor, (~req).ProtoMinor, (~req).Header, false);
-    err = readTransfer(req, Ꮡb);
-    if (err != default!) {
-        return (default!, err);
-    }
-    if (req.isH2Upgrade()) {
-        // Because it's neither chunked, nor declared:
-        req.val.ContentLength = -1;
-        // We want to give handlers a chance to hijack the
-        // connection, but we need to prevent the Server from
-        // dealing with the connection further if it's not
-        // hijacked. Set Close to ensure that:
-        req.val.Close = true;
-    }
-    return (req, default!);
-});
+    return (req, Ꮡerr.ValueSlot);
+}
 
 // MaxBytesReader is similar to [io.LimitReader] but is intended for
 // limiting the size of incoming request bodies. In contrast to
@@ -1205,7 +1215,7 @@ public static io.ReadCloser MaxBytesReader(ResponseWriter w, io.ReadCloser r, in
         // Treat negative limits as equivalent to 0.
         n = 0;
     }
-    return new maxBytesReader(w: w, r: r, i: n, n: n);
+    return new maxBytesReaderжReadCloser(Ꮡ(new maxBytesReader(w: w, r: r, i: n, n: n)));
 }
 
 // MaxBytesError is returned by [MaxBytesReader] when its read limit is exceeded.
@@ -1220,7 +1230,7 @@ public static io.ReadCloser MaxBytesReader(ResponseWriter w, io.ReadCloser r, in
 
 [GoType] partial struct maxBytesReader {
     internal ResponseWriter w;
-    internal io_package.ReadCloser r; // underlying reader
+    internal io.ReadCloser r; // underlying reader
     internal int64 i;         // max bytes initially, for MaxBytesError
     internal int64 n;         // max bytes remaining
     internal error err;         // sticky error
@@ -1244,30 +1254,30 @@ public static io.ReadCloser MaxBytesReader(ResponseWriter w, io.ReadCloser r, in
     if (l.err != default!) {
         return (0, l.err);
     }
-    if (len(p) == 0) {
+    if (builtin.len(p) == 0) {
         return (0, default!);
     }
     // If they asked for a 32KB byte read but only 5 bytes are
     // remaining, no need to read 32KB. 6 bytes will answer the
     // question of the whether we hit the limit or go past it.
     // 0 < len(p) < 2^63
-    if (((int64)len(p)) - 1 > l.n) {
+    if ((int64)builtin.len(p) - 1 > l.n) {
         p = p[..(int)(l.n + 1)];
     }
     (n, err) = l.r.Read(p);
-    if (((int64)n) <= l.n) {
-        l.n -= ((int64)n);
+    if ((int64)n <= l.n) {
+        l.n -= (int64)n;
         l.err = err;
         return (n, err);
     }
-    n = ((nint)l.n);
+    n = (nint)l.n;
     l.n = 0;
     {
-        var (res, ok) = l.w._<requestTooLarger>(ᐧ); if (ok) {
+        var (res, ok) = l.w._<Read_requestTooLarger>(ᐧ); if (ok) {
             res.requestTooLarge();
         }
     }
-    l.err = Ꮡ(new MaxBytesError(l.i));
+    l.err = new MaxBytesErrorжerror(Ꮡ(new MaxBytesError(l.i)));
     return (n, l.err);
 }
 
@@ -1275,17 +1285,17 @@ public static io.ReadCloser MaxBytesReader(ResponseWriter w, io.ReadCloser r, in
     return l.r.Close();
 }
 
-internal static void copyValues(url.Values dst, url.Values src) {
+internal static void copyValues(urlpkg.Values dst, urlpkg.Values src) {
     foreach (var (k, vs) in src) {
         dst[k] = append(dst[k], vs.ꓸꓸꓸ);
     }
 }
 
-internal static (url.Values vs, error err) parsePostForm(ж<Request> Ꮡr) {
-    url.Values vs = default!;
+internal static (urlpkg.Values vs, error err) parsePostForm(ж<Request> Ꮡr) {
+    urlpkg.Values vs = default!;
     error err = default!;
 
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
     if (r.Body == default!) {
         err = errors.New("missing form body"u8);
         return (vs, err);
@@ -1300,22 +1310,22 @@ internal static (url.Values vs, error err) parsePostForm(ж<Request> Ꮡr) {
     switch (ᐧ) {
     case {} when ct == "application/x-www-form-urlencoded"u8: {
         io.Reader reader = r.Body;
-        var maxFormSize = ((int64)(1 << (int)(63) - 1));
+        var maxFormSize = (int64)(9223372036854775807L);
         {
-            var (_, ok) = r.Body._<maxBytesReader.val>(ᐧ); if (!ok) {
-                maxFormSize = ((int64)(10 << (int)(20)));
+            var (_, ok) = r.Body._<ж<maxBytesReader>>(ᐧ); if (!ok) {
+                maxFormSize = (int64)(((int64)10 << (int)(20)));
                 // 10 MB is a lot of text.
                 reader = io.LimitReader(r.Body, maxFormSize + 1);
             }
         }
-        (b, e) = io.ReadAll(reader);
+        var (b, e) = io.ReadAll(reader);
         if (e != default!) {
             if (err == default!) {
                 err = e;
             }
             break;
         }
-        if (((int64)len(b)) > maxFormSize) {
+        if ((int64)builtin.len(b) > maxFormSize) {
             err = errors.New("http: POST too large"u8);
             return (vs, err);
         }
@@ -1356,31 +1366,33 @@ internal static (url.Values vs, error err) parsePostForm(ж<Request> Ꮡr) {
 //
 // [Request.ParseMultipartForm] calls ParseForm automatically.
 // ParseForm is idempotent.
-[GoRecv] public static error ParseForm(this ref Request r) {
+public static error ParseForm(this ж<Request> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
     error err = default!;
     if (r.PostForm == default!) {
         if (r.Method == "POST"u8 || r.Method == "PUT"u8 || r.Method == "PATCH"u8) {
-            (r.PostForm, err) = parsePostForm(r);
+            (r.PostForm, err) = parsePostForm(Ꮡr);
         }
         if (r.PostForm == default!) {
-            r.PostForm = new url.Values();
+            r.PostForm = new urlpkg.Values();
         }
     }
     if (r.Form == default!) {
-        if (len(r.PostForm) > 0) {
-            r.Form = new url.Values();
+        if (builtin.len(r.PostForm) > 0) {
+            r.Form = new urlpkg.Values();
             copyValues(r.Form, r.PostForm);
         }
-        url.Values newValues = default!;
+        urlpkg.Values newValues = default!;
         if (r.URL != nil) {
             error e = default!;
-            (newValues, e) = url.ParseQuery(r.URL.RawQuery);
+            (newValues, e) = url.ParseQuery((~r.URL).RawQuery);
             if (err == default!) {
                 err = e;
             }
         }
         if (newValues == default!) {
-            newValues = new url.Values();
+            newValues = new urlpkg.Values();
         }
         if (r.Form == default!){
             r.Form = newValues;
@@ -1399,7 +1411,9 @@ internal static (url.Values vs, error err) parsePostForm(ж<Request> Ꮡr) {
 // If ParseForm returns an error, ParseMultipartForm returns it but also
 // continues parsing the request body.
 // After one call to ParseMultipartForm, subsequent calls have no effect.
-[GoRecv] public static error ParseMultipartForm(this ref Request r, int64 maxMemory) {
+public static error ParseMultipartForm(this ж<Request> Ꮡr, int64 maxMemory) {
+    ref var r = ref Ꮡr.Value;
+
     if (r.MultipartForm == multipartByReader) {
         return errors.New("http: multipart handled by MultipartReader"u8);
     }
@@ -1407,21 +1421,21 @@ internal static (url.Values vs, error err) parsePostForm(ж<Request> Ꮡr) {
     if (r.Form == default!) {
         // Let errors in ParseForm fall through, and just
         // return it at the end.
-        parseFormErr = r.ParseForm();
+        parseFormErr = Ꮡr.ParseForm();
     }
     if (r.MultipartForm != nil) {
         return default!;
     }
-    (mr, err) = r.multipartReader(false);
+    var (mr, err) = r.multipartReader(false);
     if (err != default!) {
         return err;
     }
-    (f, err) = mr.ReadForm(maxMemory);
+    (var f, err) = mr.ReadForm(maxMemory);
     if (err != default!) {
         return err;
     }
     if (r.PostForm == default!) {
-        r.PostForm = new url.Values();
+        r.PostForm = new urlpkg.Values();
     }
     foreach (var (k, v) in (~f).Value) {
         r.Form[k] = append(r.Form[k], v.ꓸꓸꓸ);
@@ -1443,12 +1457,14 @@ internal static (url.Values vs, error err) parsePostForm(ж<Request> Ꮡr) {
 // If key is not present, FormValue returns the empty string.
 // To access multiple values of the same key, call ParseForm and
 // then inspect [Request.Form] directly.
-[GoRecv] public static @string FormValue(this ref Request r, @string key) {
+public static @string FormValue(this ж<Request> Ꮡr, @string key) {
+    ref var r = ref Ꮡr.Value;
+
     if (r.Form == default!) {
-        r.ParseMultipartForm(defaultMaxMemory);
+        Ꮡr.ParseMultipartForm(defaultMaxMemory);
     }
     {
-        var vs = r.Form[key]; if (len(vs) > 0) {
+        var vs = r.Form[key]; if (builtin.len(vs) > 0) {
             return vs[0];
         }
     }
@@ -1460,12 +1476,14 @@ internal static (url.Values vs, error err) parsePostForm(ж<Request> Ꮡr) {
 // PostFormValue calls [Request.ParseMultipartForm] and [Request.ParseForm] if necessary and ignores
 // any errors returned by these functions.
 // If key is not present, PostFormValue returns the empty string.
-[GoRecv] public static @string PostFormValue(this ref Request r, @string key) {
+public static @string PostFormValue(this ж<Request> Ꮡr, @string key) {
+    ref var r = ref Ꮡr.Value;
+
     if (r.PostForm == default!) {
-        r.ParseMultipartForm(defaultMaxMemory);
+        Ꮡr.ParseMultipartForm(defaultMaxMemory);
     }
     {
-        var vs = r.PostForm[key]; if (len(vs) > 0) {
+        var vs = r.PostForm[key]; if (builtin.len(vs) > 0) {
             return vs[0];
         }
     }
@@ -1474,20 +1492,22 @@ internal static (url.Values vs, error err) parsePostForm(ж<Request> Ꮡr) {
 
 // FormFile returns the first file for the provided form key.
 // FormFile calls [Request.ParseMultipartForm] and [Request.ParseForm] if necessary.
-[GoRecv] public static (multipart.File, ж<multipart.FileHeader>, error) FormFile(this ref Request r, @string key) {
+public static (multipart.File, ж<multipart.FileHeader>, error) FormFile(this ж<Request> Ꮡr, @string key) {
+    ref var r = ref Ꮡr.Value;
+
     if (r.MultipartForm == multipartByReader) {
         return (default!, default!, errors.New("http: multipart handled by MultipartReader"u8));
     }
     if (r.MultipartForm == nil) {
-        var err = r.ParseMultipartForm(defaultMaxMemory);
+        var err = Ꮡr.ParseMultipartForm(defaultMaxMemory);
         if (err != default!) {
             return (default!, default!, err);
         }
     }
-    if (r.MultipartForm != nil && r.MultipartForm.File != default!) {
+    if (r.MultipartForm != nil && (~r.MultipartForm).File != default!) {
         {
-            var fhs = r.MultipartForm.File[key]; if (len(fhs) > 0) {
-                (f, err) = fhs[0].Open();
+            var fhs = (~r.MultipartForm).File[key]; if (builtin.len(fhs) > 0) {
+                var (f, err) = fhs[0].Open();
                 return (f, fhs[0], err);
             }
         }
@@ -1532,7 +1552,7 @@ internal static (url.Values vs, error err) parsePostForm(ж<Request> Ꮡr) {
         return -1;
     }
     nint i = 0;
-    foreach (var (_, seg) in r.pat.segments) {
+    foreach (var (_, seg) in (~r.pat).segments) {
         if (seg.wild && seg.s != ""u8) {
             if (name == seg.s) {
                 return i;
@@ -1569,7 +1589,7 @@ internal static (url.Values vs, error err) parsePostForm(ж<Request> Ꮡr) {
 }
 
 [GoRecv] internal static bool isReplayable(this ref Request r) {
-    if (r.Body == default! || r.Body == NoBody || r.GetBody != default!) {
+    if (r.Body == default! || AreEqual(r.Body, NoBody) || r.GetBody != default!) {
         var exprᴛ1 = valueOrDefault(r.Method, "GET"u8);
         if (exprᴛ1 == "GET"u8 || exprᴛ1 == "HEAD"u8 || exprᴛ1 == "OPTIONS"u8 || exprᴛ1 == "TRACE"u8) {
             return true;
@@ -1588,7 +1608,7 @@ internal static (url.Values vs, error err) parsePostForm(ж<Request> Ꮡr) {
 // outgoingLength reports the Content-Length of this outgoing (Client) request.
 // It maps 0 into -1 (unknown) when the Body is non-nil.
 [GoRecv] internal static int64 outgoingLength(this ref Request r) {
-    if (r.Body == default! || r.Body == NoBody) {
+    if (r.Body == default! || AreEqual(r.Body, NoBody)) {
         return 0;
     }
     if (r.ContentLength != 0) {

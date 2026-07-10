@@ -3,11 +3,12 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto;
 
-using cipher = crypto.cipher_package;
-using alias = crypto.@internal.alias_package;
-using boring = crypto.@internal.boring_package;
+using cipher = go.crypto.cipher_package;
+using alias = go.crypto.@internal.alias_package;
+using boring = go.crypto.@internal.boring_package;
 using strconv = strconv_package;
-using crypto.@internal;
+using go.crypto;
+using go.crypto.@internal;
 
 partial class aes_package {
 
@@ -24,7 +25,7 @@ public static readonly UntypedInt ΔBlockSize = 16;
 [GoType("num:nint")] partial struct KeySizeError;
 
 public static @string Error(this KeySizeError k) {
-    return "crypto/aes: invalid key size "u8 + strconv.Itoa(((nint)k));
+    return "crypto/aes: invalid key size "u8 + strconv.Itoa((nint)k);
 }
 
 // NewCipher creates and returns a new [cipher.Block].
@@ -52,9 +53,9 @@ public static (cipher.Block, error) NewCipher(slice<byte> key) {
 // implemented in pure Go.
 internal static (cipher.Block, error) newCipherGeneric(slice<byte> key) {
     ref var c = ref heap<aesCipher>(out var Ꮡc);
-    c = new aesCipher(l: ((uint8)(len(key) + 28)));
+    c = new aesCipher(l: (uint8)(len(key) + 28));
     expandKeyGo(key, c.enc[..(int)(c.l)], c.dec[..(int)(c.l)]);
-    return (~Ꮡc, default!);
+    return (new aesCipherжBlock(Ꮡc), default!);
 }
 
 [GoRecv] internal static nint BlockSize(this ref aesCipher c) {

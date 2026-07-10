@@ -11,17 +11,17 @@ partial class asn1_package {
 [GoType("num:uint8")] partial struct Tag;
 
 // import "golang.org/x/crypto/cryptobyte/asn1"
-internal static readonly UntypedInt classConstructed = /* 0x20 */ 32;
-internal static readonly UntypedInt classContextSpecific = /* 0x80 */ 128;
+internal static readonly UntypedInt classConstructed = 0x20;
+internal static readonly UntypedInt classContextSpecific = 0x80;
 
 // Constructed returns t with the constructed class bit set.
 public static Tag Constructed(this Tag t) {
-    return (Tag)(t | classConstructed);
+    return (Tag)(t | (uint8)classConstructed);
 }
 
 // ContextSpecific returns t with the context-specific class bit set.
 public static Tag ContextSpecific(this Tag t) {
-    return (Tag)(t | classContextSpecific);
+    return (Tag)(t | (uint8)classContextSpecific);
 }
 
 // The following is a list of standard tag and class combinations.

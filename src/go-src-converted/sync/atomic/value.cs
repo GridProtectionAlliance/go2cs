@@ -24,62 +24,65 @@ partial class atomic_package {
 
 // Load returns the value set by the most recent Store.
 // It returns nil if there has been no call to Store for this Value.
-[GoRecv] public static any /*val*/ Load(this ref Value v) {
+public static any /*val*/ Load(this ж<Value> Ꮡv) {
     any val = default!;
 
+    ref var v = ref Ꮡv.Value;
     var vp = (ж<efaceWords>)(uintptr)(@unsafe.Pointer.FromRef(ref v));
-    @unsafe.Pointer typ = (uintptr)LoadPointer(Ꮡ((~vp).typ));
-    if (typ == nil || typ.val == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
+    @unsafe.Pointer typ = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡtyp));
+    if (typ == nil || typ.Value == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
         // First store not yet completed.
         return default!;
     }
-    @unsafe.Pointer data = (uintptr)LoadPointer(Ꮡ((~vp).data));
+    @unsafe.Pointer data = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡdata));
     var vlp = (ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(val)));
-    vlp.val.typ = typ;
-    vlp.val.data = data;
+    vlp.Value.typ = typ;
+    vlp.Value.data = data;
     return val;
 }
 
 internal static ж<byte> ᏑfirstStoreInProgress = new(default(byte));
-internal static ref byte firstStoreInProgress => ref ᏑfirstStoreInProgress.val;
+internal static ref byte firstStoreInProgress => ref ᏑfirstStoreInProgress.Value;
 
 // Store sets the value of the [Value] v to val.
 // All calls to Store for a given Value must use values of the same concrete type.
 // Store of an inconsistent type panics, as does Store(nil).
-[GoRecv] public static void Store(this ref Value v, any val) {
+public static void Store(this ж<Value> Ꮡv, any val) {
+    ref var v = ref Ꮡv.Value;
+
     if (val == default!) {
         throw panic("sync/atomic: store of nil value into Value");
     }
     var vp = (ж<efaceWords>)(uintptr)(@unsafe.Pointer.FromRef(ref v));
     var vlp = (ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(val)));
     while (ᐧ) {
-        @unsafe.Pointer typ = (uintptr)LoadPointer(Ꮡ((~vp).typ));
+        @unsafe.Pointer typ = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡtyp));
         if (typ == nil) {
             // Attempt to start first store.
             // Disable preemption so that other goroutines can use
             // active spin wait to wait for completion.
             runtime_procPin();
-            if (!CompareAndSwapPointer(Ꮡ((~vp).typ), nil, new @unsafe.Pointer(ᏑfirstStoreInProgress))) {
+            if (!CompareAndSwapPointer(vp.of(efaceWords.Ꮡtyp), nil, new @unsafe.Pointer(ᏑfirstStoreInProgress))) {
                 runtime_procUnpin();
                 continue;
             }
             // Complete first store.
-            StorePointer(Ꮡ((~vp).data), (~vlp).data);
-            StorePointer(Ꮡ((~vp).typ), (~vlp).typ);
+            StorePointer(vp.of(efaceWords.Ꮡdata), (~vlp).data);
+            StorePointer(vp.of(efaceWords.Ꮡtyp), (~vlp).typ);
             runtime_procUnpin();
             return;
         }
-        if (typ.val == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
+        if (typ.Value == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
             // First store in progress. Wait.
             // Since we disable preemption around the first store,
             // we can wait with active spinning.
             continue;
         }
         // First store completed. Check type and overwrite data.
-        if (typ.val != (~vlp).typ) {
+        if (typ.Value != (~vlp).typ) {
             throw panic("sync/atomic: store of inconsistently typed value into Value");
         }
-        StorePointer(Ꮡ((~vp).data), (~vlp).data);
+        StorePointer(vp.of(efaceWords.Ꮡdata), (~vlp).data);
         return;
     }
 }
@@ -89,44 +92,46 @@ internal static ref byte firstStoreInProgress => ref ᏑfirstStoreInProgress.val
 //
 // All calls to Swap for a given Value must use values of the same concrete
 // type. Swap of an inconsistent type panics, as does Swap(nil).
-[GoRecv] public static any /*old*/ Swap(this ref Value v, any @new) {
+public static any /*old*/ Swap(this ж<Value> Ꮡv, any @new) {
     any old = default!;
 
+    ref var v = ref Ꮡv.Value;
     if (@new == default!) {
         throw panic("sync/atomic: swap of nil value into Value");
     }
     var vp = (ж<efaceWords>)(uintptr)(@unsafe.Pointer.FromRef(ref v));
     var np = (ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(@new)));
     while (ᐧ) {
-        @unsafe.Pointer typ = (uintptr)LoadPointer(Ꮡ((~vp).typ));
+        @unsafe.Pointer typ = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡtyp));
         if (typ == nil) {
             // Attempt to start first store.
             // Disable preemption so that other goroutines can use
             // active spin wait to wait for completion; and so that
             // GC does not see the fake type accidentally.
             runtime_procPin();
-            if (!CompareAndSwapPointer(Ꮡ((~vp).typ), nil, new @unsafe.Pointer(ᏑfirstStoreInProgress))) {
+            if (!CompareAndSwapPointer(vp.of(efaceWords.Ꮡtyp), nil, new @unsafe.Pointer(ᏑfirstStoreInProgress))) {
                 runtime_procUnpin();
                 continue;
             }
             // Complete first store.
-            StorePointer(Ꮡ((~vp).data), (~np).data);
-            StorePointer(Ꮡ((~vp).typ), (~np).typ);
+            StorePointer(vp.of(efaceWords.Ꮡdata), (~np).data);
+            StorePointer(vp.of(efaceWords.Ꮡtyp), (~np).typ);
             runtime_procUnpin();
             return default!;
         }
-        if (typ.val == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
+        if (typ.Value == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
             // First store in progress. Wait.
             // Since we disable preemption around the first store,
             // we can wait with active spinning.
             continue;
         }
         // First store completed. Check type and overwrite data.
-        if (typ.val != (~np).typ) {
+        if (typ.Value != (~np).typ) {
             throw panic("sync/atomic: swap of inconsistently typed value into Value");
         }
         var op = (ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(old)));
-        (op.val.typ, op.val.data) = (np.val.typ, (uintptr)SwapPointer(Ꮡ((~vp).data), (~np).data));
+        op.Value.typ = np.Value.typ;
+        op.Value.data = (uintptr)SwapPointer(vp.of(efaceWords.Ꮡdata), (~np).data);
         return old;
     }
 }
@@ -136,9 +141,10 @@ internal static ref byte firstStoreInProgress => ref ᏑfirstStoreInProgress.val
 // All calls to CompareAndSwap for a given Value must use values of the same
 // concrete type. CompareAndSwap of an inconsistent type panics, as does
 // CompareAndSwap(old, nil).
-[GoRecv] public static bool /*swapped*/ CompareAndSwap(this ref Value v, any old, any @new) {
+public static bool /*swapped*/ CompareAndSwap(this ж<Value> Ꮡv, any old, any @new) {
     bool swapped = default!;
 
+    ref var v = ref Ꮡv.Value;
     if (@new == default!) {
         throw panic("sync/atomic: compare and swap of nil value into Value");
     }
@@ -149,7 +155,7 @@ internal static ref byte firstStoreInProgress => ref ᏑfirstStoreInProgress.val
         throw panic("sync/atomic: compare and swap of inconsistently typed values");
     }
     while (ᐧ) {
-        @unsafe.Pointer typ = (uintptr)LoadPointer(Ꮡ((~vp).typ));
+        @unsafe.Pointer typ = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡtyp));
         if (typ == nil) {
             if (old != default!) {
                 return false;
@@ -159,24 +165,24 @@ internal static ref byte firstStoreInProgress => ref ᏑfirstStoreInProgress.val
             // active spin wait to wait for completion; and so that
             // GC does not see the fake type accidentally.
             runtime_procPin();
-            if (!CompareAndSwapPointer(Ꮡ((~vp).typ), nil, new @unsafe.Pointer(ᏑfirstStoreInProgress))) {
+            if (!CompareAndSwapPointer(vp.of(efaceWords.Ꮡtyp), nil, new @unsafe.Pointer(ᏑfirstStoreInProgress))) {
                 runtime_procUnpin();
                 continue;
             }
             // Complete first store.
-            StorePointer(Ꮡ((~vp).data), (~np).data);
-            StorePointer(Ꮡ((~vp).typ), (~np).typ);
+            StorePointer(vp.of(efaceWords.Ꮡdata), (~np).data);
+            StorePointer(vp.of(efaceWords.Ꮡtyp), (~np).typ);
             runtime_procUnpin();
             return true;
         }
-        if (typ.val == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
+        if (typ.Value == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
             // First store in progress. Wait.
             // Since we disable preemption around the first store,
             // we can wait with active spinning.
             continue;
         }
         // First store completed. Check type and overwrite data.
-        if (typ.val != (~np).typ) {
+        if (typ.Value != (~np).typ) {
             throw panic("sync/atomic: compare and swap of inconsistently typed value into Value");
         }
         // Compare old and current via runtime equality check.
@@ -184,14 +190,14 @@ internal static ref byte firstStoreInProgress => ref ᏑfirstStoreInProgress.val
         // not offered by the package functions.
         // CompareAndSwapPointer below only ensures vp.data
         // has not changed since LoadPointer.
-        @unsafe.Pointer data = (uintptr)LoadPointer(Ꮡ((~vp).data));
-        any i = default!;
-        ((ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(i)))).val.typ = typ;
-        ((ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(i)))).val.data = data;
+        @unsafe.Pointer data = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡdata));
+        ref var i = ref heap<any>(out var Ꮡi);
+        ((ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡi))).Value.typ = typ;
+        ((ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡi))).Value.data = data;
         if (!AreEqual(i, old)) {
             return false;
         }
-        return CompareAndSwapPointer(Ꮡ((~vp).data), data, (~np).data);
+        return CompareAndSwapPointer(vp.of(efaceWords.Ꮡdata), data, (~np).data);
     }
 }
 

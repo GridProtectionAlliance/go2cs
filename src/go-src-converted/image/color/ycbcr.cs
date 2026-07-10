@@ -12,13 +12,13 @@ public static (uint8, uint8, uint8) RGBToYCbCr(uint8 r, uint8 g, uint8 b) {
     //	Cb = -0.1687*R - 0.3313*G + 0.5000*B + 128
     //	Cr =  0.5000*R - 0.4187*G - 0.0813*B + 128
     // https://www.w3.org/Graphics/JPEG/jfif3.pdf says Y but means Y'.
-    var r1 = ((int32)r);
-    var g1 = ((int32)g);
-    var b1 = ((int32)b);
+    var r1 = (int32)r;
+    var g1 = (int32)g;
+    var b1 = (int32)b;
     // yy is in range [0,0xff].
     //
     // Note that 19595 + 38470 + 7471 equals 65536.
-    var yy = (19595 * r1 + 38470 * g1 + 7471 * b1 + 1 << (int)(15)) >> (int)(16);
+    var yy = ((19595 * r1 + 38470 * g1 + 7471 * b1 + (int32)(1 << (int)(15))) >> (int)(16));
     // The bit twiddling below is equivalent to
     //
     // cb := (-11056*r1 - 21712*g1 + 32768*b1 + 257<<15) >> 16
@@ -34,20 +34,20 @@ public static (uint8, uint8, uint8) RGBToYCbCr(uint8 r, uint8 g, uint8 b) {
     // The code below to compute cr uses a similar pattern.
     //
     // Note that -11056 - 21712 + 32768 equals 0.
-    var cb = -11056 * r1 - 21712 * g1 + 32768 * b1 + 257 << (int)(15);
-    if ((uint32)(((uint32)cb) & (nint)4278190080L) == 0){
-        cb >>= (UntypedInt)(16);
+    var cb = -11056 * r1 - 21712 * g1 + 32768 * b1 + (int32)(257 << (int)(15));
+    if ((uint32)((uint32)cb & 0xff000000U) == 0){
+        cb >>= (int)(16);
     } else {
-        cb = ~(cb >> (int)(31));
+        cb = ~((cb >> (int)(31)));
     }
     // Note that 32768 - 27440 - 5328 equals 0.
-    var cr = 32768 * r1 - 27440 * g1 - 5328 * b1 + 257 << (int)(15);
-    if ((uint32)(((uint32)cr) & (nint)4278190080L) == 0){
-        cr >>= (UntypedInt)(16);
+    var cr = 32768 * r1 - 27440 * g1 - 5328 * b1 + (int32)(257 << (int)(15));
+    if ((uint32)((uint32)cr & 0xff000000U) == 0){
+        cr >>= (int)(16);
     } else {
-        cr = ~(cr >> (int)(31));
+        cr = ~((cr >> (int)(31)));
     }
-    return (((uint8)yy), ((uint8)cb), ((uint8)cr));
+    return ((uint8)yy, (uint8)cb, (uint8)cr);
 }
 
 // YCbCrToRGB converts a Y'CbCr triple to an RGB triple.
@@ -108,9 +108,9 @@ public static (uint8, uint8, uint8) YCbCrToRGB(uint8 y, uint8 cb, uint8 cr) {
     //	YY1 = 65536*Y' + 257*Y'
     // or equivalently:
     //	YY1 = Y' * 0x10101
-    var yy1 = ((int32)y) * 65793;
-    var cb1 = ((int32)cb) - 128;
-    var cr1 = ((int32)cr) - 128;
+    var yy1 = (int32)y * 0x10101;
+    var cb1 = (int32)cb - 128;
+    var cr1 = (int32)cr - 128;
     // The bit twiddling below is equivalent to
     //
     // r := (yy1 + 91881*cr1) >> 16
@@ -125,24 +125,24 @@ public static (uint8, uint8, uint8) YCbCrToRGB(uint8 y, uint8 cb, uint8 cr) {
     // statement will convert ^int32(0) to 0xff.
     // The code below to compute g and b uses a similar pattern.
     var r = yy1 + 91881 * cr1;
-    if ((uint32)(((uint32)r) & (nint)4278190080L) == 0){
-        r >>= (UntypedInt)(16);
+    if ((uint32)((uint32)r & 0xff000000U) == 0){
+        r >>= (int)(16);
     } else {
-        r = ~(r >> (int)(31));
+        r = ~((r >> (int)(31)));
     }
     var g = yy1 - 22554 * cb1 - 46802 * cr1;
-    if ((uint32)(((uint32)g) & (nint)4278190080L) == 0){
-        g >>= (UntypedInt)(16);
+    if ((uint32)((uint32)g & 0xff000000U) == 0){
+        g >>= (int)(16);
     } else {
-        g = ~(g >> (int)(31));
+        g = ~((g >> (int)(31)));
     }
     var b = yy1 + 116130 * cb1;
-    if ((uint32)(((uint32)b) & (nint)4278190080L) == 0){
-        b >>= (UntypedInt)(16);
+    if ((uint32)((uint32)b & 0xff000000U) == 0){
+        b >>= (int)(16);
     } else {
-        b = ~(b >> (int)(31));
+        b = ~((b >> (int)(31)));
     }
-    return (((uint8)r), ((uint8)g), ((uint8)b));
+    return ((uint8)r, (uint8)g, (uint8)b);
 }
 
 // YCbCr represents a fully opaque 24-bit Y'CbCr color, having 8 bits each for
@@ -157,9 +157,7 @@ public static (uint8, uint8, uint8) YCbCrToRGB(uint8 y, uint8 cb, uint8 cr) {
 // different formulae for converting between the two. This package follows
 // the JFIF specification at https://www.w3.org/Graphics/JPEG/jfif3.pdf.
 [GoType] partial struct YCbCr {
-    public uint8 Y;
-    public uint8 Cb;
-    public uint8 Cr;
+    public uint8 Y, Cb, Cr;
 }
 
 public static (uint32, uint32, uint32, uint32) RGBA(this YCbCr c) {
@@ -179,9 +177,9 @@ public static (uint32, uint32, uint32, uint32) RGBA(this YCbCr c) {
     // prints:
     //	0x7e18 0x808d 0x7db9
     //	0x7e7e 0x8080 0x7d7d
-    var yy1 = ((int32)c.Y) * 65793;
-    var cb1 = ((int32)c.Cb) - 128;
-    var cr1 = ((int32)c.Cr) - 128;
+    var yy1 = (int32)c.Y * 0x10101;
+    var cb1 = (int32)c.Cb - 128;
+    var cr1 = (int32)c.Cr - 128;
     // The bit twiddling below is equivalent to
     //
     // r := (yy1 + 91881*cr1) >> 8
@@ -194,24 +192,24 @@ public static (uint32, uint32, uint32, uint32) RGBA(this YCbCr c) {
     // but uses fewer branches and is faster.
     // The code below to compute g and b uses a similar pattern.
     var r = yy1 + 91881 * cr1;
-    if ((uint32)(((uint32)r) & (nint)4278190080L) == 0){
-        r >>= (UntypedInt)(8);
+    if ((uint32)((uint32)r & 0xff000000U) == 0){
+        r >>= (int)(8);
     } else {
-        r = (int32)(~(r >> (int)(31)) & 65535);
+        r = (int32)(~((r >> (int)(31))) & 0xffff);
     }
     var g = yy1 - 22554 * cb1 - 46802 * cr1;
-    if ((uint32)(((uint32)g) & (nint)4278190080L) == 0){
-        g >>= (UntypedInt)(8);
+    if ((uint32)((uint32)g & 0xff000000U) == 0){
+        g >>= (int)(8);
     } else {
-        g = (int32)(~(g >> (int)(31)) & 65535);
+        g = (int32)(~((g >> (int)(31))) & 0xffff);
     }
     var b = yy1 + 116130 * cb1;
-    if ((uint32)(((uint32)b) & (nint)4278190080L) == 0){
-        b >>= (UntypedInt)(8);
+    if ((uint32)((uint32)b & 0xff000000U) == 0){
+        b >>= (int)(8);
     } else {
-        b = (int32)(~(b >> (int)(31)) & 65535);
+        b = (int32)(~((b >> (int)(31))) & 0xffff);
     }
-    return (((uint32)r), ((uint32)g), ((uint32)b), 65535);
+    return ((uint32)r, (uint32)g, (uint32)b, 0xffff);
 }
 
 // YCbCrModel is the [Model] for Y'CbCr colors.
@@ -224,7 +222,7 @@ internal static Color yCbCrModel(Color c) {
         }
     }
     var (r, g, b, _) = c.RGBA();
-    var (y, u, v) = RGBToYCbCr(((uint8)(r >> (int)(8))), ((uint8)(g >> (int)(8))), ((uint8)(b >> (int)(8))));
+    var (y, u, v) = RGBToYCbCr((uint8)((r >> (int)(8))), (uint8)((g >> (int)(8))), (uint8)((b >> (int)(8))));
     return new YCbCr(y, u, v);
 }
 
@@ -237,9 +235,9 @@ internal static Color yCbCrModel(Color c) {
 
 public static (uint32, uint32, uint32, uint32) RGBA(this NYCbCrA c) {
     // The first part of this method is the same as YCbCr.RGBA.
-    var yy1 = ((int32)c.Y) * 65793;
-    var cb1 = ((int32)c.Cb) - 128;
-    var cr1 = ((int32)c.Cr) - 128;
+    var yy1 = (int32)c.Y * 0x10101;
+    var cb1 = (int32)c.Cb - 128;
+    var cr1 = (int32)c.Cr - 128;
     // The bit twiddling below is equivalent to
     //
     // r := (yy1 + 91881*cr1) >> 8
@@ -252,26 +250,26 @@ public static (uint32, uint32, uint32, uint32) RGBA(this NYCbCrA c) {
     // but uses fewer branches and is faster.
     // The code below to compute g and b uses a similar pattern.
     var r = yy1 + 91881 * cr1;
-    if ((uint32)(((uint32)r) & (nint)4278190080L) == 0){
-        r >>= (UntypedInt)(8);
+    if ((uint32)((uint32)r & 0xff000000U) == 0){
+        r >>= (int)(8);
     } else {
-        r = (int32)(~(r >> (int)(31)) & 65535);
+        r = (int32)(~((r >> (int)(31))) & 0xffff);
     }
     var g = yy1 - 22554 * cb1 - 46802 * cr1;
-    if ((uint32)(((uint32)g) & (nint)4278190080L) == 0){
-        g >>= (UntypedInt)(8);
+    if ((uint32)((uint32)g & 0xff000000U) == 0){
+        g >>= (int)(8);
     } else {
-        g = (int32)(~(g >> (int)(31)) & 65535);
+        g = (int32)(~((g >> (int)(31))) & 0xffff);
     }
     var b = yy1 + 116130 * cb1;
-    if ((uint32)(((uint32)b) & (nint)4278190080L) == 0){
-        b >>= (UntypedInt)(8);
+    if ((uint32)((uint32)b & 0xff000000U) == 0){
+        b >>= (int)(8);
     } else {
-        b = (int32)(~(b >> (int)(31)) & 65535);
+        b = (int32)(~((b >> (int)(31))) & 0xffff);
     }
     // The second part of this method applies the alpha.
-    var a = ((uint32)c.A) * 257;
-    return (((uint32)r) * a / 65535, ((uint32)g) * a / 65535, ((uint32)b) * a / 65535, a);
+    var a = (uint32)c.A * 0x101;
+    return ((uint32)r * a / 0xffff, (uint32)g * a / 0xffff, (uint32)b * a / 0xffff, a);
 }
 
 // NYCbCrAModel is the [Model] for non-alpha-premultiplied Y'CbCr-with-alpha
@@ -280,28 +278,28 @@ public static Model NYCbCrAModel = ModelFunc(nYCbCrAModel);
 
 internal static Color nYCbCrAModel(Color c) {
     switch (c.type()) {
-    case NYCbCrA c: {
-        return c;
+    case NYCbCrA cΔ1: {
+        return cΔ1;
     }
-    case YCbCr c: {
-        return new NYCbCrA(c, 255);
+    case YCbCr cΔ1: {
+        return new NYCbCrA(cΔ1, 0xff);
     }}
     var (r, g, b, a) = c.RGBA();
     // Convert from alpha-premultiplied to non-alpha-premultiplied.
     if (a != 0) {
-        r = (r * 65535) / a;
-        g = (g * 65535) / a;
-        b = (b * 65535) / a;
+        r = (r * 0xffff) / a;
+        g = (g * 0xffff) / a;
+        b = (b * 0xffff) / a;
     }
-    var (y, u, v) = RGBToYCbCr(((uint8)(r >> (int)(8))), ((uint8)(g >> (int)(8))), ((uint8)(b >> (int)(8))));
-    return new NYCbCrA(new YCbCr(Y: y, Cb: u, Cr: v), ((uint8)(a >> (int)(8))));
+    var (y, u, v) = RGBToYCbCr((uint8)((r >> (int)(8))), (uint8)((g >> (int)(8))), (uint8)((b >> (int)(8))));
+    return new NYCbCrA(new YCbCr(Y: y, Cb: u, Cr: v), (uint8)((a >> (int)(8))));
 }
 
 // RGBToCMYK converts an RGB triple to a CMYK quadruple.
 public static (uint8, uint8, uint8, uint8) RGBToCMYK(uint8 r, uint8 g, uint8 b) {
-    var rr = ((uint32)r);
-    var gg = ((uint32)g);
-    var bb = ((uint32)b);
+    var rr = (uint32)r;
+    var gg = (uint32)g;
+    var bb = (uint32)b;
     var w = rr;
     if (w < gg) {
         w = gg;
@@ -310,21 +308,21 @@ public static (uint8, uint8, uint8, uint8) RGBToCMYK(uint8 r, uint8 g, uint8 b) 
         w = bb;
     }
     if (w == 0) {
-        return (0, 0, 0, 255);
+        return (0, 0, 0, 0xff);
     }
-    var c = (w - rr) * 255 / w;
-    var m = (w - gg) * 255 / w;
-    var y = (w - bb) * 255 / w;
-    return (((uint8)c), ((uint8)m), ((uint8)y), ((uint8)(255 - w)));
+    var c = (w - rr) * 0xff / w;
+    var m = (w - gg) * 0xff / w;
+    var y = (w - bb) * 0xff / w;
+    return ((uint8)c, (uint8)m, (uint8)y, (uint8)(0xff - w));
 }
 
 // CMYKToRGB converts a [CMYK] quadruple to an RGB triple.
 public static (uint8, uint8, uint8) CMYKToRGB(uint8 c, uint8 m, uint8 y, uint8 k) {
-    var w = 65535 - ((uint32)k) * 257;
-    var r = (65535 - ((uint32)c) * 257) * w / 65535;
-    var g = (65535 - ((uint32)m) * 257) * w / 65535;
-    var b = (65535 - ((uint32)y) * 257) * w / 65535;
-    return (((uint8)(r >> (int)(8))), ((uint8)(g >> (int)(8))), ((uint8)(b >> (int)(8))));
+    var w = 0xffff - (uint32)k * 0x101;
+    var r = (0xffff - (uint32)c * 0x101) * w / 0xffff;
+    var g = (0xffff - (uint32)m * 0x101) * w / 0xffff;
+    var b = (0xffff - (uint32)y * 0x101) * w / 0xffff;
+    return ((uint8)((r >> (int)(8))), (uint8)((g >> (int)(8))), (uint8)((b >> (int)(8))));
 }
 
 // CMYK represents a fully opaque CMYK color, having 8 bits for each of cyan,
@@ -332,20 +330,17 @@ public static (uint8, uint8, uint8) CMYKToRGB(uint8 c, uint8 m, uint8 y, uint8 k
 //
 // It is not associated with any particular color profile.
 [GoType] partial struct CMYK {
-    public uint8 C;
-    public uint8 M;
-    public uint8 Y;
-    public uint8 K;
+    public uint8 C, M, Y, K;
 }
 
 public static (uint32, uint32, uint32, uint32) RGBA(this CMYK c) {
     // This code is a copy of the CMYKToRGB function above, except that it
     // returns values in the range [0, 0xffff] instead of [0, 0xff].
-    var w = 65535 - ((uint32)c.K) * 257;
-    var r = (65535 - ((uint32)c.C) * 257) * w / 65535;
-    var g = (65535 - ((uint32)c.M) * 257) * w / 65535;
-    var b = (65535 - ((uint32)c.Y) * 257) * w / 65535;
-    return (r, g, b, 65535);
+    var w = 0xffff - (uint32)c.K * 0x101;
+    var r = (0xffff - (uint32)c.C * 0x101) * w / 0xffff;
+    var g = (0xffff - (uint32)c.M * 0x101) * w / 0xffff;
+    var b = (0xffff - (uint32)c.Y * 0x101) * w / 0xffff;
+    return (r, g, b, 0xffff);
 }
 
 // CMYKModel is the [Model] for CMYK colors.
@@ -358,7 +353,7 @@ internal static Color cmykModel(Color c) {
         }
     }
     var (r, g, b, _) = c.RGBA();
-    var (cc, mm, yy, kk) = RGBToCMYK(((uint8)(r >> (int)(8))), ((uint8)(g >> (int)(8))), ((uint8)(b >> (int)(8))));
+    var (cc, mm, yy, kk) = RGBToCMYK((uint8)((r >> (int)(8))), (uint8)((g >> (int)(8))), (uint8)((b >> (int)(8))));
     return new CMYK(cc, mm, yy, kk);
 }
 

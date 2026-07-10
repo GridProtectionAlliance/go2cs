@@ -3,8 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.vendor.golang.org.x.text.unicode;
 
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
 
 partial class norm_package {
 
@@ -36,7 +36,7 @@ internal static readonly ssState ssOverflow = 2;
     }
     var n = p.nLeadingNonStarters();
     {
-        var ss += ((streamSafe)n); if (ss > maxNonStarters) {
+        ss += ((streamSafe)n); if (ss > maxNonStarters) {
             ss = 0;
             return ssOverflow;
         }
@@ -63,7 +63,7 @@ internal static readonly ssState ssOverflow = 2;
     if (ss > maxNonStarters) {
         throw panic("streamSafe was not reset");
     }
-    var c = ss + ((streamSafe)p.nTrailingNonStarters());
+    var c = (streamSafe)(ss + ((streamSafe)p.nTrailingNonStarters()));
     if (c > maxNonStarters) {
         return ssOverflow;
     }
@@ -101,14 +101,14 @@ public static readonly @string GraphemeJoiner = "\u034F"u8;
 }
 
 [GoRecv] internal static void init(this ref reorderBuffer rb, Form f, slice<byte> src) {
-    rb.f = formTable[f].val;
+    rb.f = formTable[f].Value;
     rb.src.setBytes(src);
     rb.nsrc = len(src);
     rb.ss = 0;
 }
 
 [GoRecv] internal static void initString(this ref reorderBuffer rb, Form f, @string src) {
-    rb.f = formTable[f].val;
+    rb.f = formTable[f].Value;
     rb.src.setString(src);
     rb.nsrc = len(src);
     rb.ss = 0;
@@ -125,22 +125,24 @@ public static readonly @string GraphemeJoiner = "\u034F"u8;
     rb.nbyte = 0;
 }
 
-[GoRecv] internal static bool doFlush(this ref reorderBuffer rb) {
+internal static bool doFlush(this ж<reorderBuffer> Ꮡrb) {
+    ref var rb = ref Ꮡrb.Value;
+
     if (rb.f.composing) {
         rb.compose();
     }
-    var res = rb.flushF(rb);
+    var res = rb.flushF(Ꮡrb);
     rb.reset();
     return res;
 }
 
 // appendFlush appends the normalized segment to rb.out.
 internal static bool appendFlush(ж<reorderBuffer> Ꮡrb) {
-    ref var rb = ref Ꮡrb.val;
+    ref var rb = ref Ꮡrb.Value;
 
     for (nint i = 0; i < rb.nrune; i++) {
         var start = rb.rune[i].pos;
-        var end = start + rb.rune[i].size;
+        var end = (uint8)(start + rb.rune[i].size);
         rb.@out = append(rb.@out, rb.@byte[(int)(start)..(int)(end)].ꓸꓸꓸ);
     }
     return true;
@@ -150,7 +152,7 @@ internal static bool appendFlush(ж<reorderBuffer> Ꮡrb) {
 [GoRecv] internal static slice<byte> flush(this ref reorderBuffer rb, slice<byte> @out) {
     for (nint i = 0; i < rb.nrune; i++) {
         var start = rb.rune[i].pos;
-        var end = start + rb.rune[i].size;
+        var end = (uint8)(start + rb.rune[i].size);
         @out = append(@out, rb.@byte[(int)(start)..(int)(end)].ꓸꓸꓸ);
     }
     rb.reset();
@@ -186,7 +188,7 @@ internal static bool appendFlush(ж<reorderBuffer> Ꮡrb) {
         }
     }
     rb.nrune += 1;
-    var pos = ((uint8)rb.nbyte);
+    var pos = (uint8)rb.nbyte;
     rb.nbyte += utf8.UTFMax;
     info.pos = pos;
     b[n] = info;
@@ -195,16 +197,16 @@ internal static bool appendFlush(ж<reorderBuffer> Ꮡrb) {
 [GoType("num:nint")] partial struct insertErr;
 
 internal static readonly insertErr iSuccess = /* -iota */ 0;
-internal static readonly GoUntyped iShortDst = /*  */
-    GoUntyped.Parse("-1");
-internal static readonly GoUntyped iShortSrc = /*  */
-    GoUntyped.Parse("-2");
+internal static readonly insertErr iShortDst = -1;
+internal static readonly insertErr iShortSrc = -2;
 
 // insertFlush inserts the given rune in the buffer ordered by CCC.
 // If a decomposition with multiple segments are encountered, they leading
 // ones are flushed.
 // It returns a non-zero error code if the rune was not inserted.
-[GoRecv] internal static insertErr insertFlush(this ref reorderBuffer rb, input src, nint i, ΔProperties info) {
+internal static insertErr insertFlush(this ж<reorderBuffer> Ꮡrb, input src, nint i, ΔProperties info) {
+    ref var rb = ref Ꮡrb.Value;
+
     {
         var rune = src.hangul(i); if (rune != 0) {
             rb.decomposeHangul(rune);
@@ -212,7 +214,7 @@ internal static readonly GoUntyped iShortSrc = /*  */
         }
     }
     if (info.hasDecomposition()) {
-        return rb.insertDecomposed(info.Decomposition());
+        return Ꮡrb.insertDecomposed(info.Decomposition());
     }
     rb.insertSingle(src, i, info);
     return iSuccess;
@@ -222,7 +224,9 @@ internal static readonly GoUntyped iShortSrc = /*  */
 // It is assumed there is sufficient space to hold the runes. It is the
 // responsibility of the caller to ensure this. This can be done by checking
 // the state returned by the streamSafe type.
-[GoRecv] internal static void insertUnsafe(this ref reorderBuffer rb, input src, nint i, ΔProperties info) {
+internal static void insertUnsafe(this ж<reorderBuffer> Ꮡrb, input src, nint i, ΔProperties info) {
+    ref var rb = ref Ꮡrb.Value;
+
     {
         var rune = src.hangul(i); if (rune != 0) {
             rb.decomposeHangul(rune);
@@ -230,7 +234,7 @@ internal static readonly GoUntyped iShortSrc = /*  */
     }
     if (info.hasDecomposition()){
         // TODO: inline.
-        rb.insertDecomposed(info.Decomposition());
+        Ꮡrb.insertDecomposed(info.Decomposition());
     } else {
         rb.insertSingle(src, i, info);
     }
@@ -239,17 +243,19 @@ internal static readonly GoUntyped iShortSrc = /*  */
 // insertDecomposed inserts an entry in to the reorderBuffer for each rune
 // in dcomp. dcomp must be a sequence of decomposed UTF-8-encoded runes.
 // It flushes the buffer on each new segment start.
-[GoRecv] internal static insertErr insertDecomposed(this ref reorderBuffer rb, slice<byte> dcomp) {
+internal static insertErr insertDecomposed(this ж<reorderBuffer> Ꮡrb, slice<byte> dcomp) {
+    ref var rb = ref Ꮡrb.Value;
+
     rb.tmpBytes.setBytes(dcomp);
     // As the streamSafe accounting already handles the counting for modifiers,
     // we don't have to call next. However, we do need to keep the accounting
     // intact when flushing the buffer.
     for (nint i = 0; i < len(dcomp); ) {
         var info = rb.f.info(rb.tmpBytes, i);
-        if (info.BoundaryBefore() && rb.nrune > 0 && !rb.doFlush()) {
+        if (info.BoundaryBefore() && rb.nrune > 0 && !Ꮡrb.doFlush()) {
             return iShortDst;
         }
-        i += copy(rb.@byte[(int)(rb.nbyte)..], dcomp[(int)(i)..(int)(i + ((nint)info.size))]);
+        i += copy(rb.@byte[(int)(rb.nbyte)..], dcomp[(int)(i)..(int)(i + (nint)info.size)]);
         rb.insertOrdered(info);
     }
     return iSuccess;
@@ -258,29 +264,29 @@ internal static readonly GoUntyped iShortSrc = /*  */
 // insertSingle inserts an entry in the reorderBuffer for the rune at
 // position i. info is the runeInfo for the rune at position i.
 [GoRecv] internal static void insertSingle(this ref reorderBuffer rb, input src, nint i, ΔProperties info) {
-    src.copySlice(rb.@byte[(int)(rb.nbyte)..], i, i + ((nint)info.size));
+    src.copySlice(rb.@byte[(int)(rb.nbyte)..], i, i + (nint)info.size);
     rb.insertOrdered(info);
 }
 
 // insertCGJ inserts a Combining Grapheme Joiner (0x034f) into rb.
 [GoRecv] internal static void insertCGJ(this ref reorderBuffer rb) {
-    rb.insertSingle(new input(str: GraphemeJoiner), 0, new ΔProperties(size: ((uint8)len(GraphemeJoiner))));
+    rb.insertSingle(new input(str: GraphemeJoiner), 0, new ΔProperties(size: (uint8)len(GraphemeJoiner)));
 }
 
 // appendRune inserts a rune at the end of the buffer. It is used for Hangul.
 [GoRecv] internal static void appendRune(this ref reorderBuffer rb, rune r) {
     var bn = rb.nbyte;
-    nint sz = utf8.EncodeRune(rb.@byte[(int)(bn)..], ((rune)r));
+    nint sz = utf8.EncodeRune(rb.@byte[(int)(bn)..], (rune)r);
     rb.nbyte += utf8.UTFMax;
-    rb.rune[rb.nrune] = new ΔProperties(pos: bn, size: ((uint8)sz));
+    rb.rune[rb.nrune] = new ΔProperties(pos: bn, size: (uint8)sz);
     rb.nrune++;
 }
 
 // assignRune sets a rune at position pos. It is used for Hangul and recomposition.
 [GoRecv] internal static void assignRune(this ref reorderBuffer rb, nint pos, rune r) {
     var bn = rb.rune[pos].pos;
-    nint sz = utf8.EncodeRune(rb.@byte[(int)(bn)..], ((rune)r));
-    rb.rune[pos] = new ΔProperties(pos: bn, size: ((uint8)sz));
+    nint sz = utf8.EncodeRune(rb.@byte[(int)(bn)..], (rune)r);
+    rb.rune[pos] = new ΔProperties(pos: bn, size: (uint8)sz);
 }
 
 // runeAt returns the rune at position n. It is used for Hangul and recomposition.
@@ -294,41 +300,41 @@ internal static readonly GoUntyped iShortSrc = /*  */
 // It is used for Hangul and recomposition.
 [GoRecv] internal static slice<byte> bytesAt(this ref reorderBuffer rb, nint n) {
     var inf = rb.rune[n];
-    return rb.@byte[(int)(inf.pos)..(int)(((nint)inf.pos) + ((nint)inf.size))];
+    return rb.@byte[(int)(inf.pos)..(int)((nint)inf.pos + (nint)inf.size)];
 }
 
 // For Hangul we combine algorithmically, instead of using tables.
-internal static readonly UntypedInt hangulBase = /* 0xAC00 */ 44032; // UTF-8(hangulBase) -> EA B0 80
+internal static readonly UntypedInt hangulBase = 0xAC00; // UTF-8(hangulBase) -> EA B0 80
 
-internal static readonly UntypedInt hangulBase0 = /* 0xEA */ 234;
+internal static readonly UntypedInt hangulBase0 = 0xEA;
 
-internal static readonly UntypedInt hangulBase1 = /* 0xB0 */ 176;
+internal static readonly UntypedInt hangulBase1 = 0xB0;
 
-internal static readonly UntypedInt hangulBase2 = /* 0x80 */ 128;
+internal static readonly UntypedInt hangulBase2 = 0x80;
 
 internal static readonly UntypedInt hangulEnd = /* hangulBase + jamoLVTCount */ 55204; // UTF-8(0xD7A4) -> ED 9E A4
 
-internal static readonly UntypedInt hangulEnd0 = /* 0xED */ 237;
+internal static readonly UntypedInt hangulEnd0 = 0xED;
 
-internal static readonly UntypedInt hangulEnd1 = /* 0x9E */ 158;
+internal static readonly UntypedInt hangulEnd1 = 0x9E;
 
-internal static readonly UntypedInt hangulEnd2 = /* 0xA4 */ 164;
+internal static readonly UntypedInt hangulEnd2 = 0xA4;
 
-internal static readonly UntypedInt jamoLBase = /* 0x1100 */ 4352; // UTF-8(jamoLBase) -> E1 84 00
+internal static readonly UntypedInt jamoLBase = 0x1100; // UTF-8(jamoLBase) -> E1 84 00
 
-internal static readonly UntypedInt jamoLBase0 = /* 0xE1 */ 225;
+internal static readonly UntypedInt jamoLBase0 = 0xE1;
 
-internal static readonly UntypedInt jamoLBase1 = /* 0x84 */ 132;
+internal static readonly UntypedInt jamoLBase1 = 0x84;
 
-internal static readonly UntypedInt jamoLEnd = /* 0x1113 */ 4371;
+internal static readonly UntypedInt jamoLEnd = 0x1113;
 
-internal static readonly UntypedInt jamoVBase = /* 0x1161 */ 4449;
+internal static readonly UntypedInt jamoVBase = 0x1161;
 
-internal static readonly UntypedInt jamoVEnd = /* 0x1176 */ 4470;
+internal static readonly UntypedInt jamoVEnd = 0x1176;
 
-internal static readonly UntypedInt jamoTBase = /* 0x11A7 */ 4519;
+internal static readonly UntypedInt jamoTBase = 0x11A7;
 
-internal static readonly UntypedInt jamoTEnd = /* 0x11C3 */ 4547;
+internal static readonly UntypedInt jamoTEnd = 0x11C3;
 
 internal static readonly UntypedInt jamoTCount = 28;
 
@@ -395,26 +401,26 @@ internal static bool isHangulString(@string b) {
 // Caller must ensure len(b) >= 2.
 internal static bool isJamoVT(slice<byte> b) {
     // True if (rune & 0xff00) == jamoLBase
-    return b[0] == jamoLBase0 && ((byte)(b[1] & 252)) == jamoLBase1;
+    return b[0] == jamoLBase0 && ((byte)(b[1] & 0xFC)) == jamoLBase1;
 }
 
 internal static bool isHangulWithoutJamoT(slice<byte> b) {
     var (c, _) = utf8.DecodeRune(b);
     c -= hangulBase;
-    return c < jamoLVTCount && c % jamoTCount == 0;
+    return c < jamoLVTCount && c % (rune)jamoTCount == 0;
 }
 
 // decomposeHangul writes the decomposed Hangul to buf and returns the number
 // of bytes written.  len(buf) should be at least 9.
 internal static nint decomposeHangul(slice<byte> buf, rune r) {
-    static readonly UntypedInt JamoUTF8Len = 3;
+    UntypedInt JamoUTF8Len = 3;
     r -= hangulBase;
-    var x = r % jamoTCount;
+    var x = r % (rune)jamoTCount;
     r /= jamoTCount;
-    utf8.EncodeRune(buf, jamoLBase + r / jamoVCount);
-    utf8.EncodeRune(buf[(int)(JamoUTF8Len)..], jamoVBase + r % jamoVCount);
+    utf8.EncodeRune(buf, (rune)jamoLBase + r / (rune)jamoVCount);
+    utf8.EncodeRune(buf[(int)(JamoUTF8Len)..], (rune)jamoVBase + r % (rune)jamoVCount);
     if (x != 0) {
-        utf8.EncodeRune(buf[(int)(2 * JamoUTF8Len)..], jamoTBase + x);
+        utf8.EncodeRune(buf[(int)(2 * JamoUTF8Len)..], (rune)jamoTBase + x);
         return 3 * JamoUTF8Len;
     }
     return 2 * JamoUTF8Len;
@@ -425,12 +431,12 @@ internal static nint decomposeHangul(slice<byte> buf, rune r) {
 // See https://unicode.org/reports/tr15/#Hangul for details on decomposing Hangul.
 [GoRecv] internal static void decomposeHangul(this ref reorderBuffer rb, rune r) {
     r -= hangulBase;
-    var x = r % jamoTCount;
+    var x = r % (rune)jamoTCount;
     r /= jamoTCount;
-    rb.appendRune(jamoLBase + r / jamoVCount);
-    rb.appendRune(jamoVBase + r % jamoVCount);
+    rb.appendRune((rune)jamoLBase + r / (rune)jamoVCount);
+    rb.appendRune((rune)jamoVBase + r % (rune)jamoVCount);
     if (x != 0) {
-        rb.appendRune(jamoTBase + x);
+        rb.appendRune((rune)jamoTBase + x);
     }
 }
 
@@ -457,12 +463,12 @@ internal static nint decomposeHangul(slice<byte> buf, rune r) {
             switch (ᐧ) {
             case {} when jamoLBase <= l && l < jamoLEnd && jamoVBase <= v && v < jamoVEnd: {
                 rb.assignRune(s, // 11xx plus 116x to LV
- hangulBase + (l - jamoLBase) * jamoVTCount + (v - jamoVBase) * jamoTCount);
+ (rune)hangulBase + (l - (rune)jamoLBase) * (rune)jamoVTCount + (v - (rune)jamoVBase) * (rune)jamoTCount);
                 break;
             }
-            case {} when hangulBase <= l && l < hangulEnd && jamoTBase < v && v < jamoTEnd && ((l - hangulBase) % jamoTCount) == 0: {
+            case {} when hangulBase <= l && l < hangulEnd && jamoTBase < v && v < jamoTEnd && ((l - (rune)hangulBase) % (rune)jamoTCount) == 0: {
                 rb.assignRune(s, // ACxx plus 11Ax to LVT
- l + v - jamoTBase);
+ l + v - (rune)jamoTBase);
                 break;
             }
             default: {
@@ -482,7 +488,7 @@ internal static nint decomposeHangul(slice<byte> buf, rune r) {
 [GoRecv] internal static void compose(this ref reorderBuffer rb) {
     // Lazily load the map used by the combine func below, but do
     // it outside of the loop.
-    recompMapOnce.Do(buildRecompMap);
+    ᏑrecompMapOnce.Do(buildRecompMap);
     // UAX #15, section X5 , including Corrigendum #5
     // "In any character sequence beginning with starter S, a character C is
     //  blocked from S if and only if there is some character B between S
@@ -494,7 +500,7 @@ internal static nint decomposeHangul(slice<byte> buf, rune r) {
     }
     nint k = 1;
     var b = rb.rune[..];
-    for (nint s = 0;nint i = 1; i < bn; i++) {
+    for ((nint s, nint i) = (0, 1); i < bn; i++) {
         if (isJamoVT(rb.bytesAt(i))) {
             // Redo from start in Hangul mode. Necessary to support
             // U+320E..U+321E in NFKC mode.

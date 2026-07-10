@@ -6,9 +6,9 @@ namespace go.@internal.coverage;
 // package cmerge provides a few small utility APIs for helping
 // with merging of counter data for a given function.
 using fmt = fmt_package;
-using coverage = @internal.coverage_package;
+using coverage = go.@internal.coverage_package;
 using math = math_package;
-using @internal;
+using go.@internal;
 
 partial class cmerge_package {
 
@@ -22,8 +22,8 @@ public static readonly ModeMergePolicy ModeMergeRelaxed = 1;
 // tools that need to implicitly merge counter as they read multiple
 // coverage counter data files.
 [GoType] partial struct Merger {
-    internal @internal.coverage_package.CounterMode cmode;
-    internal @internal.coverage_package.CounterGranularity cgran;
+    internal coverage.CounterMode cmode;
+    internal coverage.CounterGranularity cgran;
     internal ModeMergePolicy policy;
     internal bool overflow;
 }
@@ -68,14 +68,14 @@ public static readonly ModeMergePolicy ModeMergeRelaxed = 1;
 // Saturating add does a saturating addition of 'dst' and 'src',
 // returning added value or math.MaxUint32 plus an overflow flag.
 public static (uint32, bool) SaturatingAdd(uint32 dst, uint32 src) {
-    var (d, s) = (((uint64)dst), ((uint64)src));
+    var (d, s) = ((uint64)dst, (uint64)src);
     var sum = d + s;
     var overflow = false;
-    if (((uint64)((uint32)sum)) != sum) {
+    if ((uint64)(uint32)sum != sum) {
         overflow = true;
         sum = math.MaxUint32;
     }
-    return (((uint32)sum), overflow);
+    return ((uint32)sum, overflow);
 }
 
 // SetModeAndGranularity records the counter mode and granularity for

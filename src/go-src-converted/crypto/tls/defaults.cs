@@ -3,10 +3,10 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto;
 
-using godebug = @internal.godebug_package;
+using godebug = go.@internal.godebug_package;
 using slices = slices_package;
-using _ = unsafe_package; // for linkname
-using @internal;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+using go.@internal;
 
 partial class tls_package {
 
@@ -46,7 +46,7 @@ internal static ж<godebug.Setting> tlsrsakex = godebug.New("tlsrsakex"u8);
 internal static ж<godebug.Setting> tls3des = godebug.New("tls3des"u8);
 
 internal static slice<uint16> defaultCipherSuites() {
-    var suites = slices.Clone(cipherSuitesPreferenceOrder);
+    var suites = slices.Clone<slice<uint16>, uint16>(cipherSuitesPreferenceOrder);
     return slices.DeleteFunc(suites, (uint16 c) => disabledCipherSuites[c] || tlsrsakex.Value() != "1"u8 && rsaKexCiphers[c] || tls3des.Value() != "1"u8 && tdesCiphers[c]);
 }
 

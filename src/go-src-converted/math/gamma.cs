@@ -64,32 +64,32 @@ partial class math_package {
 //   Stephen L. Moshier
 //   moshier@na-net.ornl.gov
 internal static array<float64> _gamP = new float64[]{
-    1.60119522476751861407e-04F,
-    1.19135147006586384913e-03F,
-    1.04213797561761569935e-02F,
-    4.76367800457137231464e-02F,
-    2.07448227648435975150e-01F,
-    4.94214826801497100753e-01F,
-    9.99999999999999996796e-01F
+    1.60119522476751861407e-04D,
+    1.19135147006586384913e-03D,
+    1.04213797561761569935e-02D,
+    4.76367800457137231464e-02D,
+    2.07448227648435975150e-01D,
+    4.94214826801497100753e-01D,
+    9.99999999999999996796e-01D
 }.array();
 
 internal static array<float64> _gamQ = new float64[]{
-    -2.31581873324120129819e-05F,
-    5.39605580493303397842e-04F,
-    -4.45641913851797240494e-03F,
-    1.18139785222060435552e-02F,
-    3.58236398605498653373e-02F,
-    -2.34591795718243348568e-01F,
-    7.14304917030273074085e-02F,
-    1.00000000000000000320e+00F
+    -2.31581873324120129819e-05D,
+    5.39605580493303397842e-04D,
+    -4.45641913851797240494e-03D,
+    1.18139785222060435552e-02D,
+    3.58236398605498653373e-02D,
+    -2.34591795718243348568e-01D,
+    7.14304917030273074085e-02D,
+    1.00000000000000000320e+00D
 }.array();
 
 internal static array<float64> _gamS = new float64[]{
-    7.87311395793093628397e-04F,
-    -2.29549961613378126380e-04F,
-    -2.68132617805781232825e-03F,
-    3.47222221605458667310e-03F,
-    8.33333333333482257126e-02F
+    7.87311395793093628397e-04D,
+    -2.29549961613378126380e-04D,
+    -2.68132617805781232825e-03D,
+    3.47222221605458667310e-03D,
+    8.33333333333482257126e-02D
 }.array();
 
 // Gamma function computed by Stirling's formula.
@@ -103,20 +103,20 @@ internal static (float64, float64) stirling(float64 x) {
     if (x > 200) {
         return (Inf(1), 1);
     }
-    static readonly UntypedFloat SqrtTwoPi = /* 2.506628274631000502417 */ 2.50663;
-    static readonly UntypedFloat MaxStirling = /* 143.01608 */ 143.016;
+    UntypedFloat SqrtTwoPi = /* 2.506628274631000502417 */ 2.50663;
+    UntypedFloat MaxStirling = /* 143.01608 */ 143.016;
     var w = 1 / x;
     w = 1 + w * ((((_gamS[0] * w + _gamS[1]) * w + _gamS[2]) * w + _gamS[3]) * w + _gamS[4]);
     var y1 = Exp(x);
-    var y2 = 1.0F;
+    var y2 = 1.0D;
     if (x > MaxStirling){
         // avoid Pow() overflow
-        var v = Pow(x, 0.5F * x - 0.25F);
+        var v = Pow(x, 0.5D * x - 0.25D);
         (y1, y2) = (v, v / y1);
     } else {
-        y1 = Pow(x, x - 0.5F) / y1;
+        y1 = Pow(x, x - 0.5D) / y1;
     }
-    return (y1, SqrtTwoPi * w * y2);
+    return (y1, (float64)SqrtTwoPi * w * y2);
 }
 
 // Gamma returns the Gamma function of x.
@@ -130,7 +130,7 @@ internal static (float64, float64) stirling(float64 x) {
 //	Gamma(-Inf) = NaN
 //	Gamma(NaN) = NaN
 public static float64 Gamma(float64 x) {
-    static readonly UntypedFloat Euler = /* 0.57721566490153286060651209008240243104215933593992 */ 0.577216;                              // A001620
+    UntypedFloat Euler = /* 0.57721566490153286060651209008240243104215933593992 */ 0.577216;                              // A001620
     // special cases
     switch (ᐧ) {
     case {} when isNegInt(x) || IsInf(x, -1) || IsNaN(x): {
@@ -158,16 +158,16 @@ public static float64 Gamma(float64 x) {
         // If |x| were >= 2⁶³ it would have to be an integer.
         nint signgam = 1;
         {
-            var ip = ((int64)p); if ((int64)(ip & 1) == 0) {
+            var ip = (int64)p; if ((int64)(ip & 1) == 0) {
                 signgam = -1;
             }
         }
         var zΔ1 = q - p;
-        if (zΔ1 > 0.5F) {
+        if (zΔ1 > 0.5D) {
             p = p + 1;
-             = q - p;
+            zΔ1 = q - p;
         }
-         = q * Sin(Pi * zΔ1);
+        zΔ1 = q * Sin((float64)Pi * zΔ1);
         if (zΔ1 == 0) {
             return Inf(signgam);
         }
@@ -175,27 +175,27 @@ public static float64 Gamma(float64 x) {
         var absz = Abs(zΔ1);
         var d = absz * sq1 * sq2;
         if (IsInf(d, 0)){
-             = Pi / absz / sq1 / sq2;
+            zΔ1 = (float64)Pi / absz / sq1 / sq2;
         } else {
-             = Pi / d;
+            zΔ1 = (float64)Pi / d;
         }
-        return ((float64)signgam) * zΔ1;
+        return (float64)signgam * zΔ1;
     }
     // Reduce argument
-    var z = 1.0F;
+    var z = 1.0D;
     while (x >= 3) {
         x = x - 1;
         z = z * x;
     }
     while (x < 0) {
-        if (x > -1e-09F) {
+        if (x > -1e-09D) {
             goto small;
         }
         z = z / x;
         x = x + 1;
     }
     while (x < 2) {
-        if (x < 1e-09F) {
+        if (x < 1e-09D) {
             goto small;
         }
         z = z / x;
@@ -212,7 +212,7 @@ small:
     if (x == 0) {
         return Inf(1);
     }
-    return z / ((1 + Euler * x) * x);
+    return z / ((1 + (float64)Euler * x) * x);
 }
 
 internal static bool isNegInt(float64 x) {

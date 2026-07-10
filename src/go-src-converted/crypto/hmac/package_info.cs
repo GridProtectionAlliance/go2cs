@@ -38,8 +38,7 @@ using static go.crypto.hmac_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(marshalable, bool), marshalable>]
-[assembly: GoImplement<hmac, hash_package.Hash>]
+[assembly: GoImplement<hmac, hash_package.Hash>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

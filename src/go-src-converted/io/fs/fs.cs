@@ -14,6 +14,7 @@ using oserror = @internal.oserror_package;
 using time = time_package;
 using utf8 = unicode.utf8_package;
 using @internal;
+using io = io_package;
 using unicode;
 
 partial class fs_package {
@@ -82,10 +83,10 @@ public static bool ValidPath(@string name) {
 // The File interface is the minimum implementation required of the file.
 // Directory files should also implement [ReadDirFile].
 // A file may implement [io.ReaderAt] or [io.Seeker] as optimizations.
-[GoType] partial interface File {
+[GoType] partial interface File :
+    io.ReadCloser
+{
     (FileInfo, error) Stat();
-    (nint, error) Read(slice<byte> _);
-    error Close();
 }
 
 // A DirEntry is an entry read from a directory
@@ -219,8 +220,8 @@ public static @string String(this FileMode m) {
     array<byte> buf = new(32);               // Mode is uint32.
     nint w = 0;
     foreach (var (i, c) in (@string)str) {
-        if ((FileMode)(m & (1 << (int)(((nuint)(32 - 1 - i))))) != 0) {
-            buf[w] = ((byte)c);
+        if ((FileMode)(m & ((FileMode)((uint32)1 << (int)((nuint)(32 - 1 - i))))) != 0) {
+            buf[w] = (byte)c;
             w++;
         }
     }
@@ -230,8 +231,8 @@ public static @string String(this FileMode m) {
     }
     @string rwx = "rwxrwxrwx"u8;
     foreach (var (i, c) in (@string)rwx) {
-        if ((FileMode)(m & (1 << (int)(((nuint)(9 - 1 - i))))) != 0){
-            buf[w] = ((byte)c);
+        if ((FileMode)(m & ((FileMode)((uint32)1 << (int)((nuint)(9 - 1 - i))))) != 0){
+            buf[w] = (byte)c;
         } else {
             buf[w] = (rune)'-';
         }

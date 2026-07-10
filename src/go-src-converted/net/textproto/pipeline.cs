@@ -25,43 +25,53 @@ partial class textproto_package {
 // A pipelined server can use the same calls to ensure that
 // responses computed in parallel are written in the correct order.
 [GoType] partial struct Pipeline {
-    internal sync_package.Mutex mu;
+    internal sync.Mutex mu;
     internal nuint id;
     internal sequencer request;
     internal sequencer response;
 }
 
 // Next returns the next id for a request/response pair.
-[GoRecv] public static nuint Next(this ref Pipeline p) {
-    p.mu.Lock();
+public static nuint Next(this ж<Pipeline> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    Ꮡp.of(Pipeline.Ꮡmu).Lock();
     nuint id = p.id;
     p.id++;
-    p.mu.Unlock();
+    Ꮡp.of(Pipeline.Ꮡmu).Unlock();
     return id;
 }
 
 // StartRequest blocks until it is time to send (or, if this is a server, receive)
 // the request with the given id.
-[GoRecv] public static void StartRequest(this ref Pipeline p, nuint id) {
-    p.request.Start(id);
+public static void StartRequest(this ж<Pipeline> Ꮡp, nuint id) {
+    ref var p = ref Ꮡp.Value;
+
+    Ꮡp.of(Pipeline.Ꮡrequest).Start(id);
 }
 
 // EndRequest notifies p that the request with the given id has been sent
 // (or, if this is a server, received).
-[GoRecv] public static void EndRequest(this ref Pipeline p, nuint id) {
-    p.request.End(id);
+public static void EndRequest(this ж<Pipeline> Ꮡp, nuint id) {
+    ref var p = ref Ꮡp.Value;
+
+    Ꮡp.of(Pipeline.Ꮡrequest).End(id);
 }
 
 // StartResponse blocks until it is time to receive (or, if this is a server, send)
 // the request with the given id.
-[GoRecv] public static void StartResponse(this ref Pipeline p, nuint id) {
-    p.response.Start(id);
+public static void StartResponse(this ж<Pipeline> Ꮡp, nuint id) {
+    ref var p = ref Ꮡp.Value;
+
+    Ꮡp.of(Pipeline.Ꮡresponse).Start(id);
 }
 
 // EndResponse notifies p that the response with the given id has been received
 // (or, if this is a server, sent).
-[GoRecv] public static void EndResponse(this ref Pipeline p, nuint id) {
-    p.response.End(id);
+public static void EndResponse(this ж<Pipeline> Ꮡp, nuint id) {
+    ref var p = ref Ꮡp.Value;
+
+    Ꮡp.of(Pipeline.Ꮡresponse).End(id);
 }
 
 // A sequencer schedules a sequence of numbered events that must
@@ -69,7 +79,7 @@ partial class textproto_package {
 // at 0 and increment without skipping. The event number wraps around
 // safely as long as there are not 2^32 simultaneous events pending.
 [GoType] partial struct sequencer {
-    internal sync_package.Mutex mu;
+    internal sync.Mutex mu;
     internal nuint id;
     internal map<nuint, channel<EmptyStruct>> wait;
 }
@@ -77,10 +87,12 @@ partial class textproto_package {
 // Start waits until it is time for the event numbered id to begin.
 // That is, except for the first event, it waits until End(id-1) has
 // been called.
-[GoRecv] internal static void Start(this ref sequencer s, nuint id) {
-    s.mu.Lock();
+internal static void Start(this ж<sequencer> Ꮡs, nuint id) {
+    ref var s = ref Ꮡs.Value;
+
+    Ꮡs.of(sequencer.Ꮡmu).Lock();
     if (s.id == id) {
-        s.mu.Unlock();
+        Ꮡs.of(sequencer.Ꮡmu).Unlock();
         return;
     }
     var c = new channel<EmptyStruct>(1);
@@ -88,17 +100,19 @@ partial class textproto_package {
         s.wait = new map<nuint, channel<EmptyStruct>>();
     }
     s.wait[id] = c;
-    s.mu.Unlock();
+    Ꮡs.of(sequencer.Ꮡmu).Unlock();
     ᐸꟷ(c);
 }
 
 // End notifies the sequencer that the event numbered id has completed,
 // allowing it to schedule the event numbered id+1.  It is a run-time error
 // to call End with an id that is not the number of the active event.
-[GoRecv] internal static void End(this ref sequencer s, nuint id) {
-    s.mu.Lock();
+internal static void End(this ж<sequencer> Ꮡs, nuint id) {
+    ref var s = ref Ꮡs.Value;
+
+    Ꮡs.of(sequencer.Ꮡmu).Lock();
     if (s.id != id) {
-        s.mu.Unlock();
+        Ꮡs.of(sequencer.Ꮡmu).Unlock();
         throw panic("out of sync");
     }
     id++;
@@ -106,12 +120,11 @@ partial class textproto_package {
     if (s.wait == default!) {
         s.wait = new map<nuint, channel<EmptyStruct>>();
     }
-    var c = s.wait[id];
-    var ok = s.wait[id];
+    var (c, ok) = s.wait[id, ꟷ];
     if (ok) {
         delete(s.wait, id);
     }
-    s.mu.Unlock();
+    Ꮡs.of(sequencer.Ꮡmu).Unlock();
     if (ok) {
         close(c);
     }

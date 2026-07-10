@@ -6,13 +6,13 @@ namespace go.log;
 using context = context_package;
 using fmt = fmt_package;
 using io = io_package;
-using buffer = log.slog.@internal.buffer_package;
+using buffer = go.log.slog.@internal.buffer_package;
 using reflect = reflect_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using sync = sync_package;
 using time = time_package;
-using log.slog.@internal;
+using go.log.slog.@internal;
 
 partial class slog_package {
 
@@ -38,7 +38,7 @@ partial class slog_package {
     // or the method does not take a context.
     // The context is passed so Enabled can use its values
     // to make a decision.
-    bool Enabled(context.Context _, ΔLevel _);
+    bool Enabled(context.Context _Δp0, ΔLevel _Δp1);
     // Handle handles the Record.
     // It will only be called when Enabled returns true.
     // The Context argument is as for Enabled.
@@ -56,7 +56,7 @@ partial class slog_package {
     //   - If a group's key is empty, inline the group's Attrs.
     //   - If a group has no Attrs (even if it has a non-empty key),
     //     ignore it.
-    error Handle(context.Context _, Record _);
+    error Handle(context.Context _Δp0, Record _Δp1);
     // WithAttrs returns a new Handler whose attributes consist of
     // both the receiver's attributes and the arguments.
     // The Handler owns the slice: it may retain, modify or discard it.
@@ -96,32 +96,33 @@ internal static ж<defaultHandler> newDefaultHandler(Func<uintptr, slice<byte>, 
     ));
 }
 
-[GoRecv] internal static bool Enabled(this ref defaultHandler _, context.Context _, ΔLevel l) {
-    return l >= logLoggerLevel.Level();
+[GoRecv] internal static bool Enabled(this ref defaultHandler _Δp0, context.Context _Δp1, ΔLevel l) {
+    return l >= ᏑlogLoggerLevel.Level();
 }
 
 // Collect the level, attributes and message in a string and
 // write it with the default log.Logger.
 // Let the log.Logger handle time and file/line.
-[GoRecv] internal static error Handle(this ref defaultHandler h, context.Context ctx, Record r) => func((defer, _) => {
+internal static error Handle(this ж<defaultHandler> Ꮡh, context.Context ctx, Record r) => func((defer, recover) => {
+    ref var h = ref Ꮡh.Value;
+
     var buf = buffer.New();
     buf.WriteString(r.Level.String());
     buf.WriteByte((rune)' ');
     buf.WriteString(r.Message);
     ref var state = ref heap<handleState>(out var Ꮡstate);
     state = h.ch.newHandleState(buf, true, " "u8);
-    var stateʗ1 = state;
-    defer(stateʗ1.free);
-    state.appendNonBuiltIns(r);
-    return h.output(r.PC, buf.val);
+    defer(Ꮡstate.free);
+    Ꮡstate.appendNonBuiltIns(r);
+    return h.output(r.PC, buf.ValueSlot);
 });
 
 [GoRecv] internal static ΔHandler WithAttrs(this ref defaultHandler h, slice<Attr> @as) {
-    return new defaultHandler(h.ch.withAttrs(@as), h.output);
+    return new defaultHandlerжΔHandler(Ꮡ(new defaultHandler(h.ch.withAttrs(@as), h.output)));
 }
 
 [GoRecv] internal static ΔHandler WithGroup(this ref defaultHandler h, @string name) {
-    return new defaultHandler(h.ch.withGroup(name), h.output);
+    return new defaultHandlerжΔHandler(Ꮡ(new defaultHandler(h.ch.withGroup(name), h.output)));
 }
 
 // HandlerOptions are options for a [TextHandler] or [JSONHandler].
@@ -161,7 +162,7 @@ internal static ж<defaultHandler> newDefaultHandler(Func<uintptr, slice<byte>, 
     // attributes, convert types (for example, to replace a `time.Time` with the
     // integer seconds since the Unix epoch), sanitize personal information, or
     // remove attributes from the output.
-    public slog.Attr ReplaceAttr;
+    public Func<slice<@string>, Attr, Attr> ReplaceAttr;
 }
 
 // Keys for "built-in" attributes.
@@ -184,8 +185,8 @@ public static readonly @string SourceKey = "source"u8;
     internal @string groupPrefix;
     internal slice<@string> groups; // all groups started from WithGroup
     internal nint nOpenGroups;     // the number of groups opened in preformattedAttrs
-    internal ж<sync_package.Mutex> mu;
-    internal io_package.Writer w;
+    internal ж<sync.Mutex> mu;
+    internal io.Writer w;
 }
 
 [GoRecv] internal static ж<commonHandler> clone(this ref commonHandler h) {
@@ -193,9 +194,9 @@ public static readonly @string SourceKey = "source"u8;
     return Ꮡ(new commonHandler(
         json: h.json,
         opts: h.opts,
-        preformattedAttrs: slices.Clip(h.preformattedAttrs),
+        preformattedAttrs: slices.Clip<slice<byte>, byte>(h.preformattedAttrs),
         groupPrefix: h.groupPrefix,
-        groups: slices.Clip(h.groups),
+        groups: slices.Clip<slice<@string>, @string>(h.groups),
         nOpenGroups: h.nOpenGroups,
         w: h.w,
         mu: h.mu
@@ -214,21 +215,22 @@ public static readonly @string SourceKey = "source"u8;
     return l >= minLevel;
 }
 
-[GoRecv("capture")] internal static ж<commonHandler> withAttrs(this ref commonHandler h, slice<Attr> @as) => func((defer, _) => {
+internal static ж<commonHandler> withAttrs(this ж<commonHandler> Ꮡh, slice<Attr> @as) => func((defer, recover) => {
+    ref var h = ref Ꮡh.Value;
+
     // We are going to ignore empty groups, so if the entire slice consists of
     // them, there is nothing to do.
     if (countEmptyGroups(@as) == len(@as)) {
-        return withAttrsꓸᏑh;
+        return Ꮡh;
     }
     var h2 = h.clone();
     // Pre-format the attributes as an optimization.
     ref var state = ref heap<handleState>(out var Ꮡstate);
-    state = h2.newHandleState((ж<buffer.Buffer>)(Ꮡ((~h2).preformattedAttrs)), false, ""u8);
-    var stateʗ1 = state;
-    defer(stateʗ1.free);
+    state = h2.newHandleState(Ꮡ(new buffer.Buffer((~h2).preformattedAttrs)), false, ""u8);
+    defer(Ꮡstate.free);
     state.prefix.WriteString(h.groupPrefix);
     {
-        var pfa = h2.val.preformattedAttrs; if (len(pfa) > 0) {
+        var pfa = h2.Value.preformattedAttrs; if (len(pfa) > 0) {
             state.sep = h.attrSep();
             if ((~h2).json && pfa[len(pfa) - 1] == (rune)'{') {
                 state.sep = ""u8;
@@ -238,31 +240,32 @@ public static readonly @string SourceKey = "source"u8;
     // Remember the position in the buffer, in case all attrs are empty.
     nint pos = state.buf.Len();
     state.openGroups();
-    if (!state.appendAttrs(@as)){
+    if (!Ꮡstate.appendAttrs(@as)){
         state.buf.SetLen(pos);
     } else {
         // Remember the new prefix for later keys.
-        h2.val.groupPrefix = state.prefix.String();
+        h2.Value.groupPrefix = state.prefix.String();
         // Remember how many opened groups are in preformattedAttrs,
         // so we don't open them again when we handle a Record.
-        h2.val.nOpenGroups = len((~h2).groups);
+        h2.Value.nOpenGroups = len((~h2).groups);
     }
     return h2;
 });
 
 [GoRecv] internal static ж<commonHandler> withGroup(this ref commonHandler h, @string name) {
     var h2 = h.clone();
-    h2.val.groups = append((~h2).groups, name);
+    h2.Value.groups = builtin.append((~h2).groups, name);
     return h2;
 }
 
 // handle is the internal implementation of Handler.Handle
 // used by TextHandler and JSONHandler.
-[GoRecv] internal static error handle(this ref commonHandler h, Record r) => func((defer, _) => {
+internal static error handle(this ж<commonHandler> Ꮡh, Record r) => func((defer, recover) => {
+    ref var h = ref Ꮡh.Value;
+
     ref var state = ref heap<handleState>(out var Ꮡstate);
-    state = h.newHandleState(buffer.New(), true, ""u8);
-    var stateʗ1 = state;
-    defer(stateʗ1.free);
+    state = Ꮡh.newHandleState(buffer.New(), true, ""u8);
+    defer(Ꮡstate.free);
     if (h.json) {
         state.buf.WriteByte((rune)'{');
     }
@@ -278,9 +281,9 @@ public static readonly @string SourceKey = "source"u8;
         // strip monotonic to match Attr behavior
         if (rep == default!){
             state.appendKey(keyΔ1);
-            state.appendTime(valΔ1);
+            Ꮡstate.appendTime(valΔ1);
         } else {
-            state.appendAttr(Time(keyΔ1, valΔ1));
+            Ꮡstate.appendAttr(Time(keyΔ1, valΔ1));
         }
     }
     // level
@@ -290,11 +293,11 @@ public static readonly @string SourceKey = "source"u8;
         state.appendKey(key);
         state.appendString(val.String());
     } else {
-        state.appendAttr(Any(key, val));
+        Ꮡstate.appendAttr(Any(key, val));
     }
     // source
     if (h.opts.AddSource) {
-        state.appendAttr(Any(SourceKey, r.source()));
+        Ꮡstate.appendAttr(Any(SourceKey, r.source()));
     }
     key = MessageKey;
     @string msg = r.Message;
@@ -302,26 +305,28 @@ public static readonly @string SourceKey = "source"u8;
         state.appendKey(key);
         state.appendString(msg);
     } else {
-        state.appendAttr(String(key, msg));
+        Ꮡstate.appendAttr(String(key, msg));
     }
     state.groups = stateGroups;
     // Restore groups passed to ReplaceAttrs.
-    state.appendNonBuiltIns(r);
+    Ꮡstate.appendNonBuiltIns(r);
     state.buf.WriteByte((rune)'\n');
     h.mu.Lock();
-    defer(h.mu.Unlock);
-    var (_, err) = h.w.Write(state.buf.val);
+    defer(Ꮡh.Value.mu.Unlock);
+    var (_, err) = h.w.Write(state.buf.ValueSlot);
     return err;
 });
 
-[GoRecv] internal static void appendNonBuiltIns(this ref handleState s, Record r) {
+internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
+    ref var s = ref Ꮡs.Value;
+
     // preformatted Attrs
     {
-        var pfa = s.h.preformattedAttrs; if (len(pfa) > 0) {
+        var pfa = s.h.Value.preformattedAttrs; if (len(pfa) > 0) {
             s.buf.WriteString(s.sep);
             s.buf.Write(pfa);
             s.sep = s.h.attrSep();
-            if (s.h.json && pfa[len(pfa) - 1] == (rune)'{') {
+            if ((~s.h).json && pfa[len(pfa) - 1] == (rune)'{') {
                 s.sep = ""u8;
             }
         }
@@ -329,31 +334,31 @@ public static readonly @string SourceKey = "source"u8;
     // Attrs in Record -- unlike the built-in ones, they are in groups started
     // from WithGroup.
     // If the record has no Attrs, don't output any groups.
-    nint nOpenGroups = s.h.nOpenGroups;
+    nint nOpenGroups = s.h.Value.nOpenGroups;
     if (r.NumAttrs() > 0) {
-        s.prefix.WriteString(s.h.groupPrefix);
+        s.prefix.WriteString((~s.h).groupPrefix);
         // The group may turn out to be empty even though it has attrs (for
         // example, ReplaceAttr may delete all the attrs).
         // So remember where we are in the buffer, to restore the position
         // later if necessary.
         nint pos = s.buf.Len();
         s.openGroups();
-        nOpenGroups = len(s.h.groups);
+        nOpenGroups = len((~s.h).groups);
         var empty = true;
         r.Attrs((Attr a) => {
-            if (s.appendAttr(a)) {
+            if (Ꮡs.appendAttr(a)) {
                 empty = false;
             }
             return true;
         });
         if (empty) {
             s.buf.SetLen(pos);
-            nOpenGroups = s.h.nOpenGroups;
+            nOpenGroups = s.h.Value.nOpenGroups;
         }
     }
-    if (s.h.json) {
+    if ((~s.h).json) {
         // Close all open groups.
-        foreach ((_, _) in s.h.groups[..(int)(nOpenGroups)]) {
+        foreach ((_, _) in (~s.h).groups[..(int)(nOpenGroups)]) {
             s.buf.WriteByte((rune)'}');
         }
         // Close the top-level object.
@@ -374,51 +379,53 @@ public static readonly @string SourceKey = "source"u8;
 // before the next key, after which it stays true.
 [GoType] partial struct handleState {
     internal ж<commonHandler> h;
-    internal ж<log.slog.@internal.buffer_package.Buffer> buf;
+    internal ж<buffer.Buffer> buf;
     internal bool freeBuf;           // should buf be freed?
     internal @string sep;        // separator to write before next key
-    internal ж<log.slog.@internal.buffer_package.Buffer> prefix; // for text: key prefix
+    internal ж<buffer.Buffer> prefix; // for text: key prefix
     internal ж<slice<@string>> groups; // pool-allocated slice of active groups, for ReplaceAttr
 }
 
-internal static sync.Pool groupPool = new sync.Pool(New: () => {
+internal static ж<sync.Pool> ᏑgroupPool = new(new sync.Pool(New: () => {
     var s = new slice<@string>(0, 10);
     return Ꮡ(s);
 }
-);
+));
+internal static ref sync.Pool groupPool => ref ᏑgroupPool.Value;
 
-[GoRecv] internal static handleState newHandleState(this ref commonHandler h, ж<buffer.Buffer> Ꮡbuf, bool freeBuf, @string sep) {
-    ref var buf = ref Ꮡbuf.val;
+internal static handleState newHandleState(this ж<commonHandler> Ꮡh, ж<buffer.Buffer> Ꮡbuf, bool freeBuf, @string sep) {
+    ref var h = ref Ꮡh.Value;
+    ref var buf = ref Ꮡbuf.Value;
 
     var s = new handleState(
-        h: h,
-        buf: buf,
+        h: Ꮡh,
+        buf: Ꮡbuf,
         freeBuf: freeBuf,
         sep: sep,
         prefix: buffer.New()
     );
     if (h.opts.ReplaceAttr != default!) {
-        s.groups = groupPool.Get()._<slice<@string>.val>();
-        s.groups.val = append(s.groups.val, h.groups[..(int)(h.nOpenGroups)].ꓸꓸꓸ);
+        s.groups = ᏑgroupPool.Get()._<ж<slice<@string>>>();
+        s.groups.ValueSlot = builtin.append(s.groups.ValueSlot, h.groups[..(int)(h.nOpenGroups)].ꓸꓸꓸ);
     }
     return s;
 }
 
-[GoRecv] internal static unsafe void free(this ref handleState s) {
+[GoRecv] internal static void free(this ref handleState s) {
     if (s.freeBuf) {
         s.buf.Free();
     }
     {
         var gs = s.groups; if (gs != nil) {
-            gs.val = new Span<ж<slice<@string>>>((slice<@string>**), 0);
-            groupPool.Put(gs);
+            gs.ValueSlot = (gs.ValueSlot)[..0];
+            ᏑgroupPool.Put(gs);
         }
     }
     s.prefix.Free();
 }
 
 [GoRecv] internal static void openGroups(this ref handleState s) {
-    foreach (var (_, n) in s.h.groups[(int)(s.h.nOpenGroups)..]) {
+    foreach (var (_, n) in (~s.h).groups[(int)((~s.h).nOpenGroups)..]) {
         s.openGroup(n);
     }
 }
@@ -429,7 +436,7 @@ internal static readonly UntypedInt keyComponentSep = /* '.' */ 46;
 // openGroup starts a new group of attributes
 // with the given name.
 [GoRecv] internal static void openGroup(this ref handleState s, @string name) {
-    if (s.h.json){
+    if ((~s.h).json){
         s.appendKey(name);
         s.buf.WriteByte((rune)'{');
         s.sep = ""u8;
@@ -439,30 +446,32 @@ internal static readonly UntypedInt keyComponentSep = /* '.' */ 46;
     }
     // Collect group names for ReplaceAttr.
     if (s.groups != nil) {
-        s.groups.val = append(s.groups.val, name);
+        s.groups.ValueSlot = builtin.append(s.groups.ValueSlot, name);
     }
 }
 
 // closeGroup ends the group with the given name.
 [GoRecv] internal static void closeGroup(this ref handleState s, @string name) {
-    if (s.h.json){
+    if ((~s.h).json){
         s.buf.WriteByte((rune)'}');
     } else {
-        (s.prefix.val) = (s.prefix.val)[..(int)(len(s.prefix.val) - len(name) - 1)];
+        (s.prefix.ValueSlot) = (s.prefix.ValueSlot)[..(int)(len(s.prefix.ValueSlot) - len(name) - 1)];
     }
     /* for keyComponentSep */
     s.sep = s.h.attrSep();
     if (s.groups != nil) {
-        s.groups.val = (s.groups.val)[..(int)(len(s.groups.val) - 1)];
+        s.groups.ValueSlot = (s.groups.ValueSlot)[..(int)(len(s.groups.ValueSlot) - 1)];
     }
 }
 
 // appendAttrs appends the slice of Attrs.
 // It reports whether something was appended.
-[GoRecv] internal static bool appendAttrs(this ref handleState s, slice<Attr> @as) {
+internal static bool appendAttrs(this ж<handleState> Ꮡs, slice<Attr> @as) {
+    ref var s = ref Ꮡs.Value;
+
     var nonEmpty = false;
     foreach (var (_, a) in @as) {
-        if (s.appendAttr(a)) {
+        if (Ꮡs.appendAttr(a)) {
             nonEmpty = true;
         }
     }
@@ -472,13 +481,15 @@ internal static readonly UntypedInt keyComponentSep = /* '.' */ 46;
 // appendAttr appends the Attr's key and value.
 // It handles replacement and checking for an empty key.
 // It reports whether something was appended.
-[GoRecv] internal static bool appendAttr(this ref handleState s, Attr a) {
+internal static bool appendAttr(this ж<handleState> Ꮡs, Attr a) {
+    ref var s = ref Ꮡs.Value;
+
     a.Value = a.Value.Resolve();
     {
-        var rep = s.h.opts.ReplaceAttr; if (rep != default! && a.Value.Kind() != KindGroup) {
+        var rep = s.h.Value.opts.ReplaceAttr; if (rep != default! && a.Value.Kind() != KindGroup) {
             slice<@string> gs = default!;
             if (s.groups != nil) {
-                gs = s.groups.val;
+                gs = s.groups.ValueSlot;
             }
             // a.Value is resolved before calling ReplaceAttr, so the user doesn't have to.
             a = rep(gs, a);
@@ -494,8 +505,8 @@ internal static readonly UntypedInt keyComponentSep = /* '.' */ 46;
     {
         var v = a.Value; if (v.Kind() == KindAny) {
             {
-                var (src, ok) = v.Any()._<Source.val>(ᐧ); if (ok) {
-                    if (s.h.json){
+                var (src, ok) = v.Any()._<ж<Source>>(ᐧ); if (ok) {
+                    if ((~s.h).json){
                         a.Value = src.group();
                     } else {
                         a.Value = StringValue(fmt.Sprintf("%s:%d"u8, (~src).File, (~src).Line));
@@ -517,7 +528,7 @@ internal static readonly UntypedInt keyComponentSep = /* '.' */ 46;
             if (a.Key != ""u8) {
                 s.openGroup(a.Key);
             }
-            if (!s.appendAttrs(attrs)) {
+            if (!Ꮡs.appendAttrs(attrs)) {
                 s.buf.SetLen(pos);
                 return false;
             }
@@ -527,7 +538,7 @@ internal static readonly UntypedInt keyComponentSep = /* '.' */ 46;
         }
     } else {
         s.appendKey(a.Key);
-        s.appendValue(a.Value);
+        Ꮡs.appendValue(a.Value);
     }
     return true;
 }
@@ -538,13 +549,13 @@ internal static readonly UntypedInt keyComponentSep = /* '.' */ 46;
 
 [GoRecv] internal static void appendKey(this ref handleState s, @string key) {
     s.buf.WriteString(s.sep);
-    if (s.prefix != nil && len(s.prefix.val) > 0){
+    if (s.prefix != nil && len(s.prefix.ValueSlot) > 0){
         // TODO: optimize by avoiding allocation.
-        s.appendString(((@string)(s.prefix.val)) + key);
+        s.appendString(((@string)(slice<byte>)s.prefix.ValueSlot) + key);
     } else {
         s.appendString(key);
     }
-    if (s.h.json){
+    if ((~s.h).json){
         s.buf.WriteByte((rune)':');
     } else {
         s.buf.WriteByte((rune)'=');
@@ -553,21 +564,23 @@ internal static readonly UntypedInt keyComponentSep = /* '.' */ 46;
 }
 
 [GoRecv] internal static void appendString(this ref handleState s, @string str) {
-    if (s.h.json){
+    if ((~s.h).json){
         s.buf.WriteByte((rune)'"');
-        s.buf.val = appendEscapedJSONString(s.buf.val, str);
+        s.buf.ValueSlot = appendEscapedJSONString(s.buf.ValueSlot, str);
         s.buf.WriteByte((rune)'"');
     } else {
         // text
         if (needsQuoting(str)){
-            s.buf.val = strconv.AppendQuote(s.buf.val, str);
+            s.buf.ValueSlot = strconv.AppendQuote(s.buf.ValueSlot, str);
         } else {
             s.buf.WriteString(str);
         }
     }
 }
 
-[GoRecv] internal static void appendValue(this ref handleState s, Value v) => func((defer, recover) => {
+internal static void appendValue(this ж<handleState> Ꮡs, Value v) => func((defer, recover) => {
+    ref var s = ref Ꮡs.Value;
+
     var vʗ1 = v;
     defer(() => {
         {
@@ -578,33 +591,35 @@ internal static readonly UntypedInt keyComponentSep = /* '.' */ 46;
                 //
                 // Adapted from the code in fmt/print.go.
                 {
-                    ref var vʗ1 = ref heap<reflect_package.ΔValue>(out var Ꮡvʗ1);
-                    vʗ1 = reflect.ValueOf(vʗ1.any); if (vʗ1.Kind() == reflect.ΔPointer && vʗ1.IsNil()) {
-                        s.appendString("<nil>"u8);
+                    ref var vΔ1 = ref heap<reflectꓸValue>(out var ᏑvΔ1);
+                    vΔ1 = reflect.ValueOf(vʗ1.any); if (vΔ1.Kind() == reflect.ΔPointer && vΔ1.IsNil()) {
+                        Ꮡs.Value.appendString("<nil>"u8);
                         return;
                     }
                 }
                 // Otherwise just print the original panic message.
-                s.appendString(fmt.Sprintf("!PANIC: %v"u8, r));
+                Ꮡs.Value.appendString(fmt.Sprintf("!PANIC: %v"u8, r));
             }
         }
     });
     error err = default!;
-    if (s.h.json){
-        err = appendJSONValue(s, v);
+    if ((~s.h).json){
+        err = appendJSONValue(Ꮡs, v);
     } else {
-        err = appendTextValue(s, v);
+        err = appendTextValue(Ꮡs, v);
     }
     if (err != default!) {
         s.appendError(err);
     }
 });
 
-[GoRecv] internal static void appendTime(this ref handleState s, time.Time t) {
-    if (s.h.json){
-        appendJSONTime(s, t);
+internal static void appendTime(this ж<handleState> Ꮡs, time.Time t) {
+    ref var s = ref Ꮡs.Value;
+
+    if ((~s.h).json){
+        appendJSONTime(Ꮡs, t);
     } else {
-        s.buf.val = appendRFC3339Millis(s.buf.val, t);
+        s.buf.ValueSlot = appendRFC3339Millis(s.buf.ValueSlot, t);
     }
 }
 
@@ -615,9 +630,9 @@ internal static slice<byte> appendRFC3339Millis(slice<byte> b, time.Time t) {
     // to guarantee that there are exactly 4 digits after the period.
     const nint prefixLen = /* len("2006-01-02T15:04:05.000") */ 23;
     nint n = len(b);
-    t = t.Truncate(time.Millisecond).Add(time.Millisecond / 10);
-    b = t.AppendFormat(b, time.RFC3339Nano);
-    b = append(b[..(int)(n + prefixLen)], b[(int)(n + prefixLen + 1)..].ꓸꓸꓸ);
+    t = t.Truncate(time_package.Millisecond).Add(time_package.Millisecond / 10);
+    b = t.AppendFormat(b, time_package.RFC3339Nano);
+    b = builtin.append(b[..(int)(n + prefixLen)], b[(int)(n + prefixLen + 1)..].ꓸꓸꓸ);
     // drop the 4th digit
     return b;
 }

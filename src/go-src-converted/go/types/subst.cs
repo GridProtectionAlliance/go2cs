@@ -6,10 +6,12 @@
 // This file implements type parameter substitution.
 namespace go.go;
 
-using token = go.token_package;
+using token = global::go.go.token_package;
+using global::go.go;
 
 partial class types_package {
-/* visitMapType: map[*TypeParam]Type */
+
+[GoType("map[ж<TypeParam>, ΔType]")] partial struct substMap;
 
 // makeSubstMap creates a new substitution map mapping tpars[i] to targs[i].
 // If targs[i] is nil, tpars[i] is not substituted.
@@ -28,7 +30,7 @@ internal static substMap makeRenameMap(slice<ж<TypeParam>> from, slice<ж<TypeP
     assert(len(from) == len(to));
     var proj = new substMap(len(from));
     foreach (var (i, tpar) in from) {
-        proj[tpar] = to[i];
+        proj[tpar] = new TypeParamжΔType(to[i]);
     }
     return proj;
 }
@@ -38,14 +40,14 @@ internal static bool empty(this substMap m) {
 }
 
 internal static ΔType lookup(this substMap m, ж<TypeParam> Ꮡtpar) {
-    ref var tpar = ref Ꮡtpar.val;
+    ref var tpar = ref Ꮡtpar.Value;
 
     {
-        var t = m[tpar]; if (t != default!) {
+        var t = m[Ꮡtpar]; if (t != default!) {
             return t;
         }
     }
-    return ~tpar;
+    return new TypeParamжΔType(Ꮡtpar);
 }
 
 // subst returns the type typ with its type parameters tpars replaced by the
@@ -55,20 +57,21 @@ internal static ΔType lookup(this substMap m, ж<TypeParam> Ꮡtpar) {
 //
 // If expanding is non-nil, it is the instance type currently being expanded.
 // One of expanding or ctxt must be non-nil.
-[GoRecv] public static ΔType subst(this ref Checker check, tokenꓸPos pos, ΔType typ, substMap smap, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) {
-    ref var expanding = ref Ꮡexpanding.val;
-    ref var ctxt = ref Ꮡctxt.val;
+internal static ΔType subst(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔType typ, substMap smap, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) {
+    ref var check = ref Ꮡcheck.Value;
+    ref var expanding = ref Ꮡexpanding.DerefOrNil();
+    ref var ctxt = ref Ꮡctxt.DerefOrNil();
 
-    assert(expanding != nil || ctxt != nil);
+    assert(Ꮡexpanding != nil || Ꮡctxt != nil);
     if (smap.empty()) {
         return typ;
     }
     // common cases
     switch (typ.type()) {
-    case Basic.val t: {
+    case ж<Basic> t: {
         return typ;
     }
-    case TypeParam.val t: {
+    case ж<TypeParam> t: {
         return smap.lookup(t);
     }}
     // nothing to do
@@ -76,15 +79,15 @@ internal static ΔType lookup(this substMap m, ж<TypeParam> Ꮡtpar) {
     var subst = new subster(
         pos: pos,
         smap: smap,
-        check: check,
-        expanding: expanding,
-        ctxt: ctxt
+        check: Ꮡcheck,
+        expanding: Ꮡexpanding,
+        ctxt: Ꮡctxt
     );
     return subst.typ(typ);
 }
 
 [GoType] partial struct subster {
-    internal go.token_package.ΔPos pos;
+    internal tokenꓸPos pos;
     internal substMap smap;
     internal ж<Checker> check; // nil if called via Instantiate
     internal ж<Named> expanding; // if non-nil, the instance that is being expanded
@@ -93,14 +96,14 @@ internal static ΔType lookup(this substMap m, ж<TypeParam> Ꮡtpar) {
 
 [GoRecv] internal static ΔType typ(this ref subster subst, ΔType typ) {
     switch (typ.type()) {
-    case default! t: {
+    case null: {
         throw panic("nil typ");
         break;
     }
-    case Basic.val t: {
+    case ж<Basic> t: {
         break;
     }
-    case Alias.val t: {
+    case ж<Alias> t: {
         var orig = t.Origin();
         nint n = orig.TypeParams().Len();
         if (n == 0) {
@@ -108,12 +111,12 @@ internal static ΔType lookup(this substMap m, ж<TypeParam> Ꮡtpar) {
             // nothing to do
             // This code follows the code for *Named types closely.
             // TODO(gri) try to factor better
-            return ~t;
+            return new AliasжΔType(t);
         }
         if (t.TypeArgs().Len() != n) {
             // type is not parameterized
             // TODO(gri) do we need this for Alias types?
-            return ~Typ[Invalid];
+            return new BasicжΔType(Typ[Invalid]);
         }
         var (targs, updated) = subst.typeList(t.TypeArgs().list());
         if (updated) {
@@ -122,46 +125,46 @@ internal static ΔType lookup(this substMap m, ж<TypeParam> Ꮡtpar) {
             // For each (existing) type argument determine if it needs
             // to be substituted; i.e., if it is or contains a type parameter
             // that has a type argument for it.
-            return ~subst.check.newAliasInstance(subst.pos, (~t).orig, targs, subst.expanding, subst.ctxt);
+            return new AliasжΔType(subst.check.newAliasInstance(subst.pos, (~t).orig, targs, subst.expanding, subst.ctxt));
         }
         break;
     }
-    case Array.val t: {
+    case ж<Array> t: {
         var elem = subst.typOrNil((~t).elem);
         if (!AreEqual(elem, (~t).elem)) {
-            return new Array(len: (~t).len, elem: elem);
+            return new ArrayжΔType(Ꮡ(new Array(len: (~t).len, elem: elem)));
         }
         break;
     }
-    case Slice.val t: {
-        elem = subst.typOrNil((~t).elem);
+    case ж<Slice> t: {
+        var elem = subst.typOrNil((~t).elem);
         if (!AreEqual(elem, (~t).elem)) {
-            return new Slice(elem: elem);
+            return new SliceжΔType(Ꮡ(new Slice(elem: elem)));
         }
         break;
     }
-    case Struct.val t: {
+    case ж<Struct> t: {
         {
             var (fields, copied) = subst.varList((~t).fields); if (copied) {
                 var s = Ꮡ(new Struct(fields: fields, tags: (~t).tags));
                 s.markComplete();
-                return ~s;
+                return new StructжΔType(s);
             }
         }
         break;
     }
-    case Pointer.val t: {
+    case ж<Pointer> t: {
         var @base = subst.typ((~t).@base);
         if (!AreEqual(@base, (~t).@base)) {
-            return new Pointer(@base: @base);
+            return new PointerжΔType(Ꮡ(new Pointer(@base: @base)));
         }
         break;
     }
-    case Tuple.val t: {
-        return ~subst.tuple(t);
+    case ж<Tuple> t: {
+        return new TupleжΔType(subst.tuple(t));
     }
-    case ΔSignature.val t: {
-        var recv = t.val.recv;
+    case ж<ΔSignature> t: {
+        var recv = t.Value.recv;
         var @params = subst.tuple((~t).@params);
         var results = subst.tuple((~t).results);
         if (@params != (~t).@params || results != (~t).results) {
@@ -178,7 +181,7 @@ internal static ΔType lookup(this substMap m, ж<TypeParam> Ꮡtpar) {
             // type of all of its methods. Because we have no type name to break
             // cycles, substituting in the recv results in an infinite loop of
             // recv->interface->recv->interface->...
-            return new ΔSignature(
+            return new ΔSignatureжΔType(Ꮡ(new ΔSignature(
                 rparams: (~t).rparams, // TODO(gri) why can't we nil out tparams here, rather than in instantiate?
 
                 tparams: (~t).tparams, // instantiated signatures have a nil scope
@@ -187,31 +190,31 @@ internal static ΔType lookup(this substMap m, ж<TypeParam> Ꮡtpar) {
                 @params: @params,
                 results: results,
                 variadic: (~t).variadic
-            );
+            )));
         }
         break;
     }
-    case Union.val t: {
+    case ж<Union> t: {
         var (terms, copied) = subst.termlist((~t).terms);
         if (copied) {
             // term list substitution may introduce duplicate terms (unlikely but possible).
             // This is ok; lazy type set computation will determine the actual type set
             // in normal form.
-            return new Union(terms);
+            return new UnionжΔType(Ꮡ(new Union(terms)));
         }
         break;
     }
-    case Interface.val t: {
+    case ж<Interface> t: {
         var (methods, mcopied) = subst.funcList((~t).methods);
         var (embeddeds, ecopied) = subst.typeList((~t).embeddeds);
         if (mcopied || ecopied) {
             var iface = subst.check.newInterface();
-            iface.val.embeddeds = embeddeds;
-            iface.val.embedPos = t.val.embedPos;
-            iface.val.@implicit = t.val.@implicit;
+            iface.Value.embeddeds = embeddeds;
+            iface.Value.embedPos = t.Value.embedPos;
+            iface.Value.@implicit = t.Value.@implicit;
             assert((~t).complete);
             // otherwise we are copying incomplete data
-            iface.val.complete = t.val.complete;
+            iface.Value.complete = t.Value.complete;
             // If we've changed the interface type, we may need to replace its
             // receiver if the receiver type is the original interface. Receivers of
             // *Named type are replaced during named type expansion.
@@ -225,47 +228,47 @@ internal static ΔType lookup(this substMap m, ж<TypeParam> Ꮡtpar) {
             // method signatures do not depend on the type parameter P, but we still
             // need to create new interface methods to hold the instantiated
             // receiver. This is handled by Named.expandUnderlying.
-            (iface.val.methods, _) = replaceRecvType(methods, ~t, ~iface);
+            (iface.Value.methods, _) = replaceRecvType(methods, new InterfaceжΔType(t), new InterfaceжΔType(iface));
             // If check != nil, check.newInterface will have saved the interface for later completion.
             if (subst.check == nil) {
                 // golang/go#61561: all newly created interfaces must be completed
                 iface.typeSet();
             }
-            return ~iface;
+            return new InterfaceжΔType(iface);
         }
         break;
     }
-    case Map.val t: {
+    case ж<Map> t: {
         var key = subst.typ((~t).key);
-        elem = subst.typ((~t).elem);
+        var elem = subst.typ((~t).elem);
         if (!AreEqual(key, (~t).key) || !AreEqual(elem, (~t).elem)) {
-            return new Map(key: key, elem: elem);
+            return new MapжΔType(Ꮡ(new Map(key: key, elem: elem)));
         }
         break;
     }
-    case Chan.val t: {
-        elem = subst.typ((~t).elem);
+    case ж<Chan> t: {
+        var elem = subst.typ((~t).elem);
         if (!AreEqual(elem, (~t).elem)) {
-            return new Chan(dir: (~t).dir, elem: elem);
+            return new ChanжΔType(Ꮡ(new Chan(dir: (~t).dir, elem: elem)));
         }
         break;
     }
-    case Named.val t: {
-        orig = t.Origin();
-        n = orig.TypeParams().Len();
+    case ж<Named> t: {
+        var orig = t.Origin();
+        nint n = orig.TypeParams().Len();
         if (n == 0) {
             // subst is called during expansion, so in this function we need to be
             // careful not to call any methods that would cause t to be expanded: doing
             // so would result in deadlock.
             //
             // So we call t.Origin().TypeParams() rather than t.TypeParams().
-            return ~t;
+            return new NamedжΔType(t);
         }
         if (t.TypeArgs().Len() != n) {
             // type is not parameterized
-            return ~Typ[Invalid];
+            return new BasicжΔType(Typ[Invalid]);
         }
-        (targs, updated) = subst.typeList(t.TypeArgs().list());
+        var (targs, updated) = subst.typeList(t.TypeArgs().list());
         if (updated) {
             // error reported elsewhere
             // already instantiated
@@ -276,15 +279,15 @@ internal static ΔType lookup(this substMap m, ж<TypeParam> Ꮡtpar) {
             // recursion. The position used here is irrelevant because validation only
             // occurs on t (we don't call validType on named), but we use subst.pos to
             // help with debugging.
-            return subst.check.instance(subst.pos, ~orig, targs, subst.expanding, subst.ctxt);
+            return subst.check.instance(subst.pos, new NamedжΔgenericType(orig), targs, subst.expanding, subst.ctxt);
         }
         break;
     }
-    case TypeParam.val t: {
+    case ж<TypeParam> t: {
         return subst.smap.lookup(t);
     }
     default: {
-        var t = typ.type();
+        var t = typ;
         throw panic("unreachable");
         break;
     }}
@@ -296,15 +299,15 @@ internal static ΔType lookup(this substMap m, ж<TypeParam> Ꮡtpar) {
 // where an array/slice element is accessed before it is set up.
 [GoRecv] internal static ΔType typOrNil(this ref subster subst, ΔType typ) {
     if (typ == default!) {
-        return ~Typ[Invalid];
+        return new BasicжΔType(Typ[Invalid]);
     }
     return subst.typ(typ);
 }
 
 [GoRecv] internal static ж<Var> var_(this ref subster subst, ж<Var> Ꮡv) {
-    ref var v = ref Ꮡv.val;
+    ref var v = ref Ꮡv.DerefOrNil();
 
-    if (v != nil) {
+    if (Ꮡv != nil) {
         {
             var typ = subst.typ(v.typ); if (!AreEqual(typ, v.typ)) {
                 return substVar(Ꮡv, typ);
@@ -315,19 +318,19 @@ internal static ΔType lookup(this substMap m, ж<TypeParam> Ꮡtpar) {
 }
 
 internal static ж<Var> substVar(ж<Var> Ꮡv, ΔType typ) {
-    ref var v = ref Ꮡv.val;
+    ref var v = ref Ꮡv.Value;
 
     ref var copy = ref heap<Var>(out var Ꮡcopy);
     copy = v;
     copy.typ = typ;
-    copy.origin = v.Origin();
+    copy.origin = Ꮡv.Origin();
     return Ꮡcopy;
 }
 
 [GoRecv] internal static ж<Tuple> tuple(this ref subster subst, ж<Tuple> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.DerefOrNil();
 
-    if (t != nil) {
+    if (Ꮡt != nil) {
         {
             var (vars, copied) = subst.varList(t.vars); if (copied) {
                 return Ꮡ(new Tuple(vars: vars));
@@ -361,9 +364,9 @@ internal static ж<Var> substVar(ж<Var> Ꮡv, ΔType typ) {
 }
 
 [GoRecv] internal static ж<Func> func_(this ref subster subst, ж<Func> Ꮡf) {
-    ref var f = ref Ꮡf.val;
+    ref var f = ref Ꮡf.DerefOrNil();
 
-    if (f != nil) {
+    if (Ꮡf != nil) {
         {
             var typ = subst.typ(f.typ); if (!AreEqual(typ, f.typ)) {
                 return substFunc(Ꮡf, typ);
@@ -374,12 +377,12 @@ internal static ж<Var> substVar(ж<Var> Ꮡv, ΔType typ) {
 }
 
 internal static ж<Func> substFunc(ж<Func> Ꮡf, ΔType typ) {
-    ref var f = ref Ꮡf.val;
+    ref var f = ref Ꮡf.Value;
 
     ref var copy = ref heap<Func>(out var Ꮡcopy);
     copy = f;
     copy.typ = typ;
-    copy.origin = f.Origin();
+    copy.origin = Ꮡf.Origin();
     return Ꮡcopy;
 }
 
@@ -465,7 +468,7 @@ internal static (slice<ж<Func>> @out, bool copied) replaceRecvType(slice<ж<Fun
     @out = @in;
     foreach (var (i, method) in @in) {
         var sig = method.Signature();
-        if ((~sig).recv != nil && AreEqual((~sig).recv.Type(), old)) {
+        if ((~sig).recv != nil && AreEqual((~sig).recv.of(Var.Ꮡobject).Type(), old)) {
             if (!copied) {
                 // Allocate a new methods slice before mutating for the first time.
                 // This is defensive, as we may share methods across instantiations of
@@ -475,9 +478,9 @@ internal static (slice<ж<Func>> @out, bool copied) replaceRecvType(slice<ж<Fun
                 copied = true;
             }
             ref var newsig = ref heap<ΔSignature>(out var Ꮡnewsig);
-            newsig = sig.val;
+            newsig = sig.Value;
             newsig.recv = substVar((~sig).recv, @new);
-            @out[i] = substFunc(method, ~Ꮡnewsig);
+            @out[i] = substFunc(method, new ΔSignatureжΔType(Ꮡnewsig));
         }
     }
     return (@out, copied);

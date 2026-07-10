@@ -18,27 +18,28 @@ using fmt = fmt_package;
 using io = io_package;
 using log = log_package;
 using net = net_package;
-using http = net.http_package;
-using textproto = net.textproto_package;
+using http = go.net.http_package;
+using textproto = go.net.textproto_package;
 using os = os_package;
-using exec = os.exec_package;
-using filepath = path.filepath_package;
+using exec = go.os.exec_package;
+using filepath = go.path.filepath_package;
 using regexp = regexp_package;
 using runtime = runtime_package;
 using strconv = strconv_package;
 using strings = strings_package;
-using httpguts = golang.org.x.net.http.httpguts_package;
-using golang.org.x.net.http;
-using net;
-using os;
-using path;
+using httpguts = vendor.golang.org.x.net.http.httpguts_package;
+using go.net;
+using go.os;
+using go.path;
+using url = go.net.url_package;
+using vendor.golang.org.x.net.http;
 using ꓸꓸꓸany = Span<any>;
 
 partial class cgi_package {
 
 internal static ж<regexp.Regexp> trailingPort = regexp.MustCompile(@":([0-9]+)$"u8);
 
-internal static slice<@string> osDefaultInheritEnv = () => {
+internal static slice<@string> osDefaultInheritEnv = ((Func<slice<@string>>)(() => {
     var exprᴛ1 = runtime.GOOS;
     if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
         return new @string[]{"DYLD_LIBRARY_PATH"}.slice();
@@ -60,7 +61,7 @@ internal static slice<@string> osDefaultInheritEnv = () => {
     }
 
     return default!;
-}();
+}))();
 
 // Handler runs an executable in a subprocess with a CGI environment.
 [GoType] partial struct Handler {
@@ -73,9 +74,9 @@ internal static slice<@string> osDefaultInheritEnv = () => {
     public @string Dir;
     public slice<@string> Env; // extra environment variables to set, if any, as "key=value"
     public slice<@string> InheritEnv; // environment variables to inherit from host, as "key"
-    public ж<log_package.Logger> Logger; // optional log for errors or nil to use log.Print
+    public ж<log.Logger> Logger; // optional log for errors or nil to use log.Print
     public slice<@string> Args; // optional arguments to pass to child process
-    public io_package.Writer Stderr;   // optional stderr for the child process; nil means os.Stderr
+    public io.Writer Stderr;   // optional stderr for the child process; nil means os.Stderr
     // PathLocationHandler specifies the root http Handler that
     // should handle internal redirects when the CGI process
     // returns a Location header value starting with a "/", as
@@ -84,14 +85,14 @@ internal static slice<@string> osDefaultInheritEnv = () => {
     //
     // If nil, a CGI response with a local URI path is instead sent
     // back to the client and not redirected internally.
-    public net.http_package.ΔHandler PathLocationHandler;
+    public httpꓸHandler PathLocationHandler;
 }
 
 [GoRecv] internal static io.Writer stderr(this ref Handler h) {
     if (h.Stderr != default!) {
         return h.Stderr;
     }
-    return ~os.Stderr;
+    return new os.FileжWriter(os.Stderr);
 }
 
 // removeLeadingDuplicates remove leading duplicate in environments.
@@ -125,16 +126,17 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
     return ret;
 }
 
-[GoRecv] public static void ServeHTTP(this ref Handler h, http.ResponseWriter rw, ж<http.Request> Ꮡreq) => func((defer, _) => {
-    ref var req = ref Ꮡreq.val;
+public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<http.Request> Ꮡreq) => func((defer, recover) => {
+    ref var h = ref Ꮡh.Value;
+    ref var req = ref Ꮡreq.Value;
 
     if (len(req.TransferEncoding) > 0 && req.TransferEncoding[0] == "chunked") {
         rw.WriteHeader(http.StatusBadRequest);
-        rw.Write(slice<byte>("Chunked request bodies are not supported by CGI."));
+        rw.Write(slice<byte>((@string)"Chunked request bodies are not supported by CGI."));
         return;
     }
     @string root = strings.TrimRight(h.Root, "/"u8);
-    @string pathInfo = strings.TrimPrefix(req.URL.Path, root);
+    @string pathInfo = strings.TrimPrefix((~req.URL).Path, root);
     @string port = "80"u8;
     if (req.TLS != nil) {
         port = "443"u8;
@@ -147,22 +149,22 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
     var env = new @string[]{
         "SERVER_SOFTWARE=go",
         "SERVER_PROTOCOL=HTTP/1.1",
-        "HTTP_HOST="u8 + req.Host,
+        "HTTP_HOST=" + req.Host,
         "GATEWAY_INTERFACE=CGI/1.1",
-        "REQUEST_METHOD="u8 + req.Method,
-        "QUERY_STRING="u8 + req.URL.RawQuery,
-        "REQUEST_URI="u8 + req.URL.RequestURI(),
-        "PATH_INFO="u8 + pathInfo,
-        "SCRIPT_NAME="u8 + root,
-        "SCRIPT_FILENAME="u8 + h.Path,
-        "SERVER_PORT="u8 + port
+        "REQUEST_METHOD=" + req.Method,
+        "QUERY_STRING=" + (~req.URL).RawQuery,
+        "REQUEST_URI=" + req.URL.RequestURI(),
+        "PATH_INFO=" + pathInfo,
+        "SCRIPT_NAME=" + root,
+        "SCRIPT_FILENAME=" + h.Path,
+        "SERVER_PORT=" + port
     }.slice();
     {
         var (remoteIP, remotePort, errΔ1) = net.SplitHostPort(req.RemoteAddr); if (errΔ1 == default!){
-            env = append(env, "REMOTE_ADDR="u8 + remoteIP, "REMOTE_HOST="u8 + remoteIP, "REMOTE_PORT="u8 + remotePort);
+            env = append(env, "REMOTE_ADDR="u8 + remoteIP, "REMOTE_HOST=" + remoteIP, "REMOTE_PORT=" + remotePort);
         } else {
             // could not parse ip:port, let's use whole RemoteAddr and leave REMOTE_PORT undefined
-            env = append(env, "REMOTE_ADDR="u8 + req.RemoteAddr, "REMOTE_HOST="u8 + req.RemoteAddr);
+            env = append(env, "REMOTE_ADDR="u8 + req.RemoteAddr, "REMOTE_HOST=" + req.RemoteAddr);
         }
     }
     {
@@ -175,7 +177,9 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
     if (req.TLS != nil) {
         env = append(env, "HTTPS=on"u8);
     }
-    foreach (var (k, v) in req.Header) {
+    foreach (var (kᴛ1, v) in req.Header) {
+        var k = kᴛ1;
+
         k = strings.Map(upperCaseAndUnderscore, k);
         if (k == "PROXY"u8) {
             // See Issue 16405
@@ -229,9 +233,9 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
     if (cwd == ""u8) {
         cwd = "."u8;
     }
-    var internalError = (error err) => {
+    var internalError = (error errΔ3) => {
         rw.WriteHeader(http.StatusInternalServerError);
-        h.printf("CGI error: %v"u8, errΔ3);
+        Ꮡh.Value.printf("CGI error: %v"u8, errΔ3);
     };
     var cmd = Ꮡ(new exec.Cmd(
         Path: path,
@@ -241,9 +245,9 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
         Stderr: h.stderr()
     ));
     if (req.ContentLength != 0) {
-        cmd.val.Stdin = req.Body;
+        cmd.Value.Stdin = req.Body;
     }
-    (stdoutRead, err) = cmd.StdoutPipe();
+    var (stdoutRead, err) = cmd.StdoutPipe();
     if (err != default!) {
         internalError(err);
         return;
@@ -259,9 +263,9 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
         }
     }
     var cmdʗ1 = cmd;
-    defer(cmdʗ1.Wait);
+    defer(() => cmdʗ1.Wait());
     var stdoutReadʗ1 = stdoutRead;
-    defer(stdoutReadʗ1.Close);
+    defer(() => stdoutReadʗ1.Close());
     var linebody = bufio.NewReaderSize(stdoutRead, 1024);
     var headers = new httpꓸHeader();
     nint statusCode = 0;
@@ -303,8 +307,8 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
                 h.printf("cgi: bogus status (short): %q"u8, val);
                 return;
             }
-            var (code, err) = strconv.Atoi(val[0..3]);
-            if (err != default!) {
+            var (code, errΔ6) = strconv.Atoi(val[0..3]);
+            if (errΔ6 != default!) {
                 h.printf("cgi: bogus status: %q"u8, val);
                 h.printf("cgi: line was %q"u8, line);
                 return;
@@ -351,7 +355,7 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
         }
     }
     rw.WriteHeader(statusCode);
-    (_, err) = io.Copy(rw, ~linebody);
+    (_, err) = io.Copy(new http_ResponseWriterᴠWriter(rw), new bufio_ReaderжReader(linebody));
     if (err != default!) {
         h.printf("cgi: copy error: %v"u8, err);
         // And kill the child CGI process so we don't hang on
@@ -374,10 +378,10 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
     }
 }
 
-[GoRecv] public static void handleInternalRedirect(this ref Handler h, http.ResponseWriter rw, ж<http.Request> Ꮡreq, @string path) {
-    ref var req = ref Ꮡreq.val;
+[GoRecv] internal static void handleInternalRedirect(this ref Handler h, http.ResponseWriter rw, ж<http.Request> Ꮡreq, @string path) {
+    ref var req = ref Ꮡreq.Value;
 
-    (url, err) = req.URL.Parse(path);
+    var (url, err) = req.URL.Parse(path);
     if (err != default!) {
         rw.WriteHeader(http.StatusInternalServerError);
         h.printf("cgi: error resolving local URI path %q: %v"u8, path, err);

@@ -27,10 +27,10 @@ public static readonly UntypedInt ΔSize = 16;
 // The blocksize of MD5 in bytes.
 public static readonly UntypedInt ΔBlockSize = 64;
 
-internal static readonly UntypedInt init0 = /* 0x67452301 */ 1732584193;
-internal static readonly UntypedInt init1 = /* 0xEFCDAB89 */ 4023233417;
-internal static readonly UntypedInt init2 = /* 0x98BADCFE */ 2562383102;
-internal static readonly UntypedInt init3 = /* 0x10325476 */ 271733878;
+internal static readonly UntypedInt init0 = 0x67452301;
+internal static readonly UntypedInt init1 = 0xEFCDAB89;
+internal static readonly UntypedInt init2 = 0x98BADCFE;
+internal static readonly UntypedInt init3 = 0x10325476;
 
 // digest represents the partial evaluation of a checksum.
 [GoType] partial struct digest {
@@ -80,7 +80,7 @@ internal const nint marshaledSize = /* len(magic) + 4*4 + BlockSize + 8 */ 92;
     (b, d.s[3]) = consumeUint32(b);
     b = b[(int)(copy(d.x[..], b))..];
     (b, d.len) = consumeUint64(b);
-    d.nx = ((nint)(d.len % ΔBlockSize));
+    d.nx = (nint)(d.len % (uint64)ΔBlockSize);
     return default!;
 }
 
@@ -98,7 +98,7 @@ internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
 public static hash.Hash New() {
     var d = @new<digest>();
     d.Reset();
-    return ~d;
+    return new digestжHash(d);
 }
 
 [GoRecv] internal static nint Size(this ref digest d) {
@@ -109,34 +109,35 @@ public static hash.Hash New() {
     return ΔBlockSize;
 }
 
-[GoRecv] internal static (nint nn, error err) Write(this ref digest d, slice<byte> p) {
+internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) {
     nint nn = default!;
     error err = default!;
 
+    ref var d = ref Ꮡd.Value;
     // Note that we currently call block or blockGeneric
     // directly (guarded using haveAsm) because this allows
     // escape analysis to see that p and d don't escape.
     nn = len(p);
-    d.len += ((uint64)nn);
+    d.len += (uint64)nn;
     if (d.nx > 0) {
         nint n = copy(d.x[(int)(d.nx)..], p);
         d.nx += n;
         if (d.nx == ΔBlockSize) {
             if (haveAsm){
-                block(d, d.x[..]);
+                block(Ꮡd, d.x[..]);
             } else {
-                blockGeneric(d, d.x[..]);
+                blockGeneric(Ꮡd, d.x[..]);
             }
             d.nx = 0;
         }
         p = p[(int)(n)..];
     }
     if (len(p) >= ΔBlockSize) {
-        nint n = (nint)(len(p) & ~(ΔBlockSize - 1));
+        nint n = (nint)(len(p) & ~(nint)(ΔBlockSize - 1));
         if (haveAsm){
-            block(d, p[..(int)(n)]);
+            block(Ꮡd, p[..(int)(n)]);
         } else {
-            blockGeneric(d, p[..(int)(n)]);
+            blockGeneric(Ꮡd, p[..(int)(n)]);
         }
         p = p[(int)(n)..];
     }
@@ -148,23 +149,26 @@ public static hash.Hash New() {
 
 [GoRecv] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     // Make a copy of d so that caller can keep writing and summing.
-    var d0 = d;
-    var hash = d0.checkSum();
+    ref var d0 = ref heap<digest>(out var Ꮡd0);
+    d0 = d;
+    var hash = Ꮡd0.checkSum();
     return append(@in, hash[..].ꓸꓸꓸ);
 }
 
-[GoRecv] internal static array<byte> checkSum(this ref digest d) {
+internal static array<byte> checkSum(this ж<digest> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
     // Append 0x80 to the end of the message and then append zeros
     // until the length is a multiple of 56 bytes. Finally append
     // 8 bytes representing the message length in bits.
     //
     // 1 byte end marker :: 0-63 padding bytes :: 8 byte length
-    var tmp = new byte[]{128}.array();
+    var tmp = new byte[]{0x80}.array();
     var pad = (55 - d.len) % 64;
     // calculate number of padding bytes
-    byteorder.LePutUint64(tmp[(int)(1 + pad)..], d.len << (int)(3));
+    byteorder.LePutUint64(tmp[(int)(1 + pad)..], (d.len << (int)(3)));
     // append length in bits
-    d.Write(tmp[..(int)(1 + pad + 8)]);
+    Ꮡd.Write(tmp[..(int)(1 + pad + 8)]);
     // The previous write ensures that a whole number of
     // blocks (i.e. a multiple of 64 bytes) have been hashed.
     if (d.nx != 0) {
@@ -180,10 +184,10 @@ public static hash.Hash New() {
 
 // Sum returns the MD5 checksum of the data.
 public static array<byte> Sum(slice<byte> data) {
-    digest d = default!;
+    ref var d = ref heap(new digest(), out var Ꮡd);
     d.Reset();
-    d.Write(data);
-    return d.checkSum();
+    Ꮡd.Write(data);
+    return Ꮡd.checkSum();
 }
 
 } // end md5_package

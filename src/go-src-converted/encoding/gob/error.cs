@@ -35,8 +35,8 @@ internal static void error_(error err) {
 
 // catchError is meant to be used as a deferred function to turn a panic(gobError) into a
 // plain error. It overwrites the error return of the function that deferred its call.
-internal static void catchError(ж<error> Ꮡerr) => func((_, recover) => {
-    ref var err = ref Ꮡerr.val;
+internal static void catchError(ж<error> Ꮡerr) => func((defer, recover) => {
+    ref var err = ref Ꮡerr.Value;
 
     {
         var e = recover(); if (e != default!) {

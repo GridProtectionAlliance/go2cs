@@ -16,14 +16,17 @@ internal static bool ratTok(rune ch) {
     return strings.ContainsRune("+-/0123456789.eE"u8, ch);
 }
 
-internal static ΔRat ratZero;
+internal static ж<ΔRat> ᏑratZero = new(default(ΔRat));
+internal static ref ΔRat ratZero => ref ᏑratZero.Value;
 
-internal static fmt.Scanner Δ_ = Ꮡ(ratZero); // *Rat must implement fmt.Scanner
+internal static fmt.Scanner _ᴛ6ʗ = new ΔRatжScanner(ᏑratZero); // *Rat must implement fmt.Scanner
 
 // Scan is a support routine for fmt.Scanner. It accepts the formats
 // 'e', 'E', 'f', 'F', 'g', 'G', and 'v'. All formats are equivalent.
-[GoRecv] public static error Scan(this ref ΔRat z, fmt.ScanState s, rune ch) {
-    (tok, err) = s.Token(true, ratTok);
+public static error Scan(this ж<ΔRat> Ꮡz, fmt.ScanState s, rune ch) {
+    ref var z = ref Ꮡz.Value;
+
+    var (tok, err) = s.Token(true, ratTok);
     if (err != default!) {
         return err;
     }
@@ -31,7 +34,7 @@ internal static fmt.Scanner Δ_ = Ꮡ(ratZero); // *Rat must implement fmt.Scann
         return errors.New("Rat.Scan: invalid verb"u8);
     }
     {
-        var (Δ_, ok) = z.SetString(((@string)tok)); if (!ok) {
+        var (_, ok) = Ꮡz.SetString(((@string)tok)); if (!ok) {
             return errors.New("Rat.Scan: invalid syntax"u8);
         }
     }
@@ -56,7 +59,9 @@ internal static fmt.Scanner Δ_ = Ꮡ(ratZero); // *Rat must implement fmt.Scann
 // is too large, the operation may fail.
 // The entire string, not just a prefix, must be valid for success. If the
 // operation failed, the value of z is undefined but the returned value is nil.
-[GoRecv] public static (ж<ΔRat>, bool) SetString(this ref ΔRat z, @string s) {
+public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
+    ref var z = ref Ꮡz.Value;
+
     if (len(s) == 0) {
         return (default!, false);
     }
@@ -65,59 +70,59 @@ internal static fmt.Scanner Δ_ = Ꮡ(ratZero); // *Rat must implement fmt.Scann
     {
         nint sep = strings.Index(s, "/"u8); if (sep >= 0) {
             {
-                var (Δ_, ok) = z.a.SetString(s[..(int)(sep)], 0); if (!ok) {
+                var (_, ok) = Ꮡz.of(big_package.ΔRat.Ꮡa).SetString(s[..(int)(sep)], 0); if (!ok) {
                     return (default!, false);
                 }
             }
             var rΔ1 = strings.NewReader(s[(int)(sep + 1)..]);
-            error err = default!;
+            error errΔ1 = default!;
             {
-                var (z.b.abs, Δ_, Δ_, err) = z.b.abs.scan(~r, 0, false); if (err != default!) {
+                (z.b.abs, _, _, errΔ1) = z.b.abs.scan(new strings_ReaderжByteScanner(rΔ1), 0, false); if (errΔ1 != default!) {
                     return (default!, false);
                 }
             }
             // entire string must have been consumed
             {
-                (Δ_, err) = r.ReadByte(); if (!AreEqual(err, io.EOF)) {
+                (_, errΔ1) = rΔ1.ReadByte(); if (!AreEqual(errΔ1, io.EOF)) {
                     return (default!, false);
                 }
             }
             if (len(z.b.abs) == 0) {
                 return (default!, false);
             }
-            return (z.norm(), true);
+            return (Ꮡz.norm(), true);
         }
     }
     // parse floating-point number
     var r = strings.NewReader(s);
     // sign
-    var (neg, err) = scanSign(~r);
+    var (neg, err) = scanSign(new strings_ReaderжByteScanner(r));
     if (err != default!) {
         return (default!, false);
     }
     // mantissa
     nint @base = default!;
     nint fcount = default!;  // fractional digit count; valid if <= 0
-    (z.a.abs, @base, fcount, err) = z.a.abs.scan(~r, 0, true);
+    (z.a.abs, @base, fcount, err) = z.a.abs.scan(new strings_ReaderжByteScanner(r), 0, true);
     if (err != default!) {
         return (default!, false);
     }
     // exponent
     int64 exp = default!;
     nint ebase = default!;
-    (exp, ebase, err) = scanExponent(~r, true, true);
+    (exp, ebase, err) = scanExponent(new strings_ReaderжByteScanner(r), true, true);
     if (err != default!) {
         return (default!, false);
     }
     // there should be no unread characters left
     {
-        (Δ_, err) = r.ReadByte(); if (!AreEqual(err, io.EOF)) {
+        (_, err) = r.ReadByte(); if (!AreEqual(err, io.EOF)) {
             return (default!, false);
         }
     }
     // special-case 0 (see also issue #16176)
     if (len(z.a.abs) == 0) {
-        return (z.norm(), true);
+        return (Ꮡz.norm(), true);
     }
     // len(z.a.abs) > 0
     // The mantissa may have a radix point (fcount <= 0) and there
@@ -137,14 +142,14 @@ internal static fmt.Scanner Δ_ = Ꮡ(ratZero); // *Rat must implement fmt.Scann
         // The mantissa has a radix point ddd.dddd; and
         // -fcount is the number of digits to the right
         // of '.'. Adjust relevant exponent accordingly.
-        var d = ((int64)fcount);
+        var d = (int64)fcount;
         var exprᴛ1 = @base;
         var matchᴛ1 = false;
         if (exprᴛ1 is 10) { matchᴛ1 = true;
             exp5 = d;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 2)) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) { matchᴛ1 = true;
             exp2 = d;
         }
         else if (exprᴛ1 is 8) { matchᴛ1 = true;
@@ -169,7 +174,7 @@ internal static fmt.Scanner Δ_ = Ꮡ(ratZero); // *Rat must implement fmt.Scann
         exp5 += exp;
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ2 && exprᴛ2 is 2)) {
+    if (fallthrough || !matchᴛ2 && exprᴛ2 is 2) {
         exp2 += exp;
     }
     else { /* default: */
@@ -190,11 +195,11 @@ internal static fmt.Scanner Δ_ = Ꮡ(ratZero); // *Rat must implement fmt.Scann
                 return (default!, false);
             }
         }
-        if (n > 1e6F) {
+        if (n > 1000000) {
             return (default!, false);
         }
         // avoid excessively large exponents
-        var pow5 = z.b.abs.expNN(natFive, ((nat)default!).setWord(((Word)n)), default!, false);
+        var pow5 = z.b.abs.expNN(natFive, ((nat)default!).setWord(((Word)(nuint)n)), default!, false);
         // use underlying array of z.b.abs
         if (exp5 > 0){
             z.a.abs = z.a.abs.mul(z.a.abs, pow5);
@@ -206,19 +211,19 @@ internal static fmt.Scanner Δ_ = Ꮡ(ratZero); // *Rat must implement fmt.Scann
         z.b.abs = z.b.abs.setWord(1);
     }
     // apply exp2 contributions
-    if (exp2 < -1e7F || exp2 > 1e7F) {
+    if (exp2 < -10000000 || exp2 > 10000000) {
         return (default!, false);
     }
     // avoid excessively large exponents
     if (exp2 > 0){
-        z.a.abs = z.a.abs.shl(z.a.abs, ((nuint)exp2));
+        z.a.abs = z.a.abs.shl(z.a.abs, (nuint)exp2);
     } else 
     if (exp2 < 0) {
-        z.b.abs = z.b.abs.shl(z.b.abs, ((nuint)(-exp2)));
+        z.b.abs = z.b.abs.shl(z.b.abs, (nuint)(-exp2));
     }
     z.a.neg = neg && len(z.a.abs) > 0;
     // 0 has no sign
-    return (z.norm(), true);
+    return (Ꮡz.norm(), true);
 }
 
 // scanExponent scans the longest possible prefix of r representing a base 10
@@ -243,7 +248,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
     error err = default!;
 
     // one char look-ahead
-    var (ch, err) = r.ReadByte();
+    (var ch, err) = r.ReadByte();
     if (err != default!) {
         if (AreEqual(err, io.EOF)) {
             err = default!;
@@ -257,10 +262,12 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
         @base = 10;
     }
     else if (exprᴛ1 is (rune)'p' or (rune)'P') { matchᴛ1 = true;
-        if (base2ok) {
-            @base = 2;
-            break;
-        }
+        do {
+            if (base2ok) {
+                @base = 2;
+                break;
+            }
+        } while (false);
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1) { /* default: */
@@ -276,7 +283,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
     (ch, err) = r.ReadByte();
     if (err == default! && (ch == (rune)'+' || ch == (rune)'-')) {
         if (ch == (rune)'-') {
-            digits = append(digits, (rune)'-');
+            digits = append(digits, (byte)((rune)'-'));
         }
         (ch, err) = r.ReadByte();
     }
@@ -322,55 +329,63 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
 }
 
 // String returns a string representation of x in the form "a/b" (even if b == 1).
-[GoRecv] public static @string String(this ref ΔRat x) {
-    return ((@string)x.marshal());
+public static @string String(this ж<ΔRat> Ꮡx) {
+    ref var x = ref Ꮡx.Value;
+
+    return ((@string)Ꮡx.marshal());
 }
 
 // marshal implements String returning a slice of bytes
-[GoRecv] internal static slice<byte> marshal(this ref ΔRat x) {
+internal static slice<byte> marshal(this ж<ΔRat> Ꮡx) {
+    ref var x = ref Ꮡx.Value;
+
     slice<byte> buf = default!;
-    buf = x.a.Append(buf, 10);
-    buf = append(buf, (rune)'/');
+    buf = Ꮡx.of(big_package.ΔRat.Ꮡa).Append(buf, 10);
+    buf = append(buf, (byte)((rune)'/'));
     if (len(x.b.abs) != 0){
-        buf = x.b.Append(buf, 10);
+        buf = Ꮡx.of(big_package.ΔRat.Ꮡb).Append(buf, 10);
     } else {
-        buf = append(buf, (rune)'1');
+        buf = append(buf, (byte)((rune)'1'));
     }
     return buf;
 }
 
 // RatString returns a string representation of x in the form "a/b" if b != 1,
 // and in the form "a" if b == 1.
-[GoRecv] public static @string RatString(this ref ΔRat x) {
+public static @string RatString(this ж<ΔRat> Ꮡx) {
+    ref var x = ref Ꮡx.Value;
+
     if (x.IsInt()) {
-        return x.a.String();
+        return Ꮡx.of(big_package.ΔRat.Ꮡa).String();
     }
-    return x.String();
+    return Ꮡx.String();
 }
 
 // FloatString returns a string representation of x in decimal form with prec
 // digits of precision after the radix point. The last digit is rounded to
 // nearest, with halves rounded away from zero.
-[GoRecv] public static @string FloatString(this ref ΔRat x, nint prec) {
+public static @string FloatString(this ж<ΔRat> Ꮡx, nint prec) {
+    ref var x = ref Ꮡx.Value;
+
     slice<byte> buf = default!;
     if (x.IsInt()) {
-        buf = x.a.Append(buf, 10);
+        buf = Ꮡx.of(big_package.ΔRat.Ꮡa).Append(buf, 10);
         if (prec > 0) {
-            buf = append(buf, (rune)'.');
+            buf = append(buf, (byte)((rune)'.'));
             for (nint i = prec; i > 0; i--) {
-                buf = append(buf, (rune)'0');
+                buf = append(buf, (byte)((rune)'0'));
             }
         }
         return ((@string)buf);
     }
     // x.b.abs != 0
-    (q, r) = ((nat)default!).div(((nat)default!), x.a.abs, x.b.abs);
+    var (q, r) = ((nat)default!).div(((nat)default!), x.a.abs, x.b.abs);
     var p = natOne;
     if (prec > 0) {
-        p = ((nat)default!).expNN(natTen, ((nat)default!).setUint64(((uint64)prec)), default!, false);
+        p = ((nat)default!).expNN(natTen, ((nat)default!).setUint64((uint64)prec), default!, false);
     }
     r = r.mul(r, p);
-    (r, r2) = r.div(((nat)default!), r, x.b.abs);
+    (r, var r2) = r.div(((nat)default!), r, x.b.abs);
     // see if we need to round up
     r2 = r2.add(r2, r2);
     if (x.b.abs.cmp(r2) <= 0) {
@@ -381,15 +396,15 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
         }
     }
     if (x.a.neg) {
-        buf = append(buf, (rune)'-');
+        buf = append(buf, (byte)((rune)'-'));
     }
     buf = append(buf, q.utoa(10).ꓸꓸꓸ);
     // itoa ignores sign if q == 0
     if (prec > 0) {
-        buf = append(buf, (rune)'.');
+        buf = append(buf, (byte)((rune)'.'));
         var rs = r.utoa(10);
         for (nint i = prec - len(rs); i > 0; i--) {
-            buf = append(buf, (rune)'0');
+            buf = append(buf, (byte)((rune)'0'));
         }
         buf = append(buf, rs.ꓸꓸꓸ);
     }
@@ -413,10 +428,11 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
 //	1/3    0    false    0       (0.333... rounded)
 //	1/4    2    true     0.25
 //	1/6    1    false    0.2     (0.166... rounded)
-[GoRecv] public static (nint n, bool exact) FloatPrec(this ref ΔRat x) {
+public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
     nint n = default!;
     bool exact = default!;
 
+    ref var x = ref Ꮡx.Value;
     // Determine q and largest p2, p5 such that d = q·2^p2·5^p5.
     // The results n, exact are:
     //
@@ -425,7 +441,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
     //
     // For details see:
     // https://en.wikipedia.org/wiki/Repeating_decimal#Reciprocals_of_integers_not_coprime_to_10
-    var d = x.Denom().val.abs;
+    var d = Ꮡx.Denom().Value.abs;
     // d >= 1
     // Determine p2 by counting factors of 2.
     // p2 corresponds to the trailing zero bits in d.
@@ -438,15 +454,15 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
     // and use repeated squaring until the factor doesn't
     // divide q anymore. Then use the table to determine
     // the power of 5 in q.
-    static readonly UntypedInt fp = 13; // f == 5^fp
+    UntypedInt fp = 13; // f == 5^fp
     slice<nat> tab = default!;                // tab[i] == (5^fp)^(2^i) == 5^(fp·2^i)
-    var f = new nat{1220703125};
+    var f = new nat(new Word[]{1220703125}.slice());
     // == 5^fp (must fit into a uint32 Word)
     nat t = default!;                  // temporaries
     nat r = default!;
     while (ᐧ) {
         {
-            (Δ_, r) = t.div(r, q, f); if (len(r) != 0) {
+            (_, r) = t.div(r, q, f); if (len(r) != 0) {
                 break;
             }
         }
@@ -466,7 +482,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
     for (nint i = len(tab) - 1; i >= 0; i--) {
         {
             (t, r) = t.div(r, q, tab[i]); if (len(r) == 0) {
-                p5 += fp * (1 << (int)(i));
+                p5 += (nuint)fp * (((nuint)1 << (int)(i)));
                 // tab[i] == 5^(fp·2^i)
                 q = q.set(t);
             }
@@ -482,7 +498,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
         p5++;
         q = q.set(t);
     }
-    return (((nint)max(p2, p5)), q.cmp(natOne) == 0);
+    return ((nint)max(p2, p5), q.cmp(natOne) == 0);
 }
 
 } // end big_package

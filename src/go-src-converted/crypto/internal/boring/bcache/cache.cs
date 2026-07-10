@@ -1,0 +1,159 @@
+// Copyright 2022 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// Package bcache implements a GC-friendly cache (see [Cache]) for BoringCrypto.
+namespace go.crypto.@internal.boring;
+
+using atomic = sync.atomic_package;
+using @unsafe = unsafe_package;
+using sync;
+
+partial class bcache_package {
+
+// A Cache is a GC-friendly concurrent map from unsafe.Pointer to
+// unsafe.Pointer. It is meant to be used for maintaining shadow
+// BoringCrypto state associated with certain allocated structs, in
+// particular public and private RSA and ECDSA keys.
+//
+// The cache is GC-friendly in the sense that the keys do not
+// indefinitely prevent the garbage collector from collecting them.
+// Instead, at the start of each GC, the cache is cleared entirely. That
+// is, the cache is lossy, and the loss happens at the start of each GC.
+// This means that clients need to be able to cope with cache entries
+// disappearing, but it also means that clients don't need to worry about
+// cache entries keeping the keys from being collected.
+[GoType] partial struct Cache<K, V> {
+    // The runtime atomically stores nil to ptable at the start of each GC.
+    internal atomic.Pointer<cacheTable<K, V>> ptable;
+}
+
+[GoType("[1021]sync.atomic_package.Pointer<cacheEntry<K, V>>")] /* [cacheSize]sync.atomic_package.Pointer<cacheEntry<K, V>> */
+partial struct cacheTable<K, V>;
+
+// A cacheEntry is a single entry in the linked list for a given hash table entry.
+[GoType] partial struct cacheEntry<K, V> {
+    internal ж<K> k;             // immutable once created
+    internal atomic.Pointer<V> v; // read and written atomically to allow updates
+    internal ж<cacheEntry<K, V>> next; // immutable once linked into table
+}
+
+internal static partial void registerCache(@unsafe.Pointer _);
+
+// provided by runtime
+
+// Register registers the cache with the runtime,
+// so that c.ptable can be cleared at the start of each GC.
+// Register must be called during package initialization.
+public static void Register<K, V>(this ж<Cache<K, V>> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    registerCache(new @unsafe.Pointer(Ꮡc.of(Cache<K, V>.Ꮡptable)));
+}
+
+// cacheSize is the number of entries in the hash table.
+// The hash is the pointer value mod cacheSize, a prime.
+// Collisions are resolved by maintaining a linked list in each hash slot.
+internal static readonly UntypedInt cacheSize = 1021;
+
+// table returns a pointer to the current cache hash table,
+// coping with the possibility of the GC clearing it out from under us.
+internal static ж<cacheTable<K, V>> table<K, V>(this ж<Cache<K, V>> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    while (ᐧ) {
+        var p = Ꮡc.of(Cache<K, V>.Ꮡptable).Load();
+        if (p == nil) {
+            p = @new<cacheTable<K, V>>();
+            if (!Ꮡc.of(Cache<K, V>.Ꮡptable).CompareAndSwap(nil, p)) {
+                continue;
+            }
+        }
+        return p;
+    }
+}
+
+// Clear clears the cache.
+// The runtime does this automatically at each garbage collection;
+// this method is exposed only for testing.
+public static void Clear<K, V>(this ж<Cache<K, V>> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    // The runtime does this at the start of every garbage collection
+    // (itself, not by calling this function).
+    Ꮡc.of(Cache<K, V>.Ꮡptable).Store(nil);
+}
+
+// Get returns the cached value associated with v,
+// which is either the value v corresponding to the most recent call to Put(k, v)
+// or nil if that cache entry has been dropped.
+public static ж<V> Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk) {
+    ref var c = ref Ꮡc.Value;
+    ref var k = ref Ꮡk.DerefOrNil();
+
+    var head = Ꮡ(Ꮡc.table().Value[(uintptr)new @unsafe.Pointer(Ꮡk) % (uintptr)cacheSize]);
+    var e = head.Load();
+    for (; e != nil; e = e.Value.next) {
+        if ((~e).k == Ꮡk) {
+            return e.of(cacheEntry<K, V>.Ꮡv).Load();
+        }
+    }
+    return default!;
+}
+
+// Put sets the cached value associated with k to v.
+public static void Put<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk, ж<V> Ꮡv) {
+    ref var c = ref Ꮡc.Value;
+    ref var k = ref Ꮡk.DerefOrNil();
+    ref var v = ref Ꮡv.Value;
+
+    var head = Ꮡ(Ꮡc.table().Value[(uintptr)new @unsafe.Pointer(Ꮡk) % (uintptr)cacheSize]);
+    // Strategy is to walk the linked list at head,
+    // same as in Get, to look for existing entry.
+    // If we find one, we update v atomically in place.
+    // If not, then we race to replace the start = *head
+    // we observed with a new k, v entry.
+    // If we win that race, we're done.
+    // Otherwise, we try the whole thing again,
+    // with two optimizations:
+    //
+    //  1. We track in noK the start of the section of
+    //     the list that we've confirmed has no entry for k.
+    //     The next time down the list, we can stop at noK,
+    //     because new entries are inserted at the front of the list.
+    //     This guarantees we never traverse an entry
+    //     multiple times.
+    //
+    //  2. We only allocate the entry to be added once,
+    //     saving it in add for the next attempt.
+    ж<cacheEntry<K, V>> add = default!;
+    ж<cacheEntry<K, V>> noK = default!;
+    nint n = 0;
+    while (ᐧ) {
+        var e = head.Load();
+        var start = e;
+        for (; e != nil && e != noK; e = e.Value.next) {
+            if ((~e).k == Ꮡk) {
+                e.of(cacheEntry<K, V>.Ꮡv).Store(Ꮡv);
+                return;
+            }
+            n++;
+        }
+        if (add == nil) {
+            add = Ꮡ(new cacheEntry<K, V>(k: Ꮡk));
+            add.of(cacheEntry<K, V>.Ꮡv).Store(Ꮡv);
+        }
+        add.Value.next = start;
+        if (n >= 1000) {
+            // If an individual list gets too long, which shouldn't happen,
+            // throw it away to avoid quadratic lookup behavior.
+            add.Value.next = default!;
+        }
+        if (head.CompareAndSwap(start, add)) {
+            return;
+        }
+        noK = start;
+    }
+}
+
+} // end bcache_package

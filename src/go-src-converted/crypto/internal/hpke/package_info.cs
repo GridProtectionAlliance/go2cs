@@ -10,6 +10,9 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using cryptoꓸDecrypterOpts = object;
+global using cryptoꓸPrivateKey = object;
+global using cryptoꓸPublicKey = object;
 global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
 global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
 // </ImportedTypeAliases>
@@ -40,8 +43,6 @@ using static go.crypto.@internal.hpke_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<cipher.AEAD, error), crypto.cipher_package.AEAD>]
-[assembly: GoImplement<cipher.Block, error), crypto.cipher_package.Block>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

@@ -5,8 +5,6 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using ꓸꓸꓸж<Var> = Span<ж<Var>>;
-
 partial class types_package {
 
 // A Tuple represents an ordered list of variables; a nil *Tuple is a valid (empty) tuple.
@@ -17,7 +15,7 @@ partial class types_package {
 }
 
 // NewTuple returns a new tuple for the given variables.
-public static ж<Tuple> NewTuple(params ꓸꓸꓸж<Var> xʗp) {
+public static ж<Tuple> NewTuple(params Span<ж<Var>> xʗp) {
     var x = xʗp.slice();
 
     if (len(x) > 0) {
@@ -27,7 +25,9 @@ public static ж<Tuple> NewTuple(params ꓸꓸꓸж<Var> xʗp) {
 }
 
 // Len returns the number variables of tuple t.
-[GoRecv] public static nint Len(this ref Tuple t) {
+public static nint Len(this ж<Tuple> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t != nil) {
         return len(t.vars);
     }
@@ -39,12 +39,16 @@ public static ж<Tuple> NewTuple(params ꓸꓸꓸж<Var> xʗp) {
     return t.vars[i];
 }
 
-[GoRecv("capture")] public static ΔType Underlying(this ref Tuple t) {
-    return ~t;
+public static ΔType Underlying(this ж<Tuple> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return new TupleжΔType(Ꮡt);
 }
 
-[GoRecv] public static @string String(this ref Tuple t) {
-    return TypeString(~t, default!);
+public static @string String(this ж<Tuple> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return TypeString(new TupleжΔType(Ꮡt), default!);
 }
 
 } // end types_package

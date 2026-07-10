@@ -10,10 +10,10 @@ using bytes = bytes_package;
 using context = context_package;
 using tls = crypto.tls_package;
 using io = io_package;
-using http = net.http_package;
+using http = go.net.http_package;
 using strings = strings_package;
 using crypto;
-using net;
+using go.net;
 
 partial class httptest_package {
 
@@ -49,51 +49,51 @@ public static ж<http.Request> NewRequestWithContext(context.Context ctx, @strin
     if (method == ""u8) {
         method = "GET"u8;
     }
-    (req, err) = http.ReadRequest(bufio.NewReader(~strings.NewReader(method + " "u8 + target + " HTTP/1.0\r\n\r\n"u8)));
+    var (req, err) = http.ReadRequest(bufio.NewReader(new strings_ReaderжReader(strings.NewReader(method + " "u8 + target + " HTTP/1.0\r\n\r\n"u8))));
     if (err != default!) {
-        throw panic("invalid NewRequest arguments; "u8 + err.Error());
+        throw panic("invalid NewRequest arguments; " + err.Error());
     }
     req = req.WithContext(ctx);
     // HTTP/1.0 was used above to avoid needing a Host field. Change it to 1.1 here.
-    req.val.Proto = "HTTP/1.1"u8;
-    req.val.ProtoMinor = 1;
-    req.val.Close = false;
+    req.Value.Proto = "HTTP/1.1"u8;
+    req.Value.ProtoMinor = 1;
+    req.Value.Close = false;
     if (body != default!) {
         switch (body.type()) {
         case ж<bytes.Buffer> v: {
-            req.val.ContentLength = ((int64)v.Len());
+            req.Value.ContentLength = (int64)v.Len();
             break;
         }
         case ж<bytes.Reader> v: {
-            req.val.ContentLength = ((int64)v.Len());
+            req.Value.ContentLength = (int64)v.Len();
             break;
         }
         case ж<strings.Reader> v: {
-            req.val.ContentLength = ((int64)v.Len());
+            req.Value.ContentLength = (int64)v.Len();
             break;
         }
         default: {
-            var v = body.type();
-            req.val.ContentLength = -1;
+            var v = body;
+            req.Value.ContentLength = -1;
             break;
         }}
         {
             var (rc, ok) = body._<io.ReadCloser>(ᐧ); if (ok){
-                req.val.Body = rc;
+                req.Value.Body = rc;
             } else {
-                req.val.Body = io.NopCloser(body);
+                req.Value.Body = io.NopCloser(body);
             }
         }
     }
     // 192.0.2.0/24 is "TEST-NET" in RFC 5737 for use solely in
     // documentation and example source code and should not be
     // used publicly.
-    req.val.RemoteAddr = "192.0.2.1:1234"u8;
+    req.Value.RemoteAddr = "192.0.2.1:1234"u8;
     if ((~req).Host == ""u8) {
-        req.val.Host = "example.com"u8;
+        req.Value.Host = "example.com"u8;
     }
     if (strings.HasPrefix(target, "https://"u8)) {
-        req.val.TLS = Ꮡ(new tlsꓸConnectionState(
+        req.Value.TLS = Ꮡ(new tlsꓸConnectionState(
             Version: tls.VersionTLS12,
             HandshakeComplete: true,
             ServerName: (~req).Host

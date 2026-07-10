@@ -39,19 +39,21 @@ public static nint Encode(slice<byte> dst, slice<byte> src) {
         uint32 v = default!;
         var exprᴛ1 = len(src);
         var matchᴛ1 = false;
-        { /* default: */
-            v |= (uint32)(((uint32)src[3]));
-        }
-        else if (exprᴛ1 is 3) { matchᴛ1 = true;
-            v |= (uint32)(((uint32)src[2]) << (int)(8));
+        var matchᴛ2 = exprᴛ1 is 3 || exprᴛ1 is 2 || exprᴛ1 is 1;
+        if (!matchᴛ2) { /* default: */
+            v |= (uint32)((uint32)src[3]);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 2)) {
-            v |= (uint32)(((uint32)src[1]) << (int)(16));
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) { matchᴛ1 = true;
+            v |= (uint32)(((uint32)src[2] << (int)(8)));
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 1)) { matchᴛ1 = true;
-            v |= (uint32)(((uint32)src[0]) << (int)(24));
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) {
+            v |= (uint32)(((uint32)src[1] << (int)(16)));
+            fallthrough = true;
+        }
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 1) { matchᴛ1 = true;
+            v |= (uint32)(((uint32)src[0] << (int)(24)));
         }
 
         // Special case: zero (!!!!!) shortens to z.
@@ -64,7 +66,7 @@ public static nint Encode(slice<byte> dst, slice<byte> src) {
         }
         // Otherwise, 5 base 85 digits starting at !.
         for (nint i = 4; i >= 0; i--) {
-            dst[i] = (rune)'!' + ((byte)(v % 85));
+            dst[i] = (byte)((rune)'!' + (byte)(v % 85));
             v /= 85;
         }
         // If src was short, discard the low destination bytes.
@@ -92,12 +94,12 @@ public static nint MaxEncodedLen(nint n) {
 // writing, the caller must Close the returned encoder to flush any
 // trailing partial block.
 public static io.WriteCloser NewEncoder(io.Writer w) {
-    return new encoder(w: w);
+    return new encoderжWriteCloser(Ꮡ(new encoder(w: w)));
 }
 
 [GoType] partial struct encoder {
     internal error err;
-    internal io_package.Writer w;
+    internal io.Writer w;
     internal array<byte> buf = new(4); // buffered data waiting to be encoded
     internal nint nbuf;       // number of bytes in buf
     internal array<byte> @out = new(1024); // output buffer
@@ -124,7 +126,7 @@ public static io.WriteCloser NewEncoder(io.Writer w) {
         }
         nint nout = Encode(e.@out[0..], e.buf[0..]);
         {
-            var (_, e.err) = e.w.Write(e.@out[0..(int)(nout)]); if (e.err != default!) {
+            (_, e.err) = e.w.Write(e.@out[0..(int)(nout)]); if (e.err != default!) {
                 return (n, e.err);
             }
         }
@@ -140,7 +142,7 @@ public static io.WriteCloser NewEncoder(io.Writer w) {
         if (nn > 0) {
             nint nout = Encode(e.@out[0..], p[0..(int)(nn)]);
             {
-                var (_, e.err) = e.w.Write(e.@out[0..(int)(nout)]); if (e.err != default!) {
+                (_, e.err) = e.w.Write(e.@out[0..(int)(nout)]); if (e.err != default!) {
                     return (n, e.err);
                 }
             }
@@ -173,7 +175,7 @@ public static io.WriteCloser NewEncoder(io.Writer w) {
  * Decoder
  */
 public static @string Error(this CorruptInputError e) {
-    return "illegal ascii85 data at input byte "u8 + strconv.FormatInt(((int64)e), 10);
+    return "illegal ascii85 data at input byte "u8 + strconv.FormatInt((int64)e, 10);
 }
 
 // Decode decodes src into dst, returning both the number
@@ -211,20 +213,20 @@ public static (nint ndst, nint nsrc, error err) Decode(slice<byte> dst, slice<by
             break;
         }
         case {} when (rune)'!' <= b && b <= (rune)'u': {
-            v = v * 85 + ((uint32)(b - (rune)'!'));
+            v = v * 85 + (uint32)(b - (rune)'!');
             nb++;
             break;
         }
         default: {
-            return (0, 0, ((CorruptInputError)i));
+            return (0, 0, ((CorruptInputError)(int64)i));
         }}
 
         if (nb == 5) {
             nsrc = i + 1;
-            dst[ndst] = ((byte)(v >> (int)(24)));
-            dst[ndst + 1] = ((byte)(v >> (int)(16)));
-            dst[ndst + 2] = ((byte)(v >> (int)(8)));
-            dst[ndst + 3] = ((byte)v);
+            dst[ndst] = (byte)((v >> (int)(24)));
+            dst[ndst + 1] = (byte)((v >> (int)(16)));
+            dst[ndst + 2] = (byte)((v >> (int)(8)));
+            dst[ndst + 3] = (byte)v;
             ndst += 4;
             nb = 0;
             v = 0;
@@ -238,7 +240,7 @@ public static (nint ndst, nint nsrc, error err) Decode(slice<byte> dst, slice<by
             // the extra byte provides enough bits to cover
             // the inefficiency of the encoding for the block.
             if (nb == 1) {
-                return (0, 0, ((CorruptInputError)len(src)));
+                return (0, 0, ((CorruptInputError)(int64)len(src)));
             }
             for (nint i = nb; i < 5; i++) {
                 // The short encoding truncated the output value.
@@ -247,8 +249,8 @@ public static (nint ndst, nint nsrc, error err) Decode(slice<byte> dst, slice<by
                 v = v * 85 + 84;
             }
             for (nint i = 0; i < nb - 1; i++) {
-                dst[ndst] = ((byte)(v >> (int)(24)));
-                v <<= (UntypedInt)(8);
+                dst[ndst] = (byte)((v >> (int)(24)));
+                v <<= (int)(8);
                 ndst++;
             }
         }
@@ -258,13 +260,13 @@ public static (nint ndst, nint nsrc, error err) Decode(slice<byte> dst, slice<by
 
 // NewDecoder constructs a new ascii85 stream decoder.
 public static io.Reader NewDecoder(io.Reader r) {
-    return new decoder(r: r);
+    return new decoderжReader(Ꮡ(new decoder(r: r)));
 }
 
 [GoType] partial struct decoder {
     internal error err;
     internal error readErr;
-    internal io_package.Reader r;
+    internal io.Reader r;
     internal array<byte> buf = new(1024); // leftover input
     internal nint nbuf;
     internal slice<byte> @out; // leftover decoded output

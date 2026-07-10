@@ -13,8 +13,9 @@
 // restricted dialects used for the trickier parts of the runtime.
 namespace go.@internal.runtime;
 
-using atomic = @internal.runtime.atomic_package;
-using _ = unsafe_package; // for linkname
+using atomic = go.@internal.runtime.atomic_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+using go.@internal.runtime;
 
 partial class exithook_package {
 
@@ -27,8 +28,10 @@ partial class exithook_package {
     public bool RunOnFailure;   // whether to run on non-zero exit code
 }
 
-internal static atomic.Int32 locked;
-internal static atomic.Uint64 runGoid;
+internal static ж<atomic.Int32> Ꮡlocked = new(default(atomic.Int32));
+internal static ref atomic.Int32 locked => ref Ꮡlocked.Value;
+internal static ж<atomic.Uint64> ᏑrunGoid = new(default(atomic.Uint64));
+internal static ref atomic.Uint64 runGoid => ref ᏑrunGoid.Value;
 internal static slice<Hook> hooks;
 internal static bool running;
 public static Action Gosched;
@@ -37,11 +40,11 @@ public static Action<@string> Throw;
 
 // Add adds a new exit hook.
 public static void Add(Hook h) {
-    while (!locked.CompareAndSwap(0, 1)) {
+    while (!Ꮡlocked.CompareAndSwap(0, 1)) {
         Gosched();
     }
     hooks = append(hooks, h);
-    locked.Store(0);
+    Ꮡlocked.Store(0);
 }
 
 // Run runs the exit hooks.
@@ -50,17 +53,15 @@ public static void Add(Hook h) {
 // If an exit hook invokes exit in the same goroutine, the goroutine will throw.
 // If an exit hook invokes exit in another goroutine, that exit will block.
 public static void Run(nint code) => func((defer, recover) => {
-    while (!locked.CompareAndSwap(0, 1)) {
-        if (Goid() == runGoid.Load()) {
+    while (!Ꮡlocked.CompareAndSwap(0, 1)) {
+        if (Goid() == ᏑrunGoid.Load()) {
             Throw("exit hook invoked exit"u8);
         }
         Gosched();
     }
-    var lockedʗ1 = locked;
-    deferǃ(lockedʗ1.Store, 0, defer);
-    runGoid.Store(Goid());
-    var runGoidʗ1 = runGoid;
-    deferǃ(runGoidʗ1.Store, 0, defer);
+    deferǃ(Ꮡlocked.Store, (int32)(0), defer);
+    ᏑrunGoid.Store(Goid());
+    deferǃ(ᏑrunGoid.Store, (uint64)(0), defer);
     defer(() => {
         {
             var e = recover(); if (e != default!) {

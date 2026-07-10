@@ -11,7 +11,8 @@ using sync = sync_package;
 
 partial class randutil_package {
 
-internal static sync.Once closedChanOnce;
+internal static ж<sync.Once> ᏑclosedChanOnce = new(default(sync.Once));
+internal static ref sync.Once closedChanOnce => ref ᏑclosedChanOnce.Value;
 internal static channel<EmptyStruct> closedChan;
 
 // MaybeReadByte reads a single byte from r with ~50% probability. This is used
@@ -21,11 +22,9 @@ internal static channel<EmptyStruct> closedChan;
 // This does not affect tests that pass a stream of fixed bytes as the random
 // source (e.g. a zeroReader).
 public static void MaybeReadByte(io.Reader r) {
-    closedChanOnce.Do(
-    var closedChanʗ2 = closedChan;
-    () => {
-        closedChanʗ2 = new channel<EmptyStruct>(1);
-        close(closedChanʗ2);
+    ᏑclosedChanOnce.Do(() => {
+        closedChan = new channel<EmptyStruct>(1);
+        close(closedChan);
     });
     switch (select(ᐸꟷ(closedChan, ꓸꓸꓸ), ᐸꟷ(closedChan, ꓸꓸꓸ))) {
     case 0 when closedChan.ꟷᐳ(out _): {

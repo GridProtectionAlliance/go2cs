@@ -18,6 +18,7 @@ global using osꓸFileInfo = go.io.fs_package.FileInfo;
 global using osꓸFileMode = go.io.fs_package.FileMode;
 global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -47,16 +48,15 @@ using static go.debug.pe_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(io.ReadCloser, error), io_package.ReadCloser>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Reader>]
-[assembly: GoImplement<encoding.binary_package.littleEndian, encoding.binary_package.ByteOrder>]
-[assembly: GoImplement<io_package.ReadCloser, io_package.Reader>]
-[assembly: GoImplement<io_package.ReadSeeker, io_package.Reader>]
-[assembly: GoImplement<io_package.SectionReader, io_package.ReadSeeker>]
-[assembly: GoImplement<io_package.SectionReader, io_package.Reader>]
-[assembly: GoImplement<io_package.SectionReader, io_package.ReaderAt>]
-[assembly: GoImplement<nobitsSectionReader, io_package.ReaderAt>]
-[assembly: GoImplement<os_package.File, io_package.ReaderAt>]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<go.encoding.binary_package.littleEndian, go.encoding.binary_package.ByteOrder>]
+[assembly: GoImplement<io_package.SectionReader, io_package.ReadSeeker>(Pointer = true)]
+[assembly: GoImplement<io_package.SectionReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<io_package.SectionReader, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<nobitsSectionReader, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.ReaderAt>(Pointer = true)]
+[assembly: GoImplement<ΔSection, io_package.ReaderAt>(Promoted = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

@@ -4,7 +4,8 @@
 namespace go.net;
 
 partial class textproto_package {
-/* visitMapType: map[string][]string */
+
+[GoType("map[@string, slice<@string>]")] partial struct MIMEHeader;
 
 // Add adds the key, value pair to the header.
 // It appends to any existing values associated with key.

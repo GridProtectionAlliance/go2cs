@@ -4,6 +4,9 @@
 namespace go.runtime;
 
 using os = os_package;
+using fs = go.io.fs_package;
+using go.io;
+using time = time_package;
 
 partial class pprof_package {
 
@@ -11,12 +14,12 @@ partial class pprof_package {
 //
 // It would be wasteful to calculate the hash of the whole file,
 // instead use the binary name and the last modified time for the buildid.
-internal static @string peBuildID(@string file) {
-    (s, err) = os.Stat(file);
+internal static @string peBuildID(@string @file) {
+    var (s, err) = os.Stat(@file);
     if (err != default!) {
-        return file;
+        return @file;
     }
-    return file + s.ModTime().String();
+    return @file + s.ModTime().String();
 }
 
 } // end pprof_package

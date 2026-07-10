@@ -66,7 +66,7 @@ internal static bool groupListImplemented = true;
 [GoType("num:nint")] partial struct UnknownUserIdError;
 
 public static @string Error(this UnknownUserIdError e) {
-    return "user: unknown userid "u8 + strconv.Itoa(((nint)e));
+    return "user: unknown userid "u8 + strconv.Itoa((nint)e);
 }
 
 [GoType("@string")] partial struct UnknownUserError;

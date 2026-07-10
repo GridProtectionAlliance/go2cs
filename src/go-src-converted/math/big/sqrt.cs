@@ -13,13 +13,12 @@ partial class big_package {
     public partial ref sync_package.Once Once { get; }
     internal ж<Float> v;
 }
-internal static threeOnceᴛ1 threeOnce;
+internal static ж<threeOnceᴛ1> ᏑthreeOnce = new(new threeOnceᴛ1(nil));
+internal static ref threeOnceᴛ1 threeOnce => ref ᏑthreeOnce.Value;
 
 internal static ж<Float> three() {
-    threeOnce.Do(
-    var threeOnceʗ2 = threeOnce;
-    () => {
-        threeOnceʗ2.v = NewFloat(3.0F);
+    ᏑthreeOnce.of(threeOnceᴛ1.ᏑOnce).Do(() => {
+        threeOnce.v = NewFloat(3.0D);
     });
     return threeOnce.v;
 }
@@ -33,16 +32,17 @@ internal static ж<Float> three() {
 //
 // The function panics if z < 0. The value of z is undefined in that
 // case.
-[GoRecv("capture")] public static ж<Float> Sqrt(this ref Float z, ж<Float> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+public static ж<Float> Sqrt(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
 
     if (debugFloat) {
-        x.validate();
+        Ꮡx.validate();
     }
     if (z.prec == 0) {
         z.prec = x.prec;
     }
-    if (x.Sign() == -1) {
+    if (Ꮡx.Sign() == -1) {
         // following IEEE754-2008 (section 7.2)
         throw panic(new ErrNaN("square root of negative operand"));
     }
@@ -52,13 +52,13 @@ internal static ж<Float> three() {
         z.form = x.form;
         z.neg = x.neg;
         // IEEE754-2008 requires √±0 = ±0
-        return SqrtꓸᏑz;
+        return Ꮡz;
     }
     // MantExp sets the argument's precision to the receiver's, and
     // when z.prec > x.prec this will lower z.prec. Restore it after
     // the MantExp call.
     var prec = z.prec;
-    nint b = x.MantExp(z);
+    nint b = Ꮡx.MantExp(Ꮡz);
     z.prec = prec;
     // Compute √(z·2**b) as
     //   √( z)·2**(½b)     if b is even
@@ -78,9 +78,9 @@ internal static ж<Float> three() {
     // 0.25 <= z < 2.0
     // Solving 1/x² - z = 0 avoids Quo calls and is faster, especially
     // for high precisions.
-    z.sqrtInverse(z);
+    Ꮡz.sqrtInverse(Ꮡz);
     // re-attach halved exponent
-    return z.SetMantExp(z, b / 2);
+    return Ꮡz.SetMantExp(Ꮡz, b / 2);
 }
 
 // Compute √x (to z.prec precision) by solving
@@ -88,8 +88,9 @@ internal static ж<Float> three() {
 //	1/t² - x = 0
 //
 // for t (using Newton's method), and then inverting.
-[GoRecv] public static void sqrtInverse(this ref Float z, ж<Float> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+internal static void sqrtInverse(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
+    ref var z = ref Ꮡz.Value;
+    ref var x = ref Ꮡx.Value;
 
     // let
     //   f(t) = 1/t² - x
@@ -99,14 +100,13 @@ internal static ж<Float> three() {
     //   t2 = t - g(t) = ½t(3 - xt²)
     var u = newFloat(z.prec);
     var v = newFloat(z.prec);
-    var three = three();
-    var ng = 
-    var threeʗ1 = three;
+    var threeΔ1 = three();
+    var threeʗ1 = threeΔ1;
     var uʗ1 = u;
     var vʗ1 = v;
-    (ж<Float> t) => {
-        uʗ1.val.prec = t.val.prec;
-        vʗ1.val.prec = t.val.prec;
+    var ng = (ж<Float> t) => {
+        uʗ1.Value.prec = t.Value.prec;
+        vʗ1.Value.prec = t.Value.prec;
         uʗ1.Mul(t, t);
         // u = t²
         uʗ1.Mul(Ꮡx, uʗ1);
@@ -115,20 +115,20 @@ internal static ж<Float> three() {
         // v = 3 - xt²
         uʗ1.Mul(t, vʗ1);
         // u = t(3 - xt²)
-        (~uʗ1).exp--;
+        uʗ1.Value.exp--;
         //   = ½t(3 - xt²)
         return t.Set(uʗ1);
     };
-    var (xf, Δ_) = x.Float64();
+    var (xf, _) = Ꮡx.Float64();
     var sqi = newFloat(z.prec);
     sqi.SetFloat64(1 / math.Sqrt(xf));
     for (var prec = z.prec + 32; (~sqi).prec < prec; ) {
-        sqi.val.prec *= 2;
+        sqi.Value.prec *= 2;
         sqi = ng(sqi);
     }
     // sqi = 1/√x
     // x/√x = √x
-    z.Mul(Ꮡx, sqi);
+    Ꮡz.Mul(Ꮡx, sqi);
 }
 
 // newFloat returns a new *Float with space for twice the given
@@ -136,7 +136,7 @@ internal static ж<Float> three() {
 internal static ж<Float> newFloat(uint32 prec2) {
     var z = @new<Float>();
     // nat.make ensures the slice length is > 0
-    z.val.mant = (~z).mant.make(((nint)(prec2 / _W)) * 2);
+    z.Value.mant = (~z).mant.make((nint)(prec2 / (uint32)_W) * 2);
     return z;
 }
 

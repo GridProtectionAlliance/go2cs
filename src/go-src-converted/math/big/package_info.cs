@@ -40,15 +40,16 @@ using static go.math.big_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<Float, fmt_package.Formatter>]
-[assembly: GoImplement<Float, fmt_package.Scanner>]
+[assembly: GoImplement<Float, fmt_package.Formatter>(Pointer = true)]
+[assembly: GoImplement<Float, fmt_package.Scanner>(Pointer = true)]
+[assembly: GoImplement<byteReader, fmt_package.ScanState>(Promoted = true)]
 [assembly: GoImplement<byteReader, io_package.ByteScanner>]
-[assembly: GoImplement<bytes_package.Reader, io_package.ByteScanner>]
+[assembly: GoImplement<bytes_package.Reader, io_package.ByteScanner>(Pointer = true)]
 [assembly: GoImplement<fmt_package.State, io_package.Writer>]
-[assembly: GoImplement<strings_package.Reader, io_package.ByteScanner>]
-[assembly: GoImplement<ΔInt, fmt_package.Formatter>]
-[assembly: GoImplement<ΔInt, fmt_package.Scanner>]
-[assembly: GoImplement<ΔRat, fmt_package.Scanner>]
+[assembly: GoImplement<strings_package.Reader, io_package.ByteScanner>(Pointer = true)]
+[assembly: GoImplement<ΔInt, fmt_package.Formatter>(Pointer = true)]
+[assembly: GoImplement<ΔInt, fmt_package.Scanner>(Pointer = true)]
+[assembly: GoImplement<ΔRat, fmt_package.Scanner>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

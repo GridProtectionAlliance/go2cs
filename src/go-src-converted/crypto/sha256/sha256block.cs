@@ -12,74 +12,74 @@ using math;
 partial class sha256_package {
 
 internal static slice<uint32> _K = new uint32[]{
-    1116352408,
-    1899447441,
-    (nint)3049323471L,
-    (nint)3921009573L,
-    961987163,
-    1508970993,
-    (nint)2453635748L,
-    (nint)2870763221L,
-    (nint)3624381080L,
-    310598401,
-    607225278,
-    1426881987,
-    1925078388,
-    (nint)2162078206L,
-    (nint)2614888103L,
-    (nint)3248222580L,
-    (nint)3835390401L,
-    (nint)4022224774L,
-    264347078,
-    604807628,
-    770255983,
-    1249150122,
-    1555081692,
-    1996064986,
-    (nint)2554220882L,
-    (nint)2821834349L,
-    (nint)2952996808L,
-    (nint)3210313671L,
-    (nint)3336571891L,
-    (nint)3584528711L,
-    113926993,
-    338241895,
-    666307205,
-    773529912,
-    1294757372,
-    1396182291,
-    1695183700,
-    1986661051,
-    (nint)2177026350L,
-    (nint)2456956037L,
-    (nint)2730485921L,
-    (nint)2820302411L,
-    (nint)3259730800L,
-    (nint)3345764771L,
-    (nint)3516065817L,
-    (nint)3600352804L,
-    (nint)4094571909L,
-    275423344,
-    430227734,
-    506948616,
-    659060556,
-    883997877,
-    958139571,
-    1322822218,
-    1537002063,
-    1747873779,
-    1955562222,
-    2024104815,
-    (nint)2227730452L,
-    (nint)2361852424L,
-    (nint)2428436474L,
-    (nint)2756734187L,
-    (nint)3204031479L,
-    (nint)3329325298L
+    0x428a2f98,
+    0x71374491,
+    0xb5c0fbcfU,
+    0xe9b5dba5U,
+    0x3956c25b,
+    0x59f111f1,
+    0x923f82a4U,
+    0xab1c5ed5U,
+    0xd807aa98U,
+    0x12835b01,
+    0x243185be,
+    0x550c7dc3,
+    0x72be5d74,
+    0x80deb1feU,
+    0x9bdc06a7U,
+    0xc19bf174U,
+    0xe49b69c1U,
+    0xefbe4786U,
+    0x0fc19dc6,
+    0x240ca1cc,
+    0x2de92c6f,
+    0x4a7484aa,
+    0x5cb0a9dc,
+    0x76f988da,
+    0x983e5152U,
+    0xa831c66dU,
+    0xb00327c8U,
+    0xbf597fc7U,
+    0xc6e00bf3U,
+    0xd5a79147U,
+    0x06ca6351,
+    0x14292967,
+    0x27b70a85,
+    0x2e1b2138,
+    0x4d2c6dfc,
+    0x53380d13,
+    0x650a7354,
+    0x766a0abb,
+    0x81c2c92eU,
+    0x92722c85U,
+    0xa2bfe8a1U,
+    0xa81a664bU,
+    0xc24b8b70U,
+    0xc76c51a3U,
+    0xd192e819U,
+    0xd6990624U,
+    0xf40e3585U,
+    0x106aa070,
+    0x19a4c116,
+    0x1e376c08,
+    0x2748774c,
+    0x34b0bcb5,
+    0x391c0cb3,
+    0x4ed8aa4a,
+    0x5b9cca4f,
+    0x682e6ff3,
+    0x748f82ee,
+    0x78a5636f,
+    0x84c87814U,
+    0x8cc70208U,
+    0x90befffaU,
+    0xa4506cebU,
+    0xbef9a3f7U,
+    0xc67178f2U
 }.slice();
 
 internal static void blockGeneric(ж<digest> Ꮡdig, slice<byte> p) {
-    ref var dig = ref Ꮡdig.val;
+    ref var dig = ref Ꮡdig.Value;
 
     array<uint32> w = new(64);
     var (h0, h1, h2, h3, h4, h5, h6, h7) = (dig.h[0], dig.h[1], dig.h[2], dig.h[3], dig.h[4], dig.h[5], dig.h[6], dig.h[7]);
@@ -88,13 +88,13 @@ internal static void blockGeneric(ж<digest> Ꮡdig, slice<byte> p) {
         // rounds below if needed for speed.
         for (nint i = 0; i < 16; i++) {
             nint j = i * 4;
-            w[i] = (uint32)((uint32)((uint32)(((uint32)p[j]) << (int)(24) | ((uint32)p[j + 1]) << (int)(16)) | ((uint32)p[j + 2]) << (int)(8)) | ((uint32)p[j + 3]));
+            w[i] = (uint32)((uint32)((uint32)(((uint32)p[j] << (int)(24)) | ((uint32)p[j + 1] << (int)(16))) | ((uint32)p[j + 2] << (int)(8))) | (uint32)p[j + 3]);
         }
         for (nint i = 16; i < 64; i++) {
             var v1 = w[i - 2];
-            var t1 = (uint32)((uint32)((bits.RotateLeft32(v1, -17)) ^ (bits.RotateLeft32(v1, -19))) ^ (v1 >> (int)(10)));
+            var t1 = (uint32)((uint32)((bits.RotateLeft32(v1, -17)) ^ (bits.RotateLeft32(v1, -19))) ^ ((v1 >> (int)(10))));
             var v2 = w[i - 15];
-            var t2 = (uint32)((uint32)((bits.RotateLeft32(v2, -7)) ^ (bits.RotateLeft32(v2, -18))) ^ (v2 >> (int)(3)));
+            var t2 = (uint32)((uint32)((bits.RotateLeft32(v2, -7)) ^ (bits.RotateLeft32(v2, -18))) ^ ((v2 >> (int)(3))));
             w[i] = t1 + w[i - 7] + t2 + w[i - 16];
         }
         var (a, b, c, d, e, f, g, h) = (h0, h1, h2, h3, h4, h5, h6, h7);

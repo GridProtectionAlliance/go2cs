@@ -8,6 +8,7 @@ namespace go.go;
 
 using bytes = bytes_package;
 using fmt = fmt_package;
+using io = io_package;
 
 partial class types_package {
 
@@ -62,18 +63,18 @@ public static readonly SelectionKind MethodExpr = 2;  // x.f is a method express
     var exprᴛ1 = s.kind;
     if (exprᴛ1 == MethodVal) {
         ref var sig = ref heap<ΔSignature>(out var Ꮡsig);
-        sig = s.obj._<Func.val>().typ._<ΔSignature.val>().val;
+        sig = (~s.obj._<ж<Func>>()).typ._<ж<ΔSignature>>().Value;
         ref var recv = ref heap<Var>(out var Ꮡrecv);
-        recv = sig.recv.val;
+        recv = sig.recv.Value;
         recv.typ = s.recv;
         sig.recv = Ꮡrecv;
-        return ~Ꮡsig;
+        return new ΔSignatureжΔType(Ꮡsig);
     }
     if (exprᴛ1 == MethodExpr) {
         ref var sig = ref heap<ΔSignature>(out var Ꮡsig);
-        sig = s.obj._<Func.val>().typ._<ΔSignature.val>().val;
+        sig = (~s.obj._<ж<Func>>()).typ._<ж<ΔSignature>>().Value;
         ref var arg0 = ref heap<Var>(out var Ꮡarg0);
-        arg0 = sig.recv.val;
+        arg0 = sig.recv.Value;
         sig.recv = default!;
         arg0.typ = s.recv;
 // The type of x.f is a method with its receiver type set
@@ -84,10 +85,10 @@ public static readonly SelectionKind MethodExpr = 2;  // x.f is a method express
 // TODO(gri) Compute this eagerly to avoid allocations.
         slice<ж<Var>> @params = default!;
         if (sig.@params != nil) {
-            @params = sig.@params.val.vars;
+            @params = sig.@params.Value.vars;
         }
-        sig.@params = NewTuple(append(new ж<Var>[]{Ꮡarg0}.slice(), Ꮡparams.ꓸꓸꓸ).ꓸꓸꓸ);
-        return ~Ꮡsig;
+        sig.@params = NewTuple(append(new ж<Var>[]{Ꮡarg0}.slice(), @params.ꓸꓸꓸ).ꓸꓸꓸ);
+        return new ΔSignatureжΔType(Ꮡsig);
     }
 
     // In all other cases, the type of x.f is the type of x.
@@ -119,8 +120,10 @@ public static readonly SelectionKind MethodExpr = 2;  // x.f is a method express
     return s.indirect;
 }
 
-[GoRecv] public static @string String(this ref Selection s) {
-    return SelectionString(s, default!);
+public static @string String(this ж<Selection> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    return SelectionString(Ꮡs, default!);
 }
 
 // SelectionString returns the string form of s.
@@ -132,8 +135,8 @@ public static readonly SelectionKind MethodExpr = 2;  // x.f is a method express
 //	"field (T) f int"
 //	"method (T) f(X) Y"
 //	"method expr (T) f(X) Y"
-public static @string SelectionString(ж<Selection> Ꮡs, Qualifier qf) {
-    ref var s = ref Ꮡs.val;
+public static @string SelectionString(ж<Selection> Ꮡs, Func<ж<Package>, @string> qf) {
+    ref var s = ref Ꮡs.Value;
 
     @string k = default!;
     var exprᴛ1 = s.kind;
@@ -150,20 +153,20 @@ public static @string SelectionString(ж<Selection> Ꮡs, Qualifier qf) {
         throw panic("unreachable");
     }
 
-    ref var buf = ref heap(new bytes_package.Buffer(), out var Ꮡbuf);
+    ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     buf.WriteString(k);
     buf.WriteByte((rune)'(');
     WriteType(Ꮡbuf, s.Recv(), qf);
-    fmt.Fprintf(~Ꮡbuf, ") %s"u8, s.obj.Name());
+    fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), ") %s"u8, s.obj.Name());
     {
         var T = s.Type(); if (s.kind == FieldVal){
             buf.WriteByte((rune)' ');
             WriteType(Ꮡbuf, T, qf);
         } else {
-            WriteSignature(Ꮡbuf, T._<ΔSignature.val>(), qf);
+            WriteSignature(Ꮡbuf, T._<ж<ΔSignature>>(), qf);
         }
     }
-    return buf.String();
+    return Ꮡbuf.String();
 }
 
 } // end types_package

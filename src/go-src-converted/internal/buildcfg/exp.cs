@@ -6,15 +6,16 @@ namespace go.@internal;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using strings = strings_package;
-using goexperiment = @internal.goexperiment_package;
+using goexperiment = go.@internal.goexperiment_package;
+using go.@internal;
 
 partial class buildcfg_package {
 
 // ExperimentFlags represents a set of GOEXPERIMENT flags relative to a baseline
 // (platform-default) experiment configuration.
 [GoType] partial struct ExperimentFlags {
-    public partial ref @internal.goexperiment_package.Flags Flags { get; }
-    internal @internal.goexperiment_package.Flags baseline;
+    public partial ref go.@internal.goexperiment_package.Flags Flags { get; }
+    internal goexperiment.Flags baseline;
 }
 
 // Experiment contains the toolchain experiments enabled for the
@@ -26,14 +27,15 @@ partial class buildcfg_package {
 // experimentBaseline specifies the experiment flags that are enabled by
 // default in the current toolchain. This is, in effect, the "control"
 // configuration and any variation from this is an experiment.
-public static ExperimentFlags Experiment = () => {
+public static ж<ExperimentFlags> ᏑExperiment = new(((Func<ExperimentFlags>)(() => {
     var (flags, err) = ParseGOEXPERIMENT(GOOS, GOARCH, envOr("GOEXPERIMENT"u8, defaultGOEXPERIMENT));
     if (err != default!) {
-        var Error = err;
+        Error = err;
         return new ExperimentFlags(nil);
     }
-    return flags.val;
-}();
+    return flags.Value;
+}))());
+public static ref ExperimentFlags Experiment => ref ᏑExperiment.Value;
 
 // DefaultGOEXPERIMENT is the embedded default GOEXPERIMENT string.
 // It is not guaranteed to be canonical.
@@ -66,7 +68,7 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
         regabiSupported = true;
     }
 
-    ref var baseline = ref heap<@internal.goexperiment_package.Flags>(out var Ꮡbaseline);
+    ref var baseline = ref heap<goexperiment.Flags>(out var Ꮡbaseline);
     baseline = new goexperiment.Flags(
         RegabiWrappers: regabiSupported,
         RegabiArgs: regabiSupported,
@@ -83,26 +85,26 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
     if (goexp != ""u8) {
         // Create a map of known experiment names.
         var names = new map<@string, Action<bool>>();
-        var rv = reflect.ValueOf(Ꮡ((~flags).Flags)).Elem();
+        var rv = reflect.ValueOf(flags.of(ExperimentFlags.ᏑFlags)).Elem();
         var rt = rv.Type();
         for (nint i = 0; i < rt.NumField(); i++) {
             var field = rv.Field(i);
-            names[strings.ToLower(rt.Field(i).Name)] = 
             var fieldʗ1 = field;
-            () => fieldʗ1.SetBool();
+                        names[strings.ToLower(rt.Field(i).Name)] = (bool p1) => fieldʗ1.SetBool(p1);
         }
         // "regabi" is an alias for all working regabi
         // subexperiments, and not an experiment itself. Doing
         // this as an alias make both "regabi" and "noregabi"
         // do the right thing.
-        names["regabi"u8] = 
         var flagsʗ1 = flags;
-        (bool v) => {
-            flagsʗ1.RegabiWrappers = v;
-            flagsʗ1.RegabiArgs = v;
+        names["regabi"u8] = (bool v) => {
+            flagsʗ1.Value.RegabiWrappers = v;
+            flagsʗ1.Value.RegabiArgs = v;
         };
         // Parse names.
-        foreach (var (_, f) in strings.Split(goexp, ","u8)) {
+        foreach (var (_, vᴛ1) in strings.Split(goexp, ","u8)) {
+            var f = vᴛ1;
+
             if (f == ""u8) {
                 continue;
             }
@@ -110,15 +112,14 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
                 // GOEXPERIMENT=none disables all experiment flags.
                 // This is used by cmd/dist, which doesn't know how
                 // to build with any experiment flags.
-                flags.val.Flags = new goexperiment.Flags(nil);
+                flags.Value.Flags = new goexperiment.Flags(nil);
                 continue;
             }
             var val = true;
             if (strings.HasPrefix(f, "no"u8)) {
                 (f, val) = (f[2..], false);
             }
-            var set = names[f];
-            var ok = names[f];
+            var (set, ok) = names[f, ꟷ];
             if (!ok) {
                 return (default!, fmt.Errorf("unknown GOEXPERIMENT %s"u8, f));
             }
@@ -126,16 +127,16 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
         }
     }
     if (regabiAlwaysOn) {
-        flags.RegabiWrappers = true;
-        flags.RegabiArgs = true;
+        flags.Value.RegabiWrappers = true;
+        flags.Value.RegabiArgs = true;
     }
     // regabi is only supported on amd64, arm64, loong64, riscv64, ppc64 and ppc64le.
     if (!regabiSupported) {
-        flags.RegabiWrappers = false;
-        flags.RegabiArgs = false;
+        flags.Value.RegabiWrappers = false;
+        flags.Value.RegabiArgs = false;
     }
     // Check regabi dependencies.
-    if (flags.RegabiArgs && !flags.RegabiWrappers) {
+    if ((~flags).RegabiArgs && !(~flags).RegabiWrappers) {
         return (default!, fmt.Errorf("GOEXPERIMENT regabiargs requires regabiwrappers"u8));
     }
     return (flags, default!);
@@ -143,8 +144,10 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
 
 // String returns the canonical GOEXPERIMENT string to enable this experiment
 // configuration. (Experiments in the same state as in the baseline are elided.)
-[GoRecv] public static @string String(this ref ExperimentFlags exp) {
-    return strings.Join(expList(Ꮡ(exp.Flags), Ꮡ(exp.baseline), false), ","u8);
+public static @string String(this ж<ExperimentFlags> Ꮡexp) {
+    ref var exp = ref Ꮡexp.Value;
+
+    return strings.Join(expList(Ꮡexp.of(ExperimentFlags.ᏑFlags), Ꮡexp.of(ExperimentFlags.Ꮡbaseline), false), ","u8);
 }
 
 // expList returns the list of lower-cased experiment names for
@@ -152,13 +155,13 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
 // experiments. If all is true, then include all experiment flags,
 // regardless of base.
 internal static slice<@string> expList(ж<goexperiment.Flags> Ꮡexp, ж<goexperiment.Flags> Ꮡbase, bool all) {
-    ref var exp = ref Ꮡexp.val;
-    ref var @base = ref Ꮡbase.val;
+    ref var exp = ref Ꮡexp.Value;
+    ref var @base = ref Ꮡbase.DerefOrNil();
 
     slice<@string> list = default!;
     var rv = reflect.ValueOf(exp).Elem();
-    reflectꓸValue rBase = default!;
-    if (@base != nil) {
+    reflectꓸValue rBase = new(nil);
+    if (Ꮡbase != nil) {
         rBase = reflect.ValueOf(@base).Elem();
     }
     var rt = rv.Type();
@@ -166,7 +169,7 @@ internal static slice<@string> expList(ж<goexperiment.Flags> Ꮡexp, ж<goexper
         @string name = strings.ToLower(rt.Field(i).Name);
         var val = rv.Field(i).Bool();
         var baseVal = false;
-        if (@base != nil) {
+        if (Ꮡbase != nil) {
             baseVal = rBase.Field(i).Bool();
         }
         if (all || val != baseVal) {
@@ -182,14 +185,18 @@ internal static slice<@string> expList(ж<goexperiment.Flags> Ꮡexp, ж<goexper
 
 // Enabled returns a list of enabled experiments, as
 // lower-cased experiment names.
-[GoRecv] public static slice<@string> Enabled(this ref ExperimentFlags exp) {
-    return expList(Ꮡ(exp.Flags), nil, false);
+public static slice<@string> Enabled(this ж<ExperimentFlags> Ꮡexp) {
+    ref var exp = ref Ꮡexp.Value;
+
+    return expList(Ꮡexp.of(ExperimentFlags.ᏑFlags), nil, false);
 }
 
 // All returns a list of all experiment settings.
 // Disabled experiments appear in the list prefixed by "no".
-[GoRecv] public static slice<@string> All(this ref ExperimentFlags exp) {
-    return expList(Ꮡ(exp.Flags), nil, true);
+public static slice<@string> All(this ж<ExperimentFlags> Ꮡexp) {
+    ref var exp = ref Ꮡexp.Value;
+
+    return expList(Ꮡexp.of(ExperimentFlags.ᏑFlags), nil, true);
 }
 
 } // end buildcfg_package

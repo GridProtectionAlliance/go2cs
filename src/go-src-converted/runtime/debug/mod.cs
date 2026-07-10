@@ -7,6 +7,7 @@ using fmt = fmt_package;
 using runtime = runtime_package;
 using strconv = strconv_package;
 using strings = strings_package;
+using io = io_package;
 
 partial class debug_package {
 
@@ -25,7 +26,7 @@ public static (ж<BuildInfo> info, bool ok) ReadBuildInfo() {
         return (default!, false);
     }
     data = data[16..(int)(len(data) - 16)];
-    (bi, err) = ParseBuildInfo(data);
+    var (bi, err) = ParseBuildInfo(data);
     if (err != default!) {
         return (default!, false);
     }
@@ -33,7 +34,7 @@ public static (ж<BuildInfo> info, bool ok) ReadBuildInfo() {
     // historical reasons. It is not part of the modinfo() string, and
     // ParseBuildInfo does not recognize it. We inject it here to hide this
     // awkwardness from the user.
-    bi.val.GoVersion = runtime.Version();
+    bi.Value.GoVersion = runtime.Version();
     return (bi, true);
 }
 
@@ -84,8 +85,7 @@ public static (ж<BuildInfo> info, bool ok) ReadBuildInfo() {
     // Key and Value describe the build setting.
     // Key must not contain an equals sign, space, tab, or newline.
     // Value must not contain newlines ('\n').
-    public @string Key;
-    public @string Value;
+    public @string Key, Value;
 }
 
 // quoteKey reports whether key is required to be quoted.
@@ -101,16 +101,15 @@ internal static bool quoteValue(@string value) {
 [GoRecv] public static @string String(this ref BuildInfo bi) {
     var buf = @new<strings.Builder>();
     if (bi.GoVersion != ""u8) {
-        fmt.Fprintf(~buf, "go\t%s\n"u8, bi.GoVersion);
+        fmt.Fprintf(new strings_BuilderжWriter(buf), "go\t%s\n"u8, bi.GoVersion);
     }
     if (bi.Path != ""u8) {
-        fmt.Fprintf(~buf, "path\t%s\n"u8, bi.Path);
+        fmt.Fprintf(new strings_BuilderжWriter(buf), "path\t%s\n"u8, bi.Path);
     }
     Action<@string, Module> formatMod = default!;
-    formatMod = 
     var bufʗ1 = buf;
     var formatModʗ1 = formatMod;
-    (@string word, Module m) => {
+    formatMod = (@string word, Module m) => {
         bufʗ1.WriteString(word);
         bufʗ1.WriteByte((rune)'\t');
         bufʗ1.WriteString(m.Path);
@@ -121,15 +120,15 @@ internal static bool quoteValue(@string value) {
             bufʗ1.WriteString(m.Sum);
         } else {
             bufʗ1.WriteByte((rune)'\n');
-            formatModʗ1("=>"u8, m.Replace.val);
+            formatModʗ1("=>"u8, m.Replace.Value);
         }
         bufʗ1.WriteByte((rune)'\n');
     };
-    if (bi.ΔMain != (new Module(nil))) {
-        formatMod("mod"u8, bi.ΔMain);
+    if (bi.Main != (new Module(nil))) {
+        formatMod("mod"u8, bi.Main);
     }
     foreach (var (_, dep) in bi.Deps) {
-        formatMod("dep"u8, dep.val);
+        formatMod("dep"u8, dep.Value);
     }
     foreach (var (_, s) in bi.Settings) {
         @string key = s.Key;
@@ -140,161 +139,163 @@ internal static bool quoteValue(@string value) {
         if (quoteValue(value)) {
             value = strconv.Quote(value);
         }
-        fmt.Fprintf(~buf, "build\t%s=%s\n"u8, key, value);
+        fmt.Fprintf(new strings_BuilderжWriter(buf), "build\t%s=%s\n"u8, key, value);
     }
     return buf.String();
 }
 
-public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) => func((defer, _) => {
+public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
     ж<BuildInfo> bi = default!;
-    error errΔ1 = default!;
-
-    nint lineNum = 1;
-    defer(() => {
-        if (errΔ1 != default!) {
-             = fmt.Errorf("could not parse Go build info: line %d: %w"u8, lineNum, errΔ1);
-        }
-    });
-    @string pathLine = "path\t"u8;
-    @string modLine = "mod\t"u8;
-    @string depLine = "dep\t"u8;
-    @string repLine = "=>\t"u8;
-    @string buildLine = "build\t"u8;
-    @string newline = "\n"u8;
-    @string tab = "\t"u8;
-    var readModuleLine = (slice<@string> elem) => {
-        if (len(elem) != 2 && len(elem) != 3) {
-            return (new Module(nil), fmt.Errorf("expected 2 or 3 columns; got %d"u8, len(elem)));
-        }
-        @string version = elem[1];
-        @string sum = ""u8;
-        if (len(elem) == 3) {
-            sum = elem[2];
-        }
-        return (new Module(
-            Path: elem[0],
-            Version: version,
-            Sum: sum
-        ), default!);
-    };
-    bi = @new<BuildInfo>();
-    ж<Module> last = default!;
-    @string line = default!;
-    bool okΔ1 = default!;
-    // Reverse of BuildInfo.String(), except for go version.
-    while (len(data) > 0) {
-        (line, data, ) = strings.Cut(data, newline);
-        if (!okΔ1) {
-            break;
-        }
-        switch (ᐧ) {
-        case {} when strings.HasPrefix(line, pathLine): {
-            @string elem = line[(int)(len(pathLine))..];
-            bi.val.Path = ((@string)elem);
-            break;
-        }
-        case {} when strings.HasPrefix(line, modLine): {
-            var elem = strings.Split(line[(int)(len(modLine))..], tab);
-            last = Ꮡ((~bi).ΔMain);
-            (last.val, errΔ5) = readModuleLine(elem);
-            if (errΔ1 != default!) {
-                return (default!, errΔ1);
+    error err = default!;
+    func((defer, recover) => {
+        nint lineNum = 1;
+        defer(() => {
+            if (err != default!) {
+                err = fmt.Errorf("could not parse Go build info: line %d: %w"u8, lineNum, err);
             }
-            break;
-        }
-        case {} when strings.HasPrefix(line, depLine): {
-            var elem = strings.Split(line[(int)(len(depLine))..], tab);
-            last = @new<Module>();
-            bi.val.Deps = append((~bi).Deps, last);
-            (last.val, errΔ5) = readModuleLine(elem);
-            if (errΔ1 != default!) {
-                return (default!, errΔ1);
+        });
+        @string pathLine = "path\t"u8;
+        @string modLine = "mod\t"u8;
+        @string depLine = "dep\t"u8;
+        @string repLine = "=>\t"u8;
+        @string buildLine = "build\t"u8;
+        @string newline = "\n"u8;
+        @string tab = "\t"u8;
+        var readModuleLine = (slice<@string> elem) => {
+            if (len(elem) != 2 && len(elem) != 3) {
+                return (new Module(nil), fmt.Errorf("expected 2 or 3 columns; got %d"u8, len(elem)));
             }
-            break;
-        }
-        case {} when strings.HasPrefix(line, repLine): {
-            var elem = strings.Split(line[(int)(len(repLine))..], tab);
-            if (len(elem) != 3) {
-                return (default!, fmt.Errorf("expected 3 columns for replacement; got %d"u8, len(elem)));
+            @string version = elem[1];
+            @string sum = ""u8;
+            if (len(elem) == 3) {
+                sum = elem[2];
             }
-            if (last == nil) {
-                return (default!, fmt.Errorf("replacement with no module on previous line"u8));
-            }
-            last.val.Replace = Ꮡ(new Module(
-                Path: ((@string)elem[0]),
-                Version: ((@string)elem[1]),
-                Sum: ((@string)elem[2])
-            ));
-            last = default!;
-            break;
-        }
-        case {} when strings.HasPrefix(line, buildLine): {
-            @string kv = line[(int)(len(buildLine))..];
-            if (len(kv) < 1) {
-                return (default!, fmt.Errorf("build line missing '='"u8));
-            }
-            @string key = default!;
-            @string rawValue = default!;
-            switch (kv[0]) {
-            case (rune)'=': {
-                return (default!, fmt.Errorf("build line with missing key"u8));
-            }
-            case (rune)'`' or (rune)'"': {
-                var (rawKey, errΔ7) = strconv.QuotedPrefix(kv);
-                if (errΔ7 != default!) {
-                    return (default!, fmt.Errorf("invalid quoted key in build line"u8));
-                }
-                if (len(kv) == len(rawKey)) {
-                    return (default!, fmt.Errorf("build line missing '=' after quoted key"u8));
-                }
-                {
-                    var c = kv[len(rawKey)]; if (c != (rune)'=') {
-                        return (default!, fmt.Errorf("unexpected character after quoted key: %q"u8, c));
-                    }
-                }
-                (key, _) = strconv.Unquote(rawKey);
-                rawValue = kv[(int)(len(rawKey) + 1)..];
+            return (new Module(
+                Path: elem[0],
+                Version: version,
+                Sum: sum
+            ), default!);
+        };
+        bi = @new<BuildInfo>();
+        ж<Module> last = default!;
+        @string line = default!;
+        bool ok = default!;
+        // Reverse of BuildInfo.String(), except for go version.
+        while (len(data) > 0) {
+            (line, data, ok) = strings.Cut(data, newline);
+            if (!ok) {
                 break;
             }
-            default: {
-                bool okΔ3 = default!;
-                (key, rawValue, okΔ3) = strings.Cut(kv, "="u8);
-                if (!okΔ3) {
-                    return (default!, fmt.Errorf("build line missing '=' after key"u8));
-                }
-                if (quoteKey(key)) {
-                    return (default!, fmt.Errorf("unquoted key %q must be quoted"u8, key));
+            switch (ᐧ) {
+            case {} when strings.HasPrefix(line, pathLine): {
+                @string elem = line[(int)(len(pathLine))..];
+                bi.Value.Path = ((@string)elem);
+                break;
+            }
+            case {} when strings.HasPrefix(line, modLine): {
+                var elem = strings.Split(line[(int)(len(modLine))..], tab);
+                last = bi.of(BuildInfo.ᏑMain);
+                (last.Value, err) = readModuleLine(elem);
+                if (err != default!) {
+                    (bi, err) = (default!, err); return;
                 }
                 break;
-            }}
-
-            @string value = default!;
-            if (len(rawValue) > 0) {
-                switch (rawValue[0]) {
+            }
+            case {} when strings.HasPrefix(line, depLine): {
+                var elem = strings.Split(line[(int)(len(depLine))..], tab);
+                last = @new<Module>();
+                bi.Value.Deps = append((~bi).Deps, last);
+                (last.Value, err) = readModuleLine(elem);
+                if (err != default!) {
+                    (bi, err) = (default!, err); return;
+                }
+                break;
+            }
+            case {} when strings.HasPrefix(line, repLine): {
+                var elem = strings.Split(line[(int)(len(repLine))..], tab);
+                if (len(elem) != 3) {
+                    (bi, err) = (default!, fmt.Errorf("expected 3 columns for replacement; got %d"u8, len(elem))); return;
+                }
+                if (last == nil) {
+                    (bi, err) = (default!, fmt.Errorf("replacement with no module on previous line"u8)); return;
+                }
+                last.Value.Replace = Ꮡ(new Module(
+                    Path: ((@string)elem[0]),
+                    Version: ((@string)elem[1]),
+                    Sum: ((@string)elem[2])
+                ));
+                last = default!;
+                break;
+            }
+            case {} when strings.HasPrefix(line, buildLine): {
+                @string kv = line[(int)(len(buildLine))..];
+                if (len(kv) < 1) {
+                    (bi, err) = (default!, fmt.Errorf("build line missing '='"u8)); return;
+                }
+                @string key = default!;
+                @string rawValue = default!;
+                switch (kv[0]) {
+                case (rune)'=': {
+                    (bi, err) = (default!, fmt.Errorf("build line with missing key"u8)); return;
+                }
                 case (rune)'`' or (rune)'"': {
-                    error errΔ9 = default!;
-                    (value, errΔ9) = strconv.Unquote(rawValue);
-                    if (errΔ9 != default!) {
-                        return (default!, fmt.Errorf("invalid quoted value in build line"u8));
+                    var (rawKey, errΔ6) = strconv.QuotedPrefix(kv);
+                    if (errΔ6 != default!) {
+                        (bi, err) = (default!, fmt.Errorf("invalid quoted key in build line"u8)); return;
                     }
+                    if (len(kv) == len(rawKey)) {
+                        (bi, err) = (default!, fmt.Errorf("build line missing '=' after quoted key"u8)); return;
+                    }
+                    {
+                        var c = kv[len(rawKey)]; if (c != (rune)'=') {
+                            (bi, err) = (default!, fmt.Errorf("unexpected character after quoted key: %q"u8, c)); return;
+                        }
+                    }
+                    (key, _) = strconv.Unquote(rawKey);
+                    rawValue = kv[(int)(len(rawKey) + 1)..];
                     break;
                 }
                 default: {
-                    value = rawValue;
-                    if (quoteValue(value)) {
-                        return (default!, fmt.Errorf("unquoted value %q must be quoted"u8, value));
+                    bool okΔ4 = default!;
+                    (key, rawValue, okΔ4) = strings.Cut(kv, "="u8);
+                    if (!okΔ4) {
+                        (bi, err) = (default!, fmt.Errorf("build line missing '=' after key"u8)); return;
+                    }
+                    if (quoteKey(key)) {
+                        (bi, err) = (default!, fmt.Errorf("unquoted key %q must be quoted"u8, key)); return;
                     }
                     break;
                 }}
 
-            }
-            bi.val.Settings = append((~bi).Settings, new BuildSetting(Key: key, Value: value));
-            break;
-        }}
+                @string value = default!;
+                if (len(rawValue) > 0) {
+                    switch (rawValue[0]) {
+                    case (rune)'`' or (rune)'"': {
+                        error errΔ8 = default!;
+                        (value, errΔ8) = strconv.Unquote(rawValue);
+                        if (errΔ8 != default!) {
+                            (bi, err) = (default!, fmt.Errorf("invalid quoted value in build line"u8)); return;
+                        }
+                        break;
+                    }
+                    default: {
+                        value = rawValue;
+                        if (quoteValue(value)) {
+                            (bi, err) = (default!, fmt.Errorf("unquoted value %q must be quoted"u8, value)); return;
+                        }
+                        break;
+                    }}
 
-        lineNum++;
-    }
-    return (bi, default!);
-});
+                }
+                bi.Value.Settings = append((~bi).Settings, new BuildSetting(Key: key, Value: value));
+                break;
+            }}
+
+            lineNum++;
+        }
+        (bi, err) = (bi, default!);
+    });
+    return (bi, err);
+}
 
 } // end debug_package

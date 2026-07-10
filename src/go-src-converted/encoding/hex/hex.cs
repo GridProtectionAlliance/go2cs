@@ -29,8 +29,8 @@ public static nint EncodedLen(nint n) {
 public static nint Encode(slice<byte> dst, slice<byte> src) {
     nint j = 0;
     foreach (var (_, v) in src) {
-        dst[j] = hextable[v >> (int)(4)];
-        dst[j + 1] = hextable[(byte)(v & 15)];
+        dst[j] = hextable[(v >> (int)(4))];
+        dst[j + 1] = hextable[(byte)(v & 0x0f)];
         j += 2;
     }
     return len(src) * 2;
@@ -40,7 +40,7 @@ public static nint Encode(slice<byte> dst, slice<byte> src) {
 // and returns the extended buffer.
 public static slice<byte> AppendEncode(slice<byte> dst, slice<byte> src) {
     nint n = EncodedLen(len(src));
-    dst = slices.Grow(dst, n);
+    dst = slices.Grow<slice<byte>, byte>(dst, n);
     Encode(dst[(int)(len(dst))..][..(int)(n)], src);
     return dst[..(int)(len(dst) + n)];
 }
@@ -53,7 +53,7 @@ public static error ErrLength = errors.New("encoding/hex: odd length hex string"
 [GoType("num:byte")] partial struct InvalidByteError;
 
 public static @string Error(this InvalidByteError e) {
-    return fmt.Sprintf("encoding/hex: invalid byte: %#U"u8, ((rune)e));
+    return fmt.Sprintf("encoding/hex: invalid byte: %#U"u8, (rune)(byte)e);
 }
 
 // DecodedLen returns the length of a decoding of x source bytes.
@@ -77,19 +77,19 @@ public static (nint, error) Decode(slice<byte> dst, slice<byte> src) {
         var q = src[j];
         var a = reverseHexTable[p];
         var b = reverseHexTable[q];
-        if (a > 15) {
+        if (a > 0x0f) {
             return (i, ((InvalidByteError)p));
         }
-        if (b > 15) {
+        if (b > 0x0f) {
             return (i, ((InvalidByteError)q));
         }
-        dst[i] = (byte)((a << (int)(4)) | b);
+        dst[i] = (byte)(((a << (int)(4))) | b);
         i++;
     }
     if (len(src) % 2 == 1) {
         // Check for invalid char before reporting bad length,
         // since the invalid char (if present) is an earlier problem.
-        if (reverseHexTable[src[j - 1]] > 15) {
+        if (reverseHexTable[src[j - 1]] > 0x0f) {
             return (i, ((InvalidByteError)src[j - 1]));
         }
         return (i, ErrLength);
@@ -102,8 +102,8 @@ public static (nint, error) Decode(slice<byte> dst, slice<byte> src) {
 // If the input is malformed, it returns the partially decoded src and an error.
 public static (slice<byte>, error) AppendDecode(slice<byte> dst, slice<byte> src) {
     nint n = DecodedLen(len(src));
-    dst = slices.Grow(dst, n);
-    (n, err) = Decode(dst[(int)(len(dst))..][..(int)(n)], src);
+    dst = slices.Grow<slice<byte>, byte>(dst, n);
+    (n, var err) = Decode(dst[(int)(len(dst))..][..(int)(n)], src);
     return (dst[..(int)(len(dst) + n)], err);
 }
 
@@ -132,12 +132,12 @@ public static @string Dump(slice<byte> data) {
     if (len(data) == 0) {
         return ""u8;
     }
-    ref var buf = ref heap(new strings_package.Builder(), out var Ꮡbuf);
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     // Dumper will write 79 bytes per complete 16 byte chunk, and at least
     // 64 bytes for whatever remains. Round the allocation up, since only a
     // maximum of 15 bytes will be wasted.
-    buf.Grow((1 + ((len(data) - 1) / 16)) * 79);
-    var dumper = Dumper(~Ꮡbuf);
+    Ꮡbuf.Grow((1 + ((len(data) - 1) / 16)) * 79);
+    var dumper = Dumper(new strings_BuilderжWriter(Ꮡbuf));
     dumper.Write(data);
     dumper.Close();
     return buf.String();
@@ -147,14 +147,14 @@ public static @string Dump(slice<byte> data) {
 internal static readonly UntypedInt bufferSize = 1024;
 
 [GoType] partial struct encoder {
-    internal io_package.Writer w;
+    internal io.Writer w;
     internal error err;
     internal array<byte> @out = new(bufferSize); // output buffer
 }
 
 // NewEncoder returns an [io.Writer] that writes lowercase hexadecimal characters to w.
 public static io.Writer NewEncoder(io.Writer w) {
-    return new encoder(w: w);
+    return new encoderжWriter(Ꮡ(new encoder(w: w)));
 }
 
 [GoRecv] internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
@@ -176,7 +176,7 @@ public static io.Writer NewEncoder(io.Writer w) {
 }
 
 [GoType] partial struct decoder {
-    internal io_package.Reader r;
+    internal io.Reader r;
     internal error err;
     internal slice<byte> @in;      // input buffer (encoded form)
     internal array<byte> arr = new(bufferSize); // backing array for in
@@ -185,7 +185,7 @@ public static io.Writer NewEncoder(io.Writer w) {
 // NewDecoder returns an [io.Reader] that decodes hexadecimal characters from r.
 // NewDecoder expects that r contain only an even number of hexadecimal characters.
 public static io.Reader NewDecoder(io.Reader r) {
-    return new decoder(r: r);
+    return new decoderжReader(Ꮡ(new decoder(r: r)));
 }
 
 [GoRecv] internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
@@ -202,7 +202,7 @@ public static io.Reader NewDecoder(io.Reader r) {
         d.@in = d.arr[..(int)(numCopy + numRead)];
         if (AreEqual(d.err, io.EOF) && len(d.@in) % 2 != 0) {
             {
-                var a = reverseHexTable[d.@in[len(d.@in) - 1]]; if (a > 15){
+                var a = reverseHexTable[d.@in[len(d.@in) - 1]]; if (a > 0x0f){
                     d.err = ((InvalidByteError)d.@in[len(d.@in) - 1]);
                 } else {
                     d.err = io.ErrUnexpectedEOF;
@@ -216,10 +216,11 @@ public static io.Reader NewDecoder(io.Reader r) {
             p = p[..(int)(numAvail)];
         }
     }
-    var (numDec, err) = Decode(p, d.@in[..(int)(len(p) * 2)]);
+    (var numDec, err) = Decode(p, d.@in[..(int)(len(p) * 2)]);
     d.@in = d.@in[(int)(2 * numDec)..];
     if (err != default!) {
-        (d.@in, d.err) = (default!, err);
+        d.@in = default!;
+        d.err = err;
     }
     // Decode error; discard input remainder
     if (len(d.@in) < 2) {
@@ -233,11 +234,11 @@ public static io.Reader NewDecoder(io.Reader r) {
 // w. The format of the dump matches the output of `hexdump -C` on the command
 // line.
 public static io.WriteCloser Dumper(io.Writer w) {
-    return new dumper(w: w);
+    return new dumperжWriteCloser(Ꮡ(new dumper(w: w)));
 }
 
 [GoType] partial struct dumper {
-    internal io_package.Writer w;
+    internal io.Writer w;
     internal array<byte> rightChars = new(18);
     internal array<byte> buf = new(14);
     internal nint used; // number of bytes in the current line
@@ -266,10 +267,10 @@ internal static byte toChar(byte b) {
         if (h.used == 0) {
             // At the beginning of a line we print the current
             // offset in hex.
-            h.buf[0] = ((byte)(h.n >> (int)(24)));
-            h.buf[1] = ((byte)(h.n >> (int)(16)));
-            h.buf[2] = ((byte)(h.n >> (int)(8)));
-            h.buf[3] = ((byte)h.n);
+            h.buf[0] = (byte)((h.n >> (int)(24)));
+            h.buf[1] = (byte)((h.n >> (int)(16)));
+            h.buf[2] = (byte)((h.n >> (int)(8)));
+            h.buf[3] = (byte)h.n;
             Encode(h.buf[4..], h.buf[..4]);
             h.buf[12] = (rune)' ';
             h.buf[13] = (rune)' ';

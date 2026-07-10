@@ -4,11 +4,11 @@
 namespace go;
 
 using sysdll = @internal.syscall.windows.sysdll_package;
-using sync = sync_package;
-using atomic = sync.atomic_package;
+using Δsync = sync_package;
+using atomic = go.sync.atomic_package;
 using @unsafe = unsafe_package;
 using @internal.syscall.windows;
-using sync;
+using go.sync;
 using ꓸꓸꓸuintptr = Span<uintptr>;
 
 partial class syscall_package {
@@ -71,7 +71,7 @@ internal static partial (uintptr proc, Errno err) getprocaddress(uintptr handle,
 // Use [LazyDLL] in golang.org/x/sys/windows for a secure way to
 // load system DLLs.
 public static (ж<DLL>, error) LoadDLL(@string name) {
-    (namep, err) = UTF16PtrFromString(name);
+    var (namep, err) = UTF16PtrFromString(name);
     if (err != default!) {
         return (default!, err);
     }
@@ -83,22 +83,22 @@ public static (ж<DLL>, error) LoadDLL(@string name) {
         (h, e) = loadlibrary(namep);
     }
     if (e != 0) {
-        return (default!, new DLLError(
+        return (default!, new DLLErrorжerror(Ꮡ(new DLLError(
             Err: e,
             ObjName: name,
             Msg: "Failed to load "u8 + name + ": "u8 + e.Error()
-        ));
+        ))));
     }
     var d = Ꮡ(new DLL(
         Name: name,
-        ΔHandle: ((ΔHandle)h)
+        Handle: ((ΔHandle)h)
     ));
     return (d, default!);
 }
 
 // MustLoadDLL is like [LoadDLL] but panics if load operation fails.
 public static ж<DLL> MustLoadDLL(@string name) {
-    (d, e) = LoadDLL(name);
+    var (d, e) = LoadDLL(name);
     if (e != default!) {
         throw panic(e);
     }
@@ -107,24 +107,27 @@ public static ж<DLL> MustLoadDLL(@string name) {
 
 // FindProc searches [DLL] d for procedure named name and returns [*Proc]
 // if found. It returns an error if search fails.
-[GoRecv] public static (ж<Proc> proc, error err) FindProc(this ref DLL d, @string name) {
+public static (ж<Proc> proc, error err) FindProc(this ж<DLL> Ꮡd, @string name) {
     ж<Proc> proc = default!;
     error err = default!;
 
-    (namep, err) = BytePtrFromString(name);
+    ref var d = ref Ꮡd.Value;
+    (var namep, err) = BytePtrFromString(name);
     if (err != default!) {
         return (default!, err);
     }
-    (a, e) = getprocaddress(((uintptr)d.Handle), namep);
+    ref var a = ref heap<uintptr>(out var Ꮡa);
+    ref var e = ref heap<Errno>(out var Ꮡe);
+    (a, e) = getprocaddress((uintptr)d.Handle, namep);
     if (e != 0) {
-        return (default!, new DLLError(
+        return (default!, new DLLErrorжerror(Ꮡ(new DLLError(
             Err: e,
             ObjName: name,
             Msg: "Failed to find "u8 + name + " procedure in "u8 + d.Name + ": "u8 + e.Error()
-        ));
+        ))));
     }
     var p = Ꮡ(new Proc(
-        Dll: d,
+        Dll: Ꮡd,
         Name: name,
         addr: a
     ));
@@ -132,8 +135,10 @@ public static ж<DLL> MustLoadDLL(@string name) {
 }
 
 // MustFindProc is like [DLL.FindProc] but panics if search fails.
-[GoRecv] public static ж<Proc> MustFindProc(this ref DLL d, @string name) {
-    (p, e) = d.FindProc(name);
+public static ж<Proc> MustFindProc(this ж<DLL> Ꮡd, @string name) {
+    ref var d = ref Ꮡd.Value;
+
+    var (p, e) = Ꮡd.FindProc(name);
     if (e != default!) {
         throw panic(e);
     }
@@ -179,7 +184,8 @@ public static ж<DLL> MustLoadDLL(@string name) {
 [GoRecv] public static (uintptr, uintptr, error) Call(this ref Proc p, params ꓸꓸꓸuintptr aʗp) {
     var a = aʗp.slice();
 
-    return SyscallN(p.Addr(), a.ꓸꓸꓸ);
+    var (ᴛ1, ᴛ2, ᴛ3) = SyscallN(p.Addr(), a.ꓸꓸꓸ);
+    return (ᴛ1, ᴛ2, ᴛ3);
 }
 
 // A LazyDLL implements access to a single [DLL].
@@ -193,49 +199,57 @@ public static ж<DLL> MustLoadDLL(@string name) {
 // Use LazyDLL in golang.org/x/sys/windows for a secure way to
 // load system DLLs.
 [GoType] partial struct LazyDLL {
-    internal sync_package.Mutex mu;
+    internal Δsync.Mutex mu;
     internal ж<DLL> dll; // non nil once DLL is loaded
     public @string Name;
 }
 
 // Load loads DLL file d.Name into memory. It returns an error if fails.
 // Load will not try to load DLL, if it is already loaded into memory.
-[GoRecv] public static error Load(this ref LazyDLL d) => func((defer, _) => {
+public static error Load(this ж<LazyDLL> Ꮡd) => func<error>((defer, recover) => {
+    ref var d = ref Ꮡd.Value;
+
     // Non-racy version of:
     // if d.dll == nil {
-    if ((uintptr)atomic.LoadPointer((ж<@unsafe.Pointer>)(uintptr)(((@unsafe.Pointer)(Ꮡ(d.dll))))) == nil) {
-        d.mu.Lock();
-        defer(d.mu.Unlock);
+    if ((uintptr)atomic.LoadPointer((ж<@unsafe.Pointer>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡd.of(LazyDLL.Ꮡdll)).Value))) == nil) {
+        Ꮡd.of(LazyDLL.Ꮡmu).Lock();
+        defer(Ꮡd.of(LazyDLL.Ꮡmu).Unlock);
         if (d.dll == nil) {
-            (dll, e) = LoadDLL(d.Name);
+            var (dll, e) = LoadDLL(d.Name);
             if (e != default!) {
                 return e;
             }
             // Non-racy version of:
             // d.dll = dll
-            atomic.StorePointer((ж<@unsafe.Pointer>)(uintptr)(((@unsafe.Pointer)(Ꮡ(d.dll)))), new @unsafe.Pointer(dll));
+            atomic.StorePointer((ж<@unsafe.Pointer>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡd.of(LazyDLL.Ꮡdll)).Value)), new @unsafe.Pointer(dll));
         }
     }
     return default!;
 });
 
 // mustLoad is like Load but panics if search fails.
-[GoRecv] internal static void mustLoad(this ref LazyDLL d) {
-    var e = d.Load();
+internal static void mustLoad(this ж<LazyDLL> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
+    var e = Ꮡd.Load();
     if (e != default!) {
         throw panic(e);
     }
 }
 
 // Handle returns d's module handle.
-[GoRecv] public static uintptr Handle(this ref LazyDLL d) {
-    d.mustLoad();
-    return ((uintptr)d.dll.Handle);
+public static uintptr Handle(this ж<LazyDLL> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
+    Ꮡd.mustLoad();
+    return (uintptr)(~d.dll).Handle;
 }
 
 // NewProc returns a [LazyProc] for accessing the named procedure in the [DLL] d.
-[GoRecv] public static ж<LazyProc> NewProc(this ref LazyDLL d, @string name) {
-    return Ꮡ(new LazyProc(l: d, Name: name));
+public static ж<LazyProc> NewProc(this ж<LazyDLL> Ꮡd, @string name) {
+    ref var d = ref Ꮡd.Value;
+
+    return Ꮡ(new LazyProc(l: Ꮡd, Name: name));
 }
 
 // NewLazyDLL creates new [LazyDLL] associated with [DLL] file.
@@ -246,7 +260,7 @@ public static ж<LazyDLL> NewLazyDLL(@string name) {
 // A LazyProc implements access to a procedure inside a [LazyDLL].
 // It delays the lookup until the [LazyProc.Addr], [LazyProc.Call], or [LazyProc.Find] method is called.
 [GoType] partial struct LazyProc {
-    internal sync_package.Mutex mu;
+    internal Δsync.Mutex mu;
     public @string Name;
     internal ж<LazyDLL> l;
     internal ж<Proc> proc;
@@ -255,32 +269,36 @@ public static ж<LazyDLL> NewLazyDLL(@string name) {
 // Find searches [DLL] for procedure named p.Name. It returns
 // an error if search fails. Find will not search procedure,
 // if it is already found and loaded into memory.
-[GoRecv] public static error Find(this ref LazyProc p) => func((defer, _) => {
+public static error Find(this ж<LazyProc> Ꮡp) => func<error>((defer, recover) => {
+    ref var p = ref Ꮡp.Value;
+
     // Non-racy version of:
     // if p.proc == nil {
-    if ((uintptr)atomic.LoadPointer((ж<@unsafe.Pointer>)(uintptr)(((@unsafe.Pointer)(Ꮡ(p.proc))))) == nil) {
-        p.mu.Lock();
-        defer(p.mu.Unlock);
+    if ((uintptr)atomic.LoadPointer((ж<@unsafe.Pointer>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡp.of(LazyProc.Ꮡproc)).Value))) == nil) {
+        Ꮡp.of(LazyProc.Ꮡmu).Lock();
+        defer(Ꮡp.of(LazyProc.Ꮡmu).Unlock);
         if (p.proc == nil) {
             var e = p.l.Load();
             if (e != default!) {
                 return e;
             }
-            (proc, e) = p.l.dll.FindProc(p.Name);
+            (var proc, e) = (~p.l).dll.FindProc(p.Name);
             if (e != default!) {
                 return e;
             }
             // Non-racy version of:
             // p.proc = proc
-            atomic.StorePointer((ж<@unsafe.Pointer>)(uintptr)(((@unsafe.Pointer)(Ꮡ(p.proc)))), new @unsafe.Pointer(proc));
+            atomic.StorePointer((ж<@unsafe.Pointer>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡp.of(LazyProc.Ꮡproc)).Value)), new @unsafe.Pointer(proc));
         }
     }
     return default!;
 });
 
 // mustFind is like Find but panics if search fails.
-[GoRecv] internal static void mustFind(this ref LazyProc p) {
-    var e = p.Find();
+internal static void mustFind(this ж<LazyProc> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    var e = Ꮡp.Find();
     if (e != default!) {
         throw panic(e);
     }
@@ -288,8 +306,10 @@ public static ж<LazyDLL> NewLazyDLL(@string name) {
 
 // Addr returns the address of the procedure represented by p.
 // The return value can be passed to Syscall to run the procedure.
-[GoRecv] public static uintptr Addr(this ref LazyProc p) {
-    p.mustFind();
+public static uintptr Addr(this ж<LazyProc> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    Ꮡp.mustFind();
     return p.proc.Addr();
 }
 
@@ -297,13 +317,14 @@ public static ж<LazyDLL> NewLazyDLL(@string name) {
 // Proc.Call for more information.
 //
 //go:uintptrescapes
-[GoRecv] public static (uintptr r1, uintptr r2, error lastErr) Call(this ref LazyProc p, params ꓸꓸꓸuintptr aʗp) {
+public static (uintptr r1, uintptr r2, error lastErr) Call(this ж<LazyProc> Ꮡp, params ꓸꓸꓸuintptr aʗp) {
     uintptr r1 = default!;
     uintptr r2 = default!;
     error lastErr = default!;
     var a = aʗp.slice();
 
-    p.mustFind();
+    ref var p = ref Ꮡp.Value;
+    Ꮡp.mustFind();
     return p.proc.Call(a.ꓸꓸꓸ);
 }
 

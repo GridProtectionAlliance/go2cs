@@ -40,10 +40,10 @@ internal static (float64 @int, float64 frac) modf(float64 f) {
         return (0, f);
     }
     var x = Float64bits(f);
-    nuint e = (nuint)(((nuint)(x >> (int)(shift))) & mask) - bias;
+    nuint e = (nuint)((nuint)((x >> (int)(shift))) & (nuint)mask) - (nuint)bias;
     // Keep the top 12+e bits, the integer part; clear the rest.
     if (e < 64 - 12) {
-        x &= ~(uint64)(1 << (int)((64 - 12 - e)) - 1);
+        x &= unchecked((uint64)~(uint64)(((uint64)1 << (int)((64 - 12 - e))) - 1));
     }
     @int = Float64frombits(x);
     frac = f - @int;

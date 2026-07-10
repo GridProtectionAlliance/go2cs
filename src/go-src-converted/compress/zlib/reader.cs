@@ -24,14 +24,15 @@ and to read that data back:
 namespace go.compress;
 
 using bufio = bufio_package;
-using flate = compress.flate_package;
+using flate = go.compress.flate_package;
 using binary = encoding.binary_package;
 using errors = errors_package;
 using hash = hash_package;
-using adler32 = hash.adler32_package;
+using adler32 = go.hash.adler32_package;
 using io = io_package;
 using encoding;
-using hash;
+using go.compress;
+using go.hash;
 
 partial class zlib_package {
 
@@ -43,9 +44,9 @@ public static error ErrDictionary = errors.New("zlib: invalid dictionary"u8);
 public static error ErrHeader = errors.New("zlib: invalid header"u8);
 
 [GoType] partial struct reader {
-    internal compress.flate_package.Reader r;
-    internal io_package.ReadCloser decompressor;
-    internal hash_package.Hash32 digest;
+    internal flate.Reader r;
+    internal io.ReadCloser decompressor;
+    internal hash.Hash32 digest;
     internal error err;
     internal array<byte> scratch = new(4);
 }
@@ -81,7 +82,7 @@ public static (io.ReadCloser, error) NewReaderDict(io.Reader r, slice<byte> dict
     if (err != default!) {
         return (default!, err);
     }
-    return (~z, default!);
+    return (new readerжReadCloser(z), default!);
 }
 
 [GoRecv] internal static (nint, error) Read(this ref reader z, slice<byte> p) {
@@ -97,7 +98,7 @@ public static (io.ReadCloser, error) NewReaderDict(io.Reader r, slice<byte> dict
     }
     // Finished file; check checksum.
     {
-        var (_, err) = io.ReadFull(z.r, z.scratch[0..4]); if (err != default!) {
+        var (_, err) = io.ReadFull(new flate_ReaderᴠReader(z.r), z.scratch[0..4]); if (err != default!) {
             if (AreEqual(err, io.EOF)) {
                 err = io.ErrUnexpectedEOF;
             }
@@ -131,7 +132,7 @@ public static (io.ReadCloser, error) NewReaderDict(io.Reader r, slice<byte> dict
         var (fr, ok) = r._<flate.Reader>(ᐧ); if (ok){
             z.r = fr;
         } else {
-            z.r = bufio.NewReader(r);
+            z.r = new bufio_ReaderжReader(bufio.NewReader(r));
         }
     }
     // Read the header (RFC 1950 section 2.2.).
@@ -143,11 +144,11 @@ public static (io.ReadCloser, error) NewReaderDict(io.Reader r, slice<byte> dict
         return z.err;
     }
     var h = binary.BigEndian.Uint16(z.scratch[..2]);
-    if (((byte)(z.scratch[0] & 15) != zlibDeflate) || (z.scratch[0] >> (int)(4) > zlibMaxWindow) || (h % 31 != 0)) {
+    if (((byte)(z.scratch[0] & 0x0f) != zlibDeflate) || ((z.scratch[0] >> (int)(4)) > zlibMaxWindow) || (h % 31 != 0)) {
         z.err = ErrHeader;
         return z.err;
     }
-    var haveDict = (byte)(z.scratch[1] & 32) != 0;
+    var haveDict = (byte)(z.scratch[1] & 0x20) != 0;
     if (haveDict) {
         (_, z.err) = io.ReadFull(z.r, z.scratch[0..4]);
         if (z.err != default!) {

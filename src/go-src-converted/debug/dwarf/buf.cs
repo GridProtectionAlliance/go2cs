@@ -14,7 +14,7 @@ partial class dwarf_package {
 // Data buffer being decoded.
 [GoType] partial struct buf {
     internal ж<Data> dwarf;
-    internal encoding.binary_package.ByteOrder order;
+    internal binary.ByteOrder order;
     internal dataFormat format;
     internal @string name;
     internal Offset off;
@@ -50,7 +50,7 @@ internal static nint addrsize(this unknownFormat u) {
 }
 
 internal static buf makeBuf(ж<Data> Ꮡd, dataFormat format, @string name, Offset off, slice<byte> data) {
-    ref var d = ref Ꮡd.val;
+    ref var d = ref Ꮡd.Value;
 
     return new buf(Ꮡd, d.order, format, name, off, data, default!);
 }
@@ -73,7 +73,7 @@ internal static buf makeBuf(ж<Data> Ꮡd, dataFormat format, @string name, Offs
     }
     var data = b.data[0..(int)(n)];
     b.data = b.data[(int)(n)..];
-    b.off += ((Offset)n);
+    b.off += ((Offset)(uint32)n);
     return data;
 }
 
@@ -82,14 +82,14 @@ internal static buf makeBuf(ж<Data> Ꮡd, dataFormat format, @string name, Offs
 }
 
 [GoRecv] internal static @string @string(this ref buf b) {
-    nint i = bytes.IndexByte(b.data, 0);
+    nint i = bytes_package.IndexByte(b.data, 0);
     if (i < 0) {
         b.error("underflow"u8);
         return ""u8;
     }
     @string s = ((@string)(b.data[0..(int)(i)]));
     b.data = b.data[(int)(i + 1)..];
-    b.off += ((Offset)(i + 1));
+    b.off += ((Offset)(uint32)(i + 1));
     return s;
 }
 
@@ -106,10 +106,10 @@ internal static buf makeBuf(ж<Data> Ꮡd, dataFormat format, @string name, Offs
     if (a == default!) {
         return 0;
     }
-    if (b.dwarf.bigEndian){
-        return (uint32)((uint32)(((uint32)a[2]) | ((uint32)a[1]) << (int)(8)) | ((uint32)a[0]) << (int)(16));
+    if ((~b.dwarf).bigEndian){
+        return (uint32)((uint32)((uint32)a[2] | ((uint32)a[1] << (int)(8))) | ((uint32)a[0] << (int)(16)));
     } else {
-        return (uint32)((uint32)(((uint32)a[0]) | ((uint32)a[1]) << (int)(8)) | ((uint32)a[2]) << (int)(16));
+        return (uint32)((uint32)((uint32)a[0] | ((uint32)a[1] << (int)(8))) | ((uint32)a[2] << (int)(16)));
     }
 }
 
@@ -137,10 +137,10 @@ internal static buf makeBuf(ж<Data> Ꮡd, dataFormat format, @string name, Offs
 
     for (nint i = 0; i < len(b.data); i++) {
         var @byte = b.data[i];
-        c |= (uint64)(((uint64)((byte)(@byte & 127))) << (int)(bits));
+        c |= (uint64)(((uint64)((byte)(@byte & 0x7F)) << (int)(bits)));
         bits += 7;
-        if ((byte)(@byte & 128) == 0) {
-            b.off += ((Offset)(i + 1));
+        if ((byte)(@byte & 0x80) == 0) {
+            b.off += ((Offset)(uint32)(i + 1));
             b.data = b.data[(int)(i + 1)..];
             return (c, bits);
         }
@@ -157,9 +157,9 @@ internal static buf makeBuf(ж<Data> Ꮡd, dataFormat format, @string name, Offs
 // Signed int is a sign-extended varint.
 [GoRecv] internal static int64 @int(this ref buf b) {
     var (ux, bits) = b.varint();
-    var x = ((int64)ux);
-    if ((int64)(x & (1 << (int)((bits - 1)))) != 0) {
-        x |= (int64)(-1 << (int)(bits));
+    var x = (int64)ux;
+    if ((int64)(x & (((int64)1 << (int)((bits - 1))))) != 0) {
+        x |= (int64)(((int64)(-1) << (int)(bits)));
     }
     return x;
 }
@@ -168,13 +168,13 @@ internal static buf makeBuf(ж<Data> Ꮡd, dataFormat format, @string name, Offs
 [GoRecv] internal static uint64 addr(this ref buf b) {
     switch (b.format.addrsize()) {
     case 1: {
-        return ((uint64)b.uint8());
+        return (uint64)b.uint8();
     }
     case 2: {
-        return ((uint64)b.uint16());
+        return (uint64)b.uint16();
     }
     case 4: {
-        return ((uint64)b.uint32());
+        return (uint64)b.uint32();
     }
     case 8: {
         return b.uint64();
@@ -189,11 +189,11 @@ internal static buf makeBuf(ж<Data> Ꮡd, dataFormat format, @string name, Offs
     bool dwarf64 = default!;
 
     length = ((Offset)b.uint32());
-    if (length == (nint)4294967295L){
+    if (length == 0xffffffffU){
         dwarf64 = true;
-        length = ((Offset)b.uint64());
+        length = ((Offset)(uint32)b.uint64());
     } else 
-    if (length >= (nint)4294967280L) {
+    if (length >= 0xfffffff0U) {
         b.error("unit length has reserved value"u8);
     }
     return (length, dwarf64);
@@ -213,7 +213,7 @@ internal static buf makeBuf(ж<Data> Ꮡd, dataFormat format, @string name, Offs
 }
 
 public static @string Error(this DecodeError e) {
-    return "decoding dwarf section "u8 + e.Name + " at offset 0x"u8 + strconv.FormatInt(((int64)e.Offset), 16) + ": "u8 + e.Err;
+    return "decoding dwarf section "u8 + e.Name + " at offset 0x"u8 + strconv.FormatInt((int64)(uint32)e.Offset, 16) + ": "u8 + e.Err;
 }
 
 } // end dwarf_package

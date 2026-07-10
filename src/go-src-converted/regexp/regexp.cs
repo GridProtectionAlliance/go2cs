@@ -68,11 +68,11 @@ using io = io_package;
 using syntax = regexp.syntax_package;
 using strconv = strconv_package;
 using strings = strings_package;
-using sync = sync_package;
-using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
+using Δsync = sync_package;
+using Δunicode = unicode_package;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
 using regexp;
-using unicode;
 
 partial class regexp_package {
 
@@ -81,7 +81,7 @@ partial class regexp_package {
 // except for configuration methods, such as [Regexp.Longest].
 [GoType] partial struct Regexp {
     internal @string expr;      // as passed to Compile
-    internal ж<regexp.syntax_package.Prog> prog; // compiled program
+    internal ж<syntax.Prog> prog; // compiled program
     internal ж<onePassProg> onepass; // onepass program or nil
     internal nint numSubexp;
     internal nint maxBitStateLen;
@@ -93,7 +93,7 @@ partial class regexp_package {
     internal nint mpool;           // pool for machines
     internal nint matchcap;           // size of recorded match lengths
     internal bool prefixComplete;           // prefix is the entire regexp
-    internal regexp.syntax_package.EmptyOp cond; // empty-width conditions required at start of match
+    internal syntax.EmptyOp cond; // empty-width conditions required at start of match
     internal nint minInputLen;           // minimum length of the input in bytes
     // This field can be modified by the Longest method,
     // but it is otherwise read-only.
@@ -167,7 +167,7 @@ public static (ж<Regexp>, error) CompilePOSIX(@string expr) {
 }
 
 internal static (ж<Regexp>, error) compile(@string expr, syntax.Flags mode, bool longest) {
-    (re, err) = syntax.Parse(expr, mode);
+    var (re, err) = syntax.Parse(expr, mode);
     if (err != default!) {
         return (default!, err);
     }
@@ -175,12 +175,12 @@ internal static (ж<Regexp>, error) compile(@string expr, syntax.Flags mode, boo
     maxCap = re.MaxCap();
     var capNames = re.CapNames();
     re = re.Simplify();
-    (prog, err) = syntax.Compile(re);
+    (var prog, err) = syntax.Compile(re);
     if (err != default!) {
         return (default!, err);
     }
     ref var matchcap = ref heap<nint>(out var Ꮡmatchcap);
-    matchcap = prog.val.NumCap;
+    matchcap = prog.Value.NumCap;
     if (matchcap < 2) {
         matchcap = 2;
     }
@@ -196,23 +196,23 @@ internal static (ж<Regexp>, error) compile(@string expr, syntax.Flags mode, boo
         minInputLen: minInputLen(re)
     ));
     if ((~regexp).onepass == nil){
-        (regexp.val.prefix, regexp.val.prefixComplete) = prog.Prefix();
-        regexp.val.maxBitStateLen = maxBitStateLen(prog);
+        (regexp.Value.prefix, regexp.Value.prefixComplete) = prog.Prefix();
+        regexp.Value.maxBitStateLen = maxBitStateLen(prog);
     } else {
-        (regexp.val.prefix, regexp.val.prefixComplete, regexp.val.prefixEnd) = onePassPrefix(prog);
+        (regexp.Value.prefix, regexp.Value.prefixComplete, regexp.Value.prefixEnd) = onePassPrefix(prog);
     }
     if ((~regexp).prefix != ""u8) {
         // TODO(rsc): Remove this allocation by adding
         // IndexString to package bytes.
-        regexp.val.prefixBytes = slice<byte>((~regexp).prefix);
-        (regexp.val.prefixRune, _) = utf8.DecodeRuneInString((~regexp).prefix);
+        regexp.Value.prefixBytes = slice<byte>((~regexp).prefix);
+        (regexp.Value.prefixRune, _) = utf8.DecodeRuneInString((~regexp).prefix);
     }
     nint n = len((~prog).Inst);
     nint i = 0;
     while (matchSize[i] != 0 && matchSize[i] < n) {
         i++;
     }
-    regexp.val.mpool = i;
+    regexp.Value.mpool = i;
     return (regexp, default!);
 }
 
@@ -224,22 +224,27 @@ internal static (ж<Regexp>, error) compile(@string expr, syntax.Flags mode, boo
 // The final matchPool is a catch-all for very large queues.
 internal static array<nint> matchSize = new nint[]{128, 512, 2048, 16384, 0}.array();
 
-internal static array<sync.Pool> matchPool;
+internal static ж<array<Δsync.Pool>> ᏑmatchPool = new(new array<Δsync.Pool>(5));
+internal static ref array<Δsync.Pool> matchPool => ref ᏑmatchPool.Value;
 
 // get returns a machine to use for matching re.
 // It uses the re's machine cache if possible, to avoid
 // unnecessary allocation.
-[GoRecv] internal static ж<machine> get(this ref Regexp re) {
-    var (m, ok) = matchPool[re.mpool].Get()._<machine.val>(ᐧ);
+internal static ж<machine> get(this ж<Regexp> Ꮡre) {
+    ref var re = ref Ꮡre.Value;
+
+    var (m, ok) = ᏑmatchPool.at<Δsync.Pool>(re.mpool).Get()._<ж<machine>>(ᐧ);
     if (!ok) {
         m = @new<machine>();
     }
-    m.val.re = re;
-    m.val.p = re.prog;
+    m.Value.re = Ꮡre;
+    m.Value.p = re.prog;
     if (cap((~m).matchcap) < re.matchcap) {
-        m.val.matchcap = new slice<nint>(re.matchcap);
-        foreach (var (_, t) in (~m).pool) {
-            t.val.cap = new slice<nint>(re.matchcap);
+        m.Value.matchcap = new slice<nint>(re.matchcap);
+        foreach (var (_, vᴛ1) in (~m).pool) {
+            var t = vᴛ1;
+
+            t.Value.cap = new slice<nint>(re.matchcap);
         }
     }
     // Allocate queues if needed.
@@ -247,33 +252,30 @@ internal static array<sync.Pool> matchPool;
     nint n = matchSize[re.mpool];
     if (n == 0) {
         // large pool
-        n = len(re.prog.Inst);
+        n = len((~re.prog).Inst);
     }
     if (len((~m).q0.sparse) < n) {
-        m.val.q0 = new queue(new slice<uint32>(n), new slice<entry>(0, n));
-        m.val.q1 = new queue(new slice<uint32>(n), new slice<entry>(0, n));
+        m.Value.q0 = new queue(new slice<uint32>(n), new slice<entry>(0, n));
+        m.Value.q1 = new queue(new slice<uint32>(n), new slice<entry>(0, n));
     }
     return m;
 }
 
 // put returns a machine to the correct machine pool.
-[GoRecv] public static void put(this ref Regexp re, ж<machine> Ꮡm) {
-    ref var m = ref Ꮡm.val;
+[GoRecv] internal static void put(this ref Regexp re, ж<machine> Ꮡm) {
+    ref var m = ref Ꮡm.Value;
 
     m.re = default!;
     m.p = default!;
     m.inputs.clear();
-    matchPool[re.mpool].Put(m);
+    ᏑmatchPool.at<Δsync.Pool>(re.mpool).Put(m);
 }
 
 // minInputLen walks the regexp to find the minimum length of any matchable input.
 internal static nint minInputLen(ж<syntax.Regexp> Ꮡre) {
-    ref var re = ref Ꮡre.val;
+    ref var re = ref Ꮡre.Value;
 
     var exprᴛ1 = re.Op;
-    { /* default: */
-        return 0;
-    }
     if (exprᴛ1 == syntax.OpAnyChar || exprᴛ1 == syntax.OpAnyCharNotNL || exprᴛ1 == syntax.OpCharClass) {
         return 1;
     }
@@ -312,6 +314,9 @@ internal static nint minInputLen(ж<syntax.Regexp> Ꮡre) {
         }
         return l;
     }
+    { /* default: */
+        return 0;
+    }
 
 }
 
@@ -319,9 +324,9 @@ internal static nint minInputLen(ж<syntax.Regexp> Ꮡre) {
 // It simplifies safe initialization of global variables holding compiled regular
 // expressions.
 public static ж<Regexp> MustCompile(@string str) {
-    (regexp, err) = Compile(str);
+    var (regexp, err) = Compile(str);
     if (err != default!) {
-        throw panic(@"regexp: Compile("u8 + quote(str) + @"): "u8 + err.Error());
+        throw panic(@"regexp: Compile(" + quote(str) + @"): " + err.Error());
     }
     return regexp;
 }
@@ -330,9 +335,9 @@ public static ж<Regexp> MustCompile(@string str) {
 // It simplifies safe initialization of global variables holding compiled regular
 // expressions.
 public static ж<Regexp> MustCompilePOSIX(@string str) {
-    (regexp, err) = CompilePOSIX(str);
+    var (regexp, err) = CompilePOSIX(str);
     if (err != default!) {
-        throw panic(@"regexp: CompilePOSIX("u8 + quote(str) + @"): "u8 + err.Error());
+        throw panic(@"regexp: CompilePOSIX(" + quote(str) + @"): " + err.Error());
     }
     return regexp;
 }
@@ -376,8 +381,7 @@ internal static @string quote(@string s) {
     return -1;
 }
 
-internal static readonly GoUntyped endOfText = /* -1 */
-    GoUntyped.Parse("-1");
+internal const rune endOfText = -1;
 
 // input abstracts different representations of the input text. It provides
 // one-character lookahead.
@@ -398,7 +402,7 @@ internal static readonly GoUntyped endOfText = /* -1 */
     if (pos < len(i.str)) {
         var c = i.str[pos];
         if (c < utf8.RuneSelf) {
-            return (((rune)c), 1);
+            return ((rune)c, 1);
         }
         return utf8.DecodeRuneInString(i.str[(int)(pos)..]);
     }
@@ -410,13 +414,13 @@ internal static readonly GoUntyped endOfText = /* -1 */
 }
 
 [GoRecv] internal static bool hasPrefix(this ref inputString i, ж<Regexp> Ꮡre) {
-    ref var re = ref Ꮡre.val;
+    ref var re = ref Ꮡre.Value;
 
     return strings.HasPrefix(i.str, re.prefix);
 }
 
 [GoRecv] internal static nint index(this ref inputString i, ж<Regexp> Ꮡre, nint pos) {
-    ref var re = ref Ꮡre.val;
+    ref var re = ref Ꮡre.Value;
 
     return strings.Index(i.str[(int)(pos)..], re.prefix);
 }
@@ -424,15 +428,15 @@ internal static readonly GoUntyped endOfText = /* -1 */
 [GoRecv] internal static lazyFlag context(this ref inputString i, nint pos) {
     var (r1, r2) = (endOfText, endOfText);
     // 0 < pos && pos <= len(i.str)
-    if (((nuint)(pos - 1)) < ((nuint)len(i.str))) {
-        r1 = ((rune)i.str[pos - 1]);
+    if ((nuint)(pos - 1) < (nuint)len(i.str)) {
+        r1 = (rune)i.str[pos - 1];
         if (r1 >= utf8.RuneSelf) {
             (r1, _) = utf8.DecodeLastRuneInString(i.str[..(int)(pos)]);
         }
     }
     // 0 <= pos && pos < len(i.str)
-    if (((nuint)pos) < ((nuint)len(i.str))) {
-        r2 = ((rune)i.str[pos]);
+    if ((nuint)pos < (nuint)len(i.str)) {
+        r2 = (rune)i.str[pos];
         if (r2 >= utf8.RuneSelf) {
             (r2, _) = utf8.DecodeRuneInString(i.str[(int)(pos)..]);
         }
@@ -449,7 +453,7 @@ internal static readonly GoUntyped endOfText = /* -1 */
     if (pos < len(i.str)) {
         var c = i.str[pos];
         if (c < utf8.RuneSelf) {
-            return (((rune)c), 1);
+            return ((rune)c, 1);
         }
         return utf8.DecodeRune(i.str[(int)(pos)..]);
     }
@@ -461,13 +465,13 @@ internal static readonly GoUntyped endOfText = /* -1 */
 }
 
 [GoRecv] internal static bool hasPrefix(this ref inputBytes i, ж<Regexp> Ꮡre) {
-    ref var re = ref Ꮡre.val;
+    ref var re = ref Ꮡre.Value;
 
     return bytes.HasPrefix(i.str, re.prefixBytes);
 }
 
 [GoRecv] internal static nint index(this ref inputBytes i, ж<Regexp> Ꮡre, nint pos) {
-    ref var re = ref Ꮡre.val;
+    ref var re = ref Ꮡre.Value;
 
     return bytes.Index(i.str[(int)(pos)..], re.prefixBytes);
 }
@@ -475,15 +479,15 @@ internal static readonly GoUntyped endOfText = /* -1 */
 [GoRecv] internal static lazyFlag context(this ref inputBytes i, nint pos) {
     var (r1, r2) = (endOfText, endOfText);
     // 0 < pos && pos <= len(i.str)
-    if (((nuint)(pos - 1)) < ((nuint)len(i.str))) {
-        r1 = ((rune)i.str[pos - 1]);
+    if ((nuint)(pos - 1) < (nuint)len(i.str)) {
+        r1 = (rune)i.str[pos - 1];
         if (r1 >= utf8.RuneSelf) {
             (r1, _) = utf8.DecodeLastRune(i.str[..(int)(pos)]);
         }
     }
     // 0 <= pos && pos < len(i.str)
-    if (((nuint)pos) < ((nuint)len(i.str))) {
-        r2 = ((rune)i.str[pos]);
+    if ((nuint)pos < (nuint)len(i.str)) {
+        r2 = (rune)i.str[pos];
         if (r2 >= utf8.RuneSelf) {
             (r2, _) = utf8.DecodeRune(i.str[(int)(pos)..]);
         }
@@ -493,7 +497,7 @@ internal static readonly GoUntyped endOfText = /* -1 */
 
 // inputReader scans a RuneReader.
 [GoType] partial struct inputReader {
-    internal io_package.RuneReader r;
+    internal io.RuneReader r;
     internal bool atEOT;
     internal nint pos;
 }
@@ -516,13 +520,13 @@ internal static readonly GoUntyped endOfText = /* -1 */
 }
 
 [GoRecv] internal static bool hasPrefix(this ref inputReader i, ж<Regexp> Ꮡre) {
-    ref var re = ref Ꮡre.val;
+    ref var re = ref Ꮡre.Value;
 
     return false;
 }
 
 [GoRecv] internal static nint index(this ref inputReader i, ж<Regexp> Ꮡre, nint pos) {
-    ref var re = ref Ꮡre.val;
+    ref var re = ref Ꮡre.Value;
 
     return -1;
 }
@@ -545,20 +549,26 @@ internal static readonly GoUntyped endOfText = /* -1 */
 
 // MatchReader reports whether the text returned by the [io.RuneReader]
 // contains any match of the regular expression re.
-[GoRecv] public static bool MatchReader(this ref Regexp re, io.RuneReader r) {
-    return re.doMatch(r, default!, ""u8);
+public static bool MatchReader(this ж<Regexp> Ꮡre, io.RuneReader r) {
+    ref var re = ref Ꮡre.Value;
+
+    return Ꮡre.doMatch(r, default!, ""u8);
 }
 
 // MatchString reports whether the string s
 // contains any match of the regular expression re.
-[GoRecv] public static bool MatchString(this ref Regexp re, @string s) {
-    return re.doMatch(default!, default!, s);
+public static bool MatchString(this ж<Regexp> Ꮡre, @string s) {
+    ref var re = ref Ꮡre.Value;
+
+    return Ꮡre.doMatch(default!, default!, s);
 }
 
 // Match reports whether the byte slice b
 // contains any match of the regular expression re.
-[GoRecv] public static bool Match(this ref Regexp re, slice<byte> b) {
-    return re.doMatch(default!, b, ""u8);
+public static bool Match(this ж<Regexp> Ꮡre, slice<byte> b) {
+    ref var re = ref Ꮡre.Value;
+
+    return Ꮡre.doMatch(default!, b, ""u8);
 }
 
 // MatchReader reports whether the text returned by the [io.RuneReader]
@@ -568,7 +578,7 @@ public static (bool matched, error err) MatchReader(@string pattern, io.RuneRead
     bool matched = default!;
     error err = default!;
 
-    (re, err) = Compile(pattern);
+    (var re, err) = Compile(pattern);
     if (err != default!) {
         return (false, err);
     }
@@ -582,7 +592,7 @@ public static (bool matched, error err) MatchString(@string pattern, @string s) 
     bool matched = default!;
     error err = default!;
 
-    (re, err) = Compile(pattern);
+    (var re, err) = Compile(pattern);
     if (err != default!) {
         return (false, err);
     }
@@ -596,7 +606,7 @@ public static (bool matched, error err) Match(@string pattern, slice<byte> b) {
     bool matched = default!;
     error err = default!;
 
-    (re, err) = Compile(pattern);
+    (var re, err) = Compile(pattern);
     if (err != default!) {
         return (false, err);
     }
@@ -606,32 +616,40 @@ public static (bool matched, error err) Match(@string pattern, slice<byte> b) {
 // ReplaceAllString returns a copy of src, replacing matches of the [Regexp]
 // with the replacement string repl.
 // Inside repl, $ signs are interpreted as in [Regexp.Expand].
-[GoRecv] public static @string ReplaceAllString(this ref Regexp re, @string src, @string repl) {
+public static @string ReplaceAllString(this ж<Regexp> Ꮡre, @string src, @string repl) {
+    ref var re = ref Ꮡre.Value;
+
     nint n = 2;
     if (strings.Contains(repl, "$"u8)) {
         n = 2 * (re.numSubexp + 1);
     }
-    var b = re.replaceAll(default!, src, n, (slice<byte> dst, slice<nint> match) => re.expand(dst, repl, default!, src, match));
+    var b = Ꮡre.replaceAll(default!, src, n, (slice<byte> dst, slice<nint> match) => Ꮡre.Value.expand(dst, repl, default!, src, match));
     return ((@string)b);
 }
 
 // ReplaceAllLiteralString returns a copy of src, replacing matches of the [Regexp]
 // with the replacement string repl. The replacement repl is substituted directly,
 // without using [Regexp.Expand].
-[GoRecv] public static @string ReplaceAllLiteralString(this ref Regexp re, @string src, @string repl) {
-    return ((@string)re.replaceAll(default!, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl.ꓸꓸꓸ)));
+public static @string ReplaceAllLiteralString(this ж<Regexp> Ꮡre, @string src, @string repl) {
+    ref var re = ref Ꮡre.Value;
+
+    return ((@string)Ꮡre.replaceAll(default!, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl.ꓸꓸꓸ)));
 }
 
 // ReplaceAllStringFunc returns a copy of src in which all matches of the
 // [Regexp] have been replaced by the return value of function repl applied
 // to the matched substring. The replacement returned by repl is substituted
 // directly, without using [Regexp.Expand].
-[GoRecv] public static @string ReplaceAllStringFunc(this ref Regexp re, @string src, Func<@string, @string> repl) {
-    var b = re.replaceAll(default!, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl(src[(int)(match[0])..(int)(match[1])]).ꓸꓸꓸ));
+public static @string ReplaceAllStringFunc(this ж<Regexp> Ꮡre, @string src, Func<@string, @string> repl) {
+    ref var re = ref Ꮡre.Value;
+
+    var b = Ꮡre.replaceAll(default!, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl(src[(int)(match[0])..(int)(match[1])]).ꓸꓸꓸ));
     return ((@string)b);
 }
 
-[GoRecv] internal static slice<byte> replaceAll(this ref Regexp re, slice<byte> bsrc, @string src, nint nmatch, Func<slice<byte>, slice<nint>, slice<byte>> repl) {
+internal static slice<byte> replaceAll(this ж<Regexp> Ꮡre, slice<byte> bsrc, @string src, nint nmatch, Func<slice<byte>, slice<nint>, slice<byte>> repl) {
+    ref var re = ref Ꮡre.Value;
+
     nint lastMatchEnd = 0;
     // end position of the most recent match
     nint searchPos = 0;
@@ -643,12 +661,12 @@ public static (bool matched, error err) Match(@string pattern, slice<byte> b) {
     } else {
         endPos = len(src);
     }
-    if (nmatch > re.prog.NumCap) {
-        nmatch = re.prog.NumCap;
+    if (nmatch > (~re.prog).NumCap) {
+        nmatch = re.prog.Value.NumCap;
     }
     array<nint> dstCap = new(2);
     while (searchPos <= endPos) {
-        var a = re.doExecute(default!, bsrc, src, searchPos, nmatch, dstCap[..0]);
+        var a = Ꮡre.doExecute(default!, bsrc, src, searchPos, nmatch, dstCap[..0]);
         if (len(a) == 0) {
             break;
         }
@@ -697,20 +715,21 @@ public static (bool matched, error err) Match(@string pattern, slice<byte> b) {
 // ReplaceAll returns a copy of src, replacing matches of the [Regexp]
 // with the replacement text repl.
 // Inside repl, $ signs are interpreted as in [Regexp.Expand].
-[GoRecv] public static slice<byte> ReplaceAll(this ref Regexp re, slice<byte> src, slice<byte> repl) {
+public static slice<byte> ReplaceAll(this ж<Regexp> Ꮡre, slice<byte> src, slice<byte> repl) {
+    ref var re = ref Ꮡre.Value;
+
     nint n = 2;
     if (bytes.IndexByte(repl, (rune)'$') >= 0) {
         n = 2 * (re.numSubexp + 1);
     }
     @string srepl = ""u8;
-    var b = re.replaceAll(src, ""u8, n, 
     var replʗ1 = repl;
     var srcʗ1 = src;
-    (slice<byte> dst, slice<nint> match) => {
+    var b = Ꮡre.replaceAll(src, ""u8, n, (slice<byte> dst, slice<nint> match) => {
         if (len(srepl) != len(replʗ1)) {
             srepl = ((@string)replʗ1);
         }
-        return re.expand(dst, srepl, srcʗ1, ""u8, match);
+        return Ꮡre.Value.expand(dst, srepl, srcʗ1, ""u8, match);
     });
     return b;
 }
@@ -718,33 +737,35 @@ public static (bool matched, error err) Match(@string pattern, slice<byte> b) {
 // ReplaceAllLiteral returns a copy of src, replacing matches of the [Regexp]
 // with the replacement bytes repl. The replacement repl is substituted directly,
 // without using [Regexp.Expand].
-[GoRecv] public static slice<byte> ReplaceAllLiteral(this ref Regexp re, slice<byte> src, slice<byte> repl) {
-    return re.replaceAll(src, ""u8, 2, 
+public static slice<byte> ReplaceAllLiteral(this ж<Regexp> Ꮡre, slice<byte> src, slice<byte> repl) {
+    ref var re = ref Ꮡre.Value;
+
     var replʗ1 = repl;
-    (slice<byte> dst, slice<nint> match) => append(dst, replʗ1.ꓸꓸꓸ));
+    return Ꮡre.replaceAll(src, ""u8, 2, (slice<byte> dst, slice<nint> match) => append(dst, replʗ1.ꓸꓸꓸ));
 }
 
 // ReplaceAllFunc returns a copy of src in which all matches of the
 // [Regexp] have been replaced by the return value of function repl applied
 // to the matched byte slice. The replacement returned by repl is substituted
 // directly, without using [Regexp.Expand].
-[GoRecv] public static slice<byte> ReplaceAllFunc(this ref Regexp re, slice<byte> src, Func<slice<byte>, slice<byte>> repl) {
-    return re.replaceAll(src, ""u8, 2, 
+public static slice<byte> ReplaceAllFunc(this ж<Regexp> Ꮡre, slice<byte> src, Func<slice<byte>, slice<byte>> repl) {
+    ref var re = ref Ꮡre.Value;
+
     var srcʗ1 = src;
-    (slice<byte> dst, slice<nint> match) => append(dst, repl(srcʗ1[(int)(match[0])..(int)(match[1])]).ꓸꓸꓸ));
+    return Ꮡre.replaceAll(src, ""u8, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl(srcʗ1[(int)(match[0])..(int)(match[1])]).ꓸꓸꓸ));
 }
 
 // Bitmap used by func special to check whether a character needs to be escaped.
-internal static array<byte> specialBytes;
+internal static array<byte> specialBytes = new(16);
 
 // special reports whether byte b needs to be escaped by QuoteMeta.
 internal static bool special(byte b) {
-    return b < utf8.RuneSelf && (byte)(specialBytes[b % 16] & (1 << (int)((b / 16)))) != 0;
+    return b < utf8.RuneSelf && (byte)(specialBytes[b % 16] & ((byte)(1 << (int)((b / 16))))) != 0;
 }
 
 [GoInit] internal static void init() {
-    foreach (var (_, b) in slice<byte>(@"\.+*?()|[]{}^$")) {
-        specialBytes[b % 16] |= (byte)(1 << (int)((b / 16)));
+    foreach (var (_, b) in slice<byte>((@string)@"\.+*?()|[]{}^$")) {
+        specialBytes[b % 16] |= (byte)((byte)(1 << (int)((b / 16))));
     }
 }
 
@@ -789,7 +810,7 @@ public static @string QuoteMeta(@string s) {
     }
     nint n = (1 + re.numSubexp) * 2;
     while (len(a) < n) {
-        a = append(a, -1);
+        a = append(a, (nint)(-1));
     }
     return a;
 }
@@ -797,15 +818,17 @@ public static @string QuoteMeta(@string s) {
 // allMatches calls deliver at most n times
 // with the location of successive matches in the input text.
 // The input text is b if non-nil, otherwise s.
-[GoRecv] internal static void allMatches(this ref Regexp re, @string s, slice<byte> b, nint n, Action<slice<nint>> deliver) {
+internal static void allMatches(this ж<Regexp> Ꮡre, @string s, slice<byte> b, nint n, Action<slice<nint>> deliver) {
+    ref var re = ref Ꮡre.Value;
+
     nint end = default!;
     if (b == default!){
         end = len(s);
     } else {
         end = len(b);
     }
-    for (nint pos = 0;nint i = 0;nint prevMatchEnd = -1; i < n && pos <= end; ) {
-        var matches = re.doExecute(default!, b, s, pos, re.prog.NumCap, default!);
+    for ((nint pos, nint i, nint prevMatchEnd) = (0, 0, -1); i < n && pos <= end; ) {
+        var matches = Ꮡre.doExecute(default!, b, s, pos, (~re.prog).NumCap, default!);
         if (len(matches) == 0) {
             break;
         }
@@ -843,9 +866,11 @@ public static @string QuoteMeta(@string s) {
 
 // Find returns a slice holding the text of the leftmost match in b of the regular expression.
 // A return value of nil indicates no match.
-[GoRecv] public static slice<byte> Find(this ref Regexp re, slice<byte> b) {
+public static slice<byte> Find(this ж<Regexp> Ꮡre, slice<byte> b) {
+    ref var re = ref Ꮡre.Value;
+
     array<nint> dstCap = new(2);
-    var a = re.doExecute(default!, b, ""u8, 0, 2, dstCap[..0]);
+    var a = Ꮡre.doExecute(default!, b, ""u8, 0, 2, dstCap[..0]);
     if (a == default!) {
         return default!;
     }
@@ -856,10 +881,11 @@ public static @string QuoteMeta(@string s) {
 // the leftmost match in b of the regular expression. The match itself is at
 // b[loc[0]:loc[1]].
 // A return value of nil indicates no match.
-[GoRecv] public static slice<nint> /*loc*/ FindIndex(this ref Regexp re, slice<byte> b) {
+public static slice<nint> /*loc*/ FindIndex(this ж<Regexp> Ꮡre, slice<byte> b) {
     slice<nint> loc = default!;
 
-    var a = re.doExecute(default!, b, ""u8, 0, 2, default!);
+    ref var re = ref Ꮡre.Value;
+    var a = Ꮡre.doExecute(default!, b, ""u8, 0, 2, default!);
     if (a == default!) {
         return default!;
     }
@@ -871,9 +897,11 @@ public static @string QuoteMeta(@string s) {
 // but it will also be empty if the regular expression successfully matches
 // an empty string. Use [Regexp.FindStringIndex] or [Regexp.FindStringSubmatch] if it is
 // necessary to distinguish these cases.
-[GoRecv] public static @string FindString(this ref Regexp re, @string s) {
+public static @string FindString(this ж<Regexp> Ꮡre, @string s) {
+    ref var re = ref Ꮡre.Value;
+
     array<nint> dstCap = new(2);
-    var a = re.doExecute(default!, default!, s, 0, 2, dstCap[..0]);
+    var a = Ꮡre.doExecute(default!, default!, s, 0, 2, dstCap[..0]);
     if (a == default!) {
         return ""u8;
     }
@@ -884,10 +912,11 @@ public static @string QuoteMeta(@string s) {
 // location of the leftmost match in s of the regular expression. The match
 // itself is at s[loc[0]:loc[1]].
 // A return value of nil indicates no match.
-[GoRecv] public static slice<nint> /*loc*/ FindStringIndex(this ref Regexp re, @string s) {
+public static slice<nint> /*loc*/ FindStringIndex(this ж<Regexp> Ꮡre, @string s) {
     slice<nint> loc = default!;
 
-    var a = re.doExecute(default!, default!, s, 0, 2, default!);
+    ref var re = ref Ꮡre.Value;
+    var a = Ꮡre.doExecute(default!, default!, s, 0, 2, default!);
     if (a == default!) {
         return default!;
     }
@@ -899,10 +928,11 @@ public static @string QuoteMeta(@string s) {
 // the [io.RuneReader]. The match text was found in the input stream at
 // byte offset loc[0] through loc[1]-1.
 // A return value of nil indicates no match.
-[GoRecv] public static slice<nint> /*loc*/ FindReaderIndex(this ref Regexp re, io.RuneReader r) {
+public static slice<nint> /*loc*/ FindReaderIndex(this ж<Regexp> Ꮡre, io.RuneReader r) {
     slice<nint> loc = default!;
 
-    var a = re.doExecute(r, default!, ""u8, 0, 2, default!);
+    ref var re = ref Ꮡre.Value;
+    var a = Ꮡre.doExecute(r, default!, ""u8, 0, 2, default!);
     if (a == default!) {
         return default!;
     }
@@ -914,9 +944,11 @@ public static @string QuoteMeta(@string s) {
 // subexpressions, as defined by the 'Submatch' descriptions in the package
 // comment.
 // A return value of nil indicates no match.
-[GoRecv] public static slice<slice<byte>> FindSubmatch(this ref Regexp re, slice<byte> b) {
+public static slice<slice<byte>> FindSubmatch(this ж<Regexp> Ꮡre, slice<byte> b) {
+    ref var re = ref Ꮡre.Value;
+
     array<nint> dstCap = new(4);
-    var a = re.doExecute(default!, b, ""u8, 0, re.prog.NumCap, dstCap[..0]);
+    var a = Ꮡre.doExecute(default!, b, ""u8, 0, (~re.prog).NumCap, dstCap[..0]);
     if (a == default!) {
         return default!;
     }
@@ -967,14 +999,14 @@ public static @string QuoteMeta(@string s) {
         template = after;
         if (template != ""u8 && template[0] == (rune)'$') {
             // Treat $$ as $.
-            dst = append(dst, (rune)'$');
+            dst = append(dst, (byte)((rune)'$'));
             template = template[1..];
             continue;
         }
-        var (name, num, rest, ok) = extract(template);
+        (var name, var num, var rest, ok) = extract(template);
         if (!ok) {
             // Malformed; treat $ as raw text.
-            dst = append(dst, (rune)'$');
+            dst = append(dst, (byte)((rune)'$'));
             continue;
         }
         template = rest;
@@ -1023,7 +1055,7 @@ internal static (@string name, nint num, @string rest, bool ok) extract(@string 
     nint i = 0;
     while (i < len(str)) {
         var (rune, size) = utf8.DecodeRuneInString(str[(int)(i)..]);
-        if (!unicode.IsLetter(rune) && !unicode.IsDigit(rune) && rune != (rune)'_') {
+        if (!Δunicode.IsLetter(rune) && !Δunicode.IsDigit(rune) && rune != (rune)'_') {
             break;
         }
         i += size;
@@ -1043,11 +1075,11 @@ internal static (@string name, nint num, @string rest, bool ok) extract(@string 
     // Parse number.
     num = 0;
     for (nint iΔ1 = 0; iΔ1 < len(name); iΔ1++) {
-        if (name[iΔ1] < (rune)'0' || (rune)'9' < name[iΔ1] || num >= 1e8F) {
+        if (name[iΔ1] < (rune)'0' || (rune)'9' < name[iΔ1] || num >= 100000000) {
             num = -1;
             break;
         }
-        num = num * 10 + ((nint)name[iΔ1]) - (rune)'0';
+        num = num * 10 + (nint)name[iΔ1] - (rune)'0';
     }
     // Disallow leading zeros.
     if (name[0] == (rune)'0' && len(name) > 1) {
@@ -1063,8 +1095,10 @@ internal static (@string name, nint num, @string rest, bool ok) extract(@string 
 // its subexpressions, as defined by the 'Submatch' and 'Index' descriptions
 // in the package comment.
 // A return value of nil indicates no match.
-[GoRecv] public static slice<nint> FindSubmatchIndex(this ref Regexp re, slice<byte> b) {
-    return re.pad(re.doExecute(default!, b, ""u8, 0, re.prog.NumCap, default!));
+public static slice<nint> FindSubmatchIndex(this ж<Regexp> Ꮡre, slice<byte> b) {
+    ref var re = ref Ꮡre.Value;
+
+    return re.pad(Ꮡre.doExecute(default!, b, ""u8, 0, (~re.prog).NumCap, default!));
 }
 
 // FindStringSubmatch returns a slice of strings holding the text of the
@@ -1072,9 +1106,11 @@ internal static (@string name, nint num, @string rest, bool ok) extract(@string 
 // its subexpressions, as defined by the 'Submatch' description in the
 // package comment.
 // A return value of nil indicates no match.
-[GoRecv] public static slice<@string> FindStringSubmatch(this ref Regexp re, @string s) {
+public static slice<@string> FindStringSubmatch(this ж<Regexp> Ꮡre, @string s) {
+    ref var re = ref Ꮡre.Value;
+
     array<nint> dstCap = new(4);
-    var a = re.doExecute(default!, default!, s, 0, re.prog.NumCap, dstCap[..0]);
+    var a = Ꮡre.doExecute(default!, default!, s, 0, (~re.prog).NumCap, dstCap[..0]);
     if (a == default!) {
         return default!;
     }
@@ -1092,8 +1128,10 @@ internal static (@string name, nint num, @string rest, bool ok) extract(@string 
 // matches, if any, of its subexpressions, as defined by the 'Submatch' and
 // 'Index' descriptions in the package comment.
 // A return value of nil indicates no match.
-[GoRecv] public static slice<nint> FindStringSubmatchIndex(this ref Regexp re, @string s) {
-    return re.pad(re.doExecute(default!, default!, s, 0, re.prog.NumCap, default!));
+public static slice<nint> FindStringSubmatchIndex(this ж<Regexp> Ꮡre, @string s) {
+    ref var re = ref Ꮡre.Value;
+
+    return re.pad(Ꮡre.doExecute(default!, default!, s, 0, (~re.prog).NumCap, default!));
 }
 
 // FindReaderSubmatchIndex returns a slice holding the index pairs
@@ -1101,8 +1139,10 @@ internal static (@string name, nint num, @string rest, bool ok) extract(@string 
 // the [io.RuneReader], and the matches, if any, of its subexpressions, as defined
 // by the 'Submatch' and 'Index' descriptions in the package comment. A
 // return value of nil indicates no match.
-[GoRecv] public static slice<nint> FindReaderSubmatchIndex(this ref Regexp re, io.RuneReader r) {
-    return re.pad(re.doExecute(r, default!, ""u8, 0, re.prog.NumCap, default!));
+public static slice<nint> FindReaderSubmatchIndex(this ж<Regexp> Ꮡre, io.RuneReader r) {
+    ref var re = ref Ꮡre.Value;
+
+    return re.pad(Ꮡre.doExecute(r, default!, ""u8, 0, (~re.prog).NumCap, default!));
 }
 
 internal static readonly UntypedInt startSize = 10; // The size at which to start a slice in the 'All' routines.
@@ -1111,19 +1151,19 @@ internal static readonly UntypedInt startSize = 10; // The size at which to star
 // matches of the expression, as defined by the 'All' description in the
 // package comment.
 // A return value of nil indicates no match.
-[GoRecv] public static slice<slice<byte>> FindAll(this ref Regexp re, slice<byte> b, nint n) {
+public static slice<slice<byte>> FindAll(this ж<Regexp> Ꮡre, slice<byte> b, nint n) {
+    ref var re = ref Ꮡre.Value;
+
     if (n < 0) {
         n = len(b) + 1;
     }
-    slice<slice<byte>> result = default!;
-    re.allMatches(""u8, b, n, 
+    ref var result = ref heap<slice<slice<byte>>>(out var Ꮡresult);
     var bʗ1 = b;
-    var resultʗ1 = result;
-    (slice<nint> match) => {
-        if (resultʗ1 == default!) {
-            resultʗ1 = new slice<slice<byte>>(0, startSize);
+    Ꮡre.allMatches(""u8, b, n, (slice<nint> match) => {
+        if (Ꮡresult.ValueSlot == default!) {
+            Ꮡresult.ValueSlot = new slice<slice<byte>>(0, startSize);
         }
-        resultʗ1 = append(resultʗ1, bʗ1.slice(match[0], match[1], match[1]));
+        Ꮡresult.ValueSlot = append(Ꮡresult.ValueSlot, bʗ1.slice(match[0], match[1], match[1]));
     });
     return result;
 }
@@ -1132,18 +1172,18 @@ internal static readonly UntypedInt startSize = 10; // The size at which to star
 // successive matches of the expression, as defined by the 'All' description
 // in the package comment.
 // A return value of nil indicates no match.
-[GoRecv] public static slice<slice<nint>> FindAllIndex(this ref Regexp re, slice<byte> b, nint n) {
+public static slice<slice<nint>> FindAllIndex(this ж<Regexp> Ꮡre, slice<byte> b, nint n) {
+    ref var re = ref Ꮡre.Value;
+
     if (n < 0) {
         n = len(b) + 1;
     }
-    slice<slice<nint>> result = default!;
-    re.allMatches(""u8, b, n, 
-    var resultʗ1 = result;
-    (slice<nint> match) => {
-        if (resultʗ1 == default!) {
-            resultʗ1 = new slice<slice<nint>>(0, startSize);
+    ref var result = ref heap<slice<slice<nint>>>(out var Ꮡresult);
+    Ꮡre.allMatches(""u8, b, n, (slice<nint> match) => {
+        if (Ꮡresult.ValueSlot == default!) {
+            Ꮡresult.ValueSlot = new slice<slice<nint>>(0, startSize);
         }
-        resultʗ1 = append(resultʗ1, match[0..2]);
+        Ꮡresult.ValueSlot = append(Ꮡresult.ValueSlot, match[0..2]);
     });
     return result;
 }
@@ -1152,18 +1192,18 @@ internal static readonly UntypedInt startSize = 10; // The size at which to star
 // successive matches of the expression, as defined by the 'All' description
 // in the package comment.
 // A return value of nil indicates no match.
-[GoRecv] public static slice<@string> FindAllString(this ref Regexp re, @string s, nint n) {
+public static slice<@string> FindAllString(this ж<Regexp> Ꮡre, @string s, nint n) {
+    ref var re = ref Ꮡre.Value;
+
     if (n < 0) {
         n = len(s) + 1;
     }
-    slice<@string> result = default!;
-    re.allMatches(s, default!, n, 
-    var resultʗ1 = result;
-    (slice<nint> match) => {
-        if (resultʗ1 == default!) {
-            resultʗ1 = new slice<@string>(0, startSize);
+    ref var result = ref heap<slice<@string>>(out var Ꮡresult);
+    Ꮡre.allMatches(s, default!, n, (slice<nint> match) => {
+        if (Ꮡresult.ValueSlot == default!) {
+            Ꮡresult.ValueSlot = new slice<@string>(0, startSize);
         }
-        resultʗ1 = append(resultʗ1, s[(int)(match[0])..(int)(match[1])]);
+        Ꮡresult.ValueSlot = append(Ꮡresult.ValueSlot, s[(int)(match[0])..(int)(match[1])]);
     });
     return result;
 }
@@ -1172,18 +1212,18 @@ internal static readonly UntypedInt startSize = 10; // The size at which to star
 // slice of all successive matches of the expression, as defined by the 'All'
 // description in the package comment.
 // A return value of nil indicates no match.
-[GoRecv] public static slice<slice<nint>> FindAllStringIndex(this ref Regexp re, @string s, nint n) {
+public static slice<slice<nint>> FindAllStringIndex(this ж<Regexp> Ꮡre, @string s, nint n) {
+    ref var re = ref Ꮡre.Value;
+
     if (n < 0) {
         n = len(s) + 1;
     }
-    slice<slice<nint>> result = default!;
-    re.allMatches(s, default!, n, 
-    var resultʗ1 = result;
-    (slice<nint> match) => {
-        if (resultʗ1 == default!) {
-            resultʗ1 = new slice<slice<nint>>(0, startSize);
+    ref var result = ref heap<slice<slice<nint>>>(out var Ꮡresult);
+    Ꮡre.allMatches(s, default!, n, (slice<nint> match) => {
+        if (Ꮡresult.ValueSlot == default!) {
+            Ꮡresult.ValueSlot = new slice<slice<nint>>(0, startSize);
         }
-        resultʗ1 = append(resultʗ1, match[0..2]);
+        Ꮡresult.ValueSlot = append(Ꮡresult.ValueSlot, match[0..2]);
     });
     return result;
 }
@@ -1192,17 +1232,17 @@ internal static readonly UntypedInt startSize = 10; // The size at which to star
 // of all successive matches of the expression, as defined by the 'All'
 // description in the package comment.
 // A return value of nil indicates no match.
-[GoRecv] public static slice<slice<slice<byte>>> FindAllSubmatch(this ref Regexp re, slice<byte> b, nint n) {
+public static slice<slice<slice<byte>>> FindAllSubmatch(this ж<Regexp> Ꮡre, slice<byte> b, nint n) {
+    ref var re = ref Ꮡre.Value;
+
     if (n < 0) {
         n = len(b) + 1;
     }
-    slice<slice<slice<byte>>> result = default!;
-    re.allMatches(""u8, b, n, 
+    ref var result = ref heap<slice<slice<slice<byte>>>>(out var Ꮡresult);
     var bʗ1 = b;
-    var resultʗ1 = result;
-    (slice<nint> match) => {
-        if (resultʗ1 == default!) {
-            resultʗ1 = new slice<slice<slice<byte>>>(0, startSize);
+    Ꮡre.allMatches(""u8, b, n, (slice<nint> match) => {
+        if (Ꮡresult.ValueSlot == default!) {
+            Ꮡresult.ValueSlot = new slice<slice<slice<byte>>>(0, startSize);
         }
         var Δslice = new slice<slice<byte>>(len(match) / 2);
         foreach (var (j, _) in Δslice) {
@@ -1210,7 +1250,7 @@ internal static readonly UntypedInt startSize = 10; // The size at which to star
                 Δslice[j] = bʗ1.slice(match[2 * j], match[2 * j + 1], match[2 * j + 1]);
             }
         }
-        resultʗ1 = append(resultʗ1, Δslice);
+        Ꮡresult.ValueSlot = append(Ꮡresult.ValueSlot, Δslice);
     });
     return result;
 }
@@ -1219,18 +1259,18 @@ internal static readonly UntypedInt startSize = 10; // The size at which to star
 // a slice of all successive matches of the expression, as defined by the
 // 'All' description in the package comment.
 // A return value of nil indicates no match.
-[GoRecv] public static slice<slice<nint>> FindAllSubmatchIndex(this ref Regexp re, slice<byte> b, nint n) {
+public static slice<slice<nint>> FindAllSubmatchIndex(this ж<Regexp> Ꮡre, slice<byte> b, nint n) {
+    ref var re = ref Ꮡre.Value;
+
     if (n < 0) {
         n = len(b) + 1;
     }
-    slice<slice<nint>> result = default!;
-    re.allMatches(""u8, b, n, 
-    var resultʗ1 = result;
-    (slice<nint> match) => {
-        if (resultʗ1 == default!) {
-            resultʗ1 = new slice<slice<nint>>(0, startSize);
+    ref var result = ref heap<slice<slice<nint>>>(out var Ꮡresult);
+    Ꮡre.allMatches(""u8, b, n, (slice<nint> match) => {
+        if (Ꮡresult.ValueSlot == default!) {
+            Ꮡresult.ValueSlot = new slice<slice<nint>>(0, startSize);
         }
-        resultʗ1 = append(resultʗ1, match);
+        Ꮡresult.ValueSlot = append(Ꮡresult.ValueSlot, match);
     });
     return result;
 }
@@ -1239,16 +1279,16 @@ internal static readonly UntypedInt startSize = 10; // The size at which to star
 // returns a slice of all successive matches of the expression, as defined by
 // the 'All' description in the package comment.
 // A return value of nil indicates no match.
-[GoRecv] public static slice<slice<@string>> FindAllStringSubmatch(this ref Regexp re, @string s, nint n) {
+public static slice<slice<@string>> FindAllStringSubmatch(this ж<Regexp> Ꮡre, @string s, nint n) {
+    ref var re = ref Ꮡre.Value;
+
     if (n < 0) {
         n = len(s) + 1;
     }
-    slice<slice<@string>> result = default!;
-    re.allMatches(s, default!, n, 
-    var resultʗ1 = result;
-    (slice<nint> match) => {
-        if (resultʗ1 == default!) {
-            resultʗ1 = new slice<slice<@string>>(0, startSize);
+    ref var result = ref heap<slice<slice<@string>>>(out var Ꮡresult);
+    Ꮡre.allMatches(s, default!, n, (slice<nint> match) => {
+        if (Ꮡresult.ValueSlot == default!) {
+            Ꮡresult.ValueSlot = new slice<slice<@string>>(0, startSize);
         }
         var Δslice = new slice<@string>(len(match) / 2);
         foreach (var (j, _) in Δslice) {
@@ -1256,7 +1296,7 @@ internal static readonly UntypedInt startSize = 10; // The size at which to star
                 Δslice[j] = s[(int)(match[2 * j])..(int)(match[2 * j + 1])];
             }
         }
-        resultʗ1 = append(resultʗ1, Δslice);
+        Ꮡresult.ValueSlot = append(Ꮡresult.ValueSlot, Δslice);
     });
     return result;
 }
@@ -1266,18 +1306,18 @@ internal static readonly UntypedInt startSize = 10; // The size at which to star
 // the expression, as defined by the 'All' description in the package
 // comment.
 // A return value of nil indicates no match.
-[GoRecv] public static slice<slice<nint>> FindAllStringSubmatchIndex(this ref Regexp re, @string s, nint n) {
+public static slice<slice<nint>> FindAllStringSubmatchIndex(this ж<Regexp> Ꮡre, @string s, nint n) {
+    ref var re = ref Ꮡre.Value;
+
     if (n < 0) {
         n = len(s) + 1;
     }
-    slice<slice<nint>> result = default!;
-    re.allMatches(s, default!, n, 
-    var resultʗ1 = result;
-    (slice<nint> match) => {
-        if (resultʗ1 == default!) {
-            resultʗ1 = new slice<slice<nint>>(0, startSize);
+    ref var result = ref heap<slice<slice<nint>>>(out var Ꮡresult);
+    Ꮡre.allMatches(s, default!, n, (slice<nint> match) => {
+        if (Ꮡresult.ValueSlot == default!) {
+            Ꮡresult.ValueSlot = new slice<slice<nint>>(0, startSize);
         }
-        resultʗ1 = append(resultʗ1, match);
+        Ꮡresult.ValueSlot = append(Ꮡresult.ValueSlot, match);
     });
     return result;
 }
@@ -1298,14 +1338,16 @@ internal static readonly UntypedInt startSize = 10; // The size at which to star
 //   - n > 0: at most n substrings; the last substring will be the unsplit remainder;
 //   - n == 0: the result is nil (zero substrings);
 //   - n < 0: all substrings.
-[GoRecv] public static slice<@string> Split(this ref Regexp re, @string s, nint n) {
+public static slice<@string> Split(this ж<Regexp> Ꮡre, @string s, nint n) {
+    ref var re = ref Ꮡre.Value;
+
     if (n == 0) {
         return default!;
     }
     if (len(re.expr) > 0 && len(s) == 0) {
         return new @string[]{""}.slice();
     }
-    var matches = re.FindAllStringIndex(s, n);
+    var matches = Ꮡre.FindAllStringIndex(s, n);
     var strings = new slice<@string>(0, len(matches));
     nint beg = 0;
     nint end = 0;
@@ -1338,11 +1380,11 @@ internal static readonly UntypedInt startSize = 10; // The size at which to star
 // UnmarshalText implements [encoding.TextUnmarshaler] by calling
 // [Compile] on the encoded value.
 [GoRecv] public static error UnmarshalText(this ref Regexp re, slice<byte> text) {
-    (newRE, err) = Compile(((@string)text));
+    var (newRE, err) = Compile(((@string)text));
     if (err != default!) {
         return err;
     }
-    re = newRE.val;
+    re = newRE.Value;
     return default!;
 }
 

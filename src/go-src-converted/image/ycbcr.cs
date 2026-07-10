@@ -56,9 +56,7 @@ public static @string String(this YCbCrSubsampleRatio s) {
 //	For 4:1:1, CStride == YStride/4 && len(Cb) == len(Cr) == len(Y)/4.
 //	For 4:1:0, CStride == YStride/4 && len(Cb) == len(Cr) == len(Y)/8.
 [GoType] partial struct YCbCr {
-    public slice<uint8> Y;
-    public slice<uint8> Cb;
-    public slice<uint8> Cr;
+    public slice<uint8> Y, Cb, Cr;
     public nint YStride;
     public nint CStride;
     public YCbCrSubsampleRatio SubsampleRatio;
@@ -74,12 +72,12 @@ public static @string String(this YCbCrSubsampleRatio s) {
 }
 
 [GoRecv] public static color.Color At(this ref YCbCr p, nint x, nint y) {
-    return p.YCbCrAt(x, y);
+    return new color_YCbCrᴠColor(p.YCbCrAt(x, y));
 }
 
 [GoRecv] public static color.RGBA64 RGBA64At(this ref YCbCr p, nint x, nint y) {
     var (r, g, b, a) = p.YCbCrAt(x, y).RGBA();
-    return new color.RGBA64(((uint16)r), ((uint16)g), ((uint16)b), ((uint16)a));
+    return new color.RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
 [GoRecv] public static color.YCbCr YCbCrAt(this ref YCbCr p, nint x, nint y) {
@@ -133,13 +131,13 @@ public static @string String(this YCbCrSubsampleRatio s) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new YCbCr(
+        return new YCbCrжImage(Ꮡ(new YCbCr(
             SubsampleRatio: p.SubsampleRatio
-        );
+        )));
     }
     nint yi = p.YOffset(r.Min.X, r.Min.Y);
     nint ci = p.COffset(r.Min.X, r.Min.Y);
-    return new YCbCr(
+    return new YCbCrжImage(Ꮡ(new YCbCr(
         Y: p.Y[(int)(yi)..],
         Cb: p.Cb[(int)(ci)..],
         Cr: p.Cr[(int)(ci)..],
@@ -147,7 +145,7 @@ public static @string String(this YCbCrSubsampleRatio s) {
         YStride: p.YStride,
         CStride: p.CStride,
         Rect: r
-    );
+    )));
 }
 
 [GoRecv] public static bool Opaque(this ref YCbCr p) {
@@ -194,7 +192,9 @@ internal static (nint w, nint h, nint cw, nint ch) yCbCrSize(Rectangle r, YCbCrS
 // NewYCbCr returns a new YCbCr image with the given bounds and subsample
 // ratio.
 public static ж<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRatio) {
-    var (w, h, cw, ch) = yCbCrSize(r, subsampleRatio);
+    ref var w = ref heap<nint>(out var Ꮡw);
+    ref var cw = ref heap<nint>(out var Ꮡcw);
+    (w, var h, cw, var ch) = yCbCrSize(r, subsampleRatio);
     // totalLength should be the same as i2, below, for a valid Rectangle r.
     nint totalLength = add2NonNeg(
         mul3NonNeg(1, w, h),
@@ -231,20 +231,20 @@ public static ж<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRatio
 }
 
 [GoRecv] public static color.Color At(this ref NYCbCrA p, nint x, nint y) {
-    return p.NYCbCrAAt(x, y);
+    return new color_NYCbCrAᴠColor(p.NYCbCrAAt(x, y));
 }
 
 [GoRecv] public static color.RGBA64 RGBA64At(this ref NYCbCrA p, nint x, nint y) {
     var (r, g, b, a) = p.NYCbCrAAt(x, y).RGBA();
-    return new color.RGBA64(((uint16)r), ((uint16)g), ((uint16)b), ((uint16)a));
+    return new color.RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
 [GoRecv] public static color.NYCbCrA NYCbCrAAt(this ref NYCbCrA p, nint x, nint y) {
     if (!(new Point(X: x, Y: y).In(p.Rect))) {
         return new color.NYCbCrA(nil);
     }
-    nint yi = p.YOffset(x, y);
-    nint ci = p.COffset(x, y);
+    nint yi = p.YCbCr.YOffset(x, y);
+    nint ci = p.YCbCr.COffset(x, y);
     nint ai = p.AOffset(x, y);
     return new color.NYCbCrA(
         new color.YCbCr(
@@ -270,16 +270,16 @@ public static ж<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRatio
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new NYCbCrA(
+        return new NYCbCrAжImage(Ꮡ(new NYCbCrA(
             YCbCr: new YCbCr(
                 SubsampleRatio: p.SubsampleRatio
             )
-        );
+        )));
     }
-    nint yi = p.YOffset(r.Min.X, r.Min.Y);
-    nint ci = p.COffset(r.Min.X, r.Min.Y);
+    nint yi = p.YCbCr.YOffset(r.Min.X, r.Min.Y);
+    nint ci = p.YCbCr.COffset(r.Min.X, r.Min.Y);
     nint ai = p.AOffset(r.Min.X, r.Min.Y);
-    return new NYCbCrA(
+    return new NYCbCrAжImage(Ꮡ(new NYCbCrA(
         YCbCr: new YCbCr(
             Y: p.Y[(int)(yi)..],
             Cb: p.Cb[(int)(ci)..],
@@ -291,7 +291,7 @@ public static ж<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRatio
         ),
         A: p.A[(int)(ai)..],
         AStride: p.AStride
-    );
+    )));
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
@@ -303,7 +303,7 @@ public static ж<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRatio
     nint i1 = p.Rect.Dx();
     for (nint y = p.Rect.Min.Y; y < p.Rect.Max.Y; y++) {
         foreach (var (_, a) in p.A[(int)(i0)..(int)(i1)]) {
-            if (a != 255) {
+            if (a != 0xff) {
                 return false;
             }
         }
@@ -316,7 +316,8 @@ public static ж<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRatio
 // NewNYCbCrA returns a new [NYCbCrA] image with the given bounds and subsample
 // ratio.
 public static ж<NYCbCrA> NewNYCbCrA(Rectangle r, YCbCrSubsampleRatio subsampleRatio) {
-    var (w, h, cw, ch) = yCbCrSize(r, subsampleRatio);
+    ref var w = ref heap<nint>(out var Ꮡw);
+    (w, var h, var cw, var ch) = yCbCrSize(r, subsampleRatio);
     // totalLength should be the same as i3, below, for a valid Rectangle r.
     nint totalLength = add2NonNeg(
         mul3NonNeg(2, w, h),

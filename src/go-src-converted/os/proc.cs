@@ -5,7 +5,7 @@
 namespace go;
 
 using testlog = @internal.testlog_package;
-using runtime = runtime_package;
+using Δruntime = runtime_package;
 using syscall = syscall_package;
 using @internal;
 
@@ -14,8 +14,8 @@ partial class os_package {
 // Args hold the command-line arguments, starting with the program name.
 public static slice<@string> Args;
 
-[GoInit] internal static void init() {
-    if (runtime.GOOS == "windows"u8) {
+[GoInit] internal static void initΔ1() {
+    if (Δruntime.GOOS == "windows"u8) {
         // Initialized in exec_windows.go.
         return;
     }
@@ -59,7 +59,7 @@ public static nint Getegid() {
 // On Windows, it returns [syscall.EWINDOWS]. See the [os/user] package
 // for a possible alternative.
 public static (slice<nint>, error) Getgroups() {
-    (gids, e) = syscall.Getgroups();
+    var (gids, e) = syscall.Getgroups();
     return (gids, NewSyscallError("getgroups"u8, e));
 }
 

@@ -6,34 +6,35 @@ namespace go;
 using flag = flag_package;
 using fmt = fmt_package;
 using sysinfo = @internal.sysinfo_package;
-using io = io_package;
-using math = math_package;
+using Δio = io_package;
+using Δmath = math_package;
 using os = os_package;
-using runtime = runtime_package;
+using Δruntime = runtime_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
-using sync = sync_package;
-using atomic = sync.atomic_package;
+using Δsync = sync_package;
+using atomic = go.sync.atomic_package;
 using time = time_package;
-using unicode = unicode_package;
+using Δunicode = unicode_package;
 using @internal;
-using sync;
+using go.sync;
 
 partial class testing_package {
 
 internal static void initBenchmarkFlags() {
     matchBenchmarks = flag.String("test.bench"u8, ""u8, "run only benchmarks matching `regexp`"u8);
     benchmarkMemory = flag.Bool("test.benchmem"u8, false, "print memory allocations for benchmarks"u8);
-    flag.Var(benchTime, "test.benchtime"u8, "run each benchmark for duration `d` or N times if `d` is of the form Nx"u8);
+    flag.Var(new durationOrCountFlagжValue(ᏑbenchTime), "test.benchtime"u8, "run each benchmark for duration `d` or N times if `d` is of the form Nx"u8);
 }
 
 internal static ж<@string> matchBenchmarks;
 internal static ж<bool> benchmarkMemory;
-internal static durationOrCountFlag benchTime = new durationOrCountFlag(d: 1 * time.ΔSecond);   // changed during test of testing package
+internal static ж<durationOrCountFlag> ᏑbenchTime = new(new durationOrCountFlag(d: 1 * time.ΔSecond));
+internal static ref durationOrCountFlag benchTime => ref ᏑbenchTime.Value;   // changed during test of testing package
 
 [GoType] partial struct durationOrCountFlag {
-    internal time_package.Duration d;
+    internal time.Duration d;
     internal nint n;
     internal bool allowZero;
 }
@@ -51,7 +52,7 @@ internal static durationOrCountFlag benchTime = new durationOrCountFlag(d: 1 * t
         if (errΔ1 != default! || n < 0 || (!f.allowZero && n == 0)) {
             return fmt.Errorf("invalid count"u8);
         }
-        f = new durationOrCountFlag(n: ((nint)n));
+        f = new durationOrCountFlag(n: (nint)n);
         return default!;
     }
     var (d, err) = time.ParseDuration(s);
@@ -63,10 +64,12 @@ internal static durationOrCountFlag benchTime = new durationOrCountFlag(d: 1 * t
 }
 
 // Global lock to ensure only one benchmark runs at a time.
-internal static sync.Mutex benchmarkLock;
+internal static ж<Δsync.Mutex> ᏑbenchmarkLock = new(default(Δsync.Mutex));
+internal static ref Δsync.Mutex benchmarkLock => ref ᏑbenchmarkLock.Value;
 
 // Used for every benchmark for measuring memory.
-internal static runtime.MemStats memStats;
+internal static ж<Δruntime.MemStats> ᏑmemStats = new(default(Δruntime.MemStats));
+internal static ref Δruntime.MemStats memStats => ref ᏑmemStats.Value;
 
 // InternalBenchmark is an internal type but exported because it is cross-package;
 // it is part of the implementation of the "go test" command.
@@ -94,7 +97,7 @@ internal static runtime.MemStats memStats;
     internal ж<benchContext> context;
     public nint N;
     internal nint previousN;          // number of iterations in the previous run
-    internal time_package.Duration previousDuration; // total duration of the previous run
+    internal time.Duration previousDuration; // total duration of the previous run
     internal Action<ж<B>> benchFunc;
     internal durationOrCountFlag benchTime;
     internal int64 bytes;
@@ -118,7 +121,7 @@ internal static runtime.MemStats memStats;
 // a call to [B.StopTimer].
 [GoRecv] public static void StartTimer(this ref B b) {
     if (!b.timerOn) {
-        runtime.ReadMemStats(Ꮡ(memStats));
+        Δruntime.ReadMemStats(ᏑmemStats);
         b.startAllocs = memStats.Mallocs;
         b.startBytes = memStats.TotalAlloc;
         b.start = highPrecisionTimeNow();
@@ -132,7 +135,7 @@ internal static runtime.MemStats memStats;
 [GoRecv] public static void StopTimer(this ref B b) {
     if (b.timerOn) {
         b.duration += highPrecisionTimeSince(b.start);
-        runtime.ReadMemStats(Ꮡ(memStats));
+        Δruntime.ReadMemStats(ᏑmemStats);
         b.netAllocs += memStats.Mallocs - b.startAllocs;
         b.netBytes += memStats.TotalAlloc - b.startBytes;
         b.timerOn = false;
@@ -151,7 +154,7 @@ internal static runtime.MemStats memStats;
         clear(b.extra);
     }
     if (b.timerOn) {
-        runtime.ReadMemStats(Ꮡ(memStats));
+        Δruntime.ReadMemStats(ᏑmemStats);
         b.startAllocs = memStats.Mallocs;
         b.startBytes = memStats.TotalAlloc;
         b.start = highPrecisionTimeNow();
@@ -175,23 +178,24 @@ internal static runtime.MemStats memStats;
 }
 
 // runN runs a single benchmark for the specified number of iterations.
-[GoRecv] internal static void runN(this ref B b, nint n) => func((defer, _) => {
-    benchmarkLock.Lock();
-    var benchmarkLockʗ1 = benchmarkLock;
-    defer(benchmarkLockʗ1.Unlock);
+internal static void runN(this ж<B> Ꮡb, nint n) => func((defer, recover) => {
+    ref var b = ref Ꮡb.Value;
+
+    ᏑbenchmarkLock.Lock();
+    defer(ᏑbenchmarkLock.Unlock);
     defer(() => {
-        b.runCleanup(normalPanic);
-        b.checkRaces();
+        Ꮡb.of(B.Ꮡcommon).runCleanup(normalPanic);
+        Ꮡb.of(B.Ꮡcommon).checkRaces();
     });
     // Try to get a comparable environment for each run
     // by clearing garbage from previous runs.
-    runtime.GC();
-    b.resetRaces();
+    Δruntime.GC();
+    Ꮡb.of(B.Ꮡcommon).resetRaces();
     b.N = n;
     b.parallelism = 1;
     b.ResetTimer();
     b.StartTimer();
-    b.benchFunc(b);
+    b.benchFunc(Ꮡb);
     b.StopTimer();
     b.previousN = n;
     b.previousDuration = b.duration;
@@ -199,26 +203,28 @@ internal static runtime.MemStats memStats;
 
 // run1 runs the first iteration of benchFunc. It reports whether more
 // iterations of this benchmarks should be run.
-[GoRecv] internal static bool run1(this ref B b) => func((defer, _) => {
+internal static bool run1(this ж<B> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
+
     {
         var ctx = b.context; if (ctx != nil) {
             // Extend maxLen, if needed.
             {
                 nint n = len(b.name) + (~ctx).extLen + 1; if (n > (~ctx).maxLen) {
-                    ctx.val.maxLen = n + 8;
+                    ctx.Value.maxLen = n + 8;
                 }
             }
         }
     }
     // Add additional slack to avoid too many jumps in size.
-    goǃ(() => {
+    goǃ(() => func((defer, recover) => {
         // Signal that we're done whether we return normally
         // or by FailNow's runtime.Goexit.
         defer(() => {
-            b.signal.ᐸꟷ(true);
+            Ꮡb.Value.signal.ᐸꟷ(true);
         });
-        b.runN(1);
-    });
+        Ꮡb.runN(1);
+    }));
     ᐸꟷ(b.signal);
     if (b.failed) {
         fmt.Fprintf(b.w, "%s--- FAIL: %s\n%s"u8, b.chatty.prefix(), b.name, b.output);
@@ -226,10 +232,10 @@ internal static runtime.MemStats memStats;
     }
     // Only print the output if we know we are not going to proceed.
     // Otherwise it is printed in processBench.
-    b.mu.RLock();
+    Ꮡb.of(B.Ꮡmu).RLock();
     var finished = b.finished;
-    b.mu.RUnlock();
-    if (b.hasSub.Load() || finished) {
+    Ꮡb.of(B.Ꮡmu).RUnlock();
+    if (Ꮡb.of(B.ᏑhasSub).Load() || finished) {
         @string tag = "BENCH"u8;
         if (b.skipped) {
             tag = "SKIP"u8;
@@ -241,37 +247,42 @@ internal static runtime.MemStats memStats;
         return false;
     }
     return true;
-});
+}
 
-internal static sync.Once labelsOnce;
+internal static ж<Δsync.Once> ᏑlabelsOnce = new(default(Δsync.Once));
+internal static ref Δsync.Once labelsOnce => ref ᏑlabelsOnce.Value;
 
 // run executes the benchmark in a separate goroutine, including all of its
 // subbenchmarks. b must not have subbenchmarks.
-[GoRecv] internal static void run(this ref B b) {
-    labelsOnce.Do(() => {
-        fmt.Fprintf(b.w, "goos: %s\n"u8, runtime.GOOS);
-        fmt.Fprintf(b.w, "goarch: %s\n"u8, runtime.GOARCH);
-        if (b.importPath != ""u8) {
-            fmt.Fprintf(b.w, "pkg: %s\n"u8, b.importPath);
+internal static void run(this ж<B> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
+
+    ᏑlabelsOnce.Do(() => {
+        fmt.Fprintf(Ꮡb.Value.w, "goos: %s\n"u8, Δruntime.GOOS);
+        fmt.Fprintf(Ꮡb.Value.w, "goarch: %s\n"u8, Δruntime.GOARCH);
+        if (Ꮡb.Value.importPath != ""u8) {
+            fmt.Fprintf(Ꮡb.Value.w, "pkg: %s\n"u8, Ꮡb.Value.importPath);
         }
         {
             @string cpu = sysinfo.CPUName(); if (cpu != ""u8) {
-                fmt.Fprintf(b.w, "cpu: %s\n"u8, cpu);
+                fmt.Fprintf(Ꮡb.Value.w, "cpu: %s\n"u8, cpu);
             }
         }
     });
     if (b.context != nil){
         // Running go test --test.bench
-        b.context.processBench(b);
+        b.context.processBench(Ꮡb);
     } else {
         // Must call doBench.
         // Running func Benchmark.
-        b.doBench();
+        Ꮡb.doBench();
     }
 }
 
-[GoRecv] internal static BenchmarkResult doBench(this ref B b) {
-    goǃ(b.launch);
+internal static BenchmarkResult doBench(this ж<B> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
+
+    goǃ(Ꮡb.launch);
     ᐸꟷ(b.signal);
     return b.result;
 }
@@ -280,11 +291,13 @@ internal static sync.Once labelsOnce;
 // of benchmark iterations until the benchmark runs for the requested benchtime.
 // launch is run by the doBench function as a separate goroutine.
 // run1 must have been called on b.
-[GoRecv] internal static void launch(this ref B b) => func((defer, _) => {
+internal static void launch(this ж<B> Ꮡb) => func((defer, recover) => {
+    ref var b = ref Ꮡb.Value;
+
     // Signal that we're done whether we return normally
     // or by FailNow's runtime.Goexit.
     defer(() => {
-        b.signal.ᐸꟷ(true);
+        Ꮡb.Value.signal.ᐸꟷ(true);
     });
     // Run the benchmark for at least the specified amount of time.
     if (b.benchTime.n > 0){
@@ -292,15 +305,15 @@ internal static sync.Once labelsOnce;
         // If -benchtime=1x was requested, use that result.
         // See https://golang.org/issue/32051.
         if (b.benchTime.n > 1) {
-            b.runN(b.benchTime.n);
+            Ꮡb.runN(b.benchTime.n);
         }
     } else {
         var d = b.benchTime.d;
-        for (var n = ((int64)1); !b.failed && b.duration < d && n < 1e9F; ) {
+        for (var n = (int64)1; !b.failed && b.duration < d && n < 1000000000; ) {
             var last = n;
             // Predict required iterations.
             var goalns = d.Nanoseconds();
-            var prevIters = ((int64)b.N);
+            var prevIters = (int64)b.N;
             var prevns = b.duration.Nanoseconds();
             if (prevns <= 0) {
                 // Round up, to avoid div by zero.
@@ -319,8 +332,8 @@ internal static sync.Once labelsOnce;
             // Be sure to run at least one more than last time.
             n = max(n, last + 1);
             // Don't run more than 1e9 times. (This also keeps n in int range on 32 bit platforms.)
-            n = min(n, 1e9F);
-            b.runN(((nint)n));
+            n = min(n, 1000000000);
+            Ꮡb.runN((nint)n);
         }
     }
     b.result = new BenchmarkResult(b.N, b.duration, b.bytes, b.netAllocs, b.netBytes, b.extra);
@@ -350,7 +363,7 @@ internal static sync.Once labelsOnce;
     if (unit == ""u8) {
         throw panic("metric unit must not be empty");
     }
-    if (strings.IndexFunc(unit, unicode.IsSpace) >= 0) {
+    if (strings.IndexFunc(unit, Δunicode.IsSpace) >= 0) {
         throw panic("metric unit must not contain whitespace");
     }
     b.extra[unit] = n;
@@ -359,7 +372,7 @@ internal static sync.Once labelsOnce;
 // BenchmarkResult contains the results of a benchmark run.
 [GoType] partial struct BenchmarkResult {
     public nint N;          // The number of iterations.
-    public time_package.Duration T; // The total time taken.
+    public time.Duration T; // The total time taken.
     public int64 Bytes;         // Bytes processed in one iteration.
     public uint64 MemAllocs;        // The total number of memory allocations.
     public uint64 MemBytes;        // The total number of bytes allocated.
@@ -370,55 +383,55 @@ internal static sync.Once labelsOnce;
 // NsPerOp returns the "ns/op" metric.
 public static int64 NsPerOp(this BenchmarkResult r) {
     {
-        var (v, ok) = r.Extra["ns/op"u8]; if (ok) {
-            return ((int64)v);
+        var (v, ok) = r.Extra["ns/op"u8, ꟷ]; if (ok) {
+            return (int64)v;
         }
     }
     if (r.N <= 0) {
         return 0;
     }
-    return r.T.Nanoseconds() / ((int64)r.N);
+    return r.T.Nanoseconds() / (int64)r.N;
 }
 
 // mbPerSec returns the "MB/s" metric.
 internal static float64 mbPerSec(this BenchmarkResult r) {
     {
-        var (v, ok) = r.Extra["MB/s"u8]; if (ok) {
+        var (v, ok) = r.Extra["MB/s"u8, ꟷ]; if (ok) {
             return v;
         }
     }
     if (r.Bytes <= 0 || r.T <= 0 || r.N <= 0) {
         return 0;
     }
-    return (((float64)r.Bytes) * ((float64)r.N) / 1e6F) / r.T.Seconds();
+    return ((float64)r.Bytes * (float64)r.N / 1e6D) / r.T.Seconds();
 }
 
 // AllocsPerOp returns the "allocs/op" metric,
 // which is calculated as r.MemAllocs / r.N.
 public static int64 AllocsPerOp(this BenchmarkResult r) {
     {
-        var (v, ok) = r.Extra["allocs/op"u8]; if (ok) {
-            return ((int64)v);
+        var (v, ok) = r.Extra["allocs/op"u8, ꟷ]; if (ok) {
+            return (int64)v;
         }
     }
     if (r.N <= 0) {
         return 0;
     }
-    return ((int64)r.MemAllocs) / ((int64)r.N);
+    return (int64)r.MemAllocs / (int64)r.N;
 }
 
 // AllocedBytesPerOp returns the "B/op" metric,
 // which is calculated as r.MemBytes / r.N.
 public static int64 AllocedBytesPerOp(this BenchmarkResult r) {
     {
-        var (v, ok) = r.Extra["B/op"u8]; if (ok) {
-            return ((int64)v);
+        var (v, ok) = r.Extra["B/op"u8, ꟷ]; if (ok) {
+            return (int64)v;
         }
     }
     if (r.N <= 0) {
         return 0;
     }
-    return ((int64)r.MemBytes) / ((int64)r.N);
+    return (int64)r.MemBytes / (int64)r.N;
 }
 
 // String returns a summary of the benchmark results.
@@ -430,19 +443,19 @@ public static int64 AllocedBytesPerOp(this BenchmarkResult r) {
 // by [BenchmarkResult.MemString].
 public static @string String(this BenchmarkResult r) {
     var buf = @new<strings.Builder>();
-    fmt.Fprintf(~buf, "%8d"u8, r.N);
+    fmt.Fprintf(new strings_BuilderжWriter(buf), "%8d"u8, r.N);
     // Get ns/op as a float.
-    var (ns, ok) = r.Extra["ns/op"u8];
+    var (ns, ok) = r.Extra["ns/op"u8, ꟷ];
     if (!ok) {
-        ns = ((float64)r.T.Nanoseconds()) / ((float64)r.N);
+        ns = (float64)r.T.Nanoseconds() / (float64)r.N;
     }
     if (ns != 0) {
         buf.WriteByte((rune)'\t');
-        prettyPrint(~buf, ns, "ns/op"u8);
+        prettyPrint(new strings_BuilderжWriter(buf), ns, "ns/op"u8);
     }
     {
         var mbs = r.mbPerSec(); if (mbs != 0) {
-            fmt.Fprintf(~buf, "\t%7.2f MB/s"u8, mbs);
+            fmt.Fprintf(new strings_BuilderжWriter(buf), "\t%7.2f MB/s"u8, mbs);
         }
     }
     // Print extra metrics that aren't represented in the standard
@@ -457,48 +470,48 @@ public static @string String(this BenchmarkResult r) {
         // Built-in metrics reported elsewhere.
         extraKeys = append(extraKeys, k);
     }
-    slices.Sort(extraKeys);
+    slices.Sort<slice<@string>, @string>(extraKeys);
     foreach (var (_, k) in extraKeys) {
         buf.WriteByte((rune)'\t');
-        prettyPrint(~buf, r.Extra[k], k);
+        prettyPrint(new strings_BuilderжWriter(buf), r.Extra[k], k);
     }
     return buf.String();
 }
 
-internal static void prettyPrint(io.Writer w, float64 x, @string unit) {
+internal static void prettyPrint(Δio.Writer w, float64 x, @string unit) {
     // Print all numbers with 10 places before the decimal point
     // and small numbers with four sig figs. Field widths are
     // chosen to fit the whole part in 10 places while aligning
     // the decimal point of all fractional formats.
     @string format = default!;
     {
-        var y = math.Abs(x);
+        var y = Δmath.Abs(x);
         switch (ᐧ) {
-        case {} when y == 0 || y >= 999.95F: {
+        case {} when y == 0 || y >= 999.95D: {
             format = "%10.0f %s"u8;
             break;
         }
-        case {} when y is >= 99.995F: {
+        case {} when y is >= 99.995D: {
             format = "%12.1f %s"u8;
             break;
         }
-        case {} when y is >= 9.9995F: {
+        case {} when y is >= 9.9995D: {
             format = "%13.2f %s"u8;
             break;
         }
-        case {} when y is >= 0.99995F: {
+        case {} when y is >= 0.99995D: {
             format = "%14.3f %s"u8;
             break;
         }
-        case {} when y is >= 0.099995F: {
+        case {} when y is >= 0.099995D: {
             format = "%15.4f %s"u8;
             break;
         }
-        case {} when y is >= 0.0099995F: {
+        case {} when y is >= 0.0099995D: {
             format = "%16.5f %s"u8;
             break;
         }
-        case {} when y is >= 0.00099995F: {
+        case {} when y is >= 0.00099995D: {
             format = "%17.6f %s"u8;
             break;
         }
@@ -539,7 +552,7 @@ public static void RunBenchmarks(Func<@string, @string, (bool, error)> matchStri
 
 internal static bool runBenchmarks(@string importPath, Func<@string, @string, (bool, error)> matchString, slice<InternalBenchmark> benchmarks) {
     // If no flag was specified, don't run benchmarks.
-    if (len(matchBenchmarks.val) == 0) {
+    if (len(matchBenchmarks.Value) == 0) {
         return true;
     }
     // Collect matching benchmarks and determine longest name.
@@ -550,7 +563,7 @@ internal static bool runBenchmarks(@string importPath, Func<@string, @string, (b
         }
     }
     var ctx = Ꮡ(new benchContext(
-        match: newMatcher(matchString, matchBenchmarks.val, "-test.bench"u8, skip.val),
+        match: newMatcher(matchString, matchBenchmarks.Value, "-test.bench"u8, skip.Value),
         extLen: len(benchmarkName(""u8, maxprocs))
     ));
     slice<InternalBenchmark> bs = default!;
@@ -561,25 +574,25 @@ internal static bool runBenchmarks(@string importPath, Func<@string, @string, (b
                 @string benchName = benchmarkName(Benchmark.Name, maxprocs);
                 {
                     nint l = len(benchName) + (~ctx).extLen + 1; if (l > (~ctx).maxLen) {
-                        ctx.val.maxLen = l;
+                        ctx.Value.maxLen = l;
                     }
                 }
             }
         }
     }
+        var bsʗ1 = bs;
     var main = Ꮡ(new B(
         common: new common(
             name: "Main"u8,
-            w: os.Stdout,
+            w: new os.FileжWriter(os.Stdout),
             bench: true
         ),
         importPath: importPath,
-        benchFunc: 
-        var bsʗ1 = bs;
-        (ж<B> b) => {
-            ref var Benchmark = ref heap(new InternalBenchmark(), out var ᏑBenchmark);
+        benchFunc: (ж<B> b) => {
+            foreach (var (_, vᴛ1) in bsʗ1) {
+                ref var Benchmark = ref heap(new InternalBenchmark(), out var ᏑBenchmark);
+                Benchmark = vᴛ1;
 
-            foreach (var (_, Benchmark) in bsʗ1) {
                 b.Run(Benchmark.Name, Benchmark.F);
             }
         },
@@ -587,19 +600,19 @@ internal static bool runBenchmarks(@string importPath, Func<@string, @string, (b
         context: ctx
     ));
     if (Verbose()) {
-        main.chatty = newChattyPrinter(main.w);
+        main.Value.chatty = newChattyPrinter((~main).w);
     }
     main.runN(1);
-    return !main.failed;
+    return !(~main).failed;
 }
 
 // processBench runs bench b for the configured CPU counts and prints the results.
 [GoRecv] internal static void processBench(this ref benchContext ctx, ж<B> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     foreach (var (i, procs) in cpuList) {
-        for (nuint j = ((nuint)0); j < count.val; j++) {
-            runtime.GOMAXPROCS(procs);
+        for (nuint j = (nuint)0; j < count.Value; j++) {
+            Δruntime.GOMAXPROCS(procs);
             @string benchName = benchmarkName(b.name, procs);
             // If it's chatty, we've already printed this information.
             if (b.chatty == nil) {
@@ -617,10 +630,10 @@ internal static bool runBenchmarks(@string importPath, Func<@string, @string, (b
                     ),
                     benchFunc: b.benchFunc,
                     benchTime: b.benchTime
-                )); b = ref Ꮡb.val;
-                b.run1();
+                )); b = ref Ꮡb.Value;
+                Ꮡb.run1();
             }
-            var r = b.doBench();
+            var r = Ꮡb.doBench();
             if (b.failed) {
                 // The output could be very long here, but probably isn't.
                 // We print it all, regardless, because we don't want to trim the reason
@@ -632,7 +645,7 @@ internal static bool runBenchmarks(@string importPath, Func<@string, @string, (b
             if (b.chatty != nil) {
                 fmt.Fprintf(b.w, "%-*s\t"u8, ctx.maxLen, benchName);
             }
-            if (benchmarkMemory.val || b.showAllocResult) {
+            if (benchmarkMemory.Value || b.showAllocResult) {
                 results += "\t"u8 + r.MemString();
             }
             fmt.Fprintln(b.w, results);
@@ -643,11 +656,11 @@ internal static bool runBenchmarks(@string importPath, Func<@string, @string, (b
                 fmt.Fprintf(b.w, "%s--- BENCH: %s\n%s"u8, b.chatty.prefix(), benchName, b.output);
             }
             {
-                nint p = runtime.GOMAXPROCS(-1); if (p != procs) {
-                    fmt.Fprintf(~os.Stderr, "testing: %s left GOMAXPROCS set to %d\n"u8, benchName, p);
+                nint p = Δruntime.GOMAXPROCS(-1); if (p != procs) {
+                    fmt.Fprintf(new os.FileжWriter(os.Stderr), "testing: %s left GOMAXPROCS set to %d\n"u8, benchName, p);
                 }
             }
-            if (b.chatty != nil && b.chatty.json) {
+            if (b.chatty != nil && (~b.chatty).json) {
                 b.chatty.Updatef(""u8, "=== NAME  %s\n"u8, "");
             }
         }
@@ -664,29 +677,30 @@ internal static bool hideStdoutForTesting = false;
 //
 // A subbenchmark is like any other benchmark. A benchmark that calls Run at
 // least once will not be measured itself and will be called once with N=1.
-[GoRecv] public static bool Run(this ref B b, @string name, Action<ж<B>> f) => func((defer, _) => {
+public static bool Run(this ж<B> Ꮡb, @string name, Action<ж<B>> f) => func<bool>((defer, recover) => {
+    ref var b = ref Ꮡb.Value;
+
     // Since b has subbenchmarks, we will no longer run it as a benchmark itself.
     // Release the lock and acquire it on exit to ensure locks stay paired.
-    b.hasSub.Store(true);
-    benchmarkLock.Unlock();
-    var benchmarkLockʗ1 = benchmarkLock;
-    defer(benchmarkLockʗ1.Lock);
+    Ꮡb.of(B.ᏑhasSub).Store(true);
+    ᏑbenchmarkLock.Unlock();
+    defer(ᏑbenchmarkLock.Lock);
     @string benchName = b.name;
     var ok = true;
     var partial = false;
     if (b.context != nil) {
-        (benchName, ok, partial) = b.context.match.fullName(Ꮡ(b.common), name);
+        (benchName, ok, partial) = (~b.context).match.fullName(Ꮡb.of(B.Ꮡcommon), name);
     }
     if (!ok) {
         return true;
     }
     array<uintptr> pc = new(50); /* maxStackLen */
-    nint n = runtime.Callers(2, pc[..]);
+    nint n = Δruntime.Callers(2, pc[..]);
     var sub = Ꮡ(new B(
         common: new common(
             signal: new channel<bool>(1),
             name: benchName,
-            parent: Ꮡ(b.common),
+            parent: Ꮡb.of(B.Ꮡcommon),
             level: b.level + 1,
             creator: pc[..(int)(n)],
             w: b.w,
@@ -701,15 +715,14 @@ internal static bool hideStdoutForTesting = false;
     if (partial) {
         // Partial name match, like -bench=X/Y matching BenchmarkX.
         // Only process sub-benchmarks, if any.
-        sub.hasSub.Store(true);
+        sub.of(B.ᏑhasSub).Store(true);
     }
     if (b.chatty != nil) {
-        labelsOnce.Do(
-        () => {
-            fmt.Printf("goos: %s\n"u8, runtime.GOOS);
-            fmt.Printf("goarch: %s\n"u8, runtime.GOARCH);
-            if (b.importPath != ""u8) {
-                fmt.Printf("pkg: %s\n"u8, b.importPath);
+        ᏑlabelsOnce.Do(() => {
+            fmt.Printf("goos: %s\n"u8, Δruntime.GOOS);
+            fmt.Printf("goarch: %s\n"u8, Δruntime.GOARCH);
+            if (Ꮡb.Value.importPath != ""u8) {
+                fmt.Printf("pkg: %s\n"u8, Ꮡb.Value.importPath);
             }
             {
                 @string cpu = sysinfo.CPUName(); if (cpu != ""u8) {
@@ -718,7 +731,7 @@ internal static bool hideStdoutForTesting = false;
             }
         });
         if (!hideStdoutForTesting) {
-            if (b.chatty.json) {
+            if ((~b.chatty).json) {
                 b.chatty.Updatef(benchName, "=== RUN   %s\n"u8, benchName);
             }
             fmt.Println(benchName);
@@ -727,30 +740,32 @@ internal static bool hideStdoutForTesting = false;
     if (sub.run1()) {
         sub.run();
     }
-    b.add((~sub).result);
-    return !sub.failed;
+    Ꮡb.add((~sub).result);
+    return !(~sub).failed;
 });
 
 // add simulates running benchmarks in sequence in a single iteration. It is
 // used to give some meaningful results in case func Benchmark is used in
 // combination with Run.
-[GoRecv] internal static void add(this ref B b, BenchmarkResult other) {
-    var r = Ꮡ(b.result);
+internal static void add(this ж<B> Ꮡb, BenchmarkResult other) {
+    ref var b = ref Ꮡb.Value;
+
+    var r = Ꮡb.of(B.Ꮡresult);
     // The aggregated BenchmarkResults resemble running all subbenchmarks as
     // in sequence in a single benchmark.
-    r.val.N = 1;
-    r.val.T += ((time.Duration)other.NsPerOp());
+    r.Value.N = 1;
+    r.Value.T += ((time.Duration)other.NsPerOp());
     if (other.Bytes == 0) {
         // Summing Bytes is meaningless in aggregate if not all subbenchmarks
         // set it.
         b.missingBytes = true;
-        r.val.Bytes = 0;
+        r.Value.Bytes = 0;
     }
     if (!b.missingBytes) {
-        r.val.Bytes += other.Bytes;
+        r.Value.Bytes += other.Bytes;
     }
-    r.val.MemAllocs += ((uint64)other.AllocsPerOp());
-    r.val.MemBytes += ((uint64)other.AllocedBytesPerOp());
+    r.Value.MemAllocs += (uint64)other.AllocsPerOp();
+    r.Value.MemBytes += (uint64)other.AllocedBytesPerOp();
 }
 
 // trimOutput shortens the output from a benchmark, which can be very long.
@@ -758,12 +773,12 @@ internal static bool hideStdoutForTesting = false;
     // The output is likely to appear multiple times because the benchmark
     // is run multiple times, but at least it will be seen. This is not a big deal
     // because benchmarks rarely print, but just in case, we trim it if it's too long.
-    static readonly UntypedInt maxNewlines = 10;
-    for (nint nlCount = 0;nint j = 0; j < len(b.output); j++) {
+    UntypedInt maxNewlines = 10;
+    for ((nint nlCount, nint j) = (0, 0); j < len(b.output); j++) {
         if (b.output[j] == (rune)'\n') {
             nlCount++;
             if (nlCount >= maxNewlines) {
-                b.output = append(b.output[..(int)(j)], "\n\t... [output truncated]\n"u8.ꓸꓸꓸ);
+                b.output = append(b.output[..(int)(j)], ((@string)"\n\t... [output truncated]\n"u8).ꓸꓸꓸ);
                 break;
             }
         }
@@ -772,7 +787,7 @@ internal static bool hideStdoutForTesting = false;
 
 // A PB is used by RunParallel for running parallel benchmarks.
 [GoType] partial struct PB {
-    internal ж<sync.atomic_package.Uint64> globalN; // shared between all worker goroutines iteration counter
+    internal ж<atomic.Uint64> globalN; // shared between all worker goroutines iteration counter
     internal uint64 grain;         // acquire that many iterations from globalN at once
     internal uint64 cache;         // local cache of acquired iterations
     internal uint64 bN;         // total number of iterations to execute (b.N)
@@ -808,7 +823,9 @@ internal static bool hideStdoutForTesting = false;
 //
 // RunParallel reports ns/op values as wall time for the benchmark as a whole,
 // not the sum of wall time or CPU time over each parallel goroutine.
-[GoRecv] public static void RunParallel(this ref B b, Action<ж<PB>> body) => func((defer, _) => {
+public static void RunParallel(this ж<B> Ꮡb, Action<ж<PB>> body) {
+    ref var b = ref Ꮡb.Value;
+
     if (b.N == 0) {
         return;
     }
@@ -817,42 +834,39 @@ internal static bool hideStdoutForTesting = false;
     // 100µs is enough to amortize the overhead and provide sufficient
     // dynamic load balancing.
     ref var grain = ref heap<uint64>(out var Ꮡgrain);
-    grain = ((uint64)0);
+    grain = (uint64)0;
     if (b.previousN > 0 && b.previousDuration > 0) {
-        grain = 1e5F * ((uint64)b.previousN) / ((uint64)b.previousDuration);
+        grain = 100000 * (uint64)b.previousN / (uint64)(int64)b.previousDuration;
     }
     if (grain < 1) {
         grain = 1;
     }
     // We expect the inner loop and function call to take at least 10ns,
     // so do not do more than 100µs/10ns=1e4 iterations.
-    if (grain > 1e4F) {
-        grain = 1e4F;
+    if (grain > 10000) {
+        grain = 10000;
     }
-    ref var n = ref heap(new sync.atomic_package.Uint64(), out var Ꮡn);
-    nint numProcs = b.parallelism * runtime.GOMAXPROCS(0);
-    ref var wg = ref heap(new sync_package.WaitGroup(), out var Ꮡwg);
-    wg.Add(numProcs);
+    ref var n = ref heap(new atomic.Uint64(), out var Ꮡn);
+    nint numProcs = b.parallelism * Δruntime.GOMAXPROCS(0);
+    ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
+    Ꮡwg.Add(numProcs);
     for (nint p = 0; p < numProcs; p++) {
         var grainʗ1 = grain;
-        var nʗ1 = n;
-        var wgʗ1 = wg;
-        goǃ(() => {
-            var wgʗ2 = wg;
-            defer(wgʗ2.Done);
+        goǃ(() => func((defer, recover) => {
+            defer(Ꮡwg.Done);
             var pb = Ꮡ(new PB(
                 globalN: Ꮡn,
-                grain: grain,
-                bN: ((uint64)b.N)
+                grain: grainʗ1,
+                bN: (uint64)Ꮡb.Value.N
             ));
             body(pb);
-        });
+        }));
     }
-    wg.Wait();
-    if (n.Load() <= ((uint64)b.N) && !b.Failed()) {
-        b.Fatal("RunParallel: body exited without pb.Next() == false");
+    Ꮡwg.Wait();
+    if (Ꮡn.Load() <= (uint64)b.N && !Ꮡb.of(B.Ꮡcommon).Failed()) {
+        Ꮡb.of(B.Ꮡcommon).Fatal("RunParallel: body exited without pb.Next() == false");
     }
-});
+}
 
 // SetParallelism sets the number of goroutines used by [B.RunParallel] to p*GOMAXPROCS.
 // There is usually no need to call SetParallelism for CPU-bound benchmarks.

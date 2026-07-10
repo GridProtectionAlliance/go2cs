@@ -11,6 +11,7 @@
 
 // <ImportedTypeAliases>
 global using syntaxꓸError = go.regexp.syntax_package.ΔError;
+using syntax = go.regexp.syntax_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -39,14 +40,12 @@ using static go.regexp_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(input, int), input>]
-[assembly: GoImplement<inputBytes, input>]
-[assembly: GoImplement<inputReader, input>]
-[assembly: GoImplement<inputString, input>]
+[assembly: GoImplement<inputBytes, input>(Pointer = true)]
+[assembly: GoImplement<inputReader, input>(Pointer = true)]
+[assembly: GoImplement<inputString, input>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<syntax.EmptyOp; minInputLen int; longest bool}, syntax.EmptyOp; minInputLen int; longest bool}>(Inverted = true)]
 [assembly: GoImplicitConv<syntax.Prog, ж<syntax.Prog>>(Indirect = true)]
 [assembly: GoImplicitConv<thread, ж<thread>>(Indirect = true)]
 // </ImplicitConversions>

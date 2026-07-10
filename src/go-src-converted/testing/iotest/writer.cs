@@ -10,11 +10,11 @@ partial class iotest_package {
 // TruncateWriter returns a Writer that writes to w
 // but stops silently after n bytes.
 public static io.Writer TruncateWriter(io.Writer w, int64 n) {
-    return new truncateWriter(w, n);
+    return new truncateWriterжWriter(Ꮡ(new truncateWriter(w, n)));
 }
 
 [GoType] partial struct truncateWriter {
-    internal io_package.Writer w;
+    internal io.Writer w;
     internal int64 n;
 }
 
@@ -27,11 +27,11 @@ public static io.Writer TruncateWriter(io.Writer w, int64 n) {
     }
     // real write
     n = len(p);
-    if (((int64)n) > t.n) {
-        n = ((nint)t.n);
+    if ((int64)n > t.n) {
+        n = (nint)t.n;
     }
     (n, err) = t.w.Write(p[0..(int)(n)]);
-    t.n -= ((int64)n);
+    t.n -= (int64)n;
     if (err == default!) {
         n = len(p);
     }

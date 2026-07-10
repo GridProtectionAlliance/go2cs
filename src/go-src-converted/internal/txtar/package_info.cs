@@ -43,7 +43,7 @@ using static go.@internal.txtar_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

@@ -53,22 +53,18 @@ using static go.vendor.golang.org.x.net.nettest_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(c1 net.Conn, c2 net.Conn, stop func(), err error), error>]
-[assembly: GoImplement<(c1 net.Conn, c2 net.Conn, stop func(), err error), net_package.Conn>]
-[assembly: GoImplement<(net.Error, bool), net_package.ΔError>]
-[assembly: GoImplement<(net.Listener, error), net_package.Listener>]
-[assembly: GoImplement<(net.PacketConn, error), net_package.PacketConn>]
-[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>]
-[assembly: GoImplement<bytes_package.Reader, io_package.Reader>]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<chunkedCopy_dst, io_package.Writer>(Promoted = true)]
 [assembly: GoImplement<chunkedCopy_dst, io_package.Writer>]
+[assembly: GoImplement<chunkedCopy_src, io_package.Reader>(Promoted = true)]
 [assembly: GoImplement<chunkedCopy_src, io_package.Reader>]
-[assembly: GoImplement<math.rand_package.Rand, io_package.Reader>]
+[assembly: GoImplement<go.math.rand_package.Rand, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<net_package.Conn, io_package.Reader>]
 [assembly: GoImplement<net_package.Conn, io_package.Writer>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<struct{wall uint64; ext int64; loc *time.Location}, struct{wall uint64; ext int64; loc *time.Location}>(Inverted = true)]
 // </ImplicitConversions>
 
 namespace go.vendor.golang.org.x.net;

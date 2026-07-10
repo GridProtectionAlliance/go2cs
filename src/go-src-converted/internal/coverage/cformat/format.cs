@@ -30,13 +30,14 @@ namespace go.@internal.coverage;
 // emit coverage percentages.
 using cmp = cmp_package;
 using fmt = fmt_package;
-using coverage = @internal.coverage_package;
-using cmerge = @internal.coverage.cmerge_package;
+using coverage = go.@internal.coverage_package;
+using cmerge = go.@internal.coverage.cmerge_package;
 using io = io_package;
 using slices = slices_package;
 using strings = strings_package;
 using tabwriter = text.tabwriter_package;
-using @internal;
+using go.@internal;
+using go.@internal.coverage;
 using text;
 
 partial class cformat_package {
@@ -49,7 +50,7 @@ partial class cformat_package {
     // Pointer to current package state.
     internal ж<pstate> p;
     // Counter mode.
-    internal @internal.coverage_package.CounterMode cm;
+    internal coverage.CounterMode cm;
 }
 
 // pstate records package-level coverage data state:
@@ -68,12 +69,12 @@ partial class cformat_package {
 // extcu encapsulates a coverable unit within some function.
 [GoType] partial struct extcu {
     internal uint32 fnfid; // index into p.funcs slice
-    public partial ref @internal.coverage_package.CoverableUnit CoverableUnit { get; }
+    public partial ref go.@internal.coverage_package.CoverableUnit CoverableUnit { get; }
 }
 
 // fnfile is a function-name/file-name tuple.
 [GoType] partial struct fnfile {
-    internal @string file;
+    internal @string @file;
     internal @string fname;
     internal bool lit;
 }
@@ -94,13 +95,12 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
         return;
     }
     fm.pkg = importpath;
-    var ps = fm.pm[importpath];
-    var ok = fm.pm[importpath];
+    var (ps, ok) = fm.pm[importpath, ꟷ];
     if (!ok) {
         ps = @new<pstate>();
         fm.pm[importpath] = ps;
-        ps.val.unitTable = new map<extcu, uint32>();
-        ps.val.funcTable = new map<fnfile, uint32>();
+        ps.Value.unitTable = new map<extcu, uint32>();
+        ps.Value.funcTable = new map<fnfile, uint32>();
     }
     fm.p = ps;
 }
@@ -108,19 +108,19 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
 // AddUnit passes info on a single coverable unit (file, funcname,
 // literal flag, range of lines, and counter value) to the formatter.
 // Counter values will be accumulated where appropriate.
-[GoRecv] public static void AddUnit(this ref Formatter fm, @string file, @string fname, bool isfnlit, coverage.CoverableUnit unit, uint32 count) {
+[GoRecv] public static void AddUnit(this ref Formatter fm, @string @file, @string fname, bool isfnlit, coverage.CoverableUnit unit, uint32 count) {
     if (fm.p == nil) {
         throw panic("AddUnit invoked before SetPackage");
     }
-    var fkey = new fnfile(file: file, fname: fname, lit: isfnlit);
-    var (idx, ok) = fm.p.funcTable[fkey];
+    var fkey = new fnfile(@file: @file, fname: fname, lit: isfnlit);
+    var (idx, ok) = (~fm.p).funcTable[fkey, ꟷ];
     if (!ok) {
-        idx = ((uint32)len(fm.p.funcs));
-        fm.p.funcs = append(fm.p.funcs, fkey);
-        fm.p.funcTable[fkey] = idx;
+        idx = (uint32)len((~fm.p).funcs);
+        fm.p.Value.funcs = append((~fm.p).funcs, fkey);
+        fm.p.Value.funcTable[fkey] = idx;
     }
     var ukey = new extcu(fnfid: idx, CoverableUnit: unit);
-    var pcount = fm.p.unitTable[ukey];
+    var pcount = (~fm.p).unitTable[ukey];
     uint32 result = default!;
     if (fm.cm == coverage.CtrModeSet){
         if (count != 0 || pcount != 0) {
@@ -130,17 +130,19 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
         // Use saturating arithmetic.
         (result, _) = cmerge.SaturatingAdd(pcount, count);
     }
-    fm.p.unitTable[ukey] = result;
+    fm.p.Value.unitTable[ukey] = result;
 }
 
 // sortUnits sorts a slice of extcu objects in a package according to
 // source position information (e.g. file and line). Note that we don't
 // include function name as part of the sorting criteria, the thinking
 // being that is better to provide things in the original source order.
-[GoRecv] internal static void sortUnits(this ref pstate p, slice<extcu> units) {
+internal static void sortUnits(this ж<pstate> Ꮡp, slice<extcu> units) {
+    ref var p = ref Ꮡp.Value;
+
     slices.SortFunc(units, (extcu ui, extcu uj) => {
-        @string ifile = p.funcs[ui.fnfid].file;
-        @string jfile = p.funcs[uj.fnfid].file;
+        @string ifile = Ꮡp.Value.funcs[(nint)(ui.fnfid)].@file;
+        @string jfile = Ꮡp.Value.funcs[(nint)(uj.fnfid)].@file;
         {
             nint r = strings.Compare(ifile, jfile); if (r != 0) {
                 return r;
@@ -190,7 +192,7 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
     foreach (var (importpath, _) in fm.pm) {
         pkgs = append(pkgs, importpath);
     }
-    slices.Sort(pkgs);
+    slices.Sort<slice<@string>, @string>(pkgs);
     foreach (var (_, importpath) in pkgs) {
         var p = fm.pm[importpath];
         var units = new slice<extcu>(0, len((~p).unitTable));
@@ -200,10 +202,10 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
         p.sortUnits(units);
         foreach (var (_, u) in units) {
             var count = (~p).unitTable[u];
-            @string file = (~p).funcs[u.fnfid].file;
+            @string @file = (~p).funcs[(nint)(u.fnfid)].@file;
             {
                 var (_, err) = fmt.Fprintf(w, "%s:%d.%d,%d.%d %d %d\n"u8,
-                    file, u.StLine, u.StCol,
+                    @file, u.StLine, u.StCol,
                     u.EnLine, u.EnCol, u.NxStmts, count); if (err != default!) {
                     return err;
                 }
@@ -223,11 +225,11 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
             pkgs = append(pkgs, importpath);
         }
     }
-    var rep = (uint64 cov, uint64 tot) => {
+    var rep = error (uint64 cov, uint64 tot) => {
         if (tot != 0){
             {
                 var (_, err) = fmt.Fprintf(w, "coverage: %.1f%% of statements%s\n"u8,
-                    100.0F * ((float64)cov) / ((float64)tot), inpkgs); if (err != default!) {
+                    100.0D * (float64)cov / (float64)tot, inpkgs); if (err != default!) {
                     return err;
                 }
             }
@@ -241,7 +243,7 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
         }
         return default!;
     };
-    slices.Sort(pkgs);
+    slices.Sort<slice<@string>, @string>(pkgs);
     uint64 totalStmts = default!;
     uint64 coveredStmts = default!;
     foreach (var (_, importpath) in pkgs) {
@@ -253,7 +255,7 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
             (totalStmts, coveredStmts) = (0, 0);
         }
         foreach (var (unit, count) in (~p).unitTable) {
-            var nx = ((uint64)unit.NxStmts);
+            var nx = (uint64)unit.NxStmts;
             totalStmts += nx;
             if (count != 0) {
                 coveredStmts += nx;
@@ -289,7 +291,9 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
 // to name them (this is also consistent with the legacy cmd/cover
 // implementation). We do want to include their counts in the overall
 // summary however.
-[GoRecv] public static error EmitFuncs(this ref Formatter fm, io.Writer w) => func((defer, _) => {
+public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) => func<error>((defer, recover) => {
+    ref var fm = ref Ꮡfm.Value;
+
     if (fm.cm == coverage.CtrModeInvalid) {
         throw panic("internal error, counter mode unset");
     }
@@ -297,18 +301,18 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
         if (total == 0) {
             total = 1;
         }
-        return 100.0F * ((float64)covered) / ((float64)total);
+        return 100.0D * (float64)covered / (float64)total;
     };
     var tabber = tabwriter.NewWriter(w, 1, 8, 1, (rune)'\t', 0);
     var tabberʗ1 = tabber;
-    defer(tabberʗ1.Flush);
-    var allStmts = ((uint64)0);
-    var covStmts = ((uint64)0);
+    defer(() => tabberʗ1.Flush());
+    var allStmts = (uint64)0;
+    var covStmts = (uint64)0;
     var pkgs = new slice<@string>(0, len(fm.pm));
     foreach (var (importpath, _) in fm.pm) {
         pkgs = append(pkgs, importpath);
     }
-    slices.Sort(pkgs);
+    slices.Sort<slice<@string>, @string>(pkgs);
     // Emit functions for each package, sorted by import path.
     foreach (var (_, importpath) in pkgs) {
         var p = fm.pm[importpath];
@@ -330,24 +334,22 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
         uint32 fline = default!;
         uint64 cstmts = default!;
         uint64 tstmts = default!;
-        var captureFuncStart = 
         var pʗ1 = p;
-        (extcu u) => {
-            fname = (~pʗ1).funcs[u.fnfid].fname;
-            ffile = (~pʗ1).funcs[u.fnfid].file;
-            flit = (~pʗ1).funcs[u.fnfid].lit;
+        var captureFuncStart = (extcu u) => {
+            fname = (~pʗ1).funcs[(nint)(u.fnfid)].fname;
+            ffile = (~pʗ1).funcs[(nint)(u.fnfid)].@file;
+            flit = (~pʗ1).funcs[(nint)(u.fnfid)].lit;
             fline = u.StLine;
         };
-        var emitFunc = 
         var captureFuncStartʗ1 = captureFuncStart;
         var percʗ1 = perc;
         var tabberʗ2 = tabber;
-        (extcu u) => {
+        var emitFunc = error (extcu u) => {
             // Don't emit entries for function literals (see discussion
             // in function header comment above).
             if (!flit) {
                 {
-                    var (_, err) = fmt.Fprintf(~tabberʗ2, "%s:%d:\t%s\t%.1f%%\n"u8,
+                    var (_, err) = fmt.Fprintf(new tabwriter_WriterжWriter(tabberʗ2), "%s:%d:\t%s\t%.1f%%\n"u8,
                         ffile, fline, fname, percʗ1(cstmts, tstmts)); if (err != default!) {
                         return err;
                     }
@@ -364,7 +366,7 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
             if (k == 0){
                 captureFuncStart(u);
             } else {
-                if (fname != (~p).funcs[u.fnfid].fname) {
+                if (fname != (~p).funcs[(nint)(u.fnfid)].fname) {
                     // New function; emit entry for previous one.
                     {
                         var err = emitFunc(u); if (err != default!) {
@@ -373,10 +375,10 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
                     }
                 }
             }
-            tstmts += ((uint64)u.NxStmts);
+            tstmts += (uint64)u.NxStmts;
             var count = (~p).unitTable[u];
             if (count != 0) {
-                cstmts += ((uint64)u.NxStmts);
+                cstmts += (uint64)u.NxStmts;
             }
         }
         {
@@ -386,7 +388,7 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
         }
     }
     {
-        var (_, err) = fmt.Fprintf(~tabber, "%s\t%s\t%.1f%%\n"u8,
+        var (_, err) = fmt.Fprintf(new tabwriter_WriterжWriter(tabber), "%s\t%s\t%.1f%%\n"u8,
             "total", "(statements)", perc(covStmts, allStmts)); if (err != default!) {
             return err;
         }

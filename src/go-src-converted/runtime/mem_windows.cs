@@ -7,12 +7,12 @@ using @unsafe = unsafe_package;
 
 partial class runtime_package {
 
-internal static readonly UntypedInt _MEM_COMMIT = /* 0x1000 */ 4096;
-internal static readonly UntypedInt _MEM_RESERVE = /* 0x2000 */ 8192;
-internal static readonly UntypedInt _MEM_DECOMMIT = /* 0x4000 */ 16384;
-internal static readonly UntypedInt _MEM_RELEASE = /* 0x8000 */ 32768;
-internal static readonly UntypedInt _PAGE_READWRITE = /* 0x0004 */ 4;
-internal static readonly UntypedInt _PAGE_NOACCESS = /* 0x0001 */ 1;
+internal static readonly UntypedInt _MEM_COMMIT = 0x1000;
+internal static readonly UntypedInt _MEM_RESERVE = 0x2000;
+internal static readonly UntypedInt _MEM_DECOMMIT = 0x4000;
+internal static readonly UntypedInt _MEM_RELEASE = 0x8000;
+internal static readonly UntypedInt _PAGE_READWRITE = 0x0004;
+internal static readonly UntypedInt _PAGE_NOACCESS = 0x0001;
 internal static readonly UntypedInt _ERROR_NOT_ENOUGH_MEMORY = 8;
 internal static readonly UntypedInt _ERROR_COMMITMENT_LIMIT = 1455;
 
@@ -21,11 +21,11 @@ internal static readonly UntypedInt _ERROR_COMMITMENT_LIMIT = 1455;
 //
 //go:nosplit
 internal static @unsafe.Pointer sysAllocOS(uintptr n) {
-    return ((@unsafe.Pointer)stdcall4(_VirtualAlloc, 0, n, (uintptr)(_MEM_COMMIT | _MEM_RESERVE), _PAGE_READWRITE));
+    return (@unsafe.Pointer)stdcall4(_VirtualAlloc, 0, n, (uintptr)((uintptr)_MEM_COMMIT | (uintptr)_MEM_RESERVE), _PAGE_READWRITE);
 }
 
 internal static void sysUnusedOS(@unsafe.Pointer v, uintptr n) {
-    var r = stdcall3(_VirtualFree, ((uintptr)v), n, _MEM_DECOMMIT);
+    var r = stdcall3(_VirtualFree, (uintptr)v, n, _MEM_DECOMMIT);
     if (r != 0) {
         return;
     }
@@ -40,22 +40,22 @@ internal static void sysUnusedOS(@unsafe.Pointer v, uintptr n) {
     // in the worst case, but that's fast enough.
     while (n > 0) {
         var small = n;
-        while (small >= 4096 && stdcall3(_VirtualFree, ((uintptr)v), small, _MEM_DECOMMIT) == 0) {
+        while (small >= 4096 && stdcall3(_VirtualFree, (uintptr)v, small, _MEM_DECOMMIT) == 0) {
             small /= 2;
-            small &= ~(uintptr)(4096 - 1);
+            small &= unchecked((uintptr)~(uintptr)(4096 - 1));
         }
         if (small < 4096) {
             print("runtime: VirtualFree of ", small, " bytes failed with errno=", getlasterror(), "\n");
             @throw("runtime: failed to decommit pages"u8);
         }
-        v = (uintptr)add(v.val, small);
+        v.Value = (uintptr)add(v, small);
         n -= small;
     }
 }
 
 internal static void sysUsedOS(@unsafe.Pointer v, uintptr n) {
-    var Δp = stdcall4(_VirtualAlloc, ((uintptr)v), n, _MEM_COMMIT, _PAGE_READWRITE);
-    if (Δp == ((uintptr)v)) {
+    var Δp = stdcall4(_VirtualAlloc, (uintptr)v, n, _MEM_COMMIT, _PAGE_READWRITE);
+    if (Δp == (uintptr)v) {
         return;
     }
     // Commit failed. See SysUnused.
@@ -64,9 +64,9 @@ internal static void sysUsedOS(@unsafe.Pointer v, uintptr n) {
     var k = n;
     while (k > 0) {
         var small = k;
-        while (small >= 4096 && stdcall4(_VirtualAlloc, ((uintptr)v), small, _MEM_COMMIT, _PAGE_READWRITE) == 0) {
+        while (small >= 4096 && stdcall4(_VirtualAlloc, (uintptr)v, small, _MEM_COMMIT, _PAGE_READWRITE) == 0) {
             small /= 2;
-            small &= ~(uintptr)(4096 - 1);
+            small &= unchecked((uintptr)~(uintptr)(4096 - 1));
         }
         if (small < 4096) {
             var errno = getlasterror();
@@ -81,7 +81,7 @@ internal static void sysUsedOS(@unsafe.Pointer v, uintptr n) {
             }
 
         }
-        v = (uintptr)add(v.val, small);
+        v.Value = (uintptr)add(v, small);
         k -= small;
     }
 }
@@ -100,7 +100,7 @@ internal static void sysHugePageCollapseOS(@unsafe.Pointer v, uintptr n) {
 //
 //go:nosplit
 internal static void sysFreeOS(@unsafe.Pointer v, uintptr n) {
-    var r = stdcall3(_VirtualFree, ((uintptr)v), 0, _MEM_RELEASE);
+    var r = stdcall3(_VirtualFree, (uintptr)v, 0, _MEM_RELEASE);
     if (r == 0) {
         print("runtime: VirtualFree of ", n, " bytes failed with errno=", getlasterror(), "\n");
         @throw("runtime: failed to release pages"u8);
@@ -109,19 +109,19 @@ internal static void sysFreeOS(@unsafe.Pointer v, uintptr n) {
 
 internal static void sysFaultOS(@unsafe.Pointer v, uintptr n) {
     // SysUnused makes the memory inaccessible and prevents its reuse
-    sysUnusedOS(v.val, n);
+    sysUnusedOS(v, n);
 }
 
 internal static @unsafe.Pointer sysReserveOS(@unsafe.Pointer v, uintptr n) {
     // v is just a hint.
     // First try at v.
     // This will fail if any of [v, v+n) is already reserved.
-    v = ((@unsafe.Pointer)stdcall4(_VirtualAlloc, ((uintptr)v), n, _MEM_RESERVE, _PAGE_READWRITE));
+    v.Value = (@unsafe.Pointer)stdcall4(_VirtualAlloc, (uintptr)v, n, _MEM_RESERVE, _PAGE_READWRITE);
     if (v != nil) {
-        return Ꮡv;
+        return v;
     }
     // Next let the kernel choose the address.
-    return ((@unsafe.Pointer)stdcall4(_VirtualAlloc, 0, n, _MEM_RESERVE, _PAGE_READWRITE));
+    return (@unsafe.Pointer)stdcall4(_VirtualAlloc, 0, n, _MEM_RESERVE, _PAGE_READWRITE);
 }
 
 internal static void sysMapOS(@unsafe.Pointer v, uintptr n) {

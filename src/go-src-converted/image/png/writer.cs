@@ -6,14 +6,16 @@ namespace go.image;
 using bufio = bufio_package;
 using zlib = compress.zlib_package;
 using binary = encoding.binary_package;
-using crc32 = hash.crc32_package;
+using crc32 = go.hash.crc32_package;
 using image = image_package;
-using color = image.color_package;
+using color = go.image.color_package;
 using io = io_package;
 using strconv = strconv_package;
 using compress;
 using encoding;
-using hash;
+using go.hash;
+using go.image;
+using hash = hash_package;
 
 partial class png_package {
 
@@ -33,12 +35,12 @@ partial class png_package {
     void Put(ж<EncoderBuffer> _);
 }
 
-[GoType("struct{enc *image.png.Encoder; w io.Writer; m image.Image; cb int; err error; header <8>byte; footer <4>byte; tmp <1024>byte; cr <5><>uint8; pr <>uint8; zw *compress.zlib.Writer; zwLevel int; bw *bufio.Writer}")] partial struct EncoderBuffer;
+[GoType("encoder")] partial struct EncoderBuffer;
 
-[GoType] partial struct encoder {
+[GoType] public partial struct encoder {
     internal ж<Encoder> enc;
-    internal io_package.Writer w;
-    internal image_package.Image m;
+    internal io.Writer w;
+    internal image.Image m;
     internal nint cb;
     internal error err;
     internal array<byte> header = new(8);
@@ -46,20 +48,17 @@ partial class png_package {
     internal array<byte> tmp = new(4 * 256);
     internal array<slice<uint8>> cr = new(nFilter);
     internal slice<uint8> pr;
-    internal ж<compress.zlib_package.Writer> zw;
+    internal ж<zlib.Writer> zw;
     internal nint zwLevel;
-    internal ж<bufio_package.Writer> bw;
+    internal ж<bufio.Writer> bw;
 }
 
 [GoType("num:nint")] partial struct CompressionLevel;
 
 public static readonly CompressionLevel DefaultCompression = 0;
-public static readonly GoUntyped NoCompression = /* -1 */
-    GoUntyped.Parse("-1");
-public static readonly GoUntyped BestSpeed = /* -2 */
-    GoUntyped.Parse("-2");
-public static readonly GoUntyped BestCompression = /* -3 */
-    GoUntyped.Parse("-3");
+public static readonly CompressionLevel NoCompression = -1;
+public static readonly CompressionLevel BestSpeed = -2;
+public static readonly CompressionLevel BestCompression = -3;
 
 // Positive CompressionLevel values are reserved to mean a numeric zlib
 // compression level, although that is not implemented yet.
@@ -78,7 +77,7 @@ internal static bool opaque(image.Image m) {
     for (nint y = b.Min.Y; y < b.Max.Y; y++) {
         for (nint x = b.Min.X; x < b.Max.X; x++) {
             var (_, _, _, a) = m.At(x, y).RGBA();
-            if (a != 65535) {
+            if (a != 0xffff) {
                 return false;
             }
         }
@@ -89,17 +88,17 @@ internal static bool opaque(image.Image m) {
 // The absolute value of a byte interpreted as a signed int8.
 internal static nint abs8(uint8 d) {
     if (d < 128) {
-        return ((nint)d);
+        return (nint)d;
     }
-    return 256 - ((nint)d);
+    return 256 - (nint)d;
 }
 
 [GoRecv] internal static void writeChunk(this ref encoder e, slice<byte> b, @string name) {
     if (e.err != default!) {
         return;
     }
-    var n = ((uint32)len(b));
-    if (((nint)n) != len(b)) {
+    var n = (uint32)len(b);
+    if ((nint)n != len(b)) {
         e.err = ((UnsupportedError)(name + " chunk is too large: "u8 + strconv.Itoa(len(b))));
         return;
     }
@@ -125,8 +124,8 @@ internal static nint abs8(uint8 d) {
 
 [GoRecv] internal static void writeIHDR(this ref encoder e) {
     var b = e.m.Bounds();
-    binary.BigEndian.PutUint32(e.tmp[0..4], ((uint32)b.Dx()));
-    binary.BigEndian.PutUint32(e.tmp[4..8], ((uint32)b.Dy()));
+    binary.BigEndian.PutUint32(e.tmp[0..4], (uint32)b.Dx());
+    binary.BigEndian.PutUint32(e.tmp[4..8], (uint32)b.Dy());
     // Set bit depth and color type.
     var exprᴛ1 = e.cb;
     if (exprᴛ1 == cbG8) {
@@ -190,7 +189,7 @@ internal static nint abs8(uint8 d) {
         e.tmp[3 * i + 0] = c1.R;
         e.tmp[3 * i + 1] = c1.G;
         e.tmp[3 * i + 2] = c1.B;
-        if (c1.A != 255) {
+        if (c1.A != 0xff) {
             last = i;
         }
         e.tmp[3 * 256 + i] = c1.A;
@@ -207,7 +206,7 @@ internal static nint abs8(uint8 d) {
 //
 // This method should only be called from writeIDATs (via writeImage).
 // No other code should treat an encoder as an io.Writer.
-[GoRecv] internal static (nint, error) Write(this ref encoder e, slice<byte> b) {
+[GoRecv] public static (nint, error) Write(this ref encoder e, slice<byte> b) {
     e.writeChunk(b, "IDAT"u8);
     if (e.err != default!) {
         return (0, e.err);
@@ -218,7 +217,7 @@ internal static nint abs8(uint8 d) {
 // Chooses the filter to use for encoding the current row, and applies it.
 // The return value is the index of the filter and also of the row in cr that has had it applied.
 internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint bpp) {
-    ref var cr = ref Ꮡcr.val;
+    ref var cr = ref Ꮡcr.Value;
 
     // We try all five filter types, and pick the one that minimizes the sum of absolute differences.
     // This is the same heuristic that libpng uses, although the filters are attempted in order of
@@ -234,7 +233,7 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
     // The up filter.
     nint sum = 0;
     for (nint i = 0; i < n; i++) {
-        cdat2[i] = cdat0[i] - pdat[i];
+        cdat2[i] = (byte)(cdat0[i] - pdat[i]);
         sum += abs8(cdat2[i]);
     }
     nint best = sum;
@@ -242,11 +241,11 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
     // The Paeth filter.
     sum = 0;
     for (nint i = 0; i < bpp; i++) {
-        cdat4[i] = cdat0[i] - pdat[i];
+        cdat4[i] = (byte)(cdat0[i] - pdat[i]);
         sum += abs8(cdat4[i]);
     }
     for (nint i = bpp; i < n; i++) {
-        cdat4[i] = cdat0[i] - paeth(cdat0[i - bpp], pdat[i], pdat[i - bpp]);
+        cdat4[i] = (byte)(cdat0[i] - paeth(cdat0[i - bpp], pdat[i], pdat[i - bpp]));
         sum += abs8(cdat4[i]);
         if (sum >= best) {
             break;
@@ -275,7 +274,7 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
         sum += abs8(cdat1[i]);
     }
     for (nint i = bpp; i < n; i++) {
-        cdat1[i] = cdat0[i] - cdat0[i - bpp];
+        cdat1[i] = (byte)(cdat0[i] - cdat0[i - bpp]);
         sum += abs8(cdat1[i]);
         if (sum >= best) {
             break;
@@ -288,11 +287,11 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
     // The average filter.
     sum = 0;
     for (nint i = 0; i < bpp; i++) {
-        cdat3[i] = cdat0[i] - pdat[i] / 2;
+        cdat3[i] = (byte)(cdat0[i] - pdat[i] / 2);
         sum += abs8(cdat3[i]);
     }
     for (nint i = bpp; i < n; i++) {
-        cdat3[i] = cdat0[i] - ((uint8)((((nint)cdat0[i - bpp]) + ((nint)pdat[i])) / 2));
+        cdat3[i] = (byte)(cdat0[i] - (uint8)(((nint)cdat0[i - bpp] + (nint)pdat[i]) / 2));
         sum += abs8(cdat3[i]);
         if (sum >= best) {
             break;
@@ -304,9 +303,11 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
     return filter;
 }
 
-[GoRecv] internal static error writeImage(this ref encoder e, io.Writer w, image.Image m, nint cb, nint level) => func((defer, _) => {
+internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image m, nint cb, nint level) => func<error>((defer, recover) => {
+    ref var e = ref Ꮡe.Value;
+
     if (e.zw == nil || e.zwLevel != level){
-        (zw, err) = zlib.NewWriterLevel(w, level);
+        var (zw, err) = zlib.NewWriterLevel(w, level);
         if (err != default!) {
             return err;
         }
@@ -315,7 +316,7 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
     } else {
         e.zw.Reset(w);
     }
-    defer(e.zw.Close);
+    defer(() => Ꮡe.Value.zw.Close());
     nint bitsPerPixel = 0;
     var exprᴛ1 = cb;
     if (exprᴛ1 == cbG8) {
@@ -362,7 +363,7 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
         } else {
             e.cr[i] = e.cr[i][..(int)(sz)];
         }
-        e.cr[i][0] = ((uint8)i);
+        e.cr[i][0] = (uint8)i;
     }
     ref var cr = ref heap<array<slice<uint8>>>(out var Ꮡcr);
     cr = e.cr;
@@ -387,8 +388,8 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
                 copy(cr[0][1..], (~gray).Pix[(int)(offset)..(int)(offset + b.Dx())]);
             } else {
                 for (nint x = b.Min.X; x < b.Max.X; x++) {
-                    var cΔ5 = color.GrayModel.Convert(m.At(x, y))._<color.Gray>();
-                    cr[0][i] = cΔ5.Y;
+                    var c = color.GrayModel.Convert(m.At(x, y))._<color.Gray>();
+                    cr[0][i] = c.Y;
                     i++;
                 }
             }
@@ -399,10 +400,10 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
             var pix = slice<byte>(default!);
             if (rgba != nil){
                 // We have previously verified that the alpha value is fully opaque.
-                (stride, pix) = (rgba.val.Stride, rgba.val.Pix);
+                (stride, pix) = (rgba.Value.Stride, rgba.Value.Pix);
             } else 
             if (nrgba != nil) {
-                (stride, pix) = (nrgba.val.Stride, nrgba.val.Pix);
+                (stride, pix) = (nrgba.Value.Stride, nrgba.Value.Pix);
             }
             if (stride != 0){
                 nint j0 = (y - b.Min.Y) * stride;
@@ -416,9 +417,9 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
             } else {
                 for (nint x = b.Min.X; x < b.Max.X; x++) {
                     var (r, g, bΔ3, _) = m.At(x, y).RGBA();
-                    cr0[i + 0] = ((uint8)(r >> (int)(8)));
-                    cr0[i + 1] = ((uint8)(g >> (int)(8)));
-                    cr0[i + 2] = ((uint8)(bΔ3 >> (int)(8)));
+                    cr0[i + 0] = (uint8)((r >> (int)(8)));
+                    cr0[i + 1] = (uint8)((g >> (int)(8)));
+                    cr0[i + 2] = (uint8)((bΔ3 >> (int)(8)));
                     i += 3;
                 }
             }
@@ -441,7 +442,7 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
             nint c = default!;
             nint pixelsPerByte = 8 / bitsPerPixel;
             for (nint x = b.Min.X; x < b.Max.X; x++) {
-                a = (uint8)(a << (int)(((nuint)bitsPerPixel)) | pi.ColorIndexAt(x, y));
+                a = (uint8)((a << (int)((nuint)bitsPerPixel)) | pi.ColorIndexAt(x, y));
                 c++;
                 if (c == pixelsPerByte) {
                     cr[0][i] = a;
@@ -452,7 +453,7 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
             }
             if (c != 0) {
                 while (c != pixelsPerByte) {
-                    a = a << (int)(((nuint)bitsPerPixel));
+                    a = (uint8)((a << (int)((nuint)bitsPerPixel)));
                     c++;
                 }
                 cr[0][i] = a;
@@ -467,16 +468,16 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
                 var dst = cr[0][1..];
                 var src = (~rgba).Pix[(int)(rgba.PixOffset(b.Min.X, y))..(int)(rgba.PixOffset(b.Max.X, y))];
                 for (; len(src) >= 4; (dst, src) = (dst[4..], src[4..])) {
-                    var d = (ж<array<byte>>)(dst);
-                    var s = (ж<array<byte>>)(src);
-                    if (s.val[3] == 0){
-                        d.val[0] = 0;
-                        d.val[1] = 0;
-                        d.val[2] = 0;
-                        d.val[3] = 0;
+                    var d = Ꮡ(new array<byte>(dst, 4));
+                    var s = Ꮡ(new array<byte>(src, 4));
+                    if (s.Value[3] == 0x00){
+                        d.Value[0] = 0;
+                        d.Value[1] = 0;
+                        d.Value[2] = 0;
+                        d.Value[3] = 0;
                     } else 
-                    if (s.val[3] == 255){
-                        copy(d[..], s[..]);
+                    if (s.Value[3] == 0xff){
+                        copy((~d)[..], (~s)[..]);
                     } else {
                         // This code does the same as color.NRGBAModel.Convert(
                         // rgba.At(x, y)).(color.NRGBA) but with no extra memory
@@ -486,12 +487,12 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
                         // 8-bit color to 16-bit color) and 0xffff (which, when
                         // combined with the division-by-a, converts from
                         // alpha-premultiplied to non-alpha-premultiplied).
-                        static readonly UntypedInt m = /* 0x101 * 0xffff */ 16842495;
-                        var a = ((uint32)s.val[3]) * 257;
-                        d.val[0] = ((uint8)((((uint32)s.val[0]) * m / a) >> (int)(8)));
-                        d.val[1] = ((uint8)((((uint32)s.val[1]) * m / a) >> (int)(8)));
-                        d.val[2] = ((uint8)((((uint32)s.val[2]) * m / a) >> (int)(8)));
-                        d.val[3] = s.val[3];
+                        UntypedInt mΔ2 = /* 0x101 * 0xffff */ 16842495;
+                        var a = (uint32)s.Value[3] * 0x101;
+                        d.Value[0] = (uint8)((((uint32)s.Value[0] * (uint32)mΔ2 / a) >> (int)(8)));
+                        d.Value[1] = (uint8)((((uint32)s.Value[1] * (uint32)mΔ2 / a) >> (int)(8)));
+                        d.Value[2] = (uint8)((((uint32)s.Value[2] * (uint32)mΔ2 / a) >> (int)(8)));
+                        d.Value[3] = s.Value[3];
                     }
                 }
             } else {
@@ -509,8 +510,8 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
         else if (exprᴛ2 == cbG16) {
             for (nint x = b.Min.X; x < b.Max.X; x++) {
                 var c = color.Gray16Model.Convert(m.At(x, y))._<color.Gray16>();
-                cr[0][i + 0] = ((uint8)(c.Y >> (int)(8)));
-                cr[0][i + 1] = ((uint8)c.Y);
+                cr[0][i + 0] = (uint8)((c.Y >> (int)(8)));
+                cr[0][i + 1] = (uint8)c.Y;
                 i += 2;
             }
         }
@@ -518,12 +519,12 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
             for (nint x = b.Min.X; x < b.Max.X; x++) {
                 // We have previously verified that the alpha value is fully opaque.
                 var (r, g, bΔ4, _) = m.At(x, y).RGBA();
-                cr[0][i + 0] = ((uint8)(r >> (int)(8)));
-                cr[0][i + 1] = ((uint8)r);
-                cr[0][i + 2] = ((uint8)(g >> (int)(8)));
-                cr[0][i + 3] = ((uint8)g);
-                cr[0][i + 4] = ((uint8)(bΔ4 >> (int)(8)));
-                cr[0][i + 5] = ((uint8)bΔ4);
+                cr[0][i + 0] = (uint8)((r >> (int)(8)));
+                cr[0][i + 1] = (uint8)r;
+                cr[0][i + 2] = (uint8)((g >> (int)(8)));
+                cr[0][i + 3] = (uint8)g;
+                cr[0][i + 4] = (uint8)((bΔ4 >> (int)(8)));
+                cr[0][i + 5] = (uint8)bΔ4;
                 i += 6;
             }
         }
@@ -531,14 +532,14 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
             for (nint x = b.Min.X; x < b.Max.X; x++) {
                 // Convert from image.Image (which is alpha-premultiplied) to PNG's non-alpha-premultiplied.
                 var c = color.NRGBA64Model.Convert(m.At(x, y))._<color.NRGBA64>();
-                cr[0][i + 0] = ((uint8)(c.R >> (int)(8)));
-                cr[0][i + 1] = ((uint8)c.R);
-                cr[0][i + 2] = ((uint8)(c.G >> (int)(8)));
-                cr[0][i + 3] = ((uint8)c.G);
-                cr[0][i + 4] = ((uint8)(c.B >> (int)(8)));
-                cr[0][i + 5] = ((uint8)c.B);
-                cr[0][i + 6] = ((uint8)(c.A >> (int)(8)));
-                cr[0][i + 7] = ((uint8)c.A);
+                cr[0][i + 0] = (uint8)((c.R >> (int)(8)));
+                cr[0][i + 1] = (uint8)c.R;
+                cr[0][i + 2] = (uint8)((c.G >> (int)(8)));
+                cr[0][i + 3] = (uint8)c.G;
+                cr[0][i + 4] = (uint8)((c.B >> (int)(8)));
+                cr[0][i + 5] = (uint8)c.B;
+                cr[0][i + 6] = (uint8)((c.A >> (int)(8)));
+                cr[0][i + 7] = (uint8)c.A;
                 i += 8;
             }
         }
@@ -567,16 +568,18 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
 });
 
 // Write the actual image data to one or more IDAT chunks.
-[GoRecv] internal static void writeIDATs(this ref encoder e) {
+internal static void writeIDATs(this ж<encoder> Ꮡe) {
+    ref var e = ref Ꮡe.Value;
+
     if (e.err != default!) {
         return;
     }
     if (e.bw == nil){
-        e.bw = bufio.NewWriterSize(~e, 1 << (int)(15));
+        e.bw = bufio.NewWriterSize(new encoderжWriter(Ꮡe), (1 << (int)(15)));
     } else {
-        e.bw.Reset(~e);
+        e.bw.Reset(new encoderжWriter(Ꮡe));
     }
-    e.err = e.writeImage(~e.bw, e.m, e.cb, levelToZlib(e.enc.CompressionLevel));
+    e.err = Ꮡe.writeImage(new bufio_WriterжWriter(e.bw), e.m, e.cb, levelToZlib((~e.enc).CompressionLevel));
     if (e.err != default!) {
         return;
     }
@@ -612,33 +615,35 @@ internal static nint levelToZlib(CompressionLevel l) {
 // Encode writes the Image m to w in PNG format. Any Image may be
 // encoded, but images that are not [image.NRGBA] might be encoded lossily.
 public static error Encode(io.Writer w, image.Image m) {
-    Encoder e = default!;
-    return e.Encode(w, m);
+    ref var e = ref heap(new Encoder(), out var Ꮡe);
+    return Ꮡe.Encode(w, m);
 }
 
 // Encode writes the Image m to w in PNG format.
-[GoRecv] public static error Encode(this ref Encoder enc, io.Writer w, image.Image m) => func((defer, _) => {
+public static error Encode(this ж<Encoder> Ꮡenc, io.Writer w, image.Image m) => func((defer, recover) => {
+    ref var enc = ref Ꮡenc.Value;
+
     // Obviously, negative widths and heights are invalid. Furthermore, the PNG
     // spec section 11.2.2 says that zero is invalid. Excessively large images are
     // also rejected.
-    var (mw, mh) = (((int64)m.Bounds().Dx()), ((int64)m.Bounds().Dy()));
-    if (mw <= 0 || mh <= 0 || mw >= 1 << (int)(32) || mh >= 1 << (int)(32)) {
+    var (mw, mh) = ((int64)m.Bounds().Dx(), (int64)m.Bounds().Dy());
+    if (mw <= 0 || mh <= 0 || mw >= 4294967296L || mh >= 4294967296L) {
         return ((FormatError)("invalid image size: "u8 + strconv.FormatInt(mw, 10) + "x"u8 + strconv.FormatInt(mh, 10)));
     }
     ж<encoder> e = default!;
     if (enc.BufferPool != default!) {
         var buffer = enc.BufferPool.Get();
-        e = ((ж<encoder>)(buffer?.val ?? default!));
+        e = Ꮡ((encoder)(~buffer));
     }
     if (e == nil) {
         e = Ꮡ(new encoder(nil));
     }
     if (enc.BufferPool != default!) {
-        deferǃ(enc.BufferPool.Put, ((ж<EncoderBuffer>)(e?.val ?? default!)), defer);
+        deferǃ(Ꮡenc.Value.BufferPool.Put, Ꮡ((EncoderBuffer)(~e)), defer);
     }
-    e.val.enc = enc;
-    e.val.w = w;
-    e.val.m = m;
+    e.Value.enc = Ꮡenc;
+    e.Value.w = w;
+    e.Value.m = m;
     color.Palette pal = default!;
     // cbP8 encoding needs PalettedImage's ColorIndexAt method.
     {
@@ -648,41 +653,41 @@ public static error Encode(io.Writer w, image.Image m) {
     }
     if (pal != default!){
         if (len(pal) <= 2){
-            e.val.cb = cbP1;
+            e.Value.cb = cbP1;
         } else 
         if (len(pal) <= 4){
-            e.val.cb = cbP2;
+            e.Value.cb = cbP2;
         } else 
         if (len(pal) <= 16){
-            e.val.cb = cbP4;
+            e.Value.cb = cbP4;
         } else {
-            e.val.cb = cbP8;
+            e.Value.cb = cbP8;
         }
     } else {
         var exprᴛ1 = m.ColorModel();
-        if (exprᴛ1 == color.GrayModel) {
-            e.val.cb = cbG8;
+        if (AreEqual(exprᴛ1, color.GrayModel)) {
+            e.Value.cb = cbG8;
         }
-        else if (exprᴛ1 == color.Gray16Model) {
-            e.val.cb = cbG16;
+        else if (AreEqual(exprᴛ1, color.Gray16Model)) {
+            e.Value.cb = cbG16;
         }
-        else if (exprᴛ1 == color.RGBAModel || exprᴛ1 == color.NRGBAModel || exprᴛ1 == color.AlphaModel) {
+        else if (AreEqual(exprᴛ1, color.RGBAModel) || AreEqual(exprᴛ1, color.NRGBAModel) || AreEqual(exprᴛ1, color.AlphaModel)) {
             if (opaque(m)){
-                e.val.cb = cbTC8;
+                e.Value.cb = cbTC8;
             } else {
-                e.val.cb = cbTCA8;
+                e.Value.cb = cbTCA8;
             }
         }
         else { /* default: */
             if (opaque(m)){
-                e.val.cb = cbTC16;
+                e.Value.cb = cbTC16;
             } else {
-                e.val.cb = cbTCA16;
+                e.Value.cb = cbTCA16;
             }
         }
 
     }
-    (_, e.val.err) = io.WriteString(w, pngHeader);
+    (_, e.Value.err) = io.WriteString(w, pngHeader);
     e.writeIHDR();
     if (pal != default!) {
         e.writePLTEAndTRNS(pal);

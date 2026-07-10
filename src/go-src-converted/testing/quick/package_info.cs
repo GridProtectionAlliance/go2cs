@@ -47,9 +47,8 @@ using static go.testing.quick_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(Generator, bool), Generator>]
-[assembly: GoImplement<CheckEqualError, error>]
-[assembly: GoImplement<CheckError, error>]
+[assembly: GoImplement<CheckEqualError, error>(Pointer = true)]
+[assembly: GoImplement<CheckError, error>(Pointer = true)]
 [assembly: GoImplement<SetupError, error>]
 // </InterfaceImplementations>
 

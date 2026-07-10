@@ -7,31 +7,32 @@ using bufio = bufio_package;
 using bytes = bytes_package;
 using errors = errors_package;
 using fmt = fmt_package;
-using ast = go.ast_package;
-using parser = go.parser_package;
-using scanner = go.scanner_package;
-using token = go.token_package;
+using ast = global::go.go.ast_package;
+using parser = global::go.go.parser_package;
+using scanner = global::go.go.scanner_package;
+using token = global::go.go.token_package;
 using io = io_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
-using _ = unsafe_package; // for linkname
-using unicode;
+using utf8 = global::go.unicode.utf8_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+using global::go.go;
+using global::go.unicode;
 
 partial class build_package {
 
 [GoType] partial struct importReader {
-    internal ж<bufio_package.Reader> b;
+    internal ж<bufio.Reader> b;
     internal slice<byte> buf;
     internal byte peek;
     internal error err;
     internal bool eof;
     internal nint nerr;
-    internal go.token_package.ΔPosition pos;
+    internal tokenꓸPosition pos;
 }
 
-internal static slice<byte> bom = new byte[]{239, 187, 191}.slice();
+internal static slice<byte> bom = new byte[]{0xef, 0xbb, 0xbf}.slice();
 
 internal static ж<importReader> newImportReader(@string name, io.Reader r) {
     var b = bufio.NewReader(r);
@@ -40,7 +41,7 @@ internal static ж<importReader> newImportReader(@string name, io.Reader r) {
     // a compiler may ignore a UTF-8-encoded byte order mark (U+FEFF)
     // if it is the first Unicode code point in the source text.
     {
-        (leadingBytes, err) = b.Peek(3); if (err == default! && bytes.Equal(leadingBytes, bom)) {
+        var (leadingBytes, err) = b.Peek(3); if (err == default! && bytes.Equal(leadingBytes, bom)) {
             b.Discard(3);
         }
     }
@@ -188,7 +189,7 @@ internal static error errNUL = errors.New("unexpected NUL in input"u8);
     return c;
 }
 
-internal static slice<byte> goEmbed = slice<byte>("go:embed");
+internal static slice<byte> goEmbed = slice<byte>((@string)"go:embed");
 
 // findEmbed advances the input reader to the next //go:embed comment.
 // It reports whether it found a comment.
@@ -322,6 +323,7 @@ break_SkipSlashSlash:;
             break;
         }}
 
+        break_Reswitch:;
     }
     return false;
 }
@@ -421,7 +423,7 @@ internal static (slice<byte>, error) readComments(io.Reader f) {
     r.peekByte(true);
     if ((~r).err == default! && !(~r).eof) {
         // Didn't reach EOF, so must have found a non-space byte. Remove it.
-        r.val.buf = (~r).buf[..(int)(len((~r).buf) - 1)];
+        r.Value.buf = (~r).buf[..(int)(len((~r).buf) - 1)];
     }
     return ((~r).buf, (~r).err);
 }
@@ -434,7 +436,7 @@ internal static (slice<byte>, error) readComments(io.Reader f) {
 // It only returns an error if there are problems reading the file,
 // not for syntax errors in the file itself.
 internal static error readGoInfo(io.Reader f, ж<fileInfo> Ꮡinfo) {
-    ref var info = ref Ꮡinfo.val;
+    ref var info = ref Ꮡinfo.Value;
 
     var r = newImportReader(info.name, f);
     r.readKeyword("package"u8);
@@ -451,7 +453,7 @@ internal static error readGoInfo(io.Reader f, ж<fileInfo> Ꮡinfo) {
             r.readImport();
         }
     }
-    info.header = r.val.buf;
+    info.header = r.Value.buf;
     // If we stopped successfully before EOF, we read a byte that told us we were done.
     // Return all but that last byte, which would cause a syntax error if we let it through.
     if ((~r).err == default! && !(~r).eof) {
@@ -460,11 +462,11 @@ internal static error readGoInfo(io.Reader f, ж<fileInfo> Ꮡinfo) {
     // If we stopped for a syntax error, consume the whole file so that
     // we are sure we don't change the errors that go/parser returns.
     if (AreEqual((~r).err, errSyntax)) {
-        r.val.err = default!;
+        r.Value.err = default!;
         while ((~r).err == default! && !(~r).eof) {
             r.readByte();
         }
-        info.header = r.val.buf;
+        info.header = r.Value.buf;
     }
     if ((~r).err != default!) {
         return (~r).err;
@@ -478,7 +480,7 @@ internal static error readGoInfo(io.Reader f, ж<fileInfo> Ꮡinfo) {
         return default!;
     }
     var hasEmbed = false;
-    foreach (var (_, decl) in info.parsed.Decls) {
+    foreach (var (_, decl) in (~info.parsed).Decls) {
         var (d, ok) = decl._<ж<ast.GenDecl>>(ᐧ);
         if (!ok) {
             continue;
@@ -488,7 +490,7 @@ internal static error readGoInfo(io.Reader f, ж<fileInfo> Ꮡinfo) {
             if (!okΔ1) {
                 continue;
             }
-            @string quoted = (~spec).Path.val.Value;
+            @string quoted = spec.Value.Path.Value.Value;
             var (path, err) = strconv.Unquote(quoted);
             if (err != default!) {
                 return fmt.Errorf("parser returned invalid quoted string: <%s>"u8, quoted);
@@ -496,23 +498,23 @@ internal static error readGoInfo(io.Reader f, ж<fileInfo> Ꮡinfo) {
             if (!isValidImport(path)) {
                 // The parser used to return a parse error for invalid import paths, but
                 // no longer does, so check for and create the error here instead.
-                info.parseErr = new scannerꓸError(Pos: info.fset.Position(spec.Pos()), Msg: "invalid import path: "u8 + path);
+                info.parseErr = new scanner_ΔErrorᴠerror(new scannerꓸError(Pos: info.fset.Position(spec.Pos()), Msg: "invalid import path: "u8 + path));
                 info.imports = default!;
                 return default!;
             }
             if (path == "embed"u8) {
                 hasEmbed = true;
             }
-            var doc = spec.val.Doc;
+            var doc = spec.Value.Doc;
             if (doc == nil && len((~d).Specs) == 1) {
-                doc = d.val.Doc;
+                doc = d.Value.Doc;
             }
             info.imports = append(info.imports, new fileImport(path, spec.Pos(), doc));
         }
     }
     // Extract directives.
-    foreach (var (_, group) in info.parsed.Comments) {
-        if (group.Pos() >= info.parsed.Package) {
+    foreach (var (_, group) in (~info.parsed).Comments) {
+        if (group.Pos() >= (~info.parsed).Package) {
             break;
         }
         foreach (var (_, c) in (~group).List) {
@@ -533,7 +535,7 @@ internal static error readGoInfo(io.Reader f, ж<fileInfo> Ꮡinfo) {
         slice<byte> line = default!;
         for (var first = true; r.findEmbed(first); first = false) {
             line = line[..0];
-            var pos = r.val.pos;
+            var pos = r.Value.pos;
             while (ᐧ) {
                 var c = r.readByteNoBuf();
                 if (c == (rune)'\n' || (~r).err != default! || (~r).eof) {
@@ -544,7 +546,7 @@ internal static error readGoInfo(io.Reader f, ж<fileInfo> Ꮡinfo) {
             // Add args if line is well-formed.
             // Ignore badly-formed lines - the compiler will report them when it finds them,
             // and we can pretend they are not there to help go list succeed with what it knows.
-            (embs, err) = parseGoEmbed(((@string)line), pos);
+            var (embs, err) = parseGoEmbed(((@string)line), pos);
             if (err == default!) {
                 info.embeds = append(info.embeds, embs.ꓸꓸꓸ);
             }
@@ -572,23 +574,18 @@ internal static bool isValidImport(@string s) {
 // This is based on a similar function in cmd/compile/internal/gc/noder.go;
 // this version calculates position information as well.
 internal static (slice<fileEmbed>, error) parseGoEmbed(@string args, tokenꓸPosition pos) {
-    var trimBytes = 
-    var posʗ1 = pos;
-    (nint n) => {
-        posʗ1.Offset += n;
-        posʗ1.Column += utf8.RuneCountInString(args[..(int)(n)]);
+    var trimBytes = (nint n) => {
+        pos.Offset += n;
+        pos.Column += utf8.RuneCountInString(args[..(int)(n)]);
         args = args[(int)(n)..];
     };
-    var trimSpace = 
     var trimBytesʗ1 = trimBytes;
-    () => {
+    var trimSpace = () => {
         @string trim = strings.TrimLeftFunc(args, unicode.IsSpace);
         trimBytesʗ1(len(args) - len(trim));
     };
     slice<fileEmbed> list = default!;
-    for (
-    trimSpace();; args != ""u8; 
-    trimSpace();) {
+    for (trimSpace(); args != ""u8; trimSpace()) {
         @string path = default!;
         var pathPos = pos;
 Switch:
@@ -637,6 +634,7 @@ Switch:
             break;
         }}
 
+        break_Switch:;
         if (args != ""u8) {
             var (r, _) = utf8.DecodeRuneInString(args);
             if (!unicode.IsSpace(r)) {

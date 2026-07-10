@@ -38,8 +38,7 @@ using static go.strconv_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(syntax error, range_ error), error>]
-[assembly: GoImplement<NumError, error>]
+[assembly: GoImplement<NumError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

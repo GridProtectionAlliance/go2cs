@@ -19,8 +19,8 @@ using fmt = fmt_package;
 using io = io_package;
 using os = os_package;
 using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
 using ꓸꓸꓸany = Span<any>;
 
 partial class scanner_package {
@@ -83,32 +83,23 @@ public static readonly UntypedInt SkipComments = /* 1 << -skipComment */ 512; //
 public static readonly UntypedInt GoTokens = /* ScanIdents | ScanFloats | ScanChars | ScanStrings | ScanRawStrings | ScanComments | SkipComments */ 1012;
 
 // The result of Scan is one of these tokens or a Unicode character.
-public static readonly GoUntyped EOF = /* -(iota + 1) */
-    GoUntyped.Parse("-1");
+public static readonly UntypedInt EOF = /* -(iota + 1) */ -1;
 
-public static readonly GoUntyped Ident = /*  */
-    GoUntyped.Parse("-2");
+public static readonly UntypedInt Ident = -2;
 
-public static readonly GoUntyped Int = /*  */
-    GoUntyped.Parse("-3");
+public static readonly UntypedInt Int = -3;
 
-public static readonly GoUntyped Float = /*  */
-    GoUntyped.Parse("-4");
+public static readonly UntypedInt Float = -4;
 
-public static readonly GoUntyped Char = /*  */
-    GoUntyped.Parse("-5");
+public static readonly UntypedInt Char = -5;
 
-public static readonly GoUntyped ΔString = /*  */
-    GoUntyped.Parse("-6");
+public static readonly UntypedInt ΔString = -6;
 
-public static readonly GoUntyped RawString = /*  */
-    GoUntyped.Parse("-7");
+public static readonly UntypedInt RawString = -7;
 
-public static readonly GoUntyped Comment = /*  */
-    GoUntyped.Parse("-8");
+public static readonly UntypedInt Comment = -8;
 
-internal static readonly GoUntyped skipComment = /*  */
-    GoUntyped.Parse("-9");
+internal static readonly UntypedInt skipComment = -9;
 
 internal static map<rune, @string> tokenString = new map<rune, @string>{
     [EOF] = "EOF"u8,
@@ -124,8 +115,7 @@ internal static map<rune, @string> tokenString = new map<rune, @string>{
 // TokenString returns a printable string for a token or Unicode character.
 public static @string TokenString(rune tok) {
     {
-        @string s = tokenString[tok];
-        var found = tokenString[tok]; if (found) {
+        var (s, found) = tokenString[tok, ꟷ]; if (found) {
             return s;
         }
     }
@@ -141,7 +131,7 @@ internal static readonly UntypedInt bufLen = 1024; // at least utf8.UTFMax
 // A Scanner implements reading of Unicode characters and tokens from an [io.Reader].
 [GoType] partial struct Scanner {
     // Input
-    internal io_package.Reader src;
+    internal io.Reader src;
     // Source buffer
     internal array<byte> srcBuf = new(bufLen + 1); // +1 for sentinel for common case of s.next()
     internal nint srcPos;             // reading position (srcBuf index)
@@ -156,7 +146,7 @@ internal static readonly UntypedInt bufLen = 1024; // at least utf8.UTFMax
     // Typically, token text is stored completely in srcBuf, but in general
     // the token text's head may be buffered in tokBuf while the token text's
     // tail is stored in srcBuf.
-    internal bytes_package.Buffer tokBuf; // token text head that is not in srcBuf anymore
+    internal bytes.Buffer tokBuf; // token text head that is not in srcBuf anymore
     internal nint tokPos;         // token text tail position (srcBuf index); valid if >= 0
     internal nint tokEnd;         // token text tail end (srcBuf index)
     // One character look-ahead
@@ -194,7 +184,9 @@ internal static readonly UntypedInt bufLen = 1024; // at least utf8.UTFMax
 // Init initializes a [Scanner] with a new source and returns s.
 // [Scanner.Error] is set to nil, [Scanner.ErrorCount] is set to 0, [Scanner.Mode] is set to [GoTokens],
 // and [Scanner.Whitespace] is set to [GoWhitespace].
-[GoRecv("capture")] public static ж<Scanner> Init(this ref Scanner s, io.Reader src) {
+public static ж<Scanner> Init(this ж<Scanner> Ꮡs, io.Reader src) {
+    ref var s = ref Ꮡs.Value;
+
     s.src = src;
     // initialize source buffer
     // (the first call to next() will fill it by calling src.Read)
@@ -221,19 +213,21 @@ internal static readonly UntypedInt bufLen = 1024; // at least utf8.UTFMax
     s.Whitespace = GoWhitespace;
     s.Line = 0;
     // invalidate token position
-    return InitꓸᏑs;
+    return Ꮡs;
 }
 
 // next reads and returns the next Unicode character. It is designed such
 // that only a minimal amount of work needs to be done in the common ASCII
 // case (one test to check for both ASCII and end-of-buffer, and one test
 // to check for newlines).
-[GoRecv] internal static rune next(this ref Scanner s) {
-    var ch = ((rune)s.srcBuf[s.srcPos]);
+internal static rune next(this ж<Scanner> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    var ch = (rune)s.srcBuf[s.srcPos];
     nint width = 1;
     if (ch >= utf8.RuneSelf) {
         // uncommon case: not ASCII or not enough bytes
-        while (s.srcPos + utf8.UTFMax > s.srcEnd && !utf8.FullRune(s.srcBuf[(int)(s.srcPos)..(int)(s.srcEnd)])) {
+        while (s.srcPos + (nint)utf8.UTFMax > s.srcEnd && !utf8.FullRune(s.srcBuf[(int)(s.srcPos)..(int)(s.srcEnd)])) {
             // not enough bytes: read some more, but first
             // save away token text if any
             if (s.tokPos >= 0) {
@@ -257,7 +251,7 @@ internal static readonly UntypedInt bufLen = 1024; // at least utf8.UTFMax
             // sentinel
             if (err != default!) {
                 if (!AreEqual(err, io.EOF)) {
-                    s.error(err.Error());
+                    Ꮡs.error(err.Error());
                 }
                 if (s.srcEnd == 0) {
                     if (s.lastCharLen > 0) {
@@ -275,7 +269,7 @@ internal static readonly UntypedInt bufLen = 1024; // at least utf8.UTFMax
             }
         }
         // at least one byte
-        ch = ((rune)s.srcBuf[s.srcPos]);
+        ch = (rune)s.srcBuf[s.srcPos];
         if (ch >= utf8.RuneSelf) {
             // uncommon case: not ASCII
             (ch, width) = utf8.DecodeRune(s.srcBuf[(int)(s.srcPos)..(int)(s.srcEnd)]);
@@ -284,7 +278,7 @@ internal static readonly UntypedInt bufLen = 1024; // at least utf8.UTFMax
                 s.srcPos += width;
                 s.lastCharLen = width;
                 s.column++;
-                s.error("invalid UTF-8 encoding"u8);
+                Ꮡs.error("invalid UTF-8 encoding"u8);
                 return ch;
             }
         }
@@ -296,7 +290,7 @@ internal static readonly UntypedInt bufLen = 1024; // at least utf8.UTFMax
     // special situations
     switch (ch) {
     case 0: {
-        s.error("invalid character NUL"u8);
+        Ꮡs.error("invalid character NUL"u8);
         break;
     }
     case (rune)'\n': {
@@ -316,14 +310,16 @@ internal static readonly UntypedInt bufLen = 1024; // at least utf8.UTFMax
 // it prints an error message to [os.Stderr]. Next does not
 // update the [Scanner.Position] field; use [Scanner.Pos]() to
 // get the current position.
-[GoRecv] public static rune Next(this ref Scanner s) {
+public static rune Next(this ж<Scanner> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
     s.tokPos = -1;
     // don't collect token text
     s.Line = 0;
     // invalidate token position
-    var ch = s.Peek();
+    var ch = Ꮡs.Peek();
     if (ch != EOF) {
-        s.ch = s.next();
+        s.ch = Ꮡs.next();
     }
     return ch;
 }
@@ -331,37 +327,42 @@ internal static readonly UntypedInt bufLen = 1024; // at least utf8.UTFMax
 // Peek returns the next Unicode character in the source without advancing
 // the scanner. It returns [EOF] if the scanner's position is at the last
 // character of the source.
-[GoRecv] public static rune Peek(this ref Scanner s) {
+public static rune Peek(this ж<Scanner> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
     if (s.ch == -2) {
         // this code is only run for the very first character
-        s.ch = s.next();
+        s.ch = Ꮡs.next();
         if (s.ch == (rune)'\uFEFF') {
-            s.ch = s.next();
+            s.ch = Ꮡs.next();
         }
     }
     // ignore BOM
     return s.ch;
 }
 
-[GoRecv] internal static void error(this ref Scanner s, @string msg) {
+internal static void error(this ж<Scanner> Ꮡs, @string msg) {
+    ref var s = ref Ꮡs.Value;
+
     s.tokEnd = s.srcPos - s.lastCharLen;
     // make sure token text is terminated
     s.ErrorCount++;
     if (s.Error != default!) {
-        s.Error(s, msg);
+        s.Error(Ꮡs, msg);
         return;
     }
     var pos = s.Position;
     if (!pos.IsValid()) {
         pos = s.Pos();
     }
-    fmt.Fprintf(~os.Stderr, "%s: %s\n"u8, pos, msg);
+    fmt.Fprintf(new os.FileжWriter(os.Stderr), "%s: %s\n"u8, pos, msg);
 }
 
-[GoRecv] internal static void errorf(this ref Scanner s, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf(this ж<Scanner> Ꮡs, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    s.error(fmt.Sprintf(format, args.ꓸꓸꓸ));
+    ref var s = ref Ꮡs.Value;
+    Ꮡs.error(fmt.Sprintf(format, args.ꓸꓸꓸ));
 }
 
 [GoRecv] internal static bool isIdentRune(this ref Scanner s, rune ch, nint i) {
@@ -371,11 +372,13 @@ internal static readonly UntypedInt bufLen = 1024; // at least utf8.UTFMax
     return ch == (rune)'_' || unicode.IsLetter(ch) || unicode.IsDigit(ch) && i > 0;
 }
 
-[GoRecv] internal static rune scanIdentifier(this ref Scanner s) {
+internal static rune scanIdentifier(this ж<Scanner> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
     // we know the zero'th rune is OK; start scanning at the next one
-    var ch = s.next();
+    var ch = Ꮡs.next();
     for (nint i = 1; s.isIdentRune(ch, i); i++) {
-        ch = s.next();
+        ch = Ꮡs.next();
     }
     return ch;
 }
@@ -399,14 +402,15 @@ internal static bool isHex(rune ch) {
 // digits returns the first rune that is not part of the sequence
 // anymore, and a bitset describing whether the sequence contained
 // digits (bit 0 is set), or separators '_' (bit 1 is set).
-[GoRecv] public static (rune ch, nint digsep) digits(this ref Scanner s, rune ch0, nint @base, ж<rune> Ꮡinvalid) {
+internal static (rune ch, nint digsep) digits(this ж<Scanner> Ꮡs, rune ch0, nint @base, ж<rune> Ꮡinvalid) {
     rune ch = default!;
     nint digsep = default!;
 
-    ref var invalid = ref Ꮡinvalid.val;
+    ref var s = ref Ꮡs.Value;
+    ref var invalid = ref Ꮡinvalid.Value;
     ch = ch0;
     if (@base <= 10){
-        var max = ((rune)((rune)'0' + @base));
+        var max = (rune)((rune)'0' + @base);
         while (isDecimal(ch) || ch == (rune)'_') {
             nint ds = 1;
             if (ch == (rune)'_'){
@@ -416,7 +420,7 @@ internal static bool isHex(rune ch) {
                 invalid = ch;
             }
             digsep |= (nint)(ds);
-            ch = s.next();
+            ch = Ꮡs.next();
         }
     } else {
         while (isHex(ch) || ch == (rune)'_') {
@@ -425,21 +429,23 @@ internal static bool isHex(rune ch) {
                 ds = 2;
             }
             digsep |= (nint)(ds);
-            ch = s.next();
+            ch = Ꮡs.next();
         }
     }
     return (ch, digsep);
 }
 
-[GoRecv] internal static (rune, rune) scanNumber(this ref Scanner s, rune ch, bool seenDot) {
+internal static (rune, rune) scanNumber(this ж<Scanner> Ꮡs, rune ch, bool seenDot) {
+    ref var s = ref Ꮡs.Value;
+
     nint @base = 10;
     // number base
-    var prefix = ((rune)0);
+    var prefix = (rune)0;
     // one of 0 (decimal), '0' (0-octal), 'x', 'o', or 'b'
     nint digsep = 0;
     // bit 0: digit present, bit 1: '_' present
     ref var invalid = ref heap<rune>(out var Ꮡinvalid);
-    invalid = ((rune)0);
+    invalid = (rune)0;
     // invalid digit in literal, or 0
     // integer part
     rune tok = default!;
@@ -447,20 +453,20 @@ internal static bool isHex(rune ch) {
     if (!seenDot) {
         tok = Int;
         if (ch == (rune)'0') {
-            ch = s.next();
+            ch = Ꮡs.next();
             switch (lower(ch)) {
             case (rune)'x': {
-                ch = s.next();
+                ch = Ꮡs.next();
                 (@base, prefix) = (16, (rune)'x');
                 break;
             }
             case (rune)'o': {
-                ch = s.next();
+                ch = Ꮡs.next();
                 (@base, prefix) = (8, (rune)'o');
                 break;
             }
             case (rune)'b': {
-                ch = s.next();
+                ch = Ꮡs.next();
                 (@base, prefix) = (2, (rune)'b');
                 break;
             }
@@ -472,10 +478,10 @@ internal static bool isHex(rune ch) {
 
         }
         // leading 0
-        (ch, ds) = s.digits(ch, @base, Ꮡinvalid);
+        (ch, ds) = Ꮡs.digits(ch, @base, Ꮡinvalid);
         digsep |= (nint)(ds);
-        if (ch == (rune)'.' && (nuint)(s.Mode & ScanFloats) != 0) {
-            ch = s.next();
+        if (ch == (rune)'.' && (nuint)(s.Mode & (nuint)ScanFloats) != 0) {
+            ch = Ꮡs.next();
             seenDot = true;
         }
     }
@@ -483,51 +489,51 @@ internal static bool isHex(rune ch) {
     if (seenDot) {
         tok = Float;
         if (prefix == (rune)'o' || prefix == (rune)'b') {
-            s.error("invalid radix point in "u8 + litname(prefix));
+            Ꮡs.error("invalid radix point in "u8 + litname(prefix));
         }
-        (ch, ds) = s.digits(ch, @base, Ꮡinvalid);
+        (ch, ds) = Ꮡs.digits(ch, @base, Ꮡinvalid);
         digsep |= (nint)(ds);
     }
     if ((nint)(digsep & 1) == 0) {
-        s.error(litname(prefix) + " has no digits"u8);
+        Ꮡs.error(litname(prefix) + " has no digits"u8);
     }
     // exponent
     {
-        var e = lower(ch); if ((e == (rune)'e' || e == (rune)'p') && (nuint)(s.Mode & ScanFloats) != 0){
+        var e = lower(ch); if ((e == (rune)'e' || e == (rune)'p') && (nuint)(s.Mode & (nuint)ScanFloats) != 0){
             switch (ᐧ) {
             case {} when e == (rune)'e' && prefix != 0 && prefix != (rune)'0': {
-                s.errorf("%q exponent requires decimal mantissa"u8, ch);
+                Ꮡs.errorf("%q exponent requires decimal mantissa"u8, ch);
                 break;
             }
             case {} when e == (rune)'p' && prefix != (rune)'x': {
-                s.errorf("%q exponent requires hexadecimal mantissa"u8, ch);
+                Ꮡs.errorf("%q exponent requires hexadecimal mantissa"u8, ch);
                 break;
             }}
 
-            ch = s.next();
+            ch = Ꮡs.next();
             tok = Float;
             if (ch == (rune)'+' || ch == (rune)'-') {
-                ch = s.next();
+                ch = Ꮡs.next();
             }
-            (ch, ds) = s.digits(ch, 10, nil);
+            (ch, ds) = Ꮡs.digits(ch, 10, nil);
             digsep |= (nint)(ds);
             if ((nint)(ds & 1) == 0) {
-                s.error("exponent has no digits"u8);
+                Ꮡs.error("exponent has no digits"u8);
             }
         } else 
         if (prefix == (rune)'x' && tok == Float) {
-            s.error("hexadecimal mantissa requires a 'p' exponent"u8);
+            Ꮡs.error("hexadecimal mantissa requires a 'p' exponent"u8);
         }
     }
     if (tok == Int && invalid != 0) {
-        s.errorf("invalid digit %q in %s"u8, invalid, litname(prefix));
+        Ꮡs.errorf("invalid digit %q in %s"u8, invalid, litname(prefix));
     }
     if ((nint)(digsep & 2) != 0) {
         s.tokEnd = s.srcPos - s.lastCharLen;
         // make sure token text is terminated
         {
-            nint i = invalidSep(s.TokenText()); if (i >= 0) {
-                s.error("'_' must separate successive digits"u8);
+            nint i = invalidSep(Ꮡs.TokenText()); if (i >= 0) {
+                Ꮡs.error("'_' must separate successive digits"u8);
             }
         }
     }
@@ -560,7 +566,7 @@ internal static nint invalidSep(@string x) {
     nint i = 0;
     // a prefix counts as a digit
     if (len(x) >= 2 && x[0] == (rune)'0') {
-        x1 = lower(((rune)x[1]));
+        x1 = lower((rune)x[1]);
         if (x1 == (rune)'x' || x1 == (rune)'o' || x1 == (rune)'b') {
             d = (rune)'0';
             i = 2;
@@ -570,7 +576,7 @@ internal static nint invalidSep(@string x) {
     for (; i < len(x); i++) {
         var p = d;
         // previous digit
-        d = ((rune)x[i]);
+        d = (rune)x[i];
         switch (ᐧ) {
         case {} when d is (rune)'_': {
             if (p != (rune)'0') {
@@ -600,121 +606,126 @@ internal static nint invalidSep(@string x) {
 internal static nint digitVal(rune ch) {
     switch (ᐧ) {
     case {} when (rune)'0' <= ch && ch <= (rune)'9': {
-        return ((nint)(ch - (rune)'0'));
+        return (nint)(ch - (rune)'0');
     }
     case {} when (rune)'a' <= lower(ch) && lower(ch) <= (rune)'f': {
-        return ((nint)(lower(ch) - (rune)'a' + 10));
+        return (nint)(lower(ch) - (rune)'a' + 10);
     }}
 
     return 16;
 }
 
 // larger than any legal digit val
-[GoRecv] internal static rune scanDigits(this ref Scanner s, rune ch, nint @base, nint n) {
+internal static rune scanDigits(this ж<Scanner> Ꮡs, rune ch, nint @base, nint n) {
+    ref var s = ref Ꮡs.Value;
+
     while (n > 0 && digitVal(ch) < @base) {
-        ch = s.next();
+        ch = Ꮡs.next();
         n--;
     }
     if (n > 0) {
-        s.error("invalid char escape"u8);
+        Ꮡs.error("invalid char escape"u8);
     }
     return ch;
 }
 
-[GoRecv] internal static rune scanEscape(this ref Scanner s, rune quote) {
-    var ch = s.next();
+internal static rune scanEscape(this ж<Scanner> Ꮡs, rune quote) {
+    ref var s = ref Ꮡs.Value;
+
+    var ch = Ꮡs.next();
     // read character after '/'
-    switch (ch) {
-    case (rune)'a' or (rune)'b' or (rune)'f' or (rune)'n' or (rune)'r' or (rune)'t' or (rune)'v' or (rune)'\\' or quote: {
-        ch = s.next();
-        break;
+    var exprᴛ1 = ch;
+    if (exprᴛ1 == (rune)'a' || exprᴛ1 == (rune)'b' || exprᴛ1 == (rune)'f' || exprᴛ1 == (rune)'n' || exprᴛ1 == (rune)'r' || exprᴛ1 == (rune)'t' || exprᴛ1 == (rune)'v' || exprᴛ1 == (rune)'\\' || exprᴛ1 == quote) {
+        ch = Ꮡs.next();
     }
-    case (rune)'0' or (rune)'1' or (rune)'2' or (rune)'3' or (rune)'4' or (rune)'5' or (rune)'6' or (rune)'7': {
-        ch = s.scanDigits(ch, // nothing to do
+    else if (exprᴛ1 is (rune)'0' or (rune)'1' or (rune)'2' or (rune)'3' or (rune)'4' or (rune)'5' or (rune)'6' or (rune)'7') {
+        ch = Ꮡs.scanDigits(ch, // nothing to do
  8, 3);
-        break;
     }
-    case (rune)'x': {
-        ch = s.scanDigits(s.next(), 16, 2);
-        break;
+    else if (exprᴛ1 is (rune)'x') {
+        ch = Ꮡs.scanDigits(Ꮡs.next(), 16, 2);
     }
-    case (rune)'u': {
-        ch = s.scanDigits(s.next(), 16, 4);
-        break;
+    else if (exprᴛ1 is (rune)'u') {
+        ch = Ꮡs.scanDigits(Ꮡs.next(), 16, 4);
     }
-    case (rune)'U': {
-        ch = s.scanDigits(s.next(), 16, 8);
-        break;
+    else if (exprᴛ1 is (rune)'U') {
+        ch = Ꮡs.scanDigits(Ꮡs.next(), 16, 8);
     }
-    default: {
-        s.error("invalid char escape"u8);
-        break;
-    }}
+    else { /* default: */
+        Ꮡs.error("invalid char escape"u8);
+    }
 
     return ch;
 }
 
-[GoRecv] internal static nint /*n*/ scanString(this ref Scanner s, rune quote) {
+internal static nint /*n*/ scanString(this ж<Scanner> Ꮡs, rune quote) {
     nint n = default!;
 
-    var ch = s.next();
+    ref var s = ref Ꮡs.Value;
+    var ch = Ꮡs.next();
     // read character after quote
     while (ch != quote) {
         if (ch == (rune)'\n' || ch < 0) {
-            s.error("literal not terminated"u8);
+            Ꮡs.error("literal not terminated"u8);
             return n;
         }
         if (ch == (rune)'\\'){
-            ch = s.scanEscape(quote);
+            ch = Ꮡs.scanEscape(quote);
         } else {
-            ch = s.next();
+            ch = Ꮡs.next();
         }
         n++;
     }
     return n;
 }
 
-[GoRecv] internal static void scanRawString(this ref Scanner s) {
-    var ch = s.next();
+internal static void scanRawString(this ж<Scanner> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    var ch = Ꮡs.next();
     // read character after '`'
     while (ch != (rune)'`') {
         if (ch < 0) {
-            s.error("literal not terminated"u8);
+            Ꮡs.error("literal not terminated"u8);
             return;
         }
-        ch = s.next();
+        ch = Ꮡs.next();
     }
 }
 
-[GoRecv] internal static void scanChar(this ref Scanner s) {
-    if (s.scanString((rune)'\'') != 1) {
-        s.error("invalid char literal"u8);
+internal static void scanChar(this ж<Scanner> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    if (Ꮡs.scanString((rune)'\'') != 1) {
+        Ꮡs.error("invalid char literal"u8);
     }
 }
 
-[GoRecv] internal static rune scanComment(this ref Scanner s, rune ch) {
+internal static rune scanComment(this ж<Scanner> Ꮡs, rune ch) {
+    ref var s = ref Ꮡs.Value;
+
     // ch == '/' || ch == '*'
     if (ch == (rune)'/') {
         // line comment
-        ch = s.next();
+        ch = Ꮡs.next();
         // read character after "//"
         while (ch != (rune)'\n' && ch >= 0) {
-            ch = s.next();
+            ch = Ꮡs.next();
         }
         return ch;
     }
     // general comment
-    ch = s.next();
+    ch = Ꮡs.next();
     // read character after "/*"
     while (ᐧ) {
         if (ch < 0) {
-            s.error("comment not terminated"u8);
+            Ꮡs.error("comment not terminated"u8);
             break;
         }
         var ch0 = ch;
-        ch = s.next();
+        ch = Ꮡs.next();
         if (ch0 == (rune)'*' && ch == (rune)'/') {
-            ch = s.next();
+            ch = Ꮡs.next();
             break;
         }
     }
@@ -726,15 +737,17 @@ internal static nint digitVal(rune ch) {
 // It returns [EOF] at the end of the source. It reports scanner errors (read and
 // token errors) by calling s.Error, if not nil; otherwise it prints an error
 // message to [os.Stderr].
-[GoRecv] public static rune Scan(this ref Scanner s) {
-    var ch = s.Peek();
+public static rune Scan(this ж<Scanner> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    var ch = Ꮡs.Peek();
     // reset token text position
     s.tokPos = -1;
     s.Line = 0;
 redo:
-    while ((uint64)(s.Whitespace & (1 << (int)(((nuint)ch)))) != 0) {
+    while ((uint64)(s.Whitespace & (((uint64)1 << (int)((nuint)ch)))) != 0) {
         // skip white space
-        ch = s.next();
+        ch = Ꮡs.next();
 continue_redo:;
     }
 break_redo:;
@@ -759,69 +772,71 @@ break_redo:;
     var tok = ch;
     switch (ᐧ) {
     case {} when s.isIdentRune(ch, 0): {
-        if ((nuint)(s.Mode & ScanIdents) != 0){
+        if ((nuint)(s.Mode & (nuint)ScanIdents) != 0){
             tok = Ident;
-            ch = s.scanIdentifier();
+            ch = Ꮡs.scanIdentifier();
         } else {
-            ch = s.next();
+            ch = Ꮡs.next();
         }
         break;
     }
     case {} when isDecimal(ch): {
-        if ((nuint)(s.Mode & ((nuint)(ScanInts | ScanFloats))) != 0){
-            (tok, ch) = s.scanNumber(ch, false);
+        if ((nuint)(s.Mode & (nuint)((nuint)((nuint)ScanInts | (nuint)ScanFloats))) != 0){
+            (tok, ch) = Ꮡs.scanNumber(ch, false);
         } else {
-            ch = s.next();
+            ch = Ꮡs.next();
         }
         break;
     }
     default: {
         var exprᴛ1 = ch;
         if (exprᴛ1 == EOF) {
-            break;
+            do {
+                break;
+            } while (false);
         }
         else if (exprᴛ1 is (rune)'"') {
-            if ((nuint)(s.Mode & ScanStrings) != 0) {
-                s.scanString((rune)'"');
+            if ((nuint)(s.Mode & (nuint)ScanStrings) != 0) {
+                Ꮡs.scanString((rune)'"');
                 tok = ΔString;
             }
-            ch = s.next();
+            ch = Ꮡs.next();
         }
         else if (exprᴛ1 is (rune)'\'') {
-            if ((nuint)(s.Mode & ScanChars) != 0) {
-                s.scanChar();
+            if ((nuint)(s.Mode & (nuint)ScanChars) != 0) {
+                Ꮡs.scanChar();
                 tok = Char;
             }
-            ch = s.next();
+            ch = Ꮡs.next();
         }
         else if (exprᴛ1 is (rune)'.') {
-            ch = s.next();
-            if (isDecimal(ch) && (nuint)(s.Mode & ScanFloats) != 0) {
-                (tok, ch) = s.scanNumber(ch, true);
+            ch = Ꮡs.next();
+            if (isDecimal(ch) && (nuint)(s.Mode & (nuint)ScanFloats) != 0) {
+                (tok, ch) = Ꮡs.scanNumber(ch, true);
             }
         }
         else if (exprᴛ1 is (rune)'/') {
-            ch = s.next();
-            if ((ch == (rune)'/' || ch == (rune)'*') && (nuint)(s.Mode & ScanComments) != 0) {
-                if ((nuint)(s.Mode & SkipComments) != 0) {
+            ch = Ꮡs.next();
+            if ((ch == (rune)'/' || ch == (rune)'*') && (nuint)(s.Mode & (nuint)ScanComments) != 0) {
+                if ((nuint)(s.Mode & (nuint)SkipComments) != 0) {
                     s.tokPos = -1;
                     // don't collect token text
-                    ch = s.scanComment(ch);
+                    ch = Ꮡs.scanComment(ch);
                     goto redo;
                 }
-                ch = s.scanComment(ch);
+                ch = Ꮡs.scanComment(ch);
                 tok = Comment;
             }
         }
         else if (exprᴛ1 is (rune)'`') {
-            if ((nuint)(s.Mode & ScanRawStrings) != 0) {
-                s.scanRawString();
+            if ((nuint)(s.Mode & (nuint)ScanRawStrings) != 0) {
+                Ꮡs.scanRawString();
                 tok = RawString;
             }
-            ch = s.next();
+            ch = Ꮡs.next();
         }
         else { /* default: */
-            ch = s.next();
+            ch = Ꮡs.next();
         }
 
         break;
@@ -867,7 +882,9 @@ break_redo:;
 
 // TokenText returns the string corresponding to the most recently scanned token.
 // Valid after calling [Scanner.Scan] and in calls of [Scanner.Error].
-[GoRecv] public static @string TokenText(this ref Scanner s) {
+public static @string TokenText(this ж<Scanner> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
     if (s.tokPos < 0) {
         // no token text
         return ""u8;
@@ -886,7 +903,7 @@ break_redo:;
     s.tokBuf.Write(s.srcBuf[(int)(s.tokPos)..(int)(s.tokEnd)]);
     s.tokPos = s.tokEnd;
     // ensure idempotency of TokenText() call
-    return s.tokBuf.String();
+    return Ꮡs.of(Scanner.ᏑtokBuf).String();
 }
 
 } // end scanner_package

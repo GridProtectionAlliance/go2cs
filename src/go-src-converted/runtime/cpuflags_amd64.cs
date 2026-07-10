@@ -10,10 +10,10 @@ partial class runtime_package {
 
 internal static bool useAVXmemmove;
 
-[GoInit] internal static void init() {
+[GoInit] internal static void initΔ1() {
     // Let's remove stepping and reserved fields
-    var processor = (uint32)(processorVersionInfo & 268386288);
-    var isIntelBridgeFamily = isIntel && processor == 132768 || processor == 132816 || processor == 198304 || processor == 198368;
+    var processor = (uint32)(processorVersionInfo & 0x0FFF3FF0);
+    var isIntelBridgeFamily = isIntel && processor == 0x206A0 || processor == 0x206D0 || processor == 0x306A0 || processor == 0x306E0;
     useAVXmemmove = cpu.X86.HasAVX && !isIntelBridgeFamily;
 }
 

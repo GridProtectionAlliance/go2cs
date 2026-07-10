@@ -5,10 +5,10 @@ namespace go;
 
 using abi = @internal.abi_package;
 using bytealg = @internal.bytealg_package;
-using utf8 = unicode.utf8_package;
+using utf8 = go.unicode.utf8_package;
 using @unsafe = unsafe_package;
 using @internal;
-using unicode;
+using go.unicode;
 
 partial class strings_package {
 
@@ -23,7 +23,9 @@ partial class strings_package {
     internal slice<byte> buf;
 }
 
-[GoRecv] internal static void copyCheck(this ref Builder b) {
+internal static void copyCheck(this ж<Builder> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
+
     if (b.addr == nil){
         // This hack works around a failing of Go's escape analysis
         // that was causing b to escape and be heap allocated.
@@ -32,7 +34,7 @@ partial class strings_package {
         // just "b.addr = b".
         b.addr = (ж<Builder>)(uintptr)(abi.NoEscape((uintptr)@unsafe.Pointer.FromRef(ref b)));
     } else 
-    if (b.addr != b) {
+    if (b.addr != Ꮡb) {
         throw panic("strings: illegal use of non-zero Builder copied by value");
     }
 }
@@ -71,8 +73,10 @@ partial class strings_package {
 // Grow grows b's capacity, if necessary, to guarantee space for
 // another n bytes. After Grow(n), at least n bytes can be written to b
 // without another allocation. If n is negative, Grow panics.
-[GoRecv] public static void Grow(this ref Builder b, nint n) {
-    b.copyCheck();
+public static void Grow(this ж<Builder> Ꮡb, nint n) {
+    ref var b = ref Ꮡb.Value;
+
+    Ꮡb.copyCheck();
     if (n < 0) {
         throw panic("strings.Builder.Grow: negative count");
     }
@@ -83,24 +87,30 @@ partial class strings_package {
 
 // Write appends the contents of p to b's buffer.
 // Write always returns len(p), nil.
-[GoRecv] public static (nint, error) Write(this ref Builder b, slice<byte> p) {
-    b.copyCheck();
+public static (nint, error) Write(this ж<Builder> Ꮡb, slice<byte> p) {
+    ref var b = ref Ꮡb.Value;
+
+    Ꮡb.copyCheck();
     b.buf = append(b.buf, p.ꓸꓸꓸ);
     return (len(p), default!);
 }
 
 // WriteByte appends the byte c to b's buffer.
 // The returned error is always nil.
-[GoRecv] public static error WriteByte(this ref Builder b, byte c) {
-    b.copyCheck();
+public static error WriteByte(this ж<Builder> Ꮡb, byte c) {
+    ref var b = ref Ꮡb.Value;
+
+    Ꮡb.copyCheck();
     b.buf = append(b.buf, c);
     return default!;
 }
 
 // WriteRune appends the UTF-8 encoding of Unicode code point r to b's buffer.
 // It returns the length of r and a nil error.
-[GoRecv] public static (nint, error) WriteRune(this ref Builder b, rune r) {
-    b.copyCheck();
+public static (nint, error) WriteRune(this ж<Builder> Ꮡb, rune r) {
+    ref var b = ref Ꮡb.Value;
+
+    Ꮡb.copyCheck();
     nint n = len(b.buf);
     b.buf = utf8.AppendRune(b.buf, r);
     return (len(b.buf) - n, default!);
@@ -108,8 +118,10 @@ partial class strings_package {
 
 // WriteString appends the contents of s to b's buffer.
 // It returns the length of s and a nil error.
-[GoRecv] public static (nint, error) WriteString(this ref Builder b, @string s) {
-    b.copyCheck();
+public static (nint, error) WriteString(this ж<Builder> Ꮡb, @string s) {
+    ref var b = ref Ꮡb.Value;
+
+    Ꮡb.copyCheck();
     b.buf = append(b.buf, s.ꓸꓸꓸ);
     return (len(s), default!);
 }

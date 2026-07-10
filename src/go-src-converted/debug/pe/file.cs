@@ -17,7 +17,7 @@ namespace go.debug;
 
 using bytes = bytes_package;
 using zlib = compress.zlib_package;
-using dwarf = debug.dwarf_package;
+using dwarf = go.debug.dwarf_package;
 using binary = encoding.binary_package;
 using errors = errors_package;
 using fmt = fmt_package;
@@ -26,6 +26,7 @@ using os = os_package;
 using strings = strings_package;
 using compress;
 using encoding;
+using go.debug;
 
 partial class pe_package {
 
@@ -37,21 +38,21 @@ partial class pe_package {
     public slice<ж<Symbol>> Symbols; // COFF symbols with auxiliary symbol records removed
     public slice<COFFSymbol> COFFSymbols; // all COFF symbols (including auxiliary symbol records)
     public StringTable StringTable;
-    internal io_package.Closer closer;
+    internal io.Closer closer;
 }
 
 // Open opens the named file using [os.Open] and prepares it for use as a PE binary.
 public static (ж<File>, error) Open(@string name) {
-    (f, err) = os.Open(name);
+    var (f, err) = os.Open(name);
     if (err != default!) {
         return (default!, err);
     }
-    (ff, err) = NewFile(~f);
+    (var ff, err) = NewFile(new os_FileжReaderAt(f));
     if (err != default!) {
         f.Close();
         return (default!, err);
     }
-    ff.val.closer = f;
+    ff.Value.closer = new os_FileжCloser(f);
     return (ff, default!);
 }
 
@@ -72,7 +73,7 @@ public static (ж<File>, error) Open(@string name) {
 // NewFile creates a new [File] for accessing a PE binary in an underlying reader.
 public static (ж<File>, error) NewFile(io.ReaderAt r) {
     var f = @new<File>();
-    var sr = io.NewSectionReader(r, 0, 1 << (int)(63) - 1);
+    var sr = io.NewSectionReader(r, 0, 9223372036854775807L);
     array<byte> dosheader = new(96);
     {
         var (_, errΔ1) = r.ReadAt(dosheader[0..], 0); if (errΔ1 != default!) {
@@ -81,7 +82,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     }
     int64 @base = default!;
     if (dosheader[0] == (rune)'M' && dosheader[1] == (rune)'Z'){
-        var signoff = ((int64)binary.LittleEndian.Uint32(dosheader[60..]));
+        var signoff = (int64)binary.LittleEndian.Uint32(dosheader[0x3c..]);
         array<byte> sign = new(4);
         r.ReadAt(sign[..], signoff);
         if (!(sign[0] == (rune)'P' && sign[1] == (rune)'E' && sign[2] == 0 && sign[3] == 0)) {
@@ -89,11 +90,11 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         }
         @base = signoff + 4;
     } else {
-        @base = ((int64)0);
+        @base = (int64)0;
     }
     sr.Seek(@base, io.SeekStart);
     {
-        var errΔ2 = binary.Read(~sr, binary.LittleEndian, Ꮡ((~f).FileHeader)); if (errΔ2 != default!) {
+        var errΔ2 = binary.Read(new io_SectionReaderжReader(sr), new binary_littleEndianᴠByteOrder(binary.LittleEndian), f.of(File.ᏑFileHeader)); if (errΔ2 != default!) {
             return (default!, errΔ2);
         }
     }
@@ -105,46 +106,46 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
  (~f).FileHeader.Machine));
     }
 
-    error errΔ3 = default!;
+    error err = default!;
     // Read string table.
-    (f.val.StringTable, ) = readStringTable(Ꮡ((~f).FileHeader), ~sr);
-    if (errΔ3 != default!) {
-        return (default!, errΔ3);
+    (f.Value.StringTable, err) = readStringTable(f.of(File.ᏑFileHeader), new io_SectionReaderжReadSeeker(sr));
+    if (err != default!) {
+        return (default!, err);
     }
     // Read symbol table.
-    (f.val.COFFSymbols, ) = readCOFFSymbols(Ꮡ((~f).FileHeader), ~sr);
-    if (errΔ3 != default!) {
-        return (default!, errΔ3);
+    (f.Value.COFFSymbols, err) = readCOFFSymbols(f.of(File.ᏑFileHeader), new io_SectionReaderжReadSeeker(sr));
+    if (err != default!) {
+        return (default!, err);
     }
-    (f.val.Symbols, ) = removeAuxSymbols((~f).COFFSymbols, (~f).StringTable);
-    if (errΔ3 != default!) {
-        return (default!, errΔ3);
+    (f.Value.Symbols, err) = removeAuxSymbols((~f).COFFSymbols, (~f).StringTable);
+    if (err != default!) {
+        return (default!, err);
     }
     // Seek past file header.
-    (_, ) = sr.Seek(@base + ((int64)binary.Size((~f).FileHeader)), io.SeekStart);
-    if (errΔ3 != default!) {
-        return (default!, errΔ3);
+    (_, err) = sr.Seek(@base + (int64)binary.Size((~f).FileHeader), io.SeekStart);
+    if (err != default!) {
+        return (default!, err);
     }
     // Read optional header.
-    (f.val.OptionalHeader, ) = readOptionalHeader(~sr, (~f).FileHeader.SizeOfOptionalHeader);
-    if (errΔ3 != default!) {
-        return (default!, errΔ3);
+    (f.Value.OptionalHeader, err) = readOptionalHeader(new io_SectionReaderжReadSeeker(sr), (~f).FileHeader.SizeOfOptionalHeader);
+    if (err != default!) {
+        return (default!, err);
     }
     // Process sections.
-    f.val.Sections = new slice<ж<ΔSection>>((~f).FileHeader.NumberOfSections);
-    for (nint i = 0; i < ((nint)(~f).FileHeader.NumberOfSections); i++) {
+    f.Value.Sections = new slice<ж<ΔSection>>((~f).FileHeader.NumberOfSections);
+    for (nint i = 0; i < (nint)(~f).FileHeader.NumberOfSections; i++) {
         var sh = @new<SectionHeader32>();
         {
-            var errΔ4 = binary.Read(~sr, binary.LittleEndian, sh); if (errΔ4 != default!) {
-                return (default!, errΔ4);
+            var errΔ3 = binary.Read(new io_SectionReaderжReader(sr), new binary_littleEndianᴠByteOrder(binary.LittleEndian), sh); if (errΔ3 != default!) {
+                return (default!, errΔ3);
             }
         }
-        var (name, errΔ5) = sh.fullName((~f).StringTable);
-        if (errΔ5 != default!) {
-            return (default!, errΔ5);
+        var (name, errΔ4) = sh.fullName((~f).StringTable);
+        if (errΔ4 != default!) {
+            return (default!, errΔ4);
         }
         var s = @new<ΔSection>();
-        s.val.SectionHeader = new SectionHeader(
+        s.Value.SectionHeader = new SectionHeader(
             Name: name,
             VirtualSize: (~sh).VirtualSize,
             VirtualAddress: (~sh).VirtualAddress,
@@ -159,19 +160,17 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         var r2 = r;
         if ((~sh).PointerToRawData == 0) {
             // .bss must have all 0s
-            Ꮡr2 = new nobitsSectionReader(nil); r2 = ref Ꮡr2.val;
+            r2 = new nobitsSectionReaderжReaderAt(Ꮡ(new nobitsSectionReader(nil)));
         }
-        s.val.sr = io.NewSectionReader(r2, ((int64)(~s).SectionHeader.Offset), ((int64)(~s).SectionHeader.Size));
-        s.val.ReaderAt = s.val.sr;
-        (~f).Sections[i] = s;
+        s.Value.sr = io.NewSectionReader(r2, (int64)(~s).SectionHeader.Offset, (int64)(~s).SectionHeader.Size);
+        s.Value.ReaderAt = new io_SectionReaderжReaderAt(s.Value.sr);
+        f.Value.Sections[i] = s;
     }
-    ref var i = ref heap(new nint(), out var Ꮡi);
-
     foreach (var (i, _) in (~f).Sections) {
-        error errΔ6 = default!;
-        ((~f).Sections[i].val.Relocs, errΔ6) = readRelocs(Ꮡ((~(~f).Sections[i]).SectionHeader), ~sr);
-        if (errΔ6 != default!) {
-            return (default!, errΔ6);
+        error errΔ5 = default!;
+        ((~f).Sections[i].Value.Relocs, errΔ5) = readRelocs((~f).Sections[i].of(pe_package.ΔSection.ᏑSectionHeader), new io_SectionReaderжReadSeeker(sr));
+        if (errΔ5 != default!) {
+            return (default!, errΔ5);
         }
     }
     return (f, default!);
@@ -204,7 +203,7 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
 // section exists.
 [GoRecv] public static ж<ΔSection> Section(this ref File f, @string name) {
     foreach (var (_, s) in f.Sections) {
-        if (s.Name == name) {
+        if ((~s).Name == name) {
             return s;
         }
     }
@@ -212,13 +211,13 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
 }
 
 [GoRecv] public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
-    var dwarfSuffix = (ж<ΔSection> s) => {
+    var dwarfSuffix = @string (ж<ΔSection> s) => {
         switch (ᐧ) {
-        case {} when strings.HasPrefix(s.Name, ".debug_"u8): {
-            return s.Name[7..];
+        case {} when strings.HasPrefix((~s).Name, ".debug_"u8): {
+            return (~s).Name[7..];
         }
-        case {} when strings.HasPrefix(s.Name, ".zdebug_"u8): {
-            return s.Name[8..];
+        case {} when strings.HasPrefix((~s).Name, ".zdebug_"u8): {
+            return (~s).Name[8..];
         }
         default: {
             return ""u8;
@@ -226,18 +225,18 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
 
     };
     // sectionData gets the data for s and checks its size.
-    var sectionData = (ж<ΔSection> s) => {
-        (b, errΔ1) = s.Data();
-        if (errΔ1 != default! && ((uint32)len(b)) < s.Size) {
+    var sectionData = (slice<byte>, error) (ж<ΔSection> s) => {
+        var (b, errΔ1) = s.Data();
+        if (errΔ1 != default! && (uint32)len(b) < (~s).Size) {
             return (default!, errΔ1);
         }
-        if (0 < s.VirtualSize && s.VirtualSize < s.Size) {
-            b = b[..(int)(s.VirtualSize)];
+        if (0 < (~s).VirtualSize && (~s).VirtualSize < (~s).Size) {
+            b = b[..(int)((~s).VirtualSize)];
         }
         if (len(b) >= 12 && ((@string)(b[..4])) == "ZLIB"u8) {
             var dlen = binary.BigEndian.Uint64(b[4..12]);
-            var dbuf = new slice<byte>(dlen);
-            (r, errΔ2) = zlib.NewReader(~bytes.NewBuffer(b[12..]));
+            var dbuf = new slice<byte>((nint)(dlen));
+            var (r, errΔ2) = zlib.NewReader(new bytes_BufferжReader(bytes.NewBuffer(b[12..])));
             if (errΔ2 != default!) {
                 return (default!, errΔ2);
             }
@@ -265,18 +264,17 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
             continue;
         }
         {
-            var _ = dat[suffix];
-            var ok = dat[suffix]; if (!ok) {
+            var (_, ok) = dat[suffix, ꟷ]; if (!ok) {
                 continue;
             }
         }
-        (b, errΔ5) = sectionData(s);
+        var (b, errΔ5) = sectionData(s);
         if (errΔ5 != default!) {
             return (default!, errΔ5);
         }
         dat[suffix] = b;
     }
-    (d, err) = dwarf.New(dat["abbrev"u8], default!, default!, dat["info"u8], dat["line"u8], default!, dat["ranges"u8], dat["str"u8]);
+    var (d, err) = dwarf.New(dat["abbrev"u8], default!, default!, dat["info"u8], dat["line"u8], default!, dat["ranges"u8], dat["str"u8]);
     if (err != default!) {
         return (default!, err);
     }
@@ -287,23 +285,22 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
             continue;
         }
         {
-            var _ = dat[suffix];
-            var ok = dat[suffix]; if (ok) {
+            var (_, ok) = dat[suffix, ꟷ]; if (ok) {
                 // Already handled.
                 continue;
             }
         }
-        (b, err) = sectionData(s);
-        if (err != default!) {
-            return (default!, err);
+        var (b, errΔ6) = sectionData(s);
+        if (errΔ6 != default!) {
+            return (default!, errΔ6);
         }
         if (suffix == "types"u8){
-            err = d.AddTypes(fmt.Sprintf("types-%d"u8, i), b);
+            errΔ6 = d.AddTypes(fmt.Sprintf("types-%d"u8, i), b);
         } else {
-            err = d.AddSection(".debug_"u8 + suffix, b);
+            errΔ6 = d.AddSection(".debug_"u8 + suffix, b);
         }
-        if (err != default!) {
-            return (default!, err);
+        if (errΔ6 != default!) {
+            return (default!, errΔ6);
         }
     }
     return (d, default!);
@@ -327,13 +324,13 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
     if (f.OptionalHeader == default!) {
         return (default!, default!);
     }
-    var (_, pe64) = f.OptionalHeader._<OptionalHeader64.val>(ᐧ);
+    var (_, pe64) = f.OptionalHeader._<ж<OptionalHeader64>>(ᐧ);
     // grab the number of data directory entries
     uint32 dd_length = default!;
     if (pe64){
-        dd_length = f.OptionalHeader._<OptionalHeader64.val>().NumberOfRvaAndSizes;
+        dd_length = f.OptionalHeader._<ж<OptionalHeader64>>().Value.NumberOfRvaAndSizes;
     } else {
-        dd_length = f.OptionalHeader._<OptionalHeader32.val>().NumberOfRvaAndSizes;
+        dd_length = f.OptionalHeader._<ж<OptionalHeader32>>().Value.NumberOfRvaAndSizes;
     }
     // check that the length of data directory entries is large
     // enough to include the imports directory.
@@ -343,21 +340,21 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
     // grab the import data directory entry
     DataDirectory idd = default!;
     if (pe64){
-        idd = f.OptionalHeader._<OptionalHeader64.val>().DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+        idd = (~f.OptionalHeader._<ж<OptionalHeader64>>()).DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
     } else {
-        idd = f.OptionalHeader._<OptionalHeader32.val>().DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+        idd = (~f.OptionalHeader._<ж<OptionalHeader32>>()).DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
     }
     // figure out which section contains the import directory table
     ж<ΔSection> ds = default!;
     ds = default!;
     foreach (var (_, s) in f.Sections) {
-        if (s.Offset == 0) {
+        if ((~s).Offset == 0) {
             continue;
         }
         // We are using distance between s.VirtualAddress and idd.VirtualAddress
         // to avoid potential overflow of uint32 caused by addition of s.VirtualSize
         // to s.VirtualAddress.
-        if (s.VirtualAddress <= idd.VirtualAddress && idd.VirtualAddress - s.VirtualAddress < s.VirtualSize) {
+        if ((~s).VirtualAddress <= idd.VirtualAddress && idd.VirtualAddress - (~s).VirtualAddress < (~s).VirtualSize) {
             ds = s;
             break;
         }
@@ -366,12 +363,12 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
     if (ds == nil) {
         return (default!, default!);
     }
-    (d, err) = ds.Data();
+    var (d, err) = ds.Data();
     if (err != default!) {
         return (default!, err);
     }
     // seek to the virtual address specified in the import data directory
-    d = d[(int)(idd.VirtualAddress - ds.VirtualAddress)..];
+    d = d[(int)(idd.VirtualAddress - (~ds).VirtualAddress)..];
     // start decoding the import directory
     slice<ImportDirectory> ida = default!;
     while (len(d) >= 20) {
@@ -393,13 +390,15 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
     //  getString does not extracts a string from symbol string table (as getString doco says).
     //  Why ds.Data() called again and again in the loop?
     //  Needs test before rewrite.
-    (names, _) = ds.Data();
+    var (names, _) = ds.Data();
     slice<@string> all = default!;
-    foreach (var (_, dt) in ida) {
-        (dt.dll, _) = getString(names, ((nint)(dt.Name - ds.VirtualAddress)));
+    foreach (var (_, vᴛ1) in ida) {
+        var dt = vᴛ1;
+
+        (dt.dll, _) = getString(names, (nint)(dt.Name - (~ds).VirtualAddress));
         (d, _) = ds.Data();
         // seek to OriginalFirstThunk
-        d = d[(int)(dt.OriginalFirstThunk - ds.VirtualAddress)..];
+        d = d[(int)(dt.OriginalFirstThunk - (~ds).VirtualAddress)..];
         while (len(d) > 0) {
             if (pe64){
                 // 64bit
@@ -408,11 +407,11 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
                 if (va == 0) {
                     break;
                 }
-                if ((uint64)(va & (nuint)9223372036854775808UL) > 0){
+                if ((uint64)(va & (nuint)0x8000000000000000UL) > 0){
                 } else {
                     // is Ordinal
                     // TODO add dynimport ordinal support.
-                    var (fn, _) = getString(names, ((nint)(((uint32)va) - ds.VirtualAddress + 2)));
+                    var (fn, _) = getString(names, (nint)((uint32)va - (~ds).VirtualAddress + 2));
                     all = append(all, fn + ":"u8 + dt.dll);
                 }
             } else {
@@ -422,12 +421,12 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
                 if (va == 0) {
                     break;
                 }
-                if ((uint32)(va & (nint)2147483648L) > 0){
+                if ((uint32)(va & 0x80000000U) > 0){
                 } else {
                     // is Ordinal
                     // TODO add dynimport ordinal support.
                     //ord := va&0x0000FFFF
-                    var (fn, _) = getString(names, ((nint)(va - ds.VirtualAddress + 2)));
+                    var (fn, _) = getString(names, (nint)(va - (~ds).VirtualAddress + 2));
                     all = append(all, fn + ":"u8 + dt.dll);
                 }
             }
@@ -466,26 +465,24 @@ internal static (any, error) readOptionalHeader(io.ReadSeeker r, uint16 sz) {
     ref var ohMagic = ref heap(new uint16(), out var ᏑohMagic);
     nint ohMagicSz = binary.Size(ohMagic);
     // If optional header size is greater than 0 but less than its magic size, return error.
-    if (sz < ((uint16)ohMagicSz)) {
+    if (sz < (uint16)ohMagicSz) {
         return (default!, fmt.Errorf("optional header size is less than optional header magic size"u8));
     }
     // read reads from io.ReadSeeke, r, into data.
-    error err = default!;
-    var read = 
-    var errʗ1 = err;
-    (any data) => {
-        errʗ1 = binary.Read(r, binary.LittleEndian, data);
-        return errʗ1 == default!;
+    ref var err = ref heap<error>(out var Ꮡerr);
+    var read = (any data) => {
+        Ꮡerr.ValueSlot = binary.Read(r, new binary_littleEndianᴠByteOrder(binary.LittleEndian), data);
+        return Ꮡerr.ValueSlot == default!;
     };
     if (!read(ᏑohMagic)) {
         return (default!, fmt.Errorf("failure to read optional header magic: %v"u8, err));
     }
     switch (ohMagic) {
-    case 267: {
+    case 0x10b: {
 // PE32
         ref var oh32 = ref heap(new OptionalHeader32(), out var Ꮡoh32);
         nint oh32MinSz = binary.Size(oh32) - binary.Size(oh32.DataDirectory);
-        if (sz < ((uint16)oh32MinSz)) {
+        if (sz < (uint16)oh32MinSz) {
             return (default!, fmt.Errorf("optional header size(%d) is less minimum size (%d) of PE32 optional header"u8, sz, oh32MinSz));
         }
         oh32.Magic = ohMagic;
@@ -493,18 +490,18 @@ internal static (any, error) readOptionalHeader(io.ReadSeeker r, uint16 sz) {
             // Init oh32 fields
             return (default!, fmt.Errorf("failure to read PE32 optional header: %v"u8, err));
         }
-        (dd, err) = readDataDirectories(r, sz - ((uint16)oh32MinSz), oh32.NumberOfRvaAndSizes);
-        if (err != default!) {
-            return (default!, err);
+        var (dd, errΔ2) = readDataDirectories(r, (uint16)(sz - (uint16)oh32MinSz), oh32.NumberOfRvaAndSizes);
+        if (errΔ2 != default!) {
+            return (default!, errΔ2);
         }
         copy(oh32.DataDirectory[..], dd);
         return (Ꮡoh32, default!);
     }
-    case 523: {
+    case 0x20b: {
 // PE32+
         ref var oh64 = ref heap(new OptionalHeader64(), out var Ꮡoh64);
         nint oh64MinSz = binary.Size(oh64) - binary.Size(oh64.DataDirectory);
-        if (sz < ((uint16)oh64MinSz)) {
+        if (sz < (uint16)oh64MinSz) {
             return (default!, fmt.Errorf("optional header size(%d) is less minimum size (%d) for PE32+ optional header"u8, sz, oh64MinSz));
         }
         oh64.Magic = ohMagic;
@@ -512,9 +509,9 @@ internal static (any, error) readOptionalHeader(io.ReadSeeker r, uint16 sz) {
             // Init oh64 fields
             return (default!, fmt.Errorf("failure to read PE32+ optional header: %v"u8, err));
         }
-        (dd, err) = readDataDirectories(r, sz - ((uint16)oh64MinSz), oh64.NumberOfRvaAndSizes);
-        if (err != default!) {
-            return (default!, err);
+        var (dd, errΔ3) = readDataDirectories(r, (uint16)(sz - (uint16)oh64MinSz), oh64.NumberOfRvaAndSizes);
+        if (errΔ3 != default!) {
+            return (default!, errΔ3);
         }
         copy(oh64.DataDirectory[..], dd);
         return (Ꮡoh64, default!);
@@ -529,13 +526,13 @@ internal static (any, error) readOptionalHeader(io.ReadSeeker r, uint16 sz) {
 // its size and number of data directories as seen in optional header.
 // It parses the given size of bytes and returns given number of data directories.
 internal static (slice<DataDirectory>, error) readDataDirectories(io.ReadSeeker r, uint16 sz, uint32 n) {
-    var ddSz = ((uint64)binary.Size(new DataDirectory(nil)));
-    if (((uint64)sz) != ((uint64)n) * ddSz) {
+    var ddSz = (uint64)binary.Size(new DataDirectory(nil));
+    if ((uint64)sz != (uint64)n * ddSz) {
         return (default!, fmt.Errorf("size of data directories(%d) is inconsistent with number of data directories(%d)"u8, sz, n));
     }
-    var dd = new slice<DataDirectory>(n);
+    var dd = new slice<DataDirectory>((nint)(n));
     {
-        var err = binary.Read(r, binary.LittleEndian, dd); if (err != default!) {
+        var err = binary.Read(r, new binary_littleEndianᴠByteOrder(binary.LittleEndian), dd); if (err != default!) {
             return (default!, fmt.Errorf("failure to read data directories: %v"u8, err));
         }
     }

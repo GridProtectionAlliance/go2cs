@@ -496,7 +496,8 @@ usual long division proofs apply essentially unaltered.
 */
 namespace go.math;
 
-using bits = math.bits_package;
+using bits = go.math.bits_package;
+using go.math;
 
 partial class big_package {
 
@@ -509,8 +510,8 @@ internal static nat /*r*/ rem(this nat z, nat u, nat v) {
         z = default!;
     }
     var qp = getNat(0);
-    (q, r) = qp.div(z, u, v);
-    qp.val = q;
+    (var q, r) = (~qp).div(z, u, v);
+    qp.ValueSlot = q;
     putNat(qp);
     return r;
 }
@@ -550,11 +551,11 @@ internal static (nat q, Word r) divW(this nat z, nat x, Word y) {
 
     nint m = len(x);
     switch (ᐧ) {
-    case {} when y is 0: {
+    case {} when y == 0: {
         throw panic("division by zero");
         break;
     }
-    case {} when y is 1: {
+    case {} when y == 1: {
         q = z.set(x);
         return (q, r);
     }
@@ -589,7 +590,7 @@ internal static Word /*r*/ divWVW(slice<Word> z, Word xn, slice<Word> x, Word y)
 
     r = xn;
     if (len(x) == 1) {
-        var (qq, rr) = bits.Div(((nuint)r), ((nuint)x[0]), ((nuint)y));
+        var (qq, rr) = bits.Div((nuint)r, (nuint)x[0], (nuint)y);
         z[0] = ((Word)qq);
         return ((Word)rr);
     }
@@ -616,7 +617,7 @@ internal static (nat q, nat r) divLarge(this nat z, nat u, nat uIn, nat vIn) {
     // uIn is copied to u.
     nuint shift = nlz(vIn[n - 1]);
     var vp = getNat(n);
-    var v = vp.val;
+    var v = vp.ValueSlot;
     shlVU(v, vIn, shift);
     u = u.make(len(uIn) + 1);
     u[len(uIn)] = shlVU(u[0..(int)(len(uIn))], uIn, shift);
@@ -647,7 +648,7 @@ internal static void divBasic(this nat q, nat u, nat v) {
     nint n = len(v);
     nint m = len(u) - n;
     var qhatvp = getNat(n + 1);
-    var qhatv = qhatvp.val;
+    var qhatv = qhatvp.ValueSlot;
     // Set up for divWW below, precomputing reciprocal argument.
     Word vn1 = v[n - 1];
     Word rec = reciprocalWord(vn1);
@@ -734,13 +735,13 @@ internal static void divRecursive(this nat z, nat u, nat v) {
     // Recursion depth is (much) less than 2 log₂(len(v)).
     // Allocate a slice of temporaries to be reused across recursion,
     // plus one extra temporary not live across the recursion.
-    nint recDepth = 2 * bits.Len(((nuint)len(v)));
+    nint recDepth = 2 * bits.Len((nuint)len(v));
     var tmp = getNat(3 * len(v));
     var temps = new slice<ж<nat>>(recDepth);
     clear(z);
     z.divRecursiveStep(u, v, 0, tmp, temps);
     // Free temporaries.
-    foreach (var (Δ_, n) in temps) {
+    foreach (var (_, n) in temps) {
         if (n != nil) {
             putNat(n);
         }
@@ -754,7 +755,7 @@ internal static void divRecursive(this nat z, nat u, nat v) {
 // It uses temps[depth] (allocating if needed) as a temporary live across
 // the recursive call. It also uses tmp, but not live across the recursion.
 internal static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ж<nat> Ꮡtmp, slice<ж<nat>> temps) {
-    ref var tmp = ref Ꮡtmp.val;
+    ref var tmp = ref Ꮡtmp.Value;
 
     // u is a subsection of the original and may have leading zeros.
     // TODO(rsc): The v = v.norm() is useless and should be removed.
@@ -788,7 +789,7 @@ internal static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ж<n
         temps[depth] = getNat(n);
     } else {
         // TODO(rsc): Can be just B+1.
-        temps[depth] = temps[depth].make(B + 1);
+        temps[depth].ValueSlot = (~temps[depth]).make(B + 1);
     }
     // Compute each wide digit of the quotient.
     //
@@ -812,10 +813,10 @@ internal static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ж<n
         // uu is the up-to-3B-digit section of u we are working on.
         var uu = u[(int)(j - B)..];
         // Compute the 2-by-1 guess q̂, leaving r̂ in uu[s:B+n].
-        var qhatΔ1 = temps[depth];
+        var qhatΔ1 = temps[depth].ValueSlot;
         clear(qhatΔ1);
         qhatΔ1.divRecursiveStep(uu[(int)(sΔ1)..(int)(B + n)], v[(int)(sΔ1)..], depth + 1, Ꮡtmp, temps);
-         = qhatΔ1.norm();
+        qhatΔ1 = qhatΔ1.norm();
         // Extend to a 3-by-2 quotient and remainder.
         // Because divRecursiveStep overwrote the top part of uu with
         // the remainder r̂, the full uu already contains the equivalent
@@ -829,8 +830,8 @@ internal static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ж<n
         // and in long division, because we know that q̂ is wrong by at most one.
         var qhatvΔ1 = tmp.make(3 * n);
         clear(qhatvΔ1);
-         = qhatvΔ1.mul(qhatΔ1, v[..(int)(sΔ1)]);
-        for (nint iΔ1 = 0; iΔ1 < 2; iΔ1++) {
+        qhatvΔ1 = qhatvΔ1.mul(qhatΔ1, v[..(int)(sΔ1)]);
+        for (nint i = 0; i < 2; i++) {
             nint e = qhatvΔ1.cmp(uu.norm());
             if (e <= 0) {
                 break;
@@ -856,7 +857,7 @@ internal static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ж<n
     // Now u < (v<<B), compute lower bits in the same way.
     // Choose shift = B-1 again.
     nint s = B - 1;
-    var qhat = temps[depth];
+    var qhat = temps[depth].ValueSlot;
     clear(qhat);
     qhat.divRecursiveStep(u[(int)(s)..].norm(), v[(int)(s)..], depth + 1, Ꮡtmp, temps);
     qhat = qhat.norm();

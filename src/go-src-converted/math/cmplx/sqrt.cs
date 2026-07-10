@@ -67,14 +67,14 @@ public static complex128 Sqrt(complex128 x) {
         return complex(math.Sqrt(real(x)), imag(x));
     } else 
     if (math.IsInf(imag(x), 0)) {
-        return complex(math.Inf(1.0F), imag(x));
+        return complex(math.Inf(1), imag(x));
     }
     if (real(x) == 0) {
         if (imag(x) < 0) {
-            var rΔ1 = math.Sqrt(-0.5F * imag(x));
+            var rΔ1 = math.Sqrt(-0.5D * imag(x));
             return complex(rΔ1, -rΔ1);
         }
-        var rΔ2 = math.Sqrt(0.5F * imag(x));
+        var rΔ2 = math.Sqrt(0.5D * imag(x));
         return complex(rΔ2, rΔ2);
     }
     var a = real(x);
@@ -82,25 +82,25 @@ public static complex128 Sqrt(complex128 x) {
     float64 scale = default!;
     // Rescale to avoid internal overflow or underflow.
     if (math.Abs(a) > 4 || math.Abs(b) > 4){
-        a *= 0.25F;
-        b *= 0.25F;
+        a *= 0.25D;
+        b *= 0.25D;
         scale = 2;
     } else {
-        a *= 1.8014398509481984e16F;
+        a *= 1.8014398509481984e16D;
         // 2**54
-        b *= 1.8014398509481984e16F;
-        scale = 7.450580596923828125e-9F;
+        b *= 1.8014398509481984e16D;
+        scale = 7.450580596923828125e-9D;
     }
     // 2**-27
     var r = math.Hypot(a, b);
     float64 t = default!;
     if (a > 0){
-        t = math.Sqrt(0.5F * r + 0.5F * a);
-        r = scale * math.Abs((0.5F * b) / t);
+        t = math.Sqrt(0.5D * r + 0.5D * a);
+        r = scale * math.Abs((0.5D * b) / t);
         t *= scale;
     } else {
-        r = math.Sqrt(0.5F * r - 0.5F * a);
-        t = scale * math.Abs((0.5F * b) / r);
+        r = math.Sqrt(0.5D * r - 0.5D * a);
+        t = scale * math.Abs((0.5D * b) / r);
         r *= scale;
     }
     if (b < 0) {

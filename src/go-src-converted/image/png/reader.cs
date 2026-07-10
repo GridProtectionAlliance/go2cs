@@ -11,13 +11,14 @@ using zlib = compress.zlib_package;
 using binary = encoding.binary_package;
 using fmt = fmt_package;
 using hash = hash_package;
-using crc32 = hash.crc32_package;
+using crc32 = go.hash.crc32_package;
 using image = image_package;
-using color = image.color_package;
+using color = go.image.color_package;
 using io = io_package;
 using compress;
 using encoding;
-using hash;
+using go.hash;
+using go.image;
 
 partial class png_package {
 
@@ -93,10 +94,7 @@ internal static readonly UntypedInt itAdam7 = 1;
 
 // interlaceScan defines the placement and size of a pass for Adam7 interlacing.
 [GoType] partial struct interlaceScan {
-    internal nint xFactor;
-    internal nint yFactor;
-    internal nint xOffset;
-    internal nint yOffset;
+    internal nint xFactor, yFactor, xOffset, yOffset;
 }
 
 // interlacing defines Adam7 interlacing, with 7 passes of reduced images.
@@ -129,16 +127,15 @@ internal static readonly UntypedInt dsSeenIDAT = 4;
 
 internal static readonly UntypedInt dsSeenIEND = 5;
 
-internal static readonly @string pngHeader = "\x89PNG\r\n\x1a\n"u8;
+internal static readonly @string pngHeader = ((@string)(new byte[]{0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a}));
 
 [GoType] partial struct decoder {
-    internal io_package.Reader r;
-    internal image_package.Image img;
-    internal hash_package.Hash32 crc;
-    internal nint width;
-    internal nint height;
+    internal io.Reader r;
+    internal image.Image img;
+    internal hash.Hash32 crc;
+    internal nint width, height;
     internal nint depth;
-    internal image.color_package.Palette palette;
+    internal color.Palette palette;
     internal nint cb;
     internal nint stage;
     internal uint32 idatLength;
@@ -156,7 +153,7 @@ public static @string Error(this FormatError e) {
     return "png: invalid format: "u8 + ((@string)e);
 }
 
-internal static FormatError chunkOrderError = ((FormatError)"chunk out of order"u8);
+internal static FormatError chunkOrderError = ((FormatError)(@string)"chunk out of order"u8);
 
 [GoType("@string")] partial struct UnsupportedError;
 
@@ -166,7 +163,7 @@ public static @string Error(this UnsupportedError e) {
 
 [GoRecv] internal static error parseIHDR(this ref decoder d, uint32 length) {
     if (length != 13) {
-        return ((FormatError)"bad IHDR length"u8);
+        return ((FormatError)(@string)"bad IHDR length"u8);
     }
     {
         var (_, err) = io.ReadFull(d.r, d.tmp[..13]); if (err != default!) {
@@ -175,31 +172,31 @@ public static @string Error(this UnsupportedError e) {
     }
     d.crc.Write(d.tmp[..13]);
     if (d.tmp[10] != 0) {
-        return ((UnsupportedError)"compression method"u8);
+        return ((UnsupportedError)(@string)"compression method"u8);
     }
     if (d.tmp[11] != 0) {
-        return ((UnsupportedError)"filter method"u8);
+        return ((UnsupportedError)(@string)"filter method"u8);
     }
     if (d.tmp[12] != itNone && d.tmp[12] != itAdam7) {
-        return ((FormatError)"invalid interlace method"u8);
+        return ((FormatError)(@string)"invalid interlace method"u8);
     }
-    d.interlace = ((nint)d.tmp[12]);
-    var w = ((int32)binary.BigEndian.Uint32(d.tmp[0..4]));
-    var h = ((int32)binary.BigEndian.Uint32(d.tmp[4..8]));
+    d.interlace = (nint)d.tmp[12];
+    var w = (int32)binary.BigEndian.Uint32(d.tmp[0..4]);
+    var h = (int32)binary.BigEndian.Uint32(d.tmp[4..8]);
     if (w <= 0 || h <= 0) {
-        return ((FormatError)"non-positive dimension"u8);
+        return ((FormatError)(@string)"non-positive dimension"u8);
     }
-    var nPixels64 = ((int64)w) * ((int64)h);
-    nint nPixels = ((nint)nPixels64);
-    if (nPixels64 != ((int64)nPixels)) {
-        return ((UnsupportedError)"dimension overflow"u8);
+    var nPixels64 = (int64)w * (int64)h;
+    nint nPixels = (nint)nPixels64;
+    if (nPixels64 != (int64)nPixels) {
+        return ((UnsupportedError)(@string)"dimension overflow"u8);
     }
     // There can be up to 8 bytes per pixel, for 16 bits per channel RGBA.
     if (nPixels != (nPixels * 8) / 8) {
-        return ((UnsupportedError)"dimension overflow"u8);
+        return ((UnsupportedError)(@string)"dimension overflow"u8);
     }
     d.cb = cbInvalid;
-    d.depth = ((nint)d.tmp[8]);
+    d.depth = (nint)d.tmp[8];
     switch (d.depth) {
     case 1: {
         var exprᴛ1 = d.tmp[9];
@@ -275,15 +272,16 @@ public static @string Error(this UnsupportedError e) {
     if (d.cb == cbInvalid) {
         return ((UnsupportedError)fmt.Sprintf("bit depth %d, color type %d"u8, d.tmp[8], d.tmp[9]));
     }
-    (d.width, d.height) = (((nint)w), ((nint)h));
+    d.width = (nint)w;
+    d.height = (nint)h;
     return d.verifyChecksum();
 }
 
 [GoRecv] internal static error parsePLTE(this ref decoder d, uint32 length) {
-    nint np = ((nint)(length / 3));
+    nint np = (nint)(length / 3);
     // The number of palette entries.
-    if (length % 3 != 0 || np <= 0 || np > 256 || np > 1 << (int)(((nuint)d.depth))) {
-        return ((FormatError)"bad PLTE length"u8);
+    if (length % 3 != 0 || np <= 0 || np > 256 || np > (1 << (int)((nuint)d.depth))) {
+        return ((FormatError)(@string)"bad PLTE length"u8);
     }
     var (n, err) = io.ReadFull(d.r, d.tmp[..(int)(3 * np)]);
     if (err != default!) {
@@ -294,7 +292,7 @@ public static @string Error(this UnsupportedError e) {
     if (exprᴛ1 == cbP1 || exprᴛ1 == cbP2 || exprᴛ1 == cbP4 || exprᴛ1 == cbP8) {
         d.palette = new color.Palette(256);
         for (nint i = 0; i < np; i++) {
-            d.palette[i] = new colorꓸRGBA(d.tmp[3 * i + 0], d.tmp[3 * i + 1], d.tmp[3 * i + 2], 255);
+            d.palette[i] = new color_ΔRGBAᴠColor(new colorꓸRGBA(d.tmp[3 * i + 0], d.tmp[3 * i + 1], d.tmp[3 * i + 2], 0xff));
         }
         for (nint i = np; i < 256; i++) {
             // Initialize the rest of the palette to opaque black. The spec (section
@@ -302,14 +300,14 @@ public static @string Error(this UnsupportedError e) {
             // is an error", but some real-world PNG files have out-of-range pixel
             // values. We fall back to opaque black, the same as libpng 1.5.13;
             // ImageMagick 6.5.7 returns an error.
-            d.palette[i] = new colorꓸRGBA(0, 0, 0, 255);
+            d.palette[i] = new color_ΔRGBAᴠColor(new colorꓸRGBA(0x00, 0x00, 0x00, 0xff));
         }
         d.palette = d.palette[..(int)(np)];
     }
     else if (exprᴛ1 == cbTC8 || exprᴛ1 == cbTCA8 || exprᴛ1 == cbTC16 || exprᴛ1 == cbTCA16) {
     }
     else { /* default: */
-        return ((FormatError)"PLTE, color type mismatch"u8);
+        return ((FormatError)(@string)"PLTE, color type mismatch"u8);
     }
 
     // As per the PNG spec, a PLTE chunk is optional (and for practical purposes,
@@ -321,7 +319,7 @@ public static @string Error(this UnsupportedError e) {
     var exprᴛ1 = d.cb;
     if (exprᴛ1 == cbG1 || exprᴛ1 == cbG2 || exprᴛ1 == cbG4 || exprᴛ1 == cbG8 || exprᴛ1 == cbG16) {
         if (length != 2) {
-            return ((FormatError)"bad tRNS length"u8);
+            return ((FormatError)(@string)"bad tRNS length"u8);
         }
         var (n, err) = io.ReadFull(d.r, d.tmp[..(int)(length)]);
         if (err != default!) {
@@ -331,20 +329,20 @@ public static @string Error(this UnsupportedError e) {
         copy(d.transparent[..], d.tmp[..(int)(length)]);
         var exprᴛ2 = d.cb;
         if (exprᴛ2 == cbG1) {
-            d.transparent[1] *= 255;
+            d.transparent[1] *= 0xff;
         }
         else if (exprᴛ2 == cbG2) {
-            d.transparent[1] *= 85;
+            d.transparent[1] *= 0x55;
         }
         else if (exprᴛ2 == cbG4) {
-            d.transparent[1] *= 17;
+            d.transparent[1] *= 0x11;
         }
 
         d.useTransparent = true;
     }
     else if (exprᴛ1 == cbTC8 || exprᴛ1 == cbTC16) {
         if (length != 6) {
-            return ((FormatError)"bad tRNS length"u8);
+            return ((FormatError)(@string)"bad tRNS length"u8);
         }
         var (n, err) = io.ReadFull(d.r, d.tmp[..(int)(length)]);
         if (err != default!) {
@@ -356,7 +354,7 @@ public static @string Error(this UnsupportedError e) {
     }
     else if (exprᴛ1 == cbP1 || exprᴛ1 == cbP2 || exprᴛ1 == cbP4 || exprᴛ1 == cbP8) {
         if (length > 256) {
-            return ((FormatError)"bad tRNS length"u8);
+            return ((FormatError)(@string)"bad tRNS length"u8);
         }
         var (n, err) = io.ReadFull(d.r, d.tmp[..(int)(length)]);
         if (err != default!) {
@@ -368,11 +366,11 @@ public static @string Error(this UnsupportedError e) {
         }
         for (nint i = 0; i < n; i++) {
             var rgba = d.palette[i]._<colorꓸRGBA>();
-            d.palette[i] = new color.NRGBA(rgba.R, rgba.G, rgba.B, d.tmp[i]);
+            d.palette[i] = new color_NRGBAᴠColor(new color.NRGBA(rgba.R, rgba.G, rgba.B, d.tmp[i]));
         }
     }
     else { /* default: */
-        return ((FormatError)"tRNS, color type mismatch"u8);
+        return ((FormatError)(@string)"tRNS, color type mismatch"u8);
     }
 
     return d.verifyChecksum();
@@ -407,28 +405,30 @@ public static @string Error(this UnsupportedError e) {
         }
         d.idatLength = binary.BigEndian.Uint32(d.tmp[..4]);
         if (((@string)(d.tmp[4..8])) != "IDAT"u8) {
-            return (0, ((FormatError)"not enough pixel data"u8));
+            return (0, ((FormatError)(@string)"not enough pixel data"u8));
         }
         d.crc.Reset();
         d.crc.Write(d.tmp[4..8]);
     }
-    if (((nint)d.idatLength) < 0) {
-        return (0, ((UnsupportedError)"IDAT chunk length overflow"u8));
+    if ((nint)d.idatLength < 0) {
+        return (0, ((UnsupportedError)(@string)"IDAT chunk length overflow"u8));
     }
-    var (n, err) = d.r.Read(p[..(int)(min(len(p), ((nint)d.idatLength)))]);
+    var (n, err) = d.r.Read(p[..(int)(min(len(p), (nint)d.idatLength))]);
     d.crc.Write(p[..(int)(n)]);
-    d.idatLength -= ((uint32)n);
+    d.idatLength -= (uint32)n;
     return (n, err);
 }
 
 // decode decodes the IDAT data into an image.
-[GoRecv] internal static (image.Image, error) decode(this ref decoder d) => func((defer, _) => {
-    (r, err) = zlib.NewReader(~d);
+internal static (image.Image, error) decode(this ж<decoder> Ꮡd) => func<(image.Image, error)>((defer, recover) => {
+    ref var d = ref Ꮡd.Value;
+
+    var (r, err) = zlib.NewReader(new decoderжReader(Ꮡd));
     if (err != default!) {
         return (default!, err);
     }
     var rʗ1 = r;
-    defer(rʗ1.Close);
+    defer(() => rʗ1.Close());
     image.Image img = default!;
     if (d.interlace == itNone){
         (img, err) = d.readImagePass(r, 0, false);
@@ -443,7 +443,7 @@ public static @string Error(this UnsupportedError e) {
             return (default!, err);
         }
         for (nint pass = 0; pass < 7; pass++) {
-            (imagePass, errΔ1) = d.readImagePass(r, pass, false);
+            var (imagePass, errΔ1) = d.readImagePass(r, pass, false);
             if (errΔ1 != default!) {
                 return (default!, errΔ1);
             }
@@ -464,7 +464,7 @@ public static @string Error(this UnsupportedError e) {
         return (default!, ((FormatError)err.Error()));
     }
     if (n != 0 || d.idatLength != 0) {
-        return (default!, ((FormatError)"too much pixel data"u8));
+        return (default!, ((FormatError)(@string)"too much pixel data"u8));
     }
     return (img, default!);
 });
@@ -500,66 +500,66 @@ public static @string Error(this UnsupportedError e) {
         bitsPerPixel = d.depth;
         if (d.useTransparent){
             nrgba = image.NewNRGBA(image.Rect(0, 0, width, height));
-            img = ~nrgba;
+            img = new image.NRGBAжImage(nrgba);
         } else {
             gray = image.NewGray(image.Rect(0, 0, width, height));
-            img = ~gray;
+            img = new image.GrayжImage(gray);
         }
     }
     else if (exprᴛ1 == cbGA8) {
         bitsPerPixel = 16;
         nrgba = image.NewNRGBA(image.Rect(0, 0, width, height));
-        img = ~nrgba;
+        img = new image.NRGBAжImage(nrgba);
     }
     else if (exprᴛ1 == cbTC8) {
         bitsPerPixel = 24;
         if (d.useTransparent){
             nrgba = image.NewNRGBA(image.Rect(0, 0, width, height));
-            img = ~nrgba;
+            img = new image.NRGBAжImage(nrgba);
         } else {
             rgba = image.NewRGBA(image.Rect(0, 0, width, height));
-            img = ~rgba;
+            img = new image_ΔRGBAжImage(rgba);
         }
     }
     else if (exprᴛ1 == cbP1 || exprᴛ1 == cbP2 || exprᴛ1 == cbP4 || exprᴛ1 == cbP8) {
         bitsPerPixel = d.depth;
         paletted = image.NewPaletted(image.Rect(0, 0, width, height), d.palette);
-        img = ~paletted;
+        img = new image.PalettedжImage(paletted);
     }
     else if (exprᴛ1 == cbTCA8) {
         bitsPerPixel = 32;
         nrgba = image.NewNRGBA(image.Rect(0, 0, width, height));
-        img = ~nrgba;
+        img = new image.NRGBAжImage(nrgba);
     }
     else if (exprᴛ1 == cbG16) {
         bitsPerPixel = 16;
         if (d.useTransparent){
             nrgba64 = image.NewNRGBA64(image.Rect(0, 0, width, height));
-            img = ~nrgba64;
+            img = new image.NRGBA64жImage(nrgba64);
         } else {
             gray16 = image.NewGray16(image.Rect(0, 0, width, height));
-            img = ~gray16;
+            img = new image.Gray16жImage(gray16);
         }
     }
     else if (exprᴛ1 == cbGA16) {
         bitsPerPixel = 32;
         nrgba64 = image.NewNRGBA64(image.Rect(0, 0, width, height));
-        img = ~nrgba64;
+        img = new image.NRGBA64жImage(nrgba64);
     }
     else if (exprᴛ1 == cbTC16) {
         bitsPerPixel = 48;
         if (d.useTransparent){
             nrgba64 = image.NewNRGBA64(image.Rect(0, 0, width, height));
-            img = ~nrgba64;
+            img = new image.NRGBA64жImage(nrgba64);
         } else {
             rgba64 = image.NewRGBA64(image.Rect(0, 0, width, height));
-            img = ~rgba64;
+            img = new image.RGBA64жImage(rgba64);
         }
     }
     else if (exprᴛ1 == cbTCA16) {
         bitsPerPixel = 64;
         nrgba64 = image.NewNRGBA64(image.Rect(0, 0, width, height));
-        img = ~nrgba64;
+        img = new image.NRGBA64жImage(nrgba64);
     }
 
     if (allocateOnly) {
@@ -567,19 +567,19 @@ public static @string Error(this UnsupportedError e) {
     }
     nint bytesPerPixel = (bitsPerPixel + 7) / 8;
     // The +1 is for the per-row filter type, which is at cr[0].
-    var rowSize = 1 + (((int64)bitsPerPixel) * ((int64)width) + 7) / 8;
-    if (rowSize != ((int64)((nint)rowSize))) {
-        return (default!, ((UnsupportedError)"dimension overflow"u8));
+    var rowSize = 1 + ((int64)bitsPerPixel * (int64)width + 7) / 8;
+    if (rowSize != (int64)(nint)rowSize) {
+        return (default!, ((UnsupportedError)(@string)"dimension overflow"u8));
     }
     // cr and pr are the bytes for the current and previous row.
-    var cr = new slice<uint8>(rowSize);
-    var pr = new slice<uint8>(rowSize);
+    var cr = new slice<uint8>((nint)(rowSize));
+    var pr = new slice<uint8>((nint)(rowSize));
     for (nint y = 0; y < height; y++) {
         // Read the decompressed bytes.
         var (_, err) = io.ReadFull(r, cr);
         if (err != default!) {
             if (AreEqual(err, io.EOF) || AreEqual(err, io.ErrUnexpectedEOF)) {
-                return (default!, ((FormatError)"not enough pixel data"u8));
+                return (default!, ((FormatError)(@string)"not enough pixel data"u8));
             }
             return (default!, err);
         }
@@ -605,17 +605,17 @@ public static @string Error(this UnsupportedError e) {
                 // The first column has no column to the left of it, so it is a
                 // special case. We know that the first column exists because we
                 // check above that width != 0, and so len(cdat) != 0.
-                cdat[i] += pdat[i] / 2;
+                cdat[i] += (uint8)(pdat[i] / 2);
             }
             for (nint i = bytesPerPixel; i < len(cdat); i++) {
-                cdat[i] += ((uint8)((((nint)cdat[i - bytesPerPixel]) + ((nint)pdat[i])) / 2));
+                cdat[i] += (uint8)(((nint)cdat[i - bytesPerPixel] + (nint)pdat[i]) / 2);
             }
         }
         else if (exprᴛ2 == ftPaeth) {
             filterPaeth(cdat, pdat, bytesPerPixel);
         }
         else { /* default: */
-            return (default!, ((FormatError)"bad filter type"u8));
+            return (default!, ((FormatError)(@string)"bad filter type"u8));
         }
 
         // Convert from bytes to colors.
@@ -626,21 +626,21 @@ public static @string Error(this UnsupportedError e) {
                 for (nint x = 0; x < width; x += 8) {
                     var b = cdat[x / 8];
                     for (nint x2 = 0; x2 < 8 && x + x2 < width; x2++) {
-                        var ycol = (b >> (int)(7)) * 255;
-                        var acol = ((uint8)255);
+                        var ycol = (uint8)(((b >> (int)(7))) * 0xff);
+                        var acol = (uint8)0xff;
                         if (ycol == ty) {
-                            acol = 0;
+                            acol = 0x00;
                         }
                         nrgba.SetNRGBA(x + x2, y, new color.NRGBA(ycol, ycol, ycol, acol));
-                        b <<= (UntypedInt)(1);
+                        b <<= (int)(1);
                     }
                 }
             } else {
                 for (nint x = 0; x < width; x += 8) {
                     var b = cdat[x / 8];
                     for (nint x2 = 0; x2 < 8 && x + x2 < width; x2++) {
-                        gray.SetGray(x + x2, y, new color.Gray((b >> (int)(7)) * 255));
-                        b <<= (UntypedInt)(1);
+                        gray.SetGray(x + x2, y, new color.Gray((uint8)(((b >> (int)(7))) * 0xff)));
+                        b <<= (int)(1);
                     }
                 }
             }
@@ -651,21 +651,21 @@ public static @string Error(this UnsupportedError e) {
                 for (nint x = 0; x < width; x += 4) {
                     var b = cdat[x / 4];
                     for (nint x2 = 0; x2 < 4 && x + x2 < width; x2++) {
-                        var ycol = (b >> (int)(6)) * 85;
-                        var acol = ((uint8)255);
+                        var ycol = (uint8)(((b >> (int)(6))) * 0x55);
+                        var acol = (uint8)0xff;
                         if (ycol == ty) {
-                            acol = 0;
+                            acol = 0x00;
                         }
                         nrgba.SetNRGBA(x + x2, y, new color.NRGBA(ycol, ycol, ycol, acol));
-                        b <<= (UntypedInt)(2);
+                        b <<= (int)(2);
                     }
                 }
             } else {
                 for (nint x = 0; x < width; x += 4) {
                     var b = cdat[x / 4];
                     for (nint x2 = 0; x2 < 4 && x + x2 < width; x2++) {
-                        gray.SetGray(x + x2, y, new color.Gray((b >> (int)(6)) * 85));
-                        b <<= (UntypedInt)(2);
+                        gray.SetGray(x + x2, y, new color.Gray((uint8)(((b >> (int)(6))) * 0x55)));
+                        b <<= (int)(2);
                     }
                 }
             }
@@ -676,21 +676,21 @@ public static @string Error(this UnsupportedError e) {
                 for (nint x = 0; x < width; x += 2) {
                     var b = cdat[x / 2];
                     for (nint x2 = 0; x2 < 2 && x + x2 < width; x2++) {
-                        var ycol = (b >> (int)(4)) * 17;
-                        var acol = ((uint8)255);
+                        var ycol = (uint8)(((b >> (int)(4))) * 0x11);
+                        var acol = (uint8)0xff;
                         if (ycol == ty) {
-                            acol = 0;
+                            acol = 0x00;
                         }
                         nrgba.SetNRGBA(x + x2, y, new color.NRGBA(ycol, ycol, ycol, acol));
-                        b <<= (UntypedInt)(4);
+                        b <<= (int)(4);
                     }
                 }
             } else {
                 for (nint x = 0; x < width; x += 2) {
                     var b = cdat[x / 2];
                     for (nint x2 = 0; x2 < 2 && x + x2 < width; x2++) {
-                        gray.SetGray(x + x2, y, new color.Gray((b >> (int)(4)) * 17));
-                        b <<= (UntypedInt)(4);
+                        gray.SetGray(x + x2, y, new color.Gray((uint8)(((b >> (int)(4))) * 0x11)));
+                        b <<= (int)(4);
                     }
                 }
             }
@@ -700,15 +700,15 @@ public static @string Error(this UnsupportedError e) {
                 var ty = d.transparent[1];
                 for (nint x = 0; x < width; x++) {
                     var ycol = cdat[x];
-                    var acol = ((uint8)255);
+                    var acol = (uint8)0xff;
                     if (ycol == ty) {
-                        acol = 0;
+                        acol = 0x00;
                     }
                     nrgba.SetNRGBA(x, y, new color.NRGBA(ycol, ycol, ycol, acol));
                 }
             } else {
                 copy((~gray).Pix[(int)(pixOffset)..], cdat);
-                pixOffset += gray.val.Stride;
+                pixOffset += gray.Value.Stride;
             }
         }
         else if (exprᴛ3 == cbGA8) {
@@ -719,7 +719,7 @@ public static @string Error(this UnsupportedError e) {
         }
         else if (exprᴛ3 == cbTC8) {
             if (d.useTransparent){
-                var pix = nrgba.val.Pix;
+                var pix = nrgba.Value.Pix;
                 nint i = pixOffset;
                 nint j = 0;
                 var (tr, tg, tb) = (d.transparent[1], d.transparent[3], d.transparent[5]);
@@ -727,9 +727,9 @@ public static @string Error(this UnsupportedError e) {
                     var rΔ2 = cdat[j + 0];
                     var g = cdat[j + 1];
                     var b = cdat[j + 2];
-                    var a = ((uint8)255);
+                    var a = (uint8)0xff;
                     if (rΔ2 == tr && g == tg && b == tb) {
-                        a = 0;
+                        a = 0x00;
                     }
                     pix[i + 0] = rΔ2;
                     pix[i + 1] = g;
@@ -738,32 +738,32 @@ public static @string Error(this UnsupportedError e) {
                     i += 4;
                     j += 3;
                 }
-                pixOffset += nrgba.val.Stride;
+                pixOffset += nrgba.Value.Stride;
             } else {
-                var pix = rgba.val.Pix;
+                var pix = rgba.Value.Pix;
                 nint i = pixOffset;
                 nint j = 0;
                 for (nint x = 0; x < width; x++) {
                     pix[i + 0] = cdat[j + 0];
                     pix[i + 1] = cdat[j + 1];
                     pix[i + 2] = cdat[j + 2];
-                    pix[i + 3] = 255;
+                    pix[i + 3] = 0xff;
                     i += 4;
                     j += 3;
                 }
-                pixOffset += rgba.val.Stride;
+                pixOffset += rgba.Value.Stride;
             }
         }
         else if (exprᴛ3 == cbP1) {
             for (nint x = 0; x < width; x += 8) {
                 var b = cdat[x / 8];
                 for (nint x2 = 0; x2 < 8 && x + x2 < width; x2++) {
-                    var idx = b >> (int)(7);
-                    if (len((~paletted).Palette) <= ((nint)idx)) {
-                        paletted.val.Palette = (~paletted).Palette[..(int)(((nint)idx) + 1)];
+                    var idx = (uint8)((b >> (int)(7)));
+                    if (len((~paletted).Palette) <= (nint)idx) {
+                        paletted.Value.Palette = (~paletted).Palette[..(int)((nint)idx + 1)];
                     }
                     paletted.SetColorIndex(x + x2, y, idx);
-                    b <<= (UntypedInt)(1);
+                    b <<= (int)(1);
                 }
             }
         }
@@ -771,12 +771,12 @@ public static @string Error(this UnsupportedError e) {
             for (nint x = 0; x < width; x += 4) {
                 var b = cdat[x / 4];
                 for (nint x2 = 0; x2 < 4 && x + x2 < width; x2++) {
-                    var idx = b >> (int)(6);
-                    if (len((~paletted).Palette) <= ((nint)idx)) {
-                        paletted.val.Palette = (~paletted).Palette[..(int)(((nint)idx) + 1)];
+                    var idx = (uint8)((b >> (int)(6)));
+                    if (len((~paletted).Palette) <= (nint)idx) {
+                        paletted.Value.Palette = (~paletted).Palette[..(int)((nint)idx + 1)];
                     }
                     paletted.SetColorIndex(x + x2, y, idx);
-                    b <<= (UntypedInt)(2);
+                    b <<= (int)(2);
                 }
             }
         }
@@ -784,85 +784,85 @@ public static @string Error(this UnsupportedError e) {
             for (nint x = 0; x < width; x += 2) {
                 var b = cdat[x / 2];
                 for (nint x2 = 0; x2 < 2 && x + x2 < width; x2++) {
-                    var idx = b >> (int)(4);
-                    if (len((~paletted).Palette) <= ((nint)idx)) {
-                        paletted.val.Palette = (~paletted).Palette[..(int)(((nint)idx) + 1)];
+                    var idx = (uint8)((b >> (int)(4)));
+                    if (len((~paletted).Palette) <= (nint)idx) {
+                        paletted.Value.Palette = (~paletted).Palette[..(int)((nint)idx + 1)];
                     }
                     paletted.SetColorIndex(x + x2, y, idx);
-                    b <<= (UntypedInt)(4);
+                    b <<= (int)(4);
                 }
             }
         }
         else if (exprᴛ3 == cbP8) {
             if (len((~paletted).Palette) != 256) {
                 for (nint x = 0; x < width; x++) {
-                    if (len((~paletted).Palette) <= ((nint)cdat[x])) {
-                        paletted.val.Palette = (~paletted).Palette[..(int)(((nint)cdat[x]) + 1)];
+                    if (len((~paletted).Palette) <= (nint)cdat[x]) {
+                        paletted.Value.Palette = (~paletted).Palette[..(int)((nint)cdat[x] + 1)];
                     }
                 }
             }
             copy((~paletted).Pix[(int)(pixOffset)..], cdat);
-            pixOffset += paletted.val.Stride;
+            pixOffset += paletted.Value.Stride;
         }
         else if (exprᴛ3 == cbTCA8) {
             copy((~nrgba).Pix[(int)(pixOffset)..], cdat);
-            pixOffset += nrgba.val.Stride;
+            pixOffset += nrgba.Value.Stride;
         }
         else if (exprᴛ3 == cbG16) {
             if (d.useTransparent){
-                var ty = (uint16)(((uint16)d.transparent[0]) << (int)(8) | ((uint16)d.transparent[1]));
+                var ty = (uint16)(((uint16)d.transparent[0] << (int)(8)) | (uint16)d.transparent[1]);
                 for (nint x = 0; x < width; x++) {
-                    var ycol = (uint16)(((uint16)cdat[2 * x + 0]) << (int)(8) | ((uint16)cdat[2 * x + 1]));
-                    var acol = ((uint16)65535);
+                    var ycol = (uint16)(((uint16)cdat[2 * x + 0] << (int)(8)) | (uint16)cdat[2 * x + 1]);
+                    var acol = (uint16)0xffff;
                     if (ycol == ty) {
-                        acol = 0;
+                        acol = 0x0000;
                     }
                     nrgba64.SetNRGBA64(x, y, new color.NRGBA64(ycol, ycol, ycol, acol));
                 }
             } else {
                 for (nint x = 0; x < width; x++) {
-                    var ycol = (uint16)(((uint16)cdat[2 * x + 0]) << (int)(8) | ((uint16)cdat[2 * x + 1]));
+                    var ycol = (uint16)(((uint16)cdat[2 * x + 0] << (int)(8)) | (uint16)cdat[2 * x + 1]);
                     gray16.SetGray16(x, y, new color.Gray16(ycol));
                 }
             }
         }
         else if (exprᴛ3 == cbGA16) {
             for (nint x = 0; x < width; x++) {
-                var ycol = (uint16)(((uint16)cdat[4 * x + 0]) << (int)(8) | ((uint16)cdat[4 * x + 1]));
-                var acol = (uint16)(((uint16)cdat[4 * x + 2]) << (int)(8) | ((uint16)cdat[4 * x + 3]));
+                var ycol = (uint16)(((uint16)cdat[4 * x + 0] << (int)(8)) | (uint16)cdat[4 * x + 1]);
+                var acol = (uint16)(((uint16)cdat[4 * x + 2] << (int)(8)) | (uint16)cdat[4 * x + 3]);
                 nrgba64.SetNRGBA64(x, y, new color.NRGBA64(ycol, ycol, ycol, acol));
             }
         }
         else if (exprᴛ3 == cbTC16) {
             if (d.useTransparent){
-                var tr = (uint16)(((uint16)d.transparent[0]) << (int)(8) | ((uint16)d.transparent[1]));
-                var tg = (uint16)(((uint16)d.transparent[2]) << (int)(8) | ((uint16)d.transparent[3]));
-                var tb = (uint16)(((uint16)d.transparent[4]) << (int)(8) | ((uint16)d.transparent[5]));
+                var tr = (uint16)(((uint16)d.transparent[0] << (int)(8)) | (uint16)d.transparent[1]);
+                var tg = (uint16)(((uint16)d.transparent[2] << (int)(8)) | (uint16)d.transparent[3]);
+                var tb = (uint16)(((uint16)d.transparent[4] << (int)(8)) | (uint16)d.transparent[5]);
                 for (nint x = 0; x < width; x++) {
-                    var rcol = (uint16)(((uint16)cdat[6 * x + 0]) << (int)(8) | ((uint16)cdat[6 * x + 1]));
-                    var gcol = (uint16)(((uint16)cdat[6 * x + 2]) << (int)(8) | ((uint16)cdat[6 * x + 3]));
-                    var bcol = (uint16)(((uint16)cdat[6 * x + 4]) << (int)(8) | ((uint16)cdat[6 * x + 5]));
-                    var acol = ((uint16)65535);
+                    var rcol = (uint16)(((uint16)cdat[6 * x + 0] << (int)(8)) | (uint16)cdat[6 * x + 1]);
+                    var gcol = (uint16)(((uint16)cdat[6 * x + 2] << (int)(8)) | (uint16)cdat[6 * x + 3]);
+                    var bcol = (uint16)(((uint16)cdat[6 * x + 4] << (int)(8)) | (uint16)cdat[6 * x + 5]);
+                    var acol = (uint16)0xffff;
                     if (rcol == tr && gcol == tg && bcol == tb) {
-                        acol = 0;
+                        acol = 0x0000;
                     }
                     nrgba64.SetNRGBA64(x, y, new color.NRGBA64(rcol, gcol, bcol, acol));
                 }
             } else {
                 for (nint x = 0; x < width; x++) {
-                    var rcol = (uint16)(((uint16)cdat[6 * x + 0]) << (int)(8) | ((uint16)cdat[6 * x + 1]));
-                    var gcol = (uint16)(((uint16)cdat[6 * x + 2]) << (int)(8) | ((uint16)cdat[6 * x + 3]));
-                    var bcol = (uint16)(((uint16)cdat[6 * x + 4]) << (int)(8) | ((uint16)cdat[6 * x + 5]));
-                    rgba64.SetRGBA64(x, y, new color.RGBA64(rcol, gcol, bcol, 65535));
+                    var rcol = (uint16)(((uint16)cdat[6 * x + 0] << (int)(8)) | (uint16)cdat[6 * x + 1]);
+                    var gcol = (uint16)(((uint16)cdat[6 * x + 2] << (int)(8)) | (uint16)cdat[6 * x + 3]);
+                    var bcol = (uint16)(((uint16)cdat[6 * x + 4] << (int)(8)) | (uint16)cdat[6 * x + 5]);
+                    rgba64.SetRGBA64(x, y, new color.RGBA64(rcol, gcol, bcol, 0xffff));
                 }
             }
         }
         else if (exprᴛ3 == cbTCA16) {
             for (nint x = 0; x < width; x++) {
-                var rcol = (uint16)(((uint16)cdat[8 * x + 0]) << (int)(8) | ((uint16)cdat[8 * x + 1]));
-                var gcol = (uint16)(((uint16)cdat[8 * x + 2]) << (int)(8) | ((uint16)cdat[8 * x + 3]));
-                var bcol = (uint16)(((uint16)cdat[8 * x + 4]) << (int)(8) | ((uint16)cdat[8 * x + 5]));
-                var acol = (uint16)(((uint16)cdat[8 * x + 6]) << (int)(8) | ((uint16)cdat[8 * x + 7]));
+                var rcol = (uint16)(((uint16)cdat[8 * x + 0] << (int)(8)) | (uint16)cdat[8 * x + 1]);
+                var gcol = (uint16)(((uint16)cdat[8 * x + 2] << (int)(8)) | (uint16)cdat[8 * x + 3]);
+                var bcol = (uint16)(((uint16)cdat[8 * x + 4] << (int)(8)) | (uint16)cdat[8 * x + 5]);
+                var acol = (uint16)(((uint16)cdat[8 * x + 6] << (int)(8)) | (uint16)cdat[8 * x + 7]);
                 nrgba64.SetNRGBA64(x, y, new color.NRGBA64(rcol, gcol, bcol, acol));
             }
         }
@@ -883,64 +883,64 @@ public static @string Error(this UnsupportedError e) {
     nint bytesPerPixel = default!;
     switch (dst.type()) {
     case ж<image.Alpha> target: {
-        srcPix = src._<ж<image.Alpha>>().Pix;
-        (dstPix, stride, rect) = (target.val.Pix, target.val.Stride, target.val.Rect);
+        srcPix = src._<ж<image.Alpha>>().Value.Pix;
+        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
         bytesPerPixel = 1;
         break;
     }
     case ж<image.Alpha16> target: {
-        srcPix = src._<ж<image.Alpha16>>().Pix;
-        (dstPix, stride, rect) = (target.val.Pix, target.val.Stride, target.val.Rect);
+        srcPix = src._<ж<image.Alpha16>>().Value.Pix;
+        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
         bytesPerPixel = 2;
         break;
     }
     case ж<image.Gray> target: {
-        srcPix = src._<ж<image.Gray>>().Pix;
-        (dstPix, stride, rect) = (target.val.Pix, target.val.Stride, target.val.Rect);
+        srcPix = src._<ж<image.Gray>>().Value.Pix;
+        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
         bytesPerPixel = 1;
         break;
     }
     case ж<image.Gray16> target: {
-        srcPix = src._<ж<image.Gray16>>().Pix;
-        (dstPix, stride, rect) = (target.val.Pix, target.val.Stride, target.val.Rect);
+        srcPix = src._<ж<image.Gray16>>().Value.Pix;
+        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
         bytesPerPixel = 2;
         break;
     }
     case ж<image.NRGBA> target: {
-        srcPix = src._<ж<image.NRGBA>>().Pix;
-        (dstPix, stride, rect) = (target.val.Pix, target.val.Stride, target.val.Rect);
+        srcPix = src._<ж<image.NRGBA>>().Value.Pix;
+        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
         bytesPerPixel = 4;
         break;
     }
     case ж<image.NRGBA64> target: {
-        srcPix = src._<ж<image.NRGBA64>>().Pix;
-        (dstPix, stride, rect) = (target.val.Pix, target.val.Stride, target.val.Rect);
+        srcPix = src._<ж<image.NRGBA64>>().Value.Pix;
+        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
         bytesPerPixel = 8;
         break;
     }
     case ж<image.Paletted> target: {
         var source = src._<ж<image.Paletted>>();
-        srcPix = source.val.Pix;
-        (dstPix, stride, rect) = (target.val.Pix, target.val.Stride, target.val.Rect);
+        srcPix = source.Value.Pix;
+        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
         bytesPerPixel = 1;
         if (len((~target).Palette) < len((~source).Palette)) {
             // readImagePass can return a paletted image whose implicit palette
             // length (one more than the maximum Pix value) is larger than the
             // explicit palette length (what's in the PLTE chunk). Make the
             // same adjustment here.
-            var target.val.Palette = source.val.Palette;
+            target.Value.Palette = source.Value.Palette;
         }
         break;
     }
     case ж<imageꓸRGBA> target: {
-        srcPix = src._<ж<imageꓸRGBA>>().Pix;
-        (dstPix, stride, rect) = (target.val.Pix, target.val.Stride, target.val.Rect);
+        srcPix = src._<ж<imageꓸRGBA>>().Value.Pix;
+        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
         bytesPerPixel = 4;
         break;
     }
     case ж<image.RGBA64> target: {
-        srcPix = src._<ж<image.RGBA64>>().Pix;
-        (dstPix, stride, rect) = (target.val.Pix, target.val.Stride, target.val.Rect);
+        srcPix = src._<ж<image.RGBA64>>().Value.Pix;
+        (dstPix, stride, rect) = (target.Value.Pix, target.Value.Stride, target.Value.Rect);
         bytesPerPixel = 8;
         break;
     }}
@@ -956,11 +956,12 @@ public static @string Error(this UnsupportedError e) {
     }
 }
 
-[GoRecv] internal static error /*err*/ parseIDAT(this ref decoder d, uint32 length) {
+internal static error /*err*/ parseIDAT(this ж<decoder> Ꮡd, uint32 length) {
     error err = default!;
 
+    ref var d = ref Ꮡd.Value;
     d.idatLength = length;
-    (d.img, err) = d.decode();
+    (d.img, err) = Ꮡd.decode();
     if (err != default!) {
         return err;
     }
@@ -969,12 +970,14 @@ public static @string Error(this UnsupportedError e) {
 
 [GoRecv] internal static error parseIEND(this ref decoder d, uint32 length) {
     if (length != 0) {
-        return ((FormatError)"bad IEND length"u8);
+        return ((FormatError)(@string)"bad IEND length"u8);
     }
     return d.verifyChecksum();
 }
 
-[GoRecv] internal static error parseChunk(this ref decoder d, bool configOnly) {
+internal static error parseChunk(this ж<decoder> Ꮡd, bool configOnly) {
+    ref var d = ref Ꮡd.Value;
+
     // Read the length and chunk type.
     {
         var (_, err) = io.ReadFull(d.r, d.tmp[..8]); if (err != default!) {
@@ -1018,22 +1021,24 @@ public static @string Error(this UnsupportedError e) {
         return d.parsetRNS(length);
     }
     if (exprᴛ1 == "IDAT"u8) {
-        if (d.stage < dsSeenIHDR || d.stage > dsSeenIDAT || (d.stage == dsSeenIHDR && cbPaletted(d.cb))){
-            return chunkOrderError;
-        } else 
-        if (d.stage == dsSeenIDAT) {
-            // Ignore trailing zero-length or garbage IDAT chunks.
-            //
-            // This does not affect valid PNG images that contain multiple IDAT
-            // chunks, since the first call to parseIDAT below will consume all
-            // consecutive IDAT chunks required for decoding the image.
-            break;
-        }
-        d.stage = dsSeenIDAT;
-        if (configOnly) {
-            return default!;
-        }
-        return d.parseIDAT(length);
+        do {
+            if (d.stage < dsSeenIHDR || d.stage > dsSeenIDAT || (d.stage == dsSeenIHDR && cbPaletted(d.cb))){
+                return chunkOrderError;
+            } else 
+            if (d.stage == dsSeenIDAT) {
+                // Ignore trailing zero-length or garbage IDAT chunks.
+                //
+                // This does not affect valid PNG images that contain multiple IDAT
+                // chunks, since the first call to parseIDAT below will consume all
+                // consecutive IDAT chunks required for decoding the image.
+                break;
+            }
+            d.stage = dsSeenIDAT;
+            if (configOnly) {
+                return default!;
+            }
+            return Ꮡd.parseIDAT(length);
+        } while (false);
     }
     if (exprᴛ1 == "IEND"u8) {
         if (d.stage != dsSeenIDAT) {
@@ -1043,18 +1048,18 @@ public static @string Error(this UnsupportedError e) {
         return d.parseIEND(length);
     }
 
-    if (length > 2147483647) {
+    if (length > 0x7fffffff) {
         return ((FormatError)fmt.Sprintf("Bad chunk length: %d"u8, length));
     }
     // Ignore this chunk (of a known length).
     array<byte> ignored = new(4096);
     while (length > 0) {
-        var (n, err) = io.ReadFull(d.r, ignored[..(int)(min(len(ignored), ((nint)length)))]);
+        var (n, err) = io.ReadFull(d.r, ignored[..(int)(min(len(ignored), (nint)length))]);
         if (err != default!) {
             return err;
         }
         d.crc.Write(ignored[..(int)(n)]);
-        length -= ((uint32)n);
+        length -= (uint32)n;
     }
     return d.verifyChecksum();
 }
@@ -1066,7 +1071,7 @@ public static @string Error(this UnsupportedError e) {
         }
     }
     if (binary.BigEndian.Uint32(d.tmp[..4]) != d.crc.Sum32()) {
-        return ((FormatError)"invalid checksum"u8);
+        return ((FormatError)(@string)"invalid checksum"u8);
     }
     return default!;
 }
@@ -1077,7 +1082,7 @@ public static @string Error(this UnsupportedError e) {
         return err;
     }
     if (((@string)(d.tmp[..(int)(len(pngHeader))])) != pngHeader) {
-        return ((FormatError)"not a PNG file"u8);
+        return ((FormatError)(@string)"not a PNG file"u8);
     }
     return default!;
 }
@@ -1156,7 +1161,7 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
         cm = color.RGBAModel;
     }
     else if (exprᴛ1 == cbP1 || exprᴛ1 == cbP2 || exprᴛ1 == cbP4 || exprᴛ1 == cbP8) {
-        cm = d.val.palette;
+        cm = new color_PaletteᴠModel(d.Value.palette);
     }
     else if (exprᴛ1 == cbTCA8) {
         cm = color.NRGBAModel;

@@ -34,9 +34,9 @@ internal static traceWriter writeGoStatus(this traceWriter w, uint64 goid, int64
     }
     // Trace the status.
     if (stackID == 0){
-        w = w.@event(traceEvGoStatus, ((traceArg)goid), ((traceArg)((uint64)mid)), ((traceArg)status));
+        w = w.@event(traceEvGoStatus, ((traceArg)goid), ((traceArg)(uint64)mid), ((traceArg)(uint64)(uint8)status));
     } else {
-        w = w.@event(traceEvGoStatusStack, ((traceArg)goid), ((traceArg)((uint64)mid)), ((traceArg)status), ((traceArg)stackID));
+        w = w.@event(traceEvGoStatusStack, ((traceArg)goid), ((traceArg)(uint64)mid), ((traceArg)(uint64)(uint8)status), ((traceArg)stackID));
     }
     // Trace any special ranges that are in-progress.
     if (markAssist) {
@@ -50,9 +50,9 @@ internal static traceWriter writeGoStatus(this traceWriter w, uint64 goid, int64
 // The caller must fully own pp and it must be prevented from transitioning (e.g. this can be
 // called by a forEachP callback or from a STW).
 internal static traceWriter writeProcStatusForP(this traceWriter w, ж<Δp> Ꮡpp, bool inSTW) {
-    ref var pp = ref Ꮡpp.val;
+    ref var pp = ref Ꮡpp.DerefOrNil();
 
-    if (!pp.trace.acquireStatus(w.gen)) {
+    if (!Ꮡpp.of(runtime_package.Δp.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).acquireStatus(w.gen)) {
         return w;
     }
     traceProcStatus status = default!;
@@ -67,7 +67,7 @@ internal static traceWriter writeProcStatusForP(this traceWriter w, ж<Δp> Ꮡp
     }
     else if (exprᴛ1 == _Prunning) {
         status = traceProcRunning;
-        if (w.mp.p.ptr() == Ꮡpp && w.mp.curg != nil && (uint32)(readgstatus(w.mp.curg) & ~_Gscan) == _Gsyscall) {
+        if ((~w.mp).p.ptr() == Ꮡpp && (~w.mp).curg != nil && (uint32)(readgstatus((~w.mp).curg) & ~(uint32)_Gscan) == _Gsyscall) {
             // There's a short window wherein the goroutine may have entered _Gsyscall
             // but it still owns the P (it's not in _Psyscall yet). The goroutine entering
             // _Gsyscall is the tracer's signal that the P its bound to is also in a syscall,
@@ -82,7 +82,7 @@ internal static traceWriter writeProcStatusForP(this traceWriter w, ж<Δp> Ꮡp
         @throw("attempt to trace invalid or unsupported P status"u8);
     }
 
-    w = w.writeProcStatus(((uint64)pp.id), status, pp.trace.inSweep);
+    w = w.writeProcStatus((uint64)pp.id, status, pp.trace.inSweep);
     return w;
 }
 
@@ -97,7 +97,7 @@ internal static traceWriter writeProcStatus(this traceWriter w, uint64 pid, trac
         @throw("attempted to trace a bad status for a proc"u8);
     }
     // Trace the status.
-    w = w.@event(traceEvProcStatus, ((traceArg)pid), ((traceArg)status));
+    w = w.@event(traceEvProcStatus, ((traceArg)pid), ((traceArg)(uint64)(uint8)status));
     // Trace any special ranges that are in-progress.
     if (inSweep) {
         w = w.@event(traceEvGCSweepActive, ((traceArg)pid));
@@ -111,7 +111,7 @@ internal static traceWriter writeProcStatus(this traceWriter w, uint64 pid, trac
 internal static traceGoStatus goStatusToTraceGoStatus(uint32 status, waitReason wr) {
     // N.B. Ignore the _Gscan bit. We don't model it in the tracer.
     traceGoStatus tgs = default!;
-    var exprᴛ1 = (uint32)(status & ~_Gscan);
+    var exprᴛ1 = (uint32)(status & ~(uint32)_Gscan);
     if (exprᴛ1 == _Grunnable) {
         tgs = traceGoRunnable;
     }
@@ -152,7 +152,7 @@ internal static traceGoStatus goStatusToTraceGoStatus(uint32 status, waitReason 
     // There are 3 of these because when transitioning across generations, traceAdvance
     // needs to be able to reliably observe whether a status was traced for the previous
     // generation, while we need to clear the value for the next generation.
-    internal atomic.Uint32 statusTraced = new(3);
+    internal array<atomic.Uint32> statusTraced = new(3);
     // seq is the sequence counter for this scheduling resource's events.
     // The purpose of the sequence counter is to establish a partial order between
     // events that don't obviously happen serially (same M) in the stream ofevents.
@@ -165,7 +165,7 @@ internal static traceGoStatus goStatusToTraceGoStatus(uint32 status, waitReason 
 
 // acquireStatus acquires the right to emit a Status event for the scheduling resource.
 [GoRecv] internal static bool acquireStatus(this ref traceSchedResourceState r, uintptr gen) {
-    if (!r.statusTraced[gen % 3].CompareAndSwap(0, 1)) {
+    if (!Ꮡ(r.statusTraced[gen % 3]).CompareAndSwap(0, 1)) {
         return false;
     }
     r.readyNextGen(gen);
@@ -175,25 +175,25 @@ internal static traceGoStatus goStatusToTraceGoStatus(uint32 status, waitReason 
 // readyNextGen readies r for the generation following gen.
 [GoRecv] internal static void readyNextGen(this ref traceSchedResourceState r, uintptr gen) {
     var nextGen = traceNextGen(gen);
-    r.seq[nextGen % 2] = 0;
-    r.statusTraced[nextGen % 3].Store(0);
+    r.seq[(nint)(nextGen % 2)] = 0;
+    Ꮡ(r.statusTraced[nextGen % 3]).Store(0);
 }
 
 // statusWasTraced returns true if the sched resource's status was already acquired for tracing.
 [GoRecv] internal static bool statusWasTraced(this ref traceSchedResourceState r, uintptr gen) {
-    return r.statusTraced[gen % 3].Load() != 0;
+    return Ꮡ(r.statusTraced[gen % 3]).Load() != 0;
 }
 
 // setStatusTraced indicates that the resource's status was already traced, for example
 // when a goroutine is created.
 [GoRecv] internal static void setStatusTraced(this ref traceSchedResourceState r, uintptr gen) {
-    r.statusTraced[gen % 3].Store(1);
+    Ꮡ(r.statusTraced[gen % 3]).Store(1);
 }
 
 // nextSeq returns the next sequence number for the resource.
 [GoRecv] internal static traceArg nextSeq(this ref traceSchedResourceState r, uintptr gen) {
-    r.seq[gen % 2]++;
-    return ((traceArg)r.seq[gen % 2]);
+    r.seq[(nint)(gen % 2)]++;
+    return ((traceArg)r.seq[(nint)(gen % 2)]);
 }
 
 } // end runtime_package

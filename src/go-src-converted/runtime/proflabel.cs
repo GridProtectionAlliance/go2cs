@@ -7,7 +7,8 @@ using @unsafe = unsafe_package;
 
 partial class runtime_package {
 
-internal static uintptr labelSync;
+internal static ж<uintptr> ᏑlabelSync = new(default(uintptr));
+internal static ref uintptr labelSync => ref ᏑlabelSync.Value;
 
 // runtime_setProfLabel should be an internal detail,
 // but widely used packages access it using linkname.
@@ -39,9 +40,9 @@ internal static void runtime_setProfLabel(@unsafe.Pointer labels) {
     // a dependency on the previous racereleasemerge, which
     // ultimately carries forward to the acquire in profBuf.read.
     if (raceenabled) {
-        racereleasemerge(((@unsafe.Pointer)(Ꮡ(labelSync))));
+        racereleasemerge(@unsafe.Pointer.FromRef(ref (ᏑlabelSync).Value));
     }
-    getg().val.labels = labels;
+    getg().Value.labels = labels;
 }
 
 // runtime_getProfLabel should be an internal detail,

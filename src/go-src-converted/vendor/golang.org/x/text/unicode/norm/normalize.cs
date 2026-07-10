@@ -9,10 +9,10 @@
 namespace go.vendor.golang.org.x.text.unicode;
 
 // import "golang.org/x/text/unicode/norm"
-using utf8 = unicode.utf8_package;
-using transform = golang.org.x.text.transform_package;
-using golang.org.x.text;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using transform = go.vendor.golang.org.x.text.transform_package;
+using go.unicode;
+using go.vendor.golang.org.x.text;
 using ꓸꓸꓸbyte = Span<byte>;
 
 partial class norm_package {
@@ -35,7 +35,7 @@ public static slice<byte> Bytes(this Form f, slice<byte> b) {
     var @out = new slice<byte>(n, len(b));
     copy(@out, b[0..(int)(n)]);
     ref var rb = ref heap<reorderBuffer>(out var Ꮡrb);
-    rb = new reorderBuffer(f: ft.val, src: src, nsrc: len(b), @out: @out, flushF: appendFlush);
+    rb = new reorderBuffer(f: ft.Value, src: src, nsrc: len(b), @out: @out, flushF: appendFlush);
     return doAppendInner(Ꮡrb, n);
 }
 
@@ -50,7 +50,7 @@ public static @string String(this Form f, @string s) {
     var @out = new slice<byte>(n, len(s));
     copy(@out, s[0..(int)(n)]);
     ref var rb = ref heap<reorderBuffer>(out var Ꮡrb);
-    rb = new reorderBuffer(f: ft.val, src: src, nsrc: len(s), @out: @out, flushF: appendFlush);
+    rb = new reorderBuffer(f: ft.Value, src: src, nsrc: len(s), @out: @out, flushF: appendFlush);
     return ((@string)doAppendInner(Ꮡrb, n));
 }
 
@@ -63,7 +63,7 @@ public static bool IsNormal(this Form f, slice<byte> b) {
         return true;
     }
     ref var rb = ref heap<reorderBuffer>(out var Ꮡrb);
-    rb = new reorderBuffer(f: ft.val, src: src, nsrc: len(b));
+    rb = new reorderBuffer(f: ft.Value, src: src, nsrc: len(b));
     rb.setFlusher(default!, cmpNormalBytes);
     while (bp < len(b)) {
         rb.@out = b[(int)(bp)..];
@@ -78,16 +78,16 @@ public static bool IsNormal(this Form f, slice<byte> b) {
 }
 
 internal static bool cmpNormalBytes(ж<reorderBuffer> Ꮡrb) {
-    ref var rb = ref Ꮡrb.val;
+    ref var rb = ref Ꮡrb.Value;
 
     var b = rb.@out;
     for (nint i = 0; i < rb.nrune; i++) {
         var info = rb.rune[i];
-        if (((nint)info.size) > len(b)) {
+        if ((nint)info.size > len(b)) {
             return false;
         }
         var p = info.pos;
-        var pe = p + info.size;
+        var pe = (uint8)(p + info.size);
         for (; p < pe; p++) {
             if (b[0] != rb.@byte[p]) {
                 return false;
@@ -107,16 +107,16 @@ public static bool IsNormalString(this Form f, @string s) {
         return true;
     }
     ref var rb = ref heap<reorderBuffer>(out var Ꮡrb);
-    rb = new reorderBuffer(f: ft.val, src: src, nsrc: len(s));
-    rb.setFlusher(default!, (ж<reorderBuffer> rb) => {
+    rb = new reorderBuffer(f: ft.Value, src: src, nsrc: len(s));
+    rb.setFlusher(default!, (ж<reorderBuffer> rbΔ1) => {
         for (nint i = 0; i < (~rbΔ1).nrune; i++) {
             ref var info = ref heap<ΔProperties>(out var Ꮡinfo);
             info = (~rbΔ1).rune[i];
-            if (bp + ((nint)info.size) > len(s)) {
+            if (bp + (nint)info.size > len(s)) {
                 return false;
             }
             var p = info.pos;
-            var pe = p + info.size;
+            var pe = (uint8)(p + info.size);
             for (; p < pe; p++) {
                 if (s[bp] != (~rbΔ1).@byte[p]) {
                     return false;
@@ -141,13 +141,13 @@ public static bool IsNormalString(this Form f, @string s) {
 // if it is followed by illegal continuation bytes. It returns the
 // patched buffer and whether the decomposition is still in progress.
 internal static bool patchTail(ж<reorderBuffer> Ꮡrb) {
-    ref var rb = ref Ꮡrb.val;
+    ref var rb = ref Ꮡrb.Value;
 
-    var (info, p) = lastRuneStart(Ꮡ(rb.f), rb.@out);
+    var (info, p) = lastRuneStart(Ꮡrb.of(reorderBuffer.Ꮡf), rb.@out);
     if (p == -1 || info.size == 0) {
         return true;
     }
-    nint end = p + ((nint)info.size);
+    nint end = p + (nint)info.size;
     nint extra = len(rb.@out) - end;
     if (extra > 0) {
         // Potentially allocating memory. However, this only
@@ -156,7 +156,7 @@ internal static bool patchTail(ж<reorderBuffer> Ꮡrb) {
         x = append(x, rb.@out[(int)(len(rb.@out) - extra)..].ꓸꓸꓸ);
         rb.@out = rb.@out[..(int)(end)];
         decomposeToLastBoundary(Ꮡrb);
-        rb.doFlush();
+        Ꮡrb.doFlush();
         rb.@out = append(rb.@out, x.ꓸꓸꓸ);
         return false;
     }
@@ -165,21 +165,21 @@ internal static bool patchTail(ж<reorderBuffer> Ꮡrb) {
     decomposeToLastBoundary(Ꮡrb);
     {
         ssState s = rb.ss.next(info); if (s == ssStarter){
-            rb.doFlush();
+            Ꮡrb.doFlush();
             rb.ss.first(info);
         } else 
         if (s == ssOverflow) {
-            rb.doFlush();
+            Ꮡrb.doFlush();
             rb.insertCGJ();
             rb.ss = 0;
         }
     }
-    rb.insertUnsafe(inputBytes(buf), 0, info);
+    Ꮡrb.insertUnsafe(inputBytes(buf), 0, info);
     return true;
 }
 
 internal static nint appendQuick(ж<reorderBuffer> Ꮡrb, nint i) {
-    ref var rb = ref Ꮡrb.val;
+    ref var rb = ref Ꮡrb.Value;
 
     if (rb.nsrc == i) {
         return i;
@@ -210,16 +210,16 @@ internal static slice<byte> doAppend(this Form f, slice<byte> @out, input src, n
             return @out;
         }
         ref var rbΔ1 = ref heap<reorderBuffer>(out var ᏑrbΔ1);
-        rbΔ1 = new reorderBuffer(f: ft.val, src: src, nsrc: n, @out: @out, flushF: appendFlush);
+        rbΔ1 = new reorderBuffer(f: ft.Value, src: src, nsrc: n, @out: @out, flushF: appendFlush);
         return doAppendInner(ᏑrbΔ1, p);
     }
     ref var rb = ref heap<reorderBuffer>(out var Ꮡrb);
-    rb = new reorderBuffer(f: ft.val, src: src, nsrc: n);
+    rb = new reorderBuffer(f: ft.Value, src: src, nsrc: n);
     return doAppend(Ꮡrb, @out, 0);
 }
 
 internal static slice<byte> doAppend(ж<reorderBuffer> Ꮡrb, slice<byte> @out, nint p) {
-    ref var rb = ref Ꮡrb.val;
+    ref var rb = ref Ꮡrb.Value;
 
     rb.setFlusher(@out, appendFlush);
     var src = rb.src;
@@ -233,7 +233,7 @@ internal static slice<byte> doAppend(ж<reorderBuffer> Ꮡrb, slice<byte> @out, 
             doMerge = patchTail(Ꮡrb);
         }
     }
-    var fd = Ꮡ(rb.f);
+    var fd = Ꮡrb.of(reorderBuffer.Ꮡf);
     if (doMerge) {
         ΔProperties info = default!;
         if (p < n) {
@@ -246,7 +246,7 @@ internal static slice<byte> doAppend(ж<reorderBuffer> Ꮡrb, slice<byte> @out, 
             }
         }
         if (info.size == 0) {
-            rb.doFlush();
+            Ꮡrb.doFlush();
             // Append incomplete UTF-8 encoding.
             return src.appendSlice(rb.@out, p, n);
         }
@@ -259,7 +259,7 @@ internal static slice<byte> doAppend(ж<reorderBuffer> Ꮡrb, slice<byte> @out, 
 }
 
 internal static slice<byte> doAppendInner(ж<reorderBuffer> Ꮡrb, nint p) {
-    ref var rb = ref Ꮡrb.val;
+    ref var rb = ref Ꮡrb.Value;
 
     for (nint n = rb.nsrc; p < n; ) {
         p = decomposeSegment(Ꮡrb, p, true);
@@ -287,12 +287,12 @@ public static (nint n, error err) Span(this Form f, slice<byte> b, bool atEOF) {
     nint n = default!;
     error err = default!;
 
-    var (n, ok) = formTable[f].quickSpan(inputBytes(b), 0, len(b), atEOF);
+    (n, var ok) = formTable[f].quickSpan(inputBytes(b), 0, len(b), atEOF);
     if (n < len(b)) {
         if (!ok){
-            err = transform.ErrEndOfSpan;
+            err = go.vendor.golang.org.x.text.transform_package.ErrEndOfSpan;
         } else {
-            err = transform.ErrShortSrc;
+            err = go.vendor.golang.org.x.text.transform_package.ErrShortSrc;
         }
     }
     return (n, err);
@@ -304,12 +304,12 @@ public static (nint n, error err) SpanString(this Form f, @string s, bool atEOF)
     nint n = default!;
     error err = default!;
 
-    var (n, ok) = formTable[f].quickSpan(inputString(s), 0, len(s), atEOF);
+    (n, var ok) = formTable[f].quickSpan(inputString(s), 0, len(s), atEOF);
     if (n < len(s)) {
         if (!ok){
-            err = transform.ErrEndOfSpan;
+            err = go.vendor.golang.org.x.text.transform_package.ErrEndOfSpan;
         } else {
-            err = transform.ErrShortSrc;
+            err = go.vendor.golang.org.x.text.transform_package.ErrShortSrc;
         }
     }
     return (n, err);
@@ -369,7 +369,7 @@ public static (nint n, error err) SpanString(this Form f, @string s, bool atEOF)
             }
         }
         lastCC = info.ccc;
-        i += ((nint)info.size);
+        i += (nint)info.size;
     }
     if (i == n) {
         if (!atEOF) {
@@ -413,7 +413,7 @@ internal static nint firstBoundary(this Form f, input src, nint nsrc) {
                 return i;
             }
         }
-        i += ((nint)info.size);
+        i += (nint)info.size;
         if (i >= nsrc) {
             if (!info.BoundaryAfter() && !ss.isMax()) {
                 return -1;
@@ -460,7 +460,7 @@ internal static nint nextBoundary(this Form f, input src, nint nsrc, bool atEOF)
     }
     var ss = ((streamSafe)0);
     ss.first(info);
-    for (nint i = ((nint)info.size); i < nsrc; i += ((nint)info.size)) {
+    for (nint i = (nint)info.size; i < nsrc; i += (nint)info.size) {
         info = (~fd).info(src, i);
         if (info.size == 0) {
             if (atEOF) {
@@ -489,7 +489,7 @@ public static nint LastBoundary(this Form f, slice<byte> b) {
 }
 
 internal static nint lastBoundary(ж<formInfo> Ꮡfd, slice<byte> b) {
-    ref var fd = ref Ꮡfd.val;
+    ref var fd = ref Ꮡfd.Value;
 
     nint i = len(b);
     var (info, p) = lastRuneStart(Ꮡfd, b);
@@ -509,7 +509,7 @@ internal static nint lastBoundary(ж<formInfo> Ꮡfd, slice<byte> b) {
             return i;
         }
     }
-    if (p + ((nint)info.size) != i) {
+    if (p + (nint)info.size != i) {
         // trailing non-starter bytes: illegal UTF-8
         return i;
     }
@@ -525,7 +525,7 @@ internal static nint lastBoundary(ж<formInfo> Ꮡfd, slice<byte> b) {
                 break;
             }
         }
-        if (p + ((nint)info.size) != i) {
+        if (p + (nint)info.size != i) {
             if (p == -1) {
                 // no boundary found
                 return -1;
@@ -541,7 +541,7 @@ internal static nint lastBoundary(ж<formInfo> Ꮡfd, slice<byte> b) {
 // (Grapheme Joiner) when it encounters a sequence of more than 30 non-starters
 // and returns the number of bytes consumed from src or iShortDst or iShortSrc.
 internal static nint decomposeSegment(ж<reorderBuffer> Ꮡrb, nint sp, bool atEOF) {
-    ref var rb = ref Ꮡrb.val;
+    ref var rb = ref Ꮡrb.Value;
 
     // Force one character to be consumed.
     var info = rb.f.info(rb.src, sp);
@@ -561,22 +561,22 @@ internal static nint decomposeSegment(ж<reorderBuffer> Ꮡrb, nint sp, bool atE
         }
     }
     {
-        insertErr err = rb.insertFlush(rb.src, sp, info); if (err != iSuccess) {
-            return ((nint)err);
+        insertErr err = Ꮡrb.insertFlush(rb.src, sp, info); if (err != iSuccess) {
+            return (nint)err;
         }
     }
     while (ᐧ) {
-        sp += ((nint)info.size);
+        sp += (nint)info.size;
         if (sp >= rb.nsrc) {
             if (!atEOF && !info.BoundaryAfter()) {
-                return ((nint)iShortSrc);
+                return (nint)iShortSrc;
             }
             break;
         }
         info = rb.f.info(rb.src, sp);
         if (info.size == 0) {
             if (!atEOF) {
-                return ((nint)iShortSrc);
+                return (nint)iShortSrc;
             }
             break;
         }
@@ -590,14 +590,14 @@ internal static nint decomposeSegment(ж<reorderBuffer> Ꮡrb, nint sp, bool atE
             }
         }
         {
-            insertErr err = rb.insertFlush(rb.src, sp, info); if (err != iSuccess) {
-                return ((nint)err);
+            insertErr err = Ꮡrb.insertFlush(rb.src, sp, info); if (err != iSuccess) {
+                return (nint)err;
             }
         }
     }
 end:
-    if (!rb.doFlush()) {
-        return ((nint)iShortDst);
+    if (!Ꮡrb.doFlush()) {
+        return (nint)iShortDst;
     }
     return sp;
 }
@@ -605,7 +605,7 @@ end:
 // lastRuneStart returns the runeInfo and position of the last
 // rune in buf or the zero runeInfo and -1 if no rune was found.
 internal static (ΔProperties, nint) lastRuneStart(ж<formInfo> Ꮡfd, slice<byte> buf) {
-    ref var fd = ref Ꮡfd.val;
+    ref var fd = ref Ꮡfd.Value;
 
     nint p = len(buf) - 1;
     for (; p >= 0 && !utf8.RuneStart(buf[p]); p--) {
@@ -619,11 +619,11 @@ internal static (ΔProperties, nint) lastRuneStart(ж<formInfo> Ꮡfd, slice<byt
 // decomposeToLastBoundary finds an open segment at the end of the buffer
 // and scans it into rb. Returns the buffer minus the last segment.
 internal static void decomposeToLastBoundary(ж<reorderBuffer> Ꮡrb) {
-    ref var rb = ref Ꮡrb.val;
+    ref var rb = ref Ꮡrb.Value;
 
-    var fd = Ꮡ(rb.f);
+    var fd = Ꮡrb.of(reorderBuffer.Ꮡf);
     var (info, i) = lastRuneStart(fd, rb.@out);
-    if (((nint)info.size) != len(rb.@out) - i) {
+    if ((nint)info.size != len(rb.@out) - i) {
         // illegal trailing continuation bytes
         return;
     }
@@ -643,12 +643,12 @@ internal static void decomposeToLastBoundary(ж<reorderBuffer> Ꮡrb) {
             break;
         }
         padd++;
-        p -= ((nint)info.size);
+        p -= (nint)info.size;
         if (v == ssStarter || p < 0) {
             break;
         }
         (info, i) = lastRuneStart(fd, rb.@out[..(int)(p)]);
-        if (((nint)info.size) != p - i) {
+        if ((nint)info.size != p - i) {
             break;
         }
     }
@@ -659,7 +659,7 @@ internal static void decomposeToLastBoundary(ж<reorderBuffer> Ꮡrb) {
     rb.@out = rb.@out[..(int)(p)];
     for (padd--; padd >= 0; padd--) {
         info = add[padd];
-        rb.insertUnsafe(inputBytes(cp), 0, info);
+        Ꮡrb.insertUnsafe(inputBytes(cp), 0, info);
         cp = cp[(int)(info.size)..];
     }
 }

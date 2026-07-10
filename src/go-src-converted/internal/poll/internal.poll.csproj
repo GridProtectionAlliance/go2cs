@@ -9,7 +9,7 @@
     <Version>0.1.4</Version>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>
-    <Copyright>Copyright © 2025</Copyright>
+    <Copyright>Copyright © 2026</Copyright>
     <Authors>$(Product) Authors</Authors>
     <Company>Grid Protection Alliance</Company>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
@@ -86,7 +86,6 @@
     <Using Include="System.Double" Alias="float64" />
     <Using Include="System.Numerics.Complex" Alias="complex128" />
     <Using Include="System.Int32" Alias="rune" />
-    <Using Include="System.UIntPtr" Alias="uintptr" />
     <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
     <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTagAttribute" />
     <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
@@ -109,8 +108,10 @@
     <ProjectReference Include="$(go2csPath)go-src-converted\internal\race\internal.race.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\internal\syscall\windows\internal.syscall.windows.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\io\io.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\sync\atomic\sync.atomic.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\sync\sync.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\syscall\syscall.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\time\time.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\unicode\utf16\unicode.utf16.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\unicode\utf8\unicode.utf8.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\unsafe\unsafe.csproj" />

@@ -5,9 +5,9 @@ namespace go.math.rand;
 
 using errors = errors_package;
 using byteorder = @internal.byteorder_package;
-using bits = math.bits_package;
+using bits = go.math.bits_package;
 using @internal;
-using math;
+using go.math;
 
 partial class rand_package {
 
@@ -65,17 +65,17 @@ internal static error errUnmarshalPCG = errors.New("invalid PCG encoding"u8);
     // bits in the multiplier reduces the effect of low bits on the highest bits,
     // and it only saves 1 multiply out of 3.
     // (On 32-bit systems, it saves 1 out of 6, since Mul64 is doing 4.)
-    static readonly UntypedInt mulHi = 2549297995355413924;
+    UntypedInt mulHi = 2549297995355413924;
     
-    static readonly UntypedInt mulLo = 4865540595714422341;
+    UntypedInt mulLo = 4865540595714422341;
     
-    static readonly UntypedInt incHi = 6364136223846793005;
+    UntypedInt incHi = 6364136223846793005;
     
-    static readonly UntypedInt incLo = 1442695040888963407;
+    UntypedInt incLo = 1442695040888963407;
     // state = state * mul + inc
     (hi, lo) = bits.Mul64(p.lo, mulLo);
-    hi += p.hi * mulLo + p.lo * mulHi;
-    var (lo, c) = bits.Add64(lo, incLo, 0);
+    hi += p.hi * (uint64)mulLo + p.lo * (uint64)mulHi;
+    (lo, var c) = bits.Add64(lo, incLo, 0);
     (hi, _) = bits.Add64(hi, incHi, c);
     p.lo = lo;
     p.hi = hi;
@@ -94,10 +94,10 @@ internal static error errUnmarshalPCG = errors.New("invalid PCG encoding"u8);
     // DXSM "double xorshift multiply"
     // https://github.com/imneme/pcg-cpp/blob/428802d1a5/include/pcg_random.hpp#L1015
     // https://github.com/imneme/pcg-cpp/blob/428802d1a5/include/pcg_random.hpp#L176
-    static readonly UntypedInt cheapMul = /* 0xda942042e4dd58b5 */ 15750249268501108917;
-    hi ^= (uint64)(hi >> (int)(32));
+    UntypedInt cheapMul = 0xda942042e4dd58b5;
+    hi ^= (uint64)((hi >> (int)(32)));
     hi *= cheapMul;
-    hi ^= (uint64)(hi >> (int)(48));
+    hi ^= (uint64)((hi >> (int)(48)));
     hi *= ((uint64)(lo | 1));
     return hi;
 }

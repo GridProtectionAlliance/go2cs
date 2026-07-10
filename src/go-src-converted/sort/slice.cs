@@ -26,7 +26,7 @@ public static void Slice(any x, Func<nint, nint, bool> less) {
     var rv = reflectlite.ValueOf(x);
     var swap = reflectlite.Swapper(x);
     nint length = rv.Len();
-    nint limit = bits.Len(((nuint)length));
+    nint limit = bits.Len((nuint)length);
     pdqsort_func(new lessSwap(less, swap), 0, length, limit);
 }
 

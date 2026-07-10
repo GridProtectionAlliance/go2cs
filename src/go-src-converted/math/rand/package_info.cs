@@ -38,9 +38,10 @@ using static go.math.rand_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<lockedSource, Source>]
-[assembly: GoImplement<rngSource, Source>]
-[assembly: GoImplement<runtimeSource, Source>]
+[assembly: GoImplement<lockedSource, Source>(Pointer = true)]
+[assembly: GoImplement<rngSource, Source>(Pointer = true)]
+[assembly: GoImplement<runtimeSource, Source64>(Pointer = true)]
+[assembly: GoImplement<runtimeSource, Source>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

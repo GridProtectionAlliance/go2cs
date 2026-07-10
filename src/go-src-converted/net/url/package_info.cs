@@ -41,7 +41,7 @@ using static go.net.url_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<EscapeError, error>]
 [assembly: GoImplement<InvalidHostError, error>]
-[assembly: GoImplement<ΔError, error>]
+[assembly: GoImplement<ΔError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

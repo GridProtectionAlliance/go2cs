@@ -47,86 +47,87 @@ partial class types_package {
     public int64 MaxAlign; // maximum alignment in bytes - must be >= 1
 }
 
-[GoRecv] public static int64 /*result*/ Alignof(this ref StdSizes s, ΔType T) => func((defer, _) => {
+public static int64 /*result*/ Alignof(this ж<StdSizes> Ꮡs, ΔType T) {
     int64 result = default!;
+    func((defer, recover) => {
+    ref var s = ref Ꮡs.Value;
 
-    defer(() => {
-        assert(result >= 1);
-    });
-    // For arrays and structs, alignment is defined in terms
-    // of alignment of the elements and fields, respectively.
-    switch (under(T).type()) {
-    case Array.val t: {
-        return s.Alignof((~t).elem);
-    }
-    case Struct.val t: {
-        if (len((~t).fields) == 0 && _IsSyncAtomicAlign64(T)) {
-            // spec: "For a variable x of array type: unsafe.Alignof(x)
-            // is the same as unsafe.Alignof(x[0]), but at least 1."
-            // Special case: sync/atomic.align64 is an
-            // empty struct we recognize as a signal that
-            // the struct it contains must be
-            // 64-bit-aligned.
-            //
-            // This logic is equivalent to the logic in
-            // cmd/compile/internal/types/size.go:calcStructOffset
-            return 8;
+        defer(() => {
+            assert(result >= 1);
+        });
+        // For arrays and structs, alignment is defined in terms
+        // of alignment of the elements and fields, respectively.
+        var switchᴛ22 = under(T);
+        switch (switchᴛ22.type()) {
+        case ж<Array> t: {
+            result = Ꮡs.Alignof((~t).elem); return;
         }
-        var max = ((int64)1);
-        foreach (var (_, f) in (~t).fields) {
-            // spec: "For a variable x of struct type: unsafe.Alignof(x)
-            // is the largest of the values unsafe.Alignof(x.f) for each
-            // field f of x, but at least 1."
-            {
-                var aΔ1 = s.Alignof(f.typ); if (aΔ1 > max) {
-                    max = aΔ1;
+        case ж<Struct> t: {
+            if (len((~t).fields) == 0 && _IsSyncAtomicAlign64(T)) {
+                // spec: "For a variable x of array type: unsafe.Alignof(x)
+                // is the same as unsafe.Alignof(x[0]), but at least 1."
+                // Special case: sync/atomic.align64 is an
+                // empty struct we recognize as a signal that
+                // the struct it contains must be
+                // 64-bit-aligned.
+                //
+                // This logic is equivalent to the logic in
+                // cmd/compile/internal/types/size.go:calcStructOffset
+                result = 8; return;
+            }
+            var max = (int64)1;
+            foreach (var (_, f) in (~t).fields) {
+                // spec: "For a variable x of struct type: unsafe.Alignof(x)
+                // is the largest of the values unsafe.Alignof(x.f) for each
+                // field f of x, but at least 1."
+                {
+                    var aΔ1 = Ꮡs.Alignof((~f).typ); if (aΔ1 > max) {
+                        max = aΔ1;
+                    }
                 }
             }
+            result = max; return;
         }
-        return max;
-    }
-    case Slice.val t: {
-        assert(!isTypeParam(T));
-        return s.WordSize;
-    }
-    case Interface.val t: {
-        assert(!isTypeParam(T));
-        return s.WordSize;
-    }
-    case Basic.val t: {
-        if ((BasicInfo)(t.Info() & IsString) != 0) {
-            // Multiword data structures are effectively structs
-            // in which each element has size WordSize.
-            // Type parameters lead to variable sizes/alignments;
-            // StdSizes.Alignof won't be called for them.
-            // Strings are like slices and interfaces.
-            return s.WordSize;
+        case ж<Slice> _:
+        case ж<Interface> _: {
+            var t = switchᴛ22;
+            assert(!isTypeParam(T));
+            result = s.WordSize; return;
         }
-        break;
-    }
-    case TypeParam.val t: {
-        throw panic("unreachable");
-        break;
-    }
-    case Union.val t: {
-        throw panic("unreachable");
-        break;
-    }}
-    var a = s.Sizeof(T);
-    // may be 0 or negative
-    // spec: "For a variable x of any type: unsafe.Alignof(x) is at least 1."
-    if (a < 1) {
-        return 1;
-    }
-    // complex{64,128} are aligned like [2]float{32,64}.
-    if (isComplex(T)) {
-        a /= 2;
-    }
-    if (a > s.MaxAlign) {
-        return s.MaxAlign;
-    }
-    return a;
-});
+        case ж<Basic> t: {
+            if ((BasicInfo)(t.Info() & IsString) != 0) {
+                // Multiword data structures are effectively structs
+                // in which each element has size WordSize.
+                // Type parameters lead to variable sizes/alignments;
+                // StdSizes.Alignof won't be called for them.
+                // Strings are like slices and interfaces.
+                result = s.WordSize; return;
+            }
+            break;
+        }
+        case ж<TypeParam> _:
+        case ж<Union> _: {
+            var t = switchᴛ22;
+            throw panic("unreachable");
+            break;
+        }}
+        var a = Ꮡs.Sizeof(T);
+        // may be 0 or negative
+        // spec: "For a variable x of any type: unsafe.Alignof(x) is at least 1."
+        if (a < 1) {
+            result = 1; return;
+        }
+        // complex{64,128} are aligned like [2]float{32,64}.
+        if (isComplex(T)) {
+            a /= 2;
+        }
+        if (a > s.MaxAlign) {
+            result = s.MaxAlign; return;
+        }
+        result = a;
+    });
+    return result;
+}
 
 internal static bool _IsSyncAtomicAlign64(ΔType T) {
     var named = asNamed(T);
@@ -134,10 +135,12 @@ internal static bool _IsSyncAtomicAlign64(ΔType T) {
         return false;
     }
     var obj = named.Obj();
-    return obj.Name() == "align64"u8 && obj.Pkg() != nil && (obj.Pkg().Path() == "sync/atomic"u8 || obj.Pkg().Path() == "internal/runtime/atomic"u8);
+    return obj.of(TypeName.Ꮡobject).Name() == "align64"u8 && obj.of(TypeName.Ꮡobject).Pkg() != nil && (obj.of(TypeName.Ꮡobject).Pkg().Path() == "sync/atomic"u8 || obj.of(TypeName.Ꮡobject).Pkg().Path() == "internal/runtime/atomic"u8);
 }
 
-[GoRecv] public static slice<int64> Offsetsof(this ref StdSizes s, slice<ж<Var>> fields) {
+public static slice<int64> Offsetsof(this ж<StdSizes> Ꮡs, slice<ж<Var>> fields) {
+    ref var s = ref Ꮡs.Value;
+
     var offsets = new slice<int64>(len(fields));
     int64 offs = default!;
     foreach (var (i, f) in fields) {
@@ -147,12 +150,12 @@ internal static bool _IsSyncAtomicAlign64(ΔType T) {
             continue;
         }
         // offs >= 0
-        var a = s.Alignof(f.typ);
+        var a = Ꮡs.Alignof((~f).typ);
         offs = align(offs, a);
         // possibly < 0 if align overflows
         offsets[i] = offs;
         {
-            var d = s.Sizeof(f.typ); if (d >= 0 && offs >= 0){
+            var d = Ꮡs.Sizeof((~f).typ); if (d >= 0 && offs >= 0){
                 offs += d;
             } else {
                 // ok to overflow to < 0
@@ -164,31 +167,34 @@ internal static bool _IsSyncAtomicAlign64(ΔType T) {
     return offsets;
 }
 
-internal static array<byte> basicSizes = new runtime.SparseArray<byte>{
-    [Bool] = 1,
-    [Int8] = 1,
-    [Int16] = 2,
-    [Int32] = 4,
-    [Int64] = 8,
-    [Uint8] = 1,
-    [Uint16] = 2,
-    [Uint32] = 4,
-    [Uint64] = 8,
-    [Float32] = 4,
-    [Float64] = 8,
-    [Complex64] = 8,
-    [Complex128] = 16
+internal static array<byte> basicSizes = new golib.SparseArray<byte>{
+    [(int)Bool] = 1,
+    [(int)Int8] = 1,
+    [(int)Int16] = 2,
+    [(int)Int32] = 4,
+    [(int)Int64] = 8,
+    [(int)Uint8] = 1,
+    [(int)Uint16] = 2,
+    [(int)Uint32] = 4,
+    [(int)Uint64] = 8,
+    [(int)Float32] = 4,
+    [(int)Float64] = 8,
+    [(int)Complex64] = 8,
+    [(int)Complex128] = 16
 }.array();
 
-[GoRecv] public static int64 Sizeof(this ref StdSizes s, ΔType T) {
-    switch (under(T).type()) {
-    case Basic.val t: {
+public static int64 Sizeof(this ж<StdSizes> Ꮡs, ΔType T) {
+    ref var s = ref Ꮡs.Value;
+
+    var switchᴛ23 = under(T);
+    switch (switchᴛ23.type()) {
+    case ж<Basic> t: {
         assert(isTyped(T));
-        BasicKind k = t.val.kind;
-        if (((nint)k) < len(basicSizes)) {
+        BasicKind k = t.Value.kind;
+        if ((nint)k < len(basicSizes)) {
             {
                 var sΔ1 = basicSizes[k]; if (sΔ1 > 0) {
-                    return ((int64)sΔ1);
+                    return (int64)sΔ1;
                 }
             }
         }
@@ -197,12 +203,12 @@ internal static array<byte> basicSizes = new runtime.SparseArray<byte>{
         }
         break;
     }
-    case Array.val t: {
-        var n = t.val.len;
+    case ж<Array> t: {
+        var n = t.Value.len;
         if (n <= 0) {
             return 0;
         }
-        var esize = s.Sizeof((~t).elem);
+        var esize = Ꮡs.Sizeof((~t).elem);
         if (esize < 0) {
             // n > 0
             return -1;
@@ -211,7 +217,7 @@ internal static array<byte> basicSizes = new runtime.SparseArray<byte>{
             // element too large
             return 0;
         }
-        var a = s.Alignof((~t).elem);
+        var a = Ꮡs.Alignof((~t).elem);
         var ea = align(esize, // 0-size element
  // esize > 0
  a);
@@ -223,39 +229,37 @@ internal static array<byte> basicSizes = new runtime.SparseArray<byte>{
 // ea >= 1
 // n1 >= 0
         // Final size is ea*n1 + esize; and size must be <= maxInt64.
-        static readonly UntypedInt maxInt64 = /* 1<<63 - 1 */ 9223372036854775807;
-        if (n1 > 0 && ea > maxInt64 / n1) {
+        UntypedInt maxInt64 = /* 1<<63 - 1 */ 9223372036854775807;
+        if (n1 > 0 && ea > (int64)maxInt64 / n1) {
             return -1;
         }
         return ea * n1 + esize;
     }
-    case Slice.val t: {
+    case ж<Slice> t: {
         return s.WordSize * 3;
     }
-    case Struct.val t: {
-        n = t.NumFields();
+    case ж<Struct> t: {
+        nint n = t.NumFields();
         if (n == 0) {
             // ea*n1 overflows
             // may still overflow to < 0 which is ok
             return 0;
         }
-        var offsets = s.Offsetsof((~t).fields);
+        var offsets = Ꮡs.Offsetsof((~t).fields);
         var offs = offsets[n - 1];
-        var size = s.Sizeof((~t).fields[n - 1].typ);
+        var size = Ꮡs.Sizeof((~(~t).fields[n - 1]).typ);
         if (offs < 0 || size < 0) {
             return -1;
         }
         return offs + size;
     }
-    case Interface.val t: {
+    case ж<Interface> t: {
         assert(!isTypeParam(T));
         return s.WordSize * 2;
     }
-    case TypeParam.val t: {
-        throw panic("unreachable");
-        break;
-    }
-    case Union.val t: {
+    case ж<TypeParam> _:
+    case ж<Union> _: {
+        var t = switchᴛ23;
         throw panic("unreachable");
         break;
     }}
@@ -271,22 +275,22 @@ internal static array<byte> basicSizes = new runtime.SparseArray<byte>{
 // update the doc string of SizesFor below.
 // common architecture word sizes and alignments
 internal static map<@string, ж<gcSizes>> gcArchSizes = new map<@string, ж<gcSizes>>{
-    ["386"u8] = new(4, 4),
-    ["amd64"u8] = new(8, 8),
-    ["amd64p32"u8] = new(4, 8),
-    ["arm"u8] = new(4, 4),
-    ["arm64"u8] = new(8, 8),
-    ["loong64"u8] = new(8, 8),
-    ["mips"u8] = new(4, 4),
-    ["mipsle"u8] = new(4, 4),
-    ["mips64"u8] = new(8, 8),
-    ["mips64le"u8] = new(8, 8),
-    ["ppc64"u8] = new(8, 8),
-    ["ppc64le"u8] = new(8, 8),
-    ["riscv64"u8] = new(8, 8),
-    ["s390x"u8] = new(8, 8),
-    ["sparc64"u8] = new(8, 8),
-    ["wasm"u8] = new(8, 8)
+    ["386"u8] = Ꮡ(new gcSizes(4, 4)),
+    ["amd64"u8] = Ꮡ(new gcSizes(8, 8)),
+    ["amd64p32"u8] = Ꮡ(new gcSizes(4, 8)),
+    ["arm"u8] = Ꮡ(new gcSizes(4, 4)),
+    ["arm64"u8] = Ꮡ(new gcSizes(8, 8)),
+    ["loong64"u8] = Ꮡ(new gcSizes(8, 8)),
+    ["mips"u8] = Ꮡ(new gcSizes(4, 4)),
+    ["mipsle"u8] = Ꮡ(new gcSizes(4, 4)),
+    ["mips64"u8] = Ꮡ(new gcSizes(8, 8)),
+    ["mips64le"u8] = Ꮡ(new gcSizes(8, 8)),
+    ["ppc64"u8] = Ꮡ(new gcSizes(8, 8)),
+    ["ppc64le"u8] = Ꮡ(new gcSizes(8, 8)),
+    ["riscv64"u8] = Ꮡ(new gcSizes(8, 8)),
+    ["s390x"u8] = Ꮡ(new gcSizes(8, 8)),
+    ["sparc64"u8] = Ꮡ(new gcSizes(8, 8)),
+    ["wasm"u8] = Ꮡ(new gcSizes(8, 8))
 };
 
 // SizesFor returns the Sizes used by a compiler for an architecture.
@@ -300,15 +304,14 @@ public static Sizes SizesFor(@string compiler, @string arch) {
     if (exprᴛ1 == "gc"u8) {
         {
             var s = gcSizesFor(compiler, arch); if (s != nil) {
-                return new Sizes(s);
+                return ((Sizes)new gcSizesжSizes(s));
             }
         }
     }
     if (exprᴛ1 == "gccgo"u8) {
         {
-            var s = gccgoArchSizes[arch];
-            var ok = gccgoArchSizes[arch]; if (ok) {
-                return new Sizes(s);
+            var (s, ok) = gccgoArchSizes[arch, ꟷ]; if (ok) {
+                return ((Sizes)new StdSizesжSizes(s));
             }
         }
     }
@@ -320,9 +323,9 @@ public static Sizes SizesFor(@string compiler, @string arch) {
 internal static Sizes stdSizes = SizesFor("gc"u8, "amd64"u8);
 
 [GoRecv] internal static int64 alignof(this ref Config conf, ΔType T) {
-    var f = () => stdSizes.Alignof();
+    var f = stdSizes.Alignof;
     if (conf.Sizes != default!) {
-        f = () => conf.Sizes.Alignof();
+        f = conf.Sizes.Alignof;
     }
     {
         var a = f(T); if (a >= 1) {
@@ -332,15 +335,15 @@ internal static Sizes stdSizes = SizesFor("gc"u8, "amd64"u8);
     throw panic("implementation of alignof returned an alignment < 1");
 }
 
-[GoRecv] public static slice<int64> offsetsof(this ref Config conf, ж<Struct> ᏑT) {
-    ref var T = ref ᏑT.val;
+[GoRecv] internal static slice<int64> offsetsof(this ref Config conf, ж<Struct> ᏑT) {
+    ref var T = ref ᏑT.Value;
 
     slice<int64> offsets = default!;
     if (T.NumFields() > 0) {
         // compute offsets on demand
-        var f = () => stdSizes.Offsetsof();
+        var f = stdSizes.Offsetsof;
         if (conf.Sizes != default!) {
-            f = () => conf.Sizes.Offsetsof();
+            f = conf.Sizes.Offsetsof;
         }
         offsets = f(T.fields);
         // sanity checks
@@ -359,7 +362,7 @@ internal static Sizes stdSizes = SizesFor("gc"u8, "amd64"u8);
 [GoRecv] internal static int64 offsetof(this ref Config conf, ΔType T, slice<nint> index) {
     int64 offs = default!;
     foreach (var (_, i) in index) {
-        var s = under(T)._<Struct.val>();
+        var s = under(T)._<ж<Struct>>();
         var d = conf.offsetsof(s)[i];
         if (d < 0) {
             return -1;
@@ -368,7 +371,7 @@ internal static Sizes stdSizes = SizesFor("gc"u8, "amd64"u8);
         if (offs < 0) {
             return -1;
         }
-        T = (~s).fields[i].typ;
+        T = (~s).fields[i].Value.typ;
     }
     return offs;
 }
@@ -376,9 +379,9 @@ internal static Sizes stdSizes = SizesFor("gc"u8, "amd64"u8);
 // sizeof returns the size of T.
 // If T is too large, the result is negative.
 [GoRecv] internal static int64 @sizeof(this ref Config conf, ΔType T) {
-    var f = () => stdSizes.Sizeof();
+    var f = stdSizes.Sizeof;
     if (conf.Sizes != default!) {
-        f = () => conf.Sizes.Sizeof();
+        f = conf.Sizes.Sizeof;
     }
     return f(T);
 }

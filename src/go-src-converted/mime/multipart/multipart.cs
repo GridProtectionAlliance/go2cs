@@ -33,12 +33,13 @@ using fmt = fmt_package;
 using godebug = @internal.godebug_package;
 using io = io_package;
 using mime = mime_package;
-using quotedprintable = mime.quotedprintable_package;
+using quotedprintable = go.mime.quotedprintable_package;
 using textproto = net.textproto_package;
 using filepath = path.filepath_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using @internal;
+using go.mime;
 using net;
 using path;
 
@@ -56,14 +57,14 @@ internal static readonly UntypedInt peekBufferSize = 4096;
     // The headers of the body, if any, with the keys canonicalized
     // in the same fashion that the Go http.Request headers are.
     // For example, "foo-bar" changes case to "Foo-Bar"
-    public net.textproto_package.MIMEHeader Header;
+    public textproto.MIMEHeader Header;
     internal ж<Reader> mr;
     internal @string disposition;
     internal map<@string, @string> dispositionParams;
     // r is either a reader directly reading from mr, or it's a
     // wrapper around such a reader, decoding the
     // Content-Transfer-Encoding
-    internal io_package.Reader r;
+    internal io.Reader r;
     internal nint n;  // known data bytes waiting in mr.bufReader
     internal int64 total; // total data bytes read already
     internal error err; // error to return when n == 0
@@ -116,9 +117,9 @@ internal static readonly UntypedInt peekBufferSize = 4096;
 // the message's "Content-Type" header. Use [mime.ParseMediaType] to
 // parse such headers.
 public static ж<Reader> NewReader(io.Reader r, @string boundary) {
-    var b = slice<byte>("\r\n--"u8 + boundary + "--"u8);
+    var b = slice<byte>("\r\n--" + boundary + "--");
     return Ꮡ(new Reader(
-        bufReader: bufio.NewReaderSize(new stickyErrorReader(r: r), peekBufferSize),
+        bufReader: bufio.NewReaderSize(new stickyErrorReaderжReader(Ꮡ(new stickyErrorReader(r: r))), peekBufferSize),
         nl: b[..2],
         nlDashBoundary: b[..(int)(len(b) - 2)],
         dashBoundaryDash: b[2..],
@@ -132,11 +133,11 @@ public static ж<Reader> NewReader(io.Reader r, @string boundary) {
 // Read calls after an error, yet this package does do multiple Reads
 // after error)
 [GoType] partial struct stickyErrorReader {
-    internal io_package.Reader r;
+    internal io.Reader r;
     internal error err;
 }
 
-[GoRecv] internal static (nint n, error _) Read(this ref stickyErrorReader r, slice<byte> p) {
+[GoRecv] internal static (nint n, error) Read(this ref stickyErrorReader r, slice<byte> p) {
     nint n = default!;
 
     if (r.err != default!) {
@@ -147,32 +148,32 @@ public static ж<Reader> NewReader(io.Reader r, @string boundary) {
 }
 
 internal static (ж<Part>, error) newPart(ж<Reader> Ꮡmr, bool rawPart, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
-    ref var mr = ref Ꮡmr.val;
+    ref var mr = ref Ꮡmr.Value;
 
     var bp = Ꮡ(new Part(
         Header: new map<@string, slice<@string>>(),
-        mr: mr
+        mr: Ꮡmr
     ));
     {
         var err = bp.populateHeaders(maxMIMEHeaderSize, maxMIMEHeaders); if (err != default!) {
             return (default!, err);
         }
     }
-    bp.val.r = new partReader(bp);
+    bp.Value.r = new partReader(bp);
     // rawPart is used to switch between Part.NextPart and Part.NextRawPart.
     if (!rawPart) {
         @string cte = "Content-Transfer-Encoding"u8;
         if (strings.EqualFold((~bp).Header.Get(cte), "quoted-printable"u8)) {
             (~bp).Header.Del(cte);
-            bp.val.r = quotedprintable.NewReader((~bp).r);
+            bp.Value.r = new quotedprintable_ReaderжReader(quotedprintable.NewReader((~bp).r));
         }
     }
     return (bp, default!);
 }
 
 [GoRecv] internal static error populateHeaders(this ref Part p, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
-    var r = textproto.NewReader(p.mr.bufReader);
-    (header, err) = readMIMEHeader(r, maxMIMEHeaderSize, maxMIMEHeaders);
+    var r = textproto.NewReader((~p.mr).bufReader);
+    var (header, err) = readMIMEHeader(r, maxMIMEHeaderSize, maxMIMEHeaders);
     if (err == default!) {
         p.Header = header;
     }
@@ -200,17 +201,17 @@ internal static (ж<Part>, error) newPart(ж<Reader> Ꮡmr, bool rawPart, int64 
 
 internal static (nint, error) Read(this partReader pr, slice<byte> d) {
     var p = pr.p;
-    var br = (~p).mr.val.bufReader;
+    var br = p.Value.mr.Value.bufReader;
     // Read into buffer until we identify some data to return,
     // or we find a reason to stop (boundary or read error).
     while ((~p).n == 0 && (~p).err == default!) {
-        (peek, _) = br.Peek(br.Buffered());
-        (p.val.n, p.val.err) = scanUntilBoundary(peek, (~(~p).mr).dashBoundary, (~(~p).mr).nlDashBoundary, (~p).total, (~p).readErr);
+        var (peek, _) = br.Peek(br.Buffered());
+        (p.Value.n, p.Value.err) = scanUntilBoundary(peek, (~(~p).mr).dashBoundary, (~(~p).mr).nlDashBoundary, (~p).total, (~p).readErr);
         if ((~p).n == 0 && (~p).err == default!) {
             // Force buffered I/O to read more into buffer.
-            (_, p.val.readErr) = br.Peek(len(peek) + 1);
+            (_, p.Value.readErr) = br.Peek(len(peek) + 1);
             if (AreEqual((~p).readErr, io.EOF)) {
-                p.val.readErr = io.ErrUnexpectedEOF;
+                p.Value.readErr = io.ErrUnexpectedEOF;
             }
         }
     }
@@ -220,11 +221,11 @@ internal static (nint, error) Read(this partReader pr, slice<byte> d) {
     }
     nint n = len(d);
     if (n > (~p).n) {
-        n = p.val.n;
+        n = p.Value.n;
     }
     (n, _) = br.Read(d[..(int)(n)]);
-    p.val.total += ((int64)n);
-    p.val.n -= n;
+    p.Value.total += (int64)n;
+    p.Value.n -= n;
     if ((~p).n == 0) {
         return (n, (~p).err);
     }
@@ -330,8 +331,10 @@ internal static nint matchAfterPrefix(slice<byte> buf, slice<byte> prefix, error
     return -1;
 }
 
-[GoRecv] public static error Close(this ref Part p) {
-    io.Copy(io.Discard, ~p);
+public static error Close(this ж<Part> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    io.Copy(io.Discard, new PartжReader(Ꮡp));
     return default!;
 }
 
@@ -339,7 +342,7 @@ internal static nint matchAfterPrefix(slice<byte> buf, slice<byte> prefix, error
 // Reader's underlying parser consumes its input as needed. Seeking
 // isn't supported.
 [GoType] partial struct Reader {
-    internal ж<bufio_package.Reader> bufReader;
+    internal ж<bufio.Reader> bufReader;
     internal @string tempDir; // used in tests
     internal ж<Part> currentPart;
     internal nint partsRead;
@@ -378,8 +381,10 @@ internal static int64 maxMIMEHeaders() {
 // As a special case, if the "Content-Transfer-Encoding" header
 // has a value of "quoted-printable", that header is instead
 // hidden and the body is transparently decoded during Read calls.
-[GoRecv] public static (ж<Part>, error) NextPart(this ref Reader r) {
-    return r.nextPart(false, maxMIMEHeaderSize, maxMIMEHeaders());
+public static (ж<Part>, error) NextPart(this ж<Reader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.nextPart(false, maxMIMEHeaderSize, maxMIMEHeaders());
 }
 
 // NextRawPart returns the next part in the multipart or an error.
@@ -387,11 +392,15 @@ internal static int64 maxMIMEHeaders() {
 //
 // Unlike [Reader.NextPart], it does not have special handling for
 // "Content-Transfer-Encoding: quoted-printable".
-[GoRecv] public static (ж<Part>, error) NextRawPart(this ref Reader r) {
-    return r.nextPart(true, maxMIMEHeaderSize, maxMIMEHeaders());
+public static (ж<Part>, error) NextRawPart(this ж<Reader> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
+    return Ꮡr.nextPart(true, maxMIMEHeaderSize, maxMIMEHeaders());
 }
 
-[GoRecv] internal static (ж<Part>, error) nextPart(this ref Reader r, bool rawPart, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
+internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
+    ref var r = ref Ꮡr.Value;
+
     if (r.currentPart != nil) {
         r.currentPart.Close();
     }
@@ -400,7 +409,7 @@ internal static int64 maxMIMEHeaders() {
     }
     var expectNewPart = false;
     while (ᐧ) {
-        (line, err) = r.bufReader.ReadSlice((rune)'\n');
+        var (line, err) = r.bufReader.ReadSlice((rune)'\n');
         if (AreEqual(err, io.EOF) && r.isFinalBoundary(line)) {
             // If the buffer ends in "--boundary--" without the
             // trailing "\r\n", ReadSlice will return an error
@@ -414,7 +423,7 @@ internal static int64 maxMIMEHeaders() {
         }
         if (r.isBoundaryDelimiterLine(line)) {
             r.partsRead++;
-            (bp, errΔ1) = newPart(r, rawPart, maxMIMEHeaderSize, maxMIMEHeaders);
+            var (bp, errΔ1) = newPart(Ꮡr, rawPart, maxMIMEHeaderSize, maxMIMEHeaders);
             if (errΔ1 != default!) {
                 return (default!, errΔ1);
             }

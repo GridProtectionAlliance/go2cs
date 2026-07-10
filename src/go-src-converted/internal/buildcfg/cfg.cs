@@ -16,6 +16,7 @@ using os = os_package;
 using filepath = path.filepath_package;
 using strconv = strconv_package;
 using strings = strings_package;
+using io = io_package;
 using path;
 
 partial class buildcfg_package {
@@ -42,7 +43,7 @@ public static error Error;
 // Check exits the program with a fatal error if Error is non-nil.
 public static void Check() {
     if (Error != default!) {
-        fmt.Fprintf(~os.Stderr, "%s: %v\n"u8, filepath.Base(os.Args[0]), Error);
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "%s: %v\n"u8, filepath.Base(os.Args[0]), Error);
         os.Exit(2);
     }
 }
@@ -75,15 +76,15 @@ internal static nint goamd64() {
     }
 
     Error = fmt.Errorf("invalid GOAMD64: must be v1, v2, v3, v4"u8);
-    return ((nint)(defaultGOAMD64[len("v")] - (rune)'0'));
+    return (nint)(defaultGOAMD64[len("v")] - (rune)'0');
 }
 
-[GoType] partial struct goarmFeatures {
+[GoType] public partial struct goarmFeatures {
     public nint Version;
     public bool SoftFloat;
 }
 
-internal static @string String(this goarmFeatures g) {
+public static @string String(this goarmFeatures g) {
     @string armStr = strconv.Itoa(g.Version);
     if (g.SoftFloat){
         armStr += ",softfloat"u8;
@@ -126,7 +127,7 @@ internal static goarmFeatures /*g*/ goarm() {
     }
     else { /* default: */
         Error = fmt.Errorf("invalid GOARM: must start with 5, 6, or 7, and may optionally end in either %q or %q"u8, hardFloatOpt, softFloatOpt);
-        g.Version = ((nint)(def[0] - (rune)'0'));
+        g.Version = (nint)(def[0] - (rune)'0');
     }
 
     // 5 defaults to softfloat. 6 and 7 default to hardfloat.
@@ -274,7 +275,7 @@ internal static nint goppc64() {
     }
 
     Error = fmt.Errorf("invalid GOPPC64: must be power8, power9, power10"u8);
-    return ((nint)(defaultGOPPC64[len("power")] - (rune)'0'));
+    return (nint)(defaultGOPPC64[len("power")] - (rune)'0');
 }
 
 internal static nint goriscv64() {
@@ -296,12 +297,12 @@ internal static nint goriscv64() {
     return year;
 }
 
-[GoType] partial struct gowasmFeatures {
+[GoType] public partial struct gowasmFeatures {
     public bool SatConv;
     public bool SignExt;
 }
 
-internal static @string String(this gowasmFeatures f) {
+public static @string String(this gowasmFeatures f) {
     slice<@string> flags = default!;
     if (f.SatConv) {
         flags = append(flags, "satconv"u8);
@@ -351,7 +352,7 @@ internal static slice<@string> experimentTags() {
     // used for compiling alternative files for the experiment. This allows
     // changes for the experiment, like extra struct fields in the runtime,
     // without affecting the base non-experiment code at all.
-    foreach (var (_, exp) in Experiment.Enabled()) {
+    foreach (var (_, exp) in ᏑExperiment.Enabled()) {
         list = append(list, "goexperiment."u8 + exp);
     }
     return list;
@@ -395,56 +396,56 @@ public static (@string name, @string value) GOGOARCH() {
 internal static slice<@string> gogoarchTags() {
     var exprᴛ1 = GOARCH;
     if (exprᴛ1 == "386"u8) {
-        return new @string[]{GOARCH + "."u8 + GO386}.slice();
+        return new @string[]{GOARCH + "." + GO386}.slice();
     }
     if (exprᴛ1 == "amd64"u8) {
-        slice<@string> listΔ5 = default!;
+        slice<@string> list = default!;
         for (nint i = 1; i <= GOAMD64; i++) {
-            list = append(listΔ5, fmt.Sprintf("%s.v%d"u8, GOARCH, i));
+            list = append(list, fmt.Sprintf("%s.v%d"u8, GOARCH, i));
         }
-        return listΔ5;
+        return list;
     }
     if (exprᴛ1 == "arm"u8) {
-        slice<@string> listΔ6 = default!;
+        slice<@string> list = default!;
         for (nint i = 5; i <= GOARM.Version; i++) {
-            list = append(listΔ6, fmt.Sprintf("%s.%d"u8, GOARCH, i));
+            list = append(list, fmt.Sprintf("%s.%d"u8, GOARCH, i));
         }
-        return listΔ6;
+        return list;
     }
     if (exprᴛ1 == "arm64"u8) {
-        slice<@string> listΔ7 = default!;
-        nint major = ((nint)(GOARM64.Version[1] - (rune)'0'));
-        nint minor = ((nint)(GOARM64.Version[3] - (rune)'0'));
+        slice<@string> list = default!;
+        nint major = (nint)(GOARM64.Version[1] - (rune)'0');
+        nint minor = (nint)(GOARM64.Version[3] - (rune)'0');
         for (nint i = 0; i <= minor; i++) {
-            list = append(listΔ7, fmt.Sprintf("%s.v%d.%d"u8, GOARCH, major, i));
+            list = append(list, fmt.Sprintf("%s.v%d.%d"u8, GOARCH, major, i));
         }
         if (major == 9) {
             // ARM64 v9.x also includes support of v8.x+5 (i.e. v9.1 includes v8.(1+5) = v8.6).
             for (nint i = 0; i <= minor + 5 && i <= 9; i++) {
-                list = append(listΔ7, fmt.Sprintf("%s.v%d.%d"u8, GOARCH, 8, i));
+                list = append(list, fmt.Sprintf("%s.v%d.%d"u8, GOARCH, 8, i));
             }
         }
-        return listΔ7;
+        return list;
     }
     if (exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8) {
-        return new @string[]{GOARCH + "."u8 + GOMIPS}.slice();
+        return new @string[]{GOARCH + "." + GOMIPS}.slice();
     }
     if (exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8) {
-        return new @string[]{GOARCH + "."u8 + GOMIPS64}.slice();
+        return new @string[]{GOARCH + "." + GOMIPS64}.slice();
     }
     if (exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8) {
-        slice<@string> listΔ8 = default!;
+        slice<@string> list = default!;
         for (nint i = 8; i <= GOPPC64; i++) {
-            list = append(listΔ8, fmt.Sprintf("%s.power%d"u8, GOARCH, i));
+            list = append(list, fmt.Sprintf("%s.power%d"u8, GOARCH, i));
         }
-        return listΔ8;
+        return list;
     }
     if (exprᴛ1 == "riscv64"u8) {
-        var listΔ9 = new @string[]{GOARCH + "."u8 + "rva20u64"u8}.slice();
+        var list = new @string[]{GOARCH + "." + "rva20u64"}.slice();
         if (GORISCV64 >= 22) {
-            list = append(listΔ9, GOARCH + "."u8 + "rva22u64"u8);
+            list = append(list, GOARCH + "."u8 + "rva22u64"u8);
         }
-        return listΔ9;
+        return list;
     }
     if (exprᴛ1 == "wasm"u8) {
         slice<@string> list = default!;

@@ -38,10 +38,9 @@ using static go.compress.zlib_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(io.ReadCloser, error), io_package.ReadCloser>]
-[assembly: GoImplement<compress.flate_package.Reader, io_package.Reader>]
-[assembly: GoImplement<flate.Reader, bool), compress.flate_package.Reader>]
-[assembly: GoImplement<reader, io_package.ReadCloser>]
+[assembly: GoImplement<bufio_package.Reader, go.compress.flate_package.Reader>(Pointer = true)]
+[assembly: GoImplement<go.compress.flate_package.Reader, io_package.Reader>]
+[assembly: GoImplement<reader, io_package.ReadCloser>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

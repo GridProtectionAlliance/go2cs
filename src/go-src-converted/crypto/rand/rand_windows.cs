@@ -5,13 +5,13 @@
 // generator.
 namespace go.crypto;
 
-using windows = @internal.syscall.windows_package;
-using @internal.syscall;
+using windows = go.@internal.syscall.windows_package;
+using go.@internal.syscall;
 
 partial class rand_package {
 
 [GoInit] internal static void init() {
-    ᏑReader = new rngReader(nil); Reader = ref ᏑReader.val;
+    Reader = new rngReaderжReader(Ꮡ(new rngReader(nil)));
 }
 
 [GoType] partial struct rngReader {

@@ -18,7 +18,7 @@ partial class multipart_package {
 
 // A Writer generates multipart messages.
 [GoType] partial struct Writer {
-    internal io_package.Writer w;
+    internal io.Writer w;
     internal @string boundary;
     internal ж<part> lastpart;
 }
@@ -99,7 +99,9 @@ internal static @string randomBoundary() {
 // header. The body of the part should be written to the returned
 // [Writer]. After calling CreatePart, any previous part may no longer
 // be written to.
-[GoRecv] public static (io.Writer, error) CreatePart(this ref Writer w, textproto.MIMEHeader header) {
+public static (io.Writer, error) CreatePart(this ж<Writer> Ꮡw, textproto.MIMEHeader header) {
+    ref var w = ref Ꮡw.Value;
+
     if (w.lastpart != nil) {
         {
             var errΔ1 = w.lastpart.close(); if (errΔ1 != default!) {
@@ -107,32 +109,32 @@ internal static @string randomBoundary() {
             }
         }
     }
-    ref var b = ref heap(new bytes_package.Buffer(), out var Ꮡb);
+    ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     if (w.lastpart != nil){
-        fmt.Fprintf(~Ꮡb, "\r\n--%s\r\n"u8, w.boundary);
+        fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "\r\n--%s\r\n"u8, w.boundary);
     } else {
-        fmt.Fprintf(~Ꮡb, "--%s\r\n"u8, w.boundary);
+        fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "--%s\r\n"u8, w.boundary);
     }
     var keys = new slice<@string>(0, len(header));
     foreach (var (k, _) in header) {
         keys = append(keys, k);
     }
-    slices.Sort(keys);
+    slices.Sort<slice<@string>, @string>(keys);
     foreach (var (_, k) in keys) {
         foreach (var (_, v) in header[k]) {
-            fmt.Fprintf(~Ꮡb, "%s: %s\r\n"u8, k, v);
+            fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "%s: %s\r\n"u8, k, v);
         }
     }
-    fmt.Fprintf(~Ꮡb, "\r\n"u8);
-    var (_, err) = io.Copy(w.w, ~Ꮡb);
+    fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "\r\n"u8);
+    var (_, err) = io.Copy(w.w, new bytes_BufferжReader(Ꮡb));
     if (err != default!) {
         return (default!, err);
     }
     var p = Ꮡ(new part(
-        mw: w
+        mw: Ꮡw
     ));
     w.lastpart = p;
-    return (~p, default!);
+    return (new partжWriter(p), default!);
 }
 
 internal static ж<strings.Replacer> quoteEscaper = strings.NewReplacer("\\"u8, "\\\\", @"""", "\\\"");
@@ -143,27 +145,33 @@ internal static @string escapeQuotes(@string s) {
 
 // CreateFormFile is a convenience wrapper around [Writer.CreatePart]. It creates
 // a new form-data header with the provided field name and file name.
-[GoRecv] public static (io.Writer, error) CreateFormFile(this ref Writer w, @string fieldname, @string filename) {
+public static (io.Writer, error) CreateFormFile(this ж<Writer> Ꮡw, @string fieldname, @string filename) {
+    ref var w = ref Ꮡw.Value;
+
     var h = new textproto.MIMEHeader();
     h.Set("Content-Disposition"u8,
         fmt.Sprintf(@"form-data; name=""%s""; filename=""%s"""u8,
             escapeQuotes(fieldname), escapeQuotes(filename)));
     h.Set("Content-Type"u8, "application/octet-stream"u8);
-    return w.CreatePart(h);
+    return Ꮡw.CreatePart(h);
 }
 
 // CreateFormField calls [Writer.CreatePart] with a header using the
 // given field name.
-[GoRecv] public static (io.Writer, error) CreateFormField(this ref Writer w, @string fieldname) {
+public static (io.Writer, error) CreateFormField(this ж<Writer> Ꮡw, @string fieldname) {
+    ref var w = ref Ꮡw.Value;
+
     var h = new textproto.MIMEHeader();
     h.Set("Content-Disposition"u8,
         fmt.Sprintf(@"form-data; name=""%s"""u8, escapeQuotes(fieldname)));
-    return w.CreatePart(h);
+    return Ꮡw.CreatePart(h);
 }
 
 // WriteField calls [Writer.CreateFormField] and then writes the given value.
-[GoRecv] public static error WriteField(this ref Writer w, @string fieldname, @string value) {
-    (p, err) = w.CreateFormField(fieldname);
+public static error WriteField(this ж<Writer> Ꮡw, @string fieldname, @string value) {
+    ref var w = ref Ꮡw.Value;
+
+    var (p, err) = Ꮡw.CreateFormField(fieldname);
     if (err != default!) {
         return err;
     }
@@ -204,7 +212,7 @@ internal static @string escapeQuotes(@string s) {
     if (p.closed) {
         return (0, errors.New("multipart: can't write to finished part"u8));
     }
-    (n, err) = p.mw.w.Write(d);
+    (n, err) = (~p.mw).w.Write(d);
     if (err != default!) {
         p.we = err;
     }

@@ -5,19 +5,20 @@
 // Package importer provides access to export data importers.
 namespace go.go;
 
-using build = go.build_package;
-using gccgoimporter = go.@internal.gccgoimporter_package;
-using gcimporter = go.@internal.gcimporter_package;
-using srcimporter = go.@internal.srcimporter_package;
-using token = go.token_package;
-using types = go.types_package;
+using Δbuild = global::go.go.build_package;
+using gccgoimporter = global::go.go.@internal.gccgoimporter_package;
+using gcimporter = global::go.go.@internal.gcimporter_package;
+using srcimporter = global::go.go.@internal.srcimporter_package;
+using token = global::go.go.token_package;
+using types = global::go.go.types_package;
 using io = io_package;
 using runtime = runtime_package;
-using go.@internal;
+using global::go.go;
+using global::go.go.@internal;
 
 partial class importer_package {
 
-public delegate (io.ReadCloser, error) Lookup(@string path);
+// type Lookup is a methodless func type — rendered inline as its base delegate
 
 // ForCompiler returns an Importer for importing from installed packages
 // for the compilers "gc" and "gccgo", or for importing directly
@@ -36,16 +37,16 @@ public delegate (io.ReadCloser, error) Lookup(@string path);
 // A lookup function must be provided for correct module-aware operation.
 // Deprecated: If lookup is nil, for backwards-compatibility, the importer
 // will attempt to resolve imports in the $GOPATH workspace.
-public static types.Importer ForCompiler(ж<token.FileSet> Ꮡfset, @string compiler, Lookup lookup) {
-    ref var fset = ref Ꮡfset.val;
+public static types.Importer ForCompiler(ж<token.FileSet> Ꮡfset, @string compiler, Func<@string, (io.ReadCloser, error)> lookup) {
+    ref var fset = ref Ꮡfset.Value;
 
     var exprᴛ1 = compiler;
     if (exprᴛ1 == "gc"u8) {
-        return new gcimports(
-            fset: fset,
-            packages: new types.Package(),
+        return new gcimportsжImporter(Ꮡ(new gcimports(
+            fset: Ꮡfset,
+            packages: new map<@string, ж<types.Package>>(),
             lookup: lookup
-        );
+        )));
     }
     if (exprᴛ1 == "gccgo"u8) {
         gccgoimporter.GccgoInstallation inst = default!;
@@ -54,17 +55,17 @@ public static types.Importer ForCompiler(ж<token.FileSet> Ꮡfset, @string comp
                 return default!;
             }
         }
-        return new gccgoimports(
-            packages: new types.Package(),
+        return new gccgoimportsжImporter(Ꮡ(new gccgoimports(
+            packages: new map<@string, ж<types.Package>>(),
             importer: inst.GetImporter(default!, default!),
             lookup: lookup
-        );
+        )));
     }
     if (exprᴛ1 == "source"u8) {
         if (lookup != default!) {
             throw panic("source importer for custom import path lookup not supported (issue #13847).");
         }
-        return ~srcimporter.New(Ꮡ(build.Default), Ꮡfset, new types.Package());
+        return new srcimporter_ImporterжImporter(srcimporter.New(Ꮡ(Δbuild.Default), Ꮡfset, new map<@string, ж<types.Package>>()));
     }
 
     // compiler not supported
@@ -75,7 +76,7 @@ public static types.Importer ForCompiler(ж<token.FileSet> Ꮡfset, @string comp
 //
 // Deprecated: Use [ForCompiler], which populates a FileSet
 // with the positions of objects created by the importer.
-public static types.Importer For(@string compiler, Lookup lookup) {
+public static types.Importer For(@string compiler, Func<@string, (io.ReadCloser, error)> lookup) {
     return ForCompiler(token.NewFileSet(), compiler, lookup);
 }
 
@@ -87,9 +88,9 @@ public static types.Importer Default() {
 
 // gc importer
 [GoType] partial struct gcimports {
-    internal ж<go.token_package.FileSet> fset;
-    internal types.Package packages;
-    internal Lookup lookup;
+    internal ж<token.FileSet> fset;
+    internal map<@string, ж<types.Package>> packages;
+    internal Func<@string, (io.ReadCloser, error)> lookup;
 }
 
 [GoRecv] internal static (ж<types.Package>, error) Import(this ref gcimports m, @string path) {
@@ -106,9 +107,9 @@ public static types.Importer Default() {
 
 // gccgo importer
 [GoType] partial struct gccgoimports {
-    internal types.Package packages;
-    internal go.@internal.gccgoimporter_package.Importer importer;
-    internal Lookup lookup;
+    internal map<@string, ж<types.Package>> packages;
+    internal Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> importer;
+    internal Func<@string, (io.ReadCloser, error)> lookup;
 }
 
 [GoRecv] internal static (ж<types.Package>, error) Import(this ref gccgoimports m, @string path) {

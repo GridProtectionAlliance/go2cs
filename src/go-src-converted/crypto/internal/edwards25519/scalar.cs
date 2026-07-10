@@ -4,8 +4,8 @@
 namespace go.crypto.@internal;
 
 using errors = errors_package;
-using byteorder = @internal.byteorder_package;
-using @internal;
+using byteorder = go.@internal.byteorder_package;
+using go.@internal;
 
 partial class edwards25519_package {
 
@@ -60,61 +60,67 @@ public static ж<Scalar> NewScalar() {
 
 // MultiplyAdd sets s = x * y + z mod l, and returns s. It is equivalent to
 // using Multiply and then Add.
-[GoRecv] public static ж<Scalar> MultiplyAdd(this ref Scalar s, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy, ж<Scalar> Ꮡz) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
-    ref var z = ref Ꮡz.val;
+public static ж<Scalar> MultiplyAdd(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy, ж<Scalar> Ꮡz) {
+    ref var s = ref Ꮡs.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
+    ref var z = ref Ꮡz.Value;
 
     // Make a copy of z in case it aliases s.
     var zCopy = @new<Scalar>().Set(Ꮡz);
-    return s.Multiply(Ꮡx, Ꮡy).Add(s, zCopy);
+    return Ꮡs.Multiply(Ꮡx, Ꮡy).Add(Ꮡs, zCopy);
 }
 
 // Add sets s = x + y mod l, and returns s.
-[GoRecv("capture")] public static ж<Scalar> Add(this ref Scalar s, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<Scalar> Add(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
+    ref var s = ref Ꮡs.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     // s = 1 * x + y mod l
-    fiatScalarAdd(Ꮡ(s.s), Ꮡ(x.s), Ꮡ(y.s));
-    return AddꓸᏑs;
+    fiatScalarAdd(Ꮡs.of(Scalar.Ꮡs), Ꮡx.of(Scalar.Ꮡs), Ꮡy.of(Scalar.Ꮡs));
+    return Ꮡs;
 }
 
 // Subtract sets s = x - y mod l, and returns s.
-[GoRecv("capture")] public static ж<Scalar> Subtract(this ref Scalar s, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<Scalar> Subtract(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
+    ref var s = ref Ꮡs.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     // s = -1 * y + x mod l
-    fiatScalarSub(Ꮡ(s.s), Ꮡ(x.s), Ꮡ(y.s));
-    return SubtractꓸᏑs;
+    fiatScalarSub(Ꮡs.of(Scalar.Ꮡs), Ꮡx.of(Scalar.Ꮡs), Ꮡy.of(Scalar.Ꮡs));
+    return Ꮡs;
 }
 
 // Negate sets s = -x mod l, and returns s.
-[GoRecv("capture")] public static ж<Scalar> Negate(this ref Scalar s, ж<Scalar> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+public static ж<Scalar> Negate(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) {
+    ref var s = ref Ꮡs.Value;
+    ref var x = ref Ꮡx.Value;
 
     // s = -1 * x + 0 mod l
-    fiatScalarOpp(Ꮡ(s.s), Ꮡ(x.s));
-    return NegateꓸᏑs;
+    fiatScalarOpp(Ꮡs.of(Scalar.Ꮡs), Ꮡx.of(Scalar.Ꮡs));
+    return Ꮡs;
 }
 
 // Multiply sets s = x * y mod l, and returns s.
-[GoRecv("capture")] public static ж<Scalar> Multiply(this ref Scalar s, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+public static ж<Scalar> Multiply(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
+    ref var s = ref Ꮡs.Value;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     // s = x * y + 0 mod l
-    fiatScalarMul(Ꮡ(s.s), Ꮡ(x.s), Ꮡ(y.s));
-    return MultiplyꓸᏑs;
+    fiatScalarMul(Ꮡs.of(Scalar.Ꮡs), Ꮡx.of(Scalar.Ꮡs), Ꮡy.of(Scalar.Ꮡs));
+    return Ꮡs;
 }
 
 // Set sets s = x, and returns s.
-[GoRecv("capture")] public static ж<Scalar> Set(this ref Scalar s, ж<Scalar> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+public static ж<Scalar> Set(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) {
+    ref var s = ref Ꮡs.Value;
+    ref var x = ref Ꮡx.Value;
 
     s = x;
-    return SetꓸᏑs;
+    return Ꮡs;
 }
 
 // SetUniformBytes sets s = x mod l, where x is a 64-byte little-endian integer.
@@ -123,7 +129,9 @@ public static ж<Scalar> NewScalar() {
 //
 // SetUniformBytes can be used to set s to a uniformly distributed value given
 // 64 uniformly distributed random bytes.
-[GoRecv("capture")] public static (ж<Scalar>, error) SetUniformBytes(this ref Scalar s, slice<byte> x) {
+public static (ж<Scalar>, error) SetUniformBytes(this ж<Scalar> Ꮡs, slice<byte> x) {
+    ref var s = ref Ꮡs.Value;
+
     if (len(x) != 64) {
         return (default!, errors.New("edwards25519: invalid SetUniformBytes input length"u8));
     }
@@ -137,51 +145,55 @@ public static ж<Scalar> NewScalar() {
     //
     // We then precompute 2^168 and 2^336 modulo l, and perform the reduction
     // with two multiplications and two additions.
-    s.setShortBytes(x[..21]);
+    Ꮡs.setShortBytes(x[..21]);
     var t = @new<Scalar>().setShortBytes(x[21..42]);
-    s.Add(s, t.Multiply(t, scalarTwo168));
+    Ꮡs.Add(Ꮡs, t.Multiply(t, scalarTwo168));
     t.setShortBytes(x[42..]);
-    s.Add(s, t.Multiply(t, scalarTwo336));
-    return (SetUniformBytesꓸᏑs, default!);
+    Ꮡs.Add(Ꮡs, t.Multiply(t, scalarTwo336));
+    return (Ꮡs, default!);
 }
 
 // scalarTwo168 and scalarTwo336 are 2^168 and 2^336 modulo l, encoded as a
 // fiatScalarMontgomeryDomainFieldElement, which is a little-endian 4-limb value
 // in the 2^256 Montgomery domain.
-internal static ж<Scalar> scalarTwo168 = Ꮡ(new Scalar(s: new uint64[]{(nint)6596282735017805720L, (nint)4084727301971498455L,
-    (nuint)11727709552089570172UL, (nint)446589182673836592L}.array()
+internal static ж<Scalar> scalarTwo168 = Ꮡ(new Scalar(s: new uint64[]{0x5b8ab432eac74798UL, 0x38afddd6de59d5d7UL,
+    (nuint)0xa2c131b399411b7cUL, 0x6329a7ed9ce5a30UL}.array()
 ));
 
-internal static ж<Scalar> scalarTwo336 = Ꮡ(new Scalar(s: new uint64[]{(nuint)13636073449544084677UL, (nint)6645684779544594699L,
-    (nint)7181719282965082862L, (nint)275308871451790172L}.array()
+internal static ж<Scalar> scalarTwo336 = Ꮡ(new Scalar(s: new uint64[]{(nuint)0xbd3d108e2b35ecc5UL, 0x5c3a3718bdf9c90bUL,
+    0x63aa97a331b4f2eeUL, 0x3d217f5be65cb5cUL}.array()
 ));
 
 // setShortBytes sets s = x mod l, where x is a little-endian integer shorter
 // than 32 bytes.
-[GoRecv("capture")] internal static ж<Scalar> setShortBytes(this ref Scalar s, slice<byte> x) {
+internal static ж<Scalar> setShortBytes(this ж<Scalar> Ꮡs, slice<byte> x) {
+    ref var s = ref Ꮡs.Value;
+
     if (len(x) >= 32) {
         throw panic("edwards25519: internal error: setShortBytes called with a long string");
     }
     ref var buf = ref heap(new array<byte>(32), out var Ꮡbuf);
     copy(buf[..], x);
-    fiatScalarFromBytes((ж<array<uint64>>)(Ꮡ(s.s)), Ꮡbuf);
-    fiatScalarToMontgomery(Ꮡ(s.s), ((ж<fiatScalarNonMontgomeryDomainFieldElement>)(Ꮡ(s.s))));
-    return setShortBytesꓸᏑs;
+    fiatScalarFromBytes(Ꮡ((Ꮡs.of(Scalar.Ꮡs)).Value.Value), Ꮡbuf);
+    fiatScalarToMontgomery(Ꮡs.of(Scalar.Ꮡs), Ꮡ((fiatScalarNonMontgomeryDomainFieldElement)((Ꮡs.of(Scalar.Ꮡs)).Value.Value)));
+    return Ꮡs;
 }
 
 // SetCanonicalBytes sets s = x, where x is a 32-byte little-endian encoding of
 // s, and returns s. If x is not a canonical encoding of s, SetCanonicalBytes
 // returns nil and an error, and the receiver is unchanged.
-[GoRecv("capture")] public static (ж<Scalar>, error) SetCanonicalBytes(this ref Scalar s, slice<byte> x) {
+public static (ж<Scalar>, error) SetCanonicalBytes(this ж<Scalar> Ꮡs, slice<byte> x) {
+    ref var s = ref Ꮡs.Value;
+
     if (len(x) != 32) {
         return (default!, errors.New("invalid scalar length"u8));
     }
     if (!isReduced(x)) {
         return (default!, errors.New("invalid scalar encoding"u8));
     }
-    fiatScalarFromBytes((ж<array<uint64>>)(Ꮡ(s.s)), (ж<array<byte>>)(x));
-    fiatScalarToMontgomery(Ꮡ(s.s), ((ж<fiatScalarNonMontgomeryDomainFieldElement>)(Ꮡ(s.s))));
-    return (SetCanonicalBytesꓸᏑs, default!);
+    fiatScalarFromBytes(Ꮡ((Ꮡs.of(Scalar.Ꮡs)).Value.Value), Ꮡ(new array<byte>(x, 32)));
+    fiatScalarToMontgomery(Ꮡs.of(Scalar.Ꮡs), Ꮡ((fiatScalarNonMontgomeryDomainFieldElement)((Ꮡs.of(Scalar.Ꮡs)).Value.Value)));
+    return (Ꮡs, default!);
 }
 
 // scalarMinusOneBytes is l - 1 in little endian.
@@ -195,10 +207,10 @@ internal static bool isReduced(slice<byte> s) {
     }
     for (nint i = len(s) - 1; i >= 0; i--) {
         switch (ᐧ) {
-        case {} when s[i] is > scalarMinusOneBytes[i]: {
+        case {} when s[i] > scalarMinusOneBytes[i]: {
             return false;
         }
-        case {} when s[i] is < scalarMinusOneBytes[i]: {
+        case {} when s[i] < scalarMinusOneBytes[i]: {
             return true;
         }}
 
@@ -217,7 +229,9 @@ internal static bool isReduced(slice<byte> s) {
 // expected as long as it is applied to points on the prime order subgroup, like
 // in Ed25519. In fact, it is lost to history why RFC 8032 adopted the
 // irrelevant RFC 7748 clamping, but it is now required for compatibility.
-[GoRecv] public static (ж<Scalar>, error) SetBytesWithClamping(this ref Scalar s, slice<byte> x) {
+public static (ж<Scalar>, error) SetBytesWithClamping(this ж<Scalar> Ꮡs, slice<byte> x) {
+    ref var s = ref Ꮡs.Value;
+
     // The description above omits the purpose of the high bits of the clamping
     // for brevity, but those are also lost to reductions, and are also
     // irrelevant to edwards25519 as they protect against a specific
@@ -232,51 +246,57 @@ internal static bool isReduced(slice<byte> s) {
     wideBytes[0] &= (byte)(248);
     wideBytes[31] &= (byte)(63);
     wideBytes[31] |= (byte)(64);
-    return s.SetUniformBytes(wideBytes[..]);
+    return Ꮡs.SetUniformBytes(wideBytes[..]);
 }
 
 // Bytes returns the canonical 32-byte little-endian encoding of s.
-[GoRecv] public static slice<byte> Bytes(this ref Scalar s) {
+public static slice<byte> Bytes(this ж<Scalar> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var encoded = ref heap(new array<byte>(32), out var Ꮡencoded);
-    return s.bytes(Ꮡencoded);
+    return Ꮡs.bytes(Ꮡencoded);
 }
 
-[GoRecv] public static slice<byte> bytes(this ref Scalar s, ж<array<byte>> Ꮡout) {
-    ref var @out = ref Ꮡout.val;
+internal static slice<byte> bytes(this ж<Scalar> Ꮡs, ж<array<byte>> Ꮡout) {
+    ref var s = ref Ꮡs.Value;
+    ref var @out = ref Ꮡout.Value;
 
     ref var ss = ref heap(new fiatScalarNonMontgomeryDomainFieldElement(), out var Ꮡss);
-    fiatScalarFromMontgomery(Ꮡss, Ꮡ(s.s));
-    fiatScalarToBytes(Ꮡout, (ж<array<uint64>>)(Ꮡss));
+    fiatScalarFromMontgomery(Ꮡss, Ꮡs.of(Scalar.Ꮡs));
+    fiatScalarToBytes(Ꮡout, Ꮡ((Ꮡss).Value.Value));
     return @out[..];
 }
 
 // Equal returns 1 if s and t are equal, and 0 otherwise.
-[GoRecv] public static nint Equal(this ref Scalar s, ж<Scalar> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+public static nint Equal(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡt) {
+    ref var s = ref Ꮡs.Value;
+    ref var t = ref Ꮡt.Value;
 
     ref var diff = ref heap(new fiatScalarMontgomeryDomainFieldElement(), out var Ꮡdiff);
-    fiatScalarSub(Ꮡdiff, Ꮡ(s.s), Ꮡ(t.s));
+    fiatScalarSub(Ꮡdiff, Ꮡs.of(Scalar.Ꮡs), Ꮡt.of(Scalar.Ꮡs));
     ref var nonzero = ref heap(new uint64(), out var Ꮡnonzero);
-    fiatScalarNonzero(Ꮡnonzero, (ж<array<uint64>>)(Ꮡdiff));
-    nonzero |= (uint64)(nonzero >> (int)(32));
-    nonzero |= (uint64)(nonzero >> (int)(16));
-    nonzero |= (uint64)(nonzero >> (int)(8));
-    nonzero |= (uint64)(nonzero >> (int)(4));
-    nonzero |= (uint64)(nonzero >> (int)(2));
-    nonzero |= (uint64)(nonzero >> (int)(1));
-    return (nint)(((nint)(~nonzero)) & 1);
+    fiatScalarNonzero(Ꮡnonzero, Ꮡ((Ꮡdiff).Value.Value));
+    nonzero |= (uint64)((nonzero >> (int)(32)));
+    nonzero |= (uint64)((nonzero >> (int)(16)));
+    nonzero |= (uint64)((nonzero >> (int)(8)));
+    nonzero |= (uint64)((nonzero >> (int)(4)));
+    nonzero |= (uint64)((nonzero >> (int)(2)));
+    nonzero |= (uint64)((nonzero >> (int)(1)));
+    return (nint)((nint)(~nonzero) & 1);
 }
 
 // nonAdjacentForm computes a width-w non-adjacent form for this scalar.
 //
 // w must be between 2 and 8, or nonAdjacentForm will panic.
-[GoRecv] internal static array<int8> nonAdjacentForm(this ref Scalar s, nuint w) {
+internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) {
+    ref var s = ref Ꮡs.Value;
+
     // This implementation is adapted from the one
     // in curve25519-dalek and is documented there:
     // https://github.com/dalek-cryptography/curve25519-dalek/blob/f630041af28e9a405255f98a8a93adca18e4315b/src/scalar.rs#L800-L871
-    var b = s.Bytes();
+    var b = Ꮡs.Bytes();
     if (b[31] > 127) {
         throw panic("scalar has high bit set illegally");
     }
@@ -291,20 +311,20 @@ internal static bool isReduced(slice<byte> s) {
     for (nint i = 0; i < 4; i++) {
         digits[i] = byteorder.LeUint64(b[(int)(i * 8)..]);
     }
-    var width = ((uint64)(1 << (int)(w)));
-    var windowMask = ((uint64)(width - 1));
-    nuint pos = ((nuint)0);
-    var carry = ((uint64)0);
+    var width = (uint64)(((uint64)1 << (int)(w)));
+    var windowMask = (uint64)(width - 1);
+    nuint pos = (nuint)0;
+    var carry = (uint64)0;
     while (pos < 256) {
         nuint indexU64 = pos / 64;
         nuint indexBit = pos % 64;
         uint64 bitBuf = default!;
         if (indexBit < 64 - w){
             // This window's bits are contained in a single u64
-            bitBuf = digits[indexU64] >> (int)(indexBit);
+            bitBuf = (digits[(nint)(indexU64)] >> (int)(indexBit));
         } else {
             // Combine the current 64 bits with bits from the next 64
-            bitBuf = (uint64)((digits[indexU64] >> (int)(indexBit)) | (digits[1 + indexU64] << (int)((64 - indexBit))));
+            bitBuf = (uint64)(((digits[(nint)(indexU64)] >> (int)(indexBit))) | ((digits[(nint)(1 + indexU64)] << (int)((64 - indexBit)))));
         }
         // Add carry into the current window
         var window = carry + ((uint64)(bitBuf & windowMask));
@@ -320,31 +340,33 @@ internal static bool isReduced(slice<byte> s) {
         }
         if (window < width / 2){
             carry = 0;
-            naf[pos] = ((int8)window);
+            naf[(nint)(pos)] = (int8)window;
         } else {
             carry = 1;
-            naf[pos] = ((int8)window) - ((int8)width);
+            naf[(nint)(pos)] = (int8)((int8)window - (int8)width);
         }
         pos += w;
     }
     return naf;
 }
 
-[GoRecv] internal static array<int8> signedRadix16(this ref Scalar s) {
-    var b = s.Bytes();
+internal static array<int8> signedRadix16(this ж<Scalar> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    var b = Ꮡs.Bytes();
     if (b[31] > 127) {
         throw panic("scalar has high bit set illegally");
     }
     array<int8> digits = new(64);
     // Compute unsigned radix-16 digits:
     for (nint i = 0; i < 32; i++) {
-        digits[2 * i] = ((int8)((byte)(b[i] & 15)));
-        digits[2 * i + 1] = ((int8)((byte)((b[i] >> (int)(4)) & 15)));
+        digits[2 * i] = (int8)((byte)(b[i] & 15));
+        digits[2 * i + 1] = (int8)((byte)(((b[i] >> (int)(4))) & 15));
     }
     // Recenter coefficients:
     for (nint i = 0; i < 63; i++) {
-        var carry = (digits[i] + 8) >> (int)(4);
-        digits[i] -= carry << (int)(4);
+        var carry = (int8)(((digits[i] + 8) >> (int)(4)));
+        digits[i] -= (int8)((carry << (int)(4)));
         digits[i + 1] += carry;
     }
     return digits;

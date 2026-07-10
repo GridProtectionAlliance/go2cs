@@ -4,9 +4,10 @@
 namespace go.@internal.coverage;
 
 using fmt = fmt_package;
-using slicereader = @internal.coverage.slicereader_package;
-using uleb128 = @internal.coverage.uleb128_package;
+using slicereader = go.@internal.coverage.slicereader_package;
+using uleb128 = go.@internal.coverage.uleb128_package;
 using io = io_package;
+using go.@internal.coverage;
 
 partial class stringtab_package {
 
@@ -30,21 +31,21 @@ partial class stringtab_package {
 
 // Nentries returns the number of strings interned so far.
 [GoRecv] public static uint32 Nentries(this ref Writer stw) {
-    return ((uint32)len(stw.strs));
+    return (uint32)len(stw.strs);
 }
 
 // Lookup looks up string 's' in the writer's table, adding
 // a new entry if need be, and returning an index into the table.
 [GoRecv] public static uint32 Lookup(this ref Writer stw, @string s) {
     {
-        var (idxΔ1, ok) = stw.stab[s]; if (ok) {
+        var (idxΔ1, ok) = stw.stab[s, ꟷ]; if (ok) {
             return idxΔ1;
         }
     }
     if (stw.frozen) {
         throw panic("internal error: string table previously frozen");
     }
-    var idx = ((uint32)len(stw.strs));
+    var idx = (uint32)len(stw.strs);
     stw.stab[s] = idx;
     stw.strs = append(stw.strs, s);
     return idx;
@@ -53,43 +54,45 @@ partial class stringtab_package {
 // Size computes the memory in bytes needed for the serialized
 // version of a stringtab.Writer.
 [GoRecv] public static uint32 Size(this ref Writer stw) {
-    var rval = ((uint32)0);
+    var rval = (uint32)0;
     stw.tmp = stw.tmp[..0];
-    stw.tmp = uleb128.AppendUleb128(stw.tmp, ((nuint)len(stw.strs)));
-    rval += ((uint32)len(stw.tmp));
+    stw.tmp = uleb128.AppendUleb128(stw.tmp, (nuint)len(stw.strs));
+    rval += (uint32)len(stw.tmp);
     foreach (var (_, s) in stw.strs) {
         stw.tmp = stw.tmp[..0];
-        nuint slen = ((nuint)len(s));
+        nuint slen = (nuint)len(s);
         stw.tmp = uleb128.AppendUleb128(stw.tmp, slen);
-        rval += ((uint32)len(stw.tmp)) + ((uint32)slen);
+        rval += (uint32)len(stw.tmp) + (uint32)slen;
     }
     return rval;
 }
 
 // Write writes the string table in serialized form to the specified
 // io.Writer.
-[GoRecv] public static error Write(this ref Writer stw, io.Writer w) {
-    var wr128 = (nuint v) => {
-        stw.tmp = stw.tmp[..0];
-        stw.tmp = uleb128.AppendUleb128(stw.tmp, v);
+public static error Write(this ж<Writer> Ꮡstw, io.Writer w) {
+    ref var stw = ref Ꮡstw.Value;
+
+    var wr128 = error (nuint v) => {
+        Ꮡstw.Value.tmp = Ꮡstw.Value.tmp[..0];
+        Ꮡstw.Value.tmp = uleb128.AppendUleb128(Ꮡstw.Value.tmp, v);
         {
-            var (nw, err) = w.Write(stw.tmp); if (err != default!){
+            var (nw, err) = w.Write(Ꮡstw.Value.tmp); if (err != default!){
                 return fmt.Errorf("writing string table: %v"u8, err);
             } else 
-            if (nw != len(stw.tmp)) {
+            if (nw != len(Ꮡstw.Value.tmp)) {
                 return fmt.Errorf("short write emitting stringtab uleb"u8);
             }
         }
         return default!;
     };
     {
-        var err = wr128(((nuint)len(stw.strs))); if (err != default!) {
+        var err = wr128((nuint)len(stw.strs)); if (err != default!) {
             return err;
         }
     }
     foreach (var (_, s) in stw.strs) {
         {
-            var err = wr128(((nuint)len(s))); if (err != default!) {
+            var err = wr128((nuint)len(s)); if (err != default!) {
                 return err;
             }
         }
@@ -116,28 +119,28 @@ partial class stringtab_package {
 // Reader is a helper for reading a string table previously
 // serialized by a Writer.Write call.
 [GoType] partial struct Reader {
-    internal ж<@internal.coverage.slicereader_package.Reader> r;
+    internal ж<slicereader.Reader> r;
     internal slice<@string> strs;
 }
 
 // NewReader creates a stringtab.Reader to read the contents
 // of a string table from 'r'.
 public static ж<Reader> NewReader(ж<slicereader.Reader> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     var str = Ꮡ(new Reader(
-        r: r
+        r: Ꮡr
     ));
     return str;
 }
 
 // Read reads/decodes a string table using the reader provided.
 [GoRecv] public static void Read(this ref Reader str) {
-    nint numEntries = ((nint)str.r.ReadULEB128());
+    nint numEntries = (nint)str.r.ReadULEB128();
     str.strs = new slice<@string>(0, numEntries);
     for (nint idx = 0; idx < numEntries; idx++) {
         var slen = str.r.ReadULEB128();
-        str.strs = append(str.strs, str.r.ReadString(((int64)slen)));
+        str.strs = append(str.strs, str.r.ReadString((int64)slen));
     }
 }
 
@@ -148,7 +151,7 @@ public static ж<Reader> NewReader(ж<slicereader.Reader> Ꮡr) {
 
 // Get returns string 'idx' within the string table.
 [GoRecv] public static @string Get(this ref Reader str, uint32 idx) {
-    return str.strs[idx];
+    return str.strs[(nint)(idx)];
 }
 
 } // end stringtab_package

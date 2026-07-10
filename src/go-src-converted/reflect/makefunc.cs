@@ -7,6 +7,7 @@ namespace go;
 using abi = @internal.abi_package;
 using @unsafe = unsafe_package;
 using @internal;
+using sync = sync_package;
 
 partial class reflect_package {
 
@@ -18,7 +19,7 @@ partial class reflect_package {
 [GoType] partial struct makeFuncImpl {
     internal partial ref makeFuncCtxt makeFuncCtxt { get; }
     internal ж<funcType> ftyp;
-    internal Func<slice<ΔValue>, slice<reflect.Value>> fn;
+    internal Func<slice<ΔValue>, slice<ΔValue>> fn;
 }
 
 // MakeFunc returns a new function of the given [Type]
@@ -42,7 +43,7 @@ partial class reflect_package {
 //
 // The Examples section of the documentation includes an illustration
 // of how to use MakeFunc to build a swap function for different types.
-public static ΔValue MakeFunc(ΔType typ, Func<slice<ΔValue>, (results <>reflect.Value)> fn) {
+public static ΔValue MakeFunc(ΔType typ, Func<slice<ΔValue>, slice<ΔValue>> fn) {
     if (typ.Kind() != Func) {
         throw panic("reflect: call of MakeFunc with non-Func type");
     }
@@ -61,7 +62,7 @@ public static ΔValue MakeFunc(ΔType typ, Func<slice<ΔValue>, (results <>refle
         ftyp: ftyp,
         fn: fn
     ));
-    return new ΔValue(t, new @unsafe.Pointer(impl), ((flag)Func));
+    return new ΔValue(t, new @unsafe.Pointer(impl), ((flag)(uintptr)(nuint)Func));
 }
 
 // makeFuncStub is an assembly function that is the code half of
@@ -93,11 +94,11 @@ internal static ΔValue makeMethodValue(@string op, ΔValue v) {
     }
     // Ignoring the flagMethod bit, v describes the receiver, not the method type.
     var fl = (flag)(v.flag & ((flag)((flag)(flagRO | flagAddr) | flagIndir)));
-    fl |= (flag)(((flag)v.typ().Kind()));
+    fl |= (flag)(((flag)(uintptr)(uint8)v.typ().Kind()));
     ref var rcvr = ref heap<ΔValue>(out var Ꮡrcvr);
     rcvr = new ΔValue(v.typ(), v.ptr, fl);
     // v.Type returns the actual type of the method value.
-    var ftyp = (ж<funcType>)(uintptr)(new @unsafe.Pointer(v.Type()._<rtype.val>()));
+    var ftyp = (ж<funcType>)(uintptr)(new @unsafe.Pointer(v.Type()._<ж<rtype>>()));
     var code = methodValueCallCodePtr();
     // methodValue contains a stack map for use by the runtime
     var (_, _, abid) = funcLayout(ftyp, nil);
@@ -108,14 +109,14 @@ internal static ΔValue makeMethodValue(@string op, ΔValue v) {
             argLen: abid.stackCallArgsSize,
             regPtrs: abid.inRegPtrs
         ),
-        method: ((nint)v.flag) >> (int)(flagMethodShift),
+        method: ((nint)(uintptr)v.flag >> (int)(flagMethodShift)),
         rcvr: rcvr
     ));
     // Cause panic if method is not appropriate.
     // The panic would still happen during the call if we omit this,
     // but we want Interface() and other operations to fail early.
     methodReceiver(op, (~fv).rcvr, (~fv).method);
-    return new ΔValue(ftyp.Common(), new @unsafe.Pointer(fv), (flag)((flag)(v.flag & flagRO) | ((flag)Func)));
+    return new ΔValue(ftyp.of(funcType.ᏑType).Common(), new @unsafe.Pointer(fv), (flag)((flag)(v.flag & flagRO) | ((flag)(uintptr)(nuint)Func)));
 }
 
 internal static uintptr methodValueCallCodePtr() {
@@ -135,7 +136,7 @@ internal static partial void methodValueCall();
     internal uintptr fn;
     internal ж<bitVector> stack; // ptrmap for both stack args and results
     internal uintptr argLen;    // just args
-    internal @internal.abi_package.IntArgRegBitmap regPtrs;
+    internal abi.IntArgRegBitmap regPtrs;
 }
 
 // moveMakeFuncArgPtrs uses ctxt.regPtrs to copy integer pointer arguments
@@ -150,19 +151,19 @@ internal static partial void methodValueCall();
 //
 //go:nosplit
 internal static void moveMakeFuncArgPtrs(ж<makeFuncCtxt> Ꮡctxt, ж<abi.RegArgs> Ꮡargs) {
-    ref var ctxt = ref Ꮡctxt.val;
-    ref var args = ref Ꮡargs.val;
+    ref var ctxt = ref Ꮡctxt.Value;
+    ref var args = ref Ꮡargs.Value;
 
     foreach (var (i, arg) in args.Ints) {
         // Avoid write barriers! Because our write barrier enqueues what
         // was there before, we might enqueue garbage.
         if (ctxt.regPtrs.Get(i)){
-            ((ж<uintptr>)(uintptr)(((@unsafe.Pointer)(Ꮡargs.Ptrs.at<@unsafe.Pointer>(i))))).val = arg;
+            ((ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡargs.at(abi.RegArgs.ᏑPtrs, i)).Value))).Value = arg;
         } else {
             // We *must* zero this space ourselves because it's defined in
             // assembly code and the GC will scan these pointers. Otherwise,
             // there will be garbage here.
-            ((ж<uintptr>)(uintptr)(((@unsafe.Pointer)(Ꮡargs.Ptrs.at<@unsafe.Pointer>(i))))).val = 0;
+            ((ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡargs.at(abi.RegArgs.ᏑPtrs, i)).Value))).Value = 0;
         }
     }
 }

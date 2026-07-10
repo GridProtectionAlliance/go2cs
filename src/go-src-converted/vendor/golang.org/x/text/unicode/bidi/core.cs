@@ -5,7 +5,6 @@ namespace go.vendor.golang.org.x.text.unicode;
 
 using fmt = fmt_package;
 using log = log_package;
-using ꓸꓸꓸΔClass = Span<ΔClass>;
 
 partial class bidi_package {
 
@@ -51,11 +50,10 @@ partial class bidi_package {
 // engine expects combining marks in visual order (e.g. to the left of their
 // base character in RTL runs) and that it adjusts the glyphs used to render
 // mirrored characters that are in RTL runs so that they render appropriately.
-internal static readonly GoUntyped implicitLevel = /* -1 */
-    GoUntyped.Parse("-1");
+internal static readonly level implicitLevel = -1;
 
 // in returns if x is equal to any of the values in set.
-internal static bool @in(this ΔClass c, params ꓸꓸꓸΔClass setʗp) {
+internal static bool @in(this ΔClass c, params Span<bidi_package.ΔClass> setʗp) {
     var set = setʗp.slice();
 
     foreach (var (_, s) in set) {
@@ -133,7 +131,9 @@ internal static (ж<paragraph>, error) newParagraph(slice<ΔClass> types, slice<
 
 // The algorithm. Does not include line-based processing (Rules L1, L2).
 // These are applied later in the line-based phase of the algorithm.
-[GoRecv] internal static void run(this ref paragraph p) {
+internal static void run(this ж<paragraph> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     p.determineMatchingIsolates();
     // 1) determining the paragraph level
     // Rule P1 is the requirement for entering this algorithm.
@@ -155,7 +155,7 @@ internal static (ж<paragraph>, error) newParagraph(slice<ΔClass> types, slice<
     // practical purposes.
     // Rule X10.
     // Run remainder of algorithm one isolating run sequence at a time
-    foreach (var (_, seq) in p.determineIsolatingRunSequences()) {
+    foreach (var (_, seq) in Ꮡp.determineIsolatingRunSequences()) {
         // 3) resolving weak types
         // Rules W1-W7.
         seq.resolveWeakTypes();
@@ -435,11 +435,10 @@ internal static readonly UntypedInt maxDepth = 125;
     internal slice<ΔClass> types; // type of each character using the index
     internal slice<level> resolvedLevels; // resolved levels after application of rules
     internal level level;
-    internal ΔClass sos;
-    internal ΔClass eos;
+    internal ΔClass sos, eos;
 }
 
-[GoRecv] public static nint Len(this ref ΔisolatingRunSequence i) {
+[GoRecv] internal static nint Len(this ref ΔisolatingRunSequence i) {
     return len(i.indexes);
 }
 
@@ -452,7 +451,9 @@ internal static level maxLevel(level a, level b) {
 
 // Rule X10, second bullet: Determine the start-of-sequence (sos) and end-of-sequence (eos) types,
 // either L or R, for each isolating run sequence.
-[GoRecv] internal static ж<ΔisolatingRunSequence> isolatingRunSequence(this ref paragraph p, slice<nint> indexes) {
+internal static ж<ΔisolatingRunSequence> isolatingRunSequence(this ж<paragraph> Ꮡp, slice<nint> indexes) {
+    ref var p = ref Ꮡp.Value;
+
     nint length = len(indexes);
     var types = new slice<ΔClass>(length);
     foreach (var (i, x) in indexes) {
@@ -484,7 +485,7 @@ internal static level maxLevel(level a, level b) {
     ref var level = ref heap<level>(out var Ꮡlevel);
     level = p.resultLevels[indexes[0]];
     return Ꮡ(new ΔisolatingRunSequence(
-        p: p,
+        p: Ꮡp,
         indexes: indexes,
         types: types,
         level: level,
@@ -503,9 +504,9 @@ internal static level maxLevel(level a, level b) {
     // Rule W1.
     // Changes all NSMs.
     ΔClass precedingCharacterType = s.sos;
-    foreach (var (iΔ1, t) in s.types) {
+    foreach (var (i, t) in s.types) {
         if (t == NSM){
-            s.types[iΔ1] = precedingCharacterType;
+            s.types[i] = precedingCharacterType;
         } else {
             // if t.in(LRI, RLI, FSI, PDI) {
             // 	precedingCharacterType = ON
@@ -515,13 +516,13 @@ internal static level maxLevel(level a, level b) {
     }
     // Rule W2.
     // EN does not change at the start of the run, because sos != AL.
-    foreach (var (iΔ2, t) in s.types) {
+    foreach (var (i, t) in s.types) {
         if (t == EN) {
-            for (nint j = iΔ2 - 1; j >= 0; j--) {
+            for (nint j = i - 1; j >= 0; j--) {
                 {
                     ΔClass tΔ1 = s.types[j]; if (tΔ1.@in(L, R, AL)) {
                         if (tΔ1 == AL) {
-                            s.types[iΔ2] = AN;
+                            s.types[i] = AN;
                         }
                         break;
                     }
@@ -530,9 +531,9 @@ internal static level maxLevel(level a, level b) {
         }
     }
     // Rule W3.
-    foreach (var (iΔ3, t) in s.types) {
+    foreach (var (i, t) in s.types) {
         if (t == AL) {
-            s.types[iΔ3] = R;
+            s.types[i] = R;
         }
     }
     // Rule W4.
@@ -561,7 +562,9 @@ internal static level maxLevel(level a, level b) {
         }
     }
     // Rule W5.
-    foreach (var (i, t) in s.types) {
+    foreach (var (iᴛ1, t) in s.types) {
+        var i = iᴛ1;
+
         if (t == ET) {
             // locate end of sequence
             nint runStart = i;
@@ -591,7 +594,9 @@ internal static level maxLevel(level a, level b) {
         }
     }
     // Rule W7.
-    foreach (var (i, t) in s.types) {
+    foreach (var (i, vᴛ1) in s.types) {
+        var t = vᴛ1;
+
         if (t == EN) {
             // set default if we reach start of run
             ΔClass prevStrongType = s.sos;
@@ -614,7 +619,9 @@ internal static level maxLevel(level a, level b) {
 [GoRecv] internal static void resolveNeutralTypes(this ref ΔisolatingRunSequence s) {
     // on entry, only these types can be in resultTypes
     s.assertOnly(L, R, EN, AN, B, S, WS, ON, RLI, LRI, FSI, PDI);
-    foreach (var (i, t) in s.types) {
+    foreach (var (iᴛ1, t) in s.types) {
+        var i = iᴛ1;
+
         var exprᴛ1 = t;
         if (exprᴛ1 == WS || exprᴛ1 == ON || exprᴛ1 == B || exprᴛ1 == S || exprᴛ1 == RLI || exprᴛ1 == LRI || exprᴛ1 == FSI || exprᴛ1 == PDI) {
             nint runStart = i;
@@ -709,15 +716,15 @@ internal static void setTypes(slice<ΔClass> types, ΔClass newType) {
 // resultLevels array.
 [GoRecv] internal static void applyLevelsAndTypes(this ref ΔisolatingRunSequence s) {
     foreach (var (i, x) in s.indexes) {
-        s.p.resultTypes[x] = s.types[i];
-        s.p.resultLevels[x] = s.resolvedLevels[i];
+        s.p.Value.resultTypes[x] = s.types[i];
+        s.p.Value.resultLevels[x] = s.resolvedLevels[i];
     }
 }
 
 // Return the limit of the run consisting only of the types in validSet
 // starting at index. This checks the value at index, and will return
 // index if that value is not in validSet.
-[GoRecv] internal static nint findRunLimit(this ref ΔisolatingRunSequence s, nint index, params ꓸꓸꓸΔClass validSetʗp) {
+[GoRecv] internal static nint findRunLimit(this ref ΔisolatingRunSequence s, nint index, params Span<bidi_package.ΔClass> validSetʗp) {
     var validSet = validSetʗp.slice();
 
 loop:
@@ -738,7 +745,7 @@ break_loop:;
 
 // Algorithm validation. Assert that all values in types are in the
 // provided set.
-[GoRecv] internal static void assertOnly(this ref ΔisolatingRunSequence s, params ꓸꓸꓸΔClass codesʗp) {
+[GoRecv] internal static void assertOnly(this ref ΔisolatingRunSequence s, params Span<bidi_package.ΔClass> codesʗp) {
     var codes = codesʗp.slice();
 
 loop:
@@ -749,7 +756,9 @@ loop:
             }
         }
         log.Panicf("invalid bidi code %v present in assertOnly at position %d"u8, t, s.indexes[i]);
+continue_loop:;
     }
+break_loop:;
 }
 
 // determineLevelRuns returns an array of level runs. Each level run is
@@ -785,7 +794,9 @@ loop:
 }
 
 // Definition BD13. Determine isolating run sequences.
-[GoRecv] internal static slice<ж<ΔisolatingRunSequence>> determineIsolatingRunSequences(this ref paragraph p) {
+internal static slice<ж<ΔisolatingRunSequence>> determineIsolatingRunSequences(this ж<paragraph> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     var levelRuns = p.determineLevelRuns();
     // Compute the run that each character belongs to
     var runForCharacter = new slice<nint>(p.Len());
@@ -796,7 +807,9 @@ loop:
     }
     var sequences = new ж<ΔisolatingRunSequence>[]{}.slice();
     slice<nint> currentRunSequence = default!;
-    foreach (var (_, run) in levelRuns) {
+    foreach (var (_, vᴛ1) in levelRuns) {
+        var run = vᴛ1;
+
         nint first = run[0];
         if (p.initialTypes[first] != PDI || p.matchingIsolateInitiator[first] == -1) {
             currentRunSequence = default!;
@@ -812,7 +825,7 @@ loop:
                     break;
                 }
             }
-            sequences = append(sequences, p.isolatingRunSequence(currentRunSequence));
+            sequences = append(sequences, Ꮡp.isolatingRunSequence(currentRunSequence));
         }
     }
     return sequences;
@@ -823,10 +836,10 @@ loop:
 // that the levels assigned to these codes are arbitrary, they're chosen so
 // as to avoid breaking level runs.
 [GoRecv] internal static void assignLevelsToCharactersRemovedByX9(this ref paragraph p) {
-    foreach (var (iΔ1, t) in p.initialTypes) {
+    foreach (var (i, t) in p.initialTypes) {
         if (t.@in(LRE, RLE, LRO, RLO, PDF, BN)) {
-            p.resultTypes[iΔ1] = t;
-            p.resultLevels[iΔ1] = -1;
+            p.resultTypes[i] = t;
+            p.resultLevels[i] = (level)(-1);
         }
     }
     // now propagate forward the levels information (could have
@@ -950,13 +963,13 @@ internal static slice<nint> computeReordering(slice<level> levels) {
     // Note the rules say text, but no reordering across line bounds is
     // performed, so this is sufficient.
     var highestLevel = ((level)0);
-    var lowestOddLevel = ((level)(maxDepth + 2));
-    foreach (var (_, levelΔ1) in levels) {
-        if (levelΔ1 > highestLevel) {
-            highestLevel = levelΔ1;
+    var lowestOddLevel = ((level)maxDepth + 2);
+    foreach (var (_, level) in levels) {
+        if (level > highestLevel) {
+            highestLevel = level;
         }
-        if ((level)(levelΔ1 & 1) != 0 && levelΔ1 < lowestOddLevel) {
-            lowestOddLevel = levelΔ1;
+        if ((level)(level & 1) != 0 && level < lowestOddLevel) {
+            lowestOddLevel = level;
         }
     }
     for (var level = highestLevel; level >= lowestOddLevel; level--) {
@@ -968,7 +981,7 @@ internal static slice<nint> computeReordering(slice<level> levels) {
                 while (limit < len(levels) && levels[limit] >= level) {
                     limit++;
                 }
-                for (nint j = start;nint k = limit - 1; j < k; (j, k) = (j + 1, k - 1)) {
+                for ((nint j, nint k) = (start, limit - 1); j < k; (j, k) = (j + 1, k - 1)) {
                     (result[j], result[k]) = (result[k], result[j]);
                 }
                 // skip to end of level run
@@ -1002,7 +1015,7 @@ internal static bool isRemovedByX9(ΔClass c) {
 
 // typeForLevel reports the strong type (L or R) corresponding to the level.
 internal static ΔClass typeForLevel(level level) {
-    if (((level)(level & 1)) == 0) {
+    if (((level)(level & 0x1)) == 0) {
         return L;
     }
     return R;

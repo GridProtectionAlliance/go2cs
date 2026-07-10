@@ -7,8 +7,8 @@ using bytes = bytes_package;
 using fmt = fmt_package;
 using strings = strings_package;
 using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
 using ꓸꓸꓸany = Span<any>;
 
 partial class template_package {
@@ -41,7 +41,7 @@ internal static bool isCSSNmchar(rune r) {
     // Based on the CSS3 nmchar production but ignores multi-rune escape
     // sequences.
     // https://www.w3.org/TR/css3-syntax/#SUBTOK-nmchar
-    return (rune)'a' <= r && r <= (rune)'z' || (rune)'A' <= r && r <= (rune)'Z' || (rune)'0' <= r && r <= (rune)'9' || r == (rune)'-' || r == (rune)'_' || 128 <= r && r <= 55295 || 57344 <= r && r <= 65533 || 65536 <= r && r <= 1114111;
+    return (rune)'a' <= r && r <= (rune)'z' || (rune)'A' <= r && r <= (rune)'Z' || (rune)'0' <= r && r <= (rune)'9' || r == (rune)'-' || r == (rune)'_' || 0x80 <= r && r <= 0xd7ff || 0xe000 <= r && r <= 0xfffd || 0x10000 <= r && r <= 0x10ffff;
 }
 
 // Non-ASCII cases below.
@@ -62,7 +62,7 @@ internal static slice<byte> decodeCSS(slice<byte> s) {
     while (len(s) != 0) {
         nint iΔ1 = bytes.IndexByte(s, (rune)'\\');
         if (iΔ1 == -1) {
-            i = len(s);
+            iΔ1 = len(s);
         }
         (b, s) = (append(b, s[..(int)(iΔ1)].ꓸꓸꓸ), s[(int)(iΔ1)..]);
         if (len(s) < 2) {
@@ -104,18 +104,18 @@ internal static bool isHex(byte c) {
 internal static rune hexDecode(slice<byte> s) {
     var n = (rune)'\x00';
     foreach (var (_, c) in s) {
-        n <<= (UntypedInt)(4);
+        n <<= (int)(4);
         switch (ᐧ) {
         case {} when (rune)'0' <= c && c <= (rune)'9': {
-            n |= (rune)(((rune)(c - (rune)'0')));
+            n |= (rune)((rune)(c - (rune)'0'));
             break;
         }
         case {} when (rune)'a' <= c && c <= (rune)'f': {
-            n |= (rune)(((rune)(c - (rune)'a')) + 10);
+            n |= (rune)((rune)(c - (rune)'a') + 10);
             break;
         }
         case {} when (rune)'A' <= c && c <= (rune)'F': {
-            n |= (rune)(((rune)(c - (rune)'A')) + 10);
+            n |= (rune)((rune)(c - (rune)'A') + 10);
             break;
         }
         default: {
@@ -165,8 +165,8 @@ internal static @string cssEscaper(params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
     var (s, _) = stringify(args.ꓸꓸꓸ);
-    strings.Builder b = default!;
-    var r = ((rune)0);
+    ref var b = ref heap(new strings.Builder(), out var Ꮡb);
+    var r = (rune)0;
     nint w = 0;
     nint written = 0;
     for (nint i = 0; i < len(s); i += w) {
@@ -174,7 +174,7 @@ internal static @string cssEscaper(params ꓸꓸꓸany argsʗp) {
         (r, w) = utf8.DecodeRuneInString(s[(int)(i)..]);
         @string repl = default!;
         switch (ᐧ) {
-        case {} when ((nint)r) < len(cssReplacementTable) && cssReplacementTable[r] != "": {
+        case {} when (nint)r < len(cssReplacementTable) && cssReplacementTable[r] != "": {
             repl = cssReplacementTable[r];
             break;
         }
@@ -184,19 +184,19 @@ internal static @string cssEscaper(params ꓸꓸꓸany argsʗp) {
         }}
 
         if (written == 0) {
-            b.Grow(len(s));
+            Ꮡb.Grow(len(s));
         }
-        b.WriteString(s[(int)(written)..(int)(i)]);
-        b.WriteString(repl);
+        Ꮡb.WriteString(s[(int)(written)..(int)(i)]);
+        Ꮡb.WriteString(repl);
         written = i + w;
         if (repl != @"\\"u8 && (written == len(s) || isHex(s[written]) || isCSSSpace(s[written]))) {
-            b.WriteByte((rune)' ');
+            Ꮡb.WriteByte((rune)' ');
         }
     }
     if (written == 0) {
         return s;
     }
-    b.WriteString(s[(int)(written)..]);
+    Ꮡb.WriteString(s[(int)(written)..]);
     return b.String();
 }
 
@@ -204,13 +204,13 @@ internal static @string cssEscaper(params ꓸꓸꓸany argsʗp) {
 // in HTML attributes without further encoding.
 internal static slice<@string> cssReplacementTable = new slice<@string>(126){
     [0] = @"\0"u8,
-    [(rune)'\'] = @"\9"u8,
-    [(rune)'\'] = @"\a"u8,
-    [(rune)'\'] = @"\c"u8,
-    [(rune)'\'] = @"\d"u8,
+    [(rune)'\t'] = @"\9"u8,
+    [(rune)'\n'] = @"\a"u8,
+    [(rune)'\f'] = @"\c"u8,
+    [(rune)'\r'] = @"\d"u8,
     [(rune)'"'] = @"\22"u8,
     [(rune)'&'] = @"\26"u8,
-    [(rune)'\'] = @"\27"u8,
+    [(rune)'\''] = @"\27"u8,
     [(rune)'('] = @"\28"u8,
     [(rune)')'] = @"\29"u8,
     [(rune)'+'] = @"\2b"u8,
@@ -219,14 +219,14 @@ internal static slice<@string> cssReplacementTable = new slice<@string>(126){
     [(rune)';'] = @"\3b"u8,
     [(rune)'<'] = @"\3c"u8,
     [(rune)'>'] = @"\3e"u8,
-    [(rune)'\'] = @"\\"u8,
+    [(rune)'\\'] = @"\\"u8,
     [(rune)'{'] = @"\7b"u8,
     [(rune)'}'] = @"\7d"u8
 };
 
-internal static slice<byte> expressionBytes = slice<byte>("expression");
+internal static slice<byte> expressionBytes = slice<byte>((@string)"expression");
 
-internal static slice<byte> mozBindingBytes = slice<byte>("mozbinding");
+internal static slice<byte> mozBindingBytes = slice<byte>((@string)"mozbinding");
 
 // cssValueFilter allows innocuous CSS values in the output including CSS
 // quantities (10px or 25%), ID or class literals (#foo, .bar), keyword values
@@ -240,8 +240,7 @@ internal static @string cssValueFilter(params ꓸꓸꓸany argsʗp) {
     if (t == contentTypeCSS) {
         return s;
     }
-    var b = decodeCSS(slice<byte>(s));
-    var id = new slice<byte>(0, 64);
+    var (b, id) = (decodeCSS(slice<byte>(s)), new slice<byte>(0, 64));
     // CSS3 error handling is specified as honoring string boundaries per
     // https://www.w3.org/TR/css3-syntax/#error-handling :
     //     Malformed declarations. User agents must handle unexpected
@@ -267,7 +266,7 @@ internal static @string cssValueFilter(params ꓸꓸꓸany argsʗp) {
             break;
         }
         default: {
-            if (c < utf8.RuneSelf && isCSSNmchar(((rune)c))) {
+            if (c < utf8.RuneSelf && isCSSNmchar((rune)c)) {
                 id = append(id, c);
             }
             break;

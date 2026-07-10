@@ -32,7 +32,7 @@ internal static partial @unsafe.Pointer runtime_getProfLabel();
 // A new goroutine inherits the labels of the goroutine that created it.
 // This is a lower-level API than [Do], which should be used instead when possible.
 public static void SetGoroutineLabels(context.Context ctx) {
-    var (ctxLabels, _) = ctx.Value(new labelContextKey(nil))._<labelMap.val>(ᐧ);
+    var (ctxLabels, _) = ctx.Value(new labelContextKey(nil))._<ж<labelMap>>(ᐧ);
     runtime_setProfLabel(new @unsafe.Pointer(ctxLabels));
 }
 
@@ -43,7 +43,7 @@ public static void SetGoroutineLabels(context.Context ctx) {
 // order provided, overriding any previous value for the same key.
 // The augmented label map will be set for the duration of the call to f
 // and restored once f returns.
-public static void Do(context.Context ctx, LabelSet labels, Action<context.Context> f) => func((defer, _) => {
+public static void Do(context.Context ctx, LabelSet labels, Action<context.Context> f) => func((defer, recover) => {
     deferǃ(SetGoroutineLabels, ctx, defer);
     ctx = WithLabels(ctx, labels);
     SetGoroutineLabels(ctx);

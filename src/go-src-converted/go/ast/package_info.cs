@@ -24,6 +24,7 @@ global using scannerꓸError = go.go.scanner_package.ΔError;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;
+using token = go.go.token_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -41,7 +42,6 @@ using static go.go.ast_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Filter", "ΔFilter")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -53,29 +53,25 @@ using static go.go.ast_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(pkg *Object, err error), error>]
-[assembly: GoImplement<BasicLit, Node>]
-[assembly: GoImplement<BlockStmt, Node>]
-[assembly: GoImplement<CallExpr, Node>]
-[assembly: GoImplement<CommentGroup, Node>]
-[assembly: GoImplement<Decl, Node>]
-[assembly: GoImplement<Expr, Node>]
-[assembly: GoImplement<FieldList, Node>]
-[assembly: GoImplement<File, Node>]
-[assembly: GoImplement<FuncType, Node>]
-[assembly: GoImplement<Ident, Node>]
-[assembly: GoImplement<N, Node>]
-[assembly: GoImplement<Stmt, Node>]
+[assembly: GoImplement<BasicLit, Node>(Pointer = true)]
+[assembly: GoImplement<BlockStmt, Node>(Pointer = true)]
+[assembly: GoImplement<CallExpr, Node>(Pointer = true)]
+[assembly: GoImplement<Comment, Node>(Pointer = true)]
+[assembly: GoImplement<CommentGroup, Node>(Pointer = true)]
+[assembly: GoImplement<Field, Node>(Pointer = true)]
+[assembly: GoImplement<FieldList, Node>(Pointer = true)]
+[assembly: GoImplement<File, Node>(Pointer = true)]
+[assembly: GoImplement<FuncType, Node>(Pointer = true)]
+[assembly: GoImplement<Ident, Node>(Pointer = true)]
 [assembly: GoImplement<inspector, Visitor>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
-[assembly: GoImplement<printer, io_package.Writer>]
-[assembly: GoImplement<strings_package.Builder, io_package.Writer>]
+[assembly: GoImplement<printer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 [assembly: GoImplicitConv<File, ж<File>>(Indirect = true)]
 [assembly: GoImplicitConv<Ident, ж<Ident>>(Indirect = true)]
-[assembly: GoImplicitConv<Object, ж<Object>>(Indirect = true)]
+[assembly: GoImplicitConv<go.go.ast_package.Object, ж<go.go.ast_package.Object>>(Indirect = true)]
 // </ImplicitConversions>
 
 namespace go.go;

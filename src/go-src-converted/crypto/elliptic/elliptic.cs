@@ -61,7 +61,7 @@ partial class elliptic_package {
     (ж<bigꓸInt> x, ж<bigꓸInt> y) ScalarBaseMult(slice<byte> k);
 }
 
-internal static slice<byte> mask = new byte[]{255, 1, 3, 7, 15, 31, 63, 127}.slice();
+internal static slice<byte> mask = new byte[]{0xff, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f}.slice();
 
 // GenerateKey returns a public/private key pair. The private key is
 // generated using the given reader, which must return random data.
@@ -74,7 +74,7 @@ public static (slice<byte> priv, ж<bigꓸInt> x, ж<bigꓸInt> y, error err) Ge
     ж<bigꓸInt> y = default!;
     error err = default!;
 
-    var N = curve.Params().val.N;
+    var N = curve.Params().Value.N;
     nint bitSize = N.BitLen();
     nint byteLen = (bitSize + 7) / 8;
     priv = new slice<byte>(byteLen);
@@ -88,7 +88,7 @@ public static (slice<byte> priv, ж<bigꓸInt> x, ж<bigꓸInt> y, error err) Ge
         priv[0] &= (byte)(mask[bitSize % 8]);
         // This is because, in tests, rand will return all zeros and we don't
         // want to get the point at infinity and loop forever.
-        priv[1] ^= (byte)(66);
+        priv[1] ^= (byte)(0x42);
         // If the scalar is out of range, sample another random number.
         if (@new<bigꓸInt>().SetBytes(priv).Cmp(N) >= 0) {
             continue;
@@ -105,8 +105,8 @@ public static (slice<byte> priv, ж<bigꓸInt> x, ж<bigꓸInt> y, error err) Ge
 // Deprecated: for ECDH, use the crypto/ecdh package. This function returns an
 // encoding equivalent to that of PublicKey.Bytes in crypto/ecdh.
 public static slice<byte> Marshal(Curve curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     panicIfNotOnCurve(curve, Ꮡx, Ꮡy);
     nint byteLen = ((~curve.Params()).BitSize + 7) / 8;
@@ -122,13 +122,13 @@ public static slice<byte> Marshal(Curve curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt>
 // specified in SEC 1, Version 2.0, Section 2.3.3. If the point is not on the
 // curve (or is the conventional point at infinity), the behavior is undefined.
 public static slice<byte> MarshalCompressed(Curve curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     panicIfNotOnCurve(curve, Ꮡx, Ꮡy);
     nint byteLen = ((~curve.Params()).BitSize + 7) / 8;
     var compressed = new slice<byte>(1 + byteLen);
-    compressed[0] = (byte)(((byte)y.Bit(0)) | 2);
+    compressed[0] = (byte)((byte)y.Bit(0) | 2);
     x.FillBytes(compressed[1..]);
     return compressed;
 }
@@ -143,7 +143,7 @@ public static slice<byte> MarshalCompressed(Curve curve, ж<bigꓸInt> Ꮡx, ж<
 }
 
 // Assert that the known curves implement unmarshaler.
-internal static slice<unmarshaler> _ᴛ1ʗ = new unmarshaler[]{~p224, ~p256, ~p384, ~p521}.slice();
+internal static slice<unmarshaler> _ᴛ1ʗ = new unmarshaler[]{new nistCurveжunmarshaler<P224PointжnistPoint>(p224), new p256Curveжunmarshaler(p256), new nistCurveжunmarshaler<P384PointжnistPoint>(p384), new nistCurveжunmarshaler<P521PointжnistPoint>(p521)}.slice();
 
 // Unmarshal converts a point, serialized by [Marshal], into an x, y pair. It is
 // an error if the point is not in uncompressed form, is not on the curve, or is
@@ -168,7 +168,7 @@ public static (ж<bigꓸInt> x, ж<bigꓸInt> y) Unmarshal(Curve curve, slice<by
         // uncompressed form
         return (default!, default!);
     }
-    var p = curve.Params().val.P;
+    var p = curve.Params().Value.P;
     x = @new<bigꓸInt>().SetBytes(data[1..(int)(1 + byteLen)]);
     y = @new<bigꓸInt>().SetBytes(data[(int)(1 + byteLen)..]);
     if (x.Cmp(p) >= 0 || y.Cmp(p) >= 0) {
@@ -200,7 +200,7 @@ public static (ж<bigꓸInt> x, ж<bigꓸInt> y) UnmarshalCompressed(Curve curve
         // compressed form
         return (default!, default!);
     }
-    var p = curve.Params().val.P;
+    var p = curve.Params().Value.P;
     x = @new<bigꓸInt>().SetBytes(data[1..]);
     if (x.Cmp(p) >= 0) {
         return (default!, default!);
@@ -211,7 +211,7 @@ public static (ж<bigꓸInt> x, ж<bigꓸInt> y) UnmarshalCompressed(Curve curve
     if (y == nil) {
         return (default!, default!);
     }
-    if (((byte)y.Bit(0)) != (byte)(data[0] & 1)) {
+    if ((byte)y.Bit(0) != (byte)(data[0] & 1)) {
         y.Neg(y).Mod(y, p);
     }
     if (!curve.IsOnCurve(x, y)) {
@@ -221,8 +221,8 @@ public static (ж<bigꓸInt> x, ж<bigꓸInt> y) UnmarshalCompressed(Curve curve
 }
 
 internal static void panicIfNotOnCurve(Curve curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy) {
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
 
     // (0, 0) is the point at infinity by convention. It's ok to operate on it,
     // although IsOnCurve is documented to return false for it. See Issue 37294.
@@ -234,7 +234,8 @@ internal static void panicIfNotOnCurve(Curve curve, ж<bigꓸInt> Ꮡx, ж<big�
     }
 }
 
-internal static sync.Once initonce;
+internal static ж<sync.Once> Ꮡinitonce = new(default(sync.Once));
+internal static ref sync.Once initonce => ref Ꮡinitonce.Value;
 
 internal static void initAll() {
     initP224();
@@ -251,8 +252,8 @@ internal static void initAll() {
 //
 // The cryptographic operations are implemented using constant-time algorithms.
 public static Curve P224() {
-    initonce.Do(initAll);
-    return ~p224;
+    Ꮡinitonce.Do(initAll);
+    return new nistCurveжCurve<P224PointжnistPoint>(p224);
 }
 
 // P256 returns a [Curve] which implements NIST P-256 (FIPS 186-3, section D.2.3),
@@ -264,8 +265,8 @@ public static Curve P224() {
 //
 // The cryptographic operations are implemented using constant-time algorithms.
 public static Curve P256() {
-    initonce.Do(initAll);
-    return ~p256;
+    Ꮡinitonce.Do(initAll);
+    return new p256CurveжCurve(p256);
 }
 
 // P384 returns a [Curve] which implements NIST P-384 (FIPS 186-3, section D.2.4),
@@ -276,8 +277,8 @@ public static Curve P256() {
 //
 // The cryptographic operations are implemented using constant-time algorithms.
 public static Curve P384() {
-    initonce.Do(initAll);
-    return ~p384;
+    Ꮡinitonce.Do(initAll);
+    return new nistCurveжCurve<P384PointжnistPoint>(p384);
 }
 
 // P521 returns a [Curve] which implements NIST P-521 (FIPS 186-3, section D.2.5),
@@ -288,8 +289,8 @@ public static Curve P384() {
 //
 // The cryptographic operations are implemented using constant-time algorithms.
 public static Curve P521() {
-    initonce.Do(initAll);
-    return ~p521;
+    Ꮡinitonce.Do(initAll);
+    return new nistCurveжCurve<P521PointжnistPoint>(p521);
 }
 
 } // end elliptic_package

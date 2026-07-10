@@ -10,12 +10,12 @@ using context = context_package;
 using tls = crypto.tls_package;
 using nettrace = @internal.nettrace_package;
 using net = net_package;
-using textproto = net.textproto_package;
+using textproto = go.net.textproto_package;
 using reflect = reflect_package;
 using time = time_package;
 using @internal;
 using crypto;
-using net;
+using go.net;
 
 partial class httptrace_package {
 
@@ -26,7 +26,7 @@ partial class httptrace_package {
 // ContextClientTrace returns the [ClientTrace] associated with the
 // provided context. If none, it returns nil.
 public static ж<ClientTrace> ContextClientTrace(context.Context ctx) {
-    var (trace, _) = ctx.Value(new clientEventContextKey(nil))._<ClientTrace.val>(ᐧ);
+    var (trace, _) = ctx.Value(new clientEventContextKey(nil))._<ж<ClientTrace>>(ᐧ);
     return trace;
 }
 
@@ -36,31 +36,31 @@ public static ж<ClientTrace> ContextClientTrace(context.Context ctx) {
 // registered with ctx. Any hooks defined in the provided trace will
 // be called first.
 public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrace> Ꮡtrace) {
-    ref var trace = ref Ꮡtrace.val;
+    ref var trace = ref Ꮡtrace.DerefOrNil();
 
-    if (trace == nil) {
+    if (Ꮡtrace == nil) {
         throw panic("nil trace");
     }
     var old = ContextClientTrace(ctx);
-    trace.compose(old);
+    Ꮡtrace.compose(old);
     ctx = context.WithValue(ctx, new clientEventContextKey(nil), trace);
-    if (trace.hasNetHooks()) {
+    if (Ꮡtrace.hasNetHooks()) {
         var nt = Ꮡ(new nettrace.Trace(
             ConnectStart: trace.ConnectStart,
             ConnectDone: trace.ConnectDone
         ));
         if (trace.DNSStart != default!) {
-            nt.val.DNSStart = (@string name) => {
-                trace.DNSStart(new DNSStartInfo(Host: name));
+            nt.Value.DNSStart = (@string name) => {
+                Ꮡtrace.Value.DNSStart(new DNSStartInfo(Host: name));
             };
         }
         if (trace.DNSDone != default!) {
-            nt.val.DNSDone = (slice<any> netIPs, bool coalesced, error err) => {
+            nt.Value.DNSDone = (slice<any> netIPs, bool coalesced, error err) => {
                 var addrs = new slice<net.IPAddr>(len(netIPs));
                 foreach (var (i, ip) in netIPs) {
                     addrs[i] = ip._<net.IPAddr>();
                 }
-                trace.DNSDone(new DNSDoneInfo(
+                Ꮡtrace.Value.DNSDone(new DNSDoneInfo(
                     Addrs: addrs,
                     Coalesced: coalesced,
                     Err: err
@@ -112,7 +112,7 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
     // returned before the final non-1xx response. Got1xxResponse is called
     // for "100 Continue" responses, even if Got100Continue is also defined.
     // If it returns an error, the client request is aborted with that error value.
-    public textproto.MIMEHeader) error Got1xxResponse;
+    public Func<nint, textproto.MIMEHeader, error> Got1xxResponse;
     // DNSStart is called when a DNS lookup begins.
     public Action<DNSStartInfo> DNSStart;
     // DNSDone is called when a DNS lookup ends.
@@ -134,7 +134,7 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
     // TLSHandshakeDone is called after the TLS handshake with either the
     // successful handshake's connection state, or a non-nil error on handshake
     // failure.
-    public tls.ConnectionState, error) TLSHandshakeDone;
+    public Action<tlsꓸConnectionState, error> TLSHandshakeDone;
     // WroteHeaderField is called after the Transport has written
     // each request header. At the time of this call the values
     // might be buffered and not yet written to the network.
@@ -162,10 +162,11 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
 
 // compose modifies t such that it respects the previously-registered hooks in old,
 // subject to the composition policy requested in t.Compose.
-[GoRecv] public static void compose(this ref ClientTrace t, ж<ClientTrace> Ꮡold) {
-    ref var old = ref Ꮡold.val;
+internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> Ꮡold) {
+    ref var t = ref Ꮡt.Value;
+    ref var old = ref Ꮡold.DerefOrNil();
 
-    if (old == nil) {
+    if (Ꮡold == nil) {
         return;
     }
     var tv = reflect.ValueOf(t).Elem();
@@ -177,7 +178,7 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
         if (hookType.Kind() != reflect.Func) {
             continue;
         }
-        ref var of = ref heap<reflect_package.ΔValue>(out var Ꮡof);
+        ref var of = ref heap<reflectꓸValue>(out var Ꮡof);
         of = ov.Field(i);
         if (of.IsNil()) {
             continue;
@@ -188,13 +189,12 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
         }
         // Make a copy of tf for tf to call. (Otherwise it
         // creates a recursive call cycle and stack overflows)
-        ref var tfCopy = ref heap<reflect_package.ΔValue>(out var ᏑtfCopy);
+        ref var tfCopy = ref heap<reflectꓸValue>(out var ᏑtfCopy);
         tfCopy = reflect.ValueOf(tf.Interface());
         // We need to call both tf and of in some order.
-        var newFunc = reflect.MakeFunc(hookType, 
         var ofʗ1 = of;
         var tfCopyʗ1 = tfCopy;
-        (slice<reflectꓸValue> args) => {
+        var newFunc = reflect.MakeFunc(hookType, (slice<reflectꓸValue> args) => {
             tfCopyʗ1.Call(args);
             return ofʗ1.Call(args);
         });
@@ -219,7 +219,9 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
     public bool Coalesced;
 }
 
-[GoRecv] internal static bool hasNetHooks(this ref ClientTrace t) {
+internal static bool hasNetHooks(this ж<ClientTrace> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t == nil) {
         return false;
     }
@@ -232,7 +234,7 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
     // Conn is the connection that was obtained. It is owned by
     // the http.Transport and should not be read, written or
     // closed by users of ClientTrace.
-    public net_package.Conn Conn;
+    public net.Conn Conn;
     // Reused is whether this connection has been previously
     // used for another HTTP request.
     public bool Reused;
@@ -241,7 +243,7 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
     public bool WasIdle;
     // IdleTime reports how long the connection was previously
     // idle, if WasIdle is true.
-    public time_package.Duration IdleTime;
+    public time.Duration IdleTime;
 }
 
 } // end httptrace_package

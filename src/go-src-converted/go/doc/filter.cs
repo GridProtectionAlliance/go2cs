@@ -3,16 +3,17 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using ast = go.ast_package;
+using ast = global::go.go.ast_package;
+using global::go.go;
 
 partial class doc_package {
 
-public delegate bool Filter(@string _);
+// type ΔFilter is a methodless func type — rendered inline as its base delegate
 
-internal static bool matchFields(ж<ast.FieldList> Ꮡfields, ΔFilter f) {
-    ref var fields = ref Ꮡfields.val;
+internal static bool matchFields(ж<ast.FieldList> Ꮡfields, Func<@string, bool> f) {
+    ref var fields = ref Ꮡfields.DerefOrNil();
 
-    if (fields != nil) {
+    if (Ꮡfields != nil) {
         foreach (var (_, field) in fields.List) {
             foreach (var (_, name) in (~field).Names) {
                 if (f((~name).Name)) {
@@ -24,8 +25,8 @@ internal static bool matchFields(ж<ast.FieldList> Ꮡfields, ΔFilter f) {
     return false;
 }
 
-internal static bool matchDecl(ж<ast.GenDecl> Ꮡd, ΔFilter f) {
-    ref var d = ref Ꮡd.val;
+internal static bool matchDecl(ж<ast.GenDecl> Ꮡd, Func<@string, bool> f) {
+    ref var d = ref Ꮡd.Value;
 
     foreach (var (_, dΔ1) in d.Specs) {
         switch (dΔ1.type()) {
@@ -62,7 +63,7 @@ internal static bool matchDecl(ж<ast.GenDecl> Ꮡd, ΔFilter f) {
     return false;
 }
 
-internal static slice<ж<Value>> filterValues(slice<ж<Value>> a, ΔFilter f) {
+internal static slice<ж<Value>> filterValues(slice<ж<Value>> a, Func<@string, bool> f) {
     nint w = 0;
     foreach (var (_, vd) in a) {
         if (matchDecl((~vd).Decl, f)) {
@@ -73,7 +74,7 @@ internal static slice<ж<Value>> filterValues(slice<ж<Value>> a, ΔFilter f) {
     return a[0..(int)(w)];
 }
 
-internal static slice<ж<Func>> filterFuncs(slice<ж<Func>> a, ΔFilter f) {
+internal static slice<ж<Func>> filterFuncs(slice<ж<Func>> a, Func<@string, bool> f) {
     nint w = 0;
     foreach (var (_, fd) in a) {
         if (f((~fd).Name)) {
@@ -84,19 +85,21 @@ internal static slice<ж<Func>> filterFuncs(slice<ж<Func>> a, ΔFilter f) {
     return a[0..(int)(w)];
 }
 
-internal static slice<ж<Type>> filterTypes(slice<ж<Type>> a, ΔFilter f) {
+internal static slice<ж<Type>> filterTypes(slice<ж<Type>> a, Func<@string, bool> f) {
     nint w = 0;
-    foreach (var (_, td) in a) {
+    foreach (var (_, vᴛ1) in a) {
+        var td = vᴛ1;
+
         nint n = 0;
         // number of matches
         if (matchDecl((~td).Decl, f)){
             n = 1;
         } else {
             // type name doesn't match, but we may have matching consts, vars, factories or methods
-            td.val.Consts = filterValues((~td).Consts, f);
-            td.val.Vars = filterValues((~td).Vars, f);
-            td.val.Funcs = filterFuncs((~td).Funcs, f);
-            td.val.Methods = filterFuncs((~td).Methods, f);
+            td.Value.Consts = filterValues((~td).Consts, f);
+            td.Value.Vars = filterValues((~td).Vars, f);
+            td.Value.Funcs = filterFuncs((~td).Funcs, f);
+            td.Value.Methods = filterFuncs((~td).Methods, f);
             n += len((~td).Consts) + len((~td).Vars) + len((~td).Funcs) + len((~td).Methods);
         }
         if (n > 0) {
@@ -109,7 +112,7 @@ internal static slice<ж<Type>> filterTypes(slice<ж<Type>> a, ΔFilter f) {
 
 // Filter eliminates documentation for names that don't pass through the filter f.
 // TODO(gri): Recognize "Type.Method" as a name.
-[GoRecv] public static void Filter(this ref Package p, ΔFilter f) {
+[GoRecv] public static void Filter(this ref Package p, Func<@string, bool> f) {
     p.Consts = filterValues(p.Consts, f);
     p.Vars = filterValues(p.Vars, f);
     p.Types = filterTypes(p.Types, f);

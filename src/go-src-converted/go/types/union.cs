@@ -3,9 +3,12 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using ast = go.ast_package;
-using token = go.token_package;
-using static @internal.types.errors_package;
+using ast = global::go.go.ast_package;
+using token = global::go.go.token_package;
+using static global::go.@internal.types.errors_package;
+using constant = global::go.go.constant_package;
+using errors = global::go.@internal.types.errors_package;
+using global::go.go;
 
 partial class types_package {
 
@@ -34,19 +37,23 @@ public static ж<Union> NewUnion(slice<ж<ΔTerm>> terms) {
     return u.terms[i];
 }
 
-[GoRecv("capture")] public static ΔType Underlying(this ref Union u) {
-    return ~u;
+public static ΔType Underlying(this ж<Union> Ꮡu) {
+    ref var u = ref Ꮡu.Value;
+
+    return new UnionжΔType(Ꮡu);
 }
 
-[GoRecv] public static @string String(this ref Union u) {
-    return TypeString(~u, default!);
+public static @string String(this ж<Union> Ꮡu) {
+    ref var u = ref Ꮡu.Value;
+
+    return TypeString(new UnionжΔType(Ꮡu), default!);
 }
 
-[GoType("struct{tilde bool; typ go.types.Type}")] partial struct ΔTerm;
+[GoType("term")] partial struct ΔTerm;
 
 // NewTerm returns a new union term.
 public static ж<ΔTerm> NewTerm(bool tilde, ΔType typ) {
-    return Ꮡ(new ΔTerm(tilde, typ));
+    return Ꮡ(new ΔTerm(new term(tilde, typ)));
 }
 
 [GoRecv] public static bool Tilde(this ref ΔTerm t) {
@@ -57,8 +64,10 @@ public static ж<ΔTerm> NewTerm(bool tilde, ΔType typ) {
     return t.typ;
 }
 
-[GoRecv] public static @string String(this ref ΔTerm t) {
-    return (((ж<term>)(t?.val ?? default!))).val.String();
+public static @string String(this ж<ΔTerm> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
+    return (Ꮡ((term)(t))).String();
 }
 
 // ----------------------------------------------------------------------------
@@ -70,9 +79,9 @@ internal static readonly UntypedInt maxTermCount = 100;
 // parseUnion parses uexpr as a union of expressions.
 // The result is a Union type, or Typ[Invalid] for some errors.
 internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
-    ref var check = ref Ꮡcheck.val;
+    ref var check = ref Ꮡcheck.Value;
 
-    (blist, tlist) = flattenUnion(default!, uexpr);
+    var (blist, tlist) = flattenUnion(default!, uexpr);
     assert(len(blist) == len(tlist) - 1);
     slice<ж<ΔTerm>> terms = default!;
     ΔType u = default!;
@@ -87,12 +96,12 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
         // typ already recorded through check.typ in parseTilde
         if (len(terms) >= maxTermCount){
             if (isValid(u)) {
-                check.errorf(x, InvalidUnion, "cannot handle more than %d union terms (implementation limitation)"u8, maxTermCount);
-                u = ~Typ[Invalid];
+                Ꮡcheck.errorf(new ast_Exprᴠpositioner(x), InvalidUnion, "cannot handle more than %d union terms (implementation limitation)"u8, maxTermCount);
+                u = new BasicжΔType(Typ[Invalid]);
             }
         } else {
             terms = append(terms, term);
-            Ꮡu = new Union(terms); u = ref Ꮡu.val;
+            u = new UnionжΔType(Ꮡ(new Union(terms)));
         }
         if (i > 0) {
             check.recordTypeAndValue(blist[i - 1], typexpr, u, default!);
@@ -104,66 +113,74 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
     // Check validity of terms.
     // Do this check later because it requires types to be set up.
     // Note: This is a quadratic algorithm, but unions tend to be short.
-    check.later(
-    var termsʗ11 = terms;
-    var tlistʗ11 = tlist;
-    () => {
-        foreach (var (i, t) in termsʗ11) {
+    var termsʗ1 = terms;
+    var tlistʗ1 = tlist;
+
+    var termsʗ3 = terms;
+    var tlistʗ3 = tlist;
+
+    var termsʗ5 = terms;
+    var tlistʗ5 = tlist;
+
+    var termsʗ7 = terms;
+    var tlistʗ7 = tlist;
+    check.later(() => {
+        foreach (var (i, t) in termsʗ7) {
             if (!isValid((~t).typ)) {
                 continue;
             }
-            var u = under((~t).typ);
-            var (f, _) = u._<Interface.val>(ᐧ);
+            var uΔ1 = under((~t).typ);
+            var (f, _) = uΔ1._<ж<Interface>>(ᐧ);
             if ((~t).tilde) {
                 if (f != nil) {
-                    check.errorf(tlistʗ11[i], InvalidUnion, "invalid use of ~ (%s is an interface)"u8, (~t).typ);
+                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(tlistʗ7[i]), InvalidUnion, "invalid use of ~ (%s is an interface)"u8, (~t).typ);
                     continue;
                 }
-                if (!Identical(u, (~t).typ)) {
-                    check.errorf(tlistʗ11[i], InvalidUnion, "invalid use of ~ (underlying type of %s is %s)"u8, (~t).typ, u);
+                if (!Identical(uΔ1, (~t).typ)) {
+                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(tlistʗ7[i]), InvalidUnion, "invalid use of ~ (underlying type of %s is %s)"u8, (~t).typ, uΔ1);
                     continue;
                 }
             }
             if (f != nil) {
                 var tset = f.typeSet();
                 switch (ᐧ) {
-                case {} when tset.NumMethods() is != 0: {
-                    check.errorf(tlistʗ11[i], InvalidUnion, "cannot use %s in union (%s contains methods)"u8, t, t);
+                case {} when tset.NumMethods() is not 0: {
+                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(tlistʗ7[i]), InvalidUnion, "cannot use %s in union (%s contains methods)"u8, t, t);
                     break;
                 }
                 case {} when AreEqual((~t).typ, universeComparable.Type()): {
-                    check.error(tlistʗ11[i], InvalidUnion, "cannot use comparable in union"u8);
+                    Ꮡcheck.error(new ast_Exprᴠpositioner(tlistʗ7[i]), InvalidUnion, "cannot use comparable in union"u8);
                     break;
                 }
                 case {} when (~tset).comparable: {
-                    check.errorf(tlistʗ11[i], InvalidUnion, "cannot use %s in union (%s embeds comparable)"u8, t, t);
+                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(tlistʗ7[i]), InvalidUnion, "cannot use %s in union (%s embeds comparable)"u8, t, t);
                     break;
                 }}
 
                 continue;
             }
             {
-                nint j = overlappingTerm(termsʗ11[..(int)(i)], t); if (j >= 0) {
-                    check.softErrorf(tlistʗ11[i], InvalidUnion, "overlapping terms %s and %s"u8, t, termsʗ11[j]);
+                nint j = overlappingTerm(termsʗ7[..(int)(i)], t); if (j >= 0) {
+                    Ꮡcheck.softErrorf(new ast_Exprᴠpositioner(tlistʗ7[i]), InvalidUnion, "overlapping terms %s and %s"u8, t, termsʗ7[j]);
                 }
             }
         }
-    }).describef(uexpr, "check term validity %s"u8, uexpr);
+    }).describef(new ast_Exprᴠpositioner(uexpr), "check term validity %s"u8, uexpr);
     return u;
 }
 
 internal static ж<ΔTerm> parseTilde(ж<Checker> Ꮡcheck, ast.Expr tx) {
-    ref var check = ref Ꮡcheck.val;
+    ref var check = ref Ꮡcheck.Value;
 
     var x = tx;
     bool tilde = default!;
     {
         var (op, _) = x._<ж<ast.UnaryExpr>>(ᐧ); if (op != nil && (~op).Op == token.TILDE) {
-            x = op.val.X;
+            x = op.Value.X;
             tilde = true;
         }
     }
-    var typ = check.typ(x);
+    var typ = Ꮡcheck.typ(x);
     // Embedding stand-alone type parameters is not permitted (go.dev/issue/47127).
     // We don't need this restriction anymore if we make the underlying type of a type
     // parameter its constraint interface: if we embed a lone type parameter, we will
@@ -171,15 +188,15 @@ internal static ж<ΔTerm> parseTilde(ж<Checker> Ꮡcheck, ast.Expr tx) {
     // and since the underlying type is an interface the embedding is well defined.
     if (isTypeParam(typ)) {
         if (tilde){
-            check.errorf(x, MisplacedTypeParam, "type in term %s cannot be a type parameter"u8, tx);
+            Ꮡcheck.errorf(new ast_Exprᴠpositioner(x), MisplacedTypeParam, "type in term %s cannot be a type parameter"u8, tx);
         } else {
-            check.error(x, MisplacedTypeParam, "term cannot be a type parameter"u8);
+            Ꮡcheck.error(new ast_Exprᴠpositioner(x), MisplacedTypeParam, "term cannot be a type parameter"u8);
         }
-        typ = ~Typ[Invalid];
+        typ = new BasicжΔType(Typ[Invalid]);
     }
     var term = NewTerm(tilde, typ);
     if (tilde) {
-        check.recordTypeAndValue(tx, typexpr, new Union(new ж<ΔTerm>[]{term}.slice()), default!);
+        check.recordTypeAndValue(tx, typexpr, new UnionжΔType(Ꮡ(new Union(new ж<ΔTerm>[]{term}.slice()))), default!);
     }
     return term;
 }
@@ -189,7 +206,7 @@ internal static ж<ΔTerm> parseTilde(ж<Checker> Ꮡcheck, ast.Expr tx) {
 // such term. The type of term y must not be an interface, and terms
 // with an interface type are ignored in the terms list.
 internal static nint overlappingTerm(slice<ж<ΔTerm>> terms, ж<ΔTerm> Ꮡy) {
-    ref var y = ref Ꮡy.val;
+    ref var y = ref Ꮡy.DerefOrNil();
 
     assert(!IsInterface(y.typ));
     foreach (var (i, x) in terms) {
@@ -199,11 +216,11 @@ internal static nint overlappingTerm(slice<ж<ΔTerm>> terms, ж<ΔTerm> Ꮡy) {
         // disjoint requires non-nil, non-top arguments,
         // and non-interface types as term types.
         if (debug) {
-            if (x == nil || (~x).typ == default! || y == nil || y.typ == default!) {
+            if (x == nil || (~x).typ == default! || Ꮡy == nil || y.typ == default!) {
                 throw panic("empty or top union term");
             }
         }
-        if (!(((ж<term>)(x?.val ?? default!))).val.disjoint(((ж<term>)(y?.val ?? default!)))) {
+        if (!(Ꮡ((term)(~x))).disjoint(Ꮡ((term)(y)))) {
             return i;
         }
     }
@@ -219,8 +236,8 @@ internal static (slice<ast.Expr> blist, slice<ast.Expr> tlist) flattenUnion(slic
     {
         var (o, _) = x._<ж<ast.BinaryExpr>>(ᐧ); if (o != nil && (~o).Op == token.OR) {
             (blist, tlist) = flattenUnion(list, (~o).X);
-            blist = append(blist, ~o);
-            x = o.val.Y;
+            blist = append(blist, (ast.Expr)(new ast_BinaryExprжExpr(o)));
+            x = o.Value.Y;
         }
     }
     return (blist, append(tlist, x));

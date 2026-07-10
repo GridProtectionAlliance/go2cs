@@ -12,15 +12,16 @@
 namespace go.go;
 
 using fmt = fmt_package;
-using token = go.token_package;
+using token = global::go.go.token_package;
 using math = math_package;
-using big = math.big_package;
-using bits = math.bits_package;
+using big = global::go.math.big_package;
+using bits = global::go.math.bits_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using sync = sync_package;
 using utf8 = unicode.utf8_package;
-using math;
+using global::go.go;
+using global::go.math;
 using unicode;
 
 partial class constant_package {
@@ -36,14 +37,11 @@ public static readonly ΔKind Float = 4;
 public static readonly ΔKind Complex = 5;
 
 // A Value represents the value of a Go constant.
-[GoType] partial interface Value {
+[GoType] partial interface Value :
+    fmt.Stringer
+{
     // Kind returns the value kind.
     ΔKind Kind();
-    // String returns a short, quoted (human-readable) form of the value.
-    // For numeric values, the result may be an approximation;
-    // for String values the result may be a shortened string.
-    // Use ExactString for a string representing a value exactly.
-    @string String();
     // ExactString returns an exact, quoted (human-readable) form of the value.
     // If the Value is of Kind String, use StringVal to obtain the unquoted string.
     @string ExactString();
@@ -79,29 +77,27 @@ internal static readonly UntypedInt prec = 512;
 
 [GoType] partial struct stringVal {
     // Lazy value: either a string (l,r==nil) or an addition (l,r!=nil).
-    internal sync_package.Mutex mu;
+    internal sync.Mutex mu;
     internal @string s;
-    internal ж<stringVal> l;
-    internal ж<stringVal> r;
+    internal ж<stringVal> l, r;
 }
 
 [GoType("num:int64")] partial struct int64Val;
 
 [GoType] partial struct intVal {
-    internal ж<math.big_package.ΔInt> val;
+    internal ж<bigꓸInt> val;
 }
 
 [GoType] partial struct ratVal {
-    internal ж<math.big_package.ΔRat> val;
+    internal ж<bigꓸRat> val;
 }
 
 [GoType] partial struct floatVal {
-    internal ж<math.big_package.Float> val;
+    internal ж<big.Float> val;
 }
 
 [GoType] partial struct complexVal {
-    internal Value re;
-    internal Value im;
+    internal Value re, im;
 }
 
 internal static ΔKind Kind(this unknownVal _) {
@@ -141,13 +137,15 @@ internal static @string String(this unknownVal _) {
 }
 
 internal static @string String(this boolVal x) {
-    return strconv.FormatBool(((bool)x));
+    return strconv.FormatBool((bool)x);
 }
 
 // String returns a possibly shortened quoted form of the String value.
-[GoRecv] internal static @string String(this ref stringVal x) {
-    static readonly UntypedInt maxLen = 72; // a reasonable length
-    @string s = strconv.Quote(x.@string());
+internal static @string String(this ж<stringVal> Ꮡx) {
+    ref var x = ref Ꮡx.Value;
+
+    UntypedInt maxLen = 72; // a reasonable length
+    @string s = strconv.Quote(Ꮡx.@string());
     if (utf8.RuneCountInString(s) > maxLen) {
         // The string without the enclosing quotes is greater than maxLen-2 runes
         // long. Remove the last 3 runes (including the closing '"') by keeping
@@ -167,15 +165,17 @@ internal static @string String(this boolVal x) {
 // string, to speed future calls. This lazy construction avoids
 // building different string values for all subpieces of a large
 // concatenation. See golang.org/issue/23348.
-[GoRecv] internal static @string @string(this ref stringVal x) {
-    x.mu.Lock();
+internal static @string @string(this ж<stringVal> Ꮡx) {
+    ref var x = ref Ꮡx.Value;
+
+    Ꮡx.of(stringVal.Ꮡmu).Lock();
     if (x.l != nil) {
-        x.s = strings.Join(reverse(x.appendReverse(default!)), ""u8);
+        x.s = strings.Join(reverse(Ꮡx.appendReverse(default!)), ""u8);
         x.l = default!;
         x.r = default!;
     }
     @string s = x.s;
-    x.mu.Unlock();
+    Ꮡx.of(stringVal.Ꮡmu).Unlock();
     return s;
 }
 
@@ -194,28 +194,30 @@ internal static slice<@string> reverse(slice<@string> x) {
 // Because a chain like a + b + c + d + e is actually represented
 // as ((((a + b) + c) + d) + e), the left-side loop avoids deep recursion.
 // x must be locked.
-[GoRecv] internal static slice<@string> appendReverse(this ref stringVal x, slice<@string> list) {
-    var y = x;
+internal static slice<@string> appendReverse(this ж<stringVal> Ꮡx, slice<@string> list) {
+    ref var x = ref Ꮡx.Value;
+
+    var y = Ꮡx;
     while ((~y).r != nil) {
-        (~(~y).r).mu.Lock();
+        (~y).r.of(stringVal.Ꮡmu).Lock();
         list = (~y).r.appendReverse(list);
-        (~(~y).r).mu.Unlock();
-        var l = y.val.l;
-        if (y != x) {
-            (~y).mu.Unlock();
+        (~y).r.of(stringVal.Ꮡmu).Unlock();
+        var l = y.Value.l;
+        if (y != Ꮡx) {
+            y.of(stringVal.Ꮡmu).Unlock();
         }
-        (~l).mu.Lock();
+        l.of(stringVal.Ꮡmu).Lock();
         y = l;
     }
-    @string s = y.val.s;
-    if (y != x) {
-        (~y).mu.Unlock();
+    @string s = y.Value.s;
+    if (y != Ꮡx) {
+        y.of(stringVal.Ꮡmu).Unlock();
     }
     return append(list, s);
 }
 
 internal static @string String(this int64Val x) {
-    return strconv.FormatInt(((int64)x), 10);
+    return strconv.FormatInt((int64)x, 10);
 }
 
 internal static @string String(this intVal x) {
@@ -250,23 +252,23 @@ internal static @string String(this floatVal x) {
     // conversion to avoid precise but possibly slow Float
     // formatting.
     // f = mant * 2**exp
-    ref var mant = ref heap(new math.big_package.Float(), out var Ꮡmant);
+    ref var mant = ref heap(new big.Float(), out var Ꮡmant);
     nint exp = f.MantExp(Ꮡmant);
     // 0.5 <= |mant| < 1.0
     // approximate float64 mantissa m and decimal exponent d
     // f ~ m * 10**d
-    var (m, _) = mant.Float64();
+    var (m, _) = Ꮡmant.Float64();
     // 0.5 <= |m| < 1.0
-    var d = ((float64)exp) * (math.Ln2 / math.Ln10);
+    var d = (float64)exp * (float64)(math.Ln2 / math.Ln10);
     // log_10(2)
     // adjust m for truncated (integer) decimal exponent e
-    var e = ((int64)d);
-    m *= math.Pow(10, d - ((float64)e));
+    var e = (int64)d;
+    m *= math.Pow(10, d - (float64)e);
     // ensure 1 <= |m| < 10
     {
         var am = math.Abs(m);
         switch (ᐧ) {
-        case {} when am < 1 - 0.5e-6F: {
+        case {} when am < 1 - 0.5e-6D: {
             m *= 10;
             e--;
             break;
@@ -296,8 +298,10 @@ internal static @string ExactString(this boolVal x) {
     return x.String();
 }
 
-[GoRecv] internal static @string ExactString(this ref stringVal x) {
-    return strconv.Quote(x.@string());
+internal static @string ExactString(this ж<stringVal> Ꮡx) {
+    ref var x = ref Ꮡx.Value;
+
+    return strconv.Quote(Ꮡx.@string());
 }
 
 internal static @string ExactString(this int64Val x) {
@@ -361,15 +365,15 @@ internal static ж<big.Float> newFloat() {
 }
 
 internal static intVal i64toi(int64Val x) {
-    return new intVal(newInt().SetInt64(((int64)x)));
+    return new intVal(newInt().SetInt64((int64)x));
 }
 
 internal static ratVal i64tor(int64Val x) {
-    return new ratVal(newRat().SetInt64(((int64)x)));
+    return new ratVal(newRat().SetInt64((int64)x));
 }
 
 internal static floatVal i64tof(int64Val x) {
-    return new floatVal(newFloat().SetInt64(((int64)x)));
+    return new floatVal(newFloat().SetInt64((int64)x));
 }
 
 internal static ratVal itor(intVal x) {
@@ -389,7 +393,7 @@ internal static complexVal vtoc(Value x) {
 }
 
 internal static Value makeInt(ж<bigꓸInt> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     if (x.IsInt64()) {
         return ((int64Val)x.Int64());
@@ -398,10 +402,10 @@ internal static Value makeInt(ж<bigꓸInt> Ꮡx) {
 }
 
 internal static Value makeRat(ж<bigꓸRat> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
-    var a = x.Num();
-    var b = x.Denom();
+    var a = Ꮡx.Num();
+    var b = Ꮡx.Denom();
     if (smallInt(a) && smallInt(b)) {
         // ok to remain fraction
         return new ratVal(Ꮡx);
@@ -413,10 +417,10 @@ internal static Value makeRat(ж<bigꓸRat> Ꮡx) {
 internal static floatVal floatVal0 = new floatVal(newFloat());
 
 internal static Value makeFloat(ж<big.Float> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     // convert -0
-    if (x.Sign() == 0) {
+    if (Ꮡx.Sign() == 0) {
         return floatVal0;
     }
     if (x.IsInf()) {
@@ -467,7 +471,7 @@ internal static readonly UntypedInt maxExp = /* 4 << 10 */ 4096;
 // smallInt reports whether x would lead to "reasonably"-sized fraction
 // if converted to a *big.Rat.
 internal static bool smallInt(ж<bigꓸInt> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     return x.BitLen() < maxExp;
 }
@@ -485,12 +489,12 @@ internal static bool smallFloat64(float64 x) {
 // smallFloat reports whether x would lead to "reasonably"-sized fraction
 // if converted to a *big.Rat.
 internal static bool smallFloat(ж<big.Float> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     if (x.IsInf()) {
         return false;
     }
-    nint e = x.MantExp(nil);
+    nint e = Ꮡx.MantExp(nil);
     return -maxExp < e && e < maxExp;
 }
 
@@ -510,13 +514,14 @@ public static Value MakeBool(bool b) {
 // MakeString returns the [String] value for s.
 public static Value MakeString(@string s) {
     if (s == ""u8) {
-        return emptyString;
+        return new stringValжValue(ᏑemptyString);
     }
     // common case
-    return new stringVal(s: s);
+    return new stringValжValue(Ꮡ(new stringVal(s: s)));
 }
 
-internal static stringVal emptyString;
+internal static ж<stringVal> ᏑemptyString = new(default(stringVal));
+internal static ref stringVal emptyString => ref ᏑemptyString.Value;
 
 // MakeInt64 returns the [Int] value for x.
 public static Value MakeInt64(int64 x) {
@@ -525,8 +530,8 @@ public static Value MakeInt64(int64 x) {
 
 // MakeUint64 returns the [Int] value for x.
 public static Value MakeUint64(uint64 x) {
-    if (x < 1 << (int)(63)) {
-        return ((int64Val)((int64)x));
+    if (x < ((uint64)1 << (int)(63))) {
+        return ((int64Val)(int64)x);
     }
     return new intVal(newInt().SetUint64(x));
 }
@@ -590,7 +595,7 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) {
             nint n = len(lit); if (n >= 2) {
                 {
                     var (code, _, _, err) = strconv.UnquoteChar(lit[1..(int)(n - 1)], (rune)'\''); if (err == default!) {
-                        return MakeInt64(((int64)code));
+                        return MakeInt64((int64)code);
                     }
                 }
             }
@@ -620,15 +625,15 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) {
 // If x is [Unknown], the result is false.
 public static bool BoolVal(Value x) {
     switch (x.type()) {
-    case boolVal x: {
-        return ((bool)x);
+    case boolVal xΔ1: {
+        return (bool)xΔ1;
     }
-    case unknownVal x: {
+    case unknownVal xΔ1: {
         return false;
     }
     default: {
-        var x = x.type();
-        throw panic(fmt.Sprintf("%v not a Bool"u8, x));
+        var xΔ1 = x;
+        throw panic(fmt.Sprintf("%v not a Bool"u8, xΔ1));
         break;
     }}
 }
@@ -637,15 +642,15 @@ public static bool BoolVal(Value x) {
 // If x is [Unknown], the result is "".
 public static @string StringVal(Value x) {
     switch (x.type()) {
-    case stringVal.val x: {
-        return x.@string();
+    case ж<stringVal> xΔ1: {
+        return xΔ1.@string();
     }
-    case unknownVal x: {
+    case unknownVal xΔ1: {
         return ""u8;
     }
     default: {
-        var x = x.type();
-        throw panic(fmt.Sprintf("%v not a String"u8, x));
+        var xΔ1 = x;
+        throw panic(fmt.Sprintf("%v not a String"u8, xΔ1));
         break;
     }}
 }
@@ -655,19 +660,19 @@ public static @string StringVal(Value x) {
 // If x is [Unknown], the result is (0, false).
 public static (int64, bool) Int64Val(Value x) {
     switch (x.type()) {
-    case int64Val x: {
-        return (((int64)x), true);
+    case int64Val xΔ1: {
+        return ((int64)xΔ1, true);
     }
-    case intVal x: {
-        return (x.val.Int64(), false);
+    case intVal xΔ1: {
+        return (xΔ1.val.Int64(), false);
     }
-    case unknownVal x: {
+    case unknownVal xΔ1: {
         return (0, false);
     }
     default: {
-        var x = x.type();
+        var xΔ1 = x;
         throw panic(fmt.Sprintf("%v not an Int"u8, // not an int64Val and thus not exact
- x));
+ xΔ1));
         break;
     }}
 }
@@ -677,18 +682,18 @@ public static (int64, bool) Int64Val(Value x) {
 // If x is [Unknown], the result is (0, false).
 public static (uint64, bool) Uint64Val(Value x) {
     switch (x.type()) {
-    case int64Val x: {
-        return (((uint64)x), x >= 0);
+    case int64Val xΔ1: {
+        return ((uint64)(int64)xΔ1, xΔ1 >= 0);
     }
-    case intVal x: {
-        return (x.val.Uint64(), x.val.IsUint64());
+    case intVal xΔ1: {
+        return (xΔ1.val.Uint64(), xΔ1.val.IsUint64());
     }
-    case unknownVal x: {
+    case unknownVal xΔ1: {
         return (0, false);
     }
     default: {
-        var x = x.type();
-        throw panic(fmt.Sprintf("%v not an Int"u8, x));
+        var xΔ1 = x;
+        throw panic(fmt.Sprintf("%v not an Int"u8, xΔ1));
         break;
     }}
 }
@@ -696,27 +701,27 @@ public static (uint64, bool) Uint64Val(Value x) {
 // Float32Val is like [Float64Val] but for float32 instead of float64.
 public static (float32, bool) Float32Val(Value x) {
     switch (x.type()) {
-    case int64Val x: {
-        var f = ((float32)x);
-        return (f, ((int64Val)f) == x);
+    case int64Val xΔ1: {
+        var f = (float32)(int64)xΔ1;
+        return (f, ((int64Val)(int64)f) == xΔ1);
     }
-    case intVal x: {
-        var (f, acc) = newFloat().SetInt(x.val).Float32();
+    case intVal xΔ1: {
+        var (f, acc) = newFloat().SetInt(xΔ1.val).Float32();
         return (f, acc == big.Exact);
     }
-    case ratVal x: {
-        return x.val.Float32();
+    case ratVal xΔ1: {
+        return xΔ1.val.Float32();
     }
-    case floatVal x: {
-        (f, acc) = x.val.Float32();
+    case floatVal xΔ1: {
+        var (f, acc) = xΔ1.val.Float32();
         return (f, acc == big.Exact);
     }
-    case unknownVal x: {
+    case unknownVal xΔ1: {
         return (0, false);
     }
     default: {
-        var x = x.type();
-        throw panic(fmt.Sprintf("%v not a Float"u8, x));
+        var xΔ1 = x;
+        throw panic(fmt.Sprintf("%v not a Float"u8, xΔ1));
         break;
     }}
 }
@@ -728,27 +733,27 @@ public static (float32, bool) Float32Val(Value x) {
 // If x is [Unknown], the result is (0, false).
 public static (float64, bool) Float64Val(Value x) {
     switch (x.type()) {
-    case int64Val x: {
-        var f = ((float64)((int64)x));
-        return (f, ((int64Val)f) == x);
+    case int64Val xΔ1: {
+        var f = (float64)(int64)xΔ1;
+        return (f, ((int64Val)(int64)f) == xΔ1);
     }
-    case intVal x: {
-        var (f, acc) = newFloat().SetInt(x.val).Float64();
+    case intVal xΔ1: {
+        var (f, acc) = newFloat().SetInt(xΔ1.val).Float64();
         return (f, acc == big.Exact);
     }
-    case ratVal x: {
-        return x.val.Float64();
+    case ratVal xΔ1: {
+        return xΔ1.val.Float64();
     }
-    case floatVal x: {
-        (f, acc) = x.val.Float64();
+    case floatVal xΔ1: {
+        var (f, acc) = xΔ1.val.Float64();
         return (f, acc == big.Exact);
     }
-    case unknownVal x: {
+    case unknownVal xΔ1: {
         return (0, false);
     }
     default: {
-        var x = x.type();
-        throw panic(fmt.Sprintf("%v not a Float"u8, x));
+        var xΔ1 = x;
+        throw panic(fmt.Sprintf("%v not a Float"u8, xΔ1));
         break;
     }}
 }
@@ -766,26 +771,26 @@ public static (float64, bool) Float64Val(Value x) {
 //	everything else    nil
 public static any Val(Value x) {
     switch (x.type()) {
-    case boolVal x: {
-        return ((bool)x);
+    case boolVal xΔ1: {
+        return (bool)xΔ1;
     }
-    case stringVal.val x: {
-        return x.@string();
+    case ж<stringVal> xΔ1: {
+        return xΔ1.@string();
     }
-    case int64Val x: {
-        return ((int64)x);
+    case int64Val xΔ1: {
+        return (int64)xΔ1;
     }
-    case intVal x: {
-        return x.val;
+    case intVal xΔ1: {
+        return xΔ1.val;
     }
-    case ratVal x: {
-        return x.val;
+    case ratVal xΔ1: {
+        return xΔ1.val;
     }
-    case floatVal x: {
-        return x.val;
+    case floatVal xΔ1: {
+        return xΔ1.val;
     }
     default: {
-        var x = x.type();
+        var xΔ1 = x;
         return default!;
     }}
 }
@@ -803,26 +808,26 @@ public static any Val(Value x) {
 //	anything else    Unknown
 public static Value Make(any x) {
     switch (x.type()) {
-    case bool x: {
-        return ((boolVal)x);
+    case bool xΔ1: {
+        return ((boolVal)xΔ1);
     }
-    case @string x: {
-        return new stringVal(s: x);
+    case @string xΔ1: {
+        return new stringValжValue(Ꮡ(new stringVal(s: xΔ1)));
     }
-    case int64 x: {
-        return ((int64Val)x);
+    case int64 xΔ1: {
+        return ((int64Val)xΔ1);
     }
-    case ж<bigꓸInt> x: {
-        return makeInt(Ꮡx);
+    case ж<bigꓸInt> xΔ1: {
+        return makeInt(xΔ1);
     }
-    case ж<bigꓸRat> x: {
-        return makeRat(Ꮡx);
+    case ж<bigꓸRat> xΔ1: {
+        return makeRat(xΔ1);
     }
-    case ж<big.Float> x: {
-        return makeFloat(Ꮡx);
+    case ж<big.Float> xΔ1: {
+        return makeFloat(xΔ1);
     }
     default: {
-        var x = x.type();
+        var xΔ1 = x;
         return new unknownVal(nil);
     }}
 }
@@ -832,22 +837,22 @@ public static Value Make(any x) {
 // If x is [Unknown], the result is 0.
 public static nint BitLen(Value x) {
     switch (x.type()) {
-    case int64Val x: {
-        var u = ((uint64)x);
-        if (x < 0) {
-            u = ((uint64)(-x));
+    case int64Val xΔ1: {
+        var u = (uint64)(int64)xΔ1;
+        if (xΔ1 < 0) {
+            u = (uint64)(int64)(-xΔ1);
         }
         return 64 - bits.LeadingZeros64(u);
     }
-    case intVal x: {
-        return x.val.BitLen();
+    case intVal xΔ1: {
+        return xΔ1.val.BitLen();
     }
-    case unknownVal x: {
+    case unknownVal xΔ1: {
         return 0;
     }
     default: {
-        var x = x.type();
-        throw panic(fmt.Sprintf("%v not an Int"u8, x));
+        var xΔ1 = x;
+        throw panic(fmt.Sprintf("%v not an Int"u8, xΔ1));
         break;
     }}
 }
@@ -857,43 +862,43 @@ public static nint BitLen(Value x) {
 // otherwise it is != 0. If x is [Unknown], the result is 1.
 public static nint Sign(Value x) {
     switch (x.type()) {
-    case int64Val x: {
+    case int64Val xΔ1: {
         switch (ᐧ) {
-        case {} when x is < 0: {
+        case {} when xΔ1 < 0: {
             return -1;
         }
-        case {} when x is > 0: {
+        case {} when xΔ1 > 0: {
             return 1;
         }}
 
         return 0;
     }
-    case intVal x: {
-        return x.val.Sign();
+    case intVal xΔ1: {
+        return xΔ1.val.Sign();
     }
-    case ratVal x: {
-        return x.val.Sign();
+    case ratVal xΔ1: {
+        return xΔ1.val.Sign();
     }
-    case floatVal x: {
-        return x.val.Sign();
+    case floatVal xΔ1: {
+        return xΔ1.val.Sign();
     }
-    case complexVal x: {
-        return (nint)(Sign(x.re) | Sign(x.im));
+    case complexVal xΔ1: {
+        return (nint)(Sign(xΔ1.re) | Sign(xΔ1.im));
     }
-    case unknownVal x: {
+    case unknownVal xΔ1: {
         return 1;
     }
     default: {
-        var x = x.type();
+        var xΔ1 = x;
         throw panic(fmt.Sprintf("%v not numeric"u8, // avoid spurious division by zero errors
- x));
+ xΔ1));
         break;
     }}
 }
 
 // ----------------------------------------------------------------------------
 // Support for assembling/disassembling numeric values
-internal static readonly big.Word _m = /* ^big.Word(0) */ 18446744073709551615;
+internal static readonly big.Word _m = /* ^big.Word(0) */ unchecked((big.Word)18446744073709551615);
 internal static readonly big.Word _log = /* _m>>8&1 + _m>>16&1 + _m>>32&1 */ 3;
 internal static readonly UntypedInt wordSize = /* 1 << _log */ 8;
 
@@ -902,26 +907,28 @@ internal static readonly UntypedInt wordSize = /* 1 << _log */ 8;
 public static slice<byte> Bytes(Value x) {
     intVal t = default!;
     switch (x.type()) {
-    case int64Val x: {
-        t = i64toi(x);
+    case int64Val xΔ1: {
+        t = i64toi(xΔ1);
         break;
     }
-    case intVal x: {
-        t = x;
+    case intVal xΔ1: {
+        t = xΔ1;
         break;
     }
     default: {
-        var x = x.type();
-        throw panic(fmt.Sprintf("%v not an Int"u8, x));
+        var xΔ1 = x;
+        throw panic(fmt.Sprintf("%v not an Int"u8, xΔ1));
         break;
     }}
     var words = t.val.Bits();
-    var bytes = new slice<byte>(len(words) * wordSize);
+    var bytes = new slice<byte>(len(words) * (nint)wordSize);
     nint i = 0;
-    foreach (var (_, w) in words) {
+    foreach (var (_, vᴛ1) in words) {
+        var w = vᴛ1;
+
         for (nint j = 0; j < wordSize; j++) {
-            bytes[i] = ((byte)w);
-            w >>= (UntypedInt)(8);
+            bytes[i] = (byte)(nuint)w;
+            w >>= (int)(8);
             i++;
         }
     }
@@ -935,12 +942,12 @@ public static slice<byte> Bytes(Value x) {
 // MakeFromBytes returns the [Int] value given the bytes of its little-endian
 // binary representation. An empty byte slice argument represents 0.
 public static Value MakeFromBytes(slice<byte> bytes) {
-    var words = new slice<big.Word>((len(bytes) + (wordSize - 1)) / wordSize);
+    var words = new slice<big.Word>((len(bytes) + (nint)(wordSize - 1)) / (nint)wordSize);
     nint i = 0;
     big.Word w = default!;
     nuint s = default!;
     foreach (var (_, b) in bytes) {
-        w |= (big.Word)(((big.Word)b) << (int)(s));
+        w |= (big.Word)((((big.Word)(nuint)b) << (int)(s)));
         {
             s += 8; if (s == wordSize * 8) {
                 words[i] = w;
@@ -968,29 +975,28 @@ public static Value MakeFromBytes(slice<byte> bytes) {
 // with the same sign as x.
 public static Value Num(Value x) {
     switch (x.type()) {
-    case int64Val x: {
-        return x;
+    case int64Val _:
+    case intVal _: {
+        var xΔ1 = x;
+        return xΔ1;
     }
-    case intVal x: {
-        return x;
+    case ratVal xΔ1: {
+        return makeInt(xΔ1.val.Num());
     }
-    case ratVal x: {
-        return makeInt(x.val.Num());
-    }
-    case floatVal x: {
-        if (smallFloat(x.val)) {
-            var (r, _) = x.val.Rat(nil);
+    case floatVal xΔ1: {
+        if (smallFloat(xΔ1.val)) {
+            var (r, _) = xΔ1.val.Rat(nil);
             return makeInt(r.Num());
         }
         break;
     }
-    case unknownVal x: {
+    case unknownVal xΔ1: {
         break;
         break;
     }
     default: {
-        var x = x.type();
-        throw panic(fmt.Sprintf("%v not Int or Float"u8, x));
+        var xΔ1 = x;
+        throw panic(fmt.Sprintf("%v not Int or Float"u8, xΔ1));
         break;
     }}
     return new unknownVal(nil);
@@ -1001,29 +1007,28 @@ public static Value Num(Value x) {
 // fraction, the result is [Unknown]. Otherwise the result is an [Int] >= 1.
 public static Value Denom(Value x) {
     switch (x.type()) {
-    case int64Val x: {
+    case int64Val _:
+    case intVal _: {
+        var xΔ1 = x;
         return ((int64Val)1);
     }
-    case intVal x: {
-        return ((int64Val)1);
+    case ratVal xΔ1: {
+        return makeInt(xΔ1.val.Denom());
     }
-    case ratVal x: {
-        return makeInt(x.val.Denom());
-    }
-    case floatVal x: {
-        if (smallFloat(x.val)) {
-            var (r, _) = x.val.Rat(nil);
+    case floatVal xΔ1: {
+        if (smallFloat(xΔ1.val)) {
+            var (r, _) = xΔ1.val.Rat(nil);
             return makeInt(r.Denom());
         }
         break;
     }
-    case unknownVal x: {
+    case unknownVal xΔ1: {
         break;
         break;
     }
     default: {
-        var x = x.type();
-        throw panic(fmt.Sprintf("%v not Int or Float"u8, x));
+        var xΔ1 = x;
+        throw panic(fmt.Sprintf("%v not Int or Float"u8, xΔ1));
         break;
     }}
     return new unknownVal(nil);
@@ -1034,23 +1039,16 @@ public static Value Denom(Value x) {
 // If x is [Unknown], the result is [Unknown].
 public static Value MakeImag(Value x) {
     switch (x.type()) {
-    case unknownVal : {
+    case unknownVal: {
         return x;
     }
-    case int64Val : {
-        return makeComplex(((int64Val)0), x);
-    }
-    case intVal : {
-        return makeComplex(((int64Val)0), x);
-    }
-    case ratVal : {
-        return makeComplex(((int64Val)0), x);
-    }
-    case floatVal : {
+    case int64Val _:
+    case intVal _:
+    case ratVal _:
+    case floatVal _: {
         return makeComplex(((int64Val)0), x);
     }
     default: {
-
         throw panic(fmt.Sprintf("%v not Int or Float"u8, x));
         break;
     }}
@@ -1061,27 +1059,20 @@ public static Value MakeImag(Value x) {
 // If x is [Unknown], the result is [Unknown].
 public static Value Real(Value x) {
     switch (x.type()) {
-    case unknownVal x: {
-        return x;
+    case unknownVal _:
+    case int64Val _:
+    case intVal _:
+    case ratVal _:
+    case floatVal _: {
+        var xΔ1 = x;
+        return xΔ1;
     }
-    case int64Val x: {
-        return x;
-    }
-    case intVal x: {
-        return x;
-    }
-    case ratVal x: {
-        return x;
-    }
-    case floatVal x: {
-        return x;
-    }
-    case complexVal x: {
-        return x.re;
+    case complexVal xΔ1: {
+        return xΔ1.re;
     }
     default: {
-        var x = x.type();
-        throw panic(fmt.Sprintf("%v not numeric"u8, x));
+        var xΔ1 = x;
+        throw panic(fmt.Sprintf("%v not numeric"u8, xΔ1));
         break;
     }}
 }
@@ -1090,27 +1081,22 @@ public static Value Real(Value x) {
 // If x is [Unknown], the result is [Unknown].
 public static Value Imag(Value x) {
     switch (x.type()) {
-    case unknownVal x: {
-        return x;
+    case unknownVal xΔ1: {
+        return xΔ1;
     }
-    case int64Val x: {
+    case int64Val _:
+    case intVal _:
+    case ratVal _:
+    case floatVal _: {
+        var xΔ1 = x;
         return ((int64Val)0);
     }
-    case intVal x: {
-        return ((int64Val)0);
-    }
-    case ratVal x: {
-        return ((int64Val)0);
-    }
-    case floatVal x: {
-        return ((int64Val)0);
-    }
-    case complexVal x: {
-        return x.im;
+    case complexVal xΔ1: {
+        return xΔ1.im;
     }
     default: {
-        var x = x.type();
-        throw panic(fmt.Sprintf("%v not numeric"u8, x));
+        var xΔ1 = x;
+        throw panic(fmt.Sprintf("%v not numeric"u8, xΔ1));
         break;
     }}
 }
@@ -1122,57 +1108,56 @@ public static Value Imag(Value x) {
 // Otherwise it returns an [Unknown].
 public static Value ToInt(Value x) {
     switch (x.type()) {
-    case int64Val x: {
-        return x;
+    case int64Val _:
+    case intVal _: {
+        var xΔ1 = x;
+        return xΔ1;
     }
-    case intVal x: {
-        return x;
-    }
-    case ratVal x: {
-        if (x.val.IsInt()) {
-            return makeInt(x.val.Num());
+    case ratVal xΔ1: {
+        if (xΔ1.val.IsInt()) {
+            return makeInt(xΔ1.val.Num());
         }
         break;
     }
-    case floatVal x: {
-        if (smallFloat(x.val)) {
+    case floatVal xΔ1: {
+        if (smallFloat(xΔ1.val)) {
             // avoid creation of huge integers
             // (Existing tests require permitting exponents of at least 1024;
             // allow any value that would also be permissible as a fraction.)
             var i = newInt();
             {
-                var (_, acc) = x.val.Int(i); if (acc == big.Exact) {
+                var (_, acc) = xΔ1.val.Int(i); if (acc == big.Exact) {
                     return makeInt(i);
                 }
             }
             // If we can get an integer by rounding up or down,
             // assume x is not an integer because of rounding
             // errors in prior computations.
-            static readonly UntypedInt delta = 4; // a small number of bits > 0
-            big.Float t = default!;
-            t.SetPrec(prec - delta);
+            UntypedInt delta = 4; // a small number of bits > 0
+            ref var t = ref heap(new big.Float(), out var Ꮡt);
+            Ꮡt.SetPrec(prec - delta);
             // try rounding down a little
-            t.SetMode(big.ToZero);
-            t.Set(x.val);
+            Ꮡt.SetMode(big.ToZero);
+            Ꮡt.Set(xΔ1.val);
             {
-                var (_, acc) = t.Int(i); if (acc == big.Exact) {
+                var (_, acc) = Ꮡt.Int(i); if (acc == big.Exact) {
                     return makeInt(i);
                 }
             }
             // try rounding up a little
-            t.SetMode(big.AwayFromZero);
-            t.Set(x.val);
+            Ꮡt.SetMode(big.AwayFromZero);
+            Ꮡt.Set(xΔ1.val);
             {
-                var (_, acc) = t.Int(i); if (acc == big.Exact) {
+                var (_, acc) = Ꮡt.Int(i); if (acc == big.Exact) {
                     return makeInt(i);
                 }
             }
         }
         break;
     }
-    case complexVal x: {
+    case complexVal xΔ1: {
         {
-            var re = ToFloat(x); if (re.Kind() == Float) {
+            var re = ToFloat(xΔ1); if (re.Kind() == Float) {
                 return ToInt(re);
             }
         }
@@ -1185,25 +1170,24 @@ public static Value ToInt(Value x) {
 // Otherwise it returns an [Unknown].
 public static Value ToFloat(Value x) {
     switch (x.type()) {
-    case int64Val x: {
-        return i64tor(x);
+    case int64Val xΔ1: {
+        return i64tor(xΔ1);
     }
-    case intVal x: {
-        if (smallInt(x.val)) {
+    case intVal xΔ1: {
+        if (smallInt(xΔ1.val)) {
             // x is always a small int
-            return itor(x);
+            return itor(xΔ1);
         }
-        return itof(x);
+        return itof(xΔ1);
     }
-    case ratVal x: {
-        return x;
+    case ratVal _:
+    case floatVal _: {
+        var xΔ1 = x;
+        return xΔ1;
     }
-    case floatVal x: {
-        return x;
-    }
-    case complexVal x: {
-        if (Sign(x.im) == 0) {
-            return ToFloat(x.re);
+    case complexVal xΔ1: {
+        if (Sign(xΔ1.im) == 0) {
+            return ToFloat(xΔ1.re);
         }
         break;
     }}
@@ -1214,20 +1198,15 @@ public static Value ToFloat(Value x) {
 // Otherwise it returns an [Unknown].
 public static Value ToComplex(Value x) {
     switch (x.type()) {
-    case int64Val x: {
-        return vtoc(x);
+    case int64Val _:
+    case intVal _:
+    case ratVal _:
+    case floatVal _: {
+        var xΔ1 = x;
+        return vtoc(xΔ1);
     }
-    case intVal x: {
-        return vtoc(x);
-    }
-    case ratVal x: {
-        return vtoc(x);
-    }
-    case floatVal x: {
-        return vtoc(x);
-    }
-    case complexVal x: {
-        return x;
+    case complexVal xΔ1: {
+        return xΔ1;
     }}
     return new unknownVal(nil);
 }
@@ -1237,14 +1216,14 @@ public static Value ToComplex(Value x) {
 
 // is32bit reports whether x can be represented using 32 bits.
 internal static bool is32bit(int64 x) {
-    static readonly UntypedInt s = 32;
-    return -1 << (int)((s - 1)) <= x && x <= 1 << (int)((s - 1)) - 1;
+    UntypedInt s = 32;
+    return ((int64)(-1) << (int)((s - 1))) <= x && x <= 2147483648L - 1;
 }
 
 // is63bit reports whether x can be represented using 63 bits.
 internal static bool is63bit(int64 x) {
-    static readonly UntypedInt s = 63;
-    return -1 << (int)((s - 1)) <= x && x <= 1 << (int)((s - 1)) - 1;
+    UntypedInt s = 63;
+    return -4611686018427387904L <= x && x <= 4611686018427387903L;
 }
 
 // UnaryOp returns the result of the unary expression op y.
@@ -1255,71 +1234,61 @@ public static Value UnaryOp(token.Token op, Value y, nuint prec) {
     var exprᴛ1 = op;
     if (exprᴛ1 == token.ADD) {
         switch (y.type()) {
-        case unknownVal : {
-            return y;
-        }
-        case int64Val : {
-            return y;
-        }
-        case intVal : {
-            return y;
-        }
-        case ratVal : {
-            return y;
-        }
-        case floatVal : {
-            return y;
-        }
-        case complexVal : {
+        case unknownVal _:
+        case int64Val _:
+        case intVal _:
+        case ratVal _:
+        case floatVal _:
+        case complexVal _: {
             return y;
         }}
 
     }
     if (exprᴛ1 == token.SUB) {
         switch (y.type()) {
-        case unknownVal y: {
-            return y;
+        case unknownVal yΔ4: {
+            return yΔ4;
         }
-        case int64Val y: {
+        case int64Val yΔ4: {
             {
-                var z = -y; if (z != y) {
+                var z = -yΔ4; if (z != yΔ4) {
                     return z;
                 }
             }
-            return makeInt(newInt().Neg(big.NewInt(((int64)y))));
+            return makeInt(newInt().Neg(big.NewInt((int64)yΔ4)));
         }
-        case intVal y: {
-            return makeInt(newInt().Neg(y.val));
+        case intVal yΔ4: {
+            return makeInt(newInt().Neg(yΔ4.val));
         }
-        case ratVal y: {
-            return makeRat(newRat().Neg(y.val));
+        case ratVal yΔ4: {
+            return makeRat(newRat().Neg(yΔ4.val));
         }
-        case floatVal y: {
-            return makeFloat(newFloat().Neg(y.val));
+        case floatVal yΔ4: {
+            return makeFloat(newFloat().Neg(yΔ4.val));
         }
-        case complexVal y: {
+        case complexVal yΔ4: {
             var re = UnaryOp(token.SUB, // no overflow
- y.re, 0);
-            var im = UnaryOp(token.SUB, y.im, 0);
+ yΔ4.re, 0);
+            var im = UnaryOp(token.SUB, yΔ4.im, 0);
             return makeComplex(re, im);
         }}
     }
     if (exprᴛ1 == token.XOR) {
         var z = newInt();
         switch (y.type()) {
-        case unknownVal y: {
-            return y;
+        case unknownVal yΔ5: {
+            return yΔ5;
         }
-        case int64Val y: {
-            z.Not(big.NewInt(((int64)y)));
+        case int64Val yΔ5: {
+            z.Not(big.NewInt((int64)yΔ5));
             break;
         }
-        case intVal y: {
-            z.Not(y.val);
+        case intVal yΔ5: {
+            z.Not(yΔ5.val);
             break;
         }
         default: {
-            var y = y.type();
+            var yΔ5 = y;
             goto Error;
             break;
         }}
@@ -1333,11 +1302,11 @@ public static Value UnaryOp(token.Token op, Value y, nuint prec) {
     }
     if (exprᴛ1 == token.NOT) {
         switch (y.type()) {
-        case unknownVal y: {
-            return y;
+        case unknownVal yΔ6: {
+            return yΔ6;
         }
-        case boolVal y: {
-            return !y;
+        case boolVal yΔ6: {
+            return ((boolVal)(!(bool)yΔ6));
         }}
     }
 
@@ -1349,31 +1318,28 @@ Error:
 internal static nint ord(Value x) {
     switch (x.type()) {
     default: {
-
         return -1;
     }
-    case unknownVal : {
+    case unknownVal: {
         return 0;
     }
-    case boolVal : {
+    case boolVal _:
+    case ж<stringVal> _: {
         return 1;
     }
-    case stringVal.val : {
-        return 1;
-    }
-    case int64Val : {
+    case int64Val: {
         return 2;
     }
-    case intVal : {
+    case intVal: {
         return 3;
     }
-    case ratVal : {
+    case ratVal: {
         return 4;
     }
-    case floatVal : {
+    case floatVal: {
         return 5;
     }
-    case complexVal : {
+    case complexVal: {
         return 6;
     }}
 
@@ -1386,16 +1352,16 @@ internal static nint ord(Value x) {
 // smallest complexity for two values x and y. If one of them is
 // numeric, both of them must be numeric. If one of them is Unknown
 // or invalid (say, nil) both results are that value.
-internal static (Value _, Value _) match(Value x, Value y) {
+internal static (Value, Value) match(Value x, Value y) {
     {
         nint ox = ord(x);
         nint oy = ord(y);
         switch (ᐧ) {
-        case {} when ox is < oy: {
+        case {} when ox < oy: {
             (x, y) = match0(x, y);
             break;
         }
-        case {} when ox is > oy: {
+        case {} when ox > oy: {
             (y, x) = match0(y, x);
             break;
         }}
@@ -1406,18 +1372,18 @@ internal static (Value _, Value _) match(Value x, Value y) {
 
 // match0 must only be called by match.
 // Invariant: ord(x) < ord(y)
-internal static (Value _, Value _) match0(Value x, Value y) {
+internal static (Value, Value) match0(Value x, Value y) {
     // Prefer to return the original x and y arguments when possible,
     // to avoid unnecessary heap allocations.
     switch (y.type()) {
-    case intVal : {
+    case intVal: {
         switch (x.type()) {
         case int64Val x1: {
             return (i64toi(x1), y);
         }}
         break;
     }
-    case ratVal : {
+    case ratVal: {
         switch (x.type()) {
         case int64Val x1: {
             return (i64tor(x1), y);
@@ -1427,7 +1393,7 @@ internal static (Value _, Value _) match0(Value x, Value y) {
         }}
         break;
     }
-    case floatVal : {
+    case floatVal: {
         switch (x.type()) {
         case int64Val x1: {
             return (i64tof(x1), y);
@@ -1440,7 +1406,7 @@ internal static (Value _, Value _) match0(Value x, Value y) {
         }}
         break;
     }
-    case complexVal : {
+    case complexVal: {
         return (vtoc(x), y);
     }}
 
@@ -1459,26 +1425,26 @@ internal static (Value _, Value _) match0(Value x, Value y) {
 // instead of [token.QUO]; the result is guaranteed to be [Int] in this case.
 // Division by zero leads to a run-time panic.
 public static Value BinaryOp(Value x_, token.Token op, Value y_) {
-    (x, y) = match(x_, y_);
+    var (x, y) = match(x_, y_);
     switch (x.type()) {
-    case unknownVal x: {
-        return x;
+    case unknownVal xΔ1: {
+        return xΔ1;
     }
-    case boolVal x: {
+    case boolVal xΔ1: {
         var yΔ1 = y._<boolVal>();
         var exprᴛ1 = op;
         if (exprᴛ1 == token.LAND) {
-            return x && yΔ1;
+            return ((boolVal)((bool)xΔ1  &&  (bool)yΔ1));
         }
         if (exprᴛ1 == token.LOR) {
-            return x || yΔ1;
+            return ((boolVal)((bool)xΔ1  ||  (bool)yΔ1));
         }
 
         break;
     }
-    case int64Val x: {
-        var a = ((int64)x);
-        var b = ((int64)(y._<int64Val>()));
+    case int64Val xΔ1: {
+        var a = (int64)xΔ1;
+        var b = (int64)(y._<int64Val>());
         int64 c = default!;
         var exprᴛ2 = op;
         if (exprᴛ2 == token.ADD) {
@@ -1526,10 +1492,10 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
 
         return ((int64Val)c);
     }
-    case intVal x: {
-        a = x.val;
-        b = y._<intVal>().val;
-        c = newInt();
+    case intVal xΔ1: {
+        var a = xΔ1.val;
+        var b = y._<intVal>().val;
+        var c = newInt();
         var exprᴛ3 = op;
         if (exprᴛ3 == token.ADD) {
             c.Add(a, // force integer division
@@ -1569,10 +1535,10 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
 
         return makeInt(c);
     }
-    case ratVal x: {
-        a = x.val;
-        b = y._<ratVal>().val;
-        c = newRat();
+    case ratVal xΔ1: {
+        var a = xΔ1.val;
+        var b = y._<ratVal>().val;
+        var c = newRat();
         var exprᴛ4 = op;
         if (exprᴛ4 == token.ADD) {
             c.Add(a, b);
@@ -1592,10 +1558,10 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
 
         return makeRat(c);
     }
-    case floatVal x: {
-        a = x.val;
-        b = y._<floatVal>().val;
-        c = newFloat();
+    case floatVal xΔ1: {
+        var a = xΔ1.val;
+        var b = y._<floatVal>().val;
+        var c = newFloat();
         var exprᴛ5 = op;
         if (exprᴛ5 == token.ADD) {
             c.Add(a, b);
@@ -1615,11 +1581,10 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
 
         return makeFloat(c);
     }
-    case complexVal x: {
-        y = y._<complexVal>();
-        (a, b) = (x.re, x.im);
-        c = y.re;
-        var d = y.im;
+    case complexVal xΔ1: {
+        var yΔ2 = y._<complexVal>();
+        var (a, b) = (xΔ1.re, xΔ1.im);
+        var (c, d) = (yΔ2.re, yΔ2.im);
         Value re = default!;
         Value im = default!;
         var exprᴛ6 = op;
@@ -1662,9 +1627,9 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
 
         return makeComplex(re, im);
     }
-    case stringVal.val x: {
+    case ж<stringVal> xΔ1: {
         if (op == token.ADD) {
-            return new stringVal(l: x, r: y._<stringVal.val>());
+            return new stringValжValue(Ꮡ(new stringVal(l: xΔ1, r: y._<ж<stringVal>>())));
         }
         break;
     }}
@@ -1693,35 +1658,35 @@ internal static Value quo(Value x, Value y) {
 // an [Int] or an [Unknown]. If x is [Unknown], the result is x.
 public static Value Shift(Value x, token.Token op, nuint s) {
     switch (x.type()) {
-    case unknownVal x: {
-        return x;
+    case unknownVal xΔ1: {
+        return xΔ1;
     }
-    case int64Val x: {
+    case int64Val xΔ1: {
         if (s == 0) {
-            return x;
+            return xΔ1;
         }
         var exprᴛ1 = op;
         if (exprᴛ1 == token.SHL) {
-            var z = i64toi(x).val;
+            var z = i64toi(xΔ1).val;
             return makeInt(z.Lsh(z, s));
         }
         if (exprᴛ1 == token.SHR) {
-            return x >> (int)(s);
+            return (xΔ1 >> (int)(s));
         }
 
         break;
     }
-    case intVal x: {
+    case intVal xΔ1: {
         if (s == 0) {
-            return x;
+            return xΔ1;
         }
         var z = newInt();
         var exprᴛ2 = op;
         if (exprᴛ2 == token.SHL) {
-            return makeInt(z.Lsh(x.val, s));
+            return makeInt(z.Lsh(xΔ1.val, s));
         }
         if (exprᴛ2 == token.SHR) {
-            return makeInt(z.Rsh(x.val, s));
+            return makeInt(z.Rsh(xΔ1.val, s));
         }
 
         break;
@@ -1758,60 +1723,60 @@ internal static bool cmpZero(nint x, token.Token op) {
 // If one of the operands is [Unknown], the result is
 // false.
 public static bool Compare(Value x_, token.Token op, Value y_) {
-    (x, y) = match(x_, y_);
+    var (x, y) = match(x_, y_);
     switch (x.type()) {
-    case unknownVal x: {
+    case unknownVal xΔ1: {
         return false;
     }
-    case boolVal x: {
+    case boolVal xΔ1: {
         var yΔ1 = y._<boolVal>();
         var exprᴛ1 = op;
         if (exprᴛ1 == token.EQL) {
-            return x == yΔ1;
+            return xΔ1 == yΔ1;
         }
         if (exprᴛ1 == token.NEQ) {
-            return x != yΔ1;
+            return xΔ1 != yΔ1;
         }
 
         break;
     }
-    case int64Val x: {
-        y = y._<int64Val>();
+    case int64Val xΔ1: {
+        var yΔ2 = y._<int64Val>();
         var exprᴛ2 = op;
         if (exprᴛ2 == token.EQL) {
-            return x == y;
+            return xΔ1 == yΔ2;
         }
         if (exprᴛ2 == token.NEQ) {
-            return x != y;
+            return xΔ1 != yΔ2;
         }
         if (exprᴛ2 == token.LSS) {
-            return x < y;
+            return xΔ1 < yΔ2;
         }
         if (exprᴛ2 == token.LEQ) {
-            return x <= y;
+            return xΔ1 <= yΔ2;
         }
         if (exprᴛ2 == token.GTR) {
-            return x > y;
+            return xΔ1 > yΔ2;
         }
         if (exprᴛ2 == token.GEQ) {
-            return x >= y;
+            return xΔ1 >= yΔ2;
         }
 
         break;
     }
-    case intVal x: {
-        return cmpZero(x.val.Cmp(y._<intVal>().val), op);
+    case intVal xΔ1: {
+        return cmpZero(xΔ1.val.Cmp(y._<intVal>().val), op);
     }
-    case ratVal x: {
-        return cmpZero(x.val.Cmp(y._<ratVal>().val), op);
+    case ratVal xΔ1: {
+        return cmpZero(xΔ1.val.Cmp(y._<ratVal>().val), op);
     }
-    case floatVal x: {
-        return cmpZero(x.val.Cmp(y._<floatVal>().val), op);
+    case floatVal xΔ1: {
+        return cmpZero(xΔ1.val.Cmp(y._<floatVal>().val), op);
     }
-    case complexVal x: {
-        y = y._<complexVal>();
-        var re = Compare(x.re, token.EQL, y.re);
-        var im = Compare(x.im, token.EQL, y.im);
+    case complexVal xΔ1: {
+        var yΔ3 = y._<complexVal>();
+        var re = Compare(xΔ1.re, token.EQL, yΔ3.re);
+        var im = Compare(xΔ1.im, token.EQL, yΔ3.im);
         var exprᴛ3 = op;
         if (exprᴛ3 == token.EQL) {
             return re && im;
@@ -1822,9 +1787,9 @@ public static bool Compare(Value x_, token.Token op, Value y_) {
 
         break;
     }
-    case stringVal.val x: {
-        @string xs = x.@string();
-        @string ys = y._<stringVal.val>().@string();
+    case ж<stringVal> xΔ1: {
+        @string xs = xΔ1.@string();
+        @string ys = y._<ж<stringVal>>().@string();
         var exprᴛ4 = op;
         if (exprᴛ4 == token.EQL) {
             return xs == ys;

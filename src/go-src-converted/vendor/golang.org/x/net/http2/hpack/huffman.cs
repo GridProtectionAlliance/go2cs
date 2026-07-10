@@ -10,18 +10,18 @@ using sync = sync_package;
 
 partial class hpack_package {
 
-internal static sync.Pool bufPool = new sync.Pool(
+internal static ж<sync.Pool> ᏑbufPool = new(new sync.Pool(
     New: () => @new<bytes.Buffer>()
-);
+));
+internal static ref sync.Pool bufPool => ref ᏑbufPool.Value;
 
 // HuffmanDecode decodes the string in v and writes the expanded
 // result to w, returning the number of bytes written to w and the
 // Write call's return value. At most one Write call is made.
-public static (nint, error) HuffmanDecode(io.Writer w, slice<byte> v) => func((defer, _) => {
-    var buf = bufPool.Get()._<ж<bytes.Buffer>>();
+public static (nint, error) HuffmanDecode(io.Writer w, slice<byte> v) => func<(nint, error)>((defer, recover) => {
+    var buf = ᏑbufPool.Get()._<ж<bytes.Buffer>>();
     buf.Reset();
-    var bufPoolʗ1 = bufPool;
-    deferǃ(bufPoolʗ1.Put, buf, defer);
+    deferǃ(ᏑbufPool.Put, buf, defer);
     {
         var err = huffmanDecode(buf, 0, v); if (err != default!) {
             return (0, err);
@@ -31,11 +31,10 @@ public static (nint, error) HuffmanDecode(io.Writer w, slice<byte> v) => func((d
 });
 
 // HuffmanDecodeToString decodes the string in v.
-public static (@string, error) HuffmanDecodeToString(slice<byte> v) => func((defer, _) => {
-    var buf = bufPool.Get()._<ж<bytes.Buffer>>();
+public static (@string, error) HuffmanDecodeToString(slice<byte> v) => func<(@string, error)>((defer, recover) => {
+    var buf = ᏑbufPool.Get()._<ж<bytes.Buffer>>();
     buf.Reset();
-    var bufPoolʗ1 = bufPool;
-    deferǃ(bufPoolʗ1.Put, buf, defer);
+    deferǃ(ᏑbufPool.Put, buf, defer);
     {
         var err = huffmanDecode(buf, 0, v); if (err != default!) {
             return ("", err);
@@ -52,23 +51,23 @@ public static error ErrInvalidHuffman = errors.New("hpack: invalid Huffman-encod
 // If maxLen is greater than 0, attempts to write more to buf than
 // maxLen bytes will return ErrStringLength.
 internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<byte> v) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.Value;
 
     var rootHuffmanNode = getRootHuffmanNode();
     var n = rootHuffmanNode;
     // cur is the bit buffer that has not been fed into n.
     // cbits is the number of low order bits in cur that are valid.
     // sbits is the number of bits of the symbol prefix being decoded.
-    nuint cur = ((nuint)0);
-    var cbits = ((uint8)0);
-    var sbits = ((uint8)0);
+    nuint cur = (nuint)0;
+    var cbits = (uint8)0;
+    var sbits = (uint8)0;
     foreach (var (_, b) in v) {
-        cur = (nuint)(cur << (int)(8) | ((nuint)b));
+        cur = (nuint)((cur << (int)(8)) | (nuint)b);
         cbits += 8;
         sbits += 8;
         while (cbits >= 8) {
-            var idx = ((byte)(cur >> (int)((cbits - 8))));
-            n = (~n).children.val[idx];
+            var idx = (byte)((cur >> (int)((cbits - 8))));
+            n = (~n).children.Value[idx];
             if (n == nil) {
                 return ErrInvalidHuffman;
             }
@@ -77,7 +76,7 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
                     return ErrStringLength;
                 }
                 buf.WriteByte((~n).sym);
-                cbits -= n.val.codeLen;
+                cbits -= n.Value.codeLen;
                 n = rootHuffmanNode;
                 sbits = cbits;
             } else {
@@ -86,7 +85,7 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
         }
     }
     while (cbits > 0) {
-        n = (~n).children.val[((byte)(cur << (int)((8 - cbits))))];
+        n = (~n).children.Value[(byte)((cur << (int)((8 - cbits))))];
         if (n == nil) {
             return ErrInvalidHuffman;
         }
@@ -97,7 +96,7 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
             return ErrStringLength;
         }
         buf.WriteByte((~n).sym);
-        cbits -= n.val.codeLen;
+        cbits -= n.Value.codeLen;
         n = rootHuffmanNode;
         sbits = cbits;
     }
@@ -107,14 +106,15 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
         return ErrInvalidHuffman;
     }
     {
-        nuint mask = ((nuint)(1 << (int)(cbits) - 1)); if ((nuint)(cur & mask) != mask) {
+        nuint mask = (nuint)(((nuint)1 << (int)(cbits)) - 1); if ((nuint)(cur & mask) != mask) {
             // Trailing bits must be a prefix of EOS per RFC 7541 section 5.2.
             return ErrInvalidHuffman;
         }
     }
     return default!;
 }
-// [...]func()
+
+[GoType("[0]Action")] partial struct incomparable;
 
 [GoType] partial struct node {
     internal incomparable _;
@@ -129,16 +129,17 @@ internal static ж<node> newInternalNode() {
     return Ꮡ(new node(children: @new<array<ж<node>>>()));
 }
 
-internal static sync.Once buildRootOnce;
+internal static ж<sync.Once> ᏑbuildRootOnce = new(default(sync.Once));
+internal static ref sync.Once buildRootOnce => ref ᏑbuildRootOnce.Value;
 internal static ж<node> lazyRootHuffmanNode;
 
 internal static ж<node> getRootHuffmanNode() {
-    buildRootOnce.Do(buildRootHuffmanNode);
+    ᏑbuildRootOnce.Do(buildRootHuffmanNode);
     return lazyRootHuffmanNode;
 }
 
 internal static void buildRootHuffmanNode() {
-    if (len(huffmanCodes) != 256) {
+    if (builtin.len(huffmanCodes) != 256) {
         throw panic("unexpected size");
     }
     lazyRootHuffmanNode = newInternalNode();
@@ -149,19 +150,19 @@ internal static void buildRootHuffmanNode() {
         var cur = lazyRootHuffmanNode;
         while (codeLen > 8) {
             codeLen -= 8;
-            var i = ((uint8)(code >> (int)(codeLen)));
-            if ((~cur).children.val[i] == nil) {
-                (~cur).children.val[i] = newInternalNode();
+            var i = (uint8)((code >> (int)(codeLen)));
+            if ((~cur).children.Value[i] == nil) {
+                cur.Value.children.Value[i] = newInternalNode();
             }
-            cur = (~cur).children.val[i];
+            cur = (~cur).children.Value[i];
         }
-        var shift = 8 - codeLen;
-        nint start = ((nint)((uint8)(code << (int)(shift))));
-        nint end = ((nint)(1 << (int)(shift)));
-        leaves.val[sym].sym = ((byte)sym);
-        leaves.val[sym].codeLen = codeLen;
+        var shift = (uint8)(8 - codeLen);
+        nint start = (nint)(uint8)((code << (int)(shift)));
+        nint end = (nint)((1 << (int)(shift)));
+        leaves.Value[sym].sym = (byte)sym;
+        leaves.Value[sym].codeLen = codeLen;
         for (nint i = start; i < start + end; i++) {
-            (~cur).children.val[i] = Ꮡ(leaves.val[sym]);
+            cur.Value.children.Value[i] = Ꮡ(leaves.Value[sym]);
         }
     }
 }
@@ -174,27 +175,27 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
     uint64 x = default!;             // buffer
     
     nuint n = default!;           // number valid of bits present in x
-    for (nint i = 0; i < len(s); i++) {
+    for (nint i = 0; i < builtin.len(s); i++) {
         var c = s[i];
-        n += ((nuint)huffmanCodeLen[c]);
-        x <<= (uint8)(huffmanCodeLen[c] % 64);
-        x |= (uint64)(((uint64)huffmanCodes[c]));
+        n += (nuint)huffmanCodeLen[c];
+        x <<= (int)(huffmanCodeLen[c] % 64);
+        x |= (uint64)((uint64)huffmanCodes[c]);
         if (n >= 32) {
             n %= 32;
             // Normally would be -= 32 but %= 32 informs compiler 0 <= n <= 31 for upcoming shift
-            var yΔ1 = ((uint32)(x >> (int)(n)));
+            var yΔ1 = (uint32)((x >> (int)(n)));
             // Compiler doesn't combine memory writes if y isn't uint32
-            dst = append(dst, ((byte)(yΔ1 >> (int)(24))), ((byte)(yΔ1 >> (int)(16))), ((byte)(yΔ1 >> (int)(8))), ((byte)yΔ1));
+            dst = append(dst, (byte)((yΔ1 >> (int)(24))), (byte)((yΔ1 >> (int)(16))), (byte)((yΔ1 >> (int)(8))), (byte)yΔ1);
         }
     }
     // Add padding bits if necessary
     {
         nuint over = n % 8; if (over > 0) {
-            static readonly UntypedInt eosCode = /* 0x3fffffff */ 1073741823;
-            static readonly UntypedInt eosNBits = 30;
-            static readonly UntypedInt eosPadByte = /* eosCode >> (eosNBits - 8) */ 255;
+            UntypedInt eosCode = 0x3fffffff;
+            UntypedInt eosNBits = 30;
+            UntypedInt eosPadByte = /* eosCode >> (eosNBits - 8) */ 255;
             nuint pad = 8 - over;
-            x = (uint64)((x << (int)(pad)) | (eosPadByte >> (int)(over)));
+            x = (uint64)(((x << (int)(pad))) | (((uint64)eosPadByte >> (int)(over))));
             n += pad;
         }
     }
@@ -205,28 +206,28 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
         return dst;
     }
     case 1: {
-        return append(dst, ((byte)x));
+        return append(dst, (byte)x);
     }
     case 2: {
-        var yΔ3 = ((uint16)x);
-        return append(dst, ((byte)(yΔ3 >> (int)(8))), ((byte)yΔ3));
+        var yΔ3 = (uint16)x;
+        return append(dst, (byte)((yΔ3 >> (int)(8))), (byte)yΔ3);
     }
     case 3: {
-        var yΔ4 = ((uint16)(x >> (int)(8)));
-        return append(dst, ((byte)(yΔ4 >> (int)(8))), ((byte)yΔ4), ((byte)x));
+        var yΔ4 = (uint16)((x >> (int)(8)));
+        return append(dst, (byte)((yΔ4 >> (int)(8))), (byte)yΔ4, (byte)x);
     }}
 
     //	case 4:
-    var y = ((uint32)x);
-    return append(dst, ((byte)(y >> (int)(24))), ((byte)(y >> (int)(16))), ((byte)(y >> (int)(8))), ((byte)y));
+    var y = (uint32)x;
+    return append(dst, (byte)((y >> (int)(24))), (byte)((y >> (int)(16))), (byte)((y >> (int)(8))), (byte)y);
 }
 
 // HuffmanEncodeLength returns the number of bytes required to encode
 // s in Huffman codes. The result is round up to byte boundary.
 public static uint64 HuffmanEncodeLength(@string s) {
-    var n = ((uint64)0);
-    for (nint i = 0; i < len(s); i++) {
-        n += ((uint64)huffmanCodeLen[s[i]]);
+    var n = (uint64)0;
+    for (nint i = 0; i < builtin.len(s); i++) {
+        n += (uint64)huffmanCodeLen[s[i]];
     }
     return (n + 7) / 8;
 }

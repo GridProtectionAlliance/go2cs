@@ -5,12 +5,12 @@ namespace go;
 
 using errors = errors_package;
 using bytealg = @internal.bytealg_package;
-using fs = io.fs_package;
+using fs = go.io.fs_package;
 using netip = net.netip_package;
-using sync = sync_package;
+using Δsync = sync_package;
 using time = time_package;
 using @internal;
-using io;
+using go.io;
 using net;
 
 partial class net_package {
@@ -43,14 +43,15 @@ internal static @string parseLiteralIP(@string addr) {
     // including IPv6 address with zone identifier.
     // We don't support old-classful IP address notation.
     internal map<@string, slice<@string>> byAddr;
-    internal time_package.Time expire;
+    internal time.Time expire;
     internal @string path;
-    internal time_package.Time mtime;
+    internal time.Time mtime;
     internal int64 size;
 }
-internal static hostsᴛ1 hosts;
+internal static ж<hostsᴛ1> Ꮡhosts = new(new hostsᴛ1(nil));
+internal static ref hostsᴛ1 hosts => ref Ꮡhosts.Value;
 
-internal static void readHosts() => func((defer, _) => {
+internal static void readHosts() => func((defer, recover) => {
     var now = time.Now();
     @string hp = hostsFilePath;
     if (now.Before(hosts.expire) && hosts.path == hp && len(hosts.byName) > 0) {
@@ -63,7 +64,7 @@ internal static void readHosts() => func((defer, _) => {
     }
     var hs = new map<@string, byName>();
     var @is = new map<@string, slice<@string>>();
-    (Δfile, err) = open(hp);
+    (var Δfile, err) = open(hp);
     if (err != default!) {
         if (!errors.Is(err, fs.ErrNotExist) && !errors.Is(err, fs.ErrPermission)) {
             return;
@@ -98,7 +99,7 @@ internal static void readHosts() => func((defer, _) => {
                 }
                 @is[addr] = append(@is[addr], name);
                 {
-                    var (v, okΔ1) = hs[key]; if (okΔ1) {
+                    var (v, okΔ1) = hs[key, ꟷ]; if (okΔ1) {
                         hs[key] = new byName(
                             addrs: append(v.addrs, addr),
                             canonicalName: v.canonicalName
@@ -123,10 +124,9 @@ internal static void readHosts() => func((defer, _) => {
 });
 
 // lookupStaticHost looks up the addresses and the canonical name for the given host from /etc/hosts.
-internal static (slice<@string>, @string) lookupStaticHost(@string host) => func((defer, _) => {
-    hosts.Lock();
-    var hostsʗ1 = hosts;
-    defer(hostsʗ1.Unlock);
+internal static (slice<@string>, @string) lookupStaticHost(@string host) => func<(slice<@string>, @string)>((defer, recover) => {
+    Ꮡhosts.of(hostsᴛ1.ᏑMutex).Lock();
+    defer(Ꮡhosts.of(hostsᴛ1.ᏑMutex).Unlock);
     readHosts();
     if (len(hosts.byName) != 0) {
         if (hasUpperCase(host)) {
@@ -135,7 +135,7 @@ internal static (slice<@string>, @string) lookupStaticHost(@string host) => func
             host = ((@string)lowerHost);
         }
         {
-            var (byName, ok) = hosts.byName[absDomainName(host)]; if (ok) {
+            var (byName, ok) = hosts.byName[absDomainName(host), ꟷ]; if (ok) {
                 var ipsCp = new slice<@string>(len(byName.addrs));
                 copy(ipsCp, byName.addrs);
                 return (ipsCp, byName.canonicalName);
@@ -146,10 +146,9 @@ internal static (slice<@string>, @string) lookupStaticHost(@string host) => func
 });
 
 // lookupStaticAddr looks up the hosts for the given address from /etc/hosts.
-internal static slice<@string> lookupStaticAddr(@string addr) => func((defer, _) => {
-    hosts.Lock();
-    var hostsʗ1 = hosts;
-    defer(hostsʗ1.Unlock);
+internal static slice<@string> lookupStaticAddr(@string addr) => func<slice<@string>>((defer, recover) => {
+    Ꮡhosts.of(hostsᴛ1.ᏑMutex).Lock();
+    defer(Ꮡhosts.of(hostsᴛ1.ᏑMutex).Unlock);
     readHosts();
     addr = parseLiteralIP(addr);
     if (addr == ""u8) {
@@ -157,10 +156,9 @@ internal static slice<@string> lookupStaticAddr(@string addr) => func((defer, _)
     }
     if (len(hosts.byAddr) != 0) {
         {
-            var hosts = hosts.byAddr[addr];
-            var ok = hosts.byAddr[addr]; if (ok) {
-                var hostsCp = new slice<@string>(len(hosts));
-                copy(hostsCp, hosts);
+            var (hostsΔ1, ok) = hosts.byAddr[addr, ꟷ]; if (ok) {
+                var hostsCp = new slice<@string>(len(hostsΔ1));
+                copy(hostsCp, hostsΔ1);
                 return hostsCp;
             }
         }

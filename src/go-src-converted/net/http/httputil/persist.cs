@@ -7,10 +7,11 @@ using bufio = bufio_package;
 using errors = errors_package;
 using io = io_package;
 using net = net_package;
-using http = net.http_package;
-using textproto = net.textproto_package;
+using http = go.net.http_package;
+using textproto = go.net.textproto_package;
 using sync = sync_package;
-using net;
+using go.net;
+using time = time_package;
 
 partial class httputil_package {
 
@@ -28,16 +29,14 @@ internal static error errClosed = errors.New("i/o operation on closed connection
 //
 // Deprecated: Use the Server in package [net/http] instead.
 [GoType] partial struct ServerConn {
-    internal sync_package.Mutex mu; // read-write protects the following fields
-    internal net_package.Conn c;
-    internal ж<bufio_package.Reader> r;
-    internal error re; // read/write errors
-    internal error we;
-    internal io_package.ReadCloser lastbody;
-    internal nint nread;
-    internal nint nwritten;
-    internal http.Request>uint pipereq;
-    internal net.textproto_package.Pipeline pipe;
+    internal sync.Mutex mu; // read-write protects the following fields
+    internal net.Conn c;
+    internal ж<bufio.Reader> r;
+    internal error re, we; // read/write errors
+    internal io.ReadCloser lastbody;
+    internal nint nread, nwritten;
+    internal map<ж<http.Request>, nuint> pipereq;
+    internal textproto.Pipeline pipe;
 }
 
 // NewServerConn is an artifact of Go's early HTTP implementation.
@@ -46,21 +45,23 @@ internal static error errClosed = errors.New("i/o operation on closed connection
 //
 // Deprecated: Use the Server in package [net/http] instead.
 public static ж<ServerConn> NewServerConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.DerefOrNil();
 
-    if (r == nil) {
-        r = bufio.NewReader(c);
+    if (Ꮡr == nil) {
+        Ꮡr = bufio.NewReader(new net_ConnᴠReader(c)); r = ref Ꮡr.DerefOrNil();
     }
-    return Ꮡ(new ServerConn(c: c, r: r, pipereq: new http.Request>uint()));
+    return Ꮡ(new ServerConn(c: c, r: Ꮡr, pipereq: new map<ж<http.Request>, nuint>()));
 }
 
 // Hijack detaches the [ServerConn] and returns the underlying connection as well
 // as the read-side bufio which may have some left over data. Hijack may be
 // called before Read has signaled the end of the keep-alive logic. The user
 // should not call Hijack while [ServerConn.Read] or [ServerConn.Write] is in progress.
-[GoRecv] public static (net.Conn, ж<bufio.Reader>) Hijack(this ref ServerConn sc) => func((defer, _) => {
-    sc.mu.Lock();
-    defer(sc.mu.Unlock);
+public static (net.Conn, ж<bufio.Reader>) Hijack(this ж<ServerConn> Ꮡsc) => func((defer, recover) => {
+    ref var sc = ref Ꮡsc.Value;
+
+    Ꮡsc.of(ServerConn.Ꮡmu).Lock();
+    defer(Ꮡsc.of(ServerConn.Ꮡmu).Unlock);
     var c = sc.c;
     var r = sc.r;
     sc.c = default!;
@@ -69,8 +70,10 @@ public static ж<ServerConn> NewServerConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
 });
 
 // Close calls [ServerConn.Hijack] and then also closes the underlying connection.
-[GoRecv] public static error Close(this ref ServerConn sc) {
-    (c, _) = sc.Hijack();
+public static error Close(this ж<ServerConn> Ꮡsc) {
+    ref var sc = ref Ꮡsc.Value;
+
+    var (c, _) = Ꮡsc.Hijack();
     if (c != default!) {
         return c.Close();
     }
@@ -81,44 +84,45 @@ public static ж<ServerConn> NewServerConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
 // it is gracefully determined that there are no more requests (e.g. after the
 // first request on an HTTP/1.0 connection, or after a Connection:close on a
 // HTTP/1.1 connection).
-[GoRecv] public static (ж<http.Request>, error) Read(this ref ServerConn sc) => func((defer, _) => {
-    ж<http.Request> req = default!;
+public static (ж<http.Request>, error) Read(this ж<ServerConn> Ꮡsc) => func<(ж<http.Request>, error)>((defer, recover) => {
+    ref var sc = ref Ꮡsc.Value;
+
+    ref var req = ref heap<ж<http.Request>>(out var Ꮡreq);
     error err = default!;
     // Ensure ordered execution of Reads and Writes
-    nuint id = sc.pipe.Next();
-    sc.pipe.StartRequest(id);
-    var reqʗ1 = req;
+    nuint id = Ꮡsc.of(ServerConn.Ꮡpipe).Next();
+    Ꮡsc.of(ServerConn.Ꮡpipe).StartRequest(id);
     defer(() => {
-        sc.pipe.EndRequest(id);
-        if (reqʗ1 == nil){
-            sc.pipe.StartResponse(id);
-            sc.pipe.EndResponse(id);
+        Ꮡsc.of(ServerConn.Ꮡpipe).EndRequest(id);
+        if (Ꮡreq.ValueSlot == nil){
+            Ꮡsc.of(ServerConn.Ꮡpipe).StartResponse(id);
+            Ꮡsc.of(ServerConn.Ꮡpipe).EndResponse(id);
         } else {
             // Remember the pipeline id of this request
-            sc.mu.Lock();
-            sc.pipereq[reqʗ1] = id;
-            sc.mu.Unlock();
+            Ꮡsc.of(ServerConn.Ꮡmu).Lock();
+            Ꮡsc.Value.pipereq[Ꮡreq.ValueSlot] = id;
+            Ꮡsc.of(ServerConn.Ꮡmu).Unlock();
         }
     });
-    sc.mu.Lock();
+    Ꮡsc.of(ServerConn.Ꮡmu).Lock();
     if (sc.we != default!) {
         // no point receiving if write-side broken or closed
-        defer(sc.mu.Unlock);
+        defer(Ꮡsc.of(ServerConn.Ꮡmu).Unlock);
         return (default!, sc.we);
     }
     if (sc.re != default!) {
-        defer(sc.mu.Unlock);
+        defer(Ꮡsc.of(ServerConn.Ꮡmu).Unlock);
         return (default!, sc.re);
     }
     if (sc.r == nil) {
         // connection closed by user in the meantime
-        defer(sc.mu.Unlock);
+        defer(Ꮡsc.of(ServerConn.Ꮡmu).Unlock);
         return (default!, errClosed);
     }
     var r = sc.r;
     var lastbody = sc.lastbody;
     sc.lastbody = default!;
-    sc.mu.Unlock();
+    Ꮡsc.of(ServerConn.Ꮡmu).Unlock();
     // Make sure body is fully consumed, even if user does not call body.Close
     if (lastbody != default!) {
         // body.Close is assumed to be idempotent and multiple calls to
@@ -126,31 +130,31 @@ public static ж<ServerConn> NewServerConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
         // returned.
         err = lastbody.Close();
         if (err != default!) {
-            sc.mu.Lock();
-            defer(sc.mu.Unlock);
+            Ꮡsc.of(ServerConn.Ꮡmu).Lock();
+            defer(Ꮡsc.of(ServerConn.Ꮡmu).Unlock);
             sc.re = err;
             return (default!, err);
         }
     }
     (req, err) = http.ReadRequest(r);
-    sc.mu.Lock();
-    defer(sc.mu.Unlock);
+    Ꮡsc.of(ServerConn.Ꮡmu).Lock();
+    defer(Ꮡsc.of(ServerConn.Ꮡmu).Unlock);
     if (err != default!) {
         if (AreEqual(err, io.ErrUnexpectedEOF)){
             // A close from the opposing client is treated as a
             // graceful close, even if there was some unparse-able
             // data before the close.
-            sc.re = ErrPersistEOF;
+            sc.re = new http.ProtocolErrorжerror(ErrPersistEOF);
             return (default!, sc.re);
         } else {
             sc.re = err;
             return (req, err);
         }
     }
-    sc.lastbody = req.val.Body;
+    sc.lastbody = req.Value.Body;
     sc.nread++;
     if ((~req).Close) {
-        sc.re = ErrPersistEOF;
+        sc.re = new http.ProtocolErrorжerror(ErrPersistEOF);
         return (req, sc.re);
     }
     return (req, err);
@@ -158,57 +162,59 @@ public static ж<ServerConn> NewServerConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
 
 // Pending returns the number of unanswered requests
 // that have been received on the connection.
-[GoRecv] public static nint Pending(this ref ServerConn sc) => func((defer, _) => {
-    sc.mu.Lock();
-    defer(sc.mu.Unlock);
+public static nint Pending(this ж<ServerConn> Ꮡsc) => func((defer, recover) => {
+    ref var sc = ref Ꮡsc.Value;
+
+    Ꮡsc.of(ServerConn.Ꮡmu).Lock();
+    defer(Ꮡsc.of(ServerConn.Ꮡmu).Unlock);
     return sc.nread - sc.nwritten;
 });
 
 // Write writes resp in response to req. To close the connection gracefully, set the
 // Response.Close field to true. Write should be considered operational until
 // it returns an error, regardless of any errors returned on the [ServerConn.Read] side.
-[GoRecv] public static error Write(this ref ServerConn sc, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡresp) => func((defer, _) => {
-    ref var req = ref Ꮡreq.val;
-    ref var resp = ref Ꮡresp.val;
+public static error Write(this ж<ServerConn> Ꮡsc, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡresp) => func<error>((defer, recover) => {
+    ref var sc = ref Ꮡsc.Value;
+    ref var req = ref Ꮡreq.Value;
+    ref var resp = ref Ꮡresp.Value;
 
     // Retrieve the pipeline ID of this request/response pair
-    sc.mu.Lock();
-    nuint id = sc.pipereq[req];
-    var ok = sc.pipereq[req];
+    Ꮡsc.of(ServerConn.Ꮡmu).Lock();
+    var (id, ok) = sc.pipereq[Ꮡreq, ꟷ];
     delete(sc.pipereq, Ꮡreq);
     if (!ok) {
-        sc.mu.Unlock();
-        return ~ErrPipeline;
+        Ꮡsc.of(ServerConn.Ꮡmu).Unlock();
+        return new http.ProtocolErrorжerror(ErrPipeline);
     }
-    sc.mu.Unlock();
+    Ꮡsc.of(ServerConn.Ꮡmu).Unlock();
     // Ensure pipeline order
-    sc.pipe.StartResponse(id);
-    deferǃ(sc.pipe.EndResponse, id, defer);
-    sc.mu.Lock();
+    Ꮡsc.of(ServerConn.Ꮡpipe).StartResponse(id);
+    deferǃ(Ꮡsc.of(ServerConn.Ꮡpipe).EndResponse, id, defer);
+    Ꮡsc.of(ServerConn.Ꮡmu).Lock();
     if (sc.we != default!) {
-        defer(sc.mu.Unlock);
+        defer(Ꮡsc.of(ServerConn.Ꮡmu).Unlock);
         return sc.we;
     }
     if (sc.c == default!) {
         // connection closed by user in the meantime
-        defer(sc.mu.Unlock);
-        return ~ErrClosed;
+        defer(Ꮡsc.of(ServerConn.Ꮡmu).Unlock);
+        return new http.ProtocolErrorжerror(ErrClosed);
     }
     var c = sc.c;
     if (sc.nread <= sc.nwritten) {
-        defer(sc.mu.Unlock);
+        defer(Ꮡsc.of(ServerConn.Ꮡmu).Unlock);
         return errors.New("persist server pipe count"u8);
     }
     if (resp.Close) {
         // After signaling a keep-alive close, any pipelined unread
         // requests will be lost. It is up to the user to drain them
         // before signaling.
-        sc.re = ErrPersistEOF;
+        sc.re = new http.ProtocolErrorжerror(ErrPersistEOF);
     }
-    sc.mu.Unlock();
-    var err = resp.Write(c);
-    sc.mu.Lock();
-    defer(sc.mu.Unlock);
+    Ꮡsc.of(ServerConn.Ꮡmu).Unlock();
+    var err = resp.Write(new net_ConnᴠWriter(c));
+    Ꮡsc.of(ServerConn.Ꮡmu).Lock();
+    defer(Ꮡsc.of(ServerConn.Ꮡmu).Unlock);
     if (err != default!) {
         sc.we = err;
         return err;
@@ -223,17 +229,15 @@ public static ж<ServerConn> NewServerConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
 //
 // Deprecated: Use Client or Transport in package [net/http] instead.
 [GoType] partial struct ClientConn {
-    internal sync_package.Mutex mu; // read-write protects the following fields
-    internal net_package.Conn c;
-    internal ж<bufio_package.Reader> r;
-    internal error re; // read/write errors
-    internal error we;
-    internal io_package.ReadCloser lastbody;
-    internal nint nread;
-    internal nint nwritten;
-    internal http.Request>uint pipereq;
-    internal net.textproto_package.Pipeline pipe;
-    internal http.Request, io.Writer) error writeReq;
+    internal sync.Mutex mu; // read-write protects the following fields
+    internal net.Conn c;
+    internal ж<bufio.Reader> r;
+    internal error re, we; // read/write errors
+    internal io.ReadCloser lastbody;
+    internal nint nread, nwritten;
+    internal map<ж<http.Request>, nuint> pipereq;
+    internal textproto.Pipeline pipe;
+    internal Func<ж<http.Request>, io.Writer, error> writeReq;
 }
 
 // NewClientConn is an artifact of Go's early HTTP implementation.
@@ -242,16 +246,16 @@ public static ж<ServerConn> NewServerConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
 //
 // Deprecated: Use the Client or Transport in package [net/http] instead.
 public static ж<ClientConn> NewClientConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.DerefOrNil();
 
-    if (r == nil) {
-        r = bufio.NewReader(c);
+    if (Ꮡr == nil) {
+        Ꮡr = bufio.NewReader(new net_ConnᴠReader(c)); r = ref Ꮡr.DerefOrNil();
     }
     return Ꮡ(new ClientConn(
         c: c,
-        r: r,
-        pipereq: new http.Request>uint(),
-        writeReq: (ж<http.Request>).Write
+        r: Ꮡr,
+        pipereq: new map<ж<http.Request>, nuint>(),
+        writeReq: (Func<ж<http.Request>, io.Writer, error>)(http.Write)
     ));
 }
 
@@ -261,10 +265,10 @@ public static ж<ClientConn> NewClientConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
 //
 // Deprecated: Use the Client or Transport in package [net/http] instead.
 public static ж<ClientConn> NewProxyClientConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     var cc = NewClientConn(c, Ꮡr);
-    cc.val.writeReq = () => (ж<http.Request>).WriteProxy();
+    cc.Value.writeReq = (Func<ж<http.Request>, io.Writer, error>)(http.WriteProxy);
     return cc;
 }
 
@@ -272,22 +276,27 @@ public static ж<ClientConn> NewProxyClientConn(net.Conn c, ж<bufio.Reader> Ꮡ
 // as the read-side bufio which may have some left over data. Hijack may be
 // called before the user or Read have signaled the end of the keep-alive
 // logic. The user should not call Hijack while [ClientConn.Read] or ClientConn.Write is in progress.
-[GoRecv] public static (net.Conn c, ж<bufio.Reader> r) Hijack(this ref ClientConn cc) => func((defer, _) => {
+public static (net.Conn c, ж<bufio.Reader> r) Hijack(this ж<ClientConn> Ꮡcc) {
     net.Conn c = default!;
     ж<bufio.Reader> r = default!;
+    func((defer, recover) => {
+    ref var cc = ref Ꮡcc.Value;
 
-    cc.mu.Lock();
-    defer(cc.mu.Unlock);
-    c = cc.c;
-    r = cc.r;
-    cc.c = default!;
-    cc.r = default!;
+        Ꮡcc.of(ClientConn.Ꮡmu).Lock();
+        defer(Ꮡcc.of(ClientConn.Ꮡmu).Unlock);
+        c = cc.c;
+        r = cc.r;
+        cc.c = default!;
+        cc.r = default!;
+    });
     return (c, r);
-});
+}
 
 // Close calls [ClientConn.Hijack] and then also closes the underlying connection.
-[GoRecv] public static error Close(this ref ClientConn cc) {
-    (c, _) = cc.Hijack();
+public static error Close(this ж<ClientConn> Ꮡcc) {
+    ref var cc = ref Ꮡcc.Value;
+
+    var (c, _) = Ꮡcc.Hijack();
     if (c != default!) {
         return c.Close();
     }
@@ -299,51 +308,51 @@ public static ж<ClientConn> NewProxyClientConn(net.Conn c, ж<bufio.Reader> Ꮡ
 // keep-alive connection is logically closed after this request and the opposing
 // server is informed. An ErrUnexpectedEOF indicates the remote closed the
 // underlying TCP connection, which is usually considered as graceful close.
-[GoRecv] public static error Write(this ref ClientConn cc, ж<http.Request> Ꮡreq) => func((defer, _) => {
-    ref var req = ref Ꮡreq.val;
+public static error Write(this ж<ClientConn> Ꮡcc, ж<http.Request> Ꮡreq) => func<error>((defer, recover) => {
+    ref var cc = ref Ꮡcc.Value;
+    ref var req = ref Ꮡreq.Value;
 
-    error err = default!;
+    ref var err = ref heap<error>(out var Ꮡerr);
     // Ensure ordered execution of Writes
-    nuint id = cc.pipe.Next();
-    cc.pipe.StartRequest(id);
-    var errʗ1 = err;
+    nuint id = Ꮡcc.of(ClientConn.Ꮡpipe).Next();
+    Ꮡcc.of(ClientConn.Ꮡpipe).StartRequest(id);
     defer(() => {
-        cc.pipe.EndRequest(id);
-        if (errʗ1 != default!){
-            cc.pipe.StartResponse(id);
-            cc.pipe.EndResponse(id);
+        Ꮡcc.of(ClientConn.Ꮡpipe).EndRequest(id);
+        if (Ꮡerr.ValueSlot != default!){
+            Ꮡcc.of(ClientConn.Ꮡpipe).StartResponse(id);
+            Ꮡcc.of(ClientConn.Ꮡpipe).EndResponse(id);
         } else {
             // Remember the pipeline id of this request
-            cc.mu.Lock();
-            cc.pipereq[req] = id;
-            cc.mu.Unlock();
+            Ꮡcc.of(ClientConn.Ꮡmu).Lock();
+            Ꮡcc.Value.pipereq[Ꮡreq] = id;
+            Ꮡcc.of(ClientConn.Ꮡmu).Unlock();
         }
     });
-    cc.mu.Lock();
+    Ꮡcc.of(ClientConn.Ꮡmu).Lock();
     if (cc.re != default!) {
         // no point sending if read-side closed or broken
-        defer(cc.mu.Unlock);
+        defer(Ꮡcc.of(ClientConn.Ꮡmu).Unlock);
         return cc.re;
     }
     if (cc.we != default!) {
-        defer(cc.mu.Unlock);
+        defer(Ꮡcc.of(ClientConn.Ꮡmu).Unlock);
         return cc.we;
     }
     if (cc.c == default!) {
         // connection closed by user in the meantime
-        defer(cc.mu.Unlock);
+        defer(Ꮡcc.of(ClientConn.Ꮡmu).Unlock);
         return errClosed;
     }
     var c = cc.c;
     if (req.Close) {
         // We write the EOF to the write-side error, because there
         // still might be some pipelined reads
-        cc.we = ErrPersistEOF;
+        cc.we = new http.ProtocolErrorжerror(ErrPersistEOF);
     }
-    cc.mu.Unlock();
-    err = cc.writeReq(req, c);
-    cc.mu.Lock();
-    defer(cc.mu.Unlock);
+    Ꮡcc.of(ClientConn.Ꮡmu).Unlock();
+    err = cc.writeReq(Ꮡreq, new net_ConnᴠWriter(c));
+    Ꮡcc.of(ClientConn.Ꮡmu).Lock();
+    defer(Ꮡcc.of(ClientConn.Ꮡmu).Unlock);
     if (err != default!) {
         cc.we = err;
         return err;
@@ -354,9 +363,11 @@ public static ж<ClientConn> NewProxyClientConn(net.Conn c, ж<bufio.Reader> Ꮡ
 
 // Pending returns the number of unanswered requests
 // that have been sent on the connection.
-[GoRecv] public static nint Pending(this ref ClientConn cc) => func((defer, _) => {
-    cc.mu.Lock();
-    defer(cc.mu.Unlock);
+public static nint Pending(this ж<ClientConn> Ꮡcc) => func((defer, recover) => {
+    ref var cc = ref Ꮡcc.Value;
+
+    Ꮡcc.of(ClientConn.Ꮡmu).Lock();
+    defer(Ꮡcc.of(ClientConn.Ꮡmu).Unlock);
     return cc.nwritten - cc.nread;
 });
 
@@ -364,77 +375,80 @@ public static ж<ClientConn> NewProxyClientConn(net.Conn c, ж<bufio.Reader> Ꮡ
 // returned together with an [ErrPersistEOF], which means that the remote
 // requested that this be the last request serviced. Read can be called
 // concurrently with [ClientConn.Write], but not with another Read.
-[GoRecv] public static (ж<http.Response> resp, error err) Read(this ref ClientConn cc, ж<http.Request> Ꮡreq) => func((defer, _) => {
+public static (ж<http.Response> resp, error err) Read(this ж<ClientConn> Ꮡcc, ж<http.Request> Ꮡreq) {
     ж<http.Response> resp = default!;
     error err = default!;
+    func((defer, recover) => {
+    ref var cc = ref Ꮡcc.Value;
+    ref var req = ref Ꮡreq.Value;
 
-    ref var req = ref Ꮡreq.val;
-    // Retrieve the pipeline ID of this request/response pair
-    cc.mu.Lock();
-    nuint id = cc.pipereq[req];
-    var ok = cc.pipereq[req];
-    delete(cc.pipereq, Ꮡreq);
-    if (!ok) {
-        cc.mu.Unlock();
-        return (default!, ~ErrPipeline);
-    }
-    cc.mu.Unlock();
-    // Ensure pipeline order
-    cc.pipe.StartResponse(id);
-    deferǃ(cc.pipe.EndResponse, id, defer);
-    cc.mu.Lock();
-    if (cc.re != default!) {
-        defer(cc.mu.Unlock);
-        return (default!, cc.re);
-    }
-    if (cc.r == nil) {
-        // connection closed by user in the meantime
-        defer(cc.mu.Unlock);
-        return (default!, errClosed);
-    }
-    var r = cc.r;
-    var lastbody = cc.lastbody;
-    cc.lastbody = default!;
-    cc.mu.Unlock();
-    // Make sure body is fully consumed, even if user does not call body.Close
-    if (lastbody != default!) {
-        // body.Close is assumed to be idempotent and multiple calls to
-        // it should return the error that its first invocation
-        // returned.
-        err = lastbody.Close();
-        if (err != default!) {
-            cc.mu.Lock();
-            defer(cc.mu.Unlock);
-            cc.re = err;
-            return (default!, err);
+        // Retrieve the pipeline ID of this request/response pair
+        Ꮡcc.of(ClientConn.Ꮡmu).Lock();
+        var (id, ok) = cc.pipereq[Ꮡreq, ꟷ];
+        delete(cc.pipereq, Ꮡreq);
+        if (!ok) {
+            Ꮡcc.of(ClientConn.Ꮡmu).Unlock();
+            (resp, err) = (default!, new http.ProtocolErrorжerror(ErrPipeline)); return;
         }
-    }
-    (resp, err) = http.ReadResponse(r, Ꮡreq);
-    cc.mu.Lock();
-    defer(cc.mu.Unlock);
-    if (err != default!) {
-        cc.re = err;
-        return (resp, err);
-    }
-    cc.lastbody = resp.val.Body;
-    cc.nread++;
-    if ((~resp).Close) {
-        cc.re = ErrPersistEOF;
-        // don't send any more requests
-        return (resp, cc.re);
-    }
+        Ꮡcc.of(ClientConn.Ꮡmu).Unlock();
+        // Ensure pipeline order
+        Ꮡcc.of(ClientConn.Ꮡpipe).StartResponse(id);
+        deferǃ(Ꮡcc.of(ClientConn.Ꮡpipe).EndResponse, id, defer);
+        Ꮡcc.of(ClientConn.Ꮡmu).Lock();
+        if (cc.re != default!) {
+            defer(Ꮡcc.of(ClientConn.Ꮡmu).Unlock);
+            (resp, err) = (default!, cc.re); return;
+        }
+        if (cc.r == nil) {
+            // connection closed by user in the meantime
+            defer(Ꮡcc.of(ClientConn.Ꮡmu).Unlock);
+            (resp, err) = (default!, errClosed); return;
+        }
+        var r = cc.r;
+        var lastbody = cc.lastbody;
+        cc.lastbody = default!;
+        Ꮡcc.of(ClientConn.Ꮡmu).Unlock();
+        // Make sure body is fully consumed, even if user does not call body.Close
+        if (lastbody != default!) {
+            // body.Close is assumed to be idempotent and multiple calls to
+            // it should return the error that its first invocation
+            // returned.
+            err = lastbody.Close();
+            if (err != default!) {
+                Ꮡcc.of(ClientConn.Ꮡmu).Lock();
+                defer(Ꮡcc.of(ClientConn.Ꮡmu).Unlock);
+                cc.re = err;
+                (resp, err) = (default!, err); return;
+            }
+        }
+        (resp, err) = http.ReadResponse(r, Ꮡreq);
+        Ꮡcc.of(ClientConn.Ꮡmu).Lock();
+        defer(Ꮡcc.of(ClientConn.Ꮡmu).Unlock);
+        if (err != default!) {
+            cc.re = err;
+            return;
+        }
+        cc.lastbody = resp.Value.Body;
+        cc.nread++;
+        if ((~resp).Close) {
+            cc.re = new http.ProtocolErrorжerror(ErrPersistEOF);
+            // don't send any more requests
+            (resp, err) = (resp, cc.re); return;
+        }
+    });
     return (resp, err);
-});
+}
 
 // Do is convenience method that writes a request and reads a response.
-[GoRecv] public static (ж<http.Response>, error) Do(this ref ClientConn cc, ж<http.Request> Ꮡreq) {
-    ref var req = ref Ꮡreq.val;
+public static (ж<http.Response>, error) Do(this ж<ClientConn> Ꮡcc, ж<http.Request> Ꮡreq) {
+    ref var cc = ref Ꮡcc.Value;
+    ref var req = ref Ꮡreq.Value;
 
-    var err = cc.Write(Ꮡreq);
+    var err = Ꮡcc.Write(Ꮡreq);
     if (err != default!) {
         return (default!, err);
     }
-    return cc.Read(Ꮡreq);
+    return Ꮡcc.Read(Ꮡreq);
 }
 
 } // end httputil_package

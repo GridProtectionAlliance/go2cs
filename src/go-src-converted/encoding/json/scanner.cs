@@ -17,7 +17,7 @@ using sync = sync_package;
 partial class json_package {
 
 // Valid reports whether data is a valid JSON encoding.
-public static bool Valid(slice<byte> data) => func((defer, _) => {
+public static bool Valid(slice<byte> data) => func((defer, recover) => {
     var scan = newScanner();
     deferǃ(freeScanner, scan, defer);
     return checkValid(data, scan) == default!;
@@ -27,16 +27,16 @@ public static bool Valid(slice<byte> data) => func((defer, _) => {
 // scan is passed in for use by checkValid to avoid an allocation.
 // checkValid returns nil or a SyntaxError.
 internal static error checkValid(slice<byte> data, ж<scanner> Ꮡscan) {
-    ref var scan = ref Ꮡscan.val;
+    ref var scan = ref Ꮡscan.Value;
 
     scan.reset();
     foreach (var (_, c) in data) {
         scan.bytes++;
-        if (scan.step(scan, c) == scanError) {
+        if (scan.step(Ꮡscan, c) == scanError) {
             return scan.err;
         }
     }
-    if (scan.eof() == scanError) {
+    if (Ꮡscan.eof() == scanError) {
         return scan.err;
     }
     return default!;
@@ -82,26 +82,27 @@ internal static error checkValid(slice<byte> data, ж<scanner> Ꮡscan) {
     internal int64 bytes;
 }
 
-internal static sync.Pool scannerPool = new sync.Pool(
+internal static ж<sync.Pool> ᏑscannerPool = new(new sync.Pool(
     New: () => Ꮡ(new scanner(nil))
-);
+));
+internal static ref sync.Pool scannerPool => ref ᏑscannerPool.Value;
 
 internal static ж<scanner> newScanner() {
-    var scan = scannerPool.Get()._<scanner.val>();
+    var scan = ᏑscannerPool.Get()._<ж<scanner>>();
     // scan.reset by design doesn't set bytes to zero
-    scan.val.bytes = 0;
+    scan.Value.bytes = 0;
     scan.reset();
     return scan;
 }
 
 internal static void freeScanner(ж<scanner> Ꮡscan) {
-    ref var scan = ref Ꮡscan.val;
+    ref var scan = ref Ꮡscan.Value;
 
     // Avoid hanging on to too much memory in extreme cases.
     if (len(scan.parseState) > 1024) {
         scan.parseState = default!;
     }
-    scannerPool.Put(scan);
+    ᏑscannerPool.Put(scan);
 }
 
 // These values are returned by the state transition functions
@@ -160,19 +161,21 @@ internal static readonly UntypedInt maxNestingDepth = 10000;
 
 // eof tells the scanner that the end of input has been reached.
 // It returns a scan status just as s.step does.
-[GoRecv] internal static nint eof(this ref scanner s) {
+internal static nint eof(this ж<scanner> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
     if (s.err != default!) {
         return scanError;
     }
     if (s.endTop) {
         return scanEnd;
     }
-    s.step(s, (rune)' ');
+    s.step(Ꮡs, (rune)' ');
     if (s.endTop) {
         return scanEnd;
     }
     if (s.err == default!) {
-        s.err = Ꮡ(new SyntaxError("unexpected end of JSON input", s.bytes));
+        s.err = new SyntaxErrorжerror(Ꮡ(new SyntaxError("unexpected end of JSON input", s.bytes)));
     }
     return scanError;
 }
@@ -206,7 +209,7 @@ internal static bool isSpace(byte c) {
 
 // stateBeginValueOrEmpty is the state after reading `[`.
 internal static nint stateBeginValueOrEmpty(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (isSpace(c)) {
         return scanSkipSpace;
@@ -219,7 +222,7 @@ internal static nint stateBeginValueOrEmpty(ж<scanner> Ꮡs, byte c) {
 
 // stateBeginValue is the state at the beginning of the input.
 internal static nint stateBeginValue(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (isSpace(c)) {
         return scanSkipSpace;
@@ -272,7 +275,7 @@ internal static nint stateBeginValue(ж<scanner> Ꮡs, byte c) {
 
 // stateBeginStringOrEmpty is the state after reading `{`.
 internal static nint stateBeginStringOrEmpty(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (isSpace(c)) {
         return scanSkipSpace;
@@ -287,7 +290,7 @@ internal static nint stateBeginStringOrEmpty(ж<scanner> Ꮡs, byte c) {
 
 // stateBeginString is the state after reading `{"key": value,`.
 internal static nint stateBeginString(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (isSpace(c)) {
         return scanSkipSpace;
@@ -302,7 +305,7 @@ internal static nint stateBeginString(ж<scanner> Ꮡs, byte c) {
 // stateEndValue is the state after completing a value,
 // such as after reading `{}` or `true` or `["x"`.
 internal static nint stateEndValue(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     nint n = len(s.parseState);
     if (n == 0) {
@@ -356,7 +359,7 @@ internal static nint stateEndValue(ж<scanner> Ꮡs, byte c) {
 // such as after reading `{}` or `[1,2,3]`.
 // Only space characters should be seen now.
 internal static nint stateEndTop(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (!isSpace(c)) {
         // Complain about non-space byte on next call.
@@ -367,7 +370,7 @@ internal static nint stateEndTop(ж<scanner> Ꮡs, byte c) {
 
 // stateInString is the state after reading `"`.
 internal static nint stateInString(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (c == (rune)'"') {
         s.step = stateEndValue;
@@ -377,7 +380,7 @@ internal static nint stateInString(ж<scanner> Ꮡs, byte c) {
         s.step = stateInStringEsc;
         return scanContinue;
     }
-    if (c < 32) {
+    if (c < 0x20) {
         return s.error(c, "in string literal"u8);
     }
     return scanContinue;
@@ -385,7 +388,7 @@ internal static nint stateInString(ж<scanner> Ꮡs, byte c) {
 
 // stateInStringEsc is the state after reading `"\` during a quoted string.
 internal static nint stateInStringEsc(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     switch (c) {
     case (rune)'b' or (rune)'f' or (rune)'n' or (rune)'r' or (rune)'t' or (rune)'\\' or (rune)'/' or (rune)'"': {
@@ -402,7 +405,7 @@ internal static nint stateInStringEsc(ж<scanner> Ꮡs, byte c) {
 
 // stateInStringEscU is the state after reading `"\u` during a quoted string.
 internal static nint stateInStringEscU(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if ((rune)'0' <= c && c <= (rune)'9' || (rune)'a' <= c && c <= (rune)'f' || (rune)'A' <= c && c <= (rune)'F') {
         s.step = stateInStringEscU1;
@@ -414,7 +417,7 @@ internal static nint stateInStringEscU(ж<scanner> Ꮡs, byte c) {
 
 // stateInStringEscU1 is the state after reading `"\u1` during a quoted string.
 internal static nint stateInStringEscU1(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if ((rune)'0' <= c && c <= (rune)'9' || (rune)'a' <= c && c <= (rune)'f' || (rune)'A' <= c && c <= (rune)'F') {
         s.step = stateInStringEscU12;
@@ -426,7 +429,7 @@ internal static nint stateInStringEscU1(ж<scanner> Ꮡs, byte c) {
 
 // stateInStringEscU12 is the state after reading `"\u12` during a quoted string.
 internal static nint stateInStringEscU12(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if ((rune)'0' <= c && c <= (rune)'9' || (rune)'a' <= c && c <= (rune)'f' || (rune)'A' <= c && c <= (rune)'F') {
         s.step = stateInStringEscU123;
@@ -438,7 +441,7 @@ internal static nint stateInStringEscU12(ж<scanner> Ꮡs, byte c) {
 
 // stateInStringEscU123 is the state after reading `"\u123` during a quoted string.
 internal static nint stateInStringEscU123(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if ((rune)'0' <= c && c <= (rune)'9' || (rune)'a' <= c && c <= (rune)'f' || (rune)'A' <= c && c <= (rune)'F') {
         s.step = stateInString;
@@ -450,7 +453,7 @@ internal static nint stateInStringEscU123(ж<scanner> Ꮡs, byte c) {
 
 // stateNeg is the state after reading `-` during a number.
 internal static nint stateNeg(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (c == (rune)'0') {
         s.step = state0;
@@ -466,7 +469,7 @@ internal static nint stateNeg(ж<scanner> Ꮡs, byte c) {
 // state1 is the state after reading a non-zero integer during a number,
 // such as after reading `1` or `100` but not `0`.
 internal static nint state1(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if ((rune)'0' <= c && c <= (rune)'9') {
         s.step = state1;
@@ -477,7 +480,7 @@ internal static nint state1(ж<scanner> Ꮡs, byte c) {
 
 // state0 is the state after reading `0` during a number.
 internal static nint state0(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (c == (rune)'.') {
         s.step = stateDot;
@@ -493,7 +496,7 @@ internal static nint state0(ж<scanner> Ꮡs, byte c) {
 // stateDot is the state after reading the integer and decimal point in a number,
 // such as after reading `1.`.
 internal static nint stateDot(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if ((rune)'0' <= c && c <= (rune)'9') {
         s.step = stateDot0;
@@ -505,7 +508,7 @@ internal static nint stateDot(ж<scanner> Ꮡs, byte c) {
 // stateDot0 is the state after reading the integer, decimal point, and subsequent
 // digits of a number, such as after reading `3.14`.
 internal static nint stateDot0(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if ((rune)'0' <= c && c <= (rune)'9') {
         return scanContinue;
@@ -520,7 +523,7 @@ internal static nint stateDot0(ж<scanner> Ꮡs, byte c) {
 // stateE is the state after reading the mantissa and e in a number,
 // such as after reading `314e` or `0.314e`.
 internal static nint stateE(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (c == (rune)'+' || c == (rune)'-') {
         s.step = stateESign;
@@ -532,7 +535,7 @@ internal static nint stateE(ж<scanner> Ꮡs, byte c) {
 // stateESign is the state after reading the mantissa, e, and sign in a number,
 // such as after reading `314e-` or `0.314e+`.
 internal static nint stateESign(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if ((rune)'0' <= c && c <= (rune)'9') {
         s.step = stateE0;
@@ -545,7 +548,7 @@ internal static nint stateESign(ж<scanner> Ꮡs, byte c) {
 // and at least one digit of the exponent in a number,
 // such as after reading `314e-2` or `0.314e+1` or `3.14e0`.
 internal static nint stateE0(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if ((rune)'0' <= c && c <= (rune)'9') {
         return scanContinue;
@@ -555,7 +558,7 @@ internal static nint stateE0(ж<scanner> Ꮡs, byte c) {
 
 // stateT is the state after reading `t`.
 internal static nint stateT(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (c == (rune)'r') {
         s.step = stateTr;
@@ -566,7 +569,7 @@ internal static nint stateT(ж<scanner> Ꮡs, byte c) {
 
 // stateTr is the state after reading `tr`.
 internal static nint stateTr(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (c == (rune)'u') {
         s.step = stateTru;
@@ -577,7 +580,7 @@ internal static nint stateTr(ж<scanner> Ꮡs, byte c) {
 
 // stateTru is the state after reading `tru`.
 internal static nint stateTru(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (c == (rune)'e') {
         s.step = stateEndValue;
@@ -588,7 +591,7 @@ internal static nint stateTru(ж<scanner> Ꮡs, byte c) {
 
 // stateF is the state after reading `f`.
 internal static nint stateF(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (c == (rune)'a') {
         s.step = stateFa;
@@ -599,7 +602,7 @@ internal static nint stateF(ж<scanner> Ꮡs, byte c) {
 
 // stateFa is the state after reading `fa`.
 internal static nint stateFa(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (c == (rune)'l') {
         s.step = stateFal;
@@ -610,7 +613,7 @@ internal static nint stateFa(ж<scanner> Ꮡs, byte c) {
 
 // stateFal is the state after reading `fal`.
 internal static nint stateFal(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (c == (rune)'s') {
         s.step = stateFals;
@@ -621,7 +624,7 @@ internal static nint stateFal(ж<scanner> Ꮡs, byte c) {
 
 // stateFals is the state after reading `fals`.
 internal static nint stateFals(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (c == (rune)'e') {
         s.step = stateEndValue;
@@ -632,7 +635,7 @@ internal static nint stateFals(ж<scanner> Ꮡs, byte c) {
 
 // stateN is the state after reading `n`.
 internal static nint stateN(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (c == (rune)'u') {
         s.step = stateNu;
@@ -643,7 +646,7 @@ internal static nint stateN(ж<scanner> Ꮡs, byte c) {
 
 // stateNu is the state after reading `nu`.
 internal static nint stateNu(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (c == (rune)'l') {
         s.step = stateNul;
@@ -654,7 +657,7 @@ internal static nint stateNu(ж<scanner> Ꮡs, byte c) {
 
 // stateNul is the state after reading `nul`.
 internal static nint stateNul(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     if (c == (rune)'l') {
         s.step = stateEndValue;
@@ -666,7 +669,7 @@ internal static nint stateNul(ж<scanner> Ꮡs, byte c) {
 // stateError is the state after reaching a syntax error,
 // such as after reading `[1}` or `5.1.2`.
 internal static nint stateError(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     return scanError;
 }
@@ -674,7 +677,7 @@ internal static nint stateError(ж<scanner> Ꮡs, byte c) {
 // error records an error and switches to the error state.
 [GoRecv] internal static nint error(this ref scanner s, byte c, @string context) {
     s.step = stateError;
-    s.err = Ꮡ(new SyntaxError("invalid character "u8 + quoteChar(c) + " "u8 + context, s.bytes));
+    s.err = new SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character " + quoteChar(c) + " " + context, s.bytes)));
     return scanError;
 }
 

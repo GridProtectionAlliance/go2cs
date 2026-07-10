@@ -5,7 +5,7 @@ namespace go;
 
 partial class runtime_package {
 
-internal static readonly UntypedInt _CONTEXT_CONTROL = /* 0x100001 */ 1048577;
+internal static readonly UntypedInt _CONTEXT_CONTROL = 0x100001;
 
 [GoType] partial struct m128a {
     internal uint64 low;
@@ -62,11 +62,11 @@ internal static readonly UntypedInt _CONTEXT_CONTROL = /* 0x100001 */ 1048577;
 }
 
 [GoRecv] internal static uintptr ip(this ref context c) {
-    return ((uintptr)c.rip);
+    return (uintptr)c.rip;
 }
 
 [GoRecv] internal static uintptr sp(this ref context c) {
-    return ((uintptr)c.rsp);
+    return (uintptr)c.rsp;
 }
 
 // AMD64 does not have link register, so this returns 0.
@@ -78,26 +78,26 @@ internal static readonly UntypedInt _CONTEXT_CONTROL = /* 0x100001 */ 1048577;
 }
 
 [GoRecv] internal static void set_ip(this ref context c, uintptr x) {
-    c.rip = ((uint64)x);
+    c.rip = (uint64)x;
 }
 
 [GoRecv] internal static void set_sp(this ref context c, uintptr x) {
-    c.rsp = ((uint64)x);
+    c.rsp = (uint64)x;
 }
 
 [GoRecv] internal static void set_fp(this ref context c, uintptr x) {
-    c.rbp = ((uint64)x);
+    c.rbp = (uint64)x;
 }
 
 internal static void prepareContextForSigResume(ж<context> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     c.r8 = c.rsp;
     c.r9 = c.rip;
 }
 
 internal static void dumpregs(ж<context> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     print("rax     ", ((Δhex)r.rax), "\n");
     print("rbx     ", ((Δhex)r.rbx), "\n");
@@ -116,10 +116,10 @@ internal static void dumpregs(ж<context> Ꮡr) {
     print("r14     ", ((Δhex)r.r14), "\n");
     print("r15     ", ((Δhex)r.r15), "\n");
     print("rip     ", ((Δhex)r.rip), "\n");
-    print("rflags  ", ((Δhex)r.eflags), "\n");
-    print("cs      ", ((Δhex)r.segcs), "\n");
-    print("fs      ", ((Δhex)r.segfs), "\n");
-    print("gs      ", ((Δhex)r.seggs), "\n");
+    print("rflags  ", ((Δhex)(uint64)r.eflags), "\n");
+    print("cs      ", ((Δhex)(uint64)r.segcs), "\n");
+    print("fs      ", ((Δhex)(uint64)r.segfs), "\n");
+    print("gs      ", ((Δhex)(uint64)r.seggs), "\n");
 }
 
 [GoType] partial struct _DISPATCHER_CONTEXT {

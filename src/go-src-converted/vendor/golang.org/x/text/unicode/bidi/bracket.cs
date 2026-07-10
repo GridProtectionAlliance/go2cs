@@ -71,7 +71,7 @@ internal static bool Less(this bracketPairs b, nint i, nint j) {
 // The identifiers for bracket types are the rune of the canonicalized opening
 // bracket for brackets (open or close) or 0 for runes that are not brackets.
 internal static void resolvePairedBrackets(ж<ΔisolatingRunSequence> Ꮡs) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     var p = new bracketPairer(
         sos: s.sos,
@@ -83,8 +83,8 @@ internal static void resolvePairedBrackets(ж<ΔisolatingRunSequence> Ꮡs) {
     if ((level)(s.level & 1) != 0) {
         dirEmbed = R;
     }
-    p.locateBrackets(s.p.pairTypes, s.p.pairValues);
-    p.resolveBrackets(dirEmbed, s.p.initialTypes);
+    p.locateBrackets((~s.p).pairTypes, (~s.p).pairValues);
+    p.resolveBrackets(dirEmbed, (~s.p).initialTypes);
 }
 
 [GoType] partial struct bracketPairer {
@@ -106,7 +106,7 @@ internal static void resolvePairedBrackets(ж<ΔisolatingRunSequence> Ꮡs) {
 // is pushed out to the caller. The caller has to ensure that the pairValue
 // slices contain the rune of the opening bracket after normalization for
 // any opening or closing bracket.
-    internal ж<container.list_package.List> openers; // list of positions for opening brackets
+    internal ж<list.List> openers; // list of positions for opening brackets
     // bracket pair positions sorted by location of opening bracket
     internal bracketPairs pairPositions;
     internal slice<ΔClass> codesIsolatedRun; // directional bidi codes for an isolated run

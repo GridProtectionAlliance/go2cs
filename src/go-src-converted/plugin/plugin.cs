@@ -63,6 +63,8 @@
 // communication (IPC) mechanisms such as sockets, pipes, remote
 // procedure call (RPC), shared memory mappings, or file system
 // operations may be more suitable despite the performance overheads.
+global using Symbol = object;
+
 namespace go;
 
 partial class plugin_package {
@@ -86,10 +88,10 @@ public static (ж<Plugin>, error) Open(@string path) {
 // A symbol is any exported variable or function.
 // It reports an error if the symbol is not found.
 // It is safe for concurrent use by multiple goroutines.
-[GoRecv] public static (Symbol, error) Lookup(this ref Plugin p, @string symName) {
-    return lookup(p, symName);
-}
+public static (Symbol, error) Lookup(this ж<Plugin> Ꮡp, @string symName) {
+    ref var p = ref Ꮡp.Value;
 
-[GoType("any")] partial struct Symbol;
+    return lookup(Ꮡp, symName);
+}
 
 } // end plugin_package

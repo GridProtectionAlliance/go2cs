@@ -9,16 +9,14 @@ partial class http_package {
 // A zero mapping is empty and ready to use.
 // A mapping tries to pick a representation that makes [mapping.find] most efficient.
 [GoType] partial struct mapping<K, V>
-    where K : /* comparable */ IAdditionOperators<K, K, K>, ISubtractionOperators<K, K, K>, IMultiplyOperators<K, K, K>, IDivisionOperators<K, K, K>, IModulusOperators<K, K, K>, IBitwiseOperators<K, K, K>, IShiftOperators<K, K, K>, IEqualityOperators<K, K, bool>, IComparisonOperators<K, K, bool>, new()
-    where V : new()
+    where K : /* comparable */ new()
 {
     internal slice<entry<K, V>> s; // for few pairs
     internal map<K, V> m;     // for many pairs
 }
 
 [GoType] partial struct entry<K, V>
-    where K : /* comparable */ IAdditionOperators<K, K, K>, ISubtractionOperators<K, K, K>, IMultiplyOperators<K, K, K>, IDivisionOperators<K, K, K>, IModulusOperators<K, K, K>, IBitwiseOperators<K, K, K>, IShiftOperators<K, K, K>, IEqualityOperators<K, K, bool>, IComparisonOperators<K, K, bool>, new()
-    where V : new()
+    where K : /* comparable */ new()
 {
     internal K key;
     internal V value;
@@ -30,10 +28,9 @@ internal static nint maxSlice = 8;
 
 // add adds a key-value pair to the mapping.
 [GoRecv] internal static void add<K, V>(this ref mapping<K, V> h, K k, V v)
-    where K : /* comparable */ IAdditionOperators<K, K, K>, ISubtractionOperators<K, K, K>, IMultiplyOperators<K, K, K>, IDivisionOperators<K, K, K>, IModulusOperators<K, K, K>, IBitwiseOperators<K, K, K>, IShiftOperators<K, K, K>, IEqualityOperators<K, K, bool>, IComparisonOperators<K, K, bool>, new()
-    where V : new()
+    where K : /* comparable */ new()
 {
-    if (h.m == default! && len(h.s) < maxSlice){
+    if (h.m == default! && builtin.len(h.s) < maxSlice){
         h.s = append(h.s, new entry<K, V>(k, v));
     } else {
         if (h.m == default!) {
@@ -50,18 +47,18 @@ internal static nint maxSlice = 8;
 // find returns the value corresponding to the given key.
 // The second return value is false if there is no value
 // with that key.
-[GoRecv] internal static (V v, bool found) find<K, V>(this ref mapping<K, V> h, K k)
-    where K : /* comparable */ IAdditionOperators<K, K, K>, ISubtractionOperators<K, K, K>, IMultiplyOperators<K, K, K>, IDivisionOperators<K, K, K>, IModulusOperators<K, K, K>, IBitwiseOperators<K, K, K>, IShiftOperators<K, K, K>, IEqualityOperators<K, K, bool>, IComparisonOperators<K, K, bool>, new()
-    where V : new()
+internal static (V v, bool found) find<K, V>(this ж<mapping<K, V>> Ꮡh, K k)
+    where K : /* comparable */ new()
 {
     V v = default!;
     bool found = default!;
 
+    ref var h = ref Ꮡh.Value;
     if (h == nil) {
         return (v, false);
     }
     if (h.m != default!) {
-        (v, found) = h.m[k];
+        (v, found) = h.m[k, ꟷ];
         return (v, found);
     }
     foreach (var (_, e) in h.s) {
@@ -74,10 +71,11 @@ internal static nint maxSlice = 8;
 
 // eachPair calls f for each pair in the mapping.
 // If f returns false, pairs returns immediately.
-[GoRecv] internal static void eachPair<K, V>(this ref mapping<K, V> h, Func<K, V, bool> f)
-    where K : /* comparable */ IAdditionOperators<K, K, K>, ISubtractionOperators<K, K, K>, IMultiplyOperators<K, K, K>, IDivisionOperators<K, K, K>, IModulusOperators<K, K, K>, IBitwiseOperators<K, K, K>, IShiftOperators<K, K, K>, IEqualityOperators<K, K, bool>, IComparisonOperators<K, K, bool>, new()
-    where V : new()
+internal static void eachPair<K, V>(this ж<mapping<K, V>> Ꮡh, Func<K, V, bool> f)
+    where K : /* comparable */ new()
 {
+    ref var h = ref Ꮡh.Value;
+
     if (h == nil) {
         return;
     }

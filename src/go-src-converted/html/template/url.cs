@@ -5,6 +5,7 @@ namespace go.html;
 
 using fmt = fmt_package;
 using strings = strings_package;
+using io = io_package;
 using ꓸꓸꓸany = Span<any>;
 
 partial class template_package {
@@ -85,7 +86,7 @@ internal static @string urlProcessor(bool norm, params ꓸꓸꓸany argsʗp) {
     if (t == contentTypeURL) {
         norm = true;
     }
-    ref var b = ref heap(new strings_package.Builder(), out var Ꮡb);
+    ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     if (processURLOnto(s, norm, Ꮡb)) {
         return b.String();
     }
@@ -95,9 +96,9 @@ internal static @string urlProcessor(bool norm, params ꓸꓸꓸany argsʗp) {
 // processURLOnto appends a normalized URL corresponding to its input to b
 // and reports whether the appended content differs from s.
 internal static bool processURLOnto(@string s, bool norm, ж<strings.Builder> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
-    b.Grow(len(s) + 16);
+    Ꮡb.Grow(len(s) + 16);
     nint written = 0;
     // The byte loop below assumes that all URLs use UTF-8 as the
     // content-encoding. This is similar to the URI to IRI encoding scheme
@@ -105,7 +106,7 @@ internal static bool processURLOnto(@string s, bool norm, ж<strings.Builder> �
     // EcmaScript builtin encodeURIComponent.
     // It should not cause any misencoding of URLs in pages with
     // Content-type: text/html;charset=UTF-8.
-    for (nint i = 0;nint n = len(s); i < n; i++) {
+    for ((nint i, nint n) = (0, len(s)); i < n; i++) {
         var c = s[i];
         switch (c) {
         case (rune)'!' or (rune)'#' or (rune)'$' or (rune)'&' or (rune)'*' or (rune)'+' or (rune)',' or (rune)'/' or (rune)':' or (rune)';' or (rune)'=' or (rune)'?' or (rune)'@' or (rune)'[' or (rune)']': {
@@ -150,11 +151,11 @@ internal static bool processURLOnto(@string s, bool norm, ж<strings.Builder> �
             break;
         }}
 
-        b.WriteString(s[(int)(written)..(int)(i)]);
-        fmt.Fprintf(~b, "%%%02x"u8, c);
+        Ꮡb.WriteString(s[(int)(written)..(int)(i)]);
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "%%%02x"u8, c);
         written = i + 1;
     }
-    b.WriteString(s[(int)(written)..]);
+    Ꮡb.WriteString(s[(int)(written)..]);
     return written != 0;
 }
 
@@ -171,7 +172,7 @@ internal static @string srcsetFilterAndEscaper(params ꓸꓸꓸany argsʗp) {
     if (exprᴛ1 == contentTypeURL) {
         // Normalizing gets rid of all HTML whitespace
         // which separate the image URL from its metadata.
-        ref var bΔ2 = ref heap(new strings_package.Builder(), out var ᏑbΔ2);
+        ref var bΔ2 = ref heap(new strings.Builder(), out var ᏑbΔ2);
         if (processURLOnto(s, true, ᏑbΔ2)) {
             s = bΔ2.String();
         }
@@ -179,12 +180,12 @@ internal static @string srcsetFilterAndEscaper(params ꓸꓸꓸany argsʗp) {
  ","u8, "%2c"u8);
     }
 
-    ref var b = ref heap(new strings_package.Builder(), out var Ꮡb);
+    ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     nint written = 0;
     for (nint i = 0; i < len(s); i++) {
         if (s[i] == (rune)',') {
             filterSrcsetElement(s, written, i, Ꮡb);
-            b.WriteString(","u8);
+            Ꮡb.WriteString(","u8);
             written = i + 1;
         }
     }
@@ -193,20 +194,20 @@ internal static @string srcsetFilterAndEscaper(params ꓸꓸꓸany argsʗp) {
 }
 
 // Derived from https://play.golang.org/p/Dhmj7FORT5
-internal static readonly @string htmlSpaceAndASCIIAlnumBytes = "\x00\x36\x00\x00\x01\x00\xff\x03\xfe\xff\xff\x07\xfe\xff\xff\x07"u8;
+internal static readonly @string htmlSpaceAndASCIIAlnumBytes = ((@string)(new byte[]{0x00, 0x36, 0x00, 0x00, 0x01, 0x00, 0xff, 0x03, 0xfe, 0xff, 0xff, 0x07, 0xfe, 0xff, 0xff, 0x07}));
 
 // isHTMLSpace is true iff c is a whitespace character per
 // https://infra.spec.whatwg.org/#ascii-whitespace
 internal static bool isHTMLSpace(byte c) {
-    return (c <= 32) && 0 != ((byte)(htmlSpaceAndASCIIAlnumBytes[c >> (int)(3)] & (1 << (int)(((nuint)((byte)(c & 7)))))));
+    return (c <= 0x20) && 0 != ((byte)(htmlSpaceAndASCIIAlnumBytes[(c >> (int)(3))] & ((byte)(1 << (int)((nuint)((byte)(c & 0x7)))))));
 }
 
 internal static bool isHTMLSpaceOrASCIIAlnum(byte c) {
-    return (c < 128) && 0 != ((byte)(htmlSpaceAndASCIIAlnumBytes[c >> (int)(3)] & (1 << (int)(((nuint)((byte)(c & 7)))))));
+    return (c < 0x80) && 0 != ((byte)(htmlSpaceAndASCIIAlnumBytes[(c >> (int)(3))] & ((byte)(1 << (int)((nuint)((byte)(c & 0x7)))))));
 }
 
 internal static void filterSrcsetElement(@string s, nint left, nint right, ж<strings.Builder> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     nint start = left;
     while (start < right && isHTMLSpace(s[start])) {
@@ -231,15 +232,15 @@ internal static void filterSrcsetElement(@string s, nint left, nint right, ж<st
                 }
             }
             if (metadataOk) {
-                b.WriteString(s[(int)(left)..(int)(start)]);
+                Ꮡb.WriteString(s[(int)(left)..(int)(start)]);
                 processURLOnto(url, true, Ꮡb);
-                b.WriteString(s[(int)(end)..(int)(right)]);
+                Ꮡb.WriteString(s[(int)(end)..(int)(right)]);
                 return;
             }
         }
     }
-    b.WriteString("#"u8);
-    b.WriteString(filterFailsafe);
+    Ꮡb.WriteString("#"u8);
+    Ꮡb.WriteString(filterFailsafe);
 }
 
 } // end template_package

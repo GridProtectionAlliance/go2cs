@@ -1,24 +1,24 @@
 // Copyright 2011 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-global using FuncMap = go.template.FuncMap;
+global using FuncMap = go.text.template_package.FuncMap;
 
 namespace go.html;
 
 using fmt = fmt_package;
 using io = io_package;
-using fs = io.fs_package;
+using fs = go.io.fs_package;
 using os = os_package;
 using path = path_package;
-using filepath = path.filepath_package;
+using filepath = go.path.filepath_package;
 using sync = sync_package;
 using template = text.template_package;
 using parse = text.template.parse_package;
-using io;
-using path;
+using go.io;
+using go.path;
 using text;
 using text.template;
-using ꓸꓸꓸ@string = Span<@string>;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class template_package {
 
@@ -32,8 +32,8 @@ partial class template_package {
     // template's in sync.
     internal ж<template.Template> text;
     // The underlying template's parse tree, updated to be HTML-safe.
-    public ж<text.template.parse_package.Tree> Tree;
-    public partial ref ж<nameSpace> nameSpace { get; } // common to all associated templates
+    public ж<parse.Tree> Tree;
+    internal partial ref ж<nameSpace> nameSpace { get; } // common to all associated templates
 }
 
 // escapeOK is a sentinel value used to indicate valid escaping.
@@ -41,7 +41,7 @@ internal static error escapeOK = fmt.Errorf("template escaped correctly"u8);
 
 // nameSpace is the data structure shared by all templates in an association.
 [GoType] partial struct nameSpace {
-    internal sync_package.Mutex mu;
+    internal sync.Mutex mu;
     internal map<@string, ж<Template>> set;
     internal bool escaped;
     internal escaper esc;
@@ -49,11 +49,13 @@ internal static error escapeOK = fmt.Errorf("template escaped correctly"u8);
 
 // Templates returns a slice of the templates associated with t, including t
 // itself.
-[GoRecv] public static slice<ж<Template>> Templates(this ref Template t) => func((defer, _) => {
+public static slice<ж<Template>> Templates(this ж<Template> Ꮡt) => func((defer, recover) => {
+    ref var t = ref Ꮡt.Value;
+
     var ns = t.nameSpace;
-    (~ns).mu.Lock();
+    ns.of(nameSpace.Ꮡmu).Lock();
     var nsʗ1 = ns;
-    defer((~nsʗ1).mu.Unlock);
+    defer(nsʗ1.of(nameSpace.Ꮡmu).Unlock);
     // Return a slice so we don't expose the map.
     var m = new slice<ж<Template>>(0, len((~ns).set));
     foreach (var (_, v) in (~ns).set) {
@@ -80,38 +82,43 @@ internal static error escapeOK = fmt.Errorf("template escaped correctly"u8);
 //		The operation returns the zero value for the map type's element.
 //	"missingkey=error"
 //		Execution stops immediately with an error.
-[GoRecv("capture")] public static ж<Template> Option(this ref Template t, params ꓸꓸꓸ@string optʗp) {
+public static ж<Template> Option(this ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) {
     var opt = optʗp.slice();
 
+    ref var t = ref Ꮡt.Value;
     t.text.Option(opt.ꓸꓸꓸ);
-    return OptionꓸᏑt;
+    return Ꮡt;
 }
 
 // checkCanParse checks whether it is OK to parse templates.
 // If not, it returns an error.
-[GoRecv] internal static error checkCanParse(this ref Template t) => func((defer, _) => {
+internal static error checkCanParse(this ж<Template> Ꮡt) => func<error>((defer, recover) => {
+    ref var t = ref Ꮡt.Value;
+
     if (t == nil) {
         return default!;
     }
-    t.nameSpace.mu.Lock();
-    defer(t.nameSpace.mu.Unlock);
-    if (t.nameSpace.escaped) {
+    t.nameSpace.of(nameSpace.Ꮡmu).Lock();
+    defer(Ꮡt.Value.nameSpace.of(nameSpace.Ꮡmu).Unlock);
+    if ((~t.nameSpace).escaped) {
         return fmt.Errorf("html/template: cannot Parse after Execute"u8);
     }
     return default!;
 });
 
 // escape escapes all associated templates.
-[GoRecv] internal static error escape(this ref Template t) => func((defer, _) => {
-    t.nameSpace.mu.Lock();
-    defer(t.nameSpace.mu.Unlock);
-    t.nameSpace.escaped = true;
+internal static error escape(this ж<Template> Ꮡt) => func<error>((defer, recover) => {
+    ref var t = ref Ꮡt.Value;
+
+    t.nameSpace.of(nameSpace.Ꮡmu).Lock();
+    defer(Ꮡt.Value.nameSpace.of(nameSpace.Ꮡmu).Unlock);
+    t.nameSpace.Value.escaped = true;
     if (t.escapeErr == default!){
         if (t.Tree == nil) {
             return fmt.Errorf("template: %q is an incomplete or empty template"u8, t.Name());
         }
         {
-            var err = escapeTemplate(t, ~t.text.Root, t.Name()); if (err != default!) {
+            var err = escapeTemplate(Ꮡt, new parse_ListNodeжNode((~t.text).Root), t.Name()); if (err != default!) {
                 return err;
             }
         }
@@ -129,9 +136,11 @@ internal static error escapeOK = fmt.Errorf("template escaped correctly"u8);
 // the output writer.
 // A template may be executed safely in parallel, although if parallel
 // executions share a Writer the output may be interleaved.
-[GoRecv] public static error Execute(this ref Template t, io.Writer wr, any data) {
+public static error Execute(this ж<Template> Ꮡt, io.Writer wr, any data) {
+    ref var t = ref Ꮡt.Value;
+
     {
-        var err = t.escape(); if (err != default!) {
+        var err = Ꮡt.escape(); if (err != default!) {
             return err;
         }
     }
@@ -145,8 +154,10 @@ internal static error escapeOK = fmt.Errorf("template escaped correctly"u8);
 // the output writer.
 // A template may be executed safely in parallel, although if parallel
 // executions share a Writer the output may be interleaved.
-[GoRecv] public static error ExecuteTemplate(this ref Template t, io.Writer wr, @string name, any data) {
-    (tmpl, err) = t.lookupAndEscapeTemplate(name);
+public static error ExecuteTemplate(this ж<Template> Ꮡt, io.Writer wr, @string name, any data) {
+    ref var t = ref Ꮡt.Value;
+
+    var (tmpl, err) = Ꮡt.lookupAndEscapeTemplate(name);
     if (err != default!) {
         return err;
     }
@@ -156,31 +167,34 @@ internal static error escapeOK = fmt.Errorf("template escaped correctly"u8);
 // lookupAndEscapeTemplate guarantees that the template with the given name
 // is escaped, or returns an error if it cannot be. It returns the named
 // template.
-[GoRecv] internal static (ж<Template> tmpl, error err) lookupAndEscapeTemplate(this ref Template t, @string name) => func((defer, _) => {
+internal static (ж<Template> tmpl, error err) lookupAndEscapeTemplate(this ж<Template> Ꮡt, @string name) {
     ж<Template> tmpl = default!;
     error err = default!;
+    func((defer, recover) => {
+    ref var t = ref Ꮡt.Value;
 
-    t.nameSpace.mu.Lock();
-    defer(t.nameSpace.mu.Unlock);
-    t.nameSpace.escaped = true;
-    tmpl = t.set[name];
-    if (tmpl == nil) {
-        return (default!, fmt.Errorf("html/template: %q is undefined"u8, name));
-    }
-    if ((~tmpl).escapeErr != default! && !AreEqual((~tmpl).escapeErr, escapeOK)) {
-        return (default!, (~tmpl).escapeErr);
-    }
-    if ((~(~tmpl).text).Tree == nil || (~tmpl).text.Root == nil) {
-        return (default!, fmt.Errorf("html/template: %q is an incomplete template"u8, name));
-    }
-    if (t.text.Lookup(name) == nil) {
-        throw panic("html/template internal error: template escaping out of sync");
-    }
-    if ((~tmpl).escapeErr == default!) {
-        err = escapeTemplate(tmpl, ~(~tmpl).text.Root, name);
-    }
+        t.nameSpace.of(nameSpace.Ꮡmu).Lock();
+        defer(Ꮡt.Value.nameSpace.of(nameSpace.Ꮡmu).Unlock);
+        t.nameSpace.Value.escaped = true;
+        tmpl = t.set[name];
+        if (tmpl == nil) {
+            (tmpl, err) = (default!, fmt.Errorf("html/template: %q is undefined"u8, name)); return;
+        }
+        if ((~tmpl).escapeErr != default! && !AreEqual((~tmpl).escapeErr, escapeOK)) {
+            (tmpl, err) = (default!, (~tmpl).escapeErr); return;
+        }
+        if ((~(~tmpl).text).Tree == nil || (~(~tmpl).text).Root == nil) {
+            (tmpl, err) = (default!, fmt.Errorf("html/template: %q is an incomplete template"u8, name)); return;
+        }
+        if (t.text.Lookup(name) == nil) {
+            throw panic("html/template internal error: template escaping out of sync");
+        }
+        if ((~tmpl).escapeErr == default!) {
+            err = escapeTemplate(tmpl, new parse_ListNodeжNode((~(~tmpl).text).Root), name);
+        }
+    });
     return (tmpl, err);
-});
+}
 
 // DefinedTemplates returns a string listing the defined templates,
 // prefixed by the string "; defined templates are: ". If there are none,
@@ -200,48 +214,51 @@ internal static error escapeOK = fmt.Errorf("template escaped correctly"u8);
 // is considered empty and will not replace an existing template's body.
 // This allows using Parse to add new named template definitions without
 // overwriting the main template body.
-[GoRecv("capture")] public static (ж<Template>, error) Parse(this ref Template t, @string text) => func((defer, _) => {
+public static (ж<Template>, error) Parse(this ж<Template> Ꮡt, @string text) => func<(ж<Template>, error)>((defer, recover) => {
+    ref var t = ref Ꮡt.Value;
+
     {
-        var errΔ1 = t.checkCanParse(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡt.checkCanParse(); if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
     }
-    (ret, err) = t.text.Parse(text);
+    var (ret, err) = t.text.Parse(text);
     if (err != default!) {
         return (default!, err);
     }
     // In general, all the named templates might have changed underfoot.
     // Regardless, some new ones may have been defined.
     // The template.Template set has been updated; update ours.
-    t.nameSpace.mu.Lock();
-    defer(t.nameSpace.mu.Unlock);
+    t.nameSpace.of(nameSpace.Ꮡmu).Lock();
+    defer(Ꮡt.Value.nameSpace.of(nameSpace.Ꮡmu).Unlock);
     foreach (var (_, v) in ret.Templates()) {
         @string name = v.Name();
         var tmpl = t.set[name];
         if (tmpl == nil) {
             tmpl = t.@new(name);
         }
-        tmpl.val.text = v;
-        tmpl.val.Tree = v.val.Tree;
+        tmpl.Value.text = v;
+        tmpl.Value.Tree = v.Value.Tree;
     }
-    return (ParseꓸᏑt, default!);
+    return (Ꮡt, default!);
 });
 
 // AddParseTree creates a new template with the name and parse tree
 // and associates it with t.
 //
 // It returns an error if t or any associated template has already been executed.
-[GoRecv] public static (ж<Template>, error) AddParseTree(this ref Template t, @string name, ж<parse.Tree> Ꮡtree) => func((defer, _) => {
-    ref var tree = ref Ꮡtree.val;
+public static (ж<Template>, error) AddParseTree(this ж<Template> Ꮡt, @string name, ж<parse.Tree> Ꮡtree) => func<(ж<Template>, error)>((defer, recover) => {
+    ref var t = ref Ꮡt.Value;
+    ref var tree = ref Ꮡtree.Value;
 
     {
-        var errΔ1 = t.checkCanParse(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡt.checkCanParse(); if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
     }
-    t.nameSpace.mu.Lock();
-    defer(t.nameSpace.mu.Unlock);
-    (text, err) = t.text.AddParseTree(name, Ꮡtree);
+    t.nameSpace.of(nameSpace.Ꮡmu).Lock();
+    defer(Ꮡt.Value.nameSpace.of(nameSpace.Ꮡmu).Unlock);
+    var (text, err) = t.text.AddParseTree(name, Ꮡtree);
     if (err != default!) {
         return (default!, err);
     }
@@ -263,33 +280,37 @@ internal static error escapeOK = fmt.Errorf("template escaped correctly"u8);
 // by adding the variants after the clone is made.
 //
 // It returns an error if t has already been executed.
-[GoRecv] public static (ж<Template>, error) Clone(this ref Template t) => func((defer, _) => {
-    t.nameSpace.mu.Lock();
-    defer(t.nameSpace.mu.Unlock);
+public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) => func<(ж<Template>, error)>((defer, recover) => {
+    ref var t = ref Ꮡt.Value;
+
+    t.nameSpace.of(nameSpace.Ꮡmu).Lock();
+    defer(Ꮡt.Value.nameSpace.of(nameSpace.Ꮡmu).Unlock);
     if (t.escapeErr != default!) {
         return (default!, fmt.Errorf("html/template: cannot Clone %q after it has executed"u8, t.Name()));
     }
-    (textClone, err) = t.text.Clone();
+    var (textClone, err) = t.text.Clone();
     if (err != default!) {
         return (default!, err);
     }
     var ns = Ꮡ(new nameSpace(set: new map<@string, ж<Template>>()));
-    ns.val.esc = makeEscaper(ns);
+    ns.Value.esc = makeEscaper(ns);
     var ret = Ꮡ(new Template(
         default!,
         textClone,
         (~textClone).Tree,
         ns
     ));
-    ret.set[ret.Name()] = ret;
-    foreach (var (_, x) in textClone.Templates()) {
+    ret.Value.set[ret.Name()] = ret;
+    foreach (var (_, vᴛ1) in textClone.Templates()) {
+        var x = vᴛ1;
+
         @string name = x.Name();
         var src = t.set[name];
         if (src == nil || (~src).escapeErr != default!) {
             return (default!, fmt.Errorf("html/template: cannot Clone %q after it has executed"u8, t.Name()));
         }
-        x.val.Tree = (~x).Tree.Copy();
-        ret.set[name] = Ꮡ(new Template(
+        x.Value.Tree = (~x).Tree.Copy();
+        ret.Value.set[name] = Ꮡ(new Template(
             default!,
             x,
             (~x).Tree,
@@ -297,20 +318,20 @@ internal static error escapeOK = fmt.Errorf("template escaped correctly"u8);
         ));
     }
     // Return the template associated with the name of this template.
-    return (ret.set[ret.Name()], default!);
+    return ((~ret).set[ret.Name()], default!);
 });
 
 // New allocates a new HTML template with the given name.
 public static ж<Template> New(@string name) {
     var ns = Ꮡ(new nameSpace(set: new map<@string, ж<Template>>()));
-    ns.val.esc = makeEscaper(ns);
+    ns.Value.esc = makeEscaper(ns);
     var tmpl = Ꮡ(new Template(
         default!,
-        template.New(name),
+        text.template_package.New(name),
         nil,
         ns
     ));
-    tmpl.set[name] = tmpl;
+    tmpl.Value.set[name] = tmpl;
     return tmpl;
 }
 
@@ -321,9 +342,11 @@ public static ж<Template> New(@string name) {
 // If a template with the given name already exists, the new HTML template
 // will replace it. The existing template will be reset and disassociated with
 // t.
-[GoRecv] public static ж<Template> New(this ref Template t, @string name) => func((defer, _) => {
-    t.nameSpace.mu.Lock();
-    defer(t.nameSpace.mu.Unlock);
+public static ж<Template> New(this ж<Template> Ꮡt, @string name) => func((defer, recover) => {
+    ref var t = ref Ꮡt.Value;
+
+    t.nameSpace.of(nameSpace.Ꮡmu).Lock();
+    defer(Ꮡt.Value.nameSpace.of(nameSpace.Ꮡmu).Unlock);
     return t.@new(name);
 });
 
@@ -336,13 +359,12 @@ public static ж<Template> New(@string name) {
         t.nameSpace
     ));
     {
-        var existing = tmpl.set[name];
-        var ok = tmpl.set[name]; if (ok) {
+        var (existing, ok) = (~tmpl).set[name, ꟷ]; if (ok) {
             var emptyTmpl = New(existing.Name());
-            existing.val = emptyTmpl.val;
+            existing.Value = emptyTmpl.Value;
         }
     }
-    tmpl.set[name] = tmpl;
+    tmpl.Value.set[name] = tmpl;
     return tmpl;
 }
 
@@ -356,9 +378,11 @@ public static ж<Template> New(@string name) {
 // It panics if a value in the map is not a function with appropriate return
 // type. However, it is legal to overwrite elements of the map. The return
 // value is the template, so calls can be chained.
-[GoRecv("capture")] public static ж<Template> Funcs(this ref Template t, FuncMap funcMap) {
+public static ж<Template> Funcs(this ж<Template> Ꮡt, FuncMap funcMap) {
+    ref var t = ref Ꮡt.Value;
+
     t.text.Funcs(((template.FuncMap)funcMap));
-    return FuncsꓸᏑt;
+    return Ꮡt;
 }
 
 // Delims sets the action delimiters to the specified strings, to be used in
@@ -366,16 +390,20 @@ public static ж<Template> New(@string name) {
 // definitions will inherit the settings. An empty delimiter stands for the
 // corresponding default: {{ or }}.
 // The return value is the template, so calls can be chained.
-[GoRecv("capture")] public static ж<Template> Delims(this ref Template t, @string left, @string right) {
+public static ж<Template> Delims(this ж<Template> Ꮡt, @string left, @string right) {
+    ref var t = ref Ꮡt.Value;
+
     t.text.Delims(left, right);
-    return DelimsꓸᏑt;
+    return Ꮡt;
 }
 
 // Lookup returns the template with the given name that is associated with t,
 // or nil if there is no such template.
-[GoRecv] public static ж<Template> Lookup(this ref Template t, @string name) => func((defer, _) => {
-    t.nameSpace.mu.Lock();
-    defer(t.nameSpace.mu.Unlock);
+public static ж<Template> Lookup(this ж<Template> Ꮡt, @string name) => func((defer, recover) => {
+    ref var t = ref Ꮡt.Value;
+
+    t.nameSpace.of(nameSpace.Ꮡmu).Lock();
+    defer(Ꮡt.Value.nameSpace.of(nameSpace.Ꮡmu).Unlock);
     return t.set[name];
 });
 
@@ -385,7 +413,7 @@ public static ж<Template> New(@string name) {
 //
 //	var t = template.Must(template.New("name").Parse("html"))
 public static ж<Template> Must(ж<Template> Ꮡt, error err) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     if (err != default!) {
         throw panic(err);
@@ -402,7 +430,7 @@ public static ж<Template> Must(ж<Template> Ꮡt, error err) {
 // the last one mentioned will be the one that results.
 // For instance, ParseFiles("a/foo", "b/foo") stores "b/foo" as the template
 // named "foo", while "a/foo" is unavailable.
-public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸ@string filenamesʗp) {
+public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸstring filenamesʗp) {
     var filenames = filenamesʗp.slice();
 
     return parseFiles(nil, readFileOS, filenames.ꓸꓸꓸ);
@@ -416,20 +444,21 @@ public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸ@string filenames
 // the last one mentioned will be the one that results.
 //
 // ParseFiles returns an error if t or any associated template has already been executed.
-[GoRecv] public static (ж<Template>, error) ParseFiles(this ref Template t, params ꓸꓸꓸ@string filenamesʗp) {
+public static (ж<Template>, error) ParseFiles(this ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) {
     var filenames = filenamesʗp.slice();
 
-    return parseFiles(t, readFileOS, filenames.ꓸꓸꓸ);
+    ref var t = ref Ꮡt.Value;
+    return parseFiles(Ꮡt, readFileOS, filenames.ꓸꓸꓸ);
 }
 
 // parseFiles is the helper for the method and function. If the argument
 // template is nil, it is created from the first file.
-internal static (ж<Template>, error) parseFiles(ж<Template> Ꮡt, Func<@string, (string, <>byte, error)> readFile, params ꓸꓸꓸ@string filenamesʗp) {
+internal static (ж<Template>, error) parseFiles(ж<Template> Ꮡt, Func<@string, (@string, slice<byte>, error)> readFile, params ꓸꓸꓸstring filenamesʗp) {
     var filenames = filenamesʗp.slice();
 
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.DerefOrNil();
     {
-        var err = t.checkCanParse(); if (err != default!) {
+        var err = Ꮡt.checkCanParse(); if (err != default!) {
             return (default!, err);
         }
     }
@@ -450,13 +479,13 @@ internal static (ж<Template>, error) parseFiles(ж<Template> Ꮡt, Func<@string
         //  t, err := New(name).Funcs(xxx).ParseFiles(name)
         // works. Otherwise we create a new template associated with t.
         ж<Template> tmpl = default!;
-        if (t == nil) {
-            t = New(name);
+        if (Ꮡt == nil) {
+            Ꮡt = New(name); t = ref Ꮡt.DerefOrNil();
         }
         if (name == t.Name()){
-            tmpl = t;
+            tmpl = Ꮡt;
         } else {
-            tmpl = t.New(name);
+            tmpl = Ꮡt.New(name);
         }
         (_, err) = tmpl.Parse(s);
         if (err != default!) {
@@ -489,20 +518,22 @@ public static (ж<Template>, error) ParseGlob(@string pattern) {
 // the last one mentioned will be the one that results.
 //
 // ParseGlob returns an error if t or any associated template has already been executed.
-[GoRecv] public static (ж<Template>, error) ParseGlob(this ref Template t, @string pattern) {
-    return parseGlob(t, pattern);
+public static (ж<Template>, error) ParseGlob(this ж<Template> Ꮡt, @string pattern) {
+    ref var t = ref Ꮡt.Value;
+
+    return parseGlob(Ꮡt, pattern);
 }
 
 // parseGlob is the implementation of the function and method ParseGlob.
 internal static (ж<Template>, error) parseGlob(ж<Template> Ꮡt, @string pattern) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     {
-        var errΔ1 = t.checkCanParse(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡt.checkCanParse(); if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
     }
-    (filenames, err) = filepath.Glob(pattern);
+    var (filenames, err) = filepath.Glob(pattern);
     if (err != default!) {
         return (default!, err);
     }
@@ -519,35 +550,36 @@ public static (bool truth, bool ok) IsTrue(any val) {
     bool truth = default!;
     bool ok = default!;
 
-    return template.IsTrue(val);
+    return text.template_package.IsTrue(val);
 }
 
 // ParseFS is like [ParseFiles] or [ParseGlob] but reads from the file system fs
 // instead of the host operating system's file system.
 // It accepts a list of glob patterns.
 // (Note that most file names serve as glob patterns matching only themselves.)
-public static (ж<Template>, error) ParseFS(fs.FS fs, params ꓸꓸꓸ@string patternsʗp) {
+public static (ж<Template>, error) ParseFS(fs.FS fsΔ1, params ꓸꓸꓸstring patternsʗp) {
     var patterns = patternsʗp.slice();
 
-    return parseFS(nil, fs, patterns);
+    return parseFS(nil, fsΔ1, patterns);
 }
 
 // ParseFS is like [Template.ParseFiles] or [Template.ParseGlob] but reads from the file system fs
 // instead of the host operating system's file system.
 // It accepts a list of glob patterns.
 // (Note that most file names serve as glob patterns matching only themselves.)
-[GoRecv] public static (ж<Template>, error) ParseFS(this ref Template t, fs.FS fs, params ꓸꓸꓸ@string patternsʗp) {
+public static (ж<Template>, error) ParseFS(this ж<Template> Ꮡt, fs.FS fsΔ1, params ꓸꓸꓸstring patternsʗp) {
     var patterns = patternsʗp.slice();
 
-    return parseFS(t, fs, patterns);
+    ref var t = ref Ꮡt.Value;
+    return parseFS(Ꮡt, fsΔ1, patterns);
 }
 
 internal static (ж<Template>, error) parseFS(ж<Template> Ꮡt, fs.FS fsys, slice<@string> patterns) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     slice<@string> filenames = default!;
     foreach (var (_, pattern) in patterns) {
-        (list, err) = fs.Glob(fsys, pattern);
+        var (list, err) = fs.Glob(fsys, pattern);
         if (err != default!) {
             return (default!, err);
         }
@@ -559,22 +591,24 @@ internal static (ж<Template>, error) parseFS(ж<Template> Ꮡt, fs.FS fsys, sli
     return parseFiles(Ꮡt, readFileFS(fsys), filenames.ꓸꓸꓸ);
 }
 
-internal static (@string name, slice<byte> b, error err) readFileOS(@string file) {
+internal static (@string name, slice<byte> b, error err) readFileOS(@string @file) {
     @string name = default!;
     slice<byte> b = default!;
     error err = default!;
 
-    name = filepath.Base(file);
-    (b, err) = os.ReadFile(file);
+    name = filepath.Base(@file);
+    (b, err) = os.ReadFile(@file);
     return (name, b, err);
 }
 
-internal static Func<@string, (string, <>byte, error)> readFileFS(fs.FS fsys) {
-    var bʗ1 = b;
-    return (@string file) => {
-        name = path.Base(file);
-        (bʗ1, err) = fs.ReadFile(fsys, file);
-        return;
+internal static Func<@string, (@string, slice<byte>, error)> readFileFS(fs.FS fsys) {
+    return (@string @file) => {
+        @string name = default!;
+        slice<byte> b = default!;
+        error err = default!;
+        name = path.Base(@file);
+        (b, err) = fs.ReadFile(fsys, @file);
+        return (name, b, err);
     };
 }
 

@@ -17,14 +17,16 @@ namespace go.crypto;
 
 using bytes = bytes_package;
 using crypto = crypto_package;
-using edwards25519 = crypto.@internal.edwards25519_package;
-using cryptorand = crypto.rand_package;
-using sha512 = crypto.sha512_package;
-using subtle = crypto.subtle_package;
+using edwards25519 = go.crypto.@internal.edwards25519_package;
+using cryptorand = go.crypto.rand_package;
+using sha512 = go.crypto.sha512_package;
+using subtle = go.crypto.subtle_package;
 using errors = errors_package;
 using io = io_package;
 using strconv = strconv_package;
-using crypto.@internal;
+using go.crypto;
+using go.crypto.@internal;
+using hash = hash_package;
 
 partial class ed25519_package {
 
@@ -39,7 +41,7 @@ public static readonly UntypedInt SeedSize = 32;
 // PrivateKey, as the latter embeds the former and will expose its methods.
 
 // Equal reports whether pub and x have the same value.
-public static bool Equal(this PublicKey pub, crypto.PublicKey x) {
+public static bool Equal(this PublicKey pub, cryptoꓸPublicKey x) {
     var (xx, ok) = x._<PublicKey>(ᐧ);
     if (!ok) {
         return false;
@@ -50,14 +52,14 @@ public static bool Equal(this PublicKey pub, crypto.PublicKey x) {
 [GoType("[]byte")] partial struct PrivateKey;
 
 // Public returns the [PublicKey] corresponding to priv.
-public static crypto.PublicKey Public(this PrivateKey priv) {
+public static cryptoꓸPublicKey Public(this PrivateKey priv) {
     var publicKey = new slice<byte>(PublicKeySize);
     copy(publicKey, priv[32..]);
     return ((PublicKey)publicKey);
 }
 
 // Equal reports whether priv and x have the same value.
-public static bool Equal(this PrivateKey priv, crypto.PrivateKey x) {
+public static bool Equal(this PrivateKey priv, cryptoꓸPrivateKey x) {
     var (xx, ok) = x._<PrivateKey>(ᐧ);
     if (!ok) {
         return false;
@@ -88,12 +90,12 @@ public static (slice<byte> signature, error err) Sign(this PrivateKey priv, io.R
     crypto.Hash hash = opts.HashFunc();
     @string context = ""u8;
     {
-        var (optsΔ1, ok) = opts._<Options.val>(ᐧ); if (ok) {
-            context = optsΔ1.val.Context;
+        var (optsΔ1, ok) = opts._<ж<Options>>(ᐧ); if (ok) {
+            context = optsΔ1.Value.Context;
         }
     }
     switch (ᐧ) {
-    case {} when hash is crypto.SHA512: {
+    case {} when hash == crypto.SHA512: {
         {
             nint l = len(message); if (l != sha512.ΔSize) {
                 // Ed25519ph
@@ -134,7 +136,7 @@ public static (slice<byte> signature, error err) Sign(this PrivateKey priv, io.R
 // to select Ed25519 variants.
 [GoType] partial struct Options {
     // Hash can be zero for regular Ed25519, or crypto.SHA512 for Ed25519ph.
-    public crypto_package.Hash Hash;
+    public crypto.Hash Hash;
     // Context, if not empty, selects Ed25519ctx or provides the context string
     // for Ed25519ph. It can be at most 255 bytes in length.
     public @string Context;
@@ -180,11 +182,11 @@ public static PrivateKey NewKeyFromSeed(slice<byte> seed) {
 internal static void newKeyFromSeed(slice<byte> privateKey, slice<byte> seed) {
     {
         nint l = len(seed); if (l != SeedSize) {
-            throw panic("ed25519: bad seed length: "u8 + strconv.Itoa(l));
+            throw panic("ed25519: bad seed length: " + strconv.Itoa(l));
         }
     }
     var h = sha512.Sum512(seed);
-    (s, err) = edwards25519.NewScalar().SetBytesWithClamping(h[..32]);
+    var (s, err) = edwards25519.NewScalar().SetBytesWithClamping(h[..32]);
     if (err != default!) {
         throw panic("ed25519: internal error: setting scalar failed");
     }
@@ -215,13 +217,12 @@ internal static readonly @string domPrefixCtx = "SigEd25519 no Ed25519 collision
 internal static void sign(slice<byte> signature, slice<byte> privateKey, slice<byte> message, @string domPrefix, @string context) {
     {
         nint l = len(privateKey); if (l != PrivateKeySize) {
-            throw panic("ed25519: bad private key length: "u8 + strconv.Itoa(l));
+            throw panic("ed25519: bad private key length: " + strconv.Itoa(l));
         }
     }
-    var seed = privateKey[..(int)(SeedSize)];
-    var publicKey = privateKey[(int)(SeedSize)..];
+    var (seed, publicKey) = (privateKey[..(int)(SeedSize)], privateKey[(int)(SeedSize)..]);
     var h = sha512.Sum512(seed);
-    (s, err) = edwards25519.NewScalar().SetBytesWithClamping(h[..32]);
+    var (s, err) = edwards25519.NewScalar().SetBytesWithClamping(h[..32]);
     if (err != default!) {
         throw panic("ed25519: internal error: setting scalar failed");
     }
@@ -229,14 +230,14 @@ internal static void sign(slice<byte> signature, slice<byte> privateKey, slice<b
     var mh = sha512.New();
     if (domPrefix != domPrefixPure) {
         mh.Write(slice<byte>(domPrefix));
-        mh.Write(new byte[]{((byte)len(context))}.slice());
+        mh.Write(new byte[]{(byte)len(context)}.slice());
         mh.Write(slice<byte>(context));
     }
     mh.Write(prefix);
     mh.Write(message);
     var messageDigest = new slice<byte>(0, sha512.ΔSize);
     messageDigest = mh.Sum(messageDigest);
-    (r, err) = edwards25519.NewScalar().SetUniformBytes(messageDigest);
+    (var r, err) = edwards25519.NewScalar().SetUniformBytes(messageDigest);
     if (err != default!) {
         throw panic("ed25519: internal error: setting scalar failed");
     }
@@ -244,7 +245,7 @@ internal static void sign(slice<byte> signature, slice<byte> privateKey, slice<b
     var kh = sha512.New();
     if (domPrefix != domPrefixPure) {
         kh.Write(slice<byte>(domPrefix));
-        kh.Write(new byte[]{((byte)len(context))}.slice());
+        kh.Write(new byte[]{(byte)len(context)}.slice());
         kh.Write(slice<byte>(context));
     }
     kh.Write(R.Bytes());
@@ -252,7 +253,7 @@ internal static void sign(slice<byte> signature, slice<byte> privateKey, slice<b
     kh.Write(message);
     var hramDigest = new slice<byte>(0, sha512.ΔSize);
     hramDigest = kh.Sum(hramDigest);
-    (k, err) = edwards25519.NewScalar().SetUniformBytes(hramDigest);
+    (var k, err) = edwards25519.NewScalar().SetUniformBytes(hramDigest);
     if (err != default!) {
         throw panic("ed25519: internal error: setting scalar failed");
     }
@@ -282,10 +283,10 @@ public static bool Verify(PublicKey publicKey, slice<byte> message, slice<byte> 
 // The inputs are not considered confidential, and may leak through timing side
 // channels, or if an attacker has control of part of the inputs.
 public static error VerifyWithOptions(PublicKey publicKey, slice<byte> message, slice<byte> sig, ж<Options> Ꮡopts) {
-    ref var opts = ref Ꮡopts.val;
+    ref var opts = ref Ꮡopts.Value;
 
     switch (ᐧ) {
-    case {} when opts.Hash is crypto.SHA512: {
+    case {} when opts.Hash == crypto.SHA512: {
         {
             nint l = len(message); if (l != sha512.ΔSize) {
                 // Ed25519ph
@@ -330,20 +331,20 @@ public static error VerifyWithOptions(PublicKey publicKey, slice<byte> message, 
 internal static bool verify(PublicKey publicKey, slice<byte> message, slice<byte> sig, @string domPrefix, @string context) {
     {
         nint l = len(publicKey); if (l != PublicKeySize) {
-            throw panic("ed25519: bad public key length: "u8 + strconv.Itoa(l));
+            throw panic("ed25519: bad public key length: " + strconv.Itoa(l));
         }
     }
     if (len(sig) != SignatureSize || (byte)(sig[63] & 224) != 0) {
         return false;
     }
-    (A, err) = (Ꮡ(new edwards25519.Point(nil))).SetBytes(publicKey);
+    var (A, err) = (Ꮡ(new edwards25519.Point(nil))).SetBytes(publicKey);
     if (err != default!) {
         return false;
     }
     var kh = sha512.New();
     if (domPrefix != domPrefixPure) {
         kh.Write(slice<byte>(domPrefix));
-        kh.Write(new byte[]{((byte)len(context))}.slice());
+        kh.Write(new byte[]{(byte)len(context)}.slice());
         kh.Write(slice<byte>(context));
     }
     kh.Write(sig[..32]);
@@ -351,11 +352,11 @@ internal static bool verify(PublicKey publicKey, slice<byte> message, slice<byte
     kh.Write(message);
     var hramDigest = new slice<byte>(0, sha512.ΔSize);
     hramDigest = kh.Sum(hramDigest);
-    (k, err) = edwards25519.NewScalar().SetUniformBytes(hramDigest);
+    (var k, err) = edwards25519.NewScalar().SetUniformBytes(hramDigest);
     if (err != default!) {
         throw panic("ed25519: internal error: setting scalar failed");
     }
-    (S, err) = edwards25519.NewScalar().SetCanonicalBytes(sig[32..]);
+    (var S, err) = edwards25519.NewScalar().SetCanonicalBytes(sig[32..]);
     if (err != default!) {
         return false;
     }

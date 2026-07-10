@@ -38,8 +38,7 @@ using static go.@internal.zstd_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(io.Seeker, bool), io_package.Seeker>]
-[assembly: GoImplement<zstdError, error>]
+[assembly: GoImplement<zstdError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

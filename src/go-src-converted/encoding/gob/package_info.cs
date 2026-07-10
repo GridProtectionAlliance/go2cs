@@ -48,19 +48,15 @@ using static go.encoding.gob_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(gobType, bool), ΔgobType>]
-[assembly: GoImplement<(gobType, error), ΔgobType>]
-[assembly: GoImplement<(io.ByteReader, bool), io_package.ByteReader>]
-[assembly: GoImplement<CommonType, ΔgobType>]
-[assembly: GoImplement<arrayType, ΔgobType>]
-[assembly: GoImplement<bufio_package.Reader, io_package.Reader>]
-[assembly: GoImplement<decBuffer, io_package.Reader>]
-[assembly: GoImplement<encBuffer, io_package.Writer>]
-[assembly: GoImplement<gobEncoderType, ΔgobType>]
-[assembly: GoImplement<mapType, ΔgobType>]
-[assembly: GoImplement<os_package.File, io_package.Writer>]
-[assembly: GoImplement<sliceType, ΔgobType>]
-[assembly: GoImplement<structType, ΔgobType>]
+[assembly: GoImplement<CommonType, ΔgobType>(Pointer = true)]
+[assembly: GoImplement<arrayType, ΔgobType>(Pointer = true)]
+[assembly: GoImplement<bufio_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<decBuffer, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<encBuffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<gobEncoderType, ΔgobType>(Pointer = true)]
+[assembly: GoImplement<mapType, ΔgobType>(Pointer = true)]
+[assembly: GoImplement<sliceType, ΔgobType>(Pointer = true)]
+[assembly: GoImplement<structType, ΔgobType>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

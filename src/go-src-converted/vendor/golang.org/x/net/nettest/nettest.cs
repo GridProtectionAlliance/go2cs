@@ -9,17 +9,18 @@ using errors = errors_package;
 using fmt = fmt_package;
 using net = net_package;
 using os = os_package;
-using exec = os.exec_package;
+using exec = go.os.exec_package;
 using runtime = runtime_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using sync = sync_package;
 using time = time_package;
-using os;
+using go.os;
 
 partial class nettest_package {
 
-internal static sync.Once stackOnce;
+internal static ж<sync.Once> ᏑstackOnce = new(default(sync.Once));
+internal static ref sync.Once stackOnce => ref ᏑstackOnce.Value;
 internal static bool ipv4Enabled;
 internal static bool canListenTCP4OnLoopback;
 internal static bool ipv6Enabled;
@@ -33,23 +34,23 @@ internal static error errNoAvailableAddress = errors.New("no available address"u
 
 internal static void probeStack() {
     {
-        (_, err) = RoutedInterface("ip4"u8, net.FlagUp); if (err == default!) {
+        var (_, err) = RoutedInterface("ip4"u8, net.FlagUp); if (err == default!) {
             ipv4Enabled = true;
         }
     }
     {
-        (ln, err) = net.Listen("tcp4"u8, "127.0.0.1:0"u8); if (err == default!) {
+        var (ln, err) = net.Listen("tcp4"u8, "127.0.0.1:0"u8); if (err == default!) {
             ln.Close();
             canListenTCP4OnLoopback = true;
         }
     }
     {
-        (_, err) = RoutedInterface("ip6"u8, net.FlagUp); if (err == default!) {
+        var (_, err) = RoutedInterface("ip6"u8, net.FlagUp); if (err == default!) {
             ipv6Enabled = true;
         }
     }
     {
-        (ln, err) = net.Listen("tcp6"u8, "[::1]:0"u8); if (err == default!) {
+        var (ln, err) = net.Listen("tcp6"u8, "[::1]:0"u8); if (err == default!) {
             ln.Close();
             canListenTCP6OnLoopback = true;
         }
@@ -57,7 +58,7 @@ internal static void probeStack() {
     rawSocketSess = supportsRawSocket();
     var exprᴛ1 = runtime.GOOS;
     if (exprᴛ1 == "aix"u8) {
-        (@out, _) = exec.Command("oslevel"u8, // Unix network isn't properly working on AIX 7.2 with
+        var (@out, _) = exec.Command("oslevel"u8, // Unix network isn't properly working on AIX 7.2 with
  // Technical Level < 2.
  "-s"u8).Output();
         if (len(@out) >= len("7200-XX-ZZ-YYMM")) {
@@ -74,28 +75,28 @@ internal static void probeStack() {
 }
 
 internal static bool unixStrmDgramEnabled() {
-    stackOnce.Do(probeStack);
+    ᏑstackOnce.Do(probeStack);
     return unStrmDgramEnabled;
 }
 
 // SupportsIPv4 reports whether the platform supports IPv4 networking
 // functionality.
 public static bool SupportsIPv4() {
-    stackOnce.Do(probeStack);
+    ᏑstackOnce.Do(probeStack);
     return ipv4Enabled;
 }
 
 // SupportsIPv6 reports whether the platform supports IPv6 networking
 // functionality.
 public static bool SupportsIPv6() {
-    stackOnce.Do(probeStack);
+    ᏑstackOnce.Do(probeStack);
     return ipv6Enabled;
 }
 
 // SupportsRawSocket reports whether the current session is available
 // to use raw sockets.
 public static bool SupportsRawSocket() {
-    stackOnce.Do(probeStack);
+    ᏑstackOnce.Do(probeStack);
     return rawSocketSess;
 }
 
@@ -179,12 +180,12 @@ public static bool TestableAddress(@string network, @string address) {
 // The provided network must be "tcp", "tcp4", "tcp6", "unix" or
 // "unixpacket".
 public static (net.Listener, error) NewLocalListener(@string network) {
-    stackOnce.Do(probeStack);
+    ᏑstackOnce.Do(probeStack);
     var exprᴛ1 = network;
     if (exprᴛ1 == "tcp"u8) {
         if (canListenTCP4OnLoopback) {
             {
-                (ln, err) = net.Listen("tcp4"u8, "127.0.0.1:0"u8); if (err == default!) {
+                var (ln, err) = net.Listen("tcp4"u8, "127.0.0.1:0"u8); if (err == default!) {
                     return (ln, default!);
                 }
             }
@@ -219,12 +220,12 @@ public static (net.Listener, error) NewLocalListener(@string network) {
 //
 // The provided network must be "udp", "udp4", "udp6" or "unixgram".
 public static (net.PacketConn, error) NewLocalPacketListener(@string network) {
-    stackOnce.Do(probeStack);
+    ᏑstackOnce.Do(probeStack);
     var exprᴛ1 = network;
     if (exprᴛ1 == "udp"u8) {
         if (canListenTCP4OnLoopback) {
             {
-                (c, err) = net.ListenPacket("udp4"u8, "127.0.0.1:0"u8); if (err == default!) {
+                var (c, err) = net.ListenPacket("udp4"u8, "127.0.0.1:0"u8); if (err == default!) {
                     return (c, default!);
                 }
             }
@@ -261,7 +262,7 @@ public static (@string, error) LocalPath() {
     if (runtime.GOOS == "darwin"u8) {
         dir = "/tmp"u8;
     }
-    (f, err) = os.CreateTemp(dir, "go-nettest"u8);
+    var (f, err) = os.CreateTemp(dir, "go-nettest"u8);
     if (err != default!) {
         return ("", err);
     }
@@ -276,7 +277,7 @@ public static (@string, error) LocalPath() {
 //
 // The provided network must be "ip", "ip4" or "ip6".
 public static (net.IP, error) MulticastSource(@string network, ж<net.Interface> Ꮡifi) {
-    ref var ifi = ref Ꮡifi.val;
+    ref var ifi = ref Ꮡifi.DerefOrNil();
 
     var exprᴛ1 = network;
     if (exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8) {
@@ -285,7 +286,7 @@ public static (net.IP, error) MulticastSource(@string network, ж<net.Interface>
         return (default!, errNoAvailableAddress);
     }
 
-    if (ifi == nil || (net.Flags)(ifi.Flags & net.FlagUp) == 0 || (net.Flags)(ifi.Flags & net.FlagMulticast) == 0) {
+    if (Ꮡifi == nil || (net.Flags)(ifi.Flags & net.FlagUp) == 0 || (net.Flags)(ifi.Flags & net.FlagMulticast) == 0) {
         return (default!, errNoAvailableAddress);
     }
     var (ip, ok) = hasRoutableIP(network, Ꮡifi);
@@ -298,13 +299,14 @@ public static (net.IP, error) MulticastSource(@string network, ж<net.Interface>
 // LoopbackInterface returns an available logical network interface
 // for loopback test.
 public static (ж<net.Interface>, error) LoopbackInterface() {
-    (ift, err) = net.Interfaces();
+    var (ift, err) = net.Interfaces();
     if (err != default!) {
         return (default!, errNoAvailableInterface);
     }
-    ref var ifi = ref heap(new net_package.Interface(), out var Ꮡifi);
+    foreach (var (_, vᴛ1) in ift) {
+        ref var ifi = ref heap(new net.Interface(), out var Ꮡifi);
+        ifi = vᴛ1;
 
-    foreach (var (_, ifi) in ift) {
         if ((net.Flags)(ifi.Flags & net.FlagLoopback) != 0 && (net.Flags)(ifi.Flags & net.FlagUp) != 0) {
             return (Ꮡifi, default!);
         }
@@ -324,13 +326,14 @@ public static (ж<net.Interface>, error) RoutedInterface(@string network, net.Fl
         return (default!, errNoAvailableInterface);
     }
 
-    (ift, err) = net.Interfaces();
+    var (ift, err) = net.Interfaces();
     if (err != default!) {
         return (default!, errNoAvailableInterface);
     }
-    ref var ifi = ref heap(new net_package.Interface(), out var Ꮡifi);
+    foreach (var (_, vᴛ1) in ift) {
+        ref var ifi = ref heap(new net.Interface(), out var Ꮡifi);
+        ifi = vᴛ1;
 
-    foreach (var (_, ifi) in ift) {
         if ((net.Flags)(ifi.Flags & flags) != flags) {
             continue;
         }
@@ -345,25 +348,25 @@ public static (ж<net.Interface>, error) RoutedInterface(@string network, net.Fl
 }
 
 internal static (net.IP, bool) hasRoutableIP(@string network, ж<net.Interface> Ꮡifi) {
-    ref var ifi = ref Ꮡifi.val;
+    ref var ifi = ref Ꮡifi.Value;
 
-    (ifat, err) = ifi.Addrs();
+    var (ifat, err) = Ꮡifi.Addrs();
     if (err != default!) {
         return (default!, false);
     }
     foreach (var (_, ifa) in ifat) {
         switch (ifa.type()) {
-        case ж<net.IPAddr> ifa: {
+        case ж<net.IPAddr> ifaΔ1: {
             {
-                var (ip, ok) = routableIP(network, (~ifa).IP); if (ok) {
+                var (ip, ok) = routableIP(network, (~ifaΔ1).IP); if (ok) {
                     return (ip, true);
                 }
             }
             break;
         }
-        case ж<net.IPNet> ifa: {
+        case ж<net.IPNet> ifaΔ1: {
             {
-                var (ip, ok) = routableIP(network, (~ifa).IP); if (ok) {
+                var (ip, ok) = routableIP(network, (~ifaΔ1).IP); if (ok) {
                     return (ip, true);
                 }
             }

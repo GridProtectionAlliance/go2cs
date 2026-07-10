@@ -20,8 +20,7 @@ partial class syntax_package {
     public array<ж<Regexp>> Sub0 = new(1); // storage for short Sub
     public slice<rune> Rune; // matched runes, for OpLiteral, OpCharClass
     public array<rune> Rune0 = new(2); // storage for short Rune
-    public nint Min;       // min, max for OpRepeat
-    public nint Max;
+    public nint Min, Max;       // min, max for OpRepeat
     public nint Cap;       // capturing index, for OpCapture
     public @string Name;    // capturing name, for OpCapture
 }
@@ -55,11 +54,12 @@ public static readonly Op OpAlternate = 19;           // matches alternation of 
 internal static readonly Op opPseudo = 128; // where pseudo-ops start
 
 // Equal reports whether x and y have identical structure.
-[GoRecv] public static bool Equal(this ref Regexp x, ж<Regexp> Ꮡy) {
-    ref var y = ref Ꮡy.val;
+public static bool Equal(this ж<Regexp> Ꮡx, ж<Regexp> Ꮡy) {
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.DerefOrNil();
 
-    if (x == nil || y == nil) {
-        return x == Ꮡy;
+    if (x == nil || Ꮡy == nil) {
+        return Ꮡx == Ꮡy;
     }
     if (x.Op != y.Op) {
         return false;
@@ -72,10 +72,10 @@ internal static readonly Op opPseudo = 128; // where pseudo-ops start
         }
     }
     if (exprᴛ1 == OpLiteral || exprᴛ1 == OpCharClass) {
-        return slices.Equal(x.Rune, y.Rune);
+        return slices.Equal<slice<rune>, rune>(x.Rune, y.Rune);
     }
     if (exprᴛ1 == OpAlternate || exprᴛ1 == OpConcat) {
-        return slices.EqualFunc(x.Sub, y.Sub, (ж<Regexp>).Equal);
+        return slices.EqualFunc<slice<ж<Regexp>>, slice<ж<Regexp>>, ж<Regexp>, ж<Regexp>>(x.Sub, y.Sub, (Func<ж<Regexp>, ж<Regexp>, bool>)(Equal));
     }
     if (exprᴛ1 == OpStar || exprᴛ1 == OpPlus || exprᴛ1 == OpQuest) {
         if ((Flags)(x.Flags & NonGreedy) != (Flags)(y.Flags & NonGreedy) || !x.Sub[0].Equal(y.Sub[0])) {
@@ -107,16 +107,16 @@ internal static readonly UntypedInt negShift = 5;     // flagI<<negShift is (?-i
 
 // addSpan enables the flags f around start..last,
 // by setting flags[start] = f and flags[last] = flagOff.
-internal static void addSpan(ж<Regexp> Ꮡstart, ж<Regexp> Ꮡlast, printFlags f, ж<syntax.printFlags> Ꮡflags) {
-    ref var start = ref Ꮡstart.val;
-    ref var last = ref Ꮡlast.val;
-    ref var flags = ref Ꮡflags.val;
+internal static void addSpan(ж<Regexp> Ꮡstart, ж<Regexp> Ꮡlast, printFlags f, ж<map<ж<Regexp>, printFlags>> Ꮡflags) {
+    ref var start = ref Ꮡstart.Value;
+    ref var last = ref Ꮡlast.Value;
+    ref var flags = ref Ꮡflags.Value;
 
     if (flags == default!) {
-        flags = new syntax.printFlags();
+        flags = new map<ж<Regexp>, printFlags>();
     }
-    (flags)[start] = f;
-    (flags)[last] |= flagOff;
+    (flags)[Ꮡstart] = f;
+    (flags)[Ꮡlast] |= flagOff;
 }
 
 // maybe start==last
@@ -126,16 +126,13 @@ internal static void addSpan(ж<Regexp> Ꮡstart, ж<Regexp> Ꮡlast, printFlags
 // The first time an entry needs to be written to *flags, calcFlags allocates the map.
 // calcFlags also calculates the flags that must be active or can't be active
 // around re and returns those flags.
-internal static (printFlags must, printFlags cant) calcFlags(ж<Regexp> Ꮡre, ж<syntax.printFlags> Ꮡflags) {
-    printFlags mustΔ1 = default!;
-    printFlags cantΔ1 = default!;
+internal static (printFlags must, printFlags cant) calcFlags(ж<Regexp> Ꮡre, ж<map<ж<Regexp>, printFlags>> Ꮡflags) {
+    printFlags must = default!;
+    printFlags cant = default!;
 
-    ref var re = ref Ꮡre.val;
-    ref var flags = ref Ꮡflags.val;
+    ref var re = ref Ꮡre.Value;
+    ref var flags = ref Ꮡflags.Value;
     var exprᴛ1 = re.Op;
-    { /* default: */
-        return (0, 0);
-    }
     if (exprᴛ1 == OpLiteral) {
         foreach (var (_, r) in re.Rune) {
             // If literal is fold-sensitive, return (flagI, 0) or (0, flagI)
@@ -155,8 +152,8 @@ internal static (printFlags must, printFlags cant) calcFlags(ж<Regexp> Ꮡre, �
         for (nint i = 0; i < len(re.Rune); i += 2) {
             // If literal is fold-sensitive, return 0, flagI - (?i) has been compiled out.
             // If literal is not fold-sensitive, return 0, 0.
-            var lo = max(minFold, re.Rune[i]);
-            var hi = min(maxFold, re.Rune[i + 1]);
+            var lo = max((rune)(minFold), re.Rune[i]);
+            var hi = min((rune)(maxFold), re.Rune[i + 1]);
             for (var r = lo; r <= hi; r++) {
                 for (var f = unicode.SimpleFold(r); f != r; f = unicode.SimpleFold(f)) {
                     if (!(lo <= f && f <= hi) && !inCharClass(f, re.Rune)) {
@@ -196,10 +193,8 @@ internal static (printFlags must, printFlags cant) calcFlags(ж<Regexp> Ꮡre, �
         printFlags mustΔ2 = default!;
         printFlags cantΔ2 = default!;
         printFlags allCant = default!;
-        ref var start = ref heap<nint>(out var Ꮡstart);
-        start = 0;
-        ref var last = ref heap<nint>(out var Ꮡlast);
-        last = 0;
+        nint start = 0;
+        nint last = 0;
         var did = false;
         foreach (var (i, sub) in re.Sub) {
             var (subMust, subCant) = calcFlags(sub, Ꮡflags);
@@ -232,57 +227,57 @@ internal static (printFlags must, printFlags cant) calcFlags(ж<Regexp> Ꮡre, �
         }
         return (0, allCant);
     }
+    { /* default: */
+        return (0, 0);
+    }
 
 }
 
 // writeRegexp writes the Perl syntax for the regular expression re to b.
-internal static void writeRegexp(ж<strings.Builder> Ꮡb, ж<Regexp> Ꮡre, printFlags f, syntax.printFlags flags) => func((defer, _) => {
-    ref var b = ref Ꮡb.val;
-    ref var re = ref Ꮡre.val;
+internal static void writeRegexp(ж<strings.Builder> Ꮡb, ж<Regexp> Ꮡre, printFlags f, map<ж<Regexp>, printFlags> flags) => func((defer, recover) => {
+    ref var b = ref Ꮡb.Value;
+    ref var re = ref Ꮡre.Value;
 
-    f |= (printFlags)(flags[re]);
+    f |= (printFlags)(flags[Ꮡre]);
     if ((printFlags)(f & flagPrec) != 0 && (printFlags)(f & ~((printFlags)(flagOff | flagPrec))) != 0 && (printFlags)(f & flagOff) != 0) {
         // flagPrec is redundant with other flags being added and terminated
-        f &= ~(printFlags)(flagPrec);
+        f &= unchecked((printFlags)~(printFlags)(flagPrec));
     }
     if ((printFlags)(f & ~((printFlags)(flagOff | flagPrec))) != 0) {
-        b.WriteString(@"(?"u8);
+        Ꮡb.WriteString(@"(?"u8);
         if ((printFlags)(f & flagI) != 0) {
-            b.WriteString(@"i"u8);
+            Ꮡb.WriteString(@"i"u8);
         }
         if ((printFlags)(f & flagM) != 0) {
-            b.WriteString(@"m"u8);
+            Ꮡb.WriteString(@"m"u8);
         }
         if ((printFlags)(f & flagS) != 0) {
-            b.WriteString(@"s"u8);
+            Ꮡb.WriteString(@"s"u8);
         }
-        if ((printFlags)(f & (((printFlags)(flagM | flagS)) << (int)(negShift))) != 0) {
-            b.WriteString(@"-"u8);
-            if ((printFlags)(f & (flagM << (int)(negShift))) != 0) {
-                b.WriteString(@"m"u8);
+        if ((printFlags)(f & ((((printFlags)(flagM | flagS)) << (int)(negShift)))) != 0) {
+            Ꮡb.WriteString(@"-"u8);
+            if ((printFlags)(f & ((flagM << (int)(negShift)))) != 0) {
+                Ꮡb.WriteString(@"m"u8);
             }
-            if ((printFlags)(f & (flagS << (int)(negShift))) != 0) {
-                b.WriteString(@"s"u8);
+            if ((printFlags)(f & ((flagS << (int)(negShift)))) != 0) {
+                Ꮡb.WriteString(@"s"u8);
             }
         }
-        b.WriteString(@":"u8);
+        Ꮡb.WriteString(@":"u8);
     }
     if ((printFlags)(f & flagOff) != 0) {
-        deferǃ(b.WriteString, @")", defer);
+        deferǃ(Ꮡb.WriteString, (@string)@")", defer);
     }
     if ((printFlags)(f & flagPrec) != 0) {
-        b.WriteString(@"(?:"u8);
-        deferǃ(b.WriteString, @")", defer);
+        Ꮡb.WriteString(@"(?:"u8);
+        deferǃ(Ꮡb.WriteString, (@string)@")", defer);
     }
     var exprᴛ1 = re.Op;
-    { /* default: */
-        b.WriteString("<invalid op"u8 + strconv.Itoa(((nint)re.Op)) + ">"u8);
-    }
-    else if (exprᴛ1 == OpNoMatch) {
-        b.WriteString(@"[^\x00-\x{10FFFF}]"u8);
+    if (exprᴛ1 == OpNoMatch) {
+        Ꮡb.WriteString(@"[^\x00-\x{10FFFF}]"u8);
     }
     else if (exprᴛ1 == OpEmptyMatch) {
-        b.WriteString(@"(?:)"u8);
+        Ꮡb.WriteString(@"(?:)"u8);
     }
     else if (exprᴛ1 == OpLiteral) {
         foreach (var (_, r) in re.Rune) {
@@ -290,79 +285,81 @@ internal static void writeRegexp(ж<strings.Builder> Ꮡb, ж<Regexp> Ꮡre, pri
         }
     }
     else if (exprᴛ1 == OpCharClass) {
-        if (len(re.Rune) % 2 != 0) {
-            b.WriteString(@"[invalid char class]"u8);
-            break;
-        }
-        b.WriteRune((rune)'[');
-        if (len(re.Rune) == 0){
-            b.WriteString(@"^\x00-\x{10FFFF}"u8);
-        } else 
-        if (re.Rune[0] == 0 && re.Rune[len(re.Rune) - 1] == unicode.MaxRune && len(re.Rune) > 2){
-            // Contains 0 and MaxRune. Probably a negated class.
-            // Print the gaps.
-            b.WriteRune((rune)'^');
-            for (nint i = 1; i < len(re.Rune) - 1; i += 2) {
-                var (lo, hi) = (re.Rune[i] + 1, re.Rune[i + 1] - 1);
-                escape(Ꮡb, lo, lo == (rune)'-');
-                if (lo != hi) {
-                    if (hi != lo + 1) {
-                        b.WriteRune((rune)'-');
+        do {
+            if (len(re.Rune) % 2 != 0) {
+                Ꮡb.WriteString(@"[invalid char class]"u8);
+                break;
+            }
+            Ꮡb.WriteRune((rune)'[');
+            if (len(re.Rune) == 0){
+                Ꮡb.WriteString(@"^\x00-\x{10FFFF}"u8);
+            } else 
+            if (re.Rune[0] == 0 && re.Rune[len(re.Rune) - 1] == unicode.MaxRune && len(re.Rune) > 2){
+                // Contains 0 and MaxRune. Probably a negated class.
+                // Print the gaps.
+                Ꮡb.WriteRune((rune)'^');
+                for (nint i = 1; i < len(re.Rune) - 1; i += 2) {
+                    var (lo, hi) = (re.Rune[i] + 1, re.Rune[i + 1] - 1);
+                    escape(Ꮡb, lo, lo == (rune)'-');
+                    if (lo != hi) {
+                        if (hi != lo + 1) {
+                            Ꮡb.WriteRune((rune)'-');
+                        }
+                        escape(Ꮡb, hi, hi == (rune)'-');
                     }
-                    escape(Ꮡb, hi, hi == (rune)'-');
+                }
+            } else {
+                for (nint i = 0; i < len(re.Rune); i += 2) {
+                    var (lo, hi) = (re.Rune[i], re.Rune[i + 1]);
+                    escape(Ꮡb, lo, lo == (rune)'-');
+                    if (lo != hi) {
+                        if (hi != lo + 1) {
+                            Ꮡb.WriteRune((rune)'-');
+                        }
+                        escape(Ꮡb, hi, hi == (rune)'-');
+                    }
                 }
             }
-        } else {
-            for (nint i = 0; i < len(re.Rune); i += 2) {
-                var (lo, hi) = (re.Rune[i], re.Rune[i + 1]);
-                escape(Ꮡb, lo, lo == (rune)'-');
-                if (lo != hi) {
-                    if (hi != lo + 1) {
-                        b.WriteRune((rune)'-');
-                    }
-                    escape(Ꮡb, hi, hi == (rune)'-');
-                }
-            }
-        }
-        b.WriteRune((rune)']');
+            Ꮡb.WriteRune((rune)']');
+        } while (false);
     }
     else if (exprᴛ1 == OpAnyCharNotNL || exprᴛ1 == OpAnyChar) {
-        b.WriteString(@"."u8);
+        Ꮡb.WriteString(@"."u8);
     }
     else if (exprᴛ1 == OpBeginLine) {
-        b.WriteString(@"^"u8);
+        Ꮡb.WriteString(@"^"u8);
     }
     else if (exprᴛ1 == OpEndLine) {
-        b.WriteString(@"$"u8);
+        Ꮡb.WriteString(@"$"u8);
     }
     else if (exprᴛ1 == OpBeginText) {
-        b.WriteString(@"\A"u8);
+        Ꮡb.WriteString(@"\A"u8);
     }
     else if (exprᴛ1 == OpEndText) {
         if ((Flags)(re.Flags & WasDollar) != 0){
-            b.WriteString(@"$"u8);
+            Ꮡb.WriteString(@"$"u8);
         } else {
-            b.WriteString(@"\z"u8);
+            Ꮡb.WriteString(@"\z"u8);
         }
     }
     else if (exprᴛ1 == OpWordBoundary) {
-        b.WriteString(@"\b"u8);
+        Ꮡb.WriteString(@"\b"u8);
     }
     else if (exprᴛ1 == OpNoWordBoundary) {
-        b.WriteString(@"\B"u8);
+        Ꮡb.WriteString(@"\B"u8);
     }
     else if (exprᴛ1 == OpCapture) {
         if (re.Name != ""u8){
-            b.WriteString(@"(?P<"u8);
-            b.WriteString(re.Name);
-            b.WriteRune((rune)'>');
+            Ꮡb.WriteString(@"(?P<"u8);
+            Ꮡb.WriteString(re.Name);
+            Ꮡb.WriteRune((rune)'>');
         } else {
-            b.WriteRune((rune)'(');
+            Ꮡb.WriteRune((rune)'(');
         }
-        if (re.Sub[0].Op != OpEmptyMatch) {
+        if ((~re.Sub[0]).Op != OpEmptyMatch) {
             writeRegexp(Ꮡb, re.Sub[0], flags[re.Sub[0]], flags);
         }
-        b.WriteRune((rune)')');
+        Ꮡb.WriteRune((rune)')');
     }
     else if (exprᴛ1 == OpStar || exprᴛ1 == OpPlus || exprᴛ1 == OpQuest || exprᴛ1 == OpRepeat) {
         var p = ((printFlags)0);
@@ -373,28 +370,28 @@ internal static void writeRegexp(ж<strings.Builder> Ꮡb, ж<Regexp> Ꮡre, pri
         writeRegexp(Ꮡb, sub, p, flags);
         var exprᴛ2 = re.Op;
         if (exprᴛ2 == OpStar) {
-            b.WriteRune((rune)'*');
+            Ꮡb.WriteRune((rune)'*');
         }
         else if (exprᴛ2 == OpPlus) {
-            b.WriteRune((rune)'+');
+            Ꮡb.WriteRune((rune)'+');
         }
         else if (exprᴛ2 == OpQuest) {
-            b.WriteRune((rune)'?');
+            Ꮡb.WriteRune((rune)'?');
         }
         else if (exprᴛ2 == OpRepeat) {
-            b.WriteRune((rune)'{');
-            b.WriteString(strconv.Itoa(re.Min));
+            Ꮡb.WriteRune((rune)'{');
+            Ꮡb.WriteString(strconv.Itoa(re.Min));
             if (re.Max != re.Min) {
-                b.WriteRune((rune)',');
+                Ꮡb.WriteRune((rune)',');
                 if (re.Max >= 0) {
-                    b.WriteString(strconv.Itoa(re.Max));
+                    Ꮡb.WriteString(strconv.Itoa(re.Max));
                 }
             }
-            b.WriteRune((rune)'}');
+            Ꮡb.WriteRune((rune)'}');
         }
 
         if ((Flags)(re.Flags & NonGreedy) != 0) {
-            b.WriteRune((rune)'?');
+            Ꮡb.WriteRune((rune)'?');
         }
     }
     else if (exprᴛ1 == OpConcat) {
@@ -409,76 +406,81 @@ internal static void writeRegexp(ж<strings.Builder> Ꮡb, ж<Regexp> Ꮡre, pri
     else if (exprᴛ1 == OpAlternate) {
         foreach (var (i, sub) in re.Sub) {
             if (i > 0) {
-                b.WriteRune((rune)'|');
+                Ꮡb.WriteRune((rune)'|');
             }
             writeRegexp(Ꮡb, sub, 0, flags);
         }
     }
+    else { /* default: */
+        Ꮡb.WriteString("<invalid op"u8 + strconv.Itoa((nint)(uint8)re.Op) + ">"u8);
+    }
 
 });
 
-[GoRecv] public static @string String(this ref Regexp re) {
-    ref var b = ref heap(new strings_package.Builder(), out var Ꮡb);
-    syntax.printFlags flags = default!;
-    var (must, cant) = calcFlags(re, Ꮡ(flags));
-    must |= (printFlags)(((printFlags)(cant & ~flagI)) << (int)(negShift));
+public static @string String(this ж<Regexp> Ꮡre) {
+    ref var re = ref Ꮡre.Value;
+
+    ref var b = ref heap(new strings.Builder(), out var Ꮡb);
+    ref var flags = ref heap<map<ж<Regexp>, printFlags>>(out var Ꮡflags);
+    var (must, cant) = calcFlags(Ꮡre, Ꮡflags);
+    must |= (printFlags)((((printFlags)(cant & ~flagI)) << (int)(negShift)));
     if (must != 0) {
         must |= (printFlags)(flagOff);
     }
-    writeRegexp(Ꮡb, re, must, flags);
+    writeRegexp(Ꮡb, Ꮡre, must, flags);
     return b.String();
 }
 
 internal static readonly @string meta = @"\.+*?()|[]{}^$"u8;
 
 internal static void escape(ж<strings.Builder> Ꮡb, rune r, bool force) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     if (unicode.IsPrint(r)) {
         if (strings.ContainsRune(meta, r) || force) {
-            b.WriteRune((rune)'\\');
+            Ꮡb.WriteRune((rune)'\\');
         }
-        b.WriteRune(r);
+        Ꮡb.WriteRune(r);
         return;
     }
     switch (r) {
     case (rune)'\a': {
-        b.WriteString(@"\a"u8);
+        Ꮡb.WriteString(@"\a"u8);
         break;
     }
     case (rune)'\f': {
-        b.WriteString(@"\f"u8);
+        Ꮡb.WriteString(@"\f"u8);
         break;
     }
     case (rune)'\n': {
-        b.WriteString(@"\n"u8);
+        Ꮡb.WriteString(@"\n"u8);
         break;
     }
     case (rune)'\r': {
-        b.WriteString(@"\r"u8);
+        Ꮡb.WriteString(@"\r"u8);
         break;
     }
     case (rune)'\t': {
-        b.WriteString(@"\t"u8);
+        Ꮡb.WriteString(@"\t"u8);
         break;
     }
     case (rune)'\v': {
-        b.WriteString(@"\v"u8);
+        Ꮡb.WriteString(@"\v"u8);
         break;
     }
     default: {
-        if (r < 256) {
-            b.WriteString(@"\x"u8);
-            @string s = strconv.FormatInt(((int64)r), 16);
+        if (r < 0x100) {
+            Ꮡb.WriteString(@"\x"u8);
+            @string s = strconv.FormatInt((int64)r, 16);
             if (len(s) == 1) {
-                b.WriteRune((rune)'0');
+                Ꮡb.WriteRune((rune)'0');
             }
-            b.WriteString(s);
+            Ꮡb.WriteString(s);
             break;
         }
-        b.WriteString(@"\x{"u8);
-        b.WriteString(strconv.FormatInt(((int64)r), 16));
-        b.WriteString(@"}"u8);
+        Ꮡb.WriteString(@"\x{"u8);
+        Ꮡb.WriteString(strconv.FormatInt((int64)r, 16));
+        Ꮡb.WriteString(@"}"u8);
         break;
     }}
 

@@ -9,19 +9,20 @@ using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
 using net = net_package;
-using http = net.http_package;
-using cgi = net.http.cgi_package;
+using http = go.net.http_package;
+using cgi = go.net.http.cgi_package;
 using os = os_package;
 using strings = strings_package;
 using time = time_package;
-using net;
+using go.net;
+using go.net.http;
 
 partial class fcgi_package {
 
 // request holds the state for an in-progress request. As soon as it's complete,
 // it's converted to an http.Request.
 [GoType] partial struct request {
-    internal ж<io_package.PipeWriter> pw;
+    internal ж<io.PipeWriter> pw;
     internal uint16 reqId;
     internal map<@string, @string> @params;
     internal array<byte> buf = new(1024);
@@ -38,9 +39,9 @@ internal static ж<request> newRequest(uint16 reqId, uint8 flags) {
     var r = Ꮡ(new request(
         reqId: reqId,
         @params: new map<@string, @string>{},
-        keepConn: (uint8)(flags & flagKeepConn) != 0
+        keepConn: (uint8)(flags & (uint8)flagKeepConn) != 0
     ));
-    r.val.rawParams = (~r).buf[..0];
+    r.Value.rawParams = (~r).buf[..0];
     return r;
 }
 
@@ -54,12 +55,12 @@ internal static ж<request> newRequest(uint16 reqId, uint8 flags) {
             return;
         }
         text = text[(int)(n)..];
-        var (valLen, n) = readSize(text);
+        (var valLen, n) = readSize(text);
         if (n == 0) {
             return;
         }
         text = text[(int)(n)..];
-        if (((nint)keyLen) + ((nint)valLen) > len(text)) {
+        if ((nint)keyLen + (nint)valLen > len(text)) {
             return;
         }
         @string key = readString(text, keyLen);
@@ -73,7 +74,7 @@ internal static ж<request> newRequest(uint16 reqId, uint8 flags) {
 // response implements http.ResponseWriter.
 [GoType] partial struct response {
     internal ж<request> req;
-    internal net.http_package.ΔHeader header;
+    internal httpꓸHeader header;
     internal nint code;
     internal bool wroteHeader;
     internal bool wroteCGIHeader;
@@ -81,12 +82,12 @@ internal static ж<request> newRequest(uint16 reqId, uint8 flags) {
 }
 
 internal static ж<response> newResponse(ж<child> Ꮡc, ж<request> Ꮡreq) {
-    ref var c = ref Ꮡc.val;
-    ref var req = ref Ꮡreq.val;
+    ref var c = ref Ꮡc.Value;
+    ref var req = ref Ꮡreq.Value;
 
     return Ꮡ(new response(
-        req: req,
-        header: new httpꓸHeader{nil},
+        req: Ꮡreq,
+        header: new httpꓸHeader(new map<@string, slice<@string>>{}),
         w: newWriter(c.conn, typeStdout, req.reqId)
     ));
 }
@@ -105,7 +106,7 @@ internal static ж<response> newResponse(ж<child> Ꮡc, ж<request> Ꮡreq) {
     if (!r.wroteCGIHeader) {
         r.writeCGIHeader(p);
     }
-    return r.w.Write(p);
+    return r.w.Value.Writer.Value.Write(p);
 }
 
 [GoRecv] internal static void WriteHeader(this ref response r, nint code) {
@@ -134,23 +135,22 @@ internal static ж<response> newResponse(ж<child> Ꮡc, ж<request> Ꮡreq) {
         return;
     }
     r.wroteCGIHeader = true;
-    fmt.Fprintf(~r.w, "Status: %d %s\r\n"u8, r.code, http.StatusText(r.code));
+    fmt.Fprintf(new bufWriterжWriter(r.w), "Status: %d %s\r\n"u8, r.code, http.StatusText(r.code));
     {
-        var _ = r.header["Content-Type"u8];
-        var hasType = r.header["Content-Type"u8]; if (r.code != http.StatusNotModified && !hasType) {
+        var (_, hasType) = r.header["Content-Type"u8, ꟷ]; if (r.code != http.StatusNotModified && !hasType) {
             r.header.Set("Content-Type"u8, http.DetectContentType(p));
         }
     }
-    r.header.Write(~r.w);
-    r.w.WriteString("\r\n"u8);
-    r.w.Flush();
+    r.header.Write(new bufWriterжWriter(r.w));
+    r.w.Value.Writer.Value.WriteString("\r\n"u8);
+    r.w.Value.Writer.Value.Flush();
 }
 
 [GoRecv] internal static void Flush(this ref response r) {
     if (!r.wroteHeader) {
         r.WriteHeader(http.StatusOK);
     }
-    r.w.Flush();
+    r.w.Value.Writer.Value.Flush();
 }
 
 [GoRecv] internal static error Close(this ref response r) {
@@ -160,7 +160,7 @@ internal static ж<response> newResponse(ж<child> Ꮡc, ж<request> Ꮡreq) {
 
 [GoType] partial struct child {
     internal ж<conn> conn;
-    internal net.http_package.ΔHandler handler;
+    internal httpꓸHandler handler;
     internal map<uint16, ж<request>> requests; // keyed by request ID
 }
 
@@ -172,18 +172,20 @@ internal static ж<child> newChild(io.ReadWriteCloser rwc, httpꓸHandler handle
     ));
 }
 
-[GoRecv] internal static void serve(this ref child c) => func((defer, _) => {
-    defer(c.conn.Close);
-    defer(c.cleanUp);
+internal static void serve(this ж<child> Ꮡc) => func((defer, recover) => {
+    ref var c = ref Ꮡc.Value;
+
+    defer(() => Ꮡc.Value.conn.Close());
+    defer(Ꮡc.cleanUp);
     ref var rec = ref heap(new record(), out var Ꮡrec);
     while (ᐧ) {
         {
-            var err = rec.read(c.conn.rwc); if (err != default!) {
+            var err = Ꮡrec.read((~c.conn).rwc); if (err != default!) {
                 return;
             }
         }
         {
-            var err = c.handleRecord(Ꮡrec); if (err != default!) {
+            var err = Ꮡc.handleRecord(Ꮡrec); if (err != default!) {
                 return;
             }
         }
@@ -192,7 +194,7 @@ internal static ж<child> newChild(io.ReadWriteCloser rwc, httpꓸHandler handle
 
 internal static error errCloseConn = errors.New("fcgi: connection should be closed"u8);
 
-internal static io.ReadCloser emptyBody = io.NopCloser(~strings.NewReader(""u8));
+internal static io.ReadCloser emptyBody = io.NopCloser(new strings_ReaderжReader(strings.NewReader(""u8)));
 
 // ErrRequestAborted is returned by Read when a handler attempts to read the
 // body of a request that has been aborted by the web server.
@@ -202,11 +204,11 @@ public static error ErrRequestAborted = errors.New("fcgi: request aborted by web
 // a request after the connection to the web server has been closed.
 public static error ErrConnClosed = errors.New("fcgi: connection to web server closed"u8);
 
-[GoRecv] internal static error handleRecord(this ref child c, ж<record> Ꮡrec) {
-    ref var rec = ref Ꮡrec.val;
+internal static error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡrec) {
+    ref var c = ref Ꮡc.Value;
+    ref var rec = ref Ꮡrec.Value;
 
-    var req = c.requests[rec.h.Id];
-    var ok = c.requests[rec.h.Id];
+    var (req, ok) = c.requests[rec.h.Id, ꟷ];
     if (!ok && rec.h.Type != typeBeginRequest && rec.h.Type != typeGetValues) {
         // The spec says to ignore unknown request IDs.
         return default!;
@@ -236,7 +238,7 @@ public static error ErrConnClosed = errors.New("fcgi: connection to web server c
         if (len(rec.content()) > 0) {
             // NOTE(eds): Technically a key-value pair can straddle the boundary
             // between two packets. We buffer until we've received all parameters.
-            req.val.rawParams = append((~req).rawParams, rec.content().ꓸꓸꓸ);
+            req.Value.rawParams = append((~req).rawParams, rec.content().ꓸꓸꓸ);
             return default!;
         }
         req.parseParams();
@@ -249,11 +251,12 @@ public static error ErrConnClosed = errors.New("fcgi: connection to web server c
             if (len(content) > 0){
                 // body could be an io.LimitReader, but it shouldn't matter
                 // as long as both sides are behaving.
-                (body, req.val.pw) = io.Pipe();
+                var (ᴛ1, ᴛ2) = io.Pipe();
+                (body, req.Value.pw) = (new io_PipeReaderжReadCloser(ᴛ1), ᴛ2);
             } else {
                 body = emptyBody;
             }
-            goǃ(c.serveRequest, req, body);
+            goǃ(Ꮡc.serveRequest, req, body);
         }
         if (len(content) > 0){
             // TODO(eds): This blocks until the handler reads from the pipe.
@@ -290,7 +293,7 @@ public static error ErrConnClosed = errors.New("fcgi: connection to web server c
     }
     { /* default: */
         var b = new slice<byte>(8);
-        b[0] = ((byte)rec.h.Type);
+        b[0] = (byte)rec.h.Type;
         c.conn.writeRecord(typeUnknownType, 0, b);
         return default!;
     }
@@ -309,21 +312,22 @@ internal static map<@string, @string> filterOutUsedEnvVars(map<@string, @string>
     return withoutUsedEnvVars;
 }
 
-[GoRecv] internal static void serveRequest(this ref child c, ж<request> Ꮡreq, io.ReadCloser body) {
-    ref var req = ref Ꮡreq.val;
+internal static void serveRequest(this ж<child> Ꮡc, ж<request> Ꮡreq, io.ReadCloser body) {
+    ref var c = ref Ꮡc.Value;
+    ref var req = ref Ꮡreq.Value;
 
-    var r = newResponse(c, Ꮡreq);
-    (httpReq, err) = cgi.RequestFromMap(req.@params);
+    var r = newResponse(Ꮡc, Ꮡreq);
+    var (httpReq, err) = cgi.RequestFromMap(req.@params);
     if (err != default!){
         // there was an error reading the request
         r.WriteHeader(http.StatusInternalServerError);
         c.conn.writeRecord(typeStderr, req.reqId, slice<byte>(err.Error()));
     } else {
-        httpReq.val.Body = body;
+        httpReq.Value.Body = body;
         var withoutUsedEnvVars = filterOutUsedEnvVars(req.@params);
         var envVarCtx = context.WithValue(httpReq.Context(), new envVarsContextKey(nil), withoutUsedEnvVars);
         httpReq = httpReq.WithContext(envVarCtx);
-        c.handler.ServeHTTP(~r, httpReq);
+        c.handler.ServeHTTP(new responseжResponseWriter(r), httpReq);
     }
     // Make sure we serve something even if nothing was written to r
     r.Write(default!);
@@ -336,7 +340,7 @@ internal static map<@string, @string> filterOutUsedEnvVars(map<@string, @string>
     // some sort of abort request to the host, so the host
     // can properly cut off the client sending all the data.
     // For now just bound it a little and
-    io.CopyN(io.Discard, body, 100 << (int)(20));
+    io.CopyN(io.Discard, body, ((int64)100 << (int)(20)));
     body.Close();
     if (!req.keepConn) {
         c.conn.Close();
@@ -358,24 +362,24 @@ internal static map<@string, @string> filterOutUsedEnvVars(map<@string, @string>
 // to reply to them.
 // If l is nil, Serve accepts connections from os.Stdin.
 // If handler is nil, [http.DefaultServeMux] is used.
-public static error Serve(net.Listener l, httpꓸHandler handler) => func((defer, _) => {
+public static error Serve(net.Listener l, httpꓸHandler handler) => func((defer, recover) => {
     if (l == default!) {
         error err = default!;
         (l, err) = net.FileListener(os.Stdin);
         if (err != default!) {
             return err;
         }
-        defer(l.Close);
+        defer(() => l.Close());
     }
     if (handler == default!) {
-        handler = ~http.DefaultServeMux;
+        handler = new http_ServeMuxжΔHandler(http.DefaultServeMux);
     }
     while (ᐧ) {
-        (rw, err) = l.Accept();
+        var (rw, err) = l.Accept();
         if (err != default!) {
             return err;
         }
-        var c = newChild(rw, handler);
+        var c = newChild(new net_ConnᴠReadWriteCloser(rw), handler);
         var cʗ1 = c;
         goǃ(cʗ1.serve);
     }
@@ -387,9 +391,9 @@ public static error Serve(net.Listener l, httpꓸHandler handler) => func((defer
 // request, it will not be found anywhere in r, but it will be included in
 // ProcessEnv's response (via r's context).
 public static map<@string, @string> ProcessEnv(ж<http.Request> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
-    var (env, _) = r.Context().Value(new envVarsContextKey(nil))._<map<@string, @string, >>(ᐧ);
+    var (env, _) = r.Context().Value(new envVarsContextKey(nil))._<map<@string, @string>>(ᐧ);
     return env;
 }
 

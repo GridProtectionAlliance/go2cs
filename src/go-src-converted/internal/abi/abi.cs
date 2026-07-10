@@ -3,8 +3,9 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal;
 
-using goarch = @internal.goarch_package;
+using goarch = go.@internal.goarch_package;
 using @unsafe = unsafe_package;
+using go.@internal;
 
 partial class abi_package {
 
@@ -72,11 +73,11 @@ partial class abi_package {
     if (argSize > goarch.PtrSize || argSize == 0 || (uintptr)(argSize & (argSize - 1)) != 0) {
         throw panic("invalid argSize");
     }
-    var offset = ((uintptr)0);
+    var offset = (uintptr)0;
     if (goarch.BigEndian) {
-        offset = goarch.PtrSize - argSize;
+        offset = (uintptr)goarch.PtrSize - argSize;
     }
-    return ((@unsafe.Pointer)(((uintptr)((@unsafe.Pointer)(Ꮡ(r.Ints[reg])))) + offset));
+    return (@unsafe.Pointer)((uintptr)@unsafe.Pointer.FromRef(ref (Ꮡ(r.Ints[reg])).Value) + offset);
 }
 
 [GoType("[2]uint8")] /* [(IntArgRegs + 7) / 8]uint8 */
@@ -84,7 +85,7 @@ partial struct IntArgRegBitmap;
 
 // Set sets the i'th bit of the bitmap to 1.
 [GoRecv] public static void Set(this ref IntArgRegBitmap b, nint i) {
-    b.val[i / 8] |= (uint8)(((uint8)1) << (int)((i % 8)));
+    b.Value[i / 8] |= (uint8)(((uint8)1 << (int)((i % 8))));
 }
 
 // Get returns whether the i'th bit of the bitmap is set.
@@ -94,7 +95,7 @@ partial struct IntArgRegBitmap;
 //
 //go:nosplit
 [GoRecv] public static bool Get(this ref IntArgRegBitmap b, nint i) {
-    return (uint8)(b.val[i / 8] & (((uint8)1) << (int)((i % 8)))) != 0;
+    return (uint8)(b.Value[i / 8] & (((uint8)1 << (int)((i % 8))))) != 0;
 }
 
 } // end abi_package

@@ -41,15 +41,14 @@ using static go.net.textproto_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(net.Conn, error), net_package.Conn>]
 [assembly: GoImplement<ProtocolError, error>]
-[assembly: GoImplement<bufio_package.Writer, io_package.Writer>]
-[assembly: GoImplement<dotReader, io_package.Reader>]
-[assembly: GoImplement<dotWriter, io_package.WriteCloser>]
+[assembly: GoImplement<bufio_package.Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<dotReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<dotWriter, io_package.WriteCloser>(Pointer = true)]
 [assembly: GoImplement<io_package.ReadWriteCloser, io_package.Reader>]
 [assembly: GoImplement<io_package.ReadWriteCloser, io_package.Writer>]
 [assembly: GoImplement<net_package.Conn, io_package.ReadWriteCloser>]
-[assembly: GoImplement<ΔError, error>]
+[assembly: GoImplement<ΔError, error>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

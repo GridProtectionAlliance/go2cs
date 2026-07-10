@@ -11,14 +11,14 @@ internal static bool isMinimizable(reflectꓸType t) {
     return AreEqual(t, reflect.TypeOf("")) || AreEqual(t, reflect.TypeOf(slice<byte>(default!)));
 }
 
-internal static void minimizeBytes(slice<byte> v, Func<slice<byte>, bool> @try, Func<bool> shouldStop) => func((defer, _) => {
+internal static void minimizeBytes(slice<byte> v, Func<slice<byte>, bool> @try, Func<bool> shouldStop) => func((defer, recover) => {
     var tmp = new slice<byte>(len(v));
     // If minimization was successful at any point during minimizeBytes,
     // then the vals slice in (*workerServer).minimizeInput will point to
     // tmp. Since tmp is altered while making new candidates, we need to
     // make sure that it is equal to the correct value, v, before exiting
     // this function.
-    deferǃ(copy, tmp, v, defer);
+    deferǃ((ᴛ1, ᴛ2) => copy(ᴛ1, ᴛ2), tmp, v, defer);
     // First, try to cut the tail.
     for (nint n = 1024; n != 0; n /= 2) {
         while (len(v) > n) {
@@ -71,7 +71,7 @@ internal static void minimizeBytes(slice<byte> v, Func<slice<byte>, bool> @try, 
     }
     // Then, try to make it more simplified and human-readable by trying to replace each
     // byte with a printable character.
-    var printableChars = slice<byte>("012789ABCXYZabcxyz !\"#$%&'()*+,.");
+    var printableChars = slice<byte>((@string)"012789ABCXYZabcxyz !\"#$%&'()*+,.");
     foreach (var (i, b) in v) {
         if (shouldStop()) {
             return;

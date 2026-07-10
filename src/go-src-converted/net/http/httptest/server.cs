@@ -10,15 +10,16 @@ using flag = flag_package;
 using fmt = fmt_package;
 using log = log_package;
 using net = net_package;
-using http = net.http_package;
-using testcert = net.http.@internal.testcert_package;
+using http = go.net.http_package;
+using testcert = go.net.http.@internal.testcert_package;
 using os = os_package;
 using strings = strings_package;
 using sync = sync_package;
 using time = time_package;
 using crypto;
-using net;
-using net.http.@internal;
+using go.net;
+using go.net.http.@internal;
+using io = io_package;
 
 partial class httptest_package {
 
@@ -26,7 +27,7 @@ partial class httptest_package {
 // local loopback interface, for use in end-to-end HTTP tests.
 [GoType] partial struct Server {
     public @string URL; // base URL of form http://ipaddr:port with no trailing slash
-    public net_package.Listener Listener;
+    public net.Listener Listener;
     // EnableHTTP2 controls whether HTTP/2 is enabled
     // on the server. It must be set between calling
     // NewUnstartedServer and calling Server.StartTLS.
@@ -34,32 +35,32 @@ partial class httptest_package {
     // TLS is the optional TLS configuration, populated with a new config
     // after TLS is started. If set on an unstarted server before StartTLS
     // is called, existing fields are copied into the new config.
-    public ж<crypto.tls_package.Config> TLS;
+    public ж<tls.Config> TLS;
     // Config may be changed after calling NewUnstartedServer and
     // before Start or StartTLS.
-    public ж<net.http_package.Server> Config;
+    public ж<http.Server> Config;
     // certificate is a parsed version of the TLS config certificate, if present.
-    internal ж<crypto.x509_package.Certificate> certificate;
+    internal ж<x509.Certificate> certificate;
     // wg counts the number of outstanding HTTP requests on this server.
     // Close blocks until all requests are finished.
-    internal sync_package.WaitGroup wg;
-    internal sync_package.Mutex mu; // guards closed and conns
+    internal sync.WaitGroup wg;
+    internal sync.Mutex mu; // guards closed and conns
     internal bool closed;
-    internal http.ConnState conns; // except terminal states
+    internal map<net.Conn, http.ConnState> conns; // except terminal states
     // client is configured for use with the server.
     // Its transport is automatically closed when Close is called.
-    internal ж<net.http_package.Client> client;
+    internal ж<http.Client> client;
 }
 
 internal static net.Listener newLocalListener() {
     if (serveFlag != ""u8) {
-        (lΔ1, errΔ1) = net.Listen("tcp"u8, serveFlag);
+        var (lΔ1, errΔ1) = net.Listen("tcp"u8, serveFlag);
         if (errΔ1 != default!) {
             throw panic(fmt.Sprintf("httptest: failed to listen on %v: %v"u8, serveFlag, errΔ1));
         }
         return lΔ1;
     }
-    (l, err) = net.Listen("tcp"u8, "127.0.0.1:0"u8);
+    var (l, err) = net.Listen("tcp"u8, "127.0.0.1:0"u8);
     if (err != default!) {
         {
             (l, err) = net.Listen("tcp6"u8, "[::1]:0"u8); if (err != default!) {
@@ -79,11 +80,12 @@ internal static net.Listener newLocalListener() {
 // We only register this flag if it looks like the caller knows about it
 // and is trying to use it as we don't want to pollute flags and this
 // isn't really part of our API. Don't depend on this.
-internal static @string serveFlag;
+internal static ж<@string> ᏑserveFlag = new(default(@string));
+internal static ref @string serveFlag => ref ᏑserveFlag.Value;
 
 [GoInit] internal static void init() {
     if (strSliceContainsPrefix(os.Args, "-httptest.serve="u8) || strSliceContainsPrefix(os.Args, "--httptest.serve="u8)) {
-        flag.StringVar(Ꮡ(serveFlag), "httptest.serve"u8, ""u8, "if non-empty, httptest.NewServer serves on this address and blocks."u8);
+        flag.StringVar(ᏑserveFlag, "httptest.serve"u8, ""u8, "if non-empty, httptest.NewServer serves on this address and blocks."u8);
     }
 }
 
@@ -118,25 +120,29 @@ public static ж<Server> NewUnstartedServer(httpꓸHandler handler) {
 }
 
 // Start starts a server from NewUnstartedServer.
-[GoRecv] public static void Start(this ref Server s) {
+public static void Start(this ж<Server> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
     if (s.URL != ""u8) {
         throw panic("Server already started");
     }
     if (s.client == nil) {
-        s.client = Ꮡ(new http.Client(Transport: Ꮡ(new http.Transport(nil))));
+        s.client = Ꮡ(new http.Client(Transport: new http_TransportжRoundTripper(Ꮡ(new http.Transport(nil)))));
     }
     s.URL = "http://"u8 + s.Listener.Addr().String();
-    s.wrap();
-    s.goServe();
+    Ꮡs.wrap();
+    Ꮡs.goServe();
     if (serveFlag != ""u8) {
-        fmt.Fprintln(~os.Stderr, "httptest: serving on", s.URL);
+        fmt.Fprintln(new os.FileжWriter(os.Stderr), "httptest: serving on", s.URL);
         switch (select()) {
 }
     }
 }
 
 // StartTLS starts TLS on a server from NewUnstartedServer.
-[GoRecv] public static void StartTLS(this ref Server s) {
+public static void StartTLS(this ж<Server> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
     if (s.URL != ""u8) {
         throw panic("Server already started");
     }
@@ -153,32 +159,32 @@ public static ж<Server> NewUnstartedServer(httpꓸHandler handler) {
     } else {
         s.TLS = @new<tls.Config>();
     }
-    if (s.TLS.NextProtos == default!) {
+    if ((~s.TLS).NextProtos == default!) {
         var nextProtos = new @string[]{"http/1.1"}.slice();
         if (s.EnableHTTP2) {
             nextProtos = new @string[]{"h2"}.slice();
         }
-        s.TLS.NextProtos = nextProtos;
+        s.TLS.Value.NextProtos = nextProtos;
     }
-    if (len(s.TLS.Certificates) == 0) {
-        s.TLS.Certificates = new tls.Certificate[]{cert}.slice();
+    if (len((~s.TLS).Certificates) == 0) {
+        s.TLS.Value.Certificates = new tls.Certificate[]{cert}.slice();
     }
-    (s.certificate, err) = x509.ParseCertificate(s.TLS.Certificates[0].Certificate[0]);
+    (s.certificate, err) = x509.ParseCertificate((~s.TLS).Certificates[0].ΔCertificate[0]);
     if (err != default!) {
         throw panic(fmt.Sprintf("httptest: NewTLSServer: %v"u8, err));
     }
     var certpool = x509.NewCertPool();
     certpool.AddCert(s.certificate);
-    s.client.Transport = Ꮡ(new http.Transport(
+    s.client.Value.Transport = new http_TransportжRoundTripper(Ꮡ(new http.Transport(
         TLSClientConfig: Ꮡ(new tls.Config(
             RootCAs: certpool
         )),
         ForceAttemptHTTP2: s.EnableHTTP2
-    ));
+    )));
     s.Listener = tls.NewListener(s.Listener, s.TLS);
     s.URL = "https://"u8 + s.Listener.Addr().String();
-    s.wrap();
-    s.goServe();
+    Ꮡs.wrap();
+    Ꮡs.goServe();
 }
 
 // NewTLSServer starts and returns a new [Server] using TLS.
@@ -195,8 +201,10 @@ public static ж<Server> NewTLSServer(httpꓸHandler handler) {
 
 // Close shuts down the server and blocks until all outstanding
 // requests on this server have completed.
-[GoRecv] public static void Close(this ref Server s) => func((defer, _) => {
-    s.mu.Lock();
+public static void Close(this ж<Server> Ꮡs) => func((defer, recover) => {
+    ref var s = ref Ꮡs.Value;
+
+    Ꮡs.of(Server.Ꮡmu).Lock();
     if (!s.closed) {
         s.closed = true;
         s.Listener.Close();
@@ -225,11 +233,11 @@ public static ж<Server> NewTLSServer(httpꓸHandler handler) {
             }
         }
         // If this server doesn't shut down in 5 seconds, tell the user why.
-        var t = time.AfterFunc(5 * time.ΔSecond, s.logCloseHangDebugInfo);
+        var t = time.AfterFunc(5000000000L, Ꮡs.logCloseHangDebugInfo);
         var tʗ1 = t;
-        defer(tʗ1.Stop);
+        defer(() => tʗ1.Stop());
     }
-    s.mu.Unlock();
+    Ꮡs.of(Server.Ꮡmu).Unlock();
     // Not part of httptest.Server's correctness, but assume most
     // users of httptest.Server will be using the standard
     // transport, so help them out and close any idle connections for them.
@@ -241,43 +249,47 @@ public static ж<Server> NewTLSServer(httpꓸHandler handler) {
     // Also close the client idle connections.
     if (s.client != nil) {
         {
-            var (t, ok) = s.client.Transport._<closeIdleTransport>(ᐧ); if (ok) {
+            var (t, ok) = (~s.client).Transport._<closeIdleTransport>(ᐧ); if (ok) {
                 t.CloseIdleConnections();
             }
         }
     }
-    s.wg.Wait();
+    Ꮡs.of(Server.Ꮡwg).Wait();
 });
 
-[GoRecv] internal static void logCloseHangDebugInfo(this ref Server s) => func((defer, _) => {
-    s.mu.Lock();
-    defer(s.mu.Unlock);
-    ref var buf = ref heap(new strings_package.Builder(), out var Ꮡbuf);
-    buf.WriteString("httptest.Server blocked in Close after 5 seconds, waiting for connections:\n"u8);
+internal static void logCloseHangDebugInfo(this ж<Server> Ꮡs) => func((defer, recover) => {
+    ref var s = ref Ꮡs.Value;
+
+    Ꮡs.of(Server.Ꮡmu).Lock();
+    defer(Ꮡs.of(Server.Ꮡmu).Unlock);
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
+    Ꮡbuf.WriteString("httptest.Server blocked in Close after 5 seconds, waiting for connections:\n"u8);
     foreach (var (c, st) in s.conns) {
-        fmt.Fprintf(~Ꮡbuf, "  %T %p %v in state %v\n"u8, c, c, c.RemoteAddr(), st);
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "  %T %p %v in state %v\n"u8, c, c, c.RemoteAddr(), st);
     }
     log.Print(buf.String());
 });
 
 // CloseClientConnections closes any open HTTP connections to the test Server.
-[GoRecv] public static void CloseClientConnections(this ref Server s) => func((defer, _) => {
-    s.mu.Lock();
+public static void CloseClientConnections(this ж<Server> Ꮡs) => func((defer, recover) => {
+    ref var s = ref Ꮡs.Value;
+
+    Ꮡs.of(Server.Ꮡmu).Lock();
     nint nconn = len(s.conns);
     var ch = new channel<EmptyStruct>(nconn);
     foreach (var (c, _) in s.conns) {
-        goǃ(s.closeConnChan, c, ch);
+        goǃ(Ꮡs.closeConnChan, c, ch);
     }
-    s.mu.Unlock();
+    Ꮡs.of(Server.Ꮡmu).Unlock();
     // Wait for outstanding closes to finish.
     //
     // Out of paranoia for making a late change in Go 1.6, we
     // bound how long this can wait, since golang.org/issue/14291
     // isn't fully understood yet. At least this should only be used
     // in tests.
-    var timer = time.NewTimer(5 * time.ΔSecond);
+    var timer = time.NewTimer(5000000000L);
     var timerʗ1 = timer;
-    defer(timerʗ1.Stop);
+    defer(() => timerʗ1.Stop());
     for (nint i = 0; i < nconn; i++) {
         switch (select(ᐸꟷ(ch, ꓸꓸꓸ), ᐸꟷ((~timer).C, ꓸꓸꓸ))) {
         case 0 when ch.ꟷᐳ(out _): {
@@ -305,90 +317,89 @@ public static ж<Server> NewTLSServer(httpꓸHandler handler) {
     return s.client;
 }
 
-[GoRecv] internal static void goServe(this ref Server s) => func((defer, _) => {
-    s.wg.Add(1);
-    goǃ(() => {
-        defer(s.wg.Done);
-        s.Config.Serve(s.Listener);
-    });
-});
+internal static void goServe(this ж<Server> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    Ꮡs.of(Server.Ꮡwg).Add(1);
+    goǃ(() => func((defer, recover) => {
+        defer(Ꮡs.of(Server.Ꮡwg).Done);
+        Ꮡs.Value.Config.Serve(Ꮡs.Value.Listener);
+    }));
+}
 
 // wrap installs the connection state-tracking hook to know which
 // connections are idle.
-[GoRecv] internal static void wrap(this ref Server s) => func((defer, _) => {
-    var oldHook = s.Config.ConnState;
-    s.Config.ConnState = 
+internal static void wrap(this ж<Server> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    var oldHook = s.Config.Value.ConnState;
     var oldHookʗ1 = oldHook;
-    (net.Conn c, http.ConnState cs) => {
-        s.mu.Lock();
-        defer(s.mu.Unlock);
+    s.Config.Value.ConnState = (net.Conn c, http.ConnState cs) => func((defer, recover) => {
+        Ꮡs.of(Server.Ꮡmu).Lock();
+        defer(Ꮡs.of(Server.Ꮡmu).Unlock);
         var exprᴛ1 = cs;
         if (exprᴛ1 == http.StateNew) {
             {
-                http.ConnState _ = s.conns[c];
-                var exists = s.conns[c]; if (exists) {
+                var (_, exists) = Ꮡs.Value.conns[c, ꟷ]; if (exists) {
                     throw panic("invalid state transition");
                 }
             }
-            if (s.conns == default!) {
-                s.conns = new http.ConnState();
+            if (Ꮡs.Value.conns == default!) {
+                Ꮡs.Value.conns = new map<net.Conn, http.ConnState>();
             }
-            s.wg.Add(1);
-            s.conns[c] = cs;
-            if (s.closed) {
+            Ꮡs.of(Server.Ꮡwg).Add(1);
+            Ꮡs.Value.conns[c] = cs;
+            if (Ꮡs.Value.closed) {
                 // Add c to the set of tracked conns and increment it to the
                 // waitgroup.
                 // Probably just a socket-late-binding dial from
                 // the default transport that lost the race (and
                 // thus this connection is now idle and will
                 // never be used).
-                s.closeConn(c);
+                Ꮡs.Value.closeConn(c);
             }
         }
         else if (exprᴛ1 == http.StateActive) {
             {
-                http.ConnState oldState = s.conns[c];
-                var ok = s.conns[c]; if (ok) {
+                var (oldState, ok) = Ꮡs.Value.conns[c, ꟷ]; if (ok) {
                     if (oldState != http.StateNew && oldState != http.StateIdle) {
                         throw panic("invalid state transition");
                     }
-                    s.conns[c] = cs;
+                    Ꮡs.Value.conns[c] = cs;
                 }
             }
         }
         else if (exprᴛ1 == http.StateIdle) {
             {
-                http.ConnState oldState = s.conns[c];
-                var ok = s.conns[c]; if (ok) {
+                var (oldState, ok) = Ꮡs.Value.conns[c, ꟷ]; if (ok) {
                     if (oldState != http.StateActive) {
                         throw panic("invalid state transition");
                     }
-                    s.conns[c] = cs;
+                    Ꮡs.Value.conns[c] = cs;
                 }
             }
-            if (s.closed) {
-                s.closeConn(c);
+            if (Ꮡs.Value.closed) {
+                Ꮡs.Value.closeConn(c);
             }
         }
         else if (exprᴛ1 == http.StateHijacked || exprᴛ1 == http.StateClosed) {
             {
-                http.ConnState _ = s.conns[c];
-                var ok = s.conns[c]; if (ok) {
+                var (_, ok) = Ꮡs.Value.conns[c, ꟷ]; if (ok) {
                     // Remove c from the set of tracked conns and decrement it from the
                     // waitgroup, unless it was previously removed.
-                    delete(s.conns, c);
+                    delete(Ꮡs.Value.conns, c);
                     // Keep Close from returning until the user's ConnState hook
                     // (if any) finishes.
-                    defer(s.wg.Done);
+                    defer(Ꮡs.of(Server.Ꮡwg).Done);
                 }
             }
         }
 
-        if (oldHook != default!) {
-            oldHook(c, cs);
+        if (oldHookʗ1 != default!) {
+            oldHookʗ1(c, cs);
         }
-    };
-});
+    });
+}
 
 // closeConn closes c.
 // s.mu must be held.
@@ -396,15 +407,12 @@ public static ж<Server> NewTLSServer(httpꓸHandler handler) {
     s.closeConnChan(c, default!);
 }
 
-[GoType("dyn")] partial struct closeConnChan_type {
-}
-
 // closeConnChan is like closeConn, but takes an optional channel to receive a value
 // when the goroutine closing c is done.
 [GoRecv] internal static void closeConnChan(this ref Server s, net.Conn c, channel/*<-*/<EmptyStruct> done) {
     c.Close();
     if (done != default!) {
-        done.ᐸꟷ(new closeConnChan_type());
+        done.ᐸꟷ(new EmptyStruct());
     }
 }
 

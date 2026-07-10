@@ -9,19 +9,20 @@ partial class norm_package {
 
 [GoType] partial struct normWriter {
     internal reorderBuffer rb;
-    internal io_package.Writer w;
+    internal io.Writer w;
     internal slice<byte> buf;
 }
 
 // Write implements the standard write interface.  If the last characters are
 // not at a normalization boundary, the bytes will be buffered for the next
 // write. The remaining bytes will be written on close.
-[GoRecv] internal static (nint n, error err) Write(this ref normWriter w, slice<byte> data) {
+internal static (nint n, error err) Write(this ж<normWriter> Ꮡw, slice<byte> data) {
     nint n = default!;
     error err = default!;
 
+    ref var w = ref Ꮡw.Value;
     // Process data in pieces to keep w.buf size bounded.
-    static readonly UntypedInt chunk = 4000;
+    UntypedInt chunk = 4000;
     while (len(data) > 0) {
         // Normalize into w.buf.
         nint m = len(data);
@@ -30,12 +31,12 @@ partial class norm_package {
         }
         w.rb.src = inputBytes(data[..(int)(m)]);
         w.rb.nsrc = m;
-        w.buf = doAppend(Ꮡ(w.rb), w.buf, 0);
+        w.buf = doAppend(Ꮡw.of(normWriter.Ꮡrb), w.buf, 0);
         data = data[(int)(m)..];
         n += m;
         // Write out complete prefix, save remainder.
         // Note that lastBoundary looks back at most 31 runes.
-        nint i = lastBoundary(Ꮡw.rb.of(reorderBuffer.Ꮡf), w.buf);
+        nint i = lastBoundary(Ꮡw.of(normWriter.Ꮡrb).of(reorderBuffer.Ꮡf), w.buf);
         if (i == -1) {
             i = 0;
         }
@@ -69,13 +70,13 @@ partial class norm_package {
 // Calling its Close method writes any buffered data to w.
 public static io.WriteCloser Writer(this Form f, io.Writer w) {
     var wr = Ꮡ(new normWriter(rb: new reorderBuffer(nil), w: w));
-    (~wr).rb.init(f, default!);
-    return ~wr;
+    wr.of(normWriter.Ꮡrb).init(f, default!);
+    return new normWriterжWriteCloser(wr);
 }
 
 [GoType] partial struct normReader {
     internal reorderBuffer rb;
-    internal io_package.Reader r;
+    internal io.Reader r;
     internal slice<byte> inbuf;
     internal slice<byte> outbuf;
     internal nint bufStart;
@@ -84,15 +85,17 @@ public static io.WriteCloser Writer(this Form f, io.Writer w) {
 }
 
 // Read implements the standard read interface.
-[GoRecv] internal static (nint, error) Read(this ref normReader r, slice<byte> p) {
+internal static (nint, error) Read(this ж<normReader> Ꮡr, slice<byte> p) {
+    ref var r = ref Ꮡr.Value;
+
     while (ᐧ) {
         if (r.lastBoundary - r.bufStart > 0) {
-            nint n = copy(p, r.outbuf[(int)(r.bufStart)..(int)(r.lastBoundary)]);
-            r.bufStart += n;
+            nint nΔ1 = copy(p, r.outbuf[(int)(r.bufStart)..(int)(r.lastBoundary)]);
+            r.bufStart += nΔ1;
             if (r.lastBoundary - r.bufStart > 0) {
-                return (n, default!);
+                return (nΔ1, default!);
             }
-            return (n, r.err);
+            return (nΔ1, r.err);
         }
         if (r.err != default!) {
             return (0, r.err);
@@ -102,14 +105,15 @@ public static io.WriteCloser Writer(this Form f, io.Writer w) {
         r.bufStart = 0;
         var (n, err) = r.r.Read(r.inbuf);
         r.rb.src = inputBytes(r.inbuf[0..(int)(n)]);
-        (r.rb.nsrc, r.err) = (n, err);
+        r.rb.nsrc = n;
+        r.err = err;
         if (n > 0) {
-            r.outbuf = doAppend(Ꮡ(r.rb), r.outbuf, 0);
+            r.outbuf = doAppend(Ꮡr.of(normReader.Ꮡrb), r.outbuf, 0);
         }
         if (AreEqual(err, io.EOF)){
             r.lastBoundary = len(r.outbuf);
         } else {
-            r.lastBoundary = lastBoundary(Ꮡr.rb.of(reorderBuffer.Ꮡf), r.outbuf);
+            r.lastBoundary = lastBoundary(Ꮡr.of(normReader.Ꮡrb).of(reorderBuffer.Ꮡf), r.outbuf);
             if (r.lastBoundary == -1) {
                 r.lastBoundary = 0;
             }
@@ -120,11 +124,11 @@ public static io.WriteCloser Writer(this Form f, io.Writer w) {
 // Reader returns a new reader that implements Read
 // by reading data from r and returning f(data).
 public static io.Reader Reader(this Form f, io.Reader r) {
-    static readonly UntypedInt chunk = 4000;
+    UntypedInt chunk = 4000;
     var buf = new slice<byte>(chunk);
     var rr = Ꮡ(new normReader(rb: new reorderBuffer(nil), r: r, inbuf: buf));
-    (~rr).rb.init(f, buf);
-    return ~rr;
+    rr.of(normReader.Ꮡrb).init(f, buf);
+    return new normReaderжReader(rr);
 }
 
 } // end norm_package

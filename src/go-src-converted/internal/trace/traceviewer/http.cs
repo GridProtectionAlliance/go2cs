@@ -8,17 +8,18 @@ using fmt = fmt_package;
 using template = html.template_package;
 using http = net.http_package;
 using strings = strings_package;
+using fs = go.io.fs_package;
 using html;
+using io = io_package;
 using net;
 
 partial class traceviewer_package {
 
 public static httpꓸHandler MainHandler(slice<View> views) {
-    return ((http.HandlerFunc)(
     var viewsʗ1 = views;
-    (http.ResponseWriter w, ж<http.Request> _) => {
+    return new http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> _) => {
         {
-            var err = templMain.Execute(w, viewsʗ1); if (err != default!) {
+            var err = templMain.Execute(new http_ResponseWriterᴠWriter(w), viewsʗ1); if (err != default!) {
                 http.Error(w, err.Error(), http.StatusInternalServerError);
                 return;
             }
@@ -66,7 +67,7 @@ textarea.code {
 
 """u8;
 
-internal static ж<template.Template> templMain = template.Must(template.New(""u8).Parse("""
+internal static (ж<template.Template>, error) tupleᴛ1ʗ = template.New(""u8).Parse("""
 
 <html>
 <style>
@@ -253,7 +254,8 @@ internal static ж<template.Template> templMain = template.Must(template.New(""u
 </body>
 </html>
 
-"""));
+""");
+internal static ж<template.Template> templMain = template.Must(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2);
 
 [GoType] partial struct View {
     public ViewType Type;
@@ -262,8 +264,8 @@ internal static ж<template.Template> templMain = template.Must(template.New(""u
 
 [GoType("@string")] partial struct ViewType;
 
-public static readonly @string ViewProc = "proc"u8;
-public static readonly @string ViewThread = "thread"u8;
+public static readonly ViewType ViewProc = "proc"u8;
+public static readonly ViewType ViewThread = "thread"u8;
 
 public static @string URL(this View v, nint rangeIdx) {
     if (rangeIdx < 0) {
@@ -285,7 +287,7 @@ public static @string URL(this Range r, ViewType viewType) {
 }
 
 public static httpꓸHandler TraceHandler() {
-    return ((http.HandlerFunc)((http.ResponseWriter w, ж<http.Request> r) => {
+    return new http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
         {
             var err = r.ParseForm(); if (err != default!) {
                 http.Error(w, err.Error(), http.StatusInternalServerError);
@@ -431,7 +433,7 @@ function onTraceViewerImportFail() {
 internal static embed.FS staticContent;
 
 public static httpꓸHandler StaticHandler() {
-    return http.FileServer(http.FS(staticContent));
+    return http.FileServer(http.FS(new embed_FSᴠFS(staticContent)));
 }
 
 } // end traceviewer_package

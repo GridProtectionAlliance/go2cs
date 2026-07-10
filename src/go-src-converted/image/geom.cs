@@ -13,8 +13,7 @@ partial class image_package {
 
 // A Point is an X, Y coordinate pair. The axes increase right and down.
 [GoType] partial struct Point {
-    public nint X;
-    public nint Y;
+    public nint X, Y;
 }
 
 // String returns a string representation of p like "(3,4)".
@@ -88,8 +87,7 @@ public static Point Pt(nint X, nint Y) {
 // returns color.Opaque for points in the rectangle and color.Transparent
 // otherwise.
 [GoType] partial struct Rectangle {
-    public Point Min;
-    public Point Max;
+    public Point Min, Max;
 }
 
 // String returns a string representation of r like "(3,4)-(6,5)".
@@ -230,10 +228,12 @@ public static bool In(this Rectangle r, Rectangle s) {
 // and maximum coordinates swapped if necessary so that it is well-formed.
 public static Rectangle Canon(this Rectangle r) {
     if (r.Max.X < r.Min.X) {
-        (r.Min.X, r.Max.X) = (r.Max.X, r.Min.X);
+        r.Min.X = r.Max.X;
+        r.Max.X = r.Min.X;
     }
     if (r.Max.Y < r.Min.Y) {
-        (r.Min.Y, r.Max.Y) = (r.Max.Y, r.Min.Y);
+        r.Min.Y = r.Max.Y;
+        r.Max.Y = r.Min.Y;
     }
     return r;
 }
@@ -241,15 +241,15 @@ public static Rectangle Canon(this Rectangle r) {
 // At implements the [Image] interface.
 public static color.Color At(this Rectangle r, nint x, nint y) {
     if ((new Point(x, y)).In(r)) {
-        return color.Opaque;
+        return new color_Alpha16ᴠColor(color.Opaque);
     }
-    return color.Transparent;
+    return new color_Alpha16ᴠColor(color.Transparent);
 }
 
 // RGBA64At implements the [RGBA64Image] interface.
 public static color.RGBA64 RGBA64At(this Rectangle r, nint x, nint y) {
     if ((new Point(x, y)).In(r)) {
-        return new color.RGBA64(65535, 65535, 65535, 65535);
+        return new color.RGBA64(0xffff, 0xffff, 0xffff, 0xffff);
     }
     return new color.RGBA64(nil);
 }
@@ -288,16 +288,16 @@ internal static nint mul3NonNeg(nint x, nint y, nint z) {
     if ((x < 0) || (y < 0) || (z < 0)) {
         return -1;
     }
-    var (hi, lo) = bits.Mul64(((uint64)x), ((uint64)y));
+    var (hi, lo) = bits.Mul64((uint64)x, (uint64)y);
     if (hi != 0) {
         return -1;
     }
-    (hi, lo) = bits.Mul64(lo, ((uint64)z));
+    (hi, lo) = bits.Mul64(lo, (uint64)z);
     if (hi != 0) {
         return -1;
     }
-    nint a = ((nint)lo);
-    if ((a < 0) || (((uint64)a) != lo)) {
+    nint a = (nint)lo;
+    if ((a < 0) || ((uint64)a != lo)) {
         return -1;
     }
     return a;

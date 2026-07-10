@@ -42,17 +42,14 @@ using static go.syscall_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(Sockaddr, error), ΔSockaddr>]
-[assembly: GoImplement<DLLError, error>]
+[assembly: GoImplement<DLLError, error>(Pointer = true)]
 [assembly: GoImplement<Errno, error>]
-[assembly: GoImplement<SockaddrInet4, ΔSockaddr>]
-[assembly: GoImplement<SockaddrInet6, ΔSockaddr>]
-[assembly: GoImplement<SockaddrUnix, ΔSockaddr>]
+[assembly: GoImplement<SockaddrInet4, ΔSockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrInet6, ΔSockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrUnix, ΔSockaddr>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Token, ΔHandle>(Inverted = true, ValueType = "Token")]
-[assembly: GoImplicitConv<Token, ж<Token>>(Inverted = true, ValueType = "Token")]
 [assembly: GoImplicitConv<win32finddata1, ж<win32finddata1>>(Indirect = true)]
 // </ImplicitConversions>
 

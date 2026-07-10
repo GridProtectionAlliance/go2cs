@@ -38,7 +38,7 @@ using static go.@internal.godebug_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<runtimeStderr, @internal.bisect_package.Writer>]
+[assembly: GoImplement<runtimeStderr, go.@internal.bisect_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

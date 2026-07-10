@@ -16,8 +16,8 @@ namespace go.crypto;
 using errors = errors_package;
 using io = io_package;
 using big = math.big_package;
-using randutil = crypto.@internal.randutil_package;
-using crypto.@internal;
+using randutil = go.crypto.@internal.randutil_package;
+using go.crypto.@internal;
 using math;
 
 partial class dsa_package {
@@ -25,21 +25,19 @@ partial class dsa_package {
 // Parameters represents the domain parameters for a key. These parameters can
 // be shared across many keys. The bit length of Q must be a multiple of 8.
 [GoType] partial struct Parameters {
-    public ж<math.big_package.ΔInt> P;
-    public ж<math.big_package.ΔInt> Q;
-    public ж<math.big_package.ΔInt> G;
+    public ж<bigꓸInt> P, Q, G;
 }
 
 // PublicKey represents a DSA public key.
 [GoType] partial struct PublicKey {
     public partial ref Parameters Parameters { get; }
-    public ж<math.big_package.ΔInt> Y;
+    public ж<bigꓸInt> Y;
 }
 
 // PrivateKey represents a DSA private key.
 [GoType] partial struct PrivateKey {
     public partial ref PublicKey PublicKey { get; }
-    public ж<math.big_package.ΔInt> X;
+    public ж<bigꓸInt> X;
 }
 
 // ErrInvalidPublicKey results when a public key is not usable by this code.
@@ -62,7 +60,7 @@ internal static readonly UntypedInt numMRTests = 64;
 // GenerateParameters puts a random, valid set of DSA parameters into params.
 // This function can take many seconds, even on fast machines.
 public static error GenerateParameters(ж<Parameters> Ꮡparams, io.Reader rand, ParameterSizes sizes) {
-    ref var @params = ref Ꮡparams.val;
+    ref var @params = ref Ꮡparams.Value;
 
     // This function doesn't follow FIPS 186-3 exactly in that it doesn't
     // use a verification seed to generate the primes. The verification
@@ -106,7 +104,7 @@ GeneratePrimes:
             }
         }
         qBytes[len(qBytes) - 1] |= (byte)(1);
-        qBytes[0] |= (byte)(128);
+        qBytes[0] |= (byte)(0x80);
         q.SetBytes(qBytes);
         if (!q.ProbablyPrime(numMRTests)) {
             continue;
@@ -118,7 +116,7 @@ GeneratePrimes:
                 }
             }
             pBytes[len(pBytes) - 1] |= (byte)(1);
-            pBytes[0] |= (byte)(128);
+            pBytes[0] |= (byte)(0x80);
             p.SetBytes(pBytes);
             rem.Mod(p, q);
             rem.Sub(rem, one);
@@ -155,7 +153,7 @@ break_GeneratePrimes:;
 // GenerateKey generates a public&private key pair. The Parameters of the
 // [PrivateKey] must already be valid (see [GenerateParameters]).
 public static error GenerateKey(ж<PrivateKey> Ꮡpriv, io.Reader rand) {
-    ref var priv = ref Ꮡpriv.val;
+    ref var priv = ref Ꮡpriv.Value;
 
     if (priv.P == nil || priv.Q == nil || priv.G == nil) {
         return errors.New("crypto/dsa: parameters not set up before generating key"u8);
@@ -183,8 +181,8 @@ public static error GenerateKey(ж<PrivateKey> Ꮡpriv, io.Reader rand) {
 // in math/big.Int.ModInverse) although math/big itself isn't strictly
 // constant-time so it's not perfect.
 internal static ж<bigꓸInt> fermatInverse(ж<bigꓸInt> Ꮡk, ж<bigꓸInt> ᏑP) {
-    ref var k = ref Ꮡk.val;
-    ref var P = ref ᏑP.val;
+    ref var k = ref Ꮡk.Value;
+    ref var P = ref ᏑP.Value;
 
     var two = big.NewInt(2);
     var pMinus2 = @new<bigꓸInt>().Sub(ᏑP, two);
@@ -207,7 +205,7 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rand,
     ж<bigꓸInt> s = default!;
     error err = default!;
 
-    ref var priv = ref Ꮡpriv.val;
+    ref var priv = ref Ꮡpriv.Value;
     randutil.MaybeReadByte(rand);
     // FIPS 186-3, section 4.6
     nint n = priv.Q.BitLen();
@@ -215,7 +213,7 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rand,
         err = ErrInvalidPublicKey;
         return (r, s, err);
     }
-    n >>= (UntypedInt)(3);
+    n >>= (int)(3);
     nint attempts = default!;
     for (attempts = 10; attempts > 0; attempts--) {
         var k = @new<bigꓸInt>();
@@ -265,18 +263,18 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rand,
 // to the byte-length of the subgroup. This function does not perform that
 // truncation itself.
 public static bool Verify(ж<PublicKey> Ꮡpub, slice<byte> hash, ж<bigꓸInt> Ꮡr, ж<bigꓸInt> Ꮡs) {
-    ref var pub = ref Ꮡpub.val;
-    ref var r = ref Ꮡr.val;
-    ref var s = ref Ꮡs.val;
+    ref var pub = ref Ꮡpub.Value;
+    ref var r = ref Ꮡr.Value;
+    ref var s = ref Ꮡs.Value;
 
     // FIPS 186-3, section 4.7
     if (pub.P.Sign() == 0) {
         return false;
     }
-    if (r.Sign() < 1 || r.Cmp(pub.Q) >= 0) {
+    if (r.Sign() < 1 || Ꮡr.Cmp(pub.Q) >= 0) {
         return false;
     }
-    if (s.Sign() < 1 || s.Cmp(pub.Q) >= 0) {
+    if (s.Sign() < 1 || Ꮡs.Cmp(pub.Q) >= 0) {
         return false;
     }
     var w = @new<bigꓸInt>().ModInverse(Ꮡs, pub.Q);

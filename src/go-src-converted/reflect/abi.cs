@@ -32,7 +32,7 @@ internal static nint intArgRegs = abi.IntArgRegs;
 
 internal static nint floatArgRegs = abi.FloatArgRegs;
 
-internal static uintptr floatRegSize = ((uintptr)abi.EffectiveFloatRegSize);
+internal static uintptr floatRegSize = (uintptr)abi.EffectiveFloatRegSize;
 
 // abiStep represents an ABI "instruction." Each instruction
 // describes one part of how to translate between a Go value
@@ -80,8 +80,7 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
     internal slice<abiStep> steps;
     internal slice<nint> valueStart;
     internal uintptr stackBytes; // stack space used
-    internal nint iregs;    // registers used
-    internal nint fregs;
+    internal nint iregs, fregs;    // registers used
 }
 
 [GoRecv] internal static void dump(this ref abiSeq a) {
@@ -117,11 +116,11 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
 // If the value was stack-assigned, returns the single
 // abiStep describing that translation, and nil otherwise.
 [GoRecv] internal static ж<abiStep> addArg(this ref abiSeq a, ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     // We'll always be adding a new value, so do that first.
     nint pStart = len(a.steps);
-    a.valueStart = append(a.valueStart, pStart);
+    a.valueStart = builtin.append(a.valueStart, pStart);
     if (t.Size() == 0) {
         // If the size of the argument type is zero, then
         // in order to degrade gracefully into ABI0, we need
@@ -137,7 +136,7 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
         // non-zero-sized struct do not cause it to be
         // stack-assigned. So we need a special case here
         // at the top.
-        a.stackBytes = align(a.stackBytes, ((uintptr)t.Align()));
+        a.stackBytes = align(a.stackBytes, (uintptr)t.Align());
         return default!;
     }
     // Hold a copy of "a" so that we can roll back if
@@ -147,7 +146,7 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
         // Register assignment failed. Roll back any changes
         // and stack-assign.
         a = aOld;
-        a.stackAssign(t.Size(), ((uintptr)t.Align()));
+        a.stackAssign(t.Size(), (uintptr)t.Align());
         return Ꮡ(a.steps[len(a.steps) - 1]);
     }
     return default!;
@@ -160,14 +159,14 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
 // abiStep describing that translation, and nil otherwise.
 // Returns true if the receiver is a pointer.
 [GoRecv] internal static (ж<abiStep>, bool) addRcvr(this ref abiSeq a, ж<abi.Type> Ꮡrcvr) {
-    ref var rcvr = ref Ꮡrcvr.val;
+    ref var rcvr = ref Ꮡrcvr.Value;
 
     // The receiver is always one word.
-    a.valueStart = append(a.valueStart, len(a.steps));
+    a.valueStart = builtin.append(a.valueStart, len(a.steps));
     bool ok = default!;
     bool ptr = default!;
     if (rcvr.IfaceIndir() || rcvr.Pointers()){
-        ok = a.assignIntN(0, goarch.PtrSize, 1, 1);
+        ok = a.assignIntN(0, goarch.PtrSize, 1, 0b1);
         ptr = true;
     } else {
         // TODO(mknyszek): Is this case even possible?
@@ -176,7 +175,7 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
         // in the reflect package which only conditionally added
         // a pointer bit to the reflect.(Value).Call stack frame's
         // GC bitmap.
-        ok = a.assignIntN(0, goarch.PtrSize, 1, 0);
+        ok = a.assignIntN(0, goarch.PtrSize, 1, 0b0);
         ptr = false;
     }
     if (!ok) {
@@ -196,23 +195,23 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
 // This method along with the assign* methods represent the
 // complete register-assignment algorithm for the Go ABI.
 [GoRecv] internal static bool regAssign(this ref abiSeq a, ж<abi.Type> Ꮡt, uintptr offset) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
-    var exprᴛ1 = ((ΔKind)t.Kind());
+    var exprᴛ1 = ((ΔKind)(nuint)(uint8)t.Kind());
     if (exprᴛ1 == ΔUnsafePointer || exprᴛ1 == ΔPointer || exprᴛ1 == Chan || exprᴛ1 == Map || exprᴛ1 == Func) {
-        return a.assignIntN(offset, t.Size(), 1, 1);
+        return a.assignIntN(offset, t.Size(), 1, 0b1);
     }
     if (exprᴛ1 == ΔBool || exprᴛ1 == ΔInt || exprᴛ1 == ΔUint || exprᴛ1 == Int8 || exprᴛ1 == Uint8 || exprᴛ1 == Int16 || exprᴛ1 == Uint16 || exprᴛ1 == Int32 || exprᴛ1 == Uint32 || exprᴛ1 == Uintptr) {
-        return a.assignIntN(offset, t.Size(), 1, 0);
+        return a.assignIntN(offset, t.Size(), 1, 0b0);
     }
     if (exprᴛ1 == Int64 || exprᴛ1 == Uint64) {
-        switch (goarch.PtrSize) {
-        case 4: {
-            return a.assignIntN(offset, 4, 2, 0);
+        var exprᴛ2 = goarch.PtrSize;
+        if (exprᴛ2 == 4) {
+            return a.assignIntN(offset, 4, 2, 0b0);
         }
-        case 8: {
-            return a.assignIntN(offset, 8, 1, 0);
-        }}
+        if (exprᴛ2 == 8) {
+            return a.assignIntN(offset, 8, 1, 0b0);
+        }
 
     }
     if (exprᴛ1 == Float32 || exprᴛ1 == Float64) {
@@ -225,35 +224,35 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
         return a.assignFloatN(offset, 8, 2);
     }
     if (exprᴛ1 == ΔString) {
-        return a.assignIntN(offset, goarch.PtrSize, 2, 1);
+        return a.assignIntN(offset, goarch.PtrSize, 2, 0b01);
     }
     if (exprᴛ1 == ΔInterface) {
-        return a.assignIntN(offset, goarch.PtrSize, 2, 2);
+        return a.assignIntN(offset, goarch.PtrSize, 2, 0b10);
     }
     if (exprᴛ1 == ΔSlice) {
-        return a.assignIntN(offset, goarch.PtrSize, 3, 1);
+        return a.assignIntN(offset, goarch.PtrSize, 3, 0b001);
     }
     if (exprᴛ1 == Array) {
         var tt = (ж<arrayType>)(uintptr)(new @unsafe.Pointer(Ꮡt));
-        switch ((~tt).Len) {
-        case 0: {
+        var exprᴛ3 = (~tt).Len;
+        if (exprᴛ3 == 0) {
             return true;
         }
-        case 1: {
+        if (exprᴛ3 == 1) {
             return a.regAssign((~tt).Elem, // There's nothing to assign, so don't modify
  // a.steps but succeed so the caller doesn't
  // try to stack-assign this value.
  offset);
         }
-        default: {
+        { /* default: */
             return false;
-        }}
+        }
 
     }
     if (exprᴛ1 == Struct) {
         var st = (ж<structType>)(uintptr)(new @unsafe.Pointer(Ꮡt));
-        foreach (var (i, _) in st.Fields) {
-            var f = Ꮡ(st.Fields, i);
+        foreach (var (i, _) in (~st).Fields) {
+            var f = Ꮡ((~st).Fields, i);
             if (!a.regAssign((~f).Typ, offset + (~f).Offset)) {
                 return false;
             }
@@ -289,12 +288,12 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
     }
     for (nint i = 0; i < n; i++) {
         abiStepKind kind = abiStepIntReg;
-        if ((uint8)(ptrMap & (((uint8)1) << (int)(i))) != 0) {
+        if ((uint8)(ptrMap & (((uint8)1 << (int)(i)))) != 0) {
             kind = abiStepPointer;
         }
-        a.steps = append(a.steps, new abiStep(
+        a.steps = builtin.append(a.steps, new abiStep(
             kind: kind,
-            offset: offset + ((uintptr)i) * size,
+            offset: offset + (uintptr)i * size,
             size: size,
             ireg: a.iregs
         ));
@@ -317,9 +316,9 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
         return false;
     }
     for (nint i = 0; i < n; i++) {
-        a.steps = append(a.steps, new abiStep(
+        a.steps = builtin.append(a.steps, new abiStep(
             kind: abiStepFloatReg,
-            offset: offset + ((uintptr)i) * size,
+            offset: offset + (uintptr)i * size,
             size: size,
             freg: a.fregs
         ));
@@ -334,7 +333,7 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
 // Should not be called directly; use addArg instead.
 [GoRecv] internal static void stackAssign(this ref abiSeq a, uintptr size, uintptr alignment) {
     a.stackBytes = align(a.stackBytes, alignment);
-    a.steps = append(a.steps, new abiStep(
+    a.steps = builtin.append(a.steps, new abiStep(
         kind: abiStepStack,
         offset: 0, // Only used for whole arguments, so the memory offset is 0.
 
@@ -348,8 +347,7 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
 [GoType] partial struct abiDesc {
     // call and ret represent the translation steps for
     // the call and return paths of a Go function.
-    internal abiSeq call;
-    internal abiSeq ret;
+    internal abiSeq call, ret;
     // These fields describe the stack space allocated
     // for the call. stackCallArgsSize is the amount of space
     // reserved for arguments but not return values. retOffset
@@ -357,9 +355,7 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
     // spill is the size in bytes of additional space reserved
     // to spill argument registers into in case of preemption in
     // reflectcall's stack frame.
-    internal uintptr stackCallArgsSize;
-    internal uintptr retOffset;
-    internal uintptr spill;
+    internal uintptr stackCallArgsSize, retOffset, spill;
     // stackPtrs is a bitmap that indicates whether
     // each word in the ABI stack space (stack-assigned
     // args + return values) is a pointer. Used
@@ -374,8 +370,7 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
     // outRegPtrs is the same, but for result values.
     // Used by reflectcall to make result pointers visible
     // to the GC.
-    internal @internal.abi_package.IntArgRegBitmap inRegPtrs;
-    internal @internal.abi_package.IntArgRegBitmap outRegPtrs;
+    internal abi.IntArgRegBitmap inRegPtrs, outRegPtrs;
 }
 
 [GoRecv] internal static void dump(this ref abiDesc a) {
@@ -406,8 +401,8 @@ internal static void dumpPtrBitMap(abi.IntArgRegBitmap b) {
 }
 
 internal static abiDesc newAbiDesc(ж<funcType> Ꮡt, ж<abi.Type> Ꮡrcvr) {
-    ref var t = ref Ꮡt.val;
-    ref var rcvr = ref Ꮡrcvr.val;
+    ref var t = ref Ꮡt.Value;
+    ref var rcvr = ref Ꮡrcvr.DerefOrNil();
 
     // We need to add space for this argument to
     // the frame so that it can spill args into it.
@@ -417,15 +412,15 @@ internal static abiDesc newAbiDesc(ж<funcType> Ꮡt, ж<abi.Type> Ꮡrcvr) {
     //
     // TODO(mknyszek): Remove this when we no longer have
     // caller reserved spill space.
-    var spill = ((uintptr)0);
+    var spill = (uintptr)0;
     // Compute gc program & stack bitmap for stack arguments
     var stackPtrs = @new<bitVector>();
     // Compute the stack frame pointer bitmap and register
     // pointer bitmap for arguments.
-    var inRegPtrs = new abi.IntArgRegBitmap{nil};
+    var inRegPtrs = new abi.IntArgRegBitmap(new uint8[2].array());
     // Compute abiSeq for input parameters.
     abiSeq @in = default!;
-    if (rcvr != nil) {
+    if (Ꮡrcvr != nil) {
         var (stkStep, isPtr) = @in.addRcvr(Ꮡrcvr);
         if (stkStep != nil){
             if (isPtr){
@@ -437,12 +432,12 @@ internal static abiDesc newAbiDesc(ж<funcType> Ꮡt, ж<abi.Type> Ꮡrcvr) {
             spill += goarch.PtrSize;
         }
     }
-    foreach (var (i, arg) in t.InSlice()) {
+    foreach (var (i, arg) in Ꮡt.InSlice()) {
         var stkStep = @in.addArg(arg);
         if (stkStep != nil){
             addTypeBits(stackPtrs, (~stkStep).stkOff, arg);
         } else {
-            spill = align(spill, ((uintptr)arg.Align()));
+            spill = align(spill, (uintptr)arg.Align());
             spill += arg.Size();
             foreach (var (_, st) in @in.stepsForValue(i)) {
                 if (st.kind == abiStepPointer) {
@@ -458,7 +453,7 @@ internal static abiDesc newAbiDesc(ж<funcType> Ꮡt, ж<abi.Type> Ꮡrcvr) {
     var retOffset = align(@in.stackBytes, goarch.PtrSize);
     // Compute the stack frame pointer bitmap and register
     // pointer bitmap for return values.
-    var outRegPtrs = new abi.IntArgRegBitmap{nil};
+    var outRegPtrs = new abi.IntArgRegBitmap(new uint8[2].array());
     // Compute abiSeq for output parameters.
     abiSeq @out = default!;
     // Stack-assigned return values do not share
@@ -467,7 +462,7 @@ internal static abiDesc newAbiDesc(ж<funcType> Ꮡt, ж<abi.Type> Ꮡrcvr) {
     // Fake it by artificially extending stackBytes by
     // the return offset.
     @out.stackBytes = retOffset;
-    foreach (var (i, res) in t.OutSlice()) {
+    foreach (var (i, res) in Ꮡt.OutSlice()) {
         var stkStep = @out.addArg(res);
         if (stkStep != nil){
             addTypeBits(stackPtrs, (~stkStep).stkOff, res);
@@ -489,39 +484,36 @@ internal static abiDesc newAbiDesc(ж<funcType> Ꮡt, ж<abi.Type> Ꮡrcvr) {
 //
 // argSize must be non-zero, fit in a register, and a power-of-two.
 internal static void intFromReg(ж<abi.RegArgs> Ꮡr, nint reg, uintptr argSize, @unsafe.Pointer to) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
-    memmove(to.val, (uintptr)r.IntRegArgAddr(reg, argSize), argSize);
+    memmove(to, (uintptr)r.IntRegArgAddr(reg, argSize), argSize);
 }
 
 // intToReg loads an argSize sized integer and stores it into reg.
 //
 // argSize must be non-zero, fit in a register, and a power-of-two.
 internal static void intToReg(ж<abi.RegArgs> Ꮡr, nint reg, uintptr argSize, @unsafe.Pointer from) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
-    memmove((uintptr)r.IntRegArgAddr(reg, argSize), from.val, argSize);
+    memmove((uintptr)r.IntRegArgAddr(reg, argSize), from, argSize);
 }
 
 // floatFromReg loads a float value from its register representation in r.
 //
 // argSize must be 4 or 8.
 internal static void floatFromReg(ж<abi.RegArgs> Ꮡr, nint reg, uintptr argSize, @unsafe.Pointer to) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
-    switch (argSize) {
-    case 4: {
-        ((ж<float32>)(uintptr)(to)).val = archFloat32FromReg(r.Floats[reg]);
-        break;
+    var exprᴛ1 = argSize;
+    if (exprᴛ1 == 4) {
+        ((ж<float32>)(uintptr)(to)).Value = archFloat32FromReg(r.Floats[reg]);
     }
-    case 8: {
-        ((ж<float64>)(uintptr)(to)).val = ((ж<float64>)(uintptr)(new @unsafe.Pointer(Ꮡr.Floats.at<uint64>(reg)))).val;
-        break;
+    else if (exprᴛ1 == 8) {
+        ((ж<float64>)(uintptr)(to)).Value = ((ж<float64>)(uintptr)(new @unsafe.Pointer(Ꮡr.at(abi.RegArgs.ᏑFloats, reg)))).Value;
     }
-    default: {
+    else { /* default: */
         throw panic("bad argSize");
-        break;
-    }}
+    }
 
 }
 
@@ -529,21 +521,18 @@ internal static void floatFromReg(ж<abi.RegArgs> Ꮡr, nint reg, uintptr argSiz
 //
 // argSize must be either 4 or 8.
 internal static void floatToReg(ж<abi.RegArgs> Ꮡr, nint reg, uintptr argSize, @unsafe.Pointer from) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
-    switch (argSize) {
-    case 4: {
+    var exprᴛ1 = argSize;
+    if (exprᴛ1 == 4) {
         r.Floats[reg] = archFloat32ToReg(~(ж<float32>)(uintptr)(from));
-        break;
     }
-    case 8: {
+    else if (exprᴛ1 == 8) {
         r.Floats[reg] = ~(ж<uint64>)(uintptr)(from);
-        break;
     }
-    default: {
+    else { /* default: */
         throw panic("bad argSize");
-        break;
-    }}
+    }
 
 }
 

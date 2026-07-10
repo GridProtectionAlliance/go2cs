@@ -7,8 +7,8 @@ using errors = errors_package;
 using fmt = fmt_package;
 using strconv = strconv_package;
 using strings = strings_package;
-using atomic = sync.atomic_package;
-using sync;
+using atomic = go.sync.atomic_package;
+using go.sync;
 
 partial class slog_package {
 
@@ -38,8 +38,7 @@ partial class slog_package {
 // Level range. OpenTelemetry also has the names TRACE and FATAL, which slog
 // does not. But those OpenTelemetry levels can still be represented as slog
 // Levels by using the appropriate integers.
-public static readonly GoUntyped LevelDebug = /* -4 */
-    GoUntyped.Parse("-4");
+public static readonly ΔLevel LevelDebug = -4;
 
 public static readonly ΔLevel LevelInfo = 0;
 
@@ -57,20 +56,20 @@ public static readonly ΔLevel LevelError = 8;
 //	LevelWarn.String() => "WARN"
 //	(LevelInfo+2).String() => "INFO+2"
 public static @string String(this ΔLevel l) {
-    var str = (@string @base, ΔLevel val) => {
+    var str = @string (@string @base, ΔLevel val) => {
         if (val == 0) {
             return @base;
         }
         return fmt.Sprintf("%s%+d"u8, @base, val);
     };
     switch (ᐧ) {
-    case {} when l is < LevelInfo: {
+    case {} when l < LevelInfo: {
         return str("DEBUG"u8, l - LevelDebug);
     }
-    case {} when l is < LevelWarn: {
+    case {} when l < LevelWarn: {
         return str("INFO"u8, l - LevelInfo);
     }
-    case {} when l is < LevelError: {
+    case {} when l < LevelError: {
         return str("WARN"u8, l - LevelWarn);
     }
     default: {
@@ -93,12 +92,14 @@ public static (slice<byte>, error) MarshalJSON(this ΔLevel l) {
 // ignoring case.
 // It also accepts numeric offsets that would result in a different string on
 // output. For example, "Error-8" would marshal as "INFO".
-[GoRecv] public static error UnmarshalJSON(this ref ΔLevel l, slice<byte> data) {
+public static error UnmarshalJSON(this ж<ΔLevel> Ꮡl, slice<byte> data) {
+    ref var l = ref Ꮡl.Value;
+
     var (s, err) = strconv.Unquote(((@string)data));
     if (err != default!) {
         return err;
     }
-    return l.parse(s);
+    return Ꮡl.parse(s);
 }
 
 // MarshalText implements [encoding.TextMarshaler]
@@ -112,49 +113,55 @@ public static (slice<byte>, error) MarshalText(this ΔLevel l) {
 // ignoring case.
 // It also accepts numeric offsets that would result in a different string on
 // output. For example, "Error-8" would marshal as "INFO".
-[GoRecv] public static error UnmarshalText(this ref ΔLevel l, slice<byte> data) {
-    return l.parse(((@string)data));
+public static error UnmarshalText(this ж<ΔLevel> Ꮡl, slice<byte> data) {
+    ref var l = ref Ꮡl.Value;
+
+    return Ꮡl.parse(((@string)data));
 }
 
-[GoRecv] internal static error /*err*/ parse(this ref ΔLevel l, @string s) => func((defer, _) => {
+internal static error /*err*/ parse(this ж<ΔLevel> Ꮡl, @string s) {
     error err = default!;
+    func((defer, recover) => {
+    ref var l = ref Ꮡl.Value;
 
-    defer(() => {
-        if (err != default!) {
-            err = fmt.Errorf("slog: level string %q: %w"u8, s, err);
-        }
-    });
-    @string name = s;
-    nint offset = 0;
-    {
-        nint i = strings.IndexAny(s, "+-"u8); if (i >= 0) {
-            name = s[..(int)(i)];
-            (offset, err) = strconv.Atoi(s[(int)(i)..]);
+        defer(() => {
             if (err != default!) {
-                return err;
+                err = fmt.Errorf("slog: level string %q: %w"u8, s, err);
+            }
+        });
+        @string name = s;
+        nint offset = 0;
+        {
+            nint i = strings.IndexAny(s, "+-"u8); if (i >= 0) {
+                name = s[..(int)(i)];
+                (offset, err) = strconv.Atoi(s[(int)(i)..]);
+                if (err != default!) {
+                    return;
+                }
             }
         }
-    }
-    var exprᴛ1 = strings.ToUpper(name);
-    if (exprᴛ1 == "DEBUG"u8) {
-        l = LevelDebug;
-    }
-    else if (exprᴛ1 == "INFO"u8) {
-        l = LevelInfo;
-    }
-    else if (exprᴛ1 == "WARN"u8) {
-        l = LevelWarn;
-    }
-    else if (exprᴛ1 == "ERROR"u8) {
-        l = LevelError;
-    }
-    else { /* default: */
-        return errors.New("unknown name"u8);
-    }
+        var exprᴛ1 = strings.ToUpper(name);
+        if (exprᴛ1 == "DEBUG"u8) {
+            l = LevelDebug;
+        }
+        else if (exprᴛ1 == "INFO"u8) {
+            l = LevelInfo;
+        }
+        else if (exprᴛ1 == "WARN"u8) {
+            l = LevelWarn;
+        }
+        else if (exprᴛ1 == "ERROR"u8) {
+            l = LevelError;
+        }
+        else { /* default: */
+            err = errors.New("unknown name"u8); return;
+        }
 
-    l += ((ΔLevel)offset);
-    return default!;
-});
+        l += ((ΔLevel)offset);
+        err = default!;
+    });
+    return err;
+}
 
 // Level returns the receiver.
 // It implements [Leveler].
@@ -168,39 +175,49 @@ public static ΔLevel Level(this ΔLevel l) {
 // and it is safe for use by multiple goroutines.
 // The zero LevelVar corresponds to [LevelInfo].
 [GoType] partial struct LevelVar {
-    internal sync.atomic_package.Int64 val;
+    internal atomic.Int64 val;
 }
 
 // Level returns v's level.
-[GoRecv] public static ΔLevel Level(this ref LevelVar v) {
-    return ((ΔLevel)((nint)v.val.Load()));
+public static ΔLevel Level(this ж<LevelVar> Ꮡv) {
+    ref var v = ref Ꮡv.Value;
+
+    return ((ΔLevel)(nint)Ꮡv.of(LevelVar.Ꮡval).Load());
 }
 
 // Set sets v's level to l.
-[GoRecv] public static void Set(this ref LevelVar v, ΔLevel l) {
-    v.val.Store(((int64)l));
+public static void Set(this ж<LevelVar> Ꮡv, ΔLevel l) {
+    ref var v = ref Ꮡv.Value;
+
+    Ꮡv.of(LevelVar.Ꮡval).Store((int64)(nint)l);
 }
 
-[GoRecv] public static @string String(this ref LevelVar v) {
-    return fmt.Sprintf("LevelVar(%s)"u8, v.Level());
+public static @string String(this ж<LevelVar> Ꮡv) {
+    ref var v = ref Ꮡv.Value;
+
+    return fmt.Sprintf("LevelVar(%s)"u8, Ꮡv.Level());
 }
 
 // MarshalText implements [encoding.TextMarshaler]
 // by calling [Level.MarshalText].
-[GoRecv] public static (slice<byte>, error) MarshalText(this ref LevelVar v) {
-    return v.Level().MarshalText();
+public static (slice<byte>, error) MarshalText(this ж<LevelVar> Ꮡv) {
+    ref var v = ref Ꮡv.Value;
+
+    return Ꮡv.Level().MarshalText();
 }
 
 // UnmarshalText implements [encoding.TextUnmarshaler]
 // by calling [Level.UnmarshalText].
-[GoRecv] public static error UnmarshalText(this ref LevelVar v, slice<byte> data) {
-    ΔLevel l = default!;
+public static error UnmarshalText(this ж<LevelVar> Ꮡv, slice<byte> data) {
+    ref var v = ref Ꮡv.Value;
+
+    ref var l = ref heap(new ΔLevel(), out var Ꮡl);
     {
-        var err = l.UnmarshalText(data); if (err != default!) {
+        var err = Ꮡl.UnmarshalText(data); if (err != default!) {
             return err;
         }
     }
-    v.Set(l);
+    Ꮡv.Set(l);
     return default!;
 }
 

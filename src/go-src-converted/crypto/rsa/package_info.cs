@@ -13,6 +13,10 @@
 global using bigmodꓸNat = go.crypto.@internal.bigmod_package.ΔNat;
 global using bigꓸInt = go.math.big_package.ΔInt;
 global using bigꓸRat = go.math.big_package.ΔRat;
+global using cryptoꓸDecrypterOpts = object;
+global using cryptoꓸPrivateKey = object;
+global using cryptoꓸPublicKey = object;
+using bigmod = go.crypto.@internal.bigmod_package;
 // </ImportedTypeAliases>
 
 using go;

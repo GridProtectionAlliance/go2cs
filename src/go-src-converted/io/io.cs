@@ -13,7 +13,7 @@
 namespace go;
 
 using errors = errors_package;
-using sync = sync_package;
+using Δsync = sync_package;
 
 partial class io_package {
 
@@ -455,11 +455,11 @@ internal static (int64 written, error err) copyBuffer(Writer dst, Reader src, sl
     if (buf == default!) {
         nint size = 32 * 1024;
         {
-            var (l, ok) = src._<LimitedReader.val>(ᐧ); if (ok && ((int64)size) > (~l).N) {
+            var (l, ok) = src._<ж<LimitedReader>>(ᐧ); if (ok && (int64)size > (~l).N) {
                 if ((~l).N < 1){
                     size = 1;
                 } else {
-                    size = ((nint)(~l).N);
+                    size = (nint)(~l).N;
                 }
             }
         }
@@ -475,7 +475,7 @@ internal static (int64 written, error err) copyBuffer(Writer dst, Reader src, sl
                     ew = errInvalidWrite;
                 }
             }
-            written += ((int64)nw);
+            written += (int64)nw;
             if (ew != default!) {
                 err = ew;
                 break;
@@ -499,7 +499,7 @@ internal static (int64 written, error err) copyBuffer(Writer dst, Reader src, sl
 // but stops with EOF after n bytes.
 // The underlying implementation is a *LimitedReader.
 public static Reader LimitReader(Reader r, int64 n) {
-    return new LimitedReader(r, n);
+    return new LimitedReaderжReader(Ꮡ(new LimitedReader(r, n)));
 }
 
 // A LimitedReader reads from R but limits the amount of
@@ -518,11 +518,11 @@ public static Reader LimitReader(Reader r, int64 n) {
     if (l.N <= 0) {
         return (0, EOF);
     }
-    if (((int64)len(p)) > l.N) {
+    if ((int64)len(p) > l.N) {
         p = p[0..(int)(l.N)];
     }
     (n, err) = l.R.Read(p);
-    l.N -= ((int64)n);
+    l.N -= (int64)n;
     return (n, err);
 }
 
@@ -530,8 +530,8 @@ public static Reader LimitReader(Reader r, int64 n) {
 // starting at offset off and stops with EOF after n bytes.
 public static ж<SectionReader> NewSectionReader(ReaderAt r, int64 off, int64 n) {
     ref var remaining = ref heap(new int64(), out var Ꮡremaining);
-    static readonly UntypedInt maxint64 = /* 1<<63 - 1 */ 9223372036854775807;
-    if (off <= maxint64 - n){
+    UntypedInt maxint64 = /* 1<<63 - 1 */ 9223372036854775807;
+    if (off <= (int64)maxint64 - n){
         remaining = n + off;
     } else {
         // Overflow, with no way to return error.
@@ -559,12 +559,12 @@ public static ж<SectionReader> NewSectionReader(ReaderAt r, int64 off, int64 n)
         return (0, EOF);
     }
     {
-        var max = s.limit - s.off; if (((int64)len(p)) > max) {
+        var max = s.limit - s.off; if ((int64)len(p) > max) {
             p = p[0..(int)(max)];
         }
     }
     (n, err) = s.r.ReadAt(p, s.off);
-    s.off += ((int64)n);
+    s.off += (int64)n;
     return (n, err);
 }
 
@@ -574,9 +574,6 @@ internal static error errOffset = errors.New("Seek: invalid offset"u8);
 
 [GoRecv] public static (int64, error) Seek(this ref SectionReader s, int64 offset, nint whence) {
     var exprᴛ1 = whence;
-    { /* default: */
-        return (0, errWhence);
-    }
     if (exprᴛ1 == SeekStart) {
         offset += s.@base;
     }
@@ -585,6 +582,9 @@ internal static error errOffset = errors.New("Seek: invalid offset"u8);
     }
     else if (exprᴛ1 == SeekEnd) {
         offset += s.limit;
+    }
+    else { /* default: */
+        return (0, errWhence);
     }
 
     if (offset < s.@base) {
@@ -603,7 +603,7 @@ internal static error errOffset = errors.New("Seek: invalid offset"u8);
     }
     off += s.@base;
     {
-        var max = s.limit - off; if (((int64)len(p)) > max) {
+        var max = s.limit - off; if ((int64)len(p) > max) {
             p = p[0..(int)(max)];
             (n, err) = s.r.ReadAt(p, off);
             if (err == default!) {
@@ -650,7 +650,7 @@ public static ж<OffsetWriter> NewOffsetWriter(WriterAt w, int64 off) {
     error err = default!;
 
     (n, err) = o.w.WriteAt(p, o.off);
-    o.off += ((int64)n);
+    o.off += (int64)n;
     return (n, err);
 }
 
@@ -667,14 +667,14 @@ public static ж<OffsetWriter> NewOffsetWriter(WriterAt w, int64 off) {
 
 [GoRecv] public static (int64, error) Seek(this ref OffsetWriter o, int64 offset, nint whence) {
     var exprᴛ1 = whence;
-    { /* default: */
-        return (0, errWhence);
-    }
     if (exprᴛ1 == SeekStart) {
         offset += o.@base;
     }
     else if (exprᴛ1 == SeekCurrent) {
         offset += o.off;
+    }
+    else { /* default: */
+        return (0, errWhence);
     }
 
     if (offset < o.@base) {
@@ -690,7 +690,7 @@ public static ж<OffsetWriter> NewOffsetWriter(WriterAt w, int64 off) {
 // the write must complete before the read completes.
 // Any error encountered while writing is reported as a read error.
 public static Reader TeeReader(Reader r, Writer w) {
-    return new teeReader(r, w);
+    return new teeReaderжReader(Ꮡ(new teeReader(r, w)));
 }
 
 [GoType] partial struct teeReader {
@@ -722,7 +722,7 @@ public static Writer Discard = new discard(nil);
 
 // discard implements ReaderFrom as an optimization so Copy to
 // io.Discard can avoid doing unnecessary work.
-internal static ReaderFrom _ᴛ3ʗ = new discard(nil);
+internal static ReaderFrom _ᴛ1ʗ = new discard(nil);
 
 internal static (nint, error) Write(this discard _, slice<byte> p) {
     return (len(p), default!);
@@ -732,24 +732,25 @@ internal static (nint, error) WriteString(this discard _, @string s) {
     return (len(s), default!);
 }
 
-internal static sync.Pool blackHolePool = new sync.Pool(
+internal static ж<Δsync.Pool> ᏑblackHolePool = new(new Δsync.Pool(
     New: () => {
         var b = new slice<byte>(8192);
         return Ꮡ(b);
     }
-);
+));
+internal static ref Δsync.Pool blackHolePool => ref ᏑblackHolePool.Value;
 
 internal static (int64 n, error err) ReadFrom(this discard _, Reader r) {
     int64 n = default!;
     error err = default!;
 
-    var bufp = blackHolePool.Get()._<slice<byte>.val>();
+    var bufp = ᏑblackHolePool.Get()._<ж<slice<byte>>>();
     nint readSize = 0;
     while (ᐧ) {
-        (readSize, err) = r.Read(bufp.val);
-        n += ((int64)readSize);
+        (readSize, err) = r.Read(bufp.ValueSlot);
+        n += (int64)readSize;
         if (err != default!) {
-            blackHolePool.Put(bufp);
+            ᏑblackHolePool.Put(bufp);
             if (AreEqual(err, EOF)) {
                 return (n, default!);
             }
@@ -811,7 +812,7 @@ public static (slice<byte>, error) ReadAll(Reader r) {
         }
         if (len(b) == cap(b)) {
             // Add more capacity (let append pick how much).
-            b = append(b, 0)[..(int)(len(b))];
+            b = append(b, (byte)(0))[..(int)(len(b))];
         }
     }
 }

@@ -9,7 +9,7 @@ using sort = sort_package;
 
 partial class profile_package {
 
-[GoRecv] internal static slice<Δdecoder> decoder(this ref Profile p) {
+[GoRecv] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Profile p) {
     return profileDecoder;
 }
 
@@ -19,12 +19,16 @@ partial class profile_package {
 [GoRecv] internal static void preEncode(this ref Profile p) {
     var strings = new map<@string, nint>();
     addString(strings, ""u8);
-    foreach (var (_, st) in p.SampleType) {
-        st.val.typeX = addString(strings, (~st).Type);
-        st.val.unitX = addString(strings, (~st).Unit);
+    foreach (var (_, vᴛ1) in p.SampleType) {
+        var st = vᴛ1;
+
+        st.Value.typeX = addString(strings, (~st).Type);
+        st.Value.unitX = addString(strings, (~st).Unit);
     }
-    foreach (var (_, s) in p.Sample) {
-        s.val.labelX = default!;
+    foreach (var (_, vᴛ2) in p.Sample) {
+        var s = vᴛ2;
+
+        s.Value.labelX = default!;
         slice<@string> keys = default!;
         foreach (var (k, _) in (~s).Label) {
             keys = append(keys, k);
@@ -33,7 +37,7 @@ partial class profile_package {
         foreach (var (_, k) in keys) {
             var vs = (~s).Label[k];
             foreach (var (_, v) in vs) {
-                s.val.labelX = append((~s).labelX,
+                s.Value.labelX = append((~s).labelX,
                     new Label(
                         keyX: addString(strings, k),
                         strX: addString(strings, v)
@@ -48,47 +52,53 @@ partial class profile_package {
         foreach (var (_, k) in numKeys) {
             var vs = (~s).NumLabel[k];
             foreach (var (_, v) in vs) {
-                s.val.labelX = append((~s).labelX,
+                s.Value.labelX = append((~s).labelX,
                     new Label(
                         keyX: addString(strings, k),
                         numX: v
                     ));
             }
         }
-        s.val.locationIDX = default!;
+        s.Value.locationIDX = default!;
         foreach (var (_, l) in (~s).Location) {
-            s.val.locationIDX = append((~s).locationIDX, (~l).ID);
+            s.Value.locationIDX = append((~s).locationIDX, (~l).ID);
         }
     }
-    foreach (var (_, m) in p.Mapping) {
-        m.val.fileX = addString(strings, (~m).File);
-        m.val.buildIDX = addString(strings, (~m).BuildID);
+    foreach (var (_, vᴛ3) in p.Mapping) {
+        var m = vᴛ3;
+
+        m.Value.fileX = addString(strings, (~m).File);
+        m.Value.buildIDX = addString(strings, (~m).BuildID);
     }
-    foreach (var (_, l) in p.Location) {
+    foreach (var (_, vᴛ4) in p.Location) {
+        var l = vᴛ4;
+
         foreach (var (i, ln) in (~l).Line) {
             if (ln.Function != nil){
-                (~l).Line[i].functionIDX = ln.Function.val.ID;
+                (~l).Line[i].functionIDX = ln.Function.Value.ID;
             } else {
                 (~l).Line[i].functionIDX = 0;
             }
         }
         if ((~l).Mapping != nil){
-            l.val.mappingIDX = (~l).Mapping.val.ID;
+            l.Value.mappingIDX = l.Value.Mapping.Value.ID;
         } else {
-            l.val.mappingIDX = 0;
+            l.Value.mappingIDX = 0;
         }
     }
-    foreach (var (_, f) in p.Function) {
-        f.val.nameX = addString(strings, (~f).Name);
-        f.val.systemNameX = addString(strings, (~f).SystemName);
-        f.val.filenameX = addString(strings, (~f).Filename);
+    foreach (var (_, vᴛ5) in p.Function) {
+        var f = vᴛ5;
+
+        f.Value.nameX = addString(strings, (~f).Name);
+        f.Value.systemNameX = addString(strings, (~f).SystemName);
+        f.Value.filenameX = addString(strings, (~f).Filename);
     }
     p.dropFramesX = addString(strings, p.DropFrames);
     p.keepFramesX = addString(strings, p.KeepFrames);
     {
         var pt = p.PeriodType; if (pt != nil) {
-            pt.val.typeX = addString(strings, (~pt).Type);
-            pt.val.unitX = addString(strings, (~pt).Unit);
+            pt.Value.typeX = addString(strings, (~pt).Type);
+            pt.Value.unitX = addString(strings, (~pt).Unit);
         }
     }
     p.stringTable = new slice<@string>(len(strings));
@@ -97,23 +107,23 @@ partial class profile_package {
     }
 }
 
-[GoRecv] public static void encode(this ref Profile p, ж<buffer> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+[GoRecv] internal static void encode(this ref Profile p, ж<buffer> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
 
     foreach (var (_, x) in p.SampleType) {
-        encodeMessage(Ꮡb, 1, ~x);
+        encodeMessage(Ꮡb, 1, new ValueTypeжmessage(x));
     }
     foreach (var (_, x) in p.Sample) {
-        encodeMessage(Ꮡb, 2, ~x);
+        encodeMessage(Ꮡb, 2, new Sampleжmessage(x));
     }
     foreach (var (_, x) in p.Mapping) {
-        encodeMessage(Ꮡb, 3, ~x);
+        encodeMessage(Ꮡb, 3, new Mappingжmessage(x));
     }
     foreach (var (_, x) in p.Location) {
-        encodeMessage(Ꮡb, 4, ~x);
+        encodeMessage(Ꮡb, 4, new Locationжmessage(x));
     }
     foreach (var (_, x) in p.Function) {
-        encodeMessage(Ꮡb, 5, ~x);
+        encodeMessage(Ꮡb, 5, new Functionжmessage(x));
     }
     encodeStrings(Ꮡb, 6, p.stringTable);
     encodeInt64Opt(Ꮡb, 7, p.dropFramesX);
@@ -122,7 +132,7 @@ partial class profile_package {
     encodeInt64Opt(Ꮡb, 10, p.DurationNanos);
     {
         var pt = p.PeriodType; if (pt != nil && ((~pt).typeX != 0 || (~pt).unitX != 0)) {
-            encodeMessage(Ꮡb, 11, ~p.PeriodType);
+            encodeMessage(Ꮡb, 11, new ValueTypeжmessage(p.PeriodType));
         }
     }
     encodeInt64Opt(Ꮡb, 12, p.Period);
@@ -143,85 +153,93 @@ partial class profile_package {
 // repeated int64 period = 12
 // repeated int64 comment = 13
 // int64 defaultSampleType = 14
-internal static slice<Δdecoder> profileDecoder = new Δdecoder[]{
+internal static slice<Func<ж<buffer>, message, error>> profileDecoder = new Func<ж<buffer>, message, error>[]{
     default!,
     (ж<buffer> b, message m) => {
         var x = @new<ValueType>();
-        var pp = m._<Profile.val>();
-        var pp.val.SampleType = append((~pp).SampleType, x);
-        return decodeMessage(Ꮡb, ~x);
+        var pp = m._<ж<Profile>>();
+        pp.Value.SampleType = append((~pp).SampleType, x);
+        return decodeMessage(b, new ValueTypeжmessage(x));
     },
     (ж<buffer> b, message m) => {
         var x = @new<Sample>();
-        var pp = m._<Profile.val>();
-        var pp.val.Sample = append((~pp).Sample, x);
-        return decodeMessage(Ꮡb, ~x);
+        var pp = m._<ж<Profile>>();
+        pp.Value.Sample = append((~pp).Sample, x);
+        return decodeMessage(b, new Sampleжmessage(x));
     },
     (ж<buffer> b, message m) => {
         var x = @new<Mapping>();
-        var pp = m._<Profile.val>();
-        var pp.val.Mapping = append((~pp).Mapping, x);
-        return decodeMessage(Ꮡb, ~x);
+        var pp = m._<ж<Profile>>();
+        pp.Value.Mapping = append((~pp).Mapping, x);
+        return decodeMessage(b, new Mappingжmessage(x));
     },
     (ж<buffer> b, message m) => {
         var x = @new<Location>();
-        var pp = m._<Profile.val>();
-        var pp.val.Location = append((~pp).Location, x);
-        return decodeMessage(Ꮡb, ~x);
+        var pp = m._<ж<Profile>>();
+        pp.Value.Location = append((~pp).Location, x);
+        return decodeMessage(b, new Locationжmessage(x));
     },
     (ж<buffer> b, message m) => {
         var x = @new<Function>();
-        var pp = m._<Profile.val>();
-        var pp.val.Function = append((~pp).Function, x);
-        return decodeMessage(Ꮡb, ~x);
+        var pp = m._<ж<Profile>>();
+        pp.Value.Function = append((~pp).Function, x);
+        return decodeMessage(b, new Functionжmessage(x));
     },
-    (ж<buffer> b, message m) => {
-        var err = decodeStrings(Ꮡb, Ꮡ(m._<Profile.val>().stringTable));
+    error (ж<buffer> b, message m) => {
+        var err = decodeStrings(b, Ꮡ((~m._<ж<Profile>>()).stringTable));
         if (err != default!) {
             return err;
         }
-        if (m._<Profile.val>().stringTable[0] != "") {
+        if ((~m._<ж<Profile>>()).stringTable[0] != "") {
             return errors.New("string_table[0] must be ''"u8);
         }
         return default!;
     },
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<Profile.val>().dropFramesX)),
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<Profile.val>().keepFramesX)),
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<Profile.val>().TimeNanos)),
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<Profile.val>().DurationNanos)),
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<Profile>>()).dropFramesX)),
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<Profile>>()).keepFramesX)),
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<Profile>>()).TimeNanos)),
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<Profile>>()).DurationNanos)),
     (ж<buffer> b, message m) => {
         var x = @new<ValueType>();
-        var pp = m._<Profile.val>();
-        var pp.val.PeriodType = x;
-        return decodeMessage(Ꮡb, ~x);
+        var pp = m._<ж<Profile>>();
+        pp.Value.PeriodType = x;
+        return decodeMessage(b, new ValueTypeжmessage(x));
     },
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<Profile.val>().Period)),
-    (ж<buffer> b, message m) => decodeInt64s(Ꮡb, Ꮡ(m._<Profile.val>().commentX)),
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<Profile.val>().defaultSampleTypeX))
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<Profile>>()).Period)),
+    (ж<buffer> b, message m) => decodeInt64s(b, Ꮡ((~m._<ж<Profile>>()).commentX)),
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<Profile>>()).defaultSampleTypeX))
 }.slice();
 
 // postDecode takes the unexported fields populated by decode (with
 // suffix X) and populates the corresponding exported fields.
 // The unexported fields are cleared up to facilitate testing.
-[GoRecv] internal static error postDecode(this ref Profile p) {
+internal static error postDecode(this ж<Profile> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
     error err = default!;
     var mappings = new map<uint64, ж<Mapping>>();
-    foreach (var (_, m) in p.Mapping) {
-        (m.val.File, err) = getString(p.stringTable, Ꮡ((~m).fileX), err);
-        (m.val.BuildID, err) = getString(p.stringTable, Ꮡ((~m).buildIDX), err);
+    foreach (var (_, vᴛ1) in p.Mapping) {
+        var m = vᴛ1;
+
+        (m.Value.File, err) = getString(p.stringTable, m.of(Mapping.ᏑfileX), err);
+        (m.Value.BuildID, err) = getString(p.stringTable, m.of(Mapping.ᏑbuildIDX), err);
         mappings[(~m).ID] = m;
     }
     var functions = new map<uint64, ж<Function>>();
-    foreach (var (_, f) in p.Function) {
-        (f.val.Name, err) = getString(p.stringTable, Ꮡ((~f).nameX), err);
-        (f.val.SystemName, err) = getString(p.stringTable, Ꮡ((~f).systemNameX), err);
-        (f.val.Filename, err) = getString(p.stringTable, Ꮡ((~f).filenameX), err);
+    foreach (var (_, vᴛ2) in p.Function) {
+        var f = vᴛ2;
+
+        (f.Value.Name, err) = getString(p.stringTable, f.of(Function.ᏑnameX), err);
+        (f.Value.SystemName, err) = getString(p.stringTable, f.of(Function.ᏑsystemNameX), err);
+        (f.Value.Filename, err) = getString(p.stringTable, f.of(Function.ᏑfilenameX), err);
         functions[(~f).ID] = f;
     }
     var locations = new map<uint64, ж<Location>>();
-    foreach (var (_, l) in p.Location) {
-        l.val.Mapping = mappings[(~l).mappingIDX];
-        l.val.mappingIDX = 0;
+    foreach (var (_, vᴛ3) in p.Location) {
+        var l = vᴛ3;
+
+        l.Value.Mapping = mappings[(~l).mappingIDX];
+        l.Value.mappingIDX = 0;
         foreach (var (i, ln) in (~l).Line) {
             {
                 var id = ln.functionIDX; if (id != 0) {
@@ -235,16 +253,21 @@ internal static slice<Δdecoder> profileDecoder = new Δdecoder[]{
         }
         locations[(~l).ID] = l;
     }
-    foreach (var (_, st) in p.SampleType) {
-        (st.val.Type, err) = getString(p.stringTable, Ꮡ((~st).typeX), err);
-        (st.val.Unit, err) = getString(p.stringTable, Ꮡ((~st).unitX), err);
+    foreach (var (_, vᴛ4) in p.SampleType) {
+        var st = vᴛ4;
+
+        (st.Value.Type, err) = getString(p.stringTable, st.of(ValueType.ᏑtypeX), err);
+        (st.Value.Unit, err) = getString(p.stringTable, st.of(ValueType.ᏑunitX), err);
     }
-    foreach (var (_, s) in p.Sample) {
+    foreach (var (_, vᴛ5) in p.Sample) {
+        var s = vᴛ5;
+
         var labels = new map<@string, slice<@string>>();
         var numLabels = new map<@string, slice<int64>>();
-        ref var l = ref heap(new Label(), out var Ꮡl);
+        foreach (var (_, vᴛ6) in (~s).labelX) {
+            ref var l = ref heap(new Label(), out var Ꮡl);
+            l = vᴛ6;
 
-        foreach (var (_, l) in (~s).labelX) {
             @string key = default!;
             @string value = default!;
             (key, err) = getString(p.stringTable, Ꮡl.of(Label.ᏑkeyX), err);
@@ -256,21 +279,19 @@ internal static slice<Δdecoder> profileDecoder = new Δdecoder[]{
             }
         }
         if (len(labels) > 0) {
-            s.val.Label = labels;
+            s.Value.Label = labels;
         }
         if (len(numLabels) > 0) {
-            s.val.NumLabel = numLabels;
+            s.Value.NumLabel = numLabels;
         }
-        s.val.Location = default!;
-        ref var lid = ref heap(new uint64(), out var Ꮡlid);
-
+        s.Value.Location = default!;
         foreach (var (_, lid) in (~s).locationIDX) {
-            s.val.Location = append((~s).Location, locations[lid]);
+            s.Value.Location = append((~s).Location, locations[lid]);
         }
-        s.val.locationIDX = default!;
+        s.Value.locationIDX = default!;
     }
-    (p.DropFrames, err) = getString(p.stringTable, Ꮡ(p.dropFramesX), err);
-    (p.KeepFrames, err) = getString(p.stringTable, Ꮡ(p.keepFramesX), err);
+    (p.DropFrames, err) = getString(p.stringTable, Ꮡp.of(Profile.ᏑdropFramesX), err);
+    (p.KeepFrames, err) = getString(p.stringTable, Ꮡp.of(Profile.ᏑkeepFramesX), err);
     {
         var pt = p.PeriodType; if (pt == nil) {
             p.PeriodType = Ꮡ(new ValueType(nil));
@@ -278,29 +299,30 @@ internal static slice<Δdecoder> profileDecoder = new Δdecoder[]{
     }
     {
         var pt = p.PeriodType; if (pt != nil) {
-            (pt.val.Type, err) = getString(p.stringTable, Ꮡ((~pt).typeX), err);
-            (pt.val.Unit, err) = getString(p.stringTable, Ꮡ((~pt).unitX), err);
+            (pt.Value.Type, err) = getString(p.stringTable, pt.of(ValueType.ᏑtypeX), err);
+            (pt.Value.Unit, err) = getString(p.stringTable, pt.of(ValueType.ᏑunitX), err);
         }
     }
-    ref var i = ref heap(new int64(), out var Ꮡi);
+    foreach (var (_, vᴛ7) in p.commentX) {
+        ref var i = ref heap(new int64(), out var Ꮡi);
+        i = vᴛ7;
 
-    foreach (var (_, i) in p.commentX) {
         @string c = default!;
         (c, err) = getString(p.stringTable, Ꮡi, err);
         p.Comments = append(p.Comments, c);
     }
     p.commentX = default!;
-    (p.DefaultSampleType, err) = getString(p.stringTable, Ꮡ(p.defaultSampleTypeX), err);
+    (p.DefaultSampleType, err) = getString(p.stringTable, Ꮡp.of(Profile.ᏑdefaultSampleTypeX), err);
     p.stringTable = default!;
     return err;
 }
 
-[GoRecv] internal static slice<Δdecoder> decoder(this ref ValueType p) {
+[GoRecv] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref ValueType p) {
     return valueTypeDecoder;
 }
 
-[GoRecv] public static void encode(this ref ValueType p, ж<buffer> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+[GoRecv] internal static void encode(this ref ValueType p, ж<buffer> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
 
     encodeInt64Opt(Ꮡb, 1, p.typeX);
     encodeInt64Opt(Ꮡb, 2, p.unitX);
@@ -309,18 +331,18 @@ internal static slice<Δdecoder> profileDecoder = new Δdecoder[]{
 // 0
 // optional int64 type = 1
 // optional int64 unit = 2
-internal static slice<Δdecoder> valueTypeDecoder = new Δdecoder[]{
+internal static slice<Func<ж<buffer>, message, error>> valueTypeDecoder = new Func<ж<buffer>, message, error>[]{
     default!,
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<ValueType.val>().typeX)),
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<ValueType.val>().unitX))
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<ValueType>>()).typeX)),
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<ValueType>>()).unitX))
 }.slice();
 
-[GoRecv] internal static slice<Δdecoder> decoder(this ref Sample p) {
+[GoRecv] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Sample p) {
     return sampleDecoder;
 }
 
-[GoRecv] public static void encode(this ref Sample p, ж<buffer> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+[GoRecv] internal static void encode(this ref Sample p, ж<buffer> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
 
     encodeUint64s(Ꮡb, 1, p.locationIDX);
     foreach (var (_, x) in p.Value) {
@@ -335,24 +357,24 @@ internal static slice<Δdecoder> valueTypeDecoder = new Δdecoder[]{
 // repeated uint64 location = 1
 // repeated int64 value = 2
 // repeated Label label = 3
-internal static slice<Δdecoder> sampleDecoder = new Δdecoder[]{
+internal static slice<Func<ж<buffer>, message, error>> sampleDecoder = new Func<ж<buffer>, message, error>[]{
     default!,
-    (ж<buffer> b, message m) => decodeUint64s(Ꮡb, Ꮡ(m._<Sample.val>().locationIDX)),
-    (ж<buffer> b, message m) => decodeInt64s(Ꮡb, Ꮡ(m._<Sample.val>().Value)),
+    (ж<buffer> b, message m) => decodeUint64s(b, Ꮡ((~m._<ж<Sample>>()).locationIDX)),
+    (ж<buffer> b, message m) => decodeInt64s(b, Ꮡ((~m._<ж<Sample>>()).Value)),
     (ж<buffer> b, message m) => {
-        var s = m._<Sample.val>();
+        var s = m._<ж<Sample>>();
         nint n = len((~s).labelX);
-        var s.val.labelX = append((~s).labelX, new Label(nil));
-        return decodeMessage(Ꮡb, (~s).labelX, n);
+        s.Value.labelX = append((~s).labelX, new Label(nil));
+        return decodeMessage(b, new Labelжmessage(Ꮡ((~s).labelX, n)));
     }
 }.slice();
 
-internal static slice<Δdecoder> decoder(this Label p) {
+internal static slice<Func<ж<buffer>, message, error>> decoder(this Label p) {
     return labelDecoder;
 }
 
-public static void encode(this Label p, ж<buffer> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+internal static void encode(this Label p, ж<buffer> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
 
     encodeInt64Opt(Ꮡb, 1, p.keyX);
     encodeInt64Opt(Ꮡb, 2, p.strX);
@@ -363,19 +385,19 @@ public static void encode(this Label p, ж<buffer> Ꮡb) {
 // optional int64 key = 1
 // optional int64 str = 2
 // optional int64 num = 3
-internal static slice<Δdecoder> labelDecoder = new Δdecoder[]{
+internal static slice<Func<ж<buffer>, message, error>> labelDecoder = new Func<ж<buffer>, message, error>[]{
     default!,
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<Label.val>().keyX)),
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<Label.val>().strX)),
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<Label.val>().numX))
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<Label>>()).keyX)),
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<Label>>()).strX)),
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<Label>>()).numX))
 }.slice();
 
-[GoRecv] internal static slice<Δdecoder> decoder(this ref Mapping p) {
+[GoRecv] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Mapping p) {
     return mappingDecoder;
 }
 
-[GoRecv] public static void encode(this ref Mapping p, ж<buffer> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+[GoRecv] internal static void encode(this ref Mapping p, ж<buffer> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
 
     encodeUint64Opt(Ꮡb, 1, p.ID);
     encodeUint64Opt(Ꮡb, 2, p.Start);
@@ -400,32 +422,32 @@ internal static slice<Δdecoder> labelDecoder = new Δdecoder[]{
 // optional bool has_filenames = 8
 // optional bool has_line_numbers = 9
 // optional bool has_inline_frames = 10
-internal static slice<Δdecoder> mappingDecoder = new Δdecoder[]{
+internal static slice<Func<ж<buffer>, message, error>> mappingDecoder = new Func<ж<buffer>, message, error>[]{
     default!,
-    (ж<buffer> b, message m) => decodeUint64(Ꮡb, Ꮡ(m._<Mapping.val>().ID)),
-    (ж<buffer> b, message m) => decodeUint64(Ꮡb, Ꮡ(m._<Mapping.val>().Start)),
-    (ж<buffer> b, message m) => decodeUint64(Ꮡb, Ꮡ(m._<Mapping.val>().Limit)),
-    (ж<buffer> b, message m) => decodeUint64(Ꮡb, Ꮡ(m._<Mapping.val>().Offset)),
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<Mapping.val>().fileX)),
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<Mapping.val>().buildIDX)),
-    (ж<buffer> b, message m) => decodeBool(Ꮡb, Ꮡ(m._<Mapping.val>().HasFunctions)),
-    (ж<buffer> b, message m) => decodeBool(Ꮡb, Ꮡ(m._<Mapping.val>().HasFilenames)),
-    (ж<buffer> b, message m) => decodeBool(Ꮡb, Ꮡ(m._<Mapping.val>().HasLineNumbers)),
-    (ж<buffer> b, message m) => decodeBool(Ꮡb, Ꮡ(m._<Mapping.val>().HasInlineFrames))
+    (ж<buffer> b, message m) => decodeUint64(b, Ꮡ((~m._<ж<Mapping>>()).ID)),
+    (ж<buffer> b, message m) => decodeUint64(b, Ꮡ((~m._<ж<Mapping>>()).Start)),
+    (ж<buffer> b, message m) => decodeUint64(b, Ꮡ((~m._<ж<Mapping>>()).Limit)),
+    (ж<buffer> b, message m) => decodeUint64(b, Ꮡ((~m._<ж<Mapping>>()).Offset)),
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<Mapping>>()).fileX)),
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<Mapping>>()).buildIDX)),
+    (ж<buffer> b, message m) => decodeBool(b, Ꮡ((~m._<ж<Mapping>>()).HasFunctions)),
+    (ж<buffer> b, message m) => decodeBool(b, Ꮡ((~m._<ж<Mapping>>()).HasFilenames)),
+    (ж<buffer> b, message m) => decodeBool(b, Ꮡ((~m._<ж<Mapping>>()).HasLineNumbers)),
+    (ж<buffer> b, message m) => decodeBool(b, Ꮡ((~m._<ж<Mapping>>()).HasInlineFrames))
 }.slice();
 
-[GoRecv] internal static slice<Δdecoder> decoder(this ref Location p) {
+[GoRecv] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Location p) {
     return locationDecoder;
 }
 
-[GoRecv] public static void encode(this ref Location p, ж<buffer> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+[GoRecv] internal static void encode(this ref Location p, ж<buffer> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
 
     encodeUint64Opt(Ꮡb, 1, p.ID);
     encodeUint64Opt(Ꮡb, 2, p.mappingIDX);
     encodeUint64Opt(Ꮡb, 3, p.Address);
     foreach (var (i, _) in p.Line) {
-        encodeMessage(Ꮡb, 4, p.Line[i]);
+        encodeMessage(Ꮡb, 4, new Lineжmessage(Ꮡ(p.Line[i])));
     }
 }
 
@@ -434,45 +456,45 @@ internal static slice<Δdecoder> mappingDecoder = new Δdecoder[]{
 // optional uint64 mapping_id = 2;
 // optional uint64 address = 3;
 // repeated Line line = 4
-internal static slice<Δdecoder> locationDecoder = new Δdecoder[]{
+internal static slice<Func<ж<buffer>, message, error>> locationDecoder = new Func<ж<buffer>, message, error>[]{
     default!,
-    (ж<buffer> b, message m) => decodeUint64(Ꮡb, Ꮡ(m._<Location.val>().ID)),
-    (ж<buffer> b, message m) => decodeUint64(Ꮡb, Ꮡ(m._<Location.val>().mappingIDX)),
-    (ж<buffer> b, message m) => decodeUint64(Ꮡb, Ꮡ(m._<Location.val>().Address)),
+    (ж<buffer> b, message m) => decodeUint64(b, Ꮡ((~m._<ж<Location>>()).ID)),
+    (ж<buffer> b, message m) => decodeUint64(b, Ꮡ((~m._<ж<Location>>()).mappingIDX)),
+    (ж<buffer> b, message m) => decodeUint64(b, Ꮡ((~m._<ж<Location>>()).Address)),
     (ж<buffer> b, message m) => {
-        var pp = m._<Location.val>();
+        var pp = m._<ж<Location>>();
         nint n = len((~pp).Line);
-        var pp.val.Line = append((~pp).Line, new Line(nil));
-        return decodeMessage(Ꮡb, (~pp).Line, n);
+        pp.Value.Line = append((~pp).Line, new Line(nil));
+        return decodeMessage(b, new Lineжmessage(Ꮡ((~pp).Line, n)));
     }
 }.slice();
 
-[GoRecv] internal static slice<Δdecoder> decoder(this ref Line p) {
+[GoRecv] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Line p) {
     return lineDecoder;
 }
 
-[GoRecv] public static void encode(this ref Line p, ж<buffer> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+[GoRecv] internal static void encode(this ref Line p, ж<buffer> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
 
     encodeUint64Opt(Ꮡb, 1, p.functionIDX);
-    encodeInt64Opt(Ꮡb, 2, p.Line);
+    encodeInt64Opt(Ꮡb, 2, p.ΔLine);
 }
 
 // 0
 // optional uint64 function_id = 1
 // optional int64 line = 2
-internal static slice<Δdecoder> lineDecoder = new Δdecoder[]{
+internal static slice<Func<ж<buffer>, message, error>> lineDecoder = new Func<ж<buffer>, message, error>[]{
     default!,
-    (ж<buffer> b, message m) => decodeUint64(Ꮡb, Ꮡ(m._<Line.val>().functionIDX)),
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<Line.val>().Line))
+    (ж<buffer> b, message m) => decodeUint64(b, Ꮡ((~m._<ж<Line>>()).functionIDX)),
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<Line>>()).ΔLine))
 }.slice();
 
-[GoRecv] internal static slice<Δdecoder> decoder(this ref Function p) {
+[GoRecv] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Function p) {
     return functionDecoder;
 }
 
-[GoRecv] public static void encode(this ref Function p, ж<buffer> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+[GoRecv] internal static void encode(this ref Function p, ж<buffer> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
 
     encodeUint64Opt(Ꮡb, 1, p.ID);
     encodeInt64Opt(Ꮡb, 2, p.nameX);
@@ -487,32 +509,31 @@ internal static slice<Δdecoder> lineDecoder = new Δdecoder[]{
 // optional int64 function_system_name = 3
 // repeated int64 filename = 4
 // optional int64 start_line = 5
-internal static slice<Δdecoder> functionDecoder = new Δdecoder[]{
+internal static slice<Func<ж<buffer>, message, error>> functionDecoder = new Func<ж<buffer>, message, error>[]{
     default!,
-    (ж<buffer> b, message m) => decodeUint64(Ꮡb, Ꮡ(m._<Function.val>().ID)),
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<Function.val>().nameX)),
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<Function.val>().systemNameX)),
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<Function.val>().filenameX)),
-    (ж<buffer> b, message m) => decodeInt64(Ꮡb, Ꮡ(m._<Function.val>().StartLine))
+    (ж<buffer> b, message m) => decodeUint64(b, Ꮡ((~m._<ж<Function>>()).ID)),
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<Function>>()).nameX)),
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<Function>>()).systemNameX)),
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<Function>>()).filenameX)),
+    (ж<buffer> b, message m) => decodeInt64(b, Ꮡ((~m._<ж<Function>>()).StartLine))
 }.slice();
 
 internal static int64 addString(map<@string, nint> strings, @string s) {
-    nint i = strings[s];
-    var ok = strings[s];
+    var (i, ok) = strings[s, ꟷ];
     if (!ok) {
         i = len(strings);
         strings[s] = i;
     }
-    return ((int64)i);
+    return (int64)i;
 }
 
 internal static (@string, error) getString(slice<@string> strings, ж<int64> Ꮡstrng, error err) {
-    ref var strng = ref Ꮡstrng.val;
+    ref var strng = ref Ꮡstrng.Value;
 
     if (err != default!) {
         return ("", err);
     }
-    nint s = ((nint)(strng));
+    nint s = (nint)(strng);
     if (s < 0 || s >= len(strings)) {
         return ("", errMalformed);
     }

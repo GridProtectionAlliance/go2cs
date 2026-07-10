@@ -64,7 +64,7 @@ partial class runtime_package {
 internal static readonly UntypedInt bucketCntBits = /* abi.MapBucketCountBits */ 3;
 internal static readonly UntypedInt loadFactorDen = 2;
 internal static readonly UntypedInt loadFactorNum = /* loadFactorDen * abi.MapBucketCount * 13 / 16 */ 13;
-internal const uintptr dataOffset = /* unsafe.Offsetof(struct {
+internal static readonly uintptr dataOffset = /* unsafe.Offsetof(struct {
 	b	bmap
 	v	int64
 }{}.v) */ 8;
@@ -154,7 +154,7 @@ internal static bool isEmpty(uint8 x) {
 // bucketShift returns 1<<b, optimized for code generation.
 internal static uintptr bucketShift(uint8 b) {
     // Masking the shift amount allows overflow checks to be elided.
-    return ((uintptr)1) << (int)(((uint8)(b & (goarch.PtrSize * 8 - 1))));
+    return ((uintptr)1 << (int)(((uint8)(b & (uint8)((goarch.PtrSize * 8 - 1))))));
 }
 
 // bucketMask returns 1<<b - 1, optimized for code generation.
@@ -164,7 +164,7 @@ internal static uintptr bucketMask(uint8 b) {
 
 // tophash calculates the tophash value for hash.
 internal static uint8 tophash(uintptr hash) {
-    var top = ((uint8)(hash >> (int)((goarch.PtrSize * 8 - 8))));
+    var top = (uint8)((hash >> (int)((goarch.PtrSize * 8 - 8))));
     if (top < minTopHash) {
         top += minTopHash;
     }
@@ -172,26 +172,30 @@ internal static uint8 tophash(uintptr hash) {
 }
 
 internal static bool evacuated(ж<bmap> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     var h = b.tophash[0];
     return h > emptyOne && h < minTopHash;
 }
 
-[GoRecv] internal static ж<bmap> overflow(this ref bmap b, ж<maptype> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+internal static ж<bmap> overflow(this ж<bmap> Ꮡb, ж<maptype> Ꮡt) {
+    ref var b = ref Ꮡb.Value;
+    ref var t = ref Ꮡt.Value;
 
-    return ~(ж<ж<bmap>>)(uintptr)(add((uintptr)@unsafe.Pointer.FromRef(ref b), ((uintptr)t.BucketSize) - goarch.PtrSize));
+    return ~(ж<ж<bmap>>)(uintptr)(add((uintptr)@unsafe.Pointer.FromRef(ref b), (uintptr)t.BucketSize - (uintptr)goarch.PtrSize));
 }
 
-[GoRecv] internal static void setoverflow(this ref bmap b, ж<maptype> Ꮡt, ж<bmap> Ꮡovf) {
-    ref var t = ref Ꮡt.val;
-    ref var ovf = ref Ꮡovf.val;
+internal static void setoverflow(this ж<bmap> Ꮡb, ж<maptype> Ꮡt, ж<bmap> Ꮡovf) {
+    ref var b = ref Ꮡb.Value;
+    ref var t = ref Ꮡt.Value;
+    ref var ovf = ref Ꮡovf.Value;
 
-    ((ж<ж<bmap>>)(uintptr)(add((uintptr)@unsafe.Pointer.FromRef(ref b), ((uintptr)t.BucketSize) - goarch.PtrSize))).val = ovf;
+    ((ж<ж<bmap>>)(uintptr)(add((uintptr)@unsafe.Pointer.FromRef(ref b), (uintptr)t.BucketSize - (uintptr)goarch.PtrSize))).ValueSlot = Ꮡovf;
 }
 
-[GoRecv] internal static @unsafe.Pointer keys(this ref bmap b) {
+internal static @unsafe.Pointer keys(this ж<bmap> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
+
     return (uintptr)add((uintptr)@unsafe.Pointer.FromRef(ref b), dataOffset);
 }
 
@@ -213,32 +217,32 @@ internal static bool evacuated(ж<bmap> Ꮡb) {
     // Increment with probability 1/(1<<(h.B-15)).
     // When we reach 1<<15 - 1, we will have approximately
     // as many overflow buckets as buckets.
-    var mask = ((uint32)1) << (int)((h.B - 15)) - 1;
+    var mask = ((uint32)1 << (int)((h.B - 15))) - 1;
     // Example: if h.B == 18, then mask == 7,
     // and rand() & 7 == 0 with probability 1/8.
-    if ((uint32)(((uint32)rand()) & mask) == 0) {
+    if ((uint32)((uint32)rand() & mask) == 0) {
         h.noverflow++;
     }
 }
 
 [GoRecv] internal static ж<bmap> newoverflow(this ref hmap h, ж<maptype> Ꮡt, ж<bmap> Ꮡb) {
-    ref var t = ref Ꮡt.val;
-    ref var b = ref Ꮡb.val;
+    ref var t = ref Ꮡt.Value;
+    ref var b = ref Ꮡb.Value;
 
     ж<bmap> ovf = default!;
-    if (h.extra != nil && h.extra.nextOverflow != nil){
+    if (h.extra != nil && (~h.extra).nextOverflow != nil){
         // We have preallocated overflow buckets available.
         // See makeBucketArray for more details.
-        ovf = h.extra.nextOverflow;
+        ovf = h.extra.Value.nextOverflow;
         if (ovf.overflow(Ꮡt) == nil){
             // We're not at the end of the preallocated overflow buckets. Bump the pointer.
-            h.extra.nextOverflow = (ж<bmap>)(uintptr)(add(new @unsafe.Pointer(ovf), ((uintptr)t.BucketSize)));
+            h.extra.Value.nextOverflow = (ж<bmap>)(uintptr)(add(new @unsafe.Pointer(ovf), (uintptr)t.BucketSize));
         } else {
             // This is the last preallocated overflow bucket.
             // Reset the overflow pointer on this bucket,
             // which was set to a non-nil sentinel value.
             ovf.setoverflow(Ꮡt, nil);
-            h.extra.nextOverflow = default!;
+            h.extra.Value.nextOverflow = default!;
         }
     } else {
         ovf = (ж<bmap>)(uintptr)(newobject(t.Bucket));
@@ -246,9 +250,9 @@ internal static bool evacuated(ж<bmap> Ꮡb) {
     h.incrnoverflow();
     if (!t.Bucket.Pointers()) {
         h.createOverflow();
-        h.extra.overflow.val = append(h.extra.overflow.val, ovf);
+        (~h.extra).overflow.ValueSlot = append((~h.extra).overflow.ValueSlot, ovf);
     }
-    b.setoverflow(Ꮡt, ovf);
+    Ꮡb.setoverflow(Ꮡt, ovf);
     return ovf;
 }
 
@@ -256,19 +260,19 @@ internal static bool evacuated(ж<bmap> Ꮡb) {
     if (h.extra == nil) {
         h.extra = @new<mapextra>();
     }
-    if (h.extra.overflow == nil) {
-        h.extra.overflow = @new<slice<ж<bmap>>>();
+    if ((~h.extra).overflow == nil) {
+        h.extra.Value.overflow = @new<slice<ж<bmap>>>();
     }
 }
 
 internal static ж<hmap> makemap64(ж<maptype> Ꮡt, int64 hint, ж<hmap> Ꮡh) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
 
-    if (((int64)((nint)hint)) != hint) {
+    if ((int64)(nint)hint != hint) {
         hint = 0;
     }
-    return makemap(Ꮡt, ((nint)hint), Ꮡh);
+    return makemap(Ꮡt, (nint)hint, Ꮡh);
 }
 
 // makemap_small implements Go map creation for make(map[k]v) and
@@ -286,7 +290,7 @@ internal static ж<hmap> makemap64(ж<maptype> Ꮡt, int64 hint, ж<hmap> Ꮡh) 
 //go:linkname makemap_small
 internal static ж<hmap> makemap_small() {
     var h = @new<hmap>();
-    h.val.hash0 = ((uint32)rand());
+    h.Value.hash0 = (uint32)rand();
     return h;
 }
 
@@ -307,21 +311,21 @@ internal static ж<hmap> makemap_small() {
 //
 //go:linkname makemap
 internal static ж<hmap> makemap(ж<maptype> Ꮡt, nint hint, ж<hmap> Ꮡh) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.DerefOrNil();
 
-    var (mem, overflow) = math.MulUintptr(((uintptr)hint), t.Bucket.Size_);
+    var (mem, overflow) = math.MulUintptr((uintptr)hint, (~t.Bucket).Size_);
     if (overflow || mem > maxAlloc) {
         hint = 0;
     }
     // initialize Hmap
-    if (h == nil) {
-        h = @new<hmap>();
+    if (Ꮡh == nil) {
+        Ꮡh = @new<hmap>(); h = ref Ꮡh.DerefOrNil();
     }
-    h.hash0 = ((uint32)rand());
+    h.hash0 = (uint32)rand();
     // Find the size parameter B which will hold the requested # of elements.
     // For hint < 0 overLoadFactor returns false since hint < bucketCnt.
-    var B = ((uint8)0);
+    var B = (uint8)0;
     while (overLoadFactor(hint, B)) {
         B++;
     }
@@ -334,7 +338,7 @@ internal static ж<hmap> makemap(ж<maptype> Ꮡt, nint hint, ж<hmap> Ꮡh) {
         (h.buckets, nextOverflow) = makeBucketArray(Ꮡt, h.B, nil);
         if (nextOverflow != nil) {
             h.extra = @new<mapextra>();
-            h.extra.nextOverflow = nextOverflow;
+            h.extra.Value.nextOverflow = nextOverflow;
         }
     }
     return Ꮡh;
@@ -350,7 +354,7 @@ internal static (@unsafe.Pointer buckets, ж<bmap> nextOverflow) makeBucketArray
     @unsafe.Pointer buckets = default!;
     ж<bmap> nextOverflow = default!;
 
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
     var @base = bucketShift(b);
     var nbuckets = @base;
     // For small b, overflow buckets are unlikely.
@@ -359,21 +363,21 @@ internal static (@unsafe.Pointer buckets, ж<bmap> nextOverflow) makeBucketArray
         // Add on the estimated number of overflow buckets
         // required to insert the median number of elements
         // used with this value of b.
-        nbuckets += bucketShift(b - 4);
-        var sz = t.Bucket.Size_ * nbuckets;
+        nbuckets += bucketShift((uint8)(b - 4));
+        var sz = (~t.Bucket).Size_ * nbuckets;
         var up = roundupsize(sz, !t.Bucket.Pointers());
         if (up != sz) {
-            nbuckets = up / t.Bucket.Size_;
+            nbuckets = up / (~t.Bucket).Size_;
         }
     }
     if (dirtyalloc == nil){
-        buckets = (uintptr)newarray(t.Bucket, ((nint)nbuckets));
+        buckets = (uintptr)newarray(t.Bucket, (nint)nbuckets);
     } else {
         // dirtyalloc was previously generated by
         // the above newarray(t.Bucket, int(nbuckets))
         // but may not be empty.
         buckets = dirtyalloc;
-        var size = t.Bucket.Size_ * nbuckets;
+        var size = (~t.Bucket).Size_ * nbuckets;
         if (t.Bucket.Pointers()){
             memclrHasPointers(buckets, size);
         } else {
@@ -386,8 +390,8 @@ internal static (@unsafe.Pointer buckets, ж<bmap> nextOverflow) makeBucketArray
         // we use the convention that if a preallocated overflow bucket's overflow
         // pointer is nil, then there are more available by bumping the pointer.
         // We need a safe non-nil pointer for the last overflow bucket; just use buckets.
-        nextOverflow = (ж<bmap>)(uintptr)(add(buckets, @base * ((uintptr)t.BucketSize)));
-        var last = (ж<bmap>)(uintptr)(add(buckets, (nbuckets - 1) * ((uintptr)t.BucketSize)));
+        nextOverflow = (ж<bmap>)(uintptr)(add(buckets, @base * (uintptr)t.BucketSize));
+        var last = (ж<bmap>)(uintptr)(add(buckets, (nbuckets - 1) * (uintptr)t.BucketSize));
         last.setoverflow(Ꮡt, (ж<bmap>)(uintptr)(buckets));
     }
     return (buckets, nextOverflow);
@@ -399,43 +403,43 @@ internal static (@unsafe.Pointer buckets, ж<bmap> nextOverflow) makeBucketArray
 // NOTE: The returned pointer may keep the whole map live, so don't
 // hold onto it for very long.
 internal static @unsafe.Pointer mapaccess1(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.Pointer key) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.DerefOrNil();
 
-    if (raceenabled && h != nil) {
+    if (raceenabled && Ꮡh != nil) {
         var callerpc = getcallerpc();
         var pc = abi.FuncPCABIInternal(mapaccess1);
         racereadpc(new @unsafe.Pointer(Ꮡh), callerpc, pc);
-        raceReadObjectPC(t.Key, key.val, callerpc, pc);
+        raceReadObjectPC(t.Key, key, callerpc, pc);
     }
-    if (msanenabled && h != nil) {
-        msanread(key.val, t.Key.Size_);
+    if (msanenabled && Ꮡh != nil) {
+        msanread(key, (~t.Key).Size_);
     }
-    if (asanenabled && h != nil) {
-        asanread(key.val, t.Key.Size_);
+    if (asanenabled && Ꮡh != nil) {
+        asanread(key, (~t.Key).Size_);
     }
-    if (h == nil || h.count == 0) {
+    if (Ꮡh == nil || h.count == 0) {
         {
-            var err = mapKeyError(Ꮡt, key.val); if (err != default!) {
+            var err = mapKeyError(Ꮡt, key); if (err != default!) {
                 throw panic(err);
             }
         }
         // see issue 23734
         return new @unsafe.Pointer(ᏑzeroVal.at<byte>(0));
     }
-    if ((uint8)(h.flags & hashWriting) != 0) {
+    if ((uint8)(h.flags & (uint8)hashWriting) != 0) {
         fatal("concurrent map read and map write"u8);
     }
-    var hash = t.Hasher(key, ((uintptr)h.hash0));
+    var hash = t.Hasher(key, (uintptr)h.hash0);
     var m = bucketMask(h.B);
-    var b = (ж<bmap>)(uintptr)(add(h.buckets, ((uintptr)(hash & m)) * ((uintptr)t.BucketSize)));
+    var b = (ж<bmap>)(uintptr)(add(h.buckets, ((uintptr)(hash & m)) * (uintptr)t.BucketSize));
     {
         @unsafe.Pointer c = h.oldbuckets; if (c != nil) {
             if (!h.sameSizeGrow()) {
                 // There used to be half as many buckets; mask down one more power of two.
-                m >>= (UntypedInt)(1);
+                m >>= (int)(1);
             }
-            var oldb = (ж<bmap>)(uintptr)(add(c, ((uintptr)(hash & m)) * ((uintptr)t.BucketSize)));
+            var oldb = (ж<bmap>)(uintptr)(add(c, ((uintptr)(hash & m)) * (uintptr)t.BucketSize));
             if (!evacuated(oldb)) {
                 b = oldb;
             }
@@ -444,21 +448,21 @@ internal static @unsafe.Pointer mapaccess1(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @uns
     var top = tophash(hash);
 bucketloop:
     for (; b != nil; b = b.overflow(Ꮡt)) {
-        for (var i = ((uintptr)0); i < abi.MapBucketCount; i++) {
-            if ((~b).tophash[i] != top) {
-                if ((~b).tophash[i] == emptyRest) {
+        for (var i = (uintptr)0; i < abi.MapBucketCount; i++) {
+            if ((~b).tophash[(nint)(i)] != top) {
+                if ((~b).tophash[(nint)(i)] == emptyRest) {
                     goto break_bucketloop;
                 }
                 continue;
             }
-            @unsafe.Pointer k = (uintptr)add(new @unsafe.Pointer(b), dataOffset + i * ((uintptr)t.KeySize));
+            @unsafe.Pointer k = (uintptr)add(new @unsafe.Pointer(b), dataOffset + i * (uintptr)t.KeySize);
             if (t.IndirectKey()) {
-                k = ((ж<@unsafe.Pointer>)(uintptr)(k)).val;
+                k = ((ж<@unsafe.Pointer>)(uintptr)(k)).Value;
             }
-            if (t.Key.Equal(key, k)) {
-                @unsafe.Pointer e = (uintptr)add(new @unsafe.Pointer(b), dataOffset + abi.MapBucketCount * ((uintptr)t.KeySize) + i * ((uintptr)t.ValueSize));
+            if ((~t.Key).Equal(key, k)) {
+                @unsafe.Pointer e = (uintptr)add(new @unsafe.Pointer(b), dataOffset + (uintptr)abi.MapBucketCount * (uintptr)t.KeySize + i * (uintptr)t.ValueSize);
                 if (t.IndirectElem()) {
-                    e = ((ж<@unsafe.Pointer>)(uintptr)(e)).val;
+                    e = ((ж<@unsafe.Pointer>)(uintptr)(e)).Value;
                 }
                 return e;
             }
@@ -479,43 +483,43 @@ break_bucketloop:;
 //
 //go:linkname mapaccess2
 internal static (@unsafe.Pointer, bool) mapaccess2(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.Pointer key) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.DerefOrNil();
 
-    if (raceenabled && h != nil) {
+    if (raceenabled && Ꮡh != nil) {
         var callerpc = getcallerpc();
         var pc = abi.FuncPCABIInternal(mapaccess2);
         racereadpc(new @unsafe.Pointer(Ꮡh), callerpc, pc);
-        raceReadObjectPC(t.Key, key.val, callerpc, pc);
+        raceReadObjectPC(t.Key, key, callerpc, pc);
     }
-    if (msanenabled && h != nil) {
-        msanread(key.val, t.Key.Size_);
+    if (msanenabled && Ꮡh != nil) {
+        msanread(key, (~t.Key).Size_);
     }
-    if (asanenabled && h != nil) {
-        asanread(key.val, t.Key.Size_);
+    if (asanenabled && Ꮡh != nil) {
+        asanread(key, (~t.Key).Size_);
     }
-    if (h == nil || h.count == 0) {
+    if (Ꮡh == nil || h.count == 0) {
         {
-            var err = mapKeyError(Ꮡt, key.val); if (err != default!) {
+            var err = mapKeyError(Ꮡt, key); if (err != default!) {
                 throw panic(err);
             }
         }
         // see issue 23734
         return (new @unsafe.Pointer(ᏑzeroVal.at<byte>(0)), false);
     }
-    if ((uint8)(h.flags & hashWriting) != 0) {
+    if ((uint8)(h.flags & (uint8)hashWriting) != 0) {
         fatal("concurrent map read and map write"u8);
     }
-    var hash = t.Hasher(key, ((uintptr)h.hash0));
+    var hash = t.Hasher(key, (uintptr)h.hash0);
     var m = bucketMask(h.B);
-    var b = (ж<bmap>)(uintptr)(add(h.buckets, ((uintptr)(hash & m)) * ((uintptr)t.BucketSize)));
+    var b = (ж<bmap>)(uintptr)(add(h.buckets, ((uintptr)(hash & m)) * (uintptr)t.BucketSize));
     {
         @unsafe.Pointer c = h.oldbuckets; if (c != nil) {
             if (!h.sameSizeGrow()) {
                 // There used to be half as many buckets; mask down one more power of two.
-                m >>= (UntypedInt)(1);
+                m >>= (int)(1);
             }
-            var oldb = (ж<bmap>)(uintptr)(add(c, ((uintptr)(hash & m)) * ((uintptr)t.BucketSize)));
+            var oldb = (ж<bmap>)(uintptr)(add(c, ((uintptr)(hash & m)) * (uintptr)t.BucketSize));
             if (!evacuated(oldb)) {
                 b = oldb;
             }
@@ -524,21 +528,21 @@ internal static (@unsafe.Pointer, bool) mapaccess2(ж<maptype> Ꮡt, ж<hmap> �
     var top = tophash(hash);
 bucketloop:
     for (; b != nil; b = b.overflow(Ꮡt)) {
-        for (var i = ((uintptr)0); i < abi.MapBucketCount; i++) {
-            if ((~b).tophash[i] != top) {
-                if ((~b).tophash[i] == emptyRest) {
+        for (var i = (uintptr)0; i < abi.MapBucketCount; i++) {
+            if ((~b).tophash[(nint)(i)] != top) {
+                if ((~b).tophash[(nint)(i)] == emptyRest) {
                     goto break_bucketloop;
                 }
                 continue;
             }
-            @unsafe.Pointer k = (uintptr)add(new @unsafe.Pointer(b), dataOffset + i * ((uintptr)t.KeySize));
+            @unsafe.Pointer k = (uintptr)add(new @unsafe.Pointer(b), dataOffset + i * (uintptr)t.KeySize);
             if (t.IndirectKey()) {
-                k = ((ж<@unsafe.Pointer>)(uintptr)(k)).val;
+                k = ((ж<@unsafe.Pointer>)(uintptr)(k)).Value;
             }
-            if (t.Key.Equal(key, k)) {
-                @unsafe.Pointer e = (uintptr)add(new @unsafe.Pointer(b), dataOffset + abi.MapBucketCount * ((uintptr)t.KeySize) + i * ((uintptr)t.ValueSize));
+            if ((~t.Key).Equal(key, k)) {
+                @unsafe.Pointer e = (uintptr)add(new @unsafe.Pointer(b), dataOffset + (uintptr)abi.MapBucketCount * (uintptr)t.KeySize + i * (uintptr)t.ValueSize);
                 if (t.IndirectElem()) {
-                    e = ((ж<@unsafe.Pointer>)(uintptr)(e)).val;
+                    e = ((ж<@unsafe.Pointer>)(uintptr)(e)).Value;
                 }
                 return (e, true);
             }
@@ -551,22 +555,22 @@ break_bucketloop:;
 
 // returns both key and elem. Used by map iterator.
 internal static (@unsafe.Pointer, @unsafe.Pointer) mapaccessK(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.Pointer key) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.DerefOrNil();
 
-    if (h == nil || h.count == 0) {
+    if (Ꮡh == nil || h.count == 0) {
         return (default!, default!);
     }
-    var hash = t.Hasher(key, ((uintptr)h.hash0));
+    var hash = t.Hasher(key, (uintptr)h.hash0);
     var m = bucketMask(h.B);
-    var b = (ж<bmap>)(uintptr)(add(h.buckets, ((uintptr)(hash & m)) * ((uintptr)t.BucketSize)));
+    var b = (ж<bmap>)(uintptr)(add(h.buckets, ((uintptr)(hash & m)) * (uintptr)t.BucketSize));
     {
         @unsafe.Pointer c = h.oldbuckets; if (c != nil) {
             if (!h.sameSizeGrow()) {
                 // There used to be half as many buckets; mask down one more power of two.
-                m >>= (UntypedInt)(1);
+                m >>= (int)(1);
             }
-            var oldb = (ж<bmap>)(uintptr)(add(c, ((uintptr)(hash & m)) * ((uintptr)t.BucketSize)));
+            var oldb = (ж<bmap>)(uintptr)(add(c, ((uintptr)(hash & m)) * (uintptr)t.BucketSize));
             if (!evacuated(oldb)) {
                 b = oldb;
             }
@@ -575,21 +579,21 @@ internal static (@unsafe.Pointer, @unsafe.Pointer) mapaccessK(ж<maptype> Ꮡt, 
     var top = tophash(hash);
 bucketloop:
     for (; b != nil; b = b.overflow(Ꮡt)) {
-        for (var i = ((uintptr)0); i < abi.MapBucketCount; i++) {
-            if ((~b).tophash[i] != top) {
-                if ((~b).tophash[i] == emptyRest) {
+        for (var i = (uintptr)0; i < abi.MapBucketCount; i++) {
+            if ((~b).tophash[(nint)(i)] != top) {
+                if ((~b).tophash[(nint)(i)] == emptyRest) {
                     goto break_bucketloop;
                 }
                 continue;
             }
-            @unsafe.Pointer k = (uintptr)add(new @unsafe.Pointer(b), dataOffset + i * ((uintptr)t.KeySize));
+            @unsafe.Pointer k = (uintptr)add(new @unsafe.Pointer(b), dataOffset + i * (uintptr)t.KeySize);
             if (t.IndirectKey()) {
-                k = ((ж<@unsafe.Pointer>)(uintptr)(k)).val;
+                k = ((ж<@unsafe.Pointer>)(uintptr)(k)).Value;
             }
-            if (t.Key.Equal(key, k)) {
-                @unsafe.Pointer e = (uintptr)add(new @unsafe.Pointer(b), dataOffset + abi.MapBucketCount * ((uintptr)t.KeySize) + i * ((uintptr)t.ValueSize));
+            if ((~t.Key).Equal(key, k)) {
+                @unsafe.Pointer e = (uintptr)add(new @unsafe.Pointer(b), dataOffset + (uintptr)abi.MapBucketCount * (uintptr)t.KeySize + i * (uintptr)t.ValueSize);
                 if (t.IndirectElem()) {
-                    e = ((ж<@unsafe.Pointer>)(uintptr)(e)).val;
+                    e = ((ж<@unsafe.Pointer>)(uintptr)(e)).Value;
                 }
                 return (k, e);
             }
@@ -601,23 +605,23 @@ break_bucketloop:;
 }
 
 internal static @unsafe.Pointer mapaccess1_fat(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.Pointer key, @unsafe.Pointer zero) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
 
-    @unsafe.Pointer e = (uintptr)mapaccess1(Ꮡt, Ꮡh, key.val);
-    if (e.val == new @unsafe.Pointer(ᏑzeroVal.at<byte>(0))) {
-        return Ꮡzero;
+    @unsafe.Pointer e = (uintptr)mapaccess1(Ꮡt, Ꮡh, key);
+    if (e.Value == new @unsafe.Pointer(ᏑzeroVal.at<byte>(0))) {
+        return zero;
     }
     return e;
 }
 
 internal static (@unsafe.Pointer, bool) mapaccess2_fat(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.Pointer key, @unsafe.Pointer zero) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
 
-    @unsafe.Pointer e = (uintptr)mapaccess1(Ꮡt, Ꮡh, key.val);
-    if (e.val == new @unsafe.Pointer(ᏑzeroVal.at<byte>(0))) {
-        return (Ꮡzero, false);
+    @unsafe.Pointer e = (uintptr)mapaccess1(Ꮡt, Ꮡh, key);
+    if (e.Value == new @unsafe.Pointer(ᏑzeroVal.at<byte>(0))) {
+        return (zero, false);
     }
     return (e, true);
 }
@@ -638,31 +642,31 @@ internal static (@unsafe.Pointer, bool) mapaccess2_fat(ж<maptype> Ꮡt, ж<hmap
 //
 //go:linkname mapassign
 internal static @unsafe.Pointer mapassign(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.Pointer key) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.DerefOrNil();
 
-    if (h == nil) {
-        throw panic(((plainError)"assignment to entry in nil map"u8));
+    if (Ꮡh == nil) {
+        throw panic(((plainError)(@string)"assignment to entry in nil map"u8));
     }
     if (raceenabled) {
         var callerpc = getcallerpc();
         var pc = abi.FuncPCABIInternal(mapassign);
         racewritepc(new @unsafe.Pointer(Ꮡh), callerpc, pc);
-        raceReadObjectPC(t.Key, key.val, callerpc, pc);
+        raceReadObjectPC(t.Key, key, callerpc, pc);
     }
     if (msanenabled) {
-        msanread(key.val, t.Key.Size_);
+        msanread(key, (~t.Key).Size_);
     }
     if (asanenabled) {
-        asanread(key.val, t.Key.Size_);
+        asanread(key, (~t.Key).Size_);
     }
-    if ((uint8)(h.flags & hashWriting) != 0) {
+    if ((uint8)(h.flags & (uint8)hashWriting) != 0) {
         fatal("concurrent map writes"u8);
     }
-    var hash = t.Hasher(key, ((uintptr)h.hash0));
+    var hash = t.Hasher(key, (uintptr)h.hash0);
     // Set hashWriting after calling t.hasher, since t.hasher may panic,
     // in which case we have not actually done a write.
-    h.flags ^= (uint8)(hashWriting);
+    h.flags ^= hashWriting;
     if (h.buckets == nil) {
         h.buckets = (uintptr)newobject(t.Bucket);
     }
@@ -672,37 +676,37 @@ again:
     if (h.growing()) {
         growWork(Ꮡt, Ꮡh, bucket);
     }
-    var b = (ж<bmap>)(uintptr)(add(h.buckets, bucket * ((uintptr)t.BucketSize)));
+    var b = (ж<bmap>)(uintptr)(add(h.buckets, bucket * (uintptr)t.BucketSize));
     var top = tophash(hash);
     ж<uint8> inserti = default!;
     @unsafe.Pointer insertk = default!;
     @unsafe.Pointer elem = default!;
 bucketloop:
     while (ᐧ) {
-        for (var i = ((uintptr)0); i < abi.MapBucketCount; i++) {
-            if ((~b).tophash[i] != top) {
-                if (isEmpty((~b).tophash[i]) && inserti == nil) {
-                    inserti = Ꮡ(~b).tophash.at<uint8>(i);
-                    insertk = (uintptr)add(new @unsafe.Pointer(b), dataOffset + i * ((uintptr)t.KeySize));
-                    elem = (uintptr)add(new @unsafe.Pointer(b), dataOffset + abi.MapBucketCount * ((uintptr)t.KeySize) + i * ((uintptr)t.ValueSize));
+        for (var i = (uintptr)0; i < abi.MapBucketCount; i++) {
+            if ((~b).tophash[(nint)(i)] != top) {
+                if (isEmpty((~b).tophash[(nint)(i)]) && inserti == nil) {
+                    inserti = b.at(bmap.Ꮡtophash, (nint)(i));
+                    insertk = (uintptr)add(new @unsafe.Pointer(b), dataOffset + i * (uintptr)t.KeySize);
+                    elem = (uintptr)add(new @unsafe.Pointer(b), dataOffset + (uintptr)abi.MapBucketCount * (uintptr)t.KeySize + i * (uintptr)t.ValueSize);
                 }
-                if ((~b).tophash[i] == emptyRest) {
+                if ((~b).tophash[(nint)(i)] == emptyRest) {
                     goto break_bucketloop;
                 }
                 continue;
             }
-            @unsafe.Pointer k = (uintptr)add(new @unsafe.Pointer(b), dataOffset + i * ((uintptr)t.KeySize));
+            @unsafe.Pointer k = (uintptr)add(new @unsafe.Pointer(b), dataOffset + i * (uintptr)t.KeySize);
             if (t.IndirectKey()) {
-                k = ((ж<@unsafe.Pointer>)(uintptr)(k)).val;
+                k = ((ж<@unsafe.Pointer>)(uintptr)(k)).Value;
             }
-            if (!t.Key.Equal(key, k)) {
+            if (!(~t.Key).Equal(key, k)) {
                 continue;
             }
             // already have a mapping for key. Update it.
             if (t.NeedKeyUpdate()) {
-                typedmemmove(t.Key, k, key.val);
+                typedmemmove(t.Key, k, key);
             }
-            elem = (uintptr)add(new @unsafe.Pointer(b), dataOffset + abi.MapBucketCount * ((uintptr)t.KeySize) + i * ((uintptr)t.ValueSize));
+            elem = (uintptr)add(new @unsafe.Pointer(b), dataOffset + (uintptr)abi.MapBucketCount * (uintptr)t.KeySize + i * (uintptr)t.ValueSize);
             goto done;
         }
         var ovf = b.overflow(Ꮡt);
@@ -724,30 +728,30 @@ break_bucketloop:;
     if (inserti == nil) {
         // The current bucket and all the overflow buckets connected to it are full, allocate a new one.
         var newb = h.newoverflow(Ꮡt, b);
-        inserti = Ꮡ(~newb).tophash.at<uint8>(0);
+        inserti = newb.at(bmap.Ꮡtophash, 0);
         insertk = (uintptr)add(new @unsafe.Pointer(newb), dataOffset);
-        elem = (uintptr)add(insertk, abi.MapBucketCount * ((uintptr)t.KeySize));
+        elem = (uintptr)add(insertk, (uintptr)abi.MapBucketCount * (uintptr)t.KeySize);
     }
     // store new key/elem at insert position
     if (t.IndirectKey()) {
         @unsafe.Pointer kmem = (uintptr)newobject(t.Key);
-        ((ж<@unsafe.Pointer>)(uintptr)(insertk)).val = kmem;
+        ((ж<@unsafe.Pointer>)(uintptr)(insertk)).Value = kmem;
         insertk = kmem;
     }
     if (t.IndirectElem()) {
         @unsafe.Pointer vmem = (uintptr)newobject(t.Elem);
-        ((ж<@unsafe.Pointer>)(uintptr)(elem)).val = vmem;
+        ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value = vmem;
     }
-    typedmemmove(t.Key, insertk, key.val);
-    inserti.val = top;
+    typedmemmove(t.Key, insertk, key);
+    inserti.Value = top;
     h.count++;
 done:
-    if ((uint8)(h.flags & hashWriting) == 0) {
+    if ((uint8)(h.flags & (uint8)hashWriting) == 0) {
         fatal("concurrent map writes"u8);
     }
-    h.flags &= ~(uint8)(hashWriting);
+    h.flags &= unchecked((uint8)~hashWriting);
     if (t.IndirectElem()) {
-        elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).val;
+        elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
     }
     return elem;
 }
@@ -762,78 +766,78 @@ done:
 //
 //go:linkname mapdelete
 internal static void mapdelete(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.Pointer key) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.DerefOrNil();
 
-    if (raceenabled && h != nil) {
+    if (raceenabled && Ꮡh != nil) {
         var callerpc = getcallerpc();
         var pc = abi.FuncPCABIInternal(mapdelete);
         racewritepc(new @unsafe.Pointer(Ꮡh), callerpc, pc);
-        raceReadObjectPC(t.Key, key.val, callerpc, pc);
+        raceReadObjectPC(t.Key, key, callerpc, pc);
     }
-    if (msanenabled && h != nil) {
-        msanread(key.val, t.Key.Size_);
+    if (msanenabled && Ꮡh != nil) {
+        msanread(key, (~t.Key).Size_);
     }
-    if (asanenabled && h != nil) {
-        asanread(key.val, t.Key.Size_);
+    if (asanenabled && Ꮡh != nil) {
+        asanread(key, (~t.Key).Size_);
     }
-    if (h == nil || h.count == 0) {
+    if (Ꮡh == nil || h.count == 0) {
         {
-            var err = mapKeyError(Ꮡt, key.val); if (err != default!) {
+            var err = mapKeyError(Ꮡt, key); if (err != default!) {
                 throw panic(err);
             }
         }
         // see issue 23734
         return;
     }
-    if ((uint8)(h.flags & hashWriting) != 0) {
+    if ((uint8)(h.flags & (uint8)hashWriting) != 0) {
         fatal("concurrent map writes"u8);
     }
-    var hash = t.Hasher(key, ((uintptr)h.hash0));
+    var hash = t.Hasher(key, (uintptr)h.hash0);
     // Set hashWriting after calling t.hasher, since t.hasher may panic,
     // in which case we have not actually done a write (delete).
-    h.flags ^= (uint8)(hashWriting);
+    h.flags ^= hashWriting;
     var bucket = (uintptr)(hash & bucketMask(h.B));
     if (h.growing()) {
         growWork(Ꮡt, Ꮡh, bucket);
     }
-    var b = (ж<bmap>)(uintptr)(add(h.buckets, bucket * ((uintptr)t.BucketSize)));
+    var b = (ж<bmap>)(uintptr)(add(h.buckets, bucket * (uintptr)t.BucketSize));
     var bOrig = b;
     var top = tophash(hash);
 search:
     for (; b != nil; b = b.overflow(Ꮡt)) {
-        for (var i = ((uintptr)0); i < abi.MapBucketCount; i++) {
-            if ((~b).tophash[i] != top) {
-                if ((~b).tophash[i] == emptyRest) {
+        for (var i = (uintptr)0; i < abi.MapBucketCount; i++) {
+            if ((~b).tophash[(nint)(i)] != top) {
+                if ((~b).tophash[(nint)(i)] == emptyRest) {
                     goto break_search;
                 }
                 continue;
             }
-            @unsafe.Pointer k = (uintptr)add(new @unsafe.Pointer(b), dataOffset + i * ((uintptr)t.KeySize));
+            @unsafe.Pointer k = (uintptr)add(new @unsafe.Pointer(b), dataOffset + i * (uintptr)t.KeySize);
             @unsafe.Pointer k2 = k;
             if (t.IndirectKey()) {
-                k2 = ((ж<@unsafe.Pointer>)(uintptr)(k2)).val;
+                k2 = ((ж<@unsafe.Pointer>)(uintptr)(k2)).Value;
             }
-            if (!t.Key.Equal(key, k2)) {
+            if (!(~t.Key).Equal(key, k2)) {
                 continue;
             }
             // Only clear key if there are pointers in it.
             if (t.IndirectKey()){
-                ((ж<@unsafe.Pointer>)(uintptr)(k)).val = default!;
+                ((ж<@unsafe.Pointer>)(uintptr)(k)).Value = default!;
             } else 
             if (t.Key.Pointers()) {
-                memclrHasPointers(k, t.Key.Size_);
+                memclrHasPointers(k, (~t.Key).Size_);
             }
-            @unsafe.Pointer e = (uintptr)add(new @unsafe.Pointer(b), dataOffset + abi.MapBucketCount * ((uintptr)t.KeySize) + i * ((uintptr)t.ValueSize));
+            @unsafe.Pointer e = (uintptr)add(new @unsafe.Pointer(b), dataOffset + (uintptr)abi.MapBucketCount * (uintptr)t.KeySize + i * (uintptr)t.ValueSize);
             if (t.IndirectElem()){
-                ((ж<@unsafe.Pointer>)(uintptr)(e)).val = default!;
+                ((ж<@unsafe.Pointer>)(uintptr)(e)).Value = default!;
             } else 
             if (t.Elem.Pointers()){
-                memclrHasPointers(e, t.Elem.Size_);
+                memclrHasPointers(e, (~t.Elem).Size_);
             } else {
-                memclrNoHeapPointers(e, t.Elem.Size_);
+                memclrNoHeapPointers(e, (~t.Elem).Size_);
             }
-            (~b).tophash[i] = emptyOne;
+            b.Value.tophash[(nint)(i)] = emptyOne;
             // If the bucket now ends in a bunch of emptyOne states,
             // change those to emptyRest states.
             // It would be nice to make this a separate function, but
@@ -843,12 +847,12 @@ search:
                     goto notLast;
                 }
             } else {
-                if ((~b).tophash[i + 1] != emptyRest) {
+                if ((~b).tophash[(nint)(i + 1)] != emptyRest) {
                     goto notLast;
                 }
             }
             while (ᐧ) {
-                (~b).tophash[i] = emptyRest;
+                b.Value.tophash[(nint)(i)] = emptyRest;
                 if (i == 0){
                     if (b == bOrig) {
                         break;
@@ -862,7 +866,7 @@ search:
                 } else {
                     i--;
                 }
-                if ((~b).tophash[i] != emptyOne) {
+                if ((~b).tophash[(nint)(i)] != emptyOne) {
                     break;
                 }
             }
@@ -871,17 +875,17 @@ notLast:
             // Reset the hash seed to make it more difficult for attackers to
             // repeatedly trigger hash collisions. See issue 25237.
             if (h.count == 0) {
-                h.hash0 = ((uint32)rand());
+                h.hash0 = (uint32)rand();
             }
             goto break_search;
         }
 continue_search:;
     }
 break_search:;
-    if ((uint8)(h.flags & hashWriting) == 0) {
+    if ((uint8)(h.flags & (uint8)hashWriting) == 0) {
         fatal("concurrent map writes"u8);
     }
-    h.flags &= ~(uint8)(hashWriting);
+    h.flags &= unchecked((uint8)~hashWriting);
 }
 
 // mapiterinit initializes the hiter struct used for ranging over maps.
@@ -905,23 +909,23 @@ break_search:;
 //
 //go:linkname mapiterinit
 internal static void mapiterinit(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<hiter> Ꮡit) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
-    ref var it = ref Ꮡit.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.DerefOrNil();
+    ref var it = ref Ꮡit.Value;
 
-    if (raceenabled && h != nil) {
+    if (raceenabled && Ꮡh != nil) {
         var callerpc = getcallerpc();
         racereadpc(new @unsafe.Pointer(Ꮡh), callerpc, abi.FuncPCABIInternal(mapiterinit));
     }
-    it.t = t;
-    if (h == nil || h.count == 0) {
+    it.t = Ꮡt;
+    if (Ꮡh == nil || h.count == 0) {
         return;
     }
-    if (@unsafe.Sizeof(new hiter(nil)) / goarch.PtrSize != 12) {
+    if (@unsafe.Sizeof(new hiter(nil)) / (uintptr)goarch.PtrSize != 12) {
         @throw("hash_iter size incorrect"u8);
     }
     // see cmd/compile/internal/reflectdata/reflect.go
-    it.h = h;
+    it.h = Ꮡh;
     // grab snapshot of bucket state
     it.B = h.B;
     it.buckets = h.buckets;
@@ -931,20 +935,20 @@ internal static void mapiterinit(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<hiter> Ꮡi
         // the table grows and/or overflow buckets are added to the table
         // while we are iterating.
         h.createOverflow();
-        it.overflow = h.extra.overflow;
-        it.oldoverflow = h.extra.oldoverflow;
+        it.overflow = h.extra.Value.overflow;
+        it.oldoverflow = h.extra.Value.oldoverflow;
     }
     // decide where to start
-    var r = ((uintptr)rand());
+    var r = (uintptr)rand();
     it.startBucket = (uintptr)(r & bucketMask(h.B));
-    it.offset = ((uint8)((uintptr)(r >> (int)(h.B) & (abi.MapBucketCount - 1))));
+    it.offset = (uint8)((uintptr)((r >> (int)(h.B)) & (uintptr)(abi.MapBucketCount - 1)));
     // iterator state
     it.bucket = it.startBucket;
     // Remember we have an iterator.
     // Can run concurrently with another mapiterinit().
     {
-        var old = h.flags; if ((uint8)(old & ((uint8)(iterator | oldIterator))) != (uint8)(iterator | oldIterator)) {
-            atomic.Or8(Ꮡ(h.flags), (uint8)(iterator | oldIterator));
+        var old = h.flags; if ((uint8)(old & ((uint8)((uint8)iterator | (uint8)oldIterator))) != (uint8)((uint8)iterator | (uint8)oldIterator)) {
+            atomic.Or8(Ꮡh.of(hmap.Ꮡflags), (uint8)((uint8)iterator | (uint8)oldIterator));
         }
     }
     mapiternext(Ꮡit);
@@ -965,14 +969,14 @@ internal static void mapiterinit(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<hiter> Ꮡi
 //
 //go:linkname mapiternext
 internal static void mapiternext(ж<hiter> Ꮡit) {
-    ref var it = ref Ꮡit.val;
+    ref var it = ref Ꮡit.Value;
 
     var h = it.h;
     if (raceenabled) {
         var callerpc = getcallerpc();
         racereadpc(new @unsafe.Pointer(h), callerpc, abi.FuncPCABIInternal(mapiternext));
     }
-    if ((uint8)((~h).flags & hashWriting) != 0) {
+    if ((uint8)((~h).flags & (uint8)hashWriting) != 0) {
         fatal("concurrent map iteration and map write"u8);
     }
     var t = it.t;
@@ -994,15 +998,15 @@ next:
             // bucket hasn't been evacuated) then we need to iterate through the old
             // bucket and only return the ones that will be migrated to this bucket.
             var oldbucket = (uintptr)(bucket & it.h.oldbucketmask());
-            b = (ж<bmap>)(uintptr)(add((~h).oldbuckets, oldbucket * ((uintptr)(~t).BucketSize)));
+            b = (ж<bmap>)(uintptr)(add((~h).oldbuckets, oldbucket * (uintptr)(~t).BucketSize));
             if (!evacuated(b)){
                 checkBucket = bucket;
             } else {
-                b = (ж<bmap>)(uintptr)(add(it.buckets, bucket * ((uintptr)(~t).BucketSize)));
+                b = (ж<bmap>)(uintptr)(add(it.buckets, bucket * (uintptr)(~t).BucketSize));
                 checkBucket = noCheck;
             }
         } else {
-            b = (ж<bmap>)(uintptr)(add(it.buckets, bucket * ((uintptr)(~t).BucketSize)));
+            b = (ж<bmap>)(uintptr)(add(it.buckets, bucket * (uintptr)(~t).BucketSize));
             checkBucket = noCheck;
         }
         bucket++;
@@ -1013,17 +1017,17 @@ next:
         i = 0;
     }
     for (; i < abi.MapBucketCount; i++) {
-        var offi = (uint8)((i + it.offset) & (abi.MapBucketCount - 1));
+        var offi = (uint8)((i + it.offset) & (uint8)((abi.MapBucketCount - 1)));
         if (isEmpty((~b).tophash[offi]) || (~b).tophash[offi] == evacuatedEmpty) {
             // TODO: emptyRest is hard to use here, as we start iterating
             // in the middle of a bucket. It's feasible, just tricky.
             continue;
         }
-        @unsafe.Pointer k = (uintptr)add(new @unsafe.Pointer(b), dataOffset + ((uintptr)offi) * ((uintptr)(~t).KeySize));
+        @unsafe.Pointer k = (uintptr)add(new @unsafe.Pointer(b), dataOffset + (uintptr)offi * (uintptr)(~t).KeySize);
         if (t.IndirectKey()) {
-            k = ((ж<@unsafe.Pointer>)(uintptr)(k)).val;
+            k = ((ж<@unsafe.Pointer>)(uintptr)(k)).Value;
         }
-        @unsafe.Pointer e = (uintptr)add(new @unsafe.Pointer(b), dataOffset + abi.MapBucketCount * ((uintptr)(~t).KeySize) + ((uintptr)offi) * ((uintptr)(~t).ValueSize));
+        @unsafe.Pointer e = (uintptr)add(new @unsafe.Pointer(b), dataOffset + (uintptr)abi.MapBucketCount * (uintptr)(~t).KeySize + (uintptr)offi * (uintptr)(~t).ValueSize);
         if (checkBucket != noCheck && !h.sameSizeGrow()) {
             // Special case: iterator was started during a grow to a larger size
             // and the grow is not done yet. We're working on a bucket whose
@@ -1035,7 +1039,7 @@ next:
             if (t.ReflexiveKey() || (~(~t).Key).Equal(k, k)){
                 // If the item in the oldbucket is not destined for
                 // the current new bucket in the iteration, skip it.
-                var hash = (~t).Hasher(k, ((uintptr)(~h).hash0));
+                var hash = (~t).Hasher(k, (uintptr)(~h).hash0);
                 if ((uintptr)(hash & bucketMask(it.B)) != checkBucket) {
                     continue;
                 }
@@ -1047,7 +1051,7 @@ next:
                 // NOTE: this case is why we need two evacuate tophash
                 // values, evacuatedX and evacuatedY, that differ in
                 // their low bit.
-                if (checkBucket >> (int)((it.B - 1)) != ((uintptr)((uint8)((~b).tophash[offi] & 1)))) {
+                if ((checkBucket >> (int)((it.B - 1))) != (uintptr)((uint8)((~b).tophash[offi] & 1))) {
                     continue;
                 }
             }
@@ -1059,7 +1063,7 @@ next:
             // That's lucky for us because when key!=key we can't look it up successfully.
             it.key = k;
             if (t.IndirectElem()) {
-                e = ((ж<@unsafe.Pointer>)(uintptr)(e)).val;
+                e = ((ж<@unsafe.Pointer>)(uintptr)(e)).Value;
             }
             it.elem = e;
         } else {
@@ -1083,7 +1087,7 @@ next:
             // avoid unnecessary write barrier; see issue 14921
             it.bptr = b;
         }
-        it.i = i + 1;
+        it.i = (uint8)(i + 1);
         it.checkBucket = checkBucket;
         return;
     }
@@ -1105,28 +1109,28 @@ next:
 //
 //go:linkname mapclear
 internal static void mapclear(ж<maptype> Ꮡt, ж<hmap> Ꮡh) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.DerefOrNil();
 
-    if (raceenabled && h != nil) {
+    if (raceenabled && Ꮡh != nil) {
         var callerpc = getcallerpc();
         var pc = abi.FuncPCABIInternal(mapclear);
         racewritepc(new @unsafe.Pointer(Ꮡh), callerpc, pc);
     }
-    if (h == nil || h.count == 0) {
+    if (Ꮡh == nil || h.count == 0) {
         return;
     }
-    if ((uint8)(h.flags & hashWriting) != 0) {
+    if ((uint8)(h.flags & (uint8)hashWriting) != 0) {
         fatal("concurrent map writes"u8);
     }
-    h.flags ^= (uint8)(hashWriting);
+    h.flags ^= hashWriting;
     // Mark buckets empty, so existing iterators can be terminated, see issue #59411.
     var markBucketsEmpty = (@unsafe.Pointer bucket, uintptr mask) => {
-        for (var i = ((uintptr)0); i <= mask; i++) {
-            var b = (ж<bmap>)(uintptr)(add(bucket, i * ((uintptr)t.BucketSize)));
+        for (var i = (uintptr)0; i <= mask; i++) {
+            var b = (ж<bmap>)(uintptr)(add(bucket, i * (uintptr)Ꮡt.Value.BucketSize));
             for (; b != nil; b = b.overflow(Ꮡt)) {
-                for (var iΔ1 = ((uintptr)0); iΔ1 < abi.MapBucketCount; iΔ1++) {
-                    (~b).tophash[i] = emptyRest;
+                for (var iΔ1 = (uintptr)0; iΔ1 < abi.MapBucketCount; iΔ1++) {
+                    b.Value.tophash[(nint)(iΔ1)] = emptyRest;
                 }
             }
         }
@@ -1137,17 +1141,17 @@ internal static void mapclear(ж<maptype> Ꮡt, ж<hmap> Ꮡh) {
             markBucketsEmpty(oldBuckets, h.oldbucketmask());
         }
     }
-    h.flags &= ~(uint8)(ΔsameSizeGrow);
+    h.flags &= unchecked((uint8)~ΔsameSizeGrow);
     h.oldbuckets = default!;
     h.nevacuate = 0;
     h.noverflow = 0;
     h.count = 0;
     // Reset the hash seed to make it more difficult for attackers to
     // repeatedly trigger hash collisions. See issue 25237.
-    h.hash0 = ((uint32)rand());
+    h.hash0 = (uint32)rand();
     // Keep the mapextra allocation but clear any extra information.
     if (h.extra != nil) {
-        h.extra = new mapextra(nil);
+        h.extra.Value = new mapextra(nil);
     }
     // makeBucketArray clears the memory pointed to by h.buckets
     // and recovers any overflow buckets by generating them
@@ -1156,30 +1160,30 @@ internal static void mapclear(ж<maptype> Ꮡt, ж<hmap> Ꮡh) {
     if (nextOverflow != nil) {
         // If overflow buckets are created then h.extra
         // will have been allocated during initial bucket creation.
-        h.extra.nextOverflow = nextOverflow;
+        h.extra.Value.nextOverflow = nextOverflow;
     }
-    if ((uint8)(h.flags & hashWriting) == 0) {
+    if ((uint8)(h.flags & (uint8)hashWriting) == 0) {
         fatal("concurrent map writes"u8);
     }
-    h.flags &= ~(uint8)(hashWriting);
+    h.flags &= unchecked((uint8)~hashWriting);
 }
 
 internal static void hashGrow(ж<maptype> Ꮡt, ж<hmap> Ꮡh) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
 
     // If we've hit the load factor, get bigger.
     // Otherwise, there are too many overflow buckets,
     // so keep the same number of buckets and "grow" laterally.
-    var bigger = ((uint8)1);
+    var bigger = (uint8)1;
     if (!overLoadFactor(h.count + 1, h.B)) {
         bigger = 0;
-        h.flags |= (uint8)(ΔsameSizeGrow);
+        h.flags |= ΔsameSizeGrow;
     }
     @unsafe.Pointer oldbuckets = h.buckets;
-    var (newbuckets, nextOverflow) = makeBucketArray(Ꮡt, h.B + bigger, nil);
-    var flags = (uint8)(h.flags & ~((uint8)(iterator | oldIterator)));
-    if ((uint8)(h.flags & iterator) != 0) {
+    var (newbuckets, nextOverflow) = makeBucketArray(Ꮡt, (uint8)(h.B + bigger), nil);
+    var flags = (uint8)(h.flags & ~((uint8)((uint8)iterator | (uint8)oldIterator)));
+    if ((uint8)(h.flags & (uint8)iterator) != 0) {
         flags |= (uint8)(oldIterator);
     }
     // commit the grow (atomic wrt gc)
@@ -1189,19 +1193,19 @@ internal static void hashGrow(ж<maptype> Ꮡt, ж<hmap> Ꮡh) {
     h.buckets = newbuckets;
     h.nevacuate = 0;
     h.noverflow = 0;
-    if (h.extra != nil && h.extra.overflow != nil) {
+    if (h.extra != nil && (~h.extra).overflow != nil) {
         // Promote current overflow buckets to the old generation.
-        if (h.extra.oldoverflow != nil) {
+        if ((~h.extra).oldoverflow != nil) {
             @throw("oldoverflow is not nil"u8);
         }
-        h.extra.oldoverflow = h.extra.overflow;
-        h.extra.overflow = default!;
+        h.extra.Value.oldoverflow = h.extra.Value.overflow;
+        h.extra.Value.overflow = default!;
     }
     if (nextOverflow != nil) {
         if (h.extra == nil) {
             h.extra = @new<mapextra>();
         }
-        h.extra.nextOverflow = nextOverflow;
+        h.extra.Value.nextOverflow = nextOverflow;
     }
 }
 
@@ -1210,7 +1214,7 @@ internal static void hashGrow(ж<maptype> Ꮡt, ж<hmap> Ꮡh) {
 
 // overLoadFactor reports whether count items placed in 1<<B buckets is over loadFactor.
 internal static bool overLoadFactor(nint count, uint8 B) {
-    return count > abi.MapBucketCount && ((uintptr)count) > loadFactorNum * (bucketShift(B) / loadFactorDen);
+    return count > abi.MapBucketCount && (uintptr)count > (uintptr)loadFactorNum * (bucketShift(B) / (uintptr)loadFactorDen);
 }
 
 // tooManyOverflowBuckets reports whether noverflow buckets is too many for a map with 1<<B buckets.
@@ -1225,7 +1229,7 @@ internal static bool tooManyOverflowBuckets(uint16 noverflow, uint8 B) {
         B = 15;
     }
     // The compiler doesn't see here that B < 16; mask B to generate shorter shift code.
-    return noverflow >= ((uint16)1) << (int)(((uint8)(B & 15)));
+    return noverflow >= ((uint16)1 << (int)(((uint8)(B & 15))));
 }
 
 // growing reports whether h is growing. The growth may be to the same size or bigger.
@@ -1235,14 +1239,7 @@ internal static bool tooManyOverflowBuckets(uint16 noverflow, uint8 B) {
 
 // sameSizeGrow reports whether the current growth is to a map of the same size.
 [GoRecv] internal static bool sameSizeGrow(this ref hmap h) {
-    return (uint8)(h.flags & ΔsameSizeGrow) != 0;
-}
-
-//go:linkname sameSizeGrowForIssue69110Test
-internal static bool sameSizeGrowForIssue69110Test(ж<hmap> Ꮡh) {
-    ref var h = ref Ꮡh.val;
-
-    return h.sameSizeGrow();
+    return (uint8)(h.flags & (uint8)ΔsameSizeGrow) != 0;
 }
 
 // noldbuckets calculates the number of buckets prior to the current map growth.
@@ -1260,8 +1257,8 @@ internal static bool sameSizeGrowForIssue69110Test(ж<hmap> Ꮡh) {
 }
 
 internal static void growWork(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uintptr bucket) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
 
     // make sure we evacuate the oldbucket corresponding
     // to the bucket we're about to use
@@ -1273,10 +1270,10 @@ internal static void growWork(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uintptr bucket) {
 }
 
 internal static bool bucketEvacuated(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uintptr bucket) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
 
-    var b = (ж<bmap>)(uintptr)(add(h.oldbuckets, bucket * ((uintptr)t.BucketSize)));
+    var b = (ж<bmap>)(uintptr)(add(h.oldbuckets, bucket * (uintptr)t.BucketSize));
     return evacuated(b);
 }
 
@@ -1289,10 +1286,10 @@ internal static bool bucketEvacuated(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uintptr bu
 }
 
 internal static void evacuate(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uintptr oldbucket) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
 
-    var b = (ж<bmap>)(uintptr)(add(h.oldbuckets, oldbucket * ((uintptr)t.BucketSize)));
+    var b = (ж<bmap>)(uintptr)(add(h.oldbuckets, oldbucket * (uintptr)t.BucketSize));
     var newbit = h.noldbuckets();
     if (!evacuated(b)) {
         // TODO: reuse overflow buckets instead of using new ones, if there
@@ -1300,24 +1297,24 @@ internal static void evacuate(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uintptr oldbucket
         // xy contains the x and y (low and high) evacuation destinations.
         ref var xy = ref heap(new array<evacDst>(2), out var Ꮡxy);
         var x = Ꮡxy.at<evacDst>(0);
-        x.val.b = (ж<bmap>)(uintptr)(add(h.buckets, oldbucket * ((uintptr)t.BucketSize)));
-        x.val.k = (uintptr)add(new @unsafe.Pointer((~x).b), dataOffset);
-        x.val.e = (uintptr)add((~x).k, abi.MapBucketCount * ((uintptr)t.KeySize));
+        x.Value.b = (ж<bmap>)(uintptr)(add(h.buckets, oldbucket * (uintptr)t.BucketSize));
+        x.Value.k = (uintptr)add(new @unsafe.Pointer((~x).b), dataOffset);
+        x.Value.e = (uintptr)add((~x).k, (uintptr)abi.MapBucketCount * (uintptr)t.KeySize);
         if (!h.sameSizeGrow()) {
             // Only calculate y pointers if we're growing bigger.
             // Otherwise GC can see bad pointers.
             var y = Ꮡxy.at<evacDst>(1);
-            y.val.b = (ж<bmap>)(uintptr)(add(h.buckets, (oldbucket + newbit) * ((uintptr)t.BucketSize)));
-            y.val.k = (uintptr)add(new @unsafe.Pointer((~y).b), dataOffset);
-            y.val.e = (uintptr)add((~y).k, abi.MapBucketCount * ((uintptr)t.KeySize));
+            y.Value.b = (ж<bmap>)(uintptr)(add(h.buckets, (oldbucket + newbit) * (uintptr)t.BucketSize));
+            y.Value.k = (uintptr)add(new @unsafe.Pointer((~y).b), dataOffset);
+            y.Value.e = (uintptr)add((~y).k, (uintptr)abi.MapBucketCount * (uintptr)t.KeySize);
         }
         for (; b != nil; b = b.overflow(Ꮡt)) {
             @unsafe.Pointer k = (uintptr)add(new @unsafe.Pointer(b), dataOffset);
-            @unsafe.Pointer e = (uintptr)add(k, abi.MapBucketCount * ((uintptr)t.KeySize));
-            for (nint i = 0; i < abi.MapBucketCount; (i, k, e) = (i + 1, (uintptr)add(k, ((uintptr)t.KeySize)), (uintptr)add(e, ((uintptr)t.ValueSize)))) {
+            @unsafe.Pointer e = (uintptr)add(k, (uintptr)abi.MapBucketCount * (uintptr)t.KeySize);
+            for (nint i = 0; i < abi.MapBucketCount; (i, k, e) = (i + 1, (uintptr)add(k, (uintptr)t.KeySize), (uintptr)add(e, (uintptr)t.ValueSize))) {
                 var top = (~b).tophash[i];
                 if (isEmpty(top)) {
-                    (~b).tophash[i] = evacuatedEmpty;
+                    b.Value.tophash[i] = evacuatedEmpty;
                     continue;
                 }
                 if (top < minTopHash) {
@@ -1325,14 +1322,14 @@ internal static void evacuate(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uintptr oldbucket
                 }
                 @unsafe.Pointer k2 = k;
                 if (t.IndirectKey()) {
-                    k2 = ((ж<@unsafe.Pointer>)(uintptr)(k2)).val;
+                    k2 = ((ж<@unsafe.Pointer>)(uintptr)(k2)).Value;
                 }
                 uint8 useY = default!;
                 if (!h.sameSizeGrow()) {
                     // Compute hash to make our evacuation decision (whether we need
                     // to send this key/elem to bucket x or bucket y).
-                    var hash = t.Hasher(k2, ((uintptr)h.hash0));
-                    if ((uint8)(h.flags & iterator) != 0 && !t.ReflexiveKey() && !t.Key.Equal(k2, k2)){
+                    var hash = t.Hasher(k2, (uintptr)h.hash0);
+                    if ((uint8)(h.flags & (uint8)iterator) != 0 && !t.ReflexiveKey() && !(~t.Key).Equal(k2, k2)){
                         // If key != key (NaNs), then the hash could be (and probably
                         // will be) entirely different from the old hash. Moreover,
                         // it isn't reproducible. Reproducibility is required in the
@@ -1355,46 +1352,46 @@ internal static void evacuate(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uintptr oldbucket
                 if (evacuatedX + 1 != evacuatedY || (UntypedInt)(evacuatedX ^ 1) != evacuatedY) {
                     @throw("bad evacuatedN"u8);
                 }
-                (~b).tophash[i] = evacuatedX + useY;
+                b.Value.tophash[i] = (uint8)((uint8)evacuatedX + useY);
                 // evacuatedX + 1 == evacuatedY
-                var dst = Ꮡxy.at<evacDst>(useY);
+                var dst = Ꮡxy.at<evacDst>((nint)(useY));
                 // evacuation destination
                 if ((~dst).i == abi.MapBucketCount) {
-                    dst.val.b = h.newoverflow(Ꮡt, (~dst).b);
-                    dst.val.i = 0;
-                    dst.val.k = (uintptr)add(new @unsafe.Pointer((~dst).b), dataOffset);
-                    dst.val.e = (uintptr)add((~dst).k, abi.MapBucketCount * ((uintptr)t.KeySize));
+                    dst.Value.b = h.newoverflow(Ꮡt, (~dst).b);
+                    dst.Value.i = 0;
+                    dst.Value.k = (uintptr)add(new @unsafe.Pointer((~dst).b), dataOffset);
+                    dst.Value.e = (uintptr)add((~dst).k, (uintptr)abi.MapBucketCount * (uintptr)t.KeySize);
                 }
-                (~(~dst).b).tophash[(nint)((~dst).i & (abi.MapBucketCount - 1))] = top;
+                dst.Value.b.Value.tophash[(nint)((~dst).i & (nint)(abi.MapBucketCount - 1))] = top;
                 // mask dst.i as an optimization, to avoid a bounds check
                 if (t.IndirectKey()){
-                    ((ж<@unsafe.Pointer>)(uintptr)((~dst).k)).val = k2;
+                    ((ж<@unsafe.Pointer>)(uintptr)((~dst).k)).Value = k2;
                 } else {
                     // copy pointer
                     typedmemmove(t.Key, (~dst).k, k);
                 }
                 // copy elem
                 if (t.IndirectElem()){
-                    ((ж<@unsafe.Pointer>)(uintptr)((~dst).e)).val = ((ж<@unsafe.Pointer>)(uintptr)(e)).val;
+                    ((ж<@unsafe.Pointer>)(uintptr)((~dst).e)).Value = ((ж<@unsafe.Pointer>)(uintptr)(e)).Value;
                 } else {
                     typedmemmove(t.Elem, (~dst).e, e);
                 }
-                (~dst).i++;
+                dst.Value.i++;
                 // These updates might push these pointers past the end of the
                 // key or elem arrays.  That's ok, as we have the overflow pointer
                 // at the end of the bucket to protect against pointing past the
                 // end of the bucket.
-                dst.val.k = (uintptr)add((~dst).k, ((uintptr)t.KeySize));
-                dst.val.e = (uintptr)add((~dst).e, ((uintptr)t.ValueSize));
+                dst.Value.k = (uintptr)add((~dst).k, (uintptr)t.KeySize);
+                dst.Value.e = (uintptr)add((~dst).e, (uintptr)t.ValueSize);
             }
         }
         // Unlink the overflow buckets & clear key/elem to help GC.
-        if ((uint8)(h.flags & oldIterator) == 0 && t.Bucket.Pointers()) {
-            @unsafe.Pointer bΔ1 = (uintptr)add(h.oldbuckets, oldbucket * ((uintptr)t.BucketSize));
+        if ((uint8)(h.flags & (uint8)oldIterator) == 0 && t.Bucket.Pointers()) {
+            @unsafe.Pointer bΔ1 = (uintptr)add(h.oldbuckets, oldbucket * (uintptr)t.BucketSize);
             // Preserve b.tophash because the evacuation
             // state is maintained there.
             @unsafe.Pointer ptr = (uintptr)add(bΔ1, dataOffset);
-            var n = ((uintptr)t.BucketSize) - dataOffset;
+            var n = (uintptr)t.BucketSize - dataOffset;
             memclrHasPointers(ptr, n);
         }
     }
@@ -1404,8 +1401,8 @@ internal static void evacuate(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uintptr oldbucket
 }
 
 internal static void advanceEvacuationMark(ж<hmap> Ꮡh, ж<maptype> Ꮡt, uintptr newbit) {
-    ref var h = ref Ꮡh.val;
-    ref var t = ref Ꮡt.val;
+    ref var h = ref Ꮡh.Value;
+    ref var t = ref Ꮡt.Value;
 
     h.nevacuate++;
     // Experiments suggest that 1024 is overkill by at least an order of magnitude.
@@ -1425,9 +1422,9 @@ internal static void advanceEvacuationMark(ж<hmap> Ꮡh, ж<maptype> Ꮡt, uint
         // If they are still referenced by an iterator,
         // then the iterator holds a pointers to the slice.
         if (h.extra != nil) {
-            h.extra.oldoverflow = default!;
+            h.extra.Value.oldoverflow = default!;
         }
-        h.flags &= ~(uint8)(ΔsameSizeGrow);
+        h.flags &= unchecked((uint8)~ΔsameSizeGrow);
     }
 }
 
@@ -1448,37 +1445,37 @@ internal static void advanceEvacuationMark(ж<hmap> Ꮡh, ж<maptype> Ꮡt, uint
 //
 //go:linkname reflect_makemap reflect.makemap
 internal static ж<hmap> reflect_makemap(ж<maptype> Ꮡt, nint cap) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     // Check invariants and reflects math.
-    if (t.Key.Equal == default!) {
+    if ((~t.Key).Equal == default!) {
         @throw("runtime.reflect_makemap: unsupported map key type"u8);
     }
-    if (t.Key.Size_ > abi.MapMaxKeyBytes && (!t.IndirectKey() || t.KeySize != ((uint8)goarch.PtrSize)) || t.Key.Size_ <= abi.MapMaxKeyBytes && (t.IndirectKey() || t.KeySize != ((uint8)t.Key.Size_))) {
+    if ((~t.Key).Size_ > abi.MapMaxKeyBytes && (!t.IndirectKey() || t.KeySize != (uint8)goarch.PtrSize) || (~t.Key).Size_ <= abi.MapMaxKeyBytes && (t.IndirectKey() || t.KeySize != (uint8)(~t.Key).Size_)) {
         @throw("key size wrong"u8);
     }
-    if (t.Elem.Size_ > abi.MapMaxElemBytes && (!t.IndirectElem() || t.ValueSize != ((uint8)goarch.PtrSize)) || t.Elem.Size_ <= abi.MapMaxElemBytes && (t.IndirectElem() || t.ValueSize != ((uint8)t.Elem.Size_))) {
+    if ((~t.Elem).Size_ > abi.MapMaxElemBytes && (!t.IndirectElem() || t.ValueSize != (uint8)goarch.PtrSize) || (~t.Elem).Size_ <= abi.MapMaxElemBytes && (t.IndirectElem() || t.ValueSize != (uint8)(~t.Elem).Size_)) {
         @throw("elem size wrong"u8);
     }
-    if (t.Key.Align_ > abi.MapBucketCount) {
+    if ((~t.Key).Align_ > abi.MapBucketCount) {
         @throw("key align too big"u8);
     }
-    if (t.Elem.Align_ > abi.MapBucketCount) {
+    if ((~t.Elem).Align_ > abi.MapBucketCount) {
         @throw("elem align too big"u8);
     }
-    if (t.Key.Size_ % ((uintptr)t.Key.Align_) != 0) {
+    if ((~t.Key).Size_ % (uintptr)(~t.Key).Align_ != 0) {
         @throw("key size not a multiple of key align"u8);
     }
-    if (t.Elem.Size_ % ((uintptr)t.Elem.Align_) != 0) {
+    if ((~t.Elem).Size_ % (uintptr)(~t.Elem).Align_ != 0) {
         @throw("elem size not a multiple of elem align"u8);
     }
     if (abi.MapBucketCount < 8) {
         @throw("bucketsize too small for proper alignment"u8);
     }
-    if (dataOffset % ((uintptr)t.Key.Align_) != 0) {
+    if (dataOffset % (uintptr)(~t.Key).Align_ != 0) {
         @throw("need padding in bucket (key)"u8);
     }
-    if (dataOffset % ((uintptr)t.Elem.Align_) != 0) {
+    if (dataOffset % (uintptr)(~t.Elem).Align_ != 0) {
         @throw("need padding in bucket (elem)"u8);
     }
     return makemap(Ꮡt, cap, nil);
@@ -1496,10 +1493,10 @@ internal static ж<hmap> reflect_makemap(ж<maptype> Ꮡt, nint cap) {
 //
 //go:linkname reflect_mapaccess reflect.mapaccess
 internal static @unsafe.Pointer reflect_mapaccess(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.Pointer key) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
 
-    var (elem, ok) = mapaccess2(Ꮡt, Ꮡh, key.val);
+    var (elem, ok) = mapaccess2(Ꮡt, Ꮡh, key);
     if (!ok) {
         // reflect wants nil for a missing element
         elem = default!;
@@ -1509,8 +1506,8 @@ internal static @unsafe.Pointer reflect_mapaccess(ж<maptype> Ꮡt, ж<hmap> Ꮡ
 
 //go:linkname reflect_mapaccess_faststr reflect.mapaccess_faststr
 internal static @unsafe.Pointer reflect_mapaccess_faststr(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @string key) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
 
     var (elem, ok) = mapaccess2_faststr(Ꮡt, Ꮡh, key);
     if (!ok) {
@@ -1530,34 +1527,34 @@ internal static @unsafe.Pointer reflect_mapaccess_faststr(ж<maptype> Ꮡt, ж<h
 //
 //go:linkname reflect_mapassign reflect.mapassign0
 internal static void reflect_mapassign(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.Pointer key, @unsafe.Pointer elem) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
 
-    @unsafe.Pointer Δp = (uintptr)mapassign(Ꮡt, Ꮡh, key.val);
-    typedmemmove(t.Elem, Δp, elem.val);
+    @unsafe.Pointer Δp = (uintptr)mapassign(Ꮡt, Ꮡh, key);
+    typedmemmove(t.Elem, Δp, elem);
 }
 
 //go:linkname reflect_mapassign_faststr reflect.mapassign_faststr0
 internal static void reflect_mapassign_faststr(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @string key, @unsafe.Pointer elem) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
 
     @unsafe.Pointer Δp = (uintptr)mapassign_faststr(Ꮡt, Ꮡh, key);
-    typedmemmove(t.Elem, Δp, elem.val);
+    typedmemmove(t.Elem, Δp, elem);
 }
 
 //go:linkname reflect_mapdelete reflect.mapdelete
 internal static void reflect_mapdelete(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.Pointer key) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
 
-    mapdelete(Ꮡt, Ꮡh, key.val);
+    mapdelete(Ꮡt, Ꮡh, key);
 }
 
 //go:linkname reflect_mapdelete_faststr reflect.mapdelete_faststr
 internal static void reflect_mapdelete_faststr(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @string key) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
 
     mapdelete_faststr(Ꮡt, Ꮡh, key);
 }
@@ -1575,9 +1572,9 @@ internal static void reflect_mapdelete_faststr(ж<maptype> Ꮡt, ж<hmap> Ꮡh, 
 //
 //go:linkname reflect_mapiterinit reflect.mapiterinit
 internal static void reflect_mapiterinit(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<hiter> Ꮡit) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
-    ref var it = ref Ꮡit.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
+    ref var it = ref Ꮡit.Value;
 
     mapiterinit(Ꮡt, Ꮡh, Ꮡit);
 }
@@ -1596,7 +1593,7 @@ internal static void reflect_mapiterinit(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<hit
 //
 //go:linkname reflect_mapiternext reflect.mapiternext
 internal static void reflect_mapiternext(ж<hiter> Ꮡit) {
-    ref var it = ref Ꮡit.val;
+    ref var it = ref Ꮡit.Value;
 
     mapiternext(Ꮡit);
 }
@@ -1612,9 +1609,9 @@ internal static void reflect_mapiternext(ж<hiter> Ꮡit) {
 //
 //go:linkname reflect_mapiterkey reflect.mapiterkey
 internal static @unsafe.Pointer reflect_mapiterkey(ж<hiter> Ꮡit) {
-    ref var it = ref Ꮡit.val;
+    ref var it = ref Ꮡit.Value;
 
-    return Ꮡit.key;
+    return it.key;
 }
 
 // reflect_mapiterelem is for package reflect,
@@ -1628,9 +1625,9 @@ internal static @unsafe.Pointer reflect_mapiterkey(ж<hiter> Ꮡit) {
 //
 //go:linkname reflect_mapiterelem reflect.mapiterelem
 internal static @unsafe.Pointer reflect_mapiterelem(ж<hiter> Ꮡit) {
-    ref var it = ref Ꮡit.val;
+    ref var it = ref Ꮡit.Value;
 
-    return Ꮡit.elem;
+    return it.elem;
 }
 
 // reflect_maplen is for package reflect,
@@ -1644,9 +1641,9 @@ internal static @unsafe.Pointer reflect_mapiterelem(ж<hiter> Ꮡit) {
 //
 //go:linkname reflect_maplen reflect.maplen
 internal static nint reflect_maplen(ж<hmap> Ꮡh) {
-    ref var h = ref Ꮡh.val;
+    ref var h = ref Ꮡh.DerefOrNil();
 
-    if (h == nil) {
+    if (Ꮡh == nil) {
         return 0;
     }
     if (raceenabled) {
@@ -1658,17 +1655,17 @@ internal static nint reflect_maplen(ж<hmap> Ꮡh) {
 
 //go:linkname reflect_mapclear reflect.mapclear
 internal static void reflect_mapclear(ж<maptype> Ꮡt, ж<hmap> Ꮡh) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
 
     mapclear(Ꮡt, Ꮡh);
 }
 
 //go:linkname reflectlite_maplen internal/reflectlite.maplen
 internal static nint reflectlite_maplen(ж<hmap> Ꮡh) {
-    ref var h = ref Ꮡh.val;
+    ref var h = ref Ꮡh.DerefOrNil();
 
-    if (h == nil) {
+    if (Ꮡh == nil) {
         return 0;
     }
     if (raceenabled) {
@@ -1690,17 +1687,17 @@ internal static partial void mapinitnoop();
 //go:linkname mapclone maps.clone
 internal static any mapclone(any m) {
     var e = efaceOf(Ꮡ(m));
-    e.val.data = new @unsafe.Pointer(mapclone2((ж<maptype>)(uintptr)(new @unsafe.Pointer((~e)._type)), (ж<hmap>)(uintptr)((~e).data)));
+    e.Value.data = new @unsafe.Pointer(mapclone2((ж<maptype>)(uintptr)(new @unsafe.Pointer((~e)._type)), (ж<hmap>)(uintptr)((~e).data)));
     return m;
 }
 
 // moveToBmap moves a bucket from src to dst. It returns the destination bucket or new destination bucket if it overflows
 // and the pos that the next key/value will be written, if pos == bucketCnt means needs to written in overflow bucket.
 internal static (ж<bmap>, nint) moveToBmap(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<bmap> Ꮡdst, nint pos, ж<bmap> Ꮡsrc) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
-    ref var dst = ref Ꮡdst.val;
-    ref var src = ref Ꮡsrc.val;
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
+    ref var dst = ref Ꮡdst.Value;
+    ref var src = ref Ꮡsrc.Value;
 
     for (nint i = 0; i < abi.MapBucketCount; i++) {
         if (isEmpty(src.tophash[i])) {
@@ -1712,13 +1709,13 @@ internal static (ж<bmap>, nint) moveToBmap(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<
             }
         }
         if (pos == abi.MapBucketCount) {
-            dst = h.newoverflow(Ꮡt, Ꮡdst);
+            Ꮡdst = h.newoverflow(Ꮡt, Ꮡdst); dst = ref Ꮡdst.Value;
             pos = 0;
         }
-        @unsafe.Pointer srcK = (uintptr)add(new @unsafe.Pointer(Ꮡsrc), dataOffset + ((uintptr)i) * ((uintptr)t.KeySize));
-        @unsafe.Pointer srcEle = (uintptr)add(new @unsafe.Pointer(Ꮡsrc), dataOffset + abi.MapBucketCount * ((uintptr)t.KeySize) + ((uintptr)i) * ((uintptr)t.ValueSize));
-        @unsafe.Pointer dstK = (uintptr)add(new @unsafe.Pointer(Ꮡdst), dataOffset + ((uintptr)pos) * ((uintptr)t.KeySize));
-        @unsafe.Pointer dstEle = (uintptr)add(new @unsafe.Pointer(Ꮡdst), dataOffset + abi.MapBucketCount * ((uintptr)t.KeySize) + ((uintptr)pos) * ((uintptr)t.ValueSize));
+        @unsafe.Pointer srcK = (uintptr)add(new @unsafe.Pointer(Ꮡsrc), dataOffset + (uintptr)i * (uintptr)t.KeySize);
+        @unsafe.Pointer srcEle = (uintptr)add(new @unsafe.Pointer(Ꮡsrc), dataOffset + (uintptr)abi.MapBucketCount * (uintptr)t.KeySize + (uintptr)i * (uintptr)t.ValueSize);
+        @unsafe.Pointer dstK = (uintptr)add(new @unsafe.Pointer(Ꮡdst), dataOffset + (uintptr)pos * (uintptr)t.KeySize);
+        @unsafe.Pointer dstEle = (uintptr)add(new @unsafe.Pointer(Ꮡdst), dataOffset + (uintptr)abi.MapBucketCount * (uintptr)t.KeySize + (uintptr)pos * (uintptr)t.ValueSize);
         dst.tophash[pos] = src.tophash[i];
         if (t.IndirectKey()){
             srcK = ~(ж<@unsafe.Pointer>)(uintptr)(srcK);
@@ -1730,7 +1727,7 @@ internal static (ж<bmap>, nint) moveToBmap(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<
             // Note: if NeedKeyUpdate is false, then the memory
             // used to store the key is immutable, so we can share
             // it between the original map and its clone.
-            ((ж<@unsafe.Pointer>)(uintptr)(dstK)).val = srcK;
+            ((ж<@unsafe.Pointer>)(uintptr)(dstK)).Value = srcK;
         } else {
             typedmemmove(t.Key, dstK, srcK);
         }
@@ -1738,7 +1735,7 @@ internal static (ж<bmap>, nint) moveToBmap(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<
             srcEle = ~(ж<@unsafe.Pointer>)(uintptr)(srcEle);
             @unsafe.Pointer eStore = (uintptr)newobject(t.Elem);
             typedmemmove(t.Elem, eStore, srcEle);
-            ((ж<@unsafe.Pointer>)(uintptr)(dstEle)).val = eStore;
+            ((ж<@unsafe.Pointer>)(uintptr)(dstEle)).Value = eStore;
         } else {
             typedmemmove(t.Elem, dstEle, srcEle);
         }
@@ -1749,45 +1746,36 @@ internal static (ж<bmap>, nint) moveToBmap(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<
 }
 
 internal static ж<hmap> mapclone2(ж<maptype> Ꮡt, ж<hmap> Ꮡsrc) {
-    ref var t = ref Ꮡt.val;
-    ref var src = ref Ꮡsrc.val;
+    ref var t = ref Ꮡt.Value;
+    ref var src = ref Ꮡsrc.Value;
 
-    nint hint = src.count;
-    if (overLoadFactor(hint, src.B)) {
-        // Note: in rare cases (e.g. during a same-sized grow) the map
-        // can be overloaded. Make sure we don't allocate a destination
-        // bucket array larger than the source bucket array.
-        // This will cause the cloned map to be overloaded also,
-        // but that's better than crashing. See issue 69110.
-        hint = ((nint)(loadFactorNum * (bucketShift(src.B) / loadFactorDen)));
-    }
-    var dst = makemap(Ꮡt, hint, nil);
-    dst.val.hash0 = src.hash0;
-    dst.val.nevacuate = 0;
+    var dst = makemap(Ꮡt, src.count, nil);
+    dst.Value.hash0 = src.hash0;
+    dst.Value.nevacuate = 0;
     // flags do not need to be copied here, just like a new map has no flags.
     if (src.count == 0) {
         return dst;
     }
-    if ((uint8)(src.flags & hashWriting) != 0) {
+    if ((uint8)(src.flags & (uint8)hashWriting) != 0) {
         fatal("concurrent map clone and map write"u8);
     }
     if (src.B == 0 && !(t.IndirectKey() && t.NeedKeyUpdate()) && !t.IndirectElem()) {
         // Quick copy for small maps.
-        dst.val.buckets = (uintptr)newobject(t.Bucket);
-        dst.val.count = src.count;
+        dst.Value.buckets = (uintptr)newobject(t.Bucket);
+        dst.Value.count = src.count;
         typedmemmove(t.Bucket, (~dst).buckets, src.buckets);
         return dst;
     }
     if ((~dst).B == 0) {
-        dst.val.buckets = (uintptr)newobject(t.Bucket);
+        dst.Value.buckets = (uintptr)newobject(t.Bucket);
     }
-    nint dstArraySize = ((nint)bucketShift((~dst).B));
-    nint srcArraySize = ((nint)bucketShift(src.B));
+    nint dstArraySize = (nint)bucketShift((~dst).B);
+    nint srcArraySize = (nint)bucketShift(src.B);
     for (nint i = 0; i < dstArraySize; i++) {
-        var dstBmap = (ж<bmap>)(uintptr)(add((~dst).buckets, ((uintptr)(i * ((nint)t.BucketSize)))));
+        var dstBmap = (ж<bmap>)(uintptr)(add((~dst).buckets, (uintptr)(i * (nint)t.BucketSize)));
         nint pos = 0;
         for (nint j = 0; j < srcArraySize; j += dstArraySize) {
-            var srcBmap = (ж<bmap>)(uintptr)(add(src.buckets, ((uintptr)((i + j) * ((nint)t.BucketSize)))));
+            var srcBmap = (ж<bmap>)(uintptr)(add(src.buckets, (uintptr)((i + j) * (nint)t.BucketSize)));
             while (srcBmap != nil) {
                 (dstBmap, pos) = moveToBmap(Ꮡt, dst, dstBmap, pos, srcBmap);
                 srcBmap = srcBmap.overflow(Ꮡt);
@@ -1802,15 +1790,15 @@ internal static ж<hmap> mapclone2(ж<maptype> Ꮡt, ж<hmap> Ꮡsrc) {
     if (!src.sameSizeGrow()) {
         oldB--;
     }
-    nint oldSrcArraySize = ((nint)bucketShift(oldB));
+    nint oldSrcArraySize = (nint)bucketShift(oldB);
     for (nint i = 0; i < oldSrcArraySize; i++) {
-        var srcBmap = (ж<bmap>)(uintptr)(add(srcOldbuckets, ((uintptr)(i * ((nint)t.BucketSize)))));
+        var srcBmap = (ж<bmap>)(uintptr)(add(srcOldbuckets, (uintptr)(i * (nint)t.BucketSize)));
         if (evacuated(srcBmap)) {
             continue;
         }
         if (oldB >= (~dst).B) {
             // main bucket bits in dst is less than oldB bits in src
-            var dstBmap = (ж<bmap>)(uintptr)(add((~dst).buckets, ((uintptr)(((uintptr)i) & bucketMask((~dst).B))) * ((uintptr)t.BucketSize)));
+            var dstBmap = (ж<bmap>)(uintptr)(add((~dst).buckets, ((uintptr)((uintptr)i & bucketMask((~dst).B))) * (uintptr)t.BucketSize));
             while (dstBmap.overflow(Ꮡt) != nil) {
                 dstBmap = dstBmap.overflow(Ꮡt);
             }
@@ -1825,20 +1813,20 @@ internal static ж<hmap> mapclone2(ж<maptype> Ꮡt, ж<hmap> Ꮡsrc) {
         // Process entries one at a time.
         while (srcBmap != nil) {
             // move from oldBlucket to new bucket
-            for (var iΔ1 = ((uintptr)0); iΔ1 < abi.MapBucketCount; iΔ1++) {
-                if (isEmpty((~srcBmap).tophash[iΔ1])) {
+            for (var iΔ1 = (uintptr)0; iΔ1 < abi.MapBucketCount; iΔ1++) {
+                if (isEmpty((~srcBmap).tophash[(nint)(iΔ1)])) {
                     continue;
                 }
-                if ((uint8)(src.flags & hashWriting) != 0) {
+                if ((uint8)(src.flags & (uint8)hashWriting) != 0) {
                     fatal("concurrent map clone and map write"u8);
                 }
-                @unsafe.Pointer srcK = (uintptr)add(new @unsafe.Pointer(srcBmap), dataOffset + iΔ1 * ((uintptr)t.KeySize));
+                @unsafe.Pointer srcK = (uintptr)add(new @unsafe.Pointer(srcBmap), dataOffset + iΔ1 * (uintptr)t.KeySize);
                 if (t.IndirectKey()) {
-                    srcK = ((ж<@unsafe.Pointer>)(uintptr)(srcK)).val;
+                    srcK = ((ж<@unsafe.Pointer>)(uintptr)(srcK)).Value;
                 }
-                @unsafe.Pointer srcEle = (uintptr)add(new @unsafe.Pointer(srcBmap), dataOffset + abi.MapBucketCount * ((uintptr)t.KeySize) + iΔ1 * ((uintptr)t.ValueSize));
+                @unsafe.Pointer srcEle = (uintptr)add(new @unsafe.Pointer(srcBmap), dataOffset + (uintptr)abi.MapBucketCount * (uintptr)t.KeySize + iΔ1 * (uintptr)t.ValueSize);
                 if (t.IndirectElem()) {
-                    srcEle = ((ж<@unsafe.Pointer>)(uintptr)(srcEle)).val;
+                    srcEle = ((ж<@unsafe.Pointer>)(uintptr)(srcEle)).Value;
                 }
                 @unsafe.Pointer dstEle = (uintptr)mapassign(Ꮡt, dst, srcK);
                 typedmemmove(t.Elem, dstEle, srcEle);
@@ -1859,25 +1847,25 @@ internal static void keys(any m, @unsafe.Pointer Δp) {
     if (h == nil || (~h).count == 0) {
         return;
     }
-    var s = (ж<Δslice>)(uintptr)(Δp);
-    nint r = ((nint)rand());
-    var offset = ((uint8)((nint)(r >> (int)((~h).B) & (abi.MapBucketCount - 1))));
+    var s = (ж<Δsliceᴛ>)(uintptr)(Δp);
+    nint r = (nint)rand();
+    var offset = (uint8)((nint)((r >> (int)((~h).B)) & (nint)(abi.MapBucketCount - 1)));
     if ((~h).B == 0) {
         copyKeys(t, h, (ж<bmap>)(uintptr)((~h).buckets), s, offset);
         return;
     }
-    nint arraySize = ((nint)bucketShift((~h).B));
-    @unsafe.Pointer buckets = h.val.buckets;
+    nint arraySize = (nint)bucketShift((~h).B);
+    @unsafe.Pointer buckets = h.Value.buckets;
     for (nint i = 0; i < arraySize; i++) {
         nint bucket = (nint)((i + r) & (arraySize - 1));
-        var b = (ж<bmap>)(uintptr)(add(buckets, ((uintptr)bucket) * ((uintptr)(~t).BucketSize)));
+        var b = (ж<bmap>)(uintptr)(add(buckets, (uintptr)bucket * (uintptr)(~t).BucketSize));
         copyKeys(t, h, b, s, offset);
     }
     if (h.growing()) {
-        nint oldArraySize = ((nint)h.noldbuckets());
+        nint oldArraySize = (nint)h.noldbuckets();
         for (nint i = 0; i < oldArraySize; i++) {
             nint bucket = (nint)((i + r) & (oldArraySize - 1));
-            var b = (ж<bmap>)(uintptr)(add((~h).oldbuckets, ((uintptr)bucket) * ((uintptr)(~t).BucketSize)));
+            var b = (ж<bmap>)(uintptr)(add((~h).oldbuckets, (uintptr)bucket * (uintptr)(~t).BucketSize));
             if (evacuated(b)) {
                 continue;
             }
@@ -1887,32 +1875,32 @@ internal static void keys(any m, @unsafe.Pointer Δp) {
     return;
 }
 
-internal static void copyKeys(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<bmap> Ꮡb, ж<Δslice> Ꮡs, uint8 offset) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
-    ref var b = ref Ꮡb.val;
-    ref var s = ref Ꮡs.val;
+internal static void copyKeys(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<bmap> Ꮡb, ж<Δsliceᴛ> Ꮡs, uint8 offset) {
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
+    ref var b = ref Ꮡb.DerefOrNil();
+    ref var s = ref Ꮡs.Value;
 
-    while (b != nil) {
-        for (var i = ((uintptr)0); i < abi.MapBucketCount; i++) {
-            var offi = (uintptr)((i + ((uintptr)offset)) & (abi.MapBucketCount - 1));
-            if (isEmpty(b.tophash[offi])) {
+    while (Ꮡb != nil) {
+        for (var i = (uintptr)0; i < abi.MapBucketCount; i++) {
+            var offi = (uintptr)((i + (uintptr)offset) & (uintptr)(abi.MapBucketCount - 1));
+            if (isEmpty(b.tophash[(nint)(offi)])) {
                 continue;
             }
-            if ((uint8)(h.flags & hashWriting) != 0) {
+            if ((uint8)(h.flags & (uint8)hashWriting) != 0) {
                 fatal("concurrent map read and map write"u8);
             }
-            @unsafe.Pointer k = (uintptr)add(new @unsafe.Pointer(Ꮡb), dataOffset + offi * ((uintptr)t.KeySize));
+            @unsafe.Pointer k = (uintptr)add(new @unsafe.Pointer(Ꮡb), dataOffset + offi * (uintptr)t.KeySize);
             if (t.IndirectKey()) {
-                k = ((ж<@unsafe.Pointer>)(uintptr)(k)).val;
+                k = ((ж<@unsafe.Pointer>)(uintptr)(k)).Value;
             }
             if (s.len >= s.cap) {
                 fatal("concurrent map read and map write"u8);
             }
-            typedmemmove(t.Key, (uintptr)add(s.Δarray, ((uintptr)s.len) * ((uintptr)t.Key.Size())), k);
+            typedmemmove(t.Key, (uintptr)add(s.Δarray, (uintptr)s.len * (uintptr)t.Key.Size()), k);
             s.len++;
         }
-        b = b.overflow(Ꮡt);
+        Ꮡb = Ꮡb.overflow(Ꮡt); b = ref Ꮡb.DerefOrNil();
     }
 }
 
@@ -1926,25 +1914,25 @@ internal static void values(any m, @unsafe.Pointer Δp) {
     if (h == nil || (~h).count == 0) {
         return;
     }
-    var s = (ж<Δslice>)(uintptr)(Δp);
-    nint r = ((nint)rand());
-    var offset = ((uint8)((nint)(r >> (int)((~h).B) & (abi.MapBucketCount - 1))));
+    var s = (ж<Δsliceᴛ>)(uintptr)(Δp);
+    nint r = (nint)rand();
+    var offset = (uint8)((nint)((r >> (int)((~h).B)) & (nint)(abi.MapBucketCount - 1)));
     if ((~h).B == 0) {
         copyValues(t, h, (ж<bmap>)(uintptr)((~h).buckets), s, offset);
         return;
     }
-    nint arraySize = ((nint)bucketShift((~h).B));
-    @unsafe.Pointer buckets = h.val.buckets;
+    nint arraySize = (nint)bucketShift((~h).B);
+    @unsafe.Pointer buckets = h.Value.buckets;
     for (nint i = 0; i < arraySize; i++) {
         nint bucket = (nint)((i + r) & (arraySize - 1));
-        var b = (ж<bmap>)(uintptr)(add(buckets, ((uintptr)bucket) * ((uintptr)(~t).BucketSize)));
+        var b = (ж<bmap>)(uintptr)(add(buckets, (uintptr)bucket * (uintptr)(~t).BucketSize));
         copyValues(t, h, b, s, offset);
     }
     if (h.growing()) {
-        nint oldArraySize = ((nint)h.noldbuckets());
+        nint oldArraySize = (nint)h.noldbuckets();
         for (nint i = 0; i < oldArraySize; i++) {
             nint bucket = (nint)((i + r) & (oldArraySize - 1));
-            var b = (ж<bmap>)(uintptr)(add((~h).oldbuckets, ((uintptr)bucket) * ((uintptr)(~t).BucketSize)));
+            var b = (ж<bmap>)(uintptr)(add((~h).oldbuckets, (uintptr)bucket * (uintptr)(~t).BucketSize));
             if (evacuated(b)) {
                 continue;
             }
@@ -1954,32 +1942,32 @@ internal static void values(any m, @unsafe.Pointer Δp) {
     return;
 }
 
-internal static void copyValues(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<bmap> Ꮡb, ж<Δslice> Ꮡs, uint8 offset) {
-    ref var t = ref Ꮡt.val;
-    ref var h = ref Ꮡh.val;
-    ref var b = ref Ꮡb.val;
-    ref var s = ref Ꮡs.val;
+internal static void copyValues(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<bmap> Ꮡb, ж<Δsliceᴛ> Ꮡs, uint8 offset) {
+    ref var t = ref Ꮡt.Value;
+    ref var h = ref Ꮡh.Value;
+    ref var b = ref Ꮡb.DerefOrNil();
+    ref var s = ref Ꮡs.Value;
 
-    while (b != nil) {
-        for (var i = ((uintptr)0); i < abi.MapBucketCount; i++) {
-            var offi = (uintptr)((i + ((uintptr)offset)) & (abi.MapBucketCount - 1));
-            if (isEmpty(b.tophash[offi])) {
+    while (Ꮡb != nil) {
+        for (var i = (uintptr)0; i < abi.MapBucketCount; i++) {
+            var offi = (uintptr)((i + (uintptr)offset) & (uintptr)(abi.MapBucketCount - 1));
+            if (isEmpty(b.tophash[(nint)(offi)])) {
                 continue;
             }
-            if ((uint8)(h.flags & hashWriting) != 0) {
+            if ((uint8)(h.flags & (uint8)hashWriting) != 0) {
                 fatal("concurrent map read and map write"u8);
             }
-            @unsafe.Pointer ele = (uintptr)add(new @unsafe.Pointer(Ꮡb), dataOffset + abi.MapBucketCount * ((uintptr)t.KeySize) + offi * ((uintptr)t.ValueSize));
+            @unsafe.Pointer ele = (uintptr)add(new @unsafe.Pointer(Ꮡb), dataOffset + (uintptr)abi.MapBucketCount * (uintptr)t.KeySize + offi * (uintptr)t.ValueSize);
             if (t.IndirectElem()) {
-                ele = ((ж<@unsafe.Pointer>)(uintptr)(ele)).val;
+                ele = ((ж<@unsafe.Pointer>)(uintptr)(ele)).Value;
             }
             if (s.len >= s.cap) {
                 fatal("concurrent map read and map write"u8);
             }
-            typedmemmove(t.Elem, (uintptr)add(s.Δarray, ((uintptr)s.len) * ((uintptr)t.Elem.Size())), ele);
+            typedmemmove(t.Elem, (uintptr)add(s.Δarray, (uintptr)s.len * (uintptr)t.Elem.Size()), ele);
             s.len++;
         }
-        b = b.overflow(Ꮡt);
+        Ꮡb = Ꮡb.overflow(Ꮡt); b = ref Ꮡb.DerefOrNil();
     }
 }
 

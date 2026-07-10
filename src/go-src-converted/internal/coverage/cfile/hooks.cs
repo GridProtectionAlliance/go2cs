@@ -3,8 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal.coverage;
 
-using exithook = @internal.runtime.exithook_package;
-using @internal.runtime;
+using exithook = go.@internal.runtime.exithook_package;
+using go.@internal.runtime;
 
 partial class cfile_package {
 

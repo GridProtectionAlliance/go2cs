@@ -6,10 +6,10 @@ namespace go;
 using syntax = regexp.syntax_package;
 using slices = slices_package;
 using strings = strings_package;
-using unicode = unicode_package;
-using utf8 = unicode.utf8_package;
+using Δunicode = unicode_package;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
 using regexp;
-using unicode;
 
 partial class regexp_package {
 
@@ -29,7 +29,7 @@ partial class regexp_package {
 
 // A onePassInst is a single instruction in a one-pass regular expression program.
 // It is the same as syntax.Inst except for the new 'Next' field.
-[GoType] partial struct onePassInst {
+[GoType] public partial struct onePassInst {
     public partial ref regexp.syntax_package.Inst Inst { get; }
     public slice<uint32> Next;
 }
@@ -44,28 +44,28 @@ internal static (@string prefix, bool complete, uint32 pc) onePassPrefix(ж<synt
     bool complete = default!;
     uint32 pc = default!;
 
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
     var i = Ꮡ(p.Inst, p.Start);
-    if ((~i).Op != syntax.InstEmptyWidth || (syntax.EmptyOp)((((syntax.EmptyOp)(~i).Arg)) & syntax.EmptyBeginText) == 0) {
-        return ("", (~i).Op == syntax.InstMatch, ((uint32)p.Start));
+    if ((~i).Op != syntax.InstEmptyWidth || (syntax.EmptyOp)((((syntax.EmptyOp)(uint8)(~i).Arg)) & syntax.EmptyBeginText) == 0) {
+        return ("", (~i).Op == syntax.InstMatch, (uint32)p.Start);
     }
-    pc = i.val.Out;
-    i = Ꮡ(p.Inst, pc);
+    pc = i.Value.Out;
+    i = Ꮡ(p.Inst, (int)(pc));
     while ((~i).Op == syntax.InstNop) {
-        pc = i.val.Out;
-        i = Ꮡ(p.Inst, pc);
+        pc = i.Value.Out;
+        i = Ꮡ(p.Inst, (int)(pc));
     }
     // Avoid allocation of buffer if prefix is empty.
     if (iop(i) != syntax.InstRune || len((~i).Rune) != 1) {
-        return ("", (~i).Op == syntax.InstMatch, ((uint32)p.Start));
+        return ("", (~i).Op == syntax.InstMatch, (uint32)p.Start);
     }
     // Have prefix; gather characters.
-    strings.Builder buf = default!;
-    while (iop(i) == syntax.InstRune && len((~i).Rune) == 1 && (syntax.Flags)(((syntax.Flags)(~i).Arg) & syntax.FoldCase) == 0 && (~i).Rune[0] != utf8.RuneError) {
-        buf.WriteRune((~i).Rune[0]);
-        (pc, i) = (i.val.Out, Ꮡ(p.Inst, (~i).Out));
+    ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
+    while (iop(i) == syntax.InstRune && len((~i).Rune) == 1 && (syntax.Flags)(((syntax.Flags)(uint16)(~i).Arg) & syntax.FoldCase) == 0 && (~i).Rune[0] != utf8.RuneError) {
+        Ꮡbuf.WriteRune((~i).Rune[0]);
+        (pc, i) = (i.Value.Out, Ꮡ(p.Inst, (int)((~i).Out)));
     }
-    if ((~i).Op == syntax.InstEmptyWidth && (syntax.EmptyOp)(((syntax.EmptyOp)(~i).Arg) & syntax.EmptyEndText) != 0 && p.Inst[(~i).Out].Op == syntax.InstMatch) {
+    if ((~i).Op == syntax.InstEmptyWidth && (syntax.EmptyOp)(((syntax.EmptyOp)(uint8)(~i).Arg) & syntax.EmptyEndText) != 0 && p.Inst[(nint)((~i).Out)].Op == syntax.InstMatch) {
         complete = true;
     }
     return (buf.String(), complete, pc);
@@ -76,9 +76,9 @@ internal static (@string prefix, bool complete, uint32 pc) onePassPrefix(ж<synt
 // One of the alternates may ultimately lead without input to end of line. If the instruction
 // is InstAltMatch the path to the InstMatch is in i.Out, the normal node in i.Next.
 internal static uint32 onePassNext(ж<onePassInst> Ꮡi, rune r) {
-    ref var i = ref Ꮡi.val;
+    ref var i = ref Ꮡi.Value;
 
-    nint next = i.MatchRunePos(r);
+    nint next = Ꮡi.of(onePassInst.ᏑInst).MatchRunePos(r);
     if (next >= 0) {
         return i.Next[next];
     }
@@ -89,7 +89,7 @@ internal static uint32 onePassNext(ж<onePassInst> Ꮡi, rune r) {
 }
 
 internal static syntax.InstOp iop(ж<syntax.Inst> Ꮡi) {
-    ref var i = ref Ꮡi.val;
+    ref var i = ref Ꮡi.Value;
 
     var op = i.Op;
     var exprᴛ1 = op;
@@ -104,8 +104,7 @@ internal static syntax.InstOp iop(ж<syntax.Inst> Ꮡi) {
 [GoType] partial struct queueOnePass {
     internal slice<uint32> sparse;
     internal slice<uint32> dense;
-    internal uint32 size;
-    internal uint32 nextIndex;
+    internal uint32 size, nextIndex;
 }
 
 [GoRecv] internal static bool empty(this ref queueOnePass q) {
@@ -115,7 +114,7 @@ internal static syntax.InstOp iop(ж<syntax.Inst> Ꮡi) {
 [GoRecv] internal static uint32 /*n*/ next(this ref queueOnePass q) {
     uint32 n = default!;
 
-    n = q.dense[q.nextIndex];
+    n = q.dense[(nint)(q.nextIndex)];
     q.nextIndex++;
     return n;
 }
@@ -126,10 +125,10 @@ internal static syntax.InstOp iop(ж<syntax.Inst> Ꮡi) {
 }
 
 [GoRecv] internal static bool contains(this ref queueOnePass q, uint32 u) {
-    if (u >= ((uint32)len(q.sparse))) {
+    if (u >= (uint32)len(q.sparse)) {
         return false;
     }
-    return q.sparse[u] < q.size && q.dense[q.sparse[u]] == u;
+    return q.sparse[(nint)(u)] < q.size && q.dense[(nint)(q.sparse[(nint)(u)])] == u;
 }
 
 [GoRecv] internal static void insert(this ref queueOnePass q, uint32 u) {
@@ -139,11 +138,11 @@ internal static syntax.InstOp iop(ж<syntax.Inst> Ꮡi) {
 }
 
 [GoRecv] internal static void insertNew(this ref queueOnePass q, uint32 u) {
-    if (u >= ((uint32)len(q.sparse))) {
+    if (u >= (uint32)len(q.sparse)) {
         return;
     }
-    q.sparse[u] = q.size;
-    q.dense[q.size] = u;
+    q.sparse[(nint)(u)] = q.size;
+    q.dense[(nint)(q.size)] = u;
     q.size++;
 }
 
@@ -166,53 +165,50 @@ internal const uint32 mergeFailed = /* uint32(0xffffffff) */ 4294967295;
 internal static slice<rune> noRune = new rune[]{}.slice();
 internal static slice<uint32> noNext = new uint32[]{mergeFailed}.slice();
 
-internal static (slice<rune>, slice<uint32>) mergeRuneSets(ж<slice<rune>> ᏑleftRunes, ж<slice<rune>> ᏑrightRunes, uint32 leftPC, uint32 rightPC) => func((defer, _) => {
-    ref var leftRunes = ref ᏑleftRunes.val;
-    ref var rightRunes = ref ᏑrightRunes.val;
+internal static (slice<rune>, slice<uint32>) mergeRuneSets(ж<slice<rune>> ᏑleftRunes, ж<slice<rune>> ᏑrightRunes, uint32 leftPC, uint32 rightPC) => func((defer, recover) => {
+    ref var leftRunes = ref ᏑleftRunes.Value;
+    ref var rightRunes = ref ᏑrightRunes.Value;
 
     nint leftLen = len(leftRunes);
     nint rightLen = len(rightRunes);
-    if ((nint)(leftLen & 1) != 0 || (nint)(rightLen & 1) != 0) {
+    if ((nint)(leftLen & 0x1) != 0 || (nint)(rightLen & 0x1) != 0) {
         throw panic("mergeRuneSets odd length []rune");
     }
     ref var lx = ref heap(new nint(), out var Ꮡlx);
     ref var rx = ref heap(new nint(), out var Ꮡrx);
-    var merged = new slice<rune>(0);
-    var next = new slice<uint32>(0);
+    ref var merged = ref heap<slice<rune>>(out var Ꮡmerged);
+    merged = new slice<rune>(0);
+    ref var next = ref heap<slice<uint32>>(out var Ꮡnext);
+    next = new slice<uint32>(0);
     var ok = true;
-    var mergedʗ1 = merged;
-    var nextʗ1 = next;
     defer(() => {
         if (!ok) {
-            mergedʗ1 = default!;
-            nextʗ1 = default!;
+            Ꮡmerged.ValueSlot = default!;
+            Ꮡnext.ValueSlot = default!;
         }
     });
     nint ix = -1;
-    var extend = 
-    var mergedʗ2 = merged;
-    var nextʗ2 = next;
-    (ж<nint> newLow, ж<slice<rune>> newArray, uint32 pc) => {
-        if (ix > 0 && (ж<ж<slice<rune>>>)[newLow.val] <= mergedʗ2[ix]) {
+    var extend = (ж<nint> newLow, ж<slice<rune>> newArray, uint32 pc) => {
+        if (ix > 0 && (newArray.ValueSlot)[newLow.Value] <= Ꮡmerged.ValueSlot[ix]) {
             return false;
         }
-        mergedʗ2 = append(mergedʗ2, (ж<ж<slice<rune>>>)[newLow.val], (ж<ж<slice<rune>>>)[newLow.val + 1]);
-        newLow.val += 2;
+        Ꮡmerged.ValueSlot = append(Ꮡmerged.ValueSlot, (newArray.ValueSlot)[newLow.Value], (newArray.ValueSlot)[newLow.Value + 1]);
+        newLow.Value += 2;
         ix += 2;
-        nextʗ2 = append(nextʗ2, pc);
+        Ꮡnext.ValueSlot = append(Ꮡnext.ValueSlot, pc);
         return true;
     };
     while (lx < leftLen || rx < rightLen) {
         switch (ᐧ) {
-        case {} when rx is >= rightLen: {
+        case {} when rx >= rightLen: {
             ok = extend(Ꮡlx, ᏑleftRunes, leftPC);
             break;
         }
-        case {} when lx is >= leftLen: {
+        case {} when lx >= leftLen: {
             ok = extend(Ꮡrx, ᏑrightRunes, rightPC);
             break;
         }
-        case {} when (rightRunes)[rx] is < (leftRunes)[lx]: {
+        case {} when (rightRunes)[rx] < (leftRunes)[lx]: {
             ok = extend(Ꮡrx, ᏑrightRunes, rightPC);
             break;
         }
@@ -230,8 +226,8 @@ internal static (slice<rune>, slice<uint32>) mergeRuneSets(ж<slice<rune>> Ꮡle
 
 // cleanupOnePass drops working memory, and restores certain shortcut instructions.
 internal static void cleanupOnePass(ж<onePassProg> Ꮡprog, ж<syntax.Prog> Ꮡoriginal) {
-    ref var prog = ref Ꮡprog.val;
-    ref var original = ref Ꮡoriginal.val;
+    ref var prog = ref Ꮡprog.Value;
+    ref var original = ref Ꮡoriginal.Value;
 
     foreach (var (ix, instOriginal) in original.Inst) {
         var exprᴛ1 = instOriginal.Op;
@@ -250,7 +246,7 @@ internal static void cleanupOnePass(ж<onePassProg> Ꮡprog, ж<syntax.Prog> Ꮡ
 
 // onePassCopy creates a copy of the original Prog, as we'll be modifying it.
 internal static ж<onePassProg> onePassCopy(ж<syntax.Prog> Ꮡprog) {
-    ref var prog = ref Ꮡprog.val;
+    ref var prog = ref Ꮡprog.Value;
 
     var p = Ꮡ(new onePassProg(
         Start: prog.Start,
@@ -258,7 +254,7 @@ internal static ж<onePassProg> onePassCopy(ж<syntax.Prog> Ꮡprog) {
         Inst: new slice<onePassInst>(len(prog.Inst))
     ));
     foreach (var (i, inst) in prog.Inst) {
-        (~p).Inst[i] = new onePassInst(Inst: inst);
+        p.Value.Inst[i] = new onePassInst(Inst: inst);
     }
     // rewrites one or more common Prog constructs that enable some otherwise
     // non-onepass Progs to be onepass. A:BD (for example) means an InstAlt at
@@ -267,57 +263,57 @@ internal static ж<onePassProg> onePassCopy(ж<syntax.Prog> Ꮡprog) {
     // A:BC + B:DC => A:DC + B:DC
     foreach (var (pc, _) in (~p).Inst) {
         var exprᴛ1 = (~p).Inst[pc].Op;
-        { /* default: */
-            continue;
-        }
-        else if (exprᴛ1 == syntax.InstAlt || exprᴛ1 == syntax.InstAltMatch) {
-            var p_A_Other = Ꮡ(~p).Inst[pc].of(onePassInst.ᏑOut);
-            var p_A_Alt = Ꮡ(~p).Inst[pc].of(onePassInst.ᏑArg);
-            var instAlt = (~p).Inst[p_A_Alt.val];
+        if (exprᴛ1 == syntax.InstAlt || exprᴛ1 == syntax.InstAltMatch) {
+            var p_A_Other = Ꮡ((~p).Inst[pc]).of(onePassInst.ᏑOut);
+            var p_A_Alt = Ꮡ((~p).Inst[pc]).of(onePassInst.ᏑArg);
+            var instAlt = (~p).Inst[(nint)(p_A_Alt.Value)];
             if (!(instAlt.Op == syntax.InstAlt || instAlt.Op == syntax.InstAltMatch)) {
                 // A:Bx + B:Ay
                 // make sure a target is another Alt
                 (p_A_Alt, p_A_Other) = (p_A_Other, p_A_Alt);
-                instAlt = (~p).Inst[p_A_Alt.val];
+                instAlt = (~p).Inst[(nint)(p_A_Alt.Value)];
                 if (!(instAlt.Op == syntax.InstAlt || instAlt.Op == syntax.InstAltMatch)) {
                     continue;
                 }
             }
-            var instOther = (~p).Inst[p_A_Other.val];
+            var instOther = (~p).Inst[(nint)(p_A_Other.Value)];
             if (instOther.Op == syntax.InstAlt || instOther.Op == syntax.InstAltMatch) {
                 // Analyzing both legs pointing to Alts is for another day
                 // too complicated
                 continue;
             }
-            var p_B_Alt = Ꮡ(~p).Inst[p_A_Alt.val].of(onePassInst.ᏑOut);
-            var p_B_Other = Ꮡ(~p).Inst[p_A_Alt.val].of(onePassInst.ᏑArg);
+            var p_B_Alt = Ꮡ((~p).Inst[(nint)(p_A_Alt.Value)]).of(onePassInst.ᏑOut);
+            var p_B_Other = Ꮡ((~p).Inst[(nint)(p_A_Alt.Value)]).of(onePassInst.ᏑArg);
             var patch = false;
-            if (instAlt.Out == ((uint32)pc)){
+            if (instAlt.Out == (uint32)pc){
                 // simple empty transition loop
                 // A:BC + B:DA => A:BC + B:DC
                 patch = true;
             } else 
-            if (instAlt.Arg == ((uint32)pc)) {
+            if (instAlt.Arg == (uint32)pc) {
                 patch = true;
                 (p_B_Alt, p_B_Other) = (p_B_Other, p_B_Alt);
             }
             if (patch) {
-                p_B_Alt.val = p_A_Other.val;
+                p_B_Alt.Value = p_A_Other.Value;
             }
-            if (p_A_Other.val == p_B_Alt.val) {
+            if (p_A_Other.Value == p_B_Alt.Value) {
                 // empty transition to common target
                 // A:BC + B:DC => A:DC + B:DC
-                p_A_Alt.val = p_B_Other.val;
+                p_A_Alt.Value = p_B_Other.Value;
             }
+        }
+        else { /* default: */
+            continue;
         }
 
     }
     return p;
 }
 
-internal static slice<rune> anyRuneNotNL = new rune[]{0, (rune)'\n' - 1, (rune)'\n' + 1, unicode.MaxRune}.slice();
+internal static slice<rune> anyRuneNotNL = new rune[]{0, (rune)'\n' - 1, (rune)'\n' + 1, Δunicode.MaxRune}.slice();
 
-internal static slice<rune> anyRune = new rune[]{0, unicode.MaxRune}.slice();
+internal static slice<rune> anyRune = new rune[]{0, Δunicode.MaxRune}.slice();
 
 // makeOnePass creates a onepass Prog, if possible. It is possible if at any alt,
 // the match engine can always tell which branch to take. The routine may modify
@@ -325,7 +321,7 @@ internal static slice<rune> anyRune = new rune[]{0, unicode.MaxRune}.slice();
 // onepass Prog, the Prog nil is returned. makeOnePass is recursive
 // to the size of the Prog.
 internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.DerefOrNil();
 
     // If the machine is very long, it's not worth the time to check if we can use one pass.
     if (len(p.Inst) >= 1000) {
@@ -337,149 +333,158 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
     slice<slice<rune>> onePassRunes = new slice<slice<rune>>(len(p.Inst));
     // check that paths from Alt instructions are unambiguous, and rebuild the new
     // program as a onepass program
-    check = 
-    var anyRuneʗ1 = anyRune;
-    var anyRuneNotNLʗ1 = anyRuneNotNL;
     var checkʗ1 = check;
     var instQueueʗ1 = instQueue;
     var onePassRunesʗ1 = onePassRunes;
     var visitQueueʗ1 = visitQueue;
-    (uint32 pc, slice<bool> m) => {
+    check = (uint32 pc, slice<bool> mΔ1) => {
+        bool ok = default!;
         ok = true;
-        var inst = Ꮡ(p.Inst, pc);
+        var inst = Ꮡ(Ꮡp.Value.Inst, (int)(pc));
         if (visitQueueʗ1.contains(pc)) {
-            return;
+            return ok;
         }
         visitQueueʗ1.insert(pc);
-        var exprᴛ1 = inst.Op;
+        var exprᴛ1 = (~inst).Op;
         if (exprᴛ1 == syntax.InstAlt || exprᴛ1 == syntax.InstAltMatch) {
-            ok = checkʗ1(inst.Out, mΔ1) && checkʗ1(inst.Arg, mΔ1);
-            var matchOut = mΔ1[inst.Out];
-            var matchArg = mΔ1[inst.Arg];
-            if (matchOut && matchArg) {
-                // check no-input paths to InstMatch
-                ok = false;
-                break;
-            }
-            if (matchArg) {
-                // Match on empty goes in inst.Out
-                (inst.Out, inst.Arg) = (inst.Arg, inst.Out);
-                (matchOut, matchArg) = (matchArg, matchOut);
-            }
-            if (matchOut) {
-                [pc] = true;
-                inst.Op = syntax.InstAltMatch;
-            }
-            (onePassRunesʗ1[pc], inst.val.Next) = mergeRuneSets(
-                Ꮡ(onePassRunesʗ1, inst.Out), // build a dispatch operator from the two legs of the alt.
- Ꮡ(onePassRunesʗ1, inst.Arg), inst.Out, inst.Arg);
-            if (len((~inst).Next) > 0 && (~inst).Next[0] == mergeFailed) {
-                ok = false;
-                break;
-            }
+            do {
+                ok = checkʗ1((~inst).Out, mΔ1) && checkʗ1((~inst).Arg, mΔ1);
+                var matchOut = mΔ1[(nint)((~inst).Out)];
+                var matchArg = mΔ1[(nint)((~inst).Arg)];
+                if (matchOut && matchArg) {
+                    // check no-input paths to InstMatch
+                    ok = false;
+                    break;
+                }
+                if (matchArg) {
+                    // Match on empty goes in inst.Out
+                    inst.Value.Out = inst.Value.Arg;
+                    inst.Value.Arg = inst.Value.Out;
+                    (matchOut, matchArg) = (matchArg, matchOut);
+                }
+                if (matchOut) {
+                    mΔ1[(nint)(pc)] = true;
+                    inst.Value.Op = syntax.InstAltMatch;
+                }
+                (onePassRunesʗ1[(nint)(pc)], inst.Value.Next) = mergeRuneSets(
+                    Ꮡ(onePassRunesʗ1, (int)((~inst).Out)), // build a dispatch operator from the two legs of the alt.
+ Ꮡ(onePassRunesʗ1, (int)((~inst).Arg)), (~inst).Out, (~inst).Arg);
+                if (len((~inst).Next) > 0 && (~inst).Next[0] == mergeFailed) {
+                    ok = false;
+                    break;
+                }
+            } while (false);
         }
         else if (exprᴛ1 == syntax.InstCapture || exprᴛ1 == syntax.InstNop) {
-            ok = checkʗ1(inst.Out, mΔ1);
-            [pc] = mΔ1[inst.Out];
-            onePassRunesʗ1[pc] = append(new rune[]{}.slice(), // pass matching runes back through these no-ops.
- onePassRunesʗ1[inst.Out].ꓸꓸꓸ);
-            inst.val.Next = new slice<uint32>(len(onePassRunesʗ1[pc]) / 2 + 1);
+            ok = checkʗ1((~inst).Out, mΔ1);
+            mΔ1[(nint)(pc)] = mΔ1[(nint)((~inst).Out)];
+            onePassRunesʗ1[(nint)(pc)] = append(new rune[]{}.slice(), // pass matching runes back through these no-ops.
+ onePassRunesʗ1[(nint)((~inst).Out)].ꓸꓸꓸ);
+            inst.Value.Next = new slice<uint32>(len(onePassRunesʗ1[(nint)(pc)]) / 2 + 1);
             foreach (var (i, _) in (~inst).Next) {
-                (~inst).Next[i] = inst.Out;
+                inst.Value.Next[i] = inst.Value.Out;
             }
         }
         else if (exprᴛ1 == syntax.InstEmptyWidth) {
-            ok = checkʗ1(inst.Out, mΔ1);
-            [pc] = mΔ1[inst.Out];
-            onePassRunesʗ1[pc] = append(new rune[]{}.slice(), onePassRunesʗ1[inst.Out].ꓸꓸꓸ);
-            inst.val.Next = new slice<uint32>(len(onePassRunesʗ1[pc]) / 2 + 1);
+            ok = checkʗ1((~inst).Out, mΔ1);
+            mΔ1[(nint)(pc)] = mΔ1[(nint)((~inst).Out)];
+            onePassRunesʗ1[(nint)(pc)] = append(new rune[]{}.slice(), onePassRunesʗ1[(nint)((~inst).Out)].ꓸꓸꓸ);
+            inst.Value.Next = new slice<uint32>(len(onePassRunesʗ1[(nint)(pc)]) / 2 + 1);
             foreach (var (i, _) in (~inst).Next) {
-                (~inst).Next[i] = inst.Out;
+                inst.Value.Next[i] = inst.Value.Out;
             }
         }
         else if (exprᴛ1 == syntax.InstMatch || exprᴛ1 == syntax.InstFail) {
-            [pc] = inst.Op == syntax.InstMatch;
+            mΔ1[(nint)(pc)] = (~inst).Op == syntax.InstMatch;
         }
         else if (exprᴛ1 == syntax.InstRune) {
-            [pc] = false;
-            if (len((~inst).Next) > 0) {
-                break;
-            }
-            instQueueʗ1.insert(inst.Out);
-            if (len(inst.Rune) == 0) {
-                onePassRunesʗ1[pc] = new rune[]{}.slice();
-                inst.val.Next = new uint32[]{inst.Out}.slice();
-                break;
-            }
-            var runes = new slice<rune>(0);
-            if (len(inst.Rune) == 1 && (syntax.Flags)(((syntax.Flags)inst.Arg) & syntax.FoldCase) != 0){
-                var r0 = inst.Rune[0];
-                runes = append(runes, r0, r0);
-                for (var r1 = unicode.SimpleFold(r0); r1 != r0; r1 = unicode.SimpleFold(r1)) {
-                    runes = append(runes, r1, r1);
+            do {
+                mΔ1[(nint)(pc)] = false;
+                if (len((~inst).Next) > 0) {
+                    break;
                 }
-                slices.Sort(runes);
-            } else {
-                runes = append(runes, inst.Rune.ꓸꓸꓸ);
-            }
-            onePassRunesʗ1[pc] = runes;
-            inst.val.Next = new slice<uint32>(len(onePassRunesʗ1[pc]) / 2 + 1);
-            foreach (var (i, _) in (~inst).Next) {
-                (~inst).Next[i] = inst.Out;
-            }
-            inst.Op = syntax.InstRune;
+                instQueueʗ1.insert((~inst).Out);
+                if (len((~inst).Rune) == 0) {
+                    onePassRunesʗ1[(nint)(pc)] = new rune[]{}.slice();
+                    inst.Value.Next = new uint32[]{(~inst).Out}.slice();
+                    break;
+                }
+                var runes = new slice<rune>(0);
+                if (len((~inst).Rune) == 1 && (syntax.Flags)(((syntax.Flags)(uint16)(~inst).Arg) & syntax.FoldCase) != 0){
+                    var r0 = (~inst).Rune[0];
+                    runes = append(runes, r0, r0);
+                    for (var r1 = Δunicode.SimpleFold(r0); r1 != r0; r1 = Δunicode.SimpleFold(r1)) {
+                        runes = append(runes, r1, r1);
+                    }
+                    slices.Sort<slice<rune>, rune>(runes);
+                } else {
+                    runes = append(runes, (~inst).Rune.ꓸꓸꓸ);
+                }
+                onePassRunesʗ1[(nint)(pc)] = runes;
+                inst.Value.Next = new slice<uint32>(len(onePassRunesʗ1[(nint)(pc)]) / 2 + 1);
+                foreach (var (i, _) in (~inst).Next) {
+                    inst.Value.Next[i] = inst.Value.Out;
+                }
+                inst.Value.Op = syntax.InstRune;
+            } while (false);
         }
         else if (exprᴛ1 == syntax.InstRune1) {
-            [pc] = false;
-            if (len((~inst).Next) > 0) {
-                break;
-            }
-            instQueueʗ1.insert(inst.Out);
-            var runes = new rune[]{}.slice();
-            if ((syntax.Flags)(((syntax.Flags)inst.Arg) & syntax.FoldCase) != 0){
-                // expand case-folded runes
-                var r0 = inst.Rune[0];
-                runes = append(runes, r0, r0);
-                for (var r1 = unicode.SimpleFold(r0); r1 != r0; r1 = unicode.SimpleFold(r1)) {
-                    runes = append(runes, r1, r1);
+            do {
+                mΔ1[(nint)(pc)] = false;
+                if (len((~inst).Next) > 0) {
+                    break;
                 }
-                slices.Sort(runes);
-            } else {
-                runes = append(runes, inst.Rune[0], inst.Rune[0]);
-            }
-            onePassRunesʗ1[pc] = runes;
-            inst.val.Next = new slice<uint32>(len(onePassRunesʗ1[pc]) / 2 + 1);
-            foreach (var (i, _) in (~inst).Next) {
-                (~inst).Next[i] = inst.Out;
-            }
-            inst.Op = syntax.InstRune;
+                instQueueʗ1.insert((~inst).Out);
+                var runes = new rune[]{}.slice();
+                if ((syntax.Flags)(((syntax.Flags)(uint16)(~inst).Arg) & syntax.FoldCase) != 0){
+                    // expand case-folded runes
+                    var r0 = (~inst).Rune[0];
+                    runes = append(runes, r0, r0);
+                    for (var r1 = Δunicode.SimpleFold(r0); r1 != r0; r1 = Δunicode.SimpleFold(r1)) {
+                        runes = append(runes, r1, r1);
+                    }
+                    slices.Sort<slice<rune>, rune>(runes);
+                } else {
+                    runes = append(runes, (~inst).Rune[0], (~inst).Rune[0]);
+                }
+                onePassRunesʗ1[(nint)(pc)] = runes;
+                inst.Value.Next = new slice<uint32>(len(onePassRunesʗ1[(nint)(pc)]) / 2 + 1);
+                foreach (var (i, _) in (~inst).Next) {
+                    inst.Value.Next[i] = inst.Value.Out;
+                }
+                inst.Value.Op = syntax.InstRune;
+            } while (false);
         }
         else if (exprᴛ1 == syntax.InstRuneAny) {
-            [pc] = false;
-            if (len((~inst).Next) > 0) {
-                break;
-            }
-            instQueueʗ1.insert(inst.Out);
-            onePassRunesʗ1[pc] = append(new rune[]{}.slice(), anyRuneʗ1.ꓸꓸꓸ);
-            inst.val.Next = new uint32[]{inst.Out}.slice();
+            do {
+                mΔ1[(nint)(pc)] = false;
+                if (len((~inst).Next) > 0) {
+                    break;
+                }
+                instQueueʗ1.insert((~inst).Out);
+                onePassRunesʗ1[(nint)(pc)] = append(new rune[]{}.slice(), anyRune.ꓸꓸꓸ);
+                inst.Value.Next = new uint32[]{(~inst).Out}.slice();
+            } while (false);
         }
         else if (exprᴛ1 == syntax.InstRuneAnyNotNL) {
-            [pc] = false;
-            if (len((~inst).Next) > 0) {
-                break;
-            }
-            instQueueʗ1.insert(inst.Out);
-            onePassRunesʗ1[pc] = append(new rune[]{}.slice(), anyRuneNotNLʗ1.ꓸꓸꓸ);
-            inst.val.Next = new slice<uint32>(len(onePassRunesʗ1[pc]) / 2 + 1);
-            foreach (var (i, _) in (~inst).Next) {
-                (~inst).Next[i] = inst.Out;
-            }
+            do {
+                mΔ1[(nint)(pc)] = false;
+                if (len((~inst).Next) > 0) {
+                    break;
+                }
+                instQueueʗ1.insert((~inst).Out);
+                onePassRunesʗ1[(nint)(pc)] = append(new rune[]{}.slice(), anyRuneNotNL.ꓸꓸꓸ);
+                inst.Value.Next = new slice<uint32>(len(onePassRunesʗ1[(nint)(pc)]) / 2 + 1);
+                foreach (var (i, _) in (~inst).Next) {
+                    inst.Value.Next[i] = inst.Value.Out;
+                }
+            } while (false);
         }
 
-        return;
+        return ok;
     };
     instQueue.clear();
-    instQueue.insert(((uint32)p.Start));
+    instQueue.insert((uint32)p.Start);
     var m = new slice<bool>(len(p.Inst));
     while (!instQueue.empty()) {
         visitQueue.clear();
@@ -489,7 +494,7 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
             break;
         }
     }
-    if (p != nil) {
+    if (Ꮡp != nil) {
         foreach (var (i, _) in p.Inst) {
             p.Inst[i].Rune = onePassRunes[i];
         }
@@ -504,33 +509,33 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
 internal static ж<onePassProg> /*p*/ compileOnePass(ж<syntax.Prog> Ꮡprog) {
     ж<onePassProg> p = default!;
 
-    ref var prog = ref Ꮡprog.val;
+    ref var prog = ref Ꮡprog.Value;
     if (prog.Start == 0) {
         return default!;
     }
     // onepass regexp is anchored
-    if (prog.Inst[prog.Start].Op != syntax.InstEmptyWidth || (syntax.EmptyOp)(((syntax.EmptyOp)prog.Inst[prog.Start].Arg) & syntax.EmptyBeginText) != syntax.EmptyBeginText) {
+    if (prog.Inst[prog.Start].Op != syntax.InstEmptyWidth || (syntax.EmptyOp)(((syntax.EmptyOp)(uint8)prog.Inst[prog.Start].Arg) & syntax.EmptyBeginText) != syntax.EmptyBeginText) {
         return default!;
     }
     // every instruction leading to InstMatch must be EmptyEndText
     foreach (var (_, inst) in prog.Inst) {
-        var opOut = prog.Inst[inst.Out].Op;
+        var opOut = prog.Inst[(nint)(inst.Out)].Op;
         var exprᴛ1 = inst.Op;
-        { /* default: */
-            if (opOut == syntax.InstMatch) {
-                return default!;
-            }
-        }
         if (exprᴛ1 == syntax.InstAlt || exprᴛ1 == syntax.InstAltMatch) {
-            if (opOut == syntax.InstMatch || prog.Inst[inst.Arg].Op == syntax.InstMatch) {
+            if (opOut == syntax.InstMatch || prog.Inst[(nint)(inst.Arg)].Op == syntax.InstMatch) {
                 return default!;
             }
         }
         if (exprᴛ1 == syntax.InstEmptyWidth) {
             if (opOut == syntax.InstMatch) {
-                if ((syntax.EmptyOp)(((syntax.EmptyOp)inst.Arg) & syntax.EmptyEndText) == syntax.EmptyEndText) {
+                if ((syntax.EmptyOp)(((syntax.EmptyOp)(uint8)inst.Arg) & syntax.EmptyEndText) == syntax.EmptyEndText) {
                     continue;
                 }
+                return default!;
+            }
+        }
+        { /* default: */
+            if (opOut == syntax.InstMatch) {
                 return default!;
             }
         }

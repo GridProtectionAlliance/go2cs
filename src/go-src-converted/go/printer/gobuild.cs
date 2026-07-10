@@ -3,10 +3,10 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using constraint = go.build.constraint_package;
+using constraint = global::go.go.build.constraint_package;
 using slices = slices_package;
 using tabwriter = text.tabwriter_package;
-using go.build;
+using global::go.go.build;
 using text;
 
 partial class printer_package {
@@ -58,7 +58,7 @@ partial class printer_package {
     case 0: {
         foreach (var (_, pos) in p.plusBuild) {
             // Synthesize //go:build expression from // +build lines.
-            (y, err) = constraint.Parse(p.commentTextAt(pos));
+            var (y, err) = constraint.Parse(p.commentTextAt(pos));
             if (err != default!) {
                 x = default!;
                 break;
@@ -66,7 +66,7 @@ partial class printer_package {
             if (x == default!){
                 x = y;
             } else {
-                Ꮡx = new constraint.AndExpr(X: x, Y: y); x = ref Ꮡx.val;
+                x = new constraint_AndExprжExpr(Ꮡ(new constraint.AndExpr(X: x, Y: y)));
             }
         }
         break;
@@ -89,26 +89,26 @@ partial class printer_package {
             block = append(block, p.lineAt(pos).ꓸꓸꓸ);
         }
     } else {
-        block = append(block, tabwriter.Escape);
-        block = append(block, "//go:build "u8.ꓸꓸꓸ);
+        block = append(block, (byte)(tabwriter.Escape));
+        block = append(block, ((@string)"//go:build "u8).ꓸꓸꓸ);
         block = append(block, x.String().ꓸꓸꓸ);
-        block = append(block, tabwriter.Escape, (rune)'\n');
+        block = append(block, (byte)(tabwriter.Escape), (byte)((rune)'\n'));
         if (len(p.plusBuild) > 0) {
-            (lines, err) = constraint.PlusBuildLines(x);
+            var (lines, err) = constraint.PlusBuildLines(x);
             if (err != default!) {
-                lines = new @string[]{"// +build error: "u8 + err.Error()}.slice();
+                lines = new @string[]{"// +build error: " + err.Error()}.slice();
             }
             foreach (var (_, line) in lines) {
-                block = append(block, tabwriter.Escape);
+                block = append(block, (byte)(tabwriter.Escape));
                 block = append(block, line.ꓸꓸꓸ);
-                block = append(block, tabwriter.Escape, (rune)'\n');
+                block = append(block, (byte)(tabwriter.Escape), (byte)((rune)'\n'));
             }
         }
     }
-    block = append(block, (rune)'\n');
+    block = append(block, (byte)((rune)'\n'));
     // Build sorted list of lines to delete from remainder of output.
     var toDelete = append(p.goBuild, p.plusBuild.ꓸꓸꓸ);
-    slices.Sort(toDelete);
+    slices.Sort<slice<nint>, nint>(toDelete);
     // Collect output after insertion point, with lines deleted, into after.
     slice<byte> after = default!;
     nint start = insert;

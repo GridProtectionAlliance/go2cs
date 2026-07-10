@@ -42,15 +42,17 @@ public static ж<Ticker> NewTicker(Duration d) {
     // If the client falls behind while reading, we drop ticks
     // on the floor until the client catches up.
     var c = new channel<Time>(1);
-    var t = (ж<Ticker>)(uintptr)(new @unsafe.Pointer(newTimer(when(d), ((int64)d), sendTime, c, (uintptr)syncTimer(c))));
-    t.val.C = c;
+    var t = (ж<Ticker>)(uintptr)(new @unsafe.Pointer(newTimer(when(d), (int64)d, sendTime, c, (uintptr)syncTimer(c))));
+    t.Value.C = c;
     return t;
 }
 
 // Stop turns off a ticker. After Stop, no more ticks will be sent.
 // Stop does not close the channel, to prevent a concurrent goroutine
 // reading from the channel from seeing an erroneous "tick".
-[GoRecv] public static void Stop(this ref Ticker t) {
+public static void Stop(this ж<Ticker> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (!t.initTicker) {
         // This is misuse, and the same for time.Timer would panic,
         // but this didn't always panic, and we keep it not panicking
@@ -63,14 +65,16 @@ public static ж<Ticker> NewTicker(Duration d) {
 // Reset stops a ticker and resets its period to the specified duration.
 // The next tick will arrive after the new period elapses. The duration d
 // must be greater than zero; if not, Reset will panic.
-[GoRecv] public static void Reset(this ref Ticker t, Duration d) {
+public static void Reset(this ж<Ticker> Ꮡt, Duration d) {
+    ref var t = ref Ꮡt.Value;
+
     if (d <= 0) {
         throw panic("non-positive interval for Ticker.Reset");
     }
     if (!t.initTicker) {
         throw panic("time: Reset called on uninitialized Ticker");
     }
-    resetTimer((ж<Timer>)(uintptr)(@unsafe.Pointer.FromRef(ref t)), when(d), ((int64)d));
+    resetTimer((ж<Timer>)(uintptr)(@unsafe.Pointer.FromRef(ref t)), when(d), (int64)d);
 }
 
 // Tick is a convenience wrapper for [NewTicker] providing access to the ticking

@@ -41,7 +41,6 @@ using static go.@internal.syscall.windows_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<syscall_package.Errno, error>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

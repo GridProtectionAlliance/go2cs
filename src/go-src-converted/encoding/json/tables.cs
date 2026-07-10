@@ -3,8 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.encoding;
 
-using utf8 = unicode.utf8_package;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using go.unicode;
 
 partial class json_package {
 
@@ -22,7 +22,7 @@ internal static array<bool> safeSet = new array<bool>(128){
     [(rune)'$'] = true,
     [(rune)'%'] = true,
     [(rune)'&'] = true,
-    [(rune)'\'] = true,
+    [(rune)'\''] = true,
     [(rune)'('] = true,
     [(rune)')'] = true,
     [(rune)'*'] = true,
@@ -75,7 +75,7 @@ internal static array<bool> safeSet = new array<bool>(128){
     [(rune)'Y'] = true,
     [(rune)'Z'] = true,
     [(rune)'['] = true,
-    [(rune)'\'] = false,
+    [(rune)'\\'] = false,
     [(rune)']'] = true,
     [(rune)'^'] = true,
     [(rune)'_'] = true,
@@ -110,7 +110,7 @@ internal static array<bool> safeSet = new array<bool>(128){
     [(rune)'|'] = true,
     [(rune)'}'] = true,
     [(rune)'~'] = true,
-    [(rune)'\'] = true
+    [(rune)'\x7f'] = true
 };
 
 // htmlSafeSet holds the value true if the ASCII character with the given
@@ -128,7 +128,7 @@ internal static array<bool> htmlSafeSet = new array<bool>(128){
     [(rune)'$'] = true,
     [(rune)'%'] = true,
     [(rune)'&'] = false,
-    [(rune)'\'] = true,
+    [(rune)'\''] = true,
     [(rune)'('] = true,
     [(rune)')'] = true,
     [(rune)'*'] = true,
@@ -181,7 +181,7 @@ internal static array<bool> htmlSafeSet = new array<bool>(128){
     [(rune)'Y'] = true,
     [(rune)'Z'] = true,
     [(rune)'['] = true,
-    [(rune)'\'] = false,
+    [(rune)'\\'] = false,
     [(rune)']'] = true,
     [(rune)'^'] = true,
     [(rune)'_'] = true,
@@ -216,7 +216,7 @@ internal static array<bool> htmlSafeSet = new array<bool>(128){
     [(rune)'|'] = true,
     [(rune)'}'] = true,
     [(rune)'~'] = true,
-    [(rune)'\'] = true
+    [(rune)'\x7f'] = true
 };
 
 } // end json_package

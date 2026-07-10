@@ -8,7 +8,7 @@ using chacha8rand = @internal.chacha8rand_package;
 using goarch = @internal.goarch_package;
 using math = runtime.@internal.math_package;
 using @unsafe = unsafe_package;
-using _ = unsafe_package; // for go:linkname
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
 using @internal;
 using runtime.@internal;
 
@@ -27,10 +27,11 @@ internal static slice<byte> startupRand;
 [GoType("dyn")] partial struct globalRandᴛ1 {
     internal mutex @lock;
     internal array<byte> seed = new(32);
-    internal @internal.chacha8rand_package.State state;
+    internal chacha8rand.State state;
     internal bool init;
 }
-internal static globalRandᴛ1 globalRand;
+internal static ж<globalRandᴛ1> ᏑglobalRand = new(default(globalRandᴛ1));
+internal static ref globalRandᴛ1 globalRand => ref ᏑglobalRand.Value;
 
 internal static bool readRandomFailed;
 
@@ -44,21 +45,21 @@ internal static void randinit() {
     var seed = ᏑglobalRand.of(globalRandᴛ1.Ꮡseed);
     if (startupRand != default!){
         foreach (var (i, c) in startupRand) {
-            seed.val[i % len(seed)] ^= (byte)(c);
+            seed.Value[i % len(seed)] ^= (byte)(c);
         }
-        clear(startupRand);
+        builtin.clear(startupRand);
         startupRand = default!;
     } else {
-        if (readRandom(seed[..]) != len(seed)) {
+        if (readRandom((~seed)[..]) != len(seed)) {
             // readRandom should never fail, but if it does we'd rather
             // not make Go binaries completely unusable, so make up
             // some random data based on the current time.
             readRandomFailed = true;
-            readTimeRandom(seed[..]);
+            readTimeRandom((~seed)[..]);
         }
     }
-    globalRand.state.Init(seed.val);
-    clear(seed[..]);
+    ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Init(seed.Value);
+    builtin.clear((~seed)[..]);
     globalRand.init = true;
     unlock(ᏑglobalRand.of(globalRandᴛ1.Ꮡlock));
 }
@@ -73,19 +74,19 @@ internal static void readTimeRandom(slice<byte> r) {
     // An earlier version of this code used getg().m.procid as well,
     // but note that this is called so early in startup that procid
     // is not initialized yet.
-    var v = ((uint64)nanotime());
+    var v = (uint64)nanotime();
     while (len(r) > 0) {
-        v ^= (uint64)((nuint)11562461410679940143UL);
-        v *= (nuint)16646288086500911323UL;
+        v ^= (uint64)((nuint)0xa0761d6478bd642fUL);
+        v *= (nuint)0xe7037ed1a0b428dbUL;
         nint size = 8;
         if (len(r) < 8) {
             size = len(r);
         }
         for (nint i = 0; i < size; i++) {
-            r[i] ^= (byte)(((byte)(v >> (int)((8 * i)))));
+            r[i] ^= (byte)((byte)((v >> (int)((8 * i)))));
         }
         r = r[(int)(size)..];
-        v = (uint64)(v >> (int)(32) | v << (int)(32));
+        v = (uint64)((v >> (int)(32)) | (v << (int)(32)));
     }
 }
 
@@ -97,12 +98,12 @@ internal static uint64 bootstrapRand() {
     }
     while (ᐧ) {
         {
-            var (x, ok) = globalRand.state.Next(); if (ok) {
+            var (x, ok) = ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Next(); if (ok) {
                 unlock(ᏑglobalRand.of(globalRandᴛ1.Ꮡlock));
                 return x;
             }
         }
-        globalRand.state.Refill();
+        ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Refill();
     }
 }
 
@@ -113,7 +114,7 @@ internal static void bootstrapRandReseed() {
     if (!globalRand.init) {
         fatal("randinit missed"u8);
     }
-    globalRand.state.Reseed();
+    ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Reseed();
     unlock(ᏑglobalRand.of(globalRandᴛ1.Ꮡlock));
 }
 
@@ -121,7 +122,7 @@ internal static void bootstrapRandReseed() {
 //
 //go:nosplit
 internal static uint32 rand32() {
-    return ((uint32)rand());
+    return (uint32)rand();
 }
 
 // rand returns a random uint64 from the per-m chacha8 state.
@@ -134,8 +135,8 @@ internal static uint64 rand() {
     // there is just a getg, an inlined c.Next, and a return.
     // The performance difference on a 16-core AMD is
     // 3.7ns/call this way versus 4.3ns/call with acquirem (+16%).
-    var mp = getg().val.m;
-    var c = Ꮡ((~mp).chacha8);
+    var mp = getg().Value.m;
+    var c = mp.of(m.Ꮡchacha8);
     while (ᐧ) {
         // Note: c.Next is marked nosplit,
         // so we don't need to use mp.locks
@@ -145,16 +146,16 @@ internal static uint64 rand() {
         if (ok) {
             return x;
         }
-        (~mp).locks++;
+        mp.Value.locks++;
         // hold m even though c.Refill may do stack split checks
         c.Refill();
-        (~mp).locks--;
+        mp.Value.locks--;
     }
 }
 
 // mrandinit initializes the random state of an m.
 internal static void mrandinit(ж<m> Ꮡmp) {
-    ref var mp = ref Ꮡmp.val;
+    ref var mp = ref Ꮡmp.Value;
 
     array<uint64> seed = new(4);
     foreach (var (i, _) in seed) {
@@ -162,7 +163,7 @@ internal static void mrandinit(ж<m> Ꮡmp) {
     }
     bootstrapRandReseed();
     // erase key we just extracted
-    mp.chacha8.Init64(seed);
+    Ꮡmp.of(m.Ꮡchacha8).Init64(seed);
     mp.cheaprand = rand();
 }
 
@@ -173,7 +174,7 @@ internal static void mrandinit(ж<m> Ꮡmp) {
 //go:linkname randn
 internal static uint32 randn(uint32 n) {
     // See https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
-    return ((uint32)((((uint64)((uint32)rand())) * ((uint64)n)) >> (int)(32)));
+    return (uint32)((((uint64)(uint32)rand() * (uint64)n) >> (int)(32)));
 }
 
 // cheaprand is a non-cryptographic-quality 32-bit random generator
@@ -196,25 +197,25 @@ internal static uint32 randn(uint32 n) {
 //go:linkname cheaprand
 //go:nosplit
 internal static uint32 cheaprand() {
-    var mp = getg().val.m;
+    var mp = getg().Value.m;
     // Implement wyrand: https://github.com/wangyi-fudan/wyhash
     // Only the platform that math.Mul64 can be lowered
     // by the compiler should be in this list.
     if ((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(goarch.IsAmd64 | goarch.IsArm64) | goarch.IsPpc64) | goarch.IsPpc64le) | goarch.IsMips64) | goarch.IsMips64le) | goarch.IsS390x) | goarch.IsRiscv64) | goarch.IsLoong64) == 1) {
-        mp.val.cheaprand += (nuint)11562461410679940143UL;
-        var (hi, lo) = math.Mul64((~mp).cheaprand, (uint64)((~mp).cheaprand ^ (nuint)16646288086500911323UL));
-        return ((uint32)((uint64)(hi ^ lo)));
+        mp.Value.cheaprand += (nuint)0xa0761d6478bd642fUL;
+        var (hi, lo) = math.Mul64((~mp).cheaprand, (uint64)((~mp).cheaprand ^ (nuint)0xe7037ed1a0b428dbUL));
+        return (uint32)((uint64)(hi ^ lo));
     }
     // Implement xorshift64+: 2 32-bit xorshift sequences added together.
     // Shift triplet [17,7,16] was calculated as indicated in Marsaglia's
     // Xorshift paper: https://www.jstatsoft.org/article/view/v008i14/xorshift.pdf
     // This generator passes the SmallCrush suite, part of TestU01 framework:
     // http://simul.iro.umontreal.ca/testu01/tu01.html
-    var t = (ж<array<uint32>>)(uintptr)(new @unsafe.Pointer(Ꮡ((~mp).cheaprand)));
-    var (s1, s0) = (t.val[0], t.val[1]);
-    s1 ^= (uint32)(s1 << (int)(17));
-    s1 = (uint32)((uint32)((uint32)(s1 ^ s0) ^ s1 >> (int)(7)) ^ s0 >> (int)(16));
-    (t.val[0], t.val[1]) = (s0, s1);
+    var t = (ж<array<uint32>>)(uintptr)(new @unsafe.Pointer(mp.of(m.Ꮡcheaprand)));
+    var (s1, s0) = (t.Value[0], t.Value[1]);
+    s1 ^= (uint32)((s1 << (int)(17)));
+    s1 = (uint32)((uint32)((uint32)(s1 ^ s0) ^ (s1 >> (int)(7))) ^ (s0 >> (int)(16)));
+    (t.Value[0], t.Value[1]) = (s0, s1);
     return s0 + s1;
 }
 
@@ -237,7 +238,7 @@ internal static uint32 cheaprand() {
 //go:linkname cheaprand64
 //go:nosplit
 internal static int64 cheaprand64() {
-    return (int64)(((int64)cheaprand()) << (int)(31) ^ ((int64)cheaprand()));
+    return (int64)(((int64)cheaprand() << (int)(31)) ^ (int64)cheaprand());
 }
 
 // cheaprandn is like cheaprand() % n but faster.
@@ -258,7 +259,7 @@ internal static int64 cheaprand64() {
 //go:nosplit
 internal static uint32 cheaprandn(uint32 n) {
     // See https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
-    return ((uint32)((((uint64)cheaprand()) * ((uint64)n)) >> (int)(32)));
+    return (uint32)((((uint64)cheaprand() * (uint64)n) >> (int)(32)));
 }
 
 // Too much legacy code has go:linkname references
@@ -270,7 +271,7 @@ internal static uint32 cheaprandn(uint32 n) {
 
 //go:linkname legacy_fastrand runtime.fastrand
 internal static uint32 legacy_fastrand() {
-    return ((uint32)rand());
+    return (uint32)rand();
 }
 
 //go:linkname legacy_fastrandn runtime.fastrandn

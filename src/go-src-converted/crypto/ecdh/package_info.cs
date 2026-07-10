@@ -10,6 +10,10 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using cryptoꓸDecrypterOpts = object;
+global using cryptoꓸPrivateKey = object;
+global using cryptoꓸPublicKey = object;
+using boring = go.crypto.@internal.boring_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -40,18 +44,17 @@ using static go.crypto.ecdh_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(Point, error), Point>]
-[assembly: GoImplement<nistCurve<Point>, ΔCurve>]
-[assembly: GoImplement<nistec.P256Point>, ΔCurve>]
-[assembly: GoImplement<nistec.P384Point>, ΔCurve>]
-[assembly: GoImplement<nistec.P521Point>, ΔCurve>]
-[assembly: GoImplement<x25519Curve, ΔCurve>]
+[assembly: GoImplement<go.crypto.@internal.nistec_package.P256Point, nistPoint<go.crypto.@internal.nistec_package.P256Point>>(ConstraintProxy = true)]
+[assembly: GoImplement<go.crypto.@internal.nistec_package.P384Point, nistPoint<go.crypto.@internal.nistec_package.P384Point>>(ConstraintProxy = true)]
+[assembly: GoImplement<go.crypto.@internal.nistec_package.P521Point, nistPoint<go.crypto.@internal.nistec_package.P521Point>>(ConstraintProxy = true)]
+[assembly: GoImplement<nistCurve<P256PointжnistPoint>, ΔCurve>(Pointer = true)]
+[assembly: GoImplement<nistCurve<P384PointжnistPoint>, ΔCurve>(Pointer = true)]
+[assembly: GoImplement<nistCurve<P521PointжnistPoint>, ΔCurve>(Pointer = true)]
+[assembly: GoImplement<x25519Curve, ΔCurve>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 [assembly: GoImplicitConv<boring.PublicKeyECDH, ж<boring.PublicKeyECDH>>(Indirect = true)]
-[assembly: GoImplicitConv<boring.PublicKeyECDH}, boring.PublicKeyECDH}>(Inverted = true)]
-[assembly: GoImplicitConv<ecdh.PublicKey; publicKeyOnce sync.Once}, ecdh.PublicKey; publicKeyOnce sync.Once}>(Inverted = true)]
 [assembly: GoImplicitConv<ΔPublicKey, ж<ΔPublicKey>>(Indirect = true)]
 // </ImplicitConversions>
 

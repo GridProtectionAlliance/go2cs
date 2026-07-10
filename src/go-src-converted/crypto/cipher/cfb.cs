@@ -4,9 +4,10 @@
 // CFB (Cipher Feedback) Mode.
 namespace go.crypto;
 
-using alias = crypto.@internal.alias_package;
-using subtle = crypto.subtle_package;
-using crypto.@internal;
+using alias = go.crypto.@internal.alias_package;
+using subtle = go.crypto.subtle_package;
+using go.crypto;
+using go.crypto.@internal;
 
 partial class cipher_package {
 
@@ -76,7 +77,7 @@ internal static Stream newCFB(Block block, slice<byte> iv, bool decrypt) {
         decrypt: decrypt
     ));
     copy((~x).next, iv);
-    return ~x;
+    return new cfbжStream(x);
 }
 
 } // end cipher_package

@@ -85,13 +85,13 @@ internal static @string addExtendedPrefix(@string path) {
         // Note that getwdCache might be outdated if the working directory has been
         // changed without using os.Chdir, i.e. using syscall.Chdir directly or cgo.
         // This is fine, as the worst that can happen is that we fail to fix the path.
-        getwdCache.Lock();
+        ᏑgetwdCache.of(getwdCacheᴛ1.ᏑMutex).Lock();
         if (getwdCache.dir == ""u8) {
             // Init the working directory cache.
             (getwdCache.dir, _) = syscall.Getwd();
         }
         pathLength += len(getwdCache.dir) + 1;
-        getwdCache.Unlock();
+        ᏑgetwdCache.of(getwdCacheᴛ1.ᏑMutex).Unlock();
     }
     if (pathLength < 248) {
         // Don't fix. (This is how Go 1.7 and earlier worked,
@@ -120,23 +120,23 @@ internal static @string addExtendedPrefix(@string path) {
         // change its meaning.
         prefix = new uint16[]{(rune)'\\', (rune)'\\', (rune)'?', (rune)'\\'}.slice();
     }
-    (p, err) = syscall.UTF16FromString(path);
+    var (p, err) = syscall.UTF16FromString(path);
     if (err != default!) {
         return path;
     }
     // Estimate the required buffer size using the path length plus the null terminator.
     // pathLength includes the working directory. This should be accurate unless
     // the working directory has changed without using os.Chdir.
-    var n = ((uint32)pathLength) + 1;
+    var n = (uint32)pathLength + 1;
     slice<uint16> buf = default!;
     while (ᐧ) {
-        buf = new slice<uint16>(n + ((uint32)len(prefix)));
+        buf = new slice<uint16>((nint)(n + (uint32)len(prefix)));
         (n, err) = syscall.GetFullPathName(Ꮡ(p, 0), n, Ꮡ(buf, len(prefix)), nil);
         if (err != default!) {
             return path;
         }
-        if (n <= ((uint32)(len(buf) - len(prefix)))) {
-            buf = buf[..(int)(n + ((uint32)len(prefix)))];
+        if (n <= (uint32)(len(buf) - len(prefix))) {
+            buf = buf[..(int)(n + (uint32)len(prefix))];
             break;
         }
     }

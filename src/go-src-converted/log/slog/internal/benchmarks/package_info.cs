@@ -45,9 +45,8 @@ using static go.log.slog.@internal.benchmarks_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<bool, error>]
-[assembly: GoImplement<fastTextHandler, log.slog_package.ΔHandler>]
-[assembly: GoImplement<log.slog.@internal.buffer_package.Buffer, io_package.Writer>]
+[assembly: GoImplement<fastTextHandler, go.log.slog_package.ΔHandler>(Pointer = true)]
+[assembly: GoImplement<go.log.slog.@internal.buffer_package.Buffer, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

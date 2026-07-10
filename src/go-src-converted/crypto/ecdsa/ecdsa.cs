@@ -24,36 +24,37 @@ namespace go.crypto;
 // [SEC 1, Version 2.0]: https://www.secg.org/sec1-v2.pdf
 using bytes = bytes_package;
 using crypto = crypto_package;
-using aes = crypto.aes_package;
-using cipher = crypto.cipher_package;
-using ecdh = crypto.ecdh_package;
-using elliptic = crypto.elliptic_package;
-using bigmod = crypto.@internal.bigmod_package;
-using boring = crypto.@internal.boring_package;
-using bbig = crypto.@internal.boring.bbig_package;
-using nistec = crypto.@internal.nistec_package;
-using randutil = crypto.@internal.randutil_package;
-using sha512 = crypto.sha512_package;
-using subtle = crypto.subtle_package;
+using aes = go.crypto.aes_package;
+using cipher = go.crypto.cipher_package;
+using ecdh = go.crypto.ecdh_package;
+using elliptic = go.crypto.elliptic_package;
+using bigmod = go.crypto.@internal.bigmod_package;
+using boring = go.crypto.@internal.boring_package;
+using bbig = go.crypto.@internal.boring.bbig_package;
+using nistec = go.crypto.@internal.nistec_package;
+using randutil = go.crypto.@internal.randutil_package;
+using sha512 = go.crypto.sha512_package;
+using subtle = go.crypto.subtle_package;
 using errors = errors_package;
 using io = io_package;
 using big = math.big_package;
 using sync = sync_package;
-using cryptobyte = golang.org.x.crypto.cryptobyte_package;
-using asn1 = golang.org.x.crypto.cryptobyte.asn1_package;
-using crypto.@internal;
-using crypto.@internal.boring;
-using golang.org.x.crypto;
-using golang.org.x.crypto.cryptobyte;
+using cryptobyte = vendor.golang.org.x.crypto.cryptobyte_package;
+using asn1 = vendor.golang.org.x.crypto.cryptobyte.asn1_package;
+using go.crypto;
+using go.crypto.@internal;
+using go.crypto.@internal.boring;
+using hash = hash_package;
 using math;
+using vendor.golang.org.x.crypto;
+using vendor.golang.org.x.crypto.cryptobyte;
 
 partial class ecdsa_package {
 
 // PublicKey represents an ECDSA public key.
 [GoType] partial struct PublicKey {
-    public partial ref crypto.elliptic_package.Curve Curve { get; }
-    public ж<math.big_package.ΔInt> X;
-    public ж<math.big_package.ΔInt> Y;
+    public go.crypto.elliptic_package.Curve Curve;
+    public ж<bigꓸInt> X, Y;
 }
 
 // Any methods implemented on PublicKey might need to also be implemented on
@@ -78,8 +79,8 @@ partial class ecdsa_package {
 // Two keys are only considered to have the same value if they have the same Curve value.
 // Note that for example [elliptic.P256] and elliptic.P256().Params() are different
 // values, as the latter is a generic not constant time implementation.
-[GoRecv] public static bool Equal(this ref PublicKey pub, crypto.PublicKey x) {
-    var (xx, ok) = x._<PublicKey.val>(ᐧ);
+[GoRecv] public static bool Equal(this ref PublicKey pub, cryptoꓸPublicKey x) {
+    var (xx, ok) = x._<ж<PublicKey>>(ᐧ);
     if (!ok) {
         return false;
     }
@@ -94,7 +95,7 @@ partial class ecdsa_package {
 // PrivateKey represents an ECDSA private key.
 [GoType] partial struct PrivateKey {
     public partial ref PublicKey PublicKey { get; }
-    public ж<math.big_package.ΔInt> D;
+    public ж<bigꓸInt> D;
 }
 
 // ECDH returns k as a [ecdh.PrivateKey]. It returns an error if the key is
@@ -114,13 +115,13 @@ partial class ecdsa_package {
 
 internal static ecdhꓸCurve curveToECDH(elliptic.Curve c) {
     var exprᴛ1 = c;
-    if (exprᴛ1 == elliptic.P256()) {
+    if (AreEqual(exprᴛ1, elliptic.P256())) {
         return ecdh.P256();
     }
-    if (exprᴛ1 == elliptic.P384()) {
+    if (AreEqual(exprᴛ1, elliptic.P384())) {
         return ecdh.P384();
     }
-    if (exprᴛ1 == elliptic.P521()) {
+    if (AreEqual(exprᴛ1, elliptic.P521())) {
         return ecdh.P521();
     }
     { /* default: */
@@ -130,26 +131,28 @@ internal static ecdhꓸCurve curveToECDH(elliptic.Curve c) {
 }
 
 // Public returns the public key corresponding to priv.
-[GoRecv] public static crypto.PublicKey Public(this ref PrivateKey priv) {
-    return Ꮡ(priv.PublicKey);
+public static cryptoꓸPublicKey Public(this ж<PrivateKey> Ꮡpriv) {
+    ref var priv = ref Ꮡpriv.Value;
+
+    return Ꮡpriv.of(PrivateKey.ᏑPublicKey);
 }
 
 // Equal reports whether priv and x have the same value.
 //
 // See [PublicKey.Equal] for details on how Curve is compared.
-[GoRecv] public static bool Equal(this ref PrivateKey priv, crypto.PrivateKey x) {
-    var (xx, ok) = x._<PrivateKey.val>(ᐧ);
+[GoRecv] public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) {
+    var (xx, ok) = x._<ж<PrivateKey>>(ᐧ);
     if (!ok) {
         return false;
     }
-    return priv.PublicKey.Equal(Ꮡ((~xx).PublicKey)) && bigIntEqual(priv.D, (~xx).D);
+    return priv.PublicKey.Equal(xx.of(PrivateKey.ᏑPublicKey)) && bigIntEqual(priv.D, (~xx).D);
 }
 
 // bigIntEqual reports whether a and b are equal leaking only their bit length
 // through timing side-channels.
 internal static bool bigIntEqual(ж<bigꓸInt> Ꮡa, ж<bigꓸInt> Ꮡb) {
-    ref var a = ref Ꮡa.val;
-    ref var b = ref Ꮡb.val;
+    ref var a = ref Ꮡa.Value;
+    ref var b = ref Ꮡb.Value;
 
     return subtle.ConstantTimeCompare(a.Bytes(), b.Bytes()) == 1;
 }
@@ -161,8 +164,10 @@ internal static bool bigIntEqual(ж<bigꓸInt> Ꮡa, ж<bigꓸInt> Ꮡb) {
 // This method implements crypto.Signer, which is an interface to support keys
 // where the private part is kept in, for example, a hardware module. Common
 // uses can use the [SignASN1] function in this package directly.
-[GoRecv] public static (slice<byte>, error) Sign(this ref PrivateKey priv, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) {
-    return SignASN1(rand, priv, digest);
+public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) {
+    ref var priv = ref Ꮡpriv.Value;
+
+    return SignASN1(rand, Ꮡpriv, digest);
 }
 
 // GenerateKey generates a new ECDSA private key for the specified curve.
@@ -172,8 +177,8 @@ internal static bool bigIntEqual(ж<bigꓸInt> Ꮡa, ж<bigꓸInt> Ꮡb) {
 // and may change between calls and/or between versions.
 public static (ж<PrivateKey>, error) GenerateKey(elliptic.Curve c, io.Reader rand) {
     randutil.MaybeReadByte(rand);
-    if (boring.Enabled && rand == boring.RandReader) {
-        (x, y, d, err) = boring.GenerateKeyECDSA((~c.Params()).Name);
+    if (boring.Enabled && AreEqual(rand, boring.RandReader)) {
+        var (x, y, d, err) = boring.GenerateKeyECDSA((~c.Params()).Name);
         if (err != default!) {
             return (default!, err);
         }
@@ -200,18 +205,18 @@ public static (ж<PrivateKey>, error) GenerateKey(elliptic.Curve c, io.Reader ra
 }
 
 internal static (ж<PrivateKey>, error) generateNISTEC<Point>(ж<nistCurve<Point>> Ꮡc, io.Reader rand)
-    where Point : nistPoint[Point]<Point>, new()
+    where Point : nistPoint<Point>
 {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
-    (k, Q, err) = randomPoint(Ꮡc, rand);
+    var (k, Q, err) = randomPoint(Ꮡc, rand);
     if (err != default!) {
         return (default!, err);
     }
     var priv = @new<PrivateKey>();
-    (~priv).PublicKey.Curve = c.curve;
-    priv.val.D = @new<bigꓸInt>().SetBytes(k.Bytes(c.N));
-    ((~priv).PublicKey.X, (~priv).PublicKey.Y, err) = c.pointToAffine(Q);
+    priv.Value.PublicKey.Curve = c.curve;
+    priv.Value.D = @new<bigꓸInt>().SetBytes(k.Bytes(c.N));
+    (priv.Value.PublicKey.X, priv.Value.PublicKey.Y, err) = c.pointToAffine(Q);
     if (err != default!) {
         return (default!, err);
     }
@@ -221,13 +226,13 @@ internal static (ж<PrivateKey>, error) generateNISTEC<Point>(ж<nistCurve<Point
 // randomPoint returns a random scalar and the corresponding point using the
 // procedure given in FIPS 186-4, Appendix B.5.2 (rejection sampling).
 internal static (ж<bigmodꓸNat> k, Point p, error err) randomPoint<Point>(ж<nistCurve<Point>> Ꮡc, io.Reader rand)
-    where Point : nistPoint[Point]<Point>, new()
+    where Point : nistPoint<Point>
 {
     ж<bigmodꓸNat> k = default!;
     Point p = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
     k = bigmod.NewNat();
     while (ᐧ) {
         var b = new slice<byte>(c.N.Size());
@@ -247,7 +252,7 @@ internal static (ж<bigmodꓸNat> k, Point p, error err) randomPoint<Point>(ж<n
                 if (excess != 0 && (~c.curve.Params()).Name != "P-521"u8) {
                     throw panic("ecdsa: internal error: unexpectedly masking off bits");
                 }
-                b[0] >>= (nint)(excess);
+                b[0] >>= (int)(excess);
             }
         }
         // FIPS 186-4 makes us check k <= N - 2 and then add one.
@@ -284,23 +289,23 @@ internal static error errNoAsm = errors.New("no assembly implementation availabl
 // as rand. Note that the returned signature does not depend deterministically on
 // the bytes read from rand, and may change between calls and/or between versions.
 public static (slice<byte>, error) SignASN1(io.Reader rand, ж<PrivateKey> Ꮡpriv, slice<byte> hash) {
-    ref var priv = ref Ꮡpriv.val;
+    ref var priv = ref Ꮡpriv.Value;
 
     randutil.MaybeReadByte(rand);
-    if (boring.Enabled && rand == boring.RandReader) {
-        (b, errΔ1) = boringPrivateKey(Ꮡpriv);
+    if (boring.Enabled && AreEqual(rand, boring.RandReader)) {
+        var (b, errΔ1) = boringPrivateKey(Ꮡpriv);
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
         return boring.SignMarshalECDSA(b, hash);
     }
     boring.UnreachableExceptTests();
-    (csprng, err) = mixedCSPRNG(rand, Ꮡpriv, hash);
+    var (csprng, err) = mixedCSPRNG(rand, Ꮡpriv, hash);
     if (err != default!) {
         return (default!, err);
     }
     {
-        (sig, errΔ2) = signAsm(Ꮡpriv, csprng, hash); if (!AreEqual(errΔ2, errNoAsm)) {
+        var (sig, errΔ2) = signAsm(Ꮡpriv, csprng, hash); if (!AreEqual(errΔ2, errNoAsm)) {
             return (sig, errΔ2);
         }
     }
@@ -324,26 +329,26 @@ public static (slice<byte>, error) SignASN1(io.Reader rand, ж<PrivateKey> Ꮡpr
 }
 
 internal static (slice<byte> sig, error err) signNISTEC<Point>(ж<nistCurve<Point>> Ꮡc, ж<PrivateKey> Ꮡpriv, io.Reader csprng, slice<byte> hash)
-    where Point : nistPoint[Point]<Point>, new()
+    where Point : nistPoint<Point>
 {
     slice<byte> sig = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.val;
-    ref var priv = ref Ꮡpriv.val;
+    ref var c = ref Ꮡc.Value;
+    ref var priv = ref Ꮡpriv.Value;
     // SEC 1, Version 2.0, Section 4.1.3
-    (k, R, err) = randomPoint(Ꮡc, csprng);
+    (var k, var R, err) = randomPoint(Ꮡc, csprng);
     if (err != default!) {
         return (default!, err);
     }
     // kInv = k⁻¹
     var kInv = bigmod.NewNat();
     inverse(Ꮡc, kInv, k);
-    (Rx, err) = R.BytesX();
+    (var Rx, err) = R.BytesX();
     if (err != default!) {
         return (default!, err);
     }
-    (r, err) = bigmod.NewNat().SetOverflowingBytes(Rx, c.N);
+    (var r, err) = bigmod.NewNat().SetOverflowingBytes(Rx, c.N);
     if (err != default!) {
         return (default!, err);
     }
@@ -355,7 +360,7 @@ internal static (slice<byte> sig, error err) signNISTEC<Point>(ж<nistCurve<Poin
     }
     var e = bigmod.NewNat();
     hashToNat(Ꮡc, e, hash);
-    (s, err) = bigmod.NewNat().SetBytes(priv.D.Bytes(), c.N);
+    (var s, err) = bigmod.NewNat().SetBytes(priv.D.Bytes(), c.N);
     if (err != default!) {
         return (default!, err);
     }
@@ -370,11 +375,10 @@ internal static (slice<byte> sig, error err) signNISTEC<Point>(ж<nistCurve<Poin
 }
 
 internal static (slice<byte>, error) encodeSignature(slice<byte> r, slice<byte> s) {
-    cryptobyte.Builder b = default!;
-    b.AddASN1(asn1.SEQUENCE, 
+    ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     var rʗ1 = r;
     var sʗ1 = s;
-    (ж<cryptobyte.Builder> b) => {
+    Ꮡb.AddASN1(asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ1) => {
         addASN1IntBytes(bΔ1, rʗ1);
         addASN1IntBytes(bΔ1, sʗ1);
     });
@@ -384,7 +388,7 @@ internal static (slice<byte>, error) encodeSignature(slice<byte> r, slice<byte> 
 // addASN1IntBytes encodes in ASN.1 a positive integer represented as
 // a big-endian byte slice with zero or more leading zeroes.
 internal static void addASN1IntBytes(ж<cryptobyte.Builder> Ꮡb, slice<byte> bytes) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     while (len(bytes) > 0 && bytes[0] == 0) {
         bytes = bytes[1..];
@@ -393,10 +397,9 @@ internal static void addASN1IntBytes(ж<cryptobyte.Builder> Ꮡb, slice<byte> by
         b.SetError(errors.New("invalid integer"u8));
         return;
     }
-    b.AddASN1(asn1.INTEGER, 
     var bytesʗ1 = bytes;
-    (ж<cryptobyte.Builder> c) => {
-        if ((byte)(bytesʗ1[0] & 128) != 0) {
+    Ꮡb.AddASN1(asn1.INTEGER, (ж<cryptobyte.Builder> c) => {
+        if ((byte)(bytesʗ1[0] & 0x80) != 0) {
             c.AddUint8(0);
         }
         c.AddBytes(bytesʗ1);
@@ -405,17 +408,17 @@ internal static void addASN1IntBytes(ж<cryptobyte.Builder> Ꮡb, slice<byte> by
 
 // inverse sets kInv to the inverse of k modulo the order of the curve.
 internal static void inverse<Point>(ж<nistCurve<Point>> Ꮡc, ж<bigmodꓸNat> ᏑkInv, ж<bigmodꓸNat> Ꮡk)
-    where Point : nistPoint[Point]<Point>, new()
+    where Point : nistPoint<Point>
 {
-    ref var c = ref Ꮡc.val;
-    ref var kInv = ref ᏑkInv.val;
-    ref var k = ref Ꮡk.val;
+    ref var c = ref Ꮡc.Value;
+    ref var kInv = ref ᏑkInv.Value;
+    ref var k = ref Ꮡk.Value;
 
     if ((~c.curve.Params()).Name == "P-256"u8) {
-        (kBytes, err) = nistec.P256OrdInverse(k.Bytes(c.N));
+        var (kBytes, err) = nistec.P256OrdInverse(k.Bytes(c.N));
         // Some platforms don't implement P256OrdInverse, and always return an error.
         if (err == default!) {
-            (_, errΔ1) = kInv.SetBytes(kBytes, c.N);
+            var (_, errΔ1) = ᏑkInv.SetBytes(kBytes, c.N);
             if (errΔ1 != default!) {
                 throw panic("ecdsa: internal error: P256OrdInverse produced an invalid value");
             }
@@ -424,16 +427,16 @@ internal static void inverse<Point>(ж<nistCurve<Point>> Ꮡc, ж<bigmodꓸNat> 
     }
     // Calculate the inverse of s in GF(N) using Fermat's method
     // (exponentiation modulo P - 2, per Euler's theorem)
-    kInv.Exp(Ꮡk, c.nMinus2, c.N);
+    ᏑkInv.Exp(Ꮡk, c.nMinus2, c.N);
 }
 
 // hashToNat sets e to the left-most bits of hash, according to
 // SEC 1, Section 4.1.3, point 5 and Section 4.1.4, point 3.
 internal static void hashToNat<Point>(ж<nistCurve<Point>> Ꮡc, ж<bigmodꓸNat> Ꮡe, slice<byte> hash)
-    where Point : nistPoint[Point]<Point>, new()
+    where Point : nistPoint<Point>
 {
-    ref var c = ref Ꮡc.val;
-    ref var e = ref Ꮡe.val;
+    ref var c = ref Ꮡc.Value;
+    ref var e = ref Ꮡe.Value;
 
     // ECDSA asks us to take the left-most log2(N) bits of hash, and use them as
     // an integer modulo N. This is the absolute worst of all worlds: we still
@@ -446,16 +449,16 @@ internal static void hashToNat<Point>(ж<nistCurve<Point>> Ꮡc, ж<bigmodꓸNat
                 nint excess = len(hash) * 8 - c.N.BitLen(); if (excess > 0) {
                     hash = bytes.Clone(hash);
                     for (nint i = len(hash) - 1; i >= 0; i--) {
-                        hash[i] >>= (nint)(excess);
+                        hash[i] >>= (int)(excess);
                         if (i > 0) {
-                            hash[i] |= (byte)(hash[i - 1] << (int)((8 - excess)));
+                            hash[i] |= (byte)((hash[i - 1] << (int)((8 - excess))));
                         }
                     }
                 }
             }
         }
     }
-    (_, err) = e.SetOverflowingBytes(hash, c.N);
+    var (_, err) = Ꮡe.SetOverflowingBytes(hash, c.N);
     if (err != default!) {
         throw panic("ecdsa: internal error: truncated hash is too long");
     }
@@ -466,7 +469,7 @@ internal static void hashToNat<Point>(ж<nistCurve<Point>> Ꮡc, ж<bigmodꓸNat
 // equivalent in security to RFC 6979 deterministic nonce generation, but still
 // produces randomized signatures.
 internal static (io.Reader, error) mixedCSPRNG(io.Reader rand, ж<PrivateKey> Ꮡpriv, slice<byte> hash) {
-    ref var priv = ref Ꮡpriv.val;
+    ref var priv = ref Ꮡpriv.Value;
 
     // This implementation derives the nonce from an AES-CTR CSPRNG keyed by:
     //
@@ -497,17 +500,17 @@ internal static (io.Reader, error) mixedCSPRNG(io.Reader rand, ж<PrivateKey> �
     // and compute ChopMD-256(SHA-512),
     // which is an indifferentiable MAC.
     // Create an AES-CTR instance to use as a CSPRNG.
-    (block, err) = aes.NewCipher(key);
+    var (block, err) = aes.NewCipher(key);
     if (err != default!) {
         return (default!, err);
     }
     // Create a CSPRNG that xors a stream of zeros with
     // the output of the AES-CTR instance.
     @string aesIV = "IV for ECDSA CTR"u8;
-    return (new cipher.StreamReader(
+    return (new cipher_StreamReaderжReader(Ꮡ(new cipher.StreamReader(
         R: zeroReader,
         S: cipher.NewCTR(block, slice<byte>(aesIV))
-    ), default!);
+    ))), default!);
 }
 
 [GoType] partial struct zr {
@@ -530,10 +533,10 @@ internal static (nint n, error err) Read(this zr _, slice<byte> dst) {
 // The inputs are not considered confidential, and may leak through timing side
 // channels, or if an attacker has control of part of the inputs.
 public static bool VerifyASN1(ж<PublicKey> Ꮡpub, slice<byte> hash, slice<byte> sig) {
-    ref var pub = ref Ꮡpub.val;
+    ref var pub = ref Ꮡpub.Value;
 
     if (boring.Enabled) {
-        (key, err) = boringPublicKey(Ꮡpub);
+        var (key, err) = boringPublicKey(Ꮡpub);
         if (err != default!) {
             return false;
         }
@@ -565,25 +568,25 @@ public static bool VerifyASN1(ж<PublicKey> Ꮡpub, slice<byte> hash, slice<byte
 }
 
 internal static bool verifyNISTEC<Point>(ж<nistCurve<Point>> Ꮡc, ж<PublicKey> Ꮡpub, slice<byte> hash, slice<byte> sig)
-    where Point : nistPoint[Point]<Point>, new()
+    where Point : nistPoint<Point>
 {
-    ref var c = ref Ꮡc.val;
-    ref var pub = ref Ꮡpub.val;
+    ref var c = ref Ꮡc.Value;
+    ref var pub = ref Ꮡpub.Value;
 
-    (rBytes, sBytes, err) = parseSignature(sig);
+    var (rBytes, sBytes, err) = parseSignature(sig);
     if (err != default!) {
         return false;
     }
-    (Q, err) = c.pointFromAffine(pub.X, pub.Y);
+    (var Q, err) = c.pointFromAffine(pub.X, pub.Y);
     if (err != default!) {
         return false;
     }
     // SEC 1, Version 2.0, Section 4.1.4
-    (r, err) = bigmod.NewNat().SetBytes(rBytes, c.N);
+    (var r, err) = bigmod.NewNat().SetBytes(rBytes, c.N);
     if (err != default! || r.IsZero() == 1) {
         return false;
     }
-    (s, err) = bigmod.NewNat().SetBytes(sBytes, c.N);
+    (var s, err) = bigmod.NewNat().SetBytes(sBytes, c.N);
     if (err != default! || s.IsZero() == 1) {
         return false;
     }
@@ -593,21 +596,21 @@ internal static bool verifyNISTEC<Point>(ж<nistCurve<Point>> Ꮡc, ж<PublicKey
     var w = bigmod.NewNat();
     inverse(Ꮡc, w, s);
     // p₁ = [e * s⁻¹]G
-    (p1, err) = c.newPoint().ScalarBaseMult(e.Mul(w, c.N).Bytes(c.N));
+    (var p1, err) = c.newPoint().ScalarBaseMult(e.Mul(w, c.N).Bytes(c.N));
     if (err != default!) {
         return false;
     }
     // p₂ = [r * s⁻¹]Q
-    (p2, err) = Q.ScalarMult(Q, w.Mul(r, c.N).Bytes(c.N));
+    (var p2, err) = Q.ScalarMult(Q, w.Mul(r, c.N).Bytes(c.N));
     if (err != default!) {
         return false;
     }
     // BytesX returns an error for the point at infinity.
-    (Rx, err) = p1.Add(p1, p2).BytesX();
+    (var Rx, err) = p1.Add(p1, p2).BytesX();
     if (err != default!) {
         return false;
     }
-    (v, err) = bigmod.NewNat().SetOverflowingBytes(Rx, c.N);
+    (var v, err) = bigmod.NewNat().SetOverflowingBytes(Rx, c.N);
     if (err != default!) {
         return false;
     }
@@ -619,43 +622,43 @@ internal static (slice<byte> r, slice<byte> s, error err) parseSignature(slice<b
     slice<byte> s = default!;
     error err = default!;
 
-    cryptobyte.String inner = default!;
+    ref var inner = ref heap<cryptobyte.String>(out var Ꮡinner);
     var input = ((cryptobyte.String)sig);
-    if (!input.ReadASN1(Ꮡ(inner), asn1.SEQUENCE) || !input.Empty() || !inner.ReadASN1Integer(Ꮡ(r)) || !inner.ReadASN1Integer(Ꮡ(s)) || !inner.Empty()) {
+    if (!input.ReadASN1(Ꮡinner, asn1.SEQUENCE) || !input.Empty() || !inner.ReadASN1Integer(Ꮡ(r)) || !inner.ReadASN1Integer(Ꮡ(s)) || !inner.Empty()) {
         return (default!, default!, errors.New("invalid ASN.1"u8));
     }
     return (r, s, default!);
 }
 
 [GoType] partial struct nistCurve<Point>
-    where Point : nistPoint[Point]<Point>, new()
+    where Point : nistPoint<Point>
 {
     internal Func<Point> newPoint;
-    internal crypto.elliptic_package.Curve curve;
-    public ж<crypto.@internal.bigmod_package.Modulus> N;
+    internal elliptic.Curve curve;
+    public ж<bigmod.Modulus> N;
     internal slice<byte> nMinus2;
 }
 
 // nistPoint is a generic constraint for the nistec Point types.
-[GoType] partial interface nistPoint {
+[GoType] partial interface nistPoint<T> {
     slice<byte> Bytes();
     (slice<byte>, error) BytesX();
     (T, error) SetBytes(slice<byte> _);
-    T Add(T _, T _);
-    (T, error) ScalarMult(T _, slice<byte> _);
+    T Add(T _Δp0, T _Δp1);
+    (T, error) ScalarMult(T _Δp0, slice<byte> _Δp1);
     (T, error) ScalarBaseMult(slice<byte> _);
 }
 
 // pointFromAffine is used to convert the PublicKey to a nistec Point.
 [GoRecv] internal static (Point p, error err) pointFromAffine<Point>(this ref nistCurve<Point> curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy)
-    where Point : nistPoint[Point]<Point>, new()
+    where Point : nistPoint<Point>
 {
     Point p = default!;
     error err = default!;
 
-    ref var x = ref Ꮡx.val;
-    ref var y = ref Ꮡy.val;
-    nint bitSize = curve.curve.Params().val.BitSize;
+    ref var x = ref Ꮡx.Value;
+    ref var y = ref Ꮡy.Value;
+    nint bitSize = curve.curve.Params().Value.BitSize;
     // Reject values that would not get correctly encoded.
     if (x.Sign() < 0 || y.Sign() < 0) {
         return (p, errors.New("negative coordinate"u8));
@@ -675,7 +678,7 @@ internal static (slice<byte> r, slice<byte> s, error err) parseSignature(slice<b
 
 // pointToAffine is used to convert a nistec Point to a PublicKey.
 [GoRecv] internal static (ж<bigꓸInt> x, ж<bigꓸInt> y, error err) pointToAffine<Point>(this ref nistCurve<Point> curve, Point p)
-    where Point : nistPoint[Point]<Point>, new()
+    where Point : nistPoint<Point>
 {
     ж<bigꓸInt> x = default!;
     ж<bigꓸInt> y = default!;
@@ -692,13 +695,14 @@ internal static (slice<byte> r, slice<byte> s, error err) parseSignature(slice<b
     return (x, y, default!);
 }
 
-internal static sync.Once p224Once;
+internal static ж<sync.Once> Ꮡp224Once = new(default(sync.Once));
+internal static ref sync.Once p224Once => ref Ꮡp224Once.Value;
 
-internal static ж<nistec.P224Point>> _p224;
+internal static ж<nistCurve<P224PointжnistPoint>> _p224;
 
-internal static ж<nistec.P224Point>> p224() {
-    p224Once.Do(() => {
-        _p224 = Ꮡ(new nistCurve[ж<nistec.P224Point>](
+internal static ж<nistCurve<P224PointжnistPoint>> p224() {
+    Ꮡp224Once.Do(() => {
+        _p224 = Ꮡ(new nistCurve<P224PointжnistPoint>(
             newPoint: () => nistec.NewP224Point()
         ));
         precomputeParams(_p224, elliptic.P224());
@@ -706,13 +710,14 @@ internal static ж<nistec.P224Point>> p224() {
     return _p224;
 }
 
-internal static sync.Once p256Once;
+internal static ж<sync.Once> Ꮡp256Once = new(default(sync.Once));
+internal static ref sync.Once p256Once => ref Ꮡp256Once.Value;
 
-internal static ж<nistec.P256Point>> _p256;
+internal static ж<nistCurve<P256PointжnistPoint>> _p256;
 
-internal static ж<nistec.P256Point>> p256() {
-    p256Once.Do(() => {
-        _p256 = Ꮡ(new nistCurve[ж<nistec.P256Point>](
+internal static ж<nistCurve<P256PointжnistPoint>> p256() {
+    Ꮡp256Once.Do(() => {
+        _p256 = Ꮡ(new nistCurve<P256PointжnistPoint>(
             newPoint: () => nistec.NewP256Point()
         ));
         precomputeParams(_p256, elliptic.P256());
@@ -720,13 +725,14 @@ internal static ж<nistec.P256Point>> p256() {
     return _p256;
 }
 
-internal static sync.Once p384Once;
+internal static ж<sync.Once> Ꮡp384Once = new(default(sync.Once));
+internal static ref sync.Once p384Once => ref Ꮡp384Once.Value;
 
-internal static ж<nistec.P384Point>> _p384;
+internal static ж<nistCurve<P384PointжnistPoint>> _p384;
 
-internal static ж<nistec.P384Point>> p384() {
-    p384Once.Do(() => {
-        _p384 = Ꮡ(new nistCurve[ж<nistec.P384Point>](
+internal static ж<nistCurve<P384PointжnistPoint>> p384() {
+    Ꮡp384Once.Do(() => {
+        _p384 = Ꮡ(new nistCurve<P384PointжnistPoint>(
             newPoint: () => nistec.NewP384Point()
         ));
         precomputeParams(_p384, elliptic.P384());
@@ -734,13 +740,14 @@ internal static ж<nistec.P384Point>> p384() {
     return _p384;
 }
 
-internal static sync.Once p521Once;
+internal static ж<sync.Once> Ꮡp521Once = new(default(sync.Once));
+internal static ref sync.Once p521Once => ref Ꮡp521Once.Value;
 
-internal static ж<nistec.P521Point>> _p521;
+internal static ж<nistCurve<P521PointжnistPoint>> _p521;
 
-internal static ж<nistec.P521Point>> p521() {
-    p521Once.Do(() => {
-        _p521 = Ꮡ(new nistCurve[ж<nistec.P521Point>](
+internal static ж<nistCurve<P521PointжnistPoint>> p521() {
+    Ꮡp521Once.Do(() => {
+        _p521 = Ꮡ(new nistCurve<P521PointжnistPoint>(
             newPoint: () => nistec.NewP521Point()
         ));
         precomputeParams(_p521, elliptic.P521());
@@ -749,9 +756,9 @@ internal static ж<nistec.P521Point>> p521() {
 }
 
 internal static void precomputeParams<Point>(ж<nistCurve<Point>> Ꮡc, elliptic.Curve curve)
-    where Point : nistPoint[Point]<Point>, new()
+    where Point : nistPoint<Point>
 {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     var @params = curve.Params();
     c.curve = curve;

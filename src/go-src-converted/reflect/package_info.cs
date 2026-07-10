@@ -19,6 +19,7 @@ global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
 global using abiꓸName = go.@internal.abi_package.ΔName;
 global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 global using runtimeꓸError = go.runtime_package.ΔError;
+using abi = go.@internal.abi_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -60,8 +61,7 @@ using static go.reflect_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<rtype, ΔType>]
-[assembly: GoImplement<uintptr, ΔType>]
+[assembly: GoImplement<rtype, ΔType>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

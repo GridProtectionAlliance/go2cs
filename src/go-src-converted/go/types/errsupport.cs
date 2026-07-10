@@ -11,7 +11,9 @@ partial class types_package {
 // lookupError returns a case-specific error when a lookup of selector sel in the
 // given type fails but an object with alternative spelling (case folding) is found.
 // If structLit is set, the error message is specifically for struct literal fields.
-[GoRecv] internal static @string lookupError(this ref Checker check, ΔType typ, @string sel, Object obj, bool structLit) {
+internal static @string lookupError(this ж<Checker> Ꮡcheck, ΔType typ, @string sel, Object obj, bool structLit) {
+    ref var check = ref Ꮡcheck.Value;
+
     // Provide more detail if there is an unexported object, or one with different capitalization.
     // If selector and object are in the same package (==), export doesn't matter, otherwise (!=) it does.
     // Messages depend on whether it's a general lookup or a field lookup in a struct literal.
@@ -37,11 +39,11 @@ partial class types_package {
     // missing        x.foo   !=    FoO    type X has no field or method foo
     // inaccessible   x.foo   !=    foo    cannot refer to unexported field foo
     // missing        x.foo   !=    foO    type X has no field or method foo
-    static readonly UntypedInt ok = iota;
-    static readonly UntypedInt missing = 1; // no object found
-    static readonly UntypedInt misspelled = 2; // found object with different spelling
-    static readonly UntypedInt unexported = 3; // found object with name differing only in first letter
-    static readonly UntypedInt inaccessible = 4; // found object with matching name but inaccessible from the current package
+    UntypedInt ok = iota;
+    UntypedInt missing = 1; // no object found
+    UntypedInt misspelled = 2; // found object with different spelling
+    UntypedInt unexported = 3; // found object with name differing only in first letter
+    UntypedInt inaccessible = 4; // found object with matching name but inaccessible from the current package
     // determine case
     nint e = missing;
     @string alt = default!;           // alternative spelling of selector; if any
@@ -72,42 +74,42 @@ partial class types_package {
     if (structLit){
         var exprᴛ1 = e;
         if (exprᴛ1 == missing) {
-            return check.sprintf("unknown field %s in struct literal of type %s"u8, sel, typ);
+            return Ꮡcheck.sprintf("unknown field %s in struct literal of type %s"u8, sel, typ);
         }
         if (exprᴛ1 == misspelled) {
-            return check.sprintf("unknown field %s in struct literal of type %s, but does have %s"u8, sel, typ, alt);
+            return Ꮡcheck.sprintf("unknown field %s in struct literal of type %s, but does have %s"u8, sel, typ, alt);
         }
         if (exprᴛ1 == unexported) {
-            return check.sprintf("unknown field %s in struct literal of type %s, but does have unexported %s"u8, sel, typ, alt);
+            return Ꮡcheck.sprintf("unknown field %s in struct literal of type %s, but does have unexported %s"u8, sel, typ, alt);
         }
         if (exprᴛ1 == inaccessible) {
-            return check.sprintf("cannot refer to unexported field %s in struct literal of type %s"u8, alt, typ);
+            return Ꮡcheck.sprintf("cannot refer to unexported field %s in struct literal of type %s"u8, alt, typ);
         }
 
     } else {
         @string what = "object"u8;
         switch (obj.type()) {
-        case Var.val : {
+        case ж<Var>: {
             what = "field"u8;
             break;
         }
-        case Func.val : {
+        case ж<Func>: {
             what = "method"u8;
             break;
         }}
 
         var exprᴛ2 = e;
         if (exprᴛ2 == missing) {
-            return check.sprintf("type %s has no field or method %s"u8, typ, sel);
+            return Ꮡcheck.sprintf("type %s has no field or method %s"u8, typ, sel);
         }
         if (exprᴛ2 == misspelled) {
-            return check.sprintf("type %s has no field or method %s, but does have %s %s"u8, typ, sel, what, alt);
+            return Ꮡcheck.sprintf("type %s has no field or method %s, but does have %s %s"u8, typ, sel, what, alt);
         }
         if (exprᴛ2 == unexported) {
-            return check.sprintf("type %s has no field or method %s, but does have unexported %s %s"u8, typ, sel, what, alt);
+            return Ꮡcheck.sprintf("type %s has no field or method %s, but does have unexported %s %s"u8, typ, sel, what, alt);
         }
         if (exprᴛ2 == inaccessible) {
-            return check.sprintf("cannot refer to unexported %s %s"u8, what, alt);
+            return Ꮡcheck.sprintf("cannot refer to unexported %s %s"u8, what, alt);
         }
 
     }

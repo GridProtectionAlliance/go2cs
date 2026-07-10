@@ -4,34 +4,36 @@
 //go:build unix || windows
 namespace go.@internal;
 
-using syscall = syscall_package;
+using Δsyscall = syscall_package;
 
 partial class poll_package {
 
 // SetsockoptIPMreq wraps the setsockopt network call with an IPMreq argument.
-[GoRecv] public static error SetsockoptIPMreq(this ref FD fd, nint level, nint name, ж<syscall.IPMreq> Ꮡmreq) => func((defer, _) => {
-    ref var mreq = ref Ꮡmreq.val;
+public static error SetsockoptIPMreq(this ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPMreq> Ꮡmreq) => func((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+    ref var mreq = ref Ꮡmreq.Value;
 
     {
-        var err = fd.incref(); if (err != default!) {
+        var err = Ꮡfd.incref(); if (err != default!) {
             return err;
         }
     }
-    defer(fd.decref);
-    return syscall.SetsockoptIPMreq(fd.Sysfd, level, name, Ꮡmreq);
+    defer(() => Ꮡfd.decref());
+    return Δsyscall.SetsockoptIPMreq(fd.Sysfd, level, name, Ꮡmreq);
 });
 
 // SetsockoptIPv6Mreq wraps the setsockopt network call with an IPv6Mreq argument.
-[GoRecv] public static error SetsockoptIPv6Mreq(this ref FD fd, nint level, nint name, ж<syscall.IPv6Mreq> Ꮡmreq) => func((defer, _) => {
-    ref var mreq = ref Ꮡmreq.val;
+public static error SetsockoptIPv6Mreq(this ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPv6Mreq> Ꮡmreq) => func((defer, recover) => {
+    ref var fd = ref Ꮡfd.Value;
+    ref var mreq = ref Ꮡmreq.Value;
 
     {
-        var err = fd.incref(); if (err != default!) {
+        var err = Ꮡfd.incref(); if (err != default!) {
             return err;
         }
     }
-    defer(fd.decref);
-    return syscall.SetsockoptIPv6Mreq(fd.Sysfd, level, name, Ꮡmreq);
+    defer(() => Ꮡfd.decref());
+    return Δsyscall.SetsockoptIPv6Mreq(fd.Sysfd, level, name, Ꮡmreq);
 });
 
 } // end poll_package

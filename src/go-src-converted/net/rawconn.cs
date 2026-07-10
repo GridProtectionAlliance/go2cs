@@ -4,7 +4,7 @@
 namespace go;
 
 using poll = @internal.poll_package;
-using runtime = runtime_package;
+using Δruntime = runtime_package;
 using syscall = syscall_package;
 using @internal;
 
@@ -21,42 +21,50 @@ partial class net_package {
     internal ж<netFD> fd;
 }
 
-[GoRecv] internal static bool ok(this ref rawConn c) {
+internal static bool ok(this ж<rawConn> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     return c != nil && c.fd != nil;
 }
 
-[GoRecv] internal static error Control(this ref rawConn c, Action<uintptr> f) {
-    if (!c.ok()) {
+internal static error Control(this ж<rawConn> Ꮡc, Action<uintptr> f) {
+    ref var c = ref Ꮡc.Value;
+
+    if (!Ꮡc.ok()) {
         return syscall.EINVAL;
     }
-    var err = c.fd.pfd.RawControl(f);
-    runtime.KeepAlive(c.fd);
+    var err = c.fd.of(netFD.Ꮡpfd).RawControl(f);
+    Δruntime.KeepAlive(c.fd);
     if (err != default!) {
-        Ꮡerr = new OpError(Op: "raw-control"u8, Net: c.fd.net, Source: default!, ΔAddr: c.fd.laddr, Err: err); err = ref Ꮡerr.val;
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "raw-control"u8, Net: (~c.fd).net, Source: default!, Addr: (~c.fd).laddr, Err: err)));
     }
     return err;
 }
 
-[GoRecv] internal static error Read(this ref rawConn c, Func<uintptr, bool> f) {
-    if (!c.ok()) {
+internal static error Read(this ж<rawConn> Ꮡc, Func<uintptr, bool> f) {
+    ref var c = ref Ꮡc.Value;
+
+    if (!Ꮡc.ok()) {
         return syscall.EINVAL;
     }
-    var err = c.fd.pfd.RawRead(f);
-    runtime.KeepAlive(c.fd);
+    var err = c.fd.of(netFD.Ꮡpfd).RawRead(f);
+    Δruntime.KeepAlive(c.fd);
     if (err != default!) {
-        Ꮡerr = new OpError(Op: "raw-read"u8, Net: c.fd.net, Source: c.fd.laddr, ΔAddr: c.fd.raddr, Err: err); err = ref Ꮡerr.val;
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "raw-read"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
     }
     return err;
 }
 
-[GoRecv] internal static error Write(this ref rawConn c, Func<uintptr, bool> f) {
-    if (!c.ok()) {
+internal static error Write(this ж<rawConn> Ꮡc, Func<uintptr, bool> f) {
+    ref var c = ref Ꮡc.Value;
+
+    if (!Ꮡc.ok()) {
         return syscall.EINVAL;
     }
-    var err = c.fd.pfd.RawWrite(f);
-    runtime.KeepAlive(c.fd);
+    var err = c.fd.of(netFD.Ꮡpfd).RawWrite(f);
+    Δruntime.KeepAlive(c.fd);
     if (err != default!) {
-        Ꮡerr = new OpError(Op: "raw-write"u8, Net: c.fd.net, Source: c.fd.laddr, ΔAddr: c.fd.raddr, Err: err); err = ref Ꮡerr.val;
+        err = new OpErrorжerror(Ꮡ(new OpError(Op: "raw-write"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
     }
     return err;
 }
@@ -68,17 +76,19 @@ partial class net_package {
 // they can pass the *poll.FD to functions like poll.Splice.
 //
 // PollFD is not intended for use outside the standard library.
-[GoRecv] internal static ж<poll.FD> PollFD(this ref rawConn c) {
-    if (!c.ok()) {
+internal static ж<poll.FD> PollFD(this ж<rawConn> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    if (!Ꮡc.ok()) {
         return default!;
     }
-    return Ꮡ(c.fd.pfd);
+    return c.fd.of(netFD.Ꮡpfd);
 }
 
 internal static ж<rawConn> newRawConn(ж<netFD> Ꮡfd) {
-    ref var fd = ref Ꮡfd.val;
+    ref var fd = ref Ꮡfd.Value;
 
-    return Ꮡ(new rawConn(fd: fd));
+    return Ꮡ(new rawConn(fd: Ꮡfd));
 }
 
 // Network returns the network type of the underlying connection.
@@ -89,7 +99,7 @@ internal static ж<rawConn> newRawConn(ж<netFD> Ꮡfd) {
 //
 // Network is not intended for use outside the standard library.
 [GoRecv] internal static poll.String Network(this ref rawConn c) {
-    return ((poll.String)c.fd.net);
+    return ((poll.String)(~c.fd).net);
 }
 
 [GoType] partial struct rawListener {
@@ -105,9 +115,9 @@ internal static ж<rawConn> newRawConn(ж<netFD> Ꮡfd) {
 }
 
 internal static ж<rawListener> newRawListener(ж<netFD> Ꮡfd) {
-    ref var fd = ref Ꮡfd.val;
+    ref var fd = ref Ꮡfd.Value;
 
-    return Ꮡ(new rawListener(new rawConn(fd: fd)));
+    return Ꮡ(new rawListener(new rawConn(fd: Ꮡfd)));
 }
 
 } // end net_package

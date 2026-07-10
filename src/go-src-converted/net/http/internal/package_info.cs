@@ -38,9 +38,9 @@ using static go.net.http.internal_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<bufio_package.Reader, io_package.Reader>]
-[assembly: GoImplement<chunkedReader, io_package.Reader>]
-[assembly: GoImplement<chunkedWriter, io_package.WriteCloser>]
+[assembly: GoImplement<bufio_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<chunkedReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<chunkedWriter, io_package.WriteCloser>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

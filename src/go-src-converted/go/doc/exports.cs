@@ -4,14 +4,15 @@
 // This file implements export filtering of an AST.
 namespace go.go;
 
-using ast = go.ast_package;
-using token = go.token_package;
+using ast = global::go.go.ast_package;
+using token = global::go.go.token_package;
+using global::go.go;
 
 partial class doc_package {
 
 // filterIdentList removes unexported names from list in place
 // and returns the resulting list.
-internal static slice<ast.Ident> filterIdentList(slice<ast.Ident> list) {
+internal static slice<ж<ast.Ident>> filterIdentList(slice<ж<ast.Ident>> list) {
     nint j = 0;
     foreach (var (_, x) in list) {
         if (token.IsExported((~x).Name)) {
@@ -24,8 +25,8 @@ internal static slice<ast.Ident> filterIdentList(slice<ast.Ident> list) {
 
 internal static ж<ast.Ident> underscore = ast.NewIdent("_"u8);
 
-internal static void filterCompositeLit(ж<ast.CompositeLit> Ꮡlit, ΔFilter filter, bool export) {
-    ref var lit = ref Ꮡlit.val;
+internal static void filterCompositeLit(ж<ast.CompositeLit> Ꮡlit, Func<@string, bool> filter, bool export) {
+    ref var lit = ref Ꮡlit.Value;
 
     nint n = len(lit.Elts);
     lit.Elts = filterExprList(lit.Elts, filter, export);
@@ -34,7 +35,7 @@ internal static void filterCompositeLit(ж<ast.CompositeLit> Ꮡlit, ΔFilter fi
     }
 }
 
-internal static slice<ast.Expr> filterExprList(slice<ast.Expr> list, ΔFilter filter, bool export) {
+internal static slice<ast.Expr> filterExprList(slice<ast.Expr> list, Func<@string, bool> filter, bool export) {
     nint j = 0;
     foreach (var (_, exp) in list) {
         switch (exp.type()) {
@@ -44,13 +45,13 @@ internal static slice<ast.Expr> filterExprList(slice<ast.Expr> list, ΔFilter fi
         }
         case ж<ast.KeyValueExpr> x: {
             {
-                var (x, ok) = (~x).Key._<ж<ast.Ident>>(ᐧ); if (ok && !filter((~x).Name)) {
+                var (xΔ1, ok) = (~x).Key._<ж<ast.Ident>>(ᐧ); if (ok && !filter((~xΔ1).Name)) {
                     continue;
                 }
             }
             {
-                var (x, ok) = (~x).Value._<ж<ast.CompositeLit>>(ᐧ); if (ok) {
-                    filterCompositeLit(x, filter, export);
+                var (xΔ2, ok) = (~x).Value._<ж<ast.CompositeLit>>(ᐧ); if (ok) {
+                    filterCompositeLit(xΔ2, filter, export);
                 }
             }
             break;
@@ -63,7 +64,7 @@ internal static slice<ast.Expr> filterExprList(slice<ast.Expr> list, ΔFilter fi
 
 // updateIdentList replaces all unexported identifiers with underscore
 // and reports whether at least one exported name exists.
-internal static bool /*hasExported*/ updateIdentList(slice<ast.Ident> list) {
+internal static bool /*hasExported*/ updateIdentList(slice<ж<ast.Ident>> list) {
     bool hasExported = default!;
 
     foreach (var (i, x) in list) {
@@ -77,7 +78,7 @@ internal static bool /*hasExported*/ updateIdentList(slice<ast.Ident> list) {
 }
 
 // hasExportedName reports whether list contains any exported names.
-internal static bool hasExportedName(slice<ast.Ident> list) {
+internal static bool hasExportedName(slice<ж<ast.Ident>> list) {
     foreach (var (_, x) in list) {
         if (x.IsExported()) {
             return true;
@@ -88,9 +89,9 @@ internal static bool hasExportedName(slice<ast.Ident> list) {
 
 // removeAnonymousField removes anonymous fields named name from an interface.
 internal static void removeAnonymousField(@string name, ж<ast.InterfaceType> Ꮡityp) {
-    ref var ityp = ref Ꮡityp.val;
+    ref var ityp = ref Ꮡityp.Value;
 
-    var list = ityp.Methods.List;
+    var list = ityp.Methods.Value.List;
     // we know that ityp.Methods != nil
     nint j = 0;
     foreach (var (_, field) in list) {
@@ -113,7 +114,7 @@ internal static void removeAnonymousField(@string name, ж<ast.InterfaceType> �
     if (j < len(list)) {
         ityp.Incomplete = true;
     }
-    ityp.Methods.List = list[0..(int)(j)];
+    ityp.Methods.Value.List = list[0..(int)(j)];
 }
 
 // filterFieldList removes unexported fields (field names) from the field list
@@ -123,15 +124,17 @@ internal static void removeAnonymousField(@string name, ж<ast.InterfaceType> �
 [GoRecv] internal static bool /*removedFields*/ filterFieldList(this ref reader r, ж<namedType> Ꮡparent, ж<ast.FieldList> Ꮡfields, ж<ast.InterfaceType> Ꮡityp) {
     bool removedFields = default!;
 
-    ref var parent = ref Ꮡparent.val;
-    ref var fields = ref Ꮡfields.val;
-    ref var ityp = ref Ꮡityp.val;
-    if (fields == nil) {
+    ref var parent = ref Ꮡparent.Value;
+    ref var fields = ref Ꮡfields.DerefOrNil();
+    ref var ityp = ref Ꮡityp.DerefOrNil();
+    if (Ꮡfields == nil) {
         return removedFields;
     }
     var list = fields.List;
     nint j = 0;
-    foreach (var (_, field) in list) {
+    foreach (var (_, vᴛ1) in list) {
+        var field = vᴛ1;
+
         var keepField = false;
         {
             nint n = len((~field).Names); if (n == 0){
@@ -141,7 +144,7 @@ internal static void removeAnonymousField(@string name, ж<ast.InterfaceType> �
                     if (token.IsExported(fname)){
                         keepField = true;
                     } else 
-                    if (ityp != nil && predeclaredTypes[fname]) {
+                    if (Ꮡityp != nil && predeclaredTypes[fname]) {
                         // possibly an embedded predeclared type; keep it for now but
                         // remember this interface so that it can be fixed if name is also
                         // defined locally
@@ -154,10 +157,10 @@ internal static void removeAnonymousField(@string name, ж<ast.InterfaceType> �
                     //
                     // TODO(rfindley): consider traversing into approximation/unions
                     // elements to see if they are entirely unexported.
-                    keepField = ityp != nil;
+                    keepField = Ꮡityp != nil;
                 }
             } else {
-                field.val.Names = filterIdentList((~field).Names);
+                field.Value.Names = filterIdentList((~field).Names);
                 if (len((~field).Names) < n) {
                     removedFields = true;
                 }
@@ -181,9 +184,9 @@ internal static void removeAnonymousField(@string name, ж<ast.InterfaceType> �
 
 // filterParamList applies filterType to each parameter type in fields.
 [GoRecv] internal static void filterParamList(this ref reader r, ж<ast.FieldList> Ꮡfields) {
-    ref var fields = ref Ꮡfields.val;
+    ref var fields = ref Ꮡfields.DerefOrNil();
 
-    if (fields != nil) {
+    if (Ꮡfields != nil) {
         foreach (var (_, f) in fields.List) {
             r.filterType(nil, (~f).Type);
         }
@@ -194,7 +197,7 @@ internal static void removeAnonymousField(@string name, ж<ast.InterfaceType> �
 // in place. If fields (or methods) have been removed, the corresponding
 // struct or interface type has the Incomplete field set to true.
 [GoRecv] internal static void filterType(this ref reader r, ж<namedType> Ꮡparent, ast.Expr typ) {
-    ref var parent = ref Ꮡparent.val;
+    ref var parent = ref Ꮡparent.Value;
 
     switch (typ.type()) {
     case ж<ast.Ident> t: {
@@ -231,7 +234,7 @@ internal static void removeAnonymousField(@string name, ж<ast.InterfaceType> �
     }
     case ж<ast.StructType> t: {
         if (r.filterFieldList(Ꮡparent, (~t).Fields, nil)) {
-            var t.val.Incomplete = true;
+            t.Value.Incomplete = true;
         }
         break;
     }
@@ -243,7 +246,7 @@ internal static void removeAnonymousField(@string name, ж<ast.InterfaceType> �
     }
     case ж<ast.InterfaceType> t: {
         if (r.filterFieldList(Ꮡparent, (~t).Methods, t)) {
-            var t.val.Incomplete = true;
+            t.Value.Incomplete = true;
         }
         break;
     }
@@ -264,8 +267,8 @@ internal static void removeAnonymousField(@string name, ж<ast.InterfaceType> �
         return true;
     }
     case ж<ast.ValueSpec> s: {
-        var s.val.Values = filterExprList((~s).Values, // always keep imports so we can collect them
- token.IsExported, true);
+        s.Value.Values = filterExprList((~s).Values, // always keep imports so we can collect them
+ new Func<@string, bool>(token.IsExported), true);
         if (len((~s).Values) > 0 || (~s).Type == default! && len((~s).Values) == 0){
             // If there are values declared on RHS, just replace the unexported
             // identifiers on the LHS with underscore, so that it matches
@@ -278,7 +281,7 @@ internal static void removeAnonymousField(@string name, ж<ast.InterfaceType> �
                 return true;
             }
         } else {
-            var s.val.Names = filterIdentList((~s).Names);
+            s.Value.Names = filterIdentList((~s).Names);
             if (len((~s).Names) > 0) {
                 r.filterType(nil, (~s).Type);
                 return true;
@@ -288,7 +291,7 @@ internal static void removeAnonymousField(@string name, ж<ast.InterfaceType> �
     }
     case ж<ast.TypeSpec> s: {
         {
-            @string name = (~s).Name.val.Name; if (token.IsExported(name)){
+            @string name = s.Value.Name.Value.Name; if (token.IsExported(name)){
                 // Don't filter type parameters here, by analogy with function parameters
                 // which are not filtered for top-level function declarations.
                 r.filterType(r.lookupType((~(~s).Name).Name), (~s).Type);
@@ -311,17 +314,17 @@ internal static void removeAnonymousField(@string name, ж<ast.InterfaceType> �
 // In practice, only (possibly qualified) identifiers are possible.
 internal static ast.Expr copyConstType(ast.Expr typ, tokenꓸPos pos) {
     switch (typ.type()) {
-    case ж<ast.Ident> typ: {
-        return new ast.Ident(Name: (~typ).Name, NamePos: pos);
+    case ж<ast.Ident> typΔ1: {
+        return new ast_IdentжExpr(Ꮡ(new ast.Ident(Name: (~typΔ1).Name, NamePos: pos)));
     }
-    case ж<ast.SelectorExpr> typ: {
+    case ж<ast.SelectorExpr> typΔ1: {
         {
-            var (id, ok) = (~typ).X._<ж<ast.Ident>>(ᐧ); if (ok) {
+            var (id, ok) = (~typΔ1).X._<ж<ast.Ident>>(ᐧ); if (ok) {
                 // presumably a qualified identifier
-                return new ast.SelectorExpr(
-                    Sel: ast.NewIdent((~(~typ).Sel).Name),
-                    X: Ꮡ(new ast.Ident(Name: (~id).Name, NamePos: pos))
-                );
+                return new ast_SelectorExprжExpr(Ꮡ(new ast.SelectorExpr(
+                    Sel: ast.NewIdent((~(~typΔ1).Sel).Name),
+                    X: new ast_IdentжExpr(Ꮡ(new ast.Ident(Name: (~id).Name, NamePos: pos)))
+                )));
             }
         }
         break;
@@ -339,13 +342,13 @@ internal static ast.Expr copyConstType(ast.Expr typ, tokenꓸPos pos) {
             var specΔ1 = spec._<ж<ast.ValueSpec>>();
             if ((~specΔ1).Type == default! && len((~specΔ1).Values) == 0 && prevType != default!) {
                 // provide current spec with an explicit type
-                specΔ1.val.Type = copyConstType(prevType, specΔ1.Pos());
+                specΔ1.Value.Type = copyConstType(prevType, specΔ1.Pos());
             }
             if (hasExportedName((~specΔ1).Names)){
                 // exported names are preserved so there's no need to propagate the type
                 prevType = default!;
             } else {
-                prevType = specΔ1.val.Type;
+                prevType = specΔ1.Value.Type;
             }
         }
     }
@@ -362,7 +365,7 @@ internal static ast.Expr copyConstType(ast.Expr typ, tokenꓸPos pos) {
 [GoRecv] internal static bool filterDecl(this ref reader r, ast.Decl decl) {
     switch (decl.type()) {
     case ж<ast.GenDecl> d: {
-        var d.val.Specs = r.filterSpecList((~d).Specs, (~d).Tok);
+        d.Value.Specs = r.filterSpecList((~d).Specs, (~d).Tok);
         return len((~d).Specs) > 0;
     }
     case ж<ast.FuncDecl> d: {
@@ -377,7 +380,7 @@ internal static ast.Expr copyConstType(ast.Expr typ, tokenꓸPos pos) {
 
 // fileExports removes unexported declarations from src in place.
 [GoRecv] internal static void fileExports(this ref reader r, ж<ast.File> Ꮡsrc) {
-    ref var src = ref Ꮡsrc.val;
+    ref var src = ref Ꮡsrc.Value;
 
     nint j = 0;
     foreach (var (_, d) in src.Decls) {

@@ -5,11 +5,13 @@
 namespace go.@internal;
 
 using os = os_package;
-using exec = os.exec_package;
+using exec = go.os.exec_package;
 using filepath = path.filepath_package;
 using strings = strings_package;
 using sync = sync_package;
-using os;
+using fs = io.fs_package;
+using go.os;
+using io;
 using path;
 
 partial class goroot_package {
@@ -20,7 +22,7 @@ public static bool IsStandardPackage(@string goroot, @string compiler, @string p
     var exprᴛ1 = compiler;
     if (exprᴛ1 == "gc"u8) {
         @string dir = filepath.Join(goroot, "src", path);
-        (dirents, err) = os.ReadDir(dir);
+        var (dirents, err) = os.ReadDir(dir);
         if (err != default!) {
             return false;
         }
@@ -32,23 +34,24 @@ public static bool IsStandardPackage(@string goroot, @string compiler, @string p
         return false;
     }
     if (exprᴛ1 == "gccgo"u8) {
-        return gccgoSearch.isStandard(path);
+        return ᏑgccgoSearch.isStandard(path);
     }
     { /* default: */
-        throw panic("unknown compiler "u8 + compiler);
+        throw panic("unknown compiler " + compiler);
     }
 
 }
 
 // gccgoSearch holds the gccgo search directories.
 [GoType] partial struct gccgoDirs {
-    internal sync_package.Once once;
+    internal sync.Once once;
     internal slice<@string> dirs;
 }
 
 // gccgoSearch is used to check whether a gccgo package exists in the
 // standard library.
-internal static gccgoDirs gccgoSearch;
+internal static ж<gccgoDirs> ᏑgccgoSearch = new(default(gccgoDirs));
+internal static ref gccgoDirs gccgoSearch => ref ᏑgccgoSearch.Value;
 
 // init finds the gccgo search directories. If this fails it leaves dirs == nil.
 [GoRecv] internal static void init(this ref gccgoDirs gd) {
@@ -60,16 +63,16 @@ internal static gccgoDirs gccgoSearch;
     if (err != default!) {
         return;
     }
-    (allDirs, err) = exec.Command(bin, "-print-search-dirs"u8).Output();
+    (var allDirs, err) = exec.Command(bin, "-print-search-dirs"u8).Output();
     if (err != default!) {
         return;
     }
-    (versionB, err) = exec.Command(bin, "-dumpversion"u8).Output();
+    (var versionB, err) = exec.Command(bin, "-dumpversion"u8).Output();
     if (err != default!) {
         return;
     }
     @string version = strings.TrimSpace(((@string)versionB));
-    (machineB, err) = exec.Command(bin, "-dumpmachine"u8).Output();
+    (var machineB, err) = exec.Command(bin, "-dumpmachine"u8).Output();
     if (err != default!) {
         return;
     }
@@ -90,7 +93,7 @@ internal static gccgoDirs gccgoSearch;
     foreach (var (_, dir) in dirs) {
         @string goDir = filepath.Join(dir, "go", version);
         {
-            (fi, errΔ1) = os.Stat(goDir); if (errΔ1 == default! && fi.IsDir()) {
+            var (fi, errΔ1) = os.Stat(goDir); if (errΔ1 == default! && fi.IsDir()) {
                 gd.dirs = append(gd.dirs, goDir);
                 goDir = filepath.Join(goDir, machine);
                 {
@@ -101,7 +104,7 @@ internal static gccgoDirs gccgoSearch;
             }
         }
         {
-            (fi, errΔ2) = os.Stat(dir); if (errΔ2 == default! && fi.IsDir()) {
+            var (fi, errΔ2) = os.Stat(dir); if (errΔ2 == default! && fi.IsDir()) {
                 lastDirs = append(lastDirs, dir);
             }
         }
@@ -110,7 +113,9 @@ internal static gccgoDirs gccgoSearch;
 }
 
 // isStandard reports whether path is a standard library for gccgo.
-[GoRecv] internal static bool isStandard(this ref gccgoDirs gd, @string path) {
+internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
+    ref var gd = ref Ꮡgd.Value;
+
     // Quick check: if the first path component has a '.', it's not
     // in the standard library. This skips most GOPATH directories.
     nint i = strings.Index(path, "/"u8);
@@ -124,7 +129,7 @@ internal static gccgoDirs gccgoSearch;
         // Special case.
         return true;
     }
-    gd.once.Do(gd.init);
+    Ꮡgd.of(gccgoDirs.Ꮡonce).Do(Ꮡgd.init);
     if (gd.dirs == default!) {
         // We couldn't find the gccgo search directories.
         // Best guess, since the first component did not contain
@@ -134,7 +139,7 @@ internal static gccgoDirs gccgoSearch;
     foreach (var (_, dir) in gd.dirs) {
         @string full = filepath.Join(dir, path) + ".gox"u8;
         {
-            (fi, err) = os.Stat(full); if (err == default! && !fi.IsDir()) {
+            var (fi, err) = os.Stat(full); if (err == default! && !fi.IsDir()) {
                 return true;
             }
         }

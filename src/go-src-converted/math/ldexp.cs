@@ -31,10 +31,10 @@ internal static float64 ldexp(float64 frac, nint exp) {
         return frac;
     }}
 
-    var (frac, e) = normalize(frac);
+    (frac, var e) = normalize(frac);
     exp += e;
     var x = Float64bits(frac);
-    exp += (nint)(((nint)(x >> (int)(shift))) & mask) - bias;
+    exp += (nint)((nint)((x >> (int)(shift))) & (nint)mask) - (nint)bias;
     if (exp < -1075) {
         return Copysign(0, frac);
     }
@@ -50,11 +50,11 @@ internal static float64 ldexp(float64 frac, nint exp) {
     if (exp < -1022) {
         // denormal
         exp += 53;
-        m = 1.0F / (1 << (int)(53));
+        m = 1.0D / ((1 << (int)(53)));
     }
     // 2**-53
-    x &= ~(uint64)(mask << (int)(shift));
-    x |= (uint64)(((uint64)(exp + bias)) << (int)(shift));
+    x &= unchecked((uint64)~(uint64)(((uint64)mask << (int)(shift))));
+    x |= (uint64)(((uint64)(exp + (nint)bias) << (int)(shift)));
     return m * Float64frombits(x);
 }
 

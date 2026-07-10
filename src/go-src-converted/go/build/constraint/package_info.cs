@@ -38,14 +38,11 @@ using static go.go.build.constraint_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(Expr, error), Expr>]
-[assembly: GoImplement<(x Expr, err error), Expr>]
-[assembly: GoImplement<AndExpr, Expr>]
-[assembly: GoImplement<NotExpr, Expr>]
-[assembly: GoImplement<OrExpr, Expr>]
-[assembly: GoImplement<SyntaxError, error>]
-[assembly: GoImplement<TagExpr, Expr>]
-[assembly: GoImplement<slice<Expr>, Expr>]
+[assembly: GoImplement<AndExpr, Expr>(Pointer = true)]
+[assembly: GoImplement<NotExpr, Expr>(Pointer = true)]
+[assembly: GoImplement<OrExpr, Expr>(Pointer = true)]
+[assembly: GoImplement<SyntaxError, error>(Pointer = true)]
+[assembly: GoImplement<TagExpr, Expr>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

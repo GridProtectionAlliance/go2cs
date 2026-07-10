@@ -7,7 +7,7 @@ namespace go.crypto;
 partial class x509_package {
 
 internal static bool boringAllowCert(ж<Certificate> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     return true;
 }

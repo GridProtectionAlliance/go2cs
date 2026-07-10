@@ -3,9 +3,9 @@
 // license that can be found in the LICENSE file.
 namespace go.os;
 
-using fs = io.fs_package;
+using fs = go.io.fs_package;
 using syscall = syscall_package;
-using io;
+using go.io;
 
 partial class exec_package {
 
@@ -15,9 +15,9 @@ internal static bool skipStdinCopyError(error err) {
     // Ignore ERROR_BROKEN_PIPE and ERROR_NO_DATA errors copying
     // to stdin if the program completed successfully otherwise.
     // See Issue 20445.
-    static readonly syscall.Errno _ERROR_NO_DATA = /* syscall.Errno(0xe8) */ 232;
+    syscall.Errno _ERROR_NO_DATA = /* syscall.Errno(0xe8) */ 232;
     var (pe, ok) = err._<ж<fs.PathError>>(ᐧ);
-    return ok && (~pe).Op == "write"u8 && (~pe).Path == "|1"u8 && ((~pe).Err == syscall.ERROR_BROKEN_PIPE || (~pe).Err == _ERROR_NO_DATA);
+    return ok && (~pe).Op == "write"u8 && (~pe).Path == "|1"u8 && (AreEqual((~pe).Err, syscall.ERROR_BROKEN_PIPE) || AreEqual((~pe).Err, _ERROR_NO_DATA));
 }
 
 } // end exec_package

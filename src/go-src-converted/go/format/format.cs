@@ -16,11 +16,12 @@ namespace go.go;
 
 using bytes = bytes_package;
 using fmt = fmt_package;
-using ast = go.ast_package;
-using parser = go.parser_package;
-using printer = go.printer_package;
-using token = go.token_package;
+using ast = global::go.go.ast_package;
+using parser = global::go.go.parser_package;
+using printer = global::go.go.printer_package;
+using token = global::go.go.token_package;
 using io = io_package;
+using global::go.go;
 
 partial class format_package {
 
@@ -31,7 +32,8 @@ internal static readonly printer.Mode printerMode = /* printer.UseSpaces | print
 
 internal static readonly UntypedInt printerNormalizeNumbers = /* 1 << 30 */ 1073741824;
 
-internal static printer.Config config = new printer.Config(Mode: printerMode, Tabwidth: tabWidth);
+internal static ж<printer.Config> Ꮡconfig = new(new printer.Config(Mode: printerMode, Tabwidth: tabWidth));
+internal static ref printer.Config config => ref Ꮡconfig.Value;
 
 internal static readonly parser.Mode parserMode = /* parser.ParseComments | parser.SkipObjectResolution */ 68;
 
@@ -46,47 +48,47 @@ internal static readonly parser.Mode parserMode = /* parser.ParseComments | pars
 // The function may return early (before the entire result is written)
 // and return a formatting error, for instance due to an incorrect AST.
 public static error Node(io.Writer dst, ж<token.FileSet> Ꮡfset, any node) {
-    ref var fset = ref Ꮡfset.val;
+    ref var fset = ref Ꮡfset.Value;
 
     // Determine if we have a complete source file (file != nil).
-    ж<ast.File> file = default!;
+    ж<ast.File> @file = default!;
     ж<printer.CommentedNode> cnode = default!;
     switch (node.type()) {
     case ж<ast.File> n: {
-        file = n;
+        @file = n;
         break;
     }
     case ж<printer.CommentedNode> n: {
         {
             var (f, ok) = (~n).Node._<ж<ast.File>>(ᐧ); if (ok) {
-                file = f;
+                @file = f;
                 cnode = n;
             }
         }
         break;
     }}
     // Sort imports if necessary.
-    if (file != nil && hasUnsortedImports(file)) {
+    if (@file != nil && hasUnsortedImports(@file)) {
         // Make a copy of the AST because ast.SortImports is destructive.
         // TODO(gri) Do this more efficiently.
-        ref var buf = ref heap(new bytes_package.Buffer(), out var Ꮡbuf);
-        var err = config.Fprint(~Ꮡbuf, Ꮡfset, file);
+        ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+        var err = Ꮡconfig.Fprint(new bytes_BufferжWriter(Ꮡbuf), Ꮡfset, @file);
         if (err != default!) {
             return err;
         }
-        (file, err) = parser.ParseFile(Ꮡfset, ""u8, buf.Bytes(), parserMode);
+        (@file, err) = parser.ParseFile(Ꮡfset, ""u8, buf.Bytes(), parserMode);
         if (err != default!) {
             // We should never get here. If we do, provide good diagnostic.
             return fmt.Errorf("format.Node internal error (%s)"u8, err);
         }
-        ast.SortImports(Ꮡfset, file);
+        ast.SortImports(Ꮡfset, @file);
         // Use new file with sorted imports.
-        node = file;
+        node = @file;
         if (cnode != nil) {
-            Ꮡnode = Ꮡ(new printer.CommentedNode(Node: file, Comments: (~cnode).Comments)); node = ref Ꮡnode.val;
+            node = Ꮡ(new printer.CommentedNode(Node: @file, Comments: (~cnode).Comments));
         }
     }
-    return config.Fprint(dst, Ꮡfset, node);
+    return Ꮡconfig.Fprint(dst, Ꮡfset, node);
 }
 
 // Source formats src in canonical gofmt style and returns the result
@@ -99,22 +101,22 @@ public static error Node(io.Writer dst, ж<token.FileSet> Ꮡfset, any node) {
 // line of src containing code. Imports are not sorted for partial source files.
 public static (slice<byte>, error) Source(slice<byte> src) {
     var fset = token.NewFileSet();
-    var (file, sourceAdj, indentAdj, err) = parse(fset, ""u8, src, true);
+    var (@file, sourceAdj, indentAdj, err) = parse(fset, ""u8, src, true);
     if (err != default!) {
         return (default!, err);
     }
     if (sourceAdj == default!) {
         // Complete source file.
         // TODO(gri) consider doing this always.
-        ast.SortImports(fset, file);
+        ast.SortImports(fset, @file);
     }
-    return format(fset, file, sourceAdj, indentAdj, src, config);
+    return format(fset, @file, sourceAdj, indentAdj, src, config);
 }
 
 internal static bool hasUnsortedImports(ж<ast.File> Ꮡfile) {
-    ref var file = ref Ꮡfile.val;
+    ref var @file = ref Ꮡfile.Value;
 
-    foreach (var (_, d) in file.Decls) {
+    foreach (var (_, d) in @file.Decls) {
         var (dΔ1, ok) = d._<ж<ast.GenDecl>>(ᐧ);
         if (!ok || (~dΔ1).Tok != token.IMPORT) {
             // Not an import declaration, so we're done.

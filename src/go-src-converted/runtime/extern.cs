@@ -299,16 +299,16 @@ partial class runtime_package {
 // meaning of skip differs between Caller and [Callers].) The return values report the
 // program counter, file name, and line number within the file of the corresponding
 // call. The boolean ok is false if it was not possible to recover the information.
-public static (uintptr pc, @string file, nint line, bool ok) Caller(nint skip) {
+public static (uintptr pc, @string @file, nint line, bool ok) Caller(nint skip) {
     uintptr pc = default!;
-    @string file = default!;
+    @string @file = default!;
     nint line = default!;
     bool ok = default!;
 
     var rpc = new slice<uintptr>(1);
     nint n = callers(skip + 1, rpc);
     if (n < 1) {
-        return (pc, file, line, ok);
+        return (pc, @file, line, ok);
     }
     var (frame, _) = CallersFrames(rpc).Next();
     return (frame.PC, frame.File, frame.Line, frame.PC != 0);

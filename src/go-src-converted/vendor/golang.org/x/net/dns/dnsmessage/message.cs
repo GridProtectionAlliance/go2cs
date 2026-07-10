@@ -56,23 +56,21 @@ internal static map<Type, @string> typeNames = new map<Type, @string>{
 // String implements fmt.Stringer.String.
 public static @string String(this Type t) {
     {
-        @string n = typeNames[t];
-        var ok = typeNames[t]; if (ok) {
+        var (n, ok) = typeNames[t, ꟷ]; if (ok) {
             return n;
         }
     }
-    return printUint16(((uint16)t));
+    return printUint16((uint16)t);
 }
 
 // GoString implements fmt.GoStringer.GoString.
 public static @string GoString(this Type t) {
     {
-        @string n = typeNames[t];
-        var ok = typeNames[t]; if (ok) {
+        var (n, ok) = typeNames[t, ꟷ]; if (ok) {
             return "dnsmessage."u8 + n;
         }
     }
-    return printUint16(((uint16)t));
+    return printUint16((uint16)t);
 }
 
 [GoType("num:uint16")] partial struct Class;
@@ -94,30 +92,28 @@ internal static map<Class, @string> classNames = new map<Class, @string>{
 // String implements fmt.Stringer.String.
 public static @string String(this Class c) {
     {
-        @string n = classNames[c];
-        var ok = classNames[c]; if (ok) {
+        var (n, ok) = classNames[c, ꟷ]; if (ok) {
             return n;
         }
     }
-    return printUint16(((uint16)c));
+    return printUint16((uint16)c);
 }
 
 // GoString implements fmt.GoStringer.GoString.
 public static @string GoString(this Class c) {
     {
-        @string n = classNames[c];
-        var ok = classNames[c]; if (ok) {
+        var (n, ok) = classNames[c, ꟷ]; if (ok) {
             return "dnsmessage."u8 + n;
         }
     }
-    return printUint16(((uint16)c));
+    return printUint16((uint16)c);
 }
 
 [GoType("num:uint16")] partial struct OpCode;
 
 // GoString implements fmt.GoStringer.GoString.
 public static @string GoString(this OpCode o) {
-    return printUint16(((uint16)o));
+    return printUint16((uint16)o);
 }
 
 [GoType("num:uint16")] partial struct RCode;
@@ -147,43 +143,41 @@ internal static map<RCode, @string> rCodeNames = new map<RCode, @string>{
 // String implements fmt.Stringer.String.
 public static @string String(this RCode r) {
     {
-        @string n = rCodeNames[r];
-        var ok = rCodeNames[r]; if (ok) {
+        var (n, ok) = rCodeNames[r, ꟷ]; if (ok) {
             return n;
         }
     }
-    return printUint16(((uint16)r));
+    return printUint16((uint16)r);
 }
 
 // GoString implements fmt.GoStringer.GoString.
 public static @string GoString(this RCode r) {
     {
-        @string n = rCodeNames[r];
-        var ok = rCodeNames[r]; if (ok) {
+        var (n, ok) = rCodeNames[r, ꟷ]; if (ok) {
             return "dnsmessage."u8 + n;
         }
     }
-    return printUint16(((uint16)r));
+    return printUint16((uint16)r);
 }
 
 internal static @string printPaddedUint8(uint8 i) {
-    var b = ((byte)i);
+    var b = (byte)i;
     return ((@string)new byte[]{
-        b / 100 + (rune)'0',
-        b / 10 % 10 + (rune)'0',
-        b % 10 + (rune)'0'
+        (byte)(b / 100 + (rune)'0'),
+        (byte)(b / 10 % 10 + (rune)'0'),
+        (byte)(b % 10 + (rune)'0')
     }.slice());
 }
 
 internal static slice<byte> printUint8Bytes(slice<byte> buf, uint8 i) {
-    var b = ((byte)i);
+    var b = (byte)i;
     if (i >= 100) {
-        buf = append(buf, b / 100 + (rune)'0');
+        buf = append(buf, (byte)(b / 100 + (rune)'0'));
     }
     if (i >= 10) {
-        buf = append(buf, b / 10 % 10 + (rune)'0');
+        buf = append(buf, (byte)(b / 10 % 10 + (rune)'0'));
     }
-    return append(buf, b % 10 + (rune)'0');
+    return append(buf, (byte)(b % 10 + (rune)'0'));
 }
 
 internal static @string printByteSlice(slice<byte> b) {
@@ -191,10 +185,10 @@ internal static @string printByteSlice(slice<byte> b) {
         return ""u8;
     }
     var buf = new slice<byte>(0, 5 * len(b));
-    buf = printUint8Bytes(buf, ((uint8)b[0]));
+    buf = printUint8Bytes(buf, (uint8)b[0]);
     foreach (var (_, n) in b[1..]) {
-        buf = append(buf, (rune)',', (rune)' ');
-        buf = printUint8Bytes(buf, ((uint8)n));
+        buf = append(buf, (byte)((rune)','), (byte)((rune)' '));
+        buf = printUint8Bytes(buf, (uint8)n);
     }
     return ((@string)buf);
 }
@@ -209,12 +203,12 @@ internal static @string printString(slice<byte> str) {
             buf = append(buf, c);
             continue;
         }
-        var upper = c >> (int)(4);
-        var lower = (c << (int)(4)) >> (int)(4);
+        var upper = (byte)((c >> (int)(4)));
+        var lower = (byte)((((c << (int)(4))) >> (int)(4)));
         buf = append(
             buf,
-            (rune)'\\',
-            (rune)'x',
+            (byte)((rune)'\\'),
+            (byte)((rune)'x'),
             hexDigits[upper],
             hexDigits[lower]);
     }
@@ -222,14 +216,14 @@ internal static @string printString(slice<byte> str) {
 }
 
 internal static @string printUint16(uint16 i) {
-    return printUint32(((uint32)i));
+    return printUint32((uint32)i);
 }
 
 internal static @string printUint32(uint32 i) {
     // Max value is 4294967295.
     var buf = new slice<byte>(10);
-    for (var b = buf;var d = ((uint32)1000000000); d > 0; d /= 10) {
-        b[0] = ((byte)(i / d % 10 + (rune)'0'));
+    for (var (b, d) = (buf, (uint32)1000000000); d > 0; d /= 10) {
+        b[0] = (byte)(i / d % 10 + (rune)'0');
         if (b[0] == (rune)'0' && len(b) == len(buf) && len(buf) > 1) {
             buf = buf[1..];
         }
@@ -307,7 +301,7 @@ internal static readonly UntypedInt headerLen = /* 6 * uint16Len */ 12;
     uint16 bits = default!;
 
     id = m.ID;
-    bits = (uint16)(((uint16)m.OpCode) << (int)(11) | ((uint16)m.RCode));
+    bits = (uint16)(((uint16)m.OpCode << (int)(11)) | (uint16)m.RCode);
     if (m.RecursionAvailable) {
         bits |= (uint16)(headerBitRA);
     }
@@ -413,33 +407,33 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     nint newOff = off;
     error err = default!;
     {
-        var (h.id, newOff, err) = unpackUint16(msg, newOff); if (err != default!) {
-            return (off, new nestedError("id", err));
+        (h.id, newOff, err) = unpackUint16(msg, newOff); if (err != default!) {
+            return (off, new nestedErrorжerror(Ꮡ(new nestedError("id", err))));
         }
     }
     {
-        var (h.bits, newOff, err) = unpackUint16(msg, newOff); if (err != default!) {
-            return (off, new nestedError("bits", err));
+        (h.bits, newOff, err) = unpackUint16(msg, newOff); if (err != default!) {
+            return (off, new nestedErrorжerror(Ꮡ(new nestedError("bits", err))));
         }
     }
     {
-        var (h.questions, newOff, err) = unpackUint16(msg, newOff); if (err != default!) {
-            return (off, new nestedError("questions", err));
+        (h.questions, newOff, err) = unpackUint16(msg, newOff); if (err != default!) {
+            return (off, new nestedErrorжerror(Ꮡ(new nestedError("questions", err))));
         }
     }
     {
-        var (h.answers, newOff, err) = unpackUint16(msg, newOff); if (err != default!) {
-            return (off, new nestedError("answers", err));
+        (h.answers, newOff, err) = unpackUint16(msg, newOff); if (err != default!) {
+            return (off, new nestedErrorжerror(Ꮡ(new nestedError("answers", err))));
         }
     }
     {
-        var (h.authorities, newOff, err) = unpackUint16(msg, newOff); if (err != default!) {
-            return (off, new nestedError("authorities", err));
+        (h.authorities, newOff, err) = unpackUint16(msg, newOff); if (err != default!) {
+            return (off, new nestedErrorжerror(Ꮡ(new nestedError("authorities", err))));
         }
     }
     {
-        var (h.additionals, newOff, err) = unpackUint16(msg, newOff); if (err != default!) {
-            return (off, new nestedError("additionals", err));
+        (h.additionals, newOff, err) = unpackUint16(msg, newOff); if (err != default!) {
+            return (off, new nestedErrorжerror(Ꮡ(new nestedError("additionals", err))));
         }
     }
     return (newOff, default!);
@@ -448,15 +442,15 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 [GoRecv] internal static Header header(this ref Δheader h) {
     return new Header(
         ID: h.id,
-        Response: ((uint16)(h.bits & headerBitQR)) != 0,
-        OpCode: (OpCode)(((OpCode)(h.bits >> (int)(11))) & 15),
-        Authoritative: ((uint16)(h.bits & headerBitAA)) != 0,
-        Truncated: ((uint16)(h.bits & headerBitTC)) != 0,
-        RecursionDesired: ((uint16)(h.bits & headerBitRD)) != 0,
-        RecursionAvailable: ((uint16)(h.bits & headerBitRA)) != 0,
-        AuthenticData: ((uint16)(h.bits & headerBitAD)) != 0,
-        CheckingDisabled: ((uint16)(h.bits & headerBitCD)) != 0,
-        RCode: ((RCode)((uint16)(h.bits & 15)))
+        Response: ((uint16)(h.bits & (uint16)headerBitQR)) != 0,
+        OpCode: (OpCode)(((OpCode)((h.bits >> (int)(11)))) & 0xF),
+        Authoritative: ((uint16)(h.bits & (uint16)headerBitAA)) != 0,
+        Truncated: ((uint16)(h.bits & (uint16)headerBitTC)) != 0,
+        RecursionDesired: ((uint16)(h.bits & (uint16)headerBitRD)) != 0,
+        RecursionAvailable: ((uint16)(h.bits & (uint16)headerBitRA)) != 0,
+        AuthenticData: ((uint16)(h.bits & (uint16)headerBitAD)) != 0,
+        CheckingDisabled: ((uint16)(h.bits & (uint16)headerBitCD)) != 0,
+        RCode: ((RCode)((uint16)(h.bits & 0xF)))
     );
 }
 
@@ -488,14 +482,14 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     }
     var oldMsg = msg;
     r.Header.Type = r.Body.realType();
-    var (msg, lenOff, err) = r.Header.pack(msg, compression, compressionOff);
+    (msg, var lenOff, var err) = r.Header.pack(msg, compression, compressionOff);
     if (err != default!) {
-        return (msg, new nestedError("ResourceHeader", err));
+        return (msg, new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err))));
     }
     nint preLen = len(msg);
     (msg, err) = r.Body.pack(msg, compression, compressionOff);
     if (err != default!) {
-        return (msg, new nestedError("content", err));
+        return (msg, new nestedErrorжerror(Ꮡ(new nestedError("content", err))));
     }
     {
         var errΔ1 = r.Header.fixLen(msg, lenOff, preLen); if (errΔ1 != default!) {
@@ -539,8 +533,8 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     p.msg = msg;
     error err = default!;
     {
-        var (p.off, err) = p.header.unpack(msg, 0); if (err != default!) {
-            return (new Header(nil), new nestedError("unpacking header", err));
+        (p.off, err) = p.header.unpack(msg, 0); if (err != default!) {
+            return (new Header(nil), new nestedErrorжerror(Ꮡ(new nestedError("unpacking header", err))));
         }
     }
     p.section = sectionQuestions;
@@ -555,7 +549,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
         return ErrSectionDone;
     }
     p.resHeaderValid = false;
-    if (p.index == ((nint)p.header.count(sec))) {
+    if (p.index == (nint)p.header.count(sec)) {
         p.index = 0;
         p.section++;
         return ErrSectionDone;
@@ -573,7 +567,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     p.resHeaderValid = false;
     (r.Body, p.off, err) = unpackResourceBody(p.msg, p.off, r.Header);
     if (err != default!) {
-        return (new Resource(nil), new nestedError("unpacking " + sectionNames[sec], err));
+        return (new Resource(nil), new nestedErrorжerror(Ꮡ(new nestedError("unpacking " + sectionNames[sec], err))));
     }
     p.index++;
     return (r, default!);
@@ -603,7 +597,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 
 [GoRecv] internal static error skipResource(this ref Parser p, section sec) {
     if (p.resHeaderValid && p.section == sec) {
-        nint newOff = p.off + ((nint)p.resHeaderLength);
+        nint newOff = p.off + (nint)p.resHeaderLength;
         if (newOff > len(p.msg)) {
             return errResourceLen;
         }
@@ -620,7 +614,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     error err = default!;
     (p.off, err) = skipResource(p.msg, p.off);
     if (err != default!) {
-        return new nestedError("skipping: " + sectionNames[sec], err);
+        return new nestedErrorжerror(Ꮡ(new nestedError("skipping: " + sectionNames[sec], err)));
     }
     p.index++;
     return default!;
@@ -636,15 +630,15 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     Name name = default!;
     var (off, err) = name.unpack(p.msg, p.off);
     if (err != default!) {
-        return (new ΔQuestion(nil), new nestedError("unpacking Question.Name", err));
+        return (new ΔQuestion(nil), new nestedErrorжerror(Ꮡ(new nestedError("unpacking Question.Name", err))));
     }
-    var (typ, off, err) = unpackType(p.msg, off);
+    (var typ, off, err) = unpackType(p.msg, off);
     if (err != default!) {
-        return (new ΔQuestion(nil), new nestedError("unpacking Question.Type", err));
+        return (new ΔQuestion(nil), new nestedErrorжerror(Ꮡ(new nestedError("unpacking Question.Type", err))));
     }
-    var (@class, off, err) = unpackClass(p.msg, off);
+    (var @class, off, err) = unpackClass(p.msg, off);
     if (err != default!) {
-        return (new ΔQuestion(nil), new nestedError("unpacking Question.Class", err));
+        return (new ΔQuestion(nil), new nestedErrorжerror(Ꮡ(new nestedError("unpacking Question.Class", err))));
     }
     p.off = off;
     p.index++;
@@ -681,16 +675,16 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     }
     var (off, err) = skipName(p.msg, p.off);
     if (err != default!) {
-        return new nestedError("skipping Question Name", err);
+        return new nestedErrorжerror(Ꮡ(new nestedError("skipping Question Name", err)));
     }
     {
         (off, err) = skipType(p.msg, off); if (err != default!) {
-            return new nestedError("skipping Question Type", err);
+            return new nestedErrorжerror(Ꮡ(new nestedError("skipping Question Type", err)));
         }
     }
     {
         (off, err) = skipClass(p.msg, off); if (err != default!) {
-            return new nestedError("skipping Question Class", err);
+            return new nestedErrorжerror(Ꮡ(new nestedError("skipping Question Class", err)));
         }
     }
     p.off = off;
@@ -729,7 +723,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     //
     // Pre-allocate up to a certain limit, since p.header is
     // untrusted data.
-    nint n = ((nint)p.header.answers);
+    nint n = (nint)p.header.answers;
     if (n > 20) {
         n = 20;
     }
@@ -785,7 +779,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     //
     // Pre-allocate up to a certain limit, since p.header is
     // untrusted data.
-    nint n = ((nint)p.header.authorities);
+    nint n = (nint)p.header.authorities;
     if (n > 10) {
         n = 10;
     }
@@ -841,7 +835,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     //
     // Pre-allocate up to a certain limit, since p.header is
     // untrusted data.
-    nint n = ((nint)p.header.additionals);
+    nint n = (nint)p.header.additionals;
     if (n > 10) {
         n = 10;
     }
@@ -892,7 +886,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     if (err != default!) {
         return (new ΔCNAMEResource(nil), err);
     }
-    p.off += ((nint)p.resHeaderLength);
+    p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
     p.index++;
     return (r, default!);
@@ -910,7 +904,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     if (err != default!) {
         return (new ΔMXResource(nil), err);
     }
-    p.off += ((nint)p.resHeaderLength);
+    p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
     p.index++;
     return (r, default!);
@@ -928,7 +922,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     if (err != default!) {
         return (new ΔNSResource(nil), err);
     }
-    p.off += ((nint)p.resHeaderLength);
+    p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
     p.index++;
     return (r, default!);
@@ -946,7 +940,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     if (err != default!) {
         return (new ΔPTRResource(nil), err);
     }
-    p.off += ((nint)p.resHeaderLength);
+    p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
     p.index++;
     return (r, default!);
@@ -964,7 +958,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     if (err != default!) {
         return (new ΔSOAResource(nil), err);
     }
-    p.off += ((nint)p.resHeaderLength);
+    p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
     p.index++;
     return (r, default!);
@@ -982,7 +976,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     if (err != default!) {
         return (new ΔTXTResource(nil), err);
     }
-    p.off += ((nint)p.resHeaderLength);
+    p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
     p.index++;
     return (r, default!);
@@ -1000,7 +994,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     if (err != default!) {
         return (new ΔSRVResource(nil), err);
     }
-    p.off += ((nint)p.resHeaderLength);
+    p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
     p.index++;
     return (r, default!);
@@ -1018,7 +1012,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     if (err != default!) {
         return (new ΔAResource(nil), err);
     }
-    p.off += ((nint)p.resHeaderLength);
+    p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
     p.index++;
     return (r, default!);
@@ -1036,7 +1030,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     if (err != default!) {
         return (new ΔAAAAResource(nil), err);
     }
-    p.off += ((nint)p.resHeaderLength);
+    p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
     p.index++;
     return (r, default!);
@@ -1054,7 +1048,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     if (err != default!) {
         return (new ΔOPTResource(nil), err);
     }
-    p.off += ((nint)p.resHeaderLength);
+    p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
     p.index++;
     return (r, default!);
@@ -1072,7 +1066,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     if (err != default!) {
         return (new ΔUnknownResource(nil), err);
     }
-    p.off += ((nint)p.resHeaderLength);
+    p.off += (nint)p.resHeaderLength;
     p.resHeaderValid = false;
     p.index++;
     return (r, default!);
@@ -1083,27 +1077,27 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     Parser p = default!;
     error err = default!;
     {
-        var (m.Header, err) = p.Start(msg); if (err != default!) {
+        (m.Header, err) = p.Start(msg); if (err != default!) {
             return err;
         }
     }
     {
-        var (m.Questions, err) = p.AllQuestions(); if (err != default!) {
+        (m.Questions, err) = p.AllQuestions(); if (err != default!) {
             return err;
         }
     }
     {
-        var (m.Answers, err) = p.AllAnswers(); if (err != default!) {
+        (m.Answers, err) = p.AllAnswers(); if (err != default!) {
             return err;
         }
     }
     {
-        var (m.Authorities, err) = p.AllAuthorities(); if (err != default!) {
+        (m.Authorities, err) = p.AllAuthorities(); if (err != default!) {
             return err;
         }
     }
     {
-        var (m.Additionals, err) = p.AllAdditionals(); if (err != default!) {
+        (m.Additionals, err) = p.AllAdditionals(); if (err != default!) {
             return err;
         }
     }
@@ -1121,24 +1115,24 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     // Validate the lengths. It is very unlikely that anyone will try to
     // pack more than 65535 of any particular type, but it is possible and
     // we should fail gracefully.
-    if (len(m.Questions) > ((nint)(~((uint16)0)))) {
+    if (len(m.Questions) > (nint)(~(uint16)0)) {
         return (default!, errTooManyQuestions);
     }
-    if (len(m.Answers) > ((nint)(~((uint16)0)))) {
+    if (len(m.Answers) > (nint)(~(uint16)0)) {
         return (default!, errTooManyAnswers);
     }
-    if (len(m.Authorities) > ((nint)(~((uint16)0)))) {
+    if (len(m.Authorities) > (nint)(~(uint16)0)) {
         return (default!, errTooManyAuthorities);
     }
-    if (len(m.Additionals) > ((nint)(~((uint16)0)))) {
+    if (len(m.Additionals) > (nint)(~(uint16)0)) {
         return (default!, errTooManyAdditionals);
     }
     Δheader h = default!;
     (h.id, h.bits) = m.Header.pack();
-    h.questions = ((uint16)len(m.Questions));
-    h.answers = ((uint16)len(m.Answers));
-    h.authorities = ((uint16)len(m.Authorities));
-    h.additionals = ((uint16)len(m.Additionals));
+    h.questions = (uint16)len(m.Questions);
+    h.answers = (uint16)len(m.Answers);
+    h.authorities = (uint16)len(m.Authorities);
+    h.additionals = (uint16)len(m.Additionals);
     nint compressionOff = len(b);
     var msg = h.pack(b);
     // RFC 1035 allows (but does not require) compression for packing. RFC
@@ -1151,10 +1145,10 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     // compression will help ensure compliance.
     var compression = new map<@string, uint16>{};
     foreach (var (i, _) in m.Questions) {
-        error errΔ1 = default!;
+        error err = default!;
         {
-            (msg, errΔ1) = m.Questions[i].pack(msg, compression, compressionOff); if (errΔ1 != default!) {
-                return (default!, new nestedError("packing Question", errΔ1));
+            (msg, err) = m.Questions[i].pack(msg, compression, compressionOff); if (err != default!) {
+                return (default!, new nestedErrorжerror(Ꮡ(new nestedError("packing Question", err))));
             }
         }
     }
@@ -1162,7 +1156,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
         error err = default!;
         {
             (msg, err) = m.Answers[i].pack(msg, compression, compressionOff); if (err != default!) {
-                return (default!, new nestedError("packing Answer", err));
+                return (default!, new nestedErrorжerror(Ꮡ(new nestedError("packing Answer", err))));
             }
         }
     }
@@ -1170,7 +1164,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
         error err = default!;
         {
             (msg, err) = m.Authorities[i].pack(msg, compression, compressionOff); if (err != default!) {
-                return (default!, new nestedError("packing Authority", err));
+                return (default!, new nestedErrorжerror(Ꮡ(new nestedError("packing Authority", err))));
             }
         }
     }
@@ -1178,7 +1172,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
         error err = default!;
         {
             (msg, err) = m.Additionals[i].pack(msg, compression, compressionOff); if (err != default!) {
-                return (default!, new nestedError("packing Additional", err));
+                return (default!, new nestedErrorжerror(Ꮡ(new nestedError("packing Additional", err))));
             }
         }
     }
@@ -1190,28 +1184,36 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     @string s = "dnsmessage.Message{Header: "u8 + m.Header.GoString() + ", "u8 + "Questions: []dnsmessage.Question{"u8;
     if (len(m.Questions) > 0) {
         s += m.Questions[0].GoString();
-        foreach (var (_, q) in m.Questions[1..]) {
+        foreach (var (_, vᴛ1) in m.Questions[1..]) {
+            var q = vᴛ1;
+
             s += ", "u8 + q.GoString();
         }
     }
     s += "}, Answers: []dnsmessage.Resource{"u8;
     if (len(m.Answers) > 0) {
         s += m.Answers[0].GoString();
-        foreach (var (_, a) in m.Answers[1..]) {
+        foreach (var (_, vᴛ2) in m.Answers[1..]) {
+            var a = vᴛ2;
+
             s += ", "u8 + a.GoString();
         }
     }
     s += "}, Authorities: []dnsmessage.Resource{"u8;
     if (len(m.Authorities) > 0) {
         s += m.Authorities[0].GoString();
-        foreach (var (_, a) in m.Authorities[1..]) {
+        foreach (var (_, vᴛ3) in m.Authorities[1..]) {
+            var a = vᴛ3;
+
             s += ", "u8 + a.GoString();
         }
     }
     s += "}, Additionals: []dnsmessage.Resource{"u8;
     if (len(m.Additionals) > 0) {
         s += m.Additionals[0].GoString();
-        foreach (var (_, a) in m.Additionals[1..]) {
+        foreach (var (_, vᴛ4) in m.Additionals[1..]) {
+            var a = vᴛ4;
+
             s += ", "u8 + a.GoString();
         }
     }
@@ -1340,26 +1342,26 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     error err = default!;
     var exprᴛ1 = b.section;
     if (exprᴛ1 == sectionQuestions) {
-        count = Ꮡb.header.of(header.Ꮡquestions);
+        count = Ꮡ(b.header).of(dnsmessage_package.Δheader.Ꮡquestions);
         err = errTooManyQuestions;
     }
     else if (exprᴛ1 == sectionAnswers) {
-        count = Ꮡb.header.of(header.Ꮡanswers);
+        count = Ꮡ(b.header).of(dnsmessage_package.Δheader.Ꮡanswers);
         err = errTooManyAnswers;
     }
     else if (exprᴛ1 == sectionAuthorities) {
-        count = Ꮡb.header.of(header.Ꮡauthorities);
+        count = Ꮡ(b.header).of(dnsmessage_package.Δheader.Ꮡauthorities);
         err = errTooManyAuthorities;
     }
     else if (exprᴛ1 == sectionAdditionals) {
-        count = Ꮡb.header.of(header.Ꮡadditionals);
+        count = Ꮡ(b.header).of(dnsmessage_package.Δheader.Ꮡadditionals);
         err = errTooManyAdditionals;
     }
 
-    if (count.val == ~((uint16)0)) {
+    if (count.Value == ~(uint16)0) {
         return err;
     }
-    count.val++;
+    count.Value++;
     return default!;
 }
 
@@ -1371,7 +1373,7 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     if (b.section > sectionQuestions) {
         return ErrSectionDone;
     }
-    (msg, err) = q.pack(b.msg, b.compression, b.start);
+    var (msg, err) = q.pack(b.msg, b.compression, b.start);
     if (err != default!) {
         return err;
     }
@@ -1404,12 +1406,12 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != default!) {
-        return new nestedError("ResourceHeader", err);
+        return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
     {
         (msg, err) = r.pack(msg, b.compression, b.start); if (err != default!) {
-            return new nestedError("CNAMEResource body", err);
+            return new nestedErrorжerror(Ꮡ(new nestedError("CNAMEResource body", err)));
         }
     }
     {
@@ -1436,12 +1438,12 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != default!) {
-        return new nestedError("ResourceHeader", err);
+        return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
     {
         (msg, err) = r.pack(msg, b.compression, b.start); if (err != default!) {
-            return new nestedError("MXResource body", err);
+            return new nestedErrorжerror(Ꮡ(new nestedError("MXResource body", err)));
         }
     }
     {
@@ -1468,12 +1470,12 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != default!) {
-        return new nestedError("ResourceHeader", err);
+        return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
     {
         (msg, err) = r.pack(msg, b.compression, b.start); if (err != default!) {
-            return new nestedError("NSResource body", err);
+            return new nestedErrorжerror(Ꮡ(new nestedError("NSResource body", err)));
         }
     }
     {
@@ -1500,12 +1502,12 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != default!) {
-        return new nestedError("ResourceHeader", err);
+        return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
     {
         (msg, err) = r.pack(msg, b.compression, b.start); if (err != default!) {
-            return new nestedError("PTRResource body", err);
+            return new nestedErrorжerror(Ꮡ(new nestedError("PTRResource body", err)));
         }
     }
     {
@@ -1532,12 +1534,12 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != default!) {
-        return new nestedError("ResourceHeader", err);
+        return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
     {
         (msg, err) = r.pack(msg, b.compression, b.start); if (err != default!) {
-            return new nestedError("SOAResource body", err);
+            return new nestedErrorжerror(Ꮡ(new nestedError("SOAResource body", err)));
         }
     }
     {
@@ -1564,12 +1566,12 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != default!) {
-        return new nestedError("ResourceHeader", err);
+        return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
     {
         (msg, err) = r.pack(msg, b.compression, b.start); if (err != default!) {
-            return new nestedError("TXTResource body", err);
+            return new nestedErrorжerror(Ꮡ(new nestedError("TXTResource body", err)));
         }
     }
     {
@@ -1596,12 +1598,12 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != default!) {
-        return new nestedError("ResourceHeader", err);
+        return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
     {
         (msg, err) = r.pack(msg, b.compression, b.start); if (err != default!) {
-            return new nestedError("SRVResource body", err);
+            return new nestedErrorжerror(Ꮡ(new nestedError("SRVResource body", err)));
         }
     }
     {
@@ -1628,12 +1630,12 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != default!) {
-        return new nestedError("ResourceHeader", err);
+        return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
     {
         (msg, err) = r.pack(msg, b.compression, b.start); if (err != default!) {
-            return new nestedError("AResource body", err);
+            return new nestedErrorжerror(Ꮡ(new nestedError("AResource body", err)));
         }
     }
     {
@@ -1660,12 +1662,12 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != default!) {
-        return new nestedError("ResourceHeader", err);
+        return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
     {
         (msg, err) = r.pack(msg, b.compression, b.start); if (err != default!) {
-            return new nestedError("AAAAResource body", err);
+            return new nestedErrorжerror(Ꮡ(new nestedError("AAAAResource body", err)));
         }
     }
     {
@@ -1692,12 +1694,12 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != default!) {
-        return new nestedError("ResourceHeader", err);
+        return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
     {
         (msg, err) = r.pack(msg, b.compression, b.start); if (err != default!) {
-            return new nestedError("OPTResource body", err);
+            return new nestedErrorжerror(Ꮡ(new nestedError("OPTResource body", err)));
         }
     }
     {
@@ -1724,12 +1726,12 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != default!) {
-        return new nestedError("ResourceHeader", err);
+        return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
     {
         (msg, err) = r.pack(msg, b.compression, b.start); if (err != default!) {
-            return new nestedError("UnknownResource body", err);
+            return new nestedErrorжerror(Ꮡ(new nestedError("UnknownResource body", err)));
         }
     }
     {
@@ -1795,7 +1797,7 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     msg = oldMsg;
     {
         (msg, err) = h.Name.pack(msg, compression, compressionOff); if (err != default!) {
-            return (oldMsg, 0, new nestedError("Name", err));
+            return (oldMsg, 0, new nestedErrorжerror(Ꮡ(new nestedError("Name", err))));
         }
     }
     msg = packType(msg, h.Type);
@@ -1811,27 +1813,27 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     error err = default!;
     {
         (newOff, err) = h.Name.unpack(msg, newOff); if (err != default!) {
-            return (off, new nestedError("Name", err));
+            return (off, new nestedErrorжerror(Ꮡ(new nestedError("Name", err))));
         }
     }
     {
-        var (h.Type, newOff, err) = unpackType(msg, newOff); if (err != default!) {
-            return (off, new nestedError("Type", err));
+        (h.Type, newOff, err) = unpackType(msg, newOff); if (err != default!) {
+            return (off, new nestedErrorжerror(Ꮡ(new nestedError("Type", err))));
         }
     }
     {
-        var (h.Class, newOff, err) = unpackClass(msg, newOff); if (err != default!) {
-            return (off, new nestedError("Class", err));
+        (h.Class, newOff, err) = unpackClass(msg, newOff); if (err != default!) {
+            return (off, new nestedErrorжerror(Ꮡ(new nestedError("Class", err))));
         }
     }
     {
-        var (h.TTL, newOff, err) = unpackUint32(msg, newOff); if (err != default!) {
-            return (off, new nestedError("TTL", err));
+        (h.TTL, newOff, err) = unpackUint32(msg, newOff); if (err != default!) {
+            return (off, new nestedErrorжerror(Ꮡ(new nestedError("TTL", err))));
         }
     }
     {
-        var (h.Length, newOff, err) = unpackUint16(msg, newOff); if (err != default!) {
-            return (off, new nestedError("Length", err));
+        (h.Length, newOff, err) = unpackUint16(msg, newOff); if (err != default!) {
+            return (off, new nestedErrorжerror(Ꮡ(new nestedError("Length", err))));
         }
     }
     return (newOff, default!);
@@ -1845,23 +1847,23 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
 // preLen is the length that msg was before the ResourceBody was packed.
 [GoRecv] internal static error fixLen(this ref ResourceHeader h, slice<byte> msg, nint lenOff, nint preLen) {
     nint conLen = len(msg) - preLen;
-    if (conLen > ((nint)(~((uint16)0)))) {
+    if (conLen > (nint)(~(uint16)0)) {
         return errResTooLong;
     }
     // Fill in the length now that we know how long the content is.
-    packUint16(msg[(int)(lenOff)..(int)(lenOff)], ((uint16)conLen));
-    h.Length = ((uint16)conLen);
+    packUint16(msg[(int)(lenOff)..(int)(lenOff)], (uint16)conLen);
+    h.Length = (uint16)conLen;
     return default!;
 }
 
 // EDNS(0) wire constants.
 internal static readonly UntypedInt edns0Version = 0;
 
-internal static readonly UntypedInt edns0DNSSECOK = /* 0x00008000 */ 32768;
+internal static readonly UntypedInt edns0DNSSECOK = 0x00008000;
 
-internal static readonly UntypedInt ednsVersionMask = /* 0x00ff0000 */ 16711680;
+internal static readonly UntypedInt ednsVersionMask = 0x00ff0000;
 
-internal static readonly UntypedInt edns0DNSSECOKMask = /* 0x00ff8000 */ 16744448;
+internal static readonly UntypedInt edns0DNSSECOKMask = 0x00ff8000;
 
 // SetEDNS0 configures h for EDNS(0).
 //
@@ -1870,17 +1872,17 @@ internal static readonly UntypedInt edns0DNSSECOKMask = /* 0x00ff8000 */ 1674444
     h.Name = new Name(Data: new byte[]{(rune)'.'}.array(), Length: 1);
     // RFC 6891 section 6.1.2
     h.Type = TypeOPT;
-    h.Class = ((Class)udpPayloadLen);
-    h.TTL = ((uint32)extRCode) >> (int)(4) << (int)(24);
+    h.Class = ((Class)(uint16)udpPayloadLen);
+    h.TTL = (((uint32)(uint16)extRCode >> (int)(4)) << (int)(24));
     if (dnssecOK) {
-        h.TTL |= (uint32)(edns0DNSSECOK);
+        h.TTL |= edns0DNSSECOK;
     }
     return default!;
 }
 
 // DNSSECAllowed reports whether the DNSSEC OK bit is set.
 [GoRecv] public static bool DNSSECAllowed(this ref ResourceHeader h) {
-    return (uint32)(h.TTL & edns0DNSSECOKMask) == edns0DNSSECOK;
+    return (uint32)(h.TTL & (uint32)edns0DNSSECOKMask) == edns0DNSSECOK;
 }
 
 // RFC 6891 section 6.1.3
@@ -1889,9 +1891,9 @@ internal static readonly UntypedInt edns0DNSSECOKMask = /* 0x00ff8000 */ 1674444
 //
 // The provided rcode must be the RCode in DNS message header.
 [GoRecv] public static RCode ExtendedRCode(this ref ResourceHeader h, RCode rcode) {
-    if ((uint32)(h.TTL & ednsVersionMask) == edns0Version) {
+    if ((uint32)(h.TTL & (uint32)ednsVersionMask) == edns0Version) {
         // RFC 6891 section 6.1.3
-        return (RCode)(((RCode)(h.TTL >> (int)(24) << (int)(4))) | rcode);
+        return (RCode)(((RCode)(uint16)(((h.TTL >> (int)(24)) << (int)(4)))) | rcode);
     }
     return rcode;
 }
@@ -1899,29 +1901,29 @@ internal static readonly UntypedInt edns0DNSSECOKMask = /* 0x00ff8000 */ 1674444
 internal static (nint, error) skipResource(slice<byte> msg, nint off) {
     var (newOff, err) = skipName(msg, off);
     if (err != default!) {
-        return (off, new nestedError("Name", err));
+        return (off, new nestedErrorжerror(Ꮡ(new nestedError("Name", err))));
     }
     {
         (newOff, err) = skipType(msg, newOff); if (err != default!) {
-            return (off, new nestedError("Type", err));
+            return (off, new nestedErrorжerror(Ꮡ(new nestedError("Type", err))));
         }
     }
     {
         (newOff, err) = skipClass(msg, newOff); if (err != default!) {
-            return (off, new nestedError("Class", err));
+            return (off, new nestedErrorжerror(Ꮡ(new nestedError("Class", err))));
         }
     }
     {
         (newOff, err) = skipUint32(msg, newOff); if (err != default!) {
-            return (off, new nestedError("TTL", err));
+            return (off, new nestedErrorжerror(Ꮡ(new nestedError("TTL", err))));
         }
     }
-    var (length, newOff, err) = unpackUint16(msg, newOff);
+    (var length, newOff, err) = unpackUint16(msg, newOff);
     if (err != default!) {
-        return (off, new nestedError("Length", err));
+        return (off, new nestedErrorжerror(Ꮡ(new nestedError("Length", err))));
     }
     {
-        newOff += ((nint)length); if (newOff > len(msg)) {
+        newOff += (nint)length; if (newOff > len(msg)) {
             return (off, errResourceLen);
         }
     }
@@ -1930,26 +1932,26 @@ internal static (nint, error) skipResource(slice<byte> msg, nint off) {
 
 // packUint16 appends the wire format of field to msg.
 internal static slice<byte> packUint16(slice<byte> msg, uint16 field) {
-    return append(msg, ((byte)(field >> (int)(8))), ((byte)field));
+    return append(msg, (byte)((field >> (int)(8))), (byte)field);
 }
 
 internal static (uint16, nint, error) unpackUint16(slice<byte> msg, nint off) {
-    if (off + uint16Len > len(msg)) {
+    if (off + (nint)uint16Len > len(msg)) {
         return (0, off, errBaseLen);
     }
-    return ((uint16)(((uint16)msg[off]) << (int)(8) | ((uint16)msg[off + 1])), off + uint16Len, default!);
+    return ((uint16)(((uint16)msg[off] << (int)(8)) | (uint16)msg[off + 1]), off + (nint)uint16Len, default!);
 }
 
 internal static (nint, error) skipUint16(slice<byte> msg, nint off) {
-    if (off + uint16Len > len(msg)) {
+    if (off + (nint)uint16Len > len(msg)) {
         return (off, errBaseLen);
     }
-    return (off + uint16Len, default!);
+    return (off + (nint)uint16Len, default!);
 }
 
 // packType appends the wire format of field to msg.
 internal static slice<byte> packType(slice<byte> msg, Type field) {
-    return packUint16(msg, ((uint16)field));
+    return packUint16(msg, (uint16)field);
 }
 
 internal static (Type, nint, error) unpackType(slice<byte> msg, nint off) {
@@ -1963,7 +1965,7 @@ internal static (nint, error) skipType(slice<byte> msg, nint off) {
 
 // packClass appends the wire format of field to msg.
 internal static slice<byte> packClass(slice<byte> msg, Class field) {
-    return packUint16(msg, ((uint16)field));
+    return packUint16(msg, (uint16)field);
 }
 
 internal static (Class, nint, error) unpackClass(slice<byte> msg, nint off) {
@@ -1979,25 +1981,25 @@ internal static (nint, error) skipClass(slice<byte> msg, nint off) {
 internal static slice<byte> packUint32(slice<byte> msg, uint32 field) {
     return append(
         msg,
-        ((byte)(field >> (int)(24))),
-        ((byte)(field >> (int)(16))),
-        ((byte)(field >> (int)(8))),
-        ((byte)field));
+        (byte)((field >> (int)(24))),
+        (byte)((field >> (int)(16))),
+        (byte)((field >> (int)(8))),
+        (byte)field);
 }
 
 internal static (uint32, nint, error) unpackUint32(slice<byte> msg, nint off) {
-    if (off + uint32Len > len(msg)) {
+    if (off + (nint)uint32Len > len(msg)) {
         return (0, off, errBaseLen);
     }
-    var v = (uint32)((uint32)((uint32)(((uint32)msg[off]) << (int)(24) | ((uint32)msg[off + 1]) << (int)(16)) | ((uint32)msg[off + 2]) << (int)(8)) | ((uint32)msg[off + 3]));
-    return (v, off + uint32Len, default!);
+    var v = (uint32)((uint32)((uint32)(((uint32)msg[off] << (int)(24)) | ((uint32)msg[off + 1] << (int)(16))) | ((uint32)msg[off + 2] << (int)(8))) | (uint32)msg[off + 3]);
+    return (v, off + (nint)uint32Len, default!);
 }
 
 internal static (nint, error) skipUint32(slice<byte> msg, nint off) {
-    if (off + uint32Len > len(msg)) {
+    if (off + (nint)uint32Len > len(msg)) {
         return (off, errBaseLen);
     }
-    return (off + uint32Len, default!);
+    return (off + (nint)uint32Len, default!);
 }
 
 // packText appends the wire format of field to msg.
@@ -2006,7 +2008,7 @@ internal static (slice<byte>, error) packText(slice<byte> msg, @string field) {
     if (l > 255) {
         return (default!, errStringTooLong);
     }
-    msg = append(msg, ((byte)l));
+    msg = append(msg, (byte)l);
     msg = append(msg, field.ꓸꓸꓸ);
     return (msg, default!);
 }
@@ -2016,7 +2018,7 @@ internal static (@string, nint, error) unpackText(slice<byte> msg, nint off) {
         return ("", off, errBaseLen);
     }
     nint beginOff = off + 1;
-    nint endOff = beginOff + ((nint)msg[off]);
+    nint endOff = beginOff + (nint)msg[off];
     if (endOff > len(msg)) {
         return ("", off, errCalcLen);
     }
@@ -2048,7 +2050,7 @@ internal static readonly UntypedInt nonEncodedNameMax = 254;
 
 // NewName creates a new Name from a string.
 public static (Name, error) NewName(@string name) {
-    var n = new Name(Length: ((uint8)len(name)));
+    var n = new Name(Length: (uint8)len(name));
     if (len(name) > len(n.Data)) {
         return (new Name(nil), errCalcLen);
     }
@@ -2060,7 +2062,7 @@ public static (Name, error) NewName(@string name) {
 public static Name MustNewName(@string name) {
     var (n, err) = NewName(name);
     if (err != default!) {
-        throw panic("creating name: "u8 + err.Error());
+        throw panic("creating name: " + err.Error());
     }
     return n;
 }
@@ -2095,24 +2097,24 @@ public static @string String(this Name n) {
     }
     // Allow root domain.
     if (n.Data[0] == (rune)'.' && n.Length == 1) {
-        return (append(msg, 0), default!);
+        return (append(msg, (byte)(0)), default!);
     }
     @string nameAsStr = default!;
     // Emit sequence of counted strings, chopping at dots.
-    for (nint i = 0;nint begin = 0; i < ((nint)n.Length); i++) {
+    for ((nint i, nint begin) = (0, 0); i < (nint)n.Length; i++) {
         // Check for the end of the segment.
         if (n.Data[i] == (rune)'.') {
             // The two most significant bits have special meaning.
             // It isn't allowed for segments to be long enough to
             // need them.
-            if (i - begin >= 1 << (int)(6)) {
+            if (i - begin >= (1 << (int)(6))) {
                 return (oldMsg, errSegTooLong);
             }
             // Segments must have a non-zero length.
             if (i - begin == 0) {
                 return (oldMsg, errZeroSegLen);
             }
-            msg = append(msg, ((byte)(i - begin)));
+            msg = append(msg, (byte)(i - begin));
             for (nint j = begin; j < i; j++) {
                 msg = append(msg, n.Data[j]);
             }
@@ -2124,26 +2126,26 @@ public static @string String(this Name n) {
         // bits set to 1 to indicate that it is a pointer.
         if ((i == 0 || n.Data[i - 1] == (rune)'.') && compression != default!) {
             {
-                var (ptr, ok) = compression[((@string)(n.Data[(int)(i)..(int)(n.Length)]))]; if (ok) {
+                var (ptr, ok) = compression[((@string)(n.Data[(int)(i)..(int)(n.Length)])), ꟷ]; if (ok) {
                     // Hit. Emit a pointer instead of the rest of
                     // the domain.
-                    return (append(msg, ((byte)((uint16)(ptr >> (int)(8) | 192))), ((byte)ptr)), default!);
+                    return (append(msg, (byte)((uint16)((ptr >> (int)(8)) | 0xC0)), (byte)ptr), default!);
                 }
             }
             // Miss. Add the suffix to the compression table if the
             // offset can be stored in the available 14 bits.
             nint newPtr = len(msg) - compressionOff;
-            if (newPtr <= ((nint)(~((uint16)0) >> (int)(2)))) {
+            if (newPtr <= (nint)((~(uint16)0 >> (int)(2)))) {
                 if (nameAsStr == ""u8) {
                     // allocate n.Data on the heap once, to avoid allocating it
                     // multiple times (for next labels).
                     nameAsStr = ((@string)(n.Data[..(int)(n.Length)]));
                 }
-                compression[nameAsStr[(int)(i)..]] = ((uint16)newPtr);
+                compression[nameAsStr[(int)(i)..]] = (uint16)newPtr;
             }
         }
     }
-    return (append(msg, 0), default!);
+    return (append(msg, (byte)(0)), default!);
 }
 
 // unpack unpacks a domain name.
@@ -2163,11 +2165,11 @@ Loop:
         if (currOff >= len(msg)) {
             return (off, errBaseLen);
         }
-        nint c = ((nint)msg[currOff]);
+        nint c = (nint)msg[currOff];
         currOff++;
-        switch ((nint)(c & 192)) {
-        case 0: {
-            if (c == 0) {
+        switch ((nint)(c & 0xC0)) {
+        case 0x00: {
+            if (c == 0x00) {
                 // String segment
                 // A zero length signals the end of the name.
                 goto break_Loop;
@@ -2184,11 +2186,11 @@ Loop:
                 }
             }
             name = append(name, msg[(int)(currOff)..(int)(endOff)].ꓸꓸꓸ);
-            name = append(name, (rune)'.');
+            name = append(name, (byte)((rune)'.'));
             currOff = endOff;
             break;
         }
-        case 192: {
+        case 0xC0: {
             if (currOff >= len(msg)) {
                 // Pointer
                 return (off, errInvalidPtr);
@@ -2204,7 +2206,7 @@ Loop:
                     return (off, errTooManyPtr);
                 }
             }
-            currOff = (nint)(((nint)(c ^ 192)) << (int)(8) | ((nint)c1));
+            currOff = (nint)((((nint)(c ^ 0xC0)) << (int)(8)) | (nint)c1);
             break;
         }
         default: {
@@ -2216,12 +2218,12 @@ continue_Loop:;
 break_Loop:;
     // Prefixes 0x80 and 0x40 are reserved.
     if (len(name) == 0) {
-        name = append(name, (rune)'.');
+        name = append(name, (byte)((rune)'.'));
     }
     if (len(name) > nonEncodedNameMax) {
         return (off, errNameTooLong);
     }
-    n.Length = ((uint8)len(name));
+    n.Length = (uint8)len(name);
     if (ptr == 0) {
         newOff = currOff;
     }
@@ -2238,11 +2240,11 @@ Loop:
         if (newOff >= len(msg)) {
             return (off, errBaseLen);
         }
-        nint c = ((nint)msg[newOff]);
+        nint c = (nint)msg[newOff];
         newOff++;
-        switch ((nint)(c & 192)) {
-        case 0: {
-            if (c == 0) {
+        switch ((nint)(c & 0xC0)) {
+        case 0x00: {
+            if (c == 0x00) {
                 // A zero length signals the end of the name.
                 goto break_Loop;
             }
@@ -2253,7 +2255,7 @@ Loop:
             }
             break;
         }
-        case 192: {
+        case 0xC0: {
             newOff++;
             goto break_Loop;
             break;
@@ -2281,9 +2283,9 @@ break_Loop:;
 
 // pack appends the wire format of the Question to msg.
 [GoRecv] internal static (slice<byte>, error) pack(this ref ΔQuestion q, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
-    (msg, err) = q.Name.pack(msg, compression, compressionOff);
+    (msg, var err) = q.Name.pack(msg, compression, compressionOff);
     if (err != default!) {
-        return (msg, new nestedError("Name", err));
+        return (msg, new nestedErrorжerror(Ꮡ(new nestedError("Name", err))));
     }
     msg = packType(msg, q.Type);
     return (packClass(msg, q.Class), default!);
@@ -2300,76 +2302,76 @@ internal static (ResourceBody, nint, error) unpackResourceBody(slice<byte> msg, 
     @string name = default!;
     var exprᴛ1 = hdr.Type;
     if (exprᴛ1 == TypeA) {
-        ref var rbΔ11 = ref heap(new ΔAResource(), out var ᏑrbΔ11);
+        ref var rb = ref heap(new ΔAResource(), out var Ꮡrb);
         (rb, err) = unpackAResource(msg, off);
-        Ꮡr = ~ᏑrbΔ11; r = ref Ꮡr.val;
+        r = new ΔAResourceжResourceBody(Ꮡrb);
         name = "A"u8;
     }
     else if (exprᴛ1 == TypeNS) {
-        ref var rbΔ12 = ref heap(new ΔNSResource(), out var ᏑrbΔ12);
+        ref var rb = ref heap(new ΔNSResource(), out var Ꮡrb);
         (rb, err) = unpackNSResource(msg, off);
-        Ꮡr = ~ᏑrbΔ12; r = ref Ꮡr.val;
+        r = new ΔNSResourceжResourceBody(Ꮡrb);
         name = "NS"u8;
     }
     else if (exprᴛ1 == TypeCNAME) {
-        ref var rbΔ13 = ref heap(new ΔCNAMEResource(), out var ᏑrbΔ13);
+        ref var rb = ref heap(new ΔCNAMEResource(), out var Ꮡrb);
         (rb, err) = unpackCNAMEResource(msg, off);
-        Ꮡr = ~ᏑrbΔ13; r = ref Ꮡr.val;
+        r = new ΔCNAMEResourceжResourceBody(Ꮡrb);
         name = "CNAME"u8;
     }
     else if (exprᴛ1 == TypeSOA) {
-        ref var rbΔ14 = ref heap(new ΔSOAResource(), out var ᏑrbΔ14);
+        ref var rb = ref heap(new ΔSOAResource(), out var Ꮡrb);
         (rb, err) = unpackSOAResource(msg, off);
-        Ꮡr = ~ᏑrbΔ14; r = ref Ꮡr.val;
+        r = new ΔSOAResourceжResourceBody(Ꮡrb);
         name = "SOA"u8;
     }
     else if (exprᴛ1 == TypePTR) {
-        ref var rbΔ15 = ref heap(new ΔPTRResource(), out var ᏑrbΔ15);
+        ref var rb = ref heap(new ΔPTRResource(), out var Ꮡrb);
         (rb, err) = unpackPTRResource(msg, off);
-        Ꮡr = ~ᏑrbΔ15; r = ref Ꮡr.val;
+        r = new ΔPTRResourceжResourceBody(Ꮡrb);
         name = "PTR"u8;
     }
     else if (exprᴛ1 == TypeMX) {
-        ref var rbΔ16 = ref heap(new ΔMXResource(), out var ᏑrbΔ16);
+        ref var rb = ref heap(new ΔMXResource(), out var Ꮡrb);
         (rb, err) = unpackMXResource(msg, off);
-        Ꮡr = ~ᏑrbΔ16; r = ref Ꮡr.val;
+        r = new ΔMXResourceжResourceBody(Ꮡrb);
         name = "MX"u8;
     }
     else if (exprᴛ1 == TypeTXT) {
-        ref var rbΔ17 = ref heap(new ΔTXTResource(), out var ᏑrbΔ17);
+        ref var rb = ref heap(new ΔTXTResource(), out var Ꮡrb);
         (rb, err) = unpackTXTResource(msg, off, hdr.Length);
-        Ꮡr = ~ᏑrbΔ17; r = ref Ꮡr.val;
+        r = new ΔTXTResourceжResourceBody(Ꮡrb);
         name = "TXT"u8;
     }
     else if (exprᴛ1 == TypeAAAA) {
-        ref var rbΔ18 = ref heap(new ΔAAAAResource(), out var ᏑrbΔ18);
+        ref var rb = ref heap(new ΔAAAAResource(), out var Ꮡrb);
         (rb, err) = unpackAAAAResource(msg, off);
-        Ꮡr = ~ᏑrbΔ18; r = ref Ꮡr.val;
+        r = new ΔAAAAResourceжResourceBody(Ꮡrb);
         name = "AAAA"u8;
     }
     else if (exprᴛ1 == TypeSRV) {
-        ref var rbΔ19 = ref heap(new ΔSRVResource(), out var ᏑrbΔ19);
+        ref var rb = ref heap(new ΔSRVResource(), out var Ꮡrb);
         (rb, err) = unpackSRVResource(msg, off);
-        Ꮡr = ~ᏑrbΔ19; r = ref Ꮡr.val;
+        r = new ΔSRVResourceжResourceBody(Ꮡrb);
         name = "SRV"u8;
     }
     else if (exprᴛ1 == TypeOPT) {
-        ref var rbΔ20 = ref heap(new ΔOPTResource(), out var ᏑrbΔ20);
+        ref var rb = ref heap(new ΔOPTResource(), out var Ꮡrb);
         (rb, err) = unpackOPTResource(msg, off, hdr.Length);
-        Ꮡr = ~ᏑrbΔ20; r = ref Ꮡr.val;
+        r = new ΔOPTResourceжResourceBody(Ꮡrb);
         name = "OPT"u8;
     }
     else { /* default: */
         ref var rb = ref heap(new ΔUnknownResource(), out var Ꮡrb);
         (rb, err) = unpackUnknownResource(hdr.Type, msg, off, hdr.Length);
-        Ꮡr = ~Ꮡrb; r = ref Ꮡr.val;
+        r = new ΔUnknownResourceжResourceBody(Ꮡrb);
         name = "Unknown"u8;
     }
 
     if (err != default!) {
-        return (default!, off, new nestedError(name + " record"u8, err));
+        return (default!, off, new nestedErrorжerror(Ꮡ(new nestedError(name + " record", err))));
     }
-    return (r, off + ((nint)hdr.Length), default!);
+    return (r, off + (nint)hdr.Length, default!);
 }
 
 // A CNAMEResource is a CNAME Resource record.
@@ -2415,9 +2417,9 @@ internal static (ΔCNAMEResource, error) unpackCNAMEResource(slice<byte> msg, ni
 [GoRecv] internal static (slice<byte>, error) pack(this ref ΔMXResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     var oldMsg = msg;
     msg = packUint16(msg, r.Pref);
-    (msg, err) = r.MX.pack(msg, compression, compressionOff);
+    (msg, var err) = r.MX.pack(msg, compression, compressionOff);
     if (err != default!) {
-        return (oldMsg, new nestedError("MXResource.MX", err));
+        return (oldMsg, new nestedErrorжerror(Ꮡ(new nestedError("MXResource.MX", err))));
     }
     return (msg, default!);
 }
@@ -2428,14 +2430,14 @@ internal static (ΔCNAMEResource, error) unpackCNAMEResource(slice<byte> msg, ni
 }
 
 internal static (ΔMXResource, error) unpackMXResource(slice<byte> msg, nint off) {
-    var (pref, off, err) = unpackUint16(msg, off);
+    (var pref, off, var err) = unpackUint16(msg, off);
     if (err != default!) {
-        return (new ΔMXResource(nil), new nestedError("Pref", err));
+        return (new ΔMXResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Pref", err))));
     }
     Name mx = default!;
     {
         var (_, errΔ1) = mx.unpack(msg, off); if (errΔ1 != default!) {
-            return (new ΔMXResource(nil), new nestedError("MX", errΔ1));
+            return (new ΔMXResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("MX", errΔ1))));
         }
     }
     return (new ΔMXResource(pref, mx), default!);
@@ -2520,13 +2522,13 @@ internal static (ΔPTRResource, error) unpackPTRResource(slice<byte> msg, nint o
 // pack appends the wire format of the SOAResource to msg.
 [GoRecv] internal static (slice<byte>, error) pack(this ref ΔSOAResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     var oldMsg = msg;
-    (msg, err) = r.NS.pack(msg, compression, compressionOff);
+    (msg, var err) = r.NS.pack(msg, compression, compressionOff);
     if (err != default!) {
-        return (oldMsg, new nestedError("SOAResource.NS", err));
+        return (oldMsg, new nestedErrorжerror(Ꮡ(new nestedError("SOAResource.NS", err))));
     }
     (msg, err) = r.MBox.pack(msg, compression, compressionOff);
     if (err != default!) {
-        return (oldMsg, new nestedError("SOAResource.MBox", err));
+        return (oldMsg, new nestedErrorжerror(Ꮡ(new nestedError("SOAResource.MBox", err))));
     }
     msg = packUint32(msg, r.Serial);
     msg = packUint32(msg, r.Refresh);
@@ -2542,35 +2544,35 @@ internal static (ΔPTRResource, error) unpackPTRResource(slice<byte> msg, nint o
 
 internal static (ΔSOAResource, error) unpackSOAResource(slice<byte> msg, nint off) {
     Name ns = default!;
-    (off, err) = ns.unpack(msg, off);
+    (off, var err) = ns.unpack(msg, off);
     if (err != default!) {
-        return (new ΔSOAResource(nil), new nestedError("NS", err));
+        return (new ΔSOAResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("NS", err))));
     }
     Name mbox = default!;
     {
         (off, err) = mbox.unpack(msg, off); if (err != default!) {
-            return (new ΔSOAResource(nil), new nestedError("MBox", err));
+            return (new ΔSOAResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("MBox", err))));
         }
     }
-    var (serial, off, err) = unpackUint32(msg, off);
+    (var serial, off, err) = unpackUint32(msg, off);
     if (err != default!) {
-        return (new ΔSOAResource(nil), new nestedError("Serial", err));
+        return (new ΔSOAResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Serial", err))));
     }
-    var (refresh, off, err) = unpackUint32(msg, off);
+    (var refresh, off, err) = unpackUint32(msg, off);
     if (err != default!) {
-        return (new ΔSOAResource(nil), new nestedError("Refresh", err));
+        return (new ΔSOAResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Refresh", err))));
     }
-    var (retry, off, err) = unpackUint32(msg, off);
+    (var retry, off, err) = unpackUint32(msg, off);
     if (err != default!) {
-        return (new ΔSOAResource(nil), new nestedError("Retry", err));
+        return (new ΔSOAResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Retry", err))));
     }
-    var (expire, off, err) = unpackUint32(msg, off);
+    (var expire, off, err) = unpackUint32(msg, off);
     if (err != default!) {
-        return (new ΔSOAResource(nil), new nestedError("Expire", err));
+        return (new ΔSOAResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Expire", err))));
     }
-    var (minTTL, _, err) = unpackUint32(msg, off);
+    (var minTTL, _, err) = unpackUint32(msg, off);
     if (err != default!) {
-        return (new ΔSOAResource(nil), new nestedError("MinTTL", err));
+        return (new ΔSOAResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("MinTTL", err))));
     }
     return (new ΔSOAResource(ns, mbox, serial, refresh, retry, expire, minTTL), default!);
 }
@@ -2612,19 +2614,19 @@ internal static (ΔSOAResource, error) unpackSOAResource(slice<byte> msg, nint o
 
 internal static (ΔTXTResource, error) unpackTXTResource(slice<byte> msg, nint off, uint16 length) {
     var txts = new slice<@string>(0, 1);
-    for (var n = ((uint16)0); n < length; ) {
+    for (var n = (uint16)0; n < length; ) {
         @string t = default!;
         error err = default!;
         {
             (t, off, err) = unpackText(msg, off); if (err != default!) {
-                return (new ΔTXTResource(nil), new nestedError("text", err));
+                return (new ΔTXTResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("text", err))));
             }
         }
         // Check if we got too many bytes.
-        if (length - n < ((uint16)len(t)) + 1) {
+        if (length - n < (uint16)len(t) + 1) {
             return (new ΔTXTResource(nil), errCalcLen);
         }
-        n += ((uint16)len(t)) + 1;
+        n += (uint16)((uint16)len(t) + 1);
         txts = append(txts, t);
     }
     return (new ΔTXTResource(txts), default!);
@@ -2648,9 +2650,9 @@ internal static (ΔTXTResource, error) unpackTXTResource(slice<byte> msg, nint o
     msg = packUint16(msg, r.Priority);
     msg = packUint16(msg, r.Weight);
     msg = packUint16(msg, r.Port);
-    (msg, err) = r.Target.pack(msg, default!, compressionOff);
+    (msg, var err) = r.Target.pack(msg, default!, compressionOff);
     if (err != default!) {
-        return (oldMsg, new nestedError("SRVResource.Target", err));
+        return (oldMsg, new nestedErrorжerror(Ꮡ(new nestedError("SRVResource.Target", err))));
     }
     return (msg, default!);
 }
@@ -2661,22 +2663,22 @@ internal static (ΔTXTResource, error) unpackTXTResource(slice<byte> msg, nint o
 }
 
 internal static (ΔSRVResource, error) unpackSRVResource(slice<byte> msg, nint off) {
-    var (priority, off, err) = unpackUint16(msg, off);
+    (var priority, off, var err) = unpackUint16(msg, off);
     if (err != default!) {
-        return (new ΔSRVResource(nil), new nestedError("Priority", err));
+        return (new ΔSRVResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Priority", err))));
     }
-    var (weight, off, err) = unpackUint16(msg, off);
+    (var weight, off, err) = unpackUint16(msg, off);
     if (err != default!) {
-        return (new ΔSRVResource(nil), new nestedError("Weight", err));
+        return (new ΔSRVResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Weight", err))));
     }
-    var (port, off, err) = unpackUint16(msg, off);
+    (var port, off, err) = unpackUint16(msg, off);
     if (err != default!) {
-        return (new ΔSRVResource(nil), new nestedError("Port", err));
+        return (new ΔSRVResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Port", err))));
     }
     Name target = default!;
     {
         var (_, errΔ1) = target.unpack(msg, off); if (errΔ1 != default!) {
-            return (new ΔSRVResource(nil), new nestedError("Target", errΔ1));
+            return (new ΔSRVResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Target", errΔ1))));
         }
     }
     return (new ΔSRVResource(priority, weight, port, target), default!);
@@ -2769,7 +2771,7 @@ internal static (ΔAAAAResource, error) unpackAAAAResource(slice<byte> msg, nint
 [GoRecv] internal static (slice<byte>, error) pack(this ref ΔOPTResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     foreach (var (_, opt) in r.Options) {
         msg = packUint16(msg, opt.Code);
-        var l = ((uint16)len(opt.Data));
+        var l = (uint16)len(opt.Data);
         msg = packUint16(msg, l);
         msg = packBytes(msg, opt.Data);
     }
@@ -2783,7 +2785,9 @@ internal static (ΔAAAAResource, error) unpackAAAAResource(slice<byte> msg, nint
         return s + "}}"u8;
     }
     s += r.Options[0].GoString();
-    foreach (var (_, o) in r.Options[1..]) {
+    foreach (var (_, vᴛ1) in r.Options[1..]) {
+        var o = vᴛ1;
+
         s += ", "u8 + o.GoString();
     }
     return s + "}}"u8;
@@ -2791,23 +2795,23 @@ internal static (ΔAAAAResource, error) unpackAAAAResource(slice<byte> msg, nint
 
 internal static (ΔOPTResource, error) unpackOPTResource(slice<byte> msg, nint off, uint16 length) {
     slice<Option> opts = default!;
-    for (nint oldOff = off; off < oldOff + ((nint)length); ) {
+    for (nint oldOff = off; off < oldOff + (nint)length; ) {
         error err = default!;
         Option o = default!;
         (o.Code, off, err) = unpackUint16(msg, off);
         if (err != default!) {
-            return (new ΔOPTResource(nil), new nestedError("Code", err));
+            return (new ΔOPTResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Code", err))));
         }
         uint16 l = default!;
         (l, off, err) = unpackUint16(msg, off);
         if (err != default!) {
-            return (new ΔOPTResource(nil), new nestedError("Data", err));
+            return (new ΔOPTResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Data", err))));
         }
         o.Data = new slice<byte>(l);
-        if (copy(o.Data, msg[(int)(off)..]) != ((nint)l)) {
-            return (new ΔOPTResource(nil), new nestedError("Data", errCalcLen));
+        if (copy(o.Data, msg[(int)(off)..]) != (nint)l) {
+            return (new ΔOPTResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("Data", errCalcLen))));
         }
-        off += ((nint)l);
+        off += (nint)l;
         opts = append(opts, o);
     }
     return (new ΔOPTResource(opts), default!);

@@ -9,10 +9,12 @@ namespace go.net;
 */
 using fmt = fmt_package;
 using template = html.template_package;
-using http = net.http_package;
+using Δhttp = global::go.net.http_package;
 using slices = slices_package;
 using strings = strings_package;
+using global::go.net;
 using html;
+using io = io_package;
 
 partial class rpc_package {
 
@@ -38,12 +40,13 @@ internal static readonly @string debugText = """
 	</html>
 """u8;
 
-internal static ж<template.Template> debug = template.Must(template.New("RPC debug"u8).Parse(debugText));
+internal static (ж<template.Template>, error) tupleᴛ1ʗ = template.New("RPC debug"u8).Parse(debugText);
+internal static ж<template.Template> debug = template.Must(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2);
 
 // If set, print log statements for internal and I/O errors.
 internal static bool debugLog = false;
 
-[GoType] partial struct debugMethod {
+[GoType] public partial struct debugMethod {
     public ж<methodType> Type;
     public @string Name;
 }
@@ -87,30 +90,26 @@ internal static void Swap(this methodArray m, nint i, nint j) {
 }
 
 // Runs at /debug/rpc
-internal static void ServeHTTP(this debugHTTP server, http.ResponseWriter w, ж<http.Request> Ꮡreq) {
-    ref var req = ref Ꮡreq.val;
+internal static void ServeHTTP(this debugHTTP server, Δhttp.ResponseWriter w, ж<Δhttp.Request> Ꮡreq) {
+    ref var req = ref Ꮡreq.Value;
 
     // Build a sorted version of the data.
-    serviceArray services = default!;
-    server.serviceMap.Range(
-    var servicesʗ2 = services;
-    (any snamei, any svci) => {
-        var svc = svci._<service.val>();
+    ref var services = ref heap<serviceArray>(out var Ꮡservices);
+    Ꮡ(server).of(debugHTTP.ᏑserviceMap).Range((any snamei, any svci) => {
+        var svc = svci._<ж<service>>();
         ref var ds = ref heap<debugService>(out var Ꮡds);
         ds = new debugService(svc, snamei._<@string>(), new slice<debugMethod>(0, len((~svc).method)));
         foreach (var (mname, method) in (~svc).method) {
             ds.Method = append(ds.Method, new debugMethod(method, mname));
         }
-        slices.SortFunc(ds.Method, 
-        (debugMethod a, debugMethod b) => strings.Compare(a.Name, b.Name));
-        services = append(services, ds);
+        slices.SortFunc(ds.Method, (debugMethod a, debugMethod b) => strings.Compare(a.Name, b.Name));
+        Ꮡservices.ValueSlot = append(Ꮡservices.ValueSlot, ds);
         return true;
     });
-    slices.SortFunc(services, 
-    (debugService a, debugService b) => strings.Compare(a.Name, b.Name));
-    var err = debug.Execute(w, services);
+    slices.SortFunc(services, (debugService a, debugService b) => strings.Compare(a.Name, b.Name));
+    var err = debug.Execute(new http_ResponseWriterᴠWriter(w), services);
     if (err != default!) {
-        fmt.Fprintln(w, "rpc: error executing template:", err.Error());
+        fmt.Fprintln(new http_ResponseWriterᴠWriter(w), "rpc: error executing template:", err.Error());
     }
 }
 

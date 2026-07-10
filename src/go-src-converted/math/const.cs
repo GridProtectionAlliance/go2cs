@@ -48,28 +48,23 @@ internal static readonly UntypedInt intSize = /* 32 << (^uint(0) >> 63) */ 64; /
 
 public static readonly UntypedInt MaxInt = /* 1<<(intSize-1) - 1 */ 9223372036854775807; // MaxInt32 or MaxInt64 depending on intSize.
 
-public static readonly GoUntyped MinInt = /* -1 << (intSize - 1) */ // MinInt32 or MinInt64 depending on intSize.
-    GoUntyped.Parse("-9223372036854775808");
+public static readonly UntypedInt MinInt = /* -1 << (intSize - 1) */ -9223372036854775808; // MinInt32 or MinInt64 depending on intSize.
 
 public static readonly UntypedInt MaxInt8 = /* 1<<7 - 1 */ 127; // 127
 
-public static readonly GoUntyped MinInt8 = /* -1 << 7 */            // -128
-    GoUntyped.Parse("-128");
+public static readonly UntypedInt MinInt8 = /* -1 << 7 */ -128; // -128
 
 public static readonly UntypedInt MaxInt16 = /* 1<<15 - 1 */ 32767; // 32767
 
-public static readonly GoUntyped MinInt16 = /* -1 << 15 */           // -32768
-    GoUntyped.Parse("-32768");
+public static readonly UntypedInt MinInt16 = /* -1 << 15 */ -32768; // -32768
 
 public static readonly UntypedInt MaxInt32 = /* 1<<31 - 1 */ 2147483647; // 2147483647
 
-public static readonly GoUntyped MinInt32 = /* -1 << 31 */           // -2147483648
-    GoUntyped.Parse("-2147483648");
+public static readonly UntypedInt MinInt32 = /* -1 << 31 */ -2147483648; // -2147483648
 
 public static readonly UntypedInt MaxInt64 = /* 1<<63 - 1 */ 9223372036854775807; // 9223372036854775807
 
-public static readonly GoUntyped MinInt64 = /* -1 << 63 */           // -9223372036854775808
-    GoUntyped.Parse("-9223372036854775808");
+public static readonly UntypedInt MinInt64 = /* -1 << 63 */ -9223372036854775808; // -9223372036854775808
 
 public static readonly UntypedInt MaxUint = /* 1<<intSize - 1 */ 18446744073709551615; // MaxUint32 or MaxUint64 depending on intSize.
 

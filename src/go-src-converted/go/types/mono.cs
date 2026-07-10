@@ -5,9 +5,11 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using ast = go.ast_package;
-using token = go.token_package;
-using static @internal.types.errors_package;
+using ast = global::go.go.ast_package;
+using token = global::go.go.token_package;
+using static global::go.@internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
+using global::go.go;
 
 partial class types_package {
 
@@ -54,7 +56,7 @@ partial class types_package {
     internal slice<monoEdge> edges;
     // canon maps method receiver type parameters to their respective
     // receiver type's type parameters.
-    internal types.TypeParam canon;
+    internal map<ж<TypeParam>, ж<TypeParam>> canon;
     // nameIdx maps a defined type or (canonical) type parameter to its
     // vertex index.
     internal map<ж<TypeName>, nint> nameIdx;
@@ -70,14 +72,15 @@ partial class types_package {
 }
 
 [GoType] partial struct monoEdge {
-    internal nint dst;
-    internal nint src;
+    internal nint dst, src;
     internal nint weight;
-    internal go.token_package.ΔPos pos;
+    internal tokenꓸPos pos;
     internal ΔType typ;
 }
 
-[GoRecv] internal static void monomorph(this ref Checker check) {
+internal static void monomorph(this ж<Checker> Ꮡcheck) {
+    ref var check = ref Ꮡcheck.Value;
+
     // We detect unbounded instantiation cycles using a variant of
     // Bellman-Ford's algorithm. Namely, instead of always running |V|
     // iterations, we run until we either reach a fixed point or we've
@@ -95,19 +98,21 @@ partial class types_package {
             if (w <= (~dst).weight) {
                 continue;
             }
-            dst.val.pre = i;
-            dst.val.len = (~src).len + 1;
+            dst.Value.pre = i;
+            dst.Value.len = (~src).len + 1;
             if ((~dst).len == len(check.mono.vertices)) {
-                check.reportInstanceLoop(edge.dst);
+                Ꮡcheck.reportInstanceLoop(edge.dst);
                 return;
             }
-            dst.val.weight = w;
+            dst.Value.weight = w;
             again = true;
         }
     }
 }
 
-[GoRecv] internal static void reportInstanceLoop(this ref Checker check, nint v) {
+internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
+    ref var check = ref Ꮡcheck.Value;
+
     slice<nint> stack = default!;
     var seen = new slice<bool>(len(check.mono.vertices));
     // We have a path that contains a cycle and ends at v, but v may
@@ -126,26 +131,25 @@ partial class types_package {
         stack = stack[1..];
     }
     // TODO(mdempsky): Pivot stack so we report the cycle from the top?
-    var err = check.newError(InvalidInstanceCycle);
+    var err = Ꮡcheck.newError(InvalidInstanceCycle);
     var obj0 = check.mono.vertices[v].obj;
-    err.addf(~obj0, "instantiation cycle:"u8);
+    err.addf(new TypeNameжpositioner(obj0), "instantiation cycle:"u8);
     var qf = RelativeTo(check.pkg);
     foreach (var (_, vΔ1) in stack) {
         var edge = check.mono.edges[check.mono.vertices[vΔ1].pre];
         var obj = check.mono.vertices[edge.dst].obj;
-        switch (obj.Type().type()) {
+        switch (obj.of(TypeName.Ꮡobject).Type().type()) {
         default: {
-
             throw panic("unexpected type");
             break;
         }
-        case Named.val : {
-            err.addf(((atPos)edge.pos), "%s implicitly parameterized by %s"u8, obj.Name(), TypeString(edge.typ, qf));
+        case ж<Named>: {
+            err.addf(((atPos)edge.pos), "%s implicitly parameterized by %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf));
             break;
         }
-        case TypeParam.val : {
+        case ж<TypeParam>: {
             err.addf(((atPos)edge.pos), // secondary error, \t indented
- "%s instantiated as %s"u8, obj.Name(), TypeString(edge.typ, qf));
+ "%s instantiated as %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf));
             break;
         }}
 
@@ -157,33 +161,35 @@ partial class types_package {
 // recordCanon records that tpar is the canonical type parameter
 // corresponding to method type parameter mpar.
 [GoRecv] internal static void recordCanon(this ref monoGraph w, ж<TypeParam> Ꮡmpar, ж<TypeParam> Ꮡtpar) {
-    ref var mpar = ref Ꮡmpar.val;
-    ref var tpar = ref Ꮡtpar.val;
+    ref var mpar = ref Ꮡmpar.Value;
+    ref var tpar = ref Ꮡtpar.Value;
 
     if (w.canon == default!) {
-        w.canon = new types.TypeParam();
+        w.canon = new map<ж<TypeParam>, ж<TypeParam>>();
     }
-    w.canon[mpar] = tpar;
+    w.canon[Ꮡmpar] = Ꮡtpar;
 }
 
 // recordInstance records that the given type parameters were
 // instantiated with the corresponding type arguments.
-[GoRecv] internal static void recordInstance(this ref monoGraph w, ж<Package> Ꮡpkg, tokenꓸPos pos, slice<ж<TypeParam>> tparams, slice<ΔType> targs, slice<ast.Expr> xlist) {
-    ref var pkg = ref Ꮡpkg.val;
+internal static void recordInstance(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, tokenꓸPos pos, slice<ж<TypeParam>> tparams, slice<ΔType> targs, slice<ast.Expr> xlist) {
+    ref var w = ref Ꮡw.Value;
+    ref var pkg = ref Ꮡpkg.Value;
 
     foreach (var (i, tpar) in tparams) {
         tokenꓸPos posΔ1 = pos;
         if (i < len(xlist)) {
             posΔ1 = startPos(xlist[i]);
         }
-        w.assign(Ꮡpkg, posΔ1, tpar, targs[i]);
+        Ꮡw.assign(Ꮡpkg, posΔ1, tpar, targs[i]);
     }
 }
 
 // assign records that tpar was instantiated as targ at pos.
-[GoRecv] internal static void assign(this ref monoGraph w, ж<Package> Ꮡpkg, tokenꓸPos pos, ж<TypeParam> Ꮡtpar, ΔType targ) {
-    ref var pkg = ref Ꮡpkg.val;
-    ref var tpar = ref Ꮡtpar.val;
+internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, tokenꓸPos pos, ж<TypeParam> Ꮡtpar, ΔType targ) {
+    ref var w = ref Ꮡw.Value;
+    ref var pkg = ref Ꮡpkg.DerefOrNil();
+    ref var tpar = ref Ꮡtpar.Value;
 
     // Go generics do not have an analog to C++`s template-templates,
     // where a template parameter can itself be an instantiable
@@ -193,7 +199,7 @@ partial class types_package {
     //
     // TODO(mdempsky): Push this check up into recordInstance? All type
     // parameters in a list will appear in the same package.
-    if (tpar.Obj().Pkg() != Ꮡpkg) {
+    if (tpar.Obj().of(TypeName.Ꮡobject).Pkg() != Ꮡpkg) {
         return;
     }
     // flow adds an edge from vertex src representing that typ flows to tpar.
@@ -202,84 +208,83 @@ partial class types_package {
         if (AreEqual(typ, targ)) {
             weight = 0;
         }
-        w.addEdge(w.typeParamVertex(Ꮡtpar), src, weight, pos, targ);
+        Ꮡw.Value.addEdge(Ꮡw.Value.typeParamVertex(Ꮡtpar), src, weight, pos, targ);
     };
     // Recursively walk the type argument to find any defined types or
     // type parameters.
     Action<ΔType> @do = default!;
-    @do = 
     var doʗ1 = @do;
     var flowʗ1 = flow;
-    (ΔType typ) => {
-        switch (Unalias(typ).type()) {
+    @do = (ΔType typ) => {
+        var switchᴛ11 = Unalias(typ);
+        switch (switchᴛ11.type()) {
         default: {
-            var typ = Unalias(typ).type();
+            var typΔ1 = switchᴛ11;
             throw panic("unexpected type");
             break;
         }
-        case TypeParam.val typ: {
-            assert(typ.Obj().Pkg() == Ꮡpkg);
-            flowʗ1(w.typeParamVertex(typ), ~typ);
+        case ж<TypeParam> typΔ1: {
+            assert(typΔ1.Obj().of(TypeName.Ꮡobject).Pkg() == Ꮡpkg);
+            flowʗ1(Ꮡw.Value.typeParamVertex(typΔ1), new TypeParamжΔType(typΔ1));
             break;
         }
-        case Named.val typ: {
+        case ж<Named> typΔ1: {
             {
-                nint src = w.localNamedVertex(Ꮡpkg, typ.Origin()); if (src >= 0) {
-                    flowʗ1(src, ~typ);
+                nint src = Ꮡw.Value.localNamedVertex(Ꮡpkg, typΔ1.Origin()); if (src >= 0) {
+                    flowʗ1(src, new NamedжΔType(typΔ1));
                 }
             }
-            var targs = typ.TypeArgs();
+            var targs = typΔ1.TypeArgs();
             for (nint i = 0; i < targs.Len(); i++) {
                 doʗ1(targs.At(i));
             }
             break;
         }
-        case Array.val typ: {
-            doʗ1(typ.Elem());
+        case ж<Array> typΔ1: {
+            doʗ1(typΔ1.Elem());
             break;
         }
-        case Basic.val typ: {
+        case ж<Basic> typΔ1: {
             break;
         }
-        case Chan.val typ: {
-            doʗ1(typ.Elem());
+        case ж<Chan> typΔ1: {
+            doʗ1(typΔ1.Elem());
             break;
         }
-        case Map.val typ: {
-            doʗ1(typ.Key());
-            doʗ1(typ.Elem());
+        case ж<Map> typΔ1: {
+            doʗ1(typΔ1.Key());
+            doʗ1(typΔ1.Elem());
             break;
         }
-        case Pointer.val typ: {
-            doʗ1(typ.Elem());
+        case ж<Pointer> typΔ1: {
+            doʗ1(typΔ1.Elem());
             break;
         }
-        case Slice.val typ: {
-            doʗ1(typ.Elem());
+        case ж<Slice> typΔ1: {
+            doʗ1(typΔ1.Elem());
             break;
         }
-        case Interface.val typ: {
-            for (nint i = 0; i < typ.NumMethods(); i++) {
+        case ж<Interface> typΔ1: {
+            for (nint i = 0; i < typΔ1.NumMethods(); i++) {
                 // ok
-                doʗ1(typ.Method(i).Type());
+                doʗ1(typΔ1.Method(i).of(Func.Ꮡobject).Type());
             }
             break;
         }
-        case ΔSignature.val typ: {
-            var tuple = 
-            var doʗ2 = @do;
-            (ж<Tuple> tup) => {
+        case ж<ΔSignature> typΔ1: {
+            var doʗ2 = doʗ1;
+            var tuple = (ж<Tuple> tup) => {
                 for (nint i = 0; i < tup.Len(); i++) {
-                    doʗ2(tup.At(i).Type());
+                    doʗ2(tup.At(i).of(Var.Ꮡobject).Type());
                 }
             };
-            tuple(typ.Params());
-            tuple(typ.Results());
+            tuple(typΔ1.Params());
+            tuple(typΔ1.Results());
             break;
         }
-        case Struct.val typ: {
-            for (nint i = 0; i < typ.NumFields(); i++) {
-                @do(typ.Field(i).Type());
+        case ж<Struct> typΔ1: {
+            for (nint i = 0; i < typΔ1.NumFields(); i++) {
+                doʗ1(typΔ1.Field(i).of(Var.Ꮡobject).Type());
             }
             break;
         }}
@@ -290,39 +295,38 @@ partial class types_package {
 // localNamedVertex returns the index of the vertex representing
 // named, or -1 if named doesn't need representation.
 [GoRecv] internal static nint localNamedVertex(this ref monoGraph w, ж<Package> Ꮡpkg, ж<Named> Ꮡnamed) {
-    ref var pkg = ref Ꮡpkg.val;
-    ref var named = ref Ꮡnamed.val;
+    ref var pkg = ref Ꮡpkg.DerefOrNil();
+    ref var named = ref Ꮡnamed.Value;
 
     var obj = named.Obj();
-    if (obj.Pkg() != Ꮡpkg) {
+    if (obj.of(TypeName.Ꮡobject).Pkg() != Ꮡpkg) {
         return -1;
     }
     // imported type
-    var root = pkg.Scope();
-    if (obj.Parent() == root) {
+    var root = Ꮡpkg.Scope();
+    if (obj.of(TypeName.Ꮡobject).Parent() == root) {
         return -1;
     }
     // package scope, no ambient type parameters
     {
-        nint idxΔ1 = w.nameIdx[obj];
-        var ok = w.nameIdx[obj]; if (ok) {
+        var (idxΔ1, ok) = w.nameIdx[obj, ꟷ]; if (ok) {
             return idxΔ1;
         }
     }
     nint idx = -1;
     // Walk the type definition's scope to find any ambient type
     // parameters that it's implicitly parameterized by.
-    for (var scope = obj.Parent(); scope != root; scope = scope.Parent()) {
+    for (var scope = obj.of(TypeName.Ꮡobject).Parent(); scope != root; scope = scope.Parent()) {
         foreach (var (_, elem) in (~scope).elems) {
             {
-                var (elemΔ1, ok) = elem._<TypeName.val>(ᐧ); if (ok && !elemΔ1.IsAlias() && cmpPos(elemΔ1.Pos(), obj.Pos()) < 0) {
+                var (elemΔ1, ok) = elem._<ж<TypeName>>(ᐧ); if (ok && !elemΔ1.IsAlias() && cmpPos(elemΔ1.of(TypeName.Ꮡobject).Pos(), obj.of(TypeName.Ꮡobject).Pos()) < 0) {
                     {
-                        var (tpar, okΔ1) = elem.Type()._<TypeParam.val>(ᐧ); if (okΔ1) {
+                        var (tpar, okΔ1) = elemΔ1.of(TypeName.Ꮡobject).Type()._<ж<TypeParam>>(ᐧ); if (okΔ1) {
                             if (idx < 0) {
                                 idx = len(w.vertices);
                                 w.vertices = append(w.vertices, new monoVertex(obj: obj));
                             }
-                            w.addEdge(idx, w.typeParamVertex(tpar), 1, obj.Pos(), ~tpar);
+                            w.addEdge(idx, w.typeParamVertex(tpar), 1, obj.of(TypeName.Ꮡobject).Pos(), new TypeParamжΔType(tpar));
                         }
                     }
                 }
@@ -338,18 +342,16 @@ partial class types_package {
 
 // typeParamVertex returns the index of the vertex representing tpar.
 [GoRecv] internal static nint typeParamVertex(this ref monoGraph w, ж<TypeParam> Ꮡtpar) {
-    ref var tpar = ref Ꮡtpar.val;
+    ref var tpar = ref Ꮡtpar.Value;
 
     {
-        var x = w.canon[tpar];
-        var ok = w.canon[tpar]; if (ok) {
-            tpar = x;
+        var (x, ok) = w.canon[Ꮡtpar, ꟷ]; if (ok) {
+            Ꮡtpar = x; tpar = ref Ꮡtpar.Value;
         }
     }
     var obj = tpar.Obj();
     {
-        nint idxΔ1 = w.nameIdx[obj];
-        var ok = w.nameIdx[obj]; if (ok) {
+        var (idxΔ1, ok) = w.nameIdx[obj, ꟷ]; if (ok) {
             return idxΔ1;
         }
     }

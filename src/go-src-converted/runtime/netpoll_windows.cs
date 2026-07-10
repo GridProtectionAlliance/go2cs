@@ -11,9 +11,9 @@ using @internal.runtime;
 
 partial class runtime_package {
 
-internal static readonly UntypedInt _DWORD_MAX = /* 0xffffffff */ 4294967295;
+internal static readonly UntypedInt _DWORD_MAX = 0xffffffff;
 
-internal const uintptr _INVALID_HANDLE_VALUE = /* ^uintptr(0) */ 18446744073709551615;
+internal static readonly uintptr _INVALID_HANDLE_VALUE = /* ^uintptr(0) */ unchecked((uintptr)18446744073709551615);
 
 // Sources are used to identify the event that created an overlapped entry.
 // The source values are arbitrary. There is no risk of collision with user
@@ -31,25 +31,25 @@ internal static readonly UntypedInt sourceMasks = /* 1<<sourceBits - 1 */ 15;
 // packNetpollKey creates a key from a source and a tag.
 // Bits that don't fit in the result are discarded.
 internal static uintptr packNetpollKey(uint8 source, ж<pollDesc> Ꮡpd) {
-    ref var pd = ref Ꮡpd.val;
+    ref var pd = ref Ꮡpd.Value;
 
     // TODO: Consider combining the source with pd.fdseq to detect stale pollDescs.
-    if (source > (1 << (int)(sourceBits)) - 1) {
+    if (source > ((1 << (int)(sourceBits))) - 1) {
         // Also fail on 64-bit systems, even though it can hold more bits.
         @throw("runtime: source value is too large"u8);
     }
     if (goarch.PtrSize == 4) {
-        return (uintptr)(((uintptr)new @unsafe.Pointer(Ꮡpd)) << (int)(sourceBits) | ((uintptr)source));
+        return (uintptr)(((uintptr)new @unsafe.Pointer(Ꮡpd) << (int)(sourceBits)) | (uintptr)source);
     }
-    return ((uintptr)taggedPointerPack(new @unsafe.Pointer(Ꮡpd), ((uintptr)source)));
+    return (uintptr)(uint64)taggedPointerPack(new @unsafe.Pointer(Ꮡpd), (uintptr)source);
 }
 
 // unpackNetpollSource returns the source packed key.
 internal static uint8 unpackNetpollSource(uintptr key) {
     if (goarch.PtrSize == 4) {
-        return ((uint8)((uintptr)(key & sourceMasks)));
+        return (uint8)((uintptr)(key & (uintptr)sourceMasks));
     }
-    return ((uint8)((taggedPointer)key).tag());
+    return (uint8)((taggedPointer)(uint64)key).tag();
 }
 
 // pollOperation must be the same as beginning of internal/poll.operation.
@@ -66,7 +66,7 @@ internal static uint8 unpackNetpollSource(uintptr key) {
 // e. It can return nil if the entry is not from internal/poll.
 // See go.dev/issue/58870
 internal static ж<pollOperation> pollOperationFromOverlappedEntry(ж<overlappedEntry> Ꮡe) {
-    ref var e = ref Ꮡe.val;
+    ref var e = ref Ꮡe.Value;
 
     if (e.ov == nil) {
         return default!;
@@ -75,9 +75,9 @@ internal static ж<pollOperation> pollOperationFromOverlappedEntry(ж<overlapped
     // Check that the key matches the pollDesc pointer.
     bool keyMatch = default!;
     if (goarch.PtrSize == 4){
-        keyMatch = (uintptr)(e.key & ~sourceMasks) == ((uintptr)new @unsafe.Pointer((~op).pd)) << (int)(sourceBits);
+        keyMatch = (uintptr)(e.key & ~(uintptr)(uintptr)sourceMasks) == ((uintptr)new @unsafe.Pointer((~op).pd) << (int)(sourceBits));
     } else {
-        keyMatch = (ж<pollDesc>)(uintptr)(((taggedPointer)e.key).pointer()) == (~op).pd;
+        keyMatch = (ж<pollDesc>)(uintptr)(((taggedPointer)(uint64)e.key).pointer()) == (~op).pd;
     }
     if (!keyMatch) {
         return default!;
@@ -95,7 +95,8 @@ internal static ж<pollOperation> pollOperationFromOverlappedEntry(ж<overlapped
 }
 
 internal static uintptr iocphandle = _INVALID_HANDLE_VALUE; // completion port io handle
-internal static atomic.Uint32 netpollWakeSig; // used to avoid duplicate calls of netpollBreak
+internal static ж<atomic.Uint32> ᏑnetpollWakeSig = new(default(atomic.Uint32));
+internal static ref atomic.Uint32 netpollWakeSig => ref ᏑnetpollWakeSig.Value; // used to avoid duplicate calls of netpollBreak
 
 internal static void netpollinit() {
     iocphandle = stdcall4(_CreateIoCompletionPort, _INVALID_HANDLE_VALUE, 0, 0, _DWORD_MAX);
@@ -110,11 +111,11 @@ internal static bool netpollIsPollDescriptor(uintptr fd) {
 }
 
 internal static int32 netpollopen(uintptr fd, ж<pollDesc> Ꮡpd) {
-    ref var pd = ref Ꮡpd.val;
+    ref var pd = ref Ꮡpd.Value;
 
     var key = packNetpollKey(netpollSourceReady, Ꮡpd);
     if (stdcall4(_CreateIoCompletionPort, fd, iocphandle, key, 0) == 0) {
-        return ((int32)getlasterror());
+        return (int32)getlasterror();
     }
     return 0;
 }
@@ -125,14 +126,14 @@ internal static int32 netpollclose(uintptr fd) {
 }
 
 internal static void netpollarm(ж<pollDesc> Ꮡpd, nint mode) {
-    ref var pd = ref Ꮡpd.val;
+    ref var pd = ref Ꮡpd.Value;
 
     @throw("runtime: unused"u8);
 }
 
 internal static void netpollBreak() {
     // Failing to cas indicates there is an in-flight wakeup, so we're done here.
-    if (!netpollWakeSig.CompareAndSwap(0, 1)) {
+    if (!ᏑnetpollWakeSig.CompareAndSwap(0, 1)) {
         return;
     }
     var key = packNetpollKey(netpollSourceBreak, nil);
@@ -154,13 +155,13 @@ internal static (gList, int32) netpoll(int64 delay) {
     ref var entries = ref heap(new array<overlappedEntry>(64), out var Ꮡentries);
     uint32 wait = default!;
     ref var toRun = ref heap(new gList(), out var ᏑtoRun);
-    var mp = getg().val.m;
-    if (delay >= 1e15F) {
+    var mp = getg().Value.m;
+    if (delay >= 1000000000000000) {
         // An arbitrary cap on how long to wait for a timer.
         // 1e15 ns == ~11.5 days.
-        delay = 1e15F;
+        delay = 1000000000000000;
     }
-    if (delay > 0 && mp.waitIocpHandle != 0) {
+    if (delay > 0 && (~mp).waitIocpHandle != 0) {
         // GetQueuedCompletionStatusEx doesn't use a high resolution timer internally,
         // so we use a separate higher resolution timer associated with a wait completion
         // packet to wake up the poller. Note that the completion packet can be delivered
@@ -180,21 +181,21 @@ internal static (gList, int32) netpoll(int64 delay) {
     if (delay == 0){
         wait = 0;
     } else 
-    if (delay < 1e6F){
+    if (delay < 1000000){
         wait = 1;
     } else {
-        wait = ((uint32)(delay / 1e6F));
+        wait = (uint32)(delay / 1000000);
     }
     ref var n = ref heap<nint>(out var Ꮡn);
-    n = len(entries) / ((nint)gomaxprocs);
+    n = len(entries) / (nint)gomaxprocs;
     if (n < 8) {
         n = 8;
     }
     if (delay != 0) {
-        mp.val.blocked = true;
+        mp.Value.blocked = true;
     }
-    if (stdcall6(_GetQueuedCompletionStatusEx, iocphandle, ((uintptr)new @unsafe.Pointer(Ꮡentries.at<overlappedEntry>(0))), ((uintptr)n), ((uintptr)new @unsafe.Pointer(Ꮡn)), ((uintptr)wait), 0) == 0) {
-        mp.val.blocked = false;
+    if (stdcall6(_GetQueuedCompletionStatusEx, iocphandle, (uintptr)new @unsafe.Pointer(Ꮡentries.at<overlappedEntry>(0)), (uintptr)n, (uintptr)new @unsafe.Pointer(Ꮡn), (uintptr)wait, 0) == 0) {
+        mp.Value.blocked = false;
         var errno = getlasterror();
         if (errno == _WAIT_TIMEOUT) {
             return (new gList(nil), 0);
@@ -202,8 +203,8 @@ internal static (gList, int32) netpoll(int64 delay) {
         println("runtime: GetQueuedCompletionStatusEx failed (errno=", errno, ")");
         @throw("runtime: netpoll failed"u8);
     }
-    mp.val.blocked = false;
-    var delta = ((int32)0);
+    mp.Value.blocked = false;
+    var delta = (int32)0;
     for (nint i = 0; i < n; i++) {
         var e = Ꮡentries.at<overlappedEntry>(i);
         var exprᴛ1 = unpackNetpollSource((~e).key);
@@ -213,7 +214,7 @@ internal static (gList, int32) netpoll(int64 delay) {
                 // Entry from outside the Go runtime and internal/poll, ignore.
                 continue;
             }
-            var mode = op.val.mode;
+            var mode = op.Value.mode;
             if (mode != (rune)'r' && mode != (rune)'w') {
                 // Entry from internal/poll.
                 println("runtime: GetQueuedCompletionStatusEx returned net_op with invalid mode=", mode);
@@ -222,7 +223,7 @@ internal static (gList, int32) netpoll(int64 delay) {
             delta += netpollready(ᏑtoRun, (~op).pd, mode);
         }
         else if (exprᴛ1 == netpollSourceBreak) {
-            netpollWakeSig.Store(0);
+            ᏑnetpollWakeSig.Store(0);
             if (delay == 0) {
                 // Forward the notification to the blocked poller.
                 netpollBreak();
@@ -245,10 +246,10 @@ internal static (gList, int32) netpoll(int64 delay) {
 internal static bool /*signaled*/ netpollQueueTimer(int64 delay) {
     bool signaled = default!;
 
-    static readonly UntypedInt STATUS_SUCCESS = /* 0x00000000 */ 0;
-    static readonly UntypedInt STATUS_PENDING = /* 0x00000103 */ 259;
-    static readonly UntypedInt STATUS_CANCELLED = /* 0xC0000120 */ 3221225760;
-    var mp = getg().val.m;
+    UntypedInt STATUS_SUCCESS = 0x00000000;
+    UntypedInt STATUS_PENDING = 0x00000103;
+    UntypedInt STATUS_CANCELLED = 0xC0000120;
+    var mp = getg().Value.m;
     // A wait completion packet can only be associated with one timer at a time,
     // so we need to cancel the previous one if it exists. This wouldn't be necessary
     // if the poller would only be woken up by the timer, in which case the association
@@ -256,25 +257,25 @@ internal static bool /*signaled*/ netpollQueueTimer(int64 delay) {
     // such as a netpollBreak, so we can get to this point with a timer that hasn't
     // expired yet. In this case, the completion packet can still be picked up by
     // another thread, so defer the cancellation until it is really necessary.
-    var errno = stdcall2(_NtCancelWaitCompletionPacket, mp.waitIocpHandle, 1);
+    var errno = stdcall2(_NtCancelWaitCompletionPacket, (~mp).waitIocpHandle, 1);
     var exprᴛ1 = errno;
     var matchᴛ1 = false;
     if (exprᴛ1 == STATUS_CANCELLED) { matchᴛ1 = true;
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 == STATUS_SUCCESS)) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && exprᴛ1 == STATUS_SUCCESS) { matchᴛ1 = true;
         ref var dt = ref heap<int64>(out var Ꮡdt);
         dt = -delay / 100;
         if (stdcall6(_SetWaitableTimer, // STATUS_CANCELLED is returned when the associated timer has already expired,
  // in which automatically cancels the wait completion packet.
  // relative sleep (negative), 100ns units
- mp.waitIocpTimer, ((uintptr)new @unsafe.Pointer(Ꮡdt)), 0, 0, 0, 0) == 0) {
+ (~mp).waitIocpTimer, (uintptr)new @unsafe.Pointer(Ꮡdt), 0, 0, 0, 0) == 0) {
             println("runtime: SetWaitableTimer failed; errno=", getlasterror());
             @throw("runtime: netpoll failed"u8);
         }
         var key = packNetpollKey(netpollSourceTimer, nil);
         {
-            var errnoΔ2 = stdcall8(_NtAssociateWaitCompletionPacket, mp.waitIocpHandle, iocphandle, mp.waitIocpTimer, key, 0, 0, 0, ((uintptr)new @unsafe.Pointer(Ꮡ(signaled)))); if (errnoΔ2 != 0) {
+            var errnoΔ2 = stdcall8(_NtAssociateWaitCompletionPacket, (~mp).waitIocpHandle, iocphandle, (~mp).waitIocpTimer, key, 0, 0, 0, (uintptr)new @unsafe.Pointer(Ꮡ(signaled))); if (errnoΔ2 != 0) {
                 println("runtime: NtAssociateWaitCompletionPacket failed; errno=", errnoΔ2);
                 @throw("runtime: netpoll failed"u8);
             }

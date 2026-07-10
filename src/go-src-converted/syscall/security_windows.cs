@@ -7,11 +7,11 @@ using @unsafe = unsafe_package;
 
 partial class syscall_package {
 
-public static readonly UntypedInt STANDARD_RIGHTS_REQUIRED = /* 0xf0000 */ 983040;
-public static readonly UntypedInt STANDARD_RIGHTS_READ = /* 0x20000 */ 131072;
-public static readonly UntypedInt STANDARD_RIGHTS_WRITE = /* 0x20000 */ 131072;
-public static readonly UntypedInt STANDARD_RIGHTS_EXECUTE = /* 0x20000 */ 131072;
-public static readonly UntypedInt STANDARD_RIGHTS_ALL = /* 0x1F0000 */ 2031616;
+public static readonly UntypedInt STANDARD_RIGHTS_REQUIRED = 0xf0000;
+public static readonly UntypedInt STANDARD_RIGHTS_READ = 0x20000;
+public static readonly UntypedInt STANDARD_RIGHTS_WRITE = 0x20000;
+public static readonly UntypedInt STANDARD_RIGHTS_EXECUTE = 0x20000;
+public static readonly UntypedInt STANDARD_RIGHTS_ALL = 0x1F0000;
 
 public static readonly UntypedInt NameUnknown = 0;
 public static readonly UntypedInt NameFullyQualifiedDN = 1;
@@ -32,22 +32,22 @@ public static readonly UntypedInt NameDnsDomain = 12;
 // TranslateAccountName converts a directory service
 // object name from one format to another.
 public static (@string, error) TranslateAccountName(@string username, uint32 from, uint32 to, nint initSize) {
-    (u, e) = UTF16PtrFromString(username);
+    var (u, e) = UTF16PtrFromString(username);
     if (e != default!) {
         return ("", e);
     }
     ref var n = ref heap<uint32>(out var Ꮡn);
-    n = ((uint32)50);
+    n = (uint32)50;
     while (ᐧ) {
-        var b = new slice<uint16>(n);
+        var b = new slice<uint16>((nint)(n));
         e = TranslateName(u, from, to, Ꮡ(b, 0), Ꮡn);
         if (e == default!) {
             return (UTF16ToString(b[..(int)(n)]), default!);
         }
-        if (e != ERROR_INSUFFICIENT_BUFFER) {
+        if (!AreEqual(e, ERROR_INSUFFICIENT_BUFFER)) {
             return ("", e);
         }
-        if (n <= ((uint32)len(b))) {
+        if (n <= (uint32)len(b)) {
             return ("", e);
         }
     }
@@ -93,17 +93,17 @@ public static readonly UntypedInt SidTypeLabel = 10;
 
 // StringToSid converts a string-format security identifier
 // sid into a valid, functional sid.
-public static (ж<SID>, error) StringToSid(@string s) => func((defer, _) => {
-    ж<SID> sid = default!;
-    (p, e) = UTF16PtrFromString(s);
+public static (ж<SID>, error) StringToSid(@string s) => func<(ж<SID>, error)>((defer, recover) => {
+    ref var sid = ref heap<ж<SID>>(out var Ꮡsid);
+    var (p, e) = UTF16PtrFromString(s);
     if (e != default!) {
         return (default!, e);
     }
-    e = ConvertStringSidToSid(p, Ꮡ(sid));
+    e = ConvertStringSidToSid(p, Ꮡsid);
     if (e != default!) {
         return (default!, e);
     }
-    deferǃ(LocalFree, ((ΔHandle)new @unsafe.Pointer(sid)), defer);
+    deferǃ(LocalFree, ((ΔHandle)(uintptr)new @unsafe.Pointer(sid)), defer);
     return sid.Copy();
 });
 
@@ -119,7 +119,7 @@ public static (ж<SID> sid, @string domain, uint32 accType, error err) LookupSID
     if (len(account) == 0) {
         return (default!, "", 0, EINVAL);
     }
-    (acc, e) = UTF16PtrFromString(account);
+    var (acc, e) = UTF16PtrFromString(account);
     if (e != default!) {
         return (default!, "", 0, e);
     }
@@ -131,21 +131,21 @@ public static (ж<SID> sid, @string domain, uint32 accType, error err) LookupSID
         }
     }
     ref var n = ref heap<uint32>(out var Ꮡn);
-    n = ((uint32)50);
+    n = (uint32)50;
     ref var dn = ref heap<uint32>(out var Ꮡdn);
-    dn = ((uint32)50);
+    dn = (uint32)50;
     while (ᐧ) {
-        var b = new slice<byte>(n);
-        var db = new slice<uint16>(dn);
+        var b = new slice<byte>((nint)(n));
+        var db = new slice<uint16>((nint)(dn));
         sid = (ж<SID>)(uintptr)(new @unsafe.Pointer(Ꮡ(b, 0)));
         e = LookupAccountName(sys, acc, sid, Ꮡn, Ꮡ(db, 0), Ꮡdn, Ꮡ(accType));
         if (e == default!) {
             return (sid, UTF16ToString(db), accType, default!);
         }
-        if (e != ERROR_INSUFFICIENT_BUFFER) {
+        if (!AreEqual(e, ERROR_INSUFFICIENT_BUFFER)) {
             return (default!, "", 0, e);
         }
-        if (n <= ((uint32)len(b))) {
+        if (n <= (uint32)len(b)) {
             return (default!, "", 0, e);
         }
     }
@@ -153,26 +153,32 @@ public static (ж<SID> sid, @string domain, uint32 accType, error err) LookupSID
 
 // String converts sid to a string format
 // suitable for display, storage, or transmission.
-[GoRecv] public static (@string, error) String(this ref SID sid) => func((defer, _) => {
-    ж<uint16> s = default!;
-    var e = ConvertSidToStringSid(sid, Ꮡ(s));
+public static (@string, error) String(this ж<SID> Ꮡsid) => func<(@string, error)>((defer, recover) => {
+    ref var sid = ref Ꮡsid.Value;
+
+    ref var s = ref heap<ж<uint16>>(out var Ꮡs);
+    var e = ConvertSidToStringSid(Ꮡsid, Ꮡs);
     if (e != default!) {
         return ("", e);
     }
-    deferǃ(LocalFree, ((ΔHandle)new @unsafe.Pointer(s)), defer);
+    deferǃ(LocalFree, ((ΔHandle)(uintptr)new @unsafe.Pointer(s)), defer);
     return (utf16PtrToString(s), default!);
 });
 
 // Len returns the length, in bytes, of a valid security identifier sid.
-[GoRecv] public static nint Len(this ref SID sid) {
-    return ((nint)GetLengthSid(sid));
+public static nint Len(this ж<SID> Ꮡsid) {
+    ref var sid = ref Ꮡsid.Value;
+
+    return (nint)GetLengthSid(Ꮡsid);
 }
 
 // Copy creates a duplicate of security identifier sid.
-[GoRecv] public static (ж<SID>, error) Copy(this ref SID sid) {
-    var b = new slice<byte>(sid.Len());
+public static (ж<SID>, error) Copy(this ж<SID> Ꮡsid) {
+    ref var sid = ref Ꮡsid.Value;
+
+    var b = new slice<byte>(Ꮡsid.Len());
     var sid2 = (ж<SID>)(uintptr)(new @unsafe.Pointer(Ꮡ(b, 0)));
-    var e = CopySid(((uint32)len(b)), sid2, sid);
+    var e = CopySid((uint32)len(b), sid2, Ꮡsid);
     if (e != default!) {
         return (default!, e);
     }
@@ -182,12 +188,13 @@ public static (ж<SID> sid, @string domain, uint32 accType, error err) LookupSID
 // LookupAccount retrieves the name of the account for this sid
 // and the name of the first domain on which this sid is found.
 // System specify target computer to search for.
-[GoRecv] public static (@string account, @string domain, uint32 accType, error err) LookupAccount(this ref SID sid, @string system) {
+public static (@string account, @string domain, uint32 accType, error err) LookupAccount(this ж<SID> Ꮡsid, @string system) {
     @string account = default!;
     @string domain = default!;
     uint32 accType = default!;
     error err = default!;
 
+    ref var sid = ref Ꮡsid.Value;
     ж<uint16> sys = default!;
     if (len(system) > 0) {
         (sys, err) = UTF16PtrFromString(system);
@@ -196,20 +203,20 @@ public static (ж<SID> sid, @string domain, uint32 accType, error err) LookupSID
         }
     }
     ref var n = ref heap<uint32>(out var Ꮡn);
-    n = ((uint32)50);
+    n = (uint32)50;
     ref var dn = ref heap<uint32>(out var Ꮡdn);
-    dn = ((uint32)50);
+    dn = (uint32)50;
     while (ᐧ) {
-        var b = new slice<uint16>(n);
-        var db = new slice<uint16>(dn);
-        var e = LookupAccountSid(sys, sid, Ꮡ(b, 0), Ꮡn, Ꮡ(db, 0), Ꮡdn, Ꮡ(accType));
+        var b = new slice<uint16>((nint)(n));
+        var db = new slice<uint16>((nint)(dn));
+        var e = LookupAccountSid(sys, Ꮡsid, Ꮡ(b, 0), Ꮡn, Ꮡ(db, 0), Ꮡdn, Ꮡ(accType));
         if (e == default!) {
             return (UTF16ToString(b), UTF16ToString(db), accType, default!);
         }
-        if (e != ERROR_INSUFFICIENT_BUFFER) {
+        if (!AreEqual(e, ERROR_INSUFFICIENT_BUFFER)) {
             return ("", "", 0, e);
         }
-        if (n <= ((uint32)len(b))) {
+        if (n <= (uint32)len(b)) {
             return ("", "", 0, e);
         }
     }
@@ -307,23 +314,23 @@ public static (Token, error) OpenCurrentProcessToken() {
 
 // Close releases access to access token.
 public static error Close(this Token t) {
-    return CloseHandle(((ΔHandle)t));
+    return CloseHandle(((ΔHandle)(uintptr)t));
 }
 
 // getInfo retrieves a specified type of information about an access token.
 internal static (@unsafe.Pointer, error) getInfo(this Token t, uint32 @class, nint initSize) {
     ref var n = ref heap<uint32>(out var Ꮡn);
-    n = ((uint32)initSize);
+    n = (uint32)initSize;
     while (ᐧ) {
-        var b = new slice<byte>(n);
-        var e = GetTokenInformation(t, @class, Ꮡ(b, 0), ((uint32)len(b)), Ꮡn);
+        var b = new slice<byte>((nint)(n));
+        var e = GetTokenInformation(t, @class, Ꮡ(b, 0), (uint32)len(b), Ꮡn);
         if (e == default!) {
             return (new @unsafe.Pointer(Ꮡ(b, 0)), default!);
         }
-        if (e != ERROR_INSUFFICIENT_BUFFER) {
+        if (!AreEqual(e, ERROR_INSUFFICIENT_BUFFER)) {
             return (default!, e);
         }
-        if (n <= ((uint32)len(b))) {
+        if (n <= (uint32)len(b)) {
             return (default!, e);
         }
     }
@@ -353,17 +360,17 @@ public static (ж<Tokenprimarygroup>, error) GetTokenPrimaryGroup(this Token t) 
 // root directory of the access token t user's profile.
 public static (@string, error) GetUserProfileDirectory(this Token t) {
     ref var n = ref heap<uint32>(out var Ꮡn);
-    n = ((uint32)100);
+    n = (uint32)100;
     while (ᐧ) {
-        var b = new slice<uint16>(n);
+        var b = new slice<uint16>((nint)(n));
         var e = GetUserProfileDirectory(t, Ꮡ(b, 0), Ꮡn);
         if (e == default!) {
             return (UTF16ToString(b), default!);
         }
-        if (e != ERROR_INSUFFICIENT_BUFFER) {
+        if (!AreEqual(e, ERROR_INSUFFICIENT_BUFFER)) {
             return ("", e);
         }
-        if (n <= ((uint32)len(b))) {
+        if (n <= (uint32)len(b)) {
             return ("", e);
         }
     }

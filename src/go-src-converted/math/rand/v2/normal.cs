@@ -18,9 +18,9 @@ internal static readonly UntypedFloat rn = /* 3.442619855899 */ 3.44262;
 
 internal static uint32 absInt32(int32 i) {
     if (i < 0) {
-        return ((uint32)(-i));
+        return (uint32)(-i);
     }
-    return ((uint32)i);
+    return (uint32)i;
 }
 
 // NormFloat64 returns a normally distributed float64 in
@@ -33,61 +33,61 @@ internal static uint32 absInt32(int32 i) {
 [GoRecv] public static float64 NormFloat64(this ref Rand r) {
     while (ᐧ) {
         var u = r.Uint64();
-        var j = ((int32)u);
+        var j = (int32)u;
         // Possibly negative
-        var i = (uint64)(u >> (int)(32) & 127);
-        var x = ((float64)j) * ((float64)wn[i]);
-        if (absInt32(j) < kn[i]) {
+        var i = (uint64)((u >> (int)(32)) & 0x7F);
+        var x = (float64)j * (float64)wn[(nint)(i)];
+        if (absInt32(j) < kn[(nint)(i)]) {
             // This case should be hit better than 99% of the time.
             return x;
         }
         if (i == 0) {
             // This extra work is only required for the base strip.
             while (ᐧ) {
-                x = -math.Log(r.Float64()) * (1.0F / rn);
+                x = -math.Log(r.Float64()) * (float64)(1.0D / rn);
                 var y = -math.Log(r.Float64());
                 if (y + y >= x * x) {
                     break;
                 }
             }
             if (j > 0) {
-                return rn + x;
+                return (float64)rn + x;
             }
-            return -rn - x;
+            return (float64)(-rn) - x;
         }
-        if (fn[i] + ((float32)r.Float64()) * (fn[i - 1] - fn[i]) < ((float32)math.Exp(-.5F * x * x))) {
+        if (fn[(nint)(i)] + (float32)r.Float64() * (fn[(nint)(i - 1)] - fn[(nint)(i)]) < (float32)math.Exp(-.5D * x * x)) {
             return x;
         }
     }
 }
 
 internal static array<uint32> kn = new uint32[]{
-    1991057938, 0, 1611602771, 1826899878, 1918584482,
-    1969227037, 2001281515, 2023368125, 2039498179, 2051788381,
-    2061460127, 2069267110, 2075699398, 2081089314, 2085670119,
-    2089610331, 2093034710, 2096037586, 2098691595, 2101053571,
-    2103168620, 2105072996, 2106796166, 2108362327, 2109791536,
-    2111100552, 2112303493, 2113412330, 2114437283, 2115387130,
-    2116269447, 2117090813, 2117856962, 2118572919, 2119243101,
-    2119871411, 2120461303, 2121015852, 2121537798, 2122029592,
-    2122493434, 2122931299, 2123344971, 2123736059, 2124106020,
-    2124456175, 2124787725, 2125101763, 2125399283, 2125681194,
-    2125948325, 2126201433, 2126441213, 2126668298, 2126883268,
-    2127086657, 2127278949, 2127460589, 2127631985, 2127793506,
-    2127945490, 2128088244, 2128222044, 2128347141, 2128463758,
-    2128572095, 2128672327, 2128764606, 2128849065, 2128925811,
-    2128994934, 2129056501, 2129110560, 2129157136, 2129196237,
-    2129227847, 2129251929, 2129268426, 2129277255, 2129278312,
-    2129271467, 2129256561, 2129233410, 2129201800, 2129161480,
-    2129112170, 2129053545, 2128985244, 2128906855, 2128817916,
-    2128717911, 2128606255, 2128482298, 2128345305, 2128194452,
-    2128028813, 2127847342, 2127648860, 2127432031, 2127195339,
-    2126937058, 2126655214, 2126347546, 2126011445, 2125643893,
-    2125241376, 2124799783, 2124314271, 2123779094, 2123187386,
-    2122530867, 2121799464, 2120980787, 2120059418, 2119015917,
-    2117825402, 2116455471, 2114863093, 2112989789, 2110753906,
-    2108037662, 2104664315, 2100355223, 2094642347, 2086670106,
-    2074676188, 2054300022, 2010539237
+    0x76ad2212, 0x0, 0x600f1b53, 0x6ce447a6, 0x725b46a2,
+    0x7560051d, 0x774921eb, 0x789a25bd, 0x799045c3, 0x7a4bce5d,
+    0x7adf629f, 0x7b5682a6, 0x7bb8a8c6, 0x7c0ae722, 0x7c50cce7,
+    0x7c8cec5b, 0x7cc12cd6, 0x7ceefed2, 0x7d177e0b, 0x7d3b8883,
+    0x7d5bce6c, 0x7d78dd64, 0x7d932886, 0x7dab0e57, 0x7dc0dd30,
+    0x7dd4d688, 0x7de73185, 0x7df81cea, 0x7e07c0a3, 0x7e163efa,
+    0x7e23b587, 0x7e303dfd, 0x7e3beec2, 0x7e46db77, 0x7e51155d,
+    0x7e5aabb3, 0x7e63abf7, 0x7e6c222c, 0x7e741906, 0x7e7b9a18,
+    0x7e82adfa, 0x7e895c63, 0x7e8fac4b, 0x7e95a3fb, 0x7e9b4924,
+    0x7ea0a0ef, 0x7ea5b00d, 0x7eaa7ac3, 0x7eaf04f3, 0x7eb3522a,
+    0x7eb765a5, 0x7ebb4259, 0x7ebeeafd, 0x7ec2620a, 0x7ec5a9c4,
+    0x7ec8c441, 0x7ecbb365, 0x7ece78ed, 0x7ed11671, 0x7ed38d62,
+    0x7ed5df12, 0x7ed80cb4, 0x7eda175c, 0x7edc0005, 0x7eddc78e,
+    0x7edf6ebf, 0x7ee0f647, 0x7ee25ebe, 0x7ee3a8a9, 0x7ee4d473,
+    0x7ee5e276, 0x7ee6d2f5, 0x7ee7a620, 0x7ee85c10, 0x7ee8f4cd,
+    0x7ee97047, 0x7ee9ce59, 0x7eea0eca, 0x7eea3147, 0x7eea3568,
+    0x7eea1aab, 0x7ee9e071, 0x7ee98602, 0x7ee90a88, 0x7ee86d08,
+    0x7ee7ac6a, 0x7ee6c769, 0x7ee5bc9c, 0x7ee48a67, 0x7ee32efc,
+    0x7ee1a857, 0x7edff42f, 0x7ede0ffa, 0x7edbf8d9, 0x7ed9ab94,
+    0x7ed7248d, 0x7ed45fae, 0x7ed1585c, 0x7ece095f, 0x7eca6ccb,
+    0x7ec67be2, 0x7ec22eee, 0x7ebd7d1a, 0x7eb85c35, 0x7eb2c075,
+    0x7eac9c20, 0x7ea5df27, 0x7e9e769f, 0x7e964c16, 0x7e8d44ba,
+    0x7e834033, 0x7e781728, 0x7e6b9933, 0x7e5d8a1a, 0x7e4d9ded,
+    0x7e3b737a, 0x7e268c2f, 0x7e0e3ff5, 0x7df1aa5d, 0x7dcf8c72,
+    0x7da61a1e, 0x7d72a0fb, 0x7d30e097, 0x7cd9b4ab, 0x7c600f1a,
+    0x7ba90bdc, 0x7a722176, 0x77d664e5
 }.array();
 
 internal static array<float32> wn = new float32[]{

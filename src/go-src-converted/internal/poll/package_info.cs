@@ -13,6 +13,10 @@
 global using syscallꓸHandle = go.syscall_package.ΔHandle;
 global using syscallꓸSignal = go.syscall_package.ΔSignal;
 global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
+global using timeꓸLocation = go.time_package.ΔLocation;
+global using timeꓸMonth = go.time_package.ΔMonth;
+global using timeꓸWeekday = go.time_package.ΔWeekday;
+using Δsyscall = go.syscall_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -41,15 +45,13 @@ using static go.@internal.poll_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<(syscall.Sockaddr, error), syscall_package.ΔSockaddr>]
-[assembly: GoImplement<DeadlineExceededError, error>]
+[assembly: GoImplement<DeadlineExceededError, error>(Pointer = true)]
 [assembly: GoImplement<errNetClosing, error>]
-[assembly: GoImplement<syscall_package.Errno, error>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<syscall.SockaddrInet4, ж<syscall.SockaddrInet4>>(Indirect = true)]
-[assembly: GoImplicitConv<syscall.SockaddrInet6, ж<syscall.SockaddrInet6>>(Indirect = true)]
+[assembly: GoImplicitConv<Δsyscall.SockaddrInet4, ж<Δsyscall.SockaddrInet4>>(Indirect = true)]
+[assembly: GoImplicitConv<Δsyscall.SockaddrInet6, ж<Δsyscall.SockaddrInet6>>(Indirect = true)]
 // </ImplicitConversions>
 
 namespace go.@internal;

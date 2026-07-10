@@ -9,12 +9,12 @@
 namespace go.vendor.golang.org.x.text.secure;
 
 using errors = errors_package;
-using utf8 = unicode.utf8_package;
-using transform = golang.org.x.text.transform_package;
-using bidi = golang.org.x.text.unicode.bidi_package;
-using golang.org.x.text;
-using golang.org.x.text.unicode;
-using unicode;
+using utf8 = go.unicode.utf8_package;
+using transform = go.vendor.golang.org.x.text.transform_package;
+using bidi = go.vendor.golang.org.x.text.unicode.bidi_package;
+using go.unicode;
+using go.vendor.golang.org.x.text;
+using go.vendor.golang.org.x.text.unicode;
 
 partial class bidirule_package {
 
@@ -88,31 +88,25 @@ internal static readonly ruleState ruleInvalid = 5;
 // [2.5] In an LTR label, only characters with the Bidi properties L,
 // EN, ES, CS, ET, ON, BN, or NSM are allowed.
 // We exclude the entries from [2.6].
-internal static array<array<ruleTransition>> transitions = new runtime.SparseArray<array<ruleTransition>>{
-    [ruleInitial] = new(
-        new(ruleLTRFinal, 1 << (int)(bidi.L)),
-        new(ruleRTLFinal, (uint16)(1 << (int)(bidi.R) | 1 << (int)(bidi.AL)))
-    ),
-    [ruleRTL] = new(
-        new(ruleRTLFinal, (uint16)((UntypedInt)((UntypedInt)(1 << (int)(bidi.R) | 1 << (int)(bidi.AL)) | 1 << (int)(bidi.EN)) | 1 << (int)(bidi.AN))),
-        new(ruleRTL, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(bidi.ES) | 1 << (int)(bidi.CS)) | 1 << (int)(bidi.ET)) | 1 << (int)(bidi.ON)) | 1 << (int)(bidi.BN)) | 1 << (int)(bidi.NSM)))
-    ),
-    [ruleRTLFinal] = new(
-        new(ruleRTLFinal, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(bidi.R) | 1 << (int)(bidi.AL)) | 1 << (int)(bidi.EN)) | 1 << (int)(bidi.AN)) | 1 << (int)(bidi.NSM))),
-        new(ruleRTL, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(bidi.ES) | 1 << (int)(bidi.CS)) | 1 << (int)(bidi.ET)) | 1 << (int)(bidi.ON)) | 1 << (int)(bidi.BN)))
-    ),
-    [ruleLTR] = new(
-        new(ruleLTRFinal, (uint16)(1 << (int)(bidi.L) | 1 << (int)(bidi.EN))),
-        new(ruleLTR, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(bidi.ES) | 1 << (int)(bidi.CS)) | 1 << (int)(bidi.ET)) | 1 << (int)(bidi.ON)) | 1 << (int)(bidi.BN)) | 1 << (int)(bidi.NSM)))
-    ),
-    [ruleLTRFinal] = new(
-        new(ruleLTRFinal, (uint16)((UntypedInt)(1 << (int)(bidi.L) | 1 << (int)(bidi.EN)) | 1 << (int)(bidi.NSM))),
-        new(ruleLTR, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(bidi.ES) | 1 << (int)(bidi.CS)) | 1 << (int)(bidi.ET)) | 1 << (int)(bidi.ON)) | 1 << (int)(bidi.BN)))
-    ),
-    [ruleInvalid] = new(
+internal static array<array<ruleTransition>> transitions = new golib.SparseArray<array<ruleTransition>>{
+    [ruleInitial] = new ruleTransition[]{
+        new(ruleLTRFinal, (uint16)(1 << (int)(nuint)(bidi.L))),
+        new(ruleRTLFinal, (uint16)((1 << (int)(nuint)(bidi.R)) | (1 << (int)(nuint)(bidi.AL))))}.array(),
+    [ruleRTL] = new ruleTransition[]{
+        new(ruleRTLFinal, (uint16)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.R)) | (1 << (int)(nuint)(bidi.AL))) | (1 << (int)(nuint)(bidi.EN))) | (1 << (int)(nuint)(bidi.AN)))),
+        new(ruleRTL, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.ES)) | (1 << (int)(nuint)(bidi.CS))) | (1 << (int)(nuint)(bidi.ET))) | (1 << (int)(nuint)(bidi.ON))) | (1 << (int)(nuint)(bidi.BN))) | (1 << (int)(nuint)(bidi.NSM))))}.array(),
+    [ruleRTLFinal] = new ruleTransition[]{
+        new(ruleRTLFinal, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.R)) | (1 << (int)(nuint)(bidi.AL))) | (1 << (int)(nuint)(bidi.EN))) | (1 << (int)(nuint)(bidi.AN))) | (1 << (int)(nuint)(bidi.NSM)))),
+        new(ruleRTL, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.ES)) | (1 << (int)(nuint)(bidi.CS))) | (1 << (int)(nuint)(bidi.ET))) | (1 << (int)(nuint)(bidi.ON))) | (1 << (int)(nuint)(bidi.BN))))}.array(),
+    [ruleLTR] = new ruleTransition[]{
+        new(ruleLTRFinal, (uint16)((1 << (int)(nuint)(bidi.L)) | (1 << (int)(nuint)(bidi.EN)))),
+        new(ruleLTR, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.ES)) | (1 << (int)(nuint)(bidi.CS))) | (1 << (int)(nuint)(bidi.ET))) | (1 << (int)(nuint)(bidi.ON))) | (1 << (int)(nuint)(bidi.BN))) | (1 << (int)(nuint)(bidi.NSM))))}.array(),
+    [ruleLTRFinal] = new ruleTransition[]{
+        new(ruleLTRFinal, (uint16)((UntypedInt)((1 << (int)(nuint)(bidi.L)) | (1 << (int)(nuint)(bidi.EN))) | (1 << (int)(nuint)(bidi.NSM)))),
+        new(ruleLTR, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.ES)) | (1 << (int)(nuint)(bidi.CS))) | (1 << (int)(nuint)(bidi.ET))) | (1 << (int)(nuint)(bidi.ON))) | (1 << (int)(nuint)(bidi.BN))))}.array(),
+    [ruleInvalid] = new ruleTransition[]{
         new(ruleInvalid, 0),
-        new(ruleInvalid, 0)
-    )
+        new(ruleInvalid, 0)}.array()
 }.array();
 
 // [2.4] In an RTL label, if an EN is present, no AN may be present, and
@@ -128,13 +122,13 @@ internal const uint16 exclusiveRTL = /* uint16(1<<bidi.EN | 1<<bidi.AN) */ 36;
 // Direction reports the direction of the given label as defined by RFC 5893.
 // The Bidi Rule does not have to be applied to labels of the category
 // LeftToRight.
-public static bidi.Direction Direction(slice<byte> b) {
+public static bidiꓸDirection Direction(slice<byte> b) {
     for (nint i = 0; i < len(b); ) {
         var (e, sz) = bidi.Lookup(b[(int)(i)..]);
         if (sz == 0) {
             i++;
         }
-        bidi.Class c = e.Class();
+        bidiꓸClass c = e.Class();
         if (c == bidi.R || c == bidi.AL || c == bidi.AN) {
             return bidi.RightToLeft;
         }
@@ -146,14 +140,14 @@ public static bidi.Direction Direction(slice<byte> b) {
 // DirectionString reports the direction of the given label as defined by RFC
 // 5893. The Bidi Rule does not have to be applied to labels of the category
 // LeftToRight.
-public static bidi.Direction DirectionString(@string s) {
+public static bidiꓸDirection DirectionString(@string s) {
     for (nint i = 0; i < len(s); ) {
         var (e, sz) = bidi.LookupString(s[(int)(i)..]);
         if (sz == 0) {
             i++;
             continue;
         }
-        bidi.Class c = e.Class();
+        bidiꓸClass c = e.Class();
         if (c == bidi.R || c == bidi.AL || c == bidi.AN) {
             return bidi.RightToLeft;
         }
@@ -199,8 +193,8 @@ public static ж<Transformer> New() {
 // A rule can only be violated for "Bidi Domain names", meaning if one of the
 // following categories has been observed.
 [GoRecv] internal static bool isRTL(this ref Transformer t) {
-    static readonly UntypedInt isRTL = /* 1<<bidi.R | 1<<bidi.AL | 1<<bidi.AN */ 8226;
-    return (uint16)(t.seen & isRTL) != 0;
+    UntypedInt isRTL = /* 1<<bidi.R | 1<<bidi.AL | 1<<bidi.AN */ 8226;
+    return (uint16)(t.seen & (uint16)isRTL) != 0;
 }
 
 // Reset implements transform.Transformer.
@@ -236,7 +230,7 @@ public static ж<Transformer> New() {
     if (t.state == ruleInvalid && t.isRTL()) {
         return (0, ErrInvalid);
     }
-    var (n, ok) = t.advance(src);
+    (n, var ok) = t.advance(src);
     switch (ᐧ) {
     case {} when !ok: {
         err = ErrInvalid;
@@ -260,11 +254,11 @@ public static ж<Transformer> New() {
 
 // Precomputing the ASCII values decreases running time for the ASCII fast path
 // by about 30%.
-internal static array<bidi.Properties> asciiTable;
+internal static array<bidi.Properties> asciiTable = new(128);
 
 [GoInit] internal static void init() {
     foreach (var (i, _) in asciiTable) {
-        var (p, _) = bidi.LookupRune(((rune)i));
+        var (p, _) = bidi.LookupRune((rune)i);
         asciiTable[i] = p;
     }
 }
@@ -293,8 +287,8 @@ internal static array<bidi.Properties> asciiTable;
         // incomplete UTF-8 encoding
         // TODO: using CompactClass would result in noticeable speedup.
         // See unicode/bidi/prop.go:Properties.CompactClass.
-        var c = ((uint16)(1 << (int)(e.Class())));
-        t.seen |= (uint16)(c);
+        var c = (uint16)((uint16)(1 << (int)(nuint)(e.Class())));
+        t.seen |= c;
         if ((uint16)(t.seen & exclusiveRTL) == exclusiveRTL) {
             t.state = ruleInvalid;
             return (n, false);
@@ -346,8 +340,8 @@ internal static array<bidi.Properties> asciiTable;
         // incomplete UTF-8 encoding
         // TODO: using CompactClass results in noticeable speedup.
         // See unicode/bidi/prop.go:Properties.CompactClass.
-        var c = ((uint16)(1 << (int)(e.Class())));
-        t.seen |= (uint16)(c);
+        var c = (uint16)((uint16)(1 << (int)(nuint)(e.Class())));
+        t.seen |= c;
         if ((uint16)(t.seen & exclusiveRTL) == exclusiveRTL) {
             t.state = ruleInvalid;
             return (n, false);

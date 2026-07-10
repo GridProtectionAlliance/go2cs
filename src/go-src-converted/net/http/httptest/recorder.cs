@@ -6,13 +6,13 @@ namespace go.net.http;
 using bytes = bytes_package;
 using fmt = fmt_package;
 using io = io_package;
-using http = net.http_package;
-using textproto = net.textproto_package;
+using http = go.net.http_package;
+using textproto = go.net.textproto_package;
 using strconv = strconv_package;
 using strings = strings_package;
-using httpguts = golang.org.x.net.http.httpguts_package;
-using golang.org.x.net.http;
-using net;
+using httpguts = vendor.golang.org.x.net.http.httpguts_package;
+using go.net;
+using vendor.golang.org.x.net.http;
 
 partial class httptest_package {
 
@@ -32,14 +32,14 @@ partial class httptest_package {
     // Deprecated: HeaderMap exists for historical compatibility
     // and should not be used. To access the headers returned by a handler,
     // use the Response.Header map as returned by the Result method.
-    public net.http_package.ΔHeader HeaderMap;
+    public httpꓸHeader HeaderMap;
     // Body is the buffer to which the Handler's Write calls are sent.
     // If nil, the Writes are silently discarded.
-    public ж<bytes_package.Buffer> Body;
+    public ж<bytes.Buffer> Body;
     // Flushed is whether the Handler called Flush.
     public bool Flushed;
-    internal ж<net.http_package.Response> result; // cache of Result's return value
-    internal net.http_package.ΔHeader snapHeader;  // snapshot of HeaderMap at first Write
+    internal ж<http.Response> result; // cache of Result's return value
+    internal httpꓸHeader snapHeader;    // snapshot of HeaderMap at first Write
     internal bool wroteHeader;
 }
 
@@ -84,8 +84,7 @@ public static readonly @string DefaultRemoteAddr = "1.2.3.4"u8;
         str = str[..512];
     }
     var m = rw.Header();
-    var _ = m["Content-Type"u8];
-    var hasType = m["Content-Type"u8];
+    var (_, hasType) = m["Content-Type"u8, ꟷ];
     var hasTE = m.Get("Transfer-Encoding"u8) != ""u8;
     if (!hasType && !hasTE) {
         if (b == default!) {
@@ -187,34 +186,34 @@ internal static void checkWriteHeaderCode(nint code) {
     ));
     rw.result = res;
     if ((~res).StatusCode == 0) {
-        res.val.StatusCode = 200;
+        res.Value.StatusCode = 200;
     }
-    res.val.Status = fmt.Sprintf("%03d %s"u8, (~res).StatusCode, http.StatusText((~res).StatusCode));
+    res.Value.Status = fmt.Sprintf("%03d %s"u8, (~res).StatusCode, http.StatusText((~res).StatusCode));
     if (rw.Body != nil){
-        res.val.Body = io.NopCloser(~bytes.NewReader(rw.Body.Bytes()));
+        res.Value.Body = io.NopCloser(new bytes_ReaderжReader(bytes.NewReader(rw.Body.Bytes())));
     } else {
-        res.val.Body = http.NoBody;
+        res.Value.Body = http.NoBody;
     }
-    res.val.ContentLength = parseContentLength((~res).Header.Get("Content-Length"u8));
+    res.Value.ContentLength = parseContentLength((~res).Header.Get("Content-Length"u8));
     {
-        var trailers = rw.snapHeader["Trailer"u8];
-        var ok = rw.snapHeader["Trailer"u8]; if (ok) {
-            res.val.Trailer = new httpꓸHeader(len(trailers));
+        var (trailers, ok) = rw.snapHeader["Trailer"u8, ꟷ]; if (ok) {
+            res.Value.Trailer = new httpꓸHeader(len(trailers));
             foreach (var (_, k) in trailers) {
-                foreach (var (_, kΔ1) in strings.Split(k, ","u8)) {
+                foreach (var (_, vᴛ1) in strings.Split(k, ","u8)) {
+                    var kΔ1 = vᴛ1;
+
                     kΔ1 = http.CanonicalHeaderKey(textproto.TrimString(kΔ1));
                     if (!httpguts.ValidTrailerHeader(kΔ1)) {
                         // Ignore since forbidden by RFC 7230, section 4.1.2.
                         continue;
                     }
-                    var vv = rw.HeaderMap[kΔ1];
-                    var okΔ1 = rw.HeaderMap[kΔ1];
+                    var (vv, okΔ1) = rw.HeaderMap[kΔ1, ꟷ];
                     if (!okΔ1) {
                         continue;
                     }
                     var vv2 = new slice<@string>(len(vv));
                     copy(vv2, vv);
-                    (~res).Trailer[kΔ1] = vv2;
+                    res.Value.Trailer[kΔ1] = vv2;
                 }
             }
         }
@@ -224,7 +223,7 @@ internal static void checkWriteHeaderCode(nint code) {
             continue;
         }
         if ((~res).Trailer == default!) {
-            res.val.Trailer = new httpꓸHeader();
+            res.Value.Trailer = new httpꓸHeader();
         }
         foreach (var (_, v) in vv) {
             (~res).Trailer.Add(strings.TrimPrefix(k, http.TrailerPrefix), v);
@@ -247,7 +246,7 @@ internal static int64 parseContentLength(@string cl) {
     if (err != default!) {
         return -1;
     }
-    return ((int64)n);
+    return (int64)n;
 }
 
 } // end httptest_package

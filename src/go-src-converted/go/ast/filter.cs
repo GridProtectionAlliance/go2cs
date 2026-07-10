@@ -3,8 +3,9 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using token = go.token_package;
+using token = global::go.go.token_package;
 using slices = slices_package;
+using global::go.go;
 
 partial class ast_package {
 
@@ -24,9 +25,9 @@ internal static bool exportFilter(@string name) {
 //
 // FileExports reports whether there are exported declarations.
 public static bool FileExports(ж<File> Ꮡsrc) {
-    ref var src = ref Ꮡsrc.val;
+    ref var src = ref Ꮡsrc.Value;
 
-    return filterFile(Ꮡsrc, exportFilter, true);
+    return filterFile(Ꮡsrc, new Func<@string, bool>(exportFilter), true);
 }
 
 // PackageExports trims the AST for a Go package in place such that
@@ -36,16 +37,16 @@ public static bool FileExports(ж<File> Ꮡsrc) {
 // PackageExports reports whether there are exported declarations;
 // it returns false otherwise.
 public static bool PackageExports(ж<Package> Ꮡpkg) {
-    ref var pkg = ref Ꮡpkg.val;
+    ref var pkg = ref Ꮡpkg.Value;
 
-    return filterPackage(Ꮡpkg, exportFilter, true);
+    return filterPackage(Ꮡpkg, new Func<@string, bool>(exportFilter), true);
 }
 
-public delegate bool Filter(@string _);
+// type ΔFilter is a methodless func type — rendered inline as its base delegate
 
 // ----------------------------------------------------------------------------
 // General filtering
-internal static slice<ж<Ident>> filterIdentList(slice<ж<Ident>> list, ΔFilter f) {
+internal static slice<ж<Ident>> filterIdentList(slice<ж<Ident>> list, Func<@string, bool> f) {
     nint j = 0;
     foreach (var (_, x) in list) {
         if (f((~x).Name)) {
@@ -61,33 +62,35 @@ internal static slice<ж<Ident>> filterIdentList(slice<ж<Ident>> list, ΔFilter
 // anonymous field, the result is nil.
 internal static ж<Ident> fieldName(Expr x) {
     switch (x.type()) {
-    case Ident.val t: {
+    case ж<Ident> t: {
         return t;
     }
-    case SelectorExpr.val t: {
+    case ж<SelectorExpr> t: {
         {
-            var (_, ok) = (~t).X._<Ident.val>(ᐧ); if (ok) {
+            var (_, ok) = (~t).X._<ж<Ident>>(ᐧ); if (ok) {
                 return (~t).Sel;
             }
         }
         break;
     }
-    case StarExpr.val t: {
+    case ж<StarExpr> t: {
         return fieldName((~t).X);
     }}
     return default!;
 }
 
-internal static bool /*removedFields*/ filterFieldList(ж<FieldList> Ꮡfields, ΔFilter filter, bool export) {
+internal static bool /*removedFields*/ filterFieldList(ж<FieldList> Ꮡfields, Func<@string, bool> filter, bool export) {
     bool removedFields = default!;
 
-    ref var fields = ref Ꮡfields.val;
-    if (fields == nil) {
+    ref var fields = ref Ꮡfields.DerefOrNil();
+    if (Ꮡfields == nil) {
         return false;
     }
     var list = fields.List;
     nint j = 0;
-    foreach (var (_, f) in list) {
+    foreach (var (_, vᴛ1) in list) {
+        var f = vᴛ1;
+
         var keepField = false;
         if (len((~f).Names) == 0){
             // anonymous field
@@ -95,7 +98,7 @@ internal static bool /*removedFields*/ filterFieldList(ж<FieldList> Ꮡfields, 
             keepField = name != nil && filter((~name).Name);
         } else {
             nint n = len((~f).Names);
-            f.val.Names = filterIdentList((~f).Names, filter);
+            f.Value.Names = filterIdentList((~f).Names, filter);
             if (len((~f).Names) < n) {
                 removedFields = true;
             }
@@ -116,8 +119,8 @@ internal static bool /*removedFields*/ filterFieldList(ж<FieldList> Ꮡfields, 
     return removedFields;
 }
 
-internal static void filterCompositeLit(ж<CompositeLit> Ꮡlit, ΔFilter filter, bool export) {
-    ref var lit = ref Ꮡlit.val;
+internal static void filterCompositeLit(ж<CompositeLit> Ꮡlit, Func<@string, bool> filter, bool export) {
+    ref var lit = ref Ꮡlit.Value;
 
     nint n = len(lit.Elts);
     lit.Elts = filterExprList(lit.Elts, filter, export);
@@ -126,23 +129,23 @@ internal static void filterCompositeLit(ж<CompositeLit> Ꮡlit, ΔFilter filter
     }
 }
 
-internal static slice<Expr> filterExprList(slice<Expr> list, ΔFilter filter, bool export) {
+internal static slice<Expr> filterExprList(slice<Expr> list, Func<@string, bool> filter, bool export) {
     nint j = 0;
     foreach (var (_, exp) in list) {
         switch (exp.type()) {
-        case CompositeLit.val x: {
+        case ж<CompositeLit> x: {
             filterCompositeLit(x, filter, export);
             break;
         }
-        case KeyValueExpr.val x: {
+        case ж<KeyValueExpr> x: {
             {
-                var (x, ok) = (~x).Key._<Ident.val>(ᐧ); if (ok && !filter((~x).Name)) {
+                var (xΔ1, ok) = (~x).Key._<ж<Ident>>(ᐧ); if (ok && !filter((~xΔ1).Name)) {
                     continue;
                 }
             }
             {
-                var (x, ok) = (~x).Value._<CompositeLit.val>(ᐧ); if (ok) {
-                    filterCompositeLit(x, filter, export);
+                var (xΔ2, ok) = (~x).Value._<ж<CompositeLit>>(ᐧ); if (ok) {
+                    filterCompositeLit(xΔ2, filter, export);
                 }
             }
             break;
@@ -153,10 +156,10 @@ internal static slice<Expr> filterExprList(slice<Expr> list, ΔFilter filter, bo
     return list[0..(int)(j)];
 }
 
-internal static bool filterParamList(ж<FieldList> Ꮡfields, ΔFilter filter, bool export) {
-    ref var fields = ref Ꮡfields.val;
+internal static bool filterParamList(ж<FieldList> Ꮡfields, Func<@string, bool> filter, bool export) {
+    ref var fields = ref Ꮡfields.DerefOrNil();
 
-    if (fields == nil) {
+    if (Ꮡfields == nil) {
         return false;
     }
     bool b = default!;
@@ -168,50 +171,50 @@ internal static bool filterParamList(ж<FieldList> Ꮡfields, ΔFilter filter, b
     return b;
 }
 
-internal static bool filterType(Expr typ, ΔFilter f, bool export) {
+internal static bool filterType(Expr typ, Func<@string, bool> f, bool export) {
     switch (typ.type()) {
-    case Ident.val t: {
+    case ж<Ident> t: {
         return f((~t).Name);
     }
-    case ParenExpr.val t: {
+    case ж<ParenExpr> t: {
         return filterType((~t).X, f, export);
     }
-    case ArrayType.val t: {
+    case ж<ArrayType> t: {
         return filterType((~t).Elt, f, export);
     }
-    case StructType.val t: {
+    case ж<StructType> t: {
         if (filterFieldList((~t).Fields, f, export)) {
-            var t.val.Incomplete = true;
+            t.Value.Incomplete = true;
         }
         return len((~(~t).Fields).List) > 0;
     }
-    case FuncType.val t: {
+    case ж<FuncType> t: {
         var b1 = filterParamList((~t).Params, f, export);
         var b2 = filterParamList((~t).Results, f, export);
         return b1 || b2;
     }
-    case InterfaceType.val t: {
+    case ж<InterfaceType> t: {
         if (filterFieldList((~t).Methods, f, export)) {
-            var t.val.Incomplete = true;
+            t.Value.Incomplete = true;
         }
         return len((~(~t).Methods).List) > 0;
     }
-    case MapType.val t: {
-        b1 = filterType((~t).Key, f, export);
-        b2 = filterType((~t).Value, f, export);
+    case ж<MapType> t: {
+        var b1 = filterType((~t).Key, f, export);
+        var b2 = filterType((~t).Value, f, export);
         return b1 || b2;
     }
-    case ChanType.val t: {
+    case ж<ChanType> t: {
         return filterType((~t).Value, f, export);
     }}
     return false;
 }
 
-internal static bool filterSpec(Spec spec, ΔFilter f, bool export) {
+internal static bool filterSpec(Spec spec, Func<@string, bool> f, bool export) {
     switch (spec.type()) {
-    case ValueSpec.val s: {
-        var s.val.Names = filterIdentList((~s).Names, f);
-        var s.val.Values = filterExprList((~s).Values, f, export);
+    case ж<ValueSpec> s: {
+        s.Value.Names = filterIdentList((~s).Names, f);
+        s.Value.Values = filterExprList((~s).Values, f, export);
         if (len((~s).Names) > 0) {
             if (export) {
                 filterType((~s).Type, f, export);
@@ -220,7 +223,7 @@ internal static bool filterSpec(Spec spec, ΔFilter f, bool export) {
         }
         break;
     }
-    case TypeSpec.val s: {
+    case ж<TypeSpec> s: {
         if (f((~(~s).Name).Name)) {
             if (export) {
                 filterType((~s).Type, f, export);
@@ -240,7 +243,7 @@ internal static bool filterSpec(Spec spec, ΔFilter f, bool export) {
     return false;
 }
 
-internal static slice<Spec> filterSpecList(slice<Spec> list, ΔFilter f, bool export) {
+internal static slice<Spec> filterSpecList(slice<Spec> list, Func<@string, bool> f, bool export) {
     nint j = 0;
     foreach (var (_, s) in list) {
         if (filterSpec(s, f, export)) {
@@ -257,17 +260,17 @@ internal static slice<Spec> filterSpecList(slice<Spec> list, ΔFilter f, bool ex
 //
 // FilterDecl reports whether there are any declared names left after
 // filtering.
-public static bool FilterDecl(Decl decl, ΔFilter f) {
+public static bool FilterDecl(Decl decl, Func<@string, bool> f) {
     return filterDecl(decl, f, false);
 }
 
-internal static bool filterDecl(Decl decl, ΔFilter f, bool export) {
+internal static bool filterDecl(Decl decl, Func<@string, bool> f, bool export) {
     switch (decl.type()) {
-    case GenDecl.val d: {
-        var d.val.Specs = filterSpecList((~d).Specs, f, export);
+    case ж<GenDecl> d: {
+        d.Value.Specs = filterSpecList((~d).Specs, f, export);
         return len((~d).Specs) > 0;
     }
-    case FuncDecl.val d: {
+    case ж<FuncDecl> d: {
         return f((~(~d).Name).Name);
     }}
     return false;
@@ -282,14 +285,14 @@ internal static bool filterDecl(Decl decl, ΔFilter f, bool export) {
 //
 // FilterFile reports whether there are any top-level declarations
 // left after filtering.
-public static bool FilterFile(ж<File> Ꮡsrc, ΔFilter f) {
-    ref var src = ref Ꮡsrc.val;
+public static bool FilterFile(ж<File> Ꮡsrc, Func<@string, bool> f) {
+    ref var src = ref Ꮡsrc.Value;
 
     return filterFile(Ꮡsrc, f, false);
 }
 
-internal static bool filterFile(ж<File> Ꮡsrc, ΔFilter f, bool export) {
-    ref var src = ref Ꮡsrc.val;
+internal static bool filterFile(ж<File> Ꮡsrc, Func<@string, bool> f, bool export) {
+    ref var src = ref Ꮡsrc.Value;
 
     nint j = 0;
     foreach (var (_, d) in src.Decls) {
@@ -312,14 +315,14 @@ internal static bool filterFile(ж<File> Ꮡsrc, ΔFilter f, bool export) {
 //
 // FilterPackage reports whether there are any top-level declarations
 // left after filtering.
-public static bool FilterPackage(ж<Package> Ꮡpkg, ΔFilter f) {
-    ref var pkg = ref Ꮡpkg.val;
+public static bool FilterPackage(ж<Package> Ꮡpkg, Func<@string, bool> f) {
+    ref var pkg = ref Ꮡpkg.Value;
 
     return filterPackage(Ꮡpkg, f, false);
 }
 
-internal static bool filterPackage(ж<Package> Ꮡpkg, ΔFilter f, bool export) {
-    ref var pkg = ref Ꮡpkg.val;
+internal static bool filterPackage(ж<Package> Ꮡpkg, Func<@string, bool> f, bool export) {
+    ref var pkg = ref Ꮡpkg.Value;
 
     var hasDecls = false;
     foreach (var (_, src) in pkg.Files) {
@@ -342,28 +345,28 @@ public static readonly MergeMode FilterImportDuplicates = 4;
 // the given function declaration. If the AST is incorrect for the
 // receiver, it assumes a function instead.
 internal static @string nameOf(ж<FuncDecl> Ꮡf) {
-    ref var f = ref Ꮡf.val;
+    ref var f = ref Ꮡf.Value;
 
     {
         var r = f.Recv; if (r != nil && len((~r).List) == 1) {
             // looks like a correct receiver declaration
-            var t = (~r).List[0].val.Type;
+            var t = (~r).List[0].Value.Type;
             // dereference pointer receiver types
             {
-                var (p, _) = t._<StarExpr.val>(ᐧ); if (p != nil) {
-                    t = p.val.X;
+                var (p, _) = t._<ж<StarExpr>>(ᐧ); if (p != nil) {
+                    t = p.Value.X;
                 }
             }
             // the receiver type must be a type name
             {
-                var (p, _) = t._<Ident.val>(ᐧ); if (p != nil) {
-                    return (~p).Name + "."u8 + f.Name.Name;
+                var (p, _) = t._<ж<Ident>>(ᐧ); if (p != nil) {
+                    return (~p).Name + "."u8 + (~f.Name).Name;
                 }
             }
         }
     }
     // otherwise assume a function instead
-    return f.Name.Name;
+    return (~f.Name).Name;
 }
 
 // separator is an empty //-style comment that is interspersed between
@@ -373,7 +376,7 @@ internal static ж<Comment> separator = Ꮡ(new Comment(token.NoPos, "//"));
 // MergePackageFiles creates a file AST by merging the ASTs of the
 // files belonging to a package. The mode flags control merging behavior.
 public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
-    ref var pkg = ref Ꮡpkg.val;
+    ref var pkg = ref Ꮡpkg.Value;
 
     // Count the number of package docs, comments and declarations across
     // all package files. Also, compute sorted list of filenames, so that
@@ -382,8 +385,8 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
     nint ncomments = 0;
     nint ndecls = 0;
     var filenames = new slice<@string>(len(pkg.Files));
-    ref var minPos = ref heap(new go.token_package.ΔPos(), out var ᏑminPos);
-    ref var maxPos = ref heap(new go.token_package.ΔPos(), out var ᏑmaxPos);
+    ref var minPos = ref heap(new tokenꓸPos(), out var ᏑminPos);
+    ref var maxPos = ref heap(new tokenꓸPos(), out var ᏑmaxPos);
     nint i = 0;
     foreach (var (filename, f) in pkg.Files) {
         filenames[i] = filename;
@@ -395,19 +398,19 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
         ncomments += len((~f).Comments);
         ndecls += len((~f).Decls);
         if (i == 0 || (~f).FileStart < minPos) {
-            minPos = f.val.FileStart;
+            minPos = f.Value.FileStart;
         }
         if (i == 0 || (~f).FileEnd > maxPos) {
-            maxPos = f.val.FileEnd;
+            maxPos = f.Value.FileEnd;
         }
     }
-    slices.Sort(filenames);
+    slices.Sort<slice<@string>, @string>(filenames);
     // Collect package comments from all package files into a single
     // CommentGroup - the collected package documentation. In general
     // there should be only one file with a package comment; but it's
     // better to collect extra comments than drop them on the floor.
     ж<CommentGroup> doc = default!;
-    ref var pos = ref heap(new go.token_package.ΔPos(), out var Ꮡpos);
+    ref var pos = ref heap(new tokenꓸPos(), out var Ꮡpos);
     if (ndocs > 0) {
         var list = new slice<ж<Comment>>(ndocs - 1);
         // -1: no separator before first group
@@ -417,18 +420,18 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
             if ((~f).Doc != nil) {
                 if (iΔ1 > 0) {
                     // not the first group - add separator
-                    list[i] = separator;
+                    list[iΔ1] = separator;
                     iΔ1++;
                 }
                 foreach (var (_, c) in (~(~f).Doc).List) {
-                    list[i] = c;
+                    list[iΔ1] = c;
                     iΔ1++;
                 }
                 if ((~f).Package > pos) {
                     // Keep the maximum package clause position as
                     // position for the package clause of the merged
                     // files.
-                    pos = f.val.Package;
+                    pos = f.Value.Package;
                 }
             }
         }
@@ -446,7 +449,9 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
         // number of filtered entries
         foreach (var (_, filename) in filenames) {
             var f = pkg.Files[filename];
-            foreach (var (_, d) in (~f).Decls) {
+            foreach (var (_, vᴛ1) in (~f).Decls) {
+                var d = vᴛ1;
+
                 if ((MergeMode)(mode & FilterFuncDuplicates) != 0) {
                     // A language entity may be declared multiple
                     // times in different package files; only at
@@ -458,13 +463,12 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
                     //            entities (const, type, vars) if
                     //            multiple declarations are common.
                     {
-                        var (fΔ1, isFun) = d._<FuncDecl.val>(ᐧ); if (isFun) {
+                        var (fΔ1, isFun) = d._<ж<FuncDecl>>(ᐧ); if (isFun) {
                             @string name = nameOf(fΔ1);
                             {
-                                nint j = funcs[name];
-                                var exists = funcs[name]; if (exists){
+                                var (j, exists) = funcs[name, ꟷ]; if (exists){
                                     // function declared already
-                                    if (decls[j] != default! && decls[j]._<FuncDecl.val>().Doc == nil){
+                                    if (decls[j] != default! && (~decls[j]._<ж<FuncDecl>>()).Doc == nil){
                                         // existing declaration has no documentation;
                                         // ignore the existing declaration
                                         decls[j] = default!;
@@ -481,7 +485,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
                         }
                     }
                 }
-                decls[i] = d;
+                decls[iΔ2] = d;
                 iΔ2++;
             }
         }
@@ -491,10 +495,10 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
         // would also invalidate the monotonically increasing position
         // info within a single file).
         if (n > 0) {
-            i = 0;
+            iΔ2 = 0;
             foreach (var (_, d) in decls) {
                 if (d != default!) {
-                    decls[i] = d;
+                    decls[iΔ2] = d;
                     iΔ2++;
                 }
             }
@@ -509,7 +513,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
             var f = pkg.Files[filename];
             foreach (var (_, imp) in (~f).Imports) {
                 {
-                    @string path = (~imp).Path.val.Value; if (!seen[path]) {
+                    @string path = imp.Value.Path.Value.Value; if (!seen[path]) {
                         // TODO: consider handling cases where:
                         // - 2 imports exist with the same import path but
                         //   have different local names (one should probably
@@ -537,7 +541,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
         nint iΔ3 = 0;
         foreach (var (_, filename) in filenames) {
             var f = pkg.Files[filename];
-            i += copy(comments[(int)(iΔ3)..], (~f).Comments);
+            iΔ3 += copy(comments[(int)(iΔ3)..], (~f).Comments);
         }
     }
     // TODO(gri) need to compute unresolved identifiers!

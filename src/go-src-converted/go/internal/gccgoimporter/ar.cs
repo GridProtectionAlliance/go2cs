@@ -7,12 +7,12 @@ using bytes = bytes_package;
 using elf = debug.elf_package;
 using errors = errors_package;
 using fmt = fmt_package;
-using xcoff = @internal.xcoff_package;
+using xcoff = global::go.@internal.xcoff_package;
 using io = io_package;
 using strconv = strconv_package;
 using strings = strings_package;
-using @internal;
 using debug;
+using global::go.@internal;
 
 partial class gccgoimporter_package {
 
@@ -92,12 +92,12 @@ internal static (io.ReadSeeker, error) arExportData(io.ReadSeeker archive) {
 
 // standardArExportData returns export data from a standard archive.
 internal static (io.ReadSeeker, error) standardArExportData(io.ReadSeeker archive) {
-    var off = ((int64)len(armag));
+    var off = (int64)len(armag);
     while (ᐧ) {
         array<byte> hdrBuf = new(60); /* arHdrSize */
         {
-            var (_, err) = archive.Read(hdrBuf[..]); if (err != default!) {
-                return (default!, err);
+            var (_, errΔ1) = archive.Read(hdrBuf[..]); if (errΔ1 != default!) {
+                return (default!, errΔ1);
             }
         }
         off += arHdrSize;
@@ -114,7 +114,7 @@ internal static (io.ReadSeeker, error) standardArExportData(io.ReadSeeker archiv
             // Archive symbol table or extended name table,
             // which we don't care about.
             var archiveAt = readerAtFromSeeker(archive);
-            (ret, errΔ1) = elfFromAr(io.NewSectionReader(archiveAt, off, size));
+            var (ret, errΔ1) = elfFromAr(io.NewSectionReader(archiveAt, off, size));
             if (ret != default! || errΔ1 != default!) {
                 return (ret, errΔ1);
             }
@@ -134,9 +134,9 @@ internal static (io.ReadSeeker, error) standardArExportData(io.ReadSeeker archiv
 // elfFromAr tries to get export data from an archive member as an ELF file.
 // If there is no export data, this returns nil, nil.
 internal static (io.ReadSeeker, error) elfFromAr(ж<io.SectionReader> Ꮡmember) {
-    ref var member = ref Ꮡmember.val;
+    ref var member = ref Ꮡmember.Value;
 
-    (ef, err) = elf.NewFile(~member);
+    var (ef, err) = elf.NewFile(new io_SectionReaderжReaderAt(Ꮡmember));
     if (err != default!) {
         return (default!, err);
     }
@@ -150,18 +150,18 @@ internal static (io.ReadSeeker, error) elfFromAr(ж<io.SectionReader> Ꮡmember)
 // aixBigArExportData returns export data from an AIX big archive.
 internal static (io.ReadSeeker, error) aixBigArExportData(io.ReadSeeker archive) {
     var archiveAt = readerAtFromSeeker(archive);
-    (arch, err) = xcoff.NewArchive(archiveAt);
+    var (arch, err) = xcoff.NewArchive(archiveAt);
     if (err != default!) {
         return (default!, err);
     }
     foreach (var (_, mem) in (~arch).Members) {
-        (f, errΔ1) = arch.GetFile(mem.Name);
+        var (f, errΔ1) = arch.GetFile((~mem).Name);
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
         var sdat = f.CSect(".go_export"u8);
         if (sdat != default!) {
-            return (~bytes.NewReader(sdat), default!);
+            return (new bytes_ReaderжReadSeeker(bytes.NewReader(sdat)), default!);
         }
     }
     return (default!, fmt.Errorf(".go_export not found in this archive"u8));
@@ -180,7 +180,7 @@ internal static io.ReaderAt readerAtFromSeeker(io.ReadSeeker rs) {
 }
 
 [GoType] partial struct seekerReadAt {
-    internal io_package.ReadSeeker seeker;
+    internal io.ReadSeeker seeker;
 }
 
 internal static (nint, error) ReadAt(this seekerReadAt sra, slice<byte> p, int64 off) {

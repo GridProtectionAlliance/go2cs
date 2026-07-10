@@ -67,7 +67,7 @@ internal static void heapSortOrdered<E>(slice<E> data, nint a, nint b)
 internal static void pdqsortOrdered<E>(slice<E> data, nint a, nint b, nint limit)
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
-    static readonly UntypedInt maxInsertion = 12;
+    UntypedInt maxInsertion = 12;
     bool wasBalanced = true;   // whether the last partitioning was reasonably balanced
     bool wasPartitioned = true; // whether the slice was already partitioned
     while (ᐧ) {
@@ -104,8 +104,8 @@ internal static void pdqsortOrdered<E>(slice<E> data, nint a, nint b, nint limit
         // Probably the slice contains many duplicate elements, partition the slice into
         // elements equal to and elements greater than the pivot.
         if (a > 0 && !cmp.Less(data[a - 1], data[pivot])) {
-            nint mid = partitionEqualOrdered(data, a, b, pivot);
-            a = mid;
+            nint midΔ1 = partitionEqualOrdered(data, a, b, pivot);
+            a = midΔ1;
             continue;
         }
         var (mid, alreadyPartitioned) = partitionOrdered(data, a, b, pivot);
@@ -202,8 +202,8 @@ internal static nint /*newpivot*/ partitionEqualOrdered<E>(slice<E> data, nint a
 internal static bool partialInsertionSortOrdered<E>(slice<E> data, nint a, nint b)
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
-    static readonly UntypedInt maxSteps = 5; // maximum number of adjacent out-of-order pairs that will get shifted
-    static readonly UntypedInt shortestShifting = 50; // don't shift any elements on short arrays
+    UntypedInt maxSteps = 5; // maximum number of adjacent out-of-order pairs that will get shifted
+    UntypedInt shortestShifting = 50; // don't shift any elements on short arrays
     nint i = a + 1;
     for (nint j = 0; j < maxSteps; j++) {
         while (i < b && !cmp.Less(data[i], data[i - 1])) {
@@ -222,7 +222,7 @@ internal static bool partialInsertionSortOrdered<E>(slice<E> data, nint a, nint 
                 if (!cmp.Less(data[jΔ1], data[jΔ1 - 1])) {
                     break;
                 }
-                (data[j], data[j - 1]) = (data[jΔ1 - 1], data[jΔ1]);
+                (data[jΔ1], data[jΔ1 - 1]) = (data[jΔ1 - 1], data[jΔ1]);
             }
         }
         // Shift the greater one to the right.
@@ -231,7 +231,7 @@ internal static bool partialInsertionSortOrdered<E>(slice<E> data, nint a, nint 
                 if (!cmp.Less(data[jΔ2], data[jΔ2 - 1])) {
                     break;
                 }
-                (data[j], data[j - 1]) = (data[jΔ2 - 1], data[jΔ2]);
+                (data[jΔ2], data[jΔ2 - 1]) = (data[jΔ2 - 1], data[jΔ2]);
             }
         }
     }
@@ -245,10 +245,10 @@ internal static void breakPatternsOrdered<E>(slice<E> data, nint a, nint b)
 {
     nint length = b - a;
     if (length >= 8) {
-        var random = ((xorshift)length);
+        var random = ((xorshift)(uint64)length);
         nuint modulus = nextPowerOfTwo(length);
         for (nint idx = a + (length / 4) * 2 - 1; idx <= a + (length / 4) * 2 + 1; idx++) {
-            nint other = ((nint)((nuint)(((nuint)random.Next()) & (modulus - 1))));
+            nint other = (nint)((nuint)((nuint)random.Next() & (modulus - 1)));
             if (other >= length) {
                 other -= length;
             }
@@ -268,8 +268,8 @@ internal static (nint pivot, sortedHint hint) choosePivotOrdered<E>(slice<E> dat
     nint pivot = default!;
     sortedHint hint = default!;
 
-    static readonly UntypedInt shortestNinther = 50;
-    static readonly UntypedInt maxSwaps = /* 4 * 3 */ 12;
+    UntypedInt shortestNinther = 50;
+    UntypedInt maxSwaps = /* 4 * 3 */ 12;
     nint l = b - a;
     ref var swaps = ref heap(new nint(), out var Ꮡswaps);
     nint i = a + l / 4 * 1;
@@ -302,7 +302,7 @@ internal static (nint pivot, sortedHint hint) choosePivotOrdered<E>(slice<E> dat
 internal static (nint, nint) order2Ordered<E>(slice<E> data, nint a, nint b, ж<nint> Ꮡswaps)
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
-    ref var swaps = ref Ꮡswaps.val;
+    ref var swaps = ref Ꮡswaps.Value;
 
     if (cmp.Less(data[b], data[a])) {
         swaps++;
@@ -315,7 +315,7 @@ internal static (nint, nint) order2Ordered<E>(slice<E> data, nint a, nint b, ж<
 internal static nint medianOrdered<E>(slice<E> data, nint a, nint b, nint c, ж<nint> Ꮡswaps)
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
-    ref var swaps = ref Ꮡswaps.val;
+    ref var swaps = ref Ꮡswaps.Value;
 
     (a, b) = order2Ordered(data, a, b, Ꮡswaps);
     (b, c) = order2Ordered(data, b, c, Ꮡswaps);
@@ -327,7 +327,7 @@ internal static nint medianOrdered<E>(slice<E> data, nint a, nint b, nint c, ж<
 internal static nint medianAdjacentOrdered<E>(slice<E> data, nint a, ж<nint> Ꮡswaps)
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
-    ref var swaps = ref Ꮡswaps.val;
+    ref var swaps = ref Ꮡswaps.Value;
 
     return medianOrdered(data, a - 1, a, a + 1, Ꮡswaps);
 }
@@ -413,7 +413,7 @@ internal static void symMergeOrdered<E>(slice<E> data, nint a, nint m, nint b)
         nint i = m;
         nint j = b;
         while (i < j) {
-            nint h = ((nint)(((nuint)(i + j)) >> (int)(1)));
+            nint h = (nint)(((nuint)(i + j) >> (int)(1)));
             if (cmp.Less(data[h], data[a])){
                 i = h + 1;
             } else {
@@ -436,7 +436,7 @@ internal static void symMergeOrdered<E>(slice<E> data, nint a, nint m, nint b)
         nint i = a;
         nint j = m;
         while (i < j) {
-            nint h = ((nint)(((nuint)(i + j)) >> (int)(1)));
+            nint h = (nint)(((nuint)(i + j) >> (int)(1)));
             if (!cmp.Less(data[m], data[h])){
                 i = h + 1;
             } else {
@@ -449,7 +449,7 @@ internal static void symMergeOrdered<E>(slice<E> data, nint a, nint m, nint b)
         }
         return;
     }
-    nint mid = ((nint)(((nuint)(a + b)) >> (int)(1)));
+    nint mid = (nint)(((nuint)(a + b) >> (int)(1)));
     nint n = mid + m;
     nint start = default!;
     nint r = default!;
@@ -462,7 +462,7 @@ internal static void symMergeOrdered<E>(slice<E> data, nint a, nint m, nint b)
     }
     nint p = n - 1;
     while (start < r) {
-        nint c = ((nint)(((nuint)(start + r)) >> (int)(1)));
+        nint c = (nint)(((nuint)(start + r) >> (int)(1)));
         if (!cmp.Less(data[p - c], data[c])){
             start = c + 1;
         } else {

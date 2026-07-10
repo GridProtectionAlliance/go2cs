@@ -3,7 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal;
 
-using cpu = @internal.cpu_package;
+using cpu = go.@internal.cpu_package;
+using go.@internal;
 
 partial class bytealg_package {
 

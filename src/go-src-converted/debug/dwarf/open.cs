@@ -43,8 +43,8 @@ partial class dwarf_package {
     // parsed data
     internal map<uint64, abbrevTable> abbrevCache;
     internal bool bigEndian;
-    internal encoding.binary_package.ByteOrder order;
-    internal dwarf.Type typeCache;
+    internal binary.ByteOrder order;
+    internal map<Offset, ΔType> typeCache;
     internal map<uint64, ж<typeUnit>> typeSigs;
     internal slice<unit> unit;
 }
@@ -70,19 +70,19 @@ public static (ж<Data>, error) New(slice<byte> abbrev, slice<byte> aranges, sli
         ranges: ranges,
         str: str,
         abbrevCache: new map<uint64, abbrevTable>(),
-        typeCache: new dwarf.Type(),
+        typeCache: new map<Offset, ΔType>(),
         typeSigs: new map<uint64, ж<typeUnit>>()
     ));
     // Sniff .debug_info to figure out byte order.
     // 32-bit DWARF: 4 byte length, 2 byte version.
     // 64-bit DWARf: 4 bytes of 0xff, 8 byte length, 2 byte version.
     if (len((~d).info) < 6) {
-        return (default!, new DecodeError("info", ((Offset)len((~d).info)), "too short"));
+        return (default!, new DecodeError("info", ((Offset)(uint32)len((~d).info)), "too short"));
     }
     nint offset = 4;
-    if ((~d).info[0] == 255 && (~d).info[1] == 255 && (~d).info[2] == 255 && (~d).info[3] == 255) {
+    if ((~d).info[0] == 0xff && (~d).info[1] == 0xff && (~d).info[2] == 0xff && (~d).info[3] == 0xff) {
         if (len((~d).info) < 14) {
-            return (default!, new DecodeError("info", ((Offset)len((~d).info)), "too short"));
+            return (default!, new DecodeError("info", ((Offset)(uint32)len((~d).info)), "too short"));
         }
         offset = 12;
     }
@@ -93,24 +93,24 @@ public static (ж<Data>, error) New(slice<byte> abbrev, slice<byte> aranges, sli
         return (default!, new DecodeError("info", 4, "unsupported version 0"));
     }
     case {} when x is 0: {
-        d.val.bigEndian = true;
-        d.val.order = binary.BigEndian;
+        d.Value.bigEndian = true;
+        d.Value.order = new binary_bigEndianᴠByteOrder(binary.BigEndian);
         break;
     }
     case {} when y is 0: {
-        d.val.bigEndian = false;
-        d.val.order = binary.LittleEndian;
+        d.Value.bigEndian = false;
+        d.Value.order = new binary_littleEndianᴠByteOrder(binary.LittleEndian);
         break;
     }
     default: {
         return (default!, new DecodeError("info", 4, "cannot determine byte order"));
     }}
 
-    (u, err) = d.parseUnits();
+    var (u, err) = d.parseUnits();
     if (err != default!) {
         return (default!, err);
     }
-    d.val.unit = u;
+    d.Value.unit = u;
     return (d, default!);
 }
 
@@ -118,8 +118,10 @@ public static (ж<Data>, error) New(slice<byte> abbrev, slice<byte> aranges, sli
 // typical object with DWARF version 4 debug info will have multiple
 // .debug_types sections. The name is used for error reporting only,
 // and serves to distinguish one .debug_types section from another.
-[GoRecv] public static error AddTypes(this ref Data d, @string name, slice<byte> types) {
-    return d.parseTypes(name, types);
+public static error AddTypes(this ж<Data> Ꮡd, @string name, slice<byte> types) {
+    ref var d = ref Ꮡd.Value;
+
+    return Ꮡd.parseTypes(name, types);
 }
 
 // AddSection adds another DWARF section by name. The name should be a

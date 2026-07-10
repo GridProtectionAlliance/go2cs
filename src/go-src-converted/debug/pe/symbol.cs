@@ -50,7 +50,7 @@ public static readonly UntypedInt COFFSymbolSize = 18;
 // At the moment this package only provides APIs for looking at
 // aux symbols of format 5 (associated with section definition symbols).
 internal static (slice<COFFSymbol>, error) readCOFFSymbols(ж<FileHeader> Ꮡfh, io.ReadSeeker r) {
-    ref var fh = ref Ꮡfh.val;
+    ref var fh = ref Ꮡfh.Value;
 
     if (fh.PointerToSymbolTable == 0) {
         return (default!, default!);
@@ -58,26 +58,26 @@ internal static (slice<COFFSymbol>, error) readCOFFSymbols(ж<FileHeader> Ꮡfh,
     if (fh.NumberOfSymbols <= 0) {
         return (default!, default!);
     }
-    var (_, err) = r.Seek(((int64)fh.PointerToSymbolTable), io.SeekStart);
+    var (_, err) = r.Seek((int64)fh.PointerToSymbolTable, io.SeekStart);
     if (err != default!) {
         return (default!, fmt.Errorf("fail to seek to symbol table: %v"u8, err));
     }
-    nint c = saferio.SliceCap<COFFSymbol>(((uint64)fh.NumberOfSymbols));
+    nint c = saferio.SliceCap<COFFSymbol>((uint64)fh.NumberOfSymbols);
     if (c < 0) {
         return (default!, errors.New("too many symbols; file may be corrupt"u8));
     }
     var syms = new slice<COFFSymbol>(0, c);
     nint naux = 0;
-    for (var k = ((uint32)0); k < fh.NumberOfSymbols; k++) {
+    for (var k = (uint32)0; k < fh.NumberOfSymbols; k++) {
         ref var sym = ref heap(new COFFSymbol(), out var Ꮡsym);
         if (naux == 0){
             // Read a primary symbol.
-            err = binary.Read(r, binary.LittleEndian, Ꮡsym);
+            err = binary.Read(r, new binary_littleEndianᴠByteOrder(binary.LittleEndian), Ꮡsym);
             if (err != default!) {
                 return (default!, fmt.Errorf("fail to read symbol table: %v"u8, err));
             }
             // Record how many auxiliary symbols it has.
-            naux = ((nint)sym.NumberOfAuxSymbols);
+            naux = (nint)sym.NumberOfAuxSymbols;
         } else {
             // Read an aux symbol. At the moment we assume all
             // aux symbols are format 5 (obviously this doesn't always
@@ -85,7 +85,7 @@ internal static (slice<COFFSymbol>, error) readCOFFSymbols(ж<FileHeader> Ꮡfh,
             // are supported in the future).
             naux--;
             var aux = (ж<COFFSymbolAuxFormat5>)(uintptr)(new @unsafe.Pointer(Ꮡsym));
-            err = binary.Read(r, binary.LittleEndian, aux);
+            err = binary.Read(r, new binary_littleEndianᴠByteOrder(binary.LittleEndian), aux);
             if (err != default!) {
                 return (default!, fmt.Errorf("fail to read symbol table: %v"u8, err));
             }
@@ -125,13 +125,16 @@ internal static (slice<ж<Symbol>>, error) removeAuxSymbols(slice<COFFSymbol> al
         return (default!, default!);
     }
     var syms = new slice<ж<Symbol>>(0);
-    var aux = ((uint8)0);
-    foreach (var (_, sym) in allsyms) {
+    var aux = (uint8)0;
+    foreach (var (_, vᴛ1) in allsyms) {
+        var sym = vᴛ1;
+
         if (aux > 0) {
             aux--;
             continue;
         }
-        (name, err) = sym.FullName(st);
+        ref var name = ref heap<@string>(out var Ꮡname);
+        (name, var err) = sym.FullName(st);
         if (err != default!) {
             return (default!, err);
         }
@@ -205,8 +208,8 @@ public static readonly UntypedInt IMAGE_COMDAT_SELECT_LARGEST = 6;
         return (rv, fmt.Errorf("invalid symbol index"u8));
     }
     var pesym = Ꮡ(f.COFFSymbols[idx]);
-    static readonly UntypedInt IMAGE_SYM_CLASS_STATIC = 3;
-    if ((~pesym).StorageClass != ((uint8)IMAGE_SYM_CLASS_STATIC)) {
+    UntypedInt IMAGE_SYM_CLASS_STATIC = 3;
+    if ((~pesym).StorageClass != (uint8)IMAGE_SYM_CLASS_STATIC) {
         return (rv, fmt.Errorf("incorrect symbol storage class"u8));
     }
     if ((~pesym).NumberOfAuxSymbols == 0 || idx + 1 >= len(f.COFFSymbols)) {

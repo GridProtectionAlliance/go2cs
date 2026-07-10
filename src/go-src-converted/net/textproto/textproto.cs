@@ -57,14 +57,14 @@ public static @string Error(this ProtocolError p) {
     public partial ref Reader Reader { get; }
     public partial ref Writer Writer { get; }
     public partial ref Pipeline Pipeline { get; }
-    internal io_package.ReadWriteCloser conn;
+    internal io.ReadWriteCloser conn;
 }
 
 // NewConn returns a new [Conn] using conn for I/O.
 public static ж<Conn> NewConn(io.ReadWriteCloser conn) {
     return Ꮡ(new Conn(
-        Reader: new Reader(R: bufio.NewReader(conn)),
-        Writer: new Writer(W: bufio.NewWriter(conn)),
+        Reader: new Reader(R: bufio.NewReader(new io_ReadWriteCloserᴠReader(conn))),
+        Writer: new Writer(W: bufio.NewWriter(new io_ReadWriteCloserᴠWriter(conn))),
         conn: conn
     ));
 }
@@ -77,11 +77,11 @@ public static ж<Conn> NewConn(io.ReadWriteCloser conn) {
 // Dial connects to the given address on the given network using [net.Dial]
 // and then returns a new [Conn] for the connection.
 public static (ж<Conn>, error) Dial(@string network, @string addr) {
-    (c, err) = net.Dial(network, addr);
+    var (c, err) = net.Dial(network, addr);
     if (err != default!) {
         return (default!, err);
     }
-    return (NewConn(c), default!);
+    return (NewConn(new net_ConnᴠReadWriteCloser(c)), default!);
 }
 
 // Cmd is a convenience method that sends a command after
@@ -108,15 +108,16 @@ public static (ж<Conn>, error) Dial(@string network, @string addr) {
 //		return nil, err
 //	}
 //	return c.ReadCodeLine(250)
-[GoRecv] public static (nuint id, error err) Cmd(this ref Conn c, @string format, params ꓸꓸꓸany argsʗp) {
+public static (nuint id, error err) Cmd(this ж<Conn> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) {
     nuint id = default!;
     error err = default!;
     var args = argsʗp.slice();
 
-    id = c.Next();
-    c.StartRequest(id);
-    err = c.PrintfLine(format, args.ꓸꓸꓸ);
-    c.EndRequest(id);
+    ref var c = ref Ꮡc.Value;
+    id = Ꮡc.of(Conn.ᏑPipeline).Next();
+    Ꮡc.of(Conn.ᏑPipeline).StartRequest(id);
+    err = Ꮡc.of(Conn.ᏑWriter).PrintfLine(format, args.ꓸꓸꓸ);
+    Ꮡc.of(Conn.ᏑPipeline).EndRequest(id);
     if (err != default!) {
         return (0, err);
     }
@@ -150,7 +151,7 @@ internal static bool isASCIISpace(byte b) {
 }
 
 internal static bool isASCIILetter(byte b) {
-    b |= (byte)(32);
+    b |= (byte)(0x20);
     // make lower case
     return (rune)'a' <= b && b <= (rune)'z';
 }
