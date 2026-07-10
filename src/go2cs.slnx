@@ -178,6 +178,7 @@
     <Project Path="Tests/Behavioral/GlobalTupleVarDecl/GlobalTupleVarDecl.csproj" />
     <Project Path="Tests/Behavioral/GoCallVariations/GoCallVariations.csproj" />
     <Project Path="Tests/Behavioral/GoNamespaceShadow/GoNamespaceShadow.csproj" />
+    <Project Path="Tests/Behavioral/GoStmtReceiverLambda/GoStmtReceiverLambda.csproj" />
     <Project Path="Tests/Behavioral/GoStmtValueReturn/GoStmtValueReturn.csproj" />
     <Project Path="Tests/Behavioral/HeapKeywordVar/HeapKeywordVar.csproj" />
     <Project Path="Tests/Behavioral/HexByteStringLiteral/HexByteStringLiteral.csproj" />
@@ -316,6 +317,8 @@
     <Project Path="Tests/Behavioral/SparseArrayNamedIntKey/SparseArrayNamedIntKey.csproj" />
     <Project Path="Tests/Behavioral/ShadowedCompoundAssign/ShadowedCompoundAssign.csproj" />
     <Project Path="Tests/Behavioral/ShadowedHeapBoxReceiver/ShadowedHeapBoxReceiver.csproj" />
+    <Project Path="Tests/Behavioral/ShadowedImportConstLib/ShadowedImportConstLib.csproj" />
+    <Project Path="Tests/Behavioral/ShadowedImportConstUser/ShadowedImportConstUser.csproj" />
     <Project Path="Tests/Behavioral/ShadowedInterfaceEmbed/ShadowedInterfaceEmbed.csproj" />
     <Project Path="Tests/Behavioral/ShadowedPointerParam/ShadowedPointerParam.csproj" />
     <Project Path="Tests/Behavioral/ShadowedVarMethodCallLHS/ShadowedVarMethodCallLHS.csproj" />

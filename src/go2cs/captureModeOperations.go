@@ -138,7 +138,7 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 			info:     info,
 		})
 
-		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasPointerMethodValueOnReceiver(funcDecl.Body, recvName, info) || bodyCapturesReceiverInValueMethodValue(funcDecl.Body, recvName, info) || bodyPassesReceiverAsPointerArg(funcDecl.Body, recvName, info) || bodyWrappedInDeferContext(funcDecl.Body, recvName) {
+		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasPointerMethodValueOnReceiver(funcDecl.Body, recvName, info) || bodyCapturesReceiverInValueMethodValue(funcDecl.Body, recvName, info) || bodyHasGoStmtLambdaCapturingReceiver(funcDecl.Body, recvName, signature.Recv(), info) || bodyPassesReceiverAsPointerArg(funcDecl.Body, recvName, info) || bodyWrappedInDeferContext(funcDecl.Body, recvName) {
 			// Key by the generic origin so instantiated call sites (Set[int]) match.
 			origin := funcObj.Origin()
 			packageCaptureModeMethods[origin] = true
@@ -482,6 +482,104 @@ func bodyCapturesReceiverInValueMethodValue(body *ast.BlockStmt, recvName string
 		}
 
 		return true
+	})
+
+	return found
+}
+
+// bodyHasGoStmtLambdaCapturingReceiver reports whether the body contains a `go` statement whose
+// emission is FORCED into a synthesized lambda that references the method's own receiver —
+// `go q.conn.HandshakeContext(ctx)` inside `func (q *QUICConn) Start` (crypto/tls quic.go):
+// HandshakeContext returns a value, and goǃ has only void Action overloads, so visitGoStmt
+// renders `goǃ(ᴛ1 => q.conn.HandshakeContext(ᴛ1), ctx)` (the x/net/nettest CS0407 form) — a
+// lambda capturing the `ref T` receiver (CS1628). The method-group emissions (a void
+// matching-arity callee, e.g. os/exec's `go c.watchCtx(resultc)`) bind the receiver chain when
+// the delegate is created, outside any lambda, and are excluded. A func-literal callee is
+// bodyCapturesReceiverInClosure's case; a `defer` sibling needs no equivalent — any
+// function-level defer already promotes via bodyWrappedInDeferContext. Promoting the method
+// direct-ж gives the lambda the capturable box `Ꮡq`: the go-stmt capture analysis already
+// box-ref-marks the receiver (varIsDerefdPointerParam), so only the missing promotion
+// suppressed the box render (the convIdent ref-receiver guard).
+func bodyHasGoStmtLambdaCapturingReceiver(body *ast.BlockStmt, recvName string, recv *types.Var, info *types.Info) bool {
+	found := false
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		if found {
+			return false
+		}
+
+		goStmt, ok := node.(*ast.GoStmt)
+
+		if !ok {
+			return true
+		}
+
+		if _, isFuncLit := goStmt.Call.Fun.(*ast.FuncLit); isFuncLit {
+			return true
+		}
+
+		funType := info.TypeOf(goStmt.Call.Fun)
+
+		if funType == nil {
+			return true
+		}
+
+		sig, ok := funType.Underlying().(*types.Signature)
+
+		if !ok {
+			return true
+		}
+
+		hasResults := sig.Results() != nil && sig.Results().Len() > 0
+		namedFuncType := false
+
+		if named, ok := types.Unalias(funType).(*types.Named); ok {
+			if _, isSig := named.Underlying().(*types.Signature); isSig {
+				namedFuncType = true
+			}
+		}
+
+		// Mirror visitGoStmt's lambda-form decision: a nullary call synthesizes a lambda only
+		// for a value-returning or named-func-type callee; a call with arguments does so when
+		// the callee returns a value or the arity mismatches (a variadic callee never matches —
+		// see getFunctionParamCount).
+		paramCount := len(goStmt.Call.Args)
+		declaredCount := sig.Params().Len()
+
+		if sig.Variadic() {
+			declaredCount = -1
+		}
+
+		var lambdaForm bool
+
+		if paramCount == 0 {
+			lambdaForm = hasResults || namedFuncType
+		} else {
+			lambdaForm = hasResults || paramCount != declaredCount
+		}
+
+		if !lambdaForm {
+			return true
+		}
+
+		// Only the CALLEE expression (the receiver chain) renders inside the synthesized
+		// lambda; arguments render outside, as goǃ call arguments evaluated at go time.
+		ast.Inspect(goStmt.Call.Fun, func(inner ast.Node) bool {
+			ident, ok := inner.(*ast.Ident)
+
+			if !ok || ident.Name != recvName {
+				return true
+			}
+
+			if recv != nil && info.ObjectOf(ident) != recv {
+				return true
+			}
+
+			found = true
+			return false
+		})
+
+		return !found
 	})
 
 	return found

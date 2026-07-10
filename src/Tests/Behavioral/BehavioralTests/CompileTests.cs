@@ -408,6 +408,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGoNamespaceShadow() => CheckTarget("GoNamespaceShadow");
 
     [TestMethod]
+    public void CheckGoStmtReceiverLambda() => CheckTarget("GoStmtReceiverLambda");
+
+    [TestMethod]
     public void CheckGoStmtValueReturn() => CheckTarget("GoStmtValueReturn");
 
     [TestMethod]
@@ -814,6 +817,12 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckShadowedHeapBoxReceiver() => CheckTarget("ShadowedHeapBoxReceiver");
+
+    [TestMethod]
+    public void CheckShadowedImportConstLib() => CheckTarget("ShadowedImportConstLib");
+
+    [TestMethod]
+    public void CheckShadowedImportConstUser() => CheckTarget("ShadowedImportConstUser");
 
     [TestMethod]
     public void CheckShadowedInterfaceEmbed() => CheckTarget("ShadowedInterfaceEmbed");
