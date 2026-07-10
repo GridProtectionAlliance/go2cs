@@ -271,6 +271,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckFloatConstIntContext() => CheckTarget("FloatConstIntContext");
 
     [TestMethod]
+    public void CheckForeignPtrEmbedIfaceUser() => CheckTarget("ForeignPtrEmbedIfaceUser");
+
+    [TestMethod]
     public void CheckForInitMixedTypes() => CheckTarget("ForInitMixedTypes");
 
     [TestMethod]
@@ -403,6 +406,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckHexByteStringLiteral() => CheckTarget("HexByteStringLiteral");
 
     [TestMethod]
+    public void CheckIfaceFieldEmbedAdapter() => CheckTarget("IfaceFieldEmbedAdapter");
+
+    [TestMethod]
     public void CheckIfaceFieldMethodValueBind() => CheckTarget("IfaceFieldMethodValueBind");
 
     [TestMethod]
@@ -440,6 +446,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckIotaEnum() => CheckTarget("IotaEnum");
+
+    [TestMethod]
+    public void CheckKeyedLiteralIfaceAssign() => CheckTarget("KeyedLiteralIfaceAssign");
 
     [TestMethod]
     public void CheckKeywordNamedTypes() => CheckTarget("KeywordNamedTypes");

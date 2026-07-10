@@ -535,37 +535,45 @@ public class ImplementGenerator : ISourceGenerator
                     }
                 }
 
-                // Interface members may also promote through an embedded INTERFACE field —
+                // Interface members may also promote through embedded INTERFACE field(s) —
                 // zip's `type nopCloser struct { io.Writer }`: Write lives on the FIELD's
                 // interface value (Go promotes its method set), Close on the struct. Forward
-                // still-unbound members that the field's interface declares through the field:
+                // still-unbound members through the field whose interface declares them:
                 // `m_box.Value.Writer.Write(…)`. Semantic detection (field name equals its
                 // interface type's simple name — the converter names the field after the Go
                 // embed, so a Δ-renamed interface TYPE keeps a markerless FIELD: slogtest's
                 // `wrapper` embeds slog.ΔHandler as `Handler`) — the converter emits embeds
-                // as real fields, so the symbol sees them. Gated to a SINGLE embedded
-                // interface field.
-                IFieldSymbol[] embeddedIfaceFields = structType.GetMembers()
+                // as real fields, so the symbol sees them. With SEVERAL embedded interface
+                // fields (httputil's `dumpConn` embeds io.Writer AND io.Reader, adapted to
+                // net.Conn) each member routes to the UNIQUE field declaring it — Go's
+                // promotion ambiguity rules reject a member two fields declare unless the
+                // struct overrides it, which forwardReceivers already resolved above.
+                List<(string FieldName, HashSet<string> Members)> embeddedIfaceFieldMembers = structType.GetMembers()
                     .OfType<IFieldSymbol>()
                     .Where(field => !field.IsStatic && field.Type.TypeKind == TypeKind.Interface &&
+                                    field.Type is INamedTypeSymbol &&
                                     (field.Name == field.Type.Name || ShadowVarMarker + field.Name == field.Type.Name))
-                    .ToArray();
-
-                if (embeddedIfaceFields.Length == 1 && embeddedIfaceFields[0].Type is INamedTypeSymbol ifaceFieldType)
-                {
-                    string fieldName = embeddedIfaceFields[0].Name;
-
-                    HashSet<string> fieldMembers = new(ifaceFieldType.AllInterfaces
-                        .Concat([ifaceFieldType])
+                    .Select(field => (field.Name, new HashSet<string>(((INamedTypeSymbol)field.Type).AllInterfaces
+                        .Concat([(INamedTypeSymbol)field.Type])
                         .SelectMany(iface => iface.GetMembers().OfType<IMethodSymbol>())
-                        .Select(method => method.Name), StringComparer.Ordinal);
+                        .Select(method => method.Name), StringComparer.Ordinal)))
+                    .ToList();
 
+                if (embeddedIfaceFieldMembers.Count > 0)
+                {
                     foreach (MethodInfo method in methods)
                     {
                         string simpleName = GetSimpleName(method.Name);
 
-                        if (!forwardReceivers.ContainsKey(simpleName) && fieldMembers.Contains(simpleName))
-                            forwardReceivers[simpleName] = $"m_box.Value.{fieldName}";
+                        if (forwardReceivers.ContainsKey(simpleName))
+                            continue;
+
+                        List<(string FieldName, HashSet<string> Members)> declaringFields = embeddedIfaceFieldMembers
+                            .Where(field => field.Members.Contains(simpleName))
+                            .ToList();
+
+                        if (declaringFields.Count == 1)
+                            forwardReceivers[simpleName] = $"m_box.Value.{declaringFields[0].FieldName}";
                     }
                 }
 
