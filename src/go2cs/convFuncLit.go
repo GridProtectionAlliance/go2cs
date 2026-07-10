@@ -324,6 +324,24 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 				if len(armTypes) > 1 {
 					returnTypePrefix = convertToCSTypeName(v.getTypeName(results.At(0).Type(), false)) + " "
 				}
+			} else if context.isAssignment {
+				// A STRING-returning literal in natural-inference position (`pick := func(v any)
+				// string {…}` → `var pick = …`) can mix return arms of DIFFERENT C# types even
+				// though every arm is a Go string: a string literal is a `"…"u8` ReadOnlySpan<byte>,
+				// a literal+var concat binds golib's `operator +(@string, @string)` (so it is
+				// @string regardless of u8 suppression), and a call into a hand-written stub can
+				// return C# `string` (the baseline fmt.Sprintf does). @string↔string convert
+				// implicitly BOTH ways, so no unique best common type exists and the delegate is
+				// not inferable (CS8917). State the return type explicitly (`var pick = @string
+				// (any v) => …`); each arm then converts to @string in place. Gated to the basic
+				// string kind (a named string type would need its own conversions — see
+				// lambdaConstReturnCastType's named-type rationale) and to assignment position:
+				// an argument/return/composite-element literal is target-typed by its delegate
+				// (no inference to fail), where an explicit return type could only add an
+				// identity-match constraint against stub delegate types.
+				if basic, ok := types.Unalias(results.At(0).Type()).(*types.Basic); ok && basic.Kind() == types.String {
+					returnTypePrefix = convertToCSTypeName(v.getTypeName(results.At(0).Type(), false)) + " "
+				}
 			}
 		} else if results := litSig.Results(); results != nil && results.Len() > 1 && context.isAssignment {
 			// A MULTI-result literal where EVERY return arm carries a typeless element —

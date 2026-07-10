@@ -7,7 +7,7 @@ using ꓸꓸꓸnint = Span<nint>;
 partial class main_package {
 
 internal static void Main() {
-    var format = (@string f, params ꓸꓸꓸany aʗp) => {
+    var format = @string (@string f, params ꓸꓸꓸany aʗp) => {
         var a = aʗp.slice();
         return fmt.Sprintf(f, a.ꓸꓸꓸ);
     };

@@ -303,6 +303,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckFuncLitCaptureInCondition() => CheckTarget("FuncLitCaptureInCondition");
 
     [TestMethod]
+    public void CheckFuncLitStringConcatReturn() => CheckTarget("FuncLitStringConcatReturn");
+
+    [TestMethod]
     public void CheckFuncTypeParam() => CheckTarget("FuncTypeParam");
 
     [TestMethod]

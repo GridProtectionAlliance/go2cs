@@ -271,6 +271,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckFuncLitCaptureInCondition() => CheckTarget("FuncLitCaptureInCondition");
 
     [TestMethod]
+    public void CheckFuncLitStringConcatReturn() => CheckTarget("FuncLitStringConcatReturn");
+
+    [TestMethod]
     public void CheckFuncTypeParam() => CheckTarget("FuncTypeParam");
 
     [TestMethod]
