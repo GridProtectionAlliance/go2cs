@@ -864,6 +864,20 @@ An **untyped (type-inferred) composite literal** — the inner `{…}` of a `[][
 
 An **indexed (keyed) slice/array literal** — `[]string{lockRankSysmon: "sysmon", …}` — is emitted as a golib `golib.SparseArray<T>` collection initializer (`[index] = value`). Its indexer takes a Go `int`. When an index key's Go type is a **defined integer type** whose underlying type does not implicitly widen to C# `int` (i.e. `int`/`int64`/`uint`/`uint32`/`uint64`/`uintptr`, as opposed to `int8`/`uint8`/`int16`/`uint16`/`int32`), the key is cast to `int` so it satisfies the indexer (CS1503 otherwise): `[lockRankSysmon]` (a `type lockRank int`) → `[(int)lockRankSysmon]`. A key that already widens (e.g. a `uint8`-backed `Kind`) is left uncast.
 
+A keyed slice/array literal whose element type is a **non-empty INTERFACE** routes its elements
+through the interface-cast element loop (each value wraps via `convertToInterfaceType`) instead of
+`convExprList` — and that loop rendered a `KeyValueExpr` as a FLAT `key, value` pair, feeding the
+SparseArray collection initializer one item at a time (`Add(key)` then `Add(value)`:
+CS1950 + CS1503 ×21 pairs on go/internal/gccgoimporter's `lookupBuiltinType`,
+`[...]types.Type{gccgoBuiltinINT8: types.Typ[types.Int8], …}` — untyped named-const keys in a
+function-body literal, immediately indexed). The loop now emits the same `[key] = wrappedValue`
+indexer form the non-interface path produces, with the key routed through `sparseArrayKey` (so a
+defined-integer-type key keeps its `[(int)key]` cast alongside the interface-wrapped value); a
+keyed MAP literal with an interface element type reaching the same loop takes the identical
+indexer form. (Guarded by the `SparseArrayIfaceElem` behavioral test — a function-body sparse
+literal with untyped named-const keys immediately indexed, the package-level form, and a
+named-`uint`-keyed form, elements read back and output-compared vs Go.)
+
 A keyed (sparse, constant-index) literal of a **named array-wrapper** type — internal/trace/oldtrace's `timedEventArgs{1: uint64(ev.StkID)}` where `type timedEventArgs [4]uint64` — backs onto the golib `array<T>(length)` (which has an indexer setter), not a raw C# array. The wrapper's constructor takes an `array<T>` (the positional path already produces one via `.array()`), and the keyed elements render as the `[i] = v` indexed initializer — valid on `new array<uint64>(4){[1] = v}` but *not* on `new uint64[]{[1] = v}` (CS0131, an array-initializer takes no indexed members). A **positional** literal of the same wrapper keeps the `new uint64[]{…}.array()` form (unchanged — no churn). (Guarded by `NamedArrayKeyedLiteral` — a `type args [4]uint64` with multi-keyed, single-keyed, and positional literals, element reads output-compared vs Go.)
 
 A **generic** named array type carries its type parameters (and their constraints) onto the forward declaration, and its element type is emitted fully qualified in the `[GoType]` attribute so the generated array-backed partial — which lives in a file without this file's package-relative `using` aliases — can resolve it:

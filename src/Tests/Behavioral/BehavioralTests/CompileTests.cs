@@ -882,6 +882,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckSortArrayType() => CheckTarget("SortArrayType");
 
     [TestMethod]
+    public void CheckSparseArrayIfaceElem() => CheckTarget("SparseArrayIfaceElem");
+
+    [TestMethod]
     public void CheckSparseArrayNamedIntKey() => CheckTarget("SparseArrayNamedIntKey");
 
     [TestMethod]

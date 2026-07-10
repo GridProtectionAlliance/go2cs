@@ -778,10 +778,26 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 			var expr string
 
 			if kv, ok := elt.(*ast.KeyValueExpr); ok {
-				// Handle key-value pairs (for maps or sparse arrays)
-				keyStr := v.convExpr(kv.Key, nil)
+				// A keyed element (a map, or a KEYED/sparse array emitted as a golib
+				// SparseArray) takes the same `[key] = value` indexer form convKeyValueExpr's
+				// MapSource arm emits, with the VALUE routed through the interface conversion.
+				// The old flat `key, value` pair fed the collection initializer one item at a
+				// time — Add(key) then Add(value), CS1950/CS1503 ×21 pairs on gccgoimporter's
+				// `[...]types.Type{gccgoBuiltinINT8: types.Typ[types.Int8], …}` — and the key
+				// skipped the defined-integer-type index cast (sparseArrayKey).
+				keyContext := DefaultKeyValueContext()
+				keyContext.source = callContext.keyValueSource
+				keyContext.arrayBacked = callContext.keyValueArrayBacked
+				keyContext.compositeType = callContext.keyValueCompositeType
+
+				keyStr := v.sparseArrayKey(kv.Key, keyContext)
 				valStr := v.convExpr(kv.Value, nil)
-				expr = fmt.Sprintf("%s, %s", keyStr, v.convertToInterfaceType(elementType, v.getType(kv.Value, false), valStr))
+
+				if callContext.keyValueSource == MapSource {
+					expr = fmt.Sprintf("[%s] = %s", keyStr, v.convertToInterfaceType(elementType, v.getType(kv.Value, false), valStr))
+				} else {
+					expr = fmt.Sprintf("%s, %s", keyStr, v.convertToInterfaceType(elementType, v.getType(kv.Value, false), valStr))
+				}
 			} else {
 				// Handle regular elements
 				expr = v.convertToInterfaceType(elementType, v.getType(elt, false), v.convExpr(elt, nil))
