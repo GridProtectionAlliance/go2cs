@@ -2920,6 +2920,21 @@ greens `x/net/nettest` (census 271 → 272/302, zero regressions). (Guarded by `
 in an expression cross-package, alongside an unrelated `Gadget.Name()` — the foreign same-named extension
 — output-compared vs Go; CS1929 without the fix.)
 
+**Pointer-expression-receiver addendum.** The converter arm above recovers the box from the `.of(…)`
+strip of the first-hop `&embed` address — which assumes the receiver has an addressable base (an
+ident: a raw-box local, a deref'd param's `Ꮡx`). A pointer receiver **expression** — a type-assert or
+call chain like go/internal/gcimporter's `pkg.Scope().Lookup(name).(*types.TypeName).Type()` — has no
+such base: the `&`-machinery boxes a COPY (`Ꮡ(x.@object)`, no `.of(` anywhere), so the arm silently
+fell through to the spelled embed hop, `internal` cross-assembly (**CS1061**). A follow-up sub-arm
+recognizes a pointer-typed receiver expression that renders as the raw box (pointer-typed and not
+deref-aliased) and calls the promoted member straight on it — the box IS the receiver:
+```csharp
+pkg.Scope().Lookup(name)._<ж<types.TypeName>>().Type();   // binds the public Type(this ж<TypeName>)
+```
+(Guarded by `PromotedValueEmbedExprRecv`: the promoted `Name()` called on a `map[string]any`
+assert-chain receiver and on a constructor-call receiver, output-compared vs Go; CS1061 without the
+fix.)
+
 ### Cross-package value-to-interface conversions use the local VALUE adapter
 A VALUE conversion of a FOREIGN named type to a LOCAL interface (os's `Signal` interface is
 DOWNSTREAM of `syscall.Signal` — neither assembly can partial the other) records

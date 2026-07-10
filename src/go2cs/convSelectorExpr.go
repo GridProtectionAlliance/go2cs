@@ -1243,6 +1243,20 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 									box := fieldAddr[:ofIndex]
 									return getAliasedTypeName(fmt.Sprintf("%s.%s", box, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 								}
+
+								// A POINTER receiver EXPRESSION that renders as the raw box — a
+								// type-assert/call chain, `pkg.Scope().Lookup(name)._<ж<types.TypeName>>()
+								// .Type()` (go/internal/gcimporter iimport.go) — has no `.of(…)` view to
+								// strip: the &-machinery boxed a COPY (`Ꮡ(x.@object)`), whose spelled
+								// embed hop is `internal` cross-assembly (CS1061). The box itself IS the
+								// receiver — call the promoted member straight on it; the generated
+								// forwarder pair on the enclosing struct includes a public
+								// `M(this ж<T>)` overload that derefs and descends in its own assembly.
+								// A pointer IDENT (raw-box local or deref-aliased param) renders its
+								// address as `<box>.of(…)` and stays with the strip above.
+								if _, xIsPtr := v.info.TypeOf(selectorExpr.X).Underlying().(*types.Pointer); xIsPtr && !v.exprIsDerefAliasedPointer(selectorExpr.X) {
+									return getAliasedTypeName(fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+								}
 							}
 
 							for k := 1; k < len(hopFields); k++ {
