@@ -102,6 +102,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckBlankNamedReturn() => CheckTarget("BlankNamedReturn");
 
     [TestMethod]
+    public void CheckBoxedMapFieldWrite() => CheckTarget("BoxedMapFieldWrite");
+
+    [TestMethod]
     public void CheckBuiltinShadowLocal() => CheckTarget("BuiltinShadowLocal");
 
     [TestMethod]

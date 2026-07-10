@@ -102,6 +102,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckBlankNamedReturn() => CheckTarget("BlankNamedReturn");
 
     [TestMethod]
+    public void CheckBoxedMapFieldWrite() => CheckTarget("BoxedMapFieldWrite");
+
+    [TestMethod]
     public void CheckBuiltinShadowLocal() => CheckTarget("BuiltinShadowLocal");
 
     [TestMethod]

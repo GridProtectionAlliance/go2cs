@@ -213,7 +213,18 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 		}
 	}
 
-	baseExpr := v.convExpr(indexExpr.X, nil)
+	// The BASE of an index-expression assignment TARGET converts in assignment context so a
+	// pointer auto-deref takes the writable `.Value` path — `req.Value.Header[k] = vv`, not the
+	// rvalue read form `(~req).Header[k] = vv` (see IndexExprContext.isAssignmentTarget).
+	var xContexts []ExprContext
+
+	if context.isAssignmentTarget {
+		assignContext := DefaultLambdaContext()
+		assignContext.isAssignment = true
+		xContexts = []ExprContext{assignContext}
+	}
+
+	baseExpr := v.convExpr(indexExpr.X, xContexts)
 
 	// A type-CONVERSION base renders as a C# cast, and postfix binds tighter than a cast — both
 	// the pointer auto-deref `.Value` and the index itself would re-bind onto the cast's INNER

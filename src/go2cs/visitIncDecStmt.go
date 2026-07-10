@@ -14,7 +14,17 @@ func (v *Visitor) visitIncDecStmt(incDecStmt *ast.IncDecStmt, format FormattingC
 	assignContext := DefaultLambdaContext()
 	assignContext.isAssignment = true
 
-	ident := v.convExpr(incDecStmt.X, []ExprContext{assignContext})
+	contexts := []ExprContext{assignContext}
+
+	// An INDEX operand (`req.Count["hits"]++`) is likewise a write: mark it the assignment
+	// target so its BASE takes the `.Value` path too (see IndexExprContext.isAssignmentTarget).
+	if _, isIndex := incDecStmt.X.(*ast.IndexExpr); isIndex {
+		indexContext := DefaultIndexExprContext()
+		indexContext.isAssignmentTarget = true
+		contexts = append(contexts, indexContext)
+	}
+
+	ident := v.convExpr(incDecStmt.X, contexts)
 
 	if format.useNewLine {
 		v.targetFile.WriteString(v.newline)

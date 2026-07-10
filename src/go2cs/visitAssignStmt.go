@@ -869,7 +869,17 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				context.isPointer = true
 			}
 
-			lhsExpr := v.convExpr(lhs, []ExprContext{context, lambdaContext})
+			lhsElemContexts := []ExprContext{context, lambdaContext}
+
+			// An index-expression LHS marks itself the assignment TARGET so its base takes the
+			// `.Value` write path (`req.Header[k] = vv`; see IndexExprContext.isAssignmentTarget).
+			if _, lhsIsIndex := lhs.(*ast.IndexExpr); lhsIsIndex {
+				indexContext := DefaultIndexExprContext()
+				indexContext.isAssignmentTarget = true
+				lhsElemContexts = append(lhsElemContexts, indexContext)
+			}
+
+			lhsExpr := v.convExpr(lhs, lhsElemContexts)
 			leftExprs.Add(lhsExpr)
 
 			// Per-element `var` for the newly-declared members of a mixed redeclaration tuple. An
@@ -1354,14 +1364,27 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			}
 
+			// An index-expression LHS marks itself the assignment TARGET so its base takes the
+			// `.Value` write path (see IndexExprContext.isAssignmentTarget). Prepended into a
+			// FRESH slice — `contexts` is reused for the RHS conversions below, where an index
+			// READ must keep the deref form.
+			lhsContexts := contexts
+
+			if _, lhsIsIndex := lhs.(*ast.IndexExpr); lhsIsIndex {
+				indexContext := DefaultIndexExprContext()
+				indexContext.isAssignmentTarget = true
+				lhsContexts = append([]ExprContext{indexContext}, contexts...)
+			}
+
 			if ident == nil {
 				if _, ok := lhs.(*ast.StarExpr); ok {
 					starExprContext := DefaultStarExprContext()
 					starExprContext.inLhsAssign = true
 					contexts = append(contexts, starExprContext)
+					lhsContexts = append(lhsContexts, starExprContext)
 				}
 
-				result.WriteString(v.convExpr(lhs, contexts))
+				result.WriteString(v.convExpr(lhs, lhsContexts))
 				result.WriteString(operator)
 
 				rhsExpr := v.convExpr(rhs, v.appendEmptyIfaceLitContext(v.appendRhsPtrContext(contexts, rhs), lhs))
@@ -1413,7 +1436,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			} else {
 				if v.isReassignment(ident) {
-					result.WriteString(v.convExpr(lhs, contexts))
+					result.WriteString(v.convExpr(lhs, lhsContexts))
 					result.WriteString(operator)
 
 					rhsExpr := v.convExpr(rhs, v.appendEmptyIfaceLitContext(v.appendRhsPtrContext(contexts, rhs), lhs))

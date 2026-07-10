@@ -185,11 +185,19 @@ type IndexExprContext struct {
 	// isTupleResult marks a map index used in comma-ok form (`v, ok := m[k]`), so it is
 	// emitted via golib's two-value indexer `m[key, ꟷ]` (returning `(value, present)`).
 	isTupleResult bool
+	// isAssignmentTarget marks an index expression that IS the assignment LHS
+	// (`req.Header[k] = vv`): its BASE converts in assignment context, so a pointer
+	// auto-deref takes the writable `.Value` path. The read form `(~req).Header[k] = vv`
+	// indexer-sets a map-wrapper FIELD of an rvalue struct copy (CS0131, net/http client's
+	// redirect loop). Distinct from LambdaContext.isAssignment, which also rides along RHS
+	// conversions of an assignment statement — index READS there must keep the deref form.
+	isAssignmentTarget bool
 }
 
 func DefaultIndexExprContext() IndexExprContext {
 	return IndexExprContext{
-		isTupleResult: false,
+		isTupleResult:      false,
+		isAssignmentTarget: false,
 	}
 }
 

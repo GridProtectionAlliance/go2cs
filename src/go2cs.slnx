@@ -71,6 +71,7 @@
     <Project Path="Tests/Behavioral/BlankIdentifierCollision/BlankIdentifierCollision.csproj" />
     <Project Path="Tests/Behavioral/BlankMultiResult/BlankMultiResult.csproj" />
     <Project Path="Tests/Behavioral/BlankNamedReturn/BlankNamedReturn.csproj" />
+    <Project Path="Tests/Behavioral/BoxedMapFieldWrite/BoxedMapFieldWrite.csproj" />
     <Project Path="Tests/Behavioral/BuiltinShadowLocal/BuiltinShadowLocal.csproj" />
     <Project Path="Tests/Behavioral/ArrayOfCrossPackageType/ArrayOfCrossPackageType.csproj" />
     <Project Path="Tests/Behavioral/ArrayPassByValue/ArrayPassByValue.csproj" />
