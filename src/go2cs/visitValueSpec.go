@@ -621,10 +621,22 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					v.targetFile.WriteString(v.newline)
 				}
 
+				// A typed const of a NAMED string type keeps that type: materializing it as
+				// @string makes every comparison against a value of the named type ambiguous —
+				// the [GoType("@string")] wrapper and @string convert implicitly BOTH ways
+				// (CS0034 ×20, net/http pattern.go's `const equivalent relationship =
+				// "equivalent"`). The u8-literal initializer binds through the wrapper's
+				// ReadOnlySpan<byte> implicit operator (StringSurfaceMembers).
+				strTypeName := "@string"
+
+				if isNamedType {
+					strTypeName = csTypeName
+				}
+
 				if v.inFunction {
-					v.writeOutput("@string %s = %s;", csIDName, constVal)
+					v.writeOutput("%s %s = %s;", strTypeName, csIDName, constVal)
 				} else {
-					v.writeOutput("%s static readonly @string %s = %s;", access, csIDName, constVal)
+					v.writeOutput("%s static readonly %s %s = %s;", access, strTypeName, csIDName, constVal)
 				}
 
 				v.writeComment(valueSpec.Comment, tokEnd+typeLenDeviation-1)

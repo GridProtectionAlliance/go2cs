@@ -571,6 +571,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedSlicePointerReinterpret() => CheckTarget("NamedSlicePointerReinterpret");
 
     [TestMethod]
+    public void CheckNamedStringConsts() => CheckTarget("NamedStringConsts");
+
+    [TestMethod]
     public void CheckNamedStringConversion() => CheckTarget("NamedStringConversion");
 
     [TestMethod]

@@ -621,6 +621,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedSlicePointerReinterpret() => CheckTarget("NamedSlicePointerReinterpret");
 
     [TestMethod]
+    public void CheckNamedStringConsts() => CheckTarget("NamedStringConsts");
+
+    [TestMethod]
     public void CheckNamedStringConversion() => CheckTarget("NamedStringConversion");
 
     [TestMethod]

@@ -624,6 +624,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedSlicePointerReinterpret() => CheckTarget("NamedSlicePointerReinterpret");
 
     [TestMethod]
+    public void CheckNamedStringConsts() => CheckTarget("NamedStringConsts");
+
+    [TestMethod]
     public void CheckNamedStringConversion() => CheckTarget("NamedStringConversion");
 
     [TestMethod]

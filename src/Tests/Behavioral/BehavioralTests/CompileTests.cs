@@ -621,6 +621,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedSlicePointerReinterpret() => CheckTarget("NamedSlicePointerReinterpret");
 
     [TestMethod]
+    public void CheckNamedStringConsts() => CheckTarget("NamedStringConsts");
+
+    [TestMethod]
     public void CheckNamedStringConversion() => CheckTarget("NamedStringConversion");
 
     [TestMethod]

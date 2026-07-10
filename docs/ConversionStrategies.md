@@ -1096,6 +1096,26 @@ tuple-declaration form. (Guarded by the `NamedStringDefine` behavioral test — 
 methods called on the local, an escaping `cause := ""` written through its pointer, and a plain string
 local, output-compared vs Go.)
 
+### A typed const of a named string type keeps the named type
+
+The CONST-DECL arm of the same materialization family: `visitValueSpec`'s string-constant emission
+hardcoded `@string`, so net/http pattern.go's `const equivalent relationship = "equivalent"` (with
+`type relationship string`) emitted `internal static readonly @string equivalent = …` — and every
+comparison `rel == equivalent` was then ambiguous, because the `[GoType("@string")]` wrapper and
+`@string` convert implicitly BOTH ways (CS0034 ×20 across pattern.cs). A typed string const now keeps
+its named type, initializing through the wrapper's `ReadOnlySpan<byte>` implicit operator (the
+`StringSurfaceMembers` u8 bridge):
+
+```csharp
+internal static readonly relationship equivalent = "equivalent"u8;
+```
+
+Function-body typed string consts take the same form (`relationship localRel = "moreSpecific"u8;`);
+an UNTYPED string const keeps `@string` (its type is not a `*types.Named`). Full-stdlib footprint:
+net/http pattern.cs, traceviewer's `ViewType` consts, and regexp/syntax parse.cs. (Guarded by
+`NamedStringConsts` — package-level and local typed consts compared against values and each other, a
+method called on a const, and an untyped const staying plain, output-compared vs Go.)
+
 ### A grouped var spec with one multi-result call deconstructs
 A grouped `var (name, offset, abs = t.locabs() ...)` spec is not a `:=`, so the assignment tuple machinery never saw it -- the per-name path assigned the WHOLE result tuple to the first name and silently DEFAULTED the rest (time appendFormat read a zero abs; a silent-wrongness class beyond the CS0029 that exposed it). Function-local specs now emit the C# tuple deconstruction, matching the `:=` form; package-level specs use the once-evaluated hidden-field component reads:
 ```csharp
