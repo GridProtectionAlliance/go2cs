@@ -2717,6 +2717,34 @@ and wraps mismatched delegate values in the target delegate's constructor —
 FuncLit and nil initializers stay bare. Guarded by `FirstClassFunctions`
 (`handler`/`provider`/`registry`).
 
+### A named delegate value passed to a structural func parameter re-wraps
+The MIRROR of the argument-position named-delegate wrap: a **structural** (written-anonymous) func
+parameter receiving a value of a **named** delegate type — net/http h2_bundle's
+`sc.scheduleHandler(…, handler)`, where `handler` is `HandlerFunc` and the parameter is
+`func(ResponseWriter, *Request)` (CS1503). Go converts named→structural implicitly; C# needs the
+same delegate re-wrap, targeting the synthesized structural delegate:
+
+```go
+type Handler func(int, string) string   // has a method → distinct C# delegate
+func invoke(f func(int, string) string, n int, s string) string { return f(n, s) }
+var h Handler = describe
+invoke(h, 1, "a")
+```
+```csharp
+invoke(new Func<nint, @string, @string>(h), 1, "a"u8);
+```
+
+Two argument shapes render named and take the wrap: a value whose **Go type** is a named func type
+(with methods), and a `:=` local **declared from a method group**, which the declaration emission
+types with the matching package named delegate (`HandlerFunc handler = Ꮡsc.Value.handler.ServeHTTP;`
+— the bare-function-value `:=` rule above) even though go/types keeps it structural — the exact
+h2_bundle shape. A **methodless** named func type already *renders* as the structural delegate
+(`methodlessNamedFuncSignature` collapses it — same C# type), so it stays bare; method groups and
+func literals themselves convert natively. A generic structural parameter (unsubstituted type
+params) also stays native. (Guarded by the `NamedDelegateStructuralParam` behavioral test —
+named-with-method and method-group-declared locals wrapped, methodless/method-group/func-literal
+controls bare, values vs Go.)
+
 ### Func-typed fields with a cross-package (slash-path) type render structurally
 A func-typed struct field whose signature names a type from a **multi-segment** import path —
 testing/quick's `Config.Values func([]reflect.Value, *rand.Rand)`, where `rand` is `math/rand` —

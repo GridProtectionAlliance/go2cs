@@ -598,6 +598,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedByteSliceFromStringLit() => CheckTarget("NamedByteSliceFromStringLit");
 
     [TestMethod]
+    public void CheckNamedDelegateStructuralParam() => CheckTarget("NamedDelegateStructuralParam");
+
+    [TestMethod]
     public void CheckNamedFuncResultPointerArg() => CheckTarget("NamedFuncResultPointerArg");
 
     [TestMethod]

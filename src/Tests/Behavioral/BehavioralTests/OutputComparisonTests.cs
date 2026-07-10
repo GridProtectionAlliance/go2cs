@@ -542,6 +542,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedByteSliceFromStringLit() => CheckTarget("NamedByteSliceFromStringLit");
 
     [TestMethod]
+    public void CheckNamedDelegateStructuralParam() => CheckTarget("NamedDelegateStructuralParam");
+
+    [TestMethod]
     public void CheckNamedFuncResultPointerArg() => CheckTarget("NamedFuncResultPointerArg");
 
     [TestMethod]

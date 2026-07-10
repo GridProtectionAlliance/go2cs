@@ -1003,6 +1003,46 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						}
 					}
 				}
+
+				// The MIRROR: a STRUCTURAL (anonymous) func-type parameter receiving a value that
+				// RENDERS as a named delegate — h2's `sc.scheduleHandler(…, handler)` where the
+				// parameter is the written `func(ResponseWriter, *Request)` (CS1503). Go converts
+				// named→structural implicitly; C# needs the same delegate re-wrap, targeting the
+				// synthesized structural delegate: `new Action<ResponseWriter, ж<Request>>(handler)`.
+				// Two argument shapes render named: a value whose GO type is a named func type
+				// (with methods — a METHODLESS named func type already renders as the structural
+				// delegate itself and stays bare), and a `:=` local DECLARED from a method group,
+				// which the declaration emission types with the matching package named delegate
+				// (`HandlerFunc handler = Ꮡsc.Value.handler.ServeHTTP;` — see visitAssignStmt's
+				// methodGroupDelegateType) even though go/types keeps it structural. Method
+				// groups and func literals themselves convert natively and are excluded by both
+				// gates.
+				if _, paramIsSig := types.Unalias(paramType).(*types.Signature); paramIsSig && !typeContainsTypeParams(paramType) {
+					if argType := v.getType(callExpr.Args[i], false); argType != nil {
+						argRendersNamedDelegate := false
+
+						if argNamed, ok := types.Unalias(argType).(*types.Named); ok {
+							if _, argIsSig := argNamed.Underlying().(*types.Signature); argIsSig {
+								if _, collapses := methodlessNamedFuncSignature(argNamed); !collapses {
+									argRendersNamedDelegate = true
+								}
+							}
+						} else if argSig, ok := types.Unalias(argType).(*types.Signature); ok {
+							if argIdent, ok := callExpr.Args[i].(*ast.Ident); ok &&
+								v.namedFuncTypeNameForSignature(argSig) != "" && v.identDeclaredFromMethodGroup(argIdent) {
+								argRendersNamedDelegate = true
+							}
+						}
+
+						if argRendersNamedDelegate {
+							if callExprContext.wrapArgWithNew == nil {
+								callExprContext.wrapArgWithNew = make(map[int]string)
+							}
+
+							callExprContext.wrapArgWithNew[i] = v.getCSTypeName(paramType)
+						}
+					}
+				}
 			}
 
 			// An ERASED pointer-core parameter ([P *T]) reads as an interface too (same
@@ -1614,6 +1654,51 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	v.hoistedDecls = savedHoist
 
 	return result
+}
+
+// identDeclaredFromMethodGroup reports whether ident resolves to a local whose `:=` declaration
+// initialized it from a bare function/method reference (a C# method group). Such a declaration is
+// emitted with the package named delegate matching its signature when one exists (visitAssignStmt's
+// methodGroupDelegateType via namedFuncTypeNameForSignature), so at a call site the local's C# type
+// is that NAMED delegate even though go/types reports the unnamed structural signature — the shape
+// that needs the delegate re-wrap at a structural func parameter. Scans only the current function's
+// body (the `:=` declaration and its uses share the function scope).
+func (v *Visitor) identDeclaredFromMethodGroup(ident *ast.Ident) bool {
+	obj := v.info.ObjectOf(ident)
+
+	if obj == nil || v.currentFuncDecl == nil || v.currentFuncDecl.Body == nil {
+		return false
+	}
+
+	found := false
+
+	ast.Inspect(v.currentFuncDecl.Body, func(node ast.Node) bool {
+		if found {
+			return false
+		}
+
+		assign, ok := node.(*ast.AssignStmt)
+
+		if !ok || assign.Tok != token.DEFINE || len(assign.Lhs) != len(assign.Rhs) {
+			return true
+		}
+
+		for i, lhs := range assign.Lhs {
+			lhsIdent, ok := lhs.(*ast.Ident)
+
+			if !ok || v.info.Defs[lhsIdent] != obj {
+				continue
+			}
+
+			found = v.exprIsMethodGroup(assign.Rhs[i])
+
+			return false
+		}
+
+		return true
+	})
+
+	return found
 }
 
 func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, targetTypeName string) string {
