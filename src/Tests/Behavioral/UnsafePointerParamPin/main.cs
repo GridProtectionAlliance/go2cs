@@ -62,8 +62,9 @@ internal static void Main() {
     t = 77;
     fmt.Println(Ꮡt.read());
     fmt.Println(Ꮡt.tricky());
-    var h = new holder(v: 9);
-    var q = (ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡ(h).of(holder.Ꮡv)).Value));
+    ref var h = ref heap<holder>(out var Ꮡh);
+    h = new holder(v: 9);
+    var q = (ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡh.of(holder.Ꮡv)).Value));
     fmt.Println(q.Value);
     ref var a = ref heap(new uintptr(), out var Ꮡa);
     a = 11;

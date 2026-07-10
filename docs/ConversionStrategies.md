@@ -594,6 +594,40 @@ through the original variable; the churned goldens `PointerToPointer`,
 `UnsafePointerReinterpret`, `DerefPointerToField`, `PointerCastSliceRange`,
 `EscapedLoopVarSiblingIndex` all re-verified against Go.)
 
+### A field-addressed value local heap-boxes — `Ꮡ(x).of(…)` copy-boxes orphan writes
+Escape analysis's address-of walk marked `&x` (direct) and `&x[k]` (element) but had **no
+selector arm**, so a value-struct local whose FIELD address was taken in plain assignment
+(or composite-literal / return) position stayed unboxed, and convUnaryExpr fell back to the
+`Ꮡ(x).of(T.Ꮡval)` **copy**-box — writes through the pointer landed in the copy and were
+silently lost (Go reads the write back through `x`; C# printed the original value — a
+behavioral divergence, not a compile error). The walk now peels a value-field selector
+chain (`x.f1.…fn`, every hop a direct `FieldVal` selection with no pointer indirection) to
+its root ident and marks the root escaping, so the emission routes through the identity box:
+
+```go
+x := Thing{val: 7}
+p := &x.val
+*p = 99
+return x.val                       // Go: 99
+```
+```csharp
+ref var x = ref heap<Thing>(out var Ꮡx);
+x = new Thing(val: 7);
+var p = Ꮡx.of(Thing.Ꮡval);
+p.Value = 99;
+return x.val;                      // 99 — the pointer aliases x's box
+```
+
+Multi-hop chains chain the accessors (`&w.inner.val` → `Ꮡw.of(Wrap.Ꮡinner).of(Thing.Ꮡval)`),
+and a field promoted through a VALUE embed roots at the local too (`&o.ev` →
+`Ꮡo.of(Outer.Ꮡev)`). A hop that crosses a POINTER — an explicit `w.ptr.val` deref or a field
+promoted through an embedded pointer (both are `Selection.Indirect()`) — aliases the
+POINTEE's storage instead, so the root deliberately stays unboxed: `w.ptr.of(Thing.Ꮡval)`
+already writes through the held box. (Guarded by `LocalStructFieldAddr` — plain, nested,
+method-body, value-embed-promoted, composite-literal, and return positions plus the
+pointer-hop negative control, all output-compared vs Go; the one churned golden
+`UnsafePointerParamPin` — `&h.v` under `unsafe.Pointer` — re-verified.)
+
 A **blank-identifier element** in a split multi-assign is a C# discard, never a declaration. Go's `_, _, _, _ = a, b, c, d` (a common "mark these used" idiom) is emitted as one bare discard per element with **no** `var` — the per-element discard test keys off each LHS ident, not just the single-LHS case, so every blank stays a discard:
 
 ```go

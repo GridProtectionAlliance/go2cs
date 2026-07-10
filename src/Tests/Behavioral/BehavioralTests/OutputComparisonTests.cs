@@ -62,6 +62,8 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckAnyStringLitAssign() => CheckTarget("AnyStringLitAssign");
+
+    [TestMethod]
     public void CheckAnyStringLitComposite() => CheckTarget("AnyStringLitComposite");
 
     [TestMethod]
@@ -423,6 +425,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckLargeUintptrConst() => CheckTarget("LargeUintptrConst");
+
+    [TestMethod]
+    public void CheckLocalStructFieldAddr() => CheckTarget("LocalStructFieldAddr");
 
     [TestMethod]
     public void CheckLocalTypeSliceElement() => CheckTarget("LocalTypeSliceElement");
@@ -877,6 +882,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     [TestMethod]
     public void CheckTypeSwitchTagShadowRename() => CheckTarget("TypeSwitchTagShadowRename");
     public void CheckTypeSwitchPointerAdapter() => CheckTarget("TypeSwitchPointerAdapter");
+
+    [TestMethod]
+    public void CheckTypeSwitchTagShadowRename() => CheckTarget("TypeSwitchTagShadowRename");
 
     [TestMethod]
     public void CheckUnexportedEmbeddedMarker() => CheckTarget("UnexportedEmbeddedMarker");

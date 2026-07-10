@@ -244,6 +244,17 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 					}
 				}
 
+				// Address of a struct-field chain rooted at the identifier: `&x.field`,
+				// `&x.a.b`. Only the CallExpr arm below peeled selector roots — and only for
+				// pointer ARGUMENTS — so an assignment/return/composite-position field address
+				// left the local unboxed and the emitted `Ꮡ(x).of(T.Ꮡval)` boxed a COPY,
+				// silently dropping writes made through the pointer (Go reads the write back
+				// through `x`; C# did not).
+				if selectorChainRootsAtIdent(n.X, identObj, v.info) {
+					escapes = true
+					return false
+				}
+
 				// For composite literals, special case:
 				// If the variable is used only as part of calculating a value for a field,
 				// it doesn't escape to the heap
@@ -518,6 +529,50 @@ func argRootIsIdent(arg ast.Expr, identObj types.Object, info *types.Info) bool 
 	}
 
 	return false
+}
+
+// selectorChainRootsAtIdent reports whether expr is a struct-field selector chain
+// (`x.f1.…fn`, n>=1) whose peeled root is the ident under analysis, with every hop a
+// direct VALUE field selection. Taking such a chain's address aliases the root local's
+// OWN storage, so the local must be heap-boxed — the `Ꮡ(x).of(T.Ꮡval)` copy-box
+// fallback otherwise orphans writes made through the pointer. A hop that crosses a
+// pointer — an explicit `ptr.field` deref or a field promoted through an embedded
+// pointer (both are Selection.Indirect()) — aliases the POINTEE's storage instead, so
+// the root must NOT be boxed: the pointer value already routes through `.of(…)` (see
+// convUnaryExpr). A missing Selections entry is a package qualifier, and a method
+// value cannot stand under `&`, so both stop the walk.
+func selectorChainRootsAtIdent(expr ast.Expr, identObj types.Object, info *types.Info) bool {
+	sel, ok := expr.(*ast.SelectorExpr)
+
+	if !ok {
+		return false
+	}
+
+	for {
+		if selection, ok := info.Selections[sel]; !ok || selection.Kind() != types.FieldVal || selection.Indirect() {
+			return false
+		}
+
+		base := sel.X
+
+		for {
+			if paren, ok := base.(*ast.ParenExpr); ok {
+				base = paren.X
+				continue
+			}
+
+			break
+		}
+
+		switch base := base.(type) {
+		case *ast.SelectorExpr:
+			sel = base
+		case *ast.Ident:
+			return info.ObjectOf(base) == identObj
+		default:
+			return false
+		}
+	}
 }
 
 // Check if the identifier is used in a type expression (like array size)
