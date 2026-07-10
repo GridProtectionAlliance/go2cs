@@ -657,6 +657,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedPointerReinterpret() => CheckTarget("NamedPointerReinterpret");
 
     [TestMethod]
+    public void CheckNamedResultDeferCapture() => CheckTarget("NamedResultDeferCapture");
+
+    [TestMethod]
     public void CheckNamedResultLambdaInfer() => CheckTarget("NamedResultLambdaInfer");
 
     [TestMethod]

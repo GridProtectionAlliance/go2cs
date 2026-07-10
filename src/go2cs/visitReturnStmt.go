@@ -149,22 +149,26 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 	result.WriteString(DeferredDeclsMarker)
 	result.WriteString(v.indent(v.indentLevel))
 
-	if namedDeferAssign {
-		if len(v.namedReturnNames) > 1 {
-			result.WriteString("(" + strings.Join(v.namedReturnNames, ", ") + ") = ")
-		} else if len(v.namedReturnNames) == 1 {
-			result.WriteString(v.namedReturnNames[0] + " = ")
-		}
-	} else {
-		result.WriteString("return")
-	}
-
 	// Emit the results against the signature of the function/literal this `return` belongs to — a nested
 	// function literal returns against ITS OWN results, not the enclosing function's (see convFuncLit).
 	signature := v.currentReturnSignature
 
 	if signature == nil {
 		signature = v.currentFuncSignature
+	}
+
+	if namedDeferAssign {
+		// A box-ref named result's assignment target reads through its box inside a function
+		// literal's conversion (see namedReturnAssignTargets).
+		assignTargets := v.namedReturnAssignTargets(signature)
+
+		if len(assignTargets) > 1 {
+			result.WriteString("(" + strings.Join(assignTargets, ", ") + ") = ")
+		} else if len(assignTargets) == 1 {
+			result.WriteString(assignTargets[0] + " = ")
+		}
+	} else {
+		result.WriteString("return")
 	}
 
 	if returnStmt.Results == nil || explicitIsNamed {

@@ -373,14 +373,137 @@ func (v *Visitor) detectNamedReturnDefer(sig *types.Signature, hasDefer, hasReco
 	return true, names
 }
 
+// namedResultHeapBoxIdent returns the declaring ident of a heap-box-backed named result — one
+// the capture/escape analyses route to shared storage (see identHasHeapBox), whose render sites
+// reference the box (`Ꮡerr`) — or nil for a plain named result. The plain `T name = default!;`
+// declaration leaves such a box undeclared (CS0103 — internal/poll SendFile's deferred
+// `TestHookDidSendFile(fd, 0, written, err, …)` reads `Ꮡerr.ValueSlot` after `curpos, err :=`
+// escape-marked the named result).
+func (v *Visitor) namedResultHeapBoxIdent(param *types.Var) *ast.Ident {
+	if param == nil || isDiscardedVar(param.Name()) || !v.identHasHeapBox(param, param.Type()) {
+		return nil
+	}
+
+	return v.getVarIdent(param)
+}
+
+// namedResultBoxAccessor returns the box-read accessor for a named result's type: reading the
+// box of an inherently heap-allocated value (a `ж<ж<T>>`/`ж<error>`… holding the reference
+// itself) is not a dereference, so it takes the nil-check-free `.ValueSlot`; a value-type box
+// is a genuine dereference and keeps the strict `.Value` (mirrors isBoxedPointerLocal).
+func namedResultBoxAccessor(t types.Type) string {
+	if isInherentlyHeapAllocatedType(t) {
+		return ".ValueSlot"
+	}
+
+	return ".Value"
+}
+
+// namedResultBoxAliasLines renders the in-wrapper `ref var name = ref Ꮡname.Value;` re-alias for
+// each heap-box-backed named result. In namedReturnDeferMode the box is declared OUTSIDE the
+// func() wrapper (so the final post-defer return can read it) and a lambda cannot capture a ref
+// local (CS8175), so the wrapper re-derives the value alias inside — the same treatment deref'd
+// pointer parameters get (`ref var fd = ref Ꮡfd.Value;`).
+func (v *Visitor) namedResultBoxAliasLines(sig *types.Signature, indentLevel int) string {
+	results := sig.Results()
+	aliases := strings.Builder{}
+
+	for i := range results.Len() {
+		param := results.At(i)
+
+		if ident := v.namedResultHeapBoxIdent(param); ident != nil {
+			aliases.WriteString(fmt.Sprintf("%s%sref var %s = ref %s%s%s;", v.newline, v.indent(indentLevel),
+				getSanitizedIdentifier(v.getIdentName(ident)), AddressPrefix, v.boxBaseName(ident), namedResultBoxAccessor(param.Type())))
+		}
+	}
+
+	return aliases.String()
+}
+
+// namedReturnBoxReadNames maps named-result return names to their box-read form (`Ꮡerr.ValueSlot`)
+// for heap-box-backed results — used where the plain value alias is not in scope: the final
+// post-wrapper `return <named>;` of namedReturnDeferMode (the alias lives inside the wrapper).
+func (v *Visitor) namedReturnBoxReadNames(sig *types.Signature, names []string) []string {
+	results := sig.Results()
+
+	if results == nil || results.Len() != len(names) {
+		return names
+	}
+
+	mapped := make([]string, len(names))
+	copy(mapped, names)
+
+	for i := range results.Len() {
+		param := results.At(i)
+
+		if ident := v.namedResultHeapBoxIdent(param); ident != nil {
+			mapped[i] = AddressPrefix + v.boxBaseName(ident) + namedResultBoxAccessor(param.Type())
+		}
+	}
+
+	return mapped
+}
+
+// namedReturnAssignTargets returns the LHS names for an explicit namedReturnDefer return's
+// `(named) = (results);` rewrite. Inside a function LITERAL's conversion a box-ref named result
+// is referenced through its box everywhere (see convIdent's box-ref render — the ref alias the
+// enclosing-FUNCTION form re-declares in its wrapper does not exist here), so the assignment
+// target reads the box too. The enclosing FUNCTION's wrapper body keeps plain targets (its
+// in-wrapper alias is in scope; see visitFuncDecl).
+func (v *Visitor) namedReturnAssignTargets(signature *types.Signature) []string {
+	names := v.namedReturnNames
+
+	if signature == nil || v.lambdaCapture == nil || !v.lambdaCapture.conversionInLambda {
+		return names
+	}
+
+	results := signature.Results()
+
+	if results == nil || results.Len() != len(names) {
+		return names
+	}
+
+	mapped := make([]string, len(names))
+	copy(mapped, names)
+
+	for i := range results.Len() {
+		param := results.At(i)
+
+		if !v.isLambdaBoxRefVar(param) {
+			continue
+		}
+
+		if ident := v.getVarIdent(param); ident != nil {
+			mapped[i] = AddressPrefix + v.boxBaseName(ident) + namedResultBoxAccessor(param.Type())
+		}
+	}
+
+	return mapped
+}
+
 // namedReturnDeclLines renders the `Type name = default!;` declarations for a signature's named
-// results, each on its own line at the given indent level.
-func (v *Visitor) namedReturnDeclLines(sig *types.Signature, indentLevel int) string {
+// results, each on its own line at the given indent level. A heap-box-backed result (see
+// namedResultHeapBoxIdent) declares its box instead: when the decls sit OUTSIDE a func() wrapper
+// (declsOutsideWrapper — the litNamedDefer form), only the box is created here (`heap<T>(out var
+// Ꮡname);`) because the wrapper lambda cannot capture the ref-local alias (CS8175); otherwise the
+// full boxed-alias form is used, matching an escaping local's declaration.
+func (v *Visitor) namedReturnDeclLines(sig *types.Signature, indentLevel int, declsOutsideWrapper bool) string {
 	results := sig.Results()
 	decls := strings.Builder{}
 
 	for i := range results.Len() {
 		param := results.At(i)
+
+		if ident := v.namedResultHeapBoxIdent(param); ident != nil {
+			if declsOutsideWrapper {
+				decls.WriteString(fmt.Sprintf("%s%sheap<%s>(out var %s%s);", v.newline, v.indent(indentLevel),
+					v.getCSTypeName(param.Type()), AddressPrefix, v.boxBaseName(ident)))
+			} else {
+				decls.WriteString(fmt.Sprintf("%s%s%s", v.newline, v.indent(indentLevel), v.convertToHeapTypeDecl(ident, true)))
+			}
+
+			continue
+		}
 
 		// A promoted-embed struct result must construct through the NilType ctor — `default!`
 		// leaves the readonly embed boxes null (see structHasPromotedEmbeds).

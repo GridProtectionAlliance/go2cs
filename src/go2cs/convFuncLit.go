@@ -296,7 +296,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	// Declare plain named results at the top of the literal's block (the litNamedDefer arm
 	// below declares its own, outside the func() wrapper).
 	if litHasNamedResults && !litNamedDefer && strings.HasPrefix(body, "{") {
-		body = "{" + v.namedReturnDeclLines(litSig, v.indentLevel+1) + strings.TrimPrefix(body, "{")
+		body = "{" + v.namedReturnDeclLines(litSig, v.indentLevel+1, false) + strings.TrimPrefix(body, "{")
 	}
 
 	// Build the lambda body (what follows `=>`). A function literal that uses defer/recover gets
@@ -309,14 +309,22 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	switch {
 	case litNamedDefer:
 		// `{ T r = default!; func((defer, recover) => <body>); return r; }`
-		returnExpr := strings.Join(litNamedNames, ", ")
+		// A heap-box-backed named result declares only its box out here (the wrapper lambda
+		// cannot capture a ref local — CS8175); the wrapper re-aliases the value name inside,
+		// and the trailing return reads through the box (`Ꮡe.ValueSlot`).
+		returnNames := v.namedReturnBoxReadNames(litSig, litNamedNames)
+		returnExpr := strings.Join(returnNames, ", ")
 
-		if len(litNamedNames) > 1 {
+		if len(returnNames) > 1 {
 			returnExpr = "(" + returnExpr + ")"
 		}
 
+		if aliases := v.namedResultBoxAliasLines(litSig, v.indentLevel+2); aliases != "" && strings.HasPrefix(body, "{") {
+			body = "{" + aliases + strings.TrimPrefix(body, "{")
+		}
+
 		inner = fmt.Sprintf("{%s%s%sfunc((defer, recover) => %s);%s%sreturn %s;%s%s}",
-			v.namedReturnDeclLines(litSig, v.indentLevel+1),
+			v.namedReturnDeclLines(litSig, v.indentLevel+1, true),
 			v.newline, v.indent(v.indentLevel+1), body,
 			v.newline, v.indent(v.indentLevel+1), returnExpr,
 			v.newline, v.indent(v.indentLevel))

@@ -342,6 +342,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		// they go into the block prefix inside the wrapper as before.
 		namedReturnDecls := &strings.Builder{}
 
+		// In-wrapper `ref var name = ref Ꮡname.Value;` re-aliases for heap-box-backed named
+		// results in namedReturnDeferMode (see below) — joined into the block prefix with the
+		// parameter deref aliases.
+		namedResultAliases := &strings.Builder{}
+
 		if funcDecl.Type.Results != nil && len(funcDecl.Type.Results.List) > 0 {
 			resultParams := signature.Results()
 			paramIndex := 0
@@ -371,6 +376,28 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 						paramName := getSanitizedIdentifier(v.getIdentName(ident))
 
 						resultDeclTarget.WriteString(v.newline)
+
+						// A heap-box-backed named result (routed to shared storage by the
+						// capture/escape analyses — see identHasHeapBox) must declare the box
+						// its render sites reference (`Ꮡerr`); the plain form leaves it
+						// undeclared (CS0103 — internal/poll SendFile's deferred
+						// TestHookDidSendFile reading `Ꮡerr.ValueSlot`).
+						if v.identHasHeapBox(param, param.Type()) {
+							if v.namedReturnDeferMode {
+								// The decls sit OUTSIDE the func() wrapper, whose lambda cannot
+								// capture a ref local (CS8175): create only the box here; the
+								// wrapper re-aliases the value name inside (namedResultAliases),
+								// and the final post-defer return reads through the box (see the
+								// namedReturnDeferMode close-out below).
+								v.writeString(resultDeclTarget, "%sheap<%s>(out var %s%s);", v.indent(v.indentLevel+1), v.getCSTypeName(param.Type()), AddressPrefix, v.boxBaseName(ident))
+								v.writeString(namedResultAliases, "%s%sref var %s = ref %s%s%s;", v.newline, v.indent(v.indentLevel+1), paramName, AddressPrefix, v.boxBaseName(ident), namedResultBoxAccessor(param.Type()))
+							} else {
+								v.writeString(resultDeclTarget, "%s%s", v.indent(v.indentLevel+1), v.convertToHeapTypeDecl(ident, true))
+							}
+
+							paramIndex++
+							continue
+						}
 
 						// A promoted-embed struct result must construct through the NilType
 						// ctor — `default!` leaves the readonly embed boxes null (see
@@ -526,6 +553,17 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			}
 
 			blockPrefix += paramHeapBoxes.String()
+		}
+
+		// In-wrapper value aliases for heap-box-backed named results (namedReturnDeferMode):
+		// the box was created outside the wrapper; body statements keep referencing the plain
+		// name through this ref alias, exactly like a deref'd pointer parameter.
+		if namedResultAliases.Len() > 0 {
+			if blockPrefix == "" {
+				namedResultAliases.WriteString(v.newline)
+			}
+
+			blockPrefix += namedResultAliases.String()
 		}
 
 		if implicitPointers.Len() > 0 || paramHeapBoxes.Len() > 0 {
@@ -762,10 +800,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		if v.namedReturnDeferMode {
 			// Close the func(...) call (attaches to the lambda's `}` → `});`), then return the
 			// named results — which the deferred code / recover may have mutated — and close the
-			// block body opened in the exec-context above.
-			returnExpr := strings.Join(v.namedReturnNames, ", ")
+			// block body opened in the exec-context above. A heap-box-backed result's value alias
+			// lives INSIDE the wrapper, so the return reads it through the box (`Ꮡerr.ValueSlot`).
+			returnNames := v.namedReturnBoxReadNames(signature, v.namedReturnNames)
+			returnExpr := strings.Join(returnNames, ", ")
 
-			if len(v.namedReturnNames) > 1 {
+			if len(returnNames) > 1 {
 				returnExpr = "(" + returnExpr + ")"
 			}
 
