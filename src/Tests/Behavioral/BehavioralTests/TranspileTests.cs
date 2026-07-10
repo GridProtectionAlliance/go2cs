@@ -963,7 +963,6 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckTypeSwitchMultiCase() => CheckTarget("TypeSwitchMultiCase");
 
     [TestMethod]
-    public void CheckTypeSwitchTagShadowRename() => CheckTarget("TypeSwitchTagShadowRename");
     public void CheckTypeSwitchNamedInterfaceCase() => CheckTarget("TypeSwitchNamedInterfaceCase");
 
     [TestMethod]

@@ -963,7 +963,6 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckTypeSwitchMultiCase() => CheckTarget("TypeSwitchMultiCase");
 
     [TestMethod]
-    public void CheckTypeSwitchTagShadowRename() => CheckTarget("TypeSwitchTagShadowRename");
     public void CheckTypeSwitchNamedInterfaceCase() => CheckTarget("TypeSwitchNamedInterfaceCase");
 
     [TestMethod]

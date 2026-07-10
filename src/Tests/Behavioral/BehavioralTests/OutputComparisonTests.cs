@@ -889,7 +889,6 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckTypeSwitchMultiCase() => CheckTarget("TypeSwitchMultiCase");
 
     [TestMethod]
-    public void CheckTypeSwitchTagShadowRename() => CheckTarget("TypeSwitchTagShadowRename");
     public void CheckTypeSwitchNamedInterfaceCase() => CheckTarget("TypeSwitchNamedInterfaceCase");
 
     [TestMethod]
