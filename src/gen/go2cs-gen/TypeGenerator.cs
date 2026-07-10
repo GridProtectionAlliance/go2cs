@@ -431,7 +431,18 @@ public class TypeGenerator : ISourceGenerator
 
             ISymbol? symbol = semanticModel.GetSymbolInfo(directive.Name).Symbol;
             string target = symbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? directive.Name.ToString();
-            result = Regex.Replace(result, $@"(^|[<,\s\(\[]){Regex.Escape(alias)}\.", $"$1{target}.");
+
+            // Two descriptor conventions coexist: the SOURCE-ALIAS form ("CrossPkgLib.Ticks",
+            // the map key/value emitter) that this substitution resolves, and the NAMESPACE-
+            // QUALIFIED form ("io.fs_package.FileInfo", the slice/array element and defined-
+            // over-selector emitters) that must pass through untouched. They are told apart by
+            // the segment AFTER the leading identifier: a real alias maps to a package CLASS,
+            // so the next segment is a TYPE name — a "_package"-suffixed next segment means the
+            // leading identifier is a namespace segment that merely COLLIDES with a file alias
+            // (net/http's fs.go aliases `io` while `[]io.fs_package.FileInfo` roots io/fs), and
+            // substituting it mangles the reference (CS0426 ×48). The negative lookahead skips
+            // exactly those occurrences.
+            result = Regex.Replace(result, $@"(^|[<,\s\(\[]){Regex.Escape(alias)}\.(?![^.<>,\s\(\)\[\]]*{Regex.Escape(PackageSuffix)}\.)", $"$1{target}.");
         }
 
         return GlobalQualify(result);

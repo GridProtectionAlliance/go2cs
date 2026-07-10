@@ -217,7 +217,10 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			// The GoType attribute is consumed by the generated `<X>.g.cs`, which has no file-local
 			// `using` aliases. unsafe.Pointer (a *types.Basic, a C# keyword) renders via the
 			// `@unsafe` alias; rewrite it to the alias-free package class so it resolves there.
+			// A Δ collision-renamed leading namespace segment must revert to the canonical
+			// qualifier for the same reason (see canonicalizeQualifierRename).
 			csName = strings.ReplaceAll(csName, "@unsafe.", "unsafe_package.")
+			csName = canonicalizeQualifierRename(csName)
 
 			access := v.pendingTypeAccess
 			v.pendingTypeAccess = ""

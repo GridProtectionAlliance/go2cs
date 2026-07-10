@@ -6,6 +6,7 @@ import (
 	"go/token"
 	"go/types"
 	"strconv"
+	"strings"
 )
 
 // Handles array and slice types in context of a TypeSpec
@@ -54,8 +55,10 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, identType types.Type,
 		// Use the fully-qualified name (getFullTypeName) rather than the package-aliased form: the
 		// GoType attribute is consumed by the generated array-backed partial, which lives in a file
 		// without this file's package-relative `using` aliases (e.g. `using atomic = ...`), so an
-		// aliased element type would be unresolvable there (CS0246).
-		csTypeName = convertToCSTypeName(v.getFullTypeName(eltType, false))
+		// aliased element type would be unresolvable there (CS0246). The leading namespace segment
+		// must be the CANONICAL qualifier, never a file-local Δ collision-rename (same rule as the
+		// visitTypeSpec global-using target).
+		csTypeName = canonicalizeQualifierRename(convertToCSTypeName(v.getFullTypeName(eltType, false)))
 		goTypeName = csTypeName
 	} else {
 		typeName := v.getPrintedNode(arrayType.Elt)
@@ -111,4 +114,21 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, identType types.Type,
 func isSimpleIdentExpr(expr ast.Expr) bool {
 	_, ok := expr.(*ast.Ident)
 	return ok
+}
+
+// canonicalizeQualifierRename strips a file-local import collision-rename (Δ) from the LEADING
+// namespace segment of a fully-qualified type name destined for a GoType descriptor: the
+// generated partial that consumes the descriptor has no file-local using aliases, so the
+// segment must be the CANONICAL package qualifier (`IoLike.FsLike_package.Info` roots through
+// the go namespace), never the renamed alias (`ΔIoLike.…` resolves nowhere in the .g.cs).
+// Mirrors the visitTypeSpec global-using-target un-rename; a Δ-renamed TYPE segment is left
+// untouched — only an entry the import-rename map produced is reverted.
+func canonicalizeQualifierRename(typeName string) string {
+	if seg, rest, found := strings.Cut(typeName, "."); found {
+		if canonical, wasRenamed := strings.CutPrefix(seg, ShadowVarMarker); wasRenamed && packageImportAliasRenames[canonical] == seg {
+			return canonical + "." + rest
+		}
+	}
+
+	return typeName
 }

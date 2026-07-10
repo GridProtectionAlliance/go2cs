@@ -204,6 +204,8 @@
     <Project Path="Tests/Behavioral/InterfaceMapKeyPointer/InterfaceMapKeyPointer.csproj" />
     <Project Path="Tests/Behavioral/InterfaceToInterfaceAdapter/InterfaceToInterfaceAdapter.csproj" />
     <Project Path="Tests/Behavioral/IntMinLiterals/IntMinLiterals.csproj" />
+    <Project Path="Tests/Behavioral/IoLike/IoLike.csproj" />
+    <Project Path="Tests/Behavioral/IoLike/FsLike/IoLike.FsLike.csproj" />
     <Project Path="Tests/Behavioral/IotaEnum/IotaEnum.csproj" />
     <Project Path="Tests/Behavioral/KeywordNamedTypes/KeywordNamedTypes.csproj" />
     <Project Path="Tests/Behavioral/KeywordTrueFalseIdent/KeywordTrueFalseIdent.csproj" />
@@ -242,6 +244,8 @@
     <Project Path="Tests/Behavioral/NamedResultLambdaInfer/NamedResultLambdaInfer.csproj" />
     <Project Path="Tests/Behavioral/NamedReturnDefer/NamedReturnDefer.csproj" />
     <Project Path="Tests/Behavioral/NamedSliceCaptureMethod/NamedSliceCaptureMethod.csproj" />
+    <Project Path="Tests/Behavioral/NamedSliceChildPkg/NamedSliceChildPkg.csproj" />
+    <Project Path="Tests/Behavioral/NamedSliceChildPkg/netlike/NamedSliceChildPkg.netlike.csproj" />
     <Project Path="Tests/Behavioral/NamedSliceConversion/NamedSliceConversion.csproj" />
     <Project Path="Tests/Behavioral/NamedSlicePointerReinterpret/NamedSlicePointerReinterpret.csproj" />
     <Project Path="Tests/Behavioral/NamedSlicePointerElements/NamedSlicePointerElements.csproj" />

@@ -1165,6 +1165,25 @@ Map reads honor Go's nil-map and comma-ok semantics (see [The "nil" Value](#the-
 A defined map type — `type Grades map[string]int` — emits the `[GoType("map[K, V]")] partial struct` forward declaration (completing the long-standing `visitMapType` stub), implemented by go2cs-gen's Map template: full forwarding of `IMap<K, V>` (including the two-value comma-ok indexer), `IDictionary<K, V>`, enumeration, and the `ISupportMake` factory through the wrapped `map<K, V>`. Its composite literal wraps the concrete map literal in the named constructor — `new Grades(new map<@string, nint>{["a"u8] = 1})` — mirroring named arrays/slices (a direct indexer-initializer would target a default wrapper with no backing dictionary; the old emission produced Go-style `key: value` inside C# braces — CS1513). Comma-ok indexing works through a **constrained map type parameter** too: `v, ok := m[k]` where `M ~map[K]V` detects the map CORE of the constraint (both at the assignment's tuple gate and in the index emission) and routes the same `m[k, ꟷ]` two-value indexer, which lives on `IMap<K, V>` itself. The **nil comparison** `m == nil` — Go's only legal map comparison, maps.Clone's nil-preserve guard — emits the `IMap.IsNil` property (`if (m.IsNil)`; backing-store null, distinct from an allocated empty map — no operator exists on a type parameter, CS8761), and `delete(m, k)` on a constrained map binds a golib `delete(IMap<K, V>, K)` overload (key/value types infer from the interface conversion). (Guarded by the `GenericTypeInference` extension `EqualMaps` — a maps.Equal clone over a named map type through the constraint, comma-ok + comparable-erased equality, values vs Go.)
 For source-generated named-map wrappers, the generator parses the `[GoType("map[K, V]")]` payload at the top-level comma, not every comma in the string. This matters for function-valued maps: `type opTable map[CrossPkgLib.Ticks]func(int, int) int` emits `map<global::go.CrossPkgLib_package.Ticks, Func<nint, nint, nint>>`, preserving the full delegate as the value type. Any source-file alias used inside the `[GoType]` payload is resolved through Roslyn and rewritten to its fully-qualified target before the template emits `IMap<K, V>`, `IDictionary<K, V>`, and `ICollection<KeyValuePair<K, V>>`; generated files therefore do not depend on file-local package aliases such as `using token = ...`. (Guarded by `NamedMapCrossPkgKey`.)
 
+Two `[GoType]` payload conventions coexist, and the generator's alias substitution must tell them
+apart. The map/channel emitters write dotted types in **source-alias form** (`CrossPkgLib.Ticks`,
+via `getTypeName`), which the substitution above resolves; the slice/array element and
+defined-over-selector emitters write the **namespace-qualified form** (`io.fs_package.FileInfo`,
+via `getFullTypeName`), which roots through the `go` namespace and must pass through untouched.
+The telltale is the segment after the leading identifier: a real alias maps to a package *class*,
+so its next segment is a type name — a `_package`-suffixed next segment means the leading
+identifier is a namespace segment that merely *collides* with a file alias. net/http's fs.go
+aliases `io` while declaring `type fileInfoDirs []fs.FileInfo` → `[]io.fs_package.FileInfo`;
+substituting the `io.` produced the nonexistent `go.io_package.fs_package.FileInfo` (CS0426 ×48).
+The substitution skips exactly those occurrences (a negative lookahead on `_package.`). On the
+converter side, the namespace-qualified form must lead with the **canonical** qualifier, never a
+file-local Δ collision-rename: a consumer whose own namespace has a same-named child imports under
+`using ΔIoLike = IoLike_package;`, but `[]ΔIoLike.FsLike_package.Info` resolves nowhere in the
+alias-free `.g.cs` — `canonicalizeQualifierRename` reverts a leading import-rename segment
+(mirroring the visitTypeSpec global-using-target rule). (Guarded by `NamedSliceChildPkg` — a
+nested-namespace consumer package importing both `IoLike` and `IoLike/FsLike`, with a named slice
+of the subpackage's type used across the assembly boundary.)
+
 A map indexed by a **non-empty interface key** converts a concrete key expression through the same interface-adapter path used by assignments and call arguments. For example, `seen[item] = "kept"` where `seen` is `map[Node]string` and `item` is `*Item` emits `seen[new ItemжNode(item)] = "kept"u8`; the comma-ok read emits the same adapter for the key, `seen[new ItemжNode(item), ꟷ]`. This records the pointer implementation (`GoImplement<Item, Node>(Pointer = true)`) and keeps dictionary lookup semantics aligned with Go's interface key identity. Empty-interface map keys keep their existing literal handling (`map[any]...` turns string literals into Go strings rather than UTF-8 spans), and pointer-typed map keys keep the direct pointer-box path. (Guarded by `InterfaceMapKeyPointer`.)
 
 A value sent into a channel of **non-empty interface element type** converts through the same
