@@ -3300,6 +3300,23 @@ The adapter class scope cannot be derived from Go name casing alone (`error` is 
 ### GoImplement records de-duplicate at attribute emission
 os converts dirEntry to fs.DirEntry both through its own alias (`type DirEntry = fs.DirEntry`) and through the io/fs name - two records for ONE interface made the generator emit the explicit implementation twice (CS8646/CS0111). The de-duplication happens at ATTRIBUTE EMISSION with the ALIASED record winning (its simple name resolves via the package usings); normalizing the RECORD KEY instead was twice wrong - qualified attr names break generator name resolution and flip the alias-locality gate. **Measurement lesson:** those declaration-phase errors had SUPPRESSED all of os's method-body diagnostics (Roslyn phase gating) - a package is not truly measured until its declaration errors are zero.
 
+**The interface-inheritance PRUNE exempts pairs that generate their own adapter CLASS.** The same
+attribute-emission stage also drops a "lower" GoImplement record when the SAME implementing type is
+recorded against a derived interface that C#-inherits it (elf's errorReader against both io.ReadSeeker
+and io.Reader — the two value-form partial-struct implementations would implement `Read` twice,
+CS0111/CS8646). That prune is only valid for the value-boxing PARTIAL-STRUCT form (one type, one
+interface list). A pair whose implementation is a DISTINCT generated adapter class must survive, since
+each cast site references the adapter for the EXACT interface it targets — the ж<T> pointer form was
+already exempt, and the same now holds for the value-form adapter classes (`<src>ᴠ<iface>`): an
+**interface-sourced** conversion (net/http wraps `net.Conn` values as `io.Reader`/`io.Writer` — the
+prune dropped both pairs under the also-recorded `Conn→ReadWriteCloser`, so every
+`new net_ConnᴠWriter(…)` referenced a class the generator never emitted, CS0246 ×17 in net/http and
+recurring in net/rpc and httputil) and a **foreign-struct value** conversion
+(`<pkg>_<T>ᴠ<iface>`) are marked at recording time (`adapterClassImplementations` in
+`convertToInterfaceType`) and skipped by the prune. (Guarded by `IfaceToIfaceNarrow` — one source
+interface converted to a full-surface embedded-interface target AND to its narrower bases at
+argument, assignment, and return positions, dispatch output-compared vs Go.)
+
 ### Anonymous interfaces used as an adapter target are lifted package-wide
 
 An inline anonymous interface used as a `GoImplement` target — internal/trace's `readBatch(r

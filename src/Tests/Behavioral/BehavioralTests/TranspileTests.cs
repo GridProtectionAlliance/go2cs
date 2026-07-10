@@ -432,6 +432,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckIfaceFieldMethodValueBind() => CheckTarget("IfaceFieldMethodValueBind");
 
     [TestMethod]
+    public void CheckIfaceToIfaceNarrow() => CheckTarget("IfaceToIfaceNarrow");
+
+    [TestMethod]
     public void CheckIfStatements() => CheckTarget("IfStatements");
 
     [TestMethod]

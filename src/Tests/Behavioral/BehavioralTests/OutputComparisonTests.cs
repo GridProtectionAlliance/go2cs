@@ -394,6 +394,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckIfaceFieldMethodValueBind() => CheckTarget("IfaceFieldMethodValueBind");
 
     [TestMethod]
+    public void CheckIfaceToIfaceNarrow() => CheckTarget("IfaceToIfaceNarrow");
+
+    [TestMethod]
     public void CheckImmediatelyInvokedFunc() => CheckTarget("ImmediatelyInvokedFunc");
 
     [TestMethod]

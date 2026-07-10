@@ -435,6 +435,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckIfaceFieldMethodValueBind() => CheckTarget("IfaceFieldMethodValueBind");
 
     [TestMethod]
+    public void CheckIfaceToIfaceNarrow() => CheckTarget("IfaceToIfaceNarrow");
+
+    [TestMethod]
     public void CheckIfStatements() => CheckTarget("IfStatements");
 
     [TestMethod]

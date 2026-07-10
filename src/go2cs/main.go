@@ -397,6 +397,16 @@ var promotedInterfaceImplementations map[string]HashSet[string]
 // drives ImplementGenerator's EmitConstraintProxy. See constraintProxyArg.
 var constraintProxies map[string][2]string
 var interfaceInheritances map[string]HashSet[string]
+
+// adapterClassImplementations marks recorded "iface|impl" GoImplement pairs whose implementation
+// is a DISTINCT value-form adapter CLASS (`<src>ᴠ<iface>` — an interface-sourced conversion or a
+// foreign-struct value conversion) rather than an interface entry folded into the implementing
+// type's own partial-struct base list. Cast sites reference the adapter for the EXACT interface
+// they target, so the interface-inheritance prune must not drop these pairs (mirrors the ж<T>
+// pointer-form exemption there): pruning GoImplement<net.Conn, io.Writer> under
+// GoImplement<net.Conn, io.ReadWriteCloser> leaves every `new net_ConnᴠWriter(…)` use site
+// referencing a class the generator never emits (net/http, CS0246 ×17). Guarded by packageLock.
+var adapterClassImplementations HashSet[string]
 var implicitConversions map[string]HashSet[string]
 var invertedImplicitConversions map[string]HashSet[string]
 var indirectImplicitConversions map[string]HashSet[string]
@@ -705,6 +715,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		promotedInterfaceImplementations = make(map[string]HashSet[string])
 		constraintProxies = make(map[string][2]string)
 		interfaceInheritances = make(map[string]HashSet[string])
+		adapterClassImplementations = HashSet[string]{}
 		implicitConversions = make(map[string]HashSet[string])
 		invertedImplicitConversions = make(map[string]HashSet[string])
 		indirectImplicitConversions = make(map[string]HashSet[string])
@@ -1130,6 +1141,18 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 							for _, implementation := range commonImplementations.Keys() {
 								if strings.HasPrefix(implementation, PointerPrefix+"<") {
+									continue
+								}
+
+								// A VALUE-form pair that generates its own adapter CLASS (an
+								// interface-sourced or foreign-struct conversion — see
+								// adapterClassImplementations) is exempt for the same reason as
+								// the ж<T> form above: the cast site references the adapter for
+								// the EXACT interface it targets (net/http's `new
+								// net_ConnᴠWriter(…)` needs GoImplement<net.Conn, io.Writer>
+								// even though the Conn→ReadWriteCloser record also implements
+								// Writer through inheritance; CS0246 ×17).
+								if adapterClassImplementations.Contains(inheritedInterfaceName + "|" + implementation) {
 									continue
 								}
 
@@ -2560,6 +2583,10 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 			interfaceImplementations[interfaceTypeName] = NewHashSet([]string{targetTypeName})
 		}
 
+		// An interface-sourced pair generates a distinct `<src>ᴠ<iface>` adapter class the
+		// cast site references — exempt it from the interface-inheritance prune.
+		adapterClassImplementations.Add(interfaceTypeName + "|" + targetTypeName)
+
 		packageLock.Unlock()
 	}
 
@@ -2581,6 +2608,14 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 			implementations.Add(recordName)
 		} else {
 			interfaceImplementations[interfaceTypeName] = NewHashSet([]string{recordName})
+		}
+
+		// A foreign-struct VALUE pair generates a distinct `<pkg>_<src>ᴠ<iface>` adapter class
+		// the cast site references — exempt it from the interface-inheritance prune (a local
+		// impl folds into the type's own partial-struct base list and still prunes; the
+		// pointer-form record is already exempt there by its ж< prefix).
+		if recordableValueForeign {
+			adapterClassImplementations.Add(interfaceTypeName + "|" + recordName)
 		}
 
 		packageLock.Unlock()
