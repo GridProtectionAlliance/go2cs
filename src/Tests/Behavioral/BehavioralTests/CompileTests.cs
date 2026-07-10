@@ -303,6 +303,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckForVarMasksFuncLevel() => CheckTarget("ForVarMasksFuncLevel");
 
     [TestMethod]
+    public void CheckFuncFieldNestedTupleParam() => CheckTarget("FuncFieldNestedTupleParam");
+
+    [TestMethod]
     public void CheckFuncFieldUnexportedType() => CheckTarget("FuncFieldUnexportedType");
 
     [TestMethod]

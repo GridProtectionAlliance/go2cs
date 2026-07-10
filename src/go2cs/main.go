@@ -4874,6 +4874,43 @@ func splitTopLevelTypes(typeArgs string) []string {
 	return append(result, typeArgs[start:])
 }
 
+// splitTopLevelParams splits a func-type parameter list on TOP-LEVEL commas only — a comma
+// nested inside a single parameter's own type is not a separator: the tuple result of a nested
+// func param (`lookup func(string) (io.ReadCloser, error)`), a nested func's own parameter
+// list, or a generic's argument list. The naive strings.Split this replaces shredded the
+// nested tuple at its interior comma, unbalancing the delegate render
+// (`Func<@string, (io.ReadCloser>, error)` — go/importer's gccgo importer field, a
+// whole-project syntax cascade). The '<' of a channel arrow (`chan<-` / `<-chan`, and the '<'
+// inside its converted `/*<-*/` comment form) is not a bracket — see splitMapKeyValue.
+func splitTopLevelParams(paramString string) []string {
+	var result []string
+
+	depth := 0
+	start := 0
+
+	for i := 0; i < len(paramString); i++ {
+		switch paramString[i] {
+		case '<':
+			if i+1 < len(paramString) && paramString[i+1] == '-' {
+				continue
+			}
+
+			depth++
+		case '(', '[', '{':
+			depth++
+		case '>', ')', ']', '}':
+			depth--
+		case ',':
+			if depth == 0 {
+				result = append(result, paramString[start:i])
+				start = i + 1
+			}
+		}
+	}
+
+	return append(result, paramString[start:])
+}
+
 func extractTypes(signature string) []string {
 	// Remove any whitespace at the ends
 	signature = strings.TrimSpace(signature)
@@ -4883,8 +4920,9 @@ func extractTypes(signature string) []string {
 		return []string{}
 	}
 
-	// Split the signature into individual parameter declarations
-	params := strings.Split(signature, ",")
+	// Split the signature into individual parameter declarations (top-level commas only — a
+	// nested func param carries its own commas)
+	params := splitTopLevelParams(signature)
 	types := make([]string, 0, len(params))
 
 	for _, param := range params {

@@ -306,6 +306,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckForVarMasksFuncLevel() => CheckTarget("ForVarMasksFuncLevel");
 
     [TestMethod]
+    public void CheckFuncFieldNestedTupleParam() => CheckTarget("FuncFieldNestedTupleParam");
+
+    [TestMethod]
     public void CheckFuncFieldUnexportedType() => CheckTarget("FuncFieldUnexportedType");
 
     [TestMethod]
