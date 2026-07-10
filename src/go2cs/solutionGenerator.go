@@ -163,21 +163,42 @@ func buildSolutionXML(coreProjects []string, testProjects []string) string {
 	writeLine(1, "</Folder>")
 
 	// Shared runtime + converted stdlib packages, grouped into solution folders that mirror
-	// the Go package namespaces: a project's folder is its PARENT package path (`/core/` +
-	// dir of the Go import path), so `crypto/internal/nistec/fiat` lands under
-	// `/core/crypto/internal/nistec/` and a single-segment package (`fmt`, and golib itself)
-	// sits directly in `/core/`. Folder names are slash-paths — the .slnx format nests by
-	// name, so intermediate folders are implied and never need empty declarations. Projects
-	// arrive globally sorted, which also sorts the folder groups; emitting groups in
-	// first-appearance order keeps the document deterministic and diff-stable.
-	solutionFolder := func(project string) string {
-		parent := path.Dir(path.Dir(project)) // core/<gopath>/<name>.csproj → core/<gopath's parent>
+	// the Go package namespaces. A "namespace parent" is any package directory that also
+	// contains deeper packages — `crypto`, `net`, `hash`, `io`, … all have both their own
+	// package AND sub-packages. Such a package's project is placed INSIDE its own namespace
+	// folder (`crypto.csproj` in `/core/crypto/`, alongside `crypto/aes`, `crypto/cipher`, …),
+	// not as a sibling of that folder in `/core/`. That sibling placement is what Visual
+	// Studio rejects: a solution folder and a project of the same leaf name under one parent
+	// collide in its identifier space ("a Solution Folder with the same unique identifier
+	// already exists"). A leaf package with no sub-packages (`fmt`, and golib) stays directly
+	// in its parent folder. Folder names are slash-paths — the .slnx format nests by name, so
+	// intermediate folders are implied and never need empty declarations. Projects arrive
+	// globally sorted, which also sorts the folder groups; emitting groups in first-appearance
+	// order keeps the document deterministic and diff-stable.
+	namespaceParents := make(map[string]bool)
 
-		if parent == "core" || parent == "." {
+	for _, project := range coreProjects {
+		// Every strict ancestor directory of a project's own package directory is a namespace
+		// parent (it holds a deeper package). `core/crypto/aes/x.csproj` marks `core/crypto`
+		// (and `core`); a leaf like `core/fmt/fmt.csproj` marks only `core`.
+		for dir := path.Dir(path.Dir(project)); dir != "." && dir != "/" && dir != ""; dir = path.Dir(dir) {
+			namespaceParents[dir] = true
+		}
+	}
+
+	solutionFolder := func(project string) string {
+		own := path.Dir(project) // core/<import path> — the package's own directory
+		dir := path.Dir(own)     // default: the parent (a leaf package sits flat in it)
+
+		if namespaceParents[own] {
+			dir = own // this package IS a namespace parent — it lives inside its own folder
+		}
+
+		if dir == "core" || dir == "." {
 			return "/core/"
 		}
 
-		return "/" + parent + "/"
+		return "/" + dir + "/"
 	}
 
 	var folderOrder []string
