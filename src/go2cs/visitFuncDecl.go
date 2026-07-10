@@ -1281,7 +1281,15 @@ func getHeapBoxLitParamName(renderedName string) string {
 // identEscapesHeap outside markCaptureModeBoxedParams — a mixed `data, pc, line := …` define
 // re-uses the param object, so the define walker escape-analyzes it (debug/gosym's slice,
 // whose `pc` is stored into a composite literal). Those params keep their historical unboxed
-// emission; only the capture-mode trigger boxes, re-verified here against the declaring ident.
+// emission; the box fires only for the capture-mode trigger, re-verified here against the
+// declaring ident, or for a param the capture analysis routed to SHARED storage: one WRITTEN
+// after a closure captured it (see processPotentialCapture's varShareFacts arm) is referenced
+// through its box inside every capturing lambda (`Ꮡctx.ValueSlot`), so the prologue must
+// declare that box — database/sql beginDC's `ctx` (redeclared by a body-top-level
+// `ctx, cancel := …` after withLock's closure captured it) and go/types nify's `x, y`
+// (swapped after the trace defer captured them) rendered a box that was never declared
+// (CS0103). The box-ref check rides the declaring-ident lookups below so a box-ref'd value
+// RECEIVER (never `ʗp`-renamed by the signature paths) can never take the param form.
 func (v *Visitor) paramNeedsHeapBox(param *types.Var) bool {
 	if param == nil || param.Name() == "" || param.Name() == "_" {
 		return false
@@ -1304,7 +1312,7 @@ func (v *Visitor) paramNeedsHeapBox(param *types.Var) bool {
 	for _, field := range funcDecl.Type.Params.List {
 		for _, ident := range field.Names {
 			if v.info.ObjectOf(ident) == param {
-				return v.bodyCallsCaptureModeMethodOn(ident, funcDecl.Body)
+				return v.bodyCallsCaptureModeMethodOn(ident, funcDecl.Body) || v.isLambdaBoxRefVar(param)
 			}
 		}
 	}
@@ -1330,7 +1338,7 @@ func (v *Visitor) paramNeedsHeapBox(param *types.Var) bool {
 
 			for _, ident := range field.Names {
 				if v.info.ObjectOf(ident) == param {
-					needsBox = v.bodyCallsCaptureModeMethodOn(ident, funcLit.Body)
+					needsBox = v.bodyCallsCaptureModeMethodOn(ident, funcLit.Body) || v.isLambdaBoxRefVar(param)
 					return false
 				}
 			}

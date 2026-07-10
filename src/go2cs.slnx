@@ -427,6 +427,7 @@
     <Project Path="Tests/Behavioral/VariadicPointerParam/VariadicPointerParam.csproj" />
     <Project Path="Tests/Behavioral/VariadicSlotInterfaces/VariadicSlotInterfaces.csproj" />
     <Project Path="Tests/Behavioral/VariableCapture/VariableCapture.csproj" />
+    <Project Path="Tests/Behavioral/WrittenCaptureParam/WrittenCaptureParam.csproj" />
   </Folder>
   <Folder Name="/tests/library/">
     <Project Path="Tests/ChannelTests/ChannelTests.csproj" />

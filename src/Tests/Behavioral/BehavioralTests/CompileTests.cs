@@ -1142,6 +1142,9 @@ public class B2_CompileTests : BehavioralTestBase
     [TestMethod]
     public void CheckVarNamedAsType() => CheckTarget("VarNamedAsType");
 
+    [TestMethod]
+    public void CheckWrittenCaptureParam() => CheckTarget("WrittenCaptureParam");
+
     // </TestMethods>
 
     private void CheckTarget(string targetProject)

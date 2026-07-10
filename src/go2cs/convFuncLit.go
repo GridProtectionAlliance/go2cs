@@ -494,7 +494,11 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 // all). A literal param qualifies exactly like a declaration param: marked escaping by
 // markCaptureModeBoxedParams AND re-verified against the declaring ident, so a param that
 // leaked into identEscapesHeap via a mixed `t, y := …` define keeps its historical unboxed
-// emission. A variadic parameter is excluded (its `ʗp` rename/prologue is the variadic slice
+// emission — or routed to SHARED storage by the capture analysis (written after a NESTED
+// closure captured it — see processPotentialCapture's varShareFacts arm), whose renders
+// reference the box inside every capturing lambda, so the literal's prologue must declare it
+// (the declaration-param cousins are database/sql beginDC's `ctx` / go/types nify's `x, y`,
+// CS0103). A variadic parameter is excluded (its `ʗp` rename/prologue is the variadic slice
 // convention, and its unnamed []T type carries no methods).
 func (v *Visitor) funcLitHeapBoxParamIdents(funcLit *ast.FuncLit) []*ast.Ident {
 	if funcLit.Type.Params == nil {
@@ -523,7 +527,7 @@ func (v *Visitor) funcLitHeapBoxParamIdents(funcLit *ast.FuncLit) []*ast.Ident {
 				continue
 			}
 
-			if v.identHasHeapBox(obj, obj.Type()) && v.bodyCallsCaptureModeMethodOn(ident, funcLit.Body) {
+			if v.identHasHeapBox(obj, obj.Type()) && (v.bodyCallsCaptureModeMethodOn(ident, funcLit.Body) || v.isLambdaBoxRefVar(obj)) {
 				boxed = append(boxed, ident)
 			}
 		}
