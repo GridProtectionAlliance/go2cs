@@ -1017,7 +1017,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// methodGroupDelegateType) even though go/types keeps it structural. Method
 				// groups and func literals themselves convert natively and are excluded by both
 				// gates.
-				if _, paramIsSig := types.Unalias(paramType).(*types.Signature); paramIsSig && !typeContainsTypeParams(paramType) {
+				if _, paramIsSig := types.Unalias(paramType).(*types.Signature); paramIsSig && paramHasArg && !typeContainsTypeParams(paramType) {
 					if argType := v.getType(callExpr.Args[i], false); argType != nil {
 						argRendersNamedDelegate := false
 
