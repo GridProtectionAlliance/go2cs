@@ -357,6 +357,16 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			// (len 0) never matches results.Len(), so it neither sets hasReturn nor a false
 			// hasFullyTypedArm; a named literal that DOES have a fully-typed explicit arm keeps
 			// inferred typing (no return-type prefix, no churn).
+			//
+			// A basic-STRING literal element is ALSO inference-defeating — worse than typeless,
+			// it is WRONGLY typed: inside a tuple the literal emits as a bare C# string (u8
+			// spans cannot be tuple elements — see visitReturnStmt), and @string↔string convert
+			// implicitly both ways, so an arm like `return dur, coverageSnapshot, ""` infers a
+			// C# `string` element where the Go result is @string (internal/fuzz fuzzOnce: the
+			// destructured errMsg then has no `!=` against a u8 literal, CS0019 — the tuple-
+			// element sibling of the single-string-result CS8917 arm above). Gated on the
+			// literal's presence AND a declared basic-string element, so a literal whose string
+			// elements are all variables keeps inferred typing (no churn).
 			hasReturn := false
 			hasFullyTypedArm := false
 
@@ -369,9 +379,16 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 					hasReturn = true
 					fullyTyped := true
 
-					for _, res := range ret.Results {
+					for i, res := range ret.Results {
 						if tv, ok := v.info.Types[res]; ok {
 							if basic, isBasic := tv.Type.(*types.Basic); isBasic && basic.Kind() == types.UntypedNil {
+								fullyTyped = false
+								break
+							}
+						}
+
+						if isStringBasicLit(res) {
+							if declared, ok := types.Unalias(results.At(i).Type()).(*types.Basic); ok && declared.Kind() == types.String {
 								fullyTyped = false
 								break
 							}

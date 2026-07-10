@@ -56,6 +56,35 @@ internal static void Main() {
     };
     fmt.Println(pad("v"u8, true));
     fmt.Println(pad("v"u8, false));
+    var fuzzish = (nint dur, slice<byte> cov, @string errMsg) (nint entry) => {
+        nint dur = default!;
+        slice<byte> cov = default!;
+        @string errMsg = default!;
+        if (entry < 0) {
+            @string msg = fmt.Sprintf("bad entry %d"u8, entry);
+            return (entry, default!, msg);
+        }
+        if (entry == 0) {
+            return (entry, default!, "");
+        }
+        return (entry, new byte[]{(byte)entry}.slice(), "");
+    };
+    var (d1, c1, e1) = fuzzish(-1);
+    fmt.Println(d1, c1, e1 != ""u8, e1);
+    var (d2, c2, e2) = fuzzish(0);
+    fmt.Println(d2, c2, e2 != ""u8, e2);
+    var (d3, c3, e3) = fuzzish(2);
+    fmt.Println(d3, c3, e3 != ""u8, e3);
+    var sget = (@string, error) (bool ok) => {
+        if (!ok) {
+            return ("", fmt.Errorf("no string"u8));
+        }
+        return ("found", default!);
+    };
+    var (s1, err1) = sget(false);
+    fmt.Println(s1 == ""u8, err1 != default!);
+    var (s2, err2) = sget(true);
+    fmt.Println(s2, err2 == default!);
 }
 
 } // end main_package

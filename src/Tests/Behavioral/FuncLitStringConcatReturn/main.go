@@ -65,4 +65,42 @@ func main() {
 
 	fmt.Println(pad("v", true))
 	fmt.Println(pad("v", false))
+
+	// MULTI-result sibling (internal/fuzz fuzzOnce): a tuple whose string ELEMENT is a
+	// bare "" literal on some arms. Inside a tuple the literal emits as a bare C# string
+	// (u8 spans cannot be tuple elements), so an arm with no nil and no string var —
+	// `return entry, []byte{…}, ""` — counted as fully typed and suppressed the explicit
+	// tuple return type, inferring a C# string element where the Go result is string
+	// (@string): the destructured errMsg then had no `!=` against a u8 literal (CS0019).
+	fuzzish := func(entry int) (dur int, cov []byte, errMsg string) {
+		if entry < 0 {
+			msg := fmt.Sprintf("bad entry %d", entry)
+			return entry, nil, msg
+		}
+		if entry == 0 {
+			return entry, nil, ""
+		}
+		return entry, []byte{byte(entry)}, ""
+	}
+
+	d1, c1, e1 := fuzzish(-1)
+	fmt.Println(d1, c1, e1 != "", e1)
+	d2, c2, e2 := fuzzish(0)
+	fmt.Println(d2, c2, e2 != "", e2)
+	d3, c3, e3 := fuzzish(2)
+	fmt.Println(d3, c3, e3 != "", e3)
+
+	// Unnamed multi-result variant (internal/coverage/decodecounter sget): the "" element
+	// rides an arm whose other element is a typed non-nil expression.
+	sget := func(ok bool) (string, error) {
+		if !ok {
+			return "", fmt.Errorf("no string")
+		}
+		return "found", nil
+	}
+
+	s1, err1 := sget(false)
+	fmt.Println(s1 == "", err1 != nil)
+	s2, err2 := sget(true)
+	fmt.Println(s2, err2 == nil)
 }
