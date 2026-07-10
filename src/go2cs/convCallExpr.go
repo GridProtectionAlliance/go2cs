@@ -423,6 +423,20 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				if basic, ok := named.Underlying().(*types.Basic); ok && basic.Kind() == types.String {
 					return fmt.Sprintf("((%s)(@string)%s)", targetTypeName, expr)
 				}
+
+				// The BYTE/RUNE-slice sibling: a string literal converting to a NAMED type whose
+				// underlying is `[]byte`/`[]rune` — `htmlSig("<!DOCTYPE HTML")`, `type htmlSig
+				// []byte` (net/http sniff.go's signature table, CS0030 ×17). The u8 span converts
+				// to neither the wrapper (whose [GoType] operator takes exactly its underlying
+				// slice) nor through @string in one hop (C# chains at most one user-defined
+				// conversion). Materialize the underlying slice the way the plain `[]byte("…")`
+				// conversion does — the slice<T>(T[]) builtin over the literal's @string — and the
+				// wrapper's own operator applies: `((htmlSig)slice<byte>((@string)"…"u8))`.
+				if sliceType, ok := named.Underlying().(*types.Slice); ok {
+					if basic, ok := sliceType.Elem().Underlying().(*types.Basic); ok && (basic.Kind() == types.Byte || basic.Kind() == types.Rune) {
+						return fmt.Sprintf("((%s)%s((@string)%s))", targetTypeName, v.getCSTypeName(sliceType), expr)
+					}
+				}
 			}
 		}
 

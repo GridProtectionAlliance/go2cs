@@ -1014,6 +1014,19 @@ return ((errorString)(@string)"kaboom"u8);
 
 This is the form the runtime uses for every `panic(errorString("…"))` / `plainError("…")`. (Guarded by the behavioral test `NamedStringConversion`.)
 
+### Converting a string literal to a named `[]byte` / `[]rune` type
+The byte/rune-slice sibling of the named-string rule above: a string **literal** converting to a named type whose underlying is `[]byte` or `[]rune` — `htmlSig("<!DOCTYPE HTML")` where `type htmlSig []byte` (net/http `sniff.go`'s signature table) — cannot cast directly either. The `u8` span converts to neither the `[GoType]` wrapper (whose implicit operator takes exactly its underlying `slice<byte>`/`slice<rune>`) nor through `@string` in one hop (C# chains at most one user-defined conversion — CS0030). The converter materializes the underlying slice exactly the way the plain `[]byte("…")` conversion does (the `slice<T>(T[])` builtin over the literal's `@string`), and the wrapper's own operator then applies:
+
+```go
+type htmlSig []byte
+sig := htmlSig("<!DOCTYPE HTML")
+```
+```csharp
+var sig = ((htmlSig)slice<byte>((@string)"<!DOCTYPE HTML"u8));
+```
+
+The rune form decodes code points — `runeSig("héllo")` yields a rune-counted `slice<rune>` — matching Go's conversion semantics. String **variables** are unaffected (no instance in the corpus; a named-slice wrapper conversion from a `@string` variable would surface as a loud CS0030, not silent misbehavior). (Guarded by the behavioral test `NamedByteSliceFromStringLit` — direct, composite-element, and argument positions, byte/rune element reads, all output-compared vs Go.)
+
 ### A string literal with high/greedy `\x` escapes emits a byte-array `@string`
 Go's `\x` escape is **exactly two** hex digits denoting one raw byte; C#'s `\x` escape is a **greedy** 1-to-4-hex-digit code-*unit* escape, and a C# `"…"u8` literal UTF-8-re-encodes its content. So re-emitting a Go token verbatim as a C# string literal both (a) mis-parses `\xdb` followed by ASCII `"5""0"` (the token `\xdb50`) as the single code unit U+DB50 — a lone high surrogate that cannot UTF-8-encode into a golib `@string` (CS9026, time/tzdata's embedded zip blob) — and (b) silently widens every byte ≥ 0x80 to two UTF-8 bytes, so `@string` byte indexing / `len` would not match Go. Such literals are emitted as the exact bytes in a **parenthesized** byte-array-backed `@string`:
 

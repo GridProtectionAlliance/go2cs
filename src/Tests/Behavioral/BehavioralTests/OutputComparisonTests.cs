@@ -539,6 +539,7 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
+    public void CheckNamedByteSliceFromStringLit() => CheckTarget("NamedByteSliceFromStringLit");
 
     [TestMethod]
     public void CheckNamedFuncResultPointerArg() => CheckTarget("NamedFuncResultPointerArg");
