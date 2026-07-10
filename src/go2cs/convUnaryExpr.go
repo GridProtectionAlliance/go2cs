@@ -3,8 +3,11 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/constant"
 	"go/token"
 	"go/types"
+	"math"
+	"strconv"
 	"strings"
 )
 
@@ -719,6 +722,53 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 			if tv, ok := v.info.Types[unaryExpr]; ok && tv.Type != nil && tv.Value != nil {
 				if basic, ok := tv.Type.Underlying().(*types.Basic); ok && basic.Info()&types.IsInteger != 0 {
 					return tv.Value.ExactString()
+				}
+			}
+		}
+	}
+
+	// Go folds `-literal` into ONE constant, but convBasicLit classifies the POSITIVE operand
+	// alone: `[]int32{-2147483648}` sees 2147483648 > MaxInt32 → `-(nint)2147483648L`, which has
+	// no implicit conversion back to int32 (CS0266, internal/fuzz mutator's interesting32), and
+	// the int64 minimum's operand routes through the unsigned branch to `-(nuint)…UL`, where C#
+	// does not even define unary minus (CS0023). Classify the range on the UNARY expression's
+	// resolved constant — the sign-folded value — mirroring the FLOAT arm above. The exact int32
+	// minimum in an int32-typed context emits the plain negated literal (C# special-cases the
+	// negated decimal int-min as an int constant, digit separators included), and the exact int64
+	// minimum emits `-9223372036854775808L` (the matching long special case), cast for a Go-int
+	// (nint) context since long→nint has no implicit conversion. Decimal source formatting is
+	// preserved; hex/binary re-render as decimal — C# has no signed special case for those forms
+	// (`-0x80000000` binds as a long-typed expression). Everything else keeps the default path
+	// untouched: an operand within int32 never had a problem, an int32-min folded into a WIDER
+	// context (`var x int64 = -2147483648`) compiles as `-(nint)…L` today (nint converts
+	// implicitly to long) and — in an `any` slot — keeps Go-int values boxed as nint.
+	if unaryExpr.Op == token.SUB {
+		if lit, ok := unaryExpr.X.(*ast.BasicLit); ok && lit.Kind == token.INT {
+			if opval, err := strconv.ParseInt(lit.Value, 0, 64); err != nil || opval > math.MaxInt32 {
+				if tv, ok := v.info.Types[unaryExpr]; ok && tv.Type != nil && tv.Value != nil {
+					if basic, ok := tv.Type.Underlying().(*types.Basic); ok && basic.Info()&types.IsInteger != 0 && basic.Info()&types.IsUnsigned == 0 {
+						if folded, exact := constant.Int64Val(constant.ToInt(tv.Value)); exact {
+							negated := "-" + lit.Value
+
+							if len(lit.Value) > 1 && lit.Value[0] == '0' {
+								negated = strconv.FormatInt(folded, 10) // includes the sign
+							}
+
+							if folded == math.MinInt32 && basic.Kind() == types.Int32 {
+								return negated
+							}
+
+							if folded == math.MinInt64 {
+								if basic.Kind() == types.Int64 {
+									return negated + "L"
+								}
+
+								if basic.Kind() == types.Int {
+									return fmt.Sprintf("((nint)(%sL))", negated)
+								}
+							}
+						}
+					}
 				}
 			}
 		}

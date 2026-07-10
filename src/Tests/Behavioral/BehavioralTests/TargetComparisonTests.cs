@@ -468,6 +468,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckInterfaceToInterfaceAdapter() => CheckTarget("InterfaceToInterfaceAdapter");
 
     [TestMethod]
+    public void CheckIntMinLiterals() => CheckTarget("IntMinLiterals");
+
+    [TestMethod]
     public void CheckIotaEnum() => CheckTarget("IotaEnum");
 
     [TestMethod]

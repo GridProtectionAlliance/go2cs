@@ -197,6 +197,7 @@
     <Project Path="Tests/Behavioral/InterfaceIntraFunction/InterfaceIntraFunction.csproj" />
     <Project Path="Tests/Behavioral/InterfaceMapKeyPointer/InterfaceMapKeyPointer.csproj" />
     <Project Path="Tests/Behavioral/InterfaceToInterfaceAdapter/InterfaceToInterfaceAdapter.csproj" />
+    <Project Path="Tests/Behavioral/IntMinLiterals/IntMinLiterals.csproj" />
     <Project Path="Tests/Behavioral/IotaEnum/IotaEnum.csproj" />
     <Project Path="Tests/Behavioral/KeywordNamedTypes/KeywordNamedTypes.csproj" />
     <Project Path="Tests/Behavioral/KeywordTrueFalseIdent/KeywordTrueFalseIdent.csproj" />
