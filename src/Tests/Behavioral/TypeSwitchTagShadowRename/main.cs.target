@@ -45,7 +45,8 @@ internal static (@string, @string) classifyVia(any v) {
     };
     var unwrapʗ1 = unwrap;
     var pick = @string (any vΔ2) => {
-        switch (unwrapʗ1(vΔ2).type()) {
+        var switchᴛ1 = unwrapʗ1(vΔ2);
+        switch (switchᴛ1.type()) {
         case nint vΔ3: {
             return fmt.Sprintf("int:%d"u8, vΔ3);
         }
@@ -56,7 +57,7 @@ internal static (@string, @string) classifyVia(any v) {
             return fmt.Sprintf("string:%s"u8, vΔ3);
         }
         default: {
-            var vΔ3 = unwrapʗ1(vΔ2);
+            var vΔ3 = switchᴛ1;
             return fmt.Sprintf("other:%v"u8, vΔ3);
         }}
     };

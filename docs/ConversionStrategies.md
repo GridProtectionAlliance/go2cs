@@ -1915,8 +1915,9 @@ label stacks in its non-binding `{} ᴛn when ᴛn._<Iface>(out var _)` form, an
 `int32`/`uint32` companions of `case int:`/`case uint:` stack with the same discard. The
 duplicate-mapped-case merge applies per label (a merged label leaves its marker comment above the stack).
 An UNBOUND multi-type clause (`switch x.(type)`) stacks the same way with no re-bind — the body is no
-longer duplicated per label. The re-bind re-evaluates the guard EXPRESSION at body entry (nothing can
-mutate it between dispatch and entry), sharing the default arm's banked call-operand caveat below. (Guarded by the `TypeSwitchMultiCase` behavioral test — bound multi-type
+longer duplicated per label. The re-bind re-evaluates the guard EXPRESSION at body entry — harmless
+for a pure tag (nothing can mutate it between dispatch and entry), and an IMPURE tag is hoisted into
+a one-time temporary first (see *The type-switch tag evaluates exactly once* below). (Guarded by the `TypeSwitchMultiCase` behavioral test — bound multi-type
 cases over values and pointers with interface-dispatched body uses, `nil` stacked with a concrete type, an
 unbound multi-type clause, and the synthetic-int stacking, output-compared vs Go; also rewrote
 `TypeSwitch`'s `case int, int64, uint64:` golden with output proven unchanged.)
@@ -2034,11 +2035,39 @@ table, CS1012 ×133). Guarded by `StringConvPostfix` (`glyphs`).
 ### Type-switch default arm binds the interface value
 The default clause binds the guard to the ORIGINAL guarded expression (`var x = err;`), whose
 static type is the interface — the switch-operand form (`err.type()`) is object and cannot
-flow back out (`default: return x`, go/build/constraint's pushNot, CS0266). BANKED: a
-call-operand type switch still evaluates the operand in both the header and the arm re-bind —
-this now also covers a MULTI-TYPE case's interface-typed re-bind (see *Multi-type cases stack
-labels* above); go/types handleBailout's `switch p := recover().(type)` re-calls `recover()` in
-its `case nil, *bailout:` arm, harmless there only because that arm never reads `p`.
+flow back out (`default: return x`, go/build/constraint's pushNot, CS0266).
+
+### The type-switch tag evaluates exactly once
+Go evaluates the TypeSwitchGuard's operand exactly once, but the default-arm and multi-type
+re-binds above textually re-emit the tag expression, so a tag containing a **call or channel
+receive** evaluated once at dispatch and again at each matched re-bind arm —
+`switch p := recover().(type)` re-called `recover()` (which returns nil the second time,
+silently losing the recovered value in a `case nil, *bailout:`-style arm that reads `p`;
+go/types handleBailout), and a `switch v := (<-ch).(type)` re-received. Such a tag is now
+HOISTED into a one-time temporary, and both the dispatch operand and every re-bind read it:
+
+```csharp
+var switchᴛ1 = next(x);
+switch (switchᴛ1.type()) {
+case @string _:
+case bool _: {
+    var v = switchᴛ1;      // re-bind reads the temp — next() ran exactly once
+    …
+default: {
+    var v = switchᴛ1;
+```
+
+The hoist is deliberately GATED — only a tag containing a call (conversions hoist
+conservatively; the temp is merely unneeded) or a receive, and only when some arm actually
+re-binds (a bound default, or a multi-type clause with a non-blank ident) — so every pure-tag
+type switch keeps its direct, byte-identical emission. The temp name comes from the
+per-package `getGlobalTempVarName` counter (`switchᴛN`), so nested and sibling hoists never
+collide. Single-type concrete labels and the `when`-guard interface labels bind from the
+dispatch operand's pattern variable and never re-evaluate the tag regardless. (Guarded by the
+`TypeSwitchImpureTag` behavioral test — a counting-function tag whose per-switch eval count is
+printed and output-compared vs Go [the pre-fix emission provably prints `calls: 7` for Go's
+`calls: 4`], a `recover()` tag in a deferred multi-type switch, and a channel-receive tag that
+would deadlock on re-receive.)
 
 ### Generated code global::-qualifies root-namespace references
 Inside a package whose namespace nests a same-named segment (go/build/constraint emits into

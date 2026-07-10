@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"strings"
 )
@@ -38,16 +39,12 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 		v.visitStmt(typeSwitchStmt.Init, []StmtContext{})
 	}
 
-	v.targetFile.WriteString(v.newline)
-
-	v.writeOutput("switch (")
-
-	var targetIdent, typeVar, guardExpr string
+	var targetIdent, typeVar, guardExpr, operandExpr string
 	assign := typeSwitchStmt.Assign
 
 	// Check if the assignment statement is a ExprStmt
 	if exprStmt, ok := assign.(*ast.ExprStmt); ok {
-		v.targetFile.WriteString(v.convExpr(exprStmt.X, nil))
+		operandExpr = v.convExpr(exprStmt.X, nil)
 	} else {
 		assignStmt := assign.(*ast.AssignStmt)
 		targetIdent = v.convExpr(assignStmt.Lhs[0], nil)
@@ -58,11 +55,31 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 		// (go/build/constraint pushNot's `default: return x`, CS0266).
 		if typeAssert, ok := assignStmt.Rhs[0].(*ast.TypeAssertExpr); ok {
 			guardExpr = v.convExpr(typeAssert.X, nil)
+
+			// Go evaluates the type-switch tag exactly ONCE, but the multi-type and default
+			// arms re-emit the tag expression to re-bind the case variable at the guard's
+			// interface type — a tag containing a call or channel receive would then evaluate
+			// once per matched arm entry (`switch p := recover().(type)` re-probing recover).
+			// Hoist such a tag into a one-time temporary and dispatch/re-bind from it; pure
+			// tags keep the direct form (byte-identical output, no temp).
+			if tagHasSideEffects(typeAssert.X) && typeSwitchHasRebindArm(caseClauses, targetIdent) {
+				hoistVar := getGlobalTempVarName("switch")
+
+				v.targetFile.WriteString(v.newline)
+				v.writeOutput("var %s = %s;", hoistVar, guardExpr)
+
+				typeVar = fmt.Sprintf("%s.type()", hoistVar)
+				guardExpr = hoistVar
+			}
 		}
 
-		v.targetFile.WriteString(typeVar)
+		operandExpr = typeVar
 	}
 
+	v.targetFile.WriteString(v.newline)
+
+	v.writeOutput("switch (")
+	v.targetFile.WriteString(operandExpr)
 	v.targetFile.WriteString(") {")
 	v.targetFile.WriteString(v.newline)
 
@@ -423,4 +440,48 @@ func (v *Visitor) isInterfaceCaseLabel(expr ast.Expr) bool {
 	_, isIface := labelType.Underlying().(*types.Interface)
 
 	return isIface
+}
+
+// tagHasSideEffects reports whether a type-switch tag expression contains a call or a channel
+// receive — the forms whose re-evaluation is observable, requiring the tag be hoisted into a
+// one-time temporary before the switch. Conversions (also *ast.CallExpr) hoist conservatively:
+// the temp is still correct, just not strictly required.
+func tagHasSideEffects(expr ast.Expr) bool {
+	hasSideEffects := false
+
+	ast.Inspect(expr, func(node ast.Node) bool {
+		switch unaryExpr := node.(type) {
+		case *ast.CallExpr:
+			hasSideEffects = true
+		case *ast.UnaryExpr:
+			if unaryExpr.Op == token.ARROW {
+				hasSideEffects = true
+			}
+		}
+
+		return !hasSideEffects
+	})
+
+	return hasSideEffects
+}
+
+// typeSwitchHasRebindArm reports whether any arm re-emits the guard expression to re-bind the
+// case variable: the default arm (any bound ident, including the blank one) or a multi-type
+// clause (non-blank ident) — the arms whose re-bind makes an impure tag evaluate twice.
+func typeSwitchHasRebindArm(caseClauses []*ast.CaseClause, targetIdent string) bool {
+	if len(targetIdent) == 0 {
+		return false
+	}
+
+	for _, caseClause := range caseClauses {
+		if caseClause.List == nil {
+			return true
+		}
+
+		if len(caseClause.List) > 1 && targetIdent != "_" {
+			return true
+		}
+	}
+
+	return false
 }

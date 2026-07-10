@@ -883,10 +883,16 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckTypeSwitchGuardShadow() => CheckTarget("TypeSwitchGuardShadow");
 
     [TestMethod]
+    public void CheckTypeSwitchImpureTag() => CheckTarget("TypeSwitchImpureTag");
+
+    [TestMethod]
     public void CheckTypeSwitchMultiCase() => CheckTarget("TypeSwitchMultiCase");
 
     [TestMethod]
     public void CheckTypeSwitchTagShadowRename() => CheckTarget("TypeSwitchTagShadowRename");
+    public void CheckTypeSwitchNamedInterfaceCase() => CheckTarget("TypeSwitchNamedInterfaceCase");
+
+    [TestMethod]
     public void CheckTypeSwitchPointerAdapter() => CheckTarget("TypeSwitchPointerAdapter");
 
     [TestMethod]

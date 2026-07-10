@@ -34,7 +34,8 @@ internal static void Main() {
             fmt.Println("Not a string box");
         }
     }
-    switch (GetValue(1).type()) {
+    var switchᴛ1 = GetValue(1);
+    switch (switchᴛ1.type()) {
     case Box<nint> v: {
         fmt.Printf("Int box: %d\n"u8, v.Value);
         break;
@@ -48,7 +49,7 @@ internal static void Main() {
         break;
     }
     default: {
-        var v = GetValue(1);
+        var v = switchᴛ1;
         fmt.Println("Unknown box type");
         break;
     }}
