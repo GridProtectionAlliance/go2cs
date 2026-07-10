@@ -291,6 +291,8 @@ construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructField
   field prefixes, explicit types over `var`, language keywords over BCL types, `\uXXXX` for non-ASCII).
 - Conversion strategy reference: [`docs/ConversionStrategies.md`](docs/ConversionStrategies.md)
   (how each Go construct maps to C#).
+- Process/gate terminology as used in commit messages and reviews (CNR, A/B footprint, census,
+  chip, guard, golden, overlay, banked…): [`docs/Glossary.md`](docs/Glossary.md).
 - Generated C# intentionally targets Go-like *behavior first* (no implicit async), and Go-like *appearance*
   second (extra machinery hidden in partial classes / generated files).
 
