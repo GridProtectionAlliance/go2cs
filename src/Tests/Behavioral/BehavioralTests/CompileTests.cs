@@ -814,6 +814,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckShadowedVarMethodCallLHS() => CheckTarget("ShadowedVarMethodCallLHS");
 
     [TestMethod]
+    public void CheckShadowLocalOverRecvName() => CheckTarget("ShadowLocalOverRecvName");
+
+    [TestMethod]
     public void CheckShadowRangeVarOverRecvName() => CheckTarget("ShadowRangeVarOverRecvName");
 
     [TestMethod]
@@ -944,6 +947,8 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTypeSwitchMultiCase() => CheckTarget("TypeSwitchMultiCase");
+
+    [TestMethod]
     public void CheckTypeSwitchTagShadowRename() => CheckTarget("TypeSwitchTagShadowRename");
     public void CheckTypeSwitchPointerAdapter() => CheckTarget("TypeSwitchPointerAdapter");
 

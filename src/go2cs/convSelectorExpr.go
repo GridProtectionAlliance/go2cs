@@ -445,7 +445,9 @@ func (v *Visitor) exprIsValueFieldOfPointer(expr ast.Expr) bool {
 				return false
 			}
 
-			if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && b.Name == recvName {
+			// Object identity, not name: a pointer-to-struct LOCAL shadowing the receiver name
+			// must still be routed here (identResolvesToReceiver).
+			if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && v.identResolvesToReceiver(b, recvName) {
 				return false
 			}
 
@@ -513,7 +515,9 @@ func (v *Visitor) exprIsValueFieldOfDerefdPointerRoot(expr ast.Expr) bool {
 			// (`this ж<T> Ꮡrecv`). A `[GoRecv] ref` receiver has no box, so routing through `Ꮡrecv`
 			// would be CS0103 — leave it (that would need transitive direct-ж propagation, a separate
 			// capture-mode concern). Checked before identIsParameter since the receiver is not a param.
-			if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && b.Name == recvName {
+			// Object identity, not name: a pointer LOCAL shadowing the receiver name is not the
+			// receiver and keeps its own routing (identResolvesToReceiver).
+			if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && v.identResolvesToReceiver(b, recvName) {
 				return isDirectBoxReceiverMethod(v.currentFuncDecl, v.info)
 			}
 
@@ -1037,7 +1041,10 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 									needsDeref = false
 								}
 
-								if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && ident.Name == recvName {
+								// Object identity, not name: a pointer LOCAL shadowing the
+								// receiver name renders as its box and still needs the deref
+								// (identResolvesToReceiver).
+								if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && v.identResolvesToReceiver(ident, recvName) {
 									needsDeref = false
 								}
 							}
@@ -1081,7 +1088,10 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 									needsDeref = false
 								}
 
-								if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && ident.Name == recvName {
+								// Object identity, not name: a pointer LOCAL shadowing the
+								// receiver name renders as its box and still needs the deref
+								// (identResolvesToReceiver).
+								if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && v.identResolvesToReceiver(ident, recvName) {
 									needsDeref = false
 								}
 							}
@@ -1195,11 +1205,12 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 							// promoted method's `[GoRecv] ref` overload binds on the explicit field call
 							// `recv.embedField(…).method(…)`. (A direct-ж TARGET on the bare receiver would
 							// have promoted the enclosing method via the capture-mode fixpoint, so this
-							// arm's target always has the `ref` overload.) The rendered==raw check keeps
-							// an inner binding that shadows the receiver name (Δ-renamed) on the descent
-							// path.
+							// arm's target always has the `ref` overload.) The receiver match is by
+							// OBJECT identity (identResolvesToReceiver), so an inner binding that
+							// shadows the receiver name keeps the descent path; the rendered==raw
+							// check stays as the fallback defense for an unresolvable ident.
 							if recvIdent, isIdent := selectorExpr.X.(*ast.Ident); isIdent {
-								if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && recvIdent.Name == recvName &&
+								if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && v.identResolvesToReceiver(recvIdent, recvName) &&
 									v.getIdentName(recvIdent) == recvIdent.Name && !isDirectBoxReceiverMethod(v.currentFuncDecl, v.info) {
 									hopPath := make([]string, 0, len(hopFields))
 

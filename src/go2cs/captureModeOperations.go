@@ -896,13 +896,14 @@ func (v *Visitor) exprIsDerefAliasedPointer(expr ast.Expr) bool {
 		return false
 	}
 
-	// The receiver match is by NAME, so a local that SHADOWS the receiver (`r := &y` inside a method
-	// with receiver `r`) would mis-take this gate — e.g. `unsafe.Pointer(r)` on the inner pointer
-	// local would emit the receiver's `FromRef(ref r)` form against a genuine box (pinning the box
-	// reference slot: compiles, silently wrong address). The shadow-rename pass gives every inner
-	// same-named binding a `Δ` name (C# forbids shadowing), while the receiver always renders under
-	// its raw name — so requiring rendered == raw restricts the match to the actual receiver.
-	if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && ident.Name == recvName && v.getIdentName(ident) == ident.Name {
+	// The receiver match is by OBJECT identity (identResolvesToReceiver): a local that SHADOWS the
+	// receiver (`r := &y` inside a method with receiver `r`) must not take this gate — e.g.
+	// `unsafe.Pointer(r)` on the inner pointer local would emit the receiver's `FromRef(ref r)`
+	// form against a genuine box (pinning the box reference slot: compiles, silently wrong
+	// address). The rendered==raw check stays as the fallback defense for an unresolvable ident
+	// (the shadow-rename pass gives every inner same-named binding a `Δ` name, while the receiver
+	// always renders under its raw name).
+	if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && v.identResolvesToReceiver(ident, recvName) && v.getIdentName(ident) == ident.Name {
 		return true
 	}
 

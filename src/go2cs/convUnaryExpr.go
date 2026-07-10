@@ -240,14 +240,14 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 		// threads for distinct receivers — broken for concurrent types like sync/atomic.
 		if isRecvPointer {
 			if selectorExpr, ok := unaryExpr.X.(*ast.SelectorExpr); ok {
-				// rendered==raw guards the name match against an INNER binding that shadows the
-				// receiver name: the shadow pass Δ-renames such a binding (`c` → `cΔ1`), so a
-				// rendered name differing from the raw name is not the receiver. Without this, a
-				// pointer LOCAL shadowing the receiver took this arm and emitted `Ꮡ`+raw — a box
-				// that does not exist for a non-direct-ж method (CS0103); the shadow-renamed local
-				// falls through to the pointer-variable arm below, which field-refs through the
-				// local itself (`cΔ1.of(…)`).
-				if ident, ok := selectorExpr.X.(*ast.Ident); ok && ident.Name == recvName && v.getIdentName(ident) == ident.Name {
+				// The receiver match is by OBJECT identity (identResolvesToReceiver): a pointer
+				// LOCAL shadowing the receiver name must not take this arm — it would emit `Ꮡ`+raw,
+				// a box that does not exist for a non-direct-ж method (CS0103). The shadow falls
+				// through to the pointer-variable arm below, which field-refs through the local
+				// itself (`cΔ1.of(…)`). The rendered==raw check stays as the fallback defense for
+				// an unresolvable ident (the shadow pass Δ-renames an inner same-named binding,
+				// while the receiver always renders under its raw name).
+				if ident, ok := selectorExpr.X.(*ast.Ident); ok && v.identResolvesToReceiver(ident, recvName) && v.getIdentName(ident) == ident.Name {
 					recvType := recv.Type()
 
 					if pointer, ok := recvType.(*types.Pointer); ok {
@@ -336,8 +336,12 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 		if selectorExpr, ok := unaryExpr.X.(*ast.SelectorExpr); ok {
 			if _, ok := v.getType(selectorExpr.X, true).(*types.Struct); ok {
 				if isRecvPointer {
-					// Check if selector's target is an identifier matching the receiver name
-					if ident, ok := selectorExpr.X.(*ast.Ident); ok && ident.Name == recvName {
+					// Check if selector's target is the receiver — by OBJECT identity: a pointer
+					// receiver's ident types as *T (never a bare struct), so a name match here could
+					// only ever be a value-struct LOCAL shadowing the receiver name, which must keep
+					// the heap-box `.of(…)` routing below, not the copy-boxing receiver form
+					// (identResolvesToReceiver).
+					if ident, ok := selectorExpr.X.(*ast.Ident); ok && v.identResolvesToReceiver(ident, recvName) {
 						refRecv = true
 					}
 				}
@@ -415,7 +419,10 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 			exprType := v.getType(indexExpr.X, true)
 			ident := getIdentifier(indexExpr.X)
 
-			if ident != nil && isRecvPointer && ident.Name == recvName {
+			// Object identity, not name: a slice/array LOCAL shadowing the receiver name must
+			// keep the element-aliasing `Ꮡ(x, index)` form below — the receiver form `Ꮡ(x[i])`
+			// boxes a COPY of the element, silently dropping writes (identResolvesToReceiver).
+			if ident != nil && isRecvPointer && v.identResolvesToReceiver(ident, recvName) {
 				// Index target is an identifier matching the receiver name
 				refRecv = true
 			}
