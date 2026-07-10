@@ -111,6 +111,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.capturedVarCount = nil
 	v.tempVarCount = nil
 	v.useUnsafeFunc = false
+	v.loopCopyBackStack = nil
 
 	goFunctionName := funcDecl.Name.Name
 	csFunctionName := getSanitizedFunctionName(goFunctionName)

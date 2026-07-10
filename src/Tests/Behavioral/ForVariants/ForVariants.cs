@@ -24,19 +24,23 @@ internal static void Main() {
     fmt.Println("i =", i);
     fmt.Println();
 @out:
-    ref var iΔ1 = ref heap<nint>(out var ᏑiΔ1);
-    for (iΔ1 = 0; iΔ1 < 5; iΔ1++) {
+    for (nint iΔ1ᴛ1 = 0; iΔ1ᴛ1 < 5; iΔ1ᴛ1++) {
+        ref var iΔ1 = ref heap<nint>(out var ᏑiΔ1);
+        iΔ1 = iΔ1ᴛ1;
         f(ᏑiΔ1);
-        ref var iΔ2 = ref heap<nint>(out var ᏑiΔ2);
-        for (iΔ2 = 12; iΔ2 < 15; iΔ2++) {
+        for (nint iΔ2ᴛ1 = 12; iΔ2ᴛ1 < 15; iΔ2ᴛ1++) {
+            ref var iΔ2 = ref heap<nint>(out var ᏑiΔ2);
+            iΔ2 = iΔ2ᴛ1;
             f(ᏑiΔ2);
             goto break_out;
+            iΔ2ᴛ1 = iΔ2;
         }
         if (iΔ1 > 13) {
             goto continue_out;
         }
         fmt.Println();
 continue_out:;
+        iΔ1ᴛ1 = iΔ1;
     }
 break_out:;
     fmt.Println();

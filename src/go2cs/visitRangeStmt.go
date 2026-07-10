@@ -568,7 +568,12 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		context.outerSuffix = fmt.Sprintf("%s%s:;", v.newline, getBreakLabelName(target.label))
 	}
 
+	// Range variables are per-iteration natively (foreach), so no copy-backs — but the entry
+	// keeps an unlabeled `continue` in the body bound to the innermost loop's copy-backs (an
+	// enclosing transformed for loop's must not leak through; see forClausePerIterVars).
+	v.loopCopyBackStack = append(v.loopCopyBackStack, nil)
 	v.visitBlockStmt(rangeStmt.Body, context)
+	v.loopCopyBackStack = v.loopCopyBackStack[:len(v.loopCopyBackStack)-1]
 }
 
 func isYieldFunc(t types.Type) int {

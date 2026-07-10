@@ -45,15 +45,19 @@ internal static nint boxedSiblings(nint kind) {
     nint total = 0;
     switch (kind) {
     case 1: {
-        ref var i = ref heap<nint>(out var Ꮡi);
-        for (i = 0; i < 3; i++) {
+        for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
+            ref var i = ref heap<nint>(out var Ꮡi);
+            i = iᴛ1;
             var p = Ꮡi;
             total += p.Value;
+            iᴛ1 = i;
         }
-        ref var iΔ1 = ref heap<nint>(out var ᏑiΔ1);
-        for (iΔ1 = 10; iΔ1 < 13; iΔ1++) {
-            var p = ᏑiΔ1;
+        for (nint iᴛ2 = 10; iᴛ2 < 13; iᴛ2++) {
+            ref var i = ref heap<nint>(out var Ꮡi);
+            i = iᴛ2;
+            var p = Ꮡi;
             total += p.Value * 2;
+            iᴛ2 = i;
         }
         break;
     }}

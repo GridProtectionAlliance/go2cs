@@ -16,10 +16,22 @@ func (v *Visitor) visitBranchStmt(branchStmt *ast.BranchStmt) {
 			v.writeOutput("goto %s;", getBreakLabelName(branchStmt.Label.Name))
 		}
 	case token.CONTINUE:
-		v.targetFile.WriteString(v.newline)
 		if branchStmt.Label == nil {
+			// A C# `continue` transfers straight to the post clause, skipping the end-of-body
+			// per-iteration copy-backs of a Go 1.22+ transformed loop — emit them here first
+			// (see forClausePerIterVars). A labeled continue instead flows through the
+			// `continue_<label>:` target, which the copy-backs already follow.
+			if len(v.loopCopyBackStack) > 0 {
+				for _, copyBack := range v.loopCopyBackStack[len(v.loopCopyBackStack)-1] {
+					v.targetFile.WriteString(v.newline)
+					v.writeOutput(copyBack)
+				}
+			}
+
+			v.targetFile.WriteString(v.newline)
 			v.writeOutput("continue;")
 		} else {
+			v.targetFile.WriteString(v.newline)
 			v.writeOutput("goto %s;", getContinueLabelName(branchStmt.Label.Name))
 		}
 	case token.GOTO:

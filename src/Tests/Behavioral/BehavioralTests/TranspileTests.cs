@@ -315,6 +315,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckForInitShadowedUse() => CheckTarget("ForInitShadowedUse");
 
     [TestMethod]
+    public void CheckForLoopPerIterationVars() => CheckTarget("ForLoopPerIterationVars");
+
+    [TestMethod]
     public void CheckForMethodInitPost() => CheckTarget("ForMethodInitPost");
 
     [TestMethod]

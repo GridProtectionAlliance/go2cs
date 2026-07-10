@@ -488,40 +488,49 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			return true
 		}
 
-		loopVarIdents := func(stmt ast.Stmt) ([]*ast.Ident, bool) {
+		type loopVarIdent struct {
+			ident *ast.Ident
+			// hoists: this var's heap box (if any) is emitted BEFORE the loop, claiming its
+			// name in the enclosing container. A boxed `for i := …` clause var now boxes PER
+			// ITERATION inside the body (forClausePerIterVars — Go 1.22 per-iteration
+			// semantics), so it claims nothing; only the legacy clause-func-literal fallback
+			// still hoists its box. Range vars keep the rangeBoxHoists split.
+			hoists bool
+		}
+
+		loopVarIdents := func(stmt ast.Stmt) []loopVarIdent {
 			// A labeled loop (`Label: for i := …`) hoists exactly like an unlabeled one.
 			if labeled, ok := stmt.(*ast.LabeledStmt); ok {
 				stmt = labeled.Stmt
 			}
 
-			var loopVars []*ast.Ident
-			hoistsToContainer := false
+			var loopVars []loopVarIdent
 
 			switch n := stmt.(type) {
 			case *ast.ForStmt:
 				if assign, ok := n.Init.(*ast.AssignStmt); ok && assign.Tok == token.DEFINE {
 					for _, lhs := range assign.Lhs {
 						if ident, ok := lhs.(*ast.Ident); ok {
-							loopVars = append(loopVars, ident)
+							obj := v.info.Defs[ident]
+							hoists := v.funcLitReferences(n.Init, obj) || v.funcLitReferences(n.Cond, obj) || v.funcLitReferences(n.Post, obj)
+							loopVars = append(loopVars, loopVarIdent{ident, hoists})
 						}
 					}
 				}
-
-				hoistsToContainer = true
 			case *ast.RangeStmt:
 				if n.Tok == token.DEFINE {
+					hoists := rangeBoxHoists(n)
+
 					if key, ok := n.Key.(*ast.Ident); ok {
-						loopVars = append(loopVars, key)
+						loopVars = append(loopVars, loopVarIdent{key, hoists})
 					}
 					if value, ok := n.Value.(*ast.Ident); ok {
-						loopVars = append(loopVars, value)
+						loopVars = append(loopVars, loopVarIdent{value, hoists})
 					}
 				}
-
-				hoistsToContainer = rangeBoxHoists(n)
 			}
 
-			return loopVars, hoistsToContainer
+			return loopVars
 		}
 
 		processContainer := func(stmts []ast.Stmt, isFuncBody bool) {
@@ -535,9 +544,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			var groupOrder []string
 
 			for _, stmt := range stmts {
-				loopVars, hoistsToContainer := loopVarIdents(stmt)
+				for _, loopVar := range loopVarIdents(stmt) {
+					ident := loopVar.ident
 
-				for _, ident := range loopVars {
 					if isDiscardedVar(ident.Name) {
 						continue
 					}
@@ -555,7 +564,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 					// there is invisible to this pre-pass — boxRefVars populates during the main
 					// walk — so that exotic keeper shape is not grouped; it was never handled
 					// before either.)
-					claims := hoistsToContainer && v.identEscapesHeap[varObj] &&
+					claims := loopVar.hoists && v.identEscapesHeap[varObj] &&
 						!isInherentlyHeapAllocatedType(v.info.TypeOf(ident))
 
 					if len(groups[ident.Name]) == 0 {

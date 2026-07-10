@@ -70,14 +70,16 @@ internal static ж<Ring> makeRing(nint count) {
     var r = Ꮡ(new Ring(Value: 0));
     r.init();
     var p = r;
-    ref var i = ref heap<nint>(out var Ꮡi);
-    for (i = 1; i < count; i++) {
+    for (nint iᴛ1 = 1; iᴛ1 < count; iᴛ1++) {
+        ref var i = ref heap<nint>(out var Ꮡi);
+        i = iᴛ1;
         var e = Ꮡ(new Ring(Value: i));
         e.Value.prev = p;
         e.Value.next = p.Value.next;
         p.Value.next.Value.prev = e;
         p.Value.next = e;
         p = e;
+        iᴛ1 = i;
     }
     return r;
 }

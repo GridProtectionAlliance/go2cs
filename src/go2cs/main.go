@@ -255,8 +255,19 @@ type Visitor struct {
 	// box-repoint PLUS a value re-alias (`Ꮡscope = scope.Outer; scope = ref Ꮡscope…`); the
 	// second statement cannot share the single for-post slot, so the re-alias is stashed in
 	// forPostReAlias and visitForStmt injects it at the TOP of the loop body instead.
-	inForPost              bool
-	forPostReAlias         string
+	inForPost      bool
+	forPostReAlias string
+	// forPerIterVars holds the `for i := …` clause variables currently emitted with Go 1.22+
+	// per-iteration semantics (see forClausePerIterVars): the clause drives a renamed carrier
+	// and the body re-declares the variable fresh each pass. convertToHeapTypeDecl consults it
+	// so the carrier stays a plain value — a boxed variable's fresh box is emitted inside the
+	// body per iteration, never hoisted at the declaration site.
+	forPerIterVars map[types.Object]bool
+	// loopCopyBackStack parallels the enclosing loop nesting during body emission. Each entry
+	// holds the per-iteration copy-back statements (`iᴛ1 = i;`) an unlabeled `continue` must
+	// emit before transferring to the post clause (nil for range loops and for loops whose
+	// per-iteration variables are never written in the body).
+	loopCopyBackStack      [][]string
 	lastStatementWasReturn bool
 	lastReturnIndentLevel  int
 	identEscapesHeap       map[types.Object]bool
@@ -5229,6 +5240,13 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 
 	if obj == nil {
 		obj = v.info.Uses[ident]
+	}
+
+	// A per-iteration for-clause variable's CARRIER is a plain value: its heap box (if any) is
+	// declared fresh inside the loop body each pass, never at the clause declaration site (see
+	// forClausePerIterVars).
+	if obj != nil && v.forPerIterVars[obj] {
+		return ""
 	}
 
 	if obj != nil && !v.identHasHeapBox(obj, identType) {
