@@ -30,6 +30,9 @@ internal static void record(nint a, nint b) {
     fmt.Println("recorded:", a, b);
 }
 
+internal static (nint, nint) tupleᴛ1ʗ = parts();
+internal static nint g = combine(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2);
+
 internal static void Main() {
     var n = build();
     var (ᴛ3, ᴛ4) = parts();
@@ -37,6 +40,7 @@ internal static void Main() {
     fmt.Println((~n).a, (~n).b, s);
     var (ᴛ5, ᴛ6) = parts();
     record(ᴛ5, ᴛ6);
+    fmt.Println(g);
 }
 
 } // end main_package

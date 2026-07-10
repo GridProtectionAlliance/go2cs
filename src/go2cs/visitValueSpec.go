@@ -409,10 +409,25 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						access := getAccess(goIDName)
 						typeLenDeviation = token.Pos(len(csTypeName)+(len(csIDName)-len(goIDName))) - token.Pos(len(access)+9)
 
+						// A multi-value inner call spread in the initializer (`var debug =
+						// template.Must(template.New(…).Parse(…))`, net/rpc debug.go) spills
+						// into a hidden static tuple field via v.globalDeclHoist; flush it
+						// BEFORE this var's field so the once-evaluated holder precedes its
+						// readers (C# static field initializers run in textual order).
+						globalHoist := &strings.Builder{}
+						savedGlobalHoist := v.globalDeclHoist
+						v.globalDeclHoist = globalHoist
+						valExpr := v.convInterfaceDeclValue(valueSpec.Values[i], ifaceDeclType, context)
+						v.globalDeclHoist = savedGlobalHoist
+
+						if globalHoist.Len() > 0 {
+							v.targetFile.WriteString(globalHoist.String())
+						}
+
 						if v.isAddressedGlobal(ident) {
-							v.writeAddressedGlobalDecl(access, csTypeName, csIDName, v.convInterfaceDeclValue(valueSpec.Values[i], ifaceDeclType, context), isInherentlyHeapAllocatedType(v.getIdentType(ident)))
+							v.writeAddressedGlobalDecl(access, csTypeName, csIDName, valExpr, isInherentlyHeapAllocatedType(v.getIdentType(ident)))
 						} else {
-							v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, v.convInterfaceDeclValue(valueSpec.Values[i], ifaceDeclType, context))
+							v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, valExpr)
 						}
 					}
 

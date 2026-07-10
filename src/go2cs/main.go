@@ -136,6 +136,13 @@ type Visitor struct {
 	// restore around nested statements so an inner statement's decls don't leak to the outer buffer.
 	hoistedDecls *strings.Builder
 
+	// globalDeclHoist, when non-nil, is the PACKAGE-LEVEL var-initializer spill sink: a
+	// multi-value inner call spread at a package-level initializer (`var debug = template.Must(
+	// template.New(…).Parse(…))`) has no statement sink, so convExprList emits a hidden static
+	// tuple FIELD here and visitValueSpec flushes it before the var's own field (C# static field
+	// initializers run in textual order). Only the tuple-spread arm writes to it.
+	globalDeclHoist *strings.Builder
+
 	// ImportSpec variables
 	currentImportPath     string
 	packageImports        *strings.Builder

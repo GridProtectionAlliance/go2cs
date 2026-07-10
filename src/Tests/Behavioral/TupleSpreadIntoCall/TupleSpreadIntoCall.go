@@ -39,6 +39,13 @@ func record(a, b int) {
 	fmt.Println("recorded:", a, b)
 }
 
+// g is a PACKAGE-LEVEL var whose initializer wraps the multi-value call — no statement sink
+// exists at all, so the spread spills into a hidden once-evaluated static tuple FIELD emitted
+// before this field (`internal static (nint, nint) tupleᴛ1ʗ = parts();` then
+// `… g = combine(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2);`) — net/rpc debug.go's
+// `var debug = template.Must(template.New("RPC debug").Parse(debugText))`, CS7036.
+var g = combine(parts())
+
 func main() {
 	n := build()
 	// s is a plain value local → the single-declare assignment branch.
@@ -46,4 +53,6 @@ func main() {
 	fmt.Println(n.a, n.b, s) // 3 4 34
 
 	record(parts()) // statement-level spread → recorded: 3 4
+
+	fmt.Println(g) // 34 — the package-level spread, evaluated once at init
 }

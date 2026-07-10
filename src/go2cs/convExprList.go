@@ -134,11 +134,19 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		tupleExpanded := false
 
 		var tupleHoist *strings.Builder
+		globalFieldHoist := false
 
 		if callContext != nil && callContext.deferredDecls != nil {
 			tupleHoist = callContext.deferredDecls
 		} else if v.hoistedDecls != nil {
 			tupleHoist = v.hoistedDecls
+		} else if !v.inFunction && v.globalDeclHoist != nil {
+			// A PACKAGE-LEVEL var initializer (`var debug = template.Must(template.New("RPC
+			// debug").Parse(debugText))`, net/rpc debug.go) has no statement sink at all; the
+			// spill becomes a hidden once-evaluated static tuple FIELD flushed before the
+			// var's own field (mirroring visitPackageTupleVarSpec's holder emission).
+			tupleHoist = v.globalDeclHoist
+			globalFieldHoist = true
 		}
 
 		if len(exprs) == 1 && callArgs == nil && !spreadArg && tupleHoist != nil {
@@ -147,18 +155,33 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 					innerExpr := v.convExpr(innerCall, contexts)
 					tempNames := make([]string, tuple.Len())
 
-					// Per-file monotonic marker index: two expansions in nested scopes of one
-					// function otherwise collide (norm's Properties if-arm + tail, CS0136 ×4).
-					for ti := range tuple.Len() {
-						tempNames[ti] = fmt.Sprintf("%s%d", TempVarMarker, v.tupleTempIndex+ti+1)
+					if globalFieldHoist {
+						// Hidden tuple holder field; the arguments read its components.
+						tempName := getGlobalTempVarName("tuple") + CapturedVarMarker
+						componentTypes := make([]string, tuple.Len())
+
+						for ti := range tuple.Len() {
+							componentTypes[ti] = v.getCSTypeName(tuple.At(ti).Type())
+							tempNames[ti] = fmt.Sprintf("%s.Item%d", tempName, ti+1)
+						}
+
+						tupleHoist.WriteString(fmt.Sprintf("internal static (%s) %s = %s;", strings.Join(componentTypes, ", "), tempName, innerExpr))
+						tupleHoist.WriteString(v.newline)
+					} else {
+						// Per-file monotonic marker index: two expansions in nested scopes of one
+						// function otherwise collide (norm's Properties if-arm + tail, CS0136 ×4).
+						for ti := range tuple.Len() {
+							tempNames[ti] = fmt.Sprintf("%s%d", TempVarMarker, v.tupleTempIndex+ti+1)
+						}
+
+						v.tupleTempIndex += tuple.Len()
+
+						tupleHoist.WriteString(v.newline)
+						tupleHoist.WriteString(v.indent(v.indentLevel))
+						tupleHoist.WriteString(fmt.Sprintf("var (%s) = %s;", strings.Join(tempNames, ", "), innerExpr))
+						tupleHoist.WriteString(v.newline)
 					}
 
-					v.tupleTempIndex += tuple.Len()
-
-					tupleHoist.WriteString(v.newline)
-					tupleHoist.WriteString(v.indent(v.indentLevel))
-					tupleHoist.WriteString(fmt.Sprintf("var (%s) = %s;", strings.Join(tempNames, ", "), innerExpr))
-					tupleHoist.WriteString(v.newline)
 					resultExpr = strings.Join(tempNames, ", ")
 					tupleExpanded = true
 				}

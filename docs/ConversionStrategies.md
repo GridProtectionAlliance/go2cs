@@ -3342,6 +3342,21 @@ Byte-identical corpus-wide except where the pattern occurs (and a harmless renum
 the per-file marker index is monotonic). Guarded by `TupleSpreadIntoCall` (a value result, an escaping pointer
 result, and a statement-level spread).
 
+A **PACKAGE-LEVEL var initializer** has no statement sink at all — `var debug = template.Must(
+template.New("RPC debug").Parse(debugText))` (net/rpc debug.go; also internal/trace/traceviewer) passed the
+whole `(ж<Template>, error)` tuple as `Must`'s one argument (CS7036). There the spill becomes a hidden
+once-evaluated static tuple FIELD (`v.globalDeclHoist`, flushed by visitValueSpec before the var's own
+field — C# static field initializers run in textual order, the same holder shape `visitPackageTupleVarSpec`
+emits for `var a, b = f()`), and the arguments read its components:
+
+```csharp
+internal static (nint, nint) tupleᴛ1ʗ = parts();
+internal static nint g = combine(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2);
+```
+
+Guarded by the `TupleSpreadIntoCall` extension (a package-level `var` spreading a two-value call into a
+wrapping call, value read back in main).
+
 ### A range over a pointer-typed type conversion parenthesizes before the deref
 Ranging over a pointer to an array implicitly dereferences it — the converter appends `.Value` to the
 range expression. When the range expression is itself a pointer-typed TYPE CONVERSION it renders as a C#
