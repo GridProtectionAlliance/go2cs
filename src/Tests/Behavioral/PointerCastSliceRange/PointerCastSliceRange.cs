@@ -26,12 +26,11 @@ internal static unsafe void Main() {
     ip = Ꮡarr;
     var back = (~(ж<ж<array<nint>>>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡip).Value))).Value;
     _ = back;
-    var ipʗ1 = ip;
     var pick = @unsafe.Pointer (bool u) => {
         if (u) {
             return (@unsafe.Pointer)(uintptr)0;
         }
-        return new @unsafe.Pointer(ipʗ1);
+        return new @unsafe.Pointer(Ꮡip.ValueSlot);
     };
     _ = (uintptr)pick(true);
     var op = ((opaque)(ж<array<nint>>)(uintptr)(new @unsafe.Pointer(ip)));

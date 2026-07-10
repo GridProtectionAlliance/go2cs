@@ -71,6 +71,29 @@ func capturedLocalNamedAfterType() int {
 	return got + w.other // 33 + 4 = 37
 }
 
+// boxRefCapturedValueNamedAfterType: the VALUE-local variant of the shape above. The closure takes
+// &w.park, so the local is routed by-box (no snapshot — the heap box `Ꮡw` is the `.of()` receiver),
+// and the body writes the variable after the closure runs, so every reference shares the ONE box.
+// The owning-type reference in the accessor is package-qualified (`Ꮡw.of(main_package.w.Ꮡpark)`):
+// for THIS local (declared type == type name) a bare `w.Ꮡpark` would also compile via C#'s
+// identical-simple-name rule, but a box-ref'd local whose declared type DIFFERS from the type name
+// (a pointer-typed `w := &w{…}`) has no such fallback — the bare name binds the variable (CS1061) —
+// so the box-receiver render qualifies uniformly. Pins boxAccessorType's box-receiver arm via the
+// golden; the shared-box semantics (got 105, then 106 after the body write) are the output check.
+//
+//go:noinline
+func boxRefCapturedValueNamedAfterType() int {
+	w := w{park: 100, other: 9}
+	got := 0
+	run(func() {
+		p := &w.park
+		*p = *p + 5
+		got = *p
+	})
+	w.park = w.park + 1           // a write after the closure — the shared storage must show 106
+	return got + w.park + w.other // 105 + 106 + 9 = 220
+}
+
 func main() {
 	// &global.field routes through the box-field accessor: Ꮡh.of(holder.Ꮡmark).
 	p := &h.mark
@@ -102,4 +125,6 @@ func main() {
 	fmt.Println(localShadowsCollisionType()) // 62
 
 	fmt.Println(capturedLocalNamedAfterType()) // 37
+
+	fmt.Println(boxRefCapturedValueNamedAfterType()) // 220
 }

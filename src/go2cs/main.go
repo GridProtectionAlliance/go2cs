@@ -199,6 +199,15 @@ type Visitor struct {
 	// (see identAddressTaken); lazily initialized, keyed by the *types.Object so entries
 	// from prior functions are simply never consulted again.
 	identAddressTakenCache map[types.Object]bool
+	// captureAnalysisDecl is the declaration whose body performVariableAnalysis is currently
+	// walking — the real FuncDecl, or visitValueSpec's SYNTHETIC wrapper for a package-level
+	// func-literal initializer. The shared-capture routing's write scan (varShareFacts) reads
+	// it: it must match the tree processPotentialCapture is analyzing, which currentFuncDecl
+	// does not during synthetic analysis (it still points at the previously visited function).
+	captureAnalysisDecl *ast.FuncDecl
+	// captureShareFactsCache memoizes varShareFacts per captured variable (reset per
+	// performVariableAnalysis; variable objects are function-unique so entries never collide).
+	captureShareFactsCache map[types.Object]captureShareFacts
 	// nilSafePtrParamNames holds the raw names of pointer PARAMETERS that are compared with `==`/
 	// `!=` (against nil or another pointer) anywhere in the current function body — i.e. params
 	// walked to a nil terminator (`for p != nil { …; p = p.next }`). For these, the deref-alias and

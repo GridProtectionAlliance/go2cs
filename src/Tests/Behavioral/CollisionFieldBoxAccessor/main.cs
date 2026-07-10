@@ -54,6 +54,19 @@ internal static nint capturedLocalNamedAfterType() {
     return got + (~w).other;
 }
 
+internal static nint boxRefCapturedValueNamedAfterType() {
+    ref var w = ref heap<w>(out var Ꮡw);
+    w = new w(park: 100, other: 9);
+    nint got = 0;
+    run(() => {
+        var p = Ꮡw.of(w.Ꮡpark);
+        p.Value = p.Value + 5;
+        got = p.Value;
+    });
+    w.park = w.park + 1;
+    return got + w.park + w.other;
+}
+
 internal static void Main() {
     var p = Ꮡh.of(holder.Ꮡmark);
     p.Value = 42;
@@ -72,6 +85,7 @@ internal static void Main() {
     fmt.Println(h2.mark, h2.extra);
     fmt.Println(localShadowsCollisionType());
     fmt.Println(capturedLocalNamedAfterType());
+    fmt.Println(boxRefCapturedValueNamedAfterType());
 }
 
 } // end main_package

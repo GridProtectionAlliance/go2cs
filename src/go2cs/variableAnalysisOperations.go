@@ -198,8 +198,8 @@ func (p *varProcessor) processAssignStmt(stmt *ast.AssignStmt) {
 
 func newLambdaCapture() *LambdaCapture {
 	return &LambdaCapture{
-		capturedVars:         make(map[*ast.Ident]*CapturedVarInfo),
-		stmtCaptures:         make(map[ast.Node]map[*ast.Ident]bool),
+		capturedVars:      make(map[*ast.Ident]*CapturedVarInfo),
+		stmtCaptures:      make(map[ast.Node]map[*ast.Ident]bool),
 		pendingCaptures:      make(map[string]*CapturedVarInfo),
 		currentLambdaVars:    make(map[string]string),
 		currentLambdaVarObjs: make(map[string]types.Object),
@@ -224,41 +224,6 @@ func (v *Visitor) enterLambdaConversion(node ast.Node) {
 	v.lambdaCapture.currentConversion = node
 	v.lambdaCapture.currentLambdaVars = make(map[string]string)
 	v.lambdaCapture.currentLambdaVarObjs = make(map[string]types.Object)
-}
-
-// enterDeferGoLambdaConversion enters the conversion state for a defer/go STATEMENT — a
-// pass-through level whose call ARGUMENTS (and non-literal callee expression) are evaluated
-// EAGERLY in the ENCLOSING scope when the statement executes (Go spec: the deferred/spawned
-// function value and its parameters are evaluated at statement time). enterLambdaConversion
-// installs EMPTY remap state, which hid an enclosing lambda's capture renames while the
-// arguments rendered: an eager argument reading a heap-boxed local the enclosing IIFE
-// snapshot-captured (`base` → `baseʗ1`) emitted the raw ref-local `@base` inside the enclosing
-// lambda's body (CS8175 — a ref local cannot be used in an anonymous method; where the raw
-// name IS capturable it instead bypasses the snapshot every other read in that body uses).
-// Seed the fresh state with a COPY of the enclosing lambda's renames so arguments render
-// exactly like any other expression in the enclosing body; prepareStmtCaptures then OVERRIDES
-// entries for the statement's own captured callee idents (their defer-time snapshots). Copies,
-// not the maps themselves: the statement's own remaps must not leak back into the enclosing
-// state when exit restores it. At function level (no enclosing lambda) this is exactly
-// enterLambdaConversion.
-func (v *Visitor) enterDeferGoLambdaConversion(node ast.Node) {
-	enclosingInLambda := v.lambdaCapture.conversionInLambda
-	enclosingVars := v.lambdaCapture.currentLambdaVars
-	enclosingVarObjs := v.lambdaCapture.currentLambdaVarObjs
-
-	v.enterLambdaConversion(node)
-
-	if !enclosingInLambda {
-		return
-	}
-
-	for name, captureName := range enclosingVars {
-		v.lambdaCapture.currentLambdaVars[name] = captureName
-	}
-
-	for name, obj := range enclosingVarObjs {
-		v.lambdaCapture.currentLambdaVarObjs[name] = obj
-	}
 }
 
 func (v *Visitor) exitLambdaConversion() {
@@ -286,6 +251,8 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	v.scopeStack = []map[string]*types.Var{v.globalScope}
 	v.hasDefer = false
 	v.hasRecover = false
+	v.captureAnalysisDecl = funcDecl
+	v.captureShareFactsCache = nil
 
 	// blockDecls is kept index-aligned with v.scopeStack. For a genuine block scope it holds the
 	// full set of names declared *directly* in that block (pre-scanned when the scope is pushed),
@@ -1945,23 +1912,11 @@ func (v *Visitor) processPotentialCapture(ident *ast.Ident) {
 		return
 	}
 
-	// The lambda's OWN parameter is one of its locals, never a capture — and it must not take
-	// the box-ref arm below: a heap-boxed LITERAL param's box (`Ꮡ<name>`, see convFuncLit) is
-	// declared INSIDE the literal, so its own body reads keep the plain ref-local alias form.
-	// (A NESTED closure's analysis reaches here with currentLambda = the nested node, so the
-	// param correctly takes the box-ref arm there.) Own params were only ever snapshot-recorded
-	// and then name-filtered out by convFuncLit — returning here changes no capture outcome.
-	if funcLit, ok := v.lambdaCapture.currentLambda.(*ast.FuncLit); ok && v.funcLitOwnsParam(funcLit, varObj) {
-		return
-	}
-
 	// A heap-boxed VALUE parameter is the same shape: its entry-time box prologue re-declares the
 	// Go name as a ref-local alias (`ref var cfg = ref heap(cfgʗp, out var Ꮡcfg);` — see
 	// paramNeedsHeapBox), which a C# closure cannot capture (CS8175), and a snapshot copy divorces
 	// the closure from the boxed storage the direct-ж callee mutates through the receiver pointer
 	// (Go's closure and the callee share the ONE parameter variable). Reference it through its box.
-	// paramNeedsHeapBox serves declaration params AND an enclosing literal's params (its
-	// function-literal arm), so a nested closure over either routes through the box.
 	if v.paramNeedsHeapBox(varObj) {
 		v.lambdaCapture.boxRefVars[varObj] = true
 		return
@@ -2000,6 +1955,37 @@ func (v *Visitor) processPotentialCapture(ident *ast.Ident) {
 	if escapesToHeap && v.varUsedAsImplicitAddrReceiverInLambda(varObj) {
 		v.lambdaCapture.boxRefVars[varObj] = true
 		return
+	}
+
+	// A value snapshot (`var tʗ1 = t;` hoisted before the lambda, in-lambda references renamed) is
+	// observationally correct only while NEITHER side writes the variable after the snapshot point.
+	// Go closures share the ONE variable, so once anything writes it the snapshot silently diverges:
+	// the closure's writes land in a divorced copy (`bump := func() { t.total += 100 }` never affects
+	// t), and body writes after the lambda's creation are invisible to a read-only closure (`get :=
+	// func() int { return t.total }` reads a stale copy) — including a deferred literal, which in Go
+	// observes the variable's FINAL value. When the capture is a genuine closure-body reference and
+	// the variable is written after capture (varShareFacts), route it to SHARED storage instead:
+	//   - a heap-boxed variable is referenced through its box (boxRefVars → `Ꮡt` / `Ꮡt.Value`),
+	//     which the C# closure captures by reference — the box is the shared storage;
+	//   - an unboxed variable (a value parameter, or a slice/map/chan local, whose copy would
+	//     diverge on reassignment) is captured NATIVELY — no snapshot, no rename: the C# display-
+	//     class capture shares the local exactly as Go shares the variable (the same treatment
+	//     non-escaping basics have always had).
+	// Read-only-after-capture variables keep the snapshot (observationally identical, zero churn).
+	// A loop-statement-defined variable also keeps it: its per-lambda copy approximates Go's
+	// per-iteration variable, which shared routing would break. The literal's OWN parameters,
+	// results, and locals (declared within its extent) are not captures at all — writes to them are
+	// the literal's private state — so they fall through to the recording path, whose conversion-
+	// time name filter drops them (convFuncLit); routing one box-ref would render a box that is
+	// never declared.
+	if lit := v.closureBodyCaptureLit(); lit != nil && (varObj.Pos() < lit.Pos() || varObj.Pos() > lit.End()) {
+		if facts := v.varShareFacts(varObj); facts.writtenAfterCapture && !facts.loopStmtDefined {
+			if escapesToHeap {
+				v.lambdaCapture.boxRefVars[varObj] = true
+			}
+
+			return
+		}
 	}
 
 	// Record the capture
@@ -2059,18 +2045,14 @@ func (v *Visitor) varAddressTakenInLambda(varObj types.Object) bool {
 
 // varUsedAsImplicitAddrReceiverInLambda reports whether varObj is used inside the lambda currently
 // being analyzed as the VALUE receiver of a POINTER-receiver method call (`defer state.free()`,
-// state a value local, free a `*handleState` method) — directly, PROMOTED through value embeds
-// (`lazyCert.Do(…)` on a struct embedding sync.Once), or through a single VALUE-struct FIELD
-// projection (`defer p.fake.setLines()`, go/internal/gcimporter — Go takes `&p.fake`, an address
-// INTO the var's own storage). Go auto-takes the receiver's address, and emission binds this
-// through the box (`Ꮡstate.free` / the `.of(…)` field projection, see pointerReceiverBoxMethodGroup's
-// value arm and lambdaBoxRefAddressForm's `&m.field` arm), so an escaping such local must be
-// captured by-box, not snapshot-copied — the snapshot's box name is never declared (CS0103), and
-// the copy divorces the deferred call from writes made between the defer and the call, which Go's
-// live address sees. The direct and field-projection cases mirror that arm's guard exactly: a
-// NAMED value receiver whose type is identical to the method's pointer-receiver pointee. An
-// ALREADY-pointer receiver (`defer conf.releaseSema()`) is excluded — its box group is the
-// pointer variable itself, whose snapshot name IS declared, so it needs no box-ref treatment.
+// state a value local, free a `*handleState` method) — directly or PROMOTED through value embeds
+// (`lazyCert.Do(…)` on a struct embedding sync.Once). Go auto-takes the receiver's address, and
+// emission binds this through the box (`Ꮡstate.free` / the `.of(…)` field projection, see
+// pointerReceiverBoxMethodGroup's value arm), so an escaping such local must be captured by-box,
+// not snapshot-copied. The direct case mirrors that arm's guard exactly: a NAMED value receiver
+// whose type is identical to the method's pointer-receiver pointee. An ALREADY-pointer receiver
+// (`defer conf.releaseSema()`) is excluded — its box group is the pointer variable itself, whose
+// snapshot name IS declared, so it needs no box-ref treatment.
 func (v *Visitor) varUsedAsImplicitAddrReceiverInLambda(varObj types.Object) bool {
 	lambda := v.lambdaCapture.currentLambda
 
@@ -2091,163 +2073,431 @@ func (v *Visitor) varUsedAsImplicitAddrReceiverInLambda(varObj types.Object) boo
 			return true
 		}
 
-		sel, ok := call.Fun.(*ast.SelectorExpr)
-
-		if !ok {
-			return true
+		if v.callImpliesReceiverAddr(call, varObj) {
+			found = true
+			return false
 		}
 
-		ident, ok := sel.X.(*ast.Ident)
-		fieldProjection := false
-
-		if !ok {
-			// A single field projection of the var (`p.fake.setLines()`): the projected member
-			// must be a FIELD selected on the var's own VALUE-struct storage — matching the
-			// `&m.field` form of varAddressTakenInLambda and the lambdaBoxRefAddressForm
-			// emission (`Ꮡp.of(T.Ꮡfake)`). A deeper chain or a method/pointer hop falls
-			// through to the existing snapshot handling.
-			fieldSel, isSel := sel.X.(*ast.SelectorExpr)
-
-			if !isSel {
-				return true
-			}
-
-			if ident, ok = fieldSel.X.(*ast.Ident); !ok {
-				return true
-			}
-
-			if _, isField := v.info.ObjectOf(fieldSel.Sel).(*types.Var); !isField {
-				return true
-			}
-
-			if _, isStruct := v.getType(fieldSel.X, true).(*types.Struct); !isStruct {
-				return true
-			}
-
-			fieldProjection = true
-		}
-
-		if v.info.ObjectOf(ident) != varObj {
-			return true
-		}
-
-		funcObj, ok := v.info.ObjectOf(sel.Sel).(*types.Func)
-
-		if !ok {
-			return true
-		}
-
-		sig, ok := funcObj.Type().(*types.Signature)
-
-		if !ok || sig.Recv() == nil {
-			return true
-		}
-
-		recvPtr, isPtrRecv := sig.Recv().Type().(*types.Pointer)
-
-		if !isPtrRecv {
-			return true
-		}
-
-		recvType := v.getType(sel.X, false)
-
-		if recvType == nil {
-			return true
-		}
-
-		// Already a pointer (arm 1 of pointerReceiverBoxMethodGroup) — excluded (see doc).
-		if _, alreadyPtr := recvType.(*types.Pointer); alreadyPtr {
-			return true
-		}
-
-		// A NAMED value whose type is exactly the pointer-receiver's pointee (arm 2).
-		if types.Identical(recvPtr.Elem(), recvType) {
-			if _, ok := recvType.(*types.Named); ok {
-				found = true
-				return false
-			}
-
-			return true
-		}
-
-		// The field-projection form is matched on the exact pointee only — a method promoted
-		// through the FIELD's own embeds keeps the existing snapshot handling (its emission
-		// does not take the single-hop box form this analysis pairs with).
-		if fieldProjection {
-			return true
-		}
-
-		// A PROMOTED pointer-receiver method reached through EMBEDDED fields — `lazyCert.Do(…)`
-		// on `var lazyCert struct { sync.Once; … }` (crypto/x509 AppendCertsFromPEM): Go takes
-		// `&lazyCert.Once`, an address INTO the variable's own storage, so the var needs the same
-		// by-box capture — emission renders the call through the box projection
-		// (`ᏑlazyCert.of(T.ᏑOnce).Do(…)`), and a snapshot declares no such box (CS0103) besides
-		// divorcing the closure's writes from the original. Only VALUE embeds along the selection
-		// path root the address at varObj: a POINTER embed re-roots it at that pointer's target,
-		// and the snapshot (which copies the pointer) stays sound there.
-		selection, ok := v.info.Selections[sel]
-
-		if !ok || selection.Kind() != types.MethodVal || len(selection.Index()) < 2 {
-			return true
-		}
-
-		base := recvType
-
-		for _, fieldIndex := range selection.Index()[:len(selection.Index())-1] {
-			st, isStruct := base.Underlying().(*types.Struct)
-
-			if !isStruct || fieldIndex >= st.NumFields() {
-				return true
-			}
-
-			fieldType := st.Field(fieldIndex).Type()
-
-			if _, fieldIsPtr := fieldType.Underlying().(*types.Pointer); fieldIsPtr {
-				return true
-			}
-
-			base = fieldType
-		}
-
-		found = true
-		return false
+		return true
 	})
 
 	return found
 }
 
-// identIsCurrentFuncLitParam reports whether ident resolves to a parameter of the function
-// literal whose conversion is currently innermost (see enterLambdaConversion) — i.e. the
-// ident is one of the converting lambda's OWN parameters, a plain local of that lambda.
-func (v *Visitor) identIsCurrentFuncLitParam(ident *ast.Ident) bool {
-	if v.lambdaCapture == nil {
-		return false
-	}
-
-	funcLit, ok := v.lambdaCapture.currentConversion.(*ast.FuncLit)
+// callImpliesReceiverAddr reports whether call invokes a POINTER-receiver method on varObj held as a
+// VALUE — so Go implicitly takes `&varObj` for the call. The match mirrors pointerReceiverBoxMethodGroup's
+// value arm: a NAMED value receiver whose type is identical to the method's pointer-receiver pointee, or a
+// pointer-receiver method PROMOTED through VALUE embeds (the address roots INTO varObj's own storage). An
+// ALREADY-pointer receiver is excluded — its call copies the pointer, not the variable's address.
+func (v *Visitor) callImpliesReceiverAddr(call *ast.CallExpr, varObj types.Object) bool {
+	sel, ok := call.Fun.(*ast.SelectorExpr)
 
 	if !ok {
 		return false
 	}
 
-	return v.funcLitOwnsParam(funcLit, v.info.ObjectOf(ident))
+	return v.selectorImpliesReceiverAddr(sel, varObj)
 }
 
-// funcLitOwnsParam reports whether varObj is declared as one of funcLit's own parameters.
-func (v *Visitor) funcLitOwnsParam(funcLit *ast.FuncLit, varObj types.Object) bool {
-	if funcLit.Type.Params == nil {
+// selectorImpliesReceiverAddr is callImpliesReceiverAddr's core on the selector itself — also used
+// for an UNCALLED method value (`f := t.Add`, Add pointer-receiver), which binds `&t` the same way.
+func (v *Visitor) selectorImpliesReceiverAddr(sel *ast.SelectorExpr, varObj types.Object) bool {
+	ident, ok := sel.X.(*ast.Ident)
+	fieldProjection := false
+
+	if !ok {
+		// A single field projection of the var (`p.fake.setLines()`): the projected member
+		// must be a FIELD selected on the var's own VALUE-struct storage — matching the
+		// `&m.field` form of varAddressTakenInLambda and the lambdaBoxRefAddressForm
+		// emission (`Ꮡp.of(T.Ꮡfake)`). A deeper chain or a method/pointer hop keeps the
+		// snapshot handling.
+		fieldSel, isSel := sel.X.(*ast.SelectorExpr)
+
+		if !isSel {
+			return false
+		}
+
+		if ident, ok = fieldSel.X.(*ast.Ident); !ok {
+			return false
+		}
+
+		if _, isField := v.info.ObjectOf(fieldSel.Sel).(*types.Var); !isField {
+			return false
+		}
+
+		if _, isStruct := v.getType(fieldSel.X, true).(*types.Struct); !isStruct {
+			return false
+		}
+
+		fieldProjection = true
+	}
+
+	if v.info.ObjectOf(ident) != varObj {
 		return false
 	}
 
-	for _, field := range funcLit.Type.Params.List {
-		for _, ident := range field.Names {
-			if v.info.ObjectOf(ident) == varObj {
-				return true
+	funcObj, ok := v.info.ObjectOf(sel.Sel).(*types.Func)
+
+	if !ok {
+		return false
+	}
+
+	sig, ok := funcObj.Type().(*types.Signature)
+
+	if !ok || sig.Recv() == nil {
+		return false
+	}
+
+	recvPtr, isPtrRecv := sig.Recv().Type().(*types.Pointer)
+
+	if !isPtrRecv {
+		return false
+	}
+
+	recvType := v.getType(sel.X, false)
+
+	if recvType == nil {
+		return false
+	}
+
+	// Already a pointer (arm 1 of pointerReceiverBoxMethodGroup) — excluded (see doc).
+	if _, alreadyPtr := recvType.(*types.Pointer); alreadyPtr {
+		return false
+	}
+
+	// A NAMED value whose type is exactly the pointer-receiver's pointee (arm 2).
+	if types.Identical(recvPtr.Elem(), recvType) {
+		_, isNamed := recvType.(*types.Named)
+		return isNamed
+	}
+
+	// A PROMOTED pointer-receiver method reached through EMBEDDED fields — `lazyCert.Do(…)`
+	// on `var lazyCert struct { sync.Once; … }` (crypto/x509 AppendCertsFromPEM): Go takes
+	// `&lazyCert.Once`, an address INTO the variable's own storage, so the var needs the same
+	// by-box capture — emission renders the call through the box projection
+	// (`ᏑlazyCert.of(T.ᏑOnce).Do(…)`), and a snapshot declares no such box (CS0103) besides
+	// divorcing the closure's writes from the original. Only VALUE embeds along the selection
+	// path root the address at varObj: a POINTER embed re-roots it at that pointer's target,
+	// and the snapshot (which copies the pointer) stays sound there.
+	// The field-projection form is matched on the exact pointee only — a method promoted
+	// through the FIELD's own embeds keeps the existing snapshot handling (its emission
+	// does not take the single-hop box form this analysis pairs with).
+	if fieldProjection {
+		return false
+	}
+
+	selection, ok := v.info.Selections[sel]
+
+	if !ok || selection.Kind() != types.MethodVal || len(selection.Index()) < 2 {
+		return false
+	}
+
+	base := recvType
+
+	for _, fieldIndex := range selection.Index()[:len(selection.Index())-1] {
+		st, isStruct := base.Underlying().(*types.Struct)
+
+		if !isStruct || fieldIndex >= st.NumFields() {
+			return false
+		}
+
+		fieldType := st.Field(fieldIndex).Type()
+
+		if _, fieldIsPtr := fieldType.Underlying().(*types.Pointer); fieldIsPtr {
+			return false
+		}
+
+		base = fieldType
+	}
+
+	return true
+}
+
+// captureShareFacts holds, per captured variable, the facts the shared-capture routing in
+// processPotentialCapture derives from one scan of the enclosing declaration's body.
+type captureShareFacts struct {
+	// writtenAfterCapture: some write to the variable can execute after a func literal that
+	// references it has been created — so a value snapshot at the literal's creation silently
+	// diverges from Go's shared-variable closure semantics (in one direction or the other).
+	writtenAfterCapture bool
+	// loopStmtDefined: the variable is defined by a for-init or range clause. Such a variable is
+	// per-iteration in Go (1.22+); the per-lambda snapshot approximates that, while shared routing
+	// (one box, or the shared C# for-loop control variable) would break it — it keeps the snapshot.
+	loopStmtDefined bool
+}
+
+// closureBodyCaptureLit returns the func literal whose BODY the capture analysis is currently
+// inside — the literal itself, or a go/defer statement's func-literal callee — and nil otherwise.
+// Only inside a literal's body do Go's shared-variable closure semantics apply. The other capture
+// contexts — a method-value receiver (`f := t.Add`) and a go/defer statement's non-literal callee
+// expression — evaluate the receiver/callee AT STATEMENT TIME, so their value snapshot IS the
+// correct Go semantics and must stay.
+func (v *Visitor) closureBodyCaptureLit() *ast.FuncLit {
+	switch node := v.lambdaCapture.currentLambda.(type) {
+	case *ast.FuncLit:
+		return node
+	case *ast.GoStmt:
+		if lit, ok := node.Call.Fun.(*ast.FuncLit); ok {
+			return lit
+		}
+	case *ast.DeferStmt:
+		if lit, ok := node.Call.Fun.(*ast.FuncLit); ok {
+			return lit
+		}
+	}
+
+	return nil
+}
+
+// varShareFacts memoizes computeCaptureShareFacts per variable for the current analysis decl.
+func (v *Visitor) varShareFacts(varObj types.Object) captureShareFacts {
+	if varObj == nil {
+		return captureShareFacts{}
+	}
+
+	if v.captureShareFactsCache == nil {
+		v.captureShareFactsCache = make(map[types.Object]captureShareFacts)
+	}
+
+	if facts, cached := v.captureShareFactsCache[varObj]; cached {
+		return facts
+	}
+
+	facts := v.computeCaptureShareFacts(varObj)
+	v.captureShareFactsCache[varObj] = facts
+
+	return facts
+}
+
+// computeCaptureShareFacts scans the current analysis declaration's body once for varObj and decides
+// whether the variable is "written after capture": some write to it can execute after a func literal
+// referencing it exists. Writes counted, conservatively by syntax:
+//   - an assignment or ++/-- whose target roots at the variable (`t = …`, `t.f.g = …`, `t[i] = …`;
+//     a deref target `*p = …` roots at the alias's referent, not the pointer variable, and is
+//     accounted at the alias's creation instead);
+//   - a pointer-receiver method CALL on the variable held as a value (Go's implicit `&t`);
+//   - a `for t = range …` clause (rewritten every iteration);
+//   - an explicit `&t` (or `&t.field`/`&t[i]`) ANYWHERE, and an UNCALLED pointer-receiver method
+//     value — both create an alias through which later writes are syntactically invisible, so they
+//     count as writes that can occur at ANY time after;
+//   - any of the above INSIDE any func literal — the literal may run at any time after creation.
+//
+// A plain body write counts only if it can execute after some referencing literal is created: it is
+// positioned after the literal, or both sit inside the same for/range loop (a later iteration's
+// write follows an earlier iteration's creation).
+func (v *Visitor) computeCaptureShareFacts(varObj types.Object) captureShareFacts {
+	facts := captureShareFacts{}
+	decl := v.captureAnalysisDecl
+
+	if decl == nil || decl.Body == nil {
+		return facts
+	}
+
+	type site struct {
+		pos   token.Pos
+		loops []ast.Node
+	}
+
+	type litEntry struct {
+		lit      *ast.FuncLit
+		loops    []ast.Node
+		recorded bool
+	}
+
+	var (
+		litRefs    []site
+		bodyWrites []site
+		loopStack  []ast.Node
+		litStack   []litEntry
+		nodeStack  []ast.Node
+	)
+
+	anytimeWrite := false
+	calledSelectors := make(map[*ast.SelectorExpr]bool)
+
+	snapshotLoops := func() []ast.Node {
+		return append([]ast.Node(nil), loopStack...)
+	}
+
+	rootsAtVar := func(expr ast.Expr) bool {
+		root := v.writeTargetRootIdent(expr)
+		return root != nil && v.info.ObjectOf(root) == varObj && v.info.Defs[root] == nil
+	}
+
+	recordWrite := func(pos token.Pos) {
+		if len(litStack) > 0 {
+			anytimeWrite = true
+			return
+		}
+
+		bodyWrites = append(bodyWrites, site{pos, snapshotLoops()})
+	}
+
+	ast.Inspect(decl.Body, func(n ast.Node) bool {
+		if n == nil {
+			top := nodeStack[len(nodeStack)-1]
+			nodeStack = nodeStack[:len(nodeStack)-1]
+
+			switch top.(type) {
+			case *ast.ForStmt, *ast.RangeStmt:
+				loopStack = loopStack[:len(loopStack)-1]
+			case *ast.FuncLit:
+				litStack = litStack[:len(litStack)-1]
+			}
+
+			return true
+		}
+
+		nodeStack = append(nodeStack, n)
+
+		switch node := n.(type) {
+		case *ast.ForStmt:
+			if init, ok := node.Init.(*ast.AssignStmt); ok && init.Tok == token.DEFINE {
+				for _, lhs := range init.Lhs {
+					if ident, ok := lhs.(*ast.Ident); ok && v.info.Defs[ident] == varObj {
+						facts.loopStmtDefined = true
+					}
+				}
+			}
+
+			loopStack = append(loopStack, node)
+
+		case *ast.RangeStmt:
+			if node.Tok == token.DEFINE {
+				for _, expr := range []ast.Expr{node.Key, node.Value} {
+					if ident, ok := expr.(*ast.Ident); ok && v.info.Defs[ident] == varObj {
+						facts.loopStmtDefined = true
+					}
+				}
+			}
+
+			loopStack = append(loopStack, node)
+
+			if node.Tok == token.ASSIGN {
+				for _, expr := range []ast.Expr{node.Key, node.Value} {
+					if expr != nil && rootsAtVar(expr) {
+						recordWrite(node.Pos())
+					}
+				}
+			}
+
+		case *ast.FuncLit:
+			litStack = append(litStack, litEntry{node, snapshotLoops(), false})
+
+		case *ast.Ident:
+			if v.info.ObjectOf(node) == varObj && v.info.Defs[node] == nil {
+				for i := range litStack {
+					if !litStack[i].recorded {
+						litStack[i].recorded = true
+						litRefs = append(litRefs, site{litStack[i].lit.Pos(), litStack[i].loops})
+					}
+				}
+			}
+
+		case *ast.AssignStmt:
+			for _, lhs := range node.Lhs {
+				if rootsAtVar(lhs) {
+					recordWrite(node.Pos())
+				}
+			}
+
+		case *ast.IncDecStmt:
+			if rootsAtVar(node.X) {
+				recordWrite(node.Pos())
+			}
+
+		case *ast.UnaryExpr:
+			if node.Op == token.AND && rootsAtVar(node.X) {
+				anytimeWrite = true
+			}
+
+		case *ast.CallExpr:
+			if sel, ok := node.Fun.(*ast.SelectorExpr); ok {
+				calledSelectors[sel] = true
+			}
+
+			if v.callImpliesReceiverAddr(node, varObj) {
+				recordWrite(node.Pos())
+			}
+
+		case *ast.SelectorExpr:
+			if !calledSelectors[node] && v.selectorImpliesReceiverAddr(node, varObj) {
+				anytimeWrite = true
+			}
+		}
+
+		return true
+	})
+
+	if len(litRefs) == 0 {
+		return facts
+	}
+
+	if anytimeWrite {
+		facts.writtenAfterCapture = true
+		return facts
+	}
+
+	sharesLoop := func(a, b []ast.Node) bool {
+		for _, x := range a {
+			for _, y := range b {
+				if x == y {
+					return true
+				}
+			}
+		}
+
+		return false
+	}
+
+	for _, w := range bodyWrites {
+		for _, lit := range litRefs {
+			if w.pos > lit.pos || sharesLoop(w.loops, lit.loops) {
+				facts.writtenAfterCapture = true
+				return facts
 			}
 		}
 	}
 
-	return false
+	return facts
+}
+
+// writeTargetRootIdent returns the base identifier whose OWN STORAGE a write target (or `&` operand)
+// roots at: `t` for `t`, `t.f.g` (value fields), and `a[i]` (array elements). It returns nil when the
+// path leaves the variable's storage: a deref (`*p = …`), an IMPLICIT deref (`p.f = …` with p a
+// pointer — Go's `(*p).f`, which writes the pointee, not the variable), and a slice/map element
+// (`s[i] = …` writes shared backing, which a snapshot copy shares too — no divergence).
+func (v *Visitor) writeTargetRootIdent(expr ast.Expr) *ast.Ident {
+	for {
+		switch e := expr.(type) {
+		case *ast.Ident:
+			return e
+		case *ast.ParenExpr:
+			expr = e.X
+		case *ast.SelectorExpr:
+			if baseType := v.getType(e.X, false); baseType != nil {
+				if _, isPtr := baseType.Underlying().(*types.Pointer); isPtr {
+					return nil
+				}
+			}
+
+			expr = e.X
+		case *ast.IndexExpr:
+			baseType := v.getType(e.X, false)
+
+			if baseType == nil {
+				return nil
+			}
+
+			if _, isArray := baseType.Underlying().(*types.Array); !isArray {
+				return nil
+			}
+
+			expr = e.X
+		default:
+			return nil
+		}
+	}
 }
 
 // varIsDerefdPointerParam reports whether varObj is a pointer-typed parameter (or the pointer
@@ -2701,4 +2951,73 @@ func (v *Visitor) isFunctionNameInScope(name string) bool {
 	})
 
 	return foundUsageBeforeDecl || foundDelegateUsage
+}
+
+// enterDeferGoLambdaConversion enters the conversion state for a defer/go STATEMENT — a
+// pass-through level whose call ARGUMENTS (and non-literal callee expression) are evaluated
+// EAGERLY in the ENCLOSING scope when the statement executes (Go spec: the deferred/spawned
+// function value and its parameters are evaluated at statement time). enterLambdaConversion
+// installs EMPTY remap state, which hid an enclosing lambda's capture renames while the
+// arguments rendered: an eager argument reading a heap-boxed local the enclosing IIFE
+// snapshot-captured (`base` → `baseʗ1`) emitted the raw ref-local `@base` inside the enclosing
+// lambda's body (CS8175 — a ref local cannot be used in an anonymous method; where the raw
+// name IS capturable it instead bypasses the snapshot every other read in that body uses).
+// Seed the fresh state with a COPY of the enclosing lambda's renames so arguments render
+// exactly like any other expression in the enclosing body; prepareStmtCaptures then OVERRIDES
+// entries for the statement's own captured callee idents (their defer-time snapshots). Copies,
+// not the maps themselves: the statement's own remaps must not leak back into the enclosing
+// state when exit restores it. At function level (no enclosing lambda) this is exactly
+// enterLambdaConversion.
+func (v *Visitor) enterDeferGoLambdaConversion(node ast.Node) {
+	enclosingInLambda := v.lambdaCapture.conversionInLambda
+	enclosingVars := v.lambdaCapture.currentLambdaVars
+	enclosingVarObjs := v.lambdaCapture.currentLambdaVarObjs
+
+	v.enterLambdaConversion(node)
+
+	if !enclosingInLambda {
+		return
+	}
+
+	for name, captureName := range enclosingVars {
+		v.lambdaCapture.currentLambdaVars[name] = captureName
+	}
+
+	for name, obj := range enclosingVarObjs {
+		v.lambdaCapture.currentLambdaVarObjs[name] = obj
+	}
+}
+
+// identIsCurrentFuncLitParam reports whether ident resolves to a parameter of the function
+// literal whose conversion is currently innermost (see enterLambdaConversion) — i.e. the
+// ident is one of the converting lambda's OWN parameters, a plain local of that lambda.
+func (v *Visitor) identIsCurrentFuncLitParam(ident *ast.Ident) bool {
+	if v.lambdaCapture == nil {
+		return false
+	}
+
+	funcLit, ok := v.lambdaCapture.currentConversion.(*ast.FuncLit)
+
+	if !ok {
+		return false
+	}
+
+	return v.funcLitOwnsParam(funcLit, v.info.ObjectOf(ident))
+}
+
+// funcLitOwnsParam reports whether varObj is declared as one of funcLit's own parameters.
+func (v *Visitor) funcLitOwnsParam(funcLit *ast.FuncLit, varObj types.Object) bool {
+	if funcLit.Type.Params == nil {
+		return false
+	}
+
+	for _, field := range funcLit.Type.Params.List {
+		for _, ident := range field.Names {
+			if v.info.ObjectOf(ident) == varObj {
+				return true
+			}
+		}
+	}
+
+	return false
 }

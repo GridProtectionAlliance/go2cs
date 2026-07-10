@@ -3625,6 +3625,41 @@ run(() => {
 
 This also covers `&m.field` (a value-struct field address inside the closure: `Ꮡm.of(box.Ꮡfield)`). The detection is scoped to the bare `&m` and value-struct `&m.field` forms (the ones with a box-ref emission form); an element address `&m[i]` keeps the existing snapshot path. The behavioral test `FuncLitArgCapture` guards the call-argument, value-use, field-address, and initializer cases.
 
+### A capture that is WRITTEN after the capture point routes to shared storage, not a snapshot
+Go closures share the ONE variable with the enclosing function. The value snapshot the converter uses for captured structs/arrays/slices/maps/chans (`var tʗ1 = t;` hoisted before the lambda, in-lambda references renamed to `tʗ1`) is therefore only *observationally* correct while **neither side writes the variable after the snapshot point**. Once anything does, the snapshot silently diverges — the program compiles and runs, with wrong values:
+
+- a closure's writes land in a divorced copy: `bump := func() { t.total += 100 }` never affects `t` (probe-proven: Go 106, snapshot 6);
+- body writes after the lambda's creation are invisible to a read-only closure: `get := func() int { return t.total }; t.total += 10` reads the stale copy (Go 15, snapshot 5);
+- a **deferred** literal observes the variable's registration-time value instead of Go's final value (`defer func(){ fmt.Println(t.total) }(); t.total = 42` — Go 42, snapshot 5);
+- two closures over one variable each get their own copy, so a writer and a reader stop communicating entirely.
+
+The converter now detects **written-after-capture** per variable during analysis (`varShareFacts`, one cached scan of the enclosing declaration) and routes such captures to shared storage. Writes counted, conservatively by syntax: an assignment or `++`/`--` whose target roots at the variable's own storage (`t = …`, `t.f.g = …`, array `a[i] = …` — but *not* through a deref, an implicit pointer deref `p.f = …`, or a slice/map element, which a snapshot copy shares anyway); a pointer-receiver method call on the variable held as a value (Go's implicit `&t`); a `for t = range` clause; an explicit `&t` anywhere or an uncalled pointer-receiver method value (an **alias** — later writes through it are syntactically invisible, so it counts at any position, e.g. `p := &t; get := func(){…}; p.total = 50`); and any of these inside any func literal (the literal may run at any time). A plain body write counts only if positioned after a referencing literal or sharing a `for`/`range` loop with one (a later iteration's write follows an earlier iteration's creation).
+
+The routing, by variable shape:
+
+```csharp
+// Heap-boxed variable (escaping struct local, aliased int, …) → by-box (boxRefVars):
+ref var t = ref heap<Tally>(out var Ꮡt);
+t = new Tally(5, "s");
+var bump = () => {
+    Ꮡt.Value.total += 100;      // value use → Ꮡt.Value: writes the ONE box the body reads
+};
+
+// Unboxed variable (value parameter; slice/map/chan local, whose copy diverges on
+// reassignment) → NATIVE C# capture — no snapshot, no rename; the display class
+// shares the local exactly as Go shares the variable:
+internal static void probeB1(Tally t) {
+    var bump = () => {
+        t.total += 100;          // captures the parameter itself
+    };
+    bump();
+    t.total++;                   // 106, matching Go
+```
+
+This applies only to genuine **closure-body** references (a func literal's body, directly or as a go/defer statement's literal callee). A go/defer statement's non-literal callee/receiver expression and its call arguments keep their statement-time evaluation — `defer fmt.Println(t.total)` still prints the registration-time value, which IS Go's argument semantics. Read-only-after-capture variables keep the snapshot (observationally identical, zero churn — the vast majority of stdlib captures). A **loop-statement-defined** variable (for-init or range clause) also keeps it: its per-lambda snapshot approximates Go 1.22's per-iteration variable, which shared routing would break. A literal's own parameters/results are not captures and are excluded. (The remaining known gap, deliberately out of scope here: a `for`-init variable captured by closures diverges from Go 1.22 per-iteration semantics — the C# `for` control variable is shared across iterations — tracked as its own defect.)
+
+The native route makes the emitted C# read exactly like the Go for the parameter case; the by-box route reuses the box-ref machinery above (including `ValueSlot` for inherently-heap locals: a captured slice that the closure reassigns emits `Ꮡs.ValueSlot = append(Ꮡs.ValueSlot, …)` against a materialized `heap<slice<T>>` box). (Guarded by the `ClosureWriteVisibility` behavioral test — 19 probes: boxed/plain × local/param × closure-writes/body-writes-after × plain/defer/go/IIFE/loop-created contexts, plus slice/map reassignment, alias writes, two-closure sharing, and the read-only/defer-argument/range controls that must KEEP snapshot semantics.)
+
 ### A nested closure's capture snapshot reads the enclosing closure's snapshot
 When a heap-boxed **ref-local is used by VALUE** (its address is not taken) and captured by NESTED closures, it is not box-ref'd — it is snapshot-copied: the converter declares `var mʗ1 = m;` before the closure and the closure uses `mʗ1`, so the uncapturable `ref`-local `m` is never referenced inside the lambda. The snapshot chain must be threaded through each level. A capture generated for an **inner** closure that lands inside an **outer** closure's body must read the outer closure's snapshot, not the enclosing method's ref-local — testing/fuzz.go's `run` closure captures `fn := reflect.ValueOf(ff)` (a heap-boxed `reflect.Value`), and run's inner `go tRunner(t, func(t){ … fn.Call(args) })` snapshots run's `fnʗ1`, not the method-level `fn` (a ref-local uncapturable inside a closure → CS8175):
 

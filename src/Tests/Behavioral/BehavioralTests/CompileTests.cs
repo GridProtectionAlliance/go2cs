@@ -171,6 +171,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckClosureSelfShadowCapture() => CheckTarget("ClosureSelfShadowCapture");
 
     [TestMethod]
+    public void CheckClosureWriteVisibility() => CheckTarget("ClosureWriteVisibility");
+
+    [TestMethod]
     public void CheckCollisionFieldBoxAccessor() => CheckTarget("CollisionFieldBoxAccessor");
 
     [TestMethod]

@@ -99,6 +99,7 @@
     <Project Path="Tests/Behavioral/ClosureReassignsPtrParam/ClosureReassignsPtrParam.csproj" />
     <Project Path="Tests/Behavioral/ClosureReturnAnonStruct/ClosureReturnAnonStruct.csproj" />
     <Project Path="Tests/Behavioral/ClosureSelfShadowCapture/ClosureSelfShadowCapture.csproj" />
+    <Project Path="Tests/Behavioral/ClosureWriteVisibility/ClosureWriteVisibility.csproj" />
     <Project Path="Tests/Behavioral/CollisionFieldBoxAccessor/CollisionFieldBoxAccessor.csproj" />
     <Project Path="Tests/Behavioral/CollisionRenamedLocalBox/CollisionRenamedLocalBox.csproj" />
     <Project Path="Tests/Behavioral/ComplexImaginaryShadow/ComplexImaginaryShadow.csproj" />

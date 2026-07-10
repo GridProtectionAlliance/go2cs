@@ -71,9 +71,16 @@ func boxAccessorType(typeName, receiver string) string {
 	//     `m.of(runtime_package.m.Ꮡpark)`) — a bare `m.Ꮡpark` binds to the `ж<m>` variable `m` — or the
 	//     receiver is that variable's lambda CAPTURE (`mʗ1`): inside `systemstack(func(){ notesleep(&m.park) })`
 	//     the captured receiver renames to `mʗ1`, but the ENCLOSING local `m` is still visible to the
-	//     lambda, so a bare `m.Ꮡpark` binds to it all the same (CS1061, runtime rwmutex `lockSlow`).
+	//     lambda, so a bare `m.Ꮡpark` binds to it all the same (CS1061, runtime rwmutex `lockSlow`) —
+	//     or the receiver is that variable's heap BOX (`Ꮡw`, a box-ref capture): the enclosing local
+	//     `w` is likewise still visible inside the lambda. When that local's declared type IS the
+	//     type named `w`, C#'s identical-simple-name rule happens to bind the type; but a box-ref'd
+	//     local whose declared type differs (a pointer-typed `w := &w{…}`, declared `ж<w>`) has no
+	//     such fallback — the bare name binds the variable (CS1061) — so the box-receiver render
+	//     qualifies uniformly.
 	if strings.HasPrefix(typeName, ShadowVarMarker) || typeName == receiver ||
-		strings.HasPrefix(receiver, typeName+CapturedVarMarker) {
+		strings.HasPrefix(receiver, typeName+CapturedVarMarker) ||
+		receiver == AddressPrefix+typeName {
 		return getSanitizedImport(packageName+PackageSuffix) + "." + typeName
 	}
 
