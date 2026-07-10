@@ -24,6 +24,7 @@
 using System.Collections.Generic;
 using System.Text;
 using static go2cs.Common;
+using static go2cs.Symbols;
 
 namespace go2cs.Templates.InterfaceImpl;
 
@@ -84,7 +85,7 @@ internal class AdapterImplTemplate : TemplateBase
 
                  public {{AdapterName}}(ж<{{StructName}}> box) => m_box = box;
 
-                 public object? Box => m_box;
+                 public object? Box => m_box;{{RegistryInitialization}}
 
                  {{MethodsImplementation}}
 
@@ -102,6 +103,18 @@ internal class AdapterImplTemplate : TemplateBase
                  public override string? ToString() => m_box?.ToString();{{FormattableImplementation}}
              }
          """;
+
+    // Registers the box→adapter factory at module load so golib's type-assert machinery
+    // (builtin._<T>) can re-wrap a raw receiver box matched against a NAMED interface case
+    // label by Go method-set semantics. A GENERIC adapter cannot host a module initializer
+    // and its open registration key is unrepresentable — generic instantiations stay on the
+    // nominal-match path.
+    private string RegistryInitialization =>
+        TypeParameters.Length > 0
+            ? string.Empty
+            : "\r\n\r\n        [global::System.Runtime.CompilerServices.ModuleInitializer]\r\n" +
+              $"        internal static void {TempVarMarker}RegisterAdapter() =>\r\n" +
+              $"            global::go.AdapterRegistry.Register(typeof({PointerPrefix}<{StructName}>), typeof({InterfaceName}), static box => new {AdapterName}(({PointerPrefix}<{StructName}>)box));";
 
     // The interface may inherit System.IFormattable (the hand-finished io stub's Reader);
     // its member cannot forward through the box (no such overload) — implement directly.

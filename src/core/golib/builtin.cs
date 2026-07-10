@@ -1394,76 +1394,132 @@ public static class builtin
         DynamicallyAccessedMemberTypes.PublicFields
     )] T>(this object target)
     {
-        try
+        if (TryTypeAssert(target, out T value))
+            return value;
+
+        while (target is IInterfaceAdapter interfaceAdapter)
+            target = interfaceAdapter.Value!;
+
+        throw new PanicException($"interface conversion: interface {{}} is {GetGoTypeName(target)}, not {GetGoTypeName(typeof(T))}");
+    }
+
+    /// <summary>
+    /// Core non-throwing type assertion of <paramref name="target"/> object as type <typeparamref name="T"/>.
+    /// </summary>
+    /// <typeparam name="T">Desired type for <paramref name="target"/>.</typeparam>
+    /// <param name="target">Source value to type assert.</param>
+    /// <param name="value">Value cast as <typeparamref name="T"/>, if successful; otherwise <c>default</c>.</param>
+    /// <returns><c>true</c> if type assertion was successful; otherwise, <c>false</c>.</returns>
+    /// <remarks>
+    /// This is the dispatch point for emitted type-switch case guards (<c>case {} ᴛ0 when
+    /// ᴛ0._&lt;Iface&gt;(out var x):</c>), where a MISS is the normal control flow — it must not
+    /// throw on the failure path.
+    /// </remarks>
+    private static bool TryTypeAssert<[DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicMethods |
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicFields
+    )] T>(object? target, out T value)
+    {
+        while (target is IInterfaceAdapter interfaceAdapter)
+            target = interfaceAdapter.Value;
+
+        // A nil interface asserts as a failure, never a match (Go: 'v, ok := nil.(T)' is ok=false)
+        if (target is null)
         {
-            while (target is IInterfaceAdapter interfaceAdapter)
-                target = interfaceAdapter.Value!;
+            value = default!;
+            return false;
+        }
 
-            Type typeOfT = typeof(T);
+        Type typeOfT = typeof(T);
 
-            switch (target)
+        switch (target)
+        {
+            case string str when typeOfT == typeof(@string):
+                value = (T)(object)new @string(str);
+                return true;
+            case T typedTarget:
+                value = typedTarget;
+                return true;
+            // An interface value created from a Go POINTER (`var s Iface = &t`) is a generated
+            // IжAdapter wrapping the receiver box; a type assert back to the pointer type
+            // (`s.(*T)`, targeting ж<T>) unwraps the adapter to the original box, matching
+            // Go's interface-holds-the-pointer semantics.
+            case IжAdapter adapter when adapter.Box is T box:
+                value = box;
+                return true;
+        }
+
+        Type targetType = target.GetType();
+
+        if (typeOfT.IsInterface)
+        {
+            // NAMED-interface resolution by Go METHOD-SET semantics: a raw receiver box (ж<X>)
+            // matches an interface that *X implements — re-wrap it in the generated pointer
+            // adapter its module initializer registered. An IжAdapter asserting to a DIFFERENT
+            // interface re-wraps its box the same way (Go re-derives the target interface from
+            // the dynamic type *X).
+            object? dynamicValue = target is IжAdapter pointerAdapter ? pointerAdapter.Box : target;
+
+            if (dynamicValue is not null && AdapterRegistry.TryWrap(dynamicValue, typeOfT, out object? wrapped) && wrapped is T wrappedTarget)
             {
-                case string str when typeOfT == typeof(@string):
-                    return (T)(object)new @string(str);
-                case T typedTarget:
-                    return typedTarget;
-                // An interface value created from a Go POINTER (`var s Iface = &t`) is a generated
-                // IжAdapter wrapping the receiver box; a type assert back to the pointer type
-                // (`s.(*T)`, targeting ж<T>) unwraps the adapter to the original box, matching
-                // Go's interface-holds-the-pointer semantics.
-                case IжAdapter adapter when adapter.Box is T box:
-                    return box;
+                value = wrappedTarget;
+                return true;
             }
+        }
 
-            Type targetType = target.GetType();
-
-            if (typeOfT.IsValueType && targetType.IsValueType)
+        if (typeOfT.IsValueType && targetType.IsValueType)
+        {
+            // Only dynamic, unnamed types can be converted to each other in Go
+            if (typeOfT.IsDynamicType() && targetType.IsDynamicType())
             {
-                // Only dynamic, unnamed types can be converted to each other in Go
-                if (typeOfT.IsDynamicType() && targetType.IsDynamicType())
+                ImmutableHashSet<string> typeOfTFieldNames = typeOfT.GetStructFieldNames();
+
+                // Check if target type has the same fields as the asserted type
+                if (targetType.GetStructFieldNames().Except(typeOfTFieldNames).Count == 0)
                 {
-                    ImmutableHashSet<string> typeOfTFieldNames = typeOfT.GetStructFieldNames();
+                    // Create a new instance of the asserted type
+                    T newInstance = (T)Activator.CreateInstance(typeOfT)!;
 
-                    // Check if target type has the same fields as the asserted type
-                    if (targetType.GetStructFieldNames().Except(typeOfTFieldNames).Count == 0)
-                    {
-                        // Create a new instance of the asserted type
-                        T newInstance = (T)Activator.CreateInstance(typeOfT)!;
+                    // Copy the values of the fields from the target to the new instance
+                #pragma warning disable IL2075
+                    foreach (string field in typeOfTFieldNames)
+                        typeOfT.GetField(field)!.SetValue(newInstance,  targetType.GetField(field)!.GetValue(target));
+                #pragma warning restore IL2075
 
-                        // Copy the values of the fields from the target to the new instance
-                    #pragma warning disable IL2075
-                        foreach (string field in typeOfTFieldNames)
-                            typeOfT.GetField(field)!.SetValue(newInstance,  targetType.GetField(field)!.GetValue(target));
-                    #pragma warning restore IL2075
-
-                        return newInstance;
-                    }
+                    value = newInstance;
+                    return true;
                 }
             }
-
-            if (!typeOfT.IsInterface || !Implements<T>(target))
-                return (T)target;
-
-            // Handle conversion of anonymous dynamically declared interfaces - unfortunately, you can't
-            // define an interface that describes an abstract method implemented by another interface,
-            // so we are forced to use reflection to find the static interface conversion method...
-            MethodInfo? method = typeOfT.GetMethod($"{TempVarMarker}As", 1, BindingFlags.Public | BindingFlags.Static, s_asTParams);
-
-            // Ths following exception will not be captured by type assertion overload that returns a tuple
-            // that includes a "success" boolean since missing method is considered a code conversion error
-            if (method == null)
-                throw new InvalidOperationException($"Interface '{typeOfT.Name}' does not implement '{TempVarMarker}As' runtime conversion method.");
-
-        #pragma warning disable IL2060
-            MethodInfo genericMethod = method.MakeGenericMethod(targetType);
-        #pragma warning restore IL2060
-
-            return (T)genericMethod.Invoke(null, [target])!;
         }
-        catch (InvalidCastException ex)
+
+        if (!typeOfT.IsInterface || !Implements<T>(target))
         {
-            throw new PanicException($"interface conversion: interface {{}} is {GetGoTypeName(target.GetType())}, not {GetGoTypeName(typeof(T))}", ex);
+            value = default!;
+            return false;
         }
+
+        // Handle conversion of anonymous dynamically declared interfaces - unfortunately, you can't
+        // define an interface that describes an abstract method implemented by another interface,
+        // so we are forced to use reflection to find the static interface conversion method...
+        MethodInfo? method = typeOfT.GetMethod($"{TempVarMarker}As", 1, BindingFlags.Public | BindingFlags.Static, s_asTParams);
+
+        // A NAMED interface has no generated runtime conversion method — its implementations
+        // resolve nominally (case T above) or through the adapter registry. Reaching here means
+        // only the name-based method-set probe matched (no adapter was ever generated for the
+        // pair) — treat as a miss rather than a conversion error.
+        if (method == null)
+        {
+            value = default!;
+            return false;
+        }
+
+    #pragma warning disable IL2060
+        MethodInfo genericMethod = method.MakeGenericMethod(targetType);
+    #pragma warning restore IL2060
+
+        value = (T)genericMethod.Invoke(null, [target])!;
+        return true;
     }
 
     /// <summary>
@@ -1479,14 +1535,7 @@ public static class builtin
         DynamicallyAccessedMemberTypes.PublicFields
     )] T>(this object target, bool _)
     {
-        try
-        {
-            return (target._<T>(), true);
-        }
-        catch (PanicException)
-        {
-            return (default, false)!;
-        }
+        return TryTypeAssert(target, out T value) ? (value, true) : (default, false)!;
     }
 
     /// <summary>
@@ -1502,8 +1551,7 @@ public static class builtin
         DynamicallyAccessedMemberTypes.PublicFields
     )] T>(this object target, out T value)
     {
-        (value, bool ok) = target._<T>(true);
-        return ok;
+        return TryTypeAssert(target, out value);
     }
 
     /// <summary>

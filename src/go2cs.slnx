@@ -363,6 +363,7 @@
     <Project Path="Tests/Behavioral/TypeSwitch/TypeSwitch.csproj" />
     <Project Path="Tests/Behavioral/TypeSwitchGuardShadow/TypeSwitchGuardShadow.csproj" />
     <Project Path="Tests/Behavioral/TypeSwitchMultiCase/TypeSwitchMultiCase.csproj" />
+    <Project Path="Tests/Behavioral/TypeSwitchNamedInterfaceCase/TypeSwitchNamedInterfaceCase.csproj" />
     <Project Path="Tests/Behavioral/TypeSwitchTagShadowRename/TypeSwitchTagShadowRename.csproj" />
     <Project Path="Tests/Behavioral/TypeSwitchPointerAdapter/TypeSwitchPointerAdapter.csproj" />
     <Project Path="Tests/Behavioral/UnexportedEmbeddedMarker/UnexportedEmbeddedMarker.csproj" />

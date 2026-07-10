@@ -1931,17 +1931,44 @@ in `_<T>`, so a Go `case *circle:` (emitted `case ж<circle> t:`) matches the ad
 exactly as it matches the raw box that an EMPTY interface (`any`) holds directly. The bound `t`
 IS the original receiver box, so writes through it (`t.Value.r += 10`) alias the original object,
 matching Go's interface-holds-the-pointer semantics; `case nil` (emitted `case null:`) still sees
-the nil interface unchanged. Two known edges remain: an interface holding a **nil `*T`** (in Go a
+the nil interface unchanged. A known edge remains: an interface holding a **nil `*T`** (in Go a
 non-nil interface that matches `case *T:` binding a nil `t`) stays wrapped — no C# type pattern
-can bind a null — so it falls to `default` rather than wrongly matching `case null:`; and a
-**named-interface case label** (`case fmt.Stringer:`) emits a plain C# type pattern, which after
-the unwrap tests what the raw box/value implements in C# — a dynamic type that satisfies the case
-interface only through a pointer adapter (or only in Go's method-set sense) does not match. An
-*anonymous* interface label already dispatches dynamically (`case {} Δx when Δx._<Iface>(out var x):`);
-extending that form to named interface labels (plus the runtime conversion it needs) is the
-outstanding piece. (Guarded by the `TypeSwitchPointerAdapter` behavioral test — pointer-receiver
-implementations of a non-empty interface dispatched through single-type, multi-type, no-bind, and
-write-through cases, plus value-receiver, `nil`, and raw-box-in-`any` controls.)
+can bind a null — so it falls to `default` rather than wrongly matching `case null:`. (Guarded by
+the `TypeSwitchPointerAdapter` behavioral test — pointer-receiver implementations of a non-empty
+interface dispatched through single-type, multi-type, no-bind, and write-through cases, plus
+value-receiver, `nil`, and raw-box-in-`any` controls.)
+
+**Named-interface case labels dispatch by method set through the adapter registry.** An
+INTERFACE-typed case label — named (`case fmt.Stringer:`, `case error:`) or anonymous — must match
+by Go METHOD-SET semantics, and after the unwrap above the operand is the raw receiver box, which
+never nominally implements a C# interface (the generated pointer adapter does). A plain C# type
+pattern (`case Stringer t:`) therefore missed every pointer-sourced implementation. All interface
+labels now emit the `when`-guard form the anonymous labels already used —
+`case {} Δx when Δx._<Stringer>(out var x):` — routing dispatch through golib's type-assert
+machinery, which resolves in order: a **nominal** implementer (value structs made partial, adapter
+instances, duck-type wrappers) matches directly; a raw **box** `ж<X>` (or an adapter asserting to a
+*different* interface, via its `Box`) re-wraps through `go.AdapterRegistry` — each generated
+pointer adapter registers `(typeof(ж<X>), typeof(Iface)) → box => new XжIface(box)` from a
+`[ModuleInitializer]`, so the lookup is a dictionary hit and a compiled factory, reflection-free
+and Native-AOT-safe (the initializer also roots the adapter against trimming); an *anonymous*
+interface still falls back to its generated `ᴛAs` duck-typing conversion. The `out var x` binds at
+the CASE interface type exactly as Go binds the case variable, the re-wrapped adapter forwards to
+the original box (writes through the binding alias the original object), label order is preserved
+(C# tests patterns top-to-bottom, and a `when`-guarded pattern never makes a later label
+unreachable), and `case nil` is unaffected (`{}` never matches null). The type-assert core is
+non-throwing (`TryTypeAssert`), so a non-matching label — the NORMAL control flow in a type
+switch — costs no exception; this also makes a nil-interface `v, ok := x.(T)` return `ok=false`
+(Go semantics) instead of faulting, and a named interface with no registered adapter is a MISS
+rather than the former missing-`ᴛAs` hard error. Known residuals, all of the same shape (the
+adapter type does not exist or its module never loaded, so Go would match where C# misses): a
+(struct, iface) pair with **no conversion site anywhere** in the program, a **generic** struct's
+adapter (an open registration key is unrepresentable and a generic class cannot host a module
+initializer), and FOREIGN **value** adapters (`ᴠ`-composed), which are not yet registered.
+(Guarded by the `TypeSwitchNamedInterfaceCase` behavioral test — pointer-adapter value, raw
+box-in-`any`, value-struct implementer, `case error:` in both adapter-carried and raw-box forms,
+non-matching control, label-order precedence both directions, a multi-type clause of two interface
+labels, interface-tag-to-interface-label dispatch, and write-through aliasing, output-compared
+vs Go.)
 
 ## Struct Types
 Go structs are converted to C# `struct` types and used on the stack to optimize memory use and reduce GC pressure; when an instance must escape the stack it is wrapped in a heap box, [`ж<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/%D0%B6.cs) (see [Pointers](#pointers)). Rather than spell out the whole struct body, the converter emits a partial struct carrying a `[GoType]` attribute, and the `TypeGenerator` source generator synthesizes the members (equality, `ISupportMake`, embedding promotion, etc.):

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/types"
 	"strings"
 )
 
@@ -189,7 +190,14 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 
 				caseExpr := v.convExpr(expr, []ExprContext{identContext})
 
-				if v.isDynamicInterface(expr) {
+				// An INTERFACE-typed case label (named or anonymous) dispatches by Go METHOD-SET
+				// semantics, not C# nominal implementation: the operand (`x.type()`) surfaces the
+				// Go dynamic value — for a pointer-sourced implementation that is the raw receiver
+				// box ж<T>, which no plain C# type pattern `case Iface t:` can match even though
+				// *T implements the interface in Go. The `when` guard routes through golib's
+				// type-assert machinery (`_<Iface>`), which matches nominal implementers directly
+				// and re-wraps a raw box in its registered pointer adapter (see AdapterRegistry).
+				if v.isInterfaceCaseLabel(expr) {
 					if len(bindIdent) > 0 && bindIdent != "_" {
 						// case {} Δx when Δx._<liftedIfaceType>(out var x):
 						tempTarget := fmt.Sprintf("%s%s", ShadowVarMarker, bindIdent)
@@ -384,4 +392,35 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 		v.targetFile.WriteString(v.newline)
 		v.writeOutput("}")
 	}
+}
+
+// isInterfaceCaseLabel reports whether a type-switch case label denotes an interface type —
+// anonymous (dynamic) or named — the labels that must dispatch by Go method-set semantics
+// through the `when` guard form rather than a plain C# type pattern.
+func (v *Visitor) isInterfaceCaseLabel(expr ast.Expr) bool {
+	if v.isDynamicInterface(expr) {
+		return true
+	}
+
+	labelType := v.getType(expr, false)
+
+	if labelType == nil {
+		return false
+	}
+
+	labelType = types.Unalias(labelType)
+
+	// A type-parameter label matches its concrete type ARGUMENT, not a method set — its
+	// underlying constraint interface must not route it to dynamic interface dispatch.
+	if _, isTypeParam := labelType.(*types.TypeParam); isTypeParam {
+		return false
+	}
+
+	if _, isNamed := labelType.(*types.Named); !isNamed {
+		return false
+	}
+
+	_, isIface := labelType.Underlying().(*types.Interface)
+
+	return isIface
 }
