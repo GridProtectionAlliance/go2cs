@@ -59,10 +59,10 @@ internal class InheritedTypeTemplate : TemplateBase
     {
         get
         {
-            string interfaces = $" : IEquatable<{TargetTypeName}>, System.Numerics.IAdditionOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.ISubtractionOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.IMultiplyOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.IDivisionOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.IEqualityOperators<{TargetTypeName}, {TargetTypeName}, bool>, System.Numerics.IComparisonOperators<{TargetTypeName}, {TargetTypeName}, bool>, System.Numerics.IIncrementOperators<{TargetTypeName}>, System.Numerics.IDecrementOperators<{TargetTypeName}>";
+            string interfaces = $" : global::System.IEquatable<{TargetTypeName}>, global::System.Numerics.IAdditionOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, global::System.Numerics.ISubtractionOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, global::System.Numerics.IMultiplyOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, global::System.Numerics.IDivisionOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, global::System.Numerics.IEqualityOperators<{TargetTypeName}, {TargetTypeName}, bool>, global::System.Numerics.IComparisonOperators<{TargetTypeName}, {TargetTypeName}, bool>, global::System.Numerics.IIncrementOperators<{TargetTypeName}>, global::System.Numerics.IDecrementOperators<{TargetTypeName}>";
 
             if (IsIntegerNumeric)
-                interfaces += $", System.Numerics.IModulusOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.IBitwiseOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.IShiftOperators<{TargetTypeName}, int, {TargetTypeName}>";
+                interfaces += $", global::System.Numerics.IModulusOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, global::System.Numerics.IBitwiseOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, global::System.Numerics.IShiftOperators<{TargetTypeName}, int, {TargetTypeName}>";
 
             return interfaces;
         }
@@ -165,11 +165,11 @@ internal class InheritedTypeTemplate : TemplateBase
 
                 public byte this[nint index] => {{Value}}[index];
 
-                public {{ObjectName}} this[Range range] => new {{ObjectName}}({{Value}}[range]);
+                public {{ObjectName}} this[global::System.Range range] => new {{ObjectName}}({{Value}}[range]);
 
                 public nint Length => {{Value}}.Length;
 
-                public static implicit operator {{ObjectName}}(ReadOnlySpan<byte> value) => new {{ObjectName}}(new @string(value));
+                public static implicit operator {{ObjectName}}(global::System.ReadOnlySpan<byte> value) => new {{ObjectName}}(new @string(value));
 
         """;
 

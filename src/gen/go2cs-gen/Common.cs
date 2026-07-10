@@ -73,7 +73,10 @@ public static class Common
             Version = FallBackVersion;
         }
 
-        GeneratedCodeAttribute = $"""GeneratedCode("{AssemblyName}", "{Version}")""";
+        // global::-rooted so a Go type in the SAME package class can never shadow the attribute
+        // name (the generated partials sit inside `<pkg>_package`, where every Go type name is a
+        // sibling member — the same collision class as the System.Range/System.Type audit).
+        GeneratedCodeAttribute = $"""global::System.CodeDom.Compiler.GeneratedCode("{AssemblyName}", "{Version}")""";
 
         PointerExpr = new Regex($"^(?:[^<]*)?{PointerPrefix}<.*$", RegexOptions.Compiled);
         InvalidChars = [..Path.GetInvalidFileNameChars()];

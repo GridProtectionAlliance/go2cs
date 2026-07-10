@@ -41,9 +41,9 @@ internal static class ISliceTypeTemplate
                 // Slicing a named slice KEEPS the named type (Go: nat[a:b] IS a nat - math/big's
                 // `u[s:].norm()` bound slice<Word> instead, CS1929 x21); the wrapper shares the
                 // same backing window.
-                public {{structName}} this[Range range] => new {{structName}}(m_value[range]);
-                
-                ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.this[Range range] => m_value[range];
+                public {{structName}} this[global::System.Range range] => new {{structName}}(m_value[range]);
+
+                ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.this[global::System.Range range] => m_value[range];
                 
                 public {{structName}} Slice(int start, int length) => new {{structName}}(m_value.Slice(start, length));
                 
@@ -53,21 +53,21 @@ internal static class ISliceTypeTemplate
                 
                 ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.Slice(nint start, nint length) => m_value.Slice(start, length);
         
-                public Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
-                
-                public Span<{{targetTypeName}}> ToSpan() => m_value.ToSpan();
-                
+                public global::System.Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
+
+                public global::System.Span<{{targetTypeName}}> ToSpan() => m_value.ToSpan();
+
                 public ISlice? Append(object[] elems) => ((ISlice)m_value).Append(elems);
-                
-                public IEnumerator<(nint, {{targetTypeName}})> GetEnumerator() => m_value.GetEnumerator();
-                
-                IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
-                
+
+                public global::System.Collections.Generic.IEnumerator<(nint, {{targetTypeName}})> GetEnumerator() => m_value.GetEnumerator();
+
+                global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => ((global::System.Collections.IEnumerable)m_value).GetEnumerator();
+
                 public bool Equals(IArray<{{targetTypeName}}>? other) => m_value.Equals(other);
-                
+
                 public bool Equals(ISlice<{{targetTypeName}}>? other) => m_value.Equals(other);
-                
-                public object Clone() => ((ICloneable)m_value).Clone();
+
+                public object Clone() => ((global::System.ICloneable)m_value).Clone();
                 
                 public static {{structName}} Make(nint p1 = 0, nint p2 = -1) => new {{structName}}(p1, p2);
         

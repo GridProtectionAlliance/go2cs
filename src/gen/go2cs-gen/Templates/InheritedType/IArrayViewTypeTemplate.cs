@@ -55,14 +55,14 @@ internal static class IArrayViewTypeTemplate
 
                 public ref {{targetTypeName}} this[ulong index] => ref view[(nint)index];
 
-                public Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
+                public global::System.Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
 
-                public Span<{{targetTypeName}}> ToSpan() => view.ToSpan();
+                public global::System.Span<{{targetTypeName}}> ToSpan() => view.ToSpan();
 
-                public IEnumerator<(nint, {{targetTypeName}})> GetEnumerator() => view.GetEnumerator();
+                public global::System.Collections.Generic.IEnumerator<(nint, {{targetTypeName}})> GetEnumerator() => view.GetEnumerator();
 
-                IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)view).GetEnumerator();
+                global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => ((global::System.Collections.IEnumerable)view).GetEnumerator();
 
-                public object Clone() => ((ICloneable)view).Clone();
+                public object Clone() => ((global::System.ICloneable)view).Clone();
         """;
 }

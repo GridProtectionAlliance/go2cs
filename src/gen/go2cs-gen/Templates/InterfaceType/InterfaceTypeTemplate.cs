@@ -231,7 +231,7 @@ internal class InterfaceTypeTemplate : TemplateBase
                         #endregion
                     
                         // Enable comparisons between nil and {{ConversionTypeName}} interface instance
-                        public static bool operator ==({{ConversionTypeName}} value, NilType nil) => Activator.CreateInstance<{{ConversionTypeName}}>().Equals(value);
+                        public static bool operator ==({{ConversionTypeName}} value, NilType nil) => global::System.Activator.CreateInstance<{{ConversionTypeName}}>().Equals(value);
                     
                         public static bool operator !=({{ConversionTypeName}} value, NilType nil) => !(value == nil);
                     
@@ -271,7 +271,7 @@ internal class InterfaceTypeTemplate : TemplateBase
                          private static readonly {{method.Name}}ByPtr? s_{{method.Name}}ByPtr;
                          private static readonly {{method.Name}}ByVal? s_{{method.Name}}ByVal;
                          
-                         [DebuggerNonUserCode]
+                         [global::System.Diagnostics.DebuggerNonUserCode]
                          public {{method.ReturnType}} {{method.GetSignature(false)}}
                          {
                              {{TypeTTarget}} target = m_target;
@@ -327,9 +327,9 @@ internal class InterfaceTypeTemplate : TemplateBase
                   
                           static {{NonGenericConversionTypeName}}()
                           {
-                              Type targetType = typeof({{TypeTTarget}});
-                              Type targetTypeByPtr = typeof({{PointerPrefix}}<{{TypeTTarget}}>);
-                              MethodInfo? extensionMethod;                              
+                              global::System.Type targetType = typeof({{TypeTTarget}});
+                              global::System.Type targetTypeByPtr = typeof({{PointerPrefix}}<{{TypeTTarget}}>);
+                              global::System.Reflection.MethodInfo? extensionMethod;
                   """);
 
             foreach (MethodInfo method in Methods)
@@ -366,7 +366,7 @@ internal class InterfaceTypeTemplate : TemplateBase
                                  s_{{method.Name}}ByVal = extensionMethod.CreateStaticDelegate(typeof({{method.Name}}ByVal)) as {{method.Name}}ByVal;
 
                              if (s_{{method.Name}}ByPtr is null && s_{{method.Name}}ByVal is null)
-                                 throw new NotImplementedException($"{targetType.FullName} does not implement '{{NonGenericInterfaceName}}.{nameof({{escapedName}})}' method");
+                                 throw new global::System.NotImplementedException($"{targetType.FullName} does not implement '{{NonGenericInterfaceName}}.{nameof({{escapedName}})}' method");
                  """;
     }
 }

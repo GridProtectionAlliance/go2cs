@@ -66,6 +66,7 @@
     <Project Path="Tests/Behavioral/AnyStringLitComposite/AnyStringLitComposite.csproj" />
     <Project Path="Tests/Behavioral/AppendNamedSliceElement/AppendNamedSliceElement.csproj" />
     <Project Path="Tests/Behavioral/AppendUntypedConst/AppendUntypedConst.csproj" />
+    <Project Path="Tests/Behavioral/BclTypeNameShadow/BclTypeNameShadow.csproj" />
     <Project Path="Tests/Behavioral/BigUntypedConstComparison/BigUntypedConstComparison.csproj" />
     <Project Path="Tests/Behavioral/BitwiseUntypedConst/BitwiseUntypedConst.csproj" />
     <Project Path="Tests/Behavioral/BlankIdentifierCollision/BlankIdentifierCollision.csproj" />

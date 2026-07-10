@@ -25,21 +25,21 @@ internal static class IArrayTypeTemplate
             
                 public ref {{targetTypeName}} this[ulong index] => ref Value[(nint)index];
 
-                public slice<{{targetTypeName}}> this[Range range] => Value[range];
+                public slice<{{targetTypeName}}> this[global::System.Range range] => Value[range];
 
                 public slice<{{targetTypeName}}> Slice(nint start, nint length) => Value.Slice(start, length);
-                
-                public Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
-                
-                public Span<{{targetTypeName}}> ToSpan() => Value.ToSpan();
-                
-                public IEnumerator<(nint, {{targetTypeName}})> GetEnumerator() => Value.GetEnumerator();
-                
-                IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Value).GetEnumerator();
-                
+
+                public global::System.Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
+
+                public global::System.Span<{{targetTypeName}}> ToSpan() => Value.ToSpan();
+
+                public global::System.Collections.Generic.IEnumerator<(nint, {{targetTypeName}})> GetEnumerator() => Value.GetEnumerator();
+
+                global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => ((global::System.Collections.IEnumerable)Value).GetEnumerator();
+
                 public bool Equals(IArray<{{targetTypeName}}>? other) => Value.Equals(other);
-                
-                public object Clone() => ((ICloneable)Value).Clone();
+
+                public object Clone() => ((global::System.ICloneable)Value).Clone();
                 
                 public static {{structName}} Make(nint p1 = 0, nint p2 = -1) => new {{structName}}();
         """;
