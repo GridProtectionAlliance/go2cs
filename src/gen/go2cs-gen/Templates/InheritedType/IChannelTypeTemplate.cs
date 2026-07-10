@@ -1,0 +1,68 @@
+using static go2cs.Symbols;
+
+namespace go2cs.Templates.InheritedType;
+
+internal static class IChannelTypeTemplate
+{
+    public static string Generate(string structName, string typeName, string targetTypeName) =>
+        $$"""
+
+                public nint Capacity => m_value.Capacity;
+
+                public nint Length => m_value.Length;
+
+                public bool IsUnbuffered => m_value.IsUnbuffered;
+
+                public bool IsClosed => m_value.IsClosed;
+
+                public bool SendIsReady => m_value.SendIsReady;
+
+                public bool ReceiveIsReady => m_value.ReceiveIsReady;
+
+                public global::System.Threading.WaitHandle Receiving => m_value.Receiving;
+
+                // Explicit-only: Go code commonly defines its OWN Close() method on a named
+                // channel type (net/http's closeWaiter) — a public instance Close here would
+                // shadow that method's extension form at every call site. `close(ch)` routes
+                // through the golib free function, so no public surface is lost.
+                void IChannel.Close() => ((IChannel)m_value).Close();
+
+                public void Send(in {{targetTypeName}} value) => m_value.Send(value);
+
+                public void {{ChannelLeftOp}}(in {{targetTypeName}} value) => m_value.Send(value);
+
+                public global::System.Threading.WaitHandle Sending(in {{targetTypeName}} value) => m_value.Sending(value);
+
+                public global::System.Threading.WaitHandle {{ChannelLeftOp}}(in {{targetTypeName}} value, NilType _) => m_value.Sending(value);
+
+                public bool Sent(in {{targetTypeName}} value) => m_value.Sent(value);
+
+                public {{targetTypeName}} Receive() => m_value.Receive();
+
+                public ({{targetTypeName}} val, bool ok) Receive(bool _) => m_value.Receive(_);
+
+                public bool Received(out {{targetTypeName}} value) => m_value.Received(out value);
+
+                public bool Received(out {{targetTypeName}} value, out bool ok) => m_value.Received(out value, out ok);
+
+                public bool {{ChannelRightOp}}(out {{targetTypeName}} value) => m_value.Received(out value);
+
+                public bool {{ChannelRightOp}}(out {{targetTypeName}} value, out bool ok) => m_value.Received(out value, out ok);
+
+                void IChannel.Send(object value) => ((IChannel)m_value).Send(value);
+
+                object IChannel.Receive() => ((IChannel)m_value).Receive();
+
+                bool IChannel.Sent(object value) => ((IChannel)m_value).Sent(value);
+
+                bool IChannel.Received(out object value) => ((IChannel)m_value).Received(out value);
+
+                public global::System.Collections.Generic.IEnumerator<{{targetTypeName}}> GetEnumerator() => m_value.GetEnumerator();
+
+                global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => ((global::System.Collections.IEnumerable)m_value).GetEnumerator();
+
+                public static {{structName}} Make(nint p1 = 0, nint p2 = -1) => new {{structName}}(p1);
+
+                public {{structName}}(nint size) => m_value = new {{typeName}}(size < 1 ? 1 : size);
+        """;
+}

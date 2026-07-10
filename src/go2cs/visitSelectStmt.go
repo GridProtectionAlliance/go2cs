@@ -59,6 +59,10 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 
 							if v.options.useChannelOperators {
 								v.targetFile.WriteString(ChannelLeftOp)
+								// A NAMED channel operand names the element type explicitly —
+								// generic inference cannot see through the wrapper
+								// (see namedChanElemTypeArg).
+								v.targetFile.WriteString(v.namedChanElemTypeArg(unaryExpr.X))
 								v.targetFile.WriteRune('(')
 								v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
 								v.targetFile.WriteString(", ")
@@ -101,6 +105,10 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 					if unaryExpr.Op == token.ARROW {
 						if v.options.useChannelOperators {
 							v.targetFile.WriteString(ChannelLeftOp)
+							// A NAMED channel operand names the element type explicitly —
+							// generic inference cannot see through the wrapper
+							// (see namedChanElemTypeArg).
+							v.targetFile.WriteString(v.namedChanElemTypeArg(unaryExpr.X))
 							v.targetFile.WriteRune('(')
 							v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
 							v.targetFile.WriteString(", ")

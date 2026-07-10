@@ -194,7 +194,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.ArrayType:
 		v.visitArrayType(typeSpecType, identType, name, typeSpec.Comment)
 	case *ast.ChanType:
-		v.visitChanType(typeSpecType)
+		v.visitChanType(typeSpecType, name)
 	case *ast.FuncType:
 		v.visitFuncType(typeSpecType, identType, name)
 	case *ast.Ident:

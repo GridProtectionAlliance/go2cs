@@ -1100,6 +1100,27 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 		}
 
+		// close(ch) on a NAMED channel type cannot infer `close<T>(in channel<T>)`'s element
+		// from the [GoType("chan T")] wrapper (a user-defined conversion is invisible to
+		// generic inference, CS0411) — name the element type explicitly so the wrapper's
+		// implicit conversion applies at the argument (see namedChanElemTypeArg). A package
+		// that ALSO declares a `close` method shadows the using-static builtin (C# member
+		// lookup stops at the class's own group — net/http's `(*conn).close`), so the same
+		// `builtin.` qualification the general builtin path applies is needed here too.
+		if ident.Name == "close" && len(callExpr.Args) == 1 {
+			if _, isBuiltin := v.info.ObjectOf(ident).(*types.Builtin); isBuiltin {
+				if typeArgs := v.namedChanElemTypeArg(callExpr.Args[0]); typeArgs != "" {
+					funcName := ident.Name
+
+					if packageBuiltinShadows[ident.Name] {
+						funcName = "builtin." + funcName
+					}
+
+					return fmt.Sprintf("%s%s(%s)", funcName, typeArgs, v.convExpr(callExpr.Args[0], nil))
+				}
+			}
+		}
+
 		// Handle make call as a special case
 		if ident.Name == "make" {
 			typeExpr := callExpr.Args[0]
@@ -1114,7 +1135,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 
 			if typeParam != nil {
-				if _, ok := typeParam.(*types.Chan); ok && !isTypeParam {
+				// Underlying: `make(closeWaiter)` of a NAMED channel type (`type closeWaiter
+				// chan struct{}`) takes the same unbuffered default as a plain `make(chan T)` —
+				// the wrapper's `(nint size)` constructor forwards to `channel<T>(size)`.
+				if _, ok := typeParam.Underlying().(*types.Chan); ok && !isTypeParam {
 					if len(remainingArgs) == 0 {
 						remainingArgs = "1"
 					}

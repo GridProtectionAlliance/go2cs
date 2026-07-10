@@ -684,7 +684,9 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					tupleResult = ", " + OverloadDiscriminator
 				}
 
-				return fmt.Sprintf("%s(%s%s)", ChannelLeftOp, v.convExpr(unaryExpr.X, nil), tupleResult)
+				// A NAMED channel operand names the element type explicitly — generic
+				// inference cannot see through the wrapper (see namedChanElemTypeArg).
+				return fmt.Sprintf("%s%s(%s%s)", ChannelLeftOp, v.namedChanElemTypeArg(unaryExpr.X), v.convExpr(unaryExpr.X, nil), tupleResult)
 			}
 
 			if context.isTupleResult {

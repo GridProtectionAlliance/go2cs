@@ -1192,6 +1192,56 @@ The string-literal empty-interface arm of the same helper is described under
 [Empty Interface](#empty-interface). (Guarded by `AnyStringLitChanSend` — a value impl and a pointer
 impl sent through a `chan speaker`, method-dispatched on receive, output-compared vs Go.)
 
+### Named channel types
+
+A defined channel type — `type closeWaiter chan struct{}` (net/http's h2 bundle) — emits the
+`[GoType("chan T")] partial struct` forward declaration (completing the long-standing
+`visitChanType` stub; the whole corpus previously had NO `GoType("chan …")` — CS0246 at every use),
+implemented by go2cs-gen's Channel template: the wrapper holds a `channel<T>` and forwards its full
+surface — the Go-visual send/receive members (`ᐸꟷ`, `ꟷᐳ`, including the select-registration
+`ᐸꟷ(v, ꓸꓸꓸ)`/`Sending`/`Receiving` forms), the comma-ok `Receive(ꟷ)`/`Received` pair, `IChannel`'s
+object-typed members, enumeration for `range`, the `ISupportMake` factory, and a `(nint size)`
+constructor so `make(closeWaiter)` emits `new closeWaiter(1)` (the make path resolves the chan
+through `Underlying()`, giving named channels the same unbuffered default as plain `chan T`):
+
+```go
+type closeWaiter chan struct{}
+func (cw *closeWaiter) Init() { *cw = make(closeWaiter) }
+func (cw closeWaiter) Close() { close(cw) }
+func (cw closeWaiter) Wait()  { <-cw }
+```
+
+```csharp
+[GoType("chan EmptyStruct")] partial struct closeWaiter;
+
+[GoRecv] internal static void Init(this ref closeWaiter cw) {
+    cw = new closeWaiter(1);
+}
+
+internal static void Close(this closeWaiter cw) {
+    close<EmptyStruct>(cw);
+}
+
+internal static void Wait(this closeWaiter cw) {
+    ᐸꟷ<EmptyStruct>(cw);
+}
+```
+
+Two deliberate wrinkles. **Free-function channel ops name the element type explicitly** —
+`ᐸꟷ<EmptyStruct>(cw)`, `close<EmptyStruct>(cw)`: golib's `ᐸꟷ<T>(channel<T>)`/`close<T>(in
+channel<T>)` reach the wrapper only through its user-defined conversion to `channel<T>`, which C#
+generic inference never considers (CS0411); the explicit type argument lets the conversion apply at
+the argument instead (`namedChanElemTypeArg`, applied at the unary-receive, select-registration and
+`close` emission sites — a plain `chan T` operand is byte-identical; a package that ALSO
+declares a `close` method keeps the `builtin.` shadow qualification of the general builtin path,
+so net/http emits `builtin.close<EmptyStruct>(cw)`). **The wrapper's `Close` is an
+explicit `IChannel` implementation only**: Go code commonly defines its OWN `Close()` method on a
+named channel type (the closeWaiter shape above), and a public instance `Close` would shadow that
+method's extension form at every call site; `close(ch)` routes through the golib free function, so
+no public surface is lost. (Guarded by `NamedChannelType` — the closeWaiter trio plus a buffered
+`type intQueue chan int` exercising make/send/len/cap/receive/comma-ok/close/range/select, output
+vs Go.)
+
 ### Select statement lowering (terminating and empty clauses)
 
 A `select` lowers to a C# `switch`: with a `default:` clause present, the non-blocking form `switch (ᐧ)` whose case guards are try-operations (`case ᐧ when ch.ꟷᐳ(out v):`); without one, the blocking form `switch (select(ᐸꟷ(a, ꓸꓸꓸ), …))` dispatching on the ready index. Two structural completions (io pipe.go's `read`):
