@@ -102,6 +102,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckBuiltinShadowLocal() => CheckTarget("BuiltinShadowLocal");
 
     [TestMethod]
+    public void CheckCaptureModeParamClosure() => CheckTarget("CaptureModeParamClosure");
+
+    [TestMethod]
     public void CheckCaptureModeValueParam() => CheckTarget("CaptureModeValueParam");
 
     [TestMethod]

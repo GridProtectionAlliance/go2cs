@@ -1910,6 +1910,16 @@ func (v *Visitor) processPotentialCapture(ident *ast.Ident) {
 		return
 	}
 
+	// A heap-boxed VALUE parameter is the same shape: its entry-time box prologue re-declares the
+	// Go name as a ref-local alias (`ref var cfg = ref heap(cfgʗp, out var Ꮡcfg);` — see
+	// paramNeedsHeapBox), which a C# closure cannot capture (CS8175), and a snapshot copy divorces
+	// the closure from the boxed storage the direct-ж callee mutates through the receiver pointer
+	// (Go's closure and the callee share the ONE parameter variable). Reference it through its box.
+	if v.paramNeedsHeapBox(varObj) {
+		v.lambdaCapture.boxRefVars[varObj] = true
+		return
+	}
+
 	// Check if variable needs capture due to:
 	// 1. Being a reference type that needs copying, OR
 	// 2. Having escaped to heap (being a ref in C#)
