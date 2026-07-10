@@ -219,7 +219,7 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 		resultParams := signature.Results()
 		resultParamIsInterface := paramsAreInterfaces(resultParams, true)
-		resultParamIsPointer := paramsArePointers(resultParams)
+		resultParamIsPointer := v.paramsArePointers(resultParams)
 
 		// A single multi-value CALL forwarded as the whole result list (`return newRawConn(f)`)
 		// whose tuple elements need an interface conversion cannot convert in place — C# tuple
@@ -341,7 +341,11 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				// VALUE param with NO box (CS0103; runtime map.go `mapaccess1_fat`'s `return zero`).
 				if resultParamIsPointer != nil && i < len(resultParamIsPointer) && resultParamIsPointer[i] {
 					if ident, isIdent := expr.(*ast.Ident); isIdent && v.identIsParameter(ident) {
-						if _, isRealPointer := v.getIdentType(ident).(*types.Pointer); isRealPointer {
+						// paramPointerType covers both a genuine `*T` parameter and an ERASED
+						// pointer-core type parameter (`return p` under `[P *T]` — the emitted
+						// result type is ж<T>, so the box must bind here too); an unsafe.Pointer
+						// parameter still returns false and keeps its plain value render.
+						if _, isRealPointer := v.paramPointerType(v.getIdentType(ident)); isRealPointer {
 							identContext := DefaultIdentContext()
 							identContext.isPointer = true
 							exprContexts = []ExprContext{elemBasicLitContext, identContext, lambdaContext}

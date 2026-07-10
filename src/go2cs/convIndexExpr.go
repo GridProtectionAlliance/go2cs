@@ -134,6 +134,14 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 		xContext := DefaultLambdaContext()
 		xContext.suppressGenericTypeArgs = true
 
+		// A single written type argument pinning an ERASED (pointer-core) position — the partial
+		// instantiation `clone[*thing](…)` — drops entirely: the position no longer exists in the
+		// emitted C# generic parameter list, and the remaining parameters infer from the value
+		// arguments (see explicitTypeArgsAfterErasure).
+		if kept, erased := v.explicitTypeArgsAfterErasure(indexExpr.X, []ast.Expr{indexExpr.Index}); erased && len(kept) == 0 {
+			return fmt.Sprintf("%s%s", v.convExpr(indexExpr.X, []ExprContext{xContext}), ptrDeref)
+		}
+
 		return fmt.Sprintf("%s%s<%s>", v.convExpr(indexExpr.X, []ExprContext{xContext}), ptrDeref, v.convExpr(indexExpr.Index, contexts))
 	}
 

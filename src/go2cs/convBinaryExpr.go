@@ -348,6 +348,18 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 	lhsIsInterfaceType, _ := isInterface(lhsType)
 	rhsIsInterfaceType, _ := isInterface(rhsType)
 
+	// An ERASED pointer-core type parameter ([P *T]) reads as an interface (its underlying is
+	// the constraint) but IS a pointer (ж<T>): without this the interface exclusion below
+	// suppressed the box form for `p == nil`, comparing the deref'd value alias against
+	// `default!` (CS0019/CS8761 on an unconstrained T).
+	if v.typeIsErasedPointerCore(lhsType) {
+		lhsIsInterfaceType = false
+	}
+
+	if v.typeIsErasedPointerCore(rhsType) {
+		rhsIsInterfaceType = false
+	}
+
 	// Go's ONLY legal map comparison is against nil. On a CONSTRAINED map type parameter
 	// (`m == nil` — maps.Clone's nil-preserve guard) no operator exists (CS8761); the
 	// IMap.IsNil property carries the exact check (backing-store null — an allocated empty
@@ -380,13 +392,15 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 		}
 	}
 
-	rhsIsPointer := isPointer(rhsType)
+	// An erased pointer-core operand counts as a pointer comparand too (a P-typed LOCAL holds
+	// the box directly, so the other operand takes the box form exactly as against a `*T`).
+	rhsIsPointer := isPointer(rhsType) || v.typeIsErasedPointerCore(rhsType)
 	identContext.isPointer = (rhsIsPointer || leftIsDerefdPtrParam) && !lhsIsInterfaceType
 	leftOperand := v.convExpr(binaryExpr.X, []ExprContext{identContext, basicLitContext})
 
 	binaryOp := binaryExpr.Op.String()
 
-	lhsIsPointer := isPointer(lhsType)
+	lhsIsPointer := isPointer(lhsType) || v.typeIsErasedPointerCore(lhsType)
 	identContext.isPointer = (lhsIsPointer || rightIsDerefdPtrParam) && !rhsIsInterfaceType
 	rightOperand := v.convExpr(binaryExpr.Y, []ExprContext{identContext, basicLitContext})
 

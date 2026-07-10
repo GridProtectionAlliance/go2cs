@@ -15,5 +15,18 @@ func (v *Visitor) convIndexListExpr(indexListExpr *ast.IndexListExpr) string {
 	xContext := DefaultLambdaContext()
 	xContext.suppressGenericTypeArgs = true
 
-	return fmt.Sprintf("%s<%s>", v.convExpr(indexListExpr.X, []ExprContext{xContext}), v.convExprList(indexListExpr.Indices, indexListExpr.Lbrack, callExprContext))
+	// An explicitly written instantiation of a pointer-core generic drops its ERASED positions
+	// (`clone[*thing, thing]` → `clone<thing>`, see explicitTypeArgsAfterErasure); a list that
+	// erases to empty leaves the base bare (C# infers from the remaining value arguments).
+	indices := indexListExpr.Indices
+
+	if kept, erased := v.explicitTypeArgsAfterErasure(indexListExpr.X, indices); erased {
+		if len(kept) == 0 {
+			return v.convExpr(indexListExpr.X, []ExprContext{xContext})
+		}
+
+		indices = kept
+	}
+
+	return fmt.Sprintf("%s<%s>", v.convExpr(indexListExpr.X, []ExprContext{xContext}), v.convExprList(indices, indexListExpr.Lbrack, callExprContext))
 }

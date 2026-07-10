@@ -1429,14 +1429,12 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	if !context.isCallExpr && !context.suppressGenericTypeArgs {
 		if _, isFunc := v.info.Uses[selectorExpr.Sel].(*types.Func); isFunc {
 			if inst, ok := v.info.Instances[selectorExpr.Sel]; ok && inst.TypeArgs != nil && inst.TypeArgs.Len() > 0 {
-				typeArgs := make([]string, inst.TypeArgs.Len())
-
-				for i := range inst.TypeArgs.Len() {
-					typeArgs[i] = v.getCSTypeName(inst.TypeArgs.At(i))
+				// Erased (pointer-core) callee positions leave the emitted list (see
+				// renderedTypeArgs); a list that erases to empty falls through to the bare form.
+				if typeArgs := v.renderedTypeArgs(selectorExpr.Sel, inst.TypeArgs); len(typeArgs) > 0 {
+					return getAliasedTypeName(fmt.Sprintf("%s.%s<%s>", v.convExpr(selectorExpr.X, xContexts),
+						v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)), strings.Join(typeArgs, ", ")))
 				}
-
-				return getAliasedTypeName(fmt.Sprintf("%s.%s<%s>", v.convExpr(selectorExpr.X, xContexts),
-					v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)), strings.Join(typeArgs, ", ")))
 			}
 		}
 	}

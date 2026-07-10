@@ -353,6 +353,13 @@ func (v *Visitor) exprIsTypeConstraint(expr ast.Expr) (bool, int) {
 		// If it's a binary expression with | operator, it's a union type constraint
 		return t.Op == token.OR, 0
 
+	case *ast.StarExpr:
+		// A pointer type literal (`interface{ *T }`) is a type-set term, not an embeddable
+		// interface — without this it rode the embedded-interface path and emitted an interface
+		// inheriting the struct ж<T> (CS0527). The declaration keeps the constraint-comment
+		// convention; its USE sites erase (see pointerCoreConstraint).
+		return true, 0
+
 	case *ast.Ident, *ast.SelectorExpr:
 		// For named types, we check if they're type constraints
 		// by looking at their type definition
@@ -621,6 +628,290 @@ func getConstraintTypeSet(constraintTypes []types.Type) HashSet[ConstraintType] 
 	}
 
 	return constraintTypeSet
+}
+
+// pointerCoreConstraint reports whether the type parameter's constraint type-set is a single,
+// non-tilde pointer term (`[P *T]`), returning the pointer type. Such a term's type set is a
+// singleton — P is definitionally its pointer type at every instantiation (Go spec, "Interface
+// types") — so the emission ERASES P: it is dropped from the C# generic parameter list and every
+// occurrence renders as the pointer type itself (`ж<T>`), letting the normal pointer machinery
+// (deref alias, escape heap box, argument passing) apply unchanged. Approximate (`~*T`), union,
+// and method-carrying pointer constraints are declined (zero stdlib occurrences; callers keep
+// the current emission and warn): a named pointer type emits as a `[GoType("ж<E>")]` wrapper
+// class, which is not identity with `ж<E>`. See DESIGN-pointer-core-typeparam.md.
+func pointerCoreConstraint(typeParam *types.TypeParam) (*types.Pointer, bool) {
+	if typeParam == nil {
+		return nil, false
+	}
+
+	iface, ok := typeParam.Constraint().Underlying().(*types.Interface)
+
+	if !ok {
+		return nil, false
+	}
+
+	return interfacePointerTerm(iface, 0)
+}
+
+// interfacePointerTerm reports whether the interface's type-set is a single non-tilde pointer
+// term, unwrapping a NAMED (or aliased) constraint interface embedded inside another —
+// `interface{ PtrOf[X] }` must resolve identically to the direct `PtrOf[X]` spelling (both name
+// the same singleton type set). The depth cap guards degenerate self-referential constraint
+// shapes; real constraints nest one or two levels.
+func interfacePointerTerm(iface *types.Interface, depth int) (*types.Pointer, bool) {
+	if depth > 8 || iface.NumMethods() > 0 || iface.NumEmbeddeds() != 1 {
+		return nil, false
+	}
+
+	// The single embedded element is the term type directly, a one-term union (go/types wraps
+	// explicit terms in a Union; both shapes appear in practice), or a named constraint interface.
+	switch embedded := iface.EmbeddedType(0).(type) {
+	case *types.Union:
+		if embedded.Len() != 1 || embedded.Term(0).Tilde() {
+			return nil, false
+		}
+
+		pointer, ok := embedded.Term(0).Type().(*types.Pointer)
+		return pointer, ok
+
+	case *types.Pointer:
+		return embedded, true
+
+	default:
+		if nested, ok := embedded.Underlying().(*types.Interface); ok {
+			return interfacePointerTerm(nested, depth+1)
+		}
+	}
+
+	return nil, false
+}
+
+// constraintHasPointerTerm reports whether the type parameter's constraint type-set mentions any
+// pointer term at all. Used only to WARN about the pointer-core shapes pointerCoreConstraint
+// declines to erase (approximate `~*T`, unions, method-carrying interfaces) — those keep the
+// operator-lift fallback emission, which cannot express pointer semantics on the parameter.
+func constraintHasPointerTerm(typeParam *types.TypeParam) bool {
+	iface, ok := typeParam.Constraint().Underlying().(*types.Interface)
+
+	if !ok {
+		return false
+	}
+
+	return interfaceHasPointerTerm(iface, 0)
+}
+
+func interfaceHasPointerTerm(iface *types.Interface, depth int) bool {
+	if depth > 8 {
+		return false
+	}
+
+	for i := range iface.NumEmbeddeds() {
+		switch embedded := iface.EmbeddedType(i).(type) {
+		case *types.Union:
+			for j := range embedded.Len() {
+				if _, ok := embedded.Term(j).Type().(*types.Pointer); ok {
+					return true
+				}
+			}
+		case *types.Pointer:
+			return true
+		default:
+			if nested, ok := embedded.Underlying().(*types.Interface); ok && interfaceHasPointerTerm(nested, depth+1) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+// collectErasedTypeParams returns the pointer-core (erased) type parameters of a FUNCTION's own
+// type-parameter list, keyed by identity — nil when none. Populated into v.erasedTypeParams at
+// visitFuncDecl entry: erasure is strictly a property of a plain function declaration (a generic
+// NAMED type's parameters — including a method's receiver type parameters — are never erased, so
+// every consumer gates on this identity set rather than re-deriving from the constraint alone,
+// which would half-erase declined shapes).
+func collectErasedTypeParams(signature *types.Signature) map[*types.TypeParam]*types.Pointer {
+	if signature == nil {
+		return nil
+	}
+
+	typeParams := signature.TypeParams()
+
+	if typeParams == nil {
+		return nil
+	}
+
+	var erased map[*types.TypeParam]*types.Pointer
+
+	for i := range typeParams.Len() {
+		typeParam := typeParams.At(i)
+
+		if pointer, ok := pointerCoreConstraint(typeParam); ok {
+			if erased == nil {
+				erased = map[*types.TypeParam]*types.Pointer{}
+			}
+
+			erased[typeParam] = pointer
+		}
+	}
+
+	return erased
+}
+
+// typeParamErased reports whether the type parameter is ERASED in the current emission context —
+// i.e. it belongs to the function declaration being emitted and its constraint is a single
+// non-tilde pointer term. Identity-keyed, so a same-named parameter of some other declaration
+// (a generic named type, a named func type, another function) never matches.
+func (v *Visitor) typeParamErased(typeParam *types.TypeParam) (*types.Pointer, bool) {
+	pointer, ok := v.erasedTypeParams[typeParam]
+	return pointer, ok
+}
+
+// paramPointerType resolves a type's pointer form for parameter/ident classification: a
+// *types.Pointer directly, or the erased pointer of a pointer-core type parameter of the CURRENT
+// function (see typeParamErased) — so a `p P` parameter under `[P *T]` takes the same deref-alias
+// and box (`Ꮡ`) conventions as a plain `p *T` parameter.
+func (v *Visitor) paramPointerType(t types.Type) (*types.Pointer, bool) {
+	if pointer, ok := t.(*types.Pointer); ok {
+		return pointer, true
+	}
+
+	if typeParam, ok := types.Unalias(t).(*types.TypeParam); ok {
+		return v.typeParamErased(typeParam)
+	}
+
+	return nil, false
+}
+
+// signatureErasedParamPointer reports the erased pointer behind a CALLEE's declared parameter
+// type: a pointer-core type parameter counts only when the signature ITSELF declares it (its own
+// TypeParams list — a method's receiver type parameters are never erased, so an argument landing
+// in such a slot keeps the plain render).
+func signatureErasedParamPointer(sig *types.Signature, t types.Type) (*types.Pointer, bool) {
+	typeParam, ok := types.Unalias(t).(*types.TypeParam)
+
+	if !ok || sig == nil {
+		return nil, false
+	}
+
+	typeParams := sig.TypeParams()
+
+	if typeParams == nil {
+		return nil, false
+	}
+
+	for i := range typeParams.Len() {
+		if typeParams.At(i) == typeParam {
+			return pointerCoreConstraint(typeParam)
+		}
+	}
+
+	return nil, false
+}
+
+// signatureErasedParamPointerOk is the boolean form of signatureErasedParamPointer for use in
+// compound conditions.
+func signatureErasedParamPointerOk(sig *types.Signature, t types.Type) bool {
+	_, ok := signatureErasedParamPointer(sig, t)
+	return ok
+}
+
+// typeIsErasedPointerCore reports whether t is an ERASED pointer-core type parameter of the
+// current function (the boolean form of typeParamErased over a types.Type).
+func (v *Visitor) typeIsErasedPointerCore(t types.Type) bool {
+	typeParam, ok := types.Unalias(t).(*types.TypeParam)
+
+	if !ok {
+		return false
+	}
+
+	_, erased := v.typeParamErased(typeParam)
+	return erased
+}
+
+// explicitTypeArgsAfterErasure filters an EXPLICIT Go instantiation's written type-argument
+// expressions (`clone[*thing, thing]`, `setThrough[*int](…)` — including partial lists), removing
+// positions whose declared callee type parameter is erased (pointer-core): those positions no
+// longer exist in the emitted C# generic parameter list, so rendering them verbatim is an arity
+// mismatch (CS0305) or a mis-bound argument (CS1503 on a partial list). A non-function target, an
+// unresolvable base, or a callee with nothing erased returns the original slice unchanged (false)
+// — those paths stay byte-identical.
+func (v *Visitor) explicitTypeArgsAfterErasure(x ast.Expr, indices []ast.Expr) ([]ast.Expr, bool) {
+	var funIdent *ast.Ident
+
+	switch e := x.(type) {
+	case *ast.Ident:
+		funIdent = e
+	case *ast.SelectorExpr:
+		funIdent = e.Sel
+	}
+
+	if funIdent == nil {
+		return indices, false
+	}
+
+	funcObj, ok := v.info.ObjectOf(funIdent).(*types.Func)
+
+	if !ok {
+		return indices, false
+	}
+
+	sig, ok := funcObj.Type().(*types.Signature)
+
+	if !ok || sig.TypeParams() == nil {
+		return indices, false
+	}
+
+	typeParams := sig.TypeParams()
+	kept := make([]ast.Expr, 0, len(indices))
+	erasedAny := false
+
+	for i, index := range indices {
+		if i < typeParams.Len() {
+			if _, erased := pointerCoreConstraint(typeParams.At(i)); erased {
+				erasedAny = true
+				continue
+			}
+		}
+
+		kept = append(kept, index)
+	}
+
+	if !erasedAny {
+		return indices, false
+	}
+
+	return kept, true
+}
+
+// renderedTypeArgs renders an instantiation's type arguments for emission, skipping positions
+// whose declared type parameter is erased (pointer-core, see pointerCoreConstraint) — those no
+// longer exist in the emitted C# generic parameter list. funIdent resolves the callee's declared
+// type-parameter list; the result is always non-nil — an EMPTY list means every position was
+// erased (emit no `<...>`).
+func (v *Visitor) renderedTypeArgs(funIdent *ast.Ident, typeArgs *types.TypeList) []string {
+	var typeParams *types.TypeParamList
+
+	if funcObj, ok := v.info.ObjectOf(funIdent).(*types.Func); ok {
+		if sig, ok := funcObj.Type().(*types.Signature); ok {
+			typeParams = sig.TypeParams()
+		}
+	}
+
+	names := make([]string, 0, typeArgs.Len())
+
+	for i := range typeArgs.Len() {
+		if typeParams != nil && i < typeParams.Len() {
+			if _, erased := pointerCoreConstraint(typeParams.At(i)); erased {
+				continue
+			}
+		}
+
+		names = append(names, v.getCSTypeName(typeArgs.At(i)))
+	}
+
+	return names
 }
 
 func (v *Visitor) getConstraintType(typeConstraint *types.TypeParam) types.Type {

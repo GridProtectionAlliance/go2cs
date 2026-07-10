@@ -972,7 +972,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				}
 			}
 
-			if needsInterfaceCast, isEmpty := isInterface(paramType); needsInterfaceCast && !v.instantiatedParamIsPointer(callExpr, paramType, i) {
+			// An ERASED pointer-core parameter ([P *T]) reads as an interface too (same
+			// type-parameter shape as the instantiated-pointer carve-out above) — route it to
+			// the pointer arm so a P-typed argument supplies its box (`clone(p)` inside another
+			// erased generic must pass `Ꮡp`, not the deref'd value alias).
+			if needsInterfaceCast, isEmpty := isInterface(paramType); needsInterfaceCast && !v.instantiatedParamIsPointer(callExpr, paramType, i) && !signatureErasedParamPointerOk(funcSignature, paramType) {
 				callExprContext.u8StringArgOK[i] = false
 
 				if !isEmpty {
@@ -995,7 +999,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						callExprContext.interfaceTypes[j] = paramType
 					}
 				}
-			} else if paramHasArg && (isPointer(paramType) || v.instantiatedParamIsPointer(callExpr, paramType, i)) && !(callExprContext.hasSpreadOperator && i == params.Len()-1) {
+			} else if paramHasArg && (isPointer(paramType) || signatureErasedParamPointerOk(funcSignature, paramType) || v.instantiatedParamIsPointer(callExpr, paramType, i)) && !(callExprContext.hasSpreadOperator && i == params.Len()-1) {
 				// paramHasArg guards Args[i]: a variadic pointer parameter called with no
 				// trailing arguments (e.g. `In(r)` for `In(r rune, ...*RangeTable)`) has no
 				// arg at the variadic index, so indexing Args[i] would panic.
@@ -1262,21 +1266,28 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// The result's OWN arguments still gate WHETHER to emit (a generic callee
 				// returning a plain named type keeps C# inference — no churn); the conversion/
 				// constructor form (funIsType) keeps the result's arguments outright.
+				var typeParams []string
+
 				if calleeIsGeneric && !funIsType {
 					if funIdent := getCallFunIdent(callExpr.Fun); funIdent != nil {
 						if instance, ok := v.info.Instances[funIdent]; ok && instance.TypeArgs != nil {
-							typeArgs = instance.TypeArgs
+							// Instance-derived positions align with the callee's declared type
+							// parameters, so erased (pointer-core) positions leave the emitted
+							// list (see renderedTypeArgs) — identical output when nothing erases.
+							typeParams = v.renderedTypeArgs(funIdent, instance.TypeArgs)
 						}
 					}
 				}
 
-				var typeParams []string
-
-				for i := range typeArgs.Len() {
-					typeParams = append(typeParams, v.getCSTypeName(typeArgs.At(i)))
+				if typeParams == nil {
+					for i := range typeArgs.Len() {
+						typeParams = append(typeParams, v.getCSTypeName(typeArgs.At(i)))
+					}
 				}
 
-				typeParamExpr = fmt.Sprintf("<%s>", strings.Join(typeParams, ", "))
+				if len(typeParams) > 0 {
+					typeParamExpr = fmt.Sprintf("<%s>", strings.Join(typeParams, ", "))
+				}
 			}
 		}
 
@@ -1291,13 +1302,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			if funIdent := getCallFunIdent(callExpr.Fun); funIdent != nil {
 				if instance, ok := v.info.Instances[funIdent]; ok && instance.TypeArgs != nil &&
 					(v.calleeHasConstraintOnlyTypeParam(funIdent) || v.callHasMethodGroupArg(callExpr)) {
-					var typeParams []string
-
-					for i := range instance.TypeArgs.Len() {
-						typeParams = append(typeParams, v.getCSTypeName(instance.TypeArgs.At(i)))
+					// Erased (pointer-core) callee positions leave the emitted list — `clone[P *T,
+					// T any]` emits `clone<ΔSignature>(…)` (see renderedTypeArgs); a list that
+					// erases to empty stays bare.
+					if typeParams := v.renderedTypeArgs(funIdent, instance.TypeArgs); len(typeParams) > 0 {
+						typeParamExpr = fmt.Sprintf("<%s>", strings.Join(typeParams, ", "))
 					}
-
-					typeParamExpr = fmt.Sprintf("<%s>", strings.Join(typeParams, ", "))
 				}
 			}
 		}

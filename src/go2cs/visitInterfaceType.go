@@ -297,7 +297,11 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 	inheritedResult := ""
 
-	if len(typeConstraints) > 0 {
+	// The CRTP `<ΔT>` marker list serves Go's ARITY-0 constraint interfaces (`Ordered`,
+	// `Number`) — a GENERIC constraint interface (`PtrOf[T any] interface{ *T }`) already
+	// carries its own `<T>` list above, and appending both produced a malformed double list
+	// (`PtrOf<T><ΔT>`, CS1003).
+	if len(typeConstraints) > 0 && genericTypeParams == "" {
 		inheritedResult = fmt.Sprintf("%s<%s>", inheritedResult, TypeT)
 	}
 
@@ -312,7 +316,11 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		interfaceAttrs = "dyn"
 	}
 
-	if len(operatorSets) > 0 {
+	// The generated operator machinery, like the `<ΔT>` marker list above, serves ARITY-0
+	// constraint interfaces — for a GENERIC constraint interface (`PtrOf[T any] interface{ *T }`)
+	// the go2cs-gen InterfaceTypeTemplate would reference the marker parameter the declaration
+	// no longer carries (CS0246 on ΔT in the .g.cs).
+	if len(operatorSets) > 0 && genericTypeParams == "" {
 		if len(interfaceAttrs) > 0 {
 			interfaceAttrs += "; "
 		}

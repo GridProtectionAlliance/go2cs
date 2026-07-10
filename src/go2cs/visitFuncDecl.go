@@ -139,6 +139,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.currentFuncSignature = signature
 	v.currentReturnSignature = signature
 
+	// A pointer-core type parameter (`[P *T]`) of a plain function is ERASED — dropped from the
+	// emitted generic parameter list, rendered as `ж<T>`, and classified as a pointer everywhere.
+	// Every renderer/classifier consults this identity set (see collectErasedTypeParams), so the
+	// analyses below (nil-safe params, deref aliases) already see the erased pointers.
+	v.erasedTypeParams = collectErasedTypeParams(signature)
+
 	// A generic capture-mode method (e.g. atomic.Pointer[T]) is emitted with its heap box
 	// AS the receiver (`this ж<T> Ꮡx`) so the receiver's type parameter stays in scope for
 	// the field-ref form `Ꮡx.of(Type.ᏑField)`. See packageDirectBoxReceiverMethods.
@@ -407,8 +413,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 				}
 			}
 
-			// All pointers in Go can be implicitly dereferenced, so setup a "local ref" instance to each
-			if pointerType, ok := param.Type().(*types.Pointer); ok {
+			// All pointers in Go can be implicitly dereferenced, so setup a "local ref" instance to each.
+			// paramPointerType also classifies an ERASED pointer-core type parameter (`p P` under
+			// `[P *T]` renders as `ж<T> Ꮡp` — see pointerCoreConstraint), so it takes the same
+			// deref-alias and box conventions as a plain pointer parameter.
+			if pointerType, ok := v.paramPointerType(param.Type()); ok {
 				if i == 0 && funcDecl.Recv != nil && !directBoxReceiver {
 					// Skip receiver parameter (direct-ж receivers get the deref below, so
 					// the box parameter `Ꮡx` resolves to the value `x` in the body).
@@ -606,7 +615,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					updatedSignature.WriteString(v.getCSTypeName(param.Type()))
 					updatedSignature.WriteRune(' ')
 
-					if _, ok := param.Type().(*types.Pointer); ok {
+					if _, ok := v.paramPointerType(param.Type()); ok {
 						// An unnamed or blank (`_`) pointer param is never referenced (no deref alias
 						// above), so emit a plain name without the box `Ꮡ` convention — synthesized
 						// unique only when blanks would collide (else a lone `_` is kept).
@@ -991,9 +1000,19 @@ func (v *Visitor) isDerefdPointerParamIdent(ident *ast.Ident) bool {
 		return false
 	}
 
-	_, isPtr := identType.Underlying().(*types.Pointer)
+	if _, isPtr := identType.Underlying().(*types.Pointer); isPtr {
+		return true
+	}
 
-	return isPtr
+	// An ERASED pointer-core type parameter (`p P` under `[P *T]`) is a deref-aliased pointer
+	// parameter too — its box drives `==`/`!=` comparisons and the nil-safe accessor gate the
+	// same way a plain `*T` parameter's does.
+	if typeParam, ok := types.Unalias(identType).(*types.TypeParam); ok {
+		_, erased := v.typeParamErased(typeParam)
+		return erased
+	}
+
+	return false
 }
 
 func getParameters(signature *types.Signature, addRecv bool) *types.Tuple {

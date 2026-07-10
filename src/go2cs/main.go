@@ -182,6 +182,12 @@ type Visitor struct {
 	currentFuncPrefix      *strings.Builder
 	paramNames             HashSet[string]
 	paramObjects           map[types.Object]bool
+	// erasedTypeParams holds the current FUNCTION declaration's pointer-core (erased) type
+	// parameters, identity-keyed to their pointer types (see collectErasedTypeParams) — the
+	// single source every renderer/classifier consults so the erasure flips coherently, and
+	// declined shapes (generic named types, receiver type params) never half-erase. Reset per
+	// function declaration; func literals inside the declaration inherit it.
+	erasedTypeParams map[*types.TypeParam]*types.Pointer
 	// identAddressTakenCache memoizes per-object `&ident` scans of the current function
 	// (see identAddressTaken); lazily initialized, keyed by the *types.Object so entries
 	// from prior functions are simply never consulted again.
@@ -2274,7 +2280,7 @@ func paramsAreInterfaces(paramTypes *types.Tuple, andNotEmptyInterface bool) []b
 	return paramIsInterface
 }
 
-func paramsArePointers(paramTypes *types.Tuple) []bool {
+func (v *Visitor) paramsArePointers(paramTypes *types.Tuple) []bool {
 	if paramTypes == nil {
 		return nil
 	}
@@ -2283,7 +2289,12 @@ func paramsArePointers(paramTypes *types.Tuple) []bool {
 
 	for i := 0; i < paramTypes.Len(); i++ {
 		param := paramTypes.At(i)
-		paramIsPointer[i] = isPointer(param.Type())
+		// An ERASED pointer-core type parameter result (`func f[P *T, T any](…) P`) is a pointer
+		// result type too — `return p` must yield the box (paramPointerType sees the erasure;
+		// unsafe.Pointer stays covered by isPointer alone, and stays excluded from box renders
+		// by the direct-pointer check at the use site).
+		_, isErased := v.paramPointerType(param.Type())
+		paramIsPointer[i] = isPointer(param.Type()) || isErased
 	}
 
 	return paramIsPointer
@@ -3279,11 +3290,40 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 	}
 
 	typeParamNames := make([]string, typeParams.Len())
+	erasedParams := make([]bool, typeParams.Len())
 	constraintNames := []string{}
+
+	// Pointer-core ERASURE applies to FUNCTION type parameters only (`func clone[P *T, T any]`):
+	// erasing a generic NAMED type's parameter would change the type's emitted arity at every
+	// instantiation site — a surface with zero stdlib occurrences, declined with a warning until
+	// a real case exists. Receiver type parameters (a generic type's method) belong to the named
+	// type and are equally excluded, as is a named generic FUNC TYPE's list (not the function
+	// declaration being emitted — the renderer's identity set wouldn't cover it).
+	eraseAllowed := named == nil && signature == v.currentFuncSignature && typeParams == signature.TypeParams()
 
 	for i := range typeParams.Len() {
 		typeParam := typeParams.At(i)
 		typeParamNames[i] = typeParam.Obj().Name()
+
+		// A single non-tilde pointer term (`[P *T]`) has a singleton type set — P is
+		// definitionally *T — so P is erased: dropped from the emitted `<...>` list and `where`
+		// clauses, rendering inline as `ж<T>` everywhere it appears (see the getTypeName arm and
+		// pointerCoreConstraint). A breadcrumb comment keeps the Go constraint visible. Declined
+		// pointer-core shapes (approximate `~*T`, unions, generic named types) warn instead of
+		// silently mis-emitting the operator-lift fallback.
+		if pointer, ok := pointerCoreConstraint(typeParam); ok {
+			if eraseAllowed {
+				erasedParams[i] = true
+				csForm := fmt.Sprintf("%s<%s>", PointerPrefix, convertToCSTypeName(v.getTypeName(pointer.Elem(), false)))
+				constraintNames = append(constraintNames, fmt.Sprintf("%s%s    /* where %s : %s (erased: %s renders as %s) */",
+					v.newline, v.indent(v.indentLevel), typeParamNames[i], v.getTypeName(pointer, false), typeParamNames[i], csForm))
+				continue
+			}
+
+			v.showWarning("@getGenericDefinition - pointer-core constraint `%s` on generic type `%s` is not erased (no stdlib precedent); emission may not compile", v.getTypeName(pointer, false), srcType.String())
+		} else if constraintHasPointerTerm(typeParam) {
+			v.showWarning("@getGenericDefinition - approximate/union/method-carrying pointer constraint `%s` on `%s` is not erased; emission may not compile", typeParam.Constraint().String(), srcType.String())
+		}
 
 		constraint := typeParam.Constraint()
 		var constraintName string
@@ -3452,7 +3492,22 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 		constraintNames = append(constraintNames, fmt.Sprintf("%s%s    where %s : %s", v.newline, v.indent(v.indentLevel), typeParamNames[i], constraintName))
 	}
 
-	return fmt.Sprintf("<%s>", strings.Join(typeParamNames, ", ")), strings.Join(constraintNames, "")
+	// Erased (pointer-core) parameters leave the emitted list; a list that erases to empty emits
+	// no `<...>` at all (the function is no longer generic in C# terms — its breadcrumb where-
+	// comment still rides the constraints string).
+	emittedNames := make([]string, 0, len(typeParamNames))
+
+	for i, name := range typeParamNames {
+		if !erasedParams[i] {
+			emittedNames = append(emittedNames, name)
+		}
+	}
+
+	if len(emittedNames) == 0 {
+		return "", strings.Join(constraintNames, "")
+	}
+
+	return fmt.Sprintf("<%s>", strings.Join(emittedNames, ", ")), strings.Join(constraintNames, "")
 }
 
 func (v *Visitor) typeExists(name string) bool {
@@ -3886,6 +3941,19 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 		return "*" + v.getTypeName(pointer.Elem(), isUnderlying)
 	}
 
+	// A type parameter whose constraint type-set is a single non-tilde pointer term (`[P *T]`)
+	// is ERASED: the singleton type set makes P definitionally *T at every instantiation, so it
+	// renders as the pointer type itself and the whole existing pointer rendering chain applies
+	// (its element may itself be another type parameter, which renders by name). Gated on the
+	// CURRENT function's identity set (typeParamErased) so a declined declaration's parameter —
+	// a generic named type's, a receiver type parameter — keeps its bare name coherently rather
+	// than half-erasing. Non-erased type parameters keep the t.String() fallthrough.
+	if typeParam, ok := t.(*types.TypeParam); ok {
+		if pointer, ok := v.typeParamErased(typeParam); ok {
+			return "*" + v.getTypeName(pointer.Elem(), isUnderlying)
+		}
+	}
+
 	// A FOREIGN type ALIAS whose TARGET lives in yet ANOTHER package — `os.FileInfo = fs.FileInfo`
 	// (os/types.go, target in io/fs) — is emitted as an assembly-scoped `global using FileInfo =
 	// go.io.fs_package.FileInfo;` in ITS OWN package's conversion, NOT as a member of that package's C#
@@ -4055,6 +4123,15 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 
 	if pointer, ok := t.(*types.Pointer); ok {
 		return "*" + v.getFullTypeName(pointer.Elem(), isUnderlying)
+	}
+
+	// An ERASED pointer-core type parameter renders as its pointer type here too, keeping this
+	// renderer in lockstep with getTypeName (the flip-together invariant: a `P` that no longer
+	// exists in the emitted generic parameter list must never leak as a bare dangling name).
+	if typeParam, ok := t.(*types.TypeParam); ok {
+		if pointer, ok := v.typeParamErased(typeParam); ok {
+			return "*" + v.getFullTypeName(pointer.Elem(), isUnderlying)
+		}
 	}
 
 	// A non-generic methodless named func type renders as its base C# delegate (see

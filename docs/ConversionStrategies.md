@@ -1139,6 +1139,74 @@ four constraint lines. (Guarded by `GenericArrayConstraint` — two array-wrappe
 `~[4]fieldElement` core through a generic function that indexes, index-ranges, value-ranges, and
 constructs the type parameter, values vs Go.)
 
+### A single-term pointer constraint `[P *T]` erases the parameter to `ж<T>`
+
+A type parameter constrained to a single, non-tilde pointer term — go/types' flat-copy helper
+`func clone[P *T, T any](p P) P { c := *p; return &c }` (predicates.go) — cannot be modeled as a C#
+type parameter: no C# constraint fixes a parameter to a *specific constructed type*, and `ж<T>`
+implements no interface through which `*p`/`&c` could be expressed generically. The operator-lift
+fallback emitted `where P : /* *T */ IEqualityOperators<P, P, bool>, new()` with the deref dropped
+(`c = p` — CS0029 P→T) and the box mismatched (`return Ꮡc` — CS0029 ж<T>→P), and the call site's
+synthesized `clone<ж<ΔSignature>, ΔSignature>(asig)` failed CS0311 (ж<> implements no
+IEqualityOperators).
+
+The Go spec makes the faithful lowering an *identity*, not an approximation: a non-tilde term's type
+set is a **singleton**, so `P`'s only permissible type argument is `*T` itself. The converter therefore
+**erases** such a parameter (`pointerCoreConstraint` in `constraintOperations.go`): it leaves the
+emitted `<…>` list and `where` clauses (a breadcrumb comment preserves the Go constraint), renders as
+`ж<T>` everywhere it appears (a `getTypeName` arm beside the `*types.Pointer` arm), and the parameter
+classification treats a `p P` exactly like a `p *T` (`paramPointerType` — deref alias, `Ꮡ` box naming),
+so the entire existing pointer machinery applies unchanged:
+
+```csharp
+internal static ж<T> clone<T>(ж<T> Ꮡp)
+    /* where P : *T (erased: P renders as ж<T>) */
+{
+    ref var p = ref Ꮡp.Value;
+
+    ref var c = ref heap<T>(out var Ꮡc);
+    c = p;
+    return Ꮡc;
+}
+```
+
+Call sites drop the erased position from any synthesized explicit type-argument list
+(`renderedTypeArgs`, applied at convCallExpr's two synthesis blocks and convSelectorExpr's
+method-group form): `clone(asig)` emits `clone<ΔSignature>(asig)`, and a callee whose remaining
+parameters make C# inference sufficient stays bare (`setThrough(Ꮡn, 55)`). An EXPLICITLY written Go
+instantiation equally drops erased positions — full (`setThrough[*int, int](…)` →
+`setThrough<nint>(…)`), partial (`clone[*thing](…)` → bare `clone(…)`, the rest inferring), and the
+function-VALUE form (`fv := clone[*thing, thing]` → `var fv = clone<thing>;`) — via
+`explicitTypeArgsAfterErasure` in convIndexExpr/convIndexListExpr. A C# consumer calls the emitted
+method naturally — `T` sits in a real parameter position, so inference works without spelling the
+phantom `P`.
+
+The pointer classification flips at every use shape, not just the deref/address pair: returning the
+parameter WHOLE yields its box (`return a` → `return Ꮡa;`), passing it onward to another erased
+callee — including self-recursion — supplies the box (`cloneChain<T>(clone<T>(Ꮡp), …)`; the
+interface-shaped argument arm carves out erased params exactly like instantiated pointers), copying
+it into a local is a Go pointer copy (`q := p` → `var q = Ꮡp;`, writes through `q` land in the
+caller's referent), and a nil comparison takes the box form with the nil-safe entry alias
+(`if p == nil` → `ref var p = ref Ꮡp.DerefOrNil(); … if (Ꮡp == nil)` — a nil argument reaches the
+guard instead of throwing at entry, e.g. `orZero[*int, int](nil)`). The NAMED constraint-interface
+spellings — `[P PtrOf[T]]` and the embedded `[P interface{ PtrOf[T] }]`, where
+`type PtrOf[T any] interface{ *T }` — resolve to the identical singleton type set and erase
+identically. The constraint interface's own DECLARATION follows the existing constraint-interface
+convention (`[GoType] partial interface PtrOf<T> { /* Type constraints: *T */ }`): a pointer term is
+a type-set term, not an embeddable interface (previously it emitted an interface inheriting the
+struct `ж<T>` — CS0527), and a GENERIC constraint interface carries its own `<T>` list, so the
+arity-0 `<ΔT>` marker list and its generated operator machinery are both suppressed for it.
+
+Erasure is deliberately gated to the identity case: **function** type parameters whose constraint
+type-set is a single non-tilde pointer term. Declined shapes warn instead of silently mis-emitting —
+an approximate `~*T` admits *named* pointer types, which emit as `[GoType("ж<E>")]` wrapper classes
+(not identity with `ж<E>`); pointer unions have no single identity; and erasing a generic *named
+type's* parameter would change its emitted arity at every use. None occur anywhere in the converted
+stdlib (exhaustive GOROOT census: go/types' `clone` is the only compiled occurrence of the pattern;
+see `DESIGN-pointer-core-typeparam.md` on the fix branch for the full study). (Guarded by
+`PointerCoreConstraints` — clone/read/write/round-trip through `[P *T]` and the swapped-order
+`[T any, P *T]`, flat-copy independence verified, values vs Go.)
+
 ### An integer named-numeric wrapper implements the integer operator interfaces
 
 A `[GoType num:]` wrapper (`type stringID uint64`) already declared the *common* numeric operator

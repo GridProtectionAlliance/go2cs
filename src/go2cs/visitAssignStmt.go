@@ -24,7 +24,10 @@ func (v *Visitor) rhsPointerCopyContext(rhs ast.Expr) ExprContext {
 		return nil
 	}
 
-	if _, isPtr := v.getIdentType(rhsIdent).(*types.Pointer); !isPtr {
+	// paramPointerType also classifies an ERASED pointer-core type parameter (`q := p` under
+	// `[P *T]` is a Go pointer copy — the deref'd parameter must supply its box `Ꮡp`, and a
+	// P-typed local already holds the box, exactly like a plain `*T`).
+	if _, isPtr := v.paramPointerType(v.getIdentType(rhsIdent)); !isPtr {
 		return nil
 	}
 

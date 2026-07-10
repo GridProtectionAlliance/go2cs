@@ -325,7 +325,115 @@ this chip's own.
 
 ---
 
-## 7. Questions for the integration ruling
+## 7. Prototype results (Option 1, implemented on this branch)
+
+The recommended option was implemented and passed every gate; no mid-prototype flaw
+surfaced, so no runner-up was needed. Emitted form (behavioral golden and stdlib
+reconvert render identically):
+
+```csharp
+// go/types predicates.cs — from func clone[P *T, T any](p P) P { c := *p; return &c }
+internal static ж<T> clone<T>(ж<T> Ꮡp)
+    /* where P : *T (erased: P renders as ж<T>) */
+{
+    ref var p = ref Ꮡp.Value;
+
+    ref var c = ref heap<T>(out var Ꮡc);
+    c = p;
+    return Ꮡc;
+}
+// call.cs:643 — from `asig = clone(asig)`:
+asig = clone<ΔSignature>(asig);
+```
+
+Gate results:
+
+- **check-no-regression:** zero churn across all 321 pre-existing behavioral projects.
+- **Full-stdlib A/B reconvert** (HEAD-exe vs fixed-exe, 303 packages): footprint
+  **exactly** `go/types/predicates.cs` + `go/types/call.cs` — the §4 prediction, no
+  collateral. The B-side body differs from A only by the erased signature, the
+  breadcrumb, and the `ref var p = ref Ꮡp.Value;` alias line (the heap-box body
+  lines were already byte-identical).
+- **go.types overlay build: 0 errors — the package is GREEN** (own DLL on disk).
+  The merge wave (functype/stmt/capture/namespace chips, landed on master up to
+  `18897f737`) had cleared the sibling roots; these 3 errors were the last.
+  **Negative control:** restoring the A-side pair reproduces exactly CS0311 at
+  call.cs(643) + CS0029 ×2 at predicates.cs(680,681) — the delta is fully attributed.
+- **Behavioral guard `PointerCoreConstraints`** (clone/read/write/round-trip through
+  `[P *T]` and swapped-order `[T any, P *T]`, flat-copy independence, struct + basic
+  element types): all four phases green, C# output byte-matches Go. Registered in
+  `src/go2cs.slnx` (grep-verified; `dotnet restore` clean).
+- **docs/ConversionStrategies.md**: new subsection under *Generic Constraints*.
+
+Implementation notes vs the §6 plan (deltas discovered while prototyping):
+
+- `types.CoreType` is **not exported** by go/types (go1.23) — the declined-shape
+  warning uses a structural term walk instead (`constraintHasPointerTerm`).
+- go/types models the `interface{ *T }` embedded element as either a one-term
+  `*types.Union` or the `*types.Pointer` directly — `pointerCoreConstraint` handles
+  both shapes.
+- The call-site skip needed **three** loci, all via one helper (`renderedTypeArgs`):
+  convCallExpr's named-generic-result block, its constraint-only synthesis block,
+  and convSelectorExpr's method-group form. The synthesis *predicate* is untouched:
+  a callee like `setThrough[P *T, T any](p P, v T)` never triggers synthesis (T is
+  in a real param) and emits a bare, C#-inferred call — observed in the guard.
+- The merge wave landed on master before prototyping began; the branch was rebased
+  onto `18897f737` first, so the convCallExpr/convSelectorExpr/main.go edits sit on
+  the landed wave versions. The **only remaining unmerged-chip overlap is
+  `visitFuncDecl.go`** (goformat chip `36c8bcf7f`, worktree agitated-swanson, edits
+  the same parameter loop region) — flag for the integration merge order.
+
+### 7.1 Hardening round (adversarial review findings)
+
+An adversarial multi-lens review of the initial prototype surfaced silent-mis-emission
+gaps on `[P *T]` shapes with zero guard/corpus coverage — each violating this design's
+own "never silent" contract. All were fixed and guard-covered (the extended guard's C#
+output byte-matches Go across every shape); one reported finding was refuted
+(nil-vs-empty in `renderedTypeArgs` is only reachable via a hypothetical refactor —
+its doc comment was corrected instead).
+
+1. **Explicit instantiation lists** (`setThrough[*int, int](…)`, partial
+   `clone[*thing](…)`, func value `fv := clone[*thing, thing]`) rendered erased
+   positions verbatim (CS0305/CS1503) — `explicitTypeArgsAfterErasure` now drops them
+   in convIndexExpr/convIndexListExpr; an all-erased list leaves the base bare.
+2. **`return p` (parameter returned whole)** emitted the value alias — both gates
+   (`paramsArePointers`, now a Visitor method, and the direct ident check in
+   visitReturnStmt) consult `paramPointerType`.
+3. **Passing `p` onward to another erased callee / self-recursion** emitted the value
+   alias: `isInterface(P)` is true (a type param's underlying is its constraint), so
+   the call-arm interface branch shadowed the pointer branch — the same carve-out the
+   instantiated-pointer case already had (`signatureErasedParamPointerOk`) now routes
+   erased params to the pointer arm.
+4. **`q := p` (pointer copy)** emitted the value alias — `rhsPointerCopyContext`
+   consults `paramPointerType`.
+5. **`p == nil`** compared the value alias against `default!` (CS0019 on unconstrained
+   T) and the entry alias threw on a legal nil argument — `isDerefdPointerParamIdent`
+   sees erasure (box compare + nil-safe `DerefOrNil` entry alias), and convBinaryExpr's
+   interface exclusion / pointer-comparand computations treat an erased param as a
+   pointer, not an interface.
+6. **The embedded named-constraint spelling** `[P interface{ PtrOf[T] }]` was declined
+   while the direct `[P PtrOf[T]]` erased — `pointerCoreConstraint` (and the warning
+   walker) now recurse through named/aliased embeds (depth-capped), so two spellings of
+   the identical singleton type set behave identically.
+7. **The constraint interface's own declaration** emitted `partial interface
+   PtrOf<T> : ж<T>` (an interface inheriting a struct, CS0527): `exprIsTypeConstraint`
+   now recognizes a pointer type literal as a type-set term (constraint-comment
+   convention), and the arity-0 `<ΔT>` marker list plus its generated operator
+   machinery are suppressed for a GENERIC constraint interface (double list CS1003 /
+   CS0246 on ΔT in the .g.cs).
+8. **Half-erasure coherence**: the renderer arms (`getTypeName`, and the previously
+   unproven `getFullTypeName` twin) are now gated on a per-declaration identity set
+   (`v.erasedTypeParams`, populated at visitFuncDecl entry) — a declined declaration's
+   parameter (generic named type, receiver type param, named func type) keeps its bare
+   name COHERENTLY instead of half-erasing its occurrences (the review's `Box[P *T]`
+   probe emitted `struct Box<P, T>` whose field was `ж<T>` — the exact "partial flip"
+   §6 warns about).
+
+Additional files touched by the hardening (beyond the §6 list): `visitReturnStmt.go`,
+`visitAssignStmt.go`, `convBinaryExpr.go`, `convIndexExpr.go`, `convIndexListExpr.go`,
+`visitInterfaceType.go` — none is owned by an unmerged chip.
+
+## 8. Questions for the integration ruling
 
 1. **Accept the visual-parity trade?** The emitted signature drops `P`
    (`clone<T>(ж<T> Ꮡp)` + breadcrumb comment) rather than keeping a two-param
@@ -337,4 +445,6 @@ this chip's own.
 3. **Sequencing**: confirm the prototype's wave-file edits (visitFuncDecl,
    convCallExpr, convSelectorExpr) land only after a rebase onto post-wave master.
 4. Call-site form: explicit skip-erased type args (`clone<ΔSignature>(asig)`,
-   chosen) vs bare-call inference polish — cosmetic; either compiles.
+   chosen) vs bare-call inference polish — cosmetic; either compiles. (Prototype
+   observation: callees whose remaining params make inference sufficient already
+   emit bare — only genuinely constraint-only shapes carry the explicit list.)

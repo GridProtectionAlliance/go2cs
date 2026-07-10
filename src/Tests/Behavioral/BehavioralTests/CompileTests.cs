@@ -684,6 +684,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPointerCopyWalk() => CheckTarget("PointerCopyWalk");
 
     [TestMethod]
+    public void CheckPointerCoreConstraints() => CheckTarget("PointerCoreConstraints");
+
+    [TestMethod]
     public void CheckPointerEmbedBoxReceiver() => CheckTarget("PointerEmbedBoxReceiver");
 
     [TestMethod]
