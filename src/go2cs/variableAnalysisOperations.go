@@ -198,8 +198,8 @@ func (p *varProcessor) processAssignStmt(stmt *ast.AssignStmt) {
 
 func newLambdaCapture() *LambdaCapture {
 	return &LambdaCapture{
-		capturedVars:      make(map[*ast.Ident]*CapturedVarInfo),
-		stmtCaptures:      make(map[ast.Node]map[*ast.Ident]bool),
+		capturedVars:         make(map[*ast.Ident]*CapturedVarInfo),
+		stmtCaptures:         make(map[ast.Node]map[*ast.Ident]bool),
 		pendingCaptures:      make(map[string]*CapturedVarInfo),
 		currentLambdaVars:    make(map[string]string),
 		currentLambdaVarObjs: make(map[string]types.Object),
@@ -1910,11 +1910,23 @@ func (v *Visitor) processPotentialCapture(ident *ast.Ident) {
 		return
 	}
 
+	// The lambda's OWN parameter is one of its locals, never a capture — and it must not take
+	// the box-ref arm below: a heap-boxed LITERAL param's box (`Ꮡ<name>`, see convFuncLit) is
+	// declared INSIDE the literal, so its own body reads keep the plain ref-local alias form.
+	// (A NESTED closure's analysis reaches here with currentLambda = the nested node, so the
+	// param correctly takes the box-ref arm there.) Own params were only ever snapshot-recorded
+	// and then name-filtered out by convFuncLit — returning here changes no capture outcome.
+	if funcLit, ok := v.lambdaCapture.currentLambda.(*ast.FuncLit); ok && v.funcLitOwnsParam(funcLit, varObj) {
+		return
+	}
+
 	// A heap-boxed VALUE parameter is the same shape: its entry-time box prologue re-declares the
 	// Go name as a ref-local alias (`ref var cfg = ref heap(cfgʗp, out var Ꮡcfg);` — see
 	// paramNeedsHeapBox), which a C# closure cannot capture (CS8175), and a snapshot copy divorces
 	// the closure from the boxed storage the direct-ж callee mutates through the receiver pointer
 	// (Go's closure and the callee share the ONE parameter variable). Reference it through its box.
+	// paramNeedsHeapBox serves declaration params AND an enclosing literal's params (its
+	// function-literal arm), so a nested closure over either routes through the box.
 	if v.paramNeedsHeapBox(varObj) {
 		v.lambdaCapture.boxRefVars[varObj] = true
 		return
@@ -2167,6 +2179,40 @@ func (v *Visitor) varUsedAsImplicitAddrReceiverInLambda(varObj types.Object) boo
 	})
 
 	return found
+}
+
+// identIsCurrentFuncLitParam reports whether ident resolves to a parameter of the function
+// literal whose conversion is currently innermost (see enterLambdaConversion) — i.e. the
+// ident is one of the converting lambda's OWN parameters, a plain local of that lambda.
+func (v *Visitor) identIsCurrentFuncLitParam(ident *ast.Ident) bool {
+	if v.lambdaCapture == nil {
+		return false
+	}
+
+	funcLit, ok := v.lambdaCapture.currentConversion.(*ast.FuncLit)
+
+	if !ok {
+		return false
+	}
+
+	return v.funcLitOwnsParam(funcLit, v.info.ObjectOf(ident))
+}
+
+// funcLitOwnsParam reports whether varObj is declared as one of funcLit's own parameters.
+func (v *Visitor) funcLitOwnsParam(funcLit *ast.FuncLit, varObj types.Object) bool {
+	if funcLit.Type.Params == nil {
+		return false
+	}
+
+	for _, field := range funcLit.Type.Params.List {
+		for _, ident := range field.Names {
+			if v.info.ObjectOf(ident) == varObj {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 // varIsDerefdPointerParam reports whether varObj is a pointer-typed parameter (or the pointer

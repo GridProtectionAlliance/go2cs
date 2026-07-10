@@ -144,7 +144,12 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 	// alias `ref var m = ref Ꮡm.Value` can't be captured by the closure (CS8175), so a value use must
 	// deref the box directly (`Ꮡm.Value`). The box `Ꮡm` is a capturable reference. Address uses
 	// (`&m`, `&m.field`) are rendered from the box name in convUnaryExpr, bypassing this rewrite.
-	if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda && v.isLambdaBoxRefVar(v.info.ObjectOf(ident)) {
+	// A heap-boxed PARAM of the FUNCTION LITERAL currently being converted is excluded: its box
+	// prologue re-declares the ref alias INSIDE this very lambda (see convFuncLit), so the alias
+	// is a plain local here — only a NESTED lambda (whose enterLambdaConversion context replaces
+	// currentConversion) must read it through the box.
+	if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda && v.isLambdaBoxRefVar(v.info.ObjectOf(ident)) &&
+		!v.identIsCurrentFuncLitParam(ident) {
 		// The current method's REF receiver has NO box — a genuine closure capture would
 		// have promoted the method direct-ж (bodyCapturesReceiverInClosure); reaching here
 		// as a ref receiver means a PSEUDO-lambda conversion context (a method-value assign)

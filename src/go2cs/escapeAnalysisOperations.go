@@ -46,7 +46,18 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 						return true
 					}
 
-					visitor.markCaptureModeBoxedParams(node)
+					visitor.markCaptureModeBoxedParams(node.Type.Params, node.Body)
+
+					// Mark FUNCTION LITERAL value params BEFORE the define walk below, same as
+					// the declaration's own params above: a mixed `t, y := …` re-use of a literal
+					// param would otherwise record the define-walk's escape verdict first, and
+					// markCaptureModeBoxedParams skips already-analyzed objects.
+					ast.Inspect(node.Body, func(n ast.Node) bool {
+						if funcLit, ok := n.(*ast.FuncLit); ok {
+							visitor.markCaptureModeBoxedParams(funcLit.Type.Params, funcLit.Body)
+						}
+						return true
+					})
 
 					ast.Inspect(node.Body, func(n ast.Node) bool {
 						switch n := n.(type) {
@@ -114,6 +125,12 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 						}
 						return true
 					})
+
+				case *ast.FuncLit:
+					// A literal OUTSIDE any function declaration (a package-level var
+					// initializer). Literals inside a FuncDecl were already marked above —
+					// the already-analyzed guard makes this re-visit a no-op for them.
+					visitor.markCaptureModeBoxedParams(node.Type.Params, node.Body)
 				}
 				return true
 			})
@@ -134,13 +151,14 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 // so body uses hit the boxed alias and convSelectorExpr routes the call through `Ꮡcfg`.
 // Entry-time boxing (never a call-site copy-box, which compiles but silently drops the
 // callee's writes through the receiver pointer) preserves Go's by-value parameter +
-// auto-address semantics exactly.
-func (v *Visitor) markCaptureModeBoxedParams(funcDecl *ast.FuncDecl) {
-	if funcDecl.Type.Params == nil {
+// auto-address semantics exactly. Serves both function DECLARATIONS and function LITERALS
+// (whose prologue/rename convFuncLit emits — see funcLitHeapBoxParamIdents).
+func (v *Visitor) markCaptureModeBoxedParams(params *ast.FieldList, body *ast.BlockStmt) {
+	if params == nil {
 		return
 	}
 
-	for _, field := range funcDecl.Type.Params.List {
+	for _, field := range params.List {
 		// A variadic parameter already re-declares its Go name in the prologue
 		// (`var xs = xsʗp.slice();`), and its unnamed []T type carries no methods.
 		if _, isVariadic := field.Type.(*ast.Ellipsis); isVariadic {
@@ -167,7 +185,7 @@ func (v *Visitor) markCaptureModeBoxedParams(funcDecl *ast.FuncDecl) {
 				continue
 			}
 
-			if v.bodyCallsCaptureModeMethodOn(ident, funcDecl.Body) {
+			if v.bodyCallsCaptureModeMethodOn(ident, body) {
 				v.identEscapesHeap[obj] = true
 
 				// An inherently-heap value (named slice/map/chan) is already a reference, so

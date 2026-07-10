@@ -143,10 +143,32 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		}
 	}
 
+	// The literal's own VALUE parameters on which its body calls a capture-mode (direct-ж)
+	// method need the same ENTRY-TIME heap box as a declaration's parameters (see
+	// paramNeedsHeapBox): the signature takes the incoming value under the `ʗp` name and the
+	// prologue injected below re-declares the Go name as the boxed ref alias.
+	boxedParamIdents := v.funcLitHeapBoxParamIdents(funcLit)
+	var boxedParamNames HashSet[string]
+
+	if len(boxedParamIdents) > 0 {
+		boxedParamNames = HashSet[string]{}
+
+		for _, ident := range boxedParamIdents {
+			boxedParamNames.Add(v.getIdentName(ident))
+		}
+	}
+
 	var parameterSignature string
 
-	// For C#, lambda return type is inferred and not explicitly declared
+	// For C#, lambda return type is inferred and not explicitly declared. The transient
+	// boxed-param name set is scoped to exactly this call: the literal's signature is
+	// generated from SYNTHESIZED vars (see getSignature) that carry the rendered names but
+	// never match identEscapesHeap, so generateParametersSignature reads the set to emit a
+	// boxed param under its incoming `ʗp` name. Cleared before the body conversion so a
+	// NESTED literal's signature cannot inherit it.
+	v.funcLitHeapBoxParamNames = boxedParamNames
 	_, parameterSignature = v.convFuncType(funcLit.Type)
+	v.funcLitHeapBoxParamNames = nil
 
 	blockStatementContext := DefaultBlockStmtContext()
 	blockStatementContext.format.useNewLine = false
@@ -163,6 +185,44 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 
 	if litNamedDefer {
 		v.indentLevel--
+	}
+
+	// A boxed VALUE parameter (see funcLitHeapBoxParamIdents) arrives under the `ʗp` name; the
+	// literal's first statements re-declare the Go name as the boxed ref alias — the exact
+	// parameter-preamble form of a declaration's boxed param (see paramNeedsHeapBox) — so body
+	// uses hit the boxed storage and convSelectorExpr routes the capture-mode call through
+	// `Ꮡ<name>` (CS1929 on the raw value without it; a call-site Ꮡ(value) copy-box would
+	// compile but silently drop the callee's writes). Injected BEFORE the return-collapse
+	// below, which also keeps the body a block. Unlike the variadic prologue, an IIFE is NOT
+	// excluded: iifeParamName emits the `ʗp` name for a boxed param, so the rebinding is
+	// required there too. When both prologues apply, the variadic injection below prepends its
+	// line above these, matching visitFuncDecl's preamble order.
+	if len(boxedParamIdents) > 0 {
+		trimmedBody := strings.TrimSpace(body)
+
+		if strings.HasPrefix(trimmedBody, "{") {
+			prologue := strings.Builder{}
+
+			for _, ident := range boxedParamIdents {
+				renderedName := v.getIdentName(ident)
+				incomingName := getHeapBoxLitParamName(renderedName)
+
+				// An ARRAY param folds its Go by-value clone into the box init, same as
+				// visitFuncDecl's parameter preamble.
+				if _, ok := v.getIdentType(ident).(*types.Array); ok {
+					incomingName += ".Clone()"
+				}
+
+				if v.options.preferVarDecl {
+					prologue.WriteString(fmt.Sprintf("%s%sref var %s = ref heap(%s, out var %s%s);", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(renderedName), incomingName, AddressPrefix, renderedName))
+				} else {
+					csTypeName := v.getCSTypeName(v.getIdentType(ident))
+					prologue.WriteString(fmt.Sprintf("%s%sref %s %s = ref heap(%s, out %s<%s> %s%s);", v.newline, v.indent(v.indentLevel+1), csTypeName, getSanitizedIdentifier(renderedName), incomingName, PointerPrefix, csTypeName, AddressPrefix, renderedName))
+				}
+			}
+
+			body = "{" + prologue.String() + strings.TrimPrefix(trimmedBody, "{")
+		}
 	}
 
 	// A variadic parameter arrives as a C# `params` array named `<name>ʗp` (see getVariadicParamName);
@@ -275,8 +335,13 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 
 	if context.isIIFE {
 		// Immediately-invoked function literal: emit `paramNames => BODY` (names only — the
-		// delegate-cast in convCallExpr supplies the types).
-		result.WriteString(v.iifeParamNames(litSig) + " => " + inner)
+		// delegate-cast in convCallExpr supplies the types). The transient boxed-param set is
+		// scoped to the name rendering so a boxed param emits its incoming `ʗp` name here too.
+		v.funcLitHeapBoxParamNames = boxedParamNames
+		iifeParams := v.iifeParamNames(litSig)
+		v.funcLitHeapBoxParamNames = nil
+
+		result.WriteString(iifeParams + " => " + inner)
 	} else {
 		// A literal with a single unsafe.Pointer result can mix return arms of DIFFERENT C#
 		// types — reflect deepEqual's ptrval returns `(uintptr)v.pointer()` on one arm and the
@@ -412,4 +477,49 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	}
 
 	return result.String()
+}
+
+// funcLitHeapBoxParamIdents returns the literal's own VALUE parameters that need an
+// entry-time heap box, in declaration order — the function-literal analogue of
+// paramNeedsHeapBox, which serves declaration parameters via currentFuncDecl (a literal's
+// params never enter its walk, and package-level initializer literals have no declaration at
+// all). A literal param qualifies exactly like a declaration param: marked escaping by
+// markCaptureModeBoxedParams AND re-verified against the declaring ident, so a param that
+// leaked into identEscapesHeap via a mixed `t, y := …` define keeps its historical unboxed
+// emission. A variadic parameter is excluded (its `ʗp` rename/prologue is the variadic slice
+// convention, and its unnamed []T type carries no methods).
+func (v *Visitor) funcLitHeapBoxParamIdents(funcLit *ast.FuncLit) []*ast.Ident {
+	if funcLit.Type.Params == nil {
+		return nil
+	}
+
+	var boxed []*ast.Ident
+
+	for _, field := range funcLit.Type.Params.List {
+		if _, isVariadic := field.Type.(*ast.Ellipsis); isVariadic {
+			continue
+		}
+
+		for _, ident := range field.Names {
+			if isDiscardedVar(ident.Name) {
+				continue
+			}
+
+			obj := v.info.ObjectOf(ident)
+
+			if obj == nil {
+				continue
+			}
+
+			if _, isPointer := obj.Type().(*types.Pointer); isPointer {
+				continue
+			}
+
+			if v.identHasHeapBox(obj, obj.Type()) && v.bodyCallsCaptureModeMethodOn(ident, funcLit.Body) {
+				boxed = append(boxed, ident)
+			}
+		}
+	}
+
+	return boxed
 }

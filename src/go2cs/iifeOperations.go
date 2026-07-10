@@ -114,7 +114,9 @@ func (v *Visitor) iifeParamNames(sig *types.Signature) string {
 }
 
 // iifeParamName returns the C# identifier the body uses for a parameter (honoring shadow-renames
-// recorded by variable analysis); a blank parameter stays `_`.
+// recorded by variable analysis); a blank parameter stays `_`. A heap-boxed value parameter
+// (see funcLitHeapBoxParamIdents) arrives under its incoming `ʗp` name — the literal's prologue
+// re-declares the Go name as the boxed ref alias — so it emits that name here.
 func (v *Visitor) iifeParamName(param *types.Var) string {
 	if isDiscardedVar(param.Name()) {
 		return "_"
@@ -124,6 +126,10 @@ func (v *Visitor) iifeParamName(param *types.Var) string {
 
 	if adjusted, ok := v.varNames[param]; ok {
 		name = adjusted
+	}
+
+	if v.funcLitHeapBoxParamNames.Contains(name) {
+		return getHeapBoxLitParamName(name)
 	}
 
 	return getSanitizedIdentifier(name)

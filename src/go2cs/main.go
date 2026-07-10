@@ -200,9 +200,17 @@ type Visitor struct {
 	// rather than throwing a nil-pointer dereference. Populated per function in visitFuncDecl;
 	// other (non-nil-compared) pointer params keep the plain `.Value` form (zero golden churn).
 	nilSafePtrParamNames HashSet[string]
-	varNames             map[*types.Var]string
-	hasDefer             bool
-	hasRecover           bool
+	// funcLitHeapBoxParamNames holds the RENDERED names of the function literal parameters that
+	// need an entry-time heap box (see funcLitHeapBoxParamIdents) — set transiently by
+	// convFuncLit around exactly the signature-generation calls (convFuncType for a plain
+	// literal, iifeParamNames for an IIFE) so the parameter emits under its incoming `ʗp` name,
+	// and nil otherwise. A literal's signature is generated from SYNTHESIZED vars (see
+	// getSignature) that can never match the identEscapesHeap entries paramNeedsHeapBox keys
+	// on, so the box decision travels by name here.
+	funcLitHeapBoxParamNames HashSet[string]
+	varNames                 map[*types.Var]string
+	hasDefer                 bool
+	hasRecover               bool
 	// pendingTypeAccess carries an explicit C# access modifier ("public ") for the type
 	// declaration currently being emitted — set by visitTypeSpec for an unexported type that
 	// must be publicized (used as an exported struct field; see packagePublicizedTypes), and

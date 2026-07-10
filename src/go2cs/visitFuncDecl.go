@@ -1146,8 +1146,10 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 			// A heap-boxed value parameter arrives under the `ʗp` name; the parameter preamble
 			// re-declares the analyzed name as the boxed ref alias (see paramNeedsHeapBox). This
 			// path serves a function with NO pointer params (otherwise the rebuilt-signature
-			// path above applies the same rename).
-			if v.paramNeedsHeapBox(param) {
+			// path above applies the same rename). A FUNCTION LITERAL's boxed params flow in
+			// through the transient name set instead — its signature is generated from
+			// SYNTHESIZED vars (see getSignature) that never match the identEscapesHeap entries.
+			if v.paramNeedsHeapBox(param) || v.funcLitHeapBoxParamNames.Contains(param.Name()) {
 				result.WriteString(getHeapBoxParamName(param))
 			} else {
 				result.WriteString(getSanitizedIdentifier(paramName))
@@ -1218,6 +1220,14 @@ func getHeapBoxParamName(param *types.Var) string {
 	return getVariadicParamName(param)
 }
 
+// getHeapBoxLitParamName renders the incoming `ʗp` parameter name for a heap-boxed value
+// parameter of a FUNCTION LITERAL from its rendered body name (getHeapBoxParamName serves
+// declaration parameters via their *types.Var; a literal's signature is generated from
+// SYNTHESIZED vars — see getSignature — that already carry the rendered name).
+func getHeapBoxLitParamName(renderedName string) string {
+	return fmt.Sprintf("%s%sp", getSanitizedIdentifier(renderedName), CapturedVarMarker)
+}
+
 // paramNeedsHeapBox reports whether the value parameter needs an entry-time heap box: the
 // body calls a capture-mode (direct-ж) method on it, whose only emitted receiver form is the
 // box `ж<T>` — go/format's `cfg printer.Config` + `cfg.Fprint(…)`, CS1929 ×2 without it.
@@ -1258,7 +1268,37 @@ func (v *Visitor) paramNeedsHeapBox(param *types.Var) bool {
 		}
 	}
 
-	return false
+	// A FUNCTION LITERAL's own value parameter (whose prologue/rename convFuncLit emits — see
+	// funcLitHeapBoxParamIdents): the analysis phase reaches here when a NESTED closure inside
+	// the literal references the param, and the box-ref arm of processPotentialCapture must see
+	// the same verdict emission uses. Find the declaring literal within the current declaration
+	// and re-verify against ITS body.
+	needsBox := false
+
+	ast.Inspect(funcDecl.Body, func(n ast.Node) bool {
+		funcLit, ok := n.(*ast.FuncLit)
+
+		if !ok || funcLit.Type.Params == nil {
+			return true
+		}
+
+		for _, field := range funcLit.Type.Params.List {
+			if _, isVariadic := field.Type.(*ast.Ellipsis); isVariadic {
+				continue
+			}
+
+			for _, ident := range field.Names {
+				if v.info.ObjectOf(ident) == param {
+					needsBox = v.bodyCallsCaptureModeMethodOn(ident, funcLit.Body)
+					return false
+				}
+			}
+		}
+
+		return true
+	})
+
+	return needsBox
 }
 
 func (v *Visitor) getTempVarName(varPrefix string) string {
