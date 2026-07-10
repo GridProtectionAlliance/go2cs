@@ -2981,6 +2981,23 @@ keeps the `@fixed` spelling. Guarded by the `KeywordNamedTypes` behavioral test:
 and pointer-implementing `sizer` plus a keyword-named interface `lock`, with a pointer-receiver `grow`
 exercising the RecvGenerator ж-twin on the keyword-named receiver.
 
+### A keyword-named addressed global's heap-box field strips the escape after the Ꮡ prefix
+An address-taken package-level var is backed by a heap-box FIELD plus a ref-returning property
+(`writeAddressedGlobalDecl`). A keyword-named such global (`var null = json.RawMessage([]byte("null"))`,
+net/rpc/jsonrpc) arrives keyword-escaped (`@null`), and composing the box as `Ꮡ` + `@null` places the
+escape INTERIOR to the identifier token — `Ꮡ@null` lexes as two tokens (a whole-file syntax cascade).
+The `Ꮡ` prefix already de-keywords the composed name (the keyword + affix rule the adapter compositions
+above rely on), so the field declaration strips the escape — matching every `&null` use site, which
+already composed `Ꮡnull` through `boxBaseName`:
+```csharp
+internal static ж<slice<byte>> Ꮡnull = new(slice<byte>((@string)"null"));
+internal static ref slice<byte> @null => ref Ꮡnull.ValueSlot;   // the var itself keeps its escape
+
+var p = Ꮡnull;                                                  // use site, unchanged
+```
+Guarded by `HeapKeywordVar` (a package-level `var null` written through its pointer and read back both
+ways), alongside its existing keyword-named LOCAL coverage.
+
 ### A foreign struct's promoted method forwards through its value embed
 When the adapter's struct is FOREIGN (defined in another assembly) it binds forwarding from METADATA
 (the boxBound / refBound scan above); a member neither on its box nor a ref-static falls to

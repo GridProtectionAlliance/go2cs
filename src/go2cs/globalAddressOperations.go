@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"strings"
 )
 
 // packageAddressedGlobals holds the package-level value vars whose address is taken
@@ -147,7 +148,11 @@ func collectAddressedGlobals(files []FileEntry, pkg *types.Package, info *types.
 // box holds the value; the var name becomes a ref-returning property over the box, so
 // reads/writes of the global are unchanged. An empty initExpr defaults the value.
 func (v *Visitor) writeAddressedGlobalDecl(access, csTypeName, csIDName, initExpr string, valueIsRefLike bool) {
-	box := AddressPrefix + csIDName
+	// A KEYWORD-named global (`var null = …`, net/rpc/jsonrpc) arrives keyword-escaped
+	// (`@null`); composed after the marker glyph the escape is INTERIOR (`Ꮡ@null`), which
+	// lexes as two tokens. The glyph prefix already de-keywords the identifier, so strip
+	// the escape — matching every use-site composition (boxBaseName / convIdent).
+	box := AddressPrefix + strings.TrimPrefix(csIDName, "@")
 
 	if len(initExpr) == 0 {
 		// Use an explicitly typed default so the ж(in T value) constructor is chosen

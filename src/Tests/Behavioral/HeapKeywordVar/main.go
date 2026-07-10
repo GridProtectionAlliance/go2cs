@@ -13,6 +13,12 @@ func set(p *int) { *p = 42 }
 // struct is internal `@decimal`, and its exported-looking methods must CLAMP to internal -
 // the '@' escape previously read as exported in getAccess, emitting a public method with an
 // internal receiver parameter type (CS0051).
+// null is a C# keyword used as a PACKAGE-LEVEL var whose address is taken: the global's
+// heap-box backing FIELD must compose the box name with the escape stripped (`Ꮡnull`, not
+// the invalid two-token `Ꮡ@null`) while the ref property keeps the escaped name (`@null`),
+// matching every `&null` use site — net/rpc/jsonrpc's `var null = json.RawMessage([]byte("null"))`.
+var null = []byte("null")
+
 type decimal struct {
 	d int
 }
@@ -40,4 +46,10 @@ func main() {
 	var dec decimal
 	dec.Assign(7)
 	fmt.Println(dec.String())
+
+	// Write through the global's pointer, then read the global itself — the box backs the
+	// original storage, so the mutation is visible both ways.
+	p := &null
+	*p = append(*p, '!')
+	fmt.Println(string(null), string(*p))
 }

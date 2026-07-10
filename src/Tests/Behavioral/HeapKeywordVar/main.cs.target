@@ -10,6 +10,9 @@ internal static void set(ж<nint> Ꮡp) {
     p = 42;
 }
 
+internal static ж<slice<byte>> Ꮡnull = new(slice<byte>((@string)"null"));
+internal static ref slice<byte> @null => ref Ꮡnull.ValueSlot;
+
 [GoType] partial struct @decimal {
     internal nint d;
 }
@@ -34,6 +37,9 @@ internal static void Main() {
     @decimal dec = default!;
     dec.Assign(7);
     fmt.Println(dec.String());
+    var p = Ꮡnull;
+    p.ValueSlot = append(p.ValueSlot, (byte)((rune)'!'));
+    fmt.Println(((@string)@null), ((@string)(p.ValueSlot)));
 }
 
 } // end main_package
