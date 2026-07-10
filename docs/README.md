@@ -48,6 +48,8 @@ Go application in C# — this is the moment the foundation went from theory to a
 
 ---
 
+## go2cs
+
 Convert source code written in the [Go programming language](https://golang.org/ref/spec) into
 [C#](https://learn.microsoft.com/dotnet/csharp/). The generated C# is designed to be both *behaviorally*
 and *visually* similar to the original Go — so a Go developer can read the converted code and follow it
@@ -201,7 +203,6 @@ High level timeline of the project's major turning points. Full detail lives in 
 | 2026-06-25 | Baseline ↔ full-conversion separation | `3c8b3a848` | Compiling curated baseline restored to `src/core`; the WIP full conversion isolated in `src/go-src-converted`. Green build and the converter-improvement loop restored. |
 | 2026-06-26 | First full-conversion package promoted | `05a53e8c0` | `sync/atomic` migrated into the baseline (`atomic.Pointer[T]` backed by a managed slot). |
 | 2026-06-27 | `math` package compiles clean | `math-green-2026-06-27` (`914d4bd72`) | Nine full-conversion packages greened via 19 behaviorally-tested converter fixes; the core, widely-imported `math` now compiles. |
-| 2026-06-25 → ongoing | Phase 3 compile grind (`runtime` 952 → 138) | `f3713df61` … | Iterative, test-locked converter fixes drive the full stdlib toward a clean compile; `runtime` — the root of the dependency graph — is down from 952 errors to 138. |
 | 2026-07-10 | **First clean full-standard-library compile** | `51ba5d9cf` · `stdlib-green-2026-07-10` | The Phase 3 endpoint, reached: all **302** `src/go-src-converted` packages (Go 1.23.1) compile with zero errors — `runtime`, `reflect`, `net/http`, `go/types`, `crypto/tls` and every other package included. Gated by 371 Go-vs-C# behavioral regression tests; the compiled snapshot is committed alongside this row (see the NEWS section). |
 
 ## C# to Go?
