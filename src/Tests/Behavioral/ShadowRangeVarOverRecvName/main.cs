@@ -11,7 +11,7 @@ partial class main_package {
 internal static slice<ж<node>> collect(this ж<node> Ꮡc, slice<ж<node>> chain) {
     ref var c = ref Ꮡc.Value;
 
-    var describe = () => Ꮡc.Value.name;
+    var describe = @string () => Ꮡc.Value.name;
     slice<ж<node>> toCheck = default!;
     toCheck = append(toCheck, Ꮡc);
     foreach (var (_, cΔ1) in chain) {

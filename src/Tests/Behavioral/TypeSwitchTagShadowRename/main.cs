@@ -44,7 +44,7 @@ internal static (@string, @string) classifyVia(any v) {
         return vΔ1;
     };
     var unwrapʗ1 = unwrap;
-    var pick = (any vΔ2) => {
+    var pick = @string (any vΔ2) => {
         switch (unwrapʗ1(vΔ2).type()) {
         case nint vΔ3: {
             return fmt.Sprintf("int:%d"u8, vΔ3);

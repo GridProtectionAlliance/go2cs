@@ -54,10 +54,9 @@ internal static @string classify(shape v) {
 
 internal static @string classifyMulti(shape v) {
     switch (v.type()) {
-    case ж<circle> t: {
-        return "multi ptr "u8 + t.name();
-    }
-    case ж<square> t: {
+    case ж<circle> _:
+    case ж<square> _: {
+        var t = v;
         return "multi ptr "u8 + t.name();
     }
     case dot t: {
