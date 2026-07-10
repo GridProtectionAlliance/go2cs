@@ -301,6 +301,14 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println("verdict score:", sc.Score());
     sc = new talliesжScored(Ꮡ(new tallies(pts: 7)));
     fmt.Println("tallies score:", sc.Score());
+    var cal = (Action<ж<CrossPkgLib.Sensor>, CrossPkgLib.Celsius>)(CrossPkgLib.Calibrate);
+    var mx = Ꮡ(new CrossPkgLib.Sensor(Name: "mx"u8, Temp: 10));
+    cal(mx, 4);
+    fmt.Println((float64)(~mx).Temp);
+    var hot = (Func<CrossPkgLib.Sensor, bool>)(CrossPkgLib.Hot);
+    fmt.Println(hot(mx.Value), hot(new CrossPkgLib.Sensor(Temp: 60)));
+    var madd = (Func<CrossPkgLib.Celsius, CrossPkgLib.Celsius, CrossPkgLib.Celsius>)(CrossPkgLib.Add);
+    fmt.Println((float64)madd(2, 3));
 });
 
 [GoType("num:float64")] partial struct localCelsius;

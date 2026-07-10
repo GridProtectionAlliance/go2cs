@@ -650,7 +650,41 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// primary form does. FuncPCABIInternal-style `any` parameters then take a real delegate.
 	if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.MethodExpr {
 		delegateType := convertToCSTypeName(v.getCSTypeName(v.info.TypeOf(selectorExpr)))
-		return fmt.Sprintf("(%s)(%s)", delegateType, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+		methodName := v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))
+
+		// A FOREIGN type's method expression — `(*http.Request).Write` (net/http/httputil
+		// persist.go) — must QUALIFY the method's static form: the [GoRecv]/extension static
+		// (and its RecvGenerator ж-overload) lives in the DEFINING package's class, so the
+		// bare name is CS0103 (or mis-binds a same-named local method group, CS0123). The Go
+		// operand necessarily spells the type through its package qualifier — peel
+		// `(*http.Request)` to the `http` package ident and render it exactly as any
+		// package-qualified reference does (sanitization and collision renames included).
+		if obj := sel.Obj(); obj != nil && obj.Pkg() != nil && obj.Pkg() != v.pkg {
+			operand := selectorExpr.X
+
+			for {
+				switch x := operand.(type) {
+				case *ast.ParenExpr:
+					operand = x.X
+					continue
+				case *ast.StarExpr:
+					operand = x.X
+					continue
+				}
+
+				break
+			}
+
+			if typeSel, ok := operand.(*ast.SelectorExpr); ok {
+				if pkgIdent, ok := typeSel.X.(*ast.Ident); ok {
+					if _, isPkg := v.identifierIsPackageName(pkgIdent); isPkg {
+						methodName = v.convExpr(typeSel.X, nil) + "." + methodName
+					}
+				}
+			}
+		}
+
+		return fmt.Sprintf("(%s)(%s)", delegateType, methodName)
 	}
 
 	// A method call on a manually-converted foreign-receiver method (`gp.guintptr()` on a *g —

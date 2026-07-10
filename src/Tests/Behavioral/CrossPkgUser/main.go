@@ -468,6 +468,21 @@ func main() {
 	fmt.Println("verdict score:", sc.Score()) // verdict score: 40
 	sc = &tallies{pts: 7}
 	fmt.Println("tallies score:", sc.Score()) // tallies score: 7
+
+	// A METHOD EXPRESSION on a FOREIGN type — `(*CrossPkgLib.Sensor).Calibrate` — must render
+	// the [GoRecv]/extension static QUALIFIED with the defining package's class
+	// (`CrossPkgLib.Calibrate`, binding the RecvGenerator ж-overload); the bare name is CS0103
+	// (net/http/httputil's `(*http.Request).Write`, persist.go). The value-receiver forms
+	// (`Sensor.Hot`, `Celsius.Add`) qualify the same way. Each is invoked through its func
+	// value, with the pointer form's write observed through the original receiver.
+	cal := (*CrossPkgLib.Sensor).Calibrate
+	mx := &CrossPkgLib.Sensor{Name: "mx", Temp: 10}
+	cal(mx, 4)
+	fmt.Println(float64(mx.Temp)) // 14
+	hot := CrossPkgLib.Sensor.Hot
+	fmt.Println(hot(*mx), hot(CrossPkgLib.Sensor{Temp: 60})) // false true
+	madd := CrossPkgLib.Celsius.Add
+	fmt.Println(float64(madd(2, 3))) // 5
 }
 
 // localCelsius is a LOCAL named numeric over `float64` (NOT over a cross-package type), so a
