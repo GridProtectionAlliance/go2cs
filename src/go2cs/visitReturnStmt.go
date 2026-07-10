@@ -91,6 +91,19 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 	result := strings.Builder{}
 	deferredDecls := strings.Builder{}
 
+	// A func literal passed as a call ARGUMENT inside a return expression (`return HandlerFunc(
+	// func(w, r) {…}), "", nil` — net/http registerErr) emits its captured-variable snapshot
+	// declarations (`var allowedMethodsʗ1 = allowedMethods;`) — statements, invalid inside an
+	// expression. A DIRECT func-literal result threads lambdaContext.deferredDecls, but a literal
+	// nested as a call argument falls back to the pre-statement hoist sink (see convFuncLit /
+	// convExprList); provide one and splice it in before the `return` through the
+	// DeferredDeclsMarker slot (mirrors visitIfStmt/visitForStmt/visitExprStmt).
+	savedHoist := v.hoistedDecls
+	hoistBuf := &strings.Builder{}
+	v.hoistedDecls = hoistBuf
+
+	defer func() { v.hoistedDecls = savedHoist }()
+
 	// In namedReturnDeferMode a `return e1, e2` assigns the named result params and then returns
 	// (via the void func() wrapper); the wrapper's caller side emits the actual `return <named>`
 	// after the defers run. So here we emit `(named1, named2) = (e1, e2); return;` for an explicit
@@ -440,11 +453,15 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 		result.WriteString(" return;")
 	}
 
-	if deferredDecls.Len() == 0 {
-		deferredDecls.WriteString(v.newline)
+	// Hoisted capture-snapshot decls (each `\n<indent>decl;` with a trailing newline) precede any
+	// deferred decls in the marker slot; the return's own indent follows the slot.
+	hoisted := hoistBuf.String() + deferredDecls.String()
+
+	if len(hoisted) == 0 {
+		hoisted = v.newline
 	}
 
-	v.targetFile.WriteString(strings.ReplaceAll(result.String(), DeferredDeclsMarker, deferredDecls.String()))
+	v.targetFile.WriteString(strings.ReplaceAll(result.String(), DeferredDeclsMarker, hoisted))
 }
 
 // crossBaseConstCastFor returns the two-step cast chain for an untyped-CONSTANT result whose

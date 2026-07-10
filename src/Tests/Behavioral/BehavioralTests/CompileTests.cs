@@ -822,6 +822,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckReturnPointerFieldOfParam() => CheckTarget("ReturnPointerFieldOfParam");
 
     [TestMethod]
+    public void CheckReturnTupleFuncLitArg() => CheckTarget("ReturnTupleFuncLitArg");
+
+    [TestMethod]
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
 
     [TestMethod]

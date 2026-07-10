@@ -757,6 +757,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckReturnPointerFieldOfParam() => CheckTarget("ReturnPointerFieldOfParam");
 
     [TestMethod]
+    public void CheckReturnTupleFuncLitArg() => CheckTarget("ReturnTupleFuncLitArg");
+
+    [TestMethod]
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
 
     [TestMethod]

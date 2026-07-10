@@ -825,6 +825,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckReturnPointerFieldOfParam() => CheckTarget("ReturnPointerFieldOfParam");
 
     [TestMethod]
+    public void CheckReturnTupleFuncLitArg() => CheckTarget("ReturnTupleFuncLitArg");
+
+    [TestMethod]
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
 
     [TestMethod]

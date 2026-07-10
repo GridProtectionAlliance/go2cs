@@ -1790,6 +1790,31 @@ capturing an enclosing map, passed as an argument inside a plain `if` condition,
 an init clause, a traditional `for` condition, and a while-style `for` condition, all output-compared vs
 Go.)
 
+### A func-literal ARGUMENT inside a return expression hoists its captures before the `return`
+
+The third statement position with the same hazard: a capturing func literal passed as a call argument
+**inside a return expression** — net/http's `findHandler` returns
+`HandlerFunc(func(w ResponseWriter, r *Request) { … allowedMethods … }), "", nil, nil`, and traceviewer's
+`MainHandler` returns `http.HandlerFunc(func(){ … views … })`. A **direct** func-literal result threads
+`lambdaContext.deferredDecls` (the go/defer/return channel in `convFuncLit`), but a literal nested as a
+call **argument** falls back to the pre-statement hoist sink, which `visitReturnStmt` never provided —
+the snapshot declaration was dumped inline inside the return expression (10 syntax errors in `server.cs`,
+a 4-error cascade in traceviewer). `visitReturnStmt` now provides the same hoist buffer as
+`visitExprStmt`/`visitIfStmt`/`visitForStmt` and splices it before the `return` through its existing
+`DeferredDeclsMarker` slot (ahead of any deferred tuple-deconstruction temps):
+
+```csharp
+var allowedʗ1 = allowed;
+return (wrap((@string msg) => {
+    fmt.Println(allowedʗ1[0] + ":" + msg, len(allowedʗ1));
+}), "label", default!);
+```
+
+The buffer is empty for a return with no capturing-literal argument, so the behavioral corpus is
+byte-identical. (Guarded by `ReturnTupleFuncLitArg` — a slice-capturing literal as a call argument inside
+a three-result return tuple, and a map-capturing one inside a single-result return, output-compared vs
+Go.)
+
 Handling Go `defer` / `panic` / `recover` requires that the converted function run inside a [Go function execution context](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/GoFunc.cs). The context provides the [`defer`](https://golang.org/ref/spec#Defer_statements) call stack and the [`recover`](https://golang.org/pkg/builtin/#recover) handling; `panic` is the global [`panic`](https://golang.org/pkg/builtin/#panic) built-in (a `using static go.builtin`). The body is emitted as a lambda taking two parameters, `defer` and `recover`:
 
 ```go
