@@ -64,6 +64,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAnyStringLitAssign() => CheckTarget("AnyStringLitAssign");
 
     [TestMethod]
+    public void CheckAnyStringLitChanSend() => CheckTarget("AnyStringLitChanSend");
+
+    [TestMethod]
     public void CheckAnyStringLitComposite() => CheckTarget("AnyStringLitComposite");
 
     [TestMethod]

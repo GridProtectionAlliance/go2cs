@@ -87,7 +87,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 				}
 
 				v.targetFile.WriteRune('(')
-				v.targetFile.WriteString(v.convExpr(sendStmt.Value, nil))
+				v.targetFile.WriteString(v.convSendValueExpr(sendStmt))
 
 				if v.options.useChannelOperators {
 					v.targetFile.WriteString(", ")

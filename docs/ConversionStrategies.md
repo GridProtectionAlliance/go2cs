@@ -516,6 +516,30 @@ string basic-literals are affected; every non-`any` slot keeps its exact prior f
 `AnyStringLitComposite` behavioral test — all the shapes above, each read back through a `string`
 type-switch to prove runtime identity, output-compared vs Go.)
 
+The same boxing applies to a **channel send** whose element type is the empty interface — both the
+statement form and the select-case registration form. The send value previously converted with no
+target-type context at all, so the literal's default `"…"u8` span failed against the channel's
+`in object` send parameter (CS1503):
+
+```go
+ch := make(chan any, 1)
+ch <- "text"                    // statement send
+select { case ch <- "sel": … }  // select-case send (registration form)
+```
+
+```csharp
+ch.ᐸꟷ((@string)"text");                              // NOT "text"u8 (CS1503)
+switch (select(ch.ᐸꟷ((@string)"sel", ꓸꓸꓸ))) { … }    // registration form takes the same box
+```
+
+Both send positions route through a shared `convSendValueExpr` (`visitSendStmt.go`), which resolves
+the channel's ELEMENT type and applies the same `isEmptyInterfaceTarget`/`isStringBasicLit` gate as
+the assignment and composite-literal positions (a type-parameter element is excluded; only string
+basic-literals are affected). The same helper also activates the NON-empty interface element wrap —
+see [Maps and Channels](#maps-and-channels). (Guarded by the `AnyStringLitChanSend` behavioral test —
+statement and select-case sends read back through a `string` type-switch and an `x.(string)`
+assertion to prove runtime identity, output-compared vs Go.)
+
 ## Inline Assignment Order of Operations
 All right-hand operands in assignment expressions in Go are evaluated before assignment to the left-hand operands. C# can operate equivalently using tuple deconstruction (_thanks to Eugene Bekker for the [suggestion](https://github.com/GridProtectionAlliance/go2cs/issues/6)_). For the following Go code:
 
@@ -1106,6 +1130,31 @@ A defined map type — `type Grades map[string]int` — emits the `[GoType("map[
 For source-generated named-map wrappers, the generator parses the `[GoType("map[K, V]")]` payload at the top-level comma, not every comma in the string. This matters for function-valued maps: `type opTable map[CrossPkgLib.Ticks]func(int, int) int` emits `map<global::go.CrossPkgLib_package.Ticks, Func<nint, nint, nint>>`, preserving the full delegate as the value type. Any source-file alias used inside the `[GoType]` payload is resolved through Roslyn and rewritten to its fully-qualified target before the template emits `IMap<K, V>`, `IDictionary<K, V>`, and `ICollection<KeyValuePair<K, V>>`; generated files therefore do not depend on file-local package aliases such as `using token = ...`. (Guarded by `NamedMapCrossPkgKey`.)
 
 A map indexed by a **non-empty interface key** converts a concrete key expression through the same interface-adapter path used by assignments and call arguments. For example, `seen[item] = "kept"` where `seen` is `map[Node]string` and `item` is `*Item` emits `seen[new ItemжNode(item)] = "kept"u8`; the comma-ok read emits the same adapter for the key, `seen[new ItemжNode(item), ꟷ]`. This records the pointer implementation (`GoImplement<Item, Node>(Pointer = true)`) and keeps dictionary lookup semantics aligned with Go's interface key identity. Empty-interface map keys keep their existing literal handling (`map[any]...` turns string literals into Go strings rather than UTF-8 spans), and pointer-typed map keys keep the direct pointer-box path. (Guarded by `InterfaceMapKeyPointer`.)
+
+A value sent into a channel of **non-empty interface element type** converts through the same
+interface-adapter path used by assignments and call arguments — the send emission previously tested
+the CHANNEL type itself for interface-ness (never true, its underlying is `*types.Chan`), so no
+conversion ever fired. A value implementation sends bare while recording the implement pair for the
+generator (`vs.ᐸꟷ(new dog(name: "rex"u8))` with `[assembly: GoImplement<dog, speaker>]`); a pointer
+implementation wraps the box in its generated pointer adapter:
+
+```go
+ps := make(chan speaker, 1)
+c := &cat{name: "tom"}
+ps <- c
+```
+
+```csharp
+var ps = new channel<speaker>(1);
+var c = Ꮡ(new cat(name: "tom"u8));
+ps.ᐸꟷ(new catжspeaker(c));   // records GoImplement<cat, speaker>(Pointer = true)
+```
+
+A pointer-typed send value renders as its box (parity with the argument-position rule in
+`convExprList`), and a type-parameter element (`chan T` in generic code) keeps the bare emission.
+The string-literal empty-interface arm of the same helper is described under
+[Empty Interface](#empty-interface). (Guarded by `AnyStringLitChanSend` — a value impl and a pointer
+impl sent through a `chan speaker`, method-dispatched on receive, output-compared vs Go.)
 
 ### Select statement lowering (terminating and empty clauses)
 

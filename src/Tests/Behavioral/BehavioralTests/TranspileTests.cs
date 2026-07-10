@@ -60,6 +60,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAnyStringLitAssign() => CheckTarget("AnyStringLitAssign");
 
     [TestMethod]
+    public void CheckAnyStringLitChanSend() => CheckTarget("AnyStringLitChanSend");
+
+    [TestMethod]
     public void CheckAnyStringLitComposite() => CheckTarget("AnyStringLitComposite");
 
     [TestMethod]
