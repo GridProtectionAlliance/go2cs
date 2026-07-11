@@ -141,18 +141,8 @@ cd src/go2cs
 go install .
 ```
 
-Re-run the same command after pulling new source to refresh the installed binary (a stale copy is what
-produces `flag provided but not defined` for newer options such as `-recurse`). Alternatively, build a
-local binary and place it on your `PATH` yourself:
-
-```shell
-cd src/go2cs
-go build -o go2cs .
-```
-
 Go produces a self-contained native binary. To target another platform, use Go's standard cross-compilation
-(`GOOS`/`GOARCH`); matching per-platform [profiles](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go2cs/profiles)
-are included.
+(`GOOS`/`GOARCH`).
 
 ## Usage
 
@@ -239,7 +229,7 @@ This step uses two tools from opposite folders, so mind where each runs:
 
 ```shell
 # (a) In the go2cs repo's  src/  folder, stage the pre-converted stdlib + runtime + analyzer at
-#     %GOPATH%\src\go2cs (the "deploy root") -- done once per machine:
+#     %GOPATH%\src\go2cs (the "deploy root") -- done once per machine or at go2cs updates:
 cd path\to\go2cs\src
 deploy-core stdlib          # the full compilable standard library (best for arbitrary imports)
                             #   deploy-core stub  = the smaller runnable baseline subset
@@ -272,7 +262,7 @@ dotnet build "%GOPATH%\src\go2cs\go2cs-recurse.slnx" -c Debug
 module shapes (this `fatih/color` example compiles clean — app + all four dependency projects), but some
 third-party packages still surface residual per-package conversion defects. The design, the validated
 results, and the known-limitation backlog are tracked in
-[`DESIGN-recursive-enduser-conversion.md`](DESIGN-recursive-enduser-conversion.md).
+[`DESIGN-recursive-enduser-conversion.md`](Phase3/DESIGN-recursive-enduser-conversion.md).
 
 ## Project layout
 
