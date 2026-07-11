@@ -318,14 +318,18 @@ constructs appears in the corpus):
   const typed through an alias to a named type (`type Errno = syscall.Errno`) emits `static readonly`.
   **`golang.org/x/sys/windows` now compiles** — the syscall/Windows-API "raw-metal" package.
 
-These took the `fatih/color` build from **188 → 2 errors**. The remaining 2 are a **fourth** defect, this
-one in **go2cs-gen** (the Roslyn generator, not the converter): a `GoImplicitConv<@short, dword>` whose
-constructed type is a C# primitive (`short`) emits `partial struct short { implicit operator short(dword)
-=> new short(…) }` — hosting a user-defined operator in the static package class (CS0715) with an invalid
-`new short(…)` body (CS0057). The fix (host the operator in the local Go struct — the parameter side — and
-emit a cast body) was drafted but could not be verified in the scratch build environment (analyzer-reload
-mechanics) and was not landed; it is a Phase-4 go2cs-gen item. With it, `go-colorable` → `color` →
-`colordemo` would all compile and `fatih/color` would build fully.
+These took the `fatih/color` build from **188 → 2 errors**. The remaining 2 were a **fourth** defect, this
+one in **go2cs-gen** (the Roslyn generator, not the converter): a Go defined type named after a C# keyword
+(`type short int16` in go-colorable) is declared `partial struct @short`, but `ImplicitConvGenerator` built
+the conversion operator's host/return from the raw symbol name `short`, emitting `partial struct short {
+implicit operator short(dword) => new short(…) }` — which parses the operator into the enclosing static
+class (CS0715/CS0057) and, once the names were escaped, cast `dword.Value` (`uint`) straight to `@short`
+(CS0030) because the numeric-conversion body was skipped (`GetStructDeclaration` matched `Identifier.Text`
+`"@short"` against the symbol name `"short"`). **Fixed** (keyword-escape the type names via `EscapeCsKeyword`;
+match `GetStructDeclaration` on the `@`-stripped `ValueText`), yielding `partial struct @short { implicit
+operator @short(dword src) => new @short((short)src.Value); }`. **`fatih/color` now builds fully — 0 errors,
+all five projects** (app + color + colorable + isatty + x/sys/windows). Gate: full behavioral suite green
+(the generator change is byte-identical for the corpus — no keyword-named `GoImplicitConv` structs there).
 
 ## 6. Open decisions (RESOLVED)
 

@@ -95,8 +95,13 @@ public class ImplicitConvGenerator : ISourceGenerator
                 // output for the whole compilation.
                 continue;
 
-            string sourceTypeName = sourceType.GetFullTypeName();
-            string targetTypeName = targetType.GetFullTypeName();
+            // Keyword-escape the type names: a Go defined type named after a C# keyword (`type short
+            // int16` in github.com/mattn/go-colorable) is declared `partial struct @short`, so the
+            // operator's host, return, and `new` must use `@short` too — the raw symbol name `short`
+            // yields `partial struct short`, which parses the operator into the enclosing static class
+            // (CS0715/CS0057). EscapeCsKeyword is a no-op for every non-keyword (and generic) name.
+            string sourceTypeName = EscapeCsKeyword(sourceType.GetFullTypeName());
+            string targetTypeName = EscapeCsKeyword(targetType.GetFullTypeName());
 
             // Get the attribute's argument values, if defined
             (string name, string value)[] arguments = attributeSyntax.GetArgumentValues();
@@ -126,7 +131,7 @@ public class ImplicitConvGenerator : ISourceGenerator
             {
                 valueType = valueType![1..^1];
                 structMembers = [];
-                targetTypeName = targetType.GetFullTypeName(true);
+                targetTypeName = EscapeCsKeyword(targetType.GetFullTypeName(true));
             }
 
             // Cross-package numeric conversion whose operator constructs a FOREIGN named-numeric type
@@ -356,8 +361,12 @@ public class ImplicitConvGenerator : ISourceGenerator
         if (PointerExpr.IsMatch(structName))
             structName = structName[(structName.IndexOf('<') + 1)..^1];
 
+        // Match on ValueText (the identifier WITHOUT any `@` escape) against the `@`-stripped name, so a
+        // keyword-named struct declared `partial struct @short` is found whether the caller passes the
+        // symbol name `short` or the escaped `@short` — otherwise its [GoType("num:…")] tag is missed and
+        // the numeric-conversion body falls back to a broken `(@short)src.Value` cast (CS0030).
         return context.SemanticModel.Compilation.SyntaxTrees
             .SelectMany(tree => tree.GetRoot().DescendantNodes().OfType<StructDeclarationSyntax>())
-            .FirstOrDefault(structDeclaration => structDeclaration.Identifier.Text == structName);
+            .FirstOrDefault(structDeclaration => structDeclaration.Identifier.ValueText == structName.TrimStart('@'));
     }
 }
