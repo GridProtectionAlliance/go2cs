@@ -14,7 +14,7 @@ defer/panic/recover, goroutines, struct embedding, interface duck-typing) are em
 hand-written runtime library or by Roslyn source generators, so the visible converted code stays close
 to the Go original.
 
-This is the **"go2cs2"** generation of the project: the converter is now **written in Go** using the
+This is the **"go2cs iteration 2"** generation of the project: the converter is now **written in Go** using the
 official `go/ast` + `go/types` toolchain. The earlier converter (C# + ANTLR4 grammar) is fully retired —
 the last build scripts that referenced it (`convert-gosrc.*`) were removed 2026-07-11.
 
