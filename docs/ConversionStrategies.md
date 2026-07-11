@@ -536,24 +536,18 @@ method group `defer(fn)`; one that must capture arguments at defer-time uses `de
 `panic(x)` lowers to `throw panic(x)`:
 
 ```go
-func (o *Once) doSlow(f func()) {         // sync/once.go
-    o.m.Lock()
-    defer o.m.Unlock()
-    if o.done.Load() == 0 {
-        defer o.done.Store(1)
-        f()
-    }
+func withLock(lk sync.Locker, fn func()) {   // database/sql/sql.go
+    lk.Lock()
+    defer lk.Unlock() // in case fn panics
+    fn()
 }
 ```
 ```csharp
-internal static void doSlow(this ж<Once> Ꮡo, Action f) => func((defer, recover) => {  // sync/once.cs
-    ref var o = ref Ꮡo.Value;
-    Ꮡo.of(Once.Ꮡm).Lock();
-    defer(Ꮡo.of(Once.Ꮡm).Unlock);
-    if (Ꮡo.of(Once.Ꮡdone).Load() == 0) {
-        deferǃ(Ꮡo.of(Once.Ꮡdone).Store, (uint32)(1), defer);
-        f();
-    }
+internal static void withLock(sync.Locker lk, Action fn) => func((defer, recover) => {  // database/sql/sql.cs
+    lk.Lock();
+    defer(lk.Unlock);
+    // in case fn panics
+    fn();
 });
 ```
 
