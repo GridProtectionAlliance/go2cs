@@ -5,9 +5,11 @@ library that compiles, passes its upstream tests, and has working C# implementat
 assembly-backed declarations. Sequenced **green the loop first**, then compile, validate, and complete
 the full conversion.
 
-> **Status (2026-06-27): Phases 0–2 done — baseline is green.** Phase 3 is driving the full conversion
-> to compile. Phase 4 will convert and run Go's own package tests; Phase 5 will use those tests to prove
-> the C# implementations that replace assembly/cgo stubs.
+> **Status (2026-07-10): Phases 0–3 done — the full standard library compiles.** All **302** packages of
+> the `src/go-src-converted` auto-conversion (Go 1.23.1) build clean as .NET assemblies (commit `51ba5d9cf`,
+> tag `stdlib-green-2026-07-10`) — the Phase-3 milestone. **Compiling, not yet operational:** Phase 4 will
+> convert and run Go's own package tests; Phase 5 will use those tests to prove the C# implementations that
+> replace assembly/cgo stubs.
 
 ## Phase 0 — Documentation ✅ done
 
@@ -95,7 +97,19 @@ Each verified by rebuild + reconvert + compile:
 - Negative typed const (`int8 = -1`) promoted to `GoUntyped` because the range check used `ParseUint`
   (rejects negatives) → also try `ParseInt` (`visitValueSpec.go`).
 
-## Phase 3 — Drive the full conversion to compile
+## Phase 3 — Drive the full conversion to compile ✅ done (2026-07-10)
+
+**Outcome:** all **302** packages of `src/go-src-converted` (the full Go 1.23.1 standard-library
+auto-conversion) compile clean as .NET assemblies — zero errors, zero exclusions — reached 2026-07-10
+(commit `51ba5d9cf`, tag `stdlib-green-2026-07-10`). `runtime`, `reflect`, `net/http`, `go/types`,
+`crypto/tls`, `database/sql` and every other package are included. Every fix was root-caused against real
+emitted C#, locked in by a Go-vs-C# behavioral regression test (371 and counting), and verified byte-for-byte
+against the full corpus before landing. **Compiling is the milestone, not operational** — running each
+package's own tests is Phase 4. The narrative of the two-week finishing campaign is in the
+[`README.md`](README.md) NEWS section; the strategy that got there is below, followed by the early iteration
+log (retained as historical record — its dated "Next:" items are long since done).
+
+The original Phase-3 plan:
 
 1. **Build-error roadmap.** Convert + `dotnet build` `src/go-src-converted/`, capture `build.log`; bucket
    compile errors by **frequency** and by **Go feature**. This is the prioritized work queue (the README
@@ -619,11 +633,11 @@ package/target matrix.
 
 | Metric | Source | Status |
 |---|---|---|
-| Baseline + tests build clean | `dotnet build src/go2cs.sln` | ✅ 79 / 79 |
-| Behavioral suite passing | `BehavioralTests` (MSTest) | ✅ 216 tests |
-| Full packages compiling | `src/go-src-converted.sln` | ◻ Phase 3 — iters 1–2: 5 converter fixes; `internal/cpu` ~140→8 errors |
-| Full-conversion error count | build-error buckets | ◻ Phase 3 — next: address-of-global correctness; re-bucket after reconvert |
-| Converted package tests | Per-package Phase 4 manifests/results | ◻ Phase 4 planned — requirements complete |
+| Baseline + tests build clean | `dotnet build src/go2cs.slnx` | ✅ green |
+| Behavioral suite passing | `BehavioralTests` / `BehavioralRunner` | ✅ 371 projects |
+| Full packages compiling | `src/go-src-converted.slnx` | ✅ **302 / 302** (2026-07-10, `51ba5d9cf`) |
+| Full-conversion error count | build-error buckets | ✅ **0** |
+| Converted package tests | Per-package Phase 4 manifests/results | ◻ Phase 4 — next; requirements complete |
 | Assembly-backed implementations | Phase 5 external-declaration ledger | ◻ Phase 5 planned — gated by Phase 4 validation |
 
 ## Reference: open converter items (`src/go2cs/ToDo.md`)

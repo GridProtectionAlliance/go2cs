@@ -10,8 +10,10 @@ converter-improvement loop and the full-stdlib goal from colliding again.
    tests and converter-improvement loop build against. It must always stay green.
 
 2. **Full auto-conversion — `src/go-src-converted/`** *(target location)*
-   The entire Go standard library (~305 packages) auto-converted by `go2cs -stdlib`. The **ultimate
-   goal**, but **work in progress — does not all compile yet**.
+   The entire Go standard library (302 packages, Go 1.23.1) auto-converted by `go2cs -stdlib`. The
+   **ultimate goal — and as of 2026-07-10 all 302 packages compile clean** (commit `51ba5d9cf`, tag
+   `stdlib-green-2026-07-10`; the Phase-3 milestone). Compiling, not yet operational — running Go's own
+   package tests is Phase 4.
 
 3. **Runtime — `src/core/golib/`**
    Hand-written C# runtime (`slice`, `map`, `channel`, `@string`, `builtin`, `ж<T>`, type aliases).

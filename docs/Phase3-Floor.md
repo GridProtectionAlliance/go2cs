@@ -1,5 +1,9 @@
 # Phase 3 Floor Assessment — stdlib compile milestone
 
+> ✅ **PHASE 3 COMPLETE (2026-07-10, commit `51ba5d9cf`, tag `stdlib-green-2026-07-10`) — 302/302 packages
+> compile.** The assessment below is a mid-campaign snapshot (2026-07-05, 239/302); it is **retained as
+> historical record**. Next is Phase 4 (operational — running Go's own tests); see [`Roadmap.md`](Roadmap.md).
+
 > Snapshot after the 2026-07-05 converter-fix campaign (~14 roots this session). Measures the full
 > `src/go-src-converted` auto-conversion (**303 projects**) built as one solution
 > (`go-src-converted.sln`). "Compiling" = the C# compiles; **operational correctness is Phase 4**, not

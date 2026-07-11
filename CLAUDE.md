@@ -15,8 +15,15 @@ hand-written runtime library or by Roslyn source generators, so the visible conv
 to the Go original.
 
 This is the **"go2cs2"** generation of the project: the converter is now **written in Go** using the
-official `go/ast` + `go/types` toolchain. The earlier converter (C# + ANTLR4 grammar) is retired — a few
-build scripts still reference it (see *Known staleness* below).
+official `go/ast` + `go/types` toolchain. The earlier converter (C# + ANTLR4 grammar) is fully retired —
+the last build scripts that referenced it (`convert-gosrc.*`) were removed 2026-07-11.
+
+> **General working principles** (think before coding, simplicity first, surgical changes, goal-driven
+> execution) live in the user-global `~/.claude/CLAUDE.md` so they apply across all projects. This file adds
+> the go2cs-specific discipline: root-cause against the real emitted `.cs`/`.cs.target` (the golden is the
+> authoritative record), keep the A/B footprint minimal, change *only* the goldens a fix must, and prove no
+> corpus drift with `check-no-regression` — **compiling is not correctness** (that is the Phase-3 → Phase-4
+> distinction).
 
 ## Architecture map
 
@@ -26,14 +33,16 @@ build scripts still reference it (see *Known staleness* below).
 | **Runtime library (`golib`)** | `src/core/golib/` | C# | Hand-written Go semantics: `slice<T>`, `map<K,V>`, `channel<T>`, `@string`, `array<T>`, `builtin` (`append`/`len`/`make`/`panic`/`recover`…), `ж<T>` heap box, `nil`, type aliases. **Shared by everything; never auto-overwritten.** |
 | **Source generators** | `src/gen/go2cs-gen/` | C# (Roslyn) | Compile-time Go semantics: `ImplementGenerator` (interface impl), `RecvGenerator` (pointer-receiver overloads), `ImplicitConvGenerator` (type-alias conversions), `TypeGenerator` (struct embedding/promotion). Referenced as an **analyzer** by every converted project. |
 | **Baseline stdlib** | `src/core/<pkg>` | C# (converted) | Small hand-finished stdlib subset (errors, fmt, io, math, math/rand, sort, strings, sync, **sync/atomic**, time, unsafe, a few internal/*) — **compiles**; the test loop builds against this. Restored from the old stub (`3426298eb`); `sync/atomic` promoted from the full conversion (2026-06-26, first migrated package). |
-| **Full auto-conversion (WIP)** | `src/go-src-converted/` | C# (converted) | Whole Go stdlib (~301 projects) auto-output. Does **not** all compile yet. Its own `src/go-src-converted.slnx`. |
-| **Behavioral tests** | `src/Tests/Behavioral/` (59 test projects + `BehavioralTests` runner) | Go + C# | Per-feature Go↔C# equivalence (arrays, channels, defer, generics, interfaces…). |
+| **Full auto-conversion** | `src/go-src-converted/` | C# (converted) | Whole Go stdlib (302 packages, Go 1.23.1) auto-output. **Compiles clean as of 2026-07-10** (the Phase-3 milestone; operational validation is Phase 4). Its own `src/go-src-converted.slnx`. |
+| **Behavioral tests** | `src/Tests/Behavioral/` (371 test projects + `BehavioralTests` runner) | Go + C# | Per-feature Go↔C# equivalence (arrays, channels, defer, generics, interfaces…). |
 | **Performance tests** | `src/Tests/Performance/` (8 `Perf*` benchmarks + `PerformanceRunner`) | Go + C# | Go vs transpiled C# (JIT **and** Native AOT) time/memory comparison — results table in its `README.md`. |
 | **Examples** | `src/Examples/` | Go + C# | Hand-converted Tour-of-Go / go101 / misc samples. |
 
-**Two solutions:** `src/go2cs.sln` = converter-dev workspace (golib + `go2cs-gen` + the baseline subset +
-all tests/examples/utilities) — **builds green**. `src/go-src-converted.slnx` = the WIP full conversion
-(301 projects), kept separate so it doesn't break the green solution.
+**Two solutions:** `src/go2cs.slnx` = converter-dev workspace (golib + `go2cs-gen` + the baseline subset +
+all tests/examples/utilities) — **builds green**. `src/go-src-converted.slnx` = the full conversion
+(302 packages, **compiling clean as of 2026-07-10**), kept separate so its `namespace go` classes don't
+collide with the baseline's. (A third, classic-format `src/go2cs-examples.sln` covers the samples — the two
+primary solutions are `.slnx`; the old hand-maintained classic `.sln` files are retired.)
 
 Converter internals (full taxonomy in [`docs/Architecture.md`](docs/Architecture.md)):
 - Entry: `src/go2cs/main.go`. Stdlib driver: `src/go2cs/stdLibConverter.go` (builds the package
@@ -126,12 +135,13 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
   hosts *before* the build — the lock manifests at build time — and runs with `--blame-hang`) over a bare
   `dotnet test`.
 - **Faster alternative to MSTest — the standalone runner `src/Tests/Behavioral/BehavioralRunner`
-  (2026-06-30).** A dependency-free console app that runs the same four phases over all **180** behavioral
-  projects (the "59" figures elsewhere in this doc are stale) but is **not** hosted in testhost, so the
-  self-lock failure mode above is structurally absent. It collapses the 180 per-project `dotnet build`
+  (2026-06-30).** A dependency-free console app that runs the same four phases over all **371** behavioral
+  projects but is **not** hosted in testhost, so the
+  self-lock failure mode above is structurally absent. It collapses the 371 per-project `dotnet build`
   calls into one parallel MSBuild invocation (pre-building the ~10 shared `golib`/analyzer/`core/*` deps
-  sequentially first to avoid the parallel-build MSB3026/27 race, then fanning out). **Full cold run ≈2 min
-  / warm ≈80s, all 180 green** — at parity with MSTest. Drive it via **`run-behavioral.ps1 [--filter X]
+  sequentially first to avoid the parallel-build MSB3026/27 race, then fanning out). **All 371 green**, at
+  parity with MSTest (a warm run is a few minutes — the parallel MSBuild invocation keeps wall-time from
+  scaling linearly with project count). Drive it via **`run-behavioral.ps1 [--filter X]
   [--phase transpile,compile,target,output] [--update-targets] [--list]`**. Only output-compared
   (`[GoTestMatchingConsoleOutput]`) projects are `go build`- and stdout-compared, matching MSTest
   (library-style projects like `Constraints` have no `package main`). For a pure converter no-regression
@@ -250,32 +260,34 @@ construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructField
 ## Current state & known issues
 
 - **Baseline is green:** `src/go2cs.slnx` builds clean and the behavioral suite passes. The
-  separation is done — `src/core` (stub baseline + `golib`) vs `src/go-src-converted` (full WIP). The
+  separation is done — `src/core` (stub baseline + `golib`) vs `src/go-src-converted` (full conversion). The
   converter-improvement loop is restored. **`sync/atomic` was promoted into `core` (2026-06-26)** — the first
   full-conversion package migrated to the baseline (scalar types are converter output; `Pointer[T]` is
   hand-rewritten with a managed slot + `Interlocked`, since `unsafe.Pointer`=`nuint` can't hold a managed
   reference across a GC — see [`docs/Roadmap.md`](docs/Roadmap.md)).
-- **Phase 3 in progress:** drive `src/go-src-converted` (the full ~301-package conversion) toward a clean
-  C# **compile** (the milestone is compiling, NOT operational — operational is Phase 4 / Go tests). See
-  [`docs/Roadmap.md`](docs/Roadmap.md) for the iteration log.
-  - **⚠ Strategy correction (2026-07-01):** **do NOT promote `go-src-converted → core` on a clean compile.**
-    Promotion is deferred to *post-Go-test* (Phase 4) and may not be needed. `core` stays the bootstrap
-    **stub** the behavioral tests build against (`sync/atomic` there is fine). The canonical
-    `[module: GoManualConversion]` / `*_impl.cs` files are hand-owned in `core` and must be copied **back
-    into `go-src-converted`** (overlay.sh does this) — that overlaid tree is the real final state.
-  - **⚠ The S1/CS0030 "architectural wall" is a FORK, not a wall (2026-07-01).** For **native-type** pointer/
-    unsafe ops (identical memory semantics in both GC languages) there IS a faithful conversion — do it in
-    the converter/`golib`. **Managed-referent** cases (`guintptr`/`muintptr`/… hiding a managed pointer in a
-    `uintptr`) hold the `ж<T>`/`object` **directly** (like `core/sync/atomic` `atomic.Pointer<T>`), never a
-    `nuint` round-trip. Only genuine **raw-metal on non-native types** (memory-layout math, type-descriptor
-    walking, `*.asm`) is the dragon → an immediate **`[module: GoManualConversion]` stub / review** (a stub
-    that compiles is an acceptable milestone solution). The loop SORTS these; it no longer stops at S1.
-    Full detail: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConversion.md) *The corrected
-    end-state*.
-  - **Iteration 1 (2026-06-25)** landed 4 converter fixes (variadic type-param, `comparable<T>`, asm/cgo
-    throwing stubs, filename build-constraint over-exclusion). Later sessions cleared the whole
-    shadow/rename/cast defect family (CS0266/CS0841/CS0136/CS8030/CS0161) — `runtime` 952 → ~138. **Next:**
-  address-of-a-field-of-an-anonymous-struct-global mangling (~140 errors from one bug).
+- **Phase 3 complete (2026-07-10 — commit `51ba5d9cf`, tag `stdlib-green-2026-07-10`):** all **302**
+  packages of the full `src/go-src-converted` conversion (Go 1.23.1) compile clean — zero errors, zero
+  exclusions (`runtime`, `reflect`, `net/http`, `go/types`, `crypto/tls`, `database/sql`, … all included).
+  **Compiling is the milestone, NOT operational** — operational validation is Phase 4 (running Go's own
+  package tests). Campaign detail: [`docs/Roadmap.md`](docs/Roadmap.md) (Phase 3 iteration log) and the
+  [`docs/README.md`](docs/README.md) NEWS section.
+  - **⚠ Promotion is still deferred (2026-07-01 ruling — the milestone did NOT change it):** do **not**
+    promote `go-src-converted → core` on a clean compile. Promotion waits for post-Go-test (Phase 4) and may
+    not be needed at all. `core` stays the bootstrap **stub** the behavioral tests build against (`sync/atomic`
+    there is fine). The canonical `[module: GoManualConversion]` / `*_impl.cs` files are hand-owned in `core`
+    and must be copied **back into `go-src-converted`** (overlay.sh does this) — that overlaid tree is the real
+    final state.
+  - **⚠ The S1/CS0030 "architectural wall" was a FORK, not a wall (2026-07-01) — and the fork held to 302/302.**
+    **Native-type** pointer/unsafe ops (identical memory semantics in both GC languages) get a faithful
+    conversion in the converter/`golib`. **Managed-referent** cases (`guintptr`/`muintptr`/… hiding a managed
+    pointer in a `uintptr`) hold the `ж<T>`/`object` **directly** (like `core/sync/atomic` `atomic.Pointer<T>`),
+    never a `nuint` round-trip. Genuine **raw-metal on non-native types** (memory-layout math, type-descriptor
+    walking, `*.asm`) is stubbed with `[module: GoManualConversion]` (a stub that compiles is an acceptable
+    milestone solution). Full detail:
+    [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConversion.md) *The corrected end-state*.
+  - **Next — Phase 4 (operational):** convert and run Go's own `_test.go` suites against the compiling
+    packages; design in [`docs/TestingInfrastructureRequirements.md`](docs/TestingInfrastructureRequirements.md)
+    and Phase 4 of [`docs/Roadmap.md`](docs/Roadmap.md).
 - Open converter items: `src/go2cs/ToDo.md` (e.g. `visitMapType` completion, remaining dynamic-struct
   implicit-cast checks, optional recursive dependent-package conversion, comment conversion, cgo/asm targets).
 
@@ -315,4 +327,7 @@ each also have a `.bat` launcher.
 | `3426298eb` | 2025-05-05 01:51 | Last clean stub baseline — **restored into `src/core`** on 2026-06-25. |
 | `6ca1c45b7` | 2025-05-05 01:59 | First full stdlib conversion — overwrote the baseline. |
 | `cc14584c7` | 2025-05-11 | Full-conversion work; tagged `full-conversion-2025-05`. |
-| (2026-06-25) | 2026-06-25 | Separation + stub-baseline restore + converter fixes → green baseline. |
+| `3c8b3a848` | 2026-06-25 | Separation + stub-baseline restore + converter fixes → green baseline. |
+| `05a53e8c0` | 2026-06-26 | First full-conversion package promoted — `sync/atomic` into `core`. |
+| `914d4bd72` | 2026-06-27 | `math` compiles clean (tag `math-green-2026-06-27`). |
+| `51ba5d9cf` | 2026-07-10 | **First clean full-standard-library compile** — all 302 `src/go-src-converted` packages (tag `stdlib-green-2026-07-10`); Phase-3 milestone. |

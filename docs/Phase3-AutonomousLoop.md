@@ -1,5 +1,9 @@
 # Phase 3 Autonomous Loop — driver spec
 
+> ✅ **PHASE 3 COMPLETE (2026-07-10, commit `51ba5d9cf`, tag `stdlib-green-2026-07-10`) — the full stdlib
+> compiles (302/302).** This autonomous-loop driver spec is **retained as historical record**. Next is
+> Phase 4 (operational — running Go's own tests); see [`Roadmap.md`](Roadmap.md).
+
 > **Stable** protocol for an autonomous, self-paced loop that drives the full-stdlib conversion to a
 > clean compile. This file is the *fixed* driver; the *live* queue + per-iteration kickoff lives in
 > [`Phase3-Handoff.md`](Phase3-Handoff.md) (rewritten every iteration). Read [`CLAUDE.md`](../CLAUDE.md)

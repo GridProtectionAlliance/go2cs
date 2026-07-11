@@ -181,8 +181,10 @@ Contributors: see [`CLAUDE.md`](../CLAUDE.md) for an architecture overview and
 ## Status
 
 The converter builds idiomatic C# for the full range of Go language features, validated by an extensive
-behavioral test suite. A curated subset of the Go standard library converts and compiles today; converting
-the *entire* standard library cleanly is ongoing work — see the [roadmap](Roadmap.md).
+behavioral test suite (371 Go-vs-C# regression projects). As of **2026-07-10 the entire Go standard library
+(302 packages, Go 1.23.1) compiles cleanly** as .NET assemblies — see the NEWS section above. Compiling is
+the milestone, not yet full runtime parity: **converting and running the standard library's own tests is the
+ongoing Phase 4 work** — see the [roadmap](Roadmap.md).
 
 Wondering how fast the transpiled C# runs compared to the original Go — including startup time, memory,
 and Native AOT builds? See the [performance comparison](Performance.md).

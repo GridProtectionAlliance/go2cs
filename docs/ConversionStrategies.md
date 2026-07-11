@@ -123,7 +123,7 @@ The same collision detection must see GOROOT-VENDORED namespaces. `visitImportSp
 
 ### Standard-library solution file (`.slnx`)
 
-A whole-standard-library run (`go2cs -stdlib`) also emits a Visual Studio solution — **`go-src-converted.slnx`** — at the output root (`-go2cspath`), so the freshly converted stdlib is openable / buildable as **one unit** immediately after a run, rather than depending on a hand-maintained solution that drifts. It is the auto-generated counterpart of `src/go-src-converted.sln`, and its XML mirrors the format of `src/go2cs.slnx` (a `<Configurations>` block plus `<Folder>`/`<Project>` entries, CRLF line endings, no BOM). It references:
+A whole-standard-library run (`go2cs -stdlib`) also emits a Visual Studio solution — **`go-src-converted.slnx`** — at the output root (`-go2cspath`), so the freshly converted stdlib is openable / buildable as **one unit** immediately after a run, rather than depending on a hand-maintained solution that drifts. It is the auto-generated counterpart of the committed `src/go-src-converted.slnx`, and its XML mirrors the format of `src/go2cs.slnx` (a `<Configurations>` block plus `<Folder>`/`<Project>` entries, CRLF line endings, no BOM). It references:
 
 * every converted stdlib project it emitted (`core/<pkg>/<projectName>.csproj`, grouped under a `/core/` folder),
 * any per-package **test** projects (`*_test.csproj`, grouped under a `/tests/` folder — inert until Phase 4 emits them, and the folder is omitted entirely when there are none),
