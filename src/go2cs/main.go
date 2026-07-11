@@ -500,6 +500,31 @@ var packageDynamicTypeNames map[string]string
 // by packageLock.
 var packageManualTypeNames map[string]bool
 
+// parseArgsInterspersed parses fs while allowing flags to appear AFTER positional arguments. Go's
+// flag package stops at the first non-flag token, so an invocation like
+// `go2cs -recurse . -go2cspath dir` would silently drop -go2cspath (leaving the default output
+// root). This peels off one positional at a time and re-parses the remainder, so flags interspersed
+// with or following positionals are still applied. Returns the positionals in order and the first
+// parse error, if any. fs must use flag.ContinueOnError so a parse error is returned, not fatal.
+func parseArgsInterspersed(fs *flag.FlagSet, args []string) ([]string, error) {
+	var positionals []string
+
+	for {
+		if err := fs.Parse(args); err != nil {
+			return positionals, err
+		}
+
+		rest := fs.Args()
+
+		if len(rest) == 0 {
+			return positionals, nil
+		}
+
+		positionals = append(positionals, rest[0])
+		args = rest[1:]
+	}
+}
+
 func main() {
 	var goRoot, goPath, go2csPath string
 	var err error
@@ -563,7 +588,8 @@ func main() {
 	csprojFileCmd := commandLine.String("csproj", "", "Path to custom .csproj template file")
 	debugModeCmd := commandLine.Bool("debug", false, "Enable debug mode")
 
-	err = commandLine.Parse(os.Args[1:])
+	var positionals []string
+	positionals, err = parseArgsInterspersed(commandLine, os.Args[1:])
 
 	// Pin go/build's resolver to the converter's robustly-resolved GOROOT/GOPATH. build.Default is
 	// initialized at package-init from the start-up environment, which can be empty or stale in a
@@ -580,8 +606,8 @@ func main() {
 		convertStdLib = *convertStdLibCmd
 	}
 
-	if !convertStdLib {
-		inputFilePath = strings.TrimSpace(commandLine.Arg(0))
+	if !convertStdLib && len(positionals) > 0 {
+		inputFilePath = strings.TrimSpace(positionals[0])
 	}
 
 	if err != nil || (!convertStdLib && len(inputFilePath) == 0) {
@@ -643,11 +669,11 @@ Examples:
 		// Check if specific packages are specified
 		var packageFilter []string
 
-		if commandLine.NArg() > 0 {
-			packageFilter = make([]string, commandLine.NArg())
+		if len(positionals) > 0 {
+			packageFilter = make([]string, len(positionals))
 
-			for i := range commandLine.NArg() {
-				packageFilter[i] = strings.TrimSpace(commandLine.Arg(i))
+			for i := range positionals {
+				packageFilter[i] = strings.TrimSpace(positionals[i])
 			}
 
 			fmt.Printf("Only converting specified packages: %s\n", strings.Join(packageFilter, ", "))
@@ -674,8 +700,8 @@ Examples:
 		var outputFilePath string
 
 		// If the user has provided a second argument, we will use it as the output directory or file
-		if commandLine.NArg() > 1 {
-			outputFilePath = strings.TrimSpace(commandLine.Arg(1))
+		if len(positionals) > 1 {
+			outputFilePath = strings.TrimSpace(positionals[1])
 		} else {
 			outputFilePath = inputFilePath
 		}
