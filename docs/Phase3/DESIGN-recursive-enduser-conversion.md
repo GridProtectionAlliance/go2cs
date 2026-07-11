@@ -331,6 +331,59 @@ operator @short(dword src) => new @short((short)src.Value); }`. **`fatih/color` 
 all five projects** (app + color + colorable + isatty + x/sys/windows). Gate: full behavioral suite green
 (the generator change is byte-identical for the corpus — no keyword-named `GoImplicitConv` structs there).
 
+**Namespace-sanitization fix + adversarial review (2026-07-11).** An adversarial review of the five fixes
+above (14 subagents, review + verify) confirmed the fixes were correct for exactly what `fatih/color` hit but
+**incomplete for other real-world modules** — the byte-identical corpus gate cannot catch out-of-corpus
+identifier cases. The highest-impact class was fixed:
+
+- **Hyphen/tilde in an import-path segment** — the converter never mapped a hyphen (or tilde) in an
+  import-path segment to a legal C# identifier, so `github.com/google/go-cmp/cmp` produced the illegal
+  namespace `…google.go-cmp` (the hyphen is in a NON-leaf segment, so the earlier `#1` fix — which only
+  substitutes the leaf segment's package name — did not reach it). **Fixed**: `replaceInvalidIdentifierChars`
+  (hyphen/tilde → `_`) applied in both `getSanitizedImport` and `getCoreSanitizedIdentifier`, so both the
+  dependency's own namespace (`getProjectName`) and every importer's reference (`convertImportPathToNamespace`)
+  render `…google.go_cmp` consistently. Unit-tested (`sanitization_test.go`); `check-no-regression`
+  byte-identical (Go identifiers never contain hyphens, so only import-path-derived names change and the
+  corpus has none). This covers the ubiquitous `go-*`/`*-go` module families (go-cmp, go-isatty, go-sql-driver,
+  golang-jwt, …). *(A first attempt also routed `convertImportPathToNamespace`'s non-leaf parts through
+  `getCoreSanitizedIdentifier` to escape the embedded keyword in `gopkg.in` — but that Δ-prefixed the
+  `_package` class suffix and regressed 11 corpus goldens, so it was reverted; the `gopkg.in` case is backlog
+  item 8.)
+
+### Residual real-world-module hardening (Phase-4 backlog)
+
+The review + the go-cmp/gopkg.in verification surfaced these **known residual limitations** — real, but each
+out-of-corpus and narrower than the namespace fix. Left for Phase-4 hardening (none affects the stdlib,
+`fatih/color`, `uuid`, or the behavioral corpus, all of which build):
+
+1. *(medium, go2cs-gen)* A C#-keyword-named Go type nested as a **generic type argument** (the `ж<short>`
+   pointer-box of an `Indirect`/self-box conversion) is emitted unescaped — `GetFullTypeName` rebuilds
+   generic names from the raw `ITypeSymbol.Name`, and the single top-level `EscapeCsKeyword` cannot reach
+   nested arguments. Needs recursive keyword-escaping of generic arguments.
+2. *(medium, converter)* A `const` typed through an **alias to `uintptr`** (`type Handle = uintptr; const X
+   Handle = 42`) still emits `const` — the `#2` unalias reached the `*types.Named` gate but the downstream
+   `csTypeName == "uintptr"` guard reads the alias name (`Handle`), not the unaliased underlying.
+3. *(medium, go2cs-gen)* `EscapeCsKeyword` misses C# **contextual** keywords (`file`) that the converter DOES
+   escape (`os`-style `type file …` → `@file`), so a keyword-named-type conversion for such a type mismatches.
+4. *(low, converter)* A dependency whose Go **package name is a go2cs-reserved word** (`package slice`/`array`)
+   or ends in `_package`: the imported-type-alias qualification (`#3`) Δ-prefixes the class segment
+   (`Δslice_package`) while the producer emits it un-prefixed (`slice_package`) — dangling reference.
+5. *(low, converter)* An **alias-to-alias-to-named** chain (`type A = Named; type B = A`) emits
+   `global using B = go.<pkg>.A;`, referencing the intermediate alias `A` as if a class member (CS0426).
+6. *(robustness, recurse)* `processConversion`'s `log.Fatalf` on a package **load failure** (e.g. a dependency
+   whose transitive test-dep has a missing `go.sum` entry — `gopkg.in/yaml.v3` → `gopkg.in/check.v1`) aborts
+   the ENTIRE `-recurse` run rather than logging + skipping that one package. `ModuleConverter.convertAll`
+   already recovers panics; the load path should return an error instead of exiting.
+7. *(robustness, recurse)* A **deeply-nested module-cache subpackage** (`github.com/google/go-cmp/cmp/internal/
+   flags`) converted with a bare `namespace go;` instead of the full dotted namespace — `getProjectName`'s
+   walk-up-to-`go.mod` needs to handle the `@version`-segmented cache path at depth.
+8. *(low, converter)* A C# **keyword embedded after a dot** in a single import-path segment (the `in` of
+   `gopkg.in`) is escaped by `getProjectName` (the dependency's own namespace → `gopkg.@in`) but NOT by
+   `convertImportPathToNamespace` (an importer's reference → bare `gopkg.in`), so a `gopkg.in/*` dependency's
+   own package compiles while its importers mis-reference it. Needs a dot-splitting sanitizer in
+   `convertImportPathToNamespace` that escapes the embedded keyword WITHOUT Δ-prefixing the `_package` class
+   suffix (the naive `getCoreSanitizedIdentifier` swap does the latter — see the reverted attempt above).
+
 ## 6. Open decisions (RESOLVED)
 
 1. **Flag vs. auto-detect** — **explicit `-recurse`** (default off; single-package behavior unchanged).

@@ -1998,10 +1998,27 @@ func isStringLiteral(tv types.TypeAndValue) bool {
 	return isStringType(tv.Type)
 }
 
+// replaceInvalidIdentifierChars maps the characters a Go import-path element may contain that are
+// invalid in a C# identifier — the hyphen and tilde (Go allows `-._~` in path elements) — to an
+// underscore, so a module path such as github.com/mattn/go-isatty or gopkg.in/foo-bar renders a legal
+// C# namespace/identifier segment. The dot is a namespace separator that callers split on before this
+// runs, and a Go IDENTIFIER (variable/type/func name) can never contain these characters, so this
+// only ever touches import-path-derived names — the standard library and behavioral corpora contain
+// none, so their emitted C# is unchanged.
+func replaceInvalidIdentifierChars(identifier string) string {
+	if !strings.ContainsAny(identifier, "-~") {
+		return identifier
+	}
+
+	return strings.NewReplacer("-", "_", "~", "_").Replace(identifier)
+}
+
 func getSanitizedImport(identifier string) string {
 	if strings.HasPrefix(identifier, "@") {
 		return identifier // Already sanitized
 	}
+
+	identifier = replaceInvalidIdentifierChars(identifier)
 
 	if keywords.Contains(identifier) {
 		return "@" + identifier
@@ -2061,6 +2078,8 @@ func getCoreSanitizedIdentifier(identifier string) string {
 
 	// Remove pointer dereference operator if present
 	identifier = strings.TrimPrefix(identifier, "*")
+
+	identifier = replaceInvalidIdentifierChars(identifier)
 
 	if keywords.Contains(identifier) {
 		return "@" + identifier
