@@ -1633,9 +1633,9 @@ layer becomes measurable. Concretely:
 ```bash
 # 1. Reconvert the whole stdlib (ALWAYS -comments; license headers are required). Build the converter
 #    first if any src/go2cs/*.go changed: (cd src/go2cs && go build -o bin/go2cs.exe .)
-#    Use -parallel 1 for a DETERMINISTIC result when chasing a specific package; -parallel 4 is
-#    faster (~3.5 min) for broad sweeps. (Per-file work is sub-second; cost is the type graph load.)
-bin/go2cs.exe -stdlib -comments -parallel 4 -go2cspath scratchpad/recon   # writes scratchpad/recon/core/<pkg>
+#    Conversion is sequential and byte-deterministic (~3.5 min; per-file work is sub-second, the
+#    cost is the type graph load).
+bin/go2cs.exe -stdlib -comments -go2cspath scratchpad/recon   # writes scratchpad/recon/core/<pkg>
 
 # 2. Overlay fresh .cs + regenerated .csproj onto src/go-src-converted (keeps golib shared in core).
 bash scratchpad/overlay.sh scratchpad/recon/core      # recreate overlay.sh from the measurement-loop memory

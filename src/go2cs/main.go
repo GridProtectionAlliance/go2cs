@@ -551,7 +551,6 @@ func main() {
 	goPathCmd := commandLine.String("gopath", goPath, "Path to Go path directory")
 	go2csPathCmd := commandLine.String("go2cspath", go2csPath, "Path to C# converted code")
 	convertStdLibCmd := commandLine.Bool("stdlib", false, "Convert Go standard library")
-	parallelProcCmd := commandLine.Int("parallel", 1, "Number of packages to convert in parallel (1-4)")
 	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), "Target platform for conversion, format: os/arch")
 	indentSpacesCmd := commandLine.Int("indent", 4, "Number of spaces for indentation")
 	preferVarDeclCmd := commandLine.Bool("var", true, "Prefer \"var\" declarations")
@@ -631,18 +630,6 @@ Examples:
 		if err != nil {
 			log.Fatalf("Failed to read custom .csproj template file \"%s\": %s\n", *csprojFileCmd, err)
 		}
-	}
-
-	// Set parallel processing environment variable if specified
-	if *parallelProcCmd > 1 {
-		// Limit to 4 parallel processes
-		parallelCount := *parallelProcCmd
-
-		if parallelCount > 4 {
-			parallelCount = 4
-		}
-
-		os.Setenv("GO2CS_PARALLEL", strconv.Itoa(parallelCount))
 	}
 
 	if convertStdLib {
@@ -907,8 +894,8 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// that came and went with goroutine scheduling). Claim order = schedule order made the emitted
 		// bytes nondeterministic across otherwise-identical runs. Per-file emission is a small fraction
 		// of conversion cost (dominated by go/packages type-graph loading), so sequential conversion
-		// buys byte-reproducible output for free: a full-stdlib conversion (305 packages, -parallel 4)
-		// measured 3m42s with the concurrent per-file goroutines and 3m39s sequential — within noise.
+		// buys byte-reproducible output for free: a full-stdlib conversion (305 packages) measured
+		// 3m42s with the concurrent per-file goroutines and 3m39s sequential — within noise.
 		for _, fileEntry := range files {
 			func(fileEntry FileEntry) {
 				defer func() {

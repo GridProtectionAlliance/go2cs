@@ -124,7 +124,7 @@ go2cs -stdlib -comments -go2cspath <repo>/src/go-src-converted fmt strings io so
 > work — the per-file `// Copyright … The Go Authors … BSD-style license` header **must be preserved**, and
 > the Go doc-comments keep the output readable. Without the flag, headers and comments are stripped.
 
-`-parallel 1..4` controls concurrency; output `.csproj` references are generated from detected imports.
+Package conversion is sequential (it relies on package-level converter state); output `.csproj` references are generated from detected imports.
 
 > **Note on the `<go2cspath>/core` subdir:** the stdlib converter writes packages to `<go2cspath>/core/<pkg>`
 > (a hardcoded `core` subdir). To regenerate cleanly into `src/go-src-converted` you must either point

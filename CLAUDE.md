@@ -71,7 +71,7 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
   `go2cs [options] <input_dir> [output_dir]`. Key flags (from `main.go`, authoritative):
   - `-stdlib` — convert the Go stdlib. `-stdlib fmt strings io` — convert only those packages (+filter).
   - `-go2cspath <dir>` — output root for converted code (default `~/go2cs`; env `GO2CSPATH`).
-  - `-goroot` / `-gopath`, `-parallel 1..4`, `-platforms os/arch`, `-indent 4`, `-var` (default on),
+  - `-goroot` / `-gopath`, `-platforms os/arch`, `-indent 4`, `-var` (default on),
     `-uco` (channel operators, default on), `-comments`, `-cgo`, `-tree`, `-csproj <tmpl>`, `-debug`.
   - Single project/file: `go2cs package_dir` or `go2cs example.go [out.cs]`.
   - **Always pass `-comments` when converting the Go stdlib.** It defaults **off**, but the converted C#
@@ -224,7 +224,7 @@ construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructField
   converter fixes. To measure the *current* converter you must reconvert — building the committed tree
   measures old output.
 - **Reconvert → overlay → build → bucket (the measurement loop):**
-  1. `go2cs.exe -stdlib -comments -parallel 4 -go2cspath <tmp>` → output lands in **`<tmp>/core/<pkg>`**
+  1. `go2cs.exe -stdlib -comments -go2cspath <tmp>` → output lands in **`<tmp>/core/<pkg>`**
      (the `core` subdir is hardcoded; `-go2cspath` is the *output* root, unrelated to the MSBuild
      `$(go2csPath)`). Full stdlib ≈ 3–4 min (per-file work is sub-second; the cost is `go/packages`
      loading the whole type graph, so **batch** — don't invoke per package).

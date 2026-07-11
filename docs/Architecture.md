@@ -19,7 +19,8 @@ selection, implicit conversions, constant folding, unsigned detection) are seman
 - **Entry point:** `main.go` — flag parsing, GOROOT/GOPATH resolution, single-file/dir vs `-stdlib` mode.
 - **Stdlib driver:** `stdLibConverter.go` — scans stdlib packages, builds the dependency graph, produces a
   topologically sorted queue (`sortedQueue`), and converts in dependency order (optionally filtered to a
-  package list, optionally parallel via `GO2CS_PARALLEL`). The topo order is reusable for bottom-up builds.
+  package list). Conversion is sequential — it relies on package-level converter state, so a converted
+  importer must observe its dependency's finished `package_info.cs`. The topo order is reusable for bottom-up builds.
 - **Output:** `writeOperations.go` emits `.cs` files and generates each package's `.csproj` from a template,
   substituting markers (project references derived from detected imports, `unsafe` usage flag, etc.).
 

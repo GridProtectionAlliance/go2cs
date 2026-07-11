@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -514,140 +513,87 @@ func (c *StdLibConverter) convertAllPackages() error {
 		fmt.Fprintf(benchmark, "%s\n", strings.Repeat("-", 103))
 	}
 
-	// Determine concurrency level - use 1 for sequential processing for stability,
-	// but allow up to 4 packages to be processed concurrently if the environment
-	// variable GO2CS_PARALLEL is set to a number.
-	concurrentLimit := 1
-
-	if concurrentEnv := os.Getenv("GO2CS_PARALLEL"); concurrentEnv != "" {
-		if limit, err := strconv.Atoi(concurrentEnv); err == nil && limit > 0 {
-			concurrentLimit = limit
-			if concurrentLimit > 4 {
-				// Cap at 4 for stability
-				concurrentLimit = 4
-			}
-			fmt.Printf("Using parallel conversion with %d concurrent packages\n", concurrentLimit)
-		}
-	}
-
-	// TODO: Move package variables in main.go into a struct to avoid global state
-	if concurrentLimit > 1 {
-		fmt.Printf("WARNING: Running in package conversion in parallel mode is currently not supported -- resetting concurrency limit to 1\n")
-		concurrentLimit = 1
-	}
-
-	// For parallel processing we need a mutex to protect the benchmark file and counters
-	var resultMutex sync.Mutex
-
-	// Create a semaphore to limit concurrency
-	semaphore := make(chan struct{}, concurrentLimit)
-	var wg sync.WaitGroup
-
-	// Process each package in the queue
+	// Convert each package one at a time, in dependency order. Package conversion relies on
+	// package-level global state in main.go (initFuncCounter, the temp-var maps, the imported-
+	// type-alias parse markers), so a converted importer must observe its dependency's finished
+	// package_info.cs — the conversion is inherently sequential. Sequential conversion also keeps
+	// the emitted bytes byte-reproducible run-to-run (see the per-file note in processConversion).
 	for i, pkgPath := range c.sortedQueue {
-		// Acquire semaphore slot
-		semaphore <- struct{}{}
-		wg.Add(1)
+		pkg := c.packages[pkgPath]
+		pkgStartTime := time.Now()
 
-		// Launch package conversion in a goroutine if parallel mode is enabled
-		go func(i int, pkgPath string) {
-			defer func() {
-				// Release semaphore slot
-				<-semaphore
-				wg.Done()
-			}()
+		// Calculate progress
+		progress := float64(i+1) / float64(c.totalCount) * 100
+		elapsed := time.Since(c.startTime)
 
-			pkg := c.packages[pkgPath]
-			pkgStartTime := time.Now()
+		var totalEstimated time.Duration
+		var remaining time.Duration
 
-			resultMutex.Lock()
+		if i > 0 {
+			totalEstimated = time.Duration(float64(elapsed) / float64(i) * float64(c.totalCount))
+			remaining = totalEstimated - elapsed
+		}
 
-			// Calculate progress
-			progress := float64(i+1) / float64(c.totalCount) * 100
-			elapsed := time.Since(c.startTime)
+		fmt.Printf("\n[%d/%d] Converting package %s (%.1f%% complete", i+1, c.totalCount, pkgPath, progress)
 
-			var totalEstimated time.Duration
-			var remaining time.Duration
+		if i > 0 {
+			fmt.Printf(", ~%s remaining", formatDuration(remaining))
+		}
 
-			if i > 0 {
-				totalEstimated = time.Duration(float64(elapsed) / float64(i) * float64(c.totalCount))
-				remaining = totalEstimated - elapsed
-			}
+		fmt.Println(")")
 
-			fmt.Printf("\n[%d/%d] Converting package %s (%.1f%% complete", i+1, c.totalCount, pkgPath, progress)
-
-			if i > 0 {
-				fmt.Printf(", ~%s remaining", formatDuration(remaining))
-			}
-
-			fmt.Println(")")
-
-			// Handle dependencies
-			if len(pkg.Dependencies) > 0 {
-				fmt.Printf("  Dependencies (%d): ", len(pkg.Dependencies))
-				if len(pkg.Dependencies) > 5 {
-					// Show just the first 5 for brevity
-					fmt.Printf("%s... and %d more\n", strings.Join(pkg.Dependencies[:5], ", "),
-						len(pkg.Dependencies)-5)
-				} else {
-					fmt.Printf("%s\n", strings.Join(pkg.Dependencies, ", "))
-				}
-			}
-			resultMutex.Unlock()
-
-			// Create output path
-			outputPath := c.getOutputPath(pkgPath)
-
-			// Process the conversion with error handling
-			var conversionErr error
-
-			func() {
-				// Use a panic recovery to catch any unexpected errors
-				defer func() {
-					if r := recover(); r != nil {
-						conversionErr = fmt.Errorf("panic during conversion: %v", r)
-					}
-				}()
-
-				conversionErr = c.convertPackage(pkg.Dir, outputPath)
-			}()
-
-			conversionDuration := time.Since(pkgStartTime)
-
-			resultMutex.Lock()
-			defer resultMutex.Unlock()
-
-			if conversionErr != nil {
-				msg := fmt.Sprintf("failed to convert package %s: %v", pkgPath, conversionErr)
-				log.Println(msg)
-				failedPackages = append(failedPackages, pkgPath)
-
-				if benchmark != nil {
-					fmt.Fprintf(benchmark, "%-40s %-15s %-15s %s\n",
-						pkgPath, "FAILED", formatDuration(conversionDuration),
-						time.Now().Format(time.RFC3339))
-				}
+		// Handle dependencies
+		if len(pkg.Dependencies) > 0 {
+			fmt.Printf("  Dependencies (%d): ", len(pkg.Dependencies))
+			if len(pkg.Dependencies) > 5 {
+				// Show just the first 5 for brevity
+				fmt.Printf("%s... and %d more\n", strings.Join(pkg.Dependencies[:5], ", "),
+					len(pkg.Dependencies)-5)
 			} else {
-				successCount++
-				fmt.Printf("  Completed in %s\n", formatDuration(conversionDuration))
-
-				if benchmark != nil {
-					fmt.Fprintf(benchmark, "%-45s %-15s %-15s %s\n",
-						pkgPath, "SUCCESS", formatDuration(conversionDuration),
-						time.Now().Format(time.RFC3339))
-				}
+				fmt.Printf("%s\n", strings.Join(pkg.Dependencies, ", "))
 			}
-		}(i, pkgPath)
+		}
 
-		// If not running in parallel mode, wait for each package to complete
-		// before processing the next one
-		if concurrentLimit == 1 {
-			wg.Wait()
+		// Create output path
+		outputPath := c.getOutputPath(pkgPath)
+
+		// Process the conversion with error handling
+		var conversionErr error
+
+		func() {
+			// Use a panic recovery to catch any unexpected errors
+			defer func() {
+				if r := recover(); r != nil {
+					conversionErr = fmt.Errorf("panic during conversion: %v", r)
+				}
+			}()
+
+			conversionErr = c.convertPackage(pkg.Dir, outputPath)
+		}()
+
+		conversionDuration := time.Since(pkgStartTime)
+
+		if conversionErr != nil {
+			msg := fmt.Sprintf("failed to convert package %s: %v", pkgPath, conversionErr)
+			log.Println(msg)
+			failedPackages = append(failedPackages, pkgPath)
+
+			if benchmark != nil {
+				fmt.Fprintf(benchmark, "%-40s %-15s %-15s %s\n",
+					pkgPath, "FAILED", formatDuration(conversionDuration),
+					time.Now().Format(time.RFC3339))
+			}
+		} else {
+			successCount++
+			fmt.Printf("  Completed in %s\n", formatDuration(conversionDuration))
+
+			if benchmark != nil {
+				fmt.Fprintf(benchmark, "%-45s %-15s %-15s %s\n",
+					pkgPath, "SUCCESS", formatDuration(conversionDuration),
+					time.Now().Format(time.RFC3339))
+			}
 		}
 	}
-
-	// Wait for all goroutines to complete
-	wg.Wait()
 
 	// Print final statistics
 	elapsed := time.Since(c.startTime)

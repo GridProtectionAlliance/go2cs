@@ -151,7 +151,6 @@ go2cs -stdlib fmt strings io           # convert specific standard library packa
 | `-stdlib` | Convert the Go standard library (optionally followed by specific package names). |
 | `-go2cspath <dir>` | Output root for converted standard-library code (defaults to `~/go2cs`). |
 | `-goroot` / `-gopath` | Override the detected Go root / path. |
-| `-parallel <1-4>` | Number of packages to convert in parallel. |
 | `-platforms <os/arch>` | Target platform for build-tagged files (defaults to the host). |
 | `-indent <n>` | Spaces per indent level (default 4). |
 | `-var` | Prefer `var` declarations where the type is obvious (default on). |

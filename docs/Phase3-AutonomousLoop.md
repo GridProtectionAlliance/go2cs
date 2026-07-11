@@ -19,11 +19,11 @@ adversarial verification of a candidate fix and (b) read-only bucket/exploration
 
 1. **Build the converter fresh** — `cd src/go2cs && go build -o bin/go2cs.exe .` (NON-NEGOTIABLE: the
    runner false-greens on a stale binary).
-2. **Measure** — reconvert (`-stdlib -comments -parallel 4`), overlay (incl. `src/core` manual files),
+2. **Measure** — reconvert (`-stdlib -comments`), overlay (incl. `src/core` manual files),
    build `runtime` (or the current frontier project), bucket by `CS####` then file/message.
    **⚠ Timeout discipline (2026-07-01):** a full reconvert runs in **~3.5–5 min — never longer**. Wrap the
    invocation in a hard cap so a wedged run self-kills instead of stalling the loop:
-   `timeout -k 30 600 ./bin/go2cs.exe -stdlib -comments -parallel 4 -go2cspath <tmp>`; on exit 124, kill the
+   `timeout -k 30 600 ./bin/go2cs.exe -stdlib -comments -go2cspath <tmp>`; on exit 124, kill the
    tree (`taskkill //F //T` on the pid), retry ONCE, and if it times out again STOP and report. Write the
    completion marker **into the log itself** (`; echo "RECONVERT EXIT=$?" >> <log>`) — an `echo` after the
    command lands in the background task's stdout, NOT the log, so a log-polling wait can never see it.
