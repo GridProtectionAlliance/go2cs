@@ -4299,30 +4299,3 @@ Converter output is **byte-reproducible**: converting the same Go source with th
 * **Files convert sequentially, in sorted-filename order.** Per-file conversion previously ran in concurrent goroutines sharing package-level state claimed at visit time — `initΔN` module-initializer indices, blank-identifier temp numbering (`_ᴛN`, an unsynchronized map — a genuine data race), and imported collision-rename visibility: a file could mark an imported `package_info.cs` "parsed" *before* the parse finished, so a concurrently-converting file skipped the wait and emitted an imported renamed const **bare** (`abi.String` instead of `abi.ΔString` — a compile error that came and went with goroutine scheduling). Sequential conversion costs nothing measurable: a full-stdlib conversion is 3m42s concurrent vs 3m39s sequential (the cost is `go/packages` type-graph loading, not emission).
 * **The stdlib conversion queue is deterministic and dependency-complete.** The topological sort now walks sorted roots (map-iteration roots made unrelated packages' order flip run-to-run), and a GOROOT-**vendored** dependency (imported as `golang.org/x/…` but keyed on disk as `vendor/golang.org/x/…`) is resolved to its vendored key — previously the edge was silently dropped, so an importer (e.g. `x/text/secure/bidirule`) could convert *before* its dependency (`x/text/unicode/bidi`), whose `package_info.cs` — the source of imported collision-rename aliases like `bidiꓸClass` — did not exist yet at that point.
 * **Multi-box re-alias emission is sorted.** A multi-assignment that repoints several pointer boxes (`(Ꮡx, Ꮡy) = (Ꮡy, Ꮡx)`) emits its independent `n = ref Ꮡn.Value` refreshers in sorted name order (the set backing them is a map).
-
-## Examples
-
-* [Behavioral Tests](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Tests/Behavioral) — per-feature Go↔C# equivalence; the `.cs.target` goldens are current converter output and the most reliable reference for exact emitted forms.
-* [Manual Tour of Go Conversions](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions)
-* [Manual go101 Conversions](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20go101%20Conversions)
-* [Miscellaneous](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Miscellaneous)
-* Example excerpt of converted code from the Go [`errors`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/errors/errors.cs) package:
-```csharp
-public static partial class errors_package
-{
-    // New returns an error that formats as the given text.
-    // Each call to New returns a distinct error value even if the text is identical.
-    public static error New(@string text) {
-        return new errorString(text);
-    }
-
-    // errorString is a trivial implementation of error.
-    [GoType] partial struct errorString {
-        public @string s;
-    }
-
-    [GoRecv] internal static @string Error(this ref errorString e) {
-        return e.s;
-    }
-}
-```

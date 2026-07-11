@@ -185,7 +185,6 @@ NuGet package) plus a set of Roslyn source generators that supply Go semantics a
 | `src/go-src-converted/` | Work-in-progress full conversion of the Go standard library. |
 | `src/Tests/Behavioral/` | Per-feature Go↔C# equivalence tests (transpile, compile, run-and-compare). |
 | `src/Tests/Performance/` | Go vs transpiled C# runtime benchmarks (JIT and Native AOT) — see the [performance comparison](Performance.md) for current numbers. |
-| `src/Examples/` | Sample conversions. |
 
 Contributors: see [`CLAUDE.md`](../CLAUDE.md) for an architecture overview and
 [`Architecture.md`](Architecture.md), [`ConversionStrategies.md`](ConversionStrategies.md), and
