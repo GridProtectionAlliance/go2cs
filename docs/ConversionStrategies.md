@@ -1,10 +1,10 @@
 # Conversion Strategies
 
 > **A high-level, example-driven tour of how `go2cs` maps each Go construct to C#.** This is the
-> readable overview — skim it, or jump to a section. Every section ends with a **Reference →** link
-> into the exhaustive [`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md), where
-> the same topic is documented in full: every emitted form, edge case, Phase-3 fix, and the
-> behavioral test that guards it. Read the summary for the *shape*; open the reference for the *why*.
+> readable overview -- every section ends with a **Reference →** link into the exhaustive
+> [`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md), where the same topic
+> is documented in full: every emitted form, edge case, phase-level fix, and the behavioral test
+> that guards it. Read the summary for the *shape*; open the reference for the *why*.
 
 The guiding goal is that the generated C# is both **behaviorally** and **visually** similar to the
 original Go, so a Go developer can read the output and follow it. Two things the visible code does not
@@ -16,9 +16,9 @@ directly (interface satisfaction, receiver overloads, struct-embedding promotion
 > The C# snippets below are drawn from the actual converted standard library (`src/go-src-converted/`,
 > Go 1.23.1) wherever possible, paired with their original Go source. A few use small illustrative
 > programs where that reads more clearly. Glyphs you will see throughout: **`ж<T>`** a heap "box"
-> (pointer, read "zhe"), **`Ꮡ`** address-of, **`Δ`** a disambiguation rename, **`@string`** the Go
-> string type, **`default!`** = `nil` in value position, and a handful of operator glyphs (`ᐸꟷ`/`ꟷᐳ`
-> channel receive, `goǃ` goroutine, `ꟷ`/`ᐧ` comma-ok/type sentinels).
+> (pointer, read "zhe"), **`Ꮡ`** address-of, **`Δ`** a disambiguation rename (read "delta"),
+> **`@string`** the Go string type, **`default!`** = `nil` in value position, and a handful of
+> operator glyphs (`ᐸꟷ`/`ꟷᐳ` channel receive, `goǃ` goroutine, `ꟷ`/`ᐧ` comma-ok/type sentinels).
 
 ---
 

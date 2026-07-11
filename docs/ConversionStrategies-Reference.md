@@ -14,8 +14,8 @@
 > runtime library, **`golib`** (`src/core/golib/`), and a set of **Roslyn source generators**
 > (`src/gen/go2cs-gen/`) that synthesize the Go semantics which cannot be written directly in C#.
 > Notes that previously referenced the retired ANTLR4/C# converter or the old `gocore` library
-> have been updated to reflect this. See also [`Architecture.md`](Architecture.md) and
-> [`../CLAUDE.md`](../CLAUDE.md).
+> have been updated to reflect this. See also: [`Architecture.md`](Architecture.md),
+> [`Glossary.md`](Glossary.md), [`Roadmap.md`](Roadmap.md), and [`CLAUDE.md`](../CLAUDE.md).
 
 The guiding goal: the generated C# should be both *behaviorally* and *visually* similar to the
 original Go, so that a Go developer can read the output and follow it. The runtime library and
