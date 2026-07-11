@@ -183,9 +183,18 @@ follows the same shape, adding the app + `pkg\…` third-party projects.
 - **P0 — stage the referenced stdlib (done).** `deploy-core stub`|`stdlib` puts the stdlib + `go2cs-gen`
   analyzer + a root `Directory.Build.props` at `%GOPATH%\src\go2cs`; the phases below build on that root.
   Already implemented + tested (2026-07-11).
-- **P1 — extract the shared dependency graph.** Move graph build + topo sort out of `StdLibConverter`
-  into a reusable unit; `-stdlib` keeps working unchanged (regression gate: a filtered `-stdlib` run +
-  `check-no-regression`).
+- **P1 — extract the shared dependency graph (done).** Graph build + topological sort now live in a
+  reusable `DependencyGraph` (`src/go2cs/dependencyGraph.go`) parameterized by the convert-set: the added
+  nodes ARE the edge predicate (`addImportEdges` records an edge only to a dependency that is itself a
+  node, so a dependency outside the set — e.g. the stdlib, when converting a user module — never
+  constrains the order). `StdLibConverter` became one caller (discovers the `std` set + each package's
+  imports, delegates ordering); `ModuleConverter` (P2) will be the other. Pure refactor: the moved
+  algorithm is verbatim, unit-tested for the exact topo order / edge predicate / GOROOT-vendored-key
+  resolution / cycle tolerance (`dependencyGraph_test.go`), and gated green — `check-no-regression`
+  byte-identical across 371 behavioral projects, and a filtered `-stdlib fmt strconv` run scans + sorts
+  the full 305-package std graph and converts strconv→fmt in dependency order. Implemented + tested
+  (2026-07-11). *(A drive-by fix updated the stale `solutionGenerator_test.go` folder assertions, which
+  predated the `Id="…"` folder attribute, so `go test ./...` is a reliable gate for the phases below.)*
 - **P2 — `ModuleConverter` + `-recurse`.** Load the module, partition the closure, convert app +
   third-party in topo order (reuse `processConversion` per package). Reference stdlib; don't convert it.
 - **P3 — output/reference decoupling.** Route module-cache deps to `$(go2csPath)pkg` output + references

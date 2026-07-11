@@ -8,32 +8,22 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"sync"
 	"time"
 
 	"golang.org/x/tools/go/packages"
 )
 
-// Package represents a Go package with its dependencies
-type Package struct {
-	Path         string   // Import path
-	Dir          string   // Directory path
-	Dependencies []string // Dependencies (import paths)
-	Dependents   []string // Packages that depend on this one
-	Processed    bool     // Whether package has been processed
-}
-
-// StdLibConverter manages the conversion of the Go standard library
+// StdLibConverter manages the conversion of the Go standard library. The package dependency
+// graph + topological sort live in the shared DependencyGraph (dependencyGraph.go); this driver
+// discovers the "std" convert-set and each package's imports, then delegates ordering to it.
 type StdLibConverter struct {
-	goRoot      string              // Path to Go root directory
-	goPath      string              // Path to Go path directory
-	go2csPath   string              // Path to output directory
-	options     Options             // Conversion options
-	packages    map[string]*Package // Map of package paths to Package objects
-	sortedQueue []string            // Topologically sorted queue
-	mutex       sync.Mutex          // Mutex to protect concurrent map access
-	startTime   time.Time           // Start time for reporting progress
-	totalCount  int                 // Total number of packages
+	goRoot     string           // Path to Go root directory
+	goPath     string           // Path to Go path directory
+	go2csPath  string           // Path to output directory
+	options    Options          // Conversion options
+	graph      *DependencyGraph // Shared package dependency graph + conversion order
+	startTime  time.Time        // Start time for reporting progress
+	totalCount int              // Total number of packages
 }
 
 // NewStdLibConverter creates a new standard library converter
@@ -43,7 +33,7 @@ func NewStdLibConverter(options Options) *StdLibConverter {
 		goPath:    options.goPath,
 		go2csPath: options.go2csPath,
 		options:   options,
-		packages:  make(map[string]*Package),
+		graph:     NewDependencyGraph(),
 		startTime: time.Now(),
 	}
 }
@@ -93,7 +83,7 @@ func (c *StdLibConverter) ScanAndConvertFiltered(packageFilter []string) error {
 
 		// Filter the queue
 		filteredQueue := make([]string, 0)
-		for _, pkg := range c.sortedQueue {
+		for _, pkg := range c.graph.sortedQueue {
 			if filterMap[pkg] {
 				filteredQueue = append(filteredQueue, pkg)
 			}
@@ -104,8 +94,8 @@ func (c *StdLibConverter) ScanAndConvertFiltered(packageFilter []string) error {
 		}
 
 		fmt.Printf("Filtered from %d to %d packages based on filter list\n",
-			len(c.sortedQueue), len(filteredQueue))
-		c.sortedQueue = filteredQueue
+			len(c.graph.sortedQueue), len(filteredQueue))
+		c.graph.sortedQueue = filteredQueue
 	}
 
 	// Check for previously converted packages
@@ -114,7 +104,7 @@ func (c *StdLibConverter) ScanAndConvertFiltered(packageFilter []string) error {
 	}
 
 	// Step 4: Convert all packages
-	c.totalCount = len(c.sortedQueue)
+	c.totalCount = len(c.graph.sortedQueue)
 	fmt.Printf("Beginning conversion of %d packages...\n", c.totalCount)
 	if err := c.convertAllPackages(); err != nil {
 		return fmt.Errorf("error during package conversion: %w", err)
@@ -236,30 +226,24 @@ func (c *StdLibConverter) scanStdLib() error {
 		}
 
 		// Create new package object
-		c.mutex.Lock()
-		c.packages[pkg.PkgPath] = &Package{
-			Path:         pkg.PkgPath,
-			Dir:          pkg.Dir,
-			Dependencies: make([]string, 0),
-			Dependents:   make([]string, 0),
-			Processed:    false,
-		}
-		c.mutex.Unlock()
+		c.graph.AddPackage(pkg.PkgPath, pkg.Dir)
 	}
 
 	return nil
 }
 
-// buildDependencyGraph builds the dependency graph of packages
+// buildDependencyGraph loads each standard-library package's imports and records the intra-set
+// dependency edges in the shared graph (which filters to the convert-set and resolves
+// GOROOT-vendored keys), then sorts adjacency for deterministic ordering.
 func (c *StdLibConverter) buildDependencyGraph() error {
 	fmt.Println("Building dependency graph for all packages...")
 
 	// Count to track progress
-	total := len(c.packages)
+	total := len(c.graph.packages)
 	count := 0
 
 	// For each package, find all dependencies
-	for pkgPath, pkg := range c.packages {
+	for pkgPath, pkg := range c.graph.packages {
 		count++
 		if count%20 == 0 || count == total {
 			fmt.Printf("\nAnalyzing dependencies: %d/%d packages (%.1f%%)...", count, total, float64(count)/float64(total)*100)
@@ -296,176 +280,47 @@ func (c *StdLibConverter) buildDependencyGraph() error {
 			continue
 		}
 
-		// Get imports
+		// Record dependency edges to the packages in this conversion set. The graph filters to
+		// the convert-set and resolves GOROOT-vendored keys; import order is immaterial (edges are
+		// deduped and adjacency is sorted below).
+		imports := make([]string, 0, len(pkgs[0].Imports))
+
 		for importPath := range pkgs[0].Imports {
-			// A GOROOT-vendored dependency is imported by its source path (golang.org/x/…) but keyed
-			// in the package set by its on-disk path (vendor/golang.org/x/…). Resolve to the vendored
-			// key — otherwise the edge is silently dropped (isStdLib rejects the dotted domain) and the
-			// topological order can convert an importer BEFORE its dependency, whose package_info.cs
-			// (the source of imported collision-rename aliases like `bidiꓸClass`) does not exist yet
-			// at that point, so the importer emits the un-renamed form.
-			if _, exists := c.packages[importPath]; !exists {
-				if _, vendored := c.packages["vendor/"+importPath]; vendored {
-					importPath = "vendor/" + importPath
-				}
-			}
-
-			// Only include packages that are part of this conversion set
-			if _, isConversionTarget := c.packages[importPath]; isConversionTarget {
-				c.mutex.Lock()
-				// Add dependency if not already added
-				if !containsString(pkg.Dependencies, importPath) {
-					pkg.Dependencies = append(pkg.Dependencies, importPath)
-				}
-
-				// Add this package as a dependent to the dependency
-				if depPkg, exists := c.packages[importPath]; exists {
-					if !containsString(depPkg.Dependents, pkgPath) {
-						depPkg.Dependents = append(depPkg.Dependents, pkgPath)
-					}
-				}
-				c.mutex.Unlock()
-			}
+			imports = append(imports, importPath)
 		}
+
+		c.graph.addImportEdges(pkgPath, imports)
 	}
 
 	fmt.Println("\nDependency analysis complete!")
 
 	// Sort dependencies and dependents for deterministic behavior
-	for _, pkg := range c.packages {
-		sort.Strings(pkg.Dependencies)
-		sort.Strings(pkg.Dependents)
-	}
+	c.graph.sortAdjacency()
 
 	return nil
 }
 
-// containsString checks if a string slice contains a specific string
-func containsString(slice []string, str string) bool {
-	for _, s := range slice {
-		if s == str {
-			return true
-		}
-	}
-	return false
-}
-
-// isStdLib checks if a package is part of the standard library
-func (c *StdLibConverter) isStdLib(pkgPath string) bool {
-	// Standard library packages don't have a domain prefix
-	if strings.Contains(pkgPath, ".") {
-		return false
-	}
-
-	// Check if it's in our package map
-	_, exists := c.packages[pkgPath]
-	return exists
-}
-
-// topologicalSort performs a topological sort of the packages
+// topologicalSort orders the standard-library convert-set least dependencies first by delegating
+// to the shared graph, then reports the resulting order.
 func (c *StdLibConverter) topologicalSort() error {
 	fmt.Println("Sorting packages in dependency order...")
 
-	// Create a copy of the package map for sorting
-	unprocessed := make(map[string]*Package)
-	for path, pkg := range c.packages {
-		unprocessed[path] = &Package{
-			Path:         pkg.Path,
-			Dependencies: pkg.Dependencies,
-			Processed:    false,
-		}
-	}
-
-	// Create the sorted queue
-	c.sortedQueue = make([]string, 0, len(c.packages))
-
-	// First handle packages with no dependencies
-	var noDeps []string
-	for path, pkg := range unprocessed {
-		if len(pkg.Dependencies) == 0 && !pkg.Processed {
-			noDeps = append(noDeps, path)
-		}
-	}
-
-	// Sort for deterministic order
-	sort.Strings(noDeps)
-
-	// Process packages with no dependencies first
-	for _, path := range noDeps {
-		if !unprocessed[path].Processed {
-			unprocessed[path].Processed = true
-			c.sortedQueue = append(c.sortedQueue, path)
-		}
-	}
-
-	// Keep track of packages being processed (to detect cycles)
-	processing := make(map[string]bool)
-
-	// Then recursively process remaining packages — from SORTED roots, so packages not ordered
-	// relative to each other by a dependency edge still land in the same queue position every run
-	// (map-iteration roots made the queue, and thus any order-sensitive output, flip run-to-run).
-	remaining := make([]string, 0, len(unprocessed))
-
-	for path := range unprocessed {
-		remaining = append(remaining, path)
-	}
-
-	sort.Strings(remaining)
-
-	for _, path := range remaining {
-		if !unprocessed[path].Processed {
-			if err := c.visitPackage(path, unprocessed, processing); err != nil {
-				return err
-			}
-		}
-	}
+	c.graph.topologicalSort()
 
 	// Print some statistics
-	fmt.Printf("Sorted %d packages in dependency order\n", len(c.sortedQueue))
+	fmt.Printf("Sorted %d packages in dependency order\n", len(c.graph.sortedQueue))
 
 	// For debugging: print first 5 and last 5 packages in the sorted queue
-	if len(c.sortedQueue) > 10 {
+	if len(c.graph.sortedQueue) > 10 {
 		fmt.Println("First packages to convert:")
 		for i := 0; i < 5; i++ {
-			fmt.Printf("  %s\n", c.sortedQueue[i])
+			fmt.Printf("  %s\n", c.graph.sortedQueue[i])
 		}
 		fmt.Println("Last packages to convert:")
-		for i := len(c.sortedQueue) - 5; i < len(c.sortedQueue); i++ {
-			fmt.Printf("  %s\n", c.sortedQueue[i])
+		for i := len(c.graph.sortedQueue) - 5; i < len(c.graph.sortedQueue); i++ {
+			fmt.Printf("  %s\n", c.graph.sortedQueue[i])
 		}
 	}
-
-	return nil
-}
-
-// visitPackage visits a package during topological sort
-func (c *StdLibConverter) visitPackage(path string, unprocessed map[string]*Package, processing map[string]bool) error {
-	// Check for cycles
-	if processing[path] {
-		// We found a cycle, but it might be okay for Go packages
-		// Just log it and continue
-		log.Printf("WARNING: Cycle detected involving package %s", path)
-		return nil
-	}
-
-	// Mark as being processed
-	processing[path] = true
-
-	// Process dependencies first
-	for _, depPath := range unprocessed[path].Dependencies {
-		if dep, exists := unprocessed[depPath]; exists && !dep.Processed {
-			if err := c.visitPackage(depPath, unprocessed, processing); err != nil {
-				return err
-			}
-		}
-	}
-
-	// Mark as processed and add to the queue
-	unprocessed[path].Processed = true
-	c.sortedQueue = append(c.sortedQueue, path)
-
-	// Unmark as being processed
-	processing[path] = false
 
 	return nil
 }
@@ -530,7 +385,7 @@ func (c *StdLibConverter) checkForPreviousConversion() error {
 
 		// Filter the queue
 		filteredQueue := make([]string, 0)
-		for _, pkg := range c.sortedQueue {
+		for _, pkg := range c.graph.sortedQueue {
 			if filterMap[pkg] {
 				filteredQueue = append(filteredQueue, pkg)
 			}
@@ -541,8 +396,8 @@ func (c *StdLibConverter) checkForPreviousConversion() error {
 		}
 
 		fmt.Printf("Filtered from %d to %d packages based on previously failed packages\n",
-			len(c.sortedQueue), len(filteredQueue))
-		c.sortedQueue = filteredQueue
+			len(c.graph.sortedQueue), len(filteredQueue))
+		c.graph.sortedQueue = filteredQueue
 	} else {
 		fmt.Println("Proceeding with full conversion...")
 	}
@@ -572,8 +427,8 @@ func (c *StdLibConverter) convertAllPackages() error {
 	// type-alias parse markers), so a converted importer must observe its dependency's finished
 	// package_info.cs — the conversion is inherently sequential. Sequential conversion also keeps
 	// the emitted bytes byte-reproducible run-to-run (see the per-file note in processConversion).
-	for i, pkgPath := range c.sortedQueue {
-		pkg := c.packages[pkgPath]
+	for i, pkgPath := range c.graph.sortedQueue {
+		pkg := c.graph.packages[pkgPath]
 		pkgStartTime := time.Now()
 
 		// Calculate progress
@@ -749,7 +604,7 @@ func (c *StdLibConverter) GenerateDependencyGraph() error {
 	fmt.Fprintln(f, "  node [shape=box, style=filled, fillcolor=lightblue];")
 
 	// Write nodes for each package
-	for pkgPath := range c.packages {
+	for pkgPath := range c.graph.packages {
 		// Sanitize package name for DOT
 		pkgName := strings.ReplaceAll(pkgPath, "/", "_")
 		pkgName = strings.ReplaceAll(pkgName, ".", "_")
@@ -757,9 +612,9 @@ func (c *StdLibConverter) GenerateDependencyGraph() error {
 	}
 
 	// Sort packages for consistent output
-	sortedPackages := make([]string, 0, len(c.packages))
+	sortedPackages := make([]string, 0, len(c.graph.packages))
 
-	for pkgPath := range c.packages {
+	for pkgPath := range c.graph.packages {
 		sortedPackages = append(sortedPackages, pkgPath)
 	}
 
@@ -772,7 +627,7 @@ func (c *StdLibConverter) GenerateDependencyGraph() error {
 		pkgName = strings.ReplaceAll(pkgName, ".", "_")
 
 		// Get the package object
-		pkg := c.packages[pkgPath]
+		pkg := c.graph.packages[pkgPath]
 
 		// Sort dependencies for consistent output
 		sort.Strings(pkg.Dependencies)
@@ -840,8 +695,8 @@ func (c *StdLibConverter) GenerateConversionReport() error {
 	// Write package summary
 	fmt.Fprintln(f, "  <h2>Package Summary</h2>")
 	fmt.Fprintln(f, "  <ul>")
-	fmt.Fprintf(f, "    <li>Total packages: %d</li>\n", len(c.packages))
-	fmt.Fprintf(f, "    <li>Packages in conversion queue: %d</li>\n", len(c.sortedQueue))
+	fmt.Fprintf(f, "    <li>Total packages: %d</li>\n", len(c.graph.packages))
+	fmt.Fprintf(f, "    <li>Packages in conversion queue: %d</li>\n", len(c.graph.sortedQueue))
 	fmt.Fprintln(f, "  </ul>")
 
 	// Write package table
@@ -854,15 +709,15 @@ func (c *StdLibConverter) GenerateConversionReport() error {
 	fmt.Fprintln(f, "    </tr>")
 
 	// Sort packages by name for consistent output
-	sortedPackages := make([]string, 0, len(c.packages))
-	for pkgPath := range c.packages {
+	sortedPackages := make([]string, 0, len(c.graph.packages))
+	for pkgPath := range c.graph.packages {
 		sortedPackages = append(sortedPackages, pkgPath)
 	}
 	sort.Strings(sortedPackages)
 
 	// Add a row for each package
 	for _, pkgPath := range sortedPackages {
-		pkg := c.packages[pkgPath]
+		pkg := c.graph.packages[pkgPath]
 		fmt.Fprintln(f, "    <tr>")
 		fmt.Fprintf(f, "      <td>%s</td>\n", pkgPath)
 		fmt.Fprintf(f, "      <td>%d</td>\n", len(pkg.Dependencies))
@@ -881,22 +736,22 @@ func (c *StdLibConverter) GenerateConversionReport() error {
 	firstN := 20
 	lastN := 20
 
-	if len(c.sortedQueue) <= firstN+lastN {
+	if len(c.graph.sortedQueue) <= firstN+lastN {
 		// If we have fewer than firstN+lastN packages, just list them all
-		for _, pkgPath := range c.sortedQueue {
+		for _, pkgPath := range c.graph.sortedQueue {
 			fmt.Fprintf(f, "    <li>%s</li>\n", pkgPath)
 		}
 	} else {
 		// List the first firstN packages
-		for i := 0; i < firstN && i < len(c.sortedQueue); i++ {
-			fmt.Fprintf(f, "    <li>%s</li>\n", c.sortedQueue[i])
+		for i := 0; i < firstN && i < len(c.graph.sortedQueue); i++ {
+			fmt.Fprintf(f, "    <li>%s</li>\n", c.graph.sortedQueue[i])
 		}
 
 		fmt.Fprintln(f, "    <li>... (and more) ...</li>")
 
 		// List the last lastN packages
-		for i := len(c.sortedQueue) - lastN; i < len(c.sortedQueue); i++ {
-			fmt.Fprintf(f, "    <li>%s</li>\n", c.sortedQueue[i])
+		for i := len(c.graph.sortedQueue) - lastN; i < len(c.graph.sortedQueue); i++ {
+			fmt.Fprintf(f, "    <li>%s</li>\n", c.graph.sortedQueue[i])
 		}
 	}
 
