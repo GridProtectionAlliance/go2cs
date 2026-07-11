@@ -283,13 +283,13 @@ func getLocalModulePackageInfo(importPath string, options Options) (PackageInfo,
 	// version-free IMPORT PATH rather than from meta.Dir. ModuleConverter writes the package's output
 	// to the matching $(go2csPath)pkg\<import-path> directory, so reference and output stay in agreement.
 	if isPathUnder(meta.Dir, filepath.Join(options.goPath, "pkg", "mod")) {
-		libProjectName, _ := getProjectName(meta.Dir, options)
+		libProjectName, namespace := getProjectName(meta.Dir, options)
 		targetDir := "$(go2csPath)pkg\\" + strings.ReplaceAll(importPath, "/", "\\")
 		projectReference := filepath.Join(targetDir, libProjectName+".csproj")
 
 		return PackageInfo{
 			IsStdLib:         false,
-			PackageName:      meta.Name,
+			PackageName:      packageQualifiedName(namespace, meta.Name),
 			RootPackageName:  meta.Name,
 			SourceDir:        meta.Dir,
 			TargetDir:        strings.ReplaceAll(targetDir, "$(go2csPath)", options.go2csPath+string(os.PathSeparator)),
@@ -300,17 +300,35 @@ func getLocalModulePackageInfo(importPath string, options Options) (PackageInfo,
 	// A genuine LOCAL/USER module (a co-located `replace`): its converted output is in-place
 	// (co-located with its Go source), and it generates `<projectName>.csproj` in its own directory.
 	// The absolute ProjectReference is rewritten relative to the referencing project by writeProjectFile.
-	libProjectName, _ := getProjectName(meta.Dir, options)
+	libProjectName, namespace := getProjectName(meta.Dir, options)
 	projectReference := filepath.Join(meta.Dir, libProjectName+".csproj")
 
 	return PackageInfo{
 		IsStdLib:         false,
-		PackageName:      meta.Name,
+		PackageName:      packageQualifiedName(namespace, meta.Name),
 		RootPackageName:  meta.Name,
 		SourceDir:        meta.Dir,
 		TargetDir:        meta.Dir,
 		ProjectReference: projectReference,
 	}, true
+}
+
+// packageQualifiedName returns the dotted name N for which go.<N>_package is the imported package's
+// converted class: the namespace getProjectName produced (minus the `go.` root) joined with the Go
+// package name. For a single-segment module (namespace == the root `go`) it is just the package name.
+// An imported type alias must qualify against this — the bare package name targets a nonexistent
+// top-level go.<name>_package for any multi-segment import path (CS0234, e.g. github.com/google/uuid's
+// `uuid` -> go.uuid_package instead of go.github.com.google.uuid_package). Using the Go package name
+// (meta.Name) as the last segment — not the import-path segment — keeps it correct when they differ
+// (github.com/mattn/go-isatty is `package isatty` -> go.github.com.mattn.isatty_package).
+func packageQualifiedName(namespace, packageName string) string {
+	nsPrefix := strings.TrimPrefix(namespace, RootNamespace+".")
+
+	if nsPrefix == namespace {
+		return packageName
+	}
+
+	return nsPrefix + "." + packageName
 }
 
 // isPathUnder reports whether path is the directory dir or nested within it (case-insensitive on
