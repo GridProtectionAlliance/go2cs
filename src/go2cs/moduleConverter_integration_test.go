@@ -101,6 +101,20 @@ func TestRecurseSyntheticModule(t *testing.T) {
 	if !strings.Contains(slnx, "example.com.app.csproj") || !strings.Contains(slnx, "example.com.lib.csproj") {
 		t.Errorf("recurse solution missing the app or lib project:\n%s", slnx)
 	}
+
+	// A per-project solution sits next to the app csproj, over the app + its transitive converted
+	// dependency (lib) + the shared runtime (golib) + the analyzer (go2cs-gen) — no stdlib listed.
+	appSlnx := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "app", "example.com.app.slnx"))
+
+	for _, want := range []string{"example.com.app.csproj", "example.com.lib.csproj", "golib.csproj", "go2cs-gen.csproj"} {
+		if !strings.Contains(appSlnx, want) {
+			t.Errorf("app per-project solution missing %q:\n%s", want, appSlnx)
+		}
+	}
+
+	if strings.Contains(appSlnx, "fmt.csproj") {
+		t.Errorf("app per-project solution should not list stdlib projects (found fmt.csproj):\n%s", appSlnx)
+	}
 }
 
 func writeModuleFile(t *testing.T, path, content string) {
