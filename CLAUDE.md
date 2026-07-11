@@ -220,14 +220,23 @@ construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructField
    (see the test-harness notes above). The golden comparison is line-ending-insensitive, so a multi-line
    string literal needs **no** `.gitattributes` handling for the byte compare — mark the `.cs` `-text` **only
    if** the compiled program's behavior/output depends on that literal's exact newlines (autocrlf gotcha above).
-7. **Record the conversion decision (keep the strategy doc living).** Any time an *important or non-obvious*
-   conversion decision is made — a new emitted form, a runtime/generator behavior, a deliberate trade-off,
-   or a changed mapping of a Go construct to C# — add or update the matching section in
-   [`docs/ConversionStrategies.md`](docs/ConversionStrategies.md) **in the same change** so that living
-   document keeps matching reality. Verify every C# snippet against the actual `.cs.target` golden (it is the
-   authoritative record of emitted forms — e.g. `u8` format strings, `throw panic(...)`, `ж<T>`/`Ꮡ`). Skip
-   only for pure bug-fixes that restore an already-documented behavior. (This rule is not limited to the
-   regression-test flow — it applies to *any* commit that lands a notable conversion decision.)
+7. **Record the conversion decision (keep the strategy docs living).** The conversion strategy lives in
+   **two** documents, and a notable decision updates the right one (often both):
+   - [`docs/ConversionStrategies-Reference.md`](docs/ConversionStrategies-Reference.md) — the exhaustive
+     **technical reference**. Nearly every conversion decision lands here: add or update the `###` subsection
+     under the matching `##` topic with the emitted form, the edge case, the reasoning, and the guarding
+     behavioral test. This is where the deep detail and history accumulate.
+   - [`docs/ConversionStrategies.md`](docs/ConversionStrategies.md) — the high-level **summary** (one section
+     per topic, tight prose + a couple of real Go→C# examples, each linking into the reference). Update it
+     only when the decision changes the *headline* mapping of a construct or warrants a better/clearer
+     example — not for every edge-case fix. Keep it short and readable; push the detail to the reference.
+
+   Do this **in the same change** so both docs keep matching reality. Verify every C# snippet against the
+   actual `.cs.target` golden (it is the authoritative record of emitted forms — e.g. `u8` format strings,
+   `throw panic(...)`, `ж<T>`/`Ꮡ`); the summary's examples should prefer real snippets pulled from the
+   `go-src-converted` stdlib (Go source ↔ converted C#). Skip only for pure bug-fixes that restore an
+   already-documented behavior. (This rule is not limited to the regression-test flow — it applies to *any*
+   commit that lands a notable conversion decision.)
 
 ### Phase 3 mechanics — measuring/iterating the full conversion (`src/go-src-converted`)
 - **The on-disk `go-src-converted` is stale** (last bulk conversion 2025-05-11); it predates current
@@ -311,8 +320,9 @@ each also have a `.bat` launcher.
 
 - C# style: see [`docs/coding-style.md`](docs/coding-style.md) (Allman braces, 4 spaces, `m_`/`s_`/`t_`
   field prefixes, explicit types over `var`, language keywords over BCL types, `\uXXXX` for non-ASCII).
-- Conversion strategy reference: [`docs/ConversionStrategies.md`](docs/ConversionStrategies.md)
-  (how each Go construct maps to C#).
+- Conversion strategy: [`docs/ConversionStrategies.md`](docs/ConversionStrategies.md) — a high-level,
+  example-driven **summary** of how each Go construct maps to C#; each section links into the exhaustive
+  [`docs/ConversionStrategies-Reference.md`](docs/ConversionStrategies-Reference.md) for the full detail.
 - Process/gate terminology as used in commit messages and reviews (CNR, A/B footprint, census,
   chip, guard, golden, overlay, banked…): [`docs/Glossary.md`](docs/Glossary.md).
 - Generated C# intentionally targets Go-like *behavior first* (no implicit async), and Go-like *appearance*

@@ -4,7 +4,9 @@
 > Phase-3 "full stdlib compile" campaign (2026-06/07) whose commit messages, chip briefs, and
 > review verdicts lean on this shorthand heavily. For *conversion* terminology (how Go constructs
 > map to C#: `ж<T>`, heap boxes, adapters, direct-ж, shadow renames) see
-> [`ConversionStrategies.md`](ConversionStrategies.md); this file covers the **process** vocabulary.
+> [`ConversionStrategies.md`](ConversionStrategies.md) (summary) and
+> [`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md) (full detail); this file covers
+> the **process** vocabulary.
 > Companion docs: [`CLAUDE.md`](../CLAUDE.md) (authoritative workflow),
 > [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md).
 

@@ -1625,8 +1625,9 @@ disguise. **All three rise together to the finish.**
 4. **Validate no regression** — full behavioral suite green AND zero golden churn (re-transpile all
    behavioral dirs; byte-identical `.cs` ⟹ no regression). Re-baseline goldens only for *intended*
    output changes.
-5. **Record the conversion decision** in [`ConversionStrategies.md`](ConversionStrategies.md) if it's
-   a new/changed emitted form (per CLAUDE.md).
+5. **Record the conversion decision** if it's a new/changed emitted form (per CLAUDE.md): deep detail in
+   [`ConversionStrategies-Reference.md`](../ConversionStrategies-Reference.md), plus a summary example in
+   [`ConversionStrategies.md`](../ConversionStrategies.md) if the headline mapping changed.
 6. **Commit** (directly to `master` — solo project). One focused commit per root fix.
 7. Rinse and repeat until the full library compiles.
 
@@ -1688,7 +1689,8 @@ dedicated session, and greening one often un-skips dependents and re-shapes the 
 **Every session ends with a closing ritual (non-negotiable):**
 
 1. Land the fix(es) per the per-defect **Workflow** above (root fix + behavioral test + zero golden
-   churn + `ConversionStrategies.md` + commit).
+   churn + `ConversionStrategies-Reference.md` (+ summary `ConversionStrategies.md` if the headline
+   mapping changed) + commit).
 2. **Update THIS doc:** check off the completed queue item (`[x]`) with a one-line result note (commits,
    error delta), and refresh the count + date in *Where things stand*.
 3. **Rewrite the *Next session prompt* block** (bottom of this doc) into a ready-to-paste kickoff for the

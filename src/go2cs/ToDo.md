@@ -105,7 +105,7 @@ xx) Complete code comment conversions, this may be predicated on the following:
        publicize concern, it does not remove it from the converter.
     3) Confirm go2cs-gen can emit a bare accessibility-only partial for non-`[GoType]` types first.
     4) Context / trigger: the lifted-anon-struct-alias publicize (`corpusEntryᴛ1` / `testing.testDeps`);
-       see docs/ConversionStrategies.md "A publicized unexported interface is emitted public".
+       see docs/ConversionStrategies-Reference.md "A publicized unexported interface is emitted public".
 - ~~`-stdlib` output should automatically copy `$GOROOT/VERSION` into the output root~~ **DONE
   (2026-07-11):** `StdLibConverter.copyRootAttributionFiles` (Step 6 of `ScanAndConvertFiltered`)
   copies `VERSION`, `LICENSE`, `PATENTS`, `README.md`, `SECURITY.md`, `CONTRIBUTING.md` from the Go

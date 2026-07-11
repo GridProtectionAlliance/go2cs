@@ -51,8 +51,10 @@ adversarial verification of a candidate fix and (b) read-only bucket/exploration
 7. **Validate no regression** — full behavioral suite green (`run-behavioral.ps1`) AND zero unexplained
    golden churn (`check-no-regression.ps1`; classify any churn as pre-existing-stale vs my-change vs
    noise via file:line cross-reference). Re-baseline goldens ONLY for intended output changes.
-8. **Record** the conversion decision in [`ConversionStrategies.md`](ConversionStrategies.md) if it's a
-   new/changed emitted form.
+8. **Record** the conversion decision if it's a new/changed emitted form: the deep detail goes in
+   [`ConversionStrategies-Reference.md`](../ConversionStrategies-Reference.md) (a `###` subsection under the
+   matching topic), and — only if the *headline* mapping changed — a line/example in the summary
+   [`ConversionStrategies.md`](../ConversionStrategies.md).
 9. **Commit** to `master` (solo project) — ONE focused commit per root. **Do NOT push** (see knobs).
 10. **Closing ritual** — update the handoff (check off the item + result note, refresh count/date,
     rewrite the Next-session prompt for the next root), commit the doc.

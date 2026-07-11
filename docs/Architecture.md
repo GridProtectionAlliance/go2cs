@@ -97,4 +97,6 @@ Compile-time emission so converted C# stays visually close to Go. Referenced as 
 | `uint8`/`rune`/`uintptr`/`complex128`/… | aliases (`byte`/`int32`/`UIntPtr`/`Complex`) via global usings |
 | panic / runtime error | `PanicException` / `RuntimeErrorPanic` |
 
-See [`ConversionStrategies.md`](ConversionStrategies.md) for the per-construct mapping rationale.
+See [`ConversionStrategies.md`](ConversionStrategies.md) for a high-level, example-driven tour of the
+per-construct mapping, and [`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md) for the
+exhaustive rationale and edge cases behind each one.

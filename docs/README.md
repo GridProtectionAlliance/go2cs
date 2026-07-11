@@ -119,7 +119,8 @@ that covers, grouped:
 - Packages mapped to namespaces, with cross-package imports compiled as separate, referenced assemblies
 - Build-tag and `GOOS` / `GOARCH` platform file selection, and deterministic, byte-stable output
 
-See [`ConversionStrategies.md`](ConversionStrategies.md) for exactly how each construct maps to C#.
+See [`ConversionStrategies.md`](ConversionStrategies.md) for an example-driven tour of how each construct
+maps to C# (with [`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md) for the full detail).
 
 ## Requirements
 
