@@ -28,13 +28,15 @@ func TestBuildSolutionXML(t *testing.T) {
 		"<Platform Name=\"Any CPU\" />",
 		"<Platform Name=\"x64\" />",
 		"<Platform Name=\"x86\" />",
-		"<Folder Name=\"/generators/\">",
+		// Folders carry a deterministic Id attribute (see folderID) — match the opening tag and
+		// name, tolerating the trailing ` Id="…"`.
+		"<Folder Name=\"/generators/\" Id=\"",
 		"<Project Path=\"gen/go2cs-gen/go2cs-gen.csproj\" />",
-		"<Folder Name=\"/core/\">",
+		"<Folder Name=\"/core/\" Id=\"",
 		"<Project Path=\"core/fmt/fmt.csproj\" />",
 		"<Project Path=\"core/golib/golib.csproj\" />",
 		"<Project Path=\"core/internal/abi/internal.abi.csproj\" />",
-		"<Folder Name=\"/tests/\">",
+		"<Folder Name=\"/tests/\" Id=\"",
 		"<Project Path=\"core/fmt/fmt_test.csproj\" />",
 		"</Solution>",
 	}
