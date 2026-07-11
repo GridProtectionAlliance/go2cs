@@ -229,6 +229,20 @@ func (m *ModuleConverter) buildEdges(closure map[string]*packages.Package) {
 	}
 }
 
+// outputDirFor returns where a convert-set package's C# output is written. A read-only, versioned
+// module-cache dependency ($GOPATH/pkg/mod/<module>@<version>/...) is routed to a WRITABLE
+// $(go2csPath)pkg\<import-path> location (the @version stripped — the path is built from the
+// version-free import path), matching the reference getLocalModulePackageInfo emits for it.
+// Everything else — the app and co-located `replace` modules — is converted in place, co-located
+// with its Go source.
+func (m *ModuleConverter) outputDirFor(pkgPath, srcDir string) string {
+	if isPathUnder(srcDir, filepath.Join(m.options.goPath, "pkg", "mod")) {
+		return filepath.Join(m.options.go2csPath, "pkg", filepath.FromSlash(pkgPath))
+	}
+
+	return srcDir
+}
+
 // convertAll converts every convert-set package in the sorted (least-dependencies-first) order,
 // surviving a panic in any single package so the rest still convert (partial compile acceptable).
 func (m *ModuleConverter) convertAll() {
@@ -239,12 +253,10 @@ func (m *ModuleConverter) convertAll() {
 
 	for i, pkgPath := range m.graph.sortedQueue {
 		pkg := m.graph.packages[pkgPath]
+		outputDir := m.outputDirFor(pkgPath, pkg.Dir)
 
 		fmt.Printf("[%d/%d] Converting %s\n", i+1, total, pkgPath)
 
-		// Convert in place (P2): output co-located with the Go source. This is correct for the app
-		// and for `replace`d/co-located third-party modules; P3 routes read-only module-cache
-		// dependencies to a writable $(go2csPath)pkg output instead.
 		err := func() (err error) {
 			defer func() {
 				if r := recover(); r != nil {
@@ -252,7 +264,7 @@ func (m *ModuleConverter) convertAll() {
 				}
 			}()
 
-			processConversion(pkg.Dir, true, pkg.Dir, m.options)
+			processConversion(pkg.Dir, true, outputDir, m.options)
 			return nil
 		}()
 

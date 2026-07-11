@@ -720,7 +720,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 	var pkgs []*packages.Package
 
-	if strings.HasPrefix(strings.ToLower(inputFilePath), strings.ToLower(options.goPath)) {
+	// Under -recurse, ModuleConverter drives conversion one package at a time and passes the exact
+	// package dir; load only THAT package (never "./...", which would additionally pull in and
+	// re-convert sibling sub-packages — each is already its own convert-set entry, including
+	// read-only module-cache packages that must route to $(go2csPath)pkg individually). Outside
+	// recurse, a GOPATH input keeps the "./..." subtree behavior unchanged.
+	if !options.recurse && strings.HasPrefix(strings.ToLower(inputFilePath), strings.ToLower(options.goPath)) {
 		pkgs, err = packages.Load(cfg, "./...")
 	} else {
 		pkgs, err = packages.Load(cfg, inputFilePath)

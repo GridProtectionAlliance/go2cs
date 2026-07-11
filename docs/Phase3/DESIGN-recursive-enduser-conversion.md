@@ -210,8 +210,21 @@ follows the same shape, adding the app + `pkg\…` third-party projects.
   convert-set-order unit-tested (`moduleConverter_test.go`). **P2 converts in place** (output co-located with
   source) — correct for the app and `replace`d/co-located modules; read-only module-cache deps + the
   `$(go2csPath)pkg` output routing are P3. Implemented + tested (2026-07-11).
-- **P3 — output/reference decoupling.** Route module-cache deps to `$(go2csPath)pkg` output + references
-  (fix `getLocalModulePackageInfo`), strip `@version`.
+- **P3 — output/reference decoupling (done).** Read-only, versioned module-cache dependencies
+  (`$GOPATH/pkg/mod/<m>@<v>/…`) now convert to a **writable `$(go2csPath)pkg\<import-path>`** location and are
+  referenced there, never in place at the read-only cache. Three changes: (a) a new module-cache branch in
+  `getLocalModulePackageInfo` (`importOperations.go`) emits `$(go2csPath)pkg\<import-path>\…` references
+  (used as-is, like the stdlib `$(go2csPath)core` refs — `writeProjectFile` only relativizes `IsAbs`
+  references) with the `@version` **stripped** by deriving the path from the version-free import path;
+  (b) `ModuleConverter.outputDirFor` routes a module-cache package's OUTPUT to the matching
+  `$(go2csPath)pkg\<import-path>` dir so reference and output agree (the app + co-located `replace` modules
+  stay in place); (c) `processConversion` loads only the single target package under `-recurse` (never
+  `./...`, which would re-convert sibling sub-packages). Validated live against a real cache dep
+  (`github.com/google/uuid@v1.6.0`): it converted to `…\pkg\github.com\google\uuid\` (version stripped), the
+  read-only cache was untouched, and the app csproj referenced
+  `$(go2csPath)pkg\github.com\google\uuid\github.com.google.uuid.csproj`. Gate: `outputDirFor` unit-tested;
+  `check-no-regression` byte-identical across 371 behavioral projects (all changes are recurse-guarded).
+  Implemented + tested (2026-07-11).
 - **P4 — solution generation** for the app + third-party + stdlib references.
 - **P5 — test harness** (§5).
 

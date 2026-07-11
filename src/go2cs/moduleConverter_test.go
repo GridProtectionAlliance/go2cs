@@ -78,3 +78,33 @@ func TestModuleConverterConvertSetOrder(t *testing.T) {
 		t.Errorf("app convert-set dependencies = %v, want [example.com/lib]", appDeps)
 	}
 }
+
+// TestModuleConverterOutputDir verifies output routing (P3): a read-only module-cache dependency is
+// routed to a writable $(go2csPath)pkg\<import-path> location with the @version stripped, while the
+// app and co-located `replace` modules convert in place, co-located with their source.
+func TestModuleConverterOutputDir(t *testing.T) {
+	goPath := filepath.FromSlash("C:/gopath")
+	go2csPath := filepath.FromSlash("C:/gopath/src/go2cs")
+	m := &ModuleConverter{options: Options{goPath: goPath, go2csPath: go2csPath}}
+
+	cacheDir := filepath.Join(goPath, "pkg", "mod", "github.com", "fatih", "color@v1.13.0")
+	appDir := filepath.FromSlash("C:/work/app")
+	libDir := filepath.FromSlash("C:/work/lib")
+
+	cases := []struct {
+		name    string
+		pkgPath string
+		srcDir  string
+		want    string
+	}{
+		{"module-cache dep to pkg (version stripped)", "github.com/fatih/color", cacheDir, filepath.Join(go2csPath, "pkg", "github.com", "fatih", "color")},
+		{"app in place", "example.com/app", appDir, appDir},
+		{"co-located replace in place", "example.com/lib", libDir, libDir},
+	}
+
+	for _, tc := range cases {
+		if got := m.outputDirFor(tc.pkgPath, tc.srcDir); got != tc.want {
+			t.Errorf("outputDirFor(%q) = %q, want %q", tc.name, got, tc.want)
+		}
+	}
+}

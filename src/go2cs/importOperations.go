@@ -276,9 +276,30 @@ func getLocalModulePackageInfo(importPath string, options Options) (PackageInfo,
 		}, true
 	}
 
-	// A genuine LOCAL/USER module: its converted output is in-place (co-located with its Go source),
-	// and it generates `<projectName>.csproj` in its own directory. The absolute ProjectReference is
-	// rewritten relative to the referencing project by writeProjectFile.
+	// A read-only, versioned module-cache dependency ($GOPATH/pkg/mod/<module>@<version>/...): its
+	// converted output goes to a WRITABLE $(go2csPath)pkg\<import-path> location, referenced there via
+	// the $(go2csPath) property (like the stdlib $(go2csPath)core refs — NOT rewritten relative, so it
+	// resolves against the deploy root). The @version segment is stripped by deriving the path from the
+	// version-free IMPORT PATH rather than from meta.Dir. ModuleConverter writes the package's output
+	// to the matching $(go2csPath)pkg\<import-path> directory, so reference and output stay in agreement.
+	if isPathUnder(meta.Dir, filepath.Join(options.goPath, "pkg", "mod")) {
+		libProjectName, _ := getProjectName(meta.Dir, options)
+		targetDir := "$(go2csPath)pkg\\" + strings.ReplaceAll(importPath, "/", "\\")
+		projectReference := filepath.Join(targetDir, libProjectName+".csproj")
+
+		return PackageInfo{
+			IsStdLib:         false,
+			PackageName:      meta.Name,
+			RootPackageName:  meta.Name,
+			SourceDir:        meta.Dir,
+			TargetDir:        strings.ReplaceAll(targetDir, "$(go2csPath)", options.go2csPath+string(os.PathSeparator)),
+			ProjectReference: projectReference,
+		}, true
+	}
+
+	// A genuine LOCAL/USER module (a co-located `replace`): its converted output is in-place
+	// (co-located with its Go source), and it generates `<projectName>.csproj` in its own directory.
+	// The absolute ProjectReference is rewritten relative to the referencing project by writeProjectFile.
 	libProjectName, _ := getProjectName(meta.Dir, options)
 	projectReference := filepath.Join(meta.Dir, libProjectName+".csproj")
 
