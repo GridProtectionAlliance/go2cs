@@ -332,6 +332,12 @@ func (m *ModuleConverter) generateSolutionFile() error {
 	contents := buildFlatSolutionXML(rels)
 	solutionFile := filepath.Join(root, recurseSolutionFileName)
 
+	// The deploy root may not exist yet — e.g. an all-in-place conversion (a co-located `replace`
+	// module with no module-cache deps) writes nothing else under it. Create it before writing.
+	if err := os.MkdirAll(root, 0o755); err != nil {
+		return fmt.Errorf("failed to create deploy root %q: %w", root, err)
+	}
+
 	if needToWriteFile(solutionFile, []byte(contents)) {
 		if err := os.WriteFile(solutionFile, []byte(contents), 0644); err != nil {
 			return fmt.Errorf("failed to write recurse solution file %q: %w", solutionFile, err)

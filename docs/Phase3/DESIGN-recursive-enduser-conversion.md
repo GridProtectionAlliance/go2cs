@@ -9,8 +9,12 @@
 > **Update (2026-07-11):** the *staging* half is built and tested. `deploy-core.ps1` (two modes; see the
 > "Deploying the core" section of [`../CLAUDE.md`](../CLAUDE.md)) stages the referenced stdlib + the
 > `go2cs-gen` analyzer at `%GOPATH%\src\go2cs` and writes a root `Directory.Build.props` that pins
-> `$(go2csPath)` to that root. That firms up the reference-resolution story below (§3.4/§3.5). The
-> converter side (`-recurse`, phases P1–P5) is the remaining implementation goal.
+> `$(go2csPath)` to that root. That firms up the reference-resolution story below (§3.4/§3.5).
+>
+> **Update (2026-07-11, later):** the converter side is **built** — `-recurse` and phases **P1–P5 are all
+> implemented, gated, and committed**. The `-recurse` feature works end to end on a real internet DAG
+> (`fatih/color`); the remaining gaps to a *fully compiling* real-world build are per-package **converter**
+> defects (Phase-4 territory), catalogued in the §5 *5b results*.
 
 ## 1. What we're validating
 
@@ -236,9 +240,18 @@ follows the same shape, adding the app + `pkg\…` third-party projects.
   (`..\cache-test\example.com.cachetest.csproj` + `pkg\github.com\google\uuid\…csproj`). Gate:
   `buildFlatSolutionXML` unit-tested; `check-no-regression` byte-identical across 371 behavioral projects.
   Implemented + tested (2026-07-11).
-- **P5 — test harness** (§5).
+- **P5 — test harness (done).** *5a synthetic:* `TestRecurseSyntheticModule` (`moduleConverter_integration_test.go`)
+  runs the real `-recurse` conversion over an in-process two-module fixture (`app → lib(replace) → stdlib`)
+  and asserts the loop end to end — topo order (lib before app), in-place output, the cross-package
+  `lib.Greeting` call, the lib + `$(go2csPath)core\fmt` references, and the flat solution — deterministic,
+  network-free, CI-able via `go test`. It caught a `generateSolutionFile` edge case (an all-in-place
+  conversion never created the deploy root), now fixed. *5b real internet:* see §5 results — `-recurse`
+  handled the real `fatih/color` DAG (74-package closure, 4 third-party) flawlessly at the process level;
+  the dotnet build is partial, surfacing per-package **converter** defects (Phase-4 territory), not recurse
+  defects. Implemented + tested (2026-07-11).
 
 Each phase is independently reviewable; P1 is a pure refactor with a strong existing regression gate.
+**All five phases (P1–P5) are implemented, gated, and committed (2026-07-11).**
 
 ## 5. Test plan
 
@@ -264,16 +277,41 @@ pattern.
 6. **Report** — packages discovered / converted / compiled, and CS-error buckets for the rest. Success
    criterion is **process completion + solution builds** (partial compile is acceptable at this stage).
 
-## 6. Open decisions (for the user)
+**5b results (2026-07-11).** Ran end to end against `github.com/fatih/color` (v1.16.0) — a genuine DAG
+`colordemo → color → {go-colorable, go-isatty, golang.org/x/sys/windows} → stdlib`. `go build ./...`
+baselined; `deploy-core stdlib -NoBuild` staged the 302-package compilable stdlib + analyzer + golib;
+`go2cs -recurse` then `dotnet build`:
 
-1. **Flag vs. auto-detect** — start with explicit `-recurse` (recommended), or auto-recurse when a
-   third-party import is present?
-2. **Module version in the output path** — strip `@<version>` (single-version, simplest) or preserve it
-   (supports multiple versions of one module, mirrors the cache)?
-3. **Which pre-converted stdlib to reference** — *resolved by the `deploy-core` modes*: `stdlib` (full
+- **Recurse process: 100%.** 74-package closure discovered → 1 app + 4 third-party converted, 68 stdlib
+  referenced; **topological order correct** (`go-isatty` & `x/sys/windows` leaves → `go-colorable` →
+  `color` → `colordemo`); all four third-party routed to `pkg\<import-path>`; flat solution emitted.
+- **dotnet build: partial (as expected — partial compile is the accepted criterion).** The full staged
+  stdlib subset + golib + analyzer compiled (~1315 DLLs); `github.com/mattn/go-isatty` (pure-stdlib deps)
+  built; and a pure-Go control lib `github.com/google/uuid` built. The rest failed on **three per-package
+  CONVERTER defects** (Phase-4 territory — not recurse-orchestration defects):
+  1. `uintptr`→C# `nuint` cannot be `const` (`x/sys/windows`, ~180 × CS0283/CS0133) — the syscall
+     "raw-metal on non-native types" case flagged in [`Baseline-vs-FullConversion.md`].
+  2. A hyphen in a package's import-path segment is emitted into C# identifiers unsanitized
+     (`go-colorable` → `go-colorable_package`, ~8 × CS1002/CS0116) — invalid C# identifier.
+  3. A non-stdlib imported type-alias is namespace-qualified from the bare package name, not the dotted
+     import path (`getLocalModulePackageInfo` sets `PackageName = meta.Name`), so `uuid`'s app got
+     `go.uuid_package.…` instead of `go.github.com.google.uuid_package.…` (4 × CS0234). The lib built;
+     only the importer's `package_info.cs` aliases misqualified.
+
+  All three are converter identifier/qualification/`const` gaps in specific Go constructs, surfaced for the
+  first time by converting real third-party code — precisely the residual per-package defects Phase 4
+  addresses. The `-recurse` feature itself (discovery, partition, dependency order, output/reference
+  routing, solution generation) is validated correct on this real DAG.
+
+## 6. Open decisions (RESOLVED)
+
+1. **Flag vs. auto-detect** — **explicit `-recurse`** (default off; single-package behavior unchanged).
+2. **Module version in the output path** — **strip `@<version>`** (single-version assumption; the
+   `$(go2csPath)pkg\<import-path>` path is derived from the version-free import path).
+3. **Which pre-converted stdlib to reference** — the `deploy-core` modes: `stdlib` (full
    `src/go-src-converted`, compilable) or `stub` (runnable baseline); both stage to
-   `%GOPATH%\src\go2cs\core`.
-4. **Test app** — `fatih/color` (small DAG, recommended) vs. a zero-dep lib (simplest one-hop).
+   `%GOPATH%\src\go2cs\core`. 5b used `stdlib`.
+4. **Test app** — **`fatih/color`** (the small DAG), with `github.com/google/uuid` as a pure-Go control.
 
 ## 7. Relationship to the NuGet stdlib decision
 
