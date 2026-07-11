@@ -16,6 +16,14 @@ partial class main_package {
     bool held();
 }
 
+[GoType("num:int16")] partial struct @short;
+
+[GoType("num:uint32")] partial struct dword;
+
+internal static @short toShort(dword d) {
+    return ((@short)(int16)(uint32)d);
+}
+
 internal static nint size(this @fixed f, @string of) {
     return f.n + len(of);
 }
@@ -43,6 +51,9 @@ internal static void Main() {
     fmt.Println(l.held());
     @lock lp = new fixedжlock(Ꮡf);
     fmt.Println(lp.held());
+    dword d = 40000;
+    var s = toShort(d);
+    fmt.Println((nint)(int16)s, (nint)(uint32)((dword)(uint32)(int16)s));
 }
 
 } // end main_package

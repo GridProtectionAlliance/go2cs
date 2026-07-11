@@ -45,6 +45,8 @@ using static go.main_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
+[assembly: GoImplicitConv<@short, dword>(Inverted = true, ValueType = "@short")]
+[assembly: GoImplicitConv<dword, @short>(Inverted = true, ValueType = "dword")]
 // </ImplicitConversions>
 
 namespace go;

@@ -17,6 +17,16 @@ type lock interface {
 	held() bool
 }
 
+// short is a numeric defined type named after a C# keyword; dword is a numeric
+// defined type that is not. Converting between them exercises the go2cs-gen
+// implicit-conversion operators for a KEYWORD-named type — the [GoType] struct is
+// @short, so the generated `partial struct`/operator/`new` must escape the keyword
+// (regression guard for the ImplicitConvGenerator: CS0715/CS0057/CS0030).
+type short int16
+type dword uint32
+
+func toShort(d dword) short { return short(d) }
+
 func (f fixed) size(of string) int {
 	return f.n + len(of)
 }
@@ -48,4 +58,8 @@ func main() {
 
 	var lp lock = &f
 	fmt.Println(lp.held())
+
+	var d dword = 40000
+	s := toShort(d)
+	fmt.Println(int(s), int(dword(s)))
 }
