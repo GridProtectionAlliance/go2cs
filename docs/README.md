@@ -218,15 +218,29 @@ go build ./...   # baseline: confirm it compiles as Go first
 
 **2 — go2cs: stage the standard library once, then recurse-convert the app.**
 
-```shell
-# Stage the pre-converted stdlib + runtime + analyzer at %GOPATH%\src\go2cs (the "deploy root").
-#   deploy-core stdlib  = the full compilable standard library (best for arbitrary imports)
-#   deploy-core stub    = the smaller runnable baseline subset
-deploy-core stdlib
+This step uses two tools from opposite folders, so mind where each runs:
 
-# Convert the app + its third-party deps UNDER that same root. The stdlib is referenced, not converted.
+- **`deploy-core`** is a build script that lives in the go2cs repo's **`src/`** folder (it is *not* installed
+  on your `PATH`), so run it from there. Staging is a **one-time, per-machine** step shared by every
+  `-recurse` conversion — it is unrelated to the app you are converting.
+- **`go2cs`** is the converter you built onto your `PATH` in *Installing the converter* above, so it runs
+  from anywhere. Point it at the **app** directory.
+
+```shell
+# (a) In the go2cs repo's  src/  folder, stage the pre-converted stdlib + runtime + analyzer at
+#     %GOPATH%\src\go2cs (the "deploy root") -- done once per machine:
+cd path\to\go2cs\src
+deploy-core stdlib          # the full compilable standard library (best for arbitrary imports)
+                            #   deploy-core stub  = the smaller runnable baseline subset
+
+# (b) Back in the APP folder, convert the app + its third-party deps under that same root
+#     (the standard library is referenced, not converted):
+cd path\to\colordemo
 go2cs -recurse . -go2cspath %GOPATH%\src\go2cs
 ```
+
+(`go2cs -recurse` takes the module directory as its argument, so instead of `cd`-ing you can pass the path
+directly from anywhere, e.g. `go2cs -recurse path\to\colordemo -go2cspath %GOPATH%\src\go2cs`.)
 
 `go2cs` discovers the import closure, converts each package least-dependencies-first
 (`go-isatty` and `x/sys` → `go-colorable` → `color` → the app), routes every third-party library to
