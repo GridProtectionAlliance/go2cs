@@ -63,17 +63,63 @@ public static bool IsAdult(this Person p) {
 }
 ```
 
+### Real standard-library conversions, side by side
+
+The goal — *reads like Go* — is easiest to judge on real code. Below are a few converted standard-library
+files next to their original **Go 1.23.1** source. Start with `errors`, then work down as the constructs get
+richer:
+
+| Package | Go 1.23.1 source | Converted C# | What it shows |
+|:--|:--|:--|:--|
+| `errors` | [errors.go](https://github.com/golang/go/blob/go1.23.1/src/errors/errors.go) | [errors.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/errors/errors.cs) | Error values and an unexported type satisfying the `error` interface. |
+| `cmp` | [cmp.go](https://github.com/golang/go/blob/go1.23.1/src/cmp/cmp.go) | [cmp.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/cmp/cmp.cs) | Generics with an ordered-type constraint. |
+| `unicode/utf8` | [utf8.go](https://github.com/golang/go/blob/go1.23.1/src/unicode/utf8/utf8.go) | [utf8.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8.cs) | Constants keeping Go's hex/binary literal formatting; arrays and structs. |
+| `sort` | [search.go](https://github.com/golang/go/blob/go1.23.1/src/sort/search.go) | [search.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/sort/search.cs) | Binary search driven by a `func(int) bool` closure. |
+| `strings` | [reader.go](https://github.com/golang/go/blob/go1.23.1/src/strings/reader.go) | [reader.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/strings/reader.cs) | A struct with receiver methods, tuple returns, and interface implementation. |
+| `container/list` | [list.go](https://github.com/golang/go/blob/go1.23.1/src/container/list/list.go) | [list.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/container/list/list.cs) | A doubly-linked list — pointers and receiver methods. |
+
+Browse the whole set under [`src/go-src-converted`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted).
+
 ## Features
 
-Converted constructs include:
+go2cs converts the full Go language surface — the same converter that emits the 302 packages above. What
+that covers, grouped:
 
-- Slices, arrays, maps, and strings (UTF-8 backed)
-- Channels and goroutines
-- `defer` / `panic` / `recover`
-- Multiple return values and named results
-- Structs, struct embedding (field promotion), and interface implementation
-- Generics (Go 1.18+ type parameters and constraints)
-- Pointers, type assertions, type switches, `iota`, and the built-ins (`append`, `len`, `cap`, `make`, …)
+**Types & values**
+
+- Slices and arrays (backing-array aliasing preserved, as in Go), maps, and UTF-8-backed `@string`
+- `int` / `uint` mapped to platform-width native integers; named numeric types and untyped-constant semantics
+- Constants and `iota`, preserving Go's numeric literal formatting (hex, binary, underscores, exponents)
+- Pointers with automatic heap-boxing driven by escape analysis; the `nil` value; `unsafe.Pointer`
+- Type definitions and type aliases — including exported aliases that resolve across package/assembly boundaries
+
+**Functions & methods**
+
+- Multiple return values and named results, as tuples
+- Receiver methods as extension methods, with distinct pointer- and value-receiver overloads
+- Function values, closures (honoring Go's shared-storage capture semantics), and variadic functions
+- `defer` / `panic` / `recover`, including named results observed and mutated by deferred closures
+
+**Concurrency**
+
+- Goroutines, run on the thread pool (behavioral equivalence first — not rewritten into `async`)
+- Channels with channel-operator (`<-`) lowering, and `select`-statement lowering
+
+**Composition & polymorphism**
+
+- Structs and struct embedding, with promoted fields and methods (multi-hop and cross-package)
+- Interfaces, satisfied structurally in Go and realized as nominal C# glue via Roslyn source generators
+- Type assertions and type switches
+- Generics: type parameters and constraints (unions, `comparable`, `~`-underlying, and method-set constraints)
+
+**Control flow & packaging**
+
+- `for` / `range`, labeled `break` / `continue`, expression and type switches, and Go 1.22 per-iteration loop variables
+- The built-ins: `append`, `len`, `cap`, `make`, `new`, `copy`, `delete`, `close`, …
+- Packages mapped to namespaces, with cross-package imports compiled as separate, referenced assemblies
+- Build-tag and `GOOS` / `GOARCH` platform file selection, and deterministic, byte-stable output
+
+See [`ConversionStrategies.md`](ConversionStrategies.md) for exactly how each construct maps to C#.
 
 ## Requirements
 
