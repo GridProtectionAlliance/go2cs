@@ -6,13 +6,14 @@
 > map to C#: `ж<T>`, heap boxes, adapters, direct-ж, shadow renames) see
 > [`ConversionStrategies.md`](ConversionStrategies.md) (summary) and
 > [`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md) (full detail); this file covers
-> the **process** vocabulary.
+> the **process** vocabulary — plus a short [**.NET and tooling terms**](#net-and-tooling-terms) section at
+> the end for the general .NET/toolchain acronyms the conversion docs assume (BCL, Roslyn, CRTP, …).
 > Companion docs: [`CLAUDE.md`](../CLAUDE.md) (authoritative workflow),
 > [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md).
 
 ## Gates (the checks a change must pass before it lands)
 
-**CNR — check-no-regression** (`src/Tests/Behavioral/check-no-regression.ps1`).
+<a id="cnr"></a>**CNR — check-no-regression** (`src/Tests/Behavioral/check-no-regression.ps1`).
 Force-rebuilds `go2cs.exe` from current source, re-transpiles **every** behavioral test project,
 and reports any generated `.cs` that differs from the committed tree. The pass verdict is
 **"byte-identical"**: the converter change produced exactly the committed output everywhere it
@@ -21,7 +22,7 @@ Scope caveat: CNR checks *transpile output only* — it cannot see compilation, 
 (`go2cs-gen`) output, or runtime behavior. A new test's own files appearing as untracked (`??`)
 is the expected signature of adding a guard, not a failure.
 
-**A/B (full-stdlib reconvert-diff).**
+<a id="ab"></a>**A/B (full-stdlib reconvert-diff).**
 Two complete stdlib conversions — one with the **base** converter (built from `HEAD` before the
 fix, usually via the *stash dance*, below) and one with the **fixed** converter — written to two
 scratch directories and compared with `diff -r`. The set of differing files is the change's
@@ -46,7 +47,7 @@ those act at compile/run time where CNR is blind. A gen change additionally requ
 `dotnet build-server shutdown`, otherwise MSBuild serves the cached analyzer and the suite
 silently tests the *old* generator.
 
-**Census** (`dotnet build src/go-src-converted.slnx` + an own-DLL count script).
+<a id="census"></a>**Census** (`dotnet build src/go-src-converted.slnx` + an own-DLL count script).
 The Phase-3 progress metric: how many of the ~302 auto-converted stdlib projects **emit their own
 assembly** (`bin/Debug/net9.0/<AssemblyName>.dll` exists after a full solution build). Reported as
 `N / 302`. The metric is **packages-compiling, not error count** — clearing an error family can
@@ -62,7 +63,7 @@ dependency failed is **skipped**, contributing zero error lines. So the red set 
 *zero* error lines anywhere is either a skipped dependent or a bookkeeping artifact (historically:
 a csproj on disk that was never registered in the `.sln`, so it was counted but never built).
 
-**Overlay.**
+<a id="overlay"></a>**Overlay.**
 The ritual that makes a census measure the *current* converter rather than the stale committed
 tree: full reconvert to a scratch dir → copy the fresh `.cs` **and** `.csproj` over
 `src/go-src-converted/` (rewriting project references `core\` → `go-src-converted\`, **except**
@@ -128,7 +129,7 @@ A **wave** is a coordinated group of chips spawned from one diagnosis round. The
 **red set**) is the current list of red census packages; the campaign advances by collapsing the
 frontier's leaf failures wave by wave.
 
-**Banked / bank.**
+<a id="banked"></a>**Banked / bank.**
 A verified-but-not-fixed item recorded durably (memory log + a banked-follow-ups note) instead of
 fixed now — typically a latent sibling with zero occurrences in the current corpus, or a concern
 from review. Banking is legitimate *only* with a written diagnosis; several banked items later
@@ -142,7 +143,7 @@ composite-literal, tuple-return, and channel-send positions).
 
 ## Test artifacts & conventions
 
-**Guard.**
+<a id="guard"></a>**Guard.**
 A behavioral regression test locking in a fix: a minimal Go program exercising the exact
 construct, its transpiled `.cs`, and a **golden**. Requirements that recur in reviews: solution
 registration in `src/go2cs.slnx` **plus grep-verification** (the *silent-drop gotcha*: the harness
@@ -152,7 +153,7 @@ error); **write-visibility** proof for pointer/box fixes (the program observes a
 fixed path in its output, compared against Go — distinguishing a faithful fix from a
 compiles-but-copies shortcut).
 
-**Golden / re-baseline.**
+<a id="golden"></a>**Golden / re-baseline.**
 The committed expected transpiler output (`*.cs.target`), byte-compared (line-ending-insensitive)
 by the Target phase. When an *intended* emission change alters existing goldens, they are
 **re-baselined** — regenerated from converter output (via the `UpdateTestTargets` utility with
@@ -187,3 +188,43 @@ are fine — they *are* the output.
 Annotation in memory logs for a known debt: an *OWED merge* (a finished chip branch not yet
 integrated), an *OWED guard* (a fix landed with its regression test deferred — rare and always
 tracked), or an owed documentation/log compaction.
+
+## .NET and tooling terms
+
+General .NET / C# / toolchain terms the conversion docs assume. (For the *emitted-code* glyphs
+`ж`/`Ꮡ`/`Δ` see **Marker glyphs** above and the conversion docs:
+[summary](ConversionStrategies.md) · [reference](ConversionStrategies-Reference.md).)
+
+<a id="bcl"></a>**BCL — Base Class Library.**
+The core class library that ships with .NET: the fundamental `System.*` types — `System.Object`,
+`System.String`, the integer primitives (`System.Int32` and the native `nint`/`nuint`),
+`System.Collections`, `System.Numerics`, and so on. When a Go construct maps "to the BCL" it maps onto a
+built-in .NET type rather than onto `golib` or a source generator — e.g. Go `any`/`interface{}` → `object`,
+the fixed-width integer aliases (`int32` = `System.Int32`), and the `System.Numerics` operator interfaces
+that generic constraints lift to.
+
+<a id="roslyn"></a>**Roslyn.**
+The .NET compiler platform — the C#/VB compiler plus its analyzer/codegen APIs. Its **source generator**
+feature lets code participate in compilation, and go2cs relies on it heavily: the generators in
+`src/gen/go2cs-gen/` (referenced as an analyzer by every converted project) synthesize the Go semantics C#
+cannot spell directly — interface satisfaction, pointer-receiver overloads, struct-embedding promotion,
+named-type operators. See [Source Generators](ConversionStrategies.md#source-generators).
+
+<a id="crtp"></a>**CRTP — Curiously Recurring Template Pattern.**
+The idiom where a type is parameterized by *itself* — `T : IFoo<T>`. .NET's generic-math and comparison
+interfaces use it (`IComparisonOperators<TSelf, TOther, TResult>`), and `golib`'s `comparable<T>` is a CRTP
+constraint so a type can state "I am comparable with my own kind" — the shape Go's `comparable` built-in
+maps to.
+
+<a id="nre"></a>**NRE — NullReferenceException.**
+The .NET exception thrown when a member is accessed through a null reference (the CLR analogue of a nil
+dereference). In the conversion docs it appears mostly as a *hazard being designed out*: a zero-value
+`@string` or an unallocated promoted-embed box would otherwise NRE on first use, so `golib` and the
+converter make those zero values safe to touch.
+
+<a id="msbuild"></a>**MSBuild.**
+.NET's build engine — it drives `dotnet build`, project references, and analyzers. It matters to the
+converter in two places: cross-package references arrive at the source generators as compiled **metadata**
+references (not source syntax), which changes how embeds/interfaces must be resolved; and the converter
+emits MSBuild `.csproj` project files (carrying the `$(go2csPath)` property) plus `.slnx` solutions for the
+converted output.

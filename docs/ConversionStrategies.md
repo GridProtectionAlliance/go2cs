@@ -3,14 +3,14 @@
 > **A high-level, example-driven tour of how `go2cs` maps each Go construct to C#.** This is the
 > readable overview -- every section ends with a **Reference →** link into the exhaustive
 > [`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md), where the same topic
-> is documented in full: every emitted form, edge case, phase-level fix, and the behavioral test
+> is documented in full: every emitted form, edge case, phase-level fix, and the [behavioral test](Glossary.md#guard)
 > that guards it. Read the summary for the *shape*; open the reference for the *why*.
 
 The guiding goal is that the generated C# is both **behaviorally** and **visually** similar to the
 original Go, so a Go developer can read the output and follow it. Two things the visible code does not
 show in full make that possible: a hand-written runtime library, **`golib`** (`src/core/golib/`,
 supplying `slice<T>`, `map<K,V>`, `channel<T>`, `@string`, `ж<T>`, `nil`, the builtins, …), and a set
-of **Roslyn source generators** (`src/gen/go2cs-gen/`) that synthesize the Go semantics C# cannot spell
+of **[Roslyn](Glossary.md#roslyn) source generators** (`src/gen/go2cs-gen/`) that synthesize the Go semantics C# cannot spell
 directly (interface satisfaction, receiver overloads, struct-embedding promotion, named-type operators).
 
 > The C# snippets below are drawn from the actual converted standard library (`src/go-src-converted/`,
@@ -69,7 +69,7 @@ directly (interface satisfaction, receiver overloads, struct-embedding promotion
 |---|---|---|
 | `package foo` · top-level `func Bar()` | `partial class foo_package` · `static` methods (receiver methods → extension methods) | converter |
 | `import "x/y"` | `using y = go.x.y_package;` + a `ProjectReference` | converter |
-| `int` / `uint` / `uintptr` | `nint` / `nuint` / `uintptr` (a distinct golib struct) | BCL / golib |
+| `int` / `uint` / `uintptr` | `nint` / `nuint` / `uintptr` (a distinct golib struct) | [BCL](Glossary.md#bcl) / golib |
 | `int32`, `byte`, `rune`, `float64`, … | same-named C# aliases (`global using rune = System.Int32;`) | global usings |
 | untyped constant | `UntypedInt` / `UntypedFloat` / `UntypedComplex` wrapper | golib |
 | `type Celsius float64` | `[GoType("num:float64")] partial struct Celsius` | `TypeGenerator` |
@@ -205,7 +205,7 @@ public static float64 Seconds(this Duration d) {
 The wrapper carries the full operator surface (integer underlyings also get `~`, shifts, and bitwise ops),
 so `Word >> s` stays a `Word`. Converting *between* a named type and a non-underlying basic routes through
 the underlying (`traceArg(procs)` → `(traceArg)(uint64)procs`), mirroring Go's numeric-conversion rules.
-Unsigned unary minus lowers to `(T)0 - x` (C# forbids `-` on unsigned).
+Unsigned unary minus lowers to `(T)0 - x` (C# forbids unary negation, i.e., `-` prefix, on unsigned).
 
 **Full detail:** [Reference → Untyped Constants and Named Numeric Types](ConversionStrategies-Reference.md#untyped-constants-and-named-numeric-types) —
 this is one of the deepest topics: `++/--` operators, to/from conversions, cross-assembly conversion
@@ -896,7 +896,7 @@ A few Go declarations can't be faithfully auto-converted because their semantics
 `*g` the Go GC must not see). The CLR has the opposite constraint (a reference stored as a number is
 invisible to the .NET GC), so the managed conversion stores the `ж<T>` box **directly** and the numeric
 form never exists (the model precedent is `core/sync/atomic`'s hand-rewritten `Pointer<T>`). Two mechanisms
-deliver this: whole-file `[module: GoManualConversion]` (skipped by the converter, restored by overlay), and
+deliver this: whole-file `[module: GoManualConversion]` (skipped by the converter, restored by [overlay](Glossary.md#overlay)), and
 a type-level registry that skips listed types/methods and points at a hand-written `*_impl.cs`.
 
 **Full detail:** [Reference → Manually-Converted Declarations](ConversionStrategies-Reference.md#manually-converted-declarations-managed-referent-pointers) —
@@ -908,7 +908,7 @@ model.
 ## Deterministic Output
 
 Converter output is **byte-reproducible**: the same Go source with the same converter build produces
-byte-identical C# every run — a guarantee the goldens, the full-conversion error measurements, and any
+byte-identical C# every run — a guarantee the [goldens](Glossary.md#golden), the full-conversion error measurements, and any
 release tag all rest on. It's enforced by converting files sequentially in sorted-filename order, a
 deterministic dependency-complete stdlib queue, and sorted emission of any set-backed output.
 
