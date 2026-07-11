@@ -122,7 +122,7 @@ public static class TypeExtensions
         static IEnumerable<MethodInfo> getExtensionMethods(Type type)
         {
             if (!type.IsSealed || type.IsNested || type.IsGenericType)
-                return Array.Empty<MethodInfo>();
+                return [];
 
             return type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
                 .Where(methodInfo => methodInfo.IsDefined(typeof(ExtensionAttribute), false));

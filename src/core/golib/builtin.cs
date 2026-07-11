@@ -23,6 +23,7 @@
 // ReSharper disable InconsistentNaming
 // ReSharper disable BuiltInTypeReferenceStyle
 // ReSharper disable UseSymbolAlias
+// ReSharper disable StaticMemberInGenericType
 
 using System;
 using System.Collections.Concurrent;
@@ -749,7 +750,7 @@ public static class builtin
     public static nint copy(ISlice<byte> dst, in @string src)
     {
         slice<byte> bytes = src;
-        return copy(dst, (ISlice<byte>)bytes);
+        return copy(dst, bytes);
     }
 
     /// <summary>
@@ -803,10 +804,9 @@ public static class builtin
     /// (<c>S ~[]E</c> boxed to its <see cref="ISlice{T}"/> constraint) — the boxed view
     /// aliases the caller's backing array.
     /// </summary>
-    /// <param name="s">Slice view to clear.</param>
-    public static void clear<T>(ISlice<T> s)
+    public static void clear<T>(ISlice<T> slice)
     {
-        s.ToSpan().Clear();
+        slice.ToSpan().Clear();
     }
 
     /// <summary>
@@ -910,8 +910,8 @@ public static class builtin
     /// Returns the smallest value among its ordered arguments (the Go 1.21 <c>min</c> built-in).
     /// </summary>
     /// <param name="x">First value (Go requires at least one argument).</param>
-    /// <param name="rest">Remaining values to compare.</param>
-    /// <returns>The minimum of <paramref name="x"/> and <paramref name="rest"/>.</returns>
+    /// <param name="y">Remaining values to compare.</param>
+    /// <returns>The minimum of <paramref name="x"/> and <paramref name="y"/>.</returns>
     /// <remarks>For floating-point arguments this follows <see cref="IComparable{T}"/> ordering, which
     /// sorts NaN below all other values — matching Go's <c>min</c> (which yields NaN if any argument is NaN).</remarks>
     /// <summary>
@@ -925,11 +925,12 @@ public static class builtin
         return x < y ? x : y;
     }
 
-    public static T min<T>(T x, params ReadOnlySpan<T> rest) where T : IComparable<T>
+    /// <inheritdoc cref="builtin.min{T}(T, T)"/>
+    public static T min<T>(T x, params ReadOnlySpan<T> y) where T : IComparable<T>
     {
         T result = x;
 
-        foreach (T value in rest)
+        foreach (T value in y)
         {
             if (value.CompareTo(result) < 0)
                 result = value;
@@ -942,22 +943,23 @@ public static class builtin
     /// Returns the largest value among its ordered arguments (the Go 1.21 <c>max</c> built-in).
     /// </summary>
     /// <param name="x">First value (Go requires at least one argument).</param>
-    /// <param name="rest">Remaining values to compare.</param>
-    /// <returns>The maximum of <paramref name="x"/> and <paramref name="rest"/>.</returns>
+    /// <param name="y">Remaining values to compare.</param>
+    /// <returns>The maximum of <paramref name="x"/> and <paramref name="y"/>.</returns>
     /// <summary>
     /// Returns the larger of two values via comparison operators — see the two-argument
-    /// <see cref="min{T}(T, T)"/> remarks.
+    /// <see cref="builtin.min{T}(T, T)"/> remarks.
     /// </summary>
     public static T max<T>(T x, T y) where T : System.Numerics.IComparisonOperators<T, T, bool>
     {
         return x > y ? x : y;
     }
 
-    public static T max<T>(T x, params ReadOnlySpan<T> rest) where T : IComparable<T>
+    /// <inheritdoc cref="builtin.max{T}(T, T)"/>
+    public static T max<T>(T x, params ReadOnlySpan<T> y) where T : IComparable<T>
     {
         T result = x;
 
-        foreach (T value in rest)
+        foreach (T value in y)
         {
             if (value.CompareTo(result) > 0)
                 result = value;
@@ -1334,7 +1336,7 @@ public static class builtin
     /// Creates a heap allocated pointer reference to a new zero value instance of type.
     /// </summary>
     /// <returns>Pointer to heap allocated zero value of provided type.</returns>
-    public static ж<T> @new<T>()
+    public static ж<T> @new<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
     {
         // No `where T : new()` bound: an unconstrained Go type parameter no longer carries one (so a
         // delegate/func type arg like `atomic.Pointer[func()]` is legal). Construct the zero value the
@@ -1456,7 +1458,7 @@ public static class builtin
             // IжAdapter wrapping the receiver box; a type assert back to the pointer type
             // (`s.(*T)`, targeting ж<T>) unwraps the adapter to the original box, matching
             // Go's interface-holds-the-pointer semantics.
-            case IжAdapter adapter when adapter.Box is T box:
+            case IжAdapter { Box: T box }:
                 value = box;
                 return true;
         }
@@ -1540,13 +1542,13 @@ public static class builtin
     /// <param name="target">Source value to type assert.</param>
     /// <param name="_">Overload discriminator for different return type, <see cref="ꟷ"/>.</param>
     /// <returns>Tuple of <paramref name="target"/> value cast as <typeparamref name="T"/> and success boolean.</returns>
-    public static (T, bool) _<[DynamicallyAccessedMembers(
+    public static (T?, bool) _<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicMethods |
         DynamicallyAccessedMemberTypes.PublicConstructors |
         DynamicallyAccessedMemberTypes.PublicFields
     )] T>(this object target, bool _)
     {
-        return TryTypeAssert(target, out T value) ? (value, true) : (default, false)!;
+        return TryTypeAssert(target, out T? value) ? (value, true) : (default, false);
     }
 
     /// <summary>
@@ -1560,7 +1562,7 @@ public static class builtin
         DynamicallyAccessedMemberTypes.PublicMethods |
         DynamicallyAccessedMemberTypes.PublicConstructors |
         DynamicallyAccessedMemberTypes.PublicFields
-    )] T>(this object target, out T value)
+    )] T>(this object target, out T? value)
     {
         return TryTypeAssert(target, out value);
     }
@@ -2253,22 +2255,19 @@ public static class builtin
     /// semantics; C# prefers the non-generic overload for plain `object` operands, so the
     /// delegation cannot recurse.
     /// </summary>
-    /// <param name="left">Left operand.</param>
-    /// <param name="right">Right operand.</param>
     /// <returns><c>true</c> if operands are equal; otherwise, <c>false</c>.</returns>
     public static bool AreEqual<T>(T? left, T? right)
     {
-        if (default(T) is null)
-            return AreEqual((object?)left, (object?)right);
-
-        return EqualityComparer<T>.Default.Equals(left!, right!);
+        return default(T) is null ? 
+            AreEqual(left, (object?)right) : 
+            EqualityComparer<T>.Default.Equals(left!, right!);
     }
 
     public static bool AreEqual(object? left, object? right)
     {
         // An interface created from an interface is a generated IInterfaceAdapter wrapping
         // the original interface value; Go compares such interfaces by instance value.
-        // Unwrap both sides so sides so the comparison below sees the root values.
+        // Unwrap both sides so the comparison below sees the root values.
         while (left is IInterfaceAdapter leftInterfaceAdapter)
             left = leftInterfaceAdapter.Value;
 
@@ -2342,6 +2341,7 @@ public static class builtin
         // Run-time structural check (Go duck-typing). Encountered for dynamically defined interface types
         // or when a function checks a private library interface internally. Results are cached, but there
         // is an initial cost for lookup creation.
+        // FUTURE: Consider if there's a way to do this at transpile time for increased performance
         public static bool Implements(Type valueType)
         {
             return s_results.GetOrAdd(valueType, static vt =>
@@ -2405,7 +2405,7 @@ public static class builtin
             {
                 "go.string" => "string",
                 "System.IntPtr" => "int",
-                // uintptr is now a distinct struct (go.uintptr); a bare System.UIntPtr is Go's uint
+                // uintptr is a distinct struct (go.uintptr); a bare System.UIntPtr is Go's uint
                 "System.UIntPtr" => "uint",
                 "go.uintptr" => "uintptr",
                 "System.Numerics.Complex" => "complex128",
@@ -2525,7 +2525,7 @@ public static class builtin
     /// Execute Go routine.
     /// </summary>
     /// <param name="action">Routine to execute.</param>
-    // The following is basically "go!". We use the unicode bang-type character
+    // The following is basically "go!". We use the Unicode bang-type character
     // as a valid C# identifier symbol, where the standard "!" is not. This is
     // to disambiguate the method name from the namespace.
     public static void goǃ(WaitCallback action)
@@ -2537,7 +2537,7 @@ public static class builtin
     /// Execute Go routine.
     /// </summary>
     /// <param name="action">Routine to execute.</param>
-    // The following is basically "go!". We use the unicode bang-type character
+    // The following is basically "go!". We use the Unicode bang-type character
     // as a valid C# identifier symbol, where the standard "!" is not. This is
     // to disambiguate the method name from the namespace.
     public static void goǃ(Action action)
@@ -2976,7 +2976,7 @@ public static class builtin
     /// <param name="action">Target defer action.</param>
     /// <param name="arg">First parameter.</param>
     /// <param name="defer">Source defer function.</param>
-    // The following is basically "defer!". We use the unicode bang-type character
+    // The following is basically "defer!". We use the Unicode bang-type character
     // as a valid C# identifier symbol, where the standard "!" is not. This is
     // to disambiguate the method name with parameters from the Defer delegate
     // passed into the function execution context with a fixed name of 'defer'.
@@ -4143,7 +4143,11 @@ public static class builtin
     // involved cannot be a C# cast (CS0030 - no conversion to/from a type parameter). Runtime-typed
     // dispatch; the typeof checks JIT-fold to a single branch per instantiation. Signed kinds
     // sign-extend, unsigned kinds zero-extend - exactly Go integer conversion semantics.
-    public static T ConvertToType<T>(ulong value) where T : new()
+    public static T ConvertToType<[DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields
+    )] T>(ulong value) where T : new()
     {
         if (typeof(T) == typeof(nint)) return (T)(object)unchecked((nint)value);
         if (typeof(T) == typeof(long)) return (T)(object)unchecked((long)value);
@@ -4160,37 +4164,49 @@ public static class builtin
         return TypeParamCaster<T>.FromUInt64(value);
     }
 
-    public static T ConvertToType<T>(long value) where T : new() => ConvertToType<T>(unchecked((ulong)value));
+    public static T ConvertToType<[DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields
+    )] T>(long value) where T : new() => ConvertToType<T>(unchecked((ulong)value));
 
-    public static ulong ConvertToUInt64<T>(T value) where T : new()
+    public static ulong ConvertToUInt64<[DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields
+    )] T>(T value) where T : new()
     {
-        if (typeof(T) == typeof(nint)) return unchecked((ulong)(long)(nint)(object)value!);
+        if (typeof(T) == typeof(nint)) return unchecked((ulong)(nint)(object)value!);
         if (typeof(T) == typeof(long)) return unchecked((ulong)(long)(object)value!);
-        if (typeof(T) == typeof(int)) return unchecked((ulong)(long)(int)(object)value!);
-        if (typeof(T) == typeof(short)) return unchecked((ulong)(long)(short)(object)value!);
-        if (typeof(T) == typeof(sbyte)) return unchecked((ulong)(long)(sbyte)(object)value!);
-        if (typeof(T) == typeof(nuint)) return (ulong)(nuint)(object)value!;
+        if (typeof(T) == typeof(int)) return unchecked((ulong)(int)(object)value!);
+        if (typeof(T) == typeof(short)) return unchecked((ulong)(short)(object)value!);
+        if (typeof(T) == typeof(sbyte)) return unchecked((ulong)(sbyte)(object)value!);
+        if (typeof(T) == typeof(nuint)) return (nuint)(object)value!;
         if (typeof(T) == typeof(ulong)) return (ulong)(object)value!;
         if (typeof(T) == typeof(uint)) return (uint)(object)value!;
         if (typeof(T) == typeof(ushort)) return (ushort)(object)value!;
         if (typeof(T) == typeof(byte)) return (byte)(object)value!;
-        if (typeof(T) == typeof(uintptr)) return (ulong)((uintptr)(object)value!).Value;
+        if (typeof(T) == typeof(uintptr)) return ((uintptr)(object)value!).Value;
 
         return TypeParamCaster<T>.ToUInt64(value);
     }
 
     // Reflection-cached bridge for a numeric wrapper instantiation: reads/writes the wrapper
     // through its public Value member and single-argument constructor. A generated
-    // [GoType("num:*")] wrapper exposes Value as a PROPERTY; hand-written wrappers (golib
+    // [GoType("num:*")] wrapper exposes Value as a PROPERTY; handwritten wrappers (golib
     // uintptr, the managed-referent manual types) expose a public FIELD so Interlocked/Volatile
     // seams can take `ref x.Value` - probe both. Static per-T caches keep the reflection cost
     // to first use.
-    private static class TypeParamCaster<T>
+    private static class TypeParamCaster<[DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields
+    )] T>
     {
-        private static readonly System.Reflection.PropertyInfo? s_valueProperty = typeof(T).GetProperty("Value");
-        private static readonly System.Reflection.FieldInfo? s_valueField = s_valueProperty is null ? typeof(T).GetField("Value") : null;
+        private static readonly PropertyInfo? s_valueProperty = typeof(T).GetProperty("Value");
+        private static readonly FieldInfo? s_valueField = s_valueProperty is null ? typeof(T).GetField("Value") : null;
         private static readonly Type? s_valueType = s_valueProperty?.PropertyType ?? s_valueField?.FieldType;
-        private static readonly System.Reflection.ConstructorInfo? s_valueCtor = s_valueType is null ? null : typeof(T).GetConstructor(new[] { s_valueType });
+        private static readonly ConstructorInfo? s_valueCtor = s_valueType is null ? null : typeof(T).GetConstructor([s_valueType]);
 
         public static T FromUInt64(ulong value)
         {
@@ -4201,9 +4217,9 @@ public static class builtin
             object underlying =
                 s_valueType == typeof(nint) ? unchecked((nint)value) :
                 s_valueType == typeof(nuint) ? unchecked((nuint)value) :
-                System.Convert.ChangeType(unchecked((long)value), s_valueType);
+                Convert.ChangeType(unchecked((long)value), s_valueType);
 
-            return (T)s_valueCtor.Invoke(new[] { underlying });
+            return (T)s_valueCtor.Invoke([underlying]);
         }
 
         public static ulong ToUInt64(T value)
@@ -4219,9 +4235,9 @@ public static class builtin
 
             return underlying switch
             {
-                nint ni => unchecked((ulong)(long)ni),
+                nint ni => unchecked((ulong)ni),
                 nuint nu => nu,
-                _ => unchecked((ulong)System.Convert.ToInt64(underlying))
+                _ => unchecked((ulong)Convert.ToInt64(underlying))
             };
         }
     }

@@ -25,6 +25,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using go.golib;
@@ -60,7 +61,12 @@ public interface error // : IFormattable
     }
 }
 
-public class error<T> : error
+internal interface IErrorTarget
+{
+    object? TargetObject { get; }
+}
+
+public class error<T> : error, IErrorTarget
 {
     private T m_target = default!;
     private readonly ж<T>? m_target_ptr;
@@ -76,6 +82,8 @@ public class error<T> : error
             return ref m_target;
         }
     }
+
+    object? IErrorTarget.TargetObject => Target;
 
     public error(in T target)
     {
@@ -220,8 +228,8 @@ public static class errorExtensions
             if (conversionOperator is null)
                 throw new PanicException($"interface conversion: failed to create converter for {GetGoTypeName(target.GetType())} to {GetGoTypeName(type)}");
 
-            dynamic? result = conversionOperator.Invoke(null, [target]);
-            return result?.Target;
+            object? result = conversionOperator.Invoke(null, [target]);
+            return result is IErrorTarget errorTarget ? errorTarget.TargetObject : null;
         }
         catch (NotImplementedException ex)
         {
@@ -229,7 +237,7 @@ public static class errorExtensions
         }
     }
 
-    public static bool _(this error target, Type type, out object? result)
+    public static bool _(this error target, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type, out object? result)
     {
         try
         {

@@ -89,7 +89,7 @@ public struct uintptr : IEquatable<uintptr>, IComparable<uintptr>, IComparable, 
     public int CompareTo(uintptr other) => Value.CompareTo(other.Value);
 
     public int CompareTo(object? obj) => obj is uintptr other ? CompareTo(other) :
-        throw new ArgumentException($"Object must be of type {nameof(go.uintptr)}");
+        throw new ArgumentException($"Object must be of type {nameof(uintptr)}");
 
     public override string ToString() => Value.ToString();
 
