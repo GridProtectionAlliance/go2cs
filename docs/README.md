@@ -12,6 +12,7 @@ emitted by the converter, transpiled Go to C#, then compiled by Roslyn. NOTE: do
 
 * Browse transpiled code: [Converted Go Standard Library](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted)
 * Compile it yourself: [Visual Studio Go Standard Library Solution](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted.slnx)
+* Learn how it works: [Go to C# Conversion Strategies](ConversionStrategies.md)
 
 ---
 
