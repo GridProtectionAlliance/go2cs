@@ -538,10 +538,15 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 			access := getAccess(goIDName)
 			typeLenDeviation := token.Pos(len(csTypeName) + len(access) + (len(csIDName) - len(goIDName)))
 
-			// Check if the type is a named type (user-defined), not a basic type
+			// Check if the type is a named type (user-defined), not a basic type. Unalias first: a
+			// const typed through a type ALIAS to a named type (Go 1.23 renders `type Errno =
+			// syscall.Errno` as *types.Alias, not *types.Named) still needs `static readonly` — the
+			// aliased type is a [GoType] struct C# cannot declare `const` (golang.org/x/sys/windows's
+			// `ERROR_… Errno = …`, CS0283/CS0133). Unalias to a *types.Basic (an alias to a primitive)
+			// stays non-named, so those remain plain `const`.
 			isNamedType := false
 
-			if _, ok := c.Type().(*types.Named); ok {
+			if _, ok := types.Unalias(c.Type()).(*types.Named); ok {
 				isNamedType = true
 			} else if csTypeName == "UntypedInt" || csTypeName == "UntypedFloat" || csTypeName == "UntypedComplex" {
 				isNamedType = true
