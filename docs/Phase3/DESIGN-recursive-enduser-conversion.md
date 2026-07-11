@@ -303,6 +303,30 @@ baselined; `deploy-core stdlib -NoBuild` staged the 302-package compilable stdli
   addresses. The `-recurse` feature itself (discovery, partition, dependency order, output/reference
   routing, solution generation) is validated correct on this real DAG.
 
+**Converter fixes landed (2026-07-11).** All three defects above were fixed as focused, separately-gated
+commits (`check-no-regression` byte-identical across 371 behavioral projects for each — none of these Go
+constructs appears in the corpus):
+
+- **#3** (`729ce52df`) — `getLocalModulePackageInfo` now sets `PackageName` to the dotted namespace path
+  (`packageQualifiedName`), using the Go package name (not the import-path segment) as the last part.
+  **`github.com/google/uuid` now compiles fully end to end** (app + lib, 0 errors) — a working pure-Go
+  real-world example.
+- **#1** (`2d3424085`) — `convertImportPathToNamespace` uses the Go package name (from the module-aware
+  import graph, always a valid identifier) for a non-stdlib import's class segment, clearing the hyphen
+  parse errors.
+- **#2** (`238c6db36`) — `visitValueSpec` unaliases a const's type before the `*types.Named` test, so a
+  const typed through an alias to a named type (`type Errno = syscall.Errno`) emits `static readonly`.
+  **`golang.org/x/sys/windows` now compiles** — the syscall/Windows-API "raw-metal" package.
+
+These took the `fatih/color` build from **188 → 2 errors**. The remaining 2 are a **fourth** defect, this
+one in **go2cs-gen** (the Roslyn generator, not the converter): a `GoImplicitConv<@short, dword>` whose
+constructed type is a C# primitive (`short`) emits `partial struct short { implicit operator short(dword)
+=> new short(…) }` — hosting a user-defined operator in the static package class (CS0715) with an invalid
+`new short(…)` body (CS0057). The fix (host the operator in the local Go struct — the parameter side — and
+emit a cast body) was drafted but could not be verified in the scratch build environment (analyzer-reload
+mechanics) and was not landed; it is a Phase-4 go2cs-gen item. With it, `go-colorable` → `color` →
+`colordemo` would all compile and `fatih/color` would build fully.
+
 ## 6. Open decisions (RESOLVED)
 
 1. **Flag vs. auto-detect** — **explicit `-recurse`** (default off; single-package behavior unchanged).
