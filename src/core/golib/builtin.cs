@@ -46,7 +46,6 @@ public static class builtin
     public const int StackAllocThreshold = 1024; // 1KB
 
     private static readonly ThreadLocal<bool> s_fallthrough = new();
-    private static readonly ConcurrentDictionary<(Type, Type), bool> s_implementsInterface = [];
     private static readonly Type[] s_asTParams = [Type.MakeGenericMethodParameter(0).MakeByRefType()];
 
     [ModuleInitializer]
@@ -2327,24 +2326,33 @@ public static class builtin
         {
             TInterface => true,
             null => false,
-            _ => implementsInterface()
+            _ => Cache<TInterface>.Implements(value.GetType())
         };
+    }
 
-        // Fall back on run-time check. This may be encountered for dynamically defined interface
-        // types or when a function is checking a private library interface internally. All type
-        // results are cached for performance, but there is an initial cost for lookup creation.
-        bool implementsInterface()
+    // Per-interface structural-implementation cache. Keying on the closed generic type Cache<TInterface>
+    // lets the JIT specialize a distinct static dictionary for each interface, so the run-time check is a
+    // single value-Type-keyed lookup with no composite-key hashing and no cross-interface contention
+    // (this replaced a shared ConcurrentDictionary<(Type, Type), bool>). The value-type dimension stays a
+    // dictionary because one Implements<TInterface> instantiation is exercised against many runtime types.
+    private static class Cache<TInterface>
+    {
+        private static readonly ConcurrentDictionary<Type, bool> s_results = [];
+
+        // Run-time structural check (Go duck-typing). Encountered for dynamically defined interface types
+        // or when a function checks a private library interface internally. Results are cached, but there
+        // is an initial cost for lookup creation.
+        public static bool Implements(Type valueType)
         {
-            return s_implementsInterface.GetOrAdd((value.GetType(), typeof(TInterface)), entry =>
+            return s_results.GetOrAdd(valueType, static vt =>
             {
-                (Type valueType, Type interfaceType) = entry;
-                ImmutableHashSet<string> interfaceMethodNames = interfaceType.GetInterfaceMethodNames();
+                ImmutableHashSet<string> interfaceMethodNames = typeof(TInterface).GetInterfaceMethodNames();
 
                 // All types implement an empty interface
                 if (interfaceMethodNames.Count == 0)
                     return true;
 
-                ImmutableHashSet<string> typeExtensionMethodNames = valueType.GetExtensionMethodNames();
+                ImmutableHashSet<string> typeExtensionMethodNames = vt.GetExtensionMethodNames();
 
                 return interfaceMethodNames.Except(typeExtensionMethodNames).Count == 0;
             });
