@@ -157,6 +157,7 @@ go2cs package_dir                      # convert a package
 go2cs -indent 2 -var=false example.go conv/example.cs
 go2cs -stdlib                          # convert the entire Go standard library
 go2cs -stdlib fmt strings io           # convert specific standard library packages
+go2cs -recurse module_dir              # convert a module + its third-party deps (references stdlib)
 ```
 
 ### Common options
@@ -164,6 +165,7 @@ go2cs -stdlib fmt strings io           # convert specific standard library packa
 | Option | Description |
 |:--|:--|
 | `-stdlib` | Convert the Go standard library (optionally followed by specific package names). |
+| `-recurse` | Recursively convert a downloaded module **and its third-party dependencies** in dependency order, referencing the pre-converted standard library. See [Converting a real-world module](#converting-a-real-world-module). |
 | `-go2cspath <dir>` | Output root for converted standard-library code (defaults to `~/go2cs`). |
 | `-goroot` / `-gopath` | Override the detected Go root / path. |
 | `-platforms <os/arch>` | Target platform for build-tagged files (defaults to the host). |
@@ -175,6 +177,62 @@ go2cs -stdlib fmt strings io           # convert specific standard library packa
 
 The converted C# references a small hand-written runtime library (`golib`, published as the **`go.lib`**
 NuGet package) plus a set of Roslyn source generators that supply Go semantics at compile time.
+
+### Converting a real-world module
+
+The examples above convert one package. `-recurse` converts a **whole downloaded application together with
+every third-party dependency package** in its transitive import closure — in dependency order
+(least-dependencies-first) — while **referencing** (not reconverting) the pre-converted standard library.
+The result is a C# solution you can open and build.
+
+Here is the full round-trip for a small CLI that uses [`github.com/fatih/color`](https://github.com/fatih/color),
+which itself pulls in `github.com/mattn/go-colorable`, `github.com/mattn/go-isatty`, and `golang.org/x/sys` —
+a genuine dependency graph:
+
+**1 — Go: get the app and confirm it builds as Go.**
+
+```shell
+mkdir colordemo && cd colordemo
+go mod init example.com/colordemo
+# main.go:  package main
+#           import "github.com/fatih/color"
+#           func main() { color.New(color.FgGreen, color.Bold).Println("hello from fatih/color") }
+go mod tidy      # download color + its dependencies into the Go module cache
+go build ./...   # baseline: confirm it compiles as Go first
+```
+
+**2 — go2cs: stage the standard library once, then recurse-convert the app.**
+
+```shell
+# Stage the pre-converted stdlib + runtime + analyzer at %GOPATH%\src\go2cs (the "deploy root").
+#   deploy-core stdlib  = the full compilable standard library (best for arbitrary imports)
+#   deploy-core stub    = the smaller runnable baseline subset
+deploy-core stdlib
+
+# Convert the app + its third-party deps UNDER that same root. The stdlib is referenced, not converted.
+go2cs -recurse . -go2cspath %GOPATH%\src\go2cs
+```
+
+`go2cs` discovers the import closure, converts each package least-dependencies-first
+(`go-isatty` and `x/sys` → `go-colorable` → `color` → the app), routes every third-party library to
+`%GOPATH%\src\go2cs\pkg\<import-path>` (the standard library it merely references at `…\core\<pkg>`), and
+writes a flat solution `go2cs-recurse.slnx` at the deploy root.
+
+**3 — C#: build the generated solution.**
+
+```shell
+dotnet build "%GOPATH%\src\go2cs\go2cs-recurse.slnx" -c Debug
+```
+
+> The deploy root carries a `Directory.Build.props` that pins `$(go2csPath)` to itself, so every generated
+> project — the app, the third-party libraries under `pkg\`, and the referenced standard library under
+> `core\` — resolves its `$(go2csPath)…` references with no per-build flags.
+
+`-recurse` is a work in progress: it produces a **buildable** solution and handles the common real-world
+module shapes (this `fatih/color` example compiles clean — app + all four dependency projects), but some
+third-party packages still surface residual per-package conversion defects. The design, the validated
+results, and the known-limitation backlog are tracked in
+[`DESIGN-recursive-enduser-conversion.md`](DESIGN-recursive-enduser-conversion.md).
 
 ## Project layout
 
