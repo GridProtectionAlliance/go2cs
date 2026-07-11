@@ -194,9 +194,24 @@ a genuine dependency graph:
 ```shell
 mkdir colordemo && cd colordemo
 go mod init example.com/colordemo
-# main.go:  package main
-#           import "github.com/fatih/color"
-#           func main() { color.New(color.FgGreen, color.Bold).Println("hello from fatih/color") }
+```
+
+Create `main.go` (`go mod tidy` needs a real source file — with none present it reports
+`warning: "all" matched no packages`):
+
+```go
+package main
+
+import "github.com/fatih/color"
+
+func main() {
+	color.New(color.FgGreen, color.Bold).Println("hello from fatih/color")
+}
+```
+
+Then pull in the dependencies and confirm it builds as Go:
+
+```shell
 go mod tidy      # download color + its dependencies into the Go module cache
 go build ./...   # baseline: confirm it compiles as Go first
 ```
