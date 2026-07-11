@@ -34,6 +34,7 @@ type Options struct {
 	goPath              string
 	go2csPath           string
 	convertStdLib       bool
+	recurse             bool
 	targetPlatform      string
 	indentSpaces        int
 	preferVarDecl       bool
@@ -551,6 +552,7 @@ func main() {
 	goPathCmd := commandLine.String("gopath", goPath, "Path to Go path directory")
 	go2csPathCmd := commandLine.String("go2cspath", go2csPath, "Path to C# converted code")
 	convertStdLibCmd := commandLine.Bool("stdlib", false, "Convert Go standard library")
+	recurseCmd := commandLine.Bool("recurse", false, "Recursively convert an end-user module and its third-party dependencies (references the pre-converted standard library)")
 	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), "Target platform for conversion, format: os/arch")
 	indentSpacesCmd := commandLine.Int("indent", 4, "Number of spaces for indentation")
 	preferVarDeclCmd := commandLine.Bool("var", true, "Prefer \"var\" declarations")
@@ -603,6 +605,7 @@ Examples:
   go2cs package_dir
   go2cs -stdlib                           # Convert the entire Go standard library
   go2cs -stdlib fmt io/ioutil strings     # Convert specific standard library packages
+  go2cs -recurse module_dir               # Convert a module + its third-party deps (references stdlib)
  `)
 		os.Exit(1)
 	}
@@ -612,6 +615,7 @@ Examples:
 		goPath:              *goPathCmd,
 		go2csPath:           *go2csPathCmd,
 		convertStdLib:       convertStdLib,
+		recurse:             *recurseCmd,
 		targetPlatform:      *targetPlatformCmd,
 		indentSpaces:        *indentSpacesCmd,
 		preferVarDecl:       *preferVarDeclCmd,
@@ -683,7 +687,18 @@ Examples:
 			return
 		}
 
-		processConversion(inputFilePath, isDir, outputFilePath, options)
+		if options.recurse {
+			// Recursive end-user conversion: convert the input module AND every third-party
+			// dependency package in its transitive closure, in dependency order, referencing the
+			// pre-converted standard library. The stdlib is not converted.
+			converter := NewModuleConverter(options)
+
+			if err := converter.ConvertModule(inputFilePath); err != nil {
+				log.Fatalf("Recursive module conversion failed: %s\n", err)
+			}
+		} else {
+			processConversion(inputFilePath, isDir, outputFilePath, options)
+		}
 	}
 }
 

@@ -195,8 +195,21 @@ follows the same shape, adding the app + `pkg\…` third-party projects.
   the full 305-package std graph and converts strconv→fmt in dependency order. Implemented + tested
   (2026-07-11). *(A drive-by fix updated the stale `solutionGenerator_test.go` folder assertions, which
   predated the `Id="…"` folder attribute, so `go test ./...` is a reliable gate for the phases below.)*
-- **P2 — `ModuleConverter` + `-recurse`.** Load the module, partition the closure, convert app +
-  third-party in topo order (reuse `processConversion` per package). Reference stdlib; don't convert it.
+- **P2 — `ModuleConverter` + `-recurse` (done).** Added the `-recurse` flag (default off — single-package
+  behavior unchanged) and `ModuleConverter` (`src/go2cs/moduleConverter.go`): it loads the input module +
+  full dependency closure once (`LoadAllSyntax | NeedModule`), partitions every closure package by
+  `classify` — **stdlib** = under `$GOROOT/src` (covers GOROOT-vendored), **app** = `pkg.Module.Main`,
+  **third-party** = any other dependency module (`pkg.Module != nil`) — adds the app + third-party set to the
+  shared `DependencyGraph`, topo-sorts, and converts each in dependency order via `processConversion` (which
+  re-loads each package with full syntax). Stdlib is referenced (`$(go2csPath)core\…`), never converted.
+  Conversion stays sequential (package-level global state). Validated on a synthetic `app → lib(replace) →
+  stdlib` fixture: closure discovered + partitioned, converted **lib before app**, and the app csproj wired
+  `..\lib\example.com.lib.csproj` (relative `ProjectReference`) + `$(go2csPath)core\fmt` while the lib wired
+  `$(go2csPath)core\strings` — the cross-package `lib.Greeting` call resolved. Gate: `check-no-regression`
+  byte-identical across 371 behavioral projects (the default path is untouched); `classify` +
+  convert-set-order unit-tested (`moduleConverter_test.go`). **P2 converts in place** (output co-located with
+  source) — correct for the app and `replace`d/co-located modules; read-only module-cache deps + the
+  `$(go2csPath)pkg` output routing are P3. Implemented + tested (2026-07-11).
 - **P3 — output/reference decoupling.** Route module-cache deps to `$(go2csPath)pkg` output + references
   (fix `getLocalModulePackageInfo`), strip `@version`.
 - **P4 — solution generation** for the app + third-party + stdlib references.
