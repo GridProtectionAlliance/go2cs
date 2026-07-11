@@ -58,6 +58,48 @@ func TestBuildSolutionXML(t *testing.T) {
 	}
 }
 
+// TestBuildFlatSolutionXML checks the flat recurse solution (ModuleConverter): the config block, a
+// plain project list with NO <Folder> grouping, CRLF line endings, and no BOM — matching the shape
+// deploy-core.ps1 emits for go2cs-core.slnx. Third-party libs land under pkg/, and an in-place app
+// is referenced via a relative (..) path.
+func TestBuildFlatSolutionXML(t *testing.T) {
+	projects := []string{
+		"pkg/github.com/google/uuid/github.com.google.uuid.csproj",
+		"../cache-test/example.com.cachetest.csproj",
+	}
+
+	xml := buildFlatSolutionXML(projects)
+
+	wantContains := []string{
+		"<Solution>",
+		"<Configurations>",
+		"<Platform Name=\"Any CPU\" />",
+		"<Project Path=\"pkg/github.com/google/uuid/github.com.google.uuid.csproj\" />",
+		"<Project Path=\"../cache-test/example.com.cachetest.csproj\" />",
+		"</Solution>",
+	}
+
+	for _, want := range wantContains {
+		if !strings.Contains(xml, want) {
+			t.Errorf("flat solution XML missing %q\n---\n%s", want, xml)
+		}
+	}
+
+	// Flat: no namespace folder grouping.
+	if strings.Contains(xml, "<Folder") {
+		t.Errorf("flat solution must not contain <Folder> elements\n%s", xml)
+	}
+
+	// No BOM; CRLF only.
+	if !strings.HasPrefix(xml, "<Solution>\r\n") {
+		t.Errorf("flat solution must start with <Solution> and CRLF, no BOM; got prefix %q", xml[:min(24, len(xml))])
+	}
+
+	if strings.Contains(strings.ReplaceAll(xml, "\r\n", ""), "\n") {
+		t.Errorf("flat solution contains a bare LF; expected CRLF only")
+	}
+}
+
 // TestBuildSolutionXMLNoTestsFolderWhenEmpty verifies the /tests/ folder is omitted
 // entirely when there are no converted test projects (the current state — Phase 4 has not
 // emitted any yet).

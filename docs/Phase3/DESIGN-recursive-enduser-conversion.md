@@ -225,7 +225,17 @@ follows the same shape, adding the app + `pkg\…` third-party projects.
   `$(go2csPath)pkg\github.com\google\uuid\github.com.google.uuid.csproj`. Gate: `outputDirFor` unit-tested;
   `check-no-regression` byte-identical across 371 behavioral projects (all changes are recurse-guarded).
   Implemented + tested (2026-07-11).
-- **P4 — solution generation** for the app + third-party + stdlib references.
+- **P4 — solution generation (done).** `ModuleConverter` now emits a flat `go2cs-recurse.slnx` at the
+  deploy root ($(go2csPath)) listing every converted app + third-party project (relative forward-slash
+  paths — the app in place via a `..\` path, third-party under `pkg\…`). It mirrors the flat shape
+  deploy-core.ps1 emits for `go2cs-core.slnx` (new `buildFlatSolutionXML`, no namespace-folder grouping —
+  distinct from the stdlib's folder-grouped `buildSolutionXML`). Placing it at the deploy root makes
+  `$(SolutionDir)` resolve there on build, so the pre-converted stdlib ($(go2csPath)core), golib, and the
+  analyzer resolve and build transitively via the ProjectReferences — the stdlib is referenced, not
+  listed. Validated: a `go2cs -recurse` run over the uuid cache-test emitted a two-project solution
+  (`..\cache-test\example.com.cachetest.csproj` + `pkg\github.com\google\uuid\…csproj`). Gate:
+  `buildFlatSolutionXML` unit-tested; `check-no-regression` byte-identical across 371 behavioral projects.
+  Implemented + tested (2026-07-11).
 - **P5 — test harness** (§5).
 
 Each phase is independently reviewable; P1 is a pure refactor with a strong existing regression gate.

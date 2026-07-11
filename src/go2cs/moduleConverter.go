@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -36,9 +37,10 @@ const (
 // ModuleConverter converts an end-user module and its third-party dependency closure in
 // dependency order, referencing the pre-converted standard library.
 type ModuleConverter struct {
-	options   Options
-	graph     *DependencyGraph
-	startTime time.Time
+	options           Options
+	graph             *DependencyGraph
+	startTime         time.Time
+	convertedProjects []string // csproj paths of successfully converted app + third-party packages
 }
 
 // NewModuleConverter creates a recursive end-user module converter.
@@ -85,6 +87,12 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 
 	// 4. Convert app + third-party packages in dependency order.
 	m.convertAll()
+
+	// 5. Emit a flat .slnx over the converted app + third-party projects at the deploy root, tying
+	//    them to the pre-converted stdlib (referenced via $(go2csPath)core) for one dotnet build.
+	if err := m.generateSolutionFile(); err != nil {
+		fmt.Printf("WARNING: failed to generate solution file: %v\n", err)
+	}
 
 	return nil
 }
@@ -271,7 +279,13 @@ func (m *ModuleConverter) convertAll() {
 		if err != nil {
 			log.Printf("WARNING: %v", err)
 			failed = append(failed, pkgPath)
+			continue
 		}
+
+		// Record the generated project so the solution can list it. processConversion names the
+		// csproj after getProjectName(pkg.Dir) (the dotted module/import path) in the output dir.
+		projectName, _ := getProjectName(pkg.Dir, m.options)
+		m.convertedProjects = append(m.convertedProjects, filepath.Join(outputDir, projectName+".csproj"))
 	}
 
 	fmt.Printf("\nRecursive conversion complete in %s: %d/%d packages converted",
@@ -282,4 +296,49 @@ func (m *ModuleConverter) convertAll() {
 	}
 
 	fmt.Println()
+}
+
+// recurseSolutionFileName is the flat .slnx ModuleConverter writes at the deploy root over the
+// converted app + third-party projects.
+const recurseSolutionFileName = "go2cs-recurse.slnx"
+
+// generateSolutionFile writes a flat .slnx at the deploy root ($(go2csPath)) listing the converted
+// app + third-party projects. It is placed at the deploy root so that building it makes
+// $(SolutionDir) resolve to that root — the pre-converted stdlib (referenced via $(go2csPath)core),
+// the third-party libs (under pkg\...), golib, and the analyzer then all resolve and build
+// transitively. Project paths are emitted relative to the root (forward-slash), sorted for
+// deterministic output.
+func (m *ModuleConverter) generateSolutionFile() error {
+	if len(m.convertedProjects) == 0 {
+		return nil
+	}
+
+	root := m.options.go2csPath
+
+	rels := make([]string, 0, len(m.convertedProjects))
+
+	for _, csproj := range m.convertedProjects {
+		rel, err := filepath.Rel(root, csproj)
+
+		if err != nil {
+			rel = csproj
+		}
+
+		rels = append(rels, filepath.ToSlash(rel))
+	}
+
+	sort.Strings(rels)
+
+	contents := buildFlatSolutionXML(rels)
+	solutionFile := filepath.Join(root, recurseSolutionFileName)
+
+	if needToWriteFile(solutionFile, []byte(contents)) {
+		if err := os.WriteFile(solutionFile, []byte(contents), 0644); err != nil {
+			return fmt.Errorf("failed to write recurse solution file %q: %w", solutionFile, err)
+		}
+	}
+
+	fmt.Printf("Solution file generated: %s (%d projects)\n", solutionFile, len(rels))
+
+	return nil
 }

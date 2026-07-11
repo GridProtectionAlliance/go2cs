@@ -239,6 +239,38 @@ func buildSolutionXML(coreProjects []string, testProjects []string) string {
 	return sb.String()
 }
 
+// buildFlatSolutionXML renders a flat .slnx (no namespace folders) over the given solution-relative
+// forward-slash project paths, matching the shape deploy-core.ps1 emits for go2cs-core.slnx. It is
+// used for the recursive end-user solution (ModuleConverter): the app + third-party projects there
+// don't share the stdlib's deep namespace tree that buildSolutionXML groups by, and a flat list ties
+// them together with the pre-converted stdlib (referenced via $(go2csPath)core) for one dotnet build.
+// Callers sort the projects for deterministic output.
+func buildFlatSolutionXML(projects []string) string {
+	var sb strings.Builder
+
+	writeLine := func(indent int, text string) {
+		sb.WriteString(strings.Repeat("  ", indent))
+		sb.WriteString(text)
+		sb.WriteString("\r\n")
+	}
+
+	writeLine(0, "<Solution>")
+
+	writeLine(1, "<Configurations>")
+	writeLine(2, "<Platform Name=\"Any CPU\" />")
+	writeLine(2, "<Platform Name=\"x64\" />")
+	writeLine(2, "<Platform Name=\"x86\" />")
+	writeLine(1, "</Configurations>")
+
+	for _, project := range projects {
+		writeLine(1, fmt.Sprintf("<Project Path=\"%s\" />", escapeXMLAttr(project)))
+	}
+
+	writeLine(0, "</Solution>")
+
+	return sb.String()
+}
+
 // folderID returns a deterministic UUID for a solution-folder path, hashed from the full
 // path so same-named folders at different nesting levels (Go's ubiquitous `internal`,
 // `crypto` under both core and vendor, ...) never collide in Visual Studio's identifier
