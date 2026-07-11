@@ -350,6 +350,45 @@ identifier cases. The highest-impact class was fixed:
   `_package` class suffix and regressed 11 corpus goldens, so it was reverted; the `gopkg.in` case is backlog
   item 8.)
 
+### Output-layout redesign + flag/reference fixes (2026-07-11)
+
+First real end-user run of the walkthrough surfaced two blocking defects and drove a layout redesign. All
+four changes below are recurse-only (or transparent to flags-first callers); `check-no-regression` stayed
+byte-identical across all 371 behavioral projects at every step.
+
+- **R1 — flag ordering (`main.go`, all modes).** Go's `flag` package stops parsing at the first non-flag
+  token, so `go2cs -recurse . -go2cspath <dir>` silently DROPPED `-go2cspath` and wrote to the default
+  `%USERPROFILE%\go2cs` — the converted deps and solution appeared "missing" at the expected path.
+  `parseArgsInterspersed` now peels off one positional at a time and re-parses the remainder, so flags before
+  OR after the module path are honored. Unit-tested (`argParse_test.go`).
+- **R2 — parallel output tree + version-free references.** Nothing is written in place any more (the original
+  Go source stays pure): the app's own packages (the main module) convert to `$(go2csPath)src\<import-path>`
+  and every dependency — module-cache or a co-located `replace` — to `$(go2csPath)pkg\<import-path>`. Because
+  the app now lives UNDER the deploy root, it inherits the deploy-root `Directory.Build.props`, so a bare
+  `dotnet build` in the app folder (or an IDE open) resolves `$(go2csPath)` with no solution needed. This
+  also fixed a broken app→dependency reference: the app csproj had referenced a module-cache dep as
+  `$(go2csPath)pkg\mod\<module>@<version>\…` (the `build.Import` success path), which did not match where the
+  dep converts (`$(go2csPath)pkg\<import-path>`), yielding `CS0246`. App/third-party references now route
+  through the module-aware go/packages metadata (`getRecurseDependencyInfo`) to the version-free src\/pkg\
+  paths; stdlib still resolves to `$(go2csPath)core`. Added `Options.mainModulePath` to classify app vs.
+  dependency consistently in both output routing and reference emission.
+- **R3 — per-project solutions.** Alongside the flat `go2cs-recurse.slnx` at the deploy root, a sibling
+  `.slnx` is written next to every converted `.csproj`, over that project plus its **transitive** converted
+  dependencies + golib + the analyzer (no stdlib). Building the app's per-project solution builds the app and
+  its whole dependency closure in one shot, without the ~300-project stdlib solution.
+- **R4 — acceptance.** With a **current** deploy root, the `fatih/color` example (app + `color` +
+  `go-colorable` + `go-isatty` + `x/sys/windows` + golib + analyzer) **compiles clean — 0 errors, 0 MSB
+  reference errors**. Two operational caveats learned here:
+  - *Stale deploy.* The deploy root is a snapshot; building against an analyzer older than a converter fix
+    surfaces spurious errors (here `CS0715`/`CS0057` on `go-colorable`'s keyword-named `short`/`dword` types,
+    from a deploy predating the `EscapeCsKeyword` fix). Re-running `deploy-core` cleared them.
+  - *Toolchain skew.* `fatih/color` v1.19 requires go 1.25 while go2cs's `go.mod` pins go 1.23.1, so
+    `go/packages` loads the dependency closure with `package requires newer Go version` and degraded type
+    info. Bumping go2cs's toolchain is deferred — a different type-checker could shift the byte-identical
+    behavioral corpus and needs its own re-baseline. **Running** the compiled example currently throws from a
+    converted third-party `init` (a Phase-4 operational defect, plausibly downstream of the degraded x/sys
+    conversion), but the milestone — a buildable, compiling solution — is met.
+
 ### Residual real-world-module hardening (Phase-4 backlog)
 
 The review + the go-cmp/gopkg.in verification surfaced these **known residual limitations** — real, but each

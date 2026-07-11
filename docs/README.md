@@ -243,26 +243,46 @@ go2cs -recurse . -go2cspath %GOPATH%\src\go2cs
 (`go2cs -recurse` takes the module directory as its argument, so instead of `cd`-ing you can pass the path
 directly from anywhere, e.g. `go2cs -recurse path\to\colordemo -go2cspath %GOPATH%\src\go2cs`.)
 
-`go2cs` discovers the import closure, converts each package least-dependencies-first
-(`go-isatty` and `x/sys` → `go-colorable` → `color` → the app), routes every third-party library to
-`%GOPATH%\src\go2cs\pkg\<import-path>` (the standard library it merely references at `…\core\<pkg>`), and
-writes a flat solution `go2cs-recurse.slnx` at the deploy root.
+`go2cs` discovers the import closure and converts each package least-dependencies-first
+(`go-isatty` and `x/sys` → `go-colorable` → `color` → the app) into a **parallel tree under the deploy
+root, leaving your original Go source untouched**: the app's own packages land under
+`%GOPATH%\src\go2cs\src\<import-path>` and every third-party library under
+`%GOPATH%\src\go2cs\pkg\<import-path>` (the standard library it merely references at `…\core\<pkg>`). It
+writes a flat `go2cs-recurse.slnx` at the deploy root **and** a per-project `.slnx` next to every generated
+`.csproj` (each over that project plus its converted dependencies, golib, and the analyzer — no stdlib).
 
-**3 — C#: build the generated solution.**
+(Flag order does not matter — `go2cs` accepts flags before or after the module path, so both
+`go2cs -recurse . -go2cspath …` and `go2cs -recurse -go2cspath … .` work.)
+
+**3 — C#: build the generated solution.** Build everything at once with the flat solution, or just the app
+plus its dependency closure with the app's own per-project solution:
 
 ```shell
-dotnet build "%GOPATH%\src\go2cs\go2cs-recurse.slnx" -c Debug
+dotnet build "%GOPATH%\src\go2cs\go2cs-recurse.slnx" -c Debug                                    # everything
+dotnet build "%GOPATH%\src\go2cs\src\example.com\colordemo\example.com.colordemo.slnx" -c Debug  # just the app + its deps
 ```
 
 > The deploy root carries a `Directory.Build.props` that pins `$(go2csPath)` to itself, so every generated
-> project — the app, the third-party libraries under `pkg\`, and the referenced standard library under
-> `core\` — resolves its `$(go2csPath)…` references with no per-build flags.
+> project — the app under `src\`, the third-party libraries under `pkg\`, and the referenced standard library
+> under `core\` — resolves its `$(go2csPath)…` references with no per-build flags. Because the app now lives
+> under the deploy root too, a bare `dotnet build` in its `src\…` folder (or opening it in an IDE) resolves
+> the same way.
+
+Two practical notes:
+
+- **Re-run `deploy-core` after updating go2cs.** The deploy root is a *snapshot* of the runtime, analyzer,
+  and stdlib. Building converted code against a stale analyzer surfaces spurious errors (e.g. `CS0715` on a
+  keyword-named type) that a current one does not — refresh the deploy whenever you pull converter changes.
+- **Build go2cs with a Go toolchain ≥ the module's `go` directive.** `go/packages` type-checks the source
+  with go2cs's own toolchain, so converting a module that requires a newer Go than go2cs was built with
+  (e.g. `fatih/color` v1.19 requires go 1.25) loads with degraded type information.
 
 `-recurse` is a work in progress: it produces a **buildable** solution and handles the common real-world
-module shapes (this `fatih/color` example compiles clean — app + all four dependency projects), but some
-third-party packages still surface residual per-package conversion defects. The design, the validated
-results, and the known-limitation backlog are tracked in
-[`DESIGN-recursive-enduser-conversion.md`](Phase3/DESIGN-recursive-enduser-conversion.md).
+module shapes — this `fatih/color` example **compiles clean** (app + all four dependency projects, against a
+current deploy). Running the resulting program can still hit residual per-package conversion defects (this
+example currently throws from a converted third-party `init`); operational correctness of converted
+dependencies is the Phase-4 goal. The design, the validated results, and the known-limitation backlog are
+tracked in [`DESIGN-recursive-enduser-conversion.md`](Phase3/DESIGN-recursive-enduser-conversion.md).
 
 ## Project layout
 
