@@ -132,7 +132,18 @@ maps to C# (with [`ConversionStrategies-Reference.md`](ConversionStrategies-Refe
 
 ## Installing the converter
 
-Build the `go2cs` executable from source and place it on your `PATH` (e.g. in `%GOBIN%` or `%GOPATH%\bin`):
+Build the `go2cs` executable from source and place it on your `PATH`. The simplest way is `go install`,
+which compiles it and drops the binary into `%GOBIN%` (or `%GOPATH%\bin`) — already on your `PATH` in a
+standard Go setup — in one step:
+
+```shell
+cd src/go2cs
+go install .
+```
+
+Re-run the same command after pulling new source to refresh the installed binary (a stale copy is what
+produces `flag provided but not defined` for newer options such as `-recurse`). Alternatively, build a
+local binary and place it on your `PATH` yourself:
 
 ```shell
 cd src/go2cs
