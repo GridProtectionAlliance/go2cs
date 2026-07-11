@@ -1,6 +1,10 @@
-@ECHO OFF
-:: Copy go2cs core libraries source to go2cs folder in %GOPATH%\src
-XCOPY core\*.* %GOPATH%\src\go2cs /S /C /I /Y
-:: Build debug and release builds of go2cs core libraries in %GOPATH%\src
-FOR /D %%i IN (%GOPATH%\src\go2cs\*) DO (dotnet build -v q -c Debug "%%i") 
-FOR /D %%i IN (%GOPATH%\src\go2cs\*) DO (dotnet build -v q -c Release "%%i") 
+@echo off
+rem Launcher for deploy-core.ps1 -- forwards all arguments to PowerShell so the script can be
+rem run from cmd without the ExecutionPolicy / -File noise. Examples:
+rem   deploy-core stub      deploy the runnable baseline core to %GOPATH%\src\go2cs
+rem   deploy-core stdlib    deploy the compilable full standard library to %GOPATH%\src\go2cs
+pushd "%~dp0"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0deploy-core.ps1" %*
+set "_ec=%ERRORLEVEL%"
+popd
+exit /b %_ec%

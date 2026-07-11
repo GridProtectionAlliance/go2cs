@@ -279,11 +279,21 @@ construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructField
 - Open converter items: `src/go2cs/ToDo.md` (e.g. `visitMapType` completion, remaining dynamic-struct
   implicit-cast checks, optional recursive dependent-package conversion, comment conversion, cgo/asm targets).
 
+### Deploying the core to the GOPATH root
+`src/deploy-core.ps1` (cmd launcher `deploy-core.bat`) stages the runtime + standard library at
+`%GOPATH%\src\go2cs` so converted projects — and, later, recursively converted end-user apps that target
+that same root — resolve their `$(go2csPath)core\<pkg>` / `gen\go2cs-gen` references relatively. Two modes:
+`deploy-core stub` (baseline `src/core`, **runnable**) and `deploy-core stdlib` (full `src/go-src-converted`,
+**compilable**; rewrites `go-src-converted\`→`core\` refs so both modes present the stdlib at `core\<pkg>`).
+Both also deploy golib + the `go2cs-gen` analyzer, write a root `Directory.Build.props` that pins
+`$(go2csPath)` to the deploy root (so no `-p:go2csPath` is needed), generate `go2cs-core.slnx`, and build to
+verify. The other src PowerShell utilities `clean-bin.ps1` (remove bin/obj/Generated) and `set-version.ps1`
+each also have a `.bat` launcher.
+
 ### Known staleness (do not trust blindly)
-- `src/convert-gosrc.cmd` / `convert-gosrc.bat` — still invoke a retired `net6.0` C# `go2cs.exe` with old
-  flags (`-s -r -e -g`); the current converter is the Go build with the flags listed above. (Not yet fixed.)
-- `docs/README.md` is partly historical (ANTLR4-era prose) but now carries a banner and corrected
-  references; `src/deploy-core.bat` was fixed (`gocore`→`core`).
+- `docs/README.md` is partly historical (ANTLR4-era prose) but now carries a banner and corrected references.
+- The retired `net6.0` C# converter scripts (`src/convert-gosrc.cmd` / `convert-gosrc.bat`) were **removed**
+  2026-07-11; the current converter is the Go build with the flags listed above.
 
 ## Conventions
 
