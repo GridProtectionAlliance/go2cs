@@ -195,6 +195,17 @@ func getImportPackageInfo(importPaths []string, options Options) map[string]Pack
 	result := make(map[string]PackageInfo, len(importPaths))
 
 	for _, importPath := range importPaths {
+		// Under -recurse, resolve APP (main-module) and THIRD-PARTY dependency references via the
+		// module-aware go/packages metadata, routing them to the parallel $(go2csPath)src\ and
+		// $(go2csPath)pkg\ trees (version-free). Stdlib falls through to the standard resolver below,
+		// which emits $(go2csPath)core references.
+		if options.recurse {
+			if info, ok := getRecurseDependencyInfo(importPath, options); ok {
+				result[importPath] = info
+				continue
+			}
+		}
+
 		pkg, err := build.Import(importPath, "", build.FindOnly)
 
 		// go/build (GOPATH-based) cannot resolve a LOCAL/USER module reached via a `replace`
@@ -309,6 +320,55 @@ func getLocalModulePackageInfo(importPath string, options Options) (PackageInfo,
 		RootPackageName:  meta.Name,
 		SourceDir:        meta.Dir,
 		TargetDir:        meta.Dir,
+		ProjectReference: projectReference,
+	}, true
+}
+
+// isMainModulePackage reports whether importPath belongs to the app (main) module identified by
+// mainModulePath — the module path itself or any sub-package of it. Used under -recurse to route
+// the app's own packages to the src\ tree while dependencies go to pkg\.
+func isMainModulePackage(importPath, mainModulePath string) bool {
+	return mainModulePath != "" &&
+		(importPath == mainModulePath || strings.HasPrefix(importPath, mainModulePath+"/"))
+}
+
+// getRecurseDependencyInfo resolves cross-package reference info for an APP (main-module) or
+// THIRD-PARTY import under -recurse, from the module-aware go/packages metadata captured in
+// importPackageDirs. App packages reference $(go2csPath)src\<import-path>; dependencies reference
+// $(go2csPath)pkg\<import-path> — both version-free (the path is derived from the version-free
+// import path, not the possibly-@versioned module-cache source dir), and both via the $(go2csPath)
+// property so writeProjectFile leaves them deploy-root relative rather than rewriting them relative.
+// This matches where ModuleConverter writes each package's output, so reference and output agree.
+// Returns ok=false for the standard library (resolved by the default path as $(go2csPath)core refs)
+// and for imports unknown to the loaded graph.
+func getRecurseDependencyInfo(importPath string, options Options) (PackageInfo, bool) {
+	meta, ok := importPackageDirs[importPath]
+
+	if !ok || meta.Dir == "" {
+		return PackageInfo{}, false
+	}
+
+	// Standard library is resolved by the default (build.Import) path as $(go2csPath)core refs.
+	if isPathUnder(meta.Dir, filepath.Join(options.goRoot, "src")) {
+		return PackageInfo{}, false
+	}
+
+	root := "pkg"
+
+	if isMainModulePackage(importPath, options.mainModulePath) {
+		root = "src"
+	}
+
+	libProjectName, namespace := getProjectName(meta.Dir, options)
+	targetDir := "$(go2csPath)" + root + "\\" + strings.ReplaceAll(importPath, "/", "\\")
+	projectReference := filepath.Join(targetDir, libProjectName+".csproj")
+
+	return PackageInfo{
+		IsStdLib:         false,
+		PackageName:      packageQualifiedName(namespace, meta.Name),
+		RootPackageName:  meta.Name,
+		SourceDir:        meta.Dir,
+		TargetDir:        strings.ReplaceAll(targetDir, "$(go2csPath)", options.go2csPath+string(os.PathSeparator)),
 		ProjectReference: projectReference,
 	}, true
 }

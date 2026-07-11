@@ -35,6 +35,7 @@ type Options struct {
 	go2csPath           string
 	convertStdLib       bool
 	recurse             bool
+	mainModulePath      string // -recurse: import path of the app (main) module; routes its packages to src\, deps to pkg\
 	targetPlatform      string
 	indentSpaces        int
 	preferVarDecl       bool

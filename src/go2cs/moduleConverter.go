@@ -203,6 +203,11 @@ func (m *ModuleConverter) partition(closure map[string]*packages.Package) {
 		switch m.classify(pkg) {
 		case classApp:
 			m.graph.AddPackage(pkgPath, pkg.Dir)
+			// Record the app's module path so outputDirFor / reference emission can route the app's
+			// own packages to src\ and every dependency to pkg\ (all app packages share this module).
+			if pkg.Module != nil {
+				m.options.mainModulePath = pkg.Module.Path
+			}
 			appCount++
 		case classThirdParty:
 			m.graph.AddPackage(pkgPath, pkg.Dir)
@@ -237,18 +242,20 @@ func (m *ModuleConverter) buildEdges(closure map[string]*packages.Package) {
 	}
 }
 
-// outputDirFor returns where a convert-set package's C# output is written. A read-only, versioned
-// module-cache dependency ($GOPATH/pkg/mod/<module>@<version>/...) is routed to a WRITABLE
-// $(go2csPath)pkg\<import-path> location (the @version stripped — the path is built from the
-// version-free import path), matching the reference getLocalModulePackageInfo emits for it.
-// Everything else — the app and co-located `replace` modules — is converted in place, co-located
-// with its Go source.
-func (m *ModuleConverter) outputDirFor(pkgPath, srcDir string) string {
-	if isPathUnder(srcDir, filepath.Join(m.options.goPath, "pkg", "mod")) {
-		return filepath.Join(m.options.go2csPath, "pkg", filepath.FromSlash(pkgPath))
+// outputDirFor returns where a convert-set package's C# output is written, in a parallel tree under
+// the deploy root that keeps the original Go source pure (nothing is written in place). The app's own
+// packages (the main module) go to $(go2csPath)src\<import-path>; every dependency — module-cache or
+// a co-located `replace` — goes to $(go2csPath)pkg\<import-path>. The path is built from the
+// version-free import path, so a module-cache dep's @version segment is dropped, and it matches the
+// reference getRecurseDependencyInfo emits, so reference and output agree.
+func (m *ModuleConverter) outputDirFor(pkgPath string) string {
+	root := "pkg"
+
+	if isMainModulePackage(pkgPath, m.options.mainModulePath) {
+		root = "src"
 	}
 
-	return srcDir
+	return filepath.Join(m.options.go2csPath, root, filepath.FromSlash(pkgPath))
 }
 
 // convertAll converts every convert-set package in the sorted (least-dependencies-first) order,
@@ -261,7 +268,7 @@ func (m *ModuleConverter) convertAll() {
 
 	for i, pkgPath := range m.graph.sortedQueue {
 		pkg := m.graph.packages[pkgPath]
-		outputDir := m.outputDirFor(pkgPath, pkg.Dir)
+		outputDir := m.outputDirFor(pkgPath)
 
 		fmt.Printf("[%d/%d] Converting %s\n", i+1, total, pkgPath)
 
