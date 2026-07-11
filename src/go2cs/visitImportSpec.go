@@ -394,13 +394,22 @@ func convertImportPathToNamespace(importPath string, packageSuffix string) strin
 	// Split import path by "/"
 	importPathParts := strings.Split(importPath, "/")
 
-	// A MAJOR-VERSION directory (`math/rand/v2`): the Go package is named for the PARENT
-	// segment (`rand`), and the emitted class follows the package NAME — namespace
-	// go.math.rand + class rand_package. The path-derived v2_package exists nowhere
-	// (CS0234, internal/concurrent importing math/rand/v2). Convention-based: a /vN dir
-	// hosts the parent-named package (true stdlib-wide; a package literally named vN
-	// would need the type-graph name instead).
-	if len(importPathParts) > 1 {
+	// The emitted class is <packageName>_package, and a MODULE dependency's Go package name often
+	// differs from its import-path's last segment — github.com/mattn/go-isatty is `package isatty`,
+	// and a hyphen in the segment (`go-isatty`) is not even a valid C# identifier. Use the actual
+	// package name (from the module-aware import graph, which is populated with valid Go identifiers)
+	// for the last (class) segment of a NON-stdlib import; the standard library keeps its path segment
+	// (which equals the package name there), so its references stay byte-identical.
+	if meta, ok := importPackageDirs[importPath]; ok && meta.Name != "" && len(importPathParts) > 0 &&
+		!isPathUnder(meta.Dir, filepath.Join(build.Default.GOROOT, "src")) {
+		importPathParts[len(importPathParts)-1] = meta.Name
+	} else if len(importPathParts) > 1 {
+		// A MAJOR-VERSION directory (`math/rand/v2`): the Go package is named for the PARENT
+		// segment (`rand`), and the emitted class follows the package NAME — namespace
+		// go.math.rand + class rand_package. The path-derived v2_package exists nowhere
+		// (CS0234, internal/concurrent importing math/rand/v2). Convention-based: a /vN dir
+		// hosts the parent-named package (true stdlib-wide; a package literally named vN
+		// would need the type-graph name instead).
 		if last := importPathParts[len(importPathParts)-1]; majorVersionSegmentRegex.MatchString(last) {
 			importPathParts[len(importPathParts)-1] = importPathParts[len(importPathParts)-2]
 		}
