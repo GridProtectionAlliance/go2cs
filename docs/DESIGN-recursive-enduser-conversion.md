@@ -5,6 +5,12 @@
 > first test **reference the already-converted stdlib** rather than reconverting it per app.
 > Companion: the *NuGet stdlib* discussion (this thread / to be filed in [`Roadmap.md`](Roadmap.md)) —
 > the stdlib reference this design points at is exactly what a NuGet `PackageReference` later replaces.
+>
+> **Update (2026-07-11):** the *staging* half is built and tested. `deploy-core.ps1` (two modes; see the
+> "Deploying the core" section of [`../CLAUDE.md`](../CLAUDE.md)) stages the referenced stdlib + the
+> `go2cs-gen` analyzer at `%GOPATH%\src\go2cs` and writes a root `Directory.Build.props` that pins
+> `$(go2csPath)` to that root. That firms up the reference-resolution story below (§3.4/§3.5). The
+> converter side (`-recurse`, phases P1–P5) is the remaining implementation goal.
 
 ## 1. What we're validating
 
@@ -52,6 +58,13 @@ There are **two disjoint drivers** today:
 - **`-stdlib` already emits from an app without converting stdlib.** A single `processConversion` run
   emits `$(go2csPath)core\…` project references for the stdlib packages it imports *without* converting
   them — precisely the "reference, don't reconvert" behavior we want for stdlib.
+- **The referenced stdlib is now staged by `deploy-core`** (built + tested 2026-07-11). `deploy-core stub`
+  (runnable baseline) or `deploy-core stdlib` (compilable full stdlib) copies the runtime + stdlib + the
+  `go2cs-gen` analyzer to `%GOPATH%\src\go2cs`, presenting the stdlib uniformly at `core\<pkg>`, and writes
+  a **root `Directory.Build.props` pinning `<go2csPath>$(MSBuildThisFileDirectory)</go2csPath>`**. That
+  props file is the reference backbone for §3.4/§3.5: every project under the root — the staged stdlib and
+  anything `-recurse` later writes there — resolves its `$(go2csPath)core\… / gen\…` references with no
+  `-p:go2csPath` flag and no absolute paths.
 - **The template already makes every library project NuGet-publishable** (`csproj-template.xml:44-53`:
   `GeneratePackageOnBuild`, `PackageId=go.$(AssemblyName)`) — relevant to the NuGet endgame.
 
@@ -133,13 +146,24 @@ The **core change** is decoupling *source dir* from *converted-output dir* for m
 - Strip the module cache's `@<version>` segment from the output path (single-version assumption for now;
   see open decisions).
 
+**Anchor the whole conversion at the deploy root.** `-recurse` should default `-go2cspath` to
+`%GOPATH%\src\go2cs` — the same root `deploy-core` stages to — and write the app + third-party output
+*under* it (third-party at `pkg\…`; the app at, e.g., `app\<module>\`). The root `Directory.Build.props`
+that `deploy-core` wrote then supplies `$(go2csPath)` to every generated project automatically, so the
+app, the third-party libs, the staged stdlib, and the analyzer all resolve their `$(go2csPath)…`
+references with no per-project property and no machine-specific absolute paths.
+
 ### 3.5 Referencing the pre-converted stdlib
 
-Per the chosen scope, stdlib imports emit `$(go2csPath)core\…` references and are **not** converted.
-`$(go2csPath)` (template lines 30-33) resolves to `$(SolutionDir)` in Debug or `$(USERPROFILE)\go2cs\`
-otherwise, so the pre-converted stdlib simply needs to live under that root as `core/…`. For the test we
-point it at the existing **`src/go-src-converted`** tree (the full stdlib that compiles as of the
-302/302 milestone) via the generated solution + `$(go2csPath)`.
+Per the chosen scope, stdlib imports emit `$(go2csPath)core\…` references and are **not** converted. The
+staging step (`deploy-core stub`|`stdlib`) has already placed a pre-converted stdlib at
+`%GOPATH%\src\go2cs\core\<pkg>` and written a root `Directory.Build.props` pinning `$(go2csPath)` to that
+root — so `$(go2csPath)core\<pkg>\<pkg>.csproj` resolves deterministically for every project beneath it,
+independent of the template's Debug/`$(SolutionDir)` vs. Release/`$(USERPROFILE)` fallback (the props value
+wins, because the template's `go2csPath` block is `Condition="'$(go2csPath)'==''"`). `deploy-core stdlib`
+stages the full 302-package stdlib (compilable); `deploy-core stub` stages the runnable baseline subset —
+pick per what the app imports. `deploy-core` also stages the `go2cs-gen` analyzer at `gen\go2cs-gen`, which
+every converted csproj references at `$(go2csPath)gen\go2cs-gen`.
 
 This is the seam the **NuGet stdlib** replaces later: `$(go2csPath)core\<pkg>\<pkg>.csproj`
 `ProjectReference` → `go.<pkg>` `PackageReference`. Keeping the reference indirection through
@@ -151,9 +175,14 @@ Generalize `GenerateSolutionFile` to accept the app project + the `pkg/` (third-
 addition to (or instead of) `core/`, grouping into solution folders by module namespace (the folder-ID
 hashing in `solutionGenerator.go:246` already handles duplicate leaf names). The stdlib projects are
 included as references via `$(go2csPath)core` (either listed for build, or assumed pre-built).
+`deploy-core` already emits a flat `go2cs-core.slnx` over the staged core + analyzer; the recurse solution
+follows the same shape, adding the app + `pkg\…` third-party projects.
 
 ## 4. Phased implementation plan
 
+- **P0 — stage the referenced stdlib (done).** `deploy-core stub`|`stdlib` puts the stdlib + `go2cs-gen`
+  analyzer + a root `Directory.Build.props` at `%GOPATH%\src\go2cs`; the phases below build on that root.
+  Already implemented + tested (2026-07-11).
 - **P1 — extract the shared dependency graph.** Move graph build + topo sort out of `StdLibConverter`
   into a reusable unit; `-stdlib` keeps working unchanged (regression gate: a filtered `-stdlib` run +
   `check-no-regression`).
@@ -182,10 +211,12 @@ pattern.
    *(Simplest alternative: a zero-dep lib like `github.com/spf13/pflag` or `github.com/google/uuid` for a
    one-hop `app → lib → stdlib` graph.)*
 2. **Baseline with Go** — `go build ./...` to confirm it compiles as Go first.
-3. **Convert** — `go2cs -recurse <module-dir> <out>` with `$(go2csPath)` pointed at a workspace holding
-   the pre-converted stdlib.
-4. **Build** — `dotnet build` the generated solution.
-5. **Report** — packages discovered / converted / compiled, and CS-error buckets for the rest. Success
+3. **Stage the stdlib** — `deploy-core stdlib` once, putting the compilable stdlib + analyzer + root
+   `Directory.Build.props` at `%GOPATH%\src\go2cs`.
+4. **Convert** — `go2cs -recurse <module-dir> -go2cspath %GOPATH%\src\go2cs`, converting the app +
+   third-party libs under that root (stdlib referenced, not converted).
+5. **Build** — `dotnet build` the generated solution.
+6. **Report** — packages discovered / converted / compiled, and CS-error buckets for the rest. Success
    criterion is **process completion + solution builds** (partial compile is acceptable at this stage).
 
 ## 6. Open decisions (for the user)
@@ -194,8 +225,9 @@ pattern.
    third-party import is present?
 2. **Module version in the output path** — strip `@<version>` (single-version, simplest) or preserve it
    (supports multiple versions of one module, mirrors the cache)?
-3. **Which pre-converted stdlib to reference for the test** — `src/go-src-converted` (full, compiles), or
-   a dedicated workspace copy? (Both are `$(go2csPath)core` under the hood.)
+3. **Which pre-converted stdlib to reference** — *resolved by the `deploy-core` modes*: `stdlib` (full
+   `src/go-src-converted`, compilable) or `stub` (runnable baseline); both stage to
+   `%GOPATH%\src\go2cs\core`.
 4. **Test app** — `fatih/color` (small DAG, recommended) vs. a zero-dep lib (simplest one-hop).
 
 ## 7. Relationship to the NuGet stdlib decision
