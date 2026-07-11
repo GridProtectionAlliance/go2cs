@@ -127,6 +127,60 @@ func (c *StdLibConverter) ScanAndConvertFiltered(packageFilter []string) error {
 		fmt.Printf("WARNING: Failed to generate solution file: %v\n", err)
 	}
 
+	// Step 6: Copy the Go source tree's root attribution/reference files (VERSION, LICENSE,
+	// PATENTS, README.md, SECURITY.md, CONTRIBUTING.md) alongside the converted packages. The
+	// generated C# is a derivative work: the per-file "// Copyright … The Go Authors … BSD-style
+	// license" headers reference these root files ("as found in the LICENSE file"), so preserving
+	// them keeps the output properly attributed and records the exact Go toolchain it came from.
+	if err := c.copyRootAttributionFiles(); err != nil {
+		fmt.Printf("WARNING: Failed to copy root attribution files: %v\n", err)
+	}
+
+	return nil
+}
+
+// rootAttributionFiles are the non-source files at the root of the Go source tree that the
+// converted output must carry over for attribution/reference. Order is for readability only.
+var rootAttributionFiles = []string{
+	"VERSION",
+	"LICENSE",
+	"PATENTS",
+	"README.md",
+	"SECURITY.md",
+	"CONTRIBUTING.md",
+}
+
+// copyRootAttributionFiles copies each rootAttributionFiles entry from the Go source root into the
+// converted-output "core" directory (the same root the converted packages sit under — after the
+// milestone core→go-src-converted relocation these land at go-src-converted/VERSION etc.). Missing
+// or unreadable files are reported and skipped rather than failing the whole conversion.
+func (c *StdLibConverter) copyRootAttributionFiles() error {
+	destDir := filepath.Join(c.go2csPath, "core")
+	if err := os.MkdirAll(destDir, 0755); err != nil {
+		return fmt.Errorf("failed to create output directory %s: %w", destDir, err)
+	}
+
+	copied := 0
+	for _, name := range rootAttributionFiles {
+		srcPath := filepath.Join(c.goRoot, name)
+
+		data, err := os.ReadFile(srcPath)
+		if err != nil {
+			// Not every Go version ships every file; skip what isn't there.
+			fmt.Printf("WARNING: Skipping root file %s: %v\n", name, err)
+			continue
+		}
+
+		destPath := filepath.Join(destDir, name)
+		if err := os.WriteFile(destPath, data, 0644); err != nil {
+			fmt.Printf("WARNING: Failed to write %s: %v\n", destPath, err)
+			continue
+		}
+
+		copied++
+	}
+
+	fmt.Printf("Copied %d of %d root attribution files into %s\n", copied, len(rootAttributionFiles), destDir)
 	return nil
 }
 
