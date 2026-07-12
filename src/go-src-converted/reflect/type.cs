@@ -2970,30 +2970,7 @@ internal static slice<byte> appendVarint(slice<byte> x, uintptr v) {
     return x;
 }
 
-// toType converts from a *rtype to a Type that can be returned
-// to the client of package reflect. In gc, the only concern is that
-// a nil *rtype must be replaced by a nil Type, but in gccgo this
-// function takes care of ensuring that multiple *rtype for the same
-// type are coalesced into a single Type.
-//
-// toType should be an internal detail,
-// but widely used packages access it using linkname.
-// Notable members of the hall of shame include:
-//   - fortio.org/log
-//   - github.com/goccy/go-json
-//   - github.com/goccy/go-reflect
-//   - github.com/sohaha/zlsgo
-//
-// Do not remove or change the type signature.
-// See go.dev/issue/67401.
-//
-//go:linkname toType
-internal static ΔType toType(ж<abi.Type> Ꮡt) {
-    if (Ꮡt == nil) {
-        return default!;
-    }
-    return new rtypeжΔType(toRType(Ꮡt));
-}
+// func toType is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
 [GoType] partial struct layoutKey {
     internal ж<funcType> ftyp; // function signature

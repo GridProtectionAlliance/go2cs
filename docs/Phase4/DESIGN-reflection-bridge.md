@@ -135,3 +135,24 @@ defined identically in `internal/abi/type.cs:40` and `reflect/type.cs:245`. `fmt
 interface assertions — no reflection. Fast-path `printArg` types (no reflection):
 `bool, int/8/16/32/64, uint/8/16/32/64, uintptr, float32/64, complex64/128, string, []byte,
 reflect.Value`.
+
+## Fix — reflect.Type must be canonical (map-key ordering)
+
+Go's `reflect.Type` is a canonical interned descriptor: `TypeOf(x) == TypeOf(y)` exactly when `x`
+and `y` share a dynamic type, so `aType == bType` is a pointer compare. `internal/fmtsort.compare`
+(the map-key ordering used by `fmt`'s `%v`) relies on it: `if aType != bType { return -1 }`.
+
+The bridge minted a **fresh** wrapper per access — `abi.TypeOf` allocates a new `abi.Type` box, and
+both `Value.Type()` and `toType` then build a fresh `rtypeжΔType` (an `IжAdapter` compared by box
+identity via `golib` `AreEqual`). So two Types describing the *same* type never compared equal →
+`compare` returned `-1` for every pair → the stable sort **reversed** the keys
+(`map[b:2 a:1]` instead of `map[a:1 b:2]`).
+
+**Fix:** hand-own `Value.Type` and `toType` in `reflect/value_impl.cs` (registered in
+`go2cs/manualTypeOperations.go` `manualConversionFuncs["reflect"]`) so both route through `canonType`,
+which **interns** the `ΔType` wrapper in a `ConcurrentDictionary<System.Type, ΔType>` keyed on the
+`abi.Type.sysType` the Phase-1 `synthType` stamped. Identity-equality then matches Go. The cache is
+process-lifetime (type descriptors are permanent, like Go's). Interning by `System.Type` preserves
+Go's named-type distinctness for free: a `type Celsius float64` is a distinct `[GoType("num:float64")]`
+struct whose `System.Type` differs from `float64`, so `TypeOf(Celsius) != TypeOf(float64)`. `typeSlow`
+(method-value Types) stays auto — not exercised by `fmt`.
