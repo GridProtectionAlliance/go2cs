@@ -457,10 +457,57 @@ through package function bodies — syscall's `Stdin = getStdHandle(…)` readin
 `procGetStdHandle`) is emitted as a bare field plus an `initᴛ<name>()` method in its home file, called in
 `types.Info.InitOrder` by a generated `package_init.cs` static constructor. See
 [ConversionStrategies-Reference → Package-Level Variable Initialization Order](../ConversionStrategies-Reference.md#package-level-variable-initialization-order);
-guarded by the `PackageVarInitOrder` behavioral test. The remaining blocker is the Windows syscall FFI
-itself: `loadlibrary`/`getprocaddress`/`SyscallN` are throwing `PartialStubGenerator` stubs, so the
-LazyDLL/LazyProc machinery needs real bodies (P/Invoke LoadLibrary/GetProcAddress + an unmanaged-call
-trampoline), or the small `os`/`syscall` entry-point set the target program needs hand-owned natively.
+guarded by the `PackageVarInitOrder` behavioral test.
+
+### Operational stdlib — syscall FFI + runtime bootstrap (2026-07-11, groundwork)
+
+With init order fixed, the converted-program startup crash chain was cleared one layer at a time. Each
+fix below is committed groundwork; the chain now reaches `fmt.newPrinter`, blocked on a distinct
+go2cs-gen issue (see the end). All fixes live in `src/go-src-converted` unless noted, deployed via
+`deploy-core stdlib`:
+
+1. **`internal/godebug`** runtime `//go:linkname` hooks (`setUpdate`/`registerMetric`/`setNewIncNonDefault`)
+   were throwing `PartialStubGenerator` stubs → **`godebug_impl.cs`** companion (no marker needed —
+   supplying a bodyless partial's implementing part auto-suppresses the stub). One-shot `update()` notify.
+2. **Windows syscall FFI** (`loadlibrary`/`getprocaddress`/`Syscall…`/`SyscallN`) → native
+   **`syscall/dll_windows.cs`** (whole-file `GoManualConversion`): `LoadLibraryExW`/`GetProcAddress`
+   P/Invoke, plus an unmanaged function-pointer `calli` dispatch (a switch on argument count — Windows
+   x64 has a single calling convention). `LazyDLL.Load`/`LazyProc.Find` use a plain double-checked lock
+   (CLR reference writes are atomic — Go's `atomic.LoadPointer((*unsafe.Pointer)(&d.dll))` managed-
+   referent round-trip cannot be emulated).
+3. **`runtime`'s own `init` functions** divided by zero / hit stubs at class-initialization (arena
+   sizing checks against a zero `physPageSize`, etc.). In Go these run only after the assembly bootstrap
+   (`osinit`/`schedinit`) populates such globals; converted code has no bootstrap — **.NET is the
+   runtime**. **Converter fix** (`visitFuncDecl.go`): for `pkg.Path()=="runtime"`, emit `init` funcs as
+   commented-out `/* [GoInit] runtime bootstrap init - not run */` plain methods. Behavioral-neutral
+   (CNR byte-identical — scoped to `runtime`, which no behavioral test is).
+4. **`efaceOf`** reinterpret panicked at class-init (several `_type` field initializers walk it) →
+   returns an inert `eface` in `runtime/runtime2.cs` (descriptor walking is vestigial — go2cs replaces
+   Go's itab dispatch with C# interfaces + generators). Same file seeds `gomaxprocs`/`ncpu` from
+   `Environment.ProcessorCount` (the bootstrap would; left 0, `sync.Pool` sizes a zero-length shard
+   array and indexes out of range on the first `Println`).
+5. **`sync.Pool`** per-P sharding presumes Go's scheduler → native **`sync/pool.cs`** (whole-file
+   `GoManualConversion`): one `ConcurrentBag` per Pool, lazily created through the Pool's heap box (the
+   next member of the native-`sync` family).
+6. **`runtime.SetFinalizer`** walks type descriptors (`os.newFile` sets a finalizer on every opened
+   file) → **`runtime/mfinal.cs`** frozen whole-file `GoManualConversion`, its body replaced with a
+   `ConditionalWeakTable` + sentinel-finalizer bridge (the rest is inert converted GC-queue machinery
+   kept for compilation).
+
+**⚠ Open soundness constraint** (documented in `dll_windows.cs`): golib's `ж<T>→uintptr` conversion
+returns an address captured inside a `fixed` block that exits before the return, so every `uintptr` the
+converted `zsyscall` wrappers pass to the trampoline is a **transient** (GC-moveable) address. The
+window is short and allocation-free in practice; the sound fix is to pin at the capture seam — a golib
+decision to make with the project owner.
+
+**The final blocker for `fmt.Println`** is a **go2cs-gen** gap, not FFI: `fmt.newPrinter` does
+`@new<pp>()`, and `pp` has a plain field `fmt fmt` whose type carries a promoted embed (`fmtFlags`, a
+ctor-initialized `ж` box). `@new<T>()` runs `pp`'s parameterless constructor, which leaves the `fmt`
+field `default` — so its embed box (and its array-field backing) is null and `clearflags` NREs.
+`StructTypeTemplate.AppendPromotedBoxInitializers` constructs a struct's OWN embed boxes but not a
+struct-typed FIELD whose type needs construction. The fix — construct such fields as `new FieldType(nil)`
+in the zero-value constructors — is a general go2cs-gen change of comparable scope to the init-order fix
+(large blast radius: every struct with a struct-typed field), so it is deferred to its own validated pass.
 
 ## 6. Open decisions (RESOLVED)
 

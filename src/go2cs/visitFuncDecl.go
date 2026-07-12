@@ -727,7 +727,18 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.replaceMarker(functionParametersMarker, parameterSignature)
 
 	if isModuleInitializer {
-		v.replaceMarker(functionAttributeMarker, "[GoInit] ")
+		// The `runtime` package's own init functions are Go's runtime SELF-BOOTSTRAP (arena
+		// sizing checks, GC/proc setup): in real Go they run only after the assembly bootstrap
+		// (osinit/schedinit) has populated globals like physPageSize. Converted code has no such
+		// bootstrap — .NET is the runtime — so running them as module initializers executes
+		// self-checks against zero-valued stub globals (arena's `% physPageSize` divides by
+		// zero at assembly load, before Main). The faithful conversion of the Go runtime
+		// bootstrap is to not run it: emit them as plain (never-called) methods.
+		if v.pkg.Path() == "runtime" {
+			v.replaceMarker(functionAttributeMarker, "/* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ ")
+		} else {
+			v.replaceMarker(functionAttributeMarker, "[GoInit] ")
+		}
 	} else if strings.HasPrefix(parameterSignature, "this ref ") {
 		v.replaceMarker(functionAttributeMarker, "[GoRecv] ")
 	} else {
