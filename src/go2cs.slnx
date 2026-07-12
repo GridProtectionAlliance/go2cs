@@ -107,6 +107,7 @@
     <Project Path="Tests/Behavioral/ComplexImaginaryShadow/ComplexImaginaryShadow.csproj" />
     <Project Path="Tests/Behavioral/CombinedStructFields/CombinedStructFields.csproj" />
     <Project Path="Tests/Behavioral/ConstShadowsParam/ConstShadowsParam.csproj" />
+    <Project Path="Tests/Behavioral/ConstrainedSliceParamInPlace/ConstrainedSliceParamInPlace.csproj" />
     <Project Path="Tests/Behavioral/Constraints/Constraints.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgBox/CrossPkgBox.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgFuncLib/CrossPkgFuncLib.csproj" />
