@@ -58,24 +58,24 @@ func TestBuildSolutionXML(t *testing.T) {
 	}
 }
 
-// TestBuildFlatSolutionXML checks the flat recurse solution (ModuleConverter): the config block, a
-// plain project list with NO <Folder> grouping, CRLF line endings, and no BOM — matching the shape
-// deploy-core.ps1 emits for go2cs-core.slnx. Third-party libs land under pkg/, and an in-place app
-// is referenced via a relative (..) path.
+// TestBuildFlatSolutionXML checks a per-project recurse solution (ModuleConverter): the config block, a
+// plain project list with NO <Folder> grouping, the startup (anchor) project marked DefaultStartup, CRLF
+// line endings, and no BOM. Third-party libs land under pkg/, and an app under src/ is the startup.
 func TestBuildFlatSolutionXML(t *testing.T) {
 	projects := []string{
 		"pkg/github.com/google/uuid/github.com.google.uuid.csproj",
 		"../cache-test/example.com.cachetest.csproj",
 	}
+	startup := "../cache-test/example.com.cachetest.csproj" // the app is the solution's startup project
 
-	xml := buildFlatSolutionXML(projects)
+	xml := buildFlatSolutionXML(projects, startup)
 
 	wantContains := []string{
 		"<Solution>",
 		"<Configurations>",
 		"<Platform Name=\"Any CPU\" />",
 		"<Project Path=\"pkg/github.com/google/uuid/github.com.google.uuid.csproj\" />",
-		"<Project Path=\"../cache-test/example.com.cachetest.csproj\" />",
+		"<Project Path=\"../cache-test/example.com.cachetest.csproj\" DefaultStartup=\"true\" />",
 		"</Solution>",
 	}
 

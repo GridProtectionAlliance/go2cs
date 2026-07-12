@@ -372,10 +372,13 @@ byte-identical across all 371 behavioral projects at every step.
   through the module-aware go/packages metadata (`getRecurseDependencyInfo`) to the version-free src\/pkg\
   paths; stdlib still resolves to `$(go2csPath)core`. Added `Options.mainModulePath` to classify app vs.
   dependency consistently in both output routing and reference emission.
-- **R3 — per-project solutions.** Alongside the flat `go2cs-recurse.slnx` at the deploy root, a sibling
-  `.slnx` is written next to every converted `.csproj`, over that project plus its **transitive** converted
-  dependencies + golib + the analyzer (no stdlib). Building the app's per-project solution builds the app and
-  its whole dependency closure in one shot, without the ~300-project stdlib solution.
+- **R3 — per-project solutions.** A `.slnx` is written next to every converted `.csproj`, over that project
+  plus its **transitive** converted dependencies + golib + the analyzer (no stdlib), with the solution's own
+  anchor project marked the VS default startup (`DefaultStartup="true"` — a `.slnx` capability the old `.sln`
+  lacked). Building the app's per-project solution builds the app and its whole dependency closure in one
+  shot, without the ~300-project stdlib solution. *(The separate flat `go2cs-recurse.slnx` at the deploy root
+  was removed as redundant — the app's own per-project solution already lists its whole converted dependency
+  closure, so it IS the build-everything solution for the app.)*
 - **R4 — acceptance.** With a **current** deploy root, the `fatih/color` example (app + `color` +
   `go-colorable` + `go-isatty` + `x/sys/windows` + golib + analyzer) **compiles clean — 0 errors, 0 MSB
   reference errors**. Two operational caveats learned here:

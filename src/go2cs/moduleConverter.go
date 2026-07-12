@@ -90,15 +90,11 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 	// 4. Convert app + third-party packages in dependency order.
 	m.convertAll()
 
-	// 5. Emit a flat .slnx over the converted app + third-party projects at the deploy root, tying
-	//    them to the pre-converted stdlib (referenced via $(go2csPath)core) for one dotnet build.
-	if err := m.generateSolutionFile(); err != nil {
-		fmt.Printf("WARNING: failed to generate solution file: %v\n", err)
-	}
-
-	// 6. Emit a per-project .slnx next to each converted .csproj, over that project + its transitive
-	//    converted dependencies + golib + the analyzer — so any one package (notably the app) can be
-	//    opened/built on its own without the full deploy-root solution.
+	// 5. Emit a per-project .slnx next to each converted .csproj, over that project + its transitive
+	//    converted dependencies + golib + the analyzer, tied to the pre-converted stdlib (referenced via
+	//    $(go2csPath)core) for one dotnet build. The app's own solution thus lists its whole converted
+	//    dependency closure — a build-everything solution for the app — so no separate deploy-root
+	//    solution is written.
 	m.generatePerProjectSolutions()
 
 	return nil
@@ -314,57 +310,6 @@ func (m *ModuleConverter) convertAll() {
 	fmt.Println()
 }
 
-// recurseSolutionFileName is the flat .slnx ModuleConverter writes at the deploy root over the
-// converted app + third-party projects.
-const recurseSolutionFileName = "go2cs-recurse.slnx"
-
-// generateSolutionFile writes a flat .slnx at the deploy root ($(go2csPath)) listing the converted
-// app + third-party projects. It is placed at the deploy root so that building it makes
-// $(SolutionDir) resolve to that root — the pre-converted stdlib (referenced via $(go2csPath)core),
-// the third-party libs (under pkg\...), golib, and the analyzer then all resolve and build
-// transitively. Project paths are emitted relative to the root (forward-slash), sorted for
-// deterministic output.
-func (m *ModuleConverter) generateSolutionFile() error {
-	if len(m.convertedProjects) == 0 {
-		return nil
-	}
-
-	root := m.options.go2csPath
-
-	rels := make([]string, 0, len(m.convertedProjects))
-
-	for _, csproj := range m.convertedProjects {
-		rel, err := filepath.Rel(root, csproj)
-
-		if err != nil {
-			rel = csproj
-		}
-
-		rels = append(rels, filepath.ToSlash(rel))
-	}
-
-	sort.Strings(rels)
-
-	contents := buildFlatSolutionXML(rels)
-	solutionFile := filepath.Join(root, recurseSolutionFileName)
-
-	// The deploy root may not exist yet — e.g. an all-in-place conversion (a co-located `replace`
-	// module with no module-cache deps) writes nothing else under it. Create it before writing.
-	if err := os.MkdirAll(root, 0o755); err != nil {
-		return fmt.Errorf("failed to create deploy root %q: %w", root, err)
-	}
-
-	if needToWriteFile(solutionFile, []byte(contents)) {
-		if err := os.WriteFile(solutionFile, []byte(contents), 0644); err != nil {
-			return fmt.Errorf("failed to write recurse solution file %q: %w", solutionFile, err)
-		}
-	}
-
-	fmt.Printf("Solution file generated: %s (%d projects)\n", solutionFile, len(rels))
-
-	return nil
-}
-
 // transitiveConvertedDeps returns the import paths of pkgPath's transitive dependencies within the
 // convert-set (the app + third-party graph), in deterministic (sorted) order. Standard-library
 // imports are not graph nodes, so they are naturally excluded.
@@ -415,10 +360,11 @@ func relSolutionPath(baseDir, target string) string {
 // generatePerProjectSolutions writes, next to each converted project's .csproj, a sibling .slnx over
 // that project plus its transitive converted dependencies and the shared golib runtime and go2cs-gen
 // analyzer. The standard library is referenced (via $(go2csPath)core), not listed. Building that one
-// solution builds the project and everything it needs from the convert-set — so the app (or any
-// single package) can be opened/built on its own, without the full deploy-root go2cs-recurse.slnx.
-// Project paths are relative to the .slnx's own directory; the runtime/analyzer live under the
-// deploy root ($(go2csPath)core\golib, $(go2csPath)gen\go2cs-gen).
+// solution builds the project and everything it needs from the convert-set — so the app (whose solution
+// lists its whole converted dependency closure) or any single package can be opened/built on its own.
+// The solution's own (anchor) project is marked the VS default startup project. Project paths are
+// relative to the .slnx's own directory; the runtime/analyzer live under the deploy root
+// ($(go2csPath)core\golib, $(go2csPath)gen\go2cs-gen).
 func (m *ModuleConverter) generatePerProjectSolutions() {
 	golibCsproj := filepath.Join(m.options.go2csPath, "core", "golib", "golib.csproj")
 	genCsproj := filepath.Join(m.options.go2csPath, "gen", "go2cs-gen", "go2cs-gen.csproj")
@@ -446,6 +392,8 @@ func (m *ModuleConverter) generatePerProjectSolutions() {
 
 		members = append(members, golibCsproj, genCsproj)
 
+		// The solution's own project is its VS default startup project (for the app, the runnable exe).
+		anchorRel := relSolutionPath(projectDir, csproj)
 		rels := make([]string, 0, len(members))
 
 		for _, member := range members {
@@ -454,7 +402,7 @@ func (m *ModuleConverter) generatePerProjectSolutions() {
 
 		sort.Strings(rels)
 
-		contents := buildFlatSolutionXML(rels)
+		contents := buildFlatSolutionXML(rels, anchorRel)
 		slnxFile := filepath.Join(projectDir, strings.TrimSuffix(filepath.Base(csproj), ".csproj")+".slnx")
 
 		if needToWriteFile(slnxFile, []byte(contents)) {

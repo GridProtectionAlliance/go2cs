@@ -248,18 +248,19 @@ directly from anywhere, e.g. `go2cs -recurse path\to\colordemo -go2cspath %GOPAT
 root, leaving your original Go source untouched**: the app's own packages land under
 `%GOPATH%\src\go2cs\src\<import-path>` and every third-party library under
 `%GOPATH%\src\go2cs\pkg\<import-path>` (the standard library it merely references at `…\core\<pkg>`). It
-writes a flat `go2cs-recurse.slnx` at the deploy root **and** a per-project `.slnx` next to every generated
-`.csproj` (each over that project plus its converted dependencies, golib, and the analyzer — no stdlib).
+writes a per-project `.slnx` next to every generated `.csproj` — each over that project plus its converted
+dependencies, golib, and the analyzer (no stdlib). The **app's** solution therefore lists its whole
+converted dependency closure (a build-everything solution for the app) and sets the app as the Visual
+Studio startup project.
 
 (Flag order does not matter — `go2cs` accepts flags before or after the module path, so both
 `go2cs -recurse . -go2cspath …` and `go2cs -recurse -go2cspath … .` work.)
 
-**3 — C#: build the generated solution.** Build everything at once with the flat solution, or just the app
-plus its dependency closure with the app's own per-project solution:
+**3 — C#: build the generated solution.** The app's per-project `.slnx` builds the app and its whole
+converted dependency closure; opening it in Visual Studio makes the app the startup project (F5 runs it):
 
 ```shell
-dotnet build "%GOPATH%\src\go2cs\go2cs-recurse.slnx" -c Debug                                    # everything
-dotnet build "%GOPATH%\src\go2cs\src\example.com\colordemo\example.com.colordemo.slnx" -c Debug  # just the app + its deps
+dotnet build "%GOPATH%\src\go2cs\src\example.com\colordemo\example.com.colordemo.slnx" -c Debug
 ```
 
 > The deploy root carries a `Directory.Build.props` that pins `$(go2csPath)` to itself, so every generated

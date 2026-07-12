@@ -95,21 +95,25 @@ func TestRecurseSyntheticModule(t *testing.T) {
 		t.Errorf("app csproj missing the stdlib fmt reference:\n%s", appCsproj)
 	}
 
-	// A flat recurse solution was written at the deploy root listing both converted projects.
-	slnx := readGenerated(t, filepath.Join(options.go2csPath, recurseSolutionFileName))
-
-	if !strings.Contains(slnx, "example.com.app.csproj") || !strings.Contains(slnx, "example.com.lib.csproj") {
-		t.Errorf("recurse solution missing the app or lib project:\n%s", slnx)
-	}
-
 	// A per-project solution sits next to the app csproj, over the app + its transitive converted
-	// dependency (lib) + the shared runtime (golib) + the analyzer (go2cs-gen) — no stdlib listed.
+	// dependency (lib) + the shared runtime (golib) + the analyzer (go2cs-gen) — no stdlib listed. This
+	// is the build-everything solution for the app; no separate flat deploy-root solution is written.
 	appSlnx := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "app", "example.com.app.slnx"))
 
 	for _, want := range []string{"example.com.app.csproj", "example.com.lib.csproj", "golib.csproj", "go2cs-gen.csproj"} {
 		if !strings.Contains(appSlnx, want) {
 			t.Errorf("app per-project solution missing %q:\n%s", want, appSlnx)
 		}
+	}
+
+	// The app project is marked the Visual Studio default startup project.
+	if !strings.Contains(appSlnx, `example.com.app.csproj" DefaultStartup="true"`) {
+		t.Errorf("app per-project solution does not mark the app as the startup project:\n%s", appSlnx)
+	}
+
+	// The retired flat deploy-root solution must no longer be generated.
+	if _, err := os.Stat(filepath.Join(options.go2csPath, "go2cs-recurse.slnx")); !os.IsNotExist(err) {
+		t.Errorf("unexpected flat deploy-root solution go2cs-recurse.slnx was written")
 	}
 
 	if strings.Contains(appSlnx, "fmt.csproj") {

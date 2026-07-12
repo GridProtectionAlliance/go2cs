@@ -240,12 +240,12 @@ func buildSolutionXML(coreProjects []string, testProjects []string) string {
 }
 
 // buildFlatSolutionXML renders a flat .slnx (no namespace folders) over the given solution-relative
-// forward-slash project paths, matching the shape deploy-core.ps1 emits for go2cs-core.slnx. It is
-// used for the recursive end-user solution (ModuleConverter): the app + third-party projects there
-// don't share the stdlib's deep namespace tree that buildSolutionXML groups by, and a flat list ties
-// them together with the pre-converted stdlib (referenced via $(go2csPath)core) for one dotnet build.
-// Callers sort the projects for deterministic output.
-func buildFlatSolutionXML(projects []string) string {
+// forward-slash project paths, used for a recurse per-project solution (ModuleConverter): the anchor
+// project + its converted dependencies + golib + the analyzer — a flat list tying them to the
+// pre-converted stdlib (referenced via $(go2csPath)core) for one dotnet build. The project whose path
+// equals startupProject is marked the Visual Studio default startup project via the .slnx
+// DefaultStartup attribute (pass "" for none). Callers sort the projects for deterministic output.
+func buildFlatSolutionXML(projects []string, startupProject string) string {
 	var sb strings.Builder
 
 	writeLine := func(indent int, text string) {
@@ -263,7 +263,11 @@ func buildFlatSolutionXML(projects []string) string {
 	writeLine(1, "</Configurations>")
 
 	for _, project := range projects {
-		writeLine(1, fmt.Sprintf("<Project Path=\"%s\" />", escapeXMLAttr(project)))
+		if project == startupProject {
+			writeLine(1, fmt.Sprintf("<Project Path=\"%s\" DefaultStartup=\"true\" />", escapeXMLAttr(project)))
+		} else {
+			writeLine(1, fmt.Sprintf("<Project Path=\"%s\" />", escapeXMLAttr(project)))
+		}
 	}
 
 	writeLine(0, "</Solution>")
