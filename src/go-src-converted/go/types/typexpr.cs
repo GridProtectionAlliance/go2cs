@@ -25,7 +25,6 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
     ref var check = ref Ꮡcheck.Value;
     ref var x = ref Ꮡx.Value;
     ref var e = ref Ꮡe.Value;
-    ref var def = ref Ꮡdef.Value;
 
     x.mode = invalid;
     x.expr = new ast_IdentжExpr(Ꮡe);
@@ -177,8 +176,6 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
 // typ type-checks the type expression e and returns its type, or Typ[Invalid].
 // The type must not be an (uninstantiated) generic type.
 internal static ΔType typ(this ж<Checker> Ꮡcheck, ast.Expr e) {
-    ref var check = ref Ꮡcheck.Value;
-
     return Ꮡcheck.definedType(e, nil);
 }
 
@@ -186,8 +183,6 @@ internal static ΔType typ(this ж<Checker> Ꮡcheck, ast.Expr e) {
 // The type must not be an (uninstantiated) generic type and it must not be a
 // constraint interface.
 internal static ΔType varType(this ж<Checker> Ꮡcheck, ast.Expr e) {
-    ref var check = ref Ꮡcheck.Value;
-
     var typ = Ꮡcheck.definedType(e, nil);
     Ꮡcheck.validVarType(e, typ);
     return typ;
@@ -227,7 +222,6 @@ internal static void validVarType(this ж<Checker> Ꮡcheck, ast.Expr e, ΔType 
 // before any components of e are type-checked.
 internal static ΔType definedType(this ж<Checker> Ꮡcheck, ast.Expr e, ж<TypeName> Ꮡdef) {
     ref var check = ref Ꮡcheck.Value;
-    ref var def = ref Ꮡdef.Value;
 
     var typ = Ꮡcheck.typInternal(e, Ꮡdef);
     assert(isTyped(typ));
@@ -271,7 +265,6 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
     ΔType T = default!;
     func((defer, recover) => {
     ref var check = ref Ꮡcheck.Value;
-    ref var def = ref Ꮡdef.Value;
 
         if ((~check.conf)._Trace) {
             Ꮡcheck.trace(e0.Pos(), "-- type %s"u8, e0);
@@ -503,7 +496,6 @@ internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<ty
     func((defer, recover) => {
     ref var check = ref Ꮡcheck.Value;
     ref var ix = ref Ꮡix.Value;
-    ref var def = ref Ꮡdef.Value;
 
         if ((~check.conf)._Trace) {
             Ꮡcheck.trace(ix.Pos(), "-- instantiating type %s with %s"u8, ix.X, ix.Indices);
@@ -576,8 +568,6 @@ internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<ty
 // and returns the constant length >= 0, or a value < 0
 // to indicate an error (and thus an unknown length).
 internal static int64 arrayLength(this ж<Checker> Ꮡcheck, ast.Expr e) {
-    ref var check = ref Ꮡcheck.Value;
-
     // If e is an identifier, the array declaration might be an
     // attempt at a parameterized type declaration with missing
     // constraint. Provide an error message that mentions array
@@ -631,8 +621,6 @@ internal static int64 arrayLength(this ж<Checker> Ꮡcheck, ast.Expr e) {
 // typeList provides the list of types corresponding to the incoming expression list.
 // If an error occurred, the result is nil, but all list elements were type-checked.
 internal static slice<ΔType> typeList(this ж<Checker> Ꮡcheck, slice<ast.Expr> list) {
-    ref var check = ref Ꮡcheck.Value;
-
     var res = new slice<ΔType>(len(list));
     // res != nil even if len(list) == 0
     foreach (var (i, x) in list) {

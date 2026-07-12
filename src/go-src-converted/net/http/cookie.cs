@@ -228,8 +228,6 @@ internal static slice<ж<ΔCookie>> readSetCookies(ΔHeader h) {
 // The provided cookie must have a valid Name. Invalid cookies may be
 // silently dropped.
 public static void SetCookie(ResponseWriter w, ж<ΔCookie> Ꮡcookie) {
-    ref var cookie = ref Ꮡcookie.Value;
-
     {
         @string v = Ꮡcookie.String(); if (v != ""u8) {
             w.Header().Add("Set-Cookie"u8, v);

@@ -127,38 +127,28 @@ internal static ж<Interface> newInterface(this ж<Checker> Ꮡcheck) {
 
 // NumMethods returns the total number of methods of interface t.
 public static nint NumMethods(this ж<Interface> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.typeSet().NumMethods();
 }
 
 // Method returns the i'th method of interface t for 0 <= i < t.NumMethods().
 // The methods are ordered by their unique Id.
 public static ж<Func> Method(this ж<Interface> Ꮡt, nint i) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.typeSet().Method(i);
 }
 
 // Empty reports whether t is the empty interface.
 public static bool Empty(this ж<Interface> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.typeSet().IsAll();
 }
 
 // IsComparable reports whether each type in interface t's type set is comparable.
 public static bool IsComparable(this ж<Interface> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.typeSet().IsComparable(default!);
 }
 
 // IsMethodSet reports whether the interface t is fully described by its method
 // set.
 public static bool IsMethodSet(this ж<Interface> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.typeSet().IsMethodSet();
 }
 
@@ -186,14 +176,10 @@ public static ж<Interface> Complete(this ж<Interface> Ꮡt) {
 }
 
 public static ΔType Underlying(this ж<Interface> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return new InterfaceжΔType(Ꮡt);
 }
 
 public static @string String(this ж<Interface> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return TypeString(new InterfaceжΔType(Ꮡt), default!);
 }
 

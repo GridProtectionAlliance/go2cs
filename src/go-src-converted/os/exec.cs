@@ -297,8 +297,6 @@ public static (ж<Process>, error) FindProcess(nint pid) {
 //
 // If there is an error, it will be of type [*PathError].
 public static (ж<Process>, error) StartProcess(@string name, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
-    ref var attr = ref Ꮡattr.Value;
-
     testlog.Open(name);
     return startProcess(name, argv, Ꮡattr);
 }
@@ -332,8 +330,6 @@ public static error Release(this ж<Process> Ꮡp) {
 // the Process has actually exited. This only kills the Process itself,
 // not any other processes it may have started.
 public static error Kill(this ж<Process> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     return Ꮡp.kill();
 }
 
@@ -343,16 +339,12 @@ public static error Kill(this ж<Process> Ꮡp) {
 // On most operating systems, the Process must be a child
 // of the current process or an error will be returned.
 public static (ж<ProcessState>, error) Wait(this ж<Process> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     return Ꮡp.wait();
 }
 
 // Signal sends a signal to the [Process].
 // Sending [Interrupt] on Windows is not implemented.
 public static error Signal(this ж<Process> Ꮡp, ΔSignal sig) {
-    ref var p = ref Ꮡp.Value;
-
     return Ꮡp.signal(sig);
 }
 

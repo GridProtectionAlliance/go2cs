@@ -14,7 +14,6 @@ partial class ast_package {
 // SortImports sorts runs of consecutive import lines in import blocks in f.
 // It also removes duplicate imports when it is possible to do so without data loss.
 public static void SortImports(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf) {
-    ref var fset = ref Ꮡfset.Value;
     ref var f = ref Ꮡf.Value;
 
     foreach (var (_, d) in f.Decls) {
@@ -54,8 +53,6 @@ public static void SortImports(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf) {
 }
 
 internal static nint lineAt(ж<token.FileSet> Ꮡfset, tokenꓸPos pos) {
-    ref var fset = ref Ꮡfset.Value;
-
     return Ꮡfset.PositionFor(pos, false).Line;
 }
 
@@ -102,7 +99,6 @@ internal static bool collapse(Spec prev, Spec next) {
 }
 
 internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf, slice<Spec> specs) {
-    ref var fset = ref Ꮡfset.Value;
     ref var f = ref Ꮡf.Value;
 
     // Can't short-circuit here even if specs are already sorted,

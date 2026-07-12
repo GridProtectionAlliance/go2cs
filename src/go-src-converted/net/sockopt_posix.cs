@@ -20,8 +20,6 @@ internal static nint boolint(bool b) {
 }
 
 internal static (IP, error) interfaceToIPv4Addr(ж<Interface> Ꮡifi) {
-    ref var ifi = ref Ꮡifi.DerefOrNil();
-
     if (Ꮡifi == nil) {
         return (IPv4zero, default!);
     }
@@ -49,7 +47,6 @@ internal static (IP, error) interfaceToIPv4Addr(ж<Interface> Ꮡifi) {
 
 internal static error setIPv4MreqToInterface(ж<syscall.IPMreq> Ꮡmreq, ж<Interface> Ꮡifi) {
     ref var mreq = ref Ꮡmreq.Value;
-    ref var ifi = ref Ꮡifi.DerefOrNil();
 
     if (Ꮡifi == nil) {
         return default!;

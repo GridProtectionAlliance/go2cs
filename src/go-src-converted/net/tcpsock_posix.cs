@@ -77,8 +77,6 @@ internal static (int64, error) writeTo(this ж<TCPConn> Ꮡc, Δio.Writer w) {
 
 internal static (ж<TCPConn>, error) dialTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> Ꮡraddr) {
     ref var sd = ref Ꮡsd.Value;
-    ref var laddr = ref Ꮡladdr.Value;
-    ref var raddr = ref Ꮡraddr.Value;
 
     {
         var h = sd.testHookDialTCP; if (h != default!) {
@@ -94,17 +92,12 @@ internal static (ж<TCPConn>, error) dialTCP(this ж<sysDialer> Ꮡsd, context.C
 }
 
 internal static (ж<TCPConn>, error) doDialTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> Ꮡraddr) {
-    ref var sd = ref Ꮡsd.Value;
-    ref var laddr = ref Ꮡladdr.Value;
-    ref var raddr = ref Ꮡraddr.Value;
-
     return Ꮡsd.doDialTCPProto(ctx, Ꮡladdr, Ꮡraddr, 0);
 }
 
 internal static (ж<TCPConn>, error) doDialTCPProto(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> Ꮡraddr, nint proto) {
     ref var sd = ref Ꮡsd.Value;
     ref var laddr = ref Ꮡladdr.DerefOrNil();
-    ref var raddr = ref Ꮡraddr.Value;
 
     var ctrlCtxFn = sd.Dialer.ControlContext;
     if (ctrlCtxFn == default! && sd.Dialer.Control != default!) {
@@ -211,15 +204,11 @@ internal static bool ok(this ж<TCPListener> Ꮡln) {
 }
 
 internal static (ж<TCPListener>, error) listenTCP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> Ꮡladdr) {
-    ref var sl = ref Ꮡsl.Value;
-    ref var laddr = ref Ꮡladdr.Value;
-
     return Ꮡsl.listenTCPProto(ctx, Ꮡladdr, 0);
 }
 
 internal static (ж<TCPListener>, error) listenTCPProto(this ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> Ꮡladdr, nint proto) {
     ref var sl = ref Ꮡsl.Value;
-    ref var laddr = ref Ꮡladdr.Value;
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default!;
     if (sl.ListenConfig.Control != default!) {

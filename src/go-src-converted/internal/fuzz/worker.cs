@@ -46,8 +46,6 @@ internal static readonly UntypedInt workerSharedMemSize = /* 100 << 20 */ 104857
 }
 
 internal static (ж<worker>, error) newWorker(ж<coordinator> Ꮡc, @string dir, @string binPath, slice<@string> args, slice<@string> env) {
-    ref var c = ref Ꮡc.Value;
-
     var (mem, err) = sharedMemTempFile(workerSharedMemSize);
     if (err != default!) {
         return (default!, err);

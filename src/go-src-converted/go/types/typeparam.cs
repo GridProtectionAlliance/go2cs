@@ -39,8 +39,6 @@ internal static uint64 nextID() {
 // The constraint argument can be nil, and set later via SetConstraint. If the
 // constraint is non-nil, it must be fully defined.
 public static ж<TypeParam> NewTypeParam(ж<TypeName> Ꮡobj, ΔType constraint) {
-    ref var obj = ref Ꮡobj.Value;
-
     return ((ж<Checker>)(default!)).newTypeParam(Ꮡobj, constraint);
 }
 
@@ -112,8 +110,6 @@ internal static ж<TypeParam> newTypeParam(this ж<Checker> Ꮡcheck, ж<TypeNam
 }
 
 public static @string String(this ж<TypeParam> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return TypeString(new TypeParamжΔType(Ꮡt), default!);
 }
 

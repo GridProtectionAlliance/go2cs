@@ -220,8 +220,6 @@ internal static void dumpotherroot(@string description, @unsafe.Pointer to) {
 
 internal static void dumpfinalizer(@unsafe.Pointer obj, ж<funcval> Ꮡfn, ж<_type> Ꮡfint, ж<ptrtype> Ꮡot) {
     ref var fn = ref Ꮡfn.Value;
-    ref var fint = ref Ꮡfint.Value;
-    ref var ot = ref Ꮡot.Value;
 
     dumpint(tagFinalizer);
     dumpint((uint64)(uintptr)obj);
@@ -436,8 +434,6 @@ internal static void dumpgs() {
 // ok
 internal static void finq_callback(ж<funcval> Ꮡfn, @unsafe.Pointer obj, uintptr nret, ж<_type> Ꮡfint, ж<ptrtype> Ꮡot) {
     ref var fn = ref Ꮡfn.Value;
-    ref var fint = ref Ꮡfint.Value;
-    ref var ot = ref Ꮡot.Value;
 
     dumpint(tagQueuedFinalizer);
     dumpint((uint64)(uintptr)obj);
@@ -612,7 +608,6 @@ internal static void dumpmemstats(ж<MemStats> Ꮡm) {
 }
 
 internal static void dumpmemprof_callback(ж<bucket> Ꮡb, uintptr nstk, ж<uintptr> Ꮡpstk, uintptr size, uintptr allocs, uintptr frees) {
-    ref var b = ref Ꮡb.Value;
     ref var pstk = ref Ꮡpstk.Value;
 
     var stk = (ж<array<uintptr>>)(uintptr)(@unsafe.Pointer.FromRef(ref pstk));
@@ -686,8 +681,6 @@ internal static ж<slice<byte>> Ꮡdumphdr = new(slice<byte>((@string)"go1.7 hea
 internal static ref slice<byte> dumphdr => ref Ꮡdumphdr.ValueSlot;
 
 internal static void mdump(ж<MemStats> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
     assertWorldStopped();
     // make sure we're done sweeping
     foreach (var (_, s) in mheap_.allspans) {

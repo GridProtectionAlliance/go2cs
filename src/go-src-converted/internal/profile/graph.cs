@@ -79,9 +79,6 @@ partial class profile_package {
 // AddToEdge increases the weight of an edge between two nodes. If
 // there isn't such an edge one is created.
 public static void AddToEdge(this ж<Node> Ꮡn, ж<Node> Ꮡto, int64 v, bool residual, bool inline) {
-    ref var n = ref Ꮡn.Value;
-    ref var to = ref Ꮡto.Value;
-
     Ꮡn.AddToEdgeDiv(Ꮡto, 0, v, residual, inline);
 }
 
@@ -193,8 +190,6 @@ public static ж<Node> FindOrInsertNode(this NodeMap nm, NodeInfo info, NodeSet 
 [GoType("[]ж<Edge>")] partial struct EdgeMap;
 
 public static ж<Edge> FindTo(this EdgeMap em, ж<Node> Ꮡn) {
-    ref var n = ref Ꮡn.DerefOrNil();
-
     foreach (var (_, e) in em) {
         if ((~e).Dest == Ꮡn) {
             return e;
@@ -204,14 +199,10 @@ public static ж<Edge> FindTo(this EdgeMap em, ж<Node> Ꮡn) {
 }
 
 [GoRecv] public static void Add(this ref EdgeMap em, ж<Edge> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
-
     em = append(em, Ꮡe);
 }
 
 [GoRecv] public static void Delete(this ref EdgeMap em, ж<Edge> Ꮡe) {
-    ref var e = ref Ꮡe.DerefOrNil();
-
     foreach (var (i, edge) in em) {
         if (edge == Ꮡe) {
             (em)[i] = (em)[len(em) - 1];
@@ -380,7 +371,6 @@ internal static Nodes get(this locationMap l, uint64 id) {
 // set of corresponding nodes (one per location.Line).
 public static (Nodes, locationMap) CreateNodes(ж<Profile> Ꮡprof, ж<Options> Ꮡo) {
     ref var prof = ref Ꮡprof.Value;
-    ref var o = ref Ꮡo.Value;
 
     var locations = new locationMap(new slice<Nodes>(len(prof.Location) + 1), new map<uint64, Nodes>());
     var nm = new NodeMap(len(prof.Location));
@@ -427,7 +417,6 @@ internal static ж<Node> findOrInsertLine(this NodeMap nm, ж<Location> Ꮡl, Li
 
 internal static ж<NodeInfo> nodeInfo(ж<Location> Ꮡl, Line line, @string objfile, ж<Options> Ꮡo) {
     ref var l = ref Ꮡl.Value;
-    ref var o = ref Ꮡo.Value;
 
     if (line.Function == nil) {
         return Ꮡ(new NodeInfo(Address: l.Address));

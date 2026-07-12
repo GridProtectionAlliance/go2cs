@@ -146,7 +146,6 @@ public static (ж<P256Point>, error) SetBytes(this ж<P256Point> Ꮡp, slice<byt
 // p256Polynomial sets y2 to x³ - 3x + b, and returns y2.
 internal static ж<p256Element> p256Polynomial(ж<p256Element> Ꮡy2, ж<p256Element> Ꮡx) {
     ref var y2 = ref Ꮡy2.Value;
-    ref var x = ref Ꮡx.Value;
 
     var x3 = @new<p256Element>();
     p256Sqr(x3, Ꮡx, 1);
@@ -229,7 +228,6 @@ internal static bool /*isSquare*/ p256Sqrt(ж<p256Element> Ꮡe, ж<p256Element>
     bool isSquare = default!;
 
     ref var e = ref Ꮡe.Value;
-    ref var x = ref Ꮡx.Value;
     var (t0, t1) = (@new<p256Element>(), @new<p256Element>());
     // Since p = 3 mod 4, exponentiation by (p + 1) / 4 yields a square root candidate.
     //
@@ -400,10 +398,6 @@ internal static void p256OrdReduce(ж<p256OrdElement> Ꮡs) {
 
 // Add sets q = p1 + p2, and returns q. The points may overlap.
 public static ж<P256Point> Add(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡr1, ж<P256Point> Ꮡr2) {
-    ref var q = ref Ꮡq.Value;
-    ref var r1 = ref Ꮡr1.Value;
-    ref var r2 = ref Ꮡr2.Value;
-
     ref var sum = ref heap(new P256Point(), out var Ꮡsum);
     ref var @double = ref heap(new P256Point(), out var Ꮡdouble);
     nint r1IsInfinity = Ꮡr1.isInfinity();
@@ -418,9 +412,6 @@ public static ж<P256Point> Add(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡr1, ж
 
 // Double sets q = p + p, and returns q. The points may overlap.
 public static ж<P256Point> Double(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp) {
-    ref var q = ref Ꮡq.Value;
-    ref var p = ref Ꮡp.Value;
-
     ref var @double = ref heap(new P256Point(), out var Ꮡdouble);
     p256PointDoubleAsm(Ꮡdouble, Ꮡp);
     return Ꮡq.Set(Ꮡdouble);
@@ -430,8 +421,6 @@ public static ж<P256Point> Double(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp) 
 // endian value, and returns r. If scalar is not 32 bytes long, ScalarBaseMult
 // returns an error and the receiver is unchanged.
 public static (ж<P256Point>, error) ScalarBaseMult(this ж<P256Point> Ꮡr, slice<byte> scalar) {
-    ref var r = ref Ꮡr.Value;
-
     if (len(scalar) != 32) {
         return (default!, errors.New("invalid scalar length"u8));
     }
@@ -446,9 +435,6 @@ public static (ж<P256Point>, error) ScalarBaseMult(this ж<P256Point> Ꮡr, sli
 // and returns r. If scalar is not 32 bytes long, ScalarBaseMult returns an
 // error and the receiver is unchanged.
 public static (ж<P256Point>, error) ScalarMult(this ж<P256Point> Ꮡr, ж<P256Point> Ꮡq, slice<byte> scalar) {
-    ref var r = ref Ꮡr.Value;
-    ref var q = ref Ꮡq.Value;
-
     if (len(scalar) != 32) {
         return (default!, errors.New("invalid scalar length"u8));
     }
@@ -485,8 +471,6 @@ internal static nint p256Equal(ж<p256Element> Ꮡa, ж<p256Element> Ꮡb) {
 
 // isInfinity returns 1 if p is the point at infinity and 0 otherwise.
 internal static nint isInfinity(this ж<P256Point> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     return p256Equal(Ꮡp.of(P256Point.Ꮡz), Ꮡp256Zero);
 }
 
@@ -494,8 +478,6 @@ internal static nint isInfinity(this ж<P256Point> Ꮡp) {
 // SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the point at
 // infinity is shorter than all other encodings.
 public static slice<byte> Bytes(this ж<P256Point> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(65), out var Ꮡout);
@@ -503,7 +485,6 @@ public static slice<byte> Bytes(this ж<P256Point> Ꮡp) {
 }
 
 internal static slice<byte> bytes(this ж<P256Point> Ꮡp, ж<array<byte>> Ꮡout) {
-    ref var p = ref Ꮡp.Value;
     ref var @out = ref Ꮡout.Value;
 
     // The proper representation of the point at infinity is a single zero byte.
@@ -522,10 +503,6 @@ internal static slice<byte> bytes(this ж<P256Point> Ꮡp, ж<array<byte>> Ꮡou
 // affineFromMont sets (x, y) to the affine coordinates of p, converted out of the
 // Montgomery domain.
 internal static void affineFromMont(this ж<P256Point> Ꮡp, ж<p256Element> Ꮡx, ж<p256Element> Ꮡy) {
-    ref var p = ref Ꮡp.Value;
-    ref var x = ref Ꮡx.Value;
-    ref var y = ref Ꮡy.Value;
-
     p256Inverse(Ꮡy, Ꮡp.of(P256Point.Ꮡz));
     p256Sqr(Ꮡx, Ꮡy, 1);
     p256Mul(Ꮡy, Ꮡy, Ꮡx);
@@ -538,8 +515,6 @@ internal static void affineFromMont(this ж<P256Point> Ꮡp, ж<p256Element> Ꮡ
 // BytesX returns the encoding of the x-coordinate of p, as specified in SEC 1,
 // Version 2.0, Section 2.3.5, or an error if p is the point at infinity.
 public static (slice<byte>, error) BytesX(this ж<P256Point> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(32), out var Ꮡout);
@@ -547,7 +522,6 @@ public static (slice<byte>, error) BytesX(this ж<P256Point> Ꮡp) {
 }
 
 internal static (slice<byte>, error) bytesX(this ж<P256Point> Ꮡp, ж<array<byte>> Ꮡout) {
-    ref var p = ref Ꮡp.Value;
     ref var @out = ref Ꮡout.Value;
 
     if (Ꮡp.isInfinity() == 1) {
@@ -566,8 +540,6 @@ internal static (slice<byte>, error) bytesX(this ж<P256Point> Ꮡp, ж<array<by
 // specified in SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the
 // point at infinity is shorter than all other encodings.
 public static slice<byte> BytesCompressed(this ж<P256Point> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(33), out var Ꮡout);
@@ -575,7 +547,6 @@ public static slice<byte> BytesCompressed(this ж<P256Point> Ꮡp) {
 }
 
 internal static slice<byte> bytesCompressed(this ж<P256Point> Ꮡp, ж<array<byte>> Ꮡout) {
-    ref var p = ref Ꮡp.Value;
     ref var @out = ref Ꮡout.Value;
 
     if (Ꮡp.isInfinity() == 1) {
@@ -590,19 +561,12 @@ internal static slice<byte> bytesCompressed(this ж<P256Point> Ꮡp, ж<array<by
 
 // Select sets q to p1 if cond == 1, and to p2 if cond == 0.
 public static ж<P256Point> Select(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp1, ж<P256Point> Ꮡp2, nint cond) {
-    ref var q = ref Ꮡq.Value;
-    ref var p1 = ref Ꮡp1.Value;
-    ref var p2 = ref Ꮡp2.Value;
-
     p256MovCond(Ꮡq, Ꮡp1, Ꮡp2, cond);
     return Ꮡq;
 }
 
 // p256Inverse sets out to in⁻¹ mod p. If in is zero, out will be zero.
 internal static void p256Inverse(ж<p256Element> Ꮡout, ж<p256Element> Ꮡin) {
-    ref var @out = ref Ꮡout.Value;
-    ref var @in = ref Ꮡin.Value;
-
     // Inversion is calculated through exponentiation by p - 2, per Fermat's
     // little theorem.
     //

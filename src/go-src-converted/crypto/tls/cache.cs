@@ -59,7 +59,6 @@ internal static ж<certCache> globalCertCache = @new<certCache>();
 // in the cache is fine, with the only side effect being the memory overhead of
 // there being more than one distinct reference to a certificate alive at once.
 internal static ж<activeCert> active(this ж<certCache> Ꮡcc, ж<cacheEntry> Ꮡe) {
-    ref var cc = ref Ꮡcc.Value;
     ref var e = ref Ꮡe.Value;
 
     Ꮡe.of(cacheEntry.Ꮡrefs).Add(1);
@@ -74,7 +73,6 @@ internal static ж<activeCert> active(this ж<certCache> Ꮡcc, ж<cacheEntry> �
 
 // evict removes a cacheEntry from the cache.
 internal static void evict(this ж<certCache> Ꮡcc, ж<cacheEntry> Ꮡe) {
-    ref var cc = ref Ꮡcc.Value;
     ref var e = ref Ꮡe.Value;
 
     Ꮡcc.of(certCache.ᏑMap).Delete(((@string)(~e.cert).Raw));
@@ -85,8 +83,6 @@ internal static void evict(this ж<certCache> Ꮡcc, ж<cacheEntry> Ꮡe) {
 // be returned. Otherwise, a fresh certificate will be added to the cache, and
 // the reference returned. The returned reference should not be mutated.
 internal static (ж<activeCert>, error) newCert(this ж<certCache> Ꮡcc, slice<byte> der) {
-    ref var cc = ref Ꮡcc.Value;
-
     {
         var (entryΔ1, ok) = Ꮡcc.of(certCache.ᏑMap).Load(((@string)der)); if (ok) {
             return (Ꮡcc.active(entryΔ1._<ж<cacheEntry>>()), default!);

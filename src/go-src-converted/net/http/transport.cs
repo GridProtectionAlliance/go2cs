@@ -443,8 +443,6 @@ public static (ж<url.URL>, error) ProxyFromEnvironment(ж<Request> Ꮡreq) {
 // ProxyURL returns a proxy function (for use in a [Transport])
 // that always returns the same URL.
 public static Func<ж<Request>, (ж<url.URL>, error)> ProxyURL(ж<url.URL> ᏑfixedURL) {
-    ref var fixedURL = ref ᏑfixedURL.Value;
-
     return (ж<Request> _) => (ᏑfixedURL, default!);
 }
 
@@ -773,7 +771,6 @@ internal static (ж<Request> rewound, error err) rewindBody(ж<Request> Ꮡreq) 
 // HTTP request on a new connection. The non-nil input error is the
 // error from roundTrip.
 internal static bool shouldRetryRequest(this ж<persistConn> Ꮡpc, ж<Request> Ꮡreq, error err) {
-    ref var pc = ref Ꮡpc.Value;
     ref var req = ref Ꮡreq.Value;
 
     if (http2isNoCachedConnError(err)) {
@@ -842,8 +839,6 @@ public static error ErrSkipAltProtocol = errors.New("net/http: skip alternate pr
 // handle the [Transport.RoundTrip] itself for that one request, as if the
 // protocol were not registered.
 public static void RegisterProtocol(this ж<Transport> Ꮡt, @string scheme, RoundTripper rt) => func((defer, recover) => {
-    ref var t = ref Ꮡt.Value;
-
     Ꮡt.of(Transport.ᏑaltMu).Lock();
     defer(Ꮡt.of(Transport.ᏑaltMu).Unlock);
     var (oldMap, _) = Ꮡt.of(Transport.ᏑaltProto).Load()._<map<@string, RoundTripper>>(ᐧ);
@@ -897,7 +892,6 @@ public static void CloseIdleConnections(this ж<Transport> Ꮡt) {
 // prepareTransportCancel sets up state to convert Transport.CancelRequest into context cancelation.
 internal static Action<error> prepareTransportCancel(this ж<Transport> Ꮡt, ж<Request> Ꮡreq, Action<error> origCancel) {
     ref var t = ref Ꮡt.Value;
-    ref var req = ref Ꮡreq.Value;
 
     // Historically, RoundTrip has not modified the Request in any way.
     // We could avoid the need to keep a map of all in-flight requests by adding
@@ -928,7 +922,6 @@ internal static Action<error> prepareTransportCancel(this ж<Transport> Ꮡt, ж
 // requests. This may become a no-op in a future release of Go.
 public static void CancelRequest(this ж<Transport> Ꮡt, ж<Request> Ꮡreq) {
     ref var t = ref Ꮡt.Value;
-    ref var req = ref Ꮡreq.Value;
 
     Ꮡt.of(Transport.ᏑreqMu).Lock();
     var cancel = t.reqCanceler[Ꮡreq];
@@ -1030,9 +1023,6 @@ internal static @string Error(this transportReadFromServerError e) {
 }
 
 internal static void putOrCloseIdleConn(this ж<Transport> Ꮡt, ж<persistConn> Ꮡpconn) {
-    ref var t = ref Ꮡt.Value;
-    ref var pconn = ref Ꮡpconn.Value;
-
     {
         var err = Ꮡt.tryPutIdleConn(Ꮡpconn); if (err != default!) {
             Ꮡpconn.close(err);
@@ -1242,7 +1232,6 @@ internal static bool /*delivered*/ queueForIdleConn(this ж<Transport> Ꮡt, ж<
 // removeIdleConn marks pconn as dead.
 internal static bool removeIdleConn(this ж<Transport> Ꮡt, ж<persistConn> Ꮡpconn) => func((defer, recover) => {
     ref var t = ref Ꮡt.Value;
-    ref var pconn = ref Ꮡpconn.Value;
 
     Ꮡt.of(Transport.ᏑidleMu).Lock();
     defer(Ꮡt.of(Transport.ᏑidleMu).Unlock);
@@ -1380,7 +1369,6 @@ internal static bool tryDeliver(this ж<wantConn> Ꮡw, ж<persistConn> Ꮡpc, e
 // If a connection has been delivered already, cancel returns it with t.putOrCloseIdleConn.
 internal static void cancel(this ж<wantConn> Ꮡw, ж<Transport> Ꮡt, error err) {
     ref var w = ref Ꮡw.Value;
-    ref var t = ref Ꮡt.Value;
 
     Ꮡw.of(wantConn.Ꮡmu).Lock();
     ж<persistConn> pc = default!;
@@ -1425,8 +1413,6 @@ internal static void cancel(this ж<wantConn> Ꮡw, ж<Transport> Ꮡt, error er
 
 // pushBack adds w to the back of the queue.
 [GoRecv] internal static void pushBack(this ref wantConnQueue q, ж<wantConn> Ꮡw) {
-    ref var w = ref Ꮡw.Value;
-
     q.tail = append(q.tail, Ꮡw);
 }
 
@@ -1517,7 +1503,6 @@ internal static void cancel(this ж<wantConn> Ꮡw, ж<Transport> Ꮡt, error er
 internal static (ж<persistConn>, error err) getConn(this ж<Transport> Ꮡt, ж<transportRequest> Ꮡtreq, connectMethod cm) => func<(ж<persistConn>, error err)>((defer, recover) => {
     error err = default!;
 
-    ref var t = ref Ꮡt.Value;
     ref var treq = ref Ꮡtreq.Value;
     var req = treq.Request;
     var trace = treq.trace;
@@ -1633,7 +1618,6 @@ internal static void queueForDial(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) =>
 // t.connsPerHostMu must be held.
 internal static void startDialConnForLocked(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
     ref var t = ref Ꮡt.Value;
-    ref var w = ref Ꮡw.Value;
 
     t.dialsInProgress.cleanFrontCanceled();
     t.dialsInProgress.pushBack(Ꮡw);
@@ -1649,7 +1633,6 @@ internal static void startDialConnForLocked(this ж<Transport> Ꮡt, ж<wantConn
 // dialConnFor has received permission to dial w.cm and is counted in t.connCount[w.cm.key()].
 // If the dial is canceled or unsuccessful, dialConnFor decrements t.connCount[w.cm.key()].
 internal static void dialConnFor(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) => func((defer, recover) => {
-    ref var t = ref Ꮡt.Value;
     ref var w = ref Ꮡw.Value;
 
     defer(Ꮡw.Value.afterDial);
@@ -2637,8 +2620,6 @@ internal static bool is408Message(slice<byte> buf) {
 // any response, timeout or connection close. After any of them,
 // the function returns a bool which indicates if the body should be sent.
 internal static Func<bool> waitForContinue(this ж<persistConn> Ꮡpc, /*<-*/channel<EmptyStruct> continueCh) {
-    ref var pc = ref Ꮡpc.Value;
-
     if (continueCh == default!) {
         return default!;
     }
@@ -3279,8 +3260,6 @@ internal static void Unlock(this fakeLocker _) {
 //
 //go:linkname cloneTLSConfig
 internal static ж<tls.Config> cloneTLSConfig(ж<tls.Config> Ꮡcfg) {
-    ref var cfg = ref Ꮡcfg.DerefOrNil();
-
     if (Ꮡcfg == nil) {
         return Ꮡ(new tls.Config(nil));
     }
@@ -3319,8 +3298,6 @@ internal static ж<tls.Config> cloneTLSConfig(ж<tls.Config> Ꮡcfg) {
 
 // remove removes pc from cl.
 [GoRecv] internal static void remove(this ref connLRU cl, ж<persistConn> Ꮡpc) {
-    ref var pc = ref Ꮡpc.Value;
-
     {
         var (ele, ok) = cl.m[Ꮡpc, ꟷ]; if (ok) {
             cl.ll.Remove(ele);

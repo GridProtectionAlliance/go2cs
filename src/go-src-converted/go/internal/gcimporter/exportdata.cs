@@ -17,7 +17,6 @@ internal static (@string name, nint size, error err) readGopackHeader(ж<bufio.R
     nint size = default!;
     error err = default!;
 
-    ref var r = ref Ꮡr.Value;
     // See $GOROOT/include/ar.h.
     var hdr = new slice<byte>(16 + 12 + 6 + 6 + 8 + 10 + 2);
     (_, err) = io.ReadFull(new bufio_ReaderжReader(Ꮡr), hdr);

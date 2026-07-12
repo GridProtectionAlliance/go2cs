@@ -97,8 +97,6 @@ public static ж<File> NewFile(uintptr fd, @string name) {
 }
 
 internal static void epipecheck(ж<File> Ꮡfile, error e) {
-    ref var @file = ref Ꮡfile.Value;
-
 }
 
 // DevNull is the name of the operating system's “null device.”

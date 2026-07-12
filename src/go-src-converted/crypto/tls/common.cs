@@ -1005,8 +1005,6 @@ internal static slice<uint16> supportedVersions(this ж<Config> Ꮡc, bool isCli
 }
 
 internal static uint16 maxSupportedVersion(this ж<Config> Ꮡc, bool isClient) {
-    ref var c = ref Ꮡc.Value;
-
     var ΔsupportedVersions = Ꮡc.supportedVersions(isClient);
     if (len(ΔsupportedVersions) == 0) {
         return 0;
@@ -1050,8 +1048,6 @@ internal static slice<CurveID> curvePreferences(this ж<Config> Ꮡc, uint16 ver
 }
 
 internal static bool supportsCurve(this ж<Config> Ꮡc, uint16 version, CurveID curve) {
-    ref var c = ref Ꮡc.Value;
-
     foreach (var (_, cc) in Ꮡc.curvePreferences(version)) {
         if (cc == curve) {
             return true;
@@ -1063,8 +1059,6 @@ internal static bool supportsCurve(this ж<Config> Ꮡc, uint16 version, CurveID
 // mutualVersion returns the protocol version to use given the advertised
 // versions of the peer. Priority is given to the peer preference order.
 internal static (uint16, bool) mutualVersion(this ж<Config> Ꮡc, bool isClient, slice<uint16> peerVersions) {
-    ref var c = ref Ꮡc.Value;
-
     var ΔsupportedVersions = Ꮡc.supportedVersions(isClient);
     foreach (var (_, peerVersion) in peerVersions) {
         foreach (var (_, v) in ΔsupportedVersions) {
@@ -1477,7 +1471,6 @@ public static ClientSessionCache NewLRUClientSessionCache(nint capacity) {
 // corresponding to sessionKey is removed from the cache instead.
 internal static void Put(this ж<lruSessionCache> Ꮡc, @string sessionKey, ж<ClientSessionState> Ꮡcs) => func((defer, recover) => {
     ref var c = ref Ꮡc.Value;
-    ref var cs = ref Ꮡcs.DerefOrNil();
 
     Ꮡc.of(lruSessionCache.ᏑMutex).Lock();
     defer(Ꮡc.of(lruSessionCache.ᏑMutex).Unlock);

@@ -70,7 +70,6 @@ internal static bool allowVersion(this ж<Checker> Ꮡcheck, positioner at, goVe
 internal static bool verifyVersionf(this ж<Checker> Ꮡcheck, positioner at, goVersion v, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var check = ref Ꮡcheck.Value;
     if (!Ꮡcheck.allowVersion(at, v)) {
         Ꮡcheck.versionErrorf(at, v, format, args.ꓸꓸꓸ);
         return false;

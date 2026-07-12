@@ -91,8 +91,6 @@ public static (slice<byte>, error) EncryptPKCS1v15(io.Reader random, ж<PublicKe
 // forge signatures as if they had the private key. See
 // DecryptPKCS1v15SessionKey for a way of solving this problem.
 public static (slice<byte>, error) DecryptPKCS1v15(io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext) {
-    ref var priv = ref Ꮡpriv.Value;
-
     {
         var errΔ1 = checkPub(Ꮡpriv.of(PrivateKey.ᏑPublicKey)); if (errΔ1 != default!) {
             return (default!, errΔ1);
@@ -154,8 +152,6 @@ public static (slice<byte>, error) DecryptPKCS1v15(io.Reader random, ж<PrivateK
 //   - [1] RFC 3218, Preventing the Million Message Attack on CMS,
 //     https://www.rfc-editor.org/rfc/rfc3218.html
 public static error DecryptPKCS1v15SessionKey(io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext, slice<byte> key) {
-    ref var priv = ref Ꮡpriv.Value;
-
     {
         var errΔ1 = checkPub(Ꮡpriv.of(PrivateKey.ᏑPublicKey)); if (errΔ1 != default!) {
             return errΔ1;
@@ -191,7 +187,6 @@ internal static (nint valid, slice<byte> em, nint index, error err) decryptPKCS1
     nint index = default!;
     error err = default!;
 
-    ref var priv = ref Ꮡpriv.Value;
     nint k = Ꮡpriv.of(PrivateKey.ᏑPublicKey).Size();
     if (k < 11) {
         err = ErrDecryption;
@@ -290,8 +285,6 @@ internal static map<crypto.Hash, slice<byte>> hashPrefixes = new map<crypto.Hash
 // messages to signatures and identify the signed messages. As ever,
 // signatures provide authenticity, not confidentiality.
 public static (slice<byte>, error) SignPKCS1v15(io.Reader random, ж<PrivateKey> Ꮡpriv, crypto.Hash hash, slice<byte> hashed) {
-    ref var priv = ref Ꮡpriv.Value;
-
     // pkcs1v15ConstructEM is called before boring.SignRSAPKCS1v15 to return
     // consistent errors, including ErrMessageTooLong.
     var (em, err) = pkcs1v15ConstructEM(Ꮡpriv.of(PrivateKey.ᏑPublicKey), hash, hashed);

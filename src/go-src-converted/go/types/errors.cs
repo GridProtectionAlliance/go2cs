@@ -230,8 +230,6 @@ internal static readonly @string invalidOp = "invalid operation: "u8;
 }
 
 internal static void error(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string msg) {
-    ref var check = ref Ꮡcheck.Value;
-
     var err = Ꮡcheck.newError(code);
     err.addf(at, "%s"u8, msg);
     err.report();
@@ -240,7 +238,6 @@ internal static void error(this ж<Checker> Ꮡcheck, positioner at, errors.Code
 internal static void errorf(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var check = ref Ꮡcheck.Value;
     var err = Ꮡcheck.newError(code);
     err.addf(at, format, args.ꓸꓸꓸ);
     err.report();
@@ -249,7 +246,6 @@ internal static void errorf(this ж<Checker> Ꮡcheck, positioner at, errors.Cod
 internal static void softErrorf(this ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var check = ref Ꮡcheck.Value;
     var err = Ꮡcheck.newError(code);
     err.addf(at, format, args.ꓸꓸꓸ);
     err.Value.soft = true;
@@ -259,7 +255,6 @@ internal static void softErrorf(this ж<Checker> Ꮡcheck, positioner at, errors
 internal static void versionErrorf(this ж<Checker> Ꮡcheck, positioner at, goVersion v, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var check = ref Ꮡcheck.Value;
     @string msg = Ꮡcheck.sprintf(format, args.ꓸꓸꓸ);
     var err = Ꮡcheck.newError(UnsupportedFeature);
     err.addf(at, "%s requires %s or later"u8, msg, v);

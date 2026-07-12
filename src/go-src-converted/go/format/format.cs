@@ -48,8 +48,6 @@ internal static readonly parser.Mode parserMode = /* parser.ParseComments | pars
 // The function may return early (before the entire result is written)
 // and return a formatting error, for instance due to an incorrect AST.
 public static error Node(io.Writer dst, ж<token.FileSet> Ꮡfset, any node) {
-    ref var fset = ref Ꮡfset.Value;
-
     // Determine if we have a complete source file (file != nil).
     ж<ast.File> @file = default!;
     ж<printer.CommentedNode> cnode = default!;

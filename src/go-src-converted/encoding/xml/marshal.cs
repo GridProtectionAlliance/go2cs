@@ -212,8 +212,6 @@ internal static slice<byte> endProcInst = slice<byte>((@string)"?>");
 // EncodeToken allows writing a [ProcInst] with Target set to "xml" only as the first token
 // in the stream.
 public static error EncodeToken(this ж<Encoder> Ꮡenc, ΔToken t) {
-    ref var enc = ref Ꮡenc.Value;
-
     var p = Ꮡenc.of(Encoder.Ꮡp);
     switch (t.type()) {
     case StartElement tΔ1: {

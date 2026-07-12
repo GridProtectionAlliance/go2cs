@@ -104,8 +104,6 @@ internal static (nint, timestamp, error) readTimedBaseEvent(slice<byte> b, ж<ba
 }
 
 internal static slice<ж<batchCursor>> heapInsert(slice<ж<batchCursor>> heap, ж<batchCursor> Ꮡbc) {
-    ref var bc = ref Ꮡbc.Value;
-
     // Add the cursor to the end of the heap.
     heap = append(heap, Ꮡbc);
     // Sift the new entry up to the right place.

@@ -108,8 +108,6 @@ internal static readonly UntypedInt negShift = 5;     // flagI<<negShift is (?-i
 // addSpan enables the flags f around start..last,
 // by setting flags[start] = f and flags[last] = flagOff.
 internal static void addSpan(ж<Regexp> Ꮡstart, ж<Regexp> Ꮡlast, printFlags f, ж<map<ж<Regexp>, printFlags>> Ꮡflags) {
-    ref var start = ref Ꮡstart.Value;
-    ref var last = ref Ꮡlast.Value;
     ref var flags = ref Ꮡflags.Value;
 
     if (flags == default!) {
@@ -418,8 +416,6 @@ internal static void writeRegexp(ж<strings.Builder> Ꮡb, ж<Regexp> Ꮡre, pri
 });
 
 public static @string String(this ж<Regexp> Ꮡre) {
-    ref var re = ref Ꮡre.Value;
-
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     ref var flags = ref heap<map<ж<Regexp>, printFlags>>(out var Ꮡflags);
     var (must, cant) = calcFlags(Ꮡre, Ꮡflags);
@@ -434,8 +430,6 @@ public static @string String(this ж<Regexp> Ꮡre) {
 internal static readonly @string meta = @"\.+*?()|[]{}^$"u8;
 
 internal static void escape(ж<strings.Builder> Ꮡb, rune r, bool force) {
-    ref var b = ref Ꮡb.Value;
-
     if (unicode.IsPrint(r)) {
         if (strings.ContainsRune(meta, r) || force) {
             Ꮡb.WriteRune((rune)'\\');

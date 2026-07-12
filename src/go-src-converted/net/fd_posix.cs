@@ -48,14 +48,10 @@ internal static error shutdown(this ж<netFD> Ꮡfd, nint how) {
 }
 
 internal static error closeRead(this ж<netFD> Ꮡfd) {
-    ref var fd = ref Ꮡfd.Value;
-
     return Ꮡfd.shutdown(syscall.SHUT_RD);
 }
 
 internal static error closeWrite(this ж<netFD> Ꮡfd) {
-    ref var fd = ref Ꮡfd.Value;
-
     return Ꮡfd.shutdown(syscall.SHUT_WR);
 }
 
@@ -85,7 +81,6 @@ internal static (nint n, error err) readFromInet4(this ж<netFD> Ꮡfd, slice<by
     error err = default!;
 
     ref var fd = ref Ꮡfd.Value;
-    ref var from = ref Ꮡfrom.Value;
     (n, err) = Ꮡfd.of(netFD.Ꮡpfd).ReadFromInet4(p, Ꮡfrom);
     Δruntime.KeepAlive(fd);
     return (n, wrapSyscallError(readFromSyscallName, err));
@@ -96,7 +91,6 @@ internal static (nint n, error err) readFromInet6(this ж<netFD> Ꮡfd, slice<by
     error err = default!;
 
     ref var fd = ref Ꮡfd.Value;
-    ref var from = ref Ꮡfrom.Value;
     (n, err) = Ꮡfd.of(netFD.Ꮡpfd).ReadFromInet6(p, Ꮡfrom);
     Δruntime.KeepAlive(fd);
     return (n, wrapSyscallError(readFromSyscallName, err));
@@ -122,7 +116,6 @@ internal static (nint n, nint oobn, nint retflags, error err) readMsgInet4(this 
     error err = default!;
 
     ref var fd = ref Ꮡfd.Value;
-    ref var sa = ref Ꮡsa.Value;
     (n, oobn, retflags, err) = Ꮡfd.of(netFD.Ꮡpfd).ReadMsgInet4(p, oob, flags, Ꮡsa);
     Δruntime.KeepAlive(fd);
     return (n, oobn, retflags, wrapSyscallError(readMsgSyscallName, err));
@@ -135,7 +128,6 @@ internal static (nint n, nint oobn, nint retflags, error err) readMsgInet6(this 
     error err = default!;
 
     ref var fd = ref Ꮡfd.Value;
-    ref var sa = ref Ꮡsa.Value;
     (n, oobn, retflags, err) = Ꮡfd.of(netFD.Ꮡpfd).ReadMsgInet6(p, oob, flags, Ꮡsa);
     Δruntime.KeepAlive(fd);
     return (n, oobn, retflags, wrapSyscallError(readMsgSyscallName, err));
@@ -166,7 +158,6 @@ internal static (nint n, error err) writeToInet4(this ж<netFD> Ꮡfd, slice<byt
     error err = default!;
 
     ref var fd = ref Ꮡfd.Value;
-    ref var sa = ref Ꮡsa.Value;
     (n, err) = Ꮡfd.of(netFD.Ꮡpfd).WriteToInet4(p, Ꮡsa);
     Δruntime.KeepAlive(fd);
     return (n, wrapSyscallError(writeToSyscallName, err));
@@ -177,7 +168,6 @@ internal static (nint n, error err) writeToInet6(this ж<netFD> Ꮡfd, slice<byt
     error err = default!;
 
     ref var fd = ref Ꮡfd.Value;
-    ref var sa = ref Ꮡsa.Value;
     (n, err) = Ꮡfd.of(netFD.Ꮡpfd).WriteToInet6(p, Ꮡsa);
     Δruntime.KeepAlive(fd);
     return (n, wrapSyscallError(writeToSyscallName, err));
@@ -200,7 +190,6 @@ internal static (nint n, nint oobn, error err) writeMsgInet4(this ж<netFD> Ꮡf
     error err = default!;
 
     ref var fd = ref Ꮡfd.Value;
-    ref var sa = ref Ꮡsa.Value;
     (n, oobn, err) = Ꮡfd.of(netFD.Ꮡpfd).WriteMsgInet4(p, oob, Ꮡsa);
     Δruntime.KeepAlive(fd);
     return (n, oobn, wrapSyscallError(writeMsgSyscallName, err));
@@ -212,27 +201,20 @@ internal static (nint n, nint oobn, error err) writeMsgInet6(this ж<netFD> Ꮡf
     error err = default!;
 
     ref var fd = ref Ꮡfd.Value;
-    ref var sa = ref Ꮡsa.Value;
     (n, oobn, err) = Ꮡfd.of(netFD.Ꮡpfd).WriteMsgInet6(p, oob, Ꮡsa);
     Δruntime.KeepAlive(fd);
     return (n, oobn, wrapSyscallError(writeMsgSyscallName, err));
 }
 
 internal static error SetDeadline(this ж<netFD> Ꮡfd, time.Time t) {
-    ref var fd = ref Ꮡfd.Value;
-
     return Ꮡfd.of(netFD.Ꮡpfd).SetDeadline(t);
 }
 
 internal static error SetReadDeadline(this ж<netFD> Ꮡfd, time.Time t) {
-    ref var fd = ref Ꮡfd.Value;
-
     return Ꮡfd.of(netFD.Ꮡpfd).SetReadDeadline(t);
 }
 
 internal static error SetWriteDeadline(this ж<netFD> Ꮡfd, time.Time t) {
-    ref var fd = ref Ꮡfd.Value;
-
     return Ꮡfd.of(netFD.Ꮡpfd).SetWriteDeadline(t);
 }
 

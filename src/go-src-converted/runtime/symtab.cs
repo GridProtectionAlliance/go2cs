@@ -349,8 +349,6 @@ internal static ж<_func> raw(this ж<Func> Ꮡf) {
 }
 
 internal static ΔfuncInfo funcInfo(this ж<Func> Ꮡf) {
-    ref var f = ref Ꮡf.Value;
-
     return Ꮡf.raw().funcInfo();
 }
 
@@ -757,8 +755,6 @@ public static ж<Func> FuncForPC(uintptr pc) {
 
 // Name returns the name of the function.
 public static @string Name(this ж<Func> Ꮡf) {
-    ref var f = ref Ꮡf.Value;
-
     if (Ꮡf == nil) {
         return ""u8;
     }
@@ -773,8 +769,6 @@ public static @string Name(this ж<Func> Ꮡf) {
 
 // Entry returns the entry address of the function.
 public static uintptr Entry(this ж<Func> Ꮡf) {
-    ref var f = ref Ꮡf.Value;
-
     var fn = Ꮡf.raw();
     if (fn.isInlined()) {
         // inlined version
@@ -808,8 +802,6 @@ public static (@string @file, nint line) FileLine(this ж<Func> Ꮡf, uintptr pc
 // startLine returns the starting line number of the function. i.e., the line
 // number of the func keyword.
 internal static int32 startLine(this ж<Func> Ꮡf) {
-    ref var f = ref Ꮡf.Value;
-
     var fn = Ꮡf.raw();
     if (fn.isInlined()) {
         // inlined version

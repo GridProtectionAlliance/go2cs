@@ -1265,8 +1265,6 @@ internal static void fatalthrow(throwType t) {
 //
 //go:nosplit
 internal static void fatalpanic(ж<_panic> Ꮡmsgs) {
-    ref var msgs = ref Ꮡmsgs.DerefOrNil();
-
     var pc = getcallerpc();
     var sp = getcallersp();
     var gp = getg();

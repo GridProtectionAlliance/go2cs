@@ -29,8 +29,6 @@ public static ж<Uniform> ΔOpaque = NewUniform(new color_Alpha16ᴠColor(color.
 }
 
 public static color.Model ColorModel(this ж<Uniform> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return new UniformжModel(Ꮡc);
 }
 

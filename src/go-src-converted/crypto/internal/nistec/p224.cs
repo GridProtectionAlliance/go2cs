@@ -128,9 +128,6 @@ internal static ж<fiat.P224Element> p224B() {
 
 // p224Polynomial sets y2 to x³ - 3x + b, and returns y2.
 internal static ж<fiat.P224Element> p224Polynomial(ж<fiat.P224Element> Ꮡy2, ж<fiat.P224Element> Ꮡx) {
-    ref var y2 = ref Ꮡy2.Value;
-    ref var x = ref Ꮡx.Value;
-
     Ꮡy2.Square(Ꮡx);
     Ꮡy2.Mul(Ꮡy2, Ꮡx);
     var threeX = @new<fiat.P224Element>().Add(Ꮡx, Ꮡx);
@@ -422,8 +419,6 @@ public static ж<P224Point> Select(this ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1,
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
 [GoRecv] internal static void Select(this ref p224Table table, ж<P224Point> Ꮡp, uint8 n) {
-    ref var p = ref Ꮡp.Value;
-
     if (n >= 16) {
         throw panic("nistec: internal error: p224Table called with out-of-bounds value");
     }
@@ -539,8 +534,6 @@ public static (ж<P224Point>, error) ScalarBaseMult(this ж<P224Point> Ꮡp, sli
 internal static bool /*isSquare*/ p224Sqrt(ж<fiat.P224Element> Ꮡe, ж<fiat.P224Element> Ꮡx) {
     bool isSquare = default!;
 
-    ref var e = ref Ꮡe.Value;
-    ref var x = ref Ꮡx.Value;
     var candidate = @new<fiat.P224Element>();
     p224SqrtCandidate(candidate, Ꮡx);
     var square = @new<fiat.P224Element>().Square(candidate);

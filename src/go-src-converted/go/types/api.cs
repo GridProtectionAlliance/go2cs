@@ -335,8 +335,6 @@ internal static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
 //
 // Precondition: the Uses and Defs maps are populated.
 [GoRecv] public static Object ObjectOf(this ref ΔInfo info, ж<ast.Ident> Ꮡid) {
-    ref var id = ref Ꮡid.Value;
-
     {
         var obj = info.Defs[Ꮡid]; if (obj != default!) {
             return obj;
@@ -467,10 +465,6 @@ public static bool HasOk(this TypeAndValue tv) {
 // file set, and the package path the package is identified with.
 // The clean path must not be empty or dot (".").
 public static (ж<Package>, error) Check(this ж<Config> Ꮡconf, @string path, ж<token.FileSet> Ꮡfset, slice<ж<ast.File>> files, ж<ΔInfo> Ꮡinfo) {
-    ref var conf = ref Ꮡconf.Value;
-    ref var fset = ref Ꮡfset.Value;
-    ref var info = ref Ꮡinfo.Value;
-
     var pkg = NewPackage(path, ""u8);
     return (pkg, NewChecker(Ꮡconf, Ꮡfset, pkg, Ꮡinfo).Files(files));
 }

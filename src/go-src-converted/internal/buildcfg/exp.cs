@@ -147,8 +147,6 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
 // String returns the canonical GOEXPERIMENT string to enable this experiment
 // configuration. (Experiments in the same state as in the baseline are elided.)
 public static @string String(this ж<ExperimentFlags> Ꮡexp) {
-    ref var exp = ref Ꮡexp.Value;
-
     return strings.Join(expList(Ꮡexp.of(ExperimentFlags.ᏑFlags), Ꮡexp.of(ExperimentFlags.Ꮡbaseline), false), ","u8);
 }
 
@@ -188,16 +186,12 @@ internal static slice<@string> expList(ж<goexperiment.Flags> Ꮡexp, ж<goexper
 // Enabled returns a list of enabled experiments, as
 // lower-cased experiment names.
 public static slice<@string> Enabled(this ж<ExperimentFlags> Ꮡexp) {
-    ref var exp = ref Ꮡexp.Value;
-
     return expList(Ꮡexp.of(ExperimentFlags.ᏑFlags), nil, false);
 }
 
 // All returns a list of all experiment settings.
 // Disabled experiments appear in the list prefixed by "no".
 public static slice<@string> All(this ж<ExperimentFlags> Ꮡexp) {
-    ref var exp = ref Ꮡexp.Value;
-
     return expList(Ꮡexp.of(ExperimentFlags.ᏑFlags), nil, true);
 }
 

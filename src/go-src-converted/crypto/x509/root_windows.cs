@@ -67,7 +67,6 @@ internal static (slice<ж<Certificate>> chain, error err) extractSimpleChain(ж<
     slice<ж<Certificate>> chain = default!;
     error err = default!;
 
-    ref var simpleChain = ref ᏑsimpleChain.DerefOrNil();
     if (ᏑsimpleChain == nil || count == 0) {
         return (default!, errors.New("x509: invalid simple chain"u8));
     }
@@ -91,7 +90,6 @@ internal static (slice<ж<Certificate>> chain, error err) extractSimpleChain(ж<
 // checkChainTrustStatus checks the trust status of the certificate chain, translating
 // any errors it finds into Go errors in the process.
 internal static error checkChainTrustStatus(ж<Certificate> Ꮡc, ж<syscall.CertChainContext> ᏑchainCtx) {
-    ref var c = ref Ꮡc.Value;
     ref var chainCtx = ref ᏑchainCtx.Value;
 
     if (chainCtx.TrustStatus.ErrorStatus != syscall.CERT_TRUST_NO_ERROR) {
@@ -116,7 +114,6 @@ internal static error checkChainTrustStatus(ж<Certificate> Ꮡc, ж<syscall.Cer
 // use as a certificate chain for a SSL/TLS server.
 internal static error checkChainSSLServerPolicy(ж<Certificate> Ꮡc, ж<syscall.CertChainContext> ᏑchainCtx, ж<VerifyOptions> Ꮡopts) {
     ref var c = ref Ꮡc.Value;
-    ref var chainCtx = ref ᏑchainCtx.Value;
     ref var opts = ref Ꮡopts.Value;
 
     var (servernamep, err) = syscall.UTF16PtrFromString(strings.TrimSuffix(opts.DNSName, "."u8));
@@ -175,7 +172,6 @@ internal static (slice<ж<Certificate>> chain, error err) verifyChain(ж<Certifi
     slice<ж<Certificate>> chain = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.Value;
     ref var chainCtx = ref ᏑchainCtx.Value;
     ref var opts = ref Ꮡopts.DerefOrNil();
     err = checkChainTrustStatus(Ꮡc, ᏑchainCtx);
@@ -220,7 +216,6 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
     slice<slice<ж<Certificate>>> chains = default!;
     error err = default!;
     func((defer, recover) => {
-    ref var c = ref Ꮡc.Value;
     ref var opts = ref Ꮡopts.DerefOrNil();
 
         (var storeCtx, err) = createStoreContext(Ꮡc, Ꮡopts);

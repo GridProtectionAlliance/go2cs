@@ -374,8 +374,6 @@ internal static error mapKeyError2(ж<_type> Ꮡt, @unsafe.Pointer Δp) {
 
 //go:linkname reflect_typehash reflect.typehash
 internal static uintptr reflect_typehash(ж<_type> Ꮡt, @unsafe.Pointer Δp, uintptr h) {
-    ref var t = ref Ꮡt.Value;
-
     return typehash(Ꮡt, Δp, h);
 }
 

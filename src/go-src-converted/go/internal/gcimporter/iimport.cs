@@ -88,7 +88,6 @@ internal static (ж<types.Package> pkg, error err) iImportData(ж<token.FileSet>
     heap<error>(out var Ꮡerr);
     func((defer, recover) => {
     ref var fset = ref Ꮡfset.Value;
-    ref var dataReader = ref ᏑdataReader.Value;
 
     ref var err = ref Ꮡerr.ValueSlot;
         UntypedInt currentVersion = /* iexportVersionCurrent */ 2;
@@ -279,7 +278,6 @@ internal static void doDecl(this ж<iimporter> Ꮡp, ж<types.Package> Ꮡpkg, @
 
 internal static typesꓸType typAt(this ж<iimporter> Ꮡp, uint64 off, ж<types.Named> Ꮡbase) {
     ref var p = ref Ꮡp.Value;
-    ref var @base = ref Ꮡbase.Value;
 
     {
         var (tΔ1, ok) = p.typCache[off, ꟷ]; if (ok && canReuse(Ꮡbase, tΔ1)) {
@@ -305,8 +303,6 @@ internal static typesꓸType typAt(this ж<iimporter> Ꮡp, uint64 off, ж<types
 // may not be re-used because we have a convention of setting the receiver type
 // for interface methods to def.
 internal static bool canReuse(ж<types.Named> Ꮡdef, typesꓸType rhs) {
-    ref var def = ref Ꮡdef.DerefOrNil();
-
     if (Ꮡdef == nil) {
         return true;
     }
@@ -517,8 +513,6 @@ internal static (bool signed, nuint maxBytes) intSize(ж<types.Basic> Ꮡb) {
 
 internal static void mpint(this ж<importReader> Ꮡr, ж<bigꓸInt> Ꮡx, ж<types.Basic> Ꮡtyp) {
     ref var r = ref Ꮡr.Value;
-    ref var x = ref Ꮡx.Value;
-    ref var typ = ref Ꮡtyp.Value;
 
     var (signed, maxBytes) = intSize(Ꮡtyp);
     nuint maxSmall = 256 - maxBytes;
@@ -556,9 +550,6 @@ internal static void mpint(this ж<importReader> Ꮡr, ж<bigꓸInt> Ꮡx, ж<ty
 }
 
 internal static constant.Value mpfloat(this ж<importReader> Ꮡr, ж<types.Basic> Ꮡtyp) {
-    ref var r = ref Ꮡr.Value;
-    ref var typ = ref Ꮡtyp.Value;
-
     ref var mant = ref heap(new bigꓸInt(), out var Ꮡmant);
     Ꮡr.mpint(Ꮡmant, Ꮡtyp);
     ref var f = ref heap(new big.Float(), out var Ꮡf);
@@ -570,14 +561,10 @@ internal static constant.Value mpfloat(this ж<importReader> Ꮡr, ж<types.Basi
 }
 
 internal static @string ident(this ж<importReader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.@string();
 }
 
 internal static (ж<types.Package>, @string) qualifiedIdent(this ж<importReader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     @string name = Ꮡr.@string();
     var pkg = Ꮡr.pkg();
     return (pkg, name);
@@ -653,7 +640,6 @@ internal static @string @string(this ж<importReader> Ꮡr) {
 
 internal static typesꓸType doType(this ж<importReader> Ꮡr, ж<types.Named> Ꮡbase) {
     ref var r = ref Ꮡr.Value;
-    ref var @base = ref Ꮡbase.DerefOrNil();
 
     {
         var k = Ꮡr.kind();
@@ -777,15 +763,10 @@ internal static typesꓸType doType(this ж<importReader> Ꮡr, ж<types.Named> 
 }
 
 internal static itag kind(this ж<importReader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     return ((itag)Ꮡr.uint64());
 }
 
 internal static ж<typesꓸSignature> signature(this ж<importReader> Ꮡr, ж<types.Var> Ꮡrecv, slice<ж<types.TypeParam>> rparams, slice<ж<types.TypeParam>> tparams) {
-    ref var r = ref Ꮡr.Value;
-    ref var recv = ref Ꮡrecv.Value;
-
     var @params = Ꮡr.paramList();
     var results = Ꮡr.paramList();
     var variadic = @params.Len() > 0 && Ꮡr.@bool();
@@ -793,8 +774,6 @@ internal static ж<typesꓸSignature> signature(this ж<importReader> Ꮡr, ж<t
 }
 
 internal static slice<ж<types.TypeParam>> tparamList(this ж<importReader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     var n = Ꮡr.uint64();
     if (n == 0) {
         return default!;
@@ -807,8 +786,6 @@ internal static slice<ж<types.TypeParam>> tparamList(this ж<importReader> Ꮡr
 }
 
 internal static ж<types.Tuple> paramList(this ж<importReader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     var xs = new slice<ж<types.Var>>((nint)(Ꮡr.uint64()));
     foreach (var (i, _) in xs) {
         xs[i] = Ꮡr.param();
@@ -826,14 +803,10 @@ internal static ж<types.Var> param(this ж<importReader> Ꮡr) {
 }
 
 internal static bool @bool(this ж<importReader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.uint64() != 0;
 }
 
 internal static int64 int64(this ж<importReader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     var (n, err) = binary.ReadVarint(new bytes_ReaderжByteReader(Ꮡr.of(importReader.ᏑdeclReader)));
     if (err != default!) {
         errorf("readVarint: %v"u8, err);
@@ -842,8 +815,6 @@ internal static int64 int64(this ж<importReader> Ꮡr) {
 }
 
 internal static uint64 uint64(this ж<importReader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     var (n, err) = binary.ReadUvarint(new bytes_ReaderжByteReader(Ꮡr.of(importReader.ᏑdeclReader)));
     if (err != default!) {
         errorf("readUvarint: %v"u8, err);

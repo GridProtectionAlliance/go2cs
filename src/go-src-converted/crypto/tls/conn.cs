@@ -600,14 +600,10 @@ public static @string Error(this RecordHeaderError e) {
 }
 
 internal static error readRecord(this ж<Conn> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return Ꮡc.readRecordOrCCS(false);
 }
 
 internal static error readChangeCipherSpec(this ж<Conn> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return Ꮡc.readRecordOrCCS(true);
 }
 
@@ -882,8 +878,6 @@ internal static error sendAlertLocked(this ж<Conn> Ꮡc, alert err) {
 
 // sendAlert sends a TLS alert message.
 internal static error sendAlert(this ж<Conn> Ꮡc, alert err) => func((defer, recover) => {
-    ref var c = ref Ꮡc.Value;
-
     Ꮡc.of(Conn.Ꮡout).of(halfConn.ᏑMutex).Lock();
     defer(Ꮡc.of(Conn.Ꮡout).of(halfConn.ᏑMutex).Unlock);
     return Ꮡc.sendAlertLocked(err);
@@ -1072,8 +1066,6 @@ internal static (nint, error) writeRecordLocked(this ж<Conn> Ꮡc, recordType t
 // the record layer state. If transcript is non-nil the marshaled message is
 // written to it.
 internal static (nint, error) writeHandshakeRecord(this ж<Conn> Ꮡc, handshakeMessage msg, transcriptHash transcript) => func<(nint, error)>((defer, recover) => {
-    ref var c = ref Ꮡc.Value;
-
     Ꮡc.of(Conn.Ꮡout).of(halfConn.ᏑMutex).Lock();
     defer(Ꮡc.of(Conn.Ꮡout).of(halfConn.ᏑMutex).Unlock);
     var (data, err) = msg.marshal();
@@ -1089,8 +1081,6 @@ internal static (nint, error) writeHandshakeRecord(this ж<Conn> Ꮡc, handshake
 // writeChangeCipherRecord writes a ChangeCipherSpec message to the connection and
 // updates the record layer state.
 internal static error writeChangeCipherRecord(this ж<Conn> Ꮡc) => func((defer, recover) => {
-    ref var c = ref Ꮡc.Value;
-
     Ꮡc.of(Conn.Ꮡout).of(halfConn.ᏑMutex).Lock();
     defer(Ꮡc.of(Conn.Ꮡout).of(halfConn.ᏑMutex).Unlock);
     var (_, err) = Ꮡc.writeRecordLocked(recordTypeChangeCipherSpec, new byte[]{1}.slice());
@@ -1525,8 +1515,6 @@ internal static error errEarlyCloseWrite = errors.New("tls: CloseWrite called be
 // called once the handshake has completed and does not call CloseWrite on the
 // underlying connection. Most callers should just use [Conn.Close].
 public static error CloseWrite(this ж<Conn> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     if (!Ꮡc.of(Conn.ᏑisHandshakeComplete).Load()) {
         return errEarlyCloseWrite;
     }
@@ -1563,8 +1551,6 @@ internal static error closeNotify(this ж<Conn> Ꮡc) => func((defer, recover) =
 // bits. This limit can be overridden by setting tlsmaxrsasize in the GODEBUG
 // environment variable (e.g. GODEBUG=tlsmaxrsasize=4096).
 public static error Handshake(this ж<Conn> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return Ꮡc.HandshakeContext(context.Background());
 }
 
@@ -1579,8 +1565,6 @@ public static error Handshake(this ж<Conn> Ꮡc) {
 // Most uses of this package need not call HandshakeContext explicitly: the
 // first [Conn.Read] or [Conn.Write] will call it automatically.
 public static error HandshakeContext(this ж<Conn> Ꮡc, context.Context ctx) {
-    ref var c = ref Ꮡc.Value;
-
     // Delegate to unexported method for named return
     // without confusing documented signature.
     return Ꮡc.handshakeContext(ctx);
@@ -1699,8 +1683,6 @@ internal static error /*ret*/ handshakeContext(this ж<Conn> Ꮡc, context.Conte
 
 // ConnectionState returns basic TLS details about the connection.
 public static ΔConnectionState ConnectionState(this ж<Conn> Ꮡc) => func((defer, recover) => {
-    ref var c = ref Ꮡc.Value;
-
     Ꮡc.of(Conn.ᏑhandshakeMutex).Lock();
     defer(Ꮡc.of(Conn.ᏑhandshakeMutex).Unlock);
     return Ꮡc.connectionStateLocked();

@@ -22,8 +22,6 @@ internal static void sortComments(slice<ж<CommentGroup>> list) {
 [GoType("map[Node, slice<ж<CommentGroup>>]")] partial struct CommentMap;
 
 internal static void addComment(this CommentMap cmap, Node n, ж<CommentGroup> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     var list = cmap[n];
     if (len(list) == 0){
         list = new ж<CommentGroup>[]{Ꮡc}.slice();

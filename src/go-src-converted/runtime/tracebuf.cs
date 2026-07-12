@@ -40,8 +40,6 @@ internal static traceWriter writer(this traceLocker tl) {
 //
 // buf may be nil.
 internal static traceWriter unsafeTraceWriter(uintptr gen, ж<traceBuf> Ꮡbuf) {
-    ref var buf = ref Ꮡbuf.Value;
-
     return new traceWriter(traceLocker: new traceLocker(gen: gen), traceBuf: Ꮡbuf);
 }
 

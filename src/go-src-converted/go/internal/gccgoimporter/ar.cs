@@ -134,8 +134,6 @@ internal static (io.ReadSeeker, error) standardArExportData(io.ReadSeeker archiv
 // elfFromAr tries to get export data from an archive member as an ELF file.
 // If there is no export data, this returns nil, nil.
 internal static (io.ReadSeeker, error) elfFromAr(ж<io.SectionReader> Ꮡmember) {
-    ref var member = ref Ꮡmember.Value;
-
     var (ef, err) = elf.NewFile(new io_SectionReaderжReaderAt(Ꮡmember));
     if (err != default!) {
         return (default!, err);

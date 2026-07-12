@@ -15,7 +15,6 @@ public static (syscallꓸHandle s, error err) WSASocket(this ж<Switch> Ꮡsw, i
     error err = default!;
     func((defer, recover) => {
     ref var sw = ref Ꮡsw.Value;
-    ref var protinfo = ref Ꮡprotinfo.Value;
 
         Ꮡsw.of(Switch.Ꮡonce).Do(Ꮡsw.init);
         var so = Ꮡ(new Status(Cookie: cookie((nint)family, (nint)sotype, (nint)proto)));
@@ -124,9 +123,6 @@ public static error /*err*/ ConnectEx(this ж<Switch> Ꮡsw, syscallꓸHandle s,
     error err = default!;
     func((defer, recover) => {
     ref var sw = ref Ꮡsw.Value;
-    ref var b = ref Ꮡb.Value;
-    ref var nwr = ref Ꮡnwr.Value;
-    ref var o = ref Ꮡo.Value;
 
         var so = Ꮡsw.sockso(s);
         if (so == nil) {
@@ -195,9 +191,6 @@ public static error /*err*/ Listen(this ж<Switch> Ꮡsw, syscallꓸHandle s, ni
 // AcceptEx wraps [syscall.AcceptEx].
 public static error AcceptEx(this ж<Switch> Ꮡsw, syscallꓸHandle ls, syscallꓸHandle @as, ж<byte> Ꮡb, uint32 rxdatalen, uint32 laddrlen, uint32 raddrlen, ж<uint32> Ꮡrcvd, ж<syscall.Overlapped> Ꮡoverlapped) => func<error>((defer, recover) => {
     ref var sw = ref Ꮡsw.Value;
-    ref var b = ref Ꮡb.Value;
-    ref var rcvd = ref Ꮡrcvd.Value;
-    ref var overlapped = ref Ꮡoverlapped.Value;
 
     var so = Ꮡsw.sockso(ls);
     if (so == nil) {

@@ -44,7 +44,6 @@ partial class types_package {
 // Lookup returns the method with matching package and name, or nil if not found.
 public static ж<Selection> Lookup(this ж<MethodSet> Ꮡs, ж<Package> Ꮡpkg, @string name) {
     ref var s = ref Ꮡs.Value;
-    ref var pkg = ref Ꮡpkg.Value;
 
     if (s.Len() == 0) {
         return default!;

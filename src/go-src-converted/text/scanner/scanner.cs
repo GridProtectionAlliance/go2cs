@@ -361,7 +361,6 @@ internal static void error(this ж<Scanner> Ꮡs, @string msg) {
 internal static void errorf(this ж<Scanner> Ꮡs, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var s = ref Ꮡs.Value;
     Ꮡs.error(fmt.Sprintf(format, args.ꓸꓸꓸ));
 }
 
@@ -406,7 +405,6 @@ internal static (rune ch, nint digsep) digits(this ж<Scanner> Ꮡs, rune ch0, n
     rune ch = default!;
     nint digsep = default!;
 
-    ref var s = ref Ꮡs.Value;
     ref var invalid = ref Ꮡinvalid.Value;
     ch = ch0;
     if (@base <= 10){
@@ -617,8 +615,6 @@ internal static nint digitVal(rune ch) {
 
 // larger than any legal digit val
 internal static rune scanDigits(this ж<Scanner> Ꮡs, rune ch, nint @base, nint n) {
-    ref var s = ref Ꮡs.Value;
-
     while (n > 0 && digitVal(ch) < @base) {
         ch = Ꮡs.next();
         n--;
@@ -630,8 +626,6 @@ internal static rune scanDigits(this ж<Scanner> Ꮡs, rune ch, nint @base, nint
 }
 
 internal static rune scanEscape(this ж<Scanner> Ꮡs, rune quote) {
-    ref var s = ref Ꮡs.Value;
-
     var ch = Ꮡs.next();
     // read character after '/'
     var exprᴛ1 = ch;
@@ -661,7 +655,6 @@ internal static rune scanEscape(this ж<Scanner> Ꮡs, rune quote) {
 internal static nint /*n*/ scanString(this ж<Scanner> Ꮡs, rune quote) {
     nint n = default!;
 
-    ref var s = ref Ꮡs.Value;
     var ch = Ꮡs.next();
     // read character after quote
     while (ch != quote) {
@@ -680,8 +673,6 @@ internal static nint /*n*/ scanString(this ж<Scanner> Ꮡs, rune quote) {
 }
 
 internal static void scanRawString(this ж<Scanner> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     var ch = Ꮡs.next();
     // read character after '`'
     while (ch != (rune)'`') {
@@ -694,16 +685,12 @@ internal static void scanRawString(this ж<Scanner> Ꮡs) {
 }
 
 internal static void scanChar(this ж<Scanner> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     if (Ꮡs.scanString((rune)'\'') != 1) {
         Ꮡs.error("invalid char literal"u8);
     }
 }
 
 internal static rune scanComment(this ж<Scanner> Ꮡs, rune ch) {
-    ref var s = ref Ꮡs.Value;
-
     // ch == '/' || ch == '*'
     if (ch == (rune)'/') {
         // line comment

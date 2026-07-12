@@ -181,9 +181,6 @@ public static error GenerateKey(ж<PrivateKey> Ꮡpriv, io.Reader rand) {
 // in math/big.Int.ModInverse) although math/big itself isn't strictly
 // constant-time so it's not perfect.
 internal static ж<bigꓸInt> fermatInverse(ж<bigꓸInt> Ꮡk, ж<bigꓸInt> ᏑP) {
-    ref var k = ref Ꮡk.Value;
-    ref var P = ref ᏑP.Value;
-
     var two = big.NewInt(2);
     var pMinus2 = @new<bigꓸInt>().Sub(ᏑP, two);
     return @new<bigꓸInt>().Exp(Ꮡk, pMinus2, ᏑP);

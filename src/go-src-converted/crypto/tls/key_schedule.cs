@@ -33,8 +33,6 @@ internal static readonly @string trafficUpdateLabel = "traffic upd"u8;
 
 // expandLabel implements HKDF-Expand-Label from RFC 8446, Section 7.1.
 internal static slice<byte> expandLabel(this ж<cipherSuiteTLS13> Ꮡc, slice<byte> secret, @string label, slice<byte> context, nint length) {
-    ref var c = ref Ꮡc.Value;
-
     ref var hkdfLabel = ref heap(new cryptobyte.Builder(), out var ᏑhkdfLabel);
     hkdfLabel.AddUint16((uint16)length);
     ᏑhkdfLabel.AddUint8LengthPrefixed((ж<cryptobyte.Builder> b) => {
@@ -123,8 +121,6 @@ internal static slice<byte> finishedHash(this ж<cipherSuiteTLS13> Ꮡc, slice<b
 // exportKeyingMaterial implements RFC5705 exporters for TLS 1.3 according to
 // RFC 8446, Section 7.5.
 internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> exportKeyingMaterial(this ж<cipherSuiteTLS13> Ꮡc, slice<byte> masterSecret, hash.Hash transcript) {
-    ref var c = ref Ꮡc.Value;
-
     var expMasterSecret = Ꮡc.deriveSecret(masterSecret, exporterLabel, transcript);
     var expMasterSecretʗ1 = expMasterSecret;
     return (@string label, slice<byte> context, nint length) => {
@@ -143,8 +139,6 @@ internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> exportKey
 
 // kyberDecapsulate implements decapsulation according to Kyber Round 3.
 internal static (slice<byte>, error) kyberDecapsulate(ж<mlkem768.DecapsulationKey> Ꮡdk, slice<byte> c) {
-    ref var dk = ref Ꮡdk.Value;
-
     var (K, err) = mlkem768.Decapsulate(Ꮡdk, c);
     if (err != default!) {
         return (default!, err);

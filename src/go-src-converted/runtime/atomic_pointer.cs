@@ -69,8 +69,6 @@ internal static void atomic_storePointer(ж<@unsafe.Pointer> Ꮡptr, @unsafe.Poi
 //go:nosplit
 //go:linkname atomic_casPointer internal/runtime/atomic.casPointer
 internal static bool atomic_casPointer(ж<@unsafe.Pointer> Ꮡptr, @unsafe.Pointer old, @unsafe.Pointer @new) {
-    ref var ptr = ref Ꮡptr.Value;
-
     if (writeBarrier.enabled) {
         atomicwb(Ꮡptr, @new);
     }

@@ -47,7 +47,6 @@ public static (Object obj, slice<nint> index, bool indirect) LookupFieldOrMethod
     slice<nint> index = default!;
     bool indirect = default!;
 
-    ref var pkg = ref Ꮡpkg.Value;
     if (T == default!) {
         throw panic("LookupFieldOrMethod on nil type");
     }
@@ -61,7 +60,6 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
     slice<nint> index = default!;
     bool indirect = default!;
 
-    ref var pkg = ref Ꮡpkg.Value;
     // Methods cannot be associated to a named pointer type.
     // (spec: "The type denoted by T is called the receiver base type;
     // it must not be a pointer or interface type and it must be declared
@@ -324,8 +322,6 @@ internal static (nint, bool) lookupType(map<ΔType, nint> m, ΔType typ) {
 }
 
 [GoRecv] internal static ж<Named> lookup(this ref instanceLookup l, ж<Named> Ꮡinst) {
-    ref var inst = ref Ꮡinst.Value;
-
     foreach (var (_, t) in l.buf) {
         if (t != nil && Identical(new NamedжΔType(Ꮡinst), new NamedжΔType(t))) {
             return t;
@@ -340,8 +336,6 @@ internal static (nint, bool) lookupType(map<ΔType, nint> m, ΔType typ) {
 }
 
 [GoRecv] internal static void add(this ref instanceLookup l, ж<Named> Ꮡinst) {
-    ref var inst = ref Ꮡinst.Value;
-
     foreach (var (i, t) in l.buf) {
         if (t == nil) {
             l.buf[i] = Ꮡinst;
@@ -368,7 +362,6 @@ public static (ж<Func> method, bool wrongType) MissingMethod(ΔType V, ж<Inter
     ж<Func> method = default!;
     bool wrongType = default!;
 
-    ref var T = ref ᏑT.Value;
     return ((ж<Checker>)(default!)).missingMethod(V, new InterfaceжΔType(ᏑT), @static, Identical, nil);
 }
 
@@ -556,8 +549,6 @@ internal static bool isInterfacePtr(ΔType T) {
 
 // check may be nil.
 internal static @string interfacePtrError(this ж<Checker> Ꮡcheck, ΔType T) {
-    ref var check = ref Ꮡcheck.Value;
-
     assert(isInterfacePtr(T));
     {
         var (p, _) = under(T)._<ж<Pointer>>(ᐧ); if (isTypeParam((~p).@base)) {
@@ -570,7 +561,6 @@ internal static @string interfacePtrError(this ж<Checker> Ꮡcheck, ΔType T) {
 // funcString returns a string of the form name + signature for f.
 // check may be nil.
 internal static @string funcString(this ж<Checker> Ꮡcheck, ж<Func> Ꮡf, bool pkgInfo) {
-    ref var check = ref Ꮡcheck.Value;
     ref var f = ref Ꮡf.Value;
 
     var buf = bytes.NewBufferString(f.name);
@@ -593,7 +583,6 @@ internal static @string funcString(this ж<Checker> Ꮡcheck, ж<Func> Ꮡf, boo
 // TODO(gri) replace calls to this function with calls to newAssertableTo.
 internal static bool assertableTo(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, ж<@string> Ꮡcause) {
     ref var check = ref Ꮡcheck.Value;
-    ref var cause = ref Ꮡcause.Value;
 
     // no static check is required if T is an interface
     // spec: "If T is an interface type, x.(T) asserts that the
@@ -613,7 +602,6 @@ internal static bool assertableTo(this ж<Checker> Ꮡcheck, ΔType V, ΔType T,
 // If the result is false and cause is not nil, *cause is set to the error cause.
 internal static bool newAssertableTo(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔType V, ΔType T, ж<@string> Ꮡcause) {
     ref var check = ref Ꮡcheck.Value;
-    ref var cause = ref Ꮡcause.Value;
 
     // no static check is required if T is an interface
     // spec: "If T is an interface type, x.(T) asserts that the
@@ -669,8 +657,6 @@ internal static slice<nint> concat(slice<nint> list, nint i) {
 // fieldIndex returns the index for the field with matching package and name, or a value < 0.
 // See Object.sameId for the meaning of foldCase.
 internal static nint fieldIndex(slice<ж<Var>> fields, ж<Package> Ꮡpkg, @string name, bool foldCase) {
-    ref var pkg = ref Ꮡpkg.Value;
-
     if (name != "_"u8) {
         foreach (var (i, f) in fields) {
             if (f.of(Var.Ꮡobject).sameId(Ꮡpkg, name, foldCase)) {
@@ -684,8 +670,6 @@ internal static nint fieldIndex(slice<ж<Var>> fields, ж<Package> Ꮡpkg, @stri
 // methodIndex returns the index of and method with matching package and name, or (-1, nil).
 // See Object.sameId for the meaning of foldCase.
 internal static (nint, ж<Func>) methodIndex(slice<ж<Func>> methods, ж<Package> Ꮡpkg, @string name, bool foldCase) {
-    ref var pkg = ref Ꮡpkg.Value;
-
     if (name != "_"u8) {
         foreach (var (i, m) in methods) {
             if (m.of(Func.Ꮡobject).sameId(Ꮡpkg, name, foldCase)) {

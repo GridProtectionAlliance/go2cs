@@ -131,8 +131,6 @@ public static void TestHash(ж<testing.T> Ꮡt, Func<hash.Hash> mh) {
 
 // Helper function for writing. Verifies that Write does not error.
 internal static void writeToHash(ж<testing.T> Ꮡt, hash.Hash h, slice<byte> p) {
-    ref var t = ref Ꮡt.Value;
-
     Ꮡt.Helper();
     var before = new slice<byte>(len(p));
     copy(before, p);
@@ -162,8 +160,6 @@ internal static slice<byte> getSum(ж<testing.T> Ꮡt, hash.Hash h, slice<byte> 
 }
 
 internal static io.Reader newRandReader(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     var seed = time.Now().UnixNano();
     Ꮡt.Logf("Deterministic RNG seed: 0x%x"u8, seed);
     return new rand_RandжReader(rand.New(rand.NewSource(seed)));

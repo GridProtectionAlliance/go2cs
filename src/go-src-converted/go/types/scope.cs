@@ -276,8 +276,6 @@ public static void WriteTo(this ж<ΔScope> Ꮡs, io.Writer w, nint n, bool recu
 
 // String returns a string representation of the scope, for debugging.
 public static @string String(this ж<ΔScope> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     Ꮡs.WriteTo(new strings_BuilderжWriter(Ꮡbuf), 0, false);
     return buf.String();

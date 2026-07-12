@@ -124,9 +124,7 @@ internal static void removeAnonymousField(@string name, ж<ast.InterfaceType> �
 [GoRecv] internal static bool /*removedFields*/ filterFieldList(this ref reader r, ж<namedType> Ꮡparent, ж<ast.FieldList> Ꮡfields, ж<ast.InterfaceType> Ꮡityp) {
     bool removedFields = default!;
 
-    ref var parent = ref Ꮡparent.Value;
     ref var fields = ref Ꮡfields.DerefOrNil();
-    ref var ityp = ref Ꮡityp.DerefOrNil();
     if (Ꮡfields == nil) {
         return removedFields;
     }
@@ -197,8 +195,6 @@ internal static void removeAnonymousField(@string name, ж<ast.InterfaceType> �
 // in place. If fields (or methods) have been removed, the corresponding
 // struct or interface type has the Incomplete field set to true.
 [GoRecv] internal static void filterType(this ref reader r, ж<namedType> Ꮡparent, ast.Expr typ) {
-    ref var parent = ref Ꮡparent.Value;
-
     switch (typ.type()) {
     case ж<ast.Ident> t: {
         break;

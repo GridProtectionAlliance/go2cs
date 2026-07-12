@@ -447,8 +447,6 @@ internal static error writeRawFile(this ж<Writer> Ꮡtw, @string name, @string 
 // It walks the directory tree starting at the root of the filesystem
 // adding each file to the tar archive while maintaining the directory structure.
 public static error AddFS(this ж<Writer> Ꮡtw, fs.FS fsys) {
-    ref var tw = ref Ꮡtw.Value;
-
     return fs.WalkDir(fsys, "."u8, error (@string name, fs.DirEntry d, error err) => func<error>((defer, recover) => {
         if (err != default!) {
             return err;
@@ -610,8 +608,6 @@ internal static (@string prefix, @string suffix, bool ok) splitUSTARPath(@string
 }
 
 internal static (int64, error) ReadFrom(this ж<regFileWriter> Ꮡfw, io.Reader r) {
-    ref var fw = ref Ꮡfw.Value;
-
     return io.Copy(new ReadFrom_dst(new regFileWriterжWriter(Ꮡfw)), r);
 }
 

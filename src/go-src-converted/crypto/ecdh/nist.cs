@@ -106,8 +106,6 @@ internal static (ж<PrivateKey>, error) NewPrivateKey<Point>(this ж<nistCurve<P
 }
 
 internal static (ж<PrivateKey>, error) newBoringPrivateKey(ΔCurve c, ж<boring.PrivateKeyECDH> Ꮡbk, slice<byte> privateKey) {
-    ref var bk = ref Ꮡbk.Value;
-
     var k = Ꮡ(new PrivateKey(
         curve: c,
         boring: Ꮡbk,

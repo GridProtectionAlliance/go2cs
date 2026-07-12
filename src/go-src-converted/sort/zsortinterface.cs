@@ -291,8 +291,6 @@ internal static (nint, nint) order2(Interface data, nint a, nint b, ж<nint> Ꮡ
 
 // median returns x where data[x] is the median of data[a],data[b],data[c], where x is a, b, or c.
 internal static nint median(Interface data, nint a, nint b, nint c, ж<nint> Ꮡswaps) {
-    ref var swaps = ref Ꮡswaps.Value;
-
     (a, b) = order2(data, a, b, Ꮡswaps);
     (b, c) = order2(data, b, c, Ꮡswaps);
     (a, b) = order2(data, a, b, Ꮡswaps);
@@ -301,8 +299,6 @@ internal static nint median(Interface data, nint a, nint b, nint c, ж<nint> Ꮡ
 
 // medianAdjacent finds the median of data[a - 1], data[a], data[a + 1] and stores the index into a.
 internal static nint medianAdjacent(Interface data, nint a, ж<nint> Ꮡswaps) {
-    ref var swaps = ref Ꮡswaps.Value;
-
     return median(data, a - 1, a, a + 1, Ꮡswaps);
 }
 

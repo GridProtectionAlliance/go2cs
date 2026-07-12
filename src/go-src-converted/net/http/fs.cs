@@ -136,8 +136,6 @@ internal static @string name(this dirEntryDirs d, nint i) {
 }
 
 internal static void dirList(ResponseWriter w, ж<Request> Ꮡr, File f) {
-    ref var r = ref Ꮡr.Value;
-
     // Prefer to use ReadDir instead of Readdir,
     // because the former doesn't require calling
     // Stat on every entry of a directory on Unix.
@@ -243,8 +241,6 @@ internal static void serveError(ResponseWriter w, @string text, nint code) {
 // The GODEBUG setting httpservecontentkeepheaders=1 causes ServeContent
 // to preserve these headers.
 public static void ServeContent(ResponseWriter w, ж<Request> Ꮡreq, @string name, time.Time modtime, io.ReadSeeker content) {
-    ref var req = ref Ꮡreq.Value;
-
     var sizeFunc = (int64, error) () => {
         var (size, err) = content.Seek(0, io.SeekEnd);
         if (err != default!) {

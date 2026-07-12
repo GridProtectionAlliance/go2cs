@@ -46,7 +46,6 @@ partial class trace_package {
 // If gen is non-nil, it is valid and must be processed before handling the returned
 // error.
 internal static (ж<generation>, ж<spilledBatch>, error) readGeneration(ж<bufio.Reader> Ꮡr, ж<spilledBatch> Ꮡspill) {
-    ref var r = ref Ꮡr.Value;
     ref var spill = ref Ꮡspill.DerefOrNil();
 
     var g = Ꮡ(new generation(
@@ -205,7 +204,6 @@ internal static error processBatch(ж<generation> Ꮡg, batch b) {
 // the stack table are present in the string table.
 internal static error validateStackStrings(ж<dataTable<stackID, stack>> Ꮡstacks, ж<dataTable<stringID, @string>> Ꮡstrings, map<uint64, frame> frames) {
     ref var stacks = ref Ꮡstacks.Value;
-    ref var strings = ref Ꮡstrings.Value;
 
     ref var err = ref heap<error>(out var Ꮡerr);
     var framesʗ1 = frames;

@@ -70,8 +70,6 @@ internal static void unsafeslice(ж<_type> Ꮡet, @unsafe.Pointer ptr, nint len)
 
 // Keep this code in sync with cmd/compile/internal/walk/builtin.go:walkUnsafeSlice
 internal static void unsafeslice64(ж<_type> Ꮡet, @unsafe.Pointer ptr, int64 len64) {
-    ref var et = ref Ꮡet.Value;
-
     nint len = (nint)len64;
     if ((int64)len != len64) {
         panicunsafeslicelen1(getcallerpc());
@@ -116,8 +114,6 @@ internal static void panicunsafeslicenilptr1(uintptr pc) {
 
 //go:linkname reflect_unsafeslice reflect.unsafeslice
 internal static void reflect_unsafeslice(ж<_type> Ꮡet, @unsafe.Pointer ptr, nint len) {
-    ref var et = ref Ꮡet.Value;
-
     unsafeslice(Ꮡet, ptr, len);
 }
 

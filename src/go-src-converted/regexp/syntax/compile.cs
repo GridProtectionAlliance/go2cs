@@ -73,8 +73,6 @@ internal static patchList append(this patchList l1, ж<Prog> Ꮡp, patchList l2)
 // Compile compiles the regexp into a program to be executed.
 // The regexp should have been simplified already (returned from re.Simplify).
 public static (ж<Prog>, error) Compile(ж<Regexp> Ꮡre) {
-    ref var re = ref Ꮡre.Value;
-
     compiler c = default!;
     c.init();
     var f = c.compile(Ꮡre);

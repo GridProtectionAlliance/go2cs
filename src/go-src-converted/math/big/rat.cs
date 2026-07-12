@@ -350,7 +350,6 @@ public static ж<ΔRat> SetFrac64(this ж<ΔRat> Ꮡz, int64 a, int64 b) {
 // SetInt sets z to x (by making a copy of x) and returns z.
 public static ж<ΔRat> SetInt(this ж<ΔRat> Ꮡz, ж<ΔInt> Ꮡx) {
     ref var z = ref Ꮡz.Value;
-    ref var x = ref Ꮡx.Value;
 
     Ꮡz.of(big_package.ΔRat.Ꮡa).Set(Ꮡx);
     z.b.abs = z.b.abs.setWord(1);
@@ -378,7 +377,6 @@ public static ж<ΔRat> SetUint64(this ж<ΔRat> Ꮡz, uint64 x) {
 // Set sets z to x (by making a copy of x) and returns z.
 public static ж<ΔRat> Set(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
     ref var z = ref Ꮡz.Value;
-    ref var x = ref Ꮡx.DerefOrNil();
 
     if (Ꮡz != Ꮡx) {
         Ꮡz.of(big_package.ΔRat.Ꮡa).Set(Ꮡx.of(big_package.ΔRat.Ꮡa));
@@ -393,7 +391,6 @@ public static ж<ΔRat> Set(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
 // Abs sets z to |x| (the absolute value of x) and returns z.
 public static ж<ΔRat> Abs(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
     ref var z = ref Ꮡz.Value;
-    ref var x = ref Ꮡx.Value;
 
     Ꮡz.Set(Ꮡx);
     z.a.neg = false;
@@ -403,7 +400,6 @@ public static ж<ΔRat> Abs(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
 // Neg sets z to -x and returns z.
 public static ж<ΔRat> Neg(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
     ref var z = ref Ꮡz.Value;
-    ref var x = ref Ꮡx.Value;
 
     Ꮡz.Set(Ꮡx);
     z.a.neg = len(z.a.abs) > 0 && !z.a.neg;
@@ -444,8 +440,6 @@ public static ж<ΔRat> Inv(this ж<ΔRat> Ꮡz, ж<ΔRat> Ꮡx) {
 // may change if a new value is assigned to x, and vice versa.
 // The sign of the numerator corresponds to the sign of x.
 public static ж<ΔInt> Num(this ж<ΔRat> Ꮡx) {
-    ref var x = ref Ꮡx.Value;
-
     return Ꮡx.of(big_package.ΔRat.Ꮡa);
 }
 

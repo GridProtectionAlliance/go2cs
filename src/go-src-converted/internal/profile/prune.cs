@@ -13,9 +13,6 @@ partial class profile_package {
 // matching keepRx. If the root node of a Sample matches, the sample
 // will have an empty stack.
 [GoRecv] public static void Prune(this ref Profile p, ж<regexp.Regexp> ᏑdropRx, ж<regexp.Regexp> ᏑkeepRx) {
-    ref var dropRx = ref ᏑdropRx.Value;
-    ref var keepRx = ref ᏑkeepRx.DerefOrNil();
-
     var prune = new map<uint64, bool>();
     var pruneBeneath = new map<uint64, bool>();
     foreach (var (_, vᴛ1) in p.Location) {

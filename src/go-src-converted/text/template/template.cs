@@ -115,8 +115,6 @@ public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) => func<(ж<Te
 
 // copy returns a shallow copy of t, with common set to the argument.
 [GoRecv] internal static ж<Template> copy(this ref Template t, ж<common> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return Ꮡ(new Template(
         name: t.name,
         Tree: t.Tree,
@@ -132,7 +130,6 @@ public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) => func<(ж<Te
 // definition is replaced; otherwise a new template is created, defined, and returned.
 public static (ж<Template>, error) AddParseTree(this ж<Template> Ꮡt, @string name, ж<parse.Tree> Ꮡtree) => func<(ж<Template>, error)>((defer, recover) => {
     ref var t = ref Ꮡt.Value;
-    ref var tree = ref Ꮡtree.Value;
 
     t.init();
     Ꮡt.of(Template.ᏑmuTmpl).Lock();

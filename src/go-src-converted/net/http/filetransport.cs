@@ -54,7 +54,6 @@ internal static (ж<Response> resp, error err) RoundTrip(this fileTransport t, �
     ж<Response> resp = default!;
     error err = default!;
 
-    ref var req = ref Ꮡreq.Value;
     // We start ServeHTTP in a goroutine, which may take a long
     // time if the file is large. The newPopulateResponseWriter
     // call returns a channel which either ServeHTTP or finish()

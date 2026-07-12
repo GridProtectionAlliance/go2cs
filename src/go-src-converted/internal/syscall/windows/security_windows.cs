@@ -37,10 +37,6 @@ public static readonly UntypedInt SE_PRIVILEGE_ENABLED = 0x00000002;
 //sys	LookupPrivilegeValue(systemname *uint16, name *uint16, luid *LUID) (err error) = advapi32.LookupPrivilegeValueW
 //sys	adjustTokenPrivileges(token syscall.Token, disableAllPrivileges bool, newstate *TOKEN_PRIVILEGES, buflen uint32, prevstate *TOKEN_PRIVILEGES, returnlen *uint32) (ret uint32, err error) [true] = advapi32.AdjustTokenPrivileges
 public static error AdjustTokenPrivileges(syscall.Token token, bool disableAllPrivileges, ж<TOKEN_PRIVILEGES> Ꮡnewstate, uint32 buflen, ж<TOKEN_PRIVILEGES> Ꮡprevstate, ж<uint32> Ꮡreturnlen) {
-    ref var newstate = ref Ꮡnewstate.Value;
-    ref var prevstate = ref Ꮡprevstate.Value;
-    ref var returnlen = ref Ꮡreturnlen.Value;
-
     var (ret, err) = adjustTokenPrivileges(token, disableAllPrivileges, Ꮡnewstate, buflen, Ꮡprevstate, Ꮡreturnlen);
     if (ret == 0) {
         // AdjustTokenPrivileges call failed

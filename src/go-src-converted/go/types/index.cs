@@ -375,7 +375,6 @@ break_L:;
 // If the index is missing, or if there are multiple indices, an error
 // is reported and the result is nil.
 internal static ast.Expr singleIndex(this ж<Checker> Ꮡcheck, ж<typeparams.IndexExpr> Ꮡexpr) {
-    ref var check = ref Ꮡcheck.Value;
     ref var expr = ref Ꮡexpr.Value;
 
     if (len(expr.Indices) == 0) {
@@ -397,7 +396,6 @@ internal static (ΔType typ, int64 val) index(this ж<Checker> Ꮡcheck, ast.Exp
     ΔType typ = default!;
     int64 val = default!;
 
-    ref var check = ref Ꮡcheck.Value;
     typ = new BasicжΔType(Typ[Invalid]);
     val = -1;
     ref var x = ref heap(new operand(), out var Ꮡx);
@@ -422,7 +420,6 @@ internal static (ΔType typ, int64 val) index(this ж<Checker> Ꮡcheck, ast.Exp
 }
 
 internal static bool isValidIndex(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, errors.Code code, @string what, bool allowNegative) {
-    ref var check = ref Ꮡcheck.Value;
     ref var x = ref Ꮡx.Value;
 
     if (x.mode == invalid) {

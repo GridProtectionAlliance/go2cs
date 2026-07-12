@@ -67,7 +67,6 @@ public static (reflectꓸValue value, bool ok) Value(reflectꓸType t, ж<rand.R
     reflectꓸValue value = new(nil);
     bool ok = default!;
 
-    ref var randΔ1 = ref Ꮡrand.Value;
     return sizedValue(t, Ꮡrand, complexSize);
 }
 
@@ -380,7 +379,6 @@ internal static error /*err*/ arbitraryValues(slice<reflectꓸValue> args, refle
     error err = default!;
 
     ref var config = ref Ꮡconfig.Value;
-    ref var randΔ1 = ref Ꮡrand.Value;
     if (config.Values != default!) {
         config.Values(args, Ꮡrand);
         return err;

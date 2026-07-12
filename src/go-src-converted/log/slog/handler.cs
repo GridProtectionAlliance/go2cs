@@ -467,8 +467,6 @@ internal static readonly UntypedInt keyComponentSep = /* '.' */ 46;
 // appendAttrs appends the slice of Attrs.
 // It reports whether something was appended.
 internal static bool appendAttrs(this ж<handleState> Ꮡs, slice<Attr> @as) {
-    ref var s = ref Ꮡs.Value;
-
     var nonEmpty = false;
     foreach (var (_, a) in @as) {
         if (Ꮡs.appendAttr(a)) {

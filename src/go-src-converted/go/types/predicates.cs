@@ -598,9 +598,6 @@ internal static bool samePkg(ж<Package> Ꮡa, ж<Package> Ꮡb) {
 
 // identicalOrigin reports whether x and y originated in the same declaration.
 internal static bool identicalOrigin(ж<Named> Ꮡx, ж<Named> Ꮡy) {
-    ref var x = ref Ꮡx.Value;
-    ref var y = ref Ꮡy.Value;
-
     // TODO(gri) is this correct?
     return (~Ꮡx.Origin()).obj == (~Ꮡy.Origin()).obj;
 }

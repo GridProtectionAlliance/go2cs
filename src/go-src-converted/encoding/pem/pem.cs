@@ -318,8 +318,6 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
 // EncodeToMemory returns nil. If it is important to
 // report details about this error case, use [Encode] instead.
 public static slice<byte> EncodeToMemory(ж<Block> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
         var err = Encode(new bytes_BufferжWriter(Ꮡbuf), Ꮡb); if (err != default!) {

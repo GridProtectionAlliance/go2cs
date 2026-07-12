@@ -564,8 +564,6 @@ internal static stateFn lexIdentifier(ж<lexer> Ꮡl) {
 // lexField scans a field: .Alphanumeric.
 // The . has been scanned.
 internal static stateFn lexField(ж<lexer> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     return lexFieldOrVariable(Ꮡl, itemField);
 }
 

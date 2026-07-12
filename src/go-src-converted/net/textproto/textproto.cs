@@ -113,7 +113,6 @@ public static (nuint id, error err) Cmd(this ж<Conn> Ꮡc, @string format, para
     error err = default!;
     var args = argsʗp.slice();
 
-    ref var c = ref Ꮡc.Value;
     id = Ꮡc.of(Conn.ᏑPipeline).Next();
     Ꮡc.of(Conn.ᏑPipeline).StartRequest(id);
     err = Ꮡc.of(Conn.ᏑWriter).PrintfLine(format, args.ꓸꓸꓸ);

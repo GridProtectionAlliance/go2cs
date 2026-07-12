@@ -63,8 +63,6 @@ public static (slice<byte> text, error err) MarshalText(this ж<ΔInt> Ꮡx) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 public static error UnmarshalText(this ж<ΔInt> Ꮡz, slice<byte> text) {
-    ref var z = ref Ꮡz.Value;
-
     {
         var (_, ok) = Ꮡz.setFromScanner(new bytes_ReaderжByteScanner(bytes_package.NewReader(text)), 0); if (!ok) {
             return fmt.Errorf("math/big: cannot unmarshal %q into a *big.Int"u8, text);
@@ -89,8 +87,6 @@ public static (slice<byte>, error) MarshalJSON(this ж<ΔInt> Ꮡx) {
 
 // UnmarshalJSON implements the [encoding/json.Unmarshaler] interface.
 public static error UnmarshalJSON(this ж<ΔInt> Ꮡz, slice<byte> text) {
-    ref var z = ref Ꮡz.Value;
-
     // Ignore null, like in the main JSON package.
     if (((@string)text) == "null"u8) {
         return default!;

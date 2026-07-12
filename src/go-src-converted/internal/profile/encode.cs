@@ -108,8 +108,6 @@ partial class profile_package {
 }
 
 [GoRecv] internal static void encode(this ref Profile p, ж<buffer> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     foreach (var (_, x) in p.SampleType) {
         encodeMessage(Ꮡb, 1, new ValueTypeжmessage(x));
     }
@@ -322,8 +320,6 @@ internal static error postDecode(this ж<Profile> Ꮡp) {
 }
 
 [GoRecv] internal static void encode(this ref ValueType p, ж<buffer> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     encodeInt64Opt(Ꮡb, 1, p.typeX);
     encodeInt64Opt(Ꮡb, 2, p.unitX);
 }
@@ -342,8 +338,6 @@ internal static slice<Func<ж<buffer>, message, error>> valueTypeDecoder = new F
 }
 
 [GoRecv] internal static void encode(this ref Sample p, ж<buffer> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     encodeUint64s(Ꮡb, 1, p.locationIDX);
     foreach (var (_, x) in p.Value) {
         encodeInt64(Ꮡb, 2, x);
@@ -374,8 +368,6 @@ internal static slice<Func<ж<buffer>, message, error>> decoder(this Label p) {
 }
 
 internal static void encode(this Label p, ж<buffer> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     encodeInt64Opt(Ꮡb, 1, p.keyX);
     encodeInt64Opt(Ꮡb, 2, p.strX);
     encodeInt64Opt(Ꮡb, 3, p.numX);
@@ -397,8 +389,6 @@ internal static slice<Func<ж<buffer>, message, error>> labelDecoder = new Func<
 }
 
 [GoRecv] internal static void encode(this ref Mapping p, ж<buffer> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     encodeUint64Opt(Ꮡb, 1, p.ID);
     encodeUint64Opt(Ꮡb, 2, p.Start);
     encodeUint64Opt(Ꮡb, 3, p.Limit);
@@ -441,8 +431,6 @@ internal static slice<Func<ж<buffer>, message, error>> mappingDecoder = new Fun
 }
 
 [GoRecv] internal static void encode(this ref Location p, ж<buffer> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     encodeUint64Opt(Ꮡb, 1, p.ID);
     encodeUint64Opt(Ꮡb, 2, p.mappingIDX);
     encodeUint64Opt(Ꮡb, 3, p.Address);
@@ -474,8 +462,6 @@ internal static slice<Func<ж<buffer>, message, error>> locationDecoder = new Fu
 }
 
 [GoRecv] internal static void encode(this ref Line p, ж<buffer> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     encodeUint64Opt(Ꮡb, 1, p.functionIDX);
     encodeInt64Opt(Ꮡb, 2, p.ΔLine);
 }
@@ -494,8 +480,6 @@ internal static slice<Func<ж<buffer>, message, error>> lineDecoder = new Func<�
 }
 
 [GoRecv] internal static void encode(this ref Function p, ж<buffer> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     encodeUint64Opt(Ꮡb, 1, p.ID);
     encodeInt64Opt(Ꮡb, 2, p.nameX);
     encodeInt64Opt(Ꮡb, 3, p.systemNameX);

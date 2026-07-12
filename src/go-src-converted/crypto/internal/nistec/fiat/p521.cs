@@ -25,17 +25,12 @@ internal static readonly UntypedInt p521ElementLen = 66;
 
 // One sets e = 1, and returns e.
 public static ж<P521Element> One(this ж<P521Element> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
-
     p521SetOne(Ꮡe.of(P521Element.Ꮡx));
     return Ꮡe;
 }
 
 // Equal returns 1 if e == t, and zero otherwise.
 public static nint Equal(this ж<P521Element> Ꮡe, ж<P521Element> Ꮡt) {
-    ref var e = ref Ꮡe.Value;
-    ref var t = ref Ꮡt.Value;
-
     var eBytes = Ꮡe.Bytes();
     var tBytes = Ꮡt.Bytes();
     return subtle.ConstantTimeCompare(eBytes, tBytes);
@@ -43,8 +38,6 @@ public static nint Equal(this ж<P521Element> Ꮡe, ж<P521Element> Ꮡt) {
 
 // IsZero returns 1 if e == 0, and zero otherwise.
 public static nint IsZero(this ж<P521Element> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
-
     var zero = new slice<byte>(p521ElementLen);
     var eBytes = Ꮡe.Bytes();
     return subtle.ConstantTimeCompare(eBytes, zero);
@@ -61,8 +54,6 @@ public static ж<P521Element> Set(this ж<P521Element> Ꮡe, ж<P521Element> Ꮡ
 
 // Bytes returns the 66-byte big-endian encoding of e.
 public static slice<byte> Bytes(this ж<P521Element> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
-
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(66), out var Ꮡout);
@@ -70,7 +61,6 @@ public static slice<byte> Bytes(this ж<P521Element> Ꮡe) {
 }
 
 internal static slice<byte> bytes(this ж<P521Element> Ꮡe, ж<array<byte>> Ꮡout) {
-    ref var e = ref Ꮡe.Value;
     ref var @out = ref Ꮡout.Value;
 
     ref var tmp = ref heap(new p521NonMontgomeryDomainFieldElement(), out var Ꮡtmp);
@@ -84,8 +74,6 @@ internal static slice<byte> bytes(this ж<P521Element> Ꮡe, ж<array<byte>> Ꮡ
 // If v is not 66 bytes or it encodes a value higher than 2^521 - 1,
 // SetBytes returns nil and an error, and e is unchanged.
 public static (ж<P521Element>, error) SetBytes(this ж<P521Element> Ꮡe, slice<byte> v) {
-    ref var e = ref Ꮡe.Value;
-
     if (len(v) != p521ElementLen) {
         return (default!, errors.New("invalid P521Element encoding"u8));
     }
@@ -112,49 +100,30 @@ public static (ж<P521Element>, error) SetBytes(this ж<P521Element> Ꮡe, slice
 
 // Add sets e = t1 + t2, and returns e.
 public static ж<P521Element> Add(this ж<P521Element> Ꮡe, ж<P521Element> Ꮡt1, ж<P521Element> Ꮡt2) {
-    ref var e = ref Ꮡe.Value;
-    ref var t1 = ref Ꮡt1.Value;
-    ref var t2 = ref Ꮡt2.Value;
-
     p521Add(Ꮡe.of(P521Element.Ꮡx), Ꮡt1.of(P521Element.Ꮡx), Ꮡt2.of(P521Element.Ꮡx));
     return Ꮡe;
 }
 
 // Sub sets e = t1 - t2, and returns e.
 public static ж<P521Element> Sub(this ж<P521Element> Ꮡe, ж<P521Element> Ꮡt1, ж<P521Element> Ꮡt2) {
-    ref var e = ref Ꮡe.Value;
-    ref var t1 = ref Ꮡt1.Value;
-    ref var t2 = ref Ꮡt2.Value;
-
     p521Sub(Ꮡe.of(P521Element.Ꮡx), Ꮡt1.of(P521Element.Ꮡx), Ꮡt2.of(P521Element.Ꮡx));
     return Ꮡe;
 }
 
 // Mul sets e = t1 * t2, and returns e.
 public static ж<P521Element> Mul(this ж<P521Element> Ꮡe, ж<P521Element> Ꮡt1, ж<P521Element> Ꮡt2) {
-    ref var e = ref Ꮡe.Value;
-    ref var t1 = ref Ꮡt1.Value;
-    ref var t2 = ref Ꮡt2.Value;
-
     p521Mul(Ꮡe.of(P521Element.Ꮡx), Ꮡt1.of(P521Element.Ꮡx), Ꮡt2.of(P521Element.Ꮡx));
     return Ꮡe;
 }
 
 // Square sets e = t * t, and returns e.
 public static ж<P521Element> Square(this ж<P521Element> Ꮡe, ж<P521Element> Ꮡt) {
-    ref var e = ref Ꮡe.Value;
-    ref var t = ref Ꮡt.Value;
-
     p521Square(Ꮡe.of(P521Element.Ꮡx), Ꮡt.of(P521Element.Ꮡx));
     return Ꮡe;
 }
 
 // Select sets v to a if cond == 1, and to b if cond == 0.
 public static ж<P521Element> Select(this ж<P521Element> Ꮡv, ж<P521Element> Ꮡa, ж<P521Element> Ꮡb, nint cond) {
-    ref var v = ref Ꮡv.Value;
-    ref var a = ref Ꮡa.Value;
-    ref var b = ref Ꮡb.Value;
-
     p521Selectznz(Ꮡ((Ꮡv.of(P521Element.Ꮡx)).Value.Value), ((p521Uint1)(uint64)cond),
         Ꮡ((Ꮡb.of(P521Element.Ꮡx)).Value.Value), Ꮡ((Ꮡa.of(P521Element.Ꮡx)).Value.Value));
     return Ꮡv;

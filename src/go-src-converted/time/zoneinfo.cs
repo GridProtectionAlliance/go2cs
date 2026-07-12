@@ -91,8 +91,6 @@ internal static ж<Δsync.Once> ᏑlocalOnce = new(default(Δsync.Once));
 internal static ref Δsync.Once localOnce => ref ᏑlocalOnce.Value;
 
 internal static ж<ΔLocation> get(this ж<ΔLocation> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     if (Ꮡl == nil) {
         return ᏑutcLoc;
     }
@@ -105,8 +103,6 @@ internal static ж<ΔLocation> get(this ж<ΔLocation> Ꮡl) {
 // String returns a descriptive name for the time zone information,
 // corresponding to the name argument to [LoadLocation] or [FixedZone].
 public static @string String(this ж<ΔLocation> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     return (~Ꮡl.get()).name;
 }
 

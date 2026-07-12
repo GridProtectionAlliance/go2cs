@@ -59,26 +59,18 @@ internal static @string concatstrings(ж<tmpBuf> Ꮡbuf, slice<@string> a) {
 }
 
 internal static @string concatstring2(ж<tmpBuf> Ꮡbuf, @string a0, @string a1) {
-    ref var buf = ref Ꮡbuf.Value;
-
     return concatstrings(Ꮡbuf, new @string[]{a0, a1}.slice());
 }
 
 internal static @string concatstring3(ж<tmpBuf> Ꮡbuf, @string a0, @string a1, @string a2) {
-    ref var buf = ref Ꮡbuf.Value;
-
     return concatstrings(Ꮡbuf, new @string[]{a0, a1, a2}.slice());
 }
 
 internal static @string concatstring4(ж<tmpBuf> Ꮡbuf, @string a0, @string a1, @string a2, @string a3) {
-    ref var buf = ref Ꮡbuf.Value;
-
     return concatstrings(Ꮡbuf, new @string[]{a0, a1, a2, a3}.slice());
 }
 
 internal static @string concatstring5(ж<tmpBuf> Ꮡbuf, @string a0, @string a1, @string a2, @string a3, @string a4) {
-    ref var buf = ref Ꮡbuf.Value;
-
     return concatstrings(Ꮡbuf, new @string[]{a0, a1, a2, a3, a4}.slice());
 }
 
@@ -174,8 +166,6 @@ internal static (@string s, slice<byte> b) rawstringtmp(ж<tmpBuf> Ꮡbuf, nint 
 //   - Used for "<"+string(b)+">" concatenation where b is []byte.
 //   - Used for string(b)=="foo" comparison where b is []byte.
 internal static @string slicebytetostringtmp(ж<byte> Ꮡptr, nint n) {
-    ref var ptr = ref Ꮡptr.Value;
-
     if (raceenabled && n > 0) {
         racereadrangepc(new @unsafe.Pointer(Ꮡptr),
             (uintptr)n,
@@ -230,8 +220,6 @@ internal static slice<rune> stringtoslicerune(ж<array<rune>> Ꮡbuf, @string s)
 }
 
 internal static @string slicerunetostring(ж<tmpBuf> Ꮡbuf, slice<rune> a) {
-    ref var buf = ref Ꮡbuf.Value;
-
     if (raceenabled && len(a) > 0) {
         racereadrangepc(new @unsafe.Pointer(Ꮡ(a, 0)),
             (uintptr)len(a) * @unsafe.Sizeof(a[0]),
@@ -273,8 +261,6 @@ internal static @string slicerunetostring(ж<tmpBuf> Ꮡbuf, slice<rune> a) {
 }
 
 internal static ж<stringStruct> stringStructOf(ж<@string> Ꮡsp) {
-    ref var sp = ref Ꮡsp.Value;
-
     return (ж<stringStruct>)(uintptr)(new @unsafe.Pointer(Ꮡsp));
 }
 
@@ -341,7 +327,6 @@ internal static slice<rune> /*b*/ rawruneslice(nint size) {
 internal static slice<byte> /*b*/ gobytes(ж<byte> Ꮡp, nint n) {
     slice<byte> b = default!;
 
-    ref var Δp = ref Ꮡp.Value;
     if (n == 0) {
         return new slice<byte>(0);
     }
@@ -358,8 +343,6 @@ internal static slice<byte> /*b*/ gobytes(ж<byte> Ꮡp, nint n) {
 //
 //go:linkname gostring
 internal static @string gostring(ж<byte> Ꮡp) {
-    ref var Δp = ref Ꮡp.Value;
-
     nint l = findnull(Ꮡp);
     if (l == 0) {
         return ""u8;
@@ -373,14 +356,10 @@ internal static @string gostring(ж<byte> Ꮡp) {
 //
 //go:linkname internal_syscall_gostring internal/syscall/unix.gostring
 internal static @string internal_syscall_gostring(ж<byte> Ꮡp) {
-    ref var Δp = ref Ꮡp.Value;
-
     return gostring(Ꮡp);
 }
 
 internal static @string gostringn(ж<byte> Ꮡp, nint l) {
-    ref var Δp = ref Ꮡp.Value;
-
     if (l == 0) {
         return ""u8;
     }
@@ -600,8 +579,6 @@ internal static nint findnull(ж<byte> Ꮡs) {
 }
 
 internal static nint findnullw(ж<uint16> Ꮡs) {
-    ref var s = ref Ꮡs.DerefOrNil();
-
     if (Ꮡs == nil) {
         return 0;
     }
@@ -624,8 +601,6 @@ internal static @string gostringnocopy(ж<byte> Ꮡstr) {
 }
 
 internal static @string gostringw(ж<uint16> Ꮡstrw) {
-    ref var strw = ref Ꮡstrw.Value;
-
     array<byte> buf = new(8);
     var str = (ж<array<uint16>>)(uintptr)(new @unsafe.Pointer(Ꮡstrw));
     nint n1 = 0;

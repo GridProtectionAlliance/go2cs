@@ -142,7 +142,6 @@ public static (uint32 n, error err) FormatMessage(uint32 flags, uint32 msgsrc, u
     uint32 n = default!;
     error err = default!;
 
-    ref var args = ref Ꮡargs.Value;
     return formatMessage(flags, (uintptr)msgsrc, msgid, langid, buf, Ꮡargs);
 }
 
@@ -458,7 +457,6 @@ public static (nint n, error err) Write(ΔHandle fd, slice<byte> p) {
 
 public static error ReadFile(ΔHandle fd, slice<byte> p, ж<uint32> Ꮡdone, ж<Overlapped> Ꮡoverlapped) {
     ref var done = ref Ꮡdone.Value;
-    ref var overlapped = ref Ꮡoverlapped.Value;
 
     var err = readFile(fd, p, Ꮡdone, Ꮡoverlapped);
     if (race.Enabled) {
@@ -478,7 +476,6 @@ public static error ReadFile(ΔHandle fd, slice<byte> p, ж<uint32> Ꮡdone, ж<
 
 public static error WriteFile(ΔHandle fd, slice<byte> p, ж<uint32> Ꮡdone, ж<Overlapped> Ꮡoverlapped) {
     ref var done = ref Ꮡdone.Value;
-    ref var overlapped = ref Ꮡoverlapped.Value;
 
     if (race.Enabled) {
         race.ReleaseMerge(new @unsafe.Pointer(ᏑioSync));
@@ -507,8 +504,6 @@ internal static readonly uintptr ptrSize = /* unsafe.Sizeof(uintptr(0)) */ 8;
 // setFilePointerEx calls SetFilePointerEx.
 // See https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-setfilepointerex
 internal static error setFilePointerEx(ΔHandle handle, int64 distToMove, ж<int64> ᏑnewFilePointer, uint32 whence) {
-    ref var newFilePointer = ref ᏑnewFilePointer.Value;
-
     Errno e1 = default!;
     if (@unsafe.Sizeof((uintptr)0) == 8){
         (_, _, e1) = Syscall6(procSetFilePointerEx.Addr(), 4, (uintptr)handle, (uintptr)distToMove, (uintptr)new @unsafe.Pointer(ᏑnewFilePointer), (uintptr)whence, 0, 0);
@@ -1099,10 +1094,6 @@ public static error /*err*/ Shutdown(ΔHandle fd, nint how) {
 public static error /*err*/ WSASendto(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags, ΔSockaddr to, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
     error err = default!;
 
-    ref var bufs = ref Ꮡbufs.Value;
-    ref var sent = ref Ꮡsent.Value;
-    ref var overlapped = ref Ꮡoverlapped.Value;
-    ref var croutine = ref Ꮡcroutine.Value;
     @unsafe.Pointer rsa = default!;
     int32 len = default!;
     if (to != default!) {
@@ -1125,11 +1116,6 @@ public static error /*err*/ WSASendto(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 buf
 internal static error /*err*/ wsaSendtoInet4(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags, ж<SockaddrInet4> Ꮡto, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
     error err = default!;
 
-    ref var bufs = ref Ꮡbufs.Value;
-    ref var sent = ref Ꮡsent.Value;
-    ref var to = ref Ꮡto.Value;
-    ref var overlapped = ref Ꮡoverlapped.Value;
-    ref var croutine = ref Ꮡcroutine.Value;
     (var rsa, var len, err) = Ꮡto.sockaddr();
     if (err != default!) {
         return err;
@@ -1148,11 +1134,6 @@ internal static error /*err*/ wsaSendtoInet4(ΔHandle s, ж<WSABuf> Ꮡbufs, uin
 internal static error /*err*/ wsaSendtoInet6(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags, ж<SockaddrInet6> Ꮡto, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
     error err = default!;
 
-    ref var bufs = ref Ꮡbufs.Value;
-    ref var sent = ref Ꮡsent.Value;
-    ref var to = ref Ꮡto.Value;
-    ref var overlapped = ref Ꮡoverlapped.Value;
-    ref var croutine = ref Ꮡcroutine.Value;
     (var rsa, var len, err) = Ꮡto.sockaddr();
     if (err != default!) {
         return err;
@@ -1204,9 +1185,6 @@ public static error LoadConnectEx() {
 internal static error /*err*/ connectEx(ΔHandle s, @unsafe.Pointer name, int32 namelen, ж<byte> ᏑsendBuf, uint32 sendDataLen, ж<uint32> ᏑbytesSent, ж<Overlapped> Ꮡoverlapped) {
     error err = default!;
 
-    ref var sendBuf = ref ᏑsendBuf.Value;
-    ref var bytesSent = ref ᏑbytesSent.Value;
-    ref var overlapped = ref Ꮡoverlapped.Value;
     var (r1, _, e1) = Syscall9(connectExFunc.addr, 7, (uintptr)s, (uintptr)name, (uintptr)namelen, (uintptr)new @unsafe.Pointer(ᏑsendBuf), (uintptr)sendDataLen, (uintptr)new @unsafe.Pointer(ᏑbytesSent), (uintptr)new @unsafe.Pointer(Ꮡoverlapped), 0, 0);
     if (r1 == 0) {
         if (e1 != 0){
@@ -1219,10 +1197,6 @@ internal static error /*err*/ connectEx(ΔHandle s, @unsafe.Pointer name, int32 
 }
 
 public static error ConnectEx(ΔHandle fd, ΔSockaddr sa, ж<byte> ᏑsendBuf, uint32 sendDataLen, ж<uint32> ᏑbytesSent, ж<Overlapped> Ꮡoverlapped) {
-    ref var sendBuf = ref ᏑsendBuf.Value;
-    ref var bytesSent = ref ᏑbytesSent.Value;
-    ref var overlapped = ref Ꮡoverlapped.Value;
-
     var err = LoadConnectEx();
     if (err != default!) {
         return errorspkg.New("failed to find ConnectEx: "u8 + err.Error());
@@ -1327,7 +1301,6 @@ public static error /*err*/ Sendto(ΔHandle fd, slice<byte> p, nint flags, ΔSoc
 public static error /*err*/ SetsockoptTimeval(ΔHandle fd, nint level, nint opt, ж<Timeval> Ꮡtv) {
     error err = default!;
 
-    ref var tv = ref Ꮡtv.Value;
     return EWINDOWS;
 }
 
@@ -1391,7 +1364,6 @@ public static error /*err*/ SetsockoptIPMreq(ΔHandle fd, nint level, nint opt, 
 public static error /*err*/ SetsockoptIPv6Mreq(ΔHandle fd, nint level, nint opt, ж<IPv6Mreq> Ꮡmreq) {
     error err = default!;
 
-    ref var mreq = ref Ꮡmreq.Value;
     return EWINDOWS;
 }
 
@@ -1405,8 +1377,6 @@ public static (ΔHandle handle, error err) FindFirstFile(ж<uint16> Ꮡname, ж<
     ΔHandle handle = default!;
     error err = default!;
 
-    ref var name = ref Ꮡname.Value;
-    ref var data = ref Ꮡdata.Value;
     // NOTE(rsc): The Win32finddata struct is wrong for the system call:
     // the two paths are each one uint16 short. Use the correct struct,
     // a win32finddata1, and then copy the results out.
@@ -1426,7 +1396,6 @@ public static (ΔHandle handle, error err) FindFirstFile(ж<uint16> Ꮡname, ж<
 public static error /*err*/ FindNextFile(ΔHandle handle, ж<Win32finddata> Ꮡdata) {
     error err = default!;
 
-    ref var data = ref Ꮡdata.Value;
     ref var data1 = ref heap(new win32finddata1(), out var Ꮡdata1);
     err = findNextFile1(handle, Ꮡdata1);
     if (err == default!) {
@@ -1674,9 +1643,7 @@ public static (ΔHandle, error) CreateIoCompletionPort(ΔHandle filehandle, ΔHa
 
 // Deprecated: GetQueuedCompletionStatus has the wrong function signature. Use x/sys/windows.GetQueuedCompletionStatus.
 public static error GetQueuedCompletionStatus(ΔHandle cphandle, ж<uint32> Ꮡqty, ж<uint32> Ꮡkey, ж<ж<Overlapped>> Ꮡoverlapped, uint32 timeout) {
-    ref var qty = ref Ꮡqty.Value;
     ref var key = ref Ꮡkey.DerefOrNil();
-    ref var overlapped = ref Ꮡoverlapped.Value;
 
     ref var ukey = ref heap(new uintptr(), out var Ꮡukey);
     ж<uintptr> pukey = default!;
@@ -1696,8 +1663,6 @@ public static error GetQueuedCompletionStatus(ΔHandle cphandle, ж<uint32> Ꮡq
 
 // Deprecated: PostQueuedCompletionStatus has the wrong function signature. Use x/sys/windows.PostQueuedCompletionStatus.
 public static error PostQueuedCompletionStatus(ΔHandle cphandle, uint32 qty, uint32 key, ж<Overlapped> Ꮡoverlapped) {
-    ref var overlapped = ref Ꮡoverlapped.Value;
-
     return postQueuedCompletionStatus(cphandle, qty, (uintptr)key, Ꮡoverlapped);
 }
 
@@ -1749,18 +1714,10 @@ internal static (ж<_PROC_THREAD_ATTRIBUTE_LIST>, error) newProcThreadAttributeL
 public static error /*regerrno*/ RegEnumKeyEx(ΔHandle key, uint32 index, ж<uint16> Ꮡname, ж<uint32> ᏑnameLen, ж<uint32> Ꮡreserved, ж<uint16> Ꮡclass, ж<uint32> ᏑclassLen, ж<Filetime> ᏑlastWriteTime) {
     error regerrno = default!;
 
-    ref var name = ref Ꮡname.Value;
-    ref var nameLen = ref ᏑnameLen.Value;
-    ref var reserved = ref Ꮡreserved.Value;
-    ref var @class = ref Ꮡclass.Value;
-    ref var classLen = ref ᏑclassLen.Value;
-    ref var lastWriteTime = ref ᏑlastWriteTime.Value;
     return regEnumKeyEx(key, index, Ꮡname, ᏑnameLen, Ꮡreserved, Ꮡclass, ᏑclassLen, ᏑlastWriteTime);
 }
 
 public static error GetStartupInfo(ж<StartupInfo> ᏑstartupInfo) {
-    ref var startupInfo = ref ᏑstartupInfo.Value;
-
     getStartupInfo(ᏑstartupInfo);
     return default!;
 }

@@ -222,16 +222,12 @@ internal static bool isExportedOrBuiltinType(reflectꓸType t) {
 // The client accesses each method using a string of the form "Type.Method",
 // where Type is the receiver's concrete type.
 public static error Register(this ж<Server> Ꮡserver, any rcvr) {
-    ref var server = ref Ꮡserver.Value;
-
     return Ꮡserver.register(rcvr, ""u8, false);
 }
 
 // RegisterName is like [Register] but uses the provided name for the type
 // instead of the receiver's concrete type.
 public static error RegisterName(this ж<Server> Ꮡserver, @string name, any rcvr) {
-    ref var server = ref Ꮡserver.Value;
-
     return Ꮡserver.register(rcvr, name, true);
 }
 
@@ -240,8 +236,6 @@ public static error RegisterName(this ж<Server> Ꮡserver, @string name, any rc
 internal const bool logRegisterError = false;
 
 internal static error register(this ж<Server> Ꮡserver, any rcvr, @string name, bool useName) {
-    ref var server = ref Ꮡserver.Value;
-
     var s = @new<service>();
     s.Value.typ = reflect.TypeOf(rcvr);
     s.Value.rcvr = reflect.ValueOf(rcvr);
@@ -352,8 +346,6 @@ internal static map<@string, ж<methodType>> suitableMethods(reflectꓸType typ,
 internal static EmptyStruct invalidRequest = new EmptyStruct();
 
 internal static void sendResponse(this ж<Server> Ꮡserver, ж<sync.Mutex> Ꮡsending, ж<Request> Ꮡreq, any reply, ServerCodec codec, @string errmsg) {
-    ref var server = ref Ꮡserver.Value;
-    ref var sending = ref Ꮡsending.Value;
     ref var req = ref Ꮡreq.Value;
 
     var resp = Ꮡserver.getResponse();
@@ -385,11 +377,7 @@ public static nuint /*n*/ NumCalls(this ж<methodType> Ꮡm) {
 
 internal static void call(this ж<service> Ꮡs, ж<Server> Ꮡserver, ж<sync.Mutex> Ꮡsending, ж<sync.WaitGroup> Ꮡwg, ж<methodType> Ꮡmtype, ж<Request> Ꮡreq, reflectꓸValue argv, reflectꓸValue replyv, ServerCodec codec) => func((defer, recover) => {
     ref var s = ref Ꮡs.Value;
-    ref var server = ref Ꮡserver.Value;
-    ref var sending = ref Ꮡsending.Value;
-    ref var wg = ref Ꮡwg.DerefOrNil();
     ref var mtype = ref Ꮡmtype.Value;
-    ref var req = ref Ꮡreq.Value;
 
     if (Ꮡwg != nil) {
         defer(Ꮡwg.Done);
@@ -473,8 +461,6 @@ internal static void call(this ж<service> Ꮡs, ж<Server> Ꮡserver, ж<sync.M
 // connection. To use an alternate codec, use [ServeCodec].
 // See [NewClient]'s comment for information about concurrent access.
 public static void ServeConn(this ж<Server> Ꮡserver, io.ReadWriteCloser conn) {
-    ref var server = ref Ꮡserver.Value;
-
     var buf = bufio.NewWriter(conn);
     var srv = Ꮡ(new gobServerCodec(
         rwc: conn,
@@ -488,8 +474,6 @@ public static void ServeConn(this ж<Server> Ꮡserver, io.ReadWriteCloser conn)
 // ServeCodec is like [ServeConn] but uses the specified codec to
 // decode requests and encode responses.
 public static void ServeCodec(this ж<Server> Ꮡserver, ServerCodec codec) {
-    ref var server = ref Ꮡserver.Value;
-
     var sending = @new<sync.Mutex>();
     var wg = @new<sync.WaitGroup>();
     while (ᐧ) {
@@ -523,8 +507,6 @@ public static void ServeCodec(this ж<Server> Ꮡserver, ServerCodec codec) {
 // ServeRequest is like [ServeCodec] but synchronously serves a single request.
 // It does not close the codec upon completion.
 public static error ServeRequest(this ж<Server> Ꮡserver, ServerCodec codec) {
-    ref var server = ref Ꮡserver.Value;
-
     var sending = @new<sync.Mutex>();
     var (service, mtype, req, argv, replyv, keepReading, err) = Ꮡserver.readRequest(codec);
     if (err != default!) {
@@ -601,7 +583,6 @@ internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, ref
     bool keepReading = default!;
     error err = default!;
 
-    ref var server = ref Ꮡserver.Value;
     (service, mtype, req, keepReading, err) = Ꮡserver.readRequestHeader(codec);
     if (err != default!) {
         if (!keepReading) {
@@ -689,8 +670,6 @@ internal static (ж<service> svc, ж<methodType> mtype, ж<Request> req, bool ke
 // returns a non-nil error. The caller typically invokes Accept in a
 // go statement.
 public static void Accept(this ж<Server> Ꮡserver, net.Listener lis) {
-    ref var server = ref Ꮡserver.Value;
-
     while (ᐧ) {
         var (conn, err) = lis.Accept();
         if (err != default!) {
@@ -762,7 +741,6 @@ internal static @string connected = "200 Connected to Go RPC"u8;
 
 // ServeHTTP implements an [http.Handler] that answers RPC requests.
 public static void ServeHTTP(this ж<Server> Ꮡserver, Δhttp.ResponseWriter w, ж<Δhttp.Request> Ꮡreq) {
-    ref var server = ref Ꮡserver.Value;
     ref var req = ref Ꮡreq.Value;
 
     if (req.Method != "CONNECT"u8) {
@@ -784,8 +762,6 @@ public static void ServeHTTP(this ж<Server> Ꮡserver, Δhttp.ResponseWriter w,
 // and a debugging handler on debugPath.
 // It is still necessary to invoke [http.Serve](), typically in a go statement.
 public static void HandleHTTP(this ж<Server> Ꮡserver, @string rpcPath, @string debugPath) {
-    ref var server = ref Ꮡserver.Value;
-
     Δhttp.Handle(rpcPath, new ServerжΔHandler(Ꮡserver));
     Δhttp.Handle(debugPath, new debugHTTP(Ꮡserver));
 }

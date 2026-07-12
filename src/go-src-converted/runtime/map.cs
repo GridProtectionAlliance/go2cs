@@ -188,7 +188,6 @@ internal static ж<bmap> overflow(this ж<bmap> Ꮡb, ж<maptype> Ꮡt) {
 internal static void setoverflow(this ж<bmap> Ꮡb, ж<maptype> Ꮡt, ж<bmap> Ꮡovf) {
     ref var b = ref Ꮡb.Value;
     ref var t = ref Ꮡt.Value;
-    ref var ovf = ref Ꮡovf.Value;
 
     ((ж<ж<bmap>>)(uintptr)(add((uintptr)@unsafe.Pointer.FromRef(ref b), (uintptr)t.BucketSize - (uintptr)goarch.PtrSize))).ValueSlot = Ꮡovf;
 }
@@ -227,7 +226,6 @@ internal static @unsafe.Pointer keys(this ж<bmap> Ꮡb) {
 
 [GoRecv] internal static ж<bmap> newoverflow(this ref hmap h, ж<maptype> Ꮡt, ж<bmap> Ꮡb) {
     ref var t = ref Ꮡt.Value;
-    ref var b = ref Ꮡb.Value;
 
     ж<bmap> ovf = default!;
     if (h.extra != nil && (~h.extra).nextOverflow != nil){
@@ -266,9 +264,6 @@ internal static @unsafe.Pointer keys(this ж<bmap> Ꮡb) {
 }
 
 internal static ж<hmap> makemap64(ж<maptype> Ꮡt, int64 hint, ж<hmap> Ꮡh) {
-    ref var t = ref Ꮡt.Value;
-    ref var h = ref Ꮡh.Value;
-
     if ((int64)(nint)hint != hint) {
         hint = 0;
     }
@@ -605,9 +600,6 @@ break_bucketloop:;
 }
 
 internal static @unsafe.Pointer mapaccess1_fat(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.Pointer key, @unsafe.Pointer zero) {
-    ref var t = ref Ꮡt.Value;
-    ref var h = ref Ꮡh.Value;
-
     @unsafe.Pointer e = (uintptr)mapaccess1(Ꮡt, Ꮡh, key);
     if (e.Value == new @unsafe.Pointer(ᏑzeroVal.at<byte>(0))) {
         return zero;
@@ -616,9 +608,6 @@ internal static @unsafe.Pointer mapaccess1_fat(ж<maptype> Ꮡt, ж<hmap> Ꮡh, 
 }
 
 internal static (@unsafe.Pointer, bool) mapaccess2_fat(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.Pointer key, @unsafe.Pointer zero) {
-    ref var t = ref Ꮡt.Value;
-    ref var h = ref Ꮡh.Value;
-
     @unsafe.Pointer e = (uintptr)mapaccess1(Ꮡt, Ꮡh, key);
     if (e.Value == new @unsafe.Pointer(ᏑzeroVal.at<byte>(0))) {
         return (zero, false);
@@ -1109,7 +1098,6 @@ next:
 //
 //go:linkname mapclear
 internal static void mapclear(ж<maptype> Ꮡt, ж<hmap> Ꮡh) {
-    ref var t = ref Ꮡt.Value;
     ref var h = ref Ꮡh.DerefOrNil();
 
     if (raceenabled && Ꮡh != nil) {
@@ -1169,7 +1157,6 @@ internal static void mapclear(ж<maptype> Ꮡt, ж<hmap> Ꮡh) {
 }
 
 internal static void hashGrow(ж<maptype> Ꮡt, ж<hmap> Ꮡh) {
-    ref var t = ref Ꮡt.Value;
     ref var h = ref Ꮡh.Value;
 
     // If we've hit the load factor, get bigger.
@@ -1257,7 +1244,6 @@ internal static bool tooManyOverflowBuckets(uint16 noverflow, uint8 B) {
 }
 
 internal static void growWork(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uintptr bucket) {
-    ref var t = ref Ꮡt.Value;
     ref var h = ref Ꮡh.Value;
 
     // make sure we evacuate the oldbucket corresponding
@@ -1402,7 +1388,6 @@ internal static void evacuate(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uintptr oldbucket
 
 internal static void advanceEvacuationMark(ж<hmap> Ꮡh, ж<maptype> Ꮡt, uintptr newbit) {
     ref var h = ref Ꮡh.Value;
-    ref var t = ref Ꮡt.Value;
 
     h.nevacuate++;
     // Experiments suggest that 1024 is overkill by at least an order of magnitude.
@@ -1493,9 +1478,6 @@ internal static ж<hmap> reflect_makemap(ж<maptype> Ꮡt, nint cap) {
 //
 //go:linkname reflect_mapaccess reflect.mapaccess
 internal static @unsafe.Pointer reflect_mapaccess(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.Pointer key) {
-    ref var t = ref Ꮡt.Value;
-    ref var h = ref Ꮡh.Value;
-
     var (elem, ok) = mapaccess2(Ꮡt, Ꮡh, key);
     if (!ok) {
         // reflect wants nil for a missing element
@@ -1506,9 +1488,6 @@ internal static @unsafe.Pointer reflect_mapaccess(ж<maptype> Ꮡt, ж<hmap> Ꮡ
 
 //go:linkname reflect_mapaccess_faststr reflect.mapaccess_faststr
 internal static @unsafe.Pointer reflect_mapaccess_faststr(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @string key) {
-    ref var t = ref Ꮡt.Value;
-    ref var h = ref Ꮡh.Value;
-
     var (elem, ok) = mapaccess2_faststr(Ꮡt, Ꮡh, key);
     if (!ok) {
         // reflect wants nil for a missing element
@@ -1528,7 +1507,6 @@ internal static @unsafe.Pointer reflect_mapaccess_faststr(ж<maptype> Ꮡt, ж<h
 //go:linkname reflect_mapassign reflect.mapassign0
 internal static void reflect_mapassign(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.Pointer key, @unsafe.Pointer elem) {
     ref var t = ref Ꮡt.Value;
-    ref var h = ref Ꮡh.Value;
 
     @unsafe.Pointer Δp = (uintptr)mapassign(Ꮡt, Ꮡh, key);
     typedmemmove(t.Elem, Δp, elem);
@@ -1537,7 +1515,6 @@ internal static void reflect_mapassign(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.
 //go:linkname reflect_mapassign_faststr reflect.mapassign_faststr0
 internal static void reflect_mapassign_faststr(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @string key, @unsafe.Pointer elem) {
     ref var t = ref Ꮡt.Value;
-    ref var h = ref Ꮡh.Value;
 
     @unsafe.Pointer Δp = (uintptr)mapassign_faststr(Ꮡt, Ꮡh, key);
     typedmemmove(t.Elem, Δp, elem);
@@ -1545,17 +1522,11 @@ internal static void reflect_mapassign_faststr(ж<maptype> Ꮡt, ж<hmap> Ꮡh, 
 
 //go:linkname reflect_mapdelete reflect.mapdelete
 internal static void reflect_mapdelete(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @unsafe.Pointer key) {
-    ref var t = ref Ꮡt.Value;
-    ref var h = ref Ꮡh.Value;
-
     mapdelete(Ꮡt, Ꮡh, key);
 }
 
 //go:linkname reflect_mapdelete_faststr reflect.mapdelete_faststr
 internal static void reflect_mapdelete_faststr(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @string key) {
-    ref var t = ref Ꮡt.Value;
-    ref var h = ref Ꮡh.Value;
-
     mapdelete_faststr(Ꮡt, Ꮡh, key);
 }
 
@@ -1572,10 +1543,6 @@ internal static void reflect_mapdelete_faststr(ж<maptype> Ꮡt, ж<hmap> Ꮡh, 
 //
 //go:linkname reflect_mapiterinit reflect.mapiterinit
 internal static void reflect_mapiterinit(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<hiter> Ꮡit) {
-    ref var t = ref Ꮡt.Value;
-    ref var h = ref Ꮡh.Value;
-    ref var it = ref Ꮡit.Value;
-
     mapiterinit(Ꮡt, Ꮡh, Ꮡit);
 }
 
@@ -1593,8 +1560,6 @@ internal static void reflect_mapiterinit(ж<maptype> Ꮡt, ж<hmap> Ꮡh, ж<hit
 //
 //go:linkname reflect_mapiternext reflect.mapiternext
 internal static void reflect_mapiternext(ж<hiter> Ꮡit) {
-    ref var it = ref Ꮡit.Value;
-
     mapiternext(Ꮡit);
 }
 
@@ -1655,9 +1620,6 @@ internal static nint reflect_maplen(ж<hmap> Ꮡh) {
 
 //go:linkname reflect_mapclear reflect.mapclear
 internal static void reflect_mapclear(ж<maptype> Ꮡt, ж<hmap> Ꮡh) {
-    ref var t = ref Ꮡt.Value;
-    ref var h = ref Ꮡh.Value;
-
     mapclear(Ꮡt, Ꮡh);
 }
 

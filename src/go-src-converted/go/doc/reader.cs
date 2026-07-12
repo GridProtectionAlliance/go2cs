@@ -285,8 +285,6 @@ internal static (@string name, bool imported) baseTypeName(ast.Expr x) {
 }
 
 [GoRecv] internal static void remember(this ref reader r, @string predecl, ж<ast.InterfaceType> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.Value;
-
     if (r.fixmap == default!) {
         r.fixmap = new map<@string, slice<ж<ast.InterfaceType>>>();
     }

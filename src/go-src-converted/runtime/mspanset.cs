@@ -68,7 +68,6 @@ internal static readonly UntypedInt spanSetInitSpineCap = 256; // Enough for 1GB
 // with other push and pop operations.
 internal static void push(this ж<spanSet> Ꮡb, ж<mspan> Ꮡs) {
     ref var b = ref Ꮡb.Value;
-    ref var s = ref Ꮡs.Value;
 
     // Obtain our slot.
     var cursor = (uintptr)(Ꮡb.of(spanSet.Ꮡindex).incTail().tail() - 1);
@@ -131,8 +130,6 @@ retry:
 // pop removes and returns a span from buffer b, or nil if b is empty.
 // pop is safe to call concurrently with other pop and push operations.
 internal static ж<mspan> pop(this ж<spanSet> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     uint32 head = default!;
     uint32 tail = default!;
 claimLoop:
@@ -221,8 +218,6 @@ break_claimLoop:;
 // reset may not be called concurrently with any other operations
 // on the span set.
 internal static void reset(this ж<spanSet> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     var (head, tail) = Ꮡb.of(spanSet.Ꮡindex).load().split();
     if (head < tail) {
         print("head = ", head, ", tail = ", tail, "\n");
@@ -272,8 +267,6 @@ internal static void reset(this ж<spanSet> Ꮡb) {
 //
 // It has the same semantics as atomic.UnsafePointer.
 internal static spanSetSpinePointer Load(this ж<atomicSpanSetSpinePointer> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     return new spanSetSpinePointer((uintptr)Ꮡs.of(atomicSpanSetSpinePointer.Ꮡa).Load());
 }
 
@@ -281,8 +274,6 @@ internal static spanSetSpinePointer Load(this ж<atomicSpanSetSpinePointer> Ꮡs
 //
 // It has the same semantics as [atomic.UnsafePointer].
 internal static void StoreNoWB(this ж<atomicSpanSetSpinePointer> Ꮡs, spanSetSpinePointer Δp) {
-    ref var s = ref Ꮡs.Value;
-
     Ꮡs.of(atomicSpanSetSpinePointer.Ꮡa).StoreNoWB(Δp.p);
 }
 
@@ -308,8 +299,6 @@ internal static ref spanSetBlockAlloc spanSetBlockPool => ref ᏑspanSetBlockPoo
 // alloc tries to grab a spanSetBlock out of the pool, and if it fails
 // persistentallocs a new one and returns it.
 internal static ж<spanSetBlock> alloc(this ж<spanSetBlockAlloc> Ꮡp) {
-    ref var Δp = ref Ꮡp.Value;
-
     {
         var s = (ж<spanSetBlock>)(uintptr)(Ꮡp.of(spanSetBlockAlloc.Ꮡstack).pop()); if (s != nil) {
             return s;
@@ -320,9 +309,6 @@ internal static ж<spanSetBlock> alloc(this ж<spanSetBlockAlloc> Ꮡp) {
 
 // free returns a spanSetBlock back to the pool.
 internal static void free(this ж<spanSetBlockAlloc> Ꮡp, ж<spanSetBlock> Ꮡblock) {
-    ref var Δp = ref Ꮡp.Value;
-    ref var block = ref Ꮡblock.Value;
-
     Ꮡblock.of(spanSetBlock.Ꮡpopped).Store(0);
     Ꮡp.of(spanSetBlockAlloc.Ꮡstack).push(Ꮡblock.of(spanSetBlock.Ꮡlfnode));
 }
@@ -360,36 +346,26 @@ internal static (uint32 head, uint32 tail) split(this headTailIndex h) {
 
 // load atomically reads a headTailIndex value.
 internal static headTailIndex load(this ж<atomicHeadTailIndex> Ꮡh) {
-    ref var h = ref Ꮡh.Value;
-
     return ((headTailIndex)Ꮡh.of(atomicHeadTailIndex.Ꮡu).Load());
 }
 
 // cas atomically compares-and-swaps a headTailIndex value.
 internal static bool cas(this ж<atomicHeadTailIndex> Ꮡh, headTailIndex old, headTailIndex @new) {
-    ref var h = ref Ꮡh.Value;
-
     return Ꮡh.of(atomicHeadTailIndex.Ꮡu).CompareAndSwap((uint64)old, (uint64)@new);
 }
 
 // incHead atomically increments the head of a headTailIndex.
 internal static headTailIndex incHead(this ж<atomicHeadTailIndex> Ꮡh) {
-    ref var h = ref Ꮡh.Value;
-
     return ((headTailIndex)Ꮡh.of(atomicHeadTailIndex.Ꮡu).Add(4294967296L));
 }
 
 // decHead atomically decrements the head of a headTailIndex.
 internal static headTailIndex decHead(this ж<atomicHeadTailIndex> Ꮡh) {
-    ref var h = ref Ꮡh.Value;
-
     return ((headTailIndex)Ꮡh.of(atomicHeadTailIndex.Ꮡu).Add(-(4294967296L)));
 }
 
 // incTail atomically increments the tail of a headTailIndex.
 internal static headTailIndex incTail(this ж<atomicHeadTailIndex> Ꮡh) {
-    ref var h = ref Ꮡh.Value;
-
     var ht = ((headTailIndex)Ꮡh.of(atomicHeadTailIndex.Ꮡu).Add(1));
     // Check for overflow.
     if (ht.tail() == 0) {
@@ -401,8 +377,6 @@ internal static headTailIndex incTail(this ж<atomicHeadTailIndex> Ꮡh) {
 
 // reset clears the headTailIndex to (0, 0).
 internal static void reset(this ж<atomicHeadTailIndex> Ꮡh) {
-    ref var h = ref Ꮡh.Value;
-
     Ꮡh.of(atomicHeadTailIndex.Ꮡu).Store(0);
 }
 
@@ -413,16 +387,11 @@ internal static void reset(this ж<atomicHeadTailIndex> Ꮡh) {
 
 // Load returns the *mspan.
 internal static ж<mspan> Load(this ж<atomicMSpanPointer> Ꮡp) {
-    ref var Δp = ref Ꮡp.Value;
-
     return (ж<mspan>)(uintptr)(Ꮡp.of(atomicMSpanPointer.Ꮡp).Load());
 }
 
 // Store stores an *mspan.
 internal static void StoreNoWB(this ж<atomicMSpanPointer> Ꮡp, ж<mspan> Ꮡs) {
-    ref var Δp = ref Ꮡp.Value;
-    ref var s = ref Ꮡs.Value;
-
     Ꮡp.of(atomicMSpanPointer.Ꮡp).StoreNoWB(new @unsafe.Pointer(Ꮡs));
 }
 

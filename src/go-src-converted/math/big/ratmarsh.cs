@@ -85,8 +85,6 @@ public static (slice<byte> text, error err) MarshalText(this ж<ΔRat> Ꮡx) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 public static error UnmarshalText(this ж<ΔRat> Ꮡz, slice<byte> text) {
-    ref var z = ref Ꮡz.Value;
-
     // TODO(gri): get rid of the []byte/string conversion
     {
         var (_, ok) = Ꮡz.SetString(((@string)text)); if (!ok) {

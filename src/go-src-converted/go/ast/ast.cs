@@ -1432,8 +1432,6 @@ public static @string String(this ж<Ident> Ꮡid) {
 //	if err != nil { ... }
 //	gen := ast.IsGenerated(f)
 public static bool IsGenerated(ж<File> Ꮡfile) {
-    ref var @file = ref Ꮡfile.Value;
-
     var (_, ok) = generator(Ꮡfile);
     return ok;
 }

@@ -294,8 +294,6 @@ internal static void ProcStart(this traceLocker tl) {
 
 // ProcStop traces a ProcStop event.
 internal static void ProcStop(this traceLocker tl, ж<Δp> Ꮡpp) {
-    ref var pp = ref Ꮡpp.Value;
-
     // The only time a goroutine is allowed to have its Proc moved around
     // from under it is during a syscall.
     tl.eventWriter(traceGoSyscall, traceProcRunning).commit(traceEvProcStop);

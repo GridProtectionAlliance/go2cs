@@ -19,8 +19,6 @@ internal static ref Float floatZero => ref ᏑfloatZero.Value;
 // be valid for success. If the operation failed, the value of z is undefined
 // but the returned value is nil.
 public static (ж<Float>, bool) SetString(this ж<Float> Ꮡz, @string s) {
-    ref var z = ref Ꮡz.Value;
-
     {
         var (f, _, err) = Ꮡz.Parse(s, 0); if (err == default!) {
             return (f, true);
@@ -269,7 +267,6 @@ public static (ж<Float> f, nint b, error err) Parse(this ж<Float> Ꮡz, @strin
     nint b = default!;
     error err = default!;
 
-    ref var z = ref Ꮡz.Value;
     // scan doesn't handle ±Inf
     if (len(s) == 3 && (s == "Inf"u8 || s == "inf"u8)) {
         f = Ꮡz.SetInf(false);
@@ -315,8 +312,6 @@ internal static fmt.Scanner _ᴛ2ʗ = new FloatжScanner((ж<Float>)(default!));
 // 'b' (binary), 'e', 'E', 'f', 'F', 'g' and 'G'.
 // Scan doesn't handle ±Inf.
 public static error Scan(this ж<Float> Ꮡz, fmt.ScanState s, rune ch) {
-    ref var z = ref Ꮡz.Value;
-
     s.SkipSpace();
     var (_, _, err) = Ꮡz.scan(new byteReader(s), 0);
     return err;

@@ -56,8 +56,6 @@ public static error ErrMissingFile = errors.New("http: no such file"u8);
 
 // Is lets http.ErrNotSupported match errors.ErrUnsupported.
 public static bool Is(this ж<ProtocolError> Ꮡpe, error err) {
-    ref var pe = ref Ꮡpe.Value;
-
     return Ꮡpe == ErrNotSupported && AreEqual(err, errors.ErrUnsupported);
 }
 
@@ -535,8 +533,6 @@ internal static readonly @string defaultUserAgent = "Go-http-client/1.1"u8;
 // hasn't been set to "identity", Write adds "Transfer-Encoding:
 // chunked" to the header. Body is closed after it is sent.
 public static error Write(this ж<Request> Ꮡr, io.Writer w) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.write(w, false, default!, default!);
 }
 
@@ -547,8 +543,6 @@ public static error Write(this ж<Request> Ꮡr, io.Writer w) {
 // In either case, WriteProxy also writes a Host header, using
 // either r.Host or r.URL.Host.
 public static error WriteProxy(this ж<Request> Ꮡr, io.Writer w) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.write(w, true, default!, default!);
 }
 
@@ -1055,8 +1049,6 @@ internal static ж<sync.Pool> ᏑtextprotoReaderPool = new(default(sync.Pool));
 internal static ref sync.Pool textprotoReaderPool => ref ᏑtextprotoReaderPool.Value;
 
 internal static ж<textproto.Reader> newTextprotoReader(ж<bufio.Reader> Ꮡbr) {
-    ref var br = ref Ꮡbr.Value;
-
     {
         var v = ᏑtextprotoReaderPool.Get(); if (v != default!) {
             var tr = v._<ж<textproto.Reader>>();
@@ -1081,8 +1073,6 @@ internal static void putTextprotoReader(ж<textproto.Reader> Ꮡr) {
 // requests and handle them via the [Handler] interface. ReadRequest
 // only supports HTTP/1.x requests. For HTTP/2, use golang.org/x/net/http2.
 public static (ж<Request>, error) ReadRequest(ж<bufio.Reader> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     var (req, err) = readRequest(Ꮡb);
     if (err != default!) {
         return (default!, err);
@@ -1106,9 +1096,8 @@ internal static (ж<Request> req, error err) readRequest(ж<bufio.Reader> Ꮡb) 
     ж<Request> req = default!;
     heap<error>(out var Ꮡerr);
     func((defer, recover) => {
-    ref var b = ref Ꮡb.Value;
-
     ref var err = ref Ꮡerr.ValueSlot;
+
         var tp = newTextprotoReader(Ꮡb);
         deferǃ(putTextprotoReader, tp, defer);
         req = @new<Request>();

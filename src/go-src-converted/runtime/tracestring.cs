@@ -23,8 +23,6 @@ internal static readonly UntypedInt maxTraceStringLen = 1024;
 
 // put adds a string to the table, emits it, and returns a unique ID for it.
 internal static uint64 put(this ж<traceStringTable> Ꮡt, uintptr gen, @string s) {
-    ref var t = ref Ꮡt.Value;
-
     // Put the string in the table.
     var ss = stringStructOf(Ꮡ(s));
     var (id, added) = Ꮡt.of(traceStringTable.Ꮡtab).put((~ss).str, (uintptr)(~ss).len);
@@ -39,8 +37,6 @@ internal static uint64 put(this ж<traceStringTable> Ꮡt, uintptr gen, @string 
 
 // emit emits a string and creates an ID for it, but doesn't add it to the table. Returns the ID.
 internal static uint64 emit(this ж<traceStringTable> Ꮡt, uintptr gen, @string s) {
-    ref var t = ref Ꮡt.Value;
-
     // Grab an ID and write the string to the buffer.
     var id = Ꮡt.of(traceStringTable.Ꮡtab).stealID();
     systemstack(() => {

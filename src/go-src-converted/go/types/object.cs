@@ -275,9 +275,6 @@ internal static bool less(this ж<@object> Ꮡa, ж<@object> Ꮡb) {
 // NewPkgName returns a new PkgName object representing an imported package.
 // The remaining arguments set the attributes found with all Objects.
 public static ж<PkgName> NewPkgName(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, ж<Package> Ꮡimported) {
-    ref var pkg = ref Ꮡpkg.Value;
-    ref var imported = ref Ꮡimported.Value;
-
     return Ꮡ(new PkgName(new @object(nil, pos, Ꮡpkg, name, new BasicжΔType(Typ[Invalid]), 0, black, nopos), Ꮡimported, false));
 }
 
@@ -296,8 +293,6 @@ public static ж<PkgName> NewPkgName(tokenꓸPos pos, ж<Package> Ꮡpkg, @strin
 // NewConst returns a new constant with value val.
 // The remaining arguments set the attributes found with all Objects.
 public static ж<Const> NewConst(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, ΔType typ, constant.Value val) {
-    ref var pkg = ref Ꮡpkg.Value;
-
     return Ꮡ(new Const(new @object(nil, pos, Ꮡpkg, name, typ, 0, colorFor(typ), nopos), val));
 }
 
@@ -324,16 +319,12 @@ public static ж<Const> NewConst(tokenꓸPos pos, ж<Package> Ꮡpkg, @string na
 // argument for NewNamed, which will set the TypeName's type as a side-
 // effect.
 public static ж<TypeName> NewTypeName(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, ΔType typ) {
-    ref var pkg = ref Ꮡpkg.Value;
-
     return Ꮡ(new TypeName(new @object(nil, pos, Ꮡpkg, name, typ, 0, colorFor(typ), nopos)));
 }
 
 // NewTypeNameLazy returns a new defined type like NewTypeName, but it
 // lazily calls resolve to finish constructing the Named object.
 internal static ж<TypeName> _NewTypeNameLazy(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, Func<ж<Named>, (slice<ж<TypeParam>>, ΔType, slice<ж<Func>>)> load) {
-    ref var pkg = ref Ꮡpkg.Value;
-
     var obj = NewTypeName(pos, Ꮡpkg, name, default!);
     NewNamed(obj, default!, default!).Value.loader = load;
     return obj;
@@ -387,15 +378,11 @@ public static bool IsAlias(this ж<TypeName> Ꮡobj) {
 // NewVar returns a new variable.
 // The arguments set the attributes found with all Objects.
 public static ж<Var> NewVar(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, ΔType typ) {
-    ref var pkg = ref Ꮡpkg.Value;
-
     return Ꮡ(new Var(@object: new @object(nil, pos, Ꮡpkg, name, typ, 0, colorFor(typ), nopos)));
 }
 
 // NewParam returns a new variable representing a function parameter.
 public static ж<Var> NewParam(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, ΔType typ) {
-    ref var pkg = ref Ꮡpkg.Value;
-
     return Ꮡ(new Var(@object: new @object(nil, pos, Ꮡpkg, name, typ, 0, colorFor(typ), nopos), used: true));
 }
 
@@ -405,8 +392,6 @@ public static ж<Var> NewParam(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name
 // For embedded fields, the name is the unqualified type name
 // under which the field is accessible.
 public static ж<Var> NewField(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, ΔType typ, bool embedded) {
-    ref var pkg = ref Ꮡpkg.Value;
-
     return Ꮡ(new Var(@object: new @object(nil, pos, Ꮡpkg, name, typ, 0, colorFor(typ), nopos), embedded: embedded, isField: true));
 }
 
@@ -459,9 +444,6 @@ public static ж<Var> Origin(this ж<Var> Ꮡobj) {
 // NewFunc returns a new function with the given signature, representing
 // the function's type.
 public static ж<Func> NewFunc(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name, ж<ΔSignature> Ꮡsig) {
-    ref var pkg = ref Ꮡpkg.Value;
-    ref var sig = ref Ꮡsig.DerefOrNil();
-
     ΔType typ = default!;
     if (Ꮡsig != nil){
         typ = new ΔSignatureжΔType(Ꮡsig);
@@ -494,8 +476,6 @@ public static ж<Func> NewFunc(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name
 // FullName returns the package- or receiver-type-qualified name of
 // function or method obj.
 public static @string FullName(this ж<Func> Ꮡobj) {
-    ref var obj = ref Ꮡobj.Value;
-
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     writeFuncName(Ꮡbuf, Ꮡobj, default!);
     return Ꮡbuf.String();
@@ -729,50 +709,34 @@ public static @string ObjectString(Object obj, Func<ж<Package>, @string> qf) {
 }
 
 public static @string String(this ж<PkgName> Ꮡobj) {
-    ref var obj = ref Ꮡobj.Value;
-
     return ObjectString(new PkgNameжObject(Ꮡobj), default!);
 }
 
 public static @string String(this ж<Const> Ꮡobj) {
-    ref var obj = ref Ꮡobj.Value;
-
     return ObjectString(new ConstжObject(Ꮡobj), default!);
 }
 
 public static @string String(this ж<TypeName> Ꮡobj) {
-    ref var obj = ref Ꮡobj.Value;
-
     return ObjectString(new TypeNameжObject(Ꮡobj), default!);
 }
 
 public static @string String(this ж<Var> Ꮡobj) {
-    ref var obj = ref Ꮡobj.Value;
-
     return ObjectString(new VarжObject(Ꮡobj), default!);
 }
 
 public static @string String(this ж<Func> Ꮡobj) {
-    ref var obj = ref Ꮡobj.Value;
-
     return ObjectString(new FuncжObject(Ꮡobj), default!);
 }
 
 public static @string String(this ж<Label> Ꮡobj) {
-    ref var obj = ref Ꮡobj.Value;
-
     return ObjectString(new LabelжObject(Ꮡobj), default!);
 }
 
 public static @string String(this ж<Builtin> Ꮡobj) {
-    ref var obj = ref Ꮡobj.Value;
-
     return ObjectString(new BuiltinжObject(Ꮡobj), default!);
 }
 
 public static @string String(this ж<Nil> Ꮡobj) {
-    ref var obj = ref Ꮡobj.Value;
-
     return ObjectString(new NilжObject(Ꮡobj), default!);
 }
 

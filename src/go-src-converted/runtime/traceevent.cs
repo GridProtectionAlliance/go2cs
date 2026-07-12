@@ -183,8 +183,6 @@ internal static traceArg uniqueString(this traceLocker tl, @string s) {
 
 // rtype returns a traceArg representing typ which may be passed to write.
 internal static traceArg rtype(this traceLocker tl, ж<abi.Type> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.Value;
-
     return ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑtypeTab, (nint)(tl.gen % 2)).put(Ꮡtyp));
 }
 

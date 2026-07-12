@@ -9,8 +9,6 @@ using syscall = syscall_package;
 partial class os_package {
 
 internal static ж<syscall.SysProcAttr> ensurePidfd(ж<syscall.SysProcAttr> ᏑsysAttr) {
-    ref var sysAttr = ref ᏑsysAttr.Value;
-
     return ᏑsysAttr;
 }
 

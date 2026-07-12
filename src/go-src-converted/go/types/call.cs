@@ -364,7 +364,6 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
 internal static slice<ж<operand>> /*xlist*/ exprList(this ж<Checker> Ꮡcheck, slice<ast.Expr> elist) {
     slice<ж<operand>> xlist = default!;
 
-    ref var check = ref Ꮡcheck.Value;
     {
         nint n = len(elist); if (n == 1){
             (xlist, _) = Ꮡcheck.multiExpr(elist[0], false);
@@ -1055,7 +1054,6 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
 internal static bool use(this ж<Checker> Ꮡcheck, params Span<ast.Expr> argsʗp) {
     var args = argsʗp.slice();
 
-    ref var check = ref Ꮡcheck.Value;
     return Ꮡcheck.useN(args, false);
 }
 
@@ -1065,13 +1063,10 @@ internal static bool use(this ж<Checker> Ꮡcheck, params Span<ast.Expr> argsʗ
 internal static bool useLHS(this ж<Checker> Ꮡcheck, params Span<ast.Expr> argsʗp) {
     var args = argsʗp.slice();
 
-    ref var check = ref Ꮡcheck.Value;
     return Ꮡcheck.useN(args, true);
 }
 
 internal static bool useN(this ж<Checker> Ꮡcheck, slice<ast.Expr> args, bool lhs) {
-    ref var check = ref Ꮡcheck.Value;
-
     var ok = true;
     foreach (var (_, e) in args) {
         if (!Ꮡcheck.use1(e, lhs)) {

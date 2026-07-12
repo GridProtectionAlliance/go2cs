@@ -318,8 +318,6 @@ public static void CloseClientConnections(this ж<Server> Ꮡs) => func((defer, 
 }
 
 internal static void goServe(this ж<Server> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     Ꮡs.of(Server.Ꮡwg).Add(1);
     goǃ(() => func((defer, recover) => {
         defer(Ꮡs.of(Server.Ꮡwg).Done);

@@ -28,14 +28,10 @@ public static ж<Map> NewMap(ΔType key, ΔType elem) {
 }
 
 public static ΔType Underlying(this ж<Map> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return new MapжΔType(Ꮡt);
 }
 
 public static @string String(this ж<Map> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return TypeString(new MapжΔType(Ꮡt), default!);
 }
 

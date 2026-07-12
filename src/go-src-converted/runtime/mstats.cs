@@ -515,8 +515,6 @@ internal static void readmemstats_m(ж<MemStats> Ꮡstats) {
 
 //go:linkname readGCStats runtime/debug.readGCStats
 internal static void readGCStats(ж<slice<uint64>> Ꮡpauses) {
-    ref var pauses = ref Ꮡpauses.Value;
-
     systemstack(() => {
         readGCStats_m(Ꮡpauses);
     });

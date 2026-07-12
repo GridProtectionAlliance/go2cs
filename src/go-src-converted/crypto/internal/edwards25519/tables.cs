@@ -32,8 +32,6 @@ partial class edwards25519_package {
 
 // Builds a lookup table at runtime. Fast.
 [GoRecv] internal static void FromP3(this ref projLookupTable v, ж<Point> Ꮡq) {
-    ref var q = ref Ꮡq.Value;
-
     // Goal: v.points[i] = (i+1)*Q, i.e., Q, 2Q, ..., 8Q
     // This allows lookup of -8Q, ..., -Q, 0, Q, ..., 8Q
     Ꮡ(v.points[0]).FromP3(Ꮡq);
@@ -51,8 +49,6 @@ partial class edwards25519_package {
 
 // This is not optimised for speed; fixed-base tables should be precomputed.
 [GoRecv] internal static void FromP3(this ref affineLookupTable v, ж<Point> Ꮡq) {
-    ref var q = ref Ꮡq.Value;
-
     // Goal: v.points[i] = (i+1)*Q, i.e., Q, 2Q, ..., 8Q
     // This allows lookup of -8Q, ..., -Q, 0, Q, ..., 8Q
     Ꮡ(v.points[0]).FromP3(Ꮡq);
@@ -68,8 +64,6 @@ partial class edwards25519_package {
 
 // Builds a lookup table at runtime. Fast.
 [GoRecv] internal static void FromP3(this ref nafLookupTable5 v, ж<Point> Ꮡq) {
-    ref var q = ref Ꮡq.Value;
-
     // Goal: v.points[i] = (2*i+1)*Q, i.e., Q, 3Q, 5Q, ..., 15Q
     // This allows lookup of -15Q, ..., -3Q, -Q, 0, Q, 3Q, ..., 15Q
     Ꮡ(v.points[0]).FromP3(Ꮡq);
@@ -87,8 +81,6 @@ partial class edwards25519_package {
 
 // This is not optimised for speed; fixed-base tables should be precomputed.
 [GoRecv] internal static void FromP3(this ref nafLookupTable8 v, ж<Point> Ꮡq) {
-    ref var q = ref Ꮡq.Value;
-
     Ꮡ(v.points[0]).FromP3(Ꮡq);
     ref var q2 = ref heap<Point>(out var Ꮡq2);
     q2 = new Point(nil);

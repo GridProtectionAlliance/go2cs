@@ -34,50 +34,34 @@ internal static ж<regexp.Regexp> re(this ж<Regexp> Ꮡr) {
 }
 
 public static slice<slice<byte>> FindSubmatch(this ж<Regexp> Ꮡr, slice<byte> s) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.re().FindSubmatch(s);
 }
 
 public static slice<@string> FindStringSubmatch(this ж<Regexp> Ꮡr, @string s) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.re().FindStringSubmatch(s);
 }
 
 public static slice<nint> FindStringSubmatchIndex(this ж<Regexp> Ꮡr, @string s) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.re().FindStringSubmatchIndex(s);
 }
 
 public static @string ReplaceAllString(this ж<Regexp> Ꮡr, @string src, @string repl) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.re().ReplaceAllString(src, repl);
 }
 
 public static @string FindString(this ж<Regexp> Ꮡr, @string s) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.re().FindString(s);
 }
 
 public static slice<@string> FindAllString(this ж<Regexp> Ꮡr, @string s, nint n) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.re().FindAllString(s, n);
 }
 
 public static bool MatchString(this ж<Regexp> Ꮡr, @string s) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.re().MatchString(s);
 }
 
 public static slice<@string> SubexpNames(this ж<Regexp> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.re().SubexpNames();
 }
 

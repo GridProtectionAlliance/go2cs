@@ -289,8 +289,6 @@ public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>>
 // get an instance of the handler under test, then runs the test case, then
 // calls result to get the result. If the test case fails, it calls t.Error.
 public static void Run(ж<testing.T> Ꮡt, Func<ж<testing.T>, slogꓸHandler> newHandler, Func<ж<testing.T>, map<@string, any>> result) {
-    ref var t = ref Ꮡt.Value;
-
     foreach (var (_, vᴛ1) in cases) {
         ref var c = ref heap(new testCase(), out var Ꮡc);
         c = vᴛ1;

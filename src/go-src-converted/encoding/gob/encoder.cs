@@ -150,8 +150,6 @@ internal static bool /*sent*/ sendActualType(this ж<Encoder> Ꮡenc, io.Writer 
 internal static bool /*sent*/ sendType(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> Ꮡstate, reflectꓸType origt) {
     bool sent = default!;
 
-    ref var enc = ref Ꮡenc.Value;
-    ref var state = ref Ꮡstate.Value;
     var ut = userType(origt);
     if ((~ut).externalEnc != 0) {
         // The rules are different: regardless of the underlying type's representation,
@@ -207,8 +205,6 @@ internal static bool /*sent*/ sendType(this ж<Encoder> Ꮡenc, io.Writer w, ж<
 // guaranteeing that all necessary type information has been transmitted first.
 // Passing a nil pointer to Encoder will panic, as they cannot be transmitted by gob.
 public static error Encode(this ж<Encoder> Ꮡenc, any e) {
-    ref var enc = ref Ꮡenc.Value;
-
     return Ꮡenc.EncodeValue(reflect.ValueOf(e));
 }
 
@@ -217,7 +213,6 @@ public static error Encode(this ж<Encoder> Ꮡenc, any e) {
 // sent.
 internal static void sendTypeDescriptor(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut) {
     ref var enc = ref Ꮡenc.Value;
-    ref var state = ref Ꮡstate.Value;
     ref var ut = ref Ꮡut.Value;
 
     // Make sure the type is known to the other side.

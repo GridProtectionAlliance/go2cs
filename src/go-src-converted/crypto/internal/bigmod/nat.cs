@@ -201,7 +201,6 @@ internal static nuint bigEndianUint(slice<byte> buf) {
 
 internal static error setBytes(this ж<ΔNat> Ꮡx, slice<byte> b, ж<Modulus> Ꮡm) {
     ref var x = ref Ꮡx.Value;
-    ref var m = ref Ꮡm.Value;
 
     Ꮡx.resetFor(Ꮡm);
     nint i = len(b);
@@ -529,7 +528,6 @@ public static ж<ΔNat> Mod(this ж<ΔNat> Ꮡout, ж<ΔNat> Ꮡx, ж<Modulus> �
 //
 // The announced size of x must be smaller than or equal to that of m.
 public static ж<ΔNat> ExpandFor(this ж<ΔNat> Ꮡx, ж<Modulus> Ꮡm) {
-    ref var x = ref Ꮡx.Value;
     ref var m = ref Ꮡm.Value;
 
     return Ꮡx.expand(len((~m.nat).limbs));
@@ -539,7 +537,6 @@ public static ж<ΔNat> ExpandFor(this ж<ΔNat> Ꮡx, ж<Modulus> Ꮡm) {
 //
 // out is zeroed and may start at any size.
 internal static ж<ΔNat> resetFor(this ж<ΔNat> Ꮡout, ж<Modulus> Ꮡm) {
-    ref var @out = ref Ꮡout.Value;
     ref var m = ref Ꮡm.Value;
 
     return Ꮡout.reset(len((~m.nat).limbs));
@@ -572,7 +569,6 @@ internal static void maybeSubtractModulus(this ж<ΔNat> Ꮡx, choice always, ж
 // must already be reduced modulo m.
 public static ж<ΔNat> Sub(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy, ж<Modulus> Ꮡm) {
     ref var x = ref Ꮡx.Value;
-    ref var y = ref Ꮡy.Value;
     ref var m = ref Ꮡm.Value;
 
     nuint underflow = x.sub(Ꮡy);
@@ -589,8 +585,6 @@ public static ж<ΔNat> Sub(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy, ж<Modulus> Ꮡ
 // must already be reduced modulo m.
 public static ж<ΔNat> Add(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy, ж<Modulus> Ꮡm) {
     ref var x = ref Ꮡx.Value;
-    ref var y = ref Ꮡy.Value;
-    ref var m = ref Ꮡm.Value;
 
     nuint overflow = x.add(Ꮡy);
     Ꮡx.maybeSubtractModulus(((choice)overflow), Ꮡm);
@@ -605,7 +599,6 @@ public static ж<ΔNat> Add(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy, ж<Modulus> Ꮡ
 //
 // This assumes that x is already reduced mod m.
 internal static ж<ΔNat> montgomeryRepresentation(this ж<ΔNat> Ꮡx, ж<Modulus> Ꮡm) {
-    ref var x = ref Ꮡx.Value;
     ref var m = ref Ꮡm.Value;
 
     // A Montgomery multiplication (which computes a * b / R) by R * R works out
@@ -618,9 +611,6 @@ internal static ж<ΔNat> montgomeryRepresentation(this ж<ΔNat> Ꮡx, ж<Modul
 //
 // This assumes that x is already reduced mod m.
 internal static ж<ΔNat> montgomeryReduction(this ж<ΔNat> Ꮡx, ж<Modulus> Ꮡm) {
-    ref var x = ref Ꮡx.Value;
-    ref var m = ref Ꮡm.Value;
-
     // By Montgomery multiplying with 1 not in Montgomery representation, we
     // convert out back from Montgomery representation, because it works out to
     // dividing by R.
@@ -780,7 +770,6 @@ internal static nuint /*carry*/ addMulVVW(slice<nuint> z, slice<nuint> x, nuint 
 // must already be reduced modulo m.
 public static ж<ΔNat> Mul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy, ж<Modulus> Ꮡm) {
     ref var x = ref Ꮡx.Value;
-    ref var y = ref Ꮡy.Value;
     ref var m = ref Ꮡm.Value;
 
     // A Montgomery multiplication by a value out of the Montgomery domain
@@ -799,7 +788,6 @@ public static ж<ΔNat> Mul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy, ж<Modulus> Ꮡ
 public static ж<ΔNat> Exp(this ж<ΔNat> Ꮡout, ж<ΔNat> Ꮡx, slice<byte> e, ж<Modulus> Ꮡm) {
     ref var @out = ref Ꮡout.Value;
     ref var x = ref Ꮡx.Value;
-    ref var m = ref Ꮡm.Value;
 
     // We use a 4 bit window. For our RSA workload, 4 bit windows are faster
     // than 2 bit windows, but use an extra 12 nats worth of scratch space.
@@ -846,10 +834,6 @@ public static ж<ΔNat> Exp(this ж<ΔNat> Ꮡout, ж<ΔNat> Ꮡx, slice<byte> e
 // The output will be resized to the size of m and overwritten. x must already
 // be reduced modulo m. This leaks the exponent through timing side-channels.
 public static ж<ΔNat> ExpShortVarTime(this ж<ΔNat> Ꮡout, ж<ΔNat> Ꮡx, nuint e, ж<Modulus> Ꮡm) {
-    ref var @out = ref Ꮡout.Value;
-    ref var x = ref Ꮡx.Value;
-    ref var m = ref Ꮡm.Value;
-
     // For short exponents, precomputing a table and using a window like in Exp
     // doesn't pay off. Instead, we do a simple conditional square-and-multiply
     // chain, skipping the initial run of zeroes.

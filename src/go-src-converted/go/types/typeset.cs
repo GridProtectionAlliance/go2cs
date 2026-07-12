@@ -69,8 +69,6 @@ partial class types_package {
 
 // LookupMethod returns the index of and method with matching package and name, or (-1, nil).
 [GoRecv] internal static (nint, ж<Func>) LookupMethod(this ref _TypeSet s, ж<Package> Ꮡpkg, @string name, bool foldCase) {
-    ref var pkg = ref Ꮡpkg.Value;
-
     return methodIndex(s.methods, Ꮡpkg, name, foldCase);
 }
 
@@ -429,7 +427,6 @@ internal static ref _TypeSet invalidTypeSet => ref ᏑinvalidTypeSet.Value;
 // computeUnionTypeSet may be called with check == nil.
 // The result is &invalidTypeSet if the union overflows.
 internal static ж<_TypeSet> computeUnionTypeSet(ж<Checker> Ꮡcheck, map<ж<Union>, ж<_TypeSet>> unionSets, tokenꓸPos pos, ж<Union> Ꮡutyp) {
-    ref var check = ref Ꮡcheck.DerefOrNil();
     ref var utyp = ref Ꮡutyp.Value;
 
     {

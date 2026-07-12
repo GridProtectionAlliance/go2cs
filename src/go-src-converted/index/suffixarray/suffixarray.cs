@@ -265,7 +265,6 @@ internal static ints lookupAll(this ж<Index> Ꮡx, slice<byte> s) {
 public static slice<nint> /*result*/ Lookup(this ж<Index> Ꮡx, slice<byte> s, nint n) {
     slice<nint> result = default!;
 
-    ref var x = ref Ꮡx.Value;
     if (builtin.len(s) > 0 && n != 0) {
         var matches = Ꮡx.lookupAll(s);
         nint count = matches.len();

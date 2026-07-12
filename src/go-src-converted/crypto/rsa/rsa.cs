@@ -123,8 +123,6 @@ internal static error checkPub(ж<PublicKey> Ꮡpub) {
 
 // Public returns the public key corresponding to priv.
 public static cryptoꓸPublicKey Public(this ж<PrivateKey> Ꮡpriv) {
-    ref var priv = ref Ꮡpriv.Value;
-
     return Ꮡpriv.of(PrivateKey.ᏑPublicKey);
 }
 
@@ -167,8 +165,6 @@ internal static bool bigIntEqual(ж<bigꓸInt> Ꮡa, ж<bigꓸInt> Ꮡb) {
 // where the private part is kept in, for example, a hardware module. Common
 // uses should use the Sign* functions in this package directly.
 public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) {
-    ref var priv = ref Ꮡpriv.Value;
-
     {
         var (pssOpts, ok) = opts._<ж<PSSOptions>>(ᐧ); if (ok) {
             return SignPSS(rand, Ꮡpriv, (~pssOpts).Hash, digest, pssOpts);
@@ -184,7 +180,6 @@ public static (slice<byte> plaintext, error err) Decrypt(this ж<PrivateKey> Ꮡ
     slice<byte> plaintext = default!;
     error err = default!;
 
-    ref var priv = ref Ꮡpriv.Value;
     if (opts == default!) {
         return DecryptPKCS1v15(rand, Ꮡpriv, ciphertext);
     }
@@ -707,14 +702,10 @@ internal static (slice<byte>, error) decrypt(ж<PrivateKey> Ꮡpriv, slice<byte>
 // The label parameter must match the value given when encrypting. See
 // [EncryptOAEP] for details.
 public static (slice<byte>, error) DecryptOAEP(hash.Hash hashΔ1, io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext, slice<byte> label) {
-    ref var priv = ref Ꮡpriv.Value;
-
     return decryptOAEP(hashΔ1, hashΔ1, random, Ꮡpriv, ciphertext, label);
 }
 
 internal static (slice<byte>, error) decryptOAEP(hash.Hash hashΔ1, hash.Hash mgfHash, io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext, slice<byte> label) {
-    ref var priv = ref Ꮡpriv.Value;
-
     {
         var errΔ1 = checkPub(Ꮡpriv.of(PrivateKey.ᏑPublicKey)); if (errΔ1 != default!) {
             return (default!, errΔ1);

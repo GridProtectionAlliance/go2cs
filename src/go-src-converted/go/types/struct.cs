@@ -59,14 +59,10 @@ public static ж<Struct> NewStruct(slice<ж<Var>> fields, slice<@string> tags) {
 }
 
 public static ΔType Underlying(this ж<Struct> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return new StructжΔType(Ꮡt);
 }
 
 public static @string String(this ж<Struct> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return TypeString(new StructжΔType(Ꮡt), default!);
 }
 
@@ -227,7 +223,6 @@ internal static ж<ast.Ident> embeddedFieldIdent(ast.Expr e) {
 
 // invalid embedded field
 internal static bool declareInSet(this ж<Checker> Ꮡcheck, ж<objset> Ꮡoset, tokenꓸPos pos, Object obj) {
-    ref var check = ref Ꮡcheck.Value;
     ref var oset = ref Ꮡoset.Value;
 
     {
@@ -243,7 +238,6 @@ internal static bool declareInSet(this ж<Checker> Ꮡcheck, ж<objset> Ꮡoset,
 }
 
 internal static @string tag(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡt) {
-    ref var check = ref Ꮡcheck.Value;
     ref var t = ref Ꮡt.DerefOrNil();
 
     if (Ꮡt != nil) {

@@ -111,8 +111,6 @@ internal static bool netpollIsPollDescriptor(uintptr fd) {
 }
 
 internal static int32 netpollopen(uintptr fd, ж<pollDesc> Ꮡpd) {
-    ref var pd = ref Ꮡpd.Value;
-
     var key = packNetpollKey(netpollSourceReady, Ꮡpd);
     if (stdcall4(_CreateIoCompletionPort, fd, iocphandle, key, 0) == 0) {
         return (int32)getlasterror();
@@ -126,8 +124,6 @@ internal static int32 netpollclose(uintptr fd) {
 }
 
 internal static void netpollarm(ж<pollDesc> Ꮡpd, nint mode) {
-    ref var pd = ref Ꮡpd.Value;
-
     @throw("runtime: unused"u8);
 }
 

@@ -66,8 +66,6 @@ internal static nint maxBase64Len = base64.StdEncoding.DecodedLen(maxContentLen)
 
 // bEncode encodes s using base64 encoding and writes it to buf.
 internal static void bEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @string charset, @string s) {
-    ref var buf = ref Ꮡbuf.Value;
-
     var w = base64.NewEncoder(base64.StdEncoding, new strings_BuilderжWriter(Ꮡbuf));
     // If the charset is not UTF-8 or if the content is short, do not bother
     // splitting the encoded-word.
@@ -100,8 +98,6 @@ internal static void bEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @st
 // qEncode encodes s using Q encoding and writes it to buf. It splits the
 // encoded-words when necessary.
 internal static void qEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @string charset, @string s) {
-    ref var buf = ref Ꮡbuf.Value;
-
     // We only split encoded-words when the charset is UTF-8.
     if (!isUTF8(charset)) {
         writeQString(Ꮡbuf, s);
@@ -131,8 +127,6 @@ internal static void qEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @st
 
 // writeQString encodes s using Q encoding and writes it to buf.
 internal static void writeQString(ж<strings.Builder> Ꮡbuf, @string s) {
-    ref var buf = ref Ꮡbuf.Value;
-
     for (nint i = 0; i < len(s); i++) {
         {
             var b = s[i];
@@ -158,8 +152,6 @@ internal static void writeQString(ж<strings.Builder> Ꮡbuf, @string s) {
 
 // openWord writes the beginning of an encoded-word into buf.
 internal static void openWord(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @string charset) {
-    ref var buf = ref Ꮡbuf.Value;
-
     Ꮡbuf.WriteString("=?"u8);
     Ꮡbuf.WriteString(charset);
     Ꮡbuf.WriteByte((rune)'?');
@@ -169,15 +161,11 @@ internal static void openWord(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @s
 
 // closeWord writes the end of an encoded-word into buf.
 internal static void closeWord(ж<strings.Builder> Ꮡbuf) {
-    ref var buf = ref Ꮡbuf.Value;
-
     Ꮡbuf.WriteString("?="u8);
 }
 
 // splitWord closes the current encoded-word and opens a new one.
 internal static void splitWord(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @string charset) {
-    ref var buf = ref Ꮡbuf.Value;
-
     closeWord(Ꮡbuf);
     Ꮡbuf.WriteByte((rune)' ');
     e.openWord(Ꮡbuf, charset);
@@ -310,8 +298,6 @@ internal static (slice<byte>, error) decode(byte encoding, @string text) {
 }
 
 [GoRecv] internal static error convert(this ref WordDecoder d, ж<strings.Builder> Ꮡbuf, @string charset, slice<byte> content) {
-    ref var buf = ref Ꮡbuf.Value;
-
     switch (ᐧ) {
     case {} when strings.EqualFold("utf-8"u8, charset): {
         Ꮡbuf.Write(content);

@@ -24,8 +24,6 @@ internal static fmt.Scanner _ᴛ6ʗ = new ΔRatжScanner(ᏑratZero); // *Rat mu
 // Scan is a support routine for fmt.Scanner. It accepts the formats
 // 'e', 'E', 'f', 'F', 'g', 'G', and 'v'. All formats are equivalent.
 public static error Scan(this ж<ΔRat> Ꮡz, fmt.ScanState s, rune ch) {
-    ref var z = ref Ꮡz.Value;
-
     var (tok, err) = s.Token(true, ratTok);
     if (err != default!) {
         return err;
@@ -330,8 +328,6 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
 
 // String returns a string representation of x in the form "a/b" (even if b == 1).
 public static @string String(this ж<ΔRat> Ꮡx) {
-    ref var x = ref Ꮡx.Value;
-
     return ((@string)Ꮡx.marshal());
 }
 
@@ -432,7 +428,6 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
     nint n = default!;
     bool exact = default!;
 
-    ref var x = ref Ꮡx.Value;
     // Determine q and largest p2, p5 such that d = q·2^p2·5^p5.
     // The results n, exact are:
     //

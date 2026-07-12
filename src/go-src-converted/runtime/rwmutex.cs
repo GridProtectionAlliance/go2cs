@@ -122,8 +122,6 @@ internal static void runlock(this ж<rwmutex> Ꮡrw) {
 
 // lock locks rw for writing.
 internal static void @lock(this ж<rwmutex> Ꮡrw) {
-    ref var rw = ref Ꮡrw.Value;
-
     // Resolve competition with other writers and stick to our P.
     @lock(Ꮡrw.of(rwmutex.ᏑwLock));
     var m = getg().Value.m;

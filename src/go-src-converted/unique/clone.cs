@@ -62,7 +62,6 @@ internal static cloneSeq makeCloneSeq(ж<abi.Type> Ꮡtyp) {
 
 // buildStructCloneSeq populates a cloneSeq for an abi.Type that has Kind abi.Struct.
 internal static void buildStructCloneSeq(ж<abi.Type> Ꮡtyp, ж<cloneSeq> Ꮡseq, uintptr baseOffset) {
-    ref var typ = ref Ꮡtyp.Value;
     ref var seq = ref Ꮡseq.Value;
 
     var styp = Ꮡtyp.StructType();
@@ -84,7 +83,6 @@ internal static void buildStructCloneSeq(ж<abi.Type> Ꮡtyp, ж<cloneSeq> Ꮡse
 
 // buildArrayCloneSeq populates a cloneSeq for an abi.Type that has Kind abi.Array.
 internal static void buildArrayCloneSeq(ж<abi.Type> Ꮡtyp, ж<cloneSeq> Ꮡseq, uintptr baseOffset) {
-    ref var typ = ref Ꮡtyp.Value;
     ref var seq = ref Ꮡseq.Value;
 
     var atyp = Ꮡtyp.ArrayType();

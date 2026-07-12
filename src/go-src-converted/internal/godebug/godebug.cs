@@ -128,8 +128,6 @@ public static @string String(this ж<Setting> Ꮡs) {
 //
 // Note that Value must be called at least once before IncNonDefault.
 public static void IncNonDefault(this ж<Setting> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     Ꮡs.of(Setting.ᏑnonDefaultOnce).Do(Ꮡs.register);
     Ꮡs.of(Setting.ᏑnonDefault).Add(1);
 }
@@ -170,8 +168,6 @@ internal static ref value empty => ref Ꮡempty.Value;
 // Clients should therefore typically not attempt their own
 // caching of Value's result.
 public static @string Value(this ж<Setting> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     Ꮡs.of(Setting.Ꮡonce).Do(() => {
         Ꮡs.Value.setting = lookup(Ꮡs.Value.Name());
         if (Ꮡs.Value.info == nil && !Ꮡs.Value.Undocumented()) {

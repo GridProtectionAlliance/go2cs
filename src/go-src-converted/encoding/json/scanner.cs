@@ -209,8 +209,6 @@ internal static bool isSpace(byte c) {
 
 // stateBeginValueOrEmpty is the state after reading `[`.
 internal static nint stateBeginValueOrEmpty(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.Value;
-
     if (isSpace(c)) {
         return scanSkipSpace;
     }
@@ -548,8 +546,6 @@ internal static nint stateESign(ж<scanner> Ꮡs, byte c) {
 // and at least one digit of the exponent in a number,
 // such as after reading `314e-2` or `0.314e+1` or `3.14e0`.
 internal static nint stateE0(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.Value;
-
     if ((rune)'0' <= c && c <= (rune)'9') {
         return scanContinue;
     }
@@ -669,8 +665,6 @@ internal static nint stateNul(ж<scanner> Ꮡs, byte c) {
 // stateError is the state after reaching a syntax error,
 // such as after reading `[1}` or `5.1.2`.
 internal static nint stateError(ж<scanner> Ꮡs, byte c) {
-    ref var s = ref Ꮡs.Value;
-
     return scanError;
 }
 

@@ -348,8 +348,6 @@ public static (ж<net.Interface>, error) RoutedInterface(@string network, net.Fl
 }
 
 internal static (net.IP, bool) hasRoutableIP(@string network, ж<net.Interface> Ꮡifi) {
-    ref var ifi = ref Ꮡifi.Value;
-
     var (ifat, err) = Ꮡifi.Addrs();
     if (err != default!) {
         return (default!, false);

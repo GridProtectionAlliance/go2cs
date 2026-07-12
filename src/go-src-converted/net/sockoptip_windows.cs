@@ -12,7 +12,6 @@ partial class net_package {
 
 internal static error setIPv4MulticastInterface(ж<netFD> Ꮡfd, ж<Interface> Ꮡifi) {
     ref var fd = ref Ꮡfd.Value;
-    ref var ifi = ref Ꮡifi.Value;
 
     var (ip, err) = interfaceToIPv4Addr(Ꮡifi);
     if (err != default!) {

@@ -520,14 +520,10 @@ internal const rune endOfText = -1;
 }
 
 [GoRecv] internal static bool hasPrefix(this ref inputReader i, ж<Regexp> Ꮡre) {
-    ref var re = ref Ꮡre.Value;
-
     return false;
 }
 
 [GoRecv] internal static nint index(this ref inputReader i, ж<Regexp> Ꮡre, nint pos) {
-    ref var re = ref Ꮡre.Value;
-
     return -1;
 }
 
@@ -550,24 +546,18 @@ internal const rune endOfText = -1;
 // MatchReader reports whether the text returned by the [io.RuneReader]
 // contains any match of the regular expression re.
 public static bool MatchReader(this ж<Regexp> Ꮡre, io.RuneReader r) {
-    ref var re = ref Ꮡre.Value;
-
     return Ꮡre.doMatch(r, default!, ""u8);
 }
 
 // MatchString reports whether the string s
 // contains any match of the regular expression re.
 public static bool MatchString(this ж<Regexp> Ꮡre, @string s) {
-    ref var re = ref Ꮡre.Value;
-
     return Ꮡre.doMatch(default!, default!, s);
 }
 
 // Match reports whether the byte slice b
 // contains any match of the regular expression re.
 public static bool Match(this ж<Regexp> Ꮡre, slice<byte> b) {
-    ref var re = ref Ꮡre.Value;
-
     return Ꮡre.doMatch(default!, b, ""u8);
 }
 
@@ -631,8 +621,6 @@ public static @string ReplaceAllString(this ж<Regexp> Ꮡre, @string src, @stri
 // with the replacement string repl. The replacement repl is substituted directly,
 // without using [Regexp.Expand].
 public static @string ReplaceAllLiteralString(this ж<Regexp> Ꮡre, @string src, @string repl) {
-    ref var re = ref Ꮡre.Value;
-
     return ((@string)Ꮡre.replaceAll(default!, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl.ꓸꓸꓸ)));
 }
 
@@ -641,8 +629,6 @@ public static @string ReplaceAllLiteralString(this ж<Regexp> Ꮡre, @string src
 // to the matched substring. The replacement returned by repl is substituted
 // directly, without using [Regexp.Expand].
 public static @string ReplaceAllStringFunc(this ж<Regexp> Ꮡre, @string src, Func<@string, @string> repl) {
-    ref var re = ref Ꮡre.Value;
-
     var b = Ꮡre.replaceAll(default!, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl(src[(int)(match[0])..(int)(match[1])]).ꓸꓸꓸ));
     return ((@string)b);
 }
@@ -738,8 +724,6 @@ public static slice<byte> ReplaceAll(this ж<Regexp> Ꮡre, slice<byte> src, sli
 // with the replacement bytes repl. The replacement repl is substituted directly,
 // without using [Regexp.Expand].
 public static slice<byte> ReplaceAllLiteral(this ж<Regexp> Ꮡre, slice<byte> src, slice<byte> repl) {
-    ref var re = ref Ꮡre.Value;
-
     var replʗ1 = repl;
     return Ꮡre.replaceAll(src, ""u8, 2, (slice<byte> dst, slice<nint> match) => append(dst, replʗ1.ꓸꓸꓸ));
 }
@@ -749,8 +733,6 @@ public static slice<byte> ReplaceAllLiteral(this ж<Regexp> Ꮡre, slice<byte> s
 // to the matched byte slice. The replacement returned by repl is substituted
 // directly, without using [Regexp.Expand].
 public static slice<byte> ReplaceAllFunc(this ж<Regexp> Ꮡre, slice<byte> src, Func<slice<byte>, slice<byte>> repl) {
-    ref var re = ref Ꮡre.Value;
-
     var srcʗ1 = src;
     return Ꮡre.replaceAll(src, ""u8, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl(srcʗ1[(int)(match[0])..(int)(match[1])]).ꓸꓸꓸ));
 }
@@ -867,8 +849,6 @@ internal static void allMatches(this ж<Regexp> Ꮡre, @string s, slice<byte> b,
 // Find returns a slice holding the text of the leftmost match in b of the regular expression.
 // A return value of nil indicates no match.
 public static slice<byte> Find(this ж<Regexp> Ꮡre, slice<byte> b) {
-    ref var re = ref Ꮡre.Value;
-
     array<nint> dstCap = new(2);
     var a = Ꮡre.doExecute(default!, b, ""u8, 0, 2, dstCap[..0]);
     if (a == default!) {
@@ -884,7 +864,6 @@ public static slice<byte> Find(this ж<Regexp> Ꮡre, slice<byte> b) {
 public static slice<nint> /*loc*/ FindIndex(this ж<Regexp> Ꮡre, slice<byte> b) {
     slice<nint> loc = default!;
 
-    ref var re = ref Ꮡre.Value;
     var a = Ꮡre.doExecute(default!, b, ""u8, 0, 2, default!);
     if (a == default!) {
         return default!;
@@ -898,8 +877,6 @@ public static slice<nint> /*loc*/ FindIndex(this ж<Regexp> Ꮡre, slice<byte> b
 // an empty string. Use [Regexp.FindStringIndex] or [Regexp.FindStringSubmatch] if it is
 // necessary to distinguish these cases.
 public static @string FindString(this ж<Regexp> Ꮡre, @string s) {
-    ref var re = ref Ꮡre.Value;
-
     array<nint> dstCap = new(2);
     var a = Ꮡre.doExecute(default!, default!, s, 0, 2, dstCap[..0]);
     if (a == default!) {
@@ -915,7 +892,6 @@ public static @string FindString(this ж<Regexp> Ꮡre, @string s) {
 public static slice<nint> /*loc*/ FindStringIndex(this ж<Regexp> Ꮡre, @string s) {
     slice<nint> loc = default!;
 
-    ref var re = ref Ꮡre.Value;
     var a = Ꮡre.doExecute(default!, default!, s, 0, 2, default!);
     if (a == default!) {
         return default!;
@@ -931,7 +907,6 @@ public static slice<nint> /*loc*/ FindStringIndex(this ж<Regexp> Ꮡre, @string
 public static slice<nint> /*loc*/ FindReaderIndex(this ж<Regexp> Ꮡre, io.RuneReader r) {
     slice<nint> loc = default!;
 
-    ref var re = ref Ꮡre.Value;
     var a = Ꮡre.doExecute(r, default!, ""u8, 0, 2, default!);
     if (a == default!) {
         return default!;
@@ -1152,8 +1127,6 @@ internal static readonly UntypedInt startSize = 10; // The size at which to star
 // package comment.
 // A return value of nil indicates no match.
 public static slice<slice<byte>> FindAll(this ж<Regexp> Ꮡre, slice<byte> b, nint n) {
-    ref var re = ref Ꮡre.Value;
-
     if (n < 0) {
         n = len(b) + 1;
     }
@@ -1173,8 +1146,6 @@ public static slice<slice<byte>> FindAll(this ж<Regexp> Ꮡre, slice<byte> b, n
 // in the package comment.
 // A return value of nil indicates no match.
 public static slice<slice<nint>> FindAllIndex(this ж<Regexp> Ꮡre, slice<byte> b, nint n) {
-    ref var re = ref Ꮡre.Value;
-
     if (n < 0) {
         n = len(b) + 1;
     }
@@ -1193,8 +1164,6 @@ public static slice<slice<nint>> FindAllIndex(this ж<Regexp> Ꮡre, slice<byte>
 // in the package comment.
 // A return value of nil indicates no match.
 public static slice<@string> FindAllString(this ж<Regexp> Ꮡre, @string s, nint n) {
-    ref var re = ref Ꮡre.Value;
-
     if (n < 0) {
         n = len(s) + 1;
     }
@@ -1213,8 +1182,6 @@ public static slice<@string> FindAllString(this ж<Regexp> Ꮡre, @string s, nin
 // description in the package comment.
 // A return value of nil indicates no match.
 public static slice<slice<nint>> FindAllStringIndex(this ж<Regexp> Ꮡre, @string s, nint n) {
-    ref var re = ref Ꮡre.Value;
-
     if (n < 0) {
         n = len(s) + 1;
     }
@@ -1233,8 +1200,6 @@ public static slice<slice<nint>> FindAllStringIndex(this ж<Regexp> Ꮡre, @stri
 // description in the package comment.
 // A return value of nil indicates no match.
 public static slice<slice<slice<byte>>> FindAllSubmatch(this ж<Regexp> Ꮡre, slice<byte> b, nint n) {
-    ref var re = ref Ꮡre.Value;
-
     if (n < 0) {
         n = len(b) + 1;
     }
@@ -1260,8 +1225,6 @@ public static slice<slice<slice<byte>>> FindAllSubmatch(this ж<Regexp> Ꮡre, s
 // 'All' description in the package comment.
 // A return value of nil indicates no match.
 public static slice<slice<nint>> FindAllSubmatchIndex(this ж<Regexp> Ꮡre, slice<byte> b, nint n) {
-    ref var re = ref Ꮡre.Value;
-
     if (n < 0) {
         n = len(b) + 1;
     }
@@ -1280,8 +1243,6 @@ public static slice<slice<nint>> FindAllSubmatchIndex(this ж<Regexp> Ꮡre, sli
 // the 'All' description in the package comment.
 // A return value of nil indicates no match.
 public static slice<slice<@string>> FindAllStringSubmatch(this ж<Regexp> Ꮡre, @string s, nint n) {
-    ref var re = ref Ꮡre.Value;
-
     if (n < 0) {
         n = len(s) + 1;
     }
@@ -1307,8 +1268,6 @@ public static slice<slice<@string>> FindAllStringSubmatch(this ж<Regexp> Ꮡre,
 // comment.
 // A return value of nil indicates no match.
 public static slice<slice<nint>> FindAllStringSubmatchIndex(this ж<Regexp> Ꮡre, @string s, nint n) {
-    ref var re = ref Ꮡre.Value;
-
     if (n < 0) {
         n = len(s) + 1;
     }

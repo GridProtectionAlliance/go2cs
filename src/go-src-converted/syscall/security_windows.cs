@@ -154,8 +154,6 @@ public static (ж<SID> sid, @string domain, uint32 accType, error err) LookupSID
 // String converts sid to a string format
 // suitable for display, storage, or transmission.
 public static (@string, error) String(this ж<SID> Ꮡsid) => func<(@string, error)>((defer, recover) => {
-    ref var sid = ref Ꮡsid.Value;
-
     ref var s = ref heap<ж<uint16>>(out var Ꮡs);
     var e = ConvertSidToStringSid(Ꮡsid, Ꮡs);
     if (e != default!) {
@@ -167,15 +165,11 @@ public static (@string, error) String(this ж<SID> Ꮡsid) => func<(@string, err
 
 // Len returns the length, in bytes, of a valid security identifier sid.
 public static nint Len(this ж<SID> Ꮡsid) {
-    ref var sid = ref Ꮡsid.Value;
-
     return (nint)GetLengthSid(Ꮡsid);
 }
 
 // Copy creates a duplicate of security identifier sid.
 public static (ж<SID>, error) Copy(this ж<SID> Ꮡsid) {
-    ref var sid = ref Ꮡsid.Value;
-
     var b = new slice<byte>(Ꮡsid.Len());
     var sid2 = (ж<SID>)(uintptr)(new @unsafe.Pointer(Ꮡ(b, 0)));
     var e = CopySid((uint32)len(b), sid2, Ꮡsid);
@@ -194,7 +188,6 @@ public static (@string account, @string domain, uint32 accType, error err) Looku
     uint32 accType = default!;
     error err = default!;
 
-    ref var sid = ref Ꮡsid.Value;
     ж<uint16> sys = default!;
     if (len(system) > 0) {
         (sys, err) = UTF16PtrFromString(system);

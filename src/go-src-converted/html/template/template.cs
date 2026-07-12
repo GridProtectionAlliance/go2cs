@@ -155,8 +155,6 @@ public static error Execute(this ж<Template> Ꮡt, io.Writer wr, any data) {
 // A template may be executed safely in parallel, although if parallel
 // executions share a Writer the output may be interleaved.
 public static error ExecuteTemplate(this ж<Template> Ꮡt, io.Writer wr, @string name, any data) {
-    ref var t = ref Ꮡt.Value;
-
     var (tmpl, err) = Ꮡt.lookupAndEscapeTemplate(name);
     if (err != default!) {
         return err;
@@ -249,7 +247,6 @@ public static (ж<Template>, error) Parse(this ж<Template> Ꮡt, @string text) 
 // It returns an error if t or any associated template has already been executed.
 public static (ж<Template>, error) AddParseTree(this ж<Template> Ꮡt, @string name, ж<parse.Tree> Ꮡtree) => func<(ж<Template>, error)>((defer, recover) => {
     ref var t = ref Ꮡt.Value;
-    ref var tree = ref Ꮡtree.Value;
 
     {
         var errΔ1 = Ꮡt.checkCanParse(); if (errΔ1 != default!) {
@@ -413,8 +410,6 @@ public static ж<Template> Lookup(this ж<Template> Ꮡt, @string name) => func(
 //
 //	var t = template.Must(template.New("name").Parse("html"))
 public static ж<Template> Must(ж<Template> Ꮡt, error err) {
-    ref var t = ref Ꮡt.Value;
-
     if (err != default!) {
         throw panic(err);
     }
@@ -447,7 +442,6 @@ public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸstring filenames�
 public static (ж<Template>, error) ParseFiles(this ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) {
     var filenames = filenamesʗp.slice();
 
-    ref var t = ref Ꮡt.Value;
     return parseFiles(Ꮡt, readFileOS, filenames.ꓸꓸꓸ);
 }
 
@@ -519,15 +513,11 @@ public static (ж<Template>, error) ParseGlob(@string pattern) {
 //
 // ParseGlob returns an error if t or any associated template has already been executed.
 public static (ж<Template>, error) ParseGlob(this ж<Template> Ꮡt, @string pattern) {
-    ref var t = ref Ꮡt.Value;
-
     return parseGlob(Ꮡt, pattern);
 }
 
 // parseGlob is the implementation of the function and method ParseGlob.
 internal static (ж<Template>, error) parseGlob(ж<Template> Ꮡt, @string pattern) {
-    ref var t = ref Ꮡt.Value;
-
     {
         var errΔ1 = Ꮡt.checkCanParse(); if (errΔ1 != default!) {
             return (default!, errΔ1);
@@ -570,13 +560,10 @@ public static (ж<Template>, error) ParseFS(fs.FS fsΔ1, params ꓸꓸꓸstring 
 public static (ж<Template>, error) ParseFS(this ж<Template> Ꮡt, fs.FS fsΔ1, params ꓸꓸꓸstring patternsʗp) {
     var patterns = patternsʗp.slice();
 
-    ref var t = ref Ꮡt.Value;
     return parseFS(Ꮡt, fsΔ1, patterns);
 }
 
 internal static (ж<Template>, error) parseFS(ж<Template> Ꮡt, fs.FS fsys, slice<@string> patterns) {
-    ref var t = ref Ꮡt.Value;
-
     slice<@string> filenames = default!;
     foreach (var (_, pattern) in patterns) {
         var (list, err) = fs.Glob(fsys, pattern);

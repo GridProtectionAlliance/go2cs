@@ -74,7 +74,6 @@ internal static opPredicates unaryOpPredicates;
 }
 
 internal static bool op(this ж<Checker> Ꮡcheck, opPredicates m, ж<operand> Ꮡx, token.Token op) {
-    ref var check = ref Ꮡcheck.Value;
     ref var x = ref Ꮡx.Value;
 
     {
@@ -241,8 +240,6 @@ internal static bool isComparison(token.Token op) {
 // and if x is the (formerly untyped) lhs operand of a non-constant
 // shift, it must be an integer value.
 internal static void updateExprType(this ж<Checker> Ꮡcheck, ast.Expr x, ΔType typ, bool final) {
-    ref var check = ref Ꮡcheck.Value;
-
     Ꮡcheck.updateExprType0(default!, x, typ, final);
 }
 
@@ -388,7 +385,6 @@ internal static void updateExprType0(this ж<Checker> Ꮡcheck, ast.Expr parent,
 // If x is a constant operand, the returned constant.Value will be the
 // representation of x in this context.
 internal static (ΔType, constant.Value, errors.Code) implicitTypeAndValue(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔType target) {
-    ref var check = ref Ꮡcheck.Value;
     ref var x = ref Ꮡx.Value;
 
     if (x.mode == invalid || isTyped(x.typ) || !isValid(target)) {
@@ -632,8 +628,6 @@ internal static void comparison(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
 // incomparableCause returns a more specific cause why typ is not comparable.
 // If there is no more specific cause, the result is "".
 internal static @string incomparableCause(this ж<Checker> Ꮡcheck, ΔType typ) {
-    ref var check = ref Ꮡcheck.Value;
-
     switch (under(typ).type()) {
     case ж<Slice> _:
     case ж<ΔSignature> _:
@@ -652,8 +646,6 @@ internal static @string incomparableCause(this ж<Checker> Ꮡcheck, ΔType typ)
 
 // kindString returns the type kind as a string.
 internal static @string kindString(this ж<Checker> Ꮡcheck, ΔType typ) {
-    ref var check = ref Ꮡcheck.Value;
-
     switch (under(typ).type()) {
     case ж<Array>: {
         return "array"u8;
@@ -1045,8 +1037,6 @@ internal static ж<target> newTarget(ΔType typ, @string desc) {
 // parameterized type or function value.
 internal static exprKind rawExpr(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<operand> Ꮡx, ast.Expr e, ΔType hint, bool allowGeneric) => func((defer, recover) => {
     ref var check = ref Ꮡcheck.Value;
-    ref var T = ref ᏑT.Value;
-    ref var x = ref Ꮡx.Value;
 
     if ((~check.conf)._Trace) {
         Ꮡcheck.trace(e.Pos(), "-- expr %s"u8, e);
@@ -1068,8 +1058,6 @@ internal static exprKind rawExpr(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<
 // from a non-nil target T, nonGeneric reports an error and invalidates x.mode and x.typ.
 // Otherwise it leaves x alone.
 internal static void nonGeneric(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<operand> Ꮡx) {
-    ref var check = ref Ꮡcheck.Value;
-    ref var T = ref ᏑT.DerefOrNil();
     ref var x = ref Ꮡx.Value;
 
     if (x.mode == invalid || x.mode == novalue) {
@@ -1105,7 +1093,6 @@ internal static void nonGeneric(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<o
 // langCompat reports an error if the representation of a numeric
 // literal is not compatible with the current language version.
 internal static void langCompat(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡlit) {
-    ref var check = ref Ꮡcheck.Value;
     ref var lit = ref Ꮡlit.Value;
 
     @string s = lit.Value;
@@ -1703,7 +1690,6 @@ internal static any keyVal(constant.Value x) {
 
 // typeAssertion checks x.(T). The type of x must be an interface.
 internal static void typeAssertion(this ж<Checker> Ꮡcheck, ast.Expr e, ж<operand> Ꮡx, ΔType T, bool typeSwitch) {
-    ref var check = ref Ꮡcheck.Value;
     ref var x = ref Ꮡx.Value;
 
     ref var cause = ref heap(new @string(), out var Ꮡcause);
@@ -1724,10 +1710,6 @@ internal static void typeAssertion(this ж<Checker> Ꮡcheck, ast.Expr e, ж<ope
 // The result must be a single value.
 // If an error occurred, x.mode is set to invalid.
 internal static void expr(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<operand> Ꮡx, ast.Expr e) {
-    ref var check = ref Ꮡcheck.Value;
-    ref var T = ref ᏑT.Value;
-    ref var x = ref Ꮡx.Value;
-
     Ꮡcheck.rawExpr(ᏑT, Ꮡx, e, default!, false);
     Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltin))) | (nuint)(1 << (int)(byte)(typexpr))));
     Ꮡcheck.singleValue(Ꮡx);
@@ -1735,9 +1717,6 @@ internal static void expr(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<operand
 
 // genericExpr is like expr but the result may also be generic.
 internal static void genericExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e) {
-    ref var check = ref Ꮡcheck.Value;
-    ref var x = ref Ꮡx.Value;
-
     Ꮡcheck.rawExpr(nil, Ꮡx, e, default!, true);
     Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltin))) | (nuint)(1 << (int)(byte)(typexpr))));
     Ꮡcheck.singleValue(Ꮡx);
@@ -1752,7 +1731,6 @@ internal static (slice<ж<operand>> list, bool commaOk) multiExpr(this ж<Checke
     slice<ж<operand>> list = default!;
     bool commaOk = default!;
 
-    ref var check = ref Ꮡcheck.Value;
     ref var x = ref heap(new operand(), out var Ꮡx);
     Ꮡcheck.rawExpr(nil, Ꮡx, e, default!, false);
     Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltin))) | (nuint)(1 << (int)(byte)(typexpr))));
@@ -1783,9 +1761,6 @@ internal static (slice<ж<operand>> list, bool commaOk) multiExpr(this ж<Checke
 // hint is the type of a composite literal element.
 // If an error occurred, x.mode is set to invalid.
 internal static void exprWithHint(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e, ΔType hint) {
-    ref var check = ref Ꮡcheck.Value;
-    ref var x = ref Ꮡx.Value;
-
     assert(hint != default!);
     Ꮡcheck.rawExpr(nil, Ꮡx, e, hint, false);
     Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltin))) | (nuint)(1 << (int)(byte)(typexpr))));
@@ -1797,9 +1772,6 @@ internal static void exprWithHint(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, a
 // value.
 // If an error occurred, x.mode is set to invalid.
 internal static void exprOrType(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e, bool allowGeneric) {
-    ref var check = ref Ꮡcheck.Value;
-    ref var x = ref Ꮡx.Value;
-
     Ꮡcheck.rawExpr(nil, Ꮡx, e, default!, allowGeneric);
     Ꮡcheck.exclude(Ꮡx, ((nuint)1 << (int)(byte)(novalue)));
     Ꮡcheck.singleValue(Ꮡx);
@@ -1808,7 +1780,6 @@ internal static void exprOrType(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast
 // exclude reports an error if x.mode is in modeset and sets x.mode to invalid.
 // The modeset may contain any of 1<<novalue, 1<<builtin, 1<<typexpr.
 internal static void exclude(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, nuint modeset) {
-    ref var check = ref Ꮡcheck.Value;
     ref var x = ref Ꮡx.Value;
 
     if ((nuint)(modeset & (((nuint)1 << (int)(byte)(x.mode)))) != 0) {
@@ -1842,7 +1813,6 @@ internal static void exclude(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, nuint 
 
 // singleValue reports an error if x describes a tuple and sets x.mode to invalid.
 internal static void singleValue(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
-    ref var check = ref Ꮡcheck.Value;
     ref var x = ref Ꮡx.Value;
 
     if (x.mode == value) {

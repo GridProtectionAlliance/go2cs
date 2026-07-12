@@ -93,8 +93,6 @@ public static (slice<byte>, error) MarshalJSON(this ΔLevel l) {
 // It also accepts numeric offsets that would result in a different string on
 // output. For example, "Error-8" would marshal as "INFO".
 public static error UnmarshalJSON(this ж<ΔLevel> Ꮡl, slice<byte> data) {
-    ref var l = ref Ꮡl.Value;
-
     var (s, err) = strconv.Unquote(((@string)data));
     if (err != default!) {
         return err;
@@ -114,8 +112,6 @@ public static (slice<byte>, error) MarshalText(this ΔLevel l) {
 // It also accepts numeric offsets that would result in a different string on
 // output. For example, "Error-8" would marshal as "INFO".
 public static error UnmarshalText(this ж<ΔLevel> Ꮡl, slice<byte> data) {
-    ref var l = ref Ꮡl.Value;
-
     return Ꮡl.parse(((@string)data));
 }
 
@@ -180,37 +176,27 @@ public static ΔLevel Level(this ΔLevel l) {
 
 // Level returns v's level.
 public static ΔLevel Level(this ж<LevelVar> Ꮡv) {
-    ref var v = ref Ꮡv.Value;
-
     return ((ΔLevel)(nint)Ꮡv.of(LevelVar.Ꮡval).Load());
 }
 
 // Set sets v's level to l.
 public static void Set(this ж<LevelVar> Ꮡv, ΔLevel l) {
-    ref var v = ref Ꮡv.Value;
-
     Ꮡv.of(LevelVar.Ꮡval).Store((int64)(nint)l);
 }
 
 public static @string String(this ж<LevelVar> Ꮡv) {
-    ref var v = ref Ꮡv.Value;
-
     return fmt.Sprintf("LevelVar(%s)"u8, Ꮡv.Level());
 }
 
 // MarshalText implements [encoding.TextMarshaler]
 // by calling [Level.MarshalText].
 public static (slice<byte>, error) MarshalText(this ж<LevelVar> Ꮡv) {
-    ref var v = ref Ꮡv.Value;
-
     return Ꮡv.Level().MarshalText();
 }
 
 // UnmarshalText implements [encoding.TextUnmarshaler]
 // by calling [Level.UnmarshalText].
 public static error UnmarshalText(this ж<LevelVar> Ꮡv, slice<byte> data) {
-    ref var v = ref Ꮡv.Value;
-
     ref var l = ref heap(new ΔLevel(), out var Ꮡl);
     {
         var err = Ꮡl.UnmarshalText(data); if (err != default!) {

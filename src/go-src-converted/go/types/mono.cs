@@ -161,9 +161,6 @@ internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
 // recordCanon records that tpar is the canonical type parameter
 // corresponding to method type parameter mpar.
 [GoRecv] internal static void recordCanon(this ref monoGraph w, ж<TypeParam> Ꮡmpar, ж<TypeParam> Ꮡtpar) {
-    ref var mpar = ref Ꮡmpar.Value;
-    ref var tpar = ref Ꮡtpar.Value;
-
     if (w.canon == default!) {
         w.canon = new map<ж<TypeParam>, ж<TypeParam>>();
     }
@@ -173,9 +170,6 @@ internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
 // recordInstance records that the given type parameters were
 // instantiated with the corresponding type arguments.
 internal static void recordInstance(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, tokenꓸPos pos, slice<ж<TypeParam>> tparams, slice<ΔType> targs, slice<ast.Expr> xlist) {
-    ref var w = ref Ꮡw.Value;
-    ref var pkg = ref Ꮡpkg.Value;
-
     foreach (var (i, tpar) in tparams) {
         tokenꓸPos posΔ1 = pos;
         if (i < len(xlist)) {
@@ -187,8 +181,6 @@ internal static void recordInstance(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg,
 
 // assign records that tpar was instantiated as targ at pos.
 internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, tokenꓸPos pos, ж<TypeParam> Ꮡtpar, ΔType targ) {
-    ref var w = ref Ꮡw.Value;
-    ref var pkg = ref Ꮡpkg.DerefOrNil();
     ref var tpar = ref Ꮡtpar.Value;
 
     // Go generics do not have an analog to C++`s template-templates,
@@ -295,7 +287,6 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, token�
 // localNamedVertex returns the index of the vertex representing
 // named, or -1 if named doesn't need representation.
 [GoRecv] internal static nint localNamedVertex(this ref monoGraph w, ж<Package> Ꮡpkg, ж<Named> Ꮡnamed) {
-    ref var pkg = ref Ꮡpkg.DerefOrNil();
     ref var named = ref Ꮡnamed.Value;
 
     var obj = named.Obj();

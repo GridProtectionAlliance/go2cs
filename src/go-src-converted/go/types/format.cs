@@ -18,7 +18,6 @@ partial class types_package {
 internal static @string sprintf(ж<token.FileSet> Ꮡfset, Func<ж<Package>, @string> qf, bool tpSubscripts, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var fset = ref Ꮡfset.DerefOrNil();
     foreach (var (i, vᴛ1) in args) {
         var arg = vᴛ1;
 

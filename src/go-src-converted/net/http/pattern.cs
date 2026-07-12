@@ -250,8 +250,6 @@ internal static readonly relationship overlaps = "overlaps"u8;                //
 }
 
 [GoRecv] internal static relationship comparePathsAndMethods(this ref pattern p1, ж<pattern> Ꮡp2) {
-    ref var p2 = ref Ꮡp2.Value;
-
     relationship mrel = p1.compareMethods(Ꮡp2);
     // Optimization: avoid a call to comparePaths.
     if (mrel == disjoint) {
@@ -462,16 +460,12 @@ But neither is more specific than the other.
 
 // writeMatchingPath writes to b a path that matches the segments.
 internal static void writeMatchingPath(ж<strings.Builder> Ꮡb, slice<segment> segs) {
-    ref var b = ref Ꮡb.Value;
-
     foreach (var (_, s) in segs) {
         writeSegment(Ꮡb, s);
     }
 }
 
 internal static void writeSegment(ж<strings.Builder> Ꮡb, segment s) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.WriteByte((rune)'/');
     if (!s.multi && s.s != "/"u8) {
         Ꮡb.WriteString(s.s);

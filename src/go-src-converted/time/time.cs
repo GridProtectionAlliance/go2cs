@@ -1221,8 +1221,6 @@ public static Time Local(this Time t) {
 //
 // In panics if loc is nil.
 public static Time In(this Time t, ж<ΔLocation> Ꮡloc) {
-    ref var loc = ref Ꮡloc.DerefOrNil();
-
     if (Ꮡloc == nil) {
         throw panic("time: missing Location in call to Time.In");
     }
@@ -1551,8 +1549,6 @@ internal static (nint nhi, nint nlo) norm(nint hi, nint lo, nint @base) {
 //
 // Date panics if loc is nil.
 public static Time Date(nint year, ΔMonth month, nint day, nint hour, nint min, nint sec, nint nsec, ж<ΔLocation> Ꮡloc) {
-    ref var loc = ref Ꮡloc.DerefOrNil();
-
     if (Ꮡloc == nil) {
         throw panic("time: missing Location in call to Date");
     }

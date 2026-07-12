@@ -57,7 +57,6 @@ internal static partial void block(ж<array<uint64>> seed, ж<array<uint64>> blo
 public static void Init(this ж<State> Ꮡs, array<byte> seed) {
     seed = seed.Clone();
 
-    ref var s = ref Ꮡs.Value;
     Ꮡs.Init64(new uint64[]{
         byteorder.LeUint64(seed[(int)(0 * 8)..]),
         byteorder.LeUint64(seed[(int)(1 * 8)..]),

@@ -210,8 +210,6 @@ public static Action<ж<options>> MapForLookup() {
 }
 
 internal static void apply(ж<options> Ꮡo, slice<Action<ж<options>>> opts) {
-    ref var o = ref Ꮡo.Value;
-
     foreach (var (_, f) in opts) {
         f(Ꮡo);
     }
@@ -238,8 +236,6 @@ public static ж<Profile> New(params Span<Action<ж<options>>> oʗp) {
 // ToASCII("golang") is "golang". If an error is encountered it will return
 // an error and a (partially) processed result.
 public static (@string, error) ToASCII(this ж<Profile> Ꮡp, @string s) {
-    ref var p = ref Ꮡp.Value;
-
     return Ꮡp.process(s, true);
 }
 
@@ -450,7 +446,6 @@ internal static (@string mapped, bool isBidi, error err) normalize(ж<Profile> �
     bool isBidi = default!;
     error err = default!;
 
-    ref var p = ref Ꮡp.Value;
     // TODO: consider first doing a quick check to see if any of these checks
     // need to be done. This will make it slower in the general case, but
     // faster in the common case.

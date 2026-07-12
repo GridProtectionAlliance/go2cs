@@ -185,8 +185,6 @@ public static ж<ΔPublicKey> PublicKey(this ж<PrivateKey> Ꮡk) {
 // Public implements the implicit interface of all standard library private
 // keys. See the docs of [crypto.PrivateKey].
 public static cryptoꓸPublicKey Public(this ж<PrivateKey> Ꮡk) {
-    ref var k = ref Ꮡk.Value;
-
     return Ꮡk.PublicKey();
 }
 

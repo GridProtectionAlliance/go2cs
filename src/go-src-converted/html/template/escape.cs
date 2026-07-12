@@ -129,8 +129,6 @@ internal static void initᴛfuncMap() { funcMap = new text.template_package.Func
 
 // makeEscaper creates a blank escaper for the given set.
 internal static escaper makeEscaper(ж<nameSpace> Ꮡn) {
-    ref var n = ref Ꮡn.Value;
-
     return new escaper(
         Ꮡn,
         new map<@string, context>{},
@@ -660,8 +658,6 @@ internal static context joinRange(context c0, ж<rangeContext> Ꮡrc) {
 // It returns the best guess at an output context, and the result of the filter
 // which is the same as whether e was updated.
 [GoRecv] internal static (context, bool) escapeListConditionally(this ref escaper e, context c, ж<parse.ListNode> Ꮡn, Func<ж<escaper>, context, bool> filter) {
-    ref var n = ref Ꮡn.Value;
-
     ref var e1 = ref heap<escaper>(out var Ꮡe1);
     e1 = makeEscaper(e.ns);
     e1.rangeContext = e.rangeContext;

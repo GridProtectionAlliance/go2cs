@@ -465,7 +465,6 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
 // of comparisons is tracked in the given count and should not exceed the given
 // limit.
 internal static error checkNameConstraints(this ж<Certificate> Ꮡc, ж<nint> Ꮡcount, nint maxConstraintComparisons, @string nameType, @string name, any parsedName, Func<any, any, (bool, error)> match, any permitted, any excluded) {
-    ref var c = ref Ꮡc.Value;
     ref var count = ref Ꮡcount.Value;
 
     var excludedValue = reflect.ValueOf(excluded);
@@ -778,8 +777,6 @@ public static (slice<slice<ж<Certificate>>> chains, error err) Verify(this ж<C
 }
 
 internal static slice<ж<Certificate>> appendToFreshChain(slice<ж<Certificate>> chain, ж<Certificate> Ꮡcert) {
-    ref var cert = ref Ꮡcert.Value;
-
     var n = new slice<ж<Certificate>>(builtin.len(chain) + 1);
     copy(n, chain);
     n[builtin.len(chain)] = Ꮡcert;
@@ -848,8 +845,6 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) buildChains(th
     slice<slice<ж<Certificate>>> chains = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.Value;
-    ref var sigChecks = ref ᏑsigChecks.DerefOrNil();
     ref var opts = ref Ꮡopts.Value;
     ref var hintErr = ref heap<error>(out var ᏑhintErr);
     ref var hintCert = ref heap<ж<Certificate>>(out var ᏑhintCert);

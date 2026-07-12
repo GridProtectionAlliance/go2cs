@@ -256,8 +256,6 @@ internal static void pushHead(this ж<poolChain> Ꮡc, any val) {
 }
 
 internal static (any, bool) popTail(this ж<poolChain> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     var d = Ꮡc.of(poolChain.Ꮡtail).Load();
     if (d == nil) {
         return (default!, false);

@@ -131,8 +131,6 @@ internal static readonly UntypedInt infoZipUnixExtraID = 0x5855; // Info-ZIP Uni
 
 // FileInfo returns an fs.FileInfo for the [FileHeader].
 public static fs.FileInfo FileInfo(this ж<FileHeader> Ꮡh) {
-    ref var h = ref Ꮡh.Value;
-
     return new headerFileInfo(Ꮡh);
 }
 

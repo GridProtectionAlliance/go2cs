@@ -196,8 +196,6 @@ internal static bool strictErrors(this ж<Resolver> Ꮡr) {
 }
 
 internal static ж<singleflight.Group> getLookupGroup(this ж<Resolver> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     if (Ꮡr == nil) {
         return DefaultResolver.of(Resolver.ᏑlookupGroup);
     }
@@ -222,7 +220,6 @@ public static (slice<@string> addrs, error err) LookupHost(this ж<Resolver> Ꮡ
     slice<@string> addrs = default!;
     error err = default!;
 
-    ref var r = ref Ꮡr.Value;
     // Make sure that no matter what we do later, host=="" is rejected.
     if (host == ""u8) {
         return (default!, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), host, ""u8)));
@@ -252,8 +249,6 @@ public static (slice<IP>, error) LookupIP(@string host) {
 // LookupIPAddr looks up host using the local resolver.
 // It returns a slice of that host's IPv4 and IPv6 addresses.
 public static (slice<IPAddr>, error) LookupIPAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string host) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.lookupIPAddr(ctx, "ip"u8, host);
 }
 
@@ -262,8 +257,6 @@ public static (slice<IPAddr>, error) LookupIPAddr(this ж<Resolver> Ꮡr, contex
 // network.
 // network must be one of "ip", "ip4" or "ip6".
 public static (slice<IP>, error) LookupIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
-    ref var r = ref Ꮡr.Value;
-
     var (afnet, _, err) = parseNetwork(ctx, network, false);
     if (err != default!) {
         return (default!, err);
@@ -294,8 +287,6 @@ public static (slice<IP>, error) LookupIP(this ж<Resolver> Ꮡr, context.Contex
 // network.
 // The network must be one of "ip", "ip4" or "ip6".
 public static (slice<netipꓸAddr>, error) LookupNetIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
-    ref var r = ref Ꮡr.Value;
-
     // TODO(bradfitz): make this efficient, making the internal net package
     // type throughout be netip.Addr and only converting to the net.IP slice
     // version at the edge. But for now (2021-10-20), this is a wrapper around
@@ -346,8 +337,6 @@ internal static context.Context withUnexpiredValuesPreserved(context.Context loo
 // lookupIPAddr looks up host using the local resolver and particular network.
 // It returns a slice of that host's IPv4 and IPv6 addresses.
 internal static (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
-    ref var r = ref Ꮡr.Value;
-
     // Make sure that no matter what we do later, host=="" is rejected.
     if (host == ""u8) {
         return (default!, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), host, ""u8)));
@@ -475,7 +464,6 @@ public static (nint port, error err) LookupPort(this ж<Resolver> Ꮡr, context.
     nint port = default!;
     error err = default!;
 
-    ref var r = ref Ꮡr.Value;
     (port, var needsLookup) = parsePort(service);
     if (needsLookup) {
         var exprᴛ1 = network;
@@ -537,8 +525,6 @@ public static (@string cname, error err) LookupCNAME(@string host) {
 // The returned canonical name is validated to be a properly
 // formatted presentation-format domain name.
 public static (@string, error) LookupCNAME(this ж<Resolver> Ꮡr, context.Context ctx, @string host) {
-    ref var r = ref Ꮡr.Value;
-
     var (cname, err) = Ꮡr.lookupCNAME(ctx, host);
     if (err != default!) {
         return ("", err);
@@ -586,8 +572,6 @@ public static (@string cname, slice<ж<SRV>> addrs, error err) LookupSRV(@string
 // invalid names, those records are filtered out and an error
 // will be returned alongside the remaining results, if any.
 public static (@string, slice<ж<SRV>>, error) LookupSRV(this ж<Resolver> Ꮡr, context.Context ctx, @string service, @string proto, @string name) {
-    ref var r = ref Ꮡr.Value;
-
     var (cname, addrs, err) = Ꮡr.lookupSRV(ctx, service, proto, name);
     if (err != default!) {
         return ("", default!, err);
@@ -631,8 +615,6 @@ public static (slice<ж<MX>>, error) LookupMX(@string name) {
 // invalid names, those records are filtered out and an error
 // will be returned alongside the remaining results, if any.
 public static (slice<ж<MX>>, error) LookupMX(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
-    ref var r = ref Ꮡr.Value;
-
     var (records, err) = Ꮡr.lookupMX(ctx, name);
     if (err != default!) {
         return (default!, err);
@@ -673,8 +655,6 @@ public static (slice<ж<NS>>, error) LookupNS(@string name) {
 // invalid names, those records are filtered out and an error
 // will be returned alongside the remaining results, if any.
 public static (slice<ж<NS>>, error) LookupNS(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
-    ref var r = ref Ꮡr.Value;
-
     var (records, err) = Ꮡr.lookupNS(ctx, name);
     if (err != default!) {
         return (default!, err);
@@ -705,8 +685,6 @@ public static (slice<@string>, error) LookupTXT(@string name) {
 
 // LookupTXT returns the DNS TXT records for the given domain name.
 public static (slice<@string>, error) LookupTXT(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.lookupTXT(ctx, name);
 }
 
@@ -736,8 +714,6 @@ public static (slice<@string> names, error err) LookupAddr(@string addr) {
 // domain names. If the response contains invalid names, those records are filtered
 // out and an error will be returned alongside the remaining results, if any.
 public static (slice<@string>, error) LookupAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string addr) {
-    ref var r = ref Ꮡr.Value;
-
     var (names, err) = Ꮡr.lookupAddr(ctx, addr);
     if (err != default!) {
         return (default!, err);
@@ -798,7 +774,6 @@ internal static (@string target, slice<ж<SRV>> srvs, error err) goLookupSRV(thi
     slice<ж<SRV>> srvs = default!;
     error err = default!;
 
-    ref var r = ref Ꮡr.Value;
     if (service == ""u8 && proto == ""u8){
         target = name;
     } else {
@@ -853,8 +828,6 @@ internal static (@string target, slice<ж<SRV>> srvs, error err) goLookupSRV(thi
 
 // goLookupMX returns the MX records for name.
 internal static (slice<ж<MX>>, error) goLookupMX(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
-    ref var r = ref Ꮡr.Value;
-
     ref var server = ref heap<@string>(out var Ꮡserver);
     (var p, server, var err) = Ꮡr.lookup(ctx, name, dnsmessage.TypeMX, nil);
     if (err != default!) {
@@ -901,8 +874,6 @@ internal static (slice<ж<MX>>, error) goLookupMX(this ж<Resolver> Ꮡr, contex
 
 // goLookupNS returns the NS records for name.
 internal static (slice<ж<NS>>, error) goLookupNS(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
-    ref var r = ref Ꮡr.Value;
-
     ref var server = ref heap<@string>(out var Ꮡserver);
     (var p, server, var err) = Ꮡr.lookup(ctx, name, dnsmessage.TypeNS, nil);
     if (err != default!) {
@@ -948,8 +919,6 @@ internal static (slice<ж<NS>>, error) goLookupNS(this ж<Resolver> Ꮡr, contex
 
 // goLookupTXT returns the TXT records from name.
 internal static (slice<@string>, error) goLookupTXT(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
-    ref var r = ref Ꮡr.Value;
-
     ref var server = ref heap<@string>(out var Ꮡserver);
     (var p, server, var err) = Ꮡr.lookup(ctx, name, dnsmessage.TypeTXT, nil);
     if (err != default!) {

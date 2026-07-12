@@ -20,7 +20,6 @@ partial class types_package {
 // For untyped constants, it checks that the value doesn't become
 // arbitrarily large.
 internal static void overflow(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, tokenꓸPos opPos) {
-    ref var check = ref Ꮡcheck.Value;
     ref var x = ref Ꮡx.Value;
 
     assert(x.mode == constant_);
@@ -272,9 +271,7 @@ internal static constant.Value roundFloat64(constant.Value x) {
 // representable checks that a constant operand is representable in the given
 // basic type.
 internal static void representable(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Basic> Ꮡtyp) {
-    ref var check = ref Ꮡcheck.Value;
     ref var x = ref Ꮡx.Value;
-    ref var typ = ref Ꮡtyp.Value;
 
     var (v, code) = Ꮡcheck.representation(Ꮡx, Ꮡtyp);
     if (code != 0) {
@@ -291,7 +288,6 @@ internal static void representable(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
 //
 // If no such representation is possible, it returns a non-zero error code.
 internal static (constant.Value, errors.Code) representation(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Basic> Ꮡtyp) {
-    ref var check = ref Ꮡcheck.Value;
     ref var x = ref Ꮡx.Value;
     ref var typ = ref Ꮡtyp.Value;
 
@@ -319,7 +315,6 @@ internal static (constant.Value, errors.Code) representation(this ж<Checker> �
 }
 
 internal static void invalidConversion(this ж<Checker> Ꮡcheck, errors.Code code, ж<operand> Ꮡx, ΔType target) {
-    ref var check = ref Ꮡcheck.Value;
     ref var x = ref Ꮡx.Value;
 
     @string msg = "cannot convert %s to type %s"u8;

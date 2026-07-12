@@ -273,14 +273,10 @@ internal static @string Name(this rtype t) {
 }
 
 internal static rtype toRType(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return new rtype(Ꮡt);
 }
 
 internal static ж<abi.Type> elem(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     var et = Ꮡt.Elem();
     if (et != nil) {
         return et;
@@ -620,8 +616,6 @@ internal static bool haveIdenticalUnderlyingType(ж<abi.Type> ᏑT, ж<abi.Type>
 // function takes care of ensuring that multiple *rtype for the same
 // type are coalesced into a single Type.
 internal static ΔType toType(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNil();
-
     if (Ꮡt == nil) {
         return default!;
     }

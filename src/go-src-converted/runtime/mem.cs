@@ -49,8 +49,6 @@ partial class runtime_package {
 //
 //go:nosplit
 internal static @unsafe.Pointer sysAlloc(uintptr n, ж<sysMemStat> ᏑsysStat) {
-    ref var sysStat = ref ᏑsysStat.Value;
-
     ᏑsysStat.add((int64)n);
     ᏑgcController.of(gcControllerState.ᏑmappedReady).Add((int64)n);
     return (uintptr)sysAllocOS(n);
@@ -115,8 +113,6 @@ internal static void sysHugePageCollapse(@unsafe.Pointer v, uintptr n) {
 //
 //go:nosplit
 internal static void sysFree(@unsafe.Pointer v, uintptr n, ж<sysMemStat> ᏑsysStat) {
-    ref var sysStat = ref ᏑsysStat.Value;
-
     ᏑsysStat.add(-(int64)n);
     ᏑgcController.of(gcControllerState.ᏑmappedReady).Add(-(int64)n);
     sysFreeOS(v, n);
@@ -157,8 +153,6 @@ internal static @unsafe.Pointer sysReserve(@unsafe.Pointer v, uintptr n) {
 //
 // sysStat must be non-nil.
 internal static void sysMap(@unsafe.Pointer v, uintptr n, ж<sysMemStat> ᏑsysStat) {
-    ref var sysStat = ref ᏑsysStat.Value;
-
     ᏑsysStat.add((int64)n);
     sysMapOS(v, n);
 }

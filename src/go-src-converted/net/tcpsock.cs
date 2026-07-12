@@ -69,8 +69,6 @@ internal static bool isWildcard(this ж<TCPAddr> Ꮡa) {
 }
 
 internal static ΔAddr opAddr(this ж<TCPAddr> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
-
     if (Ꮡa == nil) {
         return default!;
     }
@@ -331,8 +329,6 @@ public static (bool, error) MultipathTCP(this ж<TCPConn> Ꮡc) {
 }
 
 internal static ж<TCPConn> newTCPConn(ж<netFD> Ꮡfd, time.Duration keepAliveIdle, KeepAliveConfig keepAliveCfg, Action<ж<netFD>> preKeepAliveHook, Action<KeepAliveConfig> keepAliveHook) {
-    ref var fd = ref Ꮡfd.Value;
-
     setNoDelay(Ꮡfd, true);
     if (!keepAliveCfg.Enable && keepAliveIdle >= 0) {
         keepAliveCfg = new KeepAliveConfig(
@@ -361,9 +357,6 @@ internal static ж<TCPConn> newTCPConn(ж<netFD> Ꮡfd, time.Duration keepAliveI
 // If the IP field of raddr is nil or an unspecified IP address, the
 // local system is assumed.
 public static (ж<TCPConn>, error) DialTCP(@string network, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> Ꮡraddr) {
-    ref var laddr = ref Ꮡladdr.Value;
-    ref var raddr = ref Ꮡraddr.DerefOrNil();
-
     var exprᴛ1 = network;
     if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8) {
     }

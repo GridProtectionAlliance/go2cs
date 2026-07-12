@@ -224,8 +224,6 @@ public static error ExecuteTemplate(this ж<Template> Ꮡt, io.Writer wr, @strin
 // If data is a [reflect.Value], the template applies to the concrete
 // value that the reflect.Value holds, as in [fmt.Print].
 public static error Execute(this ж<Template> Ꮡt, io.Writer wr, any data) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.execute(wr, data);
 }
 
@@ -352,9 +350,6 @@ internal static void walk(this ж<state> Ꮡs, reflectꓸValue dot, parse.Node n
 // are identical in behavior except that 'with' sets dot.
 internal static void walkIfOrWith(this ж<state> Ꮡs, parse.NodeType typ, reflectꓸValue dot, ж<parse.PipeNode> Ꮡpipe, ж<parse.ListNode> Ꮡlist, ж<parse.ListNode> ᏑelseList) => func((defer, recover) => {
     ref var s = ref Ꮡs.Value;
-    ref var pipe = ref Ꮡpipe.Value;
-    ref var list = ref Ꮡlist.Value;
-    ref var elseList = ref ᏑelseList.DerefOrNil();
 
     deferǃ(Ꮡs.pop, Ꮡs.Value.mark(), defer);
     var val = s.evalPipeline(dot, Ꮡpipe);

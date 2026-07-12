@@ -56,8 +56,6 @@ internal static void encodeVarint(ж<buffer> Ꮡb, uint64 x) {
 }
 
 internal static void encodeLength(ж<buffer> Ꮡb, nint tag, nint len) {
-    ref var b = ref Ꮡb.Value;
-
     encodeVarint(Ꮡb, (uint64)(((uint64)tag << (int)(3)) | 2));
     encodeVarint(Ꮡb, (uint64)len);
 }
@@ -93,8 +91,6 @@ internal static void encodeUint64s(ж<buffer> Ꮡb, nint tag, slice<uint64> x) {
 }
 
 internal static void encodeUint64Opt(ж<buffer> Ꮡb, nint tag, uint64 x) {
-    ref var b = ref Ꮡb.Value;
-
     if (x == 0) {
         return;
     }
@@ -102,15 +98,11 @@ internal static void encodeUint64Opt(ж<buffer> Ꮡb, nint tag, uint64 x) {
 }
 
 internal static void encodeInt64(ж<buffer> Ꮡb, nint tag, int64 x) {
-    ref var b = ref Ꮡb.Value;
-
     var u = (uint64)x;
     encodeUint64(Ꮡb, tag, u);
 }
 
 internal static void encodeInt64Opt(ж<buffer> Ꮡb, nint tag, int64 x) {
-    ref var b = ref Ꮡb.Value;
-
     if (x == 0) {
         return;
     }
@@ -147,16 +139,12 @@ internal static void encodeString(ж<buffer> Ꮡb, nint tag, @string x) {
 }
 
 internal static void encodeStrings(ж<buffer> Ꮡb, nint tag, slice<@string> x) {
-    ref var b = ref Ꮡb.Value;
-
     foreach (var (_, s) in x) {
         encodeString(Ꮡb, tag, s);
     }
 }
 
 internal static void encodeBool(ж<buffer> Ꮡb, nint tag, bool x) {
-    ref var b = ref Ꮡb.Value;
-
     if (x){
         encodeUint64(Ꮡb, tag, 1);
     } else {
@@ -165,8 +153,6 @@ internal static void encodeBool(ж<buffer> Ꮡb, nint tag, bool x) {
 }
 
 internal static void encodeBoolOpt(ж<buffer> Ꮡb, nint tag, bool x) {
-    ref var b = ref Ꮡb.Value;
-
     if (!x) {
         return;
     }
@@ -407,7 +393,6 @@ internal static error decodeString(ж<buffer> Ꮡb, ж<@string> Ꮡx) {
 }
 
 internal static error decodeStrings(ж<buffer> Ꮡb, ж<slice<@string>> Ꮡx) {
-    ref var b = ref Ꮡb.Value;
     ref var x = ref Ꮡx.Value;
 
     ref var s = ref heap(new @string(), out var Ꮡs);

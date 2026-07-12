@@ -1109,8 +1109,6 @@ public static (Time, error) Parse(@string layout, @string value) {
 // Second, when given a zone offset or abbreviation, Parse tries to match it
 // against the Local location; ParseInLocation uses the given location.
 public static (Time, error) ParseInLocation(@string layout, @string value, ж<ΔLocation> Ꮡloc) {
-    ref var loc = ref Ꮡloc.Value;
-
     // Optimize for RFC3339 as it accounts for over half of all representations.
     if (layout == RFC3339 || layout == RFC3339Nano) {
         {
@@ -1123,7 +1121,6 @@ public static (Time, error) ParseInLocation(@string layout, @string value, ж<Δ
 }
 
 internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation> ᏑdefaultLocation, ж<ΔLocation> Ꮡlocal) {
-    ref var defaultLocation = ref ᏑdefaultLocation.Value;
     ref var local = ref Ꮡlocal.Value;
 
     @string alayout = layout;

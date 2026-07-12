@@ -879,14 +879,10 @@ internal static (fileInfoDirEntry, error) stat(this ж<fileListEntry> Ꮡf) {
 }
 
 internal static (fs.FileInfo, error) Info(this ж<fileListEntry> Ꮡf) {
-    ref var f = ref Ꮡf.Value;
-
     return (new fileListEntryжFileInfo(Ꮡf), default!);
 }
 
 internal static @string String(this ж<fileListEntry> Ꮡf) {
-    ref var f = ref Ꮡf.Value;
-
     return fs.FormatDirEntry(new fileListEntryжDirEntry(Ꮡf));
 }
 

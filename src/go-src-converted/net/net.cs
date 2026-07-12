@@ -846,7 +846,6 @@ internal static (int64 n, error err) genericReadFrom(ж<TCPConn> Ꮡc, Δio.Read
     int64 n = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.Value;
     // Use wrapper to hide existing r.ReadFrom from io.Copy.
     return Δio.Copy(new tcpConnWithoutReadFrom(TCPConn: Ꮡc), r);
 }
@@ -875,7 +874,6 @@ internal static (int64 n, error err) genericWriteTo(ж<TCPConn> Ꮡc, Δio.Write
     int64 n = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.Value;
     // Use wrapper to hide existing w.WriteTo from io.Copy.
     return Δio.Copy(w, new tcpConnWithoutWriteTo(TCPConn: Ꮡc));
 }

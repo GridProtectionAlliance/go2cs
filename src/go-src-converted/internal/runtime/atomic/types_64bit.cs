@@ -16,8 +16,6 @@ partial class atomic_package {
 //
 //go:nosplit
 public static uint64 LoadAcquire(this ж<Uint64> Ꮡu) {
-    ref var u = ref Ꮡu.Value;
-
     return LoadAcq64(Ꮡu.of(Uint64.Ꮡvalue));
 }
 
@@ -31,8 +29,6 @@ public static uint64 LoadAcquire(this ж<Uint64> Ꮡu) {
 //
 //go:nosplit
 public static void StoreRelease(this ж<Uint64> Ꮡu, uint64 value) {
-    ref var u = ref Ꮡu.Value;
-
     StoreRel64(Ꮡu.of(Uint64.Ꮡvalue), value);
 }
 

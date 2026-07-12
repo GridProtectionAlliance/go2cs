@@ -64,8 +64,6 @@ public static ж<Context> NewContext() {
 // The hash should be a perfect hash, though out of caution the type checker
 // does not assume this. The result is guaranteed to not contain blanks.
 internal static @string instanceHash(this ж<Context> Ꮡctxt, ΔType orig, slice<ΔType> targs) {
-    ref var ctxt = ref Ꮡctxt.Value;
-
     assert(Ꮡctxt != nil);
     assert(orig != default!);
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);

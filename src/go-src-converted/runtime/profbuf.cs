@@ -150,8 +150,6 @@ internal static profIndex addCountsAndClearFlags(this profIndex x, nint data, ni
 
 // hasOverflow reports whether b has any overflow records pending.
 internal static bool hasOverflow(this ж<profBuf> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     return (uint32)Ꮡb.of(profBuf.Ꮡoverflow).Load() > 0;
 }
 
@@ -162,7 +160,6 @@ internal static (uint32 count, uint64 time) takeOverflow(this ж<profBuf> Ꮡb) 
     uint32 count = default!;
     uint64 time = default!;
 
-    ref var b = ref Ꮡb.Value;
     var overflow = Ꮡb.of(profBuf.Ꮡoverflow).Load();
     time = Ꮡb.of(profBuf.ᏑoverflowTime).Load();
     while (ᐧ) {
@@ -400,8 +397,6 @@ internal static void write(this ж<profBuf> Ꮡb, ж<@unsafe.Pointer> ᏑtagPtr,
 // close signals that there will be no more writes on the buffer.
 // Once all the data has been read from the buffer, reads will return eof=true.
 internal static void close(this ж<profBuf> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     if (Ꮡb.of(profBuf.Ꮡeof).Load() > 0) {
         @throw("runtime: profBuf already closed"u8);
     }
@@ -413,8 +408,6 @@ internal static void close(this ж<profBuf> Ꮡb) {
 // atomic fields b.overflow or b.eof.
 // It records the change in b.w and wakes up the reader if needed.
 internal static void wakeupExtra(this ж<profBuf> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     while (ᐧ) {
         var old = Ꮡb.of(profBuf.Ꮡw).load();
         var @new = (profIndex)(old | profWriteExtra);

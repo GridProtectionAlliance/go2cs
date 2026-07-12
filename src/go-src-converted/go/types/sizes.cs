@@ -139,8 +139,6 @@ internal static bool _IsSyncAtomicAlign64(ΔType T) {
 }
 
 public static slice<int64> Offsetsof(this ж<StdSizes> Ꮡs, slice<ж<Var>> fields) {
-    ref var s = ref Ꮡs.Value;
-
     var offsets = new slice<int64>(len(fields));
     int64 offs = default!;
     foreach (var (i, f) in fields) {

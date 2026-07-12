@@ -382,8 +382,6 @@ internal static ж<schedContext> getOrCreateThread(this ж<Validator> Ꮡv, ж<e
 }
 
 internal static void checkStack(ж<errAccumulator> Ꮡe, traceꓸStack stk) {
-    ref var e = ref Ꮡe.Value;
-
     // Check for non-empty values, but we also check for crashes due to incorrect validation.
     nint i = 0;
     stk.Frames((trace.StackFrame f) => {

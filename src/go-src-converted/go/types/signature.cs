@@ -39,10 +39,6 @@ partial class types_package {
 //
 // Deprecated: Use [NewSignatureType] instead which allows for type parameters.
 public static ж<ΔSignature> NewSignature(ж<Var> Ꮡrecv, ж<Tuple> Ꮡparams, ж<Tuple> Ꮡresults, bool variadic) {
-    ref var recv = ref Ꮡrecv.Value;
-    ref var @params = ref Ꮡparams.Value;
-    ref var results = ref Ꮡresults.Value;
-
     return NewSignatureType(Ꮡrecv, default!, default!, Ꮡparams, Ꮡresults, variadic);
 }
 
@@ -121,14 +117,10 @@ public static ж<ΔSignature> NewSignatureType(ж<Var> Ꮡrecv, slice<ж<TypePar
 }
 
 public static ΔType Underlying(this ж<ΔSignature> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return new ΔSignatureжΔType(Ꮡt);
 }
 
 public static @string String(this ж<ΔSignature> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return TypeString(new ΔSignatureжΔType(Ꮡt), default!);
 }
 
@@ -335,7 +327,6 @@ internal static (slice<ж<Var>> @params, bool variadic) collectParams(this ж<Ch
     bool variadic = default!;
 
     ref var check = ref Ꮡcheck.Value;
-    ref var scope = ref Ꮡscope.Value;
     ref var list = ref Ꮡlist.DerefOrNil();
     if (Ꮡlist == nil) {
         return (@params, variadic);

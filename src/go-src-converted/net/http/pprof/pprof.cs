@@ -111,8 +111,6 @@ partial class pprof_package {
 // command line, with arguments separated by NUL bytes.
 // The package initialization registers it as /debug/pprof/cmdline.
 public static void Cmdline(http.ResponseWriter w, ж<http.Request> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     w.Header().Set("X-Content-Type-Options"u8, "nosniff"u8);
     w.Header().Set("Content-Type"u8, "text/plain; charset=utf-8"u8);
     fmt.Fprint(new http_ResponseWriterᴠWriter(w), strings.Join(os.Args, "\x00"u8));
@@ -153,8 +151,6 @@ internal static void serveError(http.ResponseWriter w, nint status, @string txt)
 // Profiling lasts for duration specified in seconds GET parameter, or for 30 seconds if not specified.
 // The package initialization registers it as /debug/pprof/profile.
 public static void Profile(http.ResponseWriter w, ж<http.Request> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     w.Header().Set("X-Content-Type-Options"u8, "nosniff"u8);
     var (sec, err) = strconv.ParseInt(Ꮡr.FormValue("seconds"u8), 10, 64);
     if (sec <= 0 || err != default!) {
@@ -181,8 +177,6 @@ public static void Profile(http.ResponseWriter w, ж<http.Request> Ꮡr) {
 // Tracing lasts for duration specified in seconds GET parameter, or for 1 second if not specified.
 // The package initialization registers it as /debug/pprof/trace.
 public static void Trace(http.ResponseWriter w, ж<http.Request> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     w.Header().Set("X-Content-Type-Options"u8, "nosniff"u8);
     var (sec, err) = strconv.ParseFloat(Ꮡr.FormValue("seconds"u8), 64);
     if (sec <= 0 || err != default!) {
@@ -260,8 +254,6 @@ public static httpꓸHandler Handler(@string name) {
 [GoType("@string")] partial struct handler;
 
 internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http.Request> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     w.Header().Set("X-Content-Type-Options"u8, "nosniff"u8);
     var p = pprof.Lookup(((@string)name));
     if (p == nil) {
@@ -290,7 +282,6 @@ internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http
 
 internal static void serveDeltaProfile(this handler name, http.ResponseWriter w, ж<http.Request> Ꮡr, ж<pprof.Profile> Ꮡp, @string secStr) => func((defer, recover) => {
     ref var r = ref Ꮡr.Value;
-    ref var p = ref Ꮡp.Value;
 
     var (sec, err) = strconv.ParseInt(secStr, 10, 64);
     if (err != default! || sec <= 0) {
@@ -352,8 +343,6 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
 });
 
 internal static (ж<profile.Profile>, error) collectProfile(ж<pprof.Profile> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
         var errΔ1 = Ꮡp.WriteTo(new bytes_BufferжWriter(Ꮡbuf), 0); if (errΔ1 != default!) {

@@ -15,8 +15,6 @@ partial class types_package {
 // Len returns the number of type parameters in the list.
 // It is safe to call on a nil receiver.
 public static nint Len(this ж<TypeParamList> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     return len(Ꮡl.list());
 }
 
@@ -53,8 +51,6 @@ internal static ж<TypeList> newTypeList(slice<ΔType> list) {
 // Len returns the number of types in the list.
 // It is safe to call on a nil receiver.
 public static nint Len(this ж<TypeList> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     return len(Ꮡl.list());
 }
 

@@ -332,8 +332,6 @@ internal static nint matchAfterPrefix(slice<byte> buf, slice<byte> prefix, error
 }
 
 public static error Close(this ж<Part> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     io.Copy(io.Discard, new PartжReader(Ꮡp));
     return default!;
 }
@@ -382,8 +380,6 @@ internal static int64 maxMIMEHeaders() {
 // has a value of "quoted-printable", that header is instead
 // hidden and the body is transparently decoded during Read calls.
 public static (ж<Part>, error) NextPart(this ж<Reader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.nextPart(false, maxMIMEHeaderSize, maxMIMEHeaders());
 }
 
@@ -393,8 +389,6 @@ public static (ж<Part>, error) NextPart(this ж<Reader> Ꮡr) {
 // Unlike [Reader.NextPart], it does not have special handling for
 // "Content-Transfer-Encoding: quoted-printable".
 public static (ж<Part>, error) NextRawPart(this ж<Reader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.nextPart(true, maxMIMEHeaderSize, maxMIMEHeaders());
 }
 

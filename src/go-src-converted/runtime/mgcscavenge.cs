@@ -358,8 +358,6 @@ internal static void park(this ж<scavengerState> Ꮡs) {
 
 // ready signals to sysmon that the scavenger should be awoken.
 internal static void ready(this ж<scavengerState> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     Ꮡs.of(scavengerState.ᏑsysmonWake).Store(1);
 }
 
@@ -596,8 +594,6 @@ internal static void bgscavenge(channel<nint> c) {
 // scavenge always tries to scavenge nbytes worth of memory, and will
 // only fail to do so if the heap is exhausted for now.
 internal static uintptr scavenge(this ж<pageAlloc> Ꮡp, uintptr nbytes, Func<bool> shouldStop, bool force) {
-    ref var Δp = ref Ꮡp.Value;
-
     var released = (uintptr)0;
     while (released < nbytes) {
         var (ci, pageIdx) = Ꮡp.of(pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).find(force);
@@ -974,7 +970,6 @@ internal static uint64 fillAligned(uint64 x, nuint m) {
 // Returns the amount added to sysStat.
 internal static uintptr init(this ж<scavengeIndex> Ꮡs, bool test, ж<sysMemStat> ᏑsysStat) {
     ref var s = ref Ꮡs.Value;
-    ref var sysStat = ref ᏑsysStat.Value;
 
     Ꮡs.of(scavengeIndex.ᏑsearchAddrBg).Clear();
     Ꮡs.of(scavengeIndex.ᏑsearchAddrForce).Clear();
@@ -988,7 +983,6 @@ internal static uintptr init(this ж<scavengeIndex> Ꮡs, bool test, ж<sysMemSt
 // Returns the amount of memory added to sysStat.
 internal static uintptr grow(this ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> ᏑsysStat) {
     ref var s = ref Ꮡs.Value;
-    ref var sysStat = ref ᏑsysStat.Value;
 
     // Update minHeapIdx. Note that even if there's no mapping work to do,
     // we may still have a new, lower minimum heap address.
@@ -1130,16 +1124,12 @@ internal static void nextGen(this ж<scavengeIndex> Ꮡs) {
 
 // load loads and unpacks a scavChunkData.
 internal static scavChunkData load(this ж<atomicScavChunkData> Ꮡsc) {
-    ref var sc = ref Ꮡsc.Value;
-
     return unpackScavChunkData(Ꮡsc.of(atomicScavChunkData.Ꮡvalue).Load());
 }
 
 // store packs and writes a new scavChunkData. store must be serialized
 // with other calls to store.
 internal static void store(this ж<atomicScavChunkData> Ꮡsc, scavChunkData ssc) {
-    ref var sc = ref Ꮡsc.Value;
-
     Ꮡsc.of(atomicScavChunkData.Ꮡvalue).Store(ssc.pack());
 }
 

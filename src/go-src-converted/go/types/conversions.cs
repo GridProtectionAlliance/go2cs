@@ -19,7 +19,6 @@ partial class types_package {
 // conversion type-checks the conversion T(x).
 // The result is in x.
 internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔType T) {
-    ref var check = ref Ꮡcheck.Value;
     ref var x = ref Ꮡx.Value;
 
     var constArg = x.mode == constant_;

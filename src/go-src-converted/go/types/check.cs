@@ -230,15 +230,11 @@ internal static bool aliasAny() {
 
 // isBrokenAlias reports whether alias doesn't have a determined type yet.
 [GoRecv] internal static bool isBrokenAlias(this ref Checker check, ж<TypeName> Ꮡalias) {
-    ref var alias = ref Ꮡalias.Value;
-
     assert(!(~check.conf)._EnableAlias);
     return check.brokenAliases[Ꮡalias];
 }
 
 [GoRecv] internal static void rememberUntyped(this ref Checker check, ast.Expr e, bool lhs, operandMode mode, ж<Basic> Ꮡtyp, constant.Value val) {
-    ref var typ = ref Ꮡtyp.Value;
-
     var m = check.untyped;
     if (m == default!) {
         m = new map<ast.Expr, exprInfo>();
@@ -630,8 +626,6 @@ internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
 }
 
 [GoRecv] internal static void recordBuiltinType(this ref Checker check, ast.Expr f, ж<ΔSignature> Ꮡsig) {
-    ref var sig = ref Ꮡsig.Value;
-
     // f must be a (possibly parenthesized, possibly qualified)
     // identifier denoting a built-in (including unsafe's non-constant
     // functions Add and Slice): record the signature for f and possible
@@ -739,8 +733,6 @@ internal static ж<ast.Ident> instantiatedIdent(ast.Expr expr) {
 }
 
 [GoRecv] internal static void recordDef(this ref Checker check, ж<ast.Ident> Ꮡid, Object obj) {
-    ref var id = ref Ꮡid.DerefOrNil();
-
     assert(Ꮡid != nil);
     {
         var m = check.Defs; if (m != default!) {
@@ -750,8 +742,6 @@ internal static ж<ast.Ident> instantiatedIdent(ast.Expr expr) {
 }
 
 [GoRecv] internal static void recordUse(this ref Checker check, ж<ast.Ident> Ꮡid, Object obj) {
-    ref var id = ref Ꮡid.DerefOrNil();
-
     assert(Ꮡid != nil);
     assert(obj != default!);
     {
@@ -784,8 +774,6 @@ internal static ж<ast.Ident> instantiatedIdent(ast.Expr expr) {
 }
 
 [GoRecv] internal static void recordScope(this ref Checker check, ast.Node node, ж<ΔScope> Ꮡscope) {
-    ref var scope = ref Ꮡscope.DerefOrNil();
-
     assert(node != default!);
     assert(Ꮡscope != nil);
     {

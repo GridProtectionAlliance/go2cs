@@ -159,8 +159,6 @@ internal static bool hasDotSuffix(@string s, @string suffix) {
 public static slice<ж<httpꓸCookie>> /*cookies*/ Cookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu) {
     slice<ж<httpꓸCookie>> cookies = default!;
 
-    ref var j = ref Ꮡj.Value;
-    ref var u = ref Ꮡu.Value;
     return Ꮡj.cookies(Ꮡu, time.Now());
 }
 
@@ -241,9 +239,6 @@ internal static slice<ж<httpꓸCookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, 
 //
 // It does nothing if the URL's scheme is not HTTP or HTTPS.
 public static void SetCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<httpꓸCookie>> cookies) {
-    ref var j = ref Ꮡj.Value;
-    ref var u = ref Ꮡu.Value;
-
     Ꮡj.setCookies(Ꮡu, cookies, time.Now());
 }
 

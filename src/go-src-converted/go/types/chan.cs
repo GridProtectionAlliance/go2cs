@@ -38,14 +38,10 @@ public static ж<Chan> NewChan(ChanDir dir, ΔType elem) {
 }
 
 public static ΔType Underlying(this ж<Chan> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return new ChanжΔType(Ꮡc);
 }
 
 public static @string String(this ж<Chan> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return TypeString(new ChanжΔType(Ꮡc), default!);
 }
 

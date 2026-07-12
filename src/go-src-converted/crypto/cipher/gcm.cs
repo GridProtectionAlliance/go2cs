@@ -312,8 +312,6 @@ internal static slice<uint16> gcmReductionTable = new uint16[]{
 // update extends y with more polynomial terms from data. If data is not a
 // multiple of gcmBlockSize bytes long then the remainder is zero padded.
 [GoRecv] internal static void update(this ref gcm g, ж<gcmFieldElement> Ꮡy, slice<byte> data) {
-    ref var y = ref Ꮡy.Value;
-
     nint fullBlocks = (((len(data) >> (int)(4))) << (int)(4));
     g.updateBlocks(Ꮡy, data[..(int)(fullBlocks)]);
     if (len(data) != fullBlocks) {

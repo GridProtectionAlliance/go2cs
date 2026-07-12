@@ -34,8 +34,6 @@ internal static error errMessageTooLarge = errors.New("message too large"u8);
 // should be reading from an [io.LimitReader] or similar Reader to bound
 // the size of responses.
 public static ж<Reader> NewReader(ж<bufio.Reader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡ(new Reader(R: Ꮡr));
 }
 
@@ -466,8 +464,6 @@ internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b)
 //
 // See the documentation for the [Reader.DotReader] method for details about dot-encoding.
 public static (slice<byte>, error) ReadDotBytes(this ж<Reader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     return io.ReadAll(Ꮡr.DotReader());
 }
 
@@ -524,8 +520,6 @@ internal static slice<byte> colon = slice<byte>((@string)":");
 //		"Long-Key": {"Even Longer Value"},
 //	}
 public static (MIMEHeader, error) ReadMIMEHeader(this ж<Reader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     return readMIMEHeader(Ꮡr, math.MaxInt64, math.MaxInt64);
 }
 

@@ -111,8 +111,6 @@ internal static void init(this ж<timer> Ꮡt, Action<any, uintptr, int64> f, an
 }
 
 internal static void @lock(this ж<timers> Ꮡts) {
-    ref var ts = ref Ꮡts.Value;
-
     @lock(Ꮡts.of(timers.Ꮡmu));
 }
 
@@ -141,8 +139,6 @@ internal const uint8 timerZombie = 4;
 internal const bool timerDebug = false;
 
 internal static void trace(this ж<timer> Ꮡt, @string op) {
-    ref var t = ref Ꮡt.Value;
-
     if (timerDebug) {
         Ꮡt.trace1(op);
     }
@@ -176,8 +172,6 @@ internal static void trace(this ж<timers> Ꮡts, @string op) {
 
 // lock locks the timer, allowing reading or writing any of the timer fields.
 internal static void @lock(this ж<timer> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     @lock(Ꮡt.of(timer.Ꮡmu));
     Ꮡt.trace("lock"u8);
 }
@@ -328,8 +322,6 @@ internal static ж<timeTimer> newTimer(int64 when, int64 period, Action<any, uin
 //
 //go:linkname stopTimer time.stopTimer
 internal static bool stopTimer(ж<timeTimer> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.of(timeTimer.Ꮡtimer).stop();
 }
 
@@ -339,8 +331,6 @@ internal static bool stopTimer(ж<timeTimer> Ꮡt) {
 //
 //go:linkname resetTimer time.resetTimer
 internal static bool resetTimer(ж<timeTimer> Ꮡt, int64 when, int64 period) {
-    ref var t = ref Ꮡt.Value;
-
     if (raceenabled) {
         racerelease(new @unsafe.Pointer(Ꮡt.of(timeTimer.Ꮡtimer)));
     }
@@ -621,8 +611,6 @@ internal static void maybeAdd(this ж<timer> Ꮡt) {
 // If used for an inactive timer, the timer will become active.
 // Reports whether the timer was active and was stopped.
 internal static bool reset(this ж<timer> Ꮡt, int64 when, int64 period) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.modify(when, period, default!, default!, 0);
 }
 
@@ -848,8 +836,6 @@ internal static void adjust(this ж<timers> Ꮡts, int64 now, bool force) {
 //
 //go:nowritebarrierrec
 internal static int64 wakeTime(this ж<timers> Ꮡts) {
-    ref var ts = ref Ꮡts.Value;
-
     // Note that the order of these two loads matters:
     // adjust updates minWhen to make it safe to clear minNextWhen.
     // We read minWhen after reading minNextWhen so that
@@ -1118,8 +1104,6 @@ internal static void updateMinWhenHeap(this ж<timers> Ꮡts) {
 // updateMinWhenModified updates ts.minWhenModified to be <= when.
 // ts need not be (and usually is not) locked.
 internal static void updateMinWhenModified(this ж<timers> Ꮡts, int64 when) {
-    ref var ts = ref Ꮡts.Value;
-
     while (ᐧ) {
         var old = Ꮡts.of(timers.ᏑminWhenModified).Load();
         if (old != 0 && old < when) {

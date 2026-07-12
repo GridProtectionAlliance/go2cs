@@ -215,7 +215,6 @@ internal static (ж<Header>, error) next(this ж<Reader> Ꮡtr) {
 // and sets the curr reader appropriately.
 [GoRecv] internal static error handleSparseFile(this ref Reader tr, ж<Header> Ꮡhdr, ж<block> ᏑrawHdr) {
     ref var hdr = ref Ꮡhdr.Value;
-    ref var rawHdr = ref ᏑrawHdr.Value;
 
     sparseDatas spd = default!;
     error err = default!;
@@ -779,8 +778,6 @@ internal static (sparseDatas, error) readGNUSparseMap0x1(map<@string, @string> p
 }
 
 internal static (int64, error) WriteTo(this ж<regFileReader> Ꮡfr, io.Writer w) {
-    ref var fr = ref Ꮡfr.Value;
-
     return io.Copy(w, new WriteTo_src(new regFileReaderжReader(Ꮡfr)));
 }
 

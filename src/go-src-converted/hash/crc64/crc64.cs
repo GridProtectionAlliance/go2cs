@@ -101,8 +101,6 @@ internal static ж<array<Table>> makeSlicingBy8Table(ж<Table> Ꮡt) {
 // implements [encoding.BinaryMarshaler] and [encoding.BinaryUnmarshaler] to
 // marshal and unmarshal the internal state of the hash.
 public static hash.Hash64 New(ж<Table> Ꮡtab) {
-    ref var tab = ref Ꮡtab.Value;
-
     return new digestжHash64(Ꮡ(new digest(0, Ꮡtab)));
 }
 
@@ -181,8 +179,6 @@ internal static uint64 update(uint64 crc, ж<Table> Ꮡtab, slice<byte> p) {
 
 // Update returns the result of adding the bytes in p to the crc.
 public static uint64 Update(uint64 crc, ж<Table> Ꮡtab, slice<byte> p) {
-    ref var tab = ref Ꮡtab.Value;
-
     return update(crc, Ꮡtab, p);
 }
 
@@ -206,8 +202,6 @@ public static uint64 Update(uint64 crc, ж<Table> Ꮡtab, slice<byte> p) {
 // Checksum returns the CRC-64 checksum of data
 // using the polynomial represented by the [Table].
 public static uint64 Checksum(slice<byte> data, ж<Table> Ꮡtab) {
-    ref var tab = ref Ꮡtab.Value;
-
     return update(0, Ꮡtab, data);
 }
 

@@ -77,9 +77,6 @@ internal static readonly unwindFlags unwindJumpStack = 8;
 //
 // A single unwinder can be reused for multiple unwinds.
 internal static void init(this ж<unwinder> Ꮡu, ж<g> Ꮡgp, unwindFlags flags) {
-    ref var u = ref Ꮡu.Value;
-    ref var gp = ref Ꮡgp.Value;
-
     // Implementation note: This starts the iterator on the first frame and we
     // provide a "valid" method. Alternatively, this could start in a "before
     // the first frame" state and "next" could return whether it was able to
@@ -766,8 +763,6 @@ internal static void printcreatedby1(ΔfuncInfo f, uintptr pc, uint64 goid) {
 }
 
 internal static void traceback(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp) {
-    ref var gp = ref Ꮡgp.Value;
-
     traceback1(pc, sp, lr, Ꮡgp, 0);
 }
 
@@ -1087,8 +1082,6 @@ internal static nint callers(nint skip, slice<uintptr> pcbuf) {
 }
 
 internal static nint gcallers(ж<g> Ꮡgp, nint skip, slice<uintptr> pcbuf) {
-    ref var gp = ref Ꮡgp.Value;
-
     ref var u = ref heap(new unwinder(), out var Ꮡu);
     Ꮡu.init(Ꮡgp, unwindSilentErrors);
     return tracebackPCs(Ꮡu, skip, pcbuf);
@@ -1097,8 +1090,6 @@ internal static nint gcallers(ж<g> Ꮡgp, nint skip, slice<uintptr> pcbuf) {
 // showframe reports whether the frame with the given characteristics should
 // be printed during a traceback.
 internal static bool showframe(ΔsrcFunc sf, ж<g> Ꮡgp, bool firstFrame, abi.FuncID calleeID) {
-    ref var gp = ref Ꮡgp.DerefOrNil();
-
     var mp = getg().Value.m;
     if ((~mp).throwing >= throwTypeRuntime && Ꮡgp != nil && (Ꮡgp == (~mp).curg || Ꮡgp == (~mp).caughtsig.ptr())) {
         return true;
@@ -1223,8 +1214,6 @@ internal static void goroutineheader(ж<g> Ꮡgp) {
 }
 
 internal static void tracebackothers(ж<g> Ꮡme) {
-    ref var me = ref Ꮡme.DerefOrNil();
-
     var (level, _, _) = gotraceback();
     // Show the current goroutine first, if we haven't already.
     var curgp = getg().Value.m.Value.curg;
@@ -1618,8 +1607,6 @@ internal static bool printOneCgoTraceback(uintptr pc, Func<(bool, bool)> commitF
 
 // callCgoSymbolizer calls the cgoSymbolizer function.
 internal static void callCgoSymbolizer(ж<cgoSymbolizerArg> Ꮡarg) {
-    ref var arg = ref Ꮡarg.Value;
-
     var call = cgocall;
     if (Ꮡpanicking.Load() > 0 || (~(~getg()).m).curg != getg()) {
         // We do not want to call into the scheduler when panicking

@@ -128,8 +128,6 @@ public static bool IsWordChar(rune r) {
 }
 
 public static @string String(this ж<Prog> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     dumpProg(Ꮡb, Ꮡp);
     return b.String();
@@ -307,8 +305,6 @@ internal static readonly UntypedInt noMatch = -1;
 }
 
 public static @string String(this ж<Inst> Ꮡi) {
-    ref var i = ref Ꮡi.Value;
-
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     dumpInst(Ꮡb, Ꮡi);
     return b.String();
@@ -317,14 +313,12 @@ public static @string String(this ж<Inst> Ꮡi) {
 internal static void bw(ж<strings.Builder> Ꮡb, params ꓸꓸꓸstring argsʗp) {
     var args = argsʗp.slice();
 
-    ref var b = ref Ꮡb.Value;
     foreach (var (_, s) in args) {
         Ꮡb.WriteString(s);
     }
 }
 
 internal static void dumpProg(ж<strings.Builder> Ꮡb, ж<Prog> Ꮡp) {
-    ref var b = ref Ꮡb.Value;
     ref var p = ref Ꮡp.Value;
 
     foreach (var (j, _) in p.Inst) {
@@ -347,7 +341,6 @@ internal static @string u32(uint32 i) {
 }
 
 internal static void dumpInst(ж<strings.Builder> Ꮡb, ж<Inst> Ꮡi) {
-    ref var b = ref Ꮡb.Value;
     ref var i = ref Ꮡi.Value;
 
     var exprᴛ1 = i.Op;

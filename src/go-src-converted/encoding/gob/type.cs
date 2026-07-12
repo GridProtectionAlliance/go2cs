@@ -499,8 +499,6 @@ internal static @string safeString(this ж<structType> Ꮡs, map<typeId, bool> s
 }
 
 internal static @string @string(this ж<structType> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     return Ꮡs.safeString(new map<typeId, bool>());
 }
 
@@ -683,8 +681,6 @@ internal static (ΔgobType, error) getBaseType(@string name, reflectꓸType rt) 
 // base type, never a pointer.
 // typeLock must be held.
 internal static (ΔgobType, error) getType(@string name, ж<userTypeInfo> Ꮡut, reflectꓸType rt) {
-    ref var ut = ref Ꮡut.Value;
-
     var (typ, present) = types[rt, ꟷ];
     if (present) {
         return (typ, default!);

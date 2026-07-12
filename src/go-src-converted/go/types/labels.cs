@@ -13,7 +13,6 @@ partial class types_package {
 
 // labels checks correct label use in body.
 internal static void labels(this ж<Checker> Ꮡcheck, ж<ast.BlockStmt> Ꮡbody) {
-    ref var check = ref Ꮡcheck.Value;
     ref var body = ref Ꮡbody.Value;
 
     // set of all labels in this body
@@ -81,8 +80,6 @@ internal static void insert(this ж<block> Ꮡb, ж<ast.LabeledStmt> Ꮡs) {
 // gotoTarget returns the labeled statement in the current
 // or an enclosing block with the given label name, or nil.
 internal static ж<ast.LabeledStmt> gotoTarget(this ж<block> Ꮡb, @string name) {
-    ref var b = ref Ꮡb.Value;
-
     for (var s = Ꮡb; s != nil; s = s.Value.parent) {
         {
             var t = (~s).labels[name]; if (t != nil) {
@@ -96,8 +93,6 @@ internal static ж<ast.LabeledStmt> gotoTarget(this ж<block> Ꮡb, @string name
 // enclosingTarget returns the innermost enclosing labeled
 // statement with the given label name, or nil.
 internal static ж<ast.LabeledStmt> enclosingTarget(this ж<block> Ꮡb, @string name) {
-    ref var b = ref Ꮡb.Value;
-
     for (var s = Ꮡb; s != nil; s = s.Value.parent) {
         {
             var t = s.Value.lstmt; if (t != nil && (~(~t).Label).Name == name) {
@@ -113,7 +108,6 @@ internal static ж<ast.LabeledStmt> enclosingTarget(this ж<block> Ꮡb, @string
 // enclosing block, and lstmt is the labeled statement this block is associated with (or nil).
 internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡcheck, ж<ΔScope> Ꮡall, ж<block> Ꮡparent, ж<ast.LabeledStmt> Ꮡlstmt, slice<ast.Stmt> list) {
     ref var check = ref Ꮡcheck.Value;
-    ref var all = ref Ꮡall.Value;
     ref var parent = ref Ꮡparent.Value;
     ref var lstmt = ref Ꮡlstmt.Value;
 

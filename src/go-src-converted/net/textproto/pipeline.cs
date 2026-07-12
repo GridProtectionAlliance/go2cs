@@ -45,32 +45,24 @@ public static nuint Next(this ж<Pipeline> Ꮡp) {
 // StartRequest blocks until it is time to send (or, if this is a server, receive)
 // the request with the given id.
 public static void StartRequest(this ж<Pipeline> Ꮡp, nuint id) {
-    ref var p = ref Ꮡp.Value;
-
     Ꮡp.of(Pipeline.Ꮡrequest).Start(id);
 }
 
 // EndRequest notifies p that the request with the given id has been sent
 // (or, if this is a server, received).
 public static void EndRequest(this ж<Pipeline> Ꮡp, nuint id) {
-    ref var p = ref Ꮡp.Value;
-
     Ꮡp.of(Pipeline.Ꮡrequest).End(id);
 }
 
 // StartResponse blocks until it is time to receive (or, if this is a server, send)
 // the request with the given id.
 public static void StartResponse(this ж<Pipeline> Ꮡp, nuint id) {
-    ref var p = ref Ꮡp.Value;
-
     Ꮡp.of(Pipeline.Ꮡresponse).Start(id);
 }
 
 // EndResponse notifies p that the response with the given id has been received
 // (or, if this is a server, sent).
 public static void EndResponse(this ж<Pipeline> Ꮡp, nuint id) {
-    ref var p = ref Ꮡp.Value;
-
     Ꮡp.of(Pipeline.Ꮡresponse).End(id);
 }
 

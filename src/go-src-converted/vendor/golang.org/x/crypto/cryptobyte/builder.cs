@@ -121,35 +121,26 @@ public static ж<Builder> NewFixedBuilder(slice<byte> buffer) {
 
 // AddUint8LengthPrefixed adds a 8-bit length-prefixed byte sequence.
 public static void AddUint8LengthPrefixed(this ж<Builder> Ꮡb, Action<ж<Builder>> f) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.addLengthPrefixed(1, false, f);
 }
 
 // AddUint16LengthPrefixed adds a big-endian, 16-bit length-prefixed byte sequence.
 public static void AddUint16LengthPrefixed(this ж<Builder> Ꮡb, Action<ж<Builder>> f) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.addLengthPrefixed(2, false, f);
 }
 
 // AddUint24LengthPrefixed adds a big-endian, 24-bit length-prefixed byte sequence.
 public static void AddUint24LengthPrefixed(this ж<Builder> Ꮡb, Action<ж<Builder>> f) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.addLengthPrefixed(3, false, f);
 }
 
 // AddUint32LengthPrefixed adds a big-endian, 32-bit length-prefixed byte sequence.
 public static void AddUint32LengthPrefixed(this ж<Builder> Ꮡb, Action<ж<Builder>> f) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.addLengthPrefixed(4, false, f);
 }
 
 internal static void callContinuation(this ж<Builder> Ꮡb, Action<ж<Builder>> f, ж<Builder> Ꮡarg) => func((defer, recover) => {
     ref var b = ref Ꮡb.Value;
-    ref var arg = ref Ꮡarg.Value;
 
     if (!b.inContinuation.Value) {
         b.inContinuation.Value = true;

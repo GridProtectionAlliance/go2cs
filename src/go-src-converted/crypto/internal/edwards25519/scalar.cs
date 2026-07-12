@@ -62,8 +62,6 @@ public static ж<Scalar> NewScalar() {
 // using Multiply and then Add.
 public static ж<Scalar> MultiplyAdd(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy, ж<Scalar> Ꮡz) {
     ref var s = ref Ꮡs.Value;
-    ref var x = ref Ꮡx.Value;
-    ref var y = ref Ꮡy.Value;
     ref var z = ref Ꮡz.Value;
 
     // Make a copy of z in case it aliases s.
@@ -130,8 +128,6 @@ public static ж<Scalar> Set(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) {
 // SetUniformBytes can be used to set s to a uniformly distributed value given
 // 64 uniformly distributed random bytes.
 public static (ж<Scalar>, error) SetUniformBytes(this ж<Scalar> Ꮡs, slice<byte> x) {
-    ref var s = ref Ꮡs.Value;
-
     if (len(x) != 64) {
         return (default!, errors.New("edwards25519: invalid SetUniformBytes input length"u8));
     }
@@ -167,8 +163,6 @@ internal static ж<Scalar> scalarTwo336 = Ꮡ(new Scalar(s: new uint64[]{(nuint)
 // setShortBytes sets s = x mod l, where x is a little-endian integer shorter
 // than 32 bytes.
 internal static ж<Scalar> setShortBytes(this ж<Scalar> Ꮡs, slice<byte> x) {
-    ref var s = ref Ꮡs.Value;
-
     if (len(x) >= 32) {
         throw panic("edwards25519: internal error: setShortBytes called with a long string");
     }
@@ -183,8 +177,6 @@ internal static ж<Scalar> setShortBytes(this ж<Scalar> Ꮡs, slice<byte> x) {
 // s, and returns s. If x is not a canonical encoding of s, SetCanonicalBytes
 // returns nil and an error, and the receiver is unchanged.
 public static (ж<Scalar>, error) SetCanonicalBytes(this ж<Scalar> Ꮡs, slice<byte> x) {
-    ref var s = ref Ꮡs.Value;
-
     if (len(x) != 32) {
         return (default!, errors.New("invalid scalar length"u8));
     }
@@ -230,8 +222,6 @@ internal static bool isReduced(slice<byte> s) {
 // in Ed25519. In fact, it is lost to history why RFC 8032 adopted the
 // irrelevant RFC 7748 clamping, but it is now required for compatibility.
 public static (ж<Scalar>, error) SetBytesWithClamping(this ж<Scalar> Ꮡs, slice<byte> x) {
-    ref var s = ref Ꮡs.Value;
-
     // The description above omits the purpose of the high bits of the clamping
     // for brevity, but those are also lost to reductions, and are also
     // irrelevant to edwards25519 as they protect against a specific
@@ -251,8 +241,6 @@ public static (ж<Scalar>, error) SetBytesWithClamping(this ж<Scalar> Ꮡs, sli
 
 // Bytes returns the canonical 32-byte little-endian encoding of s.
 public static slice<byte> Bytes(this ж<Scalar> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var encoded = ref heap(new array<byte>(32), out var Ꮡencoded);
@@ -260,7 +248,6 @@ public static slice<byte> Bytes(this ж<Scalar> Ꮡs) {
 }
 
 internal static slice<byte> bytes(this ж<Scalar> Ꮡs, ж<array<byte>> Ꮡout) {
-    ref var s = ref Ꮡs.Value;
     ref var @out = ref Ꮡout.Value;
 
     ref var ss = ref heap(new fiatScalarNonMontgomeryDomainFieldElement(), out var Ꮡss);
@@ -271,9 +258,6 @@ internal static slice<byte> bytes(this ж<Scalar> Ꮡs, ж<array<byte>> Ꮡout) 
 
 // Equal returns 1 if s and t are equal, and 0 otherwise.
 public static nint Equal(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡt) {
-    ref var s = ref Ꮡs.Value;
-    ref var t = ref Ꮡt.Value;
-
     ref var diff = ref heap(new fiatScalarMontgomeryDomainFieldElement(), out var Ꮡdiff);
     fiatScalarSub(Ꮡdiff, Ꮡs.of(Scalar.Ꮡs), Ꮡt.of(Scalar.Ꮡs));
     ref var nonzero = ref heap(new uint64(), out var Ꮡnonzero);
@@ -351,8 +335,6 @@ internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) {
 }
 
 internal static array<int8> signedRadix16(this ж<Scalar> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     var b = Ꮡs.Bytes();
     if (b[31] > 127) {
         throw panic("scalar has high bit set illegally");

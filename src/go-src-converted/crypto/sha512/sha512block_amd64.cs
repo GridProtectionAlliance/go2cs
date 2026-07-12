@@ -18,8 +18,6 @@ internal static partial void blockAMD64(ж<digest> dig, slice<byte> p);
 internal static bool useAVX2 = cpu.X86.HasAVX2 && cpu.X86.HasBMI1 && cpu.X86.HasBMI2;
 
 internal static void block(ж<digest> Ꮡdig, slice<byte> p) {
-    ref var dig = ref Ꮡdig.Value;
-
     if (useAVX2){
         blockAVX2(Ꮡdig, p);
     } else {

@@ -70,8 +70,6 @@ internal static bool isWildcard(this ж<UDPAddr> Ꮡa) {
 }
 
 internal static ΔAddr opAddr(this ж<UDPAddr> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
-
     if (Ꮡa == nil) {
         return default!;
     }
@@ -155,7 +153,6 @@ public static (nint n, ж<UDPAddr> addr, error err) ReadFromUDP(this ж<UDPConn>
     ж<UDPAddr> addr = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.Value;
     // This function is designed to allow the caller to control the lifetime
     // of the returned *UDPAddr and thereby prevent an allocation.
     // See https://blog.filippo.io/efficient-go-apis-with-the-inliner/.
@@ -180,8 +177,6 @@ internal static (nint, ж<UDPAddr>, error) readFromUDP(this ж<UDPConn> Ꮡc, sl
 
 // ReadFrom implements the PacketConn ReadFrom method.
 public static (nint, ΔAddr, error) ReadFrom(this ж<UDPConn> Ꮡc, slice<byte> b) {
-    ref var c = ref Ꮡc.Value;
-
     var (n, addr, err) = Ꮡc.readFromUDP(b, Ꮡ(new UDPAddr(nil)));
     if (addr == nil) {
         // Return Addr(nil), not Addr(*UDPConn(nil)).
@@ -225,7 +220,6 @@ public static (nint n, nint oobn, nint flags, ж<UDPAddr> addr, error err) ReadM
     ж<UDPAddr> addr = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.Value;
     netip.AddrPort ap = default!;
     (n, oobn, flags, ap, err) = Ꮡc.ReadMsgUDPAddrPort(b, oob);
     if (ap.IsValid()) {
@@ -256,7 +250,6 @@ public static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) Re
 // WriteToUDP acts like WriteTo but takes a UDPAddr.
 public static (nint, error) WriteToUDP(this ж<UDPConn> Ꮡc, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
     ref var c = ref Ꮡc.Value;
-    ref var addr = ref Ꮡaddr.Value;
 
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
         return (0, syscall.EINVAL);
@@ -314,7 +307,6 @@ public static (nint n, nint oobn, error err) WriteMsgUDP(this ж<UDPConn> Ꮡc, 
     error err = default!;
 
     ref var c = ref Ꮡc.Value;
-    ref var addr = ref Ꮡaddr.Value;
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
         return (0, 0, syscall.EINVAL);
     }
@@ -343,8 +335,6 @@ public static (nint n, nint oobn, error err) WriteMsgUDPAddrPort(this ж<UDPConn
 }
 
 internal static ж<UDPConn> newUDPConn(ж<netFD> Ꮡfd) {
-    ref var fd = ref Ꮡfd.Value;
-
     return Ꮡ(new UDPConn(new conn(Ꮡfd)));
 }
 
@@ -356,9 +346,6 @@ internal static ж<UDPConn> newUDPConn(ж<netFD> Ꮡfd) {
 // If the IP field of raddr is nil or an unspecified IP address, the
 // local system is assumed.
 public static (ж<UDPConn>, error) DialUDP(@string network, ж<UDPAddr> Ꮡladdr, ж<UDPAddr> Ꮡraddr) {
-    ref var laddr = ref Ꮡladdr.Value;
-    ref var raddr = ref Ꮡraddr.DerefOrNil();
-
     var exprᴛ1 = network;
     if (exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8) {
     }
@@ -428,7 +415,6 @@ public static (ж<UDPConn>, error) ListenUDP(@string network, ж<UDPAddr> Ꮡlad
 // Note that ListenMulticastUDP will set the IP_MULTICAST_LOOP socket option
 // to 0 under IPPROTO_IP, to disable loopback of multicast packets.
 public static (ж<UDPConn>, error) ListenMulticastUDP(@string network, ж<Interface> Ꮡifi, ж<UDPAddr> Ꮡgaddr) {
-    ref var ifi = ref Ꮡifi.Value;
     ref var gaddr = ref Ꮡgaddr.DerefOrNil();
 
     var exprᴛ1 = network;

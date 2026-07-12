@@ -219,8 +219,6 @@ internal static @string operandString(ж<operand> Ꮡx, Func<ж<Package>, @strin
 }
 
 internal static @string String(this ж<operand> Ꮡx) {
-    ref var x = ref Ꮡx.Value;
-
     return operandString(Ꮡx, default!);
 }
 

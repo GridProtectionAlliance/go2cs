@@ -136,7 +136,6 @@ public static ж<ΔInt> SetBits(this ж<ΔInt> Ꮡz, slice<Word> abs) {
 // Abs sets z to |x| (the absolute value of x) and returns z.
 public static ж<ΔInt> Abs(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx) {
     ref var z = ref Ꮡz.Value;
-    ref var x = ref Ꮡx.Value;
 
     Ꮡz.Set(Ꮡx);
     z.neg = false;
@@ -146,7 +145,6 @@ public static ж<ΔInt> Abs(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx) {
 // Neg sets z to -x and returns z.
 public static ж<ΔInt> Neg(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx) {
     ref var z = ref Ꮡz.Value;
-    ref var x = ref Ꮡx.Value;
 
     Ꮡz.Set(Ꮡx);
     z.neg = len(z.abs) > 0 && !z.neg;
@@ -359,7 +357,6 @@ public static (ж<ΔInt>, ж<ΔInt>) QuoRem(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx,
 // Div implements Euclidean division (unlike Go); see [Int.DivMod] for more details.
 public static ж<ΔInt> Div(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
     ref var z = ref Ꮡz.Value;
-    ref var x = ref Ꮡx.Value;
     ref var y = ref Ꮡy.Value;
 
     var y_neg = y.neg;
@@ -381,7 +378,6 @@ public static ж<ΔInt> Div(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy)
 // Mod implements Euclidean modulus (unlike Go); see [Int.DivMod] for more details.
 public static ж<ΔInt> Mod(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
     ref var z = ref Ꮡz.Value;
-    ref var x = ref Ꮡx.Value;
     ref var y = ref Ꮡy.DerefOrNil();
 
     var y0 = Ꮡy;
@@ -417,7 +413,6 @@ public static ж<ΔInt> Mod(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy)
 // See [Int.QuoRem] for T-division and modulus (like Go).
 public static (ж<ΔInt>, ж<ΔInt>) DivMod(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡm) {
     ref var z = ref Ꮡz.Value;
-    ref var x = ref Ꮡx.Value;
     ref var y = ref Ꮡy.DerefOrNil();
     ref var m = ref Ꮡm.Value;
 
@@ -580,16 +575,12 @@ public static (float64, Accuracy) Float64(this ж<ΔInt> Ꮡx) {
 // are no other errors. If base != 0, underscores are not recognized
 // and act like any other character that is not a valid digit.
 public static (ж<ΔInt>, bool) SetString(this ж<ΔInt> Ꮡz, @string s, nint @base) {
-    ref var z = ref Ꮡz.Value;
-
     return Ꮡz.setFromScanner(new strings_ReaderжByteScanner(strings.NewReader(s)), @base);
 }
 
 // setFromScanner implements SetString given an io.ByteScanner.
 // For documentation see comments of SetString.
 internal static (ж<ΔInt>, bool) setFromScanner(this ж<ΔInt> Ꮡz, io.ByteScanner r, nint @base) {
-    ref var z = ref Ꮡz.Value;
-
     {
         var (_, _, err) = Ꮡz.scan(r, @base); if (err != default!) {
             return (default!, false);
@@ -660,20 +651,10 @@ public static ж<ΔInt> SetBytes(this ж<ΔInt> Ꮡz, slice<byte> buf) {
 // Modular exponentiation of inputs of a particular size is not a
 // cryptographically constant-time operation.
 public static ж<ΔInt> Exp(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡm) {
-    ref var z = ref Ꮡz.Value;
-    ref var x = ref Ꮡx.Value;
-    ref var y = ref Ꮡy.Value;
-    ref var m = ref Ꮡm.Value;
-
     return Ꮡz.exp(Ꮡx, Ꮡy, Ꮡm, false);
 }
 
 internal static ж<ΔInt> expSlow(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡm) {
-    ref var z = ref Ꮡz.Value;
-    ref var x = ref Ꮡx.Value;
-    ref var y = ref Ꮡy.Value;
-    ref var m = ref Ꮡm.Value;
-
     return Ꮡz.exp(Ꮡx, Ꮡy, Ꮡm, true);
 }
 
@@ -849,8 +830,6 @@ internal static (Word u0, Word u1, Word v0, Word v1, bool even) lehmerSimulate(�
 // For even == false: u0, v1 <= 0 && u1, v0 >= 0
 // q, r, s, t are temporary variables to avoid allocations in the multiplication.
 internal static void lehmerUpdate(ж<ΔInt> ᏑA, ж<ΔInt> ᏑB, ж<ΔInt> Ꮡq, ж<ΔInt> Ꮡr, ж<ΔInt> Ꮡs, ж<ΔInt> Ꮡt, Word u0, Word u1, Word v0, Word v1, bool even) {
-    ref var A = ref ᏑA.Value;
-    ref var B = ref ᏑB.Value;
     ref var q = ref Ꮡq.Value;
     ref var r = ref Ꮡr.Value;
     ref var s = ref Ꮡs.Value;
@@ -881,8 +860,6 @@ internal static void euclidUpdate(ж<ΔInt> ᏑA, ж<ΔInt> ᏑB, ж<ΔInt> ᏑU
     ref var Ub = ref ᏑUb.Value;
     ref var q = ref Ꮡq.Value;
     ref var r = ref Ꮡr.Value;
-    ref var s = ref Ꮡs.Value;
-    ref var t = ref Ꮡt.Value;
 
     (Ꮡq, Ꮡr) = Ꮡq.QuoRem(ᏑA, ᏑB, Ꮡr); q = ref Ꮡq.Value; r = ref Ꮡr.Value;
     (A, B, r) = (B, r, A);
@@ -1029,7 +1006,6 @@ internal static ж<ΔInt> lehmerGCD(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔIn
 // security-sensitive work. Use [crypto/rand.Int] instead.
 public static ж<ΔInt> Rand(this ж<ΔInt> Ꮡz, ж<rand.Rand> Ꮡrnd, ж<ΔInt> Ꮡn) {
     ref var z = ref Ꮡz.Value;
-    ref var rnd = ref Ꮡrnd.Value;
     ref var n = ref Ꮡn.Value;
 
     // z.neg is not modified before the if check, because z and n might alias.
@@ -1086,7 +1062,6 @@ internal static nat modInverse(this nat z, nat g, nat n) {
 // Jacobi returns the Jacobi symbol (x/y), either +1, -1, or 0.
 // The y argument must be an odd integer.
 public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
-    ref var x = ref Ꮡx.Value;
     ref var y = ref Ꮡy.Value;
 
     if (len(y.abs) == 0 || (Word)(y.abs[0] & 1) == 0) {
@@ -1169,7 +1144,6 @@ internal static ж<ΔInt> modSqrt3Mod4Prime(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx,
 // to calculate the square root of any quadratic residue mod p quickly for 5
 // mod 8 primes.
 internal static ж<ΔInt> modSqrt5Mod8Prime(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡp) {
-    ref var z = ref Ꮡz.Value;
     ref var x = ref Ꮡx.Value;
     ref var p = ref Ꮡp.Value;
 
@@ -1195,7 +1169,6 @@ internal static ж<ΔInt> modSqrt5Mod8Prime(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx,
 // modSqrtTonelliShanks uses the Tonelli-Shanks algorithm to find the square
 // root of a quadratic residue modulo any prime.
 internal static ж<ΔInt> modSqrtTonelliShanks(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡp) {
-    ref var z = ref Ꮡz.Value;
     ref var x = ref Ꮡx.Value;
     ref var p = ref Ꮡp.Value;
 
@@ -1253,7 +1226,6 @@ internal static ж<ΔInt> modSqrtTonelliShanks(this ж<ΔInt> Ꮡz, ж<ΔInt> �
 // ModSqrt leaves z unchanged and returns nil. This function panics if p is
 // not an odd integer, its behavior is undefined if p is odd but not prime.
 public static ж<ΔInt> ModSqrt(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡp) {
-    ref var z = ref Ꮡz.Value;
     ref var x = ref Ꮡx.Value;
     ref var p = ref Ꮡp.Value;
 

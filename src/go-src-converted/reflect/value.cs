@@ -4120,8 +4120,6 @@ internal static partial void mapassign0(ж<abi.Type> t, @unsafe.Pointer m, @unsa
 //
 //go:linkname mapassign
 internal static void mapassign(ж<abi.Type> Ꮡt, @unsafe.Pointer m, @unsafe.Pointer key, @unsafe.Pointer val) {
-    ref var t = ref Ꮡt.Value;
-
     contentEscapes(key);
     contentEscapes(val);
     mapassign0(Ꮡt, m, key, val);
@@ -4131,8 +4129,6 @@ internal static void mapassign(ж<abi.Type> Ꮡt, @unsafe.Pointer m, @unsafe.Poi
 internal static partial void mapassign_faststr0(ж<abi.Type> t, @unsafe.Pointer m, @string key, @unsafe.Pointer val);
 
 internal static void mapassign_faststr(ж<abi.Type> Ꮡt, @unsafe.Pointer m, @string key, @unsafe.Pointer val) {
-    ref var t = ref Ꮡt.Value;
-
     contentEscapes(((ж<unsafeheader.String>)(uintptr)(new @unsafe.Pointer(Ꮡ(key)))).Value.Data);
     contentEscapes(val);
     mapassign_faststr0(Ꮡt, m, key, val);

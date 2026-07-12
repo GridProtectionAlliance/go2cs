@@ -130,7 +130,6 @@ internal static (@string output, bool unordered, bool ok) exampleOutput(ж<ast.B
     bool unordered = default!;
     bool ok = default!;
 
-    ref var b = ref Ꮡb.Value;
     {
         var (_, last) = lastComment(Ꮡb, comments); if (last != nil) {
             // test that it begins with the correct prefix

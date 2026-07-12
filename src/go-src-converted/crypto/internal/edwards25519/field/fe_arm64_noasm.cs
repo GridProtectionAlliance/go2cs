@@ -7,8 +7,6 @@ namespace go.crypto.@internal.edwards25519;
 partial class field_package {
 
 internal static ж<Element> carryPropagate(this ж<Element> Ꮡv) {
-    ref var v = ref Ꮡv.Value;
-
     return Ꮡv.carryPropagateGeneric();
 }
 

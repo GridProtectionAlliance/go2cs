@@ -72,8 +72,6 @@ internal static map<@string, trace.UtilFlags> utilFlagNames = new map<@string, t
 };
 
 internal static trace.UtilFlags requestUtilFlags(ж<http.Request> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     trace.UtilFlags flags = default!;
     foreach (var (_, flagStr) in strings.Split(Ꮡr.FormValue("flags"u8), "|"u8)) {
         flags |= (trace.UtilFlags)(utilFlagNames[flagStr]);
@@ -120,9 +118,6 @@ internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) get
 
 // HandlePlot serves the JSON data for the MMU plot.
 internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> Ꮡr) {
-    ref var m = ref Ꮡm.Value;
-    ref var r = ref Ꮡr.Value;
-
     var (mu, mmuCurve, err) = Ꮡm.get(requestUtilFlags(Ꮡr));
     if (err != default!) {
         http.Error(w, fmt.Sprintf("failed to produce MMU data: %v"u8, err), http.StatusInternalServerError);
@@ -385,7 +380,6 @@ internal static @string templMMU = """
 // HandleDetails serves details of an MMU graph at a particular window.
 internal static void HandleDetails(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> Ꮡr) {
     ref var m = ref Ꮡm.Value;
-    ref var r = ref Ꮡr.Value;
 
     var (_, mmuCurve, err) = Ꮡm.get(requestUtilFlags(Ꮡr));
     if (err != default!) {

@@ -25,8 +25,6 @@ internal static bool exportFilter(@string name) {
 //
 // FileExports reports whether there are exported declarations.
 public static bool FileExports(ж<File> Ꮡsrc) {
-    ref var src = ref Ꮡsrc.Value;
-
     return filterFile(Ꮡsrc, new Func<@string, bool>(exportFilter), true);
 }
 
@@ -37,8 +35,6 @@ public static bool FileExports(ж<File> Ꮡsrc) {
 // PackageExports reports whether there are exported declarations;
 // it returns false otherwise.
 public static bool PackageExports(ж<Package> Ꮡpkg) {
-    ref var pkg = ref Ꮡpkg.Value;
-
     return filterPackage(Ꮡpkg, new Func<@string, bool>(exportFilter), true);
 }
 
@@ -286,8 +282,6 @@ internal static bool filterDecl(Decl decl, Func<@string, bool> f, bool export) {
 // FilterFile reports whether there are any top-level declarations
 // left after filtering.
 public static bool FilterFile(ж<File> Ꮡsrc, Func<@string, bool> f) {
-    ref var src = ref Ꮡsrc.Value;
-
     return filterFile(Ꮡsrc, f, false);
 }
 
@@ -316,8 +310,6 @@ internal static bool filterFile(ж<File> Ꮡsrc, Func<@string, bool> f, bool exp
 // FilterPackage reports whether there are any top-level declarations
 // left after filtering.
 public static bool FilterPackage(ж<Package> Ꮡpkg, Func<@string, bool> f) {
-    ref var pkg = ref Ꮡpkg.Value;
-
     return filterPackage(Ꮡpkg, f, false);
 }
 

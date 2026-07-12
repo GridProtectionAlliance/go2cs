@@ -108,8 +108,6 @@ internal static ж<entry> newEntry(any i) {
 }
 
 internal static readOnly loadReadOnly(this ж<Map> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
     {
         var p = Ꮡm.of(Map.Ꮡread).Load(); if (p != nil) {
             return p.Value;
@@ -154,7 +152,6 @@ internal static (any value, bool ok) load(this ж<entry> Ꮡe) {
     any value = default!;
     bool ok = default!;
 
-    ref var e = ref Ꮡe.Value;
     var p = Ꮡe.of(entry.Ꮡp).Load();
     if (p == nil || p == expunged) {
         return (default!, false);
@@ -164,8 +161,6 @@ internal static (any value, bool ok) load(this ж<entry> Ꮡe) {
 
 // Store sets the value for a key.
 public static void Store(this ж<Map> Ꮡm, any key, any value) {
-    ref var m = ref Ꮡm.Value;
-
     (_, _) = Ꮡm.Swap(key, value);
 }
 
@@ -196,8 +191,6 @@ public static void Clear(this ж<Map> Ꮡm) => func((defer, recover) => {
 // If the entry is expunged, tryCompareAndSwap returns false and leaves
 // the entry unchanged.
 internal static bool tryCompareAndSwap(this ж<entry> Ꮡe, any old, any @new) {
-    ref var e = ref Ꮡe.Value;
-
     var p = Ꮡe.of(entry.Ꮡp).Load();
     if (p == nil || p == expunged || !AreEqual(p.ValueSlot, old)) {
         return false;
@@ -225,7 +218,6 @@ internal static bool tryCompareAndSwap(this ж<entry> Ꮡe, any old, any @new) {
 internal static bool /*wasExpunged*/ unexpungeLocked(this ж<entry> Ꮡe) {
     bool wasExpunged = default!;
 
-    ref var e = ref Ꮡe.Value;
     return Ꮡe.of(entry.Ꮡp).CompareAndSwap(expunged, nil);
 }
 
@@ -233,9 +225,6 @@ internal static bool /*wasExpunged*/ unexpungeLocked(this ж<entry> Ꮡe) {
 //
 // The entry must be known not to be expunged.
 internal static ж<any> swapLocked(this ж<entry> Ꮡe, ж<any> Ꮡi) {
-    ref var e = ref Ꮡe.Value;
-    ref var i = ref Ꮡi.Value;
-
     return Ꮡe.of(entry.Ꮡp).Swap(Ꮡi);
 }
 
@@ -296,7 +285,6 @@ internal static (any actual, bool loaded, bool ok) tryLoadOrStore(this ж<entry>
     bool loaded = default!;
     bool ok = default!;
 
-    ref var e = ref Ꮡe.Value;
     var p = Ꮡe.of(entry.Ꮡp).Load();
     if (p == expunged) {
         return (default!, false, false);
@@ -354,8 +342,6 @@ public static (any value, bool loaded) LoadAndDelete(this ж<Map> Ꮡm, any key)
 
 // Delete deletes the value for a key.
 public static void Delete(this ж<Map> Ꮡm, any key) {
-    ref var m = ref Ꮡm.Value;
-
     Ꮡm.LoadAndDelete(key);
 }
 
@@ -363,7 +349,6 @@ internal static (any value, bool ok) delete(this ж<entry> Ꮡe) {
     any value = default!;
     bool ok = default!;
 
-    ref var e = ref Ꮡe.Value;
     while (ᐧ) {
         var p = Ꮡe.of(entry.Ꮡp).Load();
         if (p == nil || p == expunged) {
@@ -380,9 +365,6 @@ internal static (any value, bool ok) delete(this ж<entry> Ꮡe) {
 // If the entry is expunged, trySwap returns false and leaves the entry
 // unchanged.
 internal static (ж<any>, bool) trySwap(this ж<entry> Ꮡe, ж<any> Ꮡi) {
-    ref var e = ref Ꮡe.Value;
-    ref var i = ref Ꮡi.Value;
-
     while (ᐧ) {
         var p = Ꮡe.of(entry.Ꮡp).Load();
         if (p == expunged) {
@@ -613,7 +595,6 @@ internal static void dirtyLocked(this ж<Map> Ꮡm) {
 internal static bool /*isExpunged*/ tryExpungeLocked(this ж<entry> Ꮡe) {
     bool isExpunged = default!;
 
-    ref var e = ref Ꮡe.Value;
     var p = Ꮡe.of(entry.Ꮡp).Load();
     while (p == nil) {
         if (Ꮡe.of(entry.Ꮡp).CompareAndSwap(nil, expunged)) {

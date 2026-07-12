@@ -103,8 +103,6 @@ internal static slice<Action> cleanupNotify; // One-time notifications when clea
 internal static ж<uniqueMap<T>> addUniqueMap<T>(ж<abi.Type> Ꮡtyp)
     where T : /* comparable */ new()
 {
-    ref var typ = ref Ꮡtyp.Value;
-
     // Create a map for T and try to register it. We could
     // race with someone else, but that's fine; it's one
     // small, stray allocation. The number of allocations

@@ -126,7 +126,6 @@ internal static void block() {
 // a value was received.
 internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, ж<uintptr> Ꮡpc0, nint nsends, nint nrecvs, bool block) {
     ref var cas0 = ref Ꮡcas0.Value;
-    ref var order0 = ref Ꮡorder0.Value;
     ref var pc0 = ref Ꮡpc0.DerefOrNil();
 
     if (debugSelect) {

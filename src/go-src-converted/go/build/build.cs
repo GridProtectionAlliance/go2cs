@@ -503,8 +503,6 @@ public static readonly ImportMode IgnoreVendor = 8;
 // ImportDir is like [Import] but processes the Go package found in
 // the named directory.
 public static (ж<Package>, error) ImportDir(this ж<Context> Ꮡctxt, @string dir, ImportMode mode) {
-    ref var ctxt = ref Ꮡctxt.Value;
-
     return Ꮡctxt.Import("."u8, dir, mode);
 }
 
@@ -1083,8 +1081,6 @@ Found:
 }
 
 internal static ж<slice<@string>> fileListForExt(ж<Package> Ꮡp, @string ext) {
-    ref var p = ref Ꮡp.Value;
-
     var exprᴛ1 = ext;
     if (exprᴛ1 == ".c"u8) {
         return Ꮡp.of(Package.ᏑCFiles);
@@ -1437,7 +1433,6 @@ public static (bool match, error err) MatchFile(this ж<Context> Ꮡctxt, @strin
     bool match = default!;
     error err = default!;
 
-    ref var ctxt = ref Ꮡctxt.Value;
     (var info, err) = Ꮡctxt.matchFile(dir, name, default!, nil, nil);
     return (info != nil, err);
 }
@@ -1597,7 +1592,6 @@ internal static (bool shouldBuild, bool binaryOnly, error err) shouldBuild(this 
     bool binaryOnly = default!;
     error err = default!;
 
-    ref var ctxt = ref Ꮡctxt.Value;
     // Identify leading run of // comments and blank lines,
     // which must be followed by a blank line.
     // Also identify any //go:build comments.
@@ -1745,7 +1739,6 @@ break_Lines:;
 internal static error saveCgo(this ж<Context> Ꮡctxt, @string filename, ж<Package> Ꮡdi, ж<ast.CommentGroup> Ꮡcg) {
     ref var ctxt = ref Ꮡctxt.Value;
     ref var di = ref Ꮡdi.Value;
-    ref var cg = ref Ꮡcg.Value;
 
     @string text = Ꮡcg.Text();
     foreach (var (_, vᴛ1) in strings.Split(text, "\n"u8)) {
@@ -1991,8 +1984,6 @@ internal static (slice<@string> r, error err) splitQuoted(@string s) {
 // matchAuto is only used for testing of tag evaluation
 // and in #cgo lines, which accept either syntax.
 internal static bool matchAuto(this ж<Context> Ꮡctxt, @string text, map<@string, bool> allTags) {
-    ref var ctxt = ref Ꮡctxt.Value;
-
     if (strings.ContainsAny(text, "&|()"u8)){
         text = "//go:build "u8 + text;
     } else {
@@ -2006,8 +1997,6 @@ internal static bool matchAuto(this ж<Context> Ꮡctxt, @string text, map<@stri
 }
 
 internal static bool eval(this ж<Context> Ꮡctxt, constraint.Expr x, map<@string, bool> allTags) {
-    ref var ctxt = ref Ꮡctxt.Value;
-
     var allTagsʗ1 = allTags;
     return x.Eval((@string tag) => Ꮡctxt.Value.matchTag(tag, allTagsʗ1));
 }

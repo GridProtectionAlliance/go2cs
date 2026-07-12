@@ -247,8 +247,6 @@ internal static void reflect_typedmemmove(ж<_type> Ꮡtyp, @unsafe.Pointer dst,
 
 //go:linkname reflectlite_typedmemmove internal/reflectlite.typedmemmove
 internal static void reflectlite_typedmemmove(ж<_type> Ꮡtyp, @unsafe.Pointer dst, @unsafe.Pointer src) {
-    ref var typ = ref Ꮡtyp.Value;
-
     reflect_typedmemmove(Ꮡtyp, dst, src);
 }
 
@@ -398,8 +396,6 @@ internal static void typedmemclr(ж<_type> Ꮡtyp, @unsafe.Pointer ptr) {
 //
 //go:linkname reflect_typedmemclr reflect.typedmemclr
 internal static void reflect_typedmemclr(ж<_type> Ꮡtyp, @unsafe.Pointer ptr) {
-    ref var typ = ref Ꮡtyp.Value;
-
     typedmemclr(Ꮡtyp, ptr);
 }
 

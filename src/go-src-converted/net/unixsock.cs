@@ -44,8 +44,6 @@ internal static bool isWildcard(this ж<UnixAddr> Ꮡa) {
 }
 
 internal static ΔAddr opAddr(this ж<UnixAddr> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
-
     if (Ꮡa == nil) {
         return default!;
     }
@@ -177,7 +175,6 @@ public static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) Read
 // WriteToUnix acts like [UnixConn.WriteTo] but takes a [UnixAddr].
 public static (nint, error) WriteToUnix(this ж<UnixConn> Ꮡc, slice<byte> b, ж<UnixAddr> Ꮡaddr) {
     ref var c = ref Ꮡc.Value;
-    ref var addr = ref Ꮡaddr.Value;
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
         return (0, syscall.EINVAL);
@@ -219,7 +216,6 @@ public static (nint n, nint oobn, error err) WriteMsgUnix(this ж<UnixConn> Ꮡc
     error err = default!;
 
     ref var c = ref Ꮡc.Value;
-    ref var addr = ref Ꮡaddr.Value;
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
         return (0, 0, syscall.EINVAL);
     }
@@ -231,8 +227,6 @@ public static (nint n, nint oobn, error err) WriteMsgUnix(this ж<UnixConn> Ꮡc
 }
 
 internal static ж<UnixConn> newUnixConn(ж<netFD> Ꮡfd) {
-    ref var fd = ref Ꮡfd.Value;
-
     return Ꮡ(new UnixConn(new conn(Ꮡfd)));
 }
 
@@ -243,9 +237,6 @@ internal static ж<UnixConn> newUnixConn(ж<netFD> Ꮡfd) {
 // If laddr is non-nil, it is used as the local address for the
 // connection.
 public static (ж<UnixConn>, error) DialUnix(@string network, ж<UnixAddr> Ꮡladdr, ж<UnixAddr> Ꮡraddr) {
-    ref var laddr = ref Ꮡladdr.Value;
-    ref var raddr = ref Ꮡraddr.Value;
-
     var exprᴛ1 = network;
     if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8) {
     }
@@ -381,8 +372,6 @@ public static (ж<os.File> f, error err) File(this ж<UnixListener> Ꮡl) {
 //
 // The network must be "unix" or "unixpacket".
 public static (ж<UnixListener>, error) ListenUnix(@string network, ж<UnixAddr> Ꮡladdr) {
-    ref var laddr = ref Ꮡladdr.DerefOrNil();
-
     var exprᴛ1 = network;
     if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8) {
     }
@@ -405,8 +394,6 @@ public static (ж<UnixListener>, error) ListenUnix(@string network, ж<UnixAddr>
 //
 // The network must be "unixgram".
 public static (ж<UnixConn>, error) ListenUnixgram(@string network, ж<UnixAddr> Ꮡladdr) {
-    ref var laddr = ref Ꮡladdr.DerefOrNil();
-
     var exprᴛ1 = network;
     if (exprᴛ1 == "unixgram"u8) {
     }

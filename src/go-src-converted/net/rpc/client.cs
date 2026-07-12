@@ -317,8 +317,6 @@ public static error Close(this ж<Client> Ꮡclient) {
 // the same Call object. If done is nil, Go will allocate a new channel.
 // If non-nil, done must be buffered or Go will deliberately crash.
 public static ж<ΔCall> Go(this ж<Client> Ꮡclient, @string serviceMethod, any args, any reply, channel<ж<ΔCall>> done) {
-    ref var client = ref Ꮡclient.Value;
-
     var call = @new<ΔCall>();
     call.Value.ServiceMethod = serviceMethod;
     call.Value.Args = args;
@@ -342,8 +340,6 @@ public static ж<ΔCall> Go(this ж<Client> Ꮡclient, @string serviceMethod, an
 
 // Call invokes the named function, waits for it to complete, and returns its error status.
 public static error Call(this ж<Client> Ꮡclient, @string serviceMethod, any args, any reply) {
-    ref var client = ref Ꮡclient.Value;
-
     var call = ᐸꟷ((~Ꮡclient.Go(serviceMethod, args, reply, new channel<ж<ΔCall>>(1))).Done);
     return (~call).Error;
 }

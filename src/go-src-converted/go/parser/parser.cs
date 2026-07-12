@@ -65,7 +65,6 @@ partial class parser_package {
 
 internal static void init(this ж<parser> Ꮡp, ж<token.FileSet> Ꮡfset, @string filename, slice<byte> src, Mode mode) {
     ref var p = ref Ꮡp.Value;
-    ref var fset = ref Ꮡfset.Value;
 
     p.@file = Ꮡfset.AddFile(filename, -1, len(src));
     var eh = (tokenꓸPosition pos, @string msg) => {
@@ -602,7 +601,6 @@ internal static ast.Expr parseType(this ж<parser> Ꮡp) => func((defer, recover
 
 internal static ast.Expr parseQualifiedIdent(this ж<parser> Ꮡp, ж<ast.Ident> Ꮡident) => func((defer, recover) => {
     ref var p = ref Ꮡp.Value;
-    ref var ident = ref Ꮡident.Value;
 
     if (p.trace) {
         deferǃ(un, trace(Ꮡp, "QualifiedIdent"u8), defer);
@@ -2179,8 +2177,6 @@ X: x[0], TokPos: p.pos, Tok: p.tok));
 });
 
 internal static ж<ast.CallExpr> parseCallExpr(this ж<parser> Ꮡp, @string callType) {
-    ref var p = ref Ꮡp.Value;
-
     var x = Ꮡp.parseRhs();
     // could be a conversion: (some type)(x)
     {
@@ -2271,8 +2267,6 @@ internal static ж<ast.BranchStmt> parseBranchStmt(this ж<parser> Ꮡp, token.T
 });
 
 internal static ast.Expr makeExpr(this ж<parser> Ꮡp, ast.Stmt s, @string want) {
-    ref var p = ref Ꮡp.Value;
-
     if (s == default!) {
         return default!;
     }
@@ -2415,8 +2409,6 @@ internal static bool isTypeSwitchAssert(ast.Expr x) {
 }
 
 internal static bool isTypeSwitchGuard(this ж<parser> Ꮡp, ast.Stmt s) {
-    ref var p = ref Ꮡp.Value;
-
     switch (s.type()) {
     case ж<ast.ExprStmt> t: {
         return isTypeSwitchAssert((~t).X);
@@ -2753,7 +2745,6 @@ Semicolon: p.pos, Implicit: true)));
 // Declarations
 internal static ast.Spec parseImportSpec(this ж<parser> Ꮡp, ж<ast.CommentGroup> Ꮡdoc, token.Token _Δp2, nint _Δp3) => func((defer, recover) => {
     ref var p = ref Ꮡp.Value;
-    ref var doc = ref Ꮡdoc.Value;
 
     if (p.trace) {
         deferǃ(un, trace(Ꮡp, "ImportSpec"u8), defer);
@@ -2796,7 +2787,6 @@ internal static ast.Spec parseImportSpec(this ж<parser> Ꮡp, ж<ast.CommentGro
 
 internal static ast.Spec parseValueSpec(this ж<parser> Ꮡp, ж<ast.CommentGroup> Ꮡdoc, token.Token keyword, nint iota) => func((defer, recover) => {
     ref var p = ref Ꮡp.Value;
-    ref var doc = ref Ꮡdoc.Value;
 
     if (p.trace) {
         deferǃ(un, trace(Ꮡp, keyword.String() + "Spec"u8), defer);
@@ -2842,7 +2832,6 @@ internal static ast.Spec parseValueSpec(this ж<parser> Ꮡp, ж<ast.CommentGrou
 internal static void parseGenericType(this ж<parser> Ꮡp, ж<ast.TypeSpec> Ꮡspec, tokenꓸPos openPos, ж<ast.Ident> Ꮡname0, ast.Expr typ0) => func((defer, recover) => {
     ref var p = ref Ꮡp.Value;
     ref var spec = ref Ꮡspec.Value;
-    ref var name0 = ref Ꮡname0.Value;
 
     if (p.trace) {
         deferǃ(un, trace(Ꮡp, "parseGenericType"u8), defer);
@@ -2863,7 +2852,6 @@ internal static void parseGenericType(this ж<parser> Ꮡp, ж<ast.TypeSpec> Ꮡ
 
 internal static ast.Spec parseTypeSpec(this ж<parser> Ꮡp, ж<ast.CommentGroup> Ꮡdoc, token.Token _Δp2, nint _Δp3) => func((defer, recover) => {
     ref var p = ref Ꮡp.Value;
-    ref var doc = ref Ꮡdoc.Value;
 
     if (p.trace) {
         deferǃ(un, trace(Ꮡp, "TypeSpec"u8), defer);

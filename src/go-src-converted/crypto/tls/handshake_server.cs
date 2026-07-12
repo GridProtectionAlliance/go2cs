@@ -356,8 +356,6 @@ internal static (@string, error) negotiateALPN(slice<@string> serverProtos, slic
 // supportsECDHE returns whether ECDHE key exchanges can be used with this
 // pre-TLS 1.3 client.
 internal static bool supportsECDHE(ж<Config> Ꮡc, uint16 version, slice<CurveID> supportedCurves, slice<uint8> supportedPoints) {
-    ref var c = ref Ꮡc.Value;
-
     var supportsCurve = false;
     foreach (var (_, curve) in supportedCurves) {
         if (Ꮡc.supportsCurve(version, curve)) {

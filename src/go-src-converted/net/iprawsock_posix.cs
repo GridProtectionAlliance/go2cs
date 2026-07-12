@@ -100,8 +100,6 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
 }
 
 [GoRecv] internal static (nint, error) writeTo(this ref IPConn c, slice<byte> b, ж<IPAddr> Ꮡaddr) {
-    ref var addr = ref Ꮡaddr.DerefOrNil();
-
     if ((~c.fd).isConnected) {
         return (0, ErrWriteToConnected);
     }
@@ -120,7 +118,6 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
     nint oobn = default!;
     error err = default!;
 
-    ref var addr = ref Ꮡaddr.DerefOrNil();
     if ((~c.fd).isConnected) {
         return (0, 0, ErrWriteToConnected);
     }
@@ -136,8 +133,6 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
 
 internal static (ж<IPConn>, error) dialIP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<IPAddr> Ꮡladdr, ж<IPAddr> Ꮡraddr) {
     ref var sd = ref Ꮡsd.Value;
-    ref var laddr = ref Ꮡladdr.Value;
-    ref var raddr = ref Ꮡraddr.Value;
 
     var (network, proto, err) = parseNetwork(ctx, sd.network, true);
     if (err != default!) {
@@ -163,7 +158,6 @@ internal static (ж<IPConn>, error) dialIP(this ж<sysDialer> Ꮡsd, context.Con
 
 internal static (ж<IPConn>, error) listenIP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<IPAddr> Ꮡladdr) {
     ref var sl = ref Ꮡsl.Value;
-    ref var laddr = ref Ꮡladdr.Value;
 
     var (network, proto, err) = parseNetwork(ctx, sl.network, true);
     if (err != default!) {

@@ -19,29 +19,21 @@ partial class cryptobyte_package {
 
 // AddASN1Int64 appends a DER-encoded ASN.1 INTEGER.
 public static void AddASN1Int64(this ж<Builder> Ꮡb, int64 v) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.addASN1Signed(asn1.INTEGER, v);
 }
 
 // AddASN1Int64WithTag appends a DER-encoded ASN.1 INTEGER with the
 // given tag.
 public static void AddASN1Int64WithTag(this ж<Builder> Ꮡb, int64 v, asn1.Tag tag) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.addASN1Signed(tag, v);
 }
 
 // AddASN1Enum appends a DER-encoded ASN.1 ENUMERATION.
 public static void AddASN1Enum(this ж<Builder> Ꮡb, int64 v) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.addASN1Signed(asn1.ENUM, v);
 }
 
 internal static void addASN1Signed(this ж<Builder> Ꮡb, asn1.Tag tag, int64 v) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.AddASN1(tag, (ж<Builder> c) => {
         nint length = 1;
         for (var i = v; i >= 0x80 || i < -0x80; i >>= (int)(8)) {
@@ -56,8 +48,6 @@ internal static void addASN1Signed(this ж<Builder> Ꮡb, asn1.Tag tag, int64 v)
 
 // AddASN1Uint64 appends a DER-encoded ASN.1 INTEGER.
 public static void AddASN1Uint64(this ж<Builder> Ꮡb, uint64 v) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.AddASN1(asn1.INTEGER, (ж<Builder> c) => {
         nint length = 1;
         for (var i = v; i >= 0x80; i >>= (int)(8)) {
@@ -73,7 +63,6 @@ public static void AddASN1Uint64(this ж<Builder> Ꮡb, uint64 v) {
 // AddASN1BigInt appends a DER-encoded ASN.1 INTEGER.
 public static void AddASN1BigInt(this ж<Builder> Ꮡb, ж<bigꓸInt> Ꮡn) {
     ref var b = ref Ꮡb.Value;
-    ref var n = ref Ꮡn.Value;
 
     if (b.err != default!) {
         return;
@@ -109,8 +98,6 @@ public static void AddASN1BigInt(this ж<Builder> Ꮡb, ж<bigꓸInt> Ꮡn) {
 
 // AddASN1OctetString appends a DER-encoded ASN.1 OCTET STRING.
 public static void AddASN1OctetString(this ж<Builder> Ꮡb, slice<byte> bytes) {
-    ref var b = ref Ꮡb.Value;
-
     var bytesʗ1 = bytes;
     Ꮡb.AddASN1(asn1.OCTET_STRING, (ж<Builder> c) => {
         c.AddBytes(bytesʗ1);
@@ -135,8 +122,6 @@ public static void AddASN1GeneralizedTime(this ж<Builder> Ꮡb, time.Time t) {
 
 // AddASN1UTCTime appends a DER-encoded ASN.1 UTCTime.
 public static void AddASN1UTCTime(this ж<Builder> Ꮡb, time.Time t) {
-    ref var b = ref Ꮡb.Value;
-
     var tʗ1 = t;
     Ꮡb.AddASN1(asn1.UTCTime, (ж<Builder> c) => {
         // As utilized by the X.509 profile, UTCTime can only
@@ -152,8 +137,6 @@ public static void AddASN1UTCTime(this ж<Builder> Ꮡb, time.Time t) {
 // AddASN1BitString appends a DER-encoded ASN.1 BIT STRING. This does not
 // support BIT STRINGs that are not a whole number of bytes.
 public static void AddASN1BitString(this ж<Builder> Ꮡb, slice<byte> data) {
-    ref var b = ref Ꮡb.Value;
-
     var dataʗ1 = data;
     Ꮡb.AddASN1(asn1.BIT_STRING, (ж<Builder> bΔ1) => {
         bΔ1.AddUint8(0);
@@ -196,8 +179,6 @@ internal static bool isValidOID(encoding_asn1.ObjectIdentifier oid) {
 }
 
 public static void AddASN1ObjectIdentifier(this ж<Builder> Ꮡb, encoding_asn1.ObjectIdentifier oid) {
-    ref var b = ref Ꮡb.Value;
-
     var oidʗ1 = oid;
     Ꮡb.AddASN1(asn1.OBJECT_IDENTIFIER, (ж<Builder> bΔ1) => {
         if (!isValidOID(oidʗ1)) {
@@ -212,8 +193,6 @@ public static void AddASN1ObjectIdentifier(this ж<Builder> Ꮡb, encoding_asn1.
 }
 
 public static void AddASN1Boolean(this ж<Builder> Ꮡb, bool v) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.AddASN1(asn1.BOOLEAN, (ж<Builder> bΔ1) => {
         if (v){
             bΔ1.AddUint8(0xff);
@@ -357,8 +336,6 @@ internal static bool checkASN1Integer(slice<byte> bytes) {
 internal static ж<bigꓸInt> bigOne = big.NewInt(1);
 
 [GoRecv] internal static bool readASN1BigInt(this ref String s, ж<bigꓸInt> Ꮡout) {
-    ref var @out = ref Ꮡout.Value;
-
     ref var bytes = ref heap<String>(out var Ꮡbytes);
     if (!s.ReadASN1(Ꮡbytes, asn1.INTEGER) || !checkASN1Integer(bytes)) {
         return false;
@@ -396,8 +373,6 @@ internal static ж<bigꓸInt> bigOne = big.NewInt(1);
 }
 
 [GoRecv] internal static bool readASN1Int64(this ref String s, ж<int64> Ꮡout) {
-    ref var @out = ref Ꮡout.Value;
-
     ref var bytes = ref heap<String>(out var Ꮡbytes);
     if (!s.ReadASN1(Ꮡbytes, asn1.INTEGER) || !checkASN1Integer(bytes) || !asn1Signed(Ꮡout, bytes)) {
         return false;
@@ -423,8 +398,6 @@ internal static bool asn1Signed(ж<int64> Ꮡout, slice<byte> n) {
 }
 
 [GoRecv] internal static bool readASN1Uint64(this ref String s, ж<uint64> Ꮡout) {
-    ref var @out = ref Ꮡout.Value;
-
     ref var bytes = ref heap<String>(out var Ꮡbytes);
     if (!s.ReadASN1(Ꮡbytes, asn1.INTEGER) || !checkASN1Integer(bytes) || !asn1Unsigned(Ꮡout, bytes)) {
         return false;
@@ -455,8 +428,6 @@ internal static bool asn1Unsigned(ж<uint64> Ꮡout, slice<byte> n) {
 // and advances. It reports whether the read was successful and resulted in a
 // value that can be represented in an int64.
 [GoRecv] public static bool ReadASN1Int64WithTag(this ref String s, ж<int64> Ꮡout, asn1.Tag tag) {
-    ref var @out = ref Ꮡout.Value;
-
     ref var bytes = ref heap<String>(out var Ꮡbytes);
     return s.ReadASN1(Ꮡbytes, tag) && checkASN1Integer(bytes) && asn1Signed(Ꮡout, bytes);
 }
@@ -663,8 +634,6 @@ internal static readonly @string defaultUTCTimeFormatStr = "060102150405Z0700"u8
 //
 // Tags greater than 30 are not supported (i.e. low-tag-number format only).
 [GoRecv] public static bool ReadASN1(this ref String s, ж<String> Ꮡout, asn1.Tag tag) {
-    ref var @out = ref Ꮡout.Value;
-
     ref var t = ref heap(new golang.org.x.crypto.cryptobyte.asn1_package.Tag(), out var Ꮡt);
     if (!s.ReadAnyASN1(Ꮡout, Ꮡt) || t != tag) {
         return false;
@@ -678,8 +647,6 @@ internal static readonly @string defaultUTCTimeFormatStr = "060102150405Z0700"u8
 //
 // Tags greater than 30 are not supported (i.e. low-tag-number format only).
 [GoRecv] public static bool ReadASN1Element(this ref String s, ж<String> Ꮡout, asn1.Tag tag) {
-    ref var @out = ref Ꮡout.Value;
-
     ref var t = ref heap(new golang.org.x.crypto.cryptobyte.asn1_package.Tag(), out var Ꮡt);
     if (!s.ReadAnyASN1Element(Ꮡout, Ꮡt) || t != tag) {
         return false;
@@ -693,9 +660,6 @@ internal static readonly @string defaultUTCTimeFormatStr = "060102150405Z0700"u8
 //
 // Tags greater than 30 are not supported (i.e. low-tag-number format only).
 [GoRecv] public static bool ReadAnyASN1(this ref String s, ж<String> Ꮡout, ж<asn1.Tag> ᏑoutTag) {
-    ref var @out = ref Ꮡout.Value;
-    ref var outTag = ref ᏑoutTag.Value;
-
     return s.readASN1(Ꮡout, ᏑoutTag, true);
 }
 
@@ -707,9 +671,6 @@ internal static readonly @string defaultUTCTimeFormatStr = "060102150405Z0700"u8
 //
 // Tags greater than 30 are not supported (i.e. low-tag-number format only).
 [GoRecv] public static bool ReadAnyASN1Element(this ref String s, ж<String> Ꮡout, ж<asn1.Tag> ᏑoutTag) {
-    ref var @out = ref Ꮡout.Value;
-    ref var outTag = ref ᏑoutTag.Value;
-
     return s.readASN1(Ꮡout, ᏑoutTag, false);
 }
 
@@ -736,7 +697,6 @@ public static bool PeekASN1Tag(this String s, asn1.Tag tag) {
 // out. It stores whether an element with the tag was found in outPresent,
 // unless outPresent is nil. It reports whether the read was successful.
 [GoRecv] public static bool ReadOptionalASN1(this ref String s, ж<String> Ꮡout, ж<bool> ᏑoutPresent, asn1.Tag tag) {
-    ref var @out = ref Ꮡout.Value;
     ref var outPresent = ref ᏑoutPresent.DerefOrNil();
 
     var present = s.PeekASN1Tag(tag);

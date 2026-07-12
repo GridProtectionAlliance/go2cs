@@ -611,7 +611,6 @@ public static (nint, syscallꓸSockaddr, error) ReadFrom(this ж<FD> Ꮡfd, slic
 // ReadFromInet4 wraps the recvfrom network call for IPv4.
 public static (nint, error) ReadFromInet4(this ж<FD> Ꮡfd, slice<byte> buf, ж<Δsyscall.SockaddrInet4> Ꮡsa4) => func<(nint, error)>((defer, recover) => {
     ref var fd = ref Ꮡfd.Value;
-    ref var sa4 = ref Ꮡsa4.Value;
 
     if (len(buf) == 0) {
         return (0, default!);
@@ -645,7 +644,6 @@ public static (nint, error) ReadFromInet4(this ж<FD> Ꮡfd, slice<byte> buf, ж
 // ReadFromInet6 wraps the recvfrom network call for IPv6.
 public static (nint, error) ReadFromInet6(this ж<FD> Ꮡfd, slice<byte> buf, ж<Δsyscall.SockaddrInet6> Ꮡsa6) => func<(nint, error)>((defer, recover) => {
     ref var fd = ref Ꮡfd.Value;
-    ref var sa6 = ref Ꮡsa6.Value;
 
     if (len(buf) == 0) {
         return (0, default!);
@@ -887,7 +885,6 @@ public static (nint, error) WriteTo(this ж<FD> Ꮡfd, slice<byte> buf, syscall�
 // WriteToInet4 is WriteTo, specialized for syscall.SockaddrInet4.
 public static (nint, error) WriteToInet4(this ж<FD> Ꮡfd, slice<byte> buf, ж<Δsyscall.SockaddrInet4> Ꮡsa4) => func<(nint, error)>((defer, recover) => {
     ref var fd = ref Ꮡfd.Value;
-    ref var sa4 = ref Ꮡsa4.Value;
 
     {
         var err = Ꮡfd.writeLock(); if (err != default!) {
@@ -923,7 +920,6 @@ public static (nint, error) WriteToInet4(this ж<FD> Ꮡfd, slice<byte> buf, ж<
 // WriteToInet6 is WriteTo, specialized for syscall.SockaddrInet6.
 public static (nint, error) WriteToInet6(this ж<FD> Ꮡfd, slice<byte> buf, ж<Δsyscall.SockaddrInet6> Ꮡsa6) => func<(nint, error)>((defer, recover) => {
     ref var fd = ref Ꮡfd.Value;
-    ref var sa6 = ref Ꮡsa6.Value;
 
     {
         var err = Ꮡfd.writeLock(); if (err != default!) {
@@ -993,8 +989,6 @@ internal static (@string, error) acceptOne(this ж<FD> Ꮡfd, syscallꓸHandle s
 // Accept handles accepting a socket. The sysSocket parameter is used
 // to allocate the net socket.
 public static (syscallꓸHandle, slice<Δsyscall.RawSockaddrAny>, uint32, @string, error) Accept(this ж<FD> Ꮡfd, Func<(syscallꓸHandle, error)> sysSocket) => func<(syscallꓸHandle, slice<Δsyscall.RawSockaddrAny>, uint32, @string, error)>((defer, recover) => {
-    ref var fd = ref Ꮡfd.Value;
-
     {
         var err = Ꮡfd.readLock(); if (err != default!) {
             return (Δsyscall.InvalidHandle, default!, 0, "", err);
@@ -1110,7 +1104,6 @@ public static (uint32, error) GetFileType(this ж<FD> Ꮡfd) => func<(uint32, er
 // GetFileInformationByHandle wraps GetFileInformationByHandle.
 public static error GetFileInformationByHandle(this ж<FD> Ꮡfd, ж<Δsyscall.ByHandleFileInformation> Ꮡdata) => func((defer, recover) => {
     ref var fd = ref Ꮡfd.Value;
-    ref var data = ref Ꮡdata.Value;
 
     {
         var err = Ꮡfd.incref(); if (err != default!) {
@@ -1199,7 +1192,6 @@ internal static int32 sockaddrInet6ToRaw(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ж
 }
 
 internal static void rawToSockaddrInet4(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ж<Δsyscall.SockaddrInet4> Ꮡsa) {
-    ref var rsa = ref Ꮡrsa.Value;
     ref var sa = ref Ꮡsa.Value;
 
     var pp = (ж<Δsyscall.RawSockaddrInet4>)(uintptr)(new @unsafe.Pointer(Ꮡrsa));
@@ -1209,7 +1201,6 @@ internal static void rawToSockaddrInet4(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ж<
 }
 
 internal static void rawToSockaddrInet6(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ж<Δsyscall.SockaddrInet6> Ꮡsa) {
-    ref var rsa = ref Ꮡrsa.Value;
     ref var sa = ref Ꮡsa.Value;
 
     var pp = (ж<Δsyscall.RawSockaddrInet6>)(uintptr)(new @unsafe.Pointer(Ꮡrsa));
@@ -1220,8 +1211,6 @@ internal static void rawToSockaddrInet6(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ж<
 }
 
 internal static (int32, error) sockaddrToRaw(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, syscallꓸSockaddr sa) {
-    ref var rsa = ref Ꮡrsa.Value;
-
     switch (sa.type()) {
     case ж<Δsyscall.SockaddrInet4> saΔ1: {
         var sz = sockaddrInet4ToRaw(Ꮡrsa, saΔ1);
@@ -1270,7 +1259,6 @@ public static (nint, nint, nint, syscallꓸSockaddr, error) ReadMsg(this ж<FD> 
 // ReadMsgInet4 is ReadMsg, but specialized to return a syscall.SockaddrInet4.
 public static (nint, nint, nint, error) ReadMsgInet4(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet4> Ꮡsa4) => func<(nint, nint, nint, error)>((defer, recover) => {
     ref var fd = ref Ꮡfd.Value;
-    ref var sa4 = ref Ꮡsa4.Value;
 
     {
         var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != default!) {
@@ -1300,7 +1288,6 @@ public static (nint, nint, nint, error) ReadMsgInet4(this ж<FD> Ꮡfd, slice<by
 // ReadMsgInet6 is ReadMsg, but specialized to return a syscall.SockaddrInet6.
 public static (nint, nint, nint, error) ReadMsgInet6(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet6> Ꮡsa6) => func<(nint, nint, nint, error)>((defer, recover) => {
     ref var fd = ref Ꮡfd.Value;
-    ref var sa6 = ref Ꮡsa6.Value;
 
     {
         var errΔ1 = Ꮡfd.readLock(); if (errΔ1 != default!) {
@@ -1360,7 +1347,6 @@ public static (nint, nint, error) WriteMsg(this ж<FD> Ꮡfd, slice<byte> p, sli
 // WriteMsgInet4 is WriteMsg specialized for syscall.SockaddrInet4.
 public static (nint, nint, error) WriteMsgInet4(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet4> Ꮡsa) => func<(nint, nint, error)>((defer, recover) => {
     ref var fd = ref Ꮡfd.Value;
-    ref var sa = ref Ꮡsa.Value;
 
     if (len(p) > maxRW) {
         return (0, 0, errors.New("packet is too large (only 1GB is allowed)"u8));
@@ -1386,7 +1372,6 @@ public static (nint, nint, error) WriteMsgInet4(this ж<FD> Ꮡfd, slice<byte> p
 // WriteMsgInet6 is WriteMsg specialized for syscall.SockaddrInet6.
 public static (nint, nint, error) WriteMsgInet6(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet6> Ꮡsa) => func<(nint, nint, error)>((defer, recover) => {
     ref var fd = ref Ꮡfd.Value;
-    ref var sa = ref Ꮡsa.Value;
 
     if (len(p) > maxRW) {
         return (0, 0, errors.New("packet is too large (only 1GB is allowed)"u8));

@@ -149,7 +149,6 @@ public static (@string location, @string context) ErrorContext(this ж<Tree> Ꮡ
     @string location = default!;
     @string context = default!;
 
-    ref var t = ref Ꮡt.Value;
     nint pos = (nint)n.Position();
     var tree = n.tree();
     if (tree == nil) {
@@ -704,8 +703,6 @@ internal static (Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<Li
 //
 // If keyword is past.
 internal static Node ifControl(this ж<Tree> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     var (ᴛ1, ᴛ2, ᴛ3, ᴛ4, ᴛ5) = Ꮡt.parseControl("if"u8);
     return new IfNodeжNode(Ꮡt.newIf(ᴛ1, ᴛ2, ᴛ3, ᴛ4, ᴛ5));
 }
@@ -717,8 +714,6 @@ internal static Node ifControl(this ж<Tree> Ꮡt) {
 //
 // Range keyword is past.
 internal static Node rangeControl(this ж<Tree> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     var (ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10) = Ꮡt.parseControl("range"u8);
     var r = Ꮡt.newRange(ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10);
     return new RangeNodeжNode(r);
@@ -731,8 +726,6 @@ internal static Node rangeControl(this ж<Tree> Ꮡt) {
 //
 // If keyword is past.
 internal static Node withControl(this ж<Tree> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     var (ᴛ11, ᴛ12, ᴛ13, ᴛ14, ᴛ15) = Ꮡt.parseControl("with"u8);
     return new WithNodeжNode(Ꮡt.newWith(ᴛ11, ᴛ12, ᴛ13, ᴛ14, ᴛ15));
 }

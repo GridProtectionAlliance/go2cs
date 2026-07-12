@@ -95,8 +95,6 @@ internal static int64 /*result*/ Alignof(this ж<gcSizes> Ꮡs, ΔType T) {
 }
 
 internal static slice<int64> Offsetsof(this ж<gcSizes> Ꮡs, slice<ж<Var>> fields) {
-    ref var s = ref Ꮡs.Value;
-
     var offsets = new slice<int64>(len(fields));
     int64 offs = default!;
     foreach (var (i, f) in fields) {

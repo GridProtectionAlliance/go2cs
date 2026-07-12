@@ -181,7 +181,6 @@ internal static reflectꓸValue encIndirect(reflectꓸValue pv, nint indir) {
 
 // encBool encodes the bool referenced by v as an unsigned 0 or 1.
 internal static void encBool(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var i = ref Ꮡi.Value;
     ref var state = ref Ꮡstate.Value;
 
     var b = v.Bool();
@@ -197,7 +196,6 @@ internal static void encBool(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, refle
 
 // encInt encodes the signed integer (int int8 int16 int32 int64) referenced by v.
 internal static void encInt(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var i = ref Ꮡi.Value;
     ref var state = ref Ꮡstate.Value;
 
     var value = v.Int();
@@ -209,7 +207,6 @@ internal static void encInt(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflec
 
 // encUint encodes the unsigned integer (uint uint8 uint16 uint32 uint64 uintptr) referenced by v.
 internal static void encUint(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var i = ref Ꮡi.Value;
     ref var state = ref Ꮡstate.Value;
 
     var value = v.Uint();
@@ -232,7 +229,6 @@ internal static uint64 floatBits(float64 f) {
 
 // encFloat encodes the floating point value (float32 float64) referenced by v.
 internal static void encFloat(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var i = ref Ꮡi.Value;
     ref var state = ref Ꮡstate.Value;
 
     var f = v.Float();
@@ -262,7 +258,6 @@ internal static void encComplex(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, re
 // encUint8Array encodes the byte array referenced by v.
 // Byte arrays are encoded as an unsigned count followed by the raw bytes.
 internal static void encUint8Array(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var i = ref Ꮡi.Value;
     ref var state = ref Ꮡstate.Value;
 
     var b = v.Bytes();
@@ -276,7 +271,6 @@ internal static void encUint8Array(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate,
 // encString encodes the string referenced by v.
 // Strings are encoded as an unsigned count followed by the raw bytes.
 internal static void encString(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var i = ref Ꮡi.Value;
     ref var state = ref Ꮡstate.Value;
 
     @string s = v.String();
@@ -290,7 +284,6 @@ internal static void encString(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, ref
 // encStructTerminator encodes the end of an encoded struct
 // as delta field number of 0.
 internal static void encStructTerminator(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var i = ref Ꮡi.Value;
     ref var state = ref Ꮡstate.Value;
 
     state.encodeUint(0);
@@ -322,8 +315,6 @@ internal static bool valid(reflectꓸValue v) {
 
 // encodeSingle encodes a single top-level non-struct value.
 internal static void encodeSingle(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, ж<encEngine> Ꮡengine, reflectꓸValue value) => func((defer, recover) => {
-    ref var enc = ref Ꮡenc.Value;
-    ref var b = ref Ꮡb.Value;
     ref var engine = ref Ꮡengine.Value;
 
     var state = Ꮡenc.newEncoderState(Ꮡb);
@@ -343,8 +334,6 @@ internal static void encodeSingle(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, �
 
 // encodeStruct encodes a single struct value.
 internal static void encodeStruct(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, ж<encEngine> Ꮡengine, reflectꓸValue value) => func((defer, recover) => {
-    ref var enc = ref Ꮡenc.Value;
-    ref var b = ref Ꮡb.Value;
     ref var engine = ref Ꮡengine.Value;
 
     if (!valid(value)) {
@@ -374,9 +363,6 @@ internal static void encodeStruct(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, �
 
 // encodeArray encodes an array.
 internal static void encodeArray(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflectꓸValue value, Action<ж<encInstr>, ж<encoderState>, reflectꓸValue> op, nint elemIndir, nint length, Func<ж<encoderState>, reflectꓸValue, bool> helper) => func((defer, recover) => {
-    ref var enc = ref Ꮡenc.Value;
-    ref var b = ref Ꮡb.Value;
-
     var state = Ꮡenc.newEncoderState(Ꮡb);
     deferǃ(Ꮡenc.freeEncoderState, state, defer);
     state.Value.fieldnum = -1;
@@ -400,8 +386,6 @@ internal static void encodeArray(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, re
 
 // encodeReflectValue is a helper for maps. It encodes the value v.
 internal static void encodeReflectValue(ж<encoderState> Ꮡstate, reflectꓸValue v, Action<ж<encInstr>, ж<encoderState>, reflectꓸValue> op, nint indir) {
-    ref var state = ref Ꮡstate.Value;
-
     for (nint i = 0; i < indir && v.IsValid(); i++) {
         v = reflect.Indirect(v);
     }
@@ -414,7 +398,6 @@ internal static void encodeReflectValue(ж<encoderState> Ꮡstate, reflectꓸVal
 // encodeMap encodes a map as unsigned count followed by key:value pairs.
 internal static void encodeMap(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflectꓸValue mv, Action<ж<encInstr>, ж<encoderState>, reflectꓸValue> keyOp, Action<ж<encInstr>, ж<encoderState>, reflectꓸValue> elemOp, nint keyIndir, nint elemIndir) {
     ref var enc = ref Ꮡenc.Value;
-    ref var b = ref Ꮡb.Value;
 
     var state = Ꮡenc.newEncoderState(Ꮡb);
     state.Value.fieldnum = -1;
@@ -708,8 +691,6 @@ internal static ж<encEngine> compileEnc(ж<userTypeInfo> Ꮡut, map<ж<typeInfo
 
 // getEncEngine returns the engine to compile the type.
 internal static ж<encEngine> getEncEngine(ж<userTypeInfo> Ꮡut, map<ж<typeInfo>, bool> building) {
-    ref var ut = ref Ꮡut.Value;
-
     var (info, err) = getTypeInfo(Ꮡut);
     if (err != default!) {
         error_(err);
@@ -722,9 +703,6 @@ internal static ж<encEngine> getEncEngine(ж<userTypeInfo> Ꮡut, map<ж<typeIn
 }
 
 internal static ж<encEngine> buildEncEngine(ж<typeInfo> Ꮡinfo, ж<userTypeInfo> Ꮡut, map<ж<typeInfo>, bool> building) => func<ж<encEngine>>((defer, recover) => {
-    ref var info = ref Ꮡinfo.Value;
-    ref var ut = ref Ꮡut.Value;
-
     // Check for recursive types.
     if (building != default! && building[Ꮡinfo]) {
         return default!;
@@ -744,8 +722,6 @@ internal static ж<encEngine> buildEncEngine(ж<typeInfo> Ꮡinfo, ж<userTypeIn
 });
 
 internal static void encode(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflectꓸValue value, ж<userTypeInfo> Ꮡut) => func((defer, recover) => {
-    ref var enc = ref Ꮡenc.Value;
-    ref var b = ref Ꮡb.Value;
     ref var ut = ref Ꮡut.Value;
 
     deferǃ(catchError, Ꮡenc.of(Encoder.Ꮡerr), defer);

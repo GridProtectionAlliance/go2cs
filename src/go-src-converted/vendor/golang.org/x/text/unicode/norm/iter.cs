@@ -190,8 +190,6 @@ internal static slice<byte> nextHangul(ж<Iter> Ꮡi) {
 }
 
 internal static slice<byte> nextDone(ж<Iter> Ꮡi) {
-    ref var i = ref Ꮡi.Value;
-
     return default!;
 }
 

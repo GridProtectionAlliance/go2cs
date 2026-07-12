@@ -123,9 +123,6 @@ public static ж<Element> Subtract(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<E
 
 // Negate sets v = -a, and returns v.
 public static ж<Element> Negate(this ж<Element> Ꮡv, ж<Element> Ꮡa) {
-    ref var v = ref Ꮡv.Value;
-    ref var a = ref Ꮡa.Value;
-
     return Ꮡv.Subtract(feZero, Ꮡa);
 }
 
@@ -133,9 +130,6 @@ public static ж<Element> Negate(this ж<Element> Ꮡv, ж<Element> Ꮡa) {
 //
 // If z == 0, Invert returns v = 0.
 public static ж<Element> Invert(this ж<Element> Ꮡv, ж<Element> Ꮡz) {
-    ref var v = ref Ꮡv.Value;
-    ref var z = ref Ꮡz.Value;
-
     // Inversion is implemented as exponentiation with exponent p − 2. It uses the
     // same sequence of 255 squarings and 11 multiplications as [Curve25519].
     ref var z2 = ref heap(new Element(), out var Ꮡz2);
@@ -360,7 +354,6 @@ public static ж<Element> Select(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Ele
 
 // Absolute sets v to |u|, and returns v.
 public static ж<Element> Absolute(this ж<Element> Ꮡv, ж<Element> Ꮡu) {
-    ref var v = ref Ꮡv.Value;
     ref var u = ref Ꮡu.Value;
 
     return Ꮡv.Select(@new<Element>().Negate(Ꮡu), Ꮡu, u.IsNegative());
@@ -368,19 +361,12 @@ public static ж<Element> Absolute(this ж<Element> Ꮡv, ж<Element> Ꮡu) {
 
 // Multiply sets v = x * y, and returns v.
 public static ж<Element> Multiply(this ж<Element> Ꮡv, ж<Element> Ꮡx, ж<Element> Ꮡy) {
-    ref var v = ref Ꮡv.Value;
-    ref var x = ref Ꮡx.Value;
-    ref var y = ref Ꮡy.Value;
-
     feMul(Ꮡv, Ꮡx, Ꮡy);
     return Ꮡv;
 }
 
 // Square sets v = x * x, and returns v.
 public static ж<Element> Square(this ж<Element> Ꮡv, ж<Element> Ꮡx) {
-    ref var v = ref Ꮡv.Value;
-    ref var x = ref Ꮡx.Value;
-
     feSquare(Ꮡv, Ꮡx);
     return Ꮡv;
 }
@@ -419,7 +405,6 @@ internal static (uint64 lo, uint64 hi) mul51(uint64 a, uint32 b) {
 
 // Pow22523 set v = x^((p-5)/8), and returns v. (p-5)/8 is 2^252-3.
 public static ж<Element> Pow22523(this ж<Element> Ꮡv, ж<Element> Ꮡx) {
-    ref var v = ref Ꮡv.Value;
     ref var x = ref Ꮡx.Value;
 
     ref var t0 = ref heap(new Element(), out var Ꮡt0);

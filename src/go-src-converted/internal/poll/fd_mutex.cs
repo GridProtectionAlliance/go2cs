@@ -59,8 +59,6 @@ internal static readonly @string overflowMsg = "too many concurrent operations o
 // incref adds a reference to mu.
 // It reports whether mu is available for reading or writing.
 internal static bool incref(this ж<fdMutex> Ꮡmu) {
-    ref var mu = ref Ꮡmu.Value;
-
     while (ᐧ) {
         var old = atomic.LoadUint64(Ꮡmu.of(fdMutex.Ꮡstate));
         if ((uint64)(old & (uint64)mutexClosed) != 0) {
@@ -79,8 +77,6 @@ internal static bool incref(this ж<fdMutex> Ꮡmu) {
 // increfAndClose sets the state of mu to closed.
 // It returns false if the file was already closed.
 internal static bool increfAndClose(this ж<fdMutex> Ꮡmu) {
-    ref var mu = ref Ꮡmu.Value;
-
     while (ᐧ) {
         var old = atomic.LoadUint64(Ꮡmu.of(fdMutex.Ꮡstate));
         if ((uint64)(old & (uint64)mutexClosed) != 0) {
@@ -112,8 +108,6 @@ internal static bool increfAndClose(this ж<fdMutex> Ꮡmu) {
 // decref removes a reference from mu.
 // It reports whether there is no remaining reference.
 internal static bool decref(this ж<fdMutex> Ꮡmu) {
-    ref var mu = ref Ꮡmu.Value;
-
     while (ᐧ) {
         var old = atomic.LoadUint64(Ꮡmu.of(fdMutex.Ꮡstate));
         if ((uint64)(old & (uint64)mutexRefMask) == 0) {
@@ -129,8 +123,6 @@ internal static bool decref(this ж<fdMutex> Ꮡmu) {
 // lock adds a reference to mu and locks mu.
 // It reports whether mu is available for reading or writing.
 internal static bool rwlock(this ж<fdMutex> Ꮡmu, bool read) {
-    ref var mu = ref Ꮡmu.Value;
-
     uint64 mutexBit = default!;
     uint64 mutexWait = default!;
     uint64 mutexMask = default!;
@@ -179,8 +171,6 @@ internal static bool rwlock(this ж<fdMutex> Ꮡmu, bool read) {
 // unlock removes a reference from mu and unlocks mu.
 // It reports whether there is no remaining reference.
 internal static bool rwunlock(this ж<fdMutex> Ꮡmu, bool read) {
-    ref var mu = ref Ꮡmu.Value;
-
     uint64 mutexBit = default!;
     uint64 mutexWait = default!;
     uint64 mutexMask = default!;
@@ -235,8 +225,6 @@ internal static error incref(this ж<FD> Ꮡfd) {
 // It also closes fd when the state of fd is set to closed and there
 // is no remaining reference.
 internal static error decref(this ж<FD> Ꮡfd) {
-    ref var fd = ref Ꮡfd.Value;
-
     if (Ꮡfd.of(FD.Ꮡfdmu).decref()) {
         return Ꮡfd.destroy();
     }
@@ -258,8 +246,6 @@ internal static error readLock(this ж<FD> Ꮡfd) {
 // It also closes fd when the state of fd is set to closed and there
 // is no remaining reference.
 internal static void readUnlock(this ж<FD> Ꮡfd) {
-    ref var fd = ref Ꮡfd.Value;
-
     if (Ꮡfd.of(FD.Ꮡfdmu).rwunlock(true)) {
         Ꮡfd.destroy();
     }
@@ -280,8 +266,6 @@ internal static error writeLock(this ж<FD> Ꮡfd) {
 // It also closes fd when the state of fd is set to closed and there
 // is no remaining reference.
 internal static void writeUnlock(this ж<FD> Ꮡfd) {
-    ref var fd = ref Ꮡfd.Value;
-
     if (Ꮡfd.of(FD.Ꮡfdmu).rwunlock(false)) {
         Ꮡfd.destroy();
     }

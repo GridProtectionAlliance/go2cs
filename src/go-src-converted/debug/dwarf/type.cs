@@ -29,8 +29,6 @@ partial class dwarf_package {
 }
 
 public static ж<CommonType> Common(this ж<CommonType> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return Ꮡc;
 }
 
@@ -52,8 +50,6 @@ public static ж<CommonType> Common(this ж<CommonType> Ꮡc) {
 }
 
 public static ж<BasicType> Basic(this ж<BasicType> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     return Ꮡb;
 }
 

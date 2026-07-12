@@ -96,8 +96,6 @@ internal static @string urlProcessor(bool norm, params ꓸꓸꓸany argsʗp) {
 // processURLOnto appends a normalized URL corresponding to its input to b
 // and reports whether the appended content differs from s.
 internal static bool processURLOnto(@string s, bool norm, ж<strings.Builder> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.Grow(len(s) + 16);
     nint written = 0;
     // The byte loop below assumes that all URLs use UTF-8 as the
@@ -207,8 +205,6 @@ internal static bool isHTMLSpaceOrASCIIAlnum(byte c) {
 }
 
 internal static void filterSrcsetElement(@string s, nint left, nint right, ж<strings.Builder> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     nint start = left;
     while (start < right && isHTMLSpace(s[start])) {
         start++;

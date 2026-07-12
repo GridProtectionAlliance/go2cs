@@ -117,9 +117,6 @@ internal static ж<Element> insert(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Elem
 
 // insertValue is a convenience wrapper for insert(&Element{Value: v}, at).
 internal static ж<Element> insertValue(this ж<List> Ꮡl, any v, ж<Element> Ꮡat) {
-    ref var l = ref Ꮡl.Value;
-    ref var at = ref Ꮡat.Value;
-
     return Ꮡl.insert(Ꮡ(new Element(Value: v)), Ꮡat);
 }
 
@@ -170,8 +167,6 @@ public static any Remove(this ж<List> Ꮡl, ж<Element> Ꮡe) {
 
 // PushFront inserts a new element e with value v at the front of list l and returns e.
 public static ж<Element> PushFront(this ж<List> Ꮡl, any v) {
-    ref var l = ref Ꮡl.Value;
-
     Ꮡl.lazyInit();
     return Ꮡl.insertValue(v, Ꮡl.of(List.Ꮡroot));
 }
@@ -283,7 +278,6 @@ public static void PushBackList(this ж<List> Ꮡl, ж<List> Ꮡother) {
 // PushFrontList inserts a copy of another list at the front of list l.
 // The lists l and other may be the same. They must not be nil.
 public static void PushFrontList(this ж<List> Ꮡl, ж<List> Ꮡother) {
-    ref var l = ref Ꮡl.Value;
     ref var other = ref Ꮡother.Value;
 
     Ꮡl.lazyInit();

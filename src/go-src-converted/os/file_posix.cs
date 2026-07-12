@@ -255,8 +255,6 @@ public static error Chdir(this ж<File> Ꮡf) {
 
 // setDeadline sets the read and write deadline.
 internal static error setDeadline(this ж<File> Ꮡf, time.Time t) {
-    ref var f = ref Ꮡf.Value;
-
     {
         var err = Ꮡf.checkValid("SetDeadline"u8); if (err != default!) {
             return err;
@@ -267,8 +265,6 @@ internal static error setDeadline(this ж<File> Ꮡf, time.Time t) {
 
 // setReadDeadline sets the read deadline.
 internal static error setReadDeadline(this ж<File> Ꮡf, time.Time t) {
-    ref var f = ref Ꮡf.Value;
-
     {
         var err = Ꮡf.checkValid("SetReadDeadline"u8); if (err != default!) {
             return err;
@@ -279,8 +275,6 @@ internal static error setReadDeadline(this ж<File> Ꮡf, time.Time t) {
 
 // setWriteDeadline sets the write deadline.
 internal static error setWriteDeadline(this ж<File> Ꮡf, time.Time t) {
-    ref var f = ref Ꮡf.Value;
-
     {
         var err = Ꮡf.checkValid("SetWriteDeadline"u8); if (err != default!) {
             return err;
@@ -292,8 +286,6 @@ internal static error setWriteDeadline(this ж<File> Ꮡf, time.Time t) {
 // checkValid checks whether f is valid for use.
 // If not, it returns an appropriate error, perhaps incorporating the operation name op.
 internal static error checkValid(this ж<File> Ꮡf, @string op) {
-    ref var f = ref Ꮡf.Value;
-
     if (Ꮡf == nil) {
         return ErrInvalid;
     }

@@ -738,7 +738,6 @@ internal static void adjustctxt(ж<g> Ꮡgp, ж<adjustinfo> Ꮡadjinfo) {
 
 internal static void adjustdefers(ж<g> Ꮡgp, ж<adjustinfo> Ꮡadjinfo) {
     ref var gp = ref Ꮡgp.Value;
-    ref var adjinfo = ref Ꮡadjinfo.Value;
 
     // Adjust pointers in the Defer structs.
     // We need to do this first because we need to adjust the
@@ -752,9 +751,6 @@ internal static void adjustdefers(ж<g> Ꮡgp, ж<adjustinfo> Ꮡadjinfo) {
 }
 
 internal static void adjustpanics(ж<g> Ꮡgp, ж<adjustinfo> Ꮡadjinfo) {
-    ref var gp = ref Ꮡgp.Value;
-    ref var adjinfo = ref Ꮡadjinfo.Value;
-
     // Panics are on stack and already adjusted.
     // Update pointer to head of list in G.
     adjustpointer(Ꮡadjinfo, @unsafe.Pointer.FromRef(ref (Ꮡgp.of(g.Ꮡ_panic)).Value));
@@ -762,7 +758,6 @@ internal static void adjustpanics(ж<g> Ꮡgp, ж<adjustinfo> Ꮡadjinfo) {
 
 internal static void adjustsudogs(ж<g> Ꮡgp, ж<adjustinfo> Ꮡadjinfo) {
     ref var gp = ref Ꮡgp.Value;
-    ref var adjinfo = ref Ꮡadjinfo.Value;
 
     // the data elements pointed to by a SudoG structure
     // might be in the stack.
@@ -1100,7 +1095,6 @@ internal static void nilfunc() {
 // adjust Gobuf as if it executed a call to fn
 // and then stopped before the first instruction in fn.
 internal static void gostartcallfn(ж<gobuf> Ꮡgobuf, ж<funcval> Ꮡfv) {
-    ref var gobuf = ref Ꮡgobuf.Value;
     ref var fv = ref Ꮡfv.DerefOrNil();
 
     @unsafe.Pointer fn = default!;

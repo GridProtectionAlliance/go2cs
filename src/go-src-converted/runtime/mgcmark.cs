@@ -119,8 +119,6 @@ internal static ref array<uint8> oneptrmask => ref Ꮡoneptrmask.Value;
 //
 //go:nowritebarrier
 internal static int64 markroot(ж<gcWork> Ꮡgcw, uint32 i, bool flushBgCredit) {
-    ref var gcw = ref Ꮡgcw.Value;
-
     // Note: if you add a case here, please also update heapdump.go:dumproots.
     int64 workDone = default!;
     ж<atomic.Int64> workCounter = default!;
@@ -229,7 +227,6 @@ internal static int64 markroot(ж<gcWork> Ꮡgcw, uint32 i, bool flushBgCredit) 
 //go:nowritebarrier
 internal static int64 markrootBlock(uintptr b0, uintptr n0, ж<uint8> Ꮡptrmask0, ж<gcWork> Ꮡgcw, nint shard) {
     ref var ptrmask0 = ref Ꮡptrmask0.Value;
-    ref var gcw = ref Ꮡgcw.Value;
 
     if (rootBlockBytes % (8 * goarch.PtrSize) != 0) {
         // This is necessary to pick byte offsets in ptrmask0.
@@ -286,8 +283,6 @@ internal static void markrootFreeGStacks() {
 //
 //go:nowritebarrier
 internal static void markrootSpans(ж<gcWork> Ꮡgcw, nint shard) {
-    ref var gcw = ref Ꮡgcw.Value;
-
     // Objects with finalizers have two GC-related invariants:
     //
     // 1) Everything reachable from the object must be marked.
@@ -769,7 +764,6 @@ internal static void gcFlushBgCredit(int64 scanWork) {
 //go:systemstack
 internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> Ꮡgcw) {
     ref var gp = ref Ꮡgp.DerefOrNil();
-    ref var gcw = ref Ꮡgcw.Value;
 
     if ((uint32)(readgstatus(Ꮡgp) & (uint32)_Gscan) == 0) {
         print("runtime:scanstack: gp=", gp, ", goid=", gp.goid, ", gp->atomicstatus=", ((Δhex)(uint64)readgstatus(Ꮡgp)), "\n");
@@ -951,7 +945,6 @@ internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> Ꮡgcw) {
 internal static void scanframeworker(ж<stkframe> Ꮡframe, ж<stackScanState> Ꮡstate, ж<gcWork> Ꮡgcw) {
     ref var frame = ref Ꮡframe.Value;
     ref var state = ref Ꮡstate.Value;
-    ref var gcw = ref Ꮡgcw.Value;
 
     if (_DebugGC > 1 && frame.continpc != 0) {
         print("scanframe ", funcname(frame.fn), "\n");
@@ -1045,16 +1038,12 @@ internal static readonly gcDrainFlags gcDrainFractional = 8;
 // gcDrainMarkWorkerIdle is a wrapper for gcDrain that exists to better account
 // mark time in profiles.
 internal static void gcDrainMarkWorkerIdle(ж<gcWork> Ꮡgcw) {
-    ref var gcw = ref Ꮡgcw.Value;
-
     gcDrain(Ꮡgcw, (gcDrainFlags)((gcDrainFlags)(gcDrainIdle | gcDrainUntilPreempt) | gcDrainFlushBgCredit));
 }
 
 // gcDrainMarkWorkerDedicated is a wrapper for gcDrain that exists to better account
 // mark time in profiles.
 internal static void gcDrainMarkWorkerDedicated(ж<gcWork> Ꮡgcw, bool untilPreempt) {
-    ref var gcw = ref Ꮡgcw.Value;
-
     gcDrainFlags flags = gcDrainFlushBgCredit;
     if (untilPreempt) {
         flags |= (gcDrainFlags)(gcDrainUntilPreempt);
@@ -1065,8 +1054,6 @@ internal static void gcDrainMarkWorkerDedicated(ж<gcWork> Ꮡgcw, bool untilPre
 // gcDrainMarkWorkerFractional is a wrapper for gcDrain that exists to better account
 // mark time in profiles.
 internal static void gcDrainMarkWorkerFractional(ж<gcWork> Ꮡgcw) {
-    ref var gcw = ref Ꮡgcw.Value;
-
     gcDrain(Ꮡgcw, (gcDrainFlags)((gcDrainFlags)(gcDrainFractional | gcDrainUntilPreempt) | gcDrainFlushBgCredit));
 }
 
@@ -1283,8 +1270,6 @@ internal static int64 gcDrainN(ж<gcWork> Ꮡgcw, int64 scanWork) {
 //
 //go:nowritebarrier
 internal static void scanblock(uintptr b0, uintptr n0, ж<uint8> Ꮡptrmask, ж<gcWork> Ꮡgcw, ж<stackScanState> Ꮡstk) {
-    ref var ptrmask = ref Ꮡptrmask.Value;
-    ref var gcw = ref Ꮡgcw.Value;
     ref var stk = ref Ꮡstk.DerefOrNil();
 
     // Use local copies of original parameters, so that a stack trace
@@ -1427,7 +1412,6 @@ internal static void scanobject(uintptr b, ж<gcWork> Ꮡgcw) {
 // and may contain pointers to stack objects.
 internal static void scanConservative(uintptr b, uintptr n, ж<uint8> Ꮡptrmask, ж<gcWork> Ꮡgcw, ж<stackScanState> Ꮡstate) {
     ref var ptrmask = ref Ꮡptrmask.DerefOrNil();
-    ref var gcw = ref Ꮡgcw.Value;
     ref var state = ref Ꮡstate.DerefOrNil();
 
     if (debugScanConservative) {

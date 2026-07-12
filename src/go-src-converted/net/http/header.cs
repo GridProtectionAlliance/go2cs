@@ -87,8 +87,6 @@ public static error Write(this ΔHeader h, io.Writer w) {
 }
 
 internal static error write(this ΔHeader h, io.Writer w, ж<httptrace.ClientTrace> Ꮡtrace) {
-    ref var trace = ref Ꮡtrace.Value;
-
     return h.writeSubset(w, default!, Ꮡtrace);
 }
 

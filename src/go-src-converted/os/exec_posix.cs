@@ -73,8 +73,6 @@ internal static (ж<Process> p, error err) startProcess(@string name, slice<@str
 }
 
 internal static error kill(this ж<Process> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     return Ꮡp.Signal(ΔKill);
 }
 

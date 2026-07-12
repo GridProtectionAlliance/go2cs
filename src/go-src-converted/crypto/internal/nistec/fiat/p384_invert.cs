@@ -10,9 +10,6 @@ partial class fiat_package {
 //
 // If x == 0, Invert returns e = 0.
 public static ж<P384Element> Invert(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡx) {
-    ref var e = ref Ꮡe.Value;
-    ref var x = ref Ꮡx.Value;
-
     // Inversion is implemented as exponentiation with exponent p − 2.
     // The sequence of 15 multiplications and 383 squarings is derived from the
     // following addition chain generated with github.com/mmcloughlin/addchain v0.4.0.

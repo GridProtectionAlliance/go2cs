@@ -46,8 +46,6 @@ internal static partial void registerCache(@unsafe.Pointer _);
 // so that c.ptable can be cleared at the start of each GC.
 // Register must be called during package initialization.
 public static void Register<K, V>(this ж<Cache<K, V>> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     registerCache(new @unsafe.Pointer(Ꮡc.of(Cache<K, V>.Ꮡptable)));
 }
 
@@ -59,8 +57,6 @@ internal static readonly UntypedInt cacheSize = 1021;
 // table returns a pointer to the current cache hash table,
 // coping with the possibility of the GC clearing it out from under us.
 internal static ж<cacheTable<K, V>> table<K, V>(this ж<Cache<K, V>> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     while (ᐧ) {
         var p = Ꮡc.of(Cache<K, V>.Ꮡptable).Load();
         if (p == nil) {
@@ -77,8 +73,6 @@ internal static ж<cacheTable<K, V>> table<K, V>(this ж<Cache<K, V>> Ꮡc) {
 // The runtime does this automatically at each garbage collection;
 // this method is exposed only for testing.
 public static void Clear<K, V>(this ж<Cache<K, V>> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     // The runtime does this at the start of every garbage collection
     // (itself, not by calling this function).
     Ꮡc.of(Cache<K, V>.Ꮡptable).Store(nil);
@@ -88,7 +82,6 @@ public static void Clear<K, V>(this ж<Cache<K, V>> Ꮡc) {
 // which is either the value v corresponding to the most recent call to Put(k, v)
 // or nil if that cache entry has been dropped.
 public static ж<V> Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk) {
-    ref var c = ref Ꮡc.Value;
     ref var k = ref Ꮡk.DerefOrNil();
 
     var head = Ꮡ(Ꮡc.table().Value[(uintptr)new @unsafe.Pointer(Ꮡk) % (uintptr)cacheSize]);
@@ -103,7 +96,6 @@ public static ж<V> Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk) {
 
 // Put sets the cached value associated with k to v.
 public static void Put<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk, ж<V> Ꮡv) {
-    ref var c = ref Ꮡc.Value;
     ref var k = ref Ꮡk.DerefOrNil();
     ref var v = ref Ꮡv.Value;
 

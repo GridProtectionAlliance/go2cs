@@ -201,8 +201,6 @@ internal static void cgoCheckTypedBlock(ж<_type> Ꮡtyp, @unsafe.Pointer src, u
 //go:nosplit
 //go:nowritebarrier
 internal static void cgoCheckBits(@unsafe.Pointer src, ж<byte> Ꮡgcbits, uintptr off, uintptr size) {
-    ref var gcbits = ref Ꮡgcbits.Value;
-
     var skipMask = off / (uintptr)goarch.PtrSize / 8;
     var skipBytes = skipMask * (uintptr)goarch.PtrSize * 8;
     var ptrmask = addb(Ꮡgcbits, skipMask);

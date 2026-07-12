@@ -12,7 +12,6 @@ partial class net_package {
 
 internal static error joinIPv4Group(ж<netFD> Ꮡfd, ж<Interface> Ꮡifi, IP ip) {
     ref var fd = ref Ꮡfd.Value;
-    ref var ifi = ref Ꮡifi.Value;
 
     var mreq = Ꮡ(new syscall.IPMreq(Multiaddr: new byte[]{ip[0], ip[1], ip[2], ip[3]}.array()));
     {

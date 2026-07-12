@@ -500,9 +500,6 @@ internal static http2clientConnPoolIdleCloser _ᴛ2ʗ = new http2noDialClientCon
 }
 
 internal static (ж<http2ClientConn>, error) GetClientConn(this ж<http2clientConnPool> Ꮡp, ж<Request> Ꮡreq, @string addr) {
-    ref var p = ref Ꮡp.Value;
-    ref var req = ref Ꮡreq.Value;
-
     return Ꮡp.getClientConn(Ꮡreq, addr, http2dialOnMiss);
 }
 
@@ -620,8 +617,6 @@ internal static (bool used, error err) addConnIfNeeded(this ж<http2clientConnPo
     error err = default!;
 
     ref var p = ref Ꮡp.Value;
-    ref var t = ref Ꮡt.Value;
-    ref var c = ref Ꮡc.Value;
     Ꮡp.of(http2clientConnPool.Ꮡmu).Lock();
     foreach (var (_, cc) in p.conns[key]) {
         if (cc.CanTakeNewRequest()) {
@@ -658,9 +653,6 @@ internal static (bool used, error err) addConnIfNeeded(this ж<http2clientConnPo
 }
 
 [GoRecv] internal static void run(this ref http2addConnCall c, ж<http2Transport> Ꮡt, @string key, ж<tls.Conn> Ꮡtc) {
-    ref var t = ref Ꮡt.Value;
-    ref var tc = ref Ꮡtc.Value;
-
     var (cc, err) = Ꮡt.NewClientConn(new tls.ConnжConn(Ꮡtc));
     var p = c.p;
     p.of(http2clientConnPool.Ꮡmu).Lock();
@@ -678,8 +670,6 @@ internal static (bool used, error err) addConnIfNeeded(this ж<http2clientConnPo
 
 // p.mu must be held
 [GoRecv] internal static void addConnLocked(this ref http2clientConnPool p, @string key, ж<http2ClientConn> Ꮡcc) {
-    ref var cc = ref Ꮡcc.DerefOrNil();
-
     foreach (var (_, v) in p.conns[key]) {
         if (v == Ꮡcc) {
             return;
@@ -697,7 +687,6 @@ internal static (bool used, error err) addConnIfNeeded(this ж<http2clientConnPo
 
 internal static void MarkDead(this ж<http2clientConnPool> Ꮡp, ж<http2ClientConn> Ꮡcc) => func((defer, recover) => {
     ref var p = ref Ꮡp.Value;
-    ref var cc = ref Ꮡcc.Value;
 
     Ꮡp.of(http2clientConnPool.Ꮡmu).Lock();
     defer(Ꮡp.of(http2clientConnPool.Ꮡmu).Unlock);
@@ -735,8 +724,6 @@ internal static void closeIdleConnections(this ж<http2clientConnPool> Ꮡp) => 
 });
 
 internal static slice<ж<http2ClientConn>> http2filterOutClientConn(slice<ж<http2ClientConn>> @in, ж<http2ClientConn> Ꮡexclude) {
-    ref var exclude = ref Ꮡexclude.DerefOrNil();
-
     var @out = @in[..0];
     foreach (var (_, v) in @in) {
         if (v != Ꮡexclude) {
@@ -759,8 +746,6 @@ internal static slice<ж<http2ClientConn>> http2filterOutClientConn(slice<ж<htt
 }
 
 internal static (ж<http2ClientConn>, error) GetClientConn(this http2noDialClientConnPool p, ж<Request> Ꮡreq, @string addr) {
-    ref var req = ref Ꮡreq.Value;
-
     return p.getClientConn(Ꮡreq, addr, http2noDialOnMiss);
 }
 
@@ -1165,8 +1150,6 @@ internal static bool http2takeInflows(ж<http2inflow> Ꮡf1, ж<http2inflow> Ꮡ
 }
 
 [GoRecv] internal static void setConnFlow(this ref http2outflow f, ж<http2outflow> Ꮡcf) {
-    ref var cf = ref Ꮡcf.Value;
-
     f.conn = Ꮡcf;
 }
 
@@ -1589,8 +1572,6 @@ internal static readonly UntypedInt http2maxFrameSize = /* 1<<24 - 1 */ 16777215
 }
 
 internal static ж<http2DataFrame> getDataFrame(this ж<http2frameCache> Ꮡfc) {
-    ref var fc = ref Ꮡfc.Value;
-
     if (Ꮡfc == nil) {
         return Ꮡ(new http2DataFrame(nil));
     }
@@ -1780,8 +1761,6 @@ internal static (http2Frame, error) ReadFrame(this ж<http2Framer> Ꮡfr) {
 }
 
 internal static (http2Frame, error) http2parseDataFrame(ж<http2frameCache> Ꮡfc, http2FrameHeader fh, Action<@string> countError, slice<byte> payload) {
-    ref var fc = ref Ꮡfc.Value;
-
     if (fh.StreamID == 0) {
         // DATA frames MUST be associated with a stream. If a
         // DATA frame is received whose stream identifier
@@ -1833,8 +1812,6 @@ internal static bool http2validStreamID(uint32 streamID) {
 // It is the caller's responsibility not to violate the maximum frame size
 // and to not call other Write methods concurrently.
 internal static error WriteData(this ж<http2Framer> Ꮡf, uint32 streamID, bool endStream, slice<byte> data) {
-    ref var f = ref Ꮡf.Value;
-
     return Ꮡf.WriteDataPadded(streamID, endStream, data, default!);
 }
 
@@ -2761,7 +2738,6 @@ internal static (slice<byte> remain, uint32 v, error err) http2readUint32(slice<
 // with the decoded hpack values.
 internal static (http2Frame, error) readMetaFrame(this ж<http2Framer> Ꮡfr, ж<http2HeadersFrame> Ꮡhf) => func<(http2Frame, error)>((defer, recover) => {
     ref var fr = ref Ꮡfr.Value;
-    ref var hf = ref Ꮡhf.Value;
 
     if (fr.AllowIllegalReads) {
         return (default!, errors.New("illegal use of AllowIllegalReads with ReadMetaHeaders"u8));
@@ -3697,8 +3673,6 @@ internal static (nint n, error err) Write(this ж<http2pipe> Ꮡp, slice<byte> d
 //
 // The error must be non-nil.
 internal static void CloseWithError(this ж<http2pipe> Ꮡp, error err) {
-    ref var p = ref Ꮡp.Value;
-
     Ꮡp.closeWithError(Ꮡp.of(http2pipe.Ꮡerr), err, default!);
 }
 
@@ -3706,16 +3680,12 @@ internal static void CloseWithError(this ж<http2pipe> Ꮡp, error err) {
 // Read if needed) to return the provided err immediately, without
 // waiting for unread data.
 internal static void BreakWithError(this ж<http2pipe> Ꮡp, error err) {
-    ref var p = ref Ꮡp.Value;
-
     Ꮡp.closeWithError(Ꮡp.of(http2pipe.ᏑbreakErr), err, default!);
 }
 
 // closeWithErrorAndCode is like CloseWithError but also sets some code to run
 // in the caller's goroutine before returning the error.
 internal static void closeWithErrorAndCode(this ж<http2pipe> Ꮡp, error err, Action fn) {
-    ref var p = ref Ꮡp.Value;
-
     Ꮡp.closeWithError(Ꮡp.of(http2pipe.Ꮡerr), err, fn);
 }
 
@@ -3983,7 +3953,6 @@ internal static Func<ж<http2serverConn>, any, bool> http2testHookOnPanic;
 
 internal static void registerConn(this ж<http2serverInternalState> Ꮡs, ж<http2serverConn> Ꮡsc) {
     ref var s = ref Ꮡs.Value;
-    ref var sc = ref Ꮡsc.Value;
 
     if (Ꮡs == nil) {
         return;
@@ -3996,7 +3965,6 @@ internal static void registerConn(this ж<http2serverInternalState> Ꮡs, ж<htt
 
 internal static void unregisterConn(this ж<http2serverInternalState> Ꮡs, ж<http2serverConn> Ꮡsc) {
     ref var s = ref Ꮡs.Value;
-    ref var sc = ref Ꮡsc.Value;
 
     if (Ꮡs == nil) {
         return;
@@ -4186,9 +4154,6 @@ internal static ΔHandler handler(this ж<http2ServeConnOpts> Ꮡo) {
 //
 // The opts parameter is optional. If nil, default values are used.
 internal static void ServeConn(this ж<http2Server> Ꮡs, net.Conn c, ж<http2ServeConnOpts> Ꮡopts) {
-    ref var s = ref Ꮡs.Value;
-    ref var opts = ref Ꮡopts.Value;
-
     Ꮡs.serveConn(c, Ꮡopts, default!);
 }
 
@@ -4332,7 +4297,6 @@ internal static (context.Context ctx, Action cancel) http2serverConnBaseContext(
     context.Context ctx = default!;
     Action cancel = default!;
 
-    ref var opts = ref Ꮡopts.Value;
     (ctx, cancel) = context_package.WithCancel(Ꮡopts.context());
     ctx = context_package.WithValue(ctx, LocalAddrContextKey, c.LocalAddr());
     {
@@ -4676,7 +4640,6 @@ internal static readonly UntypedInt http2maxCachedCanonicalHeadersKeysSize = 204
 // serverConn.
 internal static void writeFrameAsync(this ж<http2serverConn> Ꮡsc, http2FrameWriteRequest wr, ж<http2writeData> Ꮡwd) {
     ref var sc = ref Ꮡsc.Value;
-    ref var wd = ref Ꮡwd.DerefOrNil();
 
     sc.srv.markNewGoroutine();
     error err = default!;
@@ -4707,8 +4670,6 @@ internal static void closeAllStreamsOnConnClose(this ж<http2serverConn> Ꮡsc) 
 }
 
 internal static void notePanic(this ж<http2serverConn> Ꮡsc) => func((defer, recover) => {
-    ref var sc = ref Ꮡsc.Value;
-
     // Note: this is for serverConn.serve panicking, not http.Handler code.
     if (http2testHookOnPanicMu != nil) {
         http2testHookOnPanicMu.Lock();
@@ -5350,8 +5311,6 @@ internal static void startGracefulShutdown(this ж<http2serverConn> Ꮡsc) {
 internal static time.Duration http2goAwayTimeout = 1 * time.ΔSecond;
 
 internal static void startGracefulShutdownInternal(this ж<http2serverConn> Ꮡsc) {
-    ref var sc = ref Ꮡsc.Value;
-
     Ꮡsc.goAway(http2ErrCodeNo);
 }
 
@@ -6108,8 +6067,6 @@ internal static error processTrailerHeaders(this ж<http2stream> Ꮡst, ж<http2
 }
 
 internal static error checkPriority(this ж<http2serverConn> Ꮡsc, uint32 streamID, http2PriorityParam p) {
-    ref var sc = ref Ꮡsc.Value;
-
     if (streamID == p.StreamDep) {
         // Section 5.3.1: "A stream cannot depend on itself. An endpoint MUST treat
         // this as a stream error (Section 5.4.2) of type PROTOCOL_ERROR."
@@ -6171,7 +6128,6 @@ internal static ж<http2stream> newStream(this ж<http2serverConn> Ꮡsc, uint32
 
 internal static (ж<http2responseWriter>, ж<Request>, error) newWriterAndRequest(this ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, ж<http2MetaHeadersFrame> Ꮡf) {
     ref var sc = ref Ꮡsc.Value;
-    ref var st = ref Ꮡst.Value;
     ref var f = ref Ꮡf.Value;
 
     sc.serveG.check();
@@ -6320,8 +6276,6 @@ internal static (ж<http2responseWriter>, ж<Request>, error) newWriterAndReques
 }
 
 internal static ж<http2responseWriter> newResponseWriter(this ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, ж<Request> Ꮡreq) {
-    ref var sc = ref Ꮡsc.Value;
-    ref var st = ref Ꮡst.Value;
     ref var req = ref Ꮡreq.Value;
 
     var rws = Ꮡhttp2responseWriterStatePool.Get()._<ж<http2responseWriterState>>();
@@ -6400,8 +6354,6 @@ internal static void handlerDone(this ж<http2serverConn> Ꮡsc) {
 // Run on its own goroutine.
 internal static void runHandler(this ж<http2serverConn> Ꮡsc, ж<http2responseWriter> Ꮡrw, ж<Request> Ꮡreq, Action<ResponseWriter, ж<Request>> handler) => func((defer, recover) => {
     ref var sc = ref Ꮡsc.Value;
-    ref var rw = ref Ꮡrw.Value;
-    ref var req = ref Ꮡreq.Value;
 
     sc.srv.markNewGoroutine();
     deferǃ(Ꮡsc.sendServeMsg, http2handlerDoneMsg, defer);
@@ -6433,8 +6385,6 @@ internal static void runHandler(this ж<http2serverConn> Ꮡsc, ж<http2response
 });
 
 internal static void http2handleHeaderListTooLong(ResponseWriter w, ж<Request> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     // 10.5.1 Limits on Header Block Size:
     // .. "A server that receives a larger header block than it is
     // willing to handle can send an HTTP 431 (Request Header Fields Too
@@ -6507,8 +6457,6 @@ internal static void http2handleHeaderListTooLong(ResponseWriter w, ж<Request> 
 // Notes that the handler for the given stream ID read n bytes of its body
 // and schedules flow control tokens to be sent.
 [GoRecv] internal static void noteBodyReadFromHandler(this ref http2serverConn sc, ж<http2stream> Ꮡst, nint n, error err) {
-    ref var st = ref Ꮡst.Value;
-
     sc.serveG.checkNotOn();
     // NOT on
     if (n > 0) {
@@ -6538,9 +6486,6 @@ internal static void noteBodyRead(this ж<http2serverConn> Ꮡsc, ж<http2stream
 
 // st may be nil for conn-level
 internal static void sendWindowUpdate32(this ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, int32 n) {
-    ref var sc = ref Ꮡsc.Value;
-    ref var st = ref Ꮡst.Value;
-
     Ꮡsc.sendWindowUpdate(Ꮡst, (nint)n);
 }
 
@@ -6580,8 +6525,6 @@ internal static void sendWindowUpdate(this ж<http2serverConn> Ꮡsc, ж<http2st
 }
 
 internal static error Close(this ж<http2requestBody> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.of(http2requestBody.ᏑcloseOnce).Do(() => {
         if (Ꮡb.Value.pipe != nil) {
             Ꮡb.Value.pipe.BreakWithError(http2errClosedBody);
@@ -7625,8 +7568,6 @@ internal static void markNewGoroutine(this ж<http2Transport> Ꮡt) {
 //
 // Use ConfigureTransports instead to configure the HTTP/2 Transport.
 internal static error http2ConfigureTransport(ж<Transport> Ꮡt1) {
-    ref var t1 = ref Ꮡt1.Value;
-
     var (_, err) = http2ConfigureTransports(Ꮡt1);
     return err;
 }
@@ -7635,8 +7576,6 @@ internal static error http2ConfigureTransport(ж<Transport> Ꮡt1) {
 // It returns a new HTTP/2 Transport for further configuration.
 // It returns an error if t1 has already been HTTP/2-enabled.
 internal static (ж<http2Transport>, error) http2ConfigureTransports(ж<Transport> Ꮡt1) {
-    ref var t1 = ref Ꮡt1.Value;
-
     return http2configureTransports(Ꮡt1);
 }
 
@@ -7944,9 +7883,6 @@ internal static error http2ErrNoCachedConn = new http2noCachedConnError(nil);
 }
 
 internal static (ж<Response>, error) RoundTrip(this ж<http2Transport> Ꮡt, ж<Request> Ꮡreq) {
-    ref var t = ref Ꮡt.Value;
-    ref var req = ref Ꮡreq.Value;
-
     return Ꮡt.RoundTripOpt(Ꮡreq, new http2RoundTripOpt(nil));
 }
 
@@ -8037,8 +7973,6 @@ internal static (ж<Response>, error) RoundTripOpt(this ж<http2Transport> Ꮡt,
 // connected from previous requests but are now sitting idle.
 // It does not interrupt any connections currently in use.
 internal static void CloseIdleConnections(this ж<http2Transport> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     {
         var (cp, ok) = Ꮡt.connPool()._<http2clientConnPoolIdleCloser>(ᐧ); if (ok) {
             cp.closeIdleConnections();
@@ -8134,8 +8068,6 @@ internal static (ж<http2ClientConn>, error) dialClientConn(this ж<http2Transpo
 }
 
 [GoRecv] internal static (net.Conn, error) dialTLS(this ref http2Transport t, context.Context ctx, @string network, @string addr, ж<tls.Config> ᏑtlsCfg) {
-    ref var tlsCfg = ref ᏑtlsCfg.Value;
-
     if (t.DialTLSContext != default!){
         return t.DialTLSContext(ctx, network, addr, ᏑtlsCfg);
     } else 
@@ -8496,8 +8428,6 @@ internal static http2clientConnIdleState idleState(this ж<http2ClientConn> Ꮡc
 // connection. The timer could just call closeIfIdle, but this is more
 // clear.
 internal static void onIdleTimeout(this ж<http2ClientConn> Ꮡcc) {
-    ref var cc = ref Ꮡcc.Value;
-
     Ꮡcc.closeIfIdle();
 }
 
@@ -8648,8 +8578,6 @@ internal static void closeForError(this ж<http2ClientConn> Ꮡcc, error err) {
 //
 // In-flight requests are interrupted. For a graceful shutdown, use Shutdown instead.
 public static error Close(this ж<http2ClientConn> Ꮡcc) {
-    ref var cc = ref Ꮡcc.Value;
-
     var err = errors.New("http2: client connection force closed via ClientConn.Close"u8);
     Ꮡcc.closeForError(err);
     return default!;
@@ -8759,9 +8687,6 @@ internal static void decrStreamReservations(this ж<http2ClientConn> Ꮡcc) => f
 }
 
 public static (ж<Response>, error) RoundTrip(this ж<http2ClientConn> Ꮡcc, ж<Request> Ꮡreq) {
-    ref var cc = ref Ꮡcc.Value;
-    ref var req = ref Ꮡreq.Value;
-
     return Ꮡcc.roundTrip(Ꮡreq, default!);
 }
 
@@ -8905,7 +8830,6 @@ internal static (ж<Response>, error) roundTrip(this ж<http2ClientConn> Ꮡcc, 
 // It sends the request and performs post-request cleanup (closing Request.Body, etc.).
 internal static void doRequest(this ж<http2clientStream> Ꮡcs, ж<Request> Ꮡreq, Action<ж<http2clientStream>> streamf) {
     ref var cs = ref Ꮡcs.Value;
-    ref var req = ref Ꮡreq.Value;
 
     (~cs.cc).t.markNewGoroutine();
     var err = Ꮡcs.writeRequest(Ꮡreq, streamf);
@@ -9077,7 +9001,6 @@ internal static error /*err*/ writeRequest(this ж<http2clientStream> Ꮡcs, ж<
 // keep waiting for END_STREAM
 internal static error encodeAndWriteHeaders(this ж<http2clientStream> Ꮡcs, ж<Request> Ꮡreq) => func((defer, recover) => {
     ref var cs = ref Ꮡcs.Value;
-    ref var req = ref Ꮡreq.Value;
 
     var cc = cs.cc;
     var ctx = cs.ctx;
@@ -10215,7 +10138,6 @@ internal static error processHeaders(this ж<http2clientConnReadLoop> Ꮡrl, ж<
 }
 
 internal static error processTrailers(this ж<http2clientConnReadLoop> Ꮡrl, ж<http2clientStream> Ꮡcs, ж<http2MetaHeadersFrame> Ꮡf) {
-    ref var rl = ref Ꮡrl.Value;
     ref var cs = ref Ꮡcs.Value;
     ref var f = ref Ꮡf.Value;
 
@@ -10770,8 +10692,6 @@ internal static error processPing(this ж<http2clientConnReadLoop> Ꮡrl, ж<htt
 });
 
 [GoRecv] internal static error processPushPromise(this ref http2clientConnReadLoop rl, ж<http2PushPromiseFrame> Ꮡf) {
-    ref var f = ref Ꮡf.Value;
-
     // We told the peer we don't want them.
     // Spec says:
     // "PUSH_PROMISE MUST NOT be sent if the SETTINGS_ENABLE_PUSH
@@ -10926,8 +10846,6 @@ internal static bool http2isConnectionCloseRequest(ж<Request> Ꮡreq) {
 internal static error /*err*/ http2registerHTTPSProtocol(ж<Transport> Ꮡt, http2noDialH2RoundTripper rt) {
     error err = default!;
     func((defer, recover) => {
-    ref var t = ref Ꮡt.Value;
-
         defer(() => {
             {
                 var e = recover(); if (e != default!) {
@@ -10950,8 +10868,6 @@ internal static error /*err*/ http2registerHTTPSProtocol(ж<Transport> Ꮡt, htt
 }
 
 internal static (ж<Response>, error) RoundTrip(this http2noDialH2RoundTripper rt, ж<Request> Ꮡreq) {
-    ref var req = ref Ꮡreq.Value;
-
     var (res, err) = rt.http2Transport.RoundTrip(Ꮡreq);
     if (http2isNoCachedConnError(err)) {
         return (default!, ErrSkipAltProtocol);
@@ -11067,8 +10983,6 @@ internal static Func<nint, textproto.MIMEHeader, error> http2traceGot1xxResponse
 // dialTLSWithContext uses tls.Dialer, added in Go 1.15, to open a TLS
 // connection.
 [GoRecv] internal static (ж<tls.Conn>, error) dialTLSWithContext(this ref http2Transport t, context.Context ctx, @string network, @string addr, ж<tls.Config> Ꮡcfg) {
-    ref var cfg = ref Ꮡcfg.Value;
-
     var dialer = Ꮡ(new tls.Dialer(
         Config: Ꮡcfg
     ));
@@ -11274,8 +11188,6 @@ internal static error http2splitHeaderBlock(http2writeContext ctx, slice<byte> h
 }
 
 internal static void http2encKV(ж<hpack.Encoder> Ꮡenc, @string k, @string v) {
-    ref var enc = ref Ꮡenc.Value;
-
     if (http2VerboseLogs) {
         log.Printf("http2: server encoding header %q = %q"u8, k, v);
     }
@@ -11415,8 +11327,6 @@ internal static error writeFrame(this http2writeWindowUpdate wu, http2writeConte
 // encodeHeaders encodes an http.Header. If keys is not nil, then (k, h[k])
 // is encoded only if k is in keys.
 internal static void http2encodeHeaders(ж<hpack.Encoder> Ꮡenc, ΔHeader h, slice<@string> keys) => func((defer, recover) => {
-    ref var enc = ref Ꮡenc.Value;
-
     if (keys == default!) {
         var sorter = Ꮡhttp2sorterPool.Get()._<ж<http2sorter>>();
         // Using defer here, since the returned keys from the
@@ -12114,7 +12024,6 @@ internal static (http2FrameWriteRequest wr, bool ok) Pop(this ж<http2priorityWr
     http2FrameWriteRequest wr = default!;
     bool ok = default!;
 
-    ref var ws = ref Ꮡws.Value;
     Ꮡws.of(http2priorityWriteScheduler.Ꮡroot).walkReadyInOrder(false, Ꮡws.of(http2priorityWriteScheduler.Ꮡtmp), (ж<http2priorityNode> n, bool openParent) => {
         var limit = (int32)math.MaxInt32;
         if (openParent) {
@@ -12144,7 +12053,6 @@ internal static (http2FrameWriteRequest wr, bool ok) Pop(this ж<http2priorityWr
 
 [GoRecv] internal static void addClosedOrIdleNode(this ref http2priorityWriteScheduler ws, ж<slice<ж<http2priorityNode>>> Ꮡlist, nint maxSize, ж<http2priorityNode> Ꮡn) {
     ref var list = ref Ꮡlist.Value;
-    ref var n = ref Ꮡn.Value;
 
     if (maxSize == 0) {
         return;

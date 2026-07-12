@@ -107,8 +107,6 @@ internal static readonly exprListMode noIndent = 2;      // no extra indentation
 // If indent is set, a multi-line identifier list is indented after the
 // first linebreak encountered.
 internal static void identList(this ж<printer> Ꮡp, slice<ж<ast.Ident>> list, bool indent) {
-    ref var p = ref Ꮡp.Value;
-
     // convert into an expression list so we can re-use exprList formatting
     var xlist = new slice<ast.Expr>(len(list));
     foreach (var (i, x) in list) {
@@ -447,7 +445,6 @@ internal static bool isTypeElem(ast.Expr x) {
 }
 
 internal static void signature(this ж<printer> Ꮡp, ж<ast.FuncType> Ꮡsig) {
-    ref var p = ref Ꮡp.Value;
     ref var sig = ref Ꮡsig.Value;
 
     if (sig.TypeParams != nil) {
@@ -509,8 +506,6 @@ internal static nint /*size*/ identListSize(slice<ж<ast.Ident>> list, nint maxS
 }
 
 internal static void setLineComment(this ж<printer> Ꮡp, @string text) {
-    ref var p = ref Ꮡp.Value;
-
     Ꮡp.setComment(Ꮡ(new ast.CommentGroup(List: new ж<ast.Comment>[]{Ꮡ(new ast.Comment(Slash: token.NoPos, Text: text))}.slice())));
 }
 
@@ -738,8 +733,6 @@ internal static (bool has4, bool has5, nint maxProblem) walkBinary(ж<ast.Binary
 }
 
 internal static nint cutoff(ж<ast.BinaryExpr> Ꮡe, nint depth) {
-    ref var e = ref Ꮡe.Value;
-
     var (has4, has5, maxProblem) = walkBinary(Ꮡe);
     if (maxProblem > 0) {
         return maxProblem + 1;
@@ -1246,8 +1239,6 @@ internal static ж<ast.BasicLit> normalizedNumber(ж<ast.BasicLit> Ꮡlit) {
 }
 
 internal static bool possibleSelectorExpr(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nint depth) {
-    ref var p = ref Ꮡp.Value;
-
     {
         var (x, ok) = expr._<ж<ast.SelectorExpr>>(ᐧ); if (ok) {
             return Ꮡp.selectorExpr(x, depth, true);
@@ -1282,14 +1273,10 @@ internal static bool selectorExpr(this ж<printer> Ꮡp, ж<ast.SelectorExpr> �
 }
 
 internal static void expr0(this ж<printer> Ꮡp, ast.Expr x, nint depth) {
-    ref var p = ref Ꮡp.Value;
-
     Ꮡp.expr1(x, token.LowestPrec, depth);
 }
 
 internal static void expr(this ж<printer> Ꮡp, ast.Expr x) {
-    ref var p = ref Ꮡp.Value;
-
     UntypedInt depth = 1;
     Ꮡp.expr1(x, token.LowestPrec, depth);
 }
@@ -1405,8 +1392,6 @@ internal static ast.Expr stripParensAlways(ast.Expr x) {
 }
 
 internal static void controlClause(this ж<printer> Ꮡp, bool isForStmt, ast.Stmt init, ast.Expr expr, ast.Stmt post) {
-    ref var p = ref Ꮡp.Value;
-
     Ꮡp.print(blank);
     var needsBlank = false;
     if (init == default! && post == default!){
@@ -1774,7 +1759,6 @@ internal static slice<bool> keepTypeColumn(slice<ast.Spec> specs) {
 }
 
 internal static void valueSpec(this ж<printer> Ꮡp, ж<ast.ValueSpec> Ꮡs, bool keepType) {
-    ref var p = ref Ꮡp.Value;
     ref var s = ref Ꮡs.Value;
 
     Ꮡp.setComment(s.Doc);

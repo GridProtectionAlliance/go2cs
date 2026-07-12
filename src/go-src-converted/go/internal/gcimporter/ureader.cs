@@ -115,8 +115,6 @@ internal static ж<types.Package> readUnifiedPackage(ж<token.FileSet> Ꮡfset, 
 }
 
 internal static ж<reader> newReader(this ж<pkgReader> Ꮡpr, pkgbits.RelocKind k, pkgbits.Index idx, pkgbits.SyncMarker marker) {
-    ref var pr = ref Ꮡpr.Value;
-
     return Ꮡ(new reader(
         Decoder: Ꮡpr.of(pkgReader.ᏑPkgDecoder).NewDecoder(k, idx, marker),
         p: Ꮡpr
@@ -124,8 +122,6 @@ internal static ж<reader> newReader(this ж<pkgReader> Ꮡpr, pkgbits.RelocKind
 }
 
 internal static ж<reader> tempReader(this ж<pkgReader> Ꮡpr, pkgbits.RelocKind k, pkgbits.Index idx, pkgbits.SyncMarker marker) {
-    ref var pr = ref Ꮡpr.Value;
-
     return Ꮡ(new reader(
         Decoder: Ꮡpr.of(pkgReader.ᏑPkgDecoder).TempDecoder(k, idx, marker),
         p: Ꮡpr
@@ -133,8 +129,6 @@ internal static ж<reader> tempReader(this ж<pkgReader> Ꮡpr, pkgbits.RelocKin
 }
 
 [GoRecv] internal static void retireReader(this ref pkgReader pr, ж<reader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     pr.PkgDecoder.RetireDecoder(Ꮡr.of(reader.ᏑDecoder));
 }
 
@@ -253,8 +247,6 @@ internal static typesꓸType typ(this ж<reader> Ꮡr) {
 }
 
 internal static typeInfo typInfo(this ж<reader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncType);
     if (Ꮡr.of(reader.ᏑDecoder).Bool()) {
         return new typeInfo(idx: ((pkgbits.Index)(int32)Ꮡr.of(reader.ᏑDecoder).Len()), derived: true);
@@ -357,8 +349,6 @@ internal static typesꓸType /*res*/ doTyp(this ж<reader> Ꮡr) {
 }
 
 internal static ж<types.Struct> structType(this ж<reader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     var fields = new slice<ж<types.Var>>(Ꮡr.of(reader.ᏑDecoder).Len());
     slice<@string> tags = default!;
     foreach (var (i, _) in fields) {
@@ -379,8 +369,6 @@ internal static ж<types.Struct> structType(this ж<reader> Ꮡr) {
 }
 
 internal static ж<types.Union> unionType(this ж<reader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     var terms = new slice<ж<typesꓸTerm>>(Ꮡr.of(reader.ᏑDecoder).Len());
     foreach (var (i, _) in terms) {
         terms[i] = types.NewTerm(Ꮡr.of(reader.ᏑDecoder).Bool(), Ꮡr.typ());
@@ -419,9 +407,6 @@ internal static ж<types.Interface> interfaceType(this ж<reader> Ꮡr) {
 }
 
 internal static ж<typesꓸSignature> signature(this ж<reader> Ꮡr, ж<types.Var> Ꮡrecv, slice<ж<types.TypeParam>> rtparams, slice<ж<types.TypeParam>> tparams) {
-    ref var r = ref Ꮡr.Value;
-    ref var recv = ref Ꮡrecv.Value;
-
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncSignature);
     var @params = Ꮡr.@params();
     var results = Ꮡr.@params();
@@ -430,8 +415,6 @@ internal static ж<typesꓸSignature> signature(this ж<reader> Ꮡr, ж<types.V
 }
 
 internal static ж<types.Tuple> @params(this ж<reader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncParams);
     var @params = new slice<ж<types.Var>>(Ꮡr.of(reader.ᏑDecoder).Len());
     foreach (var (i, _) in @params) {
@@ -441,8 +424,6 @@ internal static ж<types.Tuple> @params(this ж<reader> Ꮡr) {
 }
 
 internal static ж<types.Var> param(this ж<reader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncParam);
     tokenꓸPos pos = Ꮡr.pos();
     var (pkg, name) = Ꮡr.localIdent();
@@ -636,8 +617,6 @@ internal static slice<ж<types.TypeParam>> typeParamNames(this ж<reader> Ꮡr) 
 }
 
 internal static ж<types.Func> method(this ж<reader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncMethod);
     tokenꓸPos pos = Ꮡr.pos();
     var (pkg, name) = Ꮡr.selector();
@@ -649,26 +628,18 @@ internal static ж<types.Func> method(this ж<reader> Ꮡr) {
 }
 
 internal static (ж<types.Package>, @string) qualifiedIdent(this ж<reader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.ident(pkgbits.SyncSym);
 }
 
 internal static (ж<types.Package>, @string) localIdent(this ж<reader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.ident(pkgbits.SyncLocalIdent);
 }
 
 internal static (ж<types.Package>, @string) selector(this ж<reader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.ident(pkgbits.SyncSelector);
 }
 
 internal static (ж<types.Package>, @string) ident(this ж<reader> Ꮡr, pkgbits.SyncMarker marker) {
-    ref var r = ref Ꮡr.Value;
-
     Ꮡr.of(reader.ᏑDecoder).Sync(marker);
     return (Ꮡr.pkg(), Ꮡr.of(reader.ᏑDecoder).String());
 }
@@ -678,8 +649,6 @@ internal static (ж<types.Package>, @string) ident(this ж<reader> Ꮡr, pkgbits
 //
 // TODO(mdempsky): Remove after x/tools can depend on Go 1.19.
 internal static ж<typesꓸScope> pkgScope(ж<types.Package> Ꮡpkg) {
-    ref var pkg = ref Ꮡpkg.DerefOrNil();
-
     if (Ꮡpkg != nil) {
         return Ꮡpkg.Scope();
     }
@@ -688,8 +657,6 @@ internal static ж<typesꓸScope> pkgScope(ж<types.Package> Ꮡpkg) {
 
 // newAliasTypeName returns a new TypeName, with a materialized *types.Alias if supported.
 internal static ж<types.TypeName> newAliasTypeName(tokenꓸPos pos, ж<types.Package> Ꮡpkg, @string name, typesꓸType rhs) {
-    ref var pkg = ref Ꮡpkg.Value;
-
     // When GODEBUG=gotypesalias=1 or unset, the Type() of the return value is a
     // *types.Alias. Copied from x/tools/internal/aliases.NewAlias.
     var exprᴛ1 = godebug.New("gotypesalias"u8).Value();

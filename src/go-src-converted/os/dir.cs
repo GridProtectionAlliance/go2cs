@@ -39,8 +39,6 @@ internal static readonly readdirMode readdirFileInfo = 2;
 //
 // Most clients are better served by the more efficient ReadDir method.
 public static (slice<FileInfo>, error) Readdir(this ж<File> Ꮡf, nint n) {
-    ref var f = ref Ꮡf.Value;
-
     if (Ꮡf == nil) {
         return (default!, ErrInvalid);
     }
@@ -73,7 +71,6 @@ public static (slice<@string> names, error err) Readdirnames(this ж<File> Ꮡf,
     slice<@string> names = default!;
     error err = default!;
 
-    ref var f = ref Ꮡf.Value;
     if (Ꮡf == nil) {
         return (default!, ErrInvalid);
     }
@@ -98,8 +95,6 @@ public static (slice<@string> names, error err) Readdirnames(this ж<File> Ꮡf,
 // If n <= 0, ReadDir returns all the DirEntry records remaining in the directory.
 // When it succeeds, it returns a nil error (not io.EOF).
 public static (slice<DirEntry>, error) ReadDir(this ж<File> Ꮡf, nint n) {
-    ref var f = ref Ꮡf.Value;
-
     if (Ꮡf == nil) {
         return (default!, ErrInvalid);
     }

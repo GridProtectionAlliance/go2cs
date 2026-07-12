@@ -92,7 +92,6 @@ public static (ΔType, error) Instantiate(ж<Context> Ꮡctxt, ΔType orig, slic
 internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔgenericType orig, slice<ΔType> targs, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) {
     ΔType res = default!;
 
-    ref var check = ref Ꮡcheck.Value;
     ref var expanding = ref Ꮡexpanding.DerefOrNil();
     ref var ctxt = ref Ꮡctxt.DerefOrNil();
     // The order of the contexts below matters: we always prefer instances in the
@@ -198,8 +197,6 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
 // number of type parameters (want); if they don't match an error is reported.
 // If validation fails and check is nil, validateTArgLen panics.
 internal static bool validateTArgLen(this ж<Checker> Ꮡcheck, tokenꓸPos pos, @string name, nint want, nint got) {
-    ref var check = ref Ꮡcheck.Value;
-
     @string qual = default!;
     switch (ᐧ) {
     case {} when got < want: {
@@ -223,9 +220,6 @@ internal static bool validateTArgLen(this ж<Checker> Ꮡcheck, tokenꓸPos pos,
 }
 
 internal static (nint, error) verify(this ж<Checker> Ꮡcheck, tokenꓸPos pos, slice<ж<TypeParam>> tparams, slice<ΔType> targs, ж<Context> Ꮡctxt) {
-    ref var check = ref Ꮡcheck.Value;
-    ref var ctxt = ref Ꮡctxt.Value;
-
     var smap = makeSubstMap(tparams, targs);
     foreach (var (i, tpar) in tparams) {
         // Ensure that we have a (possibly implicit) interface as type bound (go.dev/issue/51048).

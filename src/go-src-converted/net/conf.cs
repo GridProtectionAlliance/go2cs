@@ -209,7 +209,6 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder(t
     ж<dnsConfig> dnsConf = default!;
     func((defer, recover) => {
     ref var c = ref Ꮡc.Value;
-    ref var r = ref Ꮡr.Value;
 
         if (c.dnsDebugLevel > 1) {
             defer(() => {
@@ -229,7 +228,6 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder(t
     ж<dnsConfig> dnsConf = default!;
     func((defer, recover) => {
     ref var c = ref Ꮡc.Value;
-    ref var r = ref Ꮡr.Value;
 
         if (c.dnsDebugLevel > 1) {
             defer(() => {
@@ -245,7 +243,6 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder(t
     ΔhostLookupOrder ret = default!;
     ж<dnsConfig> dnsConf = default!;
 
-    ref var r = ref Ꮡr.Value;
     // fallbackOrder is the order we return if we can't figure it out.
     ΔhostLookupOrder fallbackOrder = default!;
     bool canUseCgo = default!;

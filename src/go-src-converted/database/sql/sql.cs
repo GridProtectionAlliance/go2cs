@@ -608,7 +608,6 @@ internal static void releaseConn(this ж<driverConn> Ꮡdc, error err) {
 
 internal static void removeOpenStmt(this ж<driverConn> Ꮡdc, ж<driverStmt> Ꮡds) => func((defer, recover) => {
     ref var dc = ref Ꮡdc.Value;
-    ref var ds = ref Ꮡds.Value;
 
     Ꮡdc.of(driverConn.ᏑMutex).Lock();
     defer(Ꮡdc.of(driverConn.ᏑMutex).Unlock);
@@ -965,8 +964,6 @@ public static error PingContext(this ж<DB> Ꮡdb, context.Context ctx) {
 // Ping uses [context.Background] internally; to specify the context, use
 // [DB.PingContext].
 public static error Ping(this ж<DB> Ꮡdb) {
-    ref var db = ref Ꮡdb.Value;
-
     return Ꮡdb.PingContext(context.Background());
 }
 
@@ -1542,9 +1539,7 @@ internal static Action<ж<DB>, ж<driverConn>> putConnHook;
 // be closed whenever possible (when c is next not in use), unless c is
 // already closed.
 internal static void noteUnusedDriverStatement(this ж<DB> Ꮡdb, ж<driverConn> Ꮡc, ж<driverStmt> Ꮡds) => func((defer, recover) => {
-    ref var db = ref Ꮡdb.Value;
     ref var c = ref Ꮡc.Value;
-    ref var ds = ref Ꮡds.Value;
 
     Ꮡdb.of(DB.Ꮡmu).Lock();
     defer(Ꮡdb.of(DB.Ꮡmu).Unlock);
@@ -1706,8 +1701,6 @@ public static (ж<ΔStmt>, error) PrepareContext(this ж<DB> Ꮡdb, context.Cont
 // Prepare uses [context.Background] internally; to specify the context, use
 // [DB.PrepareContext].
 public static (ж<ΔStmt>, error) Prepare(this ж<DB> Ꮡdb, @string query) {
-    ref var db = ref Ꮡdb.Value;
-
     return Ꮡdb.PrepareContext(context.Background(), query);
 }
 
@@ -1786,7 +1779,6 @@ public static (Result, error) ExecContext(this ж<DB> Ꮡdb, context.Context ctx
 public static (Result, error) Exec(this ж<DB> Ꮡdb, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var db = ref Ꮡdb.Value;
     return Ꮡdb.ExecContext(context.Background(), query, args.ꓸꓸꓸ);
 }
 
@@ -1873,7 +1865,6 @@ public static (ж<Rows>, error) QueryContext(this ж<DB> Ꮡdb, context.Context 
 public static (ж<Rows>, error) Query(this ж<DB> Ꮡdb, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var db = ref Ꮡdb.Value;
     return Ꮡdb.QueryContext(context.Background(), query, args.ꓸꓸꓸ);
 }
 
@@ -1966,7 +1957,6 @@ internal static (ж<Rows>, error) query(this ж<DB> Ꮡdb, context.Context ctx, 
 public static ж<Row> QueryRowContext(this ж<DB> Ꮡdb, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var db = ref Ꮡdb.Value;
     var (rows, err) = Ꮡdb.QueryContext(ctx, query, args.ꓸꓸꓸ);
     return Ꮡ(new Row(rows: rows, err: err));
 }
@@ -1983,7 +1973,6 @@ public static ж<Row> QueryRowContext(this ж<DB> Ꮡdb, context.Context ctx, @s
 public static ж<Row> QueryRow(this ж<DB> Ꮡdb, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var db = ref Ꮡdb.Value;
     return Ꮡdb.QueryRowContext(context.Background(), query, args.ꓸꓸꓸ);
 }
 
@@ -1999,7 +1988,6 @@ public static ж<Row> QueryRow(this ж<DB> Ꮡdb, @string query, params ꓸꓸ�
 // an error will be returned.
 public static (ж<Tx>, error) BeginTx(this ж<DB> Ꮡdb, context.Context ctx, ж<TxOptions> Ꮡopts) {
     ref var db = ref Ꮡdb.Value;
-    ref var opts = ref Ꮡopts.Value;
 
     ref var tx = ref heap<ж<Tx>>(out var Ꮡtx);
     ref var err = ref heap<error>(out var Ꮡerr);
@@ -2016,8 +2004,6 @@ public static (ж<Tx>, error) BeginTx(this ж<DB> Ꮡdb, context.Context ctx, ж
 // Begin uses [context.Background] internally; to specify the context, use
 // [DB.BeginTx].
 public static (ж<Tx>, error) Begin(this ж<DB> Ꮡdb) {
-    ref var db = ref Ꮡdb.Value;
-
     return Ꮡdb.BeginTx(context.Background(), nil);
 }
 
@@ -2025,8 +2011,6 @@ internal static (ж<Tx> tx, error err) begin(this ж<DB> Ꮡdb, context.Context 
     ж<Tx> tx = default!;
     error err = default!;
 
-    ref var db = ref Ꮡdb.Value;
-    ref var opts = ref Ꮡopts.Value;
     (var dc, err) = Ꮡdb.conn(ctx, strategy);
     if (err != default!) {
         return (default!, err);
@@ -2041,7 +2025,6 @@ internal static (ж<Tx> tx, error err) beginDC(this ж<DB> Ꮡdb, context.Contex
 
     ref var db = ref Ꮡdb.Value;
     ref var dc = ref Ꮡdc.Value;
-    ref var opts = ref Ꮡopts.Value;
     ref var ctx = ref heap(ctxʗp, out var Ꮡctx);
     ref var txi = ref heap<driver.Tx>(out var Ꮡtxi);
     ref var keepConnOnRollback = ref heap<bool>(out var ᏑkeepConnOnRollback);
@@ -2197,7 +2180,6 @@ public static (ж<Rows>, error) QueryContext(this ж<ΔConn> Ꮡc, context.Conte
 public static ж<Row> QueryRowContext(this ж<ΔConn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var c = ref Ꮡc.Value;
     var (rows, err) = Ꮡc.QueryContext(ctx, query, args.ꓸꓸꓸ);
     return Ꮡ(new Row(rows: rows, err: err));
 }
@@ -2228,8 +2210,6 @@ public static (ж<ΔStmt>, error) PrepareContext(this ж<ΔConn> Ꮡc, context.C
 public static error /*err*/ Raw(this ж<ΔConn> Ꮡc, Func<any, error> f) {
     error err = default!;
     func((defer, recover) => {
-    ref var c = ref Ꮡc.Value;
-
         ж<driverConn> dc = default!;
         Action<error> release = default!;
         // grabConn takes a context to implement stmtConnGrabber, but the context is not used.
@@ -2269,7 +2249,6 @@ public static error /*err*/ Raw(this ж<ΔConn> Ꮡc, Func<any, error> f) {
 // an error will be returned.
 public static (ж<Tx>, error) BeginTx(this ж<ΔConn> Ꮡc, context.Context ctx, ж<TxOptions> Ꮡopts) {
     ref var c = ref Ꮡc.Value;
-    ref var opts = ref Ꮡopts.Value;
 
     var (dc, release, err) = Ꮡc.grabConn(ctx);
     if (err != default!) {
@@ -2281,8 +2260,6 @@ public static (ж<Tx>, error) BeginTx(this ж<ΔConn> Ꮡc, context.Context ctx,
 // closemuRUnlockCondReleaseConn read unlocks closemu
 // as the sql operation is done with the dc.
 internal static void closemuRUnlockCondReleaseConn(this ж<ΔConn> Ꮡc, error err) {
-    ref var c = ref Ꮡc.Value;
-
     Ꮡc.of(sql_package.ΔConn.Ꮡclosemu).RUnlock();
     if (errors.Is(err, driver.ErrBadConn)) {
         Ꮡc.close(err);
@@ -2315,8 +2292,6 @@ internal static error close(this ж<ΔConn> Ꮡc, error err) => func((defer, rec
 // block until all other operations finish. It may be useful to first
 // cancel any used context and then call close directly after.
 public static error Close(this ж<ΔConn> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return Ꮡc.close(default!);
 }
 
@@ -2384,8 +2359,6 @@ internal static void awaitDone(this ж<Tx> Ꮡtx) {
 }
 
 internal static bool isDone(this ж<Tx> Ꮡtx) {
-    ref var tx = ref Ꮡtx.Value;
-
     return Ꮡtx.of(Tx.Ꮡdone).Load();
 }
 
@@ -2439,8 +2412,6 @@ internal static (ж<driverConn>, Action<error>, error) grabConn(this ж<Tx> Ꮡt
 // the driver conn from being returned to the connection pool until
 // the Rows has been closed.
 internal static void closemuRUnlockRelease(this ж<Tx> Ꮡtx, error _) {
-    ref var tx = ref Ꮡtx.Value;
-
     Ꮡtx.of(Tx.Ꮡclosemu).RUnlock();
 }
 
@@ -2529,8 +2500,6 @@ internal static error rollback(this ж<Tx> Ꮡtx, bool discardConn) {
 
 // Rollback aborts the transaction.
 public static error Rollback(this ж<Tx> Ꮡtx) {
-    ref var tx = ref Ꮡtx.Value;
-
     return Ꮡtx.rollback(false);
 }
 
@@ -2571,8 +2540,6 @@ public static (ж<ΔStmt>, error) PrepareContext(this ж<Tx> Ꮡtx, context.Cont
 // Prepare uses [context.Background] internally; to specify the context, use
 // [Tx.PrepareContext].
 public static (ж<ΔStmt>, error) Prepare(this ж<Tx> Ꮡtx, @string query) {
-    ref var tx = ref Ꮡtx.Value;
-
     return Ꮡtx.PrepareContext(context.Background(), query);
 }
 
@@ -2684,9 +2651,6 @@ public static ж<ΔStmt> StmtContext(this ж<Tx> Ꮡtx, context.Context ctx, ж<
 // Stmt uses [context.Background] internally; to specify the context, use
 // [Tx.StmtContext].
 public static ж<ΔStmt> Stmt(this ж<Tx> Ꮡtx, ж<ΔStmt> Ꮡstmt) {
-    ref var tx = ref Ꮡtx.Value;
-    ref var stmt = ref Ꮡstmt.Value;
-
     return Ꮡtx.StmtContext(context.Background(), Ꮡstmt);
 }
 
@@ -2711,7 +2675,6 @@ public static (Result, error) ExecContext(this ж<Tx> Ꮡtx, context.Context ctx
 public static (Result, error) Exec(this ж<Tx> Ꮡtx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var tx = ref Ꮡtx.Value;
     return Ꮡtx.ExecContext(context.Background(), query, args.ꓸꓸꓸ);
 }
 
@@ -2734,7 +2697,6 @@ public static (ж<Rows>, error) QueryContext(this ж<Tx> Ꮡtx, context.Context 
 public static (ж<Rows>, error) Query(this ж<Tx> Ꮡtx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var tx = ref Ꮡtx.Value;
     return Ꮡtx.QueryContext(context.Background(), query, args.ꓸꓸꓸ);
 }
 
@@ -2747,7 +2709,6 @@ public static (ж<Rows>, error) Query(this ж<Tx> Ꮡtx, @string query, params �
 public static ж<Row> QueryRowContext(this ж<Tx> Ꮡtx, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var tx = ref Ꮡtx.Value;
     var (rows, err) = Ꮡtx.QueryContext(ctx, query, args.ꓸꓸꓸ);
     return Ꮡ(new Row(rows: rows, err: err));
 }
@@ -2764,7 +2725,6 @@ public static ж<Row> QueryRowContext(this ж<Tx> Ꮡtx, context.Context ctx, @s
 public static ж<Row> QueryRow(this ж<Tx> Ꮡtx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var tx = ref Ꮡtx.Value;
     return Ꮡtx.QueryRowContext(context.Background(), query, args.ꓸꓸꓸ);
 }
 
@@ -2862,7 +2822,6 @@ public static (Result, error) ExecContext(this ж<ΔStmt> Ꮡs, context.Context 
 public static (Result, error) Exec(this ж<ΔStmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var s = ref Ꮡs.Value;
     return Ꮡs.ExecContext(context.Background(), args.ꓸꓸꓸ);
 }
 
@@ -2973,7 +2932,6 @@ internal static (ж<driverConn> dc, Action<error> ΔreleaseConn, ж<driverStmt> 
 // open connStmt on the statement. It assumes the caller is holding the lock on dc.
 internal static (ж<driverStmt>, error) prepareOnConnLocked(this ж<ΔStmt> Ꮡs, context.Context ctx, ж<driverConn> Ꮡdc) {
     ref var s = ref Ꮡs.Value;
-    ref var dc = ref Ꮡdc.Value;
 
     var (si, err) = Ꮡdc.prepareLocked(ctx, s.cg, s.query);
     if (err != default!) {
@@ -3044,7 +3002,6 @@ public static (ж<Rows>, error) QueryContext(this ж<ΔStmt> Ꮡs, context.Conte
 public static (ж<Rows>, error) Query(this ж<ΔStmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var s = ref Ꮡs.Value;
     return Ꮡs.QueryContext(context.Background(), args.ꓸꓸꓸ);
 }
 
@@ -3072,7 +3029,6 @@ internal static (driver.Rows, error) rowsiFromStatement(context.Context ctx, dri
 public static ж<Row> QueryRowContext(this ж<ΔStmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var s = ref Ꮡs.Value;
     var (rows, err) = Ꮡs.QueryContext(ctx, args.ꓸꓸꓸ);
     if (err != default!) {
         return Ꮡ(new Row(err: err));
@@ -3097,7 +3053,6 @@ public static ж<Row> QueryRowContext(this ж<ΔStmt> Ꮡs, context.Context ctx,
 public static ж<Row> QueryRow(this ж<ΔStmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var s = ref Ꮡs.Value;
     return Ꮡs.QueryRowContext(context.Background(), args.ꓸꓸꓸ);
 }
 
@@ -3690,8 +3645,6 @@ internal static Func<Action<ж<Rows>, ж<error>>> rowsCloseHook = () => default!
 // the [Rows] are closed automatically and it will suffice to check the
 // result of [Rows.Err]. Close is idempotent and does not affect the result of [Rows.Err].
 public static error Close(this ж<Rows> Ꮡrs) {
-    ref var rs = ref Ꮡrs.Value;
-
     // If the user's calling Close, they're done with their previous row's Scan
     // results (any RawBytes memory), so we can release the read lock that would
     // be preventing awaitDone from calling the unexported close before we do so.

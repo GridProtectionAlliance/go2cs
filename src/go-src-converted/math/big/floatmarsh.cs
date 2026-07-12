@@ -112,7 +112,6 @@ public static (slice<byte> text, error err) MarshalText(this ж<Float> Ꮡx) {
     slice<byte> text = default!;
     error err = default!;
 
-    ref var x = ref Ꮡx.Value;
     if (Ꮡx == nil) {
         return (slice<byte>((@string)"<nil>"), default!);
     }
@@ -125,8 +124,6 @@ public static (slice<byte> text, error err) MarshalText(this ж<Float> Ꮡx) {
 // If z's precision is 0, it is changed to 64 before rounding takes
 // effect.
 public static error UnmarshalText(this ж<Float> Ꮡz, slice<byte> text) {
-    ref var z = ref Ꮡz.Value;
-
     // TODO(gri): get rid of the []byte/string conversion
     var (_, _, err) = Ꮡz.Parse(((@string)text), 0);
     if (err != default!) {

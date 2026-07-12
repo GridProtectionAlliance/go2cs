@@ -58,8 +58,6 @@ internal static readonly UntypedInt semTabSize = 251;
 partial struct semTable;
 
 [GoRecv] internal static ж<semaRoot> rootFor(this ref semTable t, ж<uint32> Ꮡaddr) {
-    ref var addr = ref Ꮡaddr.Value;
-
     return Ꮡ(t.Value[(((uintptr)new @unsafe.Pointer(Ꮡaddr) >> (int)(3))) % (uintptr)semTabSize]).of(semTableᴛ1.Ꮡroot);
 }
 
@@ -74,15 +72,11 @@ partial struct semTable;
 //
 //go:linkname sync_runtime_Semacquire sync.runtime_Semacquire
 internal static void sync_runtime_Semacquire(ж<uint32> Ꮡaddr) {
-    ref var addr = ref Ꮡaddr.Value;
-
     semacquire1(Ꮡaddr, false, semaBlockProfile, 0, waitReasonSemacquire);
 }
 
 //go:linkname poll_runtime_Semacquire internal/poll.runtime_Semacquire
 internal static void poll_runtime_Semacquire(ж<uint32> Ꮡaddr) {
-    ref var addr = ref Ꮡaddr.Value;
-
     semacquire1(Ꮡaddr, false, semaBlockProfile, 0, waitReasonSemacquire);
 }
 
@@ -97,36 +91,26 @@ internal static void poll_runtime_Semacquire(ж<uint32> Ꮡaddr) {
 //
 //go:linkname sync_runtime_Semrelease sync.runtime_Semrelease
 internal static void sync_runtime_Semrelease(ж<uint32> Ꮡaddr, bool handoff, nint skipframes) {
-    ref var addr = ref Ꮡaddr.Value;
-
     semrelease1(Ꮡaddr, handoff, skipframes);
 }
 
 //go:linkname sync_runtime_SemacquireMutex sync.runtime_SemacquireMutex
 internal static void sync_runtime_SemacquireMutex(ж<uint32> Ꮡaddr, bool lifo, nint skipframes) {
-    ref var addr = ref Ꮡaddr.Value;
-
     semacquire1(Ꮡaddr, lifo, (semaProfileFlags)(semaBlockProfile | semaMutexProfile), skipframes, waitReasonSyncMutexLock);
 }
 
 //go:linkname sync_runtime_SemacquireRWMutexR sync.runtime_SemacquireRWMutexR
 internal static void sync_runtime_SemacquireRWMutexR(ж<uint32> Ꮡaddr, bool lifo, nint skipframes) {
-    ref var addr = ref Ꮡaddr.Value;
-
     semacquire1(Ꮡaddr, lifo, (semaProfileFlags)(semaBlockProfile | semaMutexProfile), skipframes, waitReasonSyncRWMutexRLock);
 }
 
 //go:linkname sync_runtime_SemacquireRWMutex sync.runtime_SemacquireRWMutex
 internal static void sync_runtime_SemacquireRWMutex(ж<uint32> Ꮡaddr, bool lifo, nint skipframes) {
-    ref var addr = ref Ꮡaddr.Value;
-
     semacquire1(Ꮡaddr, lifo, (semaProfileFlags)(semaBlockProfile | semaMutexProfile), skipframes, waitReasonSyncRWMutexLock);
 }
 
 //go:linkname poll_runtime_Semrelease internal/poll.runtime_Semrelease
 internal static void poll_runtime_Semrelease(ж<uint32> Ꮡaddr) {
-    ref var addr = ref Ꮡaddr.Value;
-
     semrelease(Ꮡaddr);
 }
 
@@ -146,14 +130,10 @@ internal static readonly semaProfileFlags semaMutexProfile = 2;
 
 // Called from runtime.
 internal static void semacquire(ж<uint32> Ꮡaddr) {
-    ref var addr = ref Ꮡaddr.Value;
-
     semacquire1(Ꮡaddr, false, 0, 0, waitReasonSemacquire);
 }
 
 internal static void semacquire1(ж<uint32> Ꮡaddr, bool lifo, semaProfileFlags profile, nint skipframes, waitReason reason) {
-    ref var addr = ref Ꮡaddr.Value;
-
     var gp = getg();
     if (gp != (~(~gp).m).curg) {
         @throw("semacquire not on the G stack"u8);
@@ -209,14 +189,10 @@ internal static void semacquire1(ж<uint32> Ꮡaddr, bool lifo, semaProfileFlags
 }
 
 internal static void semrelease(ж<uint32> Ꮡaddr) {
-    ref var addr = ref Ꮡaddr.Value;
-
     semrelease1(Ꮡaddr, false, 0);
 }
 
 internal static void semrelease1(ж<uint32> Ꮡaddr, bool handoff, nint skipframes) {
-    ref var addr = ref Ꮡaddr.Value;
-
     var root = semtable.rootFor(Ꮡaddr);
     atomic.Xadd(Ꮡaddr, 1);
     // Easy case: no waiters?
@@ -295,8 +271,6 @@ internal static void semrelease1(ж<uint32> Ꮡaddr, bool handoff, nint skipfram
 }
 
 internal static bool cansemacquire(ж<uint32> Ꮡaddr) {
-    ref var addr = ref Ꮡaddr.Value;
-
     while (ᐧ) {
         var v = atomic.Load(Ꮡaddr);
         if (v == 0) {
@@ -586,8 +560,6 @@ internal static bool less(uint32 a, uint32 b) {
 //
 //go:linkname notifyListAdd sync.runtime_notifyListAdd
 internal static uint32 notifyListAdd(ж<notifyList> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     // This may be called concurrently, for example, when called from
     // sync.Cond.Wait while holding a RWMutex in read mode.
     return Ꮡl.of(notifyList.Ꮡwait).Add(1) - 1;

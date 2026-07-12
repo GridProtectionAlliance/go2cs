@@ -122,8 +122,6 @@ public static ж<Ring> Link(this ж<Ring> Ꮡr, ж<Ring> Ꮡs) {
 // at r.Next(). If n % r.Len() == 0, r remains unchanged.
 // The result is the removed subring. r must not be empty.
 public static ж<Ring> Unlink(this ж<Ring> Ꮡr, nint n) {
-    ref var r = ref Ꮡr.Value;
-
     if (n <= 0) {
         return default!;
     }
@@ -133,8 +131,6 @@ public static ж<Ring> Unlink(this ж<Ring> Ꮡr, nint n) {
 // Len computes the number of elements in ring r.
 // It executes in time proportional to the number of elements.
 public static nint Len(this ж<Ring> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     nint n = 0;
     if (Ꮡr != nil) {
         n = 1;

@@ -489,8 +489,6 @@ public static nint LastBoundary(this Form f, slice<byte> b) {
 }
 
 internal static nint lastBoundary(ж<formInfo> Ꮡfd, slice<byte> b) {
-    ref var fd = ref Ꮡfd.Value;
-
     nint i = len(b);
     var (info, p) = lastRuneStart(Ꮡfd, b);
     if (p == -1) {

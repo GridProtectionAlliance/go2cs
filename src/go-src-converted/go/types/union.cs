@@ -38,14 +38,10 @@ public static ж<Union> NewUnion(slice<ж<ΔTerm>> terms) {
 }
 
 public static ΔType Underlying(this ж<Union> Ꮡu) {
-    ref var u = ref Ꮡu.Value;
-
     return new UnionжΔType(Ꮡu);
 }
 
 public static @string String(this ж<Union> Ꮡu) {
-    ref var u = ref Ꮡu.Value;
-
     return TypeString(new UnionжΔType(Ꮡu), default!);
 }
 
