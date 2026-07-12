@@ -8,37 +8,36 @@
 // better done via channels and communication.
 //
 // Values containing the types defined in this package should not be copied.
+
+// go2cs NATIVE IMPLEMENTATION (hand-owned; replaces the converted mutex.go output). Go's Mutex is a
+// state machine over an int32 driven by a runtime sleeping semaphore (sema.go). That semaphore is
+// co-designed with the state machine — starvation-mode ownership is handed off to one specific waiter
+// with exact ticket semantics — and cannot be reproduced faithfully on top of any .NET primitive
+// (an emulated semaphore trips "inconsistent mutex state" / "unlock of unlocked mutex" under sustained
+// contention). So the whole type is reimplemented natively: a Mutex is a lazily-created binary
+// SemaphoreSlim, which the CLR implements correctly — FIFO wakeups, release permitted from any thread
+// (Go allows unlock on a different goroutine), and non-reentrant (a second Lock on the same thread
+// blocks, matching Go's self-deadlock). See runtime_impl.cs for the shared rationale.
 namespace go;
 
-using race = @internal.race_package;
-using atomic = sync.atomic_package;
-using @unsafe = unsafe_package;
-using @internal;
-using sync;
+using System.Threading;
 
 partial class sync_package {
 
-// Provided by runtime via linkname.
-internal static partial void @throw(@string _);
+// Fatal-error hooks (Go provides these via runtime linkname). Surfaced as a non-panic exception so
+// recover() cannot swallow them and the program terminates loudly, as Go's runtime.throw/fatal do.
+internal static void @throw(@string s) => throw new global::System.InvalidOperationException($"fatal error: {s}");
 
-internal static partial void fatal(@string _);
+internal static void fatal(@string s) => throw new global::System.InvalidOperationException($"fatal error: {s}");
 
 // A Mutex is a mutual exclusion lock.
 // The zero value for a Mutex is an unlocked mutex.
 //
 // A Mutex must not be copied after first use.
-//
-// In the terminology of [the Go memory model],
-// the n'th call to [Mutex.Unlock] “synchronizes before” the m'th call to [Mutex.Lock]
-// for any n < m.
-// A successful call to [Mutex.TryLock] is equivalent to a call to Lock.
-// A failed call to TryLock does not establish any “synchronizes before”
-// relation at all.
-//
-// [the Go memory model]: https://go.dev/ref/mem
 [GoType] partial struct Mutex {
-    internal int32 state;
-    internal uint32 sema;
+    // Lazily-created binary semaphore backing this mutex. A Mutex is always used through a pointer
+    // (ж<Mutex>), never copied after first use, so the box holds the single shared gate.
+    internal SemaphoreSlim? gate;
 }
 
 // A Locker represents an object that can be locked and unlocked.
@@ -47,198 +46,43 @@ internal static partial void fatal(@string _);
     void Unlock();
 }
 
-internal static readonly UntypedInt mutexLocked = /* 1 << iota */ 1; // mutex is locked
-internal static readonly UntypedInt mutexWoken = 2;
-internal static readonly UntypedInt mutexStarving = 4;
-internal static readonly UntypedInt mutexWaiterShift = iota;
-internal static readonly UntypedFloat starvationThresholdNs = 1e+06;
+// gateOf returns the mutex's backing semaphore, creating it once on first use (race-safe).
+private static SemaphoreSlim gateOf(ж<Mutex> Ꮡm) {
+    ref var m = ref Ꮡm.Value;
+
+    SemaphoreSlim? g = Volatile.Read(ref m.gate);
+
+    if (g is not null) {
+        return g;
+    }
+
+    var created = new SemaphoreSlim(1, 1);
+    g = Interlocked.CompareExchange(ref m.gate, created, null);
+
+    if (g is not null) {
+        created.Dispose(); // lost the race; another thread installed the gate
+        return g;
+    }
+
+    return created;
+}
 
 // Lock locks m.
-// If the lock is already in use, the calling goroutine
-// blocks until the mutex is available.
-public static void Lock(this ж<Mutex> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
-    // Fast path: grab unlocked mutex.
-    if (atomic.CompareAndSwapInt32(Ꮡm.of(Mutex.Ꮡstate), 0, mutexLocked)) {
-        if (race.Enabled) {
-            race.Acquire((uintptr)@unsafe.Pointer.FromRef(ref m));
-        }
-        return;
-    }
-    // Slow path (outlined so that the fast path can be inlined)
-    Ꮡm.lockSlow();
-}
+// If the lock is already in use, the calling goroutine blocks until the mutex is available.
+public static void Lock(this ж<Mutex> Ꮡm) => gateOf(Ꮡm).Wait();
 
 // TryLock tries to lock m and reports whether it succeeded.
-//
-// Note that while correct uses of TryLock do exist, they are rare,
-// and use of TryLock is often a sign of a deeper problem
-// in a particular use of mutexes.
-public static bool TryLock(this ж<Mutex> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
-    var old = m.state;
-    if ((int32)(old & ((int32)((int32)mutexLocked | (int32)mutexStarving))) != 0) {
-        return false;
-    }
-    // There may be a goroutine waiting for the mutex, but we are
-    // running now and can try to grab the mutex before that
-    // goroutine wakes up.
-    if (!atomic.CompareAndSwapInt32(Ꮡm.of(Mutex.Ꮡstate), old, (int32)(old | (int32)mutexLocked))) {
-        return false;
-    }
-    if (race.Enabled) {
-        race.Acquire((uintptr)@unsafe.Pointer.FromRef(ref m));
-    }
-    return true;
-}
-
-internal static void lockSlow(this ж<Mutex> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
-    int64 waitStartTime = default!;
-    var starving = false;
-    var awoke = false;
-    nint iter = 0;
-    var old = m.state;
-    while (ᐧ) {
-        // Don't spin in starvation mode, ownership is handed off to waiters
-        // so we won't be able to acquire the mutex anyway.
-        if ((int32)(old & ((int32)((int32)mutexLocked | (int32)mutexStarving))) == mutexLocked && runtime_canSpin(iter)) {
-            // Active spinning makes sense.
-            // Try to set mutexWoken flag to inform Unlock
-            // to not wake other blocked goroutines.
-            if (!awoke && (int32)(old & (int32)mutexWoken) == 0 && (old >> (int)(mutexWaiterShift)) != 0 && atomic.CompareAndSwapInt32(Ꮡm.of(Mutex.Ꮡstate), old, (int32)(old | (int32)mutexWoken))) {
-                awoke = true;
-            }
-            runtime_doSpin();
-            iter++;
-            old = m.state;
-            continue;
-        }
-        var @new = old;
-        // Don't try to acquire starving mutex, new arriving goroutines must queue.
-        if ((int32)(old & (int32)mutexStarving) == 0) {
-            @new |= (int32)(mutexLocked);
-        }
-        if ((int32)(old & ((int32)((int32)mutexLocked | (int32)mutexStarving))) != 0) {
-            @new += (int32)(1 << (int)(mutexWaiterShift));
-        }
-        // The current goroutine switches mutex to starvation mode.
-        // But if the mutex is currently unlocked, don't do the switch.
-        // Unlock expects that starving mutex has waiters, which will not
-        // be true in this case.
-        if (starving && (int32)(old & (int32)mutexLocked) != 0) {
-            @new |= (int32)(mutexStarving);
-        }
-        if (awoke) {
-            // The goroutine has been woken from sleep,
-            // so we need to reset the flag in either case.
-            if ((int32)(@new & (int32)mutexWoken) == 0) {
-                @throw("sync: inconsistent mutex state"u8);
-            }
-            @new &= ~(int32)(mutexWoken);
-        }
-        if (atomic.CompareAndSwapInt32(Ꮡm.of(Mutex.Ꮡstate), old, @new)){
-            if ((int32)(old & ((int32)((int32)mutexLocked | (int32)mutexStarving))) == 0) {
-                break;
-            }
-            // locked the mutex with CAS
-            // If we were already waiting before, queue at the front of the queue.
-            var queueLifo = waitStartTime != 0;
-            if (waitStartTime == 0) {
-                waitStartTime = runtime_nanotime();
-            }
-            runtime_SemacquireMutex(Ꮡm.of(Mutex.Ꮡsema), queueLifo, 1);
-            starving = starving || runtime_nanotime() - waitStartTime > starvationThresholdNs;
-            old = m.state;
-            if ((int32)(old & (int32)mutexStarving) != 0) {
-                // If this goroutine was woken and mutex is in starvation mode,
-                // ownership was handed off to us but mutex is in somewhat
-                // inconsistent state: mutexLocked is not set and we are still
-                // accounted as waiter. Fix that.
-                if ((int32)(old & ((int32)((int32)mutexLocked | (int32)mutexWoken))) != 0 || (old >> (int)(mutexWaiterShift)) == 0) {
-                    @throw("sync: inconsistent mutex state"u8);
-                }
-                var delta = (int32)(mutexLocked - (1 << (int)(mutexWaiterShift)));
-                if (!starving || (old >> (int)(mutexWaiterShift)) == 1) {
-                    // Exit starvation mode.
-                    // Critical to do it here and consider wait time.
-                    // Starvation mode is so inefficient, that two goroutines
-                    // can go lock-step infinitely once they switch mutex
-                    // to starvation mode.
-                    delta -= mutexStarving;
-                }
-                atomic.AddInt32(Ꮡm.of(Mutex.Ꮡstate), delta);
-                break;
-            }
-            awoke = true;
-            iter = 0;
-        } else {
-            old = m.state;
-        }
-    }
-    if (race.Enabled) {
-        race.Acquire((uintptr)@unsafe.Pointer.FromRef(ref m));
-    }
-}
+public static bool TryLock(this ж<Mutex> Ꮡm) => gateOf(Ꮡm).Wait(0);
 
 // Unlock unlocks m.
 // It is a run-time error if m is not locked on entry to Unlock.
-//
-// A locked [Mutex] is not associated with a particular goroutine.
-// It is allowed for one goroutine to lock a Mutex and then
-// arrange for another goroutine to unlock it.
+// A locked Mutex is not associated with a particular goroutine; one goroutine may lock a Mutex and
+// then arrange for another goroutine to unlock it.
 public static void Unlock(this ж<Mutex> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
-    if (race.Enabled) {
-        _ = m.state;
-        race.Release((uintptr)@unsafe.Pointer.FromRef(ref m));
-    }
-    // Fast path: drop lock bit.
-    var @new = atomic.AddInt32(Ꮡm.of(Mutex.Ꮡstate), -mutexLocked);
-    if (@new != 0) {
-        // Outlined slow path to allow inlining the fast path.
-        // To hide unlockSlow during tracing we skip one extra frame when tracing GoUnblock.
-        Ꮡm.unlockSlow(@new);
-    }
-}
-
-internal static void unlockSlow(this ж<Mutex> Ꮡm, int32 @new) {
-    ref var m = ref Ꮡm.Value;
-
-    if ((int32)((@new + (int32)mutexLocked) & (int32)mutexLocked) == 0) {
+    try {
+        gateOf(Ꮡm).Release();
+    } catch (SemaphoreFullException) {
         fatal("sync: unlock of unlocked mutex"u8);
-    }
-    if ((int32)(@new & (int32)mutexStarving) == 0){
-        var old = @new;
-        while (ᐧ) {
-            // If there are no waiters or a goroutine has already
-            // been woken or grabbed the lock, no need to wake anyone.
-            // In starvation mode ownership is directly handed off from unlocking
-            // goroutine to the next waiter. We are not part of this chain,
-            // since we did not observe mutexStarving when we unlocked the mutex above.
-            // So get off the way.
-            if ((old >> (int)(mutexWaiterShift)) == 0 || (int32)(old & ((int32)((UntypedInt)(mutexLocked | mutexWoken) | (int32)mutexStarving))) != 0) {
-                return;
-            }
-            // Grab the right to wake someone.
-            @new = (int32)((old - (int32)((int32)(1 << (int)(mutexWaiterShift)))) | (int32)mutexWoken);
-            if (atomic.CompareAndSwapInt32(Ꮡm.of(Mutex.Ꮡstate), old, @new)) {
-                runtime_Semrelease(Ꮡm.of(Mutex.Ꮡsema), false, 1);
-                return;
-            }
-            old = m.state;
-        }
-    } else {
-        // Starving mode: handoff mutex ownership to the next waiter, and yield
-        // our time slice so that the next waiter can start to run immediately.
-        // Note: mutexLocked is not set, the waiter will set it after wakeup.
-        // But mutex is still considered locked if mutexStarving is set,
-        // so new coming goroutines won't acquire it.
-        runtime_Semrelease(Ꮡm.of(Mutex.Ꮡsema), true, 1);
     }
 }
 
