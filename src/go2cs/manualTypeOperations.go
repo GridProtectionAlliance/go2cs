@@ -51,6 +51,13 @@ var manualConversionFuncs = map[string]map[string]bool{
 		"notesleep":           true,
 		"notetsleep_internal": true,
 	},
+	// internal/abi.TypeOf reads an interface's type-word via unsafe.Pointer to reach a Go runtime
+	// type descriptor that has no managed form (the reflection bridge — Phase 4). type_impl.cs
+	// synthesizes an abi.Type whose Kind_ is classified from the value's managed System.Type. See
+	// docs/Phase4/DESIGN-reflection-bridge.md.
+	"internal/abi": {
+		"TypeOf": true,
+	},
 }
 
 // isManualType reports whether the named type (raw Go name) is hand-converted in this package.

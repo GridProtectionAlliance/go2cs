@@ -121,16 +121,13 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [UnsafePointer] = "unsafe.Pointer"u8
 }.slice();
 
-// TypeOf returns the abi.Type of some value.
-public static ж<Type> TypeOf(any a) {
-    var eface = ~(ж<EmptyInterface>)(uintptr)(new @unsafe.Pointer(Ꮡ(a)));
-    // Types are either static (for compiler-created types) or
-    // heap-allocated but always reachable (for reflection-created
-    // types, held in the central map). So there is no need to
-    // escape types. noescape here help avoid unnecessary escape
-    // of v.
-    return (ж<Type>)(uintptr)(NoEscape(new @unsafe.Pointer(eface.Type)));
-}
+// func TypeOf is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+
+// Types are either static (for compiler-created types) or
+// heap-allocated but always reachable (for reflection-created
+// types, held in the central map). So there is no need to
+// escape types. noescape here help avoid unnecessary escape
+// of v.
 
 // TypeFor returns the abi.Type for a type parameter.
 public static ж<Type> TypeFor<T>() {
