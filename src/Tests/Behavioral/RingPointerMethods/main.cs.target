@@ -54,7 +54,7 @@ public static nint Len(this ж<Ring> Ꮡr) {
     ref var r = ref Ꮡr.Value;
 
     nint n = 0;
-    if (r != nil) {
+    if (Ꮡr != nil) {
         n = 1;
         for (var p = Ꮡr.Next(); p != Ꮡr; p = p.Value.next) {
             n++;

@@ -321,23 +321,25 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 	concatSuppressed := !litContext.u8StringOK && binaryExpr.Op == token.ADD
 	basicLitContext.u8StringOK = !concatSuppressed && v.isStringType(binaryExpr.X) && v.isStringType(binaryExpr.Y)
 
-	// In a `==`/`!=` comparison, a deref'd pointer PARAMETER must compare its box `Ꮡp`, not its
-	// value alias `p` (a struct value). Each operand's pointer context is otherwise taken from the
-	// OTHER operand's pointer-ness, so `p != nil` (nil is not a pointer type) would convert p in
-	// value form — the wrong comparison, and the start of a nil-terminated walk that then NREs at
-	// its re-alias. Forcing the box form here is safe only for a pointer param: a pointer LOCAL is
-	// already the box, and forcing isPointer there would emit a non-existent `Ꮡlocal` (see convIdent).
+	// In a `==`/`!=` comparison, a deref'd pointer PARAMETER (or the deref'd pointer RECEIVER) must
+	// compare its box `Ꮡp`, not its value alias `p` (a struct value). Each operand's pointer context
+	// is otherwise taken from the OTHER operand's pointer-ness, so `p != nil` (nil is not a pointer
+	// type) would convert p in value form — the wrong comparison, and for a promoted-embed struct
+	// `p == nil` then binds the generated `T.operator==(T, NilType)`, a null-embed-box NRE (os.File's
+	// `func (f *File) checkValid() { if f == nil … }`). Forcing the box form here is safe only for a
+	// deref-aliased pointer param/receiver: a pointer LOCAL is already the box, and forcing isPointer
+	// there would emit a non-existent `Ꮡlocal` (see convIdent).
 	isEqualityComparison := binaryExpr.Op == token.EQL || binaryExpr.Op == token.NEQ
 	leftIsDerefdPtrParam := false
 	rightIsDerefdPtrParam := false
 
 	if isEqualityComparison {
 		if ident, ok := binaryExpr.X.(*ast.Ident); ok {
-			leftIsDerefdPtrParam = v.isDerefdPointerParamIdent(ident)
+			leftIsDerefdPtrParam = v.isDerefdPointerParamIdent(ident) || v.isDerefdPointerReceiverIdent(ident)
 		}
 
 		if ident, ok := binaryExpr.Y.(*ast.Ident); ok {
-			rightIsDerefdPtrParam = v.isDerefdPointerParamIdent(ident)
+			rightIsDerefdPtrParam = v.isDerefdPointerParamIdent(ident) || v.isDerefdPointerReceiverIdent(ident)
 		}
 	}
 

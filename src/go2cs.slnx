@@ -313,6 +313,7 @@
     <Project Path="Tests/Behavioral/PointerParamCapturedInClosure/PointerParamCapturedInClosure.csproj" />
     <Project Path="Tests/Behavioral/PointerParamInClosure/PointerParamInClosure.csproj" />
     <Project Path="Tests/Behavioral/PointerParamNilWalk/PointerParamNilWalk.csproj" />
+    <Project Path="Tests/Behavioral/PointerReceiverNilCompare/PointerReceiverNilCompare.csproj" />
     <Project Path="Tests/Behavioral/PointerReceiverPointerLocalField/PointerReceiverPointerLocalField.csproj" />
     <Project Path="Tests/Behavioral/PointerRvalueFieldReceiver/PointerRvalueFieldReceiver.csproj" />
     <Project Path="Tests/Behavioral/PointerToPointer/PointerToPointer.csproj" />

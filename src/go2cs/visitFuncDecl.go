@@ -1067,6 +1067,27 @@ func (v *Visitor) isDerefdPointerParamIdent(ident *ast.Ident) bool {
 	return false
 }
 
+// isDerefdPointerReceiverIdent reports whether ident is the current method's POINTER (`*T`)
+// RECEIVER — which, like a deref'd pointer parameter, is emitted as a value alias
+// `ref var r = ref Ꮡr.Value` over its box `Ꮡr`. Go's `r == nil` on such a receiver is a POINTER
+// comparison (`func (f *File) checkValid() { if f == nil … }`), so it must compare the box
+// `Ꮡr == nil`, not the deref'd struct value `r == nil` (which binds the generated
+// `T.operator==(T, NilType)` — a null-embed-box NRE for a promoted-embed struct). The receiver is
+// deliberately NOT a "parameter" in identIsParameter's model (paramNames excludes Recv), so it needs
+// its own recognizer; scoped to the `==`/`!=` operand handling in convBinaryExpr (unlike a pointer
+// PARAMETER it is not folded into nilSafePtrParamNames, so the receiver's deref-alias form is
+// unchanged — only the comparison switches to the box). Object identity via identResolvesToReceiver,
+// so a local shadowing the receiver name keeps its own render.
+func (v *Visitor) isDerefdPointerReceiverIdent(ident *ast.Ident) bool {
+	if ident == nil || ident.Name == "" || ident.Name == "_" {
+		return false
+	}
+
+	isPtrRecv, recvName := v.isPointerReceiver()
+
+	return isPtrRecv && v.identResolvesToReceiver(ident, recvName)
+}
+
 func getParameters(signature *types.Signature, addRecv bool) *types.Tuple {
 	var parameters *types.Tuple
 

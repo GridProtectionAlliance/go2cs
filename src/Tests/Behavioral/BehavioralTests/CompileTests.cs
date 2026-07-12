@@ -801,6 +801,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPointerParamWalk() => CheckTarget("PointerParamWalk");
 
     [TestMethod]
+    public void CheckPointerReceiverNilCompare() => CheckTarget("PointerReceiverNilCompare");
+
+    [TestMethod]
     public void CheckPointerReceiverPointerLocalField() => CheckTarget("PointerReceiverPointerLocalField");
 
     [TestMethod]

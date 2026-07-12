@@ -4091,6 +4091,38 @@ A struct embedding a FOREIGN pointer (`net/http`'s `http2timeTimer struct { *tim
 ### Promoted methods through embedded INTERFACE fields route per-member to the declaring field
 A struct whose embeds are INTERFACE fields (httputil's `dumpConn struct { io.Writer; io.Reader }` adapted to `net.Conn`) satisfies interface members through the fields' method sets. The pointer adapter's embedded-interface-field arm was gated to a SINGLE field, so a multi-field struct got no forwarding at all (`m_box.Read(…)` — CS1061). The arm now resolves per member: each still-unbound interface member forwards through the UNIQUE embedded field whose interface declares it (`m_box.Value.Reader.Read(p)` / `m_box.Value.Writer.Write(p)`); a member declared by several fields is left unbound (Go's promotion ambiguity rules reject it unless the struct overrides, and a struct override is already resolved earlier). The single-field behavior is unchanged (zip's `nopCloser`, slogtest's Δ-renamed `Handler` field). (Guarded by the `IfaceFieldEmbedAdapter` behavioral test — a two-interface-field struct adapted by pointer to a third interface needing members from both fields plus one declared on the struct, output-compared vs Go.)
 
+### A pointer RECEIVER compared to `nil` compares its box, not its deref'd value
+A method with a pointer receiver — `func (f *File) checkValid() error { if f == nil { … } }` — is emitted
+as `checkValid(this ж<File> Ꮡf, …)` with the body alias `ref var f = ref Ꮡf.Value`. Go's `f == nil` is a
+**pointer** comparison (nil-pointer check — and Go legitimately calls methods on nil-pointer receivers), so
+it must compare the box `Ꮡf == nil`, not the deref'd struct value `f`. Emitted in value form, `f == nil`
+binds the generated `File.operator==(File, NilType)` — which compares against `default(File)` and, for a
+**promoted-embed** struct (`File` embeds `*file`), dereferences that zero value's null embed box → a
+`NullReferenceException` (the first crash of a converted `fmt.Println`, via `os.Stdout.Write` →
+`checkValid`); even for a plain struct it is the wrong answer (`&box{}`, a non-nil pointer to a zero struct,
+compares *equal* to `default(box)` → `true` where Go gives `false`). The converter already forced the box
+form for a deref'd pointer **parameter** (`isDerefdPointerParamIdent`, driving the `==`/`!=` operand
+context in `convBinaryExpr`); the receiver is deliberately not a "parameter" in that model
+(`paramNames` excludes the receiver), so it needs its own recognizer, `isDerefdPointerReceiverIdent`
+(object-identity match via `isPointerReceiver`/`identResolvesToReceiver`, so a local shadowing the receiver
+name keeps its own render). It is scoped to the comparison operands only — unlike a pointer parameter the
+receiver is **not** folded into `nilSafePtrParamNames`, so its deref-alias form is unchanged (only the
+receiver's `==`/`!=` operand switches to the box); `convIdent` renders `Ꮡf` for the receiver through its
+existing direct-ж-receiver arm. Like a deref'd pointer parameter, the box form applies to **every**
+`==`/`!=` comparison, not just against nil: a pointer receiver can only be `==`-compared to another
+pointer or to nil, so the box is always the correct (pointer-identity) operand — `func (b *Reader)
+Reset(r io.Reader) { if b == r … }` (bufio) becomes `AreEqual(Ꮡb, r)`, comparing the pointer to the
+interface's held pointer, where the pre-fix `AreEqual(b, r)` compared a *struct value* to the interface
+(never equal — a latent recursion-guard bug the fix also closes). The full-stdlib A/B is small and
+mechanical — 161 receiver operands across 77 files gain a `Ꮡ` box (155 nil-checks, 6 pointer-identity),
+every changed line adding only the box.
+A still-open **separate** gap: invoking a pointer method on an actually-nil receiver NREs at the deref alias
+`ref var f = ref Ꮡf.Value` before the guard runs (the nil-safe `DerefOrNil` accessor covers this for pointer
+*parameters* walked to nil but is not yet extended to receivers). (Guarded by the `PointerReceiverNilCompare`
+behavioral test — a plain-struct `*box` where `&box{}` must compare `!= nil`, `== nil`/`!= nil` receiver
+methods, and a promoted-embed `*embedder` whose pre-fix value comparison NRE'd, output-compared vs Go; and
+by the re-baselined `RingPointerMethods` whose `r != nil` receiver walk now renders `Ꮡr != nil`.)
+
 ## Implicit Pointer Dereferencing
 **Deciding whether a selector base is *already* dereferenced.** A field selector on a pointer-valued base auto-derefs in Go, so the converter must insert the deref (`(~x).field` / `x.Value.field`) — *unless* the base is itself an explicit dereference (`(*p).field`) or a pointer conversion whose dedicated branch appends its own `.Value`. That "is the base already deref'd" test was a whole-subtree scan for **any** `StarExpr`, which mistook a conversion star buried in a call **argument** for a dereferenced base — `stringStructOf((*string)(unsafe.Pointer(p))).n` (runtime `arena.go`): the `(*string)` star belongs to the argument's conversion, the *call result* (`ж<stringStruct>`) is not deref'd, and skipping the auto-deref left `.n` on the box (CS1061). The test now inspects only the base's own outermost shape (unwrapping parens; a pointer-conversion base still routes to the conversion branch), and the conversion-branch dispatch also unwraps **enclosing parens**, so an extra-paren conversion base — `((*specialWeakHandle)(unsafe.Pointer(…))).handle` (runtime `mheap.go`) — reaches it (the same extra-paren blind spot the reinterpret routing had). Reads through a conversion base are faithful; a **write** through one hits the copy box, the documented reinterpret-seam limitation shared by the whole `(ж<T>)(uintptr)` family (the runtime sites are reads). The corpus was byte-identical across all behavioral projects after the change — only previously-non-compiling shapes gained emissions. (Guarded by the `PointerSelectorDeref` behavioral test — both shapes, read values vs Go; cleared 3 runtime CS1061, 74 → 71.)
 

@@ -801,6 +801,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPointerParamWalk() => CheckTarget("PointerParamWalk");
 
     [TestMethod]
+    public void CheckPointerReceiverNilCompare() => CheckTarget("PointerReceiverNilCompare");
+
+    [TestMethod]
     public void CheckPointerReceiverPointerLocalField() => CheckTarget("PointerReceiverPointerLocalField");
 
     [TestMethod]
