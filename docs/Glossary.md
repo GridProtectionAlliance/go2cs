@@ -135,6 +135,18 @@ fixed now — typically a latent sibling with zero occurrences in the current co
 from review. Banking is legitimate *only* with a written diagnosis; several banked items later
 materialized in new packages and were fixed from the bank without re-diagnosis.
 
+<a id="mvp"></a>**MVP — minimum viable [increment].**
+The smallest *correct and fully-gated* first cut of a converter/runtime feature: the narrowest
+predicate or scope that proves the whole mechanism end-to-end while broader coverage is deferred to
+later, independently-gated phases (the deferred scope is **banked**, above). Reached for when a
+feature has a wide but risky design space and the aggressive, silent-failure-prone part of it is best
+proven safe on a tiny footprint first — e.g. the stack-string `sstring` emission (`s := string([]byte)`
+→ a zero-copy view instead of a heap `@string` copy), whose MVP fires on exactly **one** Go-1.23 stdlib
+site under a deliberately conservative eligibility predicate, with unnamed-temporary conversions and
+the loop-carried liveness guard deferred. An MVP is **not** a prototype, spike, or shortcut: it ships
+behind the full gate set (CNR, the behavioral suite, its own **guard**) and is production-correct
+*within its scope* — only its **reach** is minimal, and it is widened later one gated phase at a time.
+
 **Root / root family.**
 A **root** is one distinct converter/generator/runtime defect, stated as the *general* construct
 it mishandles (never as "package X fails"). **One root per commit.** A root family is a set of
