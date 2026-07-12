@@ -321,6 +321,15 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 	concatSuppressed := !litContext.u8StringOK && binaryExpr.Op == token.ADD
 	basicLitContext.u8StringOK = !concatSuppressed && v.isStringType(binaryExpr.X) && v.isStringType(binaryExpr.Y)
 
+	// A comparison against a stack string (sstring) renders the string-literal operand as a plain C#
+	// string, not a `"…"u8` span: ReadOnlySpan<byte> has only an EXPLICIT conversion to sstring, so
+	// `s == "x"u8` would not compile — whereas a plain string implicitly converts to sstring and binds
+	// sstring's own `==`. Only fires when an operand is an eligible stack string, so @string comparisons
+	// (which bind the u8 span through @string's implicit operator) are unchanged.
+	if v.exprIsSStringEligible(binaryExpr.X) || v.exprIsSStringEligible(binaryExpr.Y) {
+		basicLitContext.u8StringOK = false
+	}
+
 	// In a `==`/`!=` comparison, a deref'd pointer PARAMETER (or the deref'd pointer RECEIVER) must
 	// compare its box `Ꮡp`, not its value alias `p` (a struct value). Each operand's pointer context
 	// is otherwise taken from the OTHER operand's pointer-ness, so `p != nil` (nil is not a pointer

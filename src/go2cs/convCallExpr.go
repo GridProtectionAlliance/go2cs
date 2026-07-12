@@ -217,6 +217,16 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 		targetTypeName = convertToCSTypeName(targetTypeName)
 
+		// An eligible `s := string(x)` declaration (see markSStringEligible) emits its conversion to
+		// the stack-only `sstring` — a zero-copy view over x's bytes — instead of the heap `@string`.
+		// visitAssignStmt sets this flag only around that one RHS conversion; consume it once so every
+		// emission path below (the generic `((sstring)x)` fall-through in particular) retargets. Done
+		// after the Go-name → C#-name mapping above, where the target is the `@string` C# name.
+		if v.emitStringConvAsSString && targetTypeName == "@string" {
+			targetTypeName = "sstring"
+			v.emitStringConvAsSString = false
+		}
+
 		// A conversion TARGET that is a foreign RENAMED type routes through the recorded
 		// alias (`(syscallꓸHandle)fd`, not the nonexistent `(Δsyscall.Handle)fd` -
 		// CS0426, internal/poll DupCloseOnExec).

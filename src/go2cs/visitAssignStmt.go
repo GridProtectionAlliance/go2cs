@@ -1339,6 +1339,18 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				ident = nil
 			}
 
+			// A `s := string(x)` element the escape pass proved may become a stack-only sstring (see
+			// markSStringEligible): its explicit LHS type below becomes sstring, and its RHS conversion
+			// is steered (via emitStringConvAsSString, consumed by convCallExpr) to the zero-copy
+			// `(sstring)x` view instead of the heap `(@string)x` copy.
+			elemIsSString := false
+
+			if ident != nil {
+				if obj := v.info.ObjectOf(ident); obj != nil && v.sstringEligible[obj] {
+					elemIsSString = true
+				}
+			}
+
 			if selectorExpr, ok := rhs.(*ast.SelectorExpr); ok {
 				if v.isMethodValue(selectorExpr, false) {
 					v.enterLambdaConversion(selectorExpr)
@@ -1514,6 +1526,8 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 							} else if !isDiscarded {
 								result.WriteString("var ")
 							}
+						} else if elemIsSString {
+							result.WriteString("sstring ")
 						} else {
 							lhsType := convertToCSTypeName(v.getExprTypeName(ident, false))
 							result.WriteString(lhsType)
@@ -1524,7 +1538,16 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					result.WriteString(v.convExpr(lhs, contexts))
 					result.WriteString(operator)
 
+					// Steer an eligible stack-string's RHS conversion to the zero-copy (sstring)x view.
+					// convCallExpr consumes the flag on the one string(x) conversion; the reset after is
+					// belt-and-suspenders so it cannot leak to a later element or statement.
+					if elemIsSString {
+						v.emitStringConvAsSString = true
+					}
+
 					rhsExpr := v.convExpr(rhs, v.appendRhsPtrContext(contexts, rhs))
+
+					v.emitStringConvAsSString = false
 
 					_, rhsIsTypeAssert := rhs.(*ast.TypeAssertExpr)
 

@@ -281,6 +281,7 @@ type Visitor struct {
 	lastReturnIndentLevel  int
 	identEscapesHeap       map[types.Object]bool
 	sstringEligible        map[types.Object]bool   // String locals emittable as stack-only sstring (see FileEntry.sstringEligible)
+	emitStringConvAsSString bool                   // Transient: while emitting an eligible decl's RHS, a string([]byte) conversion emits `(sstring)` not `(@string)`
 	identNames             map[*ast.Ident]string   // Local identifiers to adjusted names map
 	isReassigned           map[*ast.Ident]bool     // Local identifiers to reassignment status map
 	funcLevelDecls         map[string]*types.Var   // Function-level local declarations of the current function (for global-shadow qualification)

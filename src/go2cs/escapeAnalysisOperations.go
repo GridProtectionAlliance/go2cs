@@ -717,7 +717,19 @@ func (v *Visitor) markSStringEligible(ident *ast.Ident, rhs ast.Expr, body *ast.
 		return
 	}
 
-	if !isByteOrRuneSlice(v.info.TypeOf(call.Args[0])) {
+	// Restrict to a []byte source. sstring is a byte view, so a []byte->string conversion is a genuine
+	// zero-copy view; a []rune->string conversion must UTF-8-encode the runes (an allocation, with no
+	// backing to share), so those stay @string. A named slice type (`type S []byte`) is also excluded:
+	// S -> slice<byte> -> sstring is a two-hop conversion C# will not chain in a single cast.
+	srcType := v.info.TypeOf(call.Args[0])
+
+	if _, isNamed := types.Unalias(srcType).(*types.Named); isNamed {
+		return
+	}
+
+	if slice, ok := srcType.Underlying().(*types.Slice); !ok {
+		return
+	} else if basic, ok := slice.Elem().Underlying().(*types.Basic); !ok || basic.Kind() != types.Uint8 {
 		return
 	}
 
@@ -890,27 +902,17 @@ func rootIdentObject(expr ast.Expr, info *types.Info) types.Object {
 	return nil
 }
 
-// isByteOrRuneSlice reports whether t is a []byte or []rune (the source types of a string conversion
-// that yields a byte-viewable string).
-func isByteOrRuneSlice(t types.Type) bool {
-	if t == nil {
-		return false
-	}
-
-	slice, ok := t.Underlying().(*types.Slice)
+// exprIsSStringEligible reports whether expr is a plain identifier bound to an sstring-eligible local.
+func (v *Visitor) exprIsSStringEligible(expr ast.Expr) bool {
+	id, ok := expr.(*ast.Ident)
 
 	if !ok {
 		return false
 	}
 
-	basic, ok := slice.Elem().Underlying().(*types.Basic)
+	obj := v.info.ObjectOf(id)
 
-	if !ok {
-		return false
-	}
-
-	// byte == uint8 and rune == int32 (same BasicKind values), so testing the two aliases is enough.
-	return basic.Kind() == types.Uint8 || basic.Kind() == types.Int32
+	return obj != nil && v.sstringEligible[obj]
 }
 
 func isComparisonOp(op token.Token) bool {

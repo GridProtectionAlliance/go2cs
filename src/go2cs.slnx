@@ -348,6 +348,7 @@
     <Project Path="Tests/Behavioral/ReservedTypeMethodCollision/ReservedTypeMethodCollision.csproj" />
     <Project Path="Tests/Behavioral/RelationalPatternGuard/RelationalPatternGuard.csproj" />
     <Project Path="Tests/Behavioral/RingPointerMethods/RingPointerMethods.csproj" />
+    <Project Path="Tests/Behavioral/SStringElision/SStringElision.csproj" />
     <Project Path="Tests/Behavioral/SameUnderlyingNamedConv/SameUnderlyingNamedConv.csproj" />
     <Project Path="Tests/Behavioral/SelectEscapeBinding/SelectEscapeBinding.csproj" />
     <Project Path="Tests/Behavioral/SelectStatement/SelectStatement.csproj" />
