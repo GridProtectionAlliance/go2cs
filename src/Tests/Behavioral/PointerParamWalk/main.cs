@@ -65,8 +65,6 @@ internal static nint visitLocal(slice<ж<node>> nodes) {
 }
 
 internal static slice<ж<node>> collect(slice<ж<node>> list, ж<node> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     if (len(list) == 0){
         list = new ж<node>[]{Ꮡp}.slice();
     } else {

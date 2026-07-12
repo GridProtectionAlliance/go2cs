@@ -9,8 +9,6 @@ partial class main_package {
 }
 
 [GoRecv] internal static void link(this ref node n, ж<node> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
     n.next = Ꮡm;
 }
 

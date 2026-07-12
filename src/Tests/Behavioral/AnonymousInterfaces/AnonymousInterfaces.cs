@@ -135,8 +135,6 @@ internal static bool Is(this fakeError _, error err) {
 }
 
 internal static (int64, error) fill(this ж<tally> Ꮡt, Δio.Reader r) {
-    ref var t = ref Ꮡt.Value;
-
     return Δio.Copy(new fill_dst(new tallyжWriter(Ꮡt)), r);
 }
 

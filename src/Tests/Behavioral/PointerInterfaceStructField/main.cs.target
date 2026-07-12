@@ -24,7 +24,6 @@ partial class main_package {
 
 internal static void assignDescriber(ж<holder> Ꮡh, ж<Setting> Ꮡs) {
     ref var h = ref Ꮡh.Value;
-    ref var s = ref Ꮡs.Value;
 
     h.d = new SettingжDescriber(Ꮡs);
 }

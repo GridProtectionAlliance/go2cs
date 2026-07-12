@@ -51,8 +51,6 @@ public static @string Describe(Labeled l) {
 }
 
 public static Labeled LabeledOf(ж<Sensor> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     return new SensorжLabeled(Ꮡs);
 }
 
@@ -86,14 +84,10 @@ public static ж<Meter> NewMeter() {
 }
 
 public static error AsErr(ж<Alarm> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
-
     return new Alarmжerror(Ꮡa);
 }
 
 public static Reporter AsReporter(ж<Meter> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
     return new MeterжReporter(Ꮡm);
 }
 

@@ -19,8 +19,6 @@ public static void Add(this ж<Tally> Ꮡt, nint n) => func((defer, recover) => 
 });
 
 public static void AddTwice(this ж<Tally> Ꮡt, nint n) {
-    ref var t = ref Ꮡt.Value;
-
     Ꮡt.Add(n);
     Ꮡt.Add(n);
 }

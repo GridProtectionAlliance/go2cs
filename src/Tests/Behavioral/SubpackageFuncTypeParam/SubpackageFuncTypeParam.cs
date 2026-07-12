@@ -9,8 +9,6 @@ partial class main_package {
 // type applyFunc is a methodless func type — rendered inline as its base delegate
 
 internal static int32 run(Func<ж<atomic.Int32>, int32> f, ж<atomic.Int32> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return f(Ꮡc);
 }
 

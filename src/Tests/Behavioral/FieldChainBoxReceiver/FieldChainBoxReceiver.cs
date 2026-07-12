@@ -9,14 +9,10 @@ partial class main_package {
 }
 
 internal static ж<counter> ptr(this ж<counter> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return Ꮡc;
 }
 
 internal static void inc(this ж<counter> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     Ꮡc.ptr().Value.n++;
 }
 
@@ -29,8 +25,6 @@ internal static void inc(this ж<counter> Ꮡc) {
 }
 
 internal static void viaParam(ж<box> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.of(box.Ꮡh).of(holder.Ꮡc).inc();
 }
 
@@ -39,14 +33,10 @@ internal static void viaParam(ж<box> Ꮡb) {
 }
 
 internal static ж<wrapper> self(this ж<wrapper> Ꮡw) {
-    ref var w = ref Ꮡw.Value;
-
     return Ꮡw;
 }
 
 internal static void bump(this ж<wrapper> Ꮡw) {
-    ref var w = ref Ꮡw.Value;
-
     _ = Ꮡw.self();
     Ꮡw.of(wrapper.Ꮡb).of(box.Ꮡh).of(holder.Ꮡc).inc();
 }
@@ -60,8 +50,6 @@ internal static void bump(this ж<wrapper> Ꮡw) {
 }
 
 internal static void bumpDeep(this ж<deep> Ꮡd) {
-    ref var d = ref Ꮡd.Value;
-
     Ꮡd.of(deep.Ꮡmid).of(mid.Ꮡc).inc();
 }
 

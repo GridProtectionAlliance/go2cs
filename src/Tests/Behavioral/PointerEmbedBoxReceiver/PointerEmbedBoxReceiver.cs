@@ -9,8 +9,6 @@ partial class main_package {
 }
 
 public static void Add(this ж<Inner> Ꮡn, nint x) {
-    ref var n = ref Ꮡn.Value;
-
     var p = Ꮡn.of(Inner.Ꮡtotal);
     p.Value += x;
 }

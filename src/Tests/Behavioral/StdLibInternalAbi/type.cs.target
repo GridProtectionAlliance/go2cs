@@ -201,8 +201,6 @@ public static nint Len(this ж<Type> Ꮡt) {
 }
 
 public static ж<Type> Common(this ж<Type> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt;
 }
 
@@ -403,8 +401,6 @@ public static ж<ΔInterfaceType> InterfaceType(this ж<Type> Ꮡt) {
 }
 
 public static slice<Method> ExportedMethods(this ж<Type> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     var ut = Ꮡt.Uncommon();
     if (ut == nil) {
         return default!;
@@ -479,8 +475,6 @@ public static ж<Type> Key(this ж<Type> Ꮡt) {
 }
 
 public static ж<Type> In(this ж<ΔFuncType> Ꮡt, nint i) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.InSlice()[i];
 }
 
@@ -493,8 +487,6 @@ public static ж<Type> In(this ж<ΔFuncType> Ꮡt, nint i) {
 }
 
 public static ж<Type> Out(this ж<ΔFuncType> Ꮡt, nint i) {
-    ref var t = ref Ꮡt.Value;
-
     return (Ꮡt.OutSlice()[i]);
 }
 

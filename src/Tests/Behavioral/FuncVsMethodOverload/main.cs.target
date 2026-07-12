@@ -23,8 +23,6 @@ internal static ж<nih> add(this ж<nih> Ꮡp, uintptr bytes) {
 }
 
 internal static uint32 step(ж<uint32> Ꮡv) {
-    ref var v = ref Ꮡv.Value;
-
     var q = (ж<uint32>)(uintptr)(add(new @unsafe.Pointer(Ꮡv), @unsafe.Sizeof((uint32)0)));
     return q.Value;
 }

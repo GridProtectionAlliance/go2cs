@@ -112,6 +112,7 @@
     <Project Path="Tests/Behavioral/CrossPkgLib/CrossPkgLib.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgSameNameAlias/CrossPkgSameNameAlias.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgUser/CrossPkgUser.csproj" />
+    <Project Path="Tests/Behavioral/DeadPointerParamAlias/DeadPointerParamAlias.csproj" />
     <Project Path="Tests/Behavioral/DeferArgEnclosingCapture/DeferArgEnclosingCapture.csproj" />
     <Project Path="Tests/Behavioral/DeferCallOrder/DeferCallOrder.csproj" />
     <Project Path="Tests/Behavioral/DeferClosure/DeferClosure.csproj" />

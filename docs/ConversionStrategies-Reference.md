@@ -4091,6 +4091,33 @@ A struct embedding a FOREIGN pointer (`net/http`'s `http2timeTimer struct { *tim
 ### Promoted methods through embedded INTERFACE fields route per-member to the declaring field
 A struct whose embeds are INTERFACE fields (httputil's `dumpConn struct { io.Writer; io.Reader }` adapted to `net.Conn`) satisfies interface members through the fields' method sets. The pointer adapter's embedded-interface-field arm was gated to a SINGLE field, so a multi-field struct got no forwarding at all (`m_box.Read(…)` — CS1061). The arm now resolves per member: each still-unbound interface member forwards through the UNIQUE embedded field whose interface declares it (`m_box.Value.Reader.Read(p)` / `m_box.Value.Writer.Write(p)`); a member declared by several fields is left unbound (Go's promotion ambiguity rules reject it unless the struct overrides, and a struct override is already resolved earlier). The single-field behavior is unchanged (zip's `nopCloser`, slogtest's Δ-renamed `Handler` field). (Guarded by the `IfaceFieldEmbedAdapter` behavioral test — a two-interface-field struct adapted by pointer to a third interface needing members from both fields plus one declared on the struct, output-compared vs Go.)
 
+### A pointer parameter used only through its box gets no deref VALUE alias
+Every named pointer parameter is emitted as its box `ж<T> Ꮡp` with an entry-time value alias
+`ref var p = ref Ꮡp.Value` (so a value use `p.field` reads through `p`). But a parameter that the body
+touches **only** through its box — `unsafe.Pointer(p)` → `new @unsafe.Pointer(Ꮡp)`, `p == nil` →
+`Ꮡp == nil`, or passing `p` on as a `*T` argument → `Ꮡp` — never references that value alias, so the
+alias is a dead local that nonetheless **dereferences the box** at function entry. When the argument is
+nil this NREs even though Go never touches the pointee: `syscall.writeFile(…, overlapped *Overlapped)`,
+called with a nil `overlapped` and using it only as `unsafe.Pointer(overlapped)`, crashed at
+`ref var overlapped = ref Ꮡoverlapped.Value` — the failure of any converted `fmt.Println` whose stdout is
+a pipe (`syscall.Write` → `writeFile`). The converter already skips the alias for an **unnamed/blank**
+pointer param (never referenced); this extends it to a **named** param whose value alias is likewise
+unreferenced. After the body is converted, `bodyReferencesIdentAsValue` scans the emitted body text for
+the value-alias name as a **standalone identifier** — the address marker `Ꮡ` is a Unicode *letter*, so
+the box form `Ꮡp` is excluded by the preceding-letter boundary, while a genuine value use always emits
+the bare name and matches. The scan only ever ADDS spurious matches (a field selector `x.p`, a string, a
+comment), which keep the alias, so a live alias is never dropped (no CS0103) — it removes strictly unused
+locals. Because a param with no alias leaves `implicitPointers` empty (which otherwise triggers the
+signature rebuild that renames pointer params to the box `Ꮡ<name>` the body references), a
+`skippedDeadPointerAlias` flag forces that rebuild. Full-stdlib/behavioral blast radius is broad (72
+behavioral files — many functions forward a pointer param onward as a pointer), all pure alias removals.
+This shares its root with the receiver case below (an eager deref alias NREs on a nil pointer); the
+converse **live**-alias nil case — invoking a pointer method/function that *does* dereference a nil
+receiver/param — still NREs at the alias, awaiting the nil-safe `DerefOrNil` extension. (Guarded by the
+`DeadPointerParamAlias` behavioral test — a pointer param used only in `p == nil`, one forwarded as a
+pointer, and one dereferenced (alias kept), each called with nil and non-nil, output-compared vs Go; the
+nil calls NRE'd before the fix.)
+
 ### A pointer RECEIVER compared to `nil` compares its box, not its deref'd value
 A method with a pointer receiver — `func (f *File) checkValid() error { if f == nil { … } }` — is emitted
 as `checkValid(this ж<File> Ꮡf, …)` with the body alias `ref var f = ref Ꮡf.Value`. Go's `f == nil` is a

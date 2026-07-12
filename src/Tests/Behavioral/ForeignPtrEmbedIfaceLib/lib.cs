@@ -7,16 +7,12 @@ partial class ForeignPtrEmbedIfaceLib_package {
 }
 
 public static nint Add(this ж<Meter> Ꮡm, nint delta) {
-    ref var m = ref Ꮡm.Value;
-
     var p = Ꮡm.of(Meter.Ꮡtotal);
     p.Value += delta;
     return p.Value;
 }
 
 public static nint Total(this ж<Meter> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
     var p = Ꮡm.of(Meter.Ꮡtotal);
     return p.Value;
 }

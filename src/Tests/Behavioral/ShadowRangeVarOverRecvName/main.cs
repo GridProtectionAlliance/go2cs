@@ -9,8 +9,6 @@ partial class main_package {
 }
 
 internal static slice<ж<node>> collect(this ж<node> Ꮡc, slice<ж<node>> chain) {
-    ref var c = ref Ꮡc.Value;
-
     var describe = @string () => Ꮡc.Value.name;
     slice<ж<node>> toCheck = default!;
     toCheck = append(toCheck, Ꮡc);
@@ -22,8 +20,6 @@ internal static slice<ж<node>> collect(this ж<node> Ꮡc, slice<ж<node>> chai
 }
 
 internal static ж<node> firstOr(this ж<node> Ꮡc, slice<ж<node>> chain) {
-    ref var c = ref Ꮡc.Value;
-
     foreach (var (_, cΔ1) in chain) {
         return cΔ1;
     }

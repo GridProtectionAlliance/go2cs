@@ -28,8 +28,6 @@ internal static stateFn stateB(ж<machine> Ꮡm) {
 }
 
 internal static void run(ж<machine> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
     stateFn state = stateA;
     while (state != default!) {
         state = state(Ꮡm);

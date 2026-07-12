@@ -16,14 +16,10 @@ internal static void initSelf(this ж<ring> Ꮡr) {
 }
 
 [GoRecv] internal static void linkTo(this ref ring r, ж<ring> Ꮡother) {
-    ref var other = ref Ꮡother.Value;
-
     r.next = Ꮡother;
 }
 
 internal static ж<ring> advance(this ж<ring> Ꮡr, nint n) {
-    ref var r = ref Ꮡr.Value;
-
     var p = Ꮡr;
     for (nint i = 0; i < n; i++) {
         p = p.Value.next;
@@ -32,8 +28,6 @@ internal static ж<ring> advance(this ж<ring> Ꮡr, nint n) {
 }
 
 internal static slice<ж<ring>> chain(this ж<ring> Ꮡr, nint n) {
-    ref var r = ref Ꮡr.Value;
-
     var nodes = new ж<ring>[]{Ꮡr}.slice();
     var p = Ꮡr;
     for (nint i = 0; i < n; i++) {
@@ -44,9 +38,6 @@ internal static slice<ж<ring>> chain(this ж<ring> Ꮡr, nint n) {
 }
 
 internal static array<ж<ring>> pair(this ж<ring> Ꮡr, ж<ring> Ꮡother) {
-    ref var r = ref Ꮡr.Value;
-    ref var other = ref Ꮡother.Value;
-
     return new ж<ring>[]{Ꮡr, Ꮡother}.array();
 }
 

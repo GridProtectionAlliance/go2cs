@@ -6,6 +6,8 @@ import (
 	"go/token"
 	"go/types"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 )
 
 const FunctionPrefixMarker = ">>MARKER:FUNC_%s_PREFIX<<"
@@ -291,6 +293,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	v.writeOutput("%s%s static%s%s %s %s%s(%s)%s%s", functionAttributeMarker, functionAccessMarker, functionUnsafeMarker, functionPartialMarker, v.generateResultSignature(signature), csFunctionName, typeParams, functionParametersMarker, constraints, functionExecContextMarker)
 
+	// The CONVERTED body text (for detecting whether a pointer parameter's deref VALUE alias is
+	// actually referenced — a param used only through its box gets no alias; see below). Captured
+	// from targetFile across the body visit; the signature written above is excluded.
+	bodyText := ""
+
 	if funcDecl.Body != nil {
 		blockContext.format.useNewLine = len(constraints) > 0
 
@@ -306,7 +313,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			v.indentLevel++
 		}
 
+		bodyStart := v.targetFile.Len()
 		v.visitBlockStmt(funcDecl.Body, blockContext)
+		bodyText = v.targetFile.String()[bodyStart:]
 
 		if bodyInBlockForm {
 			v.indentLevel--
@@ -418,6 +427,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 		parameters := getParameters(signature, true)
 
+		// A pointer param whose deref VALUE alias is skipped (dead — see below) still needs the
+		// signature rebuilt so it emits as the box `Ꮡ<name>` the body references — but with no alias
+		// there is nothing in implicitPointers to trigger that rebuild. This flag forces it.
+		skippedDeadPointerAlias := false
+
 		for i := 0; i < parameters.Len(); i++ {
 			param := parameters.At(i)
 
@@ -456,6 +470,22 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 				// body, so it gets no deref alias; it is emitted in the signature with a synthetic name
 				// and no box (`Ꮡ`) convention. Emitting the deref would produce `ref var  = ref Ꮡ.Value;`.
 				if param.Name() == "" || param.Name() == "_" {
+					continue
+				}
+
+				// A NAMED pointer param whose deref'd VALUE alias is never referenced in the body —
+				// every use goes through the box `Ꮡp` (`unsafe.Pointer(p)`, `p == nil`, or passing p
+				// as a pointer) — gets no alias either. The alias `ref var p = ref Ꮡp.Value` would be
+				// a dead local that DEREFERENCES the box, so a nil argument NREs at function entry even
+				// though Go never touches the pointee (syscall's `writeFile(…, overlapped *Overlapped)`
+				// called with a nil overlapped, used only as `unsafe.Pointer(overlapped)`). Skipping an
+				// unreferenced alias is behavior-preserving and removes the spurious nil deref. The
+				// scan errs toward KEEPING the alias — a coincidental match in a field selector,
+				// string, or comment — so a genuinely live value alias is never dropped (no CS0103).
+				if !bodyReferencesIdentAsValue(bodyText, getSanitizedIdentifier(analyzedName)) {
+					// The param still needs the box rename (`Ꮡ<name>`) the body's uses reference —
+					// force the signature rebuild even if this leaves implicitPointers empty.
+					skippedDeadPointerAlias = true
 					continue
 				}
 
@@ -566,7 +596,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			blockPrefix += namedResultAliases.String()
 		}
 
-		if implicitPointers.Len() > 0 || paramHeapBoxes.Len() > 0 {
+		if implicitPointers.Len() > 0 || paramHeapBoxes.Len() > 0 || skippedDeadPointerAlias {
 			updatedSignature := strings.Builder{}
 			dupBlankParams := hasDuplicateBlankParams(parameters) || bodyUsesBlankDiscard(funcDecl)
 
@@ -1065,6 +1095,58 @@ func (v *Visitor) isDerefdPointerParamIdent(ident *ast.Ident) bool {
 	}
 
 	return false
+}
+
+// bodyReferencesIdentAsValue reports whether name appears in the CONVERTED body text as a
+// STANDALONE identifier — not as a substring of a larger identifier and, decisively, not as the
+// suffix of its own box form `Ꮡname` (the address marker Ꮡ is a Unicode LETTER, so a preceding
+// letter excludes the box occurrence). Used to decide whether a pointer parameter's deref VALUE
+// alias (`ref var name = ref Ꮡparam.Value`) is live: every box/`unsafe.Pointer`/`== nil`/pass-as-
+// pointer use renders through `Ꮡparam`, so a param touched only through its box leaves name absent
+// and its alias is a dead local. A real value use always emits name as an identifier, so it always
+// matches — the boundary test only ever ADDS spurious matches (a field selector `x.name`, a string,
+// a comment), which keep the alias, so a genuinely live alias is never dropped.
+func bodyReferencesIdentAsValue(bodyText, name string) bool {
+	if name == "" {
+		return false
+	}
+
+	for offset := 0; ; {
+		index := strings.Index(bodyText[offset:], name)
+
+		if index < 0 {
+			return false
+		}
+
+		start := offset + index
+		end := start + len(name)
+
+		beforeOK := start == 0
+
+		if !beforeOK {
+			r, _ := utf8.DecodeLastRuneInString(bodyText[:start])
+			beforeOK = !isIdentifierRune(r)
+		}
+
+		afterOK := end == len(bodyText)
+
+		if !afterOK {
+			r, _ := utf8.DecodeRuneInString(bodyText[end:])
+			afterOK = !isIdentifierRune(r)
+		}
+
+		if beforeOK && afterOK {
+			return true
+		}
+
+		offset = start + 1
+	}
+}
+
+// isIdentifierRune reports whether r can appear within a C# identifier — a Unicode letter (which
+// includes the go2cs marker glyphs Ꮡ/ж/Δ/ᴛ), a Unicode digit, or underscore.
+func isIdentifierRune(r rune) bool {
+	return r == '_' || unicode.IsLetter(r) || unicode.IsDigit(r)
 }
 
 // isDerefdPointerReceiverIdent reports whether ident is the current method's POINTER (`*T`)

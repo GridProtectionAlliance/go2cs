@@ -6,8 +6,6 @@ using PromotedValueEmbedLib = PromotedValueEmbedLib_package;
 partial class main_package {
 
 internal static @string describe(ж<PromotedValueEmbedLib.Widget> Ꮡw) {
-    ref var w = ref Ꮡw.Value;
-
     if (Ꮡw.Name() == "widget"u8) {
         return "match"u8;
     }

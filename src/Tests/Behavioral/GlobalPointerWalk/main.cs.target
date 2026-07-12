@@ -10,8 +10,6 @@ partial class main_package {
 }
 
 internal static nint sum(this ж<node> Ꮡn) {
-    ref var n = ref Ꮡn.Value;
-
     nint total = 0;
     for (var p = Ꮡn; p != nil; p = p.Value.next) {
         total += p.Value.val;

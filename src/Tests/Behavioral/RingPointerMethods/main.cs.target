@@ -51,8 +51,6 @@ public static ж<Ring> Move(this ж<Ring> Ꮡr, nint n) {
 }
 
 public static nint Len(this ж<Ring> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     nint n = 0;
     if (Ꮡr != nil) {
         n = 1;

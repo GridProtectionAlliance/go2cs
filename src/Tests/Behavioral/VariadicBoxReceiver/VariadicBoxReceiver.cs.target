@@ -16,8 +16,6 @@ partial class main_package {
 }
 
 internal static void with(ж<sink> Ꮡs, Action<ж<sink>> f) {
-    ref var s = ref Ꮡs.Value;
-
     f(Ꮡs);
 }
 

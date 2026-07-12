@@ -210,6 +210,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckCrossPkgUser() => CheckTarget("CrossPkgUser");
 
     [TestMethod]
+    public void CheckDeadPointerParamAlias() => CheckTarget("DeadPointerParamAlias");
+
+    [TestMethod]
     public void CheckDeferArgEnclosingCapture() => CheckTarget("DeferArgEnclosingCapture");
 
     [TestMethod]

@@ -9,8 +9,6 @@ partial class main_package {
 }
 
 internal static void push(this ж<profBuf> Ꮡb, nint v) {
-    ref var b = ref Ꮡb.Value;
-
     appendInt(Ꮡb.of(profBuf.Ꮡdata), v);
 }
 

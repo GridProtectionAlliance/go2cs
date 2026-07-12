@@ -25,8 +25,6 @@ partial class main_package {
 }
 
 internal static ж<holder> get(ж<holder> Ꮡh) {
-    ref var h = ref Ꮡh.Value;
-
     return Ꮡh;
 }
 

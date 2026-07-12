@@ -9,21 +9,14 @@ partial class main_package {
 }
 
 internal static bool isNil(this ж<box> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     return Ꮡb == nil;
 }
 
 internal static bool notNil(this ж<box> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     return Ꮡb != nil;
 }
 
 internal static bool same(this ж<box> Ꮡb, ж<box> Ꮡother) {
-    ref var b = ref Ꮡb.Value;
-    ref var other = ref Ꮡother.DerefOrNil();
-
     return Ꮡb == Ꮡother;
 }
 
@@ -33,8 +26,6 @@ internal static bool same(this ж<box> Ꮡb, ж<box> Ꮡother) {
 }
 
 internal static bool isNil(this ж<embedder> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
-
     return Ꮡe == nil;
 }
 

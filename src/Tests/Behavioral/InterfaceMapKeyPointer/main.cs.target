@@ -17,21 +17,15 @@ partial class main_package {
 }
 
 internal static (@string, bool) lookup(map<Node, @string> seen, ж<Item> Ꮡit) {
-    ref var it = ref Ꮡit.Value;
-
     var (value, ok) = seen[new ItemжNode(Ꮡit), ꟷ];
     return (value, ok);
 }
 
 internal static void record(map<Node, @string> seen, ж<Item> Ꮡit, @string label) {
-    ref var it = ref Ꮡit.Value;
-
     seen[new ItemжNode(Ꮡit)] = label;
 }
 
 internal static @string plainRead(map<Node, @string> seen, ж<Item> Ꮡit) {
-    ref var it = ref Ꮡit.Value;
-
     return seen[new ItemжNode(Ꮡit)];
 }
 

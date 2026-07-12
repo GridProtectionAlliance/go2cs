@@ -187,6 +187,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckCrossPkgUser() => CheckTarget("CrossPkgUser");
 
     [TestMethod]
+    public void CheckDeadPointerParamAlias() => CheckTarget("DeadPointerParamAlias");
+
+    [TestMethod]
     public void CheckDeferArgEnclosingCapture() => CheckTarget("DeferArgEnclosingCapture");
 
     [TestMethod]

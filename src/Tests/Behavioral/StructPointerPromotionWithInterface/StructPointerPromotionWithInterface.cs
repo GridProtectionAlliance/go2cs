@@ -60,8 +60,6 @@ public static float64 Time(this MyError myErr) {
 }
 
 public static ж<nint> Tag(this ж<Device> Ꮡd) {
-    ref var d = ref Ꮡd.Value;
-
     return Ꮡd.of(Device.Ꮡhits);
 }
 

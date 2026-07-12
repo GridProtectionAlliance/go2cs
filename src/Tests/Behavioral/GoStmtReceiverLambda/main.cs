@@ -25,14 +25,10 @@ partial class main_package {
 }
 
 internal static void start(this ж<engine> Ꮡe, nint delta) {
-    ref var e = ref Ꮡe.Value;
-
     goǃ(ᴛ1 => Ꮡe.Value.tally.bump(ᴛ1), delta);
 }
 
 internal static void ping(this ж<engine> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
-
     goǃ(() => Ꮡe.Value.tally.report());
 }
 

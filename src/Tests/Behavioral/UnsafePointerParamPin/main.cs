@@ -22,8 +22,6 @@ internal static uintptr read(this ж<utp> Ꮡr) {
 }
 
 internal static uintptr tricky(this ж<utp> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     ref var y = ref heap(new uintptr(), out var Ꮡy);
     y = 111;
     {
@@ -49,8 +47,6 @@ internal static (uint32, @unsafe.Pointer) advance(@unsafe.Pointer fd, uint32 n) 
 }
 
 internal static ж<uintptr> same(ж<uintptr> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     return Ꮡp;
 }
 

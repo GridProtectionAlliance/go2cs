@@ -6,8 +6,6 @@ using PromotedEmbedLib = PromotedEmbedLib_package;
 partial class main_package {
 
 internal static void bump(ж<PromotedEmbedLib.Counter> Ꮡc, nint n) {
-    ref var c = ref Ꮡc.Value;
-
     Ꮡc.Add(n);
 }
 

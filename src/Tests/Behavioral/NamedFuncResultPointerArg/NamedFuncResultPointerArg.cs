@@ -17,8 +17,6 @@ internal static Action<ж<State>, nint> adder() {
 }
 
 internal static void apply(this ж<State> Ꮡs, nint x) {
-    ref var s = ref Ꮡs.Value;
-
     adder()(Ꮡs, x);
 }
 

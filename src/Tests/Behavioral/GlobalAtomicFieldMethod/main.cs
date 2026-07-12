@@ -14,8 +14,6 @@ internal static ж<controller> Ꮡctrl = new(default(controller));
 internal static ref controller ctrl => ref Ꮡctrl.Value;
 
 internal static void keep(ж<controller> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     _ = Ꮡc;
 }
 

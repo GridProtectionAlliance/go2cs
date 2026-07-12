@@ -17,20 +17,14 @@ internal static slice<entry> register(slice<entry> table, Func<(ж<item>, error)
 }
 
 internal static slice<entry> addItem(slice<entry> table, ж<item> Ꮡit) {
-    ref var it = ref Ꮡit.Value;
-
     return register(table, () => (Ꮡit, default!));
 }
 
 internal static Func<ж<item>> pick(ж<item> Ꮡit) {
-    ref var it = ref Ꮡit.Value;
-
     return () => Ꮡit;
 }
 
 internal static ж<item> passthrough(ж<item> Ꮡit) {
-    ref var it = ref Ꮡit.Value;
-
     return Ꮡit;
 }
 

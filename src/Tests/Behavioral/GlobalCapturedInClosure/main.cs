@@ -17,8 +17,6 @@ internal static ж<heap> Ꮡmheap = new(default(heap));
 internal static ref heap mheap => ref Ꮡmheap.Value;
 
 internal static void keep(ж<heap> Ꮡh) {
-    ref var h = ref Ꮡh.Value;
-
     _ = Ꮡh;
 }
 

@@ -7,14 +7,10 @@ using sync;
 partial class main_package {
 
 internal static nint apply(ж<atomic.Int32> Ꮡv, Func<ж<atomic.Int32>, nint> f) {
-    ref var v = ref Ꮡv.Value;
-
     return f(Ꮡv);
 }
 
 internal static void consume(ж<atomic.Int32> Ꮡv, Action<ж<atomic.Int32>> sink) {
-    ref var v = ref Ꮡv.Value;
-
     sink(Ꮡv);
 }
 
@@ -23,8 +19,6 @@ internal static void consume(ж<atomic.Int32> Ꮡv, Action<ж<atomic.Int32>> sin
 }
 
 internal static nint invoke(this runner r, ж<atomic.Int32> Ꮡv) {
-    ref var v = ref Ꮡv.Value;
-
     return r.gen(Ꮡv);
 }
 
