@@ -552,6 +552,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMakeSliceUintptrLen() => CheckTarget("MakeSliceUintptrLen");
 
     [TestMethod]
+    public void CheckManagedAtomicPointer() => CheckTarget("ManagedAtomicPointer");
+
+    [TestMethod]
     public void CheckMapAnonStructValue() => CheckTarget("MapAnonStructValue");
 
     [TestMethod]

@@ -496,6 +496,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMakeSliceUintptrLen() => CheckTarget("MakeSliceUintptrLen");
 
     [TestMethod]
+    public void CheckManagedAtomicPointer() => CheckTarget("ManagedAtomicPointer");
+
+    [TestMethod]
     public void CheckMapAnonStructValue() => CheckTarget("MapAnonStructValue");
 
     [TestMethod]
