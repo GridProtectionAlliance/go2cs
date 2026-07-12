@@ -1499,6 +1499,26 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		}
 	}
 
+	// An explicit slice conversion `[]E(x)` whose SOURCE is a ~[]E-constrained type
+	// parameter S is the EXPLICIT twin of the implicit wrapArgWithNew assignability path
+	// above (a value of S passed where a concrete []E is expected). The general call path
+	// renders `slice<E>(x)`, binding golib's array-only builtin.slice<T>(T[]) — but S is
+	// an ISlice<E>, not E[], so that fails to compile (CS1503). Emit the SHARING
+	// slice<T>(ISlice<T>) constructor instead, so an explicit conversion aliases the
+	// caller's backing exactly as the implicit form does (Go's `[]E(x)` shares storage).
+	// Cleanly disjoint from surrounding conversions: named-slice casts (`[]Named(x)`) take
+	// the isTypeConversion cast path and never reach here; string/nil sources are not
+	// *types.TypeParam; and the string|[]byte union `[]byte(x)` is handled by the block
+	// just above (typeParamSliceCore returns nil when a constraint term is not a slice).
+	if strings.HasPrefix(funcTypeName, "[]") && len(callExpr.Args) == 1 {
+		if tp, ok := types.Unalias(v.getType(callExpr.Args[0], false)).(*types.TypeParam); ok && typeParamSliceCore(tp) != nil {
+			if targetSlice, ok := funcType.(*types.Slice); ok {
+				elemName := convertToCSTypeName(v.getTypeName(targetSlice.Elem(), false))
+				return fmt.Sprintf("new slice<%s>(%s)", elemName, v.convExpr(callExpr.Args[0], nil))
+			}
+		}
+	}
+
 	if len(callExpr.Args) == 1 {
 		argTypeName := v.getExprTypeName(callExpr.Args[0], true)
 

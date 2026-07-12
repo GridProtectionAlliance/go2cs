@@ -181,6 +181,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckComplexImaginaryShadow() => CheckTarget("ComplexImaginaryShadow");
 
     [TestMethod]
+    public void CheckConstrainedSliceParamInPlace() => CheckTarget("ConstrainedSliceParamInPlace");
+
+    [TestMethod]
     public void CheckConstShadowsParam() => CheckTarget("ConstShadowsParam");
 
     [TestMethod]

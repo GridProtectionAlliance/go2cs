@@ -189,6 +189,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckComplexImaginaryShadow() => CheckTarget("ComplexImaginaryShadow");
 
     [TestMethod]
+    public void CheckConstrainedSliceParamInPlace() => CheckTarget("ConstrainedSliceParamInPlace");
+
+    [TestMethod]
     public void CheckConstraints() => CheckTarget("Constraints");
 
     [TestMethod]
