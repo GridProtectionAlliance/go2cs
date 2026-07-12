@@ -279,10 +279,13 @@ Two practical notes:
 
 `-recurse` is a work in progress: it produces a **buildable** solution and handles the common real-world
 module shapes — this `fatih/color` example **compiles clean** (app + all four dependency projects, against a
-current deploy). Running the resulting program can still hit residual per-package conversion defects (this
-example currently throws from a converted third-party `init`); operational correctness of converted
-dependencies is the Phase-4 goal. The design, the validated results, and the known-limitation backlog are
-tracked in [`DESIGN-recursive-enduser-conversion.md`](Phase3/DESIGN-recursive-enduser-conversion.md).
+current deploy). *Running* it to completion is a deeper milestone: the referenced standard library **compiles**
+but is not yet fully **operational**. This example now executes its converted `sync` correctly (reimplemented
+natively — Go's runtime concurrency primitives can't be emulated) but still stops during `syscall`
+initialization, which needs Go-style package-level variable init ordering plus the Windows FFI. Making the
+converted standard library *run*, not just compile, is the **Phase-4** goal. The design, the validated
+results, and the known-limitation backlog are tracked in
+[`DESIGN-recursive-enduser-conversion.md`](Phase3/DESIGN-recursive-enduser-conversion.md).
 
 ## Project layout
 
