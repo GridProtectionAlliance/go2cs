@@ -27,7 +27,8 @@ func TestRecurseLinknameForwarder(t *testing.T) {
 	writeModuleFile(t, filepath.Join(appDir, "main.go"),
 		"package main\n\nimport _ \"unsafe\"\n\ntype Handle uintptr\ntype Errno uintptr\n\n"+
 			"//go:linkname fwd syscall.loadlibrary\nfunc fwd(filename *uint16) (handle Handle, err Errno)\n\n"+
-			"func main() {\n\t_, _ = fwd(nil)\n}\n")
+			"//go:linkname notfwd runtime.reflectcall\nfunc notfwd(x uintptr)\n\n"+
+			"func main() {\n\t_, _ = fwd(nil)\n\tnotfwd(0)\n}\n")
 
 	goRoot := build.Default.GOROOT
 	if goRoot == "" {
@@ -56,9 +57,15 @@ func TestRecurseLinknameForwarder(t *testing.T) {
 
 	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "lnapp", "main.cs"))
 
-	// The forwarder BODY calls the linkname target with the parameter passed through.
+	// The forwarder BODY calls the WHITELISTED linkname target with the parameter passed through.
 	if !strings.Contains(mainCs, "syscall.loadlibrary(filename)") {
 		t.Errorf("linkname forwarder body missing its target call (emitted a stub?):\n%s", mainCs)
+	}
+
+	// A NON-whitelisted target (an unimplemented runtime intrinsic — there is no C# runtime.reflectcall)
+	// must NOT be forwarded; it stays a bodyless stub so the package still compiles.
+	if strings.Contains(mainCs, "runtime.reflectcall") {
+		t.Errorf("non-whitelisted linkname target runtime.reflectcall was forwarded (should stay a stub):\n%s", mainCs)
 	}
 
 	// Both num:uintptr results are bridged back through uintptr to the local result types.

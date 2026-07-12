@@ -1492,13 +1492,27 @@ func (v *Visitor) getTempVarName(varPrefix string) string {
 	return fmt.Sprintf("%s%s%d", varPrefix, TempVarMarker, count)
 }
 
+// linknameForwardTargets is the whitelist of cross-package //go:linkname PULL targets the converter
+// emits a forwarder body for — the specific NATIVE functions hand-implemented in the converted
+// standard library (syscall's Windows DLL loaders, reached by golang.org/x/sys/windows's LazyDLL /
+// LazyProc). A linkname target is INDISTINGUISHABLE at conversion time from any other bodyless
+// assembly/intrinsic Go function — syscall.loadlibrary and runtime.reflectcall are both bodyless asm
+// in Go — so forwarding is gated on this explicit set: only these have a real C# implementation to
+// call. Every other linkname pull (a method-receiver PUSH like reflect's badlinkname.go, a
+// same-package pull, or an unimplemented intrinsic like runtime.reflectcall) stays a bodyless stub,
+// the pre-forwarder behavior. Extend this set when a new native linkname target gains a hand-written
+// C# implementation.
+var linknameForwardTargets = map[string]bool{
+	"syscall.loadlibrary":       true,
+	"syscall.loadsystemlibrary": true,
+	"syscall.getprocaddress":    true,
+}
+
 // funcLinknameForward recognizes a bodyless function carrying a `//go:linkname <thisFunc>
-// <pkgpath>.<targetFunc>` directive (a cross-package PULL — the function has no body of its own
-// and links to another package's symbol). It returns the C# alias for the target package (the
-// last path segment, which is the `using <name> = <name>_package;` alias the importing file emits)
-// and the target function name, so the converter can emit a forwarder call instead of a throwing
-// stub. Only fires for a target that names a package (`pkg.func`, with a dot); a bare `//go:linkname
-// name` (a PUSH that merely exposes a LOCAL symbol) is not a forwarder and stays a stub.
+// <pkgpath>.<targetFunc>` directive whose target is a hand-implemented native function
+// (linknameForwardTargets). It returns the C# alias for the target package (the last path segment,
+// the `using <name> = <name>_package;` alias the importing file emits) and the target function name,
+// so the converter can emit a forwarder call to it instead of a throwing stub.
 func (v *Visitor) funcLinknameForward(funcDecl *ast.FuncDecl) (alias string, targetFunc string, ok bool) {
 	if funcDecl.Doc == nil || funcDecl.Name == nil {
 		return "", "", false
@@ -1513,17 +1527,16 @@ func (v *Visitor) funcLinknameForward(funcDecl *ast.FuncDecl) (alias string, tar
 		}
 
 		target := fields[2]
-		dot := strings.LastIndex(target, ".")
 
-		if dot <= 0 || dot == len(target)-1 {
+		if !linknameForwardTargets[target] {
 			return "", "", false
 		}
 
+		dot := strings.LastIndex(target, ".")
 		pkgPath := target[:dot]
 		targetFunc = getSanitizedFunctionName(target[dot+1:])
 
-		// The C# using-alias is the package's simple name — the last path segment (`internal/abi`
-		// → `abi`, `syscall` → `syscall`).
+		// The C# using-alias is the package's simple name — the last path segment (`syscall`).
 		if slash := strings.LastIndex(pkgPath, "/"); slash >= 0 {
 			pkgPath = pkgPath[slash+1:]
 		}
