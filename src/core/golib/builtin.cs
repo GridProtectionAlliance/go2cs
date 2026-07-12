@@ -1104,6 +1104,16 @@ public static class builtin
     }
 
     /// <summary>
+    /// Gets the length of the stack string <paramref name="str"/>.
+    /// </summary>
+    /// <param name="str">Target stack string.</param>
+    /// <returns>The length of the <paramref name="str"/>.</returns>
+    public static nint len(in sstring str)
+    {
+        return str.Length;
+    }
+
+    /// <summary>
     /// Gets the length of the <paramref name="str"/>.
     /// </summary>
     /// <param name="str">Target string.</param>
@@ -2500,26 +2510,18 @@ public static class builtin
 
     */
 
-#if EXPERIMENTAL
-
-    // When using stack allocated strings, you need a function to convert the stack string to a heap string
-    // any time you need to hold the string in a heap allocated object:
-
-    /// <summary>
-    /// Converts UTF8 byte array to heap allocated <see cref="@string"/>.
-    /// </summary>
-    /// <param name="value">UTF8 byte array.</param>
-    /// <returns>Heap allocated string.</returns>
-    public static @string str(ReadOnlySpan<byte> value) => (@string)value;
-    
-    /// <summary>
-    /// Converts stack allocated <see cref="sstring"/> to heap allocated <see cref="@string"/>.
-    /// </summary>
-    /// <param name="value">Stack allocated string.</param>
-    /// <returns>Heap allocated string.</returns>
+    // Materializes a stack string (sstring) as a heap string (@string) — used at an escape boundary
+    // where a converted value must live on the heap (a field, an interface, a return). The implicit
+    // sstring-to-@string conversion does the same; str(...) is the explicit form the converter emits
+    // where an inferred target slot cannot trigger the implicit conversion on its own.
     public static @string str(sstring value) => value;
 
-#endif
+    /// <summary>
+    /// Converts a span of UTF-8 bytes to a heap allocated <see cref="@string"/>.
+    /// </summary>
+    /// <param name="value">UTF-8 bytes.</param>
+    /// <returns>Heap allocated string.</returns>
+    public static @string str(ReadOnlySpan<byte> value) => (@string)value;
 
     /// <summary>
     /// Execute Go routine.

@@ -1,5 +1,5 @@
-﻿//******************************************************************************************************
-//  string.cs - Gbtc
+//******************************************************************************************************
+//  sstring.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -18,68 +18,52 @@
 //  ----------------------------------------------------------------------------------------------------
 //  06/28/2018 - J. Ritchie Carroll
 //       Generated original version of source code.
+//  07/12/2026 - J. Ritchie Carroll
+//       Promoted from experimental to a first-class stack string; rewritten for correctness and to
+//       shed ref-struct-incompatible surface.
 //
 //******************************************************************************************************
 // ReSharper disable CheckNamespace
-// ReSharper disable SpecifyACultureInStringConversionExplicitly
 // ReSharper disable InconsistentNaming
-// ReSharper disable LoopCanBeConvertedToQuery
-// ReSharper disable ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
 // ReSharper disable BuiltInTypeReferenceStyle
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using go.golib;
 
 namespace go;
 
-// This is an experiment with a stack allocated string type which should improve performance
-// of string operations by avoiding heap allocations. This works fine in stack oriented code
-// operations, but any time heap escape is needed, @string will need to be used. Added a
-// `str` function to `builtin` to do the conversion from @string to sstring, but this would
-// require proper heap type parameter and heap escape detection during the conversion
-// process. This is a work in progress. See `EXPERIMENTAL` region which controls implicit
-// vs. explicit control of ReadOnlySpan<byte> conversions, compared to what is defined in
-// heap allocated `@string` implementation. When `EXPERIMENTAL` preprocessor directive is
-// defined, `sstring` can be made to take precedence for u8 string handling.
-
-// Go automatically allows heap escape, converting things from stack to heap as needed, but
-// this is not the case in .NET, here stack only types, e.g., `ref struct`, are very explicit
-// and compiler constrained.
-
-// Although this is only an experiment with strings, a similar approach may be possible for
-// a small subset of other types, see note below on restrictions.
-
-// --- Note ---
-// The key difference between struct and ref struct is that ref struct types are forced to
-// be stack only, i.e., they cannot be boxed and stored on the heap. In general this prevents
-// unnecessary allocations which speeds processing and removes GC burden. Keeping the type on
-// the stack is enforced by .NET compiler -- the type cannot escape to the heap. This means
-// types cannot be stored in the `object` type, be a field in a class or common struct, etc.
-// In context of Go to C# conversions, in order to make use of these types, stack to heap
-// escapes which happen implicitly in Go will have to be detected during the conversion
-// process and managed explicitly in converted C# code. New Go based go2cs converter already
-// detects heap escapes, so it can be more easily modified to handle types like this one.
-//
-// In general all ref struct restrictions would apply to converted Go struct types which may
-// make "general" use very impractical, the key pain points specifically are:
-// * ref struct can't be the element type of an array:
-//      This means a slice, array or map of type would not be allowed
-// * ref struct can't be boxed to System.ValueType or System.Object:
-//      This means type cannot be stored in interface{} value, headaches.
-
 /// <summary>
-/// Represents a stack only structure that behaves like a Go string.
+/// Represents a stack-only value that behaves like a Go <c>string</c>: a read-only view over a span
+/// of UTF-8 bytes (<see cref="ReadOnlySpan{T}"/>) rather than the heap-allocated <see cref="@string"/>.
 /// </summary>
-#if NET9_0_OR_GREATER
-public readonly ref struct sstring : IConvertible, IEquatable<sstring>, IComparable<sstring>, IReadOnlyList<byte>, IEnumerable<rune>, IEnumerable<(nint, rune)>, IEnumerable<char>, ICloneable
-#else
+/// <remarks>
+/// <para>
+/// <c>sstring</c> is the stack analog of <see cref="@string"/>. Because it is a <c>ref struct</c> it can
+/// live only on the stack — it cannot be boxed, stored in a field/array/map, captured by a lambda, or
+/// used as a type argument. Those are exactly the ways a Go string "escapes", so the .NET compiler turns
+/// every escape into a compile error, and the go2cs converter emits <c>sstring</c> only for a
+/// <c>string([]byte)</c>/<c>string([]rune)</c> conversion whose result provably does not escape and whose
+/// source is not mutated while the view is alive. Where a string does escape, the converter emits
+/// <see cref="@string"/> instead; the implicit <c>sstring</c>-to-<see cref="@string"/> conversion copies
+/// the bytes to the heap at that boundary.
+/// </para>
+/// <para>
+/// Unlike <see cref="@string"/>, whose constructors copy their source, <c>sstring</c> <em>views</em> its
+/// source with no allocation — that is the whole point. Correctness of that aliasing is the converter's
+/// responsibility (the escape/mutation analysis above), not this type's.
+/// </para>
+/// <para>
+/// Conversions to heap types (<c>[]rune</c>, <c>[]byte</c>, <see cref="@string"/>) produce a detached copy
+/// and therefore represent an escape; conversions that would only make sense for an already-escaping value
+/// (e.g. rune-slice materialization) are intentionally not provided so such code falls back to
+/// <see cref="@string"/>.
+/// </para>
+/// </remarks>
 public readonly ref struct sstring
-#endif
 {
+    // A read-only view over UTF-8 bytes. NOT owned/copied: sstring aliases whatever backing the
+    // source span points at (a []byte, a u8 literal, an @string's bytes, a stackalloc, ...).
     internal readonly ReadOnlySpan<byte> m_value;
 
     public sstring()
@@ -87,26 +71,23 @@ public readonly ref struct sstring
         m_value = [];
     }
 
-    public sstring(byte[]? bytes)
-    {
-        m_value = bytes ?? [];
-    }
-
+    // Primary constructor: a zero-copy view over the given UTF-8 bytes.
     public sstring(ReadOnlySpan<byte> bytes)
     {
         m_value = bytes;
     }
 
-    public sstring(char[] value) : this(new string(value)) { }
+    public sstring(byte[]? bytes)
+    {
+        m_value = bytes ?? [];
+    }
 
-    public sstring(rune[] value) : this(new string(value.Select(rune => (char)rune).ToArray())) { }
+    // A `[]byte`-to-string conversion. Views the slice's window directly (no copy) — the converter only
+    // routes here when it has proven the slice is not mutated for the lifetime of the view.
+    public sstring(in slice<byte> value) : this(value.ToSpan()) { }
 
-    public sstring(in slice<byte> value) : this(value.ToArray()) { }
-
-    public sstring(in slice<char> value) : this(value.ToArray()) { }
-
-    public sstring(in slice<rune> value) : this(value.ToArray()) { }
-
+    // From a C# string (e.g. a string literal). This necessarily allocates the UTF-8 encoding; the view
+    // then covers that fresh buffer.
     public sstring(string? value)
     {
         m_value = Encoding.UTF8.GetBytes(value ?? "");
@@ -131,21 +112,26 @@ public readonly ref struct sstring
 
     public byte this[ulong index] => this[(int)index];
 
-    // Slicing a Go string yields a string, so the range indexer returns sstring — a zero-copy
-    // sub-view over the same backing span (mirrors @string.this[Range] returning @string, but
-    // without the copy since a stack string never outlives its source). Returning slice<byte>
-    // here — the previous form — broke string comparisons (slice<byte> != string) and forced a
-    // heap allocation via ToArray().
+    // Slicing a Go string yields a string, so the range indexer returns an sstring — a zero-copy
+    // sub-view over the same backing span (mirrors @string.this[Range] returning @string, but without
+    // the copy, since a stack string never outlives its source).
     public sstring this[Range range] => new(m_value[range]);
 
+    // `[]byte(s[a:b])`: converting a string to a byte slice copies in Go, so materialize a detached
+    // slice<byte> over a fresh array rather than aliasing the view.
     public slice<byte> Slice(int start, int length)
     {
-        return new slice<byte>(m_value, start, start + length);
+        return new slice<byte>(m_value.Slice(start, length).ToArray());
     }
 
     public slice<byte> Slice(nint start, nint length)
     {
-        return new slice<byte>(m_value, (int)start, (int)(start + length));
+        return Slice((int)start, (int)length);
+    }
+
+    public ReadOnlySpan<byte> ToSpan()
+    {
+        return m_value;
     }
 
     public override string ToString()
@@ -153,82 +139,39 @@ public readonly ref struct sstring
         return Encoding.UTF8.GetString(m_value);
     }
 
+    // Go compares strings as raw bytes (for valid UTF-8 this is also code-point order), matching
+    // @string. SequenceEqual / SequenceCompareTo are SIMD-vectorized on the backing spans.
     public bool Equals(sstring other)
     {
-        return BytesAreEqual(m_value, other.m_value);
+        return m_value.SequenceEqual(other.m_value);
     }
 
-    // Go compares strings as raw bytes (for valid UTF-8 this is also code-point order), so compare
-    // the backing spans directly — matching @string.CompareTo. The previous ToString()+ordinal form
-    // transcoded both sides to UTF-16, which diverges from Go for invalid UTF-8 and allocates.
     public int CompareTo(sstring other)
     {
         return m_value.SequenceCompareTo(other.m_value);
     }
 
-    public override bool Equals(object? obj)
-    {
-        return obj switch
-        {
-            null          => false,
-            @string gostr => Equals(gostr),
-            string str    => Equals(str),
-            _             => false
-        };
-    }
-
+    // Byte-based, so an sstring and an @string over the same bytes hash identically. (A ref struct can
+    // never be a dictionary key, but keeping this correct and consistent costs nothing.)
     public override int GetHashCode()
     {
-        return ToString().GetHashCode();
+        System.HashCode hash = new();
+        hash.AddBytes(m_value);
+        return hash.ToHashCode();
     }
 
-    public string ToString(IFormatProvider? provider)
-    {
-        return ToString().ToString(provider);
-    }
-
-    public TypeCode GetTypeCode()
-    {
-        return TypeCode.String;
-    }
-
+    // Copying a Go string shares its (immutable) data; the sstring copy shares the same view.
     public sstring Clone()
     {
         return new sstring(this);
     }
 
-    public IEnumerator<(nint, rune)> GetEnumerator()
-    {
-        return GetEnumerator(DecodeRunes());
-    }
-
-    private char[] DecodeRunes()
-    {
-        if (m_value.Length == 0)
-            return [];
-
-        Decoder decoder = Encoding.UTF8.GetDecoder();
-        Span<char> chars = new char[m_value.Length];
-
-        decoder.Convert(m_value, chars, true, out _, out int used, out bool completed);
-
-        if (!completed)
-            chars[used++] = '\uFFFD';
-
-        return chars[..used].ToArray();
-    }
-
     #region [ Operators ]
 
-    // Enable implicit conversions between string and sstring struct
+    // Enable implicit conversions between C# string and sstring.
     public static implicit operator sstring(string value)
     {
         return new sstring(value);
-    }
-
-    public static implicit operator sstring(@string value)
-    {
-        return new sstring(value.m_value);
     }
 
     public static implicit operator string(sstring value)
@@ -236,57 +179,25 @@ public readonly ref struct sstring
         return value.ToString();
     }
 
+    // sstring <-> @string. From @string is a zero-copy view (an @string's bytes are immutable, so
+    // viewing them is safe); to @string copies the bytes to the heap — this is the escape boundary
+    // where a stack string becomes a heap string.
+    public static implicit operator sstring(@string value)
+    {
+        return new sstring(value.m_value);
+    }
+
     public static implicit operator @string(sstring value)
     {
         return new @string(value.m_value);
     }
 
-#if EXPERIMENTAL
-
-    public static implicit operator sstring(ReadOnlySpan<byte> value) => new(value);
-
-#else
-        
+    // ReadOnlySpan<byte> (most importantly a u8 literal) is EXPLICIT on purpose: an implicit form would
+    // clash with @string's implicit ReadOnlySpan<byte> operator and make every "..."u8 literal
+    // CS0034-ambiguous. The converter target-types such literals to sstring where it wants them.
     public static explicit operator sstring(ReadOnlySpan<byte> value)
     {
         return new sstring(value);
-    }
-
-#endif
-
-    public static implicit operator sstring(in slice<byte> value)
-    {
-        return new sstring(value);
-    }
-
-    public static implicit operator slice<byte>(sstring value)
-    {
-        return new slice<byte>(value.m_value);
-    }
-
-    public static implicit operator sstring(slice<rune> value)
-    {
-        return new sstring(value.ToArray());
-    }
-
-    public static implicit operator slice<rune>(sstring value)
-    {
-        return new slice<rune>(value.ToString().Select(ch => (rune)ch).ToArray());
-    }
-
-    public static implicit operator sstring(in slice<char> value)
-    {
-        return new sstring(value);
-    }
-
-    public static implicit operator slice<char>(sstring value)
-    {
-        return new slice<char>(value.ToString().ToCharArray());
-    }
-
-    public static explicit operator byte[](sstring value)
-    {
-        return value.m_value.ToArray();
     }
 
     public static explicit operator ReadOnlySpan<byte>(sstring value)
@@ -294,35 +205,37 @@ public readonly ref struct sstring
         return value.m_value;
     }
 
+    // []byte <-> string. From a byte slice is a zero-copy view (the converter only routes a non-mutated
+    // source here); to a byte slice copies, since Go's []byte(string) always copies.
+    public static implicit operator sstring(in slice<byte> value)
+    {
+        return new sstring(value);
+    }
+
+    public static implicit operator slice<byte>(sstring value)
+    {
+        return new slice<byte>(value.m_value.ToArray());
+    }
+
     public static implicit operator sstring(byte[] value)
     {
         return new sstring(value);
     }
 
-    public static implicit operator rune[](sstring value)
+    public static explicit operator byte[](sstring value)
     {
-        return value.ToString().Select(ch => (rune)ch).ToArray();
+        return value.m_value.ToArray();
     }
 
-    public static implicit operator sstring(rune[] value)
+    // Enable comparisons/assignment against nil, mirroring @string (a Go string's zero value is "").
+    public static implicit operator sstring(NilType _)
     {
-        return new sstring(value);
+        return new sstring();
     }
 
-    public static explicit operator char[](sstring value)
-    {
-        return value.ToString().ToCharArray();
-    }
-
-    public static implicit operator sstring(char[] value)
-    {
-        return new sstring(value);
-    }
-
-    // Enable comparisons between nil and sstring struct
     public static bool operator ==(sstring value, NilType _)
     {
-        return value.Equals(default);
+        return value.Length == 0;
     }
 
     public static bool operator !=(sstring value, NilType nil)
@@ -338,12 +251,6 @@ public readonly ref struct sstring
     public static bool operator !=(NilType nil, sstring value)
     {
         return value != nil;
-    }
-
-    // Enable sstring to sstring comparisons
-    public static implicit operator sstring(NilType _)
-    {
-        return new sstring();
     }
 
     public static bool operator ==(sstring a, sstring b)
@@ -374,176 +281,6 @@ public readonly ref struct sstring
     public static bool operator >=(sstring a, sstring b)
     {
         return a.CompareTo(b) >= 0;
-    }
-
-    #endregion
-
-    #region [ Interface Implementations ]
-
-    private static IEnumerator<(nint, rune)> GetEnumerator(char[] runes)
-    {
-        for (int i = 0; i < runes.Length; i++)
-            yield return (i, runes[i]);
-    }
-
-    private static IEnumerator<rune> GetEnumerator(string value)
-    {
-        foreach (rune item in value)
-            yield return item;
-    }
-
-    private static IEnumerator<byte> GetEnumerator(byte[] bytes)
-    {
-        foreach (byte item in bytes)
-            yield return item;
-    }
-
-#if NET9_0_OR_GREATER
-
-    object ICloneable.Clone()
-    {
-        return (@string)Clone();
-    }
-
-    int IReadOnlyCollection<byte>.Count => Length;
-
-    bool IConvertible.ToBoolean(IFormatProvider? provider)
-    {
-        return ((IConvertible)ToString()).ToBoolean(provider);
-    }
-
-    char IConvertible.ToChar(IFormatProvider? provider)
-    {
-        return ((IConvertible)ToString()).ToChar(provider);
-    }
-
-    sbyte IConvertible.ToSByte(IFormatProvider? provider)
-    {
-        return ((IConvertible)ToString()).ToSByte(provider);
-    }
-
-    byte IConvertible.ToByte(IFormatProvider? provider)
-    {
-        return ((IConvertible)ToString()).ToByte(provider);
-    }
-
-    short IConvertible.ToInt16(IFormatProvider? provider)
-    {
-        return ((IConvertible)ToString()).ToInt16(provider);
-    }
-
-    ushort IConvertible.ToUInt16(IFormatProvider? provider)
-    {
-        return ((IConvertible)ToString()).ToUInt16(provider);
-    }
-
-    int IConvertible.ToInt32(IFormatProvider? provider)
-    {
-        return ((IConvertible)ToString()).ToInt32(provider);
-    }
-
-    uint IConvertible.ToUInt32(IFormatProvider? provider)
-    {
-        return ((IConvertible)ToString()).ToUInt32(provider);
-    }
-
-    long IConvertible.ToInt64(IFormatProvider? provider)
-    {
-        return ((IConvertible)ToString()).ToInt64(provider);
-    }
-
-    ulong IConvertible.ToUInt64(IFormatProvider? provider)
-    {
-        return ((IConvertible)ToString()).ToUInt64(provider);
-    }
-
-    float IConvertible.ToSingle(IFormatProvider? provider)
-    {
-        return ((IConvertible)ToString()).ToSingle(provider);
-    }
-
-    double IConvertible.ToDouble(IFormatProvider? provider)
-    {
-        return ((IConvertible)ToString()).ToDouble(provider);
-    }
-
-    decimal IConvertible.ToDecimal(IFormatProvider? provider)
-    {
-        return ((IConvertible)ToString()).ToDecimal(provider);
-    }
-
-    DateTime IConvertible.ToDateTime(IFormatProvider? provider)
-    {
-        return ((IConvertible)ToString()).ToDateTime(provider);
-    }
-
-    object IConvertible.ToType(Type conversionType, IFormatProvider? provider)
-    {
-        return ((IConvertible)ToString()).ToType(conversionType, provider);
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator(m_value.ToArray());
-    }
-
-    IEnumerator<byte> IEnumerable<byte>.GetEnumerator()
-    {
-        return GetEnumerator(m_value.ToArray());
-    }
-
-    IEnumerator<rune> IEnumerable<rune>.GetEnumerator()
-    {
-        return GetEnumerator(ToString());
-    }
-
-    IEnumerator<char> IEnumerable<char>.GetEnumerator()
-    {
-        return ToString().GetEnumerator();
-    }
-
-#endif
-
-    private static unsafe bool BytesAreEqual(in ReadOnlySpan<byte> data1, in ReadOnlySpan<byte> data2)
-    {
-        if (data1 == data2)
-            return true;
-
-        if (data1.Length != data2.Length)
-            return false;
-
-        if (data1.Length == 0)
-            return true;
-
-        fixed (byte* bytes1 = data1, bytes2 = data2)
-        {
-            int len = data1.Length;
-            int rem = len % (sizeof(long) * 16);
-            long* b1 = (long*)bytes1;
-            long* b2 = (long*)bytes2;
-            long* e1 = (long*)(bytes1 + len - rem);
-
-            while (b1 < e1)
-            {
-                if (*b1 != *b2 || *(b1 + 1) != *(b2 + 1) ||
-                    *(b1 + 2) != *(b2 + 2) || *(b1 + 3) != *(b2 + 3) ||
-                    *(b1 + 4) != *(b2 + 4) || *(b1 + 5) != *(b2 + 5) ||
-                    *(b1 + 6) != *(b2 + 6) || *(b1 + 7) != *(b2 + 7) ||
-                    *(b1 + 8) != *(b2 + 8) || *(b1 + 9) != *(b2 + 9) ||
-                    *(b1 + 10) != *(b2 + 10) || *(b1 + 11) != *(b2 + 11) ||
-                    *(b1 + 12) != *(b2 + 12) || *(b1 + 13) != *(b2 + 13) ||
-                    *(b1 + 14) != *(b2 + 14) || *(b1 + 15) != *(b2 + 15))
-                    return false;
-                b1 += 16;
-                b2 += 16;
-            }
-
-            for (int i = 0; i < rem; i++)
-                if (data1[len - 1 - i] != data2[len - 1 - i])
-                    return false;
-
-            return true;
-        }
     }
 
     #endregion
