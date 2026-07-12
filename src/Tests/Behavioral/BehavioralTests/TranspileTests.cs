@@ -1131,6 +1131,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckUntypedFloatDefault() => CheckTarget("UntypedFloatDefault");
 
     [TestMethod]
+    public void CheckUntypedIntInterfaceBox() => CheckTarget("UntypedIntInterfaceBox");
+
+    [TestMethod]
     public void CheckUntypedNestedSliceComposite() => CheckTarget("UntypedNestedSliceComposite");
 
     [TestMethod]

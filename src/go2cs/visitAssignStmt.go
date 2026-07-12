@@ -1084,6 +1084,14 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			rhsExpr := v.convExpr(rhs, contexts)
 
+			// Box an untyped `int` constant assigned to an EMPTY-interface LHS through nint (the
+			// numeric twin of the castToGoString @string boxing above), so a later `x.(int)` /
+			// `case int:` matches Go's boxed `int` dynamic type. emptyIfaceTarget already reports the
+			// LHS is `any`; the downstream narrow/named casts are gated off for an interface LHS.
+			if emptyIfaceTarget && v.argBoxesAsInt32ButNeedsNint(rhs) {
+				rhsExpr = fmt.Sprintf("(nint)(%s)", rhsExpr)
+			}
+
 			// A `:=` DECLARATION whose RHS is a constant-folded NAMED-NUMERIC conversion
 			// (`p := printFlags(0)` renders the bare `0`) loses the type the declaration
 			// infers from — re-impose the named cast (regexp/syntax writeRegexp's p,
@@ -1389,6 +1397,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 				rhsExpr := v.convExpr(rhs, v.appendEmptyIfaceLitContext(v.appendRhsPtrContext(contexts, rhs), lhs))
 
+				// Box an untyped `int` constant assigned to an EMPTY-interface LHS through nint (the
+				// numeric twin of appendEmptyIfaceLitContext's @string boxing); a no-op for a non-empty
+				// or non-interface LHS and for any non-int-constant RHS.
+				rhsExpr = v.boxUntypedIntAsNint(v.getType(lhs, false), rhs, rhsExpr)
+
 				// A C# compound shift-assign requires an `int` shift count; the RHS's own (possibly
 				// unsigned/native-width) type — `s.allocCache >>= (nuint)x` — is rejected (CS0019). A
 				// selector/pointer-field LHS routes through this block (its base ident is nil'd in the
@@ -1440,6 +1453,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					result.WriteString(operator)
 
 					rhsExpr := v.convExpr(rhs, v.appendEmptyIfaceLitContext(v.appendRhsPtrContext(contexts, rhs), lhs))
+
+					// Box an untyped `int` constant reassigned to an EMPTY-interface LHS through nint
+					// (twin of appendEmptyIfaceLitContext's @string boxing); a no-op otherwise.
+					rhsExpr = v.boxUntypedIntAsNint(v.getType(lhs, false), rhs, rhsExpr)
 
 					if lhsTypeIsInterface[i] {
 						result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))

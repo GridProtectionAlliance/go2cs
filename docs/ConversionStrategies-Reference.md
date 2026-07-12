@@ -589,6 +589,66 @@ see [Maps and Channels](#maps-and-channels). (Guarded by the `AnyStringLitChanSe
 statement and select-case sends read back through a `string` type-switch and an `x.(string)`
 assertion to prove runtime identity, output-compared vs Go.)
 
+### An untyped `int` constant boxed as `any` boxes through `nint`
+
+The numeric twin of the `@string` boxing above. A bare C# integer literal is `System.Int32`, but Go
+boxes an untyped `int` constant as its default dynamic type `int` — go2cs `nint` (an `IntPtr`).
+Without a cast a later `x.(int)` — emitted `x._<nint>()` — finds a boxed `Int32` and panics
+(`interface conversion: interface {} is int, not int`; both sides print "int", but one is `Int32`,
+one is `nint`). Only the int32-range default-`int` constant needs it: `float`/`rune`/`string`
+defaults already box to the matching C# type (`double` / `int32` / `@string` via golib's assertion
+normalization), and an `int` constant outside int32 range already renders `(nint)…L`. The cast
+applies at every empty-interface position — call argument, var-spec, assignment, `return`, channel
+send, and slice/array element / keyed struct-field / map value:
+
+```go
+v.Store(42)                  // non-variadic any argument (atomic.Value.Store)
+var a any = 7                // var-spec
+b = 8                        // reassignment
+func r() any { return 42 }   // return
+ch <- 3                      // channel send (chan any)
+_ = []any{5}                 // slice/array element
+_ = map[string]any{"k": 9}   // map value
+_ = holder{v: 3}             // keyed struct field
+```
+
+```csharp
+Ꮡv.Store((nint)(42));
+any a = (nint)(7);
+b = (nint)(8);
+internal static any r() { return (nint)(42); }
+ch.ᐸꟷ((nint)(3));
+_ = new any[]{(nint)(5)}.slice();
+_ = new map<@string, any>{["k"u8] = (nint)(9)};
+_ = new holder(v: (nint)(3));
+```
+
+`argBoxesAsInt32ButNeedsNint` drives the decision — keyed off `info.Types[arg]` (not the AST shape),
+so it uniformly catches a literal (`42`), a unary (`-5`), a binary (`1 + 2`), and a named untyped-int
+const, which go/types constant-folds to one `int` value; a defined-type-over-int constant (`type
+MyInt int`) is excluded (its box is the `[GoType]` wrapper, asserted as `MyInt`). Call arguments reuse
+the per-argument `castArgToType["nint"]` plumbing; the other positions wrap through
+`boxUntypedIntAsNint`. **Three deliberate exclusions:**
+
+- A **variadic `...any`** argument (the fmt/print/log family) is NOT cast: a boxed `Int32` formats
+  identically to `nint` and its `%T`/type-switch dynamic type already resolves as `int` (golib maps
+  both `Int32` and `IntPtr` to `"int"` in `GetGoTypeName`), so the cast would be redundant noise on
+  the most common call pattern. A non-variadic `any` parameter (`atomic.Value.Store`,
+  `context.WithValue`) IS cast — its value is stored and later asserted.
+- A **type-parameter parameter** constrained by `any` (`func f[T any](v T)`) reads as an empty
+  interface here too, but its instantiation binds the argument to the concrete `T` (int → the `nint`
+  parameter), where a bare int literal already converts implicitly. The call-site gate uses
+  `isEmptyInterfaceTarget` (which excludes type parameters), unlike the u8-span→`@string` case, where
+  a `K=string` parameter genuinely needs the cast to bind.
+- An **`any` map KEY** is NOT cast: golib's `map` uses the default `Dictionary` comparer (no numeric
+  normalization — `nint(6) != Int32(6)`) and index lookups (`mk[6]`) are not boxed, so casting the
+  composite key while looking it up as `Int32` would break `map[any]int{6:1}[6]` round-trips. Both
+  sides stay the consistent `System.Int32`; the string case is safe there only because `@string` keys
+  normalize. Map *values* are cast (they are retrieved, not compared).
+
+(Guarded by the `UntypedIntInterfaceBox` behavioral test — each position read back through an
+`x.(int)` assertion or an `int`/`int32` type switch, output-compared vs Go.)
+
 ## Inline Assignment Order of Operations
 All right-hand operands in assignment expressions in Go are evaluated before assignment to the left-hand operands. C# can operate equivalently using tuple deconstruction (_thanks to Eugene Bekker for the [suggestion](https://github.com/GridProtectionAlliance/go2cs/issues/6)_). For the following Go code:
 

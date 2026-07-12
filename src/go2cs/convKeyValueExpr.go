@@ -125,6 +125,31 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 
 	valueExpr := v.convExpr(keyValueExpr.Value, valueContexts)
 
+	// Box an untyped `int` constant VALUE in an EMPTY-interface slot through nint — a struct `any`
+	// field (`box{v: 9}`) or a `map[K]any` / sparse-`[N]any` value — the numeric twin of the
+	// anyBoxedStringLitContext @string boxing above, so a later `x.(int)` matches Go's boxed `int`.
+	// A no-op for any other slot or a non-int-constant value.
+	if v.argBoxesAsInt32ButNeedsNint(keyValueExpr.Value) {
+		var valueSlotType types.Type
+
+		if context.source == StructSource {
+			valueSlotType = structFieldType
+		} else if context.source == MapSource && context.compositeType != nil {
+			switch u := types.Unalias(context.compositeType).Underlying().(type) {
+			case *types.Map:
+				valueSlotType = u.Elem()
+			case *types.Array:
+				valueSlotType = u.Elem()
+			case *types.Slice:
+				valueSlotType = u.Elem()
+			}
+		}
+
+		if isEmptyInterfaceTarget(valueSlotType) {
+			valueExpr = fmt.Sprintf("(nint)(%s)", valueExpr)
+		}
+	}
+
 	// A NARROW-integer arithmetic value in a struct-FIELD initializer needs the same
 	// cast-back as the assignment forms — Go wraps the arithmetic at the operand width,
 	// C# promotes it to int (image/draw's RGBA64 literal `R: uint16(…)+srgba.R`,
@@ -212,6 +237,13 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 				if isEmptyInterfaceTarget(mapType.Key()) && isStringBasicLit(keyValueExpr.Key) {
 					keyExpr = v.convExpr(keyValueExpr.Key, []ExprContext{anyBoxedStringLitContext()})
 				}
+				// NOTE: an untyped `int` constant KEY in an `any` key slot is DELIBERATELY not boxed
+				// to nint here. golib's map uses the default Dictionary comparer (no numeric
+				// normalization — nint(6) != Int32(6)), and index LOOKUPS (`mk[6]`) are not boxed, so
+				// storing the composite key as nint while looking it up as Int32 would MISS. Leaving
+				// both sides as the bare System.Int32 keeps `map[any]int{6:1}[6]` round-tripping (the
+				// pre-existing, consistent behavior); the string case is safe only because @string keys
+				// normalize. A key later type-asserted as `.(int)` is the rare unfixed edge.
 			}
 		}
 

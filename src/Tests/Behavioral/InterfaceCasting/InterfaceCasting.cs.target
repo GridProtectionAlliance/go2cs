@@ -182,7 +182,7 @@ internal static any describe(bool b) {
     if (b) {
         return (@string)"text-value";
     }
-    return 99;
+    return (nint)(99);
 }
 
 [GoType] partial interface labeler {

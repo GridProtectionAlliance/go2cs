@@ -82,5 +82,8 @@ func (v *Visitor) convSendValueExpr(sendStmt *ast.SendStmt) string {
 		sendExpr = v.convertToInterfaceType(elemType, v.getExprType(sendStmt.Value), sendExpr)
 	}
 
-	return sendExpr
+	// An untyped `int` constant sent into an EMPTY-interface element boxes through nint (the
+	// numeric twin of the @string boxing above), so a later `x.(int)` / `case int:` on the received
+	// value matches Go's boxed `int` dynamic type rather than a stray System.Int32.
+	return v.boxUntypedIntAsNint(elemType, sendStmt.Value, sendExpr)
 }

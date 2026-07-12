@@ -372,6 +372,16 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 				resultExpr := v.convExpr(expr, exprContexts)
 
+				// Box an untyped `int` constant returned as an EMPTY interface through nint (the
+				// numeric twin of the castToGoString @string boxing above), so a later `x.(int)` on the
+				// result matches Go's boxed `int` dynamic type. A non-empty interface result routes
+				// through convertToInterfaceType below (which the empty interface deliberately bypasses),
+				// and no numeric result type reaches the empty interface, so this is the only return-path
+				// site that needs the cast.
+				if resultParams != nil && i < resultParams.Len() {
+					resultExpr = v.boxUntypedIntAsNint(resultParams.At(i).Type(), expr, resultExpr)
+				}
+
 				// Record any dynamic-struct implicit conversion AFTER converting the result expr.
 				// checkForDynamicStructs resolves each side's C# name through liftedTypeMap, but an
 				// anonymous-struct COMPOSITE LITERAL returned here (`return struct{…}{…}`) is only

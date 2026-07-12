@@ -128,7 +128,7 @@ internal static void Main() {
     any raw = Ꮡ(new circle(r: 7));
     fmt.Println(describe(raw));
     fmt.Println(describe(new dot(tag: 3)));
-    fmt.Println(describe(42));
+    fmt.Println(describe((nint)(42)));
     error e = new errMarkжerror(Ꮡ(new errMark(code: 5)));
     any anyErr = e;
     fmt.Println(describe(anyErr));

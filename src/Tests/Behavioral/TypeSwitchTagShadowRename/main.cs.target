@@ -71,11 +71,11 @@ internal static void Main() {
     @string hi = "hi"u8;
     var sn = Ꮡ(new node(nil));
     sn.Value.inner = hi;
-    fmt.Println(inspect(Ꮡ(new node(inner: 5))));
+    fmt.Println(inspect(Ꮡ(new node(inner: (nint)(5)))));
     fmt.Println(inspect(sn));
     fmt.Println(inspect(Ꮡ(new node(inner: 1.5D))));
-    fmt.Println(inspect(42));
-    var (a, b) = classifyVia(Ꮡ(new node(inner: 7)));
+    fmt.Println(inspect((nint)(42)));
+    var (a, b) = classifyVia(Ꮡ(new node(inner: (nint)(7))));
     fmt.Println(a, b);
     var (c, d) = classifyVia("direct");
     fmt.Println(c, d);

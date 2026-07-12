@@ -63,7 +63,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 					// @string — the u8 span set above has no conversion to the ctor's object
 					// parameter (CS1503).
 					if st, ok := u.Elem().Underlying().(*types.Struct); ok {
-						markAnyFieldStringLits(st, compositeLit.Elts, ptrElidedContext)
+						v.markAnyFieldLits(st, compositeLit.Elts, ptrElidedContext)
 					}
 
 					return fmt.Sprintf("%s(new %s(%s))", AddressPrefix, structName, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, ptrElidedContext))
@@ -111,7 +111,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		// the u8 span set above has no conversion to the ctor's object parameter (CS1503).
 		if inferred := elidedContext.keyValueCompositeType; inferred != nil {
 			if st, ok := inferred.Underlying().(*types.Struct); ok {
-				markAnyFieldStringLits(st, compositeLit.Elts, elidedContext)
+				v.markAnyFieldLits(st, compositeLit.Elts, elidedContext)
 			}
 		}
 
@@ -191,7 +191,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	checkStructFields := func(structType *types.Struct) {
 		// A POSITIONAL string-literal element in an `any` field slot boxes through @string
 		// (keyed elements take convKeyValueExpr's `any`-field arm instead).
-		markAnyFieldStringLits(structType, compositeLit.Elts, callContext)
+		v.markAnyFieldLits(structType, compositeLit.Elts, callContext)
 
 		for i := range structType.NumFields() {
 			field := structType.Field(i)
@@ -492,12 +492,20 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		// An EMPTY-interface element type takes no adapter wrap (excluded above), but a
 		// string-literal element must still box through @string — `new any[]{(@string)"a"}` —
 		// instead of the bare C# string the flag-less path leaves, which boxes the wrong type
-		// (a later Go x.(string) assertion fails). KeyValueExpr elements (maps, sparse arrays)
-		// are not BasicLits and route through convKeyValueExpr instead.
+		// (a later Go x.(string) assertion fails). An untyped-int element boxes through nint for
+		// the same reason (`new any[]{(nint)(4)}`, else a later x.(int) fails) — the numeric twin,
+		// applied via the same per-element castArgToType plumbing convExprList honors. KeyValueExpr
+		// elements (maps, sparse arrays) are not BasicLits and route through convKeyValueExpr instead.
 		if isEmptyInterfaceTarget(elementType) {
 			for i, elt := range compositeLit.Elts {
 				if isStringBasicLit(elt) {
 					callContext.useGoStringArg[i] = true
+				} else if v.argBoxesAsInt32ButNeedsNint(elt) {
+					if callContext.castArgToType == nil {
+						callContext.castArgToType = make(map[int]string)
+					}
+
+					callContext.castArgToType[i] = "nint"
 				}
 			}
 		}
@@ -881,22 +889,30 @@ func sparseArrayCompositeContext(compositeType types.Type, elts []ast.Expr) *Cal
 	return context
 }
 
-// markAnyFieldStringLits flips the per-element literal flags for POSITIONAL string-literal
-// elements whose struct field slot is the EMPTY interface (`any`): the element boxes through
-// @string (`(@string)"…"` — u8 off, cast on) instead of the u8 span (no conversion to the
-// generated ctor's object parameter, CS1503) or a bare C# string (which boxes the wrong type — a
-// later Go x.(string) assertion fails). KEYED elements are ast.KeyValueExpr, never a BasicLit, so
-// they skip here and resolve their field in convKeyValueExpr's own `any`-field arm instead. Go
-// requires a positional literal to list every field in order, so element index i is field i.
-func markAnyFieldStringLits(structType *types.Struct, elts []ast.Expr, context *CallExprContext) {
+// markAnyFieldLits flips the per-element literal handling for POSITIONAL literal elements whose
+// struct field slot is the EMPTY interface (`any`). A string literal boxes through @string
+// (`(@string)"…"` — u8 off, cast on) instead of the u8 span (no conversion to the generated ctor's
+// object parameter, CS1503) or a bare C# string (which boxes the wrong type — a later Go
+// x.(string) assertion fails); an untyped-int constant boxes through nint (`(nint)(8)`) for the
+// same reason (else a later x.(int) fails), via the castArgToType plumbing convExprList honors.
+// KEYED elements are ast.KeyValueExpr, never a BasicLit, so they skip here and resolve their field
+// in convKeyValueExpr's own `any`-field arm instead. Go requires a positional literal to list every
+// field in order, so element index i is field i.
+func (v *Visitor) markAnyFieldLits(structType *types.Struct, elts []ast.Expr, context *CallExprContext) {
 	for i, elt := range elts {
-		if !isStringBasicLit(elt) || i >= structType.NumFields() {
+		if i >= structType.NumFields() || !isEmptyInterfaceTarget(structType.Field(i).Type()) {
 			continue
 		}
 
-		if isEmptyInterfaceTarget(structType.Field(i).Type()) {
+		if isStringBasicLit(elt) {
 			context.u8StringArgOK[i] = false
 			context.useGoStringArg[i] = true
+		} else if v.argBoxesAsInt32ButNeedsNint(elt) {
+			if context.castArgToType == nil {
+				context.castArgToType = make(map[int]string)
+			}
+
+			context.castArgToType[i] = "nint"
 		}
 	}
 }
