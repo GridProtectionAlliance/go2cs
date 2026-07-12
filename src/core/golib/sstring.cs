@@ -34,7 +34,7 @@ using System.Linq;
 using System.Text;
 using go.golib;
 
-namespace go.experimental;
+namespace go;
 
 // This is an experiment with a stack allocated string type which should improve performance
 // of string operations by avoiding heap allocations. This works fine in stack oriented code
@@ -131,7 +131,12 @@ public readonly ref struct sstring
 
     public byte this[ulong index] => this[(int)index];
 
-    public slice<byte> this[Range range] => new(m_value.ToArray(), range.Start.GetOffset(m_value.Length), range.End.GetOffset(m_value.Length));
+    // Slicing a Go string yields a string, so the range indexer returns sstring — a zero-copy
+    // sub-view over the same backing span (mirrors @string.this[Range] returning @string, but
+    // without the copy since a stack string never outlives its source). Returning slice<byte>
+    // here — the previous form — broke string comparisons (slice<byte> != string) and forced a
+    // heap allocation via ToArray().
+    public sstring this[Range range] => new(m_value[range]);
 
     public slice<byte> Slice(int start, int length)
     {
@@ -153,9 +158,12 @@ public readonly ref struct sstring
         return BytesAreEqual(m_value, other.m_value);
     }
 
+    // Go compares strings as raw bytes (for valid UTF-8 this is also code-point order), so compare
+    // the backing spans directly — matching @string.CompareTo. The previous ToString()+ordinal form
+    // transcoded both sides to UTF-16, which diverges from Go for invalid UTF-8 and allocates.
     public int CompareTo(sstring other)
     {
-        return StringComparer.Ordinal.Compare(ToString(), other.ToString());
+        return m_value.SequenceCompareTo(other.m_value);
     }
 
     public override bool Equals(object? obj)
@@ -350,22 +358,22 @@ public readonly ref struct sstring
 
     public static bool operator <(sstring a, sstring b)
     {
-        return string.CompareOrdinal(a, b) < 0;
+        return a.CompareTo(b) < 0;
     }
 
     public static bool operator <=(sstring a, sstring b)
     {
-        return string.CompareOrdinal(a, b) <= 0;
+        return a.CompareTo(b) <= 0;
     }
 
     public static bool operator >(sstring a, sstring b)
     {
-        return string.CompareOrdinal(a, b) > 0;
+        return a.CompareTo(b) > 0;
     }
 
     public static bool operator >=(sstring a, sstring b)
     {
-        return string.CompareOrdinal(a, b) >= 0;
+        return a.CompareTo(b) >= 0;
     }
 
     #endregion
