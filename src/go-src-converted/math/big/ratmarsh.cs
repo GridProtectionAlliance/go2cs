@@ -19,7 +19,7 @@ internal const byte ratGobVersion = 1;
 public static (slice<byte>, error) GobEncode(this ж<ΔRat> Ꮡx) {
     ref var x = ref Ꮡx.Value;
 
-    if (x == nil) {
+    if (Ꮡx == nil) {
         return (default!, default!);
     }
     var buf = new slice<byte>(1 + 4 + (len(x.a.abs) + len(x.b.abs)) * (nint)_S);

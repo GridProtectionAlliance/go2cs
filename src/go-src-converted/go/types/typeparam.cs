@@ -52,7 +52,7 @@ internal static ж<TypeParam> newTypeParam(this ж<Checker> Ꮡcheck, ж<TypeNam
     // Always increment lastID, even if it is not used.
     ref var id = ref heap<uint64>(out var Ꮡid);
     id = nextID();
-    if (check != nil) {
+    if (Ꮡcheck != nil) {
         check.nextID++;
         id = check.nextID;
     }
@@ -62,7 +62,7 @@ internal static ж<TypeParam> newTypeParam(this ж<Checker> Ꮡcheck, ж<TypeNam
     }
     // iface may mutate typ.bound, so we must ensure that iface() is called
     // at least once before the resulting TypeParam escapes.
-    if (check != nil){
+    if (Ꮡcheck != nil){
         check.needsCleanup(new TypeParamжcleaner(typ));
     } else 
     if (constraint != default!) {

@@ -74,7 +74,7 @@ public static void Reset(this ж<Reader> Ꮡb, io.Reader r) {
     // If a Reader r is passed to NewReader, NewReader will return r.
     // Different layers of code may do that, and then later pass r
     // to Reset. Avoid infinite recursion in that case.
-    if (AreEqual(b, r)) {
+    if (AreEqual(Ꮡb, r)) {
         return;
     }
     if (b.buf == default!) {
@@ -644,7 +644,7 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
     // If a Writer w is passed to NewWriter, NewWriter will return w.
     // Different layers of code may do that, and then later pass w
     // to Reset. Avoid infinite recursion in that case.
-    if (AreEqual(b, w)) {
+    if (AreEqual(Ꮡb, w)) {
         return;
     }
     if (b.buf == default!) {

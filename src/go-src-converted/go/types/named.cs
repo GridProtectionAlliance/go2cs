@@ -235,7 +235,7 @@ internal static ж<Named> newNamed(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡob
         obj.typ = new NamedжΔType(typ);
     }
     // Ensure that typ is always sanity-checked.
-    if (check != nil) {
+    if (Ꮡcheck != nil) {
         check.needsCleanup(new Namedжcleaner(typ));
     }
     return typ;
@@ -266,7 +266,7 @@ internal static ж<Named> newNamedInstance(this ж<Checker> Ꮡcheck, tokenꓸPo
     var typ = Ꮡ(new Named(check: Ꮡcheck, obj: obj, inst: inst));
     obj.Value.typ = new NamedжΔType(typ);
     // Ensure that typ is always sanity-checked.
-    if (check != nil) {
+    if (Ꮡcheck != nil) {
         check.needsCleanup(new Namedжcleaner(typ));
     }
     return typ;
@@ -419,7 +419,7 @@ internal static ж<Func> expandMethod(this ж<Named> Ꮡt, nint i) {
     //
     // This occurs if t is instantiated with the receiver type parameters, as in
     // the use of m in func (r T[_]) m() { r.m() }.
-    if (AreEqual(rbase, t)) {
+    if (AreEqual(rbase, Ꮡt)) {
         return origm;
     }
     var sig = origSig;
@@ -695,7 +695,7 @@ internal static ΔType expandUnderlying(this ж<Named> Ꮡn) => func((defer, rec
     // resolve n for any recursive references.
     @string h = (~n.inst).ctxt.instanceHash(new NamedжΔType(orig), targs.list());
     var n2 = (~n.inst).ctxt.update(h, new NamedжΔType(orig), n.TypeArgs().list(), new NamedжΔType(Ꮡn));
-    assert(AreEqual(n, n2));
+    assert(AreEqual(Ꮡn, n2));
     var smap = makeSubstMap((~orig).tparams.list(), targs.list());
     ж<Context> ctxt = default!;
     if (check != nil) {

@@ -34,7 +34,7 @@ partial class net_package {
 public static netip.AddrPort AddrPort(this ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil) {
+    if (Ꮡa == nil) {
         return new netip.AddrPort(nil);
     }
     var (na, _) = netip.AddrFromSlice(a.IP);
@@ -50,7 +50,7 @@ public static netip.AddrPort AddrPort(this ж<UDPAddr> Ꮡa) {
 public static @string String(this ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil) {
+    if (Ꮡa == nil) {
         return "<nil>"u8;
     }
     @string ip = ipEmptyString(a.IP);
@@ -63,7 +63,7 @@ public static @string String(this ж<UDPAddr> Ꮡa) {
 internal static bool isWildcard(this ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil || a.IP == default!) {
+    if (Ꮡa == nil || a.IP == default!) {
         return true;
     }
     return a.IP.IsUnspecified();
@@ -72,7 +72,7 @@ internal static bool isWildcard(this ж<UDPAddr> Ꮡa) {
 internal static ΔAddr opAddr(this ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil) {
+    if (Ꮡa == nil) {
         return default!;
     }
     return new UDPAddrжΔAddr(Ꮡa);

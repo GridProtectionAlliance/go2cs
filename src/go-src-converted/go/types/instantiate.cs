@@ -215,7 +215,7 @@ internal static bool validateTArgLen(this ж<Checker> Ꮡcheck, tokenꓸPos pos,
     }}
 
     @string msg = Ꮡcheck.sprintf("%s type arguments for type %s: have %d, want %d"u8, qual, name, got, want);
-    if (check != nil) {
+    if (Ꮡcheck != nil) {
         Ꮡcheck.error(((atPos)pos), WrongTypeArgCount, msg);
         return false;
     }
@@ -328,7 +328,7 @@ internal static bool implements(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
         if (constraint && comparable(V, true, /* spec comparability */
  default!, default!)) {
             // V is comparable if we are at Go 1.20 or higher.
-            if (Ꮡcheck.Value == nil || Ꮡcheck.allowVersion(((atPos)pos), go1_20)) {
+            if (Ꮡcheck == nil || Ꮡcheck.allowVersion(((atPos)pos), go1_20)) {
                 // atPos needed so that go/types generate passes
                 return true;
             }

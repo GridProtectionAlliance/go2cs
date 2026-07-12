@@ -28,7 +28,7 @@ public static ж<Tuple> NewTuple(params Span<ж<Var>> xʗp) {
 public static nint Len(this ж<Tuple> Ꮡt) {
     ref var t = ref Ꮡt.Value;
 
-    if (t != nil) {
+    if (Ꮡt != nil) {
         return len(t.vars);
     }
     return 0;

@@ -40,7 +40,7 @@ internal static labelMap labelValue(context.Context ctx) {
 internal static @string String(this ж<labelMap> Ꮡl) {
     ref var l = ref Ꮡl.Value;
 
-    if (l == nil) {
+    if (Ꮡl == nil) {
         return ""u8;
     }
     var keyVals = new slice<@string>(0, len(l));

@@ -31,7 +31,7 @@ partial class net_package {
 public static @string String(this ж<UnixAddr> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil) {
+    if (Ꮡa == nil) {
         return "<nil>"u8;
     }
     return a.Name;
@@ -40,13 +40,13 @@ public static @string String(this ж<UnixAddr> Ꮡa) {
 internal static bool isWildcard(this ж<UnixAddr> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
-    return a == nil || a.Name == ""u8;
+    return Ꮡa == nil || a.Name == ""u8;
 }
 
 internal static ΔAddr opAddr(this ж<UnixAddr> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil) {
+    if (Ꮡa == nil) {
         return default!;
     }
     return new UnixAddrжΔAddr(Ꮡa);
@@ -274,7 +274,7 @@ public static (ж<UnixConn>, error) DialUnix(@string network, ж<UnixAddr> Ꮡla
 internal static bool ok(this ж<UnixListener> Ꮡln) {
     ref var ln = ref Ꮡln.Value;
 
-    return ln != nil && ln.fd != nil;
+    return Ꮡln != nil && ln.fd != nil;
 }
 
 // SyscallConn returns a raw network connection.

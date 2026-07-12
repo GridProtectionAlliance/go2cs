@@ -244,7 +244,7 @@ public static void SetCookie(ResponseWriter w, ж<ΔCookie> Ꮡcookie) {
 public static @string String(this ж<ΔCookie> Ꮡc) {
     ref var c = ref Ꮡc.Value;
 
-    if (c == nil || !isCookieNameValid(c.Name)) {
+    if (Ꮡc == nil || !isCookieNameValid(c.Name)) {
         return ""u8;
     }
     // extraCookieLength derived from typical length of cookie attributes
@@ -317,7 +317,7 @@ public static @string String(this ж<ΔCookie> Ꮡc) {
 public static error Valid(this ж<ΔCookie> Ꮡc) {
     ref var c = ref Ꮡc.Value;
 
-    if (c == nil) {
+    if (Ꮡc == nil) {
         return errors.New("http: nil Cookie"u8);
     }
     if (!isCookieNameValid(c.Name)) {

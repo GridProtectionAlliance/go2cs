@@ -556,7 +556,7 @@ internal static ж<chattyPrinter> newChattyPrinter(Δio.Writer w) {
 internal static @string prefix(this ж<chattyPrinter> Ꮡp) {
     ref var p = ref Ꮡp.Value;
 
-    if (p != nil && p.json) {
+    if (Ꮡp != nil && p.json) {
         return ((@string)marker);
     }
     return ""u8;

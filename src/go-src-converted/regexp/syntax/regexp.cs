@@ -58,7 +58,7 @@ public static bool Equal(this ж<Regexp> Ꮡx, ж<Regexp> Ꮡy) {
     ref var x = ref Ꮡx.Value;
     ref var y = ref Ꮡy.DerefOrNil();
 
-    if (x == nil || Ꮡy == nil) {
+    if (Ꮡx == nil || Ꮡy == nil) {
         return Ꮡx == Ꮡy;
     }
     if (x.Op != y.Op) {

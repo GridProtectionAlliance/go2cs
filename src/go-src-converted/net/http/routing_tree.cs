@@ -148,7 +148,7 @@ internal static (ж<routingNode>, slice<@string>) match(this ж<routingNode> Ꮡ
 internal static (ж<routingNode>, slice<@string>) matchMethodAndPath(this ж<routingNode> Ꮡn, @string method, @string path) {
     ref var n = ref Ꮡn.Value;
 
-    if (n == nil) {
+    if (Ꮡn == nil) {
         return (default!, default!);
     }
     {
@@ -176,7 +176,7 @@ internal static (ж<routingNode>, slice<@string>) matchMethodAndPath(this ж<rou
 internal static (ж<routingNode>, slice<@string>) matchPath(this ж<routingNode> Ꮡn, @string path, slice<@string> matches) {
     ref var n = ref Ꮡn.Value;
 
-    if (n == nil) {
+    if (Ꮡn == nil) {
         return (default!, default!);
     }
     // If path is empty, then we are done.
@@ -266,7 +266,7 @@ internal static void matchingMethods(this ж<routingNode> Ꮡroot, @string host,
 internal static void matchingMethodsPath(this ж<routingNode> Ꮡn, @string path, map<@string, bool> set) {
     ref var n = ref Ꮡn.Value;
 
-    if (n == nil) {
+    if (Ꮡn == nil) {
         return;
     }
     var setʗ1 = set;

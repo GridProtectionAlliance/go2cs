@@ -95,7 +95,7 @@ public static ж<Template> Option(this ж<Template> Ꮡt, params ꓸꓸꓸstring
 internal static error checkCanParse(this ж<Template> Ꮡt) => func<error>((defer, recover) => {
     ref var t = ref Ꮡt.Value;
 
-    if (t == nil) {
+    if (Ꮡt == nil) {
         return default!;
     }
     t.nameSpace.of(nameSpace.Ꮡmu).Lock();

@@ -449,7 +449,7 @@ public static ж<Userinfo> UserPassword(@string username, @string password) {
 public static @string Username(this ж<Userinfo> Ꮡu) {
     ref var u = ref Ꮡu.Value;
 
-    if (u == nil) {
+    if (Ꮡu == nil) {
         return ""u8;
     }
     return u.username;
@@ -459,7 +459,7 @@ public static @string Username(this ж<Userinfo> Ꮡu) {
 public static (@string, bool) Password(this ж<Userinfo> Ꮡu) {
     ref var u = ref Ꮡu.Value;
 
-    if (u == nil) {
+    if (Ꮡu == nil) {
         return ("", false);
     }
     return (u.password, u.passwordSet);
@@ -470,7 +470,7 @@ public static (@string, bool) Password(this ж<Userinfo> Ꮡu) {
 public static @string String(this ж<Userinfo> Ꮡu) {
     ref var u = ref Ꮡu.Value;
 
-    if (u == nil) {
+    if (Ꮡu == nil) {
         return ""u8;
     }
     @string s = escape(u.username, encodeUserPassword);
@@ -985,7 +985,7 @@ internal static bool validOptionalPort(@string port) {
 public static @string Redacted(this ж<URL> Ꮡu) {
     ref var u = ref Ꮡu.Value;
 
-    if (u == nil) {
+    if (Ꮡu == nil) {
         return ""u8;
     }
     var ru = u;

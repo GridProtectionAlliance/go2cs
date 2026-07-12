@@ -150,7 +150,7 @@ internal static ж<Alias> newAlias(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡob
         obj.typ = new AliasжΔType(a);
     }
     // Ensure that a.actual is set at the end of type checking.
-    if (check != nil) {
+    if (Ꮡcheck != nil) {
         check.needsCleanup(new Aliasжcleaner(a));
     }
     return a;

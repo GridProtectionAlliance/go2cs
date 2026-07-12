@@ -107,7 +107,7 @@ internal static @string sprintf(this ж<Checker> Ꮡcheck, @string format, param
     ref var check = ref Ꮡcheck.Value;
     ж<token.FileSet> fset = default!;
     Func<ж<Package>, @string> qf = default!;
-    if (check != nil) {
+    if (Ꮡcheck != nil) {
         fset = check.fset;
         qf = (ж<Package> p1) => Ꮡcheck.qualifier(p1);
     }

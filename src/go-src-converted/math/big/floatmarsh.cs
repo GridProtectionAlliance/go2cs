@@ -20,7 +20,7 @@ internal const byte floatGobVersion = 1;
 public static (slice<byte>, error) GobEncode(this ж<Float> Ꮡx) {
     ref var x = ref Ꮡx.Value;
 
-    if (x == nil) {
+    if (Ꮡx == nil) {
         return (default!, default!);
     }
     // determine max. space (bytes) required for encoding
@@ -113,7 +113,7 @@ public static (slice<byte> text, error err) MarshalText(this ж<Float> Ꮡx) {
     error err = default!;
 
     ref var x = ref Ꮡx.Value;
-    if (x == nil) {
+    if (Ꮡx == nil) {
         return (slice<byte>((@string)"<nil>"), default!);
     }
     slice<byte> buf = default!;

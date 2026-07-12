@@ -93,7 +93,7 @@ internal static ref Δsync.Once localOnce => ref ᏑlocalOnce.Value;
 internal static ж<ΔLocation> get(this ж<ΔLocation> Ꮡl) {
     ref var l = ref Ꮡl.Value;
 
-    if (l == nil) {
+    if (Ꮡl == nil) {
         return ᏑutcLoc;
     }
     if (Ꮡl == ᏑlocalLoc) {

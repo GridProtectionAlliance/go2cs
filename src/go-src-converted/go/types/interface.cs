@@ -82,7 +82,7 @@ internal static ж<Interface> newInterface(this ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.Value;
 
     var typ = Ꮡ(new Interface(check: Ꮡcheck));
-    if (check != nil) {
+    if (Ꮡcheck != nil) {
         check.needsCleanup(new Interfaceжcleaner(typ));
     }
     return typ;

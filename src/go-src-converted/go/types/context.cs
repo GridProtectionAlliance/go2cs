@@ -66,7 +66,7 @@ public static ж<Context> NewContext() {
 internal static @string instanceHash(this ж<Context> Ꮡctxt, ΔType orig, slice<ΔType> targs) {
     ref var ctxt = ref Ꮡctxt.Value;
 
-    assert(ctxt != nil);
+    assert(Ꮡctxt != nil);
     assert(orig != default!);
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var h = newTypeHasher(Ꮡbuf, Ꮡctxt);

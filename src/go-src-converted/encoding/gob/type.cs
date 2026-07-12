@@ -481,7 +481,7 @@ internal static void init(this ж<sliceType> Ꮡs, ΔgobType elem) {
 internal static @string safeString(this ж<structType> Ꮡs, map<typeId, bool> seen) {
     ref var s = ref Ꮡs.Value;
 
-    if (s == nil) {
+    if (Ꮡs == nil) {
         return "<nil>"u8;
     }
     {
@@ -742,7 +742,7 @@ internal static @string @string(this ж<wireType> Ꮡw) {
     ref var w = ref Ꮡw.Value;
 
     @string unknown = "unknown type"u8;
-    if (w == nil) {
+    if (Ꮡw == nil) {
         return unknown;
     }
     switch (ᐧ) {

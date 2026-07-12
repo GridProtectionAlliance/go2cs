@@ -3389,7 +3389,7 @@ public static error Err(this ж<Rows> Ꮡrs) => func((defer, recover) => {
 internal static slice<byte> rawbuf(this ж<Rows> Ꮡrs) {
     ref var rs = ref Ꮡrs.Value;
 
-    if (rs == nil) {
+    if (Ꮡrs == nil) {
         // convertAssignRows can take a nil *Rows; for simplicity handle it here
         return default!;
     }
@@ -3401,7 +3401,7 @@ internal static slice<byte> rawbuf(this ж<Rows> Ꮡrs) {
 internal static RawBytes setrawbuf(this ж<Rows> Ꮡrs, slice<byte> b) {
     ref var rs = ref Ꮡrs.Value;
 
-    if (rs == nil) {
+    if (Ꮡrs == nil) {
         // convertAssignRows can take a nil *Rows; for simplicity handle it here
         return ((RawBytes)b);
     }

@@ -113,7 +113,7 @@ internal static @string stripTrailingWhitespace(@string s) {
 public static @string Text(this ж<CommentGroup> Ꮡg) {
     ref var g = ref Ꮡg.Value;
 
-    if (g == nil) {
+    if (Ꮡg == nil) {
         return ""u8;
     }
     var comments = new slice<@string>(len(g.List));
@@ -282,7 +282,7 @@ public static nint NumFields(this ж<FieldList> Ꮡf) {
     ref var f = ref Ꮡf.Value;
 
     nint n = 0;
-    if (f != nil) {
+    if (Ꮡf != nil) {
         foreach (var (_, g) in f.List) {
             nint m = len((~g).Names);
             if (m == 0) {
@@ -765,7 +765,7 @@ public static bool IsExported(@string name) {
 public static @string String(this ж<Ident> Ꮡid) {
     ref var id = ref Ꮡid.Value;
 
-    if (id != nil) {
+    if (Ꮡid != nil) {
         return id.Name;
     }
     return "<nil>"u8;

@@ -848,7 +848,7 @@ public static bool Equal(this ж<Certificate> Ꮡc, ж<Certificate> Ꮡother) {
     ref var c = ref Ꮡc.Value;
     ref var other = ref Ꮡother.DerefOrNil();
 
-    if (c == nil || Ꮡother == nil) {
+    if (Ꮡc == nil || Ꮡother == nil) {
         return Ꮡc == Ꮡother;
     }
     return bytes.Equal(c.Raw, other.Raw);

@@ -38,7 +38,7 @@ partial class net_package {
 public static @string String(this ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil) {
+    if (Ꮡa == nil) {
         return "<nil>"u8;
     }
     @string ip = ipEmptyString(a.IP);
@@ -51,7 +51,7 @@ public static @string String(this ж<IPAddr> Ꮡa) {
 internal static bool isWildcard(this ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil || a.IP == default!) {
+    if (Ꮡa == nil || a.IP == default!) {
         return true;
     }
     return a.IP.IsUnspecified();
@@ -60,7 +60,7 @@ internal static bool isWildcard(this ж<IPAddr> Ꮡa) {
 internal static ΔAddr opAddr(this ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil) {
+    if (Ꮡa == nil) {
         return default!;
     }
     return new IPAddrжΔAddr(Ꮡa);

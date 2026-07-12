@@ -1591,7 +1591,7 @@ internal static readonly UntypedInt http2maxFrameSize = /* 1<<24 - 1 */ 16777215
 internal static ж<http2DataFrame> getDataFrame(this ж<http2frameCache> Ꮡfc) {
     ref var fc = ref Ꮡfc.Value;
 
-    if (fc == nil) {
+    if (Ꮡfc == nil) {
         return Ꮡ(new http2DataFrame(nil));
     }
     return Ꮡfc.of(http2frameCache.ᏑdataFrame);
@@ -3985,7 +3985,7 @@ internal static void registerConn(this ж<http2serverInternalState> Ꮡs, ж<htt
     ref var s = ref Ꮡs.Value;
     ref var sc = ref Ꮡsc.Value;
 
-    if (s == nil) {
+    if (Ꮡs == nil) {
         return;
     }
     // if the Server was used without calling ConfigureServer
@@ -3998,7 +3998,7 @@ internal static void unregisterConn(this ж<http2serverInternalState> Ꮡs, ж<h
     ref var s = ref Ꮡs.Value;
     ref var sc = ref Ꮡsc.Value;
 
-    if (s == nil) {
+    if (Ꮡs == nil) {
         return;
     }
     // if the Server was used without calling ConfigureServer
@@ -4010,7 +4010,7 @@ internal static void unregisterConn(this ж<http2serverInternalState> Ꮡs, ж<h
 internal static void startGracefulShutdown(this ж<http2serverInternalState> Ꮡs) {
     ref var s = ref Ꮡs.Value;
 
-    if (s == nil) {
+    if (Ꮡs == nil) {
         return;
     }
     // if the Server was used without calling ConfigureServer
@@ -4142,7 +4142,7 @@ internal static error http2ConfigureServer(ж<Server> Ꮡs, ж<http2Server> Ꮡc
 internal static context.Context context(this ж<http2ServeConnOpts> Ꮡo) {
     ref var o = ref Ꮡo.Value;
 
-    if (o != nil && o.Context != default!) {
+    if (Ꮡo != nil && o.Context != default!) {
         return o.Context;
     }
     return context_package.Background();
@@ -4151,7 +4151,7 @@ internal static context.Context context(this ж<http2ServeConnOpts> Ꮡo) {
 internal static ж<Server> baseConfig(this ж<http2ServeConnOpts> Ꮡo) {
     ref var o = ref Ꮡo.Value;
 
-    if (o != nil && o.BaseConfig != nil) {
+    if (Ꮡo != nil && o.BaseConfig != nil) {
         return o.BaseConfig;
     }
     return @new<Server>();
@@ -4160,7 +4160,7 @@ internal static ж<Server> baseConfig(this ж<http2ServeConnOpts> Ꮡo) {
 internal static ΔHandler handler(this ж<http2ServeConnOpts> Ꮡo) {
     ref var o = ref Ꮡo.Value;
 
-    if (o != nil) {
+    if (Ꮡo != nil) {
         if (o.Handler != default!) {
             return o.Handler;
         }
@@ -7382,7 +7382,7 @@ internal static bool http2h1ServerKeepAlivesDisabled(ж<Server> Ꮡhs) {
 internal static error countError(this ж<http2serverConn> Ꮡsc, @string name, error err) {
     ref var sc = ref Ꮡsc.Value;
 
-    if (sc == nil || sc.srv == nil) {
+    if (Ꮡsc == nil || sc.srv == nil) {
         return err;
     }
     var f = sc.srv.Value.CountError;
@@ -7557,7 +7557,7 @@ internal static readonly UntypedInt http2defaultMaxConcurrentStreams = 1000;
 internal static void markNewGoroutine(this ж<http2Transport> Ꮡt) {
     ref var t = ref Ꮡt.Value;
 
-    if (t != nil && t.http2transportTestHooks != nil) {
+    if (Ꮡt != nil && t.http2transportTestHooks != nil) {
         (~t.http2transportTestHooks).group.Join();
     }
 }
@@ -11848,7 +11848,7 @@ internal static void addBytes(this ж<http2priorityNode> Ꮡn, int64 b) {
     ref var n = ref Ꮡn.Value;
 
     n.bytes += b;
-    for (; n != nil; Ꮡn = n.parent) {
+    for (; Ꮡn != nil; Ꮡn = n.parent) {
         n = ref Ꮡn.Value;
         n.subtreeBytes += b;
     }

@@ -103,7 +103,7 @@ internal static @string sotypeToNet(nint sotype) {
 internal static (syscallꓸSockaddr, error) sockaddr(this ж<UnixAddr> Ꮡa, nint family) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil) {
+    if (Ꮡa == nil) {
         return (default!, default!);
     }
     return (new syscall.SockaddrUnixжΔSockaddr(Ꮡ(new syscall.SockaddrUnix(Name: a.Name))), default!);

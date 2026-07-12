@@ -547,7 +547,7 @@ internal static @string String(this ж<rtype> Ꮡt) {
 internal static nint Bits(this ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.Value;
 
-    if (t == nil) {
+    if (Ꮡt == nil) {
         throw panic("reflect: Bits of nil Type");
     }
     ΔKind k = t.Kind();
@@ -1063,7 +1063,7 @@ internal static (ΔMethod m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, 
     bool ok = default!;
 
     ref var t = ref Ꮡt.Value;
-    if (t == nil) {
+    if (Ꮡt == nil) {
         return (m, ok);
     }
     ж<abi.Imethod> p = default!;

@@ -26,7 +26,7 @@ internal static ΔAddr sockaddrToTCP(syscallꓸSockaddr sa) {
 internal static nint family(this ж<TCPAddr> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil || len(a.IP) <= IPv4len) {
+    if (Ꮡa == nil || len(a.IP) <= IPv4len) {
         return syscall.AF_INET;
     }
     if (a.IP.To4() != default!) {
@@ -38,7 +38,7 @@ internal static nint family(this ж<TCPAddr> Ꮡa) {
 internal static (syscallꓸSockaddr, error) sockaddr(this ж<TCPAddr> Ꮡa, nint family) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil) {
+    if (Ꮡa == nil) {
         return (default!, default!);
     }
     return ipToSockaddr(family, a.IP, a.Port, a.Zone);
@@ -187,7 +187,7 @@ internal static bool spuriousENOTAVAIL(error err) {
 internal static bool ok(this ж<TCPListener> Ꮡln) {
     ref var ln = ref Ꮡln.Value;
 
-    return ln != nil && ln.fd != nil;
+    return Ꮡln != nil && ln.fd != nil;
 }
 
 [GoRecv] internal static (ж<TCPConn>, error) accept(this ref TCPListener ln) {

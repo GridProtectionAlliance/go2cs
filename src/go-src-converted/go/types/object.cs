@@ -242,7 +242,7 @@ internal static bool less(this ж<@object> Ꮡa, ж<@object> Ꮡb) {
         return false;
     }
     // Nil before non-nil.
-    if (a == nil) {
+    if (Ꮡa == nil) {
         return true;
     }
     if (Ꮡb == nil) {

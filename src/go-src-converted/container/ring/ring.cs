@@ -136,7 +136,7 @@ public static nint Len(this ж<Ring> Ꮡr) {
     ref var r = ref Ꮡr.Value;
 
     nint n = 0;
-    if (r != nil) {
+    if (Ꮡr != nil) {
         n = 1;
         for (var p = Ꮡr.Next(); p != Ꮡr; p = p.Value.next) {
             n++;
@@ -150,7 +150,7 @@ public static nint Len(this ж<Ring> Ꮡr) {
 public static void Do(this ж<Ring> Ꮡr, Action<any> f) {
     ref var r = ref Ꮡr.Value;
 
-    if (r != nil) {
+    if (Ꮡr != nil) {
         f(r.Value);
         for (var p = Ꮡr.Next(); p != Ꮡr; p = p.Value.next) {
             f((~p).Value);

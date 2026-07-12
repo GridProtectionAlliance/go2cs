@@ -186,19 +186,19 @@ public static ref ж<Resolver> DefaultResolver => ref ᏑDefaultResolver.ValueSl
 internal static bool preferGo(this ж<Resolver> Ꮡr) {
     ref var r = ref Ꮡr.Value;
 
-    return r != nil && r.PreferGo;
+    return Ꮡr != nil && r.PreferGo;
 }
 
 internal static bool strictErrors(this ж<Resolver> Ꮡr) {
     ref var r = ref Ꮡr.Value;
 
-    return r != nil && r.StrictErrors;
+    return Ꮡr != nil && r.StrictErrors;
 }
 
 internal static ж<singleflight.Group> getLookupGroup(this ж<Resolver> Ꮡr) {
     ref var r = ref Ꮡr.Value;
 
-    if (r == nil) {
+    if (Ꮡr == nil) {
         return DefaultResolver.of(Resolver.ᏑlookupGroup);
     }
     return Ꮡr.of(Resolver.ᏑlookupGroup);
@@ -772,7 +772,7 @@ internal static (Conn, error) dial(this ж<Resolver> Ꮡr, context.Context ctx, 
     // addresses, which Dial will use without a DNS lookup.
     Conn c = default!;
     error err = default!;
-    if (r != nil && r.Dial != default!){
+    if (Ꮡr != nil && r.Dial != default!){
         (c, err) = r.Dial(ctx, network, server);
     } else {
         ref var d = ref heap(new Dialer(), out var Ꮡd);

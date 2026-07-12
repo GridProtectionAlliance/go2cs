@@ -20,7 +20,7 @@ partial class os_package {
 public static error Close(this ж<File> Ꮡf) {
     ref var f = ref Ꮡf.Value;
 
-    if (f == nil) {
+    if (Ꮡf == nil) {
         return ErrInvalid;
     }
     return f.@file.close();
@@ -294,7 +294,7 @@ internal static error setWriteDeadline(this ж<File> Ꮡf, time.Time t) {
 internal static error checkValid(this ж<File> Ꮡf, @string op) {
     ref var f = ref Ꮡf.Value;
 
-    if (f == nil) {
+    if (Ꮡf == nil) {
         return ErrInvalid;
     }
     return default!;

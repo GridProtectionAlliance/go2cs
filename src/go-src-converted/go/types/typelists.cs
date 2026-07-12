@@ -31,7 +31,7 @@ public static nint Len(this ж<TypeParamList> Ꮡl) {
 internal static slice<ж<TypeParam>> list(this ж<TypeParamList> Ꮡl) {
     ref var l = ref Ꮡl.Value;
 
-    if (l == nil) {
+    if (Ꮡl == nil) {
         return default!;
     }
     return l.tparams;
@@ -69,7 +69,7 @@ public static nint Len(this ж<TypeList> Ꮡl) {
 internal static slice<ΔType> list(this ж<TypeList> Ꮡl) {
     ref var l = ref Ꮡl.Value;
 
-    if (l == nil) {
+    if (Ꮡl == nil) {
         return default!;
     }
     return l.types;

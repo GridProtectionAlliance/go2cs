@@ -123,7 +123,7 @@ internal static ж<ΔPublicKey> privateKeyToPublicKey<Point>(this ж<nistCurve<P
     ref var key = ref Ꮡkey.Value;
 
     boring.Unreachable();
-    if (!AreEqual(key.curve, c)) {
+    if (!AreEqual(key.curve, Ꮡc)) {
         throw panic("crypto/ecdh: internal error: converting the wrong key type");
     }
     var (p, err) = c.newPoint().ScalarBaseMult(key.privateKey);

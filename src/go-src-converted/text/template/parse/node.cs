@@ -110,7 +110,7 @@ internal static ж<ListNode> newList(this ж<Tree> Ꮡt, Pos pos) {
 public static ж<ListNode> CopyList(this ж<ListNode> Ꮡl) {
     ref var l = ref Ꮡl.Value;
 
-    if (l == nil) {
+    if (Ꮡl == nil) {
         return Ꮡl;
     }
     var n = l.tr.newList(l.Pos);
@@ -254,7 +254,7 @@ internal static ж<PipeNode> newPipeline(this ж<Tree> Ꮡt, Pos pos, nint line,
 public static ж<PipeNode> CopyPipe(this ж<PipeNode> Ꮡp) {
     ref var p = ref Ꮡp.Value;
 
-    if (p == nil) {
+    if (Ꮡp == nil) {
         return Ꮡp;
     }
     var vars = new slice<ж<VariableNode>>(len(p.Decl));
@@ -365,7 +365,7 @@ internal static ж<CommandNode> newCommand(this ж<Tree> Ꮡt, Pos pos) {
 public static Node Copy(this ж<CommandNode> Ꮡc) {
     ref var c = ref Ꮡc.Value;
 
-    if (c == nil) {
+    if (Ꮡc == nil) {
         return new CommandNodeжNode(Ꮡc);
     }
     var n = c.tr.newCommand(c.Pos);

@@ -463,7 +463,7 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
                     break;
                 }
                 // methods may not have a fully set up signature yet
-                if (check != nil) {
+                if (Ꮡcheck != nil) {
                     Ꮡcheck.objDecl(new FuncжObject(f), nil);
                 }
                 if (!equivalent((~f).typ, (~m).typ)) {
@@ -480,7 +480,7 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
         if (f != nil) {
             // This method may be formatted in funcString below, so must have a fully
             // set up signature.
-            if (check != nil) {
+            if (Ꮡcheck != nil) {
                 Ꮡcheck.objDecl(new FuncжObject(f), nil);
             }
         }
@@ -575,7 +575,7 @@ internal static @string funcString(this ж<Checker> Ꮡcheck, ж<Func> Ꮡf, boo
 
     var buf = bytes.NewBufferString(f.name);
     Func<ж<Package>, @string> qf = default!;
-    if (check != nil && !pkgInfo) {
+    if (Ꮡcheck != nil && !pkgInfo) {
         qf = (ж<Package> p1) => Ꮡcheck.qualifier(p1);
     }
     var w = newTypeWriter(buf, qf);

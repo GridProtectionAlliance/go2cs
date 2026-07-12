@@ -41,7 +41,7 @@ internal static readonly readdirMode readdirFileInfo = 2;
 public static (slice<FileInfo>, error) Readdir(this ж<File> Ꮡf, nint n) {
     ref var f = ref Ꮡf.Value;
 
-    if (f == nil) {
+    if (Ꮡf == nil) {
         return (default!, ErrInvalid);
     }
     var (_, _, infos, err) = Ꮡf.readdir(n, readdirFileInfo);
@@ -74,7 +74,7 @@ public static (slice<@string> names, error err) Readdirnames(this ж<File> Ꮡf,
     error err = default!;
 
     ref var f = ref Ꮡf.Value;
-    if (f == nil) {
+    if (Ꮡf == nil) {
         return (default!, ErrInvalid);
     }
     (names, _, _, err) = Ꮡf.readdir(n, readdirName);
@@ -100,7 +100,7 @@ public static (slice<@string> names, error err) Readdirnames(this ж<File> Ꮡf,
 public static (slice<DirEntry>, error) ReadDir(this ж<File> Ꮡf, nint n) {
     ref var f = ref Ꮡf.Value;
 
-    if (f == nil) {
+    if (Ꮡf == nil) {
         return (default!, ErrInvalid);
     }
     var (_, dirents, _, err) = Ꮡf.readdir(n, readdirDirEntry);

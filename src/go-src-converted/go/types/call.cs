@@ -139,7 +139,7 @@ internal static ж<ΔSignature> /*res*/ instantiateSignature(this ж<Checker> �
     ref var check = ref Ꮡcheck.Value;
     ref var typ = ref Ꮡtyp.Value;
 
-        assert(check != nil);
+        assert(Ꮡcheck != nil);
         assert(len(targs) == typ.TypeParams().Len());
         if ((~check.conf)._Trace) {
             Ꮡcheck.trace(pos, "-- instantiating signature %s with %s"u8, typ, targs);

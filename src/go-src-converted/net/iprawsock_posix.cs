@@ -23,7 +23,7 @@ internal static ΔAddr sockaddrToIP(syscallꓸSockaddr sa) {
 internal static nint family(this ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil || len(a.IP) <= IPv4len) {
+    if (Ꮡa == nil || len(a.IP) <= IPv4len) {
         return syscall.AF_INET;
     }
     if (a.IP.To4() != default!) {
@@ -35,7 +35,7 @@ internal static nint family(this ж<IPAddr> Ꮡa) {
 internal static (syscallꓸSockaddr, error) sockaddr(this ж<IPAddr> Ꮡa, nint family) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil) {
+    if (Ꮡa == nil) {
         return (default!, default!);
     }
     return ipToSockaddr(family, a.IP, 0, a.Zone);

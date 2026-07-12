@@ -60,7 +60,7 @@ public static ж<Zipf> NewZipf(ж<Rand> Ꮡr, float64 s, float64 v, uint64 imax)
 public static uint64 Uint64(this ж<Zipf> Ꮡz) {
     ref var z = ref Ꮡz.Value;
 
-    if (z == nil) {
+    if (Ꮡz == nil) {
         throw panic("rand: nil Zipf");
     }
     var k = 0.0D;

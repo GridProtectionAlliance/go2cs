@@ -340,7 +340,7 @@ public static (ж<Matcher>, error) New(@string pattern) {
 public static bool ShouldEnable(this ж<Matcher> Ꮡm, uint64 id) {
     ref var m = ref Ꮡm.Value;
 
-    if (m == nil) {
+    if (Ꮡm == nil) {
         return true;
     }
     return m.matchResult(id) == m.enable;
@@ -350,7 +350,7 @@ public static bool ShouldEnable(this ж<Matcher> Ꮡm, uint64 id) {
 public static bool ShouldPrint(this ж<Matcher> Ꮡm, uint64 id) {
     ref var m = ref Ꮡm.Value;
 
-    if (m == nil || m.quiet) {
+    if (Ꮡm == nil || m.quiet) {
         return false;
     }
     return m.matchResult(id);
@@ -372,7 +372,7 @@ public static bool ShouldPrint(this ж<Matcher> Ꮡm, uint64 id) {
 public static bool FileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint line) {
     ref var m = ref Ꮡm.Value;
 
-    if (m == nil) {
+    if (Ꮡm == nil) {
         return true;
     }
     return Ꮡm.fileLine(w, @file, line);
@@ -431,7 +431,7 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string @file, nint 
 public static bool Stack(this ж<Matcher> Ꮡm, Writer w) {
     ref var m = ref Ꮡm.Value;
 
-    if (m == nil) {
+    if (Ꮡm == nil) {
         return true;
     }
     return Ꮡm.stack(w);

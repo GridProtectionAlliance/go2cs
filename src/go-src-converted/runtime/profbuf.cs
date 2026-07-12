@@ -309,7 +309,7 @@ internal static void write(this ж<profBuf> Ꮡb, ж<@unsafe.Pointer> ᏑtagPtr,
     ref var b = ref Ꮡb.Value;
     ref var tagPtr = ref ᏑtagPtr.DerefOrNil();
 
-    if (b == nil) {
+    if (Ꮡb == nil) {
         return;
     }
     if (len(hdr) > (nint)b.hdrsize) {
@@ -441,7 +441,7 @@ internal static (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) read
     bool eof = default!;
 
     ref var b = ref Ꮡb.Value;
-    if (b == nil) {
+    if (Ꮡb == nil) {
         return (default!, default!, true);
     }
     var br = b.rNext;

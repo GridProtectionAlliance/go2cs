@@ -416,7 +416,7 @@ internal static (V, bool) lookup<K, V>(this ж<Δentry<K, V>> Ꮡe, K key, Func<
 {
     ref var e = ref Ꮡe.Value;
 
-    while (e != nil) {
+    while (Ꮡe != nil) {
         if (equal(new @unsafe.Pointer(Ꮡe.of(concurrent_package.Δentry<K, V>.Ꮡkey)), (uintptr)abi.NoEscape(new @unsafe.Pointer(Ꮡ(key))))) {
             return (e.value, true);
         }

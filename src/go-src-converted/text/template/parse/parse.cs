@@ -44,7 +44,7 @@ public static readonly Mode SkipFuncCheck = 2;       // do not check that functi
 public static ж<Tree> Copy(this ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.Value;
 
-    if (t == nil) {
+    if (Ꮡt == nil) {
         return default!;
     }
     return Ꮡ(new Tree(
@@ -230,7 +230,7 @@ internal static void recover(this ж<Tree> Ꮡt, ж<error> Ꮡerrp) => func((def
                 throw panic(e);
             }
         }
-        if (t != nil) {
+        if (Ꮡt != nil) {
             t.stopParse();
         }
         errp = e._<error>();

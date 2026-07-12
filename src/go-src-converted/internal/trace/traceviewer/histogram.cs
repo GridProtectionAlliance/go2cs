@@ -52,7 +52,7 @@ internal static float64 logDiv = math.Log(math.Pow(10, 1.0D / 5));
 public static template.HTML ToHTML(this ж<TimeHistogram> Ꮡh, Func<time.Duration, time.Duration, @string> urlmaker) {
     ref var h = ref Ꮡh.Value;
 
-    if (h == nil || h.Count == 0) {
+    if (Ꮡh == nil || h.Count == 0) {
         return ((template.HTML)(@string)""u8);
     }
     UntypedInt barWidth = 400;

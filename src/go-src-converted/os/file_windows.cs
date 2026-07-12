@@ -44,7 +44,7 @@ internal static readonly UntypedInt _UTIME_OMIT = -1;
 public static uintptr Fd(this ж<File> Ꮡfile) {
     ref var @file = ref Ꮡfile.Value;
 
-    if (@file == nil) {
+    if (Ꮡfile == nil) {
         return (uintptr)syscall.InvalidHandle;
     }
     return (uintptr)@file.pfd.Sysfd;
@@ -136,7 +136,7 @@ internal static (ж<File>, error) openDirNolog(@string name) {
 internal static error close(this ж<@file> Ꮡfile) {
     ref var @file = ref Ꮡfile.Value;
 
-    if (@file == nil) {
+    if (Ꮡfile == nil) {
         return syscall.EINVAL;
     }
     {

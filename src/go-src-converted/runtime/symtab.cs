@@ -759,7 +759,7 @@ public static ж<Func> FuncForPC(uintptr pc) {
 public static @string Name(this ж<Func> Ꮡf) {
     ref var f = ref Ꮡf.Value;
 
-    if (f == nil) {
+    if (Ꮡf == nil) {
         return ""u8;
     }
     var fn = Ꮡf.raw();

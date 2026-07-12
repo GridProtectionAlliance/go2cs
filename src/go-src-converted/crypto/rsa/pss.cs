@@ -237,7 +237,7 @@ public static readonly UntypedInt PSSSaltLengthEqualsHash = -1;
 internal static nint saltLength(this ж<PSSOptions> Ꮡopts) {
     ref var opts = ref Ꮡopts.Value;
 
-    if (opts == nil) {
+    if (Ꮡopts == nil) {
         return PSSSaltLengthAuto;
     }
     return opts.SaltLength;

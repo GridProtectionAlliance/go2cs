@@ -63,7 +63,7 @@ internal static ж<ΔPublicKey> privateKeyToPublicKey(this ж<x25519Curve> Ꮡc,
     ref var c = ref Ꮡc.Value;
     ref var key = ref Ꮡkey.Value;
 
-    if (!AreEqual(key.curve, c)) {
+    if (!AreEqual(key.curve, Ꮡc)) {
         throw panic("crypto/ecdh: internal error: converting the wrong key type");
     }
     var k = Ꮡ(new ΔPublicKey(

@@ -107,7 +107,7 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
 public static (ж<ΔScope>, Object) LookupParent(this ж<ΔScope> Ꮡs, @string name, tokenꓸPos pos) {
     ref var s = ref Ꮡs.Value;
 
-    for (; s != nil; Ꮡs = s.parent) {
+    for (; Ꮡs != nil; Ꮡs = s.parent) {
         s = ref Ꮡs.Value;
         {
             var obj = s.Lookup(name); if (obj != default! && (!pos.IsValid() || cmpPos(obj.scopePos(), pos) <= 0)) {

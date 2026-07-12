@@ -420,7 +420,7 @@ public static (slice<byte> ticket, ж<SessionState> state, error err) Resumption
     error err = default!;
 
     ref var cs = ref Ꮡcs.Value;
-    if (cs == nil || cs.session == nil) {
+    if (Ꮡcs == nil || cs.session == nil) {
         return (default!, default!, default!);
     }
     return ((~cs.session).ticket, cs.session, default!);

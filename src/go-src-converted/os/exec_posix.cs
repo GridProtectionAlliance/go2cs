@@ -109,7 +109,7 @@ internal static error kill(this ж<Process> Ꮡp) {
 public static @string String(this ж<ProcessState> Ꮡp) {
     ref var p = ref Ꮡp.Value;
 
-    if (p == nil) {
+    if (Ꮡp == nil) {
         return "<nil>"u8;
     }
     var status = p.Sys()._<syscall.WaitStatus>();
@@ -155,7 +155,7 @@ public static nint ExitCode(this ж<ProcessState> Ꮡp) {
     ref var p = ref Ꮡp.Value;
 
     // return -1 if the process hasn't started.
-    if (p == nil) {
+    if (Ꮡp == nil) {
         return -1;
     }
     return p.status.ExitStatus();

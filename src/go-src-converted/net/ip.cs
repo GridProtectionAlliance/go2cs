@@ -493,7 +493,7 @@ public static bool Contains(this ж<IPNet> Ꮡn, IP ip) {
 public static @string String(this ж<IPNet> Ꮡn) {
     ref var n = ref Ꮡn.Value;
 
-    if (n == nil) {
+    if (Ꮡn == nil) {
         return "<nil>"u8;
     }
     var (nn, m) = networkNumberAndMask(Ꮡn);

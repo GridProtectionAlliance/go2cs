@@ -19,7 +19,7 @@ partial class big_package {
 public static @string Text(this ж<ΔInt> Ꮡx, nint @base) {
     ref var x = ref Ꮡx.Value;
 
-    if (x == nil) {
+    if (Ꮡx == nil) {
         return "<nil>"u8;
     }
     return ((@string)x.abs.itoa(x.neg, @base));
@@ -30,7 +30,7 @@ public static @string Text(this ж<ΔInt> Ꮡx, nint @base) {
 public static slice<byte> Append(this ж<ΔInt> Ꮡx, slice<byte> buf, nint @base) {
     ref var x = ref Ꮡx.Value;
 
-    if (x == nil) {
+    if (Ꮡx == nil) {
         return append(buf, ((@string)"<nil>"u8).ꓸꓸꓸ);
     }
     return append(buf, x.abs.itoa(x.neg, @base).ꓸꓸꓸ);
@@ -95,7 +95,7 @@ public static void Format(this ж<ΔInt> Ꮡx, fmt.State s, rune ch) {
         return;
     }}
 
-    if (x == nil) {
+    if (Ꮡx == nil) {
         fmt.Fprint(new fmt_StateᴠWriter(s), "<nil>");
         return;
     }

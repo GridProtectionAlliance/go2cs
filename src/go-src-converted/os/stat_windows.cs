@@ -18,7 +18,7 @@ partial class os_package {
 public static (FileInfo, error) Stat(this ж<File> Ꮡfile) {
     ref var @file = ref Ꮡfile.Value;
 
-    if (@file == nil) {
+    if (Ꮡfile == nil) {
         return (default!, ErrInvalid);
     }
     return statHandle(@file.name, @file.pfd.Sysfd);

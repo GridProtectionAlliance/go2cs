@@ -92,7 +92,7 @@ internal static readonly uintptr pinnerRefStoreSize = /* (pinnerSize - unsafe.Si
 internal static void unpin(this ж<pinner> Ꮡp) {
     ref var Δp = ref Ꮡp.Value;
 
-    if (Δp == nil || Δp.refs == default!) {
+    if (Ꮡp == nil || Δp.refs == default!) {
         return;
     }
     foreach (var (i, _) in Δp.refs) {
