@@ -258,10 +258,11 @@ cd "%GOPATH%\src\go2cs\src\example.com\colordemo\"
 dotnet build example.com.colordemo.slnx -c Debug
 ```
 
-> Note: steps produce a **buildable** solution and handle the common real-world
-module shapes — this `fatih/color` example **compiles clean** (app + all four dependency projects, against a
-current deploy). *Running* it to completion is a deeper milestone: the referenced standard library **compiles**
-but is not yet fully **operational**. *Running* is the **Phase-4** goal, see [`roadmap`](Roadmap.md#phase-4--convert-and-run-go-package-tests).
+> Note: these steps produce a **buildable** — and increasingly **runnable** — solution and handle the common
+real-world module shapes. This simple `fatih/color` example **compiles clean** (app + all four dependency
+projects, against a current deploy) **and runs**. Running more complex projects to completion is a deeper
+milestone: the referenced standard library **compiles** but is not yet fully **operational**. *Running* is the
+**Phase-4** goal, see [`roadmap`](Roadmap.md#phase-4--convert-and-run-go-package-tests).
 
 ## Project layout
 
