@@ -691,6 +691,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNilMapOperations() => CheckTarget("NilMapOperations");
 
     [TestMethod]
+    public void CheckNilPointerUintptr() => CheckTarget("NilPointerUintptr");
+
+    [TestMethod]
     public void CheckPackageShadowParam() => CheckTarget("PackageShadowParam");
 
     [TestMethod]
