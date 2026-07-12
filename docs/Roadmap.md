@@ -607,6 +607,39 @@ semantics are guarded end to end; every compiling package attempted is honestly 
 three representative leaf packages are validated (including external-package and subtest/parallel cases).
 Only **validated** satisfies the default Phase 5 behavior gate.
 
+### Phase 4 follow-up (deferred) — expand the `sstring` stack-string MVP
+
+The escape-analysis-driven stack-string emission landed as a deliberately conservative **MVP** (2026-07-12,
+branch `golib-string-performance`; see [`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md#a-non-escaping-stringbyte-local-emits-the-stack-string-sstring)
+and the [Glossary MVP entry](Glossary.md#mvp)). It emits a zero-copy [`sstring`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/sstring.cs)
+view for a `s := string([]byte)` local only when the local is non-escaping, its source is a plain unnamed
+`[]byte` never written after the conversion, and its every use is a safe read (`len`/`cap`, byte index, or
+comparison against a string literal). That fires on **exactly one** Go-1.23 stdlib site — safe, but far
+short of the win the `PerfString` benchmark wants (whose `s` is a `+` operand, so it stays `@string`).
+
+Expand the eligible surface, one gated increment at a time. **Why this is well-suited to exploratory work:**
+because `sstring` is a `ref struct`, the .NET compiler turns almost every over-reach into a **compile error**
+(it cannot be stored in a field/array/map, boxed to an interface, sent on a channel, or captured by a
+closure) — so a too-aggressive predicate fails **loud** at build time (caught by the behavioral suite +
+full-stdlib reconvert), never silently. The **only** silently-wrong vectors are escape-via-`return` and
+mutation of the source buffer during the view's lifetime; both must stay explicitly guarded. Candidate
+increments, roughly by ROI:
+
+1. **Unnamed-temporary conversions** — `bytes.Equal(a, string(b))`, `m[string(b)]`, `strconv.ParseUint(string(s), …)`:
+   the largest safe bucket (encoding/*, net/http). Needs a per-`*ast.CallExpr` verdict and a curated
+   non-retaining-callee whitelist (or the conservative "argument to any function ⇒ `@string` unless
+   whitelisted").
+2. **`sstring operator+`** (returning `@string`) plus widening the safe-use whitelist beyond
+   len/cap/byte-index/compare-literal (sub-slicing kept in safe uses, rune-range, etc.).
+3. **Mixed `sstring == @string`** operator, co-designed with the comparison-literal emission so it does not
+   reintroduce a `sstring == "literal"` ambiguity.
+4. **Positional / loop-carried liveness guard** — relax "source never written" to "not written between the
+   conversion and the local's last read, not loop-shared." This is the **only** increment that reaches the
+   `PerfString` hot loop, and the highest silent-risk one — gate it behind the heaviest adversarial pass.
+
+Guard every increment with the `SStringElision` behavioral test (extend it) + full-stdlib reconvert (inspect
+every newly-`sstring` site) + a re-run of the performance suite to quantify the actual win.
+
 ## Phase 5 — Implement assembly-backed declarations in C#
 
 **Goal:** replace the `PartialStubGenerator`'s throwing implementations for Go declarations backed by
