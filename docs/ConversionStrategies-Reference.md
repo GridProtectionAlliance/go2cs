@@ -951,13 +951,35 @@ initializers and each array field gets its `new(N)` backing. (C# 11 auto-default
 initializer; a slice/map/chan field — which has no `new(N)` initializer — stays its nil zero value,
 matching Go.) The **NilType constructor preserves the initializers too**: it used to re-assign
 `this.field = default!` to every plain member — running *after* the field initializers, which nulled an
-array field's fresh `new(N)` backing, so `S{}` (emitted `new S(nil)`) NREd on the first index. Both the
-NilType and parameterless constructor bodies now touch only the promoted-embed boxes (see
-[Struct Type Embedding](#struct-type-embedding)) and leave everything else to the field initializers plus
-C# 11 auto-default. This is generator-only and produces no golden churn (the `.g.cs` output is not a
+array field's fresh `new(N)` backing, so `S{}` (emitted `new S(nil)`) NREd on the first index. The
+NilType and parameterless constructor bodies (`AppendZeroValueInitializers`) now assign only what C#'s
+implicit zeroing would leave *broken*: the promoted-embed boxes (see
+[Struct Type Embedding](#struct-type-embedding)), and — see next paragraph — any plain struct-typed field
+whose own type needs construction; everything else is left to the field initializers plus C# 11
+auto-default. This is generator-only and produces no golden churn (the `.g.cs` output is not a
 golden). It is what lets `ArrayOfCrossPackageType` run as an **output-compared** test (`len(x.c)` /
 `len(x.d)` print `3 2`); before the fix, indexing `&x.c[i]` threw a `NullReferenceException`, so the test
 was compile+target-only.
+
+A plain (non-embed) struct-typed FIELD whose type *itself* needs construction is the recursive case:
+`default(T)` gives such a field a `default(FieldType)`, whose nested promoted-embed box or fixed-array
+backing is null — so the first touch NREs even though `T`'s own boxes were constructed. This is fmt's
+`pp{ … fmt fmt … }` where `fmt` embeds `fmtFlags` (a ctor-allocated box): `newPrinter`'s `@new<pp>()`
+ran `pp()`'s ctor, which left `fmt` as `default(fmt)` with a null box, and `p.fmt.init(&p.buf)` →
+`clearflags` NREd — the first crash of any converted `fmt.Println`. `AppendZeroValueInitializers`
+therefore also emits `this.f = new FieldType(nil);` for each such field, and because that runs
+`FieldType`'s own NilType constructor (which recursively constructs *its* needy fields), a single level of
+construction fixes every depth. "Needs construction" (`StructTypeNeedsConstruction`) is: has a promoted
+embed, a fixed-array field, or a nested struct field that needs construction — resolved only for
+converter-generated structs (`GetStructDeclaration`), so a `true` result guarantees the public
+`FieldType(NilType)` constructor exists; a reference field (pointer/interface/delegate) keeps its correct
+nil zero value, and a cross-package/golib field type is left `default` (conservative — its own package
+constructs it, and its nil zero value is correct anyway). Only the NilType and parameterless constructors
+are touched, so this covers `new(T)`/`@new<T>()`/`&T{}`/`T{}`; a `var x T` **local** still emits
+`default!` (a distinct converter-level gap — a local of a needy struct is not yet constructed). Guarded by
+the `NestedPromotedEmbedInit` output-compared test (a `printer` holding a `formatter` field that embeds
+`flags` and holds a `[3]byte`, reached via both `new(printer)` and `&printer{}`, its promoted fields and
+array written and printed against Go); before the fix the promoted-field write NRE'd.
 
 #### Prefer the file-local package alias over the fully-qualified `_package` name
 

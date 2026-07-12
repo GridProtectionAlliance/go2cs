@@ -735,6 +735,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
 
     [TestMethod]
+    public void CheckNestedPromotedEmbedInit() => CheckTarget("NestedPromotedEmbedInit");
+
+    [TestMethod]
     public void CheckNestedVarShadow() => CheckTarget("NestedVarShadow");
 
     [TestMethod]

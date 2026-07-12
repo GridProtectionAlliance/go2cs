@@ -676,6 +676,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
 
     [TestMethod]
+    public void CheckNestedPromotedEmbedInit() => CheckTarget("NestedPromotedEmbedInit");
+
+    [TestMethod]
     public void CheckNestedVarShadow() => CheckTarget("NestedVarShadow");
 
     [TestMethod]

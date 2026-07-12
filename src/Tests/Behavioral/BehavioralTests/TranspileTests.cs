@@ -732,6 +732,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
 
     [TestMethod]
+    public void CheckNestedPromotedEmbedInit() => CheckTarget("NestedPromotedEmbedInit");
+
+    [TestMethod]
     public void CheckNestedVarShadow() => CheckTarget("NestedVarShadow");
 
     [TestMethod]
