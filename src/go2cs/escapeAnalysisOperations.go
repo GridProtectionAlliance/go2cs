@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
+	"os"
 	"sync"
 )
 
@@ -37,6 +39,7 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 				pkg:              pkg,
 				info:             info,
 				identEscapesHeap: fileEntry.identEscapesHeap,
+				sstringEligible:  fileEntry.sstringEligible,
 			}
 
 			ast.Inspect(fileEntry.file, func(n ast.Node) bool {
@@ -66,6 +69,14 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 								for _, lhs := range n.Lhs {
 									if ident := getIdentifier(lhs); ident != nil {
 										visitor.performEscapeAnalysis(ident, node.Body)
+									}
+								}
+
+								// A single-value `s := string(x)` may be emittable as a stack-only
+								// sstring; decide now that identEscapesHeap is populated for the LHS.
+								if len(n.Lhs) == 1 && len(n.Rhs) == 1 {
+									if ident := getIdentifier(n.Lhs[0]); ident != nil {
+										visitor.markSStringEligible(ident, n.Rhs[0], node.Body)
 									}
 								}
 							}
@@ -664,4 +675,249 @@ func containsIdentInValueCalc(node ast.Expr, targetObj types.Object, info *types
 	})
 
 	return found
+}
+
+// markSStringEligible records whether the string local bound by `ident := string(x)` may be emitted
+// as a stack-only sstring — a zero-copy view over x's bytes — instead of the heap @string. The
+// predicate is deliberately CONSERVATIVE (the MVP's safest idiom): it fires only for a plain-string
+// local that does not escape, is never returned, is used only through safe reads (len/cap, byte
+// index, or comparison against a string literal), and whose conversion source is never written for
+// the lifetime of the view. Any uncertainty leaves the local as @string.
+//
+// sstring is a ref struct, so most missed escapes (storing into a field/slice/map, boxing to an
+// interface, sending on a channel, capturing in a closure) become COMPILE errors rather than silent
+// bugs. The two vectors that would be silently wrong — the local escaping via `return`, and mutation
+// of the source buffer while the view is alive — are guarded explicitly below.
+func (v *Visitor) markSStringEligible(ident *ast.Ident, rhs ast.Expr, body *ast.BlockStmt) {
+	obj := v.info.ObjectOf(ident)
+
+	if obj == nil {
+		return
+	}
+
+	// Must be the built-in `string` type exactly — a named string type (`type S string`) would lose
+	// its identity if emitted as sstring.
+	if !types.Identical(obj.Type(), types.Typ[types.String]) {
+		return
+	}
+
+	// Must not escape by any channel the escape analysis already detects.
+	if v.identEscapesHeap[obj] {
+		return
+	}
+
+	// Initializer must be a `string(x)` conversion whose source x is a []byte or []rune.
+	call, ok := rhs.(*ast.CallExpr)
+
+	if !ok || len(call.Args) != 1 {
+		return
+	}
+
+	if tv, ok := v.info.Types[call.Fun]; !ok || !tv.IsType() || !types.Identical(tv.Type, types.Typ[types.String]) {
+		return
+	}
+
+	if !isByteOrRuneSlice(v.info.TypeOf(call.Args[0])) {
+		return
+	}
+
+	// The source's storage root must be an identifiable local/param so the mutation scan can track it.
+	srcRoot := rootIdentObject(call.Args[0], v.info)
+
+	if srcRoot == nil {
+		return
+	}
+
+	// Every use of the local must be a safe read, and it must not be returned.
+	if !v.sstringUsesAreSafe(obj, ident, body) {
+		return
+	}
+
+	// The source must not be written anywhere in the function (strongest form of the guard for now).
+	if v.objectIsWritten(srcRoot, body) {
+		return
+	}
+
+	v.sstringEligible[obj] = true
+
+	if os.Getenv("GO2CS_DEBUG_SSTRING") != "" {
+		pos := v.fset.Position(ident.Pos())
+		fmt.Fprintf(os.Stderr, "[sstring] eligible: %s at %s:%d:%d\n", ident.Name, pos.Filename, pos.Line, pos.Column)
+	}
+}
+
+// sstringUsesAreSafe reports whether every use of the sstring-candidate local `obj` (other than its
+// declaring occurrence `declIdent`) is a safe read: an argument to len/cap, the base of a byte index
+// `s[i]`, or an operand of a comparison against a string literal (`s == "x"`). Any other use — passed
+// to a function, stored, ranged, concatenated, converted, returned, reassigned — makes it ineligible.
+func (v *Visitor) sstringUsesAreSafe(obj types.Object, declIdent *ast.Ident, body *ast.BlockStmt) bool {
+	// Pass 1: collect the identifier nodes that sit in a safe-read slot.
+	safeIdents := map[*ast.Ident]bool{}
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		switch e := n.(type) {
+		case *ast.CallExpr:
+			if fn, ok := e.Fun.(*ast.Ident); ok && (fn.Name == "len" || fn.Name == "cap") {
+				for _, arg := range e.Args {
+					if id, ok := arg.(*ast.Ident); ok {
+						safeIdents[id] = true
+					}
+				}
+			}
+		case *ast.IndexExpr:
+			// `s[i]`: the indexed BASE is a safe byte read (an ident used as the index is separate).
+			if id, ok := e.X.(*ast.Ident); ok {
+				safeIdents[id] = true
+			}
+		case *ast.BinaryExpr:
+			if isComparisonOp(e.Op) {
+				if _, ok := e.Y.(*ast.BasicLit); ok {
+					if id, ok := e.X.(*ast.Ident); ok {
+						safeIdents[id] = true
+					}
+				}
+				if _, ok := e.X.(*ast.BasicLit); ok {
+					if id, ok := e.Y.(*ast.Ident); ok {
+						safeIdents[id] = true
+					}
+				}
+			}
+		}
+
+		return true
+	})
+
+	// Pass 2: every occurrence of the local must be the declaration or one of those safe slots.
+	allSafe := true
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if !allSafe {
+			return false
+		}
+
+		if id, ok := n.(*ast.Ident); ok && id != declIdent && v.info.ObjectOf(id) == obj {
+			if !safeIdents[id] {
+				allSafe = false
+			}
+		}
+
+		return true
+	})
+
+	return allSafe
+}
+
+// objectIsWritten reports whether `root`'s storage is (potentially) written anywhere in the body:
+// as an assignment / increment target, through an address-of, or by being passed to a call that is
+// not a conversion or len/cap (a slice shares its backing array, so any such callee could mutate it).
+// This is the conservative "no write to the source for the whole function" form of the mutation guard.
+func (v *Visitor) objectIsWritten(root types.Object, body *ast.BlockStmt) bool {
+	written := false
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if written {
+			return false
+		}
+
+		switch node := n.(type) {
+		case *ast.AssignStmt:
+			for _, lhs := range node.Lhs {
+				// Skip root's OWN declaration (`root := …`): that establishes the initial value
+				// before the view exists, it is not a mutation of it. Any later reassignment
+				// (`root = append(root, …)`, `root = …`) is a distinct occurrence and IS flagged.
+				if id := rootIdent(lhs); id != nil && v.info.ObjectOf(id) == root && id.Pos() != root.Pos() {
+					written = true
+				}
+			}
+		case *ast.IncDecStmt:
+			if rootIdentObject(node.X, v.info) == root {
+				written = true
+			}
+		case *ast.UnaryExpr:
+			if node.Op == token.AND && rootIdentObject(node.X, v.info) == root {
+				written = true
+			}
+		case *ast.CallExpr:
+			// A conversion (`string(root)`, `[]byte(root)`) reads its operand; len/cap read too.
+			if tv, ok := v.info.Types[node.Fun]; ok && tv.IsType() {
+				return true
+			}
+			if fn, ok := node.Fun.(*ast.Ident); ok && (fn.Name == "len" || fn.Name == "cap") {
+				return true
+			}
+			// Any other call receiving root (or a sub-slice of it) may mutate the shared backing.
+			for _, arg := range node.Args {
+				if rootIdentObject(arg, v.info) == root {
+					written = true
+				}
+			}
+		}
+
+		return true
+	})
+
+	return written
+}
+
+// rootIdent peels an expression through parens, indexes, slice expressions and derefs to its root
+// identifier, or nil if the root is not a plain identifier (a call result, a composite literal, ...).
+func rootIdent(expr ast.Expr) *ast.Ident {
+	for {
+		switch e := expr.(type) {
+		case *ast.ParenExpr:
+			expr = e.X
+		case *ast.IndexExpr:
+			expr = e.X
+		case *ast.SliceExpr:
+			expr = e.X
+		case *ast.StarExpr:
+			expr = e.X
+		case *ast.Ident:
+			return e
+		default:
+			return nil
+		}
+	}
+}
+
+// rootIdentObject peels an expression to the object of its root identifier, or nil if the root is
+// not a plain identifier, in which case the storage cannot be tracked.
+func rootIdentObject(expr ast.Expr, info *types.Info) types.Object {
+	if id := rootIdent(expr); id != nil {
+		return info.ObjectOf(id)
+	}
+
+	return nil
+}
+
+// isByteOrRuneSlice reports whether t is a []byte or []rune (the source types of a string conversion
+// that yields a byte-viewable string).
+func isByteOrRuneSlice(t types.Type) bool {
+	if t == nil {
+		return false
+	}
+
+	slice, ok := t.Underlying().(*types.Slice)
+
+	if !ok {
+		return false
+	}
+
+	basic, ok := slice.Elem().Underlying().(*types.Basic)
+
+	if !ok {
+		return false
+	}
+
+	// byte == uint8 and rune == int32 (same BasicKind values), so testing the two aliases is enough.
+	return basic.Kind() == types.Uint8 || basic.Kind() == types.Int32
+}
+
+func isComparisonOp(op token.Token) bool {
+	switch op {
+	case token.EQL, token.NEQ, token.LSS, token.LEQ, token.GTR, token.GEQ:
+		return true
+	}
+
+	return false
 }

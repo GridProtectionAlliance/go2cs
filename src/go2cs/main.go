@@ -50,6 +50,13 @@ type FileEntry struct {
 	file             *ast.File
 	filePath         string
 	identEscapesHeap map[types.Object]bool
+
+	// sstringEligible flags a `s := string(x)` / `var s = string(x)` string LOCAL that the escape
+	// pass has proven may be emitted as a stack-only `sstring` (a zero-copy view over x's bytes)
+	// instead of the heap `@string` — non-escaping, not returned, used only through safe reads, and
+	// with no write to the conversion's source for the lifetime of the view. Keyed by the local's
+	// types.Object. Computed per file (no cross-file sharing) in performEscapeAnalysis.
+	sstringEligible map[types.Object]bool
 }
 
 // CapturedVarInfo tracks information about captured variables
@@ -273,6 +280,7 @@ type Visitor struct {
 	lastStatementWasReturn bool
 	lastReturnIndentLevel  int
 	identEscapesHeap       map[types.Object]bool
+	sstringEligible        map[types.Object]bool   // String locals emittable as stack-only sstring (see FileEntry.sstringEligible)
 	identNames             map[*ast.Ident]string   // Local identifiers to adjusted names map
 	isReassigned           map[*ast.Ident]bool     // Local identifiers to reassignment status map
 	funcLevelDecls         map[string]*types.Var   // Function-level local declarations of the current function (for global-shadow qualification)
@@ -875,7 +883,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				}
 
 				if !manualConv {
-					files = append(files, FileEntry{file, path, map[types.Object]bool{}})
+					files = append(files, FileEntry{
+						file:             file,
+						filePath:         path,
+						identEscapesHeap: map[types.Object]bool{},
+						sstringEligible:  map[types.Object]bool{},
+					})
 				}
 			}
 		}
@@ -987,6 +1000,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 					globalScope:               globalScope,
 					blocks:                    Stack[*strings.Builder]{},
 					identEscapesHeap:          fileEntry.identEscapesHeap,
+					sstringEligible:           fileEntry.sstringEligible,
 				}
 
 				visitor.visitFile(fileEntry.file)
