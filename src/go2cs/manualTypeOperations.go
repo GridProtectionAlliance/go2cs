@@ -94,6 +94,13 @@ var manualConversionFuncs = map[string]map[string]bool{
 		"rtype.Elem":     true,
 		"rtype.Field":    true,
 		"rtype.NumField": true,
+		// reflect.Type must be CANONICAL (Go interns type descriptors so `aType == bType` holds for
+		// equal types — internal/fmtsort.compare relies on `aType != bType`). The auto Value.Type()
+		// and toType() mint a fresh wrapper per call over a fresh abi.Type box, so identity-equality
+		// never matched → map-key sorting reversed. The hand-owned forms in value_impl.cs intern the
+		// ΔType wrapper by the underlying System.Type (canonType). See docs/Phase4/DESIGN-reflection-bridge.md.
+		"Value.Type": true,
+		"toType":     true,
 	},
 }
 

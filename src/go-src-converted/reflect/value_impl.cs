@@ -14,8 +14,9 @@ using @unsafe = go.unsafe_package;
 // DIRECTLY (a companion `partial struct Value { object boxed }` field), and the value-reader methods
 // read it with System.Reflection + the golib container interfaces (IArray for slices/arrays, ж<T> for
 // pointers). The entry (ValueOf/unpackEface) sets typ_ (the Phase-1 synthetic abi.Type, Kind_ from the
-// managed System.Type) and the flag's Kind bits, so Kind()/IsValid()/CanAddr()/Type() keep working from
-// value.cs. The converter skips these declarations via the manualConversionFuncs registry
+// managed System.Type) and the flag's Kind bits, so Kind()/IsValid()/CanAddr() keep working from
+// value.cs (Type() is hand-owned below so it returns a CANONICAL reflect.Type). The converter skips
+// these declarations via the manualConversionFuncs registry
 // (go2cs/manualTypeOperations.go); this module marker also makes go2cs skip re-converting this file.
 // INCREMENT 1: scalars, slices, arrays, pointers. Struct Field/NumField + map MapRange land next.
 // See docs/Phase4/DESIGN-reflection-bridge.md.
@@ -281,6 +282,61 @@ public static ж<MapIter> MapRange(this ΔValue v) {
 [GoRecv] public static ΔValue Value(this ref MapIter iter) {
     object? cur = iter.mapEnum?.Current;
     return makeReflectValue(cur?.GetType().GetProperty("Value")?.GetValue(cur));
+}
+
+// ==== reflect.Type canonicalization (hand-owned Value.Type + toType) ====
+// Go's reflect.Type is a canonical interned descriptor: TypeOf(x) == TypeOf(y) exactly when x and y
+// have the same dynamic type, so `aType == bType` is a pointer compare that internal/fmtsort.compare
+// relies on (`if aType != bType { return -1 }`). The managed bridge synthesizes a fresh abi.Type box
+// per TypeOf call and wraps it in a fresh rtypeжΔType (an IжAdapter compared by box identity), so two
+// Types describing the same Go type never compared equal — compare() always returned -1 and the stable
+// sort REVERSED the map keys (map[b:2 a:1] instead of map[a:1 b:2]). Intern the ΔType wrapper by the
+// underlying System.Type so identity-equality matches Go. The cache is process-lifetime (type
+// descriptors are permanent, exactly like Go's). See docs/Phase4/DESIGN-reflection-bridge.md.
+private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Type, ΔType> s_canonTypeCache = new();
+
+// canonType returns the canonical reflect.Type wrapper for the underlying type of Ꮡt (keyed by the
+// managed System.Type synthType stamped on the abi.Type). A nil descriptor maps to the nil Type; a
+// descriptor with no System.Type (never synthesized) falls back to a fresh, uninterned wrapper.
+internal static ΔType canonType(ж<abi.Type> Ꮡt) {
+    if (Ꮡt == nil) {
+        return default!;
+    }
+    System.Type? st = Ꮡt.Value.sysType;
+    if (st is null) {
+        // No System.Type stamped on the descriptor: the feeding path did not go through
+        // abi.synthType. Such a wrapper is UN-interned — it would compare unequal to the
+        // canonical Type for the same Go type, silently reintroducing the reversed-map-sort
+        // bug this file fixes. This branch is dead today (synthType always stamps sysType
+        // after its own nil guard, and every canonType caller feeds a synthType/abi.TypeOf
+        // box or nil), so assert to surface a future non-canonical feeder LOUDLY in dev
+        // (Debug builds) while still degrading gracefully in Release rather than crashing.
+        System.Diagnostics.Debug.Assert(false,
+            "reflect.canonType: abi.Type has no System.Type (synthType was bypassed); the " +
+            "resulting reflect.Type is non-canonical. Route the feeding path through abi.synthType.");
+        return new rtypeжΔType(toRType(Ꮡt));
+    }
+    return s_canonTypeCache.GetOrAdd(st, _ => new rtypeжΔType(toRType(Ꮡt)));
+}
+
+// Type returns v's type. Hand-owned so the common (non-method) fast path returns the CANONICAL Type
+// (canonType); the method-value path stays in the auto typeSlow. Mirrors the auto Value.Type shape.
+public static ΔType Type(this ΔValue v) {
+    if (v.flag != 0 && (flag)(v.flag & flagMethod) == 0) {
+        return canonType(v.typ_);
+    }
+    return v.typeSlow();
+}
+
+// toType converts a *rtype to a client-facing reflect.Type, coalescing multiple descriptors for the
+// same underlying type into a single canonical Type (Go's gc interns descriptors; the managed bridge
+// interns here). Hand-owned so reflect.TypeOf routes through canonType. The hand-owned rtype.Elem/
+// Field re-synthesize their element/field descriptor via abi.synthType and route here too, so they
+// are canonical as well. NOTE: rtype.In/Out/Key also call toType, but they read func/map sub-
+// descriptors that synthType never populates, so they currently NRE / return the nil Type — an
+// unimplemented bridge gap, NOT canonical (tracked separately); do not rely on their identity.
+internal static ΔType toType(ж<abi.Type> Ꮡt) {
+    return canonType(Ꮡt);
 }
 
 // ==== Type side: reflect.rtype's ΔType methods over the abi.Type's carried System.Type ====

@@ -2460,14 +2460,7 @@ public static bool TrySend(this ΔValue v, ΔValue x) {
     return v.send(x, true);
 }
 
-// Type returns v's type.
-public static ΔType Type(this ΔValue v) {
-    if (v.flag != 0 && (flag)(v.flag & flagMethod) == 0) {
-        return new rtypeжΔType((ж<rtype>)(uintptr)(noescape(new @unsafe.Pointer(v.typ_))));
-    }
-    // inline of toRType(v.typ()), for own inlining in inline test
-    return v.typeSlow();
-}
+// func Type is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
 internal static ΔType typeSlow(this ΔValue v) {
     if (v.flag == 0) {
