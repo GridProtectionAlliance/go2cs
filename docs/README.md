@@ -190,6 +190,19 @@ Here is the full round-trip for a small CLI that uses [`github.com/fatih/color`]
 which itself pulls in `github.com/mattn/go-colorable`, `github.com/mattn/go-isatty`, and `golang.org/x/sys` —
 a genuine dependency graph:
 
+**0 — (one-time) Stage the standard library.** `deploy-core` is a build script in the go2cs repo's **`src/`**
+folder (it is *not* on your `PATH`), so run it from there. It stages the pre-converted stdlib + runtime +
+analyzer at `%GOPATH%\src\go2cs` (the "deploy root") that every converted project references. This is a
+**one-time, per-machine** setup, unrelated to any particular app — **redo it only when you pull a new go2cs
+version**, to refresh the staged runtime/analyzer/stdlib (building against a stale deploy surfaces spurious
+errors, e.g. `CS0715` on a keyword-named type):
+
+```shell
+cd path\to\go2cs\src
+deploy-core stdlib          # the full compilable standard library (best for arbitrary imports)
+                            #   deploy-core stub  = the smaller runnable baseline subset
+```
+
 **1 — Go: get the app and confirm it builds as Go.**
 
 ```shell
@@ -217,25 +230,11 @@ go mod tidy      # download color + its dependencies into the Go module cache
 go build ./...   # baseline: confirm it compiles as Go first
 ```
 
-**2 — go2cs: stage the standard library once, then recurse-convert the app.**
-
-This step uses two tools from opposite folders, so mind where each runs:
-
-- **`deploy-core`** is a build script that lives in the go2cs repo's **`src/`** folder (it is *not* installed
-  on your `PATH`), so run it from there. Staging is a **one-time, per-machine** step shared by every
-  `-recurse` conversion — it is unrelated to the app you are converting.
-- **`go2cs`** is the converter you built onto your `PATH` in *Installing the converter* above, so it runs
-  from anywhere. Point it at the **app** directory.
+**2 — go2cs: recurse-convert the app.** `go2cs` is the converter you put on your `PATH` in *Installing the
+converter* above, so it runs from anywhere. Point it at the **app** directory and at the deploy root from
+step 0 (the standard library staged there is referenced, not re-converted):
 
 ```shell
-# (a) In the go2cs repo's  src/  folder, stage the pre-converted stdlib + runtime + analyzer at
-#     %GOPATH%\src\go2cs (the "deploy root") -- done once per machine or at go2cs updates:
-cd path\to\go2cs\src
-deploy-core stdlib          # the full compilable standard library (best for arbitrary imports)
-                            #   deploy-core stub  = the smaller runnable baseline subset
-
-# (b) Back in the APP folder, convert the app + its third-party deps under that same root
-#     (the standard library is referenced, not converted):
 cd path\to\colordemo
 go2cs -recurse . -go2cspath %GOPATH%\src\go2cs
 ```
@@ -269,14 +268,9 @@ dotnet build "%GOPATH%\src\go2cs\src\example.com\colordemo\example.com.colordemo
 > under the deploy root too, a bare `dotnet build` in its `src\…` folder (or opening it in an IDE) resolves
 > the same way.
 
-Two practical notes:
-
-- **Re-run `deploy-core` after updating go2cs.** The deploy root is a *snapshot* of the runtime, analyzer,
-  and stdlib. Building converted code against a stale analyzer surfaces spurious errors (e.g. `CS0715` on a
-  keyword-named type) that a current one does not — refresh the deploy whenever you pull converter changes.
-- **Build go2cs with a Go toolchain ≥ the module's `go` directive.** `go/packages` type-checks the source
-  with go2cs's own toolchain, so converting a module that requires a newer Go than go2cs was built with
-  (e.g. `fatih/color` v1.19 requires go 1.25) loads with degraded type information.
+One more practical note: **build go2cs with a Go toolchain ≥ the module's `go` directive.** `go/packages`
+type-checks the source with go2cs's own toolchain, so converting a module that requires a newer Go than
+go2cs was built with (e.g. `fatih/color` v1.19 requires go 1.25) loads with degraded type information.
 
 `-recurse` is a work in progress: it produces a **buildable** solution and handles the common real-world
 module shapes — this `fatih/color` example **compiles clean** (app + all four dependency projects, against a
