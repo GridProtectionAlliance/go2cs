@@ -67,30 +67,46 @@ public static bool Bool(this ΔValue v) {
 }
 
 public static int64 Int(this ΔValue v) {
-    return v.boxed switch {
+    return numericValue(v.boxed) switch {
         nint n => (int64)n,
         int i => i,
         long l => l,
         short s => s,
         sbyte b => b,
-        _ => System.Convert.ToInt64(v.boxed)
+        var n => System.Convert.ToInt64(n)
     };
 }
 
 public static uint64 Uint(this ΔValue v) {
-    return v.boxed switch {
+    return numericValue(v.boxed) switch {
         nuint n => (uint64)n,
         uintptr up => (uint64)up.Value,
         uint u => u,
         ulong l => l,
         ushort s => s,
         byte b => b,
-        _ => System.Convert.ToUInt64(v.boxed)
+        var n => System.Convert.ToUInt64(n)
     };
 }
 
 public static float64 Float(this ΔValue v) {
-    return System.Convert.ToDouble(v.boxed);
+    return System.Convert.ToDouble(numericValue(v.boxed));
+}
+
+// numericValue unwraps a NAMED numeric type (`type Celsius float64` → a [GoType("num:float64")] struct)
+// to its underlying primitive so Int/Uint/Float can read it — a primitive (int/double/…) or golib
+// uintptr is returned unchanged; a wrapper struct yields its single primitive field.
+private static object? numericValue(object? boxed) {
+    if (boxed is null || boxed.GetType().IsPrimitive || boxed is uintptr) {
+        return boxed;
+    }
+    foreach (FieldInfo f in boxed.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)) {
+        object? val = f.GetValue(boxed);
+        if (val is not null && (val.GetType().IsPrimitive || val is uintptr)) {
+            return val;
+        }
+    }
+    return boxed;
 }
 
 public static complex128 Complex(this ΔValue v) {
@@ -265,6 +281,48 @@ public static ж<MapIter> MapRange(this ΔValue v) {
 [GoRecv] public static ΔValue Value(this ref MapIter iter) {
     object? cur = iter.mapEnum?.Current;
     return makeReflectValue(cur?.GetType().GetProperty("Value")?.GetValue(cur));
+}
+
+// ==== Type side: reflect.rtype's ΔType methods over the abi.Type's carried System.Type ====
+// rtype wraps an abi.Type by value, so `Ꮡt.Value.t.sysType` is the managed System.Type the Phase-1
+// synthType stamped on the descriptor. These bypass Go's name/offset resolution (resolveNameOff, a
+// stub) entirely, deriving Go type info from System.Type via GoReflect.
+
+// String returns the Go source type string (`main.Point`, `[]int`, `*T`) — the value of %T.
+internal static @string String(this ж<rtype> Ꮡt) {
+    return (@string)GoReflect.GoTypeName(Ꮡt.Value.t.sysType);
+}
+
+// Name returns the type's name within its package (empty for an unnamed composite).
+internal static @string Name(this ж<rtype> Ꮡt) {
+    System.Type? st = Ꮡt.Value.t.sysType;
+    if (st is null || GoReflect.ElementType(st) is not null) {
+        return "";
+    }
+    string full = GoReflect.GoTypeName(st);
+    int dot = full.LastIndexOf('.');
+    return (@string)(dot >= 0 ? full[(dot + 1)..] : full);
+}
+
+// Elem returns the element type of a slice/array/pointer/map/chan.
+internal static ΔType Elem(this ж<rtype> Ꮡt) {
+    return toType(abi.synthType(GoReflect.ElementType(Ꮡt.Value.t.sysType)));
+}
+
+// NumField returns the number of fields in a struct type.
+internal static nint NumField(this ж<rtype> Ꮡt) {
+    System.Type? st = Ꮡt.Value.t.sysType;
+    return st is null ? 0 : goStructFields(st).Length;
+}
+
+// Field returns the i'th struct field's descriptor (fmt reads .Name for %+v).
+internal static StructField Field(this ж<rtype> Ꮡt, nint i) {
+    System.Type st = Ꮡt.Value.t.sysType!;
+    FieldInfo f = goStructFields(st)[(int)i];
+    return new StructField(
+        Name: (@string)f.Name,
+        Type: toType(abi.synthType(f.FieldType))
+    );
 }
 
 } // end reflect_package

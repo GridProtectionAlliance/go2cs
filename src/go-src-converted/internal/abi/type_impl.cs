@@ -22,15 +22,29 @@ namespace go.@internal;
 
 partial class abi_package {
 
-// TypeOf returns the abi.Type of some value.
-public static ж<Type> TypeOf(any a) {
-    if (a == default!) {
+// The managed System.Type this synthetic abi.Type stands for — carried directly on the descriptor so
+// the reflect Type methods (String/Name/Elem/Field) can recover Go type info from it (the reflect
+// rtype wraps an abi.Type by value, so the field rides along the copy). Null for a non-synthesized Type.
+partial struct Type {
+    public System.Type? sysType;
+}
+
+// synthType builds a managed-backed abi.Type from a System.Type: Kind_ classified from it (GoReflect)
+// and the System.Type carried on the descriptor. The single builder behind both TypeOf (from a value)
+// and reflect's Type.Elem/Field (from a type with no value).
+public static ж<Type> synthType(System.Type? st) {
+    if (st is null) {
         return default!;
     }
     ref var t = ref heap<Type>(out var Ꮡt);
-    t.Kind_ = (ΔKind)((uint8)GoReflect.KindOf(a.GetType()));
-    GoReflect.Register(Ꮡt, a.GetType());
+    t.Kind_ = (ΔKind)((uint8)GoReflect.KindOf(st));
+    t.sysType = st;
     return Ꮡt;
+}
+
+// TypeOf returns the abi.Type of some value.
+public static ж<Type> TypeOf(any a) {
+    return a == default! ? default! : synthType(a.GetType());
 }
 
 } // end abi_package

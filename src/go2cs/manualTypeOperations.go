@@ -88,6 +88,12 @@ var manualConversionFuncs = map[string]map[string]bool{
 		"MapIter.Next":         true,
 		"MapIter.Key":          true,
 		"MapIter.Value":        true,
+		// Type side: reflect.rtype's ΔType methods over the abi.Type's System.Type (%T, %+v names).
+		"rtype.String":   true,
+		"rtype.Name":     true,
+		"rtype.Elem":     true,
+		"rtype.Field":    true,
+		"rtype.NumField": true,
 	},
 }
 

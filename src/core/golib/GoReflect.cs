@@ -130,6 +130,86 @@ public static class GoReflect
         return Struct;
     }
 
+    /// <summary>
+    /// The Go source type string for a managed <see cref="Type"/> — what `reflect.Type.String()` and
+    /// `%T` print. Recurses over the golib container types (`[]int`, `map[string]int`, `*main.Point`),
+    /// maps the scalar representations to their Go spelling, and package-qualifies a named/struct type
+    /// (`go.main_package.Point` → `main.Point`).
+    /// </summary>
+    public static string GoTypeName(Type? t)
+    {
+        if (t is null) return "<nil>";
+
+        if (t == typeof(bool)) return "bool";
+        if (t == typeof(nint)) return "int";
+        if (t == typeof(sbyte)) return "int8";
+        if (t == typeof(short)) return "int16";
+        if (t == typeof(int)) return "int32";
+        if (t == typeof(long)) return "int64";
+        if (t == typeof(nuint)) return "uint";
+        if (t == typeof(byte)) return "uint8";
+        if (t == typeof(ushort)) return "uint16";
+        if (t == typeof(uint)) return "uint32";
+        if (t == typeof(ulong)) return "uint64";
+        if (t == typeof(uintptr)) return "uintptr";
+        if (t == typeof(float)) return "float32";
+        if (t == typeof(double)) return "float64";
+        if (t == typeof(Complex)) return "complex128";
+        if (t == typeof(@string) || t == typeof(string)) return "string";
+
+        if (t.IsGenericType)
+        {
+            Type gd = t.GetGenericTypeDefinition();
+            Type[] a = t.GetGenericArguments();
+
+            if (gd == typeof(slice<>)) return "[]" + GoTypeName(a[0]);
+            if (gd == typeof(array<>)) return "[]" + GoTypeName(a[0]);   // length is not carried on the managed type
+            if (gd == typeof(map<,>)) return "map[" + GoTypeName(a[0]) + "]" + GoTypeName(a[1]);
+            if (gd == typeof(channel<>)) return "chan " + GoTypeName(a[0]);
+            if (gd == typeof(ж<>)) return "*" + GoTypeName(a[0]);
+        }
+
+        if (t.BaseType == typeof(ж<uintptr>)) return "unsafe.Pointer";
+
+        return GoQualifiedName(t);
+    }
+
+    // The package-qualified Go name of a converted named type: a converted type is nested in a
+    // `<pkg>_package` class, so `go.main_package.Point` → `main.Point`. A Δ-collision rename (ΔHandle)
+    // strips the marker; a type with no `_package` declaring class falls back to its bare name.
+    private static string GoQualifiedName(Type t)
+    {
+        string name = t.Name;
+
+        if (name.Length > 0 && name[0] == 'Δ') // ShadowVarMarker Δ
+            name = name[1..];
+
+        Type? decl = t.DeclaringType;
+
+        if (decl is not null && decl.Name.EndsWith("_package", StringComparison.Ordinal))
+            return decl.Name[..^"_package".Length] + "." + name;
+
+        return name;
+    }
+
+    /// <summary>
+    /// The Go element type of a managed container <see cref="Type"/> — <c>slice&lt;T&gt;</c>/
+    /// <c>array&lt;T&gt;</c>/<c>channel&lt;T&gt;</c>/<c>ж&lt;T&gt;</c> → <c>T</c>, <c>map&lt;K,V&gt;</c> → <c>V</c>
+    /// — for <c>reflect.Type.Elem()</c>; <c>null</c> if <paramref name="t"/> has no element type.
+    /// </summary>
+    public static Type? ElementType(Type? t)
+    {
+        if (t is null || !t.IsGenericType) return null;
+
+        Type gd = t.GetGenericTypeDefinition();
+        Type[] a = t.GetGenericArguments();
+
+        if (gd == typeof(map<,>)) return a[1];
+        if (gd == typeof(slice<>) || gd == typeof(array<>) || gd == typeof(channel<>) || gd == typeof(ж<>)) return a[0];
+
+        return null;
+    }
+
     // Reads a [GoType] definition string ("num:int32", "@string", "num:uintptr", ...) and maps its
     // underlying-kind token to a reflect.Kind. Returns false when the type carries no such definition
     // (a plain [GoType] struct, or a non-converted type).
