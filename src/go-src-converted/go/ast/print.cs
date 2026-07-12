@@ -37,8 +37,6 @@ public static bool NotNilFilter(@string _, reflectꓸValue v) {
 // printed; all others are filtered from the output. Unexported
 // struct fields are never printed.
 public static error Fprint(io.Writer w, ж<token.FileSet> Ꮡfset, any x, Func<@string, reflectꓸValue, bool> f) {
-    ref var fset = ref Ꮡfset.Value;
-
     return fprint(w, Ꮡfset, x, f);
 }
 
@@ -80,8 +78,6 @@ internal static error /*err*/ fprint(io.Writer w, ж<token.FileSet> Ꮡfset, any
 // Print prints x to standard output, skipping nil fields.
 // Print(fset, x) is the same as Fprint(os.Stdout, fset, x, NotNilFilter).
 public static error Print(ж<token.FileSet> Ꮡfset, any x) {
-    ref var fset = ref Ꮡfset.Value;
-
     return Fprint(new os.FileжWriter(os.Stdout), Ꮡfset, x, new Func<@string, reflectꓸValue, bool>(NotNilFilter));
 }
 
@@ -143,7 +139,6 @@ internal static slice<byte> indent = slice<byte>((@string)".  ");
 internal static void printf(this ж<printer> Ꮡp, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    ref var p = ref Ꮡp.Value;
     {
         var (_, err) = fmt.Fprintf(new printerжWriter(Ꮡp), format, args.ꓸꓸꓸ); if (err != default!) {
             throw panic(new localError(err));

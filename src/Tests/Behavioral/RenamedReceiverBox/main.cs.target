@@ -19,8 +19,6 @@ internal static void p(this tagger _) {
 }
 
 internal static void add(this ж<counter> Ꮡc, nint d) {
-    ref var c = ref Ꮡc.Value;
-
     addInt(Ꮡc.of(counter.Ꮡn), d);
 }
 
@@ -31,8 +29,6 @@ internal static void addInt(ж<nint> Ꮡx, nint d) {
 }
 
 internal static void bumpTwice(this ж<counter> Ꮡp) {
-    ref var Δp = ref Ꮡp.Value;
-
     Ꮡp.add(1);
     Ꮡp.add(1);
 }

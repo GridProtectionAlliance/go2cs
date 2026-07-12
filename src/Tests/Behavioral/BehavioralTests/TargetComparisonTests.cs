@@ -213,6 +213,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckCrossPkgUser() => CheckTarget("CrossPkgUser");
 
     [TestMethod]
+    public void CheckDeadPointerParamAlias() => CheckTarget("DeadPointerParamAlias");
+
+    [TestMethod]
     public void CheckDeferArgEnclosingCapture() => CheckTarget("DeferArgEnclosingCapture");
 
     [TestMethod]
@@ -735,6 +738,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
 
     [TestMethod]
+    public void CheckNestedPromotedEmbedInit() => CheckTarget("NestedPromotedEmbedInit");
+
+    [TestMethod]
     public void CheckNestedVarShadow() => CheckTarget("NestedVarShadow");
 
     [TestMethod]
@@ -744,10 +750,16 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNilMapOperations() => CheckTarget("NilMapOperations");
 
     [TestMethod]
+    public void CheckNilPointerUintptr() => CheckTarget("NilPointerUintptr");
+
+    [TestMethod]
     public void CheckPackageShadowParam() => CheckTarget("PackageShadowParam");
 
     [TestMethod]
     public void CheckPackageShadowPointerParam() => CheckTarget("PackageShadowPointerParam");
+
+    [TestMethod]
+    public void CheckPackageVarInitOrder() => CheckTarget("PackageVarInitOrder");
 
     [TestMethod]
     public void CheckPanicRecover() => CheckTarget("PanicRecover");
@@ -796,6 +808,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPointerParamWalk() => CheckTarget("PointerParamWalk");
+
+    [TestMethod]
+    public void CheckPointerReceiverNilCompare() => CheckTarget("PointerReceiverNilCompare");
 
     [TestMethod]
     public void CheckPointerReceiverPointerLocalField() => CheckTarget("PointerReceiverPointerLocalField");

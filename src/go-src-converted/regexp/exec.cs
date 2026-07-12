@@ -89,8 +89,6 @@ internal static input newReader(this ж<inputs> Ꮡi, io.RuneReader r) {
 }
 
 internal static (input, nint) init(this ж<inputs> Ꮡi, io.RuneReader r, slice<byte> b, @string s) {
-    ref var i = ref Ꮡi.Value;
-
     if (r != default!) {
         return (Ꮡi.newReader(r), 0);
     }
@@ -112,8 +110,6 @@ internal static (input, nint) init(this ж<inputs> Ꮡi, io.RuneReader r, slice<
 // alloc allocates a new thread with the given instruction.
 // It uses the free pool if possible.
 [GoRecv] internal static ж<thread> alloc(this ref machine m, ж<syntax.Inst> Ꮡi) {
-    ref var i = ref Ꮡi.Value;
-
     ж<thread> t = default!;
     {
         nint n = len(m.pool); if (n > 0){
@@ -274,8 +270,6 @@ internal static bool match(this ж<machine> Ꮡm, input i, nint pos) {
 // nextCond gives the setting for the empty-width flags after c.
 [GoRecv] internal static void step(this ref machine m, ж<queue> Ꮡrunq, ж<queue> Ꮡnextq, nint pos, nint nextPos, rune c, ж<lazyFlag> ᏑnextCond) {
     ref var runq = ref Ꮡrunq.Value;
-    ref var nextq = ref Ꮡnextq.Value;
-    ref var nextCond = ref ᏑnextCond.Value;
 
     var longest = m.re.Value.longest;
     for (nint j = 0; j < len(runq.dense); j++) {
@@ -556,8 +550,6 @@ Return:
 
 // doMatch reports whether either r, b or s match the regexp.
 internal static bool doMatch(this ж<Regexp> Ꮡre, io.RuneReader r, slice<byte> b, @string s) {
-    ref var re = ref Ꮡre.Value;
-
     return Ꮡre.doExecute(r, b, s, 0, 0, default!) != default!;
 }
 

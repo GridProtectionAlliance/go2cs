@@ -154,7 +154,6 @@ partial class comment_package {
 // Comment returns the standard Go formatting of the [Doc],
 // without any comment markers.
 public static slice<byte> Comment(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
-    ref var p = ref Ꮡp.Value;
     ref var d = ref Ꮡd.Value;
 
     var cp = Ꮡ(new commentPrinter(Printer: Ꮡp));

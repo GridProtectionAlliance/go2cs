@@ -267,8 +267,6 @@ public static @string JoinHostPort(@string host, @string port) {
 // family addresses. The result contains at least one address when
 // error is nil.
 internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, context.Context ctx, @string net, @string addr) {
-    ref var r = ref Ꮡr.Value;
-
     error err = default!;
     @string host = default!;
     @string port = default!;

@@ -95,7 +95,6 @@ public static ж<Point> ScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡx) {
 public static ж<Point> ScalarMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡx, ж<Point> Ꮡq) {
     ref var v = ref Ꮡv.Value;
     ref var x = ref Ꮡx.Value;
-    ref var q = ref Ꮡq.Value;
 
     checkInitialized(Ꮡq);
     projLookupTable table = default!;
@@ -167,8 +166,6 @@ internal static ref basepointNafTablePrecompᴛ1 basepointNafTablePrecomp => ref
 public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡa, ж<Point> ᏑA, ж<Scalar> Ꮡb) {
     ref var v = ref Ꮡv.Value;
     ref var a = ref Ꮡa.Value;
-    ref var A = ref ᏑA.Value;
-    ref var b = ref Ꮡb.Value;
 
     checkInitialized(ᏑA);
     // Similarly to the single variable-base approach, we compute

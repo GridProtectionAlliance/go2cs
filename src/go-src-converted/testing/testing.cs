@@ -556,7 +556,7 @@ internal static ж<chattyPrinter> newChattyPrinter(Δio.Writer w) {
 internal static @string prefix(this ж<chattyPrinter> Ꮡp) {
     ref var p = ref Ꮡp.Value;
 
-    if (p != nil && p.json) {
+    if (Ꮡp != nil && p.json) {
         return ((@string)marker);
     }
     return ""u8;
@@ -784,8 +784,6 @@ internal static Δruntime.Frame frameSkip(this ж<common> Ꮡc, nint skip) => fu
 // and inserts the final newline if needed and indentation spaces for formatting.
 // This function must be called with c.mu held.
 internal static @string decorate(this ж<common> Ꮡc, @string s, nint skip) {
-    ref var c = ref Ꮡc.Value;
-
     var frame = Ꮡc.frameSkip(skip);
     @string @file = frame.File;
     nint line = frame.Line;
@@ -1043,8 +1041,6 @@ internal static void FailNow(this ж<common> Ꮡc) {
 
 // log generates the output. It's always at the same stack depth.
 internal static void log(this ж<common> Ꮡc, @string s) {
-    ref var c = ref Ꮡc.Value;
-
     Ꮡc.logDepth(s, 3);
 }
 
@@ -1865,8 +1861,6 @@ public static bool Run(this ж<T> Ꮡt, @string name, Action<ж<T>> f) {
 }
 
 internal static ж<testContext> newTestContext(nint maxParallel, ж<matcher> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
     return Ꮡ(new testContext(
         match: Ꮡm,
         startParallel: new channel<bool>(1),

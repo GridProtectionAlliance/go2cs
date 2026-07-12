@@ -21,8 +21,6 @@ partial class runtime_package {
 //
 // buf may be nil.
 internal static traceExpWriter unsafeTraceExpWriter(uintptr gen, ж<traceBuf> Ꮡbuf, traceExperiment exp) {
-    ref var buf = ref Ꮡbuf.Value;
-
     return new traceExpWriter(new traceWriter(traceLocker: new traceLocker(gen: gen), traceBuf: Ꮡbuf), exp);
 }
 

@@ -23,14 +23,10 @@ public static ж<Slice> NewSlice(ΔType elem) {
 }
 
 public static ΔType Underlying(this ж<Slice> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     return new SliceжΔType(Ꮡs);
 }
 
 public static @string String(this ж<Slice> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     return TypeString(new SliceжΔType(Ꮡs), default!);
 }
 

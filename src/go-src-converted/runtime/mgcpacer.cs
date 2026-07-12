@@ -602,8 +602,6 @@ internal static void endCycle(this ж<gcControllerState> Ꮡc, int64 now, nint p
 //
 //go:nowritebarrier
 internal static void enlistWorker(this ж<gcControllerState> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     // If there are idle Ps, wake one so it will run an idle worker.
     // NOTE: This is suspected of causing deadlocks. See golang.org/issue/19112.
     //
@@ -757,8 +755,6 @@ internal static void resetLive(this ж<gcControllerState> Ꮡc, uint64 bytesMark
 //
 // Safe to execute at any time.
 internal static void markWorkerStop(this ж<gcControllerState> Ꮡc, gcMarkWorkerMode mode, int64 duration) {
-    ref var c = ref Ꮡc.Value;
-
     var exprᴛ1 = mode;
     if (exprᴛ1 == gcMarkWorkerDedicatedMode) {
         Ꮡc.of(gcControllerState.ᏑdedicatedMarkTime).Add(duration);
@@ -778,8 +774,6 @@ internal static void markWorkerStop(this ж<gcControllerState> Ꮡc, gcMarkWorke
 }
 
 internal static void update(this ж<gcControllerState> Ꮡc, int64 dHeapLive, int64 dHeapScan) {
-    ref var c = ref Ꮡc.Value;
-
     if (dHeapLive != 0) {
         var Δtrace = traceAcquire();
         var live = ᏑgcController.of(gcControllerState.ᏑheapLive).Add(dHeapLive);
@@ -802,7 +796,6 @@ internal static void update(this ж<gcControllerState> Ꮡc, int64 dHeapLive, in
 }
 
 internal static void addScannableStack(this ж<gcControllerState> Ꮡc, ж<Δp> Ꮡpp, int64 amount) {
-    ref var c = ref Ꮡc.Value;
     ref var pp = ref Ꮡpp.DerefOrNil();
 
     if (Ꮡpp == nil) {
@@ -817,15 +810,11 @@ internal static void addScannableStack(this ж<gcControllerState> Ꮡc, ж<Δp> 
 }
 
 internal static void addGlobals(this ж<gcControllerState> Ꮡc, int64 amount) {
-    ref var c = ref Ꮡc.Value;
-
     Ꮡc.of(gcControllerState.ᏑglobalsScan).Add(amount);
 }
 
 // heapGoal returns the current heap goal.
 internal static uint64 heapGoal(this ж<gcControllerState> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     var (goal, _) = Ꮡc.heapGoalInternal();
     return goal;
 }
@@ -1258,8 +1247,6 @@ internal static int64 readGOMEMLIMIT() {
 //
 //go:nosplit
 internal static bool addIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     while (ᐧ) {
         var old = Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).Load();
         var (n, max) = ((int32)((uint64)(old & (uint64)(~(uint32)0))), (int32)((old >> (int)(32))));
@@ -1288,8 +1275,6 @@ internal static bool addIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
 //
 //go:nosplit
 internal static bool needIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     var Δp = Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).Load();
     var (n, max) = ((int32)((uint64)(Δp & (uint64)(~(uint32)0))), (int32)((Δp >> (int)(32))));
     return n < max;
@@ -1297,8 +1282,6 @@ internal static bool needIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
 
 // removeIdleMarkWorker must be called when a new idle mark worker stops executing.
 internal static void removeIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     while (ᐧ) {
         var old = Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).Load();
         var (n, max) = ((int32)((uint64)(old & (uint64)(~(uint32)0))), (int32)((old >> (int)(32))));
@@ -1319,8 +1302,6 @@ internal static void removeIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
 // idle mark workers to reduce to max before returning; it assumes the workers
 // will deschedule themselves.
 internal static void setMaxIdleMarkWorkers(this ж<gcControllerState> Ꮡc, int32 max) {
-    ref var c = ref Ꮡc.Value;
-
     while (ᐧ) {
         var old = Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).Load();
         var n = (int32)((uint64)(old & (uint64)(~(uint32)0)));

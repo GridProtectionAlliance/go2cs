@@ -142,8 +142,6 @@ internal static @string String(this boolVal x) {
 
 // String returns a possibly shortened quoted form of the String value.
 internal static @string String(this ж<stringVal> Ꮡx) {
-    ref var x = ref Ꮡx.Value;
-
     UntypedInt maxLen = 72; // a reasonable length
     @string s = strconv.Quote(Ꮡx.@string());
     if (utf8.RuneCountInString(s) > maxLen) {
@@ -195,8 +193,6 @@ internal static slice<@string> reverse(slice<@string> x) {
 // as ((((a + b) + c) + d) + e), the left-side loop avoids deep recursion.
 // x must be locked.
 internal static slice<@string> appendReverse(this ж<stringVal> Ꮡx, slice<@string> list) {
-    ref var x = ref Ꮡx.Value;
-
     var y = Ꮡx;
     while ((~y).r != nil) {
         (~y).r.of(stringVal.Ꮡmu).Lock();
@@ -299,8 +295,6 @@ internal static @string ExactString(this boolVal x) {
 }
 
 internal static @string ExactString(this ж<stringVal> Ꮡx) {
-    ref var x = ref Ꮡx.Value;
-
     return strconv.Quote(Ꮡx.@string());
 }
 
@@ -402,8 +396,6 @@ internal static Value makeInt(ж<bigꓸInt> Ꮡx) {
 }
 
 internal static Value makeRat(ж<bigꓸRat> Ꮡx) {
-    ref var x = ref Ꮡx.Value;
-
     var a = Ꮡx.Num();
     var b = Ꮡx.Denom();
     if (smallInt(a) && smallInt(b)) {

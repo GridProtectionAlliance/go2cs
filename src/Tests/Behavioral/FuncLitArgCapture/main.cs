@@ -66,8 +66,6 @@ internal static nint selfRefCapture() {
 }
 
 internal static void deferArgCapture(ж<box> Ꮡout) => func((defer, recover) => {
-    ref var @out = ref Ꮡout.Value;
-
     var pf = Ꮡout;
     var pfʗ1 = pf;
     deferǃ(run, () => {

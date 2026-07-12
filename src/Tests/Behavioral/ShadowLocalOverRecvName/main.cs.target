@@ -39,8 +39,6 @@ public static nint Sum(this Thing t) {
 }
 
 [GoRecv] public static nint PtrShadowCall(this ref Thing t, ж<Thing> Ꮡother) {
-    ref var other = ref Ꮡother.Value;
-
     nint sum = t.Sum();
     {
         var tΔ1 = Ꮡother;
@@ -50,8 +48,6 @@ public static nint Sum(this Thing t) {
 }
 
 [GoRecv] public static nint PtrShadowChain(this ref Thing t, ж<Thing> Ꮡother) {
-    ref var other = ref Ꮡother.Value;
-
     t.inner.n = 1;
     {
         var tΔ1 = Ꮡother;
@@ -87,8 +83,6 @@ public static nint ValShadowField(this ж<Thing> Ꮡt) {
 }
 
 [GoRecv] public static @string IfaceShadowEmbed(this ref Box b, ж<Box> Ꮡother) {
-    ref var other = ref Ꮡother.Value;
-
     @string name = b.HasName.Name();
     {
         var bΔ1 = Ꮡother;

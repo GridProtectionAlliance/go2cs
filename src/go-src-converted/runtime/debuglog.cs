@@ -183,29 +183,21 @@ internal static ж<dlogger> b(this ж<dlogger> Ꮡl, bool x) {
 
 //go:nosplit
 internal static ж<dlogger> i(this ж<dlogger> Ꮡl, nint x) {
-    ref var l = ref Ꮡl.Value;
-
     return Ꮡl.i64((int64)x);
 }
 
 //go:nosplit
 internal static ж<dlogger> i8(this ж<dlogger> Ꮡl, int8 x) {
-    ref var l = ref Ꮡl.Value;
-
     return Ꮡl.i64((int64)x);
 }
 
 //go:nosplit
 internal static ж<dlogger> i16(this ж<dlogger> Ꮡl, int16 x) {
-    ref var l = ref Ꮡl.Value;
-
     return Ꮡl.i64((int64)x);
 }
 
 //go:nosplit
 internal static ж<dlogger> i32(this ж<dlogger> Ꮡl, int32 x) {
-    ref var l = ref Ꮡl.Value;
-
     return Ꮡl.i64((int64)x);
 }
 
@@ -223,36 +215,26 @@ internal static ж<dlogger> i64(this ж<dlogger> Ꮡl, int64 x) {
 
 //go:nosplit
 internal static ж<dlogger> u(this ж<dlogger> Ꮡl, nuint x) {
-    ref var l = ref Ꮡl.Value;
-
     return Ꮡl.u64((uint64)x);
 }
 
 //go:nosplit
 internal static ж<dlogger> uptr(this ж<dlogger> Ꮡl, uintptr x) {
-    ref var l = ref Ꮡl.Value;
-
     return Ꮡl.u64((uint64)x);
 }
 
 //go:nosplit
 internal static ж<dlogger> u8(this ж<dlogger> Ꮡl, uint8 x) {
-    ref var l = ref Ꮡl.Value;
-
     return Ꮡl.u64((uint64)x);
 }
 
 //go:nosplit
 internal static ж<dlogger> u16(this ж<dlogger> Ꮡl, uint16 x) {
-    ref var l = ref Ꮡl.Value;
-
     return Ꮡl.u64((uint64)x);
 }
 
 //go:nosplit
 internal static ж<dlogger> u32(this ж<dlogger> Ꮡl, uint32 x) {
-    ref var l = ref Ꮡl.Value;
-
     return Ꮡl.u64((uint64)x);
 }
 

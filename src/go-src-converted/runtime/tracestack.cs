@@ -135,8 +135,6 @@ internal static uint64 traceStack(nint skip, ж<g> Ꮡgp, uintptr gen) {
 // put returns a unique id for the stack trace pcs and caches it in the table,
 // if it sees the trace for the first time.
 internal static uint64 put(this ж<traceStackTable> Ꮡt, slice<uintptr> pcs) {
-    ref var t = ref Ꮡt.Value;
-
     if (len(pcs) == 0) {
         return 0;
     }
@@ -148,8 +146,6 @@ internal static uint64 put(this ж<traceStackTable> Ꮡt, slice<uintptr> pcs) {
 // releases all memory and resets state. It must only be called once the caller
 // can guarantee that there are no more writers to the table.
 internal static void dump(this ж<traceStackTable> Ꮡt, uintptr gen) {
-    ref var t = ref Ꮡt.Value;
-
     var stackBuf = new slice<uintptr>(traceStackSize);
     var w = unsafeTraceWriter(gen, nil);
     {

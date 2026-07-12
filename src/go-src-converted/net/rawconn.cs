@@ -24,7 +24,7 @@ partial class net_package {
 internal static bool ok(this ж<rawConn> Ꮡc) {
     ref var c = ref Ꮡc.Value;
 
-    return c != nil && c.fd != nil;
+    return Ꮡc != nil && c.fd != nil;
 }
 
 internal static error Control(this ж<rawConn> Ꮡc, Action<uintptr> f) {

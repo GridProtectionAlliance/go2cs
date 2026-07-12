@@ -29,8 +29,6 @@ partial class types_package {
 // NewAlias creates a new Alias type with the given type name and rhs.
 // rhs must not be nil.
 public static ж<Alias> NewAlias(ж<TypeName> Ꮡobj, ΔType rhs) {
-    ref var obj = ref Ꮡobj.Value;
-
     var alias = ((ж<Checker>)(default!)).newAlias(Ꮡobj, rhs);
     // Ensure that alias.actual is set (#65455).
     alias.cleanup();
@@ -44,8 +42,6 @@ public static ж<Alias> NewAlias(ж<TypeName> Ꮡobj, ΔType rhs) {
 }
 
 public static @string String(this ж<Alias> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
-
     return TypeString(new AliasжΔType(Ꮡa), default!);
 }
 
@@ -55,8 +51,6 @@ public static @string String(this ж<Alias> Ꮡa) {
 //
 // [underlying type]: https://go.dev/ref/spec#Underlying_types.
 public static ΔType Underlying(this ж<Alias> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
-
     return unalias(Ꮡa).Underlying();
 }
 
@@ -150,7 +144,7 @@ internal static ж<Alias> newAlias(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡob
         obj.typ = new AliasжΔType(a);
     }
     // Ensure that a.actual is set at the end of type checking.
-    if (check != nil) {
+    if (Ꮡcheck != nil) {
         check.needsCleanup(new Aliasжcleaner(a));
     }
     return a;
@@ -160,10 +154,7 @@ internal static ж<Alias> newAlias(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡob
 // arguments, recording pos as the position of its synthetic object (for error
 // reporting).
 internal static ж<Alias> newAliasInstance(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ж<Alias> Ꮡorig, slice<ΔType> targs, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) {
-    ref var check = ref Ꮡcheck.Value;
     ref var orig = ref Ꮡorig.Value;
-    ref var expanding = ref Ꮡexpanding.Value;
-    ref var ctxt = ref Ꮡctxt.Value;
 
     assert(len(targs) > 0);
     var obj = NewTypeName(pos, (~orig.obj).pkg, (~orig.obj).name, default!);

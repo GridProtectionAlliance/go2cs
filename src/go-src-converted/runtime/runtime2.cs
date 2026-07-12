@@ -3,6 +3,15 @@
 // license that can be found in the LICENSE file.
 global using itab = go.@internal.abi_package.ITab;
 
+// go2cs HAND-OWNED. Unlike the companion pattern (runtime2_impl.cs supplies the bodyless
+// guintptr/muintptr/… partials this file declares), two edits here modify REGENERATED content a
+// companion cannot supply — efaceOf's body (a raw-metal reinterpret stubbed to an inert eface) and
+// the gomaxprocs/ncpu field-initializer seed (bootstrap-populated in Go). This marker drops
+// runtime2.go from a -stdlib reconvert so those edits — and the frozen bodyless partials the
+// companion implements — survive. (Trade-off: converter improvements to runtime2.go no longer flow
+// here until this is unfrozen; acceptable for a Phase-4 operational hand-owned file.)
+[module: go.GoManualConversion]
+
 namespace go;
 
 using abi = @internal.abi_package;
@@ -130,9 +139,16 @@ internal static readonly UntypedInt _Pdead = 4;
 }
 
 internal static ж<eface> efaceOf(ж<any> Ꮡep) {
-    ref var ep = ref Ꮡep.Value;
-
-    return (ж<eface>)(uintptr)(new @unsafe.Pointer(Ꮡep));
+    // Hand-adjusted (this file carries the GoManualConversion marker above so a reconvert keeps
+    // this edit): Go reinterprets the
+    // interface value's own memory as an eface{_type, data} to walk its type descriptor —
+    // raw-metal on a non-native type, meaningless against a managed `any` box (the reinterpret
+    // panicked on first touch, taking the whole runtime_package type initializer down with it:
+    // iface.cs's uint16Type/…/sliceType and netpoll.cs's pdType field initializers all run
+    // (~efaceOf(…))._type at class-init). Return an inert default eface (nil _type, nil data)
+    // instead — the descriptor-walking consumers are themselves vestigial in converted code
+    // (go2cs replaces itab dispatch with C# interfaces + source generators).
+    return Ꮡ(new eface());
 }
 
 // type Δguintptr is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
@@ -954,9 +970,15 @@ internal static array<bool> ΔisWaitingForGC = new golib.SparseArray<bool>{
 
 internal static ж<ж<m>> Ꮡallm = new(default(ж<m>));
 internal static ref ж<m> allm => ref Ꮡallm.ValueSlot;
-internal static ж<int32> Ꮡgomaxprocs = new(default(int32));
+// Hand-adjusted (this file carries the GoManualConversion marker above so a reconvert keeps this
+// seed): in Go these are populated by
+// the runtime bootstrap (osinit/schedinit), which converted code does not run — .NET is the
+// runtime. Left zero they break consumers at runtime while compiling clean (sync.Pool's pinSlow
+// sizes its poolLocal array from runtime.GOMAXPROCS(0) → make(…, 0) → index out of range on the
+// first fmt.Println). Seed them from the real environment instead.
+internal static ж<int32> Ꮡgomaxprocs = new((int32)Environment.ProcessorCount);
 internal static ref int32 gomaxprocs => ref Ꮡgomaxprocs.Value;
-internal static int32 ncpu;
+internal static int32 ncpu = (int32)Environment.ProcessorCount;
 internal static ж<forcegcstate> Ꮡforcegc = new(default(forcegcstate));
 internal static ref forcegcstate forcegc => ref Ꮡforcegc.Value;
 internal static ж<schedt> Ꮡsched = new(default(schedt));

@@ -57,7 +57,6 @@ internal static void funcBody(this ж<Checker> Ꮡcheck, ж<declInfo> Ꮡdecl, @
 });
 
 internal static void usage(this ж<Checker> Ꮡcheck, ж<ΔScope> Ꮡscope) {
-    ref var check = ref Ꮡcheck.Value;
     ref var scope = ref Ꮡscope.Value;
 
     slice<ж<Var>> unused = default!;
@@ -94,8 +93,6 @@ internal static readonly stmtContext finalSwitchCase = 8;
 internal static readonly stmtContext inTypeSwitch = 16;
 
 internal static void simpleStmt(this ж<Checker> Ꮡcheck, ast.Stmt s) {
-    ref var check = ref Ꮡcheck.Value;
-
     if (s != default!) {
         Ꮡcheck.stmt(0, s);
     }
@@ -113,8 +110,6 @@ internal static slice<ast.Stmt> trimTrailingEmptyStmts(slice<ast.Stmt> list) {
 }
 
 internal static void stmtList(this ж<Checker> Ꮡcheck, stmtContext ctxt, slice<ast.Stmt> list) {
-    ref var check = ref Ꮡcheck.Value;
-
     var ok = (stmtContext)(ctxt & fallthroughOk) != 0;
     stmtContext inner = (stmtContext)(ctxt & ~fallthroughOk);
     list = trimTrailingEmptyStmts(list);
@@ -181,7 +176,6 @@ internal static token.Token assignOp(token.Token op) {
 }
 
 internal static void suspendedCall(this ж<Checker> Ꮡcheck, @string keyword, ж<ast.CallExpr> Ꮡcall) {
-    ref var check = ref Ꮡcheck.Value;
     ref var call = ref Ꮡcall.Value;
 
     ref var x = ref heap(new operand(), out var Ꮡx);
@@ -260,7 +254,6 @@ internal static any goVal(constant.Value val) {
 }
 
 internal static void caseValues(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> values, valueMap seen) {
-    ref var check = ref Ꮡcheck.Value;
     ref var x = ref Ꮡx.Value;
 
 L:
@@ -329,7 +322,6 @@ internal static ΔType /*T*/ caseTypes(this ж<Checker> Ꮡcheck, ж<operand> �
     ΔType T = default!;
 
     ref var check = ref Ꮡcheck.Value;
-    ref var x = ref Ꮡx.DerefOrNil();
     ref var dummy = ref heap(new operand(), out var Ꮡdummy);
 L:
     foreach (var (_, e) in types) {

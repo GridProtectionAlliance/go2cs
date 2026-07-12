@@ -33,8 +33,6 @@ public static error Shutdown(this ж<FD> Ꮡfd, nint how) => func((defer, recove
 
 // Fchown wraps syscall.Fchown.
 public static error Fchown(this ж<FD> Ꮡfd, nint uid, nint gid) => func((defer, recover) => {
-    ref var fd = ref Ꮡfd.Value;
-
     {
         var err = Ꮡfd.incref(); if (err != default!) {
             return err;
@@ -46,8 +44,6 @@ public static error Fchown(this ж<FD> Ꮡfd, nint uid, nint gid) => func((defer
 
 // Ftruncate wraps syscall.Ftruncate.
 public static error Ftruncate(this ж<FD> Ꮡfd, int64 size) => func((defer, recover) => {
-    ref var fd = ref Ꮡfd.Value;
-
     {
         var err = Ꮡfd.incref(); if (err != default!) {
             return err;

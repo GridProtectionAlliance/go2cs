@@ -31,8 +31,6 @@ internal static (ж<item>, error) find(slice<item> xs, nint want) => func<(ж<it
 });
 
 internal static error closeIt(ж<nint> Ꮡp, nint tag) {
-    ref var p = ref Ꮡp.DerefOrNil();
-
     fmt.Println("closeIt", Ꮡp == nil, tag);
     return default!;
 }

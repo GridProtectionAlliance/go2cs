@@ -16,9 +16,6 @@ internal static map<@string, ж<node>> buildValueMap(ж<node> Ꮡa, ж<node> Ꮡ
 }
 
 internal static map<ж<node>, nint> buildKeyMap(ж<node> Ꮡa, ж<node> Ꮡb) {
-    ref var a = ref Ꮡa.Value;
-    ref var b = ref Ꮡb.Value;
-
     return new map<ж<node>, nint>{[Ꮡa] = 10, [Ꮡb] = 20};
 }
 

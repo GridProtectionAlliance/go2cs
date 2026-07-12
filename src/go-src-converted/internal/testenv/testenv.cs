@@ -519,8 +519,6 @@ public static bool SyscallIsNotSupported(error err) {
 // This function should be used when it is necessary to avoid t.Parallel on
 // 32-bit machines, typically because the test uses lots of memory.
 public static void ParallelOn64Bit(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     if (goarch.PtrSize == 4) {
         return;
     }

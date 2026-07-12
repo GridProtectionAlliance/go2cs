@@ -1265,14 +1265,10 @@ internal static @unsafe.Pointer newarray(ж<_type> Ꮡtyp, nint n) {
 //
 //go:linkname reflect_unsafe_NewArray reflect.unsafe_NewArray
 internal static @unsafe.Pointer reflect_unsafe_NewArray(ж<_type> Ꮡtyp, nint n) {
-    ref var typ = ref Ꮡtyp.Value;
-
     return (uintptr)newarray(Ꮡtyp, n);
 }
 
 internal static void profilealloc(ж<m> Ꮡmp, @unsafe.Pointer x, uintptr size) {
-    ref var mp = ref Ꮡmp.Value;
-
     var c = getMCache(Ꮡmp);
     if (c == nil) {
         @throw("profilealloc called without a P or outside bootstrapping"u8);
@@ -1387,8 +1383,6 @@ internal static ref ж<notInHeap> persistentChunks => ref ᏑpersistentChunks.Va
 // Consider marking persistentalloc'd types not in heap by embedding
 // runtime/internal/sys.NotInHeap.
 internal static @unsafe.Pointer persistentalloc(uintptr size, uintptr align, ж<sysMemStat> ᏑsysStat) {
-    ref var sysStat = ref ᏑsysStat.Value;
-
     ref var Δp = ref heap<ж<notInHeap>>(out var Ꮡp);
     systemstack(() => {
         Ꮡp.ValueSlot = persistentalloc1(size, align, ᏑsysStat);
@@ -1401,8 +1395,6 @@ internal static @unsafe.Pointer persistentalloc(uintptr size, uintptr align, ж<
 //
 //go:systemstack
 internal static ж<notInHeap> persistentalloc1(uintptr size, uintptr align, ж<sysMemStat> ᏑsysStat) {
-    ref var sysStat = ref ᏑsysStat.DerefOrNil();
-
     UntypedInt maxBlock = /* 64 << 10 */ 65536; // VM reservation granularity is 64K on windows
     if (size == 0) {
         @throw("persistentalloc: size == 0"u8);
@@ -1503,8 +1495,6 @@ internal static bool inPersistentAlloc(uintptr Δp) {
 }
 
 [GoRecv] internal static @unsafe.Pointer alloc(this ref linearAlloc l, uintptr size, uintptr align, ж<sysMemStat> ᏑsysStat) {
-    ref var sysStat = ref ᏑsysStat.Value;
-
     var Δp = alignUp(l.next, align);
     if (Δp + size > l.end) {
         return default!;

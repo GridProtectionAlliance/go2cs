@@ -59,8 +59,6 @@ internal static void addTo(ж<nint> Ꮡp, nint delta) {
 }
 
 public static @string Inc(this ж<Counter> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     addTo(Ꮡc.of(Counter.Ꮡn), 1);
     return "inc"u8;
 }
@@ -113,8 +111,6 @@ internal static (Animal, @string) pick(nint kind) {
 }
 
 public static Animal Self(this ж<Cat> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return new CatжAnimal(Ꮡc);
 }
 

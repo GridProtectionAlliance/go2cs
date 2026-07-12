@@ -64,7 +64,8 @@ internal static readonly UntypedInt alpha = /* -1 << 63 */ -9223372036854775808;
 internal static readonly UntypedInt omega = /* 1<<63 - 1 */ 9223372036854775807; // math.MaxInt64
 
 // UTC represents Universal Coordinated Time (UTC).
-public static ж<ΔLocation> ΔUTC = ᏑutcLoc;
+public static ж<ΔLocation> ΔUTC;
+internal static void initᴛΔUTC() { ΔUTC = ᏑutcLoc; }
 
 // utcLoc is separate so that get can refer to &utcLoc
 // and ensure that it never returns a nil *Location,
@@ -78,7 +79,8 @@ internal static ref ΔLocation utcLoc => ref ᏑutcLoc.Value;
 // use the system default /etc/localtime.
 // TZ="" means use UTC.
 // TZ="foo" means use file foo in the system timezone directory.
-public static ж<ΔLocation> ΔLocal = ᏑlocalLoc;
+public static ж<ΔLocation> ΔLocal;
+internal static void initᴛΔLocal() { ΔLocal = ᏑlocalLoc; }
 
 // localLoc is separate so that initLocal can initialize
 // it even if a client has changed Local.
@@ -89,9 +91,7 @@ internal static ж<Δsync.Once> ᏑlocalOnce = new(default(Δsync.Once));
 internal static ref Δsync.Once localOnce => ref ᏑlocalOnce.Value;
 
 internal static ж<ΔLocation> get(this ж<ΔLocation> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
-    if (l == nil) {
+    if (Ꮡl == nil) {
         return ᏑutcLoc;
     }
     if (Ꮡl == ᏑlocalLoc) {
@@ -103,8 +103,6 @@ internal static ж<ΔLocation> get(this ж<ΔLocation> Ꮡl) {
 // String returns a descriptive name for the time zone information,
 // corresponding to the name argument to [LoadLocation] or [FixedZone].
 public static @string String(this ж<ΔLocation> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     return (~Ꮡl.get()).name;
 }
 

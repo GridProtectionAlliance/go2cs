@@ -16,8 +16,6 @@ internal static ж<node> advance(ж<node> Ꮡn) {
 }
 
 internal static ж<node> self(ж<node> Ꮡn) {
-    ref var n = ref Ꮡn.Value;
-
     return Ꮡn;
 }
 

@@ -47,8 +47,6 @@ internal static map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool
 };
 
 internal static bool encBoolArray(ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var state = ref Ꮡstate.Value;
-
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -77,8 +75,6 @@ internal static bool encBoolSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) 
 }
 
 internal static bool encComplex64Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var state = ref Ꮡstate.Value;
-
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -106,8 +102,6 @@ internal static bool encComplex64Slice(ж<encoderState> Ꮡstate, reflectꓸValu
 }
 
 internal static bool encComplex128Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var state = ref Ꮡstate.Value;
-
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -135,8 +129,6 @@ internal static bool encComplex128Slice(ж<encoderState> Ꮡstate, reflectꓸVal
 }
 
 internal static bool encFloat32Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var state = ref Ꮡstate.Value;
-
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -162,8 +154,6 @@ internal static bool encFloat32Slice(ж<encoderState> Ꮡstate, reflectꓸValue 
 }
 
 internal static bool encFloat64Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var state = ref Ꮡstate.Value;
-
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -189,8 +179,6 @@ internal static bool encFloat64Slice(ж<encoderState> Ꮡstate, reflectꓸValue 
 }
 
 internal static bool encIntArray(ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var state = ref Ꮡstate.Value;
-
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -215,8 +203,6 @@ internal static bool encIntSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) {
 }
 
 internal static bool encInt16Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var state = ref Ꮡstate.Value;
-
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -241,8 +227,6 @@ internal static bool encInt16Slice(ж<encoderState> Ꮡstate, reflectꓸValue v)
 }
 
 internal static bool encInt32Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var state = ref Ꮡstate.Value;
-
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -267,8 +251,6 @@ internal static bool encInt32Slice(ж<encoderState> Ꮡstate, reflectꓸValue v)
 }
 
 internal static bool encInt64Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var state = ref Ꮡstate.Value;
-
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -293,8 +275,6 @@ internal static bool encInt64Slice(ж<encoderState> Ꮡstate, reflectꓸValue v)
 }
 
 internal static bool encInt8Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var state = ref Ꮡstate.Value;
-
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -319,8 +299,6 @@ internal static bool encInt8Slice(ж<encoderState> Ꮡstate, reflectꓸValue v) 
 }
 
 internal static bool encStringArray(ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var state = ref Ꮡstate.Value;
-
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -346,8 +324,6 @@ internal static bool encStringSlice(ж<encoderState> Ꮡstate, reflectꓸValue v
 }
 
 internal static bool encUintArray(ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var state = ref Ꮡstate.Value;
-
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -372,8 +348,6 @@ internal static bool encUintSlice(ж<encoderState> Ꮡstate, reflectꓸValue v) 
 }
 
 internal static bool encUint16Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var state = ref Ꮡstate.Value;
-
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -398,8 +372,6 @@ internal static bool encUint16Slice(ж<encoderState> Ꮡstate, reflectꓸValue v
 }
 
 internal static bool encUint32Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var state = ref Ꮡstate.Value;
-
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -424,8 +396,6 @@ internal static bool encUint32Slice(ж<encoderState> Ꮡstate, reflectꓸValue v
 }
 
 internal static bool encUint64Array(ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var state = ref Ꮡstate.Value;
-
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
@@ -450,8 +420,6 @@ internal static bool encUint64Slice(ж<encoderState> Ꮡstate, reflectꓸValue v
 }
 
 internal static bool encUintptrArray(ж<encoderState> Ꮡstate, reflectꓸValue v) {
-    ref var state = ref Ꮡstate.Value;
-
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;

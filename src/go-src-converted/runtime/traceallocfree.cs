@@ -98,8 +98,6 @@ internal static void SpanAlloc(this traceLocker tl, ж<mspan> Ꮡs) {
 
 // SpanFree records an event indicating that the span is about to be freed.
 internal static void SpanFree(this traceLocker tl, ж<mspan> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     tl.eventWriter(traceGoRunning, traceProcRunning).commit(traceEvSpanFree, traceSpanID(Ꮡs));
 }
 
@@ -114,8 +112,6 @@ internal static traceArg traceSpanID(ж<mspan> Ꮡs) {
 // The type is optional, and the size of the slot occupied the object is inferred from the
 // span containing it.
 internal static void HeapObjectExists(this traceLocker tl, uintptr addr, ж<abi.Type> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.Value;
-
     tl.eventWriter(traceGoRunning, traceProcRunning).commit(traceEvHeapObject, traceHeapObjectID(addr), tl.rtype(Ꮡtyp));
 }
 
@@ -123,8 +119,6 @@ internal static void HeapObjectExists(this traceLocker tl, uintptr addr, ж<abi.
 // The type is optional, and the size of the slot occupied the object is inferred from the
 // span containing it.
 internal static void HeapObjectAlloc(this traceLocker tl, uintptr addr, ж<abi.Type> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.Value;
-
     tl.eventWriter(traceGoRunning, traceProcRunning).commit(traceEvHeapObjectAlloc, traceHeapObjectID(addr), tl.rtype(Ꮡtyp));
 }
 

@@ -1451,7 +1451,6 @@ internal static error /*err*/ fprint(this ж<Config> Ꮡcfg, io.Writer output, �
     error err = default!;
     func((defer, recover) => {
     ref var cfg = ref Ꮡcfg.Value;
-    ref var fset = ref Ꮡfset.Value;
 
         // print node
         var p = newPrinter(Ꮡcfg, Ꮡfset, nodeSizes);
@@ -1516,9 +1515,6 @@ internal static error /*err*/ fprint(this ж<Config> Ꮡcfg, io.Writer output, �
 // The node type must be *[ast.File], *[CommentedNode], [][ast.Decl], [][ast.Stmt],
 // or assignment-compatible to [ast.Expr], [ast.Decl], [ast.Spec], or [ast.Stmt].
 public static error Fprint(this ж<Config> Ꮡcfg, io.Writer output, ж<token.FileSet> Ꮡfset, any node) {
-    ref var cfg = ref Ꮡcfg.Value;
-    ref var fset = ref Ꮡfset.Value;
-
     return Ꮡcfg.fprint(output, Ꮡfset, node, new map<ast.Node, nint>());
 }
 
@@ -1527,8 +1523,6 @@ public static error Fprint(this ж<Config> Ꮡcfg, io.Writer output, ж<token.Fi
 // Note that gofmt uses tabs for indentation but spaces for alignment;
 // use format.Node (package go/format) for output that matches gofmt.
 public static error Fprint(io.Writer output, ж<token.FileSet> Ꮡfset, any node) {
-    ref var fset = ref Ꮡfset.Value;
-
     return (Ꮡ(new Config(Tabwidth: 8))).Fprint(output, Ꮡfset, node);
 }
 

@@ -9,8 +9,6 @@ partial class main_package {
 // type lookup is a methodless func type — rendered inline as its base delegate
 
 internal static Action<error> makeReleaser(@string tag, ж<slice<@string>> Ꮡlog) {
-    ref var log = ref Ꮡlog.Value;
-
     return (error err) => {
         if (err != default!){
             Ꮡlog.ValueSlot = append(Ꮡlog.ValueSlot, tag + ":"u8 + err.Error());
@@ -30,8 +28,6 @@ internal static void consume(Action<error> r, error err) {
 }
 
 internal static (nint, Action<error>, error) grab(@string tag, ж<slice<@string>> Ꮡlog) {
-    ref var log = ref Ꮡlog.Value;
-
     return (len(tag), makeReleaser(tag, Ꮡlog), default!);
 }
 

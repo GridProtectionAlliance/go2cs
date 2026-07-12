@@ -27,15 +27,16 @@ partial class buildcfg_package {
 // experimentBaseline specifies the experiment flags that are enabled by
 // default in the current toolchain. This is, in effect, the "control"
 // configuration and any variation from this is an experiment.
-public static ж<ExperimentFlags> ᏑExperiment = new(((Func<ExperimentFlags>)(() => {
+public static ж<ExperimentFlags> ᏑExperiment = new(default(ExperimentFlags));
+public static ref ExperimentFlags Experiment => ref ᏑExperiment.Value;
+internal static void initᴛExperiment() { Experiment = ((Func<ExperimentFlags>)(() => {
     var (flags, err) = ParseGOEXPERIMENT(GOOS, GOARCH, envOr("GOEXPERIMENT"u8, defaultGOEXPERIMENT));
     if (err != default!) {
         Error = err;
         return new ExperimentFlags(nil);
     }
     return flags.Value;
-}))());
-public static ref ExperimentFlags Experiment => ref ᏑExperiment.Value;
+}))(); }
 
 // DefaultGOEXPERIMENT is the embedded default GOEXPERIMENT string.
 // It is not guaranteed to be canonical.
@@ -48,7 +49,8 @@ public static readonly @string DefaultGOEXPERIMENT = "";
 // platforms that support it.
 //
 // Note: must agree with runtime.framepointer_enabled.
-public static bool FramePointerEnabled = GOARCH == "amd64"u8 || GOARCH == "arm64"u8;
+public static bool FramePointerEnabled;
+internal static void initᴛFramePointerEnabled() { FramePointerEnabled = GOARCH == "amd64"u8 || GOARCH == "arm64"u8; }
 
 // ParseGOEXPERIMENT parses a (GOOS, GOARCH, GOEXPERIMENT)
 // configuration tuple and returns the enabled and baseline experiment
@@ -145,8 +147,6 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
 // String returns the canonical GOEXPERIMENT string to enable this experiment
 // configuration. (Experiments in the same state as in the baseline are elided.)
 public static @string String(this ж<ExperimentFlags> Ꮡexp) {
-    ref var exp = ref Ꮡexp.Value;
-
     return strings.Join(expList(Ꮡexp.of(ExperimentFlags.ᏑFlags), Ꮡexp.of(ExperimentFlags.Ꮡbaseline), false), ","u8);
 }
 
@@ -186,16 +186,12 @@ internal static slice<@string> expList(ж<goexperiment.Flags> Ꮡexp, ж<goexper
 // Enabled returns a list of enabled experiments, as
 // lower-cased experiment names.
 public static slice<@string> Enabled(this ж<ExperimentFlags> Ꮡexp) {
-    ref var exp = ref Ꮡexp.Value;
-
     return expList(Ꮡexp.of(ExperimentFlags.ᏑFlags), nil, false);
 }
 
 // All returns a list of all experiment settings.
 // Disabled experiments appear in the list prefixed by "no".
 public static slice<@string> All(this ж<ExperimentFlags> Ꮡexp) {
-    ref var exp = ref Ꮡexp.Value;
-
     return expList(Ꮡexp.of(ExperimentFlags.ᏑFlags), nil, true);
 }
 

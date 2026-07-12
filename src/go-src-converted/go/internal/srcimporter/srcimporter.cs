@@ -61,8 +61,6 @@ internal static ref types.Package importing => ref Ꮡimporting.Value;
 
 // Import(path) is a shortcut for ImportFrom(path, ".", 0).
 public static (ж<types.Package>, error) Import(this ж<Importer> Ꮡp, @string path) {
-    ref var p = ref Ꮡp.Value;
-
     return Ꮡp.ImportFrom(path, "."u8, 0);
 }
 

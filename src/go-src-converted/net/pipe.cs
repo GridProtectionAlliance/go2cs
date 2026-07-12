@@ -148,8 +148,6 @@ public static (Conn, Conn) Pipe() {
 }
 
 internal static (nint, error) Read(this ж<pipe> Ꮡp, slice<byte> b) {
-    ref var p = ref Ꮡp.Value;
-
     var (n, err) = Ꮡp.read(b);
     if (err != default! && !AreEqual(err, Δio.EOF) && !AreEqual(err, Δio.ErrClosedPipe)) {
         err = new OpErrorжerror(Ꮡ(new OpError(Op: "read"u8, Net: "pipe"u8, Err: err)));
@@ -192,8 +190,6 @@ internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
 }
 
 internal static (nint, error) Write(this ж<pipe> Ꮡp, slice<byte> b) {
-    ref var p = ref Ꮡp.Value;
-
     var (n, err) = Ꮡp.write(b);
     if (err != default! && !AreEqual(err, Δio.ErrClosedPipe)) {
         err = new OpErrorжerror(Ꮡ(new OpError(Op: "write"u8, Net: "pipe"u8, Err: err)));
@@ -276,8 +272,6 @@ internal static error SetWriteDeadline(this ж<pipe> Ꮡp, time.Time t) {
 }
 
 internal static error Close(this ж<pipe> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     Ꮡp.of(pipe.Ꮡonce).Do(() => {
         builtin.close(Ꮡp.Value.localDone);
     });

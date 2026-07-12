@@ -293,8 +293,6 @@ internal static ж<encodeState> newEncodeState() {
 internal static error /*err*/ marshal(this ж<encodeState> Ꮡe, any v, encOpts opts) {
     error err = default!;
     func((defer, recover) => {
-    ref var e = ref Ꮡe.Value;
-
         defer(() => {
             {
                 var r = recover(); if (r != default!) {
@@ -333,8 +331,6 @@ internal static bool isEmptyValue(reflectꓸValue v) {
 }
 
 internal static void reflectValue(this ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
-    ref var e = ref Ꮡe.Value;
-
     valueEncoder(v)(Ꮡe, v, opts);
 }
 
@@ -451,8 +447,6 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newTypeEncoder
 }
 
 internal static void invalidValueEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts _) {
-    ref var e = ref Ꮡe.Value;
-
     Ꮡe.of(encodeState.ᏑBuffer).WriteString("null"u8);
 }
 
@@ -537,8 +531,6 @@ internal static void addrTextMarshalerEncoder(ж<encodeState> Ꮡe, reflectꓸVa
 }
 
 internal static void boolEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
-    ref var e = ref Ꮡe.Value;
-
     var b = Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer();
     b = mayAppendQuote(b, opts.quoted);
     b = strconv.AppendBool(b, v.Bool());
@@ -547,8 +539,6 @@ internal static void boolEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpt
 }
 
 internal static void intEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
-    ref var e = ref Ꮡe.Value;
-
     var b = Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer();
     b = mayAppendQuote(b, opts.quoted);
     b = strconv.AppendInt(b, v.Int(), 10);
@@ -557,8 +547,6 @@ internal static void intEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts
 }
 
 internal static void uintEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
-    ref var e = ref Ꮡe.Value;
-
     var b = Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer();
     b = mayAppendQuote(b, opts.quoted);
     b = strconv.AppendUint(b, v.Uint(), 10);
@@ -704,8 +692,6 @@ internal static bool isValidNumber(@string s) {
 }
 
 internal static void interfaceEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
-    ref var e = ref Ꮡe.Value;
-
     if (v.IsNil()) {
         Ꮡe.of(encodeState.ᏑBuffer).WriteString("null"u8);
         return;
@@ -730,8 +716,6 @@ internal static void unsupportedTypeEncoder(ж<encodeState> Ꮡe, reflectꓸValu
 }
 
 internal static void encode(this structEncoder se, ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
-    ref var e = ref Ꮡe.Value;
-
     var next = (byte)(rune)'{';
 FieldLoop:
     foreach (var (i, _) in se.fields.list) {
@@ -842,8 +826,6 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newMapEncoder(
 }
 
 internal static void encodeByteSlice(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts _) {
-    ref var e = ref Ꮡe.Value;
-
     if (v.IsNil()) {
         Ꮡe.of(encodeState.ᏑBuffer).WriteString("null"u8);
         return;
@@ -911,8 +893,6 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newSliceEncode
 }
 
 internal static void encode(this arrayEncoder ae, ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
-    ref var e = ref Ꮡe.Value;
-
     Ꮡe.of(encodeState.ᏑBuffer).WriteByte((rune)'[');
     nint n = v.Len();
     for (nint i = 0; i < n; i++) {
@@ -968,8 +948,6 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newPtrEncoder(
 }
 
 internal static void encode(this condAddrEncoder ce, ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
-    ref var e = ref Ꮡe.Value;
-
     if (v.CanAddr()){
         ce.canAddrEnc(Ꮡe, v, opts);
     } else {

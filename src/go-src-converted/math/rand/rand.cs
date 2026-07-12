@@ -398,9 +398,6 @@ internal static (nint n, error err) read(this ж<runtimeSource> Ꮡfs, slice<byt
     nint n = default!;
     error err = default!;
 
-    ref var fs = ref Ꮡfs.Value;
-    ref var readVal = ref ᏑreadVal.Value;
-    ref var readPos = ref ᏑreadPos.Value;
     Ꮡfs.of(runtimeSource.Ꮡmu).Lock();
     (n, err) = read(p, new runtimeSourceжSource(Ꮡfs), ᏑreadVal, ᏑreadPos);
     Ꮡfs.of(runtimeSource.Ꮡmu).Unlock();
@@ -619,8 +616,6 @@ internal static (nint n, error err) read(this ж<lockedSource> Ꮡr, slice<byte>
     error err = default!;
 
     ref var r = ref Ꮡr.Value;
-    ref var readVal = ref ᏑreadVal.Value;
-    ref var readPos = ref ᏑreadPos.Value;
     Ꮡr.of(lockedSource.Ꮡlk).Lock();
     (n, err) = read(p, new rngSourceжSource(r.s), ᏑreadVal, ᏑreadPos);
     Ꮡr.of(lockedSource.Ꮡlk).Unlock();

@@ -159,8 +159,6 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 // NewDecoder returns a Decoder for the given (section, index) pair,
 // and decodes the given SyncMarker from the element bitstream.
 public static Decoder NewDecoder(this ж<PkgDecoder> Ꮡpr, RelocKind k, Index idx, SyncMarker marker) {
-    ref var pr = ref Ꮡpr.Value;
-
     ref var r = ref heap<Decoder>(out var Ꮡr);
     r = Ꮡpr.NewDecoderRaw(k, idx);
     Ꮡr.Sync(marker);
@@ -172,8 +170,6 @@ public static Decoder NewDecoder(this ж<PkgDecoder> Ꮡpr, RelocKind k, Index i
 // If possible the Decoder should be RetireDecoder'd when it is no longer
 // needed, this will avoid heap allocations.
 public static Decoder TempDecoder(this ж<PkgDecoder> Ꮡpr, RelocKind k, Index idx, SyncMarker marker) {
-    ref var pr = ref Ꮡpr.Value;
-
     ref var r = ref heap<Decoder>(out var Ꮡr);
     r = Ꮡpr.TempDecoderRaw(k, idx);
     Ꮡr.Sync(marker);
@@ -289,8 +285,6 @@ internal static (uint64, error) readUvarint(ж<strings.Reader> Ꮡr) {
 internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64-bit integer"u8);
 
 internal static int64 rawVarint(this ж<Decoder> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     var ux = Ꮡr.rawUvarint();
     // Zig-zag decode.
     var x = (int64)((ux >> (int)(1)));
@@ -373,24 +367,18 @@ public static bool Bool(this ж<Decoder> Ꮡr) {
 
 // Int64 decodes and returns an int64 value from the element bitstream.
 public static int64 Int64(this ж<Decoder> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     Ꮡr.Sync(SyncInt64);
     return Ꮡr.rawVarint();
 }
 
 // Int64 decodes and returns a uint64 value from the element bitstream.
 public static uint64 Uint64(this ж<Decoder> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     Ꮡr.Sync(SyncUint64);
     return Ꮡr.rawUvarint();
 }
 
 // Len decodes and returns a non-negative int value from the element bitstream.
 public static nint Len(this ж<Decoder> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     var x = Ꮡr.Uint64();
     nint v = (nint)x;
     assert((uint64)v == x);
@@ -399,8 +387,6 @@ public static nint Len(this ж<Decoder> Ꮡr) {
 
 // Int decodes and returns an int value from the element bitstream.
 public static nint Int(this ж<Decoder> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     var x = Ꮡr.Int64();
     nint v = (nint)x;
     assert((int64)v == x);
@@ -409,8 +395,6 @@ public static nint Int(this ж<Decoder> Ꮡr) {
 
 // Uint decodes and returns a uint value from the element bitstream.
 public static nuint Uint(this ж<Decoder> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     var x = Ꮡr.Uint64();
     nuint v = (nuint)x;
     assert((uint64)v == x);
@@ -425,8 +409,6 @@ public static nuint Uint(this ж<Decoder> Ꮡr) {
 // Code] T" instead, but we don't allow generic methods and the
 // compiler can't depend on generics yet anyway.
 public static nint Code(this ж<Decoder> Ꮡr, SyncMarker mark) {
-    ref var r = ref Ꮡr.Value;
-
     Ꮡr.Sync(mark);
     return Ꮡr.Len();
 }
@@ -452,8 +434,6 @@ public static @string String(this ж<Decoder> Ꮡr) {
 // Strings decodes and returns a variable-length slice of strings from
 // the element bitstream.
 public static slice<@string> Strings(this ж<Decoder> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     var res = new slice<@string>(Ꮡr.Len());
     foreach (var (i, _) in res) {
         res[i] = Ꮡr.String();
@@ -464,8 +444,6 @@ public static slice<@string> Strings(this ж<Decoder> Ꮡr) {
 // Value decodes and returns a constant.Value from the element
 // bitstream.
 public static constant.Value Value(this ж<Decoder> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     Ꮡr.Sync(SyncValue);
     var isComplex = Ꮡr.Bool();
     var val = Ꮡr.scalar();
@@ -476,8 +454,6 @@ public static constant.Value Value(this ж<Decoder> Ꮡr) {
 }
 
 internal static constant.Value scalar(this ж<Decoder> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     {
         CodeVal tag = ((CodeVal)Ꮡr.Code(SyncVal));
         var exprᴛ1 = tag;
@@ -509,8 +485,6 @@ internal static constant.Value scalar(this ж<Decoder> Ꮡr) {
 }
 
 internal static ж<bigꓸInt> bigInt(this ж<Decoder> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     var v = @new<bigꓸInt>().SetBytes(slice<byte>(Ꮡr.String()));
     if (Ꮡr.Bool()) {
         v.Neg(v);
@@ -519,8 +493,6 @@ internal static ж<bigꓸInt> bigInt(this ж<Decoder> Ꮡr) {
 }
 
 internal static ж<big.Float> bigFloat(this ж<Decoder> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     var v = @new<big.Float>().SetPrec(512);
     assert(v.UnmarshalText(slice<byte>(Ꮡr.String())) == default!);
     return v;

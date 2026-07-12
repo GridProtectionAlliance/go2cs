@@ -114,7 +114,6 @@ internal static (@string, error) validatedImportPath(@string path) {
 internal static void declarePkgObj(this ж<Checker> Ꮡcheck, ж<ast.Ident> Ꮡident, Object obj, ж<declInfo> Ꮡd) {
     ref var check = ref Ꮡcheck.Value;
     ref var ident = ref Ꮡident.Value;
-    ref var d = ref Ꮡd.Value;
 
     assert(ident.Name == obj.Name());
     // spec: "A package-scope or file-scope identifier with name init
@@ -539,7 +538,6 @@ internal static (bool ptr, ж<ast.Ident> rname, slice<ж<ast.Ident>> tparams) un
     ж<ast.Ident> rname = default!;
     slice<ж<ast.Ident>> tparams = default!;
 
-    ref var check = ref Ꮡcheck.Value;
 L:
     while (ᐧ) {
         // unpack receiver type
@@ -825,7 +823,6 @@ internal static void unusedImports(this ж<Checker> Ꮡcheck) {
 }
 
 internal static void errorUnusedPkg(this ж<Checker> Ꮡcheck, ж<PkgName> Ꮡobj) {
-    ref var check = ref Ꮡcheck.Value;
     ref var obj = ref Ꮡobj.Value;
 
     // If the package was imported with a name other than the final

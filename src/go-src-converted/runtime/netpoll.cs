@@ -141,8 +141,6 @@ internal static bool expiredWriteDeadline(this pollInfo i) {
 
 // info returns the pollInfo corresponding to pd.
 internal static pollInfo info(this ж<pollDesc> Ꮡpd) {
-    ref var pd = ref Ꮡpd.Value;
-
     return ((pollInfo)Ꮡpd.of(pollDesc.ᏑatomicInfo).Load());
 }
 
@@ -178,8 +176,6 @@ internal static void publishInfo(this ж<pollDesc> Ꮡpd) {
 // We only change the error bit if seq == 0 or if seq matches pollFDSeq
 // (issue #59545).
 internal static void setEventErr(this ж<pollDesc> Ꮡpd, bool b, uintptr seq) {
-    ref var pd = ref Ꮡpd.Value;
-
     var mSeq = (uint32)((uintptr)(seq & (uintptr)pollFDSeqMask));
     var x = Ꮡpd.of(pollDesc.ᏑatomicInfo).Load();
     var xSeq = (uint32)(((x >> (int)(pollFDSeq))) & (uint32)pollFDSeqMask);
@@ -328,8 +324,6 @@ internal static void free(this ж<pollCache> Ꮡc, ж<pollDesc> Ꮡpd) {
 //
 //go:linkname poll_runtime_pollReset internal/poll.runtime_pollReset
 internal static nint poll_runtime_pollReset(ж<pollDesc> Ꮡpd, nint mode) {
-    ref var pd = ref Ꮡpd.Value;
-
     nint errcode = netpollcheckerr(Ꮡpd, (int32)mode);
     if (errcode != pollNoError) {
         return errcode;
@@ -350,8 +344,6 @@ internal static nint poll_runtime_pollReset(ж<pollDesc> Ꮡpd, nint mode) {
 //
 //go:linkname poll_runtime_pollWait internal/poll.runtime_pollWait
 internal static nint poll_runtime_pollWait(ж<pollDesc> Ꮡpd, nint mode) {
-    ref var pd = ref Ꮡpd.Value;
-
     nint errcode = netpollcheckerr(Ꮡpd, (int32)mode);
     if (errcode != pollNoError) {
         return errcode;
@@ -374,8 +366,6 @@ internal static nint poll_runtime_pollWait(ж<pollDesc> Ꮡpd, nint mode) {
 
 //go:linkname poll_runtime_pollWaitCanceled internal/poll.runtime_pollWaitCanceled
 internal static void poll_runtime_pollWaitCanceled(ж<pollDesc> Ꮡpd, nint mode) {
-    ref var pd = ref Ꮡpd.Value;
-
     // This function is used only on windows after a failed attempt to cancel
     // a pending async IO operation. Wait for ioready, ignore closing or timeouts.
     while (!netpollblock(Ꮡpd, (int32)mode, true)) {
@@ -519,7 +509,6 @@ internal static void poll_runtime_pollUnblock(ж<pollDesc> Ꮡpd) {
 //go:nowritebarrier
 internal static int32 netpollready(ж<gList> ᏑtoRun, ж<pollDesc> Ꮡpd, int32 mode) {
     ref var toRun = ref ᏑtoRun.Value;
-    ref var pd = ref Ꮡpd.Value;
 
     ref var delta = ref heap<int32>(out var Ꮡdelta);
     delta = (int32)0;
@@ -541,8 +530,6 @@ internal static int32 netpollready(ж<gList> ᏑtoRun, ж<pollDesc> Ꮡpd, int32
 }
 
 internal static nint netpollcheckerr(ж<pollDesc> Ꮡpd, int32 mode) {
-    ref var pd = ref Ꮡpd.Value;
-
     var info = Ꮡpd.info();
     if (info.closing()) {
         return pollErrClosing;
@@ -560,8 +547,6 @@ internal static nint netpollcheckerr(ж<pollDesc> Ꮡpd, int32 mode) {
 }
 
 internal static bool netpollblockcommit(ж<g> Ꮡgp, @unsafe.Pointer gpp) {
-    ref var gp = ref Ꮡgp.Value;
-
     var r = atomic.Casuintptr((ж<uintptr>)(uintptr)(gpp), pdWait, (uintptr)new @unsafe.Pointer(Ꮡgp));
     if (r) {
         // Bump the count of goroutines waiting for the poller.
@@ -573,8 +558,6 @@ internal static bool netpollblockcommit(ж<g> Ꮡgp, @unsafe.Pointer gpp) {
 }
 
 internal static void netpollgoready(ж<g> Ꮡgp, nint traceskip) {
-    ref var gp = ref Ꮡgp.Value;
-
     goready(Ꮡgp, traceskip + 1);
 }
 
@@ -583,8 +566,6 @@ internal static void netpollgoready(ж<g> Ꮡgp, nint traceskip) {
 // Concurrent calls to netpollblock in the same mode are forbidden, as pollDesc
 // can hold only a single waiting goroutine for each mode.
 internal static bool netpollblock(ж<pollDesc> Ꮡpd, int32 mode, bool waitio) {
-    ref var pd = ref Ꮡpd.Value;
-
     var gpp = Ꮡpd.of(pollDesc.Ꮡrg);
     if (mode == (rune)'w') {
         gpp = Ꮡpd.of(pollDesc.Ꮡwg);
@@ -627,7 +608,6 @@ internal static bool netpollblock(ж<pollDesc> Ꮡpd, int32 mode, bool waitio) {
 // this adjustment should be applied after the goroutine has
 // been marked ready.
 internal static ж<g> netpollunblock(ж<pollDesc> Ꮡpd, int32 mode, bool ioready, ж<int32> Ꮡdelta) {
-    ref var pd = ref Ꮡpd.Value;
     ref var delta = ref Ꮡdelta.Value;
 
     var gpp = Ꮡpd.of(pollDesc.Ꮡrg);
@@ -765,7 +745,6 @@ internal static ж<pollDesc> alloc(this ж<pollCache> Ꮡc) {
 internal static any /*i*/ makeArg(this ж<pollDesc> Ꮡpd) {
     any i = default!;
 
-    ref var pd = ref Ꮡpd.Value;
     var x = (ж<eface>)(uintptr)(new @unsafe.Pointer(Ꮡ(i)));
     x.Value._type = pdType;
     x.Value.data = @unsafe.Pointer.FromRef(ref (Ꮡpd.of(pollDesc.Ꮡself)).Value);

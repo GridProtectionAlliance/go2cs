@@ -281,7 +281,8 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
 
 // type byteSliceMutator is a methodless func type — rendered inline as its base delegate
 
-internal static slice<Func<ж<mutator>, slice<byte>, slice<byte>>> byteSliceMutators = new Func<ж<mutator>, slice<byte>, slice<byte>>[]{
+internal static slice<Func<ж<mutator>, slice<byte>, slice<byte>>> byteSliceMutators;
+internal static void initᴛbyteSliceMutators() { byteSliceMutators = new Func<ж<mutator>, slice<byte>, slice<byte>>[]{
     byteSliceRemoveBytes,
     byteSliceInsertRandomBytes,
     byteSliceDuplicateBytes,
@@ -300,7 +301,7 @@ internal static slice<Func<ж<mutator>, slice<byte>, slice<byte>>> byteSliceMuta
     byteSliceOverwriteConstantBytes,
     byteSliceShuffleBytes,
     byteSliceSwapBytes
-}.slice();
+}.slice(); }
 
 internal static void mutateBytes(this ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB) => func((defer, recover) => {
     ref var m = ref Ꮡm.Value;

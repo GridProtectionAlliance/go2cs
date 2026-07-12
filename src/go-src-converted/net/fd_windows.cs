@@ -191,7 +191,6 @@ internal static (syscallꓸSockaddr, error) connect(this ж<netFD> Ꮡfd, contex
 
 internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> Ꮡv) {
     ref var c = ref Ꮡc.Value;
-    ref var v = ref Ꮡv.Value;
 
     if (!Ꮡc.ok()) {
         return (0, syscall.EINVAL);
@@ -205,7 +204,6 @@ internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> Ꮡv
 
 internal static (int64, error) writeBuffers(this ж<netFD> Ꮡfd, ж<Buffers> Ꮡbuf) {
     ref var fd = ref Ꮡfd.Value;
-    ref var buf = ref Ꮡbuf.Value;
 
     var (n, err) = Ꮡfd.of(netFD.Ꮡpfd).Writev(Ꮡbuf.of(Buffers.Ꮡm_value));
     Δruntime.KeepAlive(fd);

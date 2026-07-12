@@ -360,7 +360,6 @@ partial class jpeg_package {
 // section G.1.2.
 [GoRecv] internal static error refine(this ref decoder d, ж<block> Ꮡb, ж<huffman> Ꮡh, int32 zigStart, int32 zigEnd, int32 delta) {
     ref var b = ref Ꮡb.Value;
-    ref var h = ref Ꮡh.Value;
 
     // Refining a DC component is trivial.
     if (zigStart == 0) {

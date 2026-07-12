@@ -74,8 +74,6 @@ internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
 }
 
 internal static error closeRead(this ж<pipe> Ꮡp, error err) {
-    ref var p = ref Ꮡp.Value;
-
     if (err == default!) {
         err = ErrClosedPipe;
     }
@@ -119,8 +117,6 @@ internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
 }
 
 internal static error closeWrite(this ж<pipe> Ꮡp, error err) {
-    ref var p = ref Ꮡp.Value;
-
     if (err == default!) {
         err = EOF;
     }
@@ -133,8 +129,6 @@ internal static error closeWrite(this ж<pipe> Ꮡp, error err) {
 
 // readCloseError is considered internal to the pipe type.
 internal static error readCloseError(this ж<pipe> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     var rerr = Ꮡp.of(pipe.Ꮡrerr).Load();
     {
         var werr = Ꮡp.of(pipe.Ꮡwerr).Load(); if (rerr == default! && werr != default!) {
@@ -146,8 +140,6 @@ internal static error readCloseError(this ж<pipe> Ꮡp) {
 
 // writeCloseError is considered internal to the pipe type.
 internal static error writeCloseError(this ж<pipe> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     var werr = Ꮡp.of(pipe.Ꮡwerr).Load();
     {
         var rerr = Ꮡp.of(pipe.Ꮡrerr).Load(); if (werr == default! && rerr != default!) {
@@ -171,15 +163,12 @@ public static (nint n, error err) Read(this ж<PipeReader> Ꮡr, slice<byte> dat
     nint n = default!;
     error err = default!;
 
-    ref var r = ref Ꮡr.Value;
     return Ꮡr.of(PipeReader.Ꮡpipe).read(data);
 }
 
 // Close closes the reader; subsequent writes to the
 // write half of the pipe will return the error [ErrClosedPipe].
 public static error Close(this ж<PipeReader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.CloseWithError(default!);
 }
 
@@ -189,8 +178,6 @@ public static error Close(this ж<PipeReader> Ꮡr) {
 // CloseWithError never overwrites the previous error if it exists
 // and always returns nil.
 public static error CloseWithError(this ж<PipeReader> Ꮡr, error err) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.of(PipeReader.Ꮡpipe).closeRead(err);
 }
 
@@ -208,15 +195,12 @@ public static (nint n, error err) Write(this ж<PipeWriter> Ꮡw, slice<byte> da
     nint n = default!;
     error err = default!;
 
-    ref var w = ref Ꮡw.Value;
     return Ꮡw.of(PipeWriter.Ꮡr).of(PipeReader.Ꮡpipe).write(data);
 }
 
 // Close closes the writer; subsequent reads from the
 // read half of the pipe will return no bytes and EOF.
 public static error Close(this ж<PipeWriter> Ꮡw) {
-    ref var w = ref Ꮡw.Value;
-
     return Ꮡw.CloseWithError(default!);
 }
 
@@ -227,8 +211,6 @@ public static error Close(this ж<PipeWriter> Ꮡw) {
 // CloseWithError never overwrites the previous error if it exists
 // and always returns nil.
 public static error CloseWithError(this ж<PipeWriter> Ꮡw, error err) {
-    ref var w = ref Ꮡw.Value;
-
     return Ꮡw.of(PipeWriter.Ꮡr).of(PipeReader.Ꮡpipe).closeWrite(err);
 }
 

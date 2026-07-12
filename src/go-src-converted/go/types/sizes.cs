@@ -139,8 +139,6 @@ internal static bool _IsSyncAtomicAlign64(ΔType T) {
 }
 
 public static slice<int64> Offsetsof(this ж<StdSizes> Ꮡs, slice<ж<Var>> fields) {
-    ref var s = ref Ꮡs.Value;
-
     var offsets = new slice<int64>(len(fields));
     int64 offs = default!;
     foreach (var (i, f) in fields) {
@@ -320,7 +318,8 @@ public static Sizes SizesFor(@string compiler, @string arch) {
 }
 
 // stdSizes is used if Config.Sizes == nil.
-internal static Sizes stdSizes = SizesFor("gc"u8, "amd64"u8);
+internal static Sizes stdSizes;
+internal static void initᴛstdSizes() { stdSizes = SizesFor("gc"u8, "amd64"u8); }
 
 [GoRecv] internal static int64 alignof(this ref Config conf, ΔType T) {
     var f = stdSizes.Alignof;

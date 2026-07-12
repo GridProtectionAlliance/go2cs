@@ -9,8 +9,6 @@ partial class main_package {
 }
 
 internal static ж<box> get(this ж<box> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     return Ꮡb;
 }
 

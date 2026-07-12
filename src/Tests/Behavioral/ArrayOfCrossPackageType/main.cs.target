@@ -12,8 +12,6 @@ partial class main_package {
 }
 
 internal static void touch(ж<atomic.Int32> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
 }
 
 internal static ж<atomic.Int32> last(any vals) {

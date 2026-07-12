@@ -285,8 +285,6 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
 // prepare performs the bookkeeping operations required at the start of
 // CreateHeader and CreateRaw.
 [GoRecv] internal static error prepare(this ref Writer w, ж<FileHeader> Ꮡfh) {
-    ref var fh = ref Ꮡfh.DerefOrNil();
-
     if (w.last != nil && !(~w.last).closed) {
         {
             var err = w.last.close(); if (err != default!) {
@@ -557,8 +555,6 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
 // It walks the directory tree starting at the root of the filesystem
 // adding each file to the zip using deflate while maintaining the directory structure.
 public static error AddFS(this ж<Writer> Ꮡw, fs.FS fsys) {
-    ref var w = ref Ꮡw.Value;
-
     return fs.WalkDir(fsys, "."u8, error (@string name, fs.DirEntry d, error err) => func<error>((defer, recover) => {
         if (err != default!) {
             return err;

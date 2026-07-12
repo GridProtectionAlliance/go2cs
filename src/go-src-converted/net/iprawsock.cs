@@ -38,7 +38,7 @@ partial class net_package {
 public static @string String(this ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil) {
+    if (Ꮡa == nil) {
         return "<nil>"u8;
     }
     @string ip = ipEmptyString(a.IP);
@@ -51,16 +51,14 @@ public static @string String(this ж<IPAddr> Ꮡa) {
 internal static bool isWildcard(this ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil || a.IP == default!) {
+    if (Ꮡa == nil || a.IP == default!) {
         return true;
     }
     return a.IP.IsUnspecified();
 }
 
 internal static ΔAddr opAddr(this ж<IPAddr> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
-
-    if (a == nil) {
+    if (Ꮡa == nil) {
         return default!;
     }
     return new IPAddrжΔAddr(Ꮡa);
@@ -178,7 +176,6 @@ public static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) ReadMs
 // WriteToIP acts like [IPConn.WriteTo] but takes an [IPAddr].
 public static (nint, error) WriteToIP(this ж<IPConn> Ꮡc, slice<byte> b, ж<IPAddr> Ꮡaddr) {
     ref var c = ref Ꮡc.Value;
-    ref var addr = ref Ꮡaddr.Value;
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
         return (0, syscall.EINVAL);
@@ -220,7 +217,6 @@ public static (nint n, nint oobn, error err) WriteMsgIP(this ж<IPConn> Ꮡc, sl
     error err = default!;
 
     ref var c = ref Ꮡc.Value;
-    ref var addr = ref Ꮡaddr.Value;
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
         return (0, 0, syscall.EINVAL);
     }
@@ -232,8 +228,6 @@ public static (nint n, nint oobn, error err) WriteMsgIP(this ж<IPConn> Ꮡc, sl
 }
 
 internal static ж<IPConn> newIPConn(ж<netFD> Ꮡfd) {
-    ref var fd = ref Ꮡfd.Value;
-
     return Ꮡ(new IPConn(new conn(Ꮡfd)));
 }
 
@@ -245,9 +239,6 @@ internal static ж<IPConn> newIPConn(ж<netFD> Ꮡfd) {
 // If the IP field of raddr is nil or an unspecified IP address, the
 // local system is assumed.
 public static (ж<IPConn>, error) DialIP(@string network, ж<IPAddr> Ꮡladdr, ж<IPAddr> Ꮡraddr) {
-    ref var laddr = ref Ꮡladdr.Value;
-    ref var raddr = ref Ꮡraddr.DerefOrNil();
-
     if (Ꮡraddr == nil) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: default!, Err: errMissingAddress))));
     }

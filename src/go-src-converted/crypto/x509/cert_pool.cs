@@ -70,7 +70,7 @@ public static ж<CertPool> NewCertPool() {
 internal static nint len(this ж<CertPool> Ꮡs) {
     ref var s = ref Ꮡs.Value;
 
-    if (s == nil) {
+    if (Ꮡs == nil) {
         return 0;
     }
     return builtin.len(s.lazyCerts);
@@ -133,7 +133,7 @@ internal static slice<potentialParent> findPotentialParents(this ж<CertPool> �
     ref var s = ref Ꮡs.Value;
     ref var cert = ref Ꮡcert.Value;
 
-    if (s == nil) {
+    if (Ꮡs == nil) {
         return default!;
     }
     // consider all candidates where cert.Issuer matches cert.Subject.
@@ -181,7 +181,7 @@ internal static bool contains(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
     ref var s = ref Ꮡs.Value;
     ref var cert = ref Ꮡcert.Value;
 
-    if (s == nil) {
+    if (Ꮡs == nil) {
         return false;
     }
     return s.haveSum[sha256.Sum224(cert.Raw)];
@@ -282,7 +282,7 @@ public static bool Equal(this ж<CertPool> Ꮡs, ж<CertPool> Ꮡother) {
     ref var s = ref Ꮡs.Value;
     ref var other = ref Ꮡother.DerefOrNil();
 
-    if (s == nil || Ꮡother == nil) {
+    if (Ꮡs == nil || Ꮡother == nil) {
         return Ꮡs == Ꮡother;
     }
     if (s.systemPool != other.systemPool || builtin.len(s.haveSum) != builtin.len(other.haveSum)) {

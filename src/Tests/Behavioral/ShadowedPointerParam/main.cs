@@ -15,8 +15,6 @@ internal static nint use(ж<T> Ꮡt) {
 }
 
 internal static nint outer(ж<T> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     nint r = use(Ꮡt);
     switch (ᐧ) {
     default: {

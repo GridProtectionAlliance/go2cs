@@ -25,17 +25,12 @@ internal static readonly UntypedInt p224ElementLen = 28;
 
 // One sets e = 1, and returns e.
 public static ж<P224Element> One(this ж<P224Element> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
-
     p224SetOne(Ꮡe.of(P224Element.Ꮡx));
     return Ꮡe;
 }
 
 // Equal returns 1 if e == t, and zero otherwise.
 public static nint Equal(this ж<P224Element> Ꮡe, ж<P224Element> Ꮡt) {
-    ref var e = ref Ꮡe.Value;
-    ref var t = ref Ꮡt.Value;
-
     var eBytes = Ꮡe.Bytes();
     var tBytes = Ꮡt.Bytes();
     return subtle.ConstantTimeCompare(eBytes, tBytes);
@@ -43,8 +38,6 @@ public static nint Equal(this ж<P224Element> Ꮡe, ж<P224Element> Ꮡt) {
 
 // IsZero returns 1 if e == 0, and zero otherwise.
 public static nint IsZero(this ж<P224Element> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
-
     var zero = new slice<byte>(p224ElementLen);
     var eBytes = Ꮡe.Bytes();
     return subtle.ConstantTimeCompare(eBytes, zero);
@@ -61,8 +54,6 @@ public static ж<P224Element> Set(this ж<P224Element> Ꮡe, ж<P224Element> Ꮡ
 
 // Bytes returns the 28-byte big-endian encoding of e.
 public static slice<byte> Bytes(this ж<P224Element> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
-
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(28), out var Ꮡout);
@@ -70,7 +61,6 @@ public static slice<byte> Bytes(this ж<P224Element> Ꮡe) {
 }
 
 internal static slice<byte> bytes(this ж<P224Element> Ꮡe, ж<array<byte>> Ꮡout) {
-    ref var e = ref Ꮡe.Value;
     ref var @out = ref Ꮡout.Value;
 
     ref var tmp = ref heap(new p224NonMontgomeryDomainFieldElement(), out var Ꮡtmp);
@@ -84,8 +74,6 @@ internal static slice<byte> bytes(this ж<P224Element> Ꮡe, ж<array<byte>> Ꮡ
 // If v is not 28 bytes or it encodes a value higher than 2^224 - 2^96 + 1,
 // SetBytes returns nil and an error, and e is unchanged.
 public static (ж<P224Element>, error) SetBytes(this ж<P224Element> Ꮡe, slice<byte> v) {
-    ref var e = ref Ꮡe.Value;
-
     if (len(v) != p224ElementLen) {
         return (default!, errors.New("invalid P224Element encoding"u8));
     }
@@ -112,49 +100,30 @@ public static (ж<P224Element>, error) SetBytes(this ж<P224Element> Ꮡe, slice
 
 // Add sets e = t1 + t2, and returns e.
 public static ж<P224Element> Add(this ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) {
-    ref var e = ref Ꮡe.Value;
-    ref var t1 = ref Ꮡt1.Value;
-    ref var t2 = ref Ꮡt2.Value;
-
     p224Add(Ꮡe.of(P224Element.Ꮡx), Ꮡt1.of(P224Element.Ꮡx), Ꮡt2.of(P224Element.Ꮡx));
     return Ꮡe;
 }
 
 // Sub sets e = t1 - t2, and returns e.
 public static ж<P224Element> Sub(this ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) {
-    ref var e = ref Ꮡe.Value;
-    ref var t1 = ref Ꮡt1.Value;
-    ref var t2 = ref Ꮡt2.Value;
-
     p224Sub(Ꮡe.of(P224Element.Ꮡx), Ꮡt1.of(P224Element.Ꮡx), Ꮡt2.of(P224Element.Ꮡx));
     return Ꮡe;
 }
 
 // Mul sets e = t1 * t2, and returns e.
 public static ж<P224Element> Mul(this ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) {
-    ref var e = ref Ꮡe.Value;
-    ref var t1 = ref Ꮡt1.Value;
-    ref var t2 = ref Ꮡt2.Value;
-
     p224Mul(Ꮡe.of(P224Element.Ꮡx), Ꮡt1.of(P224Element.Ꮡx), Ꮡt2.of(P224Element.Ꮡx));
     return Ꮡe;
 }
 
 // Square sets e = t * t, and returns e.
 public static ж<P224Element> Square(this ж<P224Element> Ꮡe, ж<P224Element> Ꮡt) {
-    ref var e = ref Ꮡe.Value;
-    ref var t = ref Ꮡt.Value;
-
     p224Square(Ꮡe.of(P224Element.Ꮡx), Ꮡt.of(P224Element.Ꮡx));
     return Ꮡe;
 }
 
 // Select sets v to a if cond == 1, and to b if cond == 0.
 public static ж<P224Element> Select(this ж<P224Element> Ꮡv, ж<P224Element> Ꮡa, ж<P224Element> Ꮡb, nint cond) {
-    ref var v = ref Ꮡv.Value;
-    ref var a = ref Ꮡa.Value;
-    ref var b = ref Ꮡb.Value;
-
     p224Selectznz(Ꮡ((Ꮡv.of(P224Element.Ꮡx)).Value.Value), ((p224Uint1)(uint64)cond),
         Ꮡ((Ꮡb.of(P224Element.Ꮡx)).Value.Value), Ꮡ((Ꮡa.of(P224Element.Ꮡx)).Value.Value));
     return Ꮡv;

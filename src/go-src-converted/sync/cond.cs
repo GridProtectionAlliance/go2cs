@@ -80,8 +80,6 @@ public static void Wait(this ж<Cond> Ꮡc) {
 // Signal() does not affect goroutine scheduling priority; if other goroutines
 // are attempting to lock c.L, they may be awoken before a "waiting" goroutine.
 public static void Signal(this ж<Cond> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     Ꮡc.of(Cond.Ꮡchecker).check();
     runtime_notifyListNotifyOne(Ꮡc.of(Cond.Ꮡnotify));
 }
@@ -91,8 +89,6 @@ public static void Signal(this ж<Cond> Ꮡc) {
 // It is allowed but not required for the caller to hold c.L
 // during the call.
 public static void Broadcast(this ж<Cond> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     Ꮡc.of(Cond.Ꮡchecker).check();
     runtime_notifyListNotifyAll(Ꮡc.of(Cond.Ꮡnotify));
 }

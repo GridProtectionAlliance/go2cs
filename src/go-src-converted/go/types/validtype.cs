@@ -15,9 +15,6 @@ partial class types_package {
 // (Cycles involving alias types, as in "type A = [10]A" are detected
 // earlier, via the objDecl cycle detection mechanism.)
 internal static void validType(this ж<Checker> Ꮡcheck, ж<Named> Ꮡtyp) {
-    ref var check = ref Ꮡcheck.Value;
-    ref var typ = ref Ꮡtyp.Value;
-
     Ꮡcheck.validType0(nopos, new NamedжΔType(Ꮡtyp), default!, default!);
 }
 

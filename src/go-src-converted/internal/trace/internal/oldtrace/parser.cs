@@ -335,8 +335,6 @@ internal static readonly UntypedInt eventsBucketSize = 524288; // 32 MiB of even
 }
 
 public static Action<Func<ж<Event>, bool>> All(this ж<Events> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     return (Func<ж<Event>, bool> yield) => {
         for (nint i = 0; i < Ꮡl.Value.Len(); i++) {
             var (a, b) = Ꮡl.Value.index(i + Ꮡl.Value.off);

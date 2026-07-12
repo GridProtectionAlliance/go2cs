@@ -233,7 +233,6 @@ internal static void formatDecimal(ж<decimalSlice> Ꮡd, uint64 m, bool trunc, 
 // ryuFtoaShortest formats mant*2^exp with prec decimal digits.
 internal static void ryuFtoaShortest(ж<decimalSlice> Ꮡd, uint64 mant, nint exp, ж<floatInfo> Ꮡflt) {
     ref var d = ref Ꮡd.Value;
-    ref var flt = ref Ꮡflt.DerefOrNil();
 
     if (mant == 0) {
         d.nd = 0;

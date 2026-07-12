@@ -15,16 +15,12 @@ partial class tls_package {
 internal delegate error marshalingFunction(ж<cryptobyte.Builder> b);
 
 internal static error Marshal(this marshalingFunction f, ж<cryptobyte.Builder> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     return f(Ꮡb);
 }
 
 // addBytesWithLength appends a sequence of bytes to the cryptobyte.Builder. If
 // the length of the sequence is not the value specified, it produces an error.
 internal static void addBytesWithLength(ж<cryptobyte.Builder> Ꮡb, slice<byte> v, nint n) {
-    ref var b = ref Ꮡb.Value;
-
     var vʗ1 = v;
     Ꮡb.AddValue(new marshalingFunctionᴠMarshalingValue(new marshalingFunction(error (ж<cryptobyte.Builder> bΔ1) => {
         if (len(vʗ1) != n) {
@@ -409,8 +405,6 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
 }
 
 internal static (slice<byte>, error) marshal(this ж<clientHelloMsg> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
     return Ꮡm.marshalMsg(false);
 }
 
@@ -1081,8 +1075,6 @@ internal static bool unmarshal(this ж<serverHelloMsg> Ꮡm, slice<byte> data) {
 }
 
 internal static (slice<byte>, error) marshal(this ж<encryptedExtensionsMsg> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeEncryptedExtensions);
     Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
@@ -1199,8 +1191,6 @@ internal static (slice<byte>, error) marshal(this ж<encryptedExtensionsMsg> Ꮡ
 }
 
 internal static (slice<byte>, error) marshal(this ж<keyUpdateMsg> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeKeyUpdate);
     Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
@@ -1245,8 +1235,6 @@ internal static (slice<byte>, error) marshal(this ж<keyUpdateMsg> Ꮡm) {
 }
 
 internal static (slice<byte>, error) marshal(this ж<newSessionTicketMsgTLS13> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeNewSessionTicket);
     Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
@@ -1316,8 +1304,6 @@ internal static bool unmarshal(this ж<newSessionTicketMsgTLS13> Ꮡm, slice<byt
 }
 
 internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeCertificateRequest);
     Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
@@ -1528,8 +1514,6 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
 }
 
 internal static (slice<byte>, error) marshal(this ж<certificateMsgTLS13> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeCertificate);
     Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
@@ -1549,8 +1533,6 @@ internal static (slice<byte>, error) marshal(this ж<certificateMsgTLS13> Ꮡm) 
 }
 
 internal static void marshalCertificate(ж<cryptobyte.Builder> Ꮡb, Certificate certificate) {
-    ref var b = ref Ꮡb.Value;
-
     var certificateʗ1 = certificate;
     Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
         foreach (var (i, cert) in certificateʗ1.ΔCertificate) {
@@ -1701,8 +1683,6 @@ internal static bool unmarshalCertificate(ж<cryptobyte.String> Ꮡs, ж<Certifi
 }
 
 internal static (slice<byte>, error) marshal(this ж<certificateStatusMsg> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeCertificateStatus);
     Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
@@ -1772,8 +1752,6 @@ internal static bool unmarshal(this ж<certificateStatusMsg> Ꮡm, slice<byte> d
 }
 
 internal static (slice<byte>, error) marshal(this ж<finishedMsg> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeFinished);
     Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
@@ -1783,8 +1761,6 @@ internal static (slice<byte>, error) marshal(this ж<finishedMsg> Ꮡm) {
 }
 
 internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
-    ref var m = ref Ꮡm.Value;
-
     ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
     s = ((cryptobyte.String)data);
     return s.Skip(1) && readUint24LengthPrefixed(Ꮡs, Ꮡm.of(finishedMsg.ᏑverifyData)) && s.Empty();
@@ -1913,8 +1889,6 @@ internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
 }
 
 internal static (slice<byte>, error) marshal(this ж<certificateVerifyMsg> Ꮡm) {
-    ref var m = ref Ꮡm.Value;
-
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeCertificateVerify);
     Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {

@@ -31,8 +31,6 @@ internal static Func<(ж<ecdh.PrivateKey>, error)> testingOnlyGenerateKey;
 }
 
 public static slice<byte> LabeledExtract(this ж<hkdfKDF> Ꮡkdf, slice<byte> suiteID, slice<byte> salt, @string label, slice<byte> inputKey) {
-    ref var kdf = ref Ꮡkdf.Value;
-
     var labeledIKM = new slice<byte>(0, 7 + len(suiteID) + len(label) + len(inputKey));
     labeledIKM = append(labeledIKM, slice<byte>((@string)"HPKE-v1").ꓸꓸꓸ);
     labeledIKM = append(labeledIKM, suiteID.ꓸꓸꓸ);
@@ -42,8 +40,6 @@ public static slice<byte> LabeledExtract(this ж<hkdfKDF> Ꮡkdf, slice<byte> su
 }
 
 public static slice<byte> LabeledExpand(this ж<hkdfKDF> Ꮡkdf, slice<byte> suiteID, slice<byte> randomKey, @string label, slice<byte> info, uint16 length) {
-    ref var kdf = ref Ꮡkdf.Value;
-
     var labeledInfo = new slice<byte>(0, 2 + 7 + len(suiteID) + len(label) + len(info));
     labeledInfo = binary.BigEndian.AppendUint16(labeledInfo, length);
     labeledInfo = append(labeledInfo, slice<byte>((@string)"HPKE-v1").ꓸꓸꓸ);

@@ -147,7 +147,6 @@ public static (map<@string, ж<ast.Package>> pkgs, error first) ParseDir(ж<toke
     map<@string, ж<ast.Package>> pkgs = default!;
     error first = default!;
 
-    ref var fset = ref Ꮡfset.Value;
     var (list, err) = os.ReadDir(path);
     if (err != default!) {
         return (default!, err);

@@ -24,8 +24,6 @@ partial class elliptic_package {
 }
 
 public static ж<CurveParams> Params(this ж<CurveParams> Ꮡcurve) {
-    ref var curve = ref Ꮡcurve.Value;
-
     return Ꮡcurve;
 }
 
@@ -38,8 +36,6 @@ public static ж<CurveParams> Params(this ж<CurveParams> Ꮡcurve) {
 
 // polynomial returns x³ - 3x + b.
 [GoRecv] internal static ж<bigꓸInt> polynomial(this ref CurveParams curve, ж<bigꓸInt> Ꮡx) {
-    ref var x = ref Ꮡx.Value;
-
     var x3 = @new<bigꓸInt>().Mul(Ꮡx, Ꮡx);
     x3.Mul(x3, Ꮡx);
     var threeX = @new<bigꓸInt>().Lsh(Ꮡx, 1);
@@ -97,8 +93,6 @@ internal static ж<bigꓸInt> zForAffine(ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy)
     ж<bigꓸInt> xOut = default!;
     ж<bigꓸInt> yOut = default!;
 
-    ref var x = ref Ꮡx.Value;
-    ref var y = ref Ꮡy.Value;
     ref var z = ref Ꮡz.Value;
     if (z.Sign() == 0) {
         return (@new<bigꓸInt>(), @new<bigꓸInt>());
@@ -121,10 +115,6 @@ internal static ж<bigꓸInt> zForAffine(ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy)
 // from [P224], [P256], [P384], or [P521].
 public static (ж<bigꓸInt>, ж<bigꓸInt>) Add(this ж<CurveParams> Ꮡcurve, ж<bigꓸInt> Ꮡx1, ж<bigꓸInt> Ꮡy1, ж<bigꓸInt> Ꮡx2, ж<bigꓸInt> Ꮡy2) {
     ref var curve = ref Ꮡcurve.Value;
-    ref var x1 = ref Ꮡx1.Value;
-    ref var y1 = ref Ꮡy1.Value;
-    ref var x2 = ref Ꮡx2.Value;
-    ref var y2 = ref Ꮡy2.Value;
 
     // If there is a dedicated constant-time implementation for this curve operation,
     // use that instead of the generic one.
@@ -144,11 +134,7 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) Add(this ж<CurveParams> Ꮡcurve, 
 // addJacobian takes two points in Jacobian coordinates, (x1, y1, z1) and
 // (x2, y2, z2) and returns their sum, also in Jacobian form.
 [GoRecv] internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) addJacobian(this ref CurveParams curve, ж<bigꓸInt> Ꮡx1, ж<bigꓸInt> Ꮡy1, ж<bigꓸInt> Ꮡz1, ж<bigꓸInt> Ꮡx2, ж<bigꓸInt> Ꮡy2, ж<bigꓸInt> Ꮡz2) {
-    ref var x1 = ref Ꮡx1.Value;
-    ref var y1 = ref Ꮡy1.Value;
     ref var z1 = ref Ꮡz1.Value;
-    ref var x2 = ref Ꮡx2.Value;
-    ref var y2 = ref Ꮡy2.Value;
     ref var z2 = ref Ꮡz2.Value;
 
     // See https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-3.html#addition-add-2007-bl
@@ -227,8 +213,6 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) Add(this ж<CurveParams> Ꮡcurve, 
 // from [P224], [P256], [P384], or [P521].
 public static (ж<bigꓸInt>, ж<bigꓸInt>) Double(this ж<CurveParams> Ꮡcurve, ж<bigꓸInt> Ꮡx1, ж<bigꓸInt> Ꮡy1) {
     ref var curve = ref Ꮡcurve.Value;
-    ref var x1 = ref Ꮡx1.Value;
-    ref var y1 = ref Ꮡy1.Value;
 
     // If there is a dedicated constant-time implementation for this curve operation,
     // use that instead of the generic one.
@@ -246,10 +230,6 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) Double(this ж<CurveParams> Ꮡcurv
 // doubleJacobian takes a point in Jacobian coordinates, (x, y, z), and
 // returns its double, also in Jacobian form.
 [GoRecv] internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) doubleJacobian(this ref CurveParams curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy, ж<bigꓸInt> Ꮡz) {
-    ref var x = ref Ꮡx.Value;
-    ref var y = ref Ꮡy.Value;
-    ref var z = ref Ꮡz.Value;
-
     // See https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-3.html#doubling-dbl-2001-b
     var delta = @new<bigꓸInt>().Mul(Ꮡz, Ꮡz);
     delta.Mod(delta, curve.P);
@@ -309,8 +289,6 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) Double(this ж<CurveParams> Ꮡcurv
 // from [P224], [P256], [P384], or [P521].
 public static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarMult(this ж<CurveParams> Ꮡcurve, ж<bigꓸInt> ᏑBx, ж<bigꓸInt> ᏑBy, slice<byte> k) {
     ref var curve = ref Ꮡcurve.Value;
-    ref var Bx = ref ᏑBx.Value;
-    ref var By = ref ᏑBy.Value;
 
     // If there is a dedicated constant-time implementation for this curve operation,
     // use that instead of the generic one.
@@ -356,8 +334,6 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarBaseMult(this ж<CurveParams>
 }
 
 internal static (Curve, bool) matchesSpecificCurve(ж<CurveParams> Ꮡparams) {
-    ref var @params = ref Ꮡparams.DerefOrNil();
-
     foreach (var (_, c) in new Curve[]{new nistCurveжCurve<P224PointжnistPoint>(p224), new p256CurveжCurve(p256), new nistCurveжCurve<P384PointжnistPoint>(p384), new nistCurveжCurve<P521PointжnistPoint>(p521)}.slice()) {
         if (Ꮡparams == c.Params()) {
             return (c, true);

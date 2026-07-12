@@ -31,14 +31,10 @@ public static ж<Array> NewArray(ΔType elem, int64 len) {
 }
 
 public static ΔType Underlying(this ж<Array> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
-
     return new ArrayжΔType(Ꮡa);
 }
 
 public static @string String(this ж<Array> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
-
     return TypeString(new ArrayжΔType(Ꮡa), default!);
 }
 

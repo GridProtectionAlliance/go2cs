@@ -91,8 +91,6 @@ internal static void Swap(this methodArray m, nint i, nint j) {
 
 // Runs at /debug/rpc
 internal static void ServeHTTP(this debugHTTP server, Δhttp.ResponseWriter w, ж<Δhttp.Request> Ꮡreq) {
-    ref var req = ref Ꮡreq.Value;
-
     // Build a sorted version of the data.
     ref var services = ref heap<serviceArray>(out var Ꮡservices);
     Ꮡ(server).of(debugHTTP.ᏑserviceMap).Range((any snamei, any svci) => {

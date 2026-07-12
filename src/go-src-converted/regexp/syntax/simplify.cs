@@ -15,7 +15,7 @@ partial class syntax_package {
 public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.Value;
 
-    if (re == nil) {
+    if (Ꮡre == nil) {
         return default!;
     }
     var exprᴛ1 = re.Op;

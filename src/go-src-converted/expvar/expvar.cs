@@ -61,32 +61,22 @@ partial class expvar_package {
 }
 
 public static int64 Value(this ж<Int> Ꮡv) {
-    ref var v = ref Ꮡv.Value;
-
     return Ꮡv.of(Int.Ꮡi).Load();
 }
 
 public static @string String(this ж<Int> Ꮡv) {
-    ref var v = ref Ꮡv.Value;
-
     return ((@string)Ꮡv.appendJSON(default!));
 }
 
 internal static slice<byte> appendJSON(this ж<Int> Ꮡv, slice<byte> b) {
-    ref var v = ref Ꮡv.Value;
-
     return strconv.AppendInt(b, Ꮡv.of(Int.Ꮡi).Load(), 10);
 }
 
 public static void Add(this ж<Int> Ꮡv, int64 delta) {
-    ref var v = ref Ꮡv.Value;
-
     Ꮡv.of(Int.Ꮡi).Add(delta);
 }
 
 public static void Set(this ж<Int> Ꮡv, int64 value) {
-    ref var v = ref Ꮡv.Value;
-
     Ꮡv.of(Int.Ꮡi).Store(value);
 }
 
@@ -96,27 +86,19 @@ public static void Set(this ж<Int> Ꮡv, int64 value) {
 }
 
 public static float64 Value(this ж<Float> Ꮡv) {
-    ref var v = ref Ꮡv.Value;
-
     return Δmath.Float64frombits(Ꮡv.of(Float.Ꮡf).Load());
 }
 
 public static @string String(this ж<Float> Ꮡv) {
-    ref var v = ref Ꮡv.Value;
-
     return ((@string)Ꮡv.appendJSON(default!));
 }
 
 internal static slice<byte> appendJSON(this ж<Float> Ꮡv, slice<byte> b) {
-    ref var v = ref Ꮡv.Value;
-
     return strconv.AppendFloat(b, Δmath.Float64frombits(Ꮡv.of(Float.Ꮡf).Load()), (rune)'g', -1, 64);
 }
 
 // Add adds delta to v.
 public static void Add(this ж<Float> Ꮡv, float64 delta) {
-    ref var v = ref Ꮡv.Value;
-
     while (ᐧ) {
         var cur = Ꮡv.of(Float.Ꮡf).Load();
         var curVal = Δmath.Float64frombits(cur);
@@ -130,8 +112,6 @@ public static void Add(this ж<Float> Ꮡv, float64 delta) {
 
 // Set sets v to value.
 public static void Set(this ж<Float> Ꮡv, float64 value) {
-    ref var v = ref Ꮡv.Value;
-
     Ꮡv.of(Float.Ꮡf).Store(Δmath.Float64bits(value));
 }
 
@@ -149,20 +129,14 @@ public static void Set(this ж<Float> Ꮡv, float64 value) {
 }
 
 public static @string String(this ж<Map> Ꮡv) {
-    ref var v = ref Ꮡv.Value;
-
     return ((@string)Ꮡv.appendJSON(default!));
 }
 
 internal static slice<byte> appendJSON(this ж<Map> Ꮡv, slice<byte> b) {
-    ref var v = ref Ꮡv.Value;
-
     return Ꮡv.appendJSONMayExpand(b, false);
 }
 
 internal static slice<byte> appendJSONMayExpand(this ж<Map> Ꮡv, slice<byte> b, bool expand) {
-    ref var v = ref Ꮡv.Value;
-
     var afterCommaDelim = (byte)(rune)' ';
     var mayAppendNewline = (slice<byte> bΔ1) => bΔ1;
     if (expand) {
@@ -226,16 +200,12 @@ internal static void addKey(this ж<Map> Ꮡv, @string key) => func((defer, reco
 });
 
 public static Var Get(this ж<Map> Ꮡv, @string key) {
-    ref var v = ref Ꮡv.Value;
-
     var (i, _) = Ꮡv.of(Map.Ꮡm).Load(key);
     var (av, _) = i._<Var>(ᐧ);
     return av;
 }
 
 public static void Set(this ж<Map> Ꮡv, @string key, Var av) {
-    ref var v = ref Ꮡv.Value;
-
     // Before we store the value, check to see whether the key is new. Try a Load
     // before LoadOrStore: LoadOrStore causes the key interface to escape even on
     // the Load path.
@@ -254,8 +224,6 @@ public static void Set(this ж<Map> Ꮡv, @string key, Var av) {
 
 // Add adds delta to the *[Int] value stored under the given map key.
 public static void Add(this ж<Map> Ꮡv, @string key, int64 delta) {
-    ref var v = ref Ꮡv.Value;
-
     var (i, ok) = Ꮡv.of(Map.Ꮡm).Load(key);
     if (!ok) {
         bool dup = default!;
@@ -274,8 +242,6 @@ public static void Add(this ж<Map> Ꮡv, @string key, int64 delta) {
 
 // AddFloat adds delta to the *[Float] value stored under the given map key.
 public static void AddFloat(this ж<Map> Ꮡv, @string key, float64 delta) {
-    ref var v = ref Ꮡv.Value;
-
     var (i, ok) = Ꮡv.of(Map.Ꮡm).Load(key);
     if (!ok) {
         bool dup = default!;
@@ -326,8 +292,6 @@ public static void Do(this ж<Map> Ꮡv, Action<KeyValue> f) => func((defer, rec
 }
 
 public static @string Value(this ж<ΔString> Ꮡv) {
-    ref var v = ref Ꮡv.Value;
-
     var (p, _) = Ꮡv.of(expvar_package.ΔString.Ꮡs).Load()._<@string>(ᐧ);
     return p;
 }
@@ -335,20 +299,14 @@ public static @string Value(this ж<ΔString> Ꮡv) {
 // String implements the [Var] interface. To get the unquoted string
 // use [String.Value].
 public static @string String(this ж<ΔString> Ꮡv) {
-    ref var v = ref Ꮡv.Value;
-
     return ((@string)Ꮡv.appendJSON(default!));
 }
 
 internal static slice<byte> appendJSON(this ж<ΔString> Ꮡv, slice<byte> b) {
-    ref var v = ref Ꮡv.Value;
-
     return appendJSONQuote(b, Ꮡv.Value());
 }
 
 public static void Set(this ж<ΔString> Ꮡv, @string value) {
-    ref var v = ref Ꮡv.Value;
-
     Ꮡv.of(expvar_package.ΔString.Ꮡs).Store(value);
 }
 
@@ -421,8 +379,6 @@ public static void Do(Action<KeyValue> f) {
 }
 
 internal static void expvarHandler(http.ResponseWriter w, ж<http.Request> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     w.Header().Set("Content-Type"u8, "application/json; charset=utf-8"u8);
     w.Write(Ꮡvars.appendJSONMayExpand(default!, true));
 }

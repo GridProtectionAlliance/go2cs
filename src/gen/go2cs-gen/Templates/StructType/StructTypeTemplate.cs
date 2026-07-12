@@ -802,13 +802,14 @@ internal class StructTypeTemplate : TemplateBase
 
             // Construct from nil: field initializers already ran (C# executes them in every explicitly
             // declared constructor) and C# 11 auto-defaults any field the body leaves unassigned, so
-            // plain members need no assignment here — re-assigning `default!` would NULL an array
-            // field's `= new(N)` backing (a `[N]T` field of `S{}` NREd on first index). Only the
-            // promoted-embed boxes need construction: they are readonly `ж<T>` fields with no
-            // initializer, so a box exists only when a constructor allocates it.
+            // PLAIN scalar/reference/slice/map members need no assignment — re-assigning `default!` would
+            // NULL an array field's `= new(N)` backing (a `[N]T` field of `S{}` NREd on first index).
+            // AppendZeroValueInitializers assigns only what `default` leaves broken: the promoted-embed
+            // boxes (readonly `ж<T>` fields with no initializer) and any plain struct-typed field whose
+            // own type needs construction (see AppendZeroValueInitializers).
             result.AppendLine($"public {NonGenericStructName}(NilType _)");
             result.AppendLine($"{TypeElemIndent}{{");
-            AppendPromotedBoxInitializers(result);
+            AppendZeroValueInitializers(result);
             result.AppendLine($"{TypeElemIndent}}}");
 
             // Parameterless constructor so C# RUNS the struct's field initializers — most importantly an
@@ -822,7 +823,7 @@ internal class StructTypeTemplate : TemplateBase
             result.AppendLine();
             result.AppendLine($"{TypeElemIndent}public {NonGenericStructName}()");
             result.AppendLine($"{TypeElemIndent}{{");
-            AppendPromotedBoxInitializers(result);
+            AppendZeroValueInitializers(result);
             result.AppendLine($"{TypeElemIndent}}}");
 
             // Generate exported constructor from public fields. When an ALL-fields internal
@@ -846,21 +847,104 @@ internal class StructTypeTemplate : TemplateBase
         }
     }
 
-    // Allocates the readonly `ж<T>` box of every promoted embed with a nil-constructed value —
-    // shared by the NilType and parameterless constructors (the parameterized constructors box
-    // their incoming member values instead).
-    private void AppendPromotedBoxInitializers(StringBuilder result)
+    // Builds the zero value that golib's `@new<T>()`/`heap()` materialize into a FULLY USABLE
+    // instance — shared by the NilType and parameterless constructors (the parameterized
+    // constructors box/assign their incoming member values instead). Two things need it:
+    //   (1) every promoted-embed box — a readonly `ж<T>` field with no initializer, so it exists
+    //       only when a constructor allocates it; and
+    //   (2) every plain (non-embed) struct-typed FIELD whose type itself needs construction — its
+    //       own promoted-embed box or fixed-array (`[N]T`) backing, at any depth. C# implicitly
+    //       zeroes such a field to `default(FieldType)`, whose nested box/backing is null, so the
+    //       first touch NREs (`@new<pp>()` — pp has a field `fmt`, and `fmt` embeds `fmtFlags`
+    //       whose box is null → clearflags). Constructing it via its own NilType constructor
+    //       recursively initializes its needy members, so a single-level `new FieldType(nil)` here
+    //       fixes every depth. Reference fields (pointers/interfaces/delegates) keep their nil zero
+    //       value (correct — a nil `*T` matches Go); a fixed-array FIELD self-initializes via its
+    //       own `= new(N)` field initializer (which every explicitly declared constructor runs), so
+    //       it needs no assignment; a cross-package/golib field type is left `default` (conservative
+    //       — see StructTypeNeedsConstruction).
+    private void AppendZeroValueInitializers(StringBuilder result)
     {
-        foreach ((string typeName, string memberName, _, bool isPromotedStruct) in StructMembers)
+        foreach ((string typeName, string memberName, bool isReferenceType, bool isPromotedStruct) in StructMembers)
         {
-            if (!isPromotedStruct)
+            if (GetSimpleName(memberName) == "_")
+                continue;
+
+            if (isPromotedStruct)
+            {
+                result.Append($"{TypeElemIndent}    ");
+                // A keyword-named embed composes the box field from the UNESCAPED member name
+                // ('@' is only valid leading an identifier - 'Ꮡʗ@base' is CS1002).
+                result.AppendLine($"{AddressPrefix}{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)} = new {PointerPrefix}<{typeName}>(new {typeName}(nil));");
+                continue;
+            }
+
+            if (isReferenceType || !StructTypeNeedsConstruction(typeName))
                 continue;
 
             result.Append($"{TypeElemIndent}    ");
-            // A keyword-named embed composes the box field from the UNESCAPED member name
-            // ('@' is only valid leading an identifier - 'Ꮡʗ@base' is CS1002).
-            result.AppendLine($"{AddressPrefix}{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)} = new {PointerPrefix}<{typeName}>(new {typeName}(nil));");
+            result.AppendLine($"this.{memberName} = new {typeName}(nil);");
         }
+    }
+
+    private readonly Dictionary<string, bool> m_needsConstructionCache = new(StringComparer.Ordinal);
+
+    // Reports whether a value struct's zero value (`default(T)`) is broken — i.e. it has a
+    // promoted-embed box (constructor-allocated) or a fixed-array field (`= new(N)` initializer
+    // that `default` skips), directly or through a nested value-struct field — so a field of this
+    // type must be constructed rather than left `default`. Only CONVERTER-GENERATED structs
+    // (resolvable by syntax in this compilation) qualify: a `true` result guarantees the type has
+    // the public `T(NilType)` constructor `new T(nil)` needs, and a cross-package/golib type
+    // (unresolvable here) returns false so no bare `new T(nil)` is emitted for it — its own package
+    // constructs it, and its default (nil slice/map/@string) is correct anyway.
+    private bool StructTypeNeedsConstruction(string typeName)
+    {
+        if (m_needsConstructionCache.TryGetValue(typeName, out bool cached))
+            return cached;
+
+        bool result = NeedsConstruction(typeName, []);
+        m_needsConstructionCache[typeName] = result;
+        return result;
+    }
+
+    private bool NeedsConstruction(string typeName, HashSet<string> seen)
+    {
+        if (m_needsConstructionCache.TryGetValue(typeName, out bool cached))
+            return cached;
+
+        // Go forbids value-type embedding cycles (infinite size), and reference fields are skipped
+        // before recursion, so a cycle cannot actually occur — the guard is purely defensive.
+        if (!seen.Add(typeName))
+            return false;
+
+        (StructDeclarationSyntax? structDecl, Compilation? compilation) = Context.GetStructDeclaration(typeName);
+
+        if (structDecl is null)
+            return false;
+
+        foreach ((string memberType, string memberName, bool isReferenceType, bool isProperty) in structDecl.GetStructMembers(compilation!, true))
+        {
+            if (GetSimpleName(memberName) == "_")
+                continue;
+
+            // A promoted embed surfaces as a `partial ref` PROPERTY (isProperty) — its box is
+            // constructor-allocated, so the enclosing default is broken.
+            if (isProperty)
+                return true;
+
+            if (isReferenceType)
+                continue;
+
+            // A fixed-size array field (`[N]T` → golib `array<T>`) carries a `= new(N)` initializer
+            // that `default(T)` skips, leaving a null backing.
+            if (memberType.Contains("go.array<"))
+                return true;
+
+            if (NeedsConstruction(memberType, seen))
+                return true;
+        }
+
+        return false;
     }
 
     private void GenerateConstructor(string scope, List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct)> structMembers, StringBuilder result)

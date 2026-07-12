@@ -296,7 +296,7 @@ internal static readonly socksReply socksStatusSucceeded = 0x00;
 internal static @string String(this ж<socksAddr> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil) {
+    if (Ꮡa == nil) {
         return "<nil>"u8;
     }
     @string port = strconv.Itoa(a.Port);
@@ -317,7 +317,7 @@ internal static @string String(this ж<socksAddr> Ꮡa) {
 internal static netꓸAddr BoundAddr(this ж<socksConn> Ꮡc) {
     ref var c = ref Ꮡc.Value;
 
-    if (c == nil) {
+    if (Ꮡc == nil) {
         return default!;
     }
     return c.boundAddr;

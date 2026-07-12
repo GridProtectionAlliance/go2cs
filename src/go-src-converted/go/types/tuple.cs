@@ -28,7 +28,7 @@ public static ж<Tuple> NewTuple(params Span<ж<Var>> xʗp) {
 public static nint Len(this ж<Tuple> Ꮡt) {
     ref var t = ref Ꮡt.Value;
 
-    if (t != nil) {
+    if (Ꮡt != nil) {
         return len(t.vars);
     }
     return 0;
@@ -40,14 +40,10 @@ public static nint Len(this ж<Tuple> Ꮡt) {
 }
 
 public static ΔType Underlying(this ж<Tuple> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return new TupleжΔType(Ꮡt);
 }
 
 public static @string String(this ж<Tuple> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return TypeString(new TupleжΔType(Ꮡt), default!);
 }
 

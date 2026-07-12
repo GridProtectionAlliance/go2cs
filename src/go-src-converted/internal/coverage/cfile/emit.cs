@@ -318,8 +318,6 @@ internal static error emitCounterDataToDirectory(@string outdir) {
 
 // emitCounterDataToWriter emits counter data for this coverage run to an io.Writer.
 internal static error emitCounterDataToWriter(this ж<emitState> Ꮡs, io.Writer w) {
-    ref var s = ref Ꮡs.Value;
-
     {
         var err = Ꮡs.emitCounterDataFile(finalHash, w); if (err != default!) {
             return err;
@@ -565,7 +563,6 @@ internal static map<@string, @string> captureOsArgs() {
 internal static error emitCounterDataFile(this ж<emitState> Ꮡs, array<byte> finalHash, io.Writer w) {
     finalHash = finalHash.Clone();
 
-    ref var s = ref Ꮡs.Value;
     var cfw = encodecounter.NewCoverageDataWriter(w, coverage.CtrULeb128);
     {
         var err = cfw.Write(finalHash, capturedOsArgs, new emitStateжCounterVisitor(Ꮡs)); if (err != default!) {

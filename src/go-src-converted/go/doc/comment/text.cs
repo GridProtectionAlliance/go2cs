@@ -181,8 +181,6 @@ internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @s
 // without worrying about line wrapping.
 // Explicit links have the [ ] dropped to improve readability.
 [GoRecv] internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> Ꮡout, slice<ΔText> x) {
-    ref var @out = ref Ꮡout.Value;
-
     foreach (var (_, t) in x) {
         switch (t.type()) {
         case Plain tΔ1: {

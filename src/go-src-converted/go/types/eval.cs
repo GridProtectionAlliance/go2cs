@@ -24,8 +24,6 @@ partial class types_package {
 public static (TypeAndValue, error err) Eval(ж<token.FileSet> Ꮡfset, ж<Package> Ꮡpkg, tokenꓸPos pos, @string expr) {
     error err = default!;
 
-    ref var fset = ref Ꮡfset.Value;
-    ref var pkg = ref Ꮡpkg.Value;
     // parse expressions
     (var node, err) = parser.ParseExprFrom(Ꮡfset, "eval"u8, expr, 0);
     if (err != default!) {
@@ -61,7 +59,6 @@ public static error /*err*/ CheckExpr(ж<token.FileSet> Ꮡfset, ж<Package> Ꮡ
     func((defer, recover) => {
     ref var fset = ref Ꮡfset.Value;
     ref var pkg = ref Ꮡpkg.DerefOrNil();
-    ref var info = ref Ꮡinfo.Value;
 
         // determine scope
         ж<ΔScope> scope = default!;

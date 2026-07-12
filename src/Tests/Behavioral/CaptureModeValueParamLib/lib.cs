@@ -29,8 +29,6 @@ internal static (@string @out, error err) fprint(this ж<Config> Ꮡcfg, @string
 }
 
 public static (@string, error) Fprint(this ж<Config> Ꮡcfg, @string label) {
-    ref var cfg = ref Ꮡcfg.Value;
-
     return Ꮡcfg.fprint(label);
 }
 

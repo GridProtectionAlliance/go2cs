@@ -803,10 +803,11 @@ internal static void defaultUsage(this ж<FlagSet> Ꮡf) {
 // Custom usage functions may choose to exit the program; by default exiting
 // happens anyway as the command line's error handling strategy is set to
 // [ExitOnError].
-public static Action Usage = () => {
+public static Action Usage;
+internal static void initᴛUsage() { Usage = () => {
     fmt.Fprintf(CommandLine.Output(), "Usage of %s:\n"u8, os.Args[0]);
     PrintDefaults();
-};
+}; }
 
 // NFlag returns the number of flags that have been set.
 [GoRecv] public static nint NFlag(this ref FlagSet f) {
@@ -858,16 +859,12 @@ public static slice<@string> Args() {
 // BoolVar defines a bool flag with specified name, default value, and usage string.
 // The argument p points to a bool variable in which to store the value of the flag.
 [GoRecv] public static void BoolVar(this ref FlagSet f, ж<bool> Ꮡp, @string name, bool value, @string usage) {
-    ref var p = ref Ꮡp.Value;
-
     f.Var(new boolValueжValue(newBoolValue(value, Ꮡp)), name, usage);
 }
 
 // BoolVar defines a bool flag with specified name, default value, and usage string.
 // The argument p points to a bool variable in which to store the value of the flag.
 public static void BoolVar(ж<bool> Ꮡp, @string name, bool value, @string usage) {
-    ref var p = ref Ꮡp.Value;
-
     CommandLine.Var(new boolValueжValue(newBoolValue(value, Ꮡp)), name, usage);
 }
 
@@ -888,16 +885,12 @@ public static ж<bool> Bool(@string name, bool value, @string usage) {
 // IntVar defines an int flag with specified name, default value, and usage string.
 // The argument p points to an int variable in which to store the value of the flag.
 [GoRecv] public static void IntVar(this ref FlagSet f, ж<nint> Ꮡp, @string name, nint value, @string usage) {
-    ref var p = ref Ꮡp.Value;
-
     f.Var(new intValueжValue(newIntValue(value, Ꮡp)), name, usage);
 }
 
 // IntVar defines an int flag with specified name, default value, and usage string.
 // The argument p points to an int variable in which to store the value of the flag.
 public static void IntVar(ж<nint> Ꮡp, @string name, nint value, @string usage) {
-    ref var p = ref Ꮡp.Value;
-
     CommandLine.Var(new intValueжValue(newIntValue(value, Ꮡp)), name, usage);
 }
 
@@ -918,16 +911,12 @@ public static ж<nint> Int(@string name, nint value, @string usage) {
 // Int64Var defines an int64 flag with specified name, default value, and usage string.
 // The argument p points to an int64 variable in which to store the value of the flag.
 [GoRecv] public static void Int64Var(this ref FlagSet f, ж<int64> Ꮡp, @string name, int64 value, @string usage) {
-    ref var p = ref Ꮡp.Value;
-
     f.Var(new int64ValueжValue(newInt64Value(value, Ꮡp)), name, usage);
 }
 
 // Int64Var defines an int64 flag with specified name, default value, and usage string.
 // The argument p points to an int64 variable in which to store the value of the flag.
 public static void Int64Var(ж<int64> Ꮡp, @string name, int64 value, @string usage) {
-    ref var p = ref Ꮡp.Value;
-
     CommandLine.Var(new int64ValueжValue(newInt64Value(value, Ꮡp)), name, usage);
 }
 
@@ -948,16 +937,12 @@ public static ж<int64> Int64(@string name, int64 value, @string usage) {
 // UintVar defines a uint flag with specified name, default value, and usage string.
 // The argument p points to a uint variable in which to store the value of the flag.
 [GoRecv] public static void UintVar(this ref FlagSet f, ж<nuint> Ꮡp, @string name, nuint value, @string usage) {
-    ref var p = ref Ꮡp.Value;
-
     f.Var(new uintValueжValue(newUintValue(value, Ꮡp)), name, usage);
 }
 
 // UintVar defines a uint flag with specified name, default value, and usage string.
 // The argument p points to a uint variable in which to store the value of the flag.
 public static void UintVar(ж<nuint> Ꮡp, @string name, nuint value, @string usage) {
-    ref var p = ref Ꮡp.Value;
-
     CommandLine.Var(new uintValueжValue(newUintValue(value, Ꮡp)), name, usage);
 }
 
@@ -978,16 +963,12 @@ public static ж<nuint> Uint(@string name, nuint value, @string usage) {
 // Uint64Var defines a uint64 flag with specified name, default value, and usage string.
 // The argument p points to a uint64 variable in which to store the value of the flag.
 [GoRecv] public static void Uint64Var(this ref FlagSet f, ж<uint64> Ꮡp, @string name, uint64 value, @string usage) {
-    ref var p = ref Ꮡp.Value;
-
     f.Var(new uint64ValueжValue(newUint64Value(value, Ꮡp)), name, usage);
 }
 
 // Uint64Var defines a uint64 flag with specified name, default value, and usage string.
 // The argument p points to a uint64 variable in which to store the value of the flag.
 public static void Uint64Var(ж<uint64> Ꮡp, @string name, uint64 value, @string usage) {
-    ref var p = ref Ꮡp.Value;
-
     CommandLine.Var(new uint64ValueжValue(newUint64Value(value, Ꮡp)), name, usage);
 }
 
@@ -1008,16 +989,12 @@ public static ж<uint64> Uint64(@string name, uint64 value, @string usage) {
 // StringVar defines a string flag with specified name, default value, and usage string.
 // The argument p points to a string variable in which to store the value of the flag.
 [GoRecv] public static void StringVar(this ref FlagSet f, ж<@string> Ꮡp, @string name, @string value, @string usage) {
-    ref var p = ref Ꮡp.Value;
-
     f.Var(new stringValueжValue(newStringValue(value, Ꮡp)), name, usage);
 }
 
 // StringVar defines a string flag with specified name, default value, and usage string.
 // The argument p points to a string variable in which to store the value of the flag.
 public static void StringVar(ж<@string> Ꮡp, @string name, @string value, @string usage) {
-    ref var p = ref Ꮡp.Value;
-
     CommandLine.Var(new stringValueжValue(newStringValue(value, Ꮡp)), name, usage);
 }
 
@@ -1038,16 +1015,12 @@ public static ж<@string> String(@string name, @string value, @string usage) {
 // Float64Var defines a float64 flag with specified name, default value, and usage string.
 // The argument p points to a float64 variable in which to store the value of the flag.
 [GoRecv] public static void Float64Var(this ref FlagSet f, ж<float64> Ꮡp, @string name, float64 value, @string usage) {
-    ref var p = ref Ꮡp.Value;
-
     f.Var(new float64ValueжValue(newFloat64Value(value, Ꮡp)), name, usage);
 }
 
 // Float64Var defines a float64 flag with specified name, default value, and usage string.
 // The argument p points to a float64 variable in which to store the value of the flag.
 public static void Float64Var(ж<float64> Ꮡp, @string name, float64 value, @string usage) {
-    ref var p = ref Ꮡp.Value;
-
     CommandLine.Var(new float64ValueжValue(newFloat64Value(value, Ꮡp)), name, usage);
 }
 
@@ -1069,8 +1042,6 @@ public static ж<float64> Float64(@string name, float64 value, @string usage) {
 // The argument p points to a time.Duration variable in which to store the value of the flag.
 // The flag accepts a value acceptable to time.ParseDuration.
 [GoRecv] public static void DurationVar(this ref FlagSet f, ж<time.Duration> Ꮡp, @string name, time.Duration value, @string usage) {
-    ref var p = ref Ꮡp.Value;
-
     f.Var(new durationValueжValue(newDurationValue(value, Ꮡp)), name, usage);
 }
 
@@ -1078,8 +1049,6 @@ public static ж<float64> Float64(@string name, float64 value, @string usage) {
 // The argument p points to a time.Duration variable in which to store the value of the flag.
 // The flag accepts a value acceptable to time.ParseDuration.
 public static void DurationVar(ж<time.Duration> Ꮡp, @string name, time.Duration value, @string usage) {
-    ref var p = ref Ꮡp.Value;
-
     CommandLine.Var(new durationValueжValue(newDurationValue(value, Ꮡp)), name, usage);
 }
 

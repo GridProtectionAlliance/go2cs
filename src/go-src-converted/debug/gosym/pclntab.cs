@@ -548,7 +548,6 @@ internal static uint32 field(this ΔfuncData f, uint32 n) {
 
 // step advances to the next pc, value pair in the encoded table.
 [GoRecv] internal static bool step(this ref LineTable t, ж<slice<byte>> Ꮡp, ж<uint64> Ꮡpc, ж<int32> Ꮡval, bool first) {
-    ref var p = ref Ꮡp.Value;
     ref var pc = ref Ꮡpc.Value;
     ref var val = ref Ꮡval.Value;
 
@@ -773,7 +772,6 @@ internal static void initFileMap(this ж<LineTable> Ꮡt) => func((defer, recove
 // a way for callers to obtain the list of files in the program.
 internal static void go12MapFiles(this ж<LineTable> Ꮡt, map<@string, ж<Obj>> m, ж<Obj> Ꮡobj) => func((defer, recover) => {
     ref var t = ref Ꮡt.Value;
-    ref var obj = ref Ꮡobj.Value;
 
     if (!disableRecover) {
         defer(() => {

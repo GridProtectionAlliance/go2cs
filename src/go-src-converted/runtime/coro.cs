@@ -77,8 +77,6 @@ internal static void corostart() => func((defer, recover) => {
 // coroexit is like coroswitch but closes the coro
 // and exits the current goroutine
 internal static void coroexit(ж<coro> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     var gp = getg();
     gp.Value.coroarg = Ꮡc;
     gp.Value.coroexit = true;
@@ -90,8 +88,6 @@ internal static void coroexit(ж<coro> Ꮡc) {
 // coroswitch switches to the goroutine blocked on c
 // and then blocks the current goroutine on c.
 internal static void coroswitch(ж<coro> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     var gp = getg();
     gp.Value.coroarg = Ꮡc;
     mcall(coroswitch_m);

@@ -225,7 +225,6 @@ internal static (slice<byte>, error) generateOuterECHExt(uint8 id, uint16 kdfID,
 
 internal static error computeAndUpdateOuterECHExtension(ж<clientHelloMsg> Ꮡouter, ж<clientHelloMsg> Ꮡinner, ж<echContext> Ꮡech, bool useKey) {
     ref var outer = ref Ꮡouter.Value;
-    ref var inner = ref Ꮡinner.Value;
     ref var ech = ref Ꮡech.Value;
 
     slice<byte> encapKey = default!;

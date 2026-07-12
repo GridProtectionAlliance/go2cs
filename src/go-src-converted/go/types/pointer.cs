@@ -23,14 +23,10 @@ public static ж<Pointer> NewPointer(ΔType elem) {
 }
 
 public static ΔType Underlying(this ж<Pointer> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     return new PointerжΔType(Ꮡp);
 }
 
 public static @string String(this ж<Pointer> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     return TypeString(new PointerжΔType(Ꮡp), default!);
 }
 

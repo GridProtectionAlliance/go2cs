@@ -104,8 +104,6 @@ internal static (Action<slice<byte>, slice<byte>, slice<byte>, slice<byte>>, cry
 }
 
 internal static Action<slice<byte>, slice<byte>, slice<byte>, slice<byte>> prfForVersion(uint16 version, ж<cipherSuite> Ꮡsuite) {
-    ref var suite = ref Ꮡsuite.Value;
-
     var (prf, _) = prfAndHashForVersion(version, Ꮡsuite);
     return prf;
 }
@@ -113,8 +111,6 @@ internal static Action<slice<byte>, slice<byte>, slice<byte>, slice<byte>> prfFo
 // masterFromPreMasterSecret generates the master secret from the pre-master
 // secret. See RFC 5246, Section 8.1.
 internal static slice<byte> masterFromPreMasterSecret(uint16 version, ж<cipherSuite> Ꮡsuite, slice<byte> preMasterSecret, slice<byte> clientRandom, slice<byte> serverRandom) {
-    ref var suite = ref Ꮡsuite.Value;
-
     var seed = new slice<byte>(0, len(clientRandom) + len(serverRandom));
     seed = append(seed, clientRandom.ꓸꓸꓸ);
     seed = append(seed, serverRandom.ꓸꓸꓸ);
@@ -126,8 +122,6 @@ internal static slice<byte> masterFromPreMasterSecret(uint16 version, ж<cipherS
 // extMasterFromPreMasterSecret generates the extended master secret from the
 // pre-master secret. See RFC 7627.
 internal static slice<byte> extMasterFromPreMasterSecret(uint16 version, ж<cipherSuite> Ꮡsuite, slice<byte> preMasterSecret, slice<byte> transcript) {
-    ref var suite = ref Ꮡsuite.Value;
-
     var masterSecret = new slice<byte>(masterSecretLength);
     prfForVersion(version, Ꮡsuite)(masterSecret, preMasterSecret, extendedMasterSecretLabel, transcript);
     return masterSecret;
@@ -144,7 +138,6 @@ internal static (slice<byte> clientMAC, slice<byte> serverMAC, slice<byte> clien
     slice<byte> clientIV = default!;
     slice<byte> serverIV = default!;
 
-    ref var suite = ref Ꮡsuite.Value;
     var seed = new slice<byte>(0, len(serverRandom) + len(clientRandom));
     seed = append(seed, serverRandom.ꓸꓸꓸ);
     seed = append(seed, clientRandom.ꓸꓸꓸ);
@@ -166,8 +159,6 @@ internal static (slice<byte> clientMAC, slice<byte> serverMAC, slice<byte> clien
 }
 
 internal static ΔfinishedHash newFinishedHash(uint16 version, ж<cipherSuite> ᏑcipherSuite) {
-    ref var cipherSuite = ref ᏑcipherSuite.Value;
-
     slice<byte> buffer = default!;
     if (version >= VersionTLS12) {
         buffer = new byte[]{}.slice();
@@ -276,8 +267,6 @@ internal static (slice<byte>, error) noEKMBecauseNoEMS(@string label, slice<byte
 
 // ekmFromMasterSecret generates exported keying material as defined in RFC 5705.
 internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> ekmFromMasterSecret(uint16 version, ж<cipherSuite> Ꮡsuite, slice<byte> masterSecret, slice<byte> clientRandom, slice<byte> serverRandom) {
-    ref var suite = ref Ꮡsuite.Value;
-
     var clientRandomʗ1 = clientRandom;
     var masterSecretʗ1 = masterSecret;
     var serverRandomʗ1 = serverRandom;

@@ -16,14 +16,10 @@ partial class main_package {
 }
 
 internal static ж<view> viewOf(ж<header> Ꮡhp) {
-    ref var hp = ref Ꮡhp.Value;
-
     return (ж<view>)(uintptr)(new @unsafe.Pointer(Ꮡhp));
 }
 
 internal static nint readN(ж<header> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     return (~viewOf((ж<header>)(uintptr)(new @unsafe.Pointer(Ꮡp)))).n;
 }
 

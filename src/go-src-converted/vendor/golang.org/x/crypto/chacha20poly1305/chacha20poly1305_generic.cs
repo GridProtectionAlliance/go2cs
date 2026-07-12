@@ -14,8 +14,6 @@ using go.vendor.golang.org.x.crypto.@internal;
 partial class chacha20poly1305_package {
 
 internal static void writeWithPadding(ж<poly1305.MAC> Ꮡp, slice<byte> b) {
-    ref var p = ref Ꮡp.Value;
-
     Ꮡp.Write(b);
     {
         nint rem = len(b) % 16; if (rem != 0) {
@@ -27,8 +25,6 @@ internal static void writeWithPadding(ж<poly1305.MAC> Ꮡp, slice<byte> b) {
 }
 
 internal static void writeUint64(ж<poly1305.MAC> Ꮡp, nint n) {
-    ref var p = ref Ꮡp.Value;
-
     array<byte> buf = new(8);
     binary.LittleEndian.PutUint64(buf[..], (uint64)n);
     Ꮡp.Write(buf[..]);

@@ -141,9 +141,6 @@ internal static bool Temporary(this timeoutError _) {
 // DialWithDialer uses context.Background internally; to specify the context,
 // use [Dialer.DialContext] with NetDialer set to the desired dialer.
 public static (ж<Conn>, error) DialWithDialer(ж<net.Dialer> Ꮡdialer, @string network, @string addr, ж<Config> Ꮡconfig) {
-    ref var dialer = ref Ꮡdialer.Value;
-    ref var config = ref Ꮡconfig.Value;
-
     return dial(context.Background(), Ꮡdialer, network, addr, Ꮡconfig);
 }
 
@@ -200,8 +197,6 @@ internal static (ж<Conn>, error) dial(context.Context ctx, ж<net.Dialer> Ꮡne
 // the zero configuration; see the documentation of Config
 // for the defaults.
 public static (ж<Conn>, error) Dial(@string network, @string addr, ж<Config> Ꮡconfig) {
-    ref var config = ref Ꮡconfig.Value;
-
     return DialWithDialer(@new<net.Dialer>(), network, addr, Ꮡconfig);
 }
 

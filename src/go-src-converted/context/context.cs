@@ -463,8 +463,6 @@ internal static any Value(this ж<cancelCtx> Ꮡc, any key) {
 }
 
 internal static /*<-*/channel<EmptyStruct> Done(this ж<cancelCtx> Ꮡc) => func((defer, recover) => {
-    ref var c = ref Ꮡc.Value;
-
     var d = Ꮡc.of(cancelCtx.Ꮡdone).Load();
     if (d != default!) {
         return d._<channel<EmptyStruct>>();

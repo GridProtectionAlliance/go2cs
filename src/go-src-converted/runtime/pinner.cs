@@ -92,7 +92,7 @@ internal static readonly uintptr pinnerRefStoreSize = /* (pinnerSize - unsafe.Si
 internal static void unpin(this ж<pinner> Ꮡp) {
     ref var Δp = ref Ꮡp.Value;
 
-    if (Δp == nil || Δp.refs == default!) {
+    if (Ꮡp == nil || Δp.refs == default!) {
         return;
     }
     foreach (var (i, _) in Δp.refs) {
@@ -106,8 +106,6 @@ internal static void unpin(this ж<pinner> Ꮡp) {
 }
 
 internal static @unsafe.Pointer pinnerGetPtr(ж<any> Ꮡi) {
-    ref var i = ref Ꮡi.Value;
-
     var e = efaceOf(Ꮡi);
     var etyp = e.Value._type;
     if (etyp == nil) {
@@ -291,15 +289,10 @@ internal static pinState ofObject(this ж<pinnerBits> Ꮡp, uintptr n) {
 //
 //go:nosplit
 internal static ж<pinnerBits> getPinnerBits(this ж<mspan> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     return (ж<pinnerBits>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromRef(ref (Ꮡs.of(mspan.ᏑpinnerBits)).Value)));
 }
 
 internal static void setPinnerBits(this ж<mspan> Ꮡs, ж<pinnerBits> Ꮡp) {
-    ref var s = ref Ꮡs.Value;
-    ref var Δp = ref Ꮡp.Value;
-
     atomicstorep(@unsafe.Pointer.FromRef(ref (Ꮡs.of(mspan.ᏑpinnerBits)).Value), new @unsafe.Pointer(Ꮡp));
 }
 
@@ -337,8 +330,6 @@ internal static void refreshPinnerBits(this ж<mspan> Ꮡs) {
 // incPinCounter is only called for multiple pins of the same object and records
 // the _additional_ pins.
 internal static void incPinCounter(this ж<mspan> Ꮡspan, uintptr offset) {
-    ref var span = ref Ꮡspan.Value;
-
     ж<specialPinCounter> rec = default!;
     var (@ref, exists) = Ꮡspan.specialFindSplicePoint(offset, _KindSpecialPinCounter);
     if (!exists){

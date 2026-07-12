@@ -115,14 +115,10 @@ public static (ж<PublicKeyECDSA>, error) NewPublicKeyECDSA(@string curve, BigIn
 }
 
 public static (slice<byte>, error) SignMarshalECDSA(ж<PrivateKeyECDSA> Ꮡpriv, slice<byte> hash) {
-    ref var priv = ref Ꮡpriv.Value;
-
     throw panic("boringcrypto: not available");
 }
 
 public static bool VerifyECDSA(ж<PublicKeyECDSA> Ꮡpub, slice<byte> hash, slice<byte> sig) {
-    ref var pub = ref Ꮡpub.Value;
-
     throw panic("boringcrypto: not available");
 }
 
@@ -135,38 +131,26 @@ public static bool VerifyECDSA(ж<PublicKeyECDSA> Ꮡpub, slice<byte> hash, slic
 }
 
 public static (slice<byte>, error) DecryptRSAOAEP(hash.Hash h, hash.Hash mgfHash, ж<PrivateKeyRSA> Ꮡpriv, slice<byte> ciphertext, slice<byte> label) {
-    ref var priv = ref Ꮡpriv.Value;
-
     throw panic("boringcrypto: not available");
 }
 
 public static (slice<byte>, error) DecryptRSAPKCS1(ж<PrivateKeyRSA> Ꮡpriv, slice<byte> ciphertext) {
-    ref var priv = ref Ꮡpriv.Value;
-
     throw panic("boringcrypto: not available");
 }
 
 public static (slice<byte>, error) DecryptRSANoPadding(ж<PrivateKeyRSA> Ꮡpriv, slice<byte> ciphertext) {
-    ref var priv = ref Ꮡpriv.Value;
-
     throw panic("boringcrypto: not available");
 }
 
 public static (slice<byte>, error) EncryptRSAOAEP(hash.Hash h, hash.Hash mgfHash, ж<PublicKeyRSA> Ꮡpub, slice<byte> msg, slice<byte> label) {
-    ref var pub = ref Ꮡpub.Value;
-
     throw panic("boringcrypto: not available");
 }
 
 public static (slice<byte>, error) EncryptRSAPKCS1(ж<PublicKeyRSA> Ꮡpub, slice<byte> msg) {
-    ref var pub = ref Ꮡpub.Value;
-
     throw panic("boringcrypto: not available");
 }
 
 public static (slice<byte>, error) EncryptRSANoPadding(ж<PublicKeyRSA> Ꮡpub, slice<byte> msg) {
-    ref var pub = ref Ꮡpub.Value;
-
     throw panic("boringcrypto: not available");
 }
 
@@ -193,26 +177,18 @@ public static (ж<PublicKeyRSA>, error) NewPublicKeyRSA(BigInt N, BigInt E) {
 }
 
 public static (slice<byte>, error) SignRSAPKCS1v15(ж<PrivateKeyRSA> Ꮡpriv, crypto.Hash h, slice<byte> hashed) {
-    ref var priv = ref Ꮡpriv.Value;
-
     throw panic("boringcrypto: not available");
 }
 
 public static (slice<byte>, error) SignRSAPSS(ж<PrivateKeyRSA> Ꮡpriv, crypto.Hash h, slice<byte> hashed, nint saltLen) {
-    ref var priv = ref Ꮡpriv.Value;
-
     throw panic("boringcrypto: not available");
 }
 
 public static error VerifyRSAPKCS1v15(ж<PublicKeyRSA> Ꮡpub, crypto.Hash h, slice<byte> hashed, slice<byte> sig) {
-    ref var pub = ref Ꮡpub.Value;
-
     throw panic("boringcrypto: not available");
 }
 
 public static error VerifyRSAPSS(ж<PublicKeyRSA> Ꮡpub, crypto.Hash h, slice<byte> hashed, slice<byte> sig, nint saltLen) {
-    ref var pub = ref Ꮡpub.Value;
-
     throw panic("boringcrypto: not available");
 }
 

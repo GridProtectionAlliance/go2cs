@@ -79,9 +79,7 @@ public static @string String(this Flags f) {
 // Addrs returns a list of unicast interface addresses for a specific
 // interface.
 public static (slice<ΔAddr>, error) Addrs(this ж<Interface> Ꮡifi) {
-    ref var ifi = ref Ꮡifi.Value;
-
-    if (ifi == nil) {
+    if (Ꮡifi == nil) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: errInvalidInterface))));
     }
     var (ifat, err) = interfaceAddrTable(Ꮡifi);
@@ -94,9 +92,7 @@ public static (slice<ΔAddr>, error) Addrs(this ж<Interface> Ꮡifi) {
 // MulticastAddrs returns a list of multicast, joined group addresses
 // for a specific interface.
 public static (slice<ΔAddr>, error) MulticastAddrs(this ж<Interface> Ꮡifi) {
-    ref var ifi = ref Ꮡifi.Value;
-
-    if (ifi == nil) {
+    if (Ꮡifi == nil) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "route"u8, Net: "ip+net"u8, Source: default!, Addr: default!, Err: errInvalidInterface))));
     }
     var (ifat, err) = interfaceMulticastAddrTable(Ꮡifi);

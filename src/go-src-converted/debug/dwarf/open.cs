@@ -119,8 +119,6 @@ public static (ж<Data>, error) New(slice<byte> abbrev, slice<byte> aranges, sli
 // .debug_types sections. The name is used for error reporting only,
 // and serves to distinguish one .debug_types section from another.
 public static error AddTypes(this ж<Data> Ꮡd, @string name, slice<byte> types) {
-    ref var d = ref Ꮡd.Value;
-
     return Ꮡd.parseTypes(name, types);
 }
 

@@ -35,8 +35,6 @@ internal static nint addViaFieldPtr(this ж<counter> Ꮡc, nint d) {
 }
 
 internal static Action<nint> makeAdder(this ж<counter> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return (nint d) => {
         Ꮡc.Value.n += d;
     };
@@ -61,14 +59,10 @@ internal static @string call(Func<@string> f) {
 }
 
 internal static @string viaFieldMethodValue(this ж<widget> Ꮡw) {
-    ref var w = ref Ꮡw.Value;
-
     return call(() => Ꮡw.Value.id.render());
 }
 
 internal static @string viaBareMethodValue(this ж<widget> Ꮡw) {
-    ref var w = ref Ꮡw.Value;
-
     return call(() => Ꮡw.Value.tag());
 }
 

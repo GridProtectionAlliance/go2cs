@@ -71,8 +71,6 @@ public static (net.Conn, ж<bufio.Reader>) Hijack(this ж<ServerConn> Ꮡsc) => 
 
 // Close calls [ServerConn.Hijack] and then also closes the underlying connection.
 public static error Close(this ж<ServerConn> Ꮡsc) {
-    ref var sc = ref Ꮡsc.Value;
-
     var (c, _) = Ꮡsc.Hijack();
     if (c != default!) {
         return c.Close();
@@ -175,7 +173,6 @@ public static nint Pending(this ж<ServerConn> Ꮡsc) => func((defer, recover) =
 // it returns an error, regardless of any errors returned on the [ServerConn.Read] side.
 public static error Write(this ж<ServerConn> Ꮡsc, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡresp) => func<error>((defer, recover) => {
     ref var sc = ref Ꮡsc.Value;
-    ref var req = ref Ꮡreq.Value;
     ref var resp = ref Ꮡresp.Value;
 
     // Retrieve the pipeline ID of this request/response pair
@@ -265,8 +262,6 @@ public static ж<ClientConn> NewClientConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
 //
 // Deprecated: Use the Client or Transport in package [net/http] instead.
 public static ж<ClientConn> NewProxyClientConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     var cc = NewClientConn(c, Ꮡr);
     cc.Value.writeReq = (Func<ж<http.Request>, io.Writer, error>)(http.WriteProxy);
     return cc;
@@ -294,8 +289,6 @@ public static (net.Conn c, ж<bufio.Reader> r) Hijack(this ж<ClientConn> Ꮡcc)
 
 // Close calls [ClientConn.Hijack] and then also closes the underlying connection.
 public static error Close(this ж<ClientConn> Ꮡcc) {
-    ref var cc = ref Ꮡcc.Value;
-
     var (c, _) = Ꮡcc.Hijack();
     if (c != default!) {
         return c.Close();
@@ -380,7 +373,6 @@ public static (ж<http.Response> resp, error err) Read(this ж<ClientConn> Ꮡcc
     error err = default!;
     func((defer, recover) => {
     ref var cc = ref Ꮡcc.Value;
-    ref var req = ref Ꮡreq.Value;
 
         // Retrieve the pipeline ID of this request/response pair
         Ꮡcc.of(ClientConn.Ꮡmu).Lock();
@@ -441,9 +433,6 @@ public static (ж<http.Response> resp, error err) Read(this ж<ClientConn> Ꮡcc
 
 // Do is convenience method that writes a request and reads a response.
 public static (ж<http.Response>, error) Do(this ж<ClientConn> Ꮡcc, ж<http.Request> Ꮡreq) {
-    ref var cc = ref Ꮡcc.Value;
-    ref var req = ref Ꮡreq.Value;
-
     var err = Ꮡcc.Write(Ꮡreq);
     if (err != default!) {
         return (default!, err);

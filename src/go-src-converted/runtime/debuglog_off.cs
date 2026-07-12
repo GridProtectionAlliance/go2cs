@@ -16,8 +16,6 @@ internal static ж<dlogger> getCachedDlogger() {
 }
 
 internal static bool putCachedDlogger(ж<dlogger> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     return false;
 }
 

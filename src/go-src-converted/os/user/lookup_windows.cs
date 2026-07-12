@@ -92,7 +92,6 @@ internal static (@string username, @string domain, error e) lookupUsernameAndDom
     @string domain = default!;
     error e = default!;
 
-    ref var usid = ref Ꮡusid.Value;
     (username, domain, var t, e) = Ꮡusid.LookupAccount(""u8);
     if (e != default!) {
         return ("", "", e);
@@ -301,8 +300,6 @@ internal static (@string, error) lookupUserPrimaryGroup(@string username, @strin
 });
 
 internal static (ж<User>, error) newUserFromSid(ж<syscall.SID> Ꮡusid) {
-    ref var usid = ref Ꮡusid.Value;
-
     var (username, domain, e) = lookupUsernameAndDomain(Ꮡusid);
     if (e != default!) {
         return (default!, e);

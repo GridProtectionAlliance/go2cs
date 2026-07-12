@@ -9,8 +9,6 @@ partial class main_package {
 }
 
 internal static void inc(this ж<counter> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     var p = Ꮡc.of(counter.Ꮡn);
     p.Value++;
 }
@@ -24,8 +22,6 @@ internal static void inc(this ж<counter> Ꮡc) {
 }
 
 internal static void bump(ж<holder> Ꮡh, nint i) {
-    ref var h = ref Ꮡh.Value;
-
     Ꮡh.at(holder.Ꮡarr, i).inc();
 }
 

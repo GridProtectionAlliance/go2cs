@@ -25,17 +25,12 @@ internal static readonly UntypedInt p256ElementLen = 32;
 
 // One sets e = 1, and returns e.
 public static ж<P256Element> One(this ж<P256Element> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
-
     p256SetOne(Ꮡe.of(P256Element.Ꮡx));
     return Ꮡe;
 }
 
 // Equal returns 1 if e == t, and zero otherwise.
 public static nint Equal(this ж<P256Element> Ꮡe, ж<P256Element> Ꮡt) {
-    ref var e = ref Ꮡe.Value;
-    ref var t = ref Ꮡt.Value;
-
     var eBytes = Ꮡe.Bytes();
     var tBytes = Ꮡt.Bytes();
     return subtle.ConstantTimeCompare(eBytes, tBytes);
@@ -43,8 +38,6 @@ public static nint Equal(this ж<P256Element> Ꮡe, ж<P256Element> Ꮡt) {
 
 // IsZero returns 1 if e == 0, and zero otherwise.
 public static nint IsZero(this ж<P256Element> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
-
     var zero = new slice<byte>(p256ElementLen);
     var eBytes = Ꮡe.Bytes();
     return subtle.ConstantTimeCompare(eBytes, zero);
@@ -61,8 +54,6 @@ public static ж<P256Element> Set(this ж<P256Element> Ꮡe, ж<P256Element> Ꮡ
 
 // Bytes returns the 32-byte big-endian encoding of e.
 public static slice<byte> Bytes(this ж<P256Element> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
-
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(32), out var Ꮡout);
@@ -70,7 +61,6 @@ public static slice<byte> Bytes(this ж<P256Element> Ꮡe) {
 }
 
 internal static slice<byte> bytes(this ж<P256Element> Ꮡe, ж<array<byte>> Ꮡout) {
-    ref var e = ref Ꮡe.Value;
     ref var @out = ref Ꮡout.Value;
 
     ref var tmp = ref heap(new p256NonMontgomeryDomainFieldElement(), out var Ꮡtmp);
@@ -84,8 +74,6 @@ internal static slice<byte> bytes(this ж<P256Element> Ꮡe, ж<array<byte>> Ꮡ
 // If v is not 32 bytes or it encodes a value higher than 2^256 - 2^224 + 2^192 + 2^96 - 1,
 // SetBytes returns nil and an error, and e is unchanged.
 public static (ж<P256Element>, error) SetBytes(this ж<P256Element> Ꮡe, slice<byte> v) {
-    ref var e = ref Ꮡe.Value;
-
     if (len(v) != p256ElementLen) {
         return (default!, errors.New("invalid P256Element encoding"u8));
     }
@@ -112,49 +100,30 @@ public static (ж<P256Element>, error) SetBytes(this ж<P256Element> Ꮡe, slice
 
 // Add sets e = t1 + t2, and returns e.
 public static ж<P256Element> Add(this ж<P256Element> Ꮡe, ж<P256Element> Ꮡt1, ж<P256Element> Ꮡt2) {
-    ref var e = ref Ꮡe.Value;
-    ref var t1 = ref Ꮡt1.Value;
-    ref var t2 = ref Ꮡt2.Value;
-
     p256Add(Ꮡe.of(P256Element.Ꮡx), Ꮡt1.of(P256Element.Ꮡx), Ꮡt2.of(P256Element.Ꮡx));
     return Ꮡe;
 }
 
 // Sub sets e = t1 - t2, and returns e.
 public static ж<P256Element> Sub(this ж<P256Element> Ꮡe, ж<P256Element> Ꮡt1, ж<P256Element> Ꮡt2) {
-    ref var e = ref Ꮡe.Value;
-    ref var t1 = ref Ꮡt1.Value;
-    ref var t2 = ref Ꮡt2.Value;
-
     p256Sub(Ꮡe.of(P256Element.Ꮡx), Ꮡt1.of(P256Element.Ꮡx), Ꮡt2.of(P256Element.Ꮡx));
     return Ꮡe;
 }
 
 // Mul sets e = t1 * t2, and returns e.
 public static ж<P256Element> Mul(this ж<P256Element> Ꮡe, ж<P256Element> Ꮡt1, ж<P256Element> Ꮡt2) {
-    ref var e = ref Ꮡe.Value;
-    ref var t1 = ref Ꮡt1.Value;
-    ref var t2 = ref Ꮡt2.Value;
-
     p256Mul(Ꮡe.of(P256Element.Ꮡx), Ꮡt1.of(P256Element.Ꮡx), Ꮡt2.of(P256Element.Ꮡx));
     return Ꮡe;
 }
 
 // Square sets e = t * t, and returns e.
 public static ж<P256Element> Square(this ж<P256Element> Ꮡe, ж<P256Element> Ꮡt) {
-    ref var e = ref Ꮡe.Value;
-    ref var t = ref Ꮡt.Value;
-
     p256Square(Ꮡe.of(P256Element.Ꮡx), Ꮡt.of(P256Element.Ꮡx));
     return Ꮡe;
 }
 
 // Select sets v to a if cond == 1, and to b if cond == 0.
 public static ж<P256Element> Select(this ж<P256Element> Ꮡv, ж<P256Element> Ꮡa, ж<P256Element> Ꮡb, nint cond) {
-    ref var v = ref Ꮡv.Value;
-    ref var a = ref Ꮡa.Value;
-    ref var b = ref Ꮡb.Value;
-
     p256Selectznz(Ꮡ((Ꮡv.of(P256Element.Ꮡx)).Value.Value), ((p256Uint1)(uint64)cond),
         Ꮡ((Ꮡb.of(P256Element.Ꮡx)).Value.Value), Ꮡ((Ꮡa.of(P256Element.Ꮡx)).Value.Value));
     return Ꮡv;

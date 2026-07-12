@@ -18,8 +18,9 @@ internal static readonly UntypedInt itabInitSize = 512;
 
 internal static ж<mutex> ᏑitabLock = new(new mutex(nil));
 internal static ref mutex itabLock => ref ᏑitabLock.Value;                         // lock for accessing itab table
-internal static ж<ж<itabTableType>> ᏑitabTable = new(ᏑitabTableInit);
-internal static ref ж<itabTableType> itabTable => ref ᏑitabTable.ValueSlot;                    // pointer to current table
+internal static ж<ж<itabTableType>> ᏑitabTable = new(default(ж<itabTableType>));
+internal static ref ж<itabTableType> itabTable => ref ᏑitabTable.ValueSlot;
+internal static void initᴛitabTable() { itabTable = ᏑitabTableInit; }                    // pointer to current table
 internal static ж<itabTableType> ᏑitabTableInit = new(new itabTableType(size: itabInitSize));
 internal static ref itabTableType itabTableInit => ref ᏑitabTableInit.Value; // starter table
 
@@ -114,8 +115,6 @@ finish:
 // Returns nil if the given interface/type pair isn't present.
 internal static ж<itab> find(this ж<itabTableType> Ꮡt, ж<interfacetype> Ꮡinter, ж<_type> Ꮡtyp) {
     ref var t = ref Ꮡt.Value;
-    ref var inter = ref Ꮡinter.DerefOrNil();
-    ref var typ = ref Ꮡtyp.DerefOrNil();
 
     // Implemented using quadratic probing.
     // Probe sequence is h(i) = h0 + i*(i+1)/2 mod 2^k.
@@ -293,10 +292,6 @@ internal static void itabsinit() {
 // want = the static type we're trying to convert to.
 // iface = the static type we're converting from.
 internal static void panicdottypeE(ж<_type> Ꮡhave, ж<_type> Ꮡwant, ж<_type> Ꮡiface) {
-    ref var have = ref Ꮡhave.Value;
-    ref var want = ref Ꮡwant.Value;
-    ref var iface = ref Ꮡiface.Value;
-
     throw panic(Ꮡ(new TypeAssertionError(Ꮡiface, Ꮡhave, Ꮡwant, "")));
 }
 
@@ -304,8 +299,6 @@ internal static void panicdottypeE(ж<_type> Ꮡhave, ж<_type> Ꮡwant, ж<_typ
 // Same args as panicdottypeE, but "have" is the dynamic itab we have.
 internal static void panicdottypeI(ж<itab> Ꮡhave, ж<_type> Ꮡwant, ж<_type> Ꮡiface) {
     ref var have = ref Ꮡhave.DerefOrNil();
-    ref var want = ref Ꮡwant.Value;
-    ref var iface = ref Ꮡiface.Value;
 
     ж<_type> t = default!;
     if (Ꮡhave != nil) {
@@ -317,8 +310,6 @@ internal static void panicdottypeI(ж<itab> Ꮡhave, ж<_type> Ꮡwant, ж<_type
 // panicnildottype is called when doing an i.(T) conversion and the interface i is nil.
 // want = the static type we're trying to convert to.
 internal static void panicnildottype(ж<_type> Ꮡwant) {
-    ref var want = ref Ꮡwant.Value;
-
     throw panic(Ꮡ(new TypeAssertionError(nil, nil, Ꮡwant, "")));
 }
 
@@ -490,9 +481,6 @@ internal static @unsafe.Pointer /*x*/ convTslice(slice<byte> val) {
 }
 
 internal static ж<itab> assertE2I(ж<interfacetype> Ꮡinter, ж<_type> Ꮡt) {
-    ref var inter = ref Ꮡinter.Value;
-    ref var t = ref Ꮡt.DerefOrNil();
-
     if (Ꮡt == nil) {
         // explicit conversions require non-nil interface value.
         throw panic(Ꮡ(new TypeAssertionError(nil, nil, Ꮡinter.of(interfacetype.ᏑType), "")));
@@ -501,9 +489,6 @@ internal static ж<itab> assertE2I(ж<interfacetype> Ꮡinter, ж<_type> Ꮡt) {
 }
 
 internal static ж<itab> assertE2I2(ж<interfacetype> Ꮡinter, ж<_type> Ꮡt) {
-    ref var inter = ref Ꮡinter.Value;
-    ref var t = ref Ꮡt.DerefOrNil();
-
     if (Ꮡt == nil) {
         return default!;
     }
@@ -552,8 +537,6 @@ internal static ж<itab> typeAssert(ж<abi.TypeAssert> Ꮡs, ж<_type> Ꮡt) {
 
 internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCache> ᏑoldC, ж<_type> Ꮡtyp, ж<itab> Ꮡtab) {
     ref var oldC = ref ᏑoldC.Value;
-    ref var typ = ref Ꮡtyp.Value;
-    ref var tab = ref Ꮡtab.Value;
 
     var oldEntries = @unsafe.Slice(ᏑoldC.at(abi.TypeAssertCache.ᏑEntries, 0), oldC.Mask + 1);
     // Count the number of entries we need.
@@ -655,8 +638,6 @@ internal static (nint, ж<itab>) interfaceSwitch(ж<abi.InterfaceSwitch> Ꮡs, �
 // (typ,case_,tab).
 internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.InterfaceSwitchCache> ᏑoldC, ж<_type> Ꮡtyp, nint case_, ж<itab> Ꮡtab) {
     ref var oldC = ref ᏑoldC.Value;
-    ref var typ = ref Ꮡtyp.Value;
-    ref var tab = ref Ꮡtab.Value;
 
     var oldEntries = @unsafe.Slice(ᏑoldC.at(abi.InterfaceSwitchCache.ᏑEntries, 0), oldC.Mask + 1);
     // Count the number of entries we need.
@@ -716,7 +697,6 @@ internal static abi.InterfaceSwitchCache emptyInterfaceSwitchCache = new abi.Int
 //
 //go:linkname reflect_ifaceE2I reflect.ifaceE2I
 internal static void reflect_ifaceE2I(ж<interfacetype> Ꮡinter, eface e, ж<iface> Ꮡdst) {
-    ref var inter = ref Ꮡinter.Value;
     ref var dst = ref Ꮡdst.Value;
 
     dst = new iface(assertE2I(Ꮡinter, e._type), e.data);
@@ -724,7 +704,6 @@ internal static void reflect_ifaceE2I(ж<interfacetype> Ꮡinter, eface e, ж<if
 
 //go:linkname reflectlite_ifaceE2I internal/reflectlite.ifaceE2I
 internal static void reflectlite_ifaceE2I(ж<interfacetype> Ꮡinter, eface e, ж<iface> Ꮡdst) {
-    ref var inter = ref Ꮡinter.Value;
     ref var dst = ref Ꮡdst.Value;
 
     dst = new iface(assertE2I(Ꮡinter, e._type), e.data);

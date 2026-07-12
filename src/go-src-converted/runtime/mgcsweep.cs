@@ -150,8 +150,6 @@ internal static readonly UntypedInt sweepDrainedMask = /* 1 << 31 */ 2147483648;
 //
 // Even if the sweepLocker is invalid, its sweepGen is always valid.
 internal static sweepLocker begin(this ж<activeSweep> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
-
     while (ᐧ) {
         var state = Ꮡa.of(activeSweep.Ꮡstate).Load();
         if ((uint32)(state & (uint32)sweepDrainedMask) != 0) {
@@ -166,8 +164,6 @@ internal static sweepLocker begin(this ж<activeSweep> Ꮡa) {
 // end deregisters a sweeper. Must be called once for each time
 // begin is called if the sweepLocker is valid.
 internal static void end(this ж<activeSweep> Ꮡa, sweepLocker sl) {
-    ref var a = ref Ꮡa.Value;
-
     if (sl.sweepGen != mheap_.sweepgen) {
         @throw("sweeper left outstanding across sweep generations"u8);
     }
@@ -196,8 +192,6 @@ internal static void end(this ж<activeSweep> Ꮡa, sweepLocker sl) {
 // Returns true if this call was the one that actually performed
 // the mark.
 internal static bool markDrained(this ж<activeSweep> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
-
     while (ᐧ) {
         var state = Ꮡa.of(activeSweep.Ꮡstate).Load();
         if ((uint32)(state & (uint32)sweepDrainedMask) != 0) {
@@ -211,8 +205,6 @@ internal static bool markDrained(this ж<activeSweep> Ꮡa) {
 
 // sweepers returns the current number of active sweepers.
 internal static uint32 sweepers(this ж<activeSweep> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
-
     return (uint32)(Ꮡa.of(activeSweep.Ꮡstate).Load() & ~(uint32)sweepDrainedMask);
 }
 
@@ -220,8 +212,6 @@ internal static uint32 sweepers(this ж<activeSweep> Ꮡa) {
 // outstanding sweepers exist. That is, when the sweep phase is
 // completely done.
 internal static bool isDone(this ж<activeSweep> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
-
     return Ꮡa.of(activeSweep.Ꮡstate).Load() == sweepDrainedMask;
 }
 
@@ -229,8 +219,6 @@ internal static bool isDone(this ж<activeSweep> Ꮡa) {
 //
 // The world must be stopped.
 internal static void reset(this ж<activeSweep> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
-
     assertWorldStopped();
     Ꮡa.of(activeSweep.Ꮡstate).Store(0);
 }

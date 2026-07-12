@@ -88,7 +88,6 @@ internal static (uint64 i, bool nameValueMatch) searchTable(this ж<Encoder> Ꮡ
     uint64 i = default!;
     bool nameValueMatch = default!;
 
-    ref var e = ref Ꮡe.Value;
     (i, nameValueMatch) = staticTable.search(f);
     if (nameValueMatch) {
         return (i, true);

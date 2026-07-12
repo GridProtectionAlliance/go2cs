@@ -146,8 +146,6 @@ internal static @string escapeQuotes(@string s) {
 // CreateFormFile is a convenience wrapper around [Writer.CreatePart]. It creates
 // a new form-data header with the provided field name and file name.
 public static (io.Writer, error) CreateFormFile(this ж<Writer> Ꮡw, @string fieldname, @string filename) {
-    ref var w = ref Ꮡw.Value;
-
     var h = new textproto.MIMEHeader();
     h.Set("Content-Disposition"u8,
         fmt.Sprintf(@"form-data; name=""%s""; filename=""%s"""u8,
@@ -159,8 +157,6 @@ public static (io.Writer, error) CreateFormFile(this ж<Writer> Ꮡw, @string fi
 // CreateFormField calls [Writer.CreatePart] with a header using the
 // given field name.
 public static (io.Writer, error) CreateFormField(this ж<Writer> Ꮡw, @string fieldname) {
-    ref var w = ref Ꮡw.Value;
-
     var h = new textproto.MIMEHeader();
     h.Set("Content-Disposition"u8,
         fmt.Sprintf(@"form-data; name=""%s"""u8, escapeQuotes(fieldname)));
@@ -169,8 +165,6 @@ public static (io.Writer, error) CreateFormField(this ж<Writer> Ꮡw, @string f
 
 // WriteField calls [Writer.CreateFormField] and then writes the given value.
 public static error WriteField(this ж<Writer> Ꮡw, @string fieldname, @string value) {
-    ref var w = ref Ꮡw.Value;
-
     var (p, err) = Ꮡw.CreateFormField(fieldname);
     if (err != default!) {
         return err;

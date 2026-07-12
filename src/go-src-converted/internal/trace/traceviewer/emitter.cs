@@ -517,8 +517,6 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
 }
 
 [GoRecv] public static void Event(this ref Emitter e, ж<format.Event> Ꮡev) {
-    ref var ev = ref Ꮡev.Value;
-
     e.c.ConsumeViewerEvent(Ꮡev, true);
 }
 
@@ -627,8 +625,6 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
 // OptionalEvent emits ev if it's within the time range of of the consumer, i.e.
 // the selected trace split range.
 [GoRecv] public static void OptionalEvent(this ref Emitter e, ж<format.Event> Ꮡev) {
-    ref var ev = ref Ꮡev.Value;
-
     e.c.ConsumeViewerEvent(Ꮡev, false);
 }
 

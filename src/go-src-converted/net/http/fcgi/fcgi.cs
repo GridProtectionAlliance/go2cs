@@ -173,8 +173,6 @@ internal static error writeRecord(this ж<conn> Ꮡc, recType recType, uint16 re
 });
 
 internal static error writeEndRequest(this ж<conn> Ꮡc, uint16 reqId, nint appStatus, uint8 protocolStatus) {
-    ref var c = ref Ꮡc.Value;
-
     var b = new slice<byte>(8);
     binary.BigEndian.PutUint32(b, (uint32)appStatus);
     b[4] = protocolStatus;
@@ -182,8 +180,6 @@ internal static error writeEndRequest(this ж<conn> Ꮡc, uint16 reqId, nint app
 }
 
 internal static error writePairs(this ж<conn> Ꮡc, recType recType, uint16 reqId, map<@string, @string> pairs) {
-    ref var c = ref Ꮡc.Value;
-
     var w = newWriter(Ꮡc, recType, reqId);
     var b = new slice<byte>(8);
     foreach (var (k, v) in pairs) {

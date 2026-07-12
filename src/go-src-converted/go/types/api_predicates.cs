@@ -19,8 +19,6 @@ partial class types_package {
 //     as a type constraint in Go code
 //   - if T is an uninstantiated generic type
 public static bool AssertableTo(ж<Interface> ᏑV, ΔType T) {
-    ref var V = ref ᏑV.Value;
-
     // Checker.newAssertableTo suppresses errors for invalid types, so we need special
     // handling here.
     if (!isValid(T.Underlying())) {
@@ -60,8 +58,6 @@ public static bool ConvertibleTo(ΔType V, ΔType T) {
 // The behavior of Implements is unspecified if V is Typ[Invalid] or an uninstantiated
 // generic type.
 public static bool Implements(ΔType V, ж<Interface> ᏑT) {
-    ref var T = ref ᏑT.Value;
-
     if (ᏑT.Empty()) {
         // All types (even Typ[Invalid]) implement the empty interface.
         return true;
@@ -79,8 +75,6 @@ public static bool Implements(ΔType V, ж<Interface> ᏑT) {
 // The behavior of Satisfies is unspecified if V is Typ[Invalid] or an uninstantiated
 // generic type.
 public static bool Satisfies(ΔType V, ж<Interface> ᏑT) {
-    ref var T = ref ᏑT.Value;
-
     return ((ж<Checker>)(default!)).implements(nopos, V, new InterfaceжΔType(ᏑT), true, nil);
 }
 

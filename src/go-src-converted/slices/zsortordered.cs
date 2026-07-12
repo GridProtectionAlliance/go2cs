@@ -315,8 +315,6 @@ internal static (nint, nint) order2Ordered<E>(slice<E> data, nint a, nint b, ж<
 internal static nint medianOrdered<E>(slice<E> data, nint a, nint b, nint c, ж<nint> Ꮡswaps)
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
-    ref var swaps = ref Ꮡswaps.Value;
-
     (a, b) = order2Ordered(data, a, b, Ꮡswaps);
     (b, c) = order2Ordered(data, b, c, Ꮡswaps);
     (a, b) = order2Ordered(data, a, b, Ꮡswaps);
@@ -327,8 +325,6 @@ internal static nint medianOrdered<E>(slice<E> data, nint a, nint b, nint c, ж<
 internal static nint medianAdjacentOrdered<E>(slice<E> data, nint a, ж<nint> Ꮡswaps)
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
-    ref var swaps = ref Ꮡswaps.Value;
-
     return medianOrdered(data, a - 1, a, a + 1, Ꮡswaps);
 }
 

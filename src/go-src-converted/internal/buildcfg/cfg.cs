@@ -25,15 +25,24 @@ public static @string GOROOT = os.Getenv("GOROOT"u8); // cached for efficiency
 public static @string GOARCH = envOr("GOARCH"u8, defaultGOARCH);
 public static @string GOOS = envOr("GOOS"u8, defaultGOOS);
 public static @string GO386 = envOr("GO386"u8, defaultGO386);
-public static nint GOAMD64 = goamd64();
-public static goarmFeatures GOARM = goarm();
-public static Goarm64Features GOARM64 = goarm64();
-public static @string GOMIPS = gomips();
-public static @string GOMIPS64 = gomips64();
-public static nint GOPPC64 = goppc64();
-public static nint GORISCV64 = goriscv64();
-public static gowasmFeatures GOWASM = gowasm();
-public static slice<@string> ToolTags = toolTags();
+public static nint GOAMD64;
+internal static void initᴛGOAMD64() { GOAMD64 = goamd64(); }
+public static goarmFeatures GOARM;
+internal static void initᴛGOARM() { GOARM = goarm(); }
+public static Goarm64Features GOARM64;
+internal static void initᴛGOARM64() { GOARM64 = goarm64(); }
+public static @string GOMIPS;
+internal static void initᴛGOMIPS() { GOMIPS = gomips(); }
+public static @string GOMIPS64;
+internal static void initᴛGOMIPS64() { GOMIPS64 = gomips64(); }
+public static nint GOPPC64;
+internal static void initᴛGOPPC64() { GOPPC64 = goppc64(); }
+public static nint GORISCV64;
+internal static void initᴛGORISCV64() { GORISCV64 = goriscv64(); }
+public static gowasmFeatures GOWASM;
+internal static void initᴛGOWASM() { GOWASM = gowasm(); }
+public static slice<@string> ToolTags;
+internal static void initᴛToolTags() { ToolTags = toolTags(); }
 public static @string GO_LDSO = defaultGO_LDSO;
 public static @string Version = version;
 

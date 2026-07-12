@@ -42,8 +42,6 @@ public static (cipher.AEAD, error) New(slice<byte> key) {
 }
 
 internal static slice<byte> Seal(this ж<chacha20poly1305> Ꮡc, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
-    ref var c = ref Ꮡc.Value;
-
     if (len(nonce) != ΔNonceSize) {
         throw panic("chacha20poly1305: bad nonce length passed to Seal");
     }
@@ -56,8 +54,6 @@ internal static slice<byte> Seal(this ж<chacha20poly1305> Ꮡc, slice<byte> dst
 internal static error errOpen = errors.New("chacha20poly1305: message authentication failed"u8);
 
 internal static (slice<byte>, error) Open(this ж<chacha20poly1305> Ꮡc, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
-    ref var c = ref Ꮡc.Value;
-
     if (len(nonce) != ΔNonceSize) {
         throw panic("chacha20poly1305: bad nonce length passed to Open");
     }

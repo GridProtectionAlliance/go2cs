@@ -200,7 +200,7 @@ internal static readonly uintptr userArenaChunkBytes = /* uintptr(int64(userAren
 internal static readonly uintptr userArenaChunkPages = /* userArenaChunkBytes / pageSize */ 512;
 internal static readonly uintptr userArenaChunkMaxAllocBytes = /* userArenaChunkBytes / 4 */ 1048576;
 
-[GoInit] internal static void init() {
+/* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void init() {
     if (userArenaChunkPages * (uintptr)pageSize != userArenaChunkBytes) {
         @throw("user arena chunk size is not a multiple of the page size"u8);
     }
@@ -272,8 +272,6 @@ internal static ж<userArena> newUserArena() {
 // This operation is not safe to call concurrently with other operations on the
 // same arena.
 [GoRecv] internal static @unsafe.Pointer @new(this ref userArena a, ж<_type> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.Value;
-
     return (uintptr)a.alloc(Ꮡtyp, -1);
 }
 
@@ -360,8 +358,6 @@ internal static void free(this ж<userArena> Ꮡa) {
 // it will be considered as an element type for a slice backing store with capacity
 // cap.
 [GoRecv] internal static @unsafe.Pointer alloc(this ref userArena a, ж<_type> Ꮡtyp, nint cap) {
-    ref var typ = ref Ꮡtyp.Value;
-
     var s = a.active;
     @unsafe.Pointer x = default!;
     while (ᐧ) {
@@ -532,7 +528,6 @@ internal static @unsafe.Pointer userArenaNextFree(this ж<mspan> Ꮡs, ж<_type>
 // heap bitmap for n consecutive values with type typ allocated at address ptr.
 internal static void userArenaHeapBitsSetSliceType(ж<_type> Ꮡtyp, nint n, @unsafe.Pointer ptr, ж<mspan> Ꮡs) {
     ref var typ = ref Ꮡtyp.Value;
-    ref var s = ref Ꮡs.Value;
 
     var (mem, overflow) = math.MulUintptr(typ.Size_, (uintptr)n);
     if (overflow || n < 0 || mem > maxAlloc) {
@@ -656,8 +651,6 @@ internal static ΔwriteUserArenaHeapBits write(this ΔwriteUserArenaHeapBits h, 
 
 // Add padding of size bytes.
 internal static ΔwriteUserArenaHeapBits pad(this ΔwriteUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr size) {
-    ref var s = ref Ꮡs.Value;
-
     if (size == 0) {
         return h;
     }

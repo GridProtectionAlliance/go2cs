@@ -44,8 +44,6 @@ partial class big_package {
 // using x.Prec() mantissa bits.
 // The prec value is ignored for the 'b' and 'p' formats.
 public static @string Text(this ж<Float> Ꮡx, byte format, nint prec) {
-    ref var x = ref Ꮡx.Value;
-
     nint cap = 10;
     // TODO(gri) determine a good/better value here
     if (prec > 0) {
@@ -57,8 +55,6 @@ public static @string Text(this ж<Float> Ꮡx, byte format, nint prec) {
 // String formats x like x.Text('g', 10).
 // (String must be called explicitly, [Float.Format] does not support %s verb.)
 public static @string String(this ж<Float> Ꮡx) {
-    ref var x = ref Ꮡx.Value;
-
     return Ꮡx.Text((rune)'g', 10);
 }
 

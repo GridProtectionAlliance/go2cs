@@ -175,8 +175,6 @@ public static (V result, bool loaded) LoadOrStore<K, V>(this ж<HashTrieMap<K, V
     where K : /* comparable */ new()
     where V : /* comparable */ new()
 {
-    ref var oldEntry = ref ᏑoldEntry.Value;
-    ref var newEntry = ref ᏑnewEntry.Value;
     ref var parent = ref Ꮡparent.Value;
 
     // Check for a hash collision.
@@ -315,8 +313,6 @@ public static Action<Func<K, V, bool>> All<K, V>(this ж<HashTrieMap<K, V>> Ꮡh
     where K : /* comparable */ new()
     where V : /* comparable */ new()
 {
-    ref var ht = ref Ꮡht.Value;
-
     return (Func<K, V, bool> yield) => {
         Ꮡht.Value.iter(Ꮡht.Value.root, yield);
     };
@@ -416,7 +412,7 @@ internal static (V, bool) lookup<K, V>(this ж<Δentry<K, V>> Ꮡe, K key, Func<
 {
     ref var e = ref Ꮡe.Value;
 
-    while (e != nil) {
+    while (Ꮡe != nil) {
         if (equal(new @unsafe.Pointer(Ꮡe.of(concurrent_package.Δentry<K, V>.Ꮡkey)), (uintptr)abi.NoEscape(new @unsafe.Pointer(Ꮡ(key))))) {
             return (e.value, true);
         }

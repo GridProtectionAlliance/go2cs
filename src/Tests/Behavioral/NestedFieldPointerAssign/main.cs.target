@@ -14,8 +14,6 @@ partial class main_package {
 }
 
 internal static ж<outer> get(ж<outer> Ꮡo) {
-    ref var o = ref Ꮡo.Value;
-
     return Ꮡo;
 }
 

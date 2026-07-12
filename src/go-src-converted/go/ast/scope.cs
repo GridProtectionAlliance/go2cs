@@ -24,8 +24,6 @@ partial class ast_package {
 
 // NewScope creates a new scope nested in the outer scope.
 public static ж<Scope> NewScope(ж<Scope> Ꮡouter) {
-    ref var outer = ref Ꮡouter.Value;
-
     UntypedInt n = 4; // initial scope capacity
     return Ꮡ(new Scope(Ꮡouter, new map<@string, ж<Object>>(n)));
 }
@@ -59,7 +57,7 @@ public static @string String(this ж<Scope> Ꮡs) {
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "scope %p {"u8, s);
-    if (s != nil && len(s.Objects) > 0) {
+    if (Ꮡs != nil && len(s.Objects) > 0) {
         fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf));
         foreach (var (_, obj) in s.Objects) {
             fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "\t%s %s\n"u8, (~obj).Kind, (~obj).Name);

@@ -59,7 +59,6 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rand,
     ж<bigꓸInt> s = default!;
     error err = default!;
 
-    ref var priv = ref Ꮡpriv.Value;
     (var sig, err) = SignASN1(rand, Ꮡpriv, hash);
     if (err != default!) {
         return (default!, default!, err);
@@ -121,7 +120,6 @@ internal static (slice<byte> sig, error err) signLegacy(ж<PrivateKey> Ꮡpriv, 
 // The inputs are not considered confidential, and may leak through timing side
 // channels, or if an attacker has control of part of the inputs.
 public static bool Verify(ж<PublicKey> Ꮡpub, slice<byte> hash, ж<bigꓸInt> Ꮡr, ж<bigꓸInt> Ꮡs) {
-    ref var pub = ref Ꮡpub.Value;
     ref var r = ref Ꮡr.Value;
     ref var s = ref Ꮡs.Value;
 

@@ -17,8 +17,6 @@ partial class types_package {
 
 internal static void declare(this ж<Checker> Ꮡcheck, ж<ΔScope> Ꮡscope, ж<ast.Ident> Ꮡid, Object obj, tokenꓸPos pos) {
     ref var check = ref Ꮡcheck.Value;
-    ref var scope = ref Ꮡscope.Value;
-    ref var id = ref Ꮡid.DerefOrNil();
 
     // spec: "The blank identifier, represented by the underscore
     // character _, may be used in a declaration like any other
@@ -57,7 +55,6 @@ internal static @string pathString(slice<Object> path) {
 // For the meaning of def, see Checker.definedType, in typexpr.go.
 internal static void objDecl(this ж<Checker> Ꮡcheck, Object obj, ж<TypeName> Ꮡdef) => func((defer, recover) => {
     ref var check = ref Ꮡcheck.Value;
-    ref var def = ref Ꮡdef.Value;
 
     if ((~check.conf)._Trace && obj.Type() == default!) {
         if (check.indent == 0) {
@@ -458,16 +455,12 @@ internal static ast.Node node(this ΔfuncDecl d) {
 }
 
 internal static void walkDecls(this ж<Checker> Ꮡcheck, slice<ast.Decl> decls, Action<decl> f) {
-    ref var check = ref Ꮡcheck.Value;
-
     foreach (var (_, d) in decls) {
         Ꮡcheck.walkDecl(d, f);
     }
 }
 
 internal static void walkDecl(this ж<Checker> Ꮡcheck, ast.Decl d, Action<decl> f) {
-    ref var check = ref Ꮡcheck.Value;
-
     switch (d.type()) {
     case ж<ast.BadDecl> dΔ1: {
         break;
@@ -653,7 +646,6 @@ internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж
     ref var check = ref Ꮡcheck.Value;
     ref var obj = ref Ꮡobj.Value;
     ref var tdecl = ref Ꮡtdecl.Value;
-    ref var def = ref Ꮡdef.Value;
 
     assert(obj.typ == default!);
     // Only report a version error if we have not reported one already.
@@ -811,8 +803,6 @@ internal static void collectTypeParams(this ж<Checker> Ꮡcheck, ж<ж<TypePara
 });
 
 internal static ΔType bound(this ж<Checker> Ꮡcheck, ast.Expr x) {
-    ref var check = ref Ꮡcheck.Value;
-
     // A type set literal of the form ~T and A|B may only appear as constraint;
     // embed it in an implicit interface so that only interface type-checking
     // needs to take care of such type expressions.
@@ -929,9 +919,6 @@ internal static void collectMethods(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡo
 }
 
 internal static void checkFieldUniqueness(this ж<Checker> Ꮡcheck, ж<Named> Ꮡbase) {
-    ref var check = ref Ꮡcheck.Value;
-    ref var @base = ref Ꮡbase.Value;
-
     {
         var (t, _) = Ꮡbase.under()._<ж<Struct>>(ᐧ); if (t != nil) {
             objset mset = default!;

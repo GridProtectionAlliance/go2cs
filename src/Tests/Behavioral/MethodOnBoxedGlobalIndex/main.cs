@@ -15,8 +15,6 @@ internal static void add(ж<nint> Ꮡp, nint d) {
 }
 
 internal static void bump(this ж<buf> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     add(Ꮡb.of(buf.Ꮡn), 1);
 }
 
@@ -32,8 +30,6 @@ internal static ж<tracer> Ꮡtr = new(default(tracer));
 internal static ref tracer tr => ref Ꮡtr.Value;
 
 internal static void keep(ж<tracer> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     _ = Ꮡt;
 }
 

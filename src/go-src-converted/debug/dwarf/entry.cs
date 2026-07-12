@@ -1111,7 +1111,6 @@ internal static (slice<array<uint64>>, error) dwarf2Ranges(this ж<Data> Ꮡd, �
 // 2.17.3 (page 53).
 internal static (slice<array<uint64>>, error) dwarf5Ranges(this ж<Data> Ꮡd, ж<unit> Ꮡu, ж<Entry> Ꮡcu, uint64 @base, int64 ranges, slice<array<uint64>> ret) {
     ref var d = ref Ꮡd.Value;
-    ref var u = ref Ꮡu.Value;
     ref var cu = ref Ꮡcu.DerefOrNil();
 
     if (ranges < 0 || ranges > (int64)len(d.rngLists)) {

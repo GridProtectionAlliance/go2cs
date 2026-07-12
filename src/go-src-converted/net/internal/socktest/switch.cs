@@ -131,8 +131,6 @@ public static readonly FilterType FilterClose = 5;          // for Close or Clos
 public delegate (AfterFilter, error) Filter(ж<Status> _);
 
 internal static (AfterFilter, error) apply(this Filter f, ж<Status> Ꮡst) {
-    ref var st = ref Ꮡst.Value;
-
     if (f == default!) {
         return (default!, default!);
     }
@@ -142,8 +140,6 @@ internal static (AfterFilter, error) apply(this Filter f, ж<Status> Ꮡst) {
 public delegate error AfterFilter(ж<Status> _);
 
 internal static error apply(this AfterFilter f, ж<Status> Ꮡst) {
-    ref var st = ref Ꮡst.Value;
-
     if (f == default!) {
         return default!;
     }

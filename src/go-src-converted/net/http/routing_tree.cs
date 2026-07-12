@@ -39,7 +39,6 @@ partial class http_package {
 // addPattern adds a pattern and its associated Handler to the tree
 // at root.
 internal static void addPattern(this ж<routingNode> Ꮡroot, ж<pattern> Ꮡp, ΔHandler h) {
-    ref var root = ref Ꮡroot.Value;
     ref var p = ref Ꮡp.Value;
 
     // First level of tree is host.
@@ -55,7 +54,6 @@ internal static void addPattern(this ж<routingNode> Ꮡroot, ж<pattern> Ꮡp, 
 // the given pattern and handler.
 internal static void addSegments(this ж<routingNode> Ꮡn, slice<segment> segs, ж<pattern> Ꮡp, ΔHandler h) {
     ref var n = ref Ꮡn.Value;
-    ref var p = ref Ꮡp.Value;
 
     if (builtin.len(segs) == 0) {
         n.set(Ꮡp, h);
@@ -80,8 +78,6 @@ internal static void addSegments(this ж<routingNode> Ꮡn, slice<segment> segs,
 // set sets the pattern and handler for n, which
 // must be a leaf node.
 [GoRecv] internal static void set(this ref routingNode n, ж<pattern> Ꮡp, ΔHandler h) {
-    ref var p = ref Ꮡp.Value;
-
     if (n.pattern != nil || n.handler != default!) {
         throw panic("non-nil leaf fields");
     }
@@ -148,7 +144,7 @@ internal static (ж<routingNode>, slice<@string>) match(this ж<routingNode> Ꮡ
 internal static (ж<routingNode>, slice<@string>) matchMethodAndPath(this ж<routingNode> Ꮡn, @string method, @string path) {
     ref var n = ref Ꮡn.Value;
 
-    if (n == nil) {
+    if (Ꮡn == nil) {
         return (default!, default!);
     }
     {
@@ -176,7 +172,7 @@ internal static (ж<routingNode>, slice<@string>) matchMethodAndPath(this ж<rou
 internal static (ж<routingNode>, slice<@string>) matchPath(this ж<routingNode> Ꮡn, @string path, slice<@string> matches) {
     ref var n = ref Ꮡn.Value;
 
-    if (n == nil) {
+    if (Ꮡn == nil) {
         return (default!, default!);
     }
     // If path is empty, then we are done.
@@ -264,9 +260,7 @@ internal static void matchingMethods(this ж<routingNode> Ꮡroot, @string host,
 }
 
 internal static void matchingMethodsPath(this ж<routingNode> Ꮡn, @string path, map<@string, bool> set) {
-    ref var n = ref Ꮡn.Value;
-
-    if (n == nil) {
+    if (Ꮡn == nil) {
         return;
     }
     var setʗ1 = set;

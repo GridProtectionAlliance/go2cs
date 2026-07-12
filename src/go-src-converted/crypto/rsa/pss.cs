@@ -237,7 +237,7 @@ public static readonly UntypedInt PSSSaltLengthEqualsHash = -1;
 internal static nint saltLength(this ж<PSSOptions> Ꮡopts) {
     ref var opts = ref Ꮡopts.Value;
 
-    if (opts == nil) {
+    if (Ꮡopts == nil) {
         return PSSSaltLengthAuto;
     }
     return opts.SaltLength;
@@ -313,7 +313,6 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpri
 // channels, or if an attacker has control of part of the inputs.
 public static error VerifyPSS(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice<byte> digest, slice<byte> sig, ж<PSSOptions> Ꮡopts) {
     ref var pub = ref Ꮡpub.Value;
-    ref var opts = ref Ꮡopts.Value;
 
     if (boring.Enabled) {
         var (bkey, errΔ1) = boringPublicKey(Ꮡpub);

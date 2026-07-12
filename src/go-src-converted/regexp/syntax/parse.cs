@@ -147,8 +147,6 @@ internal static readonly UntypedInt runeSize = 4; // rune is int32
 }
 
 [GoRecv] internal static void checkLimits(this ref parser p, ж<Regexp> Ꮡre) {
-    ref var re = ref Ꮡre.Value;
-
     if (p.numRunes > maxRunes) {
         throw panic(ErrLarge);
     }
@@ -257,8 +255,6 @@ internal static readonly UntypedInt runeSize = 4; // rune is int32
 }
 
 [GoRecv] internal static void checkHeight(this ref parser p, ж<Regexp> Ꮡre) {
-    ref var re = ref Ꮡre.Value;
-
     if (p.numRegexp < maxHeight) {
         return;
     }
@@ -1735,7 +1731,6 @@ internal static (slice<rune> @out, @string rest, error err) parseNamedClass(this
     @string rest = default!;
     error err = default!;
 
-    ref var p = ref Ꮡp.Value;
     if (len(s) < 2 || s[0] != (rune)'[' || s[1] != (rune)':') {
         return (@out, rest, err);
     }

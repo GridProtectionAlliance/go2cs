@@ -33,8 +33,9 @@ internal static ж<_TypeSet> typeSet(this ж<Interface> Ꮡt) {
 }
 
 // emptyInterface represents the empty (completed) interface
-internal static ж<Interface> ᏑemptyInterface = new(new Interface(complete: true, tset: ᏑtopTypeSet));
+internal static ж<Interface> ᏑemptyInterface = new(default(Interface));
 internal static ref Interface emptyInterface => ref ᏑemptyInterface.Value;
+internal static void initᴛemptyInterface() { emptyInterface = new Interface(complete: true, tset: ᏑtopTypeSet); }
 
 // NewInterface returns a new interface for the given methods and embedded types.
 // NewInterface takes ownership of the provided methods and may modify their types
@@ -81,7 +82,7 @@ internal static ж<Interface> newInterface(this ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.Value;
 
     var typ = Ꮡ(new Interface(check: Ꮡcheck));
-    if (check != nil) {
+    if (Ꮡcheck != nil) {
         check.needsCleanup(new Interfaceжcleaner(typ));
     }
     return typ;
@@ -126,38 +127,28 @@ internal static ж<Interface> newInterface(this ж<Checker> Ꮡcheck) {
 
 // NumMethods returns the total number of methods of interface t.
 public static nint NumMethods(this ж<Interface> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.typeSet().NumMethods();
 }
 
 // Method returns the i'th method of interface t for 0 <= i < t.NumMethods().
 // The methods are ordered by their unique Id.
 public static ж<Func> Method(this ж<Interface> Ꮡt, nint i) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.typeSet().Method(i);
 }
 
 // Empty reports whether t is the empty interface.
 public static bool Empty(this ж<Interface> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.typeSet().IsAll();
 }
 
 // IsComparable reports whether each type in interface t's type set is comparable.
 public static bool IsComparable(this ж<Interface> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.typeSet().IsComparable(default!);
 }
 
 // IsMethodSet reports whether the interface t is fully described by its method
 // set.
 public static bool IsMethodSet(this ж<Interface> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.typeSet().IsMethodSet();
 }
 
@@ -185,14 +176,10 @@ public static ж<Interface> Complete(this ж<Interface> Ꮡt) {
 }
 
 public static ΔType Underlying(this ж<Interface> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return new InterfaceжΔType(Ꮡt);
 }
 
 public static @string String(this ж<Interface> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return TypeString(new InterfaceжΔType(Ꮡt), default!);
 }
 

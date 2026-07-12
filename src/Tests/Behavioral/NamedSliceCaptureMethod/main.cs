@@ -19,8 +19,6 @@ internal static void shrink(ж<stack> Ꮡs) {
 }
 
 internal static void push(this ж<stack> Ꮡs, nint v) {
-    ref var s = ref Ꮡs.Value;
-
     growTo(Ꮡs, v);
 }
 

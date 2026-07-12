@@ -546,8 +546,6 @@ internal static (ж<os.File>, error) childStdin(this ж<Cmd> Ꮡc) {
 }
 
 [GoRecv] internal static (ж<os.File>, error) childStderr(this ref Cmd c, ж<os.File> ᏑchildStdout) {
-    ref var childStdout = ref ᏑchildStdout.Value;
-
     if (c.Stderr != default! && interfaceEqual(c.Stderr, c.Stdout)) {
         return (ᏑchildStdout, default!);
     }
@@ -608,8 +606,6 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
 // thread state (for example, Linux or Plan 9 name spaces), the new
 // process will inherit the caller's thread state.
 public static error Run(this ж<Cmd> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     {
         var err = Ꮡc.Start(); if (err != default!) {
             return err;

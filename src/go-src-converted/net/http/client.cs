@@ -331,8 +331,6 @@ internal static bool timeBeforeContextDeadline(time.Time t, context.Context ctx)
 // to check whether this particular request is using an alternate protocol,
 // in which case we need to check the RoundTripper for that protocol.
 internal static bool knownRoundTripperImpl(RoundTripper rt, ж<Request> Ꮡreq) {
-    ref var req = ref Ꮡreq.Value;
-
     switch (rt.type()) {
     case ж<Transport> t: {
         {
@@ -522,7 +520,6 @@ public static (ж<Response> resp, error err) Get(this ж<Client> Ꮡc, @string u
     ж<Response> resp = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.Value;
     (var req, err) = NewRequest("GET"u8, url, default!);
     if (err != default!) {
         return (default!, err);
@@ -543,8 +540,6 @@ public static error ErrUseLastResponse = errors.New("net/http: use last response
 // checkRedirect calls either the user's configured CheckRedirect
 // function, or the default.
 [GoRecv] internal static error checkRedirect(this ref Client c, ж<Request> Ꮡreq, slice<ж<Request>> via) {
-    ref var req = ref Ꮡreq.Value;
-
     var fn = c.CheckRedirect;
     if (fn == default!) {
         fn = defaultCheckRedirect;
@@ -644,9 +639,6 @@ internal static @string urlErrorOp(@string method) {
 // Any returned error will be of type [*url.Error]. The url.Error
 // value's Timeout method will report true if the request timed out.
 public static (ж<Response>, error) Do(this ж<Client> Ꮡc, ж<Request> Ꮡreq) {
-    ref var c = ref Ꮡc.Value;
-    ref var req = ref Ꮡreq.Value;
-
     return Ꮡc.@do(Ꮡreq);
 }
 
@@ -879,8 +871,6 @@ internal static Action<ж<Request>> makeHeadersCopier(this ж<Client> Ꮡc, ж<R
 
 // Update previous Request with the current request
 internal static error defaultCheckRedirect(ж<Request> Ꮡreq, slice<ж<Request>> via) {
-    ref var req = ref Ꮡreq.Value;
-
     if (builtin.len(via) >= 10) {
         return errors.New("stopped after 10 redirects"u8);
     }
@@ -928,7 +918,6 @@ public static (ж<Response> resp, error err) Post(this ж<Client> Ꮡc, @string 
     ж<Response> resp = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.Value;
     (var req, err) = NewRequest("POST"u8, url, body);
     if (err != default!) {
         return (default!, err);
@@ -978,7 +967,6 @@ public static (ж<Response> resp, error err) PostForm(this ж<Client> Ꮡc, @str
     ж<Response> resp = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.Value;
     return Ꮡc.Post(urlΔ1, "application/x-www-form-urlencoded"u8, new strings_ReaderжReader(strings.NewReader(data.Encode())));
 }
 
@@ -1019,7 +1007,6 @@ public static (ж<Response> resp, error err) Head(this ж<Client> Ꮡc, @string 
     ж<Response> resp = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.Value;
     (var req, err) = NewRequest("HEAD"u8, url, default!);
     if (err != default!) {
         return (default!, err);
@@ -1081,7 +1068,6 @@ public static (ж<Response> resp, error err) Head(this ж<Client> Ꮡc, @string 
 
 internal static bool shouldCopyHeaderOnRedirect(@string headerKey, ж<url.URL> Ꮡinitial, ж<url.URL> Ꮡdest) {
     ref var initial = ref Ꮡinitial.Value;
-    ref var dest = ref Ꮡdest.Value;
 
     var exprᴛ1 = CanonicalHeaderKey(headerKey);
     if (exprᴛ1 == "Authorization"u8 || exprᴛ1 == "Www-Authenticate"u8 || exprᴛ1 == "Cookie"u8 || exprᴛ1 == "Cookie2"u8) {

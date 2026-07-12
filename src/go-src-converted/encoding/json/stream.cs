@@ -268,7 +268,7 @@ public static (slice<byte>, error) MarshalJSON(this RawMessage m) {
 public static error UnmarshalJSON(this ж<RawMessage> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.Value;
 
-    if (m == nil) {
+    if (Ꮡm == nil) {
         return errors.New("json.RawMessage: UnmarshalJSON on nil pointer"u8);
     }
     m = append((m)[0..0], data.ꓸꓸꓸ);

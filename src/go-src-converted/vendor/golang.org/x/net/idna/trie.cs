@@ -17,11 +17,12 @@ partial class idna_package {
     internal slice<uint16> offset;
 }
 
-internal static ж<sparseBlocks> ᏑidnaSparse = new(new sparseBlocks(
+internal static ж<sparseBlocks> ᏑidnaSparse = new(default(sparseBlocks));
+internal static ref sparseBlocks idnaSparse => ref ᏑidnaSparse.Value;
+internal static void initᴛidnaSparse() { idnaSparse = new sparseBlocks(
     values: idnaSparseValues[..],
     offset: idnaSparseOffset[..]
-));
-internal static ref sparseBlocks idnaSparse => ref ᏑidnaSparse.Value;
+); }
 
 // Don't use newIdnaTrie to avoid unconditional linking in of the table.
 internal static ж<idnaTrie> trie = Ꮡ(new idnaTrie(nil));

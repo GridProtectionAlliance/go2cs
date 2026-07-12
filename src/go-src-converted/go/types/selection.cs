@@ -121,8 +121,6 @@ public static readonly SelectionKind MethodExpr = 2;  // x.f is a method express
 }
 
 public static @string String(this ж<Selection> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     return SelectionString(Ꮡs, default!);
 }
 

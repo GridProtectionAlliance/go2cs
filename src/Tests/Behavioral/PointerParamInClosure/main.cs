@@ -5,16 +5,12 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void setViaDefer(ж<nint> Ꮡp) => func((defer, recover) => {
-    ref var p = ref Ꮡp.Value;
-
     defer(() => {
         Ꮡp.Value = 42;
     });
 });
 
 internal static void bumpInClosure(ж<nint> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     var add = () => {
         Ꮡp.Value = Ꮡp.Value + 1;
     };

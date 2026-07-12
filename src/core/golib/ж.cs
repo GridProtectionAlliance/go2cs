@@ -620,6 +620,14 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
 
     public static unsafe implicit operator uintptr(ж<T> value)
     {
+        // A NIL pointer's address is 0, matching Go's `uintptr(unsafe.Pointer(nil)) == 0`. A nil box
+        // has no storage to pin, so taking `&value.Value` would dereference it and throw — but the
+        // syscall wrappers legitimately pass nil pointers whose numeric address is simply 0
+        // (syscall.Write hands writeFile a nil `*Overlapped` for a synchronous write, then passes
+        // `uintptr(unsafe.Pointer(overlapped))` to the trampoline). Return 0 instead of throwing.
+        if (value is null || value.IsNull)
+            return default;
+
         fixed (void* ptr = &value.Value)
             return (uintptr)ptr;
     }
@@ -631,6 +639,11 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
 
     public static unsafe implicit operator void*(ж<T> value)
     {
+        // A nil pointer converts to the null address (see the uintptr operator above); pinning a
+        // nil box's absent storage would throw.
+        if (value is null || value.IsNull)
+            return null;
+
         fixed (T* ptr = &value.Value)
             return ptr;
     }

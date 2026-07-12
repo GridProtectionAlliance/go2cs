@@ -73,8 +73,6 @@ internal static void lfnodeValidate(ж<lfnode> Ꮡnode) {
 }
 
 internal static uint64 lfstackPack(ж<lfnode> Ꮡnode, uintptr cnt) {
-    ref var node = ref Ꮡnode.Value;
-
     return (uint64)taggedPointerPack(new @unsafe.Pointer(Ꮡnode), cnt);
 }
 

@@ -9,8 +9,6 @@ using errors = errors_package;
 partial class plugin_package {
 
 internal static (Symbol, error) lookup(ж<Plugin> Ꮡp, @string symName) {
-    ref var p = ref Ꮡp.Value;
-
     return (default!, errors.New("plugin: not implemented"u8));
 }
 

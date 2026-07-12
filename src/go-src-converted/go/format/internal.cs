@@ -26,7 +26,6 @@ internal static (ж<ast.File> @file, Func<slice<byte>, nint, slice<byte>> source
     nint indentAdj = default!;
     error err = default!;
 
-    ref var fset = ref Ꮡfset.Value;
     // Try as whole source file.
     (@file, err) = parser.ParseFile(Ꮡfset, filename, src, parserMode);
     // If there's no error, return. If the error is that the source file didn't begin with a
@@ -90,7 +89,6 @@ internal static (ж<ast.File> @file, Func<slice<byte>, nint, slice<byte>> source
 // and adjusts the result based on the original source via sourceAdj
 // and indentAdj.
 internal static (slice<byte>, error) format(ж<token.FileSet> Ꮡfset, ж<ast.File> Ꮡfile, Func<slice<byte>, nint, slice<byte>> sourceAdj, nint indentAdj, slice<byte> src, printer.Config cfgʗp) {
-    ref var fset = ref Ꮡfset.Value;
     ref var @file = ref Ꮡfile.Value;
 
     ref var cfg = ref heap(cfgʗp, out var Ꮡcfg);

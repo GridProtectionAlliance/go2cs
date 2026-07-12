@@ -138,8 +138,6 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
 // include function name as part of the sorting criteria, the thinking
 // being that is better to provide things in the original source order.
 internal static void sortUnits(this ж<pstate> Ꮡp, slice<extcu> units) {
-    ref var p = ref Ꮡp.Value;
-
     slices.SortFunc(units, (extcu ui, extcu uj) => {
         @string ifile = Ꮡp.Value.funcs[(nint)(ui.fnfid)].@file;
         @string jfile = Ꮡp.Value.funcs[(nint)(uj.fnfid)].@file;

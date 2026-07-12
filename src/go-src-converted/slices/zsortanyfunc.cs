@@ -291,8 +291,6 @@ internal static (nint, nint) order2CmpFunc<E>(slice<E> data, nint a, nint b, ж<
 
 // medianCmpFunc returns x where data[x] is the median of data[a],data[b],data[c], where x is a, b, or c.
 internal static nint medianCmpFunc<E>(slice<E> data, nint a, nint b, nint c, ж<nint> Ꮡswaps, Func<E, E, nint> cmp) {
-    ref var swaps = ref Ꮡswaps.Value;
-
     (a, b) = order2CmpFunc(data, a, b, Ꮡswaps, cmp);
     (b, c) = order2CmpFunc(data, b, c, Ꮡswaps, cmp);
     (a, b) = order2CmpFunc(data, a, b, Ꮡswaps, cmp);
@@ -301,8 +299,6 @@ internal static nint medianCmpFunc<E>(slice<E> data, nint a, nint b, nint c, ж<
 
 // medianAdjacentCmpFunc finds the median of data[a - 1], data[a], data[a + 1] and stores the index into a.
 internal static nint medianAdjacentCmpFunc<E>(slice<E> data, nint a, ж<nint> Ꮡswaps, Func<E, E, nint> cmp) {
-    ref var swaps = ref Ꮡswaps.Value;
-
     return medianCmpFunc(data, a - 1, a, a + 1, Ꮡswaps, cmp);
 }
 

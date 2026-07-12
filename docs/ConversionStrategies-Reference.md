@@ -30,6 +30,7 @@ the generators exist to keep the visible converted code close to the Go original
 ## Topics
 
 * [Package Conversion](#package-conversion)
+* [Package-Level Variable Initialization Order](#package-level-variable-initialization-order)
 * [Compiled Library versus Source Code](#compiled-library-versus-source-code)
 * [Constant Values](#constant-values)
 * [Handling "int" and "uint" Types](#handling-int-and-uint-types)
@@ -144,6 +145,39 @@ A whole-standard-library run (`go2cs -stdlib`) also emits a Visual Studio soluti
 * the **`go2cs-gen`** source-generator/analyzer project (`gen/go2cs-gen/go2cs-gen.csproj`, under a `/generators/` folder).
 
 The stdlib project list is gathered by walking the emitted `core/` output tree (so it also picks up future test projects with no code change), and every project is emitted in stable **alphabetical** order for deterministic output. All paths are **solution-relative** (forward slashes) so the generated solution is portable — no absolute, machine-specific paths. The `golib` and `go2cs-gen` references use the same `core\golib` / `gen\go2cs-gen` layout the converted `.csproj` files already assume via `$(go2csPath)` (which resolves to `$(SolutionDir)`), so the solution locates them wherever those csproj references already resolve. The file is only rewritten when its content changes, so repeated runs are a no-op.
+
+## Package-Level Variable Initialization Order
+
+Go initializes package-level variables in **dependency order** (spec: "within a package, package-level variable initialization proceeds stepwise, each step selecting the earliest variable … that has no dependencies on uninitialized variables"), where dependencies are resolved **through function calls and function literals** referenced by the initializer. The default conversion emits a package var as a C# static field with an initializer — but C# executes static field initializers in textual order **within** one file of the partial package class and in an **undefined** order **across** files. Three dependency shapes therefore break at runtime while compiling cleanly (the Phase-3 → Phase-4 distinction in miniature):
+
+1. **Cross-file:** syscall's `var procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx")` (syscall_windows.go) reads `modkernel32` declared in zsyscall_windows.go — with the wrong file order the receiver box is nil (NullReference in the type initializer, the first Phase-4 crash of any program importing `os`).
+2. **Cross-file through a function:** syscall's `var Stdin = getStdHandle(STD_INPUT_HANDLE)` — the initializer calls a package *function* whose body reads zsyscall_windows.go's `procGetStdHandle`. Same failure, invisible to a direct-reference scan; dependencies must be resolved transitively through same-package function bodies (and func-literal bodies — an IIFE initializer executes at init time), exactly as Go's own analysis does.
+3. **Same-file forward reference:** `var first = base + 1` declared above `var base = 41` — C# reads `base`'s zero value (silently wrong value, no crash).
+
+**The conversion:** `collectMovedInitVars` (converter: `initOrderOperations.go`) walks `types.Info.InitOrder` — Go's authoritative dependency-sorted initializer list — resolving each initializer's same-package var dependencies transitively through package function/method bodies. An initializer moves when a dependency is cross-file, a same-file forward reference, or **itself moved** (a moved var is only assigned in the ctor, so its dependents can no longer stay field initializers regardless of layout). A moved var is emitted as a **bare field** plus a tiny **init method beside it in its home file** (so the rendered expression keeps that file's using aliases), and a generated `package_init.cs` supplies the package class's **static constructor**, calling the methods in InitOrder:
+
+```go
+// syscall_windows.go
+var procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx")
+```
+
+```csharp
+// syscall_windows.cs
+internal static ж<LazyProc> procSetFilePointerEx;
+internal static void initᴛprocSetFilePointerEx() { procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx"u8); }
+
+// package_init.cs (generated)
+partial class syscall_package {
+    static syscall_package() {
+        initᴛprocSetFilePointerEx();
+        // … every relocated initializer, in types.Info.InitOrder …
+    }
+}
+```
+
+This is correct by C#'s own initialization guarantees: **all** static field initializers (every partial-class file) run **before** the static-constructor body, so every non-relocated dependency is already initialized when the ctor runs; the ctor then applies the relocated initializers in Go's order. Vars with no order hazard (the overwhelming majority — only ~11 stdlib packages relocate anything) keep their readable inline form. Cross-**package** order needs no handling: accessing another package's static field triggers that type's initialization first (.NET guarantees), matching Go's imported-packages-first rule. Adding an explicit static ctor also removes `beforefieldinit` from the package class, giving it *precise* initialization semantics.
+
+Notes: a **blank** (`_`) initializer never relocates (its value is unreadable, so its order is immaterial — it still runs as a field initializer for its side effect); the `initᴛ` method name composes the TempVarMarker so it cannot collide with any Go identifier; an **addressed** global relocates as a default-valued heap box whose ctor assignment writes through the ref property into the same box; the rare multi-value forms (tuple-deconstructing package vars, hoisted multi-value initializers) are not yet relocatable and warn loudly if flagged (no stdlib occurrence). Guarded by the `PackageVarInitOrder` behavioral test (all three hazard shapes plus IIFE and moved-dependency closure, output-compared vs Go).
 
 ## Compiled Library versus Source Code
 
@@ -917,13 +951,35 @@ initializers and each array field gets its `new(N)` backing. (C# 11 auto-default
 initializer; a slice/map/chan field — which has no `new(N)` initializer — stays its nil zero value,
 matching Go.) The **NilType constructor preserves the initializers too**: it used to re-assign
 `this.field = default!` to every plain member — running *after* the field initializers, which nulled an
-array field's fresh `new(N)` backing, so `S{}` (emitted `new S(nil)`) NREd on the first index. Both the
-NilType and parameterless constructor bodies now touch only the promoted-embed boxes (see
-[Struct Type Embedding](#struct-type-embedding)) and leave everything else to the field initializers plus
-C# 11 auto-default. This is generator-only and produces no golden churn (the `.g.cs` output is not a
+array field's fresh `new(N)` backing, so `S{}` (emitted `new S(nil)`) NREd on the first index. The
+NilType and parameterless constructor bodies (`AppendZeroValueInitializers`) now assign only what C#'s
+implicit zeroing would leave *broken*: the promoted-embed boxes (see
+[Struct Type Embedding](#struct-type-embedding)), and — see next paragraph — any plain struct-typed field
+whose own type needs construction; everything else is left to the field initializers plus C# 11
+auto-default. This is generator-only and produces no golden churn (the `.g.cs` output is not a
 golden). It is what lets `ArrayOfCrossPackageType` run as an **output-compared** test (`len(x.c)` /
 `len(x.d)` print `3 2`); before the fix, indexing `&x.c[i]` threw a `NullReferenceException`, so the test
 was compile+target-only.
+
+A plain (non-embed) struct-typed FIELD whose type *itself* needs construction is the recursive case:
+`default(T)` gives such a field a `default(FieldType)`, whose nested promoted-embed box or fixed-array
+backing is null — so the first touch NREs even though `T`'s own boxes were constructed. This is fmt's
+`pp{ … fmt fmt … }` where `fmt` embeds `fmtFlags` (a ctor-allocated box): `newPrinter`'s `@new<pp>()`
+ran `pp()`'s ctor, which left `fmt` as `default(fmt)` with a null box, and `p.fmt.init(&p.buf)` →
+`clearflags` NREd — the first crash of any converted `fmt.Println`. `AppendZeroValueInitializers`
+therefore also emits `this.f = new FieldType(nil);` for each such field, and because that runs
+`FieldType`'s own NilType constructor (which recursively constructs *its* needy fields), a single level of
+construction fixes every depth. "Needs construction" (`StructTypeNeedsConstruction`) is: has a promoted
+embed, a fixed-array field, or a nested struct field that needs construction — resolved only for
+converter-generated structs (`GetStructDeclaration`), so a `true` result guarantees the public
+`FieldType(NilType)` constructor exists; a reference field (pointer/interface/delegate) keeps its correct
+nil zero value, and a cross-package/golib field type is left `default` (conservative — its own package
+constructs it, and its nil zero value is correct anyway). Only the NilType and parameterless constructors
+are touched, so this covers `new(T)`/`@new<T>()`/`&T{}`/`T{}`; a `var x T` **local** still emits
+`default!` (a distinct converter-level gap — a local of a needy struct is not yet constructed). Guarded by
+the `NestedPromotedEmbedInit` output-compared test (a `printer` holding a `formatter` field that embeds
+`flags` and holds a `[3]byte`, reached via both `new(printer)` and `&printer{}`, its promoted fields and
+array written and printed against Go); before the fix the promoted-field write NRE'd.
 
 #### Prefer the file-local package alias over the fully-qualified `_package` name
 
@@ -3860,6 +3916,8 @@ public static @unsafe.Pointer Load(this ж<UnsafePointer> Ꮡu) {
 ```
 > The resulting numeric address is **not GC-stable** — the same caveat that applies to every `unsafe.Pointer`-as-`uintptr` use; the runtime intrinsics that consume it (e.g. `Loadp`, `StorepNoWB`) are assembly stubs, so this conversion is about producing compilable C#, not GC-correct pointer arithmetic. (The reinterpret pattern `*(*U)(unsafe.Pointer(&x))` is handled separately and is not affected.)
 
+**A NIL pointer converts to address 0, not a throw.** golib's `ж<T> → uintptr` (and `ж<T> → void*`) operator takes the pointed-to storage's address via a `fixed` block — but a **nil** box has no storage to pin, so `&value.Value` dereferences it and throws. Go's `uintptr(unsafe.Pointer(nil))` is simply **0**, and the syscall wrappers pass nil pointers exactly this way: `syscall.Write` hands `writeFile` a nil `*Overlapped` for a synchronous write, then passes `uintptr(unsafe.Pointer(overlapped))` (= 0) to the `SyscallN` trampoline. The operators now return `0`/`null` for a nil box before pinning — so any converted `os.Stdout.Write` (hence `fmt.Println`) whose stdout is a pipe reaches the OS `WriteFile` and prints, instead of crashing on the nil-`overlapped` argument. (Guarded by the `NilPointerUintptr` behavioral **output** test — `uintptr(unsafe.Pointer(nilPtr)) == 0` and a non-nil control, vs Go.)
+
 The `ref` the helper takes depends on how the pointer argument **renders**. A genuine box — an address-of expression, a local pointer variable, a pointer field, a call result — is the `ж<T>` object, so the ref goes through its boxed value: `FromRef(ref (box).Value)`. But a **deref-aliased** pointer — a pointer *parameter* or pointer *receiver*, which the body renders as the pointed-to value alias (`ref var p = ref Ꮡp.Value`) — is not a box; `.Value` on it is `CS1061` (`nuint` has no `Value` — runtime `select.go` `unsafe.Pointer(pc0)` and `heapdump.go` `unsafe.Pointer(pstk)`, both `*uintptr` parameters). The alias is itself a ref-local into the boxed storage, so the converter takes its ref directly: `FromRef(ref p)`. Detection reuses `exprIsDerefAliasedPointer` (the same discriminator the pointer-reinterpret block uses). This also let the `guintptr`/`muintptr` receiver family (`runtime2.go` `(*uintptr)(unsafe.Pointer(gp))` inside `guintptr.cas`) compile — previously `ref (gp).Value` bound the `[GoType]` wrapper's `Value` *property* (CS0206); the CAS it feeds (`atomic.Casuintptr`) is a `partial` asm stub, so the copy-box semantics match the established reinterpret precedent (compile-milestone bar; the faithful managed-referent `ж<T>` model for those types remains a separate effort). (Guarded by the `UnsafePointerParamPin` behavioral **output** test — the parameter and receiver shapes read through the pin and match Go, plus a field-address control that keeps the `(box).Value` form.)
 
 **Returning an `unsafe.Pointer` parameter whole is a plain value return.** The return path boxes a *pointer parameter* returned whole (`return p` → `return Ꮡp` — the value alias cannot bind the pointer result), and the pointer-result check counts the `UnsafePointer` basic as a pointer. But an `unsafe.Pointer` parameter renders as a plain **value** param (`@unsafe.Pointer zero`) with *no* box, so the prefix referenced a nonexistent `Ꮡzero`/`Ꮡv`/`Ꮡfd` (CS0103 — runtime `map.go` `mapaccess1_fat`/`mapaccess2_fat`'s `return zero`, `mem_windows.go`, and `panic.go` `readvarintUnsafe`'s tuple return). The box form now applies only when the returned parameter's own type is a **genuine `*T`** (deref-aliased, so `Ꮡp` exists); an `unsafe.Pointer` param returns as-is. (Guarded by the `UnsafePointerParamPin` extension — the whole-return, tuple-return, and genuine-`*T`-control shapes, values vs Go; cleared 4 runtime CS0103, 63 → 59.)
@@ -4034,6 +4092,65 @@ A struct embedding a FOREIGN pointer (`net/http`'s `http2timeTimer struct { *tim
 
 ### Promoted methods through embedded INTERFACE fields route per-member to the declaring field
 A struct whose embeds are INTERFACE fields (httputil's `dumpConn struct { io.Writer; io.Reader }` adapted to `net.Conn`) satisfies interface members through the fields' method sets. The pointer adapter's embedded-interface-field arm was gated to a SINGLE field, so a multi-field struct got no forwarding at all (`m_box.Read(…)` — CS1061). The arm now resolves per member: each still-unbound interface member forwards through the UNIQUE embedded field whose interface declares it (`m_box.Value.Reader.Read(p)` / `m_box.Value.Writer.Write(p)`); a member declared by several fields is left unbound (Go's promotion ambiguity rules reject it unless the struct overrides, and a struct override is already resolved earlier). The single-field behavior is unchanged (zip's `nopCloser`, slogtest's Δ-renamed `Handler` field). (Guarded by the `IfaceFieldEmbedAdapter` behavioral test — a two-interface-field struct adapted by pointer to a third interface needing members from both fields plus one declared on the struct, output-compared vs Go.)
+
+### A pointer parameter used only through its box gets no deref VALUE alias
+Every named pointer parameter is emitted as its box `ж<T> Ꮡp` with an entry-time value alias
+`ref var p = ref Ꮡp.Value` (so a value use `p.field` reads through `p`). But a parameter that the body
+touches **only** through its box — `unsafe.Pointer(p)` → `new @unsafe.Pointer(Ꮡp)`, `p == nil` →
+`Ꮡp == nil`, or passing `p` on as a `*T` argument → `Ꮡp` — never references that value alias, so the
+alias is a dead local that nonetheless **dereferences the box** at function entry. When the argument is
+nil this NREs even though Go never touches the pointee: `syscall.writeFile(…, overlapped *Overlapped)`,
+called with a nil `overlapped` and using it only as `unsafe.Pointer(overlapped)`, crashed at
+`ref var overlapped = ref Ꮡoverlapped.Value` — the failure of any converted `fmt.Println` whose stdout is
+a pipe (`syscall.Write` → `writeFile`). The converter already skips the alias for an **unnamed/blank**
+pointer param (never referenced); this extends it to a **named** param whose value alias is likewise
+unreferenced. After the body is converted, `bodyReferencesIdentAsValue` scans the emitted body text for
+the value-alias name as a **standalone identifier** — the address marker `Ꮡ` is a Unicode *letter*, so
+the box form `Ꮡp` is excluded by the preceding-letter boundary, while a genuine value use always emits
+the bare name and matches. The scan only ever ADDS spurious matches (a field selector `x.p`, a string, a
+comment), which keep the alias, so a live alias is never dropped (no CS0103) — it removes strictly unused
+locals. Because a param with no alias leaves `implicitPointers` empty (which otherwise triggers the
+signature rebuild that renames pointer params to the box `Ꮡ<name>` the body references), a
+`skippedDeadPointerAlias` flag forces that rebuild. Full-stdlib/behavioral blast radius is broad (72
+behavioral files — many functions forward a pointer param onward as a pointer), all pure alias removals.
+This shares its root with the receiver case below (an eager deref alias NREs on a nil pointer); the
+converse **live**-alias nil case — invoking a pointer method/function that *does* dereference a nil
+receiver/param — still NREs at the alias, awaiting the nil-safe `DerefOrNil` extension. (Guarded by the
+`DeadPointerParamAlias` behavioral test — a pointer param used only in `p == nil`, one forwarded as a
+pointer, and one dereferenced (alias kept), each called with nil and non-nil, output-compared vs Go; the
+nil calls NRE'd before the fix.)
+
+### A pointer RECEIVER compared to `nil` compares its box, not its deref'd value
+A method with a pointer receiver — `func (f *File) checkValid() error { if f == nil { … } }` — is emitted
+as `checkValid(this ж<File> Ꮡf, …)` with the body alias `ref var f = ref Ꮡf.Value`. Go's `f == nil` is a
+**pointer** comparison (nil-pointer check — and Go legitimately calls methods on nil-pointer receivers), so
+it must compare the box `Ꮡf == nil`, not the deref'd struct value `f`. Emitted in value form, `f == nil`
+binds the generated `File.operator==(File, NilType)` — which compares against `default(File)` and, for a
+**promoted-embed** struct (`File` embeds `*file`), dereferences that zero value's null embed box → a
+`NullReferenceException` (the first crash of a converted `fmt.Println`, via `os.Stdout.Write` →
+`checkValid`); even for a plain struct it is the wrong answer (`&box{}`, a non-nil pointer to a zero struct,
+compares *equal* to `default(box)` → `true` where Go gives `false`). The converter already forced the box
+form for a deref'd pointer **parameter** (`isDerefdPointerParamIdent`, driving the `==`/`!=` operand
+context in `convBinaryExpr`); the receiver is deliberately not a "parameter" in that model
+(`paramNames` excludes the receiver), so it needs its own recognizer, `isDerefdPointerReceiverIdent`
+(object-identity match via `isPointerReceiver`/`identResolvesToReceiver`, so a local shadowing the receiver
+name keeps its own render). It is scoped to the comparison operands only — unlike a pointer parameter the
+receiver is **not** folded into `nilSafePtrParamNames`, so its deref-alias form is unchanged (only the
+receiver's `==`/`!=` operand switches to the box); `convIdent` renders `Ꮡf` for the receiver through its
+existing direct-ж-receiver arm. Like a deref'd pointer parameter, the box form applies to **every**
+`==`/`!=` comparison, not just against nil: a pointer receiver can only be `==`-compared to another
+pointer or to nil, so the box is always the correct (pointer-identity) operand — `func (b *Reader)
+Reset(r io.Reader) { if b == r … }` (bufio) becomes `AreEqual(Ꮡb, r)`, comparing the pointer to the
+interface's held pointer, where the pre-fix `AreEqual(b, r)` compared a *struct value* to the interface
+(never equal — a latent recursion-guard bug the fix also closes). The full-stdlib A/B is small and
+mechanical — 161 receiver operands across 77 files gain a `Ꮡ` box (155 nil-checks, 6 pointer-identity),
+every changed line adding only the box.
+A still-open **separate** gap: invoking a pointer method on an actually-nil receiver NREs at the deref alias
+`ref var f = ref Ꮡf.Value` before the guard runs (the nil-safe `DerefOrNil` accessor covers this for pointer
+*parameters* walked to nil but is not yet extended to receivers). (Guarded by the `PointerReceiverNilCompare`
+behavioral test — a plain-struct `*box` where `&box{}` must compare `!= nil`, `== nil`/`!= nil` receiver
+methods, and a promoted-embed `*embedder` whose pre-fix value comparison NRE'd, output-compared vs Go; and
+by the re-baselined `RingPointerMethods` whose `r != nil` receiver walk now renders `Ꮡr != nil`.)
 
 ## Implicit Pointer Dereferencing
 **Deciding whether a selector base is *already* dereferenced.** A field selector on a pointer-valued base auto-derefs in Go, so the converter must insert the deref (`(~x).field` / `x.Value.field`) — *unless* the base is itself an explicit dereference (`(*p).field`) or a pointer conversion whose dedicated branch appends its own `.Value`. That "is the base already deref'd" test was a whole-subtree scan for **any** `StarExpr`, which mistook a conversion star buried in a call **argument** for a dereferenced base — `stringStructOf((*string)(unsafe.Pointer(p))).n` (runtime `arena.go`): the `(*string)` star belongs to the argument's conversion, the *call result* (`ж<stringStruct>`) is not deref'd, and skipping the auto-deref left `.n` on the box (CS1061). The test now inspects only the base's own outermost shape (unwrapping parens; a pointer-conversion base still routes to the conversion branch), and the conversion-branch dispatch also unwraps **enclosing parens**, so an extra-paren conversion base — `((*specialWeakHandle)(unsafe.Pointer(…))).handle` (runtime `mheap.go`) — reaches it (the same extra-paren blind spot the reinterpret routing had). Reads through a conversion base are faithful; a **write** through one hits the copy box, the documented reinterpret-seam limitation shared by the whole `(ж<T>)(uintptr)` family (the runtime sites are reads). The corpus was byte-identical across all behavioral projects after the change — only previously-non-compiling shapes gained emissions. (Guarded by the `PointerSelectorDeref` behavioral test — both shapes, read values vs Go; cleared 3 runtime CS1061, 74 → 71.)

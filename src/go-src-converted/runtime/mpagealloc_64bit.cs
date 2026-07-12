@@ -171,7 +171,6 @@ internal static void sysGrow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr lim
 // Returns the amount of memory added to sysStat.
 internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> ᏑsysStat) {
     ref var s = ref Ꮡs.Value;
-    ref var sysStat = ref ᏑsysStat.Value;
 
     if (@base % (uintptr)pallocChunkBytes != 0 || limit % (uintptr)pallocChunkBytes != 0) {
         print("runtime: base = ", ((Δhex)(uint64)@base), ", limit = ", ((Δhex)(uint64)limit), "\n");
@@ -226,8 +225,6 @@ internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uint
 //
 // Returns the amount of memory added to sysStat.
 [GoRecv] internal static uintptr sysInit(this ref scavengeIndex s, bool test, ж<sysMemStat> ᏑsysStat) {
-    ref var sysStat = ref ᏑsysStat.Value;
-
     var n = (uintptr)((uintptr)(1 << (int)(heapAddrBits))) / (uintptr)pallocChunkBytes;
     var nbytes = n * @unsafe.Sizeof(new atomicScavChunkData(nil));
     @unsafe.Pointer r = (uintptr)sysReserve(nil, nbytes);

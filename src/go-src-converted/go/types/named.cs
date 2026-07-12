@@ -137,8 +137,6 @@ internal static readonly namedState complete = 2;  // all data is known
 // If the given type name obj doesn't have a type yet, its type is set to the returned named type.
 // The underlying type must not be a *Named.
 public static ж<Named> NewNamed(ж<TypeName> Ꮡobj, ΔType underlying, slice<ж<Func>> methods) {
-    ref var obj = ref Ꮡobj.Value;
-
     if (asNamed(underlying) != nil) {
         throw panic("underlying type must not be *Named");
     }
@@ -212,16 +210,12 @@ internal static ж<Named> resolve(this ж<Named> Ꮡn) => func((defer, recover) 
 
 // state atomically accesses the current state of the receiver.
 internal static namedState state(this ж<Named> Ꮡn) {
-    ref var n = ref Ꮡn.Value;
-
     return ((namedState)atomic.LoadUint32(Ꮡn.of(Named.Ꮡstate_)));
 }
 
 // setState atomically stores the given state for n.
 // Must only be called while holding n.mu.
 internal static void setState(this ж<Named> Ꮡn, namedState state) {
-    ref var n = ref Ꮡn.Value;
-
     atomic.StoreUint32(Ꮡn.of(Named.Ꮡstate_), (uint32)state);
 }
 
@@ -235,7 +229,7 @@ internal static ж<Named> newNamed(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡob
         obj.typ = new NamedжΔType(typ);
     }
     // Ensure that typ is always sanity-checked.
-    if (check != nil) {
+    if (Ꮡcheck != nil) {
         check.needsCleanup(new Namedжcleaner(typ));
     }
     return typ;
@@ -266,7 +260,7 @@ internal static ж<Named> newNamedInstance(this ж<Checker> Ꮡcheck, tokenꓸPo
     var typ = Ꮡ(new Named(check: Ꮡcheck, obj: obj, inst: inst));
     obj.Value.typ = new NamedжΔType(typ);
     // Ensure that typ is always sanity-checked.
-    if (check != nil) {
+    if (Ꮡcheck != nil) {
         check.needsCleanup(new Namedжcleaner(typ));
     }
     return typ;
@@ -324,8 +318,6 @@ public static ж<Named> Origin(this ж<Named> Ꮡt) {
 // TypeParams returns the type parameters of the named type t, or nil.
 // The result is non-nil for an (originally) generic type even if it is instantiated.
 public static ж<TypeParamList> TypeParams(this ж<Named> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return (~Ꮡt.resolve()).tparams;
 }
 
@@ -348,8 +340,6 @@ public static void SetTypeParams(this ж<Named> Ꮡt, slice<ж<TypeParam>> tpara
 
 // NumMethods returns the number of explicit methods defined for t.
 public static nint NumMethods(this ж<Named> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return len((~Ꮡt.Origin().resolve()).methods);
 }
 
@@ -419,7 +409,7 @@ internal static ж<Func> expandMethod(this ж<Named> Ꮡt, nint i) {
     //
     // This occurs if t is instantiated with the receiver type parameters, as in
     // the use of m in func (r T[_]) m() { r.m() }.
-    if (AreEqual(rbase, t)) {
+    if (AreEqual(rbase, Ꮡt)) {
         return origm;
     }
     var sig = origSig;
@@ -515,15 +505,11 @@ public static void AddMethod(this ж<Named> Ꮡt, ж<Func> Ꮡm) {
 //
 // [underlying type]: https://go.dev/ref/spec#Underlying_types.
 public static ΔType Underlying(this ж<Named> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     // TODO(gri) Investigate if Unalias can be moved to where underlying is set.
     return Unalias((~Ꮡt.resolve()).underlying);
 }
 
 public static @string String(this ж<Named> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return TypeString(new NamedжΔType(Ꮡt), default!);
 }
 
@@ -695,7 +681,7 @@ internal static ΔType expandUnderlying(this ж<Named> Ꮡn) => func((defer, rec
     // resolve n for any recursive references.
     @string h = (~n.inst).ctxt.instanceHash(new NamedжΔType(orig), targs.list());
     var n2 = (~n.inst).ctxt.update(h, new NamedжΔType(orig), n.TypeArgs().list(), new NamedжΔType(Ꮡn));
-    assert(AreEqual(n, n2));
+    assert(AreEqual(Ꮡn, n2));
     var smap = makeSubstMap((~orig).tparams.list(), targs.list());
     ж<Context> ctxt = default!;
     if (check != nil) {

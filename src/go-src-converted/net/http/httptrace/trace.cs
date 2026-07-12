@@ -222,7 +222,7 @@ internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> Ꮡold) 
 internal static bool hasNetHooks(this ж<ClientTrace> Ꮡt) {
     ref var t = ref Ꮡt.Value;
 
-    if (t == nil) {
+    if (Ꮡt == nil) {
         return false;
     }
     return t.DNSStart != default! || t.DNSDone != default! || t.ConnectStart != default! || t.ConnectDone != default!;

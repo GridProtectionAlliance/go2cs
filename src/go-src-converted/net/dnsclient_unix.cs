@@ -173,8 +173,6 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) dnsStreamRoundTrip
 
 // exchange sends a query on the connection and hopes for a response.
 internal static (dnsmessage.Parser, dnsmessage.Header, error) exchange(this ж<Resolver> Ꮡr, context.Context ctx, @string server, dnsmessageꓸQuestion q, time.Duration timeout, bool useTCP, bool ad) => func<(dnsmessage.Parser, dnsmessage.Header, error)>((defer, recover) => {
-    ref var r = ref Ꮡr.Value;
-
     q.Class = dnsmessage.ClassINET;
     var (id, udpReq, tcpReq, err) = newRequest(q, ad);
     if (err != default!) {
@@ -312,7 +310,6 @@ internal static (dnsmessage.RCode, bool) extractExtendedRCode(dnsmessage.Parser 
 // Do a lookup for a single name, which must be rooted
 // (otherwise answer will not find the answers).
 internal static (dnsmessage.Parser, @string, error) tryOneName(this ж<Resolver> Ꮡr, context.Context ctx, ж<dnsConfig> Ꮡcfg, @string name, dnsmessage.Type qtype) {
-    ref var r = ref Ꮡr.Value;
     ref var cfg = ref Ꮡcfg.Value;
 
     error lastErr = default!;
@@ -462,7 +459,6 @@ internal static void tryUpdate(this ж<resolverConfig> Ꮡconf, @string name) =>
 }
 
 internal static (dnsmessage.Parser, @string, error) lookup(this ж<Resolver> Ꮡr, context.Context ctx, @string name, dnsmessage.Type qtype, ж<dnsConfig> Ꮡconf) {
-    ref var r = ref Ꮡr.Value;
     ref var conf = ref Ꮡconf.DerefOrNil();
 
     if (!isDomainName(name)) {
@@ -587,8 +583,6 @@ internal static (slice<@string> addrs, error err) goLookupHostOrder(this ж<Reso
     slice<@string> addrs = default!;
     error err = default!;
 
-    ref var r = ref Ꮡr.Value;
-    ref var conf = ref Ꮡconf.Value;
     if (order == hostLookupFilesDNS || order == hostLookupFiles) {
         // Use entries from /etc/hosts if they match.
         (addrs, _) = lookupStaticHost(name);
@@ -638,8 +632,6 @@ internal static (slice<IPAddr> addrs, error err) goLookupIP(this ж<Resolver> �
     slice<IPAddr> addrs = default!;
     error err = default!;
 
-    ref var r = ref Ꮡr.Value;
-    ref var conf = ref Ꮡconf.Value;
     (addrs, _, err) = Ꮡr.goLookupIPCNAMEOrder(ctx, network, host, order, Ꮡconf);
     return (addrs, err);
 }
@@ -655,7 +647,6 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
     dnsmessage.Name cname = default!;
     error err = default!;
 
-    ref var r = ref Ꮡr.Value;
     ref var conf = ref Ꮡconf.DerefOrNil();
     if (order == hostLookupFilesDNS || order == hostLookupFiles) {
         @string canonical = default!;
@@ -877,18 +868,12 @@ break_loop:;
 
 // goLookupCNAME is the native Go (non-cgo) implementation of LookupCNAME.
 internal static (@string, error) goLookupCNAME(this ж<Resolver> Ꮡr, context.Context ctx, @string host, ΔhostLookupOrder order, ж<dnsConfig> Ꮡconf) {
-    ref var r = ref Ꮡr.Value;
-    ref var conf = ref Ꮡconf.Value;
-
     var (_, cname, err) = Ꮡr.goLookupIPCNAMEOrder(ctx, "CNAME"u8, host, order, Ꮡconf);
     return (cname.String(), err);
 }
 
 // goLookupPTR is the native Go implementation of LookupAddr.
 internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, context.Context ctx, @string addr, ΔhostLookupOrder order, ж<dnsConfig> Ꮡconf) {
-    ref var r = ref Ꮡr.Value;
-    ref var conf = ref Ꮡconf.Value;
-
     if (order == hostLookupFiles || order == hostLookupFilesDNS) {
         var names = lookupStaticAddr(addr);
         if (len(names) > 0) {

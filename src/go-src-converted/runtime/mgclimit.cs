@@ -82,8 +82,6 @@ internal static ref gcCPULimiterState gcCPULimiter => ref ᏑgcCPULimiter.Value;
 //
 // It is safe to call concurrently with other operations.
 internal static bool limiting(this ж<gcCPULimiterState> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     return Ꮡl.of(gcCPULimiterState.Ꮡenabled).Load();
 }
 
@@ -145,24 +143,18 @@ internal static readonly UntypedFloat gcCPULimiterUpdatePeriod = 1e+07; // 10ms
 // needUpdate returns true if the limiter's maximum update period has been
 // exceeded, and so would benefit from an update.
 internal static bool needUpdate(this ж<gcCPULimiterState> Ꮡl, int64 now) {
-    ref var l = ref Ꮡl.Value;
-
     return now - Ꮡl.of(gcCPULimiterState.ᏑlastUpdate).Load() > gcCPULimiterUpdatePeriod;
 }
 
 // addAssistTime notifies the limiter of additional assist time. It will be
 // included in the next update.
 internal static void addAssistTime(this ж<gcCPULimiterState> Ꮡl, int64 t) {
-    ref var l = ref Ꮡl.Value;
-
     Ꮡl.of(gcCPULimiterState.ᏑassistTimePool).Add(t);
 }
 
 // addIdleTime notifies the limiter of additional time a P spent on the idle list. It will be
 // subtracted from the total CPU time in the next update.
 internal static void addIdleTime(this ж<gcCPULimiterState> Ꮡl, int64 t) {
-    ref var l = ref Ꮡl.Value;
-
     Ꮡl.of(gcCPULimiterState.ᏑidleTimePool).Add(t);
 }
 
@@ -315,15 +307,11 @@ internal static void accumulate(this ж<gcCPULimiterState> Ꮡl, int64 mutatorTi
 
 // tryLock attempts to lock l. Returns true on success.
 internal static bool tryLock(this ж<gcCPULimiterState> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     return Ꮡl.of(gcCPULimiterState.Ꮡlock).CompareAndSwap(0, 1);
 }
 
 // unlock releases the lock on l. Must be called if tryLock returns true.
 internal static void unlock(this ж<gcCPULimiterState> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     var old = Ꮡl.of(gcCPULimiterState.Ꮡlock).Swap(0);
     if (old != 1) {
         @throw("double unlock"u8);
@@ -417,8 +405,6 @@ internal static limiterEventType typ(this limiterEventStamp s) {
 // of "on-CPU" time. The OS could deschedule us at any time, but we want to maintain as
 // close of an approximation as we can.
 internal static bool start(this ж<limiterEvent> Ꮡe, limiterEventType typ, int64 now) {
-    ref var e = ref Ꮡe.Value;
-
     if (((limiterEventStamp)Ꮡe.of(limiterEvent.Ꮡstamp).Load()).typ() != limiterEventNone) {
         return false;
     }
@@ -435,7 +421,6 @@ internal static (limiterEventType typ, int64 duration) consume(this ж<limiterEv
     limiterEventType typ = default!;
     int64 duration = default!;
 
-    ref var e = ref Ꮡe.Value;
     // Read the limiter event timestamp and update it to now.
     while (ᐧ) {
         var old = ((limiterEventStamp)Ꮡe.of(limiterEvent.Ꮡstamp).Load());
@@ -463,8 +448,6 @@ internal static (limiterEventType typ, int64 duration) consume(this ж<limiterEv
 //
 // The caller must be non-preemptible across the event. See start as to why.
 internal static void stop(this ж<limiterEvent> Ꮡe, limiterEventType typ, int64 now) {
-    ref var e = ref Ꮡe.Value;
-
     limiterEventStamp stamp = default!;
     while (ᐧ) {
         stamp = ((limiterEventStamp)Ꮡe.of(limiterEvent.Ꮡstamp).Load());

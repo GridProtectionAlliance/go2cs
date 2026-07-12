@@ -176,7 +176,6 @@ internal const uint32 mProfCycleWrap = /* uint32(len(memRecord{}.future)) * (2 <
 internal static uint32 /*cycle*/ read(this ж<mProfCycleHolder> Ꮡc) {
     uint32 cycle = default!;
 
-    ref var c = ref Ꮡc.Value;
     var v = Ꮡc.of(mProfCycleHolder.Ꮡvalue).Load();
     cycle = (v >> (int)(1));
     return cycle;
@@ -188,7 +187,6 @@ internal static (uint32 cycle, bool alreadyFlushed) setFlushed(this ж<mProfCycl
     uint32 cycle = default!;
     bool alreadyFlushed = default!;
 
-    ref var c = ref Ꮡc.Value;
     while (ᐧ) {
         var prev = Ꮡc.of(mProfCycleHolder.Ꮡvalue).Load();
         cycle = (prev >> (int)(1));
@@ -203,8 +201,6 @@ internal static (uint32 cycle, bool alreadyFlushed) setFlushed(this ж<mProfCycl
 // increment increases the cycle count by one, wrapping the value at
 // mProfCycleWrap. It clears the flushed flag.
 internal static void increment(this ж<mProfCycleHolder> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     // We explicitly wrap mProfCycle rather than depending on
     // uint wraparound because the memRecord.future ring does not
     // itself wrap at a power of two.
@@ -459,8 +455,6 @@ internal static void mProf_Malloc(ж<m> Ꮡmp, @unsafe.Pointer Δp, uintptr size
 
 // Called when freeing a profiled block.
 internal static void mProf_Free(ж<bucket> Ꮡb, uintptr size) {
-    ref var b = ref Ꮡb.Value;
-
     var index = (ᏑmProfCycle.read() + 1) % (uint32)len(new memRecord(nil).future);
     var mp = Ꮡb.mp();
     var mpc = mp.at(memRecord.Ꮡfuture, (nint)(index));
@@ -714,8 +708,6 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
 }
 
 [GoRecv] internal static void recordLock(this ref mLockProfile prof, int64 cycles, ж<mutex> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     if (cycles <= 0) {
         return;
     }
@@ -760,7 +752,6 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
 //go:nowritebarrierrec
 internal static void recordUnlock(this ж<mLockProfile> Ꮡprof, ж<mutex> Ꮡl) {
     ref var prof = ref Ꮡprof.Value;
-    ref var l = ref Ꮡl.Value;
 
     if ((uintptr)new @unsafe.Pointer(Ꮡl) == prof.pending) {
         Ꮡprof.captureStack();
@@ -1519,8 +1510,6 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<pro
 //
 //go:yeswritebarrierrec
 internal static void tryRecordGoroutineProfileWB(ж<g> Ꮡgp1) {
-    ref var gp1 = ref Ꮡgp1.Value;
-
     if ((~(~getg()).m).p.ptr() == nil) {
         @throw("no P available, write barriers are forbidden"u8);
     }

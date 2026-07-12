@@ -24,7 +24,6 @@ partial class runtime_package {
 //
 // N.B. typ must be kept alive forever for this to work correctly.
 internal static uint64 put(this ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
-    ref var t = ref Ꮡt.Value;
     ref var typ = ref Ꮡtyp.DerefOrNil();
 
     if (Ꮡtyp == nil) {
@@ -39,8 +38,6 @@ internal static uint64 put(this ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
 // releases all memory and resets state. It must only be called once the caller
 // can guarantee that there are no more writers to the table.
 internal static void dump(this ж<traceTypeTable> Ꮡt, uintptr gen) {
-    ref var t = ref Ꮡt.Value;
-
     var w = unsafeTraceExpWriter(gen, nil, traceExperimentAllocFree);
     {
         var root = (ж<traceMapNode>)(uintptr)(Ꮡt.of(traceTypeTable.Ꮡtab).of(traceMap.Ꮡroot).Load()); if (root != nil) {

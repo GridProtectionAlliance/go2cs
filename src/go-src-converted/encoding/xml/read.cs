@@ -137,8 +137,6 @@ public static error Unmarshal(slice<byte> data, any v) {
 // Decode works like [Unmarshal], except it reads the decoder
 // stream to find the start element.
 public static error Decode(this ж<Decoder> Ꮡd, any v) {
-    ref var d = ref Ꮡd.Value;
-
     return Ꮡd.DecodeElement(v, nil);
 }
 
@@ -147,9 +145,6 @@ public static error Decode(this ж<Decoder> Ꮡd, any v) {
 // It is useful when a client reads some raw XML tokens itself
 // but also wants to defer to [Unmarshal] for some elements.
 public static error DecodeElement(this ж<Decoder> Ꮡd, any v, ж<StartElement> Ꮡstart) {
-    ref var d = ref Ꮡd.Value;
-    ref var start = ref Ꮡstart.Value;
-
     var val = reflect.ValueOf(v);
     if (val.Kind() != reflect.ΔPointer) {
         return errors.New("non-pointer passed to Unmarshal"u8);

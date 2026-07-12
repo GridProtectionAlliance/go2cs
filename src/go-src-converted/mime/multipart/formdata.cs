@@ -31,8 +31,6 @@ public static error ErrMessageTooLarge = errors.New("multipart: message too larg
 // It returns [ErrMessageTooLarge] if all non-file parts can't be stored in
 // memory.
 public static (ж<Form>, error) ReadForm(this ж<Reader> Ꮡr, int64 maxMemory) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.readForm(maxMemory);
 }
 

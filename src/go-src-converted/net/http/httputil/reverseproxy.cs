@@ -54,8 +54,6 @@ partial class httputil_package {
 //		r.Out.Host = r.In.Host
 //	}
 [GoRecv] public static void SetURL(this ref ProxyRequest r, ж<url.URL> Ꮡtarget) {
-    ref var target = ref Ꮡtarget.Value;
-
     rewriteRequestURL(r.Out, Ꮡtarget);
     r.Out.Value.Host = ""u8;
 }
@@ -264,8 +262,6 @@ internal static (@string path, @string rawpath) joinURLPath(ж<url.URL> Ꮡa, ж
 //		},
 //	}
 public static ж<ReverseProxy> NewSingleHostReverseProxy(ж<url.URL> Ꮡtarget) {
-    ref var target = ref Ꮡtarget.Value;
-
     var director = (ж<http.Request> req) => {
         rewriteRequestURL(req, Ꮡtarget);
     };
@@ -316,8 +312,6 @@ internal static slice<@string> hopHeaders = new @string[]{
 }.slice();
 
 [GoRecv] internal static void defaultErrorHandler(this ref ReverseProxy p, http.ResponseWriter rw, ж<http.Request> Ꮡreq, error err) {
-    ref var req = ref Ꮡreq.Value;
-
     p.logf("http: proxy error: %v"u8, err);
     rw.WriteHeader(http.StatusBadGateway);
 }
@@ -336,7 +330,6 @@ internal static Action<http.ResponseWriter, ж<http.Request>, error> getErrorHan
 internal static bool modifyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Response> Ꮡres, ж<http.Request> Ꮡreq) {
     ref var p = ref Ꮡp.Value;
     ref var res = ref Ꮡres.Value;
-    ref var req = ref Ꮡreq.Value;
 
     if (p.ModifyResponse == default!) {
         return true;
@@ -775,7 +768,6 @@ internal static @string upgradeType(httpꓸHeader h) {
 }
 
 internal static void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡres) => func((defer, recover) => {
-    ref var p = ref Ꮡp.Value;
     ref var req = ref Ꮡreq.Value;
     ref var res = ref Ꮡres.Value;
 

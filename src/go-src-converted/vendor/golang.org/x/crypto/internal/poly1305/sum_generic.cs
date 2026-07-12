@@ -28,9 +28,6 @@ partial class poly1305_package {
 // All the complexity is about doing performant constant-time math on numbers
 // larger than any available numeric type.
 internal static void sumGeneric(ж<array<byte>> Ꮡout, slice<byte> msg, ж<array<byte>> Ꮡkey) {
-    ref var @out = ref Ꮡout.Value;
-    ref var key = ref Ꮡkey.Value;
-
     ref var h = ref heap<macGeneric>(out var Ꮡh);
     h = newMACGeneric(Ꮡkey);
     Ꮡh.Write(msg);
@@ -38,8 +35,6 @@ internal static void sumGeneric(ж<array<byte>> Ꮡout, slice<byte> msg, ж<arra
 }
 
 internal static macGeneric newMACGeneric(ж<array<byte>> Ꮡkey) {
-    ref var key = ref Ꮡkey.Value;
-
     ref var m = ref heap<macGeneric>(out var Ꮡm);
     m = new macGeneric(nil);
     initialize(Ꮡkey, Ꮡm.of(macGeneric.ᏑmacState));
@@ -96,8 +91,6 @@ internal static (nint, error) Write(this ж<macGeneric> Ꮡh, slice<byte> p) {
 // the MAC output. It does not modify its state, in order to allow for multiple
 // calls to Sum, even if no Write is allowed after Sum.
 [GoRecv] internal static void Sum(this ref macGeneric h, ж<array<byte>> Ꮡout) {
-    ref var @out = ref Ꮡout.Value;
-
     ref var state = ref heap<macState>(out var Ꮡstate);
     state = h.macState;
     if (h.offset > 0) {

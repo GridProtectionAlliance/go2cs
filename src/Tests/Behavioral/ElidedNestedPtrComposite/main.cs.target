@@ -13,8 +13,6 @@ partial class main_package {
 }
 
 internal static slice<slice<ж<Node>>> group(this ж<Node> Ꮡn) {
-    ref var n = ref Ꮡn.Value;
-
     return new slice<ж<Node>>[]{new ж<Node>[]{Ꮡn}.slice()}.slice();
 }
 

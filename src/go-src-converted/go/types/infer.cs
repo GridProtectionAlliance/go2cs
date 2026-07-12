@@ -639,8 +639,6 @@ internal static bool /*res*/ isParameterized(this ж<tpWalker> Ꮡw, ΔType typ)
 }
 
 internal static bool varList(this ж<tpWalker> Ꮡw, slice<ж<Var>> list) {
-    ref var w = ref Ꮡw.Value;
-
     foreach (var (_, v) in list) {
         if (Ꮡw.isParameterized((~v).typ)) {
             return true;
@@ -817,8 +815,6 @@ internal static void typ(this ж<cycleFinder> Ꮡw, ΔType typ) => func((defer, 
 });
 
 internal static void varList(this ж<cycleFinder> Ꮡw, slice<ж<Var>> list) {
-    ref var w = ref Ꮡw.Value;
-
     foreach (var (_, v) in list) {
         Ꮡw.typ((~v).typ);
     }
@@ -827,8 +823,6 @@ internal static void varList(this ж<cycleFinder> Ꮡw, slice<ж<Var>> list) {
 // If tpar is a type parameter in list, tparamIndex returns the index
 // of the type parameter in list. Otherwise the result is < 0.
 internal static nint tparamIndex(slice<ж<TypeParam>> list, ж<TypeParam> Ꮡtpar) {
-    ref var tpar = ref Ꮡtpar.DerefOrNil();
-
     foreach (var (i, p) in list) {
         if (p == Ꮡtpar) {
             return i;

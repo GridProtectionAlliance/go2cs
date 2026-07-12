@@ -19,7 +19,7 @@ internal const byte ratGobVersion = 1;
 public static (slice<byte>, error) GobEncode(this ж<ΔRat> Ꮡx) {
     ref var x = ref Ꮡx.Value;
 
-    if (x == nil) {
+    if (Ꮡx == nil) {
         return (default!, default!);
     }
     var buf = new slice<byte>(1 + 4 + (len(x.a.abs) + len(x.b.abs)) * (nint)_S);
@@ -85,8 +85,6 @@ public static (slice<byte> text, error err) MarshalText(this ж<ΔRat> Ꮡx) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 public static error UnmarshalText(this ж<ΔRat> Ꮡz, slice<byte> text) {
-    ref var z = ref Ꮡz.Value;
-
     // TODO(gri): get rid of the []byte/string conversion
     {
         var (_, ok) = Ꮡz.SetString(((@string)text)); if (!ok) {

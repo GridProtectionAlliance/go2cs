@@ -9,7 +9,8 @@ namespace go;
 
 partial class unicode_package {
 
-public static SpecialCase TurkishCase = _TurkishCase;
+public static SpecialCase TurkishCase;
+internal static void initᴛTurkishCase() { TurkishCase = _TurkishCase; }
 
 internal static SpecialCase _TurkishCase = new SpecialCase(new CaseRange[]{
     new CaseRange(0x0049, 0x0049, new d(new rune[]{0, 0x131 - 0x49, 0}.array())),

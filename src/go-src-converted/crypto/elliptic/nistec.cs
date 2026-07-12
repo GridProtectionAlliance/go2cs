@@ -183,11 +183,6 @@ internal static void initP521() {
 [GoRecv] internal static (ж<bigꓸInt>, ж<bigꓸInt>) Add<Point>(this ref nistCurve<Point> curve, ж<bigꓸInt> Ꮡx1, ж<bigꓸInt> Ꮡy1, ж<bigꓸInt> Ꮡx2, ж<bigꓸInt> Ꮡy2)
     where Point : nistPoint<Point>
 {
-    ref var x1 = ref Ꮡx1.Value;
-    ref var y1 = ref Ꮡy1.Value;
-    ref var x2 = ref Ꮡx2.Value;
-    ref var y2 = ref Ꮡy2.Value;
-
     var (p1, err) = curve.pointFromAffine(Ꮡx1, Ꮡy1);
     if (err != default!) {
         throw panic("crypto/elliptic: Add was called on an invalid point");
@@ -202,9 +197,6 @@ internal static void initP521() {
 [GoRecv] internal static (ж<bigꓸInt>, ж<bigꓸInt>) Double<Point>(this ref nistCurve<Point> curve, ж<bigꓸInt> Ꮡx1, ж<bigꓸInt> Ꮡy1)
     where Point : nistPoint<Point>
 {
-    ref var x1 = ref Ꮡx1.Value;
-    ref var y1 = ref Ꮡy1.Value;
-
     var (p, err) = curve.pointFromAffine(Ꮡx1, Ꮡy1);
     if (err != default!) {
         throw panic("crypto/elliptic: Double was called on an invalid point");
@@ -232,9 +224,6 @@ internal static void initP521() {
 [GoRecv] internal static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarMult<Point>(this ref nistCurve<Point> curve, ж<bigꓸInt> ᏑBx, ж<bigꓸInt> ᏑBy, slice<byte> scalar)
     where Point : nistPoint<Point>
 {
-    ref var Bx = ref ᏑBx.Value;
-    ref var By = ref ᏑBy.Value;
-
     var (p, err) = curve.pointFromAffine(ᏑBx, ᏑBy);
     if (err != default!) {
         throw panic("crypto/elliptic: ScalarMult was called on an invalid point");
@@ -266,8 +255,6 @@ internal static void initP521() {
     ж<bigꓸInt> x = default!;
     ж<bigꓸInt> y = default!;
 
-    ref var Px = ref ᏑPx.Value;
-    ref var Py = ref ᏑPy.Value;
     s1 = curve.normalizeScalar(s1);
     var (q, err) = curve.newPoint().ScalarBaseMult(s1);
     if (err != default!) {

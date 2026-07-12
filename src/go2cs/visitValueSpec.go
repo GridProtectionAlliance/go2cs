@@ -420,14 +420,45 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						valExpr := v.convInterfaceDeclValue(valueSpec.Values[i], ifaceDeclType, context)
 						v.globalDeclHoist = savedGlobalHoist
 
-						if globalHoist.Len() > 0 {
-							v.targetFile.WriteString(globalHoist.String())
+						// A package var whose initializer's Go init-order dependencies C#'s
+						// static-field-initializer order cannot reproduce (cross-file / same-file
+						// forward reference / dependency on another relocated var — see
+						// collectMovedInitVars) is emitted BARE here, with the initializer relocated
+						// into an adjacent per-file init method that the ordered static ctor
+						// (package_init.cs) calls in InitOrder. The method lives in this file so the
+						// rendered expression keeps the file's own using aliases. An addressed global
+						// relocates too (its box is declared with the default value; the ctor
+						// assignment writes through the ref property into the same box), else a moved
+						// dependency of an addressed global would still read zero. The multi-value
+						// hoist form falls back inline with a warning (no stdlib occurrence).
+						ordinal, moved := v.movedInitOrdinal(def)
+
+						if moved && globalHoist.Len() > 0 {
+							v.showWarning("package var '%s' needs init-order relocation but has a multi-value hoisted initializer - left inline (init order NOT guaranteed)", goIDName)
+							moved = false
 						}
 
-						if v.isAddressedGlobal(ident) {
-							v.writeAddressedGlobalDecl(access, csTypeName, csIDName, valExpr, isInherentlyHeapAllocatedType(v.getIdentType(ident)))
+						if moved {
+							if v.isAddressedGlobal(ident) {
+								v.writeAddressedGlobalDecl(access, csTypeName, csIDName, "", isInherentlyHeapAllocatedType(v.getIdentType(ident)))
+							} else {
+								v.writeOutput("%s static %s %s;", access, csTypeName, csIDName)
+							}
+
+							methodName := packageInitMethodName(csIDName)
+							v.targetFile.WriteString(v.newline)
+							v.writeOutput("internal static void %s() { %s = %s; }", methodName, csIDName, valExpr)
+							recordMovedInitMethod(ordinal, methodName)
 						} else {
-							v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, valExpr)
+							if globalHoist.Len() > 0 {
+								v.targetFile.WriteString(globalHoist.String())
+							}
+
+							if v.isAddressedGlobal(ident) {
+								v.writeAddressedGlobalDecl(access, csTypeName, csIDName, valExpr, isInherentlyHeapAllocatedType(v.getIdentType(ident)))
+							} else {
+								v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, valExpr)
+							}
 						}
 					}
 
@@ -857,6 +888,14 @@ func (v *Visitor) visitPackageTupleVarSpec(valueSpec *ast.ValueSpec, tuple *type
 	for _, ident := range valueSpec.Names {
 		if ident.Name != "_" {
 			nonBlankCount++
+		}
+
+		// A tuple-deconstructing package var flagged for init-order relocation is not yet
+		// supported (no stdlib occurrence) — surface it loudly instead of silently misordering.
+		if def := v.info.Defs[ident]; def != nil {
+			if _, moved := v.movedInitOrdinal(def); moved {
+				v.showWarning("package tuple var '%s' needs init-order relocation (unsupported for tuple specs) - left inline (init order NOT guaranteed)", ident.Name)
+			}
 		}
 	}
 

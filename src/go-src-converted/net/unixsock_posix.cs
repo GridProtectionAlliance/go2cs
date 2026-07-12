@@ -103,15 +103,13 @@ internal static @string sotypeToNet(nint sotype) {
 internal static (syscallꓸSockaddr, error) sockaddr(this ж<UnixAddr> Ꮡa, nint family) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil) {
+    if (Ꮡa == nil) {
         return (default!, default!);
     }
     return (new syscall.SockaddrUnixжΔSockaddr(Ꮡ(new syscall.SockaddrUnix(Name: a.Name))), default!);
 }
 
 internal static Δsockaddr toLocal(this ж<UnixAddr> Ꮡa, @string net) {
-    ref var a = ref Ꮡa.Value;
-
     return new UnixAddrжΔsockaddr(Ꮡa);
 }
 
@@ -187,8 +185,6 @@ internal static Δsockaddr toLocal(this ж<UnixAddr> Ꮡa, @string net) {
 
 internal static (ж<UnixConn>, error) dialUnix(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<UnixAddr> Ꮡladdr, ж<UnixAddr> Ꮡraddr) {
     ref var sd = ref Ꮡsd.Value;
-    ref var laddr = ref Ꮡladdr.Value;
-    ref var raddr = ref Ꮡraddr.Value;
 
     var ctrlCtxFn = sd.Dialer.ControlContext;
     if (ctrlCtxFn == default! && sd.Dialer.Control != default!) {
@@ -268,7 +264,6 @@ internal static (ж<UnixListener>, error) listenUnix(this ж<sysListener> Ꮡsl,
 
 internal static (ж<UnixConn>, error) listenUnixgram(this ж<sysListener> Ꮡsl, context.Context ctx, ж<UnixAddr> Ꮡladdr) {
     ref var sl = ref Ꮡsl.Value;
-    ref var laddr = ref Ꮡladdr.Value;
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default!;
     if (sl.ListenConfig.Control != default!) {

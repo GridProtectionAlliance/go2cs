@@ -285,14 +285,10 @@ public static readonly ΔKind Ptr = /* Pointer */ 22;
 }
 
 internal static ж<abi.Type> common(this ж<rtype> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.of(rtype.Ꮡt);
 }
 
 internal static ж<abi.UncommonType> uncommon(this ж<rtype> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.of(rtype.Ꮡt).Uncommon();
 }
 
@@ -308,38 +304,26 @@ public static readonly ΔChanDir BothDir = /* RecvDir | SendDir */ 3; // chan
 }
 
 internal static abiꓸName nameOff(this ж<interfaceType> Ꮡt, aNameOff off) {
-    ref var t = ref Ꮡt.Value;
-
     return toRType(Ꮡt.of(interfaceType.ᏑType)).nameOff(off);
 }
 
 internal static abiꓸName nameOffFor(ж<abi.Type> Ꮡt, aNameOff off) {
-    ref var t = ref Ꮡt.Value;
-
     return toRType(Ꮡt).nameOff(off);
 }
 
 internal static ж<abi.Type> typeOffFor(ж<abi.Type> Ꮡt, aTypeOff off) {
-    ref var t = ref Ꮡt.Value;
-
     return toRType(Ꮡt).typeOff(off);
 }
 
 internal static ж<abi.Type> typeOff(this ж<interfaceType> Ꮡt, aTypeOff off) {
-    ref var t = ref Ꮡt.Value;
-
     return toRType(Ꮡt.of(interfaceType.ᏑType)).typeOff(off);
 }
 
 internal static ж<abi.Type> common(this ж<interfaceType> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.of(interfaceType.ᏑType);
 }
 
 internal static ж<abi.UncommonType> uncommon(this ж<interfaceType> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return Ꮡt.of(interfaceType.ᏑInterfaceType).of(abiꓸInterfaceType.ᏑType).Uncommon();
 }
 
@@ -494,8 +478,6 @@ internal static aNameOff resolveReflectName(abiꓸName n) {
 // resolveReflectType adds a *rtype to the reflection lookup map in the runtime.
 // It returns a new typeOff that can be used to refer to the pointer.
 internal static aTypeOff resolveReflectType(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return ((aTypeOff)addReflectOff(new @unsafe.Pointer(Ꮡt)));
 }
 
@@ -525,8 +507,6 @@ internal static @unsafe.Pointer textOff(this ж<rtype> Ꮡt, aTextOff off) {
 }
 
 internal static @unsafe.Pointer textOffFor(ж<abi.Type> Ꮡt, aTextOff off) {
-    ref var t = ref Ꮡt.Value;
-
     return (uintptr)toRType(Ꮡt).textOff(off);
 }
 
@@ -547,7 +527,7 @@ internal static @string String(this ж<rtype> Ꮡt) {
 internal static nint Bits(this ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.Value;
 
-    if (t == nil) {
+    if (Ꮡt == nil) {
         throw panic("reflect: Bits of nil Type");
     }
     ΔKind k = t.Kind();
@@ -570,8 +550,6 @@ internal static nint Bits(this ж<rtype> Ꮡt) {
 }
 
 internal static slice<abi.Method> exportedMethods(this ж<rtype> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     var ut = Ꮡt.uncommon();
     if (ut == nil) {
         return default!;
@@ -677,8 +655,6 @@ internal static @string PkgPath(this ж<rtype> Ꮡt) {
 }
 
 internal static @string pkgPathFor(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return toRType(Ꮡt).PkgPath();
 }
 
@@ -708,8 +684,6 @@ internal static @string Name(this ж<rtype> Ꮡt) {
 }
 
 internal static @string nameFor(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return toRType(Ꮡt).Name();
 }
 
@@ -724,14 +698,10 @@ internal static ΔChanDir ChanDir(this ж<rtype> Ꮡt) {
 }
 
 internal static ж<rtype> toRType(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return (ж<rtype>)(uintptr)(new @unsafe.Pointer(Ꮡt));
 }
 
 internal static ж<abi.Type> elem(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     var et = Ꮡt.Elem();
     if (et != nil) {
         return et;
@@ -740,8 +710,6 @@ internal static ж<abi.Type> elem(ж<abi.Type> Ꮡt) {
 }
 
 internal static ΔType Elem(this ж<rtype> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return toType(elem(Ꮡt.common()));
 }
 
@@ -1063,7 +1031,7 @@ internal static (ΔMethod m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, 
     bool ok = default!;
 
     ref var t = ref Ꮡt.Value;
-    if (t == nil) {
+    if (Ꮡt == nil) {
         return (m, ok);
     }
     ж<abi.Imethod> p = default!;
@@ -1205,7 +1173,6 @@ public static (@string value, bool ok) Lookup(this StructTag tag, @string key) {
 internal static StructField /*f*/ FieldByIndex(this ж<structType> Ꮡt, slice<nint> index) {
     StructField f = default!;
 
-    ref var t = ref Ꮡt.Value;
     f.Type = toType(Ꮡt.of(structType.ᏑType));
     foreach (var (i, x) in index) {
         if (i > 0) {
@@ -1434,8 +1401,6 @@ internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) {
 }
 
 internal static ж<abi.Type> ptrTo(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return toRType(Ꮡt).ptrTo();
 }
 
@@ -1450,8 +1415,6 @@ internal static uint32 fnv1(uint32 x, params ꓸꓸꓸbyte listʗp) {
 }
 
 internal static bool Implements(this ж<rtype> Ꮡt, ΔType u) {
-    ref var t = ref Ꮡt.Value;
-
     if (u == default!) {
         throw panic("reflect: nil type passed to Type.Implements");
     }
@@ -1462,8 +1425,6 @@ internal static bool Implements(this ж<rtype> Ꮡt, ΔType u) {
 }
 
 internal static bool AssignableTo(this ж<rtype> Ꮡt, ΔType u) {
-    ref var t = ref Ꮡt.Value;
-
     if (u == default!) {
         throw panic("reflect: nil type passed to Type.AssignableTo");
     }
@@ -1472,8 +1433,6 @@ internal static bool AssignableTo(this ж<rtype> Ꮡt, ΔType u) {
 }
 
 internal static bool ConvertibleTo(this ж<rtype> Ꮡt, ΔType u) {
-    ref var t = ref Ꮡt.Value;
-
     if (u == default!) {
         throw panic("reflect: nil type passed to Type.ConvertibleTo");
     }
@@ -2093,8 +2052,6 @@ public static ΔType FuncOf(slice<ΔType> @in, slice<ΔType> @out, bool variadic
 });
 
 internal static @string stringFor(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return toRType(Ꮡt).String();
 }
 
@@ -3081,8 +3038,6 @@ internal static slice<byte> appendVarint(slice<byte> x, uintptr v) {
 //
 //go:linkname toType
 internal static ΔType toType(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNil();
-
     if (Ꮡt == nil) {
         return default!;
     }

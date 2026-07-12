@@ -175,7 +175,6 @@ internal static error ehlo(this ж<Client> Ꮡc) {
 // Only servers that advertise the STARTTLS extension support this function.
 public static error StartTLS(this ж<Client> Ꮡc, ж<tls.Config> Ꮡconfig) {
     ref var c = ref Ꮡc.Value;
-    ref var config = ref Ꮡconfig.Value;
 
     {
         var errΔ1 = Ꮡc.hello(); if (errΔ1 != default!) {
@@ -211,8 +210,6 @@ public static error StartTLS(this ж<Client> Ꮡc, ж<tls.Config> Ꮡconfig) {
 // does not necessarily indicate an invalid address. Many servers
 // will not verify addresses for security reasons.
 public static error Verify(this ж<Client> Ꮡc, @string addr) {
-    ref var c = ref Ꮡc.Value;
-
     {
         var errΔ1 = validateLine(addr); if (errΔ1 != default!) {
             return errΔ1;
@@ -324,8 +321,6 @@ public static error Mail(this ж<Client> Ꮡc, @string from) {
 // A call to Rcpt must be preceded by a call to [Client.Mail] and may be followed by
 // a [Client.Data] call or another Rcpt call.
 public static error Rcpt(this ж<Client> Ꮡc, @string to) {
-    ref var c = ref Ꮡc.Value;
-
     {
         var errΔ1 = validateLine(to); if (errΔ1 != default!) {
             return errΔ1;
@@ -481,8 +476,6 @@ public static (bool, @string) Extension(this ж<Client> Ꮡc, @string ext) {
 // Reset sends the RSET command to the server, aborting the current mail
 // transaction.
 public static error Reset(this ж<Client> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     {
         var errΔ1 = Ꮡc.hello(); if (errΔ1 != default!) {
             return errΔ1;
@@ -495,8 +488,6 @@ public static error Reset(this ж<Client> Ꮡc) {
 // Noop sends the NOOP command to the server. It does nothing but check
 // that the connection to the server is okay.
 public static error Noop(this ж<Client> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     {
         var errΔ1 = Ꮡc.hello(); if (errΔ1 != default!) {
             return errΔ1;

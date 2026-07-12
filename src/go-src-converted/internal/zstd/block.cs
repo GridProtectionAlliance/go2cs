@@ -71,7 +71,9 @@ internal static readonly seqCode seqMatch = 2;
 }
 
 // seqCodeInfo is the seqCodeInfoData for each kind of sequence code.
-internal static ж<array<seqCodeInfoData>> ᏑseqCodeInfo = new(new golib.SparseArray<seqCodeInfoData>{
+internal static ж<array<seqCodeInfoData>> ᏑseqCodeInfo = new(default(array<seqCodeInfoData>));
+internal static ref array<seqCodeInfoData> seqCodeInfo => ref ᏑseqCodeInfo.Value;
+internal static void initᴛseqCodeInfo() { seqCodeInfo = new golib.SparseArray<seqCodeInfoData>{
     [(int)seqLiteral] = new(
         predefTable: predefinedLiteralTable[..],
         predefTableBits: 6,
@@ -93,8 +95,7 @@ internal static ж<array<seqCodeInfoData>> ᏑseqCodeInfo = new(new golib.Sparse
         maxBits: 9,
         toBaseline: (Func<ж<Reader>, nint, slice<fseEntry>, slice<fseBaselineEntry>, error>)(makeMatchBaselineFSE)
     )
-}.array());
-internal static ref array<seqCodeInfoData> seqCodeInfo => ref ᏑseqCodeInfo.Value;
+}.array(); }
 
 // initSeqs reads the Sequences_Section_Header and sets up the FSE
 // tables used to read the sequence codes. It returns the number of

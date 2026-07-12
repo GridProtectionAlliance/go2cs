@@ -128,9 +128,6 @@ internal static ж<fiat.P521Element> p521B() {
 
 // p521Polynomial sets y2 to x³ - 3x + b, and returns y2.
 internal static ж<fiat.P521Element> p521Polynomial(ж<fiat.P521Element> Ꮡy2, ж<fiat.P521Element> Ꮡx) {
-    ref var y2 = ref Ꮡy2.Value;
-    ref var x = ref Ꮡx.Value;
-
     Ꮡy2.Square(Ꮡx);
     Ꮡy2.Mul(Ꮡy2, Ꮡx);
     var threeX = @new<fiat.P521Element>().Add(Ꮡx, Ꮡx);
@@ -422,8 +419,6 @@ public static ж<P521Point> Select(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1,
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
 [GoRecv] internal static void Select(this ref p521Table table, ж<P521Point> Ꮡp, uint8 n) {
-    ref var p = ref Ꮡp.Value;
-
     if (n >= 16) {
         throw panic("nistec: internal error: p521Table called with out-of-bounds value");
     }
@@ -539,8 +534,6 @@ public static (ж<P521Point>, error) ScalarBaseMult(this ж<P521Point> Ꮡp, sli
 internal static bool /*isSquare*/ p521Sqrt(ж<fiat.P521Element> Ꮡe, ж<fiat.P521Element> Ꮡx) {
     bool isSquare = default!;
 
-    ref var e = ref Ꮡe.Value;
-    ref var x = ref Ꮡx.Value;
     var candidate = @new<fiat.P521Element>();
     p521SqrtCandidate(candidate, Ꮡx);
     var square = @new<fiat.P521Element>().Square(candidate);
@@ -553,9 +546,6 @@ internal static bool /*isSquare*/ p521Sqrt(ж<fiat.P521Element> Ꮡe, ж<fiat.P5
 
 // p521SqrtCandidate sets z to a square root candidate for x. z and x must not overlap.
 internal static void p521SqrtCandidate(ж<fiat.P521Element> Ꮡz, ж<fiat.P521Element> Ꮡx) {
-    ref var z = ref Ꮡz.Value;
-    ref var x = ref Ꮡx.Value;
-
     // Since p = 3 mod 4, exponentiation by (p + 1) / 4 yields a square root candidate.
     //
     // The sequence of 0 multiplications and 519 squarings is derived from the

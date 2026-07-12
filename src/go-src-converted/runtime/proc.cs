@@ -289,7 +289,7 @@ internal static void os_beforeExit(nint exitCode) {
     }
 }
 
-[GoInit] internal static void initΔ6() {
+/* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void initΔ6() {
     exithook.Gosched = Gosched;
     exithook.Goid = () => (~getg()).goid;
     exithook.Throw = @throw;
@@ -300,7 +300,7 @@ internal static void runExitHooks(nint code) {
 }
 
 // start forcegc helper goroutine
-[GoInit] internal static void initΔ7() {
+/* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void initΔ7() {
     goǃ(forcegchelper);
 }
 
@@ -407,8 +407,6 @@ internal static void gopark(Func<ж<g>, @unsafe.Pointer, bool> unlockf, @unsafe.
 // Puts the current goroutine into a waiting state and unlocks the lock.
 // The goroutine can be made runnable again by calling goready(gp).
 internal static void goparkunlock(ж<mutex> Ꮡlock, waitReason reason, traceBlockReason traceReason, nint traceskip) {
-    ref var @lock = ref Ꮡlock.Value;
-
     gopark(parkunlock_c, new @unsafe.Pointer(Ꮡlock), reason, traceReason, traceskip);
 }
 
@@ -423,8 +421,6 @@ internal static void goparkunlock(ж<mutex> Ꮡlock, waitReason reason, traceBlo
 //
 //go:linkname goready
 internal static void goready(ж<g> Ꮡgp, nint traceskip) {
-    ref var gp = ref Ꮡgp.Value;
-
     systemstack(() => {
         ready(Ꮡgp, traceskip, true);
     });
@@ -622,8 +618,6 @@ internal static ж<ж<ж<g>>> Ꮡallgptr = new(default(ж<ж<g>>));
 internal static ref ж<ж<g>> allgptr => ref Ꮡallgptr.ValueSlot;
 
 internal static void allgadd(ж<g> Ꮡgp) {
-    ref var gp = ref Ꮡgp.Value;
-
     if (readgstatus(Ꮡgp) == _Gidle) {
         @throw("allgadd: bad status Gidle"u8);
     }
@@ -980,8 +974,6 @@ internal const bool osHasLowResClock = /* osHasLowResClockInt > 0 */ true;
 
 // Mark gp ready to run.
 internal static void ready(ж<g> Ꮡgp, nint traceskip, bool next) {
-    ref var gp = ref Ꮡgp.Value;
-
     var status = readgstatus(Ꮡgp);
     // Mark runnable.
     var mp = acquirem();
@@ -1069,8 +1061,6 @@ internal static void freezetheworld() {
 //
 //go:nosplit
 internal static uint32 readgstatus(ж<g> Ꮡgp) {
-    ref var gp = ref Ꮡgp.Value;
-
     return Ꮡgp.of(g.Ꮡatomicstatus).Load();
 }
 
@@ -1106,8 +1096,6 @@ internal static void casfrom_Gscanstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newv
 // This will return false if the gp is not in the expected status and the cas fails.
 // This acts like a lock acquire while the casfromgstatus acts like a lock release.
 internal static bool castogscanstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
-    ref var gp = ref Ꮡgp.Value;
-
     var exprᴛ1 = oldval;
     if (exprᴛ1 == _Grunnable || exprᴛ1 == _Grunning || exprᴛ1 == _Gwaiting || exprᴛ1 == _Gsyscall) {
         if (newval == (uint32)(oldval | (uint32)_Gscan)) {
@@ -1258,8 +1246,6 @@ internal static void casGToWaiting(ж<g> Ꮡgp, uint32 old, waitReason reason) {
 //
 // Use this over casgstatus when possible to ensure that a waitreason is set.
 internal static void casGToWaitingForGC(ж<g> Ꮡgp, uint32 old, waitReason reason) {
-    ref var gp = ref Ꮡgp.Value;
-
     if (!reason.isWaitingForGC()) {
         @throw("casGToWaitingForGC with non-isWaitingForGC wait reason"u8);
     }
@@ -1274,8 +1260,6 @@ internal static void casGToWaitingForGC(ж<g> Ꮡgp, uint32 old, waitReason reas
 //
 //go:nosplit
 internal static uint32 casgcopystack(ж<g> Ꮡgp) {
-    ref var gp = ref Ꮡgp.Value;
-
     while (ᐧ) {
         var oldstatus = (uint32)(readgstatus(Ꮡgp) & ~(uint32)_Gscan);
         if (oldstatus != _Gwaiting && oldstatus != _Grunnable) {
@@ -1292,8 +1276,6 @@ internal static uint32 casgcopystack(ж<g> Ꮡgp) {
 // TODO(austin): This is the only status operation that both changes
 // the status and locks the _Gscan bit. Rethink this.
 internal static void casGToPreemptScan(ж<g> Ꮡgp, uint32 old, uint32 @new) {
-    ref var gp = ref Ꮡgp.Value;
-
     if (old != _Grunning || @new != (uint32)((uint32)_Gscan | (uint32)_Gpreempted)) {
         @throw("bad g transition"u8);
     }
@@ -2584,8 +2566,6 @@ internal static ж<m> lockextra(bool nilokay) {
 
 //go:nosplit
 internal static void unlockextra(ж<m> Ꮡmp, int32 delta) {
-    ref var mp = ref Ꮡmp.Value;
-
     ᏑextraMLength.Add(delta);
     ᏑextraM.Store((uintptr)new @unsafe.Pointer(Ꮡmp));
 }
@@ -2612,8 +2592,6 @@ internal static (ж<m> mp, bool last) getExtraM() {
 //
 //go:nosplit
 internal static void putExtraM(ж<m> Ꮡmp) {
-    ref var mp = ref Ꮡmp.Value;
-
     ᏑextraMInUse.Add(-1);
     addExtraM(Ꮡmp);
 }
@@ -2669,8 +2647,6 @@ internal static ref newmHandoffᴛ1 newmHandoff => ref ᏑnewmHandoff.Value;
 //
 //go:nowritebarrierrec
 internal static void newm(Action fn, ж<Δp> Ꮡpp, int64 id) {
-    ref var pp = ref Ꮡpp.Value;
-
     // allocm adds a new M to allm, but they do not start until created by
     // the OS in newm1 or the template thread.
     //
@@ -3965,16 +3941,12 @@ internal static void dropg() {
 }
 
 internal static bool parkunlock_c(ж<g> Ꮡgp, @unsafe.Pointer @lock) {
-    ref var gp = ref Ꮡgp.Value;
-
     unlock((ж<mutex>)(uintptr)(@lock));
     return true;
 }
 
 // park continuation on g0.
 internal static void park_m(ж<g> Ꮡgp) {
-    ref var gp = ref Ꮡgp.Value;
-
     var mp = getg().Value.m;
     var Δtrace = traceAcquire();
     if (Δtrace.ok()) {
@@ -4011,8 +3983,6 @@ internal static void park_m(ж<g> Ꮡgp) {
 }
 
 internal static void goschedImpl(ж<g> Ꮡgp, bool preempted) {
-    ref var gp = ref Ꮡgp.Value;
-
     var Δtrace = traceAcquire();
     var status = readgstatus(Ꮡgp);
     if ((uint32)(status & ~(uint32)_Gscan) != _Grunning) {
@@ -4045,8 +4015,6 @@ internal static void goschedImpl(ж<g> Ꮡgp, bool preempted) {
 
 // Gosched continuation on g0.
 internal static void gosched_m(ж<g> Ꮡgp) {
-    ref var gp = ref Ꮡgp.Value;
-
     goschedImpl(Ꮡgp, false);
 }
 
@@ -4062,8 +4030,6 @@ internal static void goschedguarded_m(ж<g> Ꮡgp) {
 }
 
 internal static void gopreempt_m(ж<g> Ꮡgp) {
-    ref var gp = ref Ꮡgp.Value;
-
     goschedImpl(Ꮡgp, true);
 }
 
@@ -4179,8 +4145,6 @@ internal static void goexit1() {
 
 // goexit continuation on g0.
 internal static void goexit0(ж<g> Ꮡgp) {
-    ref var gp = ref Ꮡgp.Value;
-
     gdestroy(Ꮡgp);
     schedule();
 }
@@ -4882,8 +4846,6 @@ internal static ж<g> malg(int32 stacksize) {
 // Put it on the queue of g's waiting to run.
 // The compiler turns a go statement into a call to this.
 internal static void newproc(ж<funcval> Ꮡfn) {
-    ref var fn = ref Ꮡfn.Value;
-
     var gp = getg();
     var pc = getcallerpc();
     var gpʗ1 = gp;
@@ -6361,8 +6323,6 @@ internal static void schedEnableUser(bool enable) {
 //
 // sched.lock must be held.
 internal static bool schedEnabled(ж<g> Ꮡgp) {
-    ref var gp = ref Ꮡgp.Value;
-
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
     if (sched.disable.user) {
         return isSystemGoroutine(Ꮡgp, true);
@@ -6406,8 +6366,6 @@ internal static ж<m> mget() {
 //
 //go:nowritebarrierrec
 internal static void globrunqput(ж<g> Ꮡgp) {
-    ref var gp = ref Ꮡgp.Value;
-
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
     Ꮡsched.of(schedt.Ꮡrunq).pushBack(Ꮡgp);
     sched.runqsize++;
@@ -6419,8 +6377,6 @@ internal static void globrunqput(ж<g> Ꮡgp) {
 //
 //go:nowritebarrierrec
 internal static void globrunqputhead(ж<g> Ꮡgp) {
-    ref var gp = ref Ꮡgp.Value;
-
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
     Ꮡsched.of(schedt.Ꮡrunq).push(Ꮡgp);
     sched.runqsize++;
@@ -6660,7 +6616,6 @@ retry:
 // Executed only by the owner P.
 internal static bool runqputslow(ж<Δp> Ꮡpp, ж<g> Ꮡgp, uint32 h, uint32 t) {
     ref var pp = ref Ꮡpp.Value;
-    ref var gp = ref Ꮡgp.Value;
 
     array<ж<g>> batch = new(129); /* len(pp.runq) / 2 + 1 */
     // First, grab a batch from local queue.
@@ -6875,7 +6830,6 @@ internal static uint32 runqgrab(ж<Δp> Ꮡpp, ж<array<Δguintptr>> Ꮡbatch, u
 // Returns one of the stolen elements (or nil if failed).
 internal static ж<g> runqsteal(ж<Δp> Ꮡpp, ж<Δp> Ꮡp2, bool stealRunNextG) {
     ref var pp = ref Ꮡpp.Value;
-    ref var p2 = ref Ꮡp2.Value;
 
     var t = pp.runqtail;
     var n = runqgrab(Ꮡp2, Ꮡpp.of(runtime_package.Δp.Ꮡrunq), t, stealRunNextG);

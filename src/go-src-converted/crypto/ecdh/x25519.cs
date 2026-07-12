@@ -35,8 +35,6 @@ internal static ж<x25519Curve> x25519 = Ꮡ(new x25519Curve(nil));
 }
 
 internal static (ж<PrivateKey>, error) GenerateKey(this ж<x25519Curve> Ꮡc, io.Reader rand) {
-    ref var c = ref Ꮡc.Value;
-
     var key = new slice<byte>(x25519PrivateKeySize);
     randutil.MaybeReadByte(rand);
     {
@@ -48,8 +46,6 @@ internal static (ж<PrivateKey>, error) GenerateKey(this ж<x25519Curve> Ꮡc, i
 }
 
 internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<x25519Curve> Ꮡc, slice<byte> key) {
-    ref var c = ref Ꮡc.Value;
-
     if (len(key) != x25519PrivateKeySize) {
         return (default!, errors.New("crypto/ecdh: invalid private key size"u8));
     }
@@ -60,10 +56,9 @@ internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<x25519Curve> Ꮡc,
 }
 
 internal static ж<ΔPublicKey> privateKeyToPublicKey(this ж<x25519Curve> Ꮡc, ж<PrivateKey> Ꮡkey) {
-    ref var c = ref Ꮡc.Value;
     ref var key = ref Ꮡkey.Value;
 
-    if (!AreEqual(key.curve, c)) {
+    if (!AreEqual(key.curve, Ꮡc)) {
         throw panic("crypto/ecdh: internal error: converting the wrong key type");
     }
     var k = Ꮡ(new ΔPublicKey(
@@ -76,8 +71,6 @@ internal static ж<ΔPublicKey> privateKeyToPublicKey(this ж<x25519Curve> Ꮡc,
 }
 
 internal static (ж<ΔPublicKey>, error) NewPublicKey(this ж<x25519Curve> Ꮡc, slice<byte> key) {
-    ref var c = ref Ꮡc.Value;
-
     if (len(key) != x25519PublicKeySize) {
         return (default!, errors.New("crypto/ecdh: invalid public key"u8));
     }

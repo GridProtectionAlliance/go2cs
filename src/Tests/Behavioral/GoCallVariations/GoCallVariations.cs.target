@@ -41,8 +41,6 @@ internal static void Main() {
 }
 
 internal static void bindAdd(ж<accum> Ꮡa) {
-    ref var a = ref Ꮡa.Value;
-
     var add = (nint p1) => Ꮡa.add(p1);
     fmt.Println("bound add:", add(5), add(7));
 }

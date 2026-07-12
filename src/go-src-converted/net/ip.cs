@@ -459,8 +459,6 @@ internal static (IP ip, IPMask m) networkNumberAndMask(ж<IPNet> Ꮡn) {
 
 // Contains reports whether the network includes ip.
 public static bool Contains(this ж<IPNet> Ꮡn, IP ip) {
-    ref var n = ref Ꮡn.Value;
-
     var (nn, m) = networkNumberAndMask(Ꮡn);
     {
         var x = ip.To4(); if (x != default!) {
@@ -491,9 +489,7 @@ public static bool Contains(this ж<IPNet> Ꮡn, IP ip) {
 // character and a mask expressed as hexadecimal form with no
 // punctuation like "198.51.100.0/c000ff00".
 public static @string String(this ж<IPNet> Ꮡn) {
-    ref var n = ref Ꮡn.Value;
-
-    if (n == nil) {
+    if (Ꮡn == nil) {
         return "<nil>"u8;
     }
     var (nn, m) = networkNumberAndMask(Ꮡn);

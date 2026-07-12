@@ -150,8 +150,6 @@ internal static slice<Object> findPath(map<Object, ж<declInfo>> objMap, Object 
 
 // reportCycle reports an error for the given cycle.
 internal static void reportCycle(this ж<Checker> Ꮡcheck, slice<Object> cycle) {
-    ref var check = ref Ꮡcheck.Value;
-
     var obj = cycle[0];
     // report a more concise error for self references
     if (len(cycle) == 1) {
@@ -203,8 +201,6 @@ internal static void reportCycle(this ж<Checker> Ꮡcheck, slice<Object> cycle)
 [GoType("map[ж<graphNode>, bool]")] partial struct nodeSet;
 
 [GoRecv] internal static void add(this ref nodeSet s, ж<graphNode> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     if (s == default!) {
         s = new nodeSet();
     }

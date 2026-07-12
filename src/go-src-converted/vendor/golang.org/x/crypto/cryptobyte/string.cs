@@ -156,8 +156,6 @@ partial class cryptobyte_package {
 // ReadUint8LengthPrefixed reads the content of an 8-bit length-prefixed value
 // into out and advances over it. It reports whether the read was successful.
 [GoRecv] public static bool ReadUint8LengthPrefixed(this ref String s, ж<String> Ꮡout) {
-    ref var @out = ref Ꮡout.Value;
-
     return s.readLengthPrefixed(1, Ꮡout);
 }
 
@@ -165,8 +163,6 @@ partial class cryptobyte_package {
 // length-prefixed value into out and advances over it. It reports whether the
 // read was successful.
 [GoRecv] public static bool ReadUint16LengthPrefixed(this ref String s, ж<String> Ꮡout) {
-    ref var @out = ref Ꮡout.Value;
-
     return s.readLengthPrefixed(2, Ꮡout);
 }
 
@@ -174,8 +170,6 @@ partial class cryptobyte_package {
 // length-prefixed value into out and advances over it. It reports whether
 // the read was successful.
 [GoRecv] public static bool ReadUint24LengthPrefixed(this ref String s, ж<String> Ꮡout) {
-    ref var @out = ref Ꮡout.Value;
-
     return s.readLengthPrefixed(3, Ꮡout);
 }
 

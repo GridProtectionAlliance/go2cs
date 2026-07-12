@@ -22,8 +22,6 @@ partial class types_package {
 // RelativeTo returns a [Qualifier] that fully qualifies members of
 // all packages other than pkg.
 public static Func<ж<Package>, @string> RelativeTo(ж<Package> Ꮡpkg) {
-    ref var pkg = ref Ꮡpkg.DerefOrNil();
-
     if (Ꮡpkg == nil) {
         return default!;
     }
@@ -49,8 +47,6 @@ public static @string TypeString(ΔType typ, Func<ж<Package>, @string> qf) {
 // The [Qualifier] controls the printing of
 // package-level objects, and may be nil.
 public static void WriteType(ж<bytes.Buffer> Ꮡbuf, ΔType typ, Func<ж<Package>, @string> qf) {
-    ref var buf = ref Ꮡbuf.Value;
-
     newTypeWriter(Ꮡbuf, qf).typ(typ);
 }
 
@@ -58,9 +54,6 @@ public static void WriteType(ж<bytes.Buffer> Ꮡbuf, ΔType typ, Func<ж<Packag
 // without a leading "func" keyword. The [Qualifier] controls the printing
 // of package-level objects, and may be nil.
 public static void WriteSignature(ж<bytes.Buffer> Ꮡbuf, ж<ΔSignature> Ꮡsig, Func<ж<Package>, @string> qf) {
-    ref var buf = ref Ꮡbuf.Value;
-    ref var sig = ref Ꮡsig.Value;
-
     newTypeWriter(Ꮡbuf, qf).signature(Ꮡsig);
 }
 
@@ -76,15 +69,10 @@ public static void WriteSignature(ж<bytes.Buffer> Ꮡbuf, ж<ΔSignature> Ꮡsi
 }
 
 internal static ж<typeWriter> newTypeWriter(ж<bytes.Buffer> Ꮡbuf, Func<ж<Package>, @string> qf) {
-    ref var buf = ref Ꮡbuf.Value;
-
     return Ꮡ(new typeWriter(Ꮡbuf, new map<ΔType, bool>(), qf, nil, nil, true, false, false));
 }
 
 internal static ж<typeWriter> newTypeHasher(ж<bytes.Buffer> Ꮡbuf, ж<Context> Ꮡctxt) {
-    ref var buf = ref Ꮡbuf.Value;
-    ref var ctxt = ref Ꮡctxt.DerefOrNil();
-
     assert(Ꮡctxt != nil);
     return Ꮡ(new typeWriter(Ꮡbuf, new map<ΔType, bool>(), default!, Ꮡctxt, nil, false, false, false));
 }

@@ -144,22 +144,16 @@ internal static error convertErr(nint res, bool isFile) {
 
 // SetDeadline sets the read and write deadlines associated with fd.
 public static error SetDeadline(this ж<FD> Ꮡfd, time.Time t) {
-    ref var fd = ref Ꮡfd.Value;
-
     return setDeadlineImpl(Ꮡfd, t, (rune)'r' + (rune)'w');
 }
 
 // SetReadDeadline sets the read deadline associated with fd.
 public static error SetReadDeadline(this ж<FD> Ꮡfd, time.Time t) {
-    ref var fd = ref Ꮡfd.Value;
-
     return setDeadlineImpl(Ꮡfd, t, (rune)'r');
 }
 
 // SetWriteDeadline sets the write deadline associated with fd.
 public static error SetWriteDeadline(this ж<FD> Ꮡfd, time.Time t) {
-    ref var fd = ref Ꮡfd.Value;
-
     return setDeadlineImpl(Ꮡfd, t, (rune)'w');
 }
 

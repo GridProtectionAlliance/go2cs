@@ -271,9 +271,6 @@ public static error AppendSegment(this ж<CoverageDataWriter> Ꮡcfw, map<@strin
 }
 
 internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterVisitor visitor, ж<slicewriter.WriteSeeker> Ꮡws) {
-    ref var cfw = ref Ꮡcfw.Value;
-    ref var ws = ref Ꮡws.Value;
-
     // Notes:
     // - this version writes everything little-endian, which means
     //   a call is needed to encode every value (expensive)

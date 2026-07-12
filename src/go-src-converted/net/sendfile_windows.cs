@@ -25,7 +25,6 @@ internal static (int64 written, error err, bool handled) sendFile(ж<netFD> Ꮡf
     error err = default!;
     bool handled = default!;
 
-    ref var fd = ref Ꮡfd.Value;
     int64 n = 0;     // by default, copy until EOF.
     var (lr, ok) = r._<ж<Δio.LimitedReader>>(ᐧ);
     if (ok) {

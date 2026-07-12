@@ -176,8 +176,6 @@ internal static partial void wintls();
 
 // Stubs so tests can link correctly. These should never be called.
 internal static int32 open(ж<byte> Ꮡname, int32 mode, int32 perm) {
-    ref var name = ref Ꮡname.Value;
-
     @throw("unimplemented"u8);
     return -1;
 }
@@ -734,8 +732,6 @@ internal static void semacreate(ж<m> Ꮡmp) {
 //go:nowritebarrierrec
 //go:nosplit
 internal static void newosproc(ж<m> Ꮡmp) {
-    ref var mp = ref Ꮡmp.Value;
-
     // We pass 0 for the stack size to use the default for this binary.
     var thandle = stdcall6(_CreateThread, 0, 0,
         abi.FuncPCABI0(tstart_stdcall), (uintptr)new @unsafe.Pointer(Ꮡmp),
@@ -763,8 +759,6 @@ internal static void newosproc(ж<m> Ꮡmp) {
 //go:nowritebarrierrec
 //go:nosplit
 internal static void newosproc0(ж<m> Ꮡmp, @unsafe.Pointer stk) {
-    ref var mp = ref Ꮡmp.Value;
-
     // TODO: this is completely broken. The args passed to newosproc0 (in asm_amd64.s)
     // are stacksize and function, not *m and stack.
     // Check os_linux.go for an implementation that might actually work.
@@ -772,8 +766,6 @@ internal static void newosproc0(ж<m> Ꮡmp, @unsafe.Pointer stk) {
 }
 
 internal static void exitThread(ж<atomic.Uint32> Ꮡwait) {
-    ref var wait = ref Ꮡwait.Value;
-
     // We should never reach exitThread on Windows because we let
     // the OS clean up threads.
     @throw("exitThread"u8);
@@ -782,14 +774,10 @@ internal static void exitThread(ж<atomic.Uint32> Ꮡwait) {
 // Called to initialize a new m (including the bootstrap m).
 // Called on the parent thread (main thread in case of bootstrap), can allocate memory.
 internal static void mpreinit(ж<m> Ꮡmp) {
-    ref var mp = ref Ꮡmp.Value;
-
 }
 
 //go:nosplit
 internal static void sigsave(ж<sigset> Ꮡp) {
-    ref var Δp = ref Ꮡp.Value;
-
 }
 
 //go:nosplit
@@ -1113,8 +1101,6 @@ internal static ж<uintptr> Ꮡprofiletimer = new(default(uintptr));
 internal static ref uintptr profiletimer => ref Ꮡprofiletimer.Value;
 
 internal static void profilem(ж<m> Ꮡmp, uintptr thread) {
-    ref var mp = ref Ꮡmp.Value;
-
     // Align Context to 16 bytes.
     ж<context> c = default!;
     ref var cbuf = ref heap(new array<byte>(1247), out var Ꮡcbuf);
@@ -1349,8 +1335,6 @@ internal static void preemptM(ж<m> Ꮡmp) {
 //
 //go:nosplit
 internal static void osPreemptExtEnter(ж<m> Ꮡmp) {
-    ref var mp = ref Ꮡmp.Value;
-
     while (!atomic.Cas(Ꮡmp.of(m.ᏑpreemptExtLock), 0, 1)) {
         // An asynchronous preemption is in progress. It's not
         // safe to enter external code because it may call
@@ -1373,8 +1357,6 @@ internal static void osPreemptExtEnter(ж<m> Ꮡmp) {
 //
 //go:nosplit
 internal static void osPreemptExtExit(ж<m> Ꮡmp) {
-    ref var mp = ref Ꮡmp.Value;
-
     atomic.Store(Ꮡmp.of(m.ᏑpreemptExtLock), 0);
 }
 

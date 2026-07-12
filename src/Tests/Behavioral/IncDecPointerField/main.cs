@@ -14,8 +14,6 @@ partial class main_package {
 }
 
 internal static ж<counter> get(ж<counter> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return Ꮡc;
 }
 

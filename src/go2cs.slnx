@@ -112,6 +112,7 @@
     <Project Path="Tests/Behavioral/CrossPkgLib/CrossPkgLib.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgSameNameAlias/CrossPkgSameNameAlias.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgUser/CrossPkgUser.csproj" />
+    <Project Path="Tests/Behavioral/DeadPointerParamAlias/DeadPointerParamAlias.csproj" />
     <Project Path="Tests/Behavioral/DeferArgEnclosingCapture/DeferArgEnclosingCapture.csproj" />
     <Project Path="Tests/Behavioral/DeferCallOrder/DeferCallOrder.csproj" />
     <Project Path="Tests/Behavioral/DeferClosure/DeferClosure.csproj" />
@@ -289,11 +290,14 @@
     <Project Path="Tests/Behavioral/NestedGenericTypes/NestedGenericTypes.csproj" />
     <Project Path="Tests/Behavioral/NestedLambdaReceiverField/NestedLambdaReceiverField.csproj" />
     <Project Path="Tests/Behavioral/NestedMapAssign/NestedMapAssign.csproj" />
+    <Project Path="Tests/Behavioral/NestedPromotedEmbedInit/NestedPromotedEmbedInit.csproj" />
     <Project Path="Tests/Behavioral/NestedVarShadow/NestedVarShadow.csproj" />
     <Project Path="Tests/Behavioral/NewAnonStructIfaceEmbed/NewAnonStructIfaceEmbed.csproj" />
     <Project Path="Tests/Behavioral/NilMapOperations/NilMapOperations.csproj" />
+    <Project Path="Tests/Behavioral/NilPointerUintptr/NilPointerUintptr.csproj" />
     <Project Path="Tests/Behavioral/PackageShadowParam/PackageShadowParam.csproj" />
     <Project Path="Tests/Behavioral/PackageShadowPointerParam/PackageShadowPointerParam.csproj" />
+    <Project Path="Tests/Behavioral/PackageVarInitOrder/PackageVarInitOrder.csproj" />
     <Project Path="Tests/Behavioral/PanicRecover/PanicRecover.csproj" />
     <Project Path="Tests/Behavioral/PartialRedeclaration/PartialRedeclaration.csproj" />
     <Project Path="Tests/Behavioral/PointerArraySlice/PointerArraySlice.csproj" />
@@ -311,6 +315,7 @@
     <Project Path="Tests/Behavioral/PointerParamCapturedInClosure/PointerParamCapturedInClosure.csproj" />
     <Project Path="Tests/Behavioral/PointerParamInClosure/PointerParamInClosure.csproj" />
     <Project Path="Tests/Behavioral/PointerParamNilWalk/PointerParamNilWalk.csproj" />
+    <Project Path="Tests/Behavioral/PointerReceiverNilCompare/PointerReceiverNilCompare.csproj" />
     <Project Path="Tests/Behavioral/PointerReceiverPointerLocalField/PointerReceiverPointerLocalField.csproj" />
     <Project Path="Tests/Behavioral/PointerRvalueFieldReceiver/PointerRvalueFieldReceiver.csproj" />
     <Project Path="Tests/Behavioral/PointerToPointer/PointerToPointer.csproj" />

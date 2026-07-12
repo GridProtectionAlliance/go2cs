@@ -25,17 +25,12 @@ internal static readonly UntypedInt p384ElementLen = 48;
 
 // One sets e = 1, and returns e.
 public static ж<P384Element> One(this ж<P384Element> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
-
     p384SetOne(Ꮡe.of(P384Element.Ꮡx));
     return Ꮡe;
 }
 
 // Equal returns 1 if e == t, and zero otherwise.
 public static nint Equal(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡt) {
-    ref var e = ref Ꮡe.Value;
-    ref var t = ref Ꮡt.Value;
-
     var eBytes = Ꮡe.Bytes();
     var tBytes = Ꮡt.Bytes();
     return subtle.ConstantTimeCompare(eBytes, tBytes);
@@ -43,8 +38,6 @@ public static nint Equal(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡt) {
 
 // IsZero returns 1 if e == 0, and zero otherwise.
 public static nint IsZero(this ж<P384Element> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
-
     var zero = new slice<byte>(p384ElementLen);
     var eBytes = Ꮡe.Bytes();
     return subtle.ConstantTimeCompare(eBytes, zero);
@@ -61,8 +54,6 @@ public static ж<P384Element> Set(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡ
 
 // Bytes returns the 48-byte big-endian encoding of e.
 public static slice<byte> Bytes(this ж<P384Element> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
-
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(48), out var Ꮡout);
@@ -70,7 +61,6 @@ public static slice<byte> Bytes(this ж<P384Element> Ꮡe) {
 }
 
 internal static slice<byte> bytes(this ж<P384Element> Ꮡe, ж<array<byte>> Ꮡout) {
-    ref var e = ref Ꮡe.Value;
     ref var @out = ref Ꮡout.Value;
 
     ref var tmp = ref heap(new p384NonMontgomeryDomainFieldElement(), out var Ꮡtmp);
@@ -84,8 +74,6 @@ internal static slice<byte> bytes(this ж<P384Element> Ꮡe, ж<array<byte>> Ꮡ
 // If v is not 48 bytes or it encodes a value higher than 2^384 - 2^128 - 2^96 + 2^32 - 1,
 // SetBytes returns nil and an error, and e is unchanged.
 public static (ж<P384Element>, error) SetBytes(this ж<P384Element> Ꮡe, slice<byte> v) {
-    ref var e = ref Ꮡe.Value;
-
     if (len(v) != p384ElementLen) {
         return (default!, errors.New("invalid P384Element encoding"u8));
     }
@@ -112,49 +100,30 @@ public static (ж<P384Element>, error) SetBytes(this ж<P384Element> Ꮡe, slice
 
 // Add sets e = t1 + t2, and returns e.
 public static ж<P384Element> Add(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) {
-    ref var e = ref Ꮡe.Value;
-    ref var t1 = ref Ꮡt1.Value;
-    ref var t2 = ref Ꮡt2.Value;
-
     p384Add(Ꮡe.of(P384Element.Ꮡx), Ꮡt1.of(P384Element.Ꮡx), Ꮡt2.of(P384Element.Ꮡx));
     return Ꮡe;
 }
 
 // Sub sets e = t1 - t2, and returns e.
 public static ж<P384Element> Sub(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) {
-    ref var e = ref Ꮡe.Value;
-    ref var t1 = ref Ꮡt1.Value;
-    ref var t2 = ref Ꮡt2.Value;
-
     p384Sub(Ꮡe.of(P384Element.Ꮡx), Ꮡt1.of(P384Element.Ꮡx), Ꮡt2.of(P384Element.Ꮡx));
     return Ꮡe;
 }
 
 // Mul sets e = t1 * t2, and returns e.
 public static ж<P384Element> Mul(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) {
-    ref var e = ref Ꮡe.Value;
-    ref var t1 = ref Ꮡt1.Value;
-    ref var t2 = ref Ꮡt2.Value;
-
     p384Mul(Ꮡe.of(P384Element.Ꮡx), Ꮡt1.of(P384Element.Ꮡx), Ꮡt2.of(P384Element.Ꮡx));
     return Ꮡe;
 }
 
 // Square sets e = t * t, and returns e.
 public static ж<P384Element> Square(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡt) {
-    ref var e = ref Ꮡe.Value;
-    ref var t = ref Ꮡt.Value;
-
     p384Square(Ꮡe.of(P384Element.Ꮡx), Ꮡt.of(P384Element.Ꮡx));
     return Ꮡe;
 }
 
 // Select sets v to a if cond == 1, and to b if cond == 0.
 public static ж<P384Element> Select(this ж<P384Element> Ꮡv, ж<P384Element> Ꮡa, ж<P384Element> Ꮡb, nint cond) {
-    ref var v = ref Ꮡv.Value;
-    ref var a = ref Ꮡa.Value;
-    ref var b = ref Ꮡb.Value;
-
     p384Selectznz(Ꮡ((Ꮡv.of(P384Element.Ꮡx)).Value.Value), ((p384Uint1)(uint64)cond),
         Ꮡ((Ꮡb.of(P384Element.Ꮡx)).Value.Value), Ꮡ((Ꮡa.of(P384Element.Ꮡx)).Value.Value));
     return Ꮡv;

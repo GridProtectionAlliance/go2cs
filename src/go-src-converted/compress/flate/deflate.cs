@@ -707,7 +707,6 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> data) 
     nint n = default!;
     error err = default!;
 
-    ref var w = ref Ꮡw.Value;
     return Ꮡw.of(Writer.Ꮡd).write(data);
 }
 
@@ -721,8 +720,6 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> data) 
 //
 // In the terminology of the zlib library, Flush is equivalent to Z_SYNC_FLUSH.
 public static error Flush(this ж<Writer> Ꮡw) {
-    ref var w = ref Ꮡw.Value;
-
     // For more about flushing:
     // https://www.bolet.org/~pornin/deflate-flush.html
     return Ꮡw.of(Writer.Ꮡd).syncFlush();
@@ -730,8 +727,6 @@ public static error Flush(this ж<Writer> Ꮡw) {
 
 // Close flushes and closes the writer.
 public static error Close(this ж<Writer> Ꮡw) {
-    ref var w = ref Ꮡw.Value;
-
     return Ꮡw.of(Writer.Ꮡd).close();
 }
 

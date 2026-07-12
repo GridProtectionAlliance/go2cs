@@ -72,11 +72,14 @@ partial class os_package {
 // Note that the Go runtime writes to standard error for panics and crashes;
 // closing Stderr may cause those messages to go elsewhere, perhaps
 // to a file opened later.
-public static ж<File> Stdin = NewFile((uintptr)syscall.Stdin, "/dev/stdin"u8);
+public static ж<File> Stdin;
+internal static void initᴛStdin() { Stdin = NewFile((uintptr)syscall.Stdin, "/dev/stdin"u8); }
 
-public static ж<File> Stdout = NewFile((uintptr)syscall.Stdout, "/dev/stdout"u8);
+public static ж<File> Stdout;
+internal static void initᴛStdout() { Stdout = NewFile((uintptr)syscall.Stdout, "/dev/stdout"u8); }
 
-public static ж<File> Stderr = NewFile((uintptr)syscall.Stderr, "/dev/stderr"u8);
+public static ж<File> Stderr;
+internal static void initᴛStderr() { Stderr = NewFile((uintptr)syscall.Stderr, "/dev/stderr"u8); }
 
 // Flags to OpenFile wrapping those of the underlying system. Not all
 // flags may be implemented on a given system.
@@ -208,8 +211,6 @@ internal static (int64, error) ReadFrom(this noReadFrom _Δp0, Δio.Reader _Δp1
 }
 
 internal static (int64, error) genericReadFrom(ж<File> Ꮡf, Δio.Reader r) {
-    ref var f = ref Ꮡf.Value;
-
     return Δio.Copy(new fileWithoutReadFrom(File: Ꮡf), r);
 }
 
@@ -316,8 +317,6 @@ internal static (int64, error) WriteTo(this noWriteTo _Δp0, Δio.Writer _Δp1) 
 }
 
 internal static (int64, error) genericWriteTo(ж<File> Ꮡf, Δio.Writer w) {
-    ref var f = ref Ꮡf.Value;
-
     return Δio.Copy(w, new fileWithoutWriteTo(File: Ꮡf));
 }
 
@@ -352,7 +351,6 @@ public static (nint n, error err) WriteString(this ж<File> Ꮡf, @string s) {
     nint n = default!;
     error err = default!;
 
-    ref var f = ref Ꮡf.Value;
     var b = @unsafe.Slice(@unsafe.StringData(s), len(s));
     return Ꮡf.Write(b);
 }
@@ -454,7 +452,8 @@ internal static (ж<File>, error) openDir(@string name) {
 }
 
 // lstat is overridden in tests.
-internal static Func<@string, (FileInfo, error)> lstat = Lstat;
+internal static Func<@string, (FileInfo, error)> lstat;
+internal static void initᴛlstat() { lstat = Lstat; }
 
 // Rename renames (moves) oldpath to newpath.
 // If newpath already exists and is not a directory, Rename replaces it.
@@ -679,8 +678,6 @@ public static error Chmod(@string name, FileMode mode) {
 // Chmod changes the mode of the file to mode.
 // If there is an error, it will be of type *PathError.
 public static error Chmod(this ж<File> Ꮡf, FileMode mode) {
-    ref var f = ref Ꮡf.Value;
-
     return Ꮡf.chmod(mode);
 }
 
@@ -709,8 +706,6 @@ public static error Chmod(this ж<File> Ꮡf, FileMode mode) {
 //
 // A zero value for t means I/O operations will not time out.
 public static error SetDeadline(this ж<File> Ꮡf, time.Time t) {
-    ref var f = ref Ꮡf.Value;
-
     return Ꮡf.setDeadline(t);
 }
 
@@ -719,8 +714,6 @@ public static error SetDeadline(this ж<File> Ꮡf, time.Time t) {
 // A zero value for t means Read will not time out.
 // Not all files support setting deadlines; see SetDeadline.
 public static error SetReadDeadline(this ж<File> Ꮡf, time.Time t) {
-    ref var f = ref Ꮡf.Value;
-
     return Ꮡf.setReadDeadline(t);
 }
 
@@ -731,16 +724,12 @@ public static error SetReadDeadline(this ж<File> Ꮡf, time.Time t) {
 // A zero value for t means Write will not time out.
 // Not all files support setting deadlines; see SetDeadline.
 public static error SetWriteDeadline(this ж<File> Ꮡf, time.Time t) {
-    ref var f = ref Ꮡf.Value;
-
     return Ꮡf.setWriteDeadline(t);
 }
 
 // SyscallConn returns a raw file.
 // This implements the syscall.Conn interface.
 public static (syscall.RawConn, error) SyscallConn(this ж<File> Ꮡf) {
-    ref var f = ref Ꮡf.Value;
-
     {
         var err = Ꮡf.checkValid("SyscallConn"u8); if (err != default!) {
             return (default!, err);

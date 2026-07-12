@@ -228,8 +228,6 @@ internal static slice<ж<ΔCookie>> readSetCookies(ΔHeader h) {
 // The provided cookie must have a valid Name. Invalid cookies may be
 // silently dropped.
 public static void SetCookie(ResponseWriter w, ж<ΔCookie> Ꮡcookie) {
-    ref var cookie = ref Ꮡcookie.Value;
-
     {
         @string v = Ꮡcookie.String(); if (v != ""u8) {
             w.Header().Add("Set-Cookie"u8, v);
@@ -244,7 +242,7 @@ public static void SetCookie(ResponseWriter w, ж<ΔCookie> Ꮡcookie) {
 public static @string String(this ж<ΔCookie> Ꮡc) {
     ref var c = ref Ꮡc.Value;
 
-    if (c == nil || !isCookieNameValid(c.Name)) {
+    if (Ꮡc == nil || !isCookieNameValid(c.Name)) {
         return ""u8;
     }
     // extraCookieLength derived from typical length of cookie attributes
@@ -317,7 +315,7 @@ public static @string String(this ж<ΔCookie> Ꮡc) {
 public static error Valid(this ж<ΔCookie> Ꮡc) {
     ref var c = ref Ꮡc.Value;
 
-    if (c == nil) {
+    if (Ꮡc == nil) {
         return errors.New("http: nil Cookie"u8);
     }
     if (!isCookieNameValid(c.Name)) {

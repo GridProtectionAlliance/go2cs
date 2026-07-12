@@ -40,10 +40,6 @@ internal static void Main() {
 }
 
 internal static nint pairTotal(ж<box> Ꮡp, ж<box> Ꮡq, ж<box> Ꮡr) {
-    ref var p = ref Ꮡp.Value;
-    ref var q = ref Ꮡq.Value;
-    ref var r = ref Ꮡr.Value;
-
     return total(Ꮡp, Ꮡq, Ꮡr);
 }
 

@@ -76,8 +76,6 @@ public static (ж<Group>, error) LookupGroupId(@string gid) {
 
 // GroupIds returns the list of group IDs that the user is a member of.
 public static (slice<@string>, error) GroupIds(this ж<User> Ꮡu) {
-    ref var u = ref Ꮡu.Value;
-
     return listGroups(Ꮡu);
 }
 

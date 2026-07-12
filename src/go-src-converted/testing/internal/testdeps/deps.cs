@@ -82,26 +82,18 @@ public static @string ImportPath(this TestDeps _) {
 }
 
 internal static void Getenv(this ж<testLog> Ꮡl, @string key) {
-    ref var l = ref Ꮡl.Value;
-
     Ꮡl.add("getenv"u8, key);
 }
 
 internal static void Open(this ж<testLog> Ꮡl, @string name) {
-    ref var l = ref Ꮡl.Value;
-
     Ꮡl.add("open"u8, name);
 }
 
 internal static void Stat(this ж<testLog> Ꮡl, @string name) {
-    ref var l = ref Ꮡl.Value;
-
     Ꮡl.add("stat"u8, name);
 }
 
 internal static void Chdir(this ж<testLog> Ꮡl, @string name) {
-    ref var l = ref Ꮡl.Value;
-
     Ꮡl.add("chdir"u8, name);
 }
 

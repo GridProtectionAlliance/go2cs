@@ -112,8 +112,6 @@ internal static @string String(this unifyMode m) {
 // As a side-effect, types may be inferred for type parameters.
 // The mode parameter controls how types are compared.
 internal static bool unify(this ж<unifier> Ꮡu, ΔType x, ΔType y, unifyMode mode) {
-    ref var u = ref Ꮡu.Value;
-
     return Ꮡu.nify(x, y, mode, nil);
 }
 
@@ -221,9 +219,6 @@ internal static void Swap(this typeParamsById s, nint i, nint j) {
 // setHandle sets the handle for type parameter x
 // (and all its joined type parameters) to h.
 [GoRecv] internal static void setHandle(this ref unifier u, ж<TypeParam> Ꮡx, ж<ΔType> Ꮡh) {
-    ref var x = ref Ꮡx.Value;
-    ref var h = ref Ꮡh.Value;
-
     var hx = u.handles[Ꮡx];
     assert(hx != nil);
     foreach (var (y, hy) in u.handles) {
@@ -235,8 +230,6 @@ internal static void Swap(this typeParamsById s, nint i, nint j) {
 
 // at returns the (possibly nil) type for type parameter x.
 [GoRecv] internal static ΔType at(this ref unifier u, ж<TypeParam> Ꮡx) {
-    ref var x = ref Ꮡx.Value;
-
     return u.handles[Ꮡx].ValueSlot;
 }
 

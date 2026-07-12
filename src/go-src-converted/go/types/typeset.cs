@@ -69,8 +69,6 @@ partial class types_package {
 
 // LookupMethod returns the index of and method with matching package and name, or (-1, nil).
 [GoRecv] internal static (nint, ж<Func>) LookupMethod(this ref _TypeSet s, ж<Package> Ꮡpkg, @string name, bool foldCase) {
-    ref var pkg = ref Ꮡpkg.Value;
-
     return methodIndex(s.methods, Ꮡpkg, name, foldCase);
 }
 
@@ -167,8 +165,9 @@ partial class types_package {
 }
 
 // topTypeSet may be used as type set for the empty interface.
-internal static ж<_TypeSet> ᏑtopTypeSet = new(new _TypeSet(terms: allTermlist));
+internal static ж<_TypeSet> ᏑtopTypeSet = new(default(_TypeSet));
 internal static ref _TypeSet topTypeSet => ref ᏑtopTypeSet.Value;
+internal static void initᴛtopTypeSet() { topTypeSet = new _TypeSet(terms: allTermlist); }
 
 // computeInterfaceTypeSet may be called with check == nil.
 internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, tokenꓸPos pos, ж<Interface> Ꮡityp) => func((defer, recover) => {
@@ -428,7 +427,6 @@ internal static ref _TypeSet invalidTypeSet => ref ᏑinvalidTypeSet.Value;
 // computeUnionTypeSet may be called with check == nil.
 // The result is &invalidTypeSet if the union overflows.
 internal static ж<_TypeSet> computeUnionTypeSet(ж<Checker> Ꮡcheck, map<ж<Union>, ж<_TypeSet>> unionSets, tokenꓸPos pos, ж<Union> Ꮡutyp) {
-    ref var check = ref Ꮡcheck.DerefOrNil();
     ref var utyp = ref Ꮡutyp.Value;
 
     {

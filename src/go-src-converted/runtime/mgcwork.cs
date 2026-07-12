@@ -16,7 +16,7 @@ partial class runtime_package {
 internal static readonly UntypedInt _WorkbufSize = 2048; // in bytes; larger values result in less contention
 internal static readonly UntypedInt workbufAlloc = /* 32 << 10 */ 32768;
 
-[GoInit] internal static void initΔ3() {
+/* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void initΔ3() {
     if (workbufAlloc % pageSize != 0 || workbufAlloc % _WorkbufSize != 0) {
         @throw("bad workbufAlloc"u8);
     }

@@ -494,8 +494,6 @@ internal static void handlePanic(this ж<Writer> Ꮡb, ж<error> Ꮡerr, @string
 // incomplete escape sequence at the end is considered
 // complete for formatting purposes.
 public static error Flush(this ж<Writer> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     return Ꮡb.flush();
 }
 

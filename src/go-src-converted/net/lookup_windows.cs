@@ -95,8 +95,6 @@ internal static (nint, error) lookupProtocol(context.Context ctx, @string name) 
 }
 
 internal static (slice<@string>, error) lookupHost(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
-    ref var r = ref Ꮡr.Value;
-
     var (ips, err) = Ꮡr.lookupIP(ctx, "ip"u8, name);
     if (err != default!) {
         return (default!, err);
@@ -117,8 +115,6 @@ internal static (slice<@string>, error) lookupHost(this ж<Resolver> Ꮡr, conte
 }
 
 internal static (slice<IPAddr>, error) lookupIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string name) {
-    ref var r = ref Ꮡr.Value;
-
     {
         var (order, conf) = systemConf().hostLookupOrder(Ꮡr, name); if (order != hostLookupCgo) {
             return Ꮡr.goLookupIP(ctx, network, name, order, conf);
@@ -223,8 +219,6 @@ internal static (slice<IPAddr>, error) lookupIP(this ж<Resolver> Ꮡr, context.
 }
 
 internal static (nint, error) lookupPort(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string service) => func<(nint, error)>((defer, recover) => {
-    ref var r = ref Ꮡr.Value;
-
     if (systemConf().mustUseGoResolver(Ꮡr)) {
         return lookupPortMap(network, service);
     }
@@ -302,8 +296,6 @@ Err: "unknown network"u8, Name: network + "/"u8 + service))));
 });
 
 internal static (@string, error) lookupCNAME(this ж<Resolver> Ꮡr, context.Context ctx, @string name) => func<(@string, error)>((defer, recover) => {
-    ref var r = ref Ꮡr.Value;
-
     {
         var (order, conf) = systemConf().hostLookupOrder(Ꮡr, name); if (order != hostLookupCgo) {
             return Ꮡr.goLookupCNAME(ctx, name, order, conf);
@@ -339,8 +331,6 @@ internal static (@string, error) lookupCNAME(this ж<Resolver> Ꮡr, context.Con
 });
 
 internal static (@string, slice<ж<SRV>>, error) lookupSRV(this ж<Resolver> Ꮡr, context.Context ctx, @string service, @string proto, @string name) => func<(@string, slice<ж<SRV>>, error)>((defer, recover) => {
-    ref var r = ref Ꮡr.Value;
-
     if (systemConf().mustUseGoResolver(Ꮡr)) {
         return Ꮡr.goLookupSRV(ctx, service, proto, name);
     }
@@ -377,8 +367,6 @@ internal static (@string, slice<ж<SRV>>, error) lookupSRV(this ж<Resolver> Ꮡ
 });
 
 internal static (slice<ж<MX>>, error) lookupMX(this ж<Resolver> Ꮡr, context.Context ctx, @string name) => func<(slice<ж<MX>>, error)>((defer, recover) => {
-    ref var r = ref Ꮡr.Value;
-
     if (systemConf().mustUseGoResolver(Ꮡr)) {
         return Ꮡr.goLookupMX(ctx, name);
     }
@@ -409,8 +397,6 @@ internal static (slice<ж<MX>>, error) lookupMX(this ж<Resolver> Ꮡr, context.
 });
 
 internal static (slice<ж<NS>>, error) lookupNS(this ж<Resolver> Ꮡr, context.Context ctx, @string name) => func<(slice<ж<NS>>, error)>((defer, recover) => {
-    ref var r = ref Ꮡr.Value;
-
     if (systemConf().mustUseGoResolver(Ꮡr)) {
         return Ꮡr.goLookupNS(ctx, name);
     }
@@ -440,8 +426,6 @@ internal static (slice<ж<NS>>, error) lookupNS(this ж<Resolver> Ꮡr, context.
 });
 
 internal static unsafe (slice<@string>, error) lookupTXT(this ж<Resolver> Ꮡr, context.Context ctx, @string name) => func<(slice<@string>, error)>((defer, recover) => {
-    ref var r = ref Ꮡr.Value;
-
     if (systemConf().mustUseGoResolver(Ꮡr)) {
         return Ꮡr.goLookupTXT(ctx, name);
     }
@@ -475,8 +459,6 @@ internal static unsafe (slice<@string>, error) lookupTXT(this ж<Resolver> Ꮡr,
 });
 
 internal static (slice<@string>, error) lookupAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string addr) => func<(slice<@string>, error)>((defer, recover) => {
-    ref var r = ref Ꮡr.Value;
-
     {
         var (order, conf) = systemConf().addrLookupOrder(Ꮡr, addr); if (order != hostLookupCgo) {
             return Ꮡr.goLookupPTR(ctx, addr, order, conf);
@@ -515,8 +497,6 @@ internal static readonly UntypedInt dnsSectionMask = 0x0003;
 
 // returns only results applicable to name and resolves CNAME entries.
 internal static slice<ж<syscall.DNSRecord>> validRecs(ж<syscall.DNSRecord> Ꮡr, uint16 dnstype, @string name) {
-    ref var r = ref Ꮡr.Value;
-
     var cname = syscall.StringToUTF16Ptr(name);
     if (dnstype != syscall.DNS_TYPE_CNAME) {
         cname = resolveCNAME(cname, Ꮡr);
@@ -541,7 +521,6 @@ internal static slice<ж<syscall.DNSRecord>> validRecs(ж<syscall.DNSRecord> Ꮡ
 // returns the last CNAME in chain.
 internal static ж<uint16> resolveCNAME(ж<uint16> Ꮡname, ж<syscall.DNSRecord> Ꮡr) {
     ref var name = ref Ꮡname.Value;
-    ref var r = ref Ꮡr.Value;
 
     // limit cname resolving to 10 in case of an infinite CNAME loop
 Cname:

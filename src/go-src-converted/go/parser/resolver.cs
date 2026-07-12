@@ -267,16 +267,12 @@ internal static ж<ast.Object> unresolved = @new<ast.Object>();
 }
 
 internal static void walkExprs(this ж<resolver> Ꮡr, slice<ast.Expr> list) {
-    ref var r = ref Ꮡr.Value;
-
     foreach (var (_, node) in list) {
         ast.Walk(new resolverжVisitor(Ꮡr), node);
     }
 }
 
 internal static void walkLHS(this ж<resolver> Ꮡr, slice<ast.Expr> list) {
-    ref var r = ref Ꮡr.Value;
-
     foreach (var (_, expr) in list) {
         var exprΔ1 = ast.Unparen(expr);
         {
@@ -288,8 +284,6 @@ internal static void walkLHS(this ж<resolver> Ꮡr, slice<ast.Expr> list) {
 }
 
 internal static void walkStmts(this ж<resolver> Ꮡr, slice<ast.Stmt> list) {
-    ref var r = ref Ꮡr.Value;
-
     foreach (var (_, stmt) in list) {
         ast.Walk(new resolverжVisitor(Ꮡr), stmt);
     }
@@ -595,7 +589,6 @@ internal static void walkFuncType(this ж<resolver> Ꮡr, ж<ast.FuncType> Ꮡty
 }
 
 internal static void resolveList(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡlist) {
-    ref var r = ref Ꮡr.Value;
     ref var list = ref Ꮡlist.DerefOrNil();
 
     if (Ꮡlist == nil) {
@@ -680,7 +673,6 @@ internal static void walkRecv(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv)
 
 internal static void walkFieldList(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡlist, ast.ObjKind kind) {
     ref var r = ref Ꮡr.Value;
-    ref var list = ref Ꮡlist.DerefOrNil();
 
     if (Ꮡlist == nil) {
         return;
@@ -694,7 +686,6 @@ internal static void walkFieldList(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡ
 // Type.
 internal static void walkTParams(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡlist) {
     ref var r = ref Ꮡr.Value;
-    ref var list = ref Ꮡlist.Value;
 
     r.declareList(Ꮡlist, ast.Typ);
     Ꮡr.resolveList(Ꮡlist);

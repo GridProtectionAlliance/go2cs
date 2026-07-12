@@ -19,7 +19,6 @@ partial class comment_package {
 // HTML returns an HTML formatting of the [Doc].
 // See the [Printer] documentation for ways to customize the HTML output.
 public static slice<byte> HTML(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
-    ref var p = ref Ꮡp.Value;
     ref var d = ref Ꮡd.Value;
 
     var hp = Ꮡ(new htmlPrinter(Printer: Ꮡp));

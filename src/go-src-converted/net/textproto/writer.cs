@@ -19,8 +19,6 @@ partial class textproto_package {
 
 // NewWriter returns a new [Writer] writing to w.
 public static ж<Writer> NewWriter(ж<bufio.Writer> Ꮡw) {
-    ref var w = ref Ꮡw.Value;
-
     return Ꮡ(new Writer(W: Ꮡw));
 }
 

@@ -163,14 +163,10 @@ public static (fs.FS, error) Sub(this MapFS fsys, @string dir) {
 }
 
 internal static (fs.FileInfo, error) Info(this ж<mapFileInfo> Ꮡi) {
-    ref var i = ref Ꮡi.Value;
-
     return (new mapFileInfoжFileInfo(Ꮡi), default!);
 }
 
 internal static @string String(this ж<mapFileInfo> Ꮡi) {
-    ref var i = ref Ꮡi.Value;
-
     return fs.FormatFileInfo(new mapFileInfoжFileInfo(Ꮡi));
 }
 
@@ -182,8 +178,6 @@ internal static @string String(this ж<mapFileInfo> Ꮡi) {
 }
 
 internal static (fs.FileInfo, error) Stat(this ж<openMapFile> Ꮡf) {
-    ref var f = ref Ꮡf.Value;
-
     return (new mapFileInfoжFileInfo(Ꮡf.of(openMapFile.ᏑmapFileInfo)), default!);
 }
 
@@ -245,8 +239,6 @@ internal static (fs.FileInfo, error) Stat(this ж<openMapFile> Ꮡf) {
 }
 
 internal static (fs.FileInfo, error) Stat(this ж<mapDir> Ꮡd) {
-    ref var d = ref Ꮡd.Value;
-
     return (new mapFileInfoжFileInfo(Ꮡd.of(mapDir.ᏑmapFileInfo)), default!);
 }
 

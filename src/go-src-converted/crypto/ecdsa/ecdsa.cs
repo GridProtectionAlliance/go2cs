@@ -132,8 +132,6 @@ internal static ecdhꓸCurve curveToECDH(elliptic.Curve c) {
 
 // Public returns the public key corresponding to priv.
 public static cryptoꓸPublicKey Public(this ж<PrivateKey> Ꮡpriv) {
-    ref var priv = ref Ꮡpriv.Value;
-
     return Ꮡpriv.of(PrivateKey.ᏑPublicKey);
 }
 
@@ -165,8 +163,6 @@ internal static bool bigIntEqual(ж<bigꓸInt> Ꮡa, ж<bigꓸInt> Ꮡb) {
 // where the private part is kept in, for example, a hardware module. Common
 // uses can use the [SignASN1] function in this package directly.
 public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) {
-    ref var priv = ref Ꮡpriv.Value;
-
     return SignASN1(rand, Ꮡpriv, digest);
 }
 
@@ -411,7 +407,6 @@ internal static void inverse<Point>(ж<nistCurve<Point>> Ꮡc, ж<bigmodꓸNat> 
     where Point : nistPoint<Point>
 {
     ref var c = ref Ꮡc.Value;
-    ref var kInv = ref ᏑkInv.Value;
     ref var k = ref Ꮡk.Value;
 
     if ((~c.curve.Params()).Name == "P-256"u8) {
@@ -436,7 +431,6 @@ internal static void hashToNat<Point>(ж<nistCurve<Point>> Ꮡc, ж<bigmodꓸNat
     where Point : nistPoint<Point>
 {
     ref var c = ref Ꮡc.Value;
-    ref var e = ref Ꮡe.Value;
 
     // ECDSA asks us to take the left-most log2(N) bits of hash, and use them as
     // an integer modulo N. This is the absolute worst of all worlds: we still

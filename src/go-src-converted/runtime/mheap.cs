@@ -297,8 +297,6 @@ internal static slice<@string> mSpanStateNames = new @string[]{
 
 //go:nosplit
 internal static void set(this ж<mSpanStateBox> Ꮡb, mSpanState s) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.of(mSpanStateBox.Ꮡs).Store((uint8)s);
 }
 
@@ -307,8 +305,6 @@ internal static void set(this ж<mSpanStateBox> Ꮡb, mSpanState s) {
 
 //go:nosplit
 internal static mSpanState get(this ж<mSpanStateBox> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     return ((mSpanState)Ꮡb.of(mSpanStateBox.Ꮡs).Load());
 }
 
@@ -858,8 +854,6 @@ internal static bool manual(this spanAllocType s) {
 // Returns a span that has been fully initialized. span.needzero indicates
 // whether the span has been zeroed. Note that it may not be.
 internal static ж<mspan> alloc(this ж<mheap> Ꮡh, uintptr npages, spanClass spanclass) {
-    ref var h = ref Ꮡh.Value;
-
     // Don't do any operations that lock the heap on the G stack.
     // It might trigger stack growth, and the stack growth code needs
     // to be able to allocate heap.
@@ -893,8 +887,6 @@ internal static ж<mspan> alloc(this ж<mheap> Ꮡh, uintptr npages, spanClass s
 //
 //go:systemstack
 internal static ж<mspan> allocManual(this ж<mheap> Ꮡh, uintptr npages, spanAllocType typ) {
-    ref var h = ref Ꮡh.Value;
-
     if (!typ.manual()) {
         @throw("manual span allocation called with non-manually-managed type"u8);
     }
@@ -904,8 +896,6 @@ internal static ж<mspan> allocManual(this ж<mheap> Ꮡh, uintptr npages, spanA
 // setSpans modifies the span map so [spanOf(base), spanOf(base+npage*pageSize))
 // is s.
 [GoRecv] internal static void setSpans(this ref mheap h, uintptr @base, uintptr npage, ж<mspan> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     var Δp = @base / (uintptr)pageSize;
     arenaIdx ai = arenaIndex(@base);
     var ha = h.arenas[(nint)(ai.l1())].Value[ai.l2()];
@@ -1051,7 +1041,6 @@ internal static ж<mspan> allocMSpanLocked(this ж<mheap> Ꮡh) {
 //go:systemstack
 internal static void freeMSpanLocked(this ж<mheap> Ꮡh, ж<mspan> Ꮡs) {
     ref var h = ref Ꮡh.Value;
-    ref var s = ref Ꮡs.Value;
 
     assertLockHeld(Ꮡh.of(mheap.Ꮡlock));
     var pp = (~(~getg()).m).p.ptr();
@@ -1463,9 +1452,6 @@ internal static (uintptr, bool) grow(this ж<mheap> Ꮡh, uintptr npage) {
 
 // Free the span back into the heap.
 internal static void freeSpan(this ж<mheap> Ꮡh, ж<mspan> Ꮡs) {
-    ref var h = ref Ꮡh.Value;
-    ref var s = ref Ꮡs.Value;
-
     systemstack(() => {
         // Trace the span free.
         if (traceAllocFreeEnabled()) {
@@ -1506,7 +1492,6 @@ internal static void freeSpan(this ж<mheap> Ꮡh, ж<mspan> Ꮡs) {
 //
 //go:systemstack
 internal static void freeManual(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ) {
-    ref var h = ref Ꮡh.Value;
     ref var s = ref Ꮡs.Value;
 
     // Trace the span free.
@@ -1591,8 +1576,6 @@ internal static void freeSpanLocked(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAll
 //
 //go:systemstack
 internal static void scavengeAll(this ж<mheap> Ꮡh) {
-    ref var h = ref Ꮡh.Value;
-
     // Disallow malloc or panic while holding the heap lock. We do
     // this here because this is a non-mallocgc entry-point to
     // the mheap API.
@@ -1848,8 +1831,6 @@ internal static ж<special> removespecial(@unsafe.Pointer Δp, uint8 kind) {
 // record. Returns a pointer to the next-reference in the list predecessor.
 // Returns true, if the referenced item is an exact match.
 internal static (ж<ж<special>>, bool) specialFindSplicePoint(this ж<mspan> Ꮡspan, uintptr offset, byte kind) {
-    ref var span = ref Ꮡspan.Value;
-
     // Find splice point, check for existing record.
     var iter = Ꮡspan.of(mspan.Ꮡspecials);
     var found = false;
@@ -1885,7 +1866,6 @@ internal static (ж<ж<special>>, bool) specialFindSplicePoint(this ж<mspan> �
 
 // Adds a finalizer to the object p. Returns true if it succeeded.
 internal static bool addfinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡf, uintptr nret, ж<_type> Ꮡfint, ж<ptrtype> Ꮡot) {
-    ref var f = ref Ꮡf.Value;
     ref var fint = ref Ꮡfint.Value;
     ref var ot = ref Ꮡot.Value;
 
@@ -2194,8 +2174,6 @@ internal static void freeSpecial(ж<special> Ꮡs, @unsafe.Pointer Δp, uintptr 
 
 // bytep returns a pointer to the n'th byte of b.
 internal static ж<uint8> bytep(this ж<gcBits> Ꮡb, uintptr n) {
-    ref var b = ref Ꮡb.Value;
-
     return addb(Ꮡb.of(gcBits.Ꮡx), n);
 }
 
@@ -2205,7 +2183,6 @@ internal static (ж<uint8> bytep, uint8 mask) bitp(this ж<gcBits> Ꮡb, uintptr
     ж<uint8> bytep = default!;
     uint8 mask = default!;
 
-    ref var b = ref Ꮡb.Value;
     return (Ꮡb.bytep(n / 8), (uint8)(1 << (int)((n % 8))));
 }
 
@@ -2242,7 +2219,7 @@ internal static ref gcBitsArenasᴛ1 gcBitsArenas => ref ᏑgcBitsArenas.Value;
 internal static ж<gcBits> tryAlloc(this ж<gcBitsArena> Ꮡb, uintptr bytes) {
     ref var b = ref Ꮡb.Value;
 
-    if (b == nil || atomic.Loaduintptr(Ꮡb.of(gcBitsArena.Ꮡfree)) + bytes > (uintptr)len(b.bits)) {
+    if (Ꮡb == nil || atomic.Loaduintptr(Ꮡb.of(gcBitsArena.Ꮡfree)) + bytes > (uintptr)len(b.bits)) {
         return default!;
     }
     // Try to allocate from this block.

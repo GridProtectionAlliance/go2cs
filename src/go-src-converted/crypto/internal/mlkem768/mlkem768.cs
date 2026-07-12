@@ -102,8 +102,6 @@ public static (ж<DecapsulationKey>, error) GenerateKey() {
 }
 
 internal static (ж<DecapsulationKey>, error) generateKey(ж<DecapsulationKey> Ꮡdk) {
-    ref var dk = ref Ꮡdk.Value;
-
     ref var d = ref heap(new array<byte>(32), out var Ꮡd);
     {
         var (_, err) = rand.Read(d[..]); if (err != default!) {
@@ -128,8 +126,6 @@ public static (ж<DecapsulationKey>, error) NewKeyFromSeed(slice<byte> seed) {
 }
 
 internal static (ж<DecapsulationKey>, error) newKeyFromSeed(ж<DecapsulationKey> Ꮡdk, slice<byte> seed) {
-    ref var dk = ref Ꮡdk.Value;
-
     if (len(seed) != SeedSize) {
         return (default!, errors.New("mlkem768: invalid seed length"u8));
     }
@@ -256,7 +252,6 @@ internal static (slice<byte> ciphertext, slice<byte> sharedKey, error err) encap
     slice<byte> sharedKey = default!;
     error err = default!;
 
-    ref var cc = ref Ꮡcc.Value;
     if (len(encapsulationKey) != EncapsulationKeySize) {
         return (default!, default!, errors.New("mlkem768: invalid encapsulation key length"u8));
     }
@@ -335,7 +330,6 @@ internal static error parseEK(ж<encryptionKey> Ꮡex, slice<byte> ekPKE) {
 internal static slice<byte> pkeEncrypt(ж<array<byte>> Ꮡcc, ж<encryptionKey> Ꮡex, ж<array<byte>> Ꮡm, slice<byte> rnd) {
     ref var cc = ref Ꮡcc.Value;
     ref var ex = ref Ꮡex.Value;
-    ref var m = ref Ꮡm.Value;
 
     byte N = default!;
     var (r, e1) = (new slice<nttElement>(k), new slice<ringElement>(k));
@@ -379,7 +373,6 @@ public static (slice<byte> sharedKey, error err) Decapsulate(ж<DecapsulationKey
     slice<byte> sharedKey = default!;
     error err = default!;
 
-    ref var dk = ref Ꮡdk.Value;
     if (len(ciphertext) != CiphertextSize) {
         return (default!, errors.New("mlkem768: invalid ciphertext length"u8));
     }

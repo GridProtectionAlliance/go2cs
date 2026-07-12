@@ -38,7 +38,6 @@ public static error SetsockoptInet4Addr(this ж<FD> Ꮡfd, nint level, nint name
 // SetsockoptLinger wraps the setsockopt network call with a Linger argument.
 public static error SetsockoptLinger(this ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.Linger> Ꮡl) => func((defer, recover) => {
     ref var fd = ref Ꮡfd.Value;
-    ref var l = ref Ꮡl.Value;
 
     {
         var err = Ꮡfd.incref(); if (err != default!) {

@@ -56,14 +56,10 @@ internal const bool debugChan = false;
 
 //go:linkname reflect_makechan reflect.makechan
 internal static ж<Δhchan> reflect_makechan(ж<chantype> Ꮡt, nint size) {
-    ref var t = ref Ꮡt.Value;
-
     return makechan(Ꮡt, size);
 }
 
 internal static ж<Δhchan> makechan64(ж<chantype> Ꮡt, int64 size) {
-    ref var t = ref Ꮡt.Value;
-
     if ((int64)(nint)size != size) {
         throw panic(((plainError)(@string)"makechan: size out of range"u8));
     }
@@ -160,8 +156,6 @@ internal static bool full(ж<Δhchan> Ꮡc) {
 //
 //go:nosplit
 internal static void chansend1(ж<Δhchan> Ꮡc, @unsafe.Pointer elem) {
-    ref var c = ref Ꮡc.Value;
-
     chansend(Ꮡc, elem, true, getcallerpc());
 }
 
@@ -497,8 +491,6 @@ internal static bool empty(ж<Δhchan> Ꮡc) {
 //
 //go:nosplit
 internal static void chanrecv1(ж<Δhchan> Ꮡc, @unsafe.Pointer elem) {
-    ref var c = ref Ꮡc.Value;
-
     chanrecv(Ꮡc, elem, true);
 }
 
@@ -506,7 +498,6 @@ internal static void chanrecv1(ж<Δhchan> Ꮡc, @unsafe.Pointer elem) {
 internal static bool /*received*/ chanrecv2(ж<Δhchan> Ꮡc, @unsafe.Pointer elem) {
     bool received = default!;
 
-    ref var c = ref Ꮡc.Value;
     (_, received) = chanrecv(Ꮡc, elem, true);
     return received;
 }
@@ -769,7 +760,6 @@ internal static bool chanparkcommit(ж<g> Ꮡgp, @unsafe.Pointer chanLock) {
 internal static bool /*selected*/ selectnbsend(ж<Δhchan> Ꮡc, @unsafe.Pointer elem) {
     bool selected = default!;
 
-    ref var c = ref Ꮡc.Value;
     return chansend(Ꮡc, elem, false, getcallerpc());
 }
 
@@ -793,7 +783,6 @@ internal static (bool selected, bool received) selectnbrecv(@unsafe.Pointer elem
     bool selected = default!;
     bool received = default!;
 
-    ref var c = ref Ꮡc.Value;
     return chanrecv(Ꮡc, elem, false);
 }
 
@@ -801,7 +790,6 @@ internal static (bool selected, bool received) selectnbrecv(@unsafe.Pointer elem
 internal static bool /*selected*/ reflect_chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer elem, bool nb) {
     bool selected = default!;
 
-    ref var c = ref Ꮡc.Value;
     return chansend(Ꮡc, elem, !nb, getcallerpc());
 }
 
@@ -810,7 +798,6 @@ internal static (bool selected, bool received) reflect_chanrecv(ж<Δhchan> Ꮡc
     bool selected = default!;
     bool received = default!;
 
-    ref var c = ref Ꮡc.Value;
     return chanrecv(Ꮡc, elem, !nb);
 }
 
@@ -854,29 +841,21 @@ internal static nint chancap(ж<Δhchan> Ꮡc) {
 
 //go:linkname reflect_chanlen reflect.chanlen
 internal static nint reflect_chanlen(ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return chanlen(Ꮡc);
 }
 
 //go:linkname reflectlite_chanlen internal/reflectlite.chanlen
 internal static nint reflectlite_chanlen(ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return chanlen(Ꮡc);
 }
 
 //go:linkname reflect_chancap reflect.chancap
 internal static nint reflect_chancap(ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     return chancap(Ꮡc);
 }
 
 //go:linkname reflect_chanclose reflect.chanclose
 internal static void reflect_chanclose(ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     closechan(Ꮡc);
 }
 
@@ -928,8 +907,6 @@ internal static void reflect_chanclose(ж<Δhchan> Ꮡc) {
 }
 
 internal static @unsafe.Pointer raceaddr(this ж<Δhchan> Ꮡc) {
-    ref var c = ref Ꮡc.Value;
-
     // Treat read-like and write-like operations on the channel to
     // happen at this address. Avoid using the address of qcount
     // or dataqsiz, because the len() and cap() builtins read
@@ -939,7 +916,6 @@ internal static @unsafe.Pointer raceaddr(this ж<Δhchan> Ꮡc) {
 }
 
 internal static void racesync(ж<Δhchan> Ꮡc, ж<sudog> Ꮡsg) {
-    ref var c = ref Ꮡc.Value;
     ref var sg = ref Ꮡsg.Value;
 
     racerelease((uintptr)chanbuf(Ꮡc, 0));

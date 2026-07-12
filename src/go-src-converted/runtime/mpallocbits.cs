@@ -239,8 +239,6 @@ break_outer:;
 //
 // Note that if npages == 1, the two returned values will always be identical.
 internal static (nuint, nuint) find(this ж<pallocBits> Ꮡb, uintptr npages, nuint searchIdx) {
-    ref var b = ref Ꮡb.Value;
-
     if (npages == 1){
         nuint addr = Ꮡb.find1(searchIdx);
         return (addr, addr);

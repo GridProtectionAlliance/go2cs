@@ -13,7 +13,6 @@ partial class main_package {
 }
 
 internal static @string status(this ж<conn> Ꮡc, ж<tracker> Ꮡt) {
-    ref var c = ref Ꮡc.Value;
     ref var t = ref Ꮡt.Value;
 
     {
@@ -25,14 +24,12 @@ internal static @string status(this ж<conn> Ꮡc, ж<tracker> Ꮡt) {
 }
 
 internal static void rename(this ж<conn> Ꮡc, ж<tracker> Ꮡt, @string s) {
-    ref var c = ref Ꮡc.Value;
     ref var t = ref Ꮡt.Value;
 
     t.m[Ꮡc] = s;
 }
 
 internal static @string label(this ж<conn> Ꮡc, ж<tracker> Ꮡt) {
-    ref var c = ref Ꮡc.Value;
     ref var t = ref Ꮡt.Value;
 
     return t.m[Ꮡc];

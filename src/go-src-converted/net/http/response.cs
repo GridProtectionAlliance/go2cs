@@ -144,9 +144,6 @@ public static error ErrNoLocation = errors.New("http: no Location header in resp
 // After that call, clients can inspect resp.Trailer to find key/value
 // pairs included in the response trailer.
 public static (ж<Response>, error) ReadResponse(ж<bufio.Reader> Ꮡr, ж<Request> Ꮡreq) {
-    ref var r = ref Ꮡr.Value;
-    ref var req = ref Ꮡreq.Value;
-
     var tp = textproto.NewReader(Ꮡr);
     var resp = Ꮡ(new Response(
         Request: Ꮡreq

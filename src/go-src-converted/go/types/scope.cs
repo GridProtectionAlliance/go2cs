@@ -107,7 +107,7 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
 public static (ж<ΔScope>, Object) LookupParent(this ж<ΔScope> Ꮡs, @string name, tokenꓸPos pos) {
     ref var s = ref Ꮡs.Value;
 
-    for (; s != nil; Ꮡs = s.parent) {
+    for (; Ꮡs != nil; Ꮡs = s.parent) {
         s = ref Ꮡs.Value;
         {
             var obj = s.Lookup(name); if (obj != default! && (!pos.IsValid() || cmpPos(obj.scopePos(), pos) <= 0)) {
@@ -276,8 +276,6 @@ public static void WriteTo(this ж<ΔScope> Ꮡs, io.Writer w, nint n, bool recu
 
 // String returns a string representation of the scope, for debugging.
 public static @string String(this ж<ΔScope> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     Ꮡs.WriteTo(new strings_BuilderжWriter(Ꮡbuf), 0, false);
     return buf.String();

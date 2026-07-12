@@ -38,8 +38,6 @@ internal static ж<template.Template> tp(this ж<Template> Ꮡr) {
 }
 
 public static error Execute(this ж<Template> Ꮡr, io.Writer w, any data) {
-    ref var r = ref Ꮡr.Value;
-
     return Ꮡr.tp().Execute(w, data);
 }
 

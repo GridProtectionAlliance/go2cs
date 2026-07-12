@@ -128,8 +128,6 @@ public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.W
 // section, and encodes the given SyncMarker as the start of the
 // element bitstream.
 public static Encoder NewEncoder(this ж<PkgEncoder> Ꮡpw, RelocKind k, SyncMarker marker) {
-    ref var pw = ref Ꮡpw.Value;
-
     var e = Ꮡpw.NewEncoderRaw(k);
     e.Sync(marker);
     return e;
@@ -412,8 +410,6 @@ public static Index Flush(this ж<Encoder> Ꮡw) {
 }
 
 [GoRecv] internal static void bigFloat(this ref Encoder w, ж<big.Float> Ꮡv) {
-    ref var v = ref Ꮡv.Value;
-
     var b = Ꮡv.Append(default!, (rune)'p', -1);
     w.String(((@string)b));
 }

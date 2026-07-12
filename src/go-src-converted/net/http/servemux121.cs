@@ -95,8 +95,6 @@ internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
 
 // Formerly ServeMux.HandleFunc.
 internal static void handleFunc(this ж<serveMux121> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
-    ref var mux = ref Ꮡmux.Value;
-
     if (handler == default!) {
         throw panic("http: nil handler");
     }

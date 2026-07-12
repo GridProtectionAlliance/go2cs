@@ -253,7 +253,6 @@ public static ж<ΔBatch> Batch(this ж<ΔGeneration> Ꮡg, trace.ThreadID threa
 // writeEventsTo emits event batches in the generation to tw.
 internal static void writeEventsTo(this ж<ΔGeneration> Ꮡg, ж<raw.TextWriter> Ꮡtw) {
     ref var g = ref Ꮡg.Value;
-    ref var tw = ref Ꮡtw.Value;
 
     // Write event batches for the generation.
     foreach (var (_, bΔ1) in g.batches) {
@@ -295,8 +294,6 @@ internal static void writeEventsTo(this ж<ΔGeneration> Ꮡg, ж<raw.TextWriter
 }
 
 internal static ж<ΔBatch> newStructuralBatch(this ж<ΔGeneration> Ꮡg) {
-    ref var g = ref Ꮡg.Value;
-
     return Ꮡ(new ΔBatch(gen: Ꮡg, thread: trace.NoThread));
 }
 

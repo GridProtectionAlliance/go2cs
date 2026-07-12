@@ -54,7 +54,7 @@ internal static (V v, bool found) find<K, V>(this ж<mapping<K, V>> Ꮡh, K k)
     bool found = default!;
 
     ref var h = ref Ꮡh.Value;
-    if (h == nil) {
+    if (Ꮡh == nil) {
         return (v, false);
     }
     if (h.m != default!) {
@@ -76,7 +76,7 @@ internal static void eachPair<K, V>(this ж<mapping<K, V>> Ꮡh, Func<K, V, bool
 {
     ref var h = ref Ꮡh.Value;
 
-    if (h == nil) {
+    if (Ꮡh == nil) {
         return;
     }
     if (h.m != default!){

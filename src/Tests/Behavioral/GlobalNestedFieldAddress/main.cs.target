@@ -17,8 +17,6 @@ internal static ж<outer> Ꮡg = new(default(outer));
 internal static ref outer g => ref Ꮡg.Value;
 
 internal static void keep(ж<outer> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     _ = Ꮡp;
 }
 

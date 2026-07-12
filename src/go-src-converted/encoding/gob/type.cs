@@ -317,7 +317,8 @@ internal static typeId tReserved2 = bootstrapType("_reserved1"u8, (ж<Δtypeᴛ5
 internal static typeId tReserved1 = bootstrapType("_reserved1"u8, (ж<Δtypeᴛ6>)(default!));
 
 // Predefined because it's needed by the Decoder
-internal static typeId tWireType = (~mustGetTypeInfo(wireTypeType)).id;
+internal static typeId tWireType;
+internal static void initᴛtWireType() { tWireType = (~mustGetTypeInfo(wireTypeType)).id; }
 
 internal static ж<userTypeInfo> wireTypeUserInfo; // userTypeInfo of wireType
 
@@ -480,7 +481,7 @@ internal static void init(this ж<sliceType> Ꮡs, ΔgobType elem) {
 internal static @string safeString(this ж<structType> Ꮡs, map<typeId, bool> seen) {
     ref var s = ref Ꮡs.Value;
 
-    if (s == nil) {
+    if (Ꮡs == nil) {
         return "<nil>"u8;
     }
     {
@@ -498,8 +499,6 @@ internal static @string safeString(this ж<structType> Ꮡs, map<typeId, bool> s
 }
 
 internal static @string @string(this ж<structType> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     return Ꮡs.safeString(new map<typeId, bool>());
 }
 
@@ -682,8 +681,6 @@ internal static (ΔgobType, error) getBaseType(@string name, reflectꓸType rt) 
 // base type, never a pointer.
 // typeLock must be held.
 internal static (ΔgobType, error) getType(@string name, ж<userTypeInfo> Ꮡut, reflectꓸType rt) {
-    ref var ut = ref Ꮡut.Value;
-
     var (typ, present) = types[rt, ꟷ];
     if (present) {
         return (typ, default!);
@@ -741,7 +738,7 @@ internal static @string @string(this ж<wireType> Ꮡw) {
     ref var w = ref Ꮡw.Value;
 
     @string unknown = "unknown type"u8;
-    if (w == nil) {
+    if (Ꮡw == nil) {
         return unknown;
     }
     switch (ᐧ) {

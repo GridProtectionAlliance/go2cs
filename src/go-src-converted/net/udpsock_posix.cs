@@ -25,7 +25,7 @@ internal static ΔAddr sockaddrToUDP(syscallꓸSockaddr sa) {
 internal static nint family(this ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil || len(a.IP) <= IPv4len) {
+    if (Ꮡa == nil || len(a.IP) <= IPv4len) {
         return syscall.AF_INET;
     }
     if (a.IP.To4() != default!) {
@@ -37,7 +37,7 @@ internal static nint family(this ж<UDPAddr> Ꮡa) {
 internal static (syscallꓸSockaddr, error) sockaddr(this ж<UDPAddr> Ꮡa, nint family) {
     ref var a = ref Ꮡa.Value;
 
-    if (a == nil) {
+    if (Ꮡa == nil) {
         return (default!, default!);
     }
     return ipToSockaddr(family, a.IP, a.Port, a.Zone);
@@ -201,7 +201,6 @@ internal static (syscallꓸSockaddr, error) sockaddr(this ж<UDPAddr> Ꮡa, nint
     nint oobn = default!;
     error err = default!;
 
-    ref var addr = ref Ꮡaddr.DerefOrNil();
     if ((~c.fd).isConnected && Ꮡaddr != nil) {
         return (0, 0, ErrWriteToConnected);
     }
@@ -251,8 +250,6 @@ internal static (syscallꓸSockaddr, error) sockaddr(this ж<UDPAddr> Ꮡa, nint
 
 internal static (ж<UDPConn>, error) dialUDP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<UDPAddr> Ꮡladdr, ж<UDPAddr> Ꮡraddr) {
     ref var sd = ref Ꮡsd.Value;
-    ref var laddr = ref Ꮡladdr.Value;
-    ref var raddr = ref Ꮡraddr.Value;
 
     var ctrlCtxFn = sd.Dialer.ControlContext;
     if (ctrlCtxFn == default! && sd.Dialer.Control != default!) {
@@ -267,7 +264,6 @@ internal static (ж<UDPConn>, error) dialUDP(this ж<sysDialer> Ꮡsd, context.C
 
 internal static (ж<UDPConn>, error) listenUDP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<UDPAddr> Ꮡladdr) {
     ref var sl = ref Ꮡsl.Value;
-    ref var laddr = ref Ꮡladdr.Value;
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default!;
     if (sl.ListenConfig.Control != default!) {
@@ -282,7 +278,6 @@ internal static (ж<UDPConn>, error) listenUDP(this ж<sysListener> Ꮡsl, conte
 
 internal static (ж<UDPConn>, error) listenMulticastUDP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<Interface> Ꮡifi, ж<UDPAddr> Ꮡgaddr) {
     ref var sl = ref Ꮡsl.Value;
-    ref var ifi = ref Ꮡifi.Value;
     ref var gaddr = ref Ꮡgaddr.Value;
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default!;
@@ -316,7 +311,6 @@ internal static (ж<UDPConn>, error) listenMulticastUDP(this ж<sysListener> Ꮡ
 
 internal static error listenIPv4MulticastUDP(ж<UDPConn> Ꮡc, ж<Interface> Ꮡifi, IP ip) {
     ref var c = ref Ꮡc.Value;
-    ref var ifi = ref Ꮡifi.DerefOrNil();
 
     if (Ꮡifi != nil) {
         {
@@ -340,7 +334,6 @@ internal static error listenIPv4MulticastUDP(ж<UDPConn> Ꮡc, ж<Interface> Ꮡ
 
 internal static error listenIPv6MulticastUDP(ж<UDPConn> Ꮡc, ж<Interface> Ꮡifi, IP ip) {
     ref var c = ref Ꮡc.Value;
-    ref var ifi = ref Ꮡifi.DerefOrNil();
 
     if (Ꮡifi != nil) {
         {

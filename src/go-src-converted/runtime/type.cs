@@ -328,8 +328,6 @@ break_collect:;
 }
 
 internal static Δrtype toRType(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
     return new Δrtype(Ꮡt);
 }
 

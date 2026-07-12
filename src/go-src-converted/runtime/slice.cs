@@ -118,8 +118,6 @@ internal static @unsafe.Pointer makeslice(ж<_type> Ꮡet, nint len, nint cap) {
 }
 
 internal static @unsafe.Pointer makeslice64(ж<_type> Ꮡet, int64 len64, int64 cap64) {
-    ref var et = ref Ꮡet.Value;
-
     nint len = (nint)len64;
     if ((int64)len != len64) {
         panicmakeslicelen();

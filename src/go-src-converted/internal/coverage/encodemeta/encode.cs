@@ -199,8 +199,6 @@ public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, i
 // HashFuncDesc computes an md5 sum of a coverage.FuncDesc and returns
 // a digest for it.
 public static array<byte> HashFuncDesc(ж<coverage.FuncDesc> Ꮡf) {
-    ref var f = ref Ꮡf.Value;
-
     var h = md5.New();
     var tmp = new slice<byte>(0, 32);
     hashFuncDesc(h, Ꮡf, tmp);

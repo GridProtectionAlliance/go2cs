@@ -23,8 +23,6 @@ partial class template_package {
 //
 //	var t = template.Must(template.New("name").Parse("text"))
 public static ж<Template> Must(ж<Template> Ꮡt, error err) {
-    ref var t = ref Ꮡt.Value;
-
     if (err != default!) {
         throw panic(err);
     }
@@ -134,8 +132,6 @@ public static (ж<Template>, error) ParseGlob(this ж<Template> Ꮡt, @string pa
 
 // parseGlob is the implementation of the function and method ParseGlob.
 internal static (ж<Template>, error) parseGlob(ж<Template> Ꮡt, @string pattern) {
-    ref var t = ref Ꮡt.Value;
-
     var (filenames, err) = filepath.Glob(pattern);
     if (err != default!) {
         return (default!, err);
@@ -169,8 +165,6 @@ public static (ж<Template>, error) ParseFS(this ж<Template> Ꮡt, fs.FS fsys, 
 }
 
 internal static (ж<Template>, error) parseFS(ж<Template> Ꮡt, fs.FS fsys, slice<@string> patterns) {
-    ref var t = ref Ꮡt.Value;
-
     slice<@string> filenames = default!;
     foreach (var (_, pattern) in patterns) {
         var (list, err) = fs.Glob(fsys, pattern);

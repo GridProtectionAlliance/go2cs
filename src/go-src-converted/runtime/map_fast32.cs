@@ -398,7 +398,6 @@ break_search:;
 }
 
 internal static void growWork_fast32(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uintptr bucket) {
-    ref var t = ref Ꮡt.Value;
     ref var h = ref Ꮡh.Value;
 
     // make sure we evacuate the oldbucket corresponding

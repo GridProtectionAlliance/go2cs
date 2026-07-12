@@ -371,8 +371,6 @@ public static bool IsInt(this ж<Float> Ꮡx) {
 
 // debugging support
 internal static void validate(this ж<Float> Ꮡx) {
-    ref var x = ref Ꮡx.Value;
-
     if (!debugFloat) {
         // avoid performance bugs
         throw panic("validate called but debugFloat is not set");
@@ -555,8 +553,6 @@ internal static ж<Float> setBits64(this ж<Float> Ꮡz, bool neg, uint64 x) {
 // If z's precision is 0, it is changed to 64 (and rounding will have
 // no effect).
 public static ж<Float> SetUint64(this ж<Float> Ꮡz, uint64 x) {
-    ref var z = ref Ꮡz.Value;
-
     return Ꮡz.setBits64(false, x);
 }
 
@@ -1252,7 +1248,6 @@ public static (ж<ΔRat>, Accuracy) Rat(this ж<Float> Ꮡx, ж<ΔRat> Ꮡz) {
 // and returns z.
 public static ж<Float> Abs(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
     ref var z = ref Ꮡz.Value;
-    ref var x = ref Ꮡx.Value;
 
     Ꮡz.Set(Ꮡx);
     z.neg = false;
@@ -1263,7 +1258,6 @@ public static ж<Float> Abs(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
 // and returns z.
 public static ж<Float> Neg(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
     ref var z = ref Ꮡz.Value;
-    ref var x = ref Ꮡx.Value;
 
     Ꮡz.Set(Ꮡx);
     z.neg = !z.neg;

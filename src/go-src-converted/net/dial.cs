@@ -271,8 +271,6 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
 // addresses. The result contains at least one address when error is
 // nil.
 internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, context.Context ctx, @string op, @string network, @string addr, ΔAddr hint) {
-    ref var r = ref Ꮡr.Value;
-
     var (afnet, _, err) = parseNetwork(ctx, network, true);
     if (err != default!) {
         return (default!, err);
@@ -452,8 +450,6 @@ public static (Conn, error) DialTimeout(@string network, @string address, time.D
 // Dial uses [context.Background] internally; to specify the context, use
 // [Dialer.DialContext].
 public static (Conn, error) Dial(this ж<Dialer> Ꮡd, @string network, @string address) {
-    ref var d = ref Ꮡd.Value;
-
     return Ꮡd.DialContext(context.Background(), network, address);
 }
 
@@ -556,8 +552,6 @@ public static (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Context ct
 // closes the others. Otherwise it returns an error from the first
 // primary address.
 internal static (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, context.Context ctx, addrList primaries, addrList fallbacks) => func<(Conn, error)>((defer, recover) => {
-    ref var sd = ref Ꮡsd.Value;
-
     if (len(fallbacks) == 0) {
         return Ꮡsd.dialSerial(ctx, primaries);
     }

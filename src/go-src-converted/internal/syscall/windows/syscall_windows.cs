@@ -283,11 +283,6 @@ internal static error loadWSASendRecvMsg() {
 }
 
 public static error WSASendMsg(syscallꓸHandle fd, ж<WSAMsg> Ꮡmsg, uint32 flags, ж<uint32> ᏑbytesSent, ж<syscall.Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
-    ref var msg = ref Ꮡmsg.Value;
-    ref var bytesSent = ref ᏑbytesSent.Value;
-    ref var overlapped = ref Ꮡoverlapped.Value;
-    ref var croutine = ref Ꮡcroutine.Value;
-
     var err = loadWSASendRecvMsg();
     if (err != default!) {
         return err;
@@ -304,11 +299,6 @@ public static error WSASendMsg(syscallꓸHandle fd, ж<WSAMsg> Ꮡmsg, uint32 fl
 }
 
 public static error WSARecvMsg(syscallꓸHandle fd, ж<WSAMsg> Ꮡmsg, ж<uint32> ᏑbytesReceived, ж<syscall.Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
-    ref var msg = ref Ꮡmsg.Value;
-    ref var bytesReceived = ref ᏑbytesReceived.Value;
-    ref var overlapped = ref Ꮡoverlapped.Value;
-    ref var croutine = ref Ꮡcroutine.Value;
-
     var err = loadWSASendRecvMsg();
     if (err != default!) {
         return err;

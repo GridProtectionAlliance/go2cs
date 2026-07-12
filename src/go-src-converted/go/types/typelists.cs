@@ -15,8 +15,6 @@ partial class types_package {
 // Len returns the number of type parameters in the list.
 // It is safe to call on a nil receiver.
 public static nint Len(this ж<TypeParamList> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     return len(Ꮡl.list());
 }
 
@@ -31,7 +29,7 @@ public static nint Len(this ж<TypeParamList> Ꮡl) {
 internal static slice<ж<TypeParam>> list(this ж<TypeParamList> Ꮡl) {
     ref var l = ref Ꮡl.Value;
 
-    if (l == nil) {
+    if (Ꮡl == nil) {
         return default!;
     }
     return l.tparams;
@@ -53,8 +51,6 @@ internal static ж<TypeList> newTypeList(slice<ΔType> list) {
 // Len returns the number of types in the list.
 // It is safe to call on a nil receiver.
 public static nint Len(this ж<TypeList> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     return len(Ꮡl.list());
 }
 
@@ -69,7 +65,7 @@ public static nint Len(this ж<TypeList> Ꮡl) {
 internal static slice<ΔType> list(this ж<TypeList> Ꮡl) {
     ref var l = ref Ꮡl.Value;
 
-    if (l == nil) {
+    if (Ꮡl == nil) {
         return default!;
     }
     return l.types;

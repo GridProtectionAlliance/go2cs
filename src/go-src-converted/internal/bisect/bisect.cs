@@ -340,7 +340,7 @@ public static (ж<Matcher>, error) New(@string pattern) {
 public static bool ShouldEnable(this ж<Matcher> Ꮡm, uint64 id) {
     ref var m = ref Ꮡm.Value;
 
-    if (m == nil) {
+    if (Ꮡm == nil) {
         return true;
     }
     return m.matchResult(id) == m.enable;
@@ -350,7 +350,7 @@ public static bool ShouldEnable(this ж<Matcher> Ꮡm, uint64 id) {
 public static bool ShouldPrint(this ж<Matcher> Ꮡm, uint64 id) {
     ref var m = ref Ꮡm.Value;
 
-    if (m == nil || m.quiet) {
+    if (Ꮡm == nil || m.quiet) {
         return false;
     }
     return m.matchResult(id);
@@ -370,9 +370,7 @@ public static bool ShouldPrint(this ж<Matcher> Ꮡm, uint64 id) {
 // FileLine reports whether the change identified by file and line should be enabled.
 // If the change should be printed, FileLine prints a one-line report to w.
 public static bool FileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint line) {
-    ref var m = ref Ꮡm.Value;
-
-    if (m == nil) {
+    if (Ꮡm == nil) {
         return true;
     }
     return Ꮡm.fileLine(w, @file, line);
@@ -429,9 +427,7 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string @file, nint 
 // If the stack should be printed, MatchStack prints it.
 // Then MatchStack reports whether a change at the current call stack should be enabled.
 public static bool Stack(this ж<Matcher> Ꮡm, Writer w) {
-    ref var m = ref Ꮡm.Value;
-
-    if (m == nil) {
+    if (Ꮡm == nil) {
         return true;
     }
     return Ꮡm.stack(w);

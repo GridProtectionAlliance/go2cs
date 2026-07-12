@@ -16,20 +16,14 @@ internal static int32 bump(ж<int32> Ꮡp, int32 delta) {
 }
 
 public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
-    ref var c = ref Ꮡc.Value;
-
     return bump(Ꮡc.of(Counter.Ꮡn), delta);
 }
 
 internal static int32 add(this ж<Counter> Ꮡc, int32 delta) {
-    ref var c = ref Ꮡc.Value;
-
     return bump(Ꮡc.of(Counter.Ꮡn), delta);
 }
 
 public static void Set(this ж<Counter> Ꮡc, int32 v) {
-    ref var c = ref Ꮡc.Value;
-
     (Ꮡc.of(Counter.Ꮡn)).Value = v;
 }
 
@@ -43,20 +37,14 @@ public static void Set(this ж<Counter> Ꮡc, int32 v) {
 }
 
 public static int32 Incr(this ж<Flag> Ꮡf) {
-    ref var f = ref Ꮡf.Value;
-
     return Ꮡf.of(Flag.Ꮡc).Add(1);
 }
 
 public static int32 AddN(this ж<Flag> Ꮡf, int32 d) {
-    ref var f = ref Ꮡf.Value;
-
     return Ꮡf.of(Flag.Ꮡc).Add(d);
 }
 
 public static void Reset(this ж<Flag> Ꮡf, int32 v) {
-    ref var f = ref Ꮡf.Value;
-
     Ꮡf.of(Flag.Ꮡc).Set(v);
 }
 
@@ -78,20 +66,14 @@ internal static int32 readVia(Func<int32> get) {
 }
 
 public static int32 AddTwice(this ж<Counter> Ꮡc, int32 d) {
-    ref var c = ref Ꮡc.Value;
-
     return applyTwice(Ꮡc.Add, d);
 }
 
 public static int32 AddViaValue(this ж<Flag> Ꮡf, int32 d) {
-    ref var f = ref Ꮡf.Value;
-
     return applyTwice(Ꮡf.of(Flag.Ꮡc).Add, d);
 }
 
 public static int32 ReadViaValue(this ж<Flag> Ꮡf) {
-    ref var f = ref Ꮡf.Value;
-
     return readVia(Ꮡf.of(Flag.Ꮡc).Get);
 }
 

@@ -55,8 +55,6 @@ partial class runtime_package {
 // stealID steals an ID from the table, ensuring that it will not
 // appear in the table anymore.
 internal static uint64 stealID(this ж<traceMap> Ꮡtab) {
-    ref var tab = ref Ꮡtab.Value;
-
     return Ꮡtab.of(traceMap.Ꮡseq).Add(1);
 }
 
@@ -67,8 +65,6 @@ internal static uint64 stealID(this ж<traceMap> Ꮡtab) {
 // Returns a unique ID for the data and whether this is the first time
 // the data has been added to the map.
 internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer data, uintptr size) {
-    ref var tab = ref Ꮡtab.Value;
-
     if (size == 0) {
         return (0, false);
     }
@@ -116,8 +112,6 @@ internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer dat
 }
 
 internal static ж<traceMapNode> newTraceMapNode(this ж<traceMap> Ꮡtab, @unsafe.Pointer data, uintptr size, uintptr hash, uint64 id) {
-    ref var tab = ref Ꮡtab.Value;
-
     // Create data array.
     var sl = new notInHeapSlice(
         Δarray: Ꮡtab.of(traceMap.Ꮡmem).alloc(size),
@@ -138,8 +132,6 @@ internal static ж<traceMapNode> newTraceMapNode(this ж<traceMap> Ꮡtab, @unsa
 // The caller must ensure that there are no put operations executing concurrently
 // with this function.
 internal static void reset(this ж<traceMap> Ꮡtab) {
-    ref var tab = ref Ꮡtab.Value;
-
     Ꮡtab.of(traceMap.Ꮡroot).Store(nil);
     Ꮡtab.of(traceMap.Ꮡseq).Store(0);
     Ꮡtab.of(traceMap.Ꮡmem).drop();

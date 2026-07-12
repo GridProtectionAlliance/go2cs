@@ -384,7 +384,6 @@ internal static error quicReadHandshakeBytes(this ж<Conn> Ꮡc, nint n) {
 
 internal static error quicResumeSession(this ж<Conn> Ꮡc, ж<SessionState> Ꮡsession) {
     ref var c = ref Ꮡc.Value;
-    ref var session = ref Ꮡsession.Value;
 
     c.quic.Value.events = append((~c.quic).events, new QUICEvent(
         Kind: QUICResumeSession,
@@ -402,8 +401,6 @@ internal static error quicResumeSession(this ж<Conn> Ꮡc, ж<SessionState> Ꮡ
 }
 
 [GoRecv] internal static void quicStoreSession(this ref Conn c, ж<SessionState> Ꮡsession) {
-    ref var session = ref Ꮡsession.Value;
-
     c.quic.Value.events = append((~c.quic).events, new QUICEvent(
         Kind: QUICStoreSession,
         SessionState: Ꮡsession

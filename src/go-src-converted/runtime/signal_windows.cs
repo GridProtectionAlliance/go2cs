@@ -333,10 +333,6 @@ internal static int32 sehhandler(ж<exceptionrecord> _Δp0, uint64 _Δp1, ж<con
 //
 //go:nosplit
 internal static int32 firstcontinuehandler(ж<exceptionrecord> Ꮡinfo, ж<context> Ꮡr, ж<g> Ꮡgp) {
-    ref var info = ref Ꮡinfo.Value;
-    ref var r = ref Ꮡr.Value;
-    ref var gp = ref Ꮡgp.Value;
-
     if (!isgoexception(Ꮡinfo, Ꮡr)) {
         return _EXCEPTION_CONTINUE_SEARCH;
     }
@@ -352,7 +348,6 @@ internal static int32 firstcontinuehandler(ж<exceptionrecord> Ꮡinfo, ж<conte
 internal static int32 lastcontinuehandler(ж<exceptionrecord> Ꮡinfo, ж<context> Ꮡr, ж<g> Ꮡgp) {
     ref var info = ref Ꮡinfo.Value;
     ref var r = ref Ꮡr.Value;
-    ref var gp = ref Ꮡgp.Value;
 
     if (islibrary || isarchive) {
         // Go DLL/archive has been loaded in a non-go program.
@@ -482,7 +477,6 @@ internal static void crash() {
 //go:nosplit
 internal static void dieFromException(ж<exceptionrecord> Ꮡinfo, ж<context> Ꮡr) {
     ref var info = ref Ꮡinfo.DerefOrNil();
-    ref var r = ref Ꮡr.Value;
 
     if (Ꮡinfo == nil) {
         var gp = getg();

@@ -244,8 +244,6 @@ internal static fs.DirEntry _ᴛ4ʗ = new fileжDirEntry((ж<@file>)(default!));
 }
 
 internal static (fs.FileInfo, error) Info(this ж<@file> Ꮡf) {
-    ref var f = ref Ꮡf.Value;
-
     return (new fileжFileInfo(Ꮡf), default!);
 }
 
@@ -257,8 +255,6 @@ internal static (fs.FileInfo, error) Info(this ж<@file> Ꮡf) {
 }
 
 internal static @string String(this ж<@file> Ꮡf) {
-    ref var f = ref Ꮡf.Value;
-
     return fs.FormatFileInfo(new fileжFileInfo(Ꮡf));
 }
 

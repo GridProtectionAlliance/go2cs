@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 // Garbage collector: finalizers and block profiling.
+
+// go2cs HAND-OWNED (frozen converted output + one native replacement): SetFinalizer's converted
+// body walks type descriptors (efaceOf/_type/findObject) — raw-metal on non-native types that is
+// meaningless against managed objects (it throws on first call, and os.newFile sets a finalizer
+// on every opened file). Its body below is replaced with a native .NET finalizer bridge;
+// everything else in this file is the unmodified converted output (vestigial GC-queue machinery
+// other runtime files reference, kept for compilation). The marker keeps -stdlib reconverts from
+// regenerating the Go version over this file.
+[module: go.GoManualConversion]
+
 namespace go;
 
 using abi = @internal.abi_package;
@@ -415,114 +425,73 @@ internal static bool blockUntilEmptyFinalizerQueue(int64 timeout) {
 // need to use appropriate synchronization, such as mutexes or atomic updates,
 // to avoid read-write races.
 public static void SetFinalizer(any obj, any finalizer) {
-    if (debug.sbrk != 0) {
-        // debug.sbrk never frees memory, so no finalizers run
-        // (and we don't have the data structures to record them).
-        return;
-    }
-    var e = efaceOf(Ꮡ(obj));
-    var etyp = e.Value._type;
-    if (etyp == nil) {
+    // go2cs NATIVE BRIDGE (see the file header): Go's implementation validates the argument
+    // types via type descriptors and queues the pair on the runtime's finalizer list. Here the
+    // registration ties the finalizer to the object's lifetime with a ConditionalWeakTable -
+    // when obj becomes unreachable, the sentinel's .NET finalizer invokes the Go finalizer with
+    // obj (resurrected for the call, exactly Go's guarantee). Go permits finalizers to never
+    // run; invocation timing follows the .NET GC.
+    if (obj is null or NilType) {
         @throw("runtime.SetFinalizer: first argument is nil"u8);
     }
-    if ((abiꓸKind)((~etyp).Kind_ & abi.KindMask) != abi.Pointer) {
-        @throw("runtime.SetFinalizer: first argument is "u8 + toRType(etyp).@string() + ", not pointer"u8);
-    }
-    var ot = (ж<ptrtype>)(uintptr)(new @unsafe.Pointer(etyp));
-    if ((~ot).Elem == nil) {
-        @throw("nil elem type!"u8);
-    }
-    if (inUserArenaChunk((uintptr)(~e).data)) {
-        // Arena-allocated objects are not eligible for finalizers.
-        @throw("runtime.SetFinalizer: first argument was allocated into an arena"u8);
-    }
-    // find the containing object
-    var (@base, span, _) = findObject((uintptr)(~e).data, 0, 0);
-    if (@base == 0) {
-        if (isGoPointerWithoutSpan((~e).data)) {
-            return;
+    if (finalizer is null or NilType) {
+        // SetFinalizer(obj, nil) clears any previously registered finalizer.
+        if (s_finalizerRegistry.TryGetValue(obj, out GoFinalizerSentinel? cleared)) {
+            cleared.Cancel();
+            s_finalizerRegistry.Remove(obj);
         }
-        @throw("runtime.SetFinalizer: pointer not in allocated block"u8);
-    }
-    // Move base forward if we've got an allocation header.
-    if (!(~span).spanclass.noscan() && !heapBitsInSpan((~span).elemsize) && (~span).spanclass.sizeclass() != 0) {
-        @base += mallocHeaderSize;
-    }
-    if ((uintptr)(~e).data != @base) {
-        // As an implementation detail we allow to set finalizers for an inner byte
-        // of an object if it could come from tiny alloc (see mallocgc for details).
-        if ((~ot).Elem == nil || (~ot).Elem.Pointers() || (~(~ot).Elem).Size_ >= maxTinySize) {
-            @throw("runtime.SetFinalizer: pointer not at beginning of allocated block"u8);
-        }
-    }
-    var f = efaceOf(Ꮡ(finalizer));
-    var ftyp = f.Value._type;
-    if (ftyp == nil) {
-        // switch to system stack and remove finalizer
-        var eʗ1 = e;
-        systemstack(() => {
-            removefinalizer((~eʗ1).data);
-        });
         return;
     }
-    if ((abiꓸKind)((~ftyp).Kind_ & abi.KindMask) != abi.Func) {
-        @throw("runtime.SetFinalizer: second argument is "u8 + toRType(ftyp).@string() + ", not a function"u8);
+    if (finalizer is not Delegate) {
+        @throw("runtime.SetFinalizer: second argument is not a function"u8);
     }
-    var ft = (ж<functype>)(uintptr)(new @unsafe.Pointer(ftyp));
-    if (ft.IsVariadic()) {
-        @throw("runtime.SetFinalizer: cannot pass "u8 + toRType(etyp).@string() + " to finalizer "u8 + toRType(ftyp).@string() + " because dotdotdot"u8);
+    if (s_finalizerRegistry.TryGetValue(obj, out GoFinalizerSentinel? _)) {
+        @throw("runtime.SetFinalizer: finalizer already set"u8);
     }
-    if ((~ft).InCount != 1) {
-        @throw("runtime.SetFinalizer: cannot pass "u8 + toRType(etyp).@string() + " to finalizer "u8 + toRType(ftyp).@string());
-    }
-    var fint = ft.InSlice()[0];
-    switch (ᐧ) {
-    case {} when fint == etyp: {
-        goto okarg;
-        break;
-    }
-    case {} when (abiꓸKind)((~fint).Kind_ & abi.KindMask) == abi.Pointer: {
-        if ((fint.Uncommon() == nil || etyp.Uncommon() == nil) && ((ж<ptrtype>)(uintptr)(new @unsafe.Pointer(fint))).Value.Elem == (~ot).Elem) {
-            // ok - same type
-            // ok - not same type, but both pointers,
-            // one or the other is unnamed, and same element type, so assignable.
-            goto okarg;
-        }
-        break;
-    }
-    case {} when (abiꓸKind)((~fint).Kind_ & abi.KindMask) == abi.Interface: {
-        var ityp = (ж<interfacetype>)(uintptr)(new @unsafe.Pointer(fint));
-        if (len((~ityp).Methods) == 0) {
-            // ok - satisfies empty interface
-            goto okarg;
-        }
-        {
-            var itab = assertE2I2(ityp, (~efaceOf(Ꮡ(obj)))._type); if (itab != nil) {
-                goto okarg;
-            }
-        }
-        break;
-    }}
+    s_finalizerRegistry.Add(obj, new GoFinalizerSentinel(obj, (Delegate)finalizer));
+}
 
-    @throw("runtime.SetFinalizer: cannot pass "u8 + toRType(etyp).@string() + " to finalizer "u8 + toRType(ftyp).@string());
-okarg:
-    var nret = (uintptr)0;
-    // compute size needed for return parameters
-    foreach (var (_, t) in ft.OutSlice()) {
-        nret = alignUp(nret, (uintptr)(~t).Align_) + (~t).Size_;
+// Maps an object to the sentinel keeping its Go finalizer registration alive. The sentinel
+// strong-references its target, and a ConditionalWeakTable value keeps its key alive only as
+// long as the key is otherwise reachable - the pair becomes collectible together (dependent
+// handles tolerate the value->key cycle), at which point the sentinel's finalizer runs with
+// the target resurrected.
+private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<object, GoFinalizerSentinel> s_finalizerRegistry = new();
+
+private sealed class GoFinalizerSentinel
+{
+    private readonly object m_target;
+    private readonly Delegate m_finalizer;
+    private volatile bool m_cancelled;
+
+    public GoFinalizerSentinel(object target, Delegate finalizer)
+    {
+        m_target = target;
+        m_finalizer = finalizer;
     }
-    nret = alignUp(nret, goarch.PtrSize);
-    // make sure we have a finalizer goroutine
-    createfing();
-    var eʗ3 = e;
-    var fʗ1 = f;
-    var fintʗ1 = fint;
-    var otʗ1 = ot;
-    systemstack(() => {
-        if (!addfinalizer((~eʗ3).data, (ж<funcval>)(uintptr)((~fʗ1).data), nret, fintʗ1, otʗ1)) {
-            @throw("runtime.SetFinalizer: finalizer already set"u8);
+
+    public void Cancel()
+    {
+        m_cancelled = true;
+        global::System.GC.SuppressFinalize(this); // qualified: bare `GC` binds Go's runtime.GC()
+    }
+
+    ~GoFinalizerSentinel()
+    {
+        if (m_cancelled)
+            return;
+
+        try
+        {
+            m_finalizer.DynamicInvoke(m_target);
         }
-    });
+        catch
+        {
+            // A throwing Go finalizer must not take down the .NET finalizer thread; Go's own
+            // finalizer goroutine would crash the program, but the converted world prefers to
+            // drop it (finalizers are best-effort by specification).
+        }
+    }
 }
 
 // Mark KeepAlive as noinline so that it is easily detectable as an intrinsic.

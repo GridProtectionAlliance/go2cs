@@ -92,8 +92,6 @@ public static void SetCPUProfileRate(nint hz) {
 //
 //go:nowritebarrierrec
 [GoRecv] internal static void add(this ref cpuProfile Δp, ж<@unsafe.Pointer> ᏑtagPtr, slice<uintptr> stk) {
-    ref var tagPtr = ref ᏑtagPtr.Value;
-
     // Simple cas-lock to coordinate with setcpuprofilerate.
     while (!Ꮡprof.of(profᴛ1.ᏑsignalLock).CompareAndSwap(0, 1)) {
         // TODO: Is it safe to osyield here? https://go.dev/issue/52672

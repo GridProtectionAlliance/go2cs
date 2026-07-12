@@ -97,8 +97,6 @@ public static ΔAuth CRAMMD5Auth(@string username, @string secret) {
 }
 
 [GoRecv] internal static (@string, slice<byte>, error) Start(this ref cramMD5Auth a, ж<ServerInfo> Ꮡserver) {
-    ref var server = ref Ꮡserver.Value;
-
     return ("CRAM-MD5", default!, default!);
 }
 

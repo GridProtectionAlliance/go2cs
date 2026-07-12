@@ -291,8 +291,6 @@ internal static (nint, nint) order2_func(lessSwap data, nint a, nint b, ж<nint>
 
 // median_func returns x where data[x] is the median of data[a],data[b],data[c], where x is a, b, or c.
 internal static nint median_func(lessSwap data, nint a, nint b, nint c, ж<nint> Ꮡswaps) {
-    ref var swaps = ref Ꮡswaps.Value;
-
     (a, b) = order2_func(data, a, b, Ꮡswaps);
     (b, c) = order2_func(data, b, c, Ꮡswaps);
     (a, b) = order2_func(data, a, b, Ꮡswaps);
@@ -301,8 +299,6 @@ internal static nint median_func(lessSwap data, nint a, nint b, nint c, ж<nint>
 
 // medianAdjacent_func finds the median of data[a - 1], data[a], data[a + 1] and stores the index into a.
 internal static nint medianAdjacent_func(lessSwap data, nint a, ж<nint> Ꮡswaps) {
-    ref var swaps = ref Ꮡswaps.Value;
-
     return median_func(data, a - 1, a, a + 1, Ꮡswaps);
 }
 

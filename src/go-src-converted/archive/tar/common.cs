@@ -559,8 +559,6 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
 
 // FileInfo returns an fs.FileInfo for the Header.
 public static fs.FileInfo FileInfo(this ж<Header> Ꮡh) {
-    ref var h = ref Ꮡh.Value;
-
     return new headerFileInfo(Ꮡh);
 }
 

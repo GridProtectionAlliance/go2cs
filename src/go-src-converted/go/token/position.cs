@@ -240,8 +240,6 @@ public static ΔPos LineStart(this ж<ΔFile> Ꮡf, nint line) => func((defer, r
 // AddLineInfo is like [File.AddLineColumnInfo] with a column = 1 argument.
 // It is here for backward-compatibility for code prior to Go 1.11.
 public static void AddLineInfo(this ж<ΔFile> Ꮡf, nint offset, @string filename, nint line) {
-    ref var f = ref Ꮡf.Value;
-
     Ꮡf.AddLineColumnInfo(offset, filename, line, 1);
 }
 
@@ -323,8 +321,6 @@ public static void AddLineColumnInfo(this ж<ΔFile> Ꮡf, nint offset, @string 
 // Line returns the line number for the given file position p;
 // p must be a [Pos] value in that file or [NoPos].
 public static nint Line(this ж<ΔFile> Ꮡf, ΔPos p) {
-    ref var f = ref Ꮡf.Value;
-
     return Ꮡf.Position(p).Line;
 }
 
@@ -407,7 +403,6 @@ internal static ΔPosition /*pos*/ position(this ж<ΔFile> Ꮡf, ΔPos p, bool 
 public static ΔPosition /*pos*/ PositionFor(this ж<ΔFile> Ꮡf, ΔPos p, bool adjusted) {
     ΔPosition pos = default!;
 
-    ref var f = ref Ꮡf.Value;
     if (p != NoPos) {
         pos = Ꮡf.position(p, adjusted);
     }
@@ -420,7 +415,6 @@ public static ΔPosition /*pos*/ PositionFor(this ж<ΔFile> Ꮡf, ΔPos p, bool
 public static ΔPosition /*pos*/ Position(this ж<ΔFile> Ꮡf, ΔPos p) {
     ΔPosition pos = default!;
 
-    ref var f = ref Ꮡf.Value;
     return Ꮡf.PositionFor(p, true);
 }
 
@@ -607,7 +601,6 @@ internal static ж<ΔFile> @file(this ж<FileSet> Ꮡs, ΔPos p) => func<ж<ΔFi
 public static ж<ΔFile> /*f*/ File(this ж<FileSet> Ꮡs, ΔPos p) {
     ж<ΔFile> f = default!;
 
-    ref var s = ref Ꮡs.Value;
     if (p != NoPos) {
         f = Ꮡs.@file(p);
     }
@@ -621,7 +614,6 @@ public static ж<ΔFile> /*f*/ File(this ж<FileSet> Ꮡs, ΔPos p) {
 public static ΔPosition /*pos*/ PositionFor(this ж<FileSet> Ꮡs, ΔPos p, bool adjusted) {
     ΔPosition pos = default!;
 
-    ref var s = ref Ꮡs.Value;
     if (p != NoPos) {
         {
             var f = Ꮡs.@file(p); if (f != nil) {
@@ -637,7 +629,6 @@ public static ΔPosition /*pos*/ PositionFor(this ж<FileSet> Ꮡs, ΔPos p, boo
 public static ΔPosition /*pos*/ Position(this ж<FileSet> Ꮡs, ΔPos p) {
     ΔPosition pos = default!;
 
-    ref var s = ref Ꮡs.Value;
     return Ꮡs.PositionFor(p, true);
 }
 

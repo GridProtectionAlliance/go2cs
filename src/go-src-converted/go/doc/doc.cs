@@ -318,8 +318,6 @@ internal static (ж<ast.Object>, error) simpleImporter(map<@string, ж<ast.Objec
 // Each call returns a new parser, so that the caller may
 // customize it before use.
 public static ж<comment.Parser> Parser(this ж<Package> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     return Ꮡ(new comment.Parser(
         LookupPackage: Ꮡp.lookupPackage,
         LookupSym: Ꮡp.lookupSym

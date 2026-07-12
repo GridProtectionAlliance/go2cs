@@ -337,8 +337,6 @@ internal static io.StringWriter getStringWriter(io.Writer w) {
 }
 
 internal static @string Replace(this ж<genericReplacer> Ꮡr, @string s) {
-    ref var r = ref Ꮡr.Value;
-
     ref var buf = ref heap<appendSliceWriter>(out var Ꮡbuf);
     buf = new appendSliceWriter(0, len(s));
     Ꮡr.WriteString(new appendSliceWriterжWriter(Ꮡbuf), s);

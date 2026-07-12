@@ -17,9 +17,7 @@ partial class main_package {
 }
 
 public static void Put<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey, ж<V> Ꮡval) {
-    ref var c = ref Ꮡc.Value;
     ref var key = ref Ꮡkey.Value;
-    ref var val = ref Ꮡval.Value;
 
     var e = Ꮡ(new entry<V>(key: Ꮡkey));
     e.of(entry<V>.Ꮡv).Store(Ꮡval);
@@ -28,7 +26,6 @@ public static void Put<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey, ж<V> Ꮡval) {
 }
 
 public static ж<V> Get<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey) {
-    ref var c = ref Ꮡc.Value;
     ref var key = ref Ꮡkey.DerefOrNil();
 
     for (var e = Ꮡc.of(Cache<V>.Ꮡhead).Load(); e != nil; e = e.Value.next) {

@@ -243,8 +243,6 @@ internal static void writeErrStr(@string s) {
 //
 //go:nosplit
 internal static void writeErrData(ж<byte> Ꮡdata, int32 n) {
-    ref var data = ref Ꮡdata.Value;
-
     write(2, new @unsafe.Pointer(Ꮡdata), n);
     // If crashing, print a copy to the SetCrashOutput fd.
     var gp = getg();

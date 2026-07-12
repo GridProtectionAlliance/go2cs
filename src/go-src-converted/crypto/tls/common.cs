@@ -760,7 +760,7 @@ internal static readonly time.Duration maxSessionTicketLifetime = /* 7 * 24 * ti
 public static ж<Config> Clone(this ж<Config> Ꮡc) => func<ж<Config>>((defer, recover) => {
     ref var c = ref Ꮡc.Value;
 
-    if (c == nil) {
+    if (Ꮡc == nil) {
         return default!;
     }
     Ꮡc.of(Config.Ꮡmutex).RLock();
@@ -985,7 +985,7 @@ internal static slice<uint16> supportedVersions(this ж<Config> Ꮡc, bool isCli
         if (needFIPS() && !slices.Contains(defaultSupportedVersionsFIPS, v)) {
             continue;
         }
-        if ((c == nil || c.MinVersion == 0) && v < VersionTLS12) {
+        if ((Ꮡc == nil || c.MinVersion == 0) && v < VersionTLS12) {
             if (isClient || tls10server.Value() != "1"u8) {
                 continue;
             }
@@ -993,10 +993,10 @@ internal static slice<uint16> supportedVersions(this ж<Config> Ꮡc, bool isCli
         if (isClient && c.EncryptedClientHelloConfigList != default! && v < VersionTLS13) {
             continue;
         }
-        if (c != nil && c.MinVersion != 0 && v < c.MinVersion) {
+        if (Ꮡc != nil && c.MinVersion != 0 && v < c.MinVersion) {
             continue;
         }
-        if (c != nil && c.MaxVersion != 0 && v > c.MaxVersion) {
+        if (Ꮡc != nil && c.MaxVersion != 0 && v > c.MaxVersion) {
             continue;
         }
         versions = append(versions, v);
@@ -1005,8 +1005,6 @@ internal static slice<uint16> supportedVersions(this ж<Config> Ꮡc, bool isCli
 }
 
 internal static uint16 maxSupportedVersion(this ж<Config> Ꮡc, bool isClient) {
-    ref var c = ref Ꮡc.Value;
-
     var ΔsupportedVersions = Ꮡc.supportedVersions(isClient);
     if (len(ΔsupportedVersions) == 0) {
         return 0;
@@ -1032,7 +1030,7 @@ internal static slice<CurveID> curvePreferences(this ж<Config> Ꮡc, uint16 ver
     ref var c = ref Ꮡc.Value;
 
     slice<CurveID> curvePreferences = default!;
-    if (c != nil && len(c.CurvePreferences) != 0){
+    if (Ꮡc != nil && len(c.CurvePreferences) != 0){
         curvePreferences = slices.Clone<slice<CurveID>, CurveID>(c.CurvePreferences);
         if (needFIPS()) {
             return slices.DeleteFunc(curvePreferences, (CurveID cΔ1) => !slices.Contains(defaultCurvePreferencesFIPS, cΔ1));
@@ -1050,8 +1048,6 @@ internal static slice<CurveID> curvePreferences(this ж<Config> Ꮡc, uint16 ver
 }
 
 internal static bool supportsCurve(this ж<Config> Ꮡc, uint16 version, CurveID curve) {
-    ref var c = ref Ꮡc.Value;
-
     foreach (var (_, cc) in Ꮡc.curvePreferences(version)) {
         if (cc == curve) {
             return true;
@@ -1063,8 +1059,6 @@ internal static bool supportsCurve(this ж<Config> Ꮡc, uint16 version, CurveID
 // mutualVersion returns the protocol version to use given the advertised
 // versions of the peer. Priority is given to the peer preference order.
 internal static (uint16, bool) mutualVersion(this ж<Config> Ꮡc, bool isClient, slice<uint16> peerVersions) {
-    ref var c = ref Ꮡc.Value;
-
     var ΔsupportedVersions = Ꮡc.supportedVersions(isClient);
     foreach (var (_, peerVersion) in peerVersions) {
         foreach (var (_, v) in ΔsupportedVersions) {
@@ -1477,7 +1471,6 @@ public static ClientSessionCache NewLRUClientSessionCache(nint capacity) {
 // corresponding to sessionKey is removed from the cache instead.
 internal static void Put(this ж<lruSessionCache> Ꮡc, @string sessionKey, ж<ClientSessionState> Ꮡcs) => func((defer, recover) => {
     ref var c = ref Ꮡc.Value;
-    ref var cs = ref Ꮡcs.DerefOrNil();
 
     Ꮡc.of(lruSessionCache.ᏑMutex).Lock();
     defer(Ꮡc.of(lruSessionCache.ᏑMutex).Unlock);

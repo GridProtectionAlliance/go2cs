@@ -512,8 +512,6 @@ public static readonly @string TrailerPrefix = "Trailer:"u8;
 // disableWriteContinue stops Request.Body.Read from sending an automatic 100-Continue.
 // If a 100-Continue is being written, it waits for it to complete before continuing.
 internal static void disableWriteContinue(this ж<response> Ꮡw) {
-    ref var w = ref Ꮡw.Value;
-
     Ꮡw.of(response.ᏑwriteContinueMu).Lock();
     Ꮡw.of(response.ᏑcanWriteContinue).Store(false);
     Ꮡw.of(response.ᏑwriteContinueMu).Unlock();
@@ -577,8 +575,6 @@ internal const bool debugServerConnections = false;
 
 // Create new connection from rwc.
 internal static ж<conn> newConn(this ж<Server> Ꮡsrv, net.Conn rwc) {
-    ref var srv = ref Ꮡsrv.Value;
-
     var c = Ꮡ(new conn(
         server: Ꮡsrv,
         rwc: rwc
@@ -622,8 +618,6 @@ internal static void @lock(this ж<connReader> Ꮡcr) {
 }
 
 internal static void unlock(this ж<connReader> Ꮡcr) {
-    ref var cr = ref Ꮡcr.Value;
-
     Ꮡcr.of(connReader.Ꮡmu).Unlock();
 }
 
@@ -1673,7 +1667,6 @@ internal static (nint n, error err) Write(this ж<response> Ꮡw, slice<byte> da
     nint n = default!;
     error err = default!;
 
-    ref var w = ref Ꮡw.Value;
     return Ꮡw.write(builtin.len(data), data, ""u8);
 }
 
@@ -1681,7 +1674,6 @@ internal static (nint n, error err) WriteString(this ж<response> Ꮡw, @string 
     nint n = default!;
     error err = default!;
 
-    ref var w = ref Ꮡw.Value;
     return Ꮡw.write(builtin.len(data), default!, data);
 }
 
@@ -1773,8 +1765,6 @@ internal static void finishRequest(this ж<response> Ꮡw) {
 }
 
 internal static void Flush(this ж<response> Ꮡw) {
-    ref var w = ref Ꮡw.Value;
-
     Ꮡw.FlushError();
 }
 
@@ -1915,7 +1905,6 @@ internal static (ConnState state, int64 unixSec) getState(this ж<conn> Ꮡc) {
     ConnState state = default!;
     int64 unixSec = default!;
 
-    ref var c = ref Ꮡc.Value;
     var packedState = Ꮡc.of(conn.ᏑcurState).Load();
     return (((ConnState)(nint)((uint64)(packedState & 0xff))), (int64)((packedState >> (int)(8))));
 }
@@ -2276,8 +2265,6 @@ public delegate void HandlerFunc(ResponseWriter _Δp0, ж<Request> _Δp1);
 
 // ServeHTTP calls f(w, r).
 public static void ServeHTTP(this HandlerFunc f, ResponseWriter w, ж<Request> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     f(w, Ꮡr);
 }
 
@@ -2313,8 +2300,6 @@ public static void Error(ResponseWriter w, @string error, nint code) {
 
 // NotFound replies to the request with an HTTP 404 not found error.
 public static void NotFound(ResponseWriter w, ж<Request> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     Error(w, "404 page not found"u8, StatusNotFound);
 }
 
@@ -2436,8 +2421,6 @@ internal static @string htmlEscape(@string s) {
 }
 
 [GoRecv] internal static void ServeHTTP(this ref redirectHandler rh, ResponseWriter w, ж<Request> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
     Redirect(w, Ꮡr, rh.url, rh.code);
 }
 
@@ -2582,7 +2565,8 @@ public static ж<ServeMux> NewServeMux() {
 }
 
 // DefaultServeMux is the default [ServeMux] used by [Serve].
-public static ж<ServeMux> DefaultServeMux = ᏑdefaultServeMux;
+public static ж<ServeMux> DefaultServeMux;
+internal static void initᴛDefaultServeMux() { DefaultServeMux = ᏑdefaultServeMux; }
 
 internal static ж<ServeMux> ᏑdefaultServeMux = new(default(ServeMux));
 internal static ref ServeMux defaultServeMux => ref ᏑdefaultServeMux.Value;
@@ -2642,8 +2626,6 @@ public static (ΔHandler h, @string pattern) Handler(this ж<ServeMux> Ꮡmux, �
     ΔHandler h = default!;
     @string pattern = default!;
 
-    ref var mux = ref Ꮡmux.Value;
-    ref var r = ref Ꮡr.Value;
     if (use121) {
         return Ꮡmux.of(ServeMux.Ꮡmux121).findHandler(Ꮡr);
     }
@@ -2728,7 +2710,6 @@ internal static (ж<routingNode>, slice<@string> matches, ж<urlpkg.URL> redirec
     slice<@string> matches = default!;
     ж<urlpkg.URL> redirectTo = default!;
 
-    ref var mux = ref Ꮡmux.Value;
     ref var u = ref Ꮡu.DerefOrNil();
     Ꮡmux.of(ServeMux.Ꮡmu).RLock();
     defer(Ꮡmux.of(ServeMux.Ꮡmu).RUnlock);
@@ -2799,8 +2780,6 @@ internal static bool exactMatch(ж<routingNode> Ꮡn, @string path) {
 
 // matchingMethods return a sorted list of all methods that would match with the given host and path.
 internal static slice<@string> matchingMethods(this ж<ServeMux> Ꮡmux, @string host, @string path) => func((defer, recover) => {
-    ref var mux = ref Ꮡmux.Value;
-
     // Hold the read lock for the entire method so that the two matches are done
     // on the same set of registered patterns.
     Ꮡmux.of(ServeMux.Ꮡmu).RLock();
@@ -2817,7 +2796,6 @@ internal static slice<@string> matchingMethods(this ж<ServeMux> Ꮡmux, @string
 // ServeHTTP dispatches the request to the handler whose
 // pattern most closely matches the request URL.
 public static void ServeHTTP(this ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Request> Ꮡr) {
-    ref var mux = ref Ꮡmux.Value;
     ref var r = ref Ꮡr.Value;
 
     if (r.RequestURI == "*"u8) {
@@ -2843,8 +2821,6 @@ public static void ServeHTTP(this ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Requ
 // If the given pattern conflicts, with one that is already registered, Handle
 // panics.
 public static void Handle(this ж<ServeMux> Ꮡmux, @string pattern, ΔHandler handler) {
-    ref var mux = ref Ꮡmux.Value;
-
     if (use121){
         Ꮡmux.of(ServeMux.Ꮡmux121).handle(pattern, handler);
     } else {
@@ -2856,8 +2832,6 @@ public static void Handle(this ж<ServeMux> Ꮡmux, @string pattern, ΔHandler h
 // If the given pattern conflicts, with one that is already registered, HandleFunc
 // panics.
 public static void HandleFunc(this ж<ServeMux> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
-    ref var mux = ref Ꮡmux.Value;
-
     if (use121){
         Ꮡmux.of(ServeMux.Ꮡmux121).handleFunc(pattern, handler);
     } else {
@@ -2886,8 +2860,6 @@ public static void HandleFunc(@string pattern, Action<ResponseWriter, ж<Request
 }
 
 internal static void register(this ж<ServeMux> Ꮡmux, @string pattern, ΔHandler handler) {
-    ref var mux = ref Ꮡmux.Value;
-
     {
         var err = Ꮡmux.registerErr(pattern, handler); if (err != default!) {
             throw panic(err);
@@ -3487,7 +3459,6 @@ public static error ServeTLS(this ж<Server> Ꮡsrv, net.Listener l, @string cer
 // It reports whether the server is still up (not Shutdown or Closed).
 internal static bool trackListener(this ж<Server> Ꮡs, ж<net.Listener> Ꮡln, bool add) => func<bool>((defer, recover) => {
     ref var s = ref Ꮡs.Value;
-    ref var ln = ref Ꮡln.Value;
 
     Ꮡs.of(Server.Ꮡmu).Lock();
     defer(Ꮡs.of(Server.Ꮡmu).Unlock);
@@ -3509,7 +3480,6 @@ internal static bool trackListener(this ж<Server> Ꮡs, ж<net.Listener> Ꮡln,
 
 internal static void trackConn(this ж<Server> Ꮡs, ж<conn> Ꮡc, bool add) => func((defer, recover) => {
     ref var s = ref Ꮡs.Value;
-    ref var c = ref Ꮡc.Value;
 
     Ꮡs.of(Server.Ꮡmu).Lock();
     defer(Ꮡs.of(Server.Ꮡmu).Unlock);
@@ -3538,14 +3508,10 @@ internal static void trackConn(this ж<Server> Ꮡs, ж<conn> Ꮡc, bool add) =>
 }
 
 internal static bool doKeepAlives(this ж<Server> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     return !Ꮡs.of(Server.ᏑdisableKeepAlives).Load() && !Ꮡs.shuttingDown();
 }
 
 internal static bool shuttingDown(this ж<Server> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
     return Ꮡs.of(Server.ᏑinShutdown).Load();
 }
 
@@ -3554,8 +3520,6 @@ internal static bool shuttingDown(this ж<Server> Ꮡs) {
 // resource-constrained environments or servers in the process of
 // shutting down should disable them.
 public static void SetKeepAlivesEnabled(this ж<Server> Ꮡsrv, bool v) {
-    ref var srv = ref Ꮡsrv.Value;
-
     if (v) {
         Ꮡsrv.of(Server.ᏑdisableKeepAlives).Store(false);
         return;
@@ -3833,8 +3797,6 @@ internal static Pusher _ᴛ10ʗ = new timeoutWriterжPusher((ж<timeoutWriter>)(
 
 // Push implements the [Pusher] interface.
 [GoRecv] internal static error Push(this ref timeoutWriter tw, @string target, ж<PushOptions> Ꮡopts) {
-    ref var opts = ref Ꮡopts.Value;
-
     {
         var (pusher, ok) = tw.w._<Pusher>(ᐧ); if (ok) {
             return pusher.Push(target, Ꮡopts);

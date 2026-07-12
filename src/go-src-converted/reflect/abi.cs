@@ -401,9 +401,6 @@ internal static void dumpPtrBitMap(abi.IntArgRegBitmap b) {
 }
 
 internal static abiDesc newAbiDesc(ж<funcType> Ꮡt, ж<abi.Type> Ꮡrcvr) {
-    ref var t = ref Ꮡt.Value;
-    ref var rcvr = ref Ꮡrcvr.DerefOrNil();
-
     // We need to add space for this argument to
     // the frame so that it can spill args into it.
     //

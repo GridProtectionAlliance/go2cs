@@ -9,8 +9,6 @@ partial class main_package {
 }
 
 public static void With(this ж<Builder> Ꮡb, Action<ж<Builder>> f) {
-    ref var b = ref Ꮡb.Value;
-
     f(Ꮡb);
 }
 

@@ -30,7 +30,6 @@ public static readonly UntypedInt TagSize = 16;
 // key allows an attacker to forge messages at will.
 public static void Sum(ж<array<byte>> Ꮡout, slice<byte> m, ж<array<byte>> Ꮡkey) {
     ref var @out = ref Ꮡout.Value;
-    ref var key = ref Ꮡkey.Value;
 
     var h = New(Ꮡkey);
     h.Write(m);
@@ -40,7 +39,6 @@ public static void Sum(ж<array<byte>> Ꮡout, slice<byte> m, ж<array<byte>> �
 // Verify returns true if mac is a valid authenticator for m with the given key.
 public static bool Verify(ж<array<byte>> Ꮡmac, slice<byte> m, ж<array<byte>> Ꮡkey) {
     ref var mac = ref Ꮡmac.Value;
-    ref var key = ref Ꮡkey.Value;
 
     ref var tmp = ref heap(new array<byte>(16), out var Ꮡtmp);
     Sum(Ꮡtmp, m, Ꮡkey);
@@ -57,8 +55,6 @@ public static bool Verify(ж<array<byte>> Ꮡmac, slice<byte> m, ж<array<byte>>
 // two different messages with the same key allows an attacker
 // to forge messages at will.
 public static ж<MAC> New(ж<array<byte>> Ꮡkey) {
-    ref var key = ref Ꮡkey.Value;
-
     var m = Ꮡ(new MAC(nil));
     initialize(Ꮡkey, m.of(MAC.ᏑmacState));
     return m;

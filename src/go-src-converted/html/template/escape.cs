@@ -76,7 +76,8 @@ internal static @string evalArgs(params ꓸꓸꓸany argsʗp) {
 }
 
 // funcMap maps command names to functions that render their inputs safe.
-internal static template.FuncMap funcMap = new text.template_package.FuncMap(new map<@string, any>{
+internal static template.FuncMap funcMap;
+internal static void initᴛfuncMap() { funcMap = new text.template_package.FuncMap(new map<@string, any>{
     ["_html_template_attrescaper"u8] = attrEscaper,
     ["_html_template_commentescaper"u8] = commentEscaper,
     ["_html_template_cssescaper"u8] = cssEscaper,
@@ -94,7 +95,7 @@ internal static template.FuncMap funcMap = new text.template_package.FuncMap(new
     ["_html_template_urlfilter"u8] = urlFilter,
     ["_html_template_urlnormalizer"u8] = urlNormalizer,
     ["_eval_args_"u8] = evalArgs
-});
+}); }
 
 // escaper collects type inferences about templates and changes needed to make
 // templates injection safe.
@@ -128,8 +129,6 @@ internal static template.FuncMap funcMap = new text.template_package.FuncMap(new
 
 // makeEscaper creates a blank escaper for the given set.
 internal static escaper makeEscaper(ж<nameSpace> Ꮡn) {
-    ref var n = ref Ꮡn.Value;
-
     return new escaper(
         Ꮡn,
         new map<@string, context>{},
@@ -659,8 +658,6 @@ internal static context joinRange(context c0, ж<rangeContext> Ꮡrc) {
 // It returns the best guess at an output context, and the result of the filter
 // which is the same as whether e was updated.
 [GoRecv] internal static (context, bool) escapeListConditionally(this ref escaper e, context c, ж<parse.ListNode> Ꮡn, Func<ж<escaper>, context, bool> filter) {
-    ref var n = ref Ꮡn.Value;
-
     ref var e1 = ref heap<escaper>(out var Ꮡe1);
     e1 = makeEscaper(e.ns);
     e1.rangeContext = e.rangeContext;

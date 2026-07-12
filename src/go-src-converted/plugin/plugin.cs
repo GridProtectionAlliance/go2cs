@@ -89,8 +89,6 @@ public static (ж<Plugin>, error) Open(@string path) {
 // It reports an error if the symbol is not found.
 // It is safe for concurrent use by multiple goroutines.
 public static (Symbol, error) Lookup(this ж<Plugin> Ꮡp, @string symName) {
-    ref var p = ref Ꮡp.Value;
-
     return lookup(Ꮡp, symName);
 }
 

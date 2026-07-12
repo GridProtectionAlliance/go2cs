@@ -40,8 +40,6 @@ internal static bool empty(this substMap m) {
 }
 
 internal static ΔType lookup(this substMap m, ж<TypeParam> Ꮡtpar) {
-    ref var tpar = ref Ꮡtpar.Value;
-
     {
         var t = m[Ꮡtpar]; if (t != default!) {
             return t;

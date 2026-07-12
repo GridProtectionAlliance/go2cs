@@ -45,8 +45,6 @@ internal static (nint, error) Write(this ж<mac> Ꮡh, slice<byte> p) {
 }
 
 [GoRecv] internal static void Sum(this ref mac h, ж<array<byte>> Ꮡout) {
-    ref var @out = ref Ꮡout.Value;
-
     ref var state = ref heap<macState>(out var Ꮡstate);
     state = h.macState;
     if (h.offset > 0) {

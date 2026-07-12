@@ -22,7 +22,7 @@ public static @string String(this ж<term> Ꮡx) {
     ref var x = ref Ꮡx.Value;
 
     switch (ᐧ) {
-    case {} when x == nil: {
+    case {} when Ꮡx == nil: {
         return "∅"u8;
     }
     case {} when x.typ == default!: {
@@ -44,7 +44,7 @@ internal static bool equal(this ж<term> Ꮡx, ж<term> Ꮡy) {
 
     // easy cases
     switch (ᐧ) {
-    case {} when x == nil || Ꮡy == nil: {
+    case {} when Ꮡx == nil || Ꮡy == nil: {
         return Ꮡx == Ꮡy;
     }
     case {} when x.typ == default! || y.typ == default!: {
@@ -62,10 +62,10 @@ internal static (ж<term>, ж<term>) union(this ж<term> Ꮡx, ж<term> Ꮡy) {
 
     // easy cases
     switch (ᐧ) {
-    case {} when x == nil && Ꮡy == nil: {
+    case {} when Ꮡx == nil && Ꮡy == nil: {
         return (default!, default!);
     }
-    case {} when x == nil: {
+    case {} when Ꮡx == nil: {
         return (Ꮡy, default!);
     }
     case {} when Ꮡy == nil: {
@@ -106,7 +106,7 @@ internal static ж<term> intersect(this ж<term> Ꮡx, ж<term> Ꮡy) {
 
     // easy cases
     switch (ᐧ) {
-    case {} when x == nil || Ꮡy == nil: {
+    case {} when Ꮡx == nil || Ꮡy == nil: {
         return default!;
     }
     case {} when x.typ == default!: {
@@ -141,7 +141,7 @@ internal static bool includes(this ж<term> Ꮡx, ΔType t) {
 
     // easy cases
     switch (ᐧ) {
-    case {} when x == nil: {
+    case {} when Ꮡx == nil: {
         return false;
     }
     case {} when x.typ == default!: {
@@ -165,7 +165,7 @@ internal static bool subsetOf(this ж<term> Ꮡx, ж<term> Ꮡy) {
 
     // easy cases
     switch (ᐧ) {
-    case {} when x == nil: {
+    case {} when Ꮡx == nil: {
         return true;
     }
     case {} when Ꮡy == nil: {

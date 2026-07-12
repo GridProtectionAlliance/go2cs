@@ -134,7 +134,7 @@ internal const bool stackTraceDebug = false;
     internal ж<stackObjectBuf> next;
 }
 
-[GoInit] internal static void initΔ2() {
+/* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void initΔ2() {
     if (@unsafe.Sizeof(new stackWorkBuf(nil)) > @unsafe.Sizeof(new workbuf(nil))) {
         throw panic("stackWorkBuf too big");
     }
@@ -158,9 +158,6 @@ internal const bool stackTraceDebug = false;
 //
 //go:nowritebarrier
 internal static void setRecord(this ж<stackObject> Ꮡobj, ж<stackObjectRecord> Ꮡr) {
-    ref var obj = ref Ꮡobj.Value;
-    ref var r = ref Ꮡr.Value;
-
     // Types of stack objects are always in read-only memory, not the heap.
     // So not using a write barrier is ok.
     ((ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡobj.of(stackObject.Ꮡr)).Value))).Value = (uintptr)new @unsafe.Pointer(Ꮡr);

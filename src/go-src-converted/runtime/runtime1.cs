@@ -73,8 +73,6 @@ internal static ж<byte> argv_index(ж<ж<byte>> Ꮡargv, int32 i) {
 }
 
 internal static void args(int32 c, ж<ж<byte>> Ꮡv) {
-    ref var v = ref Ꮡv.Value;
-
     argc = c;
     argv = Ꮡv;
     sysargs(c, Ꮡv);

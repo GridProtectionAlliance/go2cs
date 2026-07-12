@@ -21,14 +21,10 @@ internal static T getT<T>(ж<T> Ꮡp) {
 }
 
 public static void Set<T>(this ж<Box<T>> Ꮡb, T val) {
-    ref var b = ref Ꮡb.Value;
-
     setT(Ꮡb.of(Box<T>.Ꮡv), val);
 }
 
 public static T Get<T>(this ж<Box<T>> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     return getT(Ꮡb.of(Box<T>.Ꮡv));
 }
 

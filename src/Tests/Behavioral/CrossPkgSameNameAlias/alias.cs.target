@@ -8,8 +8,6 @@ using sync;
 partial class atomic_package {
 
 public static ж<Int32> Wrap(ж<atomic.Int32> Ꮡv) {
-    ref var v = ref Ꮡv.Value;
-
     return Ꮡv;
 }
 

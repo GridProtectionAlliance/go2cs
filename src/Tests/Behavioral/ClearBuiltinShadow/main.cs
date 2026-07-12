@@ -29,8 +29,6 @@ internal static void recover(this ж<guard> Ꮡg) => func((defer, recover) => {
 });
 
 internal static void run(this ж<guard> Ꮡg) => func((defer, recover) => {
-    ref var g = ref Ꮡg.Value;
-
     defer(Ꮡg.recover);
     throw panic("boom");
 });

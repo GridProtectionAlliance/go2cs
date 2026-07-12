@@ -165,7 +165,7 @@ partial class net_package {
 internal static bool ok(this ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.Value;
 
-    return c != nil && c.fd != nil;
+    return Ꮡc != nil && c.fd != nil;
 }
 
 // Implementation of the Conn interface.
@@ -510,7 +510,7 @@ internal static error mapErr(error err) {
 public static @string Error(this ж<OpError> Ꮡe) {
     ref var e = ref Ꮡe.Value;
 
-    if (e == nil) {
+    if (Ꮡe == nil) {
         return "<nil>"u8;
     }
     @string s = e.Op;
@@ -600,7 +600,7 @@ internal static channel<EmptyStruct> noCancel = (channel<EmptyStruct>)(default!)
 public static @string Error(this ж<AddrError> Ꮡe) {
     ref var e = ref Ꮡe.Value;
 
-    if (e == nil) {
+    if (Ꮡe == nil) {
         return "<nil>"u8;
     }
     @string s = e.Err;
@@ -785,7 +785,7 @@ internal static ж<DNSError> newDNSError(error err, @string name, @string server
 public static @string Error(this ж<DNSError> Ꮡe) {
     ref var e = ref Ꮡe.Value;
 
-    if (e == nil) {
+    if (Ꮡe == nil) {
         return "<nil>"u8;
     }
     @string s = "lookup "u8 + e.Name;
@@ -846,7 +846,6 @@ internal static (int64 n, error err) genericReadFrom(ж<TCPConn> Ꮡc, Δio.Read
     int64 n = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.Value;
     // Use wrapper to hide existing r.ReadFrom from io.Copy.
     return Δio.Copy(new tcpConnWithoutReadFrom(TCPConn: Ꮡc), r);
 }
@@ -875,7 +874,6 @@ internal static (int64 n, error err) genericWriteTo(ж<TCPConn> Ꮡc, Δio.Write
     int64 n = default!;
     error err = default!;
 
-    ref var c = ref Ꮡc.Value;
     // Use wrapper to hide existing w.WriteTo from io.Copy.
     return Δio.Copy(w, new tcpConnWithoutWriteTo(TCPConn: Ꮡc));
 }

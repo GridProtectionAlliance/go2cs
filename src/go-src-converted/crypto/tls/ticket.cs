@@ -321,7 +321,6 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
 // session ticket keys. It can be used as a [Config.WrapSession] implementation.
 public static (slice<byte>, error) EncryptTicket(this ж<Config> Ꮡc, ΔConnectionState cs, ж<SessionState> Ꮡss) {
     ref var c = ref Ꮡc.Value;
-    ref var ss = ref Ꮡss.Value;
 
     var ticketKeys = Ꮡc.ticketKeys(nil);
     var (stateBytes, err) = Ꮡss.Bytes();
@@ -420,7 +419,7 @@ public static (slice<byte> ticket, ж<SessionState> state, error err) Resumption
     error err = default!;
 
     ref var cs = ref Ꮡcs.Value;
-    if (cs == nil || cs.session == nil) {
+    if (Ꮡcs == nil || cs.session == nil) {
         return (default!, default!, default!);
     }
     return ((~cs.session).ticket, cs.session, default!);

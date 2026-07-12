@@ -84,14 +84,10 @@ public static readonly BasicInfo IsConstType = /* IsBoolean | IsNumeric | IsStri
 }
 
 public static ΔType Underlying(this ж<Basic> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     return new BasicжΔType(Ꮡb);
 }
 
 public static @string String(this ж<Basic> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     return TypeString(new BasicжΔType(Ꮡb), default!);
 }
 

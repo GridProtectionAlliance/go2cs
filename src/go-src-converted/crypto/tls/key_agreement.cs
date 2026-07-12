@@ -45,11 +45,6 @@ internal static error errServerKeyExchange = errors.New("tls: invalid ServerKeyE
 }
 
 internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this rsaKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> Ꮡhello) {
-    ref var config = ref Ꮡconfig.Value;
-    ref var cert = ref Ꮡcert.Value;
-    ref var clientHello = ref ᏑclientHello.Value;
-    ref var hello = ref Ꮡhello.Value;
-
     return (default!, default!);
 }
 
@@ -85,12 +80,6 @@ internal static (slice<byte>, error) processClientKeyExchange(this rsaKeyAgreeme
 }
 
 internal static error processServerKeyExchange(this rsaKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> ᏑserverHello, ж<Δx509.Certificate> Ꮡcert, ж<serverKeyExchangeMsg> Ꮡskx) {
-    ref var config = ref Ꮡconfig.Value;
-    ref var clientHello = ref ᏑclientHello.Value;
-    ref var serverHello = ref ᏑserverHello.Value;
-    ref var cert = ref Ꮡcert.Value;
-    ref var skx = ref Ꮡskx.Value;
-
     return errors.New("tls: unexpected ServerKeyExchange"u8);
 }
 
@@ -275,8 +264,6 @@ internal static slice<byte> hashForServerKeyExchange(uint8 sigType, crypto.Hash 
 }
 
 [GoRecv] internal static (slice<byte>, error) processClientKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientKeyExchangeMsg> Ꮡckx, uint16 version) {
-    ref var config = ref Ꮡconfig.Value;
-    ref var cert = ref Ꮡcert.Value;
     ref var ckx = ref Ꮡckx.Value;
 
     if (len(ckx.ciphertext) == 0 || (nint)ckx.ciphertext[0] != len(ckx.ciphertext) - 1) {
@@ -380,10 +367,6 @@ internal static slice<byte> hashForServerKeyExchange(uint8 sigType, crypto.Hash 
 }
 
 [GoRecv] internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<Δx509.Certificate> Ꮡcert) {
-    ref var config = ref Ꮡconfig.Value;
-    ref var clientHello = ref ᏑclientHello.Value;
-    ref var cert = ref Ꮡcert.Value;
-
     if (ka.ckx == nil) {
         return (default!, default!, errors.New("tls: missing ServerKeyExchange message"u8));
     }

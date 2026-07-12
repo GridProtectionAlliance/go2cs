@@ -172,8 +172,6 @@ internal static uintptr addr(this offAddr l) {
 // Clear attempts to store minOffAddr in atomicOffAddr. It may fail
 // if a marked value is placed in the box in the meanwhile.
 internal static void Clear(this ж<atomicOffAddr> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     while (ᐧ) {
         var old = Ꮡb.of(atomicOffAddr.Ꮡa).Load();
         if (old < 0) {
@@ -188,8 +186,6 @@ internal static void Clear(this ж<atomicOffAddr> Ꮡb) {
 // StoreMin stores addr if it's less than the current value in the
 // offset address space if the current value is not marked.
 internal static void StoreMin(this ж<atomicOffAddr> Ꮡb, uintptr addr) {
-    ref var b = ref Ꮡb.Value;
-
     var @new = (int64)(addr - (uintptr)arenaBaseOffset);
     while (ᐧ) {
         var old = Ꮡb.of(atomicOffAddr.Ꮡa).Load();
@@ -207,24 +203,18 @@ internal static void StoreMin(this ж<atomicOffAddr> Ꮡb, uintptr addr) {
 // returned by Load. This function will not store newAddr if the
 // box no longer contains markedAddr.
 internal static void StoreUnmark(this ж<atomicOffAddr> Ꮡb, uintptr markedAddr, uintptr newAddr) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.of(atomicOffAddr.Ꮡa).CompareAndSwap(-(int64)(markedAddr - (uintptr)arenaBaseOffset), (int64)(newAddr - (uintptr)arenaBaseOffset));
 }
 
 // StoreMarked stores addr but first converted to the offset address
 // space and then negated.
 internal static void StoreMarked(this ж<atomicOffAddr> Ꮡb, uintptr addr) {
-    ref var b = ref Ꮡb.Value;
-
     Ꮡb.of(atomicOffAddr.Ꮡa).Store(-(int64)(addr - (uintptr)arenaBaseOffset));
 }
 
 // Load returns the address in the box as a virtual address. It also
 // returns if the value was marked or not.
 internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
-
     var v = Ꮡb.of(atomicOffAddr.Ꮡa).Load();
     var wasMarked = false;
     if (v < 0) {

@@ -23,8 +23,6 @@ internal static void bump(ж<cycle> Ꮡc) {
 }
 
 internal static void viaParam(ж<rec> Ꮡp, nint i) {
-    ref var p = ref Ꮡp.Value;
-
     var c = Ꮡp.at(rec.Ꮡfuture, i);
     bump(c);
 }

@@ -143,8 +143,6 @@ public static ж<Table> MakeTable(uint32 poly) {
 // implements [encoding.BinaryMarshaler] and [encoding.BinaryUnmarshaler] to
 // marshal and unmarshal the internal state of the hash.
 public static hash.Hash32 New(ж<Table> Ꮡtab) {
-    ref var tab = ref Ꮡtab.DerefOrNil();
-
     if (Ꮡtab == IEEETable) {
         ᏑieeeOnce.Do(ieeeInit);
     }
@@ -198,8 +196,6 @@ internal const nint marshaledSize = /* len(magic) + 4 + 4 */ 12;
 }
 
 internal static uint32 update(uint32 crc, ж<Table> Ꮡtab, slice<byte> p, bool checkInitIEEE) {
-    ref var tab = ref Ꮡtab.DerefOrNil();
-
     switch (ᐧ) {
     case {} when ᏑhaveCastagnoli.Load() && Ꮡtab == castagnoliTable: {
         return updateCastagnoli(crc, p);
@@ -218,8 +214,6 @@ internal static uint32 update(uint32 crc, ж<Table> Ꮡtab, slice<byte> p, bool 
 
 // Update returns the result of adding the bytes in p to the crc.
 public static uint32 Update(uint32 crc, ж<Table> Ꮡtab, slice<byte> p) {
-    ref var tab = ref Ꮡtab.Value;
-
     // Unfortunately, because IEEETable is exported, IEEE may be used without a
     // call to MakeTable. We have to make sure it gets initialized in that case.
     return update(crc, Ꮡtab, p, true);
@@ -247,8 +241,6 @@ public static uint32 Update(uint32 crc, ж<Table> Ꮡtab, slice<byte> p) {
 // Checksum returns the CRC-32 checksum of data
 // using the polynomial represented by the [Table].
 public static uint32 Checksum(slice<byte> data, ж<Table> Ꮡtab) {
-    ref var tab = ref Ꮡtab.Value;
-
     return Update(0, Ꮡtab, data);
 }
 

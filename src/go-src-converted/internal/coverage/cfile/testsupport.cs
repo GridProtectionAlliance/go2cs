@@ -268,8 +268,6 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
 }
 
 internal static error readAuxMetaFiles(this ж<tstate> Ꮡts, @string metafiles, map<@string, EmptyStruct> importpaths) {
-    ref var ts = ref Ꮡts.Value;
-
     // Unmarshal the information on available aux metafiles into
     // a MetaFileCollection struct.
     ref var mfc = ref heap(new coverage.MetaFileCollection(), out var Ꮡmfc);

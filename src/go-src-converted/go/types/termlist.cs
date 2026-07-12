@@ -141,8 +141,6 @@ internal static bool includes(this Δtermlist xl, ΔType t) {
 
 // supersetOf reports whether y ⊆ xl.
 internal static bool supersetOf(this Δtermlist xl, ж<term> Ꮡy) {
-    ref var y = ref Ꮡy.Value;
-
     foreach (var (_, x) in xl) {
         if (Ꮡy.subsetOf(x)) {
             return true;

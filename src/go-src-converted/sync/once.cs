@@ -70,8 +70,6 @@ public static void Do(this ж<Once> Ꮡo, Action f) {
 }
 
 internal static void doSlow(this ж<Once> Ꮡo, Action f) => func((defer, recover) => {
-    ref var o = ref Ꮡo.Value;
-
     Ꮡo.of(Once.Ꮡm).Lock();
     defer(Ꮡo.of(Once.Ꮡm).Unlock);
     if (Ꮡo.of(Once.Ꮡdone).Load() == 0) {

@@ -16,14 +16,10 @@ internal static int32 bump(ж<int32> Ꮡp, int32 delta) {
 }
 
 public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
-    ref var c = ref Ꮡc.Value;
-
     return bump(Ꮡc.of(Counter.Ꮡn), delta);
 }
 
 public static void Set(this ж<Counter> Ꮡc, int32 v) {
-    ref var c = ref Ꮡc.Value;
-
     (Ꮡc.of(Counter.Ꮡn)).Value = v;
 }
 

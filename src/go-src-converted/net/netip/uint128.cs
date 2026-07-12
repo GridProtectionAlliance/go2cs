@@ -69,8 +69,6 @@ internal static uint128 addOne(this uint128 u) {
 // Logically, think of it as returning two uint64s.
 // It only returns pointers for inlining reasons on 32-bit platforms.
 internal static array<ж<uint64>> halves(this ж<uint128> Ꮡu) {
-    ref var u = ref Ꮡu.Value;
-
     return new ж<uint64>[]{Ꮡu.of(uint128.Ꮡhi), Ꮡu.of(uint128.Ꮡlo)}.array();
 }
 

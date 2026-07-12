@@ -9,8 +9,6 @@ using io = io_package;
 partial class ecdsa_package {
 
 internal static error verifyAsm(ж<PublicKey> Ꮡpub, slice<byte> hash, slice<byte> sig) {
-    ref var pub = ref Ꮡpub.Value;
-
     return errNoAsm;
 }
 
@@ -18,7 +16,6 @@ internal static (slice<byte> sig, error err) signAsm(ж<PrivateKey> Ꮡpriv, io.
     slice<byte> sig = default!;
     error err = default!;
 
-    ref var priv = ref Ꮡpriv.Value;
     return (default!, errNoAsm);
 }
 

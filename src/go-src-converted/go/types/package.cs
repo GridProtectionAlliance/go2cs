@@ -59,7 +59,7 @@ public static ж<Package> NewPackage(@string path, @string name) {
 public static ж<ΔScope> Scope(this ж<Package> Ꮡpkg) {
     ref var pkg = ref Ꮡpkg.Value;
 
-    if (pkg != nil) {
+    if (Ꮡpkg != nil) {
         return pkg.scope;
     }
     return Universe;

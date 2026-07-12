@@ -9,8 +9,6 @@ partial class runtime_package {
 internal const bool canCreateFile = false;
 
 internal static int32 create(ж<byte> Ꮡname, int32 perm) {
-    ref var name = ref Ꮡname.Value;
-
     @throw("unimplemented"u8);
     return -1;
 }

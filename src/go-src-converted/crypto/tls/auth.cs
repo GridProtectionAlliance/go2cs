@@ -278,8 +278,6 @@ internal static slice<SignatureScheme> signatureSchemesForCertificate(uint16 ver
 // that works with the selected certificate. It's only called for protocol
 // versions that support signature algorithms, so TLS 1.2 and 1.3.
 internal static (SignatureScheme, error) selectSignatureScheme(uint16 vers, ж<Certificate> Ꮡc, slice<SignatureScheme> peerAlgs) {
-    ref var c = ref Ꮡc.Value;
-
     var supportedAlgs = signatureSchemesForCertificate(vers, Ꮡc);
     if (len(supportedAlgs) == 0) {
         return (0, unsupportedCertificateError(Ꮡc));

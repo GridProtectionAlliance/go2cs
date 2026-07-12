@@ -209,8 +209,6 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 // provided for generality, although at the moment on all pre-defined
 // paths it will be 2.
 public static error Output(this ж<Logger> Ꮡl, nint calldepth, @string s) {
-    ref var l = ref Ꮡl.Value;
-
     calldepth++;
     // +1 for this frame.
     return Ꮡl.output(0, calldepth, (slice<byte> b) => append(b, s.ꓸꓸꓸ));
@@ -275,7 +273,6 @@ internal static error output(this ж<Logger> Ꮡl, uintptr pc, nint calldepth, F
 public static void Print(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    ref var l = ref Ꮡl.Value;
     var vʗ1 = v;
     Ꮡl.output(0, 2, (slice<byte> b) => fmt.Append(b, vʗ1.ꓸꓸꓸ));
 }
@@ -285,7 +282,6 @@ public static void Print(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
 public static void Printf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    ref var l = ref Ꮡl.Value;
     var vʗ1 = v;
     Ꮡl.output(0, 2, (slice<byte> b) => fmt.Appendf(b, format, vʗ1.ꓸꓸꓸ));
 }
@@ -295,7 +291,6 @@ public static void Printf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸ
 public static void Println(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    ref var l = ref Ꮡl.Value;
     var vʗ1 = v;
     Ꮡl.output(0, 2, (slice<byte> b) => fmt.Appendln(b, vʗ1.ꓸꓸꓸ));
 }
@@ -304,7 +299,6 @@ public static void Println(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
 public static void Fatal(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    ref var l = ref Ꮡl.Value;
     Ꮡl.Output(2, fmt.Sprint(v.ꓸꓸꓸ));
     os.Exit(1);
 }
@@ -313,7 +307,6 @@ public static void Fatal(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
 public static void Fatalf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    ref var l = ref Ꮡl.Value;
     Ꮡl.Output(2, fmt.Sprintf(format, v.ꓸꓸꓸ));
     os.Exit(1);
 }
@@ -322,7 +315,6 @@ public static void Fatalf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸ
 public static void Fatalln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    ref var l = ref Ꮡl.Value;
     Ꮡl.Output(2, fmt.Sprintln(v.ꓸꓸꓸ));
     os.Exit(1);
 }
@@ -331,7 +323,6 @@ public static void Fatalln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
 public static void Panic(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    ref var l = ref Ꮡl.Value;
     @string s = fmt.Sprint(v.ꓸꓸꓸ);
     Ꮡl.Output(2, s);
     throw panic(s);
@@ -341,7 +332,6 @@ public static void Panic(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
 public static void Panicf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    ref var l = ref Ꮡl.Value;
     @string s = fmt.Sprintf(format, v.ꓸꓸꓸ);
     Ꮡl.Output(2, s);
     throw panic(s);
@@ -351,7 +341,6 @@ public static void Panicf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸ
 public static void Panicln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
-    ref var l = ref Ꮡl.Value;
     @string s = fmt.Sprintln(v.ꓸꓸꓸ);
     Ꮡl.Output(2, s);
     throw panic(s);
@@ -360,23 +349,17 @@ public static void Panicln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
 // Flags returns the output flags for the logger.
 // The flag bits are [Ldate], [Ltime], and so on.
 public static nint Flags(this ж<Logger> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     return (nint)Ꮡl.of(Logger.Ꮡflag).Load();
 }
 
 // SetFlags sets the output flags for the logger.
 // The flag bits are [Ldate], [Ltime], and so on.
 public static void SetFlags(this ж<Logger> Ꮡl, nint flag) {
-    ref var l = ref Ꮡl.Value;
-
     Ꮡl.of(Logger.Ꮡflag).Store((int32)flag);
 }
 
 // Prefix returns the output prefix for the logger.
 public static @string Prefix(this ж<Logger> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     {
         var p = Ꮡl.of(Logger.Ꮡprefix).Load(); if (p != nil) {
             return p.Value;
@@ -387,8 +370,6 @@ public static @string Prefix(this ж<Logger> Ꮡl) {
 
 // SetPrefix sets the output prefix for the logger.
 public static void SetPrefix(this ж<Logger> Ꮡl, @string prefix) {
-    ref var l = ref Ꮡl.Value;
-
     Ꮡl.of(Logger.Ꮡprefix).Store(Ꮡ(prefix));
 }
 

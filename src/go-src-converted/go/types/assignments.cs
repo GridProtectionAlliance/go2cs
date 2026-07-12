@@ -133,7 +133,6 @@ internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
 }
 
 internal static void initConst(this ж<Checker> Ꮡcheck, ж<Const> Ꮡlhs, ж<operand> Ꮡx) {
-    ref var check = ref Ꮡcheck.Value;
     ref var lhs = ref Ꮡlhs.Value;
     ref var x = ref Ꮡx.Value;
 
@@ -168,7 +167,6 @@ internal static void initConst(this ж<Checker> Ꮡcheck, ж<Const> Ꮡlhs, ж<o
 // or Typ[Invalid] in case of an error.
 // If the initialization check fails, x.mode is set to invalid.
 internal static void initVar(this ж<Checker> Ꮡcheck, ж<Var> Ꮡlhs, ж<operand> Ꮡx, @string context) {
-    ref var check = ref Ꮡcheck.Value;
     ref var lhs = ref Ꮡlhs.Value;
     ref var x = ref Ꮡx.Value;
 
@@ -271,7 +269,6 @@ internal static ΔType lhsVar(this ж<Checker> Ꮡcheck, ast.Expr lhs) {
 // If x != nil, it must be the evaluation of rhs (and rhs will be ignored).
 // If the assignment check fails and x != nil, x.mode is set to invalid.
 internal static void assignVar(this ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr rhs, ж<operand> Ꮡx, @string context) {
-    ref var check = ref Ꮡcheck.Value;
     ref var x = ref Ꮡx.DerefOrNil();
 
     var T = Ꮡcheck.lhsVar(lhs);
@@ -328,8 +325,6 @@ internal static slice<ΔType> /*res*/ varTypes(slice<ж<Var>> list) {
 // If variadic is set and the last type is a slice, its string is of
 // the form "...E" where E is the slice's element type.
 internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> list, bool variadic) {
-    ref var check = ref Ꮡcheck.Value;
-
     slice<@string> res = default!;
     foreach (var (i, t) in list) {
         @string s = default!;
@@ -374,8 +369,6 @@ internal static @string measure(nint x, @string unit) {
 }
 
 internal static void assignError(this ж<Checker> Ꮡcheck, slice<ast.Expr> rhs, nint l, nint r) {
-    ref var check = ref Ꮡcheck.Value;
-
     @string vars = measure(l, "variable"u8);
     @string vals = measure(r, "value"u8);
     var rhs0 = rhs[0];
@@ -391,8 +384,6 @@ internal static void assignError(this ж<Checker> Ꮡcheck, slice<ast.Expr> rhs,
 }
 
 internal static void returnError(this ж<Checker> Ꮡcheck, positioner at, slice<ж<Var>> lhs, slice<ж<operand>> rhs) {
-    ref var check = ref Ꮡcheck.Value;
-
     nint l = len(lhs);
     nint r = len(rhs);
     @string qualifier = "not enough"u8;

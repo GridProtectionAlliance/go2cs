@@ -167,8 +167,6 @@ public static (ж<types.Package> pkg, error err) Import(ж<token.FileSet> Ꮡfse
     ж<types.Package> pkg = default!;
     error err = default!;
     func((defer, recover) => {
-    ref var fset = ref Ꮡfset.Value;
-
         io.ReadCloser rc = default!;
         @string id = default!;
         if (lookup != default!){

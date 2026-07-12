@@ -293,7 +293,7 @@ internal static ref mstats memstats => ref Ꮡmemstats.Value;
     public array<MemStats_BySize> BySize = new(61);
 }
 
-[GoInit] internal static void initΔ4() {
+/* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void initΔ4() {
     {
         var offset = @unsafe.Offsetof(memstats.GetType(), "heapStats"); if (offset % 8 != 0) {
             println(offset);
@@ -515,8 +515,6 @@ internal static void readmemstats_m(ж<MemStats> Ꮡstats) {
 
 //go:linkname readGCStats runtime/debug.readGCStats
 internal static void readGCStats(ж<slice<uint64>> Ꮡpauses) {
-    ref var pauses = ref Ꮡpauses.Value;
-
     systemstack(() => {
         readGCStats_m(Ꮡpauses);
     });

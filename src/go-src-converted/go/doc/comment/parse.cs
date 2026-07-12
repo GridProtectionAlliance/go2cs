@@ -700,8 +700,6 @@ internal static (ж<LinkDef>, bool) parseLink(@string line) {
 // list returns a list built from the indented lines,
 // using forceBlankBefore as the value of the List's ForceBlankBefore field.
 internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool forceBlankBefore) {
-    ref var d = ref Ꮡd.Value;
-
     var (num, _, _) = listMarker(lines[0]);
     ж<List> list = Ꮡ(new List(ForceBlankBefore: forceBlankBefore));
     ref var item = ref heap<ж<ListItem>>(out var Ꮡitem);

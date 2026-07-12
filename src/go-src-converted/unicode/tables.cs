@@ -7,7 +7,8 @@ partial class unicode_package {
 public static readonly @string Version = "15.0.0"u8;
 
 // Categories is the set of Unicode category tables.
-public static map<@string, ж<RangeTable>> Categories = new map<@string, ж<RangeTable>>{
+public static map<@string, ж<RangeTable>> Categories;
+internal static void initᴛCategories() { Categories = new map<@string, ж<RangeTable>>{
     ["C"u8] = C,
     ["Cc"u8] = Cc,
     ["Cf"u8] = Cf,
@@ -44,7 +45,7 @@ public static map<@string, ж<RangeTable>> Categories = new map<@string, ж<Rang
     ["Zl"u8] = Zl,
     ["Zp"u8] = Zp,
     ["Zs"u8] = Zs
-};
+}; }
 
 internal static ж<RangeTable> _C = Ꮡ(new RangeTable(
     R16: new Range16[]{
@@ -3844,7 +3845,8 @@ public static ж<RangeTable> Zp = _Zp; // Zp is the set of Unicode characters in
 public static ж<RangeTable> Zs = _Zs; // Zs is the set of Unicode characters in category Zs (Separator, space).
 
 // Scripts is the set of Unicode script tables.
-public static map<@string, ж<RangeTable>> Scripts = new map<@string, ж<RangeTable>>{
+public static map<@string, ж<RangeTable>> Scripts;
+internal static void initᴛScripts() { Scripts = new map<@string, ж<RangeTable>>{
     ["Adlam"u8] = Adlam,
     ["Ahom"u8] = Ahom,
     ["Anatolian_Hieroglyphs"u8] = Anatolian_Hieroglyphs,
@@ -4008,7 +4010,7 @@ public static map<@string, ж<RangeTable>> Scripts = new map<@string, ж<RangeTa
     ["Yezidi"u8] = Yezidi,
     ["Yi"u8] = Yi,
     ["Zanabazar_Square"u8] = Zanabazar_Square
-};
+}; }
 
 internal static ж<RangeTable> _Adlam = Ꮡ(new RangeTable(
     R16: new Range16[]{}.slice(),
@@ -6201,7 +6203,8 @@ public static ж<RangeTable> Yi = _Yi;                    // Yi is the set of Un
 public static ж<RangeTable> Zanabazar_Square = _Zanabazar_Square;      // Zanabazar_Square is the set of Unicode characters in script Zanabazar_Square.
 
 // Properties is the set of Unicode property tables.
-public static map<@string, ж<RangeTable>> Properties = new map<@string, ж<RangeTable>>{
+public static map<@string, ж<RangeTable>> Properties;
+internal static void initᴛProperties() { Properties = new map<@string, ж<RangeTable>>{
     ["ASCII_Hex_Digit"u8] = ASCII_Hex_Digit,
     ["Bidi_Control"u8] = Bidi_Control,
     ["Dash"u8] = Dash,
@@ -6237,7 +6240,7 @@ public static map<@string, ж<RangeTable>> Properties = new map<@string, ж<Rang
     ["Unified_Ideograph"u8] = Unified_Ideograph,
     ["Variation_Selector"u8] = Variation_Selector,
     ["White_Space"u8] = White_Space
-};
+}; }
 
 internal static ж<RangeTable> _ASCII_Hex_Digit = Ꮡ(new RangeTable(
     R16: new Range16[]{
@@ -7468,7 +7471,8 @@ public static ж<RangeTable> White_Space = _White_Space;                       /
 
 // CaseRanges is the table describing case mappings for all letters with
 // non-self mappings.
-public static slice<CaseRange> CaseRanges = _CaseRanges;
+public static slice<CaseRange> CaseRanges;
+internal static void initᴛCaseRanges() { CaseRanges = _CaseRanges; }
 
 internal static slice<CaseRange> _CaseRanges = new CaseRange[]{
     new(0x0041, 0x005A, new d(new rune[]{0, 32, 0}.array())),
@@ -8542,14 +8546,15 @@ internal static slice<foldPair> caseOrbit = new foldPair[]{
 // code points outside the category that are equivalent under
 // simple case folding to code points inside the category.
 // If there is no entry for a category name, there are no such points.
-public static map<@string, ж<RangeTable>> FoldCategory = new map<@string, ж<RangeTable>>{
+public static map<@string, ж<RangeTable>> FoldCategory;
+internal static void initᴛFoldCategory() { FoldCategory = new map<@string, ж<RangeTable>>{
     ["L"u8] = foldL,
     ["Ll"u8] = foldLl,
     ["Lt"u8] = foldLt,
     ["Lu"u8] = foldLu,
     ["M"u8] = foldM,
     ["Mn"u8] = foldMn
-};
+}; }
 
 internal static ж<RangeTable> foldL = Ꮡ(new RangeTable(
     R16: new Range16[]{
@@ -8842,11 +8847,12 @@ internal static ж<RangeTable> foldMn = Ꮡ(new RangeTable(
 // code points outside the script that are equivalent under
 // simple case folding to code points inside the script.
 // If there is no entry for a script name, there are no such points.
-public static map<@string, ж<RangeTable>> FoldScript = new map<@string, ж<RangeTable>>{
+public static map<@string, ж<RangeTable>> FoldScript;
+internal static void initᴛFoldScript() { FoldScript = new map<@string, ж<RangeTable>>{
     ["Common"u8] = foldCommon,
     ["Greek"u8] = foldGreek,
     ["Inherited"u8] = foldInherited
-};
+}; }
 
 internal static ж<RangeTable> foldCommon = Ꮡ(new RangeTable(
     R16: new Range16[]{
