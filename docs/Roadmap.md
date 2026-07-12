@@ -514,22 +514,38 @@ assembly-backed implementations are attempted at scale. The detailed and authori
 [`TestingInfrastructureRequirements.md`](TestingInfrastructureRequirements.md); this section tracks the
 delivery sequence and exit gates.
 
-### Phase 4 operational blockers cleared so far (running programs, ahead of the test harness)
+### 🎉 First operational milestone (2026-07-12): a converted `fmt.Println("hi")` RUNS and prints
 
-- **Native `sync` primitives** (2026-07-11, `e36dea3aa`) — Go's runtime sleeping semaphore cannot be
-  emulated; `Mutex`/`RWMutex`/`WaitGroup` are hand-owned native rewrites on .NET primitives (see
-  [DESIGN-recursive-enduser-conversion → Operational stdlib](Phase3/DESIGN-recursive-enduser-conversion.md#operational-stdlib--native-sync-primitives-2026-07-11-phase-4-start)).
-- **Package-level var initialization order** (2026-07-11) — general converter fix: initializers whose Go
-  dependency order (`types.Info.InitOrder`, resolved transitively through package function bodies) C#'s
-  static-field-initializer order cannot reproduce are relocated into per-file `initᴛ<name>()` methods
-  called by a generated `package_init.cs` static constructor. First crash of any program importing `os`
-  (syscall's `modkernel32`/`procGetStdHandle` cross-file reads). ~11 stdlib packages relocate anything;
-  the rest are byte-identical. See
-  [ConversionStrategies-Reference → Package-Level Variable Initialization Order](ConversionStrategies-Reference.md#package-level-variable-initialization-order);
-  guarded by the `PackageVarInitOrder` behavioral test.
-- **Next:** the Windows syscall FFI (`loadlibrary`/`getprocaddress`/`SyscallN` trampolines are throwing
-  stubs) and `time`'s runtime clock linknames — the remaining blockers between a converted
-  `fmt.Println("hi")` and stdout.
+A `-recurse`-converted `fmt.Println("hi")` program builds against the full converted stdlib and prints
+`hi` to stdout, byte-identical to `go run .`. Reaching it meant clearing a **ten-layer startup crash
+chain** — every layer a fix committed and validated (full behavioral suite + deployed stdlib build green
+at each step). This is the minimum Phase-4 operational bar. In order:
+
+1. **Native `sync` primitives** (`e36dea3aa`) — Go's runtime sleeping semaphore cannot be emulated;
+   `Mutex`/`RWMutex`/`WaitGroup` are hand-owned native rewrites on .NET primitives (see
+   [DESIGN → Operational stdlib](Phase3/DESIGN-recursive-enduser-conversion.md#operational-stdlib--native-sync-primitives-2026-07-11-phase-4-start)).
+2. **Package-level var initialization order** (`e39855770`) — relocate initializers whose Go dependency
+   order (`types.Info.InitOrder`, resolved transitively through package function bodies) C#'s static-field
+   order cannot reproduce, into a generated `package_init.cs` static ctor. First crash of any `os` import.
+   Guard `PackageVarInitOrder`.
+3. **Operational groundwork** (`a7ea6d3b7`, `e299253be`) — native Windows syscall FFI (`dll_windows.cs`:
+   LoadLibrary/GetProcAddress + a `calli` `SyscallN` trampoline), `godebug` hooks, `runtime` bootstrap-init
+   suppression (`.NET is the runtime`), `efaceOf`/`gomaxprocs` seeding, native `sync.Pool`, `SetFinalizer`
+   bridge. (`runtime2.cs` marker fixup `c3f907846`.)
+4. **Nested promoted-embed init** (`0bba3f5f8`, go2cs-gen) — zero-value ctors construct struct-typed fields
+   whose type needs construction; first crash of `fmt.newPrinter`. Guard `NestedPromotedEmbedInit`.
+5. **Pointer receiver `==`/`!=` compares its box** (`78fe56a7f`) — `os.(*File).checkValid`'s `if f == nil`.
+   Guard `PointerReceiverNilCompare`.
+6. **Dead pointer-param value alias skipped** (`1a723d425`) — `syscall.writeFile`'s nil `*Overlapped`
+   deref-alias NRE. Guard `DeadPointerParamAlias`.
+7. **golib nil pointer → address 0** (`5a4ad2b1b`) — `uintptr(unsafe.Pointer(nil))` == 0 instead of
+   throwing; the final layer, reaching the OS `WriteFile`. Guard `NilPointerUintptr`.
+
+**Next:** the `fatih/color` `-recurse` sample (exercises isatty/`GetConsoleMode` + `WriteConsole`, an
+untested path — a redirected/piped stdout takes the `WriteFile` path proven above), then Go's own
+`_test.go` suites (Phase 4 proper, below). Still open: dereferencing an *actually-nil* receiver/param NREs
+at the deref alias (the nil-safe `DerefOrNil` accessor is not yet extended from nil-walked params to
+receivers / live aliases); `time`'s runtime clock linknames.
 
 The behavioral suite proves individual converter/runtime constructs using hand-written fixtures. Phase 4
 adds the complementary whole-package gate: load Go's internal and external test-package variants, convert
