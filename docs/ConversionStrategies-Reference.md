@@ -4424,6 +4424,28 @@ One call-site emission cooperates (`convCallExpr.go`): a conversion **to** a man
 
 **The runtime lock/note model (`core/runtime/lock_sema_impl.cs`).** Go's `mutex.key` is a tagged atomic slot — 0 unlocked, `locked` (1) held, or an `*m` address|locked heading a waiter chain through `m.nextwaitm`, parked on OS semaphores. The managed model hand-owns `mutexContended`/`lock2`/`unlock2`/`notewakeup`/`notesleep`/`notetsleep_internal` (via the same registry; thin wrappers and consts stay auto) and keeps the **same key protocol restricted to `{0, locked}`**: the mutex is an `Interlocked` spinlock on the real `key` storage with `SpinWait` escalation standing in for the spin→yield→park ladder; the note is a signaled/clear latch (double-wakeup throw preserved; timeout at millisecond granularity). Deliberately not modeled, documented in place: the waiter queue (fairness), lock profiling, and the `m.locks`/preempt bookkeeping — `getg()` is a Go compiler intrinsic with no managed realization yet (a `[ThreadStatic]` g/m model is the future root that unlocks runtime-operational semantics; the bookkeeping returns to these bodies when it lands).
 
+**`sync/atomic.Value` (`core/sync/atomic/value.cs`, whole-file).** Go's `atomic.Value` stores and loads an `any` atomically by reinterpreting the interface's internal two-word `(type, data)` layout: `(*efaceWords)(unsafe.Pointer(&v))`, then `atomic.LoadPointer`/`StorePointer`/`CompareAndSwapPointer` on the `typ` and `data` slots, with a `firstStoreInProgress` sentinel guarding the first store. That layout is a Go runtime detail with **no managed equivalent** — an `any` here is a single `System.Object` reference (one word), and reinterpreting a managed reference as a raw address to poke type/data words simply NREs (the same managed-referent-through-`unsafe.Pointer` wall as the guintptr family). The first *operational* hit was `internal/testlog`'s package-level `var logger atomic.Value`, loaded during `os.Getenv` — so `atomic.Value.Load()` NRE'd on the zero value before any store. The whole file is hand-rewritten (marked `[module: GoManualConversion]`) to store the `any` **directly** in the `Value.v` field and use `Volatile.Read`/`Interlocked.CompareExchange` for the acquire/release ordering and CAS the literal conversion cannot provide; the nil-store and inconsistent-type panics, and `CompareAndSwap`'s by-value comparison (`AreEqual`, matching Go's `i != old`), preserve the spec. Guarded by the `AtomicValue` behavioral test (Load-nil / Store / Swap / CompareAndSwap over typed string values, output-compared vs Go).
+
+### A cross-package `//go:linkname` PULL emits a forwarder, not a throwing stub
+
+A bodyless function carrying `//go:linkname <local> <pkgpath>.<func>` (a three-field directive naming another package) is a **PULL** — the function has no body of its own and links to another package's (often unexported) symbol. `golang.org/x/sys/windows`'s `LazyDLL`/`LazyProc` reach the Go runtime's DLL loaders this way:
+
+```go
+//go:linkname syscall_loadlibrary syscall.loadlibrary
+func syscall_loadlibrary(filename *uint16) (handle Handle, err Errno)
+```
+
+Left as an ordinary bodyless declaration, it would emit a `partial` that the [`PartialStubGenerator`](#source-generators) turns into a **throwing** stub — dead DLL loading. The converter (`visitFuncDecl.go`) instead recognizes the directive and emits a **forwarder body** that calls the target, bridging any nominal `num:uintptr` type difference through `uintptr` (the linked signatures are structurally identical, so a mismatch is only between two such types):
+
+```csharp
+internal static (ΔHandle handle, Errno err) syscall_loadlibrary(ж<uint16> filename) {
+    var (ᴛ1, ᴛ2) = syscall.loadlibrary(filename);
+    return ((ΔHandle)(uintptr)ᴛ1, (Errno)(uintptr)ᴛ2);
+}
+```
+
+Pointer/slice/string parameters (`filename`) pass through unchanged (the same golib type on both sides); an integer/uintptr parameter is passed `(uintptr)p` and an integer/uintptr result returned `(LocalType)(uintptr)r`. The target alias is the last path segment of the linkname's package (`syscall.loadlibrary`), resolved through the importing file's own `using syscall = syscall_package;`. The `syscall.loadlibrary`/`loadsystemlibrary`/`getprocaddress` targets are hand-owned native P/Invokes in `core/syscall/dll_windows.cs`, so the forwarder makes x/sys's lazy-DLL machinery reach real `LoadLibraryExW`/`GetProcAddress`. A bare `//go:linkname name` (a PUSH that merely *exposes* a local symbol) is not a forwarder and stays a stub. Guarded by `TestRecurseLinknameForwarder` (asserts the forwarder body + the uintptr result bridge, not a bodyless partial).
+
 ## Deterministic Output
 
 Converter output is **byte-reproducible**: converting the same Go source with the same converter build produces byte-identical C# every run. This is a hard guarantee the goldens, the full-conversion error measurements, and any future release tag all rest on. Three mechanisms enforce it (all landed 2026-07-01, proven by two consecutive full-stdlib conversions diffing to zero across 305 packages):
