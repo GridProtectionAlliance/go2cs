@@ -1,89 +1,54 @@
 // Copyright 2014 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go.sync;
+using System.Threading;
 
-using @unsafe = unsafe_package;
+[module: go.GoManualConversion]
+
+namespace go.sync;
 
 partial class atomic_package {
 
 // A Value provides an atomic load and store of a consistently typed value.
 // The zero value for a Value returns nil from [Value.Load].
-// Once [Value.Store] has been called, a Value must not be copied.
 //
 // A Value must not be copied after first use.
 [GoType] partial struct Value {
     internal any v;
 }
 
-// efaceWords is interface{} internal representation.
-[GoType] partial struct efaceWords {
-    internal @unsafe.Pointer typ;
-    internal @unsafe.Pointer data;
-}
+// NATIVE reimplementation (hand-owned — this file carries [module: GoManualConversion], so a
+// -stdlib reconvert will not regenerate the Go version over it). Go's atomic.Value manipulates an
+// interface's internal (type, data) words through unsafe.Pointer/efaceWords to load and store an
+// `any` atomically. That two-word layout is a Go runtime detail with NO managed equivalent: here an
+// `any` is a single System.Object reference, so the whole value is one word. Reinterpreting a
+// managed reference as a raw address and poking type/data words simply NREs (the S1
+// managed-referent-through-unsafe.Pointer case — internal/testlog's package-level
+// `var logger atomic.Value`, loaded during os.Getenv, was the first operational hit). We store the
+// value directly in `v` and use Volatile/Interlocked for the acquire/release ordering and CAS the
+// literal conversion cannot provide. The nil-store and inconsistent-type panics match Go's spec.
 
 // Load returns the value set by the most recent Store.
 // It returns nil if there has been no call to Store for this Value.
-public static any /*val*/ Load(this ж<Value> Ꮡv) {
-    any val = default!;
-
-    ref var v = ref Ꮡv.Value;
-    var vp = (ж<efaceWords>)(uintptr)(@unsafe.Pointer.FromRef(ref v));
-    @unsafe.Pointer typ = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡtyp));
-    if (typ == nil || typ.Value == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
-        // First store not yet completed.
-        return default!;
-    }
-    @unsafe.Pointer data = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡdata));
-    var vlp = (ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(val)));
-    vlp.Value.typ = typ;
-    vlp.Value.data = data;
-    return val;
+[GoRecv] public static any /*val*/ Load(this ref Value v) {
+    return Volatile.Read(ref v.v);
 }
-
-internal static ж<byte> ᏑfirstStoreInProgress = new(default(byte));
-internal static ref byte firstStoreInProgress => ref ᏑfirstStoreInProgress.Value;
 
 // Store sets the value of the [Value] v to val.
 // All calls to Store for a given Value must use values of the same concrete type.
 // Store of an inconsistent type panics, as does Store(nil).
-public static void Store(this ж<Value> Ꮡv, any val) {
-    ref var v = ref Ꮡv.Value;
-
+[GoRecv] public static void Store(this ref Value v, any val) {
     if (val == default!) {
         throw panic("sync/atomic: store of nil value into Value");
     }
-    var vp = (ж<efaceWords>)(uintptr)(@unsafe.Pointer.FromRef(ref v));
-    var vlp = (ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(val)));
     while (ᐧ) {
-        @unsafe.Pointer typ = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡtyp));
-        if (typ == nil) {
-            // Attempt to start first store.
-            // Disable preemption so that other goroutines can use
-            // active spin wait to wait for completion.
-            runtime_procPin();
-            if (!CompareAndSwapPointer(vp.of(efaceWords.Ꮡtyp), nil, new @unsafe.Pointer(ᏑfirstStoreInProgress))) {
-                runtime_procUnpin();
-                continue;
-            }
-            // Complete first store.
-            StorePointer(vp.of(efaceWords.Ꮡdata), (~vlp).data);
-            StorePointer(vp.of(efaceWords.Ꮡtyp), (~vlp).typ);
-            runtime_procUnpin();
-            return;
-        }
-        if (typ.Value == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
-            // First store in progress. Wait.
-            // Since we disable preemption around the first store,
-            // we can wait with active spinning.
-            continue;
-        }
-        // First store completed. Check type and overwrite data.
-        if (typ.Value != (~vlp).typ) {
+        any cur = Volatile.Read(ref v.v);
+        if (cur != default! && cur.GetType() != val.GetType()) {
             throw panic("sync/atomic: store of inconsistently typed value into Value");
         }
-        StorePointer(vp.of(efaceWords.Ꮡdata), (~vlp).data);
-        return;
+        if (ReferenceEquals(Interlocked.CompareExchange(ref v.v, val, cur), cur)) {
+            return;
+        }
     }
 }
 
@@ -92,47 +57,18 @@ public static void Store(this ж<Value> Ꮡv, any val) {
 //
 // All calls to Swap for a given Value must use values of the same concrete
 // type. Swap of an inconsistent type panics, as does Swap(nil).
-public static any /*old*/ Swap(this ж<Value> Ꮡv, any @new) {
-    any old = default!;
-
-    ref var v = ref Ꮡv.Value;
+[GoRecv] public static any /*old*/ Swap(this ref Value v, any @new) {
     if (@new == default!) {
         throw panic("sync/atomic: swap of nil value into Value");
     }
-    var vp = (ж<efaceWords>)(uintptr)(@unsafe.Pointer.FromRef(ref v));
-    var np = (ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(@new)));
     while (ᐧ) {
-        @unsafe.Pointer typ = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡtyp));
-        if (typ == nil) {
-            // Attempt to start first store.
-            // Disable preemption so that other goroutines can use
-            // active spin wait to wait for completion; and so that
-            // GC does not see the fake type accidentally.
-            runtime_procPin();
-            if (!CompareAndSwapPointer(vp.of(efaceWords.Ꮡtyp), nil, new @unsafe.Pointer(ᏑfirstStoreInProgress))) {
-                runtime_procUnpin();
-                continue;
-            }
-            // Complete first store.
-            StorePointer(vp.of(efaceWords.Ꮡdata), (~np).data);
-            StorePointer(vp.of(efaceWords.Ꮡtyp), (~np).typ);
-            runtime_procUnpin();
-            return default!;
-        }
-        if (typ.Value == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
-            // First store in progress. Wait.
-            // Since we disable preemption around the first store,
-            // we can wait with active spinning.
-            continue;
-        }
-        // First store completed. Check type and overwrite data.
-        if (typ.Value != (~np).typ) {
+        any cur = Volatile.Read(ref v.v);
+        if (cur != default! && cur.GetType() != @new.GetType()) {
             throw panic("sync/atomic: swap of inconsistently typed value into Value");
         }
-        var op = (ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(old)));
-        op.Value.typ = np.Value.typ;
-        op.Value.data = (uintptr)SwapPointer(vp.of(efaceWords.Ꮡdata), (~np).data);
-        return old;
+        if (ReferenceEquals(Interlocked.CompareExchange(ref v.v, @new, cur), cur)) {
+            return cur;
+        }
     }
 }
 
@@ -141,69 +77,37 @@ public static any /*old*/ Swap(this ж<Value> Ꮡv, any @new) {
 // All calls to CompareAndSwap for a given Value must use values of the same
 // concrete type. CompareAndSwap of an inconsistent type panics, as does
 // CompareAndSwap(old, nil).
-public static bool /*swapped*/ CompareAndSwap(this ж<Value> Ꮡv, any old, any @new) {
-    bool swapped = default!;
-
-    ref var v = ref Ꮡv.Value;
+[GoRecv] public static bool /*swapped*/ CompareAndSwap(this ref Value v, any old, any @new) {
     if (@new == default!) {
         throw panic("sync/atomic: compare and swap of nil value into Value");
     }
-    var vp = (ж<efaceWords>)(uintptr)(@unsafe.Pointer.FromRef(ref v));
-    var np = (ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(@new)));
-    var op = (ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(old)));
-    if ((~op).typ != nil && (~np).typ != (~op).typ) {
+    if (old != default! && old.GetType() != @new.GetType()) {
         throw panic("sync/atomic: compare and swap of inconsistently typed values");
     }
     while (ᐧ) {
-        @unsafe.Pointer typ = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡtyp));
-        if (typ == nil) {
+        any cur = Volatile.Read(ref v.v);
+        if (cur == default!) {
+            // Value is empty: succeeds only against a nil `old`.
             if (old != default!) {
                 return false;
             }
-            // Attempt to start first store.
-            // Disable preemption so that other goroutines can use
-            // active spin wait to wait for completion; and so that
-            // GC does not see the fake type accidentally.
-            runtime_procPin();
-            if (!CompareAndSwapPointer(vp.of(efaceWords.Ꮡtyp), nil, new @unsafe.Pointer(ᏑfirstStoreInProgress))) {
-                runtime_procUnpin();
-                continue;
+            if (ReferenceEquals(Interlocked.CompareExchange(ref v.v, @new, null), null)) {
+                return true;
             }
-            // Complete first store.
-            StorePointer(vp.of(efaceWords.Ꮡdata), (~np).data);
-            StorePointer(vp.of(efaceWords.Ꮡtyp), (~np).typ);
-            runtime_procUnpin();
-            return true;
-        }
-        if (typ.Value == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
-            // First store in progress. Wait.
-            // Since we disable preemption around the first store,
-            // we can wait with active spinning.
             continue;
         }
-        // First store completed. Check type and overwrite data.
-        if (typ.Value != (~np).typ) {
+        if (cur.GetType() != @new.GetType()) {
             throw panic("sync/atomic: compare and swap of inconsistently typed value into Value");
         }
-        // Compare old and current via runtime equality check.
-        // This allows value types to be compared, something
-        // not offered by the package functions.
-        // CompareAndSwapPointer below only ensures vp.data
-        // has not changed since LoadPointer.
-        @unsafe.Pointer data = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡdata));
-        ref var i = ref heap<any>(out var Ꮡi);
-        ((ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡi))).Value.typ = typ;
-        ((ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡi))).Value.data = data;
-        if (!AreEqual(i, old)) {
+        // Compare current to old via runtime equality (value types compare by value), matching Go's
+        // `i != old`. A mismatch fails without swapping.
+        if (!AreEqual(cur, old)) {
             return false;
         }
-        return CompareAndSwapPointer(vp.of(efaceWords.Ꮡdata), data, (~np).data);
+        if (ReferenceEquals(Interlocked.CompareExchange(ref v.v, @new, cur), cur)) {
+            return true;
+        }
     }
 }
-
-// Disable/enable preemption, implemented in runtime.
-internal static partial nint runtime_procPin();
-
-internal static partial void runtime_procUnpin();
 
 } // end atomic_package

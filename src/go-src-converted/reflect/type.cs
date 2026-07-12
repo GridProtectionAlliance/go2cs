@@ -510,15 +510,7 @@ internal static @unsafe.Pointer textOffFor(ж<abi.Type> Ꮡt, aTextOff off) {
     return (uintptr)toRType(Ꮡt).textOff(off);
 }
 
-internal static @string String(this ж<rtype> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
-    @string s = Ꮡt.nameOff(t.t.Str).Name();
-    if ((abi.TFlag)(t.t.TFlag & abi.TFlagExtraStar) != 0) {
-        return s[1..];
-    }
-    return s;
-}
+// func String is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
 [GoRecv] internal static uintptr Size(this ref rtype t) {
     return t.t.Size();
@@ -658,30 +650,7 @@ internal static @string pkgPathFor(ж<abi.Type> Ꮡt) {
     return toRType(Ꮡt).PkgPath();
 }
 
-internal static @string Name(this ж<rtype> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
-    if (!t.t.HasName()) {
-        return ""u8;
-    }
-    @string s = Ꮡt.String();
-    nint i = len(s) - 1;
-    nint sqBrackets = 0;
-    while (i >= 0 && (s[i] != (rune)'.' || sqBrackets != 0)) {
-        switch (s[i]) {
-        case (rune)']': {
-            sqBrackets++;
-            break;
-        }
-        case (rune)'[': {
-            sqBrackets--;
-            break;
-        }}
-
-        i--;
-    }
-    return s[(int)(i + 1)..];
-}
+// func Name is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
 internal static @string nameFor(ж<abi.Type> Ꮡt) {
     return toRType(Ꮡt).Name();
@@ -709,19 +678,9 @@ internal static ж<abi.Type> elem(ж<abi.Type> Ꮡt) {
     throw panic("reflect: Elem of invalid type " + stringFor(Ꮡt));
 }
 
-internal static ΔType Elem(this ж<rtype> Ꮡt) {
-    return toType(elem(Ꮡt.common()));
-}
+// func Elem is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
-internal static StructField Field(this ж<rtype> Ꮡt, nint i) {
-    ref var t = ref Ꮡt.Value;
-
-    if (t.Kind() != Struct) {
-        throw panic("reflect: Field of non-struct type " + Ꮡt.String());
-    }
-    var tt = (ж<structType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
-    return tt.Field(i);
-}
+// func Field is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
 internal static StructField FieldByIndex(this ж<rtype> Ꮡt, slice<nint> index) {
     ref var t = ref Ꮡt.Value;
@@ -773,15 +732,7 @@ internal static nint Len(this ж<rtype> Ꮡt) {
     return (nint)(~tt).Len;
 }
 
-internal static nint NumField(this ж<rtype> Ꮡt) {
-    ref var t = ref Ꮡt.Value;
-
-    if (t.Kind() != Struct) {
-        throw panic("reflect: NumField of non-struct type " + Ꮡt.String());
-    }
-    var tt = (ж<structType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
-    return len((~tt).Fields);
-}
+// func NumField is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
 internal static ΔType In(this ж<rtype> Ꮡt, nint i) {
     ref var t = ref Ꮡt.Value;

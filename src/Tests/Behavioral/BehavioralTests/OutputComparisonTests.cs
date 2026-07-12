@@ -88,6 +88,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAtomicFieldThroughPointer() => CheckTarget("AtomicFieldThroughPointer");
 
     [TestMethod]
+    public void CheckAtomicValue() => CheckTarget("AtomicValue");
+
+    [TestMethod]
     public void CheckAtomicValues() => CheckTarget("AtomicValues");
 
     [TestMethod]
@@ -494,6 +497,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckMakeSliceUintptrLen() => CheckTarget("MakeSliceUintptrLen");
+
+    [TestMethod]
+    public void CheckManagedAtomicPointer() => CheckTarget("ManagedAtomicPointer");
 
     [TestMethod]
     public void CheckMapAnonStructValue() => CheckTarget("MapAnonStructValue");
@@ -950,6 +956,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSwitchDefaultOrder() => CheckTarget("SwitchDefaultOrder");
+
+    [TestMethod]
+    public void CheckSwitchFallthroughDefault() => CheckTarget("SwitchFallthroughDefault");
 
     [TestMethod]
     public void CheckSwitchFallthroughDefaultReturn() => CheckTarget("SwitchFallthroughDefaultReturn");

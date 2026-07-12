@@ -743,12 +743,23 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		v.replaceMarker(functionUnsafeMarker, "")
 	}
 
+	// A bodyless func carrying `//go:linkname localName otherPkg.func` PULLS another package's
+	// (often unexported) function by symbol — golang.org/x/sys/windows's LazyDLL/LazyProc reach
+	// syscall.loadlibrary/loadsystemlibrary/getprocaddress this way. Route it: emit a forwarder body
+	// that calls the target, instead of a throwing partial stub. Detected here so the `partial`
+	// modifier is dropped (it now has a body); the body is written at the signatureOnly branch below.
+	linknameAlias, linknameFunc, hasLinknameForward := "", "", false
+
+	if funcDecl.Body == nil {
+		linknameAlias, linknameFunc, hasLinknameForward = v.funcLinknameForward(funcDecl)
+	}
+
 	// A nil body means the Go function is implemented externally (assembly or cgo):
 	// emit a `partial` declaration. Its implementation is supplied either by a
 	// hand-written companion (e.g. sync/atomic's doc_impl.cs) or, when none exists, by
 	// the PartialStubGenerator (go2cs-gen), which emits a throwing default so the code
 	// still compiles.
-	if funcDecl.Body == nil {
+	if funcDecl.Body == nil && !hasLinknameForward {
 		v.replaceMarker(functionPartialMarker, " partial")
 	} else {
 		v.replaceMarker(functionPartialMarker, "")
@@ -870,9 +881,14 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			v.writeOutputLn(");")
 		}
 	} else if signatureOnly {
-		// Bodyless (assembly/cgo) function: emit a `partial` declaration; the body is
-		// supplied by a hand-written companion or the PartialStubGenerator.
-		v.writeOutputLn(";")
+		if hasLinknameForward {
+			// Cross-package //go:linkname pull — emit a forwarder body calling the target.
+			v.writeLinknameForwarder(signature, linknameAlias, linknameFunc)
+		} else {
+			// Bodyless (assembly/cgo) function: emit a `partial` declaration; the body is
+			// supplied by a hand-written companion or the PartialStubGenerator.
+			v.writeOutputLn(";")
+		}
 	} else {
 		v.targetFile.WriteString(v.newline)
 	}
@@ -1474,4 +1490,177 @@ func (v *Visitor) getTempVarName(varPrefix string) string {
 	v.tempVarCount[varPrefix] = count
 
 	return fmt.Sprintf("%s%s%d", varPrefix, TempVarMarker, count)
+}
+
+// linknameForwardTargets is the whitelist of cross-package //go:linkname PULL targets the converter
+// emits a forwarder body for — the specific NATIVE functions hand-implemented in the converted
+// standard library (syscall's Windows DLL loaders, reached by golang.org/x/sys/windows's LazyDLL /
+// LazyProc). A linkname target is INDISTINGUISHABLE at conversion time from any other bodyless
+// assembly/intrinsic Go function — syscall.loadlibrary and runtime.reflectcall are both bodyless asm
+// in Go — so forwarding is gated on this explicit set: only these have a real C# implementation to
+// call. Every other linkname pull (a method-receiver PUSH like reflect's badlinkname.go, a
+// same-package pull, or an unimplemented intrinsic like runtime.reflectcall) stays a bodyless stub,
+// the pre-forwarder behavior. Extend this set when a new native linkname target gains a hand-written
+// C# implementation.
+var linknameForwardTargets = map[string]bool{
+	"syscall.loadlibrary":       true,
+	"syscall.loadsystemlibrary": true,
+	"syscall.getprocaddress":    true,
+}
+
+// funcLinknameForward recognizes a bodyless function carrying a `//go:linkname <thisFunc>
+// <pkgpath>.<targetFunc>` directive whose target is a hand-implemented native function
+// (linknameForwardTargets). It returns the C# alias for the target package (the last path segment,
+// the `using <name> = <name>_package;` alias the importing file emits) and the target function name,
+// so the converter can emit a forwarder call to it instead of a throwing stub.
+func (v *Visitor) funcLinknameForward(funcDecl *ast.FuncDecl) (alias string, targetFunc string, ok bool) {
+	if funcDecl.Doc == nil || funcDecl.Name == nil {
+		return "", "", false
+	}
+
+	for _, comment := range funcDecl.Doc.List {
+		fields := strings.Fields(comment.Text)
+
+		// //go:linkname <local> <pkgpath>.<func>
+		if len(fields) != 3 || fields[0] != "//go:linkname" || fields[1] != funcDecl.Name.Name {
+			continue
+		}
+
+		target := fields[2]
+
+		if !linknameForwardTargets[target] {
+			return "", "", false
+		}
+
+		dot := strings.LastIndex(target, ".")
+		pkgPath := target[:dot]
+		targetFunc = getSanitizedFunctionName(target[dot+1:])
+
+		// The C# using-alias is the package's simple name — the last path segment (`syscall`).
+		if slash := strings.LastIndex(pkgPath, "/"); slash >= 0 {
+			pkgPath = pkgPath[slash+1:]
+		}
+
+		return getSanitizedIdentifier(pkgPath), targetFunc, true
+	}
+
+	return "", "", false
+}
+
+// linknameForwardArgName returns the C# identifier a parameter was emitted under in the forwarder's
+// signature, so the forwarder can pass it through to the target. It mirrors the naming decisions of
+// generateParametersSignature (blank/duplicate-blank synthesis, variable-analysis shadow renames,
+// heap-box aliasing, variadic naming) so the argument matches the declared parameter exactly.
+func (v *Visitor) linknameForwardArgName(param *types.Var, i int, dupBlank bool, variadic bool) string {
+	if variadic {
+		return getVariadicParamName(param)
+	}
+
+	paramName := param.Name()
+
+	if paramName == "" || paramName == "_" {
+		if dupBlank {
+			return fmt.Sprintf("_%sp%d", ShadowVarMarker, i)
+		}
+
+		return "_"
+	}
+
+	if adjusted, ok := v.varNames[param]; ok && adjusted != "" {
+		paramName = adjusted
+	}
+
+	if v.paramNeedsHeapBox(param) || v.funcLitHeapBoxParamNames.Contains(param.Name()) {
+		return getHeapBoxParamName(param)
+	}
+
+	return getSanitizedIdentifier(paramName)
+}
+
+// writeLinknameForwarder emits the body of a cross-package //go:linkname forwarder: a call to
+// `<alias>.<targetFunc>(args)` with the local parameters passed through and the results returned.
+// Because the target and local signatures are linkname-compatible (structurally identical Go
+// types), any nominal C# type difference is between `num:uintptr`-kind types on both sides, so a
+// mismatch is bridged through `uintptr` — an integer/uintptr parameter is passed `(uintptr)p`, and
+// an integer/uintptr result is returned `(LocalType)(uintptr)r`. Non-integer params/results
+// (pointers, slices, strings) are the same golib type on both sides and pass through directly.
+func (v *Visitor) writeLinknameForwarder(signature *types.Signature, alias string, targetFunc string) {
+	params := signature.Params()
+	dupBlank := hasDuplicateBlankParams(params) || bodyUsesBlankDiscard(v.currentFuncDecl)
+	args := make([]string, params.Len())
+
+	for i := 0; i < params.Len(); i++ {
+		param := params.At(i)
+		name := v.linknameForwardArgName(param, i, dupBlank, signature.Variadic() && i == params.Len()-1)
+
+		if v.isUintptrBridgeable(param.Type()) {
+			name = "(uintptr)" + name
+		}
+
+		args[i] = name
+	}
+
+	call := fmt.Sprintf("%s.%s(%s)", alias, targetFunc, strings.Join(args, ", "))
+
+	results := signature.Results()
+
+	savedIndent := v.indentLevel
+	v.indentLevel = 0
+
+	bodyIndent := v.indent(savedIndent + 1)
+	closeIndent := v.indent(savedIndent)
+
+	var body strings.Builder
+	body.WriteString(" {")
+	body.WriteString(v.newline)
+
+	switch results.Len() {
+	case 0:
+		body.WriteString(fmt.Sprintf("%s%s;", bodyIndent, call))
+	case 1:
+		body.WriteString(fmt.Sprintf("%sreturn %s;", bodyIndent, v.bridgeLinknameResult(call, results.At(0).Type())))
+	default:
+		names := make([]string, results.Len())
+		bridged := make([]string, results.Len())
+
+		for i := 0; i < results.Len(); i++ {
+			names[i] = fmt.Sprintf("%s%d", TempVarMarker, i+1)
+			bridged[i] = v.bridgeLinknameResult(names[i], results.At(i).Type())
+		}
+
+		body.WriteString(fmt.Sprintf("%svar (%s) = %s;", bodyIndent, strings.Join(names, ", "), call))
+		body.WriteString(v.newline)
+		body.WriteString(fmt.Sprintf("%sreturn (%s);", bodyIndent, strings.Join(bridged, ", ")))
+	}
+
+	body.WriteString(v.newline)
+	body.WriteString(closeIndent)
+	body.WriteString("}")
+
+	v.writeOutputLn(body.String())
+	v.indentLevel = savedIndent
+}
+
+// bridgeLinknameResult wraps a target-call result expression so it matches the local result type:
+// an integer/uintptr result is cast through `uintptr` (`(LocalType)(uintptr)expr`), covering the
+// nominal difference between two `num:uintptr` types across the linkname; any other type is the
+// same golib type on both sides and passes through unchanged.
+func (v *Visitor) bridgeLinknameResult(expr string, localType types.Type) string {
+	if v.isUintptrBridgeable(localType) {
+		return fmt.Sprintf("(%s)(uintptr)%s", v.getCSTypeName(localType), expr)
+	}
+
+	return expr
+}
+
+// isUintptrBridgeable reports whether t is an integer/uintptr-kind type — one that converts to and
+// from `uintptr`, so a linkname forwarder can bridge a nominal mismatch between two such types.
+func (v *Visitor) isUintptrBridgeable(t types.Type) bool {
+	if t == nil {
+		return false
+	}
+
+	basic, ok := t.Underlying().(*types.Basic)
+
+	return ok && basic.Info()&types.IsInteger != 0
 }

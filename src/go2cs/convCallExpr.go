@@ -1663,6 +1663,25 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		}
 	}
 
+	// sync/atomic.LoadPointer/StorePointer on a MANAGED pointer field — the lock-free
+	// `atomic.LoadPointer((*unsafe.Pointer)(unsafe.Pointer(&x.field)))` / `StorePointer(…,
+	// unsafe.Pointer(v))` idiom where `x.field` is a `*T` (a `ж<T>` reference). The literal
+	// conversion round-trips the managed reference through a transient `uintptr` address and NREs
+	// (x/sys/windows's LazyDLL/LazyProc caches). Emit the golib managed-referent overloads on the
+	// field box (`ж<ж<T>>`) instead, so the atomic read/write operates on the reference directly.
+	// A LOAD result stays `unsafe.Pointer`-typed to Go, so the caller's nil-compare still wraps it
+	// `(uintptr)… == nil`; the `ж<T> → uintptr` operator yields 0 for a nil box (see golib), so the
+	// comparison is correct without changing the surrounding emission.
+	if addrExpr, storeVal, isLoad, ok := v.managedAtomicPointerIdiom(callExpr); ok {
+		box := v.convExpr(addrExpr, nil)
+
+		if isLoad {
+			return fmt.Sprintf("%s(%s)", funcName, box)
+		}
+
+		return fmt.Sprintf("%s(%s, %s)", funcName, box, v.convExpr(storeVal, nil))
+	}
+
 	if len(typeParamExpr) > 0 && !strings.HasSuffix(funcName, typeParamExpr) {
 		// A PARTIAL Go instantiation (`Grow[S](nil, size)` — only S written, E inferred through
 		// core types) already rendered its explicit arguments into funcName; the RESOLVED full
@@ -2944,4 +2963,140 @@ func (v *Visitor) instantiatedParamType(callExpr *ast.CallExpr, i int) types.Typ
 	}
 
 	return nil
+}
+
+// managedAtomicPointerIdiom recognizes Go's lock-free managed-pointer-field atomics —
+//
+//	atomic.LoadPointer((*unsafe.Pointer)(unsafe.Pointer(&x.field)))
+//	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&x.field)), unsafe.Pointer(v))
+//
+// where `x.field` has a pointer type `*T` and so, in the managed conversion, holds a `ж<T>`
+// reference. A managed reference cannot survive the `uintptr` round-trip the literal conversion
+// emits (the pinned address is transient and reinterpreting it loses GC identity), so the
+// converter routes these to the golib overloads that operate on the field BOX (`ж<ж<T>>`)
+// directly. Returns the `&x.field` address expression (which renders as that box), and, for a
+// store, the stored value expression `v` (unwrapped from its `unsafe.Pointer(...)` conversion so
+// it renders as the plain `ж<T>` the overload takes).
+func (v *Visitor) managedAtomicPointerIdiom(callExpr *ast.CallExpr) (addrExpr ast.Expr, storeVal ast.Expr, isLoad bool, ok bool) {
+	sel, isSel := callExpr.Fun.(*ast.SelectorExpr)
+
+	if !isSel {
+		return nil, nil, false, false
+	}
+
+	fn, isFn := v.info.ObjectOf(sel.Sel).(*types.Func)
+
+	if !isFn || fn.Pkg() == nil || fn.Pkg().Path() != "sync/atomic" {
+		return nil, nil, false, false
+	}
+
+	switch fn.Name() {
+	case "LoadPointer":
+		isLoad = true
+	case "StorePointer":
+		isLoad = false
+	default:
+		return nil, nil, false, false
+	}
+
+	// arg[0] must be `(*unsafe.Pointer)(unsafe.Pointer(&x.field))` whose `x.field` is `*T`.
+	if len(callExpr.Args) < 1 {
+		return nil, nil, false, false
+	}
+
+	addrExpr = v.unwrapManagedPtrFieldAddress(callExpr.Args[0])
+
+	if addrExpr == nil {
+		return nil, nil, false, false
+	}
+
+	if isLoad {
+		return addrExpr, nil, true, len(callExpr.Args) == 1
+	}
+
+	// StorePointer's value arg is `unsafe.Pointer(v)`; the overload takes the plain `ж<T>` value.
+	if len(callExpr.Args) != 2 {
+		return nil, nil, false, false
+	}
+
+	storeVal = v.unwrapUnsafePointerConversion(callExpr.Args[1])
+
+	if storeVal == nil {
+		return nil, nil, false, false
+	}
+
+	return addrExpr, storeVal, false, true
+}
+
+// unwrapManagedPtrFieldAddress returns the `&Z` expression inside
+// `(*unsafe.Pointer)(unsafe.Pointer(&Z))` when `Z` has a pointer type `*T` (a managed `ж<T>`
+// field); nil otherwise.
+func (v *Visitor) unwrapManagedPtrFieldAddress(arg ast.Expr) ast.Expr {
+	// (*unsafe.Pointer)(inner)
+	outer, isCall := ast.Unparen(arg).(*ast.CallExpr)
+
+	if !isCall || len(outer.Args) != 1 || !v.isPointerToUnsafePointerType(outer.Fun) {
+		return nil
+	}
+
+	// unsafe.Pointer(&Z)
+	inner := v.unwrapUnsafePointerConversion(outer.Args[0])
+
+	if inner == nil {
+		return nil
+	}
+
+	// &Z
+	unary, isUnary := ast.Unparen(inner).(*ast.UnaryExpr)
+
+	if !isUnary || unary.Op != token.AND {
+		return nil
+	}
+
+	// Z must have a pointer type — its address `&Z` is then `**T`, i.e. the box of a `ж<T>` field.
+	operandType := v.info.TypeOf(unary.X)
+
+	if operandType == nil {
+		return nil
+	}
+
+	if _, isPointer := operandType.Underlying().(*types.Pointer); !isPointer {
+		return nil
+	}
+
+	return unary
+}
+
+// unwrapUnsafePointerConversion returns the argument of an `unsafe.Pointer(x)` conversion, or nil
+// when expr is not such a conversion.
+func (v *Visitor) unwrapUnsafePointerConversion(expr ast.Expr) ast.Expr {
+	call, isCall := ast.Unparen(expr).(*ast.CallExpr)
+
+	if !isCall || len(call.Args) != 1 || !v.isUnsafePointerType(call.Fun) {
+		return nil
+	}
+
+	return call.Args[0]
+}
+
+// isUnsafePointerType reports whether expr denotes the `unsafe.Pointer` type (used as a conversion
+// target).
+func (v *Visitor) isUnsafePointerType(expr ast.Expr) bool {
+	t := v.info.TypeOf(expr)
+
+	if t == nil {
+		return false
+	}
+
+	basic, isBasic := t.Underlying().(*types.Basic)
+
+	return isBasic && basic.Kind() == types.UnsafePointer
+}
+
+// isPointerToUnsafePointerType reports whether expr denotes `*unsafe.Pointer` (the conversion
+// target of the idiom's outer cast).
+func (v *Visitor) isPointerToUnsafePointerType(expr ast.Expr) bool {
+	star, isStar := ast.Unparen(expr).(*ast.StarExpr)
+
+	return isStar && v.isUnsafePointerType(star.X)
 }

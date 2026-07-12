@@ -51,6 +51,50 @@ var manualConversionFuncs = map[string]map[string]bool{
 		"notesleep":           true,
 		"notetsleep_internal": true,
 	},
+	// internal/abi.TypeOf reads an interface's type-word via unsafe.Pointer to reach a Go runtime
+	// type descriptor that has no managed form (the reflection bridge — Phase 4). type_impl.cs
+	// synthesizes an abi.Type whose Kind_ is classified from the value's managed System.Type. See
+	// docs/Phase4/DESIGN-reflection-bridge.md.
+	"internal/abi": {
+		"TypeOf": true,
+	},
+	// reflect.Value's entry + value-reader methods (the reflection bridge, Phase 2). Go reads the
+	// value through v.ptr as flat memory at computed offsets — no managed form. value_impl.cs carries
+	// the boxed managed value directly (a companion `partial struct Value { object boxed }` field) and
+	// reads it with System.Reflection + the golib container interfaces. Only the value READERS are
+	// hand-owned; Kind/Type/IsValid/CanAddr work from the flag/typ_ the entry sets. Increment 1
+	// (scalars, slices, arrays, pointers); struct Field/NumField + map MapRange land next.
+	"reflect": {
+		"ValueOf":         true,
+		"unpackEface":     true,
+		"valueInterface":  true, // a free function `valueInterface(v Value, safe bool)`, not a method
+		"Value.Interface": true,
+		"Value.Bool":      true,
+		"Value.Int":            true,
+		"Value.Uint":           true,
+		"Value.Float":          true,
+		"Value.Complex":        true,
+		"Value.String":         true,
+		"Value.IsNil":          true,
+		"Value.Len":            true,
+		"Value.Index":          true,
+		"Value.Elem":           true,
+		"Value.Bytes":          true,
+		"Value.NumField":       true,
+		"Value.Field":          true,
+		"Value.UnsafePointer":  true,
+		"Value.Pointer":        true,
+		"Value.MapRange":       true,
+		"MapIter.Next":         true,
+		"MapIter.Key":          true,
+		"MapIter.Value":        true,
+		// Type side: reflect.rtype's ΔType methods over the abi.Type's System.Type (%T, %+v names).
+		"rtype.String":   true,
+		"rtype.Name":     true,
+		"rtype.Elem":     true,
+		"rtype.Field":    true,
+		"rtype.NumField": true,
+	},
 }
 
 // isManualType reports whether the named type (raw Go name) is hand-converted in this package.
