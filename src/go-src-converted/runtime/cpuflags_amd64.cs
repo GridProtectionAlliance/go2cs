@@ -10,7 +10,7 @@ partial class runtime_package {
 
 internal static bool useAVXmemmove;
 
-[GoInit] internal static void initΔ1() {
+/* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void initΔ1() {
     // Let's remove stepping and reserved fields
     var processor = (uint32)(processorVersionInfo & 0x0FFF3FF0);
     var isIntelBridgeFamily = isIntel && processor == 0x206A0 || processor == 0x206D0 || processor == 0x306A0 || processor == 0x306E0;

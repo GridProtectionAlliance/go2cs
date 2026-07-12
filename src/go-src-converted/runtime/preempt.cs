@@ -319,7 +319,7 @@ internal static void asyncPreempt2() {
 // asyncPreempt call.
 internal static uintptr asyncPreemptStack = ~(uintptr)0;
 
-[GoInit] internal static void initΔ5() {
+/* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void initΔ5() {
     var f = findfunc(abi.FuncPCABI0(asyncPreempt));
     var total = funcMaxSPDelta(f);
     f = findfunc(abi.FuncPCABIInternal(asyncPreempt2));

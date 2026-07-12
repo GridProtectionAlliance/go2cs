@@ -200,7 +200,7 @@ internal static readonly uintptr userArenaChunkBytes = /* uintptr(int64(userAren
 internal static readonly uintptr userArenaChunkPages = /* userArenaChunkBytes / pageSize */ 512;
 internal static readonly uintptr userArenaChunkMaxAllocBytes = /* userArenaChunkBytes / 4 */ 1048576;
 
-[GoInit] internal static void init() {
+/* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void init() {
     if (userArenaChunkPages * (uintptr)pageSize != userArenaChunkBytes) {
         @throw("user arena chunk size is not a multiple of the page size"u8);
     }

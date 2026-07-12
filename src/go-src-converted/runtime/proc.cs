@@ -289,7 +289,7 @@ internal static void os_beforeExit(nint exitCode) {
     }
 }
 
-[GoInit] internal static void initΔ6() {
+/* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void initΔ6() {
     exithook.Gosched = Gosched;
     exithook.Goid = () => (~getg()).goid;
     exithook.Throw = @throw;
@@ -300,7 +300,7 @@ internal static void runExitHooks(nint code) {
 }
 
 // start forcegc helper goroutine
-[GoInit] internal static void initΔ7() {
+/* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void initΔ7() {
     goǃ(forcegchelper);
 }
 
