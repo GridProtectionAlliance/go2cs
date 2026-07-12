@@ -190,7 +190,7 @@ Here is the full round-trip for a small CLI that uses [`github.com/fatih/color`]
 which itself pulls in `github.com/mattn/go-colorable`, `github.com/mattn/go-isatty`, and `golang.org/x/sys` —
 a genuine dependency graph:
 
-**1— Prerequisite: Stage the standard library (one-time).** `deploy-core` is a build script in the go2cs repo's **`src/`**
+**1 — Prerequisite: Stage the standard library (one-time).** `deploy-core` is a build script in the go2cs repo's **`src/`**
 folder (it is *not* on your `PATH`), so run it from there. It stages the pre-converted stdlib + runtime +
 analyzer at `%GOPATH%\src\go2cs` (the "deploy root") that every converted project references. This is a
 **one-time, per-machine** setup, unrelated to any particular app — **redo it only when you pull a new go2cs
