@@ -304,6 +304,16 @@ internal static ΔType canonType(ж<abi.Type> Ꮡt) {
     }
     System.Type? st = Ꮡt.Value.sysType;
     if (st is null) {
+        // No System.Type stamped on the descriptor: the feeding path did not go through
+        // abi.synthType. Such a wrapper is UN-interned — it would compare unequal to the
+        // canonical Type for the same Go type, silently reintroducing the reversed-map-sort
+        // bug this file fixes. This branch is dead today (synthType always stamps sysType
+        // after its own nil guard, and every canonType caller feeds a synthType/abi.TypeOf
+        // box or nil), so assert to surface a future non-canonical feeder LOUDLY in dev
+        // (Debug builds) while still degrading gracefully in Release rather than crashing.
+        System.Diagnostics.Debug.Assert(false,
+            "reflect.canonType: abi.Type has no System.Type (synthType was bypassed); the " +
+            "resulting reflect.Type is non-canonical. Route the feeding path through abi.synthType.");
         return new rtypeжΔType(toRType(Ꮡt));
     }
     return s_canonTypeCache.GetOrAdd(st, _ => new rtypeжΔType(toRType(Ꮡt)));
@@ -320,7 +330,11 @@ public static ΔType Type(this ΔValue v) {
 
 // toType converts a *rtype to a client-facing reflect.Type, coalescing multiple descriptors for the
 // same underlying type into a single canonical Type (Go's gc interns descriptors; the managed bridge
-// interns here). Hand-owned so reflect.TypeOf and Type.Elem/In/Out route through canonType.
+// interns here). Hand-owned so reflect.TypeOf routes through canonType. The hand-owned rtype.Elem/
+// Field re-synthesize their element/field descriptor via abi.synthType and route here too, so they
+// are canonical as well. NOTE: rtype.In/Out/Key also call toType, but they read func/map sub-
+// descriptors that synthType never populates, so they currently NRE / return the nil Type — an
+// unimplemented bridge gap, NOT canonical (tracked separately); do not rely on their identity.
 internal static ΔType toType(ж<abi.Type> Ꮡt) {
     return canonType(Ꮡt);
 }
