@@ -294,6 +294,7 @@
     <Project Path="Tests/Behavioral/NilMapOperations/NilMapOperations.csproj" />
     <Project Path="Tests/Behavioral/PackageShadowParam/PackageShadowParam.csproj" />
     <Project Path="Tests/Behavioral/PackageShadowPointerParam/PackageShadowPointerParam.csproj" />
+    <Project Path="Tests/Behavioral/PackageVarInitOrder/PackageVarInitOrder.csproj" />
     <Project Path="Tests/Behavioral/PanicRecover/PanicRecover.csproj" />
     <Project Path="Tests/Behavioral/PartialRedeclaration/PartialRedeclaration.csproj" />
     <Project Path="Tests/Behavioral/PointerArraySlice/PointerArraySlice.csproj" />

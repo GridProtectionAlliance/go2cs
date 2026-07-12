@@ -514,6 +514,23 @@ assembly-backed implementations are attempted at scale. The detailed and authori
 [`TestingInfrastructureRequirements.md`](TestingInfrastructureRequirements.md); this section tracks the
 delivery sequence and exit gates.
 
+### Phase 4 operational blockers cleared so far (running programs, ahead of the test harness)
+
+- **Native `sync` primitives** (2026-07-11, `e36dea3aa`) — Go's runtime sleeping semaphore cannot be
+  emulated; `Mutex`/`RWMutex`/`WaitGroup` are hand-owned native rewrites on .NET primitives (see
+  [DESIGN-recursive-enduser-conversion → Operational stdlib](Phase3/DESIGN-recursive-enduser-conversion.md#operational-stdlib--native-sync-primitives-2026-07-11-phase-4-start)).
+- **Package-level var initialization order** (2026-07-11) — general converter fix: initializers whose Go
+  dependency order (`types.Info.InitOrder`, resolved transitively through package function bodies) C#'s
+  static-field-initializer order cannot reproduce are relocated into per-file `initᴛ<name>()` methods
+  called by a generated `package_init.cs` static constructor. First crash of any program importing `os`
+  (syscall's `modkernel32`/`procGetStdHandle` cross-file reads). ~11 stdlib packages relocate anything;
+  the rest are byte-identical. See
+  [ConversionStrategies-Reference → Package-Level Variable Initialization Order](ConversionStrategies-Reference.md#package-level-variable-initialization-order);
+  guarded by the `PackageVarInitOrder` behavioral test.
+- **Next:** the Windows syscall FFI (`loadlibrary`/`getprocaddress`/`SyscallN` trampolines are throwing
+  stubs) and `time`'s runtime clock linknames — the remaining blockers between a converted
+  `fmt.Println("hi")` and stdout.
+
 The behavioral suite proves individual converter/runtime constructs using hand-written fixtures. Phase 4
 adds the complementary whole-package gate: load Go's internal and external test-package variants, convert
 the eligible tests, compile them with the converted package sources, and compare their results with a clean

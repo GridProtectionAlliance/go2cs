@@ -26,6 +26,7 @@ directly (interface satisfaction, receiver overloads, struct-embedding promotion
 
 - **Packages & project structure**
   - [Package Conversion](#package-conversion)
+  - [Package-Level Variable Initialization Order](#package-level-variable-initialization-order)
   - [Compiled Library versus Source Code](#compiled-library-versus-source-code)
 - **Numbers, constants & nil**
   - [Constant Values](#constant-values)
@@ -110,6 +111,31 @@ using utf8 = go.unicode.utf8_package;    // one alias; per-file `package_info.cs
 cross-package imports & assembly references, module-aware resolution, exported type aliases crossing
 packages (the `ꓸ`-qualified `global using` round-trip), cross-package interface-satisfaction witnesses,
 build-tag/`GOOS`/`GOARCH` file selection, and the auto-generated `.slnx` solution.
+
+---
+
+## Package-Level Variable Initialization Order
+
+Go initializes package vars in **dependency order** (resolved through function calls); C# static field
+initializers run in an **undefined order across** a partial class's files. A var whose initializer
+depends — directly, through a package function, or via a func literal — on a var in another file (or
+declared later in the same file) is emitted as a bare field plus an init method beside it, and a
+generated `package_init.cs` static constructor calls those methods in Go's `InitOrder`. C# runs all
+field initializers before any static-ctor body, so the relocated initializers always see their
+non-relocated dependencies ready. Everything else keeps the readable inline form.
+
+```go
+var procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx") // modkernel32: another file
+```
+```csharp
+internal static ж<LazyProc> procSetFilePointerEx;
+internal static void initᴛprocSetFilePointerEx() { procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx"u8); }
+// package_init.cs: static syscall_package() { …; initᴛprocSetFilePointerEx(); … }
+```
+
+**Full detail:** [Reference → Package-Level Variable Initialization Order](ConversionStrategies-Reference.md#package-level-variable-initialization-order) —
+the three hazard shapes, transitive dependency analysis, moved-dependency closure, addressed globals,
+and the `PackageVarInitOrder` behavioral guard.
 
 ---
 

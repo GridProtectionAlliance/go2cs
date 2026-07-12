@@ -796,6 +796,8 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		packageDynamicTypeNames = make(map[string]string)
 		packageManualTypeNames = make(map[string]bool)
 		packageAddressedGlobals = make(map[types.Object]bool)
+		packageMovedInitVars = make(map[types.Object]int)
+		packageMovedInitMethods = make(map[int]string)
 		packageImportAliasRenames = make(map[string]string)
 		packageChildNamespaces = make(map[string]bool)
 		packageQualifiedNamespaces = make(map[string]bool)
@@ -913,6 +915,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// Find package-level vars whose address is taken (cross-file) so their
 		// declarations can be emitted as heap boxes that &global references directly.
 		collectAddressedGlobals(files, packageTypes, info)
+
+		// Find package-level var initializers whose Go dependency order cannot be reproduced by
+		// C#'s static-field-initializer order (cross-file / same-file forward reference /
+		// dependency on a relocated var — resolved transitively through package function bodies,
+		// mirroring Go's own analysis), so their initialization can be relocated into an ordered
+		// static constructor (package_init.cs).
+		collectMovedInitVars(fset, packageTypes, info, pkg.Syntax)
 
 		// Find import aliases whose name collides with a child namespace visible from the
 		// transitive import closure (CS0576) so alias emission and every package-qualifier
@@ -1483,6 +1492,14 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 			if err != nil {
 				log.Fatalf("Failed to write to package info file \"%s\": %s\n", packageInfoFileName, err)
+			}
+		}
+
+		// Emit the ordered package-var initialization file (no-op unless any initializer was
+		// relocated for init-order correctness). Package (directory) conversions only.
+		if isDir {
+			if err := writePackageInitFile(packageOutputPath, packageNamespace, packageName); err != nil {
+				log.Fatalf("Failed to write package init file for \"%s\": %s\n", packageOutputPath, err)
 			}
 		}
 	}

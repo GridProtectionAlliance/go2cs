@@ -450,9 +450,17 @@ the converter's `containsManualConversionMarker` scans each output `.cs` and ski
 matching `.go` when present (verified: `-stdlib sync` into a seeded dir leaves `mutex.cs` byte-identical,
 still the native `SemaphoreSlim` impl). Remaining polish: `RWMutex` uses `Monitor.PulseAll` (correct but
 O(n)/op under pathological contention).
-**Remaining to run `color` end-to-end:** the full-conversion `syscall` still crashes at init from
-**package-level var initialization order** (C# does not order cross-file static initializers to Go's
-dependency order — `modkernel32` is null when a proc var initializes) plus the Windows syscall FFI itself.
+**Remaining to run `color` end-to-end:** the **package-level var initialization order** crash is FIXED
+(2026-07-11) — a general converter fix, not a syscall patch: an initializer whose Go dependency order C#'s
+static-field-initializer order cannot reproduce (cross-file, same-file forward reference, or transitively
+through package function bodies — syscall's `Stdin = getStdHandle(…)` reading zsyscall's
+`procGetStdHandle`) is emitted as a bare field plus an `initᴛ<name>()` method in its home file, called in
+`types.Info.InitOrder` by a generated `package_init.cs` static constructor. See
+[ConversionStrategies-Reference → Package-Level Variable Initialization Order](../ConversionStrategies-Reference.md#package-level-variable-initialization-order);
+guarded by the `PackageVarInitOrder` behavioral test. The remaining blocker is the Windows syscall FFI
+itself: `loadlibrary`/`getprocaddress`/`SyscallN` are throwing `PartialStubGenerator` stubs, so the
+LazyDLL/LazyProc machinery needs real bodies (P/Invoke LoadLibrary/GetProcAddress + an unmanaged-call
+trampoline), or the small `os`/`syscall` entry-point set the target program needs hand-owned natively.
 
 ## 6. Open decisions (RESOLVED)
 

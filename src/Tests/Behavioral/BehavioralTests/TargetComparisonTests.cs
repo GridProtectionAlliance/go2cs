@@ -750,6 +750,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPackageShadowPointerParam() => CheckTarget("PackageShadowPointerParam");
 
     [TestMethod]
+    public void CheckPackageVarInitOrder() => CheckTarget("PackageVarInitOrder");
+
+    [TestMethod]
     public void CheckPanicRecover() => CheckTarget("PanicRecover");
 
     [TestMethod]
