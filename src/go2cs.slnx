@@ -393,6 +393,7 @@
     <Project Path="Tests/Behavioral/SynthesizedDelegateChildPkg/inner/SynthesizedDelegateChildPkg.inner.csproj" />
     <Project Path="Tests/Behavioral/SynthesizedDelegateCrossPkg/SynthesizedDelegateCrossPkg.csproj" />
     <Project Path="Tests/Behavioral/SwitchDefaultOrder/SwitchDefaultOrder.csproj" />
+    <Project Path="Tests/Behavioral/SwitchFallthroughDefault/SwitchFallthroughDefault.csproj" />
     <Project Path="Tests/Behavioral/SwitchFallthroughDefaultReturn/SwitchFallthroughDefaultReturn.csproj" />
     <Project Path="Tests/Behavioral/SwitchNonConstCaseLabel/SwitchNonConstCaseLabel.csproj" />
     <Project Path="Tests/Behavioral/SystemCollidingTypeName/SystemCollidingTypeName.csproj" />

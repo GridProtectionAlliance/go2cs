@@ -1035,6 +1035,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckSwitchDefaultOrder() => CheckTarget("SwitchDefaultOrder");
 
     [TestMethod]
+    public void CheckSwitchFallthroughDefault() => CheckTarget("SwitchFallthroughDefault");
+
+    [TestMethod]
     public void CheckSwitchFallthroughDefaultReturn() => CheckTarget("SwitchFallthroughDefaultReturn");
 
     [TestMethod]

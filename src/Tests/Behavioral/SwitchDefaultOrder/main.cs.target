@@ -54,7 +54,7 @@ internal static nint withFallthrough(bucketType typ) {
     else if (exprᴛ1 == mutexProfile) {
         n = 100;
     }
-    else { /* default: */
+    else if (!matchᴛ1) { /* default: */
         return -1;
     }
 

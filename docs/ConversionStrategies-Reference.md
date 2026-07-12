@@ -2216,6 +2216,33 @@ go/printer, go/types, internal/poll, syscall zsyscall shims). (Guarded by `Named
 — a mixed named-const + literal switch including a multi-label clause, and an all-literal switch,
 output-compared vs Go.)
 
+### A trailing `default` in a switch WITH `fallthrough` is guarded on `!match`
+A Go `switch` with no fallthroughs lowers to a plain `if / else if / … / else { default }` chain, where
+the trailing `else` correctly runs the default only when no case matched. But a `fallthrough` **breaks
+the chain**: the case that `fallthrough` targets is emitted as a SEPARATE, `!match`-guarded `if`
+(`if (fallthrough || !match && <labels>) { … }`) so it can be entered both by falling through and by a
+direct match. A trailing `default` after such a case was emitted as that `if`'s bare `else` — which
+fires whenever the fallthrough-target `if` is false, i.e. **after any matched NON-fallthrough case**, not
+only when nothing matched. fmt's `printValue` is exactly this shape:
+
+```go
+switch f.Kind() {
+case reflect.Int, …: p.fmtInteger(…)          // a matched non-fallthrough case
+case reflect.Pointer: … ; fallthrough
+case reflect.Chan, reflect.Func, reflect.UnsafePointer: p.fmtPointer(f, verb)
+default: p.unknownType(f)                        // wrongly ran after fmtInteger
+}
+```
+
+so formatting an `int` slice element ran `fmtInteger` AND then `unknownType` (→ reflect name
+resolution → a `resolveNameOff` stub → panic), breaking `%v` of every composite. The trailing default
+is now emitted `else if (!match) { /* default: */ }` (matchVarName). This is byte-equivalent to the
+bare `else` in a pure else-if chain (the default is reached only when `!match` either way) and correct
+in the broken chain, so it is a safe general lowering. Like the fallthrough-reached default, the guarded
+form leaves C# unable to prove exhaustiveness, so a value-returning terminal switch still gets its
+trailing `return default!;`. Guarded by `SwitchFallthroughDefault` (a `fallthrough`+`default` switch
+where a matched non-fallthrough case must NOT run the default, output-compared vs Go).
+
 ## Type Switch Statements
 For a Go type-switch, C#'s type-pattern `switch` works well. The runtime exposes the dynamic type via `.type()`, and the empty interface is `any`:
 
