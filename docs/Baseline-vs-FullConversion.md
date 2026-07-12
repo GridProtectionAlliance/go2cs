@@ -110,6 +110,47 @@ Once the whole stdlib compiles and the converted **Go tests** pass, a versioned 
 at that point the chicken-and-egg is gone and `core` can be dropped (behavioral tests reference NuGet) or
 replaced with prior operational `go-src-converted` source — TBD.
 
+## Hand-owning a package to make it OPERATIONAL (Phase 4) — two patterns + the marker
+
+Phase 3 stubbed the raw-metal dragons just to *compile*. Phase 4 (making packages *run*) needs the opposite
+in places: a **faithful native reimplementation** where the literal Go→C# conversion can compile but cannot
+work. The canonical case is **`sync`** (2026-07-11): its concurrency types are a state machine over the Go
+**runtime sleeping semaphore** (`//go:linkname` `Semacquire`/`Semrelease`/`notifyList`/…), which is
+co-designed with the mutex (starvation-mode ownership handed to one specific waiter via an exact ticket) and
+**cannot be emulated on any .NET primitive** — every emulation deterministically trips `sync: inconsistent
+mutex state` / `unlock of unlocked mutex` under sustained contention. The fix is to reimplement the *types*
+natively on proven .NET primitives (`Mutex`→binary `SemaphoreSlim`, `WaitGroup`→counter+latch,
+`RWMutex`→writer-preferring monitor lock). Expect more of this in Phase 4 (`time`, parts of `os`/`syscall`, …).
+
+There are **two** ways a package carries hand-owned C#, and they are NOT interchangeable:
+
+1. **`*_impl.cs` supplement — for SOME declarations in a file.** The converter emits the file normally but,
+   for types/funcs listed in `manualConversionTypes` / `manualConversionFuncs` (`manualTypeOperations.go`),
+   replaces the body with a `// … hand-converted … see the package's *_impl.cs` comment and a bodyless
+   `partial`. A hand-written `<name>_impl.cs` companion (no matching `.go`, so a reconvert never touches it)
+   supplies the real bodies. Use when only part of a converted file needs managed semantics (e.g.
+   `sync/atomic`, `runtime/lock_sema`). The `*_impl.cs` file typically also carries `[module:
+   GoManualConversion]` for documentation, but does not *need* it (nothing regenerates it).
+
+2. **Whole-file replacement — for an ENTIRE file, and it REQUIRES the marker.** When the whole `<name>.cs`
+   is hand-written (replacing the converted `<name>.go` output — e.g. sync's `mutex.cs`/`waitgroup.cs`/
+   `rwmutex.cs`), it MUST carry `[module: GoManualConversion]`, or a `-stdlib` reconvert regenerates the Go
+   version straight over it. `main.go`'s conversion loop calls `containsManualConversionMarker(<output>.cs)`
+   for each `.go` file and **drops that file from the conversion set when the marker is present**
+   (`directiveOperations.go`). This is the ONLY thing that makes a whole-file native reimplementation
+   durable across reconverts.
+
+Marker mechanics: `[AttributeTargets.Module, AllowMultiple = true]` (golib `GoManualConversionAttribute`), so
+one per file across a package is fine. The scanner wants it **before the first class**, so place it after the
+`using`s and before the file-scoped namespace, written `[module: go.GoManualConversion]` (fully qualified so
+it resolves without a `using go;`). **Verify** a whole-file override survives by reconverting the package into
+a dir seeded with the hand-written file and confirming it stays byte-identical
+(`go2cs -stdlib -go2cspath <seeded-root> <pkg>` → the marked `.cs` is untouched).
+
+The rule from *§5* still holds: canonical hand-owned files live under `src/core/<pkg>` and are overlaid into
+`src/go-src-converted/<pkg>` (`overlay.sh`) — with the marker, an overlaid whole-file override then survives
+the next reconvert instead of being clobbered.
+
 ## Regenerating the full conversion
 
 Current Go converter (authoritative flags in `src/go2cs/main.go`):

@@ -286,6 +286,17 @@ construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructField
     there is fine). The canonical `[module: GoManualConversion]` / `*_impl.cs` files are hand-owned in `core`
     and must be copied **back into `go-src-converted`** (overlay.sh does this) — that overlaid tree is the real
     final state.
+  - **⚠ Phase-4 operational: two hand-owned patterns, and a WHOLE-FILE rewrite MUST carry the marker.** Making a
+    package *run* (not just compile) often needs a native reimplementation where the literal conversion compiles
+    but cannot work — e.g. `sync`'s Mutex/RWMutex/WaitGroup (2026-07-11), whose Go runtime sleeping semaphore
+    cannot be emulated, are hand-rewritten on `SemaphoreSlim`/monitors. A `<name>_impl.cs` companion
+    *supplements* some declarations (bodyless `partial` + a comment placeholder the converter emits); a
+    **whole-file** hand rewrite *replaces* the converted `<name>.cs` and **must carry `[module:
+    go.GoManualConversion]`** — else a `-stdlib` reconvert regenerates the Go version over it (`main.go`'s
+    `containsManualConversionMarker` drops marked files from the convert set; place it after the `using`s,
+    before the file-scoped namespace). Detail:
+    [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConversion.md) *Hand-owning a package to make it
+    OPERATIONAL*.
   - **⚠ The S1/CS0030 "architectural wall" was a FORK, not a wall (2026-07-01) — and the fork held to 302/302.**
     **Native-type** pointer/unsafe ops (identical memory semantics in both GC languages) get a faithful
     conversion in the converter/`golib`. **Managed-referent** cases (`guintptr`/`muintptr`/… hiding a managed
