@@ -2750,7 +2750,6 @@ func getCallFunIdent(fun ast.Expr) *ast.Ident {
 	return nil
 }
 
-
 // calleeHasConstraintOnlyTypeParam reports whether the called generic function declares a type
 // parameter that appears in NO parameter type — visible only in constraints (`Twice[S ~[]E, E
 // Integer](s S)`: E). Go infers such a parameter through core types; C# cannot infer it from

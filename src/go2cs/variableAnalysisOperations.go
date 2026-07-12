@@ -198,8 +198,8 @@ func (p *varProcessor) processAssignStmt(stmt *ast.AssignStmt) {
 
 func newLambdaCapture() *LambdaCapture {
 	return &LambdaCapture{
-		capturedVars:      make(map[*ast.Ident]*CapturedVarInfo),
-		stmtCaptures:      make(map[ast.Node]map[*ast.Ident]bool),
+		capturedVars:         make(map[*ast.Ident]*CapturedVarInfo),
+		stmtCaptures:         make(map[ast.Node]map[*ast.Ident]bool),
 		pendingCaptures:      make(map[string]*CapturedVarInfo),
 		currentLambdaVars:    make(map[string]string),
 		currentLambdaVarObjs: make(map[string]types.Object),

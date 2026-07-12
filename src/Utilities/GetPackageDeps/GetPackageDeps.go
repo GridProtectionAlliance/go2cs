@@ -29,7 +29,7 @@ func GetImportPaths(packagePath string) (map[string]string, error) {
 	imports = strings.TrimSpace(imports)
 	imports = strings.TrimPrefix(imports, "[")
 	imports = strings.TrimSuffix(imports, "]")
-	
+
 	// Split the string by spaces
 	importList := []string{}
 	if imports != "" {
@@ -47,7 +47,7 @@ func GetImportPaths(packagePath string) (map[string]string, error) {
 			// Skip standard library packages that might not have a directory
 			continue
 		}
-		
+
 		// Add to result map (trim newline from output)
 		dir := strings.TrimSpace(string(dirOutput))
 		result[imp] = filepath.Clean(dir)

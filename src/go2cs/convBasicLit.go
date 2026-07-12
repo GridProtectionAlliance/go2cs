@@ -26,11 +26,13 @@ func getOctalCharRegex() *regexp.Regexp {
 // token's `\xHH` escapes — Go's `\x` is EXACTLY two hex digits denoting one raw byte; C#'s `\x` is a
 // GREEDY 1-to-4-hex-digit code-UNIT escape, and a C# `"…"u8` literal UTF-8-re-encodes its content.
 // An escape forces the byte-array form when EITHER:
-//   (1) its byte value is >= 0x80 — a C# string/u8 literal UTF-8-re-encodes such a byte to a
-//       multi-byte sequence (or, when the escape greedily forms a lone surrogate, fails to encode at
-//       all — CS9026), so @string byte indexing / len would not match Go; or
-//   (2) it is immediately followed by a third hex digit — C# greedily folds e.g. `\xdb50` into the
-//       single code unit U+DB50, changing the decoded content even if every resulting byte is ASCII.
+//
+//	(1) its byte value is >= 0x80 — a C# string/u8 literal UTF-8-re-encodes such a byte to a
+//	    multi-byte sequence (or, when the escape greedily forms a lone surrogate, fails to encode at
+//	    all — CS9026), so @string byte indexing / len would not match Go; or
+//	(2) it is immediately followed by a third hex digit — C# greedily folds e.g. `\xdb50` into the
+//	    single code unit U+DB50, changing the decoded content even if every resulting byte is ASCII.
+//
 // Only `\xHH` ESCAPES are inspected: a literal written with actual UTF-8 characters (`"Michał"`,
 // `"白鵬翔"`) round-trips exactly through C#'s `"…"u8` encoding and keeps the readable string form, as
 // does an all-ASCII escape sequence with no greedy extension (image/jpeg's `"\x00\x10\x01\x11"u8[i]`).
