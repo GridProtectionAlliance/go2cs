@@ -99,6 +99,40 @@ private static unsafe (uintptr r1, uintptr r2, Errno err) syscalln(nuint fn, Rea
     return (r, 0, (Errno)(uint32)Marshal.GetLastSystemError());
 }
 
+// The runtime-provided DLL loader entry points that OTHER packages reach by symbol via
+// `//go:linkname` — golang.org/x/sys/windows's LazyDLL/LazyProc route through `syscall.loadlibrary`
+// / `syscall.loadsystemlibrary` / `syscall.getprocaddress` (a cross-package linkname the converter
+// forwards to these). They take the raw UTF-16/ANSI pointers Go passes (the caller keeps the
+// backing []uint16/[]byte alive across the synchronous call — the same transient-address window the
+// trampoline above relies on). `public` so the forwarder can reach them across the assembly.
+public static unsafe (uintptr handle, Errno err) loadlibrary(ж<uint16> filename) {
+    return loadLibraryImpl(filename, 0);
+}
+
+public static unsafe (uintptr handle, Errno err) loadsystemlibrary(ж<uint16> filename) {
+    return loadLibraryImpl(filename, LOAD_LIBRARY_SEARCH_SYSTEM32);
+}
+
+private static unsafe (uintptr handle, Errno err) loadLibraryImpl(ж<uint16> filename, uint flags) {
+    IntPtr h = win32LoadLibraryEx(new string((char*)(void*)filename), IntPtr.Zero, flags);
+
+    if (h == IntPtr.Zero) {
+        return (0, (Errno)(uint32)Marshal.GetLastSystemError());
+    }
+
+    return ((uintptr)(nuint)h, 0);
+}
+
+public static unsafe (uintptr proc, Errno err) getprocaddress(uintptr handle, ж<uint8> procname) {
+    IntPtr p = win32GetProcAddress((IntPtr)(nint)(nuint)handle.Value, new string((sbyte*)(void*)procname));
+
+    if (p == IntPtr.Zero) {
+        return (0, (Errno)(uint32)Marshal.GetLastSystemError());
+    }
+
+    return ((uintptr)(nuint)p, 0);
+}
+
 // Deprecated: Use [SyscallN] instead.
 public static (uintptr r1, uintptr r2, Errno err) Syscall(uintptr trap, uintptr nargs, uintptr a1, uintptr a2, uintptr a3) {
     return SyscallN(trap, a1, a2, a3);
