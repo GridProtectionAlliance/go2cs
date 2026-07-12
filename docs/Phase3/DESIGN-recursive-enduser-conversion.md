@@ -442,8 +442,11 @@ ride on these unchanged (`Cond` still uses `runtime_impl.cs`'s notify-list; `Poo
 Validated by sync-only converted stress tests (no `os`/`fmt`, so unaffected by the syscall gap):
 Mutex+WaitGroup+Once at 100 goroutines × 1000 → 12/12 clean; RWMutex + Cond correct. Commit `e36dea3aa`.
 
-Two follow-ups: (a) these hand-owned files must survive a reconvert — the durable fix is a **converter
-skip-list** for manually-owned stdlib files; (b) `RWMutex` uses `Monitor.PulseAll` (correct but O(n)/op).
+These hand-owned files survive a reconvert via the existing **`[module: GoManualConversion]`** marker —
+the converter's `containsManualConversionMarker` scans each output `.cs` and skips re-converting the
+matching `.go` when present (verified: `-stdlib sync` into a seeded dir leaves `mutex.cs` byte-identical,
+still the native `SemaphoreSlim` impl). Remaining polish: `RWMutex` uses `Monitor.PulseAll` (correct but
+O(n)/op under pathological contention).
 **Remaining to run `color` end-to-end:** the full-conversion `syscall` still crashes at init from
 **package-level var initialization order** (C# does not order cross-file static initializers to Go's
 dependency order — `modkernel32` is null when a proc var initializes) plus the Windows syscall FFI itself.
