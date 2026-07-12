@@ -58,6 +58,37 @@ var manualConversionFuncs = map[string]map[string]bool{
 	"internal/abi": {
 		"TypeOf": true,
 	},
+	// reflect.Value's entry + value-reader methods (the reflection bridge, Phase 2). Go reads the
+	// value through v.ptr as flat memory at computed offsets — no managed form. value_impl.cs carries
+	// the boxed managed value directly (a companion `partial struct Value { object boxed }` field) and
+	// reads it with System.Reflection + the golib container interfaces. Only the value READERS are
+	// hand-owned; Kind/Type/IsValid/CanAddr work from the flag/typ_ the entry sets. Increment 1
+	// (scalars, slices, arrays, pointers); struct Field/NumField + map MapRange land next.
+	"reflect": {
+		"ValueOf":         true,
+		"unpackEface":     true,
+		"valueInterface":  true, // a free function `valueInterface(v Value, safe bool)`, not a method
+		"Value.Interface": true,
+		"Value.Bool":      true,
+		"Value.Int":            true,
+		"Value.Uint":           true,
+		"Value.Float":          true,
+		"Value.Complex":        true,
+		"Value.String":         true,
+		"Value.IsNil":          true,
+		"Value.Len":            true,
+		"Value.Index":          true,
+		"Value.Elem":           true,
+		"Value.Bytes":          true,
+		"Value.NumField":       true,
+		"Value.Field":          true,
+		"Value.UnsafePointer":  true,
+		"Value.Pointer":        true,
+		"Value.MapRange":       true,
+		"MapIter.Next":         true,
+		"MapIter.Key":          true,
+		"MapIter.Value":        true,
+	},
 }
 
 // isManualType reports whether the named type (raw Go name) is hand-converted in this package.

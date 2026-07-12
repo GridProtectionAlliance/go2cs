@@ -89,6 +89,11 @@ public static class GoReflect
         if (t == typeof(double)) return Float64;
         if (t == typeof(Complex)) return Complex128;
         if (t == typeof(@string)) return String;
+        // A C# System.String can reach reflection where a Go string literal boxed in a
+        // deliberately-uncast position (a variadic `...any` argument) — a bare `"a"` rather than
+        // `(@string)"a"`; treat it as a Go string so reflect.TypeOf(it).Kind() == String (fmt's doPrint
+        // inter-argument spacing depends on it).
+        if (t == typeof(string)) return String;
         if (t == typeof(uintptr)) return Uintptr;
 
         // A named numeric / string wrapper carries its underlying kind in [GoType("num:<kind>")] or
