@@ -284,8 +284,15 @@ One wrinkle worth knowing: a Go string literal normally emits as a `"…"u8` `Re
 no conversion to `object`. So a string literal returned/assigned/sent *as `any`* is boxed through `@string`
 (preserving Go string identity for a later `x.(string)`): `return (@string)"test2json";`.
 
+A related identity wrinkle: a deref-aliased pointer (a `*T` parameter or a pointer receiver) passed *as
+`any`* renders the box `Ꮡp`, not the deref'd value alias `p` — Go boxes the *pointer*, and dropping the box
+would store the pointed-to value, so a later `x.(*T)` would find a bare `T` and panic. This surfaced as
+fmt's `sync.Pool` round-trip (`ppFree.Put(p)` then `Get().(*pp)`), which crashed every multi-call fmt
+program before the fix.
+
 **Full detail:** [Reference → Empty Interface](ConversionStrategies-Reference.md#empty-interface) — the
-`@string` boxing across return, assignment, composite-literal, and channel-send positions.
+`@string` boxing across return, assignment, composite-literal, and channel-send positions, and the box for
+a pointer value passed to an `any` argument.
 
 ---
 

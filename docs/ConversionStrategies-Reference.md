@@ -1136,6 +1136,41 @@ Gated to bare idents of pointer type — keyed elements (maps) and address-of/co
 manage their own pointer rendering. Guarded by the `PointerParamWalk` extension `collect` (the
 literal arm and the append arm, aliasing proven by a post-collect write through the original).
 
+### A pointer value passed to an `any` argument takes the box
+A deref-aliased pointer passed WHOLE (as an argument, not `p.field`) to an EMPTY-interface (`any`)
+parameter renders the pointer VALUE — the box `Ꮡp` — not the deref'd value alias `p`. Go boxes the
+*pointer* into the interface, so dropping the box stores the pointed-to VALUE and loses pointer
+identity: a later `x.(*T)` assertion (rendered `._<ж<T>>()`) then finds a bare `T` and panics
+("interface conversion: … is T, not *T"). This is fmt's own `sync.Pool` round-trip —
+`func (p *pp) free() { … ppFree.Put(p) }` (Put's parameter is `any`) feeding `newPrinter`'s
+`ppFree.Get().(*pp)` — which crashed the SECOND time through the pool, blocking every multi-call fmt
+program. Both a pointer RECEIVER and a plain `*T` PARAMETER take the box:
+```go
+func (p *pp) free()  { poolPut(p) }   // p is *pp (pointer receiver); poolPut(x any)
+func keep(q *pp)     { poolPut(q) }   // a plain *T parameter, same shape
+```
+```csharp
+internal static void free(this ж<pp> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+    …
+    poolPut(Ꮡp);                       // NOT poolPut(p) — a pp VALUE loses pointer identity
+}
+internal static void keep(ж<pp> Ꮡq) {
+    poolPut(Ꮡq);
+}
+```
+This mirrors the composite-literal element arm above: the argument index is marked `argTypeIsPtr`,
+which convExprList turns into the pointer ident context, so `convIdent` emits the parameter box
+(`Ꮡp`) or the current method's direct-ж receiver box. It fires ONLY for the empty interface — a
+NON-empty interface already routes the pointer through its `*T`→interface adapter (`interfaceTypes`),
+and the two arms are mutually exclusive. A pointer LOCAL is excluded (it already holds its box
+directly — the bare name IS the box), an `unsafe.Pointer` argument is excluded (not a `*types.Pointer`),
+and the treatment fans out across a variadic `...any`. The receiver form reaches through a closure
+too — `Ꮡs.Value.d.note(Ꮡs)` for `s.d.note(s)` inside a nested lambda (the database/sql `(*Stmt)`
+shape). Guarded by `PointerValueToInterfaceArg` (a minimal sync.Pool-shaped free list round-tripping
+a `*pp` via both a pointer receiver and a pointer param, each `.(*pp)`-asserted after the `any` hop —
+the 2nd pool Get panicked before the fix) and the `NestedLambdaReceiverField` receiver-in-closure case.
+
 ### Appending to an interface-typed slice casts the element
 A value appended to a `[]Iface` slice whose type is not already the interface -- a pointer rendering as the `*T`-to-interface adapter ctor, or a raw struct value -- leaves both golib `append` overloads applicable (`append<T>(ISlice, params T[])` infers the concrete/adapter type; `append<T>(slice<T>, params Span<T>)` infers the interface -- CS0121). The converter casts such elements to the element interface type:
 ```csharp

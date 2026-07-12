@@ -822,6 +822,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]
+    public void CheckPointerValueToInterfaceArg() => CheckTarget("PointerValueToInterfaceArg");
+
+    [TestMethod]
     public void CheckPrintfWidthFlags() => CheckTarget("PrintfWidthFlags");
 
     [TestMethod]
