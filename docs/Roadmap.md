@@ -614,10 +614,14 @@ branch `golib-string-performance`; see [`ConversionStrategies-Reference.md`](Con
 and the [Glossary MVP entry](Glossary.md#mvp)). It emits a zero-copy [`sstring`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/sstring.cs)
 view for a `s := string([]byte)` local only when the local is non-escaping, its source is a plain unnamed
 `[]byte` never written after the conversion, and its every use is a safe read (`len`/`cap`, byte index, or
-comparison against a string literal). That fires on **exactly one** Go-1.23 stdlib site — safe, but far
-short of the win the `PerfString` benchmark wants (whose `s` is a `+` operand, so it stays `@string`).
+comparison against a string literal). That initial predicate fired on **exactly one** Go-1.23 stdlib site.
+A first expansion has since landed (2026-07-12) — **unnamed `string(x)` comparison operands** against a
+literal (`string(buf[:4]) == "ZLIB"`, `string(item) != "null"`), which are consumed within the comparison
+and so need no analysis at all — lifting the stdlib footprint to **~23 sites across ~19 files** (the common
+byte-signature-check idiom in `debug/*`, `encoding/json`, `image/gif`·`png`, …). Still far short of the
+`PerfString` win (whose `s` is a `+` operand, so it stays `@string` and needs increment 4 below).
 
-Expand the eligible surface, one gated increment at a time. **Why this is well-suited to exploratory work:**
+Expand the eligible surface further, one gated increment at a time. **Why this is well-suited to exploratory work:**
 because `sstring` is a `ref struct`, the .NET compiler turns almost every over-reach into a **compile error**
 (it cannot be stored in a field/array/map, boxed to an interface, sent on a channel, or captured by a
 closure) — so a too-aggressive predicate fails **loud** at build time (caught by the behavioral suite +
@@ -625,10 +629,11 @@ full-stdlib reconvert), never silently. The **only** silently-wrong vectors are 
 mutation of the source buffer during the view's lifetime; both must stay explicitly guarded. Candidate
 increments, roughly by ROI:
 
-1. **Unnamed-temporary conversions** — `bytes.Equal(a, string(b))`, `m[string(b)]`, `strconv.ParseUint(string(s), …)`:
-   the largest safe bucket (encoding/*, net/http). Needs a per-`*ast.CallExpr` verdict and a curated
-   non-retaining-callee whitelist (or the conservative "argument to any function ⇒ `@string` unless
-   whitelisted").
+1. **Unnamed-temporary conversions.** The comparison-operand slice (`string(b) == "literal"`) is **done**
+   (above). The remaining slice — `string(x)` passed to a non-retaining callee (`strconv.ParseUint(string(s), …)`)
+   or used as a map key (`m[string(b)]`) — is harder: a `@string`-typed parameter or map key copies the
+   `sstring` back at the boundary (no win) unless the callee/`map<K,V>` gains an `sstring`/`ReadOnlySpan<byte>`
+   overload. Needs a curated non-retaining-callee whitelist plus golib span-lookup support on `map`.
 2. **`sstring operator+`** (returning `@string`) plus widening the safe-use whitelist beyond
    len/cap/byte-index/compare-literal (sub-slicing kept in safe uses, rune-range, etc.).
 3. **Mixed `sstring == @string`** operator, co-designed with the comparison-literal emission so it does not

@@ -1252,12 +1252,24 @@ span (`ReadOnlySpan<byte>` converts to `sstring` only explicitly, but a plain st
 Because `sstring` is a `ref struct`, the escapes the predicate does NOT enumerate (storing into a field/
 array/map, boxing to an interface, channel send, closure capture) are C# COMPILE errors, not silent bugs;
 the two vectors that would be silently wrong — escape via `return` and mutation of the source buffer — are
-guarded explicitly. The footprint is intentionally tiny (exactly one site in the whole Go 1.23 stdlib —
-`x/net/nettest`'s `string(out[:4])`, used only in `ver > "7200"`/`ver == "7200"`). Guarded by the
-`SStringElision` behavioral test, which asserts both the emitted forms (`sstring` for two eligible locals,
-`@string` for source-mutated, print-escaped, and returned locals) and byte-identical Go/C# stdout. Later
-phases (unnamed-temporary conversions, a precise per-iteration liveness guard that would reach the
-`PerfString` loop) are deferred; see [`docs/Roadmap.md`](Roadmap.md).
+guarded explicitly.
+
+A second, broader case needs **no analysis at all**. An UNNAMED `string(x)` temporary that is an operand
+of a comparison against a string literal (`string(buf[:4]) == "ZLIB"`, `string(item) != "null"`) is created
+and consumed *within the single comparison expression* — it can neither escape nor observe a mutation of its
+source before it is read (the literal has no side effects and `x` is evaluated once, so even inside a loop
+that mutates `x` between iterations each comparison sees exactly what a copy would) — so it is emitted as
+`(sstring)x` unconditionally (`markSStringComparisonConversions`, keyed per-`*ast.CallExpr`; `convBinaryExpr`
+suppresses the `"…"u8` form on the literal). It stays `@string` only when the other operand is not a literal
+(a variable would need the mixed `sstring == @string` operator, deliberately avoided). This common
+byte-signature-check idiom lifts the Go-1.23 stdlib footprint from one site to ~23 across ~19 files
+(`debug/elf`·`macho`·`pe`, `encoding/json`, `image/gif`·`png`, `internal/chacha8rand`, `go/build`, …).
+
+Guarded by the `SStringElision` behavioral test — both cases: two eligible locals and an unnamed comparison
+operand emit `sstring`; source-mutated, print-escaped, and returned locals plus a compare-against-a-variable
+stay `@string` — asserting emitted forms and byte-identical Go/C# stdout. Further phases (unnamed conversions
+passed to non-retaining callees / used as map keys, a precise per-iteration liveness guard that would reach
+the `PerfString` loop) are deferred; see [`docs/Roadmap.md`](Roadmap.md).
 
 ## Maps and Channels
 Go maps and channels convert to the golib [`map<K,V>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/map.cs) and [`channel<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/channel.cs) structures. `make` becomes a constructor; channel send/receive use the runtime operators:

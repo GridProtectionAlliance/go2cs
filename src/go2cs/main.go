@@ -57,6 +57,13 @@ type FileEntry struct {
 	// with no write to the conversion's source for the lifetime of the view. Keyed by the local's
 	// types.Object. Computed per file (no cross-file sharing) in performEscapeAnalysis.
 	sstringEligible map[types.Object]bool
+
+	// sstringConvExprs flags the specific `string(x)` conversion CallExprs that must emit `(sstring)x`
+	// (the zero-copy view) rather than `(@string)x` (the heap copy): the RHS of an eligible local
+	// (above) and unnamed `string(x)` temporaries consumed within a comparison against a literal
+	// (`string(buf) == "…"`), which never outlive the expression so are safe unconditionally. Keyed
+	// by the *ast.CallExpr node.
+	sstringConvExprs map[*ast.CallExpr]bool
 }
 
 // CapturedVarInfo tracks information about captured variables
@@ -280,8 +287,9 @@ type Visitor struct {
 	lastStatementWasReturn bool
 	lastReturnIndentLevel  int
 	identEscapesHeap       map[types.Object]bool
-	sstringEligible        map[types.Object]bool   // String locals emittable as stack-only sstring (see FileEntry.sstringEligible)
-	emitStringConvAsSString bool                   // Transient: while emitting an eligible decl's RHS, a string([]byte) conversion emits `(sstring)` not `(@string)`
+	sstringEligible        map[types.Object]bool     // String locals emittable as stack-only sstring (see FileEntry.sstringEligible)
+	sstringConvExprs       map[*ast.CallExpr]bool     // `string(x)` conversions that emit `(sstring)x` (see FileEntry.sstringConvExprs)
+	emitStringConvAsSString bool                      // Transient: while emitting an eligible decl's RHS, a string([]byte) conversion emits `(sstring)` not `(@string)`
 	identNames             map[*ast.Ident]string   // Local identifiers to adjusted names map
 	isReassigned           map[*ast.Ident]bool     // Local identifiers to reassignment status map
 	funcLevelDecls         map[string]*types.Var   // Function-level local declarations of the current function (for global-shadow qualification)
@@ -889,6 +897,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 						filePath:         path,
 						identEscapesHeap: map[types.Object]bool{},
 						sstringEligible:  map[types.Object]bool{},
+						sstringConvExprs: map[*ast.CallExpr]bool{},
 					})
 				}
 			}
@@ -1002,6 +1011,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 					blocks:                    Stack[*strings.Builder]{},
 					identEscapesHeap:          fileEntry.identEscapesHeap,
 					sstringEligible:           fileEntry.sstringEligible,
+					sstringConvExprs:          fileEntry.sstringConvExprs,
 				}
 
 				visitor.visitFile(fileEntry.file)

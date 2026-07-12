@@ -22,6 +22,14 @@ internal static void Main() {
     @string u = ((@string)slice<byte>((@string)"printed"));
     fmt.Println(u);
     fmt.Println(returnedString());
+    var tag = slice<byte>((@string)"v2");
+    if (((sstring)tag) == "v2") {
+        fmt.Println("tagged");
+    }
+    @string want = "v2"u8;
+    if (((@string)tag) == want) {
+        fmt.Println("wanted");
+    }
 }
 
 internal static @string returnedString() {

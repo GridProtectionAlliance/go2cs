@@ -31,6 +31,21 @@ func main() {
 
 	// (5) INELIGIBLE — the local escapes via return. Stays @string.
 	fmt.Println(returnedString())
+
+	// (6) UNNAMED comparison operand — the string() temp is created and consumed within the
+	//     comparison, so it never escapes and its source cannot be mutated first: emitted as a
+	//     zero-copy (sstring)x view with no local and no escape/mutation analysis.
+	tag := []byte("v2")
+	if string(tag) == "v2" {
+		fmt.Println("tagged")
+	}
+
+	// (7) UNNAMED comparison against a VARIABLE (not a literal) — stays @string, since the other
+	//     operand is not a string literal (mixed sstring==@string is deliberately avoided).
+	want := "v2"
+	if string(tag) == want {
+		fmt.Println("wanted")
+	}
 }
 
 func returnedString() string {

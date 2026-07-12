@@ -40,7 +40,13 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 				info:             info,
 				identEscapesHeap: fileEntry.identEscapesHeap,
 				sstringEligible:  fileEntry.sstringEligible,
+				sstringConvExprs: fileEntry.sstringConvExprs,
 			}
+
+			// Unnamed `string(x)` temporaries consumed within a comparison against a literal
+			// (`string(buf) == "…"`) never outlive the expression, so they are safe to emit as a
+			// zero-copy sstring view unconditionally — no escape/mutation analysis required.
+			visitor.markSStringComparisonConversions(fileEntry.file)
 
 			ast.Inspect(fileEntry.file, func(n ast.Node) bool {
 				switch node := n.(type) {
@@ -706,30 +712,11 @@ func (v *Visitor) markSStringEligible(ident *ast.Ident, rhs ast.Expr, body *ast.
 		return
 	}
 
-	// Initializer must be a `string(x)` conversion whose source x is a []byte or []rune.
-	call, ok := rhs.(*ast.CallExpr)
+	// Initializer must be a `string(x)` conversion whose source x is an unnamed []byte (a []rune must
+	// UTF-8-encode — an allocation, no view; a named slice needs a two-hop cast C# will not chain).
+	call := v.unnamedByteSliceStringConv(rhs)
 
-	if !ok || len(call.Args) != 1 {
-		return
-	}
-
-	if tv, ok := v.info.Types[call.Fun]; !ok || !tv.IsType() || !types.Identical(tv.Type, types.Typ[types.String]) {
-		return
-	}
-
-	// Restrict to a []byte source. sstring is a byte view, so a []byte->string conversion is a genuine
-	// zero-copy view; a []rune->string conversion must UTF-8-encode the runes (an allocation, with no
-	// backing to share), so those stay @string. A named slice type (`type S []byte`) is also excluded:
-	// S -> slice<byte> -> sstring is a two-hop conversion C# will not chain in a single cast.
-	srcType := v.info.TypeOf(call.Args[0])
-
-	if _, isNamed := types.Unalias(srcType).(*types.Named); isNamed {
-		return
-	}
-
-	if slice, ok := srcType.Underlying().(*types.Slice); !ok {
-		return
-	} else if basic, ok := slice.Elem().Underlying().(*types.Basic); !ok || basic.Kind() != types.Uint8 {
+	if call == nil {
 		return
 	}
 
@@ -902,6 +889,73 @@ func rootIdentObject(expr ast.Expr, info *types.Info) types.Object {
 	return nil
 }
 
+// markSStringComparisonConversions flags every `string(x)` conversion CallExpr that is an operand of
+// a comparison against a string literal (`string(buf) == "…"` / `"…" != string(buf)`, any of
+// ==/!=/</<=/>/>=). Such a temporary is created and consumed within the single comparison expression
+// — it cannot escape and its source cannot be mutated before it is read — so emitting it as a
+// zero-copy sstring view is safe with NO escape or mutation analysis. Restricted to an unnamed []byte
+// source, like the local case.
+func (v *Visitor) markSStringComparisonConversions(file *ast.File) {
+	ast.Inspect(file, func(n ast.Node) bool {
+		binaryExpr, ok := n.(*ast.BinaryExpr)
+
+		if !ok || !isComparisonOp(binaryExpr.Op) {
+			return true
+		}
+
+		if isStringLiteralExpr(binaryExpr.Y) {
+			if call := v.unnamedByteSliceStringConv(binaryExpr.X); call != nil {
+				v.sstringConvExprs[call] = true
+			}
+		} else if isStringLiteralExpr(binaryExpr.X) {
+			if call := v.unnamedByteSliceStringConv(binaryExpr.Y); call != nil {
+				v.sstringConvExprs[call] = true
+			}
+		}
+
+		return true
+	})
+}
+
+// unnamedByteSliceStringConv returns the CallExpr if expr is a `string(x)` conversion whose source x
+// is an UNNAMED []byte — the form that can become a zero-copy sstring view — else nil. A []rune source
+// must UTF-8-encode (an allocation), and a named []byte would need a two-hop cast C# will not chain.
+func (v *Visitor) unnamedByteSliceStringConv(expr ast.Expr) *ast.CallExpr {
+	call, ok := expr.(*ast.CallExpr)
+
+	if !ok || len(call.Args) != 1 {
+		return nil
+	}
+
+	if tv, ok := v.info.Types[call.Fun]; !ok || !tv.IsType() || !types.Identical(tv.Type, types.Typ[types.String]) {
+		return nil
+	}
+
+	srcType := v.info.TypeOf(call.Args[0])
+
+	if srcType == nil {
+		return nil
+	}
+
+	if _, isNamed := types.Unalias(srcType).(*types.Named); isNamed {
+		return nil
+	}
+
+	if slice, ok := srcType.Underlying().(*types.Slice); !ok {
+		return nil
+	} else if basic, ok := slice.Elem().Underlying().(*types.Basic); !ok || basic.Kind() != types.Uint8 {
+		return nil
+	}
+
+	return call
+}
+
+func isStringLiteralExpr(expr ast.Expr) bool {
+	lit, ok := expr.(*ast.BasicLit)
+
+	return ok && lit.Kind == token.STRING
+}
+
 // exprIsSStringEligible reports whether expr is a plain identifier bound to an sstring-eligible local.
 func (v *Visitor) exprIsSStringEligible(expr ast.Expr) bool {
 	id, ok := expr.(*ast.Ident)
@@ -913,6 +967,20 @@ func (v *Visitor) exprIsSStringEligible(expr ast.Expr) bool {
 	obj := v.info.ObjectOf(id)
 
 	return obj != nil && v.sstringEligible[obj]
+}
+
+// exprEmitsSString reports whether expr will render as a stack string — an sstring-eligible local, or a
+// `string(x)` conversion marked to emit `(sstring)x`. Used to suppress the `"…"u8` form on the OTHER
+// operand of a comparison (a u8 span converts to sstring only explicitly; a plain string binds sstring's
+// operators implicitly).
+func (v *Visitor) exprEmitsSString(expr ast.Expr) bool {
+	if v.exprIsSStringEligible(expr) {
+		return true
+	}
+
+	call, ok := expr.(*ast.CallExpr)
+
+	return ok && v.sstringConvExprs[call]
 }
 
 func isComparisonOp(op token.Token) bool {

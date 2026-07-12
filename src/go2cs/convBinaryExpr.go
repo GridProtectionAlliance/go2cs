@@ -324,9 +324,10 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 	// A comparison against a stack string (sstring) renders the string-literal operand as a plain C#
 	// string, not a `"…"u8` span: ReadOnlySpan<byte> has only an EXPLICIT conversion to sstring, so
 	// `s == "x"u8` would not compile — whereas a plain string implicitly converts to sstring and binds
-	// sstring's own `==`. Only fires when an operand is an eligible stack string, so @string comparisons
-	// (which bind the u8 span through @string's implicit operator) are unchanged.
-	if v.exprIsSStringEligible(binaryExpr.X) || v.exprIsSStringEligible(binaryExpr.Y) {
+	// sstring's own `==`. Fires when an operand is an eligible stack-string local OR an unnamed
+	// `string(x)` conversion marked to emit sstring (`string(buf) == "…"`); @string comparisons (which
+	// bind the u8 span through @string's implicit operator) are unchanged.
+	if v.exprEmitsSString(binaryExpr.X) || v.exprEmitsSString(binaryExpr.Y) {
 		basicLitContext.u8StringOK = false
 	}
 
