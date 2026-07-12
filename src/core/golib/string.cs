@@ -481,6 +481,34 @@ public readonly struct @string :
         return new @string(bytes);
     }
 
+    // Concatenation directly against a `ReadOnlySpan<byte>` operand — most importantly a `u8` string
+    // literal (`s + "-"u8`), which is zero-allocation static ROM. Binding these overloads avoids the
+    // intermediate `@string` the span would otherwise be copied into (via the implicit
+    // `@string(ReadOnlySpan<byte>)` conversion) before `operator +(@string, @string)` ran: the
+    // literal's bytes are block-copied straight into the single result buffer instead. Only the
+    // per-concat path is affected — no change to the far hotter `[]byte`→`@string` conversion path.
+    public static @string operator +(@string a, ReadOnlySpan<byte> b)
+    {
+        byte[] a1 = a.Bytes;
+        byte[] bytes = new byte[a1.Length + b.Length];
+
+        Buffer.BlockCopy(a1, 0, bytes, 0, a1.Length);
+        b.CopyTo(new Span<byte>(bytes, a1.Length, b.Length));
+
+        return new @string(bytes);
+    }
+
+    public static @string operator +(ReadOnlySpan<byte> a, @string b)
+    {
+        byte[] b1 = b.Bytes;
+        byte[] bytes = new byte[a.Length + b1.Length];
+
+        a.CopyTo(new Span<byte>(bytes, 0, a.Length));
+        Buffer.BlockCopy(b1, 0, bytes, a.Length, b1.Length);
+
+        return new @string(bytes);
+    }
+
     #endregion
 
     #region [ Interface Implementations ]
