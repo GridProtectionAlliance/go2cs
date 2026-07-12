@@ -9,9 +9,13 @@
 // writer blocks new readers (Go's documented guarantee that the lock eventually reaches the writer),
 // and it is not goroutine-affine (any goroutine may release what another acquired). The RLocker/rlocker
 // interface witness is unchanged — it simply forwards to RLock/RUnlock.
-namespace go;
-
 using System.Threading;
+
+// Hand-owned native replacement of the converted rwmutex.go output — the marker makes a -stdlib
+// reconvert skip regenerating this file (see containsManualConversionMarker).
+[module: go.GoManualConversion]
+
+namespace go;
 
 partial class sync_package {
 

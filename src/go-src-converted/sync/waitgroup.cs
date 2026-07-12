@@ -7,9 +7,13 @@
 // semaphore — the same primitive that cannot be faithfully emulated (see mutex.cs / runtime_impl.cs).
 // Reimplemented natively: a guarded counter plus a latch event that is set whenever the counter is
 // zero. Wait blocks on the latch; the Add that drives the counter to zero releases every waiter.
-namespace go;
-
 using System.Threading;
+
+// Hand-owned native replacement of the converted waitgroup.go output — the marker makes a -stdlib
+// reconvert skip regenerating this file (see containsManualConversionMarker).
+[module: go.GoManualConversion]
+
+namespace go;
 
 partial class sync_package {
 

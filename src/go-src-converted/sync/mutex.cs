@@ -18,9 +18,13 @@
 // SemaphoreSlim, which the CLR implements correctly — FIFO wakeups, release permitted from any thread
 // (Go allows unlock on a different goroutine), and non-reentrant (a second Lock on the same thread
 // blocks, matching Go's self-deadlock). See runtime_impl.cs for the shared rationale.
-namespace go;
-
 using System.Threading;
+
+// Hand-owned native replacement of the converted mutex.go output — the converter skips regenerating a
+// file that carries this marker, so a -stdlib reconvert preserves it (see containsManualConversionMarker).
+[module: go.GoManualConversion]
+
+namespace go;
 
 partial class sync_package {
 

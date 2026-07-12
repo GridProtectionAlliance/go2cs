@@ -46,6 +46,10 @@ using System.Collections.Generic;
 using System.Threading;
 using Stopwatch = System.Diagnostics.Stopwatch;
 
+// Hand-owned (no runtime_impl.go exists, so a reconvert never regenerates it); marked for consistency
+// with the other hand-owned sync files.
+[module: go.GoManualConversion]
+
 namespace go;
 
 partial class sync_package
