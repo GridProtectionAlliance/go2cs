@@ -190,6 +190,8 @@ Here is the full round-trip for a small CLI that uses [`github.com/fatih/color`]
 which itself pulls in `github.com/mattn/go-colorable`, `github.com/mattn/go-isatty`, and `golang.org/x/sys` —
 a genuine dependency graph:
 
+> _NOTE: these steps have only been tested on Windows to date_
+
 **1 — Prerequisite: Stage the standard library (one-time).** `deploy-core` is a build script in the go2cs repo's **`src/`**
 folder (it is *not* on your `PATH`), so run it from there. It stages the pre-converted stdlib + runtime +
 analyzer at `%GOPATH%\src\go2cs` (the "deploy root") that every converted project references. This is a
@@ -238,24 +240,18 @@ cd path\to\colordemo
 go2cs -recurse . -go2cspath %GOPATH%\src\go2cs
 ```
 
-(`go2cs -recurse` takes the module directory as its argument, so instead of `cd`-ing you can pass the path
-directly from anywhere, e.g. `go2cs -recurse path\to\colordemo -go2cspath %GOPATH%\src\go2cs`.)
+`go2cs` discovers the imports and converts each package, least-dependencies-first
+(`go-isatty` and `x/sys` → `go-colorable` → `color` → the app), into a parallel tree under the deploy
+root, leaving your original Go source untouched. The converted app itself lands under
+`%GOPATH%\src\go2cs\src\<import-path>`, every third-party library are converted under
+`%GOPATH%\src\go2cs\pkg\<import-path>`. The existing standard library is referenced at
+`%GOPATH%\src\go2cs\core\`. 
 
-`go2cs` discovers the import closure and converts each package least-dependencies-first
-(`go-isatty` and `x/sys` → `go-colorable` → `color` → the app) into a **parallel tree under the deploy
-root, leaving your original Go source untouched**: the app's own packages land under
-`%GOPATH%\src\go2cs\src\<import-path>` and every third-party library under
-`%GOPATH%\src\go2cs\pkg\<import-path>` (the standard library it merely references at `…\core\<pkg>`). It
-writes a per-project `.slnx` next to every generated `.csproj` — each over that project plus its converted
-dependencies, golib, and the analyzer (no stdlib). The **app's** solution therefore lists its whole
-converted dependency closure (a build-everything solution for the app) and sets the app as the Visual
-Studio startup project.
-
-(Flag order does not matter — `go2cs` accepts flags before or after the module path, so both
-`go2cs -recurse . -go2cspath …` and `go2cs -recurse -go2cspath … .` work.)
+Additionally, a per-project `.slnx` exists next to every generated `.csproj` — each with that project
+plus its converted dependencies, golib, and the analyzer (no stdlib).
 
 **4 — C#: build the generated solution.** The app's per-project `.slnx` builds the app and its whole
-converted dependency closure; opening it in Visual Studio makes the app the startup project (F5 runs it):
+converted dependency tree; opening it in Visual Studio makes the app the startup project (F5 runs it):
 
 ```shell
 cd "%GOPATH%\src\go2cs\src\example.com\colordemo\"
