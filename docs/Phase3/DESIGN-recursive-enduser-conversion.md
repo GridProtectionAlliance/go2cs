@@ -423,6 +423,31 @@ out-of-corpus and narrower than the namespace fix. Left for Phase-4 hardening (n
    `convertImportPathToNamespace` that escapes the embedded keyword WITHOUT Δ-prefixing the `_package` class
    suffix (the naive `getCoreSanitizedIdentifier` swap does the latter — see the reverted attempt above).
 
+### Operational stdlib — native sync primitives (2026-07-11, Phase-4 start)
+
+Running (not just compiling) the `fatih/color` sample exposed the Phase-3 → Phase-4 boundary: the full
+conversion **compiles** but is not **operational**. The first blocker is `sync`: its `//go:linkname`
+runtime concurrency primitives (`Semacquire`/`Semrelease`, `notifyList`, `procPin`, …) are emitted as
+throwing stubs, so `sync.init` — reached by `os`/`syscall` and nearly every program — crashes at startup.
+
+Emulating Go's runtime *sleeping semaphore* on a .NET primitive is a **dead end**: it is co-designed with
+the mutex state machine (starvation-mode ownership is handed to one specific waiter via an exact ticket),
+and both a global-gate and a faithful per-address FIFO+handoff emulation deterministically trip
+`sync: inconsistent mutex state` / `unlock of unlocked mutex` at sustained contention (2 goroutines × 10k
+locks). So the runtime-dependent **types are reimplemented natively** (hand-owned files replacing the
+converted output), on proven .NET primitives: `Mutex` → binary `SemaphoreSlim`; `WaitGroup` → guarded
+counter + latch; `RWMutex` → writer-preferring monitor lock (keeps the `RLocker`/`rlocker` witness and the
+`syscall_hasWaitingReaders` linkname); `throw`/`fatal` → native fatal hooks. `Once`/`Map`/`Cond`/`Pool`
+ride on these unchanged (`Cond` still uses `runtime_impl.cs`'s notify-list; `Pool` sharding is best-effort).
+Validated by sync-only converted stress tests (no `os`/`fmt`, so unaffected by the syscall gap):
+Mutex+WaitGroup+Once at 100 goroutines × 1000 → 12/12 clean; RWMutex + Cond correct. Commit `e36dea3aa`.
+
+Two follow-ups: (a) these hand-owned files must survive a reconvert — the durable fix is a **converter
+skip-list** for manually-owned stdlib files; (b) `RWMutex` uses `Monitor.PulseAll` (correct but O(n)/op).
+**Remaining to run `color` end-to-end:** the full-conversion `syscall` still crashes at init from
+**package-level var initialization order** (C# does not order cross-file static initializers to Go's
+dependency order — `modkernel32` is null when a proc var initializes) plus the Windows syscall FFI itself.
+
 ## 6. Open decisions (RESOLVED)
 
 1. **Flag vs. auto-detect** — **explicit `-recurse`** (default off; single-package behavior unchanged).
