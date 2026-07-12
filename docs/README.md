@@ -190,12 +190,11 @@ Here is the full round-trip for a small CLI that uses [`github.com/fatih/color`]
 which itself pulls in `github.com/mattn/go-colorable`, `github.com/mattn/go-isatty`, and `golang.org/x/sys` —
 a genuine dependency graph:
 
-**0 — (one-time) Stage the standard library.** `deploy-core` is a build script in the go2cs repo's **`src/`**
+**1— Prerequisite: Stage the standard library (one-time).** `deploy-core` is a build script in the go2cs repo's **`src/`**
 folder (it is *not* on your `PATH`), so run it from there. It stages the pre-converted stdlib + runtime +
 analyzer at `%GOPATH%\src\go2cs` (the "deploy root") that every converted project references. This is a
 **one-time, per-machine** setup, unrelated to any particular app — **redo it only when you pull a new go2cs
-version**, to refresh the staged runtime/analyzer/stdlib (building against a stale deploy surfaces spurious
-errors, e.g. `CS0715` on a keyword-named type):
+version**, to refresh the staged runtime/analyzer/stdlib:
 
 ```shell
 cd path\to\go2cs\src
@@ -203,7 +202,7 @@ deploy-core stdlib          # the full compilable standard library (best for arb
                             #   deploy-core stub  = the smaller runnable baseline subset
 ```
 
-**1 — Go: get the app and confirm it builds as Go.**
+**2 — Go: get the app and confirm it builds as Go.**
 
 ```shell
 mkdir colordemo && cd colordemo
@@ -230,7 +229,7 @@ go mod tidy      # download color + its dependencies into the Go module cache
 go build ./...   # baseline: confirm it compiles as Go first
 ```
 
-**2 — go2cs: recurse-convert the app.** `go2cs` is the converter you put on your `PATH` in *Installing the
+**3 — go2cs: recurse-convert the app.** `go2cs` is the converter you put on your `PATH` in *Installing the
 converter* above, so it runs from anywhere. Point it at the **app** directory and at the deploy root from
 step 0 (the standard library staged there is referenced, not re-converted):
 
@@ -255,32 +254,18 @@ Studio startup project.
 (Flag order does not matter — `go2cs` accepts flags before or after the module path, so both
 `go2cs -recurse . -go2cspath …` and `go2cs -recurse -go2cspath … .` work.)
 
-**3 — C#: build the generated solution.** The app's per-project `.slnx` builds the app and its whole
+**4 — C#: build the generated solution.** The app's per-project `.slnx` builds the app and its whole
 converted dependency closure; opening it in Visual Studio makes the app the startup project (F5 runs it):
 
 ```shell
-dotnet build "%GOPATH%\src\go2cs\src\example.com\colordemo\example.com.colordemo.slnx" -c Debug
+cd "%GOPATH%\src\go2cs\src\example.com\colordemo\"
+dotnet build example.com.colordemo.slnx -c Debug
 ```
 
-> The deploy root carries a `Directory.Build.props` that pins `$(go2csPath)` to itself, so every generated
-> project — the app under `src\`, the third-party libraries under `pkg\`, and the referenced standard library
-> under `core\` — resolves its `$(go2csPath)…` references with no per-build flags. Because the app now lives
-> under the deploy root too, a bare `dotnet build` in its `src\…` folder (or opening it in an IDE) resolves
-> the same way.
-
-One more practical note: **build go2cs with a Go toolchain ≥ the module's `go` directive.** `go/packages`
-type-checks the source with go2cs's own toolchain, so converting a module that requires a newer Go than
-go2cs was built with (e.g. `fatih/color` v1.19 requires go 1.25) loads with degraded type information.
-
-`-recurse` is a work in progress: it produces a **buildable** solution and handles the common real-world
+> Note: steps produce a **buildable** solution and handle the common real-world
 module shapes — this `fatih/color` example **compiles clean** (app + all four dependency projects, against a
 current deploy). *Running* it to completion is a deeper milestone: the referenced standard library **compiles**
-but is not yet fully **operational**. This example now executes its converted `sync` correctly (reimplemented
-natively — Go's runtime concurrency primitives can't be emulated) but still stops during `syscall`
-initialization, which needs Go-style package-level variable init ordering plus the Windows FFI. Making the
-converted standard library *run*, not just compile, is the **Phase-4** goal. The design, the validated
-results, and the known-limitation backlog are tracked in
-[`DESIGN-recursive-enduser-conversion.md`](Phase3/DESIGN-recursive-enduser-conversion.md).
+but is not yet fully **operational**. *Running* is the **Phase-4** goal, see [`roadmap`](Roadmap.md#phase-4--convert-and-run-go-package-tests).
 
 ## Project layout
 
@@ -304,15 +289,14 @@ The converter builds idiomatic C# for the full range of Go language features, va
 behavioral test suite (371 Go-vs-C# regression projects). As of **2026-07-10 the entire Go standard library
 (302 packages, Go 1.23.1) compiles cleanly** as .NET assemblies. Compiling is
 the milestone, not yet full runtime parity: **converting and running the standard library's own tests is the
-ongoing Phase 4 work** — see the [roadmap](Roadmap.md).
+ongoing Phase 4 work** — see the [roadmap](Roadmap.md#phase-4--convert-and-run-go-package-tests).
 
 Wondering how fast the transpiled C# runs compared to the original Go — including startup time, memory,
 and Native AOT builds? See the latest [performance comparison](Performance.md). Note that performance and optimizations are not the current focus, this kind of work is targeted for _after_ Phase 4 work.
 
 ## Milestones
 
-High level timeline of the project's major turning points. Full detail lives in the git history, the
-[roadmap](Roadmap.md), and [`CLAUDE.md`](../CLAUDE.md).
+High level timeline of the project's major turning points.
 
 | Date | Milestone | Commit / Tag | Notes |
 |:--|:--|:--|:--|
