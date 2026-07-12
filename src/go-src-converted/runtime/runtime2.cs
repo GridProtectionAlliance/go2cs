@@ -3,6 +3,15 @@
 // license that can be found in the LICENSE file.
 global using itab = go.@internal.abi_package.ITab;
 
+// go2cs HAND-OWNED. Unlike the companion pattern (runtime2_impl.cs supplies the bodyless
+// guintptr/muintptr/… partials this file declares), two edits here modify REGENERATED content a
+// companion cannot supply — efaceOf's body (a raw-metal reinterpret stubbed to an inert eface) and
+// the gomaxprocs/ncpu field-initializer seed (bootstrap-populated in Go). This marker drops
+// runtime2.go from a -stdlib reconvert so those edits — and the frozen bodyless partials the
+// companion implements — survive. (Trade-off: converter improvements to runtime2.go no longer flow
+// here until this is unfrozen; acceptable for a Phase-4 operational hand-owned file.)
+[module: go.GoManualConversion]
+
 namespace go;
 
 using abi = @internal.abi_package;
@@ -130,7 +139,8 @@ internal static readonly UntypedInt _Pdead = 4;
 }
 
 internal static ж<eface> efaceOf(ж<any> Ꮡep) {
-    // Hand-adjusted (this file is already GoManualConversion-owned): Go reinterprets the
+    // Hand-adjusted (this file carries the GoManualConversion marker above so a reconvert keeps
+    // this edit): Go reinterprets the
     // interface value's own memory as an eface{_type, data} to walk its type descriptor —
     // raw-metal on a non-native type, meaningless against a managed `any` box (the reinterpret
     // panicked on first touch, taking the whole runtime_package type initializer down with it:
@@ -960,7 +970,8 @@ internal static array<bool> ΔisWaitingForGC = new golib.SparseArray<bool>{
 
 internal static ж<ж<m>> Ꮡallm = new(default(ж<m>));
 internal static ref ж<m> allm => ref Ꮡallm.ValueSlot;
-// Hand-adjusted (this file is already GoManualConversion-owned): in Go these are populated by
+// Hand-adjusted (this file carries the GoManualConversion marker above so a reconvert keeps this
+// seed): in Go these are populated by
 // the runtime bootstrap (osinit/schedinit), which converted code does not run — .NET is the
 // runtime. Left zero they break consumers at runtime while compiling clean (sync.Pool's pinSlow
 // sizes its poolLocal array from runtime.GOMAXPROCS(0) → make(…, 0) → index out of range on the
