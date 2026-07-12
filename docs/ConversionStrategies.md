@@ -290,8 +290,15 @@ its default type `int` (go2cs `nint`). So an untyped `int` constant boxed *as `a
 `...any` arguments (`fmt.Println(42)`) are left uncast — a boxed `Int32` formats identically and its `%T`
 already resolves as `int` — and `any` map keys are left uncast to keep `map[any]int` lookups consistent.
 
+A related identity wrinkle: a deref-aliased pointer (a `*T` parameter or a pointer receiver) passed *as
+`any`* renders the box `Ꮡp`, not the deref'd value alias `p` — Go boxes the *pointer*, and dropping the box
+would store the pointed-to value, so a later `x.(*T)` would find a bare `T` and panic. This surfaced as
+fmt's `sync.Pool` round-trip (`ppFree.Put(p)` then `Get().(*pp)`), which crashed every multi-call fmt
+program before the fix.
+
 **Full detail:** [Reference → Empty Interface](ConversionStrategies-Reference.md#empty-interface) — the
-`@string` and `nint` boxing across argument, return, assignment, composite-literal, and channel-send positions.
+`@string` and `nint` boxing across argument, return, assignment, composite-literal, and channel-send
+positions, and the box for a pointer value passed to an `any` argument.
 
 ---
 

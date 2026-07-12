@@ -1097,6 +1097,31 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 						callExprContext.castArgToType[j] = "nint"
 					}
+
+					// The EMPTY interface (`any`/`interface{}`) needs no wrapping adapter, but a
+					// POINTER argument must still render as the pointer VALUE — the box `Ꮡp`, not the
+					// deref'd value alias `p` — because Go boxes the *pointer* into the interface.
+					// A deref-aliased pointer (a `*T` parameter, or the current method's direct-ж
+					// receiver) whose box is dropped loses pointer identity: fmt's
+					// `func (p *pp) free() { … ppFree.Put(p) }` put the `pp` VALUE into the sync.Pool,
+					// so the next `Get().(*pp)` (rendered `._<ж<pp>>()`) failed the cast and panicked
+					// on the 2nd pool round-trip. This mirrors the pointer-parameter branch below: a
+					// pointer LOCAL already holds its box directly (`!v.isPointer`/param/direct-ж
+					// guard excludes it), and a variadic `...any` fans the treatment across every
+					// trailing argument (so it is NOT gated by variadicSlot, unlike the nint cast).
+					// Since the empty interface leaves `interfaceTypes` unset, the argument takes the
+					// identical convExpr path a `*T`-parameter argument does.
+					if isEmpty && j < len(callExpr.Args) {
+						if argType := v.getType(callExpr.Args[j], false); argType != nil {
+							if _, argIsPtr := argType.(*types.Pointer); argIsPtr {
+								ident := getIdentifier(callExpr.Args[j])
+
+								if !v.isPointer(ident) || v.identIsParameter(ident) || v.exprIsCurrentDirectBoxReceiver(callExpr.Args[j]) {
+									callExprContext.argTypeIsPtr[j] = true
+								}
+							}
+						}
+					}
 				}
 			} else if paramHasArg && (isPointer(paramType) || signatureErasedParamPointerOk(funcSignature, paramType) || v.instantiatedParamIsPointer(callExpr, paramType, i)) && !(callExprContext.hasSpreadOperator && i == params.Len()-1) {
 				// paramHasArg guards Args[i]: a variadic pointer parameter called with no
