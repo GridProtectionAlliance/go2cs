@@ -1228,6 +1228,37 @@ constant expressions render as plain C# literals and keep `var`. Applies in both
 and the mixed-statement paths. (Guarded by the `UntypedConstDefine` behavioral test — untyped rune and
 float package constants `:=`-bound then converted/multiplied, output-compared vs Go.)
 
+### A non-escaping `string([]byte)` local emits the stack-string `sstring`
+Go elides the copy in `s := string(buf)` when `s` does not escape and `buf` is not observed to change,
+letting `s` alias `buf`. `@string` (a heap `byte[]` wrapper) cannot do this — every `string([]byte)` is an
+allocation + copy — which is the dominant cost the `PerfString` benchmark measures. The converter therefore
+emits, for the provably-safe case, a stack-only [`sstring`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/sstring.cs)
+(a `readonly ref struct` over `ReadOnlySpan<byte>`) that VIEWS the source with no allocation:
+`sstring s = ((sstring)buf);` instead of `@string s = ((@string)buf);`. Where the string escapes, the
+implicit `sstring`→`@string` conversion copies the bytes to the heap at that boundary.
+
+The escape pass (`markSStringEligible`) records the verdict; it is deliberately conservative — the MVP's
+safest idiom only. A local is eligible iff: it is the built-in `string` type bound by a single
+`s := string(x)`; `x` is an UNNAMED `[]byte` (a `[]rune`→string must UTF-8-encode — an allocation, no view;
+a named `[]byte` would need a two-hop cast C# will not chain); it does not escape by any channel the escape
+analysis detects; every use is a safe read — a `len`/`cap` argument, a byte index `s[i]`, or a comparison
+against a string literal — so anything else (passed to a function, stored, ranged, concatenated, RETURNED,
+reassigned) disqualifies it; and the source is never written except at its own declaration. Emission is
+three coordinated sites: `convCallExpr` retargets the conversion cast to `sstring` (after the Go→C# name
+map) under a transient flag; `visitAssignStmt` declares the explicit type as `sstring` and sets that flag
+around the RHS; and `convBinaryExpr` renders the literal in `s == "x"` as a plain C# string, not a `"…"u8`
+span (`ReadOnlySpan<byte>` converts to `sstring` only explicitly, but a plain string binds `sstring`'s `==`).
+
+Because `sstring` is a `ref struct`, the escapes the predicate does NOT enumerate (storing into a field/
+array/map, boxing to an interface, channel send, closure capture) are C# COMPILE errors, not silent bugs;
+the two vectors that would be silently wrong — escape via `return` and mutation of the source buffer — are
+guarded explicitly. The footprint is intentionally tiny (exactly one site in the whole Go 1.23 stdlib —
+`x/net/nettest`'s `string(out[:4])`, used only in `ver > "7200"`/`ver == "7200"`). Guarded by the
+`SStringElision` behavioral test, which asserts both the emitted forms (`sstring` for two eligible locals,
+`@string` for source-mutated, print-escaped, and returned locals) and byte-identical Go/C# stdout. Later
+phases (unnamed-temporary conversions, a precise per-iteration liveness guard that would reach the
+`PerfString` loop) are deferred; see [`docs/Roadmap.md`](Roadmap.md).
+
 ## Maps and Channels
 Go maps and channels convert to the golib [`map<K,V>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/map.cs) and [`channel<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/channel.cs) structures. `make` becomes a constructor; channel send/receive use the runtime operators:
 
