@@ -33,8 +33,9 @@ internal static ж<_TypeSet> typeSet(this ж<Interface> Ꮡt) {
 }
 
 // emptyInterface represents the empty (completed) interface
-internal static ж<Interface> ᏑemptyInterface = new(new Interface(complete: true, tset: ᏑtopTypeSet));
+internal static ж<Interface> ᏑemptyInterface = new(default(Interface));
 internal static ref Interface emptyInterface => ref ᏑemptyInterface.Value;
+internal static void initᴛemptyInterface() { emptyInterface = new Interface(complete: true, tset: ᏑtopTypeSet); }
 
 // NewInterface returns a new interface for the given methods and embedded types.
 // NewInterface takes ownership of the provided methods and may modify their types

@@ -2582,7 +2582,8 @@ public static ж<ServeMux> NewServeMux() {
 }
 
 // DefaultServeMux is the default [ServeMux] used by [Serve].
-public static ж<ServeMux> DefaultServeMux = ᏑdefaultServeMux;
+public static ж<ServeMux> DefaultServeMux;
+internal static void initᴛDefaultServeMux() { DefaultServeMux = ᏑdefaultServeMux; }
 
 internal static ж<ServeMux> ᏑdefaultServeMux = new(default(ServeMux));
 internal static ref ServeMux defaultServeMux => ref ᏑdefaultServeMux.Value;

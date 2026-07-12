@@ -29,15 +29,17 @@ internal static readonly UntypedInt pLo = /* pLl | pLu */ 96; // a letter that i
 internal static readonly UntypedInt pLmask = /* pLo */ 96;
 
 // GraphicRanges defines the set of graphic characters according to Unicode.
-public static slice<ж<RangeTable>> GraphicRanges = new ж<RangeTable>[]{
+public static slice<ж<RangeTable>> GraphicRanges;
+internal static void initᴛGraphicRanges() { GraphicRanges = new ж<RangeTable>[]{
     L, M, N, P, S, Zs
-}.slice();
+}.slice(); }
 
 // PrintRanges defines the set of printable characters according to Go.
 // ASCII space, U+0020, is handled separately.
-public static slice<ж<RangeTable>> PrintRanges = new ж<RangeTable>[]{
+public static slice<ж<RangeTable>> PrintRanges;
+internal static void initᴛPrintRanges() { PrintRanges = new ж<RangeTable>[]{
     L, M, N, P, S
-}.slice();
+}.slice(); }
 
 // IsGraphic reports whether the rune is defined as a Graphic by Unicode.
 // Such characters include letters, marks, numbers, punctuation, symbols, and

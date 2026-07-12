@@ -162,7 +162,8 @@ internal static error checkChainSSLServerPolicy(ж<Certificate> Ꮡc, ж<syscall
 
 // windowsExtKeyUsageOIDs are the C NUL-terminated string representations of the
 // OIDs for use with the Windows API.
-internal static map<ExtKeyUsage, slice<byte>> windowsExtKeyUsageOIDs = new map<ExtKeyUsage, slice<byte>>(builtin.len(extKeyUsageOIDs));
+internal static map<ExtKeyUsage, slice<byte>> windowsExtKeyUsageOIDs;
+internal static void initᴛwindowsExtKeyUsageOIDs() { windowsExtKeyUsageOIDs = new map<ExtKeyUsage, slice<byte>>(builtin.len(extKeyUsageOIDs)); }
 
 [GoInit] internal static void init() {
     foreach (var (_, eku) in extKeyUsageOIDs) {

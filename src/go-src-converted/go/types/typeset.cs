@@ -167,8 +167,9 @@ partial class types_package {
 }
 
 // topTypeSet may be used as type set for the empty interface.
-internal static ж<_TypeSet> ᏑtopTypeSet = new(new _TypeSet(terms: allTermlist));
+internal static ж<_TypeSet> ᏑtopTypeSet = new(default(_TypeSet));
 internal static ref _TypeSet topTypeSet => ref ᏑtopTypeSet.Value;
+internal static void initᴛtopTypeSet() { topTypeSet = new _TypeSet(terms: allTermlist); }
 
 // computeInterfaceTypeSet may be called with check == nil.
 internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, tokenꓸPos pos, ж<Interface> Ꮡityp) => func((defer, recover) => {

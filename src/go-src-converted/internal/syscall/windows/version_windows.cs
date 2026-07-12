@@ -42,7 +42,8 @@ internal static bool supportTCPKeepAliveInterval;
 internal static bool supportTCPKeepAliveCount;
 
 // Fallback to checking the Windows version.
-internal static Action initTCPKeepAlive = sync.OnceFunc(() => func((defer, recover) => {
+internal static Action initTCPKeepAlive;
+internal static void initᴛinitTCPKeepAlive() { initTCPKeepAlive = sync.OnceFunc(() => func((defer, recover) => {
     var (s, err) = WSASocket(syscall.AF_INET, syscall.SOCK_STREAM, syscall.IPPROTO_TCP, nil, 0, WSA_FLAG_NO_HANDLE_INHERIT);
     if (err != default!) {
         var (major, _, build) = version();
@@ -59,7 +60,7 @@ internal static Action initTCPKeepAlive = sync.OnceFunc(() => func((defer, recov
     supportTCPKeepAliveIdle = optSupported(TCP_KEEPIDLE);
     supportTCPKeepAliveInterval = optSupported(TCP_KEEPINTVL);
     supportTCPKeepAliveCount = optSupported(TCP_KEEPCNT);
-}));
+})); }
 
 // SupportTCPKeepAliveInterval indicates whether TCP_KEEPIDLE is supported.
 // The minimal requirement is Windows 10.0.16299.
@@ -86,10 +87,11 @@ public static bool SupportTCPKeepAliveCount() {
 // SupportTCPInitialRTONoSYNRetransmissions indicates whether the current
 // Windows version supports the TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS.
 // The minimal requirement is Windows 10.0.16299.
-public static Func<bool> SupportTCPInitialRTONoSYNRetransmissions = sync.OnceValue(() => {
+public static Func<bool> SupportTCPInitialRTONoSYNRetransmissions;
+internal static void initᴛSupportTCPInitialRTONoSYNRetransmissions() { SupportTCPInitialRTONoSYNRetransmissions = sync.OnceValue(() => {
     var (major, _, build) = version();
     return major >= 10 && build >= 16299;
-});
+}); }
 
 // First call to get the required buffer size in bytes.
 // Ignore the error, it will always fail.

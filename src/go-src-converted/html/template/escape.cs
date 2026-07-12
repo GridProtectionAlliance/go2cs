@@ -76,7 +76,8 @@ internal static @string evalArgs(params ꓸꓸꓸany argsʗp) {
 }
 
 // funcMap maps command names to functions that render their inputs safe.
-internal static template.FuncMap funcMap = new text.template_package.FuncMap(new map<@string, any>{
+internal static template.FuncMap funcMap;
+internal static void initᴛfuncMap() { funcMap = new text.template_package.FuncMap(new map<@string, any>{
     ["_html_template_attrescaper"u8] = attrEscaper,
     ["_html_template_commentescaper"u8] = commentEscaper,
     ["_html_template_cssescaper"u8] = cssEscaper,
@@ -94,7 +95,7 @@ internal static template.FuncMap funcMap = new text.template_package.FuncMap(new
     ["_html_template_urlfilter"u8] = urlFilter,
     ["_html_template_urlnormalizer"u8] = urlNormalizer,
     ["_eval_args_"u8] = evalArgs
-});
+}); }
 
 // escaper collects type inferences about templates and changes needed to make
 // templates injection safe.

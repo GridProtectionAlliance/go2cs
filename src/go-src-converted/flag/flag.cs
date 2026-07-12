@@ -803,10 +803,11 @@ internal static void defaultUsage(this ж<FlagSet> Ꮡf) {
 // Custom usage functions may choose to exit the program; by default exiting
 // happens anyway as the command line's error handling strategy is set to
 // [ExitOnError].
-public static Action Usage = () => {
+public static Action Usage;
+internal static void initᴛUsage() { Usage = () => {
     fmt.Fprintf(CommandLine.Output(), "Usage of %s:\n"u8, os.Args[0]);
     PrintDefaults();
-};
+}; }
 
 // NFlag returns the number of flags that have been set.
 [GoRecv] public static nint NFlag(this ref FlagSet f) {

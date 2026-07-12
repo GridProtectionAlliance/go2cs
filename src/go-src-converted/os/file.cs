@@ -72,11 +72,14 @@ partial class os_package {
 // Note that the Go runtime writes to standard error for panics and crashes;
 // closing Stderr may cause those messages to go elsewhere, perhaps
 // to a file opened later.
-public static ж<File> Stdin = NewFile((uintptr)syscall.Stdin, "/dev/stdin"u8);
+public static ж<File> Stdin;
+internal static void initᴛStdin() { Stdin = NewFile((uintptr)syscall.Stdin, "/dev/stdin"u8); }
 
-public static ж<File> Stdout = NewFile((uintptr)syscall.Stdout, "/dev/stdout"u8);
+public static ж<File> Stdout;
+internal static void initᴛStdout() { Stdout = NewFile((uintptr)syscall.Stdout, "/dev/stdout"u8); }
 
-public static ж<File> Stderr = NewFile((uintptr)syscall.Stderr, "/dev/stderr"u8);
+public static ж<File> Stderr;
+internal static void initᴛStderr() { Stderr = NewFile((uintptr)syscall.Stderr, "/dev/stderr"u8); }
 
 // Flags to OpenFile wrapping those of the underlying system. Not all
 // flags may be implemented on a given system.
@@ -454,7 +457,8 @@ internal static (ж<File>, error) openDir(@string name) {
 }
 
 // lstat is overridden in tests.
-internal static Func<@string, (FileInfo, error)> lstat = Lstat;
+internal static Func<@string, (FileInfo, error)> lstat;
+internal static void initᴛlstat() { lstat = Lstat; }
 
 // Rename renames (moves) oldpath to newpath.
 // If newpath already exists and is not a directory, Rename replaces it.

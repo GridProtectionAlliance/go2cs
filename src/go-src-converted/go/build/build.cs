@@ -306,8 +306,9 @@ internal static (@string rel, bool ok) hasSubdir(@string root, @string dir) {
 // Default is the default Context for builds.
 // It uses the GOARCH, GOOS, GOROOT, and GOPATH environment variables
 // if set, or else the compiled code's GOARCH, GOOS, and GOROOT.
-public static ж<Context> ᏑDefault = new(defaultContext());
+public static ж<Context> ᏑDefault = new(default(Context));
 public static ref Context Default => ref ᏑDefault.Value;
+internal static void initᴛDefault() { Default = defaultContext(); }
 
 // Keep consistent with cmd/go/internal/cfg.defaultGOPATH.
 internal static @string defaultGOPATH() {

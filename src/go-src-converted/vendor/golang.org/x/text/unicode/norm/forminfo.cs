@@ -55,7 +55,8 @@ internal static readonly UntypedInt headerFlagsMask = 0xC0; // extract the qcInf
     internal Func<ж<Iter>, slice<byte>> nextMain;
 }
 
-internal static slice<ж<formInfo>> formTable = new ж<formInfo>[]{Ꮡ(new formInfo(
+internal static slice<ж<formInfo>> formTable;
+internal static void initᴛformTable() { formTable = new ж<formInfo>[]{Ꮡ(new formInfo(
     form: NFC,
     composing: true,
     compatibility: false,
@@ -76,7 +77,7 @@ internal static slice<ж<formInfo>> formTable = new ж<formInfo>[]{Ꮡ(new formI
     compatibility: true,
     info: lookupInfoNFKC,
     nextMain: nextDecomposed))
-}.slice();
+}.slice(); }
 
 // We do not distinguish between boundaries for NFC, NFD, etc. to avoid
 // unexpected behavior for the user.  For example, in NFD, there is a boundary

@@ -15,17 +15,19 @@ partial class norm_package {
     internal slice<uint16> offset;
 }
 
-internal static ж<sparseBlocks> ᏑnfcSparse = new(new sparseBlocks(
+internal static ж<sparseBlocks> ᏑnfcSparse = new(default(sparseBlocks));
+internal static ref sparseBlocks nfcSparse => ref ᏑnfcSparse.Value;
+internal static void initᴛnfcSparse() { nfcSparse = new sparseBlocks(
     values: nfcSparseValues[..],
     offset: nfcSparseOffset[..]
-));
-internal static ref sparseBlocks nfcSparse => ref ᏑnfcSparse.Value;
+); }
 
-internal static ж<sparseBlocks> ᏑnfkcSparse = new(new sparseBlocks(
+internal static ж<sparseBlocks> ᏑnfkcSparse = new(default(sparseBlocks));
+internal static ref sparseBlocks nfkcSparse => ref ᏑnfkcSparse.Value;
+internal static void initᴛnfkcSparse() { nfkcSparse = new sparseBlocks(
     values: nfkcSparseValues[..],
     offset: nfkcSparseOffset[..]
-));
-internal static ref sparseBlocks nfkcSparse => ref ᏑnfkcSparse.Value;
+); }
 
 internal static ж<nfcTrie> nfcData = newNfcTrie(0);
 internal static ж<nfkcTrie> nfkcData = newNfkcTrie(0);

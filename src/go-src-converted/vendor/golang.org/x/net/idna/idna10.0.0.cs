@@ -278,12 +278,17 @@ public static (@string, error) ToASCII(this ж<Profile> Ꮡp, @string s) {
     return s;
 }
 
-public static ж<Profile> Punycode = punycode;
-public static ж<Profile> Lookup = Δlookup;
-public static ж<Profile> Display = display;
-public static ж<Profile> Registration = registration;
+public static ж<Profile> Punycode;
+internal static void initᴛPunycode() { Punycode = punycode; }
+public static ж<Profile> Lookup;
+internal static void initᴛLookup() { Lookup = Δlookup; }
+public static ж<Profile> Display;
+internal static void initᴛDisplay() { Display = display; }
+public static ж<Profile> Registration;
+internal static void initᴛRegistration() { Registration = registration; }
 internal static ж<Profile> punycode = Ꮡ(new Profile(nil));
-internal static ж<Profile> Δlookup = Ꮡ(new Profile(new options(
+internal static ж<Profile> Δlookup;
+internal static void initᴛΔlookup() { Δlookup = Ꮡ(new Profile(new options(
     transitional: transitionalLookup,
     useSTD3Rules: true,
     checkHyphens: true,
@@ -293,8 +298,9 @@ internal static ж<Profile> Δlookup = Ꮡ(new Profile(new options(
     mapping: validateAndMap,
     bidirule: bidirule.ValidString
 )
-));
-internal static ж<Profile> display = Ꮡ(new Profile(new options(
+)); }
+internal static ж<Profile> display;
+internal static void initᴛdisplay() { display = Ꮡ(new Profile(new options(
     useSTD3Rules: true,
     checkHyphens: true,
     checkJoiners: true,
@@ -303,8 +309,9 @@ internal static ж<Profile> display = Ꮡ(new Profile(new options(
     mapping: validateAndMap,
     bidirule: bidirule.ValidString
 )
-));
-internal static ж<Profile> registration = Ꮡ(new Profile(new options(
+)); }
+internal static ж<Profile> registration;
+internal static void initᴛregistration() { registration = Ꮡ(new Profile(new options(
     useSTD3Rules: true,
     verifyDNSLength: true,
     checkHyphens: true,
@@ -314,7 +321,7 @@ internal static ж<Profile> registration = Ꮡ(new Profile(new options(
     mapping: validateRegistration,
     bidirule: bidirule.ValidString
 )
-));
+)); }
 
 // TODO: profiles
 // Register: recommended for approving domain names: don't do any mappings

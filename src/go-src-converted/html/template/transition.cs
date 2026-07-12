@@ -13,7 +13,8 @@ partial class template_package {
 // A transition function takes a context and template text input, and returns
 // the updated context and the number of bytes consumed from the front of the
 // input.
-internal static array<Func<context, slice<byte>, (context, nint)>> transitionFunc = new golib.SparseArray<Func<context, slice<byte>, (context, nint)>>{
+internal static array<Func<context, slice<byte>, (context, nint)>> transitionFunc;
+internal static void initᴛtransitionFunc() { transitionFunc = new golib.SparseArray<Func<context, slice<byte>, (context, nint)>>{
     [stateText] = tText,
     [stateTag] = tTag,
     [stateAttrName] = tAttrName,
@@ -42,7 +43,7 @@ internal static array<Func<context, slice<byte>, (context, nint)>> transitionFun
     [stateCSSBlockCmt] = tBlockCmt,
     [stateCSSLineCmt] = tLineCmt,
     [stateError] = tError
-}.array();
+}.array(); }
 
 internal static slice<byte> commentStart = slice<byte>((@string)"<!--");
 

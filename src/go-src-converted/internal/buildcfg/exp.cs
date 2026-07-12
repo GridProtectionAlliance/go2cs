@@ -27,15 +27,16 @@ partial class buildcfg_package {
 // experimentBaseline specifies the experiment flags that are enabled by
 // default in the current toolchain. This is, in effect, the "control"
 // configuration and any variation from this is an experiment.
-public static ж<ExperimentFlags> ᏑExperiment = new(((Func<ExperimentFlags>)(() => {
+public static ж<ExperimentFlags> ᏑExperiment = new(default(ExperimentFlags));
+public static ref ExperimentFlags Experiment => ref ᏑExperiment.Value;
+internal static void initᴛExperiment() { Experiment = ((Func<ExperimentFlags>)(() => {
     var (flags, err) = ParseGOEXPERIMENT(GOOS, GOARCH, envOr("GOEXPERIMENT"u8, defaultGOEXPERIMENT));
     if (err != default!) {
         Error = err;
         return new ExperimentFlags(nil);
     }
     return flags.Value;
-}))());
-public static ref ExperimentFlags Experiment => ref ᏑExperiment.Value;
+}))(); }
 
 // DefaultGOEXPERIMENT is the embedded default GOEXPERIMENT string.
 // It is not guaranteed to be canonical.
@@ -48,7 +49,8 @@ public static readonly @string DefaultGOEXPERIMENT = "";
 // platforms that support it.
 //
 // Note: must agree with runtime.framepointer_enabled.
-public static bool FramePointerEnabled = GOARCH == "amd64"u8 || GOARCH == "arm64"u8;
+public static bool FramePointerEnabled;
+internal static void initᴛFramePointerEnabled() { FramePointerEnabled = GOARCH == "amd64"u8 || GOARCH == "arm64"u8; }
 
 // ParseGOEXPERIMENT parses a (GOOS, GOARCH, GOEXPERIMENT)
 // configuration tuple and returns the enabled and baseline experiment

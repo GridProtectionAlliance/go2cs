@@ -34,7 +34,8 @@ partial class big_package {
     internal nat abs;  // absolute value of the integer
 }
 
-internal static ж<ΔInt> intOne = Ꮡ(new ΔInt(false, natOne));
+internal static ж<ΔInt> intOne;
+internal static void initᴛintOne() { intOne = Ꮡ(new ΔInt(false, natOne)); }
 
 // Sign returns:
 //   - -1 if x < 0;

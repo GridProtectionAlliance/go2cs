@@ -96,8 +96,10 @@ internal static nint countBits(slice<byte> cov) {
     return n;
 }
 
-internal static bool coverageEnabled = len(coverage()) > 0;
-internal static slice<byte> coverageSnapshot = new slice<byte>(len(coverage()));
+internal static bool coverageEnabled;
+internal static void initᴛcoverageEnabled() { coverageEnabled = len(coverage()) > 0; }
+internal static slice<byte> coverageSnapshot;
+internal static void initᴛcoverageSnapshot() { coverageSnapshot = new slice<byte>(len(coverage())); }
 internal static ж<array<byte>> Ꮡ_counters = new(new array<byte>(0));
 internal static ref array<byte> _counters => ref Ꮡ_counters.Value;
 internal static ж<array<byte>> Ꮡ_ecounters = new(new array<byte>(0));

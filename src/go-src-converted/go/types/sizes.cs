@@ -320,7 +320,8 @@ public static Sizes SizesFor(@string compiler, @string arch) {
 }
 
 // stdSizes is used if Config.Sizes == nil.
-internal static Sizes stdSizes = SizesFor("gc"u8, "amd64"u8);
+internal static Sizes stdSizes;
+internal static void initᴛstdSizes() { stdSizes = SizesFor("gc"u8, "amd64"u8); }
 
 [GoRecv] internal static int64 alignof(this ref Config conf, ΔType T) {
     var f = stdSizes.Alignof;

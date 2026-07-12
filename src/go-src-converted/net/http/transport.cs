@@ -48,7 +48,8 @@ partial class http_package {
 // and caches them for reuse by subsequent calls. It uses HTTP proxies
 // as directed by the environment variables HTTP_PROXY, HTTPS_PROXY
 // and NO_PROXY (or the lowercase versions thereof).
-public static RoundTripper DefaultTransport = new TransportжRoundTripper(Ꮡ(new Transport(
+public static RoundTripper DefaultTransport;
+internal static void initᴛDefaultTransport() { DefaultTransport = new TransportжRoundTripper(Ꮡ(new Transport(
     Proxy: ProxyFromEnvironment,
     DialContext: defaultTransportDialContext(Ꮡ(new net.Dialer(
         Timeout: 30000000000L,
@@ -59,7 +60,7 @@ public static RoundTripper DefaultTransport = new TransportжRoundTripper(Ꮡ(ne
     IdleConnTimeout: 90000000000L,
     TLSHandshakeTimeout: 10000000000L,
     ExpectContinueTimeout: 1 * time.ΔSecond
-)));
+))); }
 
 // DefaultMaxIdleConnsPerHost is the default value of [Transport]'s
 // MaxIdleConnsPerHost.
@@ -2864,7 +2865,8 @@ internal static error errTimeout = new timeoutErrorжerror(Ꮡ(new timeoutError(
 
 // errRequestCanceled is set to be identical to the one from h2 to facilitate
 // testing.
-internal static error errRequestCanceled = http2errRequestCanceled;
+internal static error errRequestCanceled;
+internal static void initᴛerrRequestCanceled() { errRequestCanceled = http2errRequestCanceled; }
 
 internal static error errRequestCanceledConn = errors.New("net/http: request canceled while waiting for connection"u8); // TODO: unify?
 

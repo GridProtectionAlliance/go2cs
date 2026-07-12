@@ -21,8 +21,10 @@ internal const bool debugSelect = false;
     internal @unsafe.Pointer elem; // data element
 }
 
-internal static uintptr chansendpc = abi.FuncPCABIInternal(chansend);
-internal static uintptr chanrecvpc = abi.FuncPCABIInternal(chanrecv);
+internal static uintptr chansendpc;
+internal static void initᴛchansendpc() { chansendpc = abi.FuncPCABIInternal(chansend); }
+internal static uintptr chanrecvpc;
+internal static void initᴛchanrecvpc() { chanrecvpc = abi.FuncPCABIInternal(chanrecv); }
 
 internal static void selectsetpc(ж<uintptr> Ꮡpc) {
     ref var pc = ref Ꮡpc.Value;

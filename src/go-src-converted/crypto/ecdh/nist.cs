@@ -247,11 +247,12 @@ public static ΔCurve P256() {
     return new nistCurveжΔCurve<P256PointжnistPoint>(p256);
 }
 
-internal static ж<nistCurve<P256PointжnistPoint>> p256 = Ꮡ(new nistCurve<P256PointжnistPoint>(
+internal static ж<nistCurve<P256PointжnistPoint>> p256;
+internal static void initᴛp256() { p256 = Ꮡ(new nistCurve<P256PointжnistPoint>(
     name: "P-256"u8,
     newPoint: () => nistec.NewP256Point(),
     scalarOrder: p256Order
-));
+)); }
 
 internal static slice<byte> p256Order = new byte[]{
     0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00,
@@ -268,11 +269,12 @@ public static ΔCurve P384() {
     return new nistCurveжΔCurve<P384PointжnistPoint>(p384);
 }
 
-internal static ж<nistCurve<P384PointжnistPoint>> p384 = Ꮡ(new nistCurve<P384PointжnistPoint>(
+internal static ж<nistCurve<P384PointжnistPoint>> p384;
+internal static void initᴛp384() { p384 = Ꮡ(new nistCurve<P384PointжnistPoint>(
     name: "P-384"u8,
     newPoint: () => nistec.NewP384Point(),
     scalarOrder: p384Order
-));
+)); }
 
 internal static slice<byte> p384Order = new byte[]{
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -291,11 +293,12 @@ public static ΔCurve P521() {
     return new nistCurveжΔCurve<P521PointжnistPoint>(p521);
 }
 
-internal static ж<nistCurve<P521PointжnistPoint>> p521 = Ꮡ(new nistCurve<P521PointжnistPoint>(
+internal static ж<nistCurve<P521PointжnistPoint>> p521;
+internal static void initᴛp521() { p521 = Ꮡ(new nistCurve<P521PointжnistPoint>(
     name: "P-521"u8,
     newPoint: () => nistec.NewP521Point(),
     scalarOrder: p521Order
-));
+)); }
 
 internal static ж<slice<byte>> Ꮡp521Order = new(new byte[]{0x01, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,

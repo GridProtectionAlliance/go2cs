@@ -9,7 +9,8 @@ using reflect = reflect_package;
 
 partial class gob_package {
 
-internal static map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>> decArrayHelper = new map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>>{
+internal static map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>> decArrayHelper;
+internal static void initᴛdecArrayHelper() { decArrayHelper = new map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>>{
     [reflect.ΔBool] = decBoolArray,
     [reflect.Complex64] = decComplex64Array,
     [reflect.Complex128] = decComplex128Array,
@@ -26,9 +27,10 @@ internal static map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint
     [reflect.Uint32] = decUint32Array,
     [reflect.Uint64] = decUint64Array,
     [reflect.Uintptr] = decUintptrArray
-};
+}; }
 
-internal static map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>> decSliceHelper = new map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>>{
+internal static map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>> decSliceHelper;
+internal static void initᴛdecSliceHelper() { decSliceHelper = new map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>>{
     [reflect.ΔBool] = decBoolSlice,
     [reflect.Complex64] = decComplex64Slice,
     [reflect.Complex128] = decComplex128Slice,
@@ -45,7 +47,7 @@ internal static map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint
     [reflect.Uint32] = decUint32Slice,
     [reflect.Uint64] = decUint64Slice,
     [reflect.Uintptr] = decUintptrSlice
-};
+}; }
 
 internal static bool decBoolArray(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
     ref var state = ref Ꮡstate.Value;

@@ -18,8 +18,9 @@ internal static readonly UntypedInt itabInitSize = 512;
 
 internal static ж<mutex> ᏑitabLock = new(new mutex(nil));
 internal static ref mutex itabLock => ref ᏑitabLock.Value;                         // lock for accessing itab table
-internal static ж<ж<itabTableType>> ᏑitabTable = new(ᏑitabTableInit);
-internal static ref ж<itabTableType> itabTable => ref ᏑitabTable.ValueSlot;                    // pointer to current table
+internal static ж<ж<itabTableType>> ᏑitabTable = new(default(ж<itabTableType>));
+internal static ref ж<itabTableType> itabTable => ref ᏑitabTable.ValueSlot;
+internal static void initᴛitabTable() { itabTable = ᏑitabTableInit; }                    // pointer to current table
 internal static ж<itabTableType> ᏑitabTableInit = new(new itabTableType(size: itabInitSize));
 internal static ref itabTableType itabTableInit => ref ᏑitabTableInit.Value; // starter table
 

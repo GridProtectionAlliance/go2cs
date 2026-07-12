@@ -499,7 +499,8 @@ public static error WriteFile(ΔHandle fd, slice<byte> p, ж<uint32> Ꮡdone, ж
 internal static ж<int64> ᏑioSync = new(default(int64));
 internal static ref int64 ioSync => ref ᏑioSync.Value;
 
-internal static ж<LazyProc> procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx"u8);
+internal static ж<LazyProc> procSetFilePointerEx;
+internal static void initᴛprocSetFilePointerEx() { procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx"u8); }
 
 internal static readonly uintptr ptrSize = /* unsafe.Sizeof(uintptr(0)) */ 8;
 
@@ -563,9 +564,12 @@ public static error /*err*/ Close(ΔHandle fd) {
     return CloseHandle(fd);
 }
 
-public static ΔHandle Stdin = getStdHandle(STD_INPUT_HANDLE);
-public static ΔHandle Stdout = getStdHandle(STD_OUTPUT_HANDLE);
-public static ΔHandle Stderr = getStdHandle(STD_ERROR_HANDLE);
+public static ΔHandle Stdin;
+internal static void initᴛStdin() { Stdin = getStdHandle(STD_INPUT_HANDLE); }
+public static ΔHandle Stdout;
+internal static void initᴛStdout() { Stdout = getStdHandle(STD_OUTPUT_HANDLE); }
+public static ΔHandle Stderr;
+internal static void initᴛStderr() { Stderr = getStdHandle(STD_ERROR_HANDLE); }
 
 internal static ΔHandle /*fd*/ getStdHandle(nint h) {
     ΔHandle fd = default!;

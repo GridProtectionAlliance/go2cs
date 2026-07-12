@@ -1675,7 +1675,8 @@ internal static ж<unicode.RangeTable> second = Ꮡ(new unicode.RangeTable(
 // standard HTML entity characters.
 //
 // See the [Decoder.Strict] and [Decoder.Entity] fields' documentation.
-public static map<@string, @string> HTMLEntity = htmlEntity;
+public static map<@string, @string> HTMLEntity;
+internal static void initᴛHTMLEntity() { HTMLEntity = htmlEntity; }
 
 /*
 		hget http://www.w3.org/TR/html4/sgml/entities.html |
@@ -1944,7 +1945,8 @@ internal static map<@string, @string> htmlEntity = new map<@string, @string>{
 // should be considered to close automatically.
 //
 // See the [Decoder.Strict] and [Decoder.Entity] fields' documentation.
-public static slice<@string> HTMLAutoClose = htmlAutoClose;
+public static slice<@string> HTMLAutoClose;
+internal static void initᴛHTMLAutoClose() { HTMLAutoClose = htmlAutoClose; }
 
 /*
 		hget http://www.w3.org/TR/html4/loose.dtd |

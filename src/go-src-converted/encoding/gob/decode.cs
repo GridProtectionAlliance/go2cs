@@ -930,7 +930,8 @@ internal static array<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> d
 }.array();
 
 // Indexed by gob types.  tComplex will be added during type.init().
-internal static map<typeId, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decIgnoreOpMap = new map<typeId, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>{
+internal static map<typeId, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decIgnoreOpMap;
+internal static void initᴛdecIgnoreOpMap() { decIgnoreOpMap = new map<typeId, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>{
     [tBool] = ignoreUint,
     [tInt] = ignoreUint,
     [tUint] = ignoreUint,
@@ -938,7 +939,7 @@ internal static map<typeId, Action<ж<decInstr>, ж<decoderState>, reflectꓸVal
     [tBytes] = ignoreUint8Array,
     [tString] = ignoreUint8Array,
     [tComplex] = ignoreTwoUints
-};
+}; }
 
 // decOpFor returns the decoding op for the base type under rt and
 // the indirection count to reach it.

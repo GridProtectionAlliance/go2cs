@@ -401,7 +401,8 @@ internal static asn1.ObjectIdentifier oidISOSignatureSHA1WithRSA = new asn1.Obje
     internal crypto.Hash hash;
     internal bool isRSAPSS;
 }
-internal static slice<signatureAlgorithmDetailsᴛ1> signatureAlgorithmDetails = new signatureAlgorithmDetailsᴛ1[]{
+internal static slice<signatureAlgorithmDetailsᴛ1> signatureAlgorithmDetails;
+internal static void initᴛsignatureAlgorithmDetails() { signatureAlgorithmDetails = new signatureAlgorithmDetailsᴛ1[]{
     new(MD5WithRSA, "MD5-RSA"u8, oidSignatureMD5WithRSA, asn1.NullRawValue, RSA, crypto.MD5, false),
     new(SHA1WithRSA, "SHA1-RSA"u8, oidSignatureSHA1WithRSA, asn1.NullRawValue, RSA, crypto.SHA1, false),
     new(SHA1WithRSA, "SHA1-RSA"u8, oidISOSignatureSHA1WithRSA, asn1.NullRawValue, RSA, crypto.SHA1, false),
@@ -418,7 +419,7 @@ internal static slice<signatureAlgorithmDetailsᴛ1> signatureAlgorithmDetails =
     new(ECDSAWithSHA384, "ECDSA-SHA384"u8, oidSignatureECDSAWithSHA384, emptyRawValue, ECDSA, crypto.SHA384, false),
     new(ECDSAWithSHA512, "ECDSA-SHA512"u8, oidSignatureECDSAWithSHA512, emptyRawValue, ECDSA, crypto.SHA512, false),
     new(PureEd25519, "Ed25519"u8, oidSignatureEd25519, emptyRawValue, Ed25519, ((crypto.Hash)0), false)
-}.slice();
+}.slice(); }
 
 internal static asn1.RawValue emptyRawValue = new asn1.RawValue(nil);
 
