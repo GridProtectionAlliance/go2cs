@@ -641,6 +641,24 @@ increments, roughly by ROI:
 4. **Positional / loop-carried liveness guard** — relax "source never written" to "not written between the
    conversion and the local's last read, not loop-shared." This is the **only** increment that reaches the
    `PerfString` hot loop, and the highest silent-risk one — gate it behind the heaviest adversarial pass.
+5. **Loop-invariant / repeated-conversion hoisting** (an *optimization* of already-eligible sites, not a
+   widening). When an eligible `string(x)` over a never-written identifier is emitted **repeatedly** — several
+   comparisons, or the same conversion inside a hot loop — the converter re-materializes `(sstring)x`
+   (`new sstring(x.ToSpan())`) at every use, and the JIT will **not** hoist it. This was measured, not assumed:
+   a non-throwing `MemoryMarshal.CreateReadOnlySpan` view added to `golib` (so the `ToSpan` bounds check could
+   not block loop-invariant-code-motion) made **zero** difference — the JIT simply does not lift a `ref struct`
+   view out of a loop. Emitting **one** hoisted `sstring` temp at function scope and reusing it takes the
+   `PerfStringView` benchmark from **~4.7× → ~2.9× Go** (35.8 → 22.2 ms, hand-verified end-to-end). That ~2.9×
+   is about the practical floor within .NET: the residual is inherent (`SequenceEqual`'s per-call setup on a
+   tiny buffer vs Go's inlined `memcmp`; a decomposition micro-benchmark confirmed the `sstring` `==` operator
+   itself adds **zero** over a raw span compare — the whole cost is the per-use view reconstruction). The
+   `objectIsWritten(x) == false` predicate the MVP already computes makes **function-top** hoisting always safe
+   (no cross-loop mutation analysis needed — the safe subset of increment 4). **Caveat on ROI:** the idiomatic
+   **named-local** form (`s := string(x)`) already hoists today (the MVP emits one `sstring s = (sstring)x`), so
+   only the *inline-repeated* idiom is unhoisted — and real stdlib `sstring` sites are mostly **single**
+   comparisons where hoisting is a no-op. This is a targeted win for loop/tokenizer patterns (a scanner
+   comparing `string(buf)` against several keywords), not a broad one. Implementation is a per-function pre-pass
+   that synthesizes the temp and rewrites use sites; it churns goldens, so it carries the full verification below.
 
 Guard every increment with the `SStringElision` behavioral test (extend it) + full-stdlib reconvert (inspect
 every newly-`sstring` site) + a re-run of the performance suite to quantify the actual win.

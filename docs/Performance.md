@@ -127,7 +127,11 @@ What the numbers above actually show, and why:
   **copy** and the **literal allocation** (`@string == "…"u8` materializes the literal every time; `sstring`
   compares spans in place): in isolation the eligible comparison runs **~12× faster than `@string` on the
   JIT and ~11× on Native AOT**. Closer to Go than String, and notably AOT ≈ JIT (unlike most rows). It is
-  the number to watch as the eligibility surface widens.
+  the number to watch as the eligibility surface widens. Most of the remaining gap is the converter
+  re-materializing the view on each of this benchmark's repeated comparisons — hoisting that loop-invariant
+  view to one `sstring` per call takes this benchmark to **~2.9× Go** (measured), about the practical floor
+  (the residual is `SequenceEqual`'s per-call cost on a tiny buffer vs Go's inlined `memcmp`); tracked as a
+  converter follow-up in the [Roadmap](https://github.com/GridProtectionAlliance/go2cs/blob/master/docs/Roadmap.md).
 - **Map:** the transpiled C# is *faster than Go* — `map<K,V>` rides .NET's heavily-optimized
   `Dictionary`, and the AOT build is ~3× faster than Go on this insert/lookup/delete churn.
 - **Sort (~3.5×):** the runtime's `sort.Interface` shim (`Interface<T>`) binds `Len`/`Less`/`Swap` via
