@@ -1602,6 +1602,23 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 	// Replace the unsafe code marker with the actual unsafe code setting
 	newContents = []byte(strings.ReplaceAll(string(newContents), UnsafeMarker, strconv.FormatBool(usesUnsafeCode)))
 
+	// Go's `go build` names an executable after the LAST element of the main package's import path
+	// (`example.com/colordemo` → `colordemo`), not the full dotted module path. Mirror that for an
+	// app's AssemblyName so the emitted exe matches `go build`'s name. LIBRARY assemblies keep the full
+	// dotted name — their DLL/NuGet PackageId identity ($(AssemblyName)) must stay unique across the
+	// package graph (e.g. github.com.fatih.color). Only the AssemblyName changes; the .csproj filename
+	// (the project's identity in the solution/references) is left on the full path.
+	if outputType == "Exe" {
+		fullName := strings.TrimSuffix(filepath.Base(projectFileName), ".csproj")
+
+		if idx := strings.LastIndex(fullName, "."); idx >= 0 {
+			lastSegment := fullName[idx+1:]
+			newContents = []byte(strings.ReplaceAll(string(newContents),
+				"<AssemblyName>"+fullName+"</AssemblyName>",
+				"<AssemblyName>"+lastSegment+"</AssemblyName>"))
+		}
+	}
+
 	// Extract project references from imports
 	packageInfoMap := getImportPackageInfo(projectImports.Keys(), options)
 	projectReferences := &strings.Builder{}

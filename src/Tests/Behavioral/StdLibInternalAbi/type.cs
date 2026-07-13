@@ -105,7 +105,7 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
 
 public static ж<Type> TypeOf(any a) {
     var eface = ~(ж<EmptyInterface>)(uintptr)(new @unsafe.Pointer(Ꮡ(a)));
-    return (ж<Type>)(uintptr)(NoEscape(new @unsafe.Pointer(eface.Type)));
+    return eface.Type;
 }
 
 public static ж<Type> TypeFor<T>() {

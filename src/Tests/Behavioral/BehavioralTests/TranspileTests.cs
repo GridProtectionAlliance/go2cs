@@ -825,6 +825,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPointerReceiverPointerLocalField() => CheckTarget("PointerReceiverPointerLocalField");
 
     [TestMethod]
+    public void CheckPointerReinterpretIdentity() => CheckTarget("PointerReinterpretIdentity");
+
+    [TestMethod]
     public void CheckPointerRvalueFieldReceiver() => CheckTarget("PointerRvalueFieldReceiver");
 
     [TestMethod]

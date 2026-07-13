@@ -5,22 +5,22 @@ import (
 	"unsafe"
 )
 
-// Locks in the go2cs conversion of `unsafe.Pointer(p)` where p is a DEREF-ALIASED Go pointer — a
-// pointer PARAMETER (`func f(p *uintptr)`) or a pointer RECEIVER (`func (r *utp) m()`). Such a
-// pointer renders in the body as the pointed-to VALUE alias (`ref var p = ref Ꮡp.Value`), not a box,
-// so the pin-helper emission `@unsafe.Pointer.FromRef(ref (p).Value)` was `.Value` on a plain `nuint`
-// → CS1061 ("nuint does not contain a definition for val"). The alias is itself a ref-local into
-// the boxed storage, so the converter now takes its ref directly: `FromRef(ref p)`. A genuine box
-// (a local, a struct field's address, a call result) keeps the `(box).Value` form. Runtime hits the
-// param shape in select.go `unsafe.Pointer(pc0)` and heapdump.go `unsafe.Pointer(pstk)` (both
-// *uintptr parameters).
+// Locks in the go2cs conversion of `(*T)(unsafe.Pointer(p))` where p is a DEREF-ALIASED Go pointer of
+// the SAME pointer type `*T` — a pointer PARAMETER (`func f(p *uintptr)`) or a pointer RECEIVER
+// (`func (r *utp) m()`). Converting a `*T` to unsafe.Pointer and back to `*T` is a no-op IDENTITY, so
+// the converter emits the source pointer's BOX directly (`q := Ꮡp`) rather than round-tripping through
+// uintptr. That round-trip resolved through golib's `(ж<T>)(uintptr) => new ж<T>(*(T*)value)`, which
+// DEREFERENCES-and-COPIES: the result was a fresh box over a COPY of the pointed-at value, losing
+// pointer identity and the shared storage (the bug that false-panicked strings.Builder.copyCheck's
+// `b.addr != b` self-check). Emitting the box directly preserves identity AND shared storage, so a
+// WRITE through the reinterpreted pointer now flows back (the round-trip's copy caveat is gone here).
 //
-// The reads below go through a transient FromRef pin within a single expression (address taken,
-// value read immediately), which is stable; values are verified against Go. Only READS are
-// exercised: the `(ж<T>)(uintptr)` round-trip boxes a COPY of the pointed-at value (golib's
-// `ж<T>(uintptr)` operator), so a WRITE through the reinterpreted pointer would hit the copy —
-// the same copy-semantics caveat as every raw-address reinterpret. The runtime sites (select.go,
-// heapdump.go) only read through these pins.
+// This is the same `*T`-to-unsafe.Pointer-to-`*T` shape the runtime hits in select.go
+// (`unsafe.Pointer(pc0)`) and heapdump.go (`unsafe.Pointer(pstk)`). The BARE `unsafe.Pointer(p)` pin
+// (the deref-aliased-param → `@unsafe.Pointer.FromRef(ref p)` helper, without an identity `(*T)(…)`
+// wrapper to collapse) and the GENUINE-reinterpret round-trip (`(*uintptr)(pick(…))` below, whose
+// source is an unsafe.Pointer VALUE, not a `*T`) both remain — exercised across the stdlib and by the
+// pick/advance cases here. Values are verified against Go.
 
 type utp uintptr
 
@@ -39,9 +39,9 @@ func (r *utp) read() uintptr {
 }
 
 // receiver SHADOWED by an inner pointer local of the same name: the inner `r` is a genuine box
-// (a local `*uintptr`), so it must KEEP the `(box).Value` form. The receiver gate matches by name;
-// without the rendered-name check a shadow-renamed `rΔ1` would take the receiver's bare-ref form
-// and pin the box reference slot — compiling but reading a garbage address (silent wrong value).
+// (a local `*uintptr`), so the identity collapse emits THAT box (`rΔ1`), not the receiver's. The
+// identity source is resolved by object identity, so a shadow-renamed `rΔ1` is emitted correctly and
+// never mistaken for the receiver (which would read a garbage address — silent wrong value).
 func (r *utp) tricky() uintptr {
 	var y uintptr = 111
 	{
@@ -86,7 +86,8 @@ func main() {
 	fmt.Println(t.read())
 	fmt.Println(t.tricky()) // 111 — via the INNER shadowing r, not the receiver
 
-	// genuine-box control: the address of a struct field must KEEP the (box).Value form
+	// a struct-field address as the identity source: the collapse emits the field box directly
+	// (`Ꮡh.of(holder.Ꮡv)`), reading through the real field storage
 	h := holder{v: 9}
 	q := (*uintptr)(unsafe.Pointer(&h.v))
 	fmt.Println(*q)

@@ -8,9 +8,7 @@ partial class main_package {
 [GoType("num:uintptr")] partial struct utp;
 
 internal static uintptr readViaParam(ж<uintptr> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
-    var q = (ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref p));
+    var q = Ꮡp;
     return q.Value;
 }
 
@@ -26,7 +24,7 @@ internal static uintptr tricky(this ж<utp> Ꮡr) {
     y = 111;
     {
         var rΔ1 = Ꮡy;
-        var q = (ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref (rΔ1).Value));
+        var q = rΔ1;
         return q.Value;
     }
 }
@@ -60,7 +58,7 @@ internal static void Main() {
     fmt.Println(Ꮡt.tricky());
     ref var h = ref heap<holder>(out var Ꮡh);
     h = new holder(v: 9);
-    var q = (ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡh.of(holder.Ꮡv)).Value));
+    var q = Ꮡh.of(holder.Ꮡv);
     fmt.Println(q.Value);
     ref var a = ref heap(new uintptr(), out var Ꮡa);
     a = 11;

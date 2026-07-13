@@ -31,13 +31,15 @@ func viewOf(hp *header) *view {
 }
 
 //go:noinline
-func readN(p *header) int {
-	// arena.go shape: field select on a CALL RESULT whose ARGUMENT contains a conversion star
+func readN(p *view) int {
+	// arena.go shape: field select on a CALL RESULT whose ARGUMENT contains a conversion star.
+	// p is *view, so `(*header)(unsafe.Pointer(p))` is a genuine reinterpret that KEEPS the star —
+	// an identity (*header source) would collapse the argument to a bare box and defeat the guard.
 	return viewOf((*header)(unsafe.Pointer(p))).n
 }
 
 func main() {
-	h := header{tag: 7, n: 5}
+	h := view{tag: 7, n: 5}
 	fmt.Println(readN(&h)) // 5
 
 	// mheap.go shape: field select on an EXTRA-PAREN pointer conversion

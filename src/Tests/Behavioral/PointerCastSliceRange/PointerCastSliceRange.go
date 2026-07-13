@@ -7,10 +7,12 @@ import (
 
 // A (*[N]T)(ptr)[:n] pointer-cast slice is emitted as a golib slice<T> (not a bare Span<T>), so it
 // ranges as (index, element) and supports element-address Ꮡ(s, i) — mirrors runtime's printDebugLog
-// (range + &state[i]) and os_windows (range over an unsafe []byte). This is a COMPILE + target guard:
-// the values flow through the unsafe.Pointer(&arr) round-trip (a transient fixed address → stale, the
-// known unsafe.Pointer=nuint limitation), so the runtime values are not output-compared — only that the
-// range and element-address forms over a pointer-cast slice compile.
+// (range + &state[i]) and os_windows (range over an unsafe []byte). This is a COMPILE + target guard.
+// Here the source `&arr` is already `*[4]int`, so `(*[4]int)(unsafe.Pointer(&arr))` is a no-op IDENTITY
+// that the converter collapses to the array box and slices directly (`(~Ꮡarr)[..4]`) — a real
+// slice<T> over the array's own storage, no transient unsafe.Pointer=nuint round-trip. (A NON-identity
+// pointer-cast slice, whose source is an unsafe.Pointer VALUE, keeps the Span-based emission; the
+// stdlib exercises that shape.)
 func main() {
 	arr := [4]int{10, 20, 30, 40}
 	s := (*[4]int)(unsafe.Pointer(&arr))[:4]
@@ -35,9 +37,11 @@ func main() {
 	// census F13: a DOUBLE deref of a double-pointer reinterpret - reflect MapOf's
 	// `**(**mapType)(unsafe.Pointer(&imap))` - the outer deref must parenthesize the
 	// inner `~`-form deref before appending .Value, or the postfix binds into the cast
-	// chain and reads the inner unsafe.Pointer slot (CS0029). Compile-shape only.
+	// chain and reads the inner unsafe.Pointer slot (CS0029). The target element type
+	// DIFFERS from the source (`**[2]int64` over a `**[4]int`) so it stays a genuine
+	// reinterpret — an identical type would collapse to the box. Compile-shape only.
 	ip := &arr
-	back := **(**[4]int)(unsafe.Pointer(&ip))
+	back := **(**[2]int64)(unsafe.Pointer(&ip))
 	_ = back
 
 	// census F14: a literal with an unsafe.Pointer result whose arms return different

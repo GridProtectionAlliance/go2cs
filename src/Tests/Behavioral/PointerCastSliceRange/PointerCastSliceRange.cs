@@ -5,10 +5,10 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-internal static unsafe void Main() {
+internal static void Main() {
     ref var arr = ref heap<array<nint>>(out var Ꮡarr);
     arr = new nint[]{10, 20, 30, 40}.array();
-    var s = new slice<nint>(new ReadOnlySpan<nint>((nint*)(uintptr)(new @unsafe.Pointer(Ꮡarr)), 4));
+    var s = (~Ꮡarr)[..4];
     nint sum = 0;
     foreach (var (i, _) in s) {
         sum += i;
@@ -24,7 +24,7 @@ internal static unsafe void Main() {
     fmt.Println(sum, total, s[0]);
     ref var ip = ref heap<ж<array<nint>>>(out var Ꮡip);
     ip = Ꮡarr;
-    var back = (~(ж<ж<array<nint>>>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡip).Value))).Value;
+    var back = (~(ж<ж<array<int64>>>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡip).Value))).Value;
     _ = back;
     var pick = @unsafe.Pointer (bool u) => {
         if (u) {

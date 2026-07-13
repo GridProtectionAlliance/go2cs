@@ -116,7 +116,7 @@ public static @unsafe.Pointer NoEscape(@unsafe.Pointer p) {
 
 public static ж<Type> TypeOf(any a) {
     var eface = ~(ж<EmptyInterface>)(uintptr)(new @unsafe.Pointer(Ꮡ(a)));
-    return (ж<Type>)(uintptr)(NoEscape(new @unsafe.Pointer(eface.Type)));
+    return eface.Type;
 }
 
 public static ж<Type> TypeFor<T>() {

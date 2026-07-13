@@ -68,6 +68,26 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		}
 	}
 
+	// A `(*T)(…)` conversion whose source is an IDENTITY reinterpret of a same-typed pointer —
+	// `(*Builder)(abi.NoEscape(unsafe.Pointer(b)))` with b already `*Builder` — is Go's
+	// escape-analysis idiom for `b.addr = b` (strings.Builder copyCheck; the type's own TODO says to
+	// revert it to exactly that once escape analysis improves). Every other rendering of it — whether
+	// the conversion renderer or, because `(*T)(unsafe.Pointer)` mis-classifies as a non-conversion,
+	// the regular-call path — round-trips through uintptr, which golib's
+	// `(ж<T>)(uintptr) => new ж<T>(*(T*)value)` resolves by DEREFERENCING-and-COPYING: the result box
+	// is not reference-equal to the source, so the type's copy-by-value self-check (`b.addr != b`)
+	// false-panics at runtime. Intercept ONLY this exact identity shape (leaving all other pointer
+	// conversions on their existing path) and emit the source pointer's BOX form directly. The
+	// isPointer context renders a deref-aliased pointer param/receiver as `Ꮡb`, not its value alias
+	// `b` (a `Builder` value cannot assign to the `ж<Builder>` addr field).
+	if len(callExpr.Args) == 1 {
+		if identSrc := v.pointerReinterpretIdentitySource(callExpr, callExpr.Args[0]); identSrc != nil {
+			identContext := DefaultIdentContext()
+			identContext.isPointer = true
+			return v.convExpr(identSrc, []ExprContext{identContext})
+		}
+	}
+
 	funcType := v.getType(callExpr.Fun, false)
 
 	// Check if the call is a type conversion
@@ -2237,6 +2257,91 @@ func (v *Visitor) isRawAddressPointerConversion(callExpr *ast.CallExpr, arg ast.
 	}
 
 	return false
+}
+
+// pointerReinterpretIdentitySource reports the underlying pointer expression when a `(*T)(…)`
+// conversion is a semantic IDENTITY — its source, after peeling an optional escape-analysis
+// identity wrapper, is `unsafe.Pointer(p)` where p ALREADY has the same pointer type `*T`.
+// Go's strings.Builder/bytes.Buffer copyCheck writes `b.addr = (*Builder)(abi.NoEscape(unsafe.
+// Pointer(b)))`, which the language spec makes exactly `b.addr = b` (see the type's own TODO to
+// revert it once escape analysis improves). Emitting the uintptr round-trip instead
+// DEREFERENCES-and-COPIES through golib's `(ж<T>)(uintptr) => new ж<T>(*(T*)value)`, producing a
+// box that is NOT reference-equal to the source — so the type's copy-by-value self-check
+// (`b.addr != b`) false-fires at runtime. Returning p lets the caller emit the box directly and
+// preserve managed-pointer identity. Returns nil when the pattern does not apply (a DIFFERENT
+// element type is a genuine reinterpret and keeps the round-trip).
+func (v *Visitor) pointerReinterpretIdentitySource(callExpr *ast.CallExpr, arg ast.Expr) ast.Expr {
+	targetPtr, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Pointer)
+	if !ok {
+		return nil
+	}
+
+	// Peel a single escape-analysis identity wrapper (`abi.NoEscape`/local `noescape`).
+	inner := arg
+	if call, ok := inner.(*ast.CallExpr); ok && len(call.Args) == 1 && v.isNoEscapeIdentityCall(call) {
+		inner = call.Args[0]
+	}
+
+	// The (possibly unwrapped) source must be an `unsafe.Pointer(p)` CONVERSION — a call whose Fun
+	// DENOTES the unsafe.Pointer type, not merely a function that happens to return unsafe.Pointer
+	// (e.g. runtime `mallocgc(…)`), which is a genuine raw-address reinterpret and keeps its path.
+	call, ok := inner.(*ast.CallExpr)
+	if !ok || len(call.Args) != 1 {
+		return nil
+	}
+
+	if tv, ok := v.info.Types[call.Fun]; !ok || !tv.IsType() {
+		return nil
+	}
+
+	if basic, ok := v.info.TypeOf(call).Underlying().(*types.Basic); !ok || basic.Kind() != types.UnsafePointer {
+		return nil
+	}
+
+	// p must already be `*T` with the SAME element type as the target — only then is the whole
+	// conversion a no-op identity.
+	p := call.Args[0]
+	srcPtr, ok := v.info.TypeOf(p).(*types.Pointer)
+	if !ok {
+		return nil
+	}
+
+	if !types.Identical(srcPtr.Elem(), targetPtr.Elem()) {
+		return nil
+	}
+
+	return p
+}
+
+// isNoEscapeIdentityCall reports whether call is to an escape-analysis identity helper —
+// `abi.NoEscape(…)` (internal/abi) or a package-local `noescape(…)` — each an
+// unsafe.Pointer→unsafe.Pointer function that returns its argument unchanged. Matched by name
+// AND signature shape so an unrelated one-arg call cannot be mistaken for it.
+func (v *Visitor) isNoEscapeIdentityCall(call *ast.CallExpr) bool {
+	var name string
+
+	switch fun := call.Fun.(type) {
+	case *ast.SelectorExpr:
+		name = fun.Sel.Name
+	case *ast.Ident:
+		name = fun.Name
+	default:
+		return false
+	}
+
+	if name != "NoEscape" && name != "noescape" {
+		return false
+	}
+
+	sig, ok := v.info.TypeOf(call.Fun).(*types.Signature)
+	if !ok || sig.Params().Len() != 1 || sig.Results().Len() != 1 {
+		return false
+	}
+
+	pIn, ok1 := sig.Params().At(0).Type().Underlying().(*types.Basic)
+	pOut, ok2 := sig.Results().At(0).Type().Underlying().(*types.Basic)
+
+	return ok1 && ok2 && pIn.Kind() == types.UnsafePointer && pOut.Kind() == types.UnsafePointer
 }
 
 func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
