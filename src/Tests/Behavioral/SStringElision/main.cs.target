@@ -38,6 +38,64 @@ internal static void Main() {
     fmt.Println("matchField:", matchField(slice<byte>((@string)"prod"), new config(name: "prod"u8)));
     fmt.Println("twoConv:", matchTwoConversions(slice<byte>((@string)"abc"), slice<byte>((@string)"abc")));
     fmt.Println("callOperand:", staysHeapCallOperand(slice<byte>((@string)"y"), () => "y"u8));
+    fmt.Println("switchTag:", switchTag(slice<byte>((@string)"put")));
+    fmt.Println("switchLocal:", switchLocal(slice<byte>((@string)"off")));
+    fmt.Println("switchMagic:", switchMagic(slice<byte>((@string)"PK")));
+    fmt.Println("switchCall:", switchCall(slice<byte>((@string)"q")));
+}
+
+internal static nint switchTag(slice<byte> b) {
+    var exprᴛ1 = ((sstring)b);
+    if (exprᴛ1 == "get"u8) {
+        return 1;
+    }
+    if (exprᴛ1 == "put"u8) {
+        return 2;
+    }
+
+    return 0;
+}
+
+internal static nint switchLocal(slice<byte> b) {
+    sstring s = ((sstring)b);
+    var exprᴛ1 = s;
+    if (exprᴛ1 == "on"u8) {
+        return 1;
+    }
+    if (exprᴛ1 == "off"u8) {
+        return 2;
+    }
+
+    return -1;
+}
+
+internal static readonly @string zipMagic = "PK"u8;
+
+internal static readonly @string gzMagic = ((@string)(new byte[]{0x1f, 0x8b}));
+
+internal static nint switchMagic(slice<byte> b) {
+    var exprᴛ1 = ((sstring)b);
+    if (exprᴛ1 == zipMagic) {
+        return 1;
+    }
+    if (exprᴛ1 == gzMagic) {
+        return 2;
+    }
+
+    return 0;
+}
+
+internal static nint switchCall(slice<byte> b) {
+    var exprᴛ1 = ((@string)b);
+    if (exprᴛ1 == labelValue()) {
+        return 1;
+    }
+
+    return 0;
+}
+
+internal static @string labelValue() {
+    return "q"u8;
 }
 
 [GoType] partial struct config {

@@ -78,7 +78,76 @@ func main() {
 	// (14) NEGATIVE — the other comparison operand is a function CALL, which could mutate the source
 	//      between the (lazy) view and the compare, so the conversion stays a heap @string copy.
 	fmt.Println("callOperand:", staysHeapCallOperand([]byte("y"), func() string { return "y" }))
+
+	// (15) SWITCH on string(x) with literal cases — a Go string switch lowers to one temp compared
+	//      against each case with ==, so the tag is a zero-copy sstring view.
+	fmt.Println("switchTag:", switchTag([]byte("put")))
+
+	// (16) NAMED-LOCAL as the switch tag — the local is a stack sstring and the tag read is a safe use.
+	fmt.Println("switchLocal:", switchLocal([]byte("off")))
+
+	// (17) MAGIC-CONSTANT switch — case labels are named string consts (emitted as static readonly
+	//      @string, never a C# pattern), so the tag still lowers to == and compares via the mixed
+	//      operator: still a stack sstring. The common binary-format-detection idiom.
+	fmt.Println("switchMagic:", switchMagic([]byte("PK")))
+
+	// (18) NEGATIVE — a switch case label is a function CALL, which could mutate the source before the
+	//      tag view is read, so the tag stays a heap @string.
+	fmt.Println("switchCall:", switchCall([]byte("q")))
 }
+
+// switchTag lowers `switch string(b)` (all-literal cases) to `var exprᴛN = ((sstring)b)` followed by
+// `exprᴛN == "…"u8` comparisons — the tag is a stack sstring.
+func switchTag(b []byte) int {
+	switch string(b) {
+	case "get":
+		return 1
+	case "put":
+		return 2
+	}
+	return 0
+}
+
+// switchLocal uses a named local as the switch tag; the local is a stack sstring (its only use is the
+// tag read) and the tag temp copies that view.
+func switchLocal(b []byte) int {
+	s := string(b)
+	switch s {
+	case "on":
+		return 1
+	case "off":
+		return 2
+	}
+	return -1
+}
+
+const zipMagic = "PK"
+const gzMagic = "\x1f\x8b"
+
+// switchMagic compares the tag against named string CONSTS (static readonly @string). A string switch
+// never uses the C# constant-pattern form, so the tag still lowers to `==` and stays a stack sstring
+// (comparing via the mixed sstring/@string operator).
+func switchMagic(b []byte) int {
+	switch string(b) {
+	case zipMagic:
+		return 1
+	case gzMagic:
+		return 2
+	}
+	return 0
+}
+
+// switchCall is a NEGATIVE case: a case label is a function call, which could mutate the tag's source
+// between the (lazy) view and the compare, so the tag stays a heap @string.
+func switchCall(b []byte) int {
+	switch string(b) {
+	case labelValue():
+		return 1
+	}
+	return 0
+}
+
+func labelValue() string { return "q" }
 
 type config struct {
 	name string

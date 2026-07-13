@@ -1395,6 +1395,20 @@ and more.
 The mixed comparison also widens the **named-local** case above: `s := string(x)` compared against a string
 variable or field (`s == want`, `s == cfg.name`) is now eligible, not only `s == "literal"`.
 
+A **`switch string(x) { case … }`** is the same comparison family in statement form
+(`markSStringSwitchConversions`). A Go string switch ALWAYS lowers to a single temp assigned the tag value,
+then compared against each case label with `==` — an if/else chain, never a C# `switch` and never the
+constant-pattern (`is`) form, because string constants render as `static readonly @string` (not a C#
+`const`) and literals as `"…"u8`, neither of which is a C# case constant that a `ref struct` could be the
+subject of. So `var exprᴛN = ((sstring)x)` infers the stack string and every `exprᴛN == label` binds a
+zero-allocation operator (span for a `u8` literal, the mixed operator for an `@string` const/variable).
+Because the tag is evaluated exactly ONCE into the temp, the only requirement is that no case label can
+mutate `x` before the view is read — every label must be `sstringOtherOperandSafe` (a literal, a pure read,
+or another conversion — never a call, which is rejected, and never a named string type, which has no
+operator). This covers the common binary-format-detection idiom `switch string(magic) { case elfMagic: … }`,
+and applies both to an unnamed tag (`switch string(x)`) and to a named local used as the tag
+(`s := string(x); switch s { … }`, where the tag read is added to the named local's safe-use set).
+
 A third refinement is an **optimization**, not a widening of eligibility: **loop-invariant / repeated-conversion
 hoisting**. When the same eligible `string(x)` over a never-written source is emitted repeatedly — several
 comparison operands, or one inside a loop — the inline `((sstring)x)` re-materializes the view at every use,
@@ -1423,11 +1437,13 @@ inherent (`SequenceEqual`'s per-call setup on a tiny buffer vs Go's inlined `mem
 Guarded by the `SStringElision` behavioral test — the eligible cases (two eligible locals, an unnamed
 comparison operand, two repeated-conversion groups that each hoist to a single reused `sstring` temp — one in
 a loop, one straight-line — plus the mixed-comparison additions: a named local compared against a string
-variable and against a struct field, and two `string(bytes)` conversions compared directly) emit `sstring`;
-source-mutated, print-escaped, and returned locals plus a compare-against-a-function-call stay `@string` —
-asserting emitted forms and byte-identical Go/C# stdout. Remaining phases (unnamed conversions passed to
-non-retaining callees / used as map keys, and a precise per-iteration liveness guard that would reach the
-`PerfString` loop) are deferred; see [`docs/Roadmap.md`](Roadmap.md).
+variable and against a struct field, and two `string(bytes)` conversions compared directly; plus the switch
+additions: a `switch string(x)` with literal cases, a named local as the switch tag, and a magic-constant
+switch whose case labels are named `@string` consts) emit `sstring`; source-mutated, print-escaped, and
+returned locals, a compare-against-a-function-call, and a switch with a function-call case label stay
+`@string` — asserting emitted forms and byte-identical Go/C# stdout. Remaining phases (unnamed conversions
+passed to non-retaining callees / used as map keys, and a precise per-iteration liveness guard that would
+reach the `PerfString` loop) are deferred; see [`docs/Roadmap.md`](Roadmap.md).
 
 ## Maps and Channels
 Go maps and channels convert to the golib [`map<K,V>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/map.cs) and [`channel<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/channel.cs) structures. `make` becomes a constructor; channel send/receive use the runtime operators:

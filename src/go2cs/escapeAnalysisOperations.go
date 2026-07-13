@@ -48,6 +48,11 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 			// zero-copy sstring view unconditionally — no escape/mutation analysis required.
 			visitor.markSStringComparisonConversions(fileEntry.file)
 
+			// `switch string(x) { case …: … }` lowers to a temp compared against each case with `==`
+			// (never a C# switch/pattern — string labels are not C# case constants); the tag is likewise
+			// a zero-copy sstring view when every case label is a mutation-safe comparison operand.
+			visitor.markSStringSwitchConversions(fileEntry.file)
+
 			ast.Inspect(fileEntry.file, func(n ast.Node) bool {
 				switch node := n.(type) {
 				case *ast.FuncDecl:
@@ -783,6 +788,13 @@ func (v *Visitor) sstringUsesAreSafe(obj types.Object, declIdent *ast.Ident, bod
 					safeIdents[id] = true
 				}
 			}
+		case *ast.SwitchStmt:
+			// `switch s { case …: … }` — the local is a switch tag over mutation-safe case labels.
+			// That lowers to `var exprᴛN = s;` followed by `exprᴛN == label` comparisons (the same safe
+			// `==` form as a direct comparison), so the tag read is a safe use.
+			if id, ok := e.Tag.(*ast.Ident); ok && v.allCaseLabelsSafe(e.Body) {
+				safeIdents[id] = true
+			}
 		}
 
 		return true
@@ -916,6 +928,72 @@ func (v *Visitor) markSStringComparisonConversions(file *ast.File) {
 
 		return true
 	})
+}
+
+// markSStringSwitchConversions flags the `string(x)` conversion tag of a `switch string(x) { case … }`
+// so it emits the zero-copy sstring view. A Go string switch ALWAYS lowers to a single temp assigned
+// the tag value, then compared against each case label with `==` — an if/else chain, never a C#
+// `switch` and never the constant-pattern (`is`) form: string constants render as `static readonly
+// @string` (not a C# `const`), and string literals as `"…"u8`, neither of which is a C# case constant,
+// so a `ref struct` is never made the subject of a pattern. Thus `var exprᴛN = ((sstring)x)` infers the
+// stack string and every `exprᴛN == label` binds a zero-allocation operator (span for a `u8` literal,
+// the mixed operator for an `@string` const/variable). The tag is evaluated exactly ONCE into the temp,
+// so — as with the comparison case — the only requirement is that no case label can mutate x before the
+// view is read: every label must be `sstringOtherOperandSafe` (a literal, a pure read, or another
+// conversion — never a call), which also excludes a named string type that has no operator.
+func (v *Visitor) markSStringSwitchConversions(file *ast.File) {
+	ast.Inspect(file, func(n ast.Node) bool {
+		switchStmt, ok := n.(*ast.SwitchStmt)
+
+		if !ok || switchStmt.Tag == nil {
+			return true
+		}
+
+		call := v.unnamedByteSliceStringConv(switchStmt.Tag)
+
+		if call == nil {
+			return true
+		}
+
+		if !v.allCaseLabelsSafe(switchStmt.Body) {
+			return true
+		}
+
+		v.sstringConvExprs[call] = true
+
+		return true
+	})
+}
+
+// allCaseLabelsSafe reports whether every case label in a switch body is a mutation-safe comparison
+// operand (`sstringOtherOperandSafe`) and at least one real case label is present (a `default` clause,
+// which has no labels, is allowed). This is the condition under which the switch's `string(x)` tag can
+// be a zero-copy sstring view: the switch lowers to `==` comparisons (see markSStringSwitchConversions)
+// and no label evaluated during matching can write the tag's source.
+func (v *Visitor) allCaseLabelsSafe(body *ast.BlockStmt) bool {
+	if body == nil {
+		return false
+	}
+
+	hasLabel := false
+
+	for _, stmt := range body.List {
+		caseClause, ok := stmt.(*ast.CaseClause)
+
+		if !ok {
+			return false
+		}
+
+		for _, label := range caseClause.List {
+			if !v.sstringOtherOperandSafe(label) {
+				return false
+			}
+
+			hasLabel = true
+		}
+	}
+
+	return hasLabel
 }
 
 // sstringOtherOperandSafe reports whether `expr` — the operand ON THE OTHER SIDE of a comparison whose
