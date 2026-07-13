@@ -513,6 +513,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 
 						csValue = v.convertToInterfaceType(declType, tv.Type, csValue)
 					}
+
+					// An EMPTY-interface declared type (`var x any = 1`) boxes an untyped `int`
+					// constant through nint — the numeric twin of the non-empty wrap above and the
+					// @string boxing family — so a later `x.(int)` matches Go's boxed `int`. A no-op
+					// for a non-empty/non-interface declared type and any non-int-constant value.
+					csValue = v.boxUntypedIntAsNint(declType, valueSpec.Values[i], csValue)
 				}
 			}
 			typeLenDeviation := token.Pos(len(csTypeName) + len(csValue) + (len(csIDName) - len(goIDName)) + (len(csValue) - len(goValue)))

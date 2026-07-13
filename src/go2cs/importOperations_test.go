@@ -13,7 +13,7 @@ func TestPackageQualifiedName(t *testing.T) {
 		want      string
 	}{
 		{"go.github.com.google", "uuid", "github.com.google.uuid"},
-		{"go.github.com.mattn", "isatty", "github.com.mattn.isatty"},   // path segment is go-isatty; package is isatty
+		{"go.github.com.mattn", "isatty", "github.com.mattn.isatty"},       // path segment is go-isatty; package is isatty
 		{"go.github.com.mattn", "colorable", "github.com.mattn.colorable"}, // go-colorable -> colorable
 		{"go.example.com", "lib", "example.com.lib"},
 		{"go", "foo", "foo"}, // single-segment module: namespace is the bare root

@@ -108,7 +108,7 @@ func TestEdgePredicateIgnoresNonConvertSet(t *testing.T) {
 // is recorded instead of silently dropped (which would let an importer convert before its dep).
 func TestVendoredKeyResolution(t *testing.T) {
 	nodes := map[string]string{
-		"net": "/goroot/src/net",
+		"net":                                    "/goroot/src/net",
 		"vendor/golang.org/x/net/dns/dnsmessage": "/goroot/src/vendor/golang.org/x/net/dns/dnsmessage",
 	}
 	imports := map[string][]string{

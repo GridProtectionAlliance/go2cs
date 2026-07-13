@@ -229,7 +229,7 @@ internal static void Main() {
     if (fallthrough || !matchᴛ5 && exprᴛ6 == Foo(4)) {
         fmt.Println("Second case");
     }
-    else { /* default: */
+    else if (!matchᴛ5) { /* default: */
         fmt.Println("Default case");
     }
 

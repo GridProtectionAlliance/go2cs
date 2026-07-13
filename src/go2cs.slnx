@@ -66,6 +66,7 @@
     <Project Path="Tests/Behavioral/AnyStringLitComposite/AnyStringLitComposite.csproj" />
     <Project Path="Tests/Behavioral/AppendNamedSliceElement/AppendNamedSliceElement.csproj" />
     <Project Path="Tests/Behavioral/AppendUntypedConst/AppendUntypedConst.csproj" />
+    <Project Path="Tests/Behavioral/AtomicValue/AtomicValue.csproj" />
     <Project Path="Tests/Behavioral/BclTypeNameShadow/BclTypeNameShadow.csproj" />
     <Project Path="Tests/Behavioral/BigUntypedConstComparison/BigUntypedConstComparison.csproj" />
     <Project Path="Tests/Behavioral/BitwiseUntypedConst/BitwiseUntypedConst.csproj" />
@@ -106,6 +107,7 @@
     <Project Path="Tests/Behavioral/ComplexImaginaryShadow/ComplexImaginaryShadow.csproj" />
     <Project Path="Tests/Behavioral/CombinedStructFields/CombinedStructFields.csproj" />
     <Project Path="Tests/Behavioral/ConstShadowsParam/ConstShadowsParam.csproj" />
+    <Project Path="Tests/Behavioral/ConstrainedSliceParamInPlace/ConstrainedSliceParamInPlace.csproj" />
     <Project Path="Tests/Behavioral/Constraints/Constraints.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgBox/CrossPkgBox.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgFuncLib/CrossPkgFuncLib.csproj" />
@@ -227,6 +229,7 @@
     <Project Path="Tests/Behavioral/LocalTypeSliceElement/LocalTypeSliceElement.csproj" />
     <Project Path="Tests/Behavioral/MakeLenNamedNumeric/MakeLenNamedNumeric.csproj" />
     <Project Path="Tests/Behavioral/MakeSliceUintptrLen/MakeSliceUintptrLen.csproj" />
+    <Project Path="Tests/Behavioral/ManagedAtomicPointer/ManagedAtomicPointer.csproj" />
     <Project Path="Tests/Behavioral/MapAnonStructValue/MapAnonStructValue.csproj" />
     <Project Path="Tests/Behavioral/MapCommaOk/MapCommaOk.csproj" />
     <Project Path="Tests/Behavioral/MapPointerElementLiteral/MapPointerElementLiteral.csproj" />
@@ -319,6 +322,7 @@
     <Project Path="Tests/Behavioral/PointerReceiverPointerLocalField/PointerReceiverPointerLocalField.csproj" />
     <Project Path="Tests/Behavioral/PointerRvalueFieldReceiver/PointerRvalueFieldReceiver.csproj" />
     <Project Path="Tests/Behavioral/PointerToPointer/PointerToPointer.csproj" />
+    <Project Path="Tests/Behavioral/PointerValueToInterfaceArg/PointerValueToInterfaceArg.csproj" />
     <Project Path="Tests/Behavioral/PrintfWidthFlags/PrintfWidthFlags.csproj" />
     <Project Path="Tests/Behavioral/PromotedEmbedLib/PromotedEmbedLib.csproj" />
     <Project Path="Tests/Behavioral/PromotedEmbedUser/PromotedEmbedUser.csproj" />
@@ -392,6 +396,7 @@
     <Project Path="Tests/Behavioral/SynthesizedDelegateChildPkg/inner/SynthesizedDelegateChildPkg.inner.csproj" />
     <Project Path="Tests/Behavioral/SynthesizedDelegateCrossPkg/SynthesizedDelegateCrossPkg.csproj" />
     <Project Path="Tests/Behavioral/SwitchDefaultOrder/SwitchDefaultOrder.csproj" />
+    <Project Path="Tests/Behavioral/SwitchFallthroughDefault/SwitchFallthroughDefault.csproj" />
     <Project Path="Tests/Behavioral/SwitchFallthroughDefaultReturn/SwitchFallthroughDefaultReturn.csproj" />
     <Project Path="Tests/Behavioral/SwitchNonConstCaseLabel/SwitchNonConstCaseLabel.csproj" />
     <Project Path="Tests/Behavioral/SystemCollidingTypeName/SystemCollidingTypeName.csproj" />
@@ -412,6 +417,7 @@
     <Project Path="Tests/Behavioral/TypeSwitchTagShadowRename/TypeSwitchTagShadowRename.csproj" />
     <Project Path="Tests/Behavioral/TypeSwitchPointerAdapter/TypeSwitchPointerAdapter.csproj" />
     <Project Path="Tests/Behavioral/UnexportedEmbeddedMarker/UnexportedEmbeddedMarker.csproj" />
+    <Project Path="Tests/Behavioral/UntypedIntInterfaceBox/UntypedIntInterfaceBox.csproj" />
     <Project Path="Tests/Behavioral/UntypedNestedSliceComposite/UntypedNestedSliceComposite.csproj" />
     <Project Path="Tests/Behavioral/UnnamedParams/UnnamedParams.csproj" />
     <Project Path="Tests/Behavioral/UnsafeOperations/UnsafeOperations.csproj" />

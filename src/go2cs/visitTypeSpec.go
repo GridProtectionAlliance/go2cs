@@ -177,7 +177,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			v.targetFile.WriteString(v.newline)
 		}
 
-		v.writeOutput("// type %s is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])", name)
+		v.writeOutput("// go2cs generated this placeholder — type %s is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])", name)
 		v.targetFile.WriteString(v.newline)
 		return
 	}

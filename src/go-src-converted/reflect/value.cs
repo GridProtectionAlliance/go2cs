@@ -152,20 +152,9 @@ internal static any packEface(ΔValue v) {
     return i;
 }
 
-// unpackEface converts the empty interface i to a Value.
-internal static ΔValue unpackEface(any i) {
-    var e = (ж<abi.EmptyInterface>)(uintptr)(new @unsafe.Pointer(Ꮡ(i)));
-    // NOTE: don't read e.word until we know whether it is really a pointer or not.
-    var t = e.Value.Type;
-    if (t == nil) {
-        return new ΔValue(nil);
-    }
-    var f = ((flag)(uintptr)(uint8)t.Kind());
-    if (t.IfaceIndir()) {
-        f |= (flag)(flagIndir);
-    }
-    return new ΔValue(t, (~e).Data, f);
-}
+// func unpackEface is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+
+// NOTE: don't read e.word until we know whether it is really a pointer or not.
 
 // A ValueError occurs when a Value method is invoked on
 // a [Value] that does not support it. Such cases are documented
@@ -275,34 +264,19 @@ public static ΔValue Addr(this ΔValue v) {
     return new ΔValue(ptrTo(v.typ()), v.ptr, (flag)(fl | ((flag)(uintptr)(nuint)ΔPointer)));
 }
 
-// Bool returns v's underlying value.
-// It panics if v's kind is not [Bool].
-public static bool Bool(this ΔValue v) {
-    // panicNotBool is split out to keep Bool inlineable.
-    if (v.kind() != ΔBool) {
-        v.panicNotBool();
-    }
-    return ~(ж<bool>)(uintptr)(v.ptr);
-}
+// func Bool is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
+// panicNotBool is split out to keep Bool inlineable.
 internal static void panicNotBool(this ΔValue v) {
     v.mustBe(ΔBool);
 }
 
 internal static ж<abi.Type> bytesType = rtypeOf((slice<byte>)(default!));
 
-// Bytes returns v's underlying value.
-// It panics if v's underlying value is not a slice of bytes or
-// an addressable array of bytes.
-public static slice<byte> Bytes(this ΔValue v) {
-    // bytesSlow is split out to keep Bytes inlineable for unnamed []byte.
-    if (v.typ_ == bytesType) {
-        // ok to use v.typ_ directly as comparison doesn't cause escape
-        return ~(ж<slice<byte>>)(uintptr)(v.ptr);
-    }
-    return v.bytesSlow();
-}
+// func Bytes is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
+// bytesSlow is split out to keep Bytes inlineable for unnamed []byte.
+// ok to use v.typ_ directly as comparison doesn't cause escape
 internal static slice<byte> bytesSlow(this ΔValue v) {
     var exprᴛ1 = v.kind();
     if (exprᴛ1 == ΔSlice) {
@@ -510,7 +484,7 @@ internal static slice<ΔValue> call(this ΔValue v, @string op, slice<ΔValue> @
             else if (exprᴛ1 == abiStepFloatReg) {
                 storeRcvr(rcvr, new @unsafe.Pointer(ᏑregArgs.at(abi.RegArgs.ᏑFloats, st.freg)));
             }
-            else { /* default: */
+            else if (!matchᴛ1) { /* default: */
                 throw panic("unknown ABI parameter kind");
             }
         }
@@ -1016,7 +990,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
         else if (exprᴛ1 == abiStepFloatReg) {
             storeRcvr(rcvr, new @unsafe.Pointer(ᏑmethodRegs.at(abi.RegArgs.ᏑFloats, st.freg)));
         }
-        else { /* default: */
+        else if (!matchᴛ1) { /* default: */
             throw panic("unknown ABI parameter kind");
         }
     }
@@ -1071,7 +1045,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
                     else if (exprᴛ2 == abiStepFloatReg) {
                         floatToReg(ᏑmethodRegs, mStepΔ1.freg, mStepΔ1.size, from);
                     }
-                    else { /* default: */
+                    else if (!matchᴛ2) { /* default: */
                         throw panic("unexpected method step");
                     }
 
@@ -1127,7 +1101,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
             else if (exprᴛ4 == abiStepFloatReg) {
                 methodRegs.Floats[mStep.freg] = (~valueRegs).Floats[vStep.freg];
             }
-            else { /* default: */
+            else if (!matchᴛ3) { /* default: */
                 throw panic("unexpected value step");
             }
 
@@ -1245,109 +1219,30 @@ public static bool CanComplex(this ΔValue v) {
 
 }
 
-// Complex returns v's underlying value, as a complex128.
-// It panics if v's Kind is not [Complex64] or [Complex128]
-public static complex128 Complex(this ΔValue v) {
-    ΔKind k = v.kind();
-    var exprᴛ1 = k;
-    if (exprᴛ1 == Complex64) {
-        return (complex128)(~(ж<complex64>)(uintptr)(v.ptr));
-    }
-    if (exprᴛ1 == Complex128) {
-        return ~(ж<complex128>)(uintptr)(v.ptr);
-    }
+// func Complex is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
-    throw panic(Ꮡ(new ValueError("reflect.Value.Complex", v.kind())));
-}
+// func Elem is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
-[GoType("dyn")] partial interface Elem_type {
-    void M();
-}
+// func Field is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
-// Elem returns the value that the interface v contains
-// or that the pointer v points to.
-// It panics if v's Kind is not [Interface] or [Pointer].
-// It returns the zero Value if v is nil.
-public static ΔValue Elem(this ΔValue v) {
-    ΔKind k = v.kind();
-    var exprᴛ1 = k;
-    if (exprᴛ1 == ΔInterface) {
-        any eface = default!;
-        if (v.typ().NumMethod() == 0){
-            eface = ~(ж<any>)(uintptr)(v.ptr);
-        } else {
-            eface = ((any)(((ж<Elem_type>)(uintptr)(v.ptr)).ValueSlot));
-        }
-        var x = unpackEface(eface);
-        if (x.flag != 0) {
-            x.flag |= v.flag.ro();
-        }
-        return x;
-    }
-    if (exprᴛ1 == ΔPointer) {
-        @unsafe.Pointer ptr = v.ptr;
-        if ((flag)(v.flag & flagIndir) != 0) {
-            if (v.typ().IfaceIndir()) {
-                // This is a pointer to a not-in-heap object. ptr points to a uintptr
-                // in the heap. That uintptr is the address of a not-in-heap object.
-                // In general, pointers to not-in-heap objects can be total junk.
-                // But Elem() is asking to dereference it, so the user has asserted
-                // that at least it is a valid pointer (not just an integer stored in
-                // a pointer slot). So let's check, to make sure that it isn't a pointer
-                // that the runtime will crash on if it sees it during GC or write barriers.
-                // Since it is a not-in-heap pointer, all pointers to the heap are
-                // forbidden! That makes the test pretty easy.
-                // See issue 48399.
-                if (!verifyNotInHeapPtr(~(ж<uintptr>)(uintptr)(ptr))) {
-                    throw panic("reflect: reflect.Value.Elem on an invalid notinheap pointer");
-                }
-            }
-            ptr = ~(ж<@unsafe.Pointer>)(uintptr)(ptr);
-        }
-        if (ptr == nil) {
-            // The returned value's address is v's value.
-            return new ΔValue(nil);
-        }
-        var tt = (ж<ptrType>)(uintptr)(new @unsafe.Pointer(v.typ()));
-        var typ = tt.Value.Elem;
-        var fl = (flag)((flag)((flag)(v.flag & flagRO) | flagIndir) | flagAddr);
-        fl |= (flag)(((flag)(uintptr)(uint8)typ.Kind()));
-        return new ΔValue(typ, ptr.Value, fl);
-    }
-
-    throw panic(Ꮡ(new ValueError("reflect.Value.Elem", v.kind())));
-}
-
-// Field returns the i'th field of the struct v.
-// It panics if v's Kind is not [Struct] or i is out of range.
-public static ΔValue Field(this ΔValue v, nint i) {
-    if (v.kind() != Struct) {
-        throw panic(Ꮡ(new ValueError("reflect.Value.Field", v.kind())));
-    }
-    var tt = (ж<structType>)(uintptr)(new @unsafe.Pointer(v.typ()));
-    if ((nuint)i >= (nuint)len((~tt).Fields)) {
-        throw panic("reflect: Field index out of range");
-    }
-    var field = Ꮡ((~tt).Fields, i);
-    var typ = field.Value.Typ;
-    // Inherit permission bits from v, but clear flagEmbedRO.
-    var fl = (flag)((flag)(v.flag & ((flag)((flag)(flagStickyRO | flagIndir) | flagAddr))) | ((flag)(uintptr)(uint8)typ.Kind()));
-    // Using an unexported field forces flagRO.
-    if (!(~field).Name.IsExported()) {
-        if (field.Embedded()){
-            fl |= (flag)(flagEmbedRO);
-        } else {
-            fl |= (flag)(flagStickyRO);
-        }
-    }
-    // Either flagIndir is set and v.ptr points at struct,
-    // or flagIndir is not set and v.ptr is the actual struct data.
-    // In the former case, we want v.ptr + offset.
-    // In the latter case, we must have field.offset = 0,
-    // so v.ptr + field.offset is still the correct address.
-    @unsafe.Pointer ptr = (uintptr)add(v.ptr, (~field).Offset, "same as non-reflect &v.field"u8);
-    return new ΔValue(typ, ptr.Value, fl);
-}
+// This is a pointer to a not-in-heap object. ptr points to a uintptr
+// in the heap. That uintptr is the address of a not-in-heap object.
+// In general, pointers to not-in-heap objects can be total junk.
+// But Elem() is asking to dereference it, so the user has asserted
+// that at least it is a valid pointer (not just an integer stored in
+// a pointer slot). So let's check, to make sure that it isn't a pointer
+// that the runtime will crash on if it sees it during GC or write barriers.
+// Since it is a not-in-heap pointer, all pointers to the heap are
+// forbidden! That makes the test pretty easy.
+// See issue 48399.
+// The returned value's address is v's value.
+// Inherit permission bits from v, but clear flagEmbedRO.
+// Using an unexported field forces flagRO.
+// Either flagIndir is set and v.ptr points at struct,
+// or flagIndir is not set and v.ptr is the actual struct data.
+// In the former case, we want v.ptr + offset.
+// In the latter case, we must have field.offset = 0,
+// so v.ptr + field.offset is still the correct address.
 
 // FieldByIndex returns the nested field corresponding to index.
 // It panics if evaluation requires stepping through a nil
@@ -1432,69 +1327,20 @@ public static bool CanFloat(this ΔValue v) {
 
 }
 
-// Float returns v's underlying value, as a float64.
-// It panics if v's Kind is not [Float32] or [Float64]
-public static float64 Float(this ΔValue v) {
-    ΔKind k = v.kind();
-    var exprᴛ1 = k;
-    if (exprᴛ1 == Float32) {
-        return (float64)(~(ж<float32>)(uintptr)(v.ptr));
-    }
-    if (exprᴛ1 == Float64) {
-        return ~(ж<float64>)(uintptr)(v.ptr);
-    }
-
-    throw panic(Ꮡ(new ValueError("reflect.Value.Float", v.kind())));
-}
+// func Float is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
 internal static ж<abi.Type> uint8Type = rtypeOf((uint8)0);
 
-// Index returns v's i'th element.
-// It panics if v's Kind is not [Array], [Slice], or [String] or i is out of range.
-public static ΔValue Index(this ΔValue v, nint i) {
-    var exprᴛ1 = v.kind();
-    if (exprᴛ1 == Array) {
-        var tt = (ж<arrayType>)(uintptr)(new @unsafe.Pointer(v.typ()));
-        if ((nuint)i >= (nuint)(~tt).Len) {
-            throw panic("reflect: array index out of range");
-        }
-        var typ = tt.Value.Elem;
-        var offset = (uintptr)i * typ.Size();
-        @unsafe.Pointer val = (uintptr)add(v.ptr, // Either flagIndir is set and v.ptr points at array,
- // or flagIndir is not set and v.ptr is the actual array data.
- // In the former case, we want v.ptr + offset.
- // In the latter case, we must be doing Index(0), so offset = 0,
- // so v.ptr + offset is still the correct address.
- offset, "same as &v[i], i < tt.len"u8);
-        var fl = (flag)((flag)((flag)(v.flag & ((flag)(flagIndir | flagAddr))) | v.flag.ro()) | ((flag)(uintptr)(uint8)typ.Kind()));
-        return new ΔValue( // bits same as overall array
-typ, val.Value, fl);
-    }
-    if (exprᴛ1 == ΔSlice) {
-        var s = (ж<unsafeheader.Slice>)(uintptr)(v.ptr);
-        if ((nuint)i >= (nuint)(~s).Len) {
-            // Element flag same as Elem of Pointer.
-            // Addressable, indirect, possibly read-only.
-            throw panic("reflect: slice index out of range");
-        }
-        var tt = (ж<sliceType>)(uintptr)(new @unsafe.Pointer(v.typ()));
-        var typ = tt.Value.Elem;
-        @unsafe.Pointer val = (uintptr)arrayAt((~s).Data, i, typ.Size(), "i < s.Len"u8);
-        var fl = (flag)((flag)((flag)(flagAddr | flagIndir) | v.flag.ro()) | ((flag)(uintptr)(uint8)typ.Kind()));
-        return new ΔValue(typ, val.Value, fl);
-    }
-    if (exprᴛ1 == ΔString) {
-        var s = (ж<unsafeheader.String>)(uintptr)(v.ptr);
-        if ((nuint)i >= (nuint)(~s).Len) {
-            throw panic("reflect: string index out of range");
-        }
-        @unsafe.Pointer p = (uintptr)arrayAt((~s).Data, i, 1, "i < s.Len"u8);
-        var fl = (flag)((flag)(v.flag.ro() | ((flag)(uintptr)(nuint)Uint8)) | flagIndir);
-        return new ΔValue(uint8Type, p.Value, fl);
-    }
+// func Index is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
-    throw panic(Ꮡ(new ValueError("reflect.Value.Index", v.kind())));
-}
+// Either flagIndir is set and v.ptr points at array,
+// or flagIndir is not set and v.ptr is the actual array data.
+// In the former case, we want v.ptr + offset.
+// In the latter case, we must be doing Index(0), so offset = 0,
+// so v.ptr + offset is still the correct address.
+// bits same as overall array
+// Element flag same as Elem of Pointer.
+// Addressable, indirect, possibly read-only.
 
 // CanInt reports whether Int can be used without panicking.
 public static bool CanInt(this ΔValue v) {
@@ -1508,30 +1354,7 @@ public static bool CanInt(this ΔValue v) {
 
 }
 
-// Int returns v's underlying value, as an int64.
-// It panics if v's Kind is not [Int], [Int8], [Int16], [Int32], or [Int64].
-public static int64 Int(this ΔValue v) {
-    ΔKind k = v.kind();
-    @unsafe.Pointer p = v.ptr;
-    var exprᴛ1 = k;
-    if (exprᴛ1 == ΔInt) {
-        return (int64)(~(ж<nint>)(uintptr)(p));
-    }
-    if (exprᴛ1 == Int8) {
-        return (int64)(~(ж<int8>)(uintptr)(p));
-    }
-    if (exprᴛ1 == Int16) {
-        return (int64)(~(ж<int16>)(uintptr)(p));
-    }
-    if (exprᴛ1 == Int32) {
-        return (int64)(~(ж<int32>)(uintptr)(p));
-    }
-    if (exprᴛ1 == Int64) {
-        return ~(ж<int64>)(uintptr)(p);
-    }
-
-    throw panic(Ꮡ(new ValueError("reflect.Value.Int", v.kind())));
-}
+// func Int is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
 // CanInterface reports whether [Value.Interface] can be used without panicking.
 public static bool CanInterface(this ΔValue v) {
@@ -1541,47 +1364,16 @@ public static bool CanInterface(this ΔValue v) {
     return (flag)(v.flag & flagRO) == 0;
 }
 
-// Interface returns v's current value as an interface{}.
-// It is equivalent to:
-//
-//	var i interface{} = (v's underlying value)
-//
-// It panics if the Value was obtained by accessing
-// unexported struct fields.
-public static any /*i*/ Interface(this ΔValue v) {
-    any i = default!;
+// func Interface is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
-    return valueInterface(v, true);
-}
+// func valueInterface is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
-[GoType("dyn")] partial interface valueInterface_type {
-    void M();
-}
-
-internal static any valueInterface(ΔValue v, bool safe) {
-    if (v.flag == 0) {
-        throw panic(Ꮡ(new ValueError("reflect.Value.Interface", Invalid)));
-    }
-    if (safe && (flag)(v.flag & flagRO) != 0) {
-        // Do not allow access to unexported values via Interface,
-        // because they might be pointers that should not be
-        // writable or methods or function that should not be callable.
-        throw panic("reflect.Value.Interface: cannot return value obtained from unexported field or method");
-    }
-    if ((flag)(v.flag & flagMethod) != 0) {
-        v = makeMethodValue("Interface"u8, v);
-    }
-    if (v.kind() == ΔInterface) {
-        // Special case: return the element inside the interface.
-        // Empty interface has one layout, all interfaces with
-        // methods have a second layout.
-        if (v.NumMethod() == 0) {
-            return ~(ж<any>)(uintptr)(v.ptr);
-        }
-        return ((ж<valueInterface_type>)(uintptr)(v.ptr)).ValueSlot;
-    }
-    return packEface(v);
-}
+// Do not allow access to unexported values via Interface,
+// because they might be pointers that should not be
+// writable or methods or function that should not be callable.
+// Special case: return the element inside the interface.
+// Empty interface has one layout, all interfaces with
+// methods have a second layout.
 
 // InterfaceData returns a pair of unspecified uintptr values.
 // It panics if v's Kind is not Interface.
@@ -1604,34 +1396,10 @@ public static array<uintptr> InterfaceData(this ΔValue v) {
     return ~(ж<array<uintptr>>)(uintptr)(v.ptr);
 }
 
-// IsNil reports whether its argument v is nil. The argument must be
-// a chan, func, interface, map, pointer, or slice value; if it is
-// not, IsNil panics. Note that IsNil is not always equivalent to a
-// regular comparison with nil in Go. For example, if v was created
-// by calling [ValueOf] with an uninitialized interface variable i,
-// i==nil will be true but v.IsNil will panic as v will be the zero
-// Value.
-public static bool IsNil(this ΔValue v) {
-    ΔKind k = v.kind();
-    var exprᴛ1 = k;
-    if (exprᴛ1 == Chan || exprᴛ1 == Func || exprᴛ1 == Map || exprᴛ1 == ΔPointer || exprᴛ1 == ΔUnsafePointer) {
-        if ((flag)(v.flag & flagMethod) != 0) {
-            return false;
-        }
-        @unsafe.Pointer ptr = v.ptr;
-        if ((flag)(v.flag & flagIndir) != 0) {
-            ptr = ~(ж<@unsafe.Pointer>)(uintptr)(ptr);
-        }
-        return ptr == nil;
-    }
-    if (exprᴛ1 == ΔInterface || exprᴛ1 == ΔSlice) {
-        return ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr) == nil;
-    }
+// func IsNil is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
-    // Both interface and slice are nil if first word is 0.
-    // Both are always bigger than a word; assume flagIndir.
-    throw panic(Ꮡ(new ValueError("reflect.Value.IsNil", v.kind())));
-}
+// Both interface and slice are nil if first word is 0.
+// Both are always bigger than a word; assume flagIndir.
 
 // IsValid reports whether v represents a value.
 // It returns false if v is the zero Value.
@@ -1847,16 +1615,9 @@ public static ΔKind Kind(this ΔValue v) {
     return v.kind();
 }
 
-// Len returns v's length.
-// It panics if v's Kind is not [Array], [Chan], [Map], [Slice], [String], or pointer to [Array].
-public static nint Len(this ΔValue v) {
-    // lenNonSlice is split out to keep Len inlineable for slice kinds.
-    if (v.kind() == ΔSlice) {
-        return ((ж<unsafeheader.Slice>)(uintptr)(v.ptr)).Value.Len;
-    }
-    return v.lenNonSlice();
-}
+// func Len is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
+// lenNonSlice is split out to keep Len inlineable for slice kinds.
 internal static nint lenNonSlice(this ΔValue v) {
     {
         ΔKind k = v.kind();
@@ -1990,21 +1751,7 @@ public static slice<ΔValue> MapKeys(this ΔValue v) {
     internal hiter hiter;
 }
 
-// Key returns the key of iter's current map entry.
-public static ΔValue Key(this ж<MapIter> Ꮡiter) {
-    ref var iter = ref Ꮡiter.Value;
-
-    if (!iter.hiter.initialized()) {
-        throw panic("MapIter.Key called before Next");
-    }
-    @unsafe.Pointer iterkey = (uintptr)mapiterkey(Ꮡiter.of(MapIter.Ꮡhiter));
-    if (iterkey == nil) {
-        throw panic("MapIter.Key called on exhausted iterator");
-    }
-    var t = (ж<mapType>)(uintptr)(new @unsafe.Pointer(iter.m.typ()));
-    var ktype = t.Value.Key;
-    return copyVal(ktype, (flag)(iter.m.flag.ro() | ((flag)(uintptr)(uint8)ktype.Kind())), iterkey);
-}
+// func Key is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
 // SetIterKey assigns to v the key of iter's current map entry.
 // It is equivalent to v.Set(iter.Key()), but it avoids allocating a new Value.
@@ -2034,21 +1781,7 @@ public static void SetIterKey(this ΔValue v, ж<MapIter> Ꮡiter) {
     typedmemmove(v.typ(), v.ptr, key.ptr);
 }
 
-// Value returns the value of iter's current map entry.
-public static ΔValue Value(this ж<MapIter> Ꮡiter) {
-    ref var iter = ref Ꮡiter.Value;
-
-    if (!iter.hiter.initialized()) {
-        throw panic("MapIter.Value called before Next");
-    }
-    @unsafe.Pointer iterelem = (uintptr)mapiterelem(Ꮡiter.of(MapIter.Ꮡhiter));
-    if (iterelem == nil) {
-        throw panic("MapIter.Value called on exhausted iterator");
-    }
-    var t = (ж<mapType>)(uintptr)(new @unsafe.Pointer(iter.m.typ()));
-    var vtype = t.Value.Elem;
-    return copyVal(vtype, (flag)(iter.m.flag.ro() | ((flag)(uintptr)(uint8)vtype.Kind())), iterelem);
-}
+// func Value is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
 // SetIterValue assigns to v the value of iter's current map entry.
 // It is equivalent to v.Set(iter.Value()), but it avoids allocating a new Value.
@@ -2078,25 +1811,7 @@ public static void SetIterValue(this ΔValue v, ж<MapIter> Ꮡiter) {
     typedmemmove(v.typ(), v.ptr, elem.ptr);
 }
 
-// Next advances the map iterator and reports whether there is another
-// entry. It returns false when iter is exhausted; subsequent
-// calls to [MapIter.Key], [MapIter.Value], or [MapIter.Next] will panic.
-public static bool Next(this ж<MapIter> Ꮡiter) {
-    ref var iter = ref Ꮡiter.Value;
-
-    if (!iter.m.IsValid()) {
-        throw panic("MapIter.Next called on an iterator that does not have an associated map Value");
-    }
-    if (!iter.hiter.initialized()){
-        mapiterinit(iter.m.typ(), (uintptr)iter.m.pointer(), Ꮡiter.of(MapIter.Ꮡhiter));
-    } else {
-        if ((uintptr)mapiterkey(Ꮡiter.of(MapIter.Ꮡhiter)) == nil) {
-            throw panic("MapIter.Next called on exhausted iterator");
-        }
-        mapiternext(Ꮡiter.of(MapIter.Ꮡhiter));
-    }
-    return (uintptr)mapiterkey(Ꮡiter.of(MapIter.Ꮡhiter)) != nil;
-}
+// func Next is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
 // Reset modifies iter to iterate over v.
 // It panics if v's Kind is not [Map] and v is not the zero Value.
@@ -2110,31 +1825,12 @@ public static bool Next(this ж<MapIter> Ꮡiter) {
     iter.hiter = new hiter(nil);
 }
 
-// MapRange returns a range iterator for a map.
-// It panics if v's Kind is not [Map].
-//
-// Call [MapIter.Next] to advance the iterator, and [MapIter.Key]/[MapIter.Value] to access each entry.
-// [MapIter.Next] returns false when the iterator is exhausted.
-// MapRange follows the same iteration semantics as a range statement.
-//
-// Example:
-//
-//	iter := reflect.ValueOf(m).MapRange()
-//	for iter.Next() {
-//		k := iter.Key()
-//		v := iter.Value()
-//		...
-//	}
-public static ж<MapIter> MapRange(this ΔValue v) {
-    // This is inlinable to take advantage of "function outlining".
-    // The allocation of MapIter can be stack allocated if the caller
-    // does not allow it to escape.
-    // See https://blog.filippo.io/efficient-go-apis-with-the-inliner/
-    if (v.kind() != Map) {
-        v.panicNotMap();
-    }
-    return Ꮡ(new MapIter(m: v));
-}
+// func MapRange is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+
+// This is inlinable to take advantage of "function outlining".
+// The allocation of MapIter can be stack allocated if the caller
+// does not allow it to escape.
+// See https://blog.filippo.io/efficient-go-apis-with-the-inliner/
 
 // Force slow panicking path not inlined, so it won't add to the
 // inlining budget of the caller.
@@ -2214,13 +1910,7 @@ public static ΔValue MethodByName(this ΔValue v, @string name) {
     return v.Method(m.Index);
 }
 
-// NumField returns the number of fields in the struct v.
-// It panics if v's Kind is not [Struct].
-public static nint NumField(this ΔValue v) {
-    v.mustBe(Struct);
-    var tt = (ж<structType>)(uintptr)(new @unsafe.Pointer(v.typ()));
-    return len((~tt).Fields);
-}
+// func NumField is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
 // OverflowComplex reports whether the complex128 x cannot be represented by v's type.
 // It panics if v's Kind is not [Complex64] or [Complex128].
@@ -2288,75 +1978,23 @@ public static bool OverflowUint(this ΔValue v, uint64 x) {
     throw panic(Ꮡ(new ValueError("reflect.Value.OverflowUint", v.kind())));
 }
 
+// func Pointer is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+
 //go:nocheckptr
 // This prevents inlining Value.Pointer when -d=checkptr is enabled,
 // which ensures cmd/compile can recognize unsafe.Pointer(v.Pointer())
 // and make an exception.
-
-// Pointer returns v's value as a uintptr.
-// It panics if v's Kind is not [Chan], [Func], [Map], [Pointer], [Slice], [String], or [UnsafePointer].
-//
-// If v's Kind is [Func], the returned pointer is an underlying
-// code pointer, but not necessarily enough to identify a
-// single function uniquely. The only guarantee is that the
-// result is zero if and only if v is a nil func Value.
-//
-// If v's Kind is [Slice], the returned pointer is to the first
-// element of the slice. If the slice is nil the returned value
-// is 0.  If the slice is empty but non-nil the return value is non-zero.
-//
-// If v's Kind is [String], the returned pointer is to the first
-// element of the underlying bytes of string.
-//
-// It's preferred to use uintptr(Value.UnsafePointer()) to get the equivalent result.
-public static uintptr Pointer(this ΔValue v) {
-    // The compiler loses track as it converts to uintptr. Force escape.
-    escapes(v.ptr);
-    ΔKind k = v.kind();
-    var exprᴛ1 = k;
-    var matchᴛ1 = false;
-    if (exprᴛ1 == ΔPointer) { matchᴛ1 = true;
-        if (!v.typ().Pointers()) {
-            var val = ~(ж<uintptr>)(uintptr)(v.ptr);
-            // Since it is a not-in-heap pointer, all pointers to the heap are
-            // forbidden! See comment in Value.Elem and issue #48399.
-            if (!verifyNotInHeapPtr(val)) {
-                throw panic("reflect: reflect.Value.Pointer on an invalid notinheap pointer");
-            }
-            return val;
-        }
-        fallthrough = true;
-    }
-    if (fallthrough || !matchᴛ1 && (exprᴛ1 == Chan || exprᴛ1 == Map || exprᴛ1 == ΔUnsafePointer)) { matchᴛ1 = true;
-        return (uintptr)(uintptr)v.pointer();
-    }
-    if (exprᴛ1 == Func) { matchᴛ1 = true;
-        if ((flag)(v.flag & flagMethod) != 0) {
-            // As the doc comment says, the returned pointer is an
-            // underlying code pointer but not necessarily enough to
-            // identify a single function uniquely. All method expressions
-            // created via reflect have the same underlying code pointer,
-            // so their Pointers are equal. The function used here must
-            // match the one used in makeMethodValue.
-            return methodValueCallCodePtr();
-        }
-        @unsafe.Pointer p = (uintptr)v.pointer();
-        if (p != nil) {
-            // Non-nil func value points at data block.
-            // First word of data block is actual code.
-            p = ~(ж<@unsafe.Pointer>)(uintptr)(p);
-        }
-        return (uintptr)p;
-    }
-    if (exprᴛ1 == ΔSlice) {
-        return (uintptr)((ж<unsafeheader.Slice>)(uintptr)(v.ptr)).Value.Data;
-    }
-    if (exprᴛ1 == ΔString) { matchᴛ1 = true;
-        return (uintptr)((ж<unsafeheader.String>)(uintptr)(v.ptr)).Value.Data;
-    }
-
-    throw panic(Ꮡ(new ValueError("reflect.Value.Pointer", v.kind())));
-}
+// The compiler loses track as it converts to uintptr. Force escape.
+// Since it is a not-in-heap pointer, all pointers to the heap are
+// forbidden! See comment in Value.Elem and issue #48399.
+// As the doc comment says, the returned pointer is an
+// underlying code pointer but not necessarily enough to
+// identify a single function uniquely. All method expressions
+// created via reflect have the same underlying code pointer,
+// so their Pointers are equal. The function used here must
+// match the one used in makeMethodValue.
+// Non-nil func value points at data block.
+// First word of data block is actual code.
 
 // Recv receives and returns a value from the channel v.
 // It panics if v's Kind is not [Chan].
@@ -2786,20 +2424,9 @@ public static ΔValue Slice3(this ΔValue v, nint i, nint j, nint k) {
     return new ΔValue(typ.of(sliceType.ᏑSliceType).of(abi.SliceType.ᏑType).Common(), new @unsafe.Pointer(Ꮡx), fl);
 }
 
-// String returns the string v's underlying value, as a string.
-// String is a special case because of Go's String method convention.
-// Unlike the other getters, it does not panic if v's Kind is not [String].
-// Instead, it returns a string of the form "<T value>" where T is v's type.
-// The fmt package treats Values specially. It does not call their String
-// method implicitly but instead prints the concrete values they hold.
-public static @string String(this ΔValue v) {
-    // stringNonString is split out to keep String inlineable for string kinds.
-    if (v.kind() == ΔString) {
-        return ~(ж<@string>)(uintptr)(v.ptr);
-    }
-    return v.stringNonString();
-}
+// func String is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
+// stringNonString is split out to keep String inlineable for string kinds.
 internal static @string stringNonString(this ΔValue v) {
     if (v.kind() == Invalid) {
         return "<invalid Value>"u8;
@@ -2833,14 +2460,7 @@ public static bool TrySend(this ΔValue v, ΔValue x) {
     return v.send(x, true);
 }
 
-// Type returns v's type.
-public static ΔType Type(this ΔValue v) {
-    if (v.flag != 0 && (flag)(v.flag & flagMethod) == 0) {
-        return new rtypeжΔType((ж<rtype>)(uintptr)(noescape(new @unsafe.Pointer(v.typ_))));
-    }
-    // inline of toRType(v.typ()), for own inlining in inline test
-    return v.typeSlow();
-}
+// func Type is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
 internal static ΔType typeSlow(this ΔValue v) {
     if (v.flag == 0) {
@@ -2883,33 +2503,7 @@ public static bool CanUint(this ΔValue v) {
 
 }
 
-// Uint returns v's underlying value, as a uint64.
-// It panics if v's Kind is not [Uint], [Uintptr], [Uint8], [Uint16], [Uint32], or [Uint64].
-public static uint64 Uint(this ΔValue v) {
-    ΔKind k = v.kind();
-    @unsafe.Pointer p = v.ptr;
-    var exprᴛ1 = k;
-    if (exprᴛ1 == ΔUint) {
-        return (uint64)(~(ж<nuint>)(uintptr)(p));
-    }
-    if (exprᴛ1 == Uint8) {
-        return (uint64)(~(ж<uint8>)(uintptr)(p));
-    }
-    if (exprᴛ1 == Uint16) {
-        return (uint64)(~(ж<uint16>)(uintptr)(p));
-    }
-    if (exprᴛ1 == Uint32) {
-        return (uint64)(~(ж<uint32>)(uintptr)(p));
-    }
-    if (exprᴛ1 == Uint64) {
-        return ~(ж<uint64>)(uintptr)(p);
-    }
-    if (exprᴛ1 == Uintptr) {
-        return (uint64)(~(ж<uintptr>)(uintptr)(p));
-    }
-
-    throw panic(Ꮡ(new ValueError("reflect.Value.Uint", v.kind())));
-}
+// func Uint is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
 //go:nocheckptr
 // This prevents inlining Value.UnsafeAddr when -d=checkptr is enabled,
@@ -2932,67 +2526,18 @@ public static uintptr UnsafeAddr(this ΔValue v) {
     return (uintptr)v.ptr;
 }
 
-// UnsafePointer returns v's value as a [unsafe.Pointer].
-// It panics if v's Kind is not [Chan], [Func], [Map], [Pointer], [Slice], [String] or [UnsafePointer].
-//
-// If v's Kind is [Func], the returned pointer is an underlying
-// code pointer, but not necessarily enough to identify a
-// single function uniquely. The only guarantee is that the
-// result is zero if and only if v is a nil func Value.
-//
-// If v's Kind is [Slice], the returned pointer is to the first
-// element of the slice. If the slice is nil the returned value
-// is nil.  If the slice is empty but non-nil the return value is non-nil.
-//
-// If v's Kind is [String], the returned pointer is to the first
-// element of the underlying bytes of string.
-public static @unsafe.Pointer UnsafePointer(this ΔValue v) {
-    ΔKind k = v.kind();
-    var exprᴛ1 = k;
-    var matchᴛ1 = false;
-    if (exprᴛ1 == ΔPointer) { matchᴛ1 = true;
-        if (!v.typ().Pointers()) {
-            // Since it is a not-in-heap pointer, all pointers to the heap are
-            // forbidden! See comment in Value.Elem and issue #48399.
-            if (!verifyNotInHeapPtr(~(ж<uintptr>)(uintptr)(v.ptr))) {
-                throw panic("reflect: reflect.Value.UnsafePointer on an invalid notinheap pointer");
-            }
-            return ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
-        }
-        fallthrough = true;
-    }
-    if (fallthrough || !matchᴛ1 && (exprᴛ1 == Chan || exprᴛ1 == Map || exprᴛ1 == ΔUnsafePointer)) { matchᴛ1 = true;
-        return (uintptr)v.pointer();
-    }
-    if (exprᴛ1 == Func) { matchᴛ1 = true;
-        if ((flag)(v.flag & flagMethod) != 0) {
-            // As the doc comment says, the returned pointer is an
-            // underlying code pointer but not necessarily enough to
-            // identify a single function uniquely. All method expressions
-            // created via reflect have the same underlying code pointer,
-            // so their Pointers are equal. The function used here must
-            // match the one used in makeMethodValue.
-            ref var code = ref heap<uintptr>(out var Ꮡcode);
-            code = methodValueCallCodePtr();
-            return ~(ж<@unsafe.Pointer>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡcode).Value));
-        }
-        @unsafe.Pointer p = (uintptr)v.pointer();
-        if (p != nil) {
-            // Non-nil func value points at data block.
-            // First word of data block is actual code.
-            p = ~(ж<@unsafe.Pointer>)(uintptr)(p);
-        }
-        return p;
-    }
-    if (exprᴛ1 == ΔSlice) {
-        return ((ж<unsafeheader.Slice>)(uintptr)(v.ptr)).Value.Data;
-    }
-    if (exprᴛ1 == ΔString) { matchᴛ1 = true;
-        return ((ж<unsafeheader.String>)(uintptr)(v.ptr)).Value.Data;
-    }
+// func UnsafePointer is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
-    throw panic(Ꮡ(new ValueError("reflect.Value.UnsafePointer", v.kind())));
-}
+// Since it is a not-in-heap pointer, all pointers to the heap are
+// forbidden! See comment in Value.Elem and issue #48399.
+// As the doc comment says, the returned pointer is an
+// underlying code pointer but not necessarily enough to
+// identify a single function uniquely. All method expressions
+// created via reflect have the same underlying code pointer,
+// so their Pointers are equal. The function used here must
+// match the one used in makeMethodValue.
+// Non-nil func value points at data block.
+// First word of data block is actual code.
 
 // StringHeader is the runtime representation of a string.
 // It cannot be used safely or portably and its representation may
@@ -3447,14 +2992,7 @@ public static ΔValue Indirect(ΔValue v) {
     return v.Elem();
 }
 
-// ValueOf returns a new Value initialized to the concrete value
-// stored in the interface i. ValueOf(nil) returns the zero Value.
-public static ΔValue ValueOf(any i) {
-    if (i == default!) {
-        return new ΔValue(nil);
-    }
-    return unpackEface(i);
-}
+// func ValueOf is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
 
 // Zero returns a Value representing the zero value for the specified type.
 // The result is different from the zero value of the Value struct,

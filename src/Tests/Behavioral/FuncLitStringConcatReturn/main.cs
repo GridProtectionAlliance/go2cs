@@ -22,7 +22,7 @@ internal static void Main() {
         }}
     };
     fmt.Println(pick("abc"));
-    fmt.Println(pick(42));
+    fmt.Println(pick((nint)(42)));
     fmt.Println(pick(true));
     var wrap = @string (@string s, bool quote) => {
         if (quote) {

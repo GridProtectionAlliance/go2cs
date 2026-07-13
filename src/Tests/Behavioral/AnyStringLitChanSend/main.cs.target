@@ -48,7 +48,7 @@ internal static void describe(@string prefix, any v) {
 internal static void Main() {
     var ch = new channel<any>(2);
     ch.ᐸꟷ((@string)"text");
-    ch.ᐸꟷ(42);
+    ch.ᐸꟷ((nint)(42));
     describe("send"u8, ᐸꟷ(ch));
     describe("send"u8, ᐸꟷ(ch));
     var sel = new channel<any>(1);

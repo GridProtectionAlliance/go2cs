@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/constant"
 	"go/token"
 	"go/types"
+	"math"
 	"path/filepath"
 	"strings"
 )
@@ -1062,24 +1064,73 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			if needsInterfaceCast, isEmpty := isInterface(paramType); needsInterfaceCast && !v.instantiatedParamIsPointer(callExpr, paramType, i) && !signatureErasedParamPointerOk(funcSignature, paramType) {
 				callExprContext.u8StringArgOK[i] = false
 
-				if !isEmpty {
-					// A variadic interface parameter (`...Type`) receives EVERY trailing argument
-					// (getParameterType already yields the variadic ELEMENT type), so the interface
-					// treatment must fan out to all of them — this loop only visits declared
-					// parameters, and a trailing pointer element after the first passed loose,
-					// missing its *T→iface adapter (`makeSig(S, S, NewSlice(T))` left the ж<Slice>
-					// result unwrapped — go/types builtins CS1503). Mirrors the variadic fan-out of
-					// the pointer branch below; a spread arg is excluded at consumption
-					// (convExprList's spreadArg guard), and a non-variadic parameter degenerates to
-					// the single index (lastArg == i), byte-identical to before.
-					lastArg := i
+				// A variadic interface parameter (`...Type` / `...any`) receives EVERY trailing
+				// argument (getParameterType already yields the variadic ELEMENT type), so the
+				// non-empty *T→iface adapter treatment (`makeSig(S, S, NewSlice(T))` left the
+				// ж<Slice> result unwrapped otherwise — go/types builtins CS1503) must fan out to
+				// all of them; a spread arg is excluded at consumption (convExprList's spreadArg
+				// guard), and a non-variadic parameter degenerates to the single index (lastArg == i),
+				// byte-identical to before.
+				lastArg := i
 
-					if funcSignature.Variadic() && i == params.Len()-1 {
-						lastArg = len(callExpr.Args) - 1
+				if funcSignature.Variadic() && i == params.Len()-1 {
+					lastArg = len(callExpr.Args) - 1
+				}
+
+				// The untyped-int→nint box cast is DELIBERATELY skipped for a variadic `...any`
+				// argument (the fmt/print/log family): a boxed System.Int32 formats identically to
+				// nint and its %T / type-switch dynamic type is already resolved as `int`, so the
+				// cast would be redundant noise on the most common call pattern — matching how the
+				// string→@string boxing family also leaves the variadic fmt call position untouched.
+				// A non-variadic `any` parameter (`atomic.Value.Store`, `context.WithValue`, …) is a
+				// value the caller stores and later type-asserts, so it DOES take the cast.
+				variadicSlot := funcSignature.Variadic() && i == params.Len()-1
+
+				for j := i; j <= lastArg; j++ {
+					if !isEmpty {
+						callExprContext.interfaceTypes[j] = paramType
 					}
 
-					for j := i; j <= lastArg; j++ {
-						callExprContext.interfaceTypes[j] = paramType
+					// An untyped `int` constant boxed into the interface must be cast to nint so its
+					// C# box matches Go's boxed `int` dynamic type and a later `.(int)` (`._<nint>()`)
+					// assertion succeeds — see argBoxesAsInt32ButNeedsNint. Reuses the per-argument
+					// castArgToType plumbing convExprList already applies as `(nint)(value)`.
+					// isEmptyInterfaceTarget (not the outer isInterface) gates this to a REAL `any`
+					// parameter: a type parameter constrained by `any` also reads as an empty interface
+					// here, but its instantiation binds the argument to a concrete type (`T`=int → the
+					// nint parameter), where a bare int literal already converts implicitly — unlike
+					// the u8-span→@string case, no cast is needed and one would be spurious.
+					if !variadicSlot && isEmptyInterfaceTarget(paramType) && j < len(callExpr.Args) && v.argBoxesAsInt32ButNeedsNint(callExpr.Args[j]) {
+						if callExprContext.castArgToType == nil {
+							callExprContext.castArgToType = make(map[int]string)
+						}
+
+						callExprContext.castArgToType[j] = "nint"
+					}
+
+					// The EMPTY interface (`any`/`interface{}`) needs no wrapping adapter, but a
+					// POINTER argument must still render as the pointer VALUE — the box `Ꮡp`, not the
+					// deref'd value alias `p` — because Go boxes the *pointer* into the interface.
+					// A deref-aliased pointer (a `*T` parameter, or the current method's direct-ж
+					// receiver) whose box is dropped loses pointer identity: fmt's
+					// `func (p *pp) free() { … ppFree.Put(p) }` put the `pp` VALUE into the sync.Pool,
+					// so the next `Get().(*pp)` (rendered `._<ж<pp>>()`) failed the cast and panicked
+					// on the 2nd pool round-trip. This mirrors the pointer-parameter branch below: a
+					// pointer LOCAL already holds its box directly (`!v.isPointer`/param/direct-ж
+					// guard excludes it), and a variadic `...any` fans the treatment across every
+					// trailing argument (so it is NOT gated by variadicSlot, unlike the nint cast).
+					// Since the empty interface leaves `interfaceTypes` unset, the argument takes the
+					// identical convExpr path a `*T`-parameter argument does.
+					if isEmpty && j < len(callExpr.Args) {
+						if argType := v.getType(callExpr.Args[j], false); argType != nil {
+							if _, argIsPtr := argType.(*types.Pointer); argIsPtr {
+								ident := getIdentifier(callExpr.Args[j])
+
+								if !v.isPointer(ident) || v.identIsParameter(ident) || v.exprIsCurrentDirectBoxReceiver(callExpr.Args[j]) {
+									callExprContext.argTypeIsPtr[j] = true
+								}
+							}
+						}
 					}
 				}
 			} else if paramHasArg && (isPointer(paramType) || signatureErasedParamPointerOk(funcSignature, paramType) || v.instantiatedParamIsPointer(callExpr, paramType, i)) && !(callExprContext.hasSpreadOperator && i == params.Len()-1) {
@@ -1483,6 +1534,26 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		}
 	}
 
+	// An explicit slice conversion `[]E(x)` whose SOURCE is a ~[]E-constrained type
+	// parameter S is the EXPLICIT twin of the implicit wrapArgWithNew assignability path
+	// above (a value of S passed where a concrete []E is expected). The general call path
+	// renders `slice<E>(x)`, binding golib's array-only builtin.slice<T>(T[]) — but S is
+	// an ISlice<E>, not E[], so that fails to compile (CS1503). Emit the SHARING
+	// slice<T>(ISlice<T>) constructor instead, so an explicit conversion aliases the
+	// caller's backing exactly as the implicit form does (Go's `[]E(x)` shares storage).
+	// Cleanly disjoint from surrounding conversions: named-slice casts (`[]Named(x)`) take
+	// the isTypeConversion cast path and never reach here; string/nil sources are not
+	// *types.TypeParam; and the string|[]byte union `[]byte(x)` is handled by the block
+	// just above (typeParamSliceCore returns nil when a constraint term is not a slice).
+	if strings.HasPrefix(funcTypeName, "[]") && len(callExpr.Args) == 1 {
+		if tp, ok := types.Unalias(v.getType(callExpr.Args[0], false)).(*types.TypeParam); ok && typeParamSliceCore(tp) != nil {
+			if targetSlice, ok := funcType.(*types.Slice); ok {
+				elemName := convertToCSTypeName(v.getTypeName(targetSlice.Elem(), false))
+				return fmt.Sprintf("new slice<%s>(%s)", elemName, v.convExpr(callExpr.Args[0], nil))
+			}
+		}
+	}
+
 	if len(callExpr.Args) == 1 {
 		argTypeName := v.getExprTypeName(callExpr.Args[0], true)
 
@@ -1620,6 +1691,25 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		} else if funcName == "@unsafe.Sizeof" {
 			v.showWarning("Go code converted to C# using 'unsafe.Sizeof' may not produce same value as Go - verify usage: %s", v.getPrintedNode(callExpr))
 		}
+	}
+
+	// sync/atomic.LoadPointer/StorePointer on a MANAGED pointer field — the lock-free
+	// `atomic.LoadPointer((*unsafe.Pointer)(unsafe.Pointer(&x.field)))` / `StorePointer(…,
+	// unsafe.Pointer(v))` idiom where `x.field` is a `*T` (a `ж<T>` reference). The literal
+	// conversion round-trips the managed reference through a transient `uintptr` address and NREs
+	// (x/sys/windows's LazyDLL/LazyProc caches). Emit the golib managed-referent overloads on the
+	// field box (`ж<ж<T>>`) instead, so the atomic read/write operates on the reference directly.
+	// A LOAD result stays `unsafe.Pointer`-typed to Go, so the caller's nil-compare still wraps it
+	// `(uintptr)… == nil`; the `ж<T> → uintptr` operator yields 0 for a nil box (see golib), so the
+	// comparison is correct without changing the surrounding emission.
+	if addrExpr, storeVal, isLoad, ok := v.managedAtomicPointerIdiom(callExpr); ok {
+		box := v.convExpr(addrExpr, nil)
+
+		if isLoad {
+			return fmt.Sprintf("%s(%s)", funcName, box)
+		}
+
+		return fmt.Sprintf("%s(%s, %s)", funcName, box, v.convExpr(storeVal, nil))
 	}
 
 	if len(typeParamExpr) > 0 && !strings.HasSuffix(funcName, typeParamExpr) {
@@ -1939,6 +2029,59 @@ func (v *Visitor) isUntypedNumericConstArg(arg ast.Expr) bool {
 	}
 
 	return false
+}
+
+// argBoxesAsInt32ButNeedsNint reports whether arg is a CONSTANT expression whose Go type is the
+// untyped-constant default `int` with a value in the int32 range. convBasicLit renders such a value as
+// a bare C# integer literal, which is `System.Int32`; but when the value is implicitly converted to an
+// interface, Go boxes it as its dynamic type `int` — go2cs `nint` (an IntPtr). Without an explicit
+// `(nint)` cast the C# box is `System.Int32`, so a later `.(int)` type assertion — emitted as
+// `._<nint>()` — finds a boxed Int32 and panics (both print "int", but one is Int32, one is nint).
+// Larger int constants already render as `(nint)…L` (correctly boxed); untyped float/rune/string
+// defaults box to the matching C# type (double / int32 / — @string via golib's assertion
+// normalization); so only the int32-range default-`int` constant needs the cast. Keying off
+// info.Types[arg] (rather than the AST shape) uniformly catches a literal (`42`), a unary
+// (`-5`), a binary (`1 + 2`), and a named untyped-int const, since go/types constant-folds them to a
+// single `int` value.
+func (v *Visitor) argBoxesAsInt32ButNeedsNint(arg ast.Expr) bool {
+	// A type-conversion CallExpr (`int(x)`) is itself a constant of type int but already renders with
+	// its own `(nint)…` cast — skip it so the box is not double-wrapped.
+	if _, isCall := arg.(*ast.CallExpr); isCall {
+		return false
+	}
+
+	tv, ok := v.info.Types[arg]
+
+	if !ok || tv.Value == nil {
+		return false
+	}
+
+	basic, ok := tv.Type.(*types.Basic)
+
+	if !ok || basic.Kind() != types.Int {
+		return false
+	}
+
+	iv, exact := constant.Int64Val(tv.Value)
+
+	return exact && iv >= math.MinInt32 && iv <= math.MaxInt32
+}
+
+// boxUntypedIntAsNint wraps an already-rendered value expression in a `(nint)` cast when `target` is
+// the empty interface and `value` is an untyped `int` constant that would otherwise box as
+// System.Int32 (see argBoxesAsInt32ButNeedsNint). It is the non-call-argument twin of the
+// castArgToType["nint"] treatment convCallExpr applies at interface call sites — assignment, var-spec,
+// return, channel send, and keyed composite/struct/map positions render a value against a known
+// empty-interface slot and route through here so a later `.(int)` / `case int:` observes Go's boxed
+// `int` dynamic type. A non-empty-interface slot, a type-parameter slot, or a non-int-constant value
+// passes through unchanged. Mirrors the string→@string family's per-position boxing (castToGoString),
+// which the empty interface likewise handles outside convertToInterfaceType.
+func (v *Visitor) boxUntypedIntAsNint(target types.Type, value ast.Expr, rendered string) string {
+	if isEmptyInterfaceTarget(target) && v.argBoxesAsInt32ButNeedsNint(value) {
+		return fmt.Sprintf("(nint)(%s)", rendered)
+	}
+
+	return rendered
 }
 
 // recordConversionPackageUsing registers the import alias → C# namespace for any cross-package named
@@ -2637,7 +2780,6 @@ func getCallFunIdent(fun ast.Expr) *ast.Ident {
 	return nil
 }
 
-
 // calleeHasConstraintOnlyTypeParam reports whether the called generic function declares a type
 // parameter that appears in NO parameter type — visible only in constraints (`Twice[S ~[]E, E
 // Integer](s S)`: E). Go infers such a parameter through core types; C# cannot infer it from
@@ -2850,4 +2992,140 @@ func (v *Visitor) instantiatedParamType(callExpr *ast.CallExpr, i int) types.Typ
 	}
 
 	return nil
+}
+
+// managedAtomicPointerIdiom recognizes Go's lock-free managed-pointer-field atomics —
+//
+//	atomic.LoadPointer((*unsafe.Pointer)(unsafe.Pointer(&x.field)))
+//	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&x.field)), unsafe.Pointer(v))
+//
+// where `x.field` has a pointer type `*T` and so, in the managed conversion, holds a `ж<T>`
+// reference. A managed reference cannot survive the `uintptr` round-trip the literal conversion
+// emits (the pinned address is transient and reinterpreting it loses GC identity), so the
+// converter routes these to the golib overloads that operate on the field BOX (`ж<ж<T>>`)
+// directly. Returns the `&x.field` address expression (which renders as that box), and, for a
+// store, the stored value expression `v` (unwrapped from its `unsafe.Pointer(...)` conversion so
+// it renders as the plain `ж<T>` the overload takes).
+func (v *Visitor) managedAtomicPointerIdiom(callExpr *ast.CallExpr) (addrExpr ast.Expr, storeVal ast.Expr, isLoad bool, ok bool) {
+	sel, isSel := callExpr.Fun.(*ast.SelectorExpr)
+
+	if !isSel {
+		return nil, nil, false, false
+	}
+
+	fn, isFn := v.info.ObjectOf(sel.Sel).(*types.Func)
+
+	if !isFn || fn.Pkg() == nil || fn.Pkg().Path() != "sync/atomic" {
+		return nil, nil, false, false
+	}
+
+	switch fn.Name() {
+	case "LoadPointer":
+		isLoad = true
+	case "StorePointer":
+		isLoad = false
+	default:
+		return nil, nil, false, false
+	}
+
+	// arg[0] must be `(*unsafe.Pointer)(unsafe.Pointer(&x.field))` whose `x.field` is `*T`.
+	if len(callExpr.Args) < 1 {
+		return nil, nil, false, false
+	}
+
+	addrExpr = v.unwrapManagedPtrFieldAddress(callExpr.Args[0])
+
+	if addrExpr == nil {
+		return nil, nil, false, false
+	}
+
+	if isLoad {
+		return addrExpr, nil, true, len(callExpr.Args) == 1
+	}
+
+	// StorePointer's value arg is `unsafe.Pointer(v)`; the overload takes the plain `ж<T>` value.
+	if len(callExpr.Args) != 2 {
+		return nil, nil, false, false
+	}
+
+	storeVal = v.unwrapUnsafePointerConversion(callExpr.Args[1])
+
+	if storeVal == nil {
+		return nil, nil, false, false
+	}
+
+	return addrExpr, storeVal, false, true
+}
+
+// unwrapManagedPtrFieldAddress returns the `&Z` expression inside
+// `(*unsafe.Pointer)(unsafe.Pointer(&Z))` when `Z` has a pointer type `*T` (a managed `ж<T>`
+// field); nil otherwise.
+func (v *Visitor) unwrapManagedPtrFieldAddress(arg ast.Expr) ast.Expr {
+	// (*unsafe.Pointer)(inner)
+	outer, isCall := ast.Unparen(arg).(*ast.CallExpr)
+
+	if !isCall || len(outer.Args) != 1 || !v.isPointerToUnsafePointerType(outer.Fun) {
+		return nil
+	}
+
+	// unsafe.Pointer(&Z)
+	inner := v.unwrapUnsafePointerConversion(outer.Args[0])
+
+	if inner == nil {
+		return nil
+	}
+
+	// &Z
+	unary, isUnary := ast.Unparen(inner).(*ast.UnaryExpr)
+
+	if !isUnary || unary.Op != token.AND {
+		return nil
+	}
+
+	// Z must have a pointer type — its address `&Z` is then `**T`, i.e. the box of a `ж<T>` field.
+	operandType := v.info.TypeOf(unary.X)
+
+	if operandType == nil {
+		return nil
+	}
+
+	if _, isPointer := operandType.Underlying().(*types.Pointer); !isPointer {
+		return nil
+	}
+
+	return unary
+}
+
+// unwrapUnsafePointerConversion returns the argument of an `unsafe.Pointer(x)` conversion, or nil
+// when expr is not such a conversion.
+func (v *Visitor) unwrapUnsafePointerConversion(expr ast.Expr) ast.Expr {
+	call, isCall := ast.Unparen(expr).(*ast.CallExpr)
+
+	if !isCall || len(call.Args) != 1 || !v.isUnsafePointerType(call.Fun) {
+		return nil
+	}
+
+	return call.Args[0]
+}
+
+// isUnsafePointerType reports whether expr denotes the `unsafe.Pointer` type (used as a conversion
+// target).
+func (v *Visitor) isUnsafePointerType(expr ast.Expr) bool {
+	t := v.info.TypeOf(expr)
+
+	if t == nil {
+		return false
+	}
+
+	basic, isBasic := t.Underlying().(*types.Basic)
+
+	return isBasic && basic.Kind() == types.UnsafePointer
+}
+
+// isPointerToUnsafePointerType reports whether expr denotes `*unsafe.Pointer` (the conversion
+// target of the idiom's outer cast).
+func (v *Visitor) isPointerToUnsafePointerType(expr ast.Expr) bool {
+	star, isStar := ast.Unparen(expr).(*ast.StarExpr)
+
+	return isStar && v.isUnsafePointerType(star.X)
 }

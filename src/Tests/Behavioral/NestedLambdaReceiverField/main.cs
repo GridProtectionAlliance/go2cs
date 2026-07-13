@@ -38,9 +38,9 @@ internal static void exec(this ж<stmt> Ꮡs) {
     ref var s = ref Ꮡs.Value;
 
     s.runWith(() => {
-        Ꮡs.Value.d.note(Ꮡs.Value);
+        Ꮡs.Value.d.note(Ꮡs);
         Ꮡs.Value.runWith(() => {
-            Ꮡs.Value.d.note(Ꮡs.Value);
+            Ꮡs.Value.d.note(Ꮡs);
         });
         if (Ꮡs.Value.cg != default!) {
             fmt.Println("cg:", Ꮡs.Value.cg.tag(), Ꮡs.Value.id);

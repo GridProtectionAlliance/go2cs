@@ -228,4 +228,24 @@ partial class atomic_package
     {
         Interlocked.Exchange(ref addr.Value, val);
     }
+
+    // Managed-referent atomic pointer ops. Go's `atomic.LoadPointer((*unsafe.Pointer)(
+    // unsafe.Pointer(&p.field)))` / `StorePointer(…, unsafe.Pointer(v))` targets a *T field that,
+    // in the managed world, holds a `ж<T>` REFERENCE — which cannot round-trip through a `uintptr`
+    // address (the `fixed` address is transient and reinterpreting it loses GC identity, so the
+    // literal conversion NREs, e.g. x/sys/windows's LazyDLL/LazyProc caches). The converter
+    // recognizes that idiom and emits these overloads on the FIELD BOX (`ж<ж<T>>`) directly, so the
+    // read/write is an atomic operation on the managed reference itself — Volatile gives the
+    // acquire/release ordering Go's LoadPointer/StorePointer require. Additive overloads: the
+    // `ж<ж<T>>` argument never matches the existing `ж<@unsafe.Pointer>` (= `ж<Pointer>`) signature,
+    // so ordinary `unsafe.Pointer` atomics are unaffected.
+    public static ж<T> LoadPointer<T>(ж<ж<T>> addr)
+    {
+        return Volatile.Read(ref addr.Value);
+    }
+
+    public static void StorePointer<T>(ж<ж<T>> addr, ж<T> val)
+    {
+        Volatile.Write(ref addr.Value, val);
+    }
 } // end atomic_package

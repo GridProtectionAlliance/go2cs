@@ -548,6 +548,17 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 					// A leading/middle default runs only when NO case matches (anyMatch is
 					// precomputed above); its own `fallthrough` chains into the next case.
 					v.targetFile.WriteString(fmt.Sprintf("if (!%s) { /* default: */", anyMatchVarName))
+				} else if i == len(caseClauses)-1 && hasFallthroughs {
+					// A TRAILING default in a switch WITH fallthroughs must be guarded on !match. The
+					// else-if chain is broken by the fallthrough-TARGET if-blocks (a case rendered
+					// `if (fallthrough || !match && <labels>) {…}`), so a bare `else` here is the else of
+					// that separate if and fires after a matched NON-fallthrough case — fmt's printValue
+					// ran `unknownType` (→ reflect name resolution) right after formatting an int/slice
+					// element. Guarding on !match makes the default run only when nothing matched
+					// (equivalent to the bare else in a pure else-if chain, correct in the broken chain).
+					// Like the fallthrough-reached default, this leaves C# unable to prove exhaustiveness.
+					v.targetFile.WriteString(fmt.Sprintf("if (!%s) { /* default: */", matchVarName))
+					guardedTerminalDefault = true
 				} else {
 					v.targetFile.WriteString("{ /* default: */")
 				}

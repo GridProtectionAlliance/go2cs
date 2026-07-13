@@ -88,6 +88,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAtomicFieldThroughPointer() => CheckTarget("AtomicFieldThroughPointer");
 
     [TestMethod]
+    public void CheckAtomicValue() => CheckTarget("AtomicValue");
+
+    [TestMethod]
     public void CheckAtomicValues() => CheckTarget("AtomicValues");
 
     [TestMethod]
@@ -179,6 +182,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckComplexImaginaryShadow() => CheckTarget("ComplexImaginaryShadow");
+
+    [TestMethod]
+    public void CheckConstrainedSliceParamInPlace() => CheckTarget("ConstrainedSliceParamInPlace");
 
     [TestMethod]
     public void CheckConstShadowsParam() => CheckTarget("ConstShadowsParam");
@@ -496,6 +502,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMakeSliceUintptrLen() => CheckTarget("MakeSliceUintptrLen");
 
     [TestMethod]
+    public void CheckManagedAtomicPointer() => CheckTarget("ManagedAtomicPointer");
+
+    [TestMethod]
     public void CheckMapAnonStructValue() => CheckTarget("MapAnonStructValue");
 
     [TestMethod]
@@ -763,6 +772,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]
+    public void CheckPointerValueToInterfaceArg() => CheckTarget("PointerValueToInterfaceArg");
+
+    [TestMethod]
     public void CheckPrintfWidthFlags() => CheckTarget("PrintfWidthFlags");
 
     [TestMethod]
@@ -952,6 +964,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSwitchDefaultOrder() => CheckTarget("SwitchDefaultOrder");
 
     [TestMethod]
+    public void CheckSwitchFallthroughDefault() => CheckTarget("SwitchFallthroughDefault");
+
+    [TestMethod]
     public void CheckSwitchFallthroughDefaultReturn() => CheckTarget("SwitchFallthroughDefaultReturn");
 
     [TestMethod]
@@ -1046,6 +1061,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUntypedFloatDefault() => CheckTarget("UntypedFloatDefault");
+
+    [TestMethod]
+    public void CheckUntypedIntInterfaceBox() => CheckTarget("UntypedIntInterfaceBox");
 
     [TestMethod]
     public void CheckUntypedNestedSliceComposite() => CheckTarget("UntypedNestedSliceComposite");

@@ -23,7 +23,13 @@ the last build scripts that referenced it (`convert-gosrc.*`) were removed 2026-
 > the go2cs-specific discipline: root-cause against the real emitted `.cs`/`.cs.target` (the golden is the
 > authoritative record), keep the A/B footprint minimal, change *only* the goldens a fix must, and prove no
 > corpus drift with `check-no-regression` — **compiling is not correctness** (that is the Phase-3 → Phase-4
-> distinction).
+> distinction). And **prefer the durable path over the shortcut**: when a task could be solved
+> quickly-but-throwaway or correctly-but-harder, take the harder, general fix — a converter change over a
+> one-off hand-patch, a real root cause over a workaround, the reproducible-from-repo result over a deploy-only
+> hack. go2cs is a long-horizon project; work that advances the long-term vision is worth the extra effort, and
+> throwaway code that has to be redone later is a net loss even when it ships faster today (the
+> *nothing-throwaway* principle). This does not license speculative machinery — it is still the *minimal*
+> solution, just the one that generalizes and lasts rather than the one that merely unblocks today.
 
 ## Architecture map
 

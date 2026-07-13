@@ -35,12 +35,12 @@ type CallExprContext struct {
 	// keyValueCompositeType carries the keyed composite's resolved type through to
 	// KeyValueContext.compositeType (see that field's note; runtime/metrics CS1739).
 	keyValueCompositeType types.Type
-	forceMultiLine      bool
-	sourceIsRuneArray   bool
-	sourceIsTypeParams  bool
-	callArgs            []string
-	replacementArgs     []string
-	castArgToType       map[int]string
+	forceMultiLine        bool
+	sourceIsRuneArray     bool
+	sourceIsTypeParams    bool
+	callArgs              []string
+	replacementArgs       []string
+	castArgToType         map[int]string
 	// wrapArgWithNew wraps the indexed argument in a constructor call (`new slice<E>(arg)`) — the
 	// S-where-[]E-expected materialization (see convExprList).
 	wrapArgWithNew map[int]string
