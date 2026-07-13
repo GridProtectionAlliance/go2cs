@@ -1409,6 +1409,23 @@ operator). This covers the common binary-format-detection idiom `switch string(m
 and applies both to an unnamed tag (`switch string(x)`) and to a named local used as the tag
 (`s := string(x); switch s { … }`, where the tag read is added to the named local's safe-use set).
 
+**Concatenation** (`string(x) + suffix`) is the same operand family in a `+` expression. A Go string
+concatenation always allocates a fresh result, so the result is a heap `@string` that may itself escape —
+only the *operand* is a stack value, and the win is skipping the intermediate `((@string)x)` copy of it.
+`golib`'s `sstring` gained `operator+` overloads (against `@string`, another `sstring`, a
+`ReadOnlySpan<byte>` u8 literal, and a plain C# `string`, both operand orders, all returning `@string`)
+that block-copy the operand span straight into the single result buffer instead. The plain-`string`
+overload resolves an otherwise-ambiguous `string + sstring` (both convert implicitly to the other): a
+literal in an object/vararg concat context renders without its `u8` suffix (the converter suppresses it),
+so `panic("incorrect mantissa: " + string(hm))` (math/big) becomes `"…" + ((sstring)hm)` where `"…"` is a
+plain C# `string` — the explicit overload makes it an exact match rather than a CS0034 ambiguity (mirroring
+why the comparison form keeps its literal as `u8`). A `string(x)` operand of a `+` is emitted as `sstring`
+under the same rules as a comparison operand — `markSStringBinaryOperandConversions` (formerly
+`…ComparisonConversions`) now also matches `token.ADD`, and requires the other operand to be mutation-safe
+(a literal, pure read, or another conversion — never a call); a named local used in a concatenation
+(`s := string(x); s + suffix`) is likewise added to `sstringUsesAreSafe`. `string(a) + string(b)` becomes
+`((sstring)a) + ((sstring)b)`, saving both operand copies.
+
 A third refinement is an **optimization**, not a widening of eligibility: **loop-invariant / repeated-conversion
 hoisting**. When the same eligible `string(x)` over a never-written source is emitted repeatedly — several
 comparison operands, or one inside a loop — the inline `((sstring)x)` re-materializes the view at every use,
@@ -1439,9 +1456,12 @@ comparison operand, two repeated-conversion groups that each hoist to a single r
 a loop, one straight-line — plus the mixed-comparison additions: a named local compared against a string
 variable and against a struct field, and two `string(bytes)` conversions compared directly; plus the switch
 additions: a `switch string(x)` with literal cases, a named local as the switch tag, and a magic-constant
-switch whose case labels are named `@string` consts) emit `sstring`; source-mutated, print-escaped, and
-returned locals, a compare-against-a-function-call, and a switch with a function-call case label stay
-`@string` — asserting emitted forms and byte-identical Go/C# stdout. Remaining phases (unnamed conversions
+switch whose case labels are named `@string` consts; plus the concatenation additions: a named-local
+`s + suffix`, an unnamed `string(x) + literal` and `+ variable`, two conversions concatenated, and a concat
+into an object context — `fmt.Sprint("v=" + string(b))` — that exercises the plain-`string` `operator+`)
+emit `sstring`; source-mutated, print-escaped, and returned locals, a compare-against-a-function-call, a
+switch with a function-call case label, and a concat with a function-call operand stay `@string` —
+asserting emitted forms and byte-identical Go/C# stdout. Remaining phases (unnamed conversions
 passed to non-retaining callees / used as map keys, and a precise per-iteration liveness guard that would
 reach the `PerfString` loop) are deferred; see [`docs/Roadmap.md`](Roadmap.md).
 

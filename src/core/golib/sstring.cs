@@ -421,5 +421,61 @@ public readonly ref struct sstring
         return new ReadOnlySpan<byte>(a.m_value).SequenceCompareTo(b.m_value) >= 0;
     }
 
+    // Concatenation. A Go string concatenation always allocates a fresh result, so joining a stack
+    // string with another string yields a heap @string (which may itself escape — only the OPERANDS
+    // are stack values). Binding these overloads skips the intermediate @string the sstring operand
+    // would otherwise be copied into first (`((@string)view) + b`): the operand spans are block-copied
+    // straight into the single result buffer, saving one allocation per concatenation. The converter
+    // emits an sstring operand here only when it does not escape and its source is not mutated before
+    // the concatenation reads it. Mirrors @string's own `+` overloads (incl. the `u8`-literal span form).
+    public static @string operator +(sstring a, @string b)
+    {
+        return concat(a.m_value, b.m_value);
+    }
+
+    public static @string operator +(@string a, sstring b)
+    {
+        return concat(a.m_value, b.m_value);
+    }
+
+    public static @string operator +(sstring a, sstring b)
+    {
+        return concat(a.m_value, b.m_value);
+    }
+
+    public static @string operator +(sstring a, ReadOnlySpan<byte> b)
+    {
+        return concat(a.m_value, b);
+    }
+
+    public static @string operator +(ReadOnlySpan<byte> a, sstring b)
+    {
+        return concat(a, b.m_value);
+    }
+
+    // A concatenation whose OTHER operand is a plain C# `string` — a string literal the converter
+    // rendered WITHOUT the `u8` suffix because an object/vararg context (e.g. `panic("…" + string(x))`)
+    // suppressed it. Without these explicit overloads `string + sstring` is CS0034-ambiguous, since
+    // `string` and `sstring` each convert implicitly to the other (mirrors why the comparison form keeps
+    // the literal as `u8`). UTF-8-encoding the C# string matches what its implicit `@string` conversion
+    // would have done.
+    public static @string operator +(string a, sstring b)
+    {
+        return concat(Encoding.UTF8.GetBytes(a ?? ""), b.m_value);
+    }
+
+    public static @string operator +(sstring a, string b)
+    {
+        return concat(a.m_value, Encoding.UTF8.GetBytes(b ?? ""));
+    }
+
+    private static @string concat(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b)
+    {
+        byte[] bytes = new byte[a.Length + b.Length];
+        a.CopyTo(bytes);
+        b.CopyTo(new Span<byte>(bytes, a.Length, b.Length));
+        return new @string(bytes);
+    }
+
     #endregion
 }

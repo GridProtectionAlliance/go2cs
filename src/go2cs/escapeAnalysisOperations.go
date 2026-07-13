@@ -43,10 +43,10 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 				sstringConvExprs: fileEntry.sstringConvExprs,
 			}
 
-			// Unnamed `string(x)` temporaries consumed within a comparison against a literal
-			// (`string(buf) == "…"`) never outlive the expression, so they are safe to emit as a
-			// zero-copy sstring view unconditionally — no escape/mutation analysis required.
-			visitor.markSStringComparisonConversions(fileEntry.file)
+			// Unnamed `string(x)` temporaries consumed within a comparison (`string(buf) == "…"`) or a
+			// concatenation (`string(buf) + suffix`) never outlive the expression, so they are safe to
+			// emit as a zero-copy sstring view when the other operand cannot mutate the source first.
+			visitor.markSStringBinaryOperandConversions(fileEntry.file)
 
 			// `switch string(x) { case …: … }` lowers to a temp compared against each case with `==`
 			// (never a C# switch/pattern — string labels are not C# case constants); the tag is likewise
@@ -774,13 +774,15 @@ func (v *Visitor) sstringUsesAreSafe(obj types.Object, declIdent *ast.Ident, bod
 				safeIdents[id] = true
 			}
 		case *ast.BinaryExpr:
-			if isComparisonOp(e.Op) {
-				// A comparison against a string literal (`s == "x"`) or against a plain-`string`
-				// operand (variable/field, `s == want`): the stack string has zero-copy comparison
-				// operators against a `u8` literal, another sstring, and — via the mixed
-				// sstring/@string operators — a heap @string, so any such comparison compiles and
-				// the local never escapes. (Because a safe local's source is proven never-written
-				// for the whole function, evaluating the other operand cannot mutate the view.)
+			// A COMPARISON against a string literal (`s == "x"`) or a plain-`string` operand
+			// (variable/field, `s == want`), or a string CONCATENATION (`s + suffix`): the stack
+			// string compares/concatenates against a `u8` literal, another sstring, or — via the mixed
+			// sstring/@string operators — a heap @string, with no heap copy of `s` (concatenation still
+			// allocates the RESULT @string, but not the operand). The local never escapes through
+			// either — a comparison yields a bool, a concatenation a fresh @string, neither aliasing
+			// `s` — and a safe local's source is proven never-written for the whole function, so
+			// evaluating the other operand cannot mutate the view.
+			if isComparisonOp(e.Op) || e.Op == token.ADD {
 				if id, ok := e.X.(*ast.Ident); ok && v.isPlainStringOperand(e.Y) {
 					safeIdents[id] = true
 				}
@@ -903,18 +905,21 @@ func rootIdentObject(expr ast.Expr, info *types.Info) types.Object {
 	return nil
 }
 
-// markSStringComparisonConversions flags every `string(x)` conversion CallExpr that is an operand of
-// a comparison (`string(buf) == "…"` / `string(buf) == want`, any of ==/!=/</<=/>/>=). Such a
-// temporary is created and consumed within the single comparison expression, so it cannot escape;
-// emitting it as a zero-copy sstring view is safe with NO escape analysis, provided the OTHER operand
-// cannot mutate the source buffer before the view is read (see sstringOtherOperandSafe — a literal, a
-// pure-read plain-`string` expression, or another `string(bytes)` conversion, none of which run code
-// that could write x). Restricted to an unnamed []byte source, like the local case.
-func (v *Visitor) markSStringComparisonConversions(file *ast.File) {
+// markSStringBinaryOperandConversions flags every `string(x)` conversion CallExpr that is an operand
+// of a COMPARISON (`string(buf) == "…"` / `string(buf) == want`, any of ==/!=/</<=/>/>=) or a string
+// CONCATENATION (`string(buf) + suffix`). Such a temporary is created and consumed within the single
+// binary expression, so it cannot escape (the comparison yields a bool, the concatenation a fresh
+// @string that shares no storage with the view); emitting it as a zero-copy sstring view is safe with
+// NO escape analysis, provided the OTHER operand cannot mutate the source buffer before the view is
+// read (see sstringOtherOperandSafe — a literal, a pure-read plain-`string` expression, or another
+// `string(bytes)` conversion, none of which run code that could write x). Restricted to an unnamed
+// []byte source, like the local case. Concatenation still allocates the RESULT @string; the win is
+// skipping the intermediate `((@string)x)` copy of the operand (see sstring's `+` overloads).
+func (v *Visitor) markSStringBinaryOperandConversions(file *ast.File) {
 	ast.Inspect(file, func(n ast.Node) bool {
 		binaryExpr, ok := n.(*ast.BinaryExpr)
 
-		if !ok || !isComparisonOp(binaryExpr.Op) {
+		if !ok || !(isComparisonOp(binaryExpr.Op) || binaryExpr.Op == token.ADD) {
 			return true
 		}
 

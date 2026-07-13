@@ -635,18 +635,31 @@ increments, roughly by ROI:
    (`m[string(b)]`) — is harder: a `@string`-typed parameter or map key copies the `sstring` back at the
    boundary (no win) unless the callee/`map<K,V>` gains an `sstring`/`ReadOnlySpan<byte>` overload. Needs a
    curated non-retaining-callee whitelist plus golib span-lookup support on `map`.
-2. **`sstring operator+`** (returning `@string`) plus widening the safe-use whitelist beyond
-   len/cap/byte-index/compare-literal (sub-slicing kept in safe uses, rune-range, etc.). A first
-   whitelist widening has landed (2026-07-13): a **`switch string(x)` tag** (and a named local used as
-   a switch tag). A Go string switch always lowers to a temp compared against each case label with `==`
-   (never a C# `switch`/pattern — string labels are not C# case constants), so the tag is a zero-copy
-   `sstring` view whenever every case label is a mutation-safe operand (literal, pure read, or another
-   conversion — never a call). This covers the binary-format-detection idiom
-   `switch string(magic) { case elfMagic: … }` (`markSStringSwitchConversions` + the switch-tag safe use
-   in `sstringUsesAreSafe`). Guarded by `SStringElision` (literal, named-local, magic-const, and a
-   negative call-label case); full-stdlib reconvert stays 302/302. `operator+`, sub-slicing, and rune
-   range remain. (Increment 1's `for range string(x)` sub-case is **not pursued** — the Go-1.23 stdlib
-   has zero such sites, so there is no footprint to justify the golib rune-enumerator surface.)
+2. **`sstring operator+`** (returning `@string`) — **done (2026-07-13)** — plus widening the safe-use
+   whitelist beyond len/cap/byte-index/compare-literal. Two widenings have landed:
+   - **`switch string(x)` tag** (and a named local used as a switch tag). A Go string switch always lowers
+     to a temp compared against each case label with `==` (never a C# `switch`/pattern — string labels are
+     not C# case constants), so the tag is a zero-copy `sstring` view whenever every case label is a
+     mutation-safe operand (literal, pure read, or another conversion — never a call). Covers the
+     binary-format-detection idiom `switch string(magic) { case elfMagic: … }`
+     (`markSStringSwitchConversions` + the switch-tag safe use in `sstringUsesAreSafe`).
+   - **`string(x) + suffix` concatenation.** `golib`'s `sstring` gained `operator+` overloads (vs
+     `@string`, `sstring`, and a `ReadOnlySpan<byte>` u8 literal, both orders, all → `@string`) that
+     block-copy the operand span into the single result buffer, skipping the intermediate `((@string)x)`
+     copy (the RESULT `@string` still allocates — the win is one fewer allocation per concatenation). A
+     `string(x)` `+` operand is emitted `sstring` under the comparison rules
+     (`markSStringBinaryOperandConversions` now matches `token.ADD`; a named local's `+` use is added to
+     `sstringUsesAreSafe`).
+
+   Both guarded by `SStringElision` (switch: literal/named-local/magic-const + negative call-label;
+   concat: named-local/literal/variable/two-conversion + negative call-operand); full-stdlib reconvert
+   stays 302/302. Sub-slicing kept in safe uses and rune-range remain. (Increment 1's
+   `for range string(x)` sub-case is **not pursued** — the Go-1.23 stdlib has zero such sites, so there
+   is no footprint to justify the golib rune-enumerator surface. Increment 1's `m[string(x)]` map-key
+   sub-case is **not pursued** — a zero-allocation span lookup would require replacing every
+   `@string`-keyed `map`'s default equality comparer with a custom `IAlternateEqualityComparer`, whose
+   virtual dispatch would slow ALL `@string` map operations — a net loss dwarfing the ~16 read-only
+   sites, and writes cannot be optimized at all.)
 3. **Mixed `sstring == @string`** operator — **done (2026-07-13).** `golib`'s `sstring` gained all six
    comparison operators (`==`/`!=`/`<`/`<=`/`>`/`>=`, both operand orders) against `@string`, a byte-ordinal
    `SequenceCompareTo`/`SequenceEqual` with **no** heap copy of either side. No ambiguity was reintroduced: a

@@ -94,6 +94,63 @@ func main() {
 	// (18) NEGATIVE — a switch case label is a function CALL, which could mutate the source before the
 	//      tag view is read, so the tag stays a heap @string.
 	fmt.Println("switchCall:", switchCall([]byte("q")))
+
+	// (19) CONCAT — named local + suffix: `s` is a stack sstring; the concatenation still allocates the
+	//      RESULT @string but skips the intermediate `((@string)b)` copy of the operand.
+	fmt.Println("concatLocal:", concatLocal([]byte("go"), "2cs"))
+
+	// (20) CONCAT — unnamed operand + literal: `((sstring)b) + "…"u8` via the span `operator+`.
+	fmt.Println("concatLit:", concatLit([]byte("v")))
+
+	// (21) CONCAT — unnamed operand + variable: the mixed sstring/@string `operator+`.
+	fmt.Println("concatVar:", concatVar([]byte("k"), "v"))
+
+	// (22) CONCAT — two conversions: `((sstring)a) + ((sstring)b)`, both zero-copy operands.
+	fmt.Println("concatTwo:", concatTwo([]byte("x"), []byte("y")))
+
+	// (23) NEGATIVE — a concat operand is a function CALL, which could mutate the source before the view
+	//      is read, so the conversion stays a heap @string.
+	fmt.Println("concatCall:", concatCall([]byte("q"), func() string { return "z" }))
+
+	// (24) CONCAT into an object/vararg context — the literal renders as a PLAIN C# string (u8-suppressed
+	//      by the `any` argument), so the sstring operand joins it via the `string`/`sstring` operator+
+	//      that resolves the otherwise-ambiguous `string + sstring` (the math/big `panic("…"+string(hm))`
+	//      idiom). Still a stack sstring operand producing a heap @string.
+	fmt.Println("concatObj:", concatObj([]byte("x")))
+}
+
+// concatObj concatenates into an object context (fmt.Sprint's `...any`), which u8-suppresses the string
+// literal so it renders as a plain C# string — exercising the `string`/`sstring` operator+ overloads.
+func concatObj(b []byte) string {
+	return fmt.Sprint("v=" + string(b))
+}
+
+// concatLocal joins a named-local stack string with a suffix; `s` stays a stack sstring (its only use
+// is the concatenation), and the sstring `operator+` copies its span straight into the result buffer.
+func concatLocal(b []byte, suffix string) string {
+	s := string(b)
+	return s + suffix
+}
+
+// concatLit joins an unnamed `string(b)` with a string literal — `((sstring)b) + "…"u8`.
+func concatLit(b []byte) string {
+	return string(b) + "!"
+}
+
+// concatVar joins an unnamed `string(b)` with a plain-string variable — the mixed `operator+`.
+func concatVar(b []byte, suffix string) string {
+	return string(b) + suffix
+}
+
+// concatTwo joins two `string(bytes)` conversions — both are zero-copy sstring operands.
+func concatTwo(a, b []byte) string {
+	return string(a) + string(b)
+}
+
+// concatCall is a NEGATIVE case: a concat operand is a function call, which could mutate the source
+// before the view is read, so the conversion stays a heap @string.
+func concatCall(b []byte, f func() string) string {
+	return string(b) + f()
 }
 
 // switchTag lowers `switch string(b)` (all-literal cases) to `var exprᴛN = ((sstring)b)` followed by

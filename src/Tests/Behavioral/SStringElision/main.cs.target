@@ -42,6 +42,37 @@ internal static void Main() {
     fmt.Println("switchLocal:", switchLocal(slice<byte>((@string)"off")));
     fmt.Println("switchMagic:", switchMagic(slice<byte>((@string)"PK")));
     fmt.Println("switchCall:", switchCall(slice<byte>((@string)"q")));
+    fmt.Println("concatLocal:", concatLocal(slice<byte>((@string)"go"), "2cs"u8));
+    fmt.Println("concatLit:", concatLit(slice<byte>((@string)"v")));
+    fmt.Println("concatVar:", concatVar(slice<byte>((@string)"k"), "v"u8));
+    fmt.Println("concatTwo:", concatTwo(slice<byte>((@string)"x"), slice<byte>((@string)"y")));
+    fmt.Println("concatCall:", concatCall(slice<byte>((@string)"q"), () => "z"u8));
+    fmt.Println("concatObj:", concatObj(slice<byte>((@string)"x")));
+}
+
+internal static @string concatObj(slice<byte> b) {
+    return fmt.Sprint("v=" + ((sstring)b));
+}
+
+internal static @string concatLocal(slice<byte> b, @string suffix) {
+    sstring s = ((sstring)b);
+    return s + suffix;
+}
+
+internal static @string concatLit(slice<byte> b) {
+    return ((sstring)b) + "!"u8;
+}
+
+internal static @string concatVar(slice<byte> b, @string suffix) {
+    return ((sstring)b) + suffix;
+}
+
+internal static @string concatTwo(slice<byte> a, slice<byte> b) {
+    return ((sstring)a) + ((sstring)b);
+}
+
+internal static @string concatCall(slice<byte> b, Func<@string> f) {
+    return ((@string)b) + f();
 }
 
 internal static nint switchTag(slice<byte> b) {
