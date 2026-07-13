@@ -113,7 +113,7 @@ public static (slice<byte> text, error err) MarshalText(this ж<Float> Ꮡx) {
     error err = default!;
 
     if (Ꮡx == nil) {
-        return (slice<byte>((@string)"<nil>"), default!);
+        return (slice<byte>("<nil>"u8), default!);
     }
     slice<byte> buf = default!;
     return (Ꮡx.Append(buf, (rune)'g', -1), default!);

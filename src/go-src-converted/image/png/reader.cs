@@ -404,7 +404,7 @@ public static @string Error(this UnsupportedError e) {
             }
         }
         d.idatLength = binary.BigEndian.Uint32(d.tmp[..4]);
-        if (((@string)(d.tmp[4..8])) != "IDAT"u8) {
+        if (((sstring)(d.tmp[4..8])) != "IDAT"u8) {
             return (0, ((FormatError)(@string)"not enough pixel data"u8));
         }
         d.crc.Reset();
@@ -988,7 +988,7 @@ internal static error parseChunk(this ж<decoder> Ꮡd, bool configOnly) {
     d.crc.Reset();
     d.crc.Write(d.tmp[4..8]);
     // Read the chunk data.
-    var exprᴛ1 = ((@string)(d.tmp[4..8]));
+    var exprᴛ1 = ((sstring)(d.tmp[4..8]));
     if (exprᴛ1 == "IHDR"u8) {
         if (d.stage != dsStart) {
             return chunkOrderError;
@@ -1081,7 +1081,7 @@ internal static error parseChunk(this ж<decoder> Ꮡd, bool configOnly) {
     if (err != default!) {
         return err;
     }
-    if (((@string)(d.tmp[..(int)(len(pngHeader))])) != pngHeader) {
+    if (((sstring)(d.tmp[..(int)(len(pngHeader))])) != pngHeader) {
         return ((FormatError)(@string)"not a PNG file"u8);
     }
     return default!;

@@ -129,7 +129,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     var d = new dataIO(data, false);
     // 4-byte magic "TZif"
     {
-        var magic = d.read(4); if (((@string)magic) != "TZif"u8) {
+        var magic = d.read(4); if (((sstring)magic) != "TZif"u8) {
             return (default!, errBadData);
         }
     }
@@ -475,7 +475,7 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
         nint offΔ1 = get4(buf[42..]);
         var zname = buf[46..(int)(46 + namelen)];
         buf = buf[(int)(46 + namelen + xlen + fclen)..];
-        if (((@string)zname) != name) {
+        if (((sstring)zname) != name) {
             continue;
         }
         if (meth != 0) {
@@ -499,7 +499,7 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
         //
         buf = new slice<byte>((nint)zheadersize + namelen);
         {
-            var errΔ3 = preadn(fd, buf, offΔ1); if (errΔ3 != default! || get4(buf) != zheader || get2(buf[8..]) != meth || get2(buf[26..]) != namelen || ((@string)(buf[30..(int)(30 + namelen)])) != name) {
+            var errΔ3 = preadn(fd, buf, offΔ1); if (errΔ3 != default! || get4(buf) != zheader || get2(buf[8..]) != meth || get2(buf[26..]) != namelen || ((sstring)(buf[30..(int)(30 + namelen)])) != name) {
                 return (default!, errors.New("corrupt zip file "u8 + zipfile));
             }
         }

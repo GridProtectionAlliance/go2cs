@@ -768,7 +768,7 @@ internal static (slice<byte> buf, bool park) readTrace0() {
         if (!Δtrace.headerWritten) {
             Δtrace.headerWritten = true;
             unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-            (buf, park) = (slice<byte>((@string)"go 1.23 trace\x00\x00\x00"), false); return;
+            (buf, park) = (slice<byte>("go 1.23 trace\x00\x00\x00"u8), false); return;
         }
         // Read the next buffer.
         if (ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑreaderGen).Load() == 0) {

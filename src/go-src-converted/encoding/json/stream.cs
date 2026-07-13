@@ -259,7 +259,7 @@ public static error Encode(this ж<Encoder> Ꮡenc, any v) => func((defer, recov
 // MarshalJSON returns m as the JSON encoding of m.
 public static (slice<byte>, error) MarshalJSON(this RawMessage m) {
     if (m == default!) {
-        return (slice<byte>((@string)"null"), default!);
+        return (slice<byte>("null"u8), default!);
     }
     return (m, default!);
 }

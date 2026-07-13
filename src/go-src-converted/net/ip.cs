@@ -326,7 +326,7 @@ internal static @string ipEmptyString(IP ip) {
 // When len(ip) is zero, it returns an empty slice.
 public static (slice<byte>, error) MarshalText(this IP ip) {
     if (len(ip) == 0) {
-        return (slice<byte>((@string)""), default!);
+        return (slice<byte>(""u8), default!);
     }
     if (len(ip) != IPv4len && len(ip) != IPv6len) {
         return (default!, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid IP address"u8, Addr: hexString(ip)))));

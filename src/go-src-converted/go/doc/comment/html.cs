@@ -116,7 +116,7 @@ internal static @string inc(@string s) {
         }
         b[i] = (rune)'0';
     }
-    return "1"u8 + ((@string)b);
+    return "1"u8 + ((sstring)b);
 }
 
 // text prints the text sequence x to out.

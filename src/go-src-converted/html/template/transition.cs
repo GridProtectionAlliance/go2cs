@@ -45,9 +45,9 @@ internal static void initᴛtransitionFunc() { transitionFunc = new golib.Sparse
     [stateError] = tError
 }.array(); }
 
-internal static slice<byte> commentStart = slice<byte>((@string)"<!--");
+internal static slice<byte> commentStart = slice<byte>("<!--"u8);
 
-internal static slice<byte> commentEnd = slice<byte>((@string)"-->");
+internal static slice<byte> commentEnd = slice<byte>("-->"u8);
 
 // tText is the context transition function for the text state.
 internal static (context, nint) tText(context c, slice<byte> s) {
@@ -213,14 +213,14 @@ internal static (context, nint) tHTMLCmt(context c, slice<byte> s) {
 // specialTagEndMarkers maps element types to the character sequence that
 // case-insensitively signals the end of the special tag body.
 internal static array<slice<byte>> specialTagEndMarkers = new golib.SparseArray<slice<byte>>{
-    [elementScript] = slice<byte>((@string)"script"),
-    [elementStyle] = slice<byte>((@string)"style"),
-    [elementTextarea] = slice<byte>((@string)"textarea"),
-    [elementTitle] = slice<byte>((@string)"title")
+    [elementScript] = slice<byte>("script"u8),
+    [elementStyle] = slice<byte>("style"u8),
+    [elementTextarea] = slice<byte>("textarea"u8),
+    [elementTitle] = slice<byte>("title"u8)
 }.array();
 
-internal static slice<byte> specialTagEndPrefix = slice<byte>((@string)"</");
-internal static slice<byte> tagEndSeparators = slice<byte>((@string)"> \t\n\f/");
+internal static slice<byte> specialTagEndPrefix = slice<byte>("</"u8);
+internal static slice<byte> tagEndSeparators = slice<byte>("> \t\n\f/"u8);
 
 // tSpecialTagEnd is the context transition function for raw text and RCDATA
 // element states.
@@ -478,7 +478,7 @@ internal static (context, nint) tJSDelimited(context c, slice<byte> s) {
             if (i > 0 && i + 7 <= len(s) && bytes.Equal(bytes.ToLower(s[(int)(i - 1)..(int)(i + 7)]), // If "</script" appears in a regex literal, the '/' should not
  // close the regex literal, and it will later be escaped to
  // "\x3C/script" in escapeText.
- slice<byte>((@string)"</script"))){
+ slice<byte>("</script"u8))){
                 i++;
             } else 
             if (!inCharset) {
@@ -511,7 +511,7 @@ internal static (context, nint) tJSDelimited(context c, slice<byte> s) {
     return (c, len(s));
 }
 
-internal static slice<byte> blockCommentEnd = slice<byte>((@string)"*/");
+internal static slice<byte> blockCommentEnd = slice<byte>("*/"u8);
 
 // tBlockCmt is the context transition function for /*comment*/ states.
 internal static (context, nint) tBlockCmt(context c, slice<byte> s) {

@@ -1265,7 +1265,7 @@ internal static bool /*inrange*/ isInCharacterRange(rune r) {
     // Now we check the characters.
     var b = d.buf.Bytes();
     if (!isName(b)) {
-        d.err = d.syntaxError("invalid XML name: "u8 + ((@string)b));
+        d.err = d.syntaxError("invalid XML name: "u8 + ((sstring)b));
         return ("", false);
     }
     return (((@string)b), true);
@@ -1968,15 +1968,15 @@ internal static slice<@string> htmlAutoClose = new @string[]{
     "meta"
 }.slice();
 
-internal static slice<byte> escQuot = slice<byte>((@string)"&#34;"); // shorter than "&quot;"
-internal static slice<byte> escApos = slice<byte>((@string)"&#39;"); // shorter than "&apos;"
-internal static slice<byte> escAmp = slice<byte>((@string)"&amp;");
-internal static slice<byte> escLT = slice<byte>((@string)"&lt;");
-internal static slice<byte> escGT = slice<byte>((@string)"&gt;");
-internal static slice<byte> escTab = slice<byte>((@string)"&#x9;");
-internal static slice<byte> escNL = slice<byte>((@string)"&#xA;");
-internal static slice<byte> escCR = slice<byte>((@string)"&#xD;");
-internal static slice<byte> escFFFD = slice<byte>((@string)"\uFFFD"); // Unicode replacement character
+internal static slice<byte> escQuot = slice<byte>("&#34;"u8); // shorter than "&quot;"
+internal static slice<byte> escApos = slice<byte>("&#39;"u8); // shorter than "&apos;"
+internal static slice<byte> escAmp = slice<byte>("&amp;"u8);
+internal static slice<byte> escLT = slice<byte>("&lt;"u8);
+internal static slice<byte> escGT = slice<byte>("&gt;"u8);
+internal static slice<byte> escTab = slice<byte>("&#x9;"u8);
+internal static slice<byte> escNL = slice<byte>("&#xA;"u8);
+internal static slice<byte> escCR = slice<byte>("&#xD;"u8);
+internal static slice<byte> escFFFD = slice<byte>("\uFFFD"u8); // Unicode replacement character
 
 // EscapeText writes to w the properly escaped XML equivalent
 // of the plain text data s.
@@ -2118,9 +2118,9 @@ public static void Escape(io.Writer w, slice<byte> s) {
     EscapeText(w, s);
 }
 
-internal static slice<byte> cdataStart = slice<byte>((@string)"<![CDATA[");
-internal static slice<byte> cdataEnd = slice<byte>((@string)"]]>");
-internal static slice<byte> cdataEscape = slice<byte>((@string)"]]]]><![CDATA[>");
+internal static slice<byte> cdataStart = slice<byte>("<![CDATA["u8);
+internal static slice<byte> cdataEnd = slice<byte>("]]>"u8);
+internal static slice<byte> cdataEscape = slice<byte>("]]]]><![CDATA[>"u8);
 
 // emitCDATA writes to w the CDATA-wrapped plain text data s.
 // It escapes CDATA directives nested in s.

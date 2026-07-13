@@ -1722,7 +1722,7 @@ public static (slice<byte>, error) CreateCertificate(io.Reader rand, ж<Certific
 
 // pemCRLPrefix is the magic string that indicates that we have a PEM encoded
 // CRL.
-internal static slice<byte> pemCRLPrefix = slice<byte>((@string)"-----BEGIN X509 CRL");
+internal static slice<byte> pemCRLPrefix = slice<byte>("-----BEGIN X509 CRL"u8);
 
 // pemType is the type of a PEM encoded CRL.
 internal static @string pemType = "X509 CRL"u8;

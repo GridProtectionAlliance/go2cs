@@ -74,15 +74,15 @@ internal static Action<slice<byte>, slice<byte>, slice<byte>, slice<byte>> prf12
 internal static readonly UntypedInt masterSecretLength = 48; // Length of a master secret in TLS 1.1.
 internal static readonly UntypedInt finishedVerifyLength = 12; // Length of verify_data in a Finished message.
 
-internal static slice<byte> masterSecretLabel = slice<byte>((@string)"master secret");
+internal static slice<byte> masterSecretLabel = slice<byte>("master secret"u8);
 
-internal static slice<byte> extendedMasterSecretLabel = slice<byte>((@string)"extended master secret");
+internal static slice<byte> extendedMasterSecretLabel = slice<byte>("extended master secret"u8);
 
-internal static slice<byte> keyExpansionLabel = slice<byte>((@string)"key expansion");
+internal static slice<byte> keyExpansionLabel = slice<byte>("key expansion"u8);
 
-internal static slice<byte> clientFinishedLabel = slice<byte>((@string)"client finished");
+internal static slice<byte> clientFinishedLabel = slice<byte>("client finished"u8);
 
-internal static slice<byte> serverFinishedLabel = slice<byte>((@string)"server finished");
+internal static slice<byte> serverFinishedLabel = slice<byte>("server finished"u8);
 
 internal static (Action<slice<byte>, slice<byte>, slice<byte>, slice<byte>>, crypto.Hash) prfAndHashForVersion(uint16 version, ж<cipherSuite> Ꮡsuite) {
     ref var suite = ref Ꮡsuite.Value;

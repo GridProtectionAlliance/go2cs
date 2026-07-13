@@ -1319,7 +1319,7 @@ internal static (@string s, nint line) findImportComment(slice<byte> data) {
 
     // expect keyword package
     (var word, data) = parseWord(data);
-    if (((@string)word) != "package"u8) {
+    if (((sstring)word) != "package"u8) {
         return ("", 0);
     }
     // expect package name
@@ -1351,17 +1351,17 @@ internal static (@string s, nint line) findImportComment(slice<byte> data) {
     comment = bytes.TrimSpace(comment);
     // split comment into `import`, `"pkg"`
     (word, var arg) = parseWord(comment);
-    if (((@string)word) != "import"u8) {
+    if (((sstring)word) != "import"u8) {
         return ("", 0);
     }
     line = 1 + bytes.Count(data[..(int)(cap(data) - cap(arg))], newline);
     return (strings.TrimSpace(((@string)arg)), line);
 }
 
-internal static slice<byte> slashSlash = slice<byte>((@string)"//");
-internal static slice<byte> slashStar = slice<byte>((@string)"/*");
-internal static slice<byte> starSlash = slice<byte>((@string)"*/");
-internal static slice<byte> newline = slice<byte>((@string)"\n");
+internal static slice<byte> slashSlash = slice<byte>("//"u8);
+internal static slice<byte> slashStar = slice<byte>("/*"u8);
+internal static slice<byte> starSlash = slice<byte>("*/"u8);
+internal static slice<byte> newline = slice<byte>("\n"u8);
 
 // skipSpaceOrComment returns data with any leading spaces or comments removed.
 internal static slice<byte> skipSpaceOrComment(slice<byte> data) {
@@ -1552,8 +1552,8 @@ public static (ж<Package>, error) ImportDir(@string dir, ImportMode mode) {
     return ᏑDefault.ImportDir(dir, mode);
 }
 
-internal static slice<byte> plusBuild = slice<byte>((@string)"+build");
-internal static slice<byte> goBuildComment = slice<byte>((@string)"//go:build");
+internal static slice<byte> plusBuild = slice<byte>("+build"u8);
+internal static slice<byte> goBuildComment = slice<byte>("//go:build"u8);
 internal static error errMultipleGoBuild = errors.New("multiple //go:build comments"u8);
 
 internal static bool isGoBuildComment(slice<byte> line) {
@@ -1568,7 +1568,7 @@ internal static bool isGoBuildComment(slice<byte> line) {
 // Special comment denoting a binary-only package.
 // See https://golang.org/design/2775-binary-only-packages
 // for more about the design of binary-only packages.
-internal static slice<byte> binaryOnlyComment = slice<byte>((@string)"//go:binary-only-package");
+internal static slice<byte> binaryOnlyComment = slice<byte>("//go:binary-only-package"u8);
 
 // shouldBuild reports whether it is okay to use this file,
 // The rule is that in the file's leading run of // comments

@@ -45,7 +45,7 @@ internal static error errUnmarshalPCG = errors.New("invalid PCG encoding"u8);
 
 // UnmarshalBinary implements the encoding.BinaryUnmarshaler interface.
 [GoRecv] public static error UnmarshalBinary(this ref PCG p, slice<byte> data) {
-    if (len(data) != 20 || ((@string)(data[..4])) != "pcg:"u8) {
+    if (len(data) != 20 || ((sstring)(data[..4])) != "pcg:"u8) {
         return errUnmarshalPCG;
     }
     p.hi = byteorder.BeUint64(data[4..]);

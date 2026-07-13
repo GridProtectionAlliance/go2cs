@@ -233,7 +233,7 @@ internal static (ж<clientHelloMsg>, ж<keySharePrivateKeys>, ж<echContext>, er
         }
         ech.Value.kdfID = suite.KDFID;
         ech.Value.aeadID = suite.AEADID;
-        var info = append(slice<byte>((@string)"tls ech\x00"), (~(~ech).config).raw.ꓸꓸꓸ);
+        var info = append(slice<byte>("tls ech\x00"u8), (~(~ech).config).raw.ꓸꓸꓸ);
         (ech.Value.encapsulatedKey, ech.Value.hpkeContext, errΔ4) = hpke.SetupSender((~(~ech).config).KemID, suite.KDFID, suite.AEADID, echPK, info);
         if (errΔ4 != default!) {
             return (default!, default!, default!, errΔ4);
@@ -347,8 +347,8 @@ internal static error /*err*/ clientHandshake(this ж<Conn> Ꮡc, context.Contex
         // support, check for the server downgrade canaries.
         // See RFC 8446, Section 4.1.3.
         var maxVers = c.config.maxSupportedVersion(roleClient);
-        var tls12Downgrade = ((@string)((~serverHello).random[24..])) == downgradeCanaryTLS12;
-        var tls11Downgrade = ((@string)((~serverHello).random[24..])) == downgradeCanaryTLS11;
+        var tls12Downgrade = ((sstring)((~serverHello).random[24..])) == downgradeCanaryTLS12;
+        var tls11Downgrade = ((sstring)((~serverHello).random[24..])) == downgradeCanaryTLS11;
         if (maxVers == VersionTLS13 && c.vers <= VersionTLS12 && (tls12Downgrade || tls11Downgrade) || maxVers == VersionTLS12 && c.vers <= VersionTLS11 && tls11Downgrade) {
             Ꮡc.sendAlert(alertIllegalParameter);
             err = errors.New("tls: downgrade attempt detected, possibly due to a MitM attack or a broken middlebox"u8); return;

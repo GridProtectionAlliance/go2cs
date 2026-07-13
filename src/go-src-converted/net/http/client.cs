@@ -278,7 +278,7 @@ internal static (ж<Response> resp, Func<bool> didTimeout, error err) send(ж<Re
                 // If we get a bad TLS record header, check to see if the
                 // response looks like HTTP and give a more helpful error.
                 // See golang.org/issue/11111.
-                if (((@string)(tlsErr.RecordHeader[..])) == "HTTP/"u8) {
+                if (((sstring)(tlsErr.RecordHeader[..])) == "HTTP/"u8) {
                     err = ErrSchemeMismatch;
                 }
             }

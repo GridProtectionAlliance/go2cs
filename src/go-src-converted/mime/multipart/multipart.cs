@@ -398,7 +398,7 @@ internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, i
     if (r.currentPart != nil) {
         r.currentPart.Close();
     }
-    if (((@string)r.dashBoundary) == "--"u8) {
+    if (((sstring)r.dashBoundary) == "--"u8) {
         return (default!, fmt.Errorf("multipart: boundary is empty"u8));
     }
     var expectNewPart = false;

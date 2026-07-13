@@ -63,7 +63,7 @@ internal static error errInvalidPath = errors.New("invalid path"u8);
     if (b.buf == default!) {
         return b.volAndPath[..(int)(b.volLen + b.w)];
     }
-    return b.volAndPath[..(int)(b.volLen)] + ((@string)(b.buf[..(int)(b.w)]));
+    return b.volAndPath[..(int)(b.volLen)] + ((sstring)(b.buf[..(int)(b.w)]));
 }
 
 // Clean is filepath.Clean.

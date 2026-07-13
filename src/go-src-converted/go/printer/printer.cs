@@ -1293,7 +1293,7 @@ internal static readonly UntypedInt inText = 2; // inside text
 //              of the blanks logic in the node printing functions.
 //              However, this would mess up any formatting done by
 //              the tabwriter.
-internal static slice<byte> aNewline = slice<byte>((@string)"\n");
+internal static slice<byte> aNewline = slice<byte>("\n"u8);
 
 [GoRecv] internal static (nint n, error err) Write(this ref trimmer p, slice<byte> data) {
     nint nΔ1 = default!;

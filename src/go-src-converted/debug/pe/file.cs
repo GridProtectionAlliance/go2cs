@@ -233,7 +233,7 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
         if (0 < (~s).VirtualSize && (~s).VirtualSize < (~s).Size) {
             b = b[..(int)((~s).VirtualSize)];
         }
-        if (len(b) >= 12 && ((@string)(b[..4])) == "ZLIB"u8) {
+        if (len(b) >= 12 && ((sstring)(b[..4])) == "ZLIB"u8) {
             var dlen = binary.BigEndian.Uint64(b[4..12]);
             var dbuf = new slice<byte>((nint)(dlen));
             var (r, errΔ2) = zlib.NewReader(new bytes_BufferжReader(bytes.NewBuffer(b[12..])));

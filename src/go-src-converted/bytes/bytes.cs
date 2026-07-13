@@ -20,7 +20,7 @@ partial class bytes_package {
 // A nil argument is equivalent to an empty slice.
 public static bool Equal(slice<byte> a, slice<byte> b) {
     // Neither cmd/compile nor gccgo allocates for these string conversions.
-    return ((@string)a) == ((@string)b);
+    return ((sstring)a) == ((sstring)b);
 }
 
 // Compare returns an integer comparing two byte slices lexicographically.
@@ -662,7 +662,7 @@ public static slice<byte> ToUpper(slice<byte> s) {
         // optimize for ASCII-only byte slices.
         if (!hasLower) {
             // Just return a copy.
-            return append(slice<byte>((@string)""), s.ꓸꓸꓸ);
+            return append(slice<byte>(""u8), s.ꓸꓸꓸ);
         }
         var b = bytealg.MakeNoZero(len(s)).slice(-1, len(s), len(s));
         for (nint i = 0; i < len(s); i++) {
@@ -692,7 +692,7 @@ public static slice<byte> ToLower(slice<byte> s) {
     if (isASCII) {
         // optimize for ASCII-only byte slices.
         if (!hasUpper) {
-            return append(slice<byte>((@string)""), s.ꓸꓸꓸ);
+            return append(slice<byte>(""u8), s.ꓸꓸꓸ);
         }
         var b = bytealg.MakeNoZero(len(s)).slice(-1, len(s), len(s));
         for (nint i = 0; i < len(s); i++) {

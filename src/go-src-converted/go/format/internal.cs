@@ -38,7 +38,7 @@ internal static (ж<ast.File> @file, Func<slice<byte>, nint, slice<byte>> source
     // by inserting a package clause.
     // Insert using a ';', not a newline, so that the line numbers
     // in psrc match the ones in src.
-    var psrc = append(slice<byte>((@string)"package p;"), src.ꓸꓸꓸ);
+    var psrc = append(slice<byte>("package p;"u8), src.ꓸꓸꓸ);
     (@file, err) = parser.ParseFile(Ꮡfset, filename, psrc, parserMode);
     if (err == default!) {
         sourceAdj = (slice<byte> srcΔ1, nint indent) => {
@@ -61,7 +61,7 @@ internal static (ж<ast.File> @file, Func<slice<byte>, nint, slice<byte>> source
     // Insert using a ';', not a newline, so that the line numbers
     // in fsrc match the ones in src. Add an extra '\n' before the '}'
     // to make sure comments are flushed before the '}'.
-    var fsrc = append(append(slice<byte>((@string)"package p; func _() {"), src.ꓸꓸꓸ), (byte)((rune)'\n'), (byte)((rune)'\n'), (byte)((rune)'}'));
+    var fsrc = append(append(slice<byte>("package p; func _() {"u8), src.ꓸꓸꓸ), (byte)((rune)'\n'), (byte)((rune)'\n'), (byte)((rune)'}'));
     (@file, err) = parser.ParseFile(Ꮡfset, filename, fsrc, parserMode);
     if (err == default!) {
         sourceAdj = (slice<byte> srcΔ2, nint indent) => {

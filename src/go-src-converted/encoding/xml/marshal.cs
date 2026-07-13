@@ -195,9 +195,9 @@ public static error EncodeElement(this ж<Encoder> Ꮡenc, any v, StartElement s
     return enc.p.w.Flush();
 }
 
-internal static slice<byte> begComment = slice<byte>((@string)"<!--");
-internal static slice<byte> endComment = slice<byte>((@string)"-->");
-internal static slice<byte> endProcInst = slice<byte>((@string)"?>");
+internal static slice<byte> begComment = slice<byte>("<!--"u8);
+internal static slice<byte> endComment = slice<byte>("-->"u8);
+internal static slice<byte> endProcInst = slice<byte>("?>"u8);
 
 // EncodeToken writes the given XML token to the stream.
 // It returns an error if [StartElement] and [EndElement] tokens are not properly matched.
@@ -857,7 +857,7 @@ internal static error writeStart(this ж<printer> Ꮡp, ж<StartElement> Ꮡstar
     return ("", default!, new UnsupportedTypeErrorжerror(Ꮡ(new UnsupportedTypeError(typ))));
 }
 
-internal static slice<byte> ddBytes = slice<byte>((@string)"--");
+internal static slice<byte> ddBytes = slice<byte>("--"u8);
 
 // indirect drills into interfaces and pointers, returning the pointed-at value.
 // If it encounters a nil interface or pointer, indirect returns that nil value.

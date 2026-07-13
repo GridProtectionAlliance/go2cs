@@ -226,7 +226,7 @@ exit:
     return (((@string)lit), nlOffset);
 }
 
-internal static slice<byte> prefix = slice<byte>((@string)"line ");
+internal static slice<byte> prefix = slice<byte>("line "u8);
 
 // updateLineInfo parses the incoming comment text at offset offs
 // as a line directive. If successful, it updates the line info table
@@ -248,7 +248,7 @@ internal static slice<byte> prefix = slice<byte>((@string)"line ");
     // i > 0
     if (!ok) {
         // text has a suffix :xxx but xxx is not a number
-        s.error(offs + i, "invalid line number: "u8 + ((@string)(text[(int)(i)..])));
+        s.error(offs + i, "invalid line number: "u8 + ((sstring)(text[(int)(i)..])));
         return;
     }
     // Put a cap on the maximum size of line and column numbers.
@@ -263,7 +263,7 @@ internal static slice<byte> prefix = slice<byte>((@string)"line ");
         (i, i2) = (i2, i);
         (line, col) = (n2, n);
         if (col == 0 || col > maxLineCol) {
-            s.error(offs + i2, "invalid column number: "u8 + ((@string)(text[(int)(i2)..])));
+            s.error(offs + i2, "invalid column number: "u8 + ((sstring)(text[(int)(i2)..])));
             return;
         }
         text = text[..(int)(i2 - 1)];
@@ -273,7 +273,7 @@ internal static slice<byte> prefix = slice<byte>((@string)"line ");
         line = n;
     }
     if (line == 0 || line > maxLineCol) {
-        s.error(offs + i, "invalid line number: "u8 + ((@string)(text[(int)(i)..])));
+        s.error(offs + i, "invalid line number: "u8 + ((sstring)(text[(int)(i)..])));
         return;
     }
     // If we have a column (//line filename:line:col form),

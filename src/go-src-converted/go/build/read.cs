@@ -189,7 +189,7 @@ internal static error errNUL = errors.New("unexpected NUL in input"u8);
     return c;
 }
 
-internal static slice<byte> goEmbed = slice<byte>((@string)"go:embed");
+internal static slice<byte> goEmbed = slice<byte>("go:embed"u8);
 
 // findEmbed advances the input reader to the next //go:embed comment.
 // It reports whether it found a comment.

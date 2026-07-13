@@ -655,7 +655,7 @@ Value: "array"u8, Type: v.Type(), Offset: (int64)d.off))));
     return default!;
 }
 
-internal static slice<byte> nullLiteral = slice<byte>((@string)"null");
+internal static slice<byte> nullLiteral = slice<byte>("null"u8);
 
 internal static reflectꓸType textUnmarshalerType = reflect.TypeFor<encoding.TextUnmarshaler>();
 
@@ -974,7 +974,7 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
         var c = item[0];
         switch (c) {
         case (rune)'n': {
-            if (fromQuoted && ((@string)item) != "null"u8) {
+            if (fromQuoted && ((sstring)item) != "null"u8) {
                 // null
                 // The main parser checks that only true and false can reach here,
                 // but if this was a quoted string input, it could be anything.
@@ -990,7 +990,7 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
         }
         case (rune)'t' or (rune)'f': {
             var value = item[0] == (rune)'t';
-            if (fromQuoted && ((@string)item) != "true"u8 && ((@string)item) != "false"u8) {
+            if (fromQuoted && ((sstring)item) != "true"u8 && ((sstring)item) != "false"u8) {
                 // otherwise, ignore null for primitives/string
                 // true, false
                 // The main parser checks that only true and false can reach here,
@@ -1093,7 +1093,7 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
                 do {
                     var (n, err) = strconv.ParseInt(((@string)item), 10, 64);
                     if (err != default! || v.OverflowInt(n)) {
-                        d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((@string)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
+                        d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((sstring)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
                         break;
                     }
                     v.SetInt(n);
@@ -1103,7 +1103,7 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
                 do {
                     var (n, err) = strconv.ParseUint(((@string)item), 10, 64);
                     if (err != default! || v.OverflowUint(n)) {
-                        d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((@string)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
+                        d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((sstring)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
                         break;
                     }
                     v.SetUint(n);
@@ -1113,7 +1113,7 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
                 do {
                     var (n, err) = strconv.ParseFloat(((@string)item), v.Type().Bits());
                     if (err != default! || v.OverflowFloat(n)) {
-                        d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((@string)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
+                        d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((sstring)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
                         break;
                     }
                     v.SetFloat(n);

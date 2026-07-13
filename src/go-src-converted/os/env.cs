@@ -41,7 +41,7 @@ public static @string Expand(@string s, Func<@string, @string> mapping) {
     if (buf == default!) {
         return s;
     }
-    return ((@string)buf) + s[(int)(i)..];
+    return ((sstring)buf) + s[(int)(i)..];
 }
 
 // ExpandEnv replaces ${var} or $var in the string according to the values

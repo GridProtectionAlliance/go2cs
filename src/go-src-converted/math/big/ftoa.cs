@@ -411,7 +411,7 @@ internal static slice<byte> fmtX(this ж<Float> Ꮡx, slice<byte> buf, nint prec
     // avoid wrap-around
     var hm = m.utoa(16);
     if (debugFloat && hm[0] != (rune)'1') {
-        throw panic("incorrect mantissa: " + ((@string)hm));
+        throw panic("incorrect mantissa: " + ((sstring)hm));
     }
     buf = append(buf, ((@string)"0x1"u8).ꓸꓸꓸ);
     if (len(hm) > 1) {
@@ -510,7 +510,7 @@ public static void Format(this ж<Float> Ꮡx, fmt.State s, rune format) {
     slice<byte> buf = default!;
     buf = Ꮡx.Append(buf, (byte)format, prec);
     if (len(buf) == 0) {
-        buf = slice<byte>((@string)"?");
+        buf = slice<byte>("?"u8);
     }
     // should never happen, but don't crash
     // len(buf) > 0

@@ -1013,7 +1013,7 @@ public static @string StringExpanded(this ΔAddr ip) {
 public static (slice<byte>, error) MarshalText(this ΔAddr ip) {
     var exprᴛ1 = ip.z;
     if (exprᴛ1 == z0) {
-        return (slice<byte>((@string)""), default!);
+        return (slice<byte>(""u8), default!);
     }
     if (exprᴛ1 == z4) {
         nint max = len("255.255.255.255");

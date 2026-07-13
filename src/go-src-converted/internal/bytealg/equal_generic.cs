@@ -15,7 +15,7 @@ partial class bytealg_package {
 public static bool Equal(slice<byte> a, slice<byte> b) {
     // Neither cmd/compile nor gccgo allocates for these string conversions.
     // There is a test for this in package bytes.
-    return ((@string)a) == ((@string)b);
+    return ((sstring)a) == ((sstring)b);
 }
 
 } // end bytealg_package

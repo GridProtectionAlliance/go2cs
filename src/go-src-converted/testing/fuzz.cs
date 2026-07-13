@@ -173,7 +173,7 @@ public static bool Skipped(this ж<F> Ꮡf) {
 
 // supportedTypes represents all of the supported types which can be fuzzed.
 internal static map<reflectꓸType, bool> supportedTypes = new map<reflectꓸType, bool>{
-    [reflect.TypeOf((slice<byte>)((@string)""))] = true,
+    [reflect.TypeOf(slice<byte>(""u8))] = true,
     [reflect.TypeOf(((@string)""u8))] = true,
     [reflect.TypeOf((bool)false)] = true,
     [reflect.TypeOf((byte)0)] = true,

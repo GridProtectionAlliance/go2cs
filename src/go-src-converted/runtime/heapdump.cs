@@ -677,7 +677,7 @@ internal static void dumpmemprof() {
     }
 }
 
-internal static ж<slice<byte>> Ꮡdumphdr = new(slice<byte>((@string)"go1.7 heap dump\n"));
+internal static ж<slice<byte>> Ꮡdumphdr = new(slice<byte>("go1.7 heap dump\n"u8));
 internal static ref slice<byte> dumphdr => ref Ꮡdumphdr.ValueSlot;
 
 internal static void mdump(ж<MemStats> Ꮡm) {

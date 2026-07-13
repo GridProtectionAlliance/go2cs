@@ -62,7 +62,7 @@ internal const nint marshaledSize = /* len(magic) + 5*4 + chunk + 8 */ 96;
 }
 
 [GoRecv] internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
-    if (len(b) < len(magic) || ((@string)(b[..(int)(len(magic))])) != magic) {
+    if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
         return errors.New("crypto/sha1: invalid hash state identifier"u8);
     }
     if (len(b) != marshaledSize) {

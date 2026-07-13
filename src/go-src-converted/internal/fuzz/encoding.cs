@@ -136,7 +136,7 @@ internal static (slice<any>, error) unmarshalCorpusFile(slice<byte> b) {
     if (len(b) == 0) {
         return (default!, fmt.Errorf("cannot unmarshal empty string"u8));
     }
-    var lines = bytes.Split(b, slice<byte>((@string)"\n"));
+    var lines = bytes.Split(b, slice<byte>("\n"u8));
     if (len(lines) < 2) {
         return (default!, fmt.Errorf("must include version and at least one value"u8));
     }

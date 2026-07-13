@@ -335,7 +335,7 @@ public static @string String(this ΔMonth m) {
     }
     var buf = new slice<byte>(20);
     nint n = fmtInt(buf, (uint64)(nint)m);
-    return "%!Month("u8 + ((@string)(buf[(int)(n)..])) + ")"u8;
+    return "%!Month("u8 + ((sstring)(buf[(int)(n)..])) + ")"u8;
 }
 
 [GoType("num:nint")] partial struct ΔWeekday;
@@ -355,7 +355,7 @@ public static @string String(this ΔWeekday d) {
     }
     var buf = new slice<byte>(20);
     nint n = fmtInt(buf, (uint64)(nint)d);
-    return "%!Weekday("u8 + ((@string)(buf[(int)(n)..])) + ")"u8;
+    return "%!Weekday("u8 + ((sstring)(buf[(int)(n)..])) + ")"u8;
 }
 
 // Computations on time.
@@ -1435,7 +1435,7 @@ public static (slice<byte>, error) MarshalJSON(this Time t) {
 // UnmarshalJSON implements the [json.Unmarshaler] interface.
 // The time must be a quoted string in the RFC 3339 format.
 [GoRecv] public static error UnmarshalJSON(this ref Time t, slice<byte> data) {
-    if (((@string)data) == "null"u8) {
+    if (((sstring)data) == "null"u8) {
         return default!;
     }
     // TODO(https://go.dev/issue/47353): Properly unescape a JSON string.

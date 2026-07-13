@@ -84,7 +84,7 @@ public static (nint n, error err) Read(this ж<ChaCha8> Ꮡc, slice<byte> p) {
 public static error UnmarshalBinary(this ж<ChaCha8> Ꮡc, slice<byte> data) {
     ref var c = ref Ꮡc.Value;
 
-    (data, var ok) = cutPrefix(data, slice<byte>((@string)"readbuf:"));
+    (data, var ok) = cutPrefix(data, slice<byte>("readbuf:"u8));
     if (ok) {
         slice<byte> buf = default!;
         (buf, data, ok) = readUint8LengthPrefixed(data);
@@ -100,7 +100,7 @@ internal static (slice<byte> after, bool found) cutPrefix(slice<byte> s, slice<b
     slice<byte> after = default!;
     bool found = default!;
 
-    if (len(s) < len(prefix) || ((@string)(s[..(int)(len(prefix))])) != ((@string)prefix)) {
+    if (len(s) < len(prefix) || ((sstring)(s[..(int)(len(prefix))])) != ((sstring)prefix)) {
         return (s, false);
     }
     return (s[(int)(len(prefix))..], true);
@@ -122,7 +122,7 @@ public static (slice<byte>, error) MarshalBinary(this ж<ChaCha8> Ꮡc) {
     ref var c = ref Ꮡc.Value;
 
     if (c.readLen > 0) {
-        var @out = slice<byte>((@string)"readbuf:");
+        var @out = slice<byte>("readbuf:"u8);
         @out = append(@out, (uint8)c.readLen);
         @out = append(@out, c.readBuf[(int)(len(c.readBuf) - c.readLen)..].ꓸꓸꓸ);
         return (append(@out, chacha8rand.Marshal(Ꮡc.of(ChaCha8.Ꮡstate)).ꓸꓸꓸ), default!);

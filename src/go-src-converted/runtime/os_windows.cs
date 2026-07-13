@@ -253,25 +253,25 @@ internal static void loadOptionalSyscalls() {
     if (bcryptPrimitives == 0) {
         @throw("bcryptprimitives.dll not found"u8);
     }
-    _ProcessPrng = windowsFindfunc(bcryptPrimitives, slice<byte>((@string)"ProcessPrng\u0000"));
+    _ProcessPrng = windowsFindfunc(bcryptPrimitives, slice<byte>("ProcessPrng\u0000"u8));
     var n32 = windowsLoadSystemLib(ntdlldll[..]);
     if (n32 == 0) {
         @throw("ntdll.dll not found"u8);
     }
-    _NtCreateWaitCompletionPacket = windowsFindfunc(n32, slice<byte>((@string)"NtCreateWaitCompletionPacket\u0000"));
+    _NtCreateWaitCompletionPacket = windowsFindfunc(n32, slice<byte>("NtCreateWaitCompletionPacket\u0000"u8));
     if (_NtCreateWaitCompletionPacket != default!) {
         // These functions should exists if NtCreateWaitCompletionPacket exists.
-        _NtAssociateWaitCompletionPacket = windowsFindfunc(n32, slice<byte>((@string)"NtAssociateWaitCompletionPacket\u0000"));
+        _NtAssociateWaitCompletionPacket = windowsFindfunc(n32, slice<byte>("NtAssociateWaitCompletionPacket\u0000"u8));
         if (_NtAssociateWaitCompletionPacket == default!) {
             @throw("NtCreateWaitCompletionPacket exists but NtAssociateWaitCompletionPacket does not"u8);
         }
-        _NtCancelWaitCompletionPacket = windowsFindfunc(n32, slice<byte>((@string)"NtCancelWaitCompletionPacket\u0000"));
+        _NtCancelWaitCompletionPacket = windowsFindfunc(n32, slice<byte>("NtCancelWaitCompletionPacket\u0000"u8));
         if (_NtCancelWaitCompletionPacket == default!) {
             @throw("NtCreateWaitCompletionPacket exists but NtCancelWaitCompletionPacket does not"u8);
         }
     }
-    _RtlGetCurrentPeb = windowsFindfunc(n32, slice<byte>((@string)"RtlGetCurrentPeb\u0000"));
-    _RtlGetVersion = windowsFindfunc(n32, slice<byte>((@string)"RtlGetVersion\u0000"));
+    _RtlGetCurrentPeb = windowsFindfunc(n32, slice<byte>("RtlGetCurrentPeb\u0000"u8));
+    _RtlGetVersion = windowsFindfunc(n32, slice<byte>("RtlGetVersion\u0000"u8));
 }
 
 [GoType("dyn")] partial struct monitorSuspendResume__DEVICE_NOTIFY_SUBSCRIBE_PARAMETERS {
@@ -286,7 +286,7 @@ internal static void monitorSuspendResume() {
         return;
     }
     // Running on Windows 7, where we don't need it anyway.
-    stdFunction powerRegisterSuspendResumeNotification = windowsFindfunc(powrprof, slice<byte>((@string)"PowerRegisterSuspendResumeNotification\u0000"));
+    stdFunction powerRegisterSuspendResumeNotification = windowsFindfunc(powrprof, slice<byte>("PowerRegisterSuspendResumeNotification\u0000"u8));
     if (powerRegisterSuspendResumeNotification == default!) {
         return;
     }
@@ -417,8 +417,8 @@ internal static void initHighResTimer() {
             print("runtime: LoadLibraryExW failed; errno=", getlasterror(), "\n");
             @throw("winmm.dll not found"u8);
         }
-        _timeBeginPeriod = windowsFindfunc(m32, slice<byte>((@string)"timeBeginPeriod\u0000"));
-        _timeEndPeriod = windowsFindfunc(m32, slice<byte>((@string)"timeEndPeriod\u0000"));
+        _timeBeginPeriod = windowsFindfunc(m32, slice<byte>("timeBeginPeriod\u0000"u8));
+        _timeEndPeriod = windowsFindfunc(m32, slice<byte>("timeEndPeriod\u0000"u8));
         if (_timeBeginPeriod == default! || _timeEndPeriod == default!) {
             print("runtime: GetProcAddress failed; errno=", getlasterror(), "\n");
             @throw("timeBegin/EndPeriod not found"u8);

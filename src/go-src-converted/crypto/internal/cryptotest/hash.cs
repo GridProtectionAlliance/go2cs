@@ -24,8 +24,8 @@ public static void TestHash(ж<testing.T> Ꮡt, Func<hash.Hash> mh) {
     Ꮡt.Run("SumAppend"u8, (ж<testing.T> tΔ1) => {
         var h = mh();
         var rng = newRandReader(tΔ1);
-        var emptyBuff = slice<byte>((@string)"");
-        var shortBuff = slice<byte>((@string)"a");
+        var emptyBuff = slice<byte>(""u8);
+        var shortBuff = slice<byte>("a"u8);
         var longBuff = new slice<byte>(h.BlockSize() + 1);
         rng.Read(longBuff);
         // Set of example strings to append digest to
@@ -58,8 +58,8 @@ public static void TestHash(ж<testing.T> Ꮡt, Func<hash.Hash> mh) {
     Ꮡt.Run("WriteWithoutError"u8, (ж<testing.T> tΔ2) => {
         var h = mh();
         var rng = newRandReader(tΔ2);
-        var emptySlice = slice<byte>((@string)"");
-        var shortSlice = slice<byte>((@string)"a");
+        var emptySlice = slice<byte>(""u8);
+        var shortSlice = slice<byte>("a"u8);
         var longSlice = new slice<byte>(h.BlockSize() + 1);
         rng.Read(longSlice);
         // Set of example strings to append digest to

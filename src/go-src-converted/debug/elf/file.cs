@@ -139,7 +139,7 @@ public static io.ReadSeeker Open(this ж<ΔSection> Ꮡs) {
         }
         var b = new slice<byte>(12);
         var (n, _) = s.sr.ReadAt(b, 0);
-        if (n != 12 || ((@string)(b[..4])) != "ZLIB"u8) {
+        if (n != 12 || ((sstring)(b[..4])) != "ZLIB"u8) {
             return new io_SectionReaderжReadSeeker(io.NewSectionReader(new io_SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
         }
         s.compressionOffset = 12;

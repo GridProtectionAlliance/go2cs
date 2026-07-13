@@ -132,7 +132,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
 
     if (len(req.TransferEncoding) > 0 && req.TransferEncoding[0] == "chunked") {
         rw.WriteHeader(http.StatusBadRequest);
-        rw.Write(slice<byte>((@string)"Chunked request bodies are not supported by CGI."));
+        rw.Write(slice<byte>("Chunked request bodies are not supported by CGI."u8));
         return;
     }
     @string root = strings.TrimRight(h.Root, "/"u8);

@@ -462,7 +462,7 @@ internal static void testRoundtrip(ж<testing.T> Ꮡt, net.Conn c) {
             Ꮡt.Errorf("roundtrip Read error: %v"u8, err);
         }
     }
-    if (((@string)buf) != s) {
+    if (((sstring)buf) != s) {
         Ꮡt.Errorf("roundtrip data mismatch: got %q, want %q"u8, buf, s);
     }
 }

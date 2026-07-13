@@ -343,7 +343,7 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
     }
     // Application Extension with "NETSCAPE2.0" as string and 1 in data means
     // this extension defines a loop count.
-    if (extension == eApplication && ((@string)(d.tmp[..(int)(size)])) == "NETSCAPE2.0"u8) {
+    if (extension == eApplication && ((sstring)(d.tmp[..(int)(size)])) == "NETSCAPE2.0"u8) {
         var (n, errΔ4) = d.readBlock();
         if (errΔ4 != default!) {
             return fmt.Errorf("gif: reading extension: %v"u8, errΔ4);

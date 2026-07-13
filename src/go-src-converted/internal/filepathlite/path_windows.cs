@@ -129,14 +129,14 @@ internal static bool isReservedName(@string name) {
 
 internal static bool isReservedBaseName(@string name) {
     if (len(name) == 3) {
-        var exprᴛ1 = ((@string)new byte[]{toUpper(name[0]), toUpper(name[1]), toUpper(name[2])}.slice());
+        var exprᴛ1 = ((sstring)new byte[]{toUpper(name[0]), toUpper(name[1]), toUpper(name[2])}.slice());
         if (exprᴛ1 == "CON"u8 || exprᴛ1 == "PRN"u8 || exprᴛ1 == "AUX"u8 || exprᴛ1 == "NUL"u8) {
             return true;
         }
 
     }
     if (len(name) >= 4) {
-        var exprᴛ2 = ((@string)new byte[]{toUpper(name[0]), toUpper(name[1]), toUpper(name[2])}.slice());
+        var exprᴛ2 = ((sstring)new byte[]{toUpper(name[0]), toUpper(name[1]), toUpper(name[2])}.slice());
         if (exprᴛ2 == "COM"u8 || exprᴛ2 == "LPT"u8) {
             if (len(name) == 4 && (rune)'1' <= name[3] && name[3] <= (rune)'9') {
                 return true;

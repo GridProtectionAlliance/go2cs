@@ -71,7 +71,7 @@ internal static void minimizeBytes(slice<byte> v, Func<slice<byte>, bool> @try, 
     }
     // Then, try to make it more simplified and human-readable by trying to replace each
     // byte with a printable character.
-    var printableChars = slice<byte>((@string)"012789ABCXYZabcxyz !\"#$%&'()*+,.");
+    var printableChars = slice<byte>("012789ABCXYZabcxyz !\"#$%&'()*+,."u8);
     foreach (var (i, b) in v) {
         if (shouldStop()) {
             return;

@@ -803,7 +803,7 @@ public static ж<Config> Clone(this ж<Config> Ꮡc) => func<ж<Config>>((defer,
 
 // deprecatedSessionTicketKey is set as the prefix of SessionTicketKey if it was
 // randomized for backwards compatibility but is not in use.
-internal static slice<byte> deprecatedSessionTicketKey = slice<byte>((@string)"DEPRECATED");
+internal static slice<byte> deprecatedSessionTicketKey = slice<byte>("DEPRECATED"u8);
 
 // initLegacySessionTicketKeyRLocked ensures the legacy SessionTicketKey field is
 // randomized if empty, and that sessionTicketKeys is populated from it otherwise.

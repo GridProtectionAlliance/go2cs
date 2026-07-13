@@ -609,7 +609,7 @@ internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) => func((d
 });
 
 [GoRecv] internal static void checkFileRead(this ref fsTester t, @string @file, @string desc, slice<byte> data1, slice<byte> data2) {
-    if (((@string)data1) != ((@string)data2)) {
+    if (((sstring)data1) != ((sstring)data2)) {
         t.errorf("%s: %s: different data returned\n\t%q\n\t%q"u8, @file, desc, data1, data2);
         return;
     }

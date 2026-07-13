@@ -90,9 +90,9 @@ public static ж<Archive> Parse(slice<byte> data) {
     return a;
 }
 
-internal static slice<byte> newlineMarker = slice<byte>((@string)"\n-- ");
-internal static slice<byte> marker = slice<byte>((@string)"-- ");
-internal static slice<byte> markerEnd = slice<byte>((@string)" --");
+internal static slice<byte> newlineMarker = slice<byte>("\n-- "u8);
+internal static slice<byte> marker = slice<byte>("-- "u8);
+internal static slice<byte> markerEnd = slice<byte>(" --"u8);
 
 // findFileMarker finds the next file marker in data,
 // extracts the file name, and returns the data before the marker,

@@ -93,9 +93,9 @@ internal static bool isTT(byte b) {
 // Data matching the table in section 6.
 internal static slice<sniffSig> sniffSignatures = new sniffSig[]{((htmlSig)slice<byte>((@string)"<!DOCTYPE HTML"u8)), ((htmlSig)slice<byte>((@string)"<HTML"u8)), ((htmlSig)slice<byte>((@string)"<HEAD"u8)), ((htmlSig)slice<byte>((@string)"<SCRIPT"u8)), ((htmlSig)slice<byte>((@string)"<IFRAME"u8)), ((htmlSig)slice<byte>((@string)"<H1"u8)), ((htmlSig)slice<byte>((@string)"<DIV"u8)), ((htmlSig)slice<byte>((@string)"<FONT"u8)), ((htmlSig)slice<byte>((@string)"<TABLE"u8)), ((htmlSig)slice<byte>((@string)"<A"u8)), ((htmlSig)slice<byte>((@string)"<STYLE"u8)), ((htmlSig)slice<byte>((@string)"<TITLE"u8)), ((htmlSig)slice<byte>((@string)"<B"u8)), ((htmlSig)slice<byte>((@string)"<BODY"u8)), ((htmlSig)slice<byte>((@string)"<BR"u8)), ((htmlSig)slice<byte>((@string)"<P"u8)), ((htmlSig)slice<byte>((@string)"<!--"u8)), new maskedSigжsniffSig(Ꮡ(new maskedSig(
     mask: slice<byte>(((@string)(new byte[]{0xff, 0xff, 0xff, 0xff, 0xff}))),
-    pat: slice<byte>((@string)"<?xml"),
+    pat: slice<byte>("<?xml"u8),
     skipWS: true,
-    ct: "text/xml; charset=utf-8"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>((@string)"%PDF-"), "application/pdf"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>((@string)"%!PS-Adobe-"), "application/postscript"))), new maskedSigжsniffSig(Ꮡ(new maskedSig(
+    ct: "text/xml; charset=utf-8"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("%PDF-"u8), "application/pdf"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("%!PS-Adobe-"u8), "application/postscript"))), new maskedSigжsniffSig(Ꮡ(new maskedSig(
     mask: slice<byte>(((@string)(new byte[]{0xff, 0xff, 0x00, 0x00}))),
     pat: slice<byte>(((@string)(new byte[]{0xfe, 0xff, 0x00, 0x00}))),
     ct: "text/plain; charset=utf-16be"u8
@@ -107,9 +107,9 @@ internal static slice<sniffSig> sniffSignatures = new sniffSig[]{((htmlSig)slice
     mask: slice<byte>(((@string)(new byte[]{0xff, 0xff, 0xff, 0x00}))),
     pat: slice<byte>(((@string)(new byte[]{0xef, 0xbb, 0xbf, 0x00}))),
     ct: "text/plain; charset=utf-8"u8
-))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>((@string)"\x00\x00\x01\x00"), "image/x-icon"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>((@string)"\x00\x00\x02\x00"), "image/x-icon"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>((@string)"BM"), "image/bmp"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>((@string)"GIF87a"), "image/gif"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>((@string)"GIF89a"), "image/gif"))), new maskedSigжsniffSig(Ꮡ(new maskedSig(
+))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("\x00\x00\x01\x00"u8), "image/x-icon"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("\x00\x00\x02\x00"u8), "image/x-icon"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("BM"u8), "image/bmp"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("GIF87a"u8), "image/gif"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("GIF89a"u8), "image/gif"))), new maskedSigжsniffSig(Ꮡ(new maskedSig(
     mask: slice<byte>(((@string)(new byte[]{0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}))),
-    pat: slice<byte>((@string)"RIFF\x00\x00\x00\x00WEBPVP"),
+    pat: slice<byte>("RIFF\x00\x00\x00\x00WEBPVP"u8),
     ct: "image/webp"u8
 ))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>(((@string)(new byte[]{0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a}))), "image/png"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>(((@string)(new byte[]{0xff, 0xd8, 0xff}))), "image/jpeg"))), new maskedSigжsniffSig(Ꮡ(new maskedSig(
     mask: slice<byte>(((@string)(new byte[]{0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff}))),
@@ -117,15 +117,15 @@ internal static slice<sniffSig> sniffSignatures = new sniffSig[]{((htmlSig)slice
     ct: "audio/aiff"u8
 ))), new maskedSigжsniffSig(Ꮡ(new maskedSig(
     mask: slice<byte>(((@string)(new byte[]{0xff, 0xff, 0xff}))),
-    pat: slice<byte>((@string)"ID3"),
+    pat: slice<byte>("ID3"u8),
     ct: "audio/mpeg"u8
 ))), new maskedSigжsniffSig(Ꮡ(new maskedSig(
     mask: slice<byte>(((@string)(new byte[]{0xff, 0xff, 0xff, 0xff, 0xff}))),
-    pat: slice<byte>((@string)"OggS\x00"),
+    pat: slice<byte>("OggS\x00"u8),
     ct: "application/ogg"u8
 ))), new maskedSigжsniffSig(Ꮡ(new maskedSig(
     mask: slice<byte>(((@string)(new byte[]{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}))),
-    pat: slice<byte>((@string)"MThd\x00\x00\x00\x06"),
+    pat: slice<byte>("MThd\x00\x00\x00\x06"u8),
     ct: "audio/midi"u8
 ))), new maskedSigжsniffSig(Ꮡ(new maskedSig(
     mask: slice<byte>(((@string)(new byte[]{0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff}))),
@@ -133,13 +133,13 @@ internal static slice<sniffSig> sniffSignatures = new sniffSig[]{((htmlSig)slice
     ct: "video/avi"u8
 ))), new maskedSigжsniffSig(Ꮡ(new maskedSig(
     mask: slice<byte>(((@string)(new byte[]{0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff}))),
-    pat: slice<byte>((@string)"RIFF\x00\x00\x00\x00WAVE"),
+    pat: slice<byte>("RIFF\x00\x00\x00\x00WAVE"u8),
     ct: "audio/wave"u8
 ))), new mp4Sig(nil), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>(((@string)(new byte[]{0x1a, 0x45, 0xdf, 0xa3}))), "video/webm"))), new maskedSigжsniffSig(Ꮡ(new maskedSig(
-    pat: slice<byte>((@string)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00LP"),
+    pat: slice<byte>("\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00LP"u8),
     mask: slice<byte>(((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff}))),
     ct: "application/vnd.ms-fontobject"u8
-))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>((@string)"\x00\x01\x00\x00"), "font/ttf"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>((@string)"OTTO"), "font/otf"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>((@string)"ttcf"), "font/collection"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>((@string)"wOFF"), "font/woff"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>((@string)"wOF2"), "font/woff2"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>(((@string)(new byte[]{0x1f, 0x8b, 0x08}))), "application/x-gzip"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>((@string)"PK\x03\x04"), "application/zip"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>((@string)"Rar!\x1A\x07\x00"), "application/x-rar-compressed"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>((@string)"Rar!\x1A\x07\x01\x00"), "application/x-rar-compressed"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>((@string)"\x00\x61\x73\x6D"), "application/wasm"))), new textSig(nil)
+))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("\x00\x01\x00\x00"u8), "font/ttf"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("OTTO"u8), "font/otf"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("ttcf"u8), "font/collection"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("wOFF"u8), "font/woff"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("wOF2"u8), "font/woff2"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>(((@string)(new byte[]{0x1f, 0x8b, 0x08}))), "application/x-gzip"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("PK\x03\x04"u8), "application/zip"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("Rar!\x1A\x07\x00"u8), "application/x-rar-compressed"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("Rar!\x1A\x07\x01\x00"u8), "application/x-rar-compressed"))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("\x00\x61\x73\x6D"u8), "application/wasm"))), new textSig(nil)
 }.slice();
 
 [GoType] partial struct exactSig {
@@ -204,9 +204,9 @@ internal static @string match(this htmlSig h, slice<byte> data, nint firstNonWS)
     return "text/html; charset=utf-8"u8;
 }
 
-internal static slice<byte> mp4ftype = slice<byte>((@string)"ftyp");
+internal static slice<byte> mp4ftype = slice<byte>("ftyp"u8);
 
-internal static slice<byte> mp4 = slice<byte>((@string)"mp4");
+internal static slice<byte> mp4 = slice<byte>("mp4"u8);
 
 [GoType] partial struct mp4Sig {
 }

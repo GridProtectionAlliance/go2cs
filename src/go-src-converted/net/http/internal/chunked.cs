@@ -108,7 +108,7 @@ public static io.Reader NewChunkedReader(io.Reader r) {
             }
             {
                 (_, cr.err) = io.ReadFull(new bufio_ReaderжReader(cr.r), cr.buf[..2]); if (cr.err == default!){
-                    if (((@string)(cr.buf[..])) != "\r\n"u8) {
+                    if (((sstring)(cr.buf[..])) != "\r\n"u8) {
                         cr.err = errors.New("malformed chunked encoding"u8);
                         break;
                     }
@@ -190,7 +190,7 @@ internal static bool isASCIISpace(byte b) {
     return b == (rune)' ' || b == (rune)'\t' || b == (rune)'\n' || b == (rune)'\r';
 }
 
-internal static slice<byte> semi = slice<byte>((@string)";");
+internal static slice<byte> semi = slice<byte>(";"u8);
 
 // removeChunkExtension removes any chunk-extension from p.
 // For example,

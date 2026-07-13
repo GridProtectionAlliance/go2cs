@@ -105,7 +105,7 @@ internal static error ReadRequestHeader(this ж<serverCodec> Ꮡc, ж<rpc.Reques
     return json.Unmarshal(c.req.Params.ValueSlot, Ꮡparams);
 }
 
-internal static ж<json.RawMessage> Ꮡnull = new(((json.RawMessage)slice<byte>((@string)"null")));
+internal static ж<json.RawMessage> Ꮡnull = new(((json.RawMessage)slice<byte>("null"u8)));
 internal static ref json.RawMessage @null => ref Ꮡnull.ValueSlot;
 
 internal static error WriteResponse(this ж<serverCodec> Ꮡc, ж<rpc.Response> Ꮡr, any x) {

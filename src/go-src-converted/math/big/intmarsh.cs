@@ -56,7 +56,7 @@ public static (slice<byte> text, error err) MarshalText(this ж<ΔInt> Ꮡx) {
 
     ref var x = ref Ꮡx.Value;
     if (Ꮡx == nil) {
-        return (slice<byte>((@string)"<nil>"), default!);
+        return (slice<byte>("<nil>"u8), default!);
     }
     return (x.abs.itoa(x.neg, 10), default!);
 }
@@ -80,7 +80,7 @@ public static (slice<byte>, error) MarshalJSON(this ж<ΔInt> Ꮡx) {
     ref var x = ref Ꮡx.Value;
 
     if (Ꮡx == nil) {
-        return (slice<byte>((@string)"null"), default!);
+        return (slice<byte>("null"u8), default!);
     }
     return (x.abs.itoa(x.neg, 10), default!);
 }
@@ -88,7 +88,7 @@ public static (slice<byte>, error) MarshalJSON(this ж<ΔInt> Ꮡx) {
 // UnmarshalJSON implements the [encoding/json.Unmarshaler] interface.
 public static error UnmarshalJSON(this ж<ΔInt> Ꮡz, slice<byte> text) {
     // Ignore null, like in the main JSON package.
-    if (((@string)text) == "null"u8) {
+    if (((sstring)text) == "null"u8) {
         return default!;
     }
     return Ꮡz.UnmarshalText(text);

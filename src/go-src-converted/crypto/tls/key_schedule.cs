@@ -36,7 +36,7 @@ internal static slice<byte> expandLabel(this ж<cipherSuiteTLS13> Ꮡc, slice<by
     ref var hkdfLabel = ref heap(new cryptobyte.Builder(), out var ᏑhkdfLabel);
     hkdfLabel.AddUint16((uint16)length);
     ᏑhkdfLabel.AddUint8LengthPrefixed((ж<cryptobyte.Builder> b) => {
-        b.AddBytes(slice<byte>((@string)"tls13 "));
+        b.AddBytes(slice<byte>("tls13 "u8));
         b.AddBytes(slice<byte>(label));
     });
     var contextʗ1 = context;

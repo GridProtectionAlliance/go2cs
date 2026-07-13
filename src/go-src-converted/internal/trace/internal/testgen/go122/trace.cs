@@ -138,7 +138,7 @@ public static ж<ΔGeneration> Generation(this ж<Trace> Ꮡt, uint64 gen) {
         g.writeEventsTo(tw);
     }
     // Expectation file contents.
-    var expect = slice<byte>((@string)"SUCCESS\n");
+    var expect = slice<byte>("SUCCESS\n"u8);
     if (t.bad) {
         expect = slice<byte>(fmt.Sprintf("FAILURE %q\n"u8, t.badMatch));
     }

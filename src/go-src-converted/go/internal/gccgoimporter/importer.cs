@@ -100,7 +100,7 @@ internal static (io.ReadSeeker reader, io.Closer closer, error err) openExportFi
             return;
         }
         io.ReaderAt objreader = default!;
-        var exprᴛ1 = ((@string)(magic[..]));
+        var exprᴛ1 = ((sstring)(magic[..]));
         if (exprᴛ1 == gccgov1Magic || exprᴛ1 == gccgov2Magic || exprᴛ1 == gccgov3Magic || exprᴛ1 == goimporterMagic) {
             reader = new os_FileжReadSeeker(f);
             return;

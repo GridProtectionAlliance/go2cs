@@ -1068,7 +1068,7 @@ internal static any zeroValue(reflectꓸType t) {
 }
 
 internal static slice<any> zeroVals = new any[]{
-    slice<byte>((@string)""),
+    slice<byte>(""u8),
     ((@string)""u8),
     false,
     (byte)0,

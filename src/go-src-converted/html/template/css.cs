@@ -33,7 +33,7 @@ internal static bool endsWithCSSKeyword(slice<byte> b, @string kw) {
     // https://www.w3.org/TR/css3-syntax/#TOK-URI
     // This does not attempt to recognize encoded keywords. For example,
     // given "\75\72\6c" and "url" this return false.
-    return ((@string)bytes.ToLower(b[(int)(i)..])) == kw;
+    return ((sstring)bytes.ToLower(b[(int)(i)..])) == kw;
 }
 
 // isCSSNmchar reports whether rune is allowed anywhere in a CSS identifier.
@@ -224,9 +224,9 @@ internal static slice<@string> cssReplacementTable = new slice<@string>(126){
     [(rune)'}'] = @"\7d"u8
 };
 
-internal static slice<byte> expressionBytes = slice<byte>((@string)"expression");
+internal static slice<byte> expressionBytes = slice<byte>("expression"u8);
 
-internal static slice<byte> mozBindingBytes = slice<byte>((@string)"mozbinding");
+internal static slice<byte> mozBindingBytes = slice<byte>("mozbinding"u8);
 
 // cssValueFilter allows innocuous CSS values in the output including CSS
 // quantities (10px or 25%), ID or class literals (#foo, .bar), keyword values

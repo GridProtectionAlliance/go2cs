@@ -498,7 +498,7 @@ public static (slice<byte>, error) ReadDotBytes(this ж<Reader> Ꮡr) {
     return (v, err);
 }
 
-internal static slice<byte> colon = slice<byte>((@string)":");
+internal static slice<byte> colon = slice<byte>(":"u8);
 
 // ReadMIMEHeader reads a MIME-style header from r.
 // The header is a sequence of possibly continued Key: Value lines
@@ -557,7 +557,7 @@ internal static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMem
             if (errΔ1 != default!) {
                 return (m, errΔ1);
             }
-            return (m, ((ProtocolError)("malformed MIME header initial line: "u8 + ((@string)line))));
+            return (m, ((ProtocolError)("malformed MIME header initial line: "u8 + ((sstring)line))));
         }
     }
     while (ᐧ) {
@@ -568,15 +568,15 @@ internal static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMem
         // Key ends at first colon.
         var (k, v, ok) = bytes.Cut(kv, colon);
         if (!ok) {
-            return (m, ((ProtocolError)("malformed MIME header line: "u8 + ((@string)kv))));
+            return (m, ((ProtocolError)("malformed MIME header line: "u8 + ((sstring)kv))));
         }
         (var key, ok) = canonicalMIMEHeaderKey(k);
         if (!ok) {
-            return (m, ((ProtocolError)("malformed MIME header line: "u8 + ((@string)kv))));
+            return (m, ((ProtocolError)("malformed MIME header line: "u8 + ((sstring)kv))));
         }
         foreach (var (_, c) in v) {
             if (!validHeaderValueByte(c)) {
-                return (m, ((ProtocolError)("malformed MIME header line: "u8 + ((@string)kv))));
+                return (m, ((ProtocolError)("malformed MIME header line: "u8 + ((sstring)kv))));
             }
         }
         maxHeaders--;
@@ -627,7 +627,7 @@ internal static error mustHaveFieldNameColon(slice<byte> line) {
     return default!;
 }
 
-internal static slice<byte> nl = slice<byte>((@string)"\n");
+internal static slice<byte> nl = slice<byte>("\n"u8);
 
 // upcomingHeaderKeys returns an approximation of the number of keys
 // that will be in this header. If it gets confused, it returns 0.

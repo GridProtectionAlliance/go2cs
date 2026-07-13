@@ -746,7 +746,7 @@ internal static bool special(byte b) {
 }
 
 [GoInit] internal static void init() {
-    foreach (var (_, b) in slice<byte>((@string)@"\.+*?()|[]{}^$")) {
+    foreach (var (_, b) in slice<byte>(@"\.+*?()|[]{}^$"u8)) {
         specialBytes[b % 16] |= (byte)((byte)(1 << (int)((b / 16))));
     }
 }

@@ -142,7 +142,7 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
         x = new elfExeжexe(Ꮡ(new elfExe(f)));
         break;
     }
-    case {} when bytes.HasPrefix(ident, slice<byte>((@string)"MZ")): {
+    case {} when bytes.HasPrefix(ident, slice<byte>("MZ"u8)): {
         var (f, errΔ4) = pe.NewFile(r);
         if (errΔ4 != default!) {
             return ("", "", errUnrecognizedFormat);

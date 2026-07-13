@@ -156,7 +156,7 @@ public static slice<byte> Marshal(ж<State> Ꮡs) {
 public static error Unmarshal(ж<State> Ꮡs, slice<byte> data) {
     ref var s = ref Ꮡs.Value;
 
-    if (len(data) != 6 * 8 || ((@string)(data[..8])) != "chacha8:"u8) {
+    if (len(data) != 6 * 8 || ((sstring)(data[..8])) != "chacha8:"u8) {
         return new errUnmarshalChaCha8жerror(@new<errUnmarshalChaCha8>());
     }
     var used = byteorder.BeUint64(data[(int)(1 * 8)..]);

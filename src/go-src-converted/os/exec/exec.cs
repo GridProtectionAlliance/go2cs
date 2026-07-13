@@ -391,7 +391,7 @@ public static ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗp) {
                     stack = new slice<byte>(2 * len(stack));
                 }
                 {
-                    nint i = bytes.Index(stack, slice<byte>((@string)"\nos/exec.Command(")); if (i >= 0) {
+                    nint i = bytes.Index(stack, slice<byte>("\nos/exec.Command("u8)); if (i >= 0) {
                         stack = stack[(int)(i + 1)..];
                     }
                 }

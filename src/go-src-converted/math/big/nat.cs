@@ -28,7 +28,7 @@ internal static nat natFive = new nat(new Word[]{5}.slice());
 internal static nat natTen = new nat(new Word[]{10}.slice());
 
 internal static @string String(this nat z) {
-    return "0x"u8 + ((@string)z.itoa(false, 16));
+    return "0x"u8 + ((sstring)z.itoa(false, 16));
 }
 
 internal static nat norm(this nat z) {

@@ -705,12 +705,12 @@ internal static (bool, error) ge(reflectꓸValue arg1, reflectꓸValue arg2) {
 }
 
 // HTML escaping.
-internal static slice<byte> htmlQuot = slice<byte>((@string)"&#34;"); // shorter than "&quot;"
-internal static slice<byte> htmlApos = slice<byte>((@string)"&#39;"); // shorter than "&apos;" and apos was not in HTML until HTML5
-internal static slice<byte> htmlAmp = slice<byte>((@string)"&amp;");
-internal static slice<byte> htmlLt = slice<byte>((@string)"&lt;");
-internal static slice<byte> htmlGt = slice<byte>((@string)"&gt;");
-internal static slice<byte> htmlNull = slice<byte>((@string)"\uFFFD");
+internal static slice<byte> htmlQuot = slice<byte>("&#34;"u8); // shorter than "&quot;"
+internal static slice<byte> htmlApos = slice<byte>("&#39;"u8); // shorter than "&apos;" and apos was not in HTML until HTML5
+internal static slice<byte> htmlAmp = slice<byte>("&amp;"u8);
+internal static slice<byte> htmlLt = slice<byte>("&lt;"u8);
+internal static slice<byte> htmlGt = slice<byte>("&gt;"u8);
+internal static slice<byte> htmlNull = slice<byte>("\uFFFD"u8);
 
 // HTMLEscape writes to w the escaped HTML equivalent of the plain text data b.
 public static void HTMLEscape(io.Writer w, slice<byte> b) {
@@ -774,15 +774,15 @@ public static @string HTMLEscaper(params ꓸꓸꓸany argsʗp) {
 }
 
 // JavaScript escaping.
-internal static slice<byte> jsLowUni = slice<byte>((@string)@"\u00");
-internal static slice<byte> hex = slice<byte>((@string)"0123456789ABCDEF");
-internal static slice<byte> jsBackslash = slice<byte>((@string)@"\\");
-internal static slice<byte> jsApos = slice<byte>((@string)@"\'");
-internal static slice<byte> jsQuot = slice<byte>((@string)@"\""");
-internal static slice<byte> jsLt = slice<byte>((@string)@"\u003C");
-internal static slice<byte> jsGt = slice<byte>((@string)@"\u003E");
-internal static slice<byte> jsAmp = slice<byte>((@string)@"\u0026");
-internal static slice<byte> jsEq = slice<byte>((@string)@"\u003D");
+internal static slice<byte> jsLowUni = slice<byte>(@"\u00"u8);
+internal static slice<byte> hex = slice<byte>("0123456789ABCDEF"u8);
+internal static slice<byte> jsBackslash = slice<byte>(@"\\"u8);
+internal static slice<byte> jsApos = slice<byte>(@"\'"u8);
+internal static slice<byte> jsQuot = slice<byte>(@"\"""u8);
+internal static slice<byte> jsLt = slice<byte>(@"\u003C"u8);
+internal static slice<byte> jsGt = slice<byte>(@"\u003E"u8);
+internal static slice<byte> jsAmp = slice<byte>(@"\u0026"u8);
+internal static slice<byte> jsEq = slice<byte>(@"\u003D"u8);
 
 // JSEscape writes to w the escaped JavaScript equivalent of the plain text data b.
 public static void JSEscape(io.Writer w, slice<byte> b) {

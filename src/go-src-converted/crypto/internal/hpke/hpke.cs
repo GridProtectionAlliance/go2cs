@@ -32,7 +32,7 @@ internal static Func<(ж<ecdh.PrivateKey>, error)> testingOnlyGenerateKey;
 
 public static slice<byte> LabeledExtract(this ж<hkdfKDF> Ꮡkdf, slice<byte> suiteID, slice<byte> salt, @string label, slice<byte> inputKey) {
     var labeledIKM = new slice<byte>(0, 7 + len(suiteID) + len(label) + len(inputKey));
-    labeledIKM = append(labeledIKM, slice<byte>((@string)"HPKE-v1").ꓸꓸꓸ);
+    labeledIKM = append(labeledIKM, slice<byte>("HPKE-v1"u8).ꓸꓸꓸ);
     labeledIKM = append(labeledIKM, suiteID.ꓸꓸꓸ);
     labeledIKM = append(labeledIKM, label.ꓸꓸꓸ);
     labeledIKM = append(labeledIKM, inputKey.ꓸꓸꓸ);
@@ -42,7 +42,7 @@ public static slice<byte> LabeledExtract(this ж<hkdfKDF> Ꮡkdf, slice<byte> su
 public static slice<byte> LabeledExpand(this ж<hkdfKDF> Ꮡkdf, slice<byte> suiteID, slice<byte> randomKey, @string label, slice<byte> info, uint16 length) {
     var labeledInfo = new slice<byte>(0, 2 + 7 + len(suiteID) + len(label) + len(info));
     labeledInfo = binary.BigEndian.AppendUint16(labeledInfo, length);
-    labeledInfo = append(labeledInfo, slice<byte>((@string)"HPKE-v1").ꓸꓸꓸ);
+    labeledInfo = append(labeledInfo, slice<byte>("HPKE-v1"u8).ꓸꓸꓸ);
     labeledInfo = append(labeledInfo, suiteID.ꓸꓸꓸ);
     labeledInfo = append(labeledInfo, label.ꓸꓸꓸ);
     labeledInfo = append(labeledInfo, info.ꓸꓸꓸ);
@@ -81,7 +81,7 @@ internal static (ж<dhKEM>, error) newDHKem(uint16 kemID) {
     return (Ꮡ(new dhKEM(
         dh: suite.curve,
         kdf: new hkdfKDF(suite.hash),
-        suiteID: binary.BigEndian.AppendUint16(slice<byte>((@string)"KEM"), kemID),
+        suiteID: binary.BigEndian.AppendUint16(slice<byte>("KEM"u8), kemID),
         nSecret: suite.nSecret
     )), default!);
 }
@@ -226,7 +226,7 @@ public static (slice<byte>, ж<Sender>, error) SetupSender(uint16 kemID, uint16 
 
 public static slice<byte> SuiteID(uint16 kemID, uint16 kdfID, uint16 aeadID) {
     var suiteID = new slice<byte>(0, 4 + 2 + 2 + 2);
-    suiteID = append(suiteID, slice<byte>((@string)"HPKE").ꓸꓸꓸ);
+    suiteID = append(suiteID, slice<byte>("HPKE"u8).ꓸꓸꓸ);
     suiteID = binary.BigEndian.AppendUint16(suiteID, kemID);
     suiteID = binary.BigEndian.AppendUint16(suiteID, kdfID);
     suiteID = binary.BigEndian.AppendUint16(suiteID, aeadID);

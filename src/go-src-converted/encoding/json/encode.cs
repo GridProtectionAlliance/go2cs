@@ -1220,7 +1220,7 @@ internal static structFields typeFields(reflectꓸType t) {
                     field.nameBytes = slice<byte>(field.name);
                     // Build nameEscHTML and nameNonEsc ahead of time.
                     nameEscBuf = appendHTMLEscape(nameEscBuf[..0], field.nameBytes);
-                    field.nameEscHTML = @""""u8 + ((@string)nameEscBuf) + @""":"u8;
+                    field.nameEscHTML = @""""u8 + ((sstring)nameEscBuf) + @""":"u8;
                     field.nameNonEsc = @""""u8 + field.name + @""":"u8;
                     fields = append(fields, field);
                     if (count[f.typ] > 1) {

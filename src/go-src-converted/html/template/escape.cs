@@ -813,7 +813,7 @@ internal static array<@string> delimEnds = new golib.SparseArray<@string>{
 }.array();
 
 internal static ж<regexp.Regexp> specialScriptTagRE = regexp.MustCompile("(?i)<(script|/script|!--)"u8);
-internal static slice<byte> specialScriptTagReplacement = slice<byte>((@string)"\\x3C$1");
+internal static slice<byte> specialScriptTagReplacement = slice<byte>("\\x3C$1"u8);
 
 internal static bool containsSpecialScriptTag(slice<byte> s) {
     return specialScriptTagRE.Match(s);
@@ -823,7 +823,7 @@ internal static slice<byte> escapeSpecialScriptTags(slice<byte> s) {
     return specialScriptTagRE.ReplaceAll(s, specialScriptTagReplacement);
 }
 
-internal static slice<byte> doctypeBytes = slice<byte>((@string)"<!DOCTYPE");
+internal static slice<byte> doctypeBytes = slice<byte>("<!DOCTYPE"u8);
 
 // escapeText escapes a text template node.
 [GoRecv] internal static context escapeText(this ref escaper e, context c, ж<parse.TextNode> Ꮡn) {

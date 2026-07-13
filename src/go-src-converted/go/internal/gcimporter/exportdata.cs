@@ -54,7 +54,7 @@ public static (@string hdr, nint size, error err) FindExportData(ж<bufio.Reader
         err = fmt.Errorf("can't find export data (%v)"u8, err);
         return (hdr, size, err);
     }
-    if (((@string)line) == "!<arch>\n"u8) {
+    if (((sstring)line) == "!<arch>\n"u8) {
         // Archive file. Scan to __.PKGDEF.
         @string name = default!;
         {

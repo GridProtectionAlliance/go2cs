@@ -641,9 +641,9 @@ internal static uint64 emitLocation(this ж<profileBuilder> Ꮡb) => func<uint64
     return id;
 });
 
-internal static slice<byte> space = slice<byte>((@string)" ");
+internal static slice<byte> space = slice<byte>(" "u8);
 
-internal static slice<byte> newline = slice<byte>((@string)"\n");
+internal static slice<byte> newline = slice<byte>("\n"u8);
 
 internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, uint64, @string, @string> addMapping) {
     // $ cat /proc/self/maps

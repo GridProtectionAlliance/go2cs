@@ -168,16 +168,16 @@ internal const nint marshaledSize = /* len(magic512) + 8*8 + chunk + 8 */ 204;
         return errors.New("crypto/sha512: invalid hash state identifier"u8);
     }
     switch (ᐧ) {
-    case {} when d.function == crypto.SHA384 && ((@string)(b[..(int)(len(magic384))])) == magic384: {
+    case {} when d.function == crypto.SHA384 && ((sstring)(b[..(int)(len(magic384))])) == magic384: {
         break;
     }
-    case {} when d.function == crypto.SHA512_224 && ((@string)(b[..(int)(len(magic512_224))])) == magic512_224: {
+    case {} when d.function == crypto.SHA512_224 && ((sstring)(b[..(int)(len(magic512_224))])) == magic512_224: {
         break;
     }
-    case {} when d.function == crypto.SHA512_256 && ((@string)(b[..(int)(len(magic512_256))])) == magic512_256: {
+    case {} when d.function == crypto.SHA512_256 && ((sstring)(b[..(int)(len(magic512_256))])) == magic512_256: {
         break;
     }
-    case {} when d.function == crypto.SHA512 && ((@string)(b[..(int)(len(magic512))])) == magic512: {
+    case {} when d.function == crypto.SHA512 && ((sstring)(b[..(int)(len(magic512))])) == magic512: {
         break;
     }
     default: {

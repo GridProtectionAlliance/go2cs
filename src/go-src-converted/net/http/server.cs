@@ -313,8 +313,8 @@ internal static readonly UntypedInt bufferBeforeChunkingSize = 2048;
     internal bool chunking; // using chunked transfer encoding for reply body
 }
 
-internal static slice<byte> crlf = slice<byte>((@string)"\r\n");
-internal static slice<byte> colonSpace = slice<byte>((@string)": ");
+internal static slice<byte> crlf = slice<byte>("\r\n"u8);
+internal static slice<byte> colonSpace = slice<byte>(": "u8);
 
 [GoRecv] internal static (nint n, error err) Write(this ref chunkWriter cw, slice<byte> p) {
     nint n = default!;
@@ -1245,13 +1245,13 @@ internal static void WriteHeader(this ж<response> Ꮡw, nint code) {
 
 // Sorted the same as extraHeader.Write's loop.
 internal static slice<slice<byte>> extraHeaderKeys = new slice<byte>[]{
-    slice<byte>((@string)"Content-Type"),
-    slice<byte>((@string)"Connection"),
-    slice<byte>((@string)"Transfer-Encoding")
+    slice<byte>("Content-Type"u8),
+    slice<byte>("Connection"u8),
+    slice<byte>("Transfer-Encoding"u8)
 }.slice();
 
-internal static slice<byte> headerContentLength = slice<byte>((@string)"Content-Length: ");
-internal static slice<byte> headerDate = slice<byte>((@string)"Date: ");
+internal static slice<byte> headerContentLength = slice<byte>("Content-Length: "u8);
+internal static slice<byte> headerDate = slice<byte>("Date: "u8);
 
 // Write writes the headers described in h to w.
 //
@@ -4007,7 +4007,7 @@ internal static nint /*n*/ numLeadingCRorLF(slice<byte> v) {
 internal static bool tlsRecordHeaderLooksLikeHTTP(array<byte> hdr) {
     hdr = hdr.Clone();
 
-    var exprᴛ1 = ((@string)(hdr[..]));
+    var exprᴛ1 = ((sstring)(hdr[..]));
     if (exprᴛ1 == "GET /"u8 || exprᴛ1 == "HEAD "u8 || exprᴛ1 == "POST "u8 || exprᴛ1 == "PUT /"u8 || exprᴛ1 == "OPTIO"u8) {
         return true;
     }

@@ -91,7 +91,7 @@ public static error Print(ж<token.FileSet> Ꮡfset, any x) {
     internal nint line;        // current line number
 }
 
-internal static slice<byte> indent = slice<byte>((@string)".  ");
+internal static slice<byte> indent = slice<byte>(".  "u8);
 
 [GoRecv] internal static (nint n, error err) Write(this ref printer p, slice<byte> data) {
     nint n = default!;

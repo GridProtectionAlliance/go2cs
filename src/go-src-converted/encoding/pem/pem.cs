@@ -79,13 +79,13 @@ internal static slice<byte> removeSpacesAndTabs(slice<byte> data) {
     return result[0..(int)(n)];
 }
 
-internal static slice<byte> pemStart = slice<byte>((@string)"\n-----BEGIN ");
+internal static slice<byte> pemStart = slice<byte>("\n-----BEGIN "u8);
 
-internal static slice<byte> pemEnd = slice<byte>((@string)"\n-----END ");
+internal static slice<byte> pemEnd = slice<byte>("\n-----END "u8);
 
-internal static slice<byte> pemEndOfLine = slice<byte>((@string)"-----");
+internal static slice<byte> pemEndOfLine = slice<byte>("-----"u8);
 
-internal static slice<byte> colon = slice<byte>((@string)":");
+internal static slice<byte> colon = slice<byte>(":"u8);
 
 // Decode will find the next PEM formatted block (certificate, private key
 // etc) in the input. It returns that block and the remainder of the input. If

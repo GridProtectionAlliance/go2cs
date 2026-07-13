@@ -286,7 +286,7 @@ internal static slice<byte> itoa(this nat x, bool neg, nint @base) {
     }
     // x == 0
     if (len(x) == 0) {
-        return slice<byte>((@string)"0");
+        return slice<byte>("0"u8);
     }
     // len(x) > 0
     // allocate buffer for conversion

@@ -74,7 +74,7 @@ internal static (io.ReadSeeker, error) arExportData(io.ReadSeeker archive) {
             return (default!, err);
         }
     }
-    var exprᴛ1 = ((@string)(buf[..]));
+    var exprᴛ1 = ((sstring)(buf[..]));
     if (exprᴛ1 == armag) {
         return standardArExportData(archive);
     }
@@ -109,7 +109,7 @@ internal static (io.ReadSeeker, error) standardArExportData(io.ReadSeeker archiv
             return (default!, fmt.Errorf("error parsing size in archive header (%q): %v"u8, hdrBuf[..], err));
         }
         var fn = hdrBuf[(int)(arNameOff)..(int)(arNameOff + arNameSize)];
-        if (fn[0] == (rune)'/' && (fn[1] == (rune)' ' || fn[1] == (rune)'/' || ((@string)(fn[..8])) == "/SYM64/ "u8)){
+        if (fn[0] == (rune)'/' && (fn[1] == (rune)' ' || fn[1] == (rune)'/' || ((sstring)(fn[..8])) == "/SYM64/ "u8)){
         } else {
             // Archive symbol table or extended name table,
             // which we don't care about.

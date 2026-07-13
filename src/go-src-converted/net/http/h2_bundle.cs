@@ -2947,7 +2947,7 @@ internal static void checkNotOn(this http2goroutineLock g) {
     }
 }
 
-internal static slice<byte> http2goroutineSpace = slice<byte>((@string)"goroutine ");
+internal static slice<byte> http2goroutineSpace = slice<byte>("goroutine "u8);
 
 internal static uint64 http2curGoroutineID() => func((defer, recover) => {
     var bp = Ꮡhttp2littleBuf.Get()._<ж<slice<byte>>>();

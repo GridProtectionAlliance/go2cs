@@ -258,7 +258,7 @@ public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwi
 }
 
 internal static slice<byte> newline = new byte[]{(rune)'\n'}.slice();
-internal static slice<byte> tabs = slice<byte>((@string)"\t\t\t\t\t\t\t\t");
+internal static slice<byte> tabs = slice<byte>("\t\t\t\t\t\t\t\t"u8);
 
 [GoRecv] internal static void writePadding(this ref Writer b, nint textw, nint cellw, bool useTabs) {
     if (b.padbytes[0] == (rune)'\t' || useTabs) {
@@ -528,7 +528,7 @@ internal static error /*err*/ flush(this ж<Writer> Ꮡb) {
     b.reset();
 }
 
-internal static slice<byte> hbar = slice<byte>((@string)"---\n");
+internal static slice<byte> hbar = slice<byte>("---\n"u8);
 
 // Write writes buf to the writer b.
 // The only errors returned are ones encountered

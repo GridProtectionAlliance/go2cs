@@ -965,8 +965,8 @@ internal static (nint n, error err) Read(this ж<body> Ꮡb, slice<byte> p) {
     return (n, err);
 }
 
-internal static slice<byte> singleCRLF = slice<byte>((@string)"\r\n");
-internal static slice<byte> doubleCRLF = slice<byte>((@string)"\r\n\r\n");
+internal static slice<byte> singleCRLF = slice<byte>("\r\n"u8);
+internal static slice<byte> doubleCRLF = slice<byte>("\r\n\r\n"u8);
 
 internal static bool seeUpcomingDoubleCRLF(ж<bufio.Reader> Ꮡr) {
     ref var r = ref Ꮡr.Value;

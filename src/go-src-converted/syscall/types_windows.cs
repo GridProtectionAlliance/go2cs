@@ -243,9 +243,9 @@ public static readonly UntypedInt CERT_E_CN_NO_MATCH = 0x800B010F;
 public static readonly UntypedInt AUTHTYPE_CLIENT = 1;
 public static readonly UntypedInt AUTHTYPE_SERVER = 2;
 
-public static slice<byte> OID_PKIX_KP_SERVER_AUTH = slice<byte>((@string)"1.3.6.1.5.5.7.3.1\x00");
-public static slice<byte> OID_SERVER_GATED_CRYPTO = slice<byte>((@string)"1.3.6.1.4.1.311.10.3.3\x00");
-public static slice<byte> OID_SGC_NETSCAPE = slice<byte>((@string)"2.16.840.1.113730.4.1\x00");
+public static slice<byte> OID_PKIX_KP_SERVER_AUTH = slice<byte>("1.3.6.1.5.5.7.3.1\x00"u8);
+public static slice<byte> OID_SERVER_GATED_CRYPTO = slice<byte>("1.3.6.1.4.1.311.10.3.3\x00"u8);
+public static slice<byte> OID_SGC_NETSCAPE = slice<byte>("2.16.840.1.113730.4.1\x00"u8);
 
 [GoType("ж<EmptyStruct>")] partial class Pointer;
 

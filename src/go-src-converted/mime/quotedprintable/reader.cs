@@ -74,9 +74,9 @@ internal static bool isQPDiscardWhitespace(rune r) {
     return false;
 }
 
-internal static slice<byte> crlf = slice<byte>((@string)"\r\n");
-internal static slice<byte> lf = slice<byte>((@string)"\n");
-internal static slice<byte> softSuffix = slice<byte>((@string)"=");
+internal static slice<byte> crlf = slice<byte>("\r\n"u8);
+internal static slice<byte> lf = slice<byte>("\n"u8);
+internal static slice<byte> softSuffix = slice<byte>("="u8);
 
 // Read reads and decodes quoted-printable data from the underlying reader.
 [GoRecv] public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {

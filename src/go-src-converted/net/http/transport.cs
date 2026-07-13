@@ -2529,10 +2529,10 @@ internal static bool is408Message(slice<byte> buf) {
     if (builtin.len(buf) < builtin.len("HTTP/1.x 408")) {
         return false;
     }
-    if (((@string)(buf[..7])) != "HTTP/1."u8) {
+    if (((sstring)(buf[..7])) != "HTTP/1."u8) {
         return false;
     }
-    return ((@string)(buf[8..12])) == " 408"u8;
+    return ((sstring)(buf[8..12])) == " 408"u8;
 }
 
 // readResponse reads an HTTP response (or two, in the case of "Expect:

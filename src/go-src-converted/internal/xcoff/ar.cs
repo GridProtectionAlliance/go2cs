@@ -107,7 +107,7 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
         }
     }
     var arch = @new<Archive>();
-    var exprᴛ1 = ((@string)(magic[..]));
+    var exprᴛ1 = ((sstring)(magic[..]));
     if (exprᴛ1 == AIAMAGBIG) {
         arch.Value.magic = ((@string)(magic[..]));
     }
@@ -193,7 +193,7 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
                 return (default!, errΔ9);
             }
         }
-        if (((@string)(fmag[..])) != AIAFMAG) {
+        if (((sstring)(fmag[..])) != AIAFMAG) {
             return (default!, fmt.Errorf("AIAFMAG not found after member header"u8));
         }
         fileoff += 2;
