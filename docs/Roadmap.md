@@ -629,15 +629,28 @@ full-stdlib reconvert), never silently. The **only** silently-wrong vectors are 
 mutation of the source buffer during the view's lifetime; both must stay explicitly guarded. Candidate
 increments, roughly by ROI:
 
-1. **Unnamed-temporary conversions.** The comparison-operand slice (`string(b) == "literal"`) is **done**
-   (above). The remaining slice — `string(x)` passed to a non-retaining callee (`strconv.ParseUint(string(s), …)`)
-   or used as a map key (`m[string(b)]`) — is harder: a `@string`-typed parameter or map key copies the
-   `sstring` back at the boundary (no win) unless the callee/`map<K,V>` gains an `sstring`/`ReadOnlySpan<byte>`
-   overload. Needs a curated non-retaining-callee whitelist plus golib span-lookup support on `map`.
+1. **Unnamed-temporary conversions.** The comparison-operand slice (`string(b) == "literal"`, and now — see
+   increment 3 — `string(b) == variable` and `string(a) == string(b)`) is **done**. The remaining slice —
+   `string(x)` passed to a non-retaining callee (`strconv.ParseUint(string(s), …)`) or used as a map key
+   (`m[string(b)]`) — is harder: a `@string`-typed parameter or map key copies the `sstring` back at the
+   boundary (no win) unless the callee/`map<K,V>` gains an `sstring`/`ReadOnlySpan<byte>` overload. Needs a
+   curated non-retaining-callee whitelist plus golib span-lookup support on `map`.
 2. **`sstring operator+`** (returning `@string`) plus widening the safe-use whitelist beyond
    len/cap/byte-index/compare-literal (sub-slicing kept in safe uses, rune-range, etc.).
-3. **Mixed `sstring == @string`** operator, co-designed with the comparison-literal emission so it does not
-   reintroduce a `sstring == "literal"` ambiguity.
+3. **Mixed `sstring == @string`** operator — **done (2026-07-13).** `golib`'s `sstring` gained all six
+   comparison operators (`==`/`!=`/`<`/`<=`/`>`/`>=`, both operand orders) against `@string`, a byte-ordinal
+   `SequenceCompareTo`/`SequenceEqual` with **no** heap copy of either side. No ambiguity was reintroduced: a
+   `u8` literal binds the `ReadOnlySpan<byte>` operator, an `@string` variable the new mixed operator, another
+   view the `sstring == sstring` operator — each an exact match. The converter now emits `sstring` for a
+   non-escaping `string(x)` compared against a plain-`string` variable/field, and for two `string(bytes)`
+   conversions compared directly, both for a named local (`s := string(x); s == want`) and an unnamed operand
+   (`string(x) == want`). The unnamed form additionally requires the other operand to be mutation-safe (a
+   literal, pure-read expression, or another conversion — never a call, which could write `x` before the lazy
+   view is read); the named-local form needs no such check because its source is already proven never-written.
+   This lifted the Go-1.23 stdlib footprint substantially (the common `string(b[:n]) != magic` and
+   downgrade-canary idioms across `crypto/*`, `hash/*`, `html/template`, `go/internal/*importer`, …). Guarded
+   by `SStringElision` (mixed-vs-variable, mixed-vs-field, two-conversion, and a negative call-operand case);
+   full-stdlib reconvert stays 302/302.
 4. **Positional / loop-carried liveness guard** — relax "source never written" to "not written between the
    conversion and the local's last read, not loop-shared." This is the **only** increment that reaches the
    `PerfString` hot loop, and the highest silent-risk one — gate it behind the heaviest adversarial pass.

@@ -354,5 +354,72 @@ public readonly ref struct sstring
         return a.SequenceCompareTo(b.m_value) >= 0;
     }
 
+    // sstring <-> @string comparisons — a stack string against a heap string, compared byte-ordinal
+    // with NO allocation (neither operand is copied). These explicit operators are REQUIRED: without
+    // them the comparison is ambiguous, because sstring and @string each convert implicitly to the
+    // other, so C# cannot choose sstring-vs-sstring over @string-vs-@string — and the @string route
+    // would force a heap COPY of the sstring operand (the very copy the stack string exists to avoid).
+    // The go2cs converter emits this form when a non-escaping stack string is compared against a heap
+    // string variable (`s == other`), the mixed idiom the literal-only comparison could not cover.
+    public static bool operator ==(sstring a, @string b)
+    {
+        return a.m_value.SequenceEqual(b.m_value);
+    }
+
+    public static bool operator !=(sstring a, @string b)
+    {
+        return !a.m_value.SequenceEqual(b.m_value);
+    }
+
+    public static bool operator ==(@string a, sstring b)
+    {
+        return b.m_value.SequenceEqual(a.m_value);
+    }
+
+    public static bool operator !=(@string a, sstring b)
+    {
+        return !b.m_value.SequenceEqual(a.m_value);
+    }
+
+    public static bool operator <(sstring a, @string b)
+    {
+        return a.m_value.SequenceCompareTo(b.m_value) < 0;
+    }
+
+    public static bool operator <=(sstring a, @string b)
+    {
+        return a.m_value.SequenceCompareTo(b.m_value) <= 0;
+    }
+
+    public static bool operator >(sstring a, @string b)
+    {
+        return a.m_value.SequenceCompareTo(b.m_value) > 0;
+    }
+
+    public static bool operator >=(sstring a, @string b)
+    {
+        return a.m_value.SequenceCompareTo(b.m_value) >= 0;
+    }
+
+    public static bool operator <(@string a, sstring b)
+    {
+        return new ReadOnlySpan<byte>(a.m_value).SequenceCompareTo(b.m_value) < 0;
+    }
+
+    public static bool operator <=(@string a, sstring b)
+    {
+        return new ReadOnlySpan<byte>(a.m_value).SequenceCompareTo(b.m_value) <= 0;
+    }
+
+    public static bool operator >(@string a, sstring b)
+    {
+        return new ReadOnlySpan<byte>(a.m_value).SequenceCompareTo(b.m_value) > 0;
+    }
+
+    public static bool operator >=(@string a, sstring b)
+    {
+        return new ReadOnlySpan<byte>(a.m_value).SequenceCompareTo(b.m_value) >= 0;
+    }
+
     #endregion
 }

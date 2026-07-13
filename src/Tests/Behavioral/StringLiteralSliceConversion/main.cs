@@ -12,7 +12,7 @@ internal static void Main() {
     fmt.Println(slice<byte>((@string)"hi"));
     fmt.Println(slice<rune>((@string)"aΩ"));
     @string s = "hello"u8;
-    fmt.Println(((@string)slice<byte>(s)) == ((@string)bs));
+    fmt.Println(((sstring)slice<byte>(s)) == ((sstring)bs));
 }
 
 } // end main_package

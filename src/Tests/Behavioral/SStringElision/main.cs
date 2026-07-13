@@ -23,16 +23,43 @@ internal static void Main() {
     fmt.Println(u);
     fmt.Println(returnedString());
     var tag = slice<byte>((@string)"v2");
-    if (((sstring)tag) == "v2"u8) {
+    sstring tagᴛ1 = ((sstring)tag);
+    if (tagᴛ1 == "v2"u8) {
         fmt.Println("tagged");
     }
     @string want = "v2"u8;
-    if (((@string)tag) == want) {
+    if (tagᴛ1 == want) {
         fmt.Println("wanted");
     }
     fmt.Println("classify:", classify(slice<byte>((@string)"rust")));
     fmt.Println("pick:", pick(slice<byte>((@string)"b")));
     fmt.Println("prefix:", prefix(slice<byte>((@string)"GET /x")));
+    fmt.Println("matchVar:", matchVar(slice<byte>((@string)"go2cs"), "go2cs"u8));
+    fmt.Println("matchField:", matchField(slice<byte>((@string)"prod"), new config(name: "prod"u8)));
+    fmt.Println("twoConv:", matchTwoConversions(slice<byte>((@string)"abc"), slice<byte>((@string)"abc")));
+    fmt.Println("callOperand:", staysHeapCallOperand(slice<byte>((@string)"y"), () => "y"u8));
+}
+
+[GoType] partial struct config {
+    internal @string name;
+}
+
+internal static bool matchVar(slice<byte> b, @string want) {
+    sstring s = ((sstring)b);
+    return s == want;
+}
+
+internal static bool matchField(slice<byte> b, config cfg) {
+    sstring s = ((sstring)b);
+    return s == cfg.name;
+}
+
+internal static bool matchTwoConversions(slice<byte> a, slice<byte> b) {
+    return ((sstring)a) == ((sstring)b);
+}
+
+internal static bool staysHeapCallOperand(slice<byte> a, Func<@string> next) {
+    return ((@string)a) == next();
 }
 
 internal static @string returnedString() {

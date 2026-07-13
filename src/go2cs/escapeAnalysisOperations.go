@@ -770,15 +770,17 @@ func (v *Visitor) sstringUsesAreSafe(obj types.Object, declIdent *ast.Ident, bod
 			}
 		case *ast.BinaryExpr:
 			if isComparisonOp(e.Op) {
-				if _, ok := e.Y.(*ast.BasicLit); ok {
-					if id, ok := e.X.(*ast.Ident); ok {
-						safeIdents[id] = true
-					}
+				// A comparison against a string literal (`s == "x"`) or against a plain-`string`
+				// operand (variable/field, `s == want`): the stack string has zero-copy comparison
+				// operators against a `u8` literal, another sstring, and — via the mixed
+				// sstring/@string operators — a heap @string, so any such comparison compiles and
+				// the local never escapes. (Because a safe local's source is proven never-written
+				// for the whole function, evaluating the other operand cannot mutate the view.)
+				if id, ok := e.X.(*ast.Ident); ok && v.isPlainStringOperand(e.Y) {
+					safeIdents[id] = true
 				}
-				if _, ok := e.X.(*ast.BasicLit); ok {
-					if id, ok := e.Y.(*ast.Ident); ok {
-						safeIdents[id] = true
-					}
+				if id, ok := e.Y.(*ast.Ident); ok && v.isPlainStringOperand(e.X) {
+					safeIdents[id] = true
 				}
 			}
 		}
@@ -890,11 +892,12 @@ func rootIdentObject(expr ast.Expr, info *types.Info) types.Object {
 }
 
 // markSStringComparisonConversions flags every `string(x)` conversion CallExpr that is an operand of
-// a comparison against a string literal (`string(buf) == "…"` / `"…" != string(buf)`, any of
-// ==/!=/</<=/>/>=). Such a temporary is created and consumed within the single comparison expression
-// — it cannot escape and its source cannot be mutated before it is read — so emitting it as a
-// zero-copy sstring view is safe with NO escape or mutation analysis. Restricted to an unnamed []byte
-// source, like the local case.
+// a comparison (`string(buf) == "…"` / `string(buf) == want`, any of ==/!=/</<=/>/>=). Such a
+// temporary is created and consumed within the single comparison expression, so it cannot escape;
+// emitting it as a zero-copy sstring view is safe with NO escape analysis, provided the OTHER operand
+// cannot mutate the source buffer before the view is read (see sstringOtherOperandSafe — a literal, a
+// pure-read plain-`string` expression, or another `string(bytes)` conversion, none of which run code
+// that could write x). Restricted to an unnamed []byte source, like the local case.
 func (v *Visitor) markSStringComparisonConversions(file *ast.File) {
 	ast.Inspect(file, func(n ast.Node) bool {
 		binaryExpr, ok := n.(*ast.BinaryExpr)
@@ -903,18 +906,81 @@ func (v *Visitor) markSStringComparisonConversions(file *ast.File) {
 			return true
 		}
 
-		if isStringLiteralExpr(binaryExpr.Y) {
-			if call := v.unnamedByteSliceStringConv(binaryExpr.X); call != nil {
-				v.sstringConvExprs[call] = true
-			}
-		} else if isStringLiteralExpr(binaryExpr.X) {
-			if call := v.unnamedByteSliceStringConv(binaryExpr.Y); call != nil {
-				v.sstringConvExprs[call] = true
-			}
+		if call := v.unnamedByteSliceStringConv(binaryExpr.X); call != nil && v.sstringOtherOperandSafe(binaryExpr.Y) {
+			v.sstringConvExprs[call] = true
+		}
+
+		if call := v.unnamedByteSliceStringConv(binaryExpr.Y); call != nil && v.sstringOtherOperandSafe(binaryExpr.X) {
+			v.sstringConvExprs[call] = true
 		}
 
 		return true
 	})
+}
+
+// sstringOtherOperandSafe reports whether `expr` — the operand ON THE OTHER SIDE of a comparison whose
+// first operand is an unnamed `string(bytes)` conversion — is one that (a) the emitted stack-string
+// comparison operators can handle and (b) cannot mutate the converted source before the comparison
+// reads the zero-copy view. Three safe shapes: another `string(bytes)` conversion (also a view; the
+// two compare as sstring == sstring); a string literal (`"…"u8`); or a PURE-READ plain-`string`
+// expression — a variable, field, or index read, which executes no function call and so cannot write
+// the buffer. A named string type is excluded (no operator against sstring). Anything with a call is
+// rejected: `string(x) == f()` could see f mutate x between the (lazy) view and the compare.
+func (v *Visitor) sstringOtherOperandSafe(expr ast.Expr) bool {
+	if v.unnamedByteSliceStringConv(expr) != nil {
+		return true
+	}
+
+	if isStringLiteralExpr(expr) {
+		return true
+	}
+
+	if !isPureReadExpr(expr) {
+		return false
+	}
+
+	t := v.info.TypeOf(expr)
+
+	return t != nil && types.Identical(t, types.Typ[types.String])
+}
+
+// isPlainStringOperand reports whether `expr` is a string literal or an expression whose type is the
+// built-in `string` exactly (not a named string type) — the operands an sstring can be compared
+// against via its literal (u8), sstring, or mixed-@string comparison operators. Used for the
+// named-local case, whose source is already proven never-written, so mutation ordering is moot and no
+// purity check is needed.
+func (v *Visitor) isPlainStringOperand(expr ast.Expr) bool {
+	if isStringLiteralExpr(expr) {
+		return true
+	}
+
+	t := v.info.TypeOf(expr)
+
+	return t != nil && types.Identical(t, types.Typ[types.String])
+}
+
+// isPureReadExpr reports whether evaluating `expr` runs no function/method call, channel receive, or
+// other side-effecting operation — so it cannot mutate anything, in particular the source buffer of a
+// sibling `string(bytes)` view being compared against it. Conservative: only literals, identifiers,
+// and reads composed of them (selector/index/slice/paren) qualify; a call or any other node fails.
+func isPureReadExpr(expr ast.Expr) bool {
+	switch e := expr.(type) {
+	case *ast.BasicLit, *ast.Ident:
+		return true
+	case *ast.ParenExpr:
+		return isPureReadExpr(e.X)
+	case *ast.SelectorExpr:
+		return isPureReadExpr(e.X)
+	case *ast.IndexExpr:
+		return isPureReadExpr(e.X) && isPureReadExpr(e.Index)
+	case *ast.SliceExpr:
+		return isPureReadExpr(e.X) &&
+			(e.Low == nil || isPureReadExpr(e.Low)) &&
+			(e.High == nil || isPureReadExpr(e.High)) &&
+			(e.Max == nil || isPureReadExpr(e.Max))
+	}
+
+	return false
 }
 
 // unnamedByteSliceStringConv returns the CallExpr if expr is a `string(x)` conversion whose source x

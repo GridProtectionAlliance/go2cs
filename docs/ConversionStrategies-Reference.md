@@ -1349,8 +1349,12 @@ safest idiom only. A local is eligible iff: it is the built-in `string` type bou
 `s := string(x)`; `x` is an UNNAMED `[]byte` (a `[]rune`→string must UTF-8-encode — an allocation, no view;
 a named `[]byte` would need a two-hop cast C# will not chain); it does not escape by any channel the escape
 analysis detects; every use is a safe read — a `len`/`cap` argument, a byte index `s[i]`, or a comparison
-against a string literal — so anything else (passed to a function, stored, ranged, concatenated, RETURNED,
-reassigned) disqualifies it; and the source is never written except at its own declaration. Emission is
+against a string literal OR a plain-`string` operand (a variable or field, `s == want`) — so anything else
+(passed to a function, stored, ranged, concatenated, RETURNED, reassigned) disqualifies it; and the source
+is never written except at its own declaration. (The comparison operand may be any plain-`string`
+expression, even a call, because the whole-function "never written" guard already means the source cannot
+change; only the built-in `string` type is allowed on the other side — a NAMED string type has no operator
+against `sstring`, so it stays `@string`.) Emission is
 two coordinated sites: `convCallExpr` retargets the conversion cast to `sstring` (after the Go→C# name
 map) under a transient flag; and `visitAssignStmt` declares the explicit type as `sstring` and sets that
 flag around the RHS. The comparison literal KEEPS its `"…"u8` `ReadOnlySpan<byte>` form: `sstring` has
@@ -1366,17 +1370,30 @@ array/map, boxing to an interface, channel send, closure capture) are C# COMPILE
 the two vectors that would be silently wrong — escape via `return` and mutation of the source buffer — are
 guarded explicitly.
 
-A second, broader case needs **no analysis at all**. An UNNAMED `string(x)` temporary that is an operand
-of a comparison against a string literal (`string(buf[:4]) == "ZLIB"`, `string(item) != "null"`) is created
-and consumed *within the single comparison expression* — it can neither escape nor observe a mutation of its
-source before it is read (the literal has no side effects and `x` is evaluated once, so even inside a loop
-that mutates `x` between iterations each comparison sees exactly what a copy would) — so it is emitted as
-`(sstring)x` unconditionally (`markSStringComparisonConversions`, keyed per-`*ast.CallExpr`; the literal keeps
-its `"…"u8` span form and binds `sstring`'s zero-allocation `ReadOnlySpan<byte>` comparison operators). It
-stays `@string` only when the other operand is not a literal (a variable would need the mixed
-`sstring == @string` operator, deliberately avoided). This common
-byte-signature-check idiom lifts the Go-1.23 stdlib footprint from one site to ~23 across ~19 files
-(`debug/elf`·`macho`·`pe`, `encoding/json`, `image/gif`·`png`, `internal/chacha8rand`, `go/build`, …).
+A second, broader case needs **no escape analysis at all**. An UNNAMED `string(x)` temporary that is an
+operand of a comparison is created and consumed *within the single comparison expression*, so it cannot
+escape; it is emitted as `(sstring)x` (`markSStringComparisonConversions`, keyed per-`*ast.CallExpr`) as long
+as the OTHER operand cannot mutate `x` before the view is read. Three safe shapes qualify (`sstringOtherOperandSafe`):
+
+- a **string literal** (`string(buf[:4]) == "ZLIB"`, `string(item) != "null"`) — the literal keeps its
+  `"…"u8` span form and binds `sstring`'s zero-allocation `ReadOnlySpan<byte>` comparison operators;
+- a **pure-read plain-`string` expression** — a variable, field, or index read (`string(b[:n]) != magic`,
+  `string(word) != "package"`) — which runs no code, so it cannot write the buffer, and compares via the new
+  **mixed `sstring`/`@string` operators** (byte-ordinal span compare, no heap copy of either side);
+- **another `string(bytes)` conversion** (`string(a) == string(b)`) — both become zero-copy views and compare
+  `sstring == sstring`.
+
+It stays `@string` when the other operand could mutate the source before the compare — a **function call**
+(`string(a) == next()`: Go's `string(a)` is a copy taken before `next()` runs, but a stack view would be read
+only at the `==`, after `next()` could have written `a`) — or when it is a NAMED string type (no operator
+against `sstring`). This byte-signature / header-check idiom is by far the most common `string([]byte)` pattern
+in the stdlib: the literal form alone reaches ~23 sites, and the plain-`string`-operand and two-conversion
+forms extend it further across `crypto/*` (`md5`·`sha1`·`sha256`·`sha512`, comparing against the `magic`
+gob-stream prefix), `crypto/tls` (downgrade-canary checks), `hash/*`, `go/internal/*importer`, `html/template`,
+and more.
+
+The mixed comparison also widens the **named-local** case above: `s := string(x)` compared against a string
+variable or field (`s == want`, `s == cfg.name`) is now eligible, not only `s == "literal"`.
 
 A third refinement is an **optimization**, not a widening of eligibility: **loop-invariant / repeated-conversion
 hoisting**. When the same eligible `string(x)` over a never-written source is emitted repeatedly — several
@@ -1404,11 +1421,13 @@ over a raw span compare — the whole recoverable cost is the per-use view recon
 inherent (`SequenceEqual`'s per-call setup on a tiny buffer vs Go's inlined `memcmp`).
 
 Guarded by the `SStringElision` behavioral test — the eligible cases (two eligible locals, an unnamed
-comparison operand, and two repeated-conversion groups that each hoist to a single reused `sstring` temp — one
-in a loop, one straight-line) emit `sstring`; source-mutated, print-escaped, and returned locals plus a
-compare-against-a-variable stay `@string` — asserting emitted forms and byte-identical Go/C# stdout. Remaining
-phases (unnamed conversions passed to non-retaining callees / used as map keys, and a precise per-iteration
-liveness guard that would reach the `PerfString` loop) are deferred; see [`docs/Roadmap.md`](Roadmap.md).
+comparison operand, two repeated-conversion groups that each hoist to a single reused `sstring` temp — one in
+a loop, one straight-line — plus the mixed-comparison additions: a named local compared against a string
+variable and against a struct field, and two `string(bytes)` conversions compared directly) emit `sstring`;
+source-mutated, print-escaped, and returned locals plus a compare-against-a-function-call stay `@string` —
+asserting emitted forms and byte-identical Go/C# stdout. Remaining phases (unnamed conversions passed to
+non-retaining callees / used as map keys, and a precise per-iteration liveness guard that would reach the
+`PerfString` loop) are deferred; see [`docs/Roadmap.md`](Roadmap.md).
 
 ## Maps and Channels
 Go maps and channels convert to the golib [`map<K,V>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/map.cs) and [`channel<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/channel.cs) structures. `make` becomes a constructor; channel send/receive use the runtime operators:

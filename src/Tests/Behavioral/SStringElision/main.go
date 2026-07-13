@@ -40,8 +40,10 @@ func main() {
 		fmt.Println("tagged")
 	}
 
-	// (7) UNNAMED comparison against a VARIABLE (not a literal) — stays @string, since the other
-	//     operand is not a string literal (mixed sstring==@string is deliberately avoided).
+	// (7) UNNAMED comparison against a plain-string VARIABLE (`string(tag) == want`) — now ELIGIBLE:
+	//     reading a variable cannot mutate tag, and the mixed sstring/@string operators compare the
+	//     views byte-for-byte with no heap copy. This is the second `string(tag)` over the same
+	//     never-written source, so the repeated-conversion hoist lifts BOTH (6) and (7) to one temp.
 	want := "v2"
 	if string(tag) == want {
 		fmt.Println("wanted")
@@ -61,6 +63,53 @@ func main() {
 	//      temp — string(buf[:3]) and string(buf[3:6]) are distinct views, so each stays an inline
 	//      (sstring) comparison. (The net/http is408Message idiom; only a BARE-identifier source hoists.)
 	fmt.Println("prefix:", prefix([]byte("GET /x")))
+
+	// (11) MIXED named-local vs plain-string VARIABLE — `s == want` uses the sstring/@string operator
+	//      (byte-compare, no heap copy of s). The common `string(header) == expected` idiom.
+	fmt.Println("matchVar:", matchVar([]byte("go2cs"), "go2cs"))
+
+	// (12) MIXED named-local vs struct FIELD (a selector — a pure read) — same mixed operator.
+	fmt.Println("matchField:", matchField([]byte("prod"), config{name: "prod"}))
+
+	// (13) TWO conversions compared (`string(a) == string(b)`) — both are zero-copy sstring views,
+	//      compared sstring==sstring, neither copied to the heap.
+	fmt.Println("twoConv:", matchTwoConversions([]byte("abc"), []byte("abc")))
+
+	// (14) NEGATIVE — the other comparison operand is a function CALL, which could mutate the source
+	//      between the (lazy) view and the compare, so the conversion stays a heap @string copy.
+	fmt.Println("callOperand:", staysHeapCallOperand([]byte("y"), func() string { return "y" }))
+}
+
+type config struct {
+	name string
+}
+
+// matchVar compares a named-local stack string against a plain-string VARIABLE. The named local is
+// non-escaping and its source is never written, so `s` is a stack sstring; the mixed sstring/@string
+// comparison operator makes `s == want` compile and run with no heap copy.
+func matchVar(b []byte, want string) bool {
+	s := string(b)
+	return s == want
+}
+
+// matchField compares a named-local stack string against a struct FIELD (a selector). A field read
+// cannot mutate the source, so `s` stays a stack sstring and the mixed operator applies.
+func matchField(b []byte, cfg config) bool {
+	s := string(b)
+	return s == cfg.name
+}
+
+// matchTwoConversions compares two `string(bytes)` conversions directly — each is a zero-copy view,
+// so the comparison is sstring == sstring with no heap allocation on either side.
+func matchTwoConversions(a, b []byte) bool {
+	return string(a) == string(b)
+}
+
+// staysHeapCallOperand is a NEGATIVE case: `string(a) == next()` has a function CALL as the other
+// operand. Go evaluates string(a) as a copy before next() runs, but a stack view would be read only
+// at the comparison — after next() could have mutated a — so the conversion must stay a heap @string.
+func staysHeapCallOperand(a []byte, next func() string) bool {
+	return string(a) == next()
 }
 
 func returnedString() string {
