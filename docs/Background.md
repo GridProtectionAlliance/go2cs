@@ -6,7 +6,7 @@ Hopefully (once it's complete) for those of you that code in Go all the time and
 
 ## Converted Code
 
-TL;DR: Do not expect converted C# code to run as fast as the original Go code.
+**`TL;DR`**: Do not expect converted C# code to run as fast as the original Go code.
 
 The .NET runtime environment is very different from Go -- a compiled .NET application actually consists of an abstract byte-code based instruction set called [Common Intermediate Language](https://en.wikipedia.org/wiki/Common_Intermediate_Language) (CIL). At runtime the CIL code is compiled to native machine code using a [just-in-time compilation](https://en.wikipedia.org/wiki/Just-in-time_compilation) process. Compared to Go, which is compiled directly to native machine code, .NET incurs some compile based processing delays at startup. However, you can remove the just-in-time compilation startup delays for a .NET application by pre-compiling the application to native machine code using the native image generation tool in .NET [`crossgen`](https://github.com/dotnet/runtime/blob/master/docs/workflow/building/coreclr/crossgen.md).
 

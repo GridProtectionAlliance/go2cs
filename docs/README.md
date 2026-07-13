@@ -198,15 +198,15 @@ analyzer at `%GOPATH%\src\go2cs` (the "deploy root") that every converted projec
 **one-time, per-machine** setup, unrelated to any particular app — **redo it only when you pull a new go2cs
 version**, to refresh the staged runtime/analyzer/stdlib:
 
-```shell
+```cmd
 cd path\to\go2cs\src
-deploy-core stdlib          # the full compilable standard library (best for arbitrary imports)
-                            #   deploy-core stub  = the smaller runnable baseline subset
+deploy-core stdlib          :: the full compilable standard library (best for arbitrary imports)
 ```
+> **NOTE:** _you can use `deploy-core stub` instead to deploy the smaller, more runnable baseline subset of the Go Standard Library, i.e., the one currently used with behavioral tests. However, this will only work for the most simple of Go applications._
 
 **2 — Go: get the app and confirm it builds as Go.**
 
-```shell
+```cmd
 mkdir colordemo && cd colordemo
 go mod init example.com/colordemo
 ```
@@ -224,18 +224,22 @@ func main() {
 }
 ```
 
-Then pull in the dependencies and confirm it builds as Go:
+Next, pin the app to a **Go 1.23-compatible** dependency set and confirm it builds as Go. 
 
-```shell
-go mod tidy      # download color + its dependencies into the Go module cache
-go build ./...   # baseline: confirm it compiles as Go first
+> **NOTE:** _this pin is needed because go2cs is currently built with **Go 1.23** (see [status](#status)), so its type-checker can only read modules whose `go` directive — and their dependencies' — is **≤ 1.23**; the latest `fatih/color` (v1.19+) and `golang.org/x/sys` releases now require **Go 1.25**, which would make the conversion in step 3 fail with_ `package requires newer Go version go1.25`_. Future go2cs builds will work against newer Go toolchains and lift this constraint, letting an unpinned `go mod tidy` "just work"; until then, pin third-party dependencies as shown:_:
+
+```cmd
+set GOTOOLCHAIN=local
+go get github.com/fatih/color@v1.18.0     :: a Go 1.23-era release (v1.19+ requires Go 1.25)
+go mod tidy                               :: download color + its (Go 1.23-era) dependencies
+go build ./...                            :: baseline: confirm it compiles as Go first
 ```
 
 **3 — go2cs: recurse-convert the app.** `go2cs` is the converter you put on your `PATH` in *Installing the
 converter* above, so it runs from anywhere. Point it at the **app** directory and at the deploy root from
-step 0 (the standard library staged there is referenced, not re-converted):
+step 1 (the standard library staged there is referenced, not re-converted):
 
-```shell
+```cmd
 cd path\to\colordemo
 go2cs -recurse . -go2cspath %GOPATH%\src\go2cs
 ```
@@ -250,7 +254,7 @@ root, leaving your original Go source untouched. The converted app itself lands 
 Additionally, a per-project `.slnx` exists next to every generated `.csproj` — each with that project
 plus its converted dependencies, golib, and the analyzer (no stdlib).
 
-_Converted code should look like the following:_
+_Code converted from `main.go` should look like the following in `main.cs`:_
 ```c#
 namespace go.example.com;
 
@@ -269,19 +273,21 @@ internal static void Main() {
 **4 — C#: build the generated solution.** The app's per-project `.slnx` builds the app and its whole
 converted dependency tree; opening it in Visual Studio makes the app the startup project (F5 runs it):
 
-```shell
+```cmd
 cd "%GOPATH%\src\go2cs\src\example.com\colordemo\"
 dotnet build example.com.colordemo.slnx -c Debug
 ```
 
-**5 — C#: run the converted app.**
-```shell
+**5 — C#: run the converted app.** Navigate into the default .NET 9.0 debug build folder, and run demo:
+```cmd
+cd "bin\Debug\net9.0\"
 colordemo.exe
 ```
 _Expected output:_
+
 ![colorapp-output](images/colorapp-output.png)
 
-> Note: these conversion and build steps will produce a **buildable** — and increasingly **runnable** — solution handling common real-world module shapes. This simple `fatih/color` example **compiles clean** (app + all four dependency projects, against a current deploy) **and runs**. Running more complex projects to completion is a deeper milestone: the referenced standard library **compiles** but is not yet fully **operational**. *Running* is the **Phase-4** goal, see [`roadmap`](Roadmap.md#phase-4--convert-and-run-go-package-tests).
+> **NOTE:** these conversion and build steps will produce a **buildable** — and increasingly **runnable** — .NET-based solution handling common real-world Go module shapes. This simple `fatih/color` example **compiles clean** (app + all four dependency projects, against a current deploy) **and runs**. Running more complex projects to completion is a deeper milestone: the referenced standard library **compiles** but is not yet fully **operational**. *Running* is the **Phase-4** goal, see [`roadmap`](Roadmap.md#phase-4--convert-and-run-go-package-tests).
 
 ## Project layout
 
@@ -297,7 +303,7 @@ _Expected output:_
 
 Contributors: see [`CLAUDE.md`](../CLAUDE.md) for an architecture overview and
 [`Architecture.md`](Architecture.md), [`ConversionStrategies.md`](ConversionStrategies.md), and
-[`Roadmap.md`](Roadmap.md) for details.
+[`Roadmap.md`](Roadmap.md) for details. There's lots of low hanging fruit to be had here, jump in if you'd like to help...
 
 ## Status
 
@@ -307,8 +313,9 @@ behavioral test suite (371 Go-vs-C# regression projects). As of **2026-07-10 the
 the milestone, not yet full runtime parity: **converting and running the standard library's own tests is the
 ongoing Phase 4 work** — see the [roadmap](Roadmap.md#phase-4--convert-and-run-go-package-tests).
 
-Wondering how fast the transpiled C# runs compared to the original Go — including startup time, memory,
-and Native AOT builds? See the latest [performance comparison](Performance.md). Note that performance and optimizations are not the current focus, this kind of work is targeted for _after_ Phase 4 work.
+_Everyone asks:_ wondering how fast the transpiled C# runs compared to the original Go — including startup time, memory, and Native AOT builds? See the latest [performance comparison](Performance.md) — **`TL;DR`**: _no, it's not as fast as native Go, [nor is this an expected outcome](Background.md#converted-code)_. Save for some work with a [stack-based string](ConversionStrategies.md#stack-strings-sstring), performance and optimizations are not the current focus, this kind of work is targeted for _after_ Phase 4 work.
+
+What about newer versions of Go / .NET? Planned, but creating a baseline "here" to validate process and operations.
 
 ## Milestones
 
