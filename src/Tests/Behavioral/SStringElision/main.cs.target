@@ -5,24 +5,24 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void Main() {
-    var name = slice<byte>((@string)"go2cs");
+    var name = slice<byte>("go2cs"u8);
     sstring s = ((sstring)name);
     if (s == "go2cs"u8) {
         fmt.Println("match");
     }
-    var digits = slice<byte>((@string)"2468");
+    var digits = slice<byte>("2468"u8);
     sstring d = ((sstring)digits);
     fmt.Println((nint)d[0] + (nint)d[3] + len(d));
-    var scratch = slice<byte>((@string)"AB");
+    var scratch = slice<byte>("AB"u8);
     @string t = ((@string)scratch);
     scratch[0] = (rune)'X';
     if (t == "AB"u8) {
         fmt.Println("copy-safe");
     }
-    @string u = ((@string)slice<byte>((@string)"printed"));
+    @string u = ((@string)slice<byte>("printed"u8));
     fmt.Println(u);
     fmt.Println(returnedString());
-    var tag = slice<byte>((@string)"v2");
+    var tag = slice<byte>("v2"u8);
     sstring tagᴛ1 = ((sstring)tag);
     if (tagᴛ1 == "v2"u8) {
         fmt.Println("tagged");
@@ -31,23 +31,23 @@ internal static void Main() {
     if (tagᴛ1 == want) {
         fmt.Println("wanted");
     }
-    fmt.Println("classify:", classify(slice<byte>((@string)"rust")));
-    fmt.Println("pick:", pick(slice<byte>((@string)"b")));
-    fmt.Println("prefix:", prefix(slice<byte>((@string)"GET /x")));
-    fmt.Println("matchVar:", matchVar(slice<byte>((@string)"go2cs"), "go2cs"u8));
-    fmt.Println("matchField:", matchField(slice<byte>((@string)"prod"), new config(name: "prod"u8)));
-    fmt.Println("twoConv:", matchTwoConversions(slice<byte>((@string)"abc"), slice<byte>((@string)"abc")));
-    fmt.Println("callOperand:", staysHeapCallOperand(slice<byte>((@string)"y"), () => "y"u8));
-    fmt.Println("switchTag:", switchTag(slice<byte>((@string)"put")));
-    fmt.Println("switchLocal:", switchLocal(slice<byte>((@string)"off")));
-    fmt.Println("switchMagic:", switchMagic(slice<byte>((@string)"PK")));
-    fmt.Println("switchCall:", switchCall(slice<byte>((@string)"q")));
-    fmt.Println("concatLocal:", concatLocal(slice<byte>((@string)"go"), "2cs"u8));
-    fmt.Println("concatLit:", concatLit(slice<byte>((@string)"v")));
-    fmt.Println("concatVar:", concatVar(slice<byte>((@string)"k"), "v"u8));
-    fmt.Println("concatTwo:", concatTwo(slice<byte>((@string)"x"), slice<byte>((@string)"y")));
-    fmt.Println("concatCall:", concatCall(slice<byte>((@string)"q"), () => "z"u8));
-    fmt.Println("concatObj:", concatObj(slice<byte>((@string)"x")));
+    fmt.Println("classify:", classify(slice<byte>("rust"u8)));
+    fmt.Println("pick:", pick(slice<byte>("b"u8)));
+    fmt.Println("prefix:", prefix(slice<byte>("GET /x"u8)));
+    fmt.Println("matchVar:", matchVar(slice<byte>("go2cs"u8), "go2cs"u8));
+    fmt.Println("matchField:", matchField(slice<byte>("prod"u8), new config(name: "prod"u8)));
+    fmt.Println("twoConv:", matchTwoConversions(slice<byte>("abc"u8), slice<byte>("abc"u8)));
+    fmt.Println("callOperand:", staysHeapCallOperand(slice<byte>("y"u8), () => "y"u8));
+    fmt.Println("switchTag:", switchTag(slice<byte>("put"u8)));
+    fmt.Println("switchLocal:", switchLocal(slice<byte>("off"u8)));
+    fmt.Println("switchMagic:", switchMagic(slice<byte>("PK"u8)));
+    fmt.Println("switchCall:", switchCall(slice<byte>("q"u8)));
+    fmt.Println("concatLocal:", concatLocal(slice<byte>("go"u8), "2cs"u8));
+    fmt.Println("concatLit:", concatLit(slice<byte>("v"u8)));
+    fmt.Println("concatVar:", concatVar(slice<byte>("k"u8), "v"u8));
+    fmt.Println("concatTwo:", concatTwo(slice<byte>("x"u8), slice<byte>("y"u8)));
+    fmt.Println("concatCall:", concatCall(slice<byte>("q"u8), () => "z"u8));
+    fmt.Println("concatObj:", concatObj(slice<byte>("x"u8)));
 }
 
 internal static @string concatObj(slice<byte> b) {
@@ -152,7 +152,7 @@ internal static bool staysHeapCallOperand(slice<byte> a, Func<@string> next) {
 }
 
 internal static @string returnedString() {
-    var b = slice<byte>((@string)"returned");
+    var b = slice<byte>("returned"u8);
     @string r = ((@string)b);
     return r;
 }

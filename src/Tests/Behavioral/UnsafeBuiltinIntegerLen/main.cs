@@ -14,7 +14,7 @@ internal static void Main() {
     nuint m = 2;
     var s2 = @unsafe.Slice(Ꮡarr.at<int32>(0), m);
     fmt.Println(len(s2), s2[1]);
-    var bytes = slice<byte>((@string)"hello");
+    var bytes = slice<byte>("hello"u8);
     @string str = @unsafe.String(Ꮡ(bytes, 0), (uintptr)3);
     fmt.Println(str);
 }

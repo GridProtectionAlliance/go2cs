@@ -27,7 +27,7 @@ internal static void Main() {
     var r = ((runeSig)slice<rune>((@string)"héllo, 世界"u8));
     fmt.Println(len(r), ((@string)(slice<rune>)r));
     fmt.Println(r[1], r[7]);
-    var plain = slice<byte>((@string)"<?xml");
+    var plain = slice<byte>("<?xml"u8);
     fmt.Println(len(plain), ((@string)plain));
 }
 

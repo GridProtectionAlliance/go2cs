@@ -436,7 +436,9 @@ public static error Join(params ꓸꓸꓸerror errsʗp) {     // errors/join.cs
 ```
 
 A string↔bytes conversion is a cast over the golib types: `string(b.buf[b.off:])` →
-`(@string)(b.buf[(int)(b.off)..])`, and `[]byte(s)` → `slice<byte>(s)`.
+`(@string)(b.buf[(int)(b.off)..])`, and `[]byte(s)` → `slice<byte>(s)`. A `[]byte("literal")` over a
+plain-text string literal feeds the zero-allocation `u8` ROM span straight into the slice —
+`[]byte("hi")` → `slice<byte>("hi"u8)` — rather than round-tripping through a heap `@string`.
 
 **Full detail:** [Reference → Slices and Arrays](ConversionStrategies-Reference.md#slices-and-arrays) —
 named slice/array wrappers, string↔`[]byte`/`[]rune` conversions, high-`\x`-escape byte arrays, structural

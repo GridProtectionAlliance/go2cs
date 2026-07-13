@@ -1624,6 +1624,27 @@ public static class builtin
     }
 
     /// <summary>
+    /// Converts a C# read-only <paramref name="source"/> span to a Go <see cref="go.slice{T}"/> over a
+    /// detached copy of its elements.
+    /// </summary>
+    /// <typeparam name="T">Element type.</typeparam>
+    /// <param name="source">C# source span — most importantly a <c>"…"u8</c> literal (a zero-allocation
+    /// static ROM <see cref="ReadOnlySpan{T}"/>).</param>
+    /// <returns>Go <see cref="go.slice{T}"/> holding a copy of <paramref name="source"/>.</returns>
+    /// <remarks>
+    /// This is the emission for a <c>[]byte("…")</c> conversion of a plain-text string literal: the
+    /// <c>u8</c> ROM span feeds the slice directly (<c>slice&lt;byte&gt;("…"u8)</c>), skipping the
+    /// intermediate heap <see cref="@string"/> the older <c>slice&lt;byte&gt;((@string)"…")</c> form
+    /// allocated. Not ambiguous with the <c>T[]</c> overload above: a <c>u8</c> literal is a span (exact
+    /// match here), an <see cref="@string"/> converts to <c>byte[]</c> (exact match there) but not to a
+    /// span, and a <c>byte[]</c> binds the array overload.
+    /// </remarks>
+    public static slice<T> slice<T>(ReadOnlySpan<T> source)
+    {
+        return new slice<T>(source);
+    }
+
+    /// <summary>
     /// Projects a slice's elements into a widened target type via the supplied conversion.
     /// </summary>
     /// <typeparam name="T">Source element type.</typeparam>

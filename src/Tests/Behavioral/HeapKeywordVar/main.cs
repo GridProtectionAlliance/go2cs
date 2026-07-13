@@ -10,7 +10,7 @@ internal static void set(ж<nint> Ꮡp) {
     p = 42;
 }
 
-internal static ж<slice<byte>> Ꮡnull = new(slice<byte>((@string)"null"));
+internal static ж<slice<byte>> Ꮡnull = new(slice<byte>("null"u8));
 internal static ref slice<byte> @null => ref Ꮡnull.ValueSlot;
 
 [GoType] partial struct @decimal {

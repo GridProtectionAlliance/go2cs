@@ -37,10 +37,10 @@ internal static void Main() {
     fmt.Println("prefix too long:", prefixMatch(str, (@string)"hello world"));
     fmt.Println("last(string):", lastByte(str));
     fmt.Println("last([]byte):", lastByte(bs));
-    fmt.Println("sum:", digitSum((@string)"12:34"), digitSum(slice<byte>((@string)"56:78")));
-    fmt.Println("head:", headSum((@string)"x98:76"), headSum(slice<byte>((@string)"y10:23")));
+    fmt.Println("sum:", digitSum((@string)"12:34"), digitSum(slice<byte>("56:78"u8)));
+    fmt.Println("head:", headSum((@string)"x98:76"), headSum(slice<byte>("y10:23"u8)));
     fmt.Println("appendRun(string):", ((@string)appendRun(default!, (@string)"abcde")));
-    fmt.Println("appendRun([]byte):", ((@string)appendRun(slice<byte>((@string)"<"), slice<byte>((@string)"abcde"))));
+    fmt.Println("appendRun([]byte):", ((@string)appendRun(slice<byte>("<"u8), slice<byte>("abcde"u8))));
 }
 
 internal static nint digitSum<T>(T s)

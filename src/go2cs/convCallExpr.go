@@ -1542,6 +1542,24 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		}
 	}
 
+	// A `[]byte("literal")` over a plain-text string LITERAL feeds the `u8` ROM span straight into the
+	// slice — `slice<byte>("literal"u8)` — instead of routing through the heap `@string` the general
+	// `[]byte`/`[]rune` path emits (`slice<byte>((@string)"literal")`, via sourceIsRuneArray below). The
+	// `u8` literal is zero-allocation static ROM; golib's `slice<T>(ReadOnlySpan<T>)` copies it into the
+	// slice's backing array — one fewer allocation and a cleaner rendering. Gated to what `convBasicLit`
+	// renders as a `u8` span: a high-`\xHH`-byte literal stays the byte-array-backed `@string` (its bytes
+	// do not round-trip through `u8`), and a `[]rune` conversion needs `@string`'s rune decoding, so only
+	// `[]byte` qualifies. A string VARIABLE is already an `@string` and keeps the general path.
+	if funcTypeName == "[]byte" && len(callExpr.Args) == 1 {
+		if basicLit, ok := callExpr.Args[0].(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
+			if strings.HasPrefix(basicLit.Value, "`") || !stringLiteralNeedsByteArray(basicLit.Value) {
+				u8Context := DefaultBasicLitContext()
+				u8Context.u8StringOK = true
+				return fmt.Sprintf("slice<byte>(%s)", v.convExpr(basicLit, []ExprContext{u8Context}))
+			}
+		}
+	}
+
 	// An explicit slice conversion `[]E(x)` whose SOURCE is a ~[]E-constrained type
 	// parameter S is the EXPLICIT twin of the implicit wrapArgWithNew assignability path
 	// above (a value of S passed where a concrete []E is expected). The general call path

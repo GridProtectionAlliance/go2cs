@@ -292,7 +292,7 @@ internal static void Main() => func((defer, recover) => {
     var scan = makeScanner("p:"u8);
     var (scanName, scanData, scanErr) = scan("hello"u8);
     fmt.Println(scanName, ((@string)scanData), scanErr == default!);
-    var bbuf = slice<byte>((@string)"key");
+    var bbuf = slice<byte>("key"u8);
     bbuf = append(bbuf, (byte)(CrossPkgLib.Sep));
     var rbuf = new rune[]{(rune)'a'}.slice();
     rbuf = append(rbuf, (rune)(CrossPkgLib.Precision));
