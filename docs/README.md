@@ -8,7 +8,7 @@
 cleanly as .NET assemblies — zero errors, zero exclusions.** Every package you'd expect to be hard is
 in that number: `runtime`, `reflect`, `net/http`, `go/types`, `crypto/tls`, `database/sql`,
 `encoding/json`. The transpiled output is not a demo subset — it is the standard library, end to end,
-emitted by the converter, transpiled Go to C#, then compiled by Roslyn. NOTE: don't get _too_ excited, this is _fully compilable_ not _fully runnable_, that's the next phase! See [About Standard Library Compile Milestone](#about-standard-library-compile-milestone) for more details.
+emitted by the converter, transpiled Go to C#, then compiled by Roslyn. NOTE: don't get _too_ excited, this is _fully compilable_ not _fully runnable_, that's the next phase! However, simple apps will run, try [converting a real-world module](#converting-a-real-world-module). Read more about this [milestone's details](#about-standard-library-compile-milestone) and [current status](#status) below.
 
 * Browse transpiled code: [Converted Go Standard Library](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted)
 * Compile it yourself: [Visual Studio Go Standard Library Solution](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted.slnx)
@@ -198,7 +198,7 @@ analyzer at `%GOPATH%\src\go2cs` (the "deploy root") that every converted projec
 **one-time, per-machine** setup, unrelated to any particular app — **redo it only when you pull a new go2cs
 version**, to refresh the staged runtime/analyzer/stdlib:
 
-```cmd
+```shell
 cd path\to\go2cs\src
 deploy-core stdlib          :: the full compilable standard library (best for arbitrary imports)
 ```
@@ -206,7 +206,7 @@ deploy-core stdlib          :: the full compilable standard library (best for ar
 
 **2 — Go: get the app and confirm it builds as Go.**
 
-```cmd
+```shell
 mkdir colordemo && cd colordemo
 go mod init example.com/colordemo
 ```
@@ -228,7 +228,7 @@ Next, pin the app to a **Go 1.23-compatible** dependency set and confirm it buil
 
 > **NOTE:** _this pin is needed because go2cs is currently built with **Go 1.23** (see [status](#status)), so its type-checker can only read modules whose `go` directive — and their dependencies' — is **≤ 1.23**; the latest `fatih/color` (v1.19+) and `golang.org/x/sys` releases now require **Go 1.25**, which would make the conversion in step 3 fail with_ `package requires newer Go version go1.25`_. Future go2cs builds will work against newer Go toolchains and lift this constraint, letting an unpinned `go mod tidy` "just work"; until then, pin third-party dependencies as shown:_:
 
-```cmd
+```shell
 set GOTOOLCHAIN=local
 go get github.com/fatih/color@v1.18.0     :: a Go 1.23-era release (v1.19+ requires Go 1.25)
 go mod tidy                               :: download color + its (Go 1.23-era) dependencies
@@ -239,7 +239,7 @@ go build ./...                            :: baseline: confirm it compiles as Go
 converter* above, so it runs from anywhere. Point it at the **app** directory and at the deploy root from
 step 1 (the standard library staged there is referenced, not re-converted):
 
-```cmd
+```shell
 cd path\to\colordemo
 go2cs -recurse . -go2cspath %GOPATH%\src\go2cs
 ```
@@ -273,13 +273,13 @@ internal static void Main() {
 **4 — C#: build the generated solution.** The app's per-project `.slnx` builds the app and its whole
 converted dependency tree; opening it in Visual Studio makes the app the startup project (F5 runs it):
 
-```cmd
+```shell
 cd "%GOPATH%\src\go2cs\src\example.com\colordemo\"
 dotnet build example.com.colordemo.slnx -c Debug
 ```
 
 **5 — C#: run the converted app.** Navigate into the default .NET 9.0 debug build folder, and run demo:
-```cmd
+```shell
 cd "bin\Debug\net9.0\"
 colordemo.exe
 ```
