@@ -28,6 +28,8 @@
 // ReSharper disable BuiltInTypeReferenceStyle
 
 using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using go.golib;
 
@@ -104,7 +106,11 @@ public readonly ref struct sstring
             if (index < 0 || index >= m_value.Length)
                 throw RuntimeErrorPanic.IndexOutOfRange(index, m_value.Length);
 
-            return m_value[index];
+            // The bounds check above already validated the index, so read straight through the span's
+            // reference and skip the ReadOnlySpan indexer's OWN (now-redundant) bounds check — which
+            // Native AOT does not elide, making the plain `m_value[index]` measurably slower there than
+            // the equivalent byte[] index. Matches @string's effective cost.
+            return Unsafe.Add(ref MemoryMarshal.GetReference(m_value), index);
         }
     }
 
@@ -281,6 +287,71 @@ public readonly ref struct sstring
     public static bool operator >=(sstring a, sstring b)
     {
         return a.CompareTo(b) >= 0;
+    }
+
+    // Comparisons directly against a `ReadOnlySpan<byte>` — most importantly a `u8` string literal
+    // (`s == "…"u8`), which is zero-allocation static ROM. These compare the backing spans in place;
+    // without them the converter would have to render the literal as a plain C# string and let it
+    // convert to sstring (a per-comparison `UTF8.GetBytes` allocation) just to reuse the sstring-vs-
+    // sstring operators. The go2cs converter emits stack-string comparisons in this form.
+    public static bool operator ==(sstring a, ReadOnlySpan<byte> b)
+    {
+        return a.m_value.SequenceEqual(b);
+    }
+
+    public static bool operator !=(sstring a, ReadOnlySpan<byte> b)
+    {
+        return !a.m_value.SequenceEqual(b);
+    }
+
+    public static bool operator ==(ReadOnlySpan<byte> a, sstring b)
+    {
+        return a.SequenceEqual(b.m_value);
+    }
+
+    public static bool operator !=(ReadOnlySpan<byte> a, sstring b)
+    {
+        return !a.SequenceEqual(b.m_value);
+    }
+
+    public static bool operator <(sstring a, ReadOnlySpan<byte> b)
+    {
+        return a.m_value.SequenceCompareTo(b) < 0;
+    }
+
+    public static bool operator <=(sstring a, ReadOnlySpan<byte> b)
+    {
+        return a.m_value.SequenceCompareTo(b) <= 0;
+    }
+
+    public static bool operator >(sstring a, ReadOnlySpan<byte> b)
+    {
+        return a.m_value.SequenceCompareTo(b) > 0;
+    }
+
+    public static bool operator >=(sstring a, ReadOnlySpan<byte> b)
+    {
+        return a.m_value.SequenceCompareTo(b) >= 0;
+    }
+
+    public static bool operator <(ReadOnlySpan<byte> a, sstring b)
+    {
+        return a.SequenceCompareTo(b.m_value) < 0;
+    }
+
+    public static bool operator <=(ReadOnlySpan<byte> a, sstring b)
+    {
+        return a.SequenceCompareTo(b.m_value) <= 0;
+    }
+
+    public static bool operator >(ReadOnlySpan<byte> a, sstring b)
+    {
+        return a.SequenceCompareTo(b.m_value) > 0;
+    }
+
+    public static bool operator >=(ReadOnlySpan<byte> a, sstring b)
+    {
+        return a.SequenceCompareTo(b.m_value) >= 0;
     }
 
     #endregion

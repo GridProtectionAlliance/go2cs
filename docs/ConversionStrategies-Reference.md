@@ -1244,10 +1244,15 @@ a named `[]byte` would need a two-hop cast C# will not chain); it does not escap
 analysis detects; every use is a safe read — a `len`/`cap` argument, a byte index `s[i]`, or a comparison
 against a string literal — so anything else (passed to a function, stored, ranged, concatenated, RETURNED,
 reassigned) disqualifies it; and the source is never written except at its own declaration. Emission is
-three coordinated sites: `convCallExpr` retargets the conversion cast to `sstring` (after the Go→C# name
-map) under a transient flag; `visitAssignStmt` declares the explicit type as `sstring` and sets that flag
-around the RHS; and `convBinaryExpr` renders the literal in `s == "x"` as a plain C# string, not a `"…"u8`
-span (`ReadOnlySpan<byte>` converts to `sstring` only explicitly, but a plain string binds `sstring`'s `==`).
+two coordinated sites: `convCallExpr` retargets the conversion cast to `sstring` (after the Go→C# name
+map) under a transient flag; and `visitAssignStmt` declares the explicit type as `sstring` and sets that
+flag around the RHS. The comparison literal KEEPS its `"…"u8` `ReadOnlySpan<byte>` form: `sstring` has
+zero-allocation comparison operators against `ReadOnlySpan<byte>`, so `s == "x"u8` compares the backing
+spans in place. This is what makes the win real — rendering the literal as a plain C# string would force
+a `UTF8.GetBytes` allocation on every comparison, and `@string == "…"u8` allocates the literal-as-`@string`
+each time (a copy neither the JIT nor Native AOT elides); the `sstring` form is the only zero-allocation
+one. Measured: the comparison idiom (`string(buf) == "…"`) runs ~12× faster than `@string` on the JIT and
+~11× faster on Native AOT.
 
 Because `sstring` is a `ref struct`, the escapes the predicate does NOT enumerate (storing into a field/
 array/map, boxing to an interface, channel send, closure capture) are C# COMPILE errors, not silent bugs;
@@ -1259,9 +1264,10 @@ of a comparison against a string literal (`string(buf[:4]) == "ZLIB"`, `string(i
 and consumed *within the single comparison expression* — it can neither escape nor observe a mutation of its
 source before it is read (the literal has no side effects and `x` is evaluated once, so even inside a loop
 that mutates `x` between iterations each comparison sees exactly what a copy would) — so it is emitted as
-`(sstring)x` unconditionally (`markSStringComparisonConversions`, keyed per-`*ast.CallExpr`; `convBinaryExpr`
-suppresses the `"…"u8` form on the literal). It stays `@string` only when the other operand is not a literal
-(a variable would need the mixed `sstring == @string` operator, deliberately avoided). This common
+`(sstring)x` unconditionally (`markSStringComparisonConversions`, keyed per-`*ast.CallExpr`; the literal keeps
+its `"…"u8` span form and binds `sstring`'s zero-allocation `ReadOnlySpan<byte>` comparison operators). It
+stays `@string` only when the other operand is not a literal (a variable would need the mixed
+`sstring == @string` operator, deliberately avoided). This common
 byte-signature-check idiom lifts the Go-1.23 stdlib footprint from one site to ~23 across ~19 files
 (`debug/elf`·`macho`·`pe`, `encoding/json`, `image/gif`·`png`, `internal/chacha8rand`, `go/build`, …).
 

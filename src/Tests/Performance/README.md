@@ -19,6 +19,7 @@ where the two runtimes should be close. Results below give the "common expected"
 | **Sieve** | Sieve of Eratosthenes to 10M ×3: slice allocation, indexing, tight loops (`slice<T>` bounds/header emulation). |
 | **MatMul** | 256×256 `float64` matrix multiply ×4: floating-point throughput, nested slice-of-slice access. |
 | **String** | 10M iterations of byte-slice append → `string` conversion, indexing, concatenation (`@string` emulation). |
+| **StringView** | 20M iterations of keyword checks `string(buf) == "null"/"true"/"false"` over a fixed buffer — the idiom the converter's stack-string (`sstring`) emission optimizes: a zero-copy view compared against a `u8` literal span, no per-comparison allocation. |
 | **Map** | 2M inserts + 2M comma-ok lookups + 1M deletes on `map[int]int` (`map<K,V>` emulation). |
 | **Sort** | `sort.Ints` on 2M deterministic pseudo-random ints (`sort.Interface` dispatch through the runtime's reflection-bound `Interface<T>`). |
 | **Channel** | 1M ints producer→consumer through a buffered channel with one goroutine (`channel<T>` + goroutine scheduling emulation). |
@@ -77,6 +78,7 @@ C# builds: JIT = framework-dependent `Release`; Native AOT = `-p:PublishAot=true
 | Sieve | 73.1 | 98.2 (1.34×) | 135.7 (1.86×) |
 | MatMul | 54.5 | 139.8 (2.57×) | 201.7 (3.70×) |
 | String | 70.2 | 491.2 (7.00×) | 619.5 (8.83×) |
+| StringView † | 7.5 | 37.3 (4.99×) | 34.2 (4.58×) |
 | Map | 277.6 | 233.7 (0.84×) | 81.8 (0.29×) |
 | Sort | 113.1 | 384.7 (3.40×) | 409.0 (3.62×) |
 | Channel | 46.9 | 150.2 (3.20×) | 102.1 (2.18×) |
@@ -90,9 +92,12 @@ C# builds: JIT = framework-dependent `Release`; Native AOT = `-p:PublishAot=true
 | Sieve | 35.5 | 38.6 | 29.9 |
 | MatMul | 10.5 | 26.4 | 16.8 |
 | String | 5.4 | 40.4 | 28.8 |
+| StringView † | 5.4 | 21.6 | 10.7 |
 | Map | 158.7 | 138.6 | 128.3 |
 | Sort | 21.9 | 42.5 | 28.5 |
 | Channel | 5.4 | 39.8 | 10.8 |
+
+† StringView was measured separately on 2026-07-12 (the other rows are the 2026-07-02 batch); its ratios are the meaningful figure. A full `--update-readme` on a cool machine will fold it into a single consistent batch.
 
 <!-- PERF-RESULTS:END -->
 
@@ -112,7 +117,17 @@ What the numbers above actually show, and why:
 - **String:** the biggest honest gap (~7–9×): every `[]byte`→`string` round-trip is an allocation +
   copy through the `@string` emulation, plus the per-call `append` chain Go inlines to a few
   instructions. (Already down from ~11–14× — this suite caught a per-`append` array allocation and a
-  single-element slow path in `golib`; it remains the number to watch when optimizing `@string`.)
+  single-element slow path in `golib`; it remains the number to watch when optimizing `@string`.) The
+  String benchmark's conversions are all **ineligible** for the stack-string optimization (its `s` is a
+  concat operand and its buffer is mutated), so they stay `@string` — see StringView for the eligible case.
+- **StringView (~4.5–5×):** the same `[]byte`→`string` cost, but for the subset the converter can prove
+  non-escaping and used only in safe reads/comparisons — where it emits a zero-copy stack string
+  (`sstring`) instead of `@string` (see [ConversionStrategies-Reference](https://github.com/GridProtectionAlliance/go2cs/blob/master/docs/ConversionStrategies-Reference.md)).
+  Both runtimes already stack-allocate `@string`'s byte[] here, so the win is eliminating the per-comparison
+  **copy** and the **literal allocation** (`@string == "…"u8` materializes the literal every time; `sstring`
+  compares spans in place): in isolation the eligible comparison runs **~12× faster than `@string` on the
+  JIT and ~11× on Native AOT**. Closer to Go than String, and notably AOT ≈ JIT (unlike most rows). It is
+  the number to watch as the eligibility surface widens.
 - **Map:** the transpiled C# is *faster than Go* — `map<K,V>` rides .NET's heavily-optimized
   `Dictionary`, and the AOT build is ~3× faster than Go on this insert/lookup/delete churn.
 - **Sort (~3.5×):** the runtime's `sort.Interface` shim (`Interface<T>`) binds `Len`/`Less`/`Swap` via

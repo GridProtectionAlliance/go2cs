@@ -956,33 +956,6 @@ func isStringLiteralExpr(expr ast.Expr) bool {
 	return ok && lit.Kind == token.STRING
 }
 
-// exprIsSStringEligible reports whether expr is a plain identifier bound to an sstring-eligible local.
-func (v *Visitor) exprIsSStringEligible(expr ast.Expr) bool {
-	id, ok := expr.(*ast.Ident)
-
-	if !ok {
-		return false
-	}
-
-	obj := v.info.ObjectOf(id)
-
-	return obj != nil && v.sstringEligible[obj]
-}
-
-// exprEmitsSString reports whether expr will render as a stack string — an sstring-eligible local, or a
-// `string(x)` conversion marked to emit `(sstring)x`. Used to suppress the `"…"u8` form on the OTHER
-// operand of a comparison (a u8 span converts to sstring only explicitly; a plain string binds sstring's
-// operators implicitly).
-func (v *Visitor) exprEmitsSString(expr ast.Expr) bool {
-	if v.exprIsSStringEligible(expr) {
-		return true
-	}
-
-	call, ok := expr.(*ast.CallExpr)
-
-	return ok && v.sstringConvExprs[call]
-}
-
 func isComparisonOp(op token.Token) bool {
 	switch op {
 	case token.EQL, token.NEQ, token.LSS, token.LEQ, token.GTR, token.GEQ:
