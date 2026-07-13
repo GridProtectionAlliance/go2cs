@@ -1636,7 +1636,7 @@ internal static void cgoContextPCs(uintptr ctxt, slice<uintptr> buf) {
     ref var arg = ref heap<cgoTracebackArg>(out var Ꮡarg);
     arg = new cgoTracebackArg(
         context: ctxt,
-        buf: (ж<uintptr>)(uintptr)((uintptr)noescape(@unsafe.Pointer.FromRef(ref (Ꮡ(buf, 0)).Value))),
+        buf: Ꮡ(buf, 0),
         max: (uintptr)len(buf)
     );
     if (msanenabled) {

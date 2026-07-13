@@ -853,7 +853,7 @@ internal static void start(this ж<_panic> Ꮡp, uintptr pc, @unsafe.Pointer sp)
         return;
     }
     Δp.link = gp.Value._panic;
-    gp.Value._panic = (ж<_panic>)(uintptr)(noescape((uintptr)@unsafe.Pointer.FromRef(ref Δp)));
+    gp.Value._panic = Ꮡp;
     // Initialize state machine, and find the first frame with a defer.
     //
     // Note: We could use startPC and startSP here, but callers will

@@ -89,7 +89,7 @@ internal static ж<abi.Type> typ(this Value v) {
     // types, held in the central map). So there is no need to
     // escape types. noescape here help avoid unnecessary escape
     // of v.
-    return (ж<abi.Type>)(uintptr)(abi.NoEscape(new @unsafe.Pointer(v.typ_)));
+    return v.typ_;
 }
 
 // pointer returns the underlying pointer represented by v.

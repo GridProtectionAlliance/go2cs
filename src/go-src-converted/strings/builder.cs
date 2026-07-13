@@ -32,7 +32,7 @@ internal static void copyCheck(this ж<Builder> Ꮡb) {
         // See issue 23382.
         // TODO: once issue 7921 is fixed, this should be reverted to
         // just "b.addr = b".
-        b.addr = (ж<Builder>)(uintptr)(abi.NoEscape((uintptr)@unsafe.Pointer.FromRef(ref b)));
+        b.addr = Ꮡb;
     } else 
     if (b.addr != Ꮡb) {
         throw panic("strings: illegal use of non-zero Builder copied by value");

@@ -1351,7 +1351,7 @@ public static error /*err*/ SetsockoptInet4Addr(ΔHandle fd, nint level, nint op
     error err = default!;
 
     value = value.Clone();
-    return Setsockopt(fd, (int32)level, (int32)opt, (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡ(value).at<byte>(0))), 4);
+    return Setsockopt(fd, (int32)level, (int32)opt, Ꮡ(value).at<byte>(0), 4);
 }
 
 public static error /*err*/ SetsockoptIPMreq(ΔHandle fd, nint level, nint opt, ж<IPMreq> Ꮡmreq) {

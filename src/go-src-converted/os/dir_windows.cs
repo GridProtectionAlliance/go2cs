@@ -126,7 +126,7 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
         while (n != 0) {
             // Refill the buffer if necessary
             if ((~d).bufp == 0) {
-                err = windows.GetFileInformationByHandleEx(@file.pfd.Sysfd, (~d).@class, (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡ(((~d).buf.ValueSlot), 0))), (uint32)len((~d).buf.ValueSlot));
+                err = windows.GetFileInformationByHandleEx(@file.pfd.Sysfd, (~d).@class, Ꮡ(((~d).buf.ValueSlot), 0), (uint32)len((~d).buf.ValueSlot));
                 Δruntime.KeepAlive(Ꮡfile);
                 if (err != default!) {
                     if (AreEqual(err, syscall.ERROR_NO_MORE_FILES)) {

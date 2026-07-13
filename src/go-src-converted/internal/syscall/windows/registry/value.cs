@@ -50,7 +50,7 @@ public static (nint n, uint32 valtype, error err) GetValue(this Key k, @string n
     }
     ж<byte> pbuf = default!;
     if (len(buf) > 0) {
-        pbuf = (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡ(buf, 0)));
+        pbuf = Ꮡ(buf, 0);
     }
     ref var l = ref heap<uint32>(out var Ꮡl);
     l = (uint32)len(buf);
@@ -74,7 +74,7 @@ internal static (slice<byte> date, uint32 valtype, error err) getValue(this Key 
     ref var n = ref heap<uint32>(out var Ꮡn);
     n = (uint32)len(buf);
     while (ᐧ) {
-        err = syscall.RegQueryValueEx(((syscallꓸHandle)k), p, nil, Ꮡt, (ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡ(buf, 0))), Ꮡn);
+        err = syscall.RegQueryValueEx(((syscallꓸHandle)k), p, nil, Ꮡt, Ꮡ(buf, 0), Ꮡn);
         if (err == default!) {
             return (buf[..(int)(n)], t, default!);
         }

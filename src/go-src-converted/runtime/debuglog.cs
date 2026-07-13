@@ -778,7 +778,7 @@ internal static unsafe void printDebugLog() {
             pnano = 0;
         }
         var pnanoBytes = itoaDiv(tmpbuf[..], (uint64)pnano, 9);
-        print(slicebytetostringtmp((ж<byte>)(uintptr)(noescape(new @unsafe.Pointer(Ꮡ(pnanoBytes, 0)))), len(pnanoBytes)));
+        print(slicebytetostringtmp(Ꮡ(pnanoBytes, 0), len(pnanoBytes)));
         print(" P ", Δp, "] ");
         for (nint i = 0; (~s).begin < (~s).end; i++) {
             if (i > 0) {
