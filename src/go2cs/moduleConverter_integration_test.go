@@ -15,7 +15,7 @@ import (
 // closure is partitioned, the lib converts before the app (topological order), each converts into the
 // parallel tree under the deploy root (the app to src\, the dependency lib to pkg\ — keeping the Go
 // source pure), the cross-package call resolves, references wire to the lib ($(go2csPath)pkg) and the
-// stdlib ($(go2csPath)core), and a flat recurse solution is emitted. Deterministic and network-free.
+// stdlib ($(go2csPath)core), and a folder-grouped recurse solution is emitted. Deterministic and network-free.
 func TestRecurseSyntheticModule(t *testing.T) {
 	if testing.Short() {
 		t.Skip("integration test: loads the app's standard-library closure via go/packages")
@@ -104,6 +104,23 @@ func TestRecurseSyntheticModule(t *testing.T) {
 		if !strings.Contains(appSlnx, want) {
 			t.Errorf("app per-project solution missing %q:\n%s", want, appSlnx)
 		}
+	}
+
+	// Projects are grouped into the %GOPATH%-mirroring solution folders, emitted in the enforced
+	// src → pkg → core order (deliberately NOT alphabetic): the app under /src/, its converted dependency
+	// (lib) under /pkg/, and the runtime + analyzer under /core/.
+	for _, want := range []string{`<Folder Name="/src/">`, `<Folder Name="/pkg/">`, `<Folder Name="/core/">`} {
+		if !strings.Contains(appSlnx, want) {
+			t.Errorf("app per-project solution missing folder %q:\n%s", want, appSlnx)
+		}
+	}
+
+	srcIdx := strings.Index(appSlnx, `<Folder Name="/src/">`)
+	pkgIdx := strings.Index(appSlnx, `<Folder Name="/pkg/">`)
+	coreIdx := strings.Index(appSlnx, `<Folder Name="/core/">`)
+
+	if !(srcIdx < pkgIdx && pkgIdx < coreIdx) {
+		t.Errorf("solution folders not in enforced src→pkg→core order (src=%d pkg=%d core=%d):\n%s", srcIdx, pkgIdx, coreIdx, appSlnx)
 	}
 
 	// The app project is marked the Visual Studio default startup project.

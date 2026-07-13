@@ -378,7 +378,17 @@ byte-identical across all 371 behavioral projects at every step.
   lacked). Building the app's per-project solution builds the app and its whole dependency closure in one
   shot, without the ~300-project stdlib solution. *(The separate flat `go2cs-recurse.slnx` at the deploy root
   was removed as redundant — the app's own per-project solution already lists its whole converted dependency
-  closure, so it IS the build-everything solution for the app.)*
+  closure, so it IS the build-everything solution for the app.)* Projects are grouped into three top-level
+  solution folders that mirror the `%GOPATH%` layout — **`src`** for the project(s) being converted (the
+  app's own main-module packages), **`pkg`** for their converted dependency packages, and **`core`** for the
+  go2cs runtime/generator projects (`golib`, `go2cs-gen`) — emitted in that **enforced `src → pkg → core`
+  order** (deliberately not alphabetic). Classification is by import path (`isMainModulePackage`, the same
+  rule that routed each package's output to `src\`/`pkg\`), so the folders agree with the on-disk tree. An
+  empty folder is omitted (a dependency's own per-project solution has no `src` package), mirroring how the
+  stdlib solution drops its `/tests/` folder when empty. The three folder names are unique leaves, so —
+  unlike the namespace-nested stdlib solution — no folder `Id` is needed. (`buildRecurseSolutionXML`,
+  `solutionGenerator.go`; guarded by `TestBuildRecurseSolutionXML` + `TestBuildRecurseSolutionXMLSkipsEmptyFolders`
+  and the folder-order assertions in `TestRecurseSyntheticModule`.)
 - **R4 — acceptance.** With a **current** deploy root, the `fatih/color` example (app + `color` +
   `go-colorable` + `go-isatty` + `x/sys/windows` + golib + analyzer) **compiles clean — 0 errors, 0 MSB
   reference errors**. Two operational caveats learned here:

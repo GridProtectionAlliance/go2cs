@@ -239,19 +239,40 @@ func buildSolutionXML(coreProjects []string, testProjects []string) string {
 	return sb.String()
 }
 
-// buildFlatSolutionXML renders a flat .slnx (no namespace folders) over the given solution-relative
-// forward-slash project paths, used for a recurse per-project solution (ModuleConverter): the anchor
-// project + its converted dependencies + golib + the analyzer — a flat list tying them to the
-// pre-converted stdlib (referenced via $(go2csPath)core) for one dotnet build. The project whose path
-// equals startupProject is marked the Visual Studio default startup project via the .slnx
-// DefaultStartup attribute (pass "" for none). Callers sort the projects for deterministic output.
-func buildFlatSolutionXML(projects []string, startupProject string) string {
+// solutionFolder groups solution-relative (forward-slash) csproj paths under one top-level .slnx
+// solution folder. Name is the slash-wrapped display name (e.g. "/src/"); projects are its members,
+// sorted by the caller for deterministic output.
+type solutionFolder struct {
+	name     string
+	projects []string
+}
+
+// buildRecurseSolutionXML renders a recurse per-project solution (ModuleConverter): the anchor project +
+// its converted dependencies + golib + the analyzer, tying them to the pre-converted stdlib (referenced
+// via $(go2csPath)core) for one dotnet build. Projects are grouped into top-level solution folders that
+// mirror the %GOPATH% layout — `src` for the project(s) being converted (the app's own main-module
+// packages), `pkg` for their dependency packages, and `core` for the go2cs runtime/generator projects
+// (golib, go2cs-gen). Folders are emitted in the EXACT order the caller passes them — the enforced
+// src → pkg → core order, deliberately NOT alphabetic — and an empty folder is skipped (a dependency's own
+// solution has no src package, for instance). These three names are unique leaves, so no folder Id is
+// needed (unlike the namespace-nested stdlib solution). The project whose path equals startupProject is
+// marked the Visual Studio default startup project via the .slnx DefaultStartup attribute (pass "" for
+// none). Output uses CRLF line endings and no BOM, matching the other emitted solutions.
+func buildRecurseSolutionXML(folders []solutionFolder, startupProject string) string {
 	var sb strings.Builder
 
 	writeLine := func(indent int, text string) {
 		sb.WriteString(strings.Repeat("  ", indent))
 		sb.WriteString(text)
 		sb.WriteString("\r\n")
+	}
+
+	writeProject := func(indent int, project string) {
+		if project == startupProject {
+			writeLine(indent, fmt.Sprintf("<Project Path=\"%s\" DefaultStartup=\"true\" />", escapeXMLAttr(project)))
+		} else {
+			writeLine(indent, fmt.Sprintf("<Project Path=\"%s\" />", escapeXMLAttr(project)))
+		}
 	}
 
 	writeLine(0, "<Solution>")
@@ -262,12 +283,18 @@ func buildFlatSolutionXML(projects []string, startupProject string) string {
 	writeLine(2, "<Platform Name=\"x86\" />")
 	writeLine(1, "</Configurations>")
 
-	for _, project := range projects {
-		if project == startupProject {
-			writeLine(1, fmt.Sprintf("<Project Path=\"%s\" DefaultStartup=\"true\" />", escapeXMLAttr(project)))
-		} else {
-			writeLine(1, fmt.Sprintf("<Project Path=\"%s\" />", escapeXMLAttr(project)))
+	for _, folder := range folders {
+		if len(folder.projects) == 0 {
+			continue // skip an empty folder — e.g. a dependency's own solution has no src package
 		}
+
+		writeLine(1, fmt.Sprintf("<Folder Name=\"%s\">", escapeXMLAttr(folder.name)))
+
+		for _, project := range folder.projects {
+			writeProject(2, project)
+		}
+
+		writeLine(1, "</Folder>")
 	}
 
 	writeLine(0, "</Solution>")

@@ -362,9 +362,11 @@ func relSolutionPath(baseDir, target string) string {
 // analyzer. The standard library is referenced (via $(go2csPath)core), not listed. Building that one
 // solution builds the project and everything it needs from the convert-set — so the app (whose solution
 // lists its whole converted dependency closure) or any single package can be opened/built on its own.
-// The solution's own (anchor) project is marked the VS default startup project. Project paths are
-// relative to the .slnx's own directory; the runtime/analyzer live under the deploy root
-// ($(go2csPath)core\golib, $(go2csPath)gen\go2cs-gen).
+// The solution's own (anchor) project is marked the VS default startup project. Projects are grouped into
+// solution folders mirroring the %GOPATH% layout — the app's own (main-module) packages under src, their
+// dependency packages under pkg, and the go2cs runtime/analyzer under core — emitted in that enforced
+// order. Project paths are relative to the .slnx's own directory; the runtime/analyzer live under the
+// deploy root ($(go2csPath)core\golib, $(go2csPath)gen\go2cs-gen).
 func (m *ModuleConverter) generatePerProjectSolutions() {
 	golibCsproj := filepath.Join(m.options.go2csPath, "core", "golib", "golib.csproj")
 	genCsproj := filepath.Join(m.options.go2csPath, "gen", "go2cs-gen", "go2cs-gen.csproj")
@@ -380,29 +382,49 @@ func (m *ModuleConverter) generatePerProjectSolutions() {
 
 		projectDir := filepath.Dir(csproj)
 
-		// The project itself + every transitive converted dependency that also converted, then the
-		// shared runtime + analyzer.
-		members := []string{csproj}
+		// Group the anchor project + every transitive converted dependency by %GOPATH% root: the app's
+		// own (main-module) packages under src, their dependency packages under pkg. golib + the analyzer
+		// are the go2cs runtime under core. The standard library is referenced (via $(go2csPath)core),
+		// not listed. Classify by import path (the same rule that routed each package's output), so this
+		// agrees with the src\/pkg\ output tree regardless of the .slnx-relative path shape.
+		var srcProjects, pkgProjects []string
 
-		for _, dep := range m.transitiveConvertedDeps(pkgPath) {
-			if depCsproj, ok := m.convertedCsproj[dep]; ok {
-				members = append(members, depCsproj)
+		for _, importPath := range append([]string{pkgPath}, m.transitiveConvertedDeps(pkgPath)...) {
+			memberCsproj, ok := m.convertedCsproj[importPath]
+
+			if !ok {
+				continue // this dependency failed to convert — nothing to list
+			}
+
+			rel := relSolutionPath(projectDir, memberCsproj)
+
+			if isMainModulePackage(importPath, m.options.mainModulePath) {
+				srcProjects = append(srcProjects, rel)
+			} else {
+				pkgProjects = append(pkgProjects, rel)
 			}
 		}
 
-		members = append(members, golibCsproj, genCsproj)
+		coreProjects := []string{
+			relSolutionPath(projectDir, golibCsproj),
+			relSolutionPath(projectDir, genCsproj),
+		}
+
+		sort.Strings(srcProjects)
+		sort.Strings(pkgProjects)
+		sort.Strings(coreProjects)
+
+		// Enforced folder order — src, then pkg, then core — deliberately NOT alphabetic.
+		folders := []solutionFolder{
+			{name: "/src/", projects: srcProjects},
+			{name: "/pkg/", projects: pkgProjects},
+			{name: "/core/", projects: coreProjects},
+		}
 
 		// The solution's own project is its VS default startup project (for the app, the runnable exe).
 		anchorRel := relSolutionPath(projectDir, csproj)
-		rels := make([]string, 0, len(members))
 
-		for _, member := range members {
-			rels = append(rels, relSolutionPath(projectDir, member))
-		}
-
-		sort.Strings(rels)
-
-		contents := buildFlatSolutionXML(rels, anchorRel)
+		contents := buildRecurseSolutionXML(folders, anchorRel)
 		slnxFile := filepath.Join(projectDir, strings.TrimSuffix(filepath.Base(csproj), ".csproj")+".slnx")
 
 		if needToWriteFile(slnxFile, []byte(contents)) {

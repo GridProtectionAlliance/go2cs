@@ -58,45 +58,83 @@ func TestBuildSolutionXML(t *testing.T) {
 	}
 }
 
-// TestBuildFlatSolutionXML checks a per-project recurse solution (ModuleConverter): the config block, a
-// plain project list with NO <Folder> grouping, the startup (anchor) project marked DefaultStartup, CRLF
-// line endings, and no BOM. Third-party libs land under pkg/, and an app under src/ is the startup.
-func TestBuildFlatSolutionXML(t *testing.T) {
-	projects := []string{
-		"pkg/github.com/google/uuid/github.com.google.uuid.csproj",
-		"../cache-test/example.com.cachetest.csproj",
-	}
-	startup := "../cache-test/example.com.cachetest.csproj" // the app is the solution's startup project
+// TestBuildRecurseSolutionXML checks a per-project recurse solution (ModuleConverter): the config block,
+// the three %GOPATH%-mirroring solution folders in ENFORCED (non-alphabetic) order — /src/ then /pkg/ then
+// /core/ — the startup (anchor) app project marked DefaultStartup under /src/, third-party deps under
+// /pkg/, the runtime + analyzer under /core/, CRLF line endings, and no BOM.
+func TestBuildRecurseSolutionXML(t *testing.T) {
+	startup := "example.com.app.csproj" // the app is the solution's startup project
 
-	xml := buildFlatSolutionXML(projects, startup)
+	folders := []solutionFolder{
+		{name: "/src/", projects: []string{"example.com.app.csproj"}},
+		{name: "/pkg/", projects: []string{"../../pkg/github.com/google/uuid/github.com.google.uuid.csproj"}},
+		{name: "/core/", projects: []string{"../../core/golib/golib.csproj", "../../gen/go2cs-gen/go2cs-gen.csproj"}},
+	}
+
+	xml := buildRecurseSolutionXML(folders, startup)
 
 	wantContains := []string{
 		"<Solution>",
 		"<Configurations>",
 		"<Platform Name=\"Any CPU\" />",
-		"<Project Path=\"pkg/github.com/google/uuid/github.com.google.uuid.csproj\" />",
-		"<Project Path=\"../cache-test/example.com.cachetest.csproj\" DefaultStartup=\"true\" />",
+		"<Folder Name=\"/src/\">",
+		"<Project Path=\"example.com.app.csproj\" DefaultStartup=\"true\" />",
+		"<Folder Name=\"/pkg/\">",
+		"<Project Path=\"../../pkg/github.com/google/uuid/github.com.google.uuid.csproj\" />",
+		"<Folder Name=\"/core/\">",
+		"<Project Path=\"../../core/golib/golib.csproj\" />",
+		"<Project Path=\"../../gen/go2cs-gen/go2cs-gen.csproj\" />",
 		"</Solution>",
 	}
 
 	for _, want := range wantContains {
 		if !strings.Contains(xml, want) {
-			t.Errorf("flat solution XML missing %q\n---\n%s", want, xml)
+			t.Errorf("recurse solution XML missing %q\n---\n%s", want, xml)
 		}
 	}
 
-	// Flat: no namespace folder grouping.
-	if strings.Contains(xml, "<Folder") {
-		t.Errorf("flat solution must not contain <Folder> elements\n%s", xml)
+	// Enforced folder order: /src/ before /pkg/ before /core/ — deliberately NOT alphabetic.
+	srcIdx := strings.Index(xml, `<Folder Name="/src/">`)
+	pkgIdx := strings.Index(xml, `<Folder Name="/pkg/">`)
+	coreIdx := strings.Index(xml, `<Folder Name="/core/">`)
+
+	if !(srcIdx < pkgIdx && pkgIdx < coreIdx) {
+		t.Errorf("solution folders out of enforced order (src=%d pkg=%d core=%d):\n%s", srcIdx, pkgIdx, coreIdx, xml)
 	}
 
 	// No BOM; CRLF only.
 	if !strings.HasPrefix(xml, "<Solution>\r\n") {
-		t.Errorf("flat solution must start with <Solution> and CRLF, no BOM; got prefix %q", xml[:min(24, len(xml))])
+		t.Errorf("recurse solution must start with <Solution> and CRLF, no BOM; got prefix %q", xml[:min(24, len(xml))])
 	}
 
 	if strings.Contains(strings.ReplaceAll(xml, "\r\n", ""), "\n") {
-		t.Errorf("flat solution contains a bare LF; expected CRLF only")
+		t.Errorf("recurse solution contains a bare LF; expected CRLF only")
+	}
+}
+
+// TestBuildRecurseSolutionXMLSkipsEmptyFolders verifies a dependency package's own solution — which has no
+// main-module (src) project — omits the /src/ folder entirely while keeping /pkg/ and /core/ in enforced
+// order (mirroring how the /tests/ folder is omitted from the stdlib solution when empty).
+func TestBuildRecurseSolutionXMLSkipsEmptyFolders(t *testing.T) {
+	folders := []solutionFolder{
+		{name: "/src/", projects: nil},
+		{name: "/pkg/", projects: []string{"github.com.google.uuid.csproj"}},
+		{name: "/core/", projects: []string{"../../core/golib/golib.csproj", "../../gen/go2cs-gen/go2cs-gen.csproj"}},
+	}
+
+	xml := buildRecurseSolutionXML(folders, "github.com.google.uuid.csproj")
+
+	if strings.Contains(xml, `<Folder Name="/src/">`) {
+		t.Errorf("expected no /src/ folder when there are no main-module projects\n%s", xml)
+	}
+
+	if !strings.Contains(xml, `<Folder Name="/pkg/">`) || !strings.Contains(xml, `<Folder Name="/core/">`) {
+		t.Errorf("expected both /pkg/ and /core/ folders\n%s", xml)
+	}
+
+	// The third-party anchor is still the startup project in its own solution.
+	if !strings.Contains(xml, `<Project Path="github.com.google.uuid.csproj" DefaultStartup="true" />`) {
+		t.Errorf("dependency anchor should be marked DefaultStartup in its own solution\n%s", xml)
 	}
 }
 

@@ -110,7 +110,8 @@ using utf8 = go.unicode.utf8_package;    // one alias; per-file `package_info.cs
 **Full detail:** [Reference → Package Conversion](ConversionStrategies-Reference.md#package-conversion) —
 cross-package imports & assembly references, module-aware resolution, exported type aliases crossing
 packages (the `ꓸ`-qualified `global using` round-trip), cross-package interface-satisfaction witnesses,
-build-tag/`GOOS`/`GOARCH` file selection, and the auto-generated `.slnx` solution.
+build-tag/`GOOS`/`GOARCH` file selection, and the auto-generated `.slnx` solutions (the stdlib solution, and
+the `-recurse` per-project solutions grouped into `src`/`pkg`/`core` folders).
 
 ---
 
