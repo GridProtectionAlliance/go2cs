@@ -181,6 +181,12 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     private readonly bool m_isNull;
     private T m_val;
 
+    // Lazily-created pin of this box's fixed-array backing store, kept alive for the box's lifetime so a
+    // native syscall can write into the array data and the managed reads afterward observe the result.
+    // See the uintptr/void* operators and pinnedArrayData below. Freed when the box is collected (the
+    // PinnedBuffer finalizer releases the GCHandle).
+    private PinnedBuffer? m_pinnedArrayData;
+
     /// <summary>
     /// Creates a new pointer to heap allocated instance of type <typeparamref name="T"/>.
     /// </summary>
@@ -628,6 +634,13 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         if (value is null || value.IsNull)
             return default;
 
+        // A pointer to a Go fixed array (`unsafe.Pointer(&arr)`): the native address must reference the
+        // array's DATA (element 0), pinned so a syscall can fill it in and the managed reads afterward
+        // observe the result — not the transient address of the `array<T>` struct wrapper. Slices keep
+        // header semantics (`&s` is the slice header in Go), so they fall through to the value-slot path.
+        if (value.Value is IArray arr && arr is not ISlice)
+            return (uintptr)value.pinnedArrayData(arr);
+
         fixed (void* ptr = &value.Value)
             return (uintptr)ptr;
     }
@@ -644,8 +657,28 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         if (value is null || value.IsNull)
             return null;
 
+        // A pointer to a Go fixed array resolves to the pinned address of the array data — see the
+        // uintptr operator above for the full rationale.
+        if (value.Value is IArray arr && arr is not ISlice)
+            return value.pinnedArrayData(arr);
+
         fixed (T* ptr = &value.Value)
             return ptr;
+    }
+
+    // Returns a stable native pointer to the first element of this box's Go fixed-array data, pinning the
+    // backing store for the box's lifetime (freed when the box is collected). Used when a fixed array is
+    // handed to a native syscall as a read/write buffer via `unsafe.Pointer(&arr)`: the address must
+    // reference the array DATA — not the `array<T>` struct wrapper — and the data must not move while
+    // native code fills it in and while the value is read back afterward. Valid only for Go fixed arrays
+    // (`array<T>`, an IArray that is not an ISlice); a slice's `&s` addresses its header, not its data.
+    private unsafe void* pinnedArrayData(IArray arr)
+    {
+        // One stable pin per box: the syscall write and the subsequent managed reads must all see the
+        // same address. (Not locked — a syscall buffer is a function-local array, never shared; a rare
+        // concurrent first-touch would at worst leak one pinned handle to the finalizer.)
+        m_pinnedArrayData ??= new PinnedBuffer(arr.Source, arr.Length);
+        return m_pinnedArrayData.Pointer;
     }
 
     private static readonly bool IsReferenceType = default(T) is null;

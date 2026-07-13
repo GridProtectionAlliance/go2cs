@@ -283,6 +283,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
 
     [TestMethod]
+    public void CheckFixedArrayBufferPointer() => CheckTarget("FixedArrayBufferPointer");
+
+    [TestMethod]
     public void CheckFloatConstIntContext() => CheckTarget("FloatConstIntContext");
 
     [TestMethod]

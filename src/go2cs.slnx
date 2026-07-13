@@ -146,6 +146,7 @@
     <Project Path="Tests/Behavioral/FieldNamedAsType/FieldNamedAsType.csproj" />
     <Project Path="Tests/Behavioral/FileNameBuildConstraints/FileNameBuildConstraints.csproj" />
     <Project Path="Tests/Behavioral/FirstClassFunctions/FirstClassFunctions.csproj" />
+    <Project Path="Tests/Behavioral/FixedArrayBufferPointer/FixedArrayBufferPointer.csproj" />
     <Project Path="Tests/Behavioral/FloatConstIntContext/FloatConstIntContext.csproj" />
     <Project Path="Tests/Behavioral/ForInitMixedTypes/ForInitMixedTypes.csproj" />
     <Project Path="Tests/Behavioral/ForInitShadowedUse/ForInitShadowedUse.csproj" />

@@ -312,6 +312,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckFirstClassFunctions() => CheckTarget("FirstClassFunctions");
 
     [TestMethod]
+    public void CheckFixedArrayBufferPointer() => CheckTarget("FixedArrayBufferPointer");
+
+    [TestMethod]
     public void CheckFloatConstIntContext() => CheckTarget("FloatConstIntContext");
 
     [TestMethod]
