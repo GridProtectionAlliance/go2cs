@@ -190,7 +190,7 @@ Here is the full round-trip for a small CLI that uses [`github.com/fatih/color`]
 which itself pulls in `github.com/mattn/go-colorable`, `github.com/mattn/go-isatty`, and `golang.org/x/sys` —
 a genuine dependency graph:
 
-> _NOTE: the following steps have only been tested on Windows to date_
+> _NOTE: to date, the following steps have only been tested on Windows — instructions assume `cmd.exe` shell._
 
 **1 — Prerequisite: Stage the standard library (one-time).** `deploy-core` is a build script in the go2cs repo's **`src/`**
 folder (it is *not* on your `PATH`), so run it from there. It stages the pre-converted stdlib + runtime +
@@ -250,6 +250,22 @@ root, leaving your original Go source untouched. The converted app itself lands 
 Additionally, a per-project `.slnx` exists next to every generated `.csproj` — each with that project
 plus its converted dependencies, golib, and the analyzer (no stdlib).
 
+_Converted code should look like the following:_
+```c#
+namespace go.example.com;
+
+using color = github.com.fatih.color_package;
+using github.com.fatih;
+
+partial class main_package {
+
+internal static void Main() {
+    color.New(color.FgGreen, color.Bold).Println("hello from fatih/color");
+}
+
+} // end main_package
+```
+
 **4 — C#: build the generated solution.** The app's per-project `.slnx` builds the app and its whole
 converted dependency tree; opening it in Visual Studio makes the app the startup project (F5 runs it):
 
@@ -265,7 +281,7 @@ colordemo.exe
 _Expected output:_
 ![colorapp-output](images/colorapp-output.png)
 
-> Note: these steps produce a **buildable** — and increasingly **runnable** — solution and handle the common real-world module shapes. This simple `fatih/color` example **compiles clean** (app + all four dependency projects, against a current deploy) **and runs**. Running more complex projects to completion is a deeper milestone: the referenced standard library **compiles** but is not yet fully **operational**. *Running* is the **Phase-4** goal, see [`roadmap`](Roadmap.md#phase-4--convert-and-run-go-package-tests).
+> Note: these conversion and build steps will produce a **buildable** — and increasingly **runnable** — solution handling common real-world module shapes. This simple `fatih/color` example **compiles clean** (app + all four dependency projects, against a current deploy) **and runs**. Running more complex projects to completion is a deeper milestone: the referenced standard library **compiles** but is not yet fully **operational**. *Running* is the **Phase-4** goal, see [`roadmap`](Roadmap.md#phase-4--convert-and-run-go-package-tests).
 
 ## Project layout
 
