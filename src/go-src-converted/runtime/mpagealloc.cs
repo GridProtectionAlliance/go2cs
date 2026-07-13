@@ -279,7 +279,7 @@ internal static void init(this ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sy
         // of pages we need to represent at the root level, in a summary, which
         // is a big problem. Throw.
         print("runtime: root level max pages = ", (1 << (int)(levelLogPages[0])), "\n");
-        print("runtime: summary max pages = ", maxPackedValue, "\n");
+        print("runtime: summary max pages = ", (nint)(maxPackedValue), "\n");
         @throw("root level max pages doesn't fit in summary"u8);
     }
     Δp.sysStat = ᏑsysStat;
@@ -792,7 +792,7 @@ break_nextLevel:;
         // We couldn't find any space in this chunk despite the summaries telling
         // us it should be there. There's likely a bug, so dump some state and throw.
         var sum = Δp.summary[len(Δp.summary) - 1][i];
-        print("runtime: summary[", len(Δp.summary) - 1, "][", i, "] = (", sum.start(), ", ", sum.max(), ", ", sum.end(), ")\n");
+        print("runtime: summary[", (nint)(len(Δp.summary) - 1), "][", i, "] = (", sum.start(), ", ", sum.max(), ", ", sum.end(), ")\n");
         print("runtime: npages = ", npages, "\n");
         @throw("bad summary data"u8);
     }

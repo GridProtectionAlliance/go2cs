@@ -31,7 +31,7 @@ public static void Free(this ж<Buffer> Ꮡb) {
     UntypedInt maxBufferSize = /* 16 << 10 */ 16384;
     if (cap(b) <= maxBufferSize) {
         b = (b)[..0];
-        ᏑbufPool.Put(b);
+        ᏑbufPool.Put(Ꮡb);
     }
 }
 

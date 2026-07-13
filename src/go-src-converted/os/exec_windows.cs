@@ -61,8 +61,6 @@ internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
 }
 
 internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) => func<error>((defer, recover) => {
-    ref var p = ref Ꮡp.Value;
-
     var (handle, status) = Ꮡp.handleTransientAcquire();
     var exprᴛ1 = status;
     if (exprᴛ1 == statusDone) {
@@ -79,7 +77,7 @@ internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) => func<error>
         if (e != default!) {
             return NewSyscallError("DuplicateHandle"u8, e);
         }
-        Δruntime.KeepAlive(p);
+        Δruntime.KeepAlive(Ꮡp);
         deferǃ(syscall.CloseHandle, terminationHandle, defer);
         e = syscall.TerminateProcess(terminationHandle, 1);
         return NewSyscallError("TerminateProcess"u8, e);
@@ -89,8 +87,6 @@ internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) => func<error>
 });
 
 internal static error release(this ж<Process> Ꮡp) {
-    ref var p = ref Ꮡp.Value;
-
     // Drop the Process' reference and mark handle unusable for
     // future calls.
     //
@@ -102,7 +98,7 @@ internal static error release(this ж<Process> Ꮡp) {
         }
     }
     // no need for a finalizer anymore
-    Δruntime.SetFinalizer(p, default!);
+    Δruntime.SetFinalizer(Ꮡp, default!);
     return default!;
 }
 

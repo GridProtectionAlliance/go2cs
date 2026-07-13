@@ -159,14 +159,12 @@ internal static void trace1(this ж<timer> Ꮡt, @string op) {
     if (!t.isChan) {
         bits[3] = "-"u8;
     }
-    print("T ", t, " ", bits[0], bits[1], bits[2], bits[3], " b=", t.blocked, " ", op, "\n");
+    print("T ", Ꮡt, " ", bits[0], bits[1], bits[2], bits[3], " b=", t.blocked, " ", op, "\n");
 }
 
 internal static void trace(this ж<timers> Ꮡts, @string op) {
-    ref var ts = ref Ꮡts.Value;
-
     if (timerDebug) {
-        println("TS", ts, op);
+        println("TS", Ꮡts, op);
     }
 }
 

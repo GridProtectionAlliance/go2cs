@@ -80,7 +80,7 @@ internal static bool /*_*/ builtin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
             msg = "too many"u8;
         }
         if (msg != ""u8) {
-            Ꮡcheck.errorf(argErrPos(Ꮡcall), WrongArgCount, invalidOp + "%s arguments for %v (expected %d, found %d)", msg, call, bin.nargs, nargs);
+            Ꮡcheck.errorf(argErrPos(Ꮡcall), WrongArgCount, invalidOp + "%s arguments for %v (expected %d, found %d)", msg, Ꮡcall, bin.nargs, nargs);
             return default!;
         }
     }
@@ -107,15 +107,15 @@ internal static bool /*_*/ builtin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
                     case {} when isTypeParam(S): {
                         {
                             var u = coreType(S); if (u != default!){
-                                cause = Ꮡcheck.sprintf("%s has core type %s"u8, x, u);
+                                cause = Ꮡcheck.sprintf("%s has core type %s"u8, Ꮡx, u);
                             } else {
-                                cause = Ꮡcheck.sprintf("%s has no core type"u8, x);
+                                cause = Ꮡcheck.sprintf("%s has no core type"u8, Ꮡx);
                             }
                         }
                         break;
                     }
                     default: {
-                        cause = Ꮡcheck.sprintf("have %s"u8, x);
+                        cause = Ꮡcheck.sprintf("have %s"u8, Ꮡx);
                         break;
                     }}
 
@@ -244,7 +244,7 @@ internal static bool /*_*/ builtin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
                 if (id == _Len) {
                     code = InvalidLen;
                 }
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, invalidArg + "%s for built-in %s", x, bin.name);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, invalidArg + "%s for built-in %s", Ꮡx, bin.name);
             }
             return default!;
         }
@@ -266,7 +266,7 @@ internal static bool /*_*/ builtin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
                 return true;
             }}
 
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidClear, invalidArg + "cannot clear %s: argument must be (or constrained by) map or slice", Ꮡx.Value);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidClear, invalidArg + "cannot clear %s: argument must be (or constrained by) map or slice", Ꮡx);
             return false;
         })) {
             return default!;
@@ -281,11 +281,11 @@ internal static bool /*_*/ builtin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
  (ΔType u) => {
             var (uch, _) = u._<ж<Chan>>(ᐧ);
             if (uch == nil) {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidClose, invalidOp + "cannot close non-channel %s", Ꮡx.Value);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidClose, invalidOp + "cannot close non-channel %s", Ꮡx);
                 return false;
             }
             if ((~uch).dir == RecvOnly) {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidClose, invalidOp + "cannot close receive-only channel %s", Ꮡx.Value);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidClose, invalidOp + "cannot close receive-only channel %s", Ꮡx);
                 return false;
             }
             return true;
@@ -354,7 +354,7 @@ internal static bool /*_*/ builtin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
         }
         if (!Identical(x.typ, // both argument types must be identical
  (~y).typ)) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidComplex, invalidOp + "%v (mismatched types %s and %s)", call, x.typ, (~y).typ);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidComplex, invalidOp + "%v (mismatched types %s and %s)", Ꮡcall, x.typ, (~y).typ);
             return default!;
         }
         var f = ΔType (ΔType typ) => {
@@ -404,11 +404,11 @@ internal static bool /*_*/ builtin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
         }
         var (src, _) = src0._<ж<Slice>>(ᐧ);
         if (dst == nil || src == nil) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidCopy, invalidArg + "copy expects slice arguments; found %s and %s", x, y);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidCopy, invalidArg + "copy expects slice arguments; found %s and %s", Ꮡx, y);
             return default!;
         }
         if (!Identical((~dst).elem, (~src).elem)) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidCopy, invalidArg + "arguments to copy %s and %s have different element types %s and %s", x, y, (~dst).elem, (~src).elem);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidCopy, invalidArg + "arguments to copy %s and %s have different element types %s and %s", Ꮡx, y, (~dst).elem, (~src).elem);
             return default!;
         }
         if (check.recordTypes()) {
@@ -426,11 +426,11 @@ internal static bool /*_*/ builtin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
         if (!underIs(map_, (ΔType u) => {
             var (map_Δ1, _) = u._<ж<Map>>(ᐧ);
             if (map_Δ1 == nil) {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidDelete, invalidArg + "%s is not a map", Ꮡx.Value);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidDelete, invalidArg + "%s is not a map", Ꮡx);
                 return false;
             }
             if (Ꮡkey.ValueSlot != default! && !Identical((~map_Δ1).key, Ꮡkey.ValueSlot)) {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidDelete, invalidArg + "maps of %s must have identical key types", Ꮡx.Value);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidDelete, invalidArg + "maps of %s must have identical key types", Ꮡx);
                 return false;
             }
             Ꮡkey.ValueSlot = map_Δ1.Value.key;
@@ -547,7 +547,7 @@ internal static bool /*_*/ builtin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
         }}
 
         if (nargs < min || min + 1 < nargs) {
-            Ꮡcheck.errorf(new ast_CallExprжpositioner(Ꮡcall), WrongArgCount, invalidOp + "%v expects %d or %d arguments; found %d", call, min, min + 1, nargs);
+            Ꮡcheck.errorf(new ast_CallExprжpositioner(Ꮡcall), WrongArgCount, invalidOp + "%v expects %d or %d arguments; found %d", Ꮡcall, min, min + 1, nargs);
             return default!;
         }
         var types = new ΔType[]{T}.slice();
@@ -782,7 +782,7 @@ internal static bool /*_*/ builtin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
         } else {
             var offs = check.conf.offsetof(@base, index);
             if (offs < 0) {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), TypeTooLarge, "%s is too large"u8, x);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), TypeTooLarge, "%s is too large"u8, Ꮡx);
                 return default!;
             }
             x.mode = constant_;
@@ -805,7 +805,7 @@ internal static bool /*_*/ builtin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
         } else {
             var size = check.conf.@sizeof(x.typ);
             if (size < 0) {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), TypeTooLarge, "%s is too large"u8, x);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), TypeTooLarge, "%s is too large"u8, Ꮡx);
                 return default!;
             }
             x.mode = constant_;
@@ -819,7 +819,7 @@ internal static bool /*_*/ builtin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
  go1_17, "unsafe.Slice"u8);
         var (ptr, _) = coreType(x.typ)._<ж<Pointer>>(ᐧ);
         if (ptr == nil) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidUnsafeSlice, invalidArg + "%s is not a pointer", x);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidUnsafeSlice, invalidArg + "%s is not a pointer", Ꮡx);
             return default!;
         }
         var y = args[1];
@@ -837,7 +837,7 @@ internal static bool /*_*/ builtin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
  go1_20, "unsafe.SliceData"u8);
         var (Δslice, _) = coreType(x.typ)._<ж<Slice>>(ᐧ);
         if (Δslice == nil) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidUnsafeSliceData, invalidArg + "%s is not a slice", x);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidUnsafeSliceData, invalidArg + "%s is not a slice", Ꮡx);
             return default!;
         }
         x.mode = value;
@@ -881,15 +881,15 @@ internal static bool /*_*/ builtin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
             // assert(pred) causes a typechecker error if pred is false.
             // The result of assert is the value of pred if there is no error.
             // Note: assert is only available in self-test mode.
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), Test, invalidArg + "%s is not a boolean constant", x);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), Test, invalidArg + "%s is not a boolean constant", Ꮡx);
             return default!;
         }
         if (x.val.Kind() != constant.Bool) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), Test, "internal error: value of %s should be a boolean constant"u8, x);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), Test, "internal error: value of %s should be a boolean constant"u8, Ꮡx);
             return default!;
         }
         if (!constant.BoolVal(x.val)) {
-            Ꮡcheck.errorf(new ast_CallExprжpositioner(Ꮡcall), Test, "%v failed"u8, call);
+            Ꮡcheck.errorf(new ast_CallExprжpositioner(Ꮡcall), Test, "%v failed"u8, Ꮡcall);
         }
     }
     else if (exprᴛ2 == _Trace) {
@@ -1034,7 +1034,7 @@ internal static ΔType applyTypeFunc(this ж<Checker> Ꮡcheck, Func<ΔType, ΔT
                 throw panic("unreachable");
             }
 
-            Ꮡcheck.softErrorf(new operandжpositioner(Ꮡx), code, "%s not supported as argument to built-in %s for go1.18 (see go.dev/issue/50937)"u8, x, predeclaredFuncs[id].name);
+            Ꮡcheck.softErrorf(new operandжpositioner(Ꮡx), code, "%s not supported as argument to built-in %s for go1.18 (see go.dev/issue/50937)"u8, Ꮡx, predeclaredFuncs[id].name);
             // Construct a suitable new type parameter for the result type.
             // The type parameter is placed in the current package so export/import
             // works as expected.

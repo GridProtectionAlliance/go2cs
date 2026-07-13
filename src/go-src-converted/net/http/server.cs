@@ -844,10 +844,8 @@ internal static ж<bufio.Reader> newBufioReader(io.Reader r) {
 //
 //go:linkname putBufioReader
 internal static void putBufioReader(ж<bufio.Reader> Ꮡbr) {
-    ref var br = ref Ꮡbr.Value;
-
     Ꮡbr.Reset(default!);
-    ᏑbufioReaderPool.Put(br);
+    ᏑbufioReaderPool.Put(Ꮡbr);
 }
 
 // newBufioWriterSize should be an internal detail,
@@ -888,7 +886,7 @@ internal static void putBufioWriter(ж<bufio.Writer> Ꮡbw) {
     Ꮡbw.Reset(default!);
     {
         var pool = bufioWriterPool(bw.Available()); if (pool != nil) {
-            pool.Put(bw);
+            pool.Put(Ꮡbw);
         }
     }
 }
@@ -3362,7 +3360,7 @@ public static error Serve(this ж<Server> Ꮡsrv, net.Listener l) => func((defer
         }
     }
     time.Duration tempDelay = default!;                   // how long to sleep on accept failure
-    var ctx = context_package.WithValue(baseCtx, ServerContextKey, srv);
+    var ctx = context_package.WithValue(baseCtx, ServerContextKey, Ꮡsrv);
     while (ᐧ) {
         var (rw, err) = l.Accept();
         if (err != default!) {

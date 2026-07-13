@@ -429,13 +429,12 @@ internal static bool isLitOrSingle(segment seg) {
 // describeConflict returns an explanation of why two patterns conflict.
 internal static @string describeConflict(ж<pattern> Ꮡp1, ж<pattern> Ꮡp2) {
     ref var p1 = ref Ꮡp1.Value;
-    ref var p2 = ref Ꮡp2.Value;
 
     relationship mrel = p1.compareMethods(Ꮡp2);
     relationship prel = p1.comparePaths(Ꮡp2);
     relationship rel = combineRelationships(mrel, prel);
     if (rel == equivalent) {
-        return fmt.Sprintf("%s matches the same requests as %s"u8, p1, p2);
+        return fmt.Sprintf("%s matches the same requests as %s"u8, Ꮡp1, Ꮡp2);
     }
     if (rel != overlaps) {
         throw panic("describeConflict called with non-conflicting patterns");
@@ -447,15 +446,15 @@ But neither is more specific than the other.
 %[1]s matches %[4]q, but %[2]s doesn't.
 %[2]s matches %[5]q, but %[1]s doesn't.
 """u8,
-            p1, p2, commonPath(Ꮡp1, Ꮡp2), differencePath(Ꮡp1, Ꮡp2), differencePath(Ꮡp2, Ꮡp1));
+            Ꮡp1, Ꮡp2, commonPath(Ꮡp1, Ꮡp2), differencePath(Ꮡp1, Ꮡp2), differencePath(Ꮡp2, Ꮡp1));
     }
     if (mrel == moreGeneral && prel == moreSpecific) {
-        return fmt.Sprintf("%s matches more methods than %s, but has a more specific path pattern"u8, p1, p2);
+        return fmt.Sprintf("%s matches more methods than %s, but has a more specific path pattern"u8, Ꮡp1, Ꮡp2);
     }
     if (mrel == moreSpecific && prel == moreGeneral) {
-        return fmt.Sprintf("%s matches fewer methods than %s, but has a more general path pattern"u8, p1, p2);
+        return fmt.Sprintf("%s matches fewer methods than %s, but has a more general path pattern"u8, Ꮡp1, Ꮡp2);
     }
-    return fmt.Sprintf("bug: unexpected way for two patterns %s and %s to conflict: methods %s, paths %s"u8, p1, p2, mrel, prel);
+    return fmt.Sprintf("bug: unexpected way for two patterns %s and %s to conflict: methods %s, paths %s"u8, Ꮡp1, Ꮡp2, mrel, prel);
 }
 
 // writeMatchingPath writes to b a path that matches the segments.

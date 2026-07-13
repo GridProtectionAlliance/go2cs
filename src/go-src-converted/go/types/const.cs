@@ -315,8 +315,6 @@ internal static (constant.Value, errors.Code) representation(this ж<Checker> �
 }
 
 internal static void invalidConversion(this ж<Checker> Ꮡcheck, errors.Code code, ж<operand> Ꮡx, ΔType target) {
-    ref var x = ref Ꮡx.Value;
-
     @string msg = "cannot convert %s to type %s"u8;
     var exprᴛ1 = code;
     if (exprᴛ1 == TruncatedFloat) {
@@ -326,7 +324,7 @@ internal static void invalidConversion(this ж<Checker> Ꮡcheck, errors.Code co
         msg = "%s overflows %s"u8;
     }
 
-    Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, msg, x, target);
+    Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, msg, Ꮡx, target);
 }
 
 // convertUntyped attempts to set the type of an untyped value to the target type.

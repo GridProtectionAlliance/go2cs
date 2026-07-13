@@ -84,32 +84,24 @@ done:
 }
 
 internal static error setReadBuffer(ж<netFD> Ꮡfd, nint bytes) {
-    ref var fd = ref Ꮡfd.Value;
-
     var err = Ꮡfd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.SOL_SOCKET, syscall.SO_RCVBUF, bytes);
-    Δruntime.KeepAlive(fd);
+    Δruntime.KeepAlive(Ꮡfd);
     return wrapSyscallError("setsockopt"u8, err);
 }
 
 internal static error setWriteBuffer(ж<netFD> Ꮡfd, nint bytes) {
-    ref var fd = ref Ꮡfd.Value;
-
     var err = Ꮡfd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.SOL_SOCKET, syscall.SO_SNDBUF, bytes);
-    Δruntime.KeepAlive(fd);
+    Δruntime.KeepAlive(Ꮡfd);
     return wrapSyscallError("setsockopt"u8, err);
 }
 
 internal static error setKeepAlive(ж<netFD> Ꮡfd, bool keepalive) {
-    ref var fd = ref Ꮡfd.Value;
-
     var err = Ꮡfd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.SOL_SOCKET, syscall.SO_KEEPALIVE, boolint(keepalive));
-    Δruntime.KeepAlive(fd);
+    Δruntime.KeepAlive(Ꮡfd);
     return wrapSyscallError("setsockopt"u8, err);
 }
 
 internal static error setLinger(ж<netFD> Ꮡfd, nint sec) {
-    ref var fd = ref Ꮡfd.Value;
-
     ref var l = ref heap(new syscall.Linger(), out var Ꮡl);
     if (sec >= 0){
         l.Onoff = 1;
@@ -119,7 +111,7 @@ internal static error setLinger(ж<netFD> Ꮡfd, nint sec) {
         l.ΔLinger = 0;
     }
     var err = Ꮡfd.of(netFD.Ꮡpfd).SetsockoptLinger(syscall.SOL_SOCKET, syscall.SO_LINGER, Ꮡl);
-    Δruntime.KeepAlive(fd);
+    Δruntime.KeepAlive(Ꮡfd);
     return wrapSyscallError("setsockopt"u8, err);
 }
 

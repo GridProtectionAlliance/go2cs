@@ -57,7 +57,7 @@ internal static (ж<Process> p, error err) startProcess(@string name, slice<@str
     }
     var (pid, h, e) = syscall.StartProcess(name, argv, sysattr);
     // Make sure we don't run the finalizers of attr.Files.
-    Δruntime.KeepAlive(attr);
+    Δruntime.KeepAlive(Ꮡattr);
     if (e != default!) {
         return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "fork/exec"u8, Path: name, Err: e))));
     }

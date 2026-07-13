@@ -1443,7 +1443,7 @@ internal static void free(this ж<printer> Ꮡp) {
     if (cap(p.output) > (64 << (int)(10))) {
         return;
     }
-    ᏑprinterPool.Put(p);
+    ᏑprinterPool.Put(Ꮡp);
 }
 
 // fprint implements Fprint and takes a nodesSizes map for setting up the printer state.

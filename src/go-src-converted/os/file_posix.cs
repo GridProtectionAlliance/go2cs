@@ -32,9 +32,8 @@ internal static (nint n, error err) read(this ж<File> Ꮡf, slice<byte> b) {
     nint n = default!;
     error err = default!;
 
-    ref var f = ref Ꮡf.Value;
     (n, err) = Ꮡf.of(File.Ꮡpfd).Read(b);
-    Δruntime.KeepAlive(f);
+    Δruntime.KeepAlive(Ꮡf);
     return (n, err);
 }
 
@@ -45,9 +44,8 @@ internal static (nint n, error err) pread(this ж<File> Ꮡf, slice<byte> b, int
     nint n = default!;
     error err = default!;
 
-    ref var f = ref Ꮡf.Value;
     (n, err) = Ꮡf.of(File.Ꮡpfd).Pread(b, off);
-    Δruntime.KeepAlive(f);
+    Δruntime.KeepAlive(Ꮡf);
     return (n, err);
 }
 
@@ -57,9 +55,8 @@ internal static (nint n, error err) write(this ж<File> Ꮡf, slice<byte> b) {
     nint n = default!;
     error err = default!;
 
-    ref var f = ref Ꮡf.Value;
     (n, err) = Ꮡf.of(File.Ꮡpfd).Write(b);
-    Δruntime.KeepAlive(f);
+    Δruntime.KeepAlive(Ꮡf);
     return (n, err);
 }
 
@@ -69,9 +66,8 @@ internal static (nint n, error err) pwrite(this ж<File> Ꮡf, slice<byte> b, in
     nint n = default!;
     error err = default!;
 
-    ref var f = ref Ꮡf.Value;
     (n, err) = Ꮡf.of(File.Ꮡpfd).Pwrite(b, off);
-    Δruntime.KeepAlive(f);
+    Δruntime.KeepAlive(Ꮡf);
     return (n, err);
 }
 

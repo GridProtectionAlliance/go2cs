@@ -654,12 +654,12 @@ internal static ΔType expandUnderlying(this ж<Named> Ꮡn) => func((defer, rec
 
     var check = n.check;
     if (check != nil && (~(~check).conf)._Trace) {
-        check.trace((~n.obj).pos, "-- Named.expandUnderlying %s"u8, n);
+        check.trace((~n.obj).pos, "-- Named.expandUnderlying %s"u8, Ꮡn);
         check.Value.indent++;
         var checkʗ1 = check;
         defer(() => {
             checkʗ1.Value.indent--;
-            checkʗ1.trace((~Ꮡn.Value.obj).pos, "=> %s (tparams = %s, under = %s)"u8, Ꮡn.Value, Ꮡn.Value.tparams.list(), Ꮡn.Value.underlying);
+            checkʗ1.trace((~Ꮡn.Value.obj).pos, "=> %s (tparams = %s, under = %s)"u8, Ꮡn, Ꮡn.Value.tparams.list(), Ꮡn.Value.underlying);
         });
     }
     assert((~(~n.inst).orig).underlying != default!);

@@ -296,7 +296,7 @@ internal static void init(this ж<scavengerState> Ꮡs) {
     var f = (any sΔ1, uintptr _Δp1, int64 _Δp2) => {
         sΔ1._<ж<scavengerState>>().wake();
     };
-    s.timer.init(f, s);
+    s.timer.init(f, Ꮡs);
     // input: fraction of CPU time actually used.
     // setpoint: ideal CPU fraction.
     // output: ratio of time worked to time slept (determines sleep time).

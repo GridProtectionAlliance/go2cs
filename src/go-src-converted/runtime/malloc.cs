@@ -192,11 +192,11 @@ internal static void mallocinit() {
         @throw("failed to get system page size"u8);
     }
     if (physPageSize > maxPhysPageSize) {
-        print("system page size (", physPageSize, ") is larger than maximum page size (", maxPhysPageSize, ")\n");
+        print("system page size (", physPageSize, ") is larger than maximum page size (", (nint)(maxPhysPageSize), ")\n");
         @throw("bad system page size"u8);
     }
     if (physPageSize < minPhysPageSize) {
-        print("system page size (", physPageSize, ") is smaller than minimum page size (", minPhysPageSize, ")\n");
+        print("system page size (", physPageSize, ") is smaller than minimum page size (", (nint)(minPhysPageSize), ")\n");
         @throw("bad system page size"u8);
     }
     if ((uintptr)(physPageSize & (physPageSize - 1)) != 0) {
@@ -222,11 +222,11 @@ internal static void mallocinit() {
         }
     }
     if (pagesPerArena % pagesPerSpanRoot != 0) {
-        print("pagesPerArena (", pagesPerArena, ") is not divisible by pagesPerSpanRoot (", pagesPerSpanRoot, ")\n");
+        print("pagesPerArena (", (nint)(pagesPerArena), ") is not divisible by pagesPerSpanRoot (", (nint)(pagesPerSpanRoot), ")\n");
         @throw("bad pagesPerSpanRoot"u8);
     }
     if (pagesPerArena % pagesPerReclaimerChunk != 0) {
-        print("pagesPerArena (", pagesPerArena, ") is not divisible by pagesPerReclaimerChunk (", pagesPerReclaimerChunk, ")\n");
+        print("pagesPerArena (", (nint)(pagesPerArena), ") is not divisible by pagesPerReclaimerChunk (", (nint)(pagesPerReclaimerChunk), ")\n");
         @throw("bad pagesPerReclaimerChunk"u8);
     }
     // Check that the minimum size (exclusive) for a malloc header is also

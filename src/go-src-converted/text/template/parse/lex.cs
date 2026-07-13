@@ -482,9 +482,10 @@ internal static stateFn lexInsideAction(ж<lexer> Ꮡl) {
         if (r <= unicode.MaxASCII && unicode.IsPrint(r)) {
             return l.emit(itemChar);
         }
-        { /* default: */
+        if (!matchᴛ1) { /* default: */
             return l.errorf("unrecognized character in action: %#U"u8, r);
         }
+        return default!;
     }
 
 }

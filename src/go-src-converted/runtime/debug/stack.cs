@@ -82,7 +82,7 @@ public static error SetCrashOutput(ж<os.File> Ꮡf, CrashOptions opts) {
         if (err != default!) {
             return err;
         }
-        runtime.KeepAlive(f);
+        runtime.KeepAlive(Ꮡf);
         // prevent finalization before dup
         fd = (uintptr)fd2;
     }

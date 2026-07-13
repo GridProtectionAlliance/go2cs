@@ -289,7 +289,7 @@ NextChar:
                 localPartBytes = append(localPartBytes, @in[0]);
                 @in = @in[1..];
             }
-            else { /* default: */
+            else if (!matchᴛ1) { /* default: */
                 goto break_NextChar;
             }
 

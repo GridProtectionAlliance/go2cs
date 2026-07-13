@@ -20,7 +20,7 @@ internal static void push(this ж<lfstack> Ꮡhead, ж<lfnode> Ꮡnode) {
     var @new = lfstackPack(Ꮡnode, node.pushcnt);
     {
         var node1 = lfstackUnpack(@new); if (node1 != Ꮡnode) {
-            print("runtime: lfstack.push invalid packing: node=", node, " cnt=", ((Δhex)(uint64)node.pushcnt), " packed=", ((Δhex)@new), " -> node=", node1, "\n");
+            print("runtime: lfstack.push invalid packing: node=", Ꮡnode, " cnt=", ((Δhex)(uint64)node.pushcnt), " packed=", ((Δhex)@new), " -> node=", node1, "\n");
             @throw("lfstack.push"u8);
         }
     }

@@ -102,7 +102,7 @@ internal static void freeScanner(ж<scanner> Ꮡscan) {
     if (len(scan.parseState) > 1024) {
         scan.parseState = default!;
     }
-    ᏑscannerPool.Put(scan);
+    ᏑscannerPool.Put(Ꮡscan);
 }
 
 // These values are returned by the state transition functions

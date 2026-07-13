@@ -156,7 +156,7 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
         else if (exprᴛ1 is 16) {
             exp2 = d * 4;
         }
-        else { /* default: */
+        else if (!matchᴛ1) { /* default: */
             throw panic("unexpected mantissa base");
         }
 
@@ -175,7 +175,7 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
     if (fallthrough || !matchᴛ2 && exprᴛ2 is 2) {
         exp2 += exp;
     }
-    else { /* default: */
+    else if (!matchᴛ2) { /* default: */
         throw panic("unexpected exponent base");
     }
 

@@ -182,7 +182,7 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
         @throw("unreachable"u8);
     }
     if (debugChan) {
-        print("chansend: chan=", c, "\n");
+        print("chansend: chan=", Ꮡc, "\n");
     }
     if (raceenabled) {
         racereadpc((uintptr)Ꮡc.raceaddr(), callerpc, abi.FuncPCABIInternal(chansend));
@@ -516,7 +516,7 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
     // raceenabled: don't need to check ep, as it is always on the stack
     // or is new memory allocated by reflect.
     if (debugChan) {
-        print("chanrecv: chan=", c, "\n");
+        print("chanrecv: chan=", Ꮡc, "\n");
     }
     if (Ꮡc == nil) {
         if (!block) {

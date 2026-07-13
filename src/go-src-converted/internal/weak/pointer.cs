@@ -63,7 +63,7 @@ public static Pointer<T> Make<T>(ж<T> Ꮡptr) {
     if (Ꮡptr != nil) {
         u = (uintptr)runtime_registerWeakPointer(new @unsafe.Pointer(Ꮡptr));
     }
-    Δruntime.KeepAlive(ptr);
+    Δruntime.KeepAlive(Ꮡptr);
     return new Pointer<T>(u.Value);
 }
 

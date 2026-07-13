@@ -766,7 +766,7 @@ internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> Ꮡgcw) {
     ref var gp = ref Ꮡgp.DerefOrNil();
 
     if ((uint32)(readgstatus(Ꮡgp) & (uint32)_Gscan) == 0) {
-        print("runtime:scanstack: gp=", gp, ", goid=", gp.goid, ", gp->atomicstatus=", ((Δhex)(uint64)readgstatus(Ꮡgp)), "\n");
+        print("runtime:scanstack: gp=", Ꮡgp, ", goid=", gp.goid, ", gp->atomicstatus=", ((Δhex)(uint64)readgstatus(Ꮡgp)), "\n");
         @throw("scanstack - bad status"u8);
     }
     var exprᴛ1 = (uint32)(readgstatus(Ꮡgp) & ~(uint32)_Gscan);
@@ -774,13 +774,13 @@ internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> Ꮡgcw) {
         return 0;
     }
     if (exprᴛ1 == _Grunning) {
-        print("runtime: gp=", gp, ", goid=", gp.goid, ", gp->atomicstatus=", readgstatus(Ꮡgp), "\n");
+        print("runtime: gp=", Ꮡgp, ", goid=", gp.goid, ", gp->atomicstatus=", readgstatus(Ꮡgp), "\n");
         @throw("scanstack: goroutine not stopped"u8);
     }
     else if (exprᴛ1 == _Grunnable || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gwaiting) {
     }
     else { /* default: */
-        print("runtime: gp=", gp, ", goid=", gp.goid, ", gp->atomicstatus=", readgstatus(Ꮡgp), "\n");
+        print("runtime: gp=", Ꮡgp, ", goid=", gp.goid, ", gp->atomicstatus=", readgstatus(Ꮡgp), "\n");
         @throw("mark - bad status"u8);
     }
 

@@ -1113,7 +1113,7 @@ internal static error tryPutIdleConn(this ж<Transport> Ꮡt, ж<persistConn> �
     }
     foreach (var (_, exist) in idles) {
         if (exist == Ꮡpconn) {
-            log.Fatalf("dup idle pconn %p in freelist"u8, pconn);
+            log.Fatalf("dup idle pconn %p in freelist"u8, Ꮡpconn);
         }
     }
     t.idleConn[key] = append(idles, Ꮡpconn);
@@ -3273,13 +3273,11 @@ internal static ж<tls.Config> cloneTLSConfig(ж<tls.Config> Ꮡcfg) {
 
 // add adds pc to the head of the linked list.
 [GoRecv] internal static void add(this ref connLRU cl, ж<persistConn> Ꮡpc) {
-    ref var pc = ref Ꮡpc.Value;
-
     if (cl.ll == nil) {
         cl.ll = list.New();
         cl.m = new map<ж<persistConn>, ж<list.Element>>();
     }
-    var ele = cl.ll.PushFront(pc);
+    var ele = cl.ll.PushFront(Ꮡpc);
     {
         var (_, ok) = cl.m[Ꮡpc, ꟷ]; if (ok) {
             throw panic("persistConn was already in LRU");

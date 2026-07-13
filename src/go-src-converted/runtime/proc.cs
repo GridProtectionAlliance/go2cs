@@ -847,7 +847,7 @@ internal static void dumpgstatus(ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.Value;
 
     var thisg = getg();
-    print("runtime:   gp: gp=", gp, ", goid=", gp.goid, ", gp->atomicstatus=", readgstatus(Ꮡgp), "\n");
+    print("runtime:   gp: gp=", Ꮡgp, ", goid=", gp.goid, ", gp->atomicstatus=", readgstatus(Ꮡgp), "\n");
     print("runtime: getg:  g=", thisg, ", goid=", (~thisg).goid, ",  g->atomicstatus=", readgstatus(thisg), "\n");
 }
 
@@ -1080,13 +1080,13 @@ internal static void casfrom_Gscanstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newv
         }
     }
     else { /* default: */
-        print("runtime: casfrom_Gscanstatus bad oldval gp=", gp, ", oldval=", ((Δhex)(uint64)oldval), ", newval=", ((Δhex)(uint64)newval), "\n");
+        print("runtime: casfrom_Gscanstatus bad oldval gp=", Ꮡgp, ", oldval=", ((Δhex)(uint64)oldval), ", newval=", ((Δhex)(uint64)newval), "\n");
         dumpgstatus(Ꮡgp);
         @throw("casfrom_Gscanstatus:top gp->status is not in scan state"u8);
     }
 
     if (!success) {
-        print("runtime: casfrom_Gscanstatus failed gp=", gp, ", oldval=", ((Δhex)(uint64)oldval), ", newval=", ((Δhex)(uint64)newval), "\n");
+        print("runtime: casfrom_Gscanstatus failed gp=", Ꮡgp, ", oldval=", ((Δhex)(uint64)oldval), ", newval=", ((Δhex)(uint64)newval), "\n");
         dumpgstatus(Ꮡgp);
         @throw("casfrom_Gscanstatus: gp->status is not in scan state"u8);
     }

@@ -228,9 +228,8 @@ public static ж<Client> NewClientWithCodec(ClientCodec codec) {
 [GoRecv] internal static error /*err*/ WriteRequest(this ref gobClientCodec c, ж<Request> Ꮡr, any body) {
     error err = default!;
 
-    ref var r = ref Ꮡr.Value;
     {
-        err = c.enc.Encode(r); if (err != default!) {
+        err = c.enc.Encode(Ꮡr); if (err != default!) {
             return err;
         }
     }
@@ -243,9 +242,7 @@ public static ж<Client> NewClientWithCodec(ClientCodec codec) {
 }
 
 [GoRecv] internal static error ReadResponseHeader(this ref gobClientCodec c, ж<Response> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
-    return c.dec.Decode(r);
+    return c.dec.Decode(Ꮡr);
 }
 
 [GoRecv] internal static error ReadResponseBody(this ref gobClientCodec c, any body) {

@@ -269,7 +269,7 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
     // set and won't need to pass in a *Checker.
     check.later(() => {
         computeInterfaceTypeSet(Ꮡcheck, Ꮡiface.Value.Pos(), Ꮡityp);
-    }).describef(new ast_InterfaceTypeжpositioner(Ꮡiface), "compute type set for %s"u8, ityp);
+    }).describef(new ast_InterfaceTypeжpositioner(Ꮡiface), "compute type set for %s"u8, Ꮡityp);
 }
 
 } // end types_package

@@ -421,7 +421,7 @@ internal static void freeOnePassMachine(ж<onePassMachine> Ꮡm) {
     ref var m = ref Ꮡm.Value;
 
     m.inputs.clear();
-    ᏑonePassPool.Put(m);
+    ᏑonePassPool.Put(Ꮡm);
 }
 
 // doOnePass implements r.doExecute using the one-pass execution engine.

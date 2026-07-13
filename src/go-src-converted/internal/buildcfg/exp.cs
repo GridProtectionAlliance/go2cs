@@ -155,14 +155,11 @@ public static @string String(this ж<ExperimentFlags> Ꮡexp) {
 // experiments. If all is true, then include all experiment flags,
 // regardless of base.
 internal static slice<@string> expList(ж<goexperiment.Flags> Ꮡexp, ж<goexperiment.Flags> Ꮡbase, bool all) {
-    ref var exp = ref Ꮡexp.Value;
-    ref var @base = ref Ꮡbase.DerefOrNil();
-
     slice<@string> list = default!;
-    var rv = reflect.ValueOf(exp).Elem();
+    var rv = reflect.ValueOf(Ꮡexp).Elem();
     reflectꓸValue rBase = new(nil);
     if (Ꮡbase != nil) {
-        rBase = reflect.ValueOf(@base).Elem();
+        rBase = reflect.ValueOf(Ꮡbase).Elem();
     }
     var rt = rv.Type();
     for (nint i = 0; i < rt.NumField(); i++) {

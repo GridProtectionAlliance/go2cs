@@ -501,7 +501,7 @@ public static void Format(this ж<Float> Ꮡx, fmt.State s, rune format) {
             prec = -1;
         }
     }
-    else { /* default: */
+    else if (!matchᴛ1) { /* default: */
         fmt.Fprintf(new fmt_StateᴠWriter(s), // default precision for 'g', 'G'
  "%%!%c(*big.Float=%s)"u8, format, Ꮡx.String());
         return;

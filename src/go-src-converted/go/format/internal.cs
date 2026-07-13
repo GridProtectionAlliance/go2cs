@@ -89,13 +89,12 @@ internal static (ж<ast.File> @file, Func<slice<byte>, nint, slice<byte>> source
 // and adjusts the result based on the original source via sourceAdj
 // and indentAdj.
 internal static (slice<byte>, error) format(ж<token.FileSet> Ꮡfset, ж<ast.File> Ꮡfile, Func<slice<byte>, nint, slice<byte>> sourceAdj, nint indentAdj, slice<byte> src, printer.Config cfgʗp) {
-    ref var @file = ref Ꮡfile.Value;
-
     ref var cfg = ref heap(cfgʗp, out var Ꮡcfg);
+
     if (sourceAdj == default!) {
         // Complete source file.
         ref var bufΔ1 = ref heap(new bytes.Buffer(), out var ᏑbufΔ1);
-        var errΔ1 = Ꮡcfg.Fprint(new bytes_BufferжWriter(ᏑbufΔ1), Ꮡfset, @file);
+        var errΔ1 = Ꮡcfg.Fprint(new bytes_BufferжWriter(ᏑbufΔ1), Ꮡfset, Ꮡfile);
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
@@ -141,7 +140,7 @@ internal static (slice<byte>, error) format(ж<token.FileSet> Ꮡfset, ж<ast.Fi
     // Write it without any leading and trailing space.
     cfg.Indent = indent + indentAdj;
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    var err = Ꮡcfg.Fprint(new bytes_BufferжWriter(Ꮡbuf), Ꮡfset, @file);
+    var err = Ꮡcfg.Fprint(new bytes_BufferжWriter(Ꮡbuf), Ꮡfset, Ꮡfile);
     if (err != default!) {
         return (default!, err);
     }

@@ -474,7 +474,7 @@ internal static ж<ΔRat> norm(this ж<ΔRat> Ꮡz) {
     if (fallthrough || !matchᴛ1 && len(z.b.abs) is 0) {
         z.b.abs = z.b.abs.setWord(1);
     }
-    else { /* default: */
+    else if (!matchᴛ1) { /* default: */
         var neg = z.a.neg;
         z.a.neg = false;
         z.b.neg = false;

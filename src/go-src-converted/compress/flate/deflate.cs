@@ -573,7 +573,7 @@ internal static error syncFlush(this ж<compressor> Ꮡd) {
         d.fill = (Func<ж<compressor>, slice<byte>, nint>)(fillDeflate);
         d.step = (Action<ж<compressor>>)(deflate);
     }
-    else { /* default: */
+    else if (!matchᴛ1) { /* default: */
         return fmt.Errorf("flate: invalid compression level %d: want value in range [-2, 9]"u8, level);
     }
 

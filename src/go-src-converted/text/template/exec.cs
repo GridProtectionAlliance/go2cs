@@ -700,7 +700,7 @@ internal static bool isHexInt(@string s) {
         s.errorf("internal error: no fields in evalChainNode"u8);
     }
     if (chain.Node.Type() == parse.NodeNil) {
-        s.errorf("indirection through explicit nil in %s"u8, chain);
+        s.errorf("indirection through explicit nil in %s"u8, Ꮡchain);
     }
     // (pipe).Field1.Field2 has pipe as .Node, fields as .Field. Eval the pipeline, then the fields.
     var pipe = s.evalArg(dot, default!, chain.Node);

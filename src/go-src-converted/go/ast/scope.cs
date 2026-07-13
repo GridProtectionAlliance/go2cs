@@ -56,7 +56,7 @@ public static @string String(this ж<Scope> Ꮡs) {
     ref var s = ref Ꮡs.Value;
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "scope %p {"u8, s);
+    fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "scope %p {"u8, Ꮡs);
     if (Ꮡs != nil && len(s.Objects) > 0) {
         fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf));
         foreach (var (_, obj) in s.Objects) {

@@ -194,7 +194,7 @@ internal static void free(this ж<pp> Ꮡp) {
     p.arg = default!;
     p.value = new reflectꓸValue(nil);
     p.wrappedErrs = p.wrappedErrs[..0];
-    ᏑppFree.Put(p);
+    ᏑppFree.Put(Ꮡp);
 }
 
 [GoRecv] internal static (nint wid, bool ok) Width(this ref pp p) {
@@ -1181,7 +1181,7 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
         if (fallthrough || !matchᴛ1 && (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func || exprᴛ1 == reflect.ΔUnsafePointer)) {
             Ꮡp.fmtPointer(f, verb);
         }
-        else { /* default: */
+        else if (!matchᴛ1) { /* default: */
             p.unknownType(f);
         }
     }

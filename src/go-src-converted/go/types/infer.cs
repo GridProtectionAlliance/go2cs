@@ -48,7 +48,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
             });
         }
         if (traceInference) {
-            Ꮡcheck.dump("== infer : %s%s ➞ %s"u8, tparams, @params, targs);
+            Ꮡcheck.dump("== infer : %s%s ➞ %s"u8, tparams, Ꮡparams, targs);
             // aligned with rename print below
             var tparamsʗ2 = tparams;
             defer(() => {
@@ -156,7 +156,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
         // --- 1 ---
         // use information from function arguments
         if (traceInference) {
-            u.tracef("== function parameters: %s"u8, @params);
+            u.tracef("== function parameters: %s"u8, Ꮡparams);
             u.tracef("-- function arguments : %s"u8, args);
         }
         foreach (var (i, arg) in args) {

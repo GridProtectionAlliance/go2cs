@@ -152,7 +152,7 @@ internal static error close(this ж<@file> Ꮡfile) {
         }
     }
     // no need for a finalizer anymore
-    Δruntime.SetFinalizer(@file, default!);
+    Δruntime.SetFinalizer(Ꮡfile, default!);
     return err;
 }
 
@@ -164,7 +164,6 @@ internal static (int64 ret, error err) seek(this ж<File> Ꮡf, int64 offset, ni
     int64 ret = default!;
     error err = default!;
 
-    ref var f = ref Ꮡf.Value;
     {
         var info = Ꮡf.of(File.Ꮡdirinfo).Swap(nil); if (info != nil) {
             // Free cached dirinfo, so we allocate a new one if we
@@ -173,7 +172,7 @@ internal static (int64 ret, error err) seek(this ж<File> Ꮡf, int64 offset, ni
         }
     }
     (ret, err) = Ꮡf.of(File.Ꮡpfd).Seek(offset, whence);
-    Δruntime.KeepAlive(f);
+    Δruntime.KeepAlive(Ꮡf);
     return (ret, err);
 }
 

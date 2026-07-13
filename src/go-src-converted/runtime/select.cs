@@ -129,7 +129,7 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     ref var pc0 = ref Ꮡpc0.DerefOrNil();
 
     if (debugSelect) {
-        print("select: cas0=", cas0, "\n");
+        print("select: cas0=", Ꮡcas0, "\n");
     }
     // NOTE: In order to maintain a lean stack size, the number of scases
     // is capped at 65536.
@@ -373,7 +373,7 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     }
     c = cas.Value.c;
     if (debugSelect) {
-        print("wait-return: cas0=", cas0, " c=", c, " cas=", cas, " send=", casi < nsends, "\n");
+        print("wait-return: cas0=", Ꮡcas0, " c=", c, " cas=", cas, " send=", casi < nsends, "\n");
     }
     if (casi < nsends){
         if (!caseSuccess) {
@@ -463,7 +463,7 @@ recv:
         selunlock(scasesʗ1, lockorderʗ1);
     }, 2);
     if (debugSelect) {
-        print("syncrecv: cas0=", cas0, " c=", c, "\n");
+        print("syncrecv: cas0=", Ꮡcas0, " c=", c, "\n");
     }
     recvOK = true;
     goto retc;
@@ -495,7 +495,7 @@ send:
         selunlock(scasesʗ3, lockorderʗ3);
     }, 2);
     if (debugSelect) {
-        print("syncsend: cas0=", cas0, " c=", c, "\n");
+        print("syncsend: cas0=", Ꮡcas0, " c=", c, "\n");
     }
     goto retc;
 retc:

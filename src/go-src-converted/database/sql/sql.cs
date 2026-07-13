@@ -692,7 +692,7 @@ internal static Func<error> closeDBLocked(this ж<driverConn> Ꮡdc) => func((de
         return () => errors.New("sql: duplicate driverConn close"u8);
     }
     dc.closed = true;
-    return dc.db.removeDepLocked(new driverConnжfinalCloser(Ꮡdc), dc);
+    return dc.db.removeDepLocked(new driverConnжfinalCloser(Ꮡdc), Ꮡdc);
 });
 
 internal static error Close(this ж<driverConn> Ꮡdc) {
@@ -709,7 +709,7 @@ internal static error Close(this ж<driverConn> Ꮡdc) {
     // And now updates that require holding dc.mu.Lock.
     dc.db.of(DB.Ꮡmu).Lock();
     dc.dbmuClosed = true;
-    var fn = dc.db.removeDepLocked(new driverConnжfinalCloser(Ꮡdc), dc);
+    var fn = dc.db.removeDepLocked(new driverConnжfinalCloser(Ꮡdc), Ꮡdc);
     dc.db.of(DB.Ꮡmu).Unlock();
     return fn();
 }
@@ -1576,7 +1576,7 @@ internal static void putConn(this ж<DB> Ꮡdb, ж<driverConn> Ꮡdc, error err,
     if (!dc.inUse) {
         Ꮡdb.of(DB.Ꮡmu).Unlock();
         if (debugGetPut) {
-            fmt.Printf("putConn(%v) DUPLICATE was: %s\n\nPREVIOUS was: %s"u8, dc, stack(), db.lastPut[Ꮡdc]);
+            fmt.Printf("putConn(%v) DUPLICATE was: %s\n\nPREVIOUS was: %s"u8, Ꮡdc, stack(), db.lastPut[Ꮡdc]);
         }
         throw panic("sql: connection returned that was never out");
     }
@@ -3075,12 +3075,12 @@ public static error Close(this ж<ΔStmt> Ꮡs) => func<error>((defer, recover) 
     s.cgds = default!;
     Ꮡs.of(sql_package.ΔStmt.Ꮡmu).Unlock();
     if (s.cg == default!) {
-        return s.db.removeDep(new ΔStmtжfinalCloser(Ꮡs), s);
+        return s.db.removeDep(new ΔStmtжfinalCloser(Ꮡs), Ꮡs);
     }
     if (s.parentStmt != nil) {
         // If parentStmt is set, we must not close s.txds since it's stored
         // in the css array of the parentStmt.
-        return s.db.removeDep(new ΔStmtжfinalCloser(s.parentStmt), s);
+        return s.db.removeDep(new ΔStmtжfinalCloser(s.parentStmt), Ꮡs);
     }
     return txds.Close();
 });

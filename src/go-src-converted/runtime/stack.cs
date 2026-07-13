@@ -859,7 +859,7 @@ internal static void copystack(ж<g> Ꮡgp, uintptr newsize) {
         fillstack(@new, 0xfd);
     }
     if (stackDebug >= 1) {
-        print("copystack gp=", gp, " [", ((Δhex)(uint64)old.lo), " ", ((Δhex)(uint64)(old.hi - used)), " ", ((Δhex)(uint64)old.hi), "]", " -> [", ((Δhex)(uint64)@new.lo), " ", ((Δhex)(uint64)(@new.hi - used)), " ", ((Δhex)(uint64)@new.hi), "]/", newsize, "\n");
+        print("copystack gp=", Ꮡgp, " [", ((Δhex)(uint64)old.lo), " ", ((Δhex)(uint64)(old.hi - used)), " ", ((Δhex)(uint64)old.hi), "]", " -> [", ((Δhex)(uint64)@new.lo), " ", ((Δhex)(uint64)(@new.hi - used)), " ", ((Δhex)(uint64)@new.hi), "]/", newsize, "\n");
     }
     // Compute adjustment.
     ref var adjinfo = ref heap(new adjustinfo(), out var Ꮡadjinfo);

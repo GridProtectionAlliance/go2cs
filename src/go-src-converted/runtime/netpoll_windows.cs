@@ -279,7 +279,7 @@ internal static bool /*signaled*/ netpollQueueTimer(int64 delay) {
     }
     else if (exprᴛ1 == STATUS_PENDING) {
     }
-    else { /* default: */
+    else if (!matchᴛ1) { /* default: */
         println("runtime: NtCancelWaitCompletionPacket failed; errno=", // STATUS_PENDING is returned if the wait operation can't be canceled yet.
  // This can happen if this thread was woken up by another event, such as a netpollBreak,
  // and the timer expired just while calling NtCancelWaitCompletionPacket, in which case

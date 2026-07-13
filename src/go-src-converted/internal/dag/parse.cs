@@ -316,7 +316,7 @@ internal static (slice<rule> @out, error err) parseRules(@string rules) {
             p.text = p.text[1..];
             continue;
         }
-        else { /* default: */
+        else if (!matchᴛ1) { /* default: */
             nint i = strings.IndexAny(p.text, "!;,<#\n \t"u8);
             if (i < 0) {
                 i = len(p.text);

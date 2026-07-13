@@ -29,7 +29,7 @@ internal static void funcBody(this ж<Checker> Ꮡcheck, ж<declInfo> Ꮡdecl, @
         throw panic("function body not ignored");
     }
     if ((~check.conf)._Trace) {
-        Ꮡcheck.trace(body.Pos(), "-- %s: %s"u8, name, sig);
+        Ꮡcheck.trace(body.Pos(), "-- %s: %s"u8, name, Ꮡsig);
     }
     // save/restore current environment and set up function environment
     // (and use 0 indentation at function start)

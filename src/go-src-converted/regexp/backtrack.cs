@@ -56,7 +56,7 @@ internal static void freeBitState(ж<bitState> Ꮡb) {
     ref var b = ref Ꮡb.Value;
 
     b.inputs.clear();
-    ᏑbitStatePool.Put(b);
+    ᏑbitStatePool.Put(Ꮡb);
 }
 
 // maxBitStateLen returns the maximum length of a string to search with

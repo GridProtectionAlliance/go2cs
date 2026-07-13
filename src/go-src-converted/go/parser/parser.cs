@@ -390,7 +390,7 @@ internal static ж<ast.CommentGroup> /*comment*/ expectSemi(this ж<parser> Ꮡp
             }
             return comment;
         }
-        { /* default: */
+        if (!matchᴛ1) { /* default: */
             Ꮡp.errorExpected(p.pos, "';'"u8);
             p.advance(stmtStart);
         }

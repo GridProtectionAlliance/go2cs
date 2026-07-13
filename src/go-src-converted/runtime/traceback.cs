@@ -158,7 +158,7 @@ internal static void initAt(this ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, ui
     var f = findfunc(frame.pc);
     if (!f.valid()) {
         if ((unwindFlags)(flags & unwindSilentErrors) == 0) {
-            print("runtime: g ", gp.goid, " gp=", gp, ": unknown pc ", ((Δhex)(uint64)frame.pc), "\n");
+            print("runtime: g ", gp.goid, " gp=", Ꮡgp, ": unknown pc ", ((Δhex)(uint64)frame.pc), "\n");
             tracebackHexdump(gp.stack, Ꮡframe, 0);
         }
         if ((unwindFlags)(flags & ((unwindFlags)(unwindPrintErrors | unwindSilentErrors))) == 0) {
@@ -1193,7 +1193,7 @@ internal static void goroutineheader(ж<g> Ꮡgp) {
     }
     print("goroutine ", gp.goid);
     if (gp.m != nil && (~gp.m).throwing >= throwTypeRuntime && Ꮡgp == (~gp.m).curg || level >= 2) {
-        print(" gp=", gp);
+        print(" gp=", Ꮡgp);
         if (gp.m != nil){
             print(" m=", (~gp.m).id, " mp=", gp.m);
         } else {

@@ -486,7 +486,7 @@ internal static void free(this ж<ss> Ꮡs, ssave old) {
     }
     s.buf = s.buf[..0];
     s.rs = default!;
-    ᏑssFree.Put(s);
+    ᏑssFree.Put(Ꮡs);
 }
 
 // SkipSpace provides Scan methods the ability to skip space and newline

@@ -79,7 +79,7 @@ internal static bool op(this ж<Checker> Ꮡcheck, opPredicates m, ж<operand> �
     {
         var pred = m[op]; if (pred != default!){
             if (!pred(x.typ)) {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UndefinedOp, invalidOp + "operator %s not defined on %s", op, x);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UndefinedOp, invalidOp + "operator %s not defined on %s", op, Ꮡx);
                 return false;
             }
         } else {
@@ -151,7 +151,7 @@ internal static void unary(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.U
             var (_, ok) = ast.Unparen(e.X)._<ж<ast.CompositeLit>>(ᐧ); if (!ok && x.mode != variable) {
                 // spec: "As an exception to the addressability
                 // requirement x may also be a composite literal."
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnaddressableOperand, invalidOp + "cannot take address of %s", x);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnaddressableOperand, invalidOp + "cannot take address of %s", Ꮡx);
                 x.mode = invalid;
                 return;
             }
@@ -163,18 +163,18 @@ internal static void unary(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.U
     if (exprᴛ1 == token.ARROW) {
         var u = coreType(x.typ);
         if (u == default!) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidReceive, invalidOp + "cannot receive from %s (no core type)", x);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidReceive, invalidOp + "cannot receive from %s (no core type)", Ꮡx);
             x.mode = invalid;
             return;
         }
         var (ch, _) = u._<ж<Chan>>(ᐧ);
         if (ch == nil) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidReceive, invalidOp + "cannot receive from non-channel %s", x);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidReceive, invalidOp + "cannot receive from non-channel %s", Ꮡx);
             x.mode = invalid;
             return;
         }
         if ((~ch).dir == SendOnly) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidReceive, invalidOp + "cannot receive from send-only channel %s", x);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidReceive, invalidOp + "cannot receive from send-only channel %s", Ꮡx);
             x.mode = invalid;
             return;
         }
@@ -698,7 +698,7 @@ internal static void shift(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<opera
         // The lhs is of integer type or an untyped constant representable
         // as an integer. Nothing to do.
         // shift has no chance
-        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidShiftOperand, invalidOp + "shifted operand %s must be integer", x);
+        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidShiftOperand, invalidOp + "shifted operand %s must be integer", Ꮡx);
         x.mode = invalid;
         return;
     }
@@ -712,7 +712,7 @@ internal static void shift(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<opera
         yval = constant.ToInt(y.val);
         // consider -1, 1.0, but not -1.1
         if (yval.Kind() == constant.Int && constant.Sign(yval) < 0) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡy), InvalidShiftCount, invalidOp + "negative shift count %s", y);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡy), InvalidShiftCount, invalidOp + "negative shift count %s", Ꮡy);
             x.mode = invalid;
             return;
         }
@@ -729,7 +729,7 @@ internal static void shift(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<opera
         // Check that RHS is otherwise at least of integer type.
         switch (ᐧ) {
         case {} when allInteger(y.typ): {
-            if (!allUnsigned(y.typ) && !Ꮡcheck.verifyVersionf(new operandжpositioner(Ꮡy), go1_13, invalidOp + "signed shift count %s", y)) {
+            if (!allUnsigned(y.typ) && !Ꮡcheck.verifyVersionf(new operandжpositioner(Ꮡy), go1_13, invalidOp + "signed shift count %s", Ꮡy)) {
                 x.mode = invalid;
                 return;
             }
@@ -746,7 +746,7 @@ internal static void shift(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<opera
             break;
         }
         default: {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡy), InvalidShiftCount, invalidOp + "shift count %s must be integer", y);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡy), InvalidShiftCount, invalidOp + "shift count %s must be integer", Ꮡy);
             x.mode = invalid;
             return;
         }}
@@ -767,7 +767,7 @@ internal static void shift(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<opera
             UntypedInt shiftBound = /* 1023 - 1 + 52 */ 1074; // so we can express smallestFloat64 (see go.dev/issue/44057)
             var (s, ok) = constant.Uint64Val(yval);
             if (!ok || s > shiftBound) {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡy), InvalidShiftCount, invalidOp + "invalid shift count %s", y);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡy), InvalidShiftCount, invalidOp + "invalid shift count %s", Ꮡy);
                 x.mode = invalid;
                 return;
             }
@@ -824,7 +824,7 @@ internal static void shift(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<opera
     }
     // non-constant shift - lhs must be an integer
     if (!allInteger(x.typ)) {
-        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidShiftOperand, invalidOp + "shifted operand %s must be integer", x);
+        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidShiftOperand, invalidOp + "shifted operand %s must be integer", Ꮡx);
         x.mode = invalid;
         return;
     }
@@ -1043,7 +1043,7 @@ internal static exprKind rawExpr(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<
         check.indent++;
         defer(() => {
             Ꮡcheck.Value.indent--;
-            Ꮡcheck.trace(e.Pos(), "=> %s"u8, Ꮡx.Value);
+            Ꮡcheck.trace(e.Pos(), "=> %s"u8, Ꮡx);
         });
     }
     exprKind kind = Ꮡcheck.exprInternal(ᏑT, Ꮡx, e, hint);
@@ -1525,12 +1525,12 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
             goto ΔError;
         }
         if (isTypeParam(x.typ)) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidAssert, invalidOp + "cannot use type assertion on type parameter value %s", x);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidAssert, invalidOp + "cannot use type assertion on type parameter value %s", Ꮡx);
             goto ΔError;
         }
         {
             var (_, ok) = under(x.typ)._<ж<Interface>>(ᐧ); if (!ok) {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidAssert, invalidOp + "%s is not an interface", x);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidAssert, invalidOp + "%s is not an interface", Ꮡx);
                 goto ΔError;
             }
         }
@@ -1561,11 +1561,11 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
             if (!underIs(x.typ, (ΔType u) => {
                 var (p, _) = u._<ж<Pointer>>(ᐧ);
                 if (p == nil) {
-                    Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidIndirection, invalidOp + "cannot indirect %s", Ꮡx.Value);
+                    Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidIndirection, invalidOp + "cannot indirect %s", Ꮡx);
                     return false;
                 }
                 if (Ꮡbase.ValueSlot != default! && !Identical((~p).@base, Ꮡbase.ValueSlot)) {
-                    Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidIndirection, invalidOp + "pointers of %s must have identical base types", Ꮡx.Value);
+                    Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidIndirection, invalidOp + "pointers of %s must have identical base types", Ꮡx);
                     return false;
                 }
                 Ꮡbase.ValueSlot = p.Value.@base;
@@ -1698,7 +1698,7 @@ internal static void typeAssertion(this ж<Checker> Ꮡcheck, ast.Expr e, ж<ope
     }
     // success
     if (typeSwitch) {
-        Ꮡcheck.errorf(new ast_Exprᴠpositioner(e), ImpossibleAssert, "impossible type switch case: %s\n\t%s cannot have dynamic type %s %s"u8, e, x, T, cause);
+        Ꮡcheck.errorf(new ast_Exprᴠpositioner(e), ImpossibleAssert, "impossible type switch case: %s\n\t%s cannot have dynamic type %s %s"u8, e, Ꮡx, T, cause);
         return;
     }
     Ꮡcheck.errorf(new ast_Exprᴠpositioner(e), ImpossibleAssert, "impossible type assertion: %s\n\t%s does not implement %s %s"u8, e, T, x.typ, cause);
@@ -1806,7 +1806,7 @@ internal static void exclude(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, nuint 
             throw panic("unreachable");
         }
 
-        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, msg, x);
+        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, msg, Ꮡx);
         x.mode = invalid;
     }
 }
@@ -1820,7 +1820,7 @@ internal static void singleValue(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
         {
             var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok) {
                 assert(t.Len() != 1);
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), TooManyValues, "multiple-value %s in single-value context"u8, x);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), TooManyValues, "multiple-value %s in single-value context"u8, Ꮡx);
                 x.mode = invalid;
             }
         }

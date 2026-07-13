@@ -680,7 +680,7 @@ internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usi
             }
         }
         // Process Body,ContentLength,Close,Trailer
-        (var tw, err) = newTransferWriter(r);
+        (var tw, err) = newTransferWriter(Ꮡr);
         if (err != default!) {
             return;
         }
@@ -1063,7 +1063,7 @@ internal static void putTextprotoReader(ж<textproto.Reader> Ꮡr) {
     ref var r = ref Ꮡr.Value;
 
     r.R = default!;
-    ᏑtextprotoReaderPool.Put(r);
+    ᏑtextprotoReaderPool.Put(Ꮡr);
 }
 
 // ReadRequest reads and parses an incoming request from b.

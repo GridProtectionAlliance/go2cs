@@ -86,7 +86,7 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
                     // see comment above on constant conversion
                     Ꮡcause.Value = Ꮡcheck.sprintf("constant %s overflows %s (in %s)"u8, Ꮡx.Value.val, u, T);
                 } else {
-                    Ꮡcause.Value = Ꮡcheck.sprintf("cannot convert %s to type %s (in %s)"u8, Ꮡx.Value, u, T);
+                    Ꮡcause.Value = Ꮡcheck.sprintf("cannot convert %s to type %s (in %s)"u8, Ꮡx, u, T);
                 }
                 return false;
             }
@@ -105,9 +105,9 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
     // non-constant conversion
     if (!ok) {
         if (cause != ""u8){
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConversion, "cannot convert %s to type %s: %s"u8, x, T, cause);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConversion, "cannot convert %s to type %s: %s"u8, Ꮡx, T, cause);
         } else {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConversion, "cannot convert %s to type %s"u8, x, T);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConversion, "cannot convert %s to type %s"u8, Ꮡx, T);
         }
         x.mode = invalid;
         return;

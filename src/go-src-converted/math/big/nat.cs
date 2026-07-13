@@ -654,9 +654,7 @@ internal static ж<nat> getNat(nint n) {
 }
 
 internal static void putNat(ж<nat> Ꮡx) {
-    ref var x = ref Ꮡx.Value;
-
-    ᏑnatPool.Put(x);
+    ᏑnatPool.Put(Ꮡx);
 }
 
 internal static ж<sync.Pool> ᏑnatPool = new(default(sync.Pool));

@@ -232,7 +232,6 @@ internal static (ж<types.Package> pkg, error err) iImportData(ж<token.FileSet>
 
 internal static void doDecl(this ж<iimporter> Ꮡp, ж<types.Package> Ꮡpkg, @string name) {
     ref var p = ref Ꮡp.Value;
-    ref var pkg = ref Ꮡpkg.Value;
 
     // See if we've already imported this declaration.
     {
@@ -242,7 +241,7 @@ internal static void doDecl(this ж<iimporter> Ꮡp, ж<types.Package> Ꮡpkg, @
     }
     var (off, ok) = p.pkgIndex[Ꮡpkg][name, ꟷ];
     if (!ok) {
-        errorf("%v.%v not in index"u8, pkg, name);
+        errorf("%v.%v not in index"u8, Ꮡpkg, name);
     }
     var r = Ꮡ(new importReader(p: Ꮡp, currPkg: Ꮡpkg));
     r.of(importReader.ᏑdeclReader).Reset(p.declData[(int)(off)..]);

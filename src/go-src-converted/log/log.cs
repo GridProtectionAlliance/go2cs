@@ -199,7 +199,7 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
     if (cap(p) > (64 << (int)(10))) {
         p = default!;
     }
-    ᏑbufferPool.Put(p);
+    ᏑbufferPool.Put(Ꮡp);
 }
 
 // Output writes the output for a logging event. The string s contains

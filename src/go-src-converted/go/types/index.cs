@@ -214,7 +214,7 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
     }}
     if (!valid) {
         // types2 uses the position of '[' for the error
-        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonIndexableOperand, invalidOp + "cannot index %s", x);
+        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonIndexableOperand, invalidOp + "cannot index %s", Ꮡx);
         Ꮡcheck.use(e.Indices.ꓸꓸꓸ);
         x.mode = invalid;
         return false;
@@ -249,7 +249,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
     // valid if >= 0
     switch (coreString(x.typ).type()) {
     case null: {
-        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, invalidOp + "cannot slice %s: %s has no core type", x, x.typ);
+        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, invalidOp + "cannot slice %s: %s has no core type", Ꮡx, x.typ);
         x.mode = invalid;
         return;
     }
@@ -281,7 +281,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
         valid = true;
         length = u.Value.len;
         if (x.mode != variable) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, invalidOp + "cannot slice %s (value not addressable)", x);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, invalidOp + "cannot slice %s (value not addressable)", Ꮡx);
             x.mode = invalid;
             return;
         }
@@ -304,7 +304,7 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
     }}
     // x.typ doesn't change
     if (!valid) {
-        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, invalidOp + "cannot slice %s", x);
+        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NonSliceableOperand, invalidOp + "cannot slice %s", Ꮡx);
         x.mode = invalid;
         return;
     }
@@ -378,7 +378,7 @@ internal static ast.Expr singleIndex(this ж<Checker> Ꮡcheck, ж<typeparams.In
     ref var expr = ref Ꮡexpr.Value;
 
     if (len(expr.Indices) == 0) {
-        Ꮡcheck.errorf(new ast_Exprᴠpositioner(expr.Orig), InvalidSyntaxTree, "index expression %v with 0 indices"u8, expr);
+        Ꮡcheck.errorf(new ast_Exprᴠpositioner(expr.Orig), InvalidSyntaxTree, "index expression %v with 0 indices"u8, Ꮡexpr);
         return default!;
     }
     if (len(expr.Indices) > 1) {
@@ -432,18 +432,18 @@ internal static bool isValidIndex(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, e
     }
     // spec: "the index x must be of integer type or an untyped constant"
     if (!allInteger(x.typ)) {
-        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, invalidArg + "%s %s must be integer", what, x);
+        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, invalidArg + "%s %s must be integer", what, Ꮡx);
         return false;
     }
     if (x.mode == constant_) {
         // spec: "a constant index must be non-negative ..."
         if (!allowNegative && constant.Sign(x.val) < 0) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, invalidArg + "%s %s must not be negative", what, x);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, invalidArg + "%s %s must not be negative", what, Ꮡx);
             return false;
         }
         // spec: "... and representable by a value of type int"
         if (!representableConst(x.val, Ꮡcheck, Typ[Int], Ꮡx.of(operand.Ꮡval))) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, invalidArg + "%s %s overflows int", what, x);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, invalidArg + "%s %s overflows int", what, Ꮡx);
             return false;
         }
     }

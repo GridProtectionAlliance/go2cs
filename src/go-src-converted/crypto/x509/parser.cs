@@ -918,7 +918,7 @@ internal static (ж<Certificate>, error) parseCertificate(slice<byte> der) {
     if (!tbs.ReadASN1(Ꮡtbs, cryptobyte_asn1.SEQUENCE)) {
         return (default!, errors.New("x509: malformed tbs certificate"u8));
     }
-    if (!tbs.ReadOptionalASN1Integer(cert.of(Certificate.ᏑVersion), ((cryptobyte_asn1.Tag)0).Constructed().ContextSpecific(), 0)) {
+    if (!tbs.ReadOptionalASN1Integer(cert.of(Certificate.ᏑVersion), ((cryptobyte_asn1.Tag)0).Constructed().ContextSpecific(), (nint)(0))) {
         return (default!, errors.New("x509: malformed version"u8));
     }
     if ((~cert).Version < 0) {

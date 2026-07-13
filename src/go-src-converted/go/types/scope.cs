@@ -261,7 +261,7 @@ public static void WriteTo(this ж<ΔScope> Ꮡs, io.Writer w, nint n, bool recu
 
     @string ind = ".  "u8;
     @string indn = strings.Repeat(ind, n);
-    fmt.Fprintf(w, "%s%s scope %p {\n"u8, indn, s.comment, s);
+    fmt.Fprintf(w, "%s%s scope %p {\n"u8, indn, s.comment, Ꮡs);
     @string indn1 = indn + ind;
     foreach (var (_, name) in s.Names()) {
         fmt.Fprintf(w, "%s%s\n"u8, indn1, s.Lookup(name));

@@ -226,7 +226,7 @@ g: Ꮡgp, stopped: stopped);
                     }
                 } while (false);
             }
-            else { /* default: */
+            else if (!matchᴛ1) { /* default: */
                 do {
                     if ((uint32)(s & (uint32)_Gscan) != 0) {
                         break;

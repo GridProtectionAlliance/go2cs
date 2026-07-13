@@ -43,7 +43,7 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
     }
     var old = ContextClientTrace(ctx);
     Ꮡtrace.compose(old);
-    ctx = context.WithValue(ctx, new clientEventContextKey(nil), trace);
+    ctx = context.WithValue(ctx, new clientEventContextKey(nil), Ꮡtrace);
     if (Ꮡtrace.hasNetHooks()) {
         var nt = Ꮡ(new nettrace.Trace(
             ConnectStart: trace.ConnectStart,
@@ -163,14 +163,11 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
 // compose modifies t such that it respects the previously-registered hooks in old,
 // subject to the composition policy requested in t.Compose.
 internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> Ꮡold) {
-    ref var t = ref Ꮡt.Value;
-    ref var old = ref Ꮡold.DerefOrNil();
-
     if (Ꮡold == nil) {
         return;
     }
-    var tv = reflect.ValueOf(t).Elem();
-    var ov = reflect.ValueOf(old).Elem();
+    var tv = reflect.ValueOf(Ꮡt).Elem();
+    var ov = reflect.ValueOf(Ꮡold).Elem();
     var structType = tv.Type();
     for (nint i = 0; i < structType.NumField(); i++) {
         var tf = tv.Field(i);

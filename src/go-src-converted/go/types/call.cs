@@ -142,7 +142,7 @@ internal static ж<ΔSignature> /*res*/ instantiateSignature(this ж<Checker> �
         assert(Ꮡcheck != nil);
         assert(len(targs) == typ.TypeParams().Len());
         if ((~check.conf)._Trace) {
-            Ꮡcheck.trace(pos, "-- instantiating signature %s with %s"u8, typ, targs);
+            Ꮡcheck.trace(pos, "-- instantiating signature %s with %s"u8, Ꮡtyp, targs);
             check.indent++;
             defer(() => {
                 Ꮡcheck.Value.indent--;
@@ -276,7 +276,7 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
     // a type parameter may be "called" if all types have the same signature
     var (sig, _) = coreType(x.typ)._<ж<ΔSignature>>(ᐧ);
     if (sig == nil) {
-        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidCall, invalidOp + "cannot call non-function %s", x);
+        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidCall, invalidOp + "cannot call non-function %s", Ꮡx);
         x.mode = invalid;
         x.expr = new ast_CallExprжExpr(Ꮡcall);
         return statement;
@@ -856,7 +856,7 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
     }
     else if (exprᴛ1 == Δbuiltin) {
         Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), // types2 uses the position of '.' for the error
- UncalledBuiltin, "cannot select on %s"u8, x);
+ UncalledBuiltin, "cannot select on %s"u8, Ꮡx);
         goto ΔError;
     }
     else if (exprᴛ1 == invalid) {

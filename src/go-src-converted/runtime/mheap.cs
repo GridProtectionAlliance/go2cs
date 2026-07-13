@@ -1524,7 +1524,7 @@ internal static void freeSpanLocked(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAll
             @throw("mheap.freeSpanLocked - invalid free of user arena chunk"u8);
         }
         if (s.allocCount != 0 || s.sweepgen != h.sweepgen) {
-            print("mheap.freeSpanLocked - span ", s, " ptr ", ((Δhex)(uint64)s.@base()), " allocCount ", s.allocCount, " sweepgen ", s.sweepgen, "/", h.sweepgen, "\n");
+            print("mheap.freeSpanLocked - span ", Ꮡs, " ptr ", ((Δhex)(uint64)s.@base()), " allocCount ", s.allocCount, " sweepgen ", s.sweepgen, "/", h.sweepgen, "\n");
             @throw("mheap.freeSpanLocked - invalid free"u8);
         }
         Ꮡh.of(mheap.ᏑpagesInUse).Add(((uintptr)0 - s.npages));
@@ -1638,7 +1638,7 @@ internal static void remove(this ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
 
     if (span.list != Ꮡlist) {
         print("runtime: failed mSpanList.remove span.npages=", span.npages,
-            " span=", span, " prev=", span.prev, " span.list=", span.list, " list=", list, "\n");
+            " span=", Ꮡspan, " prev=", span.prev, " span.list=", span.list, " list=", Ꮡlist, "\n");
         @throw("mSpanList.remove"u8);
     }
     if (list.first == Ꮡspan){
@@ -1665,7 +1665,7 @@ internal static void insert(this ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
     ref var span = ref Ꮡspan.Value;
 
     if (span.next != nil || span.prev != nil || span.list != nil) {
-        println("runtime: failed mSpanList.insert", span, span.next, span.prev, span.list);
+        println("runtime: failed mSpanList.insert", Ꮡspan, span.next, span.prev, span.list);
         @throw("mSpanList.insert"u8);
     }
     span.next = list.first;
@@ -1686,7 +1686,7 @@ internal static void insertBack(this ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
     ref var span = ref Ꮡspan.Value;
 
     if (span.next != nil || span.prev != nil || span.list != nil) {
-        println("runtime: failed mSpanList.insertBack", span, span.next, span.prev, span.list);
+        println("runtime: failed mSpanList.insertBack", Ꮡspan, span.next, span.prev, span.list);
         @throw("mSpanList.insertBack"u8);
     }
     span.prev = list.last;

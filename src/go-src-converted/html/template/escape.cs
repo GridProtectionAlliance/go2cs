@@ -252,10 +252,10 @@ internal static ж<godebug.Setting> debugAllowActionJSTmpl = godebug.New("jstmpl
         else if (exprᴛ2 == urlPartUnknown) {
             return new context(
                 state: stateError,
-                err: errorf(ErrAmbigContext, new parse_ActionNodeжNode(Ꮡn), n.Line, "%s appears in an ambiguous context within a URL"u8, n)
+                err: errorf(ErrAmbigContext, new parse_ActionNodeжNode(Ꮡn), n.Line, "%s appears in an ambiguous context within a URL"u8, Ꮡn)
             );
         }
-        { /* default: */
+        if (!matchᴛ1) { /* default: */
             throw panic(c.urlPart.String());
         }
 
@@ -971,11 +971,9 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
 
 // editActionNode records a change to an action pipeline for later commit.
 [GoRecv] internal static void editActionNode(this ref escaper e, ж<parse.ActionNode> Ꮡn, slice<@string> cmds) {
-    ref var n = ref Ꮡn.Value;
-
     {
         var (_, ok) = e.actionNodeEdits[Ꮡn, ꟷ]; if (ok) {
-            throw panic(fmt.Sprintf("node %s shared between templates"u8, n));
+            throw panic(fmt.Sprintf("node %s shared between templates"u8, Ꮡn));
         }
     }
     e.actionNodeEdits[Ꮡn] = cmds;
@@ -983,11 +981,9 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
 
 // editTemplateNode records a change to a {{template}} callee for later commit.
 [GoRecv] internal static void editTemplateNode(this ref escaper e, ж<parse.TemplateNode> Ꮡn, @string callee) {
-    ref var n = ref Ꮡn.Value;
-
     {
         var (_, ok) = e.templateNodeEdits[Ꮡn, ꟷ]; if (ok) {
-            throw panic(fmt.Sprintf("node %s shared between templates"u8, n));
+            throw panic(fmt.Sprintf("node %s shared between templates"u8, Ꮡn));
         }
     }
     e.templateNodeEdits[Ꮡn] = callee;
@@ -995,11 +991,9 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
 
 // editTextNode records a change to a text node for later commit.
 [GoRecv] internal static void editTextNode(this ref escaper e, ж<parse.TextNode> Ꮡn, slice<byte> text) {
-    ref var n = ref Ꮡn.Value;
-
     {
         var (_, ok) = e.textNodeEdits[Ꮡn, ꟷ]; if (ok) {
-            throw panic(fmt.Sprintf("node %s shared between templates"u8, n));
+            throw panic(fmt.Sprintf("node %s shared between templates"u8, Ꮡn));
         }
     }
     e.textNodeEdits[Ꮡn] = text;

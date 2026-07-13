@@ -268,7 +268,7 @@ internal static ж<machine> get(this ж<Regexp> Ꮡre) {
     m.re = default!;
     m.p = default!;
     m.inputs.clear();
-    ᏑmatchPool.at<Δsync.Pool>(re.mpool).Put(m);
+    ᏑmatchPool.at<Δsync.Pool>(re.mpool).Put(Ꮡm);
 }
 
 // minInputLen walks the regexp to find the minimum length of any matchable input.

@@ -11,10 +11,8 @@ using @internal;
 partial class net_package {
 
 internal static error setNoDelay(ж<netFD> Ꮡfd, bool noDelay) {
-    ref var fd = ref Ꮡfd.Value;
-
     var err = Ꮡfd.of(netFD.Ꮡpfd).SetsockoptInt(syscall.IPPROTO_TCP, syscall.TCP_NODELAY, boolint(noDelay));
-    Δruntime.KeepAlive(fd);
+    Δruntime.KeepAlive(Ꮡfd);
     return wrapSyscallError("setsockopt"u8, err);
 }
 

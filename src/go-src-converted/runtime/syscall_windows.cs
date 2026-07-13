@@ -425,9 +425,8 @@ internal static (uintptr handle, uintptr err) syscall_loadsystemlibrary(ж<uint1
     uintptr handle = default!;
     uintptr err = default!;
 
-    ref var filename = ref Ꮡfilename.Value;
     (handle, _, err) = syscall_SyscallN((uintptr)(@unsafe.Pointer)_LoadLibraryExW, (uintptr)new @unsafe.Pointer(Ꮡfilename), 0, _LOAD_LIBRARY_SEARCH_SYSTEM32);
-    KeepAlive(filename);
+    KeepAlive(Ꮡfilename);
     if (handle != 0) {
         err = 0;
     }
@@ -443,9 +442,8 @@ internal static (uintptr handle, uintptr err) syscall_loadlibrary(ж<uint16> Ꮡ
     uintptr handle = default!;
     uintptr err = default!;
 
-    ref var filename = ref Ꮡfilename.Value;
     (handle, _, err) = syscall_SyscallN((uintptr)(@unsafe.Pointer)_LoadLibraryW, (uintptr)new @unsafe.Pointer(Ꮡfilename));
-    KeepAlive(filename);
+    KeepAlive(Ꮡfilename);
     if (handle != 0) {
         err = 0;
     }
@@ -461,9 +459,8 @@ internal static (uintptr outhandle, uintptr err) syscall_getprocaddress(uintptr 
     uintptr outhandle = default!;
     uintptr err = default!;
 
-    ref var procname = ref Ꮡprocname.Value;
     (outhandle, _, err) = syscall_SyscallN((uintptr)(@unsafe.Pointer)_GetProcAddress, handle, (uintptr)new @unsafe.Pointer(Ꮡprocname));
-    KeepAlive(procname);
+    KeepAlive(Ꮡprocname);
     if (outhandle != 0) {
         err = 0;
     }

@@ -504,7 +504,7 @@ public static Transformer Chain(params Span<transform_package.Transformer> tʗp)
                 continue;
             }
         }
-        else { /* default: */
+        else if (!matchᴛ1) { /* default: */
             c.fatalError(i, err0);
         }
 

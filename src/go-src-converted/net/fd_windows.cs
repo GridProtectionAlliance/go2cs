@@ -203,10 +203,8 @@ internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> Ꮡv
 }
 
 internal static (int64, error) writeBuffers(this ж<netFD> Ꮡfd, ж<Buffers> Ꮡbuf) {
-    ref var fd = ref Ꮡfd.Value;
-
     var (n, err) = Ꮡfd.of(netFD.Ꮡpfd).Writev(Ꮡbuf.of(Buffers.Ꮡm_value));
-    Δruntime.KeepAlive(fd);
+    Δruntime.KeepAlive(Ꮡfd);
     return (n, wrapSyscallError("wsasend"u8, err));
 }
 

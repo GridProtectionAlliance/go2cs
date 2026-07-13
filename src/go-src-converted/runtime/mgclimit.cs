@@ -230,7 +230,7 @@ internal static void updateLocked(this ж<gcCPULimiterState> Ꮡl, int64 now) {
                     break;
                 } while (false);
             }
-            else { /* default: */
+            else if (!matchᴛ1) { /* default: */
                 @throw("invalid limiter event type found"u8);
             }
 
@@ -485,7 +485,7 @@ internal static void stop(this ж<limiterEvent> Ꮡe, limiterEventType typ, int6
     if (fallthrough || !matchᴛ1 && exprᴛ1 == limiterEventScavengeAssist) {
         ᏑgcCPULimiter.addAssistTime(duration);
     }
-    else { /* default: */
+    else if (!matchᴛ1) { /* default: */
         @throw("limiterEvent.stop: invalid limiter event type found"u8);
     }
 

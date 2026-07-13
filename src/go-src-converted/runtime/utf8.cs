@@ -126,7 +126,7 @@ internal static nint encoderune(slice<byte> Δp, rune r) {
             Δp[2] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
             return 3;
         }
-        { /* default: */
+        if (!matchᴛ1) { /* default: */
             _ = Δp[3];
             Δp[0] = (byte)((byte)t4 | (byte)((r >> (int)(18))));
             Δp[1] = (byte)((byte)tx | (byte)((byte)((r >> (int)(12))) & (byte)maskx));
@@ -134,6 +134,7 @@ internal static nint encoderune(slice<byte> Δp, rune r) {
             Δp[3] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
             return 4;
         }
+        return default!;
     }
 
 }

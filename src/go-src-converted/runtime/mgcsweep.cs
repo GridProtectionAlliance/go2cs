@@ -836,7 +836,7 @@ internal static void reportZombies(this ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.Value;
 
     printlock();
-    print("runtime: marked free object in span ", s, ", elemsize=", s.elemsize, " freeindex=", s.freeindex, " (bad use of unsafe.Pointer? try -d=checkptr)\n");
+    print("runtime: marked free object in span ", Ꮡs, ", elemsize=", s.elemsize, " freeindex=", s.freeindex, " (bad use of unsafe.Pointer? try -d=checkptr)\n");
     var mbits = s.markBitsForBase();
     var abits = s.allocBitsForIndex(0);
     for (var i = (uintptr)0; i < (uintptr)s.nelems; i++) {

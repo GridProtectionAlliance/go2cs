@@ -197,7 +197,7 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
         if (!pos.IsValid() && len(ityp.methods) > 0) {
             pos = ityp.methods[0].Value.pos;
         }
-        Ꮡcheck.trace(pos, "-- type set for %s"u8, ityp);
+        Ꮡcheck.trace(pos, "-- type set for %s"u8, Ꮡityp);
         check.indent++;
         defer(() => {
             Ꮡcheck.Value.indent--;

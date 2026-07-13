@@ -124,7 +124,7 @@ internal static slice<byte> appendEscapedRune(slice<byte> buf, rune r, byte quot
                 buf = append(buf, lowerhex[(rune)((r >> (int)((nuint)s)) & 0xF)]);
             }
         }
-        else { /* default: */
+        else if (!matchᴛ1) { /* default: */
             buf = append(buf, ((@string)@"\U"u8).ꓸꓸꓸ);
             for (nint s = 28; s >= 0; s -= 4) {
                 buf = append(buf, lowerhex[(rune)((r >> (int)((nuint)s)) & 0xF)]);

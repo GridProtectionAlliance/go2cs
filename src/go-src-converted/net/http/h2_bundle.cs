@@ -1532,10 +1532,10 @@ internal static void logWrite(this ж<http2Framer> Ꮡf) {
     f.debugFramerBuf.Write(f.wbuf);
     var (fr, err) = f.debugFramer.ReadFrame();
     if (err != default!) {
-        f.debugWriteLoggerf("http2: Framer %p: failed to decode just-written frame"u8, f);
+        f.debugWriteLoggerf("http2: Framer %p: failed to decode just-written frame"u8, Ꮡf);
         return;
     }
-    f.debugWriteLoggerf("http2: Framer %p: wrote %v"u8, f, http2summarizeFrame(fr));
+    f.debugWriteLoggerf("http2: Framer %p: wrote %v"u8, Ꮡf, http2summarizeFrame(fr));
 }
 
 [GoRecv] internal static void writeByte(this ref http2Framer f, byte v) {
@@ -1684,7 +1684,7 @@ internal static (http2Frame, error) ReadFrame(this ж<http2Framer> Ꮡfr) {
         }
     }
     if (fr.logReads) {
-        fr.debugReadLoggerf("http2: Framer %p: read %v"u8, fr, http2summarizeFrame(f));
+        fr.debugReadLoggerf("http2: Framer %p: read %v"u8, Ꮡfr, http2summarizeFrame(f));
     }
     if (fh.Type == http2FrameHeaders && fr.ReadMetaHeaders != nil) {
         return Ꮡfr.readMetaFrame(f._<ж<http2HeadersFrame>>());
@@ -5829,9 +5829,9 @@ internal static error processGoAway(this ж<http2serverConn> Ꮡsc, ж<http2GoAw
 
     sc.serveG.check();
     if (f.ErrCode != http2ErrCodeNo){
-        sc.logf("http2: received GOAWAY %+v, starting graceful shutdown"u8, f);
+        sc.logf("http2: received GOAWAY %+v, starting graceful shutdown"u8, Ꮡf);
     } else {
-        sc.vlogf("http2: received GOAWAY %+v, starting graceful shutdown"u8, f);
+        sc.vlogf("http2: received GOAWAY %+v, starting graceful shutdown"u8, Ꮡf);
     }
     Ꮡsc.startGracefulShutdownInternal();
     // http://tools.ietf.org/html/rfc7540#section-6.8
@@ -8467,7 +8467,7 @@ internal static void closeIfIdle(this ж<http2ClientConn> Ꮡcc) {
     // TODO: do clients send GOAWAY too? maybe? Just Close:
     Ꮡcc.of(http2ClientConn.Ꮡmu).Unlock();
     if (http2VerboseLogs) {
-        cc.vlogf("http2: Transport closing idle conn %p (forSingleUse=%v, maxStream=%v)"u8, cc, cc.singleUse, nextID - 2);
+        cc.vlogf("http2: Transport closing idle conn %p (forSingleUse=%v, maxStream=%v)"u8, Ꮡcc, cc.singleUse, nextID - 2);
     }
     Ꮡcc.closeConn();
 }
@@ -9719,7 +9719,7 @@ internal static void forgetStreamID(this ж<http2ClientConn> Ꮡcc, uint32 id) =
     var closeOnIdle = cc.singleUse || cc.doNotReuse || cc.t.disableKeepAlives() || cc.goAway != nil;
     if (closeOnIdle && cc.streamsReserved == 0 && builtin.len(cc.streams) == 0) {
         if (http2VerboseLogs) {
-            cc.vlogf("http2: Transport closing idle conn %p (forSingleUse=%v, maxStream=%v)"u8, cc, cc.singleUse, cc.nextStreamID - 2);
+            cc.vlogf("http2: Transport closing idle conn %p (forSingleUse=%v, maxStream=%v)"u8, Ꮡcc, cc.singleUse, cc.nextStreamID - 2);
         }
         cc.closed = true;
         defer(Ꮡcc.closeConn);

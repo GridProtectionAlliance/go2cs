@@ -348,7 +348,7 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
             if (fallthrough || !matchᴛ1 && exprᴛ1 == name) {
                 check.files = append(check.files, @file);
             }
-            else { /* default: */
+            else if (!matchᴛ1) { /* default: */
                 Ꮡcheck.errorf(((atPos)(~@file).Package), MismatchedPkgName, "package %s; expected package %s"u8, name, (~pkg).name);
             }
         }

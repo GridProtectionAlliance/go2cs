@@ -398,7 +398,7 @@ public static nint EncodeRune(slice<byte> p, rune r) {
             p[2] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
             return 3;
         }
-        { /* default: */
+        if (!matchᴛ1) { /* default: */
             _ = p[3];
             p[0] = (byte)((byte)t4 | (byte)((r >> (int)(18))));
             p[1] = (byte)((byte)tx | (byte)((byte)((r >> (int)(12))) & (byte)maskx));
@@ -406,6 +406,7 @@ public static nint EncodeRune(slice<byte> p, rune r) {
             p[3] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
             return 4;
         }
+        return default!;
     }
 
 }
@@ -440,9 +441,10 @@ internal static slice<byte> appendRuneNonASCII(slice<byte> p, rune r) {
         if (fallthrough || !matchᴛ1 && (i <= rune3Max)) {
             return append(p, (byte)((byte)t3 | (byte)((r >> (int)(12)))), (byte)((byte)tx | (byte)((byte)((r >> (int)(6))) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
         }
-        { /* default: */
+        if (!matchᴛ1) { /* default: */
             return append(p, (byte)((byte)t4 | (byte)((r >> (int)(18)))), (byte)((byte)tx | (byte)((byte)((r >> (int)(12))) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)((r >> (int)(6))) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
         }
+        return default!;
     }
 
 }

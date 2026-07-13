@@ -407,9 +407,7 @@ internal static void call(this ж<service> Ꮡs, ж<Server> Ꮡserver, ж<sync.M
 }
 
 [GoRecv] internal static error ReadRequestHeader(this ref gobServerCodec c, ж<Request> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
-    return c.dec.Decode(r);
+    return c.dec.Decode(Ꮡr);
 }
 
 [GoRecv] internal static error ReadRequestBody(this ref gobServerCodec c, any body) {
@@ -419,9 +417,8 @@ internal static void call(this ж<service> Ꮡs, ж<Server> Ꮡserver, ж<sync.M
 [GoRecv] internal static error /*err*/ WriteResponse(this ref gobServerCodec c, ж<Response> Ꮡr, any body) {
     error err = default!;
 
-    ref var r = ref Ꮡr.Value;
     {
-        err = c.enc.Encode(r); if (err != default!) {
+        err = c.enc.Encode(Ꮡr); if (err != default!) {
             if (c.encBuf.Flush() == default!) {
                 // Gob couldn't encode the header. Should not happen, so if it does,
                 // shut down the connection to signal that the connection is broken.

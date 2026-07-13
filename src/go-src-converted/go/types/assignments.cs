@@ -42,7 +42,7 @@ internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
  // ok
  // we may get here because of other problems (go.dev/issue/39634, crash 12)
  // TODO(gri) do we need a new "generic" error code here?
- IncompatibleAssign, "cannot assign %s to %s in %s"u8, x, T, context);
+ IncompatibleAssign, "cannot assign %s to %s in %s"u8, Ꮡx, T, context);
         x.mode = invalid;
         return;
     }
@@ -78,7 +78,7 @@ internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
         }
         var (newType, val, code) = Ꮡcheck.implicitTypeAndValue(Ꮡx, target);
         if (code != 0) {
-            @string msg = Ꮡcheck.sprintf("cannot use %s as %s value in %s"u8, x, target, context);
+            @string msg = Ꮡcheck.sprintf("cannot use %s as %s value in %s"u8, Ꮡx, target, context);
             var exprᴛ2 = code;
             if (exprᴛ2 == TruncatedFloat) {
                 msg += " (truncated)"u8;
@@ -107,7 +107,7 @@ internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
     // A generic (non-instantiated) function value cannot be assigned to a variable.
     {
         var (sig, _) = under(x.typ)._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), WrongTypeArgCount, "cannot use generic function %s without instantiation in %s"u8, x, context);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), WrongTypeArgCount, "cannot use generic function %s without instantiation in %s"u8, Ꮡx, context);
             x.mode = invalid;
             return;
         }
@@ -123,9 +123,9 @@ internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
     {
         var (ok, code) = Ꮡx.assignableTo(Ꮡcheck, T, Ꮡcause); if (!ok) {
             if (cause != ""u8){
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, "cannot use %s as %s value in %s: %s"u8, x, T, context, cause);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, "cannot use %s as %s value in %s: %s"u8, Ꮡx, T, context, cause);
             } else {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, "cannot use %s as %s value in %s"u8, x, T, context);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, "cannot use %s as %s value in %s"u8, Ꮡx, T, context);
             }
             x.mode = invalid;
         }
@@ -144,7 +144,7 @@ internal static void initConst(this ж<Checker> Ꮡcheck, ж<Const> Ꮡlhs, ж<o
     }
     // rhs must be a constant
     if (x.mode != constant_) {
-        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConstInit, "%s is not constant"u8, x);
+        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConstInit, "%s is not constant"u8, Ꮡx);
         if (lhs.typ == default!) {
             lhs.typ = new BasicжΔType(Typ[Invalid]);
         }

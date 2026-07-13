@@ -315,7 +315,7 @@ internal static void free(this ж<userArena> Ꮡa) {
     }
     // Mark ourselves as defunct.
     Ꮡa.of(userArena.Ꮡdefunct).Store(true);
-    SetFinalizer(a, default!);
+    SetFinalizer(Ꮡa, default!);
     // Free all the full arenas.
     //
     // The refs on this list are in reverse order from the second-to-last.

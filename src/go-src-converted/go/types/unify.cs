@@ -169,7 +169,7 @@ internal static void Swap(this typeParamsById s, nint i, nint j) {
     ref var y = ref Ꮡy.Value;
 
     if (traceInference) {
-        u.tracef("%s ⇄ %s"u8, x, y);
+        u.tracef("%s ⇄ %s"u8, Ꮡx, Ꮡy);
     }
     {
         var (hx, hy) = (u.handles[Ꮡx], u.handles[Ꮡy]);
@@ -236,11 +236,9 @@ internal static void Swap(this typeParamsById s, nint i, nint j) {
 // set sets the type t for type parameter x;
 // t must not be nil.
 [GoRecv] internal static void set(this ref unifier u, ж<TypeParam> Ꮡx, ΔType t) {
-    ref var x = ref Ꮡx.Value;
-
     assert(t != default!);
     if (traceInference) {
-        u.tracef("%s ➞ %s"u8, x, t);
+        u.tracef("%s ➞ %s"u8, Ꮡx, t);
     }
     u.handles[Ꮡx].ValueSlot = t;
 }
