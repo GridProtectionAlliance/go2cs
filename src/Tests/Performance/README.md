@@ -65,7 +65,7 @@ can never silently report a benchmark that computes something different in C#.
 
 <!-- PERF-RESULTS:BEGIN -->
 
-**Environment:** 13th Gen Intel(R) Core(TM) i9-13900K · Microsoft Windows 10.0.26200 · go1.23.1 · .NET SDK 9.0.315 · 2026-07-02
+**Environment:** 13th Gen Intel(R) Core(TM) i9-13900K · Microsoft Windows 10.0.26200 · go1.23.1 · .NET SDK 9.0.315 · 2026-07-12
 
 C# builds: JIT = framework-dependent `Release`; Native AOT = `-p:PublishAot=true` self-contained, partial trim. Median of 5 runs (1 discarded warmup). Workload time is measured in-program and excludes process startup; the Startup row is pure process wall time. Ratios are relative to Go.
 
@@ -73,31 +73,29 @@ C# builds: JIT = framework-dependent `Release`; Native AOT = `-p:PublishAot=true
 
 | Benchmark | Go | C# (JIT) | C# (Native AOT) |
 |---|---:|---:|---:|
-| Startup | 12.5 | 34.1 (2.73×) | 15.3 (1.23×) |
-| Fib | 81.6 | 101.3 (1.24×) | 88.1 (1.08×) |
-| Sieve | 73.1 | 98.2 (1.34×) | 135.7 (1.86×) |
-| MatMul | 54.5 | 139.8 (2.57×) | 201.7 (3.70×) |
-| String | 70.2 | 491.2 (7.00×) | 619.5 (8.83×) |
-| StringView † | 7.5 | 37.3 (4.99×) | 34.2 (4.58×) |
-| Map | 277.6 | 233.7 (0.84×) | 81.8 (0.29×) |
-| Sort | 113.1 | 384.7 (3.40×) | 409.0 (3.62×) |
-| Channel | 46.9 | 150.2 (3.20×) | 102.1 (2.18×) |
+| Startup | 12.2 | 34.4 (2.82×) | 16.0 (1.31×) |
+| Fib | 79.9 | 99.4 (1.24×) | 87.5 (1.10×) |
+| Sieve | 71.2 | 95.4 (1.34×) | 147.4 (2.07×) |
+| MatMul | 54.5 | 132.4 (2.43×) | 192.7 (3.53×) |
+| String | 69.9 | 754.5 (10.79×) | 775.3 (11.09×) |
+| Map | 258.9 | 220.6 (0.85×) | 79.0 (0.31×) |
+| Sort | 113.6 | 411.8 (3.63×) | 418.5 (3.68×) |
+| Channel | 43.6 | 147.7 (3.39×) | 116.3 (2.67×) |
+| StringView | 7.6 | 36.9 (4.82×) | 34.4 (4.49×) |
 
 **Peak memory** (working set, MB -- lower is better):
 
 | Benchmark | Go | C# (JIT) | C# (Native AOT) |
 |---|---:|---:|---:|
-| Startup | 2.5 | 16.3 | 2.5 |
-| Fib | 5.5 | 17.9 | 10.6 |
-| Sieve | 35.5 | 38.6 | 29.9 |
-| MatMul | 10.5 | 26.4 | 16.8 |
-| String | 5.4 | 40.4 | 28.8 |
-| StringView † | 5.4 | 21.6 | 10.7 |
-| Map | 158.7 | 138.6 | 128.3 |
-| Sort | 21.9 | 42.5 | 28.5 |
-| Channel | 5.4 | 39.8 | 10.8 |
-
-† StringView was measured separately on 2026-07-12 (the other rows are the 2026-07-02 batch); its ratios are the meaningful figure. A full `--update-readme` on a cool machine will fold it into a single consistent batch.
+| Startup | 2.6 | 17.1 | 2.6 |
+| Fib | 5.5 | 18.7 | 10.7 |
+| Sieve | 35.4 | 40.8 | 30.0 |
+| MatMul | 10.2 | 26.5 | 16.9 |
+| String | 5.5 | 38.6 | 28.9 |
+| Map | 158.3 | 137.3 | 128.4 |
+| Sort | 21.8 | 41.5 | 28.8 |
+| Channel | 5.5 | 39.2 | 10.8 |
+| StringView | 5.5 | 19.5 | 10.7 |
 
 <!-- PERF-RESULTS:END -->
 
@@ -114,9 +112,9 @@ What the numbers above actually show, and why:
   checks the JIT can't always elide, compounded on nested `[][]float64` access. Note **AOT is *slower*
   than the JIT here** — ILC lacks the JIT's dynamic PGO / OSR loop optimizations, so AOT trades tight-
   loop throughput for its startup and memory wins.
-- **String:** the biggest honest gap (~7–9×): every `[]byte`→`string` round-trip is an allocation +
+- **String:** the biggest honest gap (~10–11×): every `[]byte`→`string` round-trip is an allocation +
   copy through the `@string` emulation, plus the per-call `append` chain Go inlines to a few
-  instructions. (Already down from ~11–14× — this suite caught a per-`append` array allocation and a
+  instructions. (Down from an initial ~11–14× — this suite caught a per-`append` array allocation and a
   single-element slow path in `golib`; it remains the number to watch when optimizing `@string`.) The
   String benchmark's conversions are all **ineligible** for the stack-string optimization (its `s` is a
   concat operand and its buffer is mutated), so they stay `@string` — see StringView for the eligible case.
