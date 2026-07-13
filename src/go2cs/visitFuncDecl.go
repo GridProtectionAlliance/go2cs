@@ -115,6 +115,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.useUnsafeFunc = false
 	v.loopCopyBackStack = nil
 
+	// Plan which repeated `string(x)` sstring conversions to lift to a single function-scope temp
+	// (loop-invariant / repeated-conversion hoisting — see planSStringHoists). Runs after tempVarCount
+	// is reset so the temp names are function-scoped, and before the body is emitted so visitBlockStmt
+	// and convCallExpr can consult the plan.
+	v.planSStringHoists(funcDecl)
+
 	goFunctionName := funcDecl.Name.Name
 	csFunctionName := getSanitizedFunctionName(goFunctionName)
 

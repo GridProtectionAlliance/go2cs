@@ -46,10 +46,69 @@ func main() {
 	if string(tag) == want {
 		fmt.Println("wanted")
 	}
+
+	// (8) REPEATED conversion inside a LOOP over a never-written source: the same string(word) is
+	//     compared against several literals each iteration. The hoisting pre-pass lifts it to ONE
+	//     function-scope `sstring` temp reused by every comparison, instead of re-materializing the
+	//     view (3x per iteration) — the loop/tokenizer idiom this optimization targets.
+	fmt.Println("classify:", classify([]byte("rust")))
+
+	// (9) REPEATED conversion NOT in a loop — two comparisons of the same never-written source still
+	//     hoist to one temp (the second would otherwise re-materialize the view).
+	fmt.Println("pick:", pick([]byte("b")))
+
+	// (10) DIFFERENT sub-slices of the same never-written source must NOT collapse into one hoisted
+	//      temp — string(buf[:3]) and string(buf[3:6]) are distinct views, so each stays an inline
+	//      (sstring) comparison. (The net/http is408Message idiom; only a BARE-identifier source hoists.)
+	fmt.Println("prefix:", prefix([]byte("GET /x")))
 }
 
 func returnedString() string {
 	b := []byte("returned")
 	r := string(b)
 	return r
+}
+
+// classify compares the same never-written []byte against several keywords inside a loop — the
+// converter hoists `string(word)` to a single `sstring` temp reused by all three comparisons.
+func classify(word []byte) int {
+	total := 0
+	for i := 0; i < 2; i++ {
+		if string(word) == "go" {
+			total++
+		}
+		if string(word) == "rust" {
+			total += 10
+		}
+		if string(word) == "c" {
+			total += 100
+		}
+	}
+	return total
+}
+
+// pick compares the same never-written []byte against two keywords in straight-line code — two uses
+// is enough to hoist (the second reuses the temp rather than rebuilding the view).
+func pick(tag []byte) string {
+	if string(tag) == "a" {
+		return "alpha"
+	}
+	if string(tag) == "b" {
+		return "bravo"
+	}
+	return "other"
+}
+
+// prefix converts two DIFFERENT sub-slices of the same source — the source is a bare identifier only
+// at the root, but the conversion operand (buf[:3] / buf[3:6]) differs, so the two views must stay
+// separate inline conversions. Hoisting is gated on a bare-identifier operand precisely to avoid
+// collapsing these into one temp (which would compare buf[:3] against " /x").
+func prefix(buf []byte) bool {
+	if len(buf) < 6 {
+		return false
+	}
+	if string(buf[:3]) != "GET" {
+		return false
+	}
+	return string(buf[3:6]) == " /x"
 }

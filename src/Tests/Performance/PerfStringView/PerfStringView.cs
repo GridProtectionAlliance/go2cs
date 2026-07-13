@@ -8,14 +8,15 @@ partial class main_package {
 internal static nint run(nint n) {
     nint total = 0;
     var buf = keyword();
+    sstring bufᴛ1 = ((sstring)buf);
     for (nint i = 0; i < n; i++) {
-        if (((sstring)buf) == "null"u8) {
+        if (bufᴛ1 == "null"u8) {
             total++;
         }
-        if (((sstring)buf) == "true"u8) {
+        if (bufᴛ1 == "true"u8) {
             total += 2;
         }
-        if (((sstring)buf) == "false"u8) {
+        if (bufᴛ1 == "false"u8) {
             total += 4;
         }
     }

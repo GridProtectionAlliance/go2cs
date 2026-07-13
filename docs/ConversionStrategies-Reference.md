@@ -1366,11 +1366,37 @@ stays `@string` only when the other operand is not a literal (a variable would n
 byte-signature-check idiom lifts the Go-1.23 stdlib footprint from one site to ~23 across ~19 files
 (`debug/elf`·`macho`·`pe`, `encoding/json`, `image/gif`·`png`, `internal/chacha8rand`, `go/build`, …).
 
-Guarded by the `SStringElision` behavioral test — both cases: two eligible locals and an unnamed comparison
-operand emit `sstring`; source-mutated, print-escaped, and returned locals plus a compare-against-a-variable
-stay `@string` — asserting emitted forms and byte-identical Go/C# stdout. Further phases (unnamed conversions
-passed to non-retaining callees / used as map keys, a precise per-iteration liveness guard that would reach
-the `PerfString` loop) are deferred; see [`docs/Roadmap.md`](Roadmap.md).
+A third refinement is an **optimization**, not a widening of eligibility: **loop-invariant / repeated-conversion
+hoisting**. When the same eligible `string(x)` over a never-written source is emitted repeatedly — several
+comparison operands, or one inside a loop — the inline `((sstring)x)` re-materializes the view at every use,
+and the JIT will **not** hoist a `ref struct` view out of a loop (measured: a non-throwing
+`MemoryMarshal.CreateReadOnlySpan` golib view, added so the `ToSpan` bounds check could not block
+loop-invariant-code-motion, made *zero* difference and was reverted — the fix must be converter-level). A
+per-`FuncDecl` pre-pass (`planSStringHoists`) instead lifts each such group to ONE
+`sstring <temp> = ((sstring)x);` at function scope and rewrites every use to the temp (`convCallExpr` returns
+the temp name for a lifted `*ast.CallExpr`; `visitBlockStmt` injects the decl before the group's anchor —
+the first top-level body statement that contains a use). The safe gate is strong and needs no liveness
+analysis: the conversion operand must be a **bare identifier** `x` (never a sub-slice/index — `string(buf[:7])`
+and `string(buf[8:12])` are distinct views that must not share one temp), and that `x` must be a plain
+function-local or parameter that is NEVER written in the body (`objectIsWritten == false`), declared before the
+injection point, with no use inside a nested func literal (a `ref struct` cannot cross a closure boundary —
+that is a C# compile error, so the gate keeps the impossibility loud). Worth doing only when the conversion is
+genuinely repeated — ≥2 uses, or ≥1 use inside a loop — so a lone comparison stays inline. Real Go-1.23 stdlib `sstring` sites are mostly *single* comparisons where this
+is a no-op, so it changes few-to-zero stdlib goldens (the Go-1.23 reconvert hoists **zero** sites — the one
+candidate, net/http's `is408Message`, is `string(buf[:7])`/`string(buf[8:12])`, distinct sub-slices the
+bare-identifier gate keeps inline); the win is targeted at loop/tokenizer patterns — a scanner comparing
+`string(buf)` against several keywords — where a clean back-to-back A/B took `PerfStringView` from ~4.8× → ~3.0×
+Go on the JIT (35.9 → 22.5 ms) and ~4.5× → ~1.9× on Native AOT (34.4 → 14.1 ms). That is about the practical
+floor within .NET: a decomposition micro-benchmark confirmed the `sstring` `==` operator itself adds *zero*
+over a raw span compare — the whole recoverable cost is the per-use view reconstruction, and the residual is
+inherent (`SequenceEqual`'s per-call setup on a tiny buffer vs Go's inlined `memcmp`).
+
+Guarded by the `SStringElision` behavioral test — the eligible cases (two eligible locals, an unnamed
+comparison operand, and two repeated-conversion groups that each hoist to a single reused `sstring` temp — one
+in a loop, one straight-line) emit `sstring`; source-mutated, print-escaped, and returned locals plus a
+compare-against-a-variable stay `@string` — asserting emitted forms and byte-identical Go/C# stdout. Remaining
+phases (unnamed conversions passed to non-retaining callees / used as map keys, and a precise per-iteration
+liveness guard that would reach the `PerfString` loop) are deferred; see [`docs/Roadmap.md`](Roadmap.md).
 
 ## Maps and Channels
 Go maps and channels convert to the golib [`map<K,V>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/map.cs) and [`channel<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/channel.cs) structures. `make` becomes a constructor; channel send/receive use the runtime operators:

@@ -83,7 +83,7 @@ C# builds: JIT = framework-dependent `Release`; Native AOT = `-p:PublishAot=true
 | Map | 258.9 | 220.6 (0.85×) | 79.0 (0.31×) |
 | Sort | 113.6 | 411.8 (3.63×) | 418.5 (3.68×) |
 | Channel | 43.6 | 147.7 (3.39×) | 116.3 (2.67×) |
-| StringView | 7.6 | 36.9 (4.82×) | 34.4 (4.49×) |
+| StringView | 7.6 | 23.4 (3.09×) | 14.1 (1.86×) |
 
 **Peak memory** (working set, MB -- lower is better):
 
@@ -97,7 +97,7 @@ C# builds: JIT = framework-dependent `Release`; Native AOT = `-p:PublishAot=true
 | Map | 158.3 | 137.3 | 128.4 |
 | Sort | 21.8 | 41.5 | 28.8 |
 | Channel | 5.5 | 39.2 | 10.8 |
-| StringView | 5.5 | 19.5 | 10.7 |
+| StringView | 2.9 | 19.3 | 10.7 |
 
 <!-- PERF-RESULTS:END -->
 
@@ -120,18 +120,21 @@ What the numbers above actually show, and why:
   single-element slow path in `golib`; it remains the number to watch when optimizing `@string`.) The
   String benchmark's conversions are all **ineligible** for the stack-string optimization (its `s` is a
   concat operand and its buffer is mutated), so they stay `@string` — see StringView for the eligible case.
-- **StringView (~4.5–5×):** the same `[]byte`→`string` cost, but for the subset the converter can prove
-  non-escaping and used only in safe reads/comparisons — where it emits a zero-copy stack string
+- **StringView (JIT ~3.1×, AOT ~1.9×):** the same `[]byte`→`string` cost, but for the subset the converter
+  can prove non-escaping and used only in safe reads/comparisons — where it emits a zero-copy stack string
   (`sstring`) instead of `@string` (see [ConversionStrategies-Reference](https://github.com/GridProtectionAlliance/go2cs/blob/master/docs/ConversionStrategies-Reference.md)).
   Both runtimes already stack-allocate `@string`'s byte[] here, so the win is eliminating the per-comparison
   **copy** and the **literal allocation** (`@string == "…"u8` materializes the literal every time; `sstring`
   compares spans in place): in isolation the eligible comparison runs **~12× faster than `@string` on the
-  JIT and ~11× on Native AOT**. Closer to Go than String, and notably AOT ≈ JIT (unlike most rows). It is
-  the number to watch as the eligibility surface widens. Most of the remaining gap is the converter
-  re-materializing the view on each of this benchmark's repeated comparisons — hoisting that loop-invariant
-  view to one `sstring` per call takes this benchmark to **~2.9× Go** (measured), about the practical floor
-  (the residual is `SequenceEqual`'s per-call cost on a tiny buffer vs Go's inlined `memcmp`); tracked as a
-  converter follow-up in the [Roadmap](https://github.com/GridProtectionAlliance/go2cs/blob/master/docs/Roadmap.md).
+  JIT and ~11× on Native AOT**. This row also now reflects **loop-invariant hoisting** (Roadmap increment 5):
+  the converter was re-materializing the zero-copy view on each of this benchmark's three repeated
+  comparisons, and the JIT will not lift a `ref struct` view out of a loop — so the converter now emits **one**
+  hoisted `sstring` per call and reuses it. A clean back-to-back A/B on this machine measured the JIT drop
+  from **4.84× → 3.04× Go** (35.9 → 22.5 ms) and Native AOT from **4.49× → 1.86×** (34.4 → 14.1 ms) — about
+  the practical floor within .NET (the residual is `SequenceEqual`'s per-call setup on a tiny buffer vs Go's
+  inlined `memcmp`; a decomposition micro-benchmark confirmed the `sstring` `==` operator itself adds zero
+  over a raw span compare). Closer to Go than String, and the number to watch as the eligibility surface
+  widens.
 - **Map:** the transpiled C# is *faster than Go* — `map<K,V>` rides .NET's heavily-optimized
   `Dictionary`, and the AOT build is ~3× faster than Go on this insert/lookup/delete churn.
 - **Sort (~3.5×):** the runtime's `sort.Interface` shim (`Interface<T>`) binds `Len`/`Less`/`Swap` via

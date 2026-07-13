@@ -64,6 +64,14 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtCont
 			}
 		}
 
+		// Inject any hoisted stack-string temp declarations whose anchor is this statement, so a
+		// repeated `string(x)` conversion is materialized once here and each use references the temp
+		// (see planSStringHoists). The anchor is always a top-level function-body statement, so this
+		// fires exactly once, at body scope, before the first use.
+		for _, hoist := range v.sstringHoistsByStmt[stmt] {
+			v.emitSStringHoist(hoist)
+		}
+
 		v.visitStmt(stmt, []StmtContext{})
 
 		lastStmt = stmt

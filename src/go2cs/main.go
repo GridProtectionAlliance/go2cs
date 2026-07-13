@@ -290,6 +290,9 @@ type Visitor struct {
 	sstringEligible        map[types.Object]bool     // String locals emittable as stack-only sstring (see FileEntry.sstringEligible)
 	sstringConvExprs       map[*ast.CallExpr]bool     // `string(x)` conversions that emit `(sstring)x` (see FileEntry.sstringConvExprs)
 	emitStringConvAsSString bool                      // Transient: while emitting an eligible decl's RHS, a string([]byte) conversion emits `(sstring)` not `(@string)`
+	sstringHoistedConvExprs map[*ast.CallExpr]string  // Per-func: eligible `string(x)` uses lifted to a shared sstring temp — each emits the temp NAME (see planSStringHoists)
+	sstringHoistsByStmt    map[ast.Stmt][]sstringHoist // Per-func: hoisted sstring temp decls to inject before a top-level body statement (its anchor)
+	suppressSStringHoist   bool                      // Transient: while rendering a hoisted temp's OWN initializer, ignore sstringHoistedConvExprs so the real `((sstring)x)` view is emitted
 	identNames             map[*ast.Ident]string   // Local identifiers to adjusted names map
 	isReassigned           map[*ast.Ident]bool     // Local identifiers to reassignment status map
 	funcLevelDecls         map[string]*types.Var   // Function-level local declarations of the current function (for global-shadow qualification)

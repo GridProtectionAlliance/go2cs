@@ -74,6 +74,14 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	if ok, targetTypeName := v.isTypeConversion(callExpr); ok {
 		arg := callExpr.Args[0]
 
+		// A `string(x)` conversion the hoisting pre-pass elected to lift to a single function-scope
+		// `sstring` temp (see planSStringHoists) emits just the temp NAME at every use, instead of
+		// re-materializing `((sstring)x)` here. suppressSStringHoist is set only while the hoisted
+		// decl's OWN initializer is being rendered, so that one keeps emitting the real view.
+		if tempName, ok := v.sstringHoistedConvExprs[callExpr]; ok && !v.suppressSStringHoist {
+			return tempName
+		}
+
 		// `(*Base)(p)` reinterpreting a pointer to a DEFINED type as a pointer to its underlying
 		// named type — `(*atomic.Uint32)(c)` where `c` is `*counter` and `type counter atomic.Uint32`
 		// (runtime/mprof goroutineProfileStateHolder). C# has no `ж<counter> → ж<atomic.Uint32>`

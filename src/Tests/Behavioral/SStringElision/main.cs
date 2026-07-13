@@ -30,12 +30,53 @@ internal static void Main() {
     if (((@string)tag) == want) {
         fmt.Println("wanted");
     }
+    fmt.Println("classify:", classify(slice<byte>((@string)"rust")));
+    fmt.Println("pick:", pick(slice<byte>((@string)"b")));
+    fmt.Println("prefix:", prefix(slice<byte>((@string)"GET /x")));
 }
 
 internal static @string returnedString() {
     var b = slice<byte>((@string)"returned");
     @string r = ((@string)b);
     return r;
+}
+
+internal static nint classify(slice<byte> word) {
+    nint total = 0;
+    sstring wordᴛ1 = ((sstring)word);
+    for (nint i = 0; i < 2; i++) {
+        if (wordᴛ1 == "go"u8) {
+            total++;
+        }
+        if (wordᴛ1 == "rust"u8) {
+            total += 10;
+        }
+        if (wordᴛ1 == "c"u8) {
+            total += 100;
+        }
+    }
+    return total;
+}
+
+internal static @string pick(slice<byte> tag) {
+    sstring tagᴛ1 = ((sstring)tag);
+    if (tagᴛ1 == "a"u8) {
+        return "alpha"u8;
+    }
+    if (tagᴛ1 == "b"u8) {
+        return "bravo"u8;
+    }
+    return "other"u8;
+}
+
+internal static bool prefix(slice<byte> buf) {
+    if (len(buf) < 6) {
+        return false;
+    }
+    if (((sstring)(buf[..3])) != "GET"u8) {
+        return false;
+    }
+    return ((sstring)(buf[3..6])) == " /x"u8;
 }
 
 } // end main_package
