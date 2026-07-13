@@ -104,7 +104,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	// marker comment — the package's *_impl.cs supplies the implementation.
 	if v.isManualFuncDecl(funcDecl) {
 		v.targetFile.WriteString(v.newline)
-		v.writeOutput("// func %s is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])", funcDecl.Name.Name)
+		v.writeOutput("// go2cs generated this placeholder — func %s is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])", funcDecl.Name.Name)
 		v.targetFile.WriteString(v.newline)
 		return
 	}
