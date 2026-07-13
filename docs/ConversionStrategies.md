@@ -40,6 +40,7 @@ directly (interface satisfaction, receiver overloads, struct-embedding promotion
   - [Return Tuples](#return-tuples)
 - **Composite & named types**
   - [Slices and Arrays](#slices-and-arrays)
+  - [Stack Strings (`sstring`)](#stack-strings-sstring)
   - [Maps and Channels](#maps-and-channels)
   - [Generic Constraints](#generic-constraints)
   - [Type Aliasing](#type-aliasing)
@@ -78,7 +79,7 @@ directly (interface satisfaction, receiver overloads, struct-embedding promotion
 | `interface{}` / `any` | `any` (a global alias for `object`) | BCL |
 | `[]T` slice · `[N]T` array | `slice<T>` · `array<T>` | golib |
 | `map[K]V` · `chan T` | `map<K,V>` · `channel<T>` | golib |
-| `string` | `@string` | golib |
+| `string` | `@string` (heap) · `sstring` (non-escaping stack view) | golib |
 | `v, ok := m[k]` (comma-ok) | `var (v, ok) = m[k, ꟷ];` | golib |
 | `a, b = b, a` | `(a, b) = (b, a);` | C# tuples |
 | `*T` · `&x` | `ж<T>` heap box · `Ꮡx` address-of | golib |
@@ -440,6 +441,49 @@ A string↔bytes conversion is a cast over the golib types: `string(b.buf[b.off:
 **Full detail:** [Reference → Slices and Arrays](ConversionStrategies-Reference.md#slices-and-arrays) —
 named slice/array wrappers, string↔`[]byte`/`[]rune` conversions, high-`\x`-escape byte arrays, structural
 composite rendering, and slice-aliasing/write-through semantics.
+
+---
+
+## Stack Strings (`sstring`)
+
+A Go `string` is a heap `@string`, so every `string([]byte)` conversion **copies** the bytes into a fresh
+allocation — the price of Go's immutable-string guarantee. Go's own compiler *elides* that copy when the
+resulting string does not escape and its source is not modified while it is alive, letting the string alias
+the bytes in place; `@string` cannot, so the very common "convert a byte slice, inspect it, discard it"
+idiom allocates in C# where Go would not.
+
+The converter recovers this with a second string type,
+[`sstring`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/sstring.cs): a
+stack-only `readonly ref struct` that *views* a `ReadOnlySpan<byte>` with **no allocation**. A provably-safe
+`string([]byte)` conversion emits `sstring`; anything that escapes stays `@string` (the implicit
+`sstring`→`@string` conversion copies to the heap at that boundary, so correctness never depends on getting
+the analysis right — only performance does).
+
+Safety is enforced two ways. Because `sstring` is a `ref struct`, the .NET compiler forbids every way a
+string could escape — a field, array, map, interface box, channel, closure, or a return past its data's
+lifetime — so an over-reach is a **compile error, not a silent bug**. The one hazard the compiler cannot
+see — the source slice mutated while the view is alive — the converter's escape analysis rules out. So
+`sstring` appears only for a non-escaping conversion used in **read-only** positions: a comparison, a
+`switch` tag, `len`/index, or a concatenation operand.
+
+```go
+if string(hdr[:4]) == wantMagic { … }        // compare a slice against a []byte-derived string
+switch string(cmd) { case "get": …; case "put": … }
+```
+```csharp
+if (((sstring)(hdr[..4])) == wantMagic) { … }   // mixed sstring/@string compare — no heap copy
+var exprᴛ1 = ((sstring)cmd);                     // a string switch lowers to == comparisons
+if (exprᴛ1 == "get"u8) { … } if (exprᴛ1 == "put"u8) { … }
+```
+
+Comparing an `sstring` against a `"…"u8` literal, an `@string`, or another view runs zero-allocation
+directly over the backing spans — which is where the win shows: the eligible comparison idiom measures
+~11–12× faster than the `@string` copy-and-compare. A repeated conversion in a loop is hoisted to a single
+reused view; everything that escapes simply stays `@string`.
+
+**Full detail:** [Reference → the stack string `sstring`](ConversionStrategies-Reference.md#a-non-escaping-stringbyte-local-emits-the-stack-string-sstring) —
+the exact eligibility predicate, the comparison / `switch` / concatenation forms and the `u8`-literal and
+mixed-`@string` operators, loop-invariant hoisting, and the `SStringElision` guard test.
 
 ---
 
