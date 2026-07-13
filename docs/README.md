@@ -167,7 +167,7 @@ go2cs -recurse module_dir              # convert a module + its third-party deps
 |:--|:--|
 | `-stdlib` | Convert the Go standard library (optionally followed by specific package names). |
 | `-recurse` | Recursively convert a downloaded module **and its third-party dependencies** in dependency order, referencing the pre-converted standard library. See [Converting a real-world module](#converting-a-real-world-module). |
-| <nobr> ``-go2cspath <dir>`` </nobr> | Root for converted code (env `GO2CSPATH`; default `~/go2cs`): the **output** root for `-stdlib` (`…\core\<pkg>`) and `-recurse` (`…\src\` app + `…\pkg\` deps), and the root that generated `$(go2csPath)…` project references resolve against. For a single-package/file convert the C# output instead goes to the optional `[output_dir]` argument (in place by default). |
+| <nobr>`-go2cspath <dir>`</nobr> | Root for converted code (env `GO2CSPATH`; default `~/go2cs`): the **output** root for `-stdlib` (`…\core\<pkg>`) and `-recurse` (`…\src\` app + `…\pkg\` deps), and the root that generated `$(go2csPath)…` project references resolve against. For a single-package/file convert the C# output instead goes to the optional `[output_dir]` argument (in place by default). |
 | `-goroot` / `-gopath` | Override the detected Go root / path. |
 | `-platforms <os/arch>` | Target platform for build-tagged files (defaults to the host). |
 | `-indent <n>` | Spaces per indent level (default 4). |
