@@ -82,14 +82,15 @@ directly (interface satisfaction, receiver overloads, struct-embedding promotion
 | `string` | [`@string`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/string.cs) (heap) · [`sstring`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/sstring.cs) (non-escaping stack view) | golib |
 | `v, ok := m[k]` (comma-ok) | [`var (v, ok) = m[k, ꟷ];`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/map.cs) | golib |
 | `a, b = b, a` | `(a, b) = (b, a);` | C# tuples |
-| `*T` · `&x` | [`ж<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/ж.cs) heap box · [`Ꮡx`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/ж.cs) address-of | golib |
+| `*T` · `&x` | [`ж<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/%D0%B6.cs) heap box · [`Ꮡx`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/%D0%B6.cs) address-of | golib |
 | `type I interface{…}` | [`[GoType]`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/GoTypeAttribute.cs) `partial interface` + [generated implementing glue](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gen/go2cs-gen/ImplementGenerator.cs) | `ImplementGenerator` |
 | struct embedding | [promoted field accessors + method forwarders](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gen/go2cs-gen/TypeGenerator.cs) | `TypeGenerator` |
-| `func (t T) M()` / `func (t *T) M()` | [`[GoRecv]`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/GoRecvAttribute.cs)/`this` extension method + a [`ж<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/ж.cs) overload | `RecvGenerator` |
+| `func (t T) M()` / `func (t *T) M()` | [`[GoRecv]`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/GoRecvAttribute.cs)/`this` extension method + a [`ж<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/%D0%B6.cs) overload | `RecvGenerator` |
 | `defer f()` · `panic(x)` · `recover()` | body-wrapped [`func((defer, recover) => {…})`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/GoFunc.cs); `defer(f)`; [`throw panic(x)`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/PanicException.cs) | golib |
 | `go f()` · `select {…}` | [`goǃ(…)`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/builtin.cs) · [`switch (select(…))`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/builtin.cs) | golib |
 | `x.(T)` · `switch x.(type)` | [`x._<T>()`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/builtin.cs) · [`x.type()`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/builtin.cs) | golib / converter |
 | generic `[T Constraint]` | `where T : <lifted interface(s)>` | golib / .NET |
+
 ---
 
 ## Package Conversion
