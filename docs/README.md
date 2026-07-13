@@ -167,7 +167,7 @@ go2cs -recurse module_dir              # convert a module + its third-party deps
 |:--|:--|
 | `-stdlib` | Convert the Go standard library (optionally followed by specific package names). |
 | `-recurse` | Recursively convert a downloaded module **and its third-party dependencies** in dependency order, referencing the pre-converted standard library. See [Converting a real-world module](#converting-a-real-world-module). |
-| <nobr>`-go2cspath <dir>`</nobr> | Root for converted code (env `GO2CSPATH`; default `~/go2cs`): the **output** root for `-stdlib` (`…\core\<pkg>`) and `-recurse` (`…\src\` app + `…\pkg\` deps), and the root that generated `$(go2csPath)…` project references resolve against. For a single-package/file convert the C# output instead goes to the optional `[output_dir]` argument (in place by default). |
+| <nobr> `-go2cspath <dir>` </nobr> | Root for converted code (env `GO2CSPATH`; default `~/go2cs`): the **output** root for `-stdlib` (`…\core\<pkg>`) and `-recurse` (`…\src\` app + `…\pkg\` deps), and the root that generated `$(go2csPath)…` project references resolve against. For a single-package/file convert the C# output instead goes to the optional `[output_dir]` argument (in place by default). |
 | `-goroot` / `-gopath` | Override the detected Go root / path. |
 | `-platforms <os/arch>` | Target platform for build-tagged files (defaults to the host). |
 | `-indent <n>` | Spaces per indent level (default 4). |
@@ -190,7 +190,7 @@ Here is the full round-trip for a small CLI that uses [`github.com/fatih/color`]
 which itself pulls in `github.com/mattn/go-colorable`, `github.com/mattn/go-isatty`, and `golang.org/x/sys` —
 a genuine dependency graph:
 
-> _NOTE: these steps have only been tested on Windows to date_
+> _NOTE: the following steps have only been tested on Windows to date_
 
 **1 — Prerequisite: Stage the standard library (one-time).** `deploy-core` is a build script in the go2cs repo's **`src/`**
 folder (it is *not* on your `PATH`), so run it from there. It stages the pre-converted stdlib + runtime +
@@ -258,11 +258,14 @@ cd "%GOPATH%\src\go2cs\src\example.com\colordemo\"
 dotnet build example.com.colordemo.slnx -c Debug
 ```
 
-> Note: these steps produce a **buildable** — and increasingly **runnable** — solution and handle the common
-real-world module shapes. This simple `fatih/color` example **compiles clean** (app + all four dependency
-projects, against a current deploy) **and runs**. Running more complex projects to completion is a deeper
-milestone: the referenced standard library **compiles** but is not yet fully **operational**. *Running* is the
-**Phase-4** goal, see [`roadmap`](Roadmap.md#phase-4--convert-and-run-go-package-tests).
+**5 — C#: run the converted app.**
+```shell
+.\colordemo.exe
+```
+_Expected output:_
+![colorapp-output](images\colorapp-output.png)
+
+> Note: these steps produce a **buildable** — and increasingly **runnable** — solution and handle the common real-world module shapes. This simple `fatih/color` example **compiles clean** (app + all four dependency projects, against a current deploy) **and runs**. Running more complex projects to completion is a deeper milestone: the referenced standard library **compiles** but is not yet fully **operational**. *Running* is the **Phase-4** goal, see [`roadmap`](Roadmap.md#phase-4--convert-and-run-go-package-tests).
 
 ## Project layout
 

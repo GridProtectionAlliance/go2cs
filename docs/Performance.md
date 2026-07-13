@@ -79,11 +79,11 @@ C# builds: JIT = framework-dependent `Release`; Native AOT = `-p:PublishAot=true
 | Fib | 79.9 | 99.4 (1.24×) | 87.5 (1.10×) |
 | Sieve | 71.2 | 95.4 (1.34×) | 147.4 (2.07×) |
 | MatMul | 54.5 | 132.4 (2.43×) | 192.7 (3.53×) |
-| String | 69.9 | 754.5 (10.79×) | 775.3 (11.09×) |
 | Map | 258.9 | 220.6 (0.85×) | 79.0 (0.31×) |
 | Sort | 113.6 | 411.8 (3.63×) | 418.5 (3.68×) |
 | Channel | 43.6 | 147.7 (3.39×) | 116.3 (2.67×) |
-| StringView | 7.6 | 23.4 (3.09×) | 14.1 (1.86×) |
+| String (heap) | 69.9 | 754.5 (10.79×) | 775.3 (11.09×) |
+| StringView (stack) | 7.6 | 23.4 (3.09×) | 14.1 (1.86×) |
 
 **Peak memory** (working set, MB -- lower is better):
 
@@ -93,11 +93,11 @@ C# builds: JIT = framework-dependent `Release`; Native AOT = `-p:PublishAot=true
 | Fib | 5.5 | 18.7 | 10.7 |
 | Sieve | 35.4 | 40.8 | 30.0 |
 | MatMul | 10.2 | 26.5 | 16.9 |
-| String | 5.5 | 38.6 | 28.9 |
 | Map | 158.3 | 137.3 | 128.4 |
 | Sort | 21.8 | 41.5 | 28.8 |
 | Channel | 5.5 | 39.2 | 10.8 |
-| StringView | 2.9 | 19.3 | 10.7 |
+| String (heap) | 5.5 | 38.6 | 28.9 |
+| StringView (stack) | 2.9 | 19.3 | 10.7 |
 
 <!-- PERF-RESULTS:END -->
 
