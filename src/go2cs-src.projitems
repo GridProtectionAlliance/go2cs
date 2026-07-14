@@ -9,6 +9,8 @@
     <Import_RootNamespace>go2cs_src</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)go2cs\argParse_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\captureModeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\constraintOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convArrayType.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convBasicLit.go" />
@@ -33,13 +35,26 @@
     <None Include="$(MSBuildThisFileDirectory)go2cs\convStructType.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convTypeAssertExpr.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convUnaryExpr.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\dependencyGraph.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\dependencyGraph_test.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\directiveOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\dynamicTypeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\escapeAnalysisOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\globalAddressOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\go.mod" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\go.sum" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\HashSet.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\iifeOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\importAliasOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\importOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\importOperations_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\initOrderOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\linknameForward_test.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\manualTypeOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\moduleConverter.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\moduleConverter_integration_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\moduleConverter_test.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\nameCollisionAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\linux-arm.pubxml" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\linux-arm64.pubxml" />
@@ -50,10 +65,17 @@
     <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\win-arm64.pubxml" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\win-x64.pubxml" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\win-x86.pubxml" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\readme.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\rsrc_windows_386.syso" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\rsrc_windows_amd64.syso" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\sanitization_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\solutionGenerator.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\solutionGenerator_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\sstringHoistOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\Stack.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\stdLibConverter.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\ToDo.md" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\typeAccessibilityOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\variableAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\visitArrayType.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\visitAssignStmt.go" />
@@ -89,6 +111,7 @@
     <None Include="$(MSBuildThisFileDirectory)go2cs\visitTypeSwitchStmt.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\visitValueSpec.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\writeOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\writtenUnderlyingOperations.go" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)go2cs\csproj-template.xml" />

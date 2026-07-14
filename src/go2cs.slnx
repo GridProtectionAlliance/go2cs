@@ -37,10 +37,14 @@
     <File Path="../docs/Baseline-vs-FullConversion.md" />
     <File Path="../docs/CNAME" />
     <File Path="../docs/coding-style.md" />
+    <File Path="../docs/ConversionStrategies-Reference.md" />
     <File Path="../docs/ConversionStrategies.md" />
+    <File Path="../docs/Glossary.md" />
+    <File Path="../docs/Performance.md" />
     <File Path="../docs/README.md" />
     <File Path="../docs/Roadmap.md" />
     <File Path="../docs/SECURITY.md" />
+    <File Path="../docs/TestingInfrastructureRequirements.md" />
     <File Path="../LICENSE" />
     <File Path="../NOTICE" />
   </Folder>
@@ -195,7 +199,7 @@
     <Project Path="Tests/Behavioral/GlobalTupleVarDecl/GlobalTupleVarDecl.csproj" />
     <Project Path="Tests/Behavioral/GoCallVariations/GoCallVariations.csproj" />
     <Project Path="Tests/Behavioral/GoNamespaceShadow/GoNamespaceShadow.csproj" />
-    <Project Path="Tests/Behavioral/GoNamespaceShadow/nsshadowlib/go.nsshadow.csproj" />
+    <Project Path="Tests/Behavioral/DoesNotExist/DoesNotExist.csproj" />
     <Project Path="Tests/Behavioral/GoStmtReceiverLambda/GoStmtReceiverLambda.csproj" />
     <Project Path="Tests/Behavioral/GoStmtValueReturn/GoStmtValueReturn.csproj" />
     <Project Path="Tests/Behavioral/HeapKeywordVar/HeapKeywordVar.csproj" />
