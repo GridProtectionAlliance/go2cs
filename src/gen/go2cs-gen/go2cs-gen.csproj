@@ -7,12 +7,23 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>go2cs</RootNamespace>
     <Product>go2cs</Product>
-    <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
+    <Description>go2cs Roslyn source generator/analyzer emitting the C# glue (interface satisfaction, implicit conversions, receiver overloads, init ordering) for go2cs converted projects: $(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
+    <Description></Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>
-    <Copyright>Copyright © 2025</Copyright>
+    <Copyright>Copyright © 2026</Copyright>
     <Authors>$(Product) Authors</Authors>
     <Company>Grid Protection Alliance</Company>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Title>go2cs source generator</Title>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>go.gen</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageDescription>$(Description)</PackageDescription>
+    <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
+    <PackageIcon>go2cs.png</PackageIcon>
+    <PackageTags>go2cs;Golang;go;roslyn;analyzer;source-generator</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <IsRoslynComponent>true</IsRoslynComponent>
@@ -28,24 +39,11 @@
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
-  <!-- NuGet: publish as a Roslyn analyzer / source-generator package (go.gen) -->
+  <!-- Analyzer packaging: no lib/, no runtime dependencies, development-time only -->
   <PropertyGroup>
-    <PackageId>go.gen</PackageId>
-    <Title>go2cs source generator</Title>
-    <Description>go2cs Roslyn source generator/analyzer emitting the C# glue (interface satisfaction, implicit conversions, receiver overloads, init ordering) for go2cs-converted projects.</Description>
-    <Authors>Grid Protection Alliance</Authors>
-    <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageIcon>go2cs.png</PackageIcon>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>go2cs;Golang;go;roslyn;analyzer;source-generator</PackageTags>
-
-    <!-- Analyzer packaging: no lib/, no runtime dependencies, development-time only -->
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <DevelopmentDependency>true</DevelopmentDependency>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddGeneratorToPackage</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
