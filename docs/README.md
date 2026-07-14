@@ -2,6 +2,13 @@
 
 # go2cs — Go to C# Converter
 
+[![golib NuGet package](https://img.shields.io/nuget/dt/go.lib?label=go.lib%20NuGet%20package)
+](https://www.nuget.org/packages/go.lib)
+
+Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll)
+
+---
+
 ## 📰 NEWS — July 2026: The entire Go standard library now compiles in .NET
 
 **As of July 10, 2026, all 302 packages of the auto-converted Go standard library (Go 1.23.1) compile
@@ -176,7 +183,7 @@ go2cs -recurse module_dir              # convert a module + its third-party deps
 | `-comments` | Carry source comments into the output (best effort, see [go/ast comment status](https://github.com/golang/go/issues/20744)). |
 | ~~`-cgo`~~ | ~~Also convert cgo-targeted files.~~ |
 
-The converted C# references a small hand-written runtime library (`golib`, published as the **`go.lib`**
+The converted C# references a small hand-written runtime library (`golib`, published as the [`go.lib`](https://www.nuget.org/packages/go.lib)
 NuGet package) plus a set of Roslyn source generators that supply Go semantics at compile time.
 
 ### Converting a real-world module
