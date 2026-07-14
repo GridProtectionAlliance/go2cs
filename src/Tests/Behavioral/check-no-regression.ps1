@@ -32,6 +32,14 @@ $converterSrc = Join-Path $repoRoot "src\go2cs"
 $go2csExe     = Join-Path $converterSrc "bin\go2cs.exe"
 $behavioral   = $PSScriptRoot
 
+# 0. Solution-integrity preflight (fast, static, <1s): every behavioral test project on disk must be
+#    registered in go2cs.slnx. A missing registration builds fine here (the harness builds each .csproj
+#    by path) but breaks the go2cs.slnx build in Visual Studio, so the transpile no-regression loop
+#    below would never catch it. Fail fast before the expensive re-transpile if the tree is inconsistent.
+Write-Host "==> solution-integrity preflight" -ForegroundColor Cyan
+& (Join-Path $PSScriptRoot "check-solution-integrity.ps1")
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
 # 1. Build a current go2cs.exe (cheap; only relinks if the Go sources changed).
 Write-Host "==> go build -o bin\go2cs.exe" -ForegroundColor Cyan
 Push-Location $converterSrc

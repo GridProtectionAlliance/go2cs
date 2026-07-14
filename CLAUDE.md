@@ -203,11 +203,18 @@ construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructField
    `Ꮡ(value)` (address of a non-boxed value) currently boxes a *copy*, so don't write through a
    `&global.field` pointer and then read the *original* global; read back through the same pointer.
 3. **Register in the solution** — add a `<Project Path="Tests/Behavioral/<Name>/<Name>.csproj" />` line under
-   the `/tests/behavioral/target-projects/` folder in `src/go2cs.slnx` (alphabetical). **Then verify it
-   stuck:** `grep "<Name>/<Name>.csproj" src/go2cs.slnx` and `dotnet restore src/go2cs.slnx`. If Visual Studio
-   has the `.slnx` open it can rewrite/reformat the file and silently drop an external edit — re-add and
-   re-verify if so. Note the tests pass even when the project is *missing* from the solution (the harness
-   builds each `.csproj` by path, not via the solution), so this check is the only thing that catches it.
+   the `/tests/behavioral/target-projects/` folder in `src/go2cs.slnx` (alphabetical). **If the test pulls in
+   a sibling library sub-project via `<ProjectReference>`** (e.g. `GoNamespaceShadow` → `nsshadowlib/go.nsshadow.csproj`),
+   register **that** too, on the line right after its parent (the pattern used by `IoLike`→`IoLike/FsLike`,
+   `NamedSliceChildPkg`→`.../netlike`). **Then verify it stuck** — run **`./check-solution-integrity.ps1`**
+   (from `src/Tests/Behavioral`): it asserts every behavioral `.csproj` on disk is registered in `go2cs.slnx`
+   and flags any dangling entry, exit-1 on violation. (Also runs automatically as the preflight of
+   `check-no-regression.ps1`.) This matters because the harness builds each `.csproj` **by path**, not via the
+   solution, so a missing registration still passes the whole suite — it only breaks the `go2cs.slnx` build in
+   Visual Studio (the unregistered project loses the Debug/`$(go2csPath)` context and its `core\*`/`gen\*` refs
+   fail: CS0246/CS0234). That is exactly how `nsshadow` slipped through (added in `96eff53cd`, unregistered
+   until `53dd2497e`). If Visual Studio has the `.slnx` open it can rewrite/reformat the file and silently drop
+   an external edit — re-add and re-verify if so.
 4. **Transpile once** (`go2cs.exe src/Tests/Behavioral/<Name>`, no `-comments` — behavioral goldens omit
    them) to generate the `.cs` + `package_info.cs`. For output comparison, add `[GoTestMatchingConsoleOutput]`
    to the generated `package_info.cs` class (a hand-added attribute the converter preserves).
