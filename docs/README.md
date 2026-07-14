@@ -166,6 +166,7 @@ go2cs -indent 2 -var=false example.go conv/example.cs
 go2cs -stdlib                          # convert the entire Go standard library
 go2cs -stdlib fmt strings io           # convert specific standard library packages
 go2cs -recurse module_dir              # convert a module + its third-party deps (references stdlib)
+go2cs -recurse=nuget module_dir        # same, but reference the go2cs stdlib from NuGet (go.*, no deploy-core)
 ```
 
 ### Common options
@@ -173,7 +174,7 @@ go2cs -recurse module_dir              # convert a module + its third-party deps
 | Option | Description |
 |:--|:--|
 | `-stdlib` | Convert the Go standard library (optionally followed by specific package names). |
-| `-recurse` | Recursively convert a downloaded module **and its third-party dependencies** in dependency order, referencing the pre-converted standard library. See [Converting a real-world module](#converting-a-real-world-module). |
+| `-recurse` | Recursively convert a downloaded module **and its third-party dependencies** in dependency order, referencing the pre-converted standard library. Add `=nuget` (`-recurse=nuget`) to reference the published go2cs NuGet packages ([`go.<pkg>`](https://www.nuget.org/packages?q=go.) stdlib + [`go.lib`](https://www.nuget.org/packages/go.lib) runtime + [`go.gen`](https://www.nuget.org/packages/go.gen) analyzer) instead of a locally-staged deploy root — no `deploy-core` needed. See [Converting a real-world module](#converting-a-real-world-module). |
 | `-go2cspath <dir>` | Root for converted code (env `GO2CSPATH`; default `~/go2cs`): the **output** root for `-stdlib` (`…\core\<pkg>`) and `-recurse` (`…\src\` app + `…\pkg\` deps), and the root that generated `$(go2csPath)…` project references resolve against. For a single-package/file convert the C# output instead goes to the optional `[output_dir]` argument (in place by default). |
 | `-goroot` / `-gopath` | Override the detected Go root / path. |
 | `-platforms <os/arch>` | Target platform for build-tagged files (defaults to the host). |

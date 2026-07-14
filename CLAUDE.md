@@ -85,6 +85,12 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
 - **Converter (Go):** built with the Go toolchain from `src/go2cs/`. Usage:
   `go2cs [options] <input_dir> [output_dir]`. Key flags (from `main.go`, authoritative):
   - `-stdlib` — convert the Go stdlib. `-stdlib fmt strings io` — convert only those packages (+filter).
+  - `-recurse` — recursively convert an end-user module + its third-party deps (references the pre-converted
+    stdlib via local `$(go2csPath)` project refs). `-recurse=nuget` instead emits NuGet PackageReferences
+    (`go.<pkg>`/`go.lib`/`go.gen`, versioned `$(GoStdLibVersion)`) for the go2cs stdlib/runtime/analyzer so a
+    converted app restores from nuget.org with no `deploy-core` staging; the app's own converted packages
+    stay project refs, and the converter emits an output-root `Directory.Build.props` pinning `$(go2csPath)`
+    + a floating `GoStdLibVersion` default.
   - `-go2cspath <dir>` — output root for converted code (default `~/go2cs`; env `GO2CSPATH`).
   - `-goroot` / `-gopath`, `-platforms os/arch`, `-indent 4`, `-var` (default on),
     `-uco` (channel operators, default on), `-comments`, `-cgo`, `-tree`, `-csproj <tmpl>`, `-debug`.

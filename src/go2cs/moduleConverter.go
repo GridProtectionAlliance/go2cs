@@ -97,6 +97,13 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 	//    solution is written.
 	m.generatePerProjectSolutions()
 
+	// 6. Under -recurse=nuget, emit an output-root Directory.Build.props that pins $(go2csPath) to the
+	//    output root (so the converted app's src\ / pkg\ ProjectReferences resolve without a deploy-core
+	//    staging step) and defaults GoStdLibVersion for the go.* NuGet PackageReferences.
+	if m.options.nugetRefs {
+		m.generateNuGetDeployProps()
+	}
+
 	return nil
 }
 
@@ -405,9 +412,16 @@ func (m *ModuleConverter) generatePerProjectSolutions() {
 			}
 		}
 
-		coreProjects := []string{
-			relSolutionPath(projectDir, golibCsproj),
-			relSolutionPath(projectDir, genCsproj),
+		// Under -recurse=nuget golib and the analyzer are NuGet packages (go.lib / go.gen), not local
+		// projects, so they are omitted from the solution — the /core/ folder then has no members and is
+		// skipped by buildRecurseSolutionXML's empty-folder guard.
+		var coreProjects []string
+
+		if !m.options.nugetRefs {
+			coreProjects = []string{
+				relSolutionPath(projectDir, golibCsproj),
+				relSolutionPath(projectDir, genCsproj),
+			}
 		}
 
 		sort.Strings(srcProjects)
@@ -440,4 +454,64 @@ func (m *ModuleConverter) generatePerProjectSolutions() {
 	if written > 0 {
 		fmt.Printf("Per-project solutions generated: %d (one .slnx next to each converted .csproj)\n", written)
 	}
+}
+
+// generateNuGetDeployProps writes a Directory.Build.props at the -recurse=nuget output root. It lets a
+// project that consumes the go2cs standard library, runtime and analyzer from NuGet (rather than a
+// deploy-core staged tree) build with no further setup, by supplying two things every generated .csproj
+// below it needs:
+//
+//  1. It pins $(go2csPath) to the output root (this file's directory) so the converted app's own
+//     ProjectReferences to its converted dependencies ($(go2csPath)src\... app packages,
+//     $(go2csPath)pkg\... third-party) still resolve — those stay LOCAL project references; only the go2cs
+//     stdlib/runtime/analyzer move to NuGet. Without it the template default ($(go2csPath) = $(SolutionDir))
+//     would resolve to each per-project .slnx's own folder under src\<import>\, not the output root.
+//  2. It defaults GoStdLibVersion — the version every emitted go.* PackageReference resolves — to the
+//     converter's Go release, floating on the NuGet revision (e.g. 1.23.1.*), so a freshly converted project
+//     restores from nuget.org with no extra configuration. A consumer value (edit this file, a higher
+//     Directory.Build.props, or a -p:GoStdLibVersion global) overrides it via the Condition to pin exactly.
+//
+// It is written only if the file does not already exist, so a user-authored or deploy-core props is never
+// clobbered. Mirrors deploy-core.ps1's root props idiom ($(MSBuildThisFileDirectory) ends with a separator).
+func (m *ModuleConverter) generateNuGetDeployProps() {
+	propsFile := filepath.Join(m.options.go2csPath, "Directory.Build.props")
+
+	if _, err := os.Stat(propsFile); err == nil {
+		return // exists — don't clobber a user/deploy-core props
+	}
+
+	lines := []string{
+		"<Project>",
+		"",
+		"  <!-- Written by go2cs -recurse=nuget. Pins $(go2csPath) to this output root so the converted app's",
+		"       src\\ and pkg\\ ProjectReferences resolve without a deploy-core staging step; the go2cs standard",
+		"       library, runtime (go.lib) and analyzer (go.gen) come from NuGet. MSBuildThisFileDirectory ends",
+		"       with a separator. A -p:go2csPath / -p:GoStdLibVersion global still overrides these. -->",
+		"  <PropertyGroup>",
+		"    <go2csPath>$(MSBuildThisFileDirectory)</go2csPath>",
+		"  </PropertyGroup>",
+	}
+
+	// Default GoStdLibVersion to the converter's Go release, floating on the NuGet revision. Omitted if the
+	// Go version can't be resolved (then a consumer must define GoStdLibVersion for restore to succeed).
+	if base := goVersion(); base != "" {
+		lines = append(lines,
+			"",
+			"  <!-- Default the go2cs NuGet package version to the converter's Go release, floating on the",
+			"       revision. Pin exactly by setting GoStdLibVersion here (or a -p: global) before build. -->",
+			"  <PropertyGroup Condition=\"'$(GoStdLibVersion)' == ''\">",
+			fmt.Sprintf("    <GoStdLibVersion>%s.*</GoStdLibVersion>", base),
+			"  </PropertyGroup>",
+		)
+	}
+
+	lines = append(lines, "", "</Project>", "")
+	contents := []byte(strings.Join(lines, "\r\n"))
+
+	if err := os.WriteFile(propsFile, contents, 0644); err != nil {
+		fmt.Printf("WARNING: failed to write NuGet deploy props %q: %v\n", propsFile, err)
+		return
+	}
+
+	fmt.Printf("NuGet deploy props generated: %s\n", propsFile)
 }

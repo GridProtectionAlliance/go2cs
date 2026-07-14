@@ -36,6 +36,7 @@ type Options struct {
 	convertStdLib       bool
 	recurse             bool
 	mainModulePath      string // -recurse: import path of the app (main) module; routes its packages to src\, deps to pkg\
+	nugetRefs           bool   // -recurse=nuget: reference the published go2cs NuGet packages (go.<pkg>/go.lib/go.gen) instead of local $(go2csPath) project references
 	targetPlatform      string
 	indentSpaces        int
 	preferVarDecl       bool
@@ -525,6 +526,48 @@ var packageDynamicTypeNames map[string]string
 // by packageLock.
 var packageManualTypeNames map[string]bool
 
+// recurseMode backs the -recurse flag. It is an optional-value boolean-ish flag: it implements
+// IsBoolFlag so a bare `-recurse` (or `-recurse .`) sets the mode without consuming the next argument,
+// while an explicit `-recurse=<value>` selects the reference style. `-recurse` / `-recurse=true` convert an
+// end-user module against LOCAL project references ($(go2csPath)core\... staged by deploy-core), and
+// `-recurse=nuget` instead emits NuGet PackageReferences (go.<pkg> stdlib + go.lib runtime + go.gen
+// analyzer) so a converted app restores the go2cs stack from nuget.org with no local checkout.
+type recurseMode struct {
+	enabled bool
+	nuget   bool
+}
+
+// IsBoolFlag lets the flag package treat a bare `-recurse` as a boolean (Set("true")) rather than
+// consuming the following token as its value — so `go2cs -recurse .` keeps "." as a positional.
+func (r *recurseMode) IsBoolFlag() bool { return true }
+
+func (r *recurseMode) String() string {
+	if r == nil || !r.enabled {
+		return "false"
+	}
+
+	if r.nuget {
+		return "nuget"
+	}
+
+	return "true"
+}
+
+func (r *recurseMode) Set(value string) error {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "", "true", "1", "on":
+		r.enabled, r.nuget = true, false
+	case "false", "0", "off":
+		r.enabled, r.nuget = false, false
+	case "nuget":
+		r.enabled, r.nuget = true, true
+	default:
+		return fmt.Errorf("invalid -recurse value %q (want: (bare) | nuget | false)", value)
+	}
+
+	return nil
+}
+
 // parseArgsInterspersed parses fs while allowing flags to appear AFTER positional arguments. Go's
 // flag package stops at the first non-flag token, so an invocation like
 // `go2cs -recurse . -go2cspath dir` would silently drop -go2cspath (leaving the default output
@@ -602,7 +645,8 @@ func main() {
 	goPathCmd := commandLine.String("gopath", goPath, "Path to Go path directory")
 	go2csPathCmd := commandLine.String("go2cspath", go2csPath, "Path to C# converted code")
 	convertStdLibCmd := commandLine.Bool("stdlib", false, "Convert Go standard library")
-	recurseCmd := commandLine.Bool("recurse", false, "Recursively convert an end-user module and its third-party dependencies (references the pre-converted standard library)")
+	var recurseVal recurseMode
+	commandLine.Var(&recurseVal, "recurse", "Recursively convert an end-user module and its third-party dependencies (references the pre-converted standard library); use -recurse=nuget to reference the published go2cs NuGet packages (go.<pkg>/go.lib/go.gen) instead of local project references")
 	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), "Target platform for conversion, format: os/arch")
 	indentSpacesCmd := commandLine.Int("indent", 4, "Number of spaces for indentation")
 	preferVarDeclCmd := commandLine.Bool("var", true, "Prefer \"var\" declarations")
@@ -657,6 +701,7 @@ Examples:
   go2cs -stdlib                           # Convert the entire Go standard library
   go2cs -stdlib fmt io/ioutil strings     # Convert specific standard library packages
   go2cs -recurse module_dir               # Convert a module + its third-party deps (references stdlib)
+  go2cs -recurse=nuget module_dir         # Same, but reference the go2cs stdlib from NuGet (go.*, no deploy-core)
  `)
 		os.Exit(1)
 	}
@@ -666,7 +711,8 @@ Examples:
 		goPath:              *goPathCmd,
 		go2csPath:           *go2csPathCmd,
 		convertStdLib:       convertStdLib,
-		recurse:             *recurseCmd,
+		recurse:             recurseVal.enabled,
+		nugetRefs:           recurseVal.nuget,
 		targetPlatform:      *targetPlatformCmd,
 		indentSpaces:        *indentSpacesCmd,
 		preferVarDecl:       *preferVarDeclCmd,
@@ -1626,6 +1672,26 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 		}
 	}
 
+	// -recurse=nuget: reference the published go2cs NuGet packages (go.<pkg> stdlib, go.lib runtime,
+	// go.gen analyzer) instead of local $(go2csPath) project references. Gated OFF the stdlib
+	// self-conversion — its packages must reference each other locally to build the very assemblies that
+	// get published — mirroring the README-emission gate below (options.convertStdLib).
+	emitNuGet := options.nugetRefs && !options.convertStdLib
+
+	// The golib runtime and the go2cs-gen analyzer are FIXED ProjectReferences hardcoded in
+	// csproj-template.xml (NOT part of the ProjectReferenceMarker block), so swap them here. Match strings
+	// must stay in sync with csproj-template.xml (~line 75 analyzer, ~line 113 golib); TestRecurseNuGetReferences
+	// guards against drift. The analyzer keeps PrivateAssets="all" (go.gen is a DevelopmentDependency
+	// analyzer package, delivered under analyzers/dotnet/cs — analyzer-only, no compile/runtime asset).
+	if emitNuGet {
+		newContents = []byte(strings.ReplaceAll(string(newContents),
+			`<ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />`,
+			`<PackageReference Include="go.lib" Version="$(GoStdLibVersion)" />`))
+		newContents = []byte(strings.ReplaceAll(string(newContents),
+			`<ProjectReference Include="$(go2csPath)gen\go2cs-gen\go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />`,
+			`<PackageReference Include="go.gen" Version="$(GoStdLibVersion)" PrivateAssets="all" />`))
+	}
+
 	// Extract project references from imports
 	packageInfoMap := getImportPackageInfo(projectImports.Keys(), options)
 	projectReferences := &strings.Builder{}
@@ -1644,10 +1710,27 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 		projectDir = absDir
 	}
 
+	// Under -recurse=nuget, stdlib imports become go.<name> NuGet PackageReferences; the app's own
+	// converted packages (main-module + third-party, IsStdLib=false) stay local ProjectReferences.
+	var packageIds []string
+
 	for _, info := range packageInfoMap {
 		reference := info.ProjectReference
 
 		if len(reference) == 0 {
+			continue
+		}
+
+		// Load imported type aliases for the current package, if not already loaded — needed regardless of
+		// whether this import is emitted as a ProjectReference or a NuGet PackageReference.
+		loadImportedTypeAliases(info)
+
+		if emitNuGet && info.IsStdLib {
+			// PackageId is `go.` + the referenced project's AssemblyName. That AssemblyName is the .csproj
+			// base name — the dotted import path, uniform across every resolver (e.g.
+			// net\http\net.http.csproj → go.net.http). Derive it from the csproj base name, NOT
+			// info.PackageName (a class-qualification name that differs for non-stdlib packages).
+			packageIds = append(packageIds, "go."+strings.TrimSuffix(filepath.Base(reference), ".csproj"))
 			continue
 		}
 
@@ -1659,14 +1742,18 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 
 		// Track project references
 		references = append(references, reference)
-
-		// Load imported type aliases for the current package, if not already loaded
-		loadImportedTypeAliases(info)
 	}
 
 	sort.Strings(references)
+	sort.Strings(packageIds)
 
-	// Build project references XML
+	// Build reference XML — NuGet PackageReferences first (stdlib/runtime/analyzer under -recurse=nuget),
+	// then local ProjectReferences; both share the one ItemGroup ProjectReferenceMarker. When not in NuGet
+	// mode packageIds is empty and this is byte-identical to the prior ProjectReference-only output.
+	for _, packageID := range packageIds {
+		projectReferences.WriteString(fmt.Sprintf("\r\n    <PackageReference Include=\"%s\" Version=\"$(GoStdLibVersion)\" />", packageID))
+	}
+
 	for _, reference := range references {
 		projectReferences.WriteString(fmt.Sprintf("\r\n    <ProjectReference Include=\"%s\" />", reference))
 	}

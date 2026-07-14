@@ -169,9 +169,14 @@ stages the full 302-package stdlib (compilable); `deploy-core stub` stages the r
 pick per what the app imports. `deploy-core` also stages the `go2cs-gen` analyzer at `gen\go2cs-gen`, which
 every converted csproj references at `$(go2csPath)gen\go2cs-gen`.
 
-This is the seam the **NuGet stdlib** replaces later: `$(go2csPath)core\<pkg>\<pkg>.csproj`
-`ProjectReference` → `go.<pkg>` `PackageReference`. Keeping the reference indirection through
-`$(go2csPath)` now means the NuGet switch is a reference-rewrite, not a structural change.
+This is the seam the **NuGet stdlib** replaces — now **implemented** as `-recurse=nuget` (2026-07-14):
+`$(go2csPath)core\<pkg>\<pkg>.csproj` `ProjectReference` → `go.<pkg>` `PackageReference`, and likewise golib
+→ `go.lib` and the `go2cs-gen` analyzer → `go.gen` (`PrivateAssets="all"`), all versioned
+`$(GoStdLibVersion)`. Keeping the reference indirection through `$(go2csPath)` made the switch a
+reference-rewrite, not a structural change: the app's own converted packages (`src\` + `pkg\`) stay
+`ProjectReference`s, and the converter emits an output-root `Directory.Build.props` in this mode that pins
+`$(go2csPath)` for them and defaults `GoStdLibVersion` to the converter's Go release (floating, e.g.
+`1.23.1.*`), so a converted app restores from nuget.org with **no `deploy-core` staging**.
 
 ### 3.6 Solution generation
 
@@ -532,8 +537,11 @@ in the zero-value constructors — is a general go2cs-gen change of comparable s
 ## 7. Relationship to the NuGet stdlib decision
 
 This design deliberately keeps the stdlib behind the `$(go2csPath)core` reference indirection so that the
-future switch to a **NuGet stdlib** (post-Phase-4; see the pros/cons in the project thread /
-[`Roadmap.md`](Roadmap.md)) is a `ProjectReference` → `PackageReference` rewrite. The same applies to
-third-party libs: because the template already sets `GeneratePackageOnBuild`/`PackageId`, a converted
-third-party lib is itself NuGet-publishable — so "convert once, reference everywhere" generalizes beyond
-the stdlib.
+switch to a **NuGet stdlib** is a `ProjectReference` → `PackageReference` rewrite. That switch is now
+**implemented** as **`-recurse=nuget`** (2026-07-14): the go2cs stdlib (`go.<pkg>`), runtime (`go.lib`) and
+analyzer (`go.gen`) become NuGet `PackageReference`s versioned `$(GoStdLibVersion)`, while the app's own
+converted packages stay `ProjectReference`s and the converter emits an output-root `Directory.Build.props`
+supplying the `$(go2csPath)` pin + a floating `GoStdLibVersion` default — so a converted app restores from
+nuget.org with no `deploy-core` step. The same applies to third-party libs: because the template already
+sets `GeneratePackageOnBuild`/`PackageId`, a converted third-party lib is itself NuGet-publishable — so
+"convert once, reference everywhere" generalizes beyond the stdlib.

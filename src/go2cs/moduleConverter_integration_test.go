@@ -138,6 +138,120 @@ func TestRecurseSyntheticModule(t *testing.T) {
 	}
 }
 
+// TestRecurseNuGetReferences is the -recurse=nuget counterpart to TestRecurseSyntheticModule: it runs the
+// same two-module fixture (app importing a co-located lib via replace, each importing the standard library)
+// but with nugetRefs enabled, and confirms the reference rewrite. The go2cs standard library (fmt),
+// runtime (golib) and analyzer (go2cs-gen) become NuGet PackageReferences (go.fmt / go.lib / go.gen), while
+// the app's own converted dependency (lib) stays a LOCAL ProjectReference; an output-root
+// Directory.Build.props pins $(go2csPath) (so the lib ProjectReference resolves with no deploy-core) and
+// defaults GoStdLibVersion; and the per-project solution drops golib/analyzer and the /core/ folder.
+// Deterministic and network-free (asserts the emitted .csproj/.props/.slnx text; no dotnet restore).
+func TestRecurseNuGetReferences(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: loads the app's standard-library closure via go/packages")
+	}
+
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+	libDir := filepath.Join(root, "lib")
+
+	writeModuleFile(t, filepath.Join(libDir, "go.mod"), "module example.com/lib\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(libDir, "greeting.go"),
+		"package lib\n\nimport \"strings\"\n\nfunc Greeting(name string) string {\n\treturn strings.TrimSpace(\"Hello, \"+name+\"!\")\n}\n")
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"),
+		"module example.com/app\n\ngo 1.23\n\nrequire example.com/lib v0.0.0\n\nreplace example.com/lib => ../lib\n")
+	writeModuleFile(t, filepath.Join(appDir, "main.go"),
+		"package main\n\nimport (\n\t\"fmt\"\n\n\t\"example.com/lib\"\n)\n\nfunc main() {\n\tfmt.Println(lib.Greeting(\"go2cs\"))\n}\n")
+
+	goRoot := build.Default.GOROOT
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{
+		goRoot:              goRoot,
+		goPath:              build.Default.GOPATH,
+		go2csPath:           filepath.Join(root, "out"),
+		recurse:             true,
+		nugetRefs:           true,
+		targetPlatform:      runtime.GOOS + "/" + runtime.GOARCH,
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+	}
+
+	// getImportPackageInfo resolves stdlib references through build.Default; pin it as main() does.
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	appCsproj := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "app", "example.com.app.csproj"))
+
+	// The go2cs standard library, runtime and analyzer are referenced from NuGet.
+	for _, want := range []string{
+		`<PackageReference Include="go.fmt" Version="$(GoStdLibVersion)" />`,
+		`<PackageReference Include="go.lib" Version="$(GoStdLibVersion)" />`,
+		`<PackageReference Include="go.gen" Version="$(GoStdLibVersion)" PrivateAssets="all" />`,
+	} {
+		if !strings.Contains(appCsproj, want) {
+			t.Errorf("app csproj missing NuGet reference %q:\n%s", want, appCsproj)
+		}
+	}
+
+	// No local $(go2csPath) references remain for the stdlib or the runtime.
+	for _, notWant := range []string{
+		`$(go2csPath)core\fmt\fmt.csproj`,
+		`$(go2csPath)core\golib\golib.csproj`,
+		`$(go2csPath)gen\go2cs-gen\go2cs-gen.csproj`,
+	} {
+		if strings.Contains(appCsproj, notWant) {
+			t.Errorf("app csproj still has local reference %q under -recurse=nuget:\n%s", notWant, appCsproj)
+		}
+	}
+
+	// The app's OWN converted dependency (lib) stays a LOCAL ProjectReference under $(go2csPath)pkg.
+	if !strings.Contains(appCsproj, `<ProjectReference Include="$(go2csPath)pkg\example.com\lib\example.com.lib.csproj" />`) {
+		t.Errorf("app csproj missing the local lib ProjectReference (converted deps must stay project refs):\n%s", appCsproj)
+	}
+
+	// The output-root Directory.Build.props pins $(go2csPath) (so the lib ProjectReference resolves without
+	// deploy-core) and defaults GoStdLibVersion to the converter's Go release, floating on the revision.
+	props := readGenerated(t, filepath.Join(options.go2csPath, "Directory.Build.props"))
+
+	if !strings.Contains(props, `<go2csPath>$(MSBuildThisFileDirectory)</go2csPath>`) {
+		t.Errorf("output-root Directory.Build.props does not pin $(go2csPath):\n%s", props)
+	}
+
+	if base := goVersion(); base != "" {
+		if !strings.Contains(props, `<PropertyGroup Condition="'$(GoStdLibVersion)' == ''">`) {
+			t.Errorf("Directory.Build.props missing the conditional GoStdLibVersion default:\n%s", props)
+		}
+
+		if want := "<GoStdLibVersion>" + base + ".*</GoStdLibVersion>"; !strings.Contains(props, want) {
+			t.Errorf("Directory.Build.props missing floating version default %q:\n%s", want, props)
+		}
+	}
+
+	// The per-project solution drops golib/analyzer (now NuGet) and the /core/ folder, but still lists the
+	// app (src) and its converted dependency lib (pkg).
+	appSlnx := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "app", "example.com.app.slnx"))
+
+	for _, notWant := range []string{"golib.csproj", "go2cs-gen.csproj", `<Folder Name="/core/">`} {
+		if strings.Contains(appSlnx, notWant) {
+			t.Errorf("app per-project solution should not list %q under -recurse=nuget:\n%s", notWant, appSlnx)
+		}
+	}
+
+	for _, want := range []string{"example.com.app.csproj", "example.com.lib.csproj", `<Folder Name="/src/">`, `<Folder Name="/pkg/">`} {
+		if !strings.Contains(appSlnx, want) {
+			t.Errorf("app per-project solution missing %q:\n%s", want, appSlnx)
+		}
+	}
+}
+
 func writeModuleFile(t *testing.T, path, content string) {
 	t.Helper()
 

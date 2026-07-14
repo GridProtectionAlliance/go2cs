@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"io"
 	"reflect"
 	"testing"
 )
@@ -48,6 +49,64 @@ func TestParseArgsInterspersed(t *testing.T) {
 
 			if *out != tc.wantOut {
 				t.Errorf("go2cspath = %q, want %q", *out, tc.wantOut)
+			}
+		})
+	}
+}
+
+// TestRecurseModeFlag locks the -recurse flag contract after it became a custom optional-value flag.Value.
+// A bare `-recurse` (and `-recurse .`) must still enable LOCAL project references without consuming the
+// following positional (backward compatibility), while `-recurse=nuget` selects NuGet PackageReferences and
+// `-recurse=false` disables it. An unrecognized value is an error, not a silent enable.
+func TestRecurseModeFlag(t *testing.T) {
+	cases := []struct {
+		name        string
+		args        []string
+		wantPos     []string
+		wantEnabled bool
+		wantNuget   bool
+		wantErr     bool
+	}{
+		{"bare recurse then positional", []string{"-recurse", "."}, []string{"."}, true, false, false},
+		{"recurse=nuget then positional", []string{"-recurse=nuget", "."}, []string{"."}, true, true, false},
+		{"recurse=nuget flag only", []string{"-recurse=nuget"}, nil, true, true, false},
+		{"recurse=true", []string{"-recurse=true", "."}, []string{"."}, true, false, false},
+		{"recurse=false", []string{"-recurse=false", "."}, []string{"."}, false, false, false},
+		{"nuget after positional", []string{".", "-recurse=nuget"}, []string{"."}, true, true, false},
+		{"invalid value errors", []string{"-recurse=bogus"}, nil, false, false, true},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			fs := flag.NewFlagSet("test", flag.ContinueOnError)
+			fs.SetOutput(io.Discard)
+
+			var rec recurseMode
+			fs.Var(&rec, "recurse", "")
+
+			pos, err := parseArgsInterspersed(fs, tc.args)
+
+			if tc.wantErr {
+				if err == nil {
+					t.Fatalf("expected an error for %v, got none (enabled=%v nuget=%v)", tc.args, rec.enabled, rec.nuget)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if !reflect.DeepEqual(pos, tc.wantPos) {
+				t.Errorf("positionals = %#v, want %#v", pos, tc.wantPos)
+			}
+
+			if rec.enabled != tc.wantEnabled {
+				t.Errorf("enabled = %v, want %v", rec.enabled, tc.wantEnabled)
+			}
+
+			if rec.nuget != tc.wantNuget {
+				t.Errorf("nuget = %v, want %v", rec.nuget, tc.wantNuget)
 			}
 		})
 	}
