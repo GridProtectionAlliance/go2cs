@@ -197,7 +197,7 @@ Here is the full round-trip for a small CLI that uses [`github.com/fatih/color`]
 which itself pulls in `github.com/mattn/go-colorable`, `github.com/mattn/go-isatty`, and `golang.org/x/sys` —
 a genuine dependency graph:
 
-> _NOTE: to date, the following steps have only been tested on Windows — instructions assume `cmd.exe` type shell._
+> **NOTE:** _to date, the following steps have only been tested on Windows — instructions assume `cmd.exe` type shell._
 
 **1 — Prerequisite: Stage the standard library (one-time).** `deploy-core` is a build script in the go2cs repo's **`src/`**
 folder (it is *not* on your `PATH`), so run it from there. It stages the pre-converted stdlib + runtime +
