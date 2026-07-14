@@ -875,6 +875,9 @@
   <Folder Name="/unique/" Id="39181c4f-9fbd-5fee-89e6-054e7321cc31">
     <Project Path="go-src-converted/unique/unique.csproj" />
   </Folder>
+  <Folder Name="/unsafe/" Id="98f74097-975f-5e7b-8b80-18bf722660d9">
+    <Project Path="go-src-converted/unsafe/unsafe.csproj" />
+  </Folder>
   <Folder Name="/vendor/" />
   <Folder Name="/vendor/golang.org/" />
   <Folder Name="/vendor/golang.org/x/" />
