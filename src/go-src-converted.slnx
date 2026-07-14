@@ -6,6 +6,7 @@
   </Configurations>
   <Project Path="gen/go2cs-gen/go2cs-gen.csproj" />
   <Project Path="core/golib/golib.csproj" />
+  <Folder Name="/archive/" />
   <Folder Name="/archive/tar/" Id="46c4be9e-64a0-547b-8b20-85f0b1288761">
     <Project Path="go-src-converted/archive/tar/archive.tar.csproj" />
   </Folder>
@@ -21,6 +22,7 @@
   <Folder Name="/cmp/" Id="10e373cc-7e17-5bdb-b71e-26c128c02b9d">
     <Project Path="go-src-converted/cmp/cmp.csproj" />
   </Folder>
+  <Folder Name="/compress/" />
   <Folder Name="/compress/bzip2/" Id="065c0734-94a9-5db4-bf0e-7dba71cebf43">
     <Project Path="go-src-converted/compress/bzip2/compress.bzip2.csproj" />
   </Folder>
@@ -36,6 +38,7 @@
   <Folder Name="/compress/zlib/" Id="b596451d-d095-5b0c-9bfb-b48d3bb38439">
     <Project Path="go-src-converted/compress/zlib/compress.zlib.csproj" />
   </Folder>
+  <Folder Name="/container/" />
   <Folder Name="/container/heap/" Id="b28fe765-6919-55c8-b321-754248c491e9">
     <Project Path="go-src-converted/container/heap/container.heap.csproj" />
   </Folder>
@@ -78,6 +81,7 @@
   <Folder Name="/crypto/hmac/" Id="e880e2c4-ac45-55b7-90cb-0d49f1337e9d">
     <Project Path="go-src-converted/crypto/hmac/crypto.hmac.csproj" />
   </Folder>
+  <Folder Name="/crypto/internal/" />
   <Folder Name="/crypto/internal/alias/" Id="63e13540-b3d3-5e38-8818-cd40e28348ba">
     <Project Path="go-src-converted/crypto/internal/alias/crypto.internal.alias.csproj" />
   </Folder>
@@ -153,12 +157,14 @@
   <Folder Name="/crypto/x509/pkix/" Id="54723e0e-5d2e-5da3-ac34-d335edd1d8f8">
     <Project Path="go-src-converted/crypto/x509/pkix/crypto.x509.pkix.csproj" />
   </Folder>
+  <Folder Name="/database/" />
   <Folder Name="/database/sql/" Id="6e9a9a3a-bae0-56ae-b2c4-f777c71f431b">
     <Project Path="go-src-converted/database/sql/database.sql.csproj" />
   </Folder>
   <Folder Name="/database/sql/driver/" Id="de31b495-6440-5be3-8ee1-0c615e002afc">
     <Project Path="go-src-converted/database/sql/driver/database.sql.driver.csproj" />
   </Folder>
+  <Folder Name="/debug/" />
   <Folder Name="/debug/buildinfo/" Id="ccedaccb-f782-5bd1-83bd-eaac9c70a623">
     <Project Path="go-src-converted/debug/buildinfo/debug.buildinfo.csproj" />
   </Folder>
@@ -231,6 +237,7 @@
   <Folder Name="/fmt/" Id="cd3dad2f-cf04-548a-ab81-48e3e9b1b525">
     <Project Path="go-src-converted/fmt/fmt.csproj" />
   </Folder>
+  <Folder Name="/go/" />
   <Folder Name="/go/ast/" Id="38f5151b-e1de-5cd7-aaed-7c8898dcd6b5">
     <Project Path="go-src-converted/go/ast/go.ast.csproj" />
   </Folder>
@@ -255,6 +262,7 @@
   <Folder Name="/go/importer/" Id="d68ee476-ed58-5ac0-9902-33f7f5ebcc03">
     <Project Path="go-src-converted/go/importer/go.importer.csproj" />
   </Folder>
+  <Folder Name="/go/internal/" />
   <Folder Name="/go/internal/gccgoimporter/" Id="91855dcf-ef81-5df1-902b-df035c4a5da9">
     <Project Path="go-src-converted/go/internal/gccgoimporter/go.internal.gccgoimporter.csproj" />
   </Folder>
@@ -324,6 +332,7 @@
   <Folder Name="/image/" Id="a4f3616e-77a1-5739-aeed-cbbfcd947285">
     <Project Path="go-src-converted/image/image.csproj" />
   </Folder>
+  <Folder Name="/image/internal/" />
   <Folder Name="/image/internal/imageutil/" Id="157c6ebe-9ee1-5f01-b689-552caf376012">
     <Project Path="go-src-converted/image/internal/imageutil/image.internal.imageutil.csproj" />
   </Folder>
@@ -333,9 +342,11 @@
   <Folder Name="/image/png/" Id="5ef23581-dc6d-5def-ae27-e35aecb6bae5">
     <Project Path="go-src-converted/image/png/image.png.csproj" />
   </Folder>
+  <Folder Name="/index/" />
   <Folder Name="/index/suffixarray/" Id="d1eac5a9-b875-59e8-b6e2-ea6365e1f70e">
     <Project Path="go-src-converted/index/suffixarray/index.suffixarray.csproj" />
   </Folder>
+  <Folder Name="/internal/" />
   <Folder Name="/internal/abi/" Id="6aef5917-db5b-5f76-89c6-70c392789b44">
     <Project Path="go-src-converted/internal/abi/internal.abi.csproj" />
   </Folder>
@@ -492,6 +503,7 @@
   <Folder Name="/internal/reflectlite/" Id="2f2e22ab-1a07-552d-bfc8-ba21ea45c83d">
     <Project Path="go-src-converted/internal/reflectlite/internal.reflectlite.csproj" />
   </Folder>
+  <Folder Name="/internal/runtime/" />
   <Folder Name="/internal/runtime/atomic/" Id="0c1bd934-8b64-5cc0-9f0a-522f84ac6c72">
     <Project Path="go-src-converted/internal/runtime/atomic/internal.runtime.atomic.csproj" />
   </Folder>
@@ -507,6 +519,7 @@
   <Folder Name="/internal/stringslite/" Id="3a15def1-8ecc-52f5-bb77-4ad3506f2fd2">
     <Project Path="go-src-converted/internal/stringslite/internal.stringslite.csproj" />
   </Folder>
+  <Folder Name="/internal/syscall/" />
   <Folder Name="/internal/syscall/execenv/" Id="ae2715d8-dedf-57c5-917b-4ed2e0218a06">
     <Project Path="go-src-converted/internal/syscall/execenv/internal.syscall.execenv.csproj" />
   </Folder>
@@ -543,9 +556,11 @@
   <Folder Name="/internal/trace/" Id="d3eb6a62-f751-5797-b5e4-12427dbd78b9">
     <Project Path="go-src-converted/internal/trace/internal.trace.csproj" />
   </Folder>
+  <Folder Name="/internal/trace/internal/" />
   <Folder Name="/internal/trace/internal/oldtrace/" Id="0927bcd8-2a82-578e-ac94-176bb4669c3e">
     <Project Path="go-src-converted/internal/trace/internal/oldtrace/internal.trace.internal.oldtrace.csproj" />
   </Folder>
+  <Folder Name="/internal/trace/internal/testgen/" />
   <Folder Name="/internal/trace/internal/testgen/go122/" Id="47057d4b-f858-52e4-8d3b-a1e8acd26ea6">
     <Project Path="go-src-converted/internal/trace/internal/testgen/go122/internal.trace.internal.testgen.go122.csproj" />
   </Folder>
@@ -567,6 +582,7 @@
   <Folder Name="/internal/txtar/" Id="fcc3069d-6370-5882-afb7-cc2d3c5ddb14">
     <Project Path="go-src-converted/internal/txtar/internal.txtar.csproj" />
   </Folder>
+  <Folder Name="/internal/types/" />
   <Folder Name="/internal/types/errors/" Id="8578649b-4628-5287-8c2f-d5d2c99c2563">
     <Project Path="go-src-converted/internal/types/errors/internal.types.errors.csproj" />
   </Folder>
@@ -681,6 +697,7 @@
   <Folder Name="/net/http/pprof/" Id="44b766ae-ef03-5d81-b770-0c8dc3b031c7">
     <Project Path="go-src-converted/net/http/pprof/net.http.pprof.csproj" />
   </Folder>
+  <Folder Name="/net/internal/" />
   <Folder Name="/net/internal/socktest/" Id="0b550613-1bb7-5662-9d44-5796e576b801">
     <Project Path="go-src-converted/net/internal/socktest/net.internal.socktest.csproj" />
   </Folder>
@@ -708,6 +725,7 @@
   <Folder Name="/net/url/" Id="65fcad06-70d3-5048-8367-adb658766eb3">
     <Project Path="go-src-converted/net/url/net.url.csproj" />
   </Folder>
+  <Folder Name="/os/exec/internal/" />
   <Folder Name="/os/exec/internal/fdtest/" Id="07063627-496e-5771-9322-d72203de5698">
     <Project Path="go-src-converted/os/exec/internal/fdtest/os.exec.internal.fdtest.csproj" />
   </Folder>
@@ -732,6 +750,7 @@
   <Folder Name="/plugin/" Id="050c292a-cda1-5765-9fdd-9719f568dd4a">
     <Project Path="go-src-converted/plugin/plugin.csproj" />
   </Folder>
+  <Folder Name="/reflect/internal/" />
   <Folder Name="/reflect/internal/example1/" Id="4d3740c4-ae35-558d-b715-50e5058ecc5f">
     <Project Path="go-src-converted/reflect/internal/example1/reflect.internal.example1.csproj" />
   </Folder>
@@ -753,6 +772,7 @@
   <Folder Name="/runtime/debug/" Id="a3a25c33-5f50-5260-b527-870d2cae4584">
     <Project Path="go-src-converted/runtime/debug/runtime.debug.csproj" />
   </Folder>
+  <Folder Name="/runtime/internal/" />
   <Folder Name="/runtime/internal/math/" Id="50241d88-cd9d-5d54-841a-c8bccf227fb6">
     <Project Path="go-src-converted/runtime/internal/math/runtime.internal.math.csproj" />
   </Folder>
@@ -768,6 +788,7 @@
   <Folder Name="/runtime/pprof/" Id="f629f9e1-2585-5446-a926-8bc0e7c24b4e">
     <Project Path="go-src-converted/runtime/pprof/runtime.pprof.csproj" />
   </Folder>
+  <Folder Name="/runtime/race/internal/" />
   <Folder Name="/runtime/race/internal/amd64v1/" Id="7b1a8d86-8c1b-514d-9609-f848402ad27c">
     <Project Path="go-src-converted/runtime/race/internal/amd64v1/runtime.race.internal.amd64v1.csproj" />
   </Folder>
@@ -807,6 +828,7 @@
   <Folder Name="/testing/fstest/" Id="de7775db-512c-58fd-a9a5-027ae090947d">
     <Project Path="go-src-converted/testing/fstest/testing.fstest.csproj" />
   </Folder>
+  <Folder Name="/testing/internal/" />
   <Folder Name="/testing/internal/testdeps/" Id="3d744e6f-fca3-5ee2-8e7d-eb4ea01ab7eb">
     <Project Path="go-src-converted/testing/internal/testdeps/testing.internal.testdeps.csproj" />
   </Folder>
@@ -822,6 +844,7 @@
   <Folder Name="/testing/" Id="49bef292-8c1c-515a-a24e-983cd1747ffc">
     <Project Path="go-src-converted/testing/testing.csproj" />
   </Folder>
+  <Folder Name="/text/" />
   <Folder Name="/text/scanner/" Id="c48288e9-9a32-506a-b601-c9a310ccf941">
     <Project Path="go-src-converted/text/scanner/text.scanner.csproj" />
   </Folder>
@@ -852,6 +875,10 @@
   <Folder Name="/unique/" Id="39181c4f-9fbd-5fee-89e6-054e7321cc31">
     <Project Path="go-src-converted/unique/unique.csproj" />
   </Folder>
+  <Folder Name="/vendor/" />
+  <Folder Name="/vendor/golang.org/" />
+  <Folder Name="/vendor/golang.org/x/" />
+  <Folder Name="/vendor/golang.org/x/crypto/" />
   <Folder Name="/vendor/golang.org/x/crypto/chacha20/" Id="ad41403f-15be-5da6-993f-02184d7cf605">
     <Project Path="go-src-converted/vendor/golang.org/x/crypto/chacha20/vendor.golang.org.x.crypto.chacha20.csproj" />
   </Folder>
@@ -867,6 +894,7 @@
   <Folder Name="/vendor/golang.org/x/crypto/hkdf/" Id="d90f44ba-a38c-5cce-aa03-ee9b3beda379">
     <Project Path="go-src-converted/vendor/golang.org/x/crypto/hkdf/vendor.golang.org.x.crypto.hkdf.csproj" />
   </Folder>
+  <Folder Name="/vendor/golang.org/x/crypto/internal/" />
   <Folder Name="/vendor/golang.org/x/crypto/internal/alias/" Id="66fe8a4d-3a7f-569d-879a-94707ceb5442">
     <Project Path="go-src-converted/vendor/golang.org/x/crypto/internal/alias/vendor.golang.org.x.crypto.internal.alias.csproj" />
   </Folder>
@@ -876,15 +904,19 @@
   <Folder Name="/vendor/golang.org/x/crypto/sha3/" Id="81836070-e7d5-541c-ba41-a1700e06a5e5">
     <Project Path="go-src-converted/vendor/golang.org/x/crypto/sha3/vendor.golang.org.x.crypto.sha3.csproj" />
   </Folder>
+  <Folder Name="/vendor/golang.org/x/net/" />
+  <Folder Name="/vendor/golang.org/x/net/dns/" />
   <Folder Name="/vendor/golang.org/x/net/dns/dnsmessage/" Id="5b2cefbf-67ba-5ae5-822d-96e2a9c214bb">
     <Project Path="go-src-converted/vendor/golang.org/x/net/dns/dnsmessage/vendor.golang.org.x.net.dns.dnsmessage.csproj" />
   </Folder>
+  <Folder Name="/vendor/golang.org/x/net/http/" />
   <Folder Name="/vendor/golang.org/x/net/http/httpguts/" Id="b5288ecc-5711-52ca-9e5c-0b5277b67272">
     <Project Path="go-src-converted/vendor/golang.org/x/net/http/httpguts/vendor.golang.org.x.net.http.httpguts.csproj" />
   </Folder>
   <Folder Name="/vendor/golang.org/x/net/http/httpproxy/" Id="04465a5d-c042-5443-8578-58e4a460f427">
     <Project Path="go-src-converted/vendor/golang.org/x/net/http/httpproxy/vendor.golang.org.x.net.http.httpproxy.csproj" />
   </Folder>
+  <Folder Name="/vendor/golang.org/x/net/http2/" />
   <Folder Name="/vendor/golang.org/x/net/http2/hpack/" Id="ca33d542-7465-5444-8bfa-9d08041553ad">
     <Project Path="go-src-converted/vendor/golang.org/x/net/http2/hpack/vendor.golang.org.x.net.http2.hpack.csproj" />
   </Folder>
@@ -894,15 +926,19 @@
   <Folder Name="/vendor/golang.org/x/net/nettest/" Id="31be96dc-b027-500c-bb6b-a2da3cc1bdb0">
     <Project Path="go-src-converted/vendor/golang.org/x/net/nettest/vendor.golang.org.x.net.nettest.csproj" />
   </Folder>
+  <Folder Name="/vendor/golang.org/x/sys/" />
   <Folder Name="/vendor/golang.org/x/sys/cpu/" Id="ce20011c-29be-50dc-8476-a9e2d9481ddc">
     <Project Path="go-src-converted/vendor/golang.org/x/sys/cpu/vendor.golang.org.x.sys.cpu.csproj" />
   </Folder>
+  <Folder Name="/vendor/golang.org/x/text/" />
+  <Folder Name="/vendor/golang.org/x/text/secure/" />
   <Folder Name="/vendor/golang.org/x/text/secure/bidirule/" Id="c336ded6-7190-5c50-8434-47aeeaf6a006">
     <Project Path="go-src-converted/vendor/golang.org/x/text/secure/bidirule/vendor.golang.org.x.text.secure.bidirule.csproj" />
   </Folder>
   <Folder Name="/vendor/golang.org/x/text/transform/" Id="9ab532e5-e319-539f-b375-afe8544806cb">
     <Project Path="go-src-converted/vendor/golang.org/x/text/transform/vendor.golang.org.x.text.transform.csproj" />
   </Folder>
+  <Folder Name="/vendor/golang.org/x/text/unicode/" />
   <Folder Name="/vendor/golang.org/x/text/unicode/bidi/" Id="521b614b-2dfc-5249-80a3-100394a47fbe">
     <Project Path="go-src-converted/vendor/golang.org/x/text/unicode/bidi/vendor.golang.org.x.text.unicode.bidi.csproj" />
   </Folder>

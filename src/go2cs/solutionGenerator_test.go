@@ -9,8 +9,9 @@ import (
 
 // TestBuildSolutionXML checks the emitted .slnx structure: the configuration block, the
 // root-level infrastructure projects (golib + go2cs-gen, no folder), the per-package
-// import-path folders, project ordering, CRLF line endings, and no BOM — matching the format
-// of the existing src/go2cs.slnx.
+// import-path folders, the explicit self-closing intermediate folders (VS's canonical form),
+// project ordering, CRLF line endings, and no BOM — matching the format of the existing
+// src/go2cs.slnx.
 func TestBuildSolutionXML(t *testing.T) {
 	coreProjects := []string{
 		"core/fmt/fmt.csproj",
@@ -33,13 +34,16 @@ func TestBuildSolutionXML(t *testing.T) {
 		// the folder tree is reserved for Go import paths.
 		"\r\n  <Project Path=\"gen/go2cs-gen/go2cs-gen.csproj\" />\r\n",
 		"\r\n  <Project Path=\"core/golib/golib.csproj\" />\r\n",
-		// Every package nests under a folder named by its bare Go import path (no /core/ umbrella).
-		// Folders carry a deterministic Id attribute (see folderID) — match the opening tag and
-		// name, tolerating the trailing ` Id="…"`.
+		// Member packages nest under a folder named by their bare Go import path (no /core/
+		// umbrella), carrying a deterministic Id (see folderID) — match the opening tag and name,
+		// tolerating the trailing ` Id="…"`.
 		"<Folder Name=\"/fmt/\" Id=\"",
 		"<Project Path=\"core/fmt/fmt.csproj\" />",
 		"<Folder Name=\"/internal/abi/\" Id=\"",
 		"<Project Path=\"core/internal/abi/internal.abi.csproj\" />",
+		// The `internal` namespace is not itself a package, so its folder is an explicit
+		// self-closing intermediate with NO Id — matching how Visual Studio serializes it.
+		"<Folder Name=\"/internal/\" />",
 		"<Folder Name=\"/tests/\" Id=\"",
 		"<Project Path=\"core/fmt/fmt_test.csproj\" />",
 		"</Solution>",
@@ -49,6 +53,12 @@ func TestBuildSolutionXML(t *testing.T) {
 		if !strings.Contains(xml, want) {
 			t.Errorf("solution XML missing %q\n---\n%s", want, xml)
 		}
+	}
+
+	// The intermediate /internal/ folder is declared before its child /internal/abi/ (VS's
+	// canonical order — a pure intermediate sorts first within its subtree).
+	if i, j := strings.Index(xml, "<Folder Name=\"/internal/\" />"), strings.Index(xml, "<Folder Name=\"/internal/abi/\""); i < 0 || j < 0 || i > j {
+		t.Errorf("intermediate /internal/ must precede /internal/abi/ (got %d, %d)\n---\n%s", i, j, xml)
 	}
 
 	// The old /core/ umbrella and /generators/ folder are gone — folders are bare import paths

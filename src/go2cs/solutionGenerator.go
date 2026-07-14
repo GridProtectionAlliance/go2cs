@@ -169,24 +169,36 @@ func buildSolutionXML(coreProjects []string, testProjects []string) string {
 	writeProject(1, genProjectReference)
 	writeProject(1, golibProjectReference)
 
-	// Every converted package nests under a solution folder named by its FULL Go import path,
-	// so the folder tree mirrors `import "..."` exactly: `bufio` → /bufio/, `crypto/aes` →
+	// Every converted package nests under a solution folder named by its FULL Go import path, so
+	// the folder tree mirrors `import "..."` exactly: `bufio` → /bufio/, `crypto/aes` →
 	// /crypto/aes/, `archive/tar` → /archive/tar/. A package's own directory is core/<import
-	// path>; stripping the leading "core/" yields the import path. Pure intermediate folders
-	// (`archive/`, `container/`, and `crypto/` where only sub-packages exist) are implied by
-	// their child folder's slash-path and need no explicit declaration — verified against the
-	// dotnet/VS SolutionPersistence loader, which accepts leaf-only folder paths and builds the
-	// ancestors. Folders still carry an explicit deterministic Id (see folderID) because leaf
-	// display names repeat across the tree (`internal`, `testdata`, …). Projects arrive
-	// globally sorted, which also sorts the folder groups; emitting groups in first-appearance
-	// order keeps the document deterministic and diff-stable.
+	// path>; stripping the leading "core/" yields the import path.
 	importFolder := func(project string) string {
 		own := path.Dir(project) // core/<import path> — the package's own directory
 		return "/" + strings.TrimPrefix(own, "core/") + "/"
 	}
 
-	var folderOrder []string
-	folderProjects := make(map[string][]string)
+	// folderParent returns a folder's immediate parent ("/crypto/aes/" → "/crypto/"), or "/" at
+	// the top level so the ancestor walk below terminates.
+	folderParent := func(folder string) string {
+		parent := path.Dir(strings.TrimSuffix(folder, "/"))
+		if parent == "/" {
+			return "/"
+		}
+		return parent + "/"
+	}
+
+	// Collect the folders to emit: every member folder (one that directly holds package
+	// project(s)) PLUS every intermediate ancestor of one. A "pure intermediate" folder
+	// (`archive/`, `crypto/internal/`, `vendor/golang.org/x/` — a namespace with only
+	// sub-packages, no package of its own) must be declared EXPLICITLY: although the .slnx
+	// loader tolerates leaf-only folder paths and implies the ancestors, Visual Studio's
+	// canonical serialization writes each intermediate as a self-closing `<Folder .../>`, so an
+	// implied-only solution is rewritten (and marked dirty) the instant it is opened. Emitting
+	// them up front matches VS byte-for-byte and keeps a freshly generated solution clean.
+	memberProjects := make(map[string][]string)
+	memberFolder := make(map[string]bool)
+	folderSet := make(map[string]bool)
 
 	for _, project := range coreProjects {
 		if project == golibProjectReference {
@@ -194,18 +206,54 @@ func buildSolutionXML(coreProjects []string, testProjects []string) string {
 		}
 
 		folder := importFolder(project)
+		memberProjects[folder] = append(memberProjects[folder], project)
+		memberFolder[folder] = true
+		folderSet[folder] = true
 
-		if _, exists := folderProjects[folder]; !exists {
-			folderOrder = append(folderOrder, folder)
+		for parent := folderParent(folder); parent != "/"; parent = folderParent(parent) {
+			folderSet[parent] = true
 		}
-
-		folderProjects[folder] = append(folderProjects[folder], project)
 	}
 
-	for _, folder := range folderOrder {
+	// folderSortKey reproduces Visual Studio's canonical folder order so a freshly generated
+	// solution opens without VS re-sorting (and dirtying) it. VS lays folders out by a
+	// depth-first walk in which each folder's own line is placed AMONG its children by name: a
+	// member folder sorts by its project's dotted name (net/http's line follows `internal/`
+	// because "net.http" > "internal/"), while a pure intermediate folder sorts first (its bare
+	// path is a prefix of every child key). Both collapse to one key: the folder path with the
+	// member's project base name appended (nothing for an intermediate). The trailing "/" on a
+	// child segment vs the "." in a sibling project name orders them exactly as VS does, since
+	// '.' (0x2E) sorts before '/' (0x2F).
+	folderSortKey := func(folder string) string {
+		if projects := memberProjects[folder]; len(projects) > 0 {
+			return folder + strings.TrimSuffix(path.Base(projects[0]), ".csproj")
+		}
+		return folder // pure intermediate — sorts first within its subtree
+	}
+
+	folders := make([]string, 0, len(folderSet))
+	for folder := range folderSet {
+		folders = append(folders, folder)
+	}
+
+	sort.Slice(folders, func(i, j int) bool {
+		return folderSortKey(folders[i]) < folderSortKey(folders[j])
+	})
+
+	for _, folder := range folders {
+		if !memberFolder[folder] {
+			// Pure intermediate folder — self-closing, NO Id, exactly as VS writes it. (VS derives
+			// an Id-less folder's identity from its full path, so duplicate leaves like the many
+			// `internal/` namespaces never collide.)
+			writeLine(1, fmt.Sprintf("<Folder Name=\"%s\" />", escapeXMLAttr(folder)))
+			continue
+		}
+
+		// Member folder — carries an explicit deterministic Id (see folderID) and holds its
+		// package project(s).
 		writeFolderOpen(folder)
 
-		for _, project := range folderProjects[folder] {
+		for _, project := range memberProjects[folder] {
 			writeProject(2, project)
 		}
 
