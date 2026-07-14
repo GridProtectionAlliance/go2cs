@@ -166,7 +166,7 @@ go2cs -indent 2 -var=false example.go conv/example.cs
 go2cs -stdlib                          # convert the entire Go standard library
 go2cs -stdlib fmt strings io           # convert specific standard library packages
 go2cs -recurse module_dir              # convert a module + its third-party deps (references stdlib)
-go2cs -recurse=nuget module_dir        # same, but reference the go2cs stdlib from NuGet (go.*, no deploy-core)
+go2cs -recurse=nuget module_dir        # same, but reference the go2cs stdlib from NuGet
 ```
 
 ### Common options
@@ -174,7 +174,7 @@ go2cs -recurse=nuget module_dir        # same, but reference the go2cs stdlib fr
 | Option | Description |
 |:--|:--|
 | `-stdlib` | Convert the Go standard library (optionally followed by specific package names). |
-| `-recurse` | Recursively convert a downloaded module **and its third-party dependencies** in dependency order, referencing the pre-converted standard library. Optionally, use `nuget` option (`-recurse=nuget`) to reference the published go2cs NuGet packages ([`go.<pkg>`](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) stdlib + [`go.lib`](https://www.nuget.org/packages/go.lib) runtime + [`go.gen`](https://www.nuget.org/packages/go.gen) analyzer) instead of a locally-staged deploy root — no `deploy-core` needed. **NOTE:** _using NuGet references with analyzer is still a work in progress_. See [Converting a real-world module](#converting-a-real-world-module). |
+| `-recurse` | Recursively convert a downloaded module **and its third-party dependencies** in dependency order, referencing the pre-converted standard library. Use the `nuget` option (`-recurse=nuget`) to reference the published go2cs NuGet packages ([`go.<pkg>`](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) stdlib + [`go.lib`](https://www.nuget.org/packages/go.lib) runtime + [`go.gen`](https://www.nuget.org/packages/go.gen) analyzer) instead of a locally-staged deploy root — no `deploy-core` needed. **NOTE:** _using NuGet references with analyzer is still a work in progress_. See [Converting a real-world module](#converting-a-real-world-module). |
 | `-go2cspath <dir>` | Root for converted code (env `GO2CSPATH`; default `~/go2cs`): the **output** root for `-stdlib` (`…\core\<pkg>`) and `-recurse` (`…\src\` app + `…\pkg\` deps), and the root that generated `$(go2csPath)…` project references resolve against. For a single-package/file convert the C# output instead goes to the optional `[output_dir]` argument (in place by default). |
 | `-goroot` / `-gopath` | Override the detected Go root / path. |
 | `-platforms <os/arch>` | Target platform for build-tagged files (defaults to the host). |
@@ -323,9 +323,9 @@ behavioral test suite (371 Go-vs-C# regression projects). As of **2026-07-10 the
 the milestone, not yet full runtime parity: **converting and running the standard library's own tests is the
 ongoing Phase 4 work** — see the [roadmap](Roadmap.md#phase-4--convert-and-run-go-package-tests).
 
-_Everyone asks:_ wondering how fast the transpiled C# runs compared to the original Go — including startup time, memory, and Native AOT builds? See the latest [performance comparison](Performance.md) — **`TL;DR`**: _no, it's not as fast as native Go, [nor is this an expected outcome](Background.md#converted-code)_. Save for some work with a [stack-based string](ConversionStrategies.md#stack-strings-sstring), performance and optimizations are not the current focus, this kind of work is targeted for _after_ Phase 4 work.
+_Everyone asks:_ wondering how fast the transpiled C# runs compared to the original Go — including startup time, memory, and Native AOT builds? See the latest [performance comparison](Performance.md) — **`TL;DR`**: _no, it's not as fast as native Go, [nor is this an expected outcome](Background.md#converted-code)_. Save for some initial work with a [stack-based string](ConversionStrategies.md#stack-strings-sstring), performance and optimizations are not the current focus, this kind of work is targeted for _after_ Phase 4 work.
 
-What about newer versions of Go / .NET? Planned, but creating a baseline "here" to validate process and operations.
+What about newer versions of Go / .NET? These are planned, but the current focus is creating a baseline "here" to validate process and operations.
 
 ## Milestones
 
