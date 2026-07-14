@@ -503,6 +503,10 @@ var goBuiltinNames = map[string]bool{
 var globalTempVarCount map[string]int
 var initFuncCounter int
 var usesUnsafeCode bool
+
+// packageDoc holds the current package's Go doc comment rendered to Markdown, for the NuGet README.
+var packageDoc string
+
 var packageLock = sync.Mutex{}
 
 // packageDynamicTypeNames maps a lifted (anonymous struct/interface) type's
@@ -829,6 +833,9 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		packageDirectBoxReceiverMethods = make(map[*types.Func]bool)
 		initFuncCounter = 0
 		usesUnsafeCode = false
+
+		// Capture the package-level Go doc (rendered to Markdown) for the NuGet README
+		packageDoc = extractPackageDoc(pkg.Syntax)
 
 		files := []FileEntry{}
 		fset := pkg.Fset
@@ -1692,6 +1699,17 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 
 		if err != nil {
 			return fmt.Errorf("failed to write package files for project \"%s\": %s", outputFilePath, err)
+		}
+
+		// Emit the per-package NuGet README from the package's Go doc. Gated to stdlib conversions:
+		// the README is a NuGet-packaging artifact for the published stdlib, and emitting it for
+		// behavioral-test / example / single-project conversions would only litter their dirs.
+		if options.convertStdLib {
+			projectName := strings.TrimSuffix(filepath.Base(projectFileName), ".csproj")
+
+			if err := writeReadmeFile(outputFilePath, projectName, packageDoc); err != nil {
+				return fmt.Errorf("failed to write README file for project \"%s\": %s", outputFilePath, err)
+			}
 		}
 	}
 

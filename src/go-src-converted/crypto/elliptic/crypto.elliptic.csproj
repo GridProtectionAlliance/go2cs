@@ -6,7 +6,6 @@
     <RootNamespace>go.crypto</RootNamespace>
     <AssemblyName>crypto.elliptic</AssemblyName>
     <Product>go2cs</Product>
-    <Version>0.1.4</Version>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>
     <Copyright>Copyright © 2026</Copyright>
@@ -55,6 +54,14 @@
   <ItemGroup Condition="'$(OutputType)'=='Library'">
     <None Include="go2cs.png" Pack="true" PackagePath="" Visible="false" />
     <None Include="go2cs.ico" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
+
+  <!-- Include the per-package README (emitted by the converter) in the NuGet package -->
+  <PropertyGroup Condition="'$(OutputType)'=='Library' AND Exists('$(MSBuildProjectDirectory)\README.md')">
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(OutputType)'=='Library' AND Exists('$(MSBuildProjectDirectory)\README.md')">
+    <None Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <!-- Expose output of source generators as local files -->

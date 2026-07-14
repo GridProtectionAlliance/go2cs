@@ -1,10 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Shared NuGet version: go.gen carries the same stamp as the converted stdlib (src\version.props) -->
+  <Import Project="..\..\version.props" />
+
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>go2cs</RootNamespace>
     <Product>go2cs</Product>
-    <Version>0.1.4</Version>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>
     <Copyright>Copyright © 2025</Copyright>
@@ -24,6 +26,39 @@
 
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <!-- NuGet: publish as a Roslyn analyzer / source-generator package (go.gen) -->
+  <PropertyGroup>
+    <PackageId>go.gen</PackageId>
+    <Title>go2cs source generator</Title>
+    <Description>go2cs Roslyn source generator/analyzer emitting the C# glue (interface satisfaction, implicit conversions, receiver overloads, init ordering) for go2cs-converted projects.</Description>
+    <Authors>Grid Protection Alliance</Authors>
+    <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>go2cs.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>go2cs;Golang;go;roslyn;analyzer;source-generator</PackageTags>
+
+    <!-- Analyzer packaging: no lib/, no runtime dependencies, development-time only -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddGeneratorToPackage</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <!-- Pack the built generator DLL into the analyzer path (runs after build, so the DLL exists) -->
+  <Target Name="_AddGeneratorToPackage">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(OutputPath)$(AssemblyName).dll" PackagePath="analyzers/dotnet/cs" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <None Include="..\..\core\go2cs.png" Pack="true" PackagePath="" Visible="false" />
+    <None Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <Import Project="..\..\core\go2cs\go2cs.projitems" Label="Shared" />

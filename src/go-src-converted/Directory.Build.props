@@ -30,4 +30,7 @@
     <go2csPath>$([MSBuild]::EnsureTrailingSlash($([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..'))))</go2csPath>
   </PropertyGroup>
 
+  <!-- Shared NuGet version for every converted stdlib package (single source: src\version.props) -->
+  <Import Project="$(MSBuildThisFileDirectory)..\version.props" />
+
 </Project>

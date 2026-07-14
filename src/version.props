@@ -1,0 +1,28 @@
+<Project>
+
+  <!--
+    Single source of truth for the PUBLISHED NuGet version of the go2cs converted Go standard
+    library, the golib runtime (go.lib) and the source generator (go.gen).
+
+    Format:  <GoStdLibVersion>.<GoBuildNumber>  ==  NuGet Major.Minor.Patch.Revision
+      * GoStdLibVersion tracks the converted Go release (e.g. 1.23.1) — the "base" version.
+      * GoBuildNumber is the LAST-PUBLISHED build number (0 = nothing published yet).
+        push-nuget.ps1 -Push increments it before publishing (so the first publish is
+        "1.23.1.1"), then rewrites this file; commit it afterward to record the release.
+
+    Notes:
+      * A body-level <Version> in a .csproj OVERRIDES this value, so the converter's
+        csproj-template.xml (and golib/go2cs-gen) intentionally carry NO <Version> element —
+        they inherit $(Version) from here.
+      * NuGet normalizes a trailing-zero revision, so build 0 packs as the 3-part "1.23.1";
+        that only appears in a pre-first-publish pack-only run, never in a published version.
+      * SemVer "+buildN" build-metadata is deliberately NOT used: NuGet ignores build metadata
+        for version equality, so successive builds could not be pushed.
+  -->
+  <PropertyGroup>
+    <GoStdLibVersion>1.23.1</GoStdLibVersion>
+    <GoBuildNumber>0</GoBuildNumber>
+    <Version>$(GoStdLibVersion).$(GoBuildNumber)</Version>
+  </PropertyGroup>
+
+</Project>
