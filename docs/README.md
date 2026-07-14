@@ -174,7 +174,7 @@ go2cs -recurse=nuget module_dir        # same, but reference the go2cs stdlib fr
 | Option | Description |
 |:--|:--|
 | `-stdlib` | Convert the Go standard library (optionally followed by specific package names). |
-| `-recurse` | Recursively convert a downloaded module **and its third-party dependencies** in dependency order, referencing the pre-converted standard library. Add `=nuget` (`-recurse=nuget`) to reference the published go2cs NuGet packages ([`go.<pkg>`](https://www.nuget.org/packages?q=go.) stdlib + [`go.lib`](https://www.nuget.org/packages/go.lib) runtime + [`go.gen`](https://www.nuget.org/packages/go.gen) analyzer) instead of a locally-staged deploy root — no `deploy-core` needed. See [Converting a real-world module](#converting-a-real-world-module). |
+| `-recurse` | Recursively convert a downloaded module **and its third-party dependencies** in dependency order, referencing the pre-converted standard library. Optionally, use `nuget` option (`-recurse=nuget`) to reference the published go2cs NuGet packages ([`go.<pkg>`](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) stdlib + [`go.lib`](https://www.nuget.org/packages/go.lib) runtime + [`go.gen`](https://www.nuget.org/packages/go.gen) analyzer) instead of a locally-staged deploy root — no `deploy-core` needed. **NOTE:** _using NuGet references with analyzer is still a work in progress_. See [Converting a real-world module](#converting-a-real-world-module). |
 | `-go2cspath <dir>` | Root for converted code (env `GO2CSPATH`; default `~/go2cs`): the **output** root for `-stdlib` (`…\core\<pkg>`) and `-recurse` (`…\src\` app + `…\pkg\` deps), and the root that generated `$(go2csPath)…` project references resolve against. For a single-package/file convert the C# output instead goes to the optional `[output_dir]` argument (in place by default). |
 | `-goroot` / `-gopath` | Override the detected Go root / path. |
 | `-platforms <os/arch>` | Target platform for build-tagged files (defaults to the host). |
@@ -184,7 +184,7 @@ go2cs -recurse=nuget module_dir        # same, but reference the go2cs stdlib fr
 | `-comments` | Carry source comments into the output (best effort, see [go/ast comment status](https://github.com/golang/go/issues/20744)). |
 | ~~`-cgo`~~ | ~~Also convert cgo-targeted files.~~ |
 
-The converted C# references a small hand-written runtime library (`golib`, published as the [`go.lib`](https://www.nuget.org/packages/go.lib)
+All converted C# code will reference a hand-written runtime library (`golib`, published as the [`go.lib`](https://www.nuget.org/packages/go.lib)
 NuGet package) plus a set of Roslyn source generators that supply Go semantics at compile time.
 
 ### Converting a real-world module
@@ -210,7 +210,9 @@ version**, to refresh the staged runtime/analyzer/stdlib:
 cd path\to\go2cs\src
 deploy-core stdlib    & :: the full compilable standard library
 ```
-> **NOTE:** _you can use `deploy-core stub` instead to deploy the smaller, more runnable baseline subset of the Go Standard Library, i.e., the one currently used with behavioral tests. However, this will only work for the most simple of Go applications._
+> **NOTE 1:** _you can use the `deploy-core stub` instead to deploy the smaller, more runnable baseline subset of the Go Standard Library, i.e., the one currently used with behavioral tests. However, this will only work for the most simple of Go applications._
+
+>  **NOTE 2:** _although you can use `-recurse=nuget` option to reference needed Go Standard Library assemblies and the go2cs source generation analyzer as pre-compiled binaries, thus skipping the need for this source code deployment step entirely, using the analyzer with referenced assemblies instead of source code is still a work in progress. This example **requires source code deployment** to run._
 
 **2 — Go: get the app and confirm it builds as Go.**
 
