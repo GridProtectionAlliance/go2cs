@@ -288,12 +288,19 @@ type solutionFolder struct {
 // via $(go2csPath)core) for one dotnet build. Projects are grouped into top-level solution folders that
 // mirror the %GOPATH% layout — `src` for the project(s) being converted (the app's own main-module
 // packages), `pkg` for their dependency packages, and `core` for the go2cs runtime/generator projects
-// (golib, go2cs-gen). Folders are emitted in the EXACT order the caller passes them — the enforced
-// src → pkg → core order, deliberately NOT alphabetic — and an empty folder is skipped (a dependency's own
-// solution has no src package, for instance). These three names are unique leaves, so no folder Id is
-// needed (unlike the namespace-nested stdlib solution). The project whose path equals startupProject is
-// marked the Visual Studio default startup project via the .slnx DefaultStartup attribute (pass "" for
-// none). Output uses CRLF line endings and no BOM, matching the other emitted solutions.
+// (golib, go2cs-gen). Folders are emitted in the enforced src → pkg → core order (an empty folder is
+// skipped — a dependency's own solution has no src package, for instance). That file order is only for
+// deterministic output: Visual Studio's Solution Explorer sorts folders/projects alphabetically in the
+// DISPLAY regardless, so the layout has no visible effect. This is a FLAT three-folder tree with no
+// nested import-path folders, so — unlike the stdlib solution — it needs no explicit intermediate folders
+// and no folder Ids (the three leaves are unique); it is already VS-canonical and never dirties on open.
+//
+// The project whose path equals startupProject is marked the VS default startup project via the .slnx
+// DefaultStartup attribute (pass "" for none). CAVEAT: this only takes effect on a CLEAN FIRST open (a
+// per-user .suo, once written, overrides it) and requires a VS new enough to include the 2025-05
+// vs-solutionpersistence update; older VS ignores the attribute. It is the officially-supported
+// mechanism, so it is kept for the fresh-conversion first-open case. Output uses CRLF line endings and no
+// BOM, matching the other emitted solutions.
 func buildRecurseSolutionXML(folders []solutionFolder, startupProject string) string {
 	var sb strings.Builder
 
