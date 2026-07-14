@@ -43,8 +43,8 @@ func (c *StdLibConverter) GenerateSolutionFile() error {
 	}
 
 	// golib is the shared runtime; it lives under core/ in the repo source tree (not in the
-	// converter's output), so add it explicitly and let it sort into its natural position
-	// among the converted core packages — matching the layout of the existing src/go2cs.slnx.
+	// converter's output). Add it so it is counted and present; buildSolutionXML emits it at
+	// the solution root (no folder), not among the import-path package folders.
 	coreProjects = append(coreProjects, golibProjectReference)
 
 	// Sort for deterministic, stable output regardless of filesystem walk order.
@@ -122,10 +122,13 @@ func (c *StdLibConverter) collectConvertedProjects() (coreProjects []string, tes
 	return coreProjects, testProjects, nil
 }
 
-// buildSolutionXML renders the .slnx document. Projects are emitted in the order given
-// (callers sort them for determinism), with solution-relative forward-slash paths that
-// match the on-disk output layout and the existing src/go2cs.slnx. Output uses CRLF line
-// endings and no BOM, matching that file.
+// buildSolutionXML renders the .slnx document. golib (the shared runtime) and go2cs-gen (the
+// source generator / analyzer) are emitted as projects at the solution root with no folder;
+// every converted package nests under a solution folder named by its full Go import path, so
+// the folder tree mirrors `import "..."` (`bufio` → /bufio/, `crypto/aes` → /crypto/aes/).
+// Projects are emitted in the order given (callers sort them for determinism), with
+// solution-relative forward-slash paths that match the on-disk output layout. Output uses CRLF
+// line endings and no BOM, matching the existing src/go2cs.slnx.
 func buildSolutionXML(coreProjects []string, testProjects []string) string {
 	var sb strings.Builder
 
@@ -135,16 +138,16 @@ func buildSolutionXML(coreProjects []string, testProjects []string) string {
 		sb.WriteString("\r\n")
 	}
 
-	writeProject := func(path string) {
-		writeLine(2, fmt.Sprintf("<Project Path=\"%s\" />", escapeXMLAttr(path)))
+	writeProject := func(indent int, path string) {
+		writeLine(indent, fmt.Sprintf("<Project Path=\"%s\" />", escapeXMLAttr(path)))
 	}
 
 	// Folders carry an EXPLICIT deterministic Id: Visual Studio's .slnx loader derives a
 	// missing folder Id from the folder's leaf display name, and Go namespaces guarantee
-	// duplicate leaves (`/core/crypto/` vs `/core/vendor/golang.org/x/crypto/` are both
-	// "crypto") — VS then refuses to open the solution ("a Solution Folder with the same
-	// unique identifier already exists"). A UUID hashed from the FULL folder path is unique,
-	// stable across regenerations, and machine-independent.
+	// duplicate leaves (`/crypto/` vs `/vendor/golang.org/x/crypto/` are both "crypto") — VS
+	// then refuses to open the solution ("a Solution Folder with the same unique identifier
+	// already exists"). A UUID hashed from the FULL folder path is unique, stable across
+	// regenerations, and machine-independent.
 	writeFolderOpen := func(folder string) {
 		writeLine(1, fmt.Sprintf("<Folder Name=\"%s\" Id=\"%s\">", escapeXMLAttr(folder), folderID(folder)))
 	}
@@ -157,55 +160,40 @@ func buildSolutionXML(coreProjects []string, testProjects []string) string {
 	writeLine(2, "<Platform Name=\"x86\" />")
 	writeLine(1, "</Configurations>")
 
-	// Source generators / analyzers.
-	writeFolderOpen("/generators/")
-	writeProject(genProjectReference)
-	writeLine(1, "</Folder>")
+	// Infrastructure projects sit at the solution ROOT with no folder: golib (the shared
+	// runtime) and go2cs-gen (the source generator / analyzer) are not Go packages, and the
+	// folder tree is reserved exclusively for Go import paths — so a folder name can never
+	// collide with a current or future stdlib package (`generators`, `core`, …). golib arrives
+	// inside coreProjects (the caller appends it); it is emitted here and skipped in the
+	// package grouping below.
+	writeProject(1, genProjectReference)
+	writeProject(1, golibProjectReference)
 
-	// Shared runtime + converted stdlib packages, grouped into solution folders that mirror
-	// the Go package namespaces. A "namespace parent" is any package directory that also
-	// contains deeper packages — `crypto`, `net`, `hash`, `io`, … all have both their own
-	// package AND sub-packages. Such a package's project is placed INSIDE its own namespace
-	// folder (`crypto.csproj` in `/core/crypto/`, alongside `crypto/aes`, `crypto/cipher`, …),
-	// not as a sibling of that folder in `/core/`. That sibling placement is what Visual
-	// Studio rejects: a solution folder and a project of the same leaf name under one parent
-	// collide in its identifier space ("a Solution Folder with the same unique identifier
-	// already exists"). A leaf package with no sub-packages (`fmt`, and golib) stays directly
-	// in its parent folder. Folder names are slash-paths — the .slnx format nests by name, so
-	// intermediate folders are implied and never need empty declarations. Projects arrive
+	// Every converted package nests under a solution folder named by its FULL Go import path,
+	// so the folder tree mirrors `import "..."` exactly: `bufio` → /bufio/, `crypto/aes` →
+	// /crypto/aes/, `archive/tar` → /archive/tar/. A package's own directory is core/<import
+	// path>; stripping the leading "core/" yields the import path. Pure intermediate folders
+	// (`archive/`, `container/`, and `crypto/` where only sub-packages exist) are implied by
+	// their child folder's slash-path and need no explicit declaration — verified against the
+	// dotnet/VS SolutionPersistence loader, which accepts leaf-only folder paths and builds the
+	// ancestors. Folders still carry an explicit deterministic Id (see folderID) because leaf
+	// display names repeat across the tree (`internal`, `testdata`, …). Projects arrive
 	// globally sorted, which also sorts the folder groups; emitting groups in first-appearance
 	// order keeps the document deterministic and diff-stable.
-	namespaceParents := make(map[string]bool)
-
-	for _, project := range coreProjects {
-		// Every strict ancestor directory of a project's own package directory is a namespace
-		// parent (it holds a deeper package). `core/crypto/aes/x.csproj` marks `core/crypto`
-		// (and `core`); a leaf like `core/fmt/fmt.csproj` marks only `core`.
-		for dir := path.Dir(path.Dir(project)); dir != "." && dir != "/" && dir != ""; dir = path.Dir(dir) {
-			namespaceParents[dir] = true
-		}
-	}
-
-	solutionFolder := func(project string) string {
+	importFolder := func(project string) string {
 		own := path.Dir(project) // core/<import path> — the package's own directory
-		dir := path.Dir(own)     // default: the parent (a leaf package sits flat in it)
-
-		if namespaceParents[own] {
-			dir = own // this package IS a namespace parent — it lives inside its own folder
-		}
-
-		if dir == "core" || dir == "." {
-			return "/core/"
-		}
-
-		return "/" + dir + "/"
+		return "/" + strings.TrimPrefix(own, "core/") + "/"
 	}
 
 	var folderOrder []string
 	folderProjects := make(map[string][]string)
 
 	for _, project := range coreProjects {
-		folder := solutionFolder(project)
+		if project == golibProjectReference {
+			continue // emitted at the root above, not under an import-path folder
+		}
+
+		folder := importFolder(project)
 
 		if _, exists := folderProjects[folder]; !exists {
 			folderOrder = append(folderOrder, folder)
@@ -218,7 +206,7 @@ func buildSolutionXML(coreProjects []string, testProjects []string) string {
 		writeFolderOpen(folder)
 
 		for _, project := range folderProjects[folder] {
-			writeProject(project)
+			writeProject(2, project)
 		}
 
 		writeLine(1, "</Folder>")
@@ -229,7 +217,7 @@ func buildSolutionXML(coreProjects []string, testProjects []string) string {
 	if len(testProjects) > 0 {
 		writeFolderOpen("/tests/")
 		for _, project := range testProjects {
-			writeProject(project)
+			writeProject(2, project)
 		}
 		writeLine(1, "</Folder>")
 	}

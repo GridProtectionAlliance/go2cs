@@ -8,8 +8,9 @@ import (
 )
 
 // TestBuildSolutionXML checks the emitted .slnx structure: the configuration block, the
-// generator/core folders, project ordering, CRLF line endings, and no BOM — matching the
-// format of the existing src/go2cs.slnx.
+// root-level infrastructure projects (golib + go2cs-gen, no folder), the per-package
+// import-path folders, project ordering, CRLF line endings, and no BOM — matching the format
+// of the existing src/go2cs.slnx.
 func TestBuildSolutionXML(t *testing.T) {
 	coreProjects := []string{
 		"core/fmt/fmt.csproj",
@@ -28,13 +29,16 @@ func TestBuildSolutionXML(t *testing.T) {
 		"<Platform Name=\"Any CPU\" />",
 		"<Platform Name=\"x64\" />",
 		"<Platform Name=\"x86\" />",
+		// go2cs-gen and golib are root-level projects (2-space indent), NOT wrapped in a folder —
+		// the folder tree is reserved for Go import paths.
+		"\r\n  <Project Path=\"gen/go2cs-gen/go2cs-gen.csproj\" />\r\n",
+		"\r\n  <Project Path=\"core/golib/golib.csproj\" />\r\n",
+		// Every package nests under a folder named by its bare Go import path (no /core/ umbrella).
 		// Folders carry a deterministic Id attribute (see folderID) — match the opening tag and
 		// name, tolerating the trailing ` Id="…"`.
-		"<Folder Name=\"/generators/\" Id=\"",
-		"<Project Path=\"gen/go2cs-gen/go2cs-gen.csproj\" />",
-		"<Folder Name=\"/core/\" Id=\"",
+		"<Folder Name=\"/fmt/\" Id=\"",
 		"<Project Path=\"core/fmt/fmt.csproj\" />",
-		"<Project Path=\"core/golib/golib.csproj\" />",
+		"<Folder Name=\"/internal/abi/\" Id=\"",
 		"<Project Path=\"core/internal/abi/internal.abi.csproj\" />",
 		"<Folder Name=\"/tests/\" Id=\"",
 		"<Project Path=\"core/fmt/fmt_test.csproj\" />",
@@ -45,6 +49,19 @@ func TestBuildSolutionXML(t *testing.T) {
 		if !strings.Contains(xml, want) {
 			t.Errorf("solution XML missing %q\n---\n%s", want, xml)
 		}
+	}
+
+	// The old /core/ umbrella and /generators/ folder are gone — folders are bare import paths
+	// and the two infrastructure projects live at the root.
+	for _, unwanted := range []string{"<Folder Name=\"/core/\"", "<Folder Name=\"/generators/\""} {
+		if strings.Contains(xml, unwanted) {
+			t.Errorf("solution XML should not contain %q\n---\n%s", unwanted, xml)
+		}
+	}
+
+	// golib is not grouped under a /golib/ import-path folder.
+	if strings.Contains(xml, "<Folder Name=\"/golib/\"") {
+		t.Errorf("golib should be a root project, not a /golib/ folder\n---\n%s", xml)
 	}
 
 	// No BOM; starts directly with the root element (like src/go2cs.slnx).
