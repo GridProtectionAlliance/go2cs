@@ -30,17 +30,17 @@ directly (interface satisfaction, receiver overloads, struct-embedding promotion
   - [Compiled Library versus Source Code](#compiled-library-versus-source-code)
 - **Numbers, constants & nil**
   - [Constant Values](#constant-values)
-  - [Handling "int" and "uint" Types](#handling-int-and-uint-types)
-  - [Untyped Constants and Named Numeric Types](#untyped-constants-and-named-numeric-types)
-  - [The "nil" Value](#the-nil-value)
-  - [Empty Interface](#empty-interface)
+  - [Native and Narrow Integer Types](#native-and-narrow-integer-types)
+  - [Named Numeric Types and Constant Contexts](#named-numeric-types-and-constant-contexts)
+  - [Nil and Zero Values](#nil-and-zero-values)
+  - [Empty Interface (`any`)](#empty-interface-any)
 - **Assignment & scope**
-  - [Inline Assignment Order of Operations](#inline-assignment-order-of-operations)
+  - [Multi-Assignment and Evaluation Order](#multi-assignment-and-evaluation-order)
   - [Short Variable Redeclaration (Shadowing)](#short-variable-redeclaration-shadowing)
-  - [Return Tuples](#return-tuples)
+  - [Multi-Result Values and Comma-Ok Forms](#multi-result-values-and-comma-ok-forms)
 - **Composite & named types**
   - [Slices and Arrays](#slices-and-arrays)
-  - [Stack Strings (`sstring`)](#stack-strings-sstring)
+  - [Strings (`@string` and `sstring`)](#strings-string-and-sstring)
   - [Maps and Channels](#maps-and-channels)
   - [Generic Constraints](#generic-constraints)
   - [Type Aliasing](#type-aliasing)
@@ -49,7 +49,7 @@ directly (interface satisfaction, receiver overloads, struct-embedding promotion
   - [Defer / Panic / Recover](#defer--panic--recover)
   - [Expression Switch Statements](#expression-switch-statements)
   - [Type Switch Statements](#type-switch-statements)
-  - [Break / Continue Labels](#break--continue-labels)
+  - [Labeled Control Flow and Loop Variables](#labeled-control-flow-and-loop-variables)
 - **Types & polymorphism**
   - [Struct Types](#struct-types)
   - [Struct Type Embedding](#struct-type-embedding)
@@ -58,8 +58,8 @@ directly (interface satisfaction, receiver overloads, struct-embedding promotion
   - [Pointers](#pointers)
   - [Implicit Pointer Dereferencing](#implicit-pointer-dereferencing)
 - **The machinery**
-  - [Source Generators](#source-generators)
   - [The `go.golib` support namespace](#the-gogolib-support-namespace)
+  - [Source Generators](#source-generators)
   - [Manually-Converted Declarations](#manually-converted-declarations)
   - [Deterministic Output](#deterministic-output)
 
@@ -181,7 +181,7 @@ identity.
 
 ---
 
-## Handling "int" and "uint" Types
+## Native and Narrow Integer Types
 
 Go's `int`/`uint` are platform-sized; C#'s are always 32-bit. C# 9's native integers `nint`/`nuint`
 behave exactly like Go's, so `int` → `nint`, `uint` → `nuint` (and `uintptr` → the `uintptr` struct). The
@@ -200,13 +200,18 @@ uint8 a = 200, b = 100;
 take((uint8)(a + b));   // wraps to 44, not 300
 ```
 
-**Full detail:** [Reference → Handling int and uint](ConversionStrategies-Reference.md#handling-int-and-uint-types) —
+**Full detail:** [Reference → Native and Narrow Integer Types](ConversionStrategies-Reference.md#native-and-narrow-integer-types) —
 narrow-arithmetic casts across argument/assignment/return contexts, wide-const overflow folding, signed
 minima sign-folding, and the `Index`/`Range` `nint`→`int` caveat.
 
 ---
 
-## Untyped Constants and Named Numeric Types
+## Named Numeric Types and Constant Contexts
+
+General untyped constant representation is covered in [Constant Values](#constant-values). This section
+focuses on what happens after numeric context is known: Go defined types over numeric bases, constants that
+must flow into those named or native-width types, and the casts needed to keep C# overload resolution and
+operator binding aligned with Go.
 
 A Go type over a numeric base — `type Celsius float64`, `type Duration int64` — becomes a `[GoType("num:…")]`
 partial struct whose body (operators, comparisons, conversions to/from the underlying) the `TypeGenerator`
@@ -235,14 +240,14 @@ so `Word >> s` stays a `Word`. Converting *between* a named type and a non-under
 the underlying (`traceArg(procs)` → `(traceArg)(uint64)procs`), mirroring Go's numeric-conversion rules.
 Unsigned unary minus lowers to `(T)0 - x` (C# forbids unary negation, i.e., `-` prefix, on unsigned).
 
-**Full detail:** [Reference → Untyped Constants and Named Numeric Types](ConversionStrategies-Reference.md#untyped-constants-and-named-numeric-types) —
+**Full detail:** [Reference → Named Numeric Types and Constant Contexts](ConversionStrategies-Reference.md#named-numeric-types-and-constant-contexts) —
 this is one of the deepest topics: `++/--` operators, to/from conversions, cross-assembly conversion
 operators, named slice/array/map wrappers, `append` element casting, shift-width and bit-mask casts, and
 the `&^=` bit-clear lowering.
 
 ---
 
-## The "nil" Value
+## Nil and Zero Values
 
 `nil` maps to the golib `NilType` value `nil` (from `go.builtin`), which defines comparison operators so
 `x == nil` / `x != nil` work across slices, maps, channels, pointers, and interfaces — each defining what
@@ -271,12 +276,12 @@ public static error Unwrap(error err) {     // errors/wrap.cs
 Zero-value reference-backed values are null-safe: a `default!` `@string` reads as `""` rather than
 throwing.
 
-**Full detail:** [Reference → The "nil" Value](ConversionStrategies-Reference.md#the-nil-value) —
+**Full detail:** [Reference → Nil and Zero Values](ConversionStrategies-Reference.md#nil-and-zero-values) —
 null-safe zero values and pointer-to-interface assignment through selector fields.
 
 ---
 
-## Empty Interface
+## Empty Interface (`any`)
 
 Every Go type satisfies `interface{}` (spelled `any`), which behaves like .NET's `object`, so the empty
 interface maps directly to **`any`** (a global alias for `object`). `func(i interface{})` → `void f(any i)`;
@@ -298,13 +303,13 @@ would store the pointed-to value, so a later `x.(*T)` would find a bare `T` and 
 fmt's `sync.Pool` round-trip (`ppFree.Put(p)` then `Get().(*pp)`), which crashed every multi-call fmt
 program before the fix.
 
-**Full detail:** [Reference → Empty Interface](ConversionStrategies-Reference.md#empty-interface) — the
+**Full detail:** [Reference → Empty Interface (`any`)](ConversionStrategies-Reference.md#empty-interface-any) — the
 `@string` and `nint` boxing across argument, return, assignment, composite-literal, and channel-send
 positions, and the box for a pointer value passed to an `any` argument.
 
 ---
 
-## Inline Assignment Order of Operations
+## Multi-Assignment and Evaluation Order
 
 Go evaluates every right-hand operand before assigning, which C# expresses with tuple deconstruction:
 
@@ -319,7 +324,7 @@ Go's **partial redeclaration** (`a, b := f()` where `a` already exists) reuses `
 new names, so the converter emits `var` per newly-declared element: `(frac, var e) = normalize(frac);`. A
 blank element is a discard with no `var` (`_ = fi;`).
 
-**Full detail:** [Reference → Inline Assignment Order of Operations](ConversionStrategies-Reference.md#inline-assignment-order-of-operations) —
+**Full detail:** [Reference → Multi-Assignment and Evaluation Order](ConversionStrategies-Reference.md#multi-assignment-and-evaluation-order) —
 per-element `var` mechanics, escaping/heap-boxed tuple elements, interface-converting deconstruction, and
 address-taken value locals (the `Ꮡ(value)` copy-vs-box distinction).
 
@@ -358,7 +363,7 @@ shadowing, box-name rules for renamed receivers/pointers, and nested-closure cap
 
 ---
 
-## Return Tuples
+## Multi-Result Values and Comma-Ok Forms
 
 Go functions returning `(value, ok)` / `(value, error)` become ordinary C# value tuples, destructured at
 the call site. The runtime's own comma-ok forms (map read, type assertion) use a discard **sentinel** to
@@ -388,7 +393,7 @@ public static (nint, error) Atoi(@string s) {     // strconv/atoi.cs
 The single-value assertion `i.(T)` → `i._<T>()` panics on failure; the comma-ok `i._<T>(ᐧ)` returns safely.
 An assertion to a *pointer* type renders the box type: `i.(*box)` → `i._<ж<box>>()`.
 
-**Full detail:** [Reference → Return Tuples](ConversionStrategies-Reference.md#return-tuples) —
+**Full detail:** [Reference → Multi-Result Values and Comma-Ok Forms](ConversionStrategies-Reference.md#multi-result-values-and-comma-ok-forms) —
 package-level `var a, b = f()` component reads, variadic pointer-arg boxing, named-func-result signatures,
 and variadic-closure `params` rebinding.
 
@@ -435,29 +440,58 @@ public static error Join(params ꓸꓸꓸerror errsʗp) {     // errors/join.cs
 }
 ```
 
-A string↔bytes conversion is a cast over the golib types: `string(b.buf[b.off:])` →
-`(@string)(b.buf[(int)(b.off)..])`, and `[]byte(s)` → `slice<byte>(s)`. A `[]byte("literal")` over a
-plain-text string literal feeds the zero-allocation `u8` ROM span straight into the slice —
-`[]byte("hi")` → `slice<byte>("hi"u8)` — rather than round-tripping through a heap `@string`.
-
 **Full detail:** [Reference → Slices and Arrays](ConversionStrategies-Reference.md#slices-and-arrays) —
-named slice/array wrappers, string↔`[]byte`/`[]rune` conversions, high-`\x`-escape byte arrays, structural
+named slice/array wrappers, pointer-to-array slicing, named-slice pointer reinterpretation, structural
 composite rendering, and slice-aliasing/write-through semantics.
 
 ---
 
-## Stack Strings (`sstring`)
+## Strings (`@string` and `sstring`)
 
-A Go `string` is a heap [`@string`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/string.cs), so every `string([]byte)` conversion **copies** the bytes into a fresh
-allocation — the price of Go's immutable-string guarantee. Go's own compiler *elides* that copy when the
-resulting string does not escape and its source is not modified while it is alive, letting the string alias
-the bytes in place; `@string` cannot, so the very common "convert a byte slice, inspect it, discard it"
-idiom allocates in C# where Go would not.
+Go's `string` is represented by golib [`@string`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/string.cs):
+an immutable byte string whose `len`, indexing, ranging, concatenation, and comparisons are byte-oriented
+like Go's, not UTF-16-oriented like `System.String`. Plain string literals usually render as
+`"..."u8` `ReadOnlySpan<byte>` values, then target-type into `@string` only when a heap string is actually
+needed. That keeps common literal-to-slice and literal-comparison forms allocation-free:
 
-The converter recovers this with a second string type,
+```go
+var s string = "ready"
+b := []byte("hi")
+```
+```csharp
+@string s = "ready"u8;
+var b = slice<byte>("hi"u8);
+```
+
+A string↔bytes conversion is a cast over the golib types: `string(b.buf[b.off:])` →
+`(@string)(b.buf[(int)(b.off)..])`, and `[]byte(s)` → `slice<byte>(s)`. `[]rune(s)` decodes through the
+Go string model rather than the CLR string model. Literals with raw byte escapes that cannot be expressed
+faithfully as UTF-8 source (for example high `\xHH` bytes or greedy hex escapes) emit as byte-array-backed
+`@string`, preserving Go's exact bytes.
+
+Named string types are real wrapper structs (`type relationship string`), so the generated type keeps the
+string surface: indexing, sub-slicing, `len`, comparisons, constants, and method calls stay on the named
+type instead of collapsing back to plain `@string`.
+
+```go
+type Token string
+func (t Token) First() byte { return t[0] }
+const done Token = "done"
+```
+```csharp
+[GoType("@string")] partial struct Token;
+internal static readonly Token done = "done"u8;
+public static byte First(this Token t) => t[0];
+```
+
+Most `string([]byte)` conversions must copy into `@string` — the price of Go's immutable-string guarantee.
+Go's own compiler *elides* that copy when the resulting string does not escape and its source is not
+modified while it is alive, letting the string alias the bytes in place. The converter recovers this common
+fast path with a second string type,
 [`sstring`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/sstring.cs): a
-stack-only `readonly ref struct` that *views* a `ReadOnlySpan<byte>` with **no allocation**. A provably-safe
-`string([]byte)` conversion emits `sstring`; anything that escapes stays `@string` (the implicit
+stack-only `readonly ref struct` that *views* a `ReadOnlySpan<byte>` with **no allocation**.
+
+A provably-safe `string([]byte)` conversion emits `sstring`; anything that escapes stays `@string` (the implicit
 `sstring`→`@string` conversion copies to the heap at that boundary, so correctness never depends on getting
 the analysis right — only performance does).
 
@@ -483,9 +517,10 @@ directly over the backing spans — which is where the win shows: the eligible c
 ~11–12× faster than the `@string` copy-and-compare. A repeated conversion in a loop is hoisted to a single
 reused view; everything that escapes simply stays `@string`.
 
-**Full detail:** [Reference → the stack string `sstring`](ConversionStrategies-Reference.md#a-non-escaping-stringbyte-local-emits-the-stack-string-sstring) —
-the exact eligibility predicate, the comparison / `switch` / concatenation forms and the `u8`-literal and
-mixed-`@string` operators, loop-invariant hoisting, and the `SStringElision` guard test.
+**Full detail:** [Reference → Strings (`@string` and `sstring`)](ConversionStrategies-Reference.md#strings-string-and-sstring) —
+literal rendering, string↔`[]byte`/`[]rune` conversions, named-string wrapper behavior, high-`\x`-escape
+byte arrays, the exact `sstring` eligibility predicate, comparison / `switch` / concatenation forms,
+loop-invariant hoisting, and the `SStringElision` guard test.
 
 ---
 
@@ -734,7 +769,7 @@ the tag-evaluates-once guarantee, default-arm binding, astral rune literals, and
 
 ---
 
-## Break / Continue Labels
+## Labeled Control Flow and Loop Variables
 
 Go labels sit immediately before their statement; C# reproduces the behavior with a placed label and a
 `goto`:
@@ -756,7 +791,7 @@ Outer:
     break_Outer:;
 ```
 
-**Full detail:** [Reference → Break / Continue Labels](ConversionStrategies-Reference.md#break--continue-labels) —
+**Full detail:** [Reference → Labeled Control Flow and Loop Variables](ConversionStrategies-Reference.md#labeled-control-flow-and-loop-variables) —
 break vs continue label placement, labels on empty statements, and per-iteration loop-variable semantics
 (Go 1.22).
 
@@ -932,6 +967,20 @@ selector-base deref detection, nested LHS `.Value` chains, index-expression assi
 
 ---
 
+## The `go.golib` support namespace
+
+golib's hand-written support types (`SparseArray<T>`, `PinnedBuffer`, `HashCode`, …) live in the
+**`go.golib`** child namespace — deliberately *not* `go.<any Go package name>`, because a child namespace
+visible from every referenced assembly would win simple-name lookup over an import alias (`go.runtime` would
+shadow `using runtime = runtime_package;`, CS0576). The general form of that collision — a real
+parent/child package pair — is handled by **Δ-renaming the import alias** (`using Δruntime = …`).
+
+**Full detail:** [Reference → The go.golib support namespace](ConversionStrategies-Reference.md#the-gogolib-support-namespace) —
+the collision reasoning and the transitive-closure alias-rename pre-pass (incl. foreign renamed-type alias
+resolution).
+
+---
+
 ## Source Generators
 
 Several Go semantics can't be written directly in C#, so the converter emits compact attributed partial
@@ -955,20 +1004,6 @@ Common attributes: `[GoType]`, `[GoRecv]`, `[GoTag]`, `[GoPackage]`, and the tes
 
 ---
 
-## The `go.golib` support namespace
-
-golib's hand-written support types (`SparseArray<T>`, `PinnedBuffer`, `HashCode`, …) live in the
-**`go.golib`** child namespace — deliberately *not* `go.<any Go package name>`, because a child namespace
-visible from every referenced assembly would win simple-name lookup over an import alias (`go.runtime` would
-shadow `using runtime = runtime_package;`, CS0576). The general form of that collision — a real
-parent/child package pair — is handled by **Δ-renaming the import alias** (`using Δruntime = …`).
-
-**Full detail:** [Reference → The go.golib support namespace](ConversionStrategies-Reference.md#the-gogolib-support-namespace) —
-the collision reasoning and the transitive-closure alias-rename pre-pass (incl. foreign renamed-type alias
-resolution).
-
----
-
 ## Manually-Converted Declarations
 
 A few Go declarations can't be faithfully auto-converted because their semantics depend on hiding a
@@ -977,11 +1012,16 @@ A few Go declarations can't be faithfully auto-converted because their semantics
 invisible to the .NET GC), so the managed conversion stores the `ж<T>` box **directly** and the numeric
 form never exists (the model precedent is `core/sync/atomic`'s hand-rewritten `Pointer<T>`). Two mechanisms
 deliver this: whole-file `[module: GoManualConversion]` (skipped by the converter, restored by [overlay](Glossary.md#overlay)), and
-a type-level registry that skips listed types/methods and points at a hand-written `*_impl.cs`.
+a type-level registry that skips listed types/methods and points at a hand-written `*_impl.cs`. The same
+"managed reality beats raw reinterpretation" rule also hand-owns `sync/atomic.Value`, whose Go
+implementation depends on the runtime's two-word interface layout; in C# it stores the boxed `any`
+directly and uses `Volatile`/`Interlocked` for the atomic operations. A small whitelist of
+`//go:linkname` pulls (currently the Windows DLL-loading helpers) emits forwarders to real hand-written
+targets; non-whitelisted linkname pulls remain throwing stubs.
 
-**Full detail:** [Reference → Manually-Converted Declarations](ConversionStrategies-Reference.md#manually-converted-declarations-managed-referent-pointers) —
-the guintptr family surface, the `unsafe.Pointer`→manual-type ctor cooperation, and the runtime lock/note
-model.
+**Full detail:** [Reference → Manually-Converted Declarations](ConversionStrategies-Reference.md#manually-converted-declarations) —
+the guintptr family surface, the `unsafe.Pointer`→manual-type ctor cooperation, the runtime lock/note
+model, `sync/atomic.Value`, and whitelisted `//go:linkname` forwarders.
 
 ---
 

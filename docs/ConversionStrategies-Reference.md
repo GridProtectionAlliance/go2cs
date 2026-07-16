@@ -33,15 +33,17 @@ the generators exist to keep the visible converted code close to the Go original
 * [Package-Level Variable Initialization Order](#package-level-variable-initialization-order)
 * [Compiled Library versus Source Code](#compiled-library-versus-source-code)
 * [Constant Values](#constant-values)
-* [Handling "int" and "uint" Types](#handling-int-and-uint-types)
-* [Untyped Constants and Named Numeric Types](#untyped-constants-and-named-numeric-types)
-* [The "nil" Value](#the-nil-value)
-* [Empty Interface](#empty-interface)
-* [Inline Assignment Order of Operations](#inline-assignment-order-of-operations)
+* [Native and Narrow Integer Types](#native-and-narrow-integer-types)
+* [Named Numeric Types and Constant Contexts](#named-numeric-types-and-constant-contexts)
+* [Nil and Zero Values](#nil-and-zero-values)
+* [Empty Interface (`any`)](#empty-interface-any)
+* [Multi-Assignment and Evaluation Order](#multi-assignment-and-evaluation-order)
 * [Short Variable Redeclaration (Shadowing)](#short-variable-redeclaration-shadowing)
-* [Return Tuples](#return-tuples)
+* [Multi-Result Values and Comma-Ok Forms](#multi-result-values-and-comma-ok-forms)
 * [Slices and Arrays](#slices-and-arrays)
+* [Strings (`@string` and `sstring`)](#strings-string-and-sstring)
 * [Maps and Channels](#maps-and-channels)
+* [Generic Constraints](#generic-constraints)
 * [Type Aliasing](#type-aliasing)
 * [Delegates to Value Receiver Instances](#delegates-to-value-receiver-instances)
 * [Defer / Panic / Recover](#defer--panic--recover)
@@ -52,11 +54,11 @@ the generators exist to keep the visible converted code close to the Go original
 * [Interfaces](#interfaces)
 * [Pointers](#pointers)
 * [Implicit Pointer Dereferencing](#implicit-pointer-dereferencing)
-* [Break / Continue Labels](#break--continue-labels)
+* [Labeled Control Flow and Loop Variables](#labeled-control-flow-and-loop-variables)
+* [The `go.golib` support namespace](#the-gogolib-support-namespace)
 * [Source Generators](#source-generators)
-* [Manually-Converted Declarations (managed-referent pointers)](#manually-converted-declarations-managed-referent-pointers)
+* [Manually-Converted Declarations](#manually-converted-declarations)
 * [Deterministic Output](#deterministic-output)
-* [Examples](#examples)
 
 ## Package Conversion
 Although a Go package more traditionally parallels a C# namespace, Go includes referenceable functions directly from within a package root, for example, the `Println` function in the `fmt` package is called like: `fmt.Println("Hello, world")`. For C#, only type declarations, e.g., `class`, `struct`, `enum`, etc., are allowed in a namespace; functions exist as part of a `class` or `struct`. Described from a C# perspective, all Go functions are [`static`](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/static-classes-and-static-class-members), i.e., the functions exist separately from an instance of a type. Go supports the notion of a receiver function which allows a function to be targeted to an instance of a type (paralleling the operation of a C# extension function), but this is still a static function.
@@ -236,9 +238,9 @@ The same `unchecked` cast is emitted for a **named** constant declared over a *w
 
 **Numeric literal formatting is preserved** wherever Go and C# syntax overlap: hex (`0x4000`), binary (`0b1011`), and decimal literals — including `_` digit separators — emit with their original source text (`0x4000` never flattens to `16384`), keeping bit masks and addresses recognizable; required `U`/`UL`/`L` suffixes and casts compose with the preserved text (`0xFFFFFFFFU`). Go-only forms re-render as decimal: `0o…` octal has no C# syntax, and a legacy leading-zero octal (`0755`) would silently re-bind as decimal 755 in C#.
 
-See [Untyped Constants and Named Numeric Types](#untyped-constants-and-named-numeric-types) for how these interact with native-int and named numeric types. See also [example](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/basics/numeric-constants).
+See [Named Numeric Types and Constant Contexts](#named-numeric-types-and-constant-contexts) for how these interact with native-int and named numeric types. See also [example](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/basics/numeric-constants).
 
-## Handling "int" and "uint" Types
+## Native and Narrow Integer Types
 
 In Go the `int` and `uint` types are sized according to the platform build target, i.e., 32-bit or 64-bit. C#'s `int`/`uint` are always 32-bit and `long`/`ulong` are always 64-bit. As of C# 9.0, native-sized integer types exist that behave exactly like their Go counterparts: [`nint` and `nuint`](https://docs.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-9#performance-and-interop). The converter maps Go `int` → `nint` and Go `uint` → `nuint`; `uintptr` also maps to `nuint`. The fixed-width Go types (`int8/16/32/64`, `uint8/16/32/64`, `byte`, `rune`) are kept as readable C# aliases of the same name (e.g. `global using uint16 = System.UInt16;`).
 
@@ -265,7 +267,12 @@ A related **wide** case: a computed *constant* arithmetic expression assigned to
 
 > One sticking point: not all C# indexing constructs accept a `nint`. Explicit indexers support `nint`, but [implicit index support](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support) (the `Index`/`Range` syntax) currently only works with `int`, so range-operation indices are cast to `int` where needed. (The earlier strategy of compiling to `long`/`ulong`, or of custom `@int`/`@uint` structs selected by a `TARGET32BIT` directive, has been superseded by `nint`/`nuint`.)
 
-## Untyped Constants and Named Numeric Types
+## Named Numeric Types and Constant Contexts
+
+General untyped constant representation is covered in [Constant Values](#constant-values). This section
+records the places where constants and operators become difficult because a numeric context is already
+known: named numeric wrappers, native-width targets, typed-element contexts such as `append`, shift and
+bit-mask operands, and the casts needed to keep C# overload resolution aligned with Go.
 
 This area is where Go's flexible numeric model meets C#'s stricter one, and it has a few moving parts worth calling out.
 
@@ -497,7 +504,7 @@ var mask = ((int64)(-1) << (int)((nuint)bits));
 
 Two emission sites carry it: the type-conversion cast (convCallExpr, `castOperandNeedsParens`) covers `level(-1)`/`int64(-1)`, and the wide-shift left-operand cast (convBinaryExpr) covers `-1 << bits` (a wide shift type does not promote to `int`, so its left operand is cast to that type). A keyword target (`(int)-1`, `(nint)-1`) and a non-negative operand keep the bare form (no golden churn). (Guarded by the `CastNegativeNamedType` and `ShiftNegativeWideConst` behavioral tests.)
 
-## The "nil" Value
+## Nil and Zero Values
 In Go, `nil` is the equivalent of C# `null`. Where possible, converted code uses the golib [`NilType`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/NilType.cs) with a default instance called `nil` (defined in [`go.builtin`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/builtin.cs)). `NilType` provides comparison operators so `x == nil` / `x != nil` work across the runtime types (slices, maps, channels, pointers, interfaces), each of which defines what "nil" means for it (e.g. a `map<K,V>` whose backing dictionary is null is the nil map: reads return the zero value, `len` is 0, ranging yields nothing, and a write panics — matching Go).
 
 The same null-safe-zero-value principle applies to value types whose backing store is a reference. A zero-value `string` converts to `@string s = default!`, which runs no constructor, so the backing `byte[]` is null. Rather than [NRE](Glossary.md#nre) on the first read, `@string` treats a null backing as Go's empty string `""` for every read — length 0, no bytes to index/range, `== ""` is true, prints empty, and concatenation yields the other operand (`var s string; s += "x"` → `"x"`). Constructors still allocate, so only the `default(@string)` zero value relies on this. (Guarded by the `StringZeroValueConcat` behavioral test.)
@@ -521,7 +528,7 @@ internal static void assignDescriber(ж<holder> Ꮡh, ж<Setting> Ꮡs) {
 
 This is intentionally keyed on selector/index expression type instead of the root identifier, so struct fields such as `go/types`' `operand.expr ast.Expr` and ordinary behavioral fields both take the same path. Guarded by `PointerInterfaceStructField`, including the assignment case after the struct-literal cases.
 
-## Empty Interface
+## Empty Interface (`any`)
 In Go, every type satisfies the method-less interface `interface{}`, now spelled `any`. This operates fundamentally like .NET's `System.Object`, so the converter maps the Go empty interface to `any` (a global alias for `object`). For example, a Go `func(i interface{})` becomes `void f(any i)`, and a `map[any]string` becomes `map<any, @string>`.
 
 ### A string literal returned as `any` boxes through `@string`
@@ -665,7 +672,7 @@ the per-argument `castArgToType["nint"]` plumbing; the other positions wrap thro
 (Guarded by the `UntypedIntInterfaceBox` behavioral test — each position read back through an
 `x.(int)` assertion or an `int`/`int32` type switch, output-compared vs Go.)
 
-## Inline Assignment Order of Operations
+## Multi-Assignment and Evaluation Order
 All right-hand operands in assignment expressions in Go are evaluated before assignment to the left-hand operands. C# can operate equivalently using tuple deconstruction (_thanks to Eugene Bekker for the [suggestion](https://github.com/GridProtectionAlliance/go2cs/issues/6)_). For the following Go code:
 
 ```go
@@ -834,7 +841,7 @@ The same forward-collision rule applies at **every block level, not just the fun
 
 The mirror image — a local shadowing a package-level **GLOBAL** — is resolved the other way: the *global reference* is qualified rather than the local renamed. C# locals are function-scoped, so a local `trace := traceAcquire()` shadows a same-named global `var trace` throughout the function, and an *earlier* read of the global binds to the not-yet-declared local (CS0841; the wrong variable regardless). Renaming the local is the fragile, entangled path (it interacts with collision renames and the shadow-rename counter); instead a use whose ident resolves to a package-level var **of this package** — while a same-named function-level local is declared — is emitted qualified with the package static class: `runtime_package.Δtrace.minPageHeapAddr`, which a local can never shadow. This is the same package-class qualifier the box-field accessor uses for a shadowed owning type (below). Runtime's `traceallocfree.traceSnapshotMemory` reads the global `trace.minPageHeapAddr` before its local `trace := traceAcquire()` (both collision-renamed `Δtrace`); the qualifier is gated so an ordinary global (no shadowing local) and the local's own uses (which resolve to the local, not the package scope) keep their bare, Go-like form — no churn. (Guarded by the `GlobalShadowedByLocal` behavioral test — a collision-renamed global and a plain global each read before a same-named local; cleared runtime's last CS0841.)
 
-Two subtleties complete this for loops whose variable's box hoists before the loop. **A hoisted loop-variable box is block-scoped in C#, one per name per container.** A loop variable that escapes to the heap *and whose box is emitted before the loop* — today that is a string/int/chan/func **range** variable, or the legacy fallback of a `for i := …` clause variable referenced by a *clause* func literal; every other case boxes per-iteration inside the body (slice/array/map ranges via the deferred range-var box, and `for` clause variables via the per-iteration carrier rewrite — Go 1.22 semantics, see [Break / Continue Labels](#break--continue-labels)) — is emitted as a `ref var i = ref heap<…>(out var Ꮡi)` declaration hoisted into the *enclosing container* (function body, block, or switch/select clause) — see [Pointers](#pointers) — so other loops in that container that reuse `i` genuinely collide with it, unlike the ordinary all-loop-scoped case above. Loop variables are therefore grouped **per container and name**: the first whose box *actually claims a container-level name* is the keeper and keeps its name; every other direct-child loop variable with that name in the same container is force-shadow-renamed. The claim test mirrors the emission exactly — the var escapes AND is not inherently heap-allocated (a pointer/slice/map/chan/interface/func var is already a reference and gets no box) AND the box actually hoists (per the split above). A group with no claiming var is untouched, so ordinary same-named sibling loops keep their Go names — a claiming sibling would otherwise emit a *duplicate hoisted box* in the same scope (CS0128), and a non-claiming sibling's loop-scoped variable (or deferred in-body box) nests inside the block that owns the box name (CS0136). (The historical motivating cases — runtime `typesEqual`'s `for i := 0` pair inside one switch case and `runqputslow`'s three `for i := …` loops — now box per-iteration inside their bodies and no longer claim container names at all; `EscapedLoopVarSiblingIndex` keeps guarding the sibling grouping and was re-baselined to the per-iteration shape.) A function-body-level keeper is additionally recorded as function-level (so non-loop uses elsewhere shadow-rename as before), but never masks a real function-level declaration — preserving the `ForVarMasks…` invariant above. A name group with no escaped variable is untouched (loop-scoped in C# too — no churn).
+Two subtleties complete this for loops whose variable's box hoists before the loop. **A hoisted loop-variable box is block-scoped in C#, one per name per container.** A loop variable that escapes to the heap *and whose box is emitted before the loop* — today that is a string/int/chan/func **range** variable, or the legacy fallback of a `for i := …` clause variable referenced by a *clause* func literal; every other case boxes per-iteration inside the body (slice/array/map ranges via the deferred range-var box, and `for` clause variables via the per-iteration carrier rewrite — Go 1.22 semantics, see [Labeled Control Flow and Loop Variables](#labeled-control-flow-and-loop-variables)) — is emitted as a `ref var i = ref heap<…>(out var Ꮡi)` declaration hoisted into the *enclosing container* (function body, block, or switch/select clause) — see [Pointers](#pointers) — so other loops in that container that reuse `i` genuinely collide with it, unlike the ordinary all-loop-scoped case above. Loop variables are therefore grouped **per container and name**: the first whose box *actually claims a container-level name* is the keeper and keeps its name; every other direct-child loop variable with that name in the same container is force-shadow-renamed. The claim test mirrors the emission exactly — the var escapes AND is not inherently heap-allocated (a pointer/slice/map/chan/interface/func var is already a reference and gets no box) AND the box actually hoists (per the split above). A group with no claiming var is untouched, so ordinary same-named sibling loops keep their Go names — a claiming sibling would otherwise emit a *duplicate hoisted box* in the same scope (CS0128), and a non-claiming sibling's loop-scoped variable (or deferred in-body box) nests inside the block that owns the box name (CS0136). (The historical motivating cases — runtime `typesEqual`'s `for i := 0` pair inside one switch case and `runqputslow`'s three `for i := …` loops — now box per-iteration inside their bodies and no longer claim container names at all; `EscapedLoopVarSiblingIndex` keeps guarding the sibling grouping and was re-baselined to the per-iteration shape.) A function-body-level keeper is additionally recorded as function-level (so non-loop uses elsewhere shadow-rename as before), but never masks a real function-level declaration — preserving the `ForVarMasks…` invariant above. A name group with no escaped variable is untouched (loop-scoped in C# too — no churn).
 
 **Escape analysis marks only the arg's storage ROOT, not every identifier in a pointer argument.** Passing an expression to a pointer parameter escapes the storage the pointer refers to — the *peeled root* of a literal `&expr` (through parens, field selectors, index expressions, and derefs), or the bare identifier itself. An identifier appearing merely in a *subexpression* of the argument contributes a value, not its own address: in `xs[i].link(&xs[i+1])` or `typesEqual(tin[i], vin[i], seen)` the container (`xs`/`tin`'s elements) escapes but the index `i` does not. The old contains-anywhere check heap-boxed every such loop index — a spurious allocation on a hot path (Go keeps these in registers), gratuitous `Ꮡi` machinery in the emitted code, and the very duplicate-hoist collisions the grouping above then had to resolve (`typesEqual`'s pair now emits two plain `for (nint i = 0; …)` loops, no boxes, no renames). A direct `&i` anywhere — including nested inside a larger argument — is still caught independently by the address-of analysis. **And a renamed variable used as an LHS index/map key is rewritten there too.** An assignment `a[i] = …` / `m[ns] = …` / `p.f[k] = …` reassigns the *root* (`a`/`m`/`p`); the index/key expression is a separate value, so a shadow-renamed variable used there (`a[iΔ1]`, `m[nsΔ1]`) must be rewritten by descending the target's index/selector/deref chain and renaming each index. Missing this is a *silent* bug — the LHS key kept the enclosing variable's name, so `m[ns] = nsΔ1*100` wrote to the wrong key with no compile error — as well as a CS0136/CS0165 once the loop variable itself is renamed. (Both guarded by the `EscapedLoopVarSiblingIndex` behavioral test — the array case would not compile and the map case would silently return the wrong value without the pair, its `boxedSiblings` extension covers two genuinely-escaping siblings in one switch case (both take `&i`; first keeps the name, second renames), and its `caseSiblings` extension proves the index-only pair stays UNBOXED; cleared the 2 `runqputslow` CS0136, a CS0841, and the 2 `typesEqual` CS0128.) The target-chain descent also visits a **method-call receiver** in the chain — `x.ptr().Value.next = …` (runtime `stackpoolalloc`, where the loop `x` is renamed `xΔ1` because a func-body `x` is declared after the loop). The `x` is buried inside the `x.ptr()` call, past the selector/index steps, so without visiting the call the use kept the raw `x` — read before its (later) declaration → CS0841, or a silent wrong bind. Visiting the whole call renames its receiver and argument identifiers (the call's result is the navigated base, so the descent stops there). (Guarded by the `ShadowedVarMethodCallLHS` behavioral test — write-through through the method verified vs Go; cleared the `stack.cs` CS0841.)
 
@@ -907,7 +914,7 @@ A non-shadowed parameter maps to its own raw name (no churn). (Guarded by the `P
 
 A shadow-renamed **pointer** parameter completes the same rule on two more paths. A `*T` parameter is deref-aliased as `ref var <value> = ref Ꮡ<raw>.Value`, so its box companion `Ꮡ<raw>` always keeps the **raw** Go name even when the value alias is shadow-renamed — `func decrypt(rand io.Reader, …)` where `rand` shadows the `math/rand`-style alias becomes `ref var randΔ1 = ref Ꮡrand.Value`. **(A)** An address-of or by-pointer pass of that parameter must therefore use the raw box name `Ꮡrand`, not `Ꮡ`+value-alias `ᏑrandΔ1` (which is not in scope, CS0103) — `boxBaseName` returns the raw name for a pointer *parameter* specifically (unlike an escaping shadow-renamed *local*, whose box *is* the shadow form `ᏑiΔ1`). **(B)** When a function has **both** a pointer parameter and a shadow-renamed value parameter, its signature is rebuilt through a separate `updatedSignature` path (not the `generateParametersSignature` path fixed above), which had kept emitting the value param's raw name — so `EncryptOAEP(hash.Hash hash, …)` diverged from its `hashΔ1` uses again. That path now resolves value-param names through `v.varNames` too, matching the primary fix. Together these cleared 50 errors (crypto/rsa 23 + testing/quick 27). (Guarded by the `PackageShadowPointerParam` behavioral test.)
 
-## Return Tuples
+## Multi-Result Values and Comma-Ok Forms
 Many Go functions return either a single value or a "value, ok"/"value, error" tuple, where only the declared return arity selects the behavior. You cannot differentiate C# overloads by return type alone, so the runtime types expose a second overload distinguished by an extra discard argument. For map access, the "comma-ok" read routes through a two-value indexer using the discard sentinel `ꟷ`:
 
 ```csharp
@@ -1118,6 +1125,15 @@ storage with the cloned parameter — element reads and writes through the point
 correct. (One accepted edge, no stdlib hit: reassigning the *whole* array param after taking an
 element address leaves the pointer on the older backing array.) (Guarded by `DeferTypelessReturns`'
 `first` — element address of a `[4]byte` parameter, value vs Go.)
+
+## Strings (`@string` and `sstring`)
+Go's `string` is represented by golib [`@string`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/string.cs), not `System.String`. That is a semantic decision, not just a naming one: Go strings are immutable byte sequences, so `len`, indexing, ranging, concatenation, conversion to `[]byte`/`[]rune`, equality, and type assertions must all observe Go's UTF-8/byte model rather than C#'s UTF-16 string model. A zero-value `@string` is also null-safe and reads as `""`, which lets `default!` stand in for Go's zero value without sprinkling null checks through converted code.
+
+Plain Go string literals usually render as C# UTF-8 literals (`"..."u8`, a `ReadOnlySpan<byte>`) and are target-typed only at the boundary that needs an actual Go string. That gives allocation-free fast paths such as `[]byte("hi")` -> `slice<byte>("hi"u8)`, `@string s = "hi"u8`, and comparisons against `sstring` views. When the literal's bytes cannot be represented faithfully as source UTF-8 -- notably high `\xHH` escapes and greedy hex-escape runs -- the converter emits a byte-array-backed `@string` instead, so byte indexing and `len` stay Go-correct.
+
+Named string types are generated as real `[GoType("@string")]` wrappers. The generator supplies the Go string surface directly on the wrapper -- byte indexers, range/sub-slice behavior, `Length` for `len`, `ReadOnlySpan<byte>` bridging for `u8` literals, comparisons, and conversions through the underlying `@string` -- so code that declares `type Token string` keeps distinct-type behavior while still reading like a string in method bodies.
+
+The heap `@string` form is always the correctness fallback for `string([]byte)`: it copies bytes into an immutable string, matching Go when the value escapes or the source buffer can later mutate. The performance fast path is golib [`sstring`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/sstring.cs), a stack-only `readonly ref struct` view over a `ReadOnlySpan<byte>`. A local or expression-level `string([]byte)` conversion may emit `sstring` only when the converter can prove the view is read-only, non-escaping, and not observed after a source mutation; if that proof is too weak, the conversion stays `@string`. Because `sstring` is a `ref struct`, most missed escape cases are C# compile errors rather than silent aliasing bugs.
 
 A **built-in used as a generic type argument** is rendered in its golib form, the same as anywhere else — in particular Go `string` becomes golib `@string`, never C# `string` (`System.String`). This matters because the converter adds a `new()` constraint to every generic type parameter: `@string` is a struct with a public parameterless constructor and satisfies it, whereas `System.String` would violate it (CS0310), and assigning a string literal — emitted as a `u8` `ReadOnlySpan<byte>` — into such a field would fail (CS0029). So:
 
@@ -1481,7 +1497,7 @@ var m = new map<@string, nint>();
 var c = new channel<nint>(3);
 ```
 
-Map reads honor Go's nil-map and comma-ok semantics (see [The "nil" Value](#the-nil-value) and [Return Tuples](#return-tuples)).
+Map reads honor Go's nil-map and comma-ok semantics (see [Nil and Zero Values](#nil-and-zero-values) and [Multi-Result Values and Comma-Ok Forms](#multi-result-values-and-comma-ok-forms)).
 
 ### Named map types and constrained map access
 
@@ -1533,7 +1549,7 @@ ps.ᐸꟷ(new catжspeaker(c));   // records GoImplement<cat, speaker>(Pointer =
 A pointer-typed send value renders as its box (parity with the argument-position rule in
 `convExprList`), and a type-parameter element (`chan T` in generic code) keeps the bare emission.
 The string-literal empty-interface arm of the same helper is described under
-[Empty Interface](#empty-interface). (Guarded by `AnyStringLitChanSend` — a value impl and a pointer
+[Empty Interface (`any`)](#empty-interface-any). (Guarded by `AnyStringLitChanSend` — a value impl and a pointer
 impl sent through a `chan speaker`, method-dispatched on receive, output-compared vs Go.)
 
 ### Named channel types
@@ -4492,7 +4508,7 @@ output-compared vs Go.)
 
 The **receiver** flavor of the same shortcut (`*u` inside `func (u *unifier)` → the deref-aliased `u`) had the identical overreach: it keyed off the root identifier, so `*u.handles[x]` — a deref of a **pointer-valued map element** reached through the receiver (go/types unify.go's `return *u.handles[x]` and `*u.handles[x] = t`, `handles` a `map[*TypeParam]*Type`) — dropped the element deref entirely, returning/assigning the raw `ж<ΔType>` (CS0266 in both directions). The receiver shortcut is now gated on the operand *being* the receiver ident (object identity, like every other receiver-specific render), and the non-direct operand falls through to the tail deref: `u.handles[Ꮡx].ValueSlot` (`ValueSlot` because the element's pointee is an interface — reference-like reads and writes both persist through the real slot). (Guarded by the `RecvMapElementDeref` behavioral test — element deref read and write through the receiver, the write observed through the shared pointer, alongside the genuine `return *r` receiver copy, output-compared vs Go.)
 
-## Break / Continue Labels
+## Labeled Control Flow and Loop Variables
 Go restricts a label to immediately precede the enclosing statement (e.g. a `for`). Equivalent behavior is produced with a placed label and a `goto`:
 
 ### Break Label
@@ -4686,7 +4702,7 @@ Guarded by `CrossPkgUser` (`CheckFunc`/`gauge`/`meterBox` -- delegate, signature
 ## Source Generators
 Several Go semantics cannot be written directly in C#, so the converter emits compact, attributed partial declarations and lets a set of Roslyn source generators (`src/gen/go2cs-gen/`, referenced as an analyzer by every converted project) synthesize the rest at compile time. This keeps the visible converted code close to the Go original. The principal generators and attributes:
 
-* **`TypeGenerator`** — driven by `[GoType]`. Emits the body of a converted type: a struct's members and equality, a named numeric/slice/array/map/channel type's wrapper and operators (see [Untyped Constants and Named Numeric Types](#untyped-constants-and-named-numeric-types) and [Slices and Arrays](#slices-and-arrays)), and struct-embedding field/method promotion.
+* **`TypeGenerator`** — driven by `[GoType]`. Emits the body of a converted type: a struct's members and equality, a named numeric/slice/array/map/channel type's wrapper and operators (see [Named Numeric Types and Constant Contexts](#named-numeric-types-and-constant-contexts) and [Slices and Arrays](#slices-and-arrays)), and struct-embedding field/method promotion.
 * **`ImplementGenerator`** — wires up Go's duck-typed [interfaces](#interfaces): finds the concrete types that satisfy each `[GoType] partial interface` and emits the implementation glue and implicit conversions.
 * **`RecvGenerator`** — emits pointer-receiver overloads for receiver methods (`[GoRecv]`), so a method written against a value (`this ref T`) is also callable through the pointer/box form. A **variadic** method keeps its `params` in the generated overload: cryptobyte's `func (b *Builder) add(bytes ...byte)` emits the value form `add(this ref Builder b, params Span<byte> bytesʗp)`, but the `ж<Builder>` overload had dropped `params` (a bare `Span<byte>`), so a call passing individual elements through a box (`c.add(0xff)`, `c` a `ж<Builder>` closure parameter) could not bind it and fell back to the ref-receiver value method — CS1929. `GetMethodInfo` now preserves the `params` modifier (the Go variadic is always the last, non-receiver parameter, so it never lands on the `this ж<T>` receiver). Guarded by `VariadicBoxReceiver` (a `*sink` with `add(bytes ...byte)` called on a box — via a closure and directly — with zero, one, several, and spread arguments, values vs Go).
 * **`ImplicitConvGenerator`** — emits the implicit conversion operators that let a [named type](#type-definitions) and its underlying types be used interchangeably.
@@ -4694,7 +4710,7 @@ Several Go semantics cannot be written directly in C#, so the converter emits co
 
 Common attributes the converter emits for the generators (and tooling) to consume: `[GoType]` (type bodies), `[GoRecv]` (receiver methods), `[GoTag]` (struct field tags), `[GoPackage]` (package info), and the test-only `[GoTestMatchingConsoleOutput]`.
 
-## Manually-Converted Declarations (managed-referent pointers)
+## Manually-Converted Declarations
 
 Some Go declarations cannot be faithfully auto-converted because their semantics depend on hiding a managed pointer inside an integer. The canonical family is runtime's `guintptr`/`puintptr`/`muintptr` (`type guintptr uintptr` holding a `*g` the Go GC must not see): the CLR has the *opposite* constraint — a managed reference stored as a number is invisible to the .NET GC, so the referent can be collected or moved and the number is garbage. The managed conversion stores the `ж<T>` box **directly** and the numeric form never exists (model precedent: `core/sync/atomic`'s hand-rewritten `Pointer<T>`).
 
