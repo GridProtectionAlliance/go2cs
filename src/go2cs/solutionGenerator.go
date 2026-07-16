@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -67,11 +68,50 @@ func (c *StdLibConverter) GenerateSolutionFile() error {
 	return nil
 }
 
+// coreProjectRefRE matches an inter-package `<ProjectReference Include="$(go2csPath)core\...csproj">`
+// as emitted for a converted stdlib import (writeProjectFile / getImportPackageInfo always root such
+// references at `$(go2csPath)core\` with OS-native separators). The captured group is the reference's
+// solution-relative path; parseCoreProjectRefs normalizes it to forward slashes. The analyzer
+// reference is rooted at `$(go2csPath)gen\` and golib at `core\golib\`, so both are handled elsewhere.
+var coreProjectRefRE = regexp.MustCompile(`Include="\$\(go2csPath\)(core[\\/][^"]+\.csproj)"`)
+
+// parseCoreProjectRefs returns the solution-relative (forward-slash) path of every core\ package a
+// converted .csproj references via <ProjectReference>. It is how an entirely hand-owned package the
+// converter never emits into the fresh output (its C# is 100% [module: go.GoManualConversion]) is
+// still recovered for the solution: its dependents reference it, so it surfaces here even though its
+// own .csproj is absent from the output tree. `unsafe` is the canonical case.
+func parseCoreProjectRefs(csprojContent string) []string {
+	matches := coreProjectRefRE.FindAllStringSubmatch(csprojContent, -1)
+	refs := make([]string, 0, len(matches))
+
+	for _, m := range matches {
+		refs = append(refs, filepath.ToSlash(m[1]))
+	}
+
+	return refs
+}
+
+// importPathOf maps a solution-relative core package .csproj path back to its Go import path, e.g.
+// "core/unsafe/unsafe.csproj" -> "unsafe", "core/internal/abi/internal.abi.csproj" -> "internal/abi".
+func importPathOf(coreProject string) string {
+	return strings.TrimPrefix(path.Dir(coreProject), "core/")
+}
+
 // collectConvertedProjects walks the emitted core/ output tree and returns the
 // solution-relative (forward-slash) paths of every package .csproj, split into regular
 // package projects and *_test.csproj test projects. golib is excluded here — the caller
 // adds it explicitly so its reference is emitted even on a filtered run that produced no
 // core output.
+//
+// It also recovers any ENTIRELY HAND-OWNED package: one every converted dependent references but
+// that the converter never emits into the fresh output because its C# is 100% [module:
+// go.GoManualConversion] (so it is dropped from the convert set — `unsafe` is the canonical case).
+// Such a package leaves no .csproj for the walk to find, so it would silently fall out of the
+// generated solution and, downstream, never be published to NuGet — even though its dependents
+// cannot build without it. Every converted project that imports it still emits a
+// `$(go2csPath)core\...` ProjectReference to it, so the missing package is discovered from those
+// references and appended in its normal import-path position. This generalizes the explicit golib
+// append to any such package with no hardcoded names.
 func (c *StdLibConverter) collectConvertedProjects() (coreProjects []string, testProjects []string, err error) {
 	coreDir := filepath.Join(c.go2csPath, "core")
 
@@ -80,6 +120,11 @@ func (c *StdLibConverter) collectConvertedProjects() (coreProjects []string, tes
 		// lists golib + the analyzer, which is harmless and keeps the output deterministic.
 		return nil, nil, nil
 	}
+
+	// converted: solution-relative path of every package .csproj the walk actually found.
+	// referenced: every core\ package a converted .csproj points at via <ProjectReference>.
+	converted := make(map[string]bool)
+	referenced := make(map[string]bool)
 
 	walkErr := filepath.WalkDir(coreDir, func(path string, d fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -104,11 +149,20 @@ func (c *StdLibConverter) collectConvertedProjects() (coreProjects []string, tes
 			return nil
 		}
 
+		// Record the packages this project references so a referenced-but-unconverted (hand-owned)
+		// package can be recovered after the walk. A read error simply yields no references.
+		if data, readErr := os.ReadFile(path); readErr == nil {
+			for _, ref := range parseCoreProjectRefs(string(data)) {
+				referenced[ref] = true
+			}
+		}
+
 		// Per-package test projects (a Phase 4 artifact) are grouped separately. Nothing
 		// emits them today, so this branch is inert until the convention lands.
 		if strings.HasSuffix(d.Name(), "_test.csproj") {
 			testProjects = append(testProjects, rel)
 		} else {
+			converted[rel] = true
 			coreProjects = append(coreProjects, rel)
 		}
 
@@ -118,6 +172,31 @@ func (c *StdLibConverter) collectConvertedProjects() (coreProjects []string, tes
 	if walkErr != nil {
 		return nil, nil, fmt.Errorf("failed to scan converted projects under \"%s\": %w", coreDir, walkErr)
 	}
+
+	// Append every referenced-but-unconverted hand-owned package (see the doc comment): one whose
+	// .csproj the walk never saw, discovered because its dependents reference it. golib is referenced
+	// too but is added explicitly by the caller, so it is skipped here. Sorted so this function's own
+	// output is deterministic (GenerateSolutionFile re-sorts the combined list).
+	missing := make([]string, 0)
+
+	for ref := range referenced {
+		if converted[ref] || ref == golibProjectReference || strings.HasPrefix(ref, "core/golib/") {
+			continue
+		}
+
+		// Only recover a package the converter deliberately does NOT transpile — one that is not a
+		// node in the convert-set graph (scan-time-skipped, like the compiler pseudo-package
+		// `unsafe`, whose C# is entirely hand-owned). A package that IS a graph node but is missing
+		// from THIS output was merely excluded by a -stdlib package filter (its .csproj belongs to a
+		// full conversion, not this filtered one); adding it would point the solution at a project
+		// that is not in the output. With no graph wired up (unit tests), recover the reference.
+		if c.graph == nil || !c.graph.Contains(importPathOf(ref)) {
+			missing = append(missing, ref)
+		}
+	}
+
+	sort.Strings(missing)
+	coreProjects = append(coreProjects, missing...)
 
 	return coreProjects, testProjects, nil
 }

@@ -227,3 +227,200 @@ func TestCollectConvertedProjects(t *testing.T) {
 		t.Errorf("expected exactly [core/fmt/fmt_test.csproj] in test projects, got %v", testProjects)
 	}
 }
+
+// TestParseCoreProjectRefs checks that only $(go2csPath)core\ ProjectReferences are extracted
+// (normalized to forward slashes), while the analyzer's $(go2csPath)gen\ reference and NuGet
+// PackageReferences are ignored — the raw material for recovering hand-owned packages like unsafe.
+func TestParseCoreProjectRefs(t *testing.T) {
+	content := strings.Join([]string{
+		`<ProjectReference Include="$(go2csPath)gen\go2cs-gen\go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />`,
+		`<ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />`,
+		`<ProjectReference Include="$(go2csPath)core\errors\errors.csproj" />`,
+		`<ProjectReference Include="$(go2csPath)core\unsafe\unsafe.csproj" />`,
+		`<PackageReference Include="go.unsafe" Version="$(GoStdLibVersion)" />`,
+	}, "\r\n")
+
+	got := parseCoreProjectRefs(content)
+
+	want := map[string]bool{
+		"core/golib/golib.csproj":   true,
+		"core/errors/errors.csproj": true,
+		"core/unsafe/unsafe.csproj": true,
+	}
+
+	if len(got) != len(want) {
+		t.Fatalf("expected %d core refs, got %d: %v", len(want), len(got), got)
+	}
+
+	for _, ref := range got {
+		if !want[ref] {
+			t.Errorf("unexpected core ref %q (analyzer gen\\ ref and NuGet PackageReference must be ignored); got %v", ref, got)
+		}
+	}
+}
+
+// TestCollectConvertedProjectsRecoversReferencedManualPackage builds a fake output tree in which a
+// converted package references an entirely hand-owned package (unsafe) that the converter never
+// emits — so unsafe has NO .csproj on disk — and confirms collectConvertedProjects recovers unsafe
+// from the reference. This is the durable fix for go.unsafe silently falling out of the generated
+// solution (and thus never being published to NuGet). A referenced golib is still skipped here (the
+// caller adds it explicitly), and a normally-converted referenced package is not double-listed.
+func TestCollectConvertedProjectsRecoversReferencedManualPackage(t *testing.T) {
+	root := t.TempDir()
+
+	// bytes imports unsafe (absent from the fresh output) + errors (converted) + golib.
+	bytesCsproj := strings.Join([]string{
+		`<Project Sdk="Microsoft.NET.Sdk">`,
+		`  <ItemGroup>`,
+		`    <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />`,
+		`    <ProjectReference Include="$(go2csPath)core\errors\errors.csproj" />`,
+		`    <ProjectReference Include="$(go2csPath)core\unsafe\unsafe.csproj" />`,
+		`  </ItemGroup>`,
+		`</Project>`,
+	}, "\r\n")
+
+	files := map[string]string{
+		"core/bytes/bytes.csproj":   bytesCsproj, // converted, references unsafe
+		"core/errors/errors.csproj": "<Project />",
+		// NOTE: no core/unsafe/unsafe.csproj — the whole point (hand-owned, never emitted).
+	}
+
+	for rel, body := range files {
+		full := filepath.Join(root, filepath.FromSlash(rel))
+		if err := os.MkdirAll(filepath.Dir(full), 0755); err != nil {
+			t.Fatalf("mkdir: %v", err)
+		}
+		if err := os.WriteFile(full, []byte(body), 0644); err != nil {
+			t.Fatalf("write: %v", err)
+		}
+	}
+
+	converter := &StdLibConverter{go2csPath: root}
+
+	coreProjects, _, err := converter.collectConvertedProjects()
+
+	if err != nil {
+		t.Fatalf("collectConvertedProjects: %v", err)
+	}
+
+	count := func(target string) int {
+		n := 0
+		for _, p := range coreProjects {
+			if p == target {
+				n++
+			}
+		}
+		return n
+	}
+
+	// unsafe is recovered from the reference even though it has no .csproj on disk.
+	if count("core/unsafe/unsafe.csproj") != 1 {
+		t.Errorf("expected core/unsafe/unsafe.csproj to be recovered exactly once, got %v", coreProjects)
+	}
+
+	// The normally-converted packages are present exactly once (errors is both converted AND
+	// referenced — it must not be double-listed).
+	if count("core/bytes/bytes.csproj") != 1 {
+		t.Errorf("expected core/bytes/bytes.csproj once, got %v", coreProjects)
+	}
+	if count("core/errors/errors.csproj") != 1 {
+		t.Errorf("expected core/errors/errors.csproj exactly once (converted + referenced), got %v", coreProjects)
+	}
+
+	// golib is referenced but must NOT be added here — GenerateSolutionFile appends it explicitly.
+	if count("core/golib/golib.csproj") != 0 {
+		t.Errorf("golib must not be added by collectConvertedProjects (caller adds it), got %v", coreProjects)
+	}
+}
+
+// TestCollectConvertedProjectsFilteredRunSkipsOutOfFilterRefs guards the recovery gate: on a
+// filtered -stdlib run, a converted project references packages that are real convert-set nodes but
+// simply weren't emitted (out of the filter). Those must NOT be recovered (their .csproj belongs to
+// a full conversion, not this output), while a genuinely hand-owned package the converter never
+// transpiles (unsafe — absent from the convert-set graph) still must be. The distinguishing signal
+// is convert-set membership, so this drives collectConvertedProjects with a populated graph.
+func TestCollectConvertedProjectsFilteredRunSkipsOutOfFilterRefs(t *testing.T) {
+	root := t.TempDir()
+
+	// fmt is the only converted project in this filtered output; it references errors (a real
+	// convert-set package that was filtered out) and unsafe (hand-owned, never in the convert set).
+	fmtCsproj := strings.Join([]string{
+		`<Project Sdk="Microsoft.NET.Sdk">`,
+		`  <ItemGroup>`,
+		`    <ProjectReference Include="$(go2csPath)core\errors\errors.csproj" />`,
+		`    <ProjectReference Include="$(go2csPath)core\unsafe\unsafe.csproj" />`,
+		`  </ItemGroup>`,
+		`</Project>`,
+	}, "\r\n")
+
+	full := filepath.Join(root, filepath.FromSlash("core/fmt/fmt.csproj"))
+	if err := os.MkdirAll(filepath.Dir(full), 0755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+	if err := os.WriteFile(full, []byte(fmtCsproj), 0644); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+
+	// A convert-set graph that knows fmt and errors (both real stdlib packages) but NOT unsafe
+	// (scan-time-skipped, hand-owned) — the state after a -stdlib fmt filter.
+	graph := NewDependencyGraph()
+	graph.AddPackage("fmt", "")
+	graph.AddPackage("errors", "")
+
+	converter := &StdLibConverter{go2csPath: root, graph: graph}
+
+	coreProjects, _, err := converter.collectConvertedProjects()
+
+	if err != nil {
+		t.Fatalf("collectConvertedProjects: %v", err)
+	}
+
+	joined := strings.Join(coreProjects, "\n")
+
+	// unsafe (not a convert-set node) is recovered even on a filtered run.
+	if !strings.Contains(joined, "core/unsafe/unsafe.csproj") {
+		t.Errorf("expected unsafe to be recovered (not a convert-set node), got %v", coreProjects)
+	}
+
+	// errors (a convert-set node merely excluded by the filter) must NOT be phantom-added; its
+	// .csproj is not in this output, so referencing it would break the solution.
+	if strings.Contains(joined, "core/errors/errors.csproj") {
+		t.Errorf("out-of-filter errors must NOT be recovered (it is a convert-set node), got %v", coreProjects)
+	}
+}
+
+// TestBuildSolutionXMLPlacesRecoveredUnsafeCanonically confirms a recovered unsafe project lands in
+// its normal import-path folder with the deterministic folder Id and in canonical order (between the
+// sibling top-level packages /unique/ and /vendor/), matching the hand-added stopgap in the committed
+// go-src-converted.slnx so a regenerated + adopted solution is byte-identical for unsafe.
+func TestBuildSolutionXMLPlacesRecoveredUnsafeCanonically(t *testing.T) {
+	coreProjects := []string{
+		"core/unique/unique.csproj",
+		"core/unsafe/unsafe.csproj",
+		"core/vendor/golang.org/x/sys/vendor.golang.org.x.sys.csproj",
+		"core/golib/golib.csproj",
+	}
+
+	xml := buildSolutionXML(coreProjects, nil)
+
+	// The stopgap's committed folder Id for /unsafe/ (sha1 of "go2cs-slnx-folder:/unsafe/", v5 bits).
+	const unsafeFolder = "<Folder Name=\"/unsafe/\" Id=\"98f74097-975f-5e7b-8b80-18bf722660d9\">"
+
+	for _, want := range []string{
+		unsafeFolder,
+		"<Project Path=\"core/unsafe/unsafe.csproj\" />",
+	} {
+		if !strings.Contains(xml, want) {
+			t.Errorf("solution XML missing %q\n---\n%s", want, xml)
+		}
+	}
+
+	// Canonical order: /unique/ before /unsafe/ before /vendor/ (as in the committed slnx).
+	uniqueIdx := strings.Index(xml, "<Folder Name=\"/unique/\"")
+	unsafeIdx := strings.Index(xml, "<Folder Name=\"/unsafe/\"")
+	vendorIdx := strings.Index(xml, "<Folder Name=\"/vendor/\"")
+
+	if uniqueIdx < 0 || unsafeIdx < 0 || vendorIdx < 0 || !(uniqueIdx < unsafeIdx && unsafeIdx < vendorIdx) {
+		t.Errorf("expected /unique/ < /unsafe/ < /vendor/ (got %d, %d, %d)\n---\n%s", uniqueIdx, unsafeIdx, vendorIdx, xml)
+	}
+}
