@@ -786,11 +786,22 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					v.targetFile.WriteString(v.newline)
 				}
 
-				// golib's `iota` is a `const nint` — fine as an Untyped* wrapper initializer,
-				// but a TIGHTENED declaration may carry a different concrete type with no
-				// implicit nint path, so it keeps the folded value (`/* iota */` comment shows).
-				if srcVal == "iota" && !isTightened {
-					constVal = "iota"
+				// golib's builtin declares `const nint iota = 0`, so a const initialized by
+				// exactly the builtin `iota` references that constant directly when it can
+				// express the SAME value at an ACCEPTING emitted type: an UntypedInt wrapper
+				// takes the nint implicitly, and a declaration EMITTED at nint (explicit Go
+				// `int`, or tightened to it) matches golib's constant type exactly —
+				// `const nint stateInit = iota;` (compress/flate's stepState group). The `0`
+				// gate keeps LATER group positions folded (`x = iota` at position 1 folds to
+				// 1, which golib's constant cannot express), and any other emitted type —
+				// named wrappers, non-int widths — keeps the folded `/* iota */ N` form
+				// rather than casting golib's nint.
+				if constVal == "0" && (csTypeName == "nint" || csTypeName == "UntypedInt") && len(valueSpec.Values) >= i+1 {
+					if iotaIdent, ok := valueSpec.Values[i].(*ast.Ident); ok && iotaIdent.Name == "iota" {
+						if obj := v.info.Uses[iotaIdent]; obj != nil && obj.Parent() == types.Universe {
+							constVal = "iota"
+						}
+					}
 				}
 
 				// A plain integer-literal initializer keeps its Go source formatting when it is

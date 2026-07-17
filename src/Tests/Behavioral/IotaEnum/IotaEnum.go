@@ -183,6 +183,55 @@ func (t *Type) ArrayType() *ArrayType {
 	return (*ArrayType)(unsafe.Pointer(t))
 }
 
+// Bare-iota emission rule: golib's builtin declares `const nint iota = 0`. A const
+// initialized by exactly the builtin `iota` emits it bare only when the emitted C# type
+// matches golib's constant (nint — Go int, explicit or tightened) AND the folded
+// group-position value is 0; every other type (named wrappers like Kind above, other
+// widths like int64) and every later group position keeps the folded `/* iota */ N` form.
+const (
+	seqFirst  int = iota // position 0 at int -> `const nint seqFirst = iota`
+	seqSecond            // implicit repetition -> folded 1
+	seqAgain  int = iota // later position, explicit iota -> `/* iota */ 2`
+)
+
+const (
+	wideFirst int64 = iota // position 0 but int64 != nint -> `/* iota */ 0`
+	wideNext
+)
+
+const (
+	rawZero = iota // untyped at package level (never tightens) -> `UntypedInt rawZero = iota`
+	rawOne  = iota // later position: value 1 is not golib's iota -> `/* iota */ 1`
+)
+
+// stateMachine mirrors compress/flate's function-local const group: every use of the
+// state consts below is a concrete int context, so the group TIGHTENS to nint and
+// position 0 emits bare `iota`; wideLocal's only use is int64, so it tightens to a
+// non-nint type and keeps the folded form.
+func stateMachine(step int) string {
+	const (
+		stateInit = iota // tightens to nint -> `const nint stateInit = iota`
+		stateDict
+	)
+
+	const wideLocal = iota // tightens to int64 -> `const int64 wideLocal = /* iota */ 0`
+	var offset int64 = wideLocal
+
+	switch step {
+	case stateInit:
+		return fmt.Sprintf("init[%d]", offset)
+	case stateDict:
+		return fmt.Sprintf("dict[%d]", offset)
+	}
+	return "unknown"
+}
+
 func main() {
 	fmt.Printf("Slice Kind Value: %s [%d]\n", Slice.String(), int(Slice))
+	fmt.Println(seqFirst, seqSecond, seqAgain)
+	fmt.Println(wideFirst, wideNext)
+	fmt.Println(rawZero, rawOne)
+	fmt.Println(stateMachine(0))
+	fmt.Println(stateMachine(1))
+	fmt.Println(stateMachine(2))
 }

@@ -190,8 +190,40 @@ public static ж<ΔArrayType> ArrayType(this ж<Type> Ꮡt) {
     return (ж<ΔArrayType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
 }
 
+internal const nint seqFirst = iota;
+internal const nint seqSecond = 1;
+internal const nint seqAgain = /* iota */ 2;
+
+internal const int64 wideFirst = /* iota */ 0;
+internal const int64 wideNext = 1;
+
+internal static readonly UntypedInt rawZero = iota;
+internal static readonly UntypedInt rawOne = /* iota */ 1;
+
+internal static @string stateMachine(nint step) {
+    const nint stateInit = iota;
+    const nint stateDict = 1;
+    const int64 wideLocal = /* iota */ 0;
+    int64 offset = wideLocal;
+    var exprᴛ1 = step;
+    if (exprᴛ1 == stateInit) {
+        return fmt.Sprintf("init[%d]"u8, offset);
+    }
+    if (exprᴛ1 == stateDict) {
+        return fmt.Sprintf("dict[%d]"u8, offset);
+    }
+
+    return "unknown"u8;
+}
+
 internal static void Main() {
     fmt.Printf("Slice Kind Value: %s [%d]\n"u8, Slice.String(), (nint)(uint8)Slice);
+    fmt.Println(seqFirst, seqSecond, seqAgain);
+    fmt.Println(wideFirst, wideNext);
+    fmt.Println(rawZero, rawOne);
+    fmt.Println(stateMachine(0));
+    fmt.Println(stateMachine(1));
+    fmt.Println(stateMachine(2));
 }
 
 } // end main_package
