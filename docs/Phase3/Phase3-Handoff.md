@@ -1572,7 +1572,11 @@
   The user hand-finishes certain stdlib files in `src/core` marked `[module: GoManualConversion]` (the
   converter skips re-converting them) or named `*_impl.cs`. A fresh reconvert into an empty scratchpad
   dir does NOT trigger the skip (it checks the destination file), so the overlay must re-copy them —
-  `overlay.sh` now does this after the cs/csproj copy. **The canonical unsafe.Pointer model is here:**
+  `overlay.sh` now does this after the cs/csproj copy. Better: SEED the scratch dir with the marked
+  hand-owned `.cs` files BEFORE reconverting — the marker gate then engages (skips them) and the converter
+  emits refreshed `<name>.cs.auto` review siblings beside them (non-compiled auto-conversion reference for
+  upgrade-time diffing, committed in `src/go-src-converted`; 2026-07-16). The overlay copy must include
+  `*.cs.auto` — a bare `*.cs` glob misses them. **The canonical unsafe.Pointer model is here:**
   `core/sync/atomic/type.cs` stores `atomic.Pointer<T>` as a managed `ж<T>` (Volatile/Interlocked +
   `nilCanon`), NOT a `nuint` round-trip; `reflectlite/value.cs` uses `object? m_target`. *Where Go
   stores a managed pointer via `unsafe.Pointer`, the C# model holds the `ж<T>`/`object` DIRECTLY* — the
@@ -1641,9 +1645,14 @@ layer becomes measurable. Concretely:
 #    first if any src/go2cs/*.go changed: (cd src/go2cs && go build -o bin/go2cs.exe .)
 #    Conversion is sequential and byte-deterministic (~3.5 min; per-file work is sub-second, the
 #    cost is the type graph load).
+#    FIRST seed the marked hand-owned files into the scratch output so the GoManualConversion gate
+#    engages (it probes the DESTINATION .cs) and the <name>.cs.auto review siblings get regenerated:
+grep -rlE '\[\s*module\s*:\s*(go\.)?GoManualConversion' src/go-src-converted --include='*.cs' |
+  while read f; do rel="${f#src/go-src-converted/}"; mkdir -p "scratchpad/recon/core/$(dirname "$rel")"; cp "$f" "scratchpad/recon/core/$rel"; done
 bin/go2cs.exe -stdlib -comments -go2cspath scratchpad/recon   # writes scratchpad/recon/core/<pkg>
 
-# 2. Overlay fresh .cs + regenerated .csproj onto src/go-src-converted (keeps golib shared in core).
+# 2. Overlay fresh .cs + .cs.auto + regenerated .csproj onto src/go-src-converted (keeps golib shared
+#    in core; the .cs.auto siblings are COMMITTED — refresh them, don't drop them).
 bash scratchpad/overlay.sh scratchpad/recon/core      # recreate overlay.sh from the measurement-loop memory
 
 # 3. Build a package (deps build first; a failed dep's dependents are SKIPPED). RUN FROM THE REPO ROOT

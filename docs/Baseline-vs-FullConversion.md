@@ -79,7 +79,10 @@ full auto-output), so restoring it realigns with the original design.
    files are hand-owned in `src/core/<pkg>`. For a full-conversion **milestone** to be complete, these must
    be overlaid into their matching `src/go-src-converted/<pkg>` locations — that overlaid tree (auto-output
    + manual/asm stubs) **is the real final state.** `overlay.sh` already re-copies the `src/core` manual
-   files after the cs/csproj copy; during these final compiling stages, do this **religiously**.
+   files after the cs/csproj copy; during these final compiling stages, do this **religiously**. The overlay
+   must also copy the `<name>.cs.auto` review siblings the reconvert produces (a bare `*.cs` glob misses
+   them) — and a reconvert only *produces* them when its output dir was seeded with the marked hand-owned
+   files first, since the marker gate probes the destination `.cs` (see *Hand-owning a package…* below).
 
 ## The corrected end-state (2026-07-01) — compile first, operate later
 
@@ -158,6 +161,21 @@ one per file across a package is fine. The scanner wants it **before the first c
 it resolves without a `using go;`). **Verify** a whole-file override survives by reconverting the package into
 a dir seeded with the hand-written file and confirming it stays byte-identical
 (`go2cs -stdlib -go2cspath <seeded-root> <pkg>` → the marked `.cs` is untouched).
+
+**Upgrade-time review — the `<name>.cs.auto` sibling (2026-07-16).** A marker-skipped file would otherwise
+leave NO auto-converted output at all, so a Go-version upgrade would have nothing to diff the hand-owned C#
+against. The converter therefore emits a non-compiled **`<name>.cs.auto`** sibling beside every marked
+`<name>.cs` it skips (`emitAutoConversionSiblings`, `src/go2cs/autoSiblingOperations.go`) — the converter's
+best-effort auto conversion of the same `.go`, for review only. It need not compile and is invisible to the
+build: generated csprojs compile `<Compile Include="*.cs" />` only, which cannot match a name ending in
+`.auto`. The pass runs as the LAST step of a package's conversion (after the `.cs` set, csproj,
+`package_info.cs`, and `package_init.cs` are written), so it adds only `.cs.auto` files and cannot alter any
+other emitted byte. Siblings are **committed** in `src/go-src-converted/<pkg>` and refreshed by reconverts —
+but the gate probes the DESTINATION `.cs`, so a reconvert only produces them when its output dir is seeded
+with the marked files first (see *§5* above). `*_impl.cs` companions have no matching `.go`, so they get no
+sibling; `unsafe` is never queued by `-stdlib` (compiler-intrinsic, `stdLibConverter.go`), so
+`unsafe/unsafe.cs` has none either. Single-file conversion mode (`go2cs example.go`) emits no siblings — the
+marker gate is not effective there to begin with.
 
 The rule from *§5* still holds: canonical hand-owned files live under `src/core/<pkg>` and are overlaid into
 `src/go-src-converted/<pkg>` (`overlay.sh`) — with the marker, an overlaid whole-file override then survives

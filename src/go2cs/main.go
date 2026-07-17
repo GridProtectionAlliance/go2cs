@@ -914,6 +914,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		packageDoc = extractPackageDoc(pkg.Syntax)
 
 		files := []FileEntry{}
+		markedFiles := []FileEntry{}
 		fset := pkg.Fset
 		packageTypes := pkg.Types
 		info := pkg.TypesInfo
@@ -985,12 +986,37 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 						sstringEligible:  map[types.Object]bool{},
 						sstringConvExprs: map[*ast.CallExpr]bool{},
 					})
+				} else if isDir {
+					// Manually-converted destination: the source .go is dropped from the convert
+					// set, but a non-compiled `<name>.cs.auto` review sibling is still emitted
+					// after all package artifacts are written — see emitAutoConversionSiblings.
+					markedFiles = append(markedFiles, FileEntry{
+						file:             file,
+						filePath:         path,
+						identEscapesHeap: map[types.Object]bool{},
+						sstringEligible:  map[types.Object]bool{},
+						sstringConvExprs: map[*ast.CallExpr]bool{},
+					})
 				}
 			}
 		}
 
 		if len(files) == 0 {
-			showMessage("Skipping conversion: no target Go source files found for conversion in input path \"%s\"", packageInputPath)
+			if len(markedFiles) > 0 {
+				// FULLY hand-owned package: nothing to (re)convert normally, but still emit the
+				// `.cs.auto` review siblings. Run the whole-package analyses the sibling
+				// conversion depends on first — safe, since every package-level global they and
+				// the sibling visits mutate is reset at the top of the next package iteration.
+				performNameCollisionAnalysis(pkg)
+				collectCaptureModeMethods(pkg)
+				collectTypeSpecRHS(pkg)
+				collectMovedInitVars(fset, packageTypes, info, pkg.Syntax)
+				collectPublicizedTypes(packageTypes)
+				emitAutoConversionSiblings(markedFiles, fset, packageTypes, info, map[*ast.Ident]string{}, map[string]*types.Var{}, packageOutputPath, options)
+			} else {
+				showMessage("Skipping conversion: no target Go source files found for conversion in input path \"%s\"", packageInputPath)
+			}
+
 			continue
 		}
 
@@ -1613,6 +1639,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				log.Fatalf("Failed to write package init file for \"%s\": %s\n", packageOutputPath, err)
 			}
 		}
+
+		// Emit non-compiled `<name>.cs.auto` review siblings for manually-converted files. This
+		// MUST stay the LAST step of the package iteration: every shared artifact (the .cs set,
+		// .csproj, package_info.cs, package_init.cs, dynamic-marker resolution) is already
+		// written, and all package-level state is reset at the top of the next iteration, so the
+		// isolated conversions cannot alter any other emitted byte.
+		emitAutoConversionSiblings(markedFiles, fset, packageTypes, info, globalIdentNames, globalScope, packageOutputPath, options)
 	}
 }
 
