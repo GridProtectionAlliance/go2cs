@@ -385,10 +385,16 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		if err != nil {
 			return nil, nil, err
 		}
-		if !manual {
-			// The copy shares the analysis maps with the allEntries element (maps are references).
-			selected = append(selected, *entry)
-		}
+
+		// A hand-owned (GoManualConversion-marked) test `.cs` is never overwritten, but its
+		// source stays in the convert set — its visit feeds package-wide emission state that
+		// sibling files depend on; only its EMISSION redirects, to the non-compiled `.cs.auto`
+		// review sibling. Same semantics as processConversion's marked-file flow — dropping the
+		// visit corrupts sibling emission.
+		// The copy shares the analysis maps with the allEntries element (maps are references).
+		selectedEntry := *entry
+		selectedEntry.manualConversion = manual
+		selected = append(selected, selectedEntry)
 	}
 
 	if len(selected) == 0 {
@@ -418,7 +424,8 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	collectPublicizedTypes(pkg.Types)
 	preloadImportedTypeAliases(allEntries, options)
 
-	var outputNames []string
+	var compileNames []string // emitted test .cs basenames — the csproj's compile items
+	var resolveNames []string // every emission (incl. .cs.auto review siblings) for marker resolution
 
 	convert := func(entry FileEntry) (err error) {
 		if !options.debugMode {
@@ -432,13 +439,31 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		visitor := newFileVisitor(pkg.Fset, pkg.Types, pkg.TypesInfo, options, globalIdentNames, globalScope, entry)
 		visitor.visitFile(entry.file)
 
-		outputName := filepath.Join(outputPath, strings.TrimSuffix(filepath.Base(entry.filePath), ".go")+".cs")
+		baseName := strings.TrimSuffix(filepath.Base(entry.filePath), ".go")
+
+		if entry.manualConversion {
+			// Hand-owned destination: the visit above already fed this file's package-wide state;
+			// emit the auto conversion to the `.cs.auto` review sibling, leaving the marked `.cs`
+			// untouched. The HAND-OWNED `.cs` is the compile item; the `.cs.auto` sibling never is.
+			outputName := filepath.Join(outputPath, baseName+".cs.auto")
+			if writeErr := writeAutoConversionSibling(outputName, baseName, visitor.targetFile.String()); writeErr != nil {
+				showWarning("%s", writeErr)
+			}
+
+			projectImports.UnionWithSet(visitor.importQueue)
+			compileNames = append(compileNames, baseName+".cs")
+			resolveNames = append(resolveNames, outputName)
+			return nil
+		}
+
+		outputName := filepath.Join(outputPath, baseName+".cs")
 		if writeErr := visitor.writeOutputFile(outputName); writeErr != nil {
 			return writeErr
 		}
 
 		projectImports.UnionWithSet(visitor.importQueue)
-		outputNames = append(outputNames, filepath.Base(outputName))
+		compileNames = append(compileNames, filepath.Base(outputName))
+		resolveNames = append(resolveNames, outputName)
 		return nil
 	}
 
@@ -448,13 +473,9 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 		}
 	}
 
-	absNames := make([]string, 0, len(outputNames))
-	for _, name := range outputNames {
-		absNames = append(absNames, filepath.Join(outputPath, name))
-	}
-	resolveDynamicTypeMarkers(absNames)
+	resolveDynamicTypeMarkers(resolveNames)
 
-	return outputNames, NewHashSet(projectImports.Keys()), nil
+	return compileNames, NewHashSet(projectImports.Keys()), nil
 }
 
 // appendExternalTestPackageClass appends the external test package's [GoPackage] partial class
@@ -831,6 +852,12 @@ func writeTestProject(projectFile, projectName, namespace string, productionFile
 // hand-owned core/testing shim, added as fixed references by the template) are the only core
 // references. The mapping is deterministic — no filesystem probing — so a missing converted
 // project surfaces as a loud MSBuild resolve error naming the exact expected path.
+//
+// KNOWN ITEM (F15b, deferred): a TEST-ONLY dependency that itself imports "testing" (e.g.
+// internal/testenv, used by the strings/sort/bytes suites) resolves here to the auto-converted
+// go-src-converted/testing — colliding with the hand-owned shim's [GoPackage("testing")] classes
+// in the same build. Needs a ruling before such a package converts: exclude go-src-converted/
+// testing in favor of the shim, or hand-own a testenv mini-shim (see the first-proof plan).
 func resolveTestProjectReference(info PackageInfo) string {
 	if info.Err != nil || info.ProjectReference == "" || !info.IsStdLib {
 		return info.ProjectReference
@@ -972,9 +999,11 @@ func conversionOptionsDigest(options Options) string {
 
 // runtimeSourcesDigest hashes the hand-owned runtime the converted tests build against (golib +
 // the go.testing shim) as staged under the converter's go2csPath output root (F7): a runtime
-// behavior change invalidates prior comparisons. Best-effort by design — in a dev tree the
-// runtime is resolved by MSBuild from $(SolutionDir), not the converter's output root, so the
-// sources may not be present; the constant "runtime-unavailable" keeps the digest deterministic.
+// behavior change invalidates prior comparisons. KNOWN ITEM (review #5, accepted): best-effort
+// by design — in a dev tree the runtime is resolved by MSBuild from $(SolutionDir), not the
+// converter's output root, so the sources may not be present and a runtime edit then does NOT
+// invalidate the manifest ("runtime-unavailable" keeps the digest deterministic either way);
+// deployed (deploy-core) and -go2cspath-staged layouts get full invalidation.
 func runtimeSourcesDigest(options Options) string {
 	var files []string
 
@@ -1062,7 +1091,12 @@ func writeNoTestsManifest(production *packages.Package, inputPath, outputPath st
 		Fixtures: []string{}, Tests: []testDeclaration{}, Dependencies: []string{}, Capabilities: supportedTestCapabilities(),
 		RequiredCapabilities: []string{}, UnsupportedCapabilities: []string{},
 	}
-	manifest.InputDigest, _ = testInputDigest(inputPath, outputPath, options, manifest.ConverterRevision)
+	digest, err := testInputDigest(inputPath, outputPath, options, manifest.ConverterRevision)
+	if err != nil {
+		return fmt.Errorf("compute no-tests manifest input digest: %w", err)
+	}
+	manifest.InputDigest = digest
+
 	return writeJSONFile(filepath.Join(outputPath, testManifestFileName), manifest)
 }
 
@@ -1405,7 +1439,14 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	if csErr != nil {
 		result.Matched = false
 		if result.Status != "infrastructure-blocked" {
-			result.Status = "conversion-blocked"
+			// Parsed events prove the converted host RAN: a nonzero exit with results is a
+			// genuine test failure (`failing`). `conversion-blocked` is reserved for actual
+			// conversion/build/run infrastructure causes — the host produced no events at all.
+			if len(csResults) > 0 {
+				result.Status = "failing"
+			} else {
+				result.Status = "conversion-blocked"
+			}
 		}
 		result.Errors = append(result.Errors, "converted tests: "+csErr.Error())
 	}

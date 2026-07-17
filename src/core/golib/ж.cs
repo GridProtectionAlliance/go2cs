@@ -176,7 +176,15 @@ public interface IPointer<T>
 /// </remarks>
 public class ж<T> : IPointer<T>, IEquatable<ж<T>>
 {
-    private readonly (object, FieldRefFunc<T>)? m_structFieldRef;
+    // Item3 is the field's IDENTITY token for pointer equality: the ORIGINAL (typically static,
+    // compiler-cached) field accessor delegate when the field ref was created through the typed
+    // `of(FieldRefFunc<T, TElem>)` overload — that overload WRAPS the accessor in a per-call
+    // closure (getFieldRef), so comparing the wrapper delegates made every distinct `&x.field`
+    // box unequal (`&x.f == &x.f` was FALSE, violating Go pointer identity; it also broke the
+    // address-keyed runtime semaphores in the hand-owned sync/internal-poll implementations).
+    // Delegate.Equals compares method+target, so two conversions of the same accessor method
+    // group compare equal across call sites.
+    private readonly (object, FieldRefFunc<T>, Delegate)? m_structFieldRef;
     private readonly (IArray, int)? m_arrayIndexRef;
     private readonly bool m_isNull;
     private T m_val;
@@ -196,10 +204,12 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         m_val = value;
     }
 
-    // Create a new reference to a field in a heap allocated struct
-    internal ж(object source, FieldRefFunc<T> fieldRefFunc)
+    // Create a new reference to a field in a heap allocated struct. fieldIdentity carries the
+    // original accessor delegate when fieldRefFunc is a per-call closure wrapper (see the typed
+    // `of(...)` overload) so pointer equality compares the FIELD, not the wrapper instance.
+    internal ж(object source, FieldRefFunc<T> fieldRefFunc, Delegate? fieldIdentity = null)
     {
-        m_structFieldRef = (source, fieldRefFunc);
+        m_structFieldRef = (source, fieldRefFunc, fieldIdentity ?? fieldRefFunc);
         m_val = default!;
     }
 
@@ -243,7 +253,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
             // Get reference to struct field
             if (m_structFieldRef is not null)
             {
-                (object source, FieldRefFunc<T> fieldRefFunc) = m_structFieldRef!.Value;
+                (object source, FieldRefFunc<T> fieldRefFunc, Delegate _) = m_structFieldRef!.Value;
                 return ref fieldRefFunc(source);
             }
 
@@ -284,7 +294,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
 
             if (m_structFieldRef is not null)
             {
-                (object source, FieldRefFunc<T> fieldRefFunc) = m_structFieldRef!.Value;
+                (object source, FieldRefFunc<T> fieldRefFunc, Delegate _) = m_structFieldRef!.Value;
                 return ref fieldRefFunc(source);
             }
 
@@ -329,7 +339,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
             // Get reference to struct field
             if (m_structFieldRef is not null)
             {
-                (object source, FieldRefFunc<T> _) = m_structFieldRef!.Value;
+                (object source, FieldRefFunc<T> _, Delegate _) = m_structFieldRef!.Value;
                 return new PinnedBuffer(Value, Marshal.SizeOf(source));
             }
 
@@ -354,7 +364,9 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     /// <inheritdoc/>
     public ж<TElem> of<TElem>(FieldRefFunc<T, TElem> fieldRefFunc)
     {
-        return new ж<TElem>(this, getFieldRef);
+        // fieldRefFunc doubles as the equality-identity token: getFieldRef is a NEW closure per
+        // call, but the accessor delegate compares equal across call sites (same method group).
+        return new ж<TElem>(this, getFieldRef, fieldRefFunc);
 
         ref TElem getFieldRef(object structPtr)
         {
@@ -470,15 +482,20 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         // container/ring's `Ring.next *Ring`), since the struct's own Equals compares those fields.
 
         // Pointer into a struct field (`Ꮡx.of(T.ᏑField)`): same source object and field accessor.
+        // The comparison uses the field IDENTITY token (Item3) — the original accessor delegate —
+        // not the stored ref function, which the typed `of(...)` overload wraps in a PER-CALL
+        // closure: comparing wrappers made every distinct `&x.field` box unequal, so `&x.f == &x.f`
+        // was false (Go pointer identity violated) and the address-keyed runtime semaphores in the
+        // hand-owned sync/internal-poll implementations never paired release with acquire.
         if (m_structFieldRef is not null || other.m_structFieldRef is not null)
         {
             if (m_structFieldRef is null || other.m_structFieldRef is null)
                 return false;
 
-            (object source1, FieldRefFunc<T> fieldRef1) = m_structFieldRef.Value;
-            (object source2, FieldRefFunc<T> fieldRef2) = other.m_structFieldRef.Value;
+            (object source1, FieldRefFunc<T> _, Delegate fieldId1) = m_structFieldRef.Value;
+            (object source2, FieldRefFunc<T> _, Delegate fieldId2) = other.m_structFieldRef.Value;
 
-            return ReferenceEquals(source1, source2) && fieldRef1.Equals(fieldRef2);
+            return ReferenceEquals(source1, source2) && fieldId1.Equals(fieldId2);
         }
 
         // Pointer into an array/slice element: same backing array and same index.

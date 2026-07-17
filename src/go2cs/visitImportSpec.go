@@ -120,9 +120,26 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 	}
 
 	v.importQueue.Add(v.currentImportPath)
-	v.loadImportedTypeAliases(v.currentImportPath)
+
+	// -tests: an EXTERNAL package test (package <name>_test) imports the package under test, but
+	// its converted C# compiles INTO the test assembly that RECOMPILES the production sources
+	// (TestingInfrastructureRequirements §2.1/§4.2) — the import must bind to that local partial
+	// class, never back at the production project. Skip the imported-alias load (the package's
+	// types are local here, and its exported metadata is already seeded into package_test_info.cs)
+	// and rebind the emitted using target to the local class. The substitution PRECEDES the alias
+	// branches below so every form binds identically — including the dot-import form
+	// (`. "unicode/utf8"` → `using static <ns>.<name>_package;`) the first-proof package requires.
+	isPackageUnderTest := v.options.testPackagePath != "" && v.currentImportPath == v.options.testPackagePath
+
+	if !isPackageUnderTest {
+		v.loadImportedTypeAliases(v.currentImportPath)
+	}
 
 	importPath := rootQualifyIfAmbiguous(convertImportPathToNamespace(v.currentImportPath, PackageSuffix))
+
+	if isPackageUnderTest {
+		importPath = fmt.Sprintf("%s.%s", packageNamespace, getSanitizedImport(v.options.testPackageName+PackageSuffix))
+	}
 
 	// The canonical C# alias for this package — what an unaliased import emits and what getTypeName's
 	// short-form type references (`pkg.Type`) resolve through. Record the import path when THIS import

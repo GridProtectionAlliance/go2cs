@@ -332,6 +332,34 @@ public class TestingRuntimeTests
         Assert.IsFalse(verboseSeen);
     }
 
+    [TestMethod]
+    public void FieldPointerEqualityPairsAcrossOfCalls()
+    {
+        // Guards the golib pointer-identity fix the Phase-4 test runtime depends on: the typed
+        // ж.of(...) overload wraps its accessor in a per-call closure, and comparing the wrappers
+        // made every distinct `&x.field` box unequal — `&x.f == &x.f` was FALSE (violating Go
+        // pointer identity) and the address-keyed runtime semaphores in the hand-owned
+        // sync/internal-poll implementations never paired Semrelease with Semacquire (the
+        // ConvertedTestHarness os.ReadFile close hang). Equality now compares the field's
+        // identity token: same box + same accessor = equal pointer, across call sites.
+        ж<SemaHolder> box = new(new SemaHolder());
+        ж<uint> first = box.of<uint>(SemaField);
+        ж<uint> second = box.of<uint>(SemaField);
+
+        Assert.IsTrue(first.Equals(second));
+        Assert.AreEqual(first.GetHashCode(), second.GetHashCode());
+
+        ж<SemaHolder> otherBox = new(new SemaHolder());
+        Assert.IsFalse(first.Equals(otherBox.of<uint>(SemaField)));
+    }
+
+    private struct SemaHolder
+    {
+        public uint Sema;
+    }
+
+    private static ref uint SemaField(ref SemaHolder instance) => ref instance.Sema;
+
     private static int RunSingle(string name, ActionRef action)
     {
         TestRegistry registry = new("runtime/failure", []);

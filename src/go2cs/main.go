@@ -662,6 +662,9 @@ func main() {
 	goPathCmd := commandLine.String("gopath", goPath, "Path to Go path directory")
 	go2csPathCmd := commandLine.String("go2cspath", go2csPath, "Path to C# converted code")
 	convertStdLibCmd := commandLine.Bool("stdlib", false, "Convert Go standard library")
+	convertTestsCmd := commandLine.Bool("tests", false, "Convert eligible Go package tests and emit a runnable test host project")
+	testActionCmd := commandLine.String("test-action", "convert", "Converted-test action: convert, build, run, compare, or all")
+	testTimeoutCmd := commandLine.Duration("test-timeout", 2*time.Minute, "Timeout for each converted-test child process (build/run/compare)")
 	var recurseVal recurseMode
 	commandLine.Var(&recurseVal, "recurse", "Recursively convert an end-user module and its third-party dependencies (references the pre-converted standard library); use -recurse=nuget to reference the published go2cs NuGet packages (go.<pkg>/go.lib/go.gen) instead of local project references")
 	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), "Target platform for conversion, format: os/arch")
@@ -715,6 +718,8 @@ Examples:
   go2cs example.go
   go2cs -cgo=true input_dir output_dir
   go2cs package_dir
+  go2cs -tests package_dir                  # Convert production sources and package tests
+  go2cs -tests -test-action all package_dir # Convert, build, run, and compare with go test
   go2cs -stdlib                           # Convert the entire Go standard library
   go2cs -stdlib fmt io/ioutil strings     # Convert specific standard library packages
   go2cs -recurse module_dir               # Convert a module + its third-party deps (references stdlib)
@@ -728,6 +733,9 @@ Examples:
 		goPath:              *goPathCmd,
 		go2csPath:           *go2csPathCmd,
 		convertStdLib:       convertStdLib,
+		convertTests:        *convertTestsCmd,
+		testAction:          strings.ToLower(strings.TrimSpace(*testActionCmd)),
+		testTimeout:         *testTimeoutCmd,
 		recurse:             recurseVal.enabled,
 		nugetRefs:           recurseVal.nuget,
 		targetPlatform:      *targetPlatformCmd,
@@ -738,6 +746,25 @@ Examples:
 		parseCgoTargets:     *parseCgoTargetsCmd,
 		showParseTree:       *showParseTreeCmd,
 		debugMode:           *debugModeCmd,
+	}
+
+	if options.convertTests {
+		// -tests and -recurse compose badly today (the recursive module walk has its own
+		// conversion driver and output routing); convert the module first, then its packages'
+		// tests individually. Revisit when a recursive test-conversion mode is designed.
+		if options.recurse {
+			log.Fatalln("-tests cannot be combined with -recurse: convert the module first, then convert its package tests individually")
+		}
+
+		switch options.testAction {
+		case "convert", "build", "run", "compare", "all":
+		default:
+			log.Fatalf("Invalid -test-action %q: expected convert, build, run, compare, or all\n", options.testAction)
+		}
+
+		if options.testTimeout <= 0 {
+			log.Fatalln("-test-timeout must be greater than zero")
+		}
 	}
 
 	// Load custom .csproj template if specified
@@ -811,7 +838,18 @@ Examples:
 				log.Fatalf("Recursive module conversion failed: %s\n", err)
 			}
 		} else {
-			processConversion(inputFilePath, isDir, outputFilePath, options)
+			// -tests: convert-and-hook runs for the convert/all actions (processConversion ends
+			// by converting the package's tests); build/run/compare act on EXISTING artifacts
+			// (manifest-validated) without reconverting.
+			if !options.convertTests || options.testAction == "convert" || options.testAction == "all" {
+				processConversion(inputFilePath, isDir, outputFilePath, options)
+			}
+
+			if options.convertTests && options.testAction != "convert" {
+				if err := executeTestAction(inputFilePath, outputFilePath, options); err != nil {
+					log.Fatalf("Converted test action failed: %v\n", err)
+				}
+			}
 		}
 	}
 }
@@ -1091,6 +1129,14 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// NOTE: `.cs.auto` review siblings for manually-converted files were emitted inline by the
 		// file-visit loop above — marked files convert WITH the package (same order, same analyses)
 		// so their package-wide state reaches sibling files, and only their write target differs.
+	}
+
+	// -tests: with the production conversion complete (its package_info.cs is the seed for the
+	// test metadata), convert the package's _test.go variants into the colocated test project.
+	if options.convertTests {
+		if err := processTestConversion(inputFilePath, outputFilePath, options); err != nil {
+			log.Fatalf("Failed to convert package tests in %q: %v\n", inputFilePath, err)
+		}
 	}
 }
 
