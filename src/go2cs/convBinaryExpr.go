@@ -302,10 +302,114 @@ func (v *Visitor) constExprHasBeyondInt64UntypedOperatorSubexpr(expr ast.Expr) b
 	return found
 }
 
+// floatContextConstLiteral reports the folded literal form of a FLOAT-typed compile-time constant
+// expression built purely from integer literals whose value falls OUTSIDE the C# int32 range, or ""
+// otherwise. Go evaluates such a constant in exact arithmetic and converts the RESULT to the float
+// type, but the emitted C# operand form is all `int` literals, so C# evaluates the operators in
+// int32 — and a float target makes the damage SILENT rather than a compile error: `var hf float64 =
+// 1 << 63` emits `1 << (int)(63)`, and C# MASKS a shift count to 5 bits (63 & 31 = 31) → int.MinValue;
+// `hf / (1 << 60)` divides by 2^28 (60 & 31 = 28) instead of 2^60. Emitting the Go-evaluated value as
+// a float literal (`9223372036854775808D`) computes it correctly. This is the float counterpart of
+// overflowingConstLiteral, kept separate because that fold's result is contracted to be a signed
+// `long` literal (nativeIntConstCastType reads it as proof the emitted arithmetic is 64-bit wide).
+// Scope notes:
+//   - ALL-INT-LITERAL operands only — that is what makes C# evaluate in int32. A float-literal
+//     operand (`1e18 * 10.0`) already renders as a C# `double` computation, and a named-const operand
+//     renders via its golib Untyped* wrapper; both are correct as-is and keep the readable operator form.
+//   - OUTSIDE int32 only — an in-range constant (`1 << 10`) computes identically in C# int32, so it
+//     keeps the readable operator form.
+//   - Both the node go/types TYPED float and an inner node left `untyped float` fold; the latter is
+//     what `1<<40 * 1.5` needs (see the untyped context handling below). The int-context counterpart
+//     — an inner shift left `untyped int` by an int64-typed parent (`1<<40 + 7`) — is not this
+//     function's business: it keeps IsInteger and overflowingConstLiteral folds it to `…L`.
+func (v *Visitor) floatContextConstLiteral(expr ast.Expr) string {
+	tv, ok := v.info.Types[expr]
+
+	if !ok || tv.Value == nil || tv.Type == nil {
+		return ""
+	}
+
+	// The suffix follows the UNDERLYING basic type: a named float type takes the bare literal and
+	// converts implicitly through its [GoType] underlying, exactly as convBasicLit emits `2.5D`.
+	basic, ok := tv.Type.Underlying().(*types.Basic)
+
+	if !ok {
+		return ""
+	}
+
+	// An UNTYPED node takes its float-ness from the propagated context. go/types resolves a
+	// constant expression's context on the OUTERMOST node only, so a shift nested in a float
+	// computation is left `untyped float` — Go promotes the operands of `1<<40 * 1.5` to a common
+	// kind, so the shift is no longer `untyped int` and overflowingConstLiteral's integer arm does
+	// not see it either. Without the context it would emit as a bare int32 shift (256), so the
+	// float multiply silently yields 0.375 instead of 1.610612736e+09. See markUntypedConstContexts.
+	if basic.Info()&types.IsUntyped != 0 {
+		if basic = v.untypedConstContext(expr); basic == nil {
+			return ""
+		}
+	}
+
+	var suffix string
+
+	switch basic.Kind() {
+	case types.Float32:
+		suffix = "F"
+	case types.Float64:
+		suffix = "D"
+	default:
+		return ""
+	}
+
+	if !constExprIsIntLiteralArithmetic(expr) {
+		return ""
+	}
+
+	// An all-int-literal tree is exact integer arithmetic in Go (an untyped-int `/` is integer
+	// division), so the value always converts back to exact digits — which read far closer to the
+	// Go source than a float rendering would.
+	val := constant.ToInt(tv.Value)
+
+	if val.Kind() != constant.Int {
+		return ""
+	}
+
+	if i, exact := constant.Int64Val(val); exact && i >= math.MinInt32 && i <= math.MaxInt32 {
+		return ""
+	}
+
+	return val.ExactString() + suffix
+}
+
+// constExprIsIntLiteralArithmetic reports whether expr is built exclusively from INTEGER literals
+// combined by paren/unary/binary operators — the exact shape the converter renders as an all-`int`
+// C# operator expression, which C# therefore evaluates in int32. Any other leaf carries its own
+// width and is deliberately excluded: a float/imaginary literal makes C# compute in `double`, a
+// named-const reference emits as a golib Untyped* wrapper, and a conversion emits concretely typed.
+func constExprIsIntLiteralArithmetic(expr ast.Expr) bool {
+	switch e := expr.(type) {
+	case *ast.ParenExpr:
+		return constExprIsIntLiteralArithmetic(e.X)
+	case *ast.UnaryExpr:
+		return constExprIsIntLiteralArithmetic(e.X)
+	case *ast.BinaryExpr:
+		return constExprIsIntLiteralArithmetic(e.X) && constExprIsIntLiteralArithmetic(e.Y)
+	case *ast.BasicLit:
+		return e.Kind == token.INT
+	}
+
+	return false
+}
+
 func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatchExprContext, litContext BasicLitContext) string {
 	// A constant operator expression whose value overflows int32 must emit as the folded 64-bit
 	// literal — C# would compute the operators in int32 and overflow at compile time (CS0220).
 	if lit := v.overflowingConstLiteral(binaryExpr); lit != "" {
+		return lit
+	}
+
+	// The same in a FLOAT context, where the fold above does not apply (the constant's type is not
+	// an integer) but C# still evaluates the int-literal operands in int32 — silently, not loudly.
+	if lit := v.floatContextConstLiteral(binaryExpr); lit != "" {
 		return lit
 	}
 
