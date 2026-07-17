@@ -25,6 +25,36 @@ public static partial class testing_package
     }
 
     /// <summary>
+    /// The testing.TB interface — the common surface of T and B that test-support packages
+    /// (internal/testenv is the driving consumer) accept as parameters. Declared with Go 1.23's
+    /// full public member set so the compiled shape never drifts as more helpers convert.
+    /// T does not yet implement TB (no suite validated so far passes a T into a TB parameter —
+    /// sort uses only testenv's t-free helpers); wiring the implementation lands with the first
+    /// suite that needs it.
+    /// </summary>
+    public interface TB
+    {
+        void Cleanup(Action cleanup);
+        void Error(params ꓸꓸꓸany args);
+        void Errorf(@string format, params ꓸꓸꓸany args);
+        void Fail();
+        void FailNow();
+        bool Failed();
+        void Fatal(params ꓸꓸꓸany args);
+        void Fatalf(@string format, params ꓸꓸꓸany args);
+        void Helper();
+        void Log(params ꓸꓸꓸany args);
+        void Logf(@string format, params ꓸꓸꓸany args);
+        @string Name();
+        void Setenv(@string key, @string value);
+        void Skip(params ꓸꓸꓸany args);
+        void SkipNow();
+        void Skipf(@string format, params ꓸꓸꓸany args);
+        bool Skipped();
+        @string TempDir();
+    }
+
+    /// <summary>
     /// Benchmark receiver surface — COMPILE-ONLY in the bootstrap shim. Benchmark declarations
     /// are disclosed-unsupported in the manifest (execution is deferred to Phase 4D) and never
     /// registered with the host, but their converted BODIES still compile into the test assembly,
@@ -145,6 +175,13 @@ public static partial class testing_package
     /// Reports whether the -short flag was set — like Go's testing.Short() (default false).
     /// </summary>
     public static bool Short() => TestHost.ShortMode;
+
+    /// <summary>
+    /// Reports whether the program is a test binary — like Go's testing.Testing(). The shim is
+    /// referenced ONLY by converted test projects (the go2cs test host is the program), so every
+    /// reachable caller is a test binary.
+    /// </summary>
+    public static bool Testing() => true;
 
     /// <summary>
     /// Reports whether the -v flag was set — like Go's testing.Verbose() (default false).

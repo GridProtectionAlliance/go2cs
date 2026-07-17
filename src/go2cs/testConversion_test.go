@@ -141,6 +141,39 @@ func TestManifestCapabilityBlockScope(t *testing.T) {
 	}
 }
 
+// F6 guard: the census gate compares the RAW go test results against the manifest's
+// declarations — a name go test ran that the manifest never declared (under ANY status) fails
+// the comparison, closing the shared-filter silent-pass channel between discovery and
+// comparison. Subtests roll up to their top-level parent; examples/fuzz seed-corpus runs are
+// accounted through their disclosed-unsupported declarations.
+func TestManifestCensusDetectsUndeclaredTests(t *testing.T) {
+	manifest := testManifest{
+		Tests: []testDeclaration{
+			{Name: "TestKnown", Kind: "test", Status: "included"},
+			{Name: "ExampleValue", Kind: "example", Status: "unsupported"},
+			{Name: "FuzzSeed", Kind: "fuzz", Status: "unsupported"},
+		},
+		TestMain: &testDeclaration{Name: "TestMain", Kind: "test-main", Status: "included"},
+	}
+
+	goResults := map[string]string{
+		"TestKnown":       "pass",
+		"TestKnown/child": "pass",
+		"ExampleValue":    "pass",
+		"FuzzSeed":        "pass",
+	}
+	if gaps := manifestCensusGaps(goResults, manifest); len(gaps) != 0 {
+		t.Fatalf("fully declared results should have no census gaps, got %v", gaps)
+	}
+
+	goResults["TestGhost"] = "pass"
+	goResults["TestGhost/sub"] = "pass"
+	goResults["TestPhantom"] = "fail"
+	if gaps := manifestCensusGaps(goResults, manifest); !reflect.DeepEqual(gaps, []string{"TestGhost", "TestPhantom"}) {
+		t.Fatalf("census gaps = %v, want [TestGhost TestPhantom]", gaps)
+	}
+}
+
 // F15 guard: stdlib dependencies ALWAYS resolve to the overlaid go-src-converted tree (the
 // mixed-tree ruling) — deterministically, with no filesystem probing; golib and non-stdlib
 // references pass through untouched.
@@ -163,6 +196,13 @@ func TestResolveTestProjectReferenceRewritesStdLibToConvertedTree(t *testing.T) 
 	local := PackageInfo{IsStdLib: false, ProjectReference: `..\sibling\sibling.csproj`}
 	if got := resolveTestProjectReference(local); got != local.ProjectReference {
 		t.Fatalf("non-stdlib reference must pass through, got %q", got)
+	}
+
+	// F15b ruling: `testing` ALWAYS resolves to the hand-owned shim — the auto-converted
+	// go-src-converted/testing is excluded from test graphs (one testing package, period).
+	shimmed := PackageInfo{IsStdLib: true, PackageName: "testing", ProjectReference: `$(go2csPath)core\testing\testing.csproj`}
+	if got, want := resolveTestProjectReference(shimmed), `$(go2csPath)core\testing\testing.csproj`; got != want {
+		t.Fatalf("testing reference = %q, want the shim %q", got, want)
 	}
 }
 

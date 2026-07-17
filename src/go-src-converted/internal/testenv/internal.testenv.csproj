@@ -128,7 +128,7 @@
     <ProjectReference Include="$(go2csPath)go-src-converted\strings\strings.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\sync\sync.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\syscall\syscall.csproj" />
-    <ProjectReference Include="$(go2csPath)go-src-converted\testing\testing.csproj" />
+    <ProjectReference Include="$(go2csPath)core\testing\testing.csproj" />
     <ProjectReference Include="$(go2csPath)go-src-converted\time\time.csproj" />
   </ItemGroup>
 

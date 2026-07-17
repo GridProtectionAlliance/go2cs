@@ -863,6 +863,15 @@ func resolveTestProjectReference(info PackageInfo) string {
 		return info.ProjectReference
 	}
 
+	// F15b ruling: `testing` ALWAYS resolves to the hand-owned shim — go-src-converted/testing
+	// is excluded from test graphs (ONE testing package, period). Two testing assemblies in one
+	// build make every `testing_package` type ambiguous (CS0433, sort via internal/testenv).
+	// The direct dependency is normally stripped upstream (the template carries the fixed shim
+	// reference), so this is the backstop for any resolver path that still sees it.
+	if info.PackageName == "testing" {
+		return `$(go2csPath)core\testing\testing.csproj`
+	}
+
 	normalized := strings.ReplaceAll(info.ProjectReference, "/", `\`)
 
 	relative, ok := strings.CutPrefix(normalized, `$(go2csPath)core\`)
@@ -1356,6 +1365,37 @@ func matchTerminalStatuses(names []string, goResults, csResults map[string]strin
 	return mismatches, skipped
 }
 
+// manifestCensusGaps returns the top-level test names present in the RAW `go test -json` results
+// that the manifest cannot account for (F6 census gate). Discovery and comparison otherwise share
+// a single point of failure: eligibleTerminalTestResults filters BOTH sides by the manifest, so a
+// discovery bug self-censors — a test the converter never discovered is silently removed from the
+// comparison and the package can be declared "validated" without it. The census runs against the
+// UNFILTERED Go results: every name go test actually ran must be declared in the manifest under
+// SOME status (included, capability-blocked, or disclosed-unsupported — examples and fuzz
+// seed-corpus runs land here too); subtest names roll up to their top-level parent. Any gap fails
+// the comparison — a package cannot validate past a test the manifest never accounted for.
+func manifestCensusGaps(goResults map[string]string, manifest testManifest) []string {
+	declared := HashSet[string]{}
+	for _, test := range manifest.Tests {
+		declared.Add(test.Name)
+	}
+	if manifest.TestMain != nil {
+		declared.Add(manifest.TestMain.Name)
+	}
+
+	gaps := HashSet[string]{}
+	for name := range goResults {
+		topLevelName, _, _ := strings.Cut(name, "/")
+		if !declared.Contains(topLevelName) {
+			gaps.Add(topLevelName)
+		}
+	}
+
+	result := gaps.Keys()
+	sort.Strings(result)
+	return result
+}
+
 // excludedDeclarations lists every disclosed-unsupported declaration the comparison excludes
 // (F2/F3): benchmarks, fuzz targets, Examples, and capability-blocked tests are filtered from
 // BOTH sides of the oracle, so the comparison record must say what was excluded and why —
@@ -1384,10 +1424,15 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	goResults := terminalTestResults(goOutput)
 	csResults := terminalTestResults(csOutput)
 	var manifest testManifest
+	var censusGaps []string
 	manifestData, manifestErr := os.ReadFile(filepath.Join(outputPath, testManifestFileName))
 	if manifestErr == nil {
 		manifestErr = json.Unmarshal(manifestData, &manifest)
 		if manifestErr == nil {
+			// F6 census gate: computed over the RAW Go results BEFORE the manifest-driven
+			// filtering below — the filter shares the manifest with discovery, so only the
+			// unfiltered stream can expose a declaration discovery missed.
+			censusGaps = manifestCensusGaps(goResults, manifest)
 			goResults = eligibleTerminalTestResults(goResults, manifest)
 			csResults = eligibleTerminalTestResults(csResults, manifest)
 		}
@@ -1422,6 +1467,13 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 		result.Matched = false
 		result.Status = "infrastructure-blocked"
 		result.Errors = append(result.Errors, "unsupported testing capabilities: "+strings.Join(blocked, ", "))
+	}
+
+	if len(censusGaps) > 0 {
+		// F6: go test ran declarations the manifest never accounted for — a DISCOVERY defect,
+		// not a test failure. The package must not validate past it.
+		result.Matched = false
+		result.Errors = append(result.Errors, "census: go test reported tests the manifest does not declare: "+strings.Join(censusGaps, ", "))
 	}
 
 	mismatches, skipped := matchTerminalStatuses(names, goResults, csResults)
