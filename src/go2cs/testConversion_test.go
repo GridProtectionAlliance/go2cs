@@ -355,6 +355,44 @@ func TestUnsupportedTestingCapabilityIsDiscovered(t *testing.T) {
 	}
 }
 
+// AllocsPerRun support guard: the shim implements testing.AllocsPerRun (byte-derived — see
+// core/testing/testing.cs), so a test requiring it must convert as INCLUDED while the
+// requirement still appears in the manifest's per-test attribution.
+func TestAllocsPerRunCapabilityIsSupported(t *testing.T) {
+	dir := t.TempDir()
+	files := map[string]string{
+		"go.mod":   "module example/allocs\n\ngo 1.23\n",
+		"value.go": "package allocs\n",
+		"value_test.go": "package allocs\n" +
+			"import \"testing\"\n" +
+			"func TestNoAllocs(t *testing.T) {\n" +
+			"\tif allocs := testing.AllocsPerRun(100, func() {}); allocs != 0 {\n" +
+			"\t\tt.Errorf(\"allocs = %v\", allocs)\n" +
+			"\t}\n" +
+			"}\n",
+	}
+	for name, contents := range files {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(contents), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	_, internal := loadTestVariantForDir(t, dir)
+
+	analysis := analyzeTestingCapabilities(internal)
+	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, NewHashSet(supportedTestCapabilities()))
+
+	if len(declarations) != 1 || declarations[0].Name != "TestNoAllocs" {
+		t.Fatalf("declarations = %#v, want just TestNoAllocs", declarations)
+	}
+	declaration := declarations[0]
+	if declaration.Status != "included" {
+		t.Fatalf("TestNoAllocs should be included (testing.AllocsPerRun is supported), got status %q reason %q", declaration.Status, declaration.Reason)
+	}
+	if !NewHashSet(declaration.RequiredCapabilities).Contains("testing.AllocsPerRun") {
+		t.Fatalf("required capabilities %v do not contain testing.AllocsPerRun", declaration.RequiredCapabilities)
+	}
+}
+
 // F4 guard: capability attribution is per test THROUGH its helper closure — one blocked test
 // (via a helper it calls) blocks itself; its supported sibling stays included.
 func TestPerTestCapabilityAttributionBlocksOnlyOffendingTest(t *testing.T) {

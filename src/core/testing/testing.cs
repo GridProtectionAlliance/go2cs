@@ -172,6 +172,42 @@ public static partial class testing_package
     [GoRecv] public static bool Run(this ref B b, @string name, Action<ж<B>> benchmark) => true;
 
     /// <summary>
+    /// Reports the average allocation cost per run of f — like Go's testing.AllocsPerRun, with
+    /// one deliberate semantic difference: Go counts MALLOCS (runtime.MemStats.Mallocs delta);
+    /// the CLR exposes no malloc counter, so the shim measures allocated BYTES on the calling
+    /// thread. Zero maps exactly — 0 bytes ⟺ 0 allocations — so the dominant assert-zero stdlib
+    /// tests are faithful; a nonzero result is the average allocated bytes per run (floored at 1
+    /// so amortized sub-byte-per-run allocation can never masquerade as the exact-zero case) — a
+    /// byte-derived approximation, NOT a malloc count, so a test asserting a specific nonzero
+    /// count diverges as a loud failure in the differential oracle instead of silently passing.
+    /// </summary>
+    /// <remarks>
+    /// GC.GetAllocatedBytesForCurrentThread is precise and inherently scoped to this thread,
+    /// which stands in for Go's GOMAXPROCS(1) pinning: other threads' allocations never pollute
+    /// the measurement. Like Go's, f is assumed single-threaded — allocations made by goroutines
+    /// f spawns run on other threads (converted goroutines share the thread pool) and are not
+    /// observed. See docs/ConversionStrategies-Reference.md "Manually-Converted Declarations".
+    /// </remarks>
+    public static double AllocsPerRun(nint runs, Action f)
+    {
+        // Warmup run outside the measurement window (Go does the same): first-call lazy
+        // initialization — and JIT compilation here — must not count against f.
+        f();
+
+        long start = GC.GetAllocatedBytesForCurrentThread();
+
+        for (nint i = 0; i < runs; i++)
+            f();
+
+        long allocated = GC.GetAllocatedBytesForCurrentThread() - start;
+
+        // Integer division like Go's (its comment: "do the division as integers"); runs == 0
+        // divides by zero — a runtime-error panic exactly where Go's own division panics.
+        double average = Math.Max(1L, allocated / runs);
+        return allocated == 0L ? 0.0D : average;
+    }
+
+    /// <summary>
     /// Reports whether the -short flag was set — like Go's testing.Short() (default false).
     /// </summary>
     public static bool Short() => TestHost.ShortMode;

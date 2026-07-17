@@ -334,6 +334,34 @@ public class TestingRuntimeTests
     }
 
     [TestMethod]
+    public void AllocsPerRunMapsZeroExactlyAndReportsBytesWhenAllocating()
+    {
+        // F4 support guard: .NET has no malloc counter, so testing.AllocsPerRun measures
+        // allocated BYTES on the calling thread — 0 bytes ⟺ 0 allocations makes the zero case
+        // exact (the contract the stdlib's assert-zero tests rely on); a nonzero result is a
+        // positive byte-derived value, never rounded down to a silent zero pass.
+        double zeroAllocs = double.NaN;
+        double someAllocs = double.NaN;
+        byte[]? sink = null;
+
+        TestRegistry registry = new("runtime/allocs", []);
+        registry.Add("TestAllocs", _ =>
+        {
+            zeroAllocs = testing_package.AllocsPerRun(100, static () => { });
+
+            // The capturing delegate is allocated at this call site, before the measurement
+            // window opens; the captured sink keeps each per-run array observable so no
+            // future JIT escape analysis can elide the allocation under test.
+            someAllocs = testing_package.AllocsPerRun(100, () => sink = new byte[64]);
+        }, "runtime_test.go", 1);
+
+        Assert.AreEqual(0, TestHost.Run(registry, []));
+        Assert.AreEqual(0.0D, zeroAllocs);
+        Assert.IsTrue(someAllocs >= 64.0D, $"expected byte-scaled result >= 64, got {someAllocs}");
+        Assert.IsNotNull(sink);
+    }
+
+    [TestMethod]
     public void JUnitOutputSurvivesXmlInvalidCharacters()
     {
         // Real Go test logs legitimately contain XML-invalid characters (unicode/utf8's own
