@@ -2,8 +2,8 @@
 
 # 📰 go2cs News Archive
 
-All project sannouncement, newest first. The latest item is always
-summarized at the top of the [README](README.md), its full text is kept here.
+All project announcements, newest first. The latest item is always
+summarized at the top of the [README](README.md), full text kept here.
 
 ---
 
@@ -88,7 +88,7 @@ July 10, 2026 (above).
 
 ---
 
-## January 12, 2025 — The converter is rewritten in Go ("go2cs2")
+## January 12, 2025 — The converter is rewritten in Go ("go2cs" version 2)
 
 **Major project restructuring** — the "go2cs iteration 2" generation begins: the converter is
 re-implemented **in Go** on the official `go/ast` + `go/types` toolchain, replacing the original C#
