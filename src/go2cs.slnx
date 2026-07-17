@@ -63,6 +63,7 @@
     <Project Path="Tests/Behavioral/AndNotAssignNarrow/AndNotAssignNarrow.csproj" />
     <Project Path="Tests/Behavioral/AnonInterfaceCrossFile/AnonInterfaceCrossFile.csproj" />
     <Project Path="Tests/Behavioral/AnonStructArrayElement/AnonStructArrayElement.csproj" />
+    <Project Path="Tests/Behavioral/AnonStructCrossFile/AnonStructCrossFile.csproj" />
     <Project Path="Tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.csproj" />
     <Project Path="Tests/Behavioral/AnonymousStructs/AnonymousStructs.csproj" />
     <Project Path="Tests/Behavioral/AnyKeyMap/AnyKeyMap.csproj" />

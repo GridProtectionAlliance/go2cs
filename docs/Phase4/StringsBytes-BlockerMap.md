@@ -90,6 +90,18 @@ abi-accessibility errors exist under the current absolute-path pipeline.
   whichever compilation unit hosts the production-seeded attributes. Folded into the B4/B5 chip.
 - **Sort's wall after these fixes:** 1 × CS0234 (B2c) + 10 × CS0246 adapter anchoring (B4/B5) —
   exactly the documented next tier; runtime rows R1-R13 still unreached.
+- **B8: FIXED** (worktree branch `claude/eloquent-mestorf-c5e017`) — the general type-name
+  renderers (`getTypeName`/`getFullTypeName`) now resolve a non-empty anonymous struct/interface
+  through the shared dynamic-type registry / deferred marker (`deferredDynamicTypeName`) instead
+  of falling through to raw `t.String()` Go text; the `«DYNTYPE:…»` marker payload is now the
+  HEX-ENCODED signature so it survives the string-transform passes (`convertToCSTypeName`
+  rewrites `[`/`]` → `<`/`>`, which corrupted a raw-signature marker before post-barrier
+  resolution). Guard: `AnonStructCrossFile` (three files, both visit-order directions, heap-boxed
+  range var; CS1526 without the fix). CNR byte-identical ×399. **Bytes probe after the fix:** the
+  ~170-error parser cascade is gone — `bytes.tests.csproj` is down to exactly **2 × CS0246** in
+  ONE generated adapter (`negativeReader` → io.Reader ptr impl in `bytes_package`'s .g.cs), i.e.
+  the B4/B5 anchoring class. Bytes' next wall = B4/B5 (+ B7a/B7b sites at their lines), then the
+  runtime rows.
 
 ## Cross-cutting lessons
 

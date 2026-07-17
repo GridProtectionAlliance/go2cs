@@ -48,6 +48,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAnonStructArrayElement() => CheckTarget("AnonStructArrayElement");
 
     [TestMethod]
+    public void CheckAnonStructCrossFile() => CheckTarget("AnonStructCrossFile");
+
+    [TestMethod]
     public void CheckAnonymousInterfaces() => CheckTarget("AnonymousInterfaces");
 
     [TestMethod]

@@ -4146,10 +4146,10 @@ referenced cross-file — exactly as anonymous structs already register (`visitS
 `dynamicStructTypeName` uses: this file's `liftedTypeMap`, then the shared registry, then a
 deferred `«DYNTYPE:…»` marker resolved after the file-visit barrier. The marker survives the
 adapter-name composition (`adapterTypeRef`/`valueAdapterTypeRef` skip the simple-name strip when
-it is present — the embedded signature contains dots), and the `GoImplement` attribute writer
-resolves or drops it (mirroring the implicit-conversion writer). Because file visits are
-concurrent, `registerDynamicTypeName` keeps the lexically smallest name for a signature so the
-result is deterministic. Emitted form:
+it is present — the marker resolves as one unit to the already-simple lifted name), and the
+`GoImplement` attribute writer resolves or drops it (mirroring the implicit-conversion writer).
+`registerDynamicTypeName` keeps the lexically smallest name for a signature so the winner is
+well-defined even when several files lift the same shape. Emitted form:
 ```csharp
 // batch.cs (declaring file):
 [GoType("dyn")] partial interface readBatch_r : /* io.Reader */ … { … }
@@ -4163,6 +4163,48 @@ not satisfying a lifted operator constraint — is a distinct, deeper root). Gua
 `AnonInterfaceCrossFile` (a two-file package: file A declares `describe(thing interface{ Sizer;
 Namer })`, file B casts a concrete `*box` to it — the lifted name must flow into the attribute,
 the adapter, and the signature).
+
+### Every type-name render resolves a lifted anonymous struct cross-file
+
+The registry/marker resolution above initially covered only two dedicated call sites
+(`dynamicStructTypeName`'s `ж.of(…)` address-of-field form and `convertToInterfaceType`), while
+the GENERAL type-name renderers — `getTypeName`/`getFullTypeName`, which every other emission
+path reaches (heap-box declarations, casts, generic arguments…) — still fell through to raw
+`t.String()` Go text on a `liftedTypeMap` miss. So ranging over a package-level anonymous-struct
+slice declared in a SIBLING file, with the loop variable escaping to a heap box, stringified the
+element type into the box declaration: bytes' `compareTests` (`[]struct{a, b []byte; i int}`,
+declared in compare_test.go, ranged from the earlier-sorted bytes_test.go) emitted
+`ref var tt = ref heap(new struct{a <>byte; b <>byte; i int}(), …)` — CS1526 plus a ~170-error
+parser cascade that blocked all of bytes (Phase-4 blocker B8).
+
+Both renderers now resolve a NON-EMPTY anonymous struct/interface through
+`deferredDynamicTypeName` before the `t.String()` fall-through: the shared
+`packageDynamicTypeNames` registry (the declaring file may already have been visited — file
+visits run in deterministic sorted-file order), else the deferred `«DYNTYPE:…»` marker. The
+empty `struct{}`/`interface{}` are excluded — their raw signatures intentionally map to
+`EmptyStruct`/`any` downstream. The marker payload is now the HEX-ENCODED signature rather than
+the raw text: these general render paths flow through string transformation passes
+(`convertToCSTypeName` rewrites every `[`/`]` to `<`/`>`, alias handling splits on `.`) that
+would corrupt an embedded raw signature before the post-barrier resolution could match it back
+to the registry; hex digits pass through every transform untouched, and the encoding is a pure
+function of the signature so equal signatures still render the identical (comparable) string.
+Emitted form:
+
+```csharp
+// zvars.cs (declaring file, visited AFTER the reference):
+[GoType("dyn")] partial struct compareTestsᴛ1 { … }
+internal static slice<compareTestsᴛ1> compareTests = …;
+// main.cs (cross-file range + heap box):
+foreach (var (_, vᴛ1) in compareTests) {
+    ref var tt = ref heap(new compareTestsᴛ1(), out var Ꮡtt);
+    …
+}
+```
+
+Guarded by `AnonStructCrossFile` (a three-file package covering BOTH directions: `zvars.go`
+declares `compareTests` and sorts after `main.go`, forcing the marker path; `avars.go` declares
+`sizeTests` and sorts before it, taking the direct registry hit — main.go ranges over both with
+`&tt`/`&st` forcing the heap box, output-compared vs Go).
 
 ### Function-literal parameters share the body scope
 Go declares parameters in the function block, so a body-level `fpath, err := ...` REUSES a literal's `err` parameter. The variable analysis gives literals ONE merged scope (params + body declarations) mirroring real function declarations; a separate param scope had made the `:=` a shadow declaration beside later reuses (CS0841/CS0128, os CopyFS's WalkDir literal). Guarded by `LambdaFunctions` (`probe`).

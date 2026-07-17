@@ -51,6 +51,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAnonStructArrayElement() => CheckTarget("AnonStructArrayElement");
 
     [TestMethod]
+    public void CheckAnonStructCrossFile() => CheckTarget("AnonStructCrossFile");
+
+    [TestMethod]
     public void CheckAnonymousInterfaces() => CheckTarget("AnonymousInterfaces");
 
     [TestMethod]

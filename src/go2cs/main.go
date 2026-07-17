@@ -2723,7 +2723,7 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 		} else if name := lookupDynamicTypeName(interfaceType.String()); name != "" {
 			interfaceTypeName = name
 		} else {
-			interfaceTypeName = dynamicTypeMarkerPrefix + interfaceType.String() + dynamicTypeMarkerSuffix
+			interfaceTypeName = dynamicTypeMarker(interfaceType.String())
 		}
 	} else {
 		interfaceTypeName = convertToCSTypeName(v.getFullTypeName(interfaceType, false))
@@ -3228,8 +3228,8 @@ func valueAdapterTypeRef(structTypeName string, interfaceTypeName string) string
 	ifaceSimple := interfaceTypeName
 
 	// A deferred dynamic-type marker (an anonymous interface lifted in a not-yet-visited
-	// file) must survive INTACT to the post-barrier resolution — its embedded signature
-	// contains dots (`interface{io.Reader; …}`), so the simple-name strip would mangle it.
+	// file) must survive INTACT to the post-barrier resolution — it resolves as one unit
+	// to the already-simple lifted name, so no strip applies.
 	if !strings.Contains(ifaceSimple, dynamicTypeMarkerPrefix) {
 		if idx := strings.LastIndex(ifaceSimple, "."); idx >= 0 {
 			ifaceSimple = ifaceSimple[idx+1:]
@@ -4455,11 +4455,16 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 		}
 	}
 
+	// A NON-EMPTY anonymous struct/interface reaching this fallback was lifted by its
+	// DECLARING file's visitor (this visitor's liftedTypeMap missed above — a cross-file
+	// reference, or a same-file use ABOVE the declaration): resolve through the shared
+	// package registry, or defer with a marker resolved after the file-visit barrier.
+	// The raw t.String() fall-through below is never valid C# for these (B8: bytes'
+	// `range compareTests` from bytes_test.go emitted `struct{a <>byte; …}` — CS1526
+	// + ~170-error parser cascade).
 	if !isUnderlying {
-		if structType, ok := t.(*types.Struct); ok && !isEmptyStructType(structType) {
-			v.showWarning("Unresolved dynamic struct type: %s", t.String())
-		} else if interfaceType, ok := t.(*types.Interface); ok && !interfaceType.Empty() {
-			v.showWarning("Unresolved dynamic interface type: %s", t.String())
+		if name := deferredDynamicTypeName(t); name != "" {
+			return name
 		}
 	}
 
@@ -4620,11 +4625,11 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 		}
 	}
 
+	// Cross-file/forward reference to a lifted anonymous struct/interface: shared-registry
+	// name or a deferred marker, never raw Go type text (see the getTypeName twin).
 	if !isUnderlying {
-		if _, ok := t.(*types.Struct); ok {
-			v.showWarning("Unresolved dynamic struct type: %s", t.String())
-		} else if iface, ok := t.(*types.Interface); ok && !iface.Empty() {
-			v.showWarning("Unresolved dynamic interface type: %s", t.String())
+		if name := deferredDynamicTypeName(t); name != "" {
+			return name
 		}
 	}
 
@@ -5759,7 +5764,7 @@ func (v *Visitor) implicitConvStructTypeName(t types.Type) string {
 		return name
 	}
 
-	return dynamicTypeMarkerPrefix + signature + dynamicTypeMarkerSuffix
+	return dynamicTypeMarker(signature)
 }
 
 // resolveImplicitConvTypeName resolves a possibly-deferred implicit-conversion type name after
@@ -5768,7 +5773,7 @@ func (v *Visitor) implicitConvStructTypeName(t types.Type) string {
 // its record is dropped.
 func resolveImplicitConvTypeName(name string) (string, bool) {
 	if strings.HasPrefix(name, dynamicTypeMarkerPrefix) && strings.HasSuffix(name, dynamicTypeMarkerSuffix) {
-		signature := name[len(dynamicTypeMarkerPrefix) : len(name)-len(dynamicTypeMarkerSuffix)]
+		signature, _ := dynamicTypeMarkerSignature(name[len(dynamicTypeMarkerPrefix) : len(name)-len(dynamicTypeMarkerSuffix)])
 
 		if resolved := lookupDynamicTypeName(signature); resolved != "" {
 			return resolved, true
