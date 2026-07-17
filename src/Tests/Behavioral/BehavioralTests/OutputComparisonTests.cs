@@ -1090,6 +1090,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckUntypedConstFloatContext() => CheckTarget("UntypedConstFloatContext");
 
     [TestMethod]
+    public void CheckUntypedFloatConstExpr() => CheckTarget("UntypedFloatConstExpr");
+
+    [TestMethod]
     public void CheckUntypedFloatDefault() => CheckTarget("UntypedFloatDefault");
 
     [TestMethod]
