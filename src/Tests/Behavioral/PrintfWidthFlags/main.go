@@ -37,4 +37,25 @@ func main() {
 
 	// space flag is a no-op for negative numbers and strings
 	fmt.Printf("[% d] [% 6s]\n", -3, "ab")
+
+	// floating-point infinities render Go-style ("+Inf"/"-Inf", never "∞"): the sign is
+	// inherent even for positives, the space flag demotes '+' to a space, and the '0' flag
+	// falls back to space padding (Inf/NaN don't look like numbers)
+	zero := 0.0
+	posInf := 1.0 / zero
+	negInf := -1.0 / zero
+	nan := zero / zero
+	posInf32 := float32(posInf)
+	negInf32 := float32(negInf)
+
+	fmt.Println(posInf, negInf, nan)
+	fmt.Println(posInf32, negInf32)
+	fmt.Printf("[%v] [%v] [%g] [%g]\n", posInf, negInf, posInf, negInf)
+	fmt.Printf("[%e] [%e] [%f] [%f]\n", posInf, negInf, posInf, negInf)
+	fmt.Printf("[%.2f] [%.2f] [%8.2f] [%-8.2f]\n", posInf, negInf, posInf, negInf)
+	fmt.Printf("[%+v] [%+f] [% f] [% f]\n", posInf, posInf, posInf, negInf)
+	fmt.Printf("[%08f] [%08f] [%08f]\n", posInf, negInf, nan)
+	fmt.Printf("[%v] [%g] [%e] [%f]\n", posInf32, negInf32, posInf32, negInf32)
+	fmt.Println(fmt.Sprint(posInf), fmt.Sprint(negInf))
+	fmt.Printf("[%v] [%f] [%+f] [% f]\n", nan, nan, nan, nan)
 }

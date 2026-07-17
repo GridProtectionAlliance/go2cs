@@ -49,6 +49,14 @@ public static partial class fmt_package
         if (arg is bool)
             return arg.ToString()!.ToLowerInvariant();
 
+        // Go renders floating-point infinities as "+Inf"/"-Inf" (strconv keeps the sign
+        // even for positives) — .NET default formatting would produce "∞"/"-∞"
+        if (arg is double doubleValue && double.IsInfinity(doubleValue))
+            return doubleValue > 0.0D ? "+Inf" : "-Inf";
+
+        if (arg is float floatValue && float.IsInfinity(floatValue))
+            return floatValue > 0.0F ? "+Inf" : "-Inf";
+
         return arg?.ToString() ?? "<nil>";
     }
 
@@ -78,7 +86,7 @@ public static partial class fmt_package
     public static void Printf(string format, params ꓸꓸꓸobject args) =>
         Console.Write(Sprintf(format, args));
 
-    public static string Sprint(object? arg) => arg?.ToString() ?? "<nil>";
+    public static string Sprint(object? arg) => arg is null ? "<nil>" : ToString(arg);
 
     public static string Sprintf(@string format, params object[] args)
     {
@@ -141,14 +149,21 @@ public static partial class fmt_package
         bool numeric = IsNumericValue(arg);
         string value;
 
-        if (precision.Success && verb is "f" or "F" && TryGetDouble(arg, out double number))
+        if (precision.Success && verb is "f" or "F" && TryGetDouble(arg, out double number) && !double.IsInfinity(number))
             value = number.ToString("F" + (precision.Value.Length == 0 ? "0" : precision.Value), CultureInfo.InvariantCulture);
         else
             value = ToString(arg!);
 
         if (numeric && !value.StartsWith('-'))
         {
-            if (flags.Contains('+'))
+            if (value.StartsWith('+'))
+            {
+                // Only ±Inf renders with an inherent '+' — Go keeps it unless the space flag
+                // (without the plus flag) demotes it to a space
+                if (flags.Contains(' ') && !flags.Contains('+'))
+                    value = " " + value[1..];
+            }
+            else if (flags.Contains('+'))
                 value = "+" + value;
             else if (flags.Contains(' '))
                 value = " " + value;
@@ -174,6 +189,11 @@ public static partial class fmt_package
         {
             // Zero padding goes after any sign (or the space/plus sign placeholder)
             int prefixLength = value.Length > 0 && value[0] is '-' or '+' or ' ' ? 1 : 0;
+
+            // Inf and NaN don't look like numbers, so Go space-pads them despite the '0' flag
+            if (prefixLength < value.Length && value[prefixLength] is 'I' or 'N')
+                return value.PadLeft(width);
+
             return value[..prefixLength] + value[prefixLength..].PadLeft(width - prefixLength, '0');
         }
 
