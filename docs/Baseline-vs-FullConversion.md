@@ -140,11 +140,17 @@ There are **two** ways a package carries hand-owned C#, and they are NOT interch
    (`directiveOperations.go`). This is the ONLY thing that makes a whole-file native reimplementation
    durable across reconverts.
 
-   Current whole-file replacements: sync `mutex.cs` / `waitgroup.cs` / `rwmutex.cs` (2026-07-11, live in
-   `go-src-converted` only); math `unsafe.cs` (2026-07-16 — Float32/64 bits/frombits as direct
-   `BitConverter` bit-cast intrinsics, replacing the literal conversion's `ж<T>`/`uintptr` round-trip that
-   compiles but cannot reinterpret bits at runtime; canonical in `src/core/math`, byte-identical copy in
-   `go-src-converted/math`; guarded by the `MathFloatBits` behavioral test).
+   Complete inventory of whole-file replacements (every non-`*_impl` file carrying a real module-level
+   marker in `src/go-src-converted`; grep-verified 2026-07-16): sync `mutex.cs` / `waitgroup.cs` /
+   `rwmutex.cs` / `pool.cs`; runtime `runtime2.cs` / `mfinal.cs`; syscall `dll_windows.cs` (these live in
+   `go-src-converted` only); sync/atomic `type.cs` / `value.cs` and unsafe `unsafe.cs` (canonical in
+   `src/core`, byte-identical copies in `go-src-converted`); math `unsafe.cs` (2026-07-16 — Float32/64
+   bits/frombits as direct `BitConverter` bit-cast intrinsics, replacing the literal conversion's
+   `ж<T>`/`uintptr` round-trip that compiles but cannot reinterpret bits at runtime; canonical in
+   `src/core/math`, byte-identical copy in `go-src-converted/math`; guarded by the `MathFloatBits`
+   behavioral test). Five `*_impl.cs` companions also carry the marker (documentation only, per
+   pattern 1): internal/abi `type_impl.cs`, reflect `value_impl.cs`, runtime `lock_sema_impl.cs` /
+   `runtime2_impl.cs`, sync `runtime_impl.cs`.
 
 Marker mechanics: `[AttributeTargets.Module, AllowMultiple = true]` (golib `GoManualConversionAttribute`), so
 one per file across a package is fine. The scanner wants it **before the first class**, so place it after the
