@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using static go2cs.Symbols;
 
 namespace go;
 
@@ -186,8 +187,8 @@ public static class GoReflect
 
         Type? decl = t.DeclaringType;
 
-        if (decl is not null && decl.Name.EndsWith("_package", StringComparison.Ordinal))
-            return decl.Name[..^"_package".Length] + "." + name;
+        if (decl is not null && decl.Name.EndsWith(PackageSuffix, StringComparison.Ordinal))
+            return decl.Name[..^PackageSuffix.Length] + "." + name;
 
         return name;
     }
