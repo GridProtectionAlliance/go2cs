@@ -838,6 +838,27 @@ Examples:
 				log.Fatalf("Recursive module conversion failed: %s\n", err)
 			}
 		} else {
+			// -tests always preserves comments: test conversions are derivative works of the
+			// package's Go sources, and the per-file Go copyright/license header MUST survive
+			// into the emitted *_test.cs (the same license requirement as -stdlib -comments) —
+			// plus the doc comments are what keep the converted suite reviewable.
+			if options.convertTests {
+				options.includeComments = true
+
+				// Self-locate the project-reference root when the configured go2csPath is not
+				// itself a valid root (no core\golib — e.g. the ~/go2cs default on a bare clone
+				// with no deploy-core staging) and the OUTPUT lands inside a go2cs source tree.
+				// Mutated HERE, before conversion AND the test actions, so the manifest's digest
+				// (which folds the options) is written and validated with the same root — the
+				// documented two-argument validation command then works from a clone with no
+				// flags or environment setup. An explicitly configured WORKING root wins.
+				if !isGo2CSRoot(options.go2csPath) {
+					if root := findGo2CSRootAbove(outputFilePath); root != "" {
+						options.go2csPath = root
+					}
+				}
+			}
+
 			// -tests: convert-and-hook runs for the convert/all actions (processConversion ends
 			// by converting the package's tests); build/run/compare act on EXISTING artifacts
 			// (manifest-validated) without reconverting.

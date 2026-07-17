@@ -50,6 +50,36 @@ const (
 
 const unsupportedCapabilityReasonPrefix = "requires unsupported testing capabilities: "
 
+// isGo2CSRoot reports whether dir is a go2cs project-reference root — the directory the
+// $(go2csPath) MSBuild property points at, identified by the shared runtime living at
+// core\golib\golib.csproj beneath it.
+func isGo2CSRoot(dir string) bool {
+	if dir == "" {
+		return false
+	}
+
+	_, err := os.Stat(filepath.Join(dir, "core", "golib", "golib.csproj"))
+	return err == nil
+}
+
+// findGo2CSRootAbove walks dir's ancestor chain (inclusive) and returns the first go2cs
+// project-reference root, or "" when none exists above dir.
+func findGo2CSRootAbove(dir string) string {
+	for current := dir; ; {
+		if isGo2CSRoot(current) {
+			return current
+		}
+
+		parent := filepath.Dir(current)
+
+		if parent == current {
+			return ""
+		}
+
+		current = parent
+	}
+}
+
 type testDeclaration struct {
 	Name                 string   `json:"name"`
 	Kind                 string   `json:"kind"`
@@ -804,11 +834,17 @@ func writeTestProject(projectFile, projectName, namespace string, productionFile
 		}
 	}
 
+	// The template's last-resort go2csPath fallback must be a COMPLETE property value: an
+	// $(MSBuildThisFileDirectory)-anchored relative walk-up when one exists, else the absolute
+	// path on its own. filepath.Rel fails across Windows drive letters (an H:\ checkout with the
+	// default C:\Users\...\go2cs), and concatenating the absolute after the MSBuild prefix
+	// produced an unresolvable garbage path — the bare-clone CS0246 golib failure.
 	relativeGo2CSPath, relErr := filepath.Rel(filepath.Dir(projectFile), options.go2csPath)
-	if relErr != nil {
-		relativeGo2CSPath = options.go2csPath
+	if relErr == nil {
+		relativeGo2CSPath = "$(MSBuildThisFileDirectory)" + strings.TrimRight(filepath.ToSlash(relativeGo2CSPath), "/") + "/"
+	} else {
+		relativeGo2CSPath = strings.TrimRight(filepath.ToSlash(options.go2csPath), "/") + "/"
 	}
-	relativeGo2CSPath = strings.TrimRight(filepath.ToSlash(relativeGo2CSPath), "/") + "/"
 
 	var compileItems strings.Builder
 	compileFiles := append(append([]string{}, productionFiles...), testFiles...)

@@ -45,7 +45,7 @@
   <PropertyGroup Condition="'$(go2csPath)'==''">
     <go2csPath Condition="'$(Configuration)'!='Debug'">$(USERPROFILE)\go2cs\</go2csPath>
     <go2csPath Condition="'$(Configuration)'=='Debug' and '$(SolutionDir)'!=''">$(SolutionDir)</go2csPath>
-    <go2csPath Condition="'$(go2csPath)'==''">$(MSBuildThisFileDirectory)>>MARKER:TEST_GO2CS_RELATIVE_PATH<<</go2csPath>
+    <go2csPath Condition="'$(go2csPath)'==''">>>MARKER:TEST_GO2CS_RELATIVE_PATH<<</go2csPath>
   </PropertyGroup>
 
   <!-- Expose output of source generators as local files -->
