@@ -15,15 +15,9 @@ Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?
 verdict for verdict.** [`unicode/utf8`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf8)'s
 real test suite (Go 1.23.1) validates **14/14** through the new converted-test pipeline — transpiled to
 C#, built against the converted standard library, run under a Go-semantics test host, and differentially
-compared against a clean `go test -json` baseline. One week after "the whole standard library
-*compiles*," the answer to *"but does it **run**?"* has its first machine-checked proof — and you can
-[reproduce it yourself from a clone](#try-it-yourself--validate-a-converted-test-suite)
-(tag: `utf8-tests-green-2026-07-17`).
+compared against a clean `go test -json` baseline. The answer to *"but does it **run**?"* has its first [machine-checked proof](#try-it-yourself--validate-a-converted-test-suite).
 
-**➡ All announcements — this one in full, and everything back to 2020 — are in the
-[go2cs News Archive](NEWS.md).**
-
----
+**➡ All announcements can be found in the [go2cs News Archive](NEWS.md).**
 
 ## go2cs Purpose
 
@@ -31,6 +25,13 @@ Convert source code written in the [Go programming language](https://golang.org/
 [C#](https://learn.microsoft.com/dotnet/csharp/). The generated C# is designed to be both *behaviorally*
 and *visually* similar to the original Go — so a Go developer can read the converted code and follow it
 easily, and a .NET developer can use Go code directly within the .NET ecosystem.
+
+* Browse transpiled code: [Converted Go Standard Library](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted)
+* Learn how it works: [Go to C# Conversion Strategies](ConversionStrategies.md)
+* Compile in Visual Studio: [Go Standard Library Solution](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted.slnx)
+* Reproduce test validation: [Try it yourself](#try-it-yourself--validate-a-converted-test-suite)
+* View example converted test: [`utf8_test.cs`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8_test.cs)
+* See major project developments: [Milestones](README.md#milestones)
 
 ## Transpiler Goals
 

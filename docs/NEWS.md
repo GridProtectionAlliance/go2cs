@@ -2,13 +2,8 @@
 
 # 📰 go2cs News Archive
 
-Every project announcement, newest first — this file is the complete record. The latest item is always
-summarized at the top of the [README](README.md), with its full text kept here.
-
-> *This archive was assembled on 2026-07-17. Items before June 2026 are reconstructed from the
-> repository's git history — chiefly the README's former "News" sections — with their original
-> announcement dates preserved; tag and commit references point at the repository state each item
-> describes.*
+All project sannouncement, newest first. The latest item is always
+summarized at the top of the [README](README.md), its full text is kept here.
 
 ---
 
@@ -25,10 +20,6 @@ machine-checked proof — and it's one you can
 [reproduce yourself from a clone](README.md#try-it-yourself--validate-a-converted-test-suite)
 (tag: `utf8-tests-green-2026-07-17`). This is the Phase 4 operational era: **real Go tests, not
 compilation, are now the currency of correctness** — with `sort`, `strings`, and `bytes` next in line.
-
-* Read the passing converted tests: [`utf8_test.cs`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8_test.cs)
-* Reproduce the validation: [Try it yourself](README.md#try-it-yourself--validate-a-converted-test-suite)
-* See how it's built: [Milestones](README.md#milestones)
 
 *Tag: [`utf8-tests-green-2026-07-17`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/utf8-tests-green-2026-07-17)
 · commit `337a928df`*
@@ -63,10 +54,6 @@ above)! However, simple apps will run, try
 [converting a real-world module](README.md#converting-a-real-world-module). Read more about this
 [milestone's details](README.md#about-standard-library-compile-milestone) and
 [current status](README.md#status) in the README.
-
-* Browse transpiled code: [Converted Go Standard Library](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted)
-* Compile it yourself: [Visual Studio Go Standard Library Solution](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted.slnx)
-* Learn how it works: [Go to C# Conversion Strategies](ConversionStrategies.md)
 
 *Tag: [`stdlib-green-2026-07-10`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/stdlib-green-2026-07-10)
 · commit `51ba5d9cf`*
@@ -156,8 +143,7 @@ see the [GoUnity](https://github.com/ritchiecarroll/GoUnity) and
 
 ## August 29, 2020 — First full conversion of the Go standard library (ANTLR4 era)
 
-The initial conversion of the **full Go source library** completed without failing — the ANTLR4-era
-converter's first end-to-end pass over the entire standard library, committed to `src/go-src-converted`.
+The initial conversion of the **full Go source library** completed without failing — the converter's first end-to-end pass over the entire standard library, committed to `src/go-src-converted`.
 The warnings in that conversion's build log laid out the road map of the parsing and conversion work
 remaining. Converted code at the time targeted .NET Core 3.1 / C# 8.0, and simple conversions depended
 on `src/gocore` — the small, manually-converted subset of the Go library that survives today as the
