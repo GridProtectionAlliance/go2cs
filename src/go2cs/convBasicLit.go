@@ -179,8 +179,22 @@ func isValidCSharpRealLiteral(lit string) bool {
 		return false
 	}
 
-	if len(body) > 1 && body[0] == '0' && (body[1] == 'x' || body[1] == 'X') {
-		return false
+	if len(body) > 1 && body[0] == '0' {
+		// Go-only radix prefixes: hex (also hex FLOATS, `0x1p-2`), octal `0o…`, binary `0b…` —
+		// none lex as a C# real literal once the D/F suffix is appended (`0b101D` is CS1003;
+		// `0xabcD` is worse — a VALID hex integer with D as a digit). An imaginary-literal
+		// MANTISSA may be any Go int literal, which is how these reach a float context.
+		if c := body[1]; c == 'x' || c == 'X' || c == 'o' || c == 'O' || c == 'b' || c == 'B' {
+			return false
+		}
+
+		// LEGACY leading-zero forms (`0123`, `0_123`): octal-flavored Go int-literal source that
+		// C# would re-read as decimal — re-render as the exact decimal value instead, mirroring
+		// preserveGoIntLiteral's rule for the integer arm. (`0.25`/`0e5` pass through — '.'/'e'
+		// are not digits.)
+		if body[1] == '_' || (body[1] >= '0' && body[1] <= '9') {
+			return false
+		}
 	}
 
 	if i := strings.IndexByte(body, '.'); i != -1 && (i+1 >= len(body) || body[i+1] < '0' || body[i+1] > '9') {

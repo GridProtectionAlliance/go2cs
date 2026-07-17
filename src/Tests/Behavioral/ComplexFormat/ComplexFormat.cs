@@ -28,9 +28,9 @@ internal static void Main() {
     fmt.Printf("%v;%v\n"u8, c128, c64);
     fmt.Println("sprint:", fmt.Sprint(neg));
     fmt.Println(2748D.i());
-    fmt.Println(0o123D.i());
-    fmt.Println(0b101D.i());
-    fmt.Println(0123D.i());
+    fmt.Println(83D.i());
+    fmt.Println(5D.i());
+    fmt.Println(123D.i());
     fmt.Println(0D.i());
     fmt.Println(100D.i());
     fmt.Println(0.25D.i());
