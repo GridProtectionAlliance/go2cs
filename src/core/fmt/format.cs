@@ -57,7 +57,26 @@ public static partial class fmt_package
         if (arg is float floatValue && float.IsInfinity(floatValue))
             return floatValue > 0.0F ? "+Inf" : "-Inf";
 
+        // Go renders complex values as "(2+3i)" — each part formatted like a scalar float,
+        // imaginary part always signed — where the .NET ToString() forms are "<2; 3>"
+        // (System.Numerics.Complex) and "(2, 3)" (go.complex64)
+        if (arg is complex128 complex128Value)
+            return FormatComplex(ToString(complex128Value.Real), ToString(complex128Value.Imaginary));
+
+        if (arg is complex64 complex64Value)
+            return FormatComplex(ToString(complex64Value.Real), ToString(complex64Value.Imaginary));
+
+        if (arg is UntypedComplex untypedComplexValue)
+            return ToString((complex128)untypedComplexValue);
+
         return arg?.ToString() ?? "<nil>";
+    }
+
+    private static @string FormatComplex(string realText, string imaginaryText)
+    {
+        return imaginaryText[0] is '-' or '+' ?
+            $"({realText}{imaginaryText}i)" :
+            $"({realText}+{imaginaryText}i)";
     }
 
     public static void Print(params object[] args) =>

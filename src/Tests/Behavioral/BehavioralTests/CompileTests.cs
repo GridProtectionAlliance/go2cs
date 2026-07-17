@@ -189,6 +189,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckCombinedStructFields() => CheckTarget("CombinedStructFields");
 
     [TestMethod]
+    public void CheckComplexFormat() => CheckTarget("ComplexFormat");
+
+    [TestMethod]
     public void CheckComplexImaginaryShadow() => CheckTarget("ComplexImaginaryShadow");
 
     [TestMethod]
