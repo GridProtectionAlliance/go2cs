@@ -205,6 +205,25 @@ func isValidCSharpRealLiteral(lit string) bool {
 // A beyond-float64 value keeps the shortened String() form so the GoUntyped overflow path
 // (strconv.ParseFloat fails → writeUntypedConst) still triggers exactly as before.
 func exactFloatConstString(val constant.Value, source ast.Expr, isFloat32 bool) string {
+	lit := ""
+
+	if source != nil {
+		lit = floatLiteralSourceText(source)
+	}
+
+	return exactFloatText(val, lit, isFloat32)
+}
+
+// exactFloatText is the text-based core of exactFloatConstString, shared with the float and
+// imaginary literal arms of convBasicLit (which hold the literal's source text directly rather
+// than an initializer expression). It returns `lit` verbatim when that text is valid C# syntax
+// denoting the same value, and otherwise the shortest round-trip decimal at the value's width.
+// Passing lit == "" forces the re-rendered form.
+//
+// The float32 width rounds the EXACT constant straight to float32 (constant.Float32Val), never
+// float64-then-narrow: an exact hex-float mantissa that is not representable in either width
+// would otherwise round twice and can land a ULP off Go's single rounding.
+func exactFloatText(val constant.Value, lit string, isFloat32 bool) string {
 	f64, _ := constant.Float64Val(val)
 
 	if math.IsInf(f64, 0) {
@@ -220,15 +239,51 @@ func exactFloatConstString(val constant.Value, source ast.Expr, isFloat32 bool) 
 		target = float64(f32)
 	}
 
-	if source != nil {
-		if lit := floatLiteralSourceText(source); lit != "" && isValidCSharpRealLiteral(lit) {
-			if parsed, err := strconv.ParseFloat(lit, bitSize); err == nil && parsed == target {
-				return lit
-			}
+	if lit != "" && isValidCSharpRealLiteral(lit) {
+		if parsed, err := strconv.ParseFloat(lit, bitSize); err == nil && parsed == target {
+			return lit
 		}
 	}
 
 	return strconv.FormatFloat(target, 'g', -1, bitSize)
+}
+
+// goFloatLiteralText returns the C# real-literal text for a Go float literal's SOURCE text (for
+// an imaginary literal, its mantissa — the trailing `i` already stripped). A form C# also accepts
+// is kept VERBATIM, preserving the developer's own formatting per preserveGoIntLiteral's goal
+// (`1.5e-3` must not flatten to `0.0015`) and leaving every literal that compiles today byte-
+// identical. The Go-only forms C# cannot parse re-render as the shortest round-trip decimal at
+// the literal's RESOLVED width:
+//
+//   - a hex float (`0x1p-2`) — C# has no hex-float syntax at all. With an INTEGER mantissa
+//     (`0x10i`) the pasted-on suffix is worse than a syntax error: `0x10D` is a valid C# HEX
+//     INTEGER (269), so the emission silently changed the value.
+//   - a `.` not followed by a digit (`2.`, `1.e2`) — C# requires fractional digits after the
+//     decimal point.
+//
+// `val` is the go/types-folded constant — the authoritative value, already rounded as Go rounds
+// an untyped constant to its target type. When it is unavailable the source text is parsed
+// directly; strconv accepts every Go float literal form, including hex floats.
+func goFloatLiteralText(lit string, val constant.Value, isFloat32 bool) string {
+	if isValidCSharpRealLiteral(lit) {
+		return lit
+	}
+
+	if val != nil {
+		return exactFloatText(val, "", isFloat32)
+	}
+
+	bitSize := 64
+
+	if isFloat32 {
+		bitSize = 32
+	}
+
+	if parsed, err := strconv.ParseFloat(lit, bitSize); err == nil {
+		return strconv.FormatFloat(parsed, 'g', -1, bitSize)
+	}
+
+	return lit
 }
 
 // preserveGoIntLiteral returns the literal's SOURCE text when it is also a valid C# integer
@@ -324,7 +379,11 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 		isFloat32 := false
 		intForm := ""
 
+		var constVal constant.Value
+
 		if tv, ok := v.info.Types[basicLit]; ok && tv.Type != nil {
+			constVal = tv.Value
+
 			if basic, ok := tv.Type.Underlying().(*types.Basic); ok {
 				if basic.Info()&types.IsInteger != 0 && tv.Value != nil {
 					intForm = tv.Value.ExactString()
@@ -344,10 +403,10 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 		if intForm != "" {
 			result.WriteString(intForm)
 		} else if isFloat32 {
-			result.WriteString(value)
+			result.WriteString(goFloatLiteralText(value, constVal, true))
 			result.WriteRune('F')
 		} else {
-			result.WriteString(value)
+			result.WriteString(goFloatLiteralText(value, constVal, false))
 			result.WriteRune('D')
 		}
 	case token.IMAG:
@@ -371,7 +430,16 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 		// default (complex128) emits D.
 		isComplex64 := false
 
+		// The mantissa's own value — the folded constant is COMPLEX (`0x1p-2i` → 0+0.25i), so the
+		// text handed to goFloatLiteralText must be matched against its IMAGINARY part, not the
+		// whole complex value.
+		var mantissaVal constant.Value
+
 		if tv, ok := v.info.Types[basicLit]; ok && tv.Type != nil {
+			if tv.Value != nil {
+				mantissaVal = constant.Imag(tv.Value)
+			}
+
 			if basic, ok := tv.Type.Underlying().(*types.Basic); ok {
 				if basic.Kind() == types.Complex64 {
 					isComplex64 = true
@@ -389,9 +457,9 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 		if !endsWith_i {
 			result.WriteString(value)
 		} else if isComplex64 {
-			result.WriteString(fmt.Sprintf("builtin.i(%sF)", value))
+			result.WriteString(fmt.Sprintf("builtin.i(%sF)", goFloatLiteralText(value, mantissaVal, true)))
 		} else {
-			result.WriteString(fmt.Sprintf("builtin.i(%sD)", value))
+			result.WriteString(fmt.Sprintf("builtin.i(%sD)", goFloatLiteralText(value, mantissaVal, false)))
 		}
 	case token.CHAR:
 		value = replaceOctalChars(value)

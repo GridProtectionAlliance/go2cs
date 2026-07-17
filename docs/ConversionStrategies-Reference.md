@@ -298,6 +298,18 @@ float32 b = -3.5F;
 
 The same resolved type drives the **imaginary literal**'s golib overload choice: `builtin.i(…F)` returns a `complex64` and `builtin.i(…D)` a `complex128`, so the suffix follows the literal's resolved complex type — replacing the earlier fits-in-float32 heuristic, which routed `0.1i` in a `complex128` context through `complex64` and silently lost precision (`(double)(0.1f) != 0.1`). (Guarded by the `UntypedConstFloatContext` behavioral test — the shapes above plus nested parens, quotient operands, `min`/`max`, `real`/`imag` round-trips, and a named-`float32` context, values verified vs Go.)
 
+**Go-only float literal forms re-render as decimal.** The suffix decisions above choose *what type* a literal is; independently, its *text* must be a form C# can parse. Both literal arms emit the Go **source text verbatim** whenever C# shares the form — the same visually-similar goal that keeps `0x4000` from flattening to `16384`, so `1.5e-3` stays `1.5e-3D` — but two Go float forms have no C# spelling and must re-render as the shortest round-trip decimal (`strconv.FormatFloat 'g'/-1`) of the go/types-folded constant:
+
+| Go | Was emitted | Now |
+|---|---|---|
+| `0x1p-2` | `0x1p-2D` — CS1002, C# has no hex-float syntax | `0.25D` |
+| `2.` / `1.e2` | `2.D` / `1.e2D` — C# requires digits after the point | `2D` / `100D` |
+| `0x10i` | `builtin.i(0x10D)` — **silently 269** | `builtin.i(16D)` |
+
+The imaginary row is the dangerous one: `0x10D` is a *valid* C# hex integer literal, so the pasted-on suffix changed the value with no diagnostic rather than failing to compile. An imaginary literal's mantissa is matched against `constant.Imag` of its folded (complex) value, never the whole constant.
+
+The re-render rounds the **exact** constant straight to the literal's resolved width (`constant.Float32Val` for a `float32`/`complex64` context), never float64-then-narrow: `var j float32 = 0x1.0000010000000000001p0` is 1 + 2⁻²⁴ + a residue, so double rounding lands exactly halfway and ties-to-even *down* to `1`, while Go's single rounding sees the residue and rounds up to `1.0000001`. These forms are absent from the non-test stdlib corpus but routine in Go's own `_test.go` files (the math tests) and in user code. The shared predicate (`isValidCSharpRealLiteral`) is the same one the constant-declaration path above uses. (Guarded by the `GoOnlyFloatLiteralForms` behavioral test — hex floats, trailing-dot and `1.e2` forms in `float64`/`float32` contexts, hex-float/hex-integer/trailing-dot imaginary literals in `complex128`/`complex64` contexts, the double-rounding case above, and decimal controls proving verbatim round-trip; values verified vs Go.)
+
 A native-sized integer constant (`nint`/`nuint`, including the `uintptr` alias) whose value does not fit a C# constant of that type — e.g. `const MaxUintptr = ^uintptr(0)` (= `0xFFFFFFFFFFFFFFFF`), a `ulong` literal that needs a *non-constant* `nuint` conversion — cannot be a C# `const` (CS0133/CS0266). It is emitted as `static readonly` with an `unchecked` cast instead (small native-int consts like `const nint iota = 0` stay `const`):
 
 ```csharp

@@ -421,6 +421,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGoNamespaceShadow() => CheckTarget("GoNamespaceShadow");
 
     [TestMethod]
+    public void CheckGoOnlyFloatLiteralForms() => CheckTarget("GoOnlyFloatLiteralForms");
+
+    [TestMethod]
     public void CheckGoStmtReceiverLambda() => CheckTarget("GoStmtReceiverLambda");
 
     [TestMethod]
