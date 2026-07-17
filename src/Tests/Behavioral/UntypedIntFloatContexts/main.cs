@@ -1,0 +1,36 @@
+namespace go;
+
+using fmt = fmt_package;
+
+partial class main_package {
+
+internal static readonly UntypedInt pkgConst = 1000;
+
+internal static readonly UntypedInt hugeConst = /* 1 << 63 */ 9223372036854775808;
+
+internal static void Main() {
+    UntypedInt m = 3;
+    nint i = m;
+    float64 fl = m;
+    float32 f32 = m;
+    fmt.Println(i, fl, f32);
+    float64 half = m;
+    fmt.Println(half / 2);
+    float64 pf = pkgConst;
+    nint pi = pkgConst;
+    fmt.Println(pf / 8, pi);
+    UntypedInt scale = /* 1 << 60 */ 1152921504606846976;
+    float64 sf = scale;
+    float64 hf = hugeConst;
+    uint64 hu = hugeConst;
+    fmt.Println(hf / sf, hu);
+    complex128 c = m;
+    complex64 c64 = m;
+    fmt.Println(real(c), imag(c), real(c64));
+    UntypedInt neg = -7;
+    float64 nf = neg;
+    nint ni = neg;
+    fmt.Println(nf / 2, ni);
+}
+
+} // end main_package

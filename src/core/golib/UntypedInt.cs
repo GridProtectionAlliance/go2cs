@@ -34,6 +34,10 @@ public readonly struct UntypedInt : IEquatable<UntypedInt>
     // 64-bit value of the struct 'UntypedInt'
     private readonly int64 m_value;
 
+    // Payload bits originated from an unsigned 64-bit constant (e.g., a ulong literal like
+    // 18446744073709551615) -- m_value must be reinterpreted as uint64 for value conversions
+    private readonly bool m_unsigned;
+
     /// <summary>
     /// Creates a new <see cref="UntypedInt"/> from <c>int64</c> value.
     /// </summary>
@@ -48,6 +52,7 @@ public readonly struct UntypedInt : IEquatable<UntypedInt>
     public UntypedInt(uint64 value)
     {
         m_value = CastFrom(value);
+        m_unsigned = true;
     }
 
     // Perform bitwise cast from T to int64
@@ -66,6 +71,12 @@ public readonly struct UntypedInt : IEquatable<UntypedInt>
         return *(T*)sourceBits;
     }
 
+    // Value (not bitwise) interpretation of the payload for floating-point conversions --
+    // a Go untyped int used in a floating-point context converts by value
+    private float32 ToFloat32() => m_unsigned ? (float32)CastTo<uint64>(m_value) : (float32)m_value;
+
+    private float64 ToFloat64() => m_unsigned ? (float64)CastTo<uint64>(m_value) : (float64)m_value;
+
     public bool Equals(UntypedInt other) => m_value == other.m_value;
 
     public override bool Equals(object? obj)
@@ -83,10 +94,10 @@ public readonly struct UntypedInt : IEquatable<UntypedInt>
             uint16 value => Equals(value),
             uint32 value => Equals(value),
             uint64 value => Equals(value),
-            float32 value => Equals(value),
-            float64 value => Equals(value),
-            complex64 value => Equals(value),
-            complex128 value => Equals(value),
+            float32 value => ToFloat64() == value,
+            float64 value => ToFloat64() == value,
+            complex64 value => value == (complex64)this,
+            complex128 value => value == (complex128)this,
             _ => false
         };
     }
@@ -113,7 +124,7 @@ public readonly struct UntypedInt : IEquatable<UntypedInt>
 
     public static UntypedInt operator %(UntypedInt left, UntypedInt right) => left.m_value % right.m_value;
 
-    public override string ToString() => m_value.ToString();
+    public override string ToString() => m_unsigned ? CastTo<uint64>(m_value).ToString() : m_value.ToString();
 
     public static bool operator ==(UntypedInt left, UntypedInt right) => left.Equals(right);
 
@@ -145,7 +156,7 @@ public readonly struct UntypedInt : IEquatable<UntypedInt>
     public static implicit operator int64(UntypedInt value) => value.m_value;
 
     // Handle implicit conversions between 'nuint' and struct 'UntypedInt'
-    public static implicit operator UntypedInt(nuint value) => new(CastFrom(value));
+    public static implicit operator UntypedInt(nuint value) => new((uint64)value);
 
     public static implicit operator nuint(UntypedInt value) => CastTo<nuint>(value.m_value);
 
@@ -165,29 +176,29 @@ public readonly struct UntypedInt : IEquatable<UntypedInt>
     public static implicit operator uint32(UntypedInt value) => (uint32)value.m_value;
 
     // Handle implicit conversions between 'uint64' and struct 'UntypedInt'
-    public static implicit operator UntypedInt(uint64 value) => new(CastFrom(value));
+    public static implicit operator UntypedInt(uint64 value) => new(value);
 
     public static implicit operator uint64(UntypedInt value) => CastTo<uint64>(value.m_value);
 
     // Handle implicit conversions between 'float32' and struct 'UntypedInt'
-    public static implicit operator UntypedInt(float32 value) => new(CastFrom(value));
+    public static implicit operator UntypedInt(float32 value) => new((int64)value);
 
-    public static implicit operator float32(UntypedInt value) => CastTo<float32>(value.m_value);
+    public static implicit operator float32(UntypedInt value) => value.ToFloat32();
 
     // Handle implicit conversions between 'float64' and struct 'UntypedInt'
-    public static implicit operator UntypedInt(float64 value) => new(CastFrom(value));
+    public static implicit operator UntypedInt(float64 value) => new((int64)value);
 
-    public static implicit operator float64(UntypedInt value) => CastTo<float64>(value.m_value);
+    public static implicit operator float64(UntypedInt value) => value.ToFloat64();
 
     // Handle implicit conversions between 'complex64' and struct 'UntypedInt'
-    public static implicit operator UntypedInt(complex64 value) => new(CastFrom(value.Real));
+    public static implicit operator UntypedInt(complex64 value) => new((int64)value.Real);
 
-    public static implicit operator complex64(UntypedInt value) => CastTo<float32>(value.m_value);
+    public static implicit operator complex64(UntypedInt value) => value.ToFloat32();
 
     // Handle implicit conversions between 'complex128' and struct 'UntypedInt'
-    public static implicit operator UntypedInt(complex128 value) => new(CastFrom(value.Real));
+    public static implicit operator UntypedInt(complex128 value) => new((int64)value.Real);
 
-    public static implicit operator complex128(UntypedInt value) => CastTo<float64>(value.m_value);
+    public static implicit operator complex128(UntypedInt value) => value.ToFloat64();
 
     // Handle comparisons between 'nil' and struct 'UntypedInt'
     public static bool operator ==(UntypedInt value, NilType nil) => value.Equals(default);

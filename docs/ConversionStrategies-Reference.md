@@ -215,6 +215,18 @@ internal static readonly UntypedInt win = 100;
 public static readonly UntypedInt N = /* 11 + 1 */ 12;
 ```
 
+**Wrapper conversions are VALUE conversions in every direction.** `UntypedInt` stores its payload as
+`int64` bits (so a `ulong`-range literal like `9223372036854775808` round-trips through the same 8 bytes),
+and its float/complex operators originally *bit-reinterpreted* that payload — `var fl float64 = m` (m an
+untyped `3`) produced `1.5e-323`, the denormal double whose bit pattern is 3, instead of `3`. The
+float32/float64/complex64/complex128 operators now convert by **value**, like every integer-direction
+operator always did. Because the payload can be unsigned-flavored (a beyond-int64 `ulong` literal such as
+`1 << 63` uses the `uint64` constructor — bits identical to a signed `-9223372036854775808`), the wrapper
+carries a payload-kind discriminator so a float conversion keeps the uint64 magnitude and `ToString()`
+prints it unsigned. (Guarded by the `UntypedIntFloatContexts` behavioral test — one local const used in
+both int and float contexts, the `1<<63` unsigned payload, complex contexts via `real`/`imag`, and a
+negative payload, values verified vs Go.)
+
 A Go untyped *float* constant defaults to `float64`, so its C# literal carries the double suffix `D` — not `F` — regardless of whether the value happens to fit in `float32`. (Emitting `F` whenever the value fit would make `z := 1.0` a `float`, breaking later `float64` arithmetic with CS0266.) A literal in an explicit `float32` context keeps `F`:
 
 ```go
