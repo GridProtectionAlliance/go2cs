@@ -1230,6 +1230,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckVarNamedAsType() => CheckTarget("VarNamedAsType");
 
     [TestMethod]
+    public void CheckVersionedImport() => CheckTarget("VersionedImport");
+
+    [TestMethod]
     public void CheckWrittenCaptureParam() => CheckTarget("WrittenCaptureParam");
 
     // </TestMethods>

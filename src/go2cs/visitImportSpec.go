@@ -447,3 +447,20 @@ func convertImportPathToNamespace(importPath string, packageSuffix string) strin
 
 	return strings.Join(importPathParts, ".")
 }
+
+// packageClassPath returns pkgPath with its FINAL segment replaced by the Go package NAME — the
+// segment the package's emitted C# class (`<name>_package`) is named for. The two agree for nearly
+// every package (a Go package is named for its directory), so this normally returns pkgPath
+// unchanged; they differ when the path tail is a major-version directory (math/rand/v2 is
+// `package rand`: class rand_package under namespace go.math.rand, so a string-path renderer that
+// composes a `<path>_package.<Type>` intermediate from the raw path targets the nonexistent
+// `v2_package` — CS0426/CS0234, sort's test suite importing math/rand/v2) or a module directory
+// named differently from its package (github.com/mattn/go-isatty is `package isatty`). Unlike the
+// convention-based /vN branch above, this works from the type graph's authoritative package name.
+func packageClassPath(pkgPath string, pkgName string) string {
+	if idx := strings.LastIndex(pkgPath, "/"); idx != -1 && pkgPath[idx+1:] != pkgName {
+		return pkgPath[:idx+1] + pkgName
+	}
+
+	return pkgPath
+}

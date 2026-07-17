@@ -3405,10 +3405,42 @@ variadic assert invoked through the asserted value, a negative assert on a non-f
 non-variadic anonymous func assert, output-compared vs Go.)
 
 ### Major-version import directories
-A `/vN` import path segment (math/rand/v2) hosts a package named for the PARENT segment, and
-the emitted class follows the package NAME: consumers reference `math.rand.rand_package`, not
-the path-derived `v2_package` (CS0234). Centralized in `convertImportPathToNamespace`, so
-every consumer-side derivation (using aliases, attribute references, FQ renderings) agrees.
+A `/vN` import path segment (math/rand/v2) hosts a package named for the PARENT segment, so the
+emitted class follows the package NAME: consumers reference `go.math.rand.rand_package`, and the
+namespace is `go.math.rand` — never the path-derived `v2_package` / `go.math.rand.v2`. Go's own
+convention (the directory is a version marker, not the package identifier) means the package name
+equals the second-to-last path segment, and every place the converter derives a class/namespace/
+alias from a `/vN` import path must honor it. There are **four** such derivations, reached by
+different renderers, and each needed the convention applied at its own site:
+
+1. **`using`-alias + namespace emission** — `convertImportPathToNamespace` (`visitImportSpec.go`)
+   rewrites the last path part to the parent segment via `majorVersionSegmentRegex`, so the file's
+   `using rand = go.math.rand.rand_package;` and the package's own `namespace go.math.rand` agree.
+2. **`t.String()`-based FQ type rendering** — `getTypeName` / `getFullTypeName` (`main.go`) build a
+   foreign type's name from the type graph's path-qualified string, whose last segment slash-strip
+   assumes the path tail IS the package qualifier. For a `/vN` tail it left the version behind
+   (`math/rand/v2.Rand` → `v2.Rand`), which the alias-prepend then doubled into `rand.v2.Rand`
+   (`v2` read as a member of class `rand_package` — CS0426). Both renderers now reduce the foreign
+   import-PATH qualifier to the package NAME before the slash-strip. `getFullTypeName` also composes
+   `pkg.Path()+"_package"` directly for the qualified base name — routed through `packageClassPath`,
+   which swaps a `/vN` tail for the Go package name.
+3. **Cross-package reference metadata** — `PackageInfo.RootPackageName` (`importOperations.go`) is the
+   code-facing qualifier that keys imported-alias loading and the foreign-implement records that cast
+   sites reference (`GoImplement<…rand_package.PCG, …rand_package.Source>(Pointer = true)`). It was the
+   path's last segment (`v2`); `rootPackageNameFromPathParts` now returns the parent segment for a
+   `/vN` tail. `PackageName` stays path-formed — it also names the referenced `.csproj`, which IS
+   `math.rand.v2.csproj`.
+4. **Imported type-alias TARGET class** — `loadImportedTypeAliases` (`importOperations.go`) qualifies
+   an imported alias's target as `go.<PackageName>_package.<Type>`; the class path is `PackageName`
+   with its final segment replaced by `RootPackageName`, so a `/vN` producer's exported aliases
+   resolve to `rand_package`, not `v2_package`.
+
+The convention is that a package literally named `vN` would instead need the type-graph name; the
+stdlib has none, so the regex/parent-segment rule holds corpus-wide. Guarded by the `VersionedImport`
+behavioral test — a `main` importing a sibling `vlib/v2` module (`package vlib`) that mirrors
+math/rand/v2's shape: a struct field `ж<vlib.Rand>` (renderer #2), a `*PCG → Source` pointer cast
+recorded as `go.vlib.vlib_package.PCG` (#3/#4), output-compared vs `go run` across all four phases.
+This is what unblocks sort as Phase 4's second validated package (its test suite imports math/rand/v2).
 
 ### A non-canonically-aliased import renders foreign types via the file's alias
 A file that imports a package under an **explicit alias that differs from the canonical package

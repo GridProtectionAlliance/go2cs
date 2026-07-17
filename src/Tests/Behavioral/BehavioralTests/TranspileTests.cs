@@ -1227,6 +1227,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckVarNamedAsType() => CheckTarget("VarNamedAsType");
 
     [TestMethod]
+    public void CheckVersionedImport() => CheckTarget("VersionedImport");
+
+    [TestMethod]
     public void CheckWrittenCaptureParam() => CheckTarget("WrittenCaptureParam");
 
     // </TestMethods>

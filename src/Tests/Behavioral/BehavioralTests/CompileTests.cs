@@ -1227,6 +1227,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckVarNamedAsType() => CheckTarget("VarNamedAsType");
 
     [TestMethod]
+    public void CheckVersionedImport() => CheckTarget("VersionedImport");
+
+    [TestMethod]
     public void CheckWrittenCaptureParam() => CheckTarget("WrittenCaptureParam");
 
     // </TestMethods>

@@ -1144,6 +1144,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckVarNamedAsType() => CheckTarget("VarNamedAsType");
 
     [TestMethod]
+    public void CheckVersionedImport() => CheckTarget("VersionedImport");
+
+    [TestMethod]
     public void CheckWrittenCaptureParam() => CheckTarget("WrittenCaptureParam");
 
     // </TestMethods>

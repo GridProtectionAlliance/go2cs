@@ -4427,6 +4427,7 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 
 	var pkgPrefix string
 	var plainPkgPrefix string
+	var foreignPathPrefix string
 
 	if named, ok := t.(*types.Named); ok {
 		obj := named.Obj()
@@ -4448,6 +4449,7 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 
 			pkgPrefix = aliasQualifier + "."
 			plainPkgPrefix = pkg.Name() + "."
+			foreignPathPrefix = pkg.Path() + "."
 		}
 	}
 
@@ -4467,6 +4469,17 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	// stripping only the first leaves a self-qualified one (which then also trips the slash
 	// handling below for slash-bearing package paths like internal/platform → CS0246).
 	typeName = strings.ReplaceAll(typeName, packagePathPrefix, "")
+
+	// A FOREIGN named type's t.String() carries its full import-PATH qualifier; reduce it to the
+	// package NAME here, because the generic last-segment slash-strip below assumes the path's
+	// last segment IS the package qualifier. When the two differ — a major-version path tail —
+	// the strip leaves the version segment behind as a phantom qualifier (`math/rand/v2.Rand` →
+	// `v2.Rand`) and the alias prepend below then doubles it into `rand.v2.Rand` (`v2` read as a
+	// member of class rand_package — CS0426, sort's test suite). An equal-name path reduces to
+	// exactly what the slash-strip produced, so every existing emission is unchanged.
+	if len(foreignPathPrefix) > 0 && strings.HasPrefix(typeName, foreignPathPrefix) {
+		typeName = plainPkgPrefix + typeName[len(foreignPathPrefix):]
+	}
 
 	// The slash-strip below reduces a remaining cross-package import path to its last segment
 	// (`internal/platform.Foo` → `platform.Foo`). It must NOT touch a composite type string whose
@@ -4563,7 +4576,7 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 		// `go.text.template_package.FuncMap`). getTypeName and collectCrossPackagePaths already key on
 		// identity (`pkg != v.pkg`); align this path with them.
 		if pkg != nil && pkg != v.pkg {
-			baseName := getSanitizedImport(pkg.Path()+PackageSuffix) + "." + getSanitizedImport(obj.Name())
+			baseName := getSanitizedImport(packageClassPath(pkg.Path(), pkg.Name())+PackageSuffix) + "." + getSanitizedImport(obj.Name())
 
 			// Append type arguments for an instantiated cross-package generic type (e.g.
 			// atomic.Pointer[Config]). The qualified-name form above omits them, whereas the

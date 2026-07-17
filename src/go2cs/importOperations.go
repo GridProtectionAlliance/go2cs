@@ -237,12 +237,11 @@ func getImportPackageInfo(importPaths []string, options Options) map[string]Pack
 		packageName := strings.Join(importPathParts, ".")
 		projectReference := filepath.Join(strings.ReplaceAll(targetDir, "/", "\\"), "\\"+packageName+".csproj")
 		targetDir = strings.ReplaceAll(targetDir, "$(go2csPath)", options.go2csPath+string(os.PathSeparator))
-		packageNameParts := strings.Split(packageName, ".")
 
 		result[importPath] = PackageInfo{
 			IsStdLib:         isStdLib,
 			PackageName:      packageName,
-			RootPackageName:  packageNameParts[len(packageNameParts)-1],
+			RootPackageName:  rootPackageNameFromPathParts(importPathParts),
 			SourceDir:        sourceDir,
 			TargetDir:        targetDir,
 			ProjectReference: projectReference,
@@ -250,6 +249,23 @@ func getImportPackageInfo(importPaths []string, options Options) map[string]Pack
 	}
 
 	return result
+}
+
+// rootPackageNameFromPathParts derives the Go package NAME from a path-resolved import's
+// segments. Normally the last segment, but a major-version tail (/vN) is a version marker,
+// not the package — math/rand/v2 is `package rand`, named for the PARENT segment.
+// RootPackageName is the code-facing qualifier (imported-alias keys, foreign-implement
+// record keys keyed by the name cast sites use), so it must carry the package name;
+// PackageName keeps the full path form (it names the referenced .csproj, which IS
+// math.rand.v2.csproj).
+func rootPackageNameFromPathParts(pathParts []string) string {
+	last := pathParts[len(pathParts)-1]
+
+	if len(pathParts) > 1 && majorVersionSegmentRegex.MatchString(last) {
+		return pathParts[len(pathParts)-2]
+	}
+
+	return last
 }
 
 // getLocalModulePackageInfo resolves cross-package reference info for a LOCAL/USER module import that
@@ -273,14 +289,14 @@ func getLocalModulePackageInfo(importPath string, options Options) (PackageInfo,
 
 	if isPathUnder(meta.Dir, goRootSrc) {
 		targetDir := pathReplace(meta.Dir, goRootSrc, "$(go2csPath)core")
-		packageName := strings.Join(strings.Split(importPath, "/"), ".")
+		importPathParts := strings.Split(importPath, "/")
+		packageName := strings.Join(importPathParts, ".")
 		projectReference := filepath.Join(strings.ReplaceAll(targetDir, "/", "\\"), "\\"+packageName+".csproj")
-		packageNameParts := strings.Split(packageName, ".")
 
 		return PackageInfo{
 			IsStdLib:         true,
 			PackageName:      packageName,
-			RootPackageName:  packageNameParts[len(packageNameParts)-1],
+			RootPackageName:  rootPackageNameFromPathParts(importPathParts),
 			SourceDir:        meta.Dir,
 			TargetDir:        strings.ReplaceAll(targetDir, "$(go2csPath)", options.go2csPath+string(os.PathSeparator)),
 			ProjectReference: projectReference,
@@ -460,7 +476,21 @@ func loadImportedTypeAliases(info PackageInfo) {
 
 	if err == nil {
 		rootPackageName := getSanitizedIdentifier(info.RootPackageName)
-		packageName := getCoreSanitizedIdentifier(info.PackageName)
+
+		// The alias TARGET names the imported package's converted CLASS — `go.<N>_package` where N is
+		// info.PackageName with its final segment replaced by the Go package NAME. The two agree except
+		// for a major-version path tail: math/rand/v2's class path is math.rand.rand (class
+		// rand_package), while the path-derived math.rand.v2 targets the nonexistent v2_package
+		// (CS0426). info.PackageName itself stays path-formed — it also names the referenced .csproj.
+		classPath := info.PackageName
+
+		if idx := strings.LastIndex(classPath, "."); idx != -1 {
+			classPath = classPath[:idx+1] + info.RootPackageName
+		} else {
+			classPath = info.RootPackageName
+		}
+
+		packageName := getCoreSanitizedIdentifier(classPath)
 
 		// A collision-renamed type whose renamed form is ITSELF an exported alias produces a TWO-HOP
 		// chain in the producer's package_info: encoding/json's `Token` type collides with
