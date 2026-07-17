@@ -112,6 +112,50 @@ abi-accessibility errors exist under the current absolute-path pipeline.
   argument-position and literal-only-arm literals keep the plain form). Guards:
   `NativeIntWideConstElement` + `FuncLitUntypedConstReturn`, both discriminating — reverted-fix
   runs fail with exactly the mapped errors (CS1503 long→nint; CS1503 `Func<int, UntypedInt>`).
+- **B4/B5 + B2c: FIXED** (worktree branch `claude/trusting-engelbart-161588`) — converter-only,
+  as ruled. (a) The EXTERNAL variant's GoImplement/GoImplicitConv records now split across TWO
+  anchors: test-anchored records (bare test-local impls, every non-production ж pointer adapter,
+  adapter-class-marked ᴠ pairs) land in a NEW compilation unit `package_info_test.cs` whose
+  first — and only — class is the test package class (bare partial, no `[GoPackage]` — that
+  stays on `package_test_info.cs`'s appended block, CS0579), so the generators host their
+  output where test-file cast sites resolve it; production-qualified records keep the
+  production anchor. The `_test.cs` suffix free-rides the committed `*_test.cs` production
+  exclusions — no shared-csproj-template edit (which would churn every behavioral csproj).
+  The unit is only written when the variant records test-anchored attrs — utf8's committed
+  shape is byte-identical (re-validated 14/14, git clean). (b) Same-assembly naming coherence:
+  the production-under-test package's pairs are pre-loaded from its seeded package_info.cs, so
+  production-type pointer casts reference the seeded adapter through the aliased qualifier
+  (`sort.XжIface`, not the never-generated `sort_XжIface`), value casts fall through to the
+  plain emission the partial-struct route implements (`sort_IntSliceᴠInterface` ᴠ-adapters are
+  never generated for same-assembly types), and interface-source adapters compose unprefixed —
+  in every case matching what ImplementGenerator (foreign = containing-ASSEMBLY) actually
+  emits. (c) B2c: `using`-alias lines in the final test metadata are scanned for `go.`-rooted
+  `_package` namespace tokens, reverse-mapped through the transitive import closure (the same
+  `/vN`-collapsing renderer that emitted them), and any target not directly referenced gets a
+  direct F15-mapped project reference (sort: `internal/abi`); manifest dependencies stay
+  import-derived. Guards: `TestExternalVariantRecordPartitionAnchors`,
+  `TestWriteExternalVariantMetadataSplitsAnchors`,
+  `TestAliasReferenceImportsAddsTransitiveAliasTargets`. CNR byte-identical ×399.
+- **Sort's wall after B4/B5 + B2c (wave 2 — method-body errors the declaration errors had
+  MASKED; Roslyn skips method-body binding while declaration errors exist, so these were
+  invisible to every earlier probe):** 23 errors, sort still does NOT build. New rows:
+  - **B9 (new, M?):** 14 × CS1501 — sort_test.go dot-imports sort AND example_keys_test.go
+    declares a METHOD `Sort` on its `By` type; Go keeps those namespaces separate, but the
+    converted method becomes a static `Sort(this By, …)` member of `sort_test_package`, and
+    C# member lookup prefers the enclosing class's method group over `using static` imports —
+    every dot-imported `Sort(x)` call binds the wrong group. Name-collision family (B2's
+    cousin: production symbols must also be pinned against test-package METHOD names under
+    dot-import).
+  - **B10 (new, S-M):** 6 × CS1503 — delegate-typed argument mismatches: named func type `By`
+    passed where the emitted parameter is the raw `Func<ж<Planet>, ж<Planet>, bool>`
+    (example_keys_test.cs:29), and method groups passed where `Action<sort_package.Interface>`
+    is expected (5 sites, sort_test.cs 569/784/821/829 + one more in the same family).
+  - **B7a-family:** 2 × CS1503 numeric-constant typing (`long`→`nint` sort_test.cs:769 = B7a
+    exactly; `double`→`nint` search_test.cs:49 is a float-typed sibling).
+  - **B6-gap (XS):** 1 × CS1929 — the shim's compile-only `B` surface lacks `Skip`
+    (sort_test.cs:791 `b.Skip(…)`); add the no-op + ж\<B\> overload beside the existing eight.
+  Sort's dir was fully restored after measurement (validated-package policy: only a validating
+  package commits its test sources).
 
 ## Cross-cutting lessons
 

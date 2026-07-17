@@ -2705,6 +2705,23 @@ func (v *Visitor) isLocalImplType(t types.Type) bool {
 	return false
 }
 
+// isSameAssemblyPkg reports whether pkg's converted C# compiles into the SAME assembly as the
+// package currently being converted. Ordinarily that is just v.pkg, but under -tests an
+// EXTERNAL test variant (package <name>_test) RECOMPILES the production sources into the test
+// assembly (TestingInfrastructureRequirements §2.1/§4.2), so the package under test is
+// same-assembly even though it is a different Go package. Adapter naming keys off this
+// distinction: the go2cs-gen generators decide "foreign" by CONTAINING ASSEMBLY (a local
+// declaration resolves), so the converter's cast-site references must agree or the two compose
+// different adapter class names (B4/B5 — `strings_BuilderжWriter` referenced,
+// `BuilderжWriter` generated).
+func (v *Visitor) isSameAssemblyPkg(pkg *types.Package) bool {
+	if pkg == v.pkg {
+		return true
+	}
+
+	return v.options.testPackagePath != "" && pkg != nil && pkg.Path() == v.options.testPackagePath
+}
+
 func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType types.Type, exprResult string) string {
 	// Track interface types that need to an implementation mapping
 	// to properly handle duck typed Go interface implementations
@@ -2868,12 +2885,21 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 	// generator emits a local VALUE ADAPTER class wrapping a COPY (Go value semantics)
 	// instead of the impossible foreign partial (exec_posix p.Signal(Kill), CS1503).
 	// Gate to a NAMED foreign type - tuples/other shapes must not record (the first cut
-	// wrapped a destructured tuple result in a phantom adapter).
+	// wrapped a destructured tuple result in a phantom adapter). The -tests
+	// production-under-test package is carved out (B4/B5): its types are a foreign Go
+	// PACKAGE but compile into the SAME test assembly, so the generator takes the
+	// partial-struct route for them and a ᴠ value-adapter class is never emitted —
+	// referencing one is CS0246 (sort_test's `sort_IntSliceᴠInterface`).
 	targetIsForeignNamed := false
+	targetIsSameAssemblyForeign := false
 
 	if named, ok := types.Unalias(targetType).(*types.Named); ok {
 		if pkg := named.Obj().Pkg(); pkg != nil && pkg != v.pkg {
-			targetIsForeignNamed = true
+			if v.isSameAssemblyPkg(pkg) {
+				targetIsSameAssemblyForeign = true
+			} else {
+				targetIsForeignNamed = true
+			}
 		}
 	}
 
@@ -2915,6 +2941,37 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 		}
 	}
 
+	// A VALUE conversion of the PRODUCTION-UNDER-TEST package's type from an EXTERNAL test file
+	// (sort_test's `Sort(IntSlice(data))`, B4/B5): the type's declaration compiles into this
+	// same test assembly, so the pair is realized by the partial-struct route — record it
+	// (production-qualified, so the metadata write anchors it to the production class where the
+	// declaration lives) unless the production package already records the pair itself (its
+	// package_info.cs pairs are loaded by convertTestVariant), and let the cast site fall
+	// through to the plain value emission the production package's own local casts use.
+	recordableValueSameAssembly := false
+
+	if recordableBase && !pointerTarget && targetIsSameAssemblyForeign {
+		if named, ok := types.Unalias(targetType).(*types.Named); ok {
+			if pkg := named.Obj().Pkg(); pkg != nil {
+				ifacePkgName := pkg.Name()
+
+				if ifaceNamed, ok := types.Unalias(interfaceType).(*types.Named); ok {
+					if ifacePkg := ifaceNamed.Obj().Pkg(); ifacePkg != nil {
+						ifacePkgName = ifacePkg.Name()
+					}
+				}
+
+				key := fmt.Sprintf("%s|%s|%s", getSanitizedIdentifier(pkg.Name()),
+					removeSanitizationMarker(getCoreSanitizedIdentifier(named.Obj().Name())),
+					canonicalRecordIfaceName(interfaceTypeName, ifacePkgName))
+
+				packageLock.Lock()
+				recordableValueSameAssembly = !importedValueImplements.Contains(key)
+				packageLock.Unlock()
+			}
+		}
+	}
+
 	if recordableInterface && !targetIsOpenGeneric {
 		packageLock.Lock()
 
@@ -2931,7 +2988,7 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 		packageLock.Unlock()
 	}
 
-	if (recordable || recordableValueForeign) && !targetIsOpenGeneric {
+	if (recordable || recordableValueForeign || recordableValueSameAssembly) && !targetIsOpenGeneric {
 		// A POINTER-sourced cast records the ж<T>-wrapped name; the attribute emission unwraps
 		// it to `GoImplement<T, Iface>(Pointer = true)`, which generates the IжAdapter wrapper
 		// instead of the value-boxing partial struct (see convert-to-interface emission below).
@@ -3051,8 +3108,12 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 	if recordableInterface && exprResult != "" {
 		adapterSource := targetTypeName
 
+		// A SAME-ASSEMBLY source interface (the -tests production-under-test package, B4/B5)
+		// composes UNPREFIXED: the generator's foreign check is by containing assembly, so it
+		// generates the bare composed name — and the record is adapter-class-marked, so the
+		// -tests metadata split anchors it in the test package unit where the bare name resolves.
 		if named, ok := types.Unalias(targetType).(*types.Named); ok {
-			if pkg := named.Obj().Pkg(); pkg != nil && pkg != v.pkg {
+			if pkg := named.Obj().Pkg(); pkg != nil && pkg != v.pkg && !v.isSameAssemblyPkg(pkg) {
 				simpleTarget := targetTypeName
 
 				if idx := strings.LastIndex(simpleTarget, "."); idx >= 0 {
@@ -3176,6 +3237,20 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 					}
 
 					packageLock.Unlock()
+
+					// The PRODUCTION-UNDER-TEST package's struct compiles INTO this test
+					// assembly (B4/B5): the generator resolves its declaration locally and
+					// composes the adapter WITHOUT the package prefix, nested in the production
+					// class (the production-qualified ж<T> record above anchors there).
+					// Reference it through the aliased package qualifier — the same form as the
+					// foreign-adapter-exists arm — instead of `<pkg>_<Type>`, which names a
+					// class the generator never emits in a same-assembly build (strings_test's
+					// `strings_BuilderжWriter` CS0246).
+					if v.isSameAssemblyPkg(pkg) {
+						adapterBase := convertToCSTypeName(v.getTypeName(named, false))
+
+						return fmt.Sprintf("new %s(%s)", adapterTypeRef(adapterBase, interfaceTypeName), exprResult)
+					}
 
 					simpleTarget := targetTypeName
 

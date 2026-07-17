@@ -551,39 +551,49 @@ func loadImportedTypeAliases(info PackageInfo) {
 			packageLock.Unlock()
 		}
 
-		// Record the imported package's POINTER-sourced GoImplement pairs: their generated
-		// adapter classes (TжIface) are public members of the foreign package class, so a
-		// cross-package pointer-to-interface conversion here can reference them by qualified
-		// name (io/fs's PathErrorжerror consumed by os - CS0029 x38).
-		if pairs, err := parseExportedPointerImplements(packageInfoFile); err == nil {
-			rootPackageName := getSanitizedIdentifier(info.RootPackageName)
-
-			packageLock.Lock()
-
-			for _, pair := range pairs {
-				importedPointerImplements.Add(fmt.Sprintf("%s|%s|%s", rootPackageName, pair[0], canonicalRecordIfaceName(pair[1], info.RootPackageName)))
-			}
-
-			packageLock.Unlock()
-		}
-
-		// Record the imported package's VALUE-form GoImplement pairs (plain or Promoted): the
-		// foreign struct's own assembly implements the interface, so a value cast here converts
-		// implicitly and needs no local adapter (see the both-foreign value arm in
-		// convertToInterfaceType).
-		if pairs, err := parseExportedValueImplements(packageInfoFile); err == nil {
-			rootPackageName := getSanitizedIdentifier(info.RootPackageName)
-
-			packageLock.Lock()
-
-			for _, pair := range pairs {
-				importedValueImplements.Add(fmt.Sprintf("%s|%s|%s", rootPackageName, pair[0], canonicalRecordIfaceName(pair[1], info.RootPackageName)))
-			}
-
-			packageLock.Unlock()
-		}
+		loadPackageImplements(packageInfoFile, info.RootPackageName)
 	} else {
 		showWarning("Failed to parse exported type aliases from package info file \"%s\": %s", packageInfoFile, err)
+	}
+}
+
+// loadPackageImplements records a converted package's exported GoImplement pairs from its
+// package_info.cs into the imported-implements sets. Split out of loadImportedTypeAliases so
+// the -tests path can load the PRODUCTION package's pairs without its alias load
+// (visitImportSpec deliberately skips that for the package under test — its types bind
+// locally): an EXTERNAL test file's cast of a production type must reference the seeded
+// adapter through the aliased qualifier instead of re-recording the pair (B4/B5).
+func loadPackageImplements(packageInfoFile string, rootPackageName string) {
+	// Record the package's POINTER-sourced GoImplement pairs: their generated adapter
+	// classes (TжIface) are public members of the foreign package class, so a cross-package
+	// pointer-to-interface conversion here can reference them by qualified name (io/fs's
+	// PathErrorжerror consumed by os - CS0029 x38).
+	if pairs, err := parseExportedPointerImplements(packageInfoFile); err == nil {
+		sanitizedRootName := getSanitizedIdentifier(rootPackageName)
+
+		packageLock.Lock()
+
+		for _, pair := range pairs {
+			importedPointerImplements.Add(fmt.Sprintf("%s|%s|%s", sanitizedRootName, pair[0], canonicalRecordIfaceName(pair[1], rootPackageName)))
+		}
+
+		packageLock.Unlock()
+	}
+
+	// Record the package's VALUE-form GoImplement pairs (plain or Promoted): the foreign
+	// struct's own assembly implements the interface, so a value cast here converts
+	// implicitly and needs no local adapter (see the both-foreign value arm in
+	// convertToInterfaceType).
+	if pairs, err := parseExportedValueImplements(packageInfoFile); err == nil {
+		sanitizedRootName := getSanitizedIdentifier(rootPackageName)
+
+		packageLock.Lock()
+
+		for _, pair := range pairs {
+			importedValueImplements.Add(fmt.Sprintf("%s|%s|%s", sanitizedRootName, pair[0], canonicalRecordIfaceName(pair[1], rootPackageName)))
+		}
+
+		packageLock.Unlock()
 	}
 }
 

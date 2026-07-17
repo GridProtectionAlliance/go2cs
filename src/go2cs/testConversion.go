@@ -35,6 +35,14 @@ const (
 	testPackageInfoFileName = "package_test_info.cs"
 	testHostFileName        = "go2cs_test_host.cs"
 	testManifestFileName    = "go2cs_test_manifest.json"
+
+	// The EXTERNAL test package's metadata anchor (B4/B5) — the compilation unit hosting the
+	// GoImplement/GoImplicitConv attributes whose generated adapters/partials must anchor to
+	// the <name>_test package class. Named per Go's `_test` file convention, which doubles as
+	// the exclusion mechanism: the production csproj's committed `*_test.cs` Compile Remove and
+	// productionCSFiles both skip it WITHOUT a shared-csproj-template edit (which would churn
+	// every behavioral csproj on re-transpile).
+	externalTestPackageInfoFileName = "package_info_test.cs"
 )
 
 // Markers substituted into test-csproj-template.xml by writeTestProject (embedded-resource
@@ -242,9 +250,23 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 			return err
 		}
 
-		// Merge this variant's collected metadata globals into package_test_info.cs while they
-		// are still live (the next variant's conversion resets them).
-		writePackageInfoFile(testInfoPath, true)
+		// Merge this variant's collected metadata globals while they are still live (the next
+		// variant's conversion resets them). The EXTERNAL variant's records are split across
+		// TWO anchor files (B4/B5): records whose generated code must live in the test package
+		// class go to package_info_test.cs; production-anchored records stay in
+		// package_test_info.cs.
+		if variant == external {
+			unitName, err := writeExternalVariantMetadata(testInfoPath, outputPath, production.Name)
+			if err != nil {
+				return err
+			}
+
+			if unitName != "" {
+				outputFiles = append(outputFiles, unitName)
+			}
+		} else {
+			writePackageInfoFile(testInfoPath, true)
+		}
 
 		outputFiles = append(outputFiles, variantOutputs...)
 		allImports.UnionWithSet(imports)
@@ -281,8 +303,19 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	dependencies = removeString(dependencies, "testing")
 	sort.Strings(dependencies)
 
+	// B2c: a seeded/merged `using` ALIAS in the test metadata can target an assembly the
+	// package reaches only TRANSITIVELY (sort's `global using reflectliteꓸKind =
+	// go.@internal.abi_package.ΔKind;` targets internal/abi via sort → reflectlite → abi),
+	// which DisableTransitiveProjectReferences (B2b) hides from the test compile view
+	// (CS0234). Add direct F15-mapped project references for every such target; the
+	// manifest's dependency list stays import-derived — alias targets are purely a
+	// project-reference concern.
+	referenceImports := append(append([]string{}, dependencies...), aliasReferenceImports(
+		[]string{testInfoPath, filepath.Join(outputPath, externalTestPackageInfoFileName)},
+		production.PkgPath, dependencies)...)
+
 	testProjectName := projectName + ".tests.csproj"
-	if err := writeTestProject(filepath.Join(outputPath, testProjectName), projectName, projectNamespace, productionFiles, outputFiles, fixtures, dependencies, options); err != nil {
+	if err := writeTestProject(filepath.Join(outputPath, testProjectName), projectName, projectNamespace, productionFiles, outputFiles, fixtures, referenceImports, options); err != nil {
 		return err
 	}
 
@@ -390,6 +423,15 @@ func testFileEntries(pkg *packages.Package) []FileEntry {
 func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPath, projectNamespace string, options Options) ([]string, HashSet[string], error) {
 	resetPackageState(pkg)
 	packageNamespace = projectNamespace
+
+	// Load the PRODUCTION package's own GoImplement pairs from its (colocated, already-seeded)
+	// package_info.cs (B4/B5): visitImportSpec skips the package-under-test alias load — its
+	// types bind locally — which also skipped these sets, so an EXTERNAL test file's cast of a
+	// production type could not see the seeded adapters and re-recorded the pair. Must run per
+	// variant: resetPackageState above just cleared the sets.
+	if options.testPackagePath != "" {
+		loadPackageImplements(filepath.Join(outputPath, PackageInfoFileName), options.testPackageName)
+	}
 
 	allEntries := make([]FileEntry, 0, len(pkg.Syntax))
 	entryByPath := make(map[string]*FileEntry, len(pkg.Syntax))
@@ -550,6 +592,276 @@ func appendExternalTestPackageClass(testInfoPath, packageNamespace, productionPa
 	}
 
 	return os.WriteFile(testInfoPath, []byte(contents), 0644)
+}
+
+// conversionRecordSet snapshots the package-scoped GoImplement/GoImplicitConv record globals so
+// the external test variant's records can be written through the shared writePackageInfoFile in
+// TWO passes with different anchors (B4/B5) — the writer reads the live globals, so each pass
+// installs its partition.
+type conversionRecordSet struct {
+	interfaceImplements map[string]HashSet[string]
+	promotedImplements  map[string]HashSet[string]
+	proxies             map[string][2]string
+	implicitConvs       map[string]HashSet[string]
+	invertedConvs       map[string]HashSet[string]
+	indirectConvs       map[string]HashSet[string]
+	numericConvs        map[string]map[string]string
+	indirectNumerics    map[string]map[string]string
+}
+
+func newConversionRecordSet() conversionRecordSet {
+	return conversionRecordSet{
+		interfaceImplements: make(map[string]HashSet[string]),
+		promotedImplements:  make(map[string]HashSet[string]),
+		proxies:             make(map[string][2]string),
+		implicitConvs:       make(map[string]HashSet[string]),
+		invertedConvs:       make(map[string]HashSet[string]),
+		indirectConvs:       make(map[string]HashSet[string]),
+		numericConvs:        make(map[string]map[string]string),
+		indirectNumerics:    make(map[string]map[string]string),
+	}
+}
+
+func (r conversionRecordSet) install() {
+	interfaceImplementations = r.interfaceImplements
+	promotedInterfaceImplementations = r.promotedImplements
+	constraintProxies = r.proxies
+	implicitConversions = r.implicitConvs
+	invertedImplicitConversions = r.invertedConvs
+	indirectImplicitConversions = r.indirectConvs
+	numericConversions = r.numericConvs
+	indirectNumericConversions = r.indirectNumerics
+}
+
+func (r conversionRecordSet) isEmpty() bool {
+	return len(r.interfaceImplements) == 0 && len(r.promotedImplements) == 0 &&
+		len(r.proxies) == 0 && len(r.implicitConvs) == 0 && len(r.invertedConvs) == 0 &&
+		len(r.indirectConvs) == 0 && len(r.numericConvs) == 0 && len(r.indirectNumerics) == 0
+}
+
+// isTestAnchoredImplementRecord decides which -tests metadata anchor hosts an EXTERNAL variant
+// GoImplement record (B4/B5). The go2cs-gen generators host generated code in the FIRST class
+// of the attribute-bearing file, so anchoring is dictated by where each record's generated form
+// must land:
+//   - an adapter-CLASS record (interface-sourced or foreign-value ᴠ adapters, per
+//     adapterClassImplementations; and every ж pointer adapter for a non-production type) is
+//     referenced BARE from test-file cast sites, which are partial pieces of the test package
+//     class — the adapter must be its member;
+//   - a BARE impl name is a type declared in the external test package itself — its generated
+//     partial struct must merge with that declaration in the test package class;
+//   - a PRODUCTION-qualified record (`sort_package.IntSlice`, or its rooted form) generates a
+//     partial/adapter on the production class — it stays with the production-anchored
+//     package_test_info.cs, whose first class is the production class.
+func isTestAnchoredImplementRecord(ifaceName, implName, productionClassName string) bool {
+	if adapterClassImplementations.Contains(ifaceName + "|" + implName) {
+		return true
+	}
+
+	inner := implName
+	pointerForm := false
+
+	if trimmed, ok := strings.CutPrefix(inner, PointerPrefix+"<"); ok {
+		inner = strings.TrimSuffix(trimmed, ">")
+		pointerForm = true
+	}
+
+	if !strings.Contains(inner, ".") {
+		return true
+	}
+
+	if pointerForm {
+		inner = strings.TrimPrefix(inner, "global::")
+
+		return !strings.HasPrefix(inner, productionClassName+".") &&
+			!strings.HasPrefix(inner, packageNamespace+"."+productionClassName+".")
+	}
+
+	return false
+}
+
+// isTestAnchoredConversionRecord decides the anchor for an EXTERNAL variant GoImplicitConv
+// record: the generated conversion operators live inside a partial declaration of one of the
+// two types, so a pair involving ANY test-package-local (bare) type must anchor to the test
+// package class; a pair between qualified (production/foreign) types keeps the production
+// anchor, matching the pre-split emission.
+func isTestAnchoredConversionRecord(sourceType, targetType string) bool {
+	isBare := func(name string) bool {
+		if trimmed, ok := strings.CutPrefix(name, PointerPrefix+"<"); ok {
+			name = strings.TrimSuffix(trimmed, ">")
+		}
+
+		return !strings.Contains(name, ".")
+	}
+
+	return isBare(sourceType) || isBare(targetType)
+}
+
+// splitExternalVariantRecords partitions the LIVE record globals (the external variant's
+// collected records) into the test-anchored and production-anchored sets (B4/B5).
+func splitExternalVariantRecords(productionClassName string) (testAnchored, productionAnchored conversionRecordSet) {
+	testAnchored = newConversionRecordSet()
+	productionAnchored = newConversionRecordSet()
+
+	splitImplements := func(source map[string]HashSet[string], test, production map[string]HashSet[string]) {
+		for ifaceName, implementations := range source {
+			for implementation := range implementations {
+				target := production
+
+				if isTestAnchoredImplementRecord(ifaceName, implementation, productionClassName) {
+					target = test
+				}
+
+				if existing, ok := target[ifaceName]; ok {
+					existing.Add(implementation)
+				} else {
+					target[ifaceName] = NewHashSet([]string{implementation})
+				}
+			}
+		}
+	}
+
+	splitImplements(interfaceImplementations, testAnchored.interfaceImplements, productionAnchored.interfaceImplements)
+	splitImplements(promotedInterfaceImplementations, testAnchored.promotedImplements, productionAnchored.promotedImplements)
+
+	for key, proxy := range constraintProxies {
+		if isTestAnchoredConversionRecord(proxy[0], proxy[1]) {
+			testAnchored.proxies[key] = proxy
+		} else {
+			productionAnchored.proxies[key] = proxy
+		}
+	}
+
+	splitConversions := func(source map[string]HashSet[string], test, production map[string]HashSet[string]) {
+		for sourceType, targetTypes := range source {
+			for targetType := range targetTypes {
+				target := production
+
+				if isTestAnchoredConversionRecord(sourceType, targetType) {
+					target = test
+				}
+
+				if existing, ok := target[sourceType]; ok {
+					existing.Add(targetType)
+				} else {
+					target[sourceType] = NewHashSet([]string{targetType})
+				}
+			}
+		}
+	}
+
+	splitConversions(implicitConversions, testAnchored.implicitConvs, productionAnchored.implicitConvs)
+	splitConversions(invertedImplicitConversions, testAnchored.invertedConvs, productionAnchored.invertedConvs)
+	splitConversions(indirectImplicitConversions, testAnchored.indirectConvs, productionAnchored.indirectConvs)
+
+	splitNumerics := func(source map[string]map[string]string, test, production map[string]map[string]string) {
+		for sourceType, targetTypes := range source {
+			for targetType, valueType := range targetTypes {
+				target := production
+
+				if isTestAnchoredConversionRecord(sourceType, targetType) {
+					target = test
+				}
+
+				if existing, ok := target[sourceType]; ok {
+					existing[targetType] = valueType
+				} else {
+					target[sourceType] = map[string]string{targetType: valueType}
+				}
+			}
+		}
+	}
+
+	splitNumerics(numericConversions, testAnchored.numericConvs, productionAnchored.numericConvs)
+	splitNumerics(indirectNumericConversions, testAnchored.indirectNumerics, productionAnchored.indirectNumerics)
+
+	return testAnchored, productionAnchored
+}
+
+// externalTestPackageInfoSeed composes the initial contents of package_info_test.cs. The
+// structure mirrors package_info-template.txt (the shared writer requires all four marker
+// sections); the FIRST — and only — class declaration is the external test package class, which
+// is what the go2cs-gen generators anchor generated adapters and partials to
+// (GetFirstClassName). The class is declared WITHOUT [GoPackage]: the attribute-bearing partial
+// lives in package_test_info.cs (appendExternalTestPackageClass), and duplicating the attribute
+// on a second partial declaration is CS0579. Both `using static` scopes are included so
+// attribute arguments resolve exactly as they do in package_test_info.cs.
+func externalTestPackageInfoSeed(projectNamespace, productionClassName, testClassName string) string {
+	var b strings.Builder
+
+	b.WriteString("// go2cs metadata anchor for the EXTERNAL test package (<name>_test): GoImplement /\r\n")
+	b.WriteString("// GoImplicitConv attributes recorded by its converted _test files whose GENERATED code\r\n")
+	b.WriteString("// (adapter classes, partial-struct implementations, conversion operators) must anchor to\r\n")
+	b.WriteString("// the test package class — the source generators host output in the first class of the\r\n")
+	b.WriteString("// attribute-bearing file, and test-file cast sites reference the adapters as members of\r\n")
+	b.WriteString("// the test package class. Production-anchored records stay in package_test_info.cs.\r\n")
+	b.WriteString("\r\n")
+	b.WriteString("// <ImportedTypeAliases>\r\n")
+	b.WriteString("// </ImportedTypeAliases>\r\n")
+	b.WriteString("\r\n")
+	b.WriteString("using go;\r\n")
+	b.WriteString(fmt.Sprintf("using static %s.%s;\r\n", projectNamespace, productionClassName))
+	b.WriteString(fmt.Sprintf("using static %s.%s;\r\n", projectNamespace, testClassName))
+	b.WriteString("\r\n")
+	b.WriteString("// <ExportedTypeAliases>\r\n")
+	b.WriteString("// </ExportedTypeAliases>\r\n")
+	b.WriteString("\r\n")
+	b.WriteString("// <InterfaceImplementations>\r\n")
+	b.WriteString("// </InterfaceImplementations>\r\n")
+	b.WriteString("\r\n")
+	b.WriteString("// <ImplicitConversions>\r\n")
+	b.WriteString("// </ImplicitConversions>\r\n")
+	b.WriteString("\r\n")
+	b.WriteString(fmt.Sprintf("namespace %s;\r\n", projectNamespace))
+	b.WriteString("\r\n")
+	b.WriteString(fmt.Sprintf("public static partial class %s\r\n{\r\n}\r\n", testClassName))
+
+	return b.String()
+}
+
+// writeExternalVariantMetadata merges the EXTERNAL test variant's live metadata globals into
+// the -tests anchor files (B4/B5). Test-anchored records are written into
+// package_info_test.cs — a separate compilation unit whose first class is the test package
+// class — through the SAME shared writer (with the alias globals stashed: `global using`
+// aliases must live in exactly one file, CS1537, and GoTypeAlias attributes stay with the
+// production-anchored metadata). Production-anchored records and every alias then merge into
+// package_test_info.cs as before. Returns the unit's file name when it was written (the caller
+// adds it to the test project's compile items), or "" when the variant introduced no
+// test-anchored records — utf8-class packages keep their single-file shape byte-identical.
+func writeExternalVariantMetadata(testInfoPath, outputPath, productionPackageName string) (string, error) {
+	productionClassName := getSanitizedImport(productionPackageName + PackageSuffix)
+	testAnchored, productionAnchored := splitExternalVariantRecords(productionClassName)
+
+	unitName := ""
+
+	if !testAnchored.isEmpty() {
+		unitPath := filepath.Join(outputPath, externalTestPackageInfoFileName)
+
+		if _, err := os.Stat(unitPath); os.IsNotExist(err) {
+			seed := externalTestPackageInfoSeed(packageNamespace, productionClassName, getSanitizedImport(packageName+PackageSuffix))
+
+			if err := os.WriteFile(unitPath, []byte(seed), 0644); err != nil {
+				return "", fmt.Errorf("seed external test package metadata: %w", err)
+			}
+		}
+
+		savedImported, savedExported := importedTypeAliases, exportedTypeAliases
+		importedTypeAliases = map[string]string{}
+		exportedTypeAliases = map[string]string{}
+
+		testAnchored.install()
+		writePackageInfoFile(unitPath, true)
+
+		importedTypeAliases, exportedTypeAliases = savedImported, savedExported
+		unitName = externalTestPackageInfoFileName
+	}
+
+	// The production-anchored partition (plus the full alias globals) merges into
+	// package_test_info.cs; the split partitions stay installed afterward — the external
+	// variant is the last one converted, and nothing downstream reads these globals.
+	productionAnchored.install()
+	writePackageInfoFile(testInfoPath, true)
+
+	return unitName, nil
 }
 
 // discoverTestDeclarations finds every go-test-shaped top-level declaration in the variant's
@@ -899,6 +1211,66 @@ func writeTestProject(projectFile, projectName, namespace string, productionFile
 		return os.WriteFile(projectFile, contents, 0644)
 	}
 	return nil
+}
+
+// aliasReferenceImports returns the import paths of converted packages that `using` ALIASES in
+// the test metadata files target but that the test project does not directly reference (B2c). A
+// seeded global alias (or a file-local package-qualifier using) can target an assembly the
+// package reaches only transitively, and DisableTransitiveProjectReferences (B2b) hides such
+// assemblies from the test compile view — the alias line itself then fails (CS0234). Candidates
+// come from the module-aware TRANSITIVE import closure captured at load time
+// (importPackageDirs), whose namespace tokens are rendered by the same machinery that emitted
+// the aliases — including the /vN major-version collapse — so matching is exact. When several
+// closure paths render the same token (math/rand beside math/rand/v2), the lexically first is
+// taken, deterministically.
+func aliasReferenceImports(infoFiles []string, productionPkgPath string, directDependencies []string) []string {
+	direct := NewHashSet(directDependencies)
+	tokens := make(map[string][]string)
+
+	for importPath := range importPackageDirs {
+		if importPath == productionPkgPath || importPath == "testing" || direct.Contains(importPath) {
+			continue
+		}
+
+		token := RootNamespace + "." + convertImportPathToNamespace(importPath, PackageSuffix)
+		tokens[token] = append(tokens[token], importPath)
+	}
+
+	found := HashSet[string]{}
+
+	for _, infoFile := range infoFiles {
+		data, err := os.ReadFile(infoFile)
+		if err != nil {
+			continue
+		}
+
+		for _, line := range strings.Split(string(data), "\n") {
+			trimmed := strings.TrimSpace(strings.TrimSuffix(line, "\r"))
+
+			if !strings.HasPrefix(trimmed, "global using ") && !strings.HasPrefix(trimmed, "using ") {
+				continue
+			}
+
+			if strings.HasPrefix(trimmed, "using static ") || !strings.Contains(trimmed, "=") {
+				continue
+			}
+
+			_, target, _ := strings.Cut(trimmed, "=")
+			target = strings.TrimSuffix(strings.TrimSpace(target), ";")
+
+			for token, paths := range tokens {
+				if strings.Contains(target, token+".") || strings.HasSuffix(target, token) {
+					sort.Strings(paths)
+					found.Add(paths[0])
+				}
+			}
+		}
+	}
+
+	result := found.Keys()
+	sort.Strings(result)
+
+	return result
 }
 
 // resolveTestProjectReference maps a test dependency's project reference per the mixed-tree

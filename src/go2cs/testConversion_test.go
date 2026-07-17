@@ -647,3 +647,199 @@ func TestWritePackageInfoFileMergesExistingSections(t *testing.T) {
 		t.Fatal("content outside the sections must be preserved")
 	}
 }
+
+// B4/B5 guard (partition predicate): an EXTERNAL variant GoImplement record anchors to the test
+// package unit when its generated code must live in the test package class — bare (test-local)
+// impls, every non-production ж pointer adapter, and adapter-class-marked (interface-sourced /
+// foreign-value ᴠ) pairs; production-qualified records keep the production anchor, where the
+// partial-struct/adapter they generate merges with the production declaration.
+func TestExternalVariantRecordPartitionAnchors(t *testing.T) {
+	resetPackageState(&packages.Package{})
+	packageNamespace = "go"
+	adapterClassImplementations.Add("io.Writer|value_package.WriterTo")
+
+	cases := []struct {
+		iface string
+		impl  string
+		want  bool
+	}{
+		{"value_package.Interface", "ByAge", true},                                       // bare value ⇒ test partial struct
+		{"value_package.Interface", PointerPrefix + "<multiSorter>", true},               // bare pointer ⇒ test-hosted adapter
+		{"rand_package.Source", PointerPrefix + "<go.math.rand.rand_package.PCG>", true}, // true-foreign pointer adapter
+		{"io.Writer", PointerPrefix + "<value_package.Builder>", false},                  // production pointer ⇒ production-hosted adapter
+		{"io.Writer", PointerPrefix + "<go.value_package.Builder>", false},               // rooted production form
+		{"value_package.Interface", "value_package.IntSlice", false},                     // production value ⇒ production partial struct
+		{"io.Writer", "value_package.WriterTo", true},                                    // adapter-class-marked ⇒ consumer-hosted ᴠ class
+	}
+
+	for _, testCase := range cases {
+		if got := isTestAnchoredImplementRecord(testCase.iface, testCase.impl, "value_package"); got != testCase.want {
+			t.Errorf("isTestAnchoredImplementRecord(%q, %q) = %v, want %v", testCase.iface, testCase.impl, got, testCase.want)
+		}
+	}
+
+	if !isTestAnchoredConversionRecord("localData", "value_package.Person") {
+		t.Error("a conversion pair involving a bare (test-local) type must anchor to the test unit")
+	}
+	if isTestAnchoredConversionRecord("value_package.Data", "go.io_package.Writer") {
+		t.Error("a conversion pair between qualified types must keep the production anchor")
+	}
+}
+
+// B4/B5 guard (split write): the external variant's test-anchored records land in
+// package_info_test.cs — whose FIRST class is the test package class (the generator's anchor)
+// and which carries NO [GoPackage] (the attribute-bearing partial stays in
+// package_test_info.cs, CS0579) — while production-anchored records and the alias globals merge
+// into package_test_info.cs. A variant with NO test-anchored records writes no unit at all
+// (utf8-class packages keep their single-file shape).
+func TestWriteExternalVariantMetadataSplitsAnchors(t *testing.T) {
+	dir := t.TempDir()
+	testInfoPath := filepath.Join(dir, testPackageInfoFileName)
+
+	seed := strings.Join([]string{
+		"// <ImportedTypeAliases>",
+		"// </ImportedTypeAliases>",
+		"",
+		"using go;",
+		"using static go.value_package;",
+		"",
+		"// <ExportedTypeAliases>",
+		"// </ExportedTypeAliases>",
+		"",
+		"// <InterfaceImplementations>",
+		"// </InterfaceImplementations>",
+		"",
+		"// <ImplicitConversions>",
+		"// </ImplicitConversions>",
+		"",
+		"namespace go;",
+		"",
+		"[GoPackage(\"value\")]",
+		"public static partial class value_package",
+		"{",
+		"}",
+	}, "\r\n")
+
+	if err := os.WriteFile(testInfoPath, []byte(seed), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	resetPackageState(&packages.Package{})
+	packageName = "value_test"
+	packageNamespace = "go"
+	interfaceImplementations["value_package.Interface"] = NewHashSet([]string{
+		"localSorter", // bare ⇒ test anchor
+		"value_package.IntSlice", // production-qualified ⇒ production anchor
+	})
+	importedTypeAliases["alpha"] = "go.alpha_package.Alpha"
+
+	unitName, err := writeExternalVariantMetadata(testInfoPath, dir, "value")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if unitName != externalTestPackageInfoFileName {
+		t.Fatalf("unit name = %q, want %q", unitName, externalTestPackageInfoFileName)
+	}
+
+	unitData, err := os.ReadFile(filepath.Join(dir, externalTestPackageInfoFileName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	unit := string(unitData)
+
+	if !strings.Contains(unit, "[assembly: GoImplement<localSorter, value_package.Interface>]") {
+		t.Fatalf("test-anchored record must land in the external unit:\n%s", unit)
+	}
+	if strings.Contains(unit, "IntSlice") {
+		t.Fatalf("production-qualified record must not land in the external unit:\n%s", unit)
+	}
+	if strings.Contains(unit, "GoPackage") {
+		t.Fatalf("the external unit must not duplicate the [GoPackage] attribute (CS0579):\n%s", unit)
+	}
+	if strings.Contains(unit, "global using alpha") {
+		t.Fatalf("global using aliases must stay in package_test_info.cs (CS1537):\n%s", unit)
+	}
+
+	classIndex := strings.Index(unit, "public static partial class value_test_package")
+	if classIndex < 0 || strings.Contains(unit[:classIndex], "partial class value_package") {
+		t.Fatalf("the external unit's FIRST class must be the test package class:\n%s", unit)
+	}
+
+	infoData, err := os.ReadFile(testInfoPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	info := string(infoData)
+
+	if !strings.Contains(info, "[assembly: GoImplement<value_package.IntSlice, value_package.Interface>]") {
+		t.Fatalf("production-qualified record must merge into package_test_info.cs:\n%s", info)
+	}
+	if strings.Contains(info, "localSorter") {
+		t.Fatalf("test-anchored record must not merge into package_test_info.cs:\n%s", info)
+	}
+	if !strings.Contains(info, "global using alpha = go.alpha_package.Alpha;") {
+		t.Fatalf("alias globals must merge into package_test_info.cs:\n%s", info)
+	}
+
+	// A variant with no test-anchored records writes no unit.
+	unitOnlyDir := t.TempDir()
+	secondInfoPath := filepath.Join(unitOnlyDir, testPackageInfoFileName)
+	if err := os.WriteFile(secondInfoPath, []byte(seed), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	resetPackageState(&packages.Package{})
+	packageName = "value_test"
+	packageNamespace = "go"
+	interfaceImplementations["value_package.Interface"] = NewHashSet([]string{"value_package.IntSlice"})
+
+	unitName, err = writeExternalVariantMetadata(secondInfoPath, unitOnlyDir, "value")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if unitName != "" {
+		t.Fatalf("no unit expected for a production-only record set, got %q", unitName)
+	}
+	if _, err := os.Stat(filepath.Join(unitOnlyDir, externalTestPackageInfoFileName)); !os.IsNotExist(err) {
+		t.Fatal("no external unit file may be written when the variant has no test-anchored records")
+	}
+}
+
+// B2c guard: a `using` ALIAS in the test metadata targeting an assembly the package reaches only
+// TRANSITIVELY yields a direct project-reference import for that assembly — matched through the
+// same namespace rendering the alias emission uses; direct dependencies, the production package,
+// `using static` lines, and comment lines contribute nothing.
+func TestAliasReferenceImportsAddsTransitiveAliasTargets(t *testing.T) {
+	dir := t.TempDir()
+	infoPath := filepath.Join(dir, testPackageInfoFileName)
+
+	contents := strings.Join([]string{
+		"// Example: global using mypkgꓸTable = go.map<go.@string, nint>;",
+		"// <ImportedTypeAliases>",
+		"global using reflectliteꓸKind = go.@internal.abi_package.ΔKind;",
+		"global using reflectliteꓸType = go.@internal.reflectlite_package.ΔType;",
+		"using conv = go.@internal.convalias_package;",
+		"// </ImportedTypeAliases>",
+		"using go;",
+		"using static go.value_package;",
+	}, "\r\n")
+
+	if err := os.WriteFile(infoPath, []byte(contents), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	resetPackageState(&packages.Package{})
+	importPackageDirs = map[string]importedPackageMeta{
+		"internal/abi":         {Dir: dir, Name: "abi"},
+		"internal/reflectlite": {Dir: dir, Name: "reflectlite"},
+		"internal/convalias":   {Dir: dir, Name: "convalias"},
+		"internal/unrelated":   {Dir: dir, Name: "unrelated"},
+	}
+
+	got := aliasReferenceImports([]string{infoPath, filepath.Join(dir, "missing.cs")}, "sort", []string{"internal/reflectlite"})
+	want := []string{"internal/abi", "internal/convalias"}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("alias reference imports = %v, want %v", got, want)
+	}
+}
