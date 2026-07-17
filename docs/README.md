@@ -9,13 +9,31 @@ Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?
 
 ---
 
-## 📰 NEWS — July 2026: The entire Go standard library now compiles in .NET
+## 📰 NEWS — July 17, 2026: Go's own tests now pass in C#
 
-**As of July 10, 2026, all 302 packages of the auto-converted Go standard library (Go 1.23.1) compile
+**A standard-library package's own Go test suite — converted to C# — now runs and agrees with `go test`,
+verdict for verdict.** [`unicode/utf8`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf8)'s
+real test suite (Go 1.23.1) validates **14/14** through the new converted-test pipeline: the `_test.go`
+files are transpiled to C#, built against the converted standard library, executed under a Go-semantics
+test host, and differentially compared against a clean `go test -json` baseline by full test name — with
+every benchmark and example declaration honestly disclosed rather than silently skipped. One week after
+"the whole standard library *compiles*," the answer to *"but does it **run**?"* has its first
+machine-checked proof — and it's one you can
+[reproduce yourself from a clone](#try-it-yourself--validate-a-converted-test-suite)
+(tag: `utf8-tests-green-2026-07-17`). This is the Phase 4 operational era: **real Go tests, not
+compilation, are now the currency of correctness** — with `sort`, `strings`, and `bytes` next in line.
+
+* Read the passing converted tests: [`utf8_test.cs`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8_test.cs)
+* Reproduce the validation: [Try it yourself](#try-it-yourself--validate-a-converted-test-suite)
+* See how it's built: [Milestones](#milestones)
+
+### Previously — July 10, 2026: The entire Go standard library compiles in .NET
+
+**All 302 packages of the auto-converted Go standard library (Go 1.23.1) compile
 cleanly as .NET assemblies — zero errors, zero exclusions.** Every package you'd expect to be hard is
 in that number: `runtime`, `reflect`, `net/http`, `go/types`, `crypto/tls`, `database/sql`,
 `encoding/json`. The transpiled output is not a demo subset — it is the standard library, end to end,
-emitted by the converter, transpiled Go to C#, then compiled by Roslyn. NOTE: don't get _too_ excited, this is _fully compilable_ not _fully runnable_, that's the next phase! However, simple apps will run, try [converting a real-world module](#converting-a-real-world-module). Read more about this [milestone's details](#about-standard-library-compile-milestone) and [current status](#status) below.
+emitted by the converter, transpiled Go to C#, then compiled by Roslyn. NOTE: don't get _too_ excited, this is _fully compilable_ not _fully runnable_, that's the next phase (underway above)! However, simple apps will run, try [converting a real-world module](#converting-a-real-world-module). Read more about this [milestone's details](#about-standard-library-compile-milestone) and [current status](#status) below.
 
 * Browse transpiled code: [Converted Go Standard Library](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted)
 * Compile it yourself: [Visual Studio Go Standard Library Solution](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted.slnx)
