@@ -845,6 +845,18 @@ Examples:
 			if options.convertTests {
 				options.includeComments = true
 
+				// Resolve the output to an ABSOLUTE path up front so every downstream path is
+				// absolute: the test .tests.csproj passed to `dotnet build`/`run` (executeTestAction
+				// joins it onto this outputPath and runs from it), and the $(go2csPath) root walk
+				// below. A relative output argument — the README's `src/go-src-converted/...` — left
+				// `dotnet run --project <relative>` resolving against the wrong working directory
+				// (MSB1009), and left the located root relative so the emitted csproj's relative
+				// go2csPath (via filepath.Rel, which needs matching absoluteness) came out broken and
+				// non-reproducible. Absolute here makes the whole -tests flow invocation-independent.
+				if abs, absErr := filepath.Abs(outputFilePath); absErr == nil {
+					outputFilePath = abs
+				}
+
 				// Self-locate the project-reference root when the configured go2csPath is not
 				// itself a valid root (no core\golib — e.g. the ~/go2cs default on a bare clone
 				// with no deploy-core staging) and the OUTPUT lands inside a go2cs source tree.
