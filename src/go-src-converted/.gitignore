@@ -1,0 +1,18 @@
+# Phase-4 converted-test artifacts (produced by `go2cs -tests`).
+#
+# The converted C# TEST SOURCES of a VALIDATED package ARE committed alongside the production
+# package — `<file>_test.cs`, `package_test_info.cs`, `go2cs_test_host.cs`, and
+# `<pkg>.tests.csproj` — because they are the visible, reviewable proof that the package's own
+# Go test suite passes in C#. Everything the pipeline REGENERATES on each run is ignored here so
+# a fresh validation from a clone leaves the tree clean:
+
+# Go source copies staged from GOROOT for the differential `go test` baseline. This is a C#
+# output tree — a `.go` file here is always a transient pipeline input, never a committed artifact.
+*.go
+
+# Run-time artifacts. The input-digest manifest embeds a machine-specific converter revision
+# (the running executable's hash), and the comparison / results files are per-run output.
+go2cs_test_manifest.json
+go2cs_test_comparison.json
+go2cs_test_results.json
+go2cs_test_results.xml

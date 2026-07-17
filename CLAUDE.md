@@ -329,7 +329,24 @@ construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructField
     [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConversion.md) *The corrected end-state*.
   - **Next — Phase 4 (operational):** convert and run Go's own `_test.go` suites against the compiling
     packages; design in [`docs/TestingInfrastructureRequirements.md`](docs/TestingInfrastructureRequirements.md)
-    and Phase 4 of [`docs/Roadmap.md`](docs/Roadmap.md).
+    and Phase 4 of [`docs/Roadmap.md`](docs/Roadmap.md). The `-tests` pipeline is live (`go2cs -tests
+    -test-action all <goroot-pkg> <go-src-converted-pkg>`): converts `_test.go` variants, builds a
+    hand-owned `go.testing` host (`src/core/testing`), runs it isolated, and diffs terminal results
+    against `go test -json`. `-tests` **always forces `-comments`** (test conversions are derivative
+    works — the per-file Go copyright header must survive) and **self-locates `$(go2csPath)`** by walking
+    the output dir up to the tree root (so the two-arg command works from a bare clone, no env). First
+    validated package: `unicode/utf8` (2026-07-17, tag `utf8-tests-green-2026-07-17`).
+  - **⚠ Validated-package commit policy (2026-07-17 user ruling):** when a package's Go test suite
+    **validates** through the pipeline, COMMIT its converted C# test sources into
+    `src/go-src-converted/<pkg>` beside the production code — `*_test.cs`, `package_test_info.cs`,
+    `go2cs_test_host.cs`, `<pkg>.tests.csproj` — so the passing suite is **visible and reviewable on
+    GitHub**, and reproducible via the [README "Try it yourself"](docs/README.md#try-it-yourself--validate-a-converted-test-suite)
+    instructions. The pipeline's regenerated inputs/outputs are **git-ignored** by
+    `src/go-src-converted/.gitignore` (the staged `*.go` source copies + `go2cs_test_manifest.json`
+    [machine-specific exe-hash digest] + `go2cs_test_comparison/results.json`/`.xml`). The production
+    `<pkg>.csproj` also updates on this run (the IP-4 test-artifact `<Compile Remove>` exclusion) — that
+    change is intended, not drift. Refresh the committed test sources at each milestone rebank alongside
+    the production tree.
 - Open converter items: `src/go2cs/ToDo.md` (e.g. `visitMapType` completion, remaining dynamic-struct
   implicit-cast checks, optional recursive dependent-package conversion, comment conversion, cgo/asm targets).
 

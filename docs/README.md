@@ -318,10 +318,50 @@ Contributors: see [`CLAUDE.md`](../CLAUDE.md) for an architecture overview and
 ## Status
 
 The converter builds idiomatic C# for the full range of Go language features, validated by an extensive
-behavioral test suite (371 Go-vs-C# regression projects). As of **2026-07-10 the entire Go standard library
-(302 packages, Go 1.23.1) compiles cleanly** as .NET assemblies. Compiling is
-the milestone, not yet full runtime parity: **converting and running the standard library's own tests is the
-ongoing Phase 4 work** — see the [roadmap](Roadmap.md#phase-4--convert-and-run-go-package-tests).
+behavioral test suite (390+ Go-vs-C# regression projects). As of **2026-07-10 the entire Go standard library
+(302 packages, Go 1.23.1) compiles cleanly** as .NET assemblies. Compiling is the milestone, not yet full
+runtime parity: **converting and running the standard library's own tests is the ongoing Phase 4 work** —
+see the [roadmap](Roadmap.md#phase-4--convert-and-run-go-package-tests). As of **2026-07-17 the first
+standard-library package's own test suite passes in C#**: [`unicode/utf8`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf8)
+validates **14/14 against `go test`** through the converted-test pipeline — and you can
+[reproduce it yourself](#try-it-yourself--validate-a-converted-test-suite) from a clone.
+
+### Try it yourself — validate a converted test suite
+
+Every package whose own Go test suite has been validated ships its **converted C# test sources** next to the
+production code under [`src/go-src-converted`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted)
+(for example, [`unicode/utf8/utf8_test.cs`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8_test.cs)) —
+so you can read the exact C# that runs. You can also re-run the validation yourself. You need
+**[Go 1.23.1](https://go.dev/dl/)** (for the reference `go test` run) and the **[.NET 9 SDK](https://dotnet.microsoft.com/download)**
+(to build and run the converted test host). From a fresh clone:
+
+```sh
+# 1. Build the converter
+cd src/go2cs
+go build -o bin/go2cs.exe .
+cd ../..
+
+# 2. Convert unicode/utf8's test suite, build + run the C# host, and diff it against `go test`.
+#    The second argument is the package's home in the converted tree; the converter locates the
+#    runtime and its stdlib dependencies from there — no flags or environment setup required.
+#    (On Windows, Go's source lives under "C:\Program Files\Go\src"; elsewhere use "$(go env GOROOT)/src".)
+src/go2cs/bin/go2cs.exe -tests -test-action all \
+    "C:\Program Files\Go\src\unicode\utf8" \
+    src/go-src-converted/unicode/utf8
+```
+
+Expected final line:
+
+```text
+Validated 14 tests against go test (0 skipped identically on both sides, 37 disclosed-unsupported declarations excluded).
+```
+
+The command converts the `_test.go` files to C#, generates a test host, builds it against the converted
+standard library, runs it in an isolated process, captures a clean `go test -json -count=1` baseline, and
+compares terminal results by full Go test name — reporting `validated` only when every test agrees on both
+sides and every unsupported declaration (benchmarks, examples) is accounted for. It regenerates the local
+converted `.cs` in place (`git status` stays clean when your toolchain matches the pinned versions); the Go
+source copies and run manifests it stages are git-ignored.
 
 _Everyone asks:_ wondering how fast the transpiled C# runs compared to the original Go — including startup time, memory, and Native AOT builds? See the latest [performance comparison](Performance.md) — **`TL;DR`**: _no, it's not as fast as native Go, [nor is this an expected outcome](Background.md#converted-code)_. Save for some initial work with a [stack-based string](ConversionStrategies.md#stack-strings-sstring), performance and optimizations are not the current focus, this kind of work is targeted for _after_ Phase 4 work.
 
