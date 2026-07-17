@@ -851,80 +851,15 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 	}
 
 	for _, pkg := range pkgs {
-		// Reset package level variables for each package
-		packageName = ""
-		packageNamespace = ""
-		projectImports = NewHashSet([]string{})
-		exportedTypeAliases = make(map[string]string)
-		importedTypeAliases = make(map[string]string)
-		packageInlineFuncTypeNames = make(map[string]bool)
-		importedPointerImplements = HashSet[string]{}
-		importedValueImplements = HashSet[string]{}
-		constImportedTypeAliases = NewHashSet([]string{})
-		parsedPackageInfoFiles = NewHashSet([]string{})
-		interfaceImplementations = make(map[string]HashSet[string])
-		promotedInterfaceImplementations = make(map[string]HashSet[string])
-		constraintProxies = make(map[string][2]string)
-		interfaceInheritances = make(map[string]HashSet[string])
-		adapterClassImplementations = HashSet[string]{}
-		implicitConversions = make(map[string]HashSet[string])
-		invertedImplicitConversions = make(map[string]HashSet[string])
-		indirectImplicitConversions = make(map[string]HashSet[string])
-		conversionPackageUsings = make(map[string]string)
-		numericConversions = make(map[string]map[string]string)
-		indirectNumericConversions = make(map[string]map[string]string)
-		nameCollisions = make(map[string]bool)
-		globalTempVarCount = make(map[string]int)
-		packageDynamicTypeNames = make(map[string]string)
-		packageManualTypeNames = make(map[string]bool)
-		packageAddressedGlobals = make(map[types.Object]bool)
-		packageMovedInitVars = make(map[types.Object]int)
-		packageMovedInitMethods = make(map[int]string)
-		packageImportAliasRenames = make(map[string]string)
-		packageChildNamespaces = make(map[string]bool)
-		packageQualifiedNamespaces = make(map[string]bool)
-		packageImportLeadingSegments = make(map[string]bool)
-		packagePublicizedTypes = make(map[types.Object]bool)
-		packagePublicizedLiftedTypes = make(map[types.Type]bool)
-		packageCaptureModeMethods = make(map[*types.Func]bool)
-		packageCaptureModeBoxIdents = make(map[types.Object]bool)
-		packageDirectBoxReceiverMethods = make(map[*types.Func]bool)
-		initFuncCounter = 0
-		usesUnsafeCode = false
-
-		// Capture the package-level Go doc (rendered to Markdown) for the NuGet README
-		packageDoc = extractPackageDoc(pkg.Syntax)
+		// Reset package level variables and capture the per-package inputs (packageDoc,
+		// importPackageDirs) — shared with the test-conversion path, see packageStateOperations.go
+		resetPackageState(pkg)
 
 		files := []FileEntry{}
 		unmarkedFileCount := 0
 		fset := pkg.Fset
 		packageTypes := pkg.Types
 		info := pkg.TypesInfo
-
-		// Capture the module-aware source dir + package name of every REACHABLE imported package
-		// (the transitive closure, not just direct imports), so cross-package references to
-		// LOCAL/USER modules (which go/build cannot resolve) can be wired up — both their
-		// ProjectReference and their exported-type-alias package_info.cs. The closure matters for
-		// a type reached ONLY through another package's signature (the on-demand alias load in
-		// aliasedElementTypeName): the consumer never imports the type's package directly, so a
-		// direct-imports-only map could not resolve it. Entries are deduped by path; the same
-		// path resolves to the same Dir/Name from any route, so the walk order is immaterial.
-		importPackageDirs = make(map[string]importedPackageMeta)
-
-		var captureImportDirs func(imports map[string]*packages.Package)
-
-		captureImportDirs = func(imports map[string]*packages.Package) {
-			for importPath, importedPkg := range imports {
-				if _, exists := importPackageDirs[importPath]; exists {
-					continue
-				}
-
-				importPackageDirs[importPath] = importedPackageMeta{Dir: importedPkg.Dir, Name: importedPkg.Name}
-				captureImportDirs(importedPkg.Imports)
-			}
-		}
-
-		captureImportDirs(pkg.Imports)
 
 		packageInputPath := inputFilePath
 		packageOutputPath := outputFilePath
@@ -961,14 +896,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				}
 
 				if !manualConv {
-					files = append(files, FileEntry{
-						file:             file,
-						filePath:         path,
-						identEscapesHeap: map[types.Object]bool{},
-						sstringEligible:  map[types.Object]bool{},
-						sstringConvExprs: map[*ast.CallExpr]bool{},
-					})
-
+					files = append(files, newFileEntry(file, path, false))
 					unmarkedFileCount++
 				} else if isDir {
 					// Manually-converted destination: the hand-owned `.cs` is never overwritten,
@@ -980,14 +908,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 					// file-visit loop below). Dropping the visit entirely corrupted every sibling
 					// file of a seeded reconvert: raw Go `struct{...}` text where a lifted type
 					// name belongs, and package-var assignments re-declared as shadowing locals.
-					files = append(files, FileEntry{
-						file:             file,
-						filePath:         path,
-						identEscapesHeap: map[types.Object]bool{},
-						sstringEligible:  map[types.Object]bool{},
-						sstringConvExprs: map[*ast.CallExpr]bool{},
-						manualConversion: true,
-					})
+					files = append(files, newFileEntry(file, path, true))
 				}
 			}
 		}
@@ -1093,34 +1014,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 					}
 				}()
 
-				visitor := &Visitor{
-					fset:                      fset,
-					pkg:                       packageTypes,
-					info:                      info,
-					targetFile:                &strings.Builder{},
-					liftedTypeNames:           HashSet[string]{},
-					liftedTypeMap:             map[types.Type]string{},
-					subStructTypes:            map[types.Type][]types.Type{},
-					packageImports:            &strings.Builder{},
-					requiredUsings:            HashSet[string]{},
-					importQueue:               HashSet[string]{},
-					referencedForeignPackages: HashSet[string]{},
-					canonicalAliasImported:    HashSet[string]{},
-					importAliasesEmitted:      HashSet[string]{},
-					importPathAliases:         map[string]string{},
-					typeAliasDeclarations:     &strings.Builder{},
-					standAloneComments:        map[token.Pos]string{},
-					sortedCommentPos:          []token.Pos{},
-					processedComments:         HashSet[token.Pos]{},
-					newline:                   "\r\n",
-					options:                   options,
-					globalIdentNames:          globalIdentNames,
-					globalScope:               globalScope,
-					blocks:                    Stack[*strings.Builder]{},
-					identEscapesHeap:          fileEntry.identEscapesHeap,
-					sstringEligible:           fileEntry.sstringEligible,
-					sstringConvExprs:          fileEntry.sstringConvExprs,
-				}
+				visitor := newFileVisitor(fset, packageTypes, info, options, globalIdentNames, globalScope, fileEntry)
 
 				visitor.visitFile(fileEntry.file)
 
