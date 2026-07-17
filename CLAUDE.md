@@ -121,7 +121,10 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
   byte-for-byte compare until 2026-07-07. Content diffs are still caught exactly; a pure line-ending
   difference is ignored (it can only come from autocrlf, never from the deterministic converter). To
   re-baseline goldens after an *intended* output change, run the **`UpdateTestTargets`** project with
-  **`--createTargetFiles`** (re-runs the converter, rewrites all `.cs.target`) — don't hand-edit goldens.
+  **`--createTargetFiles`** — it copies each project's current on-disk transpiled `.cs` over its
+  `.cs.target` (it does **NOT** re-run the converter — re-transpile first, e.g. via
+  `check-no-regression.ps1` or a runner pass, or the copy silently re-baselines stale output) —
+  don't hand-edit goldens.
 - **autocrlf gotcha (`core.autocrlf=true`) — two SEPARATE concerns:** the converter emits CRLF for C# line
   endings but preserves the Go source's LF inside multi-line string literals, so those `.cs`/`.cs.target`
   contain mixed CRLF/LF, and autocrlf rewrites the in-string LFs to CRLF on checkout.
