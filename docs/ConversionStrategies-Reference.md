@@ -2310,6 +2310,24 @@ A `:=` from a method group whose signature matches no package named func type ke
 
 ## Defer / Panic / Recover
 
+### An unrecovered panic crashes the process Go-style: report on stderr, exit code 2
+`throw panic(x)` unwinds until some enclosing `func((defer, recover) => …)` recovers it. When nothing
+does — including in a **goroutine**, since `goǃ` queues the body on the bare thread pool with no wrapper
+catch and GoFunc's exception filter only captures panic-convertible exceptions — the exception reaches
+golib's `AppDomain.UnhandledException` backstop (registered in `builtin.InitializeGoLib`). The backstop
+matches Go: it writes the report to **stderr** (`panic: <message>`, first mapping runtime-error
+exceptions through `RuntimeErrorPanic.TryAsPanic` so e.g. an integer divide by zero reports Go's
+`panic: runtime error: …` form) and terminates with **exit code 2** — exactly like an unrecovered Go
+panic, minus the goroutine stack-trace lines. It previously printed to *stdout* and called
+`Environment.Exit(0)`, which polluted compared output and signaled false success to every caller
+(shells, CI, the Phase-4 differential oracle). The behavioral output-comparison harness validates this
+differentially: the Go binary is the oracle, so exit codes must **match** (not be zero), stdout must
+match, and the **first stderr line** must match — the remainder of Go's panic stderr is a
+machine-specific goroutine stack trace, so only the first line is compared. (Guarded by the
+`GoroutinePanicExitCode` behavioral test — a goroutine panics unrecovered while `main` blocks on a
+channel receive; both binaries must exit 2 with `panic: goroutine boom` as the first stderr line and a
+clean stdout.)
+
 ### Named-delegate and builtin callees keep the lambda form
 A zero-argument deferred/goroutine'd call whose callee is a **named func type** (`defer cancel()`
 with `cancel context.CancelFunc`, net dial) cannot take the bare trimmed method-group form —

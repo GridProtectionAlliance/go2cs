@@ -386,7 +386,7 @@ namespace BehavioralRunner
 
         private static void RunOutputComparison(IReadOnlyList<string> projects, Dictionary<string, ProjectResult> results)
         {
-            Console.Write($"[Output]   running C# vs Go and comparing stdout... ");
+            Console.Write($"[Output]   running C# vs Go, comparing exit code + stdout... ");
             int failed = 0, compared = 0;
 
             foreach (string p in projects)
@@ -420,22 +420,28 @@ namespace BehavioralRunner
                 ProcResult cs = Exec(csExe, null, workDir, RunTimeoutMs);
                 ProcResult go = Exec(goExe, null, workDir, RunTimeoutMs);
 
-                if (cs.ExitCode != 0)
+                // The Go binary is the oracle: exit codes must MATCH rather than both be zero, so a
+                // program that legitimately crashes (e.g. an unrecovered panic exits 2, like Go) is
+                // validated differentially instead of being rejected outright. stderr is compared by
+                // FIRST LINE only: Go's panic report appends a machine-specific goroutine stack
+                // trace, so a full comparison can never match; the first line carries the
+                // deterministic report and is empty for clean runs.
+                if (cs.ExitCode != go.ExitCode)
                 {
                     results[p].Phases[Phase.Output] = Status.Fail;
-                    results[p].Messages.Add($"C# exe exit {cs.ExitCode}");
-                    failed++;
-                }
-                else if (go.ExitCode != 0)
-                {
-                    results[p].Phases[Phase.Output] = Status.Fail;
-                    results[p].Messages.Add($"Go exe exit {go.ExitCode}");
+                    results[p].Messages.Add($"exit code mismatch: C# {cs.ExitCode} vs Go {go.ExitCode}");
                     failed++;
                 }
                 else if (!string.Equals(cs.StdOut, go.StdOut, StringComparison.Ordinal))
                 {
                     results[p].Phases[Phase.Output] = Status.Fail;
                     results[p].Messages.Add("stdout mismatch C# vs Go");
+                    failed++;
+                }
+                else if (!string.Equals(FirstLine(cs.StdErr), FirstLine(go.StdErr), StringComparison.Ordinal))
+                {
+                    results[p].Phases[Phase.Output] = Status.Fail;
+                    results[p].Messages.Add($"stderr first-line mismatch: C# \"{FirstLine(cs.StdErr)}\" vs Go \"{FirstLine(go.StdErr)}\"");
                     failed++;
                 }
                 else
@@ -703,6 +709,13 @@ namespace BehavioralRunner
 
             process.WaitForExit();
             return new ProcResult(process.ExitCode, outBuf.ToString(), errBuf.ToString());
+        }
+
+        private static string FirstLine(string text)
+        {
+            int index = text.IndexOf('\n');
+
+            return (index < 0 ? text : text[..index]).TrimEnd('\r');
         }
 
         private static string Truncate(string s, int max = 300)

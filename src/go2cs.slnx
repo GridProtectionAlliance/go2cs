@@ -204,6 +204,7 @@
     <Project Path="Tests/Behavioral/GoNamespaceShadow/GoNamespaceShadow.csproj" />
     <Project Path="Tests/Behavioral/GoNamespaceShadow/nsshadowlib/go.nsshadow.csproj" />
     <Project Path="Tests/Behavioral/GoOnlyFloatLiteralForms/GoOnlyFloatLiteralForms.csproj" />
+    <Project Path="Tests/Behavioral/GoroutinePanicExitCode/GoroutinePanicExitCode.csproj" />
     <Project Path="Tests/Behavioral/GoStmtReceiverLambda/GoStmtReceiverLambda.csproj" />
     <Project Path="Tests/Behavioral/GoStmtValueReturn/GoStmtValueReturn.csproj" />
     <Project Path="Tests/Behavioral/HeapKeywordVar/HeapKeywordVar.csproj" />

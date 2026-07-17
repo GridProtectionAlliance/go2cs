@@ -119,12 +119,12 @@ public abstract class BehavioralTestBase
 
     public TestContext? TestContext { get; set; }
 
-    protected int Exec(string application, string? arguments, string? workingDir = null, DataReceivedEventHandler? outputHandler = null, int timeoutMs = DefaultExecTimeoutMs)
+    protected int Exec(string application, string? arguments, string? workingDir = null, DataReceivedEventHandler? outputHandler = null, int timeoutMs = DefaultExecTimeoutMs, DataReceivedEventHandler? errorHandler = null)
     {
-        return Exec(TestContext, application, arguments, workingDir, outputHandler, timeoutMs);
+        return Exec(TestContext, application, arguments, workingDir, outputHandler, timeoutMs, errorHandler);
     }
 
-    protected static int Exec(TestContext? context, string application, string? arguments, string? workingDir = null, DataReceivedEventHandler? outputHandler = null, int timeoutMs = DefaultExecTimeoutMs)
+    protected static int Exec(TestContext? context, string application, string? arguments, string? workingDir = null, DataReceivedEventHandler? outputHandler = null, int timeoutMs = DefaultExecTimeoutMs, DataReceivedEventHandler? errorHandler = null)
     {
         ProcessStartInfo startInfo = new()
         {
@@ -167,7 +167,13 @@ public abstract class BehavioralTestBase
             process.OutputDataReceived += outputHandler;
         }
 
-        if (outputHandler is null)
+        // stderr routes to the dedicated errorHandler when one is provided (so callers can compare
+        // the streams separately); otherwise it falls back to the merged/legacy behavior.
+        if (errorHandler is not null)
+        {
+            process.ErrorDataReceived += errorHandler;
+        }
+        else if (outputHandler is null)
         {
             process.ErrorDataReceived += (_, e) =>
             {
@@ -278,9 +284,12 @@ public abstract class BehavioralTestBase
             Assert.AreEqual(0, exitCode = Exec("dotnet", $"build --configuration {TargetConfig} \"{Path.Combine(projPath, $"{targetProject}.csproj")}\""), $"dotnet build for \"{targetProject}\" failed with exit code {exitCode:N0}");
         #endif
 
-            // If matching console output, run once after compile to ensure any first run initialization steps are completed
+            // If matching console output, run once after compile to ensure any first run initialization
+            // steps are completed. The exit code is intentionally not asserted: a program may
+            // legitimately exit nonzero (e.g. an unrecovered panic exits 2, like Go) — the output
+            // comparison phase validates the exit code differentially against the Go binary.
             if (MatchConsoleOutput(targetProject))
-                Assert.AreEqual(0, exitCode = Exec(projExe, null, csExePath, timeoutMs: RunExecTimeoutMs), $"Initial run of \"{targetProject}\" failed with exit code {exitCode:N0}");
+                Exec(projExe, null, csExePath, timeoutMs: RunExecTimeoutMs);
         }
     }
 

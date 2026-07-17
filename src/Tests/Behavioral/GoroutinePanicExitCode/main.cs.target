@@ -1,0 +1,16 @@
+namespace go;
+
+using fmt = fmt_package;
+
+partial class main_package {
+
+internal static void Main() {
+    fmt.Println("before goroutine panic");
+    var done = new channel<EmptyStruct>(1);
+    goǃ(() => {
+        throw panic("goroutine boom");
+    });
+    ᐸꟷ(done);
+}
+
+} // end main_package

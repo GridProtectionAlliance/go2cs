@@ -474,6 +474,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGoOnlyFloatLiteralForms() => CheckTarget("GoOnlyFloatLiteralForms");
 
     [TestMethod]
+    public void CheckGoroutinePanicExitCode() => CheckTarget("GoroutinePanicExitCode");
+
+    [TestMethod]
     public void CheckGoStmtReceiverLambda() => CheckTarget("GoStmtReceiverLambda");
 
     [TestMethod]

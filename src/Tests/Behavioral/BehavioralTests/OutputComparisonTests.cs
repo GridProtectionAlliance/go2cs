@@ -433,6 +433,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGoOnlyFloatLiteralForms() => CheckTarget("GoOnlyFloatLiteralForms");
 
     [TestMethod]
+    public void CheckGoroutinePanicExitCode() => CheckTarget("GoroutinePanicExitCode");
+
+    [TestMethod]
     public void CheckGoStmtReceiverLambda() => CheckTarget("GoStmtReceiverLambda");
 
     [TestMethod]
@@ -1162,27 +1165,37 @@ public class D4_OutputComparisonTests : BehavioralTestBase
         Assert.IsTrue(File.Exists(csExe), $"Expected C# executable does not exist: {csExe}");
 
         StringBuilder csOutput = new();
+        StringBuilder csError = new();
 
         stopwatch.Start();
-        int csExitCode = Exec(csExe, null, Path.GetDirectoryName(projPath), csOutputHandler, RunExecTimeoutMs);
+        int csExitCode = Exec(csExe, null, Path.GetDirectoryName(projPath), csOutputHandler, RunExecTimeoutMs, csErrorHandler);
         stopwatch.Stop();
 
-        Assert.AreEqual(0, csExitCode, $"C# executable failed with exit code {csExitCode:N0}");
         TestContext?.WriteLine($"C# execution Time: {stopwatch.ElapsedMilliseconds:N0} ms");
 
         string goExe = Path.Combine(GetGoExePath(projPath, targetProject), $"{targetProject}.exe");
         Assert.IsTrue(File.Exists(goExe), $"Expected Go executable does not exist: {goExe}");
 
         StringBuilder goOutput = new();
-        
+        StringBuilder goError = new();
+
         stopwatch.Restart();
-        int goExitCode = Exec(goExe, null, Path.GetDirectoryName(projPath), goOutputHandler, RunExecTimeoutMs);
+        int goExitCode = Exec(goExe, null, Path.GetDirectoryName(projPath), goOutputHandler, RunExecTimeoutMs, goErrorHandler);
         stopwatch.Stop();
 
-        Assert.AreEqual(0, goExitCode, $"Go executable failed with exit code {goExitCode:N0}");
         TestContext?.WriteLine($"Go execution Time: {stopwatch.ElapsedMilliseconds:N0} ms");
 
+        // The Go binary is the oracle: exit codes must MATCH rather than both be zero, so a program
+        // that legitimately crashes (e.g. an unrecovered panic exits 2, like Go) is validated
+        // differentially instead of being rejected outright.
+        Assert.AreEqual(goExitCode, csExitCode, $"Exit code mismatch: C# executable exited {csExitCode:N0}, Go executable exited {goExitCode:N0}");
+
         Assert.AreEqual(csOutput.ToString(), goOutput.ToString(), "Output mismatch between C# and Go executables");
+
+        // stderr is compared by FIRST LINE only: Go's panic report appends a machine-specific
+        // goroutine stack trace, so a full comparison can never match. The first line carries the
+        // deterministic report (e.g. "panic: goroutine boom") and is empty for clean runs.
+        Assert.AreEqual(FirstLine(goError), FirstLine(csError), "stderr first-line mismatch between C# and Go executables");
 
         return;
 
@@ -1192,10 +1205,30 @@ public class D4_OutputComparisonTests : BehavioralTestBase
                 csOutput.AppendLine(e.Data);
         }
 
+        void csErrorHandler(object sender, DataReceivedEventArgs e)
+        {
+            if (e.Data is not null)
+                csError.AppendLine(e.Data);
+        }
+
         void goOutputHandler(object sender, DataReceivedEventArgs e)
         {
             if (e.Data is not null)
                 goOutput.AppendLine(e.Data);
         }
+
+        void goErrorHandler(object sender, DataReceivedEventArgs e)
+        {
+            if (e.Data is not null)
+                goError.AppendLine(e.Data);
+        }
+    }
+
+    private static string FirstLine(StringBuilder buffer)
+    {
+        string text = buffer.ToString();
+        int index = text.IndexOf('\n');
+
+        return (index < 0 ? text : text[..index]).TrimEnd('\r');
     }
 }

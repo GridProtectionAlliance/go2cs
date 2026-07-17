@@ -696,6 +696,9 @@ internal static void withLock(sync.Locker lk, Action fn) => func((defer, recover
 });
 ```
 
+An unrecovered panic — even in a goroutine — crashes the process exactly as in Go: golib's
+`AppDomain.UnhandledException` backstop writes the `panic: …` report to stderr and exits with code 2.
+
 `recover()` is the same wrapper's parameter; a re-`panic` is `throw panic(err)`:
 
 ```go
@@ -710,8 +713,8 @@ var err = recover(); if (err != default!) {   // fmt/print.cs
 ```
 
 **Full detail:** [Reference → Defer / Panic / Recover](ConversionStrategies-Reference.md#defer--panic--recover) —
-named-delegate/builtin callees, value-returning goroutine wrapping, func-literal argument capture hoisting,
-and box-bound deferred pointer-receiver methods.
+unrecovered-panic process exit (stderr + code 2), named-delegate/builtin callees, value-returning goroutine
+wrapping, func-literal argument capture hoisting, and box-bound deferred pointer-receiver methods.
 
 ---
 

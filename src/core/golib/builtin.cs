@@ -66,8 +66,11 @@ public static class builtin
             if (ex is not null && RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
                 ex = panic;
 
-            Console.WriteLine($"{(ex is PanicException ? "panic: " : "")}{ex?.Message ?? $"unhandled exception: {e.ExceptionObject}"}");
-            Environment.Exit(0);
+            // Match Go: an unrecovered panic in any goroutine reports on stderr and terminates the
+            // process with exit code 2 — never stdout / exit 0, which polluted compared output and
+            // signaled false success to callers (shells, CI, the Phase-4 differential oracle).
+            Console.Error.WriteLine($"{(ex is PanicException ? "panic: " : "")}{ex?.Message ?? $"unhandled exception: {e.ExceptionObject}"}");
+            Environment.Exit(2);
         }
     }
 
