@@ -683,7 +683,7 @@ func supportedTestCapabilities() []string {
 		"T.Cleanup", "T.Error", "T.Errorf", "T.Fail", "T.FailNow", "T.Failed",
 		"T.Fatal", "T.Fatalf", "T.Helper", "T.Log", "T.Logf", "T.Name", "T.Parallel",
 		"T.Run", "T.Setenv", "T.Skip", "T.SkipNow", "T.Skipf", "T.Skipped", "T.TempDir", "M.Run",
-		"testing.AllocsPerRun", "testing.Short", "testing.Verbose",
+		"testing.AllocsPerRun", "testing.CoverMode", "testing.Short", "testing.Verbose",
 	}
 	sort.Strings(capabilities)
 	return capabilities

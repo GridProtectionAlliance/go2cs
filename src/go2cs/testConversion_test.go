@@ -467,6 +467,43 @@ func TestAllocsPerRunCapabilityIsSupported(t *testing.T) {
 	}
 }
 
+// The shim's CoverMode() returns "" (Go's exact coverage-off value), so tests branching on it —
+// strings' TestIndexRune is the sole stdlib caller in the #3-4 packages — must census as included.
+func TestCoverModeCapabilityIsSupported(t *testing.T) {
+	dir := t.TempDir()
+	files := map[string]string{
+		"go.mod":   "module example/covermode\n\ngo 1.23\n",
+		"value.go": "package covermode\n",
+		"value_test.go": "package covermode\n" +
+			"import \"testing\"\n" +
+			"func TestCoverageOffPath(t *testing.T) {\n" +
+			"\tif testing.CoverMode() != \"\" {\n" +
+			"\t\tt.Skip(\"coverage instrumentation active\")\n" +
+			"\t}\n" +
+			"}\n",
+	}
+	for name, contents := range files {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(contents), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	_, internal := loadTestVariantForDir(t, dir)
+
+	analysis := analyzeTestingCapabilities(internal)
+	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, NewHashSet(supportedTestCapabilities()))
+
+	if len(declarations) != 1 || declarations[0].Name != "TestCoverageOffPath" {
+		t.Fatalf("declarations = %#v, want just TestCoverageOffPath", declarations)
+	}
+	declaration := declarations[0]
+	if declaration.Status != "included" {
+		t.Fatalf("TestCoverageOffPath should be included (testing.CoverMode is supported), got status %q reason %q", declaration.Status, declaration.Reason)
+	}
+	if !NewHashSet(declaration.RequiredCapabilities).Contains("testing.CoverMode") {
+		t.Fatalf("required capabilities %v do not contain testing.CoverMode", declaration.RequiredCapabilities)
+	}
+}
+
 // F4 guard: capability attribution is per test THROUGH its helper closure — one blocked test
 // (via a helper it calls) blocks itself; its supported sibling stays included.
 func TestPerTestCapabilityAttributionBlocksOnlyOffendingTest(t *testing.T) {
