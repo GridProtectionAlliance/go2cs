@@ -31,7 +31,7 @@ easily, and a .NET developer can use Go code directly within the .NET ecosystem.
 * Compile in Visual Studio: [Go Standard Library Solution](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted.slnx)
 * Reproduce test validation: [Try it yourself](#try-it-yourself--validate-a-converted-test-suite)
 * View example converted test: [`utf8_test.cs`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8_test.cs)
-* See major project developments: [Milestones](README.md#milestones)
+* Project activity: [Status](#status) — [Milestones](#milestones)
 
 ## Transpiler Goals
 
@@ -373,6 +373,8 @@ compares terminal results by full Go test name — reporting `validated` only wh
 sides and every unsupported declaration (benchmarks, examples) is accounted for. It regenerates the local
 converted `.cs` in place (`git status` stays clean when your toolchain matches the pinned versions); the Go
 source copies and run manifests it stages are git-ignored.
+
+### Performance
 
 _Everyone asks:_ wondering how fast the transpiled C# runs compared to the original Go — including startup time, memory, and Native AOT builds? See the latest [performance comparison](Performance.md) — **`TL;DR`**: _no, it's not as fast as native Go, [nor is this an expected outcome](Background.md#converted-code)_. Save for some initial work with a [stack-based string](ConversionStrategies.md#stack-strings-sstring), performance and optimizations are not the current focus, this kind of work is targeted for _after_ Phase 4 work.
 
