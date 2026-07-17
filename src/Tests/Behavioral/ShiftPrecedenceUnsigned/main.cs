@@ -33,7 +33,7 @@ internal static void Main() {
     fmt.Println(bf.cache);
     bf.cache <<= (int)(n);
     fmt.Println(bf.cache);
-    uint64 hi = (nuint)0xFFFFFFFFFFFFFFFFUL;
+    uint64 hi = 0xFFFFFFFFFFFFFFFFUL;
     fmt.Println((uint64)(hi & ~(((uint64)1 << (int)(63)))));
     uint32 u = 0xFFFFFFFFU;
     fmt.Println((uint32)(u & ~(((uint32)1 << (int)(31)))));

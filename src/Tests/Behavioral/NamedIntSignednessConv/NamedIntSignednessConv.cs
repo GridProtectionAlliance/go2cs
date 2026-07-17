@@ -22,7 +22,7 @@ internal static void Main() {
     fmt.Println((int64)t);
     var back = toTimestamp(t + 1);
     fmt.Println((uint64)back);
-    timestamp big = (nuint)18446744073709551615UL;
+    timestamp big = 18446744073709551615UL;
     fmt.Println((int64)toTime(big));
 }
 

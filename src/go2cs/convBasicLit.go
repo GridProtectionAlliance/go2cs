@@ -284,7 +284,21 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 			value = preserveGoIntLiteral(value, strconv.FormatUint(uintval, 10))
 
 			if uintval > math.MaxUint32 {
-				result.WriteString("(nuint)")
+				// A literal above MaxInt64 only parses here, and its resolved type picks
+				// the emitted form: a uint64 context (incl. named types over uint64 — their
+				// [GoType] wrappers convert implicitly from ulong) takes the plain UL
+				// literal — math.Float64frombits(0xFFF0000000000000). A (nuint) prefix
+				// there is spurious: semantically wrong for a 64-bit target type, and
+				// truncating on a 32-bit platform. Only a native-width unsigned context
+				// (uint/uintptr -> C# nuint) keeps the (nuint) cast — a bare ulong literal
+				// has no implicit conversion to nuint (CS0266); the non-constant unchecked
+				// (nuint) conversion does compile.
+				basic, isBasic := v.getType(basicLit, true).(*types.Basic)
+
+				if !isBasic || basic.Kind() != types.Uint64 {
+					result.WriteString("(nuint)")
+				}
+
 				result.WriteString(value)
 				result.WriteString("UL")
 			} else {
