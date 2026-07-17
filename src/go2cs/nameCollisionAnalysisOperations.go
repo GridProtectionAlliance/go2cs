@@ -16,6 +16,19 @@ import (
 // to runtime errors or unexpected behavior in the generated C# code, which is more
 // strict about unique naming of discrete types than Go is in this case.
 
+// emitterSpelledTypeNames are type names the converter's EMITTER spells independent of the Go
+// source's own spelling — so a user-declared package-level TYPE of the same name must be
+// package-scoped Δ-renamed (nameCollisions), never '@'-escaped or globally `reserved` (both
+// would corrupt the emitter's legitimate spellings in every other package). Proven vectors:
+// `any` — the `interface{}` rendering (`slice<any>` bound the user struct, CS0029 ×3);
+// `rune` — the untyped rune-constant default (`c := 'x'` emits `rune c = 'x';`, CS0030);
+// `nint`/`nuint` — the Go int/uint MAPPED spellings and C# native-int contextual keywords
+// (`partial struct nint { internal nint d; }` is a CS0523 layout cycle, and '@' cannot fix a
+// name-identity problem).
+var emitterSpelledTypeNames = map[string]bool{
+	"any": true, "rune": true, "nint": true, "nuint": true,
+}
+
 func performNameCollisionAnalysis(pkg *packages.Package) {
 	// Track names of various declarations
 	namedElementNames := make(map[string]bool)
@@ -81,6 +94,20 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 
 		if goBuiltinNames[name] {
 			packageBuiltinShadows[name] = true
+		}
+	}
+
+	// A package-level TYPE named after a spelling the EMITTER produces on its own (`any`,
+	// `rune`, `nint`, `nuint` — see emitterSpelledTypeNames) shadows that spelling inside the
+	// package class, breaking the converter's own emissions (`slice<any>` bound the user
+	// struct, CS0029 ×3; `internal nint d;` inside `partial struct nint` is a CS0523 cycle).
+	// Δ-rename every ident named it in THIS package (nameCollisions is package-scoped),
+	// keeping the bare name bound to its emitter meaning. These names must never go in the
+	// string-based `reserved` set: that would corrupt the emitter's legitimate spellings in
+	// every OTHER package (see the comment on that set).
+	for name, isType := range namedElementNames {
+		if isType && emitterSpelledTypeNames[name] {
+			nameCollisions[name] = true
 		}
 	}
 

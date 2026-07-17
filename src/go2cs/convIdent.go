@@ -17,12 +17,21 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		}
 	}
 
+	// `nil` is a Go PREDECLARED identifier (universe scope), not a keyword — a user object may
+	// shadow it (`nil := 5`). Only an ident that resolves to the universe nil is the literal
+	// (pointer context: golib `nil`; value context: `default!`); a shadowing object falls
+	// through to normal identifier rendering (mirrors the `true`/`false` handling below). A
+	// synthetic ident with no type info keeps the literal rendering.
 	if ident.Name == "nil" {
-		if context.isPointer {
-			return "nil"
-		}
+		obj := v.info.ObjectOf(ident)
 
-		return "default!"
+		if _, isUniverseNil := obj.(*types.Nil); isUniverseNil || obj == nil {
+			if context.isPointer {
+				return "nil"
+			}
+
+			return "default!"
+		}
 	}
 
 	// `true`/`false` are C# KEYWORDS but Go PREDECLARED identifiers (universe scope). A VALUE

@@ -918,6 +918,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckRenamedReceiverBox() => CheckTarget("RenamedReceiverBox");
 
     [TestMethod]
+    public void CheckReservedNameShadows() => CheckTarget("ReservedNameShadows");
+
+    [TestMethod]
     public void CheckReservedTypeMethodCollision() => CheckTarget("ReservedTypeMethodCollision");
 
     [TestMethod]

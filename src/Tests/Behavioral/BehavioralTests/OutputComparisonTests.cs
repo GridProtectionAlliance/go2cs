@@ -847,6 +847,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckRenamedReceiverBox() => CheckTarget("RenamedReceiverBox");
 
     [TestMethod]
+    public void CheckReservedNameShadows() => CheckTarget("ReservedNameShadows");
+
+    [TestMethod]
     public void CheckReservedTypeMethodCollision() => CheckTarget("ReservedTypeMethodCollision");
 
     [TestMethod]

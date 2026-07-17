@@ -347,7 +347,7 @@ var keywords = NewHashSet([]string{
 	"is", "lock", "long", "namespace", "new", "null", "object", "operator", "out", "override", "params", "private",
 	"protected", "public", "readonly", "ref", "sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "this",
 	"throw", "try", "typeof", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile",
-	"while", "__argslist", "__makeref", "__reftype", "__refvalue",
+	"while", "__arglist", "__makeref", "__reftype", "__refvalue",
 
 	// The following C# types overlap with Go types, however, Go unnamed fields in structs will use type
 	// name as the field name, so these should also be escaped with an `@` when encountered:
@@ -364,6 +364,14 @@ var keywords = NewHashSet([]string{
 	// text/template/parse), so the raw `bool true` is a C# syntax error (CS1001/CS1003). Escape.
 	"true", "false",
 
+	// `required` and `scoped` are C# 11 contextual keywords banned as TYPE names: a type
+	// declared `partial struct required` is CS9029 and `partial struct scoped` is CS9062
+	// ("Types and aliases cannot be named '...'"). Like `file`, the '@' escape is valid in
+	// every position, so they are escaped like full keywords. (`record` and `partial` type
+	// names compile clean on C# 13/net9 and need no escape; `nint`/`nuint` need a RENAME,
+	// not an escape — see the reserved set below. All verified empirically.)
+	"required", "scoped",
+
 	// The remaining C# keywords overlap with Go keywords (true keywords in Go too), so they
 	// do not need detection: "break", "case", "const", "continue", "default", "else", "for",
 	// "goto", "if", "interface", "return", "select", "struct", "switch", "var"
@@ -372,14 +380,25 @@ var keywords = NewHashSet([]string{
 // The following names are reserved by go2cs or C#, if encountered in Go code, prefix with `Δ`:
 // Note that "_" is used for type assertion functions in go2cs converted C# code, but it is not
 // a valid method name in Go, so it is not included in the reserved list.
+// `builtin` and `sstring` are golib names the emitted C# references unqualified even when the
+// Go source never spells them: `builtin` is the target of qualified `builtin.<name>(...)` calls
+// (packageBuiltinShadows) and `sstring` is the zero-copy view type emitted by the string([]byte)
+// elision pass. A same-named user identifier (a nested type especially) would shadow the golib
+// name inside the package class, so it is renamed. Names the EMITTER itself spells — UNIVERSE
+// names (`any`, `rune`, the numeric alias names, ...) and the MAPPED C# spellings (`nint`,
+// `nuint`) — must NEVER go in this set: legitimate emissions flow back through the same
+// string-based sanitizers (`slice<rune>(...)` corpus-wide would corrupt to `slice<Δrune>`;
+// re-fed delegate compositions corrupt `Func<..., nint, nint>` to `Δnint`), so a user TYPE
+// named one of those is instead renamed package-scoped via performNameCollisionAnalysis
+// (emitterSpelledTypeNames). Guarded by Tests/Behavioral/ReservedNameShadows.
 var reserved = NewHashSet([]string{
-	"AreEqual", "array", "channel", "defer\u01C3", "EmptyStruct", "Equals", "Finalize", "GetGoTypeName",
+	"AreEqual", "array", "builtin", "channel", "defer\u01C3", "EmptyStruct", "Equals", "Finalize", "GetGoTypeName",
 	"GetHashCode", "GetType", "GoFunc", "GoFuncRoot", "GoImplement", "GoImplementAttribute", "GoImplicitConv",
 	"GoImplicitConvAttribute", "GoPackage", "GoPackageAttribute", "GoRecv", "GoRecvAttribute",
 	"GoTestMatchingConsoleOutput", "GoTestMatchingConsoleOutputAttribute", "GoTag", "GoTagAttribute",
 	"GoTypeAlias", "GoTypeAliasAttribute", "GoType", "GoTypeAttribute", "GoUntyped", "go\u01C3",
 	"IArray", "IChannel", "IMap", "ISlice", "ISupportMake", "make\u01C3", "MemberwiseClone", "NilType",
-	"PanicException", "PrintPointer", "slice", "ToString", "ToUTF8Bytes", "TryCastAsInteger", "type",
+	"PanicException", "PrintPointer", "slice", "sstring", "ToString", "ToUTF8Bytes", "TryCastAsInteger", "type",
 	"UntypedInt", "UntypedFloat", "UntypedComplex",
 	PointerPrefix, TrueMarker, OverloadDiscriminator, EllipsisOperator,
 })
