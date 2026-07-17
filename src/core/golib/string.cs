@@ -230,7 +230,6 @@ public readonly struct @string :
     {
         private readonly byte[] m_bytes = bytes;
         private int m_byteIndex;
-        private int m_runeIndex = -1;
         private (nint, rune) m_current;
 
         public (nint, rune) Current => m_current;
@@ -249,14 +248,18 @@ public readonly struct @string :
 
             if (status == OperationStatus.Done)
             {
-                m_current = (++m_runeIndex, rune.Value);
+                // Go `for i, r := range s` yields the BYTE index of each rune's first byte, not
+                // the rune ordinal — a multi-byte rune advances the next index by its encoded
+                // length (unicode/utf8 TestSequencing walks exactly this contract).
+                m_current = (m_byteIndex, rune.Value);
             }
             else
             {
-                // When status is InvalidData or NeedMoreData or DestinationTooSmall, follow
-                // Go behavior: Replace invalid sequences with Unicode replacement character
-                m_current = (++m_runeIndex, RuneReplacementChar);
-                bytesConsumed = bytesConsumed == 0 ? 1 : bytesConsumed;
+                // Invalid sequence: Go yields U+FFFD at the byte's index and advances a SINGLE
+                // byte (spec: range and DecodeRune consume one byte per invalid sequence) — never
+                // .NET's maximal-subpart consumption, which can swallow several bytes at once.
+                m_current = (m_byteIndex, RuneReplacementChar);
+                bytesConsumed = 1;
             }
 
             m_byteIndex += bytesConsumed;
@@ -266,7 +269,6 @@ public readonly struct @string :
         public void Reset()
         {
             m_byteIndex = 0;
-            m_runeIndex = -1;
             m_current = default;
         }
     }
@@ -302,10 +304,11 @@ public readonly struct @string :
             }
             else
             {
-                // When status is InvalidData or NeedMoreData or DestinationTooSmall, follow
-                // Go behavior: Replace invalid sequences with Unicode replacement character
+                // Invalid sequence: Go's []rune(string) yields one U+FFFD PER INVALID BYTE
+                // (same single-byte advance as range/DecodeRune) — never .NET's maximal-subpart
+                // consumption, which can swallow several bytes as one replacement.
                 runes[index++] = RuneReplacementChar;
-                bytesConsumed = bytesConsumed == 0 ? 1 : bytesConsumed;
+                bytesConsumed = 1;
             }
 
             bytes = bytes[bytesConsumed..];
@@ -376,9 +379,18 @@ public readonly struct @string :
 
     public static implicit operator byte[](@string value)
     {
-        return value.Bytes;
+        // Go: `[]byte(s)` COPIES — strings are immutable and the receiver may freely mutate the
+        // result. Returning the backing array let a converted `b := []byte(m.str); b[0] = 0x80`
+        // write THROUGH into the string (unicode/utf8's TestDecodeRune corrupted the package's
+        // utf8map string table for every later test). Zero-copy read-only access uses sstring
+        // views / ToSpan() internally — never this conversion.
+        return value.Bytes.ToArray();
     }
 
+    // NOTE: stores WITHOUT copying — every LIVE Go []byte value is a slice<byte> in converted
+    // code, so `string(b)` conversions route through the copying slice<byte> constructor above;
+    // a raw byte[] reaches this operator only as a freshly allocated array (emitted literals,
+    // golib internals), where a defensive copy would be pure waste.
     public static implicit operator @string(byte[] value)
     {
         return new @string(value);

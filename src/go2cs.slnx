@@ -393,6 +393,7 @@
     <Project Path="Tests/Behavioral/SortArrayType/SortArrayType.csproj" />
     <Project Path="Tests/Behavioral/SpreadOperator/SpreadOperator.csproj" />
     <Project Path="Tests/Behavioral/StdLibInternalAbi/StdLibInternalAbi.csproj" />
+    <Project Path="Tests/Behavioral/StringByteSemantics/StringByteSemantics.csproj" />
     <Project Path="Tests/Behavioral/StringByteUnionConstraint/StringByteUnionConstraint.csproj" />
     <Project Path="Tests/Behavioral/StringConvNamedInt/StringConvNamedInt.csproj" />
     <Project Path="Tests/Behavioral/StringConvPostfix/StringConvPostfix.csproj" />

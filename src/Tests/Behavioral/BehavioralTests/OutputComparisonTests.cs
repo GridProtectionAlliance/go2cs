@@ -952,6 +952,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckStdLibInternalAbi() => CheckTarget("StdLibInternalAbi");
 
     [TestMethod]
+    public void CheckStringByteSemantics() => CheckTarget("StringByteSemantics");
+
+    [TestMethod]
     public void CheckStringByteUnionConstraint() => CheckTarget("StringByteUnionConstraint");
 
     [TestMethod]

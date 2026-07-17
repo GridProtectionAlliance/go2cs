@@ -1026,6 +1026,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckStdLibInternalAbi() => CheckTarget("StdLibInternalAbi");
 
     [TestMethod]
+    public void CheckStringByteSemantics() => CheckTarget("StringByteSemantics");
+
+    [TestMethod]
     public void CheckStringByteUnionConstraint() => CheckTarget("StringByteUnionConstraint");
 
     [TestMethod]
