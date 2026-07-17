@@ -43,7 +43,7 @@ internal static void Main() {
     fmt.Printf("[%.4x] [%.4x] [%#.4x] [%8.4x] [%-8.4x]\n"u8, 255, -255, 255, 255, 255);
     fmt.Printf("[%.0x] [%.0x] [%5.2x] [%05.2x]\n"u8, 0, 255, 255, 255);
     fmt.Printf("[%x] [%#x] [%x] [%x]\n"u8, (int8)(-128), (int8)(-128), (uint8)255, (nuint)255);
-    fmt.Printf("[%x] [%#x]\n"u8, (uint64)(nuint)18446744073709551615UL, (int64)(-1));
+    fmt.Printf("[%x] [%#x]\n"u8, (uint64)18446744073709551615UL, (int64)(-1));
     fmt.Printf("[%x] [%X] [%#x] [%#X]\n"u8, "abc", "abc", "abc", "abc");
     fmt.Printf("[% x] [% X] [% #x]\n"u8, "abc", "abc", "abc");
     fmt.Printf("[%x] [%#x] [% x]\n"u8, slice<byte>("abc"u8), slice<byte>("abc"u8), new byte[]{1, 2}.slice());
