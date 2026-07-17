@@ -5,7 +5,7 @@ using sort = sort_package;
 
 partial class main_package {
 
-internal const float32 w = 1f;
+internal const float32 w = 1.0f;
 internal static readonly UntypedInt _addr_X = 1;
 public static readonly UntypedInt Y = 2;
 public static readonly UntypedInt Z = 3;
@@ -24,7 +24,7 @@ public static readonly @string String = "Hello"u8;
 public static readonly @string String2 = "World"u8;
 public static readonly @string String3 = "世界 \u0053\u004a3"u8;
 public static readonly UntypedFloat Float = 3.14;
-public static readonly UntypedFloat Float2 = 3.14e+100;
+public static readonly UntypedFloat Float2 = 3.14e100;
 public static readonly GoUntyped GiantFloat = /* 1e309 */
     GoUntyped.Parse("1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
 public static readonly @string MultiLine = """

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/constant"
 	"go/token"
 	"go/types"
 	"math"
@@ -136,6 +137,98 @@ func replaceOctalChars(value string) string {
 	}
 
 	return value
+}
+
+// floatLiteralSourceText returns the SOURCE text of a float-constant initializer that is a
+// plain literal — an ast.BasicLit, optionally under a single unary sign (`-7.05306122448979611050e-01`
+// parses as a UnaryExpr over the literal) — or "" when the initializer is a folded expression
+// with no single literal form.
+func floatLiteralSourceText(expr ast.Expr) string {
+	sign := ""
+
+	if unary, ok := expr.(*ast.UnaryExpr); ok {
+		switch unary.Op {
+		case token.SUB, token.ADD:
+			sign = unary.Op.String()
+			expr = unary.X
+		default:
+			return ""
+		}
+	}
+
+	if lit, ok := expr.(*ast.BasicLit); ok && lit.Kind == token.FLOAT {
+		return sign + lit.Value
+	}
+
+	return ""
+}
+
+// isValidCSharpRealLiteral reports whether a Go decimal float literal's source text is ALSO a
+// valid C# real-literal, so it can be emitted verbatim. Go and C# share the decimal forms —
+// digits with optional fraction, `e`/`E` exponent, and `_` digit separators (both languages
+// restrict separators to between digits) — but Go additionally allows hex floats (`0x1p-2`)
+// and a bare trailing dot (`5.`, `5.e2`), which C# does not.
+func isValidCSharpRealLiteral(lit string) bool {
+	body := lit
+
+	if len(body) > 0 && (body[0] == '+' || body[0] == '-') {
+		body = body[1:]
+	}
+
+	if len(body) == 0 {
+		return false
+	}
+
+	if len(body) > 1 && body[0] == '0' && (body[1] == 'x' || body[1] == 'X') {
+		return false
+	}
+
+	if i := strings.IndexByte(body, '.'); i != -1 && (i+1 >= len(body) || body[i+1] < '0' || body[i+1] > '9') {
+		return false
+	}
+
+	return true
+}
+
+// exactFloatConstString returns the EXACT C# value text for a float-kind constant declaration.
+// go/constant's Value.String() is a SHORTENED human-readable form (~6 significant digits), so
+// emitting it silently truncated the COMPILED value (math cbrt's `C = 0.542857` — the exact
+// 5.42857142857142815906e-01 survived only in the `/* … */` comment). Preference order:
+//  1. The Go source literal VERBATIM when it is also valid C# syntax and parses to the same
+//     value — the declaration then reads exactly like the Go source, and the comment-elision
+//     check sees constVal == orgExpr and drops the now-redundant `/* original */` comment.
+//  2. The shortest round-trip form (strconv.FormatFloat 'g'/-1) at the declaration's width —
+//     bitSize 32 for a float32-typed const (the appended `f` suffix then parses with the same
+//     single rounding Go applies converting the exact constant), 64 otherwise. This covers
+//     folded const expressions and Go-only literal forms (hex floats, trailing-dot).
+//
+// A beyond-float64 value keeps the shortened String() form so the GoUntyped overflow path
+// (strconv.ParseFloat fails → writeUntypedConst) still triggers exactly as before.
+func exactFloatConstString(val constant.Value, source ast.Expr, isFloat32 bool) string {
+	f64, _ := constant.Float64Val(val)
+
+	if math.IsInf(f64, 0) {
+		return val.String()
+	}
+
+	bitSize := 64
+	target := f64
+
+	if isFloat32 {
+		bitSize = 32
+		f32, _ := constant.Float32Val(val)
+		target = float64(f32)
+	}
+
+	if source != nil {
+		if lit := floatLiteralSourceText(source); lit != "" && isValidCSharpRealLiteral(lit) {
+			if parsed, err := strconv.ParseFloat(lit, bitSize); err == nil && parsed == target {
+				return lit
+			}
+		}
+	}
+
+	return strconv.FormatFloat(target, 'g', -1, bitSize)
 }
 
 // preserveGoIntLiteral returns the literal's SOURCE text when it is also a valid C# integer

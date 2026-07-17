@@ -227,6 +227,23 @@ prints it unsigned. (Guarded by the `UntypedIntFloatContexts` behavioral test �
 both int and float contexts, the `1<<63` unsigned payload, complex contexts via `real`/`imag`, and a
 negative payload, values verified vs Go.)
 
+**Float constant values are emitted exactly.** The emitted value of a float-kind constant declaration is never `go/constant`'s `Value.String()` — that is a *shortened* human-readable form (~6 significant digits), and using it silently truncated the **compiled** value while the exact literal survived only in the `/* … */` comment (math `cbrt`'s `C = /* 5.42857142857142815906e-01 */ 0.542857`). The emission prefers the Go **source literal verbatim** when it is also valid C# syntax — decimal floats including exponents and `_` digit separators overlap C# exactly, and a unary-minus form (`-7.05306122448979611050e-01`) carries its sign — which also elides the now-redundant original-expression comment (the emitted value *is* the original). When no single valid literal exists — a folded constant expression (`19.0 / 35.0`), or a Go-only literal form (hex float `0x1p-2`, trailing-dot `5.`) — the value emits as the **shortest round-trip** form (`strconv.FormatFloat 'g'/-1`) of the constant converted at the declaration's width (bitSize 32 for a `float32`-typed const, so the `f`-suffixed single parses with the same one rounding Go applies; 64 otherwise):
+
+```go
+const (
+    C              = 5.42857142857142815906e-01 // 19/35 = 0x3FE15F15F15F15F1
+    D              = -7.05306122448979611050e-01
+    folded         = 19.0 / 35.0
+)
+```
+```csharp
+internal static readonly UntypedFloat C = 5.42857142857142815906e-01;
+internal static readonly UntypedFloat D = -7.05306122448979611050e-01;
+internal static readonly UntypedFloat folded = /* 19.0 / 35.0 */ 0.5428571428571428;
+```
+
+A beyond-float64 value still routes to the `GoUntyped` (BigInteger) overflow path unchanged. (Guarded by the `UntypedConstDefine` behavioral test — package-level and function-local high-precision consts printed and compared against Go, which fails with the truncated `0.542857` emission; `SortArrayType` additionally locks the verbatim forms `1.0f`/`3.14e100`.)
+
 A Go untyped *float* constant defaults to `float64`, so its C# literal carries the double suffix `D` — not `F` — regardless of whether the value happens to fit in `float32`. (Emitting `F` whenever the value fit would make `z := 1.0` a `float`, breaking later `float64` arithmetic with CS0266.) A literal in an explicit `float32` context keeps `F`:
 
 ```go

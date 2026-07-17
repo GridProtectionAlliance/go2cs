@@ -600,7 +600,17 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					constVal, _ = v.getStringLiteral(c.Val().ExactString())
 				}
 			} else if c.Val().Kind() == constant.Float {
-				constVal = c.Val().String()
+				// The COMPILED value must be exact — Value.String() shortens to ~6 significant
+				// digits, truncating the emitted literal (the exact value survived only in the
+				// `/* … */` comment; math cbrt's C/D/E/F/G). Emit the source literal verbatim
+				// when it is valid C#, else the shortest round-trip form (see exactFloatConstString).
+				var srcExpr ast.Expr
+
+				if len(valueSpec.Values) >= i+1 {
+					srcExpr = valueSpec.Values[i]
+				}
+
+				constVal = exactFloatConstString(c.Val(), srcExpr, csTypeName == "float32")
 			} else {
 				constVal = c.Val().ExactString()
 			}
