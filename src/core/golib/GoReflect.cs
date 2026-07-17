@@ -182,8 +182,8 @@ public static class GoReflect
     {
         string name = t.Name;
 
-        if (name.Length > 0 && name[0] == 'Δ') // ShadowVarMarker Δ
-            name = name[1..];
+        if (name.StartsWith(ShadowVarMarker, StringComparison.Ordinal))
+            name = name[ShadowVarMarker.Length..];
 
         Type? decl = t.DeclaringType;
 
