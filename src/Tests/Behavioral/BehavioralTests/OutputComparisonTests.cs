@@ -295,6 +295,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckFloatFormatExponent() => CheckTarget("FloatFormatExponent");
 
     [TestMethod]
+    public void CheckFloatFormatting() => CheckTarget("FloatFormatting");
+
+    [TestMethod]
     public void CheckForeignPtrEmbedIfaceUser() => CheckTarget("ForeignPtrEmbedIfaceUser");
 
     [TestMethod]
@@ -374,6 +377,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGenericStringTypeArg() => CheckTarget("GenericStringTypeArg");
+
+    [TestMethod]
+    public void CheckGenericStructFields() => CheckTarget("GenericStructFields");
 
     [TestMethod]
     public void CheckGenericTypeAssertions() => CheckTarget("GenericTypeAssertions");

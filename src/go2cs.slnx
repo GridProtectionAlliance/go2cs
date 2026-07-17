@@ -154,6 +154,7 @@
     <Project Path="Tests/Behavioral/FloatFormatExponent/FloatFormatExponent.csproj" />
     <Project Path="Tests/Behavioral/FixedArrayBufferPointer/FixedArrayBufferPointer.csproj" />
     <Project Path="Tests/Behavioral/FloatConstIntContext/FloatConstIntContext.csproj" />
+    <Project Path="Tests/Behavioral/FloatFormatting/FloatFormatting.csproj" />
     <Project Path="Tests/Behavioral/ForInitMixedTypes/ForInitMixedTypes.csproj" />
     <Project Path="Tests/Behavioral/ForInitShadowedUse/ForInitShadowedUse.csproj" />
     <Project Path="Tests/Behavioral/ForLoopPerIterationVars/ForLoopPerIterationVars.csproj" />

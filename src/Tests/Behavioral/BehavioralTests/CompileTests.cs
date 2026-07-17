@@ -324,6 +324,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckFloatFormatExponent() => CheckTarget("FloatFormatExponent");
 
     [TestMethod]
+    public void CheckFloatFormatting() => CheckTarget("FloatFormatting");
+
+    [TestMethod]
     public void CheckForeignPtrEmbedIfaceLib() => CheckTarget("ForeignPtrEmbedIfaceLib");
 
     [TestMethod]
