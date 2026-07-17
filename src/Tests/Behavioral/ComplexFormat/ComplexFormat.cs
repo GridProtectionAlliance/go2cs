@@ -27,6 +27,18 @@ internal static void Main() {
     fmt.Println(2 + 3D.i());
     fmt.Printf("%v;%v\n"u8, c128, c64);
     fmt.Println("sprint:", fmt.Sprint(neg));
+    fmt.Println(2748D.i());
+    fmt.Println(0o123D.i());
+    fmt.Println(0b101D.i());
+    fmt.Println(0123D.i());
+    fmt.Println(0D.i());
+    fmt.Println(100D.i());
+    fmt.Println(0.25D.i());
+    fmt.Println(.25D.i());
+    fmt.Println(2.5e-3D.i());
+    fmt.Println(1_000D.i());
+    complex64 c64hex = 16F.i();
+    fmt.Println(c64hex);
 }
 
 } // end main_package
