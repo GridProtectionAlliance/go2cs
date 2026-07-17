@@ -19,17 +19,17 @@ internal static void Main() {
     fmt.Println(g, h, i);
     float32 j = 1.0000001F;
     fmt.Println(j);
-    var z = builtin.i(0.25D);
-    var w = builtin.i(16D);
-    var v = builtin.i(2D);
+    var z = 0.25D.i();
+    var w = 16D.i();
+    var v = 2D.i();
     fmt.Println(z, w, v);
-    complex64 c64 = builtin.i(0.25F);
-    complex64 c64b = builtin.i(16F);
+    complex64 c64 = 0.25F.i();
+    complex64 c64b = 16F.i();
     fmt.Println(c64, c64b);
     var k = 1.5e-3D;
     var l = 0.25D;
     float32 m = 0.1F;
-    var n = builtin.i(2D);
+    var n = 2D.i();
     fmt.Println(k, l, m, n);
 }
 
