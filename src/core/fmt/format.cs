@@ -155,9 +155,11 @@ public static partial class fmt_package
     }
 
     // Renders a single argument applying the matched verb's flags, width and precision —
-    // stub-proxy scope: the float verbs (%v/%g/%G/%e/%E/%f/%F) with their precisions, the
-    // ' '/'+' sign flags on numbers, and '-'/'0' width padding. Other verb-specific
-    // renderings still fall back to ToString.
+    // stub-proxy scope: the float verbs (%v/%g/%G/%e/%E/%f/%F) with their precisions, base-16
+    // rendering (%x/%X) with the '#' alternate form, the ' '/'+' sign flags on numbers, and
+    // '-'/'0' width padding. Other verb-specific renderings still fall back to ToString —
+    // notably the sibling base verbs %b/%o/%O, which diverge from Go the same way %x did
+    // before TryFormatHex was added.
     private static string FormatArg(object? arg, Match match)
     {
         string flags = match.Groups["flags"].Value;
@@ -165,6 +167,11 @@ public static partial class fmt_package
         string verb = match.Groups["type"].Value;
         bool numeric = IsNumericValue(arg);
         string value;
+
+        // %x/%X impose their own sign, prefix, precision and padding rules, so they render
+        // whole here rather than falling through to the shared sign/ApplyWidth handling
+        if (verb is "x" or "X" && TryFormatHex(arg, match, verb == "X", out string hex))
+            return hex;
 
         if (verb is "v" or "g" or "G" or "e" or "E" or "f" or "F" && TryGetFloat(arg, out double value64, out bool single))
         {
@@ -476,6 +483,186 @@ public static partial class fmt_package
                 single = false;
                 return false;
         }
+    }
+
+    // Renders the %x/%X verbs, which Go applies to two operand kinds with distinct rules: an
+    // integer becomes base-16 digits, and a byte sequence (string, []byte) becomes bytewise hex.
+    // Operand kinds outside stub scope return false and fall back to ToString — floats (Go renders
+    // those in hexadecimal-exponent form, "0x1.91eb851eb851fp+01") and composites (Go renders those
+    // elementwise, "[ff 100]").
+    private static bool TryFormatHex(object? arg, Match match, bool upper, out string value)
+    {
+        if (TryGetByteSequence(arg, out ReadOnlySpan<byte> bytes))
+        {
+            value = FormatHexBytes(bytes, match, upper);
+            return true;
+        }
+
+        if (TryGetInteger(arg, out bool negative, out ulong magnitude))
+        {
+            value = FormatHexInteger(negative, magnitude, match, upper);
+            return true;
+        }
+
+        value = "";
+        return false;
+    }
+
+    // Go renders %x/%X of an integer as sign-magnitude ("-ff", never a two's-complement form), so
+    // the operand is reduced to a sign and an unsigned magnitude.
+    private static bool TryGetInteger(object? arg, out bool negative, out ulong magnitude)
+    {
+        long signed;
+
+        switch (arg)
+        {
+            case byte or ushort or uint or ulong:
+                negative = false;
+                magnitude = Convert.ToUInt64(arg, CultureInfo.InvariantCulture);
+                return true;
+            case nuint source:
+                negative = false;
+                magnitude = source;
+                return true;
+            case uintptr source:
+                negative = false;
+                magnitude = (nuint)source;
+                return true;
+            case sbyte or short or int or long:
+                signed = Convert.ToInt64(arg, CultureInfo.InvariantCulture);
+                break;
+            case nint source:
+                signed = source;
+                break;
+            case UntypedInt source:
+                // An UntypedInt's payload may be an unsigned 64-bit constant that reads back
+                // negative as int64 — its ToString() accounts for that, so it decides the sign
+                if (!source.ToString().StartsWith('-'))
+                {
+                    negative = false;
+                    magnitude = (ulong)source;
+                    return true;
+                }
+
+                signed = (long)source;
+                break;
+            default:
+                negative = false;
+                magnitude = 0UL;
+                return false;
+        }
+
+        negative = signed < 0L;
+
+        // Negating long.MinValue overflows back to itself — the unchecked cast still yields the
+        // correct magnitude (0x8000000000000000)
+        magnitude = negative ? unchecked((ulong)-signed) : (ulong)signed;
+        return true;
+    }
+
+    // Go renders %x/%X of a byte sequence over its raw bytes — for a string that is its UTF-8
+    // encoding, not its chars
+    private static bool TryGetByteSequence(object? arg, out ReadOnlySpan<byte> bytes)
+    {
+        switch (arg)
+        {
+            case @string source:
+                bytes = source.ToSpan();
+                return true;
+            case slice<byte> source:
+                bytes = source.ToSpan();
+                return true;
+            case string source:
+                bytes = Encoding.UTF8.GetBytes(source);
+                return true;
+            default:
+                bytes = default;
+                return false;
+        }
+    }
+
+    private static string FormatHexInteger(bool negative, ulong magnitude, Match match, bool upper)
+    {
+        string flags = match.Groups["flags"].Value;
+        Group precision = match.Groups["precision"];
+        string widthText = match.Groups["width"].Value;
+        int width = widthText.Length == 0 ? 0 : int.Parse(widthText, CultureInfo.InvariantCulture);
+        string sign = negative ? "-" : flags.Contains('+') ? "+" : flags.Contains(' ') ? " " : "";
+        string prefix = flags.Contains('#') ? upper ? "0X" : "0x" : "";
+        string digits = magnitude.ToString(upper ? "X" : "x", CultureInfo.InvariantCulture);
+
+        if (precision.Success)
+        {
+            int digitCount = precision.Value.Length == 0 ? 0 : int.Parse(precision.Value, CultureInfo.InvariantCulture);
+
+            // An explicit precision is a minimum digit count that also overrides the '0' flag;
+            // precision 0 applied to a 0 value prints no digits at all, only padding
+            digits = digitCount == 0 && magnitude == 0UL ? "" : digits.PadLeft(digitCount, '0');
+        }
+        else if (flags.Contains('0') && !flags.Contains('-') && width > 0)
+        {
+            // Go's '0' flag on an integer is NOT padding to the width — it sets the digit count
+            // (an implicit precision) that leaves room for the sign but does NOT count the '0x'
+            // prefix. So `%#08x` of 255 is the 10-char "0x000000ff", where the space-padded
+            // `%#8x` is "    0xff".
+            digits = digits.PadLeft(width - sign.Length, '0');
+        }
+
+        return PadHex(sign + prefix + digits, width, flags, zeroPad: false);
+    }
+
+    private static string FormatHexBytes(ReadOnlySpan<byte> bytes, Match match, bool upper)
+    {
+        string flags = match.Groups["flags"].Value;
+        Group precision = match.Groups["precision"];
+        string widthText = match.Groups["width"].Value;
+        int width = widthText.Length == 0 ? 0 : int.Parse(widthText, CultureInfo.InvariantCulture);
+        int length = bytes.Length;
+
+        // Precision limits the length of the INPUT (the bytes consumed), not of the hex output
+        if (precision.Success)
+        {
+            int limit = precision.Value.Length == 0 ? 0 : int.Parse(precision.Value, CultureInfo.InvariantCulture);
+
+            if (limit < length)
+                length = limit;
+        }
+
+        // Unlike an integer's digit-count reading of the flag, a byte sequence zero-pads its whole
+        // rendering — prefix included, so `%#08x` of "ab" is "000x6162"
+        bool zeroPad = flags.Contains('0');
+
+        // An empty sequence renders as padding alone — no '0x' prefix
+        if (length == 0)
+            return PadHex("", width, flags, zeroPad);
+
+        // The ' ' flag separates the bytes, and makes '#' prefix every byte rather than the run
+        bool spaced = flags.Contains(' ');
+        string prefix = flags.Contains('#') ? upper ? "0X" : "0x" : "";
+        string format = upper ? "X2" : "x2";
+        StringBuilder builder = new();
+
+        for (int index = 0; index < length; index++)
+        {
+            if (spaced && index > 0)
+                builder.Append(' ');
+
+            if (prefix.Length > 0 && (spaced || index == 0))
+                builder.Append(prefix);
+
+            builder.Append(bytes[index].ToString(format, CultureInfo.InvariantCulture));
+        }
+
+        return PadHex(builder.ToString(), width, flags, zeroPad);
+    }
+
+    private static string PadHex(string value, int width, string flags, bool zeroPad)
+    {
+        if (value.Length >= width)
+            return value;
+
+        // '-' left-justifies and always pads with spaces, outranking the '0' flag
+        return flags.Contains('-') ? value.PadRight(width) : value.PadLeft(width, zeroPad ? '0' : ' ');
     }
 
     private static bool IsNumericValue(object? arg) =>
