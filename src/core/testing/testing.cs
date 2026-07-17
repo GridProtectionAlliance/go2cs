@@ -191,11 +191,15 @@ public static partial class testing_package
 
     public static void Fatalf(this ref B b, @string format, params ꓸꓸꓸany args) { }
 
+    public static void Skip(this ref B b, params ꓸꓸꓸany args) { }
+
     public static void Errorf(this ж<B> b, @string format, params ꓸꓸꓸany args) => Errorf(ref b.Value, format, args);
 
     public static void Fatal(this ж<B> b, params ꓸꓸꓸany args) => Fatal(ref b.Value, args);
 
     public static void Fatalf(this ж<B> b, @string format, params ꓸꓸꓸany args) => Fatalf(ref b.Value, format, args);
+
+    public static void Skip(this ж<B> b, params ꓸꓸꓸany args) => Skip(ref b.Value, args);
 
     /// <summary>
     /// Reports the average allocation cost per run of f — like Go's testing.AllocsPerRun, with

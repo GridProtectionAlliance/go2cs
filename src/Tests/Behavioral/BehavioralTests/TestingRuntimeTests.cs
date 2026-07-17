@@ -379,6 +379,7 @@ public class TestingRuntimeTests
         benchmark.Errorf("errorf %d", 1);
         benchmark.Fatal("fatal");
         benchmark.Fatalf("fatalf %d", 2);
+        benchmark.Skip("skip");
         Assert.IsTrue(benchmark.Run("sub", _ => { }));
 
         ref testing_package.B direct = ref benchmark.Value;
@@ -390,6 +391,7 @@ public class TestingRuntimeTests
         direct.Errorf("errorf");
         direct.Fatal("fatal");
         direct.Fatalf("fatalf");
+        direct.Skip("skip");
         Assert.AreEqual((nint)0, direct.N);
 
         // strings TestIndexRune branches on `testing.CoverMode() == ""` — the shim must report
