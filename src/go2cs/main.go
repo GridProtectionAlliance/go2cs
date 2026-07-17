@@ -832,7 +832,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		log.Fatalf("Invalid target platform format: %s\n", options.targetPlatform)
 	}
 
-	cfg.Env = append(os.Environ(), fmt.Sprintf(`"GOOS=%s", "GOARCH=%s"`, targetParts[0], targetParts[1]))
+	// Two separate KEY=VALUE entries — matching stdLibConverter/moduleConverter. The old
+	// single-token form (`"GOOS=%s", "GOARCH=%s"` through ONE Sprintf) set an env var
+	// literally named `"GOOS` that the go command ignored, so -platforms never reached
+	// the loader here: it loaded host-platform files while the converter's filename
+	// filter used the requested platform, silently dropping BOTH platforms' constrained
+	// files from a cross-platform conversion.
+	cfg.Env = append(os.Environ(), fmt.Sprintf("GOOS=%s", targetParts[0]), fmt.Sprintf("GOARCH=%s", targetParts[1]))
 
 	var pkgs []*packages.Package
 
