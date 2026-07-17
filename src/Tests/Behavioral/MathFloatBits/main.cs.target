@@ -11,7 +11,7 @@ internal static void Main() {
     fmt.Println(Δmath.Float64bits(z));
     fmt.Println(Δmath.Float64bits(nz));
     var pinf = Δmath.Float64frombits(0x7FF0000000000000UL);
-    var ninf = Δmath.Float64frombits((nuint)0xFFF0000000000000UL);
+    var ninf = Δmath.Float64frombits(0xFFF0000000000000UL);
     fmt.Println(pinf > 1e308D);
     fmt.Println(ninf < -1e308D);
     fmt.Println(Δmath.Float64bits(pinf));

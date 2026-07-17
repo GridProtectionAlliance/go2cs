@@ -19,7 +19,7 @@ internal static void Main() {
     float64 pf = pkgConst;
     nint pi = pkgConst;
     fmt.Println(pf / 8, pi);
-    UntypedInt scale = /* 1 << 60 */ 1152921504606846976;
+    const float64 scale = /* 1 << 60 */ 1152921504606846976;
     float64 sf = scale;
     float64 hf = hugeConst;
     uint64 hu = hugeConst;
