@@ -80,4 +80,9 @@ func main() {
 	// --- Sprint / Sprintf share the same rendering ---
 	fmt.Println(fmt.Sprint(e6), fmt.Sprint(em5), fmt.Sprint(negZero))
 	fmt.Println(fmt.Sprintf("%v|%g", maxFloat64, smallestNonzeroFloat64))
+
+	// A const shift in a float context exercises the float-context fold (emits the exact
+	// Go-evaluated value, not a masked C# int shift) feeding the %g exponent form.
+	var big float64 = 1 << 62
+	fmt.Printf("%g\n", big)
 }

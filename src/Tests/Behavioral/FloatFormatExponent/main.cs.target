@@ -50,6 +50,8 @@ internal static void Main() {
     fmt.Printf("[%v] [%g]\n"u8, maxFloat32, smallestNonzeroFloat32);
     fmt.Println(fmt.Sprint(e6), fmt.Sprint(em5), fmt.Sprint(negZero));
     fmt.Println(fmt.Sprintf("%v|%g"u8, maxFloat64, smallestNonzeroFloat64));
+    float64 big = 4611686018427387904D;
+    fmt.Printf("%g\n"u8, big);
 }
 
 } // end main_package

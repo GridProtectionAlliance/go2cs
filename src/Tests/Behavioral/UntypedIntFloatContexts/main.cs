@@ -19,11 +19,9 @@ internal static void Main() {
     float64 pf = pkgConst;
     nint pi = pkgConst;
     fmt.Println(pf / 8, pi);
-    const float64 scale = /* 1 << 60 */ 1152921504606846976;
-    float64 sf = scale;
     float64 hf = hugeConst;
     uint64 hu = hugeConst;
-    fmt.Println(hf / sf, hu);
+    fmt.Println(hf / (1152921504606846976D), hu);
     complex128 c = m;
     complex64 c64 = m;
     fmt.Println(real(c), imag(c), real(c64));

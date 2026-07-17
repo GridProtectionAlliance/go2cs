@@ -31,13 +31,11 @@ func main() {
 
 	// Unsigned-range payload: 1<<63 does not fit int64, so the wrapper holds uint64-flavored
 	// bits; a float conversion must keep the uint64 magnitude, not read the bits as negative.
-	// Scale down (via a const bound to a float var) before printing to keep %v out of
-	// exponent notation.
-	const scale = 1 << 60
-	var sf float64 = scale
+	// Scaled by a direct 1<<60 divisor (the float-context const-shift fold renders it exactly)
+	// to keep %v out of exponent notation.
 	var hf float64 = hugeConst
 	var hu uint64 = hugeConst
-	fmt.Println(hf/sf, hu) // 8 9223372036854775808
+	fmt.Println(hf/(1<<60), hu) // 8 9223372036854775808
 
 	// Complex contexts (asserted via real/imag to stay independent of complex %v formatting).
 	var c complex128 = m
