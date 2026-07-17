@@ -1799,6 +1799,8 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 			continue
 		}
 
+		reference = resolveProductionProjectReference(info, options)
+
 		if filepath.IsAbs(reference) {
 			if rel, relErr := filepath.Rel(projectDir, reference); relErr == nil {
 				reference = rel

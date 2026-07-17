@@ -32,6 +32,12 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <IsPackable>false</IsPackable>
+    <!-- The compile view must be EXACTLY the direct references the test converter computed: a
+         transitive project reference that contributes a child `go.<pkg>` namespace (e.g.
+         internal/testenv dragging io/fs, namespace go.io) collides with the converter's
+         in-namespace `using io = io_package;` alias emission (CS0576) — the alias machinery is
+         computed against the direct import closure only. -->
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OutDir)'==''">

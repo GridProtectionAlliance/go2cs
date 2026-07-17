@@ -14,6 +14,7 @@
 
 using go;
 using static go.unicode.utf8_package;
+using static go.unicode.utf8_test_package;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in

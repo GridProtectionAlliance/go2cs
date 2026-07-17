@@ -250,7 +250,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 		allImports.UnionWithSet(imports)
 	}
 
-	if err := appendExternalTestPackageClass(testInfoPath, external); err != nil {
+	if err := appendExternalTestPackageClass(testInfoPath, projectNamespace, production.Name, external); err != nil {
 		return err
 	}
 
@@ -511,8 +511,12 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 // appendExternalTestPackageClass appends the external test package's [GoPackage] partial class
 // declaration to package_test_info.cs — converted external-test files declare partial pieces of
 // <name>_test_package, and this block is the attribute-bearing anchor the production
-// package_info.cs provides for the production class.
-func appendExternalTestPackageClass(testInfoPath string, external *packages.Package) error {
+// package_info.cs provides for the production class. It also widens the file's `using static`
+// scope to that class (B3): metadata attributes merged from the test variants (GoImplement /
+// GoImplicitConv) can reference types DECLARED in the external test package (e.g. an errWriter
+// helper cast to io.Writer), which the seeded production-only `using static <ns>.<pkg>_package;`
+// cannot resolve — CS0246 on every such attribute argument.
+func appendExternalTestPackageClass(testInfoPath, packageNamespace, productionPackageName string, external *packages.Package) error {
 	if external == nil {
 		return nil
 	}
@@ -522,14 +526,30 @@ func appendExternalTestPackageClass(testInfoPath string, external *packages.Pack
 		return fmt.Errorf("read test package metadata: %w", err)
 	}
 
+	contents := string(data)
 	className := getSanitizedImport(external.Name + PackageSuffix)
+
+	productionUsing := fmt.Sprintf("using static %s.%s;", packageNamespace, getSanitizedImport(productionPackageName+PackageSuffix))
+	testUsing := fmt.Sprintf("using static %s.%s;", packageNamespace, className)
+
+	if !strings.Contains(contents, testUsing) {
+		if !strings.Contains(contents, productionUsing) {
+			return fmt.Errorf("seeded test package metadata %q is missing the production using directive %q", testInfoPath, productionUsing)
+		}
+		contents = strings.Replace(contents, productionUsing, productionUsing+"\r\n"+testUsing, 1)
+	}
+
 	block := fmt.Sprintf("\r\n[GoPackage(\"%s\")]\r\npublic static partial class %s\r\n{\r\n}\r\n", external.Name, className)
 
-	if strings.Contains(string(data), block) {
+	if !strings.Contains(contents, block) {
+		contents += block
+	}
+
+	if contents == string(data) {
 		return nil
 	}
 
-	return os.WriteFile(testInfoPath, append(data, []byte(block)...), 0644)
+	return os.WriteFile(testInfoPath, []byte(contents), 0644)
 }
 
 // discoverTestDeclarations finds every go-test-shaped top-level declaration in the variant's
@@ -916,6 +936,22 @@ func resolveTestProjectReference(info PackageInfo) string {
 	}
 
 	return `$(go2csPath)go-src-converted\` + relative
+}
+
+// resolveProductionProjectReference maps a PRODUCTION csproj project reference. Under -tests the
+// production project is regenerated as part of the test conversion, and its stdlib references
+// must agree with the colocated test project's (the F15 mixed-tree ruling above): stdlib
+// dependencies resolve from the overlaid go-src-converted tree, `testing` to the hand-owned
+// core/testing shim, golib and non-stdlib references untouched. Raw `$(go2csPath)core\<pkg>`
+// refs here clobbered the committed go-src-converted production csprojs and pulled the baseline
+// stub tree into the one test build graph (B1 — the src/core/errors CS0246 storm). Outside
+// -tests the reference passes through unchanged.
+func resolveProductionProjectReference(info PackageInfo, options Options) string {
+	if options.convertTests {
+		return resolveTestProjectReference(info)
+	}
+
+	return info.ProjectReference
 }
 
 func productionCSFiles(outputPath string) ([]string, error) {

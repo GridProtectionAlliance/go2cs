@@ -206,6 +206,80 @@ func TestResolveTestProjectReferenceRewritesStdLibToConvertedTree(t *testing.T) 
 	}
 }
 
+// B1 guard: under -tests the regenerated PRODUCTION csproj resolves its stdlib references
+// through the same F15 mapping as the colocated test project — raw `$(go2csPath)core\<pkg>`
+// refs clobbered the committed go-src-converted production csprojs and pulled the baseline
+// stub tree into the test build graph. Outside -tests the reference passes through unchanged.
+func TestResolveProductionProjectReferenceAppliesF15UnderTests(t *testing.T) {
+	stdlib := PackageInfo{IsStdLib: true, ProjectReference: `$(go2csPath)core\internal\reflectlite\internal.reflectlite.csproj`}
+
+	if got, want := resolveProductionProjectReference(stdlib, Options{convertTests: true}), `$(go2csPath)go-src-converted\internal\reflectlite\internal.reflectlite.csproj`; got != want {
+		t.Fatalf("-tests production stdlib reference = %q, want %q", got, want)
+	}
+	if got := resolveProductionProjectReference(stdlib, Options{}); got != stdlib.ProjectReference {
+		t.Fatalf("non-tests production reference must pass through, got %q", got)
+	}
+
+	shimmed := PackageInfo{IsStdLib: true, PackageName: "testing", ProjectReference: `$(go2csPath)core\testing\testing.csproj`}
+	if got, want := resolveProductionProjectReference(shimmed, Options{convertTests: true}), `$(go2csPath)core\testing\testing.csproj`; got != want {
+		t.Fatalf("-tests production testing reference = %q, want the shim %q", got, want)
+	}
+}
+
+// B2b guard: the embedded test project template pins DisableTransitiveProjectReferences so the
+// test compilation's reference view is EXACTLY the direct refs the test converter computed — a
+// transitive ref contributing a child `go.<pkg>` namespace (internal/testenv -> io/fs, go.io)
+// collides with the converter's in-namespace `using io = io_package;` alias emission (CS0576).
+func TestTestProjectTemplateDisablesTransitiveProjectReferences(t *testing.T) {
+	if !strings.Contains(string(testCsprojTemplate), "<DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>") {
+		t.Fatal("test-csproj-template.xml must set DisableTransitiveProjectReferences=true")
+	}
+}
+
+// B3 guard: package_test_info.cs brings the EXTERNAL test package class into `using static`
+// scope beside the production class — metadata attributes merged from the test variants can
+// reference types declared in <pkg>_test (an errWriter helper cast to io.Writer), which the
+// seeded production-only using cannot resolve. Also guards the appended [GoPackage] anchor
+// block and re-run idempotence.
+func TestAppendExternalTestPackageClassAddsTestUsingAndAnchor(t *testing.T) {
+	dir := t.TempDir()
+	fileName := filepath.Join(dir, "package_test_info.cs")
+
+	seed := "using go;\r\nusing static go.value_package;\r\n\r\nnamespace go;\r\n\r\n[GoPackage(\"value\")]\r\npublic static partial class value_package\r\n{\r\n}\r\n"
+	if err := os.WriteFile(fileName, []byte(seed), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	external := &packages.Package{Name: "value_test"}
+	if err := appendExternalTestPackageClass(fileName, "go", "value", external); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := os.ReadFile(fileName)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	contents := string(data)
+	if !strings.Contains(contents, "using static go.value_package;\r\nusing static go.value_test_package;") {
+		t.Fatalf("test package using must follow the production using:\n%s", contents)
+	}
+	if !strings.Contains(contents, "[GoPackage(\"value_test\")]\r\npublic static partial class value_test_package\r\n{\r\n}") {
+		t.Fatalf("external test package anchor class must be appended:\n%s", contents)
+	}
+
+	if err := appendExternalTestPackageClass(fileName, "go", "value", external); err != nil {
+		t.Fatal(err)
+	}
+	again, err := os.ReadFile(fileName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(again) != contents {
+		t.Fatalf("appendExternalTestPackageClass must be idempotent:\nfirst:\n%s\nsecond:\n%s", contents, string(again))
+	}
+}
+
 // F14b guard: a dependency that fails to resolve fails the test-project emission loudly, naming
 // the dependency — never a silent reference drop.
 func TestWriteTestProjectFailsLoudlyOnDependencyError(t *testing.T) {
