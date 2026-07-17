@@ -103,8 +103,10 @@
     <Compile Remove="**/*.cs" />
     <!-- Include only .cs files from current folder -->
     <Compile Include="*.cs" />
-    <!-- Remove test files from current folder -->
-    <Compile Remove="*._test.cs" />
+    <!-- Remove converted test artifacts from current folder (compiled by the colocated
+         <name>.tests.csproj instead; the old `*._test.cs` pattern matched nothing the
+         converter emits — Go test files are `*_test.go` so their outputs are `*_test.cs`) -->
+    <Compile Remove="*_test.cs;package_test_info.cs;go2cs_test_host.cs" />
     <!--Remove all sub-folders -->
     <None Remove="*/**/*" />
   </ItemGroup>
