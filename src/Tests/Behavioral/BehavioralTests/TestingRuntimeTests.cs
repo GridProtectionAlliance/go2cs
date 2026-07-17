@@ -301,6 +301,37 @@ public class TestingRuntimeTests
         Assert.IsTrue(childRan);
     }
 
+    [TestMethod]
+    public void ShortAndVerboseFlagsReachTheTestingShim()
+    {
+        // F4 support guard: testing.Short()/testing.Verbose() report the host's -short/-v flags
+        // (go test defaults: both false when absent).
+        bool shortSeen = true;
+        bool verboseSeen = true;
+
+        TestRegistry registry = new("runtime/flags", []);
+        registry.Add("TestFlags", _ =>
+        {
+            shortSeen = testing_package.Short();
+            verboseSeen = testing_package.Verbose();
+        }, "runtime_test.go", 1);
+
+        Assert.AreEqual(0, TestHost.Run(registry, ["-short", "-v"]));
+        Assert.IsTrue(shortSeen);
+        Assert.IsTrue(verboseSeen);
+
+        TestRegistry defaults = new("runtime/flags", []);
+        defaults.Add("TestDefaults", _ =>
+        {
+            shortSeen = testing_package.Short();
+            verboseSeen = testing_package.Verbose();
+        }, "runtime_test.go", 1);
+
+        Assert.AreEqual(0, TestHost.Run(defaults, []));
+        Assert.IsFalse(shortSeen);
+        Assert.IsFalse(verboseSeen);
+    }
+
     private static int RunSingle(string name, ActionRef action)
     {
         TestRegistry registry = new("runtime/failure", []);

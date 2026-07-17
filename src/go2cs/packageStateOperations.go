@@ -17,8 +17,10 @@ import (
 // grew ~13 globals and 6 Visitor/FileEntry fields the copies never learned about — guaranteed
 // nil-map panics. This extraction makes that failure mode structurally impossible.)
 
-// resetPackageState reinitializes every package-scoped global the package-wide analyses and
-// per-file visitors mutate, then captures the per-package inputs derived directly from the loaded
+// resetPackageState reinitializes every package-scoped global not self-reset by its own analysis
+// pass (packageBuiltinShadows, packageFuncMethodNames, packageTypeSpecRHS, captureModeCandidates,
+// and packageMethodNames reinitialize themselves at the top of their passes — this function alone
+// does NOT establish a clean slate), then captures the per-package inputs derived directly from the loaded
 // package: the package Go doc (NuGet README) and the module-aware source dir + package name of
 // every REACHABLE imported package (the transitive closure, not just direct imports), so
 // cross-package references to LOCAL/USER modules (which go/build cannot resolve) can be wired up —

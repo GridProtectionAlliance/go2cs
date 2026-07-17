@@ -124,6 +124,16 @@ public static partial class testing_package
         return runner.RunAll();
     }
 
+    /// <summary>
+    /// Reports whether the -short flag was set — like Go's testing.Short() (default false).
+    /// </summary>
+    public static bool Short() => TestHost.ShortMode;
+
+    /// <summary>
+    /// Reports whether the -v flag was set — like Go's testing.Verbose() (default false).
+    /// </summary>
+    public static bool Verbose() => TestHost.VerboseMode;
+
     // Formatting is intentionally NOT the fmt package's: the shim stays fmt-free so converted test
     // projects can resolve fmt (like every other stdlib dependency) from the overlaid
     // go-src-converted tree without this baseline-built runtime dragging in a second tree's

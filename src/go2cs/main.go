@@ -45,6 +45,14 @@ type Options struct {
 	parseCgoTargets     bool
 	showParseTree       bool
 	debugMode           bool
+
+	// -tests conversion options (dispatch is wired in a later stage; until then these are set only
+	// by the test-conversion entry points and unit tests — the flag surface stays default-off)
+	convertTests    bool          // convert the package's _test.go variants into a runnable test project
+	testAction      string        // convert | build | run | compare | all
+	testTimeout     time.Duration // per-child-command timeout for test build/run/compare actions
+	testPackagePath string        // import path of the package under test (self-import binding, IP-3)
+	testPackageName string        // package name of the package under test (self-import binding, IP-3)
 }
 
 type FileEntry struct {
@@ -392,6 +400,9 @@ var reserved = NewHashSet([]string{
 
 //go:embed csproj-template.xml
 var csprojTemplate []byte
+
+//go:embed test-csproj-template.xml
+var testCsprojTemplate []byte
 
 //go:embed package_info-template.txt
 var packageInfoTemplate []byte
@@ -1067,470 +1078,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			packageInfoFileName = filepath.Join(filepath.Dir(packageOutputPath), PackageInfoFileName)
 		}
 
-		var packageInfoLines []string
-
-		if _, err := os.Stat(packageInfoFileName); err == nil {
-			// Read all lines from existing package info file
-			packageInfoBytes, err := os.ReadFile(packageInfoFileName)
-
-			if err != nil {
-				log.Fatalf("Failed to read existing package info file \"%s\": %s\n", packageInfoFileName, err)
-			}
-
-			packageInfoLines = strings.Split(string(packageInfoBytes), "\r\n")
-		} else {
-			// Generate new package info file from template
-			packageClassName := getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix))
-			templateFile := fmt.Sprintf(string(packageInfoTemplate), packageNamespace+"."+packageClassName, packageNamespace, packageName, packageClassName)
-			packageInfoLines = strings.Split(templateFile, "\r\n")
-		}
-
-		// Handle imported type aliases
-		startLineIndex := -1
-		endLineIndex := -1
-
-		for i, line := range packageInfoLines {
-			if strings.Contains(line, "<ImportedTypeAliases>") {
-				startLineIndex = i
-				continue
-			}
-
-			if strings.Contains(line, "</ImportedTypeAliases>") {
-				endLineIndex = i
-				break
-			}
-		}
-
-		if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
-			// Read existing type aliases from package info file
-			lines := HashSet[string]{}
-
-			// If processing a single file, instead of all package files, merge type aliases
-			if !isDir {
-				for i := startLineIndex + 1; i < endLineIndex; i++ {
-					line := packageInfoLines[i]
-					lines.Add(strings.TrimSpace(line))
-				}
-			}
-
-			// Add new type aliases to package info file (hashset ensures uniqueness)
-			for alias, typeName := range importedTypeAliases {
-				if !constImportedTypeAliases.Contains(alias) {
-					lines.Add(fmt.Sprintf("global using %s = %s;", strings.ReplaceAll(alias, ".", TypeAliasDot), typeName))
-				}
-			}
-
-			// Add package-qualifier aliases used by recorded GoImplicitConv attributes (e.g.
-			// `abi.Type`). package_info.cs has no file-local `using abi = …`; emit a FILE-LOCAL `using`
-			// (not `global` — that would clash with the per-file `using abi = …` other source files
-			// already declare, CS1537) resolving each alias to its `go`-rooted namespace.
-			for alias, namespace := range conversionPackageUsings {
-				lines.Add(fmt.Sprintf("using %s = %s.%s;", alias, RootNamespace, namespace))
-			}
-
-			// Sort lines
-			sortedLines := lines.Keys()
-			sort.Strings(sortedLines)
-
-			// Insert imported type aliases into package info file
-			packageInfoLines = append(packageInfoLines[:startLineIndex+1],
-				append(sortedLines, packageInfoLines[endLineIndex:]...)...)
-		} else {
-			log.Fatalf("Failed to find '<ImportedTypeAliases>...</ImportedTypeAliases>' section for inserting exported type aliases into package info file \"%s\"\n", packageInfoFileName)
-		}
-
-		// Handle exported type aliases
-		startLineIndex = -1
-		endLineIndex = -1
-
-		for i, line := range packageInfoLines {
-			if strings.Contains(line, "<ExportedTypeAliases>") {
-				startLineIndex = i
-				continue
-			}
-
-			if strings.Contains(line, "</ExportedTypeAliases>") {
-				endLineIndex = i
-				break
-			}
-		}
-
-		if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
-			// Read existing type aliases from package info file
-			lines := HashSet[string]{}
-
-			// If processing a single file, instead of all package files, merge type aliases
-			if !isDir {
-				for i := startLineIndex + 1; i < endLineIndex; i++ {
-					line := packageInfoLines[i]
-					lines.Add(strings.TrimSpace(line))
-				}
-			}
-
-			// Add new type aliases to package info file (hashset ensures uniqueness). A NON-GENERIC
-			// METHODLESS named func type is rendered inline as its base delegate with no named
-			// declaration (visitFuncType), so it has no `<pkg>_package.<Δname>` type — skip its alias,
-			// or a consumer's generated `global using` names a nonexistent type (go/doc's `ast.Filter`
-			// → `go.go.ast_package.ΔFilter`, CS0426).
-			for alias, typeName := range exportedTypeAliases {
-				// visitFuncType records the RENAMED name (a collision-renamed `Filter` is stored as
-				// `ΔFilter`, which is the alias VALUE), while a non-collision methodless func type is
-				// stored under its plain name (the alias KEY) — check both.
-				if packageInlineFuncTypeNames[alias] || packageInlineFuncTypeNames[typeName] {
-					continue
-				}
-
-				lines.Add(fmt.Sprintf("[assembly: GoTypeAlias(\"%s\", \"%s\")]", alias, typeName))
-			}
-
-			// Sort lines
-			sortedLines := lines.Keys()
-			sort.Strings(sortedLines)
-
-			// Insert exported type aliases into package info file
-			packageInfoLines = append(packageInfoLines[:startLineIndex+1],
-				append(sortedLines, packageInfoLines[endLineIndex:]...)...)
-		} else {
-			log.Fatalf("Failed to find '<ExportedTypeAliases>...</ExportedTypeAliases>' section for inserting exported type aliases into package info file \"%s\"\n", packageInfoFileName)
-		}
-
-		// Fully-qualified prefix (e.g. `go.@internal.profile_package`) for this package's own types.
-		// Used to root a BARE local type reference in the GoImplement/GoImplicitConv assembly
-		// attributes when that name collides with a `using System;`-imported type (CS0104) — see
-		// qualifySystemCollidingLocalTypeRefs.
-		localTypePrefix := packageNamespace + "." + getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix))
-
-		qualifyLocalTypeRef := func(name string) string {
-			return qualifySystemCollidingLocalTypeRefs(rootQualifySubNamespaceTypeRefs(name), localTypePrefix)
-		}
-
-		// Handle interface implementations
-		startLineIndex = -1
-		endLineIndex = -1
-
-		for i, line := range packageInfoLines {
-			if strings.Contains(line, "<InterfaceImplementations>") {
-				startLineIndex = i
-				continue
-			}
-
-			if strings.Contains(line, "</InterfaceImplementations>") {
-				endLineIndex = i
-				break
-			}
-		}
-
-		if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
-			// Read existing interface lines from package info file
-			lines := HashSet[string]{}
-
-			// If processing a single file, instead of all package files, merge interface implementations
-			if !isDir {
-				for i := startLineIndex + 1; i < endLineIndex; i++ {
-					line := packageInfoLines[i]
-					lines.Add(strings.TrimSpace(line))
-				}
-			}
-
-			// Drop lower level interface implementations where interface inheritances are already covered.
-			// POINTER-form (ж<T>-wrapped) pairs are exempt: each generates a DISTINCT IжAdapter class,
-			// and cast sites reference the adapter for the EXACT interface they target — a Source-
-			// targeted cast needs runtimeSourceᴵSource even though runtimeSourceᴵSource64 also
-			// implements Source through interface inheritance (math/rand CS0246). Only the value-boxing
-			// partial-struct form (one type, one interface list) is redundant under inheritance.
-			for interfaceName, inheritedInterfaces := range interfaceInheritances {
-				for _, inheritedInterfaceName := range inheritedInterfaces.Keys() {
-					// Check if the same type implements both interfaces
-					if inheritedImplementations, ok := interfaceImplementations[inheritedInterfaceName]; ok {
-						if baseImplementations, ok := interfaceImplementations[interfaceName]; ok {
-							// Intersect on a COPY — IntersectWithSet mutates its receiver, and the receiver
-							// here is the DERIVED interface's LIVE implementation set. The old in-place
-							// intersect deleted every derived-only implementation (io: nopCloser →
-							// ReadCloser shares nothing with Reader's set, so both ReadCloser pairs
-							// vanished and the returns failed CS0029) and made the surviving set depend
-							// on map iteration order. Only the COMMON implementations are dropped, and
-							// only from the LOWER (inherited) interface — C# interface inheritance
-							// already covers them via the derived implementation.
-							commonImplementations := NewHashSet(baseImplementations.Keys())
-							commonImplementations.IntersectWithSet(inheritedImplementations)
-
-							for _, implementation := range commonImplementations.Keys() {
-								if strings.HasPrefix(implementation, PointerPrefix+"<") {
-									continue
-								}
-
-								// A VALUE-form pair that generates its own adapter CLASS (an
-								// interface-sourced or foreign-struct conversion — see
-								// adapterClassImplementations) is exempt for the same reason as
-								// the ж<T> form above: the cast site references the adapter for
-								// the EXACT interface it targets (net/http's `new
-								// net_ConnᴠWriter(…)` needs GoImplement<net.Conn, io.Writer>
-								// even though the Conn→ReadWriteCloser record also implements
-								// Writer through inheritance; CS0246 ×17).
-								if adapterClassImplementations.Contains(inheritedInterfaceName + "|" + implementation) {
-									continue
-								}
-
-								inheritedImplementations.Remove(implementation)
-							}
-						}
-					}
-				}
-			}
-
-			// Add new interface implementations to package info file (hashset ensures uniqueness).
-			// A ж<T>-wrapped implementation records a POINTER-sourced cast (`var s Iface = &t`) —
-			// unwrap it to `GoImplement<T, Iface>(Pointer = true)`, which generates the IжAdapter
-			// wrapper (interface aliases the receiver box) instead of the value-boxing partial.
-			//
-			// De-duplicate implementations recorded under BOTH a package type ALIAS and the
-			// aliased type's qualified name (os converts dirEntry to fs.DirEntry through its own
-			// `type DirEntry = fs.DirEntry` AND through the io/fs name): two GoImplement
-			// attributes for ONE interface make the generator emit the explicit interface
-			// implementation twice (CS8646 ×4 + CS0111 ×4, os dirEntry). The ALIASED record wins
-			// — its simple name resolves via the package usings and keeps the generator's
-			// last-dot-segment naming; the QUALIFIED duplicate is skipped. (Normalizing the
-			// RECORDS to the qualified form instead regressed os 8→77: the qualified interface
-			// name broke generator resolution and flipped the alias-locality gate.)
-			aliasCoveredImplementations := HashSet[string]{}
-
-			for alias, typeName := range exportedTypeAliases {
-				if implementations, ok := interfaceImplementations[alias]; ok {
-					canonIface := strings.TrimPrefix(typeName, RootNamespace+".")
-
-					for implementation := range implementations {
-						aliasCoveredImplementations.Add(canonIface + "|" + implementation)
-					}
-				}
-			}
-
-			for interfaceName, implementations := range interfaceImplementations {
-				// A marker-form key (an anonymous-interface record made from a file visited
-				// before the declaring file registered its lift) resolves against the
-				// now-complete registry; an unresolvable one is dropped — mirroring the
-				// implicit-conversion writer's resolveImplicitConvTypeName skip below.
-				interfaceName, okIface := resolveImplicitConvTypeName(interfaceName)
-
-				if !okIface {
-					continue
-				}
-
-				for implementation := range implementations {
-					canonKey := strings.TrimPrefix(interfaceName, RootNamespace+".") + "|" + implementation
-
-					if aliasCoveredImplementations.Contains(canonKey) {
-						continue
-					}
-					if inner, ok := strings.CutPrefix(implementation, PointerPrefix+"<"); ok {
-						lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Pointer = true)]", qualifyLocalTypeRef(strings.TrimSuffix(inner, ">")), qualifyLocalTypeRef(interfaceName)))
-						continue
-					}
-
-					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>]", qualifyLocalTypeRef(implementation), qualifyLocalTypeRef(interfaceName)))
-				}
-			}
-
-			// Add new promoted interface implementations to package info file (hashset ensures uniqueness)
-			for interfaceName, implementations := range promotedInterfaceImplementations {
-				for implementation := range implementations {
-					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Promoted = true)]", qualifyLocalTypeRef(implementation), qualifyLocalTypeRef(interfaceName)))
-				}
-			}
-
-			// Add self-referential constraint proxies (nistCurve[*P224Point]'s Point). Each is a
-			// `GoImplement<element, iface<element>>(ConstraintProxy = true)` — the interface's own
-			// type argument is a PLACEHOLDER (the generator closes it over the emitted proxy itself),
-			// so the element doubles as the dummy. See constraintProxyArg / EmitConstraintProxy.
-			for _, proxy := range constraintProxies {
-				elementRef := qualifyLocalTypeRef(proxy[0])
-				interfaceRef := qualifyLocalTypeRef(proxy[1])
-				lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s<%s>>(ConstraintProxy = true)]", elementRef, interfaceRef, elementRef))
-			}
-
-			// Sort lines
-			sortedLines := lines.Keys()
-			sort.Strings(sortedLines)
-
-			// Insert interface implementations into package info file
-			packageInfoLines = append(packageInfoLines[:startLineIndex+1],
-				append(sortedLines, packageInfoLines[endLineIndex:]...)...)
-
-		} else {
-			log.Fatalf("Failed to find '<InterfaceImplementations>...</InterfaceImplementations>' section for inserting interface implementations into package info file \"%s\"\n", packageInfoFileName)
-		}
-
-		// Handle implicit conversions
-		startLineIndex = -1
-		endLineIndex = -1
-
-		for i, line := range packageInfoLines {
-			if strings.Contains(line, "<ImplicitConversions>") {
-				startLineIndex = i
-				continue
-			}
-
-			if strings.Contains(line, "</ImplicitConversions>") {
-				endLineIndex = i
-				break
-			}
-		}
-
-		if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
-			// Read existing interface lines from package info file
-			lines := HashSet[string]{}
-
-			// If processing a single file, instead of all package files, merge implicit conversions
-			if !isDir {
-				for i := startLineIndex + 1; i < endLineIndex; i++ {
-					line := packageInfoLines[i]
-					lines.Add(strings.TrimSpace(line))
-				}
-			}
-
-			// A conversion referencing a manually-converted type must not emit — the generated
-			// operator would read the skipped auto form's numeric backing; the *_impl.cs declares
-			// any conversion operators its call sites need (see manualTypeOperations.go).
-			referencesManualType := func(typeNames ...string) bool {
-				for _, typeName := range typeNames {
-					if packageManualTypeNames[typeName] {
-						return true
-					}
-				}
-
-				return false
-			}
-
-			// Add new implicit conversions to package info file (hashset ensures uniqueness)
-			for sourceType, targetTypes := range implicitConversions {
-				for targetType := range targetTypes {
-					if referencesManualType(sourceType, targetType) {
-						continue
-					}
-
-					source, okSource := resolveImplicitConvTypeName(sourceType)
-					target, okTarget := resolveImplicitConvTypeName(targetType)
-
-					if !okSource || !okTarget || source == target {
-						continue
-					}
-
-					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>]", qualifyLocalTypeRef(source), qualifyLocalTypeRef(target)))
-				}
-			}
-
-			// Add new inverted implicit conversions to package info file (hashset ensures uniqueness)
-			for sourceType, targetTypes := range invertedImplicitConversions {
-				for targetType := range targetTypes {
-					if referencesManualType(sourceType, targetType) {
-						continue
-					}
-
-					source, okSource := resolveImplicitConvTypeName(sourceType)
-					target, okTarget := resolveImplicitConvTypeName(targetType)
-
-					if !okSource || !okTarget || source == target {
-						continue
-					}
-
-					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = true)]", qualifyLocalTypeRef(target), qualifyLocalTypeRef(source)))
-				}
-			}
-
-			// Add new indirect implicit conversions to package info file (hashset ensures uniqueness)
-			for sourceType, targetTypes := range indirectImplicitConversions {
-				for targetType := range targetTypes {
-					if referencesManualType(sourceType, targetType) {
-						continue
-					}
-
-					source, okSource := resolveImplicitConvTypeName(sourceType)
-					target, okTarget := resolveImplicitConvTypeName(targetType)
-
-					if !okSource || !okTarget {
-						continue
-					}
-
-					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Indirect = true)]", qualifyLocalTypeRef(source), qualifyLocalTypeRef(target)))
-				}
-			}
-
-			// Add new numeric conversions to package info file (maps ensure uniqueness)
-			for sourceType, targetTypes := range numericConversions {
-				for targetType, valueType := range targetTypes {
-					if referencesManualType(sourceType, targetType) {
-						continue
-					}
-
-					var inverted bool
-
-					if strings.HasPrefix(valueType, "imported:") {
-						valueType = strings.TrimPrefix(valueType, "imported:")
-						inverted = false
-					} else {
-						inverted = true
-					}
-
-					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = %t, ValueType = \"%s\")]", qualifyLocalTypeRef(sourceType), qualifyLocalTypeRef(targetType), inverted, valueType))
-				}
-			}
-
-			// Add new indirect numeric conversions to package info file (maps ensure uniqueness)
-			for sourceType, targetTypes := range indirectNumericConversions {
-				for targetType, valueType := range targetTypes {
-					if referencesManualType(sourceType, targetType) {
-						continue
-					}
-
-					var inverted bool
-
-					if strings.HasPrefix(valueType, "imported:") {
-						valueType = strings.TrimPrefix(valueType, "imported:")
-						inverted = false
-					} else {
-						inverted = true
-					}
-
-					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = %t, Indirect = true, ValueType = \"%s\")]", qualifyLocalTypeRef(sourceType), qualifyLocalTypeRef(targetType), inverted, valueType))
-				}
-			}
-
-			// Sort lines
-			sortedLines := lines.Keys()
-			sort.Strings(sortedLines)
-
-			// Insert implicit conversions into package info file
-			packageInfoLines = append(packageInfoLines[:startLineIndex+1],
-				append(sortedLines, packageInfoLines[endLineIndex:]...)...)
-
-		} else {
-			log.Fatalf("Failed to find '<ImplicitConversions>...</ImplicitConversions>' section for inserting implicit conversions into package info file \"%s\"\n", packageInfoFileName)
-		}
-
-		// Remove trailing empty lines
-		for i := len(packageInfoLines) - 1; i >= 0; i-- {
-			if strings.TrimSpace(packageInfoLines[i]) == "" {
-				packageInfoLines = packageInfoLines[:i]
-			} else {
-				break
-			}
-		}
-
-		// Write updated package info file
-		packageInfoFile, err := os.Create(packageInfoFileName)
-
-		if err != nil {
-			log.Fatalf("Failed to create package info file \"%s\": %s\n", packageInfoFileName, err)
-		}
-
-		defer packageInfoFile.Close()
-
-		for _, line := range packageInfoLines {
-			_, err = packageInfoFile.WriteString(line + "\r\n")
-
-			if err != nil {
-				log.Fatalf("Failed to write to package info file \"%s\": %s\n", packageInfoFileName, err)
-			}
-		}
+		writePackageInfoFile(packageInfoFileName, !isDir)
 
 		// Emit the ordered package-var initialization file (no-op unless any initializer was
 		// relocated for init-order correctness). Package (directory) conversions only.
@@ -1543,6 +1091,484 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// NOTE: `.cs.auto` review siblings for manually-converted files were emitted inline by the
 		// file-visit loop above — marked files convert WITH the package (same order, same analyses)
 		// so their package-wide state reaches sibling files, and only their write target differs.
+	}
+}
+
+// writePackageInfoFile creates or updates a package information file (package_info.cs, or the
+// test conversion's package_test_info.cs) by inserting the CURRENT package-scoped metadata
+// globals (imported/exported type aliases, interface implementations, implicit conversions)
+// into the file's marker sections. When mergeExisting is true each section's existing entries
+// are preserved and merged with the new ones (single-file conversions, and the -tests path --
+// which seeds package_test_info.cs from the production package_info.cs and then merges each
+// test variant's additions); when false the sections are rebuilt from the current globals
+// alone (whole-package conversions). Shared by processConversion and the test-conversion path
+// so the emission semantics (pointer-form GoImplement unwrapping, alias-covered dedup,
+// inheritance pruning, constraint proxies, numeric conversions, manual-type skips) can never
+// drift between the two.
+func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
+	var packageInfoLines []string
+
+	if _, err := os.Stat(packageInfoFileName); err == nil {
+		// Read all lines from existing package info file
+		packageInfoBytes, err := os.ReadFile(packageInfoFileName)
+
+		if err != nil {
+			log.Fatalf("Failed to read existing package info file \"%s\": %s\n", packageInfoFileName, err)
+		}
+
+		packageInfoLines = strings.Split(string(packageInfoBytes), "\r\n")
+	} else {
+		// Generate new package info file from template
+		packageClassName := getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix))
+		templateFile := fmt.Sprintf(string(packageInfoTemplate), packageNamespace+"."+packageClassName, packageNamespace, packageName, packageClassName)
+		packageInfoLines = strings.Split(templateFile, "\r\n")
+	}
+
+	// Handle imported type aliases
+	startLineIndex := -1
+	endLineIndex := -1
+
+	for i, line := range packageInfoLines {
+		if strings.Contains(line, "<ImportedTypeAliases>") {
+			startLineIndex = i
+			continue
+		}
+
+		if strings.Contains(line, "</ImportedTypeAliases>") {
+			endLineIndex = i
+			break
+		}
+	}
+
+	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
+		// Read existing type aliases from package info file
+		lines := HashSet[string]{}
+
+		// If processing a single file, instead of all package files, merge type aliases
+		if mergeExisting {
+			for i := startLineIndex + 1; i < endLineIndex; i++ {
+				line := packageInfoLines[i]
+				lines.Add(strings.TrimSpace(line))
+			}
+		}
+
+		// Add new type aliases to package info file (hashset ensures uniqueness)
+		for alias, typeName := range importedTypeAliases {
+			if !constImportedTypeAliases.Contains(alias) {
+				lines.Add(fmt.Sprintf("global using %s = %s;", strings.ReplaceAll(alias, ".", TypeAliasDot), typeName))
+			}
+		}
+
+		// Add package-qualifier aliases used by recorded GoImplicitConv attributes (e.g.
+		// `abi.Type`). package_info.cs has no file-local `using abi = …`; emit a FILE-LOCAL `using`
+		// (not `global` — that would clash with the per-file `using abi = …` other source files
+		// already declare, CS1537) resolving each alias to its `go`-rooted namespace.
+		for alias, namespace := range conversionPackageUsings {
+			lines.Add(fmt.Sprintf("using %s = %s.%s;", alias, RootNamespace, namespace))
+		}
+
+		// Sort lines
+		sortedLines := lines.Keys()
+		sort.Strings(sortedLines)
+
+		// Insert imported type aliases into package info file
+		packageInfoLines = append(packageInfoLines[:startLineIndex+1],
+			append(sortedLines, packageInfoLines[endLineIndex:]...)...)
+	} else {
+		log.Fatalf("Failed to find '<ImportedTypeAliases>...</ImportedTypeAliases>' section for inserting exported type aliases into package info file \"%s\"\n", packageInfoFileName)
+	}
+
+	// Handle exported type aliases
+	startLineIndex = -1
+	endLineIndex = -1
+
+	for i, line := range packageInfoLines {
+		if strings.Contains(line, "<ExportedTypeAliases>") {
+			startLineIndex = i
+			continue
+		}
+
+		if strings.Contains(line, "</ExportedTypeAliases>") {
+			endLineIndex = i
+			break
+		}
+	}
+
+	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
+		// Read existing type aliases from package info file
+		lines := HashSet[string]{}
+
+		// If processing a single file, instead of all package files, merge type aliases
+		if mergeExisting {
+			for i := startLineIndex + 1; i < endLineIndex; i++ {
+				line := packageInfoLines[i]
+				lines.Add(strings.TrimSpace(line))
+			}
+		}
+
+		// Add new type aliases to package info file (hashset ensures uniqueness). A NON-GENERIC
+		// METHODLESS named func type is rendered inline as its base delegate with no named
+		// declaration (visitFuncType), so it has no `<pkg>_package.<Δname>` type — skip its alias,
+		// or a consumer's generated `global using` names a nonexistent type (go/doc's `ast.Filter`
+		// → `go.go.ast_package.ΔFilter`, CS0426).
+		for alias, typeName := range exportedTypeAliases {
+			// visitFuncType records the RENAMED name (a collision-renamed `Filter` is stored as
+			// `ΔFilter`, which is the alias VALUE), while a non-collision methodless func type is
+			// stored under its plain name (the alias KEY) — check both.
+			if packageInlineFuncTypeNames[alias] || packageInlineFuncTypeNames[typeName] {
+				continue
+			}
+
+			lines.Add(fmt.Sprintf("[assembly: GoTypeAlias(\"%s\", \"%s\")]", alias, typeName))
+		}
+
+		// Sort lines
+		sortedLines := lines.Keys()
+		sort.Strings(sortedLines)
+
+		// Insert exported type aliases into package info file
+		packageInfoLines = append(packageInfoLines[:startLineIndex+1],
+			append(sortedLines, packageInfoLines[endLineIndex:]...)...)
+	} else {
+		log.Fatalf("Failed to find '<ExportedTypeAliases>...</ExportedTypeAliases>' section for inserting exported type aliases into package info file \"%s\"\n", packageInfoFileName)
+	}
+
+	// Fully-qualified prefix (e.g. `go.@internal.profile_package`) for this package's own types.
+	// Used to root a BARE local type reference in the GoImplement/GoImplicitConv assembly
+	// attributes when that name collides with a `using System;`-imported type (CS0104) — see
+	// qualifySystemCollidingLocalTypeRefs.
+	localTypePrefix := packageNamespace + "." + getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix))
+
+	qualifyLocalTypeRef := func(name string) string {
+		return qualifySystemCollidingLocalTypeRefs(rootQualifySubNamespaceTypeRefs(name), localTypePrefix)
+	}
+
+	// Handle interface implementations
+	startLineIndex = -1
+	endLineIndex = -1
+
+	for i, line := range packageInfoLines {
+		if strings.Contains(line, "<InterfaceImplementations>") {
+			startLineIndex = i
+			continue
+		}
+
+		if strings.Contains(line, "</InterfaceImplementations>") {
+			endLineIndex = i
+			break
+		}
+	}
+
+	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
+		// Read existing interface lines from package info file
+		lines := HashSet[string]{}
+
+		// If processing a single file, instead of all package files, merge interface implementations
+		if mergeExisting {
+			for i := startLineIndex + 1; i < endLineIndex; i++ {
+				line := packageInfoLines[i]
+				lines.Add(strings.TrimSpace(line))
+			}
+		}
+
+		// Drop lower level interface implementations where interface inheritances are already covered.
+		// POINTER-form (ж<T>-wrapped) pairs are exempt: each generates a DISTINCT IжAdapter class,
+		// and cast sites reference the adapter for the EXACT interface they target — a Source-
+		// targeted cast needs runtimeSourceᴵSource even though runtimeSourceᴵSource64 also
+		// implements Source through interface inheritance (math/rand CS0246). Only the value-boxing
+		// partial-struct form (one type, one interface list) is redundant under inheritance.
+		for interfaceName, inheritedInterfaces := range interfaceInheritances {
+			for _, inheritedInterfaceName := range inheritedInterfaces.Keys() {
+				// Check if the same type implements both interfaces
+				if inheritedImplementations, ok := interfaceImplementations[inheritedInterfaceName]; ok {
+					if baseImplementations, ok := interfaceImplementations[interfaceName]; ok {
+						// Intersect on a COPY — IntersectWithSet mutates its receiver, and the receiver
+						// here is the DERIVED interface's LIVE implementation set. The old in-place
+						// intersect deleted every derived-only implementation (io: nopCloser →
+						// ReadCloser shares nothing with Reader's set, so both ReadCloser pairs
+						// vanished and the returns failed CS0029) and made the surviving set depend
+						// on map iteration order. Only the COMMON implementations are dropped, and
+						// only from the LOWER (inherited) interface — C# interface inheritance
+						// already covers them via the derived implementation.
+						commonImplementations := NewHashSet(baseImplementations.Keys())
+						commonImplementations.IntersectWithSet(inheritedImplementations)
+
+						for _, implementation := range commonImplementations.Keys() {
+							if strings.HasPrefix(implementation, PointerPrefix+"<") {
+								continue
+							}
+
+							// A VALUE-form pair that generates its own adapter CLASS (an
+							// interface-sourced or foreign-struct conversion — see
+							// adapterClassImplementations) is exempt for the same reason as
+							// the ж<T> form above: the cast site references the adapter for
+							// the EXACT interface it targets (net/http's `new
+							// net_ConnᴠWriter(…)` needs GoImplement<net.Conn, io.Writer>
+							// even though the Conn→ReadWriteCloser record also implements
+							// Writer through inheritance; CS0246 ×17).
+							if adapterClassImplementations.Contains(inheritedInterfaceName + "|" + implementation) {
+								continue
+							}
+
+							inheritedImplementations.Remove(implementation)
+						}
+					}
+				}
+			}
+		}
+
+		// Add new interface implementations to package info file (hashset ensures uniqueness).
+		// A ж<T>-wrapped implementation records a POINTER-sourced cast (`var s Iface = &t`) —
+		// unwrap it to `GoImplement<T, Iface>(Pointer = true)`, which generates the IжAdapter
+		// wrapper (interface aliases the receiver box) instead of the value-boxing partial.
+		//
+		// De-duplicate implementations recorded under BOTH a package type ALIAS and the
+		// aliased type's qualified name (os converts dirEntry to fs.DirEntry through its own
+		// `type DirEntry = fs.DirEntry` AND through the io/fs name): two GoImplement
+		// attributes for ONE interface make the generator emit the explicit interface
+		// implementation twice (CS8646 ×4 + CS0111 ×4, os dirEntry). The ALIASED record wins
+		// — its simple name resolves via the package usings and keeps the generator's
+		// last-dot-segment naming; the QUALIFIED duplicate is skipped. (Normalizing the
+		// RECORDS to the qualified form instead regressed os 8→77: the qualified interface
+		// name broke generator resolution and flipped the alias-locality gate.)
+		aliasCoveredImplementations := HashSet[string]{}
+
+		for alias, typeName := range exportedTypeAliases {
+			if implementations, ok := interfaceImplementations[alias]; ok {
+				canonIface := strings.TrimPrefix(typeName, RootNamespace+".")
+
+				for implementation := range implementations {
+					aliasCoveredImplementations.Add(canonIface + "|" + implementation)
+				}
+			}
+		}
+
+		for interfaceName, implementations := range interfaceImplementations {
+			// A marker-form key (an anonymous-interface record made from a file visited
+			// before the declaring file registered its lift) resolves against the
+			// now-complete registry; an unresolvable one is dropped — mirroring the
+			// implicit-conversion writer's resolveImplicitConvTypeName skip below.
+			interfaceName, okIface := resolveImplicitConvTypeName(interfaceName)
+
+			if !okIface {
+				continue
+			}
+
+			for implementation := range implementations {
+				canonKey := strings.TrimPrefix(interfaceName, RootNamespace+".") + "|" + implementation
+
+				if aliasCoveredImplementations.Contains(canonKey) {
+					continue
+				}
+				if inner, ok := strings.CutPrefix(implementation, PointerPrefix+"<"); ok {
+					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Pointer = true)]", qualifyLocalTypeRef(strings.TrimSuffix(inner, ">")), qualifyLocalTypeRef(interfaceName)))
+					continue
+				}
+
+				lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>]", qualifyLocalTypeRef(implementation), qualifyLocalTypeRef(interfaceName)))
+			}
+		}
+
+		// Add new promoted interface implementations to package info file (hashset ensures uniqueness)
+		for interfaceName, implementations := range promotedInterfaceImplementations {
+			for implementation := range implementations {
+				lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Promoted = true)]", qualifyLocalTypeRef(implementation), qualifyLocalTypeRef(interfaceName)))
+			}
+		}
+
+		// Add self-referential constraint proxies (nistCurve[*P224Point]'s Point). Each is a
+		// `GoImplement<element, iface<element>>(ConstraintProxy = true)` — the interface's own
+		// type argument is a PLACEHOLDER (the generator closes it over the emitted proxy itself),
+		// so the element doubles as the dummy. See constraintProxyArg / EmitConstraintProxy.
+		for _, proxy := range constraintProxies {
+			elementRef := qualifyLocalTypeRef(proxy[0])
+			interfaceRef := qualifyLocalTypeRef(proxy[1])
+			lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s<%s>>(ConstraintProxy = true)]", elementRef, interfaceRef, elementRef))
+		}
+
+		// Sort lines
+		sortedLines := lines.Keys()
+		sort.Strings(sortedLines)
+
+		// Insert interface implementations into package info file
+		packageInfoLines = append(packageInfoLines[:startLineIndex+1],
+			append(sortedLines, packageInfoLines[endLineIndex:]...)...)
+
+	} else {
+		log.Fatalf("Failed to find '<InterfaceImplementations>...</InterfaceImplementations>' section for inserting interface implementations into package info file \"%s\"\n", packageInfoFileName)
+	}
+
+	// Handle implicit conversions
+	startLineIndex = -1
+	endLineIndex = -1
+
+	for i, line := range packageInfoLines {
+		if strings.Contains(line, "<ImplicitConversions>") {
+			startLineIndex = i
+			continue
+		}
+
+		if strings.Contains(line, "</ImplicitConversions>") {
+			endLineIndex = i
+			break
+		}
+	}
+
+	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
+		// Read existing interface lines from package info file
+		lines := HashSet[string]{}
+
+		// If processing a single file, instead of all package files, merge implicit conversions
+		if mergeExisting {
+			for i := startLineIndex + 1; i < endLineIndex; i++ {
+				line := packageInfoLines[i]
+				lines.Add(strings.TrimSpace(line))
+			}
+		}
+
+		// A conversion referencing a manually-converted type must not emit — the generated
+		// operator would read the skipped auto form's numeric backing; the *_impl.cs declares
+		// any conversion operators its call sites need (see manualTypeOperations.go).
+		referencesManualType := func(typeNames ...string) bool {
+			for _, typeName := range typeNames {
+				if packageManualTypeNames[typeName] {
+					return true
+				}
+			}
+
+			return false
+		}
+
+		// Add new implicit conversions to package info file (hashset ensures uniqueness)
+		for sourceType, targetTypes := range implicitConversions {
+			for targetType := range targetTypes {
+				if referencesManualType(sourceType, targetType) {
+					continue
+				}
+
+				source, okSource := resolveImplicitConvTypeName(sourceType)
+				target, okTarget := resolveImplicitConvTypeName(targetType)
+
+				if !okSource || !okTarget || source == target {
+					continue
+				}
+
+				lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>]", qualifyLocalTypeRef(source), qualifyLocalTypeRef(target)))
+			}
+		}
+
+		// Add new inverted implicit conversions to package info file (hashset ensures uniqueness)
+		for sourceType, targetTypes := range invertedImplicitConversions {
+			for targetType := range targetTypes {
+				if referencesManualType(sourceType, targetType) {
+					continue
+				}
+
+				source, okSource := resolveImplicitConvTypeName(sourceType)
+				target, okTarget := resolveImplicitConvTypeName(targetType)
+
+				if !okSource || !okTarget || source == target {
+					continue
+				}
+
+				lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = true)]", qualifyLocalTypeRef(target), qualifyLocalTypeRef(source)))
+			}
+		}
+
+		// Add new indirect implicit conversions to package info file (hashset ensures uniqueness)
+		for sourceType, targetTypes := range indirectImplicitConversions {
+			for targetType := range targetTypes {
+				if referencesManualType(sourceType, targetType) {
+					continue
+				}
+
+				source, okSource := resolveImplicitConvTypeName(sourceType)
+				target, okTarget := resolveImplicitConvTypeName(targetType)
+
+				if !okSource || !okTarget {
+					continue
+				}
+
+				lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Indirect = true)]", qualifyLocalTypeRef(source), qualifyLocalTypeRef(target)))
+			}
+		}
+
+		// Add new numeric conversions to package info file (maps ensure uniqueness)
+		for sourceType, targetTypes := range numericConversions {
+			for targetType, valueType := range targetTypes {
+				if referencesManualType(sourceType, targetType) {
+					continue
+				}
+
+				var inverted bool
+
+				if strings.HasPrefix(valueType, "imported:") {
+					valueType = strings.TrimPrefix(valueType, "imported:")
+					inverted = false
+				} else {
+					inverted = true
+				}
+
+				lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = %t, ValueType = \"%s\")]", qualifyLocalTypeRef(sourceType), qualifyLocalTypeRef(targetType), inverted, valueType))
+			}
+		}
+
+		// Add new indirect numeric conversions to package info file (maps ensure uniqueness)
+		for sourceType, targetTypes := range indirectNumericConversions {
+			for targetType, valueType := range targetTypes {
+				if referencesManualType(sourceType, targetType) {
+					continue
+				}
+
+				var inverted bool
+
+				if strings.HasPrefix(valueType, "imported:") {
+					valueType = strings.TrimPrefix(valueType, "imported:")
+					inverted = false
+				} else {
+					inverted = true
+				}
+
+				lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = %t, Indirect = true, ValueType = \"%s\")]", qualifyLocalTypeRef(sourceType), qualifyLocalTypeRef(targetType), inverted, valueType))
+			}
+		}
+
+		// Sort lines
+		sortedLines := lines.Keys()
+		sort.Strings(sortedLines)
+
+		// Insert implicit conversions into package info file
+		packageInfoLines = append(packageInfoLines[:startLineIndex+1],
+			append(sortedLines, packageInfoLines[endLineIndex:]...)...)
+
+	} else {
+		log.Fatalf("Failed to find '<ImplicitConversions>...</ImplicitConversions>' section for inserting implicit conversions into package info file \"%s\"\n", packageInfoFileName)
+	}
+
+	// Remove trailing empty lines
+	for i := len(packageInfoLines) - 1; i >= 0; i-- {
+		if strings.TrimSpace(packageInfoLines[i]) == "" {
+			packageInfoLines = packageInfoLines[:i]
+		} else {
+			break
+		}
+	}
+
+	// Write updated package info file
+	packageInfoFile, err := os.Create(packageInfoFileName)
+
+	if err != nil {
+		log.Fatalf("Failed to create package info file \"%s\": %s\n", packageInfoFileName, err)
+	}
+
+	defer packageInfoFile.Close()
+
+	for _, line := range packageInfoLines {
+		_, err = packageInfoFile.WriteString(line + "\r\n")
+
+		if err != nil {
+			log.Fatalf("Failed to write to package info file \"%s\": %s\n", packageInfoFileName, err)
+		}
 	}
 }
 

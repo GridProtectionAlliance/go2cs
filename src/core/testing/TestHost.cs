@@ -94,6 +94,7 @@ internal sealed class TestOptions
 {
     public bool Json { get; private set; }
     public bool Verbose { get; private set; }
+    public bool Short { get; private set; }
     public int Count { get; private set; } = 1;
     public int Parallel { get; private set; } = Environment.ProcessorCount;
     public int? ShuffleSeed { get; private set; }
@@ -126,7 +127,12 @@ internal sealed class TestOptions
                     break;
                 case "-v":
                 case "-test.v":
-                    options.Verbose = true;
+                    options.Verbose = value is null || bool.Parse(value);
+                    break;
+                case "-short":
+                case "-test.short":
+                    // Backs testing.Short() in the shim; go test's default (flag absent) is false.
+                    options.Short = value is null || bool.Parse(value);
                     break;
                 case "-run":
                 case "-test.run":
@@ -224,6 +230,17 @@ internal sealed class TestOptions
 
 public static class TestHost
 {
+    /// <summary>
+    /// Gets whether the current run was started with -short — the value testing.Short() reports.
+    /// One host run executes per test process, so process-wide state matches Go's model.
+    /// </summary>
+    public static bool ShortMode { get; private set; }
+
+    /// <summary>
+    /// Gets whether the current run was started with -v — the value testing.Verbose() reports.
+    /// </summary>
+    public static bool VerboseMode { get; private set; }
+
     public static int Run(TestRegistry registry, string[] args)
     {
         TestOptions options;
@@ -237,6 +254,9 @@ public static class TestHost
             Console.Error.WriteLine(ex.Message);
             return 2;
         }
+
+        ShortMode = options.Short;
+        VerboseMode = options.Verbose;
 
         CultureInfo previousCulture = CultureInfo.CurrentCulture;
         CultureInfo previousUICulture = CultureInfo.CurrentUICulture;
