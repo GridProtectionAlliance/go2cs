@@ -603,14 +603,6 @@ func (c *StdLibConverter) GenerateDependencyGraph() error {
 	fmt.Fprintln(f, "  rankdir=LR;")
 	fmt.Fprintln(f, "  node [shape=box, style=filled, fillcolor=lightblue];")
 
-	// Write nodes for each package
-	for pkgPath := range c.graph.packages {
-		// Sanitize package name for DOT
-		pkgName := strings.ReplaceAll(pkgPath, "/", "_")
-		pkgName = strings.ReplaceAll(pkgName, ".", "_")
-		fmt.Fprintf(f, "  \"%s\" [label=\"%s\"];\n", pkgName, pkgPath)
-	}
-
 	// Sort packages for consistent output
 	sortedPackages := make([]string, 0, len(c.graph.packages))
 
@@ -619,6 +611,14 @@ func (c *StdLibConverter) GenerateDependencyGraph() error {
 	}
 
 	sort.Strings(sortedPackages)
+
+	// Write nodes for each package
+	for _, pkgPath := range sortedPackages {
+		// Sanitize package name for DOT
+		pkgName := strings.ReplaceAll(pkgPath, "/", "_")
+		pkgName = strings.ReplaceAll(pkgName, ".", "_")
+		fmt.Fprintf(f, "  \"%s\" [label=\"%s\"];\n", pkgName, pkgPath)
+	}
 
 	// Write edges for dependencies
 	for _, pkgPath := range sortedPackages {
