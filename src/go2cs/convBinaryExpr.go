@@ -193,7 +193,8 @@ func (v *Visitor) concreteNumericCSType(t types.Type) string {
 // expression whose value falls OUTSIDE the C# int32 range, or "" otherwise. C# evaluates an operator
 // expression like `1 << 63` or `12345 * 1000000000` in int32 and overflows at compile time in checked
 // mode (CS0220), whereas Go evaluates the constant in its (64-bit) type; emitting the folded value
-// (`9223372036854775807L`) computes it correctly. Scope notes:
+// (`9223372036854775807L`) computes it correctly. A fold whose type is Go `int` additionally carries
+// its own `(nint)(…)` cast — see the typed-int arm below. Scope notes:
 //   - Restricted to SIGNED targets: an unsigned constant shift already emits with a width-cast operand
 //     (`(uint64)1 << 40`) from the named-numeric path, so folding it would needlessly lose the readable
 //     `1<<40` form. The signed builtin-int64 path is the one that lacks the width cast and overflows.
@@ -249,7 +250,22 @@ func (v *Visitor) overflowingConstLiteral(expr ast.Expr) string {
 		return ""
 	}
 
-	return strconv.FormatInt(i, 10) + "L"
+	lit := strconv.FormatInt(i, 10) + "L"
+
+	// A constant TYPED Go `int` lands in a C# `nint` context, which has NO implicit conversion
+	// from `long` — a bare fold fails loudly at every non-assignment use (strings' SplitN table
+	// element `math.MaxInt / 4` emitted `2305843009213693951L` against the `n int` field,
+	// CS1503). Carry the narrowing cast in the fold itself, in the parenthesized `(nint)(…)`
+	// form nativeIntConstCastType recognizes (wholeExprIsCastOfType), so the assignment path
+	// does not re-wrap and those sites stay byte-identical. The value always fits — nint is
+	// 64-bit on all supported platforms — and the runtime conversion is unchecked by default.
+	// An UNTYPED-int subtree keeps the bare `L` form (kind UntypedInt — its enclosing context
+	// supplies the conversion), as does an int64 target (`long` is already exact).
+	if basic.Kind() == types.Int {
+		return "(nint)(" + lit + ")"
+	}
+
+	return lit
 }
 
 // constExprHasBeyondInt64UntypedOperatorSubexpr reports whether any PROPER subexpression of the
@@ -310,8 +326,9 @@ func (v *Visitor) constExprHasBeyondInt64UntypedOperatorSubexpr(expr ast.Expr) b
 // 1 << 63` emits `1 << (int)(63)`, and C# MASKS a shift count to 5 bits (63 & 31 = 31) → int.MinValue;
 // `hf / (1 << 60)` divides by 2^28 (60 & 31 = 28) instead of 2^60. Emitting the Go-evaluated value as
 // a float literal (`9223372036854775808D`) computes it correctly. This is the float counterpart of
-// overflowingConstLiteral, kept separate because that fold's result is contracted to be a signed
-// `long` literal (nativeIntConstCastType reads it as proof the emitted arithmetic is 64-bit wide).
+// overflowingConstLiteral, kept separate because that fold's result is contracted to be 64-bit-wide
+// signed emission — a `long` literal, `(nint)`-wrapped when typed Go `int` — whose non-empty result
+// nativeIntConstCastType reads as proof the emitted arithmetic is 64-bit wide.
 // Scope notes:
 //   - ALL-INT-LITERAL operands only — that is what makes C# evaluate in int32. A float-literal
 //     operand (`1e18 * 10.0`) already renders as a C# `double` computation, and a named-const operand

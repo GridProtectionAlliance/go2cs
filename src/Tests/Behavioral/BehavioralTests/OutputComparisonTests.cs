@@ -340,6 +340,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckFuncLitStringConcatReturn() => CheckTarget("FuncLitStringConcatReturn");
 
     [TestMethod]
+    public void CheckFuncLitUntypedConstReturn() => CheckTarget("FuncLitUntypedConstReturn");
+
+    [TestMethod]
     public void CheckFuncTypeParam() => CheckTarget("FuncTypeParam");
 
     [TestMethod]
@@ -698,6 +701,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNativeIntWideConstAssign() => CheckTarget("NativeIntWideConstAssign");
+
+    [TestMethod]
+    public void CheckNativeIntWideConstElement() => CheckTarget("NativeIntWideConstElement");
 
     [TestMethod]
     public void CheckNestedAliasUser() => CheckTarget("NestedAliasUser");

@@ -375,6 +375,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckFuncLitStringConcatReturn() => CheckTarget("FuncLitStringConcatReturn");
 
     [TestMethod]
+    public void CheckFuncLitUntypedConstReturn() => CheckTarget("FuncLitUntypedConstReturn");
+
+    [TestMethod]
     public void CheckFuncTypeParam() => CheckTarget("FuncTypeParam");
 
     [TestMethod]
@@ -751,6 +754,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNativeIntWideConstAssign() => CheckTarget("NativeIntWideConstAssign");
+
+    [TestMethod]
+    public void CheckNativeIntWideConstElement() => CheckTarget("NativeIntWideConstElement");
 
     [TestMethod]
     public void CheckNestedAliasUser() => CheckTarget("NestedAliasUser");

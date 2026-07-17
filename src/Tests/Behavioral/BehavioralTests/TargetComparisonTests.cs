@@ -378,6 +378,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckFuncLitStringConcatReturn() => CheckTarget("FuncLitStringConcatReturn");
 
     [TestMethod]
+    public void CheckFuncLitUntypedConstReturn() => CheckTarget("FuncLitUntypedConstReturn");
+
+    [TestMethod]
     public void CheckFuncTypeParam() => CheckTarget("FuncTypeParam");
 
     [TestMethod]
@@ -754,6 +757,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNativeIntWideConstAssign() => CheckTarget("NativeIntWideConstAssign");
+
+    [TestMethod]
+    public void CheckNativeIntWideConstElement() => CheckTarget("NativeIntWideConstElement");
 
     [TestMethod]
     public void CheckNestedAliasUser() => CheckTarget("NestedAliasUser");

@@ -102,6 +102,16 @@ abi-accessibility errors exist under the current absolute-path pipeline.
   ONE generated adapter (`negativeReader` → io.Reader ptr impl in `bytes_package`'s .g.cs), i.e.
   the B4/B5 anchoring class. Bytes' next wall = B4/B5 (+ B7a/B7b sites at their lines), then the
   runtime rows.
+- **B7a + B7b: FIXED** (2026-07-17, worktree branch `claude/modest-ramanujan-87ebb2` — coordinator
+  gates the merge). B7a: the typed-`int` signed constant fold (`overflowingConstLiteral`) now
+  carries its own `(nint)(…L)` cast, parenthesized so the assignment path's
+  `nativeIntConstCastType` recognizes it and does not re-wrap — zero corpus drift
+  (`NativeIntWideConstAssign` byte-identical). B7b: `convFuncLit` states an explicit lambda
+  return type when a single-result BASIC-numeric literal in assignment position has a named
+  untyped-const return arm (targeted predicate, not the uniform fallback — no golden churn;
+  argument-position and literal-only-arm literals keep the plain form). Guards:
+  `NativeIntWideConstElement` + `FuncLitUntypedConstReturn`, both discriminating — reverted-fix
+  runs fail with exactly the mapped errors (CS1503 long→nint; CS1503 `Func<int, UntypedInt>`).
 
 ## Cross-cutting lessons
 

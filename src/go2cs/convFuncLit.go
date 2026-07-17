@@ -26,6 +26,33 @@ func numericBasicLit(expr ast.Expr) (*ast.BasicLit, bool) {
 	return lit, true
 }
 
+// funcLitReturnsUntypedNamedConst reports whether any of the literal's OWN top-level return arms
+// returns a bare reference to a named untyped numeric constant — the shape that emits as a golib
+// `Untyped*` wrapper reference (see isUntypedNamedConstRef) and defeats C# lambda return-type
+// inference in natural-inference position (see the single-result numeric arm in convFuncLit).
+func (v *Visitor) funcLitReturnsUntypedNamedConst(funcLit *ast.FuncLit) bool {
+	found := false
+
+	ast.Inspect(funcLit.Body, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		if _, isLit := n.(*ast.FuncLit); isLit && n != funcLit.Body {
+			return false // a nested literal's returns belong to it
+		}
+
+		if ret, ok := n.(*ast.ReturnStmt); ok && len(ret.Results) == 1 && v.isUntypedNamedConstRef(ret.Results[0]) {
+			found = true
+			return false
+		}
+
+		return true
+	})
+
+	return found
+}
+
 func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) string {
 	if v.currentFuncSignature == nil {
 		v.currentFuncSignature = v.info.Types[funcLit].Type.(*types.Signature)
@@ -431,8 +458,26 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 				// an argument/return/composite-element literal is target-typed by its delegate
 				// (no inference to fail), where an explicit return type could only add an
 				// identity-match constraint against stub delegate types.
-				if basic, ok := types.Unalias(results.At(0).Type()).(*types.Basic); ok && basic.Kind() == types.String {
-					returnTypePrefix = convertToCSTypeName(v.getTypeName(results.At(0).Type(), false)) + " "
+				if basic, ok := types.Unalias(results.At(0).Type()).(*types.Basic); ok {
+					if basic.Kind() == types.String {
+						returnTypePrefix = convertToCSTypeName(v.getTypeName(results.At(0).Type(), false)) + " "
+					} else if basic.Info()&types.IsNumeric != 0 && v.funcLitReturnsUntypedNamedConst(funcLit) {
+						// A NUMERIC-result literal in natural-inference position with a NAMED
+						// untyped-constant return arm — `maxRune := func(rune) rune { return
+						// unicode.MaxRune }` (strings TestMap): the const ref renders as a golib
+						// `Untyped*` wrapper reference, whose implicit conversions run BOTH ways
+						// with every numeric type. An all-const arm set therefore infers the
+						// wrapper delegate (`Func<rune, UntypedInt>` — rejected at the invariant-
+						// delegate use site, CS1503), and a mixed const/typed arm set has no
+						// unique best common type at all (CS8917). Stating the declared return
+						// type explicitly (`var maxRune = rune (rune _) => …`) converts each arm
+						// in place. Gated to a BASIC numeric result (a named type would need a
+						// second user conversion the wrapper cannot chain — see
+						// lambdaConstReturnCastType's named-type rationale); literal-only arm
+						// sets (`return 'a'`, `return -1`) keep inferred typing — those render at
+						// concrete C# types already (no churn).
+						returnTypePrefix = convertToCSTypeName(v.getTypeName(results.At(0).Type(), false)) + " "
+					}
 				}
 			}
 		} else if results := litSig.Results(); results != nil && results.Len() > 1 && context.isAssignment {
