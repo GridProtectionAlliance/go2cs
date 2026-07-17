@@ -735,6 +735,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNarrowByteArithReturn() => CheckTarget("NarrowByteArithReturn");
 
     [TestMethod]
+    public void CheckNarrowShiftVarCount() => CheckTarget("NarrowShiftVarCount");
+
+    [TestMethod]
     public void CheckNativeIntConstMask() => CheckTarget("NativeIntConstMask");
 
     [TestMethod]

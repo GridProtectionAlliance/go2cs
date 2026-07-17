@@ -222,11 +222,15 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 					label, value, keyed = "", resultExpr, false
 				}
 
-				// Skip when the value already opens with the target cast (convBinaryExpr
-				// casts a same-type named/narrow binary result on its own — a redundant
-				// `(uint16)((uint16)…)` would only add noise); apply only where the render
-				// actually promoted (image/png's `(b >> 7) * 0xff` has no leading cast).
-				if !strings.HasPrefix(value, fmt.Sprintf("(%s)(", castType)) {
+				// Skip when the WHOLE value is already `(castType)(…)` (convBinaryExpr casts a
+				// same-type named/narrow binary result on its own — a redundant
+				// `(uint16)((uint16)…)` would only add noise); apply where the render actually
+				// promoted (image/png's `(b >> 7) * 0xff` has no leading cast). A leading
+				// `(castType)(` that closes BEFORE the end is only the FIRST OPERAND's cast —
+				// `(uint16)(x << 8) + (uint16)y`, whose sum still promotes to `int` — so it must
+				// still take the cast (the same whole-expression test the narrow-arithmetic
+				// assignment path applies; see wholeExprIsCastOfType).
+				if !wholeExprIsCastOfType(value, castType) {
 					if keyed {
 						resultExpr = fmt.Sprintf("%s: (%s)(%s)", label, castType, value)
 					} else {

@@ -660,6 +660,33 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 						}
 					}
 				}
+			} else if binaryExpr.Op == token.SHL {
+				// A TYPED narrow-width shifted operand — `cb << k` where cb is a byte/int8/int16/
+				// uint16 var or TYPED const — also loses Go's width semantics: C# promotes the
+				// sub-int left operand to `int`, so `byte(200) << 1` computes 400 with no
+				// wraparound where Go wraps to 144 at byte width. Re-type the result exactly as
+				// the untyped-const narrow branch above does, keyed on the SHIFT EXPRESSION's
+				// resolved Go type (int32-and-wider left operands already shift at their Go width
+				// in C#, so only the four sub-int kinds take the cast). Right shifts need no cast:
+				// a narrow operand zero-/sign-extends into the int-width shift, so the result
+				// always fits the narrow width. A whole-expression Go CONSTANT is skipped — Go
+				// constant arithmetic cannot overflow its type, and the wrap cast on a C#
+				// compile-time constant expression would even be rejected in checked constant
+				// evaluation (CS0221).
+				if tv, ok := v.info.Types[binaryExpr]; ok && tv.Value == nil && tv.Type != nil {
+					if basic, ok := tv.Type.Underlying().(*types.Basic); ok && isNarrowIntegerKind(basic.Kind()) {
+						underlyingCS := v.getCSTypeName(basic)
+						resolvedCS := convertToCSTypeName(v.getTypeName(tv.Type, false))
+
+						shiftExpr = fmt.Sprintf("(%s)%s", underlyingCS, shiftExpr)
+
+						// A NAMED narrow type routes through its underlying (see above) — the
+						// `[GoType]` conversion accepts its exact underlying, never C# `int`.
+						if resolvedCS != underlyingCS {
+							shiftExpr = fmt.Sprintf("(%s)%s", resolvedCS, shiftExpr)
+						}
+					}
+				}
 			}
 
 			return shiftExpr

@@ -294,6 +294,7 @@
     <Project Path="Tests/Behavioral/NarrowArithmeticArg/NarrowArithmeticArg.csproj" />
     <Project Path="Tests/Behavioral/NarrowByteArithFirstOperandCast/NarrowByteArithFirstOperandCast.csproj" />
     <Project Path="Tests/Behavioral/NarrowByteArithReturn/NarrowByteArithReturn.csproj" />
+    <Project Path="Tests/Behavioral/NarrowShiftVarCount/NarrowShiftVarCount.csproj" />
     <Project Path="Tests/Behavioral/NativeIntConstMask/NativeIntConstMask.csproj" />
     <Project Path="Tests/Behavioral/NativeIntWideConstAssign/NativeIntWideConstAssign.csproj" />
     <Project Path="Tests/Behavioral/NestedAliasUser/NestedAliasUser.csproj" />

@@ -735,6 +735,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNarrowByteArithReturn() => CheckTarget("NarrowByteArithReturn");
 
     [TestMethod]
+    public void CheckNarrowShiftVarCount() => CheckTarget("NarrowShiftVarCount");
+
+    [TestMethod]
     public void CheckNativeIntConstMask() => CheckTarget("NativeIntConstMask");
 
     [TestMethod]
