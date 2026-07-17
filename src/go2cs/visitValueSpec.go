@@ -57,6 +57,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 				v.varNames = make(map[*types.Var]string)
 
 				v.performVariableAnalysis(syntheticDecl, types.NewSignatureType(nil, nil, nil, nil, nil, false))
+				v.performUntypedConstAnalysis(syntheticDecl)
 			}
 		}
 
@@ -570,7 +571,21 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 			}
 
 			c := v.info.ObjectOf(ident).(*types.Const)
-			goTypeName := v.getTypeName(c.Type(), false)
+
+			// A function-local untyped const whose every use resolves to ONE concrete basic
+			// type is DECLARED at that type (see performUntypedConstAnalysis): the wrapper
+			// indirection and the per-use casts disappear, C#'s `const` keyword applies where
+			// legal for the type, and the existing typed-const machinery below (native-int
+			// demotion, uintptr `static readonly`, the float32 `f` suffix) applies unchanged.
+			declType := types.Type(c.Type())
+
+			tightenedType, isTightened := v.tightenedConsts[c]
+
+			if isTightened {
+				declType = tightenedType
+			}
+
+			goTypeName := v.getTypeName(declType, false)
 			csTypeName := convertToCSTypeName(goTypeName)
 			access := getAccess(goIDName)
 			typeLenDeviation := token.Pos(len(csTypeName) + len(access) + (len(csIDName) - len(goIDName)))
@@ -762,7 +777,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					v.targetFile.WriteString(v.newline)
 				}
 
-				if srcVal == "iota" {
+				// golib's `iota` is a `const nint` — fine as an Untyped* wrapper initializer,
+				// but a TIGHTENED declaration may carry a different concrete type with no
+				// implicit nint path, so it keeps the folded value (`/* iota */` comment shows).
+				if srcVal == "iota" && !isTightened {
 					constVal = "iota"
 				}
 

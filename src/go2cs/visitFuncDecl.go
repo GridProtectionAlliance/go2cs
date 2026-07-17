@@ -162,6 +162,10 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	// Analyze function variables for reassignments and redeclarations (variable shadows).
 	v.performVariableAnalysis(funcDecl, signature)
 
+	// Record the function-local untyped consts whose declaration tightens to a single
+	// concrete basic type (the declaration and every wrapper-keyed cast site consult it).
+	v.performUntypedConstAnalysis(funcDecl)
+
 	// Scope defer/recover to THIS function's own body: a `defer`/`recover` inside a nested
 	// function literal (an IIFE or closure) belongs to that literal, not to this function, so it
 	// must not force a func() execution context here. (performVariableAnalysis sets hasDefer/

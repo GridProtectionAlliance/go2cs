@@ -244,6 +244,33 @@ internal static readonly UntypedFloat folded = /* 19.0 / 35.0 */ 0.5428571428571
 
 A beyond-float64 value still routes to the `GoUntyped` (BigInteger) overflow path unchanged. (Guarded by the `UntypedConstDefine` behavioral test — package-level and function-local high-precision consts printed and compared against Go, which fails with the truncated `0.542857` emission; `SortArrayType` additionally locks the verbatim forms `1.0f`/`3.14e100`.)
 
+**Function-local untyped constants TIGHTEN to their single concrete use type.** A per-function analysis pass (`performUntypedConstAnalysis`) resolves every use of each function-local untyped numeric constant through go/types: when ALL uses record the SAME concrete basic type — and none participates in constant folding — the declaration emits at that type (with C#'s `const` keyword where legal: the primitive aliases; native-int/`uintptr` values fall to the existing `static readonly`/`unchecked` demotions), and every wrapper-keyed cast-insertion site (the bitwise/arith operand casts, the `append`/deferred-call element casts, the shift retype) skips its now-unneeded cast. The emitted code then reads like the Go source — math `cbrt`:
+
+```go
+const (
+    C = 5.42857142857142815906e-01 // 19/35 = 0x3FE15F15F15F15F1
+    G = 3.57142857142857150787e-01 // 5/14  = 0x3FD6DB6DB6DB6DB7
+)
+s := C + r*t
+t *= G + F/(s+E+D/s)
+```
+```csharp
+const float64 C = 5.42857142857142815906e-01; // 19/35     = 0x3FE15F15F15F15F1
+const float64 G = 3.57142857142857150787e-01; // 5/14      = 0x3FD6DB6DB6DB6DB7
+var s = C + r * t;
+t *= G + F / (s + E + D / s);
+```
+
+The guards are deliberately conservative — any doubt keeps today's `Untyped*` wrapper form:
+
+- **Function-local only** (package-level constants keep the wrapper: they are visible across functions whose contexts may differ, including from other files of the package).
+- **Untyped integer/rune/float only** — untyped COMPLEX is excluded (`complex128` is a golib struct with no C# `const` form), as is any value on the `GoUntyped` (BigInteger) path.
+- **Every use must record a concrete numeric basic type** in go/types' `Info.Types`, and all uses must agree on ONE basic kind. go/types records the implicit-conversion target for an untyped operand (`float64` for `C + x` with `x float64`), so a use that stays untyped (another constant's initializer), resolves to a NAMED type or type parameter, or records a non-numeric type (`string(c)`) disqualifies — as do mixed concrete types (`float64` and `float32` uses of one constant).
+- **No use may participate in constant folding**: an ancestor expression carrying a folded constant value (`uint64(B1) << 32` — cbrt's B1/B2 stay `UntypedInt`) disqualifies. Go folds untyped constant expressions at arbitrary precision; re-expressing an operand at a concrete C# type could change the folded result (or re-fold it in C#'s checked int32 arithmetic).
+- The exact value is re-checked representable in the resolved type (belt-and-braces — go/types already validated each use's conversion).
+
+A tightened constant composes with the exact-float emission above (the cbrt literals round-trip to their documented bit patterns, e.g. `C` ↔ `0x3FE15F15F15F15F1`) and with the `iota` initializer (golib's `iota` is a `const nint`, so a tightened declaration keeps the folded value with the `/* iota */` comment instead). (Guarded by the `UntypedConstDefine` behavioral test's `tightenGuards` — single-type/append/defer/shift-operand uses tighten, mixed-type/const-feeding/folding uses keep the wrapper, output-compared vs Go — and by `BitwiseUntypedConst`, whose local `signBit = 1 << 63` now emits `const uint64` with the `(uint64)` operand casts dropped; `ConstShadowsParam` locks the shadow-rename interplay, its folded `int64(ns)` uses staying untightened.)
+
 A Go untyped *float* constant defaults to `float64`, so its C# literal carries the double suffix `D` — not `F` — regardless of whether the value happens to fit in `float32`. (Emitting `F` whenever the value fit would make `z := 1.0` a `float`, breaking later `float64` arithmetic with CS0266.) A literal in an explicit `float32` context keeps `F`:
 
 ```go
@@ -321,7 +348,7 @@ bit-mask operands, and the casts needed to keep C# overload resolution aligned w
 
 This area is where Go's flexible numeric model meets C#'s stricter one, and it has a few moving parts worth calling out.
 
-**Untyped constants.** As noted under [Constant Values](#constant-values), an untyped Go constant becomes a golib `UntypedInt`/`UntypedFloat`/`UntypedComplex`. These wrappers define implicit conversions to **and from** every numeric type so the value can slot into whatever context uses it, just like an untyped Go constant. The trade-off is that mixing an `UntypedInt` directly into heavily-typed arithmetic (e.g. `someUint64 * untypedConst`) can become ambiguous to C#'s overload resolution, since the wrapper is convertible in either direction. Context-typing of untyped *local* constants (emitting them with the concrete type their use demands instead of the wrapper) is an area of ongoing refinement.
+**Untyped constants.** As noted under [Constant Values](#constant-values), an untyped Go constant becomes a golib `UntypedInt`/`UntypedFloat`/`UntypedComplex`. These wrappers define implicit conversions to **and from** every numeric type so the value can slot into whatever context uses it, just like an untyped Go constant. The trade-off is that mixing an `UntypedInt` directly into heavily-typed arithmetic (e.g. `someUint64 * untypedConst`) can become ambiguous to C#'s overload resolution, since the wrapper is convertible in either direction. A *function-local* untyped constant whose every use resolves to one concrete basic type sidesteps the wrapper entirely — it is declared AT that type with the per-use casts dropped (see [Constant Values](#constant-values), *function-local untyped constants tighten*); the wrapper-cast machinery below applies to the remaining wrapper-emitted constants (package-level, mixed-context, and folding-participating locals).
 
 One resolved instance: an argument to the **`min`/`max` builtins** that is a named untyped constant renders as its `UntypedInt` static, which golib's `min<T>(T, params ReadOnlySpan<T>)` overloads reject (CS1503 — params-span element binding does not apply the user-defined implicit conversion): runtime `min(n, maxObletBytes)` (`mgcmark.go`, `uintptr` sibling) and `min(debug.profstackdepth, maxProfStackDepth)` (`runtime1.go`, `int32`). The converter casts such an argument to the call's Go-resolved result type — `min(n, (uintptr)(maxObletBytes))` — and, once one argument is cast, every constant-valued sibling too (`min(big, limit, 500)` → `…, (uintptr)(limit), (uintptr)(500))` — a bare literal is a C# `int` and would break `T` inference against the cast type). Typed arguments and literal-only calls are unchanged. (Guarded by the `MinMaxBuiltin` extension — untyped consts typed by `uintptr`/`int32` siblings plus the mixed literal case, values vs Go.)
 

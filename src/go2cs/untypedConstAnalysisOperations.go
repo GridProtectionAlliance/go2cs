@@ -1,0 +1,269 @@
+package main
+
+import (
+	"go/ast"
+	"go/constant"
+	"go/token"
+	"go/types"
+	"math"
+	"strconv"
+)
+
+// performUntypedConstAnalysis records, for the given function, every FUNCTION-LOCAL untyped
+// numeric constant whose declaration can be TIGHTENED to a single concrete basic type — the
+// type is written into v.tightenedConsts and consulted by (a) the const declaration emission
+// (visitValueSpec emits the concrete type, with C#'s `const` keyword where legal for it,
+// instead of the `Untyped*` wrapper) and (b) every wrapper-keyed cast-insertion site
+// (isUntypedNamedConstRef, isUntypedNumericConstArg, the deferred-call default-type wrap),
+// which then skip their now-unneeded casts. The result reads like the Go source: math cbrt's
+// `s := C + r*t` emits `var s = C + r * t;` over `const float64 C = …` instead of
+// `var s = (float64)C + r * t;` over an `UntypedFloat` wrapper.
+//
+// A constant qualifies only when ALL of the following hold (conservative by design — any
+// doubt keeps today's wrapper form, correctness beats beauty):
+//
+//   - It is declared inside the function (package-level consts are out of scope this pass)
+//     with an untyped INTEGER/RUNE/FLOAT type. Untyped COMPLEX is excluded (complex128 is a
+//     golib struct with no C# const form and no corpus shape to validate against).
+//   - Its value fits the native numeric range — a value needing the GoUntyped (BigInteger)
+//     emission is never tightened (mirrors visitValueSpec's writeUntypedConst triggers).
+//   - EVERY use records a concrete (non-untyped) NUMERIC, non-complex *types.Basic in
+//     go/types' Info.Types, and all uses record the SAME basic kind. go/types records the
+//     implicit-conversion target for an untyped operand (float64 for `C + x` with x float64),
+//     the untyped type where the constant stays untyped (another const's initializer), and a
+//     named/type-parameter type where the context demands one — the latter two disqualify.
+//   - NO use participates in constant folding: an ANCESTOR expression carrying a folded
+//     constant value (`uint64(B1) << 32`, `int64(ns) + int64(ns)`) disqualifies the constant.
+//     Go folds untyped constant expressions at arbitrary precision; re-expressing the operand
+//     at a concrete C# type could change the folded result (or re-fold it in C#'s checked
+//     int32 arithmetic), so any folding participation keeps the wrapper form.
+//   - The exact value is representable in the resolved type (belt-and-braces — go/types
+//     already validated each use's conversion, so this can only re-confirm).
+//
+// The map is keyed by the *types.Const object (globally unique per load), so no per-function
+// reset is needed; uses inside nested function literals are analyzed with their enclosing
+// declared function.
+func (v *Visitor) performUntypedConstAnalysis(funcDecl *ast.FuncDecl) {
+	if funcDecl.Body == nil {
+		return
+	}
+
+	// Pass 1: collect the function-local untyped numeric const objects still eligible.
+	eligible := map[*types.Const]bool{}
+
+	ast.Inspect(funcDecl.Body, func(n ast.Node) bool {
+		decl, ok := n.(*ast.GenDecl)
+
+		if !ok || decl.Tok != token.CONST {
+			return true
+		}
+
+		for _, spec := range decl.Specs {
+			valueSpec, ok := spec.(*ast.ValueSpec)
+
+			if !ok {
+				continue
+			}
+
+			for _, name := range valueSpec.Names {
+				c, ok := v.info.Defs[name].(*types.Const)
+
+				if !ok {
+					continue
+				}
+
+				basic, ok := c.Type().(*types.Basic)
+
+				if !ok || basic.Info()&types.IsUntyped == 0 || basic.Info()&types.IsNumeric == 0 {
+					continue
+				}
+
+				if basic.Kind() == types.UntypedComplex {
+					continue
+				}
+
+				if constNeedsGoUntyped(c.Val()) {
+					continue
+				}
+
+				eligible[c] = true
+			}
+		}
+
+		return true
+	})
+
+	if len(eligible) == 0 {
+		return
+	}
+
+	// Pass 2: resolve every use against the eligibility rules, tracking the expression
+	// ancestor chain so constant-folding participation is visible.
+	resolved := map[*types.Const]*types.Basic{}
+	var stack []ast.Node
+
+	ast.Inspect(funcDecl.Body, func(n ast.Node) bool {
+		if n == nil {
+			stack = stack[:len(stack)-1]
+			return true
+		}
+
+		stack = append(stack, n)
+
+		ident, ok := n.(*ast.Ident)
+
+		if !ok {
+			return true
+		}
+
+		c, ok := v.info.Uses[ident].(*types.Const)
+
+		if !ok {
+			return true
+		}
+
+		if stillEligible, isCandidate := eligible[c]; !isCandidate || !stillEligible {
+			return true
+		}
+
+		// The use must record a concrete numeric (non-complex) basic type.
+		tv, hasType := v.info.Types[ident]
+		basic, isBasic := tv.Type.(*types.Basic)
+
+		if !hasType || !isBasic || basic.Info()&types.IsUntyped != 0 ||
+			basic.Info()&types.IsNumeric == 0 || basic.Info()&types.IsComplex != 0 {
+			eligible[c] = false
+			return true
+		}
+
+		// No ancestor expression may itself be constant-folded (the ident is stack top;
+		// expression ancestors are contiguous below it — the chain ends at the first
+		// non-expression node).
+		for i := len(stack) - 2; i >= 0; i-- {
+			ancestor, isExpr := stack[i].(ast.Expr)
+
+			if !isExpr {
+				break
+			}
+
+			if atv, ok := v.info.Types[ancestor]; ok && atv.Value != nil {
+				eligible[c] = false
+				return true
+			}
+		}
+
+		// All uses must agree on ONE basic kind.
+		if prev, seen := resolved[c]; seen {
+			if prev.Kind() != basic.Kind() {
+				eligible[c] = false
+			}
+		} else {
+			resolved[c] = basic
+		}
+
+		return true
+	})
+
+	for c, stillEligible := range eligible {
+		target, hasUse := resolved[c]
+
+		if !stillEligible || !hasUse || !constRepresentableAs(c.Val(), target) {
+			continue
+		}
+
+		if v.tightenedConsts == nil {
+			v.tightenedConsts = map[*types.Const]*types.Basic{}
+		}
+
+		v.tightenedConsts[c] = target
+	}
+}
+
+// constNeedsGoUntyped reports whether a constant value routes to visitValueSpec's GoUntyped
+// (BigInteger) emission — an integer that fits neither int64 nor uint64, or a float beyond
+// float64. EXACTLY mirrors the writeUntypedConst triggers (which parse the emitted value
+// text), so a tightened const can never reach that path.
+func constNeedsGoUntyped(val constant.Value) bool {
+	switch val.Kind() {
+	case constant.Int:
+		s := val.ExactString()
+		_, errUint := strconv.ParseUint(s, 0, 64)
+		_, errInt := strconv.ParseInt(s, 0, 64)
+		return errUint != nil && errInt != nil
+	case constant.Float:
+		f64, _ := constant.Float64Val(val)
+		return math.IsInf(f64, 0)
+	}
+
+	return false
+}
+
+// constRepresentableAs reports whether the constant value is representable in the concrete
+// basic type per Go's conversion rules — exact for integer targets, rounding allowed (but no
+// overflow) for float targets. go/types already validated each use-site conversion, so this
+// is a belt-and-braces re-check, deliberately conservative: an unhandled kind returns false.
+func constRepresentableAs(val constant.Value, target *types.Basic) bool {
+	if target.Info()&types.IsInteger != 0 {
+		intVal := constant.ToInt(val)
+
+		if intVal.Kind() != constant.Int {
+			return false
+		}
+
+		// The converter targets 64-bit platforms: int/uint/uintptr take the 64-bit ranges
+		// (matching the emitted nint/nuint whose beyond-int32 constants visitValueSpec
+		// already demotes to `static readonly unchecked((nint)…)`).
+		if target.Info()&types.IsUnsigned != 0 {
+			u, exact := constant.Uint64Val(intVal)
+
+			if !exact {
+				return false
+			}
+
+			switch target.Kind() {
+			case types.Uint8:
+				return u <= math.MaxUint8
+			case types.Uint16:
+				return u <= math.MaxUint16
+			case types.Uint32:
+				return u <= math.MaxUint32
+			case types.Uint64, types.Uint, types.Uintptr:
+				return true
+			}
+
+			return false
+		}
+
+		i, exact := constant.Int64Val(intVal)
+
+		if !exact {
+			return false
+		}
+
+		switch target.Kind() {
+		case types.Int8:
+			return i >= math.MinInt8 && i <= math.MaxInt8
+		case types.Int16:
+			return i >= math.MinInt16 && i <= math.MaxInt16
+		case types.Int32:
+			return i >= math.MinInt32 && i <= math.MaxInt32
+		case types.Int64, types.Int:
+			return true
+		}
+
+		return false
+	}
+
+	if target.Info()&types.IsFloat != 0 {
+		switch target.Kind() {
+		case types.Float32:
+			f32, _ := constant.Float32Val(val)
+			return !math.IsInf(float64(f32), 0)
+		case types.Float64:
+			f64, _ := constant.Float64Val(val)
+			return !math.IsInf(f64, 0)
+		}
+	}
+
+	return false
+}

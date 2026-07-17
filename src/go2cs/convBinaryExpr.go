@@ -70,6 +70,12 @@ func (v *Visitor) isUntypedNamedConstRef(expr ast.Expr) bool {
 	}
 
 	if constObj, ok := v.info.ObjectOf(sel).(*types.Const); ok {
+		// A TIGHTENED local const is declared at its concrete type — no wrapper, so none
+		// of the wrapper-driven casts apply (see performUntypedConstAnalysis).
+		if _, tightened := v.tightenedConsts[constObj]; tightened {
+			return false
+		}
+
 		if basic, ok := constObj.Type().(*types.Basic); ok {
 			return basic.Info()&types.IsUntyped != 0 && basic.Info()&types.IsNumeric != 0
 		}

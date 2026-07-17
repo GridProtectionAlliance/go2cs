@@ -288,6 +288,7 @@ type Visitor struct {
 	lastStatementWasReturn bool
 	lastReturnIndentLevel  int
 	identEscapesHeap       map[types.Object]bool
+	tightenedConsts        map[*types.Const]*types.Basic // Function-local untyped consts declared at their single concrete use type (see performUntypedConstAnalysis)
 	sstringEligible        map[types.Object]bool     // String locals emittable as stack-only sstring (see FileEntry.sstringEligible)
 	sstringConvExprs       map[*ast.CallExpr]bool     // `string(x)` conversions that emit `(sstring)x` (see FileEntry.sstringConvExprs)
 	emitStringConvAsSString bool                      // Transient: while emitting an eligible decl's RHS, a string([]byte) conversion emits `(sstring)` not `(@string)`

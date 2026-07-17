@@ -346,10 +346,16 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			if !alreadyCast && constExpr != nil {
 				if constIdent, ok := constExpr.(*ast.Ident); ok {
 					if constObj, ok := v.info.ObjectOf(constIdent).(*types.Const); ok {
-						if basic, ok := constObj.Type().(*types.Basic); ok && basic.Info()&types.IsUntyped != 0 {
-							wrapped := fmt.Sprintf("(%s)%s", v.getCSTypeName(types.Default(basic).(*types.Basic)), arg.String())
-							arg.Reset()
-							arg.WriteString(wrapped)
+						// A TIGHTENED local const is declared at its concrete type, which
+						// deferǃ's inference unifies directly — and the DEFAULT-type cast
+						// could even mistype it where the tightened type differs from the
+						// default (see performUntypedConstAnalysis).
+						if _, tightened := v.tightenedConsts[constObj]; !tightened {
+							if basic, ok := constObj.Type().(*types.Basic); ok && basic.Info()&types.IsUntyped != 0 {
+								wrapped := fmt.Sprintf("(%s)%s", v.getCSTypeName(types.Default(basic).(*types.Basic)), arg.String())
+								arg.Reset()
+								arg.WriteString(wrapped)
+							}
 						}
 					}
 				}

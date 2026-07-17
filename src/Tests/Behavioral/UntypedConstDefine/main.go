@@ -30,6 +30,43 @@ func main() {
 	fmt.Println(cbrtD)
 	fmt.Println(folded)
 	fmt.Println(localPrecision(2.0))
+	tightenGuards()
+}
+
+// tightenGuards exercises the LOCAL-const declaration-tightening rules (a function-local
+// untyped const whose every use resolves to ONE concrete basic type is declared at that
+// type, casts suppressed — the localPrecision consts above) and, more importantly, the
+// guards that must KEEP the Untyped* wrapper: mixed-type uses, a const feeding another
+// const's initializer, and any participation in folded constant arithmetic.
+func tightenGuards() {
+	const mixed = 0.25 // float64 AND float32 uses -> stays UntypedFloat
+	var f64 float64 = mixed
+	var f32 float32 = mixed
+	fmt.Println(f64, f32)
+
+	const feeder = 3.5         // feeds another const's initializer -> stays UntypedFloat
+	const derived = feeder * 2 // its own use below is single-type -> tightens
+	fmt.Println(derived)
+
+	const big = 1 << 62 // wide value, single int64 use -> tightens to the exact literal
+	var n int64 = 1
+	fmt.Println(n + big)
+
+	const sh = 3 // shift-count use
+	var v2 uint64 = 1
+	fmt.Println(v2 << sh)
+
+	const shifted = 3 // shifted-left operand with a non-constant count
+	var k uint = 2
+	fmt.Println(shifted << k)
+
+	const localMarker = 0xFFFD // append element use (the utf16 pattern, local form)
+	var u16 []uint16
+	u16 = append(u16, localMarker)
+	fmt.Println(u16[0])
+
+	const localDefer = 42 // deferred-call argument use
+	defer fmt.Println(localDefer)
 }
 
 // localPrecision exercises the FUNCTION-LOCAL untyped const path (same emission arm,

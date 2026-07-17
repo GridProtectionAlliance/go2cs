@@ -171,13 +171,36 @@ internal static readonly UntypedInt win = 100;
 internal static readonly UntypedInt mask = 0x4000;   // not flattened to 16384
 ```
 
+Float constant values emit **exactly**: the Go source literal verbatim when it is valid C#, else the
+shortest round-trip form — never a shortened decimal. And a **function-local** untyped constant whose
+every use resolves to one concrete type is **tightened** to that type — declared with C#'s `const`
+where legal, with the per-use casts dropped — so the emitted code reads like the Go source
+(math `cbrt`; uses that stay genuinely untyped, feed other constants, or participate in constant
+folding conservatively keep the wrapper form):
+
+```go
+const (
+    C = 5.42857142857142815906e-01 // 19/35 = 0x3FE15F15F15F15F1
+    G = 3.57142857142857150787e-01 // 5/14  = 0x3FD6DB6DB6DB6DB7
+)
+s := C + r*t
+t *= G + F/(s+E+D/s)
+```
+```csharp
+const float64 C = 5.42857142857142815906e-01; // 19/35     = 0x3FE15F15F15F15F1
+const float64 G = 3.57142857142857150787e-01; // 5/14      = 0x3FD6DB6DB6DB6DB7
+var s = C + r * t;
+t *= G + F / (s + E + D / s);
+```
+
 A native-sized constant whose value doesn't fit a C# `const` (e.g. `^uintptr(0)`) falls back to
 `static readonly` with an `unchecked` cast. Note `uintptr` is a **distinct golib struct**, not an alias of
 `System.UIntPtr` — Go treats `uint` and `uintptr` as different types, and the struct preserves that
 identity.
 
 **Full detail:** [Reference → Constant Values](ConversionStrategies-Reference.md#constant-values) — the
-`unchecked` native-int cast rules, wide-unsigned named consts, and the full `uintptr` conversion matrix.
+exact-float and local-const tightening rules, the `unchecked` native-int cast rules, wide-unsigned named
+consts, and the full `uintptr` conversion matrix.
 
 ---
 

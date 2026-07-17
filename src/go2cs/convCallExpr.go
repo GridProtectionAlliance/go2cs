@@ -2047,6 +2047,13 @@ func (v *Visitor) isUntypedNumericConstArg(arg ast.Expr) bool {
 		return a.Kind == token.INT || a.Kind == token.FLOAT || a.Kind == token.CHAR || a.Kind == token.IMAG
 	case *ast.Ident:
 		if constObj, ok := v.info.Uses[a].(*types.Const); ok {
+			// A TIGHTENED local const is declared at its concrete type — element/parameter
+			// inference sees that type directly, so the cast machinery does not apply
+			// (see performUntypedConstAnalysis).
+			if _, tightened := v.tightenedConsts[constObj]; tightened {
+				return false
+			}
+
 			if basic, ok := constObj.Type().(*types.Basic); ok {
 				return basic.Info()&types.IsUntyped != 0 && basic.Info()&types.IsNumeric != 0
 			}

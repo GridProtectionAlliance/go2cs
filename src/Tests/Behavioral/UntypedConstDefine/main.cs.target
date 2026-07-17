@@ -24,16 +24,42 @@ internal static void Main() {
     fmt.Println(cbrtD);
     fmt.Println(folded);
     fmt.Println(localPrecision(2.0D));
+    tightenGuards();
 }
 
+internal static void tightenGuards() => func((defer, recover) => {
+    UntypedFloat mixed = 0.25;
+    float64 f64 = mixed;
+    float32 f32 = mixed;
+    fmt.Println(f64, f32);
+    UntypedFloat feeder = 3.5;
+    const float64 derived = /* feeder * 2 */ 7;
+    fmt.Println(derived);
+    const int64 big = /* 1 << 62 */ 4611686018427387904;
+    int64 n = 1;
+    fmt.Println(n + big);
+    UntypedInt sh = 3;
+    uint64 v2 = 1;
+    fmt.Println((v2 << (int)(sh)));
+    const nint shifted = 3;
+    nuint k = 2;
+    fmt.Println((shifted << (int)(k)));
+    const uint16 localMarker = 0xFFFD;
+    slice<uint16> u16 = default!;
+    u16 = append(u16, localMarker);
+    fmt.Println(u16[0]);
+    const nint localDefer = 42;
+    deferǃ(ᴛ1 => fmt.Println(ᴛ1), localDefer, defer);
+});
+
 internal static float64 localPrecision(float64 x) {
-    UntypedFloat c = 5.42857142857142815906e-01;
-    UntypedFloat d = -7.05306122448979611050e-01;
-    UntypedFloat smallestNormal = 2.22507385850720138309e-308;
+    const float64 c = 5.42857142857142815906e-01;
+    const float64 d = -7.05306122448979611050e-01;
+    const float64 smallestNormal = 2.22507385850720138309e-308;
     if (x < smallestNormal) {
         return d;
     }
-    return (float64)c + x * (float64)d;
+    return c + x * d;
 }
 
 } // end main_package
