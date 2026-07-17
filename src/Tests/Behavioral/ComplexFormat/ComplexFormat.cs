@@ -11,9 +11,7 @@ internal static void Main() {
     complex128 frac = complex(2.5D, -1.25D);
     complex128 realOnly = complex(5, 0);
     complex128 imagOnly = builtin.i(3D);
-    float32 c64re = 2.5F;
-    float32 c64im = 3.5F;
-    var c64 = complex(c64re, -c64im);
+    complex64 c64 = complex(2.5F, -3.5F);
     complex64 c64pos = 1 + builtin.i(2F);
     var inf = complex(Δmath.Inf(1), Δmath.Inf(-1));
     var nan = complex(Δmath.NaN(), Δmath.NaN());

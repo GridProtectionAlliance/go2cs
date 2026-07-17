@@ -14,11 +14,7 @@ func main() {
 	var frac complex128 = complex(2.5, -1.25)
 	var realOnly complex128 = complex(5, 0)
 	var imagOnly complex128 = 3i
-	// NOTE: the natural forms `complex(2.5, -3.5)` / `2.5 - 3.5i` currently hit a converter
-	// constant-typing defect in complex64/float32 contexts (double-typed literals) — negating
-	// a float32 variable sidesteps it until that is fixed
-	var c64re, c64im float32 = 2.5, 3.5
-	c64 := complex(c64re, -c64im)
+	var c64 complex64 = complex(2.5, -3.5)
 	var c64pos complex64 = 1 + 2i
 	inf := complex(math.Inf(1), math.Inf(-1))
 	nan := complex(math.NaN(), math.NaN())
