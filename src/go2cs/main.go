@@ -316,43 +316,15 @@ type Visitor struct {
 	lambdaCapture          *LambdaCapture          // Lambda capture tracking
 }
 
-const RootNamespace = "go"
-const PackageSuffix = "_package"
+// Converter-internal template sentinels and limits. The cross-language symbol constants
+// (RootNamespace, PackageSuffix, the marker glyphs, ...) live in symbols.go, generated
+// from the canonical symbol table src/core/go2cs/symbols.json - edit THAT file and run
+// `go generate .` (or src/check-symbol-sync.ps1) to change them.
 const OutputTypeMarker = ">>MARKER:OUTPUT_TYPE<<"
 const UnsafeMarker = ">>MARKER:UNSAFE<<"
 const ProjectReferenceMarker = ">>MARKER:PROJECT_REFERENCE<<"
 const DynamicCastArgMarker = ">>MARKER:DYNAMIC_CAST_ARG<<"
-const PackageInfoFileName = "package_info.cs"
 const MaxSupportedGoVersion = 23
-
-// Extended Unicode characters are being used to help avoid conflicts with Go identifiers for
-// symbols, markers, intermediate and temporary variables. These characters have to be valid
-// C# identifiers, i.e., Unicode letter characters, decimal digit characters, connecting
-// characters, combining characters, or formatting characters. Some character variants will
-// be better suited to different fonts or display environments. Defaults have been chosen
-// based on better appearance with common Visual Studio code fonts, e.g., "Cascadia Mono".
-// Note: keep constants in sync with go2cs-gen source code generator and golib core.
-const PointerPrefix = "\u0436"                   // Variants: ж Ж ǂ
-const AddressPrefix = "\u13D1"                   // Variants: Ꮡ ꝸ
-const ShadowVarMarker = "\u0394"                 // Variants: Δ Ʌ ꞥ
-const CapturedVarMarker = "\u0297"               // Variants: ʗ ɔ ᴄ
-const TempVarMarker = "\u1D1B"                   // Variants: ᴛ Ŧ ᵀ
-const TrueMarker = "\u1427"                      // Variants: ᐧ true
-const OpaqueTrueMarker = TrueMarker + TrueMarker // golib static readonly true - NOT compiler-foldable (leading constant-true case, CS8120)
-const ValueAdapterInfix = "ᴠ"                    // ᴠ - value-form foreign adapter infix (keep in sync with Symbols.ValueAdapterInfix)
-const OverloadDiscriminator = "\uA7F7"           // Variants: ꟷ false
-const EllipsisOperator = "\uA4F8\uA4F8\uA4F8"    // Variants: ꓸꓸꓸ ᐧᐧᐧ
-const TypeAliasDot = "\uA4F8"                    // Variants: ꓸ
-const ChannelLeftOp = "\u1438\uA7F7"             // Example: `ch.ᐸꟷ(val)` for `ch <- val`
-const ChannelRightOp = "\uA7F7\u1433"            // Example: `ch.ꟷᐳ(out var val)` for `val := <-ch`
-const PointerDerefOp = "~"                       // Example: `~ptr` for dereferencing a pointer
-
-// NilSafeDerefAccessor is the golib ж<T> extension method used in place of `.Value` to re-alias a
-// deref'd pointer parameter that is walked to a nil terminator (see nilSafePtrParamNames). Unlike
-// `.Value` (which throws on a nil box), it returns a ref to a shared default(T) slot when the box is
-// nil — the ref is never read while the box is nil, so the standard `*p` panic semantics are
-// preserved (a genuine nil deref still uses `~`/`.Value`). Includes `()` as it is a method call.
-const NilSafeDerefAccessor = "DerefOrNil()"
 
 var keywords = NewHashSet([]string{
 	// The following are all valid C# keywords and types, when encountered in Go code they should be

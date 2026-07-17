@@ -29,6 +29,7 @@ using go2cs.Templates.ReceiverMethod;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static go2cs.Common;
+using static go2cs.Symbols;
 
 #if DEBUG_GENERATOR
 using System.Diagnostics;
@@ -72,7 +73,7 @@ public class RecvGenerator : ISourceGenerator
 
             string packageNamespace = methodSyntax.GetNamespaceName();
             string packageClassName = methodSyntax.GetParentClassName();
-            string packageName = packageClassName.EndsWith("_package") ? packageClassName[..^8] : packageClassName;
+            string packageName = packageClassName.EndsWith(PackageSuffix) ? packageClassName[..^PackageSuffix.Length] : packageClassName;
             string identifier = methodSyntax.Identifier.Text;
             string scope = GetScope(identifier);
 

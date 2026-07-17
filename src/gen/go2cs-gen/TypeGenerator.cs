@@ -73,7 +73,7 @@ public class TypeGenerator : ISourceGenerator
 
             string packageNamespace = targetSyntax.GetNamespaceName();
             string packageClassName = targetSyntax.GetParentClassName();
-            string packageName = packageClassName.EndsWith("_package") ? packageClassName[..^8] : packageClassName;
+            string packageName = packageClassName.EndsWith(PackageSuffix) ? packageClassName[..^PackageSuffix.Length] : packageClassName;
             string identifier = targetSyntax.Identifier.Text;
             bool hasEqualityOperators = true;
 

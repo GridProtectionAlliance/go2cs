@@ -1,0 +1,179 @@
+{
+  "description": [
+    "Canonical go2cs symbol table - the SINGLE SOURCE OF TRUTH for the naming/marker",
+    "constants shared between the Go converter and the C# runtime/analyzer. This file is",
+    "kept PURE ASCII: every non-ASCII character is written as a JSON \\uXXXX escape so no",
+    "tool can mangle the glyphs. Generated projections (committed; regenerate with",
+    "`go generate .` from src/go2cs, or run src/check-symbol-sync.ps1):",
+    "  - src/go2cs/symbols.go       (Go, package main - ALL symbols)",
+    "  - src/core/go2cs/Symbols.cs  (C#, class go2cs.Symbols - only symbols with",
+    "    csharp:true; shared into golib and the go2cs-gen analyzer via go2cs.projitems)",
+    "Fields: name (identifier, same in both languages); value (the constant string);",
+    "csharp (emit into Symbols.cs - keep minimal, only what a C# consumer actually",
+    "needs); goEscape (render the Go value with \\uXXXX escapes instead of literal",
+    "glyphs); goExpr (optional Go initializer expression - a `A + B` concatenation of",
+    "previously defined symbol names, validated against value); comment (lines emitted",
+    "above the const in BOTH projections); goComment/csComment (language-specific extra",
+    "lines); goTrailing (Go end-of-line comment); csBlankBefore (blank separator line",
+    "before the entry in Symbols.cs); note (JSON-only documentation, never emitted)."
+  ],
+  "symbols": [
+    {
+      "name": "RootNamespace",
+      "value": "go",
+      "goTrailing": "Root namespace for all converted C# code",
+      "note": "Root C# namespace all converted Go code is emitted into."
+    },
+    {
+      "name": "PackageSuffix",
+      "value": "_package",
+      "csharp": true,
+      "goTrailing": "Suffix of a package's static partial class (e.g. `fmt_package`)",
+      "note": "Static partial class suffix for a Go package's declarations; also consumed by the go2cs-gen analyzer to strip/derive package names."
+    },
+    {
+      "name": "PackageInfoFileName",
+      "value": "package_info.cs",
+      "goTrailing": "Converter-emitted per-package metadata file",
+      "note": "Name of the per-package metadata file the converter emits."
+    },
+    {
+      "name": "PointerPrefix",
+      "value": "\u0436",
+      "csharp": true,
+      "goEscape": true,
+      "csBlankBefore": true,
+      "comment": [
+        "Extended Unicode characters are being used to help avoid conflicts with Go identifiers for",
+        "symbols, markers, intermediate and temporary variables. These characters have to be valid",
+        "C# identifiers, i.e., Unicode letter characters, decimal digit characters, connecting",
+        "characters, combining characters, or formatting characters. Some character variants will",
+        "be better suited to different fonts or display environments. Defaults have been chosen",
+        "based on better appearance with common Visual Studio code fonts, e.g., \"Cascadia Mono\"."
+      ],
+      "goTrailing": "Variants: \u0436 \u0416 \u01C2",
+      "note": "U+0436 - pointer marker; composes the golib heap-box type and pointer-adapter names."
+    },
+    {
+      "name": "AddressPrefix",
+      "value": "\u13D1",
+      "csharp": true,
+      "goEscape": true,
+      "goTrailing": "Variants: \u13D1 \uA778",
+      "note": "U+13D1 - address-of operator prefix."
+    },
+    {
+      "name": "ShadowVarMarker",
+      "value": "\u0394",
+      "csharp": true,
+      "goEscape": true,
+      "goTrailing": "Variants: \u0394 \u0245 \uA7A5",
+      "note": "U+0394 - shadowed/reserved-name variable rename marker."
+    },
+    {
+      "name": "TypeAliasDot",
+      "value": "\uA4F8",
+      "csharp": true,
+      "goEscape": true,
+      "goTrailing": "Variants: \uA4F8",
+      "note": "U+A4F8 - dot stand-in inside type-alias identifiers."
+    },
+    {
+      "name": "EllipsisOperator",
+      "value": "\uA4F8\uA4F8\uA4F8",
+      "csharp": true,
+      "goEscape": true,
+      "goTrailing": "Variants: \uA4F8\uA4F8\uA4F8 \u1427\u1427\u1427",
+      "note": "U+A4F8 x3 - rendering of the Go `...` variadic marker."
+    },
+    {
+      "name": "CapturedVarMarker",
+      "value": "\u0297",
+      "csharp": true,
+      "goEscape": true,
+      "goTrailing": "Variants: \u0297 \u0254 \u1D04",
+      "note": "U+0297 - lambda-captured variable marker."
+    },
+    {
+      "name": "TempVarMarker",
+      "value": "\u1D1B",
+      "csharp": true,
+      "goEscape": true,
+      "goTrailing": "Variants: \u1D1B \u0166 \u1D40",
+      "note": "U+1D1B - compiler temporary variable prefix."
+    },
+    {
+      "name": "TrueMarker",
+      "value": "\u1427",
+      "goEscape": true,
+      "goTrailing": "Variants: \u1427 true",
+      "note": "U+1427 - compile-time-true marker (converter-only)."
+    },
+    {
+      "name": "OpaqueTrueMarker",
+      "value": "\u1427\u1427",
+      "goEscape": true,
+      "goExpr": "TrueMarker + TrueMarker",
+      "goTrailing": "golib static readonly true - NOT compiler-foldable (leading constant-true case, CS8120)",
+      "note": "TrueMarker doubled - golib static readonly true, opaque to C# compile-time constant folding (converter-only)."
+    },
+    {
+      "name": "ValueAdapterInfix",
+      "value": "\u1D20",
+      "csharp": true,
+      "goEscape": true,
+      "goTrailing": "\u1D20 - value-form foreign adapter infix ({Struct}\u1D20{Iface})",
+      "csComment": [
+        "Composes VALUE-form foreign interface adapter class names ({Struct}\u1D20{Iface}) - the",
+        "value sibling of the \u0436-composed pointer adapters (wraps a COPY, Go value semantics)."
+      ],
+      "note": "U+1D20 - value-form foreign interface adapter infix."
+    },
+    {
+      "name": "OverloadDiscriminator",
+      "value": "\uA7F7",
+      "goEscape": true,
+      "goTrailing": "Variants: \uA7F7 false",
+      "note": "U+A7F7 - overload discriminator (converter-only)."
+    },
+    {
+      "name": "ChannelLeftOp",
+      "value": "\u1438\uA7F7",
+      "csharp": true,
+      "goEscape": true,
+      "goTrailing": "Example: `ch.\u1438\uA7F7(val)` for `ch <- val`",
+      "csComment": [
+        "Channel operator method names - the Go-visual send/receive member forms the converter",
+        "emits (\"ch.\u1438\uA7F7(val)\" for \"ch <- val\", \"ch.\uA7F7\u1433(out val)\" for \"val := <-ch\"); the named",
+        "channel wrapper template forwards these to its underlying channel<T>."
+      ],
+      "note": "U+1438 + U+A7F7 - channel send method name."
+    },
+    {
+      "name": "ChannelRightOp",
+      "value": "\uA7F7\u1433",
+      "csharp": true,
+      "goEscape": true,
+      "goTrailing": "Example: `ch.\uA7F7\u1433(out var val)` for `val := <-ch`",
+      "note": "U+A7F7 + U+1433 - channel receive method name."
+    },
+    {
+      "name": "PointerDerefOp",
+      "value": "~",
+      "goTrailing": "Example: `~ptr` for dereferencing a pointer",
+      "note": "C# operator used for pointer dereference (converter-only; golib defines `operator ~` on the heap box)."
+    },
+    {
+      "name": "NilSafeDerefAccessor",
+      "value": "DerefOrNil()",
+      "goComment": [
+        "NilSafeDerefAccessor is the golib \u0436<T> extension method used in place of `.Value` to re-alias a",
+        "deref'd pointer parameter that is walked to a nil terminator (see nilSafePtrParamNames). Unlike",
+        "`.Value` (which throws on a nil box), it returns a ref to a shared default(T) slot when the box is",
+        "nil \u2014 the ref is never read while the box is nil, so the standard `*p` panic semantics are",
+        "preserved (a genuine nil deref still uses `~`/`.Value`). Includes `()` as it is a method call."
+      ],
+      "note": "golib pointer-box extension used instead of `.Value` for nil-walked pointer params (converter-only)."
+    }
+  ]
+}

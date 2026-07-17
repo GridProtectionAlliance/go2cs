@@ -187,14 +187,17 @@ duplicated methods.
 `git log --format='%G?'` showing `G` — a good signature. All campaign commits are gpg-signed;
 signing is never bypassed, and cherry-picks re-sign automatically.
 
-**Marker glyphs / `Symbols.cs`.**
+**Marker glyphs / `Symbols.cs` / `symbols.json`.**
 The emitted C# uses reserved glyphs (`ж` pointer box, `Ꮡ` address-of, `Δ` shadow/collision rename,
 `ꓸ` type-alias dot, `ᴛ` temp, …). Converter and generator **source** must reference named
 constants, never literal glyphs: the C# side (golib, go2cs-gen) uses `Symbols.cs`
 (`PointerPrefix`, `AddressPrefix`, `ShadowVarMarker`, …, via `using static go2cs.Symbols`); the
-Go converter uses its mirrored constants in `src/go2cs/main.go` (kept in sync by comment-contract
-with `Symbols.cs`). Audits flag violations. Glyphs inside goldens, docs examples, and comments
-are fine — they *are* the output.
+Go converter uses the same-named constants in `src/go2cs/symbols.go`. Both files are **generated
+projections of the canonical symbol table `src/core/go2cs/symbols.json`** (kept pure-ASCII —
+every glyph a `\uXXXX` escape — so no tool can mangle it): edit the JSON and regenerate with
+`go generate .` from `src/go2cs`, or run `src/check-symbol-sync.ps1`, which regenerates and
+exits 1 on drift. Never hand-edit the two generated files. Audits flag violations. Glyphs inside
+goldens, docs examples, and comments are fine — they *are* the output.
 
 **OWED.**
 Annotation in memory logs for a known debt: an *OWED merge* (a finished chip branch not yet

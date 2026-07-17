@@ -124,7 +124,7 @@ public class ImplementGenerator : ISourceGenerator
 
             string packageNamespace = GetNamespace(namespaceSyntax) ?? Namespace;
             string packageClassName = GetFirstClassName(compilationUnit) ?? throw new MissingMemberException($"No package class found in same file as [assembly: {AttributeName}]");
-            string packageName = packageClassName.EndsWith("_package") ? packageClassName[..^8] : packageClassName;
+            string packageName = packageClassName.EndsWith(PackageSuffix) ? packageClassName[..^PackageSuffix.Length] : packageClassName;
             
             string[] usingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel);
 
@@ -860,10 +860,10 @@ public class ImplementGenerator : ISourceGenerator
     {
         string? packageClassName = structType.ContainingType?.Name;
 
-        if (packageClassName is null || !packageClassName.EndsWith("_package"))
+        if (packageClassName is null || !packageClassName.EndsWith(PackageSuffix))
             return string.Empty;
 
-        return $"{packageClassName.Substring(0, packageClassName.Length - "_package".Length)}_";
+        return $"{packageClassName.Substring(0, packageClassName.Length - PackageSuffix.Length)}_";
     }
 
     // Renders the C# `where T : …` clauses for a GENERIC struct's adapter from the struct's own

@@ -30,6 +30,7 @@ using go2cs.Templates.ImplicitConv;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static go2cs.Common;
+using static go2cs.Symbols;
 
 #if DEBUG_GENERATOR
 using System.Diagnostics;
@@ -79,7 +80,7 @@ public class ImplicitConvGenerator : ISourceGenerator
 
             string packageNamespace = GetNamespace(namespaceSyntax) ?? Namespace;
             string packageClassName = GetFirstClassName(compilationUnit) ?? throw new MissingMemberException($"No package class found in same file as [assembly: {AttributeName}]");
-            string packageName = packageClassName.EndsWith("_package") ? packageClassName[..^8] : packageClassName;
+            string packageName = packageClassName.EndsWith(PackageSuffix) ? packageClassName[..^PackageSuffix.Length] : packageClassName;
 
             string[] usingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel);
 

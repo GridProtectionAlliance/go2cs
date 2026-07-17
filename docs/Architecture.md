@@ -17,6 +17,12 @@ walks the typed AST emitting C#. Because types are fully resolved, conversion de
 selection, implicit conversions, constant folding, unsigned detection) are semantic, not syntactic.
 
 - **Entry point:** `main.go` — flag parsing, GOROOT/GOPATH resolution, single-file/dir vs `-stdlib` mode.
+- **Symbol constants:** `symbols.go` — the cross-language naming/marker constants (`RootNamespace`,
+  `PackageSuffix`, `PointerPrefix` `ж`, `AddressPrefix` `Ꮡ`, …). Generated — together with its C# twin
+  `src/core/go2cs/Symbols.cs` (class `go2cs.Symbols`, shared into golib and the `go2cs-gen` analyzer via
+  `go2cs.projitems`) — from the **canonical symbol table `src/core/go2cs/symbols.json`** by
+  `internal/gensymbols`. Edit the JSON, never the generated files; regenerate with `go generate .` from
+  `src/go2cs`, or run `src/check-symbol-sync.ps1` (regenerates + exits 1 on drift).
 - **Stdlib driver:** `stdLibConverter.go` — scans stdlib packages, builds the dependency graph, produces a
   topologically sorted queue (`sortedQueue`), and converts in dependency order (optionally filtered to a
   package list). Conversion is sequential — it relies on package-level converter state, so a converted
