@@ -362,6 +362,42 @@ public class TestingRuntimeTests
     }
 
     [TestMethod]
+    public void BenchmarkCompileSurfaceIsNoOpAndCoverModeReportsCoverageOff()
+    {
+        // B6 guard (strings/bytes blocker map): capability-excluded benchmark bodies still
+        // COMPILE — exclusion gates the run registry, not emission — so every B member the
+        // strings/bytes suites reference must exist on the compile-only shim, through both
+        // receiver shapes converted code binds (the ж<B> box and the ref-local value), and
+        // stay a safe non-throwing no-op.
+        ж<testing_package.B> benchmark = new(new testing_package.B());
+
+        benchmark.ReportAllocs();
+        benchmark.SetBytes(1024L);
+        benchmark.ResetTimer();
+        benchmark.StopTimer();
+        benchmark.StartTimer();
+        benchmark.Errorf("errorf %d", 1);
+        benchmark.Fatal("fatal");
+        benchmark.Fatalf("fatalf %d", 2);
+        Assert.IsTrue(benchmark.Run("sub", _ => { }));
+
+        ref testing_package.B direct = ref benchmark.Value;
+        direct.ReportAllocs();
+        direct.SetBytes(2048L);
+        direct.ResetTimer();
+        direct.StopTimer();
+        direct.StartTimer();
+        direct.Errorf("errorf");
+        direct.Fatal("fatal");
+        direct.Fatalf("fatalf");
+        Assert.AreEqual((nint)0, direct.N);
+
+        // strings TestIndexRune branches on `testing.CoverMode() == ""` — the shim must report
+        // Go's coverage-off value so the test takes the same path as an uncovered `go test` run.
+        Assert.IsTrue(testing_package.CoverMode() == "");
+    }
+
+    [TestMethod]
     public void JUnitOutputSurvivesXmlInvalidCharacters()
     {
         // Real Go test logs legitimately contain XML-invalid characters (unicode/utf8's own

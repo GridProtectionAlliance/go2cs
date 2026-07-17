@@ -59,8 +59,9 @@ public static partial class testing_package
     /// are disclosed-unsupported in the manifest (execution is deferred to Phase 4D) and never
     /// registered with the host, but their converted BODIES still compile into the test assembly,
     /// so the members they reference must exist. All members are safe non-throwing no-ops
-    /// (req §6.2): N defaults to 0 so a b.N loop iterates zero times, and Run reports success
-    /// without executing.
+    /// (req §6.2): N defaults to 0 so a b.N loop iterates zero times, Run reports success
+    /// without executing, and the timer/allocation/failure reporters have empty bodies —
+    /// there is no run to time or fail.
     /// </summary>
     public struct B
     {
@@ -168,8 +169,33 @@ public static partial class testing_package
     }
 
     // Compile-only B surface (see struct B above) — never executed, never throwing. The
-    // RecvGenerator supplies the ж<B> overload, as for every ordinary [GoRecv] signature.
+    // RecvGenerator supplies the ж<B> overloads, as for every ordinary [GoRecv] signature.
     [GoRecv] public static bool Run(this ref B b, @string name, Action<ж<B>> benchmark) => true;
+
+    [GoRecv] public static void ReportAllocs(this ref B b) { }
+
+    [GoRecv] public static void ResetTimer(this ref B b) { }
+
+    [GoRecv] public static void SetBytes(this ref B b, long n) { }
+
+    [GoRecv] public static void StartTimer(this ref B b) { }
+
+    [GoRecv] public static void StopTimer(this ref B b) { }
+
+    // Params-taking B members need the same explicit ж<B> overloads as T's above (params
+    // collections are ref-like Spans the RecvGenerator does not synthesize overloads for).
+    // Failure reporting is a no-op: benchmark bodies never execute, so there is no run to fail.
+    public static void Errorf(this ref B b, @string format, params ꓸꓸꓸany args) { }
+
+    public static void Fatal(this ref B b, params ꓸꓸꓸany args) { }
+
+    public static void Fatalf(this ref B b, @string format, params ꓸꓸꓸany args) { }
+
+    public static void Errorf(this ж<B> b, @string format, params ꓸꓸꓸany args) => Errorf(ref b.Value, format, args);
+
+    public static void Fatal(this ж<B> b, params ꓸꓸꓸany args) => Fatal(ref b.Value, args);
+
+    public static void Fatalf(this ж<B> b, @string format, params ꓸꓸꓸany args) => Fatalf(ref b.Value, format, args);
 
     /// <summary>
     /// Reports the average allocation cost per run of f — like Go's testing.AllocsPerRun, with
@@ -206,6 +232,13 @@ public static partial class testing_package
         double average = Math.Max(1L, allocated / runs);
         return allocated == 0L ? 0.0D : average;
     }
+
+    /// <summary>
+    /// Reports what the test coverage mode is set to — like Go's testing.CoverMode(). Coverage
+    /// instrumentation does not exist in the shim, so the mode is always "" — exactly Go's value
+    /// when the binary is built without -cover, sending callers down the coverage-off path.
+    /// </summary>
+    public static @string CoverMode() => "";
 
     /// <summary>
     /// Reports whether the -short flag was set — like Go's testing.Short() (default false).
