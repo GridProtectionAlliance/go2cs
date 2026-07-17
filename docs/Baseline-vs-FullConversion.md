@@ -83,6 +83,9 @@ full auto-output), so restoring it realigns with the original design.
    must also copy the `<name>.cs.auto` review siblings the reconvert produces (a bare `*.cs` glob misses
    them) — and a reconvert only *produces* them when its output dir was seeded with the marked hand-owned
    files first, since the marker gate probes the destination `.cs` (see *Hand-owning a package…* below).
+   Seeding is **safe** (2026-07-17 fix): a marked file is still analyzed and visited with its package —
+   only its emission is redirected to the sibling — so every unmarked file of a seeded reconvert emits
+   byte-identical to an unseeded run.
 
 ## The corrected end-state (2026-07-01) — compile first, operate later
 
@@ -162,18 +165,35 @@ it resolves without a `using go;`). **Verify** a whole-file override survives by
 a dir seeded with the hand-written file and confirming it stays byte-identical
 (`go2cs -stdlib -go2cspath <seeded-root> <pkg>` → the marked `.cs` is untouched).
 
-**Upgrade-time review — the `<name>.cs.auto` sibling (2026-07-16).** A marker-skipped file would otherwise
-leave NO auto-converted output at all, so a Go-version upgrade would have nothing to diff the hand-owned C#
-against. The converter therefore emits a non-compiled **`<name>.cs.auto`** sibling beside every marked
-`<name>.cs` it skips (`emitAutoConversionSiblings`, `src/go2cs/autoSiblingOperations.go`) — the converter's
-best-effort auto conversion of the same `.go`, for review only. It need not compile and is invisible to the
-build: generated csprojs compile `<Compile Include="*.cs" />` only, which cannot match a name ending in
-`.auto`. The pass runs as the LAST step of a package's conversion (after the `.cs` set, csproj,
-`package_info.cs`, and `package_init.cs` are written), so it adds only `.cs.auto` files and cannot alter any
-other emitted byte. Siblings are **committed** in `src/go-src-converted/<pkg>` and refreshed by reconverts —
-but the gate probes the DESTINATION `.cs`, so a reconvert only produces them when its output dir is seeded
-with the marked files first (see *§5* above). `*_impl.cs` companions have no matching `.go`, so they get no
-sibling; `unsafe` is never queued by `-stdlib` (compiler-intrinsic, `stdLibConverter.go`), so
+**Upgrade-time review — the `<name>.cs.auto` sibling (2026-07-16; emission model corrected 2026-07-17).** A
+marker-skipped file would otherwise leave NO auto-converted output at all, so a Go-version upgrade would have
+nothing to diff the hand-owned C# against. The converter therefore emits a non-compiled **`<name>.cs.auto`**
+sibling beside every marked `<name>.cs` — the converter's best-effort auto conversion of the same `.go`, for
+review only. It need not compile and is invisible to the build: generated csprojs compile
+`<Compile Include="*.cs" />` only, which cannot match a name ending in `.auto`.
+
+*How it is emitted matters (2026-07-17 defect fix).* A marked file is NOT dropped from the conversion
+pipeline: it stays in the convert set and is analyzed and visited **with the package**, in normal file order,
+so every piece of package-wide emission state its declarations feed — anonymous-struct lifts, package-var
+registrations, escape/addressed-global analysis, imports, init/temp-var numbering — reaches the package's
+other files exactly as in an unseeded conversion; only the file's WRITE target is redirected from `<name>.cs`
+to `<name>.cs.auto` (main.go's file-visit loop). The original implementation instead skipped the marked
+file's entire visit and emitted siblings in a separate last pass (`emitAutoConversionSiblings`), which
+corrupted every OTHER file of a seeded package: runtime's `proc.cs` emitted raw Go `struct{…}` text where
+`schedt`'s lifted anonymous-struct type names belong (unparseable C#, a CS1513/CS1022 cascade) and re-declared
+the `newprocs = 0` package-var assignment as a shadowing local `var newprocs = 0;`, because runtime2.go's
+state contributions never registered. With the fix, a seeded reconvert is **byte-identical to an unseeded
+one** for every unmarked file — plus the marked `.cs` left untouched and the `.cs.auto` siblings added.
+Guarded by the `ManualConversionSiblingState` behavioral test (a marked `state.cs` whose skipped `state.go`
+declares an anonymous-struct-field type and package vars; the sibling `main.cs` consumes both).
+`emitAutoConversionSiblings` (`src/go2cs/autoSiblingOperations.go`) remains only for FULLY hand-owned
+packages, where the normal conversion path is skipped outright (no unmarked files, and no .csproj /
+`package_info.cs` / `package_init.cs` regeneration).
+
+Siblings are **committed** in `src/go-src-converted/<pkg>` and refreshed by reconverts — the gate probes the
+DESTINATION `.cs`, so a reconvert only produces them when its output dir is seeded with the marked files
+first (see *§5* above); with the fix that seeding is safe. `*_impl.cs` companions have no matching `.go`, so
+they get no sibling; `unsafe` is never queued by `-stdlib` (compiler-intrinsic, `stdLibConverter.go`), so
 `unsafe/unsafe.cs` has none either. Single-file conversion mode (`go2cs example.go`) emits no siblings — the
 marker gate is not effective there to begin with.
 

@@ -511,6 +511,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckManagedAtomicPointer() => CheckTarget("ManagedAtomicPointer");
 
     [TestMethod]
+    public void CheckManualConversionSiblingState() => CheckTarget("ManualConversionSiblingState");
+
+    [TestMethod]
     public void CheckMapAnonStructValue() => CheckTarget("MapAnonStructValue");
 
     [TestMethod]

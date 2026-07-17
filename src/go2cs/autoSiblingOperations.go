@@ -10,20 +10,28 @@ import (
 	"strings"
 )
 
-// emitAutoConversionSiblings converts each manually-converted (marker-skipped) source file to a
-// NON-COMPILED `<name>.cs.auto` sibling written beside the hand-owned `<name>.cs`, so upgrade-time
-// review (a new Go version vs the hand-owned C#) has an auto-converted reference to diff against.
-// Without this, a `[module: go.GoManualConversion]` whole-file rewrite leaves NO auto output at all
-// (containsManualConversionMarker drops the source .go from the convert set entirely).
+// emitAutoConversionSiblings converts each manually-converted (marker-skipped) source file of a
+// FULLY hand-owned package — one whose convert set has NO unmarked files left — to a NON-COMPILED
+// `<name>.cs.auto` sibling written beside the hand-owned `<name>.cs`, so upgrade-time review (a new
+// Go version vs the hand-owned C#) has an auto-converted reference to diff against. Without this, a
+// `[module: go.GoManualConversion]` whole-file rewrite leaves NO auto output at all.
 //
-// Side-effect safety: this pass MUST run as the LAST step of a package's conversion — after the
-// normal .cs set, the .csproj, package_info.cs, package_init.cs, and dynamic-marker resolution are
-// all written. At that point every package-level global the isolated conversions below mutate is
-// dead state (processConversion resets all of it at the top of the next package iteration), so the
-// pass can reuse the normal analysis + visitor pipeline verbatim and still add ONLY `.cs.auto`
-// files — no other emitted byte changes. The whole-package analyses (name collision, capture-mode
-// methods, typespec RHS, moved init vars, publicized types) already include marked files' syntax
-// during normal conversion, so the sibling output reflects the same package-level decisions.
+// This pass serves ONLY the fully-hand-owned case, where the normal conversion path is skipped
+// outright (no .csproj / package_info.cs / package_init.cs is regenerated — those are hand-owned
+// too) and none of the per-file analyses have run. A PARTIALLY hand-owned package never reaches
+// this code: its marked files stay in the main convert set — analyzed and visited with the package,
+// in pkg.Syntax order, so their package-wide state (anonymous-struct lifts, package-var
+// registrations, escape/addressed-global analysis, imports) reaches sibling files exactly as in an
+// unseeded conversion — with only their write target redirected to `<name>.cs.auto` (see the
+// file-visit loop in main.go). Emitting siblings AFTER the normal .cs set was written (this
+// function's original role for partial packages) corrupted every sibling file of a seeded
+// reconvert, because the marked files' state contributions arrived too late.
+//
+// Side-effect safety: the caller runs the whole-package analyses (name collision, capture-mode
+// methods, typespec RHS, moved init vars, publicized types) first; every package-level global the
+// isolated conversions below mutate is dead state afterward (processConversion resets all of it at
+// the top of the next package iteration), so the pass can reuse the normal analysis + visitor
+// pipeline verbatim and still add ONLY `.cs.auto` files.
 //
 // The `.cs.auto` extension is invisible to the generated projects: csproj-template.xml compiles
 // `<Compile Include="*.cs" />` only, which cannot match a file name ending in `.auto`.

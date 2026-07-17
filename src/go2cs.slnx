@@ -237,6 +237,7 @@
     <Project Path="Tests/Behavioral/MakeLenNamedNumeric/MakeLenNamedNumeric.csproj" />
     <Project Path="Tests/Behavioral/MakeSliceUintptrLen/MakeSliceUintptrLen.csproj" />
     <Project Path="Tests/Behavioral/ManagedAtomicPointer/ManagedAtomicPointer.csproj" />
+    <Project Path="Tests/Behavioral/ManualConversionSiblingState/ManualConversionSiblingState.csproj" />
     <Project Path="Tests/Behavioral/MapAnonStructValue/MapAnonStructValue.csproj" />
     <Project Path="Tests/Behavioral/MapCommaOk/MapCommaOk.csproj" />
     <Project Path="Tests/Behavioral/MapPointerElementLiteral/MapPointerElementLiteral.csproj" />

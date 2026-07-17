@@ -65,6 +65,15 @@ type FileEntry struct {
 	// (`string(buf) == "…"`), which never outlive the expression so are safe unconditionally. Keyed
 	// by the *ast.CallExpr node.
 	sstringConvExprs map[*ast.CallExpr]bool
+
+	// manualConversion marks a file whose DESTINATION `.cs` is a hand-owned manual conversion
+	// ([module: go.GoManualConversion]). The file is still fully analyzed and visited with the
+	// rest of its package — its package-wide state contributions (anonymous-struct lifts,
+	// package-var registrations, escape/addressed-global analysis, imports) must match an
+	// unseeded conversion exactly, or sibling files emit corrupted — but its EMISSION is
+	// redirected to the non-compiled `<name>.cs.auto` review sibling instead of overwriting
+	// the hand-owned `<name>.cs`.
+	manualConversion bool
 }
 
 // CapturedVarInfo tracks information about captured variables
@@ -915,7 +924,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		packageDoc = extractPackageDoc(pkg.Syntax)
 
 		files := []FileEntry{}
-		markedFiles := []FileEntry{}
+		unmarkedFileCount := 0
 		fset := pkg.Fset
 		packageTypes := pkg.Types
 		info := pkg.TypesInfo
@@ -987,24 +996,34 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 						sstringEligible:  map[types.Object]bool{},
 						sstringConvExprs: map[*ast.CallExpr]bool{},
 					})
+
+					unmarkedFileCount++
 				} else if isDir {
-					// Manually-converted destination: the source .go is dropped from the convert
-					// set, but a non-compiled `<name>.cs.auto` review sibling is still emitted
-					// after all package artifacts are written — see emitAutoConversionSiblings.
-					markedFiles = append(markedFiles, FileEntry{
+					// Manually-converted destination: the hand-owned `.cs` is never overwritten,
+					// but the source .go MUST stay in the convert set, in pkg.Syntax order — its
+					// analysis and visit feed package-wide emission state that sibling files depend
+					// on (anonymous-struct lifts, package-var registrations, escape/addressed-global
+					// analysis, imports, init/temp-var numbering). Only the file's EMISSION is
+					// redirected, to the non-compiled `<name>.cs.auto` review sibling (see the
+					// file-visit loop below). Dropping the visit entirely corrupted every sibling
+					// file of a seeded reconvert: raw Go `struct{...}` text where a lifted type
+					// name belongs, and package-var assignments re-declared as shadowing locals.
+					files = append(files, FileEntry{
 						file:             file,
 						filePath:         path,
 						identEscapesHeap: map[types.Object]bool{},
 						sstringEligible:  map[types.Object]bool{},
 						sstringConvExprs: map[*ast.CallExpr]bool{},
+						manualConversion: true,
 					})
 				}
 			}
 		}
 
-		if len(files) == 0 {
-			if len(markedFiles) > 0 {
-				// FULLY hand-owned package: nothing to (re)convert normally, but still emit the
+		if unmarkedFileCount == 0 {
+			if len(files) > 0 {
+				// FULLY hand-owned package: nothing to (re)convert normally — the .csproj,
+				// package_info.cs and package_init.cs stay hand-owned too — but still emit the
 				// `.cs.auto` review siblings. Run the whole-package analyses the sibling
 				// conversion depends on first — safe, since every package-level global they and
 				// the sibling visits mutate is reset at the top of the next package iteration.
@@ -1013,7 +1032,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				collectTypeSpecRHS(pkg)
 				collectMovedInitVars(fset, packageTypes, info, pkg.Syntax)
 				collectPublicizedTypes(packageTypes)
-				emitAutoConversionSiblings(markedFiles, fset, packageTypes, info, map[*ast.Ident]string{}, map[string]*types.Var{}, packageOutputPath, options)
+				emitAutoConversionSiblings(files, fset, packageTypes, info, map[*ast.Ident]string{}, map[string]*types.Var{}, packageOutputPath, options)
 			} else {
 				showMessage("Skipping conversion: no target Go source files found for conversion in input path \"%s\"", packageInputPath)
 			}
@@ -1093,7 +1112,11 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				defer func() {
 					if !options.debugMode {
 						if r := recover(); r != nil {
-							showWarning("visit file error: %v in \"%s\"", r, filepath.Base(fileEntry.filePath))
+							if fileEntry.manualConversion {
+								showWarning("visit file error: %v in \"%s\" (auto-conversion sibling skipped)", r, filepath.Base(fileEntry.filePath))
+							} else {
+								showWarning("visit file error: %v in \"%s\"", r, filepath.Base(fileEntry.filePath))
+							}
 						}
 					}
 				}()
@@ -1130,14 +1153,24 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				visitor.visitFile(fileEntry.file)
 
 				var outputFileName string
+				baseName := strings.TrimSuffix(filepath.Base(fileEntry.filePath), ".go")
 
-				if isDir {
-					outputFileName = filepath.Join(packageOutputPath, strings.TrimSuffix(filepath.Base(fileEntry.filePath), ".go")+".cs")
-				} else {
+				if !isDir {
 					outputFileName = strings.TrimSuffix(packageOutputPath, ".go") + ".cs"
+				} else if fileEntry.manualConversion {
+					outputFileName = filepath.Join(packageOutputPath, baseName+".cs.auto")
+				} else {
+					outputFileName = filepath.Join(packageOutputPath, baseName+".cs")
 				}
 
-				if err := visitor.writeOutputFile(outputFileName); err != nil {
+				if fileEntry.manualConversion {
+					// Hand-owned destination: the visit above already fed this file's package-wide
+					// state (the part its sibling files depend on); emit the auto conversion to the
+					// non-compiled `<name>.cs.auto` review sibling, leaving the marked `.cs` untouched.
+					if err := writeAutoConversionSibling(outputFileName, baseName, visitor.targetFile.String()); err != nil {
+						showWarning("%s", err)
+					}
+				} else if err := visitor.writeOutputFile(outputFileName); err != nil {
 					log.Printf("%s\n", err)
 				}
 
@@ -1641,12 +1674,9 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			}
 		}
 
-		// Emit non-compiled `<name>.cs.auto` review siblings for manually-converted files. This
-		// MUST stay the LAST step of the package iteration: every shared artifact (the .cs set,
-		// .csproj, package_info.cs, package_init.cs, dynamic-marker resolution) is already
-		// written, and all package-level state is reset at the top of the next iteration, so the
-		// isolated conversions cannot alter any other emitted byte.
-		emitAutoConversionSiblings(markedFiles, fset, packageTypes, info, globalIdentNames, globalScope, packageOutputPath, options)
+		// NOTE: `.cs.auto` review siblings for manually-converted files were emitted inline by the
+		// file-visit loop above — marked files convert WITH the package (same order, same analyses)
+		// so their package-wide state reaches sibling files, and only their write target differs.
 	}
 }
 

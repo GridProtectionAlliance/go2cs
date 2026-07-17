@@ -567,6 +567,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckManagedAtomicPointer() => CheckTarget("ManagedAtomicPointer");
 
     [TestMethod]
+    public void CheckManualConversionSiblingState() => CheckTarget("ManualConversionSiblingState");
+
+    [TestMethod]
     public void CheckMapAnonStructValue() => CheckTarget("MapAnonStructValue");
 
     [TestMethod]
