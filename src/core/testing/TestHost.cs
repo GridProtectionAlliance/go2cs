@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -391,21 +392,56 @@ public static class TestHost
         {
             XElement testCase = new("testcase",
                 new XAttribute("classname", package),
-                new XAttribute("name", testEvent.Test),
+                new XAttribute("name", XmlSanitize(testEvent.Test)),
                 new XAttribute("time", testEvent.Elapsed.ToString("0.######", CultureInfo.InvariantCulture)));
 
             if (testEvent.Action == "skip")
-                testCase.Add(new XElement("skipped", new XAttribute("message", testEvent.Output ?? "skipped")));
+                testCase.Add(new XElement("skipped", new XAttribute("message", XmlSanitize(testEvent.Output ?? "skipped"))));
             else if (testEvent.Action is "fail" or "timeout")
-                testCase.Add(new XElement("failure", new XAttribute("message", testEvent.Action), testEvent.Output ?? ""));
+                testCase.Add(new XElement("failure", new XAttribute("message", testEvent.Action), XmlSanitize(testEvent.Output ?? "")));
             else if (testEvent.Action == "infrastructure-error")
-                testCase.Add(new XElement("error", new XAttribute("message", "infrastructure-error"), testEvent.Output ?? ""));
+                testCase.Add(new XElement("error", new XAttribute("message", "infrastructure-error"), XmlSanitize(testEvent.Output ?? "")));
 
             suite.Add(testCase);
         }
 
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
         new XDocument(new XElement("testsuites", suite)).Save(path);
+    }
+
+    /// <summary>
+    /// Replaces characters XML 1.0 cannot carry with visible \uXXXX escape text. Real Go test
+    /// logs legitimately contain them — unicode/utf8's own tests log U+FFFE/U+FFFF data — and an
+    /// unsanitized XDocument.Save throws AFTER the run completed, downgrading a finished suite to
+    /// an infrastructure error with no JUnit file at all.
+    /// </summary>
+    private static string XmlSanitize(string value)
+    {
+        StringBuilder? sanitized = null;
+
+        for (int i = 0; i < value.Length; i++)
+        {
+            char ch = value[i];
+            bool valid;
+
+            if (char.IsHighSurrogate(ch))
+                valid = i + 1 < value.Length && char.IsLowSurrogate(value[i + 1]);
+            else if (char.IsLowSurrogate(ch))
+                valid = i > 0 && char.IsHighSurrogate(value[i - 1]);
+            else
+                valid = ch is '\t' or '\n' or '\r' || (ch >= 0x20 && ch <= 0xD7FF) || (ch >= 0xE000 && ch <= 0xFFFD);
+
+            if (valid)
+            {
+                sanitized?.Append(ch);
+                continue;
+            }
+
+            sanitized ??= new StringBuilder(value[..i], value.Length + 8);
+            sanitized.Append(CultureInfo.InvariantCulture, $"\\u{(int)ch:x4}");
+        }
+
+        return sanitized?.ToString() ?? value;
     }
 
     private static string SanitizePath(string value) =>

@@ -1,4 +1,20 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project>
+
+  <!-- The test project shares its directory with the production project, and NuGet writes each
+       project's restore artifacts (project.assets.json) to MSBuildProjectExtensionsPath — which
+       defaults to obj\ for BOTH. Shared, the two projects overwrite each other's assets, and a
+       production project pulled into the test build graph (bytes -> unicode/utf8) then READS the
+       test project's assets and appears to reference ITSELF through the test closure — MSB4006
+       "circular dependency involving ResolveProjectReferences". Distinct obj\tests\ / bin\tests\
+       roots end the fight; the paths must be set BEFORE Sdk.props, hence the explicit SDK
+       imports instead of the Sdk attribute. -->
+  <PropertyGroup>
+    <MSBuildProjectExtensionsPath>obj\tests\</MSBuildProjectExtensionsPath>
+    <BaseIntermediateOutputPath>obj\tests\</BaseIntermediateOutputPath>
+    <BaseOutputPath>bin\tests\</BaseOutputPath>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -74,5 +90,7 @@
     <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTagAttribute" />
     <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
   </ItemGroup>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>

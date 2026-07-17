@@ -24,6 +24,19 @@ public static partial class testing_package
         internal TestRunner? Runner;
     }
 
+    /// <summary>
+    /// Benchmark receiver surface — COMPILE-ONLY in the bootstrap shim. Benchmark declarations
+    /// are disclosed-unsupported in the manifest (execution is deferred to Phase 4D) and never
+    /// registered with the host, but their converted BODIES still compile into the test assembly,
+    /// so the members they reference must exist. All members are safe non-throwing no-ops
+    /// (req §6.2): N defaults to 0 so a b.N loop iterates zero times, and Run reports success
+    /// without executing.
+    /// </summary>
+    public struct B
+    {
+        public nint N;
+    }
+
     public static void Error(this ref T t, params ꓸꓸꓸany args)
     {
         TestExecution execution = t.RequiredExecution;
@@ -123,6 +136,10 @@ public static partial class testing_package
         TestRunner runner = m.Runner ?? throw new InvalidOperationException("testing.M is not attached to a test registry");
         return runner.RunAll();
     }
+
+    // Compile-only B surface (see struct B above) — never executed, never throwing. The
+    // RecvGenerator supplies the ж<B> overload, as for every ordinary [GoRecv] signature.
+    [GoRecv] public static bool Run(this ref B b, @string name, Action<ж<B>> benchmark) => true;
 
     /// <summary>
     /// Reports whether the -short flag was set — like Go's testing.Short() (default false).

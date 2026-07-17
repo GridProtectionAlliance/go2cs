@@ -334,6 +334,30 @@ public class TestingRuntimeTests
     }
 
     [TestMethod]
+    public void JUnitOutputSurvivesXmlInvalidCharacters()
+    {
+        // Real Go test logs legitimately contain XML-invalid characters (unicode/utf8's own
+        // tests log U+FFFE/U+FFFF data); an unsanitized XDocument.Save threw AFTER the suite
+        // completed, downgrading the whole run to an infrastructure error with no JUnit file.
+        string junitPath = Path.Combine(Path.GetTempPath(), $"go2cs-junit-{Guid.NewGuid():N}.xml");
+
+        try
+        {
+            TestRegistry registry = new("runtime/xmlchars", []);
+            registry.Add("TestWeirdOutput", pointer => pointer.Error("bad ￾￿ chars"), "runtime_test.go", 1);
+
+            Assert.AreEqual(1, TestHost.Run(registry, ["--junit", junitPath]));
+            string junit = File.ReadAllText(junitPath);
+            StringAssert.Contains(junit, "TestWeirdOutput");
+            StringAssert.Contains(junit, "\\ufffe");
+        }
+        finally
+        {
+            File.Delete(junitPath);
+        }
+    }
+
+    [TestMethod]
     public void FieldPointerEqualityPairsAcrossOfCalls()
     {
         // Guards the golib pointer-identity fix the Phase-4 test runtime depends on: the typed
