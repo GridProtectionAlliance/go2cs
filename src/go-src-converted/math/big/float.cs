@@ -905,7 +905,7 @@ public static (float32, Accuracy) Float32(this ж<Float> Ꮡx) {
         UntypedInt bias = /* 1<<(ebits-1) - 1 */ 127; //   127  exponent bias
         UntypedInt dmin = /* 1 - bias - mbits */ -149; //  -149  smallest unbiased exponent (denormal)
         UntypedInt emin = /* 1 - bias */ -126; //  -126  smallest unbiased exponent (normal)
-        UntypedInt emax = /* bias */ 127; //   127  largest unbiased exponent (normal)
+        const int32 emax = /* bias */ 127;     //   127  largest unbiased exponent (normal)
         var e = x.exp - 1;
         nint p = mbits + 1;
         if (e < emin) {
@@ -1025,7 +1025,7 @@ public static (float64, Accuracy) Float64(this ж<Float> Ꮡx) {
         UntypedInt bias = /* 1<<(ebits-1) - 1 */ 1023; //  1023  exponent bias
         UntypedInt dmin = /* 1 - bias - mbits */ -1074; // -1074  smallest unbiased exponent (denormal)
         UntypedInt emin = /* 1 - bias */ -1022; // -1022  smallest unbiased exponent (normal)
-        UntypedInt emax = /* bias */ 1023; //  1023  largest unbiased exponent (normal)
+        const int32 emax = /* bias */ 1023;    //  1023  largest unbiased exponent (normal)
         var e = x.exp - 1;
         nint p = mbits + 1;
         if (e < emin) {

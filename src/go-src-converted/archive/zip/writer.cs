@@ -429,7 +429,7 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
 internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
     ref var h = ref Ꮡh.Value;
 
-    UntypedInt maxUint16 = /* 1<<16 - 1 */ 65535;
+    const nint maxUint16 = /* 1<<16 - 1 */ 65535;
     if (len(h.Name) > maxUint16) {
         return errLongName;
     }

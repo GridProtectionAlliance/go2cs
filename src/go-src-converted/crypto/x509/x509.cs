@@ -1047,9 +1047,9 @@ internal static readonly UntypedInt nameTypeIP = 7;
 }
 
 internal static byte reverseBitsInAByte(byte @in) {
-    var b1 = (byte)((@in >> (int)(4)) | (@in << (int)(4)));
-    var b2 = (byte)((byte)((b1 >> (int)(2)) & 0x33) | (byte)((b1 << (int)(2)) & 0xcc));
-    var b3 = (byte)((byte)((b2 >> (int)(1)) & 0x55) | (byte)((b2 << (int)(1)) & 0xaa));
+    var b1 = (byte)((@in >> (int)(4)) | (byte)(@in << (int)(4)));
+    var b2 = (byte)((byte)((b1 >> (int)(2)) & 0x33) | (byte)((byte)(b1 << (int)(2)) & 0xcc));
+    var b3 = (byte)((byte)((b2 >> (int)(1)) & 0x55) | (byte)((byte)(b2 << (int)(1)) & 0xaa));
     return b3;
 }
 

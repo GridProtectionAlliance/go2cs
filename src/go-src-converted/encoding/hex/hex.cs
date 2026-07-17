@@ -83,7 +83,7 @@ public static (nint, error) Decode(slice<byte> dst, slice<byte> src) {
         if (b > 0x0f) {
             return (i, ((InvalidByteError)q));
         }
-        dst[i] = (byte)(((a << (int)(4))) | b);
+        dst[i] = (byte)(((byte)(a << (int)(4))) | b);
         i++;
     }
     if (len(src) % 2 == 1) {

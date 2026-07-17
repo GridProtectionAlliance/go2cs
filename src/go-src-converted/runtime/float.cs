@@ -34,15 +34,15 @@ internal static bool isInf(float64 f) {
 //	abs(±Inf) = +Inf
 //	abs(NaN) = NaN
 internal static float64 abs(float64 x) {
-    UntypedInt sign = /* 1 << 63 */ 9223372036854775808;
-    return float64frombits((uint64)(float64bits(x) & ~(uint64)sign));
+    const uint64 sign = /* 1 << 63 */ 9223372036854775808;
+    return float64frombits((uint64)(float64bits(x) & ~sign));
 }
 
 // copysign returns a value with the magnitude
 // of x and the sign of y.
 internal static float64 copysign(float64 x, float64 y) {
-    UntypedInt sign = /* 1 << 63 */ 9223372036854775808;
-    return float64frombits((uint64)((uint64)(float64bits(x) & ~(uint64)sign) | (uint64)(float64bits(y) & (uint64)sign)));
+    const uint64 sign = /* 1 << 63 */ 9223372036854775808;
+    return float64frombits((uint64)((uint64)(float64bits(x) & ~sign) | (uint64)(float64bits(y) & sign)));
 }
 
 // float64bits returns the IEEE 754 binary representation of f.

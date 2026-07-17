@@ -419,7 +419,7 @@ public static @string String(this ж<Regexp> Ꮡre) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     ref var flags = ref heap<map<ж<Regexp>, printFlags>>(out var Ꮡflags);
     var (must, cant) = calcFlags(Ꮡre, Ꮡflags);
-    must |= (printFlags)((((printFlags)(cant & ~flagI)) << (int)(negShift)));
+    must |= (printFlags)((printFlags)(uint8)(((printFlags)(cant & ~flagI)) << (int)(negShift)));
     if (must != 0) {
         must |= (printFlags)(flagOff);
     }

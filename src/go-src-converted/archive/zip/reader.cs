@@ -507,7 +507,7 @@ parseExtras:
                     continue;
                 }
                 // Ignore irrelevant attributes
-                UntypedFloat ticksPerSecond = 1e+07; // Windows timestamp resolution
+                UntypedFloat ticksPerSecond = 1e7; // Windows timestamp resolution
                 var ts = (int64)attrBuf.uint64();
                 // ModTime since Windows epoch
                 var secs = ts / (int64)ticksPerSecond;

@@ -67,7 +67,7 @@ internal static void heapSortOrdered<E>(slice<E> data, nint a, nint b)
 internal static void pdqsortOrdered<E>(slice<E> data, nint a, nint b, nint limit)
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
-    UntypedInt maxInsertion = 12;
+    const nint maxInsertion = 12;
     bool wasBalanced = true;   // whether the last partitioning was reasonably balanced
     bool wasPartitioned = true; // whether the slice was already partitioned
     while (ᐧ) {
@@ -202,8 +202,8 @@ internal static nint /*newpivot*/ partitionEqualOrdered<E>(slice<E> data, nint a
 internal static bool partialInsertionSortOrdered<E>(slice<E> data, nint a, nint b)
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
-    UntypedInt maxSteps = 5; // maximum number of adjacent out-of-order pairs that will get shifted
-    UntypedInt shortestShifting = 50; // don't shift any elements on short arrays
+    const nint maxSteps = 5; // maximum number of adjacent out-of-order pairs that will get shifted
+    const nint shortestShifting = 50; // don't shift any elements on short arrays
     nint i = a + 1;
     for (nint j = 0; j < maxSteps; j++) {
         while (i < b && !cmp.Less(data[i], data[i - 1])) {
@@ -268,8 +268,8 @@ internal static (nint pivot, sortedHint hint) choosePivotOrdered<E>(slice<E> dat
     nint pivot = default!;
     sortedHint hint = default!;
 
-    UntypedInt shortestNinther = 50;
-    UntypedInt maxSwaps = /* 4 * 3 */ 12;
+    const nint shortestNinther = 50;
+    const nint maxSwaps = /* 4 * 3 */ 12;
     nint l = b - a;
     ref var swaps = ref heap(new nint(), out var Ꮡswaps);
     nint i = a + l / 4 * 1;

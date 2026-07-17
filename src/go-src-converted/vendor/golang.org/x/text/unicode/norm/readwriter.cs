@@ -22,7 +22,7 @@ internal static (nint n, error err) Write(this ж<normWriter> Ꮡw, slice<byte> 
 
     ref var w = ref Ꮡw.Value;
     // Process data in pieces to keep w.buf size bounded.
-    UntypedInt chunk = 4000;
+    const nint chunk = 4000;
     while (len(data) > 0) {
         // Normalize into w.buf.
         nint m = len(data);
@@ -124,7 +124,7 @@ internal static (nint, error) Read(this ж<normReader> Ꮡr, slice<byte> p) {
 // Reader returns a new reader that implements Read
 // by reading data from r and returning f(data).
 public static io.Reader Reader(this Form f, io.Reader r) {
-    UntypedInt chunk = 4000;
+    const nint chunk = 4000;
     var buf = new slice<byte>(chunk);
     var rr = Ꮡ(new normReader(rb: new reorderBuffer(nil), r: r, inbuf: buf));
     rr.of(normReader.Ꮡrb).init(f, buf);

@@ -193,8 +193,8 @@ public static ж<Transformer> New() {
 // A rule can only be violated for "Bidi Domain names", meaning if one of the
 // following categories has been observed.
 [GoRecv] internal static bool isRTL(this ref Transformer t) {
-    UntypedInt isRTL = /* 1<<bidi.R | 1<<bidi.AL | 1<<bidi.AN */ 8226;
-    return (uint16)(t.seen & (uint16)isRTL) != 0;
+    const uint16 isRTL = /* 1<<bidi.R | 1<<bidi.AL | 1<<bidi.AN */ 8226;
+    return (uint16)(t.seen & isRTL) != 0;
 }
 
 // Reset implements transform.Transformer.

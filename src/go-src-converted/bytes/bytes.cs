@@ -626,10 +626,10 @@ public static slice<byte> Repeat(slice<byte> b, nint count) {
     // have completed the construction of the result.
     // This yields significant speedups (up to +100%) in cases where
     // the result length is large (roughly, over L2 cache size).
-    UntypedInt chunkLimit = /* 8 * 1024 */ 8192;
+    const nint chunkLimit = /* 8 * 1024 */ 8192;
     nint chunkMax = n;
     if (chunkMax > chunkLimit) {
-        chunkMax = (nint)chunkLimit / len(b) * len(b);
+        chunkMax = chunkLimit / len(b) * len(b);
         if (chunkMax == 0) {
             chunkMax = len(b);
         }

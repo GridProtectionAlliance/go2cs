@@ -759,7 +759,7 @@ internal static (ж<Response> retres, error reterr) @do(this ж<Client> Ꮡc, ж
                 // small the underlying TCP connection will be
                 // re-used. No need to check for errors: if it
                 // fails, the Transport won't reuse it anyway.
-                UntypedInt maxBodySlurpSize = /* 2 << 10 */ 2048;
+                const int64 maxBodySlurpSize = /* 2 << 10 */ 2048;
                 if ((~resp).ContentLength == -1 || (~resp).ContentLength <= maxBodySlurpSize) {
                     io.CopyN(io.Discard, (~resp).Body, maxBodySlurpSize);
                 }

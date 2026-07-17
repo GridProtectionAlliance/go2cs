@@ -354,7 +354,7 @@ internal static void Swap(this byFreq s, nint i, nint j) {
 }
 
 internal static uint16 reverseBits(uint16 number, byte bitLength) {
-    return bits.Reverse16((uint16)((number << (int)((16 - bitLength)))));
+    return bits.Reverse16((uint16)(number << (int)((16 - bitLength))));
 }
 
 } // end flate_package

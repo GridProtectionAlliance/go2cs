@@ -1179,7 +1179,7 @@ internal static markBits /*mbits*/ markBitsForSpan(uintptr @base) {
         m.bytep = (ж<uint8>)(uintptr)((@unsafe.Pointer)((uintptr)new @unsafe.Pointer(m.bytep) + 1));
         m.mask = 1;
     } else {
-        m.mask = (uint8)((m.mask << (int)(1)));
+        m.mask = (uint8)(m.mask << (int)(1));
     }
     m.index++;
 }
@@ -1309,7 +1309,7 @@ internal static void bulkBarrierBitmap(uintptr dst, uintptr src, uintptr size, u
 
     var word = maskOffset / (uintptr)goarch.PtrSize;
     Ꮡbits = addb(Ꮡbits, word / 8); bits = ref Ꮡbits.Value;
-    var mask = (uint8)(((uint8)1 << (int)((word % 8))));
+    var mask = (uint8)((uint8)1 << (int)((word % 8)));
     var buf = (~(~getg()).m).p.ptr().of(runtime_package.Δp.ᏑwbBuf);
     for (var i = (uintptr)0; i < size; i += goarch.PtrSize) {
         if (mask == 0) {

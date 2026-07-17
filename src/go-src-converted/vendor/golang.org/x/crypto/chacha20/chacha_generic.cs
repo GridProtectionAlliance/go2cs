@@ -220,8 +220,8 @@ internal static (uint32, uint32, uint32, uint32) quarterRound(uint32 a, uint32 b
     (dst, src) = (dst[(int)(full)..], src[(int)(full)..]);
     // If using a multi-block xorKeyStreamBlocks would overflow, use the generic
     // one that does one block at a time.
-    UntypedInt blocksPerBuf = /* bufSize / blockSize */ 1;
-    if ((uint64)s.counter + (uint64)blocksPerBuf > ((uint64)1 << (int)(32))) {
+    const uint64 blocksPerBuf = /* bufSize / blockSize */ 1;
+    if ((uint64)s.counter + blocksPerBuf > ((uint64)1 << (int)(32))) {
         s.buf = new byte[]{}.array();
         nint numBlocksΔ1 = (len(src) + (nint)blockSize - 1) / (nint)blockSize;
         var buf = s.buf[(int)((nint)bufSize - numBlocksΔ1 * (nint)blockSize)..];

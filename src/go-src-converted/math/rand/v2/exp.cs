@@ -14,7 +14,7 @@ partial class rand_package {
  * (Marsaglia & Tsang, 2000)
  * https://www.jstatsoft.org/v05/i08/paper [pdf]
  */
-internal static readonly UntypedFloat re = /* 7.69711747013104972 */ 7.69712;
+internal static readonly UntypedFloat re = 7.69711747013104972;
 
 // ExpFloat64 returns an exponentially distributed float64 in the range
 // (0, +math.MaxFloat64] with an exponential distribution whose rate parameter

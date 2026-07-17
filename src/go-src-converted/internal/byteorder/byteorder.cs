@@ -11,7 +11,7 @@ partial class byteorder_package {
 public static uint16 LeUint16(slice<byte> b) {
     _ = b[1];
     // bounds check hint to compiler; see golang.org/issue/14808
-    return (uint16)((uint16)b[0] | ((uint16)b[1] << (int)(8)));
+    return (uint16)((uint16)b[0] | (uint16)((uint16)b[1] << (int)(8)));
 }
 
 public static void LePutUint16(slice<byte> b, uint16 v) {
@@ -84,7 +84,7 @@ public static slice<byte> LeAppendUint64(slice<byte> b, uint64 v) {
 public static uint16 BeUint16(slice<byte> b) {
     _ = b[1];
     // bounds check hint to compiler; see golang.org/issue/14808
-    return (uint16)((uint16)b[1] | ((uint16)b[0] << (int)(8)));
+    return (uint16)((uint16)b[1] | (uint16)((uint16)b[0] << (int)(8)));
 }
 
 public static void BePutUint16(slice<byte> b, uint16 v) {

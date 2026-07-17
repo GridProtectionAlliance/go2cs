@@ -42,7 +42,7 @@ internal static (slice<@string> matches, error err) globWithLimit(FS fsys, @stri
 
     // This limit is added to prevent stack exhaustion issues. See
     // CVE-2022-30630.
-    UntypedInt pathSeparatorsLimit = 10000;
+    const nint pathSeparatorsLimit = 10000;
     if (depth > pathSeparatorsLimit) {
         return (default!, path.ErrBadPattern);
     }

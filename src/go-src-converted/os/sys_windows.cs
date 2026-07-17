@@ -14,7 +14,7 @@ internal static (@string name, error err) hostname() {
     error err = default!;
 
     // Use PhysicalDnsHostname to uniquely identify host in a cluster
-    UntypedInt format = /* windows.ComputerNamePhysicalDnsHostname */ 5;
+    const uint32 format = /* windows.ComputerNamePhysicalDnsHostname */ 5;
     ref var n = ref heap<uint32>(out var Ꮡn);
     n = (uint32)64;
     while (ᐧ) {

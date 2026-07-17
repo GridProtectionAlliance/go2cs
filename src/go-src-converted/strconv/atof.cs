@@ -526,7 +526,7 @@ internal static (float32 f, bool ok) atof32exact(uint64 mantissa, nint exp, bool
             f *= float32pow10[exp - 10];
             exp = 10;
         }
-        if (f > 1e7F || f < -1e7D) {
+        if (f > 1e7F || f < -1e7F) {
             // the exponent was really too large.
             return (f, ok);
         }

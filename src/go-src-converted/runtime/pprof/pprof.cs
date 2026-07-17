@@ -848,7 +848,7 @@ public static error StartCPUProfile(io.Writer w) => func<error>((defer, recover)
     // system, and a nice round number to make it easy to
     // convert sample counts to seconds. Instead of requiring
     // each client to specify the frequency, we hard code it.
-    UntypedInt hz = 100;
+    const nint hz = 100;
     Ꮡcpu.of(cpuᴛ1.ᏑMutex).Lock();
     defer(Ꮡcpu.of(cpuᴛ1.ᏑMutex).Unlock);
     if (cpu.done == default!) {

@@ -464,8 +464,8 @@ internal static void revise(this ж<gcControllerState> Ꮡc) {
         // We're already past our heap goal, even the extrapolated one.
         // Leave ourselves some extra runway, so in the worst case we
         // finish by that point.
-        UntypedFloat maxOvershoot = 1.1;
-        heapGoal = (int64)((float64)heapGoal * (float64)maxOvershoot);
+        const float64 maxOvershoot = 1.1;
+        heapGoal = (int64)((float64)heapGoal * maxOvershoot);
         // Compute the upper bound on the scan work remaining.
         scanWorkExpected = maxScanWork;
     }
@@ -862,9 +862,9 @@ internal static (uint64 goal, uint64 minTrigger) heapGoalInternal(this ж<gcCont
             // have the GC respond hard about how close we are to the goal than to
             // push the goal back in such a manner that it could cause us to exceed
             // the memory limit.
-            UntypedInt minRunway = /* 64 << 10 */ 65536;
-            if (c.triggered != ~(uint64)0 && goal < c.triggered + (uint64)minRunway) {
-                goal = c.triggered + (uint64)minRunway;
+            const uint64 minRunway = /* 64 << 10 */ 65536;
+            if (c.triggered != ~(uint64)0 && goal < c.triggered + minRunway) {
+                goal = c.triggered + minRunway;
             }
         }
     }

@@ -305,7 +305,7 @@ internal static ref Mutex allPoolsMu => ref ᏑallPoolsMu.Value;
 internal static slice<ж<Pool>> allPools;
 internal static slice<ж<Pool>> oldPools;
 
-[GoInit] internal static void initΔ1() {
+[GoInit] internal static void init() {
     runtime_registerPoolCleanup(poolCleanup);
 }
 

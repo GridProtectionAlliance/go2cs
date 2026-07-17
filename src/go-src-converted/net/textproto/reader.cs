@@ -357,17 +357,17 @@ internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b)
     // Run data through a simple state machine to
     // elide leading dots, rewrite trailing \r\n into \n,
     // and detect ending .\r\n line.
-    UntypedInt stateBeginLine = iota; // beginning of line; initial state; must be zero
+    const nint stateBeginLine = /* iota */ 0; // beginning of line; initial state; must be zero
     
-    UntypedInt stateDot = 1; // read . at beginning of line
+    const nint stateDot = 1; // read . at beginning of line
     
-    UntypedInt stateDotCR = 2; // read .\r at beginning of line
+    const nint stateDotCR = 2; // read .\r at beginning of line
     
-    UntypedInt stateCR = 3; // read \r (possibly at end of line)
+    const nint stateCR = 3;  // read \r (possibly at end of line)
     
-    UntypedInt stateData = 4; // reading data in middle of line
+    const nint stateData = 4; // reading data in middle of line
     
-    UntypedInt stateEOF = 5; // reached .\r\n end marker line
+    const nint stateEOF = 5; // reached .\r\n end marker line
     var br = d.r.Value.R;
     while (n < len(b) && d.state != stateEOF) {
         byte c = default!;
@@ -548,11 +548,11 @@ internal static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMem
     // Benchmarking map creation as of go1.20, a one-entry MIMEHeader is 416 bytes and large
     // MIMEHeaders average about 200 bytes per entry.
     maxMemory -= 400;
-    UntypedInt mapEntryOverhead = 200;
+    const int64 mapEntryOverhead = 200;
     // The first line cannot start with a leading space.
     {
         var (buf, err) = r.R.Peek(1); if (err == default! && (buf[0] == (rune)' ' || buf[0] == (rune)'\t')) {
-            UntypedInt errorLimit = 80; // arbitrary limit on how much of the line we'll quote
+            const int64 errorLimit = 80; // arbitrary limit on how much of the line we'll quote
             var (line, errΔ1) = r.readLineSlice(errorLimit);
             if (errΔ1 != default!) {
                 return (m, errΔ1);

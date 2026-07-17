@@ -204,7 +204,7 @@ internal static void exprList(this ж<printer> Ꮡp, tokenꓸPos prev0, slice<as
         // generated code - simply ignore the size in this case by setting
         // it to 0).
         nint prevSize = size;
-        UntypedFloat infinity = 1e+06; // larger than any source line
+        const nint infinity = 1000000; // larger than any source line
         size = p.nodeSize(x, infinity);
         var (pair, isPair) = x._<ж<ast.KeyValueExpr>>(ᐧ);
         if (size <= infinity && prev.IsValid() && next.IsValid()){
@@ -223,15 +223,15 @@ internal static void exprList(this ж<printer> Ꮡp, tokenꓸPos prev0, slice<as
         // if the previous key sizes does not exceed a threshold,
         // align columns and do not use formfeed.
         if (prevSize > 0 && size > 0) {
-            UntypedInt smallSize = 40;
+            const nint smallSize = 40;
             if (count == 0 || prevSize <= smallSize && size <= smallSize){
                 useFF = false;
             } else {
-                UntypedFloat r = 2.5;              // threshold
+                const float64 r = 2.5;                   // threshold
                 var geomean = math.Exp(lnsum / (float64)count);
                 // count > 0
                 var ratio = (float64)size / geomean;
-                useFF = (float64)r * ratio <= 1 || r <= ratio;
+                useFF = r * ratio <= 1 || r <= ratio;
             }
         }
         var needsLinebreak = 0 < prevLine && prevLine < line;
@@ -495,7 +495,7 @@ internal static nint /*size*/ identListSize(slice<ж<ast.Ident>> list, nint maxS
     }
     // don't allow tags or comments
     // only name(s) and type
-    UntypedInt maxSize = 30; // adjust as appropriate, this is an approximate value
+    const nint maxSize = 30; // adjust as appropriate, this is an approximate value
     nint namesSize = identListSize((~f).Names, maxSize);
     if (namesSize > 0) {
         namesSize = 1;
@@ -879,7 +879,7 @@ internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nin
         break;
     }
     case ж<ast.StarExpr> x: {
-        UntypedInt prec = /* token.UnaryPrec */ 6;
+        const nint prec = /* token.UnaryPrec */ 6;
         if (prec < prec1){
             // parenthesis needed
             Ꮡp.print(token.LPAREN);
@@ -894,7 +894,7 @@ internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nin
         break;
     }
     case ж<ast.UnaryExpr> x: {
-        UntypedInt prec = /* token.UnaryPrec */ 6;
+        const nint prec = /* token.UnaryPrec */ 6;
         if (prec < prec1){
             // parenthesis needed
             Ꮡp.print(token.LPAREN);
@@ -1277,7 +1277,7 @@ internal static void expr0(this ж<printer> Ꮡp, ast.Expr x, nint depth) {
 }
 
 internal static void expr(this ж<printer> Ꮡp, ast.Expr x) {
-    UntypedInt depth = 1;
+    const nint depth = 1;
     Ꮡp.expr1(x, token.LowestPrec, depth);
 }
 
@@ -1501,12 +1501,12 @@ internal static void stmt(this ж<printer> Ꮡp, ast.Stmt stmt, bool nextIsRBrac
         break;
     }
     case ж<ast.ExprStmt> s: {
-        UntypedInt depth = 1;
+        const nint depth = 1;
         Ꮡp.expr0((~s).X, depth);
         break;
     }
     case ж<ast.SendStmt> s: {
-        UntypedInt depth = 1;
+        const nint depth = 1;
         Ꮡp.expr0((~s).Chan, depth);
         Ꮡp.print(blank);
         p.setPos((~s).Arrow);
@@ -2058,7 +2058,7 @@ internal static void funcBody(this ж<printer> Ꮡp, nint headerSize, whiteSpace
         Ꮡp.Value.level = level;
     }, Ꮡp.Value.level, defer);
     p.level = 0;
-    UntypedInt maxSize = 100;
+    const nint maxSize = 100;
     if (headerSize + Ꮡp.bodySize(Ꮡb, maxSize) <= maxSize) {
         Ꮡp.print(sep);
         p.setPos(b.Lbrace);

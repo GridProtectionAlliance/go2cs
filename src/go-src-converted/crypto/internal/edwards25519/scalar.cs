@@ -153,10 +153,10 @@ public static (ж<Scalar>, error) SetUniformBytes(this ж<Scalar> Ꮡs, slice<by
 // fiatScalarMontgomeryDomainFieldElement, which is a little-endian 4-limb value
 // in the 2^256 Montgomery domain.
 internal static ж<Scalar> scalarTwo168 = Ꮡ(new Scalar(s: new uint64[]{0x5b8ab432eac74798UL, 0x38afddd6de59d5d7UL,
-    (nuint)0xa2c131b399411b7cUL, 0x6329a7ed9ce5a30UL}.array()
+    0xa2c131b399411b7cUL, 0x6329a7ed9ce5a30UL}.array()
 ));
 
-internal static ж<Scalar> scalarTwo336 = Ꮡ(new Scalar(s: new uint64[]{(nuint)0xbd3d108e2b35ecc5UL, 0x5c3a3718bdf9c90bUL,
+internal static ж<Scalar> scalarTwo336 = Ꮡ(new Scalar(s: new uint64[]{0xbd3d108e2b35ecc5UL, 0x5c3a3718bdf9c90bUL,
     0x63aa97a331b4f2eeUL, 0x3d217f5be65cb5cUL}.array()
 ));
 
@@ -348,7 +348,7 @@ internal static array<int8> signedRadix16(this ж<Scalar> Ꮡs) {
     // Recenter coefficients:
     for (nint i = 0; i < 63; i++) {
         var carry = (int8)(((digits[i] + 8) >> (int)(4)));
-        digits[i] -= (int8)((carry << (int)(4)));
+        digits[i] -= (int8)(carry << (int)(4));
         digits[i + 1] += carry;
     }
     return digits;

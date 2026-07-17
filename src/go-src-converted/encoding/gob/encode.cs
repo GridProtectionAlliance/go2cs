@@ -246,7 +246,7 @@ internal static void encComplex(ж<encInstr> Ꮡi, ж<encoderState> Ꮡstate, re
     ref var state = ref Ꮡstate.Value;
 
     var c = v.Complex();
-    if (c != 0 + builtin.i(0F) || state.sendZero) {
+    if (c != 0 + 0D.i() || state.sendZero) {
         var rpart = floatBits(real(c));
         var ipart = floatBits(imag(c));
         state.update(Ꮡi);

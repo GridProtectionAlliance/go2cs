@@ -296,7 +296,7 @@ retry:
         windowSize = r.remainingFrameSize;
     }
     // RFC 8878 3.1.1.1.1.2. permits us to set an 8M max on window size.
-    UntypedInt maxWindowSize = /* 8 << 20 */ 8388608;
+    const uint64 maxWindowSize = /* 8 << 20 */ 8388608;
     if (windowSize > maxWindowSize) {
         windowSize = maxWindowSize;
     }

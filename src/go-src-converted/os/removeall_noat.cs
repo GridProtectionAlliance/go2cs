@@ -54,7 +54,7 @@ internal static error removeAll(@string path) {
             }
             return errΔ1;
         }
-        UntypedInt reqSize = 1024;
+        const nint reqSize = 1024;
         slice<@string> names = default!;
         error readErr = default!;
         while (ᐧ) {

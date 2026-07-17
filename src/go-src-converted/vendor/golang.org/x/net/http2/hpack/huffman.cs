@@ -193,9 +193,9 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
         nuint over = n % 8; if (over > 0) {
             UntypedInt eosCode = 0x3fffffff;
             UntypedInt eosNBits = 30;
-            UntypedInt eosPadByte = /* eosCode >> (eosNBits - 8) */ 255;
+            const uint64 eosPadByte = /* eosCode >> (eosNBits - 8) */ 255;
             nuint pad = 8 - over;
-            x = (uint64)(((x << (int)(pad))) | (((uint64)eosPadByte >> (int)(over))));
+            x = (uint64)(((x << (int)(pad))) | ((eosPadByte >> (int)(over))));
             n += pad;
         }
     }

@@ -1456,7 +1456,7 @@ internal static ref sync.Mutex writerMutex => ref ᏑwriterMutex.Value;
 // capacity that uses an LRU strategy. If capacity is < 1, a default capacity
 // is used instead.
 public static ClientSessionCache NewLRUClientSessionCache(nint capacity) {
-    UntypedInt defaultSessionCacheCapacity = 64;
+    const nint defaultSessionCacheCapacity = 64;
     if (capacity < 1) {
         capacity = defaultSessionCacheCapacity;
     }

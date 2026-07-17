@@ -49,7 +49,7 @@ public static float64 Acosh(float64 x) {
 }
 
 internal static float64 acosh(float64 x) {
-    UntypedInt Large = /* 1 << 28 */ 268435456; // 2**28
+    const float64 Large = /* 1 << 28 */ 268435456; // 2**28
     // first case is special case
     switch (ᐧ) {
     case {} when x < 1 || IsNaN(x): {

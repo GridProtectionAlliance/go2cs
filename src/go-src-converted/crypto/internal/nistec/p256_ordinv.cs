@@ -42,7 +42,7 @@ public static (slice<byte>, error) P256OrdInverse(slice<byte> k) {
     // form a×R and p256OrdMul calculates (a × b × R⁻¹) mod n. RR is R in the
     // domain, or R×R mod n, thus p256OrdMul(x, RR) gives x×R, i.e. converts x
     // into the Montgomery domain.
-    var RR = Ꮡ(new p256OrdElement(new uint64[]{(nuint)0x83244c95be79eea2UL, 0x4699799c49bd6fa6UL,
+    var RR = Ꮡ(new p256OrdElement(new uint64[]{0x83244c95be79eea2UL, 0x4699799c49bd6fa6UL,
         0x2845b2392b6bec59UL, 0x66e12d94f3d95620UL}.array()));
     p256OrdMul(_1, x, RR);
     // _1

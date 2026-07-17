@@ -14,7 +14,7 @@ partial class rand_package {
  * (Marsaglia & Tsang, 2000)
  * http://www.jstatsoft.org/v05/i08/paper [pdf]
  */
-internal static readonly UntypedFloat rn = /* 3.442619855899 */ 3.44262;
+internal static readonly UntypedFloat rn = 3.442619855899;
 
 internal static uint32 absInt32(int32 i) {
     if (i < 0) {

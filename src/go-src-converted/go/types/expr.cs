@@ -764,7 +764,7 @@ internal static void shift(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<opera
                 return;
             }
             // rhs must be within reasonable bounds in constant shifts
-            UntypedInt shiftBound = /* 1023 - 1 + 52 */ 1074; // so we can express smallestFloat64 (see go.dev/issue/44057)
+            const uint64 shiftBound = /* 1023 - 1 + 52 */ 1074; // so we can express smallestFloat64 (see go.dev/issue/44057)
             var (s, ok) = constant.Uint64Val(yval);
             if (!ok || s > shiftBound) {
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡy), InvalidShiftCount, invalidOp + "invalid shift count %s", Ꮡy);
@@ -1163,7 +1163,7 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
             // consume a lot of space and time for a useless conversion.
             // Cap constant length with a generous upper limit that also
             // allows for separators between all digits.
-            UntypedInt limit = 10000;
+            const nint limit = 10000;
             if (len((~eΔ1).Value) > limit) {
                 Ꮡcheck.errorf(new ast_BasicLitжpositioner(eΔ1), InvalidConstVal, "excessively long constant: %s... (%d chars)"u8, (~eΔ1).Value[..10], len((~eΔ1).Value));
                 goto ΔError;
@@ -1711,14 +1711,14 @@ internal static void typeAssertion(this ж<Checker> Ꮡcheck, ast.Expr e, ж<ope
 // If an error occurred, x.mode is set to invalid.
 internal static void expr(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<operand> Ꮡx, ast.Expr e) {
     Ꮡcheck.rawExpr(ᏑT, Ꮡx, e, default!, false);
-    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltin))) | (nuint)(1 << (int)(byte)(typexpr))));
+    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltinᴛ))) | (nuint)(1 << (int)(byte)(typexpr))));
     Ꮡcheck.singleValue(Ꮡx);
 }
 
 // genericExpr is like expr but the result may also be generic.
 internal static void genericExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e) {
     Ꮡcheck.rawExpr(nil, Ꮡx, e, default!, true);
-    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltin))) | (nuint)(1 << (int)(byte)(typexpr))));
+    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltinᴛ))) | (nuint)(1 << (int)(byte)(typexpr))));
     Ꮡcheck.singleValue(Ꮡx);
 }
 
@@ -1733,7 +1733,7 @@ internal static (slice<ж<operand>> list, bool commaOk) multiExpr(this ж<Checke
 
     ref var x = ref heap(new operand(), out var Ꮡx);
     Ꮡcheck.rawExpr(nil, Ꮡx, e, default!, false);
-    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltin))) | (nuint)(1 << (int)(byte)(typexpr))));
+    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltinᴛ))) | (nuint)(1 << (int)(byte)(typexpr))));
     {
         var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok && x.mode != invalid) {
             // multiple values
@@ -1763,7 +1763,7 @@ internal static (slice<ж<operand>> list, bool commaOk) multiExpr(this ж<Checke
 internal static void exprWithHint(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e, ΔType hint) {
     assert(hint != default!);
     Ꮡcheck.rawExpr(nil, Ꮡx, e, hint, false);
-    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltin))) | (nuint)(1 << (int)(byte)(typexpr))));
+    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltinᴛ))) | (nuint)(1 << (int)(byte)(typexpr))));
     Ꮡcheck.singleValue(Ꮡx);
 }
 
@@ -1794,7 +1794,7 @@ internal static void exclude(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, nuint 
             }
             code = TooManyValues;
         }
-        else if (exprᴛ1 == Δbuiltin) {
+        else if (exprᴛ1 == Δbuiltinᴛ) {
             msg = "%s must be called"u8;
             code = UncalledBuiltin;
         }

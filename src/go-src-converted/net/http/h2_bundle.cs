@@ -1097,7 +1097,7 @@ internal static readonly UntypedInt http2inflowMinRefresh = /* 4 << 10 */ 4096;
     var unsent = (int64)f.unsent + (int64)n;
     // "A sender MUST NOT allow a flow-control window to exceed 2^31-1 octets."
     // RFC 7540 Section 6.9.1.
-    UntypedInt maxWindow = /* 1<<31 - 1 */ 2147483647;
+    const int64 maxWindow = /* 1<<31 - 1 */ 2147483647;
     if (unsent + (int64)f.avail > maxWindow) {
         throw panic("flow control update exceeds maximum window size");
     }
@@ -2885,13 +2885,13 @@ internal static @string http2summarizeFrame(http2Frame f) {
     case ж<http2DataFrame> fΔ1: {
         var data = fΔ1.Data();
 // remove trailing comma
-        UntypedInt max = 256;
+        const nint max = 256;
         if (builtin.len(data) > max) {
             data = data[..(int)(max)];
         }
         fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), " data=%q"u8, data);
         if (builtin.len(fΔ1.Data()) > max) {
-            fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), " (%d bytes omitted)"u8, builtin.len(fΔ1.Data()) - (nint)max);
+            fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), " (%d bytes omitted)"u8, builtin.len(fΔ1.Data()) - max);
         }
         break;
     }
@@ -4525,8 +4525,8 @@ internal static bool http2isClosedConnError(error err) {
             var (oe, ok) = err._<ж<net.OpError>>(ᐧ); if (ok && (~oe).Op == "read"u8) {
                 {
                     var (se, okΔ1) = (~oe).Err._<ж<os.SyscallError>>(ᐧ); if (okΔ1 && (~se).Syscall == "wsarecv"u8) {
-                        UntypedInt WSAECONNABORTED = 10053;
-                        UntypedInt WSAECONNRESET = 10054;
+                        uintptr WSAECONNABORTED = 10053;
+                        uintptr WSAECONNRESET = 10054;
                         {
                             var n = http2errno((~se).Err); if (n == WSAECONNRESET || n == WSAECONNABORTED) {
                                 return true;
@@ -6371,7 +6371,7 @@ internal static void runHandler(this ж<http2serverConn> Ꮡsc, ж<http2response
             ));
             // Same as net/http:
             if (e != default! && !AreEqual(e, ErrAbortHandler)) {
-                UntypedInt size = /* 64 << 10 */ 65536;
+                const nint size = /* 64 << 10 */ 65536;
                 var buf = new slice<byte>(size);
                 buf = buf[..(int)(runtime.Stack(buf, false))];
                 Ꮡsc.Value.logf("http2: panic serving %v: %v\n%s"u8, Ꮡsc.Value.conn.RemoteAddr(), e, buf);
@@ -6389,7 +6389,7 @@ internal static void http2handleHeaderListTooLong(ResponseWriter w, ж<Request> 
     // .. "A server that receives a larger header block than it is
     // willing to handle can send an HTTP 431 (Request Header Fields Too
     // Large) status code"
-    UntypedInt statusRequestHeaderFieldsTooLarge = 431; // only in Go 1.6+
+    const nint statusRequestHeaderFieldsTooLarge = 431; // only in Go 1.6+
     w.WriteHeader(statusRequestHeaderFieldsTooLarge);
     io.WriteString(new ResponseWriterᴠWriter(w), "<h1>HTTP Error 431</h1><p>Request Header Field(s) Too Large</p>"u8);
 }
@@ -8141,7 +8141,7 @@ internal static (ж<http2ClientConn>, error) newClientConn(this ж<http2Transpor
 
         maxConcurrentStreams: http2initialMaxConcurrentStreams, // "infinite", per spec. Use a smaller value until we have received server settings.
 
-        peerMaxHeaderListSize: (nuint)0xffffffffffffffffUL, // "infinite", per spec. Use 2^64-1 instead.
+        peerMaxHeaderListSize: 0xffffffffffffffffUL, // "infinite", per spec. Use 2^64-1 instead.
 
         streams: new map<uint32, ж<http2clientStream>>(),
         singleUse: singleUse,
@@ -9190,7 +9190,7 @@ internal static error http2errReqBodyTooLong = errors.New("http2: request body l
 // It returns max(1, min(peer's advertised max frame size,
 // Request.ContentLength+1, 512KB)).
 [GoRecv] internal static nint frameScratchBufferLen(this ref http2clientStream cs, nint maxFrameSize) {
-    UntypedInt max = /* 512 << 10 */ 524288;
+    const int64 max = /* 512 << 10 */ 524288;
     var n = (int64)maxFrameSize;
     if (n > max) {
         n = max;
@@ -10065,7 +10065,7 @@ internal static error processHeaders(this ж<http2clientConnReadLoop> Ꮡrl, ж<
             return (default!, errors.New("1xx informational response with END_STREAM flag"u8));
         }
         cs.num1xx++;
-        UntypedInt max1xxResponses = 5; // arbitrary bound on number of informational responses, same as net/http
+        const uint8 max1xxResponses = 5; // arbitrary bound on number of informational responses, same as net/http
         if (cs.num1xx > max1xxResponses) {
             return (default!, errors.New("http2: too many 1xx informational responses"u8));
         }
@@ -11058,8 +11058,8 @@ internal static bool staysWithinBuffer(this http2flushFrameWriter _, nint max) {
 [GoType("[]http2Setting")] partial struct http2writeSettings;
 
 internal static bool staysWithinBuffer(this http2writeSettings s, nint max) {
-    UntypedInt settingSize = 6; // uint16 + uint32
-    return (nint)http2frameHeaderLen + (nint)settingSize * builtin.len(s) <= max;
+    const nint settingSize = 6; // uint16 + uint32
+    return (nint)http2frameHeaderLen + settingSize * builtin.len(s) <= max;
 }
 
 internal static error writeFrame(this http2writeSettings s, http2writeContext ctx) {
@@ -11156,7 +11156,7 @@ internal static error http2splitHeaderBlock(http2writeContext ctx, slice<byte> h
     // there's little point. Most headers are small anyway (so we
     // generally won't have CONTINUATION frames), and extra frames
     // only waste 9 bytes anyway.
-    UntypedInt maxFrameSize = 16384;
+    const nint maxFrameSize = 16384;
     var first = true;
     while (builtin.len(headerBlock) > 0) {
         var frag = headerBlock;

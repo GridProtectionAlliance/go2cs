@@ -95,9 +95,9 @@ public static float64 Tan(float64 x) {
 }
 
 internal static float64 tan(float64 x) {
-    UntypedFloat PI4A = /* 7.85398125648498535156e-1 */ 0.785398;    // 0x3fe921fb40000000, Pi/4 split into three parts
-    UntypedFloat PI4B = /* 3.77489470793079817668e-8 */ 3.77489e-08; // 0x3e64442d00000000,
-    UntypedFloat PI4C = /* 2.69515142907905952645e-15 */ 2.69515e-15; // 0x3ce8469898cc5170,
+    const float64 PI4A = 7.85398125648498535156e-1; // 0x3fe921fb40000000, Pi/4 split into three parts
+    const float64 PI4B = 3.77489470793079817668e-8; // 0x3e64442d00000000,
+    const float64 PI4C = 2.69515142907905952645e-15; // 0x3ce8469898cc5170,
     // special cases
     switch (ᐧ) {
     case {} when x == 0 || IsNaN(x): {
@@ -129,7 +129,7 @@ internal static float64 tan(float64 x) {
             j++;
             y++;
         }
-        z = ((x - y * (float64)PI4A) - y * (float64)PI4B) - y * (float64)PI4C;
+        z = ((x - y * PI4A) - y * PI4B) - y * PI4C;
     }
     var zz = z * z;
     if (zz > 1e-14D){

@@ -46,9 +46,9 @@ public static float64 Asinh(float64 x) {
 }
 
 internal static float64 asinh(float64 x) {
-    UntypedFloat Ln2 = /* 6.93147180559945286227e-01 */ 0.693147;    // 0x3FE62E42FEFA39EF
-    UntypedFloat NearZero = /* 1.0 / (1 << 28) */ 3.72529e-09; // 2**-28
-    UntypedInt Large = /* 1 << 28 */ 268435456; // 2**28
+    const float64 Ln2 = 6.93147180559945286227e-01; // 0x3FE62E42FEFA39EF
+    const float64 NearZero = /* 1.0 / (1 << 28) */ 3.725290298461914e-09; // 2**-28
+    const float64 Large = /* 1 << 28 */ 268435456; // 2**28
     // special cases
     if (IsNaN(x) || IsInf(x, 0)) {
         return x;
@@ -61,7 +61,7 @@ internal static float64 asinh(float64 x) {
     float64 temp = default!;
     switch (ᐧ) {
     case {} when x > Large: {
-        temp = Log(x) + (float64)Ln2;
+        temp = Log(x) + Ln2;
         break;
     }
     case {} when x is > 2: {

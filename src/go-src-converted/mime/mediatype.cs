@@ -381,7 +381,7 @@ internal static (@string, error) percentHexUnescape(@string s) {
     for (nint i = 0; i < len(s); ) {
         switch (s[i]) {
         case (rune)'%': {
-            t[j] = (byte)((unhex(s[i + 1]) << (int)(4)) | unhex(s[i + 2]));
+            t[j] = (byte)((byte)(unhex(s[i + 1]) << (int)(4)) | unhex(s[i + 2]));
             j++;
             i += 3;
             break;

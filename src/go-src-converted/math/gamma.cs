@@ -103,8 +103,8 @@ internal static (float64, float64) stirling(float64 x) {
     if (x > 200) {
         return (Inf(1), 1);
     }
-    UntypedFloat SqrtTwoPi = /* 2.506628274631000502417 */ 2.50663;
-    UntypedFloat MaxStirling = /* 143.01608 */ 143.016;
+    const float64 SqrtTwoPi = 2.506628274631000502417;
+    const float64 MaxStirling = 143.01608;
     var w = 1 / x;
     w = 1 + w * ((((_gamS[0] * w + _gamS[1]) * w + _gamS[2]) * w + _gamS[3]) * w + _gamS[4]);
     var y1 = Exp(x);
@@ -116,7 +116,7 @@ internal static (float64, float64) stirling(float64 x) {
     } else {
         y1 = Pow(x, x - 0.5D) / y1;
     }
-    return (y1, (float64)SqrtTwoPi * w * y2);
+    return (y1, SqrtTwoPi * w * y2);
 }
 
 // Gamma returns the Gamma function of x.
@@ -130,7 +130,7 @@ internal static (float64, float64) stirling(float64 x) {
 //	Gamma(-Inf) = NaN
 //	Gamma(NaN) = NaN
 public static float64 Gamma(float64 x) {
-    UntypedFloat Euler = /* 0.57721566490153286060651209008240243104215933593992 */ 0.577216;                              // A001620
+    const float64 Euler = 0.57721566490153286060651209008240243104215933593992; // A001620
     // special cases
     switch (ᐧ) {
     case {} when isNegInt(x) || IsInf(x, -1) || IsNaN(x): {
@@ -212,7 +212,7 @@ small:
     if (x == 0) {
         return Inf(1);
     }
-    return z / ((1 + (float64)Euler * x) * x);
+    return z / ((1 + Euler * x) * x);
 }
 
 internal static bool isNegInt(float64 x) {

@@ -409,7 +409,7 @@ internal static (byte, error) readHexByte(byte a, byte b) {
             return (0, err);
         }
     }
-    return ((byte)((hb << (int)(4)) | lb), default!);
+    return ((byte)((byte)(hb << (int)(4)) | lb), default!);
 }
 
 internal static (byte, error) fromHex(byte b) {

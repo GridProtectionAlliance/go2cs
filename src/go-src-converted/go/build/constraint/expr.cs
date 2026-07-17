@@ -436,7 +436,7 @@ internal static (Expr, error) parsePlusBuildExpr(@string text) {
     // Only allow up to 100 AND/OR operators for "old" syntax.
     // This is much less than the limit for "new" syntax,
     // but uses of old syntax were always very simple.
-    UntypedInt maxOldSize = 100;
+    const nint maxOldSize = 100;
     nint size = 0;
     Expr x = default!;
     foreach (var (_, clause) in strings.Fields(text)) {

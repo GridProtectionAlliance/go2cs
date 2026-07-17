@@ -62,15 +62,15 @@ internal static readonly UntypedInt dequeueLimit = /* (1 << dequeueBits) / 4 */ 
     uint32 head = default!;
     uint32 tail = default!;
 
-    UntypedInt mask = /* 1<<dequeueBits - 1 */ 4294967295;
-    head = (uint32)((uint64)(((ptrs >> (int)(dequeueBits))) & (uint64)mask));
-    tail = (uint32)((uint64)(ptrs & (uint64)mask));
+    const uint64 mask = /* 1<<dequeueBits - 1 */ 4294967295;
+    head = (uint32)((uint64)(((ptrs >> (int)(dequeueBits))) & mask));
+    tail = (uint32)((uint64)(ptrs & mask));
     return (head, tail);
 }
 
 [GoRecv] internal static uint64 pack(this ref poolDequeue d, uint32 head, uint32 tail) {
-    UntypedInt mask = /* 1<<dequeueBits - 1 */ 4294967295;
-    return (uint64)((((uint64)head << (int)(dequeueBits))) | (uint64)((uint32)(tail & (uint32)mask)));
+    const uint32 mask = /* 1<<dequeueBits - 1 */ 4294967295;
+    return (uint64)((((uint64)head << (int)(dequeueBits))) | (uint64)((uint32)(tail & mask)));
 }
 
 // pushHead adds val at the head of the queue. It returns false if the
@@ -216,7 +216,7 @@ internal static void pushHead(this ж<poolChain> Ꮡc, any val) {
     var d = c.head;
     if (d == nil) {
         // Initialize the chain.
-        UntypedInt initSize = 8; // Must be a power of 2
+        const nint initSize = 8; // Must be a power of 2
         d = @new<poolChainElt>();
         d.Value.vals = new slice<eface>(initSize);
         c.head = d;

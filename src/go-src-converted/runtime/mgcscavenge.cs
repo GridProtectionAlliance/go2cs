@@ -212,7 +212,7 @@ internal static ж<Δscavengeᴛ1> ᏑΔscavenge = new(default(Δscavengeᴛ1));
 internal static ref Δscavengeᴛ1 Δscavenge => ref ᏑΔscavenge.Value;
 
 internal static readonly UntypedFloat startingScavSleepRatio = 0.001;
-internal static readonly UntypedFloat minScavWorkTime = 1e+06;
+internal static readonly UntypedFloat minScavWorkTime = 1e6;
 
 // Sleep/wait state of the background scavenger.
 internal static ж<scavengerState> Ꮡscavenger = new(default(scavengerState));
@@ -522,7 +522,7 @@ internal static (uintptr released, float64 worked) run(this ж<scavengerState> �
         // (this is somewhat pessimistic), which implies a worst-case latency of
         // about 160µs for 4 KiB physical pages. The current value is biased
         // toward latency over throughput.
-        UntypedInt scavengeQuantum = /* 64 << 10 */ 65536;
+        uintptr scavengeQuantum = /* 64 << 10 */ 65536;
         // Accumulate the amount of time spent scavenging.
         var (r, duration) = s.scavenge(scavengeQuantum);
         // On some platforms we may see end >= start if the time it takes to scavenge
@@ -532,9 +532,9 @@ internal static (uintptr released, float64 worked) run(this ж<scavengerState> �
         // In this case, just assume scavenging takes 10 µs per regular physical page
         // (determined empirically), and conservatively ignore the impact of huge pages
         // on timing.
-        UntypedFloat approxWorkedNSPerPhysicalPage = 10000;
+        const float64 approxWorkedNSPerPhysicalPage = 10e3;
         if (duration == 0){
-            worked += (float64)approxWorkedNSPerPhysicalPage * (float64)(r / physPageSize);
+            worked += approxWorkedNSPerPhysicalPage * (float64)(r / physPageSize);
         } else {
             // TODO(mknyszek): If duration is small compared to worked, it could be
             // rounded down to zero. Probably not a problem in practice because the

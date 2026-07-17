@@ -384,7 +384,7 @@ public static bool IsType(this TypeAndValue tv) {
 // IsBuiltin reports whether the corresponding expression denotes
 // a (possibly parenthesized) built-in function.
 public static bool IsBuiltin(this TypeAndValue tv) {
-    return tv.mode == Δbuiltin;
+    return tv.mode == Δbuiltinᴛ;
 }
 
 // IsValue reports whether the corresponding expression is a value.

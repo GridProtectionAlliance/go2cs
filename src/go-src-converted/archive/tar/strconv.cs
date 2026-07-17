@@ -205,7 +205,7 @@ internal static bool fitsInOctal(nint n, int64 x) {
 // specification. Note that this implementation allows for negative timestamps,
 // which is allowed for by the PAX specification, but not always portable.
 internal static (time.Time, error) parsePAXTime(@string s) {
-    UntypedInt maxNanoSecondDigits = 9;
+    const nint maxNanoSecondDigits = 9;
     // Split string into seconds and sub-seconds parts.
     var (ss, sn, _) = strings.Cut(s, "."u8);
     // Parse the seconds.
@@ -222,7 +222,7 @@ internal static (time.Time, error) parsePAXTime(@string s) {
         return (new time.Time(nil), ErrHeader);
     }
     if (len(sn) < maxNanoSecondDigits){
-        sn += strings.Repeat("0"u8, (nint)maxNanoSecondDigits - len(sn));
+        sn += strings.Repeat("0"u8, maxNanoSecondDigits - len(sn));
     } else {
         // Right pad
         sn = sn[..(int)(maxNanoSecondDigits)];
@@ -309,8 +309,8 @@ internal static (@string, error) formatPAXRecord(@string k, @string v) {
     if (!validPAXRecord(k, v)) {
         return ("", ErrHeader);
     }
-    UntypedInt padding = 3; // Extra padding for ' ', '=', and '\n'
-    nint size = len(k) + len(v) + (nint)padding;
+    const nint padding = 3; // Extra padding for ' ', '=', and '\n'
+    nint size = len(k) + len(v) + padding;
     size += len(strconv.Itoa(size));
     @string record = strconv.Itoa(size) + " "u8 + k + "="u8 + v + "\n"u8;
     // Final adjustment if adding size field increased the record size.

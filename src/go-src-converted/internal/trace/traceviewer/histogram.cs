@@ -55,7 +55,7 @@ public static template.HTML ToHTML(this ж<TimeHistogram> Ꮡh, Func<time.Durati
     if (Ꮡh == nil || h.Count == 0) {
         return ((template.HTML)(@string)""u8);
     }
-    UntypedInt barWidth = 400;
+    const nint barWidth = 400;
     nint maxCount = 0;
     foreach (var (_, count) in h.Buckets) {
         if (count > maxCount) {
@@ -72,7 +72,7 @@ public static template.HTML ToHTML(this ж<TimeHistogram> Ꮡh, Func<time.Durati
             fmt.Fprintf(new strings_BuilderжWriter(w), @"<tr><td class=""histoTime"" align=""right"">%s</td>"u8, h.BucketMin(i));
         }
         // Bucket bar.
-        nint width = h.Buckets[i] * (nint)barWidth / maxCount;
+        nint width = h.Buckets[i] * barWidth / maxCount;
         fmt.Fprintf(new strings_BuilderжWriter(w), @"<td><div style=""width:%dpx;background:blue;position:relative"">&nbsp;</div></td>"u8, width);
         // Bucket count.
         fmt.Fprintf(new strings_BuilderжWriter(w), @"<td align=""right""><div style=""position:relative"">%d</div></td>"u8, h.Buckets[i]);

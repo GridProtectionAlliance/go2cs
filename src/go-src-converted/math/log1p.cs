@@ -102,20 +102,20 @@ public static float64 Log1p(float64 x) {
 }
 
 internal static float64 log1p(float64 x) {
-    UntypedFloat Sqrt2M1 = /* 4.142135623730950488017e-01 */ 0.414214;      // Sqrt(2)-1 = 0x3fda827999fcef34
-    UntypedFloat Sqrt2HalfM1 = /* -2.928932188134524755992e-01 */ -0.292893; // Sqrt(2)/2-1 = 0xbfd2bec333018866
-    UntypedFloat Small = /* 1.0 / (1 << 29) */ 1.86265e-09; // 2**-29 = 0x3e20000000000000
-    UntypedFloat Tiny = /* 1.0 / (1 << 54) */ 5.55112e-17; // 2**-54
-    UntypedInt Two53 = /* 1 << 53 */ 9007199254740992; // 2**53
-    UntypedFloat Ln2Hi = /* 6.93147180369123816490e-01 */ 0.693147;      // 3fe62e42fee00000
-    UntypedFloat Ln2Lo = /* 1.90821492927058770002e-10 */ 1.90821e-10;   // 3dea39ef35793c76
-    UntypedFloat Lp1 = /* 6.666666666666735130e-01 */ 0.666667;      // 3FE5555555555593
-    UntypedFloat Lp2 = /* 3.999999999940941908e-01 */ 0.4;           // 3FD999999997FA04
-    UntypedFloat Lp3 = /* 2.857142874366239149e-01 */ 0.285714;      // 3FD2492494229359
-    UntypedFloat Lp4 = /* 2.222219843214978396e-01 */ 0.222222;      // 3FCC71C51D8E78AF
-    UntypedFloat Lp5 = /* 1.818357216161805012e-01 */ 0.181836;      // 3FC7466496CB03DE
-    UntypedFloat Lp6 = /* 1.531383769920937332e-01 */ 0.153138;      // 3FC39A09D078C69F
-    UntypedFloat Lp7 = /* 1.479819860511658591e-01 */ 0.147982;      // 3FC2F112DF3E5244
+    const float64 Sqrt2M1 = 4.142135623730950488017e-01; // Sqrt(2)-1 = 0x3fda827999fcef34
+    const float64 Sqrt2HalfM1 = -2.928932188134524755992e-01; // Sqrt(2)/2-1 = 0xbfd2bec333018866
+    const float64 Small = /* 1.0 / (1 << 29) */ 1.862645149230957e-09; // 2**-29 = 0x3e20000000000000
+    const float64 Tiny = /* 1.0 / (1 << 54) */ 5.551115123125783e-17; // 2**-54
+    const float64 Two53 = /* 1 << 53 */ 9007199254740992; // 2**53
+    const float64 Ln2Hi = 6.93147180369123816490e-01; // 3fe62e42fee00000
+    const float64 Ln2Lo = 1.90821492927058770002e-10; // 3dea39ef35793c76
+    const float64 Lp1 = 6.666666666666735130e-01; // 3FE5555555555593
+    const float64 Lp2 = 3.999999999940941908e-01; // 3FD999999997FA04
+    const float64 Lp3 = 2.857142874366239149e-01; // 3FD2492494229359
+    const float64 Lp4 = 2.222219843214978396e-01; // 3FCC71C51D8E78AF
+    const float64 Lp5 = 1.818357216161805012e-01; // 3FC7466496CB03DE
+    const float64 Lp6 = 1.531383769920937332e-01; // 3FC39A09D078C69F
+    const float64 Lp7 = 1.479819860511658591e-01; // 3FC2F112DF3E5244
     // special cases
     switch (ᐧ) {
     case {} when x < -1 || IsNaN(x): {
@@ -196,23 +196,23 @@ internal static float64 log1p(float64 x) {
             if (k == 0) {
                 return 0;
             }
-            c += (float64)k * (float64)Ln2Lo;
-            return (float64)k * (float64)Ln2Hi + c;
+            c += (float64)k * Ln2Lo;
+            return (float64)k * Ln2Hi + c;
         }
         R = hfsq * (1.0D - 0.66666666666666666D * f);
         // avoid division
         if (k == 0) {
             return f - R;
         }
-        return (float64)k * (float64)Ln2Hi - ((R - ((float64)k * (float64)Ln2Lo + c)) - f);
+        return (float64)k * Ln2Hi - ((R - ((float64)k * Ln2Lo + c)) - f);
     }
     s = f / (2.0D + f);
     z = s * s;
-    R = z * ((float64)Lp1 + z * ((float64)Lp2 + z * ((float64)Lp3 + z * ((float64)Lp4 + z * ((float64)Lp5 + z * ((float64)Lp6 + z * (float64)Lp7))))));
+    R = z * (Lp1 + z * (Lp2 + z * (Lp3 + z * (Lp4 + z * (Lp5 + z * (Lp6 + z * Lp7))))));
     if (k == 0) {
         return f - (hfsq - s * (hfsq + R));
     }
-    return (float64)k * (float64)Ln2Hi - ((hfsq - (s * (hfsq + R) + ((float64)k * (float64)Ln2Lo + c))) - f);
+    return (float64)k * Ln2Hi - ((hfsq - (s * (hfsq + R) + ((float64)k * Ln2Lo + c))) - f);
 }
 
 } // end math_package

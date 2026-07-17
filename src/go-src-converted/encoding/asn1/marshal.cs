@@ -236,7 +236,7 @@ internal static nint /*numBytes*/ lengthLength(nint i) {
 }
 
 internal static slice<byte> appendTagAndLength(slice<byte> dst, tagAndLength t) {
-    var b = (uint8)(((uint8)t.@class << (int)(6)));
+    var b = (uint8)((uint8)t.@class << (int)(6));
     if (t.isCompound) {
         b |= (uint8)(0x20);
     }

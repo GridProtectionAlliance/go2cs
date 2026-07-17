@@ -166,17 +166,17 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     //	number of transition times
     //	number of local time zones
     //	number of characters of time zone abbrev strings
-    UntypedInt NUTCLocal = iota;
+    const nint NUTCLocal = /* iota */ 0;
     
-    UntypedInt NStdWall = 1;
+    const nint NStdWall = 1;
     
-    UntypedInt NLeap = 2;
+    const nint NLeap = 2;
     
-    UntypedInt NTime = 3;
+    const nint NTime = 3;
     
-    UntypedInt NZone = 4;
+    const nint NZone = 4;
     
-    UntypedInt NChar = 5;
+    const nint NChar = 5;
     array<nint> n = new(6);
     for (nint i = 0; i < 6; i++) {
         var (nn, ok) = d.big4();
@@ -420,11 +420,11 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
         return (default!, err);
     }
     deferǃ(closefd, fd, defer);
-    UntypedInt zecheader = 0x06054b50;
-    UntypedInt zcheader = 0x02014b50;
+    const nint zecheader = 0x06054b50;
+    const nint zcheader = 0x02014b50;
     UntypedInt ztailsize = 22;
-    UntypedInt zheadersize = 30;
-    UntypedInt zheader = 0x04034b50;
+    const nint zheadersize = 30;
+    const nint zheader = 0x04034b50;
     var buf = new slice<byte>(ztailsize);
     {
         var errΔ1 = preadn(fd, buf, -ztailsize); if (errΔ1 != default! || get4(buf) != zecheader) {
@@ -497,7 +497,7 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
         //	30	name[namelen]
         //	30+namelen+xlen - file data
         //
-        buf = new slice<byte>((nint)zheadersize + namelen);
+        buf = new slice<byte>(zheadersize + namelen);
         {
             var errΔ3 = preadn(fd, buf, offΔ1); if (errΔ3 != default! || get4(buf) != zheader || get2(buf[8..]) != meth || get2(buf[26..]) != namelen || ((sstring)(buf[30..(int)(30 + namelen)])) != name) {
                 return (default!, errors.New("corrupt zip file "u8 + zipfile));

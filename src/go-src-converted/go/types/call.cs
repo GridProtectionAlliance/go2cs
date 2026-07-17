@@ -256,9 +256,9 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         x.expr = new ast_CallExprжExpr(Ꮡcall);
         return Δconversion;
     }
-    if (exprᴛ1 == Δbuiltin) {
+    if (exprᴛ1 == Δbuiltinᴛ) {
         builtinId id = x.id;
-        if (!Ꮡcheck.builtin(Ꮡx, // no need to check for non-genericity here
+        if (!Ꮡcheck.Δbuiltin(Ꮡx, // no need to check for non-genericity here
  Ꮡcall, id)) {
             x.mode = invalid;
         }
@@ -443,7 +443,7 @@ internal static (slice<ж<operand>> resList, slice<slice<ΔType>> targsList, sli
                 } else {
                     // x is not a function instantiation (it may still be a generic function).
                     Ꮡcheck.rawExpr(nil, Ꮡx, e, default!, true);
-                    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltin))) | (nuint)(1 << (int)(byte)(typexpr))));
+                    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltinᴛ))) | (nuint)(1 << (int)(byte)(typexpr))));
                     {
                         var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok && x.mode != invalid){
                             // x is a function call returning multiple values; it cannot be generic.
@@ -828,7 +828,7 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
                         break;
                     }
                     case ж<Builtin> expΔ1: {
-                        x.mode = Δbuiltin;
+                        x.mode = Δbuiltinᴛ;
                         x.typ = expΔ1.Value.typ;
                         x.id = expΔ1.Value.id;
                         break;
@@ -854,7 +854,7 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
             goto ΔError;
         }
     }
-    else if (exprᴛ1 == Δbuiltin) {
+    else if (exprᴛ1 == Δbuiltinᴛ) {
         Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), // types2 uses the position of '.' for the error
  UncalledBuiltin, "cannot select on %s"u8, Ꮡx);
         goto ΔError;

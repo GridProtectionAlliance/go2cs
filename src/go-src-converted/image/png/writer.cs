@@ -442,7 +442,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
             nint c = default!;
             nint pixelsPerByte = 8 / bitsPerPixel;
             for (nint x = b.Min.X; x < b.Max.X; x++) {
-                a = (uint8)((a << (int)((nuint)bitsPerPixel)) | pi.ColorIndexAt(x, y));
+                a = (uint8)((uint8)(a << (int)((nuint)bitsPerPixel)) | pi.ColorIndexAt(x, y));
                 c++;
                 if (c == pixelsPerByte) {
                     cr[0][i] = a;
@@ -453,7 +453,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
             }
             if (c != 0) {
                 while (c != pixelsPerByte) {
-                    a = (uint8)((a << (int)((nuint)bitsPerPixel)));
+                    a = (uint8)(a << (int)((nuint)bitsPerPixel));
                     c++;
                 }
                 cr[0][i] = a;
@@ -487,11 +487,11 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
                         // 8-bit color to 16-bit color) and 0xffff (which, when
                         // combined with the division-by-a, converts from
                         // alpha-premultiplied to non-alpha-premultiplied).
-                        UntypedInt mΔ2 = /* 0x101 * 0xffff */ 16842495;
+                        const uint32 mΔ2 = /* 0x101 * 0xffff */ 16842495;
                         var a = (uint32)s.Value[3] * 0x101;
-                        d.Value[0] = (uint8)((((uint32)s.Value[0] * (uint32)mΔ2 / a) >> (int)(8)));
-                        d.Value[1] = (uint8)((((uint32)s.Value[1] * (uint32)mΔ2 / a) >> (int)(8)));
-                        d.Value[2] = (uint8)((((uint32)s.Value[2] * (uint32)mΔ2 / a) >> (int)(8)));
+                        d.Value[0] = (uint8)((((uint32)s.Value[0] * mΔ2 / a) >> (int)(8)));
+                        d.Value[1] = (uint8)((((uint32)s.Value[1] * mΔ2 / a) >> (int)(8)));
+                        d.Value[2] = (uint8)((((uint32)s.Value[2] * mΔ2 / a) >> (int)(8)));
                         d.Value[3] = s.Value[3];
                     }
                 }

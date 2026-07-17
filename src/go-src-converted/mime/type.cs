@@ -117,7 +117,7 @@ public static @string TypeByExtension(@string ext) {
     // allocation-free in that case.
     array<byte> buf = new(10);
     var lower = buf[..0];
-    UntypedInt utf8RuneSelf = 0x80; // from utf8 package, but not importing it.
+    const byte utf8RuneSelf = 0x80; // from utf8 package, but not importing it.
     for (nint i = 0; i < len(ext); i++) {
         var c = ext[i];
         if (c >= utf8RuneSelf) {

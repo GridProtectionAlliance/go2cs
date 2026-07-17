@@ -68,7 +68,7 @@ partial class edwards25519_package {
 internal static void fiatScalarCmovznzU64(ж<uint64> Ꮡout1, fiatScalarUint1 arg1, uint64 arg2, uint64 arg3) {
     ref var out1 = ref Ꮡout1.Value;
 
-    var x1 = ((uint64)arg1 * (nuint)0xffffffffffffffffUL);
+    var x1 = ((uint64)arg1 * 0xffffffffffffffffUL);
     var x2 = ((uint64)(((uint64)(x1 & arg3)) | ((uint64)((~x1) & arg2))));
     out1 = x2;
 }
@@ -116,7 +116,7 @@ internal static void fiatScalarMul(ж<fiatScalarMontgomeryDomainFieldElement> �
     (x17, x18) = bits.Add64(x8, x5, (uint64)((fiatScalarUint1)x16));
     var x19 = ((uint64)((fiatScalarUint1)x18) + x6);
     uint64 x20 = default!;
-    (_, x20) = bits.Mul64(x11, (nuint)0xd2b51da312547e1bUL);
+    (_, x20) = bits.Mul64(x11, 0xd2b51da312547e1bUL);
     uint64 x22 = default!;
     uint64 x23 = default!;
     (x23, x22) = bits.Mul64(x20, 0x1000000000000000UL);
@@ -182,7 +182,7 @@ internal static void fiatScalarMul(ж<fiatScalarMontgomeryDomainFieldElement> �
     uint64 x65 = default!;
     (x64, x65) = bits.Add64((uint64)((fiatScalarUint1)x40), x55, (uint64)((fiatScalarUint1)x63));
     uint64 x66 = default!;
-    (_, x66) = bits.Mul64(x56, (nuint)0xd2b51da312547e1bUL);
+    (_, x66) = bits.Mul64(x56, 0xd2b51da312547e1bUL);
     uint64 x68 = default!;
     uint64 x69 = default!;
     (x69, x68) = bits.Mul64(x66, 0x1000000000000000UL);
@@ -249,7 +249,7 @@ internal static void fiatScalarMul(ж<fiatScalarMontgomeryDomainFieldElement> �
     uint64 x112 = default!;
     (x111, x112) = bits.Add64(x87, x102, (uint64)((fiatScalarUint1)x110));
     uint64 x113 = default!;
-    (_, x113) = bits.Mul64(x103, (nuint)0xd2b51da312547e1bUL);
+    (_, x113) = bits.Mul64(x103, 0xd2b51da312547e1bUL);
     uint64 x115 = default!;
     uint64 x116 = default!;
     (x116, x115) = bits.Mul64(x113, 0x1000000000000000UL);
@@ -316,7 +316,7 @@ internal static void fiatScalarMul(ж<fiatScalarMontgomeryDomainFieldElement> �
     uint64 x159 = default!;
     (x158, x159) = bits.Add64(x134, x149, (uint64)((fiatScalarUint1)x157));
     uint64 x160 = default!;
-    (_, x160) = bits.Mul64(x150, (nuint)0xd2b51da312547e1bUL);
+    (_, x160) = bits.Mul64(x150, 0xd2b51da312547e1bUL);
     uint64 x162 = default!;
     uint64 x163 = default!;
     (x163, x162) = bits.Mul64(x160, 0x1000000000000000UL);
@@ -458,7 +458,7 @@ internal static void fiatScalarSub(ж<fiatScalarMontgomeryDomainFieldElement> �
     uint64 x8 = default!;
     (x7, x8) = bits.Sub64(arg1[3], arg2[3], (uint64)((fiatScalarUint1)x6));
     ref var x9 = ref heap(new uint64(), out var Ꮡx9);
-    fiatScalarCmovznzU64(Ꮡx9, ((fiatScalarUint1)x8), (uint64)0x0, (nuint)0xffffffffffffffffUL);
+    fiatScalarCmovznzU64(Ꮡx9, ((fiatScalarUint1)x8), (uint64)0x0, 0xffffffffffffffffUL);
     uint64 x10 = default!;
     uint64 x11 = default!;
     (x10, x11) = bits.Add64(x1, ((uint64)(x9 & 0x5812631a5cf5d3edUL)), (uint64)0x0);
@@ -503,7 +503,7 @@ internal static void fiatScalarOpp(ж<fiatScalarMontgomeryDomainFieldElement> �
     uint64 x8 = default!;
     (x7, x8) = bits.Sub64((uint64)0x0, arg1[3], (uint64)((fiatScalarUint1)x6));
     ref var x9 = ref heap(new uint64(), out var Ꮡx9);
-    fiatScalarCmovznzU64(Ꮡx9, ((fiatScalarUint1)x8), (uint64)0x0, (nuint)0xffffffffffffffffUL);
+    fiatScalarCmovznzU64(Ꮡx9, ((fiatScalarUint1)x8), (uint64)0x0, 0xffffffffffffffffUL);
     uint64 x10 = default!;
     uint64 x11 = default!;
     (x10, x11) = bits.Add64(x1, ((uint64)(x9 & 0x5812631a5cf5d3edUL)), (uint64)0x0);
@@ -562,7 +562,7 @@ internal static void fiatScalarFromMontgomery(ж<fiatScalarNonMontgomeryDomainFi
 
     var x1 = arg1[0];
     uint64 x2 = default!;
-    (_, x2) = bits.Mul64(x1, (nuint)0xd2b51da312547e1bUL);
+    (_, x2) = bits.Mul64(x1, 0xd2b51da312547e1bUL);
     uint64 x4 = default!;
     uint64 x5 = default!;
     (x5, x4) = bits.Mul64(x2, 0x1000000000000000UL);
@@ -584,7 +584,7 @@ internal static void fiatScalarFromMontgomery(ж<fiatScalarNonMontgomeryDomainFi
     uint64 x17 = default!;
     (x16, x17) = bits.Add64(x14, arg1[1], (uint64)0x0);
     uint64 x18 = default!;
-    (_, x18) = bits.Mul64(x16, (nuint)0xd2b51da312547e1bUL);
+    (_, x18) = bits.Mul64(x16, 0xd2b51da312547e1bUL);
     uint64 x20 = default!;
     uint64 x21 = default!;
     (x21, x20) = bits.Mul64(x18, 0x1000000000000000UL);
@@ -618,7 +618,7 @@ internal static void fiatScalarFromMontgomery(ж<fiatScalarNonMontgomeryDomainFi
     uint64 x41 = default!;
     (x40, x41) = bits.Add64(x34, (uint64)0x0, (uint64)((fiatScalarUint1)x39));
     uint64 x42 = default!;
-    (_, x42) = bits.Mul64(x36, (nuint)0xd2b51da312547e1bUL);
+    (_, x42) = bits.Mul64(x36, 0xd2b51da312547e1bUL);
     uint64 x44 = default!;
     uint64 x45 = default!;
     (x45, x44) = bits.Mul64(x42, 0x1000000000000000UL);
@@ -652,7 +652,7 @@ internal static void fiatScalarFromMontgomery(ж<fiatScalarNonMontgomeryDomainFi
     uint64 x65 = default!;
     (x64, x65) = bits.Add64(x58, (uint64)0x0, (uint64)((fiatScalarUint1)x63));
     uint64 x66 = default!;
-    (_, x66) = bits.Mul64(x60, (nuint)0xd2b51da312547e1bUL);
+    (_, x66) = bits.Mul64(x60, 0xd2b51da312547e1bUL);
     uint64 x68 = default!;
     uint64 x69 = default!;
     (x69, x68) = bits.Mul64(x66, 0x1000000000000000UL);
@@ -728,13 +728,13 @@ internal static void fiatScalarToMontgomery(ж<fiatScalarMontgomeryDomainFieldEl
     (x6, x5) = bits.Mul64(x4, 0x399411b7c309a3dUL);
     uint64 x7 = default!;
     uint64 x8 = default!;
-    (x8, x7) = bits.Mul64(x4, (nuint)0xceec73d217f5be65UL);
+    (x8, x7) = bits.Mul64(x4, 0xceec73d217f5be65UL);
     uint64 x9 = default!;
     uint64 x10 = default!;
-    (x10, x9) = bits.Mul64(x4, (nuint)0xd00e1ba768859347UL);
+    (x10, x9) = bits.Mul64(x4, 0xd00e1ba768859347UL);
     uint64 x11 = default!;
     uint64 x12 = default!;
-    (x12, x11) = bits.Mul64(x4, (nuint)0xa40611e3449c0f01UL);
+    (x12, x11) = bits.Mul64(x4, 0xa40611e3449c0f01UL);
     uint64 x13 = default!;
     uint64 x14 = default!;
     (x13, x14) = bits.Add64(x12, x9, (uint64)0x0);
@@ -745,7 +745,7 @@ internal static void fiatScalarToMontgomery(ж<fiatScalarMontgomeryDomainFieldEl
     uint64 x18 = default!;
     (x17, x18) = bits.Add64(x8, x5, (uint64)((fiatScalarUint1)x16));
     uint64 x19 = default!;
-    (_, x19) = bits.Mul64(x11, (nuint)0xd2b51da312547e1bUL);
+    (_, x19) = bits.Mul64(x11, 0xd2b51da312547e1bUL);
     uint64 x21 = default!;
     uint64 x22 = default!;
     (x22, x21) = bits.Mul64(x19, 0x1000000000000000UL);
@@ -774,13 +774,13 @@ internal static void fiatScalarToMontgomery(ж<fiatScalarMontgomeryDomainFieldEl
     (x38, x37) = bits.Mul64(x1, 0x399411b7c309a3dUL);
     uint64 x39 = default!;
     uint64 x40 = default!;
-    (x40, x39) = bits.Mul64(x1, (nuint)0xceec73d217f5be65UL);
+    (x40, x39) = bits.Mul64(x1, 0xceec73d217f5be65UL);
     uint64 x41 = default!;
     uint64 x42 = default!;
-    (x42, x41) = bits.Mul64(x1, (nuint)0xd00e1ba768859347UL);
+    (x42, x41) = bits.Mul64(x1, 0xd00e1ba768859347UL);
     uint64 x43 = default!;
     uint64 x44 = default!;
-    (x44, x43) = bits.Mul64(x1, (nuint)0xa40611e3449c0f01UL);
+    (x44, x43) = bits.Mul64(x1, 0xa40611e3449c0f01UL);
     uint64 x45 = default!;
     uint64 x46 = default!;
     (x45, x46) = bits.Add64(x44, x41, (uint64)0x0);
@@ -803,7 +803,7 @@ internal static void fiatScalarToMontgomery(ж<fiatScalarMontgomeryDomainFieldEl
     uint64 x58 = default!;
     (x57, x58) = bits.Add64((((uint64)((fiatScalarUint1)x36) + ((uint64)((fiatScalarUint1)x18) + x6)) + x22), x49, (uint64)((fiatScalarUint1)x56));
     uint64 x59 = default!;
-    (_, x59) = bits.Mul64(x51, (nuint)0xd2b51da312547e1bUL);
+    (_, x59) = bits.Mul64(x51, 0xd2b51da312547e1bUL);
     uint64 x61 = default!;
     uint64 x62 = default!;
     (x62, x61) = bits.Mul64(x59, 0x1000000000000000UL);
@@ -832,13 +832,13 @@ internal static void fiatScalarToMontgomery(ж<fiatScalarMontgomeryDomainFieldEl
     (x78, x77) = bits.Mul64(x2, 0x399411b7c309a3dUL);
     uint64 x79 = default!;
     uint64 x80 = default!;
-    (x80, x79) = bits.Mul64(x2, (nuint)0xceec73d217f5be65UL);
+    (x80, x79) = bits.Mul64(x2, 0xceec73d217f5be65UL);
     uint64 x81 = default!;
     uint64 x82 = default!;
-    (x82, x81) = bits.Mul64(x2, (nuint)0xd00e1ba768859347UL);
+    (x82, x81) = bits.Mul64(x2, 0xd00e1ba768859347UL);
     uint64 x83 = default!;
     uint64 x84 = default!;
-    (x84, x83) = bits.Mul64(x2, (nuint)0xa40611e3449c0f01UL);
+    (x84, x83) = bits.Mul64(x2, 0xa40611e3449c0f01UL);
     uint64 x85 = default!;
     uint64 x86 = default!;
     (x85, x86) = bits.Add64(x84, x81, (uint64)0x0);
@@ -861,7 +861,7 @@ internal static void fiatScalarToMontgomery(ж<fiatScalarMontgomeryDomainFieldEl
     uint64 x98 = default!;
     (x97, x98) = bits.Add64((((uint64)((fiatScalarUint1)x76) + ((uint64)((fiatScalarUint1)x58) + ((uint64)((fiatScalarUint1)x50) + x38))) + x62), x89, (uint64)((fiatScalarUint1)x96));
     uint64 x99 = default!;
-    (_, x99) = bits.Mul64(x91, (nuint)0xd2b51da312547e1bUL);
+    (_, x99) = bits.Mul64(x91, 0xd2b51da312547e1bUL);
     uint64 x101 = default!;
     uint64 x102 = default!;
     (x102, x101) = bits.Mul64(x99, 0x1000000000000000UL);
@@ -890,13 +890,13 @@ internal static void fiatScalarToMontgomery(ж<fiatScalarMontgomeryDomainFieldEl
     (x118, x117) = bits.Mul64(x3, 0x399411b7c309a3dUL);
     uint64 x119 = default!;
     uint64 x120 = default!;
-    (x120, x119) = bits.Mul64(x3, (nuint)0xceec73d217f5be65UL);
+    (x120, x119) = bits.Mul64(x3, 0xceec73d217f5be65UL);
     uint64 x121 = default!;
     uint64 x122 = default!;
-    (x122, x121) = bits.Mul64(x3, (nuint)0xd00e1ba768859347UL);
+    (x122, x121) = bits.Mul64(x3, 0xd00e1ba768859347UL);
     uint64 x123 = default!;
     uint64 x124 = default!;
-    (x124, x123) = bits.Mul64(x3, (nuint)0xa40611e3449c0f01UL);
+    (x124, x123) = bits.Mul64(x3, 0xa40611e3449c0f01UL);
     uint64 x125 = default!;
     uint64 x126 = default!;
     (x125, x126) = bits.Add64(x124, x121, (uint64)0x0);
@@ -919,7 +919,7 @@ internal static void fiatScalarToMontgomery(ж<fiatScalarMontgomeryDomainFieldEl
     uint64 x138 = default!;
     (x137, x138) = bits.Add64((((uint64)((fiatScalarUint1)x116) + ((uint64)((fiatScalarUint1)x98) + ((uint64)((fiatScalarUint1)x90) + x78))) + x102), x129, (uint64)((fiatScalarUint1)x136));
     uint64 x139 = default!;
-    (_, x139) = bits.Mul64(x131, (nuint)0xd2b51da312547e1bUL);
+    (_, x139) = bits.Mul64(x131, 0xd2b51da312547e1bUL);
     uint64 x141 = default!;
     uint64 x142 = default!;
     (x142, x141) = bits.Mul64(x139, 0x1000000000000000UL);

@@ -161,7 +161,7 @@ partial struct timedEventArgs;
     d.dense = new slice<E>(size);
     foreach (var (id, data) in d.sparse) {
         d.dense[(nint)(ConvertToUInt64<EI>(id))] = data;
-        d.present[(nint)(ConvertToUInt64<EI>(id / ConvertToType<EI>(8)))] |= (uint8)(((uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))));
+        d.present[(nint)(ConvertToUInt64<EI>(id / ConvertToType<EI>(8)))] |= (uint8)((uint8)((uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))));
     }
     d.sparse = default!;
 }
@@ -175,7 +175,7 @@ partial struct timedEventArgs;
         return (@new<E>().ValueSlot, true);
     }
     if (ConvertToUInt64<EI>(id) < (uint64)len(d.dense)){
-        if ((uint8)(d.present[(nint)(ConvertToUInt64<EI>(id / ConvertToType<EI>(8)))] & (((uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))))) != 0) {
+        if ((uint8)(d.present[(nint)(ConvertToUInt64<EI>(id / ConvertToType<EI>(8)))] & ((uint8)((uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))))) != 0) {
             return (d.dense[(nint)(ConvertToUInt64<EI>(id))], true);
         }
     } else 
@@ -194,7 +194,7 @@ partial struct timedEventArgs;
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     foreach (var (id, value) in d.dense) {
-        if ((uint8)(d.present[id / 8] & (((uint8)1 << (int)((id % 8))))) == 0) {
+        if ((uint8)(d.present[id / 8] & ((uint8)((uint8)1 << (int)((id % 8))))) == 0) {
             continue;
         }
         if (!yield(ConvertToType<EI>(id), value)) {

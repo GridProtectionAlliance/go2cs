@@ -132,19 +132,19 @@ public static float64 Expm1(float64 x) {
 }
 
 internal static float64 expm1(float64 x) {
-    UntypedFloat Othreshold = /* 7.09782712893383973096e+02 */ 709.783;     // 0x40862E42FEFA39EF
-    UntypedFloat Ln2X56 = /* 3.88162421113569373274e+01 */ 38.8162;     // 0x4043687a9f1af2b1
-    UntypedFloat Ln2HalfX3 = /* 1.03972077083991796413e+00 */ 1.03972;     // 0x3ff0a2b23f3bab73
-    UntypedFloat Ln2Half = /* 3.46573590279972654709e-01 */ 0.346574;    // 0x3fd62e42fefa39ef
-    UntypedFloat Ln2Hi = /* 6.93147180369123816490e-01 */ 0.693147;    // 0x3fe62e42fee00000
-    UntypedFloat Ln2Lo = /* 1.90821492927058770002e-10 */ 1.90821e-10; // 0x3dea39ef35793c76
-    UntypedFloat InvLn2 = /* 1.44269504088896338700e+00 */ 1.4427;      // 0x3ff71547652b82fe
-    UntypedFloat Tiny = /* 1.0 / (1 << 54) */ 5.55112e-17; // 2**-54 = 0x3c90000000000000
-    UntypedFloat Q1 = /* -3.33333333333331316428e-02 */ -0.0333333; // 0xBFA11111111110F4
-    UntypedFloat Q2 = /* 1.58730158725481460165e-03 */ 0.0015873;    // 0x3F5A01A019FE5585
-    UntypedFloat Q3 = /* -7.93650757867487942473e-05 */ -7.93651e-05; // 0xBF14CE199EAADBB7
-    UntypedFloat Q4 = /* 4.00821782732936239552e-06 */ 4.00822e-06;  // 0x3ED0CFCA86E65239
-    UntypedFloat Q5 = /* -2.01099218183624371326e-07 */ -2.01099e-07; // 0xBE8AFDB76E09C32D
+    const float64 Othreshold = 7.09782712893383973096e+02; // 0x40862E42FEFA39EF
+    const float64 Ln2X56 = 3.88162421113569373274e+01; // 0x4043687a9f1af2b1
+    const float64 Ln2HalfX3 = 1.03972077083991796413e+00; // 0x3ff0a2b23f3bab73
+    const float64 Ln2Half = 3.46573590279972654709e-01; // 0x3fd62e42fefa39ef
+    const float64 Ln2Hi = 6.93147180369123816490e-01; // 0x3fe62e42fee00000
+    UntypedFloat Ln2Lo = 1.90821492927058770002e-10; // 0x3dea39ef35793c76
+    const float64 InvLn2 = 1.44269504088896338700e+00; // 0x3ff71547652b82fe
+    const float64 Tiny = /* 1.0 / (1 << 54) */ 5.551115123125783e-17; // 2**-54 = 0x3c90000000000000
+    const float64 Q1 = -3.33333333333331316428e-02; // 0xBFA11111111110F4
+    const float64 Q2 = 1.58730158725481460165e-03; // 0x3F5A01A019FE5585
+    const float64 Q3 = -7.93650757867487942473e-05; // 0xBF14CE199EAADBB7
+    const float64 Q4 = 4.00821782732936239552e-06; // 0x3ED0CFCA86E65239
+    const float64 Q5 = -2.01099218183624371326e-07; // 0xBE8AFDB76E09C32D
     // special cases
     switch (ᐧ) {
     case {} when IsInf(x, 1) || IsNaN(x): {
@@ -182,22 +182,22 @@ internal static float64 expm1(float64 x) {
         if (absx < Ln2HalfX3){
             // and |x| < 1.5 * ln2
             if (!sign){
-                hi = x - (float64)Ln2Hi;
+                hi = x - Ln2Hi;
                 lo = Ln2Lo;
                 k = 1;
             } else {
-                hi = x + (float64)Ln2Hi;
+                hi = x + Ln2Hi;
                 lo = -Ln2Lo;
                 k = -1;
             }
         } else {
             if (!sign){
-                k = (nint)((float64)InvLn2 * x + 0.5D);
+                k = (nint)(InvLn2 * x + 0.5D);
             } else {
-                k = (nint)((float64)InvLn2 * x - 0.5D);
+                k = (nint)(InvLn2 * x - 0.5D);
             }
             var tΔ1 = (float64)k;
-            hi = x - tΔ1 * (float64)Ln2Hi;
+            hi = x - tΔ1 * Ln2Hi;
             // t * Ln2Hi is exact here
             lo = tΔ1 * (float64)Ln2Lo;
         }
@@ -213,7 +213,7 @@ internal static float64 expm1(float64 x) {
     // x is now in primary range
     var hfx = 0.5D * x;
     var hxs = x * hfx;
-    var r1 = 1 + hxs * ((float64)Q1 + hxs * ((float64)Q2 + hxs * ((float64)Q3 + hxs * ((float64)Q4 + hxs * (float64)Q5))));
+    var r1 = 1 + hxs * (Q1 + hxs * (Q2 + hxs * (Q3 + hxs * (Q4 + hxs * Q5))));
     var t = 3 - r1 * hfx;
     var e = hxs * ((r1 - t) / (6.0D - x * t));
     if (k == 0) {

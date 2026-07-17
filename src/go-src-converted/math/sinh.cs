@@ -33,19 +33,19 @@ public static float64 Sinh(float64 x) {
 
 internal static float64 sinh(float64 x) {
     // The coefficients are #2029 from Hart & Cheney. (20.36D)
-    UntypedFloat P0 = -630767.3640497717;
+    const float64 P0 = -0.6307673640497716991184787251e+6;
     
-    UntypedFloat P1 = /* -0.8991272022039509355398013511e+5 */ -89912.7;
+    const float64 P1 = -0.8991272022039509355398013511e+5;
     
-    UntypedFloat P2 = /* -0.2894211355989563807284660366e+4 */ -2894.21;
+    const float64 P2 = -0.2894211355989563807284660366e+4;
     
-    UntypedFloat P3 = /* -0.2630563213397497062819489e+2 */ -26.3056;
+    const float64 P3 = -0.2630563213397497062819489e+2;
     
-    UntypedFloat Q0 = -630767.3640497717;
+    const float64 Q0 = -0.6307673640497716991212077277e+6;
     
-    UntypedFloat Q1 = /* 0.1521517378790019070696485176e+5 */ 15215.2;
+    const float64 Q1 = 0.1521517378790019070696485176e+5;
     
-    UntypedFloat Q2 = /* -0.173678953558233699533450911e+3 */ -173.679;
+    const float64 Q2 = -0.173678953558233699533450911e+3;
     var sign = false;
     if (x < 0) {
         x = -x;
@@ -64,8 +64,8 @@ internal static float64 sinh(float64 x) {
     }
     default: {
         var sq = x * x;
-        temp = ((((float64)P3 * sq + (float64)P2) * sq + (float64)P1) * sq + (float64)P0) * x;
-        temp = temp / (((sq + (float64)Q2) * sq + (float64)Q1) * sq + (float64)Q0);
+        temp = (((P3 * sq + P2) * sq + P1) * sq + P0) * x;
+        temp = temp / (((sq + Q2) * sq + Q1) * sq + Q0);
         break;
     }}
 

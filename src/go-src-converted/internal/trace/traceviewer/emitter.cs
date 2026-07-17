@@ -49,9 +49,9 @@ public static TraceConsumer ViewerDataTraceConsumer(io.Writer w, int64 startIdx,
             encʗ1.Encode(unit);
             io.WriteString(w, ","u8);
         },
-        ConsumeViewerEvent: (ж<format.Event> v, bool required) => {
+        ConsumeViewerEvent: (ж<format.Event> v, bool @required) => {
             index++;
-            if (!required && (index < startIdx || index > endIdx)) {
+            if (!@required && (index < startIdx || index > endIdx)) {
                 // not in the range. Skip!
                 return;
             }
@@ -113,8 +113,8 @@ public static (ж<splitter>, TraceConsumer) SplittingTraceConsumer(nint max) {
         ConsumeTimeUnit: (@string unit) => {
             Ꮡdata.Value.TimeUnit = unit;
         },
-        ConsumeViewerEvent: (ж<format.Event> v, bool required) => {
-            if (required) {
+        ConsumeViewerEvent: (ж<format.Event> v, bool @required) => {
+            if (@required) {
                 // Store required events inside data so flush
                 // can include them in the required part of the
                 // trace.
@@ -576,7 +576,7 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
     // This cutoff at 1 PiB is a Workaround for https://github.com/golang/go/issues/63864.
     //
     // TODO(mknyszek): Remove this once the problem has been fixed.
-    UntypedInt PB = /* 1 << 50 */ 1125899906842624;
+    const uint64 PB = /* 1 << 50 */ 1125899906842624;
     if (v > PB) {
         v = 0;
     }

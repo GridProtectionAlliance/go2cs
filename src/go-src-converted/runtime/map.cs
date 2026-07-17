@@ -1216,7 +1216,7 @@ internal static bool tooManyOverflowBuckets(uint16 noverflow, uint8 B) {
         B = 15;
     }
     // The compiler doesn't see here that B < 16; mask B to generate shorter shift code.
-    return noverflow >= ((uint16)1 << (int)(((uint8)(B & 15))));
+    return noverflow >= (uint16)((uint16)1 << (int)(((uint8)(B & 15))));
 }
 
 // growing reports whether h is growing. The growth may be to the same size or bigger.

@@ -171,7 +171,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
             continue;
         }
         var length = ((uint32)1 << (int)((w - 1)));
-        var tval = (uint16)(((uint16)i << (int)(8)) | ((uint16)tableBits + 1 - (uint16)w));
+        var tval = (uint16)((uint16)((uint16)i << (int)(8)) | ((uint16)tableBits + 1 - (uint16)w));
         var start = weightMark[w];
         for (var j = (uint32)0; j < length; j++) {
             table[(nint)(start + j)] = tval;

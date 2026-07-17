@@ -3471,7 +3471,7 @@ public static SymType ST_TYPE(uint8 info) {
 }
 
 public static uint8 ST_INFO(SymBind bind, SymType typ) {
-    return (uint8)(((uint8)(nint)bind << (int)(4)) | (uint8)((uint8)(nint)typ & 0xf));
+    return (uint8)((uint8)((uint8)(nint)bind << (int)(4)) | (uint8)((uint8)(nint)typ & 0xf));
 }
 
 public static SymVis ST_VISIBILITY(uint8 other) {

@@ -470,7 +470,7 @@ internal static readonly UntypedInt numSpanClasses = /* _NumSizeClasses << 1 */ 
 internal static readonly spanClass tinySpanClass = /* spanClass(tinySizeClass<<1 | 1) */ 5;
 
 internal static spanClass makeSpanClass(uint8 sizeclass, bool noscan) {
-    return (spanClass)(((spanClass)((sizeclass << (int)(1)))) | ((spanClass)(uint8)bool2int(noscan)));
+    return (spanClass)(((spanClass)((uint8)(sizeclass << (int)(1)))) | ((spanClass)(uint8)bool2int(noscan)));
 }
 
 //go:nosplit
@@ -1747,7 +1747,7 @@ internal static void spanHasSpecials(ж<mspan> Ꮡs) {
     var arenaPage = (s.@base() / (uintptr)pageSize) % (uintptr)pagesPerArena;
     arenaIdx ai = arenaIndex(s.@base());
     var ha = mheap_.arenas[(nint)(ai.l1())].Value[ai.l2()];
-    atomic.Or8(ha.at(heapArena.ᏑpageSpecials, (nint)(arenaPage / 8)), (uint8)(((uint8)1 << (int)((arenaPage % 8)))));
+    atomic.Or8(ha.at(heapArena.ᏑpageSpecials, (nint)(arenaPage / 8)), (uint8)((uint8)1 << (int)((arenaPage % 8))));
 }
 
 // spanHasNoSpecials marks a span as having no specials in the arena bitmap.
@@ -1757,7 +1757,7 @@ internal static void spanHasNoSpecials(ж<mspan> Ꮡs) {
     var arenaPage = (s.@base() / (uintptr)pageSize) % (uintptr)pagesPerArena;
     arenaIdx ai = arenaIndex(s.@base());
     var ha = mheap_.arenas[(nint)(ai.l1())].Value[ai.l2()];
-    atomic.And8(ha.at(heapArena.ᏑpageSpecials, (nint)(arenaPage / 8)), (uint8)(~(((uint8)1 << (int)((arenaPage % 8))))));
+    atomic.And8(ha.at(heapArena.ᏑpageSpecials, (nint)(arenaPage / 8)), (uint8)(~((uint8)((uint8)1 << (int)((arenaPage % 8))))));
 }
 
 // Adds the special record s to the list of special records for

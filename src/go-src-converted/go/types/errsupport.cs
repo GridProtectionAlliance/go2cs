@@ -40,10 +40,10 @@ internal static @string lookupError(this ж<Checker> Ꮡcheck, ΔType typ, @stri
     // inaccessible   x.foo   !=    foo    cannot refer to unexported field foo
     // missing        x.foo   !=    foO    type X has no field or method foo
     UntypedInt ok = iota;
-    UntypedInt missing = 1; // no object found
-    UntypedInt misspelled = 2; // found object with different spelling
-    UntypedInt unexported = 3; // found object with name differing only in first letter
-    UntypedInt inaccessible = 4; // found object with matching name but inaccessible from the current package
+    const nint missing = 1; // no object found
+    const nint misspelled = 2; // found object with different spelling
+    const nint unexported = 3; // found object with name differing only in first letter
+    const nint inaccessible = 4; // found object with matching name but inaccessible from the current package
     // determine case
     nint e = missing;
     @string alt = default!;           // alternative spelling of selector; if any

@@ -139,32 +139,32 @@ internal static float64 reducePi(float64 x) {
     // trailing zero bits respectively, t should have less than 30 significant bits.
     //	t < 1<<30  -> floor(x*(1/Pi)+0.5) < 1<<30 -> x < (1<<30-1) * Pi - 0.5
     // So, conservatively we can take x < 1<<30.
-    const float64 reduceThreshold = /* 1 << 30 */ 1.07374e+09;
+    const float64 reduceThreshold = /* 1 << 30 */ 1.073741824e+09;
     if (math.Abs(x) < reduceThreshold) {
         // Use Cody-Waite reduction in three parts.
-        UntypedFloat PI1 = /* 3.141592502593994 */ 3.14159; // 0x400921fb40000000
+        const float64 PI1 = 3.141592502593994; // 0x400921fb40000000
         
-        UntypedFloat PI2 = /* 1.5099578831723193e-07 */ 1.50996e-07; // 0x3e84442d00000000
+        const float64 PI2 = 1.5099578831723193e-07; // 0x3e84442d00000000
         
-        UntypedFloat PI3 = /* 1.0780605716316238e-14 */ 1.07806e-14; // 0x3d08469898cc5170
+        const float64 PI3 = 1.0780605716316238e-14; // 0x3d08469898cc5170
         var t = x / (float64)math.Pi;
         t += 0.5D;
         t = (float64)(int64)t;
         // int64(t) = the multiple
-        return ((x - t * (float64)PI1) - t * (float64)PI2) - t * (float64)PI3;
+        return ((x - t * PI1) - t * PI2) - t * PI3;
     }
     // Must apply Payne-Hanek range reduction
-    UntypedInt mask = 0x7FF;
+    const uint64 mask = 0x7FF;
     
     UntypedInt shift = /* 64 - 11 - 1 */ 52;
     
     UntypedInt bias = 1023;
     
-    UntypedInt fracMask = /* 1<<shift - 1 */ 4503599627370495;
+    const uint64 fracMask = /* 1<<shift - 1 */ 4503599627370495;
     // Extract out the integer and exponent such that,
     // x = ix * 2 ** exp.
     var ix = math.Float64bits(x);
-    nint exp = (nint)((uint64)((ix >> (int)(shift)) & (uint64)mask)) - (nint)bias - (nint)shift;
+    nint exp = (nint)((uint64)((ix >> (int)(shift)) & mask)) - (nint)bias - (nint)shift;
     ix &= (uint64)(fracMask);
     ix |= (uint64)(((uint64)1 << (int)(shift)));
     // mPi is the binary digits of 1/Pi as a uint64 array,
@@ -174,22 +174,22 @@ internal static float64 reducePi(float64 x) {
     array<uint64> mPi = new uint64[]{
         0x0000000000000000,
         0x517cc1b727220a94UL,
-        (nuint)0xfe13abe8fa9a6ee0UL,
+        0xfe13abe8fa9a6ee0UL,
         0x6db14acc9e21c820UL,
-        (nuint)0xff28b1d5ef5de2b0UL,
-        (nuint)0xdb92371d2126e970UL,
+        0xff28b1d5ef5de2b0UL,
+        0xdb92371d2126e970UL,
         0x0324977504e8c90eUL,
         0x7f0ef58e5894d39fUL,
         0x74411afa975da242UL,
         0x74ce38135a2fbf20UL,
-        (nuint)0x9cc8eb1cc1a99cfaUL,
+        0x9cc8eb1cc1a99cfaUL,
         0x4e422fc5defc941dUL,
-        (nuint)0x8ffc4bffef02cc07UL,
-        (nuint)0xf79788c5ad05368fUL,
-        (nuint)0xb69b3f6793e584dbUL,
-        (nuint)0xa7a31fb34f2ff516UL,
-        (nuint)0xba93dd63f5f2f8bdUL,
-        (nuint)0x9e839cfbc5294975UL,
+        0x8ffc4bffef02cc07UL,
+        0xf79788c5ad05368fUL,
+        0xb69b3f6793e584dbUL,
+        0xa7a31fb34f2ff516UL,
+        0xba93dd63f5f2f8bdUL,
+        0x9e839cfbc5294975UL,
         0x35fdafd88fc6ae84UL,
         0x2b0198237e3db5d5UL
     }.array();
@@ -225,7 +225,7 @@ internal static float64 reducePi(float64 x) {
 
 // Taylor series expansion for cosh(2y) - cos(2x)
 internal static float64 tanSeries(complex128 z) {
-    UntypedFloat MACHEP = /* 1.0 / (1 << 53) */ 1.11022e-16;
+    const float64 MACHEP = /* 1.0 / (1 << 53) */ 1.1102230246251565e-16;
     var x = math.Abs(2 * real(z));
     var y = math.Abs(2 * imag(z));
     x = reducePi(x);

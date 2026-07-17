@@ -92,7 +92,7 @@ internal static ж<dlogger> dlog() {
     // If the time delta is getting too high, write a new sync
     // packet. We set the limit so we don't write more than 6
     // bytes of delta in the record header.
-    UntypedInt deltaLimit = /* 1<<(3*7) - 1 */ 2097151; // ~2ms between sync packets
+    const uint64 deltaLimit = /* 1<<(3*7) - 1 */ 2097151; // ~2ms between sync packets
     if (tick - (~l).w.tick > deltaLimit || nano - (~l).w.nano > deltaLimit) {
         l.of(dlogger.Ꮡw).writeSync(tick, nano);
     }
@@ -514,7 +514,7 @@ internal static readonly UntypedInt debugLogSyncSize = /* debugLogHeaderSize + 2
 
 //go:nosplit
 [GoRecv] internal static uint16 readUint16LEAt(this ref debugLogReader r, uint64 pos) {
-    return (uint16)((uint16)(~r.data).b[(nint)(pos % (uint64)len((~r.data).b))] | ((uint16)(~r.data).b[(nint)((pos + 1) % (uint64)len((~r.data).b))] << (int)(8)));
+    return (uint16)((uint16)(~r.data).b[(nint)(pos % (uint64)len((~r.data).b))] | (uint16)((uint16)(~r.data).b[(nint)((pos + 1) % (uint64)len((~r.data).b))] << (int)(8)));
 }
 
 //go:nosplit

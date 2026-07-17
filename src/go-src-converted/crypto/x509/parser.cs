@@ -86,7 +86,7 @@ internal static (@string, error) parseASN1String(cryptobyte_asn1.Tag tag, slice<
         }
         var s = new slice<uint16>(0, builtin.len(value) / 2);
         while (builtin.len(value) > 0) {
-            s = append(s, (uint16)(((uint16)value[0] << (int)(8)) + (uint16)value[1]));
+            s = append(s, (uint16)((uint16)((uint16)value[0] << (int)(8)) + (uint16)value[1]));
             value = value[2..];
         }
         return (((@string)utf16.Decode(s)), default!);

@@ -483,14 +483,14 @@ internal static (uint64 lo, uint64 hi) mullu(uint64 u, uint64 v) {
     uint64 hi = default!;
 
     UntypedInt s = 32;
-    UntypedInt mask = /* 1<<s - 1 */ 4294967295;
-    var u0 = (uint64)(u & (uint64)mask);
+    const uint64 mask = /* 1<<s - 1 */ 4294967295;
+    var u0 = (uint64)(u & mask);
     var u1 = (u >> (int)(s));
-    var v0 = (uint64)(v & (uint64)mask);
+    var v0 = (uint64)(v & mask);
     var v1 = (v >> (int)(s));
     var w0 = u0 * v0;
     var t = u1 * v0 + (w0 >> (int)(s));
-    var w1 = (uint64)(t & (uint64)mask);
+    var w1 = (uint64)(t & mask);
     var w2 = (t >> (int)(s));
     w1 += u0 * v1;
     return (u * v, u1 * v1 + w2 + (w1 >> (int)(s)));
@@ -502,7 +502,7 @@ internal static (uint64 q, uint64 r) divlu(uint64 u1, uint64 u0, uint64 v) {
     uint64 q = default!;
     uint64 r = default!;
 
-    UntypedInt b = /* 1 << 32 */ 4294967296;
+    const uint64 b = /* 1 << 32 */ 4294967296;
     if (u1 >= v) {
         return (18446744073709551615UL, 18446744073709551615UL);
     }
@@ -521,25 +521,25 @@ internal static (uint64 q, uint64 r) divlu(uint64 u1, uint64 u0, uint64 v) {
     var q1 = un32 / vn1;
     var rhat = un32 - q1 * vn1;
 again1:
-    if (q1 >= b || q1 * vn0 > (uint64)b * rhat + un1) {
+    if (q1 >= b || q1 * vn0 > b * rhat + un1) {
         q1--;
         rhat += vn1;
         if (rhat < b) {
             goto again1;
         }
     }
-    var un21 = un32 * (uint64)b + un1 - q1 * v;
+    var un21 = un32 * b + un1 - q1 * v;
     var q0 = un21 / vn1;
     rhat = un21 - q0 * vn1;
 again2:
-    if (q0 >= b || q0 * vn0 > (uint64)b * rhat + un0) {
+    if (q0 >= b || q0 * vn0 > b * rhat + un0) {
         q0--;
         rhat += vn1;
         if (rhat < b) {
             goto again2;
         }
     }
-    return (q1 * (uint64)b + q0, ((un21 * (uint64)b + un0 - q0 * v) >> (int)(s)));
+    return (q1 * b + q0, ((un21 * b + un0 - q0 * v) >> (int)(s)));
 }
 
 internal static uint32 fadd32(uint32 x, uint32 y) {

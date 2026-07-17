@@ -22,7 +22,7 @@ internal static (slice<ж<windows.IpAdapterAddresses>>, error) adapterAddresses(
     // recommended initial size
     while (ᐧ) {
         b = new slice<byte>((nint)(l));
-        UntypedInt flags = /* windows.GAA_FLAG_INCLUDE_PREFIX | windows.GAA_FLAG_INCLUDE_GATEWAYS */ 144;
+        const uint32 flags = /* windows.GAA_FLAG_INCLUDE_PREFIX | windows.GAA_FLAG_INCLUDE_GATEWAYS */ 144;
         var err = windows.GetAdaptersAddresses(syscall.AF_UNSPEC, flags, 0, (ж<windows.IpAdapterAddresses>)(uintptr)(new @unsafe.Pointer(Ꮡ(b, 0))), Ꮡl);
         if (err == default!) {
             if (l == 0) {

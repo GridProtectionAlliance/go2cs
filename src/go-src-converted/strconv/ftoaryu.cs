@@ -595,7 +595,7 @@ internal static (uint32, uint32) divmod1e9(uint64 x) {
         return ((uint32)(x / 1000000000), (uint32)(x % 1000000000));
     }
     // Use the same sequence of operations as the amd64 compiler.
-    var (hi, _) = bits.Mul64((x >> (int)(1)), (nuint)0x89705f4136b4a598UL);
+    var (hi, _) = bits.Mul64((x >> (int)(1)), 0x89705f4136b4a598UL);
     // binary digits of 1e-9
     var q = (hi >> (int)(28));
     return ((uint32)q, (uint32)(x - q * 1000000000));

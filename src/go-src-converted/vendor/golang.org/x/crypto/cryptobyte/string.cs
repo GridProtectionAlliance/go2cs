@@ -61,7 +61,7 @@ partial class cryptobyte_package {
     if (v == default!) {
         return false;
     }
-    @out = (uint16)(((uint16)v[0] << (int)(8)) | (uint16)v[1]);
+    @out = (uint16)((uint16)((uint16)v[0] << (int)(8)) | (uint16)v[1]);
     return true;
 }
 

@@ -773,7 +773,7 @@ internal static void add(this ж<B> Ꮡb, BenchmarkResult other) {
     // The output is likely to appear multiple times because the benchmark
     // is run multiple times, but at least it will be seen. This is not a big deal
     // because benchmarks rarely print, but just in case, we trim it if it's too long.
-    UntypedInt maxNewlines = 10;
+    const nint maxNewlines = 10;
     for ((nint nlCount, nint j) = (0, 0); j < len(b.output); j++) {
         if (b.output[j] == (rune)'\n') {
             nlCount++;

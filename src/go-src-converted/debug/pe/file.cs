@@ -407,7 +407,7 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
                 if (va == 0) {
                     break;
                 }
-                if ((uint64)(va & (nuint)0x8000000000000000UL) > 0){
+                if ((uint64)(va & 0x8000000000000000UL) > 0){
                 } else {
                     // is Ordinal
                     // TODO add dynimport ordinal support.

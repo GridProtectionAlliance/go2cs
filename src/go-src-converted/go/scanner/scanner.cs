@@ -254,7 +254,7 @@ internal static slice<byte> prefix = slice<byte>("line "u8);
     // Put a cap on the maximum size of line and column numbers.
     // 30 bits allows for some additional space before wrapping an int32.
     // Keep this consistent with cmd/compile/internal/syntax.PosMax.
-    UntypedInt maxLineCol = /* 1 << 30 */ 1073741824;
+    const nint maxLineCol = /* 1 << 30 */ 1073741824;
     nint line = default!;
     nint col = default!;
     var (i2, n2, ok2) = trailingDigits(text[..(int)(i - 1)]);

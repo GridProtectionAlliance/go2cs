@@ -86,15 +86,15 @@ public static float64 Log(float64 x) {
 }
 
 internal static float64 log(float64 x) {
-    UntypedFloat Ln2Hi = /* 6.93147180369123816490e-01 */ 0.693147;    /* 3fe62e42 fee00000 */
-    UntypedFloat Ln2Lo = /* 1.90821492927058770002e-10 */ 1.90821e-10; /* 3dea39ef 35793c76 */
-    UntypedFloat L1 = /* 6.666666666666735130e-01 */ 0.666667;    /* 3FE55555 55555593 */
-    UntypedFloat L2 = /* 3.999999999940941908e-01 */ 0.4;         /* 3FD99999 9997FA04 */
-    UntypedFloat L3 = /* 2.857142874366239149e-01 */ 0.285714;    /* 3FD24924 94229359 */
-    UntypedFloat L4 = /* 2.222219843214978396e-01 */ 0.222222;    /* 3FCC71C5 1D8E78AF */
-    UntypedFloat L5 = /* 1.818357216161805012e-01 */ 0.181836;    /* 3FC74664 96CB03DE */
-    UntypedFloat L6 = /* 1.531383769920937332e-01 */ 0.153138;    /* 3FC39A09 D078C69F */
-    UntypedFloat L7 = /* 1.479819860511658591e-01 */ 0.147982;    /* 3FC2F112 DF3E5244 */
+    const float64 Ln2Hi = 6.93147180369123816490e-01; /* 3fe62e42 fee00000 */
+    const float64 Ln2Lo = 1.90821492927058770002e-10; /* 3dea39ef 35793c76 */
+    const float64 L1 = 6.666666666666735130e-01; /* 3FE55555 55555593 */
+    const float64 L2 = 3.999999999940941908e-01; /* 3FD99999 9997FA04 */
+    const float64 L3 = 2.857142874366239149e-01; /* 3FD24924 94229359 */
+    const float64 L4 = 2.222219843214978396e-01; /* 3FCC71C5 1D8E78AF */
+    const float64 L5 = 1.818357216161805012e-01; /* 3FC74664 96CB03DE */
+    const float64 L6 = 1.531383769920937332e-01; /* 3FC39A09 D078C69F */
+    const float64 L7 = 1.479819860511658591e-01; /* 3FC2F112 DF3E5244 */
     // special cases
     switch (ᐧ) {
     case {} when IsNaN(x) || IsInf(x, 1): {
@@ -119,11 +119,11 @@ internal static float64 log(float64 x) {
     var s = f / (2 + f);
     var s2 = s * s;
     var s4 = s2 * s2;
-    var t1 = s2 * ((float64)L1 + s4 * ((float64)L3 + s4 * ((float64)L5 + s4 * (float64)L7)));
-    var t2 = s4 * ((float64)L2 + s4 * ((float64)L4 + s4 * (float64)L6));
+    var t1 = s2 * (L1 + s4 * (L3 + s4 * (L5 + s4 * L7)));
+    var t2 = s4 * (L2 + s4 * (L4 + s4 * L6));
     var R = t1 + t2;
     var hfsq = 0.5D * f * f;
-    return k * (float64)Ln2Hi - ((hfsq - (s * (hfsq + R) + k * (float64)Ln2Lo)) - f);
+    return k * Ln2Hi - ((hfsq - (s * (hfsq + R) + k * Ln2Lo)) - f);
 }
 
 } // end math_package

@@ -110,7 +110,7 @@ internal static (ж<Process> p, error err) findProcess(nint pid) {
     ж<Process> p = default!;
     error err = default!;
 
-    UntypedInt da = /* syscall.STANDARD_RIGHTS_READ |
+    const uint32 da = /* syscall.STANDARD_RIGHTS_READ |
 	syscall.PROCESS_QUERY_INFORMATION | syscall.SYNCHRONIZE */ 1180672;
     var (h, e) = syscall.OpenProcess(da, false, (uint32)pid);
     if (e != default!) {

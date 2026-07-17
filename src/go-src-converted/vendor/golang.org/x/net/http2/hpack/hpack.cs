@@ -277,8 +277,8 @@ public static (slice<HeaderField>, error) DecodeFull(this ж<Decoder> Ꮡd, slic
             // reading code earlier should already catch
             // overlong things and return ErrStringLength,
             // but keep this as a last resort.
-            UntypedInt varIntOverhead = 8; // conservative
-            if (d.maxStrLen != 0 && (int64)builtin.len(d.buf) > 2 * ((int64)d.maxStrLen + (int64)varIntOverhead)) {
+            const int64 varIntOverhead = 8; // conservative
+            if (d.maxStrLen != 0 && (int64)builtin.len(d.buf) > 2 * ((int64)d.maxStrLen + varIntOverhead)) {
                 return (0, ErrStringLength);
             }
             d.saveBuf.Write(d.buf);

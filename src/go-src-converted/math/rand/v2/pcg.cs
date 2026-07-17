@@ -65,16 +65,16 @@ internal static error errUnmarshalPCG = errors.New("invalid PCG encoding"u8);
     // bits in the multiplier reduces the effect of low bits on the highest bits,
     // and it only saves 1 multiply out of 3.
     // (On 32-bit systems, it saves 1 out of 6, since Mul64 is doing 4.)
-    UntypedInt mulHi = 2549297995355413924;
+    const uint64 mulHi = 2549297995355413924;
     
-    UntypedInt mulLo = 4865540595714422341;
+    const uint64 mulLo = 4865540595714422341;
     
-    UntypedInt incHi = 6364136223846793005;
+    const uint64 incHi = 6364136223846793005;
     
-    UntypedInt incLo = 1442695040888963407;
+    const uint64 incLo = 1442695040888963407;
     // state = state * mul + inc
     (hi, lo) = bits.Mul64(p.lo, mulLo);
-    hi += p.hi * (uint64)mulLo + p.lo * (uint64)mulHi;
+    hi += p.hi * mulLo + p.lo * mulHi;
     (lo, var c) = bits.Add64(lo, incLo, 0);
     (hi, _) = bits.Add64(hi, incHi, c);
     p.lo = lo;
@@ -94,7 +94,7 @@ internal static error errUnmarshalPCG = errors.New("invalid PCG encoding"u8);
     // DXSM "double xorshift multiply"
     // https://github.com/imneme/pcg-cpp/blob/428802d1a5/include/pcg_random.hpp#L1015
     // https://github.com/imneme/pcg-cpp/blob/428802d1a5/include/pcg_random.hpp#L176
-    UntypedInt cheapMul = 0xda942042e4dd58b5;
+    const uint64 cheapMul = 0xda942042e4dd58b5;
     hi ^= (uint64)((hi >> (int)(32)));
     hi *= cheapMul;
     hi ^= (uint64)((hi >> (int)(48)));

@@ -53,18 +53,18 @@ partial class math_package {
 
 // xatan evaluates a series valid in the range [0, 0.66].
 internal static float64 xatan(float64 x) {
-    UntypedFloat P0 = /* -8.750608600031904122785e-01 */ -0.875061;
-    UntypedFloat P1 = /* -1.615753718733365076637e+01 */ -16.1575;
-    UntypedFloat P2 = /* -7.500855792314704667340e+01 */ -75.0086;
-    UntypedFloat P3 = /* -1.228866684490136173410e+02 */ -122.887;
-    UntypedFloat P4 = /* -6.485021904942025371773e+01 */ -64.8502;
-    UntypedFloat Q0 = /* +2.485846490142306297962e+01 */ 24.8585;
-    UntypedFloat Q1 = /* +1.650270098316988542046e+02 */ 165.027;
-    UntypedFloat Q2 = /* +4.328810604912902668951e+02 */ 432.881;
-    UntypedFloat Q3 = /* +4.853903996359136964868e+02 */ 485.39;
-    UntypedFloat Q4 = /* +1.945506571482613964425e+02 */ 194.551;
+    const float64 P0 = -8.750608600031904122785e-01;
+    const float64 P1 = -1.615753718733365076637e+01;
+    const float64 P2 = -7.500855792314704667340e+01;
+    const float64 P3 = -1.228866684490136173410e+02;
+    const float64 P4 = -6.485021904942025371773e+01;
+    const float64 Q0 = +2.485846490142306297962e+01;
+    const float64 Q1 = +1.650270098316988542046e+02;
+    const float64 Q2 = +4.328810604912902668951e+02;
+    const float64 Q3 = +4.853903996359136964868e+02;
+    const float64 Q4 = +1.945506571482613964425e+02;
     var z = x * x;
-    z = z * (((((float64)P0 * z + (float64)P1) * z + (float64)P2) * z + (float64)P3) * z + (float64)P4) / (((((z + (float64)Q0) * z + (float64)Q1) * z + (float64)Q2) * z + (float64)Q3) * z + (float64)Q4);
+    z = z * ((((P0 * z + P1) * z + P2) * z + P3) * z + P4) / (((((z + Q0) * z + Q1) * z + Q2) * z + Q3) * z + Q4);
     z = x * z + x;
     return z;
 }
@@ -72,8 +72,8 @@ internal static float64 xatan(float64 x) {
 // satan reduces its argument (known to be positive)
 // to the range [0, 0.66] and calls xatan.
 internal static float64 satan(float64 x) {
-    UntypedFloat Morebits = /* 6.123233995736765886130e-17 */ 6.12323e-17;  // pi/2 = PIO2 + Morebits
-    UntypedFloat Tan3pio8 = /* 2.41421356237309504880 */ 2.41421;      // tan(3*pi/8)
+    UntypedFloat Morebits = 6.123233995736765886130e-17; // pi/2 = PIO2 + Morebits
+    const float64 Tan3pio8 = 2.41421356237309504880; // tan(3*pi/8)
     if (x <= 0.66D) {
         return xatan(x);
     }

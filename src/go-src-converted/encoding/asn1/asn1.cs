@@ -199,7 +199,7 @@ public static slice<byte> RightAlign(this BitString b) {
     var a = new slice<byte>(len(b.Bytes));
     a[0] = (byte)((b.Bytes[0] >> (int)(shift)));
     for (nint i = 1; i < len(b.Bytes); i++) {
-        a[i] = (byte)((b.Bytes[i - 1] << (int)((8 - shift))));
+        a[i] = (byte)(b.Bytes[i - 1] << (int)((8 - shift)));
         a[i] |= (byte)((b.Bytes[i] >> (int)(shift)));
     }
     return a;
@@ -519,7 +519,7 @@ internal static (@string, error) parseBMPString(slice<byte> bmpString) {
     }
     var s = new slice<uint16>(0, len(bmpString) / 2);
     while (len(bmpString) > 0) {
-        s = append(s, (uint16)(((uint16)bmpString[0] << (int)(8)) + (uint16)bmpString[1]));
+        s = append(s, (uint16)((uint16)((uint16)bmpString[0] << (int)(8)) + (uint16)bmpString[1]));
         bmpString = bmpString[2..];
     }
     return (((@string)utf16.Decode(s)), default!);

@@ -256,7 +256,7 @@ internal static gcmFieldElement /*double*/ gcmDouble(ж<gcmFieldElement> Ꮡx) {
     // four terms. In characteristic 2 fields, subtraction == addition ==
     // XOR.
     if (msbSet) {
-        @double.low ^= (nuint)0xe100000000000000UL;
+        @double.low ^= 0xe100000000000000UL;
     }
     return @double;
 }

@@ -158,7 +158,7 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
     }
     case ж<Builtin> objΔ1: {
         x.id = objΔ1.Value.id;
-        x.mode = Δbuiltin;
+        x.mode = Δbuiltinᴛ;
         break;
     }
     case ж<Nil> objΔ1: {

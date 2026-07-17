@@ -136,10 +136,10 @@ internal static nint pixelBufferLength(nint bytesPerPixel, Rectangle r, @string 
     var b = (uint16)s[2];
     var a = (uint16)s[3];
     return new color.RGBA64(
-        (uint16)(((r << (int)(8))) | r),
-        (uint16)(((g << (int)(8))) | g),
-        (uint16)(((b << (int)(8))) | b),
-        (uint16)(((a << (int)(8))) | a)
+        (uint16)(((uint16)(r << (int)(8))) | r),
+        (uint16)(((uint16)(g << (int)(8))) | g),
+        (uint16)(((uint16)(b << (int)(8))) | b),
+        (uint16)(((uint16)(a << (int)(8))) | a)
     );
 }
 
@@ -276,10 +276,10 @@ public static ж<ΔRGBA> NewRGBA(Rectangle r) {
     var s = p.Pix.slice(i, i + 8, i + 8);
     // Small cap improves performance, see https://golang.org/issue/27857
     return new color.RGBA64(
-        (uint16)(((uint16)s[0] << (int)(8)) | (uint16)s[1]),
-        (uint16)(((uint16)s[2] << (int)(8)) | (uint16)s[3]),
-        (uint16)(((uint16)s[4] << (int)(8)) | (uint16)s[5]),
-        (uint16)(((uint16)s[6] << (int)(8)) | (uint16)s[7])
+        (uint16)((uint16)((uint16)s[0] << (int)(8)) | (uint16)s[1]),
+        (uint16)((uint16)((uint16)s[2] << (int)(8)) | (uint16)s[3]),
+        (uint16)((uint16)((uint16)s[4] << (int)(8)) | (uint16)s[5]),
+        (uint16)((uint16)((uint16)s[6] << (int)(8)) | (uint16)s[7])
     );
 }
 
@@ -542,10 +542,10 @@ public static ж<NRGBA> NewNRGBA(Rectangle r) {
     var s = p.Pix.slice(i, i + 8, i + 8);
     // Small cap improves performance, see https://golang.org/issue/27857
     return new color.NRGBA64(
-        (uint16)(((uint16)s[0] << (int)(8)) | (uint16)s[1]),
-        (uint16)(((uint16)s[2] << (int)(8)) | (uint16)s[3]),
-        (uint16)(((uint16)s[4] << (int)(8)) | (uint16)s[5]),
-        (uint16)(((uint16)s[6] << (int)(8)) | (uint16)s[7])
+        (uint16)((uint16)((uint16)s[0] << (int)(8)) | (uint16)s[1]),
+        (uint16)((uint16)((uint16)s[2] << (int)(8)) | (uint16)s[3]),
+        (uint16)((uint16)((uint16)s[4] << (int)(8)) | (uint16)s[5]),
+        (uint16)((uint16)((uint16)s[6] << (int)(8)) | (uint16)s[7])
     );
 }
 
@@ -684,7 +684,7 @@ public static ж<NRGBA64> NewNRGBA64(Rectangle r) {
 
 [GoRecv] public static color.RGBA64 RGBA64At(this ref Alpha p, nint x, nint y) {
     var a = (uint16)p.AlphaAt(x, y).A;
-    a |= (uint16)((a << (int)(8)));
+    a |= (uint16)((uint16)(a << (int)(8)));
     return new color.RGBA64(a, a, a, a);
 }
 
@@ -805,7 +805,7 @@ public static ж<Alpha> NewAlpha(Rectangle r) {
         return new color.Alpha16(nil);
     }
     nint i = p.PixOffset(x, y);
-    return new color.Alpha16((uint16)(((uint16)p.Pix[i + 0] << (int)(8)) | (uint16)p.Pix[i + 1]));
+    return new color.Alpha16((uint16)((uint16)((uint16)p.Pix[i + 0] << (int)(8)) | (uint16)p.Pix[i + 1]));
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
@@ -913,7 +913,7 @@ public static ж<Alpha16> NewAlpha16(Rectangle r) {
 
 [GoRecv] public static color.RGBA64 RGBA64At(this ref Gray p, nint x, nint y) {
     var gray = (uint16)p.GrayAt(x, y).Y;
-    gray |= (uint16)((gray << (int)(8)));
+    gray |= (uint16)((uint16)(gray << (int)(8)));
     return new color.RGBA64(gray, gray, gray, 0xffff);
 }
 
@@ -1022,7 +1022,7 @@ public static ж<Gray> NewGray(Rectangle r) {
         return new color.Gray16(nil);
     }
     nint i = p.PixOffset(x, y);
-    return new color.Gray16((uint16)(((uint16)p.Pix[i + 0] << (int)(8)) | (uint16)p.Pix[i + 1]));
+    return new color.Gray16((uint16)((uint16)((uint16)p.Pix[i + 0] << (int)(8)) | (uint16)p.Pix[i + 1]));
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to

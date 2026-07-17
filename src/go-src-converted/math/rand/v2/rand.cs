@@ -221,7 +221,7 @@ internal const bool is32bit = /* ^uint(0)>>32 == 0 */ false;
 // Float64 returns, as a float64, a pseudo-random number in the half-open interval [0.0,1.0).
 [GoRecv] public static float64 Float64(this ref Rand r) {
     // There are exactly 1<<53 float64s in [0,1). Use Intn(1<<53) / (1<<53).
-    return (float64)(((r.Uint64() << (int)(11)) >> (int)(11))) / ((1 << (int)(53)));
+    return (float64)(((r.Uint64() << (int)(11)) >> (int)(11))) / (9007199254740992D);
 }
 
 // Float32 returns, as a float32, a pseudo-random number in the half-open interval [0.0,1.0).

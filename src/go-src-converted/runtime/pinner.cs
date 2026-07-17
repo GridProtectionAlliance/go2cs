@@ -235,7 +235,7 @@ internal static bool setPinned(@unsafe.Pointer ptr, bool pin) {
 }
 
 [GoRecv] internal static bool isMultiPinned(this ref pinState v) {
-    return ((uint8)(v.byteVal & ((v.mask << (int)(1))))) != 0;
+    return ((uint8)(v.byteVal & ((uint8)(v.mask << (int)(1))))) != 0;
 }
 
 [GoRecv] internal static void setPinned(this ref pinState v, bool val) {

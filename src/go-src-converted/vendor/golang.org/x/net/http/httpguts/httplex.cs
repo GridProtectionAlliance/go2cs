@@ -182,7 +182,7 @@ internal static bool isLWS(byte b) {
 //	CTL            = <any US-ASCII control character
 //	                 (octets 0 - 31) and DEL (127)>
 internal static bool isCTL(byte b) {
-    UntypedInt del = 0x7f; // a CTL
+    const byte del = 0x7f; // a CTL
     return b < (rune)' ' || b == del;
 }
 

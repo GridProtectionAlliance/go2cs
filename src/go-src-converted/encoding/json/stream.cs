@@ -158,9 +158,9 @@ break_Input:;
         dec.scanp = 0;
     }
     // Grow buffer if not large enough.
-    UntypedInt minRead = 512;
+    const nint minRead = 512;
     if (cap(dec.buf) - len(dec.buf) < minRead) {
-        var newBuf = new slice<byte>(len(dec.buf), 2 * cap(dec.buf) + (nint)minRead);
+        var newBuf = new slice<byte>(len(dec.buf), 2 * cap(dec.buf) + minRead);
         copy(newBuf, dec.buf);
         dec.buf = newBuf;
     }

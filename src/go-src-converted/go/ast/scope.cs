@@ -24,7 +24,7 @@ partial class ast_package {
 
 // NewScope creates a new scope nested in the outer scope.
 public static ж<Scope> NewScope(ж<Scope> Ꮡouter) {
-    UntypedInt n = 4; // initial scope capacity
+    const nint n = 4; // initial scope capacity
     return Ꮡ(new Scope(Ꮡouter, new map<@string, ж<Object>>(n)));
 }
 

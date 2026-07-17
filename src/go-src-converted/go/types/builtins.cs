@@ -19,7 +19,7 @@ partial class types_package {
 // reports whether the call is valid, with *x holding the result;
 // but x.expr is not set. If the call is invalid, the result is
 // false, and *x is undefined.
-internal static bool /*_*/ builtin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CallExpr> Ꮡcall, builtinId id) => func<bool /*_*/>((defer, recover) => {
+internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CallExpr> Ꮡcall, builtinId id) => func<bool /*_*/>((defer, recover) => {
     ref var check = ref Ꮡcheck.Value;
     ref var x = ref Ꮡx.Value;
     ref var call = ref Ꮡcall.Value;

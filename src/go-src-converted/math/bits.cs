@@ -60,9 +60,9 @@ internal static (float64 y, nint exp) normalize(float64 x) {
     float64 y = default!;
     nint exp = default!;
 
-    UntypedFloat SmallestNormal = /* 2.2250738585072014e-308 */ 2.22507e-308; // 2**-1022
+    const float64 SmallestNormal = 2.2250738585072014e-308; // 2**-1022
     if (Abs(x) < SmallestNormal) {
-        return (x * ((1 << (int)(52))), -52);
+        return (x * (4503599627370496D), -52);
     }
     return (x, 0);
 }

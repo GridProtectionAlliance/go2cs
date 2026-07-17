@@ -57,7 +57,7 @@ internal static void heapSortCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E
 // Rust implementation: https://docs.rs/pdqsort/latest/pdqsort/
 // limit is the number of allowed bad (very unbalanced) pivots before falling back to heapsort.
 internal static void pdqsortCmpFunc<E>(slice<E> data, nint a, nint b, nint limit, Func<E, E, nint> cmp) {
-    UntypedInt maxInsertion = 12;
+    const nint maxInsertion = 12;
     bool wasBalanced = true;   // whether the last partitioning was reasonably balanced
     bool wasPartitioned = true; // whether the slice was already partitioned
     while (ᐧ) {
@@ -186,8 +186,8 @@ internal static nint /*newpivot*/ partitionEqualCmpFunc<E>(slice<E> data, nint a
 
 // partialInsertionSortCmpFunc partially sorts a slice, returns true if the slice is sorted at the end.
 internal static bool partialInsertionSortCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E, nint> cmp) {
-    UntypedInt maxSteps = 5; // maximum number of adjacent out-of-order pairs that will get shifted
-    UntypedInt shortestShifting = 50; // don't shift any elements on short arrays
+    const nint maxSteps = 5; // maximum number of adjacent out-of-order pairs that will get shifted
+    const nint shortestShifting = 50; // don't shift any elements on short arrays
     nint i = a + 1;
     for (nint j = 0; j < maxSteps; j++) {
         while (i < b && !(cmp(data[i], data[i - 1]) < 0)) {
@@ -248,8 +248,8 @@ internal static (nint pivot, sortedHint hint) choosePivotCmpFunc<E>(slice<E> dat
     nint pivot = default!;
     sortedHint hint = default!;
 
-    UntypedInt shortestNinther = 50;
-    UntypedInt maxSwaps = /* 4 * 3 */ 12;
+    const nint shortestNinther = 50;
+    const nint maxSwaps = /* 4 * 3 */ 12;
     nint l = b - a;
     ref var swaps = ref heap(new nint(), out var Ꮡswaps);
     nint i = a + l / 4 * 1;

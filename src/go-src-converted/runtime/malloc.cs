@@ -1173,9 +1173,9 @@ internal static ж<g> deductAssistCredit(uintptr size) {
 internal static void memclrNoHeapPointersChunked(uintptr size, @unsafe.Pointer x) {
     var v = (uintptr)x;
     // got this from benchmarking. 128k is too small, 512k is too large.
-    UntypedInt chunkBytes = /* 256 * 1024 */ 262144;
+    uintptr chunkBytes = /* 256 * 1024 */ 262144;
     var vsize = v + size;
-    for (var voff = v; voff < vsize; voff = voff + (uintptr)chunkBytes) {
+    for (var voff = v; voff < vsize; voff = voff + chunkBytes) {
         if ((~getg()).preempt) {
             // may hold locks, e.g., profiling
             goschedguarded();
@@ -1331,8 +1331,8 @@ internal static int32 fastexprand(nint mean) {
     if (qlog > 0) {
         qlog = 0;
     }
-    UntypedFloat minusLog2 = /* -0.6931471805599453 */ -0.693147; // -ln(2)
-    return (int32)(qlog * ((float64)minusLog2 * (float64)mean)) + 1;
+    const float64 minusLog2 = -0.6931471805599453; // -ln(2)
+    return (int32)(qlog * (minusLog2 * (float64)mean)) + 1;
 }
 
 // nextSampleNoFP is similar to nextSample, but uses older,
@@ -1395,7 +1395,7 @@ internal static @unsafe.Pointer persistentalloc(uintptr size, uintptr align, ж<
 //
 //go:systemstack
 internal static ж<notInHeap> persistentalloc1(uintptr size, uintptr align, ж<sysMemStat> ᏑsysStat) {
-    UntypedInt maxBlock = /* 64 << 10 */ 65536; // VM reservation granularity is 64K on windows
+    uintptr maxBlock = /* 64 << 10 */ 65536; // VM reservation granularity is 64K on windows
     if (size == 0) {
         @throw("persistentalloc: size == 0"u8);
     }

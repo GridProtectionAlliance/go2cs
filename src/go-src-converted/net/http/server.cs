@@ -1966,7 +1966,7 @@ internal static void serve(this ж<conn> Ꮡc, context.Context ctx) => func((def
     defer(() => {
         {
             var err = recover(); if (err != default! && !AreEqual(err, ErrAbortHandler)) {
-                UntypedInt size = /* 64 << 10 */ 65536;
+                const nint size = /* 64 << 10 */ 65536;
                 var buf = new slice<byte>(size);
                 buf = buf[..(int)(runtime.Stack(buf, false))];
                 Ꮡc.Value.server.logf("http: panic serving %v: %v\n%s"u8, Ꮡc.Value.remoteAddr, err, buf);

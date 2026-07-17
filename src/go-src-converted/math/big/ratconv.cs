@@ -449,7 +449,7 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
     // and use repeated squaring until the factor doesn't
     // divide q anymore. Then use the table to determine
     // the power of 5 in q.
-    UntypedInt fp = 13; // f == 5^fp
+    const nuint fp = 13; // f == 5^fp
     slice<nat> tab = default!;                // tab[i] == (5^fp)^(2^i) == 5^(fp·2^i)
     var f = new nat(new Word[]{1220703125}.slice());
     // == 5^fp (must fit into a uint32 Word)
@@ -477,7 +477,7 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
     for (nint i = len(tab) - 1; i >= 0; i--) {
         {
             (t, r) = t.div(r, q, tab[i]); if (len(r) == 0) {
-                p5 += (nuint)fp * (((nuint)1 << (int)(i)));
+                p5 += fp * (((nuint)1 << (int)(i)));
                 // tab[i] == 5^(fp·2^i)
                 q = q.set(t);
             }

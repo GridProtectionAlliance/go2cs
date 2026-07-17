@@ -2537,7 +2537,7 @@ internal static ref atomic.Uint32 extraMInUse => ref ᏑextraMInUse.Value;
 //
 //go:nosplit
 internal static ж<m> lockextra(bool nilokay) {
-    UntypedInt locked = 1;
+    uintptr locked = 1;
     var incr = false;
     while (ᐧ) {
         var old = ᏑextraM.Load();

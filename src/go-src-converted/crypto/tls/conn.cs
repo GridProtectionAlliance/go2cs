@@ -310,9 +310,9 @@ internal static (nint toRemove, byte good) extractPadding(slice<byte> payload) {
     }
     // We AND together the bits of good and replicate the result across
     // all the bits.
-    good &= (byte)((good << (int)(4)));
-    good &= (byte)((good << (int)(2)));
-    good &= (byte)((good << (int)(1)));
+    good &= (byte)((byte)(good << (int)(4)));
+    good &= (byte)((byte)(good << (int)(2)));
+    good &= (byte)((byte)(good << (int)(1)));
     good = (uint8)(((int8)good >> (int)(7)));
     // Zero the padding length on error. This ensures any unchecked bytes
     // are included in the MAC. Otherwise, an attacker that could
@@ -663,7 +663,7 @@ internal static error readRecordOrCCS(this ж<Conn> Ꮡc, bool expectChangeCiphe
         Ꮡc.sendAlert(alertProtocolVersion);
         return c.@in.setErrorLocked(c.newRecordHeaderError(default!, "unsupported SSLv2 handshake received"u8));
     }
-    var vers = (uint16)(((uint16)hdr[1] << (int)(8)) | (uint16)hdr[2]);
+    var vers = (uint16)((uint16)((uint16)hdr[1] << (int)(8)) | (uint16)hdr[2]);
     var expectedVers = c.vers;
     if (expectedVers == VersionTLS13) {
         // All TLS 1.3 records are expected to have 0x0303 (1.2) after

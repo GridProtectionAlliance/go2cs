@@ -219,7 +219,7 @@ public static void Seed(this ж<Rand> Ꮡr, int64 seed) {
     // Getting 1 only happens 1/2⁵³ of the time, so most clients
     // will not observe it anyway.
 again:
-    var f = (float64)r.Int63() / ((1 << (int)(63)));
+    var f = (float64)r.Int63() / (9223372036854775808D);
     if (f == 1) {
         goto again;
     }

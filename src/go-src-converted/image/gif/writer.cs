@@ -287,9 +287,9 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
         e.buf[2] = gcBlockSize;
         // Block Size.
         if (transparentIndex != -1){
-            e.buf[3] = (byte)(0x01 | (disposal << (int)(2)));
+            e.buf[3] = (byte)(0x01 | (byte)(disposal << (int)(2)));
         } else {
-            e.buf[3] = (byte)(0x00 | (disposal << (int)(2)));
+            e.buf[3] = (byte)(0x00 | (byte)(disposal << (int)(2)));
         }
         byteorder.LePutUint16(e.buf[4..6], (uint16)delay);
         // Delay Time (1/100ths of a second)

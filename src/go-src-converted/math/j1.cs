@@ -73,18 +73,18 @@ partial class math_package {
 //	J1(±Inf) = 0
 //	J1(NaN) = NaN
 public static float64 J1(float64 x) {
-    UntypedFloat TwoM27 = /* 1.0 / (1 << 27) */ 7.45058e-09; // 2**-27 0x3e40000000000000
+    const float64 TwoM27 = /* 1.0 / (1 << 27) */ 7.450580596923828e-09; // 2**-27 0x3e40000000000000
     GoUntyped Two129 = /* 1 << 129 */       // 2**129 0x4800000000000000
             GoUntyped.Parse("680564733841876926926749214863536422912");
-    UntypedFloat R00 = -0.0625; // 0xBFB0000000000000
-    UntypedFloat R01 = /* 1.40705666955189706048e-03 */ 0.00140706;   // 0x3F570D9F98472C61
-    UntypedFloat R02 = /* -1.59955631084035597520e-05 */ -1.59956e-05; // 0xBEF0C5C6BA169668
-    UntypedFloat R03 = /* 4.96727999609584448412e-08 */ 4.96728e-08;  // 0x3E6AAAFA46CA0BD9
-    UntypedFloat S01 = /* 1.91537599538363460805e-02 */ 0.0191538;    // 0x3F939D0B12637E53
-    UntypedFloat S02 = /* 1.85946785588630915560e-04 */ 0.000185947;  // 0x3F285F56B9CDF664
-    UntypedFloat S03 = /* 1.17718464042623683263e-06 */ 1.17718e-06;  // 0x3EB3BFF8333F8498
-    UntypedFloat S04 = /* 5.04636257076217042715e-09 */ 5.04636e-09;  // 0x3E35AC88C97DFF2C
-    UntypedFloat S05 = /* 1.23542274426137913908e-11 */ 1.23542e-11;  // 0x3DAB2ACFCFB97ED8
+    const float64 R00 = -6.25000000000000000000e-02; // 0xBFB0000000000000
+    const float64 R01 = 1.40705666955189706048e-03; // 0x3F570D9F98472C61
+    const float64 R02 = -1.59955631084035597520e-05; // 0xBEF0C5C6BA169668
+    const float64 R03 = 4.96727999609584448412e-08; // 0x3E6AAAFA46CA0BD9
+    const float64 S01 = 1.91537599538363460805e-02; // 0x3F939D0B12637E53
+    const float64 S02 = 1.85946785588630915560e-04; // 0x3F285F56B9CDF664
+    const float64 S03 = 1.17718464042623683263e-06; // 0x3EB3BFF8333F8498
+    const float64 S04 = 5.04636257076217042715e-09; // 0x3E35AC88C97DFF2C
+    const float64 S05 = 1.23542274426137913908e-11; // 0x3DAB2ACFCFB97ED8
     // special cases
     switch (ᐧ) {
     case {} when IsNaN(x): {
@@ -133,8 +133,8 @@ public static float64 J1(float64 x) {
     }
     // inexact if x!=0 necessary
     var z = x * x;
-    var r = z * ((float64)R00 + z * ((float64)R01 + z * ((float64)R02 + z * (float64)R03)));
-    var s = 1.0D + z * ((float64)S01 + z * ((float64)S02 + z * ((float64)S03 + z * ((float64)S04 + z * (float64)S05))));
+    var r = z * (R00 + z * (R01 + z * (R02 + z * R03)));
+    var s = 1.0D + z * (S01 + z * (S02 + z * (S03 + z * (S04 + z * S05))));
     r *= x;
     z = 0.5D * x + r / s;
     if (sign) {
@@ -152,19 +152,19 @@ public static float64 J1(float64 x) {
 //	Y1(x < 0) = NaN
 //	Y1(NaN) = NaN
 public static float64 Y1(float64 x) {
-    UntypedFloat TwoM54 = /* 1.0 / (1 << 54) */ 5.55112e-17; // 2**-54 0x3c90000000000000
+    const float64 TwoM54 = /* 1.0 / (1 << 54) */ 5.551115123125783e-17; // 2**-54 0x3c90000000000000
     GoUntyped Two129 = /* 1 << 129 */                   // 2**129 0x4800000000000000
             GoUntyped.Parse("680564733841876926926749214863536422912");
-    UntypedFloat U00 = /* -1.96057090646238940668e-01 */ -0.196057; // 0xBFC91866143CBC8A
-    UntypedFloat U01 = /* 5.04438716639811282616e-02 */ 0.0504439;    // 0x3FA9D3C776292CD1
-    UntypedFloat U02 = /* -1.91256895875763547298e-03 */ -0.00191257; // 0xBF5F55E54844F50F
-    UntypedFloat U03 = /* 2.35252600561610495928e-05 */ 2.35253e-05;  // 0x3EF8AB038FA6B88E
-    UntypedFloat U04 = /* -9.19099158039878874504e-08 */ -9.19099e-08; // 0xBE78AC00569105B8
-    UntypedFloat V00 = /* 1.99167318236649903973e-02 */ 0.0199167;    // 0x3F94650D3F4DA9F0
-    UntypedFloat V01 = /* 2.02552581025135171496e-04 */ 0.000202553;  // 0x3F2A8C896C257764
-    UntypedFloat V02 = /* 1.35608801097516229404e-06 */ 1.35609e-06;  // 0x3EB6C05A894E8CA6
-    UntypedFloat V03 = /* 6.22741452364621501295e-09 */ 6.22741e-09;  // 0x3E3ABF1D5BA69A86
-    UntypedFloat V04 = /* 1.66559246207992079114e-11 */ 1.66559e-11;  // 0x3DB25039DACA772A
+    const float64 U00 = -1.96057090646238940668e-01; // 0xBFC91866143CBC8A
+    const float64 U01 = 5.04438716639811282616e-02; // 0x3FA9D3C776292CD1
+    const float64 U02 = -1.91256895875763547298e-03; // 0xBF5F55E54844F50F
+    const float64 U03 = 2.35252600561610495928e-05; // 0x3EF8AB038FA6B88E
+    const float64 U04 = -9.19099158039878874504e-08; // 0xBE78AC00569105B8
+    const float64 V00 = 1.99167318236649903973e-02; // 0x3F94650D3F4DA9F0
+    const float64 V01 = 2.02552581025135171496e-04; // 0x3F2A8C896C257764
+    const float64 V02 = 1.35608801097516229404e-06; // 0x3EB6C05A894E8CA6
+    const float64 V03 = 6.22741452364621501295e-09; // 0x3E3ABF1D5BA69A86
+    const float64 V04 = 1.66559246207992079114e-11; // 0x3DB25039DACA772A
     // special cases
     switch (ᐧ) {
     case {} when x < 0 || IsNaN(x): {
@@ -215,8 +215,8 @@ public static float64 Y1(float64 x) {
         return (float64)(-(2 / Pi)) / x;
     }
     var z = x * x;
-    var u = (float64)U00 + z * ((float64)U01 + z * ((float64)U02 + z * ((float64)U03 + z * (float64)U04)));
-    var v = 1 + z * ((float64)V00 + z * ((float64)V01 + z * ((float64)V02 + z * ((float64)V03 + z * (float64)V04))));
+    var u = U00 + z * (U01 + z * (U02 + z * (U03 + z * U04)));
+    var v = 1 + z * (V00 + z * (V01 + z * (V02 + z * (V03 + z * V04))));
     return x * (u / v) + (float64)(2 / Pi) * (J1(x) * Log(x) - 1 / x);
 }
 

@@ -22,7 +22,7 @@ partial class types_package {
 
 internal static readonly operandMode invalid = /* iota */ 0;  // operand is invalid
 internal static readonly operandMode novalue = 1;  // operand represents no value (result of a function call w/o result)
-internal static readonly operandMode Δbuiltin = 2; // operand is a built-in function
+internal static readonly operandMode Δbuiltinᴛ = 2; // operand is a built-in function
 internal static readonly operandMode typexpr = 3;  // operand is a type
 internal static readonly operandMode constant_ = 4; // operand is a constant; the operand's typ is a Basic type
 internal static readonly operandMode variable = 5; // operand is an addressable variable
@@ -37,7 +37,7 @@ internal static readonly operandMode cgofunc = 11;  // operand is a cgo function
 internal static array<@string> operandModeString = new golib.SparseArray<@string>{
     [invalid] = "invalid operand"u8,
     [novalue] = "no value"u8,
-    [Δbuiltin] = "built-in"u8,
+    [Δbuiltinᴛ] = "built-in"u8,
     [typexpr] = "type"u8,
     [constant_] = "constant"u8,
     [variable] = "variable"u8,
@@ -138,7 +138,7 @@ internal static @string operandString(ж<operand> Ꮡx, Func<ж<Package>, @strin
         expr = ExprString(x.expr);
     } else {
         var exprᴛ2 = x.mode;
-        if (exprᴛ2 == Δbuiltin) {
+        if (exprᴛ2 == Δbuiltinᴛ) {
             expr = predeclaredFuncs[x.id].name;
         }
         else if (exprᴛ2 == typexpr) {
@@ -157,7 +157,7 @@ internal static @string operandString(ж<operand> Ꮡx, Func<ж<Package>, @strin
     // <untyped kind>
     var hasType = false;
     var exprᴛ3 = x.mode;
-    if (exprᴛ3 == invalid || exprᴛ3 == novalue || exprᴛ3 == Δbuiltin || exprᴛ3 == typexpr) {
+    if (exprᴛ3 == invalid || exprᴛ3 == novalue || exprᴛ3 == Δbuiltinᴛ || exprᴛ3 == typexpr) {
     }
     else { /* default: */
         do {

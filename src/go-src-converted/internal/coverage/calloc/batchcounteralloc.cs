@@ -15,7 +15,7 @@ partial class calloc_package {
 }
 
 [GoRecv] public static slice<uint32> AllocateCounters(this ref BatchCounterAlloc ca, nint n) {
-    UntypedInt chunk = 8192;
+    const nint chunk = 8192;
     if (n > cap(ca.pool)) {
         nint siz = chunk;
         if (n > chunk) {

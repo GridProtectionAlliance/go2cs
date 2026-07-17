@@ -180,12 +180,12 @@ internal static array<int64> rngCooked = new int64[]{
 
 // seed rng x[n+1] = 48271 * x[n] mod (2**31 - 1)
 internal static int32 seedrand(int32 x) {
-    UntypedInt A = 48271;
-    UntypedInt Q = 44488;
-    UntypedInt R = 3399;
-    var hi = x / (int32)Q;
-    var lo = x % (int32)Q;
-    x = (int32)A * lo - (int32)R * hi;
+    const int32 A = 48271;
+    const int32 Q = 44488;
+    const int32 R = 3399;
+    var hi = x / Q;
+    var lo = x % Q;
+    x = A * lo - R * hi;
     if (x < 0) {
         x += int32max;
     }

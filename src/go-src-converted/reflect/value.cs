@@ -95,7 +95,7 @@ internal static ж<abi.Type> typ(this ΔValue v) {
     // types, held in the central map). So there is no need to
     // escape types. noescape here help avoid unnecessary escape
     // of v.
-    return (ж<abi.Type>)(uintptr)(abi.NoEscape(new @unsafe.Pointer(v.typ_)));
+    return v.typ_;
 }
 
 // pointer returns the underlying pointer represented by v.
@@ -152,7 +152,7 @@ internal static any packEface(ΔValue v) {
     return i;
 }
 
-// func unpackEface is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func unpackEface is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // NOTE: don't read e.word until we know whether it is really a pointer or not.
 
@@ -264,7 +264,7 @@ public static ΔValue Addr(this ΔValue v) {
     return new ΔValue(ptrTo(v.typ()), v.ptr, (flag)(fl | ((flag)(uintptr)(nuint)ΔPointer)));
 }
 
-// func Bool is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Bool is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // panicNotBool is split out to keep Bool inlineable.
 internal static void panicNotBool(this ΔValue v) {
@@ -273,7 +273,7 @@ internal static void panicNotBool(this ΔValue v) {
 
 internal static ж<abi.Type> bytesType = rtypeOf((slice<byte>)(default!));
 
-// func Bytes is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Bytes is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // bytesSlow is split out to keep Bytes inlineable for unnamed []byte.
 // ok to use v.typ_ directly as comparison doesn't cause escape
@@ -853,7 +853,7 @@ break_stepsLoop:;
     // runtime.getArgInfo expects to be able to find ctxt on the
     // stack when it finds our caller, makeFuncStub. Make sure it
     // doesn't get garbage collected.
-    Δruntime.KeepAlive(ctxt);
+    Δruntime.KeepAlive(Ꮡctxt);
 }
 
 // methodReceiver returns information about the receiver
@@ -1148,7 +1148,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
     typedmemclr(methodFrameType, methodFrame);
     methodFramePool.Put(methodFrame);
     // See the comment in callReflect.
-    Δruntime.KeepAlive(ctxt);
+    Δruntime.KeepAlive(Ꮡctxt);
     // Keep valueRegs alive because it may hold live pointer results.
     // The caller (methodValueCall) has it as a stack object, which is only
     // scanned when there is a reference to it.
@@ -1219,11 +1219,11 @@ public static bool CanComplex(this ΔValue v) {
 
 }
 
-// func Complex is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Complex is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// func Elem is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Elem is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// func Field is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Field is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // This is a pointer to a not-in-heap object. ptr points to a uintptr
 // in the heap. That uintptr is the address of a not-in-heap object.
@@ -1327,11 +1327,11 @@ public static bool CanFloat(this ΔValue v) {
 
 }
 
-// func Float is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Float is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static ж<abi.Type> uint8Type = rtypeOf((uint8)0);
 
-// func Index is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Index is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Either flagIndir is set and v.ptr points at array,
 // or flagIndir is not set and v.ptr is the actual array data.
@@ -1354,7 +1354,7 @@ public static bool CanInt(this ΔValue v) {
 
 }
 
-// func Int is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Int is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // CanInterface reports whether [Value.Interface] can be used without panicking.
 public static bool CanInterface(this ΔValue v) {
@@ -1364,9 +1364,9 @@ public static bool CanInterface(this ΔValue v) {
     return (flag)(v.flag & flagRO) == 0;
 }
 
-// func Interface is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Interface is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// func valueInterface is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func valueInterface is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Do not allow access to unexported values via Interface,
 // because they might be pointers that should not be
@@ -1396,7 +1396,7 @@ public static array<uintptr> InterfaceData(this ΔValue v) {
     return ~(ж<array<uintptr>>)(uintptr)(v.ptr);
 }
 
-// func IsNil is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func IsNil is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Both interface and slice are nil if first word is 0.
 // Both are always bigger than a word; assume flagIndir.
@@ -1497,7 +1497,7 @@ internal static bool isZero(slice<byte> b) {
     if (len(b) == 0) {
         return true;
     }
-    UntypedInt n = 32;
+    const nint n = 32;
     // Align memory addresses to 8 bytes.
     while ((uintptr)new @unsafe.Pointer(Ꮡ(b, 0)) % 8 != 0) {
         if (b[0] != 0) {
@@ -1518,7 +1518,7 @@ internal static bool isZero(slice<byte> b) {
         return true;
     }
     var w = @unsafe.Slice((ж<uint64>)(uintptr)(new @unsafe.Pointer(Ꮡ(b, 0))), len(b) / 8);
-    while (len(w) % (nint)n != 0) {
+    while (len(w) % n != 0) {
         if (w[0] != 0) {
             return false;
         }
@@ -1615,7 +1615,7 @@ public static ΔKind Kind(this ΔValue v) {
     return v.kind();
 }
 
-// func Len is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Len is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // lenNonSlice is split out to keep Len inlineable for slice kinds.
 internal static nint lenNonSlice(this ΔValue v) {
@@ -1751,7 +1751,7 @@ public static slice<ΔValue> MapKeys(this ΔValue v) {
     internal hiter hiter;
 }
 
-// func Key is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Key is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // SetIterKey assigns to v the key of iter's current map entry.
 // It is equivalent to v.Set(iter.Key()), but it avoids allocating a new Value.
@@ -1781,7 +1781,7 @@ public static void SetIterKey(this ΔValue v, ж<MapIter> Ꮡiter) {
     typedmemmove(v.typ(), v.ptr, key.ptr);
 }
 
-// func Value is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Value is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // SetIterValue assigns to v the value of iter's current map entry.
 // It is equivalent to v.Set(iter.Value()), but it avoids allocating a new Value.
@@ -1811,7 +1811,7 @@ public static void SetIterValue(this ΔValue v, ж<MapIter> Ꮡiter) {
     typedmemmove(v.typ(), v.ptr, elem.ptr);
 }
 
-// func Next is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Next is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Reset modifies iter to iterate over v.
 // It panics if v's Kind is not [Map] and v is not the zero Value.
@@ -1825,7 +1825,7 @@ public static void SetIterValue(this ΔValue v, ж<MapIter> Ꮡiter) {
     iter.hiter = new hiter(nil);
 }
 
-// func MapRange is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func MapRange is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // This is inlinable to take advantage of "function outlining".
 // The allocation of MapIter can be stack allocated if the caller
@@ -1910,7 +1910,7 @@ public static ΔValue MethodByName(this ΔValue v, @string name) {
     return v.Method(m.Index);
 }
 
-// func NumField is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func NumField is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // OverflowComplex reports whether the complex128 x cannot be represented by v's type.
 // It panics if v's Kind is not [Complex64] or [Complex128].
@@ -1978,7 +1978,7 @@ public static bool OverflowUint(this ΔValue v, uint64 x) {
     throw panic(Ꮡ(new ValueError("reflect.Value.OverflowUint", v.kind())));
 }
 
-// func Pointer is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Pointer is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:nocheckptr
 // This prevents inlining Value.Pointer when -d=checkptr is enabled,
@@ -2424,7 +2424,7 @@ public static ΔValue Slice3(this ΔValue v, nint i, nint j, nint k) {
     return new ΔValue(typ.of(sliceType.ᏑSliceType).of(abi.SliceType.ᏑType).Common(), new @unsafe.Pointer(Ꮡx), fl);
 }
 
-// func String is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func String is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // stringNonString is split out to keep String inlineable for string kinds.
 internal static @string stringNonString(this ΔValue v) {
@@ -2460,8 +2460,9 @@ public static bool TrySend(this ΔValue v, ΔValue x) {
     return v.send(x, true);
 }
 
-// func Type is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Type is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+// inline of toRType(v.typ()), for own inlining in inline test
 internal static ΔType typeSlow(this ΔValue v) {
     if (v.flag == 0) {
         throw panic(Ꮡ(new ValueError("reflect.Value.Type", Invalid)));
@@ -2503,7 +2504,7 @@ public static bool CanUint(this ΔValue v) {
 
 }
 
-// func Uint is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Uint is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:nocheckptr
 // This prevents inlining Value.UnsafeAddr when -d=checkptr is enabled,
@@ -2526,7 +2527,7 @@ public static uintptr UnsafeAddr(this ΔValue v) {
     return (uintptr)v.ptr;
 }
 
-// func UnsafePointer is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func UnsafePointer is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Since it is a not-in-heap pointer, all pointers to the heap are
 // forbidden! See comment in Value.Elem and issue #48399.
@@ -2992,7 +2993,7 @@ public static ΔValue Indirect(ΔValue v) {
     return v.Elem();
 }
 
-// func ValueOf is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func ValueOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Zero returns a Value representing the zero value for the specified type.
 // The result is different from the zero value of the Value struct,

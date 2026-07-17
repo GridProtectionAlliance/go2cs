@@ -631,7 +631,7 @@ internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
     // functions Add and Slice): record the signature for f and possible
     // children.
     while (ᐧ) {
-        check.recordTypeAndValue(f, Δbuiltin, new ΔSignatureжΔType(Ꮡsig), default!);
+        check.recordTypeAndValue(f, Δbuiltinᴛ, new ΔSignatureжΔType(Ꮡsig), default!);
         switch (f.type()) {
         case ж<ast.Ident> _:
         case ж<ast.SelectorExpr> _: {

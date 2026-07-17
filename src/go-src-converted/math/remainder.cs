@@ -44,8 +44,8 @@ public static float64 Remainder(float64 x, float64 y) {
 }
 
 internal static float64 remainder(float64 x, float64 y) {
-    UntypedFloat Tiny = /* 4.45014771701440276618e-308 */ 4.45015e-308; // 0x0020000000000000
-    UntypedFloat HalfMax = /* MaxFloat64 / 2 */ 8.98847e+307;
+    const float64 Tiny = 4.45014771701440276618e-308; // 0x0020000000000000
+    const float64 HalfMax = /* MaxFloat64 / 2 */ 8.988465674311579e+307;
     // special cases
     switch (ᐧ) {
     case {} when IsNaN(x) || IsNaN(y) || IsInf(x, 0) || y == 0: {

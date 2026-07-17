@@ -484,8 +484,8 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
 // and the distance values, respectively. If hd == nil, using the
 // fixed distance encoding associated with fixed Huffman blocks.
 [GoRecv] internal static void huffmanBlock(this ref decompressor f) {
-    UntypedInt stateInit = iota; // Zero value must be stateInit
-    UntypedInt stateDict = 1;
+    const nint stateInit = /* iota */ 0; // Zero value must be stateInit
+    const nint stateDict = 1;
     var exprᴛ1 = f.stepState;
     if (exprᴛ1 == stateInit) {
         goto readLiteral;

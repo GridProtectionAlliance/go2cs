@@ -107,9 +107,9 @@ public static float64 Round(float64 x) {
         //
         // Numbers with larger exponents are returned unchanged since they
         // must be either an integer, infinity, or NaN.
-        UntypedInt half = /* 1 << (shift - 1) */ 2251799813685248;
+        const uint64 half = /* 1 << (shift - 1) */ 2251799813685248;
         e -= bias;
-        bits += ((uint64)half >> (int)(e));
+        bits += (half >> (int)(e));
         bits &= unchecked((uint64)~(uint64)(((uint64)fracMask >> (int)(e))));
     }
     return Float64frombits(bits);
@@ -140,9 +140,9 @@ public static float64 RoundToEven(float64 x) {
         // - Large numbers without fractional components, infinity, and NaN are unchanged.
         // - Add 0.499.. or 0.5 before truncating depending on whether the truncated
         //   number is even or odd (respectively).
-        UntypedInt halfMinusULP = /* (1 << (shift - 1)) - 1 */ 2251799813685247;
+        const uint64 halfMinusULP = /* (1 << (shift - 1)) - 1 */ 2251799813685247;
         e -= bias;
-        bits += (((uint64)halfMinusULP + (uint64)(((bits >> (int)(((nuint)shift - e)))) & 1)) >> (int)(e));
+        bits += ((halfMinusULP + (uint64)(((bits >> (int)(((nuint)shift - e)))) & 1)) >> (int)(e));
         bits &= unchecked((uint64)~(uint64)(((uint64)fracMask >> (int)(e))));
     } else 
     if (e == bias - 1 && (uint64)(bits & (uint64)fracMask) != 0){

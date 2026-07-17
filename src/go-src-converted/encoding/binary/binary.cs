@@ -69,7 +69,7 @@ public static bigEndian BigEndian;
 public static uint16 Uint16(this littleEndian _Δp0, slice<byte> b) {
     _ = b[1];
     // bounds check hint to compiler; see golang.org/issue/14808
-    return (uint16)((uint16)b[0] | ((uint16)b[1] << (int)(8)));
+    return (uint16)((uint16)b[0] | (uint16)((uint16)b[1] << (int)(8)));
 }
 
 public static void PutUint16(this littleEndian _Δp0, slice<byte> b, uint16 v) {
@@ -153,7 +153,7 @@ public static @string GoString(this littleEndian _) {
 public static uint16 Uint16(this bigEndian _Δp0, slice<byte> b) {
     _ = b[1];
     // bounds check hint to compiler; see golang.org/issue/14808
-    return (uint16)((uint16)b[1] | ((uint16)b[0] << (int)(8)));
+    return (uint16)((uint16)b[1] | (uint16)((uint16)b[0] << (int)(8)));
 }
 
 public static void PutUint16(this bigEndian _Δp0, slice<byte> b, uint16 v) {

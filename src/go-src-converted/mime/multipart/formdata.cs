@@ -139,7 +139,7 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
         // Multiple values for the same key (one map entry, longer slice) are cheaper
         // than the same number of values for different keys (many map entries), but
         // using a consistent per-value cost for overhead is simpler.
-        UntypedInt mapEntryOverhead = 200;
+        const int64 mapEntryOverhead = 200;
         maxMemoryBytes -= (int64)len(name);
         maxMemoryBytes -= mapEntryOverhead;
         if (maxMemoryBytes < 0) {
@@ -162,7 +162,7 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
             continue;
         }
         // file, store in memory or on disk
-        UntypedInt fileHeaderSize = 100;
+        const int64 fileHeaderSize = 100;
         maxMemoryBytes -= mimeHeaderSize((~p).Header);
         maxMemoryBytes -= mapEntryOverhead;
         maxMemoryBytes -= fileHeaderSize;

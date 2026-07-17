@@ -607,13 +607,13 @@ internal static readonly UntypedInt skipStrings = 2;
     // The number of arguments is encoded using two bits and can thus only
     // represent the values 0–3. The value 3 (on the wire) indicates that
     // arguments are prefixed by their byte length, to encode >=3 arguments.
-    UntypedInt inlineArgs = 3;
+    const byte inlineArgs = 3;
     // Read event type and number of arguments (1 byte).
     var (b, ok) = p.readByte();
     if (!ok) {
         return io.EOF;
     }
-    var typ = ((@event.Type)(((b << (int)(2)) >> (int)(2))));
+    var typ = ((@event.Type)(((byte)(b << (int)(2)) >> (int)(2))));
     // Most events have a timestamp before the actual arguments, so we add 1 and
     // parse it like it's the first argument. EvString has a special format and
     // the number of arguments doesn't matter. EvBatch writes '1' as the number
@@ -1010,10 +1010,10 @@ public static error ErrTimeOrder = errors.New("time stamps out of order"u8);
 internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
     ref var p = ref Ꮡp.Value;
 
-    UntypedInt gDead = iota;
-    UntypedInt gRunnable = 1;
-    UntypedInt gRunning = 2;
-    UntypedInt gWaiting = 3;
+    const nint gDead = /* iota */ 0;
+    const nint gRunnable = 1;
+    const nint gRunning = 2;
+    const nint gWaiting = 3;
     var gs = new map<uint64, postProcessTrace_gdesc>();
     var ps = new map<int32, postProcessTrace_pdesc>();
     var tasks = new map<uint64, ж<Event>>();

@@ -288,7 +288,7 @@ internal static readonly abiStepKind abiStepFloatReg = 4; // copy to/from FP reg
     }
     for (nint i = 0; i < n; i++) {
         abiStepKind kind = abiStepIntReg;
-        if ((uint8)(ptrMap & (((uint8)1 << (int)(i)))) != 0) {
+        if ((uint8)(ptrMap & ((uint8)((uint8)1 << (int)(i)))) != 0) {
             kind = abiStepPointer;
         }
         a.steps = builtin.append(a.steps, new abiStep(

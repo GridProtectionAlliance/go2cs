@@ -90,7 +90,7 @@ internal static (ж<types.Package> pkg, error err) iImportData(ж<token.FileSet>
     ref var fset = ref Ꮡfset.Value;
 
     ref var err = ref Ꮡerr.ValueSlot;
-        UntypedInt currentVersion = /* iexportVersionCurrent */ 2;
+        const int64 currentVersion = /* iexportVersionCurrent */ 2;
         var version = (int64)(-1);
         defer(() => {
             {

@@ -146,7 +146,7 @@ internal static FormatError errShortHuffmanData = ((FormatError)(@string)"short 
                 // The high 8 bits of lutValue are the encoded value.
                 // The low 8 bits are 1 plus the codeLength.
                 var @base = (uint8)((code << (int)((7 - i))));
-                var lutValue = (uint16)(((uint16)(~h).vals[(nint)(x)] << (int)(8)) | (uint16)(2 + i));
+                var lutValue = (uint16)((uint16)((uint16)(~h).vals[(nint)(x)] << (int)(8)) | (uint16)(2 + i));
                 for (var k = (uint8)0; k < (uint8)(1 << (int)((7 - i))); k++) {
                     h.Value.lut[(uint8)(@base | k)] = lutValue;
                 }

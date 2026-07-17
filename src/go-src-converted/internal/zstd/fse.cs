@@ -183,7 +183,7 @@ internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> �
         nint highBit = 15 - bits.LeadingZeros16(nextState);
         nint bitsΔ1 = tableBits - highBit;
         table[i].bits = (uint8)bitsΔ1;
-        table[i].@base = (uint16)(((nextState << (int)(bitsΔ1))) - (uint16)tableSize);
+        table[i].@base = (uint16)(((uint16)(nextState << (int)(bitsΔ1))) - (uint16)tableSize);
     }
     return default!;
 }

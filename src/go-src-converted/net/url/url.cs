@@ -251,7 +251,7 @@ internal static (@string, error) unescape(@string s, encoding mode) {
                 // That is, you can use escaping in the zone identifier but not
                 // to introduce bytes you couldn't just write directly.
                 // But Windows puts spaces here! Yay.
-                var v = (byte)((unhex(s[i + 1]) << (int)(4)) | unhex(s[i + 2]));
+                var v = (byte)((byte)(unhex(s[i + 1]) << (int)(4)) | unhex(s[i + 2]));
                 if (s[(int)(i)..(int)(i + 3)] != "%25" && v != (rune)' ' && shouldEscape(v, encodeHost)) {
                     return ("", ((EscapeError)(s[(int)(i)..(int)(i + 3)])));
                 }
@@ -281,7 +281,7 @@ internal static (@string, error) unescape(@string s, encoding mode) {
     for (nint i = 0; i < len(s); i++) {
         switch (s[i]) {
         case (rune)'%': {
-            Ꮡt.WriteByte((byte)((unhex(s[i + 1]) << (int)(4)) | unhex(s[i + 2])));
+            Ꮡt.WriteByte((byte)((byte)(unhex(s[i + 1]) << (int)(4)) | unhex(s[i + 2])));
             i += 2;
             break;
         }
@@ -332,11 +332,11 @@ internal static @string escape(@string s, encoding mode) {
     }
     array<byte> buf = new(64);
     slice<byte> t = default!;
-    nint required = len(s) + 2 * hexCount;
-    if (required <= len(buf)){
-        t = buf[..(int)(required)];
+    nint @required = len(s) + 2 * hexCount;
+    if (@required <= len(buf)){
+        t = buf[..(int)(@required)];
     } else {
-        t = new slice<byte>(required);
+        t = new slice<byte>(@required);
     }
     if (hexCount == 0) {
         copy(t, s);

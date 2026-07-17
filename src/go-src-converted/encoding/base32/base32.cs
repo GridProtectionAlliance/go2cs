@@ -352,27 +352,27 @@ public static @string Error(this CorruptInputError e) {
         var exprᴛ1 = dlen;
         var matchᴛ1 = false;
         if (exprᴛ1 is 8) { matchᴛ1 = true;
-            dst[dsti + 4] = (byte)((dbuf[6] << (int)(5)) | dbuf[7]);
+            dst[dsti + 4] = (byte)((byte)(dbuf[6] << (int)(5)) | dbuf[7]);
             n++;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 is 7) { matchᴛ1 = true;
-            dst[dsti + 3] = (byte)((byte)((dbuf[4] << (int)(7)) | (dbuf[5] << (int)(2))) | (dbuf[6] >> (int)(3)));
+            dst[dsti + 3] = (byte)((byte)((byte)(dbuf[4] << (int)(7)) | (byte)(dbuf[5] << (int)(2))) | (dbuf[6] >> (int)(3)));
             n++;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 is 5) { matchᴛ1 = true;
-            dst[dsti + 2] = (byte)((dbuf[3] << (int)(4)) | (dbuf[4] >> (int)(1)));
+            dst[dsti + 2] = (byte)((byte)(dbuf[3] << (int)(4)) | (dbuf[4] >> (int)(1)));
             n++;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 is 4) {
-            dst[dsti + 1] = (byte)((byte)((dbuf[1] << (int)(6)) | (dbuf[2] << (int)(1))) | (dbuf[3] >> (int)(4)));
+            dst[dsti + 1] = (byte)((byte)((byte)(dbuf[1] << (int)(6)) | (byte)(dbuf[2] << (int)(1))) | (dbuf[3] >> (int)(4)));
             n++;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) { matchᴛ1 = true;
-            dst[dsti + 0] = (byte)((dbuf[0] << (int)(3)) | (dbuf[1] >> (int)(2)));
+            dst[dsti + 0] = (byte)((byte)(dbuf[0] << (int)(3)) | (dbuf[1] >> (int)(2)));
             n++;
         }
 

@@ -461,7 +461,7 @@ internal static void prepareFreeWorkbufs() {
 // freeSomeWbufs frees some workbufs back to the heap and returns
 // true if it should be called again to free more.
 internal static bool freeSomeWbufs(bool preemptible) {
-    UntypedInt batchSize = 64; // ~1–2 µs per span.
+    const nint batchSize = 64; // ~1–2 µs per span.
     @lock(Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡlock));
     if (gcphase != _GCoff || Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡfree).isEmpty()) {
         unlock(Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡlock));

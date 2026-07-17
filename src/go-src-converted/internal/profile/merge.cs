@@ -309,10 +309,10 @@ internal static bool isZeroSample(ж<Sample> Ꮡs) {
 [GoRecv] internal static mappingKey key(this ref Mapping m) {
     // Normalize addresses to handle address space randomization.
     // Round up to next 4K boundary to avoid minor discrepancies.
-    UntypedInt mapsizeRounding = 0x1000;
+    const uint64 mapsizeRounding = 0x1000;
     var size = m.Limit - m.Start;
-    size = size + (uint64)mapsizeRounding - 1;
-    size = size - (size % (uint64)mapsizeRounding);
+    size = size + mapsizeRounding - 1;
+    size = size - (size % mapsizeRounding);
     var key = new mappingKey(
         size: size,
         offset: m.Offset

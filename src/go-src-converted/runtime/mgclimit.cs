@@ -138,7 +138,7 @@ internal static void finishGCTransition(this ж<gcCPULimiterState> Ꮡl, int64 n
 
 // gcCPULimiterUpdatePeriod dictates the maximum amount of wall-clock time
 // we can go before updating the limiter.
-internal static readonly UntypedFloat gcCPULimiterUpdatePeriod = 1e+07; // 10ms
+internal static readonly UntypedFloat gcCPULimiterUpdatePeriod = 10e6; // 10ms
 
 // needUpdate returns true if the limiter's maximum update period has been
 // exceeded, and so would benefit from an update.
@@ -319,7 +319,7 @@ internal static void unlock(this ж<gcCPULimiterState> Ꮡl) {
 }
 
 // capacityPerProc is the limiter's bucket capacity for each P in GOMAXPROCS.
-internal static readonly UntypedFloat capacityPerProc = 1e+09; // 1 second in nanoseconds
+internal static readonly UntypedFloat capacityPerProc = 1e9; // 1 second in nanoseconds
 
 // resetCapacity updates the capacity based on GOMAXPROCS. Must not be called
 // while the GC is enabled.

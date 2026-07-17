@@ -280,7 +280,7 @@ internal static void loadOptionalSyscalls() {
 }
 
 internal static void monitorSuspendResume() {
-    UntypedInt _DEVICE_NOTIFY_CALLBACK = 2;
+    uintptr _DEVICE_NOTIFY_CALLBACK = 2;
     var powrprof = windowsLoadSystemLib(powrprofdll[..]);
     if (powrprof == 0) {
         return;
@@ -393,7 +393,7 @@ internal static bool haveHighResSleep = false;
 // resolution timer. createHighResTimer returns new timer
 // handle or 0, if CreateWaitableTimerEx failed.
 internal static uintptr createHighResTimer() {
-    UntypedInt _CREATE_WAITABLE_TIMER_HIGH_RESOLUTION = 0x00000002;
+    uintptr _CREATE_WAITABLE_TIMER_HIGH_RESOLUTION = 0x00000002;
     UntypedInt _SYNCHRONIZE = 0x00100000;
     UntypedInt _TIMER_QUERY_STATE = 0x0001;
     UntypedInt _TIMER_MODIFY_STATE = 0x0002;
@@ -431,8 +431,8 @@ internal static bool canUseLongPaths;
 
 // initLongPathSupport enables long path support.
 internal static void initLongPathSupport() {
-    UntypedInt IsLongPathAwareProcess = 0x80;
-    UntypedInt PebBitFieldOffset = 3;
+    const byte IsLongPathAwareProcess = 0x80;
+    uintptr PebBitFieldOffset = 3;
     // Check that we're ≥ 10.0.15063.
     ref var info = ref heap<_OSVERSIONINFOW>(out var Ꮡinfo);
     info = new _OSVERSIONINFOW(nil);
@@ -444,7 +444,7 @@ internal static void initLongPathSupport() {
     // Set the IsLongPathAwareProcess flag of the PEB's bit field.
     // This flag is not documented, but it's known to be used
     // by Windows to enable long path support.
-    var bitField = (ж<byte>)(uintptr)((@unsafe.Pointer)(stdcall0(_RtlGetCurrentPeb) + (uintptr)PebBitFieldOffset));
+    var bitField = (ж<byte>)(uintptr)((@unsafe.Pointer)(stdcall0(_RtlGetCurrentPeb) + PebBitFieldOffset));
     bitField.Value |= (byte)(IsLongPathAwareProcess);
     canUseLongPaths = true;
 }
@@ -578,7 +578,7 @@ internal static ref mutex utf16ConsoleBackLock => ref Ꮡutf16ConsoleBackLock.Va
 // writeConsole writes bufLen bytes from buf to the console File.
 // It returns the number of bytes written.
 internal static unsafe nint writeConsole(uintptr handle, @unsafe.Pointer buf, int32 bufLen) {
-    UntypedInt surr2 = /* (surrogateMin + surrogateMax + 1) / 2 */ 56320;
+    const uint16 surr2 = /* (surrogateMin + surrogateMax + 1) / 2 */ 56320;
     // Do not use defer for unlock. May cause issues when printing a panic.
     @lock(Ꮡutf16ConsoleBackLock);
     ref var b = ref heap<slice<byte>>(out var Ꮡb);
@@ -600,7 +600,7 @@ internal static unsafe nint writeConsole(uintptr handle, @unsafe.Pointer buf, in
         } else {
             r -= 0x10000;
             utf16tmp[w] = (uint16)((uint16)surrogateMin + (uint16)((uint16)((r >> (int)(10))) & 0x3ff));
-            utf16tmp[w + 1] = (uint16)((uint16)surr2 + (uint16)((uint16)r & 0x3ff));
+            utf16tmp[w + 1] = (uint16)(surr2 + (uint16)((uint16)r & 0x3ff));
             w += 2;
         }
     }
@@ -629,10 +629,10 @@ internal static void writeConsoleUTF16(uintptr handle, slice<uint16> b) {
 
 //go:nosplit
 internal static int32 semasleep(int64 ns) {
-    UntypedInt _WAIT_ABANDONED = 0x00000080;
+    uintptr _WAIT_ABANDONED = 0x00000080;
     UntypedInt _WAIT_OBJECT_0 = 0x00000000;
-    UntypedInt _WAIT_TIMEOUT = 0x00000102;
-    UntypedInt _WAIT_FAILED = 0xFFFFFFFF;
+    uintptr _WAIT_TIMEOUT = 0x00000102;
+    uintptr _WAIT_FAILED = unchecked((uintptr)0xFFFFFFFF);
     uintptr result = default!;
     if (ns < 0){
         result = stdcall2(_WaitForSingleObject, (~(~getg()).m).waitsema, (uintptr)_INFINITE);
@@ -819,7 +819,7 @@ internal static void minit() {
             print("runtime: CreateWaitableTimerEx failed; errno=", getlasterror(), "\n");
             @throw("CreateWaitableTimerEx when creating timer failed"u8);
         }
-        UntypedInt GENERIC_ALL = 0x10000000;
+        uintptr GENERIC_ALL = 0x10000000;
         var errno = stdcall3(_NtCreateWaitCompletionPacket, (uintptr)@unsafe.Pointer.FromRef(ref (mp.of(m.ᏑwaitIocpHandle)).Value), GENERIC_ALL, 0);
         if ((~mp).waitIocpHandle == 0) {
             print("runtime: NtCreateWaitCompletionPacket failed; errno=", errno, "\n");

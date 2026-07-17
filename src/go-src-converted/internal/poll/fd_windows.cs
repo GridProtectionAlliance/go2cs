@@ -752,7 +752,7 @@ public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> buf) => func<(n
     // syscall.WriteConsole seems to fail, if given large buffer.
     // So limit the buffer to 16000 characters. This number was
     // discovered by experimenting with syscall.WriteConsole.
-    UntypedInt maxWrite = 16000;
+    const nint maxWrite = 16000;
     while (len(runes) > 0) {
         nint m = len(runes);
         if (m > maxWrite) {

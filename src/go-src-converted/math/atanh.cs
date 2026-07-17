@@ -54,7 +54,7 @@ public static float64 Atanh(float64 x) {
 }
 
 internal static float64 atanh(float64 x) {
-    UntypedFloat NearZero = /* 1.0 / (1 << 28) */ 3.72529e-09; // 2**-28
+    const float64 NearZero = /* 1.0 / (1 << 28) */ 3.725290298461914e-09; // 2**-28
     // special cases
     switch (ᐧ) {
     case {} when x < -1 || x > 1 || IsNaN(x): {

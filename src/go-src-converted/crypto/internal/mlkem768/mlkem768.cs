@@ -616,10 +616,10 @@ internal static (T, error) polyByteDecode<T>(slice<byte> b)
     T f = default!;
     for (nint i = 0; i < n; i += 2) {
         var d = (uint32)((uint32)((uint32)b[0] | ((uint32)b[1] << (int)(8))) | ((uint32)b[2] << (int)(16)));
-        UntypedInt mask12 = 0b1111_1111_1111;
+        const uint32 mask12 = 0b1111_1111_1111;
         error err = default!;
         {
-            (f[i], err) = fieldCheckReduced((uint16)((uint32)(d & (uint32)mask12))); if (err != default!) {
+            (f[i], err) = fieldCheckReduced((uint16)((uint32)(d & mask12))); if (err != default!) {
                 return (new T{}, errors.New("mlkem768: invalid polynomial encoding"u8));
             }
         }
@@ -664,7 +664,7 @@ internal static slice<byte> ringCompressAndEncode1(slice<byte> s, ringElement f)
         b[i] = 0;
     }
     foreach (var (i, _) in f) {
-        b[i / 8] |= (uint8)((uint8)((compress(f[i], 1) << (int)((i % 8)))));
+        b[i / 8] |= (uint8)((uint8)((uint16)(compress(f[i], 1) << (int)((i % 8)))));
     }
     return s;
 }
@@ -695,7 +695,7 @@ internal static ringElement ringDecodeAndDecompress1(ж<array<byte>> Ꮡb) {
 internal static slice<byte> ringCompressAndEncode4(slice<byte> s, ringElement f) {
     (s, var b) = sliceForAppend(s, encodingSize4);
     for (nint i = 0; i < n; i += 2) {
-        b[i / 2] = (uint8)((uint16)(compress(f[i], 4) | (compress(f[i + 1], 4) << (int)(4))));
+        b[i / 2] = (uint8)((uint16)(compress(f[i], 4) | (uint16)(compress(f[i + 1], 4) << (int)(4))));
     }
     return s;
 }

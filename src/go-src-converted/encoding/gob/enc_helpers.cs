@@ -91,7 +91,7 @@ internal static bool encComplex64Slice(ж<encoderState> Ꮡstate, reflectꓸValu
         return false;
     }
     foreach (var (_, x) in Δslice) {
-        if (x != 0 + builtin.i(0F) || state.sendZero) {
+        if (x != 0 + 0F.i() || state.sendZero) {
             var rpart = floatBits((float64)real(x));
             var ipart = floatBits((float64)imag(x));
             state.encodeUint(rpart);
@@ -118,7 +118,7 @@ internal static bool encComplex128Slice(ж<encoderState> Ꮡstate, reflectꓸVal
         return false;
     }
     foreach (var (_, x) in Δslice) {
-        if (x != 0 + builtin.i(0F) || state.sendZero) {
+        if (x != 0 + 0D.i() || state.sendZero) {
             var rpart = floatBits(real(x));
             var ipart = floatBits(imag(x));
             state.encodeUint(rpart);

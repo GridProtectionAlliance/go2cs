@@ -481,7 +481,7 @@ internal static uint64 RoundedInteger(this ж<@decimal> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
     if (a.dp > 20) {
-        return (nuint)0xFFFFFFFFFFFFFFFFUL;
+        return 0xFFFFFFFFFFFFFFFFUL;
     }
     nint i = default!;
     var n = (uint64)0;

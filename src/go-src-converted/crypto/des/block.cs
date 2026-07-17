@@ -133,7 +133,7 @@ internal static uint64 permuteInitialBlock(uint64 block) {
     //  3  2
     //  1  0 [+16] [+32] [+64]
     // exchange 0,2,4,6 with 9,11,13,15:
-    b1 = (uint64)(block & (nuint)0xaaaaaaaa55555555UL);
+    b1 = (uint64)(block & 0xaaaaaaaa55555555UL);
     block ^= (uint64)((uint64)((uint64)(b1 ^ (b1 >> (int)(33))) ^ (b1 << (int)(33))));
     // block is the permutation:
     // 6 14 22 30 38 46 54 62
@@ -152,7 +152,7 @@ internal static uint64 permuteInitialBlock(uint64 block) {
 internal static uint64 permuteFinalBlock(uint64 block) {
     // Perform the same bit exchanges as permuteInitialBlock
     // but in reverse order.
-    var b1 = (uint64)(block & (nuint)0xaaaaaaaa55555555UL);
+    var b1 = (uint64)(block & 0xaaaaaaaa55555555UL);
     block ^= (uint64)((uint64)((uint64)(b1 ^ (b1 >> (int)(33))) ^ (b1 << (int)(33))));
     b1 = (uint64)(block & 0x3300330033003300UL);
     var b2 = (uint64)(block & 0x00cc00cc00cc00ccUL);

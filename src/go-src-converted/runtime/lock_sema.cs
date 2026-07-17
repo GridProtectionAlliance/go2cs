@@ -30,15 +30,13 @@ internal static readonly UntypedInt active_spin_cnt = 30;
 
 internal static readonly UntypedInt passive_spin = 1;
 
-// func mutexContended is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func mutexContended is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static void @lock(ж<mutex> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     lockWithRank(Ꮡl, getLockRank(Ꮡl));
 }
 
-// func lock2 is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func lock2 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Speculative grab for lock.
 // On uniprocessor's, no point spinning.
@@ -50,12 +48,10 @@ internal static void @lock(ж<mutex> Ꮡl) {
 // Queue this M.
 // Queued. Wait.
 internal static void unlock(ж<mutex> Ꮡl) {
-    ref var l = ref Ꮡl.Value;
-
     unlockWithRank(Ꮡl);
 }
 
-// func unlock2 is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func unlock2 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Other M's are waiting for the lock.
 // Dequeue an M.
@@ -69,11 +65,11 @@ internal static void noteclear(ж<note> Ꮡn) {
     n.key = 0;
 }
 
-// func notewakeup is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func notewakeup is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// func notesleep is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func notesleep is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// func notetsleep_internal is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func notetsleep_internal is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Successfully set waitm to locked.
 // What was it before?
@@ -102,8 +98,6 @@ internal static void noteclear(ж<note> Ꮡn) {
 // Wakeup happened so semaphore is available.
 // Grab it to avoid getting out of sync.
 internal static bool notetsleep(ж<note> Ꮡn, int64 ns) {
-    ref var n = ref Ꮡn.Value;
-
     var gp = getg();
     if (gp != (~(~gp).m).g0) {
         @throw("notetsleep not on g0"u8);
@@ -115,8 +109,6 @@ internal static bool notetsleep(ж<note> Ꮡn, int64 ns) {
 // same as runtime·notetsleep, but called on user g (not g0)
 // calls only nosplit functions between entersyscallblock/exitsyscall.
 internal static bool notetsleepg(ж<note> Ꮡn, int64 ns) {
-    ref var n = ref Ꮡn.Value;
-
     var gp = getg();
     if (gp == (~(~gp).m).g0) {
         @throw("notetsleepg on g0"u8);

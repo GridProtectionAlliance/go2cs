@@ -57,7 +57,7 @@ internal static readonly UntypedInt mutexLocked = /* 1 << iota */ 1; // mutex is
 internal static readonly UntypedInt mutexWoken = 2;
 internal static readonly UntypedInt mutexStarving = 4;
 internal static readonly UntypedInt mutexWaiterShift = iota;
-internal static readonly UntypedFloat starvationThresholdNs = 1e+06;
+internal static readonly UntypedFloat starvationThresholdNs = 1e6;
 
 // Lock locks m.
 // If the lock is already in use, the calling goroutine

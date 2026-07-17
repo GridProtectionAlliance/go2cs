@@ -1255,8 +1255,8 @@ internal static void tracebackothers(ж<g> Ꮡme) {
 internal static void tracebackHexdump(Δstack stk, ж<stkframe> Ꮡframe, uintptr bad) {
     ref var frame = ref Ꮡframe.Value;
 
-    UntypedInt expand = /* 32 * goarch.PtrSize */ 256;
-    UntypedInt maxExpand = /* 256 * goarch.PtrSize */ 2048;
+    uintptr expand = /* 32 * goarch.PtrSize */ 256;
+    uintptr maxExpand = /* 256 * goarch.PtrSize */ 2048;
     // Start around frame.sp.
     var (lo, hi) = (frame.sp, frame.sp);
     // Expand to include frame.fp.
@@ -1267,13 +1267,13 @@ internal static void tracebackHexdump(Δstack stk, ж<stkframe> Ꮡframe, uintpt
         hi = frame.fp;
     }
     // Expand a bit more.
-    (lo, hi) = (lo - (uintptr)expand, hi + (uintptr)expand);
+    (lo, hi) = (lo - expand, hi + expand);
     // But don't go too far from frame.sp.
-    if (lo < frame.sp - (uintptr)maxExpand) {
-        lo = frame.sp - (uintptr)maxExpand;
+    if (lo < frame.sp - maxExpand) {
+        lo = frame.sp - maxExpand;
     }
-    if (hi > frame.sp + (uintptr)maxExpand) {
-        hi = frame.sp + (uintptr)maxExpand;
+    if (hi > frame.sp + maxExpand) {
+        hi = frame.sp + maxExpand;
     }
     // And don't go outside the stack bounds.
     if (lo < stk.lo) {

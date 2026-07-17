@@ -530,8 +530,8 @@ public static Reader LimitReader(Reader r, int64 n) {
 // starting at offset off and stops with EOF after n bytes.
 public static ж<SectionReader> NewSectionReader(ReaderAt r, int64 off, int64 n) {
     ref var remaining = ref heap(new int64(), out var Ꮡremaining);
-    UntypedInt maxint64 = /* 1<<63 - 1 */ 9223372036854775807;
-    if (off <= (int64)maxint64 - n){
+    const int64 maxint64 = /* 1<<63 - 1 */ 9223372036854775807;
+    if (off <= maxint64 - n){
         remaining = n + off;
     } else {
         // Overflow, with no way to return error.

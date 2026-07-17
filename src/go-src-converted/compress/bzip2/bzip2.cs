@@ -455,12 +455,12 @@ internal static uint32 inverseBWT(slice<uint32> tt, nuint origPtr, slice<nuint> 
 internal static array<uint32> crctab = new(256);
 
 [GoInit] internal static void init() {
-    UntypedInt poly = 0x04C11DB7;
+    const uint32 poly = 0x04C11DB7;
     foreach (var (i, _) in crctab) {
         var crc = ((uint32)i << (int)(24));
         for (nint j = 0; j < 8; j++) {
             if ((uint32)(crc & 0x80000000U) != 0){
-                crc = (uint32)(((crc << (int)(1))) ^ (uint32)poly);
+                crc = (uint32)(((crc << (int)(1))) ^ poly);
             } else {
                 crc <<= (int)(1);
             }

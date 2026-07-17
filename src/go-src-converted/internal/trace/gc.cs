@@ -887,8 +887,8 @@ keep:;
     // Very often, this will be nearby, so we optimize that case,
     // but it may be arbitrarily far away, so we handled that
     // efficiently, too.
-    UntypedInt maxSeq = 8;
-    if (pos + (nint)maxSeq < len(util) && util[pos + (nint)maxSeq].Time > time){
+    const nint maxSeq = 8;
+    if (pos + maxSeq < len(util) && util[pos + maxSeq].Time > time){
         // Nearby. Use a linear scan.
         while (pos + 1 < len(util) && util[pos + 1].Time <= time) {
             pos++;

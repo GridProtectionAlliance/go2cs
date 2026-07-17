@@ -294,7 +294,7 @@ internal static slice<byte> hashForServerKeyExchange(uint8 sigType, crypto.Hash 
         // named curve
         return errors.New("tls: server selected unsupported curve"u8);
     }
-    var curveID = (CurveID)((((CurveID)(uint16)skx.key[1]) << (int)(8)) | ((CurveID)(uint16)skx.key[2]));
+    var curveID = (CurveID)((CurveID)(uint16)(((CurveID)(uint16)skx.key[1]) << (int)(8)) | ((CurveID)(uint16)skx.key[2]));
     nint publicLen = (nint)skx.key[3];
     if (publicLen + 4 > len(skx.key)) {
         return errServerKeyExchange;
@@ -331,7 +331,7 @@ internal static slice<byte> hashForServerKeyExchange(uint8 sigType, crypto.Hash 
     uint8 sigType = default!;
     crypto.Hash sigHash = default!;
     if (ka.version >= VersionTLS12){
-        var signatureAlgorithm = (SignatureScheme)((((SignatureScheme)(uint16)sig[0]) << (int)(8)) | ((SignatureScheme)(uint16)sig[1]));
+        var signatureAlgorithm = (SignatureScheme)((SignatureScheme)(uint16)(((SignatureScheme)(uint16)sig[0]) << (int)(8)) | ((SignatureScheme)(uint16)sig[1]));
         sig = sig[2..];
         if (len(sig) < 2) {
             return errServerKeyExchange;

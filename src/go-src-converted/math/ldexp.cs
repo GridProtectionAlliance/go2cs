@@ -50,7 +50,7 @@ internal static float64 ldexp(float64 frac, nint exp) {
     if (exp < -1022) {
         // denormal
         exp += 53;
-        m = 1.0D / ((1 << (int)(53)));
+        m = 1.0D / (9007199254740992D);
     }
     // 2**-53
     x &= unchecked((uint64)~(uint64)(((uint64)mask << (int)(shift))));

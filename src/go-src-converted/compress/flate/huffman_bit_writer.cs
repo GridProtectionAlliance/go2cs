@@ -602,9 +602,9 @@ internal static ж<huffmanEncoder> huffOffset;
     // Add everything as literals
     histogram(input, w.literalFreq);
     w.literalFreq[endBlockMarker] = 1;
-    UntypedInt numLiterals = /* endBlockMarker + 1 */ 257;
+    const nint numLiterals = /* endBlockMarker + 1 */ 257;
     w.offsetFreq[0] = 1;
-    UntypedInt numOffsets = 1;
+    const nint numOffsets = 1;
     w.literalEncoding.generate(w.literalFreq, 15);
     // Figure out smallest code.
     // Always use dynamic Huffman or Store

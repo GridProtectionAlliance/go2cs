@@ -175,7 +175,7 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
             // current node position
             // set fake sentinel position to infinity so that
             // all comments get processed before the sentinel
-            UntypedInt infinity = /* 1 << 30 */ 1073741824;
+            const nint infinity = /* 1 << 30 */ 1073741824;
             qpos.Offset = infinity;
             qpos.Line = infinity;
         }

@@ -29,14 +29,14 @@ public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y) {
     uint64 hi = default!;
     uint64 lo = default!;
 
-    UntypedInt mask32 = /* 1<<32 - 1 */ 4294967295;
-    var x0 = (uint64)(x & (uint64)mask32);
+    const uint64 mask32 = /* 1<<32 - 1 */ 4294967295;
+    var x0 = (uint64)(x & mask32);
     var x1 = (x >> (int)(32));
-    var y0 = (uint64)(y & (uint64)mask32);
+    var y0 = (uint64)(y & mask32);
     var y1 = (y >> (int)(32));
     var w0 = x0 * y0;
     var t = x1 * y0 + (w0 >> (int)(32));
-    var w1 = (uint64)(t & (uint64)mask32);
+    var w1 = (uint64)(t & mask32);
     var w2 = (t >> (int)(32));
     w1 += x0 * y1;
     hi = x1 * y1 + w2 + (w1 >> (int)(32));

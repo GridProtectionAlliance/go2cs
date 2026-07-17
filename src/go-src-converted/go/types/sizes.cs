@@ -227,8 +227,8 @@ public static int64 Sizeof(this ж<StdSizes> Ꮡs, ΔType T) {
 // ea >= 1
 // n1 >= 0
         // Final size is ea*n1 + esize; and size must be <= maxInt64.
-        UntypedInt maxInt64 = /* 1<<63 - 1 */ 9223372036854775807;
-        if (n1 > 0 && ea > (int64)maxInt64 / n1) {
+        const int64 maxInt64 = /* 1<<63 - 1 */ 9223372036854775807;
+        if (n1 > 0 && ea > maxInt64 / n1) {
             return -1;
         }
         return ea * n1 + esize;

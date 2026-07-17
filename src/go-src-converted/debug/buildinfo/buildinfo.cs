@@ -200,7 +200,7 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
         return ("", "", err);
     }
     UntypedInt buildInfoAlign = 16;
-    UntypedInt buildInfoSize = 32;
+    const nint buildInfoSize = 32;
     while (ᐧ) {
         nint i = bytes.Index(data, buildInfoMagic);
         if (i < 0 || len(data) - i < buildInfoSize) {
@@ -379,9 +379,9 @@ internal static @string readString(exe x, nint ptrSize, Func<slice<byte>, uint64
     
     UntypedInt IMAGE_SCN_LNK_NRELOC_OVFL = 0x1000000;
     
-    UntypedInt IMAGE_SCN_ALIGN_32BYTES = 0x600000;
+    const uint32 IMAGE_SCN_ALIGN_32BYTES = 0x600000;
     foreach (var (_, sect) in (~x.f).Sections) {
-        if ((~sect).VirtualAddress != 0 && (~sect).Size != 0 && (uint32)((~sect).Characteristics & ~(uint32)IMAGE_SCN_ALIGN_32BYTES) == (uint32)((UntypedInt)(IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ) | (uint32)IMAGE_SCN_MEM_WRITE)) {
+        if ((~sect).VirtualAddress != 0 && (~sect).Size != 0 && (uint32)((~sect).Characteristics & ~IMAGE_SCN_ALIGN_32BYTES) == (uint32)((UntypedInt)(IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ) | (uint32)IMAGE_SCN_MEM_WRITE)) {
             return ((uint64)(~sect).VirtualAddress + x.imageBase(), (uint64)(~sect).VirtualSize);
         }
     }
@@ -421,7 +421,7 @@ internal static @string readString(exe x, nint ptrSize, Func<slice<byte>, uint64
         }
     }
     // Try the first non-empty writable segment.
-    UntypedInt RW = 3;
+    const uint32 RW = 3;
     foreach (var (_, load) in (~x.f).Loads) {
         var (seg, ok) = load._<ж<machoꓸSegment>>(ᐧ);
         if (ok && (~seg).Addr != 0 && (~seg).Filesz != 0 && (~seg).Prot == RW && (~seg).Maxprot == RW) {

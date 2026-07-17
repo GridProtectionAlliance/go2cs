@@ -204,7 +204,7 @@ internal static @string printString(slice<byte> str) {
             continue;
         }
         var upper = (byte)((c >> (int)(4)));
-        var lower = (byte)((((c << (int)(4))) >> (int)(4)));
+        var lower = (byte)((((byte)(c << (int)(4))) >> (int)(4)));
         buf = append(
             buf,
             (byte)((rune)'\\'),
@@ -301,7 +301,7 @@ internal static readonly UntypedInt headerLen = /* 6 * uint16Len */ 12;
     uint16 bits = default!;
 
     id = m.ID;
-    bits = (uint16)(((uint16)m.OpCode << (int)(11)) | (uint16)m.RCode);
+    bits = (uint16)((uint16)((uint16)m.OpCode << (int)(11)) | (uint16)m.RCode);
     if (m.RecursionAvailable) {
         bits |= (uint16)(headerBitRA);
     }
@@ -1939,7 +1939,7 @@ internal static (uint16, nint, error) unpackUint16(slice<byte> msg, nint off) {
     if (off + (nint)uint16Len > len(msg)) {
         return (0, off, errBaseLen);
     }
-    return ((uint16)(((uint16)msg[off] << (int)(8)) | (uint16)msg[off + 1]), off + (nint)uint16Len, default!);
+    return ((uint16)((uint16)((uint16)msg[off] << (int)(8)) | (uint16)msg[off + 1]), off + (nint)uint16Len, default!);
 }
 
 internal static (nint, error) skipUint16(slice<byte> msg, nint off) {

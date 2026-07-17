@@ -292,10 +292,10 @@ internal static ж<Reader> newReader(io.Reader src, Order order, nint litWidth) 
     r.r = br;
     r.litWidth = litWidth;
     r.width = 1 + (nuint)litWidth;
-    r.clear = (uint16)(((uint16)1 << (int)((nuint)litWidth)));
+    r.clear = (uint16)((uint16)1 << (int)((nuint)litWidth));
     r.eof = (uint16)(r.clear + 1);
     r.hi = (uint16)(r.clear + 1);
-    r.overflow = (uint16)(((uint16)1 << (int)(r.width)));
+    r.overflow = (uint16)((uint16)1 << (int)(r.width));
     r.last = decoderInvalidCode;
 }
 

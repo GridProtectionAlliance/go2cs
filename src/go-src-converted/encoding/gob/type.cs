@@ -1016,8 +1016,8 @@ internal static void registerBasics() {
     Register((uint64)0);
     Register((float32)0);
     Register((float64)0);
-    Register((complex64)builtin.i(0F));
-    Register((complex128)builtin.i(0F));
+    Register((complex64)0F.i());
+    Register((complex128)0D.i());
     Register((uintptr)0);
     Register(false);
     Register("");

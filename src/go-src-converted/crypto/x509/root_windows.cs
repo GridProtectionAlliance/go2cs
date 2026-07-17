@@ -259,7 +259,7 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
         // The default is to return only the highest quality chain,
         // setting this flag will add additional lower quality contexts.
         // These are returned in the LowerQualityChains field.
-        UntypedInt CERT_CHAIN_RETURN_LOWER_QUALITY_CONTEXTS = 0x00000080;
+        const uint32 CERT_CHAIN_RETURN_LOWER_QUALITY_CONTEXTS = 0x00000080;
         // CertGetCertificateChain will traverse Windows's root stores in an attempt to build a verified certificate chain
         ref var topCtx = ref heap<ж<syscall.CertChainContext>>(out var ᏑtopCtx);
         err = syscall.CertGetCertificateChain(((syscallꓸHandle)0), storeCtx, verifyTime, (~storeCtx).Store, para, CERT_CHAIN_RETURN_LOWER_QUALITY_CONTEXTS, 0, ᏑtopCtx);

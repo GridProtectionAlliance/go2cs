@@ -510,7 +510,7 @@ internal static @unsafe.Pointer textOffFor(ж<abi.Type> Ꮡt, aTextOff off) {
     return (uintptr)toRType(Ꮡt).textOff(off);
 }
 
-// func String is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func String is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 [GoRecv] internal static uintptr Size(this ref rtype t) {
     return t.t.Size();
@@ -650,7 +650,7 @@ internal static @string pkgPathFor(ж<abi.Type> Ꮡt) {
     return toRType(Ꮡt).PkgPath();
 }
 
-// func Name is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Name is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static @string nameFor(ж<abi.Type> Ꮡt) {
     return toRType(Ꮡt).Name();
@@ -678,9 +678,9 @@ internal static ж<abi.Type> elem(ж<abi.Type> Ꮡt) {
     throw panic("reflect: Elem of invalid type " + stringFor(Ꮡt));
 }
 
-// func Elem is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Elem is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// func Field is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func Field is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static StructField FieldByIndex(this ж<rtype> Ꮡt, slice<nint> index) {
     ref var t = ref Ꮡt.Value;
@@ -732,7 +732,7 @@ internal static nint Len(this ж<rtype> Ꮡt) {
     return (nint)(~tt).Len;
 }
 
-// func NumField is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func NumField is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static ΔType In(this ж<rtype> Ꮡt, nint i) {
     ref var t = ref Ꮡt.Value;
@@ -1316,7 +1316,7 @@ internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) {
     }
     // Check the cache.
     {
-        var (piΔ1, ok) = ᏑptrMap.Load(t); if (ok) {
+        var (piΔ1, ok) = ᏑptrMap.Load(Ꮡt); if (ok) {
             return Ꮡ((~piΔ1._<ж<ptrType>>()).Type);
         }
     }
@@ -1327,7 +1327,7 @@ internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) {
         if ((~p).Elem != Ꮡt.of(rtype.Ꮡt)) {
             continue;
         }
-        var (piΔ2, _) = ᏑptrMap.LoadOrStore(t, p);
+        var (piΔ2, _) = ᏑptrMap.LoadOrStore(Ꮡt, p);
         return Ꮡ((~piΔ2._<ж<ptrType>>()).Type);
     }
     // Create a new ptrType starting with the description
@@ -1347,7 +1347,7 @@ internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) {
     // old hash and the new "*".
     pp.Hash = fnv1(t.t.Hash, (rune)'*');
     pp.Elem = at;
-    var (pi, _) = ᏑptrMap.LoadOrStore(t, Ꮡpp);
+    var (pi, _) = ᏑptrMap.LoadOrStore(Ꮡt, Ꮡpp);
     return Ꮡ((~pi._<ж<ptrType>>()).Type);
 }
 
@@ -2381,7 +2381,7 @@ internal static bool isPaddedField(ΔType t, nint i) {
 // StructOf currently does not support promoted methods of embedded fields
 // and panics if passed unexported StructFields.
 public static ΔType StructOf(slice<StructField> fields) => func((defer, recover) => {
-    uint32 hash = fnv1(0, slice<byte>((@string)"struct {").ꓸꓸꓸ);
+    uint32 hash = fnv1(0, slice<byte>("struct {"u8).ꓸꓸꓸ);
     uintptr size = default!;
     uint8 typalign = default!;
     bool comparable = true;
@@ -2970,7 +2970,7 @@ internal static slice<byte> appendVarint(slice<byte> x, uintptr v) {
     return x;
 }
 
-// func toType is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func toType is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 [GoType] partial struct layoutKey {
     internal ж<funcType> ftyp; // function signature
@@ -3064,7 +3064,7 @@ internal static (ж<abi.Type> frametype, ж<Δsync.Pool> framePool, abiDesc abid
             bv.data = builtin.append(bv.data, (byte)(0));
         }
     }
-    bv.data[(nint)(bv.n / 8)] |= (uint8)((bit << (int)((bv.n % 8))));
+    bv.data[(nint)(bv.n / 8)] |= (uint8)((uint8)(bit << (int)((bv.n % 8))));
     bv.n++;
 }
 

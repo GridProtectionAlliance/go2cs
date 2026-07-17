@@ -46,7 +46,7 @@ public static (slice<byte>, error) GobEncode(this ж<Float> Ꮡx) {
     // exp + mant
     var buf = new slice<byte>(sz);
     buf[0] = floatGobVersion;
-    var b = (byte)((byte)(((byte)((RoundingMode)(x.mode & 7)) << (int)(5)) | ((byte)(int8)((Accuracy)((x.acc + 1) & 3)) << (int)(3))) | ((byte)((form)(x.form & 3)) << (int)(1)));
+    var b = (byte)((byte)((byte)((byte)((RoundingMode)(x.mode & 7)) << (int)(5)) | (byte)((byte)(int8)((Accuracy)((x.acc + 1) & 3)) << (int)(3))) | (byte)((byte)((form)(x.form & 3)) << (int)(1)));
     if (x.neg) {
         b |= (byte)(1);
     }

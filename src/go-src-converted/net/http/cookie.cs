@@ -247,9 +247,9 @@ public static @string String(this ж<ΔCookie> Ꮡc) {
     }
     // extraCookieLength derived from typical length of cookie attributes
     // see RFC 6265 Sec 4.1.
-    UntypedInt extraCookieLength = 110;
+    const nint extraCookieLength = 110;
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-    Ꮡb.Grow(builtin.len(c.Name) + builtin.len(c.Value) + builtin.len(c.Domain) + builtin.len(c.Path) + (nint)extraCookieLength);
+    Ꮡb.Grow(builtin.len(c.Name) + builtin.len(c.Value) + builtin.len(c.Domain) + builtin.len(c.Path) + extraCookieLength);
     Ꮡb.WriteString(c.Name);
     Ꮡb.WriteRune((rune)'=');
     Ꮡb.WriteString(sanitizeCookieValue(c.Value, c.Quoted));

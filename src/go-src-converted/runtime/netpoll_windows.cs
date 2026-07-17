@@ -242,9 +242,9 @@ internal static (gList, int32) netpoll(int64 delay) {
 internal static bool /*signaled*/ netpollQueueTimer(int64 delay) {
     bool signaled = default!;
 
-    UntypedInt STATUS_SUCCESS = 0x00000000;
-    UntypedInt STATUS_PENDING = 0x00000103;
-    UntypedInt STATUS_CANCELLED = 0xC0000120;
+    uintptr STATUS_SUCCESS = 0x00000000;
+    uintptr STATUS_PENDING = 0x00000103;
+    uintptr STATUS_CANCELLED = unchecked((uintptr)0xC0000120);
     var mp = getg().Value.m;
     // A wait completion packet can only be associated with one timer at a time,
     // so we need to cancel the previous one if it exists. This wouldn't be necessary

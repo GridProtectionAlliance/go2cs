@@ -28,7 +28,7 @@ public static void Free(this ж<Buffer> Ꮡb) {
     ref var b = ref Ꮡb.Value;
 
     // To reduce peak allocation, return only smaller buffers to the pool.
-    UntypedInt maxBufferSize = /* 16 << 10 */ 16384;
+    const nint maxBufferSize = /* 16 << 10 */ 16384;
     if (cap(b) <= maxBufferSize) {
         b = (b)[..0];
         ᏑbufPool.Put(Ꮡb);

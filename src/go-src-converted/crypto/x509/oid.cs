@@ -273,7 +273,7 @@ public static @string String(this OID oid) {
     Ꮡb.Grow(32);
     UntypedInt valSize = 64; // size in bits of val.
     UntypedInt bitsPerByte = 7;
-    UntypedInt maxValSafeShift = /* (1 << (valSize - bitsPerByte)) - 1 */ 144115188075855871;
+    const uint64 maxValSafeShift = /* (1 << (valSize - bitsPerByte)) - 1 */ 144115188075855871;
     nint start = 0;
     uint64 val = (uint64)0;
     slice<byte> numBuf = new slice<byte>(0, 21);
@@ -336,7 +336,7 @@ internal static (asn1.ObjectIdentifier, bool) toASN1OID(this OID oid) {
     var @out = new slice<nint>(0, builtin.len(oid.der) + 1);
     UntypedInt valSize = 31; // amount of usable bits of val for OIDs.
     UntypedInt bitsPerByte = 7;
-    UntypedInt maxValSafeShift = /* (1 << (valSize - bitsPerByte)) - 1 */ 16777215;
+    const nint maxValSafeShift = /* (1 << (valSize - bitsPerByte)) - 1 */ 16777215;
     nint val = 0;
     foreach (var (_, v) in oid.der) {
         if (val > maxValSafeShift) {

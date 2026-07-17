@@ -498,7 +498,7 @@ internal static void dieFromException(ж<exceptionrecord> Ꮡinfo, ж<context> �
             )); info = ref Ꮡinfo.DerefOrNil();
         }
     }
-    UntypedInt FAIL_FAST_GENERATE_EXCEPTION_ADDRESS = 0x1;
+    uintptr FAIL_FAST_GENERATE_EXCEPTION_ADDRESS = 0x1;
     stdcall3(_RaiseFailFastException, (uintptr)new @unsafe.Pointer(Ꮡinfo), (uintptr)new @unsafe.Pointer(Ꮡr), FAIL_FAST_GENERATE_EXCEPTION_ADDRESS);
 }
 

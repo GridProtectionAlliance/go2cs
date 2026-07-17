@@ -6,7 +6,7 @@ namespace go;
 partial class math_package {
 
 internal static bool isOddInt(float64 x) {
-    if (Abs(x) >= ((1 << (int)(53)))) {
+    if (Abs(x) >= (9007199254740992D)) {
         // 1 << 53 is the largest exact integer in the float64 format.
         // Any number outside this range will be truncated before the decimal point and therefore will always be
         // an even integer.
@@ -120,7 +120,7 @@ internal static float64 pow(float64 x, float64 y) {
     if (yf != 0 && x < 0) {
         return NaN();
     }
-    if (yi >= (1 << (int)(63))) {
+    if (yi >= 9223372036854775808D) {
         // yi is a large even int that will lead to overflow (or underflow to 0)
         // for all x except -1 (x == 1 was handled earlier)
         switch (ᐧ) {

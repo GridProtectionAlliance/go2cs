@@ -289,7 +289,7 @@ internal static (slice<@string> matches, error err) globWithLimit(@string patter
     error err = default!;
 
     // This limit is used prevent stack exhaustion issues. See CVE-2022-30632.
-    UntypedInt pathSeparatorsLimit = 10000;
+    const nint pathSeparatorsLimit = 10000;
     if (depth == pathSeparatorsLimit) {
         return (default!, ErrBadPattern);
     }

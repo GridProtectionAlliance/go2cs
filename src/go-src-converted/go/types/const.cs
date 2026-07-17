@@ -39,7 +39,7 @@ internal static void overflow(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, token
         return;
     }
     // Untyped integer values must not grow arbitrarily.
-    UntypedInt prec = 512; // 512 is the constant precision
+    const nint prec = 512; // 512 is the constant precision
     if (x.val.Kind() == constant.Int && constant.BitLen(x.val) > prec) {
         @string op = opName(x.expr);
         if (op != ""u8) {

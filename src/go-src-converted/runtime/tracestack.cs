@@ -225,15 +225,15 @@ internal static traceFrame makeTraceFrame(uintptr gen, Frame f) {
     traceFrame frame = default!;
     frame.PC = f.PC;
     @string fn = f.Function;
-    UntypedInt maxLen = /* 1 << 10 */ 1024;
+    const nint maxLen = /* 1 << 10 */ 1024;
     if (len(fn) > maxLen) {
-        fn = fn[(int)(len(fn) - (nint)maxLen)..];
+        fn = fn[(int)(len(fn) - maxLen)..];
     }
     frame.funcID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (nint)(gen % 2)).put(gen, fn);
     frame.line = (uint64)f.Line;
     @string @file = f.File;
     if (len(@file) > maxLen) {
-        @file = @file[(int)(len(@file) - (nint)maxLen)..];
+        @file = @file[(int)(len(@file) - maxLen)..];
     }
     frame.fileID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (nint)(gen % 2)).put(gen, @file);
     return frame;

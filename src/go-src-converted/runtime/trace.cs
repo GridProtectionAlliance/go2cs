@@ -921,7 +921,7 @@ internal static void start(this ж<traceAdvancerState> Ꮡs) {
 
 // traceAdvancePeriod is the approximate period between
 // new generations.
-internal static readonly UntypedFloat defaultTraceAdvancePeriod = 1e+09; // 1 second.
+internal static readonly UntypedFloat defaultTraceAdvancePeriod = 1e9; // 1 second.
 
 // wakeableSleep manages a wakeable goroutine sleep.
 //

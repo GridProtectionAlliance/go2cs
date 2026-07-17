@@ -360,8 +360,8 @@ internal static void readValue(this ж<reader> Ꮡr, ж<ast.GenDecl> Ꮡdecl) {
     }
     // determine values list with which to associate the Value for this decl
     var values = Ꮡr.of(reader.Ꮡvalues);
-    UntypedFloat threshold = 0.75;
-    if (domName != ""u8 && r.isVisible(domName) && domFreq >= (nint)((float64)len(decl.Specs) * (float64)threshold)) {
+    const float64 threshold = 0.75;
+    if (domName != ""u8 && r.isVisible(domName) && domFreq >= (nint)((float64)len(decl.Specs) * threshold)) {
         // typed entries are sufficiently frequent
         {
             var typ = r.lookupType(domName); if (typ != nil) {

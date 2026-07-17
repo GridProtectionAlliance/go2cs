@@ -289,11 +289,11 @@ internal static void bgsweep(channel<nint> c) {
         // isn't spare idle time available on other cores. If there's available idle
         // time, helping to sweep can reduce allocation latencies by getting ahead of
         // the proportional sweeper and having spans ready to go for allocation.
-        UntypedInt sweepBatchSize = 10;
+        const nint sweepBatchSize = 10;
         nint nSwept = 0;
         while (sweepone() != ~(uintptr)0) {
             nSwept++;
-            if (nSwept % (nint)sweepBatchSize == 0) {
+            if (nSwept % sweepBatchSize == 0) {
                 goschedIfBusy();
             }
         }

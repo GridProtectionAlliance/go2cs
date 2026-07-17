@@ -394,8 +394,8 @@ internal static bool fileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, ni
 
 // printFileLine prints a non-marker-only report for file:line to w.
 internal static error printFileLine(Writer w, uint64 h, @string @file, nint line) {
-    UntypedInt markerLen = 40; // overestimate
-    var b = new slice<byte>(0, (nint)markerLen + len(@file) + 24);
+    const nint markerLen = 40; // overestimate
+    var b = new slice<byte>(0, markerLen + len(@file) + 24);
     b = AppendMarker(b, h);
     b = appendFileLine(b, @file, line);
     b = append(b, (byte)((rune)'\n'));

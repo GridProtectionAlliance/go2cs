@@ -76,8 +76,8 @@ internal static void readTimeRandom(slice<byte> r) {
     // is not initialized yet.
     var v = (uint64)nanotime();
     while (len(r) > 0) {
-        v ^= (uint64)((nuint)0xa0761d6478bd642fUL);
-        v *= (nuint)0xe7037ed1a0b428dbUL;
+        v ^= (uint64)(0xa0761d6478bd642fUL);
+        v *= 0xe7037ed1a0b428dbUL;
         nint size = 8;
         if (len(r) < 8) {
             size = len(r);
@@ -202,8 +202,8 @@ internal static uint32 cheaprand() {
     // Only the platform that math.Mul64 can be lowered
     // by the compiler should be in this list.
     if ((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(goarch.IsAmd64 | goarch.IsArm64) | goarch.IsPpc64) | goarch.IsPpc64le) | goarch.IsMips64) | goarch.IsMips64le) | goarch.IsS390x) | goarch.IsRiscv64) | goarch.IsLoong64) == 1) {
-        mp.Value.cheaprand += (nuint)0xa0761d6478bd642fUL;
-        var (hi, lo) = math.Mul64((~mp).cheaprand, (uint64)((~mp).cheaprand ^ (nuint)0xe7037ed1a0b428dbUL));
+        mp.Value.cheaprand += 0xa0761d6478bd642fUL;
+        var (hi, lo) = math.Mul64((~mp).cheaprand, (uint64)((~mp).cheaprand ^ 0xe7037ed1a0b428dbUL));
         return (uint32)((uint64)(hi ^ lo));
     }
     // Implement xorshift64+: 2 32-bit xorshift sequences added together.

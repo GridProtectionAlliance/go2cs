@@ -25,15 +25,15 @@ partial class nistec_package {
 [GoType("[4]uint64")] partial struct p256Element;
 
 // p256One is one in the Montgomery domain.
-internal static p256Element p256One = new p256Element(new uint64[]{0x0000000000000001, (nuint)0xffffffff00000000UL,
-    (nuint)0xffffffffffffffffUL, 0x00000000fffffffeU}.array());
+internal static p256Element p256One = new p256Element(new uint64[]{0x0000000000000001, 0xffffffff00000000UL,
+    0xffffffffffffffffUL, 0x00000000fffffffeU}.array());
 
 internal static ж<p256Element> Ꮡp256Zero = new(new p256Element(new uint64[4].array()));
 internal static ref p256Element p256Zero => ref Ꮡp256Zero.Value;
 
 // p256P is 2²⁵⁶ - 2²²⁴ + 2¹⁹² + 2⁹⁶ - 1 in the Montgomery domain.
-internal static p256Element p256P = new p256Element(new uint64[]{(nuint)0xffffffffffffffffUL, 0x00000000ffffffffU,
-    0x0000000000000000, (nuint)0xffffffff00000001UL}.array());
+internal static p256Element p256P = new p256Element(new uint64[]{0xffffffffffffffffUL, 0x00000000ffffffffU,
+    0x0000000000000000, 0xffffffff00000001UL}.array());
 
 // P256Point is a P-256 point. The zero value should not be assumed to be valid
 // (although it is in this implementation).
@@ -56,8 +56,8 @@ public static ж<P256Point> SetGenerator(this ж<P256Point> Ꮡp) {
 
     p.x = new p256Element(new uint64[]{0x79e730d418a9143cUL, 0x75ba95fc5fedb601UL,
         0x79fb732b77622510UL, 0x18905f76a53755c6UL}.array());
-    p.y = new p256Element(new uint64[]{(nuint)0xddf25357ce95560aUL, (nuint)0x8b4ab8e4ba19e45cUL,
-        (nuint)0xd2e88688dd21f325UL, (nuint)0x8571ff1825885d85UL}.array());
+    p.y = new p256Element(new uint64[]{0xddf25357ce95560aUL, 0x8b4ab8e4ba19e45cUL,
+        0xd2e88688dd21f325UL, 0x8571ff1825885d85UL}.array());
     p.z = p256One;
     return Ꮡp;
 }
@@ -90,8 +90,8 @@ public static (ж<P256Point>, error) SetBytes(this ж<P256Point> Ꮡp, slice<byt
     // here is R in the Montgomery domain, or R×R mod p. See comment in
     // P256OrdInverse about how this is used.
     ref var rr = ref heap<p256Element>(out var Ꮡrr);
-    rr = new p256Element(new uint64[]{0x0000000000000003, (nuint)0xfffffffbffffffffUL,
-        (nuint)0xfffffffffffffffeUL, 0x00000004fffffffdUL}.array());
+    rr = new p256Element(new uint64[]{0x0000000000000003, 0xfffffffbffffffffUL,
+        0xfffffffffffffffeUL, 0x00000004fffffffdUL}.array());
     switch (ᐧ) {
     case {} when len(b) == 1 && b[0] == 0: {
         return (Ꮡp.Set(NewP256Point()), default!);
@@ -154,8 +154,8 @@ internal static ж<p256Element> p256Polynomial(ж<p256Element> Ꮡy2, ж<p256Ele
     p256Add(threeX, Ꮡx, Ꮡx);
     p256Add(threeX, threeX, Ꮡx);
     p256NegCond(threeX, 1);
-    var p256B = Ꮡ(new p256Element(new uint64[]{(nuint)0xd89cdf6229c4bddfUL, (nuint)0xacf005cd78843090UL,
-        (nuint)0xe5a220abf7212ed6UL, (nuint)0xdc30061d04874834UL}.array()));
+    var p256B = Ꮡ(new p256Element(new uint64[]{0xd89cdf6229c4bddfUL, 0xacf005cd78843090UL,
+        0xe5a220abf7212ed6UL, 0xdc30061d04874834UL}.array()));
     p256Add(x3, x3, threeX);
     p256Add(x3, x3, p256B);
     y2 = x3.Value;
@@ -384,10 +384,10 @@ internal static void p256OrdReduce(ж<p256OrdElement> Ꮡs) {
 
     // Since 2 * ord(G) > 2²⁵⁶, we can just conditionally subtract ord(G),
     // keeping the result if it doesn't underflow.
-    var (t0, b) = bits.Sub64(s[0], (nuint)0xf3b9cac2fc632551UL, 0);
-    (var t1, b) = bits.Sub64(s[1], (nuint)0xbce6faada7179e84UL, b);
-    (var t2, b) = bits.Sub64(s[2], (nuint)0xffffffffffffffffUL, b);
-    (var t3, b) = bits.Sub64(s[3], (nuint)0xffffffff00000000UL, b);
+    var (t0, b) = bits.Sub64(s[0], 0xf3b9cac2fc632551UL, 0);
+    (var t1, b) = bits.Sub64(s[1], 0xbce6faada7179e84UL, b);
+    (var t2, b) = bits.Sub64(s[2], 0xffffffffffffffffUL, b);
+    (var t3, b) = bits.Sub64(s[3], 0xffffffff00000000UL, b);
     var tMask = b - 1;
     // zero if subtraction underflowed
     s[0] ^= (uint64)((uint64)(((uint64)(t0 ^ s[0])) & tMask));

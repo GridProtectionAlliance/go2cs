@@ -421,7 +421,7 @@ public static (ΔHandle fd, error err) Open(@string path, nint mode, uint32 perm
         attrs |= (uint32)(FILE_FLAG_BACKUP_SEMANTICS);
     }
     if ((nint)(mode & (nint)O_SYNC) != 0) {
-        UntypedInt _FILE_FLAG_WRITE_THROUGH = 0x80000000;
+        const uint32 _FILE_FLAG_WRITE_THROUGH = 0x80000000;
         attrs |= (uint32)(_FILE_FLAG_WRITE_THROUGH);
     }
     return CreateFile(pathp, access, sharemode, sa, createmode, attrs, 0);

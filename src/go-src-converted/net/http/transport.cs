@@ -2552,7 +2552,7 @@ internal static bool is408Message(slice<byte> buf) {
     }
     nint num1xx = 0;
     // number of informational 1xx headers received
-    UntypedInt max1xxResponses = 5; // arbitrary bound on number of informational responses
+    const nint max1xxResponses = 5; // arbitrary bound on number of informational responses
     var continueCh = rc.continueCh;
     while (ᐧ) {
         (resp, err) = ReadResponse(pc.br, (~rc.treq).Request);

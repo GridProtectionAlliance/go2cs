@@ -1383,7 +1383,7 @@ public static (slice<byte>, error) MarshalBinary(this Time t) {
     buf = buf[8..];
     var nsec = (int32)((int32)((int32)((int32)buf[3] | ((int32)buf[2] << (int)(8))) | ((int32)buf[1] << (int)(16))) | ((int32)buf[0] << (int)(24)));
     buf = buf[4..];
-    nint offset = (nint)((int16)((int16)buf[1] | ((int16)buf[0] << (int)(8)))) * 60;
+    nint offset = (nint)((int16)((int16)buf[1] | (int16)((int16)buf[0] << (int)(8)))) * 60;
     if (version == timeBinaryVersionV2) {
         offset += (nint)buf[2];
     }

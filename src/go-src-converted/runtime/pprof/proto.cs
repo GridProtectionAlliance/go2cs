@@ -118,7 +118,7 @@ internal static readonly UntypedInt tagFunction_StartLine = 5; // int64
 }
 
 [GoRecv] internal static void flush(this ref profileBuilder b) {
-    UntypedInt dataFlush = 4096;
+    const nint dataFlush = 4096;
     if (b.pb.nest == 0 && len(b.pb.data) > dataFlush) {
         b.zw.Write(b.pb.data);
         b.pb.data = b.pb.data[..0];

@@ -263,7 +263,7 @@ internal static void init(this ж<addrRanges> Ꮡa, ж<sysMemStat> ᏑsysStat) {
     // Narrow down the search space via a binary search
     // for large addrRanges until we have at most iterMax
     // candidates left.
-    UntypedInt iterMax = 8;
+    const nint iterMax = 8;
     nint bot = 0;
     nint top = len(a.ranges);
     while (top - bot > iterMax) {

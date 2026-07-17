@@ -121,7 +121,7 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [UnsafePointer] = "unsafe.Pointer"u8
 }.slice();
 
-// func TypeOf is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])
+// go2cs generated this placeholder — func TypeOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Types are either static (for compiler-created types) or
 // heap-allocated but always reachable (for reflection-created

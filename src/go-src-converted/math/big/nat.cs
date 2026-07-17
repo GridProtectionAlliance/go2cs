@@ -50,8 +50,8 @@ internal static nat make(this nat z, nint n) {
     }
     // Choosing a good value for e has significant performance impact
     // because it increases the chance that a value can be reused.
-    UntypedInt e = 4; // extra capacity
-    return new nat(n, n + (nint)e);
+    const nint e = 4; // extra capacity
+    return new nat(n, n + e);
 }
 
 internal static nat setWord(this nat z, Word x) {

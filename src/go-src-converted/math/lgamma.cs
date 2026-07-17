@@ -240,14 +240,14 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
     float64 lgamma = default!;
     nint sign = default!;
 
-    UntypedFloat Ymin = /* 1.461632144968362245 */ 1.46163;
-    UntypedInt Two52 = /* 1 << 52 */ 4503599627370496; // 0x4330000000000000 ~4.5036e+15
+    UntypedFloat Ymin = 1.461632144968362245;
+    const float64 Two52 = /* 1 << 52 */ 4503599627370496; // 0x4330000000000000 ~4.5036e+15
     UntypedInt Two53 = /* 1 << 53 */ 9007199254740992; // 0x4340000000000000 ~9.0072e+15
-    UntypedInt Two58 = /* 1 << 58 */ 288230376151711744; // 0x4390000000000000 ~2.8823e+17
-    UntypedFloat Tiny = /* 1.0 / (1 << 70) */ 8.47033e-22; // 0x3b90000000000000 ~8.47033e-22
-    UntypedFloat Tc = /* 1.46163214496836224576e+00 */ 1.46163;      // 0x3FF762D86356BE3F
-    UntypedFloat Tf = /* -1.21486290535849611461e-01 */ -0.121486; // 0xBFBF19B9BCC38A42
-    UntypedFloat Tt = /* -3.63867699703950536541e-18 */ -3.63868e-18; // 0xBC50C7CAA48A971F
+    const float64 Two58 = /* 1 << 58 */ 288230376151711744; // 0x4390000000000000 ~2.8823e+17
+    const float64 Tiny = /* 1.0 / (1 << 70) */ 8.470329472543003e-22; // 0x3b90000000000000 ~8.47033e-22
+    UntypedFloat Tc = 1.46163214496836224576e+00; // 0x3FF762D86356BE3F
+    const float64 Tf = -1.21486290535849611461e-01; // 0xBFBF19B9BCC38A42
+    const float64 Tt = -3.63867699703950536541e-18; // 0xBC50C7CAA48A971F
     // special cases
     sign = 1;
     switch (ᐧ) {
@@ -362,8 +362,8 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
             var p1 = _lgamT[0] + w * (_lgamT[3] + w * (_lgamT[6] + w * (_lgamT[9] + w * _lgamT[12])));
             var p2 = _lgamT[1] + w * (_lgamT[4] + w * (_lgamT[7] + w * (_lgamT[10] + w * _lgamT[13])));
             var p3 = _lgamT[2] + w * (_lgamT[5] + w * (_lgamT[8] + w * (_lgamT[11] + w * _lgamT[14])));
-            var p = z * p1 - ((float64)Tt - w * (p2 + y * p3));
-            lgamma += ((float64)Tf + p);
+            var p = z * p1 - (Tt - w * (p2 + y * p3));
+            lgamma += (Tf + p);
             break;
         }
         case 2: {
@@ -436,8 +436,8 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
 
 // sinPi(x) is a helper function for negative x
 internal static float64 sinPi(float64 x) {
-    UntypedInt Two52 = /* 1 << 52 */ 4503599627370496; // 0x4330000000000000 ~4.5036e+15
-    UntypedInt Two53 = /* 1 << 53 */ 9007199254740992; // 0x4340000000000000 ~9.0072e+15
+    const float64 Two52 = /* 1 << 52 */ 4503599627370496; // 0x4330000000000000 ~4.5036e+15
+    const float64 Two53 = /* 1 << 53 */ 9007199254740992; // 0x4340000000000000 ~9.0072e+15
     if (x < 0.25D) {
         return -Sin((float64)Pi * x);
     }
@@ -455,7 +455,7 @@ internal static float64 sinPi(float64 x) {
             n = 0;
         } else {
             if (x < Two52) {
-                z = x + (float64)Two52;
+                z = x + Two52;
             }
             // exact
             n = (nint)((uint64)(1 & Float64bits(z)));

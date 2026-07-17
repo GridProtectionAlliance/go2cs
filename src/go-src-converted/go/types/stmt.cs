@@ -447,7 +447,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
         @string msg = default!;
         errors.Code code = default!;
         var exprᴛ1 = x.mode;
-        if (exprᴛ1 == Δbuiltin) {
+        if (exprᴛ1 == Δbuiltinᴛ) {
             msg = "must be called"u8;
             code = UncalledBuiltin;
         }

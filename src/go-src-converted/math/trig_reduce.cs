@@ -32,7 +32,7 @@ internal static (uint64 j, float64 z) trigReduce(float64 x) {
     uint64 j = default!;
     float64 z = default!;
 
-    UntypedFloat PI4 = /* Pi / 4 */ 0.785398;
+    const float64 PI4 = /* Pi / 4 */ 0.7853981633974483;
     if (x < PI4) {
         return (0, x);
     }
@@ -75,7 +75,7 @@ internal static (uint64 j, float64 z) trigReduce(float64 x) {
         z--;
     }
     // Multiply the fractional part by pi/4.
-    return (j, z * (float64)PI4);
+    return (j, z * PI4);
 }
 
 // mPi4 is the binary digits of 4/pi as a uint64 array,
@@ -85,24 +85,24 @@ internal static (uint64 j, float64 z) trigReduce(float64 x) {
 internal static array<uint64> mPi4 = new uint64[]{
     0x0000000000000001,
     0x45f306dc9c882a53UL,
-    (nuint)0xf84eafa3ea69bb81UL,
-    (nuint)0xb6c52b3278872083UL,
-    (nuint)0xfca2c757bd778ac3UL,
+    0xf84eafa3ea69bb81UL,
+    0xb6c52b3278872083UL,
+    0xfca2c757bd778ac3UL,
     0x6e48dc74849ba5c0UL,
     0x0c925dd413a32439UL,
-    (nuint)0xfc3bd63962534e7dUL,
-    (nuint)0xd1046bea5d768909UL,
-    (nuint)0xd338e04d68befc82UL,
+    0xfc3bd63962534e7dUL,
+    0xd1046bea5d768909UL,
+    0xd338e04d68befc82UL,
     0x7323ac7306a673e9UL,
     0x3908bf177bf25076UL,
     0x3ff12fffbc0b301fUL,
-    (nuint)0xde5e2316b414da3eUL,
-    (nuint)0xda6cfd9e4f96136eUL,
-    (nuint)0x9e8c7ecd3cbfd45aUL,
-    (nuint)0xea4f758fd7cbe2f6UL,
+    0xde5e2316b414da3eUL,
+    0xda6cfd9e4f96136eUL,
+    0x9e8c7ecd3cbfd45aUL,
+    0xea4f758fd7cbe2f6UL,
     0x7a0e73ef14a525d4UL,
-    (nuint)0xd7f6bf623f1aba10UL,
-    (nuint)0xac06608df8f6d757UL
+    0xd7f6bf623f1aba10UL,
+    0xac06608df8f6d757UL
 }.array();
 
 } // end math_package

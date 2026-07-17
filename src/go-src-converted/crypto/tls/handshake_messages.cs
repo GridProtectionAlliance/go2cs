@@ -1840,7 +1840,7 @@ internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
         if (len(data) < 2) {
             return false;
         }
-        var sigAndHashLen = (uint16)(((uint16)data[0] << (int)(8)) | (uint16)data[1]);
+        var sigAndHashLen = (uint16)((uint16)((uint16)data[0] << (int)(8)) | (uint16)data[1]);
         data = data[2..];
         if ((uint16)(sigAndHashLen & 1) != 0) {
             return false;
@@ -1851,14 +1851,14 @@ internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
         var numSigAlgos = (uint16)(sigAndHashLen / 2);
         m.supportedSignatureAlgorithms = new slice<SignatureScheme>(numSigAlgos);
         foreach (var (i, _) in m.supportedSignatureAlgorithms) {
-            m.supportedSignatureAlgorithms[i] = (SignatureScheme)((((SignatureScheme)(uint16)data[0]) << (int)(8)) | ((SignatureScheme)(uint16)data[1]));
+            m.supportedSignatureAlgorithms[i] = (SignatureScheme)((SignatureScheme)(uint16)(((SignatureScheme)(uint16)data[0]) << (int)(8)) | ((SignatureScheme)(uint16)data[1]));
             data = data[2..];
         }
     }
     if (len(data) < 2) {
         return false;
     }
-    var casLength = (uint16)(((uint16)data[0] << (int)(8)) | (uint16)data[1]);
+    var casLength = (uint16)((uint16)((uint16)data[0] << (int)(8)) | (uint16)data[1]);
     data = data[2..];
     if (len(data) < (nint)casLength) {
         return false;
@@ -1871,7 +1871,7 @@ internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
         if (len(cas) < 2) {
             return false;
         }
-        var caLen = (uint16)(((uint16)cas[0] << (int)(8)) | (uint16)cas[1]);
+        var caLen = (uint16)((uint16)((uint16)cas[0] << (int)(8)) | (uint16)cas[1]);
         cas = cas[2..];
         if (len(cas) < (nint)caLen) {
             return false;

@@ -810,9 +810,9 @@ internal static (image.Image, error) decode(this ж<decoder> Ꮡd) => func<(imag
         }
         else if (exprᴛ3 == cbG16) {
             if (d.useTransparent){
-                var ty = (uint16)(((uint16)d.transparent[0] << (int)(8)) | (uint16)d.transparent[1]);
+                var ty = (uint16)((uint16)((uint16)d.transparent[0] << (int)(8)) | (uint16)d.transparent[1]);
                 for (nint x = 0; x < width; x++) {
-                    var ycol = (uint16)(((uint16)cdat[2 * x + 0] << (int)(8)) | (uint16)cdat[2 * x + 1]);
+                    var ycol = (uint16)((uint16)((uint16)cdat[2 * x + 0] << (int)(8)) | (uint16)cdat[2 * x + 1]);
                     var acol = (uint16)0xffff;
                     if (ycol == ty) {
                         acol = 0x0000;
@@ -821,27 +821,27 @@ internal static (image.Image, error) decode(this ж<decoder> Ꮡd) => func<(imag
                 }
             } else {
                 for (nint x = 0; x < width; x++) {
-                    var ycol = (uint16)(((uint16)cdat[2 * x + 0] << (int)(8)) | (uint16)cdat[2 * x + 1]);
+                    var ycol = (uint16)((uint16)((uint16)cdat[2 * x + 0] << (int)(8)) | (uint16)cdat[2 * x + 1]);
                     gray16.SetGray16(x, y, new color.Gray16(ycol));
                 }
             }
         }
         else if (exprᴛ3 == cbGA16) {
             for (nint x = 0; x < width; x++) {
-                var ycol = (uint16)(((uint16)cdat[4 * x + 0] << (int)(8)) | (uint16)cdat[4 * x + 1]);
-                var acol = (uint16)(((uint16)cdat[4 * x + 2] << (int)(8)) | (uint16)cdat[4 * x + 3]);
+                var ycol = (uint16)((uint16)((uint16)cdat[4 * x + 0] << (int)(8)) | (uint16)cdat[4 * x + 1]);
+                var acol = (uint16)((uint16)((uint16)cdat[4 * x + 2] << (int)(8)) | (uint16)cdat[4 * x + 3]);
                 nrgba64.SetNRGBA64(x, y, new color.NRGBA64(ycol, ycol, ycol, acol));
             }
         }
         else if (exprᴛ3 == cbTC16) {
             if (d.useTransparent){
-                var tr = (uint16)(((uint16)d.transparent[0] << (int)(8)) | (uint16)d.transparent[1]);
-                var tg = (uint16)(((uint16)d.transparent[2] << (int)(8)) | (uint16)d.transparent[3]);
-                var tb = (uint16)(((uint16)d.transparent[4] << (int)(8)) | (uint16)d.transparent[5]);
+                var tr = (uint16)((uint16)((uint16)d.transparent[0] << (int)(8)) | (uint16)d.transparent[1]);
+                var tg = (uint16)((uint16)((uint16)d.transparent[2] << (int)(8)) | (uint16)d.transparent[3]);
+                var tb = (uint16)((uint16)((uint16)d.transparent[4] << (int)(8)) | (uint16)d.transparent[5]);
                 for (nint x = 0; x < width; x++) {
-                    var rcol = (uint16)(((uint16)cdat[6 * x + 0] << (int)(8)) | (uint16)cdat[6 * x + 1]);
-                    var gcol = (uint16)(((uint16)cdat[6 * x + 2] << (int)(8)) | (uint16)cdat[6 * x + 3]);
-                    var bcol = (uint16)(((uint16)cdat[6 * x + 4] << (int)(8)) | (uint16)cdat[6 * x + 5]);
+                    var rcol = (uint16)((uint16)((uint16)cdat[6 * x + 0] << (int)(8)) | (uint16)cdat[6 * x + 1]);
+                    var gcol = (uint16)((uint16)((uint16)cdat[6 * x + 2] << (int)(8)) | (uint16)cdat[6 * x + 3]);
+                    var bcol = (uint16)((uint16)((uint16)cdat[6 * x + 4] << (int)(8)) | (uint16)cdat[6 * x + 5]);
                     var acol = (uint16)0xffff;
                     if (rcol == tr && gcol == tg && bcol == tb) {
                         acol = 0x0000;
@@ -850,19 +850,19 @@ internal static (image.Image, error) decode(this ж<decoder> Ꮡd) => func<(imag
                 }
             } else {
                 for (nint x = 0; x < width; x++) {
-                    var rcol = (uint16)(((uint16)cdat[6 * x + 0] << (int)(8)) | (uint16)cdat[6 * x + 1]);
-                    var gcol = (uint16)(((uint16)cdat[6 * x + 2] << (int)(8)) | (uint16)cdat[6 * x + 3]);
-                    var bcol = (uint16)(((uint16)cdat[6 * x + 4] << (int)(8)) | (uint16)cdat[6 * x + 5]);
+                    var rcol = (uint16)((uint16)((uint16)cdat[6 * x + 0] << (int)(8)) | (uint16)cdat[6 * x + 1]);
+                    var gcol = (uint16)((uint16)((uint16)cdat[6 * x + 2] << (int)(8)) | (uint16)cdat[6 * x + 3]);
+                    var bcol = (uint16)((uint16)((uint16)cdat[6 * x + 4] << (int)(8)) | (uint16)cdat[6 * x + 5]);
                     rgba64.SetRGBA64(x, y, new color.RGBA64(rcol, gcol, bcol, 0xffff));
                 }
             }
         }
         else if (exprᴛ3 == cbTCA16) {
             for (nint x = 0; x < width; x++) {
-                var rcol = (uint16)(((uint16)cdat[8 * x + 0] << (int)(8)) | (uint16)cdat[8 * x + 1]);
-                var gcol = (uint16)(((uint16)cdat[8 * x + 2] << (int)(8)) | (uint16)cdat[8 * x + 3]);
-                var bcol = (uint16)(((uint16)cdat[8 * x + 4] << (int)(8)) | (uint16)cdat[8 * x + 5]);
-                var acol = (uint16)(((uint16)cdat[8 * x + 6] << (int)(8)) | (uint16)cdat[8 * x + 7]);
+                var rcol = (uint16)((uint16)((uint16)cdat[8 * x + 0] << (int)(8)) | (uint16)cdat[8 * x + 1]);
+                var gcol = (uint16)((uint16)((uint16)cdat[8 * x + 2] << (int)(8)) | (uint16)cdat[8 * x + 3]);
+                var bcol = (uint16)((uint16)((uint16)cdat[8 * x + 4] << (int)(8)) | (uint16)cdat[8 * x + 5]);
+                var acol = (uint16)((uint16)((uint16)cdat[8 * x + 6] << (int)(8)) | (uint16)cdat[8 * x + 7]);
                 nrgba64.SetNRGBA64(x, y, new color.NRGBA64(rcol, gcol, bcol, acol));
             }
         }

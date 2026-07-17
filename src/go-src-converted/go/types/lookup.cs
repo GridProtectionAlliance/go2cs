@@ -385,14 +385,14 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
     if (len(methods) == 0) {
         return (default!, false);
     }
-    UntypedInt ok = iota;
-    UntypedInt notFound = 1;
-    UntypedInt wrongName = 2;
-    UntypedInt unexported = 3;
-    UntypedInt wrongSig = 4;
-    UntypedInt ambigSel = 5;
-    UntypedInt ptrRecv = 6;
-    UntypedInt field = 7;
+    const nint ok = /* iota */ 0;
+    const nint notFound = 1;
+    const nint wrongName = 2;
+    const nint unexported = 3;
+    const nint wrongSig = 4;
+    const nint ambigSel = 5;
+    const nint ptrRecv = 6;
+    const nint field = 7;
     nint state = ok;
     ж<Func> m = default!;           // method on T we're trying to implement
     ж<Func> f = default!;           // method on V, if found (state is one of ok, wrongName, wrongSig)
