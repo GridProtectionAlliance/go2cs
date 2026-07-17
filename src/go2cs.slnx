@@ -25,6 +25,7 @@
     <Project Path="core/strings/strings.csproj" />
     <Project Path="core/sync/sync.csproj" />
     <Project Path="core/sync/atomic/sync.atomic.csproj" />
+    <Project Path="core/testing/testing.csproj" />
     <Project Path="core/time/time.csproj" />
     <Project Path="core/unsafe/unsafe.csproj" />
   </Folder>

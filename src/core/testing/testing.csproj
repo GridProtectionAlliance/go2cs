@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>go</RootNamespace>
+    <AssemblyName>testing_package</AssemblyName>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>CS8981;IDE1006</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- golib is the ONLY runtime reference: the shim must stay fmt-free so converted test projects
+         resolve fmt (and every other stdlib package) from the overlaid go-src-converted tree without
+         this runtime pulling the baseline tree's "namespace go" classes into the same build. -->
+    <ProjectReference Include="..\golib\golib.csproj" />
+    <ProjectReference Include="..\..\gen\go2cs-gen\go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>
