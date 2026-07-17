@@ -321,6 +321,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckFloatConstIntContext() => CheckTarget("FloatConstIntContext");
 
     [TestMethod]
+    public void CheckFloatFormatExponent() => CheckTarget("FloatFormatExponent");
+
+    [TestMethod]
     public void CheckForeignPtrEmbedIfaceLib() => CheckTarget("ForeignPtrEmbedIfaceLib");
 
     [TestMethod]

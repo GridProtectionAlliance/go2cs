@@ -324,6 +324,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckFloatConstIntContext() => CheckTarget("FloatConstIntContext");
 
     [TestMethod]
+    public void CheckFloatFormatExponent() => CheckTarget("FloatFormatExponent");
+
+    [TestMethod]
     public void CheckForeignPtrEmbedIfaceLib() => CheckTarget("ForeignPtrEmbedIfaceLib");
 
     [TestMethod]

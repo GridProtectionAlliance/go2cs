@@ -25,6 +25,7 @@ using System;
 using System.Collections;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using ꓸꓸꓸobject = System.Span<object>;
 
@@ -49,13 +50,9 @@ public static partial class fmt_package
         if (arg is bool)
             return arg.ToString()!.ToLowerInvariant();
 
-        // Go renders floating-point infinities as "+Inf"/"-Inf" (strconv keeps the sign
-        // even for positives) — .NET default formatting would produce "∞"/"-∞"
-        if (arg is double doubleValue && double.IsInfinity(doubleValue))
-            return doubleValue > 0.0D ? "+Inf" : "-Inf";
-
-        if (arg is float floatValue && float.IsInfinity(floatValue))
-            return floatValue > 0.0F ? "+Inf" : "-Inf";
+        // A float's default format is Go's %g with the shortest round-tripping digits
+        if (TryGetFloat(arg, out double number, out bool single))
+            return FormatFloat(number, 'g', -1, single);
 
         // Go renders complex values as "(2+3i)" — each part formatted like a scalar float,
         // imaginary part always signed — where the .NET ToString() forms are "<2; 3>"
@@ -158,8 +155,9 @@ public static partial class fmt_package
     }
 
     // Renders a single argument applying the matched verb's flags, width and precision —
-    // stub-proxy scope: fixed-point precision (%f/%F), the ' '/'+' sign flags on numbers,
-    // and '-'/'0' width padding. Other verb-specific renderings still fall back to ToString.
+    // stub-proxy scope: the float verbs (%v/%g/%G/%e/%E/%f/%F) with their precisions, the
+    // ' '/'+' sign flags on numbers, and '-'/'0' width padding. Other verb-specific
+    // renderings still fall back to ToString.
     private static string FormatArg(object? arg, Match match)
     {
         string flags = match.Groups["flags"].Value;
@@ -168,10 +166,24 @@ public static partial class fmt_package
         bool numeric = IsNumericValue(arg);
         string value;
 
-        if (precision.Success && verb is "f" or "F" && TryGetDouble(arg, out double number) && !double.IsInfinity(number))
+        if (verb is "v" or "g" or "G" or "e" or "E" or "f" or "F" && TryGetFloat(arg, out double value64, out bool single))
+        {
+            // Go defaults %e/%f to a precision of 6 and %v/%g to the shortest round-trip; an
+            // explicit precision in the verb overrules either. %v renders as %g, %F as %f.
+            int prec = precision.Success
+                ? precision.Value.Length == 0 ? 0 : int.Parse(precision.Value, CultureInfo.InvariantCulture)
+                : verb is "e" or "E" or "f" or "F" ? 6 : -1;
+
+            value = FormatFloat(value64, verb switch { "v" => 'g', "F" => 'f', _ => verb[0] }, prec, single);
+        }
+        else if (precision.Success && verb is "f" or "F" && TryGetDouble(arg, out double number) && !double.IsInfinity(number))
+        {
             value = number.ToString("F" + (precision.Value.Length == 0 ? "0" : precision.Value), CultureInfo.InvariantCulture);
+        }
         else
+        {
             value = ToString(arg!);
+        }
 
         if (numeric && !value.StartsWith('-'))
         {
@@ -217,6 +229,253 @@ public static partial class fmt_package
         }
 
         return value.PadLeft(width);
+    }
+
+    // Renders a float the way Go's strconv.FormatFloat(value, verb, prec, bitSize) does, where a
+    // negative precision selects the shortest representation that round-trips. Go and .NET agree on
+    // the digits — .NET's "R" is the same shortest round-trip, and its "E<n>" rounds the exact value
+    // to n+1 significant digits just as strconv does (half-to-even, and exact well past 17 digits) —
+    // but they disagree on presentation: .NET switches to exponent form on different thresholds and
+    // writes an uppercase, three-digit exponent ("1E+006") where Go writes lowercase and at least
+    // two ("1e+06"). So take .NET's digits and lay them out the way strconv's formatDigits does.
+    private static string FormatFloat(double value, char verb, int prec, bool single)
+    {
+        if (double.IsNaN(value))
+            return "NaN";
+
+        if (double.IsInfinity(value))
+            return value > 0.0D ? "+Inf" : "-Inf";
+
+        // Fixed-point wants digits rounded at a decimal place rather than a significant-digit
+        // count; .NET's "F" already matches strconv's fmtF exactly, so let it render this one.
+        if (verb is 'f' && prec >= 0)
+            return NetFormat(value, single, "F" + prec.ToString(CultureInfo.InvariantCulture));
+
+        bool shortest = prec < 0;
+        string netForm;
+
+        if (shortest)
+        {
+            netForm = NetFormat(value, single, "R");
+        }
+        else
+        {
+            // Go promotes a zero precision to one for 'g', and carries that through to the layout
+            // below — not just to the digit count — so that %.0g of 0.7 stays "0.7" rather than
+            // rounding away to "0"
+            if (verb is 'g' or 'G' && prec == 0)
+                prec = 1;
+
+            // 'e' carries one digit before the point and `prec` after it; 'g' counts significant
+            // digits outright
+            int digits = verb is 'e' or 'E' ? prec + 1 : prec;
+            netForm = NetFormat(value, single, "E" + (digits - 1).ToString(CultureInfo.InvariantCulture));
+        }
+
+        (string digs, int dp) = DecomposeDigits(netForm);
+        bool negative = double.IsNegative(value);
+
+        if (shortest)
+        {
+            prec = verb switch
+            {
+                'e' or 'E' => digs.Length - 1,
+                'f' => Math.Max(digs.Length - dp, 0),
+                _ => digs.Length
+            };
+        }
+
+        if (verb is 'e' or 'E')
+            return FmtE(negative, digs, dp, prec, verb);
+
+        if (verb is 'f')
+            return FmtF(negative, digs, dp, prec);
+
+        // 'g'/'G': exponent form when the decimal exponent is below -4 or has reached the
+        // precision — where "the precision" is a flat 6 whenever the digits were the shortest
+        // round-trip, which is what makes Go print 1000000.0 as "1e+06" but 999999.0 as "999999"
+        int eprec = prec;
+
+        if (eprec > digs.Length && digs.Length >= dp)
+            eprec = digs.Length;
+
+        if (shortest)
+            eprec = 6;
+
+        int exponent = dp - 1;
+
+        if (exponent < -4 || exponent >= eprec)
+        {
+            if (prec > digs.Length)
+                prec = digs.Length;
+
+            return FmtE(negative, digs, dp, prec - 1, verb == 'G' ? 'E' : 'e');
+        }
+
+        if (prec > dp)
+            prec = digs.Length;
+
+        return FmtF(negative, digs, dp, Math.Max(prec - dp, 0));
+    }
+
+    private static string NetFormat(double value, bool single, string format) =>
+        single
+            ? ((float)value).ToString(format, CultureInfo.InvariantCulture)
+            : value.ToString(format, CultureInfo.InvariantCulture);
+
+    // Reduces a .NET rendering ("123456.789", "1.234568E+005", "5E-324") to strconv's decimalSlice
+    // shape: the significant digits, sign and trailing zeros stripped, scaled so that the value is
+    // 0.<digits> x 10^dp. Zero decomposes to no digits at all, which both layouts special-case.
+    private static (string digits, int dp) DecomposeDigits(string netForm)
+    {
+        ReadOnlySpan<char> text = netForm;
+
+        if (text.Length > 0 && text[0] is '-' or '+')
+            text = text[1..];
+
+        int exponent = 0;
+        int exponentIndex = text.IndexOfAny('E', 'e');
+
+        if (exponentIndex >= 0)
+        {
+            exponent = int.Parse(text[(exponentIndex + 1)..], NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture);
+            text = text[..exponentIndex];
+        }
+
+        int pointIndex = text.IndexOf('.');
+        string digits;
+        int integerLength;
+
+        if (pointIndex >= 0)
+        {
+            integerLength = pointIndex;
+            digits = string.Concat(text[..pointIndex], text[(pointIndex + 1)..]);
+        }
+        else
+        {
+            integerLength = text.Length;
+            digits = text.ToString();
+        }
+
+        int dp = integerLength + exponent;
+        int leading = 0;
+
+        while (leading < digits.Length && digits[leading] == '0')
+        {
+            leading++;
+            dp--;
+        }
+
+        digits = digits[leading..].TrimEnd('0');
+
+        return digits.Length == 0 ? ("", 0) : (digits, dp);
+    }
+
+    // strconv's fmtE: one digit, `prec` more after the point (zero-filled), then a signed
+    // exponent of at least two digits
+    private static string FmtE(bool negative, string digits, int dp, int prec, char exponentChar)
+    {
+        StringBuilder result = new();
+
+        if (negative)
+            result.Append('-');
+
+        result.Append(digits.Length == 0 ? '0' : digits[0]);
+
+        if (prec > 0)
+        {
+            result.Append('.');
+
+            int index = 1;
+            int available = Math.Min(digits.Length, prec + 1);
+
+            if (index < available)
+            {
+                result.Append(digits, index, available - index);
+                index = available;
+            }
+
+            result.Append('0', prec + 1 - index);
+        }
+
+        result.Append(char.IsUpper(exponentChar) ? 'E' : 'e');
+
+        int exponent = digits.Length == 0 ? 0 : dp - 1;
+
+        if (exponent < 0)
+        {
+            result.Append('-');
+            exponent = -exponent;
+        }
+        else
+        {
+            result.Append('+');
+        }
+
+        if (exponent < 10)
+            result.Append('0');
+
+        result.Append(exponent.ToString(CultureInfo.InvariantCulture));
+
+        return result.ToString();
+    }
+
+    // strconv's fmtF: the integer part zero-padded out to the decimal point, then `prec` fractional
+    // digits drawn from the digit string (zero where it has run out)
+    private static string FmtF(bool negative, string digits, int dp, int prec)
+    {
+        StringBuilder result = new();
+
+        if (negative)
+            result.Append('-');
+
+        if (dp > 0)
+        {
+            int available = Math.Min(digits.Length, dp);
+            result.Append(digits, 0, available);
+            result.Append('0', dp - available);
+        }
+        else
+        {
+            result.Append('0');
+        }
+
+        if (prec > 0)
+        {
+            result.Append('.');
+
+            for (int i = 0; i < prec; i++)
+            {
+                int index = dp + i;
+                result.Append(index >= 0 && index < digits.Length ? digits[index] : '0');
+            }
+        }
+
+        return result.ToString();
+    }
+
+    private static bool TryGetFloat(object? arg, out double value, out bool single)
+    {
+        switch (arg)
+        {
+            case float source:
+                value = source;
+                single = true;
+                return true;
+            case double source:
+                value = source;
+                single = false;
+                return true;
+            // An untyped float constant reaching fmt takes its default type, float64
+            case UntypedFloat source:
+                value = (float64)source;
+                single = false;
+                return true;
+            default:
+                value = 0.0D;
+                single = false;
+                return false;
+        }
     }
 
     private static bool IsNumericValue(object? arg) =>

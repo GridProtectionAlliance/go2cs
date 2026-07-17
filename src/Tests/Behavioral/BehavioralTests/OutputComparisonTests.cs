@@ -292,6 +292,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckFloatConstIntContext() => CheckTarget("FloatConstIntContext");
 
     [TestMethod]
+    public void CheckFloatFormatExponent() => CheckTarget("FloatFormatExponent");
+
+    [TestMethod]
     public void CheckForeignPtrEmbedIfaceUser() => CheckTarget("ForeignPtrEmbedIfaceUser");
 
     [TestMethod]
