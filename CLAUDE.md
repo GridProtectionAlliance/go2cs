@@ -91,6 +91,16 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
     converted app restores from nuget.org with no `deploy-core` staging; the app's own converted packages
     stay project refs, and the converter emits an output-root `Directory.Build.props` pinning `$(go2csPath)`
     + a floating `GoStdLibVersion` default.
+  - `-tests` — also convert the package's eligible `_test.go` suite + emit a runnable test-host project
+    (default off; mutually exclusive with `-recurse` — `log.Fatal` on both). Forces `-comments` on (test
+    conversions are derivative works), resolves the output path absolute, and self-locates `$(go2csPath)` by
+    walking the output dir up to the first root containing `core/golib` — so the canonical two-argument form
+    `go2cs -tests -test-action all <goroot-pkg-dir> <converted-pkg-dir>` needs no flags or env from a clone.
+  - `-test-action convert|build|run|compare|all` (default `convert`) — `convert`/`all` convert-and-hook
+    (production sources then tests); `build`/`run`/`compare` act on EXISTING digest-validated artifacts
+    without reconverting; `compare` (and `all`) diffs the C# host's terminal results vs `go test -json -count=1`.
+  - `-test-timeout <dur>` — per converted-test child process (build/run/compare); Go duration syntax,
+    default `2m`, must be > 0.
   - `-go2cspath <dir>` — output root for converted code (default `~/go2cs`; env `GO2CSPATH`).
   - `-goroot` / `-gopath`, `-platforms os/arch`, `-indent 4`, `-var` (default on),
     `-uco` (channel operators, default on), `-comments`, `-cgo`, `-tree`, `-csproj <tmpl>`, `-debug`.

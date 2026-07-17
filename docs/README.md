@@ -169,6 +169,8 @@ go2cs -stdlib                          # convert the entire Go standard library
 go2cs -stdlib fmt strings io           # convert specific standard library packages
 go2cs -recurse module_dir              # convert a module + its third-party deps (references stdlib)
 go2cs -recurse=nuget module_dir        # same, but reference the go2cs stdlib from NuGet
+go2cs -tests package_dir               # convert a package plus its Go test suite
+go2cs -tests -test-action all goroot_pkg_dir converted_pkg_dir   # ...and build, run, and diff vs go test
 ```
 
 ### Common options
@@ -177,6 +179,9 @@ go2cs -recurse=nuget module_dir        # same, but reference the go2cs stdlib fr
 |:--|:--|
 | `-stdlib` | Convert the Go standard library (optionally followed by specific package names). |
 | `-recurse` | Recursively convert a downloaded module **and its third-party dependencies** in dependency order, referencing the pre-converted standard library. Use the `nuget` option (`-recurse=nuget`) to reference the published go2cs NuGet packages ([`go.<pkg>`](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) stdlib + [`go.lib`](https://www.nuget.org/packages/go.lib) runtime + [`go.gen`](https://www.nuget.org/packages/go.gen) analyzer) instead of a locally-staged deploy root — no `deploy-core` needed. **NOTE:** _using NuGet references with analyzer is still a work in progress_. See [Converting a real-world module](#converting-a-real-world-module). |
+| `-tests` | Also convert the package's eligible `_test.go` suite and emit a runnable C# test-host project alongside the converted package (default off; cannot be combined with `-recurse`). Forces `-comments` on (test conversions are derivative works — the per-file Go copyright header must survive), resolves the output path to absolute, and self-locates `$(go2csPath)` by walking up from the output directory to the first root containing `core\golib` — so the canonical two-argument form `go2cs -tests -test-action all <goroot-package-dir> <converted-package-dir>` works from a bare clone with no flags or environment setup. See [Try it yourself — validate a converted test suite](#try-it-yourself--validate-a-converted-test-suite) for a worked example. |
+| `-test-action <action>` | With `-tests`: one of `convert` (default), `build`, `run`, `compare`, or `all`. `convert` and `all` convert the package and its tests; `build` / `run` / `compare` act on the **existing** converted artifacts — validated against the test manifest's recorded input digest — without reconverting. `compare` (and `all`, after converting) runs both `go test -json -count=1` and the converted C# test host and diffs the terminal results by test name. |
+| `-test-timeout <duration>` | Timeout for each converted-test child process (build / run / compare), in Go duration syntax (default `2m`; must be positive). |
 | `-go2cspath <dir>` | Root for converted code (env `GO2CSPATH`; default `~/go2cs`): the **output** root for `-stdlib` (`…\core\<pkg>`) and `-recurse` (`…\src\` app + `…\pkg\` deps), and the root that generated `$(go2csPath)…` project references resolve against. For a single-package/file convert the C# output instead goes to the optional `[output_dir]` argument (in place by default). |
 | `-goroot` / `-gopath` | Override the detected Go root / path. |
 | `-platforms <os/arch>` | Target platform for build-tagged files (defaults to the host). |
@@ -184,6 +189,9 @@ go2cs -recurse=nuget module_dir        # same, but reference the go2cs stdlib fr
 | `-var` | Prefer `var` declarations where the type is obvious (default on). |
 | `-uco` | Emit channel operators instead of method calls (default on). |
 | `-comments` | Carry source comments into the output (best effort, see [go/ast comment status](https://github.com/golang/go/issues/20744)). |
+| `-csproj <file>` | Generate project files from a custom `.csproj` template instead of the embedded one. |
+| `-tree` | Print each file's Go parse tree (`go/ast`) to stdout during conversion — a diagnostic aid. |
+| `-debug` | Debug mode: disables the converter's per-file panic recovery, so a conversion failure crashes with a full stack trace instead of being reported as a warning. |
 | ~~`-cgo`~~ | ~~Also convert cgo-targeted files.~~ |
 
 All converted C# code will reference a hand-written runtime library (`golib`, published as the [`go.lib`](https://www.nuget.org/packages/go.lib)
