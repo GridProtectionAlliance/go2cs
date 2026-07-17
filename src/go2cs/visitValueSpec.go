@@ -615,17 +615,26 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					constVal, _ = v.getStringLiteral(c.Val().ExactString())
 				}
 			} else if c.Val().Kind() == constant.Float {
-				// The COMPILED value must be exact — Value.String() shortens to ~6 significant
-				// digits, truncating the emitted literal (the exact value survived only in the
-				// `/* … */` comment; math cbrt's C/D/E/F/G). Emit the source literal verbatim
-				// when it is valid C#, else the shortest round-trip form (see exactFloatConstString).
-				var srcExpr ast.Expr
+				if basic, ok := declType.(*types.Basic); ok && basic.Info()&types.IsInteger != 0 {
+					// A float-KIND value under an INTEGER declared type — an integral untyped
+					// float like `const infinity = 1e6` TIGHTENED to its int use type
+					// (go/printer nodeSize) — must emit the integer form: C# has no implicit
+					// double→int constant conversion (a `1e6` literal is CS0266 against nint),
+					// and the tightening pass guaranteed integral representability.
+					constVal = constant.ToInt(c.Val()).ExactString()
+				} else {
+					// The COMPILED value must be exact — Value.String() shortens to ~6 significant
+					// digits, truncating the emitted literal (the exact value survived only in the
+					// `/* … */` comment; math cbrt's C/D/E/F/G). Emit the source literal verbatim
+					// when it is valid C#, else the shortest round-trip form (see exactFloatConstString).
+					var srcExpr ast.Expr
 
-				if len(valueSpec.Values) >= i+1 {
-					srcExpr = valueSpec.Values[i]
+					if len(valueSpec.Values) >= i+1 {
+						srcExpr = valueSpec.Values[i]
+					}
+
+					constVal = exactFloatConstString(c.Val(), srcExpr, csTypeName == "float32")
 				}
-
-				constVal = exactFloatConstString(c.Val(), srcExpr, csTypeName == "float32")
 			} else {
 				constVal = c.Val().ExactString()
 			}

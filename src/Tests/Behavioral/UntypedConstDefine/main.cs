@@ -58,6 +58,11 @@ internal static void tightenGuards() => func((defer, recover) => {
     const uint16 cu16 = 60000;
     uint16 w16 = 1;
     fmt.Println(w16 + (uint16)(cu16 << (int)(sh1)));
+    const nint infinity = 1000000;
+    nint lineCount = 3;
+    if (lineCount < infinity) {
+        fmt.Println(lineCount + infinity);
+    }
     const nint localDefer = 42;
     deferǃ(ᴛ1 => fmt.Println(ᴛ1), localDefer, defer);
 });

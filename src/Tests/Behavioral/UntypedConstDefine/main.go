@@ -82,6 +82,16 @@ func tightenGuards() {
 	var w16 uint16 = 1
 	fmt.Println(w16 + cu16<<sh1) // 54465 (uint16 wrap), NOT 120001
 
+	// A float-KIND constant (1e6 lexes as a float literal) whose uses are all INTEGER
+	// contexts tightens to the int type and must emit the INTEGER value form — a C#
+	// `1e6` double literal has no implicit conversion to nint (the go/printer
+	// `const infinity = 1e6; p.nodeSize(x, infinity)` pattern).
+	const infinity = 1e6
+	var lineCount int = 3
+	if lineCount < infinity {
+		fmt.Println(lineCount + infinity) // 1000003
+	}
+
 	const localDefer = 42 // deferred-call argument use
 	defer fmt.Println(localDefer)
 }
