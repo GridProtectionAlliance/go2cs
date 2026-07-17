@@ -609,8 +609,9 @@ public sealed class TestExecution
             {
                 // Execute contains its own handling; anything escaping it is a host defect. Contain
                 // it here — an unhandled exception on a background thread would hit golib's
-                // AppDomain backstop, which prints and calls Environment.Exit(0): a false-green
-                // process exit with no results written.
+                // AppDomain backstop, which prints the report to stderr and exits 2 (like Go):
+                // the whole run dies mid-flight with NO result files and every unrelated test
+                // killed, instead of one attributed infrastructure failure.
                 m_runner.RecordInfrastructureFailure(Name, $"test host failure: {ex}");
             }
             finally
@@ -864,11 +865,11 @@ public sealed class TestExecution
     /// Throwing here would surface inside foreign converted code: golib's GoFunc exception filter
     /// only captures panic-convertible exceptions (its comment: "Non-panic exceptions fail the
     /// filter and propagate unchanged"), converted goroutines are queued on the bare thread pool
-    /// (builtin.goǃ), and golib's AppDomain.UnhandledException backstop prints the message then
-    /// calls Environment.Exit(0) — terminating the whole run with a SUCCESS exit code and no
-    /// result files. Routing to an infrastructure failure keeps the misuse disclosed (req §6.1)
-    /// without throwing into code that cannot handle it. (Fail/Error/Log intentionally have no
-    /// owner check — Go permits them from any goroutine.)
+    /// (builtin.goǃ), and golib's AppDomain.UnhandledException backstop prints the report to
+    /// stderr and exits 2 (like Go) — terminating the whole run mid-flight with NO result files
+    /// and every unrelated test killed. Routing to an infrastructure failure keeps the misuse
+    /// disclosed (req §6.1) without throwing into code that cannot handle it. (Fail/Error/Log
+    /// intentionally have no owner check — Go permits them from any goroutine.)
     /// </remarks>
     private bool TryEnsureOwner(string operation)
     {

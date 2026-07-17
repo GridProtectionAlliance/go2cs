@@ -171,9 +171,10 @@ public class TestingRuntimeTests
     public void CrossGoroutineFatalRecordsInfrastructureFailureWithoutKillingProcess()
     {
         // F8 guard: golib goroutines run on the bare thread pool with no non-panic exception
-        // handler, and golib's AppDomain backstop responds to an unhandled exception with
-        // Environment.Exit(0) — so an ownership violation must be ROUTED to an infrastructure
-        // failure on the owning execution, never thrown into the foreign thread.
+        // handler, and golib's AppDomain backstop responds to an unhandled exception by printing
+        // the report to stderr and exiting 2 (like Go) — killing the whole run with no result
+        // files — so an ownership violation must be ROUTED to an infrastructure failure on the
+        // owning execution, never thrown into the foreign thread.
         string resultPath = Path.Combine(Path.GetTempPath(), $"go2cs-ownership-{Guid.NewGuid():N}.json");
 
         try
