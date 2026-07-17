@@ -140,6 +140,12 @@ There are **two** ways a package carries hand-owned C#, and they are NOT interch
    (`directiveOperations.go`). This is the ONLY thing that makes a whole-file native reimplementation
    durable across reconverts.
 
+   Current whole-file replacements: sync `mutex.cs` / `waitgroup.cs` / `rwmutex.cs` (2026-07-11, live in
+   `go-src-converted` only); math `unsafe.cs` (2026-07-16 — Float32/64 bits/frombits as direct
+   `BitConverter` bit-cast intrinsics, replacing the literal conversion's `ж<T>`/`uintptr` round-trip that
+   compiles but cannot reinterpret bits at runtime; canonical in `src/core/math`, byte-identical copy in
+   `go-src-converted/math`; guarded by the `MathFloatBits` behavioral test).
+
 Marker mechanics: `[AttributeTargets.Module, AllowMultiple = true]` (golib `GoManualConversionAttribute`), so
 one per file across a package is fine. The scanner wants it **before the first class**, so place it after the
 `using`s and before the file-scoped namespace, written `[module: go.GoManualConversion]` (fully qualified so
