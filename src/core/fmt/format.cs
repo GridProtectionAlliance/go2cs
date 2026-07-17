@@ -155,11 +155,13 @@ public static partial class fmt_package
     }
 
     // Renders a single argument applying the matched verb's flags, width and precision —
-    // stub-proxy scope: the float verbs (%v/%g/%G/%e/%E/%f/%F) with their precisions, base-16
-    // rendering (%x/%X) with the '#' alternate form, the ' '/'+' sign flags on numbers, and
-    // '-'/'0' width padding. Other verb-specific renderings still fall back to ToString —
-    // notably the sibling base verbs %b/%o/%O, which diverge from Go the same way %x did
-    // before TryFormatHex was added.
+    // stub-proxy scope: the float verbs (%v/%g/%G/%e/%E/%f/%F) with their precisions, the
+    // integer base verbs (%b/%o/%O/%x/%X) with their prefix/digit-count rules, the strconv
+    // float forms of %x/%X (hex mantissa-exponent) and %b (power-of-two exponent), the
+    // ' '/'+' sign flags on numbers, and '-'/'0' width padding. Other verb-specific
+    // renderings still fall back to ToString — notably composites, which Go renders
+    // elementwise (%x of []int is "[ff 100]", %b of []byte likewise), and the %!-error
+    // forms for verb/operand mismatches (%b of a string, %o/%O of a float).
     private static string FormatArg(object? arg, Match match)
     {
         string flags = match.Groups["flags"].Value;
@@ -173,6 +175,11 @@ public static partial class fmt_package
         if (verb is "x" or "X" && TryFormatHex(arg, match, verb == "X", out string hex))
             return hex;
 
+        // %b/%o/%O of an integer run the same base-N machinery (%x's byte-sequence reading
+        // has no analog: Go renders those elementwise or as %!-error forms — out of scope)
+        if (verb is "b" or "o" or "O" && TryGetInteger(arg, out bool intNegative, out ulong intMagnitude))
+            return FormatBaseInteger(intNegative, intMagnitude, match, verb[0]);
+
         if (verb is "v" or "g" or "G" or "e" or "E" or "f" or "F" && TryGetFloat(arg, out double value64, out bool single))
         {
             // Go defaults %e/%f to a precision of 6 and %v/%g to the shortest round-trip; an
@@ -182,6 +189,19 @@ public static partial class fmt_package
                 : verb is "e" or "E" or "f" or "F" ? 6 : -1;
 
             value = FormatFloat(value64, verb switch { "v" => 'g', "F" => 'f', _ => verb[0] }, prec, single);
+        }
+        else if (verb is "x" or "X" or "b" && TryGetFloat(arg, out double bits64, out bool bitsSingle))
+        {
+            // Go's float forms for the base verbs come from strconv: %x/%X is the
+            // hexadecimal-exponent form ("0x1.91eb851eb851fp+01"), %b the decimalless
+            // power-of-two-exponent form ("4503599627370496p-52"). Sign flags and the
+            // (naive, whole-rendering) '0'-flag padding follow the shared path below.
+            if (verb is "b")
+                value = FormatBinaryFloat(bits64, bitsSingle);
+            else
+                value = FormatHexFloat(bits64, bitsSingle, verb == "X",
+                    precision.Success ? precision.Value.Length == 0 ? 0 : int.Parse(precision.Value, CultureInfo.InvariantCulture) : -1,
+                    flags.Contains('#'));
         }
         else if (precision.Success && verb is "f" or "F" && TryGetDouble(arg, out double number) && !double.IsInfinity(number))
         {
@@ -485,11 +505,192 @@ public static partial class fmt_package
         }
     }
 
-    // Renders the %x/%X verbs, which Go applies to two operand kinds with distinct rules: an
-    // integer becomes base-16 digits, and a byte sequence (string, []byte) becomes bytewise hex.
-    // Operand kinds outside stub scope return false and fall back to ToString — floats (Go renders
-    // those in hexadecimal-exponent form, "0x1.91eb851eb851fp+01") and composites (Go renders those
-    // elementwise, "[ff 100]").
+    // Splits a finite float into strconv's (neg, mant, exp) triple, where the value is
+    // mant x 2^(exp - mantissa bits): the stored fraction with its implicit leading 1 restored
+    // for normals, and a subnormal's exponent pinned to the minimum normal exponent
+    private static (bool negative, ulong mantissa, int exponent) DecomposeFloatBits(double value, bool single)
+    {
+        int mantissaBits = single ? 23 : 52;
+        int exponentBits = single ? 8 : 11;
+        int bias = single ? -127 : -1023;
+        ulong bits = single ? BitConverter.SingleToUInt32Bits((float)value) : BitConverter.DoubleToUInt64Bits(value);
+
+        bool negative = bits >> (mantissaBits + exponentBits) != 0UL;
+        int exponent = (int)(bits >> mantissaBits) & ((1 << exponentBits) - 1);
+        ulong mantissa = bits & ((1UL << mantissaBits) - 1UL);
+
+        if (exponent == 0)
+            exponent = 1;
+        else
+            mantissa |= 1UL << mantissaBits;
+
+        return (negative, mantissa, exponent + bias);
+    }
+
+    // Renders a float the way Go's strconv.FormatFloat(value, 'b', -1, bitSize) does — the
+    // decimalless-scientific power-of-two-exponent form "4503599627370496p-52": the raw
+    // (unnormalized) mantissa in decimal and an exponent with no zero padding ("8388608p-9").
+    // fmt ignores both precision and the '#' flag for %b.
+    private static string FormatBinaryFloat(double value, bool single)
+    {
+        if (double.IsNaN(value))
+            return "NaN";
+
+        if (double.IsInfinity(value))
+            return value > 0.0D ? "+Inf" : "-Inf";
+
+        (bool negative, ulong mantissa, int exponent) = DecomposeFloatBits(value, single);
+
+        exponent -= single ? 23 : 52;
+
+        return (negative ? "-" : "") + mantissa.ToString(CultureInfo.InvariantCulture) +
+            "p" + (exponent >= 0 ? "+" : "") + exponent.ToString(CultureInfo.InvariantCulture);
+    }
+
+    // Renders a float the way Go's strconv.FormatFloat(value, 'x', prec, bitSize) does — the
+    // hexadecimal-exponent form "0x1.91eb851eb851fp+01": mantissa normalized to a leading 1
+    // (even for subnormals, so 5e-324 is "0x1p-1074"), the shortest form trimming trailing
+    // zero fraction digits, and an explicit precision rounding the binary mantissa to
+    // nearest-ties-to-even at that hex digit (with carry renormalization: %.0x of 255.9999
+    // is "0x1p+08"). The exponent is decimal with at least two digits.
+    private static string FormatHexFloat(double value, bool single, bool upper, int prec, bool sharp)
+    {
+        if (double.IsNaN(value))
+            return "NaN";
+
+        if (double.IsInfinity(value))
+            return value > 0.0D ? "+Inf" : "-Inf";
+
+        (bool negative, ulong mantissa, int exponent) = DecomposeFloatBits(value, single);
+
+        if (mantissa == 0UL)
+            exponent = 0;
+
+        // strconv's fmtX: align the leading 1 (if any) to bit 60
+        mantissa <<= 60 - (single ? 23 : 52);
+
+        while (mantissa != 0UL && (mantissa & (1UL << 60)) == 0UL)
+        {
+            mantissa <<= 1;
+            exponent--;
+        }
+
+        // Round to `prec` hex fraction digits (a precision of 15+ already holds every bit)
+        if (prec >= 0 && prec < 15)
+        {
+            int shift = prec * 4;
+            ulong extra = (mantissa << shift) & ((1UL << 60) - 1UL);
+
+            mantissa >>= 60 - shift;
+
+            if ((extra | (mantissa & 1UL)) > 1UL << 59)
+                mantissa++;
+
+            mantissa <<= 60 - shift;
+
+            // The round-up wrapped the mantissa past 2.0 — renormalize
+            if ((mantissa & (1UL << 61)) != 0UL)
+            {
+                mantissa >>= 1;
+                exponent++;
+            }
+        }
+
+        string hexDigits = upper ? "0123456789ABCDEF" : "0123456789abcdef";
+        StringBuilder result = new();
+
+        if (negative)
+            result.Append('-');
+
+        result.Append('0');
+        result.Append(upper ? 'X' : 'x');
+        result.Append((mantissa & (1UL << 60)) != 0UL ? '1' : '0');
+
+        mantissa <<= 4; // drop the leading digit
+
+        if (prec < 0 && mantissa != 0UL)
+        {
+            result.Append('.');
+
+            while (mantissa != 0UL)
+            {
+                result.Append(hexDigits[(int)((mantissa >> 60) & 15UL)]);
+                mantissa <<= 4;
+            }
+        }
+        else if (prec > 0)
+        {
+            result.Append('.');
+
+            for (int i = 0; i < prec; i++)
+            {
+                result.Append(hexDigits[(int)((mantissa >> 60) & 15UL)]);
+                mantissa <<= 4;
+            }
+        }
+
+        result.Append(upper ? 'P' : 'p');
+
+        if (exponent < 0)
+        {
+            result.Append('-');
+            exponent = -exponent;
+        }
+        else
+        {
+            result.Append('+');
+        }
+
+        if (exponent < 10)
+            result.Append('0');
+
+        result.Append(exponent.ToString(CultureInfo.InvariantCulture));
+
+        return sharp ? RestoreSharpZeros(result.ToString(), prec, upper) : result.ToString();
+    }
+
+    // fmt's '#' pass over a hex-float rendering: force a decimal point and restore trailing
+    // zeros up to a budget of `prec` significant characters (default 6 when no explicit
+    // precision), counted from the first nonzero character on — which includes the 'x'
+    // itself, making %#x of 1.5 the four-fraction-digit "0x1.8000p+00". The budget applies
+    // to lowercase %x only; %#X gets budget 0 but still forces the point ("0X1.P+00").
+    private static string RestoreSharpZeros(string value, int prec, bool upper)
+    {
+        int digits = upper ? 0 : prec < 0 ? 6 : prec;
+        int tailIndex = value.IndexOf(upper ? 'P' : 'p');
+        string number = value[..tailIndex];
+        bool sawNonzero = false;
+
+        foreach (char c in number)
+        {
+            if (c is '-' or '.')
+                continue;
+
+            if (c != '0')
+                sawNonzero = true;
+
+            if (sawNonzero)
+                digits--;
+        }
+
+        StringBuilder result = new(number);
+
+        if (!number.Contains('.'))
+            result.Append('.');
+
+        for (; digits > 0; digits--)
+            result.Append('0');
+
+        result.Append(value, tailIndex, value.Length - tailIndex);
+
+        return result.ToString();
+    }
+
+    // Renders the %x/%X verbs' whole-rendering operand kinds, which Go treats with distinct
+    // rules: an integer becomes base-16 digits, and a byte sequence (string, []byte) becomes
+    // bytewise hex. Other kinds return false — a float is rendered downstream
+    // (FormatHexFloat), and composites fall back to ToString (Go renders those elementwise,
+    // "[ff 100]").
     private static bool TryFormatHex(object? arg, Match match, bool upper, out string value)
     {
         if (TryGetByteSequence(arg, out ReadOnlySpan<byte> bytes))
@@ -500,7 +701,7 @@ public static partial class fmt_package
 
         if (TryGetInteger(arg, out bool negative, out ulong magnitude))
         {
-            value = FormatHexInteger(negative, magnitude, match, upper);
+            value = FormatBaseInteger(negative, magnitude, match, upper ? 'X' : 'x');
             return true;
         }
 
@@ -581,32 +782,63 @@ public static partial class fmt_package
         }
     }
 
-    private static string FormatHexInteger(bool negative, ulong magnitude, Match match, bool upper)
+    // Renders an integer under any of the base verbs (%b/%o/%O/%x/%X), whose sign, width,
+    // precision and '0'-flag digit-count rules are shared — only the base and the '#'
+    // alternate form differ per verb
+    private static string FormatBaseInteger(bool negative, ulong magnitude, Match match, char verb)
     {
         string flags = match.Groups["flags"].Value;
         Group precision = match.Groups["precision"];
         string widthText = match.Groups["width"].Value;
         int width = widthText.Length == 0 ? 0 : int.Parse(widthText, CultureInfo.InvariantCulture);
         string sign = negative ? "-" : flags.Contains('+') ? "+" : flags.Contains(' ') ? " " : "";
-        string prefix = flags.Contains('#') ? upper ? "0X" : "0x" : "";
-        string digits = magnitude.ToString(upper ? "X" : "x", CultureInfo.InvariantCulture);
+        bool sharp = flags.Contains('#');
+
+        // Convert.ToString(long, base) renders the two's-complement bit pattern, which for the
+        // sign-magnitude-reduced value is exactly the unsigned magnitude in that base
+        string digits = verb switch
+        {
+            'b' => Convert.ToString(unchecked((long)magnitude), 2),
+            'o' or 'O' => Convert.ToString(unchecked((long)magnitude), 8),
+            'X' => magnitude.ToString("X", CultureInfo.InvariantCulture),
+            _ => magnitude.ToString("x", CultureInfo.InvariantCulture)
+        };
 
         if (precision.Success)
         {
             int digitCount = precision.Value.Length == 0 ? 0 : int.Parse(precision.Value, CultureInfo.InvariantCulture);
 
-            // An explicit precision is a minimum digit count that also overrides the '0' flag;
-            // precision 0 applied to a 0 value prints no digits at all, only padding
-            digits = digitCount == 0 && magnitude == 0UL ? "" : digits.PadLeft(digitCount, '0');
+            // Precision 0 applied to a 0 value prints nothing at all — not even the sign or
+            // the '#'/'0o' prefix — and pads the width with spaces regardless of the '0' flag
+            if (digitCount == 0 && magnitude == 0UL)
+                return PadHex("", width, flags, zeroPad: false);
+
+            // An explicit precision is a minimum digit count that also overrides the '0' flag
+            digits = digits.PadLeft(digitCount, '0');
         }
         else if (flags.Contains('0') && !flags.Contains('-') && width > 0)
         {
             // Go's '0' flag on an integer is NOT padding to the width — it sets the digit count
             // (an implicit precision) that leaves room for the sign but does NOT count the '0x'
-            // prefix. So `%#08x` of 255 is the 10-char "0x000000ff", where the space-padded
-            // `%#8x` is "    0xff".
+            // ('0b', '0o') prefix. So `%#08x` of 255 is the 10-char "0x000000ff", where the
+            // space-padded `%#8x` is "    0xff".
             digits = digits.PadLeft(width - sign.Length, '0');
         }
+
+        // '#' gives base 16 and 2 a "0x"/"0X"/"0b" prefix; %O always carries "0o". Octal's
+        // '#' form instead guarantees a leading '0' DIGIT (inserted under any "0o" prefix),
+        // so it is absorbed by zero-padded digits: `%#08o` of 255 is just "00000377".
+        string prefix = verb switch
+        {
+            'x' when sharp => "0x",
+            'X' when sharp => "0X",
+            'b' when sharp => "0b",
+            'O' => "0o",
+            _ => ""
+        };
+
+        if (sharp && verb is 'o' or 'O' && digits[0] != '0')
+            digits = "0" + digits;
 
         return PadHex(sign + prefix + digits, width, flags, zeroPad: false);
     }

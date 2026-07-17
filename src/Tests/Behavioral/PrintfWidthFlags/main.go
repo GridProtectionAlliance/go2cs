@@ -15,6 +15,19 @@
 // an integer sets the DIGIT count rather than padding to the width, and does not count the
 // `0x` prefix (`%#08x` of 255 is the 10-char "0x000000ff", where `%#8x` is "    0xff"),
 // while on a byte sequence it zero-pads the whole rendering ("000x6162").
+//
+// The sibling base verbs `%b`/`%o`/`%O` share that integer machinery with per-verb `#`
+// forms: `%#b` gets a `0b` prefix (excluded from the `0`-flag digit count like `0x`),
+// `%#o` instead guarantees a leading `0` DIGIT (so zero-padding absorbs it: `%#08o` of
+// 255 is "00000377"), and `%O` always carries `0o` with the `#` rule layered beneath
+// (`%#O` of 8 is "0o010"). Precision 0 of a 0 value drops everything — even the sign and
+// prefix (`%#.0x` of 0 is ""). Floats get strconv's forms: `%b` is the raw mantissa with
+// a power-of-two exponent and no exponent padding ("4503599627370496p-52", "8388608p-9"),
+// ignoring precision; `%x`/`%X` is the hex-mantissa-exponent form ("0x1.91eb851eb851fp+01")
+// with binary round-half-to-even at the precision's hex digit (carrying into the exponent:
+// `%.0x` of 255.9999 is "0x1p+08"), and `%#x` restores trailing zeros against a
+// six-significant-char budget that counts the 'x' itself ("0x1.8000p+00") — lowercase only,
+// though `%#X` still forces the point ("0X1.P+00").
 package main
 
 import "fmt"
@@ -105,4 +118,69 @@ func main() {
 	fmt.Printf("[%6x] [%-6x] [%06x] [%#08x] [%-08x]\n", "ab", "ab", "ab", "ab", "ab")
 	fmt.Printf("[% 08x] [%12x] [%10.3x]\n", "ab", "abc", "abcdef")
 	fmt.Printf("[%x] [%#x] [%8x] [%08x] [%#x]\n", "", "", "", "", []byte{})
+
+	// %b on integers: base 2 with the same sign/width/precision rules as %x; '#' adds a
+	// "0b" prefix that is likewise excluded from the '0'-flag digit count
+	fmt.Printf("[%b] [%b] [%b] [%b] [%#b] [%#b] [%#b]\n", 5, 255, -255, 0, 5, -5, 0)
+	fmt.Printf("[%+b] [% b] [% #b] [%12b] [%-12b] [%012b] [%012b]\n", 5, 5, 5, 255, 255, 255, -255)
+	fmt.Printf("[%#12b] [%#012b] [%+012b] [%#012b]\n", 255, 255, 255, -255)
+	fmt.Printf("[%.12b] [%.12b] [%#.12b] [%16.12b] [%-16.12b] [%.0b] [%.0b]\n", 255, -255, 255, 255, 255, 0, 255)
+	fmt.Printf("[%b] [%b] [%b] [%b]\n", int8(-128), uint8(255), uint64(18446744073709551615), int64(-9223372036854775808))
+
+	// %o on integers: base 8; '#' guarantees a leading 0 DIGIT rather than a prefix, so
+	// zero-padded digits absorb it ("%#08o" of 255 is "00000377", but "%#8o" is "    0377")
+	fmt.Printf("[%o] [%o] [%o] [%o] [%#o] [%#o] [%#o] [%#o]\n", 8, 255, -255, 0, 8, -8, 0, 1)
+	fmt.Printf("[%+o] [% o] [%+#o] [%8o] [%-8o] [%08o] [%08o]\n", 8, 8, 8, 255, 255, 255, -255)
+	fmt.Printf("[%#8o] [%#08o] [%#-8o] [%#010o] [%#o] [%#5o]\n", 255, 255, 255, -8, 511, 511)
+	fmt.Printf("[%.6o] [%.6o] [%#.6o] [%8.6o] [%.0o] [%.0o] [%#.0o] [%#.2o] [%#.2o]\n", 255, -255, 255, 255, 0, 255, 0, 8, 1)
+	fmt.Printf("[%o] [%o] [%o]\n", int8(-128), uint8(255), uint64(18446744073709551615))
+
+	// %O: octal with an always-present "0o" prefix (excluded from the '0'-flag digit count
+	// like "0x"), and '#' layering its leading-0-digit rule beneath it ("0o010")
+	fmt.Printf("[%O] [%O] [%O] [%O] [%#O] [%#O] [%#O] [% #O]\n", 8, 255, -255, 0, 8, -8, 0, 8)
+	fmt.Printf("[%12O] [%-12O] [%012O] [%012O] [%+O] [% O] [%+012O]\n", 255, 255, 255, -255, 8, 8, 255)
+	fmt.Printf("[%.6O] [%12.6O] [%#.6O] [%#12O] [%#012O]\n", 255, 255, 255, 255, 255)
+	fmt.Printf("[%O] [%O]\n", uint64(18446744073709551615), int64(-9223372036854775808))
+
+	// precision 0 of a 0 value prints nothing at all across the base verbs — even the
+	// sign and '#'/"0o" prefix drop, and the width pads with spaces despite the '0' flag
+	fmt.Printf("[%#.0x] [%+.0x] [%5.0x] [%#05.0x] [%#.0b] [%.0O] [%-3.0x]\n", 0, 0, 0, 0, 0, 0, 0)
+
+	// %b on floats: strconv's decimalless scientific form with a power-of-two exponent —
+	// the raw (unnormalized) mantissa in decimal, exponent unpadded ("p-9", "p+1"), the
+	// subnormal exponent pinned (5e-324 is "1p-1074"), and precision ignored
+	negZero := -zero
+	fmt.Printf("[%b] [%b] [%b] [%b] [%b]\n", 1.0, 8.0, 0.5, 3.14159, -3.14159)
+	fmt.Printf("[%b] [%b] [%b] [%b]\n", 0.0, negZero, 1e300, 5e-324)
+	fmt.Printf("[%b] [%b] [%b] [%b]\n", float32(1.0), float32(0.1), float32(-2.5), float32(16384.0))
+	fmt.Printf("[%b] [%b] [%b] [%.3b] [%#b]\n", posInf, negInf, nan, 3.14159, 1.5)
+	fmt.Printf("[%25b] [%-25b] [%025b] [%025b] [%+b] [% b]\n", 1.5, 1.5, 1.5, -1.5, 1.5, 1.5)
+	fmt.Printf("[%b] [%b]\n", 9007199254740992.0, 1.7976931348623157e308)
+
+	// %x/%X on floats: strconv's hexadecimal-exponent form — mantissa normalized to a
+	// leading 1 (even for subnormals), shortest form trimming trailing zero digits, a
+	// two-digit-minimum exponent, and Inf/NaN rendering as ±Inf/NaN
+	fmt.Printf("[%x] [%X] [%x] [%x] [%x] [%x]\n", 3.14, 3.14, -3.14, 1.0, 2.0, 0.5)
+	fmt.Printf("[%x] [%x] [%x] [%x]\n", 0.0, negZero, 1e300, 5e-324)
+	fmt.Printf("[%x] [%X] [%x] [%x]\n", float32(0.1), float32(0.1), float32(-2.5), float32(3.4028235e38))
+	fmt.Printf("[%x] [%x] [%x] [%.2x] [%.2X]\n", posInf, negInf, nan, posInf, nan)
+	fmt.Printf("[%x] [%x]\n", 255.0, 4503599627370495.5)
+
+	// float %x precision rounds the binary mantissa half-to-even at that hex digit, with
+	// the carry renormalizing into the exponent ("%.0x" of 255.9999 is "0x1p+08"); a
+	// precision past the mantissa zero-fills
+	fmt.Printf("[%.2x] [%.0x] [%.0x] [%.0x] [%.5x] [%.13x] [%.15x]\n", 3.14, 1.9, 1.5, 2.5, 3.14, 3.14, 3.14)
+	fmt.Printf("[%.2x] [%.2x] [%.10x] [%.1x] [%.1x] [%.4x]\n", 0.0, 1.0, 3.14, 1.999999, 0.09999, 0.1)
+	fmt.Printf("[%.3x] [%.1x] [%.0x]\n", 1.9999999, 1.99, 255.9999)
+
+	// float %x width/sign flags: the '0' flag zero-pads the whole rendering naively
+	// (unlike the integer digit-count reading), Inf stays space-padded
+	fmt.Printf("[%20x] [%-20x] [%020x] [%020x] [%+x] [% x] [%+020x]\n", 1.5, 1.5, 1.5, -1.5, 1.5, 1.5, 1.5)
+	fmt.Printf("[%030x] [%08x]\n", negInf, nan)
+
+	// '#' on float %x restores trailing zeros against a six-significant-char budget that
+	// counts the 'x' itself ("0x1.8000p+00"); %#X gets no budget but still forces the
+	// decimal point ("0X1.P+00")
+	fmt.Printf("[%#x] [%#x] [%#x] [%#x] [%#x] [%#x]\n", 1.0, 1.5, 3.14, 0.0, negZero, 255.0)
+	fmt.Printf("[%#X] [%#X] [%#.2X] [%#.2x] [%#.0x] [%#020x] [%#16x] [%#x]\n", 1.0, 1.5, 3.14, 3.14, 3.14, 1.5, 1.5, -1.5)
 }
