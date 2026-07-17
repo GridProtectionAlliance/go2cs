@@ -374,3 +374,4 @@ each also have a `.bat` launcher.
 | `05a53e8c0` | 2026-06-26 | First full-conversion package promoted — `sync/atomic` into `core`. |
 | `914d4bd72` | 2026-06-27 | `math` compiles clean (tag `math-green-2026-06-27`). |
 | `51ba5d9cf` | 2026-07-10 | **First clean full-standard-library compile** — all 302 `src/go-src-converted` packages (tag `stdlib-green-2026-07-10`); Phase-3 milestone. |
+| `337a928df` | 2026-07-17 | **First real Go test suite validated in C#** — `unicode/utf8` 14/14 vs `go test -json` through the Phase-4 `-tests` pipeline (tag `utf8-tests-green-2026-07-17`); §12.8 opened. |
