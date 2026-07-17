@@ -502,7 +502,12 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 			// whole shift the type it assumes from context (e.g. uintptr when compared with a
 			// uintptr), but the bare C# literal makes the result `int`, which then can't compare
 			// or combine with the typed operand (CS0034). Re-type the shift to its resolved type.
-			if v.isUntypedNumericConstArg(binaryExpr.X) {
+			// A TIGHTENED const left operand (declared at the shift's own concrete type) normally
+			// makes the retype redundant — EXCEPT for sub-int32 shift types, where the cast is
+			// VALUE-CHANGING: C# promotes a narrow shifted operand to `int`, so without the
+			// `(uint8)(…)` result cast Go's wraparound at the declared width is lost
+			// (`const cb = 200; b + cb<<k` → Go 145, promoted C# 401). Keep the retype there.
+			if v.isUntypedNumericConstArg(binaryExpr.X) || v.tightenedNarrowConstRef(binaryExpr.X) {
 				if shiftType := v.info.Types[binaryExpr].Type; shiftType != nil {
 					if basic, ok := shiftType.Underlying().(*types.Basic); ok && basic.Info()&types.IsInteger != 0 && basic.Info()&types.IsUntyped == 0 {
 						// Shift width is decided by the UNDERLYING basic type. For a NAMED numeric

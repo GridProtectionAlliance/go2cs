@@ -179,6 +179,42 @@ func (v *Visitor) performUntypedConstAnalysis(funcDecl *ast.FuncDecl) {
 	}
 }
 
+// tightenedNarrowConstRef reports whether expr references a TIGHTENED function-local const
+// whose concrete type is narrower than 32 bits (int8/int16/uint8/uint16). Such a reference
+// still needs the shift-width retype when it is the LEFT operand of a shift: C# promotes a
+// sub-int shifted operand to `int`, so without the result cast Go's wraparound at the
+// declared width is lost (`const cb = 200; b + cb<<k` — Go wraps 200<<1 to 144 at byte
+// width; the promoted C# shift yields 400). This is the one cast-insertion site where the
+// suppressed cast was VALUE-CHANGING rather than made redundant by the concrete declaration
+// — 32-bit-and-wider shift types compute at the declared C# width already. See the
+// isUntypedNumericConstArg consult in convBinaryExpr's shift arm.
+func (v *Visitor) tightenedNarrowConstRef(expr ast.Expr) bool {
+	ident := getIdentifier(expr)
+
+	if ident == nil {
+		return false
+	}
+
+	constObj, ok := v.info.ObjectOf(ident).(*types.Const)
+
+	if !ok {
+		return false
+	}
+
+	target, tightened := v.tightenedConsts[constObj]
+
+	if !tightened {
+		return false
+	}
+
+	switch target.Kind() {
+	case types.Int8, types.Int16, types.Uint8, types.Uint16:
+		return true
+	}
+
+	return false
+}
+
 // constNeedsGoUntyped reports whether a constant value routes to visitValueSpec's GoUntyped
 // (BigInteger) emission — an integer that fits neither int64 nor uint64, or a float beyond
 // float64. EXACTLY mirrors the writeUntypedConst triggers (which parse the emitted value

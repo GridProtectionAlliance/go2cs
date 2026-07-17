@@ -65,6 +65,23 @@ func tightenGuards() {
 	u16 = append(u16, localMarker)
 	fmt.Println(u16[0])
 
+	// NARROW shifted consts: a sub-int32 tightened const as the LEFT operand of a
+	// non-constant shift KEEPS the width retype cast — C# promotes a narrow shifted
+	// operand to int, so without `(byte)(…)` Go's wraparound at the declared width
+	// is lost (200<<1 must wrap to 144 at byte width, not compute 400).
+	const cb = 200
+	var sh1 uint = 1
+	var b byte = 1
+	fmt.Println(b + cb<<sh1) // 145, NOT 401
+
+	const c16 = 30000
+	var i16 int16 = 1
+	fmt.Println(i16 + c16<<sh1) // -5535 (int16 wrap), NOT 60001
+
+	const cu16 = 60000
+	var w16 uint16 = 1
+	fmt.Println(w16 + cu16<<sh1) // 54465 (uint16 wrap), NOT 120001
+
 	const localDefer = 42 // deferred-call argument use
 	defer fmt.Println(localDefer)
 }

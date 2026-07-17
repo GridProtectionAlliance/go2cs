@@ -174,9 +174,10 @@ internal static readonly UntypedInt mask = 0x4000;   // not flattened to 16384
 Float constant values emit **exactly**: the Go source literal verbatim when it is valid C#, else the
 shortest round-trip form — never a shortened decimal. And a **function-local** untyped constant whose
 every use resolves to one concrete type is **tightened** to that type — declared with C#'s `const`
-where legal, with the per-use casts dropped — so the emitted code reads like the Go source
-(math `cbrt`; uses that stay genuinely untyped, feed other constants, or participate in constant
-folding conservatively keep the wrapper form):
+where legal, with the now-redundant per-use casts dropped (one value-changing cast stays: the
+sub-int32 shift width retype) — so the emitted code reads like the Go source (math `cbrt`; uses that
+stay genuinely untyped, feed other constants, or participate in constant folding conservatively keep
+the wrapper form):
 
 ```go
 const (
