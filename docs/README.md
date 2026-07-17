@@ -13,31 +13,15 @@ Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?
 
 **A standard-library package's own Go test suite — converted to C# — now runs and agrees with `go test`,
 verdict for verdict.** [`unicode/utf8`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf8)'s
-real test suite (Go 1.23.1) validates **14/14** through the new converted-test pipeline: the `_test.go`
-files are transpiled to C#, built against the converted standard library, executed under a Go-semantics
-test host, and differentially compared against a clean `go test -json` baseline by full test name — with
-every benchmark and example declaration honestly disclosed rather than silently skipped. One week after
-"the whole standard library *compiles*," the answer to *"but does it **run**?"* has its first
-machine-checked proof — and it's one you can
-[reproduce yourself from a clone](#try-it-yourself--validate-a-converted-test-suite)
-(tag: `utf8-tests-green-2026-07-17`). This is the Phase 4 operational era: **real Go tests, not
-compilation, are now the currency of correctness** — with `sort`, `strings`, and `bytes` next in line.
+real test suite (Go 1.23.1) validates **14/14** through the new converted-test pipeline — transpiled to
+C#, built against the converted standard library, run under a Go-semantics test host, and differentially
+compared against a clean `go test -json` baseline. One week after "the whole standard library
+*compiles*," the answer to *"but does it **run**?"* has its first machine-checked proof — and you can
+[reproduce it yourself from a clone](#try-it-yourself--validate-a-converted-test-suite)
+(tag: `utf8-tests-green-2026-07-17`).
 
-* Read the passing converted tests: [`utf8_test.cs`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8_test.cs)
-* Reproduce the validation: [Try it yourself](#try-it-yourself--validate-a-converted-test-suite)
-* See how it's built: [Milestones](#milestones)
-
-### Previously — July 10, 2026: The entire Go standard library compiles in .NET
-
-**All 302 packages of the auto-converted Go standard library (Go 1.23.1) compile
-cleanly as .NET assemblies — zero errors, zero exclusions.** Every package you'd expect to be hard is
-in that number: `runtime`, `reflect`, `net/http`, `go/types`, `crypto/tls`, `database/sql`,
-`encoding/json`. The transpiled output is not a demo subset — it is the standard library, end to end,
-emitted by the converter, transpiled Go to C#, then compiled by Roslyn. NOTE: don't get _too_ excited, this is _fully compilable_ not _fully runnable_, that's the next phase (underway above)! However, simple apps will run, try [converting a real-world module](#converting-a-real-world-module). Read more about this [milestone's details](#about-standard-library-compile-milestone) and [current status](#status) below.
-
-* Browse transpiled code: [Converted Go Standard Library](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted)
-* Compile it yourself: [Visual Studio Go Standard Library Solution](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted.slnx)
-* Learn how it works: [Go to C# Conversion Strategies](ConversionStrategies.md)
+**➡ All announcements — this one in full, and everything back to 2020 — are in the
+[go2cs News Archive](NEWS.md).**
 
 ---
 
@@ -393,15 +377,15 @@ High level timeline of the project's major turning points.
 |:--|:--|:--|:--|
 | 2018-05-21 | Project inception | `929d1457f` | Original go2cs: a C#/.NET converter built on an ANTLR4 Go grammar with T4 templates. |
 | 2020-07-09 | Runtime library + hand-converted stub | `9792eeea2` | `golib` Go-semantics runtime (slices, maps, channels, built-ins) and a curated hand-finished stdlib stub. |
-| 2022-03-13 | `v0.1.2` release | `v0.1.2` | Tagged release of the mature ANTLR4-era converter. |
-| 2025-01-12 | Rewrite as "go2cs2" — Go-based converter | `87465f5f5` | Converter re-implemented in Go on `go/ast` + `go/types`; T4 templates replaced by raw string literals; Roslyn source generators supply ancillary Go semantics; the ANTLR4/C# converter is retired. |
-| 2025-05-05 | First full standard-library auto-conversion | `6ca1c45b7` · `full-conversion-2025-05` (`cc14584c7`, 05-11) | Whole Go stdlib converted (~301 projects). "Converts" here means the transpiler did not crash with all Go code files getting a corresponding C# code file — not that all the emitted correctly C# compiles. |
+| 2022-03-13 | [`v0.1.2` release](NEWS.md#march-13-2022--v012-release) | [`v0.1.2`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/v0.1.2) | Tagged release of the mature ANTLR4-era converter. |
+| 2025-01-12 | [Rewrite as "go2cs2" — Go-based converter](NEWS.md#january-12-2025--the-converter-is-rewritten-in-go-go2cs2) | `87465f5f5` | Converter re-implemented in Go on `go/ast` + `go/types`; T4 templates replaced by raw string literals; Roslyn source generators supply ancillary Go semantics; the ANTLR4/C# converter is retired. |
+| 2025-05-05 | [First full standard-library auto-conversion](NEWS.md#may-5-2025--first-full-standard-library-auto-conversion) | `6ca1c45b7` · [`full-conversion-2025-05`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/full-conversion-2025-05) (`cc14584c7`, 05-11) | Whole Go stdlib converted (~301 projects). "Converts" here means the transpiler did not crash with all Go code files getting a corresponding C# code file — not that all the emitted correctly C# compiles. |
 | 2026-06-25 | Baseline ↔ full-conversion separation | `3c8b3a848` | Compiling curated baseline restored to `src/core`; the WIP full conversion isolated in `src/go-src-converted`. Green build and the converter-improvement loop restored. |
 | 2026-06-26 | First full-conversion package promoted | `05a53e8c0` | `sync/atomic` migrated into the baseline (`atomic.Pointer[T]` backed by a managed slot). |
-| 2026-06-27 | `math` package compiles clean | `math-green-2026-06-27` (`914d4bd72`) | Nine full-conversion packages greened via 19 behaviorally-tested converter fixes; the core, widely-imported `math` now compiles. |
-| 2026-07-10 | **First clean full-standard-library compile** | `51ba5d9cf` · `stdlib-green-2026-07-10` | The Phase 3 endpoint, reached: all **302** `src/go-src-converted` packages (Go 1.23.1) compile with zero errors — `runtime`, `reflect`, `net/http`, `go/types`, `crypto/tls` and every other package included. Gated by 371 Go-vs-C# behavioral regression tests; the compiled snapshot is committed alongside this row (see [About Standard Library Compile Milestone](#about-standard-library-compile-milestone)). |
-| 2026-07-14 | Standard library on NuGet + NuGet-referencing conversion | `2363af0e6` · `dd821a556` · `nuget-stdlib-2026-07-14` | The converted standard library, the `golib` runtime and the `go2cs-gen` analyzer are published to [nuget.org](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) as `go.<pkg>` / `go.lib` / `go.gen` (versioned `1.23.1.<build>` from `src/version.props`). The converter's new `-recurse=nuget` mode emits matching `<PackageReference>` entries — defaulting `$(GoStdLibVersion)` to a floating release — so a converted end-user app or library restores the whole go2cs stack from NuGet with **no local go2cs source checkout**; the app's own and third-party converted packages stay project references. |
-| 2026-07-17 | **First Go standard-library test suite passing in C#** | `337a928df` · `utf8-tests-green-2026-07-17` | Phase 4's operational era opens: `unicode/utf8`'s real Go test suite (14 tests, external dot-import test package) is converted and executed under the new hand-owned `go.testing` host, validating **14/14 against `go test -json`** with all 37 benchmark/example declarations honestly disclosed as excluded. The differential pipeline (convert → template csproj → isolated host run → oracle compare, gated by input-digest manifests) is live end-to-end. Getting here surfaced and fixed five real defects — including two golib Go-correctness bugs affecting *all* converted code: `[]byte(s)` shared the string's backing array, and range-over-string yielded rune ordinals instead of byte indices. Real tests, not compilation, are now the currency of correctness. |
+| 2026-06-27 | [`math` package compiles clean](NEWS.md#june-27-2026--the-math-package-compiles-clean) | [`math-green-2026-06-27`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/math-green-2026-06-27) (`914d4bd72`) | Nine full-conversion packages greened via 19 behaviorally-tested converter fixes; the core, widely-imported `math` now compiles. |
+| 2026-07-10 | [**First clean full-standard-library compile**](NEWS.md#july-10-2026--the-entire-go-standard-library-compiles-in-net) | `51ba5d9cf` · [`stdlib-green-2026-07-10`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/stdlib-green-2026-07-10) | The Phase 3 endpoint, reached: all **302** `src/go-src-converted` packages (Go 1.23.1) compile with zero errors — `runtime`, `reflect`, `net/http`, `go/types`, `crypto/tls` and every other package included. Gated by 371 Go-vs-C# behavioral regression tests; the compiled snapshot is committed alongside this row (see [About Standard Library Compile Milestone](#about-standard-library-compile-milestone)). |
+| 2026-07-14 | [Standard library on NuGet + NuGet-referencing conversion](NEWS.md#july-14-2026--the-converted-go-standard-library-is-on-nuget) | `2363af0e6` · `dd821a556` · [`nuget-stdlib-2026-07-14`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/nuget-stdlib-2026-07-14) | The converted standard library, the `golib` runtime and the `go2cs-gen` analyzer are published to [nuget.org](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) as `go.<pkg>` / `go.lib` / `go.gen` (versioned `1.23.1.<build>` from `src/version.props`). The converter's new `-recurse=nuget` mode emits matching `<PackageReference>` entries — defaulting `$(GoStdLibVersion)` to a floating release — so a converted end-user app or library restores the whole go2cs stack from NuGet with **no local go2cs source checkout**; the app's own and third-party converted packages stay project references. |
+| 2026-07-17 | [**First Go standard-library test suite passing in C#**](NEWS.md#july-17-2026--gos-own-tests-now-pass-in-c) | `337a928df` · [`utf8-tests-green-2026-07-17`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/utf8-tests-green-2026-07-17) | Phase 4's operational era opens: `unicode/utf8`'s real Go test suite (14 tests, external dot-import test package) is converted and executed under the new hand-owned `go.testing` host, validating **14/14 against `go test -json`** with all 37 benchmark/example declarations honestly disclosed as excluded. The differential pipeline (convert → template csproj → isolated host run → oracle compare, gated by input-digest manifests) is live end-to-end. Getting here surfaced and fixed five real defects — including two golib Go-correctness bugs affecting *all* converted code: `[]byte(s)` shared the string's backing array, and range-over-string yielded rune ordinals instead of byte indices. Real tests, not compilation, are now the currency of correctness. |
 
 ### _About Standard Library Compile Milestone_
 
