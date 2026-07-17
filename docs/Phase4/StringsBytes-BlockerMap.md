@@ -67,6 +67,30 @@ abi-accessibility errors exist under the current absolute-path pipeline.
 4. **Runtime:** R1+R2+R3+R4 alone took strings from 23→57 PASS in the scout run — highest leverage.
    R5 (DeepEqual) clears 6 tests across both packages. The tail (R7–R13) is per-test polish.
 
+## Status updates (2026-07-17 evening)
+
+- **B1 + B2b + B3: FIXED** (master `3ef721665`, chip commit `9400f3680`) —
+  `resolveProductionProjectReference` routes `-tests` production-csproj refs through the F15
+  mapping (pass-through otherwise, CNR byte-identical ×399); the tests-csproj template sets
+  `DisableTransitiveProjectReferences`; `appendExternalTestPackageClass` widens the info file's
+  `using static` scope to the external test class. Three converter guards. utf8 re-validates
+  14/14 through the changed pipeline; sort's production csproj survives a `-tests` run with only
+  the intended IP-4 exclusion diff.
+- **B6: FIXED** (master `21dd3da1c`) — compile-only `B` surface (`ReportAllocs`/`SetBytes`/
+  `ResetTimer`/`StartTimer`/`StopTimer`/`Errorf`/`Fatal`/`Fatalf`) + `CoverMode() => ""`;
+  discriminating guard `BenchmarkCompileSurfaceIsNoOpAndCoverModeReportsCoverageOff`.
+  `testing.CoverMode` census inclusion followed as a coordinator commit, so strings censuses
+  68/68 included once it builds.
+- **NEW — B2c (exposed by B2b's fix; 1 × CS0234 in sort):** the seeded global alias
+  `reflectliteꓸKind = go.@internal.abi_package.ΔKind` (package_test_info.cs) targets
+  `internal/abi`, which sort reaches only transitively (sort → reflectlite → abi) — now hidden
+  from the test compile view by `DisableTransitiveProjectReferences`. **Ruling:** the converter
+  must emit direct F15-mapped project references for every assembly a seeded alias targets (it
+  knows the alias set it seeds); NOT subsumed by B4/B5's anchoring split — the alias survives in
+  whichever compilation unit hosts the production-seeded attributes. Folded into the B4/B5 chip.
+- **Sort's wall after these fixes:** 1 × CS0234 (B2c) + 10 × CS0246 adapter anchoring (B4/B5) —
+  exactly the documented next tier; runtime rows R1-R13 still unreached.
+
 ## Cross-cutting lessons
 
 - **Capability-excluded tests still compile** — exclusion gates the run registry, not emission; a broken
