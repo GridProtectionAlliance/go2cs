@@ -196,7 +196,12 @@ Go converter uses the same-named constants in `src/go2cs/symbols.go`. Both files
 projections of the canonical symbol table `src/core/go2cs/symbols.json`** (kept pure-ASCII —
 every glyph a `\uXXXX` escape — so no tool can mangle it): edit the JSON and regenerate with
 `go generate .` from `src/go2cs`, or run `src/check-symbol-sync.ps1`, which regenerates and
-exits 1 on drift. Never hand-edit the two generated files. Audits flag violations. Glyphs inside
+exits 1 on drift. Never hand-edit the two generated files. Deliberately OUTSIDE the table
+(deferred 2026-07-16): the converter's Go-only `reserved` list and the `Go*` attribute-name
+strings — the attribute/type names are C# identifiers *defined* by golib source (folding them in
+would mean generating golib class names), and `reserved` has no C# twin and already consumes the
+symbol constants; likewise the `{{PackageName}}_package` text inside go2cs-gen emission templates
+(it is the emission shape itself). Audits flag violations. Glyphs inside
 goldens, docs examples, and comments are fine — they *are* the output.
 
 **OWED.**
