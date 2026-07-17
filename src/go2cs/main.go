@@ -309,7 +309,7 @@ type Visitor struct {
 	// untypedConstContexts maps an UNTYPED constant subexpression to the resolved type of its
 	// enclosing typed constant expression — the context go/types drops when it leaves constant
 	// operands untyped (see markUntypedConstContexts). convBasicLit consults it for the F/D
-	// float-literal suffix and the builtin.i() complex64/complex128 overload choice.
+	// float-literal suffix and the postfix `.i()` complex64/complex128 overload choice.
 	untypedConstContexts map[ast.Expr]types.Type
 	funcLevelDecls         map[string]*types.Var   // Function-level local declarations of the current function (for global-shadow qualification)
 	scopeStack             []map[string]*types.Var // Stack of local variable scopes

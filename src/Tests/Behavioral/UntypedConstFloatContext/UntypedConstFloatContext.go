@@ -5,7 +5,7 @@ import "fmt"
 // Guards contextual typing of untyped constants in float32/complex64 contexts: go/types
 // resolves the context on the OUTERMOST constant expression only, leaving inner operands
 // untyped, so the converter must propagate the context down (F vs D literal suffixes and
-// the builtin.i()/complex() overload choice) instead of falling back to the untyped
+// the postfix .i()/complex() overload choice) instead of falling back to the untyped
 // default float64/complex128.
 func main() {
 	var c64 complex64 = complex(2.5, -3.5) // builtin args through a unary minus

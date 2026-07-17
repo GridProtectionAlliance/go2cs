@@ -6,7 +6,7 @@ partial class main_package {
 
 internal static @string encComplex(nint i, complex128 c) {
     _ = i;
-    if (c != 0 + builtin.i(0D)) {
+    if (c != 0 + 0D.i()) {
         return "nonzero"u8;
     }
     return "zero"u8;
@@ -15,7 +15,7 @@ internal static @string encComplex(nint i, complex128 c) {
 internal static void Main() {
     fmt.Println(encComplex(1, complex(0, 0)));
     fmt.Println(encComplex(2, complex(3, -4)));
-    fmt.Println(encComplex(3, builtin.i(5D)));
+    fmt.Println(encComplex(3, 5D.i()));
 }
 
 } // end main_package

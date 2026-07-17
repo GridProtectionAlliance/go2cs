@@ -12,7 +12,7 @@ import (
 // constant operands (they never materialize at runtime in Go), so the inner literals stay recorded
 // as `untyped float`/`untyped complex` and later render from their untyped DEFAULT (float64 →
 // `2.5D`, no implicit conversion to float32/complex64 → CS0266/CS0019). The emitted C# preserves
-// the operand structure (`complex(2.5F, -3.5F)`, `2.5F - builtin.i(3.5F)`), so each literal needs
+// the operand structure (`complex(2.5F, -3.5F)`, `2.5F - 3.5F.i()`), so each literal needs
 // the context go/types dropped: propagate a typed constant expression's resolved type down through
 // the constant shapes — parens, unary `+`/`-`/`^`, arithmetic binary operands, and the complex/
 // real/imag/min/max builtin arguments — into untypedConstContexts, which convBasicLit consults for

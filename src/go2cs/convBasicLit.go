@@ -416,18 +416,25 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 			value = strings.TrimSuffix(value, "i")
 		}
 
-		// For complex literals, we use the golib `builtin.i()` helper. Qualify it with the
-		// class name (never a bare `i(…)`): `i` is the single most common Go loop/receiver
-		// variable, and a local named `i` in scope shadows the using-static import so the bare
-		// call binds the variable and fails (encoding/gob encComplex's `i *encInstr` parameter,
-		// `c != 0+0i` → CS0149 "Method name expected").
-		// The F/D argument suffix selects the golib OVERLOAD — i(float) returns complex64,
-		// i(double) returns complex128 — so it must reflect the literal's RESOLVED complex type,
+		// For complex literals, we use the golib `i()` extension method in POSTFIX form —
+		// `3.5D.i()` — the closest C# rendering of Go's `3.5i`. Member access cannot be
+		// shadowed by a local: `i` is the single most common Go loop/receiver variable, and a
+		// bare `i(…)` call binds a local named `i` instead of the using-static import (encoding/
+		// gob encComplex's `i *encInstr` parameter, `c != 0+0i` → CS0149 "Method name expected";
+		// C# scope rules make even a LATER-declared local poison an earlier bare call —
+		// CS0135/CS0844). The prior solution was the class-qualified `builtin.i(…)`; postfix
+		// member access is equally shadow-immune with zero scope analysis (context-independent
+		// output) and reads closer to the Go literal. The receiver's F/D suffix — emitted
+		// UNCONDITIONALLY, so the receiver is always a real literal and `.i()` always lexes as
+		// member access — selects the golib extension OVERLOAD: i(this float) returns complex64,
+		// i(this double) returns complex128. It must reflect the literal's RESOLVED complex type,
 		// not whether the value happens to fit in float32 (the old heuristic routed `0.1i` in a
 		// complex128 context through complex64, silently losing precision). Like the FLOAT case
 		// above, a literal inside a constant expression stays recorded untyped and takes its
 		// complex64-ness from the propagated context (see markUntypedConstContexts); the untyped
-		// default (complex128) emits D.
+		// default (complex128) emits D. Negation composes correctly: member invocation binds
+		// tighter than unary minus, so `-3.5D.i()` is -(3.5i) — matching Go, down to the
+		// negative-zero real part.
 		isComplex64 := false
 
 		// The mantissa's own value — the folded constant is COMPLEX (`0x1p-2i` → 0+0.25i), so the
@@ -457,9 +464,9 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 		if !endsWith_i {
 			result.WriteString(value)
 		} else if isComplex64 {
-			result.WriteString(fmt.Sprintf("builtin.i(%sF)", goFloatLiteralText(value, mantissaVal, true)))
+			result.WriteString(fmt.Sprintf("%sF.i()", goFloatLiteralText(value, mantissaVal, true)))
 		} else {
-			result.WriteString(fmt.Sprintf("builtin.i(%sD)", goFloatLiteralText(value, mantissaVal, false)))
+			result.WriteString(fmt.Sprintf("%sD.i()", goFloatLiteralText(value, mantissaVal, false)))
 		}
 	case token.CHAR:
 		value = replaceOctalChars(value)

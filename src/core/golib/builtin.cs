@@ -1679,7 +1679,13 @@ public static class builtin
     /// </summary>
     /// <param name="imaginary">Value to convert to imaginary.</param>
     /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
-    public static complex64 i(float imaginary)
+    /// <remarks>
+    /// An extension method so converted code renders a Go imaginary literal in postfix form,
+    /// e.g. Go <c>3.5i</c> in a complex64 context emits <c>3.5F.i()</c> — member access cannot
+    /// be shadowed by a local named <c>i</c>, unlike a bare <c>i(…)</c> call. The static call
+    /// form <c>builtin.i(3.5F)</c> remains valid.
+    /// </remarks>
+    public static complex64 i(this float imaginary)
     {
         return new complex64(0.0F, imaginary);
     }
@@ -1689,7 +1695,13 @@ public static class builtin
     /// </summary>
     /// <param name="imaginary">Value to convert to imaginary.</param>
     /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
-    public static complex128 i(double imaginary)
+    /// <remarks>
+    /// An extension method so converted code renders a Go imaginary literal in postfix form,
+    /// e.g. Go <c>3.5i</c> emits <c>3.5D.i()</c> — member access cannot be shadowed by a local
+    /// named <c>i</c>, unlike a bare <c>i(…)</c> call. The static call form
+    /// <c>builtin.i(3.5D)</c> remains valid.
+    /// </remarks>
+    public static complex128 i(this double imaginary)
     {
         return new complex128(0.0D, imaginary);
     }
