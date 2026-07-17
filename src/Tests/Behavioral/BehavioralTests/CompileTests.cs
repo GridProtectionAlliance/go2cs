@@ -1158,6 +1158,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckUntypedConstDefine() => CheckTarget("UntypedConstDefine");
 
     [TestMethod]
+    public void CheckUntypedConstFloatContext() => CheckTarget("UntypedConstFloatContext");
+
+    [TestMethod]
     public void CheckUntypedFloatDefault() => CheckTarget("UntypedFloatDefault");
 
     [TestMethod]

@@ -210,6 +210,10 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 		// resolves the literal as float32; otherwise `D` (double, matching Go's float64 default).
 		// And when an integer-valued float constant is used in an integer context — `math.Inf(1.0)`,
 		// where Inf takes an int — emit the integer form (`1`), not `1.0D` (which is CS1503).
+		// A literal INSIDE a constant expression (`var b float32 = -3.5`, `complex(2.5, -3.5)`
+		// in a complex64 context) stays recorded UNTYPED — go/types resolves the context on the
+		// outermost expression only — so its float32-ness comes from the propagated context (see
+		// markUntypedConstContexts); a complex64 context makes the literal a float32 operand too.
 		isFloat32 := false
 		intForm := ""
 
@@ -219,6 +223,13 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 					intForm = tv.Value.ExactString()
 				} else if basic.Kind() == types.Float32 {
 					isFloat32 = true
+				} else if basic.Info()&types.IsUntyped != 0 {
+					if constContext := v.untypedConstContext(basicLit); constContext != nil {
+						switch constContext.Kind() {
+						case types.Float32, types.Complex64:
+							isFloat32 = true
+						}
+					}
 				}
 			}
 		}
@@ -244,18 +255,36 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 		// variable, and a local named `i` in scope shadows the using-static import so the bare
 		// call binds the variable and fails (encoding/gob encComplex's `i *encInstr` parameter,
 		// `c != 0+0i` → CS0149 "Method name expected").
-		if _, err := strconv.ParseFloat(value, 32); err == nil {
-			if endsWith_i {
-				result.WriteString(fmt.Sprintf("builtin.i(%sF)", value))
-			} else {
-				result.WriteString(value)
+		// The F/D argument suffix selects the golib OVERLOAD — i(float) returns complex64,
+		// i(double) returns complex128 — so it must reflect the literal's RESOLVED complex type,
+		// not whether the value happens to fit in float32 (the old heuristic routed `0.1i` in a
+		// complex128 context through complex64, silently losing precision). Like the FLOAT case
+		// above, a literal inside a constant expression stays recorded untyped and takes its
+		// complex64-ness from the propagated context (see markUntypedConstContexts); the untyped
+		// default (complex128) emits D.
+		isComplex64 := false
+
+		if tv, ok := v.info.Types[basicLit]; ok && tv.Type != nil {
+			if basic, ok := tv.Type.Underlying().(*types.Basic); ok {
+				if basic.Kind() == types.Complex64 {
+					isComplex64 = true
+				} else if basic.Info()&types.IsUntyped != 0 {
+					if constContext := v.untypedConstContext(basicLit); constContext != nil {
+						switch constContext.Kind() {
+						case types.Complex64, types.Float32:
+							isComplex64 = true
+						}
+					}
+				}
 			}
+		}
+
+		if !endsWith_i {
+			result.WriteString(value)
+		} else if isComplex64 {
+			result.WriteString(fmt.Sprintf("builtin.i(%sF)", value))
 		} else {
-			if endsWith_i {
-				result.WriteString(fmt.Sprintf("builtin.i(%sD)", value))
-			} else {
-				result.WriteString(value)
-			}
+			result.WriteString(fmt.Sprintf("builtin.i(%sD)", value))
 		}
 	case token.CHAR:
 		value = replaceOctalChars(value)

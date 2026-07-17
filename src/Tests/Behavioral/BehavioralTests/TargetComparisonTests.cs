@@ -1161,6 +1161,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckUntypedConstDefine() => CheckTarget("UntypedConstDefine");
 
     [TestMethod]
+    public void CheckUntypedConstFloatContext() => CheckTarget("UntypedConstFloatContext");
+
+    [TestMethod]
     public void CheckUntypedFloatDefault() => CheckTarget("UntypedFloatDefault");
 
     [TestMethod]

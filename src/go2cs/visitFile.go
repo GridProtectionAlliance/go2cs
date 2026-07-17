@@ -24,6 +24,10 @@ func (v *Visitor) Visit(node ast.Node) ast.Visitor {
 }
 
 func (v *Visitor) visitFile(file *ast.File) {
+	// Recover the contextual types go/types drops inside constant expressions (see
+	// markUntypedConstContexts) before any expression conversion renders a literal
+	v.markUntypedConstContexts(file)
+
 	if v.options.includeComments {
 		// Create standalone comments map
 		for _, commentGroup := range file.Comments {

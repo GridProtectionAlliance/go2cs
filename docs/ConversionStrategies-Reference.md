@@ -226,6 +226,22 @@ var z = 1.0D;
 float32 f = 2.5F;
 ```
 
+The `F`-vs-`D` decision needs one more step **inside a constant expression**: go/types resolves the contextual type on the *outermost* constant expression only (its `updateExprType` deliberately never descends into constant operands — they never materialize at runtime in Go), so the inner literals of `var b float32 = -3.5`, of `complex(2.5, -3.5)` in a `complex64` context, or of `-(1.5 + 2.0)` stay recorded `untyped float` and would fall back to the `D` default — emitting `-3.5D` where C# needs `-3.5F` (no implicit double→float32/complex64 conversion: CS0266/CS0019). Since the emitted C# preserves the operand structure, the converter re-propagates the resolved type down the constant shapes go/types dropped it from — parens, unary `+`/`-`, arithmetic binary operands, and the `complex`/`real`/`imag`/`min`/`max` builtin arguments, each mapping the context appropriately (a `complex64` result makes `complex(…)`'s arguments `float32`; a `float32` result makes `real(…)`'s argument `complex64`) — via `markUntypedConstContexts` (`untypedConstOperations.go`), which the literal emitter consults when the literal's own recorded type is untyped:
+
+```go
+var c64 complex64 = complex(2.5, -3.5)
+var c64b complex64 = 2.5 - 3.5i
+var a, b float32 = 2.5, -3.5
+```
+```csharp
+complex64 c64 = complex(2.5F, -3.5F);
+complex64 c64b = 2.5F - builtin.i(3.5F);
+float32 a = 2.5F;
+float32 b = -3.5F;
+```
+
+The same resolved type drives the **imaginary literal**'s golib overload choice: `builtin.i(…F)` returns a `complex64` and `builtin.i(…D)` a `complex128`, so the suffix follows the literal's resolved complex type — replacing the earlier fits-in-float32 heuristic, which routed `0.1i` in a `complex128` context through `complex64` and silently lost precision (`(double)(0.1f) != 0.1`). (Guarded by the `UntypedConstFloatContext` behavioral test — the shapes above plus nested parens, quotient operands, `min`/`max`, `real`/`imag` round-trips, and a named-`float32` context, values verified vs Go.)
+
 A native-sized integer constant (`nint`/`nuint`, including the `uintptr` alias) whose value does not fit a C# constant of that type — e.g. `const MaxUintptr = ^uintptr(0)` (= `0xFFFFFFFFFFFFFFFF`), a `ulong` literal that needs a *non-constant* `nuint` conversion — cannot be a C# `const` (CS0133/CS0266). It is emitted as `static readonly` with an `unchecked` cast instead (small native-int consts like `const nint iota = 0` stay `const`):
 
 ```csharp
