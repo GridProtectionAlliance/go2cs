@@ -228,6 +228,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDeadPointerParamAlias() => CheckTarget("DeadPointerParamAlias");
 
     [TestMethod]
+    public void CheckDeepEqual() => CheckTarget("DeepEqual");
+
+    [TestMethod]
     public void CheckDeferArgEnclosingCapture() => CheckTarget("DeferArgEnclosingCapture");
 
     [TestMethod]

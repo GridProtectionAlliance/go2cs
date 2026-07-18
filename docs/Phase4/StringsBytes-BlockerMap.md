@@ -306,6 +306,37 @@ classes; strings: Builder-allocs/Map/Finder classes) — next wave's work order.
   finding: strings' host needs `-test-timeout` > 2m headroom because TestCompareStrings alone runs
   ~109 s in the C# runtime (the `unsafeString`→`@string` copy cost, a pre-existing performance gap
   worth its own row).
+- **R5: FIXED (2026-07-18, worktree branch `claude/adoring-kirch-cd66c2` — coordinator gates the
+  merge; base master `f999c8f78`).** The reflect bridge gains DeepEqual: the converter skips ONLY
+  `deepValueEqual` (`manualConversionFuncs["reflect"]` — `DeepEqual` stays auto, its body only touches
+  the bridged ValueOf/Type/AreEqual), and `reflect/deepequal_impl.cs` re-implements the recursion
+  arm-for-arm over the bridge's BOXED values: elementwise arrays/slices (+`[]byte` span fast path),
+  nil-vs-empty slice from the REAL backing (`m_array` via cached reflection — public `Source` is a
+  detached copy), struct fields via goStructFields, maps key-by-key through the backing Dictionary
+  (same-map identity short-circuit), pointer identity = ж-box reference equality, NaN ≠ NaN, funcs
+  never equal unless both nil; cycle detection mirrors Go's hard()/visited on managed-identity pairs
+  (self-referential structures terminate). The committed `deepequal.cs` was regenerated from a FULL
+  -stdlib reconvert (filtered reconverts derive wrong cross-package names) — the only reflect drift
+  was the placeholder swap. Guard: `DeepEqual` behavioral test (30 cases output-compared vs `go run`;
+  discriminating — the pre-fix reflect crashes it at the first slice compare, exit 2 NRE). Its
+  `Directory.Build.targets` redirects the emitted `core\reflect` ref to `go-src-converted\reflect`
+  (baseline has no reflect; the targets file survives csproj regeneration — the Performance-suite
+  pattern). golib print/println now render bools gc-style (`true`/`false`) — surfaced by the guard's
+  output compare. **Differentials: bytes 14 → 12 mismatches (TestSplit + TestSplitAfter flip to
+  agreement), strings 15 → 13 (same two flip)** — the four R5 tests exactly; remainder untouched.
+- **Shared infrastructure-error diagnosis (the six-test class, from the real stacks):** strings
+  TestSplit/TestSplitAfter + bytes TestSplit/TestSplitAfter are R5 (identical stacks:
+  deepequal.cs:74 → unsafe.cs:261 `Pointer.op_Implicit` on the never-populated `v.ptr`). Strings
+  **TestReplacer + TestWriteStringError are R8, not R5**: TestReplacer NREs at replace.cs:83
+  (`r.replacements[o]` — the `[256][]byte` field left zero-value by the composite literal, so the
+  default `array<T>`'s null backing faults at array.cs:134 — the same class as
+  TestFinderCreation/Next), and TestWriteStringError is R8-DOWNSTREAM: build's panic runs under
+  `sync.Once` whose deferred done-store marks the shared package-level Replacer built, so the next
+  `Do` no-ops and `r.r` is still nil at replace.cs:109. Fixing R8's zero-value array backing clears
+  both (plus the Finder pair).
+- **Differential-run note:** strings' C# host needs `-test-timeout` headroom — TestCompareStrings
+  legitimately takes minutes through the golib @string paths (the 2m default killed the host mid-run,
+  reporting everything after TestCompareIdenticalString as `C#=""`); 8m completes. Slow ≠ hung.
 
 ## Cross-cutting lessons
 

@@ -205,6 +205,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDeadPointerParamAlias() => CheckTarget("DeadPointerParamAlias");
 
     [TestMethod]
+    public void CheckDeepEqual() => CheckTarget("DeepEqual");
+
+    [TestMethod]
     public void CheckDeferArgEnclosingCapture() => CheckTarget("DeferArgEnclosingCapture");
 
     [TestMethod]

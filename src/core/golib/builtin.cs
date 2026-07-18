@@ -1381,7 +1381,7 @@ public static class builtin
     /// <param name="args">Arguments to display.</param>
     public static void print(params object[] args)
     {
-        Console.Error.Write(string.Join(" ", args.Select(arg => arg.ToString())));
+        Console.Error.Write(string.Join(" ", args.Select(printArg)));
     }
 
     /// <summary>
@@ -1390,7 +1390,14 @@ public static class builtin
     /// <param name="args">Arguments to display.</param>
     public static void println(params object[] args)
     {
-        Console.Error.WriteLine(string.Join(" ", args.Select(arg => arg.ToString())));
+        Console.Error.WriteLine(string.Join(" ", args.Select(printArg)));
+    }
+
+    // Formats a single print/println argument the way gc's runtime printer does where the BCL
+    // rendering diverges: a bool prints lowercase true/false (bool.ToString() yields True/False).
+    private static string? printArg(object arg)
+    {
+        return arg is bool value ? value ? "true" : "false" : arg.ToString();
     }
 
     /// <summary>
