@@ -251,8 +251,15 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public slice(nint length, nint capacity = -1, nint low = 0)
     {
-        if (length < 0)
-            throw new ArgumentOutOfRangeException(nameof(length), "Value is less than zero.");
+        // This is the `make([]T, len[, cap])` path: Go panics RECOVERABLY for a negative or
+        // over-allocatable length/capacity ("runtime error: makeslice: len/cap out of range");
+        // the .NET ArgumentOutOfRange/OverflowException raised here before could not be caught
+        // by recover(). .NET's heap ceiling for a T[] is Array.MaxLength.
+        if (length < 0 || length > Array.MaxLength)
+            throw RuntimeErrorPanic.MakeSliceLenOutOfRange();
+
+        if (capacity > Array.MaxLength)
+            throw RuntimeErrorPanic.MakeSliceCapOutOfRange();
 
         if (low < 0)
             throw new ArgumentOutOfRangeException(nameof(low), "Value is less than zero.");

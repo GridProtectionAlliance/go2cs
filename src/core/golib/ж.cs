@@ -33,6 +33,7 @@ using System.Runtime.InteropServices;
 using go.golib;
 
 [assembly:InternalsVisibleTo("unsafe")]
+[assembly:InternalsVisibleTo("GolibTests")]
 
 namespace go;
 

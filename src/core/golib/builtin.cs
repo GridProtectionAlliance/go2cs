@@ -296,12 +296,18 @@ public static class builtin
 
         int bytesWritten = 0;
 
-        foreach (Rune codePoint in runes)
+        foreach (rune value in runes)
         {
+            // Go encodes an invalid rune (surrogate or out of range) as U+FFFD (RuneError, 3 bytes)
+            // rather than failing — e.g. string([]rune{0xD800}) is "�"; the explicit int-to-Rune
+            // conversion threw for exactly those values.
+            if (!Rune.TryCreate(value, out Rune codePoint))
+                codePoint = Rune.ReplacementChar;
+
             // Encoding not expected to fail given 4x buffer
             if (!codePoint.TryEncodeToUtf8(buffer[bytesWritten..], out int runeBytes))
                 throw new InvalidOperationException("Buffer too small for UTF-8 encoding");
-            
+
             bytesWritten += runeBytes;
         }
 

@@ -1,4 +1,5 @@
 using System;
+using go.golib;
 
 namespace go.@internal;
 
@@ -6,6 +7,13 @@ partial class bytealg_package
 {
     public static partial slice<byte> MakeNoZero(nint n)
     {
+        // Go's runtime implementation panics (uintptr(len) > maxAlloc) with a recoverable
+        // "runtime error: makeslice: len out of range"; .NET's heap ceiling for a byte[] is
+        // Array.MaxLength, and exceeding it raised OverflowException — which recover() cannot
+        // catch, so strings/bytes TestRepeatCatchesOverflow died instead of observing the panic.
+        if (n < 0 || n > Array.MaxLength)
+            throw RuntimeErrorPanic.MakeSliceLenOutOfRange();
+
         return new slice<byte>(new byte[n]);
     }
 

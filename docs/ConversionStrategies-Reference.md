@@ -1498,6 +1498,35 @@ by the `SliceNilVsEmpty` behavioral test — every row of the table probed with 
 `Reslice` fix, and `appendNilNothing` the `Append` fix. `NilSliceConversion` continues to guard the
 `[]T(nil)` conversion row.)
 
+### A composite literal omitting a fixed-array field keeps the zeroed backing
+
+A Go struct's fixed-array field is emitted with a field initializer carrying its Go length
+(`badCharSkip [256]int` → `internal array<nint> badCharSkip = new(256);`), and C# runs field
+initializers in every explicitly declared constructor — but the generated **parameterized**
+constructor then assigned every member from its argument, and an argument the composite literal
+OMITS arrives as the zero value `default!`, whose backing `T[]` is null. The assignment nulled the
+initializer's backing, so the field's first walk NREd (strings' Boyer-Moore
+`stringFinder{pattern: …, goodSuffixSkip: …}` never sets `badCharSkip` — the
+`TestFinderCreation`/`TestFinderNext` operational blocker, Phase-4 row R8). The generated
+constructor now guards exactly the fixed-array members:
+
+```csharp
+if (badCharSkip.Source is not null) this.badCharSkip = badCharSkip;
+```
+
+`array<T>.Source` intentionally returns the RAW backing reference (null discriminates a
+never-constructed zero value), and keeping the initializer for a zero-value argument is precisely
+Go's semantics — the zero `[N]T` IS the zeroed backing the initializer produced. A constructed
+argument assigns as before (see the copy-semantics gaps above for the literal-argument clone).
+Separately, golib `array<T>` reads are now **null-safe**: a bare `default(array<T>)` (a zero value
+no constructor ever touched) enumerates/compares/prints as an EMPTY array and panics Go-style on
+any index, instead of throwing NRE — mirroring `@string`'s null-safe zero value. The empty view is
+a disclosed approximation: the declared length only exists where a constructor or initializer ran,
+so a `holder z = default!;` zero-var local or a `make([]S, n)` element still reads its array field
+at length 0, not N (a known converter gap, chipped separately). (Guarded by the
+`ZeroValueArrayField` behavioral test — the literal-omission shape ranged/indexed/printed vs Go,
+plus an explicit-argument control.)
+
 ## Strings (`@string` and `sstring`)
 Go's `string` is represented by golib [`@string`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/string.cs), not `System.String`. That is a semantic decision, not just a naming one: Go strings are immutable byte sequences, so `len`, indexing, ranging, concatenation, conversion to `[]byte`/`[]rune`, equality, and type assertions must all observe Go's UTF-8/byte model rather than C#'s UTF-16 string model. A zero-value `@string` is also null-safe and reads as `""`, which lets `default!` stand in for Go's zero value without sprinkling null checks through converted code.
 
@@ -1534,6 +1563,23 @@ var rs = slice<rune>((@string)"héllo");
 ```
 
 The `@string` cast fires only on a string-literal argument; a string-variable conversion (`[]byte(s)`) needs no cast. (Guarded by the behavioral test `StringLiteralSliceConversion`.)
+
+### `string([]rune)` encodes an INVALID rune as U+FFFD, never fails
+
+Go's rune-to-string conversions replace every invalid rune — a surrogate (`0xD800`–`0xDFFF`) or an
+out-of-range value (`< 0` or `> 0x10FFFF`) — with `U+FFFD` (`utf8.RuneError`, bytes `EF BF BD`),
+one replacement per invalid element: `string([]rune{0xD800})` is `"�"` (probed vs `go run`).
+Every golib rune-span encoding routes through one seam, `builtin.ToUTF8Bytes` (the `@string`
+rune-span constructor, the `slice<rune>`/single-`rune`→`@string` operators, and rune `append` all
+land there), which used the element conversion `int` → `System.Text.Rune` — and that conversion
+THROWS `ArgumentOutOfRangeException` for exactly Go's invalid values, killing the host instead of
+producing the replacement bytes (strings' `TestCaseConsistency` builds a string of every rune
+`0..MaxRune`, surrogates included — Phase-4 row R7). The encoder now uses
+`Rune.TryCreate(value, out codePoint)` and substitutes `Rune.ReplacementChar` on failure; the
+4-bytes-per-rune buffer estimate still covers the 3-byte replacement. (Guarded by the
+`InvalidRuneString` behavioral test — slice and single-rune conversions over runtime values, byte
+values and lengths compared vs Go; runtime values keep both compilers from constant-folding the
+conversions.)
 
 ### Converting a string literal to a named string type
 A Go conversion of a string **literal** to a named type whose underlying type is `string` — `errorString("…")` where `type errorString string` — needs the same `@string` intermediate. The literal renders as a `u8` `ReadOnlySpan<byte>`, which has no conversion to the named type, so a bare `(errorString)"…"u8` is CS0030. The converter routes it through `@string` (which converts implicitly from the `u8` span and to which the named type converts):
@@ -2533,6 +2579,27 @@ machine-specific goroutine stack trace, so only the first line is compared. (Gua
 `GoroutinePanicExitCode` behavioral test — a goroutine panics unrecovered while `main` blocks on a
 channel receive; both binaries must exit 2 with `panic: goroutine boom` as the first stderr line and a
 clean stdout.)
+
+### `make([]T, len[, cap])` out-of-range panics are RECOVERABLE, with Go's messages
+
+Go's `makeslice` panics recoverably for a negative or over-allocatable length/capacity — the
+recovered value's text is `runtime error: makeslice: len out of range` (or `cap`; probed vs
+`go run` — the recovered value is a `runtime.errorString`). golib's make path (the
+`slice<T>(nint length, nint capacity, nint low)` constructor) raised
+`ArgumentOutOfRangeException`/`OverflowException` for the same inputs — .NET exceptions
+`recover()` cannot catch, so a deferred recover never ran and the process died. The constructor
+now validates first and throws `RuntimeErrorPanic.MakeSliceLenOutOfRange()` /
+`MakeSliceCapOutOfRange()` (recoverable `PanicException`s carrying Go's message text), using
+`Array.MaxLength` as .NET's `maxAlloc` equivalent. The same validation class applies to the
+hand-owned `internal/bytealg.MakeNoZero` (`bytealg_impl.cs`) — Go's runtime implementation of it
+panics `len out of range` before allocating, and strings/bytes `TestRepeatCatchesOverflow`
+recovers that panic and matches on `"out of range"` (Phase-4 row R6; `strings.Repeat` of a
+near-`maxInt` product reaches `MakeNoZero` after passing Repeat's own overflow pre-checks).
+Like the established golib runtime-panic convention, the panic STATE is the message string, not
+an `error` value — a recovering type switch takes Go's `case error:` arm only in Go; both sides
+converge on the same `err.Error()` text through the `fmt.Errorf("%s", v)` default arm. (Guarded
+by the `MakeSlicePanicRange` behavioral test — in-range, negative, huge-length, and huge-capacity
+`make` under `recover()`, messages compared vs Go.)
 
 ### Named-delegate and builtin callees keep the lambda form
 A zero-argument deferred/goroutine'd call whose callee is a **named func type** (`defer cancel()`
@@ -4789,6 +4856,26 @@ Passing an `unsafe.Pointer` **argument to an `unsafe.Pointer` parameter** keeps 
 **The `uintptr → ж<T>` raw-address reinterpret operator is `explicit` by design.** It boxes a **copy** of the value read at an arbitrary address (the runtime-unsafe reinterpret seam) — never something to happen silently, and every converter-emitted reinterpret already uses explicit cast syntax (`(ж<T>)(uintptr)(p)`). As an *implicit* conversion it also poisoned overload resolution: a `uintptr` argument converted to **both** an `@unsafe.Pointer` parameter (via the numeric `uintptr ↔ Pointer` operators, which stay implicit) and any `ж<T>` parameter, so a **free function and a same-named pointer-receiver method** — runtime's `func add(p unsafe.Pointer, x uintptr)` (stubs.go) vs `func (p *notInHeap) add(bytes uintptr)` (malloc.go), both emitted as static `add` overloads in the package class — were ambiguous (CS0121) at every free-call site whose argument is a **pin of a boxless receiver**: inside a `[GoRecv] ref` method, `unsafe.Pointer(b)` emits the `uintptr`-typed `(uintptr)@unsafe.Pointer.FromRef(ref b)` (runtime `map.go` `b.keys()`/`b.overflow()`/`b.setoverflow()`, `mprof.go`'s stack-record walkers — 6 sites). With the operator explicit, the `uintptr` argument binds only the `@unsafe.Pointer` overload. The reverse `ж<T> → uintptr` (box → address) operator remains implicit — producing a number is not a silent deref. (Guarded by the `FuncVsMethodOverload` behavioral **output** test — the free `add` + direct-ж method `add` overload pair with the boxless-receiver pin call shape, plus both method-call forms, values vs Go; cleared all 6 runtime CS0121, 59 → 53.)
 
 **A cross-package type reference emits its `using <alias> = <namespace>;` even when the file did not import the package under a usable name.** A foreign type renders in short-alias form — `pkg.Type` (`time.Duration`, `abi.Kind`) for a named type, `@unsafe.Pointer` for the `unsafe.Pointer` basic — which resolves only through a file-local alias (`using time = time_package;`, `using @unsafe = unsafe_package;`). That alias is normally generated from a *canonical* (unaliased) `import`, but a file can reference a foreign type with no such import through three routes: **type inference** — a *same-package* function returns a foreign type, so the caller infers a local of that type but never writes `pkg.` and need not import the package (runtime `preempt.go`: `fd := funcdata(f, i)`, where `funcdata` returns `unsafe.Pointer`); a **blank import** (`_ "pkg"`, side-effects-only — **no `using` is emitted for it at all**: the old `using _ = <ns>;` emission hijacked C#'s `_` DISCARD for the whole file, so a deconstruction discard (`(w, _) = w.ensure(…)`, runtime `tracetime.go`) bound the namespace alias instead (CS0118 + CS0029); the import is recorded as a comment, and a genuine type reference still gets its canonical alias from this machinery — e.g. `symtabinl.go`'s `_ "unsafe"` for `//go:linkname`); or an **aliased import** (`import u "unsafe"`, whose alias `u` differs from the canonical `pkg.Name()` prefix the type reference uses). All previously yielded CS0246. The converter now walks every emitted type (`collectTypePackages`, called from `getTypeName` — named types by `pkg.Path()`, an `unsafe.Pointer` basic by the pseudo-path `"unsafe"`, recursing through pointer/slice/array/map/chan/generic/func-signature so a `[]time.Duration` element registers too) and, at file close (`visitFile`), supplies the canonical `using <alias> = <namespace>;` for every referenced foreign package the file did not already import canonically. It is idempotent-safe — a canonical import records its path in `canonicalAliasImported`, so `visitFile` never re-emits (duplicates) it — and a non-canonical alias (`using u = unsafe_package;`) coexists with the added canonical one without conflict. It is also **collision-guarded**: the synthesized `using <alias> = <namespace>;` is skipped when its canonical `<alias>` was already bound to a *different* namespace by a real import — cryptobyte's `asn1.go` imports both `encoding_asn1 "encoding/asn1"` (referenced by type, so it reaches this loop) and the subpackage `.../cryptobyte/asn1` (unaliased → alias `asn1`), so synthesizing `using asn1 = encoding.asn1_package` would duplicate the subpackage's `using asn1` (CS1537). The real imports' emitted aliases are tracked per file (`importAliasesEmitted`); the parent stays reachable through its `encoding_asn1` alias, so skipping the canonical one is safe (a non-colliding canonical alias is still supplied — no churn). (The *separate* defect that the type reference itself renders `asn1.ObjectIdentifier` rather than the file's `encoding_asn1.ObjectIdentifier` — `getTypeName` uses the canonical alias, not the file's non-canonical one — is tracked independently.) This is the *type-reference* analog of the method-call `addMethodPackageNamespaceUsing`. (Guarded by `UnsafePointerInferredNoImport` — the `unsafe.Pointer` basic arm, scalar/composite/blank-import variants — and `InferredForeignTypeNoImport` — the generic named arm, an inferred `*strings.Reader` in an `fmt`-only consumer.)
+
+### Pointer DISPLAY never dereferences out-of-range; `unsafe.StringData("")` is nil
+
+Printing a pointer (`ж<T>.ToString()` → `PrintPointer`, the stub-fmt fallback for `%v`/`%p` of a
+pointer) only needs an address-like `0x…` token, but the printer read `ptr.Value` to derive one —
+and an array/slice-ELEMENT reference can legally sit outside its backing store's valid range (the
+zero index of an EMPTY pinned buffer, or one-past-the-end pointer arithmetic), where that read
+throws `IndexOutOfRangeException` and kills the host (strings' `TestClone`, Phase-4 row R9).
+`PrintPointer` now checks an element reference's index against its backing store first and prints
+the BACKING STORE's identity when the element is unreadable — stable per pointer box, never a
+throw. Relatedly, `unsafe.StringData` of an EMPTY string now returns **nil**: Go documents the
+empty-string result as unspecified-may-be-nil, its runtime returns nil (probed — so distinct empty
+strings' data pointers compare EQUAL, which `TestClone` asserts), and golib's
+pin-a-fresh-buffer-per-call implementation could never satisfy that identity. Addresses differ run
+to run, so behavioral coverage checks printed SHAPE and nil-identity (`UnsafePointerPrint`); the
+out-of-range print itself has no Go-parity spelling from converted code today (the
+`unsafe.Add`-through-`unsafe.Pointer` seam loses the element box), so that property is guarded at
+the golib level by `GolibTests.PointerPrintTests` — a golib UNIT-test project (beside
+`ChannelTests` under `/tests/library/`) for runtime properties no Go↔C# output comparison can
+reach.
 
 ### Reinterpreting a pointer to a defined type with identical underlying — `(*Base)(p)`
 A Go conversion `(*Base)(p)` where `p` is a `*Def` and `Base`/`Def` share an *identical underlying* type (one is a defined type over the other, e.g. `type pinnerBits gcBits`, or both over the same type) reinterprets the pointer. C# has no conversion between the two distinct generic instantiations `ж<Def>` and `ж<Base>`; only the `[GoType]` wrapper's **value** conversion `Def ↔ Base` exists. So the converter performs the reinterpret on the value and re-boxes it:

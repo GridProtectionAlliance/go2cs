@@ -505,6 +505,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckIntMinLiterals() => CheckTarget("IntMinLiterals");
 
     [TestMethod]
+    public void CheckInvalidRuneString() => CheckTarget("InvalidRuneString");
+
+    [TestMethod]
     public void CheckIotaEnum() => CheckTarget("IotaEnum");
 
     [TestMethod]
@@ -536,6 +539,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckMakeLenNamedNumeric() => CheckTarget("MakeLenNamedNumeric");
+
+    [TestMethod]
+    public void CheckMakeSlicePanicRange() => CheckTarget("MakeSlicePanicRange");
 
     [TestMethod]
     public void CheckMakeSliceUintptrLen() => CheckTarget("MakeSliceUintptrLen");
@@ -1129,6 +1135,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckUnsafePointerParamPin() => CheckTarget("UnsafePointerParamPin");
 
     [TestMethod]
+    public void CheckUnsafePointerPrint() => CheckTarget("UnsafePointerPrint");
+
+    [TestMethod]
     public void CheckUnsignedNamedNumeric() => CheckTarget("UnsignedNamedNumeric");
 
     [TestMethod]
@@ -1187,6 +1196,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckWrittenCaptureParam() => CheckTarget("WrittenCaptureParam");
+
+    [TestMethod]
+    public void CheckZeroValueArrayField() => CheckTarget("ZeroValueArrayField");
 
     // </TestMethods>
 
