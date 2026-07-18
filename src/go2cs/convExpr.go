@@ -50,6 +50,12 @@ type CallExprContext struct {
 	// `func() Point` field assigned `nistec.NewP224Point`, whose ж<P224Point> return needs the
 	// proxy — CS0407). The map value is the comma-joined lambda parameter list ("" for niladic).
 	wrapArgWithLambda map[int]string
+	// cloneArrayArg appends the strongly-typed `.Clone()` to the indexed element — a POSITIONAL
+	// composite-literal element that reads an ARRAY value out of existing storage (Go copies the
+	// array into the composite's slot; the emitted struct copy would alias its backing — see
+	// exprReadsArrayValueFromStorage). Applied before any interface conversion so an `any`/
+	// interface slot boxes the clone. Keyed elements clone in convKeyValueExpr instead.
+	cloneArrayArg map[int]bool
 	// deferredDecls hoists a func-literal argument's capture declarations out of the call's
 	// argument list (where a `var mʗ1 = m;` statement is invalid C#) up to the enclosing
 	// statement. Threaded from the statement emitter (visitExprStmt/visitAssignStmt) through

@@ -53,20 +53,19 @@ func (v *Visitor) appendRhsPtrContext(base []ExprContext, rhs ast.Expr) []ExprCo
 	return append(out, ptrContext)
 }
 
-// cloneArrayValueCopy appends golib's strongly-typed `array<T>.Clone()` to a converted
-// assignment RHS when the Go statement copies an ARRAY BY VALUE out of existing storage.
-// Go array assignment copies the whole array (`data := ints` yields independent storage),
-// but the emitted `array<T>` is a struct over a shared T[] backing store, so the plain C#
-// struct copy ALIASES — a later write through the copy mutated the source (sort's
-// TestReverseSortIntSlice: `data := ints; data1 := ints` left ONE store sorted twice).
-// Only existing storage needs the clone — an ident, selector, index, or deref RHS reads a
-// value some other name can still reach; a composite literal, call result, or conversion is
-// freshly constructed. Only a DIRECT (unnamed, possibly alias-declared) array type takes it:
-// its rendering is golib's `array<T>`, whose Clone() returns array<T> — a NAMED array type
-// renders as a generated wrapper struct whose only Clone() is the object-returning
-// ICloneable form (named-array copies remain a known gap, with the other array-copy sites:
-// range element values, struct-field copies, returns, composite-literal elements). A blank
-// LHS discards the value, so it takes no clone.
+// cloneArrayValueCopy appends the strongly-typed `.Clone()` to a converted assignment RHS
+// when the Go statement copies an ARRAY BY VALUE out of existing storage. Go array assignment
+// copies the whole array (`data := ints` yields independent storage), but the emitted
+// `array<T>` — and the generated named-array wrapper — is a struct over a shared T[] backing
+// store, so the plain C# struct copy ALIASES — a later write through the copy mutated the
+// source (sort's TestReverseSortIntSlice: `data := ints; data1 := ints` left ONE store sorted
+// twice). The shape/type gate is the shared exprReadsArrayValueFromStorage (an ident,
+// selector, index, or deref RHS reads a value some other name can still reach; a composite
+// literal or call result is freshly constructed) — which covers DIRECT, alias-declared, AND
+// NAMED array types alike, the named wrapper having its own strongly-typed Clone(). A blank
+// LHS discards the value, so it takes no clone. (Known remaining edge: a named↔underlying
+// array CONVERSION RHS — `[4]int(named)` — is excluded as a call result but hands the
+// wrapper's backing through the implicit operator uncloned.)
 func (v *Visitor) cloneArrayValueCopy(lhs ast.Expr, rhs ast.Expr, rhsExpr string) string {
 	if lhs != nil {
 		if ident := getIdentifier(lhs); ident != nil && ident.Name == "_" {
@@ -74,31 +73,7 @@ func (v *Visitor) cloneArrayValueCopy(lhs ast.Expr, rhs ast.Expr, rhsExpr string
 		}
 	}
 
-	expr := rhs
-
-	for {
-		paren, ok := expr.(*ast.ParenExpr)
-
-		if !ok {
-			break
-		}
-
-		expr = paren.X
-	}
-
-	switch expr.(type) {
-	case *ast.Ident, *ast.SelectorExpr, *ast.IndexExpr, *ast.StarExpr:
-	default:
-		return rhsExpr
-	}
-
-	exprType := v.getExprType(expr)
-
-	if exprType == nil {
-		return rhsExpr
-	}
-
-	if _, isArray := types.Unalias(exprType).(*types.Array); !isArray {
+	if !v.exprReadsArrayValueFromStorage(rhs) {
 		return rhsExpr
 	}
 

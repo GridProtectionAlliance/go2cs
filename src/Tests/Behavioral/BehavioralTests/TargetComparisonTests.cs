@@ -84,6 +84,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckArrayPassByValue() => CheckTarget("ArrayPassByValue");
 
     [TestMethod]
+    public void CheckArrayValueCopySites() => CheckTarget("ArrayValueCopySites");
+
+    [TestMethod]
     public void CheckArrayWideIndexAddress() => CheckTarget("ArrayWideIndexAddress");
 
     [TestMethod]

@@ -76,7 +76,7 @@ internal class InheritedTypeTemplate : TemplateBase
         "Array" => IArrayTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName, TargetTypeSize),
         "Numeric" => NumericTypeTemplate.Generate(TypeName, TargetTypeName),
         "Pointer" => PointerTypeTemplate.Generate(ObjectName, TargetTypeName),
-        _ => UnderlyingArrayElementType is null ? "" : IArrayViewTypeTemplate.Generate(TypeName, UnderlyingArrayElementType)
+        _ => UnderlyingArrayElementType is null ? "" : IArrayViewTypeTemplate.Generate(ObjectName, TypeName, UnderlyingArrayElementType)
     };
 
     private string ValueGetter => TypeClass switch

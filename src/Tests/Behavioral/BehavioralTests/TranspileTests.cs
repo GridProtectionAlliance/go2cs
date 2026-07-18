@@ -81,6 +81,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckArrayPassByValue() => CheckTarget("ArrayPassByValue");
 
     [TestMethod]
+    public void CheckArrayValueCopySites() => CheckTarget("ArrayValueCopySites");
+
+    [TestMethod]
     public void CheckArrayWideIndexAddress() => CheckTarget("ArrayWideIndexAddress");
 
     [TestMethod]

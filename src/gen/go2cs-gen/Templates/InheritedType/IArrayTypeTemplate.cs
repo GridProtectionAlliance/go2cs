@@ -39,8 +39,10 @@ internal static class IArrayTypeTemplate
 
                 public bool Equals(IArray<{{targetTypeName}}>? other) => Value.Equals(other);
 
-                public object Clone() => ((global::System.ICloneable)Value).Clone();
-                
+                public {{structName}} Clone() => new {{structName}}(Value.Clone());
+
+                object global::System.ICloneable.Clone() => Clone();
+
                 public static {{structName}} Make(nint p1 = 0, nint p2 = -1) => new {{structName}}();
         """;
 }

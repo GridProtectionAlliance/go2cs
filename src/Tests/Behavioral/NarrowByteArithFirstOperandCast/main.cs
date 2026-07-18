@@ -9,7 +9,7 @@ internal static array<byte> encode(nint e) {
     buf[0] = (byte)((byte)(e / 100) + (rune)'0');
     buf[1] = (byte)((byte)(e / 10) % 10 + (rune)'0');
     buf[2] = (byte)((byte)(e % 10) + (rune)'0');
-    return buf;
+    return buf.Clone();
 }
 
 internal static byte wrapCase(byte x) {

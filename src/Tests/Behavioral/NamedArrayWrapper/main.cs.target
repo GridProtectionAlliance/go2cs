@@ -103,6 +103,8 @@ internal static void Main() {
 [GoType("[3]unit")] partial struct Grid;
 
 public static nint Total(this Grid g) {
+    g = g.Clone();
+
     return (nint)g[0] + (nint)g[1] + (nint)g[2];
 }
 

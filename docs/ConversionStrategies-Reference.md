@@ -1373,14 +1373,76 @@ x, y = y, x      // tuple swap        → (x, y) = (y.Clone(), x.Clone());
 
 Only existing storage takes the clone — an ident, selector, index, or deref RHS reads a value some
 other name can still reach; a composite literal, call result, or conversion is freshly constructed
-and stays bare. Only a DIRECT (unnamed, possibly alias-declared) array type takes it: its rendering
-is `array<T>`, whose `Clone()` returns `array<T>` — a NAMED array type renders as a generated
-wrapper struct whose only `Clone()` is the object-returning `ICloneable` form. *Known remaining
-gaps (pre-existing, same defect class): named-array-type copies, range element values of array
-type, struct-typed copies whose fields embed arrays, array returns of leaked locals, and
-composite-literal elements initialized from array variables.* (Guarded by the `ArrayPassByValue`
-extension — all seven assignment shapes above, written-through and read back against the source,
-values vs Go.)
+and stays bare. The shape/type gate is the shared `exprReadsArrayValueFromStorage`
+(`arrayCloneOperations.go`), which tests the UNDERLYING type — so direct, alias-declared, and NAMED
+array types all clone (the named wrapper via its strongly-typed `Clone()`, next section), and an
+interface-typed LHS (`var x any = arr`) boxes the clone. (Guarded by the `ArrayPassByValue`
+extension — all seven assignment shapes above, written-through and read back against the source —
+and `ArrayValueCopySites`' `namedAssignCopies` — named `:=`/`var`/`any`-boxed forms, values vs Go.)
+The other copy sites of the same defect class — range elements, composite-literal elements,
+returns, channel sends, append elements — are covered by the follow-up section below.
+
+### Array VALUE-COPY at every transfer site (range, composite, return, send, append) — DEEP for nested arrays
+
+Go copies the whole array at **every** value transfer, not just assignment and parameter passing —
+but the emitted `array<T>` (and the generated named-array wrapper) is a struct over a shared `T[]`
+backing store, so every plain C# struct copy ALIASES. The converter appends the strongly-typed
+`.Clone()` wherever an array value is read **out of existing storage** (an ident, selector, index,
+or pointer-deref — `exprReadsArrayValueFromStorage` in `arrayCloneOperations.go`; a composite
+literal or call result is freshly constructed and needs none):
+
+```go
+for _, row := range m { row[0] = 99 }  // → foreach (var (_, vᴛ1) in m) { var row = vᴛ1.Clone(); … }
+for i, row = range m { … }             // pre-existing vars → row = vᴛ1.Clone(); inside the body
+m := [2][3]int{a, b}                   // → new array<nint>[]{a.Clone(), b.Clone()}.array()
+s1 := holder{arr: a}                   // keyed struct field  → new holder(arr: a.Clone())
+mv := map[string][3]int{"x": a}        // map value           → ["x"u8] = a.Clone()
+mk := map[[2]int]string{k: "kv"}       // map KEY             → [k.Clone()] = "kv"u8
+lst := []any{b}                        // interface boxing    → new any[]{b.Clone()}.slice()
+return h.arr                           // return              → return h.arr.Clone();
+ch <- a                                // channel send        → ch.ᐸꟷ(a.Clone())
+s = append(s, a)                       // append element      → s = append(s, a.Clone())
+```
+
+The range emission routes an array-valued key/value through the same iterate-a-temp mechanism a
+reassigned range var uses (a C# foreach variable cannot be redeclared from itself); a map range KEY
+of array type clones the same way. The RECEIVE side of a channel needs no twin — the send stored an
+unaliased element and a buffered element is dequeued exactly once.
+
+Three deeper repairs make the single `.Clone()` correct everywhere:
+
+- **`array<T>.Clone()` is DEEP for nested arrays** (golib `array.cs`): Go's `[2][3]int` copy copies
+  the inner arrays too, but the shallow `T[]` clone left every nested backing shared — so even the
+  cloned sites under-copied at depth ≥ 2 (`m.Clone()` then `m[0][0] = 99` wrote the source's inner
+  array). An element that is itself an array wrapper (anything implementing `IArray`) is re-cloned
+  through its `ICloneable` surface, which now returns the properly-wrapped clone so the unbox
+  recurses through any nesting depth; the `typeof` gate keeps flat element types on the single
+  shallow copy.
+- **NAMED array types get a strongly-typed `Clone()`** (`IArrayTypeTemplate` /
+  `IArrayViewTypeTemplate`): the wrapper's only clone was the object-returning `ICloneable` form, so
+  named-array copies could not be expressed. `public Row Clone() => new Row(Value.Clone());` (and
+  the view-wrapper equivalent through its underlying wrapper) lets every site above — plus the
+  function-parameter preamble, func-literal parameters, and array-typed VALUE RECEIVERS — clone
+  named and alias-declared arrays exactly like direct ones (`typeIsArrayValue` tests the underlying
+  type, widening the old direct-`*types.Array` preamble gate).
+- **`array<T>` equality/hash is structural per-ELEMENT** (golib `array.cs`): Go arrays are
+  comparable values, so a `map[[2]int]V` key must be found again by an equal array with different
+  backing. `GetHashCode` hashed the backing reference (every structural-equal key missed), and the
+  `Equals` overloads passed container-typed comparers (`EqualityComparer<T[]>`) where
+  `IStructuralEquatable` calls them per boxed element — throwing on the first equal-length
+  distinct-backing comparison. Element-typed comparers fix both and recurse through nested arrays.
+
+(All guarded by the `ArrayValueCopySites` behavioral test — one output-compared section per site
+class, including multidimensional deep-copy through range and parameter passing.)
+
+**Known remaining gaps (documented, not yet emitted):** (1) STRUCT-typed copies whose fields embed
+arrays (`s2 := s1` memberwise-copies the `array<T>` field reference — needs a deep-copy strategy
+decision, likely a TypeGenerator-emitted clone for structs with array fields — and the same hole
+flows through every transfer site of a struct VALUE with array fields); (2) golib-internal
+element-wise transfers of nested-array elements (`copy(dst, src)`, spread `append(dst, src...)`)
+copy element structs without re-cloning; (3) an array-typed map KEY at an index-STORE (`mk[k] = v`
+stores `k` uncloned — only the composite-literal key form clones); (4) a named↔underlying array
+CONVERSION (`[4]int(named)`) hands the wrapper's backing through the implicit operator uncloned.
 
 ## Strings (`@string` and `sstring`)
 Go's `string` is represented by golib [`@string`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/string.cs), not `System.String`. That is a semantic decision, not just a naming one: Go strings are immutable byte sequences, so `len`, indexing, ranging, concatenation, conversion to `[]byte`/`[]rune`, equality, and type assertions must all observe Go's UTF-8/byte model rather than C#'s UTF-16 string model. A zero-value `@string` is also null-safe and reads as `""`, which lets `default!` stand in for Go's zero value without sprinkling null checks through converted code.

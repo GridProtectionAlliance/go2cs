@@ -464,20 +464,26 @@ public static error Join(params ꓸꓸꓸerror errsʗp) {     // errors/join.cs
 }
 ```
 
-Arrays are Go **values**: assignment copies the whole array. `array<T>` is a struct over a shared
-`T[]`, so the converter appends a strongly-typed `.Clone()` wherever an assignment copies an array
-out of existing storage (function parameters already cloned in the callee preamble):
+Arrays are Go **values**: every transfer copies the whole array. `array<T>` is a struct over a
+shared `T[]`, so the converter appends a strongly-typed `.Clone()` wherever an array value is read
+out of existing storage — assignment, range elements, composite-literal elements and struct fields,
+returns, channel sends, `append` elements, and function parameters (cloned in the callee preamble).
+Named array types clone the same way through their generated wrapper's own `Clone()`, and the copy
+is **deep** for nested arrays (`[2][3]int` copies its inner arrays too, matching Go):
 
 ```go
-data := ints        // an independent copy — writes to data never reach ints
+data := ints                          // an independent copy — writes to data never reach ints
+for _, row := range m { row[0] = 9 }  // row is a per-iteration copy — m is never written
 ```
 ```csharp
 var data = ints.Clone();
+foreach (var (_, vᴛ1) in m) { var row = vᴛ1.Clone(); row[0] = 9; }
 ```
 
 **Full detail:** [Reference → Slices and Arrays](ConversionStrategies-Reference.md#slices-and-arrays) —
 named slice/array wrappers, pointer-to-array slicing, named-slice pointer reinterpretation, structural
-composite rendering, array assignment-copy cloning, and slice-aliasing/write-through semantics.
+composite rendering, array value-copy cloning (deep for nested arrays), and slice-aliasing/write-through
+semantics.
 
 ---
 

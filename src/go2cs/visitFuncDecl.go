@@ -464,7 +464,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 				analyzedName = renamed
 			}
 
-			if _, ok := param.Type().(*types.Array); ok {
+			// Direct, aliased, AND named array types all clone: a NAMED array's generated wrapper
+			// is a struct over the same shared backing, and its strongly-typed Clone() returns the
+			// wrapper (an array-typed VALUE RECEIVER — necessarily a named type — is a per-call
+			// copy in Go and clones here too).
+			if typeIsArrayValue(param.Type()) {
 				// A heap-boxed array param folds its by-value clone into the box init below
 				// (the plain reassignment would reference the pre-rename name — CS0103).
 				if !v.paramNeedsHeapBox(param) {
@@ -534,7 +538,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			if v.paramNeedsHeapBox(param) {
 				incomingName := getHeapBoxParamName(param)
 
-				if _, ok := param.Type().(*types.Array); ok {
+				if typeIsArrayValue(param.Type()) {
 					incomingName += ".Clone()"
 				}
 
