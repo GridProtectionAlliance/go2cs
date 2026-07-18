@@ -332,16 +332,17 @@ The converter builds idiomatic C# for the full range of Go language features, va
 behavioral test suite (390+ Go-vs-C# regression projects). As of **2026-07-10 the entire Go standard library
 (302 packages, Go 1.23.1) compiles cleanly** as .NET assemblies. Compiling is the milestone, not yet full
 runtime parity: **converting and running the standard library's own tests is the ongoing Phase 4 work** —
-see the [roadmap](Roadmap.md#phase-4--convert-and-run-go-package-tests). Five standard-library packages'
+see the [roadmap](Roadmap.md#phase-4--convert-and-run-go-package-tests). Six standard-library packages'
 own test suites now pass in C#: [`unicode/utf8`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf8)
 (14/14) and [`sort`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/sort)
 (63/63); as of **2026-07-18** [`bytes`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/bytes)
 (81) and [`strings`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/strings)
 (68) — exercising a new **disclosed-divergence** mechanism for the handful of exact allocation-count
-asserts the managed runtime provably cannot satisfy; and
+asserts the managed runtime provably cannot satisfy;
 [`unicode/utf16`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf16)
-(8, plus 1 disclosed), the first package to reuse that mechanism as a general tool. Each validates against
-`go test` through the converted-test pipeline, and you can
+(8, plus 1 disclosed), the first package to reuse that mechanism as a general tool; and
+[`path`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/path)
+(9/9, no disclosure). Each validates against `go test` through the converted-test pipeline, and you can
 [reproduce them yourself](#try-it-yourself--validate-a-converted-test-suite) from a clone.
 
 ### Try it yourself — validate a converted test suite
@@ -419,6 +420,18 @@ is correct. Expect:
 
 ```text
 Validated 8 tests against go test (0 skipped identically on both sides, 1 disclosed-divergent (alloc-profile), 8 disclosed-unsupported declarations excluded).
+```
+
+[`path`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/path) is the
+sixth — a pure path-manipulation package (`Clean`/`Split`/`Join`/`Match`/`Base`/`Dir`/`Ext`/`IsAbs`) whose
+nine tests agree outright with **no disclosure at all**. Its one `testing.AllocsPerRun` test,
+`TestCleanMallocs`, is written to run its allocation check only under `GOMAXPROCS == 1`; on a normal
+multi-core `go test` run it takes the early-return path on *both* sides, so the differential matches exactly
+as Go's own CI sees it. Substitute `"C:\Program Files\Go\src\path"` and `src/go-src-converted/path`, and
+expect:
+
+```text
+Validated 9 tests against go test (0 skipped identically on both sides, 8 disclosed-unsupported declarations excluded).
 ```
 
 ### Performance
