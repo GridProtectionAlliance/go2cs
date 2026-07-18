@@ -498,7 +498,10 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
             return ReferenceEquals(source1, source2) && fieldId1.Equals(fieldId2);
         }
 
-        // Pointer into an array/slice element: same backing array and same index.
+        // Pointer into an array/slice element: same backing storage and same index. A PinnedBuffer
+        // is a per-access VIEW over its pinned storage (e.g. @string.buffer creates one per
+        // unsafe.StringData call), so it canonicalizes to the pinned object — two pointers to the
+        // same string data compare equal (Go compares addresses, never view instances).
         if (m_arrayIndexRef is not null || other.m_arrayIndexRef is not null)
         {
             if (m_arrayIndexRef is null || other.m_arrayIndexRef is null)
@@ -507,13 +510,22 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
             (IArray array1, int index1) = m_arrayIndexRef.Value;
             (IArray array2, int index2) = other.m_arrayIndexRef.Value;
 
-            return ReferenceEquals(array1, array2) && index1 == index2;
+            return ReferenceEquals(CanonicalStorage(array1), CanonicalStorage(array2)) && index1 == index2;
         }
 
         // Two standard heap pointers, each a distinct allocation: equal only if they wrap the same
         // reference-type object (the ReferenceEquals(this, other) check above already handled the
         // same-box case, so distinct value-type allocations are distinct addresses → not equal).
         return IsReferenceType && ReferenceEquals(m_val, other.m_val);
+    }
+
+    // Reduces an array-index referent to the identity of its actual storage: a PinnedBuffer view
+    // yields the object it pins (falling back to the view itself when nothing is pinned); any
+    // other IArray is its own storage. Used by Equals/GetHashCode above so equal pointers into
+    // per-access views still hash and compare as the same address.
+    private static object CanonicalStorage(IArray array)
+    {
+        return array is PinnedBuffer pinned ? pinned.PinnedTarget ?? array : array;
     }
 
     /// <inheritdoc />
@@ -535,7 +547,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
             return RuntimeHelpers.GetHashCode(m_structFieldRef.Value.Item1);
 
         if (m_arrayIndexRef is not null)
-            return System.HashCode.Combine(RuntimeHelpers.GetHashCode(m_arrayIndexRef.Value.Item1), m_arrayIndexRef.Value.Item2);
+            return System.HashCode.Combine(RuntimeHelpers.GetHashCode(CanonicalStorage(m_arrayIndexRef.Value.Item1)), m_arrayIndexRef.Value.Item2);
 
         // Standard heap pointer: a reference-type value uses the wrapped object's identity (equal
         // pointers share it); a value-type box uses this box's own identity.

@@ -165,6 +165,8 @@
     <Project Path="Tests/Behavioral/ForVarMasksBlockLevel/ForVarMasksBlockLevel.csproj" />
     <Project Path="Tests/Behavioral/ForVarMasksFuncLevel/ForVarMasksFuncLevel.csproj" />
     <Project Path="Tests/Behavioral/ForVariants/ForVariants.csproj" />
+    <Project Path="Tests/Behavioral/FormatTypeAdapters/FormatTypeAdapters.csproj" />
+    <Project Path="Tests/Behavioral/FormatTypeAdapters/typelib/FormatTypeAdapters.typelib.csproj" />
     <Project Path="Tests/Behavioral/FuncFieldNestedTupleParam/FuncFieldNestedTupleParam.csproj" />
     <Project Path="Tests/Behavioral/ForeignPtrEmbedIfaceLib/ForeignPtrEmbedIfaceLib.csproj" />
     <Project Path="Tests/Behavioral/ForeignPtrEmbedIfaceUser/ForeignPtrEmbedIfaceUser.csproj" />
@@ -404,6 +406,7 @@
     <Project Path="Tests/Behavioral/StringByteUnionConstraint/StringByteUnionConstraint.csproj" />
     <Project Path="Tests/Behavioral/StringConvNamedInt/StringConvNamedInt.csproj" />
     <Project Path="Tests/Behavioral/StringConvPostfix/StringConvPostfix.csproj" />
+    <Project Path="Tests/Behavioral/StringDataIdentity/StringDataIdentity.csproj" />
     <Project Path="Tests/Behavioral/StringLenUtf8Bytes/StringLenUtf8Bytes.csproj" />
     <Project Path="Tests/Behavioral/StringLiteralIndexLoop/StringLiteralIndexLoop.csproj" />
     <Project Path="Tests/Behavioral/StringLiteralSliceConversion/StringLiteralSliceConversion.csproj" />

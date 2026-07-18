@@ -87,6 +87,11 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
 
     public unsafe byte* Pointer => (byte*)m_handle.AddrOfPinnedObject();
 
+    // The pinned storage object itself (normally the byte[] the buffer wraps). PinnedBuffer is a
+    // per-access VIEW — e.g. @string.buffer creates a fresh one per unsafe.StringData call — so
+    // pointer identity (ж equality/hashing) must compare this canonical target, not the view.
+    internal object? PinnedTarget => m_handle.IsAllocated ? m_handle.Target : null;
+
     public nint Length => m_len;
 
     public Span<byte> ꓸꓸꓸ => ToSpan();

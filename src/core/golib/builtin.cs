@@ -2441,7 +2441,15 @@ public static class builtin
     /// <returns>Common Go type name for the specified <paramref name="value"/>.</returns>
     public static string GetGoTypeName(object? value)
     {
-        return GetGoTypeName(value?.GetType());
+        return value switch
+        {
+            // A generated pointer-sourced interface adapter stands in for the *T it wraps —
+            // Go's dynamic type is the pointer, never the adapter class.
+            IжAdapter adapter => GetGoTypeName(adapter.Box),
+            // An interface-to-interface adapter preserves the original dynamic value.
+            IInterfaceAdapter adapter => GetGoTypeName(adapter.Value),
+            _ => GetGoTypeName(value?.GetType())
+        };
     }
 
     /// <summary>
@@ -2476,17 +2484,31 @@ public static class builtin
         {
             string typeName = type.FullName ?? type.Name;
 
-            return typeName switch
+            switch (typeName)
             {
-                "go.string" => "string",
-                "System.IntPtr" => "int",
+                case "go.string": return "string";
+                case "System.IntPtr": return "int";
                 // uintptr is a distinct struct (go.uintptr); a bare System.UIntPtr is Go's uint
-                "System.UIntPtr" => "uint",
-                "go.uintptr" => "uintptr",
-                "System.Numerics.Complex" => "complex128",
-                "go.complex64" => "complex64",
-                _ => type == typeof(object) ? "interface {}" : typeName
-            };
+                case "System.UIntPtr": return "uint";
+                case "go.uintptr": return "uintptr";
+                case "System.Numerics.Complex": return "complex128";
+                case "go.complex64": return "complex64";
+            }
+
+            if (type == typeof(object))
+                return "interface {}";
+
+            // A pointer box renders as Go's *T, a generated interface adapter as the Go dynamic
+            // type it stands in for, and a converted named type package-qualifies (main.Point) —
+            // GoReflect.GoTypeName covers all three; everything else keeps the raw managed name.
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ж<>) ||
+                GoReflect.TryAdapterWrappedType(type, out Type? _1, out bool _2) ||
+                type.DeclaringType?.Name.EndsWith(PackageSuffix, StringComparison.Ordinal) == true)
+            {
+                return GoReflect.GoTypeName(type);
+            }
+
+            return typeName;
         }
     }
 

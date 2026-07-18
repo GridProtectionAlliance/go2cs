@@ -316,6 +316,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckForLoopPerIterationVars() => CheckTarget("ForLoopPerIterationVars");
 
     [TestMethod]
+    public void CheckFormatTypeAdapters() => CheckTarget("FormatTypeAdapters");
+
+    [TestMethod]
     public void CheckForMethodInitPost() => CheckTarget("ForMethodInitPost");
 
     [TestMethod]
@@ -983,6 +986,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckStringConvPostfix() => CheckTarget("StringConvPostfix");
+
+    [TestMethod]
+    public void CheckStringDataIdentity() => CheckTarget("StringDataIdentity");
 
     [TestMethod]
     public void CheckStringLenUtf8Bytes() => CheckTarget("StringLenUtf8Bytes");

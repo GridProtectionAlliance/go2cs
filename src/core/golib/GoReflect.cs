@@ -19,7 +19,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go2cs.Symbols;
 
@@ -172,7 +174,70 @@ public static class GoReflect
 
         if (t.BaseType == typeof(ж<uintptr>)) return "unsafe.Pointer";
 
+        // A generated interface-implementation adapter stands in for the Go dynamic value it
+        // wraps: a pointer-sourced ж-adapter renders as Go's *T, a value-sourced ᴠ-adapter as
+        // the wrapped struct type itself — never as the adapter class.
+        if (TryAdapterWrappedType(t, out Type? wrapped, out bool pointerSourced))
+            return pointerSourced ? "*" + GoTypeName(wrapped) : GoTypeName(wrapped);
+
         return GoQualifiedName(t);
+    }
+
+    /// <summary>
+    /// Identifies a generated interface-implementation adapter class and recovers the Go dynamic
+    /// type it stands in for: a pointer-sourced adapter (<see cref="IжAdapter"/>, wrapping the
+    /// receiver box <c>ж&lt;T&gt;</c>) yields <c>T</c> with <paramref name="pointerSourced"/>
+    /// <c>true</c>; a value-sourced foreign adapter (<c>{Struct}ᴠ{Iface}</c>, wrapping a copy)
+    /// yields the struct type. Both are recovered from the adapter's single one-parameter
+    /// constructor, so no name parsing of the wrapped type is involved.
+    /// </summary>
+    public static bool TryAdapterWrappedType(Type? t, [NotNullWhen(true)] out Type? wrapped, out bool pointerSourced)
+    {
+        wrapped = null;
+        pointerSourced = false;
+
+        if (t is null || t.IsValueType)
+            return false;
+
+        if (typeof(IжAdapter).IsAssignableFrom(t))
+        {
+            // The template's only constructor takes the wrapped receiver box ж<T>.
+            foreach (ConstructorInfo ctor in t.GetConstructors())
+            {
+                ParameterInfo[] parameters = ctor.GetParameters();
+
+                if (parameters.Length == 1 && parameters[0].ParameterType is { IsGenericType: true } boxType &&
+                    boxType.GetGenericTypeDefinition() == typeof(ж<>))
+                {
+                    wrapped = boxType.GetGenericArguments()[0];
+                    pointerSourced = true;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // A value-sourced adapter carries the ᴠ infix in its class name, nests in its consuming
+        // package class, and its only constructor takes the wrapped struct by value.
+        if (!t.Name.Contains(ValueAdapterInfix, StringComparison.Ordinal))
+            return false;
+
+        if (t.DeclaringType?.Name.EndsWith(PackageSuffix, StringComparison.Ordinal) != true)
+            return false;
+
+        foreach (ConstructorInfo ctor in t.GetConstructors())
+        {
+            ParameterInfo[] parameters = ctor.GetParameters();
+
+            if (parameters.Length == 1 && parameters[0].ParameterType.IsValueType)
+            {
+                wrapped = parameters[0].ParameterType;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // The package-qualified Go name of a converted named type: a converted type is nested in a
