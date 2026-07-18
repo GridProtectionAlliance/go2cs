@@ -125,6 +125,10 @@ internal sealed class TestOptions
             {
                 case "--json":
                     options.Json = true;
+                    // `go test -json` implies -v (cmd/go passes -test.v), so the Go side of the
+                    // differential runs with testing.Verbose() == true; mirror it or tests that
+                    // gate on Verbose() (sort's countOps) skip here while passing there.
+                    options.Verbose = true;
                     break;
                 case "-v":
                 case "-test.v":
