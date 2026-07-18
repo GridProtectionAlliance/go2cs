@@ -36,6 +36,11 @@ const (
 	testHostFileName        = "go2cs_test_host.cs"
 	testManifestFileName    = "go2cs_test_manifest.json"
 
+	// The package's HAND-OWNED disclosed-divergence manifest (see testDisclosure). Unlike the
+	// go2cs_test_* artifacts above, this file is never generated: it is authored by hand,
+	// committed beside the converted package, and reviewed like source.
+	testDisclosureFileName = "go2cs_test_disclosures.json"
+
 	// The EXTERNAL test package's metadata anchor (B4/B5) — the compilation unit hosting the
 	// GoImplement/GoImplicitConv attributes whose generated adapters/partials must anchor to
 	// the <name>_test package class. Named per Go's `_test` file convention, which doubles as
@@ -1784,25 +1789,92 @@ type normalizedTestEvent struct {
 }
 
 type testComparison struct {
-	Package  string            `json:"package"`
-	Status   string            `json:"status"`
-	Go       map[string]string `json:"go"`
-	CSharp   map[string]string `json:"csharp"`
-	Matched  bool              `json:"matched"`
-	Skipped  []string          `json:"skipped"`
-	Excluded []string          `json:"excluded"`
-	Errors   []string          `json:"errors"`
+	Package   string            `json:"package"`
+	Status    string            `json:"status"`
+	Go        map[string]string `json:"go"`
+	CSharp    map[string]string `json:"csharp"`
+	Matched   bool              `json:"matched"`
+	Skipped   []string          `json:"skipped"`
+	Disclosed []string          `json:"disclosed"`
+	Excluded  []string          `json:"excluded"`
+	Errors    []string          `json:"errors"`
+}
+
+// testDisclosure pins one test-level disclosed divergence — extending the declaration-level
+// "disclosed-unsupported" vocabulary (req §2.7) to individual test outcomes. A hand-owned,
+// repo-committed manifest beside the converted package lists tests whose Go=pass/C#=fail
+// divergence is provably unsatisfiable in the managed runtime (e.g. the AllocsPerRun
+// allocation-count/-profile classes: the CLR allocates where Go's compiler stack-allocates, so
+// a malloc-counting shim would fail the same asserts). The signature pin is the integrity
+// guard: the oracle reclassifies ONLY a failure whose captured C# output contains the pinned
+// substring — a disclosed test failing any OTHER way (a regression beyond the documented
+// divergence) is still a mismatch, and a package without a manifest compares strictly.
+type testDisclosure struct {
+	Name      string `json:"name"`
+	Class     string `json:"class"`
+	Signature string `json:"signature"`
+	Reason    string `json:"reason"`
+}
+
+type testDisclosureManifest struct {
+	SchemaVersion int              `json:"schemaVersion"`
+	Disclosures   []testDisclosure `json:"disclosures"`
+}
+
+// loadTestDisclosures reads the package's hand-owned disclosure manifest. A missing file is the
+// normal case (no disclosures — strict comparison); a malformed or incomplete manifest is an
+// error, never a silent no-op, because a broken disclosure must not widen the oracle. Every
+// field is required: an empty signature would substring-match ANY failure, defeating the pin.
+func loadTestDisclosures(outputPath string) (map[string]testDisclosure, error) {
+	data, err := os.ReadFile(filepath.Join(outputPath, testDisclosureFileName))
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var manifest testDisclosureManifest
+	if err := json.Unmarshal(data, &manifest); err != nil {
+		return nil, err
+	}
+
+	disclosures := make(map[string]testDisclosure, len(manifest.Disclosures))
+	for _, disclosure := range manifest.Disclosures {
+		if disclosure.Name == "" || disclosure.Class == "" || disclosure.Signature == "" || disclosure.Reason == "" {
+			return nil, fmt.Errorf("disclosure entries require name, class, signature, and reason: %+v", disclosure)
+		}
+		if _, exists := disclosures[disclosure.Name]; exists {
+			return nil, fmt.Errorf("duplicate disclosure for %s", disclosure.Name)
+		}
+		disclosures[disclosure.Name] = disclosure
+	}
+
+	return disclosures, nil
 }
 
 // matchTerminalStatuses compares the two sides' terminal statuses per test. A test matches when
 // both sides report the SAME terminal status (F1) — skip==skip is agreement, disclosed via the
-// returned skipped list rather than flagged as failure (real stdlib suites skip routinely).
-func matchTerminalStatuses(names []string, goResults, csResults map[string]string) (mismatches, skipped []string) {
+// returned skipped list rather than flagged as failure (real stdlib suites skip routinely). A
+// Go=pass/C#=fail divergence pinned by the package's hand-owned disclosure manifest — exact
+// test name AND the pinned signature present in the captured C# failure output — is returned
+// as disclosed-divergent instead of a mismatch; any other failure shape of a disclosed test
+// (different signature, different status pair, a subtest) remains a strict mismatch.
+func matchTerminalStatuses(names []string, goResults, csResults map[string]string, disclosures map[string]testDisclosure, csOutputs map[string]string) (mismatches, skipped, disclosed []string) {
 	for _, name := range names {
 		goStatus, goOK := goResults[name]
 		csStatus, csOK := csResults[name]
 
 		if !goOK || !csOK || goStatus != csStatus {
+			if disclosure, ok := disclosures[name]; ok && goStatus == "pass" && csStatus == "fail" {
+				if strings.Contains(csOutputs[name], disclosure.Signature) {
+					disclosed = append(disclosed, name)
+					continue
+				}
+				mismatches = append(mismatches, fmt.Sprintf("%s: Go=%q C#=%q (failure does not match the disclosed %s signature %q)",
+					name, goStatus, csStatus, disclosure.Class, disclosure.Signature))
+				continue
+			}
 			mismatches = append(mismatches, fmt.Sprintf("%s: Go=%q C#=%q", name, goStatus, csStatus))
 			continue
 		}
@@ -1812,7 +1884,7 @@ func matchTerminalStatuses(names []string, goResults, csResults map[string]strin
 		}
 	}
 
-	return mismatches, skipped
+	return mismatches, skipped, disclosed
 }
 
 // manifestCensusGaps returns the top-level test names present in the RAW `go test -json` results
@@ -1873,6 +1945,8 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 
 	goResults := terminalTestResults(goOutput)
 	csResults := terminalTestResults(csOutput)
+	csOutputs := terminalTestOutputs(csOutput)
+	disclosures, disclosureErr := loadTestDisclosures(outputPath)
 	var manifest testManifest
 	var censusGaps []string
 	manifestData, manifestErr := os.ReadFile(filepath.Join(outputPath, testManifestFileName))
@@ -1907,7 +1981,12 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	}
 	result := testComparison{
 		Package: filepath.Base(inputPath), Status: status, Go: goResults, CSharp: csResults,
-		Matched: true, Skipped: []string{}, Excluded: excludedDeclarations(manifest), Errors: []string{},
+		Matched: true, Skipped: []string{}, Disclosed: []string{}, Excluded: excludedDeclarations(manifest), Errors: []string{},
+	}
+	if disclosureErr != nil {
+		result.Matched = false
+		result.Errors = append(result.Errors, "test disclosures: "+disclosureErr.Error())
+		disclosures = nil
 	}
 	if manifestErr != nil {
 		result.Matched = false
@@ -1926,12 +2005,25 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 		result.Errors = append(result.Errors, "census: go test reported tests the manifest does not declare: "+strings.Join(censusGaps, ", "))
 	}
 
-	mismatches, skipped := matchTerminalStatuses(names, goResults, csResults)
+	mismatches, skipped, disclosed := matchTerminalStatuses(names, goResults, csResults, disclosures, csOutputs)
 	if len(mismatches) > 0 {
 		result.Matched = false
 		result.Errors = append(result.Errors, mismatches...)
 	}
 	result.Skipped = append(result.Skipped, skipped...)
+	for _, name := range disclosed {
+		disclosure := disclosures[name]
+		result.Disclosed = append(result.Disclosed, fmt.Sprintf("%s (%s): %s", name, disclosure.Class, disclosure.Reason))
+	}
+
+	if csErr != nil && goErr == nil && len(disclosed) > 0 && len(mismatches) == 0 && len(csResults) > 0 {
+		// The converted host exits nonzero BECAUSE the disclosed-divergent tests fail — that
+		// exit code is part of the disclosed outcome, not an additional failure signal.
+		// Forgiveness is deliberately narrow: go test itself was clean, the host produced
+		// results, and every divergence matched its pinned signature (zero mismatches — a
+		// truncated run surfaces as one-sided rows, which are mismatches, and stays fatal).
+		csErr = nil
+	}
 
 	if goErr != nil {
 		result.Matched = false
@@ -1961,8 +2053,19 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	if !result.Matched {
 		return fmt.Errorf("Go/C# test comparison failed: %s", strings.Join(result.Errors, "; "))
 	}
-	fmt.Printf("Validated %d tests against go test (%d skipped identically on both sides, %d disclosed-unsupported declarations excluded).\n",
-		len(goResults), len(result.Skipped), len(result.Excluded))
+	if len(disclosed) > 0 {
+		classes := HashSet[string]{}
+		for _, name := range disclosed {
+			classes.Add(disclosures[name].Class)
+		}
+		classList := classes.Keys()
+		sort.Strings(classList)
+		fmt.Printf("Validated %d tests against go test (%d skipped identically on both sides, %d disclosed-divergent (%s), %d disclosed-unsupported declarations excluded).\n",
+			len(goResults)-len(disclosed), len(result.Skipped), len(disclosed), strings.Join(classList, ", "), len(result.Excluded))
+	} else {
+		fmt.Printf("Validated %d tests against go test (%d skipped identically on both sides, %d disclosed-unsupported declarations excluded).\n",
+			len(goResults), len(result.Skipped), len(result.Excluded))
+	}
 	return nil
 }
 
@@ -1976,6 +2079,24 @@ func terminalTestResults(output string) map[string]string {
 		switch event.Action {
 		case "pass", "fail", "skip", "timeout", "infrastructure-error":
 			result[event.Test] = event.Action
+		}
+	}
+	return result
+}
+
+// terminalTestOutputs captures each test's accumulated log output from its terminal event —
+// the converted host attaches the joined t.Log/t.Error text to the terminal record — keyed by
+// test name, for disclosure signature matching against the C# side's failure messages.
+func terminalTestOutputs(output string) map[string]string {
+	result := make(map[string]string)
+	for _, line := range strings.Split(output, "\n") {
+		var event normalizedTestEvent
+		if json.Unmarshal([]byte(line), &event) != nil || event.Test == "" {
+			continue
+		}
+		switch event.Action {
+		case "pass", "fail", "skip", "timeout", "infrastructure-error":
+			result[event.Test] = event.Output
 		}
 	}
 	return result

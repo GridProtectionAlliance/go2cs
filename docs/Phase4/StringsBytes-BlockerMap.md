@@ -390,7 +390,32 @@ classes; strings: Builder-allocs/Map/Finder classes) — next wave's work order.
   (TestRepeatCatchesOverflow), R7 (TestCaseConsistency), R8 (TestFinderCreation/TestFinderNext/
   TestPickAlgorithm/TestReplacer/TestWriteStringError) — all owned rows.
 
-## AllocsPerRun divergence analysis (Builder trio + TestIndexRune) — PROPOSAL, awaiting ruling
+## AllocsPerRun divergence — IMPLEMENTED (2026-07-18, disclosed-divergence manifest)
+
+**Ruling: build the manifest.** The proposal below is now the shipped mechanism. A hand-owned,
+repo-committed `go2cs_test_disclosures.json` beside each affected converted package pins
+`{name, class, signature, reason}` per divergent test; the `-test-action compare` oracle
+(`matchTerminalStatuses`, `testConversion.go`) reclassifies a Go=pass/C#=fail row as
+**disclosed-divergent** only when the exact name is listed AND the captured C# failure output
+contains the pinned signature substring — any other failure shape (different signature, other
+status pair, C#=infrastructure-error) stays a strict mismatch, and a package with no manifest is
+unaffected (sort, utf8 compare strictly). The validation line gained the count:
+
+- **bytes** (2026-07-18): `Validated 81 tests against go test (0 skipped identically on both
+  sides, 7 disclosed-divergent (alloc-profile), 123 disclosed-unsupported declarations
+  excluded).` — TestEqual, TestGrow, TestIndex, TestIndexRune, TestLastIndex,
+  TestNewBufferShallow, TestWriteAppend (all `alloc-profile`, want-zero).
+- **strings** (2026-07-18): `Validated 68 tests against go test (0 skipped identically on both
+  sides, 4 disclosed-divergent (alloc-count-semantics, alloc-profile), 118 disclosed-unsupported
+  declarations excluded).` — TestBuilderAllocs / TestBuilderGrow / TestBuilderGrowSizeclasses
+  (`alloc-count-semantics`), TestIndexRune (`alloc-profile`).
+
+Both packages policy-committed (converted `*_test.cs` + host + tests-csproj + IP-4 production
+exclusion + the disclosure manifest). Guards: converter `TestDisclosedDivergenceOracle` +
+`TestDisclosureManifestLoading`. Reference: the *AllocsPerRun* entry in
+`docs/ConversionStrategies-Reference.md`. The original analysis follows.
+
+## AllocsPerRun divergence analysis (Builder trio + TestIndexRune) — original proposal
 
 The four remaining alloc-asserting failures are diagnosed to two distinct divergence classes, and
 NONE is legitimately fixable in golib without faking measurements:

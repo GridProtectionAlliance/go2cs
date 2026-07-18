@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "disclosures": [
+    {
+      "name": "TestBuilderAllocs",
+      "class": "alloc-count-semantics",
+      "signature": "Builder allocs = ",
+      "reason": "exact-count AllocsPerRun assert (want 1): the managed shim is deliberately byte-derived (no CLR malloc counter), so a nonzero count assert can never agree — see the AllocsPerRun entry in docs/ConversionStrategies-Reference.md"
+    },
+    {
+      "name": "TestBuilderGrow",
+      "class": "alloc-count-semantics",
+      "signature": " allocs during Write; want ",
+      "reason": "exact-count AllocsPerRun asserts (want 1 per growLen>0 leg, want 0 for growLen=0): the byte-derived shim can never agree on a nonzero count, and the growLen=0 leg's addressed Builder heap-boxes per run where Go's escape analysis stack-allocates"
+    },
+    {
+      "name": "TestBuilderGrowSizeclasses",
+      "class": "alloc-count-semantics",
+      "signature": "unexpected amount of allocations: ",
+      "reason": "count-bound AllocsPerRun assert (want <= 1): the byte-derived shim reports allocated bytes, so the managed Builder path can never satisfy the count bound"
+    },
+    {
+      "name": "TestIndexRune",
+      "class": "alloc-profile",
+      "signature": "expected no allocations, got ",
+      "reason": "want-zero AllocsPerRun assert: IndexRune's Index(s, string(r)) materializes a byte[] in the managed model where Go uses a 4-byte stack buffer (runtime.intstring); the index-semantics legs all pass"
+    }
+  ]
+}

@@ -920,11 +920,11 @@ internal static (asciiSet @as, bool ok) makeASCIISet(@string chars) {
     for (nint i = 0; i < len(chars); i++) {
         var c = chars[i];
         if (c >= utf8.RuneSelf) {
-            return (@as, false);
+            return (@as.Clone(), false);
         }
         @as[c / 32] |= (uint32)(((uint32)1 << (int)((c % 32))));
     }
-    return (@as, true);
+    return (@as.Clone(), true);
 }
 
 // contains reports whether c is inside the set.

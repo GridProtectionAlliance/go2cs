@@ -24,7 +24,7 @@ partial class strings_package {
 }
 
 internal static void copyCheck(this ж<Builder> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
+    ref var b = ref Ꮡb.DerefOrNil();
 
     if (b.addr == nil){
         // This hack works around a failing of Go's escape analysis
