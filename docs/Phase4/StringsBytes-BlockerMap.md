@@ -276,6 +276,37 @@ equality, the reflectlite mini-bridge, the gen nil-embed fix, and R1-R4. Bytes/s
 attempts ran deep and reported their R5-R13 tails honestly (bytes: DeepEqual/MakeNoZero/nil-empty
 classes; strings: Builder-allocs/Map/Finder classes) — next wave's work order.
 
+- **R12 + R13: FIXED** (2026-07-18, worktree branch `claude/dazzling-golick-918c1a` — coordinator
+  gates the merge). **R12 (converter):** the RECEIVER of a direct-ж method now joins
+  `nilSafePtrParamNames` under a precise predicate — the body `==`/`!=`-compares the bare receiver
+  ident (OBJECT identity via `identResolvesToReceiver`; a shadowing local never qualifies), gated on
+  the direct-ж form (implied by the comparison itself via `bodyUsesReceiverAsPointerValue`'s
+  promotion arm, checked explicitly) — so the entry preamble emits `ref var b = ref Ꮡb.DerefOrNil();`
+  and the body's `if (Ꮡb == nil)` guard runs where Go's does; every non-comparing method keeps
+  `.Value` byte-for-byte. CNR drift = exactly TWO files, both the mapped shape (the extended
+  `PointerReceiverNilCompare` guard + `PointerReinterpretIdentity`, whose `copyCheck` is
+  strings.Builder's `b.addr != b`); no third shape. **R13 (golib):** `slice<T> == nil` is now
+  REPRESENTATION nilness (`m_array is null`), the slice==slice operator (the `s == default!`
+  emission of `s == nil`) is Go header identity, `Reslice` preserves a nil backing (`nil[0:0]` stays
+  nil), `Append` with zero elements returns the source header unchanged (nil stays nil; bytes.Clone's
+  `append([]byte{}, empty...)` stays non-nil), and `builtin.widen` projects only a nil source to nil.
+  Identity enumeration + known adjacent gaps (zero-arg variadic, named-slice wrapper `== nil`,
+  NilType's ISlice arm) recorded in ConversionStrategies-Reference.md. Guards:
+  `PointerReceiverNilCompare` extension (nil-pointer calls print Go's results; reverted-converter run
+  fails Target + crashes exit-2) and NEW `SliceNilVsEmpty` (14 identity probes incl. the
+  `resliceTailCapZero` operator discriminator, `nilReslice` Reslice discriminator,
+  `appendNilNothing` Append discriminator; reverted-golib run fails Output). `NilSliceConversion`
+  (R1) stays green. Full behavioral suite: 408/408/408 + 379 output-compared, 0 failed.
+  **Bytes differential: 14 → 10 test mismatches** — TestNil (R12), TestClone, TestTrim, TestTrimFunc
+  (R13) all cleared; honest remainder = R5 ×2 (TestSplit/TestSplitAfter DeepEqual), R6 ×1
+  (TestRepeatCatchesOverflow), and 7 allocation-count divergences (TestEqual, TestGrow, TestIndex,
+  TestIndexRune, TestLastIndex, TestNewBufferShallow, TestWriteAppend — C# allocates where Go's
+  optimized paths don't; a distinct class, not nil semantics). **Strings differential: 15 → 15 test
+  mismatches, none R12/R13-related (unchanged classes R5–R11 + Builder-allocs)** — and a measurement
+  finding: strings' host needs `-test-timeout` > 2m headroom because TestCompareStrings alone runs
+  ~109 s in the C# runtime (the `unsafeString`→`@string` copy cost, a pre-existing performance gap
+  worth its own row).
+
 ## Cross-cutting lessons
 
 - **Capability-excluded tests still compile** — exclusion gates the run registry, not emission; a broken

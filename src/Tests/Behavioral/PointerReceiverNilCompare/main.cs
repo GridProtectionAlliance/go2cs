@@ -30,12 +30,21 @@ internal static bool isNil(this ж<embedder> Ꮡe) {
 }
 
 internal static @string checkGuard(this ж<embedder> Ꮡe) {
-    ref var e = ref Ꮡe.Value;
+    ref var e = ref Ꮡe.DerefOrNil();
 
     if (Ꮡe == nil) {
         return "nil"u8;
     }
     return fmt.Sprintf("val=%d tag=%d"u8, e.val, e.tag);
+}
+
+internal static @string describe(this ж<box> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNil();
+
+    if (Ꮡb == nil) {
+        return "<nil>"u8;
+    }
+    return fmt.Sprintf("box(%d)"u8, b.val);
 }
 
 internal static void Main() {
@@ -46,6 +55,11 @@ internal static void Main() {
     e.Value.val = 7;
     e.Value.tag = 9;
     fmt.Println(e.isNil(), e.checkGuard());
+    ж<box> np = default!;
+    fmt.Println(np.isNil(), np.notNil(), np.describe());
+    fmt.Println(b.describe());
+    ж<embedder> ne = default!;
+    fmt.Println(ne.isNil(), ne.checkGuard());
 }
 
 } // end main_package

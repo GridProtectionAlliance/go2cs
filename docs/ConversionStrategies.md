@@ -300,8 +300,15 @@ public static error Unwrap(error err) {     // errors/wrap.cs
 Zero-value reference-backed values are null-safe: a `default!` `@string` reads as `""` rather than
 throwing.
 
+Nilness is **representation** identity, not emptiness: `s == nil` on a slice is true exactly for the
+nil slice (null backing array), so a non-nil empty (`[]byte{}`, `make([]T, 0)`, `s[len(s):]`) stays
+observably non-nil, and nil survives reslicing (`nil[0:0]`) and no-op appends — the distinctions
+Go programs (and the stdlib's own tests) rely on.
+
 **Full detail:** [Reference → Nil and Zero Values](ConversionStrategies-Reference.md#nil-and-zero-values) —
-null-safe zero values and pointer-to-interface assignment through selector fields.
+null-safe zero values and pointer-to-interface assignment through selector fields; and
+[Reference → Nil-vs-empty slice identity](ConversionStrategies-Reference.md#nil-vs-empty-slice-identity-s--nil-is-representation-nilness-not-emptiness)
+— the full construction-identity enumeration.
 
 ---
 

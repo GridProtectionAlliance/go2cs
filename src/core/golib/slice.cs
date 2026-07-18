@@ -335,13 +335,20 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     // Core of every Go slice expression over a slice: bounds are RELATIVE to this slice and checked
     // like Go (0 <= low <= high <= max <= cap(s)); the result is a shared view over the same backing
-    // array with length high - low and capacity max - low.
+    // array with length high - low and capacity max - low. Reslicing a NIL slice (legal only at
+    // 0:0:0 — the capacity bound excludes everything else) yields the nil slice: Go's result shares
+    // the source's (nil) backing pointer, and `nil[0:0] == nil` is observably true. The old
+    // `m_array ?? []` fallback laundered the nil backing into a fresh empty array, silently turning
+    // a nil slice non-nil.
     internal slice<T> Reslice(nint low, nint high, nint max)
     {
         if (low < 0 || high < low || max < high || max > m_capacity)
             throw RuntimeErrorPanic.SliceBoundsOutOfRange(low, high, max, m_capacity);
 
-        return new slice<T>(m_array ?? [], m_low + low, m_low + high, m_low + max);
+        if (m_array is null)
+            return default;
+
+        return new slice<T>(m_array, m_low + low, m_low + high, m_low + max);
     }
 
     public nint IndexOf(in T item)
@@ -487,10 +494,17 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         return new array<T>(value.ToArray());
     }
 
-    // slice<T> to slice<T> comparisons
+    // slice<T> to slice<T> comparisons — HEADER identity (same backing array reference, window and
+    // capacity), matching Go's slice header. Go forbids comparing two slices, so the only converted
+    // code that binds this operator is the nil comparison `s == nil`, emitted as `s == default!`
+    // (the nil literal renders `default!` in value contexts): header identity against the default
+    // header (null, 0, 0, 0) is exactly Go's nil test, TRUE only for a genuinely nil slice — a
+    // zero-length view over a real array (`s[:0]`, `[]byte{}`, `[]byte("")`) stays non-nil, which
+    // Go distinguishes observably (bytes TestTrim/TestClone). Structural content equality remains
+    // on the Equals overloads for C#-side collection use.
     public static bool operator ==(slice<T> a, slice<T> b)
     {
-        return a.Equals(b);
+        return ReferenceEquals(a.m_array, b.m_array) && a.m_low == b.m_low && a.m_length == b.m_length && a.m_capacity == b.m_capacity;
     }
 
     public static bool operator !=(slice<T> a, slice<T> b)
@@ -519,10 +533,16 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         return !(a == b);
     }
 
-    // slice<T> to nil comparisons
+    // slice<T> to nil comparisons — REPRESENTATION nilness: a nil slice is exactly the default
+    // header (null backing array). Go distinguishes nil from a non-nil empty slice (`[]byte{}`,
+    // `make([]T, 0)`, `s[:0]` — all non-nil with a real backing array), and the previous
+    // `Length == 0 && Capacity == 0` test misclassified every zero-length zero-capacity view
+    // (`s[len(s):]` of a full slice, an empty literal) as nil. Every golib construction path
+    // maintains the invariant nil ⟺ m_array is null — see the nil-vs-empty identity enumeration
+    // in docs/ConversionStrategies-Reference.md.
     public static bool operator ==(slice<T> slice, NilType _)
     {
-        return slice is { Length: 0, Capacity: 0 };
+        return slice.m_array is null;
     }
 
     public static bool operator !=(slice<T> slice, NilType nil)
@@ -660,9 +680,9 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
         internal SliceEnumerator(slice<T> slice)
         {
-            if (slice != nil && slice.m_array is null)
-                throw new InvalidOperationException("slice array reference is null.");
-
+            // A nil slice (null m_array) enumerates as zero elements — Go's `range nil` — via the
+            // zero start/end window; the backing array is never indexed. (Non-nil ⟺ m_array is
+            // present, so the old corrupt-state guard here had no remaining reachable case.)
             m_array = slice.m_array;
             m_start = slice.m_low;
             m_end = m_start + slice.m_length;
@@ -741,6 +761,13 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public static slice<T> Append(in slice<T> slice, params Span<T> elems)
     {
+        // Go's append with nothing to add returns s ITSELF (no growth is needed, so the same
+        // header comes back): nil stays nil and a non-nil empty stays that same non-nil empty —
+        // `append([]byte{}, b...)` with an empty b (bytes.Clone) must return the non-nil literal,
+        // never launder identity through a fresh allocation.
+        if (elems.Length == 0)
+            return slice;
+
         T[] newArray;
 
         if (slice == nil)
