@@ -7,7 +7,6 @@ namespace go;
 using bytealg = @internal.bytealg_package;
 using @unsafe = unsafe_package;
 using @internal;
-using abi = @internal.abi_package;
 
 partial class reflect_package {
 
@@ -21,173 +20,29 @@ partial class reflect_package {
     internal ΔType typ;
 }
 
-// Tests for deep equality using reflected types. The map argument tracks
-// comparisons that have already been seen, which allows short circuiting on
-// recursive types.
-internal static bool deepValueEqual(ΔValue v1, ΔValue v2, map<visit, bool> visited) {
-    if (!v1.IsValid() || !v2.IsValid()) {
-        return v1.IsValid() == v2.IsValid();
-    }
-    if (!AreEqual(v1.Type(), v2.Type())) {
-        return false;
-    }
-    // We want to avoid putting more in the visited map than we need to.
-    // For any possible reference cycle that might be encountered,
-    // hard(v1, v2) needs to return true for at least one of the types in the cycle,
-    // and it's safe and valid to get Value's internal pointer.
-    var hard = (ΔValue v1Δ1, ΔValue v2Δ1) => {
-        var exprᴛ1 = v1Δ1.Kind();
-        var matchᴛ1 = false;
-        if (exprᴛ1 == ΔPointer) {
-            if (!v1Δ1.typ().Pointers()) {
-                // not-in-heap pointers can't be cyclic.
-                // At least, all of our current uses of runtime/internal/sys.NotInHeap
-                // have that property. The runtime ones aren't cyclic (and we don't use
-                // DeepEqual on them anyway), and the cgo-generated ones are
-                // all empty structs.
-                return false;
-            }
-            fallthrough = true;
-        }
-        if (fallthrough || !matchᴛ1 && (exprᴛ1 == Map || exprᴛ1 == ΔSlice || exprᴛ1 == ΔInterface)) { matchᴛ1 = true;
-            return !v1Δ1.IsNil() && !v2Δ1.IsNil();
-        }
+// go2cs generated this placeholder — func deepValueEqual is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-        // Nil pointers cannot be cyclic. Avoid putting them in the visited map.
-        return false;
-    };
-    if (hard(v1, v2)) {
-        // For a Pointer or Map value, we need to check flagIndir,
-        // which we do by calling the pointer method.
-        // For Slice or Interface, flagIndir is always set,
-        // and using v.ptr suffices.
-        var ptrval = @unsafe.Pointer (ΔValue vΔ1) => {
-            var exprᴛ2 = vΔ1.Kind();
-            if (exprᴛ2 == ΔPointer || exprᴛ2 == Map) {
-                return (uintptr)vΔ1.pointer();
-            }
-            { /* default: */
-                return vΔ1.ptr;
-            }
-
-        };
-        @unsafe.Pointer addr1 = (uintptr)ptrval(v1);
-        @unsafe.Pointer addr2 = (uintptr)ptrval(v2);
-        if ((uintptr)addr1 > (uintptr)addr2) {
-            // Canonicalize order to reduce number of entries in visited.
-            // Assumes non-moving garbage collector.
-            (addr1, addr2) = (addr2, addr1);
-        }
-        // Short circuit if references are already seen.
-        var typ = v1.Type();
-        var v = new visit(addr1.Value, addr2.Value, typ);
-        if (visited[v]) {
-            return true;
-        }
-        // Remember for later.
-        visited[v] = true;
-    }
-    var exprᴛ3 = v1.Kind();
-    if (exprᴛ3 == Array) {
-        for (nint i = 0; i < v1.Len(); i++) {
-            if (!deepValueEqual(v1.Index(i), v2.Index(i), visited)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    if (exprᴛ3 == ΔSlice) {
-        if (v1.IsNil() != v2.IsNil()) {
-            return false;
-        }
-        if (v1.Len() != v2.Len()) {
-            return false;
-        }
-        if ((uintptr)v1.UnsafePointer() == (uintptr)v2.UnsafePointer()) {
-            return true;
-        }
-        if (v1.Type().Elem().Kind() == Uint8) {
-            // Special case for []byte, which is common.
-            return bytealg.Equal(v1.Bytes(), v2.Bytes());
-        }
-        for (nint i = 0; i < v1.Len(); i++) {
-            if (!deepValueEqual(v1.Index(i), v2.Index(i), visited)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    if (exprᴛ3 == ΔInterface) {
-        if (v1.IsNil() || v2.IsNil()) {
-            return v1.IsNil() == v2.IsNil();
-        }
-        return deepValueEqual(v1.Elem(), v2.Elem(), visited);
-    }
-    if (exprᴛ3 == ΔPointer) {
-        if ((uintptr)v1.UnsafePointer() == (uintptr)v2.UnsafePointer()) {
-            return true;
-        }
-        return deepValueEqual(v1.Elem(), v2.Elem(), visited);
-    }
-    if (exprᴛ3 == Struct) {
-        for ((nint i, nint n) = (0, v1.NumField()); i < n; i++) {
-            if (!deepValueEqual(v1.Field(i), v2.Field(i), visited)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    if (exprᴛ3 == Map) {
-        if (v1.IsNil() != v2.IsNil()) {
-            return false;
-        }
-        if (v1.Len() != v2.Len()) {
-            return false;
-        }
-        if ((uintptr)v1.UnsafePointer() == (uintptr)v2.UnsafePointer()) {
-            return true;
-        }
-        var iter = v1.MapRange();
-        while (iter.Next()) {
-            var val1 = iter.Value();
-            var val2 = v2.MapIndex(iter.Key());
-            if (!val1.IsValid() || !val2.IsValid() || !deepValueEqual(val1, val2, visited)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    if (exprᴛ3 == Func) {
-        if (v1.IsNil() && v2.IsNil()) {
-            return true;
-        }
-        return false;
-    }
-    if (exprᴛ3 == ΔInt || exprᴛ3 == Int8 || exprᴛ3 == Int16 || exprᴛ3 == Int32 || exprᴛ3 == Int64) {
-        return v1.Int() == v2.Int();
-    }
-    if (exprᴛ3 == ΔUint || exprᴛ3 == Uint8 || exprᴛ3 == Uint16 || exprᴛ3 == Uint32 || exprᴛ3 == Uint64 || exprᴛ3 == Uintptr) {
-        return v1.Uint() == v2.Uint();
-    }
-    if (exprᴛ3 == ΔString) {
-        return v1.String() == v2.String();
-    }
-    if (exprᴛ3 == ΔBool) {
-        return v1.Bool() == v2.Bool();
-    }
-    if (exprᴛ3 == Float32 || exprᴛ3 == Float64) {
-        return v1.Float() == v2.Float();
-    }
-    if (exprᴛ3 == Complex64 || exprᴛ3 == Complex128) {
-        return v1.Complex() == v2.Complex();
-    }
-    { /* default: */
-        return AreEqual(valueInterface(v1, // Can't do better than this:
- // Normal equality suffices
- false), valueInterface(v2, false));
-    }
-
-}
+// We want to avoid putting more in the visited map than we need to.
+// For any possible reference cycle that might be encountered,
+// hard(v1, v2) needs to return true for at least one of the types in the cycle,
+// and it's safe and valid to get Value's internal pointer.
+// not-in-heap pointers can't be cyclic.
+// At least, all of our current uses of runtime/internal/sys.NotInHeap
+// have that property. The runtime ones aren't cyclic (and we don't use
+// DeepEqual on them anyway), and the cgo-generated ones are
+// all empty structs.
+// Nil pointers cannot be cyclic. Avoid putting them in the visited map.
+// For a Pointer or Map value, we need to check flagIndir,
+// which we do by calling the pointer method.
+// For Slice or Interface, flagIndir is always set,
+// and using v.ptr suffices.
+// Canonicalize order to reduce number of entries in visited.
+// Assumes non-moving garbage collector.
+// Short circuit if references are already seen.
+// Remember for later.
+// Special case for []byte, which is common.
+// Can't do better than this:
+// Normal equality suffices
 
 // DeepEqual reports whether x and y are “deeply equal,” defined as follows.
 // Two values of identical type are deeply equal if one of the following cases applies.

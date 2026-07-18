@@ -1,0 +1,14 @@
+<Project>
+
+  <!-- The baseline stub has no core\reflect: redirect the converter-emitted reflect reference to the
+       full-conversion package (whose own refs stay inside go-src-converted + the shared golib). This
+       lives in Directory.Build.targets because the converter regenerates the csproj on every
+       re-transpile (same pattern as Tests/Performance): the csproj stays pure template output and
+       this redirect survives. No Directory.Build.targets exists above Tests/Behavioral, so nothing
+       upstream is masked. -->
+  <ItemGroup>
+    <ProjectReference Remove="$(go2csPath)core\reflect\reflect.csproj" />
+    <ProjectReference Include="$(go2csPath)go-src-converted\reflect\reflect.csproj" />
+  </ItemGroup>
+
+</Project>

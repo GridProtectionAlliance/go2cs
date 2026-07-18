@@ -101,6 +101,13 @@ var manualConversionFuncs = map[string]map[string]bool{
 		// ΔType wrapper by the underlying System.Type (canonType). See docs/Phase4/DESIGN-reflection-bridge.md.
 		"Value.Type": true,
 		"toType":     true,
+		// deepValueEqual keys its cycle-detection visited map on the values' internal data words
+		// (v.ptr / v.pointer()) — eface addresses the bridge never populates, so the auto form NREs
+		// converting the null unsafe.Pointer slot (strings/bytes TestSplit/TestSplitAfter, R5).
+		// deepequal_impl.cs recurses over the bridge's boxed values and keys cycle detection on
+		// managed reference identity. DeepEqual itself stays auto (it only uses the bridged
+		// ValueOf/Type/AreEqual).
+		"deepValueEqual": true,
 	},
 	// internal/reflectlite mirrors the reflect bridge for the mini-surface sort.Slice
 	// exercises (ValueOf → Len, Swapper — sort's TestSlice was the first operational hit):

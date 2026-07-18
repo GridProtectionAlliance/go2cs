@@ -5175,6 +5175,34 @@ including `packEface`/`Interface()` (used by `errors.As`) — stays auto and is 
 Verified by the sort differential: `TestSlice` flips to pass — `sort.Slice` sorts through the
 managed Swapper, and its closing `SliceIsSorted` check reads length through the same `ValueOf` path. Go's version counts **mallocs**: it pins `GOMAXPROCS(1)`, runs `f` once as a warmup, then `runs` more times, and returns the `runtime.MemStats.Mallocs` delta divided (as integers) by `runs`. The CLR exposes no malloc counter, so the shim measures allocated **bytes** on the calling thread instead (`GC.GetAllocatedBytesForCurrentThread()` — precise, and inherently thread-scoped, which stands in for the GOMAXPROCS pinning; like Go's, `f` is assumed single-threaded — allocations made by goroutines `f` spawns land on other threads and are not observed). The mapping is deliberately honest rather than count-approximating: **zero maps exactly** (0 bytes ⟺ 0 mallocs — and the stdlib tests that use AllocsPerRun overwhelmingly assert zero, e.g. sort's `TestSearchWrappersDontAlloc` and the strings/bytes no-alloc guards), while a nonzero result is the average allocated bytes per run, floored at 1 so amortized sub-byte-per-run allocation can never masquerade as the exact-zero case. A converted test asserting a specific nonzero *count* therefore diverges as a loud failure in the differential oracle instead of silently passing — the disclosed outcome. (`runs == 0` divides by zero, a runtime-error panic exactly where Go's own integer division panics.) The capability sits in the converter's supported list (`supportedTestCapabilities`, `testConversion.go`), so tests requiring it convert as *included*; guarded by `TestAllocsPerRunCapabilityIsSupported` (converter) and `TestingRuntimeTests.AllocsPerRunMapsZeroExactlyAndReportsBytesWhenAllocating` (shim).
 
+**The `reflect.DeepEqual` bridge (`reflect/deepequal_impl.cs`, Phase-4 — blocker-map R5).** Go's
+`deepValueEqual` keys its cycle-detection `visited` map on the values' internal data words (`v.ptr` /
+`v.pointer()`) — eface addresses the managed bridge never populates — so the first slice/map/pointer
+comparison converted the null `unsafe.Pointer` slot and NREd (`deepequal.cs:74` → unsafe `op_Implicit`;
+first operational hits: strings and bytes `TestSplit`/`TestSplitAfter`). The converter skips **only**
+`deepValueEqual` (`manualConversionFuncs["reflect"]`; `DeepEqual` itself stays auto — its body only
+touches the bridged `ValueOf`/`Type`/`AreEqual`), and the hand-owned form re-implements the recursion
+arm-for-arm with Go's switch over the bridge's **boxed** values: elementwise arrays/slices with the
+`[]byte` fast path (`Span.SequenceEqual` standing in for `bytealg.Equal`); the nil-vs-empty slice
+distinction read from the REAL backing (`m_array` null ⟺ the golib `default` = nil — the public
+`slice<T>.Source` materializes a detached copy, so the impl reads `m_array`/`m_low` via cached
+reflection, the same pattern as the bridge's `IsNull`/`Value` property reads); struct fields via
+`goStructFields`; maps compared key-by-key through the backing `Dictionary` (same-map identity
+short-circuits — Go's "same map object" rule — and a missing key fails exactly like Go's invalid
+`MapIndex`); pointer identity as `ж<T>`-box reference equality (one box per variable ≙ Go's address
+equality, so the same slice/pointer is deeply equal to itself even holding NaN); IEEE float semantics
+(C# `==` on `double` — NaN ≠ NaN, like Go); funcs never deeply equal unless both nil. Cycle detection
+mirrors Go's `hard()` step on managed identity: (pointer box | map `Dictionary` | slice backing array
++ `Low`) pairs in a reference-identity set, added before recursing so in-progress checks are assumed
+true — self-referential structures terminate. Guarded by the `DeepEqual` behavioral test (30 cases —
+slices incl. nil-vs-empty and same-slice-NaN identity, structs, maps incl. nil/empty/same-map,
+pointers incl. nil and cycles — output-compared vs `go run`). The guard project references the
+full-conversion `reflect` (the baseline stub has none): its `Directory.Build.targets` redirects the
+emitted `core\reflect` reference to `go-src-converted\reflect` — the Performance-suite pattern for
+settings the per-transpile csproj regeneration would otherwise clobber. Surfaced by the guard's output
+comparison: golib's `print`/`println` now render a `bool` as gc's runtime printer does (`true`/`false`,
+not the BCL `True`/`False`).
+
 **The testing shim's compile-only benchmark surface and `CoverMode` (`core/testing/testing.cs`).** Capability-excluded test and benchmark declarations still **compile** — exclusion gates the run registry, not emission — so every member their bodies reference must exist even though the code never executes (a broken emission inside an excluded test blocks the whole package build; see the strings/bytes blocker map, B6). The `B` surface (`N`, `Run`, `ReportAllocs`, `SetBytes`, `ResetTimer`, `StartTimer`, `StopTimer`, `Errorf`, `Fatal`, `Fatalf`) is therefore compile-only: safe non-throwing no-ops, with the params-taking members carrying explicit `ж<B>` overloads exactly as `T`'s do (ref-like `params` Spans are outside the RecvGenerator's synthesis). `testing.CoverMode()` returns `""` — not a stub-lie but Go's exact coverage-off value: the sole caller across the strings/bytes suites (strings' TestIndexRune) branches on `CoverMode() == ""` and so takes the same path as an uncovered `go test` run. Guarded by `TestingRuntimeTests.BenchmarkCompileSurfaceIsNoOpAndCoverModeReportsCoverageOff`, which compile-references every member through both receiver shapes and asserts the coverage-off semantic — removing any member fails the suite at build.
 
 ### A cross-package `//go:linkname` PULL emits a forwarder, not a throwing stub

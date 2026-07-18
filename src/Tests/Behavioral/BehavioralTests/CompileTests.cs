@@ -225,6 +225,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckDeadPointerParamAlias() => CheckTarget("DeadPointerParamAlias");
 
     [TestMethod]
+    public void CheckDeepEqual() => CheckTarget("DeepEqual");
+
+    [TestMethod]
     public void CheckDeferArgEnclosingCapture() => CheckTarget("DeferArgEnclosingCapture");
 
     [TestMethod]

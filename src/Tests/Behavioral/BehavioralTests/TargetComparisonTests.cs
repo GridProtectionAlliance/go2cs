@@ -228,6 +228,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDeadPointerParamAlias() => CheckTarget("DeadPointerParamAlias");
 
     [TestMethod]
+    public void CheckDeepEqual() => CheckTarget("DeepEqual");
+
+    [TestMethod]
     public void CheckDeferArgEnclosingCapture() => CheckTarget("DeferArgEnclosingCapture");
 
     [TestMethod]

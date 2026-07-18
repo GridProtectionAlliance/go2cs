@@ -1053,13 +1053,18 @@ deliver this: whole-file `[module: GoManualConversion]` (skipped by the converte
 a type-level registry that skips listed types/methods and points at a hand-written `*_impl.cs`. The same
 "managed reality beats raw reinterpretation" rule also hand-owns `sync/atomic.Value`, whose Go
 implementation depends on the runtime's two-word interface layout; in C# it stores the boxed `any`
-directly and uses `Volatile`/`Interlocked` for the atomic operations. A small whitelist of
-`//go:linkname` pulls (currently the Windows DLL-loading helpers) emits forwarders to real hand-written
-targets; non-whitelisted linkname pulls remain throwing stubs.
+directly and uses `Volatile`/`Interlocked` for the atomic operations — and the Phase-4 **reflection
+bridge**: `reflect`/`internal/reflectlite` read an interface's `{type,data}` words through
+`unsafe.Pointer`, so the bridged entry points instead carry the boxed managed value and a synthetic
+descriptor stamped with the real `System.Type` (`ValueOf`, the value readers, canonical `Type`
+interning, `Swapper`, and `DeepEqual`'s recursion keyed on managed reference identity). A small
+whitelist of `//go:linkname` pulls (currently the Windows DLL-loading helpers) emits forwarders to
+real hand-written targets; non-whitelisted linkname pulls remain throwing stubs.
 
 **Full detail:** [Reference → Manually-Converted Declarations](ConversionStrategies-Reference.md#manually-converted-declarations) —
 the guintptr family surface, the `unsafe.Pointer`→manual-type ctor cooperation, the runtime lock/note
-model, `sync/atomic.Value`, and whitelisted `//go:linkname` forwarders.
+model, `sync/atomic.Value`, the reflection bridge (`abi.TypeOf`/`reflect` value+type side,
+`reflectlite`, `DeepEqual`), and whitelisted `//go:linkname` forwarders.
 
 ---
 
