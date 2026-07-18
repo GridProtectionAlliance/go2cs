@@ -5505,7 +5505,13 @@ silent no-ops. Guards: `TestDisclosedDivergenceOracle` (signature match disclose
 signature still fails / no manifest strict / direction+status pairs never widen) and
 `TestDisclosureManifestLoading` (absent-file no-op; empty-signature and duplicate rejection).
 First users: `bytes` (7 alloc-profile rows) and `strings` (3 alloc-count-semantics + 1
-alloc-profile), validating as Phase-4 packages #3 and #4.
+alloc-profile), validating as Phase-4 packages #3 and #4. `unicode/utf16` (package #5) is the first
+to reuse the mechanism as a general tool rather than a bytes/strings special case: its lone
+`TestAllocationsDecode` asserts `Decode` returns its non-escaping `[]rune` with **zero** allocations —
+which Go reaches only through escape analysis (the test guards itself with `testenv.SkipIfOptimizationOff`),
+and which the managed runtime provably cannot, since a returned `slice<rune>` is always a heap allocation.
+It discloses one `alloc-profile` row (signature `"Decode allocated "`) while `TestDecode` independently
+proves the decoded output is correct — the disclosure covers exactly the allocation profile, nothing else.
 
 **The `reflect.DeepEqual` bridge (`reflect/deepequal_impl.cs`, Phase-4 — blocker-map R5).** Go's
 `deepValueEqual` keys its cycle-detection `visited` map on the values' internal data words (`v.ptr` /

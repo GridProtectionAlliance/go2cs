@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "disclosures": [
+    {
+      "name": "TestAllocationsDecode",
+      "class": "alloc-profile",
+      "signature": "Decode allocated ",
+      "reason": "want-zero AllocsPerRun assert: Decode returns a []rune that the managed runtime heap-allocates where Go's escape analysis stack-allocates the non-escaping result (the test is guarded by testenv.SkipIfOptimizationOff precisely because the zero-alloc outcome depends on the optimizer); a malloc-counting shim would fail identically. TestDecode proves the decoded output is correct — only the allocation profile diverges"
+    }
+  ]
+}

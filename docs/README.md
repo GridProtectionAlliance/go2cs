@@ -332,14 +332,16 @@ The converter builds idiomatic C# for the full range of Go language features, va
 behavioral test suite (390+ Go-vs-C# regression projects). As of **2026-07-10 the entire Go standard library
 (302 packages, Go 1.23.1) compiles cleanly** as .NET assemblies. Compiling is the milestone, not yet full
 runtime parity: **converting and running the standard library's own tests is the ongoing Phase 4 work** —
-see the [roadmap](Roadmap.md#phase-4--convert-and-run-go-package-tests). Four standard-library packages'
+see the [roadmap](Roadmap.md#phase-4--convert-and-run-go-package-tests). Five standard-library packages'
 own test suites now pass in C#: [`unicode/utf8`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf8)
 (14/14) and [`sort`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/sort)
-(63/63), and as of **2026-07-18** [`bytes`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/bytes)
+(63/63); as of **2026-07-18** [`bytes`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/bytes)
 (81) and [`strings`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/strings)
-(68) — the last two exercising a new **disclosed-divergence** mechanism for the handful of exact
-allocation-count asserts the managed runtime provably cannot satisfy. Each validates against `go test`
-through the converted-test pipeline, and you can
+(68) — exercising a new **disclosed-divergence** mechanism for the handful of exact allocation-count
+asserts the managed runtime provably cannot satisfy; and
+[`unicode/utf16`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf16)
+(8, plus 1 disclosed), the first package to reuse that mechanism as a general tool. Each validates against
+`go test` through the converted-test pipeline, and you can
 [reproduce them yourself](#try-it-yourself--validate-a-converted-test-suite) from a clone.
 
 ### Try it yourself — validate a converted test suite
@@ -405,6 +407,20 @@ and for `strings`:
 Validated 68 tests against go test (0 skipped identically on both sides, 4 disclosed-divergent (alloc-count-semantics, alloc-profile), 118 disclosed-unsupported declarations excluded).
 ```
 
+[`unicode/utf16`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf16)
+is the fifth — the structural twin of `unicode/utf8`, and the first package to reuse the disclosed-divergence
+mechanism as a general tool rather than a bytes/strings special case. Its eight correctness tests agree
+outright (encode/decode round-trips checked with `reflect.DeepEqual`, driven through the reflection bridge),
+and its one `testing.AllocsPerRun` test (`TestAllocationsDecode`, which asserts `Decode` returns its `[]rune`
+with **zero** heap allocations — an outcome Go reaches only via escape analysis, guarded by
+`testenv.SkipIfOptimizationOff`) is disclosed as `alloc-profile`: the managed runtime always heap-allocates
+the returned slice, so the assert can never agree, while `TestDecode` independently proves the decoded output
+is correct. Expect:
+
+```text
+Validated 8 tests against go test (0 skipped identically on both sides, 1 disclosed-divergent (alloc-profile), 8 disclosed-unsupported declarations excluded).
+```
+
 ### Performance
 
 _Everyone asks:_ wondering how fast the transpiled C# runs compared to the original Go — including startup time, memory, and Native AOT builds? See the latest [performance comparison](Performance.md) — **`TL;DR`**: _no, it's not as fast as native Go, [nor is this an expected outcome](Background.md#converted-code)_. Save for some initial work with a [stack-based string](ConversionStrategies.md#stack-strings-sstring), performance and optimizations are not the current focus, this kind of work is targeted for _after_ Phase 4 work.
@@ -429,6 +445,7 @@ High level timeline of the project's major turning points.
 | 2026-07-14 | [Standard library on NuGet + NuGet-referencing conversion](NEWS.md#july-14-2026--the-converted-go-standard-library-is-on-nuget) | `2363af0e6` · `dd821a556` · [`nuget-stdlib-2026-07-14`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/nuget-stdlib-2026-07-14) | The converted standard library, the `golib` runtime and the `go2cs-gen` analyzer are published to [nuget.org](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) as `go.<pkg>` / `go.lib` / `go.gen` (versioned `1.23.1.<build>` from `src/version.props`). The converter's new `-recurse=nuget` mode emits matching `<PackageReference>` entries — defaulting `$(GoStdLibVersion)` to a floating release — so a converted end-user app or library restores the whole go2cs stack from NuGet with **no local go2cs source checkout**; the app's own and third-party converted packages stay project references. |
 | 2026-07-17 | [**First Go standard-library test suite passing in C#**](NEWS.md#july-17-2026--gos-own-tests-now-pass-in-c) | `337a928df` · [`utf8-tests-green-2026-07-17`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/utf8-tests-green-2026-07-17) | Phase 4's operational era opens: `unicode/utf8`'s real Go test suite (14 tests, external dot-import test package) is converted and executed under the new hand-owned `go.testing` host, validating **14/14 against `go test -json`** with all 37 benchmark/example declarations honestly disclosed as excluded. The differential pipeline (convert → template csproj → isolated host run → oracle compare, gated by input-digest manifests) is live end-to-end. Getting here surfaced and fixed five real defects — including two golib Go-correctness bugs affecting *all* converted code: `[]byte(s)` shared the string's backing array, and range-over-string yielded rune ordinals instead of byte indices. Real tests, not compilation, are now the currency of correctness. |
 | 2026-07-18 | [**`bytes` and `strings` test suites passing in C#** — with disclosed-divergence](NEWS.md#july-18-2026--bytes-and-strings-tests-pass-with-disclosed-divergence) | `40f39d2be` · [`bytes-strings-tests-green-2026-07-18`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/bytes-strings-tests-green-2026-07-18) · `sort` at `f999c8f78` / [`sort-tests-green-2026-07-18`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/sort-tests-green-2026-07-18) | Phase-4 packages #3 and #4: `bytes` validates **81 tests** and `strings` **68** against `go test -json`. Both exercise a new **test-level disclosed-divergence manifest** — a hand-owned, committed `go2cs_test_disclosures.json` the differential oracle consumes to reclassify the handful of exact-allocation-count asserts (Go's `testing.AllocsPerRun`) the managed CLR provably cannot satisfy, matched by exact failure signature so any *other* failure is still a hard mismatch. `bytes` discloses 7 (alloc-profile), `strings` 4 (alloc-count-semantics + alloc-profile); no other package has a manifest, so `sort` (63/63) and `utf8` (14/14) still compare strictly and stay byte-identical. |
+| 2026-07-18 | [**`unicode/utf16` test suite passing in C#** — disclosed-divergence generalizes](NEWS.md#july-18-2026--unicodeutf16-validates-disclosed-divergence-generalizes) | [`utf16-tests-green-2026-07-18`](https://github.com/GridProtectionAlliance/go2cs/releases/tag/utf16-tests-green-2026-07-18) | Phase-4 package #5: [`unicode/utf16`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf16) validates **8 tests** against `go test -json` (encode/decode round-trips checked with `reflect.DeepEqual` through the reflection bridge), plus one disclosed. It is the first package to reuse the disclosed-divergence manifest as a **general tool** rather than a bytes/strings special case: its lone `TestAllocationsDecode` asserts `Decode` returns its non-escaping `[]rune` with **zero** allocations — reachable in Go only via escape analysis (`testenv.SkipIfOptimizationOff`-guarded), unsatisfiable in a managed runtime where a returned slice is always a heap allocation — pinned as one `alloc-profile` row while `TestDecode` independently proves the output correct. A mechanism that generalizes to the next package cleanly is one that was designed right. |
 
 ### _About Standard Library Compile Milestone_
 
