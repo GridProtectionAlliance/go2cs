@@ -464,9 +464,20 @@ public static error Join(params ꓸꓸꓸerror errsʗp) {     // errors/join.cs
 }
 ```
 
+Arrays are Go **values**: assignment copies the whole array. `array<T>` is a struct over a shared
+`T[]`, so the converter appends a strongly-typed `.Clone()` wherever an assignment copies an array
+out of existing storage (function parameters already cloned in the callee preamble):
+
+```go
+data := ints        // an independent copy — writes to data never reach ints
+```
+```csharp
+var data = ints.Clone();
+```
+
 **Full detail:** [Reference → Slices and Arrays](ConversionStrategies-Reference.md#slices-and-arrays) —
 named slice/array wrappers, pointer-to-array slicing, named-slice pointer reinterpretation, structural
-composite rendering, and slice-aliasing/write-through semantics.
+composite rendering, array assignment-copy cloning, and slice-aliasing/write-through semantics.
 
 ---
 

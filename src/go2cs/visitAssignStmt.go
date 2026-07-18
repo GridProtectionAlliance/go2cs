@@ -53,6 +53,58 @@ func (v *Visitor) appendRhsPtrContext(base []ExprContext, rhs ast.Expr) []ExprCo
 	return append(out, ptrContext)
 }
 
+// cloneArrayValueCopy appends golib's strongly-typed `array<T>.Clone()` to a converted
+// assignment RHS when the Go statement copies an ARRAY BY VALUE out of existing storage.
+// Go array assignment copies the whole array (`data := ints` yields independent storage),
+// but the emitted `array<T>` is a struct over a shared T[] backing store, so the plain C#
+// struct copy ALIASES — a later write through the copy mutated the source (sort's
+// TestReverseSortIntSlice: `data := ints; data1 := ints` left ONE store sorted twice).
+// Only existing storage needs the clone — an ident, selector, index, or deref RHS reads a
+// value some other name can still reach; a composite literal, call result, or conversion is
+// freshly constructed. Only a DIRECT (unnamed, possibly alias-declared) array type takes it:
+// its rendering is golib's `array<T>`, whose Clone() returns array<T> — a NAMED array type
+// renders as a generated wrapper struct whose only Clone() is the object-returning
+// ICloneable form (named-array copies remain a known gap, with the other array-copy sites:
+// range element values, struct-field copies, returns, composite-literal elements). A blank
+// LHS discards the value, so it takes no clone.
+func (v *Visitor) cloneArrayValueCopy(lhs ast.Expr, rhs ast.Expr, rhsExpr string) string {
+	if lhs != nil {
+		if ident := getIdentifier(lhs); ident != nil && ident.Name == "_" {
+			return rhsExpr
+		}
+	}
+
+	expr := rhs
+
+	for {
+		paren, ok := expr.(*ast.ParenExpr)
+
+		if !ok {
+			break
+		}
+
+		expr = paren.X
+	}
+
+	switch expr.(type) {
+	case *ast.Ident, *ast.SelectorExpr, *ast.IndexExpr, *ast.StarExpr:
+	default:
+		return rhsExpr
+	}
+
+	exprType := v.getExprType(expr)
+
+	if exprType == nil {
+		return rhsExpr
+	}
+
+	if _, isArray := types.Unalias(exprType).(*types.Array); !isArray {
+		return rhsExpr
+	}
+
+	return rhsExpr + ".Clone()"
+}
+
 // lhsIsEmptyInterface reports whether the assignment target's static type is an EMPTY
 // interface (`any`). A string literal assigned to such a target must render as a boxed
 // @string (`(@string)"…"`) — the default `"…"u8` ReadOnlySpan<byte> has no conversion to
@@ -1114,6 +1166,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			}
 
+			// A Go array copied by value out of existing storage takes golib's `.Clone()` so the
+			// target gets independent backing storage (see cloneArrayValueCopy).
+			rhsExpr = v.cloneArrayValueCopy(lhs, rhs, rhsExpr)
+
 			// Narrow-integer arithmetic RHS assigned to a narrow LHS needs a cast back to the LHS
 			// type (see narrowArithmeticCastType). The existing bitwise-assign / `&^=` wrappers take
 			// precedence (their own cast already applies).
@@ -1293,6 +1349,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			rhsExpr := v.convExpr(rhs, contexts)
 
+			// A for-init tuple element declared from an existing array value takes golib's
+			// `.Clone()` for independent backing storage (see cloneArrayValueCopy).
+			if i < lhsLen {
+				rhsExpr = v.cloneArrayValueCopy(lhsExprs[i], rhs, rhsExpr)
+			}
+
 			if i < lhsLen && lhsTypeIsInterface[i] {
 				result.WriteString(v.convertExprToInterfaceType(lhsExprs[i], rhs, rhsExpr))
 			} else {
@@ -1414,6 +1476,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				// or non-interface LHS and for any non-int-constant RHS.
 				rhsExpr = v.boxUntypedIntAsNint(v.getType(lhs, false), rhs, rhsExpr)
 
+				// A Go array copied by value into existing storage (`s.arr = a` / `*p = a`) takes
+				// golib's `.Clone()` for independent backing storage (see cloneArrayValueCopy).
+				rhsExpr = v.cloneArrayValueCopy(lhs, rhs, rhsExpr)
+
 				// A C# compound shift-assign requires an `int` shift count; the RHS's own (possibly
 				// unsigned/native-width) type — `s.allocCache >>= (nuint)x` — is rejected (CS0019). A
 				// selector/pointer-field LHS routes through this block (its base ident is nil'd in the
@@ -1469,6 +1535,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					// Box an untyped `int` constant reassigned to an EMPTY-interface LHS through nint
 					// (twin of appendEmptyIfaceLitContext's @string boxing); a no-op otherwise.
 					rhsExpr = v.boxUntypedIntAsNint(v.getType(lhs, false), rhs, rhsExpr)
+
+					// A Go array copied by value over an existing variable takes golib's `.Clone()`
+					// for independent backing storage (see cloneArrayValueCopy).
+					rhsExpr = v.cloneArrayValueCopy(lhs, rhs, rhsExpr)
 
 					if lhsTypeIsInterface[i] {
 						result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
@@ -1565,6 +1635,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					rhsExpr := v.convExpr(rhs, v.appendRhsPtrContext(contexts, rhs))
 
 					v.emitStringConvAsSString = false
+
+					// A `:=`-declared local initialized from an existing array value takes golib's
+					// `.Clone()` for independent backing storage (see cloneArrayValueCopy).
+					rhsExpr = v.cloneArrayValueCopy(lhs, rhs, rhsExpr)
 
 					_, rhsIsTypeAssert := rhs.(*ast.TypeAssertExpr)
 

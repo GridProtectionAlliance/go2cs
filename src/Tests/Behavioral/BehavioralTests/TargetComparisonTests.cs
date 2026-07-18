@@ -969,6 +969,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckReturnTupleFuncLitArg() => CheckTarget("ReturnTupleFuncLitArg");
 
     [TestMethod]
+    public void CheckReverseSortNaNOrder() => CheckTarget("ReverseSortNaNOrder");
+
+    [TestMethod]
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
 
     [TestMethod]

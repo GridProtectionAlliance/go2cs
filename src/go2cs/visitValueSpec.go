@@ -911,7 +911,9 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 // A nil ifaceDeclType renders the plain expression.
 func (v *Visitor) convInterfaceDeclValue(value ast.Expr, ifaceDeclType types.Type, context ExprContext) string {
 	if ifaceDeclType == nil {
-		return v.convExpr(value, []ExprContext{context})
+		// A `var` declaration initialized from an existing array value takes golib's
+		// `.Clone()` for independent backing storage (see cloneArrayValueCopy).
+		return v.cloneArrayValueCopy(nil, value, v.convExpr(value, []ExprContext{context}))
 	}
 
 	rhsType := v.info.TypeOf(value)
