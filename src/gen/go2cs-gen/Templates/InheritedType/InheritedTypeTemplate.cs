@@ -106,6 +106,25 @@ internal class InheritedTypeTemplate : TemplateBase
         _ => "left.Equals(right)"
     };
 
+    // A named slice/map/channel's `s == nil` — the ONLY comparison Go permits on these kinds — renders
+    // as `s == default!` (nil literal in value context) or `s == nil` (pointer context), and BOTH bind
+    // THIS `operator ==(S, NilType)` overload, not the same-type operator above (verified against the
+    // emitted C# — reverting EqualityExpression has no effect; reverting this flips the result). The
+    // SLICE wrapper's default `value.Equals(default(S))` is structural CONTENT equality (its
+    // ISliceTypeTemplate Equals(ISlice<T>?) compares the backing arrays element-wise), so a non-nil
+    // EMPTY named slice (`S{}`, `make(S, 0)`, an `s[len(s):]` tail) was misclassified as nil. Delegate
+    // to slice<T>'s own == NilType — REPRESENTATION nilness (null backing array, R13) — so `IntSlice{}
+    // == nil` is false while the zero value stays nil. Map/channel keep the structural default and are
+    // already correct: they declare no structural Equals, so `Equals(default)` falls back to reference
+    // identity on the backing field (map<K,V>.Equals is ReferenceEquals(m_map); channel<T> compares its
+    // queue). Pointer uses its reference-identity Equals override, and array/numeric/string/struct/any
+    // are not nil-comparable in Go — all keep the default.
+    private string NilComparisonExpression => TypeClass switch
+    {
+        "Slice" => "value.m_value == nil",
+        _ => $"value.Equals(default({ObjectName}))"
+    };
+
     private string ValueProperty => TypeClass switch
     {
         "Pointer" => "",
@@ -260,7 +279,7 @@ internal class InheritedTypeTemplate : TemplateBase
         {{UnderlyingConversionOperators}}
                     {{UintptrBridgeOperators}}{{UntypedIntBridgeOperator}}{{StringSurfaceMembers}}
                 // Handle comparisons between 'nil' and {{ObjectKind}} '{{ObjectName}}'
-                public static bool operator ==({{ObjectName}} value, NilType nil) => value.Equals(default({{ObjectName}}));
+                public static bool operator ==({{ObjectName}} value, NilType nil) => {{NilComparisonExpression}};
         
                 public static bool operator !=({{ObjectName}} value, NilType nil) => !(value == nil);
         
