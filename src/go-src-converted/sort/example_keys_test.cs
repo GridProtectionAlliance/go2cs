@@ -1,0 +1,87 @@
+// Copyright 2013 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+namespace go;
+
+using fmt = fmt_package;
+using sort = go.sort_package;
+using go;
+
+partial class sort_test_package {
+
+[GoType("num:float64")] partial struct earthMass;
+
+[GoType("num:float64")] partial struct au;
+
+// A Planet defines the properties of a solar system object.
+[GoType] partial struct Planet {
+    internal @string name;
+    internal earthMass mass;
+    internal au distance;
+}
+
+public delegate bool By(ж<Planet> p1, ж<Planet> p2);
+
+// Sort is a method on the function type, By, that sorts the argument slice according to the function.
+public static void ΔSort(this By by, slice<Planet> planets) {
+    var ps = Ꮡ(new planetSorter(
+        planets: planets,
+        by: new Func<ж<Planet>, ж<Planet>, bool>(by)
+    ));
+    // The Sort method's receiver is the function (closure) that defines the sort order.
+    sort.Sort(new planetSorterжInterface(ps));
+}
+
+// planetSorter joins a By function and a slice of Planets to be sorted.
+[GoType] partial struct planetSorter {
+    internal slice<Planet> planets;
+    internal Func<ж<Planet>, ж<Planet>, bool> by; // Closure used in the Less method.
+}
+
+// Len is part of sort.Interface.
+[GoRecv] internal static nint Len(this ref planetSorter s) {
+    return len(s.planets);
+}
+
+// Swap is part of sort.Interface.
+[GoRecv] internal static void Swap(this ref planetSorter s, nint i, nint j) {
+    (s.planets[i], s.planets[j]) = (s.planets[j], s.planets[i]);
+}
+
+// Less is part of sort.Interface. It is implemented by calling the "by" closure in the sorter.
+[GoRecv] internal static bool Less(this ref planetSorter s, nint i, nint j) {
+    return s.by(Ꮡ(s.planets[i]), Ꮡ(s.planets[j]));
+}
+
+internal static slice<Planet> planets = new Planet[]{
+    new("Mercury"u8, 0.055D, 0.4D),
+    new("Venus"u8, 0.815D, 0.7D),
+    new("Earth"u8, 1.0D, 1.0D),
+    new("Mars"u8, 0.107D, 1.5D)
+}.slice();
+
+// ExampleSortKeys demonstrates a technique for sorting a struct type using programmable sort criteria.
+public static void Example_sortKeys() {
+    // Closures that order the Planet structure.
+    var name = (ж<Planet> p1, ж<Planet> p2) => (~p1).name < (~p2).name;
+    var mass = (ж<Planet> p1, ж<Planet> p2) => (~p1).mass < (~p2).mass;
+    var distance = (ж<Planet> p1, ж<Planet> p2) => (~p1).distance < (~p2).distance;
+    var distanceʗ1 = distance;
+    var decreasingDistance = (ж<Planet> p1, ж<Planet> p2) => distanceʗ1(p2, p1);
+    // Sort the planets by the various criteria.
+    new By(name).ΔSort(planets);
+    fmt.Println("By name:", planets);
+    new By(mass).ΔSort(planets);
+    fmt.Println("By mass:", planets);
+    new By(distance).ΔSort(planets);
+    fmt.Println("By distance:", planets);
+    new By(decreasingDistance).ΔSort(planets);
+    fmt.Println("By decreasing distance:", planets);
+}
+
+// Output: By name: [{Earth 1 1} {Mars 0.107 1.5} {Mercury 0.055 0.4} {Venus 0.815 0.7}]
+// By mass: [{Mercury 0.055 0.4} {Mars 0.107 1.5} {Venus 0.815 0.7} {Earth 1 1}]
+// By distance: [{Mercury 0.055 0.4} {Venus 0.815 0.7} {Earth 1 1} {Mars 0.107 1.5}]
+// By decreasing distance: [{Mars 0.107 1.5} {Earth 1 1} {Venus 0.815 0.7} {Mercury 0.055 0.4}]
+
+} // end sort_test_package
