@@ -891,6 +891,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPointerReceiverPointerLocalField() => CheckTarget("PointerReceiverPointerLocalField");
 
     [TestMethod]
+    public void CheckPointerReceiverSliceSwap() => CheckTarget("PointerReceiverSliceSwap");
+
+    [TestMethod]
     public void CheckPointerReinterpretIdentity() => CheckTarget("PointerReinterpretIdentity");
 
     [TestMethod]

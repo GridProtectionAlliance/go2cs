@@ -875,6 +875,20 @@ the equivalent C# code operates as follows:
 (x, y) = (y, x + y);
 ```
 
+The simultaneous deconstruction is **mandatory** whenever the targets alias — a swap `s[i], s[j] = s[j], s[i]` shattered into `s[i] = s[j]; s[j] = s[i];` loses the first target's original value (the second read sees the already-overwritten slot). The converter routes a multi-target assignment to the deconstruction form when every target is a *reassignment to existing storage*, counted per element; an index, star-deref, or selector LHS is always such a write. This recognition keyed off `getIdentifier`, which resolves a target's root identifier by unwrapping index/star/selector/chan/array/map nodes but **not** `ParenExpr` — so an index whose base is a *parenthesized* pointer deref, `(*p)[i]` (the shape a pointer-receiver method uses to write its own named-slice element, e.g. a heap's `func (h *myHeap) Swap(i, j int) { (*h)[i], (*h)[j] = (*h)[j], (*h)[i] }`), resolved to a nil root and was **not** counted as a reassignment. The parallel assignment then fell through to sequential statements and the swap silently corrupted the slice — one element lost, the other duplicated:
+
+```go
+func (h *myHeap) Swap(i, j int) { (*h)[i], (*h)[j] = (*h)[j], (*h)[i] }
+```
+```csharp
+// before: two sequential stores drop the temporary — (h)[i] and (h)[j] both end up as the old (h)[j]
+[GoRecv] internal static void Swap(this ref myHeap h, nint i, nint j) {
+    ((h)[i], (h)[j]) = ((h)[j], (h)[i]);   // simultaneous deconstruction, correct swap
+}
+```
+
+Such a paren-deref index LHS is now counted as a reassignment directly (a single-element `(*h)[i] = v` write emits identically on either path, so nothing else drifts). The bug was invisible to compilation — the broken form compiled cleanly — and only surfaced when a converted test *ran*: it silently miscompiled `container/heap`'s test heap and the `internal/trace/internal/oldtrace` order heap (three swap sites). (Guarded by the `PointerReceiverSliceSwap` behavioral test — a pointer-receiver `swap` and a full slice reversal by repeated swaps, output-compared vs `go run`; the pre-fix converter loses elements and diverges. It is also what makes `container/heap`'s Go test suite validate — see [Phase 4](Roadmap.md#phase-4--convert-and-run-go-package-tests).)
+
 Go's **partial redeclaration** — `a, b := f()` where `a` already exists in the same scope — reuses `a` (assigns it) and declares only the new names. A blanket `var (a, b)` would re-declare the reused variable, so the converter emits `var` per *newly-declared* element only:
 
 ```go

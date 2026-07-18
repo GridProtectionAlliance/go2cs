@@ -832,6 +832,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPointerReceiverPointerLocalField() => CheckTarget("PointerReceiverPointerLocalField");
 
     [TestMethod]
+    public void CheckPointerReceiverSliceSwap() => CheckTarget("PointerReceiverSliceSwap");
+
+    [TestMethod]
     public void CheckPointerReinterpretIdentity() => CheckTarget("PointerReinterpretIdentity");
 
     [TestMethod]

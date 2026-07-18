@@ -151,8 +151,7 @@ internal static orderEvent Pop(this ж<orderEventList> Ꮡh) {
     ref var h = ref Ꮡh.Value;
 
     nint n = len(h) - 1;
-    (h)[0] = (h)[n];
-    (h)[n] = (h)[0];
+    ((h)[0], (h)[n]) = ((h)[n], (h)[0]);
     heapDown(Ꮡh, 0, n);
     var x = (h)[len(h) - 1];
     h = (h)[..(int)(len(h) - 1)];
@@ -168,8 +167,7 @@ internal static void heapUp(ж<orderEventList> Ꮡh, nint j) {
         if (i == j || !h.Less(j, i)) {
             break;
         }
-        (h)[i] = (h)[j];
-        (h)[j] = (h)[i];
+        ((h)[i], (h)[j]) = ((h)[j], (h)[i]);
         j = i;
     }
 }
@@ -195,8 +193,7 @@ internal static bool heapDown(ж<orderEventList> Ꮡh, nint i0, nint n) {
         if (!h.Less(j, i)) {
             break;
         }
-        (h)[i] = (h)[j];
-        (h)[j] = (h)[i];
+        ((h)[i], (h)[j]) = ((h)[j], (h)[i]);
         i = j;
     }
     return i > i0;

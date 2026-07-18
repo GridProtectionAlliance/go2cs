@@ -510,7 +510,18 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					anyTypeIsInt = true
 				}
 			} else if indexExpr, ok := lhs.(*ast.IndexExpr); ok {
+				// An INDEX-expression LHS whose base has no plain-ident root — a deref through a
+				// paren (`(*h)[i]`, a pointer-receiver method writing its named-slice element), a
+				// call result, etc. — is a write to EXISTING storage, exactly like the plain-base
+				// `hw[i]` form counted in the ident != nil arm below (see its comment). It must
+				// count as REASSIGNED so a parallel assignment `(*h)[i], (*h)[j] = (*h)[j], (*h)[i]`
+				// stays a simultaneous tuple deconstruction `((h)[i], (h)[j]) = ((h)[j], (h)[i])`
+				// instead of shattering into sequential statements that drop the swap's temporary
+				// (heap's myHeap.Swap corrupted the heap: the first store clobbered the value the
+				// second needed). getIdentifier does not unwrap ParenExpr, so ident stays nil here;
+				// the single-element form (`(*h)[i] = v`) emits identically on either path.
 				ident = getIdentifier(indexExpr.X)
+				reassignedCount++
 
 				isInterface, isEmpty := v.isInterface(ident)
 				lhsTypeIsInterface[i] = isInterface && !isEmpty
