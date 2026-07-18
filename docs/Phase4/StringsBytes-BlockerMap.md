@@ -186,6 +186,43 @@ abi-accessibility errors exist under the current absolute-path pipeline.
   dominated by the R1 cctor cascade (`slice array reference is null` via `NewReplacer` in the
   `strings_test_package` cctor — the `[]T(nil)` signature). R1–R4 remain the next chip's scope;
   dir fully restored after measurement.
+- **B10 + B7-family remainder: FIXED / RE-BUCKETED (2026-07-17 late, worktree branch
+  `claude/pensive-torvalds-58cda0` — coordinator gates the merge; base master `b642642a5`).**
+  Four defects fixed, one re-bucketed:
+  - **B10b FIXED** — the composite-literal walk gains the MIRROR arm the call-site rule already
+    had: a STRUCTURAL func-type field receiving a value that renders as a named delegate wraps in
+    the synthesized structural delegate (`by: new Func<ж<Planet>, ж<Planet>, bool>(by)`,
+    example_keys_test's planetSorter). Guard: `NamedFuncTypeStructuralField` (method-group field
+    control stays bare).
+  - **B7a-family `long`→`nint` (sort_test.cs:769) FIXED** — a NEW shape, not B7a exactly: the
+    whole value of `maxswap: 1<<31 - 1` fits int32 (no whole-expression fold), but the untyped
+    inner shift folds to a bare `2147483648L`, widening the rendering to `long`; neither the
+    argument path nor `nativeIntConstCastType` (whole-value-out-of-range gate) narrows it.
+    `convBinaryExpr` now wraps the emission itself: `(nint)(2147483648L - 1)`, shape-restricted
+    to folded OPERATOR operands (`maxInt - maxInt` wrapper refs stay unwrapped). Guard:
+    `NativeIntWideConstElement` extension.
+  - **Float-const `double`→`nint` (search_test.cs:49) FIXED** — integer contexts now propagate
+    through `markUntypedConstContexts` (division excluded: exact-rational vs truncating `/`), and
+    a float literal under an integer context renders its exact integer form: `1e9 - 7` →
+    `1000000000 - 7`. Guard: `NativeIntWideConstElement` extension.
+  - **B7b-GAP (bytes_test.cs:1160) FIXED** — `returnArmKeepsUntypedWrapper` widens the B7b
+    predicate to constant paren/unary/binary arms containing a named untyped-const ref (bytes
+    TestMap's `return utf8.MaxRune + 1`), unless a constant fold rewrites the arm to a plain
+    literal. Guard: `FuncLitUntypedConstReturn` extension (both must-stay-plain controls green).
+  - **B10a RE-BUCKETED into B9** — root-caused against the real emission: all five method-group
+    CS1503 sites pass `Sort`, and `sort_test_package` declares the converted `By.Sort` as
+    `public static void Sort(this By, slice<Planet>)`, so C# simple-name lookup binds the
+    enclosing class's method group and never reaches the `using static` production `Sort` —
+    `Stable` ×6 and `Heapsort` ×1 at the SAME `func(Interface)` helper parameters convert
+    cleanly, proving the method-group machinery itself is sound. These are the argument-position
+    manifestation of B9's dot-import shadowing (CS1503 instead of CS1501); the B9 pinning fix
+    clears all 19. No separate converter defect exists.
+  - **Post-fix probe walls:** sort = exactly 19 errors, all `Sort` shadowing (14 CS1501 + 5
+    CS1503 = B9); **bytes BUILDS CLEAN (0 errors)** and its differential RAN — the C# host dies
+    in the `go.bytes_test_package` type initializer ("The type initializer for
+    'go.bytes_test_package' threw an exception", exit 2), so every included test reports
+    `Go="pass" C#=""` — the expected R-row wall (R1 `[]T(nil)` et al.); runtime rows remain
+    untouched per the chip split.
 
 ## Cross-cutting lessons
 

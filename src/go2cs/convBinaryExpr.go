@@ -430,6 +430,64 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 		return lit
 	}
 
+	// A TYPED-int constant expression whose VALUE fits int32 but whose emitted arithmetic an
+	// operand fold has widened to `long` carries its own narrowing `(nint)(…)` — see
+	// nativeIntWidenedConstExpr.
+	if v.nativeIntWidenedConstExpr(binaryExpr) {
+		return "(nint)(" + v.convBinaryExprCore(binaryExpr, context, litContext) + ")"
+	}
+
+	return v.convBinaryExprCore(binaryExpr, context, litContext)
+}
+
+// nativeIntWidenedConstExpr reports whether a constant operator expression TYPED Go `int` whose
+// VALUE fits int32 still renders as 64-bit C# arithmetic because an operand subtree folds to a
+// signed `long` literal — `maxswap: 1<<31 - 1` (sort_test countOps): the whole value (2147483647)
+// is in range, so overflowingConstLiteral keeps the operator form, but the UNTYPED inner shift
+// folds to a bare `2147483648L`, making the whole rendering `long`-typed. `long` has no implicit
+// conversion to `nint`, and only the ASSIGNMENT path has an enclosing-cast mechanism
+// (nativeIntConstCastType — which also only wraps when the whole value is OUT of int32 range); at
+// an argument/composite-element use nothing narrows it (CS1503). Carry the cast in the emission
+// itself, in the parenthesized `(nint)(…)` form wholeExprIsCastOfType recognizes, so assignment
+// sites do not re-wrap. Scoped like the B7a fold arm: PLAIN `int` only (a named type's [GoType]
+// cast rejects a `long` operand — those keep the loud error), and an UNTYPED node is left to its
+// enclosing context. Out-of-int32-range values never reach this check — overflowingConstLiteral
+// folds them first.
+func (v *Visitor) nativeIntWidenedConstExpr(binaryExpr *ast.BinaryExpr) bool {
+	tv, ok := v.info.Types[binaryExpr]
+
+	if !ok || tv.Value == nil || tv.Type == nil {
+		return false
+	}
+
+	basic, ok := tv.Type.(*types.Basic)
+
+	if !ok || basic.Kind() != types.Int {
+		return false
+	}
+
+	return v.operandRendersWidenedFold(binaryExpr.X) || v.operandRendersWidenedFold(binaryExpr.Y)
+}
+
+// operandRendersWidenedFold reports whether an operand's emission is a folded 64-bit `long`
+// literal. Only an OPERATOR subtree is rewritten by overflowingConstLiteral (via convBinaryExpr) —
+// a named untyped-const REFERENCE of the same value renders as its golib `Untyped*` wrapper, whose
+// implicit conversions already narrow at the use site (wrapping those would churn green
+// emissions) — so the check strips paren/unary wrapping and requires a BinaryExpr.
+func (v *Visitor) operandRendersWidenedFold(expr ast.Expr) bool {
+	switch e := expr.(type) {
+	case *ast.ParenExpr:
+		return v.operandRendersWidenedFold(e.X)
+	case *ast.UnaryExpr:
+		return v.operandRendersWidenedFold(e.X)
+	case *ast.BinaryExpr:
+		return v.overflowingConstLiteral(e) != ""
+	}
+
+	return false
+}
+
+func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context PatternMatchExprContext, litContext BasicLitContext) string {
 	lhsType := v.getExprType(binaryExpr.X)
 	rhsType := v.getExprType(binaryExpr.Y)
 

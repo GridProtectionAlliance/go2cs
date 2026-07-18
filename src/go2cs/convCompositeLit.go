@@ -287,9 +287,14 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		// A NAMED FUNC-type field initialized with a value of a DIFFERENT delegate type must
 		// wrap in the target delegate's constructor — C# has no implicit conversion between
 		// distinct delegate types (internal/concurrent's `keyHash: mapType.Hasher` feeding a
-		// hashFunc field from a Func<…,…> field, CS1503 ×3). Keyed-aware: elements resolve
-		// their field by NAME, so a reordered/partial literal maps correctly. FuncLit values
-		// (anonymous-method conversion applies) and nil stay bare.
+		// hashFunc field from a Func<…,…> field, CS1503 ×3). The MIRROR direction is handled
+		// too, matching the call-site rule (see convCallExpr): a STRUCTURAL func-type field
+		// receiving a value that RENDERS as a named delegate re-wraps in the synthesized
+		// structural delegate (sort example_keys_test's planetSorter `by: by` — the `By` value
+		// against the written `func(p1, p2 *Planet) bool` field, CS1503). Keyed-aware: elements
+		// resolve their field by NAME, so a reordered/partial literal maps correctly. FuncLit
+		// values (anonymous-method conversion applies), method groups (convert natively), and
+		// nil stay bare.
 		fieldByName := map[string]*types.Var{}
 
 		for i := range structType.NumFields() {
@@ -352,16 +357,6 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 				}
 			}
 
-			named, ok := types.Unalias(fieldVar.Type()).(*types.Named)
-
-			if !ok {
-				continue
-			}
-
-			if _, isSig := named.Underlying().(*types.Signature); !isSig {
-				continue
-			}
-
 			if _, isLit := valueExpr.(*ast.FuncLit); isLit {
 				continue
 			}
@@ -372,7 +367,40 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 
 			valueType := v.info.TypeOf(valueExpr)
 
-			if valueType == nil || types.Identical(types.Unalias(valueType), types.Unalias(fieldVar.Type())) {
+			if valueType == nil {
+				continue
+			}
+
+			wrapDelegate := false
+
+			if named, ok := types.Unalias(fieldVar.Type()).(*types.Named); ok {
+				// NAMED func-type field ← any different delegate type.
+				if _, isSig := named.Underlying().(*types.Signature); isSig {
+					wrapDelegate = !types.Identical(types.Unalias(valueType), types.Unalias(fieldVar.Type()))
+				}
+			} else if _, isSig := types.Unalias(fieldVar.Type()).(*types.Signature); isSig && !typeContainsTypeParams(fieldVar.Type()) {
+				// The MIRROR: STRUCTURAL func-type field ← value rendering as a named delegate.
+				// Same two named-rendering shapes as the call-site rule (convCallExpr): a value
+				// whose GO type is a named func type with methods (a METHODLESS one already
+				// renders as the structural delegate itself and stays bare), and a `:=` local
+				// declared from a method group (typed with the matching package named delegate
+				// by visitAssignStmt's methodGroupDelegateType). Method groups and func literals
+				// themselves convert natively and are excluded by both gates.
+				if argNamed, ok := types.Unalias(valueType).(*types.Named); ok {
+					if _, argIsSig := argNamed.Underlying().(*types.Signature); argIsSig {
+						if _, collapses := methodlessNamedFuncSignature(argNamed); !collapses {
+							wrapDelegate = true
+						}
+					}
+				} else if argSig, ok := types.Unalias(valueType).(*types.Signature); ok {
+					if argIdent, ok := valueExpr.(*ast.Ident); ok &&
+						v.namedFuncTypeNameForSignature(argSig) != "" && v.identDeclaredFromMethodGroup(argIdent) {
+						wrapDelegate = true
+					}
+				}
+			}
+
+			if !wrapDelegate {
 				continue
 			}
 

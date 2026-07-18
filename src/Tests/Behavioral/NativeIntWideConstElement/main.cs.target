@@ -13,7 +13,11 @@ internal static readonly UntypedInt maxInt = /* 1<<63 - 1 */ 9223372036854775807
 
 internal static slice<splitTest> tests = new splitTest[]{
     new("quarter"u8, (nint)(2305843009213693951L)),
-    new("eighth"u8, (nint)(1152921504606846976L))
+    new("eighth"u8, (nint)(1152921504606846976L)),
+    new("boundary"u8, (nint)(2147483648L - 1)),
+    new("efloat"u8, 1000000000 - 7),
+    new("escale"u8, 500000000 * 2),
+    new("zero"u8, maxInt - maxInt)
 }.slice();
 
 internal static nint half(nint n) {
@@ -26,8 +30,12 @@ internal static void Main() {
     }
     fmt.Println(half((nint)(4611686018427387903L)));
     fmt.Println(half((nint)(2305843009213693948L)));
+    fmt.Println(half((nint)(2147483648L - 1)));
+    fmt.Println(half(2000000000 - 8));
     nint local = (nint)(576460752303423487L);
     fmt.Println(local);
+    nint boundary = (nint)(2147483648L - 1);
+    fmt.Println(boundary);
 }
 
 } // end main_package

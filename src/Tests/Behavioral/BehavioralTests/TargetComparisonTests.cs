@@ -663,6 +663,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedFuncTypeStateMachine() => CheckTarget("NamedFuncTypeStateMachine");
 
     [TestMethod]
+    public void CheckNamedFuncTypeStructuralField() => CheckTarget("NamedFuncTypeStructuralField");
+
+    [TestMethod]
     public void CheckNamedIntSignednessConv() => CheckTarget("NamedIntSignednessConv");
 
     [TestMethod]

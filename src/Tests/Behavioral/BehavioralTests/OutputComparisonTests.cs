@@ -607,6 +607,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedFuncTypeStateMachine() => CheckTarget("NamedFuncTypeStateMachine");
 
     [TestMethod]
+    public void CheckNamedFuncTypeStructuralField() => CheckTarget("NamedFuncTypeStructuralField");
+
+    [TestMethod]
     public void CheckNamedIntSignednessConv() => CheckTarget("NamedIntSignednessConv");
 
     [TestMethod]

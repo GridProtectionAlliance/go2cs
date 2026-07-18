@@ -409,6 +409,17 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 						case types.Float32, types.Complex64:
 							isFloat32 = true
 						}
+
+						// A float literal INSIDE a constant expression resolved to an INTEGER
+						// context takes the same integer form as the directly-typed case above
+						// (`1e9 - 7` against an `int` field renders `1000000000 - 7`, keeping
+						// the C# arithmetic `int` — see propagateUntypedConstContext). ToInt
+						// guards exactness: a non-integral literal keeps its loud float form.
+						if constContext.Info()&types.IsInteger != 0 && tv.Value != nil {
+							if ival := constant.ToInt(tv.Value); ival.Kind() == constant.Int {
+								intForm = ival.ExactString()
+							}
+						}
 					}
 				}
 			}

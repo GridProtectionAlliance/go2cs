@@ -46,6 +46,12 @@ func main() {
 	}
 	fmt.Println(pick(false), pick(true))
 
+	// Const-EXPRESSION arm containing a named untyped constant — bytes TestMap's
+	// `invalidRune := func(r rune) rune { return utf8.MaxRune + 1 }`: the operator result
+	// keeps the wrapper type, so inference fails the same way as the bare reference (CS1503).
+	invalid := func(r rune) rune { return maxRune + 1 }
+	fmt.Println(apply(invalid, 'c'))
+
 	// Literal-only arms keep inferred typing (concrete C# types already; no prefix, no churn).
 	shrink := func(r rune) rune { return 'a' }
 	fmt.Println(apply(shrink, maxRune))

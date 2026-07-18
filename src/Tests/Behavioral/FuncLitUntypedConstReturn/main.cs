@@ -36,6 +36,8 @@ internal static void Main() {
         return bigConst;
     };
     fmt.Println(pick(false), pick(true));
+    var invalid = rune (rune r) => maxRune + 1;
+    fmt.Println(apply(invalid, (rune)'c'));
     var shrink = (rune r) => (rune)'a';
     fmt.Println(apply(shrink, maxRune));
     fmt.Println(apply((rune _) => maxRune, (rune)'b'));

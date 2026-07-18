@@ -269,6 +269,7 @@
     <Project Path="Tests/Behavioral/NamedFuncResultPointerArg/NamedFuncResultPointerArg.csproj" />
     <Project Path="Tests/Behavioral/NamedFuncTypeMapParam/NamedFuncTypeMapParam.csproj" />
     <Project Path="Tests/Behavioral/NamedFuncTypeStateMachine/NamedFuncTypeStateMachine.csproj" />
+    <Project Path="Tests/Behavioral/NamedFuncTypeStructuralField/NamedFuncTypeStructuralField.csproj" />
     <Project Path="Tests/Behavioral/NamedMapValuesCollision/NamedMapValuesCollision.csproj" />
     <Project Path="Tests/Behavioral/NamedMapCrossPkgKey/NamedMapCrossPkgKey.csproj" />
     <Project Path="Tests/Behavioral/NamedPointerReinterpret/NamedPointerReinterpret.csproj" />

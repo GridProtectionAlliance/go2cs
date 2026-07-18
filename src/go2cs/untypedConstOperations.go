@@ -46,14 +46,25 @@ func (v *Visitor) markUntypedConstContexts(file *ast.File) {
 }
 
 // propagateUntypedConstContext pushes a resolved constant context type into the untyped constant
-// children of expr, per expr's shape. Only float/complex contexts propagate — those are the kinds
-// whose C# literal rendering is context-sensitive (`F`/`D` suffixes, builtin.i overload choice).
+// children of expr, per expr's shape. Float/complex contexts propagate because those are the kinds
+// whose C# literal rendering is context-sensitive (`F`/`D` suffixes, builtin.i overload choice) —
+// and INTEGER contexts propagate so a FLOAT literal inside a constant expression can render its
+// integer form: `f(data, 3)` vs `1e9 - 7` (sort search_test's tests table, field `i int`) — the
+// direct literal is typed `int` by go/types and convBasicLit already emits `1000000000`, but
+// inside the operator expression the literal stays untyped float, rendered `1e9D`, making the
+// whole element `double` against the `nint` field (CS1503). With the context propagated the
+// literal renders `1000000000` and the arithmetic stays exact C# `int`. Division is EXCLUDED for
+// integer contexts: Go evaluates an untyped-float constant `/` in exact rational arithmetic, so a
+// nested quotient may be non-integral (`3.0 / 2 * 2` = 3) where the folded operands would
+// int-divide (3/2*2 = 2) — a silently wrong value; those trees keep the loud `double` rendering.
 func (v *Visitor) propagateUntypedConstContext(expr ast.Expr, context types.Type) {
 	basic, ok := context.Underlying().(*types.Basic)
 
-	if !ok || basic.Info()&(types.IsFloat|types.IsComplex) == 0 {
+	if !ok || basic.Info()&(types.IsFloat|types.IsComplex|types.IsInteger) == 0 {
 		return
 	}
+
+	intContext := basic.Info()&types.IsInteger != 0
 
 	switch e := expr.(type) {
 	case *ast.ParenExpr:
@@ -65,11 +76,17 @@ func (v *Visitor) propagateUntypedConstContext(expr ast.Expr, context types.Type
 		}
 	case *ast.BinaryExpr:
 		// Arithmetic operands adopt the result type; shifts, comparisons, and the
-		// integer-only operators never carry a float/complex context
+		// integer-only operators never carry a float/complex context (and an integer
+		// context must not cross `/` — exact-rational vs truncating division, above)
 		switch e.Op {
-		case token.ADD, token.SUB, token.MUL, token.QUO:
+		case token.ADD, token.SUB, token.MUL:
 			v.assignUntypedConstContext(e.X, context)
 			v.assignUntypedConstContext(e.Y, context)
+		case token.QUO:
+			if !intContext {
+				v.assignUntypedConstContext(e.X, context)
+				v.assignUntypedConstContext(e.Y, context)
+			}
 		}
 	case *ast.CallExpr:
 		ident, ok := e.Fun.(*ast.Ident)

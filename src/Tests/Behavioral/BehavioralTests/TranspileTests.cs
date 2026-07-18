@@ -660,6 +660,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedFuncTypeStateMachine() => CheckTarget("NamedFuncTypeStateMachine");
 
     [TestMethod]
+    public void CheckNamedFuncTypeStructuralField() => CheckTarget("NamedFuncTypeStructuralField");
+
+    [TestMethod]
     public void CheckNamedIntSignednessConv() => CheckTarget("NamedIntSignednessConv");
 
     [TestMethod]

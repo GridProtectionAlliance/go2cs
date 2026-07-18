@@ -27,9 +27,15 @@ func numericBasicLit(expr ast.Expr) (*ast.BasicLit, bool) {
 }
 
 // funcLitReturnsUntypedNamedConst reports whether any of the literal's OWN top-level return arms
-// returns a bare reference to a named untyped numeric constant — the shape that emits as a golib
-// `Untyped*` wrapper reference (see isUntypedNamedConstRef) and defeats C# lambda return-type
-// inference in natural-inference position (see the single-result numeric arm in convFuncLit).
+// returns a bare reference to a named untyped numeric constant — OR a constant operator expression
+// containing one that no literal fold rescues. Both shapes emit with a golib `Untyped*` wrapper
+// (see isUntypedNamedConstRef) and defeat C# lambda return-type inference in natural-inference
+// position (see the single-result numeric arm in convFuncLit): bytes TestMap's `invalidRune :=
+// func(r rune) rune { return utf8.MaxRune + 1 }` renders the arm `utf8.MaxRune + 1`, whose C#
+// operator result keeps the wrapper type, so the inferred delegate was `Func<int, UntypedInt>`
+// (CS1503 at the invariant Map call) exactly like the bare-reference case. An arm the constant
+// folds rewrite to a plain literal (overflowingConstLiteral / floatContextConstLiteral) emits
+// concretely typed and is excluded, as are literal-only arms (`return 'a'`, `return -1`).
 func (v *Visitor) funcLitReturnsUntypedNamedConst(funcLit *ast.FuncLit) bool {
 	found := false
 
@@ -42,7 +48,7 @@ func (v *Visitor) funcLitReturnsUntypedNamedConst(funcLit *ast.FuncLit) bool {
 			return false // a nested literal's returns belong to it
 		}
 
-		if ret, ok := n.(*ast.ReturnStmt); ok && len(ret.Results) == 1 && v.isUntypedNamedConstRef(ret.Results[0]) {
+		if ret, ok := n.(*ast.ReturnStmt); ok && len(ret.Results) == 1 && v.returnArmKeepsUntypedWrapper(ret.Results[0]) {
 			found = true
 			return false
 		}
@@ -51,6 +57,50 @@ func (v *Visitor) funcLitReturnsUntypedNamedConst(funcLit *ast.FuncLit) bool {
 	})
 
 	return found
+}
+
+// returnArmKeepsUntypedWrapper reports whether a single-result return arm's emission keeps a golib
+// `Untyped*` wrapper type: a bare named untyped-const reference, or a CONSTANT paren/unary/binary
+// operator expression containing one — unless a constant fold (overflowingConstLiteral /
+// floatContextConstLiteral) rewrites the whole arm to a plain literal, which emits concretely typed.
+func (v *Visitor) returnArmKeepsUntypedWrapper(expr ast.Expr) bool {
+	if v.isUntypedNamedConstRef(expr) {
+		return true
+	}
+
+	switch expr.(type) {
+	case *ast.ParenExpr, *ast.UnaryExpr, *ast.BinaryExpr:
+	default:
+		return false
+	}
+
+	tv, ok := v.info.Types[expr]
+
+	if !ok || tv.Value == nil {
+		return false
+	}
+
+	if v.overflowingConstLiteral(expr) != "" || v.floatContextConstLiteral(expr) != "" {
+		return false
+	}
+
+	return v.constExprContainsUntypedNamedConstRef(expr)
+}
+
+// constExprContainsUntypedNamedConstRef reports whether a named untyped numeric constant reference
+// appears as a leaf of the paren/unary/binary operator tree — the operand shape that renders as a
+// golib `Untyped*` wrapper and makes the whole operator result wrapper-typed.
+func (v *Visitor) constExprContainsUntypedNamedConstRef(expr ast.Expr) bool {
+	switch e := expr.(type) {
+	case *ast.ParenExpr:
+		return v.constExprContainsUntypedNamedConstRef(e.X)
+	case *ast.UnaryExpr:
+		return v.constExprContainsUntypedNamedConstRef(e.X)
+	case *ast.BinaryExpr:
+		return v.constExprContainsUntypedNamedConstRef(e.X) || v.constExprContainsUntypedNamedConstRef(e.Y)
+	default:
+		return v.isUntypedNamedConstRef(expr)
+	}
 }
 
 func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) string {
