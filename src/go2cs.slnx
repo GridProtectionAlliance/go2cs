@@ -370,6 +370,7 @@
     <Project Path="Tests/Behavioral/RecvMapElementDeref/RecvMapElementDeref.csproj" />
     <Project Path="Tests/Behavioral/RenamedReceiverBox/RenamedReceiverBox.csproj" />
     <Project Path="Tests/Behavioral/ReturnPointerFieldOfParam/ReturnPointerFieldOfParam.csproj" />
+    <Project Path="Tests/Behavioral/ReverseSortNaNOrder/ReverseSortNaNOrder.csproj" />
     <Project Path="Tests/Behavioral/ReturnTupleFuncLitArg/ReturnTupleFuncLitArg.csproj" />
     <Project Path="Tests/Behavioral/ReservedNameShadows/ReservedNameShadows.csproj" />
     <Project Path="Tests/Behavioral/ReservedTypeMethodCollision/ReservedTypeMethodCollision.csproj" />

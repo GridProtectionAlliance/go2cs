@@ -901,6 +901,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckReturnTupleFuncLitArg() => CheckTarget("ReturnTupleFuncLitArg");
 
     [TestMethod]
+    public void CheckReverseSortNaNOrder() => CheckTarget("ReverseSortNaNOrder");
+
+    [TestMethod]
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
 
     [TestMethod]

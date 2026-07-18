@@ -1350,6 +1350,34 @@ correct. (One accepted edge, no stdlib hit: reassigning the *whole* array param 
 element address leaves the pointer on the older backing array.) (Guarded by `DeferTypelessReturns`'
 `first` — element address of a `[4]byte` parameter, value vs Go.)
 
+### Array ASSIGNMENT copies the whole array (`.Clone()` on the RHS)
+
+Go array assignment copies the array — `data := ints` yields independent storage — but the emitted
+`array<T>` is a struct over a shared `T[]` backing store, so a plain C# struct copy **aliases**: a
+write through the copy was visible through the source. The first operational hit was sort's
+`TestReverseSortIntSlice` (`data := ints; data1 := ints` left ONE store sorted ascending then
+descending, so the ascending/descending mirror check failed ×7 — misdiagnosed at first as an
+embed-override dispatch defect; the dispatch was correct). The converter now appends golib's
+strongly-typed `array<T>.Clone()` to an assignment RHS that copies an array **out of existing
+storage** (see `cloneArrayValueCopy` in `visitAssignStmt.go`):
+
+```go
+d := garr        // → var d = garr.Clone();
+var e = garr     // → array<nint> e = garr.Clone();
+e = src          // → e = src.Clone();
+f := h.arr       // selector RHS      → var f = h.arr.Clone();
+row := m[1]      // index RHS         → var row = m[1].Clone();
+g := *q          // deref RHS         → var g = q.Value.Clone();
+x, y = y, x      // tuple swap        → (x, y) = (y.Clone(), x.Clone());
+```
+
+Only existing storage takes the clone — an ident, selector, index, or deref RHS reads a value some
+other name can still reach; a composite literal, call result, or conversion is freshly constructed
+and stays bare. (Guarded by the `ArrayPassByValue` extension — all seven assignment shapes above,
+written-through and read back against the source, values vs Go.) The other copy sites of the same
+defect class — range elements, composite-literal elements, returns, channel sends, append elements,
+named-array types — are covered by the follow-up section below.
+
 ### Array VALUE-COPY at every transfer site (range, composite, return, send, append) — DEEP for nested arrays
 
 Go copies the whole array at **every** value transfer, not just assignment and parameter passing —
@@ -2266,6 +2294,23 @@ The same explicit-type-argument rule applies to a generic function referenced as
 Go's built-in `comparable` admits every `==`-able Go type — numerics, strings, pointers, channels, and comparable structs/arrays/interfaces. No C# constraint can express that set: golib's old `comparable<T>` CRTP interface was implemented by *nothing* (every real instantiation failed — `maps.Keys[M ~map[K]V, K comparable]` could not be used at all), and lifting `IEqualityOperators` would reject structs, which Go admits. A `comparable` type parameter therefore emits **no C# constraint** beyond the standard `new()` — `where K : /* comparable */ new()` — relying on the two facts that make it sound: Go's checker already validated every instantiation, and emitted equality on type parameters routes through `AreEqual`, never operator `==`.
 
 `AreEqual` itself is not a performance tax on that path: a generic overload `AreEqual<T>(T, T)` — automatically preferred by overload resolution exactly where both operands share the type parameter — takes `EqualityComparer<T>.Default.Equals` for value-type arguments, which the JIT specializes per type and devirtualizes to the type's own `IEquatable<T>` (operator-comparable speed, no reflection or boxing; golib wrappers emit `operator ==` and `Equals` as consistent pairs, so semantics match). Reference/interface type arguments delegate to the reflective `AreEqual(object, object)` overload, preserving its typed-null and runtime-type semantics. (A constraint-differentiated overload pair is not expressible — C# treats `where` clauses as outside the signature, CS0111 — and a source-generated `==` twin is unnecessary given the `EqualityComparer<T>.Default` JIT intrinsic.) (The behavioral `GenericVariadicFunc` golden captures the erased form with unchanged output.)
+
+**Floating-point equality follows Go's IEEE-754 `==`, not `Equals`.** The `Equals`-based fast path
+above is wrong for exactly one family: `double`/`float` report `NaN.Equals(NaN)` as *true* (and
+`Complex`/golib `complex64` inherit that componentwise), while Go's `==` — the operation `AreEqual`
+stands in for — is IEEE: NaN compares unequal to everything, itself included. That inverted every
+generic NaN probe of the `x != x` form: `cmp.isNaN` emits `!AreEqual(x, x)`, so `cmp.Less` lost its
+NaN-first ordering (sort's `TestFloat64s` — `Float64s` → `slices.Sort` produced a NaN-scrambled
+order) *and* `cmp.Compare` reported NaN equal to everything, which let the mis-sort slip past
+`TestSortFloat64sCompareSlicesSort`'s own equality check. The generic overload now special-cases
+`double`, `float`, `complex128`, and `complex64` to the operator compare (JIT-constant `typeof(T)`
+guards, box-cast elided). The reflective object overload (boxed/interface comparisons) was already
+IEEE-correct and stays untouched: on .NET 7+ the primitives DECLARE `op_Equality` (the
+`IEqualityOperators` implementation), so its cached operator lookup finds the real operator rather
+than falling to `Equals`. Concrete (non-generic) float comparisons were always correct — `f != f`
+emits the C# operator directly. (Guarded by the `ReverseSortNaNOrder`
+behavioral test — generic `isNaN`/`less`/`eq` legs over `float64`/`float32`/`complex128`/
+`complex64`, boxed-`any` NaN equality, and a NaN-aware interface sort, values vs Go.)
 
 ### The `string | []byte` union
 C# generic constraints are conjunctive ("and"), so they cannot express Go's `string | []byte` union directly. The two members share no operators (the union is neither comparable nor additive), so a conforming body may only use the read operations common to both — indexing, `len`, and sub-slicing. These are captured by the golib read-only byte-sequence interface [`IByteSeq<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/IByteSeq.cs), which both `@string` (as `IByteSeq<byte>`) and `slice<T>` implement; the converter emits it for the union and suppresses the (spurious) lifted operator constraints:
@@ -5172,7 +5217,23 @@ One call-site emission cooperates (`convCallExpr.go`): a conversion **to** a man
 
 **`sync/atomic.Value` (`core/sync/atomic/value.cs`, whole-file).** Go's `atomic.Value` stores and loads an `any` atomically by reinterpreting the interface's internal two-word `(type, data)` layout: `(*efaceWords)(unsafe.Pointer(&v))`, then `atomic.LoadPointer`/`StorePointer`/`CompareAndSwapPointer` on the `typ` and `data` slots, with a `firstStoreInProgress` sentinel guarding the first store. That layout is a Go runtime detail with **no managed equivalent** — an `any` here is a single `System.Object` reference (one word), and reinterpreting a managed reference as a raw address to poke type/data words simply NREs (the same managed-referent-through-`unsafe.Pointer` wall as the guintptr family). The first *operational* hit was `internal/testlog`'s package-level `var logger atomic.Value`, loaded during `os.Getenv` — so `atomic.Value.Load()` NRE'd on the zero value before any store. The whole file is hand-rewritten (marked `[module: GoManualConversion]`) to store the `any` **directly** in the `Value.v` field and use `Volatile.Read`/`Interlocked.CompareExchange` for the acquire/release ordering and CAS the literal conversion cannot provide; the nil-store and inconsistent-type panics, and `CompareAndSwap`'s by-value comparison (`AreEqual`, matching Go's `i != old`), preserve the spec. Guarded by the `AtomicValue` behavioral test (Load-nil / Store / Swap / CompareAndSwap over typed string values, output-compared vs Go).
 
-**`testing.AllocsPerRun` (`core/testing/testing.cs`, Phase-4 testing shim).** Go's version counts **mallocs**: it pins `GOMAXPROCS(1)`, runs `f` once as a warmup, then `runs` more times, and returns the `runtime.MemStats.Mallocs` delta divided (as integers) by `runs`. The CLR exposes no malloc counter, so the shim measures allocated **bytes** on the calling thread instead (`GC.GetAllocatedBytesForCurrentThread()` — precise, and inherently thread-scoped, which stands in for the GOMAXPROCS pinning; like Go's, `f` is assumed single-threaded — allocations made by goroutines `f` spawns land on other threads and are not observed). The mapping is deliberately honest rather than count-approximating: **zero maps exactly** (0 bytes ⟺ 0 mallocs — and the stdlib tests that use AllocsPerRun overwhelmingly assert zero, e.g. sort's `TestSearchWrappersDontAlloc` and the strings/bytes no-alloc guards), while a nonzero result is the average allocated bytes per run, floored at 1 so amortized sub-byte-per-run allocation can never masquerade as the exact-zero case. A converted test asserting a specific nonzero *count* therefore diverges as a loud failure in the differential oracle instead of silently passing — the disclosed outcome. (`runs == 0` divides by zero, a runtime-error panic exactly where Go's own integer division panics.) The capability sits in the converter's supported list (`supportedTestCapabilities`, `testConversion.go`), so tests requiring it convert as *included*; guarded by `TestAllocsPerRunCapabilityIsSupported` (converter) and `TestingRuntimeTests.AllocsPerRunMapsZeroExactlyAndReportsBytesWhenAllocating` (shim).
+**The `internal/reflectlite` mini-bridge (`value_impl.cs` + `swapper_impl.cs`, Phase-4 reflection
+bridge).** `sort.Slice`/`SliceStable`/`SliceIsSorted` route through reflectlite —
+`ValueOf(x).Len()` and `Swapper(x)` — and the auto forms reinterpret the interface's eface
+`{type,data}` words, so the first touch dereferenced a nil `ж<abi.Type>` (sort's `TestSlice`, the
+first operational hit: `unpackEface` → `abi.Kind` → NRE). The fix mirrors the full `reflect`
+bridge (see `reflect/value_impl.cs` and `docs/Phase4/DESIGN-reflection-bridge.md`) for exactly the
+mini-surface sort exercises: `ValueOf`/`unpackEface` build the `Value` over a companion
+`partial struct Value { object boxed }` field — `typ_` takes the Phase-1 synthetic `abi.Type` and
+the flag takes the Kind bits, so `Kind()`/`IsValid()` keep working from the auto `value.cs`
+unchanged — `Value.Len` reads the boxed value through the golib container interfaces
+(`@string`/`IArray`/`IMap`), and `Swapper` swaps through golib's non-generic `ISlice` indexer
+(which applies the slice window offset, so swaps land on the shared backing store exactly like
+Go's). The four declarations are skipped by the converter via the `manualConversionFuncs`
+registry (`"internal/reflectlite"` in `go2cs/manualTypeOperations.go`); the rest of reflectlite —
+including `packEface`/`Interface()` (used by `errors.As`) — stays auto and is NOT yet operational.
+Verified by the sort differential: `TestSlice` flips to pass — `sort.Slice` sorts through the
+managed Swapper, and its closing `SliceIsSorted` check reads length through the same `ValueOf` path. Go's version counts **mallocs**: it pins `GOMAXPROCS(1)`, runs `f` once as a warmup, then `runs` more times, and returns the `runtime.MemStats.Mallocs` delta divided (as integers) by `runs`. The CLR exposes no malloc counter, so the shim measures allocated **bytes** on the calling thread instead (`GC.GetAllocatedBytesForCurrentThread()` — precise, and inherently thread-scoped, which stands in for the GOMAXPROCS pinning; like Go's, `f` is assumed single-threaded — allocations made by goroutines `f` spawns land on other threads and are not observed). The mapping is deliberately honest rather than count-approximating: **zero maps exactly** (0 bytes ⟺ 0 mallocs — and the stdlib tests that use AllocsPerRun overwhelmingly assert zero, e.g. sort's `TestSearchWrappersDontAlloc` and the strings/bytes no-alloc guards), while a nonzero result is the average allocated bytes per run, floored at 1 so amortized sub-byte-per-run allocation can never masquerade as the exact-zero case. A converted test asserting a specific nonzero *count* therefore diverges as a loud failure in the differential oracle instead of silently passing — the disclosed outcome. (`runs == 0` divides by zero, a runtime-error panic exactly where Go's own integer division panics.) The capability sits in the converter's supported list (`supportedTestCapabilities`, `testConversion.go`), so tests requiring it convert as *included*; guarded by `TestAllocsPerRunCapabilityIsSupported` (converter) and `TestingRuntimeTests.AllocsPerRunMapsZeroExactlyAndReportsBytesWhenAllocating` (shim).
 
 **The testing shim's compile-only benchmark surface and `CoverMode` (`core/testing/testing.cs`).** Capability-excluded test and benchmark declarations still **compile** — exclusion gates the run registry, not emission — so every member their bodies reference must exist even though the code never executes (a broken emission inside an excluded test blocks the whole package build; see the strings/bytes blocker map, B6). The `B` surface (`N`, `Run`, `ReportAllocs`, `SetBytes`, `ResetTimer`, `StartTimer`, `StopTimer`, `Errorf`, `Fatal`, `Fatalf`) is therefore compile-only: safe non-throwing no-ops, with the params-taking members carrying explicit `ж<B>` overloads exactly as `T`'s do (ref-like `params` Spans are outside the RecvGenerator's synthesis). `testing.CoverMode()` returns `""` — not a stub-lie but Go's exact coverage-off value: the sole caller across the strings/bytes suites (strings' TestIndexRune) branches on `CoverMode() == ""` and so takes the same path as an uncovered `go test` run. Guarded by `TestingRuntimeTests.BenchmarkCompileSurfaceIsNoOpAndCoverModeReportsCoverageOff`, which compile-references every member through both receiver shapes and asserts the coverage-off semantic — removing any member fails the suite at build.
 

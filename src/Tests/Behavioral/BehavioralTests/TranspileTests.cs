@@ -969,6 +969,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckReturnTupleFuncLitArg() => CheckTarget("ReturnTupleFuncLitArg");
 
     [TestMethod]
+    public void CheckReverseSortNaNOrder() => CheckTarget("ReverseSortNaNOrder");
+
+    [TestMethod]
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
 
     [TestMethod]
