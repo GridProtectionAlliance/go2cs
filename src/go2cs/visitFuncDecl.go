@@ -1076,6 +1076,16 @@ func (v *Visitor) identIsParameter(ident *ast.Ident) bool {
 // is that an UNGUARDED deref of an actually-nil argument reads default(T) instead of raising Go's
 // nil-deref panic — a path that only a program already panicking in Go would observe. A param that
 // is never nil-compared keeps the plain `.Value` form. The set is reset each function.
+//
+// The RECEIVER of a direct-ж method joins the set under the same predicate: Go permits calling a
+// method through a nil pointer when the body nil-checks first (`func (b *Buffer) String() string {
+// if b == nil { return "<nil>" } … }`), and any method whose body `==`/`!=`-compares its bare
+// receiver is direct-ж (the comparison arm of bodyUsesReceiverAsPointerValue promotes it), so its
+// entry preamble `ref var b = ref Ꮡb.Value;` deref'd the box BEFORE the body's guard could run —
+// an entry NRE where Go returns cleanly (bytes TestNil). Matched by OBJECT identity (a shadowing
+// local comparison does not qualify) and gated on the direct-ж form (only it has a receiver box
+// to deref); a receiver that is never compared keeps the plain `.Value` form, so emission is
+// unchanged for every method that does not test its receiver.
 func (v *Visitor) collectNilSafePtrParams(body *ast.BlockStmt) {
 	if v.nilSafePtrParamNames == nil {
 		v.nilSafePtrParamNames = HashSet[string]{}
@@ -1090,7 +1100,7 @@ func (v *Visitor) collectNilSafePtrParams(body *ast.BlockStmt) {
 	ast.Inspect(body, func(node ast.Node) bool {
 		if n, ok := node.(*ast.BinaryExpr); ok && (n.Op == token.EQL || n.Op == token.NEQ) {
 			for _, operand := range []ast.Expr{n.X, n.Y} {
-				if ident, ok := operand.(*ast.Ident); ok && v.isDerefdPointerParamIdent(ident) {
+				if ident, ok := operand.(*ast.Ident); ok && (v.isDerefdPointerParamIdent(ident) || v.isComparedDirectBoxReceiverIdent(ident)) {
 					v.nilSafePtrParamNames.Add(ident.Name)
 				}
 			}
@@ -1098,6 +1108,24 @@ func (v *Visitor) collectNilSafePtrParams(body *ast.BlockStmt) {
 
 		return true
 	})
+}
+
+// isComparedDirectBoxReceiverIdent reports whether ident is the current method's pointer receiver
+// (object identity — a shadowing local does not match) and the method is direct-ж, i.e. its
+// receiver box `Ꮡrecv` is a parameter whose entry deref alias exists to be made nil-safe. Scoped
+// to the `==`/`!=` operand scan of collectNilSafePtrParams — see the receiver paragraph there.
+func (v *Visitor) isComparedDirectBoxReceiverIdent(ident *ast.Ident) bool {
+	if ident == nil || ident.Name == "" || ident.Name == "_" {
+		return false
+	}
+
+	isPtrRecv, recvName := v.isPointerReceiver()
+
+	if !isPtrRecv || !v.identResolvesToReceiver(ident, recvName) {
+		return false
+	}
+
+	return isDirectBoxReceiverMethod(v.currentFuncDecl, v.info)
 }
 
 // isDerefdPointerParamIdent reports whether ident resolves to a non-blank pointer (`*T`) PARAMETER

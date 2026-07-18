@@ -34,6 +34,16 @@ func (e *embedder) checkGuard() string {
 	return fmt.Sprintf("val=%d tag=%d", e.val, e.tag)
 }
 
+// describe is the (*bytes.Buffer).String shape: the method is CALLED through a nil
+// pointer (legal Go — the receiver is just an argument), the body's guard runs before
+// any dereference, and only the non-nil path touches fields.
+func (b *box) describe() string {
+	if b == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("box(%d)", b.val)
+}
+
 func main() {
 	b := &box{}
 	fmt.Println(b.isNil(), b.notNil())     // false true — non-nil pointer to a zero struct
@@ -43,4 +53,14 @@ func main() {
 	e.val = 7 // promoted field through the embed
 	e.tag = 9
 	fmt.Println(e.isNil(), e.checkGuard()) // false val=7 tag=9
+
+	// Calls through ACTUALLY-NIL pointers: Go permits the call; the body nil-checks
+	// before dereferencing, so each returns cleanly. The pre-fix preamble deref'd the
+	// receiver box at entry — an NRE before the guard could run (bytes TestNil).
+	var np *box
+	fmt.Println(np.isNil(), np.notNil(), np.describe()) // true false <nil>
+	fmt.Println(b.describe())                           // box(0) — non-nil path still works
+
+	var ne *embedder
+	fmt.Println(ne.isNil(), ne.checkGuard()) // true nil
 }

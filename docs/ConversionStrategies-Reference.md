@@ -1382,6 +1382,60 @@ composite-literal elements initialized from array variables.* (Guarded by the `A
 extension — all seven assignment shapes above, written-through and read back against the source,
 values vs Go.)
 
+### Nil-vs-empty slice identity (`s == nil` is representation nilness, not emptiness)
+Go distinguishes a **nil** slice (nil backing pointer) from a **non-nil empty** slice (a real backing
+pointer with zero length), and programs observe the difference through `s == nil`, `reflect.DeepEqual`,
+and marshaling — bytes' `TestTrim`/`TestTrimFunc`/`TestClone` assert it directly (`TrimRight` of a
+non-empty slice trims *in place* and stays non-nil; `Clone` of a non-nil input must return non-nil;
+the `[]byte{}` *want*-side literals must not classify as nil). golib `slice<T>` carries the
+distinction in its representation — the backing `m_array` field is `null` exactly for the nil slice —
+but the observation and two construction paths used to lose it:
+
+- **`operator ==(slice<T>, NilType)`** tested `Length == 0 && Capacity == 0`, misclassifying every
+  zero-length zero-capacity view (`[]byte{}`, `[]byte("")`, `x[len(x):]`) as nil. It now tests
+  `m_array is null` — representation nilness.
+- **`operator ==(slice<T>, slice<T>)`** was structural content equality. Go forbids comparing two
+  slices, so the *only* converted code binding this operator is the nil comparison `s == nil`, which
+  renders as `s == default!` (the nil literal renders `default!` in value contexts). It is now Go
+  slice-**header identity** (same backing array reference, offset, length, capacity), which against
+  the default header `(null, 0, 0, 0)` is exactly the nil test. Structural equality remains on the
+  `Equals` overloads for C#-side collection use, and the generated named-type wrappers bind `Equals`
+  (not this operator), so their behavior is unchanged.
+- **`Reslice`** (every `s[a:b]`/`s[a:b:c]`) laundered a nil backing into a fresh empty array
+  (`m_array ?? []`). Reslicing nil is legal only within zero bounds, and Go's `nil[0:0]` **is** the
+  nil slice (the result shares the nil backing pointer) — it now returns `default` for a nil source.
+- **`Append`** with **zero elements** allocated a fresh empty slice for a nil source. Go's
+  `append(s)` (and `append(s, empty...)`) returns `s` itself — no growth is needed, so the same
+  header comes back: nil stays nil, and bytes.Clone's `append([]byte{}, b...)` with empty `b`
+  returns the non-nil literal. `Append` now returns the source unchanged when there is nothing to
+  add. (`builtin.widen`, the generic pointer-instantiation projection, likewise now projects only a
+  nil source to nil instead of any empty one.)
+
+The full identity enumeration golib maintains (invariant: **nil ⟺ `m_array is null`**):
+
+| Construction | Go identity | golib path |
+|---|---|---|
+| `var s []T`, struct/element zero values | nil | `default(slice<T>)` — null backing |
+| `[]T(nil)`, nil literal in slice context | nil | `T[]`-taking ctors map null → `default` |
+| `nil[0:0]`, `nil[0:0:0]` | nil | `Reslice`/bounded ctors preserve the null backing |
+| `append(nilSlice)` — nothing to add | nil | `Append` returns the source header unchanged |
+| `[]T{}` composite literal | non-nil empty | `new T[]{}.slice()` — real empty array |
+| `[]byte("")` / `[]rune("")` / conversions of empty strings | non-nil empty | span/`@string` paths materialize a real array |
+| `make([]T, 0)` | non-nil empty | parameterless ctor / `Make` — real empty array |
+| `s[a:a]`, `s[len(s):]` of non-nil `s` (even cap 0) | non-nil empty | `Reslice` shares the real backing array |
+| `append(emptySlice)` — nothing to add | that same non-nil empty | `Append` identity return |
+| `append(s, elems...)` with elements | non-nil | in-place or reallocated — always a real array |
+
+Known adjacent gaps, deliberately out of this change's scope: a **zero-argument variadic call**
+materializes a non-nil empty (`params Span<T>` → `.slice()`) where Go passes nil; the generated
+**named-slice wrapper**'s `== nil` still compares `Equals(default)` structurally (a sibling defect in
+go2cs-gen's `InheritedTypeTemplate`, gated behind the generator's full-suite+corpus gate); and
+`NilType`'s `ISlice == nil` operator retains its historical unreachable `Source: null` arm. (Guarded
+by the `SliceNilVsEmpty` behavioral test — every row of the table probed with `s == nil`, `len`, and
+`cap` against `go run`; `resliceTailCapZero` discriminates the operator fix, `nilReslice` the
+`Reslice` fix, and `appendNilNothing` the `Append` fix. `NilSliceConversion` continues to guard the
+`[]T(nil)` conversion row.)
+
 ## Strings (`@string` and `sstring`)
 Go's `string` is represented by golib [`@string`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/string.cs), not `System.String`. That is a semantic decision, not just a naming one: Go strings are immutable byte sequences, so `len`, indexing, ranging, concatenation, conversion to `[]byte`/`[]rune`, equality, and type assertions must all observe Go's UTF-8/byte model rather than C#'s UTF-16 string model. A zero-value `@string` is also null-safe and reads as `""`, which lets `default!` stand in for Go's zero value without sprinkling null checks through converted code.
 
@@ -4876,12 +4930,47 @@ interface's held pointer, where the pre-fix `AreEqual(b, r)` compared a *struct 
 (never equal — a latent recursion-guard bug the fix also closes). The full-stdlib A/B is small and
 mechanical — 161 receiver operands across 77 files gain a `Ꮡ` box (155 nil-checks, 6 pointer-identity),
 every changed line adding only the box.
-A still-open **separate** gap: invoking a pointer method on an actually-nil receiver NREs at the deref alias
-`ref var f = ref Ꮡf.Value` before the guard runs (the nil-safe `DerefOrNil` accessor covers this for pointer
-*parameters* walked to nil but is not yet extended to receivers). (Guarded by the `PointerReceiverNilCompare`
+(Guarded by the `PointerReceiverNilCompare`
 behavioral test — a plain-struct `*box` where `&box{}` must compare `!= nil`, `== nil`/`!= nil` receiver
 methods, and a promoted-embed `*embedder` whose pre-fix value comparison NRE'd, output-compared vs Go; and
 by the re-baselined `RingPointerMethods` whose `r != nil` receiver walk now renders `Ꮡr != nil`.)
+
+### A compared receiver's deref alias is nil-safe — methods callable through a nil pointer
+The gap the box-comparison fix left open: Go legitimately **calls** methods through a nil pointer and
+panics only on an actual dereference, so the guard-first idiom returns cleanly on nil —
+`func (b *Buffer) String() string { if b == nil { return "<nil>" } … }` (bytes; its `TestNil` calls
+`b.String()` on a `var b *Buffer`). The emitted preamble deref'd the box **before** the body's guard
+could run — `ref var b = ref Ꮡb.Value;` NRE'd at entry where Go returns `"<nil>"`. The fix folds the
+**receiver** into `nilSafePtrParamNames` under the receiver-specific predicate, so the entry alias (and
+a reassigned receiver's re-alias, which reads the same set) routes through the nil-safe accessor:
+
+```csharp
+public static @string String(this ж<Buffer> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNil();
+
+    if (Ꮡb == nil) {
+        // Special case, useful in debugging.
+        return "<nil>"u8;
+    }
+    return ((@string)(b.buf[(int)(b.off)..]));
+}
+```
+
+**The predicate, precisely** (`isComparedDirectBoxReceiverIdent`, consulted by `collectNilSafePtrParams`'
+`==`/`!=` operand scan): the deref alias of a method's receiver uses `DerefOrNil()` iff (a) the body
+contains a `==`/`!=` binary expression with the **bare receiver identifier** as an operand — object
+identity via `identResolvesToReceiver`, so a shadowing local's comparison does not qualify — and (b) the
+method is **direct-ж** (only that form has a receiver box parameter whose entry deref exists to be made
+nil-safe). Condition (b) is implied by (a) — the same comparison promotes the method to direct-ж through
+`bodyUsesReceiverAsPointerValue` — but is checked explicitly so the predicate is self-contained. Every
+method that never compares its receiver keeps the plain `.Value` form byte-for-byte, and for a non-nil
+receiver `DerefOrNil()` returns the identical real slot, so the only behavioral change is at entry with
+an actually-nil receiver. The accepted trade-off is the same one documented for nil-compared pointer
+parameters above: an *unguarded* deref of an actually-nil receiver reads the throwaway default slot
+instead of raising Go's nil-deref panic — observable only by a program already panicking in Go.
+(Guarded by the `PointerReceiverNilCompare` extension — `isNil`/`notNil`/guard-first `describe`
+called through actually-nil `*box` and `*embedder` pointers beside the original non-nil probes,
+output-compared vs Go; bytes' `TestNil` exercises the stdlib shape.)
 
 ## Implicit Pointer Dereferencing
 **Deciding whether a selector base is *already* dereferenced.** A field selector on a pointer-valued base auto-derefs in Go, so the converter must insert the deref (`(~x).field` / `x.Value.field`) — *unless* the base is itself an explicit dereference (`(*p).field`) or a pointer conversion whose dedicated branch appends its own `.Value`. That "is the base already deref'd" test was a whole-subtree scan for **any** `StarExpr`, which mistook a conversion star buried in a call **argument** for a dereferenced base — `stringStructOf((*string)(unsafe.Pointer(p))).n` (runtime `arena.go`): the `(*string)` star belongs to the argument's conversion, the *call result* (`ж<stringStruct>`) is not deref'd, and skipping the auto-deref left `.n` on the box (CS1061). The test now inspects only the base's own outermost shape (unwrapping parens; a pointer-conversion base still routes to the conversion branch), and the conversion-branch dispatch also unwraps **enclosing parens**, so an extra-paren conversion base — `((*specialWeakHandle)(unsafe.Pointer(…))).handle` (runtime `mheap.go`) — reaches it (the same extra-paren blind spot the reinterpret routing had). Reads through a conversion base are faithful; a **write** through one hits the copy box, the documented reinterpret-seam limitation shared by the whole `(ж<T>)(uintptr)` family (the runtime sites are reads). The corpus was byte-identical across all behavioral projects after the change — only previously-non-compiling shapes gained emissions. (Guarded by the `PointerSelectorDeref` behavioral test — both shapes, read values vs Go; cleared 3 runtime CS1061, 74 → 71.)

@@ -1029,6 +1029,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckSliceAliasing() => CheckTarget("SliceAliasing");
 
     [TestMethod]
+    public void CheckSliceNilVsEmpty() => CheckTarget("SliceNilVsEmpty");
+
+    [TestMethod]
     public void CheckSolitaire() => CheckTarget("Solitaire");
 
     [TestMethod]

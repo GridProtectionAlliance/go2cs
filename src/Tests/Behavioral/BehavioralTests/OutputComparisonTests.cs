@@ -952,6 +952,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSliceAliasing() => CheckTarget("SliceAliasing");
 
     [TestMethod]
+    public void CheckSliceNilVsEmpty() => CheckTarget("SliceNilVsEmpty");
+
+    [TestMethod]
     public void CheckSolitaire() => CheckTarget("Solitaire");
 
     [TestMethod]

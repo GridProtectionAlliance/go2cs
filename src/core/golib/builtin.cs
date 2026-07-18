@@ -1670,7 +1670,10 @@ public static class builtin
     /// </remarks>
     public static slice<TWide> widen<T, TWide>(slice<T> source, Func<T, TWide> conv)
     {
-        if (source.Length == 0)
+        // Preserve the source's nil-vs-empty identity: only a NIL source projects to nil — a
+        // non-nil empty slice projects to a non-nil empty (the old zero-length early return
+        // manufactured nil from an empty, observable through `== nil` in the instantiated callee).
+        if (source == nil)
             return default;
 
         TWide[] result = new TWide[source.Length];
