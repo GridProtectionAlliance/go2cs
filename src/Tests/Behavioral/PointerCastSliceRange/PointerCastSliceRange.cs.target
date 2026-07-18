@@ -24,7 +24,7 @@ internal static void Main() {
     fmt.Println(sum, total, s[0]);
     ref var ip = ref heap<ж<array<nint>>>(out var Ꮡip);
     ip = Ꮡarr;
-    var back = (~(ж<ж<array<int64>>>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡip).Value))).Value;
+    var back = (~(ж<ж<array<int64>>>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡip).Value))).Value.Clone();
     _ = back;
     var pick = @unsafe.Pointer (bool u) => {
         if (u) {

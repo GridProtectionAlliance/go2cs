@@ -102,6 +102,19 @@ var manualConversionFuncs = map[string]map[string]bool{
 		"Value.Type": true,
 		"toType":     true,
 	},
+	// internal/reflectlite mirrors the reflect bridge for the mini-surface sort.Slice
+	// exercises (ValueOf → Len, Swapper — sort's TestSlice was the first operational hit):
+	// the auto forms reinterpret the interface's eface words, so the first touch derefs a
+	// nil ж<abi.Type>. value_impl.cs carries the boxed managed value on a companion
+	// `partial struct Value { object boxed }` field (typ_/flag set from the Phase-1
+	// synthetic abi.Type, so Kind()/IsValid() work from value.cs unchanged); swapper_impl.cs
+	// swaps through golib's non-generic ISlice indexer. See docs/Phase4/DESIGN-reflection-bridge.md.
+	"internal/reflectlite": {
+		"ValueOf":     true,
+		"unpackEface": true,
+		"Value.Len":   true,
+		"Swapper":     true,
+	},
 }
 
 // isManualType reports whether the named type (raw Go name) is hand-converted in this package.

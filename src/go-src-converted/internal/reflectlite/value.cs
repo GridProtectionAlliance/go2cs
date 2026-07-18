@@ -145,20 +145,9 @@ internal static any packEface(Value v) {
     return i;
 }
 
-// unpackEface converts the empty interface i to a Value.
-internal static Value unpackEface(any i) {
-    var e = (ж<abi.EmptyInterface>)(uintptr)(new @unsafe.Pointer(Ꮡ(i)));
-    // NOTE: don't read e.word until we know whether it is really a pointer or not.
-    var t = e.Value.Type;
-    if (t == nil) {
-        return new Value(nil);
-    }
-    var f = ((flag)(uintptr)(uint8)t.Kind());
-    if (t.IfaceIndir()) {
-        f |= (flag)(flagIndir);
-    }
-    return new Value(t, (~e).Data, f);
-}
+// go2cs generated this placeholder — func unpackEface is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+// NOTE: don't read e.word until we know whether it is really a pointer or not.
 
 // A ValueError occurs when a Value method is invoked on
 // a Value that does not support it. Such cases are documented
@@ -337,32 +326,10 @@ internal static partial nint chanlen(@unsafe.Pointer _);
 //go:noescape
 internal static partial nint maplen(@unsafe.Pointer _);
 
-// Len returns v's length.
-// It panics if v's Kind is not Array, Chan, Map, Slice, or String.
-public static nint Len(this Value v) {
-    var k = v.kind();
-    var exprᴛ1 = k;
-    if (exprᴛ1 == abi.Array) {
-        var tt = (ж<arrayType>)(uintptr)(new @unsafe.Pointer(v.typ()));
-        return (nint)(~tt).Len;
-    }
-    if (exprᴛ1 == abi.Chan) {
-        return chanlen((uintptr)v.pointer());
-    }
-    if (exprᴛ1 == abi.Map) {
-        return maplen((uintptr)v.pointer());
-    }
-    if (exprᴛ1 == abi.Slice) {
-        return ((ж<unsafeheader.Slice>)(uintptr)(v.ptr)).Value.Len;
-    }
-    if (exprᴛ1 == abi.ΔString) {
-        return ((ж<unsafeheader.String>)(uintptr)(v.ptr)).Value.Len;
-    }
+// go2cs generated this placeholder — func Len is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-    // Slice is bigger than a word; assume flagIndir.
-    // String is bigger than a word; assume flagIndir.
-    throw panic(Ꮡ(new ValueError("reflect.Value.Len", v.kind())));
-}
+// Slice is bigger than a word; assume flagIndir.
+// String is bigger than a word; assume flagIndir.
 
 // NumMethod returns the number of exported methods in the value's method set.
 internal static nint numMethod(this Value v) {
@@ -409,14 +376,7 @@ public static ΔType Type(this Value v) {
 //go:noescape
 internal static partial @unsafe.Pointer unsafe_New(ж<abi.Type> _);
 
-// ValueOf returns a new Value initialized to the concrete value
-// stored in the interface i. ValueOf(nil) returns the zero Value.
-public static Value ValueOf(any i) {
-    if (i == default!) {
-        return new Value(nil);
-    }
-    return unpackEface(i);
-}
+// go2cs generated this placeholder — func ValueOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // assignTo returns a value v that can be assigned directly to typ.
 // It panics if v is not assignable to typ.

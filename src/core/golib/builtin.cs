@@ -2304,8 +2304,27 @@ public static class builtin
     /// <returns><c>true</c> if operands are equal; otherwise, <c>false</c>.</returns>
     public static bool AreEqual<T>(T? left, T? right)
     {
-        return default(T) is null ? 
-            AreEqual(left, (object?)right) : 
+        // Go's `==` on floating-point follows IEEE-754: NaN compares unequal to everything,
+        // itself included. EqualityComparer instead routes through the type's Equals, which
+        // reports NaN equal to NaN (double/float bitwise-style Equals; complex componentwise
+        // Equals) — that inverted every generic NaN probe of the `x != x` form (cmp.isNaN,
+        // the basis of slices.Sort's NaN-first ordering). The typeof guards are JIT-time
+        // constants per value-type instantiation, so each branch compiles to the bare
+        // operator compare with the box-cast elided.
+        if (typeof(T) == typeof(double))
+            return (double)(object)left! == (double)(object)right!;
+
+        if (typeof(T) == typeof(float))
+            return (float)(object)left! == (float)(object)right!;
+
+        if (typeof(T) == typeof(complex128))
+            return (complex128)(object)left! == (complex128)(object)right!;
+
+        if (typeof(T) == typeof(complex64))
+            return (complex64)(object)left! == (complex64)(object)right!;
+
+        return default(T) is null ?
+            AreEqual(left, (object?)right) :
             EqualityComparer<T>.Default.Equals(left!, right!);
     }
 
@@ -2346,6 +2365,11 @@ public static class builtin
 
         // Get equality "==" operator for type using reflection,
         // lookup is cached for performance.
+        // (This already yields Go's IEEE-754 `==` for boxed floating-point values: on .NET 7+
+        // the primitives DECLARE op_Equality — the IEqualityOperators implementation — so the
+        // lookup finds the real operator and never falls to double/float.Equals, whose NaN
+        // self-equality would diverge from Go. Complex128/complex64 likewise declare
+        // componentwise-IEEE operators. Guarded by ReverseSortNaNOrder's boxed-`any` NaN leg.)
         MethodInfo? equalityOperator = leftType.GetEqualityOperator();
 
         // If equality operator is not found, use default object.Equals
