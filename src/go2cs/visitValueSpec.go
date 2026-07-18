@@ -254,6 +254,14 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 								// box null and the first promoted-member access NREs, so the
 								// zero value must construct through the NilType ctor.
 								v.writeOutput("%s %s = new(nil);", csTypeName, csIDName)
+							} else if v.structZeroValueNeedsConstruction(def.Type()) {
+								// A struct whose default(T) is broken by a fixed-size array
+								// field (its `= new(N)` backing, at any nesting depth) must run
+								// the generated parameterless constructor so those field
+								// initializers (and AppendZeroValueInitializers) execute —
+								// `default!` skips them, leaving a null backing (len 0 / NRE on
+								// index). Mirrors go2cs-gen's NeedsConstruction.
+								v.writeOutput("%s %s = new();", csTypeName, csIDName)
 							} else {
 								v.writeOutput("%s %s = default!;", csTypeName, csIDName)
 							}
@@ -286,6 +294,13 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						// field's implicit default.
 						hasPromotedEmbeds := v.structHasPromotedEmbeds(def.Type())
 
+						// A struct global whose default(T) is broken by a fixed-size array field
+						// (at any nesting depth) must likewise construct — `new()` runs the
+						// generated parameterless constructor's field initializers. Mirrors the
+						// local branch above (structZeroValueNeedsConstruction / go2cs-gen); the
+						// promoted-embed case above already covers its own superset, so exclude it.
+						needsConstruction := !hasPromotedEmbeds && v.structZeroValueNeedsConstruction(def.Type())
+
 						if v.isAddressedGlobal(ident) {
 							// Box an N-sized array, not the empty default, so writes through the
 							// pointer (and indexing) hit real storage.
@@ -295,6 +310,8 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 								initExpr = fmt.Sprintf("new %s(%s)", csTypeName, arrayLenValue)
 							} else if hasPromotedEmbeds {
 								initExpr = fmt.Sprintf("new %s(nil)", csTypeName)
+							} else if needsConstruction {
+								initExpr = fmt.Sprintf("new %s()", csTypeName)
 							}
 
 							v.writeAddressedGlobalDecl(access, csTypeName, csIDName, initExpr, isInherentlyHeapAllocatedType(v.getIdentType(ident)))
@@ -302,6 +319,8 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 							v.writeOutput("%s static %s %s = new(%s);", access, csTypeName, csIDName, arrayLenValue)
 						} else if hasPromotedEmbeds {
 							v.writeOutput("%s static %s %s = new(nil);", access, csTypeName, csIDName)
+						} else if needsConstruction {
+							v.writeOutput("%s static %s %s = new();", access, csTypeName, csIDName)
 						} else {
 							v.writeOutput("%s static %s %s;", access, csTypeName, csIDName)
 						}

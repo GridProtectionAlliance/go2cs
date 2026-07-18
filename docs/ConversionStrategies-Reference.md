@@ -1282,8 +1282,18 @@ converter-generated structs (`GetStructDeclaration`), so a `true` result guarant
 `FieldType(NilType)` constructor exists; a reference field (pointer/interface/delegate) keeps its correct
 nil zero value, and a cross-package/golib field type is left `default` (conservative — its own package
 constructs it, and its nil zero value is correct anyway). Only the NilType and parameterless constructors
-are touched, so this covers `new(T)`/`@new<T>()`/`&T{}`/`T{}`; a `var x T` **local** still emits
-`default!` (a distinct converter-level gap — a local of a needy struct is not yet constructed). Guarded by
+are touched, so this covers `new(T)`/`@new<T>()`/`&T{}`/`T{}`. A bare **`var x T`** zero-value declaration (no initializer) calls none of those, so the *converter*
+closes the remaining gap on its side: when `T` needs construction it emits `T x = new();` — the generated
+parameterless constructor, which runs the same field initializers + `AppendZeroValueInitializers` — instead
+of the `T x = default!;` that left an array field's backing null (an NRE on the first index/`len`). The
+converter mirrors `StructTypeNeedsConstruction` with the Go-side `structZeroValueNeedsConstruction` (promoted
+embed / fixed-array field / nested needy struct, recursively; a reference field keeps its correct nil zero
+value). A promoted-embed `var` keeps its existing `new(nil)` (the NilType ctor) and a scalar-only struct
+keeps `default!`, so the change is confined to genuinely-needy structs — one pre-existing corpus golden
+re-baselined, `PublicizedFieldType`'s `var cr CaseRange` (a `[3]rune` `Delta` field). A needy struct
+**global** likewise gets `new()` in place of the bare `static T x;`. This `var`/global path is guarded by the
+`ZeroValueStructVar` output-compared test (`var z holder` with a `[8]int` field, a nested `wrapper`, and a
+scalar-only `point` control). Guarded by
 the `NestedPromotedEmbedInit` output-compared test (a `printer` holding a `formatter` field that embeds
 `flags` and holds a `[3]byte`, reached via both `new(printer)` and `&printer{}`, its promoted fields and
 array written and printed against Go); before the fix the promoted-field write NRE'd.

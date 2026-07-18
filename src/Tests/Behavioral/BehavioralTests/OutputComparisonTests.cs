@@ -1203,6 +1203,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     [TestMethod]
     public void CheckZeroValueArrayField() => CheckTarget("ZeroValueArrayField");
 
+    [TestMethod]
+    public void CheckZeroValueStructVar() => CheckTarget("ZeroValueStructVar");
+
     // </TestMethods>
 
     private void CheckTarget(string targetProject)
