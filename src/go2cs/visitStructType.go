@@ -579,3 +579,70 @@ func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {
 
 	return false
 }
+
+// structZeroValueNeedsConstruction reports whether a struct type's zero value default(T) is
+// BROKEN — it has a promoted-embed box (constructor-allocated) or a fixed-size array field
+// (`= new(N)` field initializer that default(T) skips), directly or through a nested value-struct
+// field — so `var z T` must run the generated parameterless constructor (`new()`) rather than
+// emit `default!`. Mirrors go2cs-gen StructTypeTemplate.NeedsConstruction; a false result keeps the
+// existing `default!`/bare emission. The top-level promoted-embed case is routed to `new(nil)` by
+// the caller's earlier structHasPromotedEmbeds check — this predicate still recurses for it so a
+// NESTED field whose own type carries a promoted embed (or array) also constructs.
+func (v *Visitor) structZeroValueNeedsConstruction(t types.Type) bool {
+	return v.structZeroValueNeedsConstructionRec(t, map[*types.Struct]bool{})
+}
+
+func (v *Visitor) structZeroValueNeedsConstructionRec(t types.Type, seen map[*types.Struct]bool) bool {
+	if t == nil {
+		return false
+	}
+
+	st, ok := t.Underlying().(*types.Struct)
+
+	if !ok {
+		return false
+	}
+
+	// Go forbids value-type embedding cycles (infinite size), so a cycle cannot actually occur —
+	// the guard is purely defensive.
+	if seen[st] {
+		return false
+	}
+
+	seen[st] = true
+
+	// Any promoted embed surfaces as a constructor-allocated `ж<T>` box — default leaves it null.
+	if v.structHasPromotedEmbeds(t) {
+		return true
+	}
+
+	for i := range st.NumFields() {
+		field := st.Field(i)
+
+		if field.Name() == "_" {
+			continue
+		}
+
+		fieldType := field.Type()
+
+		// A reference field keeps its nil zero value (correct — a nil pointer/slice/map/chan/func
+		// matches Go), so it never forces construction; skipping it also stops the recursion from
+		// descending through a self-referential pointer field.
+		if isInherentlyHeapAllocatedType(fieldType) {
+			continue
+		}
+
+		// A fixed-size array field (`[N]T` → golib array<T>) carries a `= new(N)` field initializer
+		// that default(T) skips, leaving a null backing.
+		if _, isArray := fieldType.Underlying().(*types.Array); isArray {
+			return true
+		}
+
+		// A nested value-struct field whose own type needs construction.
+		if v.structZeroValueNeedsConstructionRec(fieldType, seen) {
+			return true
+		}
+	}
+
+	return false
+}

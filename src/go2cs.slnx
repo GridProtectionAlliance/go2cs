@@ -473,6 +473,7 @@
     <Project Path="Tests/Behavioral/VersionedImport/VersionedImport.csproj" />
     <Project Path="Tests/Behavioral/VersionedImport/vlib/vlib.v2.csproj" />
     <Project Path="Tests/Behavioral/WrittenCaptureParam/WrittenCaptureParam.csproj" />
+    <Project Path="Tests/Behavioral/ZeroValueStructVar/ZeroValueStructVar.csproj" />
   </Folder>
   <Folder Name="/tests/library/">
     <Project Path="Tests/ChannelTests/ChannelTests.csproj" />

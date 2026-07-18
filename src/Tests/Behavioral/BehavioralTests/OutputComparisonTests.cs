@@ -1176,6 +1176,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     [TestMethod]
     public void CheckWrittenCaptureParam() => CheckTarget("WrittenCaptureParam");
 
+    [TestMethod]
+    public void CheckZeroValueStructVar() => CheckTarget("ZeroValueStructVar");
+
     // </TestMethods>
 
     private void CheckTarget(string targetProject)

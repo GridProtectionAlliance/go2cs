@@ -1259,6 +1259,9 @@ public class B2_CompileTests : BehavioralTestBase
     [TestMethod]
     public void CheckWrittenCaptureParam() => CheckTarget("WrittenCaptureParam");
 
+    [TestMethod]
+    public void CheckZeroValueStructVar() => CheckTarget("ZeroValueStructVar");
+
     // </TestMethods>
 
     private void CheckTarget(string targetProject)
