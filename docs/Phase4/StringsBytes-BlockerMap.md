@@ -157,6 +157,36 @@ abi-accessibility errors exist under the current absolute-path pipeline.
   Sort's dir was fully restored after measurement (validated-package policy: only a validating
   package commits its test sources).
 
+- **B2 + B9: FIXED** (worktree branch `claude/friendly-archimedes-833505` — coordinator gates the
+  merge). One shared mechanism, as ruled: production symbol names are IMMUTABLE in a test-variant
+  analysis; a collision a test file introduces Δ-renames the TEST-side method declarator.
+  `performNameCollisionAnalysis` now tracks per-name declaration origin — (B2) an element-vs-method
+  collision whose methods are all test-declared over a production element pins the element (no
+  nameCollisions entry, no exported alias) and renames the method; (B9) a test-declared method
+  matching a dot-imported foreign function the variant references UNQUALIFIED (Sel-excluded AST
+  scan over the whole universe — qualified refs never trigger) renames the same way. The registry
+  (`testMethodRenames`) is OBJECT-keyed (same-named production symbols keep their plain emission)
+  and SESSION-scoped (one per -tests run, not per variant — both variants share one load, so the
+  external variant's `tc.r.ΔReplacer()` resolves the internal pass's rename by object identity).
+  Declaration renames in visitFuncDecl; every reference follows via convIdent's isMethod arm; the
+  RecvGenerator ж-overloads follow from the emitted name. Guards:
+  `TestTestVariantPinsProductionTypeAgainstTestMethodCollision` +
+  `TestTestVariantRenamesTestMethodShadowingDotImportedFunction`, both discriminating (neutered-fix
+  runs fail on the mapped symptoms). CNR byte-identical ×402; utf8 re-validates 14/14, git-clean.
+- **Sort's wall after B2/B9 (probe 2026-07-17):** ALL 14 CS1501 GONE — and so are the 5
+  method-group CS1503 sites wave 2 attributed to B10: they were B9-DOWNSTREAM (the wrong method
+  group failing delegate conversion; another Roslyn-masking layer — B10's real count was measured
+  with B9 present). Remaining: exactly **3 × CS1503** — sort_test.cs:769 `long`→`nint` (B7a
+  exactly) + search_test.cs:49 `double`→`nint` (B7a float sibling) + example_keys_test.cs:29 `By`
+  → raw `Func<ж<Planet>, ж<Planet>, bool>` (the one true B10 site). Runtime rows unreached; dir
+  fully restored after measurement.
+- **Strings' wall after B2/B9 (probe 2026-07-17):** B2's CS0102/CS0246 GONE — strings now BUILDS
+  and runs through the test host end-to-end (first time). Wall moved to the runtime rows as
+  mapped: C# host runs 72 → **23 pass / 7 fail / 42 infrastructure-error**, the infra bucket
+  dominated by the R1 cctor cascade (`slice array reference is null` via `NewReplacer` in the
+  `strings_test_package` cctor — the `[]T(nil)` signature). R1–R4 remain the next chip's scope;
+  dir fully restored after measurement.
+
 ## Cross-cutting lessons
 
 - **Capability-excluded tests still compile** — exclusion gates the run registry, not emission; a broken

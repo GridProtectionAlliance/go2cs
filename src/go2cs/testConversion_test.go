@@ -1,6 +1,7 @@
 package main
 
 import (
+	"go/types"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -841,5 +842,158 @@ func TestAliasReferenceImportsAddsTransitiveAliasTargets(t *testing.T) {
 
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("alias reference imports = %v, want %v", got, want)
+	}
+}
+
+func loadBothTestVariantsForDir(t *testing.T, dir string) (internal, external *packages.Package) {
+	t.Helper()
+
+	loaded, err := packages.Load(&packages.Config{Mode: packages.LoadAllSyntax, Dir: dir, Tests: true}, ".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	production := findProductionPackage(loaded, dir)
+	if production == nil {
+		t.Fatal("production package was not loaded")
+	}
+	return findTestVariants(loaded, production)
+}
+
+func readConvertedTestFile(t *testing.T, dir, name string) string {
+	t.Helper()
+
+	data, err := os.ReadFile(filepath.Join(dir, name))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(data)
+}
+
+// B2 guard (production-name pinning): a `_test.go` METHOD declared over a production TYPE's name
+// must Δ-rename the TEST-side declarator — the production .cs on disk keeps the bare name, so the
+// pre-fix element rename split one assembly into two disagreeing halves (strings' export_test.go
+// `func (r *Replacer) Replacer()`: CS0102 `strings_package` already contains `Replacer` + CS0246
+// `ΔReplacer`). The rename must hold at the declaration, at internal-variant call sites, AND at
+// EXTERNAL-variant call sites (the export_test pattern — both variants share one load, so the
+// session-scoped object-keyed registry carries the internal pass's rename into the external one).
+func TestTestVariantPinsProductionTypeAgainstTestMethodCollision(t *testing.T) {
+	dir := t.TempDir()
+	files := map[string]string{
+		"go.mod":   "module example/pinned\n\ngo 1.23\n",
+		"value.go": "package pinned\n\ntype Replacer struct{ n int }\n\nfunc NewReplacer(n int) *Replacer { return &Replacer{n: n} }\n",
+		"export_test.go": "package pinned\n\nfunc (r *Replacer) Replacer() int { return r.n }\n\n" +
+			"func replacerProbe(r *Replacer) int { return r.Replacer() }\n",
+		"external_test.go": "package pinned_test\n\nimport \"example/pinned\"\n\n" +
+			"func externalProbe(r *pinned.Replacer) int { return r.Replacer() }\n",
+	}
+	for name, contents := range files {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(contents), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	internal, external := loadBothTestVariantsForDir(t, dir)
+	if internal == nil || external == nil {
+		t.Fatal("both test variants must load")
+	}
+
+	outputPath := t.TempDir()
+	options := Options{indentSpaces: 4, preferVarDecl: true, useChannelOperators: true}
+
+	// Session scope mirrors processTestConversion: ONE registry across both variant passes.
+	testMethodRenames = make(map[types.Object]bool)
+	t.Cleanup(func() { testMethodRenames = nil })
+
+	if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", options); err != nil {
+		t.Fatal(err)
+	}
+
+	if nameCollisions["Replacer"] {
+		t.Fatal("the production type name must stay pinned — nameCollisions must not Δ-rename `Replacer` in a test variant")
+	}
+
+	exportCs := readConvertedTestFile(t, outputPath, "export_test.cs")
+
+	if !strings.Contains(exportCs, ShadowVarMarker+"Replacer(") {
+		t.Fatalf("the test-side method declarator must be Δ-renamed:\n%s", exportCs)
+	}
+	if !strings.Contains(exportCs, "."+ShadowVarMarker+"Replacer()") {
+		t.Fatalf("the internal-variant call site must follow the Δ-renamed method:\n%s", exportCs)
+	}
+	if strings.Contains(exportCs, "ref "+ShadowVarMarker+"Replacer") || strings.Contains(exportCs, PointerPrefix+"<"+ShadowVarMarker+"Replacer>") {
+		t.Fatalf("the production TYPE must keep its bare name in every reference:\n%s", exportCs)
+	}
+
+	if _, _, err := convertTestVariant(external, testFileEntries(external), outputPath, "go", options); err != nil {
+		t.Fatal(err)
+	}
+
+	externalCs := readConvertedTestFile(t, outputPath, "external_test.cs")
+
+	if !strings.Contains(externalCs, "."+ShadowVarMarker+"Replacer()") {
+		t.Fatalf("an EXTERNAL-variant call site must follow the internal variant's Δ-renamed method:\n%s", externalCs)
+	}
+}
+
+// B9 guard (dot-import shadowing): a TEST-declared method named like a dot-imported production
+// FUNCTION the variant references unqualified must Δ-rename the TEST-side declarator (C# member
+// lookup binds the enclosing class's method group before `using static` — sort_test's `Sort(data)`
+// bound example_keys_test.go's `By.Sort`, CS1501 ×14), while the dot-imported call keeps its bare
+// emission. Discrimination both ways: a same-named method whose production function is never
+// referenced (Stable), or referenced only QUALIFIED (Reverse), keeps its plain name.
+func TestTestVariantRenamesTestMethodShadowingDotImportedFunction(t *testing.T) {
+	dir := t.TempDir()
+	files := map[string]string{
+		"go.mod":   "module example/value\n\ngo 1.23\n",
+		"value.go": "package value\n\nfunc Sort(x []int) {}\n\nfunc Stable(x []int) {}\n\nfunc Reverse(x []int) {}\n",
+		"value_test.go": "package value_test\n\nimport . \"example/value\"\n\n" +
+			"type By []int\n\n" +
+			"func (by By) Sort() { Sort(by) }\n\n" +
+			"func (by By) Stable() {}\n\n" +
+			"func probe(by By) {\n\tby.Sort()\n\tby.Stable()\n}\n",
+		"qualified_test.go": "package value_test\n\nimport value \"example/value\"\n\n" +
+			"type QB []int\n\nfunc (qb QB) Reverse() { value.Reverse(qb) }\n",
+	}
+	for name, contents := range files {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(contents), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	_, external := loadBothTestVariantsForDir(t, dir)
+	if external == nil {
+		t.Fatal("external test variant was not loaded")
+	}
+
+	outputPath := t.TempDir()
+	testMethodRenames = make(map[types.Object]bool)
+	t.Cleanup(func() { testMethodRenames = nil })
+
+	options := Options{indentSpaces: 4, preferVarDecl: true, useChannelOperators: true}
+	if _, _, err := convertTestVariant(external, testFileEntries(external), outputPath, "go", options); err != nil {
+		t.Fatal(err)
+	}
+
+	valueCs := readConvertedTestFile(t, outputPath, "value_test.cs")
+
+	if !strings.Contains(valueCs, ShadowVarMarker+"Sort(") {
+		t.Fatalf("the shadowing test method declarator must be Δ-renamed:\n%s", valueCs)
+	}
+	if !strings.Contains(valueCs, "."+ShadowVarMarker+"Sort()") {
+		t.Fatalf("the test method's call sites must follow the Δ-rename:\n%s", valueCs)
+	}
+
+	// After removing every Δ-renamed occurrence, a bare `Sort(` must remain — the dot-imported
+	// production call keeps its unqualified emission (bound through `using static`).
+	if !strings.Contains(strings.ReplaceAll(valueCs, ShadowVarMarker+"Sort", ""), "Sort(") {
+		t.Fatalf("the dot-imported production call must keep its bare emission:\n%s", valueCs)
+	}
+
+	if strings.Contains(valueCs, ShadowVarMarker+"Stable") {
+		t.Fatalf("a same-named method whose production function is never referenced unqualified must keep its plain name:\n%s", valueCs)
+	}
+
+	qualifiedCs := readConvertedTestFile(t, outputPath, "qualified_test.cs")
+
+	if strings.Contains(qualifiedCs, ShadowVarMarker+"Reverse") {
+		t.Fatalf("a QUALIFIED production reference must not trigger the rename (Sel exclusion):\n%s", qualifiedCs)
 	}
 }

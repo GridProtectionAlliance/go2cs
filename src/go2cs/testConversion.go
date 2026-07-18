@@ -179,6 +179,12 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 		return writeNoTestsManifest(production, inputPath, outputPath, targetParts, options)
 	}
 
+	// Session-scoped, not per-variant (B2/B9): both variants come from the ONE load above, so the
+	// external variant's references to an internal-variant-renamed method (the export_test
+	// pattern) resolve by object identity to entries registered during the internal pass —
+	// resetPackageState deliberately does not clear this map.
+	testMethodRenames = make(map[types.Object]bool)
+
 	// Seed package_test_info.cs from the production package_info.cs so the production
 	// assembly-level metadata carries over verbatim; each converted variant's ADDITIONS are then
 	// merged in by the shared writePackageInfoFile (identical emission semantics to production —

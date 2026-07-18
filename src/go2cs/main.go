@@ -496,6 +496,19 @@ var numericConversions map[string]map[string]string
 var indirectNumericConversions map[string]map[string]string
 var nameCollisions map[string]bool
 
+// testMethodRenames holds the `-tests` TEST-file method declarators that must emit Δ-renamed to
+// keep production symbol names IMMUTABLE in a test-variant emission (blockers B2/B9): the variant
+// universe mixes production files with `_test.go` files, but only the test files are emitted — the
+// production .cs on disk keep their production-only-universe names, so a collision introduced by a
+// test-file method resolves by renaming the TEST-side declarator (and every reference site, via
+// convIdent's isMethod arm), never the production element. Object-keyed so the same-named
+// production/dot-imported symbols keep their plain emission, and SESSION-scoped (initialized once
+// per -tests conversion in processTestConversion, NOT reset per variant): both variants share one
+// go/packages load, so the external variant's references to an internal-variant method (the
+// export_test pattern) resolve to the very object registered during the internal pass. Nil outside
+// -tests conversions. See performNameCollisionAnalysis / registerTestMethodRenames.
+var testMethodRenames map[types.Object]bool
+
 // packageBuiltinShadows holds Go built-in names (`clear`, `len`, …) that the current package ALSO
 // declares as a method or function. In Go a method `func (x T) clear()` and the universe `clear`
 // built-in coexist (the method is only reached as `x.clear()`), but in C# the method is emitted as a

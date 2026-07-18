@@ -130,6 +130,14 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 			name = getCoreSanitizedIdentifier(ident.Name)
 		} else {
 			name = getSanitizedFunctionName(v.getIdentName(ident))
+
+			// A `-tests` variant Δ-renamed this test-file method declarator to keep production
+			// symbol names immutable (B2/B9, see performNameCollisionAnalysis) — matched by
+			// OBJECT identity, so the same-named production type / dot-imported function keeps
+			// its plain emission at every other site.
+			if testMethodRenames[v.info.ObjectOf(ident)] {
+				name = ShadowVarMarker + name
+			}
 		}
 
 		// A field whose name equals its enclosing struct's type name is renamed with the

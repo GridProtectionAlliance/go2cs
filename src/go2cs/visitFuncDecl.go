@@ -132,6 +132,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		csFunctionName = getGlobalTempVarName("_")
 	}
 
+	// A `-tests` variant registered THIS test-file method declarator for a Δ-rename — its name
+	// collides with a pinned production element or a dot-imported function (B2/B9, see
+	// performNameCollisionAnalysis); reference sites follow via convIdent's isMethod arm.
+	if testMethodRenames[v.info.ObjectOf(funcDecl.Name)] {
+		csFunctionName = ShadowVarMarker + csFunctionName
+	}
+
 	v.currentFuncDecl = funcDecl
 	v.currentFuncName = csFunctionName
 	v.currentFuncPrefix = &strings.Builder{}
