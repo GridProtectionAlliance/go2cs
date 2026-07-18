@@ -338,6 +338,104 @@ classes; strings: Builder-allocs/Map/Finder classes) — next wave's work order.
   legitimately takes minutes through the golib @string paths (the 2m default killed the host mid-run,
   reporting everything after TestCompareIdenticalString as `C#=""`); 8m completes. Slow ≠ hung.
 
+## Status updates (2026-07-18 — R10/R11 + the Builder-allocs/IndexRune analysis)
+
+- **Baseline moved before this chip ran:** with R1–R4 merged, the strings host runs end-to-end at
+  **57 pass / 5 fail / 10 infrastructure-error** (72 run; full host ≈1m43s — the pipeline's default
+  2m `-test-timeout` is borderline and killed the compare mid-run; pass `-test-timeout 5m` when
+  driving strings through `-test-action compare/all`). The scout-era "23 pass / 42 infra" picture is
+  obsolete.
+- **R10: FIXED** (worktree branch `claude/sleepy-germain-074709` — coordinator gates the merge).
+  `%T` of a generated adapter now renders the Go dynamic type at BOTH format layers:
+  `GoReflect.GoTypeName` (the reflection bridge's `rtype.String()`, which the converted fmt's `%T`
+  reads — the differential's actual path) gains `TryAdapterWrappedType` — `IжAdapter` → `*T`,
+  ᴠ-infix value adapter → wrapped struct, both recovered structurally from the adapter's single
+  one-parameter constructor (never name-parsed; glyphs via `Symbols`) — and golib's
+  `builtin.GetGoTypeName` (stub fmt `%T`, `TestFormat`, panic texts) unwraps
+  `IжAdapter.Box`/`IInterfaceAdapter.Value` at the value level and routes ж-boxes/adapters/named
+  types through `GoReflect.GoTypeName` (so `go.main_package+soft` renders `main.soft`, raw
+  `ж<loud>` renders `*main.loud`). Guard: `FormatTypeAdapters` (+ `typelib` sub-package for the
+  foreign ᴠ arm), output-compared vs `go run`; discrimination: reverted-fix run prints
+  `main_package+loudжgreeter` / ``ж`1[[go.main_package+loud, …]]`` / `main_package+typelib_Markᴠstamper`.
+  **Honest scope note:** TestPickAlgorithm still reports infrastructure-error — its `%T` mismatch
+  (case 0) is gone, but later cases crash in `build()` at replace.cs:83 on the **R8** zero-value
+  `[256]byte` null-backing NRE (the same class as TestFinderCreation/Next, owned by the Finder
+  chip). The test flips only when R8 lands. `reflect.Kind()/Elem()` of adapter TYPES still report
+  the adapter class — a reflection-bridge follow-up that belongs with R5's DeepEqual work.
+- **R11: FIXED — no disclosure needed** (same branch). Decision path: the map entry anticipated an
+  acceptable-difference disclosure, but root-causing showed identity was ALREADY preserved —
+  converted `Map`'s fast path returns `s`, sharing the backing `byte[]` through the `@string`
+  struct copy — and only the COMPARISON was blind: `unsafe.StringData` materializes a fresh
+  `PinnedBuffer` view per call, and `ж.Equals`'s array-index arm compared view instances by
+  reference. Fix: the array-index arm (and `GetHashCode`) canonicalizes a `PinnedBuffer` to its
+  pinned storage object (`PinnedTarget`) before the identity comparison — strictly widens equality
+  to same-storage-same-index pairs; Go pointer semantics otherwise unchanged (distinct-but-equal
+  arrays still unequal, value comparison never introduced). **TestMap flips to PASS.** Guard:
+  `StringDataIdentity` (header-copy true / repeated-call true / runtime-copy false / content-equal
+  true); discrimination: reverted-fix run prints `false false false true`.
+
+- **After-differential (same branch, full run to completion under `-test-timeout 5m`):**
+  **59 pass / 4 fail / 9 infrastructure-error** (72 run; baseline same-day: 57 / 5 / 10 — the
+  earlier "6 fail" read double-counted the host's bare trailing `FAIL` line). Delta: TestMap
+  fail→pass (R11), **TestClone infrastructure-error→pass** — its baseline crash was **R9's
+  PrintPointer defect TRIGGERED BY R11's wrong comparison**: the empty-string leg
+  `unsafe.StringData(clone) != unsafe.StringData(emptyString)` compared wrongly-unequal
+  (fresh-view reference equality), entering `t.Errorf("Clone(%#v)…", unsafe.StringData(input))`,
+  whose pointer print walks `ж.ToString → PrintPointer → PinnedBuffer[0]` over the EMPTY backing →
+  IndexOutOfRange. Post-R11 the comparison is correctly equal, the Errorf never fires, and the
+  non-empty leg's must-NOT-share assert still holds (distinct arrays stay unequal through the
+  canonicalization). **R9 stays open as a latent golib defect** (PrintPointer on an empty-backing
+  ж) — the strings suite merely no longer triggers it. Honest remainder: 4 fail = the AllocsPerRun
+  divergence classes below (proposal pending); 9 infra = R5 (TestSplit/TestSplitAfter), R6
+  (TestRepeatCatchesOverflow), R7 (TestCaseConsistency), R8 (TestFinderCreation/TestFinderNext/
+  TestPickAlgorithm/TestReplacer/TestWriteStringError) — all owned rows.
+
+## AllocsPerRun divergence analysis (Builder trio + TestIndexRune) — PROPOSAL, awaiting ruling
+
+The four remaining alloc-asserting failures are diagnosed to two distinct divergence classes, and
+NONE is legitimately fixable in golib without faking measurements:
+
+| Test | Asserts | Measured (bytes/run) | Class |
+|---|---|---|---|
+| TestBuilderAllocs | exactly 1 malloc | 648 | count-shape (+ profile) |
+| TestBuilderGrow, growLen>0 legs | exactly 1 malloc | (with 0-leg: 520+) | count-shape (+ profile) |
+| TestBuilderGrow, growLen=0 leg | exactly 0 mallocs | 520 | allocation profile |
+| TestBuilderGrowSizeclasses | allocs ≤ 1 | 712 | count-shape (+ profile) |
+| TestIndexRune (alloc leg) | exactly 0 mallocs | 32 | allocation profile |
+
+- **Count-shape** (`want 1`, `want ≤ 1`): the shim is deliberately byte-derived (see the
+  AllocsPerRun entry in `docs/ConversionStrategies-Reference.md`) — a nonzero count-assert can
+  never agree and diverges loudly BY DESIGN.
+- **Allocation profile** (`want 0`): the zero-shape maps exactly through the shim, but the managed
+  MODEL genuinely allocates where Go's compiler doesn't — the emitted test lambda heap-boxes the
+  addressed `var b Builder` per run (`ref var b = ref heap(...)`; Go's escape analysis
+  stack-allocates, which is the very thing issue-23382's test verifies), converted
+  `Builder.String()` copies through `unsafe.String` where Go's is zero-copy, and `IndexRune`'s
+  `Index(s, string(r))` materializes a `byte[]` where Go uses a 4-byte stack buffer
+  (`runtime.intstring`). A malloc-COUNTING shim would fail these identically — the divergence is
+  the CLR allocation model, not the measurement unit. TestIndexRune's index-semantics legs all
+  pass; only the alloc leg fails.
+- **TestIndexRune post-CoverMode note:** the shim's `CoverMode() == ""` is Go's exact coverage-off
+  value; the test's gate `allocs != 0 && CoverMode() == ""` behaves exactly as an uncovered
+  `go test` run. The failure is the 32-byte profile divergence above, not a CoverMode artifact.
+
+**Proposed mechanism — test-level disclosed-divergence manifest (extends the existing
+"disclosed-unsupported" vocabulary from declaration level to test level):** a hand-owned,
+repo-committed per-package manifest beside the converted package (reviewed like any source, NOT
+regenerated) that the `-test-action compare` oracle consumes. Each entry pins `{test name,
+divergence class, expected C# failure signature}` — e.g. `TestBuilderGrow /
+alloc-count-semantics / "got %d allocs during Write"` — and the oracle reports a matching
+divergence as `disclosed-divergent (alloc profile)` in the validation line (alongside the existing
+"N disclosed-unsupported declarations excluded") instead of a failure. The **signature pin** is the
+integrity guard: a disclosed test that fails with any OTHER message (e.g. TestIndexRune's index
+legs regressing via Fatalf) still fails the differential — the disclosure covers exactly the
+documented divergence, never the whole test. Alternatives considered and rejected: demoting
+AllocsPerRun from `supportedTestCapabilities` (loses sort's TestSearchWrappersDontAlloc and every
+want-zero guard that legitimately passes); static assertion-shape analysis in the converter
+(fragile, and cannot see the profile class at all). **No implementation in this chip — the
+mechanism, its manifest shape, and whether strings validates with disclosed rows are a
+coordinator/user ruling.**
+
 ## Cross-cutting lessons
 
 - **Capability-excluded tests still compile** — exclusion gates the run registry, not emission; a broken

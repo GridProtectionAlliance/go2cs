@@ -354,6 +354,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckForLoopPerIterationVars() => CheckTarget("ForLoopPerIterationVars");
 
     [TestMethod]
+    public void CheckFormatTypeAdapters() => CheckTarget("FormatTypeAdapters");
+
+    [TestMethod]
     public void CheckForMethodInitPost() => CheckTarget("ForMethodInitPost");
 
     [TestMethod]
@@ -1066,6 +1069,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckStringConvPostfix() => CheckTarget("StringConvPostfix");
+
+    [TestMethod]
+    public void CheckStringDataIdentity() => CheckTarget("StringDataIdentity");
 
     [TestMethod]
     public void CheckStringLenUtf8Bytes() => CheckTarget("StringLenUtf8Bytes");
