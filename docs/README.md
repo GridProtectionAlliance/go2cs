@@ -180,7 +180,7 @@ go2cs -tests -test-action all goroot_pkg_dir converted_pkg_dir   # ...and build,
 |:--|:--|
 | `-stdlib` | Convert the Go standard library (optionally followed by specific package names). |
 | `-recurse` | Recursively convert a downloaded module **and its third-party dependencies** in dependency order, referencing the pre-converted standard library. Use the `nuget` option (`-recurse=nuget`) to reference the published go2cs NuGet packages ([`go.<pkg>`](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) stdlib + [`go.lib`](https://www.nuget.org/packages/go.lib) runtime + [`go.gen`](https://www.nuget.org/packages/go.gen) analyzer) instead of a locally-staged deploy root — no `deploy-core` needed. **NOTE:** _using NuGet references with analyzer is still a work in progress_. See [Converting a real-world module](#converting-a-real-world-module). |
-| `-tests` | Also convert the package's eligible `_test.go` suite and emit a runnable C# test-host project alongside the converted package (default off; cannot be combined with `-recurse`). Forces `-comments` on (test conversions are derivative works — the per-file Go copyright header must survive), resolves the output path to absolute, and self-locates `$(go2csPath)` by walking up from the output directory to the first root containing `core\golib` — so the canonical two-argument form `go2cs -tests -test-action all <goroot-package-dir> <converted-package-dir>` works from a bare clone with no flags or environment setup. See [Try it yourself — validate a converted test suite](#try-it-yourself--validate-a-converted-test-suite) for a worked example. |
+| `-tests` | Also convert the package's eligible `_test.go` suite and emit a runnable C# test-host project alongside the converted package (default off; cannot be combined with `-recurse`). Defaults to `-comments` on, resolves the output path to absolute, and self-locates `$(go2csPath)` by walking up from the output directory to the first root containing `core\golib` — so the canonical two-argument form `go2cs -tests -test-action all <goroot-package-dir> <converted-package-dir>` works from a bare clone with no flags or environment setup. See [Try it yourself — validate a converted test suite](#try-it-yourself--validate-a-converted-test-suite) for a worked example. |
 | `-test-action <action>` | With `-tests`: one of `convert` (default), `build`, `run`, `compare`, or `all`. `convert` and `all` convert the package and its tests; `build` / `run` / `compare` act on the **existing** converted artifacts — validated against the test manifest's recorded input digest — without reconverting. `compare` (and `all`, after converting) runs both `go test -json -count=1` and the converted C# test host and diffs the terminal results by test name. |
 | `-test-timeout <duration>` | Timeout for each converted-test child process (build / run / compare), in Go duration syntax (default `2m`; must be positive). |
 | `-go2cspath <dir>` | Root for converted code (env `GO2CSPATH`; default `~/go2cs`): the **output** root for `-stdlib` (`…\core\<pkg>`) and `-recurse` (`…\src\` app + `…\pkg\` deps), and the root that generated `$(go2csPath)…` project references resolve against. For a single-package/file convert the C# output instead goes to the optional `[output_dir]` argument (in place by default). |
@@ -344,19 +344,14 @@ production code under [`src/go-src-converted`](https://github.com/GridProtection
 (for example, [`unicode/utf8/utf8_test.cs`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/unicode/utf8/utf8_test.cs)) —
 so you can read the exact C# that runs. You can also re-run the validation yourself. You need
 **[Go 1.23.1](https://go.dev/dl/)** (for the reference `go test` run) and the **[.NET 9 SDK](https://dotnet.microsoft.com/download)**
-(to build and run the converted test host). From a fresh clone:
+(to build and run the converted test host). This example assumes `go2cs` is installed, see step 2 from [converting a real-world module](#converting-a-real-world-module):
 
 ```sh
-# 1. Build the converter
-cd src/go2cs
-go build -o bin/go2cs.exe .
-cd ../..
-
-# 2. Convert unicode/utf8's test suite, build + run the C# host, and diff it against `go test`.
+# 1. Convert unicode/utf8's test suite, build + run the C# host, and diff it against `go test`.
 #    The second argument is the package's home in the converted tree; the converter locates the
 #    runtime and its stdlib dependencies from there — no flags or environment setup required.
 #    (On Windows, Go's source lives under "C:\Program Files\Go\src"; elsewhere use "$(go env GOROOT)/src".)
-src/go2cs/bin/go2cs.exe -tests -test-action all \
+go2cs.exe -tests -test-action all \
     "C:\Program Files\Go\src\unicode\utf8" \
     src/go-src-converted/unicode/utf8
 ```

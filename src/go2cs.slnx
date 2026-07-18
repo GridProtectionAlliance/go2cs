@@ -279,6 +279,7 @@
     <Project Path="Tests/Behavioral/NamedFuncTypeStructuralField/NamedFuncTypeStructuralField.csproj" />
     <Project Path="Tests/Behavioral/NamedMapValuesCollision/NamedMapValuesCollision.csproj" />
     <Project Path="Tests/Behavioral/NamedMapCrossPkgKey/NamedMapCrossPkgKey.csproj" />
+    <Project Path="Tests/Behavioral/NamedMapMakeNonNil/NamedMapMakeNonNil.csproj" />
     <Project Path="Tests/Behavioral/NamedPointerReinterpret/NamedPointerReinterpret.csproj" />
     <Project Path="Tests/Behavioral/NamedResultLambdaInfer/NamedResultLambdaInfer.csproj" />
     <Project Path="Tests/Behavioral/NamedReturnDefer/NamedReturnDefer.csproj" />

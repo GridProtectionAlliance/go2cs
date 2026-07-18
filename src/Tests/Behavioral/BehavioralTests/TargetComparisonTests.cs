@@ -690,6 +690,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedMapCrossPkgKey() => CheckTarget("NamedMapCrossPkgKey");
 
     [TestMethod]
+    public void CheckNamedMapMakeNonNil() => CheckTarget("NamedMapMakeNonNil");
+
+    [TestMethod]
     public void CheckNamedMapValuesCollision() => CheckTarget("NamedMapValuesCollision");
 
     [TestMethod]

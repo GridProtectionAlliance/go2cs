@@ -1287,6 +1287,19 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					}
 				}
 
+				// `make(StrIntMap)` of a DEFINED map type (`type StrIntMap map[string]int`) with NO
+				// size argument: the generated wrapper struct has an allocating `(nint size)` ctor
+				// but NO parameterless one, so a bare `new StrIntMap()` is default(StrIntMap) — a
+				// NIL map (its backing store is null), making `m == nil` TRUE. Go's `make` yields a
+				// NON-nil empty map (`m == nil` is false), so default the size to 0 to run the
+				// allocating ctor. Scoped to *types.Named defined types: the UNNAMED `map<K,V>`
+				// builtin already has an allocating parameterless ctor and is left as `new map<K,V>()`.
+				if _, isNamed := typeParam.(*types.Named); isNamed && !isTypeParam {
+					if _, ok := typeParam.Underlying().(*types.Map); ok && len(remainingArgs) == 0 {
+						remainingArgs = "0"
+					}
+				}
+
 				// make(T, len[, cap]) for a slice/map/chan — the golib `slice<T>(nint length, nint
 				// capacity)` / `map<K,V>(nint capacity)` / `channel<T>(nint capacity)` ctors all take nint.
 				// A length/cap/hint whose Go type is an integer with NO implicit C# conversion to nint

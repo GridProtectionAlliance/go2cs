@@ -687,6 +687,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedMapCrossPkgKey() => CheckTarget("NamedMapCrossPkgKey");
 
     [TestMethod]
+    public void CheckNamedMapMakeNonNil() => CheckTarget("NamedMapMakeNonNil");
+
+    [TestMethod]
     public void CheckNamedMapValuesCollision() => CheckTarget("NamedMapValuesCollision");
 
     [TestMethod]
