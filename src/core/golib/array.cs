@@ -191,7 +191,23 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public array<T> Clone()
     {
-        return new array<T>(m_array.Clone() as T[]);
+        T[] copy = (T[])m_array.Clone();
+
+        // Go array copy semantics are DEEP for nested arrays: assigning a [2][3]int copies the
+        // inner arrays too. An element that is itself an array wrapper (array<T> or a generated
+        // named-array wrapper — both implement IArray) is a struct over a shared T[] backing, so
+        // the shallow element copy above would leave every nested backing aliased; re-clone each
+        // element through its ICloneable surface, which returns the properly-wrapped clone for
+        // unboxing back to T (recursing through deeper nestings). The typeof test is a JIT-time
+        // constant, so non-nested element types keep the single shallow copy with no per-element
+        // work.
+        if (typeof(IArray).IsAssignableFrom(typeof(T)))
+        {
+            for (int i = 0; i < copy.Length; i++)
+                copy[i] = (T)((ICloneable)copy[i]!).Clone();
+        }
+
+        return new array<T>(copy);
     }
 
     public IEnumerator<(nint, T)> GetEnumerator()
@@ -209,7 +225,13 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public override int GetHashCode()
     {
-        return m_array.GetHashCode();
+        // Structural (content-based) hash to match the structural Equals below: Go arrays are
+        // comparable VALUES — a `map[[2]int]V` key must be found again by an equal array with
+        // different backing storage (e.g. the defensive `.Clone()` a stored key takes). The
+        // previous `m_array.GetHashCode()` hashed the backing REFERENCE, so every structural-
+        // equal key missed.
+        IStructuralEquatable equatable = m_array;
+        return equatable.GetHashCode(EqualityComparer<T>.Default);
     }
 
     public override bool Equals(object? obj)
@@ -226,22 +248,29 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
         };
     }
 
+    // Structural equality comparers are called per-ELEMENT by IStructuralEquatable (each side
+    // boxed), so they must be typed to the element — the previous container-typed comparers
+    // (EqualityComparer<T[]>/<object[]>) threw "Type of argument is not compatible with the
+    // generic comparer" on the first equal-length comparison of arrays with distinct backing
+    // stores (e.g. a map<array<nint>, V> key lookup). An element that is itself an array
+    // wrapper recurses through its own Equals(object) via the element comparer, so nested
+    // arrays compare by content Go-style.
     public bool Equals(IArray? other)
     {
         IStructuralEquatable equatable = m_array;
-        return equatable.Equals(other?.Source , EqualityComparer<object[]>.Default);
+        return equatable.Equals(other?.Source, EqualityComparer<object>.Default);
     }
 
     public bool Equals(IArray<T>? other)
     {
         IStructuralEquatable equatable = m_array;
-        return equatable.Equals(other?.Source, EqualityComparer<T[]>.Default);
+        return equatable.Equals(other?.Source, EqualityComparer<T>.Default);
     }
 
     public bool Equals(array<T> other)
     {
         IStructuralEquatable equatable = m_array;
-        return equatable.Equals(other.m_array, EqualityComparer<T[]>.Default);
+        return equatable.Equals(other.m_array, EqualityComparer<T>.Default);
     }
 
     #region [ Operators ]
@@ -341,7 +370,10 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     object ICloneable.Clone()
     {
-        return m_array.Clone();
+        // Returns the boxed array<T> wrapper (not the raw T[]): the deep-clone element pass in
+        // Clone() above — and the generated named-array wrappers — unbox this result back to the
+        // element type, which requires the exact wrapped form.
+        return Clone();
     }
 
     Array IArray.Source => m_array;

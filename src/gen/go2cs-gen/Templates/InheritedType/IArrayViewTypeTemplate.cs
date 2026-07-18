@@ -20,7 +20,7 @@ namespace go2cs.Templates.InheritedType;
 /// </remarks>
 internal static class IArrayViewTypeTemplate
 {
-    public static string Generate(string typeName, string targetTypeName) =>
+    public static string Generate(string objectName, string typeName, string targetTypeName) =>
         $$"""
 
                 // View over the underlying array wrapper: first touches m_value.Value ON THE FIELD
@@ -63,6 +63,8 @@ internal static class IArrayViewTypeTemplate
 
                 global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => ((global::System.Collections.IEnumerable)view).GetEnumerator();
 
-                public object Clone() => ((global::System.ICloneable)view).Clone();
+                public {{objectName}} Clone() => new {{objectName}}(view.Clone());
+
+                object global::System.ICloneable.Clone() => Clone();
         """;
 }

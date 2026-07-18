@@ -188,6 +188,16 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			}
 		}
 
+		// A positional composite-literal element that reads an ARRAY value out of existing
+		// storage appends the strongly-typed `.Clone()` (Go copies the array into the slot; the
+		// emitted struct copy would alias its backing) — applied to the element's own rendering,
+		// BEFORE any interface conversion, so an `any`/interface slot boxes the clone.
+		cloneSuffix := ""
+
+		if callContext != nil && callContext.cloneArrayArg != nil && callContext.cloneArrayArg[i] {
+			cloneSuffix = ".Clone()"
+		}
+
 		if tupleExpanded {
 			// expanded above — skip the per-argument conversion chain
 		} else if interfaceType, ok := interfaceTypes[i]; ok && interfaceType != nil && !spreadArg {
@@ -200,9 +210,9 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 				contexts = []ExprContext{basicLitContext, identContext, keyValueContext, lambdaContext, callContext}
 			}
 
-			resultExpr = v.convertToInterfaceType(interfaceType, v.getType(expr, false), v.convExpr(expr, contexts))
+			resultExpr = v.convertToInterfaceType(interfaceType, v.getType(expr, false), v.convExpr(expr, contexts)+cloneSuffix)
 		} else {
-			resultExpr = v.convExpr(expr, contexts)
+			resultExpr = v.convExpr(expr, contexts) + cloneSuffix
 		}
 
 		if replacementArgs != nil && i < len(replacementArgs) && len(replacementArgs[i]) > 0 {

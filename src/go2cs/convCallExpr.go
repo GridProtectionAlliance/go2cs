@@ -1330,6 +1330,22 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// from the slice. Cast such elements to the slice's element type, matching Go's implicit
 		// conversion and the already-working explicitly-converted element pattern (`uint16(r)`).
 		if ident.Name == "append" && len(callExpr.Args) >= 2 && !callExpr.Ellipsis.IsValid() {
+			// A Go array VALUE appended as a slice ELEMENT (`append(rows, arr)` with rows of
+			// type [][3]int) is copied into the new slot; an existing-storage array element
+			// clones so the stored element does not alias the source's backing (see
+			// exprReadsArrayValueFromStorage). A spread `append(dst, src...)` is untouched —
+			// its element-wise copy happens inside golib (a documented remaining gap for
+			// nested-array elements, alongside copy()).
+			for i := 1; i < len(callExpr.Args); i++ {
+				if v.exprReadsArrayValueFromStorage(callExpr.Args[i]) {
+					if callExprContext.cloneArrayArg == nil {
+						callExprContext.cloneArrayArg = make(map[int]bool)
+					}
+
+					callExprContext.cloneArrayArg[i] = true
+				}
+			}
+
 			if sliceType := v.info.TypeOf(callExpr.Args[0]); sliceType != nil {
 				if sliceUnder, ok := sliceType.Underlying().(*types.Slice); ok {
 					// Only numeric element types are affected (the wrong-element-type overload

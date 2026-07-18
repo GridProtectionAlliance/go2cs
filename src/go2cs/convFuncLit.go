@@ -303,9 +303,9 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 				renderedName := v.getIdentName(ident)
 				incomingName := getHeapBoxLitParamName(renderedName)
 
-				// An ARRAY param folds its Go by-value clone into the box init, same as
-				// visitFuncDecl's parameter preamble.
-				if _, ok := v.getIdentType(ident).(*types.Array); ok {
+				// An ARRAY param (direct, aliased, or named — see visitFuncDecl's parameter
+				// preamble) folds its Go by-value clone into the box init.
+				if typeIsArrayValue(v.getIdentType(ident)) {
 					incomingName += ".Clone()"
 				}
 
@@ -318,6 +318,37 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			}
 
 			body = "{" + prologue.String() + strings.TrimPrefix(trimmedBody, "{")
+		}
+	}
+
+	// A plain (non-boxed) ARRAY-typed literal parameter is a per-call COPY in Go; mirror
+	// visitFuncDecl's parameter-preamble clone (`a = a.Clone();`) so writes through the
+	// parameter cannot reach the caller's backing store. A heap-boxed array param already
+	// folds its clone into the box init above.
+	if funcLit.Type.Params != nil {
+		prologue := strings.Builder{}
+
+		for _, field := range funcLit.Type.Params.List {
+			for _, name := range field.Names {
+				if name.Name == "_" || boxedParamNames.Contains(v.getIdentName(name)) {
+					continue
+				}
+
+				if !typeIsArrayValue(v.getIdentType(name)) {
+					continue
+				}
+
+				renderedName := getSanitizedIdentifier(v.getIdentName(name))
+				prologue.WriteString(fmt.Sprintf("%s%s%s = %s.Clone();", v.newline, v.indent(v.indentLevel+1), renderedName, renderedName))
+			}
+		}
+
+		if prologue.Len() > 0 {
+			trimmedBody := strings.TrimSpace(body)
+
+			if strings.HasPrefix(trimmedBody, "{") {
+				body = "{" + prologue.String() + strings.TrimPrefix(trimmedBody, "{")
+			}
 		}
 	}
 

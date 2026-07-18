@@ -19,6 +19,8 @@ internal static void Main() {
 }
 
 internal static rune first(triple t) {
+    t = t.Clone();
+
     return t[0];
 }
 

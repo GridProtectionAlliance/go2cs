@@ -125,6 +125,14 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 
 	valueExpr := v.convExpr(keyValueExpr.Value, valueContexts)
 
+	// A keyed VALUE that reads an ARRAY out of existing storage clones into its slot — Go
+	// copies the array into a struct field, map value, or sparse-array element alike, and the
+	// emitted struct copy would alias its backing (see exprReadsArrayValueFromStorage). Applied
+	// before the interface wraps below so an interface-typed slot boxes the clone.
+	if v.exprReadsArrayValueFromStorage(keyValueExpr.Value) {
+		valueExpr += ".Clone()"
+	}
+
 	// Box an untyped `int` constant VALUE in an EMPTY-interface slot through nint — a struct `any`
 	// field (`box{v: 9}`) or a `map[K]any` / sparse-`[N]any` value — the numeric twin of the
 	// anyBoxedStringLitContext @string boxing above, so a later `x.(int)` matches Go's boxed `int`.
@@ -245,6 +253,14 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 				// pre-existing, consistent behavior); the string case is safe only because @string keys
 				// normalize. A key later type-asserted as `.(int)` is the rare unfixed edge.
 			}
+		}
+
+		// An ARRAY-typed map KEY (arrays are comparable, so `map[[2]int]V` is legal Go) is
+		// copied into the map on store; clone it so a later write through the source variable
+		// cannot mutate the stored key's backing out from under the dictionary. A sparse-array
+		// key is an int index and never matches the type gate.
+		if v.exprReadsArrayValueFromStorage(keyValueExpr.Key) {
+			keyExpr += ".Clone()"
 		}
 
 		return fmt.Sprintf("[%s] = %s", keyExpr, valueExpr)

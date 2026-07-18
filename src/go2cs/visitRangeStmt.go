@@ -288,13 +288,36 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		varInit = "var "
 	}
 
+	// A slice/array/map range VALUE of ARRAY type — and a map range KEY of ARRAY type — is a
+	// fresh per-iteration COPY in Go, but the emitted foreach tuple element is a struct over a
+	// shared T[] backing store, so writes through the variable would reach the container's
+	// elements (and later container writes would show through the variable). Route such a
+	// variable through the same iterate-a-temp mechanism as a reassigned var, appending the
+	// strongly-typed `.Clone()` when it is copied into the variable. A channel range is
+	// excluded: the SEND site clones (see visitSendStmt), and a buffered element is received
+	// exactly once, so the received struct copy is already unaliased.
+	arrayCloneArm := isSlice || isArray || isMap
+	keyIsArrayValue := arrayCloneArm && rangeStmt.Key != nil && keyExpr != "_" && typeIsArrayValue(v.getExprType(rangeStmt.Key))
+	valIsArrayValue := arrayCloneArm && rangeStmt.Value != nil && len(valExpr) > 0 && valExpr != "_" && typeIsArrayValue(v.getExprType(rangeStmt.Value))
+
+	keyCloneSuffix, valCloneSuffix := "", ""
+
+	if keyIsArrayValue {
+		keyCloneSuffix = ".Clone()"
+	}
+
+	if valIsArrayValue {
+		valCloneSuffix = ".Clone()"
+	}
+
 	// A newly-DEFINED range var that is reassigned in the body — or that receives a pointer-
-	// receiver ([GoRecv] `this ref`) method call — must become a mutable local: a C# foreach
-	// iteration variable is read-only (CS1656) and cannot bind ref (CS1657). The string and
-	// slice/array/map emissions iterate a temp and declare the var from it in the body
-	// (`foreach (var (_, rᴛ1) in s) { var r = rᴛ1; … }`).
-	keyNeedsCopy := !assignVars && v.rangeVarNeedsMutableCopy(rangeStmt.Key, rangeStmt.Body)
-	valNeedsCopy := !assignVars && v.rangeVarNeedsMutableCopy(rangeStmt.Value, rangeStmt.Body)
+	// receiver ([GoRecv] `this ref`) method call, or holds an ARRAY value (the by-value copy
+	// above) — must become a mutable local: a C# foreach iteration variable is read-only
+	// (CS1656) and cannot bind ref (CS1657). The string and slice/array/map emissions iterate
+	// a temp and declare the var from it in the body (`foreach (var (_, rᴛ1) in s) { var r =
+	// rᴛ1; … }`).
+	keyNeedsCopy := !assignVars && (v.rangeVarNeedsMutableCopy(rangeStmt.Key, rangeStmt.Body) || keyIsArrayValue)
+	valNeedsCopy := !assignVars && (v.rangeVarNeedsMutableCopy(rangeStmt.Value, rangeStmt.Body) || valIsArrayValue)
 
 	if isStr {
 		if untypedStr {
@@ -424,7 +447,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 					keyType = v.getCSTypeName(v.getExprType(rangeStmt.Key)) + " "
 				}
 
-				innerPrefix += fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), keyExpr, tempKeyExpr)
+				innerPrefix += fmt.Sprintf("%s%s%s = %s%s;", v.newline, v.indent(v.indentLevel+1), keyExpr, tempKeyExpr, keyCloneSuffix)
 			}
 
 			if valExpr == "_" {
@@ -436,7 +459,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 					valType = v.getCSTypeName(v.getExprType(rangeStmt.Value)) + " "
 				}
 
-				innerPrefix += fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), valExpr, tempValExpr)
+				innerPrefix += fmt.Sprintf("%s%s%s = %s%s;", v.newline, v.indent(v.indentLevel+1), valExpr, tempValExpr, valCloneSuffix)
 			}
 
 			v.writeOutput("foreach (%s(%s%s, %s%s) in %s%s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, rangeExpr, ptrDeref)
@@ -459,7 +482,24 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 					name = "k"
 				}
 				kExpr = v.getTempVarName(name)
-				innerPrefix += fmt.Sprintf("%s%s%s%s%s = %s;", v.newline, bodyIndent, keyHeapDecl, v.newline+bodyIndent, keyExpr, kExpr)
+				innerPrefix += fmt.Sprintf("%s%s%s%s%s = %s%s;", v.newline, bodyIndent, keyHeapDecl, v.newline+bodyIndent, keyExpr, kExpr, keyCloneSuffix)
+			} else if keyNeedsCopy {
+				// The OTHER variable's heap decl routed the loop into this branch; a non-boxed
+				// key that still needs a mutable/cloned copy takes the same iterate-a-temp
+				// escape the dedicated branch below applies.
+				name := "i"
+				if isMap {
+					name = "k"
+				}
+				kExpr = v.getTempVarName(name)
+				decl := "var "
+
+				if !v.options.preferVarDecl {
+					keyType = v.getCSTypeName(v.getExprType(rangeStmt.Key)) + " "
+					decl = ""
+				}
+
+				innerPrefix += fmt.Sprintf("%s%s%s%s = %s%s;", v.newline, bodyIndent, decl, keyExpr, kExpr, keyCloneSuffix)
 			} else {
 				kExpr = keyExpr
 			}
@@ -468,7 +508,18 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 				vExpr = "_"
 			} else if valHeapDecl != "" {
 				vExpr = v.getTempVarName("v")
-				innerPrefix += fmt.Sprintf("%s%s%s%s%s = %s;", v.newline, bodyIndent, valHeapDecl, v.newline+bodyIndent, valExpr, vExpr)
+				innerPrefix += fmt.Sprintf("%s%s%s%s%s = %s%s;", v.newline, bodyIndent, valHeapDecl, v.newline+bodyIndent, valExpr, vExpr, valCloneSuffix)
+			} else if valNeedsCopy {
+				// Same escape as the key arm above, for the value variable.
+				vExpr = v.getTempVarName("v")
+				decl := "var "
+
+				if !v.options.preferVarDecl {
+					valType = v.getCSTypeName(v.getExprType(rangeStmt.Value)) + " "
+					decl = ""
+				}
+
+				innerPrefix += fmt.Sprintf("%s%s%s%s = %s%s;", v.newline, bodyIndent, decl, valExpr, vExpr, valCloneSuffix)
 			} else {
 				vExpr = valExpr
 			}
@@ -505,7 +556,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 						decl = ""
 					}
 
-					innerPrefix += fmt.Sprintf("%s%s%s%s = %s;", v.newline, bodyIndent, decl, keyExpr, tempKeyExpr)
+					innerPrefix += fmt.Sprintf("%s%s%s%s = %s%s;", v.newline, bodyIndent, decl, keyExpr, tempKeyExpr, keyCloneSuffix)
 				}
 
 				if valExpr == "_" || valExpr == "" || !valNeedsCopy {
@@ -519,7 +570,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 						decl = ""
 					}
 
-					innerPrefix += fmt.Sprintf("%s%s%s%s = %s;", v.newline, bodyIndent, decl, valExpr, tempValExpr)
+					innerPrefix += fmt.Sprintf("%s%s%s%s = %s%s;", v.newline, bodyIndent, decl, valExpr, tempValExpr, valCloneSuffix)
 				}
 
 				v.writeOutput("foreach (%s(%s%s, %s%s) in %s%s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, rangeExpr, ptrDeref)

@@ -83,6 +83,7 @@
     <Project Path="Tests/Behavioral/BuiltinShadowLocal/BuiltinShadowLocal.csproj" />
     <Project Path="Tests/Behavioral/ArrayOfCrossPackageType/ArrayOfCrossPackageType.csproj" />
     <Project Path="Tests/Behavioral/ArrayPassByValue/ArrayPassByValue.csproj" />
+    <Project Path="Tests/Behavioral/ArrayValueCopySites/ArrayValueCopySites.csproj" />
     <Project Path="Tests/Behavioral/ArrayWideIndexAddress/ArrayWideIndexAddress.csproj" />
     <Project Path="Tests/Behavioral/AtomicFieldThroughPointer/AtomicFieldThroughPointer.csproj" />
     <Project Path="Tests/Behavioral/AtomicValues/AtomicValues.csproj" />

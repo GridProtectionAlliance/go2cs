@@ -78,6 +78,15 @@ func (v *Visitor) convSendValueExpr(sendStmt *ast.SendStmt) string {
 
 	sendExpr := v.convExpr(sendStmt.Value, contexts)
 
+	// A Go array SENT into a channel is copied at the send (`ch <- arr` then `arr[0] = 9` must
+	// not affect the buffered element); the emitted struct copy would alias its backing, so an
+	// existing-storage array value clones here. The RECEIVE side needs no twin: a buffered
+	// element is dequeued exactly once, so the received struct copy is already unaliased.
+	// Applied before the interface wrap below so an interface-element channel boxes the clone.
+	if v.exprReadsArrayValueFromStorage(sendStmt.Value) {
+		sendExpr += ".Clone()"
+	}
+
 	if elemIsNonEmptyIface {
 		sendExpr = v.convertToInterfaceType(elemType, v.getExprType(sendStmt.Value), sendExpr)
 	}

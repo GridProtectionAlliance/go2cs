@@ -26,7 +26,7 @@ internal static array<nint> process(nint n) {
     for (nint i = 0; i < n - 1; i++) {
         nodes[i].link(Ꮡnodes.at<node>(i + 1));
     }
-    return a;
+    return a.Clone();
 }
 
 internal static nint mapShadow(nint ns) {

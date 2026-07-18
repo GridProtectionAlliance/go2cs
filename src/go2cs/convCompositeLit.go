@@ -28,7 +28,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 				if compositeLitIsKeyed(compositeLit.Elts) {
 					return fmt.Sprintf("new golib.SparseArray<%s>{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(inferred, compositeLit.Elts)))
 				}
-				return fmt.Sprintf("new %s[]{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.elidedPointerElemContext(u.Elem(), compositeLit.Elts)))
+				return fmt.Sprintf("new %s[]{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withArrayValueCloneArgs(compositeLit.Elts, v.elidedPointerElemContext(u.Elem(), compositeLit.Elts))))
 			case *types.Array:
 				csElem := convertToCSTypeName(v.getTypeName(u.Elem(), false))
 				// A KEYED elided ARRAY literal — the inner `{joiningL: stateBefore, …}` of a
@@ -38,7 +38,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 				if compositeLitIsKeyed(compositeLit.Elts) {
 					return fmt.Sprintf("new golib.SparseArray<%s>{%s}.array()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(inferred, compositeLit.Elts)))
 				}
-				return fmt.Sprintf("new %s[]{%s}.array()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.elidedPointerElemContext(u.Elem(), compositeLit.Elts)))
+				return fmt.Sprintf("new %s[]{%s}.array()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withArrayValueCloneArgs(compositeLit.Elts, v.elidedPointerElemContext(u.Elem(), compositeLit.Elts))))
 			case *types.Pointer:
 				// An untyped composite whose inferred type is `*Struct` — the `[]*T{ {…} }` shorthand
 				// for `&T{…}` (e.g. runtime's `dbgvars = []*dbgVar{ {name, &debug.x}, … }`). Emit the
@@ -65,6 +65,8 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 					if st, ok := u.Elem().Underlying().(*types.Struct); ok {
 						v.markAnyFieldLits(st, compositeLit.Elts, ptrElidedContext)
 					}
+
+					v.withArrayValueCloneArgs(compositeLit.Elts, ptrElidedContext)
 
 					return fmt.Sprintf("%s(new %s(%s))", AddressPrefix, structName, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, ptrElidedContext))
 				}
@@ -115,6 +117,8 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 			}
 		}
 
+		v.withArrayValueCloneArgs(compositeLit.Elts, elidedContext)
+
 		result.WriteString(fmt.Sprintf("new(%s", v.convExprList(compositeLit.Elts, compositeLit.Lbrace, elidedContext)))
 		v.writeStandAloneCommentString(result, compositeLit.Rbrace, nil, " ")
 		result.WriteString(fmt.Sprintf("%s)", rparenSuffix))
@@ -162,6 +166,11 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	// func-literal FIELD value's capture decls hoist (see KeyValueContext.deferredDecls).
 	callContext.deferredDecls = context.deferredDecls
 	callContext.keyValueIdent = context.ident
+
+	// Every POSITIONAL element that reads an ARRAY value out of existing storage clones into
+	// its slot — Go copies the array into array/slice elements and struct fields alike (keyed
+	// elements clone in convKeyValueExpr).
+	v.withArrayValueCloneArgs(compositeLit.Elts, callContext)
 
 	// Thread the composite's RESOLVED type to the keyed-field emission so a field named like
 	// its OWN struct type detects the declaration's type-colliding rename (runtime/metrics

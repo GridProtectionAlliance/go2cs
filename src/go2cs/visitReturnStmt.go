@@ -372,6 +372,17 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 				resultExpr := v.convExpr(expr, exprContexts)
 
+				// A Go array RETURNED by value out of existing storage takes the strongly-typed
+				// `.Clone()` so the caller receives independent backing storage: the callee may
+				// have leaked the local's address (`return arr` after `p = &arr`), or the result
+				// reads a field/element/deref some other name still reaches — and the emitted
+				// struct copy aliases the shared backing either way (see
+				// exprReadsArrayValueFromStorage). Applied before any interface conversion below,
+				// so a boxed array result (`func f() any { return arr }`) boxes the clone.
+				if v.exprReadsArrayValueFromStorage(expr) {
+					resultExpr += ".Clone()"
+				}
+
 				// Box an untyped `int` constant returned as an EMPTY interface through nint (the
 				// numeric twin of the castToGoString @string boxing above), so a later `x.(int)` on the
 				// result matches Go's boxed `int` dynamic type. A non-empty interface result routes
