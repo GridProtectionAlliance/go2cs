@@ -69,6 +69,18 @@ public static class RuntimeErrorPanic
         return new PanicException(IntegerDivideByZeroMessage);
     }
 
+    private const string MakeSliceLenOutOfRangeMessage = $"{RuntimeErrorMessage}makeslice: len out of range";
+    public static PanicException MakeSliceLenOutOfRange()
+    {
+        return new PanicException(MakeSliceLenOutOfRangeMessage);
+    }
+
+    private const string MakeSliceCapOutOfRangeMessage = $"{RuntimeErrorMessage}makeslice: cap out of range";
+    public static PanicException MakeSliceCapOutOfRange()
+    {
+        return new PanicException(MakeSliceCapOutOfRangeMessage);
+    }
+
     /// <summary>
     /// Converts a .NET exception that corresponds to a Go runtime panic into a <see cref="PanicException"/>,
     /// so it can be recovered with <c>recover()</c> and reported like a Go panic. Returns <c>false</c>

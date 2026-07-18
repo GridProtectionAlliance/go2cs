@@ -546,6 +546,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckIntMinLiterals() => CheckTarget("IntMinLiterals");
 
     [TestMethod]
+    public void CheckInvalidRuneString() => CheckTarget("InvalidRuneString");
+
+    [TestMethod]
     public void CheckIoLike() => CheckTarget("IoLike");
 
     [TestMethod]
@@ -580,6 +583,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckMakeLenNamedNumeric() => CheckTarget("MakeLenNamedNumeric");
+
+    [TestMethod]
+    public void CheckMakeSlicePanicRange() => CheckTarget("MakeSlicePanicRange");
 
     [TestMethod]
     public void CheckMakeSliceUintptrLen() => CheckTarget("MakeSliceUintptrLen");
@@ -1194,6 +1200,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckUnsafePointerParamPin() => CheckTarget("UnsafePointerParamPin");
 
     [TestMethod]
+    public void CheckUnsafePointerPrint() => CheckTarget("UnsafePointerPrint");
+
+    [TestMethod]
     public void CheckUnsafePointerReinterpret() => CheckTarget("UnsafePointerReinterpret");
 
     [TestMethod]
@@ -1255,6 +1264,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckWrittenCaptureParam() => CheckTarget("WrittenCaptureParam");
+
+    [TestMethod]
+    public void CheckZeroValueArrayField() => CheckTarget("ZeroValueArrayField");
 
     // </TestMethods>
 

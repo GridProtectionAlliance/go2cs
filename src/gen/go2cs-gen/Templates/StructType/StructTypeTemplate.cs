@@ -976,12 +976,35 @@ internal class StructTypeTemplate : TemplateBase
             // regardless of which constructor produced it (ж.Equals: nil == nil).
             string memberValue = isPromotedStruct && isReferenceType ? $"{memberName} ?? new {typeName}(nil)" : memberName;
 
+            // A fixed-size array member (`[N]T` → golib array<T>) carries a `= new(N)` field
+            // initializer that gives the field its Go length; an OMITTED argument arrives as the
+            // zero value `default!`, whose backing is null — assigning it unconditionally nulled
+            // the initializer's backing, so a composite literal omitting the field (strings'
+            // stringFinder{pattern:…, goodSuffixSkip:…}) left its `[256]int` unusable. Keep the
+            // initializer for a zero-value argument (Go's zero `[N]T` IS the zeroed backing the
+            // initializer produced); a constructed argument assigns as before.
             result.AppendLine(isPromotedStruct ?
                 $"{AddressPrefix}{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)} = new {PointerPrefix}<{typeName}>({memberValue});" :
-                $"this.{memberName} = {memberName};");
+                IsFixedArrayMember(typeName, isReferenceType) ?
+                    $"if ({memberName}.Source is not null) this.{memberName} = {memberName};" :
+                    $"this.{memberName} = {memberName};");
         }
 
         result.Append($"{TypeElemIndent}}}");
+    }
+
+    // The member's type IS golib's fixed-array struct (`global::go.array<…>` / `go.array<…>`) — a
+    // PREFIX match, not Contains: a reference member like `ж<array<T>>` (pointer-to-array field,
+    // runtime's inlineUnwinder) or a struct member merely instantiated over an array type has no
+    // `Source` T[] discriminator and must keep the plain assignment.
+    private static bool IsFixedArrayMember(string typeName, bool isReferenceType)
+    {
+        if (isReferenceType)
+            return false;
+
+        string name = typeName.StartsWith("global::", StringComparison.Ordinal) ? typeName["global::".Length..] : typeName;
+
+        return name.StartsWith("go.array<", StringComparison.Ordinal) || name.StartsWith("array<", StringComparison.Ordinal);
     }
 
     private static string GetToStringImplementation((string typeName, string memberName, bool isReferenceType, bool isPromotedStruct) item)

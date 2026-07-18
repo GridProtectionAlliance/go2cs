@@ -119,11 +119,22 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_array = source.ToArray();
     }
 
+    // Source intentionally stays the RAW backing reference: a null result is the discriminator
+    // for a never-constructed zero value (see the generated struct constructors, which use it to
+    // keep an array field's `= new(N)` initializer when the incoming argument is a zero value).
     public T[] Source => m_array;
+
+    // Null-safe view of the backing store: `default(array<T>)` runs no constructor, so m_array is
+    // null; treat that zero value as an EMPTY array for all reads (length, index, enumerate,
+    // print, compare) instead of throwing NRE — mirroring @string's null-safe zero value. (Go's
+    // true zero `[N]T` has N zeroed elements, but the declared length only exists where a
+    // constructor or field initializer ran; empty is the closest zero-value behavior a bare
+    // `default` can have, and any index into it panics Go-style rather than crashing the host.)
+    private T[] Backing => m_array ?? [];
 
     public Span<T> ꓸꓸꓸ => ToSpan(); // Spread operator
 
-    public nint Length => m_array.Length;
+    public nint Length => Backing.Length;
 
     // Returning by-ref value allows array to be a struct instead of a class and still allow read and write
     // Allows for implicit index support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support
@@ -131,10 +142,12 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     {
         get
         {
-            if (index < 0 || index >= m_array.Length)
-                throw RuntimeErrorPanic.IndexOutOfRange(index, m_array.Length);
+            T[] backing = Backing;
 
-            return ref m_array[index];
+            if (index < 0 || index >= backing.Length)
+                throw RuntimeErrorPanic.IndexOutOfRange(index, backing.Length);
+
+            return ref backing[index];
         }
     }
 
@@ -142,20 +155,22 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     {
         get
         {
-            if (index < 0 || index >= m_array.Length)
-                throw RuntimeErrorPanic.IndexOutOfRange(index, m_array.Length);
+            T[] backing = Backing;
 
-            return ref m_array[index];
+            if (index < 0 || index >= backing.Length)
+                throw RuntimeErrorPanic.IndexOutOfRange(index, backing.Length);
+
+            return ref backing[index];
         }
     }
 
     public ref T this[ulong index] => ref this[(nint)index];
 
-    public slice<T> this[Range range] => new(m_array, range.Start.GetOffset(m_array.Length), range.End.GetOffset(m_array.Length));
+    public slice<T> this[Range range] => new(Backing, range.Start.GetOffset(Backing.Length), range.End.GetOffset(Backing.Length));
 
     public slice<T> Slice(int start, int length)
     {
-        return new slice<T>(m_array, start, start + length);
+        return new slice<T>(Backing, start, start + length);
     }
 
     public slice<T> Slice(nint start, nint length)
@@ -165,18 +180,20 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public int IndexOf(in T item)
     {
-        int index = Array.IndexOf(m_array, item, 0, m_array.Length);
+        T[] backing = Backing;
+        int index = Array.IndexOf(backing, item, 0, backing.Length);
         return index >= 0 ? index : -1;
     }
 
     public bool Contains(in T item)
     {
-        return Array.IndexOf(m_array, item, 0, m_array.Length) >= 0;
+        T[] backing = Backing;
+        return Array.IndexOf(backing, item, 0, backing.Length) >= 0;
     }
 
     public void CopyTo(T[] array, int arrayIndex)
     {
-        m_array.CopyTo(array, arrayIndex);
+        Backing.CopyTo(array, arrayIndex);
     }
 
     public T[] ToArray()
@@ -191,14 +208,14 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public array<T> Clone()
     {
-        return new array<T>(m_array.Clone() as T[]);
+        return new array<T>(Backing.Clone() as T[]);
     }
 
     public IEnumerator<(nint, T)> GetEnumerator()
     {
         nint index = 0;
 
-        foreach (T item in m_array)
+        foreach (T item in Backing)
             yield return (index++, item);
     }
 
@@ -209,7 +226,7 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public override int GetHashCode()
     {
-        return m_array.GetHashCode();
+        return Backing.GetHashCode();
     }
 
     public override bool Equals(object? obj)
@@ -228,20 +245,20 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public bool Equals(IArray? other)
     {
-        IStructuralEquatable equatable = m_array;
+        IStructuralEquatable equatable = Backing;
         return equatable.Equals(other?.Source , EqualityComparer<object[]>.Default);
     }
 
     public bool Equals(IArray<T>? other)
     {
-        IStructuralEquatable equatable = m_array;
+        IStructuralEquatable equatable = Backing;
         return equatable.Equals(other?.Source, EqualityComparer<T[]>.Default);
     }
 
     public bool Equals(array<T> other)
     {
-        IStructuralEquatable equatable = m_array;
-        return equatable.Equals(other.m_array, EqualityComparer<T[]>.Default);
+        IStructuralEquatable equatable = Backing;
+        return equatable.Equals(other.Backing, EqualityComparer<T[]>.Default);
     }
 
     #region [ Operators ]
@@ -274,7 +291,7 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public static implicit operator T[](array<T> value)
     {
-        return value.m_array;
+        return value.Backing;
     }
 
     // array<T> to array<T> comparisons
@@ -341,7 +358,7 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     object ICloneable.Clone()
     {
-        return m_array.Clone();
+        return Backing.Clone();
     }
 
     Array IArray.Source => m_array;
@@ -409,12 +426,12 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     IEnumerator<T> IEnumerable<T>.GetEnumerator()
     {
-        return m_array.AsEnumerable().GetEnumerator();
+        return Backing.AsEnumerable().GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-        return m_array.GetEnumerator();
+        return Backing.GetEnumerator();
     }
 
     #endregion

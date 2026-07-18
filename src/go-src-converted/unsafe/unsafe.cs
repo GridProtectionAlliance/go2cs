@@ -598,6 +598,13 @@ public static @string String<TLen>(ж<byte> ptr, TLen len) where TLen : System.N
 // Since Go strings are immutable, the bytes returned by StringData
 // must not be modified.
 public static ж<byte> StringData(@string str) {
+    // Go returns nil for an empty string (the doc leaves it unspecified, but the runtime's
+    // zero string has a nil data pointer and strings' TestClone asserts StringData identity
+    // across DISTINCT empty strings) — each call here pins a fresh buffer, so only nil
+    // preserves that identity.
+    if (str.Length == 0)
+        return new ж<byte>(nil);
+
     PinnedBuffer buffer = str.buffer;
     return new ж<byte>(buffer, 0);
 }

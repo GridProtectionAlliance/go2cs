@@ -202,7 +202,17 @@ public static class TypeExtensions
     /// <returns>Object pointer value as string in hexadecimal format.</returns>
     public static string PrintPointer<T>(this ж<T> ptr)
     {
-        return ptr == nil ? "<nil>" : ptr.Value.PrintPointer();
+        if (ptr == nil)
+            return "<nil>";
+
+        // An array/slice-element reference can sit outside its backing store's valid range —
+        // e.g. a pointer at the zero index of an EMPTY backing (unsafe.StringData semantics) —
+        // where reading Value would throw. Display only needs an address-like token, so print
+        // the backing store's identity instead of dereferencing the element.
+        if (ptr.ArrayRef is var (array, index) && !array.IndexIsValid(index))
+            return array.PrintPointer();
+
+        return ptr.Value.PrintPointer();
     }
 
     /// <summary>

@@ -276,6 +276,67 @@ equality, the reflectlite mini-bridge, the gen nil-embed fix, and R1-R4. Bytes/s
 attempts ran deep and reported their R5-R13 tails honestly (bytes: DeepEqual/MakeNoZero/nil-empty
 classes; strings: Builder-allocs/Map/Finder classes) — next wave's work order.
 
+## R6–R9 FIXED (2026-07-18, worktree branch `claude/blissful-poitras-5b23d5` — coordinator gates)
+
+Four mechanical golib/hand-owned runtime fixes, base master `f999c8f78`. No converter (`*.go`)
+change — CNR is byte-identical apart from the four new guard projects. The go2cs-gen analyzer DID
+change (R8), so the change carried the full behavioral suite (411/411 four phases) + the corpus
+gate (302-package `go-src-converted` clean compile). Sort re-validates **63/63** and utf8 **14/14**
+through the two-arg `-tests` command, both dirs left git-clean.
+
+- **R6 FIXED** — `internal/bytealg.MakeNoZero` (`bytealg_impl.cs`) and golib's `slice<T>` make-path
+  ctor (`slice(nint length, nint capacity, nint low)`) validate first and throw recoverable
+  `RuntimeErrorPanic.MakeSliceLenOutOfRange()` / `MakeSliceCapOutOfRange()` (Go's exact
+  `runtime error: makeslice: len/cap out of range` text, probed vs `go run`; recovered value was a
+  `runtime.errorString`), using `Array.MaxLength` as .NET's `maxAlloc`. The .NET
+  `ArgumentOutOfRange`/`OverflowException` these replaced could not be caught by `recover()`.
+  **`TestRepeatCatchesOverflow` flips infra-error → pass in BOTH strings and bytes.** Guard:
+  `MakeSlicePanicRange` behavioral test (discriminating — reverting `slice.cs` crashes it with the
+  .NET exception).
+- **R7 FIXED** — golib `ToUTF8Bytes` (the single seam all rune-span → UTF-8 encodings route
+  through) substitutes `Rune.ReplacementChar` (U+FFFD) via `Rune.TryCreate` for a surrogate or
+  out-of-range rune instead of throwing on the `int`→`System.Text.Rune` conversion.
+  **strings `TestCaseConsistency` flips infra-error → pass.** Guard: `InvalidRuneString`
+  (discriminating — reverted `builtin.cs` throws `ArgumentOutOfRangeException`).
+- **R8 FIXED — root cause was one level deeper than the sketch.** The generated PARAMETERIZED
+  struct constructor (`StructTypeTemplate.GenerateConstructor`) assigned every member from its
+  argument, and an OMITTED fixed-array field arrives as `default!` (null backing), overwriting the
+  `= new(N)` field initializer — so `stringFinder{pattern:…, goodSuffixSkip:…}` left `badCharSkip
+  [256]int` unusable. Fix: the generated ctor guards a `go.array<…>` member with
+  `if (m.Source is not null) this.m = m;` (`IsFixedArrayMember` — prefix match, reference members
+  like `ж<array<T>>` excluded, which was necessary for runtime's `inlineUnwinder` to compile).
+  Plus golib `array<T>` reads are now null-safe (`Backing => m_array ?? []`) so a bare
+  `default(array<T>)` enumerates/indexes/prints as empty and panics Go-style rather than NRE-ing.
+  **strings `TestFinderNext` flips infra-error → pass.** `TestFinderCreation` **ADVANCES**: R8
+  cleared its `bad`-table `[256]int` walk (search_test.go:76-84 — the exact `search.cs:56` NRE
+  cited), so the error moved from R8's site (`array.cs`/`search.cs:56`) to R5's site
+  (`deepequal.cs:74` → `unsafe.cs:261`) at its `reflect.DeepEqual(good, tc.suf)` (search_test.go:86)
+  — an R8-was-masking-R5 layer; TestFinderCreation is now an R5 test, owned by the DeepEqual chip.
+  Guards: `ZeroValueArrayField` behavioral (literal-omission ranged/indexed vs Go, explicit-arg
+  control; discriminating — reverted gen panics `index out of range [3] with length 0`).
+- **R9 FIXED** — `PrintPointer` no longer dereferences an out-of-range array/slice-element
+  reference (checks `IndexIsValid` and prints the backing store's identity instead), and hand-owned
+  `unsafe.StringData("")` returns nil (Go-faithful, probed — distinct empty strings' data pointers
+  compare equal, which TestClone asserts; both `unsafe.cs` copies edited identically).
+  **strings `TestClone` flips infra-error → pass.** Guards: `UnsafePointerPrint` behavioral
+  (StringData nil-identity + in-range print shape) + `GolibTests.PointerPrintTests` (new golib
+  UNIT project under `/tests/library/`, for the out-of-range print shape that has no Go-parity
+  spelling; discriminating — reverted, 2/3 fail).
+
+**Differential AFTER (master `f999c8f78` + R6–R9, this branch):**
+- **strings**: 63 agree / 6 disagree / 3 infra / 0 skip (72 included). My targets:
+  `TestRepeatCatchesOverflow` pass, `TestCaseConsistency` pass, `TestFinderNext` pass, `TestClone`
+  pass; `TestFinderCreation` infra (R8-cleared, now R5-blocked). Honest remainder (other chips):
+  `TestBuilderAllocs`/`Grow`/`GrowSizeclasses` (alloc-class), `TestIndexRune`, `TestMap` (R11),
+  `TestPickAlgorithm` (R10), infra `TestSplit`/`TestSplitAfter` (R5).
+- **bytes**: 75 agree / 10 disagree / 3 infra (88 included). My target
+  `TestRepeatCatchesOverflow` pass. Honest remainder (other chips): `TestClone`/`Trim`/`TrimFunc`
+  (R13), `TestEqual`/`Grow`/`Index`/`IndexRune`/`LastIndex`/`NewBufferShallow`/`WriteAppend`
+  (R5/alloc), infra `TestNil`/`Split`/`SplitAfter` (R5/R13).
+
+Both bytes/strings dirs restored to git-clean after measurement (non-validated packages — no
+policy commit). R5, R10, R11, R13, and the Builder alloc-class rows remain, owned by their chips.
+
 ## Cross-cutting lessons
 
 - **Capability-excluded tests still compile** — exclusion gates the run registry, not emission; a broken

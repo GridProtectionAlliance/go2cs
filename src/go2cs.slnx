@@ -230,6 +230,7 @@
     <Project Path="Tests/Behavioral/InterfaceMapKeyPointer/InterfaceMapKeyPointer.csproj" />
     <Project Path="Tests/Behavioral/InterfaceToInterfaceAdapter/InterfaceToInterfaceAdapter.csproj" />
     <Project Path="Tests/Behavioral/IntMinLiterals/IntMinLiterals.csproj" />
+    <Project Path="Tests/Behavioral/InvalidRuneString/InvalidRuneString.csproj" />
     <Project Path="Tests/Behavioral/IoLike/IoLike.csproj" />
     <Project Path="Tests/Behavioral/IoLike/FsLike/IoLike.FsLike.csproj" />
     <Project Path="Tests/Behavioral/IotaEnum/IotaEnum.csproj" />
@@ -243,6 +244,7 @@
     <Project Path="Tests/Behavioral/LocalStructFieldAddr/LocalStructFieldAddr.csproj" />
     <Project Path="Tests/Behavioral/LocalTypeSliceElement/LocalTypeSliceElement.csproj" />
     <Project Path="Tests/Behavioral/MakeLenNamedNumeric/MakeLenNamedNumeric.csproj" />
+    <Project Path="Tests/Behavioral/MakeSlicePanicRange/MakeSlicePanicRange.csproj" />
     <Project Path="Tests/Behavioral/MakeSliceUintptrLen/MakeSliceUintptrLen.csproj" />
     <Project Path="Tests/Behavioral/ManagedAtomicPointer/ManagedAtomicPointer.csproj" />
     <Project Path="Tests/Behavioral/ManualConversionSiblingState/ManualConversionSiblingState.csproj" />
@@ -452,6 +454,7 @@
     <Project Path="Tests/Behavioral/UnsafePointerInferredNoImport/UnsafePointerInferredNoImport.csproj" />
     <Project Path="Tests/Behavioral/UnsafePointerKeywordParam/UnsafePointerKeywordParam.csproj" />
     <Project Path="Tests/Behavioral/UnsafePointerParamPin/UnsafePointerParamPin.csproj" />
+    <Project Path="Tests/Behavioral/UnsafePointerPrint/UnsafePointerPrint.csproj" />
     <Project Path="Tests/Behavioral/UnsafePointerReinterpret/UnsafePointerReinterpret.csproj" />
     <Project Path="Tests/Behavioral/UnsignedNamedNumeric/UnsignedNamedNumeric.csproj" />
     <Project Path="Tests/Behavioral/UntypedConstArithmetic/UntypedConstArithmetic.csproj" />
@@ -472,9 +475,11 @@
     <Project Path="Tests/Behavioral/VersionedImport/VersionedImport.csproj" />
     <Project Path="Tests/Behavioral/VersionedImport/vlib/vlib.v2.csproj" />
     <Project Path="Tests/Behavioral/WrittenCaptureParam/WrittenCaptureParam.csproj" />
+    <Project Path="Tests/Behavioral/ZeroValueArrayField/ZeroValueArrayField.csproj" />
   </Folder>
   <Folder Name="/tests/library/">
     <Project Path="Tests/ChannelTests/ChannelTests.csproj" />
+    <Project Path="Tests/GolibTests/GolibTests.csproj" />
   </Folder>
   <Folder Name="/tests/performance/">
     <File Path="Tests/Performance/README.md" />
