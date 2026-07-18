@@ -285,6 +285,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckElidedNestedPtrComposite() => CheckTarget("ElidedNestedPtrComposite");
 
     [TestMethod]
+    public void CheckEmbeddedPointerNilAssign() => CheckTarget("EmbeddedPointerNilAssign");
+
+    [TestMethod]
     public void CheckEmbeddedValuePointerMethod() => CheckTarget("EmbeddedValuePointerMethod");
 
     [TestMethod]

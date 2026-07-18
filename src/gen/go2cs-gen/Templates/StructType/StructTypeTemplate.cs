@@ -101,10 +101,17 @@ internal class StructTypeTemplate : TemplateBase
 
             result.Append($"\r\n\r\n{TypeElemIndent}// Promoted Struct Accessors");
 
+            // ValueSlot, not Value: the Ꮡʗ box is a real constructor allocation, so resolving the
+            // accessor is a READ OF THE HELD VALUE, never a dereference of the box — for a POINTER
+            // embed (a ж<ж<T>> box) whose held ж<T> is null, `.Value` treated that as a nil-pointer
+            // deref and panicked, making Go-legal post-construction ASSIGNMENT of the embedded
+            // pointer (`s.setting = lookup(…)`, internal/godebug's New→once.Do shape) impossible.
+            // A genuine deref of a nil embed still panics downstream, on the held ж<T>'s own Value
+            // (the promoted field/method accessors descend `<embed>.Value.<member>`).
             foreach ((string typeName, string memberName, _, _) in promotedStructs)
             {
                 string typeScope = GetScope(GetSimpleName(typeName));
-                result.Append($"\r\n{TypeElemIndent}{typeScope} partial ref {typeName} {memberName} => ref {AddressPrefix}{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)}.Value;");
+                result.Append($"\r\n{TypeElemIndent}{typeScope} partial ref {typeName} {memberName} => ref {AddressPrefix}{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)}.ValueSlot;");
             }
 
             result.Append($"\r\n\r\n{TypeElemIndent}// Promoted Struct Field Accessors");
@@ -958,12 +965,19 @@ internal class StructTypeTemplate : TemplateBase
         result.AppendLine(")");
         result.AppendLine($"{TypeElemIndent}{{");
 
-        foreach ((string typeName, string memberName, _, bool isPromotedStruct) in structMembers)
+        foreach ((string typeName, string memberName, bool isReferenceType, bool isPromotedStruct) in structMembers)
         {
             result.Append($"{TypeElemIndent}    ");
 
+            // A POINTER embed (its member type is the reference type ж<T>) whose argument is
+            // omitted arrives as a raw null; hold a nil BOX (`new ж<T>(nil)`) instead, matching
+            // the NilType/parameterless constructors, so a genuine deref of the nil embed panics
+            // (Go nil-pointer semantics) rather than NREs, and a nil embed compares equal
+            // regardless of which constructor produced it (ж.Equals: nil == nil).
+            string memberValue = isPromotedStruct && isReferenceType ? $"{memberName} ?? new {typeName}(nil)" : memberName;
+
             result.AppendLine(isPromotedStruct ?
-                $"{AddressPrefix}{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)} = new {PointerPrefix}<{typeName}>({memberName});" :
+                $"{AddressPrefix}{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)} = new {PointerPrefix}<{typeName}>({memberValue});" :
                 $"this.{memberName} = {memberName};");
         }
 

@@ -142,6 +142,7 @@
     <Project Path="Tests/Behavioral/DynamicInterfaceKeywordMethod/DynamicInterfaceKeywordMethod.csproj" />
     <Project Path="Tests/Behavioral/ElementAddressUnsignedIndex/ElementAddressUnsignedIndex.csproj" />
     <Project Path="Tests/Behavioral/ElidedNestedPtrComposite/ElidedNestedPtrComposite.csproj" />
+    <Project Path="Tests/Behavioral/EmbeddedPointerNilAssign/EmbeddedPointerNilAssign.csproj" />
     <Project Path="Tests/Behavioral/EmbeddedValuePointerMethod/EmbeddedValuePointerMethod.csproj" />
     <Project Path="Tests/Behavioral/EmptyStructMapSet/EmptyStructMapSet.csproj" />
     <Project Path="Tests/Behavioral/ErrorfFormatting/ErrorfFormatting.csproj" />

@@ -3544,6 +3544,49 @@ A pointer-receiver method promoted through two or more embedded VALUE structs de
 ```
 The own-receiver bare form joins the hop path (`recv.E1.E2.method(...)`); a chain broken by a pointer embed falls through unchanged. Guarded by `CrossPkgUser`.
 
+### A nil embedded pointer is holdable and assignable — only its dereference panics
+
+Go permits an embedded pointer to *be* nil: constructing `&Setting{name: name}` with the embedded
+`*setting` unset, comparing it (`s.setting == nil`), and assigning it after construction
+(`s.setting = lookup(…)` — internal/godebug's `New` → `once.Do` population shape) are all legal;
+only *dereferencing through* the nil embed panics. The generator's promoted-pointer machinery
+(a `ж<ж<T>>` box behind a ref accessor) previously conflated the two: the accessor resolved the box
+with `.Value`, which treats a null held value as a nil-pointer dereference — so the *first touch* of
+an unpopulated embed (even the legal `== nil` comparison, or the assignment that would populate it)
+panicked from the accessor. Two generator changes separate holding from dereferencing
+(`StructTypeTemplate`):
+
+1. **The promoted-struct accessor resolves through `ValueSlot`** — golib's nil-check-free real slot.
+   The `Ꮡʗ` box is a real constructor allocation, so resolving the accessor is a read of the *held*
+   value, never a dereference *of* the box; reads and writes of the held `ж<T>` must not panic.
+2. **The parameterized constructors box a nil pointer for an omitted POINTER embed** (`arg ?? new
+   ж<T>(nil)`), matching what the NilType/parameterless constructors already emitted. The held value
+   is then a *nil box* rather than a raw null, so a genuine deref of the nil embed panics with Go's
+   `runtime error: invalid memory address or nil pointer dereference` (recoverable) instead of
+   surfacing an unrecoverable `NullReferenceException`, and a nil embed compares equal regardless of
+   which constructor produced it (`ж.Equals`: nil == nil). Value embeds are untouched (their member
+   type is a value type — never null).
+
+```csharp
+// Promoted Struct Accessors
+internal partial ref ж<setting> setting => ref Ꮡʗsetting.ValueSlot;   // was .Value — panicked on first touch
+
+// internal ctor: an omitted pointer embed holds a nil BOX, not a raw null
+internal Setting(@string tag = default!, ж<setting> setting = default!)
+{
+    this.tag = tag;
+    Ꮡʗsetting = new ж<ж<setting>>(setting ?? new ж<setting>(nil));
+}
+```
+
+Go's nil-deref panic is preserved *downstream*, where the actual dereference happens: the promoted
+field/method accessors descend `setting.Value.name` / `target.setting.Value.bump()`, and that inner
+`.Value` — on the held nil `ж<T>` itself — still routes through the strict panic path. (Guarded by
+the `EmbeddedPointerNilAssign` behavioral test — compare-nil on a fresh instance, a recovered deref
+panic through the nil embed, assignment of a nil pointer variable, post-construction population, and
+aliasing through the populated embed, vs Go; each half discriminates independently — without (1) the
+nil-variable assignment leg panics, without (2) the recover leg crashes with an unrecoverable NRE.)
+
 ## Interfaces
 Go interfaces are duck-typed: a type implements an interface simply by having the methods. The converter emits each **user-defined** interface as a partial interface with a `[GoType]` attribute, and the **`ImplementGenerator`** source generator discovers which concrete types satisfy it and emits the implementing glue plus the implicit conversions. As a result, assigning a concrete value to an interface variable is direct — no reflection lookup or `.As(...)` call is needed:
 
