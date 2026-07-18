@@ -84,7 +84,15 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public slice(T[]? array)
     {
-        m_array = array ?? throw new ArgumentNullException(nameof(array), "slice array reference is null.");
+        // Go converts a nil source to a nil slice, never a fault: `[]T(nil)` (e.g. the
+        // `append([]string(nil), …)` copy idiom) is the nil slice.
+        if (array is null)
+        {
+            this = default;
+            return;
+        }
+
+        m_array = array;
         m_low = 0;
         m_length = array.Length;
         m_capacity = array.Length;
@@ -185,8 +193,16 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public slice(T[]? array, nint low = 0, nint high = -1)
     {
+        // Slicing a nil source is legal in Go while the indices stay within its zero
+        // length/capacity (`nil[0:0]` is the nil slice); beyond that Go panics.
         if (array is null)
-            throw new ArgumentNullException(nameof(array), "slice array reference is null.");
+        {
+            if (low != 0 || high > 0)
+                throw new ArgumentException($"Indices {nameof(low)} and {nameof(high)} represent a range outside bounds of the array reference.");
+
+            this = default;
+            return;
+        }
 
         if (low < 0)
             throw new ArgumentOutOfRangeException(nameof(low), "Value is less than zero.");
@@ -211,8 +227,15 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     // CAPACITY (cap = max - low), which can end before the backing array does. The view SHARES the array.
     public slice(T[]? array, nint low, nint high, nint max)
     {
+        // Same nil-source rule as above: legal while every index stays at zero.
         if (array is null)
-            throw new ArgumentNullException(nameof(array), "slice array reference is null.");
+        {
+            if (low != 0 || high > 0 || max > 0)
+                throw new ArgumentException($"Indices {nameof(low)}, {nameof(high)} and {nameof(max)} represent a range outside bounds of the array reference.");
+
+            this = default;
+            return;
+        }
 
         if (low < 0)
             throw new ArgumentOutOfRangeException(nameof(low), "Value is less than zero.");
