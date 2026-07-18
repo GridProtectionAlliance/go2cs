@@ -224,6 +224,23 @@ abi-accessibility errors exist under the current absolute-path pipeline.
     `Go="pass" C#=""` — the expected R-row wall (R1 `[]T(nil)` et al.); runtime rows remain
     untouched per the chip split.
 
+## Sort's first full differential (2026-07-18, master `9c620008b`)
+
+Sort BUILDS clean and runs the complete differential: **53/63 included tests agree with
+`go test`**. Every divergence is root-caused and owned:
+
+| Bucket | Tests | Root cause | Owner |
+|---|---|---|---|
+| runtime_rand stub (R3) | 7 (CountSortOps, CountStableOps, HeapsortBM, SortBM, SortLarge_Random, Stability, StableBM) | math/rand/v2 `runtime_rand` PartialStub NotImplemented | R1-R4 chip |
+| Embed-override dispatch | 2 (ReverseSortIntSlice, Float64s) | dispatch through `reverse{Interface}` does not call the overriding `Less` — reverse sorts ascend; NaN order breaks | dispatch chip |
+| reflectlite Swapper NRE | 1 (TestSlice) | nil `ж` deref at `abi.Kind` via reflectlite (R5 family) | dispatch chip |
+
+**R14 (FIXED, master `9c620008b`): `--json` now implies `Verbose()`** — `go test -json` implies
+`-v` (cmd/go passes `-test.v`), so the Go side of every differential runs verbose; the host
+mirrored `false`, making every Verbose-gated test (sort's countOps pair) a guaranteed skip-vs-pass
+mismatch. Post-fix those tests RUN and surface their true wall (R3) — the honest progression.
+utf8 unaffected (still 0-skipped both sides).
+
 ## Cross-cutting lessons
 
 - **Capability-excluded tests still compile** — exclusion gates the run registry, not emission; a broken
