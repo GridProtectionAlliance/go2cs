@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "disclosures": [
+    {
+      "name": "TestEqual",
+      "class": "alloc-profile",
+      "signature": "Equal allocated ",
+      "reason": "want-zero AllocsPerRun assert: the managed runtime allocates during the converted Equal comparison loop where Go's compiler-optimized code does not; a malloc-counting shim would fail identically"
+    },
+    {
+      "name": "TestGrow",
+      "class": "alloc-profile",
+      "signature": "allocation occurred during write",
+      "reason": "want-zero AllocsPerRun assert: the converted Buffer.Grow/Write path allocates in the managed slice model where Go's pre-grown buffer writes allocation-free"
+    },
+    {
+      "name": "TestIndex",
+      "class": "alloc-profile",
+      "signature": "expected no allocations, got ",
+      "reason": "want-zero AllocsPerRun assert: the converted Index search allocates in the managed runtime where Go's compiler stack-allocates its working state"
+    },
+    {
+      "name": "TestIndexRune",
+      "class": "alloc-profile",
+      "signature": "expected no allocations, got ",
+      "reason": "want-zero AllocsPerRun assert: string(r) materializes a byte[] in the managed model where Go uses a 4-byte stack buffer (runtime.intstring)"
+    },
+    {
+      "name": "TestLastIndex",
+      "class": "alloc-profile",
+      "signature": "expected no allocations, got ",
+      "reason": "want-zero AllocsPerRun assert: the converted LastIndex search allocates in the managed runtime where Go's compiler stack-allocates its working state"
+    },
+    {
+      "name": "TestNewBufferShallow",
+      "class": "alloc-profile",
+      "signature": "allocations occurred while shallow copying",
+      "reason": "want-zero AllocsPerRun assert: the addressed Buffer copy heap-boxes per run in the managed model (ref var through the heap) where Go's escape analysis keeps the shallow copy on the stack"
+    },
+    {
+      "name": "TestWriteAppend",
+      "class": "alloc-profile",
+      "signature": "allocations occurred while appending",
+      "reason": "want-zero AllocsPerRun assert: the converted AvailableBuffer/AppendInt/Write loop allocates in the managed slice model where Go's sufficiently-sized buffer appends allocation-free"
+    }
+  ]
+}

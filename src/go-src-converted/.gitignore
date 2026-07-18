@@ -12,6 +12,9 @@
 
 # Run-time artifacts. The input-digest manifest embeds a machine-specific converter revision
 # (the running executable's hash), and the comparison / results files are per-run output.
+# NOTE: go2cs_test_disclosures.json is deliberately NOT listed here — it is the HAND-OWNED
+# disclosed-divergence manifest (pinned Go=pass/C#=fail divergences the comparison oracle
+# reclassifies by failure signature), authored and committed like source, never regenerated.
 go2cs_test_manifest.json
 go2cs_test_comparison.json
 go2cs_test_results.json

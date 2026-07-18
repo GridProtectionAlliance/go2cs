@@ -5472,16 +5472,40 @@ including `packEface`/`Interface()` (used by `errors.As`) — stays auto and is 
 Verified by the sort differential: `TestSlice` flips to pass — `sort.Slice` sorts through the
 managed Swapper, and its closing `SliceIsSorted` check reads length through the same `ValueOf` path. Go's version counts **mallocs**: it pins `GOMAXPROCS(1)`, runs `f` once as a warmup, then `runs` more times, and returns the `runtime.MemStats.Mallocs` delta divided (as integers) by `runs`. The CLR exposes no malloc counter, so the shim measures allocated **bytes** on the calling thread instead (`GC.GetAllocatedBytesForCurrentThread()` — precise, and inherently thread-scoped, which stands in for the GOMAXPROCS pinning; like Go's, `f` is assumed single-threaded — allocations made by goroutines `f` spawns land on other threads and are not observed). The mapping is deliberately honest rather than count-approximating: **zero maps exactly** (0 bytes ⟺ 0 mallocs — and the stdlib tests that use AllocsPerRun overwhelmingly assert zero, e.g. sort's `TestSearchWrappersDontAlloc` and the strings/bytes no-alloc guards), while a nonzero result is the average allocated bytes per run, floored at 1 so amortized sub-byte-per-run allocation can never masquerade as the exact-zero case. A converted test asserting a specific nonzero *count* therefore diverges as a loud failure in the differential oracle instead of silently passing — the disclosed outcome. (`runs == 0` divides by zero, a runtime-error panic exactly where Go's own integer division panics.) The capability sits in the converter's supported list (`supportedTestCapabilities`, `testConversion.go`), so tests requiring it convert as *included*; guarded by `TestAllocsPerRunCapabilityIsSupported` (converter) and `TestingRuntimeTests.AllocsPerRunMapsZeroExactlyAndReportsBytesWhenAllocating` (shim).
 
-The strings suite exposed the two divergence classes this mapping discloses (full analysis and the
-proposed test-level disclosure mechanism: `docs/Phase4/StringsBytes-BlockerMap.md`, *AllocsPerRun
-divergence analysis*): **count-shape asserts** (`TestBuilderAllocs` wants exactly 1 malloc; the shim
-reports bytes, so any nonzero diverges loudly — by design), and **allocation-profile divergences**,
-where the zero-shape itself is unsatisfiable because the managed model allocates where Go's
-compiler doesn't: an addressed local (`var b Builder` + pointer-receiver calls) heap-boxes per run
-where Go stack-allocates (`TestBuilderGrow`'s growLen=0 leg), and `string(r)` materializes a
-`byte[]` where Go uses a stack buffer (`TestIndexRune`). Neither class is a shim defect — a
-malloc-counting shim would fail the same asserts — and neither is faked; both surface as loud
-differential failures pending a disclosure ruling.
+The strings suite exposed the two divergence classes this mapping discloses (full analysis:
+`docs/Phase4/StringsBytes-BlockerMap.md`, *AllocsPerRun divergence analysis*): **count-shape
+asserts** (`TestBuilderAllocs` wants exactly 1 malloc; the shim reports bytes, so any nonzero
+diverges loudly — by design), and **allocation-profile divergences**, where the zero-shape itself
+is unsatisfiable because the managed model allocates where Go's compiler doesn't: an addressed
+local (`var b Builder` + pointer-receiver calls) heap-boxes per run where Go stack-allocates
+(`TestBuilderGrow`'s growLen=0 leg), and `string(r)` materializes a `byte[]` where Go uses a
+stack buffer (`TestIndexRune`). Neither class is a shim defect — a malloc-counting shim would
+fail the same asserts — and neither is faked.
+
+**The disclosed-divergence manifest (2026-07-18 ruling — implemented).** These provably
+unsatisfiable divergences are disclosed at TEST level, extending the declaration-level
+"disclosed-unsupported" vocabulary: an affected package carries a hand-owned, repo-committed
+`go2cs_test_disclosures.json` beside its converted sources (never generated — reviewed like
+source; deliberately absent from `src/go-src-converted/.gitignore`'s regenerated-artifact list),
+pinning `{name, class, signature, reason}` per divergent test. The `-test-action compare` oracle
+(`matchTerminalStatuses`, `testConversion.go`) reclassifies a Go=pass/C#=fail row as
+**disclosed-divergent** ONLY when the exact test name is pinned AND the captured C# failure
+output contains the pinned signature substring — the converted host attaches each test's
+accumulated log text to its terminal event, which is what the signature matches against. The
+signature pin is the integrity guard: a pinned test failing with ANY other signature (e.g. an
+index-semantics leg regressing) is still a mismatch, a pinned test in any other status pair
+(including C#=infrastructure-error) is still a mismatch, and a package with no manifest compares
+strictly — sort and utf8 are unaffected. The validation summary discloses the reclassified rows
+alongside the excluded declarations (`… 7 disclosed-divergent (alloc-profile), …`), subtracting
+them from the validated count, and the nonzero C# host exit the disclosed failures cause is
+forgiven only when `go test` itself was clean and every divergence matched its pin (zero
+mismatches — a truncated host run surfaces as one-sided rows and stays fatal). An empty
+signature (which would substring-match anything) and duplicate names are load-time errors, never
+silent no-ops. Guards: `TestDisclosedDivergenceOracle` (signature match discloses / different
+signature still fails / no manifest strict / direction+status pairs never widen) and
+`TestDisclosureManifestLoading` (absent-file no-op; empty-signature and duplicate rejection).
+First users: `bytes` (7 alloc-profile rows) and `strings` (3 alloc-count-semantics + 1
+alloc-profile), validating as Phase-4 packages #3 and #4.
 
 **The `reflect.DeepEqual` bridge (`reflect/deepequal_impl.cs`, Phase-4 — blocker-map R5).** Go's
 `deepValueEqual` keys its cycle-detection `visited` map on the values' internal data words (`v.ptr` /

@@ -67,7 +67,7 @@ internal static readonly nint maxInt = /* int(^uint(0) >> 1) */ unchecked((nint)
 //
 // To build strings more efficiently, see the [strings.Builder] type.
 public static @string String(this ж<Buffer> Ꮡb) {
-    ref var b = ref Ꮡb.Value;
+    ref var b = ref Ꮡb.DerefOrNil();
 
     if (Ꮡb == nil) {
         // Special case, useful in debugging.
