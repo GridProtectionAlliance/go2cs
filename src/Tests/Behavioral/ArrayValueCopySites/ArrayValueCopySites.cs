@@ -206,6 +206,25 @@ internal static void funcLitParam() {
     fmt.Println("funcLitParam:", a);
 }
 
+internal static void namedAssignCopies() {
+    var nr = new Row(new nint[]{1, 2, 3}.array());
+    var d = nr.Clone();
+    d[0] = 99;
+    fmt.Println("namedAssign:", nr[0], d[0]);
+    Row e = nr.Clone();
+    e[1] = 88;
+    fmt.Println("namedVarDecl:", nr[1], e[1]);
+    any x = nr.Clone();
+    nr[2] = 77;
+    var got = x._<Row>();
+    fmt.Println("namedAnyBoxed:", got[2], nr[2]);
+    var a = new nint[]{5, 6, 7}.array();
+    any y = a.Clone();
+    a[0] = 99;
+    var gotA = y._<array<nint>>();
+    fmt.Println("directAnyBoxed:", gotA[0], a[0]);
+}
+
 internal static void channelSend() {
     var a = new nint[]{1, 2, 3}.array();
     var ch = new channel<array<nint>>(1);
@@ -236,6 +255,7 @@ internal static void Main() {
     returnCopies();
     paramCopies();
     funcLitParam();
+    namedAssignCopies();
     channelSend();
     appendElement();
 }

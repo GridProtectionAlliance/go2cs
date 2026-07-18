@@ -1373,10 +1373,14 @@ x, y = y, x      // tuple swap        → (x, y) = (y.Clone(), x.Clone());
 
 Only existing storage takes the clone — an ident, selector, index, or deref RHS reads a value some
 other name can still reach; a composite literal, call result, or conversion is freshly constructed
-and stays bare. (Guarded by the `ArrayPassByValue` extension — all seven assignment shapes above,
-written-through and read back against the source, values vs Go.) The other copy sites of the same
-defect class — range elements, composite-literal elements, returns, channel sends, append elements,
-named-array types — are covered by the follow-up section below.
+and stays bare. The shape/type gate is the shared `exprReadsArrayValueFromStorage`
+(`arrayCloneOperations.go`), which tests the UNDERLYING type — so direct, alias-declared, and NAMED
+array types all clone (the named wrapper via its strongly-typed `Clone()`, next section), and an
+interface-typed LHS (`var x any = arr`) boxes the clone. (Guarded by the `ArrayPassByValue`
+extension — all seven assignment shapes above, written-through and read back against the source —
+and `ArrayValueCopySites`' `namedAssignCopies` — named `:=`/`var`/`any`-boxed forms, values vs Go.)
+The other copy sites of the same defect class — range elements, composite-literal elements,
+returns, channel sends, append elements — are covered by the follow-up section below.
 
 ### Array VALUE-COPY at every transfer site (range, composite, return, send, append) — DEEP for nested arrays
 
@@ -1431,16 +1435,14 @@ Three deeper repairs make the single `.Clone()` correct everywhere:
 (All guarded by the `ArrayValueCopySites` behavioral test — one output-compared section per site
 class, including multidimensional deep-copy through range and parameter passing.)
 
-**Known remaining gaps (documented, not yet emitted):** (1) NAMED-array ASSIGNMENT/var-decl copies —
-`cloneArrayValueCopy`'s direct-array gate can now be widened to `typeIsArrayValue` since the
-strongly-typed wrapper Clone exists; (2) STRUCT-typed copies whose fields embed arrays (`s2 := s1`
-memberwise-copies the `array<T>` field reference — needs a deep-copy strategy decision, likely a
-TypeGenerator-emitted clone for structs with array fields); (3) interface boxing at
-assignment/var-decl positions (`var x any = arr`); (4) golib-internal element-wise transfers of
-nested-array elements (`copy(dst, src)`, spread `append(dst, src...)`) copy element structs without
-re-cloning; (5) an array-typed map KEY at an index-STORE (`mk[k] = v` stores `k` uncloned — only the
-composite-literal key form clones); (6) a named↔underlying array CONVERSION (`[4]int(named)`) hands
-the wrapper's backing through the implicit operator uncloned.
+**Known remaining gaps (documented, not yet emitted):** (1) STRUCT-typed copies whose fields embed
+arrays (`s2 := s1` memberwise-copies the `array<T>` field reference — needs a deep-copy strategy
+decision, likely a TypeGenerator-emitted clone for structs with array fields — and the same hole
+flows through every transfer site of a struct VALUE with array fields); (2) golib-internal
+element-wise transfers of nested-array elements (`copy(dst, src)`, spread `append(dst, src...)`)
+copy element structs without re-cloning; (3) an array-typed map KEY at an index-STORE (`mk[k] = v`
+stores `k` uncloned — only the composite-literal key form clones); (4) a named↔underlying array
+CONVERSION (`[4]int(named)`) hands the wrapper's backing through the implicit operator uncloned.
 
 ## Strings (`@string` and `sstring`)
 Go's `string` is represented by golib [`@string`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/string.cs), not `System.String`. That is a semantic decision, not just a naming one: Go strings are immutable byte sequences, so `len`, indexing, ranging, concatenation, conversion to `[]byte`/`[]rune`, equality, and type assertions must all observe Go's UTF-8/byte model rather than C#'s UTF-16 string model. A zero-value `@string` is also null-safe and reads as `""`, which lets `default!` stand in for Go's zero value without sprinkling null checks through converted code.

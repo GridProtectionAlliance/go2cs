@@ -208,6 +208,30 @@ func funcLitParam() {
 	fmt.Println("funcLitParam:", a)
 }
 
+// Named-array assignment/var-decl copies, and interface boxing of array values
+// at declaration positions (gap classes: named arrays at assignment, any-boxing).
+func namedAssignCopies() {
+	nr := Row{1, 2, 3}
+	d := nr
+	d[0] = 99
+	fmt.Println("namedAssign:", nr[0], d[0])
+
+	var e Row = nr
+	e[1] = 88
+	fmt.Println("namedVarDecl:", nr[1], e[1])
+
+	var x any = nr
+	nr[2] = 77
+	got := x.(Row)
+	fmt.Println("namedAnyBoxed:", got[2], nr[2])
+
+	a := [3]int{5, 6, 7}
+	var y any = a
+	a[0] = 99
+	gotA := y.([3]int)
+	fmt.Println("directAnyBoxed:", gotA[0], a[0])
+}
+
 // A channel send copies the array value at the send (audit: channel send).
 func channelSend() {
 	a := [3]int{1, 2, 3}
@@ -240,6 +264,7 @@ func main() {
 	returnCopies()
 	paramCopies()
 	funcLitParam()
+	namedAssignCopies()
 	channelSend()
 	appendElement()
 }
