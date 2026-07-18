@@ -340,9 +340,11 @@ own test suites now pass in C#: [`unicode/utf8`](https://github.com/GridProtecti
 (68) — exercising a new **disclosed-divergence** mechanism for the handful of exact allocation-count
 asserts the managed runtime provably cannot satisfy;
 [`unicode/utf16`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/unicode/utf16)
-(8, plus 1 disclosed), the first package to reuse that mechanism as a general tool; and
+(8, plus 1 disclosed), the first package to reuse that mechanism as a general tool;
 [`path`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/path)
-(9/9, no disclosure). Each validates against `go test` through the converted-test pipeline, and you can
+(9/9, no disclosure); and [`container/ring`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/container/ring)
+(8/8), the first container/pointer-graph package. Each validates against `go test` through the
+converted-test pipeline, and you can
 [reproduce them yourself](#try-it-yourself--validate-a-converted-test-suite) from a clone.
 
 ### Try it yourself — validate a converted test suite
@@ -433,6 +435,12 @@ expect:
 ```text
 Validated 9 tests against go test (0 skipped identically on both sides, 8 disclosed-unsupported declarations excluded).
 ```
+
+[`container/ring`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/container/ring)
+is the seventh and the first container — a circular linked list whose eight tests exercise the ring's
+pointer graph (`Link`/`Unlink`/`Move`/`Do`) and agree outright. Substitute its paths above and expect
+`Validated 8 tests against go test (0 skipped identically on both sides, 7 disclosed-unsupported
+declarations excluded).`
 
 ### Performance
 

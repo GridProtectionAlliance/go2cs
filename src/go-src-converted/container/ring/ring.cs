@@ -144,7 +144,7 @@ public static nint Len(this ж<Ring> Ꮡr) {
 // Do calls function f on each element of the ring, in forward order.
 // The behavior of Do is undefined if f changes *r.
 public static void Do(this ж<Ring> Ꮡr, Action<any> f) {
-    ref var r = ref Ꮡr.Value;
+    ref var r = ref Ꮡr.DerefOrNil();
 
     if (Ꮡr != nil) {
         f(r.Value);
