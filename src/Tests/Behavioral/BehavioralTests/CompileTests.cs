@@ -552,6 +552,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckInterfaceToInterfaceAdapter() => CheckTarget("InterfaceToInterfaceAdapter");
 
     [TestMethod]
+    public void CheckInterfaceToInterfaceAssertion() => CheckTarget("InterfaceToInterfaceAssertion");
+
+    [TestMethod]
     public void CheckIntMinLiterals() => CheckTarget("IntMinLiterals");
 
     [TestMethod]

@@ -502,6 +502,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckInterfaceToInterfaceAdapter() => CheckTarget("InterfaceToInterfaceAdapter");
 
     [TestMethod]
+    public void CheckInterfaceToInterfaceAssertion() => CheckTarget("InterfaceToInterfaceAssertion");
+
+    [TestMethod]
     public void CheckIntMinLiterals() => CheckTarget("IntMinLiterals");
 
     [TestMethod]

@@ -555,6 +555,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckInterfaceToInterfaceAdapter() => CheckTarget("InterfaceToInterfaceAdapter");
 
     [TestMethod]
+    public void CheckInterfaceToInterfaceAssertion() => CheckTarget("InterfaceToInterfaceAssertion");
+
+    [TestMethod]
     public void CheckIntMinLiterals() => CheckTarget("IntMinLiterals");
 
     [TestMethod]
