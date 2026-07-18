@@ -379,7 +379,10 @@ The same command validates every other banked package — as of **2026-07-18**,
 second: substitute `"C:\Program Files\Go\src\sort"` and `src/go-src-converted/sort` above, and expect
 `Validated 63 tests against go test (1 skipped identically on both sides, 46 disclosed-unsupported
 declarations excluded).` — 63/63 agreement including interface-driven sorting, `sort.Slice` reflection
-swaps, NaN-aware float ordering, and stability tests.
+swaps, NaN-aware float ordering, and stability tests. (The `sort` run also prints a
+`WARNING: Failed to evaluate build constraints for file "...\sort\sort_impl_go121.go"` line before the
+result — a harmless converter notice about one filename the constraint parser doesn't recognize, not a
+failure; the final `Validated` line is what matters.)
 
 [`bytes`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/bytes) and
 [`strings`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/strings)
