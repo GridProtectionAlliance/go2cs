@@ -20,67 +20,38 @@
 //		}
 //		...
 //	}
-//
-// Each time a non-default setting causes a change in program behavior,
-// code must call [Setting.IncNonDefault] to increment a counter that can
-// be reported by [runtime/metrics.Read]. The call must only happen when
-// the program executes a non-default behavior, not just when the setting
-// is set to a non-default value. This is occasionally (but very rarely)
-// infeasible, in which case the internal/godebugs table entry must set
-// Opaque: true, and the documentation in doc/godebug.md should
-// mention that metrics are unavailable.
-//
-// Conventionally, the global variable representing a godebug is named
-// for the godebug itself, with no case changes:
-//
-//	var gotypesalias = godebug.New("gotypesalias") // this
-//	var goTypesAlias = godebug.New("gotypesalias") // NOT THIS
-//
-// The test in internal/godebugs that checks for use of IncNonDefault
-// requires the use of this convention.
-//
-// Note that counters used with IncNonDefault must be added to
-// various tables in other packages. See the [Setting.IncNonDefault]
-// documentation for details.
-namespace go.@internal;
 
-// Note: Be careful about new imports here. Any package
-// that internal/godebug imports cannot itself import internal/godebug,
-// meaning it cannot introduce a GODEBUG setting of its own.
-// We keep imports to the absolute bare minimum.
-using bisect = go.@internal.bisect_package;
+// go2cs NATIVE IMPLEMENTATION (hand-owned; replaces the converted godebug.go output). The Go
+// implementation maintains a cache of per-setting atomic pointers kept current by runtime update
+// hooks (re-notified when os.Setenv changes $GODEBUG), reached through a *setting EMBEDDED in
+// Setting and resolved under a sync.Once. The converted runtime has no Setenv notification, and
+// the literal conversion of the embedded-pointer machinery faults at runtime (the generated
+// promoted-field box treats its held nil *setting as a nil POINTER dereference, so even the
+// `s.setting = lookup(...)` assignment panics). This hand-owned implementation parses $GODEBUG
+// once on first use (comma-separated key=value, later entries overriding earlier ones, matching
+// Go's backward parse) and serves every lookup from that snapshot — the behavior of a Go process
+// whose $GODEBUG never changes after startup. An unset or unlisted key yields "", Go's unset
+// default. Not carried over: bisect stack-pattern values (the `value#pattern` suffix is stripped,
+// enabling the setting unconditionally) and the runtime/metrics non-default counters
+// (IncNonDefault is inert — there is no converted metrics consumer).
+
+using System;
+using System.Collections.Generic;
 
 using godebugs = go.@internal.godebugs_package;
 
-using sync = sync_package;
+// Hand-owned native replacement of the converted godebug.go output — the converter skips
+// regenerating a file that carries this marker, so a -stdlib reconvert preserves it (see
+// containsManualConversionMarker).
+[module: go.GoManualConversion]
 
-using atomic = go.sync.atomic_package;
-
-using @unsafe = unsafe_package;
-
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // go:linkname
-using go.@internal;
-using go.sync;
+namespace go.@internal;
 
 partial class godebug_package {
 
 // A Setting is a single setting in the $GODEBUG environment variable.
 [GoType] partial struct Setting {
     internal @string name;
-    internal sync.Once once;
-    internal partial ref ж<setting> setting { get; }
-}
-
-[GoType] partial struct setting {
-    internal atomic.Pointer<value> value;
-    internal sync.Once nonDefaultOnce;
-    internal atomic.Uint64 nonDefault;
-    internal ж<godebugs.Info> info;
-}
-
-[GoType] partial struct value {
-    internal @string text;
-    internal ж<bisect.Matcher> bisect;
 }
 
 // New returns a new Setting for the $GODEBUG setting with the given name.
@@ -92,11 +63,6 @@ partial class godebug_package {
 // To disable that panic for access to an undocumented setting,
 // prefix the name with a #, as in godebug.New("#gofsystrace").
 // The # is a signal to New but not part of the key used in $GODEBUG.
-//
-// Note that almost all settings should arrange to call [IncNonDefault] precisely
-// when program behavior is changing from the default due to the setting
-// (not just when the setting is different, but when program behavior changes).
-// See the [internal/godebug] package comment for more.
 public static ж<Setting> New(@string name) {
     return Ꮡ(new Setting(name: name));
 }
@@ -126,39 +92,9 @@ public static @string String(this ж<Setting> Ꮡs) {
 // This counter is exposed in the runtime/metrics value
 // /godebug/non-default-behavior/<name>:events.
 //
-// Note that Value must be called at least once before IncNonDefault.
+// go2cs: runtime/metrics plumbing with no converted consumer — inert.
 public static void IncNonDefault(this ж<Setting> Ꮡs) {
-    Ꮡs.of(Setting.ᏑnonDefaultOnce).Do(Ꮡs.register);
-    Ꮡs.of(Setting.ᏑnonDefault).Add(1);
 }
-
-internal static void register(this ж<Setting> Ꮡs) {
-    ref var s = ref Ꮡs.Value;
-
-    if (s.info == nil || (~s.info).Opaque) {
-        throw panic("godebug: unexpected IncNonDefault of " + s.name);
-    }
-    registerMetric("/godebug/non-default-behavior/"u8 + s.Name() + ":events"u8, Ꮡs.of(Setting.ᏑnonDefault).Load);
-}
-
-// cache is a cache of all the GODEBUG settings,
-// a locked map[string]*atomic.Pointer[string].
-//
-// All Settings with the same name share a single
-// *atomic.Pointer[string], so that when GODEBUG
-// changes only that single atomic string pointer
-// needs to be updated.
-//
-// A name appears in the values map either if it is the
-// name of a Setting for which Value has been called
-// at least once, or if the name has ever appeared in
-// a name=value pair in the $GODEBUG environment variable.
-// Once entered into the map, the name is never removed.
-internal static ж<sync.Map> Ꮡcache = new(default(sync.Map));
-internal static ref sync.Map cache => ref Ꮡcache.Value; // name string -> value *atomic.Pointer[string]
-
-internal static ж<value> Ꮡempty = new(default(value));
-internal static ref value empty => ref Ꮡempty.Value;
 
 // Value returns the current value for the GODEBUG setting s.
 //
@@ -168,149 +104,42 @@ internal static ref value empty => ref Ꮡempty.Value;
 // Clients should therefore typically not attempt their own
 // caching of Value's result.
 public static @string Value(this ж<Setting> Ꮡs) {
-    Ꮡs.of(Setting.Ꮡonce).Do(() => {
-        Ꮡs.Value.setting = lookup(Ꮡs.Value.Name());
-        if (Ꮡs.Value.info == nil && !Ꮡs.Value.Undocumented()) {
-            throw panic("godebug: Value of name not listed in godebugs.All: " + Ꮡs.Value.name);
-        }
-    });
-    var v = Ꮡs.of(Setting.Ꮡvalue).Load().Value;
-    if (v.bisect != nil && !v.bisect.Stack(new runtimeStderrжWriter(Ꮡstderr))) {
-        return ""u8;
+    ref var s = ref Ꮡs.Value;
+
+    string name = s.Name();
+
+    if (godebugs.Lookup(name) == nil && !s.Undocumented()) {
+        throw panic("godebug: Value of name not listed in godebugs.All: " + s.name);
     }
-    return v.text;
+    return s_settings.Value.TryGetValue(name, out string? value) ? value : "";
 }
 
-// lookup returns the unique *setting value for the given name.
-internal static ж<setting> lookup(@string name) {
-    {
-        var (v, ok) = Ꮡcache.Load(name); if (ok) {
-            return v._<ж<setting>>();
-        }
+// The one-shot $GODEBUG snapshot: comma-separated key=value pairs, later entries overriding
+// earlier ones (Go parses backward and pins the first hit — same winner). A `value#pattern`
+// bisect suffix is stripped, keeping just the value.
+private static readonly Lazy<Dictionary<string, string>> s_settings = new(parseGodebugEnv);
+
+private static Dictionary<string, string> parseGodebugEnv() {
+    Dictionary<string, string> settings = new(StringComparer.Ordinal);
+
+    foreach (string pair in (Environment.GetEnvironmentVariable("GODEBUG") ?? "").Split(',')) {
+        int eq = pair.IndexOf('=');
+
+        if (eq < 0)
+            continue;
+
+        string value = pair[(eq + 1)..];
+        int hash = value.IndexOf('#');
+
+        settings[pair[..eq]] = hash < 0 ? value : value[..hash];
     }
-    var s = @new<setting>();
-    s.Value.info = godebugs.Lookup(name);
-    s.of(setting.Ꮡvalue).Store(Ꮡempty);
-    {
-        var (v, loaded) = Ꮡcache.LoadOrStore(name, s); if (loaded) {
-            // Lost race: someone else created it. Use theirs.
-            return v._<ж<setting>>();
-        }
-    }
-    return s;
+
+    return settings;
 }
 
-// setUpdate is provided by package runtime.
-// It calls update(def, env), where def is the default GODEBUG setting
-// and env is the current value of the $GODEBUG environment variable.
-// After that first call, the runtime calls update(def, env)
-// again each time the environment variable changes
-// (due to use of os.Setenv, for example).
-//
-//go:linkname setUpdate
-internal static partial void setUpdate(Action<@string, @string> update);
-
-// registerMetric is provided by package runtime.
-// It forwards registrations to runtime/metrics.
-//
-//go:linkname registerMetric
-internal static partial void registerMetric(@string name, Func<uint64> read);
-
-// setNewIncNonDefault is provided by package runtime.
-// The runtime can do
-//
-//	inc := newNonDefaultInc(name)
-//
-// instead of
-//
-//	inc := godebug.New(name).IncNonDefault
-//
-// since it cannot import godebug.
-//
-//go:linkname setNewIncNonDefault
-internal static partial void setNewIncNonDefault(Func<@string, Action> newIncNonDefault);
-
-[GoInit] internal static void init() {
-    setUpdate(update);
-    setNewIncNonDefault(newIncNonDefault);
-}
-
-internal static Action newIncNonDefault(@string name) {
-    var s = New(name);
-    s.Value();
-    return s.IncNonDefault;
-}
-
-internal static ж<sync.Mutex> ᏑupdateMu = new(default(sync.Mutex));
-internal static ref sync.Mutex updateMu => ref ᏑupdateMu.Value;
-
-// update records an updated GODEBUG setting.
-// def is the default GODEBUG setting for the running binary,
-// and env is the current value of the $GODEBUG environment variable.
-internal static void update(@string def, @string env) => func((defer, recover) => {
-    ᏑupdateMu.Lock();
-    defer(ᏑupdateMu.Unlock);
-    // Update all the cached values, creating new ones as needed.
-    // We parse the environment variable first, so that any settings it has
-    // are already locked in place (did[name] = true) before we consider
-    // the defaults.
-    var did = new map<@string, bool>();
-    parse(did, env);
-    parse(did, def);
-    // Clear any cached values that are no longer present.
-    var didʗ1 = did;
-    Ꮡcache.Range((any name, any s) => {
-        if (!didʗ1[name._<@string>()]) {
-            Ꮡ((~s._<ж<setting>>()).value).Store(Ꮡempty);
-        }
-        return true;
-    });
-});
-
-// parse parses the GODEBUG setting string s,
-// which has the form k=v,k2=v2,k3=v3.
-// Later settings override earlier ones.
-// Parse only updates settings k=v for which did[k] = false.
-// It also sets did[k] = true for settings that it updates.
-// Each value v can also have the form v#pattern,
-// in which case the GODEBUG is only enabled for call stacks
-// matching pattern, for use with golang.org/x/tools/cmd/bisect.
-internal static void parse(map<@string, bool> did, @string s) {
-    // Scan the string backward so that later settings are used
-    // and earlier settings are ignored.
-    // Note that a forward scan would cause cached values
-    // to temporarily use the ignored value before being
-    // updated to the "correct" one.
-    nint end = len(s);
-    nint eq = -1;
-    for (nint i = end - 1; i >= -1; i--) {
-        if (i == -1 || s[i] == (rune)','){
-            if (eq >= 0) {
-                @string name = s[(int)(i + 1)..(int)(eq)];
-                ref var arg = ref heap<@string>(out var Ꮡarg);
-                arg = s[(int)(eq + 1)..(int)(end)];
-                if (!did[name]) {
-                    did[name] = true;
-                    var v = Ꮡ(new value(text: arg));
-                    for (nint j = 0; j < len(arg); j++) {
-                        if (arg[j] == (rune)'#') {
-                            v.Value.text = arg[..(int)(j)];
-                            (v.Value.bisect, _) = bisect.New(arg[(int)(j + 1)..]);
-                            break;
-                        }
-                    }
-                    lookup(name).of(setting.Ꮡvalue).Store(v);
-                }
-            }
-            eq = -1;
-            end = i;
-        } else 
-        if (s[i] == (rune)'=') {
-            eq = i;
-        }
-    }
-}
-
+// go2cs: retained from the converted output because the package's GoImplement registration
+// (package_info.cs) binds runtimeStderr to bisect.Writer; writes go to standard error directly
+// (Go routes through the runtime's fd-2 write since it cannot import os).
 [GoType] partial struct runtimeStderr {
 }
 
@@ -319,15 +148,9 @@ internal static ref runtimeStderr stderr => ref Ꮡstderr.Value;
 
 [GoRecv] internal static (nint, error) Write(this ref runtimeStderr _, slice<byte> b) {
     if (len(b) > 0) {
-        write(2, new @unsafe.Pointer(Ꮡ(b, 0)), (int32)len(b));
+        System.Console.OpenStandardError().Write(b.ToSpan());
     }
     return (len(b), default!);
 }
-
-// Since we cannot import os or syscall, use the runtime's write function
-// to print to standard error.
-//
-//go:linkname write runtime.write
-internal static partial int32 write(uintptr fd, @unsafe.Pointer p, int32 n);
 
 } // end godebug_package

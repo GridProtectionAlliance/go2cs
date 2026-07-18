@@ -374,6 +374,13 @@ sides and every unsupported declaration (benchmarks, examples) is accounted for.
 converted `.cs` in place (`git status` stays clean when your toolchain matches the pinned versions); the Go
 source copies and run manifests it stages are git-ignored.
 
+The same command validates every other banked package — as of **2026-07-18**,
+[`sort`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/sort) is the
+second: substitute `"C:\Program Files\Go\src\sort"` and `src/go-src-converted/sort` above, and expect
+`Validated 63 tests against go test (1 skipped identically on both sides, 46 disclosed-unsupported
+declarations excluded).` — 63/63 agreement including interface-driven sorting, `sort.Slice` reflection
+swaps, NaN-aware float ordering, and stability tests.
+
 ### Performance
 
 _Everyone asks:_ wondering how fast the transpiled C# runs compared to the original Go — including startup time, memory, and Native AOT builds? See the latest [performance comparison](Performance.md) — **`TL;DR`**: _no, it's not as fast as native Go, [nor is this an expected outcome](Background.md#converted-code)_. Save for some initial work with a [stack-based string](ConversionStrategies.md#stack-strings-sstring), performance and optimizations are not the current focus, this kind of work is targeted for _after_ Phase 4 work.

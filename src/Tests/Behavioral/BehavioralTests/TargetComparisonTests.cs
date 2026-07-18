@@ -807,6 +807,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNilPointerUintptr() => CheckTarget("NilPointerUintptr");
 
     [TestMethod]
+    public void CheckNilSliceConversion() => CheckTarget("NilSliceConversion");
+
+    [TestMethod]
     public void CheckPackageShadowParam() => CheckTarget("PackageShadowParam");
 
     [TestMethod]
@@ -1060,6 +1063,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckStringConvPostfix() => CheckTarget("StringConvPostfix");
+
+    [TestMethod]
+    public void CheckStringLenUtf8Bytes() => CheckTarget("StringLenUtf8Bytes");
 
     [TestMethod]
     public void CheckStringLiteralIndexLoop() => CheckTarget("StringLiteralIndexLoop");

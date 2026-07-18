@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>sort</AssemblyName>
+    <AssemblyName>StringLenUtf8Bytes</AssemblyName>
     <Product>go2cs</Product>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>
@@ -114,9 +114,7 @@
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
 
-    <ProjectReference Include="$(go2csPath)go-src-converted\internal\reflectlite\internal.reflectlite.csproj" />
-    <ProjectReference Include="$(go2csPath)go-src-converted\math\bits\math.bits.csproj" />
-    <ProjectReference Include="$(go2csPath)go-src-converted\slices\slices.csproj" />
+    <ProjectReference Include="$(go2csPath)core\fmt\fmt.csproj" />
   </ItemGroup>
 
 </Project>

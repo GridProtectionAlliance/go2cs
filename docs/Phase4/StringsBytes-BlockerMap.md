@@ -240,6 +240,41 @@ Sort BUILDS clean and runs the complete differential: **53/63 included tests agr
 mirrored `false`, making every Verbose-gated test (sort's countOps pair) a guaranteed skip-vs-pass
 mismatch. Post-fix those tests RUN and surface their true wall (R3) — the honest progression.
 utf8 unaffected (still 0-skipped both sides).
+- **R1 + R2 + R3 + R4: FIXED** (2026-07-17, worktree branch `claude/youthful-newton-4156e6` —
+  coordinator gates the merge; no converter change, so CNR is trivially byte-identical). R1:
+  golib `slice<T>` T[]-taking ctors map a null source to the nil slice (`this = default`) per Go
+  `[]T(nil)`; the bounded forms allow it only while every index stays at zero (Go's legal
+  `nil[0:0]`). R4: golib `builtin.len(string)` returns `Encoding.UTF8.GetByteCount` — Go counts
+  UTF-8 bytes, `.Length` counted UTF-16 chars; audit of every other raw-`string`-accepting golib
+  API found no second instance (`@string`/`sstring` transcode at construction; remaining `string`
+  params are format/message/parse-ASCII only). Guards: `NilSliceConversion` +
+  `StringLenUtf8Bytes`, both discriminating (reverted-fix runs fail Output: exit-2 crash / UTF-16
+  counts). R2: whole-file hand-owned `internal/godebug/godebug.cs` (`[module: GoManualConversion]`,
+  old output preserved as `godebug.cs.auto`, `godebug_impl.cs` subsumed/removed) — parses $GODEBUG
+  once on first use, "" unset default, unlisted-name panic kept; the scout's "atomic pointer" nil
+  deref is actually the generated promoted-field box of the embedded `*setting` treating its held
+  nil pointer as a nil DEREFERENCE even for the populating assignment (`Setting.g.cs`
+  `setting => ref Ꮡʗsetting.Value` → PanicException) — a latent TypeGenerator/ж defect for ALL
+  post-construction embedded-pointer assignment, worth its own gen-gated chip. R3: `rand_impl.cs`
+  companions for math/rand AND math/rand/v2 (the failing site was v1's rand.cs:375; both carry the
+  same linkname) — `runtime.rand` on `Random.Shared`, correctly non-deterministic. Probe evidence
+  (small driver against the built assemblies): `godebug.Value()` = "" unset / "0" under
+  `GODEBUG=randautoseed=0`, and under that setting v1 `Int63()` returns 5577006791947779410 —
+  Go's canonical first Seed(1) draw, proving the GODEBUG-routed deterministic path end to end;
+  unset, v1/v2 draw random values through the new hook. R5–R13 remain.
+
+## 🏁 SORT VALIDATED (2026-07-18) — package #2
+
+With R1-R4 merged (`32638f729`), sort's full differential went green:
+**`Validated 63 tests against go test (1 skipped identically on both sides, 46
+disclosed-unsupported declarations excluded).`** — every included test agrees, skip-parity holds
+(TestSearchWrappersDontAlloc), and the converted test sources are committed beside the production
+code per the validated-package policy. The path consumed, in order: B1, B2b, B2c, B3, B4/B5, B6
+(+Skip), B7a (+fold-widening +float-context), B7b (+const-expr arms), B8, B9, B10, AllocsPerRun,
+CoverMode census, /vN imports, --json-implies-Verbose (R14), array-copy cloning, IEEE float
+equality, the reflectlite mini-bridge, the gen nil-embed fix, and R1-R4. Bytes/strings same-day
+attempts ran deep and reported their R5-R13 tails honestly (bytes: DeepEqual/MakeNoZero/nil-empty
+classes; strings: Builder-allocs/Map/Finder classes) — next wave's work order.
 
 ## Cross-cutting lessons
 

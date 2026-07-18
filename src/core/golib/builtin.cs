@@ -1139,11 +1139,16 @@ public static class builtin
     /// <summary>
     /// Gets the length of the <paramref name="str"/>.
     /// </summary>
-    /// <param name="str">Target channel.</param>
+    /// <param name="str">Target string.</param>
     /// <returns>The length of the <paramref name="str"/>.</returns>
+    /// <remarks>
+    /// Go's <c>len(string)</c> counts UTF-8 bytes, not UTF-16 chars — the two only agree
+    /// for pure-ASCII values, so the C# <see cref="string.Length"/> shortcut is wrong for
+    /// any multi-byte rune (<c>len("a☺b☻")</c> is 8, not 4).
+    /// </remarks>
     public static nint len(string str)
     {
-        return str.Length;
+        return Encoding.UTF8.GetByteCount(str);
     }
 
     /// <summary>

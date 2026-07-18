@@ -319,6 +319,7 @@
     <Project Path="Tests/Behavioral/NewAnonStructIfaceEmbed/NewAnonStructIfaceEmbed.csproj" />
     <Project Path="Tests/Behavioral/NilMapOperations/NilMapOperations.csproj" />
     <Project Path="Tests/Behavioral/NilPointerUintptr/NilPointerUintptr.csproj" />
+    <Project Path="Tests/Behavioral/NilSliceConversion/NilSliceConversion.csproj" />
     <Project Path="Tests/Behavioral/PackageShadowParam/PackageShadowParam.csproj" />
     <Project Path="Tests/Behavioral/PackageShadowPointerParam/PackageShadowPointerParam.csproj" />
     <Project Path="Tests/Behavioral/PackageVarInitOrder/PackageVarInitOrder.csproj" />
@@ -404,6 +405,7 @@
     <Project Path="Tests/Behavioral/StringByteUnionConstraint/StringByteUnionConstraint.csproj" />
     <Project Path="Tests/Behavioral/StringConvNamedInt/StringConvNamedInt.csproj" />
     <Project Path="Tests/Behavioral/StringConvPostfix/StringConvPostfix.csproj" />
+    <Project Path="Tests/Behavioral/StringLenUtf8Bytes/StringLenUtf8Bytes.csproj" />
     <Project Path="Tests/Behavioral/StringLiteralIndexLoop/StringLiteralIndexLoop.csproj" />
     <Project Path="Tests/Behavioral/StringLiteralSliceConversion/StringLiteralSliceConversion.csproj" />
     <Project Path="Tests/Behavioral/StringPassByValue/StringPassByValue.csproj" />
