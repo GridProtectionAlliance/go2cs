@@ -78,10 +78,18 @@ public class NilType : IConvertible
         return array != nil;
     }
 
-    // ISlice to nil comparisons
+    // ISlice to nil comparisons — REPRESENTATION nilness: only a genuinely-null reference is nil.
+    // A boxed ISlice value is a real slice header and is never nil, even when empty — matching Go
+    // (an interface holding an empty or nil slice is itself != nil) and slice<T>'s own == NilType (a
+    // CONCRETE slice<T> binds that operator, not this interface one, so this path never observes a
+    // representation-nil value). The former `{ Length: 0, Capacity: 0, Source: null }` arm was
+    // unreachable dead code: slice<T>.Source (and every wrapper's IArray.Source) materializes a
+    // DETACHED copy (ToSpan().ToArray()) and is never null, so the property pattern could not match —
+    // the expression already reduced to `slice is null`. (See docs/ConversionStrategies-Reference.md,
+    // "Nil-vs-empty slice identity".)
     public static bool operator ==(ISlice? slice, NilType _)
     {
-        return slice is null or { Length: 0, Capacity: 0, Source: null };
+        return slice is null;
     }
 
     public static bool operator !=(ISlice? slice, NilType nil)

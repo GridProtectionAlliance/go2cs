@@ -1426,15 +1426,46 @@ The full identity enumeration golib maintains (invariant: **nil ⟺ `m_array is 
 | `append(emptySlice)` — nothing to add | that same non-nil empty | `Append` identity return |
 | `append(s, elems...)` with elements | non-nil | in-place or reallocated — always a real array |
 
-Known adjacent gaps, deliberately out of this change's scope: a **zero-argument variadic call**
-materializes a non-nil empty (`params Span<T>` → `.slice()`) where Go passes nil; the generated
-**named-slice wrapper**'s `== nil` still compares `Equals(default)` structurally (a sibling defect in
-go2cs-gen's `InheritedTypeTemplate`, gated behind the generator's full-suite+corpus gate); and
-`NilType`'s `ISlice == nil` operator retains its historical unreachable `Source: null` arm. (Guarded
+Known adjacent gap, deliberately out of this change's scope: a **zero-argument variadic call**
+materializes a non-nil empty (`params Span<T>` → `.slice()`) where Go passes nil. (Guarded
 by the `SliceNilVsEmpty` behavioral test — every row of the table probed with `s == nil`, `len`, and
 `cap` against `go run`; `resliceTailCapZero` discriminates the operator fix, `nilReslice` the
 `Reslice` fix, and `appendNilNothing` the `Append` fix. `NilSliceConversion` continues to guard the
 `[]T(nil)` conversion row.)
+
+**Named slice/map/channel wrappers (defined types).** The distinction extends to DEFINED types
+(`type S []int`, generated as go2cs-gen `InheritedTypeTemplate` wrappers). The comparison Go permits on
+a named slice/map/channel is `x == nil`; the converter renders it as `s == default!` (nil literal in
+value context) or `s == nil` (pointer context), and — verified against the emitted C# — **both bind the
+wrapper's `operator ==(S, NilType)` overload**, not the same-type `operator ==(S, S)` (reverting the
+latter has no observable effect; reverting the former flips the result). That overload emitted
+`value.Equals(default(S))`, and the **slice** wrapper's `Equals` (from `ISliceTypeTemplate`'s
+`Equals(ISlice<T>?)`) is structural *content* equality, so an empty non-nil named slice (`S{}`,
+`make(S, 0)`, an `s[len(s):]` tail) was misclassified as nil. It now delegates to `slice<T>`'s own
+`== NilType` — REPRESENTATION nilness (null backing array, R13) — via `value.m_value == nil`, so
+`IntSlice{} == nil` is false while the zero value stays nil. Audit of the other nil-comparable kinds:
+**map** and **channel** wrappers were already correct and are unchanged — they declare no structural
+`Equals`, so `Equals(default)` falls back to reference identity through the backing field
+(`map<K,V>.Equals` is `ReferenceEquals(m_map, …)`; `channel<T>` compares its queue by reference).
+Array/numeric/string/struct/`any` wrappers are not nil-comparable in Go (and the pointer wrapper
+already uses a reference-identity `Equals` override), so they keep the structural default; the same-type
+`operator ==(S, S)` is likewise left untouched (Go forbids comparing two slices, so no converted code
+reaches it). Because this is a compile-time (go2cs-gen) change it leaves TRANSPILER output — the
+`.cs.target` goldens — byte-identical, so it is gated on the FULL behavioral suite (four phases)
+**plus** a full `go-src-converted` corpus build rather than CNR alone.
+
+Separately, `NilType`'s `operator ==(ISlice?, NilType)` dropped its historical
+`{ Length: 0, Capacity: 0, Source: null }` arm: `slice<T>.Source` (and every wrapper's
+`IArray.Source`) materializes a DETACHED copy (`ToSpan().ToArray()`) and is never null, so the
+property pattern could never match — the expression already reduced to `slice is null`
+(representation nilness), which is what it now states plainly. No converted `s == nil` routes through
+this interface operator: a concrete `slice<T>` binds its own `== NilType`, and interface/`any`
+comparands bind `NilType`'s `object` arm.
+
+(The named-wrapper rows are guarded by the `NamedSliceNilVsEmpty` behavioral test — named
+slice/map/channel zero value (nil) vs empty literal (non-nil), plus the slice `resliceTailCapZero` and
+`nilReslice` discriminators, output-compared vs `go run`; it fails if the wrapper's `== nil` regresses
+to structural equality.)
 
 ## Strings (`@string` and `sstring`)
 Go's `string` is represented by golib [`@string`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/string.cs), not `System.String`. That is a semantic decision, not just a naming one: Go strings are immutable byte sequences, so `len`, indexing, ranging, concatenation, conversion to `[]byte`/`[]rune`, equality, and type assertions must all observe Go's UTF-8/byte model rather than C#'s UTF-16 string model. A zero-value `@string` is also null-safe and reads as `""`, which lets `default!` stand in for Go's zero value without sprinkling null checks through converted code.

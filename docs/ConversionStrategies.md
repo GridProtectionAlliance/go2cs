@@ -303,7 +303,10 @@ throwing.
 Nilness is **representation** identity, not emptiness: `s == nil` on a slice is true exactly for the
 nil slice (null backing array), so a non-nil empty (`[]byte{}`, `make([]T, 0)`, `s[len(s):]`) stays
 observably non-nil, and nil survives reslicing (`nil[0:0]`) and no-op appends — the distinctions
-Go programs (and the stdlib's own tests) rely on.
+Go programs (and the stdlib's own tests) rely on. The same holds for a DEFINED slice type
+(`type S []int`): the generated wrapper's `== nil` delegates to the wrapped `slice<T>`'s own
+`== nil` (representation nilness), so `S{}` is non-nil while the zero value is nil (named map/channel
+wrappers were already correct — their backing compares by reference).
 
 **Full detail:** [Reference → Nil and Zero Values](ConversionStrategies-Reference.md#nil-and-zero-values) —
 null-safe zero values and pointer-to-interface assignment through selector fields; and

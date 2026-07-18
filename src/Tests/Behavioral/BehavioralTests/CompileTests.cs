@@ -723,6 +723,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedSliceConversion() => CheckTarget("NamedSliceConversion");
 
     [TestMethod]
+    public void CheckNamedSliceNilVsEmpty() => CheckTarget("NamedSliceNilVsEmpty");
+
+    [TestMethod]
     public void CheckNamedSlicePointerElements() => CheckTarget("NamedSlicePointerElements");
 
     [TestMethod]
