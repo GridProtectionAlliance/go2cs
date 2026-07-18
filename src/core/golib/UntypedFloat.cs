@@ -148,15 +148,22 @@ public readonly struct UntypedFloat(float64 value) : IEquatable<UntypedFloat>
 
     public static implicit operator float64(UntypedFloat value) => value.m_value;
 
-    // Handle implicit conversions between 'complex64' and struct 'UntypedFloat'
-    public static implicit operator UntypedFloat(complex64 value) => new(value.Real);
+    // EXPLICIT (not implicit) in BOTH directions: an untyped float already converts implicitly to
+    // float64, so letting it ALSO relate implicitly to a complex type makes every
+    // `complexExpr op untypedFloat` (Go's `1i * math.Pi`) ambiguous — the operands can bind either
+    // as `Complex op double` (untypedFloat → double) OR as `UntypedFloat op UntypedFloat` (the
+    // complex → UntypedFloat conversion), and neither is preferred (CS0034). Keeping the
+    // float↔complex relationship explicit in both directions resolves such arithmetic to
+    // `Complex op double`; the converter emits an explicit cast where Go assigns an untyped float
+    // constant directly to a complex (the rare direction), and complex → UntypedFloat is never a
+    // real conversion the converter needs (untyped complex constants are UntypedComplex).
+    public static explicit operator UntypedFloat(complex64 value) => new(value.Real);
 
-    public static implicit operator complex64(UntypedFloat value) => (complex64)value.m_value;
+    public static explicit operator complex64(UntypedFloat value) => (complex64)value.m_value;
 
-    // Handle implicit conversions between 'complex128' and struct 'UntypedFloat'
-    public static implicit operator UntypedFloat(complex128 value) => new(value.Real);
+    public static explicit operator UntypedFloat(complex128 value) => new(value.Real);
 
-    public static implicit operator complex128(UntypedFloat value) => value.m_value;
+    public static explicit operator complex128(UntypedFloat value) => value.m_value;
 
     // Handle comparisons between 'nil' and struct 'UntypedFloat'
     public static bool operator ==(UntypedFloat value, NilType nil) => value.Equals(default);

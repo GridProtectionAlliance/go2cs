@@ -2,6 +2,11 @@ package main
 
 import "fmt"
 
+// A package-level untyped float constant is emitted as a golib UntypedFloat, which is what
+// makes the `imaginary * gPi` arithmetic below exercise the Complex/UntypedFloat operator
+// resolution (a folded literal would not).
+const gPi = 3.141592653589793
+
 // Guards contextual typing of untyped constants in float32/complex64 contexts: go/types
 // resolves the context on the OUTERMOST constant expression only, leaving inner operands
 // untyped, so the converter must propagate the context down (F vs D literal suffixes and
@@ -23,6 +28,15 @@ func main() {
 	type meters float32
 	var dist meters = -1.5 // named type context resolves through its underlying float32
 
+	// UntypedFloat<->complex arithmetic: an imaginary literal multiplied by an untyped float
+	// constant. This bound AMBIGUOUSLY (CS0034) while UntypedFloat converted implicitly to BOTH
+	// float64 and complex128 — the complex operand could bind as `Complex * double` OR as
+	// `UntypedFloat * UntypedFloat` (via the implicit complex->UntypedFloat conversion), and
+	// neither was preferred. Those conversions are now explicit, so it resolves as `Complex * double`.
+	cprod := 1i * gPi   // imaginary literal * untyped float const
+	cprod2 := gPi * 2i  // untyped float const * imaginary literal
+	csum := 1i + gPi    // and the additive form
+
 	// Complex values print via their real/imag parts so this test guards only the
 	// converter's constant typing, not golib fmt's Go-style complex rendering
 	fmt.Println(real(c64), imag(c64))
@@ -35,4 +49,7 @@ func main() {
 	fmt.Println(minf, maxf)
 	fmt.Println(re, im)
 	fmt.Println(dist)
+	fmt.Println(real(cprod), imag(cprod))
+	fmt.Println(real(cprod2), imag(cprod2))
+	fmt.Println(real(csum), imag(csum))
 }

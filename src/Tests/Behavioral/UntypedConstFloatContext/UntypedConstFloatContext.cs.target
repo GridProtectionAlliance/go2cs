@@ -4,6 +4,8 @@ using fmt = fmt_package;
 
 partial class main_package {
 
+internal static readonly UntypedFloat gPi = 3.141592653589793;
+
 [GoType("num:float32")] partial struct main_meters;
 
 internal static void Main() {
@@ -20,6 +22,9 @@ internal static void Main() {
     float32 re = real(2.5F - 3.5F.i());
     float32 im = imag(complex(2.5F, -3.5F));
     main_meters dist = -1.5F;
+    var cprod = 1D.i() * gPi;
+    var cprod2 = gPi * 2D.i();
+    var csum = 1D.i() + gPi;
     fmt.Println(real(c64), imag(c64));
     fmt.Println(real(c64b), imag(c64b));
     fmt.Println(a, b);
@@ -30,6 +35,9 @@ internal static void Main() {
     fmt.Println(minf, maxf);
     fmt.Println(re, im);
     fmt.Println(dist);
+    fmt.Println(real(cprod), imag(cprod));
+    fmt.Println(real(cprod2), imag(cprod2));
+    fmt.Println(real(csum), imag(csum));
 }
 
 } // end main_package
