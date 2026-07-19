@@ -190,6 +190,19 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     private readonly bool m_isNull;
     private T m_val;
 
+    // A NATIVE address this box aliases, rather than managed storage it owns (0 when this is an
+    // ordinary managed box). This is the fourth reference kind, alongside the standard value, the
+    // struct-field ref and the array-element ref above.
+    //
+    // It exists because a Win32 API can RETURN a pointer into native memory that the caller must
+    // walk and then hand BACK to the OS — GetEnvironmentStringsW/FreeEnvironmentStringsW being the
+    // canonical pair. Reinterpreting such an address by copying the pointed-at value into a managed
+    // box (what the uintptr operator used to do) loses the address: the walk then scans the GC heap,
+    // and returning the box's address to the OS asks it to free GC memory — observed as an outright
+    // STATUS_HEAP_CORRUPTION (0xC0000374) process kill. A native-backed box instead aliases the real
+    // address, so `.Value` reads the real memory and the uintptr/void* round-trip is EXACT.
+    private readonly nuint m_nativeAddr;
+
     // Lazily-created pin of this box's fixed-array backing store, kept alive for the box's lifetime so a
     // native syscall can write into the array data and the managed reads afterward observe the result.
     // See the uintptr/void* operators and pinnedArrayData below. Freed when the box is collected (the
@@ -221,6 +234,15 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         m_val = default!;
     }
 
+    // Create a pointer that ALIASES a native address (see m_nativeAddr). A zero address is the
+    // nil pointer, matching Go's `(*T)(unsafe.Pointer(uintptr(0))) == nil`.
+    internal ж(nuint nativeAddress)
+    {
+        m_nativeAddr = nativeAddress;
+        m_val = default!;
+        m_isNull = nativeAddress == 0;
+    }
+
     /// <summary>
     /// Creates a new pointer from a nil value.
     /// </summary>
@@ -238,10 +260,14 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
 
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Cannot get reference to value, source is not a valid array or slice pointer.</exception>
-    public ref T Value
+    public unsafe ref T Value
     {
         get
         {
+            // Alias native memory at the address this box holds (never managed storage).
+            if (m_nativeAddr != 0)
+                return ref Unsafe.AsRef<T>((void*)m_nativeAddr);
+
             // Get reference to standard pointer value
             if (m_structFieldRef is null && m_arrayIndexRef is null)
             {
@@ -286,10 +312,14 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     /// still routes through the strict <see cref="Value"/> and panics, preserving Go semantics.
     /// </para>
     /// </remarks>
-    public ref T ValueSlot
+    public unsafe ref T ValueSlot
     {
         get
         {
+            // Alias native memory at the address this box holds (see Value).
+            if (m_nativeAddr != 0)
+                return ref Unsafe.AsRef<T>((void*)m_nativeAddr);
+
             if (m_structFieldRef is null && m_arrayIndexRef is null)
                 return ref m_val!;
 
@@ -309,7 +339,20 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     }
 
     /// <inheritdoc/>
-    public bool IsNull => m_isNull || m_val is null;
+    // A native-backed box is non-nil exactly when its address is non-zero — its m_val slot is unused
+    // and would read as null for a reference-typed T, which must not be mistaken for a nil pointer.
+    public bool IsNull => m_isNull || (m_nativeAddr == 0 && m_val is null);
+
+    /// <summary>
+    /// Gets a flag indicating whether this pointer ALIASES a native address rather than managed
+    /// storage — see the <c>m_nativeAddr</c> field.
+    /// </summary>
+    internal bool IsNative => m_nativeAddr != 0;
+
+    /// <summary>
+    /// Gets the native address this pointer aliases, or zero when it is an ordinary managed box.
+    /// </summary>
+    internal nuint NativeAddress => m_nativeAddr;
 
     /// <summary>
     /// Gets a flag indicating whether this is a nil <em>standard</em> pointer — a plain heap pointer
@@ -643,19 +686,28 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         return new ж<T>(nil);
     }
 
-    // EXPLICIT by design: reinterpreting a raw address as a pointer BOXES A COPY of the pointed-at
-    // value (the runtime-unsafe reinterpret seam) and dereferences an arbitrary address — never
-    // something to happen silently. Converter-emitted reinterprets always use explicit cast syntax
-    // ((ж<T>)(uintptr)(p)). As an implicit conversion it also made every uintptr argument ambiguous
-    // between an unsafe.Pointer overload and a ж<T> overload (CS0121 — runtime's free `add(p, x)`
-    // vs the `(*notInHeap).add` static companion).
+    // EXPLICIT by design: reinterpreting a raw address as a pointer is the runtime-unsafe reinterpret
+    // seam — never something to happen silently. Converter-emitted reinterprets always use explicit
+    // cast syntax ((ж<T>)(uintptr)(p)). As an implicit conversion it also made every uintptr argument
+    // ambiguous between an unsafe.Pointer overload and a ж<T> overload (CS0121 — runtime's free
+    // `add(p, x)` vs the `(*notInHeap).add` static companion).
+    //
+    // The result ALIASES the address (see m_nativeAddr). It formerly boxed a COPY of the pointed-at
+    // value, which silently discarded the address: pointer arithmetic then walked the GC heap and
+    // handing the pointer back to a native API freed GC memory (STATUS_HEAP_CORRUPTION). Aliasing
+    // keeps `uintptr(unsafe.Pointer(p))` an exact round-trip, as Go requires.
     public static unsafe explicit operator ж<T>(uintptr value)
     {
-        return new ж<T>(*(T*)value.Value);
+        return new ж<T>((nuint)value.Value);
     }
 
     public static unsafe implicit operator uintptr(ж<T> value)
     {
+        // A native-backed pointer round-trips to the EXACT address it aliases — it is not managed
+        // storage, so there is nothing to pin and no copy to take.
+        if (value is not null && value.m_nativeAddr != 0)
+            return (uintptr)value.m_nativeAddr;
+
         // A NIL pointer's address is 0, matching Go's `uintptr(unsafe.Pointer(nil)) == 0`. A nil box
         // has no storage to pin, so taking `&value.Value` would dereference it and throw — but the
         // syscall wrappers legitimately pass nil pointers whose numeric address is simply 0
@@ -675,13 +727,18 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
             return (uintptr)ptr;
     }
 
+    // Aliases the address rather than copying the pointed-at value — see the uintptr operator above.
     public static unsafe implicit operator ж<T>(void* value)
     {
-        return new ж<T>(*(T*)value);
+        return new ж<T>((nuint)value);
     }
 
     public static unsafe implicit operator void*(ж<T> value)
     {
+        // A native-backed pointer converts to the exact address it aliases (see the uintptr operator).
+        if (value is not null && value.m_nativeAddr != 0)
+            return (void*)value.m_nativeAddr;
+
         // A nil pointer converts to the null address (see the uintptr operator above); pinning a
         // nil box's absent storage would throw.
         if (value is null || value.IsNull)

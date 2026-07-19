@@ -485,6 +485,24 @@ public static ж<T> Add<T>(ж<T> ptr, uintptr len) {
     return Add(ptr, len.Value);
 }
 
+// Go's unsafe.Add takes an unsafe.Pointer and offsets it by len BYTES. unsafe.Pointer models the
+// address as its VALUE (not as managed storage it points at), so the generic ж<T> overload below —
+// which resolves a managed array-element reference — cannot serve it: it found no array ref and
+// returned a NIL pointer, so walking a native block (syscall.Environ stepping through the
+// GetEnvironmentStringsW block) dereferenced address 0 on the first step. This overload is the
+// faithful one for the pointer type Go actually requires here, and being more derived it wins
+// overload resolution over ж<uintptr>.
+public static Pointer Add(Pointer ptr, uintptr len) {
+    return Add(ptr, len.Value);
+}
+
+public static Pointer Add<TLen>(Pointer ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
+    if (ptr == nil)
+        return new Pointer(nil);
+
+    return new Pointer(ptr.Value + (uintptr)(nuint)nint.CreateTruncating(len));
+}
+
 public static ж<T> Add<T, TLen>(ж<T> ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
     // Go's len is of any integer type (the `IntegerType` constraint); reduce it to the pointer
     // offset type. A signed/unsigned/native-width argument (e.g. a `uintptr`) thus all bind here.
@@ -492,6 +510,12 @@ public static ж<T> Add<T, TLen>(ж<T> ptr, TLen len) where TLen : System.Numeri
 
     if (ptr == nil)
         return new ж<T>();
+
+    // A pointer that ALIASES a native address offsets that address directly. Go's unsafe.Add is
+    // byte arithmetic (its argument is an unsafe.Pointer), which is what a native alias reproduces;
+    // the managed array-element path below is an element step against a managed backing store.
+    if (ptr.IsNative)
+        return new ж<T>((nuint)((nint)ptr.NativeAddress + n));
 
     (IArray array, int index)? arrayRef  = ptr.ArrayRef;
 
@@ -538,6 +562,13 @@ public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.N
 
         throw panic("ptr is nil and len is not zero");
     }
+
+    // A pointer that ALIASES a native address reads the n elements from that address. Note this
+    // SNAPSHOTS native memory into a managed slice rather than aliasing it the way Go's unsafe.Slice
+    // does — sufficient for reading a block a syscall returned (syscall.Environ), but writes through
+    // the resulting slice do not reach the native memory. See docs/ConversionStrategies-Reference.md.
+    if (ptr.IsNative)
+        return new slice<T>(new ReadOnlySpan<T>((void*)ptr.NativeAddress, n));
 
     fixed (T* pointer = &ptr.Value)
         return new slice<T>(new ReadOnlySpan<T>(pointer, n));
@@ -587,6 +618,10 @@ public static @string String<TLen>(ж<byte> ptr, TLen len) where TLen : System.N
 
         throw panic("ptr is nil and len is not zero");
     }
+
+    // A pointer that ALIASES a native address reads its n bytes from that address (see Slice above).
+    if (ptr.IsNative)
+        return new @string(new ReadOnlySpan<byte>((void*)ptr.NativeAddress, n));
 
     fixed (byte* pointer = &ptr.Value)
         return new @string(new ReadOnlySpan<byte>(pointer, n));
