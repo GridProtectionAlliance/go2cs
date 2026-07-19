@@ -68,6 +68,17 @@ public static partial class testing_package
         public nint N;
     }
 
+    /// <summary>
+    /// Parallel-benchmark body handle — COMPILE-ONLY, for the same reason as B above. A Go
+    /// parallel benchmark is written as b.RunParallel(func(pb *testing.PB) { for pb.Next() {…} }),
+    /// so both the type and its Next method must exist for the converted body to compile. Next
+    /// reports false so the loop it drives would iterate zero times; RunParallel never invokes
+    /// the body at all, since benchmarks are not executed by the bootstrap host.
+    /// </summary>
+    public struct PB
+    {
+    }
+
     public static void Error(this ref T t, params ꓸꓸꓸany args)
     {
         TestExecution execution = t.RequiredExecution;
@@ -181,6 +192,13 @@ public static partial class testing_package
     [GoRecv] public static void StartTimer(this ref B b) { }
 
     [GoRecv] public static void StopTimer(this ref B b) { }
+
+    // Parallel benchmarks (see struct PB above): RunParallel does not invoke the body — nothing
+    // runs, so nothing is scheduled across goroutines — and PB.Next reports "no more work" so the
+    // body's for pb.Next() loop would terminate immediately if it ever were invoked.
+    [GoRecv] public static void RunParallel(this ref B b, Action<ж<PB>> body) { }
+
+    [GoRecv] public static bool Next(this ref PB pb) => false;
 
     // Params-taking B members need the same explicit ж<B> overloads as T's above (params
     // collections are ref-like Spans the RecvGenerator does not synthesize overloads for).
