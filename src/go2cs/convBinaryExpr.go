@@ -946,6 +946,19 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			}
 		}
 
+		// A narrow-integer (int8/uint8/int16/uint16) NON-CONSTANT arithmetic result COMPARED directly —
+		// `v + 1 != MinInt8` (math's TestMaxInt/TestMaxUint) — keeps Go's modular-overflow value: C#
+		// promotes the sub-int operands to `int`, so `int8(127) + 1` is 128 where Go wraps to -128 at
+		// int8 width, flipping the comparison. Wrap each such operand at its own narrow width, exactly as
+		// the narrow-arith DESTINATION casts already do (assignment/return/arg/shift). A CONSTANT operand
+		// is left alone — a Go constant cannot overflow its type, and a wrap cast on a C# compile-time
+		// constant expression is CS0221 (the shift-retype path guards the same way).
+		switch binaryExpr.Op {
+		case token.LSS, token.LEQ, token.GTR, token.GEQ, token.EQL, token.NEQ:
+			leftOperand = v.narrowComparisonOperand(binaryExpr.X, leftOperand)
+			rightOperand = v.narrowComparisonOperand(binaryExpr.Y, rightOperand)
+		}
+
 		// Go's `&&`/`||` on a NAMED boolean type (`type boolVal bool`) yields that named type,
 		// which satisfies an interface return (`case boolVal: return x && y` in go/constant's
 		// BinaryOp, returned as the `Value` interface). In C# the `[GoType("bool")]` struct that

@@ -221,6 +221,26 @@ func (v *Visitor) narrowArithmeticCastTypeFor(targetType types.Type, rhs ast.Exp
 	return castType
 }
 
+// narrowComparisonOperand wraps a comparison operand that is a NON-CONSTANT narrow-integer
+// arithmetic/complement result at its own width, so Go's modular overflow survives the comparison —
+// `int8(127) + 1 != MinInt8` must see -128, not the C# int-promoted 128 (see convBinaryExprCore).
+// A constant operand (Go constants cannot overflow their type; a wrap cast on a C# constant is
+// CS0221) or a non-arithmetic operand is returned unchanged, and narrowArithmeticCastTypeFor's
+// already-cast guard prevents double-wrapping.
+func (v *Visitor) narrowComparisonOperand(operand ast.Expr, converted string) string {
+	if tv, ok := v.info.Types[operand]; !ok || tv.Value != nil {
+		return converted
+	}
+
+	castType := v.narrowArithmeticCastTypeFor(v.getType(operand, false), operand, converted)
+
+	if castType == "" {
+		return converted
+	}
+
+	return fmt.Sprintf("(%s)(%s)", castType, converted)
+}
+
 // wholeExprIsCastOfType reports whether expr is exactly `(castType)(…)` spanning its whole length — the
 // cast wraps the entire expression, not just a leading sub-expression. Used to decide whether a
 // narrow-integer arithmetic RHS has already been narrowed in full (skip the redundant cast) versus only

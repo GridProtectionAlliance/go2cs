@@ -66,4 +66,12 @@ func main() {
 
 	p2 := pix{Y: (a >> 1) * 3, A: ^a} // 44 ; ^200 = 55
 	fmt.Println(p2.Y, p2.A)           // 44 55
+
+	// Comparison context: a narrow-arith result compared DIRECTLY (no narrow destination) must keep
+	// Go's wrap — C# promotes `a + b` to int (300) so the comparison would flip. math's TestMaxInt/
+	// TestMaxUint are exactly this shape (`int8(MaxInt8)+1 != MinInt8`). Both binary and unary (^).
+	fmt.Println(a+b == 44)   // 300 wraps to 44 (uint8) -> true
+	fmt.Println(c+d == -56)  // 200 wraps to -56 (int8) -> true
+	fmt.Println(e+f != 4464) // 70000 wraps to 4464 (uint16) -> false
+	fmt.Println(^a > 50)     // ^200 = 55 (uint8) -> true
 }

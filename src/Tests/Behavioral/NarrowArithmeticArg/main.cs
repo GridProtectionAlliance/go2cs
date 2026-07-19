@@ -53,6 +53,10 @@ internal static void Main() {
     fmt.Println(p1.Y, p1.A);
     var p2 = new pix(Y: (uint8)(((a >> (int)(1))) * 3), A: (uint8)(~a));
     fmt.Println(p2.Y, p2.A);
+    fmt.Println((uint8)(a + b) == 44);
+    fmt.Println((int8)(c + d) == -56);
+    fmt.Println((uint16)(e + f) != 4464);
+    fmt.Println((uint8)(~a) > 50);
 }
 
 } // end main_package
