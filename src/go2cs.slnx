@@ -274,6 +274,7 @@
     <Project Path="Tests/Behavioral/NamedBooleanLogic/NamedBooleanLogic.csproj" />
     <Project Path="Tests/Behavioral/NamedChannelType/NamedChannelType.csproj" />
     <Project Path="Tests/Behavioral/NamedByteSliceFromStringLit/NamedByteSliceFromStringLit.csproj" />
+    <Project Path="Tests/Behavioral/NamedConstFloatFold/NamedConstFloatFold.csproj" />
     <Project Path="Tests/Behavioral/NamedDelegateStructuralParam/NamedDelegateStructuralParam.csproj" />
     <Project Path="Tests/Behavioral/NamedFuncResultPointerArg/NamedFuncResultPointerArg.csproj" />
     <Project Path="Tests/Behavioral/NamedFuncTypeMapParam/NamedFuncTypeMapParam.csproj" />

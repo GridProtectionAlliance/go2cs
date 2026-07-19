@@ -672,6 +672,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
 
     [TestMethod]
+    public void CheckNamedConstFloatFold() => CheckTarget("NamedConstFloatFold");
+
+    [TestMethod]
     public void CheckNamedDelegateStructuralParam() => CheckTarget("NamedDelegateStructuralParam");
 
     [TestMethod]

@@ -94,6 +94,22 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	if ok, targetTypeName := v.isTypeConversion(callExpr); ok {
 		arg := callExpr.Args[0]
 
+		// A compile-time FLOAT constant CONVERSION whose operand references a named untyped-float
+		// const — `float64(100000 * Pi)` / `float32(...)` — FOLDS to a single-rounded literal at the
+		// TARGET width, the conversion-operand counterpart of the package-level const fold in
+		// visitValueSpec. The runtime form `(float64)(100000D * Pi)` rounds a SECOND time
+		// (314159.2653589793, −1 ULP), whereas Go folds `100000*Pi` in arbitrary precision and rounds
+		// ONCE to 314159.26535897935. Restricted to a BASIC float64/float32 target (a named float type
+		// keeps its [GoType]-wrapper conversion path below), and short-circuits so the operand is NOT
+		// separately converted — re-introducing the double round. (Bare refs / pure-literal / int /
+		// complex operands are rejected inside the helper.)
+		if targetBasic, ok := v.info.TypeOf(callExpr).(*types.Basic); ok &&
+			(targetBasic.Kind() == types.Float64 || targetBasic.Kind() == types.Float32) {
+			if folded := v.foldedNamedFloatConstLiteral(arg, v.getCSTypeName(targetBasic)); folded != "" {
+				return folded
+			}
+		}
+
 		// A `string(x)` conversion the hoisting pre-pass elected to lift to a single function-scope
 		// `sstring` temp (see planSStringHoists) emits just the temp NAME at every use, instead of
 		// re-materializing `((sstring)x)` here. suppressSStringHoist is set only while the hoisted

@@ -54,6 +54,48 @@ func (v *Visitor) containsUntypedNamedConstRef(expr ast.Expr) bool {
 	return found
 }
 
+// foldedNamedFloatConstLiteral returns the single-rounded folded literal — with a `/* <gofmt> */`
+// comment, like the package-level const fold in visitValueSpec — for a COMPUTED float-kind constant
+// operand that references a NAMED untyped-float const (`100000 * Pi`, `1 / Ln10`), rendered at the
+// resolved float width; it returns "" for anything else. The runtime C# arithmetic the converter
+// would otherwise emit (a `double`/`float` cast of the operand) rounds a SECOND time and can land a
+// ULP off Go's single arbitrary-precision fold — `(float64)(100000D * Pi)` = 314159.2653589793
+// (−1 ULP) where Go's `float64(100000*Pi)` = 314159.26535897935. Folding at the target width matches
+// Go's single round; a float32 target rounds the EXACT constant straight to float32 inside
+// exactFloatText (constant.Float32Val), NEVER via a float64 intermediate — that would double-round
+// differently than Go's single round-to-float32. Excluded (kept on their existing form):
+//   - a bare named-const REFERENCE (`Ln10`, an ident/selector) — it already renders as a
+//     single-rounded golib `UntypedFloat` wrapper cast, so folding it would only churn a readable
+//     reference into a magic number.
+//   - an int-valued or complex constant, and a pure-literal float const (`1.5 * 2.0`, no named ref)
+//     — the latter computes exactly in C# double, so its readable operator form is kept.
+// `targetCSType` is the resolved float C# type name ("float64"/"float32"); any other value is "".
+func (v *Visitor) foldedNamedFloatConstLiteral(operand ast.Expr, targetCSType string) string {
+	isFloat32 := targetCSType == "float32"
+
+	if targetCSType != "float64" && !isFloat32 {
+		return ""
+	}
+
+	tv, ok := v.info.Types[operand]
+
+	if !ok || tv.Value == nil || tv.Value.Kind() != constant.Float {
+		return ""
+	}
+
+	if !v.isComputedConstOperand(operand) || !v.containsUntypedNamedConstRef(operand) {
+		return ""
+	}
+
+	suffix := "D"
+
+	if isFloat32 {
+		suffix = "F"
+	}
+
+	return fmt.Sprintf("/* %s */ %s%s", strings.TrimSpace(v.getPrintedNode(operand)), exactFloatText(tv.Value, "", isFloat32), suffix)
+}
+
 // isUntypedNamedConstRef reports whether the expression is a reference (ident or selector) to an
 // untyped numeric constant — which the converter emits as a golib `Untyped*` wrapper. It is false
 // for literals (those render as ordinary C# literals and follow normal numeric promotion rules).
@@ -930,7 +972,12 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 
 		if castLeft {
 			if tn := v.concreteNumericCSType(rhsType); tn != "" {
-				if v.needsParentheses(binaryExpr.X) {
+				// A COMPUTED float const operand with a named-const ref, in a float64/float32
+				// context, FOLDS to a single-rounded literal instead of casting the runtime
+				// arithmetic (which rounds twice — the `1 / Ln10` double-round; see HOOK 1).
+				if folded := v.foldedNamedFloatConstLiteral(binaryExpr.X, tn); folded != "" {
+					leftOperand = folded
+				} else if v.needsParentheses(binaryExpr.X) {
 					leftOperand = fmt.Sprintf("(%s)(%s)", tn, leftOperand)
 				} else {
 					leftOperand = fmt.Sprintf("(%s)%s", tn, leftOperand)
@@ -938,7 +985,9 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			}
 		} else if castRight {
 			if tn := v.concreteNumericCSType(lhsType); tn != "" {
-				if v.needsParentheses(binaryExpr.Y) {
+				if folded := v.foldedNamedFloatConstLiteral(binaryExpr.Y, tn); folded != "" {
+					rightOperand = folded
+				} else if v.needsParentheses(binaryExpr.Y) {
 					rightOperand = fmt.Sprintf("(%s)(%s)", tn, rightOperand)
 				} else {
 					rightOperand = fmt.Sprintf("(%s)%s", tn, rightOperand)

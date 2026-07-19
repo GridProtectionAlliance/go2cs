@@ -619,6 +619,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
 
     [TestMethod]
+    public void CheckNamedConstFloatFold() => CheckTarget("NamedConstFloatFold");
+
+    [TestMethod]
     public void CheckNamedDelegateStructuralParam() => CheckTarget("NamedDelegateStructuralParam");
 
     [TestMethod]
