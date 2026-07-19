@@ -1172,6 +1172,12 @@ The live records qualify the implementer **namespace-relative — WITHOUT the `g
 
 ⚠ **`package_info_test.cs` and `package_test_info.cs` are MERGE-PRESERVING.** After any change to this routing, DELETE both files *and* the package's `Generated/` directory before re-running the pipeline — otherwise a stale record persists in **both** anchors and masks the result.
 
+### A package-qualifier `using` in a converted TEST SOURCE contributes a project reference
+
+Test projects set `DisableTransitiveProjectReferences=true`, so an assembly the package reaches only *transitively* is invisible to the test compile (CS0234). `aliasReferenceImports` covers this by scanning `using` ALIASES for namespace tokens of packages in the transitive import closure and adding a direct project reference for each. It formerly scanned only the two **metadata** files, despite its contract covering a file-local package-qualifier `using`; it now scans the converted `*_test.cs` **outputs** as well.
+
+The shape this misses otherwise has no textual import at all: math/rand's `default_test.go` does not import `os/exec`, but `testenv.Command(…)` **returns** `*exec.Cmd`, so the emitted `default_test.cs` binds `cmd.Value.Env` and `cmd.CombinedOutput()` through the os/exec assembly while `exec.` never appears in any import list. Scanning the emitted source finds the qualifier `using` and emits `$(go2csPath)go-src-converted\os\exec\os.exec.csproj`. The manifest's dependency list stays import-derived — alias targets are purely a project-reference concern — and the scan is additive, so a package whose sources introduce no new qualifier is unchanged.
+
 ### Shadowing the names go2cs itself spells (`nil`, golib names, emitter-spelled type names, C# keywords)
 
 A census (2026-07-16) of every non-function predeclared Go identifier, the golib public top-level type surface, and the C# keyword list — checked against the three name-protection mechanisms (`keywords` `@`-escape, `reserved` `Δ`-rename, and the shadow analyses) with a minimal transpile-and-run repro per candidate — found five real gaps, each fixed and guarded by the `ReservedNameShadows` behavioral test:

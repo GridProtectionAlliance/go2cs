@@ -314,16 +314,23 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	dependencies = removeString(dependencies, "testing")
 	sort.Strings(dependencies)
 
-	// B2c: a seeded/merged `using` ALIAS in the test metadata can target an assembly the
-	// package reaches only TRANSITIVELY (sort's `global using reflectliteꓸKind =
-	// go.@internal.abi_package.ΔKind;` targets internal/abi via sort → reflectlite → abi),
-	// which DisableTransitiveProjectReferences (B2b) hides from the test compile view
-	// (CS0234). Add direct F15-mapped project references for every such target; the
+	// B2c: a seeded/merged `using` ALIAS in the test metadata — or a package-qualifier `using`
+	// emitted into a converted test SOURCE — can target an assembly the package reaches only
+	// TRANSITIVELY (sort's `global using reflectliteꓸKind = go.@internal.abi_package.ΔKind;`
+	// targets internal/abi via sort → reflectlite → abi; math/rand's default_test.cs needs
+	// os/exec purely because testenv.Command RETURNS *exec.Cmd, so "os/exec" appears in no
+	// import list), which DisableTransitiveProjectReferences (B2b) hides from the test compile
+	// view (CS0234). Add direct F15-mapped project references for every such target; the
 	// manifest's dependency list stays import-derived — alias targets are purely a
 	// project-reference concern.
+	aliasScanFiles := []string{testInfoPath, filepath.Join(outputPath, externalTestPackageInfoFileName)}
+
+	for _, outputFile := range outputFiles {
+		aliasScanFiles = append(aliasScanFiles, filepath.Join(outputPath, outputFile))
+	}
+
 	referenceImports := append(append([]string{}, dependencies...), aliasReferenceImports(
-		[]string{testInfoPath, filepath.Join(outputPath, externalTestPackageInfoFileName)},
-		production.PkgPath, dependencies)...)
+		aliasScanFiles, production.PkgPath, dependencies)...)
 
 	testProjectName := projectName + ".tests.csproj"
 	if err := writeTestProject(filepath.Join(outputPath, testProjectName), projectName, projectNamespace, productionFiles, outputFiles, fixtures, referenceImports, options); err != nil {
@@ -1239,10 +1246,12 @@ func writeTestProject(projectFile, projectName, namespace string, productionFile
 }
 
 // aliasReferenceImports returns the import paths of converted packages that `using` ALIASES in
-// the test metadata files target but that the test project does not directly reference (B2c). A
-// seeded global alias (or a file-local package-qualifier using) can target an assembly the
-// package reaches only transitively, and DisableTransitiveProjectReferences (B2b) hides such
-// assemblies from the test compile view — the alias line itself then fails (CS0234). Candidates
+// the scanned files target but that the test project does not directly reference (B2c). Both the
+// test metadata files AND the converted test sources are scanned: a seeded global alias, or a
+// file-local package-qualifier using emitted into a *_test.cs, can target an assembly the package
+// reaches only transitively — including one no import list mentions, when a test-only helper
+// RETURNS a type from it — and DisableTransitiveProjectReferences (B2b) hides such assemblies
+// from the test compile view, so the alias line itself fails (CS0234). Candidates
 // come from the module-aware TRANSITIVE import closure captured at load time
 // (importPackageDirs), whose namespace tokens are rendered by the same machinery that emitted
 // the aliases — including the /vN major-version collapse — so matching is exact. When several
