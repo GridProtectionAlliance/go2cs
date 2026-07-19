@@ -124,6 +124,10 @@ public readonly struct UntypedInt : IEquatable<UntypedInt>
 
     public static UntypedInt operator %(UntypedInt left, UntypedInt right) => left.m_value % right.m_value;
 
+    public static UntypedInt operator <<(UntypedInt left, int right) => left.m_value << right;
+
+    public static UntypedInt operator >>(UntypedInt left, int right) => left.m_value >> right;
+
     public override string ToString() => m_unsigned ? CastTo<uint64>(m_value).ToString() : m_value.ToString();
 
     public static bool operator ==(UntypedInt left, UntypedInt right) => left.Equals(right);

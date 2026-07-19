@@ -1260,6 +1260,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckUntypedIntInterfaceBox() => CheckTarget("UntypedIntInterfaceBox");
 
     [TestMethod]
+    public void CheckUntypedIntWideShift() => CheckTarget("UntypedIntWideShift");
+
+    [TestMethod]
     public void CheckUntypedNestedSliceComposite() => CheckTarget("UntypedNestedSliceComposite");
 
     [TestMethod]

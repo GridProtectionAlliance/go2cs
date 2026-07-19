@@ -473,6 +473,7 @@
     <Project Path="Tests/Behavioral/UntypedFloatConstExpr/UntypedFloatConstExpr.csproj" />
     <Project Path="Tests/Behavioral/UntypedFloatDefault/UntypedFloatDefault.csproj" />
     <Project Path="Tests/Behavioral/UntypedIntFloatContexts/UntypedIntFloatContexts.csproj" />
+    <Project Path="Tests/Behavioral/UntypedIntWideShift/UntypedIntWideShift.csproj" />
     <Project Path="Tests/Behavioral/VarNamedAsType/VarNamedAsType.csproj" />
     <Project Path="Tests/Behavioral/VariadicBoxReceiver/VariadicBoxReceiver.csproj" />
     <Project Path="Tests/Behavioral/VariadicClosureSpread/VariadicClosureSpread.csproj" />

@@ -1257,6 +1257,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckUntypedIntInterfaceBox() => CheckTarget("UntypedIntInterfaceBox");
 
     [TestMethod]
+    public void CheckUntypedIntWideShift() => CheckTarget("UntypedIntWideShift");
+
+    [TestMethod]
     public void CheckUntypedNestedSliceComposite() => CheckTarget("UntypedNestedSliceComposite");
 
     [TestMethod]
