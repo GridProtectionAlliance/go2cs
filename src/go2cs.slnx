@@ -111,6 +111,7 @@
     <Project Path="Tests/Behavioral/ClosureWriteVisibility/ClosureWriteVisibility.csproj" />
     <Project Path="Tests/Behavioral/CollisionFieldBoxAccessor/CollisionFieldBoxAccessor.csproj" />
     <Project Path="Tests/Behavioral/CollisionRenamedLocalBox/CollisionRenamedLocalBox.csproj" />
+    <Project Path="Tests/Behavioral/ComplexConstContext/ComplexConstContext.csproj" />
     <Project Path="Tests/Behavioral/ComplexFormat/ComplexFormat.csproj" />
     <Project Path="Tests/Behavioral/ComplexImaginaryShadow/ComplexImaginaryShadow.csproj" />
     <Project Path="Tests/Behavioral/CombinedStructFields/CombinedStructFields.csproj" />

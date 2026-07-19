@@ -324,6 +324,28 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 
 	switch basicLit.Kind {
 	case token.INT:
+		// An untyped int literal RESOLVED to a floating type by its context (a complex() element,
+		// a min/max arg, or a float-constant arithmetic operand — see markUntypedConstContexts) is a
+		// floating value in Go; render it at that type so it binds float-typed overloads like a float
+		// literal does. `complex(0, math.Pi/2)` in a complex128 context must pick golib's
+		// complex(float64, float64), not complex(float32, float32): C# rates int->float a better
+		// argument conversion than int->double, so a bare `0` drags the call onto the float32
+		// overload and recomputes math.Pi/2 at float32, silently losing precision. The FLOAT/IMAG
+		// cases below make the analogous F/D choice; an int literal has no fractional part, so its
+		// exact digits plus the suffix suffice.
+		if cc := v.untypedConstContext(basicLit); cc != nil && cc.Info()&(types.IsFloat|types.IsComplex) != 0 {
+			if tv, ok := v.info.Types[basicLit]; ok && tv.Value != nil {
+				if ival := constant.ToInt(tv.Value); ival.Kind() == constant.Int {
+					switch cc.Kind() {
+					case types.Float32, types.Complex64:
+						return ival.ExactString() + "F"
+					case types.Float64, types.Complex128:
+						return ival.ExactString() + "D"
+					}
+				}
+			}
+		}
+
 		// Parse literal octal, binary, etc as a decimal integer (the VALUE classifies the
 		// emitted form below; the TEXT keeps the Go source formatting where C# supports it)
 		if intval, err := strconv.ParseInt(value, 0, 64); err == nil {

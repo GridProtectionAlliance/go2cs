@@ -318,9 +318,9 @@ func (v *Visitor) constExprHasBeyondInt64UntypedOperatorSubexpr(expr ast.Expr) b
 	return found
 }
 
-// floatContextConstLiteral reports the folded literal form of a FLOAT-typed compile-time constant
-// expression built purely from integer literals whose value falls OUTSIDE the C# int32 range, or ""
-// otherwise. Go evaluates such a constant in exact arithmetic and converts the RESULT to the float
+// floatContextConstLiteral reports the folded literal form of a FLOAT- or complex128-typed
+// compile-time constant expression built purely from integer literals whose value falls OUTSIDE the
+// C# int32 range, or "" otherwise. Go evaluates such a constant in exact arithmetic and converts the RESULT to the float
 // type, but the emitted C# operand form is all `int` literals, so C# evaluates the operators in
 // int32 — and a float target makes the damage SILENT rather than a compile error: `var hf float64 =
 // 1 << 63` emits `1 << (int)(63)`, and C# MASKS a shift count to 5 bits (63 & 31 = 31) → int.MinValue;
@@ -368,10 +368,15 @@ func (v *Visitor) floatContextConstLiteral(expr ast.Expr) string {
 
 	var suffix string
 
+	// complex128 is float64-backed (System.Numerics.Complex), so an int-literal shift in a
+	// complex128 context (`[]complex128{1 << 35}`) carries the same silent int32-masking hazard and
+	// folds through its real part below. complex64 is deliberately excluded: its float32 parts would
+	// overflow to a C# compile error for the beyond-float32 magnitudes this fold targets, and such
+	// constants do not arise in practice.
 	switch basic.Kind() {
 	case types.Float32:
 		suffix = "F"
-	case types.Float64:
+	case types.Float64, types.Complex128:
 		suffix = "D"
 	default:
 		return ""
@@ -383,8 +388,14 @@ func (v *Visitor) floatContextConstLiteral(expr ast.Expr) string {
 
 	// An all-int-literal tree is exact integer arithmetic in Go (an untyped-int `/` is integer
 	// division), so the value always converts back to exact digits — which read far closer to the
-	// Go source than a float rendering would.
-	val := constant.ToInt(tv.Value)
+	// Go source than a float rendering would. A complex128 value carries the integer in its real
+	// part (its imaginary part is 0 — an imaginary literal is not int-literal arithmetic), so take
+	// that component before converting.
+	value := tv.Value
+	if basic.Info()&types.IsComplex != 0 {
+		value = constant.Real(value)
+	}
+	val := constant.ToInt(value)
 
 	if val.Kind() != constant.Int {
 		return ""
