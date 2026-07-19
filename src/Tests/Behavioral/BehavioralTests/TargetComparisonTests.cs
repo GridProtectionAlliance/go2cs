@@ -219,6 +219,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckConstShadowsParam() => CheckTarget("ConstShadowsParam");
 
     [TestMethod]
+    public void CheckConstSubexprOverflow() => CheckTarget("ConstSubexprOverflow");
+
+    [TestMethod]
     public void CheckCrossPkgBox() => CheckTarget("CrossPkgBox");
 
     [TestMethod]

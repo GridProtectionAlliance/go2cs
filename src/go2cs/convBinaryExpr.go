@@ -692,43 +692,66 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 		return lit
 	}
 
-	// A TYPED-int constant expression whose VALUE fits int32 but whose emitted arithmetic an
-	// operand fold has widened to `long` carries its own narrowing `(nint)(…)` — see
-	// nativeIntWidenedConstExpr.
-	if v.nativeIntWidenedConstExpr(binaryExpr) {
-		return "(nint)(" + v.convBinaryExprCore(binaryExpr, context, litContext) + ")"
+	core := v.convBinaryExprCore(binaryExpr, context, litContext)
+
+	// A TYPED-integer constant expression whose VALUE fits its target type but whose emitted
+	// arithmetic an operand fold has widened to `long` carries its own narrowing cast — see
+	// widenedConstExprCastType. The BITWISE path already returns its result wrapped in exactly
+	// this cast, so skip when the whole rendering is one (the shared wholeExprIsCastOfType test).
+	if castType := v.widenedConstExprCastType(binaryExpr); castType != "" && !wholeExprIsCastOfType(core, castType) {
+		return "(" + castType + ")(" + core + ")"
 	}
 
-	return v.convBinaryExprCore(binaryExpr, context, litContext)
+	return core
 }
 
-// nativeIntWidenedConstExpr reports whether a constant operator expression TYPED Go `int` whose
-// VALUE fits int32 still renders as 64-bit C# arithmetic because an operand subtree folds to a
-// signed `long` literal — `maxswap: 1<<31 - 1` (sort_test countOps): the whole value (2147483647)
-// is in range, so overflowingConstLiteral keeps the operator form, but the UNTYPED inner shift
-// folds to a bare `2147483648L`, making the whole rendering `long`-typed. `long` has no implicit
-// conversion to `nint`, and only the ASSIGNMENT path has an enclosing-cast mechanism
-// (nativeIntConstCastType — which also only wraps when the whole value is OUT of int32 range); at
-// an argument/composite-element use nothing narrows it (CS1503). Carry the cast in the emission
-// itself, in the parenthesized `(nint)(…)` form wholeExprIsCastOfType recognizes, so assignment
-// sites do not re-wrap. Scoped like the B7a fold arm: PLAIN `int` only (a named type's [GoType]
-// cast rejects a `long` operand — those keep the loud error), and an UNTYPED node is left to its
-// enclosing context. Out-of-int32-range values never reach this check — overflowingConstLiteral
-// folds them first.
-func (v *Visitor) nativeIntWidenedConstExpr(binaryExpr *ast.BinaryExpr) bool {
+// widenedConstExprCastType returns the C# type a TYPED-integer constant operator expression must be
+// cast to because its emitted arithmetic renders as 64-bit `long` — or "" when none is needed. Go
+// evaluates a constant expression in arbitrary precision and requires only the FINAL value to be
+// representable in the target type, so `[]int32{1<<31 - 2}` is legal Go even though the inner shift
+// (2147483648) overflows int32. That inner shift is UNTYPED and out of int32 range, so
+// overflowingConstLiteral folds it to a bare `2147483648L`, while the whole expression's value
+// (2147483646) IS in range and therefore keeps its operator form — leaving a `long`-typed rendering
+// against a narrower target, which C# rejects (CS0266 at a composite element or assignment, CS1503
+// at an argument). Casting the whole rendering narrows it back exactly once, mirroring Go's
+// evaluate-wide-then-represent rule; the value provably fits, since go/types already typed it.
+//
+// Applies to every integer target EXCEPT int64, whose C# `long` already is the widened width. Two
+// scope restrictions carry over from the sibling assignment-path mechanism (nativeIntConstCastType,
+// which keeps handling the out-of-int32-range values overflowingConstLiteral folds whole — the cast
+// string matches, so wholeExprIsCastOfType stops it re-wrapping these):
+//   - CRUX: at least one OPERAND must itself fold to a `long` literal. A bare `1 << 40` (both
+//     operands small) emits as a 32-bit `1 << (int)(40)` whose count C# MASKS to 8, truncating the
+//     value; casting that would turn a loud error into a silent wrong value. Requiring a folded
+//     operand also guarantees the non-folded operands compute exactly — a shift is only left
+//     unfolded when its value fits int32, which bounds its count below 32.
+//   - The whole value must be int64-exact. Beyond that, an operand can exceed int64 and mis-emit as
+//     a truncating shift (a `uintptr` past int64 range), which must keep its visible error.
+//
+// PLAIN basic types only (not `.Underlying()`): a named type's [GoType] cast rejects a `long`
+// operand (CS0030), and an UNTYPED node is left to its enclosing context.
+func (v *Visitor) widenedConstExprCastType(binaryExpr *ast.BinaryExpr) string {
 	tv, ok := v.info.Types[binaryExpr]
 
 	if !ok || tv.Value == nil || tv.Type == nil {
-		return false
+		return ""
 	}
 
 	basic, ok := tv.Type.(*types.Basic)
 
-	if !ok || basic.Kind() != types.Int {
-		return false
+	if !ok || basic.Info()&types.IsInteger == 0 || basic.Info()&types.IsUntyped != 0 || basic.Kind() == types.Int64 {
+		return ""
 	}
 
-	return v.operandRendersWidenedFold(binaryExpr.X) || v.operandRendersWidenedFold(binaryExpr.Y)
+	if _, exact := constant.Int64Val(constant.ToInt(tv.Value)); !exact {
+		return ""
+	}
+
+	if !v.operandRendersWidenedFold(binaryExpr.X) && !v.operandRendersWidenedFold(binaryExpr.Y) {
+		return ""
+	}
+
+	return convertToCSTypeName(v.getTypeName(basic, false))
 }
 
 // operandRendersWidenedFold reports whether an operand's emission is a folded 64-bit `long`
@@ -1190,8 +1213,11 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			castRight = !castLeft && v.isBigIntegerBackedConstRef(binaryExpr.Y)
 		}
 
+		// An operand whose own emission is ALREADY exactly this cast — the widened-const narrowing
+		// above renders `(uint64)(4503599627370496L - 1)` for `1<<52 - 1` — needs no second one;
+		// the same doubling the Go-conversion exclusion in untypedConstOperand guards against.
 		if castLeft {
-			if tn := v.concreteNumericCSType(rhsType); tn != "" {
+			if tn := v.concreteNumericCSType(rhsType); tn != "" && !wholeExprIsCastOfType(leftOperand, tn) {
 				// A COMPUTED float const operand with a named-const ref, in a float64/float32
 				// context, FOLDS to a single-rounded literal instead of casting the runtime
 				// arithmetic (which rounds twice — the `1 / Ln10` double-round; see HOOK 1).
@@ -1204,7 +1230,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				}
 			}
 		} else if castRight {
-			if tn := v.concreteNumericCSType(lhsType); tn != "" {
+			if tn := v.concreteNumericCSType(lhsType); tn != "" && !wholeExprIsCastOfType(rightOperand, tn) {
 				if folded := v.foldedNamedFloatConstLiteral(binaryExpr.Y, tn); folded != "" {
 					rightOperand = folded
 				} else if v.needsParentheses(binaryExpr.Y) {

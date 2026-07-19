@@ -205,6 +205,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckConstShadowsParam() => CheckTarget("ConstShadowsParam");
 
     [TestMethod]
+    public void CheckConstSubexprOverflow() => CheckTarget("ConstSubexprOverflow");
+
+    [TestMethod]
     public void CheckCrossPkgUser() => CheckTarget("CrossPkgUser");
 
     [TestMethod]

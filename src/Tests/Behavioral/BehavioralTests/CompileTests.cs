@@ -216,6 +216,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckConstShadowsParam() => CheckTarget("ConstShadowsParam");
 
     [TestMethod]
+    public void CheckConstSubexprOverflow() => CheckTarget("ConstSubexprOverflow");
+
+    [TestMethod]
     public void CheckCrossPkgBox() => CheckTarget("CrossPkgBox");
 
     [TestMethod]
