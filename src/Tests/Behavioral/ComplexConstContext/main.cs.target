@@ -13,6 +13,10 @@ internal static void Main() {
     }
     var c = complex(0D, gHalfPi);
     fmt.Println(real(c), imag(c));
+    float64 q = 7 / 2;
+    var e = complex(7 / 2, 0D);
+    fmt.Println(q, real(e), imag(e));
+    fmt.Println(gHalfPi / 2D);
 }
 
 } // end main_package

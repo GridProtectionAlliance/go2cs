@@ -83,9 +83,19 @@ func (v *Visitor) propagateUntypedConstContext(expr ast.Expr, context types.Type
 			v.assignUntypedConstContext(e.X, context)
 			v.assignUntypedConstContext(e.Y, context)
 		case token.QUO:
+			// Go performs INTEGER division on integer-kind operands even in a float/complex context
+			// (`7 / 2` is 3, then 3.0 — not 3.5), so an integer-kind operand must NOT adopt the
+			// context: rendered as a float literal (`7D`) it switches C# to float division, a
+			// silently wrong value. A float-kind operand (`math.Pi`, `1.5`) already divides in float
+			// and keeps the context so its F/D suffix is still chosen. (Integer contexts never reach
+			// here — the outer !intContext guard — matching the exact-rational concern noted above.)
 			if !intContext {
-				v.assignUntypedConstContext(e.X, context)
-				v.assignUntypedConstContext(e.Y, context)
+				if !v.isIntegerKindConstExpr(e.X) {
+					v.assignUntypedConstContext(e.X, context)
+				}
+				if !v.isIntegerKindConstExpr(e.Y) {
+					v.assignUntypedConstContext(e.Y, context)
+				}
 			}
 		}
 	case *ast.CallExpr:
@@ -160,4 +170,20 @@ func (v *Visitor) untypedConstContext(expr ast.Expr) *types.Basic {
 	}
 
 	return nil
+}
+
+// isIntegerKindConstExpr reports whether expr is an integer-kind constant — an untyped integer
+// literal or an integer-typed constant (sub)expression. Such an operand of a `/` participates in
+// Go's integer division, so it must not be pushed into a float/complex context (which would render
+// it as a float literal and turn integer division into float division — a silent value change).
+func (v *Visitor) isIntegerKindConstExpr(expr ast.Expr) bool {
+	tv, ok := v.info.Types[expr]
+
+	if !ok || tv.Value == nil || tv.Type == nil {
+		return false
+	}
+
+	basic, ok := tv.Type.Underlying().(*types.Basic)
+
+	return ok && basic.Info()&types.IsInteger != 0
 }

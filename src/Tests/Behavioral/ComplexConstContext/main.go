@@ -21,4 +21,15 @@ func main() {
 	// float64 (1.5707963267948966). Guards the convBasicLit int-literal float-context render.
 	c := complex(0, gHalfPi)
 	fmt.Println(real(c), imag(c))
+
+	// (3) INTEGER division stays integer even in a float/complex context: Go evaluates untyped int
+	// operands with integer division, so `7 / 2` is 3 (then 3.0), NOT 3.5. The int-literal render
+	// must not push a float context onto a `/` operand. `e`'s 0D sibling still pins complex128, so
+	// its real part is the integer quotient 3.0.
+	var q float64 = 7 / 2
+	e := complex(7/2, 0)
+	fmt.Println(q, real(e), imag(e))
+
+	// A FLOAT-kind operand keeps float division (gHalfPi is UntypedFloat): gHalfPi / 2 = 0.785...
+	fmt.Println(gHalfPi / 2)
 }
