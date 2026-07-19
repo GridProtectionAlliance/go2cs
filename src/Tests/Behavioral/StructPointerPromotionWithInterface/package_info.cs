@@ -38,10 +38,17 @@ using static go.main_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Device, Describer>(Pointer = true)]
 [assembly: GoImplement<MyCustomError, Abser>(Promoted = true)]
+[assembly: GoImplement<Station, Pinger>(Pointer = true)]
+[assembly: GoImplement<core, Pinger>(Pointer = true)]
 [assembly: GoImplement<counterKind, stamper>(Pointer = true)]
 [assembly: GoImplement<deviceHandle, Describer>]
+[assembly: GoImplement<kindBase, stamper>(Pointer = true)]
+[assembly: GoImplement<leftSide, Pinger>]
 [assembly: GoImplement<link, Pinger>]
+[assembly: GoImplement<meta, stamper>(Pointer = true)]
+[assembly: GoImplement<rightSide, Pinger>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

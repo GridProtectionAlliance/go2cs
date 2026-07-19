@@ -846,6 +846,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNilSliceConversion() => CheckTarget("NilSliceConversion");
 
     [TestMethod]
+    public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");
+
+    [TestMethod]
     public void CheckPackageShadowParam() => CheckTarget("PackageShadowParam");
 
     [TestMethod]

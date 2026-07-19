@@ -144,9 +144,9 @@ internal static (CrossPkgLib.Reporter, error) getReporter() {
     return (new relayжReporter(ᴛ1), ᴛ2);
 }
 
-internal static CrossPkgLib.Emitter leafEmitter = new CrossPkgLib_LeafжEmitter(CrossPkgLib.NewLeaf("leaf"u8));
+internal static CrossPkgLib.Emitter leafEmitter = new CrossPkgLib.LeafжEmitter(CrossPkgLib.NewLeaf("leaf"u8));
 
-internal static CrossPkgLib.Emitter branchEmitter = new CrossPkgLib_BranchжEmitter(CrossPkgLib.NewBranch("branch"u8, 3));
+internal static CrossPkgLib.Emitter branchEmitter = new CrossPkgLib.BranchжEmitter(CrossPkgLib.NewBranch("branch"u8, 3));
 
 internal static Func<@string, (@string, slice<byte>, error)> makeScanner(@string @base) {
     return (@string @file) => {
@@ -267,7 +267,7 @@ internal static void Main() => func((defer, recover) => {
     CrossPkgLib.Rated rt = ct;
     fmt.Println(sd.Label(), rt.Rating());
     var pr = Ꮡ(new CrossPkgLib.Probe(nil));
-    CrossPkgLib.Sampler sam = new CrossPkgLib_ProbeжSampler(pr);
+    CrossPkgLib.Sampler sam = new CrossPkgLib.ProbeжSampler(pr);
     fmt.Println(sam.Sample(), sam.Sample(), (~pr).Hits);
     var h = Ꮡ(new holder<nint>(Cache: Ꮡ(new CrossPkgLib.Cache<nint>(nil)), name: "h"u8));
     fmt.Println(h.Value.Cache.Value.Bump(), h.Value.Cache.Value.Bump(), (~h).name);
@@ -297,7 +297,7 @@ internal static void Main() => func((defer, recover) => {
     var rbuf = new rune[]{(rune)'a'}.slice();
     rbuf = append(rbuf, (rune)(CrossPkgLib.Precision));
     fmt.Println(((@string)bbuf), len(rbuf), rbuf[1]);
-    var sc = ((CrossPkgLib.Scored)new CrossPkgLib_VerdictᴠScored(((CrossPkgLib.Verdict)4)));
+    var sc = ((CrossPkgLib.Scored)((CrossPkgLib.Verdict)4));
     fmt.Println("verdict score:", sc.Score());
     sc = new talliesжScored(Ꮡ(new tallies(pts: 7)));
     fmt.Println("tallies score:", sc.Score());

@@ -849,6 +849,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNilSliceConversion() => CheckTarget("NilSliceConversion");
 
     [TestMethod]
+    public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");
+
+    [TestMethod]
     public void CheckPackageShadowParam() => CheckTarget("PackageShadowParam");
 
     [TestMethod]

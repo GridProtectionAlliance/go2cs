@@ -38,6 +38,8 @@ using static go.main_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<box, Namer>(Pointer = true)]
+[assembly: GoImplement<box, Sizer>(Pointer = true)]
 [assembly: GoImplement<box, describe_thing>(Pointer = true)]
 // </InterfaceImplementations>
 

@@ -334,6 +334,7 @@
     <Project Path="Tests/Behavioral/NilMapOperations/NilMapOperations.csproj" />
     <Project Path="Tests/Behavioral/NilPointerUintptr/NilPointerUintptr.csproj" />
     <Project Path="Tests/Behavioral/NilSliceConversion/NilSliceConversion.csproj" />
+    <Project Path="Tests/Behavioral/OptionalInterfaceStructuralAssertion/OptionalInterfaceStructuralAssertion.csproj" />
     <Project Path="Tests/Behavioral/PackageShadowParam/PackageShadowParam.csproj" />
     <Project Path="Tests/Behavioral/PackageShadowPointerParam/PackageShadowPointerParam.csproj" />
     <Project Path="Tests/Behavioral/PackageVarInitOrder/PackageVarInitOrder.csproj" />

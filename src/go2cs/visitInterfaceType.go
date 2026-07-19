@@ -168,6 +168,12 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 		if !hasConstraint {
 			structuralBases, canonicalStructuralBases, structuralCovered = v.getStructuralInterfaceBases(interfaceType, identType)
+
+			// Record every same-package concrete type that STRUCTURALLY implements this named
+			// interface as a GoImplement pair, so a run-time assertion `x.(Iface)` resolves even
+			// when the ASSERTING package cannot name the concrete dynamic type (runtime's
+			// unexported errorString, asserted to runtime.Error by math/bits). See the helper.
+			v.recordLocalConcreteImplementers(identType)
 		}
 	}
 
@@ -529,6 +535,66 @@ func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, 
 	}
 
 	return baseNames, canonicalBaseNames, covered
+}
+
+// recordLocalConcreteImplementers records a GoImplement for every same-package concrete type
+// that STRUCTURALLY implements this named interface — i.e. whose value or pointer method set
+// satisfies it WITHOUT any explicit conversion in the source. A named interface resolves a
+// run-time type assertion `x.(Iface)` ONLY through a compile-time GoImplement adapter (golib
+// TryTypeAssert has no duck-typing path for named interfaces), and the assertion-site recorder
+// (recordAssertConcreteImplementers) fires only where the package itself performs the assertion.
+// When the ASSERTING package cannot name the concrete dynamic type, no adapter is ever recorded
+// and the assertion misses at run time despite the code compiling cleanly: runtime's overflowError
+// panic value is asserted to runtime.Error by math/bits, but its dynamic errorString is unexported
+// and never explicitly cast to runtime.Error inside runtime, so only an errorString->error record
+// (from the plain `error` casts) existed — never errorString->runtime.Error, which errorString
+// satisfies structurally via its value-receiver RuntimeError() method. Recording the pair at the
+// interface's own DECLARATION site — the concrete's HOME assembly, where the go2cs-gen adapter can
+// be generated — closes that gap with zero generator/golib change.
+//
+// Scoping is deliberately EAGER: same-package, non-interface, non-generic concrete types that
+// structurally implement the same-package named interface, with no gate on the assertion actually
+// occurring, no gate on the concrete being exported (errorString is unexported yet escapes via the
+// exported overflowError panic value), and no cross-package pre-pass. The value form is probed
+// first, then the pointer form (a pointer-receiver method set records against *T, Pointer = true).
+// convertToInterfaceType's recordableBase/recordable gates and the writePackageInfoFile HashSet
+// dedup are reused unchanged. Constraint (operator) interfaces are excluded by the caller (they
+// are generic machinery, never an assertion's dynamic value). Complements the assertion-site
+// recorder (commit fcfe4a948), which still covers cross-package concrete dynamic types the
+// declaration-site scan cannot see.
+func (v *Visitor) recordLocalConcreteImplementers(identType types.Type) {
+	if v.pkg == nil {
+		return
+	}
+
+	iface, ok := identType.Underlying().(*types.Interface)
+
+	if !ok || iface.Empty() {
+		return
+	}
+
+	scope := v.pkg.Scope()
+
+	for _, name := range scope.Names() {
+		named, ok := scope.Lookup(name).Type().(*types.Named)
+
+		if !ok {
+			continue
+		}
+
+		// Concrete (non-interface), non-generic types only — an interface can't be an assertion's
+		// dynamic value, and a generic type's parameters can't appear in an assembly-attribute
+		// type argument.
+		if _, isInterfaceType := named.Underlying().(*types.Interface); isInterfaceType {
+			continue
+		}
+
+		if named.TypeParams() != nil {
+			continue
+		}
+
+		v.recordIfImplements(named, iface, identType)
+	}
 }
 
 func (v *Visitor) getSourceParameterSignatureLen(signature *types.Signature) int {
