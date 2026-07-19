@@ -530,7 +530,20 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 
 			nextClauseIsDefault := i < len(caseClauses)-1 && (i == len(caseClauses)-2 || caseClauses[i+1].List == nil)
 
-			if i > 0 && !caseFallsThrough && !v.lastStatementWasReturn {
+			// Dropping the `else` is only sound when EVERY preceding clause terminates — otherwise the
+			// clause is no longer chained and runs after a preceding clause already ran. That is harmless
+			// for a `case` (its condition cannot match a value an earlier case matched) but silently WRONG
+			// for `default`, which has no condition and therefore always executes: os's (*Process).wait
+			// emitted `if (s == WAIT_OBJECT_0) { do { break; } while (false); } else if (s == WAIT_FAILED)
+			// { return … } { /* default: */ return errors.New("os: unexpected result from
+			// WaitForSingleObject") }` — the success path fell straight into the error return, so EVERY
+			// child-process wait failed. `lastStatementWasReturn` only reports the IMMEDIATELY preceding
+			// clause (here the returning WAIT_FAILED case), missing the non-terminating `break` case before
+			// it; allCasesTerminal is the accumulated check the trailing-return logic below already relies
+			// on (see its note that the shallow flag is wrong for this purpose). Keeping the original
+			// condition as one arm makes this strictly ADD an `else` where one was missing — never remove
+			// one — so no already-correct emission changes.
+			if i > 0 && !caseFallsThrough && (!v.lastStatementWasReturn || !allCasesTerminal) {
 				v.targetFile.WriteString("else ")
 			}
 

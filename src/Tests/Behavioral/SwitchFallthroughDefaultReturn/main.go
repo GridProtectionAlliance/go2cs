@@ -125,6 +125,37 @@ func leadingDefault(n int) int {
 	return v
 }
 
+// Non-constant case expressions (Go permits them in an expression switch) force the converter to
+// lower the switch to an if-CHAIN rather than a C# `switch`, which is the shape os's
+// (*Process).wait has: its labels are syscall.WAIT_OBJECT_0 / WAIT_FAILED, emitted as
+// `static readonly UntypedInt` rather than C# constants.
+var waitObject0 = 0
+var waitFailed = -1
+
+// waitShape mirrors os (*Process).wait exactly: a case whose body is a bare `break` — NOT a Go
+// terminating statement, so it falls OUT of the switch — followed by a RETURNING case and a
+// RETURNING `default:`. In the if-chain lowering the converter may drop the `else` before a clause
+// when the immediately preceding clause returned, but that is only sound when EVERY preceding
+// clause terminates. Here case waitObject0 falls out, so an unguarded `{ /* default: */ … }` block
+// executes right after it and the function returns the default's value instead of "ok". A `case`
+// clause would be harmless (its condition cannot match a value an earlier case matched), but
+// `default:` has no condition and therefore ALWAYS runs — silently wrong, and it compiled cleanly.
+// In os this made EVERY child-process wait return "os: unexpected result from WaitForSingleObject",
+// so no converted program could collect a spawned child's exit status.
+//
+//go:noinline
+func waitShape(s int) string {
+	switch s {
+	case waitObject0:
+		break
+	case waitFailed:
+		return "failed"
+	default:
+		return "unexpected"
+	}
+	return "ok"
+}
+
 func main() {
 	for _, n := range []int{0, 1, 2, 3} {
 		fmt.Println(classify(n))
@@ -143,5 +174,9 @@ func main() {
 	for _, n := range []int{0, 1, 2} {
 		r, ok := namedDefer(n)
 		fmt.Println(r, ok) // 100 true / 10 true / 20 true
+	}
+	// ok (the break case falls OUT to the trailing return) / failed / unexpected
+	for _, s := range []int{0, -1, 258} {
+		fmt.Println(waitShape(s))
 	}
 }

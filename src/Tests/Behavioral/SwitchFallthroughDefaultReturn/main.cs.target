@@ -48,7 +48,7 @@ internal static nint conditionalReturn(nint n) {
             return 111;
         }
     }
-    if (exprᴛ1 is 1) { matchᴛ1 = true;
+    else if (exprᴛ1 is 1) { matchᴛ1 = true;
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1) { /* default: */
@@ -122,6 +122,27 @@ internal static nint leadingDefault(nint n) {
     return v;
 }
 
+internal static nint waitObject0 = 0;
+
+internal static nint waitFailed = -1;
+
+internal static @string waitShape(nint s) {
+    var exprᴛ1 = s;
+    if (exprᴛ1 == waitObject0) {
+        do {
+            break;
+        } while (false);
+    }
+    else if (exprᴛ1 == waitFailed) {
+        return "failed"u8;
+    }
+    else { /* default: */
+        return "unexpected"u8;
+    }
+
+    return "ok"u8;
+}
+
 internal static void Main() {
     foreach (var (_, n) in new nint[]{0, 1, 2, 3}.slice()) {
         fmt.Println(classify(n));
@@ -139,6 +160,9 @@ internal static void Main() {
     foreach (var (_, n) in new nint[]{0, 1, 2}.slice()) {
         var (r, ok) = namedDefer(n);
         fmt.Println(r, ok);
+    }
+    foreach (var (_, s) in new nint[]{0, -1, 258}.slice()) {
+        fmt.Println(waitShape(s));
     }
 }
 
