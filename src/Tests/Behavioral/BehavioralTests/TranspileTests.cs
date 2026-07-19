@@ -846,6 +846,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNilMapOperations() => CheckTarget("NilMapOperations");
 
     [TestMethod]
+    public void CheckNilPointerParamUnsafePointer() => CheckTarget("NilPointerParamUnsafePointer");
+
+    [TestMethod]
     public void CheckNilPointerUintptr() => CheckTarget("NilPointerUintptr");
 
     [TestMethod]

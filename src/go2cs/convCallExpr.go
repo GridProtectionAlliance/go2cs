@@ -396,11 +396,29 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 
 			if _, isPtr := v.info.TypeOf(arg).(*types.Pointer); isPtr {
-				// A deref-aliased pointer PARAMETER or RECEIVER renders as the pointed-to VALUE alias
-				// (`ref var pc0 = ref Ꮡpc0.Value`), not a box — `.Value` on it is CS1061 (`nuint` has no
-				// `val`; runtime select.go `unsafe.Pointer(pc0)` / heapdump.go `unsafe.Pointer(pstk)`,
-				// both `*uintptr` params). The alias is itself a ref-local into the boxed storage, so
-				// take its ref directly. A genuine box (a local, field, call result) keeps `.Value`.
+				// A pointer PARAMETER carries its BOX (`Ꮡp`) alongside the value alias, and golib's
+				// `implicit operator uintptr(ж<T>)` already yields exactly the address Go wants: 0 for
+				// a nil box, the aliased address for a reinterpreted native pointer, the pinned
+				// storage otherwise. Build the Pointer from the box so `unsafe.Pointer(p)` never
+				// DEREFERENCES p — Go's `unsafe.Pointer(nil)` is the 0 address, and a nil out-pointer
+				// is idiomatic in the syscall wrappers (`DuplicateHandle(…, nil, …,
+				// DUPLICATE_CLOSE_SOURCE)` closes a handle without returning one). The FromRef form
+				// instead read the value alias, whose entry-time `ref var p = ref Ꮡp.Value` threw a
+				// nil-pointer panic before the call — the hang/crash behind os/exec child creation.
+				// Rendering the box also removes the bare VALUE reference from the body, so an
+				// otherwise-unused alias is then skipped as dead (visitFuncDecl's
+				// bodyReferencesIdentAsValue) and the entry deref disappears with it. Pointer params
+				// whose pointee is a basic or struct type already emitted this box form.
+				if v.exprIsDerefdPointerParam(arg) {
+					identContext := DefaultIdentContext()
+					identContext.isPointer = true
+
+					return fmt.Sprintf("new @unsafe.Pointer(%s)", v.convExpr(arg, []ExprContext{identContext}))
+				}
+
+				// A deref-aliased pointer RECEIVER renders as the pointed-to VALUE alias
+				// (`ref var pc0 = ref Ꮡpc0.Value`) and has NO box to address — a value-ref receiver is
+				// `this ref T r` — so its address must come from the alias itself.
 				if v.exprIsDerefAliasedPointer(arg) {
 					return fmt.Sprintf("@unsafe.Pointer.FromRef(ref %s)", expr)
 				}

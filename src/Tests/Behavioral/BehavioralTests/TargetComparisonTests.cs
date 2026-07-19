@@ -849,6 +849,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNilMapOperations() => CheckTarget("NilMapOperations");
 
     [TestMethod]
+    public void CheckNilPointerParamUnsafePointer() => CheckTarget("NilPointerParamUnsafePointer");
+
+    [TestMethod]
     public void CheckNilPointerUintptr() => CheckTarget("NilPointerUintptr");
 
     [TestMethod]
